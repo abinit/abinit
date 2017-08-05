@@ -34,9 +34,9 @@
 <p>A DFPT calculation workflow is conducted as follows:
 <li> Run a Ground-State calculation in order to extract the Kohn-Sham pseudo wave-functions; these must be extremely well converged.</li>
 
-<li>If necessary, e.g., for the application of the derivative of the Hamiltonian with respect to an electric field, determine the derivatives of the wave functions with respect to the wave vector <b>k</b>, and keep them in a file. The keyword <a href="../../input_variables/generated_files/varrf.html#rfddk">rfddk</a> is used to perform this type of calculation.</li>
+<li>If necessary, e.g., for the application of the derivative of the Hamiltonian with respect to an electric field, determine the derivatives of the wave functions with respect to the wave vector <b>k</b>, and keep them in a file. The keyword <a href="../../input_variables/generated_files/dfpt.html#rfddk">rfddk</a> is used to perform this type of calculation.</li>
 
-<li>Compute the 2nd-order derivative matrix (i.e., 2nd derivatives of the energy with respect to different perturbations &lambda;). This can be done thanks to the keywords <a href="../../input_variables/generated_files/varrf.html#rfphon">rfphon</a> (&lambda;=atomic displacement), <a href="../../input_variables/generated_files/varrf.html#rfstrs">rfstrs</a> (&lambda;=strain), <a href="../../input_variables/generated_files/varrf.html#rfelfd">rfelfd</a> (&lambda;=electric field) or <a href="../../input_variables/generated_files/varrf.html#rfmagn">rfmagn</a> (&lambda;=magnetic field). </li>
+<li>Compute the 2nd-order derivative matrix (i.e., 2nd derivatives of the energy with respect to different perturbations &lambda;). This can be done thanks to the keywords <a href="../../input_variables/generated_files/dfpt.html#rfphon">rfphon</a> (&lambda;=atomic displacement), <a href="../../input_variables/generated_files/dfpt.html#rfstrs">rfstrs</a> (&lambda;=strain), <a href="../../input_variables/generated_files/dfpt.html#rfelfd">rfelfd</a> (&lambda;=electric field) or <a href="../../input_variables/generated_files/dfpt.html#rfmagn">rfmagn</a> (&lambda;=magnetic field). </li>
 
 <li>Launch the anaddb tool (distributed with ABINIT) to analyse the derivative database and compute relaxed tensors and thermodynamical properties.</li>
 
@@ -85,56 +85,56 @@ href="../../tutorial/generated_files/lesson_rf1.html"> Response-Function 1 (RF1)
 <h3><b>3. Related input variables.</b></h3>
 
 
-<p>Compulsory input variables:<p>... <a href="../../input_variables/generated_files/vargs.html#ngqpt">ngqpt</a>   [Number of Grid pointsfor Q PoinTs generation]<br>
-... <a href="../../input_variables/generated_files/vargs.html#nqpt">nqpt</a>   [Number of Q - POINTs]<br>
-... <a href="../../input_variables/generated_files/vargs.html#qptopt">qptopt</a>   [QPoinTs OPTion]<br>
-... <a href="../../input_variables/generated_files/varrf.html#rfdir">rfdir</a>   [Response Function : DIRections]<br>
-... <a href="../../input_variables/generated_files/varrf.html#rfelfd">rfelfd</a>   [Response Function with respect to the ELectric FielD]<br>
-... <a href="../../input_variables/generated_files/varrf.html#rfmagn">rfmagn</a>   [Response Function with respect to MAGNetic B-field perturbation]<br>
-... <a href="../../input_variables/generated_files/varrf.html#rfphon">rfphon</a>   [Response Function with respect to PHONons]<br>
-... <a href="../../input_variables/generated_files/varrf.html#rfstrs">rfstrs</a>   [Response Function with respect to STRainS]<br>
-<p>Basic input variables:<p>... <a href="../../input_variables/generated_files/varrf.html#rfasr">rfasr</a>   [Response Function : Acoustic Sum Rule]<br>
-... <a href="../../input_variables/generated_files/varrf.html#rfatpol">rfatpol</a>   [Response Function : ATomic POLarisation]<br>
-... <a href="../../input_variables/generated_files/varrf.html#rfddk">rfddk</a>   [Response Function with respect to Derivative with respect to K]<br>
-<p>Useful input variables:<p>... <a href="../../input_variables/generated_files/vareph.html#asr">asr</a>   [Acoustic Sum Rule]<br>
-... <a href="../../input_variables/generated_files/vareph.html#chneut">chneut</a>   [CHarge NEUTrality treatment ]<br>
-... <a href="../../input_variables/generated_files/varrf.html#dfpt_sciss">dfpt_sciss</a>   [DFPT SCISSor operator]<br>
-... <a href="../../input_variables/generated_files/vareph.html#dipdip">dipdip</a>   [DIPole-DIPole interaction ]<br>
-... <a href="../../input_variables/generated_files/vardev.html#getwfkfine">getwfkfine</a>   [GET the fine grid wavefunctions from _WFK file]<br>
-... <a href="../../input_variables/generated_files/vargs.html#iqpt">iqpt</a>   [Index for QPoinT generation]<br>
-... <a href="../../input_variables/generated_files/varfil.html#ird1wf">ird1wf</a>   [Integer that governs the ReaDing of _1WF files ]<br>
-... <a href="../../input_variables/generated_files/varfil.html#irdddk">irdddk</a>   [Integer that governs the ReaDing of DDK wavefunctions, in _1WF files]<br>
-... <a href="../../input_variables/generated_files/varfil.html#irdwfq">irdwfq</a>   [Integer that governs the ReaDing of _WFQ files]<br>
-... <a href="../../input_variables/generated_files/vargs.html#nshiftq">nshiftq</a>   [Number of SHIFTs for Q point grids]<br>
-... <a href="../../input_variables/generated_files/vareph.html#ph_intmeth">ph_intmeth</a>   [PHonons: INTegration METHod]<br>
-... <a href="../../input_variables/generated_files/vareph.html#ph_ndivsm">ph_ndivsm</a>   [PHonons: Number of DIVisions for sampling the SMallest segment]<br>
-... <a href="../../input_variables/generated_files/varrf.html#ph_ngqpt">ph_ngqpt</a>   [PHonons: Number of Grid points for Q-PoinT mesh.]<br>
-... <a href="../../input_variables/generated_files/vareph.html#ph_nqpath">ph_nqpath</a>   [PHonons: Number of Q-points defining the PATH]<br>
-... <a href="../../input_variables/generated_files/vareph.html#ph_nqshift">ph_nqshift</a>   [PHonons: Number of Q-SHIFTs]<br>
-... <a href="../../input_variables/generated_files/varrf.html#ph_qpath">ph_qpath</a>   [Phonons: Q-PATH]<br>
-... <a href="../../input_variables/generated_files/vareph.html#ph_qshift">ph_qshift</a>   [PHonons: Q-SHIFTs for mesh.]<br>
-... <a href="../../input_variables/generated_files/vareph.html#ph_smear">ph_smear</a>   [PHonons: SMEARing factor]<br>
-... <a href="../../input_variables/generated_files/vareph.html#ph_wstep">ph_wstep</a>   [PHonons: frequency(W)  STEP.]<br>
-... <a href="../../input_variables/generated_files/varff.html#polcen">polcen</a>   [POLarization for CENtrosymmetric geometry]<br>
-... <a href="../../input_variables/generated_files/vareph.html#prtphdos">prtphdos</a>   [PRinT the PHonon Density Of States]<br>
-... <a href="../../input_variables/generated_files/varpaw.html#ptcharge">ptcharge</a>   [PoinT CHARGEs]<br>
-... <a href="../../input_variables/generated_files/vargs.html#qpt">qpt</a>   [Q PoinT]<br>
-... <a href="../../input_variables/generated_files/vargs.html#qptnrm">qptnrm</a>   [Q PoinTs NoRMalization]<br>
-... <a href="../../input_variables/generated_files/vargs.html#qptrlatt">qptrlatt</a>   [Q - PoinTs grid : Real space LATTice]<br>
-... <a href="../../input_variables/generated_files/varpaw.html#quadmom">quadmom</a>   [QUADrupole MOMents]<br>
-... <a href="../../input_variables/generated_files/vargs.html#shiftq">shiftq</a>   [SHIFT for Q points]<br>
-... <a href="../../input_variables/generated_files/vareph.html#symdynmat">symdynmat</a>   [SYMmetrize the DYNamical MATrix]<br>
-... <a href="../../input_variables/generated_files/vargs.html#wtq">wtq</a>   [WeighTs for the current Q-points]<br>
-<p>Relevant internal variables:<p>... <a href="../../input_variables/generated_files/varint.html#qptn">%qptn</a>   [Q-PoinT re-Normalized]<br>
-<p>Input variables for experts:<p>... <a href="../../input_variables/generated_files/varrf.html#frzfermi">frzfermi</a>   [FReeZe FERMI energy]<br>
-... <a href="../../input_variables/generated_files/varpaw.html#pawcross">pawcross</a>   [PAW - add CROSS term in oscillator strengths]<br>
-... <a href="../../input_variables/generated_files/varff.html#qprtrb">qprtrb</a>   [Q-wavevector of the PERTurbation]<br>
-... <a href="../../input_variables/generated_files/varrf.html#rf2_dkdk">rf2_dkdk</a>   [Response Function : 2nd Derivative of wavefunctions with respect to K]<br>
-... <a href="../../input_variables/generated_files/varrf.html#rfmeth">rfmeth</a>   [Response Function METHod]<br>
-... <a href="../../input_variables/generated_files/varrf.html#rfuser">rfuser</a>   [Response Function, USER-defined]<br>
-... <a href="../../input_variables/generated_files/vargs.html#scphon_supercell">scphon_supercell</a>   [Self Consistent PHONon SUPERCELL]<br>
-... <a href="../../input_variables/generated_files/vargs.html#scphon_temp">scphon_temp</a>   [Self Consistent PHONon TEMPerature]<br>
-... <a href="../../input_variables/generated_files/varff.html#vprtrb">vprtrb</a>   [potential -V- for the PeRTuRBation]<br>
+<p>Compulsory input variables:<p>... <a href="../../input_variables/generated_files/gstate.html#ngqpt">ngqpt</a>   [Number of Grid pointsfor Q PoinTs generation]<br>
+... <a href="../../input_variables/generated_files/gstate.html#nqpt">nqpt</a>   [Number of Q - POINTs]<br>
+... <a href="../../input_variables/generated_files/gstate.html#qptopt">qptopt</a>   [QPoinTs OPTion]<br>
+... <a href="../../input_variables/generated_files/dfpt.html#rfdir">rfdir</a>   [Response Function : DIRections]<br>
+... <a href="../../input_variables/generated_files/dfpt.html#rfelfd">rfelfd</a>   [Response Function with respect to the ELectric FielD]<br>
+... <a href="../../input_variables/generated_files/dfpt.html#rfmagn">rfmagn</a>   [Response Function with respect to MAGNetic B-field perturbation]<br>
+... <a href="../../input_variables/generated_files/dfpt.html#rfphon">rfphon</a>   [Response Function with respect to PHONons]<br>
+... <a href="../../input_variables/generated_files/dfpt.html#rfstrs">rfstrs</a>   [Response Function with respect to STRainS]<br>
+<p>Basic input variables:<p>... <a href="../../input_variables/generated_files/dfpt.html#rfasr">rfasr</a>   [Response Function : Acoustic Sum Rule]<br>
+... <a href="../../input_variables/generated_files/dfpt.html#rfatpol">rfatpol</a>   [Response Function : ATomic POLarisation]<br>
+... <a href="../../input_variables/generated_files/dfpt.html#rfddk">rfddk</a>   [Response Function with respect to Derivative with respect to K]<br>
+<p>Useful input variables:<p>... <a href="../../input_variables/generated_files/eph.html#asr">asr</a>   [Acoustic Sum Rule]<br>
+... <a href="../../input_variables/generated_files/eph.html#chneut">chneut</a>   [CHarge NEUTrality treatment ]<br>
+... <a href="../../input_variables/generated_files/dfpt.html#dfpt_sciss">dfpt_sciss</a>   [DFPT SCISSor operator]<br>
+... <a href="../../input_variables/generated_files/eph.html#dipdip">dipdip</a>   [DIPole-DIPole interaction ]<br>
+... <a href="../../input_variables/generated_files/dev.html#getwfkfine">getwfkfine</a>   [GET the fine grid wavefunctions from _WFK file]<br>
+... <a href="../../input_variables/generated_files/gstate.html#iqpt">iqpt</a>   [Index for QPoinT generation]<br>
+... <a href="../../input_variables/generated_files/files.html#ird1wf">ird1wf</a>   [Integer that governs the ReaDing of _1WF files ]<br>
+... <a href="../../input_variables/generated_files/files.html#irdddk">irdddk</a>   [Integer that governs the ReaDing of DDK wavefunctions, in _1WF files]<br>
+... <a href="../../input_variables/generated_files/files.html#irdwfq">irdwfq</a>   [Integer that governs the ReaDing of _WFQ files]<br>
+... <a href="../../input_variables/generated_files/gstate.html#nshiftq">nshiftq</a>   [Number of SHIFTs for Q point grids]<br>
+... <a href="../../input_variables/generated_files/eph.html#ph_intmeth">ph_intmeth</a>   [PHonons: INTegration METHod]<br>
+... <a href="../../input_variables/generated_files/eph.html#ph_ndivsm">ph_ndivsm</a>   [PHonons: Number of DIVisions for sampling the SMallest segment]<br>
+... <a href="../../input_variables/generated_files/dfpt.html#ph_ngqpt">ph_ngqpt</a>   [PHonons: Number of Grid points for Q-PoinT mesh.]<br>
+... <a href="../../input_variables/generated_files/eph.html#ph_nqpath">ph_nqpath</a>   [PHonons: Number of Q-points defining the PATH]<br>
+... <a href="../../input_variables/generated_files/eph.html#ph_nqshift">ph_nqshift</a>   [PHonons: Number of Q-SHIFTs]<br>
+... <a href="../../input_variables/generated_files/dfpt.html#ph_qpath">ph_qpath</a>   [Phonons: Q-PATH]<br>
+... <a href="../../input_variables/generated_files/eph.html#ph_qshift">ph_qshift</a>   [PHonons: Q-SHIFTs for mesh.]<br>
+... <a href="../../input_variables/generated_files/eph.html#ph_smear">ph_smear</a>   [PHonons: SMEARing factor]<br>
+... <a href="../../input_variables/generated_files/eph.html#ph_wstep">ph_wstep</a>   [PHonons: frequency(W)  STEP.]<br>
+... <a href="../../input_variables/generated_files/ffield.html#polcen">polcen</a>   [POLarization for CENtrosymmetric geometry]<br>
+... <a href="../../input_variables/generated_files/eph.html#prtphdos">prtphdos</a>   [PRinT the PHonon Density Of States]<br>
+... <a href="../../input_variables/generated_files/paw.html#ptcharge">ptcharge</a>   [PoinT CHARGEs]<br>
+... <a href="../../input_variables/generated_files/gstate.html#qpt">qpt</a>   [Q PoinT]<br>
+... <a href="../../input_variables/generated_files/gstate.html#qptnrm">qptnrm</a>   [Q PoinTs NoRMalization]<br>
+... <a href="../../input_variables/generated_files/gstate.html#qptrlatt">qptrlatt</a>   [Q - PoinTs grid : Real space LATTice]<br>
+... <a href="../../input_variables/generated_files/paw.html#quadmom">quadmom</a>   [QUADrupole MOMents]<br>
+... <a href="../../input_variables/generated_files/gstate.html#shiftq">shiftq</a>   [SHIFT for Q points]<br>
+... <a href="../../input_variables/generated_files/eph.html#symdynmat">symdynmat</a>   [SYMmetrize the DYNamical MATrix]<br>
+... <a href="../../input_variables/generated_files/gstate.html#wtq">wtq</a>   [WeighTs for the current Q-points]<br>
+<p>Relevant internal variables:<p>... <a href="../../input_variables/generated_files/internal.html#qptn">%qptn</a>   [Q-PoinT re-Normalized]<br>
+<p>Input variables for experts:<p>... <a href="../../input_variables/generated_files/dfpt.html#frzfermi">frzfermi</a>   [FReeZe FERMI energy]<br>
+... <a href="../../input_variables/generated_files/paw.html#pawcross">pawcross</a>   [PAW - add CROSS term in oscillator strengths]<br>
+... <a href="../../input_variables/generated_files/ffield.html#qprtrb">qprtrb</a>   [Q-wavevector of the PERTurbation]<br>
+... <a href="../../input_variables/generated_files/dfpt.html#rf2_dkdk">rf2_dkdk</a>   [Response Function : 2nd Derivative of wavefunctions with respect to K]<br>
+... <a href="../../input_variables/generated_files/dfpt.html#rfmeth">rfmeth</a>   [Response Function METHod]<br>
+... <a href="../../input_variables/generated_files/dfpt.html#rfuser">rfuser</a>   [Response Function, USER-defined]<br>
+... <a href="../../input_variables/generated_files/gstate.html#scphon_supercell">scphon_supercell</a>   [Self Consistent PHONon SUPERCELL]<br>
+... <a href="../../input_variables/generated_files/gstate.html#scphon_temp">scphon_temp</a>   [Self Consistent PHONon TEMPerature]<br>
+... <a href="../../input_variables/generated_files/ffield.html#vprtrb">vprtrb</a>   [potential -V- for the PeRTuRBation]<br>
 
 
 &nbsp; 

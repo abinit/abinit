@@ -38,8 +38,8 @@ norm-conserving pseudopotential case.<br>
 <ul>
 <li><a href="#0">0.</a> Summary of the PAW method</li>
 <li><a href="#1">1.</a> Using PAW with ABINIT</li>
-<li><a href="#2">2.</a> The convergence on plane-wave cut-off (<a href="../../input_variables/generated_files/varbas.html#ecut">ecut</a>)</li>
-<li><a href="#3">3.</a> The convergence on double FFT grid cut-off (<a href="../../input_variables/generated_files/varpaw.html#pawecutdg">pawecutdg</a>)&nbsp;</li>
+<li><a href="#2">2.</a> The convergence on plane-wave cut-off (<a href="../../input_variables/generated_files/basic.html#ecut">ecut</a>)</li>
+<li><a href="#3">3.</a> The convergence on double FFT grid cut-off (<a href="../../input_variables/generated_files/paw.html#pawecutdg">pawecutdg</a>)&nbsp;</li>
 <li><a href="#4">4.</a> Plotting PAW contributions to the DOS</li>
 <li><a href="#5">5.</a> Testing the completeness of the PAW partial wave basis</li>
 <li><a href="#6">6.</a> Checking the validity of PAW results</li>
@@ -164,7 +164,7 @@ file by&nbsp;<span style="font-weight: bold; color: rgb(0, 102, 0);">6c.lda.atom
 <p>Run ABINIT again:</p>
 <pre style="margin-left: 40px;"><span style="color: rgb(153, 0, 0);">abinit &lt; tpaw1_1.files &gt; tmp-log</span></pre><p><span style="text-decoration: underline;">Your
 run should stop before end !</span> &nbsp;The input file
-is missing a mandatory argument:&nbsp;<a href="../../input_variables/generated_files/varpaw.html#pawecutdg">pawecutdg</a><span style="font-weight: bold;"></span>
+is missing a mandatory argument:&nbsp;<a href="../../input_variables/generated_files/paw.html#pawecutdg">pawecutdg</a><span style="font-weight: bold;"></span>
 !!</p>
 <p>Add the line "<span style="font-weight: bold;">pawecutdg
 50.</span>" in the &nbsp;<span style="color: rgb(0, 102, 0);">tpaw1_1.in&nbsp;</span>file
@@ -172,7 +172,7 @@ and run ABINIT again.<br>
 Now ABINIT runs to the end.<span style="font-style: italic;"></span></p><p><span style="font-style: italic;">Note
 that the time needed for the PAW run is greater than the time needed
 for the norm-conserving pseudopotential run; indeed, at constant value
-of plane wave cut-off energy <a href="../../input_variables/generated_files/varbas.html#ecut">ecut</a> 
+of plane wave cut-off energy <a href="../../input_variables/generated_files/basic.html#ecut">ecut</a> 
 PAW requires more computational
 resources:</span><span style="font-style: italic;">&nbsp;&nbsp;&nbsp; -
 the "on-site"
@@ -195,9 +195,9 @@ the following specific topics:</p>
 <p><span style="font-weight: bold; text-decoration: underline;">At
 the beginning of the file:</span>
 </p><div style="margin-left: 40px;">- Some specific default
-PAW input variables (<a href="../../input_variables/generated_files/varpaw.html#ngfftdg">ngfftdg</a>,
-<a href="../../input_variables/generated_files/varpaw.html#pawecutdg">pawecutdg</a>,
-and <a href="../../input_variables/generated_files/vardev.html#useylm">useylm</a>)
+PAW input variables (<a href="../../input_variables/generated_files/paw.html#ngfftdg">ngfftdg</a>,
+<a href="../../input_variables/generated_files/paw.html#pawecutdg">pawecutdg</a>,
+and <a href="../../input_variables/generated_files/dev.html#useylm">useylm</a>)
 are mentioned in the
 section:
 </div><p style="color: rgb(0, 153, 0); margin-left: 80px;"><font size="-1">-outvars:
@@ -346,7 +346,7 @@ in general you should be able to compare numbers for (valence)<i> energies</i>
 between different PAW potentials or
 different codes.</p>
 <h3><hr> <a name="2"></a>&nbsp;<b><b><br>
-2.&nbsp; The convergence on plane-wave cut-off (<a href="../../input_variables/generated_files/varbas.html#ecut">ecut</a>)</b></b></h3>
+2.&nbsp; The convergence on plane-wave cut-off (<a href="../../input_variables/generated_files/basic.html#ecut">ecut</a>)</b></b></h3>
 As in the usual case, the critical convergence parameter is the cut-off
 defining the size of the plane-wave basis...
 <p><b>1.a</b><b> Computing the convergence in
@@ -356,7 +356,7 @@ the norm-conserving case</b></p>
 The input file&nbsp;<span style="color: rgb(0, 102, 0); font-weight: bold;">tpaw1_2.in</span>
 contains data for computing the convergence in ecut for&nbsp;<span style="font-weight: bold; color: rgb(153, 0, 0);">diamond</span>
 (at experimental volume).
-There are 9 datasets, for which&nbsp;<a href="../../input_variables/generated_files/varbas.html#ecut">ecut</a>
+There are 9 datasets, for which&nbsp;<a href="../../input_variables/generated_files/basic.html#ecut">ecut</a>
 increases from 8 Ha to 24 Ha
 by step of 2 Ha.<br>
 You might use the&nbsp;<span style="color: rgb(0, 102, 0); font-weight: bold;">tpaw1_2.files</span>
@@ -423,7 +423,7 @@ calculation. </p>
 <hr>
 
 <h3><a name="3">&nbsp;</a><b><b><br>
-3. The convergence on the double grid FFT cut-off (<a href="../../input_variables/generated_files/varpaw.html#pawecutdg">pawecutdg</a>)
+3. The convergence on the double grid FFT cut-off (<a href="../../input_variables/generated_files/paw.html#pawecutdg">pawecutdg</a>)
 </b></b></h3><p>In a<span style="font-style: italic;">
 norm-conserving pseudopotential</span> calculation, the (plane wave) density
 grid is (at least)
@@ -431,16 +431,16 @@ twice
 bigger than the wavefunctions grid, in each direction. In
 a <span style="font-style: italic;">PAW</span>
 calculation, the (plane wave) density grid is tunable thanks to the
-input variable <a href="../../input_variables/generated_files/varpaw.html#pawecutdg">pawecutdg</a>
+input variable <a href="../../input_variables/generated_files/paw.html#pawecutdg">pawecutdg</a>
 (PAW: ECUT for Double Grid). This is needed because of the mapping of
 &nbsp;objects (densities, potentials) located in
 the augmentation regions (PAW spheres) onto the global FFT grid.<br>
 The number of points
 of the Fourier grid located in the spheres must be high enough to
 preserve the accuracy. It is determined from the cut-off
-energy&nbsp; <a href="../../input_variables/generated_files/varpaw.html#pawecutdg">pawecutdg</a>. An
+energy&nbsp; <a href="../../input_variables/generated_files/paw.html#pawecutdg">pawecutdg</a>. An
 alternative
-is to use directly the input variable <a href="../../input_variables/generated_files/varpaw.html#ngfftdg">ngfftdg</a>.
+is to use directly the input variable <a href="../../input_variables/generated_files/paw.html#ngfftdg">ngfftdg</a>.
 One of
 the most sensitive objects affected by this "grid transfer" is the
 compensation charge density; its integral over the augmentation
@@ -450,9 +450,9 @@ whole simulation cell (on the FFT grid).</p>
 and the associated <span style="color: rgb(0, 102, 0); font-weight: bold;">tpaw1_3.files</span>
 file.<br>
 The only difference with the <span style="color: rgb(0, 102, 0);">tpaw1_2.in</span>
-file is that <a href="../../input_variables/generated_files/varbas.html#ecut">ecut</a>
+file is that <a href="../../input_variables/generated_files/basic.html#ecut">ecut</a>
 is fixed to 12 Ha,
-while <a href="../../input_variables/generated_files/varpaw.html#pawecutdg">pawecutdg</a>
+while <a href="../../input_variables/generated_files/paw.html#pawecutdg">pawecutdg</a>
 runs from 12 to 39 Ha.
 </p><p>Launch ABINIT with these files; you should obtain the values
 (file <span style="color: rgb(0, 102, 0);">tpaw1_3.out</span>):
@@ -473,8 +473,8 @@ the 1 mHa level. In principle, it should be sufficient to choose <span style="fo
 dataset), the energy change is lower than 0.001 <span style="font-style: italic;">mHa</span><code></code>: this choice will be more than enough.</p>
 <p>Note the steps
 in the convergence. They are due to the sudden (integer) changes in the grid size
-(see the output values for&nbsp; <a href="../../input_variables/generated_files/varpaw.html#ngfftdg">ngfftdg</a>) which do not occur
-for each increase of&nbsp;<a href="../../input_variables/generated_files/varpaw.html#pawecutdg">pawecutdg</a>. To avoid troubles due to these steps, it is better to choose a value of pawecutdg slightly higher.<br>
+(see the output values for&nbsp; <a href="../../input_variables/generated_files/paw.html#ngfftdg">ngfftdg</a>) which do not occur
+for each increase of&nbsp;<a href="../../input_variables/generated_files/paw.html#pawecutdg">pawecutdg</a>. To avoid troubles due to these steps, it is better to choose a value of pawecutdg slightly higher.<br>
 </p>
 
 <p>The&nbsp;convergence
@@ -499,9 +499,9 @@ that, for numerical reasons, they cannot be exactly the same
 (integration over a radial grid does not use the same scheme as
 integration over a FFT grid).</span></p>
 <span style="text-decoration: underline;">Additional test:</span><br>
-We want now to check the convergence in <a href="../../input_variables/generated_files/varbas.html#ecut">ecut</a>
+We want now to check the convergence in <a href="../../input_variables/generated_files/basic.html#ecut">ecut</a>
 with a fixed value
-of 24 Ha for <a href="../../input_variables/generated_files/varpaw.html#pawecutdg">pawecutdg</a>.
+of 24 Ha for <a href="../../input_variables/generated_files/paw.html#pawecutdg">pawecutdg</a>.
 Modify the file<span style="color: rgb(0, 102, 0);">
 tpaw1_2.in</span>, setting pawecutdg to 24 Ha, and launch ABINIT
 again...<br>
@@ -528,27 +528,27 @@ convergence (at the 0.1 mHartree level) is achieved for&nbsp;16&lt;=<span style=
 Hartree.
 <br>
 <span style="text-decoration: underline;"><br>Note 1:</span><br>
-Associated with the input variable <a href="../../input_variables/generated_files/varpaw.html#pawecutdg">pawecutdg</a>
-is the input variable <a href="../../input_variables/generated_files/varpaw.html#ngfftdg">ngfftdg</a>:
+Associated with the input variable <a href="../../input_variables/generated_files/paw.html#pawecutdg">pawecutdg</a>
+is the input variable <a href="../../input_variables/generated_files/paw.html#ngfftdg">ngfftdg</a>:
 it
-gives the size of the FFT grid associated with <a href="../../input_variables/generated_files/varpaw.html#pawecutdg">pawecutdg</a>.
-Note that <a href="../../input_variables/generated_files/varpaw.html#pawecutdg">pawecutdg</a>
+gives the size of the FFT grid associated with <a href="../../input_variables/generated_files/paw.html#pawecutdg">pawecutdg</a>.
+Note that <a href="../../input_variables/generated_files/paw.html#pawecutdg">pawecutdg</a>
 is only useful to define the FFT grid for the density in a convenient
-way. You can therefore tune directly <a href="../../input_variables/generated_files/varpaw.html#ngfftdg">ngfftdg</a>
+way. You can therefore tune directly <a href="../../input_variables/generated_files/paw.html#ngfftdg">ngfftdg</a>
 to define the
 size of the FFT
 grid for the density.<br>
 <br><span style="text-decoration: underline;">Note 2:</span><br>
-Although <a href="../../input_variables/generated_files/varpaw.html#pawecutdg">pawecutdg</a>
-should always be checked, in practice, a common use it to put it bigger than&nbsp;<a href="../../input_variables/generated_files/varbas.html#ecut">ecut</a>
+Although <a href="../../input_variables/generated_files/paw.html#pawecutdg">pawecutdg</a>
+should always be checked, in practice, a common use it to put it bigger than&nbsp;<a href="../../input_variables/generated_files/basic.html#ecut">ecut</a>
 and keep it constant during
-all calculations. Increasing&nbsp;<span style="text-decoration: underline;"></span><a href="../../input_variables/generated_files/varpaw.html#pawecutdg">pawecutdg</a>
+all calculations. Increasing&nbsp;<span style="text-decoration: underline;"></span><a href="../../input_variables/generated_files/paw.html#pawecutdg">pawecutdg</a>
 slightly changes the CPU execution time, but above all it is
 memory-consuming.<br>
-Note that, if <a href="../../input_variables/generated_files/varbas.html#ecut">ecut</a> is already high,
-there is no need for a high&nbsp;<a href="../../input_variables/generated_files/varpaw.html#pawecutdg">pawecutdg</a>.<span style="text-decoration: underline;"></span><br>
-Last warning: when testing <a href="../../input_variables/generated_files/varbas.html#ecut">ecut</a>
-convergency, <span style="text-decoration: underline;"></span><a href="../../input_variables/generated_files/varpaw.html#pawecutdg">pawecutdg</a>
+Note that, if <a href="../../input_variables/generated_files/basic.html#ecut">ecut</a> is already high,
+there is no need for a high&nbsp;<a href="../../input_variables/generated_files/paw.html#pawecutdg">pawecutdg</a>.<span style="text-decoration: underline;"></span><br>
+Last warning: when testing <a href="../../input_variables/generated_files/basic.html#ecut">ecut</a>
+convergency, <span style="text-decoration: underline;"></span><a href="../../input_variables/generated_files/paw.html#pawecutdg">pawecutdg</a>
 has to remain constant to obtain consistent results.<br>
 <br><hr><h3><p><b><a name="4"><br>4.</a> Plotting PAW contributions to
 the Density of States (DOS)</b></p>
@@ -556,11 +556,11 @@ the Density of States (DOS)</b></p>
 and the associated <span style="color: rgb(0, 102, 0); font-weight: bold;">tpaw1_4.files</span>
 file.<br>
 ABINIT is now asked to compute the Density Of State (DOS) (see
-the&nbsp; <a href="../../input_variables/generated_files/varfil.html#prtdos">prtdos</a>&nbsp;keyword in the
+the&nbsp; <a href="../../input_variables/generated_files/files.html#prtdos">prtdos</a>&nbsp;keyword in the
 input file). Also note that more k-points are used in order to increase
-the accuracy of the DOS. <a href="../../input_variables/generated_files/varbas.html#ecut">ecut</a>
+the accuracy of the DOS. <a href="../../input_variables/generated_files/basic.html#ecut">ecut</a>
 is set to 12 Ha,
-while <a href="../../input_variables/generated_files/varpaw.html#pawecutdg">pawecutdg</a> is 24 Ha.
+while <a href="../../input_variables/generated_files/paw.html#pawecutdg">pawecutdg</a> is 24 Ha.
 </p><p>Launch ABINIT with these files; you should obtain the <span style="color: rgb(0, 102, 0);">tpaw1_4.out</span> and
 the DOS file (<span style="color: rgb(0, 153, 0); font-weight: bold;">tpaw1_4o_DOS</span>):</p>
 <pre style="margin-left: 40px;"><span style="color: rgb(153, 0, 0);">abinit &lt; tpaw1_4.files &gt; tmp-log</span>
@@ -573,21 +573,21 @@ launch:</p>
 this stage, you have the usual plot for a DOS; nothing
 specific to PAW.</p>
 <p>Now, edit the&nbsp;<span style="color: rgb(0, 102, 0); font-weight: bold;">tpaw1_4.in</span>
-file,&nbsp;comment the "<span style="font-family: monospace; color: rgb(0, 153, 0);"></span><a href="../../input_variables/generated_files/varfil.html#prtdos">prtdos</a>
+file,&nbsp;comment the "<span style="font-family: monospace; color: rgb(0, 153, 0);"></span><a href="../../input_variables/generated_files/files.html#prtdos">prtdos</a>
 1", and uncomment (or add):</p>
 <div style="margin-left: 80px;"><span style="font-family: monospace; color: rgb(0, 153, 0);">prtdos
 3&nbsp; pawprtdos 1</span>
 <span style="font-family: monospace; color: rgb(0, 153, 0);">natsph
 1 iatsph 1 ratsph 1.5</span>
-</div><p>The "&nbsp;<a href="../../input_variables/generated_files/varfil.html#prtdos">prtdos</a>
+</div><p>The "&nbsp;<a href="../../input_variables/generated_files/files.html#prtdos">prtdos</a>
 3<span style="font-family: monospace;"></span>"
-statement now requires the output of the projected DOS; "<a href="../../input_variables/generated_files/vargs.html#natsph">natsph</a>
-1&nbsp; <a href="../../input_variables/generated_files/vargs.html#iatsph">iatsph</a> 1&nbsp; <a href="../../input_variables/generated_files/vargs.html#ratsph">ratsph</a>
+statement now requires the output of the projected DOS; "<a href="../../input_variables/generated_files/gstate.html#natsph">natsph</a>
+1&nbsp; <a href="../../input_variables/generated_files/gstate.html#iatsph">iatsph</a> 1&nbsp; <a href="../../input_variables/generated_files/gstate.html#ratsph">ratsph</a>
 1.5" selects the first carbon atom as the center of projection, and
 sets the
 radius of the projection area to 1.5 atomic units (this is exactly the
 radius of the PAW augmentation regions: generally the best choice).<br>
-The "<a href="../../input_variables/generated_files/varpaw.html#pawprtdos">pawprtdos</a> 1" is&nbsp;specific
+The "<a href="../../input_variables/generated_files/paw.html#pawprtdos">pawprtdos</a> 1" is&nbsp;specific
 to PAW. With this option, ABINIT is asked to compute all the
 contributions to the projected DOS.<br>
 Let's remember that:</p>
@@ -623,7 +623,7 @@ contribution are close.<br>
 So, in a first approach, they cancel; we could approximate the DOS by
 the AE on-site
 part taken alone.<br>
-That is exactly what is done when&nbsp;<a href="../../input_variables/generated_files/varpaw.html#pawprtdos">pawprtdos</a>=2;
+That is exactly what is done when&nbsp;<a href="../../input_variables/generated_files/paw.html#pawprtdos">pawprtdos</a>=2;
 in that case, only the AE on-site contribution is computed and given
 as&nbsp;a
 good approximation of the total projected DOS. The main advantage of
@@ -634,7 +634,7 @@ the DOS (it is instantaneously computed).<br>
 the next section, this approximation is only valid when:</span>
 <div style="margin-left: 40px;"><span style="font-weight: bold;"> (1) the</span><span style="position: relative; top: -8pt; left: 8pt; font-weight: bold;"></span><span style="font-weight: bold;"></span><span style="position: relative; top: -5pt; left: 6pt; font-weight: bold;">~</span><span style="font-weight: bold;">&#966;</span><sub style="font-weight: bold;">i</sub><span style="font-weight: bold;"> basis is complete enough <br></span>
 <span style="font-weight: bold;">(2) the electronic density
-is mainly contained in the sphere defined by <a href="../../input_variables/generated_files/vargs.html#ratsph">ratsph</a>.
+is mainly contained in the sphere defined by <a href="../../input_variables/generated_files/gstate.html#ratsph">ratsph</a>.
 </span></div>
 
 <br><hr><h3><p><b><a name="5"><br>5.</a> Testing the
@@ -793,15 +793,15 @@ pseudopotential calculation, the mixing is done on the potential; but,
 for technical reasons, this choice is not optimal for PAW calculations.
 Thus, by default, the mixing is done on the density when PAW is
 activated.<br>
-The mixing scheme can be controlled by the <a href="../../input_variables/generated_files/varbas.html#iscf">iscf</a>
+The mixing scheme can be controlled by the <a href="../../input_variables/generated_files/basic.html#iscf">iscf</a>
 variable (please, read again
 the different options of this input variable).<br>
-By default,&nbsp;<a href="../../input_variables/generated_files/varbas.html#iscf">iscf</a>=<span style="font-weight: bold;">7</span> for norm-conserving
+By default,&nbsp;<a href="../../input_variables/generated_files/basic.html#iscf">iscf</a>=<span style="font-weight: bold;">7</span> for norm-conserving
 pseudopotentials, while
-<a href="../../input_variables/generated_files/varbas.html#iscf">iscf</a>=
+<a href="../../input_variables/generated_files/basic.html#iscf">iscf</a>=
 <span style="font-weight: bold;">17</span> for PAW...<br>
 To compare both schemes, you can edit the <span style="color: rgb(0, 153, 0); font-weight: bold;">tpaw1_1.in</span>
-file and try <a href="../../input_variables/generated_files/varbas.html#iscf">iscf</a>=7 or 17 and compare
+file and try <a href="../../input_variables/generated_files/basic.html#iscf">iscf</a>=7 or 17 and compare
 the
 behaviour of the SC cycle in both cases; as you can see, final total
 energy is the same but the way to reach it is completely different.<br>
@@ -819,7 +819,7 @@ file is to print the direct energy when the mixing is on the
 potential,
 and the double counting energy when the mixing is on the density.<br>
 <br>You can try (using the <span style="color: rgb(0, 153, 0);">tpaw1_1.in</span>&nbsp;file)
-to decrease the values of&nbsp;<a href="../../input_variables/generated_files/varbas.html#tolvrs">tolvrs</a>
+to decrease the values of&nbsp;<a href="../../input_variables/generated_files/basic.html#tolvrs">tolvrs</a>
 and look at the difference between both values of energy.<br>
 <br>Also note that PAW <span style="font-style: italic; font-weight: bold;">&#961;</span><sub style="font-style: italic; font-weight: bold;">ij</sub> quantities
 (occupancies of
@@ -833,8 +833,8 @@ regions (PAW spheres). But, in usual cases, a small overlap between
 spheres is acceptable.<br>By
 default, ABINIT checks that the distances between atoms are large
 enough to avoid overlap; a "small" voluminal overlap of 5% is accepted
-by default. This value can be tuned with the&nbsp;<a href="../../input_variables/generated_files/varpaw.html#pawovlp">pawovlp</a>&nbsp;input keyword. The overlap
-check can even be by-passed with&nbsp;<a href="../../input_variables/generated_files/varpaw.html#pawovlp">pawovlp</a>=-1.</p><p><span style="text-decoration: underline;">Important warning</span>:
+by default. This value can be tuned with the&nbsp;<a href="../../input_variables/generated_files/paw.html#pawovlp">pawovlp</a>&nbsp;input keyword. The overlap
+check can even be by-passed with&nbsp;<a href="../../input_variables/generated_files/paw.html#pawovlp">pawovlp</a>=-1.</p><p><span style="text-decoration: underline;">Important warning</span>:
 while a small overlap can be acceptable for the augmentation regions,
 an overlap of the compensation charge densities has to be avoided. The
 compensation charge density is defined by a radius (named <span style="font-style: italic; font-weight: bold;">r</span><sub style="font-style: italic; font-weight: bold;">shape</sub>
@@ -844,7 +844,7 @@ WARNING is eventually printed...</p><p>Also note that you can control
 the compensation charge radius and shape function while generating the
 PAW dataset (see tutorial PAW2).</p><b></b><p><b>7.c</b><b>
 Printing volume for PAW</b></p>If you want to get more detailed output
-concerning the PAW computation, you can use the&nbsp;<a href="../../input_variables/generated_files/varpaw.html#pawprtvol">pawprtvol</a> input keyword. See its
+concerning the PAW computation, you can use the&nbsp;<a href="../../input_variables/generated_files/paw.html#pawprtvol">pawprtvol</a> input keyword. See its
 description in the user's manual...<br>It is particularly useful to
 print details about pseudopotential strength (<span style="font-style: italic; font-weight: bold;">D</span><sub style="font-style: italic; font-weight: bold;">ij</sub>) or partial
 waves occupancies (<span style="font-style: italic; font-weight: bold;">&#961;</span><sub style="font-style: italic; font-weight: bold;">ij</sub>).
@@ -859,9 +859,9 @@ variables should not be modified !</span>
 <br>
 <br>Variables that can be used to gain accuracy (in ascending order of
 importance):<br>
-<div style="margin-left: 40px;"><a href="../../input_variables/generated_files/varpaw.html#pawxcdev">pawxcdev</a>: control the accuracy of
+<div style="margin-left: 40px;"><a href="../../input_variables/generated_files/paw.html#pawxcdev">pawxcdev</a>: control the accuracy of
 exchange-correlation on-site potentials (try pawxcdev=2 to increase
-accuracy).<br> <a href="../../input_variables/generated_files/varpaw.html#mqgriddg">mqgriddg</a>: control the
+accuracy).<br> <a href="../../input_variables/generated_files/paw.html#mqgriddg">mqgriddg</a>: control the
 accuracy of spline fits to transfer densities/potentials from FFT grid
 to spherical grid.<br> <a href="../../input_variables/generated_files/varpaw.html#pawnzlm" target="kwimgk">pawnzlm</a>: control the
 computation of moments of spherical densities that should be zero by
@@ -869,21 +869,21 @@ symmetry. </div>
 
 <br> Variables that can be used to save memory (in
 ascending order of importance):<br>
-<div style="margin-left: 40px;"><a href="../../input_variables/generated_files/varpaw.html#pawstgylm">pawstgylm</a>: control the storage of
-spherical harmonics computed around atoms. </div><div style="margin-left: 40px;"><a href="../../input_variables/generated_files/varpaw.html#pawmixdg">pawmixdg</a>: control on which grid the
-potential/density is mixed during SCF cycles.<br> <a href="../../input_variables/generated_files/varpaw.html#pawlcutd">pawlcutd</a>: control the number of angular
-momenta to take into account in on-site densities.<br> <a href="../../input_variables/generated_files/varpaw.html#pawlmix">pawlmix</a>: control the number of <span style="font-style: italic;">&#961;</span><sub style="font-style: italic;">ij</sub> to be mixed during SCF cycle.
+<div style="margin-left: 40px;"><a href="../../input_variables/generated_files/paw.html#pawstgylm">pawstgylm</a>: control the storage of
+spherical harmonics computed around atoms. </div><div style="margin-left: 40px;"><a href="../../input_variables/generated_files/paw.html#pawmixdg">pawmixdg</a>: control on which grid the
+potential/density is mixed during SCF cycles.<br> <a href="../../input_variables/generated_files/paw.html#pawlcutd">pawlcutd</a>: control the number of angular
+momenta to take into account in on-site densities.<br> <a href="../../input_variables/generated_files/paw.html#pawlmix">pawlmix</a>: control the number of <span style="font-style: italic;">&#961;</span><sub style="font-style: italic;">ij</sub> to be mixed during SCF cycle.
 </div>
 
 <br> Variables that can be used to save
 CPU time (in ascending order of importance):
 <div style="margin-left: 40px;">
- <a href="../../input_variables/generated_files/varpaw.html#pawnhatxc">pawnhatxc</a>: control the numerical
+ <a href="../../input_variables/generated_files/paw.html#pawnhatxc">pawnhatxc</a>: control the numerical
 treatment of gradients of compensation charge density in case of GGA<br>
-<a href="../../input_variables/generated_files/varpaw.html#pawstgylm">pawstgylm</a>: control the storage of
-spherical harmonics computed around atoms.<br><a href="../../input_variables/generated_files/varpaw.html#pawlcutd">pawlcutd</a>: control the number of angular
-momenta to take into account in on-site densities.<br> <a href="../../input_variables/generated_files/varpaw.html#pawlmix">pawlmix</a>: control the number of <span style="font-style: italic;">&#961;</span><sub style="font-style: italic;">ij</sub> to be mixed during SCF cycle.<br>
-<a href="../../input_variables/generated_files/varpaw.html#bxctmindg">bxctmindg</a>: can be used to decrease the
+<a href="../../input_variables/generated_files/paw.html#pawstgylm">pawstgylm</a>: control the storage of
+spherical harmonics computed around atoms.<br><a href="../../input_variables/generated_files/paw.html#pawlcutd">pawlcutd</a>: control the number of angular
+momenta to take into account in on-site densities.<br> <a href="../../input_variables/generated_files/paw.html#pawlmix">pawlmix</a>: control the number of <span style="font-style: italic;">&#961;</span><sub style="font-style: italic;">ij</sub> to be mixed during SCF cycle.<br>
+<a href="../../input_variables/generated_files/paw.html#bxctmindg">bxctmindg</a>: can be used to decrease the
 size of fine FFT grid for a given value of pawecutdg. </div><div style="margin-left: 40px;"> </div><p>The above list is not exhaustive. several other keywords can be used to tune ABINIT PAW calculations.</p>
 <p><b><br>
 </b></p>
@@ -891,11 +891,11 @@ size of fine FFT grid for a given value of pawecutdg. </div><div style="margin-l
 If the system under study contains strongly correlated electrons, 
 the&nbsp;<span style="font-style: italic; font-weight: bold;">LDA+U</span> method can be useful. 
 It is controlled by the&nbsp;
-<a href="../../input_variables/generated_files/varpaw.html#usepawu">usepawu</a>,
+<a href="../../input_variables/generated_files/paw.html#usepawu">usepawu</a>,
 &nbsp;
-<a href="../../input_variables/generated_files/varpaw.html#lpawu">lpawu</a>, 
-<a href="../../input_variables/generated_files/varpaw.html#upawu">upawu</a> and 
-<a href="../../input_variables/generated_files/varpaw.html#jpawu">jpawu</a> input keywords. Note that the
+<a href="../../input_variables/generated_files/paw.html#lpawu">lpawu</a>, 
+<a href="../../input_variables/generated_files/paw.html#upawu">upawu</a> and 
+<a href="../../input_variables/generated_files/paw.html#jpawu">jpawu</a> input keywords. Note that the
 formalism implemented in ABINIT is approximate, i.e. it is only valid if:
 <br>
 <div style="margin-left: 40px;">(1) the<span style="position: relative; top: -8pt; left: 8pt;"></span><span style="position: relative; top: -5pt; left: 6pt;">~</span>&#966;<sub>i</sub>
@@ -908,7 +908,7 @@ section of this tutorial: considering that smooth PW contributions and
 PS on-site contributions are closely related, only the AE on-site
 contribution is computed; it is indeed a very good approximation.<br>
 <br>Converging a Self-Consistent Cycle, or ensuring the global minimum
-is reached, with PAW+U is sometimes difficult. Using <a href="../../input_variables/generated_files/varpaw.html#usedmatpu">usedmatpu</a> and <a href="../../input_variables/generated_files/varpaw.html#dmatpawu">dmatpawu</a> can help...<br>
+is reached, with PAW+U is sometimes difficult. Using <a href="../../input_variables/generated_files/paw.html#usedmatpu">usedmatpu</a> and <a href="../../input_variables/generated_files/paw.html#dmatpawu">dmatpawu</a> can help...<br>
 <script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
 
 </body>

@@ -30,22 +30,22 @@
 <h3><b>1. Introduction.</b></h3>
 
 
-<p>The main Electron-Phonon Coupling (EPC) analysis is performed in anaddb, setting <a href="../../input_variables/generated_files/varanaddb.html#elphflag@anaddb">elphflag</a>
+<p>The main Electron-Phonon Coupling (EPC) analysis is performed in anaddb, setting <a href="../../input_variables/generated_files/anaddb.html#elphflag@anaddb">elphflag</a>
 variable to 1. Most of the procedure is automatic, but can be
-lengthy if a large number of k-points is being used. The <a href="../../input_variables/generated_files/varanaddb.html#nqpath@anaddb">nqpath</a> and
-<a href="../../input_variables/generated_files/varanaddb.html#qpath@anaddb">qpath</a> variables must be set, specifying a path in reciprocal space.
+lengthy if a large number of k-points is being used. The <a href="../../input_variables/generated_files/anaddb.html#nqpath@anaddb">nqpath</a> and
+<a href="../../input_variables/generated_files/anaddb.html#qpath@anaddb">qpath</a> variables must be set, specifying a path in reciprocal space.
 anaddb generates files containing the
 phonon linewidths (suffixed _LWD) and frequencies &omega;<sub>qj</sub> (suffixed _BST)
-along <a href="../../input_variables/generated_files/varanaddb.html#qpath@anaddb">qpath</a>. One can calculate the nesting function n(q) =
+along <a href="../../input_variables/generated_files/anaddb.html#qpath@anaddb">qpath</a>. One can calculate the nesting function n(q) =
 &sum;<sub>kii'</sub> &delta;(&epsilon;<sub>k,i</sub>) &delta;(&epsilon;<sub>k+q,i'</sub>) by
-setting <a href="../../input_variables/generated_files/varanaddb.html#prtnest@anaddb">prtnest</a> to 1 (output to _NEST).
+setting <a href="../../input_variables/generated_files/anaddb.html#prtnest@anaddb">prtnest</a> to 1 (output to _NEST).
 
 <p>After interpolation, the quantities must be integrated over the Fermi
-surface. Several quadrature methods are available. The default (<a href="../../input_variables/generated_files/varanaddb.html#telphint@anaddb">telphint</a>=1) is to use Gaussian weighting,
-with a width <a href="../../input_variables/generated_files/varanaddb.html#elphsmear@anaddb">elphsmear</a>. Another option is the improved
-tetrahedron <a href="../../bibliography/generated_files/bibliography.html#Bloechl1994a">[Bloechl1994a]</a> (<a href="../../input_variables/generated_files/varanaddb.html#telphint@anaddb">telphint</a>=0).
-Finally (<a href="../../input_variables/generated_files/varanaddb.html#telphint@anaddb">telphint</a>=2), one can integrate a given set of electron bands,
-between <a href="../../input_variables/generated_files/varanaddb.html#ep_b_max@anaddb">ep_b_max</a> and <a href="../../input_variables/generated_files/varanaddb.html#ep_b_min@anaddb">ep_b_min</a>.
+surface. Several quadrature methods are available. The default (<a href="../../input_variables/generated_files/anaddb.html#telphint@anaddb">telphint</a>=1) is to use Gaussian weighting,
+with a width <a href="../../input_variables/generated_files/anaddb.html#elphsmear@anaddb">elphsmear</a>. Another option is the improved
+tetrahedron <a href="../../bibliography/generated_files/bibliography.html#Bloechl1994a">[Bloechl1994a]</a> (<a href="../../input_variables/generated_files/anaddb.html#telphint@anaddb">telphint</a>=0).
+Finally (<a href="../../input_variables/generated_files/anaddb.html#telphint@anaddb">telphint</a>=2), one can integrate a given set of electron bands,
+between <a href="../../input_variables/generated_files/anaddb.html#ep_b_max@anaddb">ep_b_max</a> and <a href="../../input_variables/generated_files/anaddb.html#ep_b_min@anaddb">ep_b_min</a>.
 The resulting integrated quantities are the Eliashberg function (in a file
 suffixed _A2F), and the EPC strength &lambda;
 which is printed in the main output file.
@@ -56,17 +56,17 @@ obtained from the conducti post-processor, but due to electron-electron
 scattering, instead of electron-phonon. A
 preliminary calculation of the derivatives of the wavefunctions with respect to
 k-vector must be carried out. The transport calculation is turned on by setting
-<a href="../../input_variables/generated_files/varanaddb.html#ifltransport@anaddb">ifltransport</a> to 1 in anaddb. The transport quantities depend on
+<a href="../../input_variables/generated_files/anaddb.html#ifltransport@anaddb">ifltransport</a> to 1 in anaddb. The transport quantities depend on
 the Fermi velocity for each band, and the electronic band-dependence of the
 matrix elements must be
-preserved before integration, by setting <a href="../../input_variables/generated_files/varanaddb.html#ep_keepbands@anaddb">ep_keepbands</a> to 1.
+preserved before integration, by setting <a href="../../input_variables/generated_files/anaddb.html#ep_keepbands@anaddb">ep_keepbands</a> to 1.
 This increases the memory used,
 by the square of the number of bands crossing E<sub>F</sub>. The results are the
 transport Eliashberg function (in file _A2F_TR), the
 electrical resistivity (in file _RHO), and the thermal
 conductivity (in file _WTH).
 
-<p>It is also possible to consider the temperature dependence of the Fermi energy: cubic spline interpolation (<a href="../../input_variables/generated_files/varanaddb.html#ep_nspline@anaddb">ep_nspline</a>) enables to linearly interpolate the transport arrays and reduce the memory usage. Besides setting the Fermi level with <a href="../../input_variables/generated_files/varanaddb.html#elph_fermie@anaddb">elph_fermie</a> (in Hartree), it is also possible to specify the extra electrons per unit cell, (i.e., the doping concentration often expressed in cm<sup>-3</sup>)  with <a href="../../input_variables/generated_files/varanaddb.html#ep_extrael@anaddb">ep_extrael</a>.
+<p>It is also possible to consider the temperature dependence of the Fermi energy: cubic spline interpolation (<a href="../../input_variables/generated_files/anaddb.html#ep_nspline@anaddb">ep_nspline</a>) enables to linearly interpolate the transport arrays and reduce the memory usage. Besides setting the Fermi level with <a href="../../input_variables/generated_files/anaddb.html#elph_fermie@anaddb">elph_fermie</a> (in Hartree), it is also possible to specify the extra electrons per unit cell, (i.e., the doping concentration often expressed in cm<sup>-3</sup>)  with <a href="../../input_variables/generated_files/anaddb.html#ep_extrael@anaddb">ep_extrael</a>.
 <p>Some details about the calculation of electron-phonon quantities in ABINIT and ANADDB can be found <a href="../documents/elphon_manual.pdf">here</a>.
  <p>
 
@@ -89,34 +89,34 @@ conductivity (in file _WTH).
 <h3><b>3. Related input variables.</b></h3>
 
 
-<p>Compulsory input variables:<p>... <a href="../../input_variables/generated_files/varanaddb.html#elphflag@anaddb">elphflag@anaddb</a>   [ELectron-PHonon FLAG]<br>
-<p>Basic input variables:<p>... <a href="../../input_variables/generated_files/varanaddb.html#ep_keepbands@anaddb">ep_keepbands@anaddb</a>   [Electron-Phonon KEEP dependence on electron BANDS]<br>
-... <a href="../../input_variables/generated_files/varanaddb.html#ifltransport@anaddb">ifltransport@anaddb</a>   [IFLag for TRANSPORT]<br>
-... <a href="../../input_variables/generated_files/varanaddb.html#kptrlatt@anaddb">kptrlatt@anaddb</a>   [K PoinT Reciprocal LATTice]<br>
-... <a href="../../input_variables/generated_files/varanaddb.html#telphint@anaddb">telphint@anaddb</a>   [Technique for ELectron-PHonon INTegration]<br>
-<p>Useful input variables:<p>... <a href="../../input_variables/generated_files/varanaddb.html#elph_fermie@anaddb">elph_fermie@anaddb</a>   [ELectron-PHonon FERMI Energy]<br>
-... <a href="../../input_variables/generated_files/varanaddb.html#ep_b_max@anaddb">ep_b_max@anaddb</a>   [Electron Phonon integration Band MAXimum]<br>
-... <a href="../../input_variables/generated_files/varanaddb.html#ep_b_min@anaddb">ep_b_min@anaddb</a>   [Electron Phonon integration Band MINimum]<br>
-... <a href="../../input_variables/generated_files/varanaddb.html#ep_extrael@anaddb">ep_extrael@anaddb</a>   [Electron-Phonon EXTRA ELectrons]<br>
-... <a href="../../input_variables/generated_files/varanaddb.html#ep_nspline@anaddb">ep_nspline@anaddb</a>   [Electron Phonon Number for SPLINE interpolation]<br>
-... <a href="../../input_variables/generated_files/varanaddb.html#gkqwrite@anaddb">gkqwrite@anaddb</a>   [GKk for input Q grid to be WRITtEn to disk]<br>
-... <a href="../../input_variables/generated_files/varanaddb.html#iatprj_bs@anaddb">iatprj_bs@anaddb</a>   [Indices of the AToms for the PRoJection of the phonon Band Structure]<br>
-... <a href="../../input_variables/generated_files/varanaddb.html#mustar@anaddb">mustar@anaddb</a>   [MU STAR]<br>
-... <a href="../../input_variables/generated_files/varanaddb.html#natprj_bs@anaddb">natprj_bs@anaddb</a>   [Number of AToms for PRoJection of the Band Structure]<br>
-... <a href="../../input_variables/generated_files/varanaddb.html#prtfsurf@anaddb">prtfsurf@anaddb</a>   [PRinT the Fermi SURFace]<br>
-... <a href="../../input_variables/generated_files/varanaddb.html#prtnest@anaddb">prtnest@anaddb</a>   [PRinT the NESTing function]<br>
-<p>Input variables for experts:<p>... <a href="../../input_variables/generated_files/varanaddb.html#a2fsmear@anaddb">a2fsmear@anaddb</a>   [Alpha2F SMEARing factor]<br>
-... <a href="../../input_variables/generated_files/varanaddb.html#band_gap@anaddb">band_gap@anaddb</a>   [BAND GAP]<br>
-... <a href="../../input_variables/generated_files/varanaddb.html#elphsmear@anaddb">elphsmear@anaddb</a>   [ELectron-PHonon SMEARing factor]<br>
-... <a href="../../input_variables/generated_files/varanaddb.html#ep_int_gkk@anaddb">ep_int_gkk@anaddb</a>   [Electron-Phonon INTerpolation of GKK]<br>
-... <a href="../../input_variables/generated_files/varanaddb.html#ep_nqpt@anaddb">ep_nqpt@anaddb</a>   [Electron Phonon Number of Q PoinTs]<br>
-... <a href="../../input_variables/generated_files/varanaddb.html#ep_prt_yambo@anaddb">ep_prt_yambo@anaddb</a>   [Electron Phonon PRinTout YAMBO data]<br>
-... <a href="../../input_variables/generated_files/varanaddb.html#ep_qptlist@anaddb">ep_qptlist@anaddb</a>   [Electron Phonon Q PoinT LIST]<br>
-... <a href="../../input_variables/generated_files/varanaddb.html#ep_scalprod@anaddb">ep_scalprod@anaddb</a>   [DO SCALar PRODuct for gkk matrix elements]<br>
-... <a href="../../input_variables/generated_files/varanaddb.html#kptrlatt_fine@anaddb">kptrlatt_fine@anaddb</a>   [K PoinT Reciprocal LATTice for FINE grid]<br>
-... <a href="../../input_variables/generated_files/varanaddb.html#qgrid_type@anaddb">qgrid_type@anaddb</a>   [Q wavevectors defining a PATH]<br>
-... <a href="../../input_variables/generated_files/varanaddb.html#symgkq@anaddb">symgkq@anaddb</a>   [SYMmetrize the GKk matrix elements for each Q]<br>
-... <a href="../../input_variables/generated_files/varanaddb.html#use_k_fine@anaddb">use_k_fine@anaddb</a>   [USE K-grid FINEr than the coarse k-grid]<br>
+<p>Compulsory input variables:<p>... <a href="../../input_variables/generated_files/anaddb.html#elphflag@anaddb">elphflag@anaddb</a>   [ELectron-PHonon FLAG]<br>
+<p>Basic input variables:<p>... <a href="../../input_variables/generated_files/anaddb.html#ep_keepbands@anaddb">ep_keepbands@anaddb</a>   [Electron-Phonon KEEP dependence on electron BANDS]<br>
+... <a href="../../input_variables/generated_files/anaddb.html#ifltransport@anaddb">ifltransport@anaddb</a>   [IFLag for TRANSPORT]<br>
+... <a href="../../input_variables/generated_files/anaddb.html#kptrlatt@anaddb">kptrlatt@anaddb</a>   [K PoinT Reciprocal LATTice]<br>
+... <a href="../../input_variables/generated_files/anaddb.html#telphint@anaddb">telphint@anaddb</a>   [Technique for ELectron-PHonon INTegration]<br>
+<p>Useful input variables:<p>... <a href="../../input_variables/generated_files/anaddb.html#elph_fermie@anaddb">elph_fermie@anaddb</a>   [ELectron-PHonon FERMI Energy]<br>
+... <a href="../../input_variables/generated_files/anaddb.html#ep_b_max@anaddb">ep_b_max@anaddb</a>   [Electron Phonon integration Band MAXimum]<br>
+... <a href="../../input_variables/generated_files/anaddb.html#ep_b_min@anaddb">ep_b_min@anaddb</a>   [Electron Phonon integration Band MINimum]<br>
+... <a href="../../input_variables/generated_files/anaddb.html#ep_extrael@anaddb">ep_extrael@anaddb</a>   [Electron-Phonon EXTRA ELectrons]<br>
+... <a href="../../input_variables/generated_files/anaddb.html#ep_nspline@anaddb">ep_nspline@anaddb</a>   [Electron Phonon Number for SPLINE interpolation]<br>
+... <a href="../../input_variables/generated_files/anaddb.html#gkqwrite@anaddb">gkqwrite@anaddb</a>   [GKk for input Q grid to be WRITtEn to disk]<br>
+... <a href="../../input_variables/generated_files/anaddb.html#iatprj_bs@anaddb">iatprj_bs@anaddb</a>   [Indices of the AToms for the PRoJection of the phonon Band Structure]<br>
+... <a href="../../input_variables/generated_files/anaddb.html#mustar@anaddb">mustar@anaddb</a>   [MU STAR]<br>
+... <a href="../../input_variables/generated_files/anaddb.html#natprj_bs@anaddb">natprj_bs@anaddb</a>   [Number of AToms for PRoJection of the Band Structure]<br>
+... <a href="../../input_variables/generated_files/anaddb.html#prtfsurf@anaddb">prtfsurf@anaddb</a>   [PRinT the Fermi SURFace]<br>
+... <a href="../../input_variables/generated_files/anaddb.html#prtnest@anaddb">prtnest@anaddb</a>   [PRinT the NESTing function]<br>
+<p>Input variables for experts:<p>... <a href="../../input_variables/generated_files/anaddb.html#a2fsmear@anaddb">a2fsmear@anaddb</a>   [Alpha2F SMEARing factor]<br>
+... <a href="../../input_variables/generated_files/anaddb.html#band_gap@anaddb">band_gap@anaddb</a>   [BAND GAP]<br>
+... <a href="../../input_variables/generated_files/anaddb.html#elphsmear@anaddb">elphsmear@anaddb</a>   [ELectron-PHonon SMEARing factor]<br>
+... <a href="../../input_variables/generated_files/anaddb.html#ep_int_gkk@anaddb">ep_int_gkk@anaddb</a>   [Electron-Phonon INTerpolation of GKK]<br>
+... <a href="../../input_variables/generated_files/anaddb.html#ep_nqpt@anaddb">ep_nqpt@anaddb</a>   [Electron Phonon Number of Q PoinTs]<br>
+... <a href="../../input_variables/generated_files/anaddb.html#ep_prt_yambo@anaddb">ep_prt_yambo@anaddb</a>   [Electron Phonon PRinTout YAMBO data]<br>
+... <a href="../../input_variables/generated_files/anaddb.html#ep_qptlist@anaddb">ep_qptlist@anaddb</a>   [Electron Phonon Q PoinT LIST]<br>
+... <a href="../../input_variables/generated_files/anaddb.html#ep_scalprod@anaddb">ep_scalprod@anaddb</a>   [DO SCALar PRODuct for gkk matrix elements]<br>
+... <a href="../../input_variables/generated_files/anaddb.html#kptrlatt_fine@anaddb">kptrlatt_fine@anaddb</a>   [K PoinT Reciprocal LATTice for FINE grid]<br>
+... <a href="../../input_variables/generated_files/anaddb.html#qgrid_type@anaddb">qgrid_type@anaddb</a>   [Q wavevectors defining a PATH]<br>
+... <a href="../../input_variables/generated_files/anaddb.html#symgkq@anaddb">symgkq@anaddb</a>   [SYMmetrize the GKk matrix elements for each Q]<br>
+... <a href="../../input_variables/generated_files/anaddb.html#use_k_fine@anaddb">use_k_fine@anaddb</a>   [USE K-grid FINEr than the coarse k-grid]<br>
 
 
 &nbsp; 

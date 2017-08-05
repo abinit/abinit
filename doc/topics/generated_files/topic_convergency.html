@@ -31,7 +31,7 @@
 
 
 <p> The convergency of the energy must be tested towards the plane wave convergency and the k-point convergency according to tolerance criteria. The convergency of the Self-Consistent cycle is governed by the way densities or potentials are mixed between each iteration.
-<br/> The <a href="../../input_variables/generated_files/varbas.html#accuracy">accuracy</a> variable enables to tune the accuracy of a calculation by setting automatically up to seventeen variables.
+<br/> The <a href="../../input_variables/generated_files/basic.html#accuracy">accuracy</a> variable enables to tune the accuracy of a calculation by setting automatically up to seventeen variables.
 <br/>At the level of the generation of electronic eigenfunctions, an efficient band-by-band preconditioned conjugate-gradient algorithm is used, in its non-self-consistent version. An alternative algorithm "lobpcg"
 is also available.
 <br/>
@@ -64,49 +64,49 @@ compute the projected DOS of NiO. Prerequisite : PAW1.</li>
 <h3><b>3. Related input variables.</b></h3>
 
 
-<p>Compulsory input variables:<p>... <a href="../../input_variables/generated_files/varbas.html#ecut">ecut</a>   [Energy CUToff]<br>
-... <a href="../../input_variables/generated_files/varpaw.html#pawecutdg">pawecutdg</a>   [PAW - Energy CUToff for the Double Grid]<br>
-<p>Basic input variables:<p>... <a href="../../input_variables/generated_files/varbas.html#accuracy">accuracy</a>   [ACCURACY]<br>
-... <a href="../../input_variables/generated_files/varrlx.html#ecutsm">ecutsm</a>   [Energy CUToff SMearing]<br>
-... <a href="../../input_variables/generated_files/vargs.html#ngfft">ngfft</a>   [Number of Grid points for Fast Fourier Transform]<br>
-... <a href="../../input_variables/generated_files/varbas.html#nstep">nstep</a>   [Number of (non-)self-consistent field STEPS]<br>
-... <a href="../../input_variables/generated_files/varbas.html#toldfe">toldfe</a>   [TOLerance on the DiFference of total Energy]<br>
-... <a href="../../input_variables/generated_files/varbas.html#tolrff">tolrff</a>   [TOLerance on the Relative diFference of Forces]<br>
-... <a href="../../input_variables/generated_files/varbas.html#tolvrs">tolvrs</a>   [TOLerance on the potential V(r) ReSidual]<br>
-... <a href="../../input_variables/generated_files/varbas.html#tolwfr">tolwfr</a>   [TOLerance on WaveFunction squared Residual]<br>
-<p>Useful input variables:<p>... <a href="../../input_variables/generated_files/vargs.html#diecut">diecut</a>   [DIElectric matrix energy CUToff]<br>
-... <a href="../../input_variables/generated_files/vargs.html#diegap">diegap</a>   [DIElectric matrix GAP]<br>
-... <a href="../../input_variables/generated_files/vargs.html#dielam">dielam</a>   [DIElectric matrix LAMbda]<br>
-... <a href="../../input_variables/generated_files/vargs.html#dielng">dielng</a>   [model DIElectric screening LeNGth]<br>
-... <a href="../../input_variables/generated_files/vargs.html#diemac">diemac</a>   [model DIElectric MACroscopic constant]<br>
-... <a href="../../input_variables/generated_files/vargs.html#diemix">diemix</a>   [model DIElectric MIXing factor]<br>
-... <a href="../../input_variables/generated_files/vargs.html#iprcel">iprcel</a>   [Integer for PReConditioning of ELectron response]<br>
-... <a href="../../input_variables/generated_files/varbas.html#iscf">iscf</a>   [Integer for Self-Consistent-Field cycles]<br>
-... <a href="../../input_variables/generated_files/vardev.html#npulayit">npulayit</a>   [Number of PULAY ITerations for SC mixing]<br>
-<p>Relevant internal variables:<p>... <a href="../../input_variables/generated_files/varint.html#mgfft">%mgfft</a>   [Maximum of nGFFT]<br>
-... <a href="../../input_variables/generated_files/varint.html#mgfftdg">%mgfftdg</a>   [Maximum of nGFFT for the Double Grid]<br>
-... <a href="../../input_variables/generated_files/varint.html#mpw">%mpw</a>   [Maximum number of Plane Waves]<br>
-... <a href="../../input_variables/generated_files/varint.html#nfft">%nfft</a>   [Number of FFT points]<br>
-... <a href="../../input_variables/generated_files/varint.html#nfftdg">%nfftdg</a>   [Number of FFT points for the Double Grid]<br>
-<p>Input variables for experts:<p>... <a href="../../input_variables/generated_files/vargs.html#boxcutmin">boxcutmin</a>   [BOX CUT-off MINimum]<br>
-... <a href="../../input_variables/generated_files/vardev.html#densfor_pred">densfor_pred</a>   [DENSity and FORces PREDictor]<br>
-... <a href="../../input_variables/generated_files/vardev.html#exchn2n3d">exchn2n3d</a>   [EXCHange N2 and N3 Dimensions]<br>
-... <a href="../../input_variables/generated_files/vardev.html#extrapwf">extrapwf</a>   [flag - EXTRAPolation of the Wave-Functions]<br>
-... <a href="../../input_variables/generated_files/vardev.html#fftalg">fftalg</a>   [Fast Fourier Transform ALGorithm]<br>
-... <a href="../../input_variables/generated_files/varpaw.html#iboxcut">iboxcut</a>   [Integer governing the internal use of BOXCUT - not a very good choice of variable name]<br>
-... <a href="../../input_variables/generated_files/vargs.html#icoulomb">icoulomb</a>   [Index for the Coulomb TReaTMenT]<br>
-... <a href="../../input_variables/generated_files/vardev.html#iprcfc">iprcfc</a>   [Integer for PReConditioner of Force Constants]<br>
-... <a href="../../input_variables/generated_files/vardev.html#isecur">isecur</a>   [Integer for level of SECURity choice]<br>
-... <a href="../../input_variables/generated_files/vardev.html#mqgrid">mqgrid</a>   [Maximum number of Q-space GRID points for pseudopotentials]<br>
-... <a href="../../input_variables/generated_files/vardev.html#nbdblock">nbdblock</a>   [Number of BanDs in a BLOCK]<br>
-... <a href="../../input_variables/generated_files/vargs.html#nbdbuf">nbdbuf</a>   [Number of BanDs for the BUFfer]<br>
-... <a href="../../input_variables/generated_files/vardev.html#nc_xccc_gspace">nc_xccc_gspace</a>   [Norm-Conserving pseudopotentials - use XC Core-Correction in G-SPACE]<br>
-... <a href="../../input_variables/generated_files/vargs.html#nline">nline</a>   [Number of LINE minimisations]<br>
-... <a href="../../input_variables/generated_files/vardev.html#nnsclo">nnsclo</a>   [Number of Non-Self Consistent LOops]<br>
-... <a href="../../input_variables/generated_files/vardev.html#nscforder">nscforder</a>   [Nth - SCaling Function ORDER]<br>
-... <a href="../../input_variables/generated_files/vardev.html#ortalg">ortalg</a>   [ORThogonalisation ALGorithm]<br>
-... <a href="../../input_variables/generated_files/vardev.html#tolrde">tolrde</a>   [TOLerance on the Relative Difference of Eigenenergies]<br>
-... <a href="../../input_variables/generated_files/vardev.html#wfoptalg">wfoptalg</a>   [WaveFunction OPTimisation ALGorithm]<br>
+<p>Compulsory input variables:<p>... <a href="../../input_variables/generated_files/basic.html#ecut">ecut</a>   [Energy CUToff]<br>
+... <a href="../../input_variables/generated_files/paw.html#pawecutdg">pawecutdg</a>   [PAW - Energy CUToff for the Double Grid]<br>
+<p>Basic input variables:<p>... <a href="../../input_variables/generated_files/basic.html#accuracy">accuracy</a>   [ACCURACY]<br>
+... <a href="../../input_variables/generated_files/rlx.html#ecutsm">ecutsm</a>   [Energy CUToff SMearing]<br>
+... <a href="../../input_variables/generated_files/gstate.html#ngfft">ngfft</a>   [Number of Grid points for Fast Fourier Transform]<br>
+... <a href="../../input_variables/generated_files/basic.html#nstep">nstep</a>   [Number of (non-)self-consistent field STEPS]<br>
+... <a href="../../input_variables/generated_files/basic.html#toldfe">toldfe</a>   [TOLerance on the DiFference of total Energy]<br>
+... <a href="../../input_variables/generated_files/basic.html#tolrff">tolrff</a>   [TOLerance on the Relative diFference of Forces]<br>
+... <a href="../../input_variables/generated_files/basic.html#tolvrs">tolvrs</a>   [TOLerance on the potential V(r) ReSidual]<br>
+... <a href="../../input_variables/generated_files/basic.html#tolwfr">tolwfr</a>   [TOLerance on WaveFunction squared Residual]<br>
+<p>Useful input variables:<p>... <a href="../../input_variables/generated_files/gstate.html#diecut">diecut</a>   [DIElectric matrix energy CUToff]<br>
+... <a href="../../input_variables/generated_files/gstate.html#diegap">diegap</a>   [DIElectric matrix GAP]<br>
+... <a href="../../input_variables/generated_files/gstate.html#dielam">dielam</a>   [DIElectric matrix LAMbda]<br>
+... <a href="../../input_variables/generated_files/gstate.html#dielng">dielng</a>   [model DIElectric screening LeNGth]<br>
+... <a href="../../input_variables/generated_files/gstate.html#diemac">diemac</a>   [model DIElectric MACroscopic constant]<br>
+... <a href="../../input_variables/generated_files/gstate.html#diemix">diemix</a>   [model DIElectric MIXing factor]<br>
+... <a href="../../input_variables/generated_files/gstate.html#iprcel">iprcel</a>   [Integer for PReConditioning of ELectron response]<br>
+... <a href="../../input_variables/generated_files/basic.html#iscf">iscf</a>   [Integer for Self-Consistent-Field cycles]<br>
+... <a href="../../input_variables/generated_files/dev.html#npulayit">npulayit</a>   [Number of PULAY ITerations for SC mixing]<br>
+<p>Relevant internal variables:<p>... <a href="../../input_variables/generated_files/internal.html#mgfft">%mgfft</a>   [Maximum of nGFFT]<br>
+... <a href="../../input_variables/generated_files/internal.html#mgfftdg">%mgfftdg</a>   [Maximum of nGFFT for the Double Grid]<br>
+... <a href="../../input_variables/generated_files/internal.html#mpw">%mpw</a>   [Maximum number of Plane Waves]<br>
+... <a href="../../input_variables/generated_files/internal.html#nfft">%nfft</a>   [Number of FFT points]<br>
+... <a href="../../input_variables/generated_files/internal.html#nfftdg">%nfftdg</a>   [Number of FFT points for the Double Grid]<br>
+<p>Input variables for experts:<p>... <a href="../../input_variables/generated_files/gstate.html#boxcutmin">boxcutmin</a>   [BOX CUT-off MINimum]<br>
+... <a href="../../input_variables/generated_files/dev.html#densfor_pred">densfor_pred</a>   [DENSity and FORces PREDictor]<br>
+... <a href="../../input_variables/generated_files/dev.html#exchn2n3d">exchn2n3d</a>   [EXCHange N2 and N3 Dimensions]<br>
+... <a href="../../input_variables/generated_files/dev.html#extrapwf">extrapwf</a>   [flag - EXTRAPolation of the Wave-Functions]<br>
+... <a href="../../input_variables/generated_files/dev.html#fftalg">fftalg</a>   [Fast Fourier Transform ALGorithm]<br>
+... <a href="../../input_variables/generated_files/paw.html#iboxcut">iboxcut</a>   [Integer governing the internal use of BOXCUT - not a very good choice of variable name]<br>
+... <a href="../../input_variables/generated_files/gstate.html#icoulomb">icoulomb</a>   [Index for the Coulomb TReaTMenT]<br>
+... <a href="../../input_variables/generated_files/dev.html#iprcfc">iprcfc</a>   [Integer for PReConditioner of Force Constants]<br>
+... <a href="../../input_variables/generated_files/dev.html#isecur">isecur</a>   [Integer for level of SECURity choice]<br>
+... <a href="../../input_variables/generated_files/dev.html#mqgrid">mqgrid</a>   [Maximum number of Q-space GRID points for pseudopotentials]<br>
+... <a href="../../input_variables/generated_files/dev.html#nbdblock">nbdblock</a>   [Number of BanDs in a BLOCK]<br>
+... <a href="../../input_variables/generated_files/gstate.html#nbdbuf">nbdbuf</a>   [Number of BanDs for the BUFfer]<br>
+... <a href="../../input_variables/generated_files/dev.html#nc_xccc_gspace">nc_xccc_gspace</a>   [Norm-Conserving pseudopotentials - use XC Core-Correction in G-SPACE]<br>
+... <a href="../../input_variables/generated_files/gstate.html#nline">nline</a>   [Number of LINE minimisations]<br>
+... <a href="../../input_variables/generated_files/dev.html#nnsclo">nnsclo</a>   [Number of Non-Self Consistent LOops]<br>
+... <a href="../../input_variables/generated_files/dev.html#nscforder">nscforder</a>   [Nth - SCaling Function ORDER]<br>
+... <a href="../../input_variables/generated_files/dev.html#ortalg">ortalg</a>   [ORThogonalisation ALGorithm]<br>
+... <a href="../../input_variables/generated_files/dev.html#tolrde">tolrde</a>   [TOLerance on the Relative Difference of Eigenenergies]<br>
+... <a href="../../input_variables/generated_files/dev.html#wfoptalg">wfoptalg</a>   [WaveFunction OPTimisation ALGorithm]<br>
 
 
 &nbsp; 

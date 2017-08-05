@@ -41,11 +41,11 @@ The resulting implementation exhibits a 500-fold speedup for the silane molecule
 <p>Furthermore, it does not supports PAW and spinors. 
 <p>However, it supports parallelism over bands and FFTs <a href="../../bibliography/generated_files/bibliography.html#Bottin2008">[Bottin2008]</a>. 
 
-<p>To compute G<sub>0</sub>W<sub>0</sub> corrections to DFT eigenenergies, one needs to set <a href="../../input_variables/generated_files/vargs.html#optdriver">optdriver</a>= 66 in the input file. 
-This type of calculation requires that the ground state density and wavefunctions be available from disk (using <a href="../../input_variables/generated_files/varfil.html#getden">getden</a> and <a href="../../input_variables/generated_files/varfil.html#getwfk">getwfk</a>). 
-It also requires the user to specify the state to be corrected (<a href="../../input_variables/generated_files/vargw.html#gwls_band_index">gwls_band_index</a>), the maximum allowed residual when solving the Sternheimer equations (<a href="../../input_variables/generated_files/varbas.html#tolwfr">tolwfr</a>), and the number of Lanczos vectors used to express the dielectric matrix (<a href="../../input_variables/generated_files/vargw.html#gwls_stern_kmax">gwls_stern_kmax</a>). 
+<p>To compute G<sub>0</sub>W<sub>0</sub> corrections to DFT eigenenergies, one needs to set <a href="../../input_variables/generated_files/gstate.html#optdriver">optdriver</a>= 66 in the input file. 
+This type of calculation requires that the ground state density and wavefunctions be available from disk (using <a href="../../input_variables/generated_files/files.html#getden">getden</a> and <a href="../../input_variables/generated_files/files.html#getwfk">getwfk</a>). 
+It also requires the user to specify the state to be corrected (<a href="../../input_variables/generated_files/gw.html#gwls_band_index">gwls_band_index</a>), the maximum allowed residual when solving the Sternheimer equations (<a href="../../input_variables/generated_files/basic.html#tolwfr">tolwfr</a>), and the number of Lanczos vectors used to express the dielectric matrix (<a href="../../input_variables/generated_files/gw.html#gwls_stern_kmax">gwls_stern_kmax</a>). 
 Note that a convergence study on the latter value is required to check the accuracy of the results. 
-Since only molecular systems are currently supported, the calculation also requires that the Coulomb potential be spherically truncated (<a href="../../input_variables/generated_files/vargw.html#icutcoul">icutcoul</a>= 0) with a radius <a href="../../input_variables/generated_files/vargw.html#rcut">rcut</a> that should be validated with a convergence study. 
+Since only molecular systems are currently supported, the calculation also requires that the Coulomb potential be spherically truncated (<a href="../../input_variables/generated_files/gw.html#icutcoul">icutcoul</a>= 0) with a radius <a href="../../input_variables/generated_files/gw.html#rcut">rcut</a> that should be validated with a convergence study. 
 </br>
 <p><b> This functionality is under development.</b>
 
@@ -57,27 +57,27 @@ Since only molecular systems are currently supported, the calculation also requi
 <h3><b>2. Related input variables.</b></h3>
 
 
-<p>Compulsory input variables:<p>... <a href="../../input_variables/generated_files/vargw.html#icutcoul">icutcoul</a>   [Integer that governs the CUT-off for COULomb interaction]<br>
-... <a href="../../input_variables/generated_files/vargs.html#optdriver">optdriver</a>   [OPTions for the DRIVER]<br>
-... <a href="../../input_variables/generated_files/vargw.html#rcut">rcut</a>   [Radius of the CUT-off for coulomb interaction]<br>
-... <a href="../../input_variables/generated_files/vargw.html#vcutgeo">vcutgeo</a>   [V (potential) CUT-off GEOmetry]<br>
-<p>Input variables for experts:<p>... <a href="../../input_variables/generated_files/vargw.html#gwls_band_index">gwls_band_index</a>   [GWLS BAND INDEX]<br>
-... <a href="../../input_variables/generated_files/vargw.html#gwls_correlation">gwls_correlation</a>   [GWLS CORRELATION]<br>
-... <a href="../../input_variables/generated_files/vargw.html#gwls_diel_model">gwls_diel_model</a>   [GWLS dielectric model]<br>
-... <a href="../../input_variables/generated_files/vargw.html#gwls_exchange">gwls_exchange</a>   [GWLS exact EXCHANGE]<br>
-... <a href="../../input_variables/generated_files/vargw.html#gwls_first_seed">gwls_first_seed</a>   [GWLS FIRST SEED vector]<br>
-... <a href="../../input_variables/generated_files/vargw.html#gwls_kmax_analytic">gwls_kmax_analytic</a>   [GWLS KMAX for the ANALYTIC term]<br>
-... <a href="../../input_variables/generated_files/vargw.html#gwls_kmax_complement">gwls_kmax_complement</a>   [GWLS KMAX for the COMPLEMENT space.]<br>
-... <a href="../../input_variables/generated_files/vargw.html#gwls_kmax_numeric">gwls_kmax_numeric</a>   [GWLS KMAX for the NUMERIC term]<br>
-... <a href="../../input_variables/generated_files/vargw.html#gwls_kmax_poles">gwls_kmax_poles</a>   [GWLS KMAX for the calculation of the POLES residue]<br>
-... <a href="../../input_variables/generated_files/vargw.html#gwls_list_proj_freq">gwls_list_proj_freq</a>   [GWLS LIST of the PROJection FREQuencies]<br>
-... <a href="../../input_variables/generated_files/vargw.html#gwls_model_parameter">gwls_model_parameter</a>   [GWLS MODEL PARAMETER]<br>
-... <a href="../../input_variables/generated_files/vargw.html#gwls_n_proj_freq">gwls_n_proj_freq</a>   [GWLS Number of PROJection FREQuencies]<br>
-... <a href="../../input_variables/generated_files/vargw.html#gwls_npt_gauss_quad">gwls_npt_gauss_quad</a>   [GWLS Number of PoinTs to use for the GAUSSian QUADrature ]<br>
-... <a href="../../input_variables/generated_files/vargw.html#gwls_nseeds">gwls_nseeds</a>   [GWLS Number of SEED vectorS]<br>
-... <a href="../../input_variables/generated_files/vargw.html#gwls_print_debug">gwls_print_debug</a>   [GWLS PRINT level for DEBUGging]<br>
-... <a href="../../input_variables/generated_files/vargw.html#gwls_recycle">gwls_recycle</a>   [GWLS RECYCLE]<br>
-... <a href="../../input_variables/generated_files/vargw.html#gwls_stern_kmax">gwls_stern_kmax</a>   [GWLS Kmax]<br>
+<p>Compulsory input variables:<p>... <a href="../../input_variables/generated_files/gw.html#icutcoul">icutcoul</a>   [Integer that governs the CUT-off for COULomb interaction]<br>
+... <a href="../../input_variables/generated_files/gstate.html#optdriver">optdriver</a>   [OPTions for the DRIVER]<br>
+... <a href="../../input_variables/generated_files/gw.html#rcut">rcut</a>   [Radius of the CUT-off for coulomb interaction]<br>
+... <a href="../../input_variables/generated_files/gw.html#vcutgeo">vcutgeo</a>   [V (potential) CUT-off GEOmetry]<br>
+<p>Input variables for experts:<p>... <a href="../../input_variables/generated_files/gw.html#gwls_band_index">gwls_band_index</a>   [GWLS BAND INDEX]<br>
+... <a href="../../input_variables/generated_files/gw.html#gwls_correlation">gwls_correlation</a>   [GWLS CORRELATION]<br>
+... <a href="../../input_variables/generated_files/gw.html#gwls_diel_model">gwls_diel_model</a>   [GWLS dielectric model]<br>
+... <a href="../../input_variables/generated_files/gw.html#gwls_exchange">gwls_exchange</a>   [GWLS exact EXCHANGE]<br>
+... <a href="../../input_variables/generated_files/gw.html#gwls_first_seed">gwls_first_seed</a>   [GWLS FIRST SEED vector]<br>
+... <a href="../../input_variables/generated_files/gw.html#gwls_kmax_analytic">gwls_kmax_analytic</a>   [GWLS KMAX for the ANALYTIC term]<br>
+... <a href="../../input_variables/generated_files/gw.html#gwls_kmax_complement">gwls_kmax_complement</a>   [GWLS KMAX for the COMPLEMENT space.]<br>
+... <a href="../../input_variables/generated_files/gw.html#gwls_kmax_numeric">gwls_kmax_numeric</a>   [GWLS KMAX for the NUMERIC term]<br>
+... <a href="../../input_variables/generated_files/gw.html#gwls_kmax_poles">gwls_kmax_poles</a>   [GWLS KMAX for the calculation of the POLES residue]<br>
+... <a href="../../input_variables/generated_files/gw.html#gwls_list_proj_freq">gwls_list_proj_freq</a>   [GWLS LIST of the PROJection FREQuencies]<br>
+... <a href="../../input_variables/generated_files/gw.html#gwls_model_parameter">gwls_model_parameter</a>   [GWLS MODEL PARAMETER]<br>
+... <a href="../../input_variables/generated_files/gw.html#gwls_n_proj_freq">gwls_n_proj_freq</a>   [GWLS Number of PROJection FREQuencies]<br>
+... <a href="../../input_variables/generated_files/gw.html#gwls_npt_gauss_quad">gwls_npt_gauss_quad</a>   [GWLS Number of PoinTs to use for the GAUSSian QUADrature ]<br>
+... <a href="../../input_variables/generated_files/gw.html#gwls_nseeds">gwls_nseeds</a>   [GWLS Number of SEED vectorS]<br>
+... <a href="../../input_variables/generated_files/gw.html#gwls_print_debug">gwls_print_debug</a>   [GWLS PRINT level for DEBUGging]<br>
+... <a href="../../input_variables/generated_files/gw.html#gwls_recycle">gwls_recycle</a>   [GWLS RECYCLE]<br>
+... <a href="../../input_variables/generated_files/gw.html#gwls_stern_kmax">gwls_stern_kmax</a>   [GWLS Kmax]<br>
 
 
 &nbsp; 

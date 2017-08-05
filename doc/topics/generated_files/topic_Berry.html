@@ -45,7 +45,7 @@ where E<sub>0</sub> is the usual ground state energy obtained from Kohn-Sham DFT
 <p>In the NCPP case, the electric field has no additional contribution to the Hellmann-Feynman forces, because the electronic
 states do not depend explicitly on ionic position <a href="../../bibliography/generated_files/bibliography.html#Souza2002">[Souza2002]</a>.  In the PAW case however, as the projectors do depend on ion location, an additional force and additional stresses terms arise <a href="../../bibliography/generated_files/bibliography.html#Zwanziger2012">[Zwanziger2012]</a>. 
 
-<p>The polarization and finite electric field calculation in ABINIT is accessed through the variables <a href="../../input_variables/generated_files/varff.html#berryopt">berryopt</a> and <a href="../../input_variables/generated_files/varff.html#efield">efield</a>. In addition, 
+<p>The polarization and finite electric field calculation in ABINIT is accessed through the variables <a href="../../input_variables/generated_files/ffield.html#berryopt">berryopt</a> and <a href="../../input_variables/generated_files/ffield.html#efield">efield</a>. In addition, 
 displacement fields and mixed boundary conditions (a mix of electric field and displacement field) can be computed as well.
 
 
@@ -68,20 +68,20 @@ thanks to the Berry phase approach).</li>
 <h3><b>3. Related input variables.</b></h3>
 
 
-<p>Compulsory input variables:<p>... <a href="../../input_variables/generated_files/varff.html#berryopt">berryopt</a>   [BERRY phase OPTions]<br>
-<p>Basic input variables:<p>... <a href="../../input_variables/generated_files/varff.html#bdberry">bdberry</a>   [BanD limits for BERRY phase]<br>
-... <a href="../../input_variables/generated_files/varff.html#dfield">dfield</a>   [Displacement FIELD]<br>
-... <a href="../../input_variables/generated_files/varff.html#efield">efield</a>   [Electric FIELD]<br>
-... <a href="../../input_variables/generated_files/varff.html#jfielddir">jfielddir</a>   [electric/displacement FIELD DIRection]<br>
-... <a href="../../input_variables/generated_files/varff.html#kberry">kberry</a>   [K wavevectors for BERRY phase computation]<br>
-... <a href="../../input_variables/generated_files/varff.html#nberry">nberry</a>   [Number of BERRY phase computations]<br>
-<p>Useful input variables:<p>... <a href="../../input_variables/generated_files/varff.html#berrysav">berrysav</a>   [BERRY SAVe]<br>
-... <a href="../../input_variables/generated_files/varff.html#ddamp">ddamp</a>   [electric Displacement field DAMPing parameter]<br>
-... <a href="../../input_variables/generated_files/varff.html#maxestep">maxestep</a>   [MAXimum Electric field STEP]<br>
-... <a href="../../input_variables/generated_files/varff.html#red_dfield">red_dfield</a>   [REDuced Displacement FIELD]<br>
-... <a href="../../input_variables/generated_files/varff.html#red_efield">red_efield</a>   [REDuced Electric FIELD]<br>
-... <a href="../../input_variables/generated_files/varff.html#red_efieldbar">red_efieldbar</a>   [REDuced Electric FIELD BAR]<br>
-<p>Input variables for experts:<p>... <a href="../../input_variables/generated_files/varff.html#berrystep">berrystep</a>   [BERRY phase : multiple STEP]<br>
+<p>Compulsory input variables:<p>... <a href="../../input_variables/generated_files/ffield.html#berryopt">berryopt</a>   [BERRY phase OPTions]<br>
+<p>Basic input variables:<p>... <a href="../../input_variables/generated_files/ffield.html#bdberry">bdberry</a>   [BanD limits for BERRY phase]<br>
+... <a href="../../input_variables/generated_files/ffield.html#dfield">dfield</a>   [Displacement FIELD]<br>
+... <a href="../../input_variables/generated_files/ffield.html#efield">efield</a>   [Electric FIELD]<br>
+... <a href="../../input_variables/generated_files/ffield.html#jfielddir">jfielddir</a>   [electric/displacement FIELD DIRection]<br>
+... <a href="../../input_variables/generated_files/ffield.html#kberry">kberry</a>   [K wavevectors for BERRY phase computation]<br>
+... <a href="../../input_variables/generated_files/ffield.html#nberry">nberry</a>   [Number of BERRY phase computations]<br>
+<p>Useful input variables:<p>... <a href="../../input_variables/generated_files/ffield.html#berrysav">berrysav</a>   [BERRY SAVe]<br>
+... <a href="../../input_variables/generated_files/ffield.html#ddamp">ddamp</a>   [electric Displacement field DAMPing parameter]<br>
+... <a href="../../input_variables/generated_files/ffield.html#maxestep">maxestep</a>   [MAXimum Electric field STEP]<br>
+... <a href="../../input_variables/generated_files/ffield.html#red_dfield">red_dfield</a>   [REDuced Displacement FIELD]<br>
+... <a href="../../input_variables/generated_files/ffield.html#red_efield">red_efield</a>   [REDuced Electric FIELD]<br>
+... <a href="../../input_variables/generated_files/ffield.html#red_efieldbar">red_efieldbar</a>   [REDuced Electric FIELD BAR]<br>
+<p>Input variables for experts:<p>... <a href="../../input_variables/generated_files/ffield.html#berrystep">berrystep</a>   [BERRY phase : multiple STEP]<br>
 
 
 &nbsp; 

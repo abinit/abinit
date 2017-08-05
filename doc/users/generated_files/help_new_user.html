@@ -132,12 +132,12 @@ In addition to the main ABINIT code, different utility programs are provided.
 single input file, is given in the ABINIT <a href="../../input_variables/generated_files/varset_allvars.html#">list of all variable</a>.
 <br>The detailed description of input variables is given in many "VAR*" files, including:
 <ul>
-<li> Basic variables, <a href="../../input_variables/generated_files/varbas.html#">varbas</a></li>
-<li> Ground-state calculation variables, <a href="../../input_variables/generated_files/vargs.html#">vargs</a></li>
-<li> GW variables, <a href="../../input_variables/generated_files/vargw.html#">vargw</a></li>
-<li> Files handling variables, <a href="../../input_variables/generated_files/varfil.html#">varfil</a></li>
-<li> Parallelisation variables, <a href="../../input_variables/generated_files/varpar.html#">varpar</a></li>
-<li> Response Function variables, <a href="../../input_variables/generated_files/varrf.html#">varrf</a></li>
+<li> Basic variables, <a href="#">[[FAKE LINK:varbas]]</a></li>
+<li> Ground-state calculation variables, <a href="#">[[FAKE LINK:vargs]]</a></li>
+<li> GW variables, <a href="#">[[FAKE LINK:vargw]]</a></li>
+<li> Files handling variables, <a href="#">[[FAKE LINK:varfil]]</a></li>
+<li> Parallelisation variables, <a href="#">[[FAKE LINK:varpar]]</a></li>
+<li> Response Function variables, <a href="#">[[FAKE LINK:varrf]]</a></li>
 <li>  ... </li>
 </ul>
 
@@ -241,47 +241,47 @@ Of course, you might get more by browsing the Web...
 As an overview, the most important input variables, to be provided in the input file, are listed below:
 <pre>
 Specification of the geometry of the problem, and types of atoms :
-<a href="../../input_variables/generated_files/varbas.html#natom">natom</a>           total number of atoms in unit cell
-<a href="../../input_variables/generated_files/varbas.html#ntypat">ntypat</a>          number of types of atoms
-<a href="../../input_variables/generated_files/varbas.html#typat">typat</a>(<a href="../../input_variables/generated_files/varbas.html#natom">natom</a>)    sequence of integers, specifying the type of each atom.
-                NOTE: the atomic coordinates (<a href="../../input_variables/generated_files/varbas.html#xangst">xangst</a>, <a href="../../input_variables/generated_files/varbas.html#xcart">xcart</a> or <a href="../../input_variables/generated_files/varbas.html#xred">xred</a>)
+<a href="../../input_variables/generated_files/basic.html#natom">natom</a>           total number of atoms in unit cell
+<a href="../../input_variables/generated_files/basic.html#ntypat">ntypat</a>          number of types of atoms
+<a href="../../input_variables/generated_files/basic.html#typat">typat</a>(<a href="../../input_variables/generated_files/basic.html#natom">natom</a>)    sequence of integers, specifying the type of each atom.
+                NOTE: the atomic coordinates (<a href="../../input_variables/generated_files/basic.html#xangst">xangst</a>, <a href="../../input_variables/generated_files/basic.html#xcart">xcart</a> or <a href="../../input_variables/generated_files/basic.html#xred">xred</a>)
                 must be specified in the same order
-<a href="../../input_variables/generated_files/varbas.html#rprim">rprim</a>(3,3)      unscaled primitive translations of periodic cell;
+<a href="../../input_variables/generated_files/basic.html#rprim">rprim</a>(3,3)      unscaled primitive translations of periodic cell;
                 each COLUMN of this array is one primitive translation
-<a href="../../input_variables/generated_files/varbas.html#xangst">xangst</a>(3,<a href="../../input_variables/generated_files/varbas.html#natom">natom</a>)  cartesian coordinates (Angstrom) of atoms in unit cell
-                NOTE: only used when <a href="../../input_variables/generated_files/varbas.html#xred">xred</a> and <a href="../../input_variables/generated_files/varbas.html#xcart">xcart</a> are absent
-<a href="../../input_variables/generated_files/varbas.html#xcart">xcart</a>(3,<a href="../../input_variables/generated_files/varbas.html#natom">natom</a>)  cartesian coordinates (Bohr) of atoms in unit cell
-                NOTE: only used when <a href="../../input_variables/generated_files/varbas.html#xred">xred</a> and <a href="../../input_variables/generated_files/varbas.html#xangst">xangst</a> are absent
-<a href="../../input_variables/generated_files/varbas.html#xred">xred</a>(3,<a href="../../input_variables/generated_files/varbas.html#natom">natom</a>)   fractional coordinates for atomic locations;
-                NOTE: leave out if <a href="../../input_variables/generated_files/varbas.html#xangst">xangst</a> or <a href="../../input_variables/generated_files/varbas.html#xcart">xcart</a> is used
-<a href="../../input_variables/generated_files/varbas.html#znucl">znucl</a>(<a href="../../input_variables/generated_files/varbas.html#ntypat">ntypat</a>)   Nuclear charge of each type of element; must agree with
+<a href="../../input_variables/generated_files/basic.html#xangst">xangst</a>(3,<a href="../../input_variables/generated_files/basic.html#natom">natom</a>)  cartesian coordinates (Angstrom) of atoms in unit cell
+                NOTE: only used when <a href="../../input_variables/generated_files/basic.html#xred">xred</a> and <a href="../../input_variables/generated_files/basic.html#xcart">xcart</a> are absent
+<a href="../../input_variables/generated_files/basic.html#xcart">xcart</a>(3,<a href="../../input_variables/generated_files/basic.html#natom">natom</a>)  cartesian coordinates (Bohr) of atoms in unit cell
+                NOTE: only used when <a href="../../input_variables/generated_files/basic.html#xred">xred</a> and <a href="../../input_variables/generated_files/basic.html#xangst">xangst</a> are absent
+<a href="../../input_variables/generated_files/basic.html#xred">xred</a>(3,<a href="../../input_variables/generated_files/basic.html#natom">natom</a>)   fractional coordinates for atomic locations;
+                NOTE: leave out if <a href="../../input_variables/generated_files/basic.html#xangst">xangst</a> or <a href="../../input_variables/generated_files/basic.html#xcart">xcart</a> is used
+<a href="../../input_variables/generated_files/basic.html#znucl">znucl</a>(<a href="../../input_variables/generated_files/basic.html#ntypat">ntypat</a>)   Nuclear charge of each type of element; must agree with
                 nuclear charge found in psp file.
 
 Specification of the planewave basis set, Brillouin zone wavevector sampling, and occupation of the bands:
-<a href="../../input_variables/generated_files/varbas.html#ecut">ecut</a>            planewave kinetic energy cutoff in Hartree
-<a href="../../input_variables/generated_files/varbas.html#kptopt">kptopt</a>          option for specifying the k-point grid
-                if <a href="../../input_variables/generated_files/varbas.html#kptopt">kptopt</a>=1, automatic generation, using ngkpt and shiftk.
+<a href="../../input_variables/generated_files/basic.html#ecut">ecut</a>            planewave kinetic energy cutoff in Hartree
+<a href="../../input_variables/generated_files/basic.html#kptopt">kptopt</a>          option for specifying the k-point grid
+                if <a href="../../input_variables/generated_files/basic.html#kptopt">kptopt</a>=1, automatic generation, using ngkpt and shiftk.
                 (for the latter, see the <a href="help_abinit.html">help_abinit</a> file)
-<a href="../../input_variables/generated_files/varbas.html#ngkpt">ngkpt</a>(3)        dimensions of the three-dimensional grid of k-points
-<a href="../../input_variables/generated_files/varbas.html#occopt">occopt</a>          set the occupation of electronic levels :
+<a href="../../input_variables/generated_files/basic.html#ngkpt">ngkpt</a>(3)        dimensions of the three-dimensional grid of k-points
+<a href="../../input_variables/generated_files/basic.html#occopt">occopt</a>          set the occupation of electronic levels :
                  =1 for semiconductors
                  =3 ... 7  for metals
 
 Specification of the type of calculation to be done:
-<a href="../../input_variables/generated_files/varrlx.html#ionmov">ionmov</a>          when <a href="../../input_variables/generated_files/varrlx.html#ionmov">ionmov</a> = 0 : the ions and cell shape are fixed
+<a href="../../input_variables/generated_files/rlx.html#ionmov">ionmov</a>          when <a href="../../input_variables/generated_files/rlx.html#ionmov">ionmov</a> = 0 : the ions and cell shape are fixed
                             = 2 : search for the equilibrium geometry
                             = 6 : molecular dynamics
-<a href="../../input_variables/generated_files/varbas.html#iscf">iscf</a>            either a positive number for defining self-consistent
+<a href="../../input_variables/generated_files/basic.html#iscf">iscf</a>            either a positive number for defining self-consistent
                 algorithm (usual), or -2 for band structure in fixed potential
-<a href="../../input_variables/generated_files/vargs.html#optdriver">optdriver</a>       when == 3 and 4 : will do GW calculations (many-body perturbation theory)
-<a href="../../input_variables/generated_files/varrf.html#rfelfd">rfelfd</a>          when /= 0 : will do response calculation to electric field
-<a href="../../input_variables/generated_files/varrf.html#rfphon">rfphon</a>          when = 1 : will do response calculation to atomic displacements
+<a href="../../input_variables/generated_files/gstate.html#optdriver">optdriver</a>       when == 3 and 4 : will do GW calculations (many-body perturbation theory)
+<a href="../../input_variables/generated_files/dfpt.html#rfelfd">rfelfd</a>          when /= 0 : will do response calculation to electric field
+<a href="../../input_variables/generated_files/dfpt.html#rfphon">rfphon</a>          when = 1 : will do response calculation to atomic displacements
 
 Specification of the numerical convergency of the calculation:
-<a href="../../input_variables/generated_files/varbas.html#nstep">nstep</a>           maximal number of self-consistent cycles (on the order of 20)
-<a href="../../input_variables/generated_files/varbas.html#tolvrs">tolvrs</a>          tolerance on self-consistent convergence
-<a href="../../input_variables/generated_files/varrlx.html#ntime">ntime</a>           number of molecular dynamics or relaxation steps
-<a href="../../input_variables/generated_files/varrlx.html#tolmxf">tolmxf</a>          force tolerance for structural relaxation in Hartree/Bohr
+<a href="../../input_variables/generated_files/basic.html#nstep">nstep</a>           maximal number of self-consistent cycles (on the order of 20)
+<a href="../../input_variables/generated_files/basic.html#tolvrs">tolvrs</a>          tolerance on self-consistent convergence
+<a href="../../input_variables/generated_files/rlx.html#ntime">ntime</a>           number of molecular dynamics or relaxation steps
+<a href="../../input_variables/generated_files/rlx.html#tolmxf">tolmxf</a>          force tolerance for structural relaxation in Hartree/Bohr
 </pre>
 
 <p>&nbsp;

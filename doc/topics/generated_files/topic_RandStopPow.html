@@ -49,8 +49,8 @@ and <b>G</b> are reciprocal lattice vectors.
 <p>The GW module of ABINIT gives access to the full inverse dielectric function for a grid of frequencies &omega;.
 Then, the implementation of the above equation is a post-processing employing a spline interpolation of the inverse dielectric function in order to evaluate
 it at &omega;=<b>v.</b>(<b>q</b>+<b>G</b>).
-The energy cutoff on <b>G</b> is governed by the <a href="../../input_variables/generated_files/vargw.html#ecuteps">ecuteps</a>, as in the GW module.
-The integer <a href="../../input_variables/generated_files/vargw.html#npvel">npvel</a> and the cartesian vector <a href="../../input_variables/generated_files/vargw.html#pvelmax">pvelmax</a> control the discretization of the particle velocity.
+The energy cutoff on <b>G</b> is governed by the <a href="../../input_variables/generated_files/gw.html#ecuteps">ecuteps</a>, as in the GW module.
+The integer <a href="../../input_variables/generated_files/gw.html#npvel">npvel</a> and the cartesian vector <a href="../../input_variables/generated_files/gw.html#pvelmax">pvelmax</a> control the discretization of the particle velocity.
 <p>Note that the absolute convergence of the random electronic stopping power is a delicate matter that generally requires thousands of empty states together with large values of the energy cutoff.
 
 
@@ -61,9 +61,9 @@ The integer <a href="../../input_variables/generated_files/vargw.html#npvel">npv
 <h3><b>2. Related input variables.</b></h3>
 
 
-<p>Compulsory input variables:<p>... <a href="../../input_variables/generated_files/vargw.html#ecuteps">ecuteps</a>   [Energy CUT-off for EPSilon (the dielectric matrix)]<br>
-... <a href="../../input_variables/generated_files/vargw.html#npvel">npvel</a>   [Number of Particle VELocities]<br>
-<p>Basic input variables:<p>... <a href="../../input_variables/generated_files/vargw.html#pvelmax">pvelmax</a>   [Particle VELocity MAXimum]<br>
+<p>Compulsory input variables:<p>... <a href="../../input_variables/generated_files/gw.html#ecuteps">ecuteps</a>   [Energy CUT-off for EPSilon (the dielectric matrix)]<br>
+... <a href="../../input_variables/generated_files/gw.html#npvel">npvel</a>   [Number of Particle VELocities]<br>
+<p>Basic input variables:<p>... <a href="../../input_variables/generated_files/gw.html#pvelmax">pvelmax</a>   [Particle VELocity MAXimum]<br>
 
 
 &nbsp; 

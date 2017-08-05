@@ -108,22 +108,22 @@ We will adopt the following set of generic parameters :
 </pre>
 
 <p>
-In principle, the <a href="../../input_variables/generated_files/varbas.html#acell">acell</a> to be used should be the one corresponding to the optimized structure
-at the <a href="../../input_variables/generated_files/varbas.html#ecut">ecut</a>, and
-<a href="../../input_variables/generated_files/varbas.html#ngkpt">ngkpt</a> combined with
-<a href="../../input_variables/generated_files/varbas.html#nshiftk">nshiftk</a> and
-<a href="../../input_variables/generated_files/varbas.html#shiftk">shiftk</a>, chosen for the calculations.
+In principle, the <a href="../../input_variables/generated_files/basic.html#acell">acell</a> to be used should be the one corresponding to the optimized structure
+at the <a href="../../input_variables/generated_files/basic.html#ecut">ecut</a>, and
+<a href="../../input_variables/generated_files/basic.html#ngkpt">ngkpt</a> combined with
+<a href="../../input_variables/generated_files/basic.html#nshiftk">nshiftk</a> and
+<a href="../../input_variables/generated_files/basic.html#shiftk">shiftk</a>, chosen for the calculations.
 Unfortunately,  for the purpose of this tutorial, in order to limit the duration of the runs,
 we have to work at an unusually low cutoff of 2.8 Ha for which the optimized lattice constant
 is equal to 7.45*0.707*2 Bohr=10.53 Bohr (instead of the converged value of 10.64 Bohr).
-For comparison, results with <a href="../../input_variables/generated_files/varbas.html#ecut">ecut</a>=5 are also reported and, in that case,
+For comparison, results with <a href="../../input_variables/generated_files/basic.html#ecut">ecut</a>=5 are also reported and, in that case,
 were obtained at the optimized lattice constant of 10.64 bohr.
 For those who would like to try later,
 convergence tests and structural optimizations can be done using the file <a href="../../tests/tutorespfn/Input/tnlo_1.in">&#126;abinit/tests/tutorespfn/Input/tnlo_1.in</a>.
 Before going further, you might refresh your memory concerning the other variables :
-<a href="../../input_variables/generated_files/varbas.html#ixc">ixc</a>,
-<a href="../../input_variables/generated_files/varrlx.html#ecutsm">ecutsm</a>,
-<a href="../../input_variables/generated_files/varrlx.html#dilatmx">dilatmx</a>.
+<a href="../../input_variables/generated_files/basic.html#ixc">ixc</a>,
+<a href="../../input_variables/generated_files/rlx.html#ecutsm">ecutsm</a>,
+<a href="../../input_variables/generated_files/rlx.html#dilatmx">dilatmx</a>.
 <p>
 
 <hr>
@@ -152,8 +152,8 @@ contains refer to tffield_1 rather than tffield_x).
   Because of the use of
   two types of atoms, have also a look at the following input variables present, in the "input" file:
 <ul>
-  <li><a href="../../input_variables/generated_files/varbas.html#ntypat">ntypat</a>
-  <li><a href="../../input_variables/generated_files/varbas.html#typat">typat</a>
+  <li><a href="../../input_variables/generated_files/basic.html#ntypat">ntypat</a>
+  <li><a href="../../input_variables/generated_files/basic.html#typat">typat</a>
 </ul>
 
 <p>
@@ -164,16 +164,16 @@ of three datasets corresponding to the reference optimized structure
 right and left (referred to as tau = +0.01 and tau = -0.01).  This is
 typically the amplitude of atomic displacement to be considered in this
 kind of computations.  Notice also that the displacements are given using
-<a href="../../input_variables/generated_files/varbas.html#xcart">xcart</a>,
+<a href="../../input_variables/generated_files/basic.html#xcart">xcart</a>,
 that is, explicitly in Cartesian directions, rather than the primitive
 cell axes (using <a href="../../input_variables/generated_files/varbas.html#xred"
 target="kwimg">xred</a>).  This makes the correspondence with the
 polarization output in Cartesian directions much simpler to understand.
 
 <p> There are two implementations of the Berry phase
-within ABINIT.  One corresponds to positive values of <a href="../../input_variables/generated_files/varff.html#berryopt">berryopt</a>
+within ABINIT.  One corresponds to positive values of <a href="../../input_variables/generated_files/ffield.html#berryopt">berryopt</a>
 and was implemented by Na Sai.  The other one corresponds to negative values of
-<a href="../../input_variables/generated_files/varff.html#berryopt">berryopt</a>
+<a href="../../input_variables/generated_files/ffield.html#berryopt">berryopt</a>
 was implemented by Marek Veithen.  Both are suitable to compute the
 polarization.  Here we will focus on the implementation of Marek Veithen
 for two reasons.  First, the results are directly provided in Cartesian
@@ -183,14 +183,14 @@ Veithen is the one to be used for the finite electric field calculation
 as described in the next Section.  Finally, note also that Veithen's
 implementation works with <a href="../../input_variables/generated_files/varbas.html#kptopt"
 target="kwimg">kptopt</a> = 1 or 2 while Na Sai implementation is restricted
-to <a href="../../input_variables/generated_files/varbas.html#kptopt">kptopt</a>
+to <a href="../../input_variables/generated_files/basic.html#kptopt">kptopt</a>
 = 2, which is less convenient.
 
 <p>
 The file is the one of a usual self-consistent calculation.
 On top of the usual variables, for the Berry phase calculation we simply need to define
-<a href="../../input_variables/generated_files/varff.html#berryopt">berryopt</a>
-and <a href="../../input_variables/generated_files/varrf.html#rfdir">rfdir</a>:
+<a href="../../input_variables/generated_files/ffield.html#berryopt">berryopt</a>
+and <a href="../../input_variables/generated_files/dfpt.html#rfdir">rfdir</a>:
 <pre>
         berryopt      -1
         rfdir          1 1 1
@@ -333,7 +333,7 @@ tffield_3.out, the following:
       0.04575010      0.00000000      0.00000000
 </pre>
 Restarting case ffield_2 and ffield_3 with
-<a href="../../input_variables/generated_files/varbas.html#ecut">ecut</a>=5 (three minutes on a PC 3 GHz),
+<a href="../../input_variables/generated_files/basic.html#ecut">ecut</a>=5 (three minutes on a PC 3 GHz),
 one gets
 the following values
 <pre>
@@ -355,9 +355,9 @@ or relaxed ions configurations.  For this purpose, have a look at the
 files ~abinit/tests/tutorespfn/Input/tffield_4.in (clamped ions) and
 ~abinit/tests/tutorespfn/Input/tffield_5.in (relaxed ions).  Notice how
 in the relaxed ion case, the input file includes
-<a href="../../input_variables/generated_files/varrlx.html#ionmov">ionmov</a>=2  
+<a href="../../input_variables/generated_files/rlx.html#ionmov">ionmov</a>=2  
 and 
-<a href="../../input_variables/generated_files/varrlx.html#optcell">optcell</a>=0,
+<a href="../../input_variables/generated_files/rlx.html#optcell">optcell</a>=0,
 in order to relax the ion positions at fixed cell geometry.  
 These calculations should
 give the following final results (obtained by taking finite difference
@@ -387,7 +387,7 @@ gives the finite
 difference -0.012983, that, divided by 0.02 (the change of strain) gives -0.6491, announced above.
 
 <br>
-Using to <a href="../../input_variables/generated_files/varbas.html#ecut">ecut</a>=5
+Using to <a href="../../input_variables/generated_files/basic.html#ecut">ecut</a>=5
 gives
 <pre>
 Proper piezoelectric constants(clamped ion)(Unit:c/m^2) = -0.6841215
@@ -412,9 +412,9 @@ It performs a finite field calculation at clamped atomic positions.
 You can look at this input file to identify the features specific to the finite field calculation.
 <p>
 As general parameters, one has to specify
-<a href="../../input_variables/generated_files/varbas.html#nband">nband</a>,
-<a href="../../input_variables/generated_files/vargs.html#nbdbuf">nbdbuf</a>
-and <a href="../../input_variables/generated_files/varbas.html#kptopt">kptopt</a>:
+<a href="../../input_variables/generated_files/basic.html#nband">nband</a>,
+<a href="../../input_variables/generated_files/gstate.html#nbdbuf">nbdbuf</a>
+and <a href="../../input_variables/generated_files/basic.html#kptopt">kptopt</a>:
 <pre>
         nband          4
         nbdbuf         0
@@ -423,8 +423,8 @@ and <a href="../../input_variables/generated_files/varbas.html#kptopt">kptopt</a
 <p>
 As a first step (dataset 11), the code must perform a Berry phase calculation in zero field.
 For that purpose, it is necessary to set the values of
-<a href="../../input_variables/generated_files/varff.html#berryopt">berryopt</a>
-and <a href="../../input_variables/generated_files/varrf.html#rfdir">rfdir</a>:
+<a href="../../input_variables/generated_files/ffield.html#berryopt">berryopt</a>
+and <a href="../../input_variables/generated_files/dfpt.html#rfdir">rfdir</a>:
 <pre>
         berryopt11     -1
         rfdir11        1 1 1
@@ -434,7 +434,7 @@ and <a href="../../input_variables/generated_files/varrf.html#rfdir">rfdir</a>:
 begin with berryopt -1.
 <p>
 After that, there are different steps corresponding to various value of the electric field,
-thanks to <a href="../../input_variables/generated_files/varff.html#efield">efield</a>.
+thanks to <a href="../../input_variables/generated_files/ffield.html#efield">efield</a>.
 For those steps, it is important to take care of the following parameters, shown here for dataset 21:
 <pre>
         berryopt21     4
@@ -515,7 +515,7 @@ This value is similar to the value reported from DFPT.
 If you do calculations for more electric fields,
 fitting them with the general expression of the force above (including the E^2 term), you can find
 the dchi/dtau term.  At
-<a href="../../input_variables/generated_files/varbas.html#ecut">ecut</a>=5 you should get dchi/dtau for Al = -0.06169.
+<a href="../../input_variables/generated_files/basic.html#ecut">ecut</a>=5 you should get dchi/dtau for Al = -0.06169.
 This will be useful later for the
 <a href="lesson_nlo.html">lesson on static Non-linear properties</a>.
 
@@ -577,14 +577,14 @@ The optical dielectric constant is :
 <p>
 This value underestimates the value of 9.20 obtained by DFPT.
 The agreement is not better at
-<a href="../../input_variables/generated_files/varbas.html#ecut">ecut</a>=5. Typically, finite field calculations
+<a href="../../input_variables/generated_files/basic.html#ecut">ecut</a>=5. Typically, finite field calculations
 converge with the density of the k point grid more slowly than DFPT calculations.
 
 <p>If you do calculations for more electric fields, fitting them with
 the general expression of the force above (including the E^2 term)
 you can find the non-linear optical susceptibilities \chi(2).
 At
-<a href="../../input_variables/generated_files/varbas.html#ecut">ecut</a>=5 you should get \chi(2) = 29.769 pm/V.
+<a href="../../input_variables/generated_files/basic.html#ecut">ecut</a>=5 you should get \chi(2) = 29.769 pm/V.
 This result will be also be useful for the
 <a href="lesson_nlo.html">lesson on static Non-linear properties</a>.
 <p>
@@ -594,7 +594,7 @@ You can try to do it as an exercise.
 As the calculation here was at clamped ions,
 you will get the clamped ion proper piezoelectric constants.
 At
-<a href="../../input_variables/generated_files/varbas.html#ecut">ecut</a>=5,
+<a href="../../input_variables/generated_files/basic.html#ecut">ecut</a>=5,
 you should obtain -0.69088 C/m^2.
 <p>
 <img src="../documents/lesson_ffield/image007.gif">
@@ -605,7 +605,7 @@ when allowing the ions to relax
 ,
 one can access the relaxed ion proper piezoelectric constant.
 At
-<a href="../../input_variables/generated_files/varbas.html#ecut">ecut</a>=5 the result is -0.03259.
+<a href="../../input_variables/generated_files/basic.html#ecut">ecut</a>=5 the result is -0.03259.
 <script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
 
 </body>

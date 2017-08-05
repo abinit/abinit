@@ -122,7 +122,7 @@ which will   be  discussed below:<br>
                       </li>
 
 
-  <li><a href="../../input_variables/generated_files/varrlx.html#iatfix">iatfix</a>
+  <li><a href="../../input_variables/generated_files/rlx.html#iatfix">iatfix</a>
                       </li>
 
 
@@ -296,7 +296,7 @@ in lesson     RF1.    We  will     introduce only one new input variable
 <ul>
 
 
-  <li><a href="../../input_variables/generated_files/varrf.html#rfstrs">rfstrs</a>
+  <li><a href="../../input_variables/generated_files/dfpt.html#rfstrs">rfstrs</a>
                         <br>
                       </li>
 
@@ -325,7 +325,7 @@ do all   the   RF   calculations   you learned in lesson RF1 together
                       </li>
 
 
-  <li><a href="../../input_variables/generated_files/varrf.html#rfelfd">rfelfd</a>
+  <li><a href="../../input_variables/generated_files/dfpt.html#rfelfd">rfelfd</a>
                         <br>
                       </li>
 
@@ -402,7 +402,7 @@ used later  to compute the atomic   relaxation  contribution to the   elastic
   and piezoelectric  tensor.</p>
 
 <p>First-order wave functions for the strain perturbation are computed next.
-                Setting <a href="../../input_variables/generated_files/varrf.html#rfstrs">rfstrs</a>
+                Setting <a href="../../input_variables/generated_files/dfpt.html#rfstrs">rfstrs</a>
                                 = 3 specifies that we want both uniaxial
 and   shear    strains     to  be  treated,     and <a href="../../input_variables/generated_files/varrf.html#rfdir" target="kwimg">
             rfdir</a>
@@ -497,7 +497,7 @@ will find</p>
 of   GS  calculations.&nbsp; The fact that vres2, the residual of the self-consistent
      first-order potential, has reached <a href="../../input_variables/generated_files/varbas.html#tolvrs" target="kwimg">
           tolvrs</a>
-           well within <a href="../../input_variables/generated_files/varbas.html#nstep">nstep</a>
+           well within <a href="../../input_variables/generated_files/basic.html#nstep">nstep</a>
           (40) iterations indicates that the 2DTE calculation for this perturbation
      (xy strain) has converged .  It would   pay   to  examine     a few
 more     cases for different perturbations  (unless   you  have looked
@@ -677,10 +677,10 @@ now   go to the <a href="../../users/generated_files/help_anaddb.html" target="k
                     </p>
 
 <ul>
-  <li><a href="../../input_variables/generated_files/varanaddb.html#elaflag@anaddb">elaflag</a>,</li>
-  <li><a href="../../input_variables/generated_files/varanaddb.html#piezoflag@anaddb">piezoflag</a>,</li>
-  <li><a href="../../input_variables/generated_files/varanaddb.html#instrflag@anaddb">instrflag</a>,</li>
-  <li><a href="../../input_variables/generated_files/varanaddb.html#chneut@anaddb">chneut</a>.</li>
+  <li><a href="../../input_variables/generated_files/anaddb.html#elaflag@anaddb">elaflag</a>,</li>
+  <li><a href="../../input_variables/generated_files/anaddb.html#piezoflag@anaddb">piezoflag</a>,</li>
+  <li><a href="../../input_variables/generated_files/anaddb.html#instrflag@anaddb">instrflag</a>,</li>
+  <li><a href="../../input_variables/generated_files/anaddb.html#chneut@anaddb">chneut</a>.</li>
 </ul>
                               For the theory underlying the incorporation
 of  atom-relaxation         corrections,      it is recommended you see <cite>
@@ -845,7 +845,7 @@ wave functions    for the  strained   lattices and compute    the stress.
 <ul>
 
 
-  <li><a href="../../input_variables/generated_files/varff.html#berryopt">berryopt</a>
+  <li><a href="../../input_variables/generated_files/ffield.html#berryopt">berryopt</a>
                       </li>
 
 </ul>
@@ -865,7 +865,7 @@ in  <a href="#2">   2</a>
                          .  We will use <a href="../../input_variables/generated_files/varff.html#berryopt" target="kwimg">
                berryopt</a>
                         = -1, which utilizes an improved coding of the calculation,
-     and  must   specify   <a href="../../input_variables/generated_files/varrf.html#rfdir">rfdir</a>
+     and  must   specify   <a href="../../input_variables/generated_files/dfpt.html#rfdir">rfdir</a>
                         = 1 1 1 so that the Cartesian components of the polarization
       are  computed.<br>
                     <br>
@@ -1176,12 +1176,12 @@ ngkpt=3*10  0.0042034396   0.0020343437   0.0012956768   7.5694820855
         more rapidly with <b>k</b> sample than the elastic constants. &nbsp;For
       <a href="../../input_variables/generated_files/varbas.html#ngkpt" target="kwimg">   ngkpt</a>
                 =3*6, acell is converged to 0.02%, while the C's have 5-10%
- errors.     &nbsp;For   <a href="../../input_variables/generated_files/varbas.html#ngkpt">ngkpt</a>
+ errors.     &nbsp;For   <a href="../../input_variables/generated_files/basic.html#ngkpt">ngkpt</a>
                 =3*8, the C's are converged to better than 1%, much better
  for   the   largest,    C<small><small>11</small></small>, which should
 be  acceptable.</p>
 
-<p>As in lesson 4, the <a href="../../input_variables/generated_files/varbas.html#ngkpt">ngkpt</a>
+<p>As in lesson 4, the <a href="../../input_variables/generated_files/basic.html#ngkpt">ngkpt</a>
                  convergence is controlled by <a href="../../input_variables/generated_files/vargs.html#tsmear" target="kwimg">
                tsmear</a>
                 . &nbsp;The smaller the broadening, the denser the <b>k</b>
@@ -1242,7 +1242,7 @@ measuring the elastic tensor elements. If you start with the conventional cubic 
 to one face, you can measure <I>C<SUB>11</SUB></I>. But if you turn the cell to some random angle, you'll
 measure a response that is a mixture of <I>C<SUB>11</SUB></I> and <I>C<SUB>12</SUB></I>.
 Within ABINIT, if the aluminum fcc cell is described
-using <a href="../../input_variables/generated_files/varbas.html#angdeg">angdeg</a>
+using <a href="../../input_variables/generated_files/basic.html#angdeg">angdeg</a>
 and <a href="../../input_variables/generated_files/varbas.html#angdeg" target="kwimg">acell</a>, 
 then an axis of the primitive cell will be aligned along the laboratory <I>z</I> axis but this will not lead
 to a (conventional) cell alignment with the laboratory frame. The resulting elastic tensor

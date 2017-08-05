@@ -64,16 +64,16 @@ all bands are doubly occupied, and permits the current approach to be used
 with more complex electronic and magnetic states than just insulators.
 
 <p>Within ABINIT, the electric field gradient computation is invoked with
-the key word <a href="../../input_variables/generated_files/varpaw.html#prtefg">prtefg</a> (for Print EFG), together with the key word <a href="../../input_variables/generated_files/varpaw.html#quadmom">quadmom</a>.
-The <a href="../../input_variables/generated_files/varpaw.html#prtefg">prtefg</a> key word takes the values 1--3. For value 1, the electric field
+the key word <a href="../../input_variables/generated_files/paw.html#prtefg">prtefg</a> (for Print EFG), together with the key word <a href="../../input_variables/generated_files/paw.html#quadmom">quadmom</a>.
+The <a href="../../input_variables/generated_files/paw.html#prtefg">prtefg</a> key word takes the values 1--3. For value 1, the electric field
 gradient coupling in MHz is reported, where the conversion is made by atom by combining
-the gradient with the nuclear quadrupole moments supplied by <a href="../../input_variables/generated_files/varpaw.html#quadmom">quadmom</a>. When <a href="../../input_variables/generated_files/varpaw.html#prtefg">prtefg</a> is
+the gradient with the nuclear quadrupole moments supplied by <a href="../../input_variables/generated_files/paw.html#quadmom">quadmom</a>. When <a href="../../input_variables/generated_files/paw.html#prtefg">prtefg</a> is
 input as 2, the additional breakdown of the field gradient in terms of valence and on-site
 PAW terms is reported, along with the eigenvectors of the EFG matrix, so that 
 principal directions may be determined with respect to the crystal axes. Finally,
-<a href="../../input_variables/generated_files/varpaw.html#prtefg">prtefg</a>=3 allows additional computation of a point-charge model of the gradient, 
+<a href="../../input_variables/generated_files/paw.html#prtefg">prtefg</a>=3 allows additional computation of a point-charge model of the gradient, 
 for comparison purposes. The point charges by atom are supplied through the additional
-variable <a href="../../input_variables/generated_files/varpaw.html#ptcharge">ptcharge</a>.
+variable <a href="../../input_variables/generated_files/paw.html#ptcharge">ptcharge</a>.
 Detailed examples of the use of ABINIT to compute EFG's can be found in 
 <a href="../../bibliography/generated_files/bibliography.html#Zwanziger2008">[Zwanziger2008]</a>,<a href="../../bibliography/generated_files/bibliography.html#Zwanziger2009a">[Zwanziger2009a]</a>. 
 
@@ -92,7 +92,7 @@ are evaluated from a linear fit to the first few points of the PAW radial
 functions.
 
 <p>Within ABINIT the Fermi contact interaction is invoked with the 
-key word <a href="../../input_variables/generated_files/varpaw.html#prtfc">prtfc</a> (for Print Fermi Contact), which only takes the value 1.
+key word <a href="../../input_variables/generated_files/paw.html#prtfc">prtfc</a> (for Print Fermi Contact), which only takes the value 1.
 When called, the electron density at each nuclear position is reported, in atomic
 units (electrons per cubic Bohr). The isomer shift as measured in M&ouml;ssbauer
 spectroscopy is typically reported in velocity units and is obtained from the

@@ -54,8 +54,8 @@ The decomposition of the stresses in their different
 components can be provided. A smearing scheme applied to the kinetic
 energy allows to get smooth energy curves as a function of
 lattice parameters and angles.
-<p> see basic input variables <a href="../../input_variables/generated_files/vardev.html#optforces">optforces</a> and <a href="../../input_variables/generated_files/vargs.html#optstress">optstress</a> and 
-useful variables <a href="../../input_variables/generated_files/varrlx.html#strprecon">strprecon</a>, <a href="../../input_variables/generated_files/varrlx.html#strtarget">strtarget</a>, <a href="../../input_variables/generated_files/varbas.html#toldff">toldff</a>, <a href="../../input_variables/generated_files/varbas.html#tolrff">tolrff</a>.
+<p> see basic input variables <a href="../../input_variables/generated_files/dev.html#optforces">optforces</a> and <a href="../../input_variables/generated_files/gstate.html#optstress">optstress</a> and 
+useful variables <a href="../../input_variables/generated_files/rlx.html#strprecon">strprecon</a>, <a href="../../input_variables/generated_files/rlx.html#strtarget">strtarget</a>, <a href="../../input_variables/generated_files/basic.html#toldff">toldff</a>, <a href="../../input_variables/generated_files/basic.html#tolrff">tolrff</a>.
 
 
 &nbsp; 
@@ -84,35 +84,35 @@ studies ...</li>
 <h3><b>3. Related input variables.</b></h3>
 
 
-<p>Basic input variables:<p>... <a href="../../input_variables/generated_files/varbas.html#natom">natom</a>   [Number of ATOMs]<br>
-... <a href="../../input_variables/generated_files/varbas.html#nband">nband</a>   [Number of BANDs]<br>
-... <a href="../../input_variables/generated_files/varbas.html#ntypat">ntypat</a>   [Number of TYPes of AToms]<br>
-... <a href="../../input_variables/generated_files/vargs.html#occ">occ</a>   [OCCupation numbers]<br>
-... <a href="../../input_variables/generated_files/varbas.html#occopt">occopt</a>   [OCCupation OPTion]<br>
-... <a href="../../input_variables/generated_files/vardev.html#optforces">optforces</a>   [OPTions for the calculation of FORCES]<br>
-... <a href="../../input_variables/generated_files/vargs.html#optstress">optstress</a>   [OPTion for the computation of STRESS]<br>
-... <a href="../../input_variables/generated_files/vargs.html#tsmear">tsmear</a>   [Temperature of SMEARing]<br>
-... <a href="../../input_variables/generated_files/varbas.html#typat">typat</a>   [TYPe of AToms]<br>
-... <a href="../../input_variables/generated_files/varbas.html#znucl">znucl</a>   [charge -Z- of the NUCLeus]<br>
-<p>Useful input variables:<p>... <a href="../../input_variables/generated_files/varrlx.html#amu">amu</a>   [Atomic Mass Units]<br>
-... <a href="../../input_variables/generated_files/vargs.html#charge">charge</a>   [CHARGE]<br>
-... <a href="../../input_variables/generated_files/vargs.html#enunit">enunit</a>   [ENergy UNITs]<br>
-... <a href="../../input_variables/generated_files/vargs.html#fband">fband</a>   [Factor for the number of BANDs]<br>
-... <a href="../../input_variables/generated_files/varfil.html#irdden">irdden</a>   [Integer that governs the ReaDing of DEN file]<br>
-... <a href="../../input_variables/generated_files/varfil.html#irdwfk">irdwfk</a>   [Integer that governs the ReaDing of _WFK files]<br>
-... <a href="../../input_variables/generated_files/vardev.html#irdwfkfine">irdwfkfine</a>   [Integer that governs the ReaDing of the grid _WFK file on the FINE grid]<br>
-... <a href="../../input_variables/generated_files/vargs.html#stmbias">stmbias</a>   [Scanning Tunneling Microscopy BIAS voltage]<br>
-... <a href="../../input_variables/generated_files/varrlx.html#strprecon">strprecon</a>   [STRess PRECONditioner]<br>
-... <a href="../../input_variables/generated_files/varrlx.html#strtarget">strtarget</a>   [STRess TARGET]<br>
-... <a href="../../input_variables/generated_files/varbas.html#toldff">toldff</a>   [TOLerance on the DiFference of Forces]<br>
-... <a href="../../input_variables/generated_files/varbas.html#tolrff">tolrff</a>   [TOLerance on the Relative diFference of Forces]<br>
-... <a href="../../input_variables/generated_files/vargs.html#tphysel">tphysel</a>   [Temperature (PHYSical) of the ELectrons]<br>
-<p>Relevant internal variables:<p>... <a href="../../input_variables/generated_files/varint.html#mband">%mband</a>   [Maximum number of BANDs]<br>
-... <a href="../../input_variables/generated_files/varint.html#nelect">%nelect</a>   [Number of ELECTrons]<br>
-... <a href="../../input_variables/generated_files/varint.html#ziontypat">ziontypat</a>   [Z (charge) of the IONs for the different TYPes of AToms]<br>
-<p>Input variables for experts:<p>... <a href="../../input_variables/generated_files/vardev.html#effmass">effmass</a>   [EFFective MASS]<br>
-... <a href="../../input_variables/generated_files/vargs.html#timopt">timopt</a>   [TIMing OPTion]<br>
-... <a href="../../input_variables/generated_files/vardev.html#useylm">useylm</a>   [USE YLM (the spherical harmonics)]<br>
+<p>Basic input variables:<p>... <a href="../../input_variables/generated_files/basic.html#natom">natom</a>   [Number of ATOMs]<br>
+... <a href="../../input_variables/generated_files/basic.html#nband">nband</a>   [Number of BANDs]<br>
+... <a href="../../input_variables/generated_files/basic.html#ntypat">ntypat</a>   [Number of TYPes of AToms]<br>
+... <a href="../../input_variables/generated_files/gstate.html#occ">occ</a>   [OCCupation numbers]<br>
+... <a href="../../input_variables/generated_files/basic.html#occopt">occopt</a>   [OCCupation OPTion]<br>
+... <a href="../../input_variables/generated_files/dev.html#optforces">optforces</a>   [OPTions for the calculation of FORCES]<br>
+... <a href="../../input_variables/generated_files/gstate.html#optstress">optstress</a>   [OPTion for the computation of STRESS]<br>
+... <a href="../../input_variables/generated_files/gstate.html#tsmear">tsmear</a>   [Temperature of SMEARing]<br>
+... <a href="../../input_variables/generated_files/basic.html#typat">typat</a>   [TYPe of AToms]<br>
+... <a href="../../input_variables/generated_files/basic.html#znucl">znucl</a>   [charge -Z- of the NUCLeus]<br>
+<p>Useful input variables:<p>... <a href="../../input_variables/generated_files/rlx.html#amu">amu</a>   [Atomic Mass Units]<br>
+... <a href="../../input_variables/generated_files/gstate.html#charge">charge</a>   [CHARGE]<br>
+... <a href="../../input_variables/generated_files/gstate.html#enunit">enunit</a>   [ENergy UNITs]<br>
+... <a href="../../input_variables/generated_files/gstate.html#fband">fband</a>   [Factor for the number of BANDs]<br>
+... <a href="../../input_variables/generated_files/files.html#irdden">irdden</a>   [Integer that governs the ReaDing of DEN file]<br>
+... <a href="../../input_variables/generated_files/files.html#irdwfk">irdwfk</a>   [Integer that governs the ReaDing of _WFK files]<br>
+... <a href="../../input_variables/generated_files/dev.html#irdwfkfine">irdwfkfine</a>   [Integer that governs the ReaDing of the grid _WFK file on the FINE grid]<br>
+... <a href="../../input_variables/generated_files/gstate.html#stmbias">stmbias</a>   [Scanning Tunneling Microscopy BIAS voltage]<br>
+... <a href="../../input_variables/generated_files/rlx.html#strprecon">strprecon</a>   [STRess PRECONditioner]<br>
+... <a href="../../input_variables/generated_files/rlx.html#strtarget">strtarget</a>   [STRess TARGET]<br>
+... <a href="../../input_variables/generated_files/basic.html#toldff">toldff</a>   [TOLerance on the DiFference of Forces]<br>
+... <a href="../../input_variables/generated_files/basic.html#tolrff">tolrff</a>   [TOLerance on the Relative diFference of Forces]<br>
+... <a href="../../input_variables/generated_files/gstate.html#tphysel">tphysel</a>   [Temperature (PHYSical) of the ELectrons]<br>
+<p>Relevant internal variables:<p>... <a href="../../input_variables/generated_files/internal.html#mband">%mband</a>   [Maximum number of BANDs]<br>
+... <a href="../../input_variables/generated_files/internal.html#nelect">%nelect</a>   [Number of ELECTrons]<br>
+... <a href="../../input_variables/generated_files/internal.html#ziontypat">ziontypat</a>   [Z (charge) of the IONs for the different TYPes of AToms]<br>
+<p>Input variables for experts:<p>... <a href="../../input_variables/generated_files/dev.html#effmass">effmass</a>   [EFFective MASS]<br>
+... <a href="../../input_variables/generated_files/gstate.html#timopt">timopt</a>   [TIMing OPTion]<br>
+... <a href="../../input_variables/generated_files/dev.html#useylm">useylm</a>   [USE YLM (the spherical harmonics)]<br>
 
 
 &nbsp; 

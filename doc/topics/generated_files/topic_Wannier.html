@@ -31,12 +31,12 @@
 
 
 <p> There are two ways to obtain Wannier functions with ABINIT: 
-<li>The first one is to use an internal implementation of Projected Local Orbital Wannier functions <a href="../../bibliography/generated_files/bibliography.html#Amadon2008">[Amadon2008]</a>, <a href="../../bibliography/generated_files/bibliography.html#Amadon2015">[Amadon2015]</a> that can be activated with the input variable <a href="../../input_variables/generated_files/vardev.html#plowan_compute">plowan_compute</a>.
-The variables <a href="../../input_variables/generated_files/vardev.html#plowan_bandi">plowan_bandi</a> and <a href="../../input_variables/generated_files/vardev.html#plowan_bandf">plowan_bandf</a> specifies the Kohn Sham bands that are used to built Wannier functions,
-whereas variables <a href="../../input_variables/generated_files/vardev.html#plowan_natom">plowan_natom</a>,<a href="../../input_variables/generated_files/vardev.html#plowan_iatom">plowan_iatom</a>,<a href="../../input_variables/generated_files/vardev.html#plowan_nbl">plowan_nbl</a>, <a href="../../input_variables/generated_files/vardev.html#plowan_lcalc">plowan_lcalc</a>, and <a href="../../input_variables/generated_files/vardev.html#plowan_projcalc">plowan_projcalc</a> specify
+<li>The first one is to use an internal implementation of Projected Local Orbital Wannier functions <a href="../../bibliography/generated_files/bibliography.html#Amadon2008">[Amadon2008]</a>, <a href="../../bibliography/generated_files/bibliography.html#Amadon2015">[Amadon2015]</a> that can be activated with the input variable <a href="../../input_variables/generated_files/dev.html#plowan_compute">plowan_compute</a>.
+The variables <a href="../../input_variables/generated_files/dev.html#plowan_bandi">plowan_bandi</a> and <a href="../../input_variables/generated_files/dev.html#plowan_bandf">plowan_bandf</a> specifies the Kohn Sham bands that are used to built Wannier functions,
+whereas variables <a href="../../input_variables/generated_files/dev.html#plowan_natom">plowan_natom</a>,<a href="../../input_variables/generated_files/dev.html#plowan_iatom">plowan_iatom</a>,<a href="../../input_variables/generated_files/dev.html#plowan_nbl">plowan_nbl</a>, <a href="../../input_variables/generated_files/dev.html#plowan_lcalc">plowan_lcalc</a>, and <a href="../../input_variables/generated_files/dev.html#plowan_projcalc">plowan_projcalc</a> specify
 the atoms, angular momentum and projectors corresponding to the projected local Orbital Wannier functions.
-<p>In order to do Wannier interpolation or analysis of hopping integrals, real space Wannier functions can be built using the variables <a href="../../input_variables/generated_files/vardev.html#plowan_realspace">plowan_realspace</a>
-and <a href="../../input_variables/generated_files/vardev.html#plowan_nt">plowan_nt</a> as well as <a href="../../input_variables/generated_files/vardev.html#plowan_it">plowan_it</a>. Real space Hamiltonian for analysis is given in latex file whose name ending is "wanniereigen" and the band structure is given in the output and log file.</li>
+<p>In order to do Wannier interpolation or analysis of hopping integrals, real space Wannier functions can be built using the variables <a href="../../input_variables/generated_files/dev.html#plowan_realspace">plowan_realspace</a>
+and <a href="../../input_variables/generated_files/dev.html#plowan_nt">plowan_nt</a> as well as <a href="../../input_variables/generated_files/dev.html#plowan_it">plowan_it</a>. Real space Hamiltonian for analysis is given in latex file whose name ending is "wanniereigen" and the band structure is given in the output and log file.</li>
 </br>
 <li> The second one is to use the external code wannier90 (<a href="http://www.wannier.org"><b>www.wannier.org</b></a>) that calculates Maximally Localized Wannier Functions (MLWF). After a ground state calculation the Wannier90 code will obtain the MLWFs requiring just two ingredients:
 <ul>
@@ -45,7 +45,7 @@ and <a href="../../input_variables/generated_files/vardev.html#plowan_nt">plowan
 </ul>
 <p>What ABINIT do is to take the Bloch functions from a ground state calculation and compute these two ingredients. Then, Wannier90 is run.
 Wannier90 is included as a library and ABINIT and the process is automatic, so that in a single run you can do both the ground state
-calculation and the computation of MLWFs. The input variables <a href="../../input_variables/generated_files/varfil.html#prtwant">prtwant</a>, <a href="../../input_variables/generated_files/varw90.html#w90iniprj">w90iniprj</a> and <a href="../../input_variables/generated_files/varw90.html#w90prtunk">w90prtunk</a> are related to the use of the wannier90 librairy.</li>
+calculation and the computation of MLWFs. The input variables <a href="../../input_variables/generated_files/files.html#prtwant">prtwant</a>, <a href="../../input_variables/generated_files/w90.html#w90iniprj">w90iniprj</a> and <a href="../../input_variables/generated_files/w90.html#w90prtunk">w90prtunk</a> are related to the use of the wannier90 librairy.</li>
 
 
 &nbsp; 
@@ -64,21 +64,21 @@ Functions.</li>
 <h3><b>3. Related input variables.</b></h3>
 
 
-<p>Compulsory input variables:<p>... <a href="../../input_variables/generated_files/vardev.html#plowan_bandf">plowan_bandf</a>   [Projected Local Orbital WANnier functions BAND Final]<br>
-... <a href="../../input_variables/generated_files/vardev.html#plowan_bandi">plowan_bandi</a>   [Projected Local Orbital WANnier functions BAND Initial]<br>
-... <a href="../../input_variables/generated_files/vardev.html#plowan_compute">plowan_compute</a>   [Projected Local Orbital WANnier functions COMPUTATION]<br>
-... <a href="../../input_variables/generated_files/vardev.html#plowan_iatom">plowan_iatom</a>   [Projected Local Orbital WANnier functions, Index of ATOM]<br>
-... <a href="../../input_variables/generated_files/vardev.html#plowan_lcalc">plowan_lcalc</a>   [Projected Local Orbital WANnier functions,  L values to use for CALCulation]<br>
-... <a href="../../input_variables/generated_files/vardev.html#plowan_natom">plowan_natom</a>   [Projected Local Orbital WANnier functions, Number of ATOMs]<br>
-... <a href="../../input_variables/generated_files/vardev.html#plowan_nbl">plowan_nbl</a>   [Projected Local Orbital WANnier functions,  NumBer of L values]<br>
-... <a href="../../input_variables/generated_files/vardev.html#plowan_projcalc">plowan_projcalc</a>   [Projected Local Orbital WANnier functions,  PROJectors values to use for CALCulation]<br>
-... <a href="../../input_variables/generated_files/varfil.html#prtwant">prtwant</a>   [PRinT WANT file]<br>
-<p>Basic input variables:<p>... <a href="../../input_variables/generated_files/varw90.html#w90iniprj">w90iniprj</a>   [Wannier90- INItial PROJections]<br>
-... <a href="../../input_variables/generated_files/varw90.html#w90prtunk">w90prtunk</a>   [Wannier90- PRINT UNKp.s file]<br>
-<p>Useful input variables:<p>... <a href="../../input_variables/generated_files/vardev.html#plowan_it">plowan_it</a>   [Projected Local Orbital WANnier functions,  Index of Translation.]<br>
-... <a href="../../input_variables/generated_files/vardev.html#plowan_nt">plowan_nt</a>   [Projected Local Orbital WANnier functions,  Number of Translation on which the real space values of
+<p>Compulsory input variables:<p>... <a href="../../input_variables/generated_files/dev.html#plowan_bandf">plowan_bandf</a>   [Projected Local Orbital WANnier functions BAND Final]<br>
+... <a href="../../input_variables/generated_files/dev.html#plowan_bandi">plowan_bandi</a>   [Projected Local Orbital WANnier functions BAND Initial]<br>
+... <a href="../../input_variables/generated_files/dev.html#plowan_compute">plowan_compute</a>   [Projected Local Orbital WANnier functions COMPUTATION]<br>
+... <a href="../../input_variables/generated_files/dev.html#plowan_iatom">plowan_iatom</a>   [Projected Local Orbital WANnier functions, Index of ATOM]<br>
+... <a href="../../input_variables/generated_files/dev.html#plowan_lcalc">plowan_lcalc</a>   [Projected Local Orbital WANnier functions,  L values to use for CALCulation]<br>
+... <a href="../../input_variables/generated_files/dev.html#plowan_natom">plowan_natom</a>   [Projected Local Orbital WANnier functions, Number of ATOMs]<br>
+... <a href="../../input_variables/generated_files/dev.html#plowan_nbl">plowan_nbl</a>   [Projected Local Orbital WANnier functions,  NumBer of L values]<br>
+... <a href="../../input_variables/generated_files/dev.html#plowan_projcalc">plowan_projcalc</a>   [Projected Local Orbital WANnier functions,  PROJectors values to use for CALCulation]<br>
+... <a href="../../input_variables/generated_files/files.html#prtwant">prtwant</a>   [PRinT WANT file]<br>
+<p>Basic input variables:<p>... <a href="../../input_variables/generated_files/w90.html#w90iniprj">w90iniprj</a>   [Wannier90- INItial PROJections]<br>
+... <a href="../../input_variables/generated_files/w90.html#w90prtunk">w90prtunk</a>   [Wannier90- PRINT UNKp.s file]<br>
+<p>Useful input variables:<p>... <a href="../../input_variables/generated_files/dev.html#plowan_it">plowan_it</a>   [Projected Local Orbital WANnier functions,  Index of Translation.]<br>
+... <a href="../../input_variables/generated_files/dev.html#plowan_nt">plowan_nt</a>   [Projected Local Orbital WANnier functions,  Number of Translation on which the real space values of
 energy are computed]<br>
-... <a href="../../input_variables/generated_files/vardev.html#plowan_realspace">plowan_realspace</a>   [Projected Local Orbital WANnier functions,  activate REAL SPACE calculation.]<br>
+... <a href="../../input_variables/generated_files/dev.html#plowan_realspace">plowan_realspace</a>   [Projected Local Orbital WANnier functions,  activate REAL SPACE calculation.]<br>
 
 
 &nbsp; 

@@ -160,10 +160,10 @@
     of which is a potential-based conjugate gradient algorithm.
   <p>The representation of potential, density and wavefunctions in real space
     will be done on a regular 3D grid of points. Its spacing will be determined
-    by the cut-off energy (see the input variable <a href="../../input_variables/generated_files/varbas.html#ecut">ecut</a>)
+    by the cut-off energy (see the input variable <a href="../../input_variables/generated_files/basic.html#ecut">ecut</a>)
     of the planewave basis in reciprocal space. This grid of points will also
     be the starting point of Fast Fourier Transforms between real and reciprocal
-    space. The number of such points, called <a href="../../input_variables/generated_files/vargs.html#ngfft">ngfft</a>,
+    space. The number of such points, called <a href="../../input_variables/generated_files/gstate.html#ngfft">ngfft</a>,
     should be sufficiently large for adequate representation of the functions,
     but not too large, for reasons of computational efficiency. The trade-off between
     accuracy and computational efficiency is present in many places of the code,
@@ -218,19 +218,19 @@
     The list of input variables present in the latter file links them to their definitions,
     contained in different files, of which some are listed here:
 <ul>
-<li> Basic variables, <a href="../../input_variables/generated_files/varbas.html#">varbas</a></li>
-<li> Files handling variables, <a href="../../input_variables/generated_files/varfil.html#">varfil</a></li>
-<li> Ground-state calculation variables, <a href="../../input_variables/generated_files/vargs.html#">vargs</a></li>
-<li> GW variables, <a href="../../input_variables/generated_files/vargw.html#">vargw</a></li>
-<li> Parallelisation variables, <a href="../../input_variables/generated_files/varpar.html#">varpar</a></li>
-<li> Response Function variables, <a href="../../input_variables/generated_files/varrf.html#">varrf</a></li>
+<li> Basic variables, <a href="#">[[FAKE LINK:varbas]]</a></li>
+<li> Files handling variables, <a href="#">[[FAKE LINK:varfil]]</a></li>
+<li> Ground-state calculation variables, <a href="#">[[FAKE LINK:vargs]]</a></li>
+<li> GW variables, <a href="#">[[FAKE LINK:vargw]]</a></li>
+<li> Parallelisation variables, <a href="#">[[FAKE LINK:varpar]]</a></li>
+<li> Response Function variables, <a href="#">[[FAKE LINK:varrf]]</a></li>
 </ul>
     In the actual input file, these parameters may be given in any desired order,
     and more than one may be given per line. Spaces are used to separate values
     and additional spaces are ignored. <br>
     An as example of input, the parameter for length scales is called
-    <a href="../../input_variables/generated_files/varbas.html#acell">acell</a>
-    and is an array <a href="../../input_variables/generated_files/varbas.html#acell">acell</a>(3) for
+    <a href="../../input_variables/generated_files/basic.html#acell">acell</a>
+    and is an array <a href="../../input_variables/generated_files/basic.html#acell">acell</a>(3) for
     the lengths of the primitive translations in Bohr atomic
     units. To input a typical Si diamond lattice one would have the line
     <p>
@@ -251,12 +251,12 @@
     the needed numbers will be considered, and the eventual numbers after those
     needed will also be ignored. For example,
     <p>
-    <code><a href="../../input_variables/generated_files/varbas.html#natom">natom</a> 3 # This gives
+    <code><a href="../../input_variables/generated_files/basic.html#natom">natom</a> 3 # This gives
     the number of atoms <br>
-    <a href="../../input_variables/generated_files/varbas.html#typat">typat</a> 1 1 2 2 3 # typat(1:natom)
+    <a href="../../input_variables/generated_files/basic.html#typat">typat</a> 1 1 2 2 3 # typat(1:natom)
     gives the type of each atom : only <br>
     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#
-    the first three data are read, since <a href="../../input_variables/generated_files/varbas.html#natom">natom</a>=3
+    the first three data are read, since <a href="../../input_variables/generated_files/basic.html#natom">natom</a>=3
     </code><br>
     <p>
     A given variable is identified by the parser by having at least one blank
@@ -279,7 +279,7 @@
     Additional text, not preceded by a "#" or a "!" would not otherwise
     cause trouble unless the text inadvertently contained character
     strings which were the same as variable names
-     (e.g. <a href="../../input_variables/generated_files/varbas.html#acell">acell</a>).
+     (e.g. <a href="../../input_variables/generated_files/basic.html#acell">acell</a>).
     The characters "#" or "!" can also be used to "store" old values
     of variables or place anything else of convenience into the file
     in such a way as to be
@@ -333,7 +333,7 @@
     Indeed, it should be <i>easy to set up the geometry of systems with less than
     20-40 atoms without this geometry builder</i>. Even for larger systems, its
     functionalities could eventually be of no help. For a step-to-step description
-    of this geometry builder, look at the variable '<a href="../../input_variables/generated_files/vargeo.html#nobj">nobj</a>'.
+    of this geometry builder, look at the variable '<a href="../../input_variables/generated_files/geo.html#nobj">nobj</a>'.
     The related input variables being used for preprocessing of the input file, they are not echoed
     in the output file.
   </p>
@@ -344,7 +344,7 @@
     to generate the symmetry operations from the knowledge of the number of the
     space group according to the international crystallographic tables. The indication
     '<b>SYMMETRISER</b>' is given for the variables related to its use. Look at
-    the variable '<a href="../../input_variables/generated_files/vargeo.html#spgroup">spgroup</a>'.
+    the variable '<a href="../../input_variables/generated_files/geo.html#spgroup">spgroup</a>'.
     <br>
     You may find in the space group <a href="../spacegrouphelpfile.html">help file</a>
     the crystallographic equivalence of the parameters belonging to the symmetriser.
@@ -357,7 +357,7 @@
     Note that the default tolerance on the coordinates that are provided
     by the user, for a symmetry to be recognized, is on the order of 1.e-8 . If the
     provided coordinates are rather inaccurate, ABINIT will not recognize the symmetry,
-    unless the input variable <a href="../../input_variables/generated_files/vargeo.html#tolsym">tolsym</a>
+    unless the input variable <a href="../../input_variables/generated_files/geo.html#tolsym">tolsym</a>
     is changed.</p>
   <a name="NO_MULTI"></a>
   <p>Most of the variables can be used in the multi-dataset mode (see
@@ -423,16 +423,16 @@
       acell 3*10 Bohr  ecut 270 eV  tsmear 0.01
   </pre>
     The use of the atomic units is mandatory for other dimensioned input variables, like
-    the tolerance on forces (<a href="../../input_variables/generated_files/varbas.html#toldff">toldff</a>),
+    the tolerance on forces (<a href="../../input_variables/generated_files/basic.html#toldff">toldff</a>),
     parameters that define an 'object' (<a href="../../input_variables/generated_files/vargeo.html#objaax" target="kwimg">objaax, objbax</a>, 
     <a href="../../input_variables/generated_files/vargeo.html#objatr" target="kwimg">objatr, objbtr</a>),
-    and the initial velocity of atoms (<a href="../../input_variables/generated_files/varrlx.html#vel">vel</a>
+    and the initial velocity of atoms (<a href="../../input_variables/generated_files/rlx.html#vel">vel</a>
     - if needed). </p>
-  <p>The initial atomic positions can be input in Bohr or Angstrom through '<a href="../../input_variables/generated_files/varbas.html#xcart">xcart</a>',
-    but also, independently, in Angstrom through '<a href="../../input_variables/generated_files/varbas.html#xangst">xangst</a>',
-    or even in reduced coordinates, through '<a href="../../input_variables/generated_files/varbas.html#xred">xred</a>'.
+  <p>The initial atomic positions can be input in Bohr or Angstrom through '<a href="../../input_variables/generated_files/basic.html#xcart">xcart</a>',
+    but also, independently, in Angstrom through '<a href="../../input_variables/generated_files/basic.html#xangst">xangst</a>',
+    or even in reduced coordinates, through '<a href="../../input_variables/generated_files/basic.html#xred">xred</a>'.
     Reduced cartesian coordinates must be used for the eventual translations accompanying
-    symmetry operations (<a href="../../input_variables/generated_files/varbas.html#tnons">tnons</a>).
+    symmetry operations (<a href="../../input_variables/generated_files/basic.html#tnons">tnons</a>).
   </p>
 
   <p><a name="chkexit">In addition to giving the input variables</a>,
@@ -440,7 +440,7 @@
      for another purpose : placing the word "<b>exit</b>" on the top line
      will cause the job to
      end smoothly on the very next iteration, if the
-     <a href="../../input_variables/generated_files/vargs.html#chkexit">chkexit</a> input variable is non-zero.  This functions because
+     <a href="../../input_variables/generated_files/gstate.html#chkexit">chkexit</a> input variable is non-zero.  This functions because
      the program closes and reopens the input file on every iteration
      and checks the top line for the keyword "exit".  THE WORD MUST BE
      PLACED WITH SPACES (BLANKS) ON BOTH SIDES.  Thus placing exit on the top
@@ -472,17 +472,17 @@
   <p>For that purpose, the <b>multi-dataset mode</b> has been implemented. </p>
   <p>It allows the code to treat, in one run, different sets of data, and to chain
     them. The number of datasets to be treated is specified by the variable
-    <a href="../../input_variables/generated_files/varbas.html#ndtset">ndtset</a>,
+    <a href="../../input_variables/generated_files/basic.html#ndtset">ndtset</a>,
     while the indices of the datasets (by default 1, 2, 3,
-    and so on) can be eventually provided by the array <a href="../../input_variables/generated_files/varbas.html#jdtset">jdtset</a>.
+    and so on) can be eventually provided by the array <a href="../../input_variables/generated_files/basic.html#jdtset">jdtset</a>.
   </p>
   <p>For each dataset to be treated, characterized by some index, each input variable
     will determined by the following <b>rules</b> (actually, it is easier to understand
     when one looks at examples, see below) : </p>
   <ul>
     <li> (<a name="ref8_1"></a>1) ABINIT looks whether the variable name (e.g.
-      <a href="../../input_variables/generated_files/varbas.html#ecut">ecut</a> ), appended with the
-      index of the dataset (e.g. <a href="../../input_variables/generated_files/varbas.html#jdtset">jdtset</a>=2),
+      <a href="../../input_variables/generated_files/basic.html#ecut">ecut</a> ), appended with the
+      index of the dataset (e.g. <a href="../../input_variables/generated_files/basic.html#jdtset">jdtset</a>=2),
       exists (e.g. "ecut2" ) . It
       will take the data that follows this keyword, if it exists.</li>
     <li> (<a name="ref8_2"></a>2) If this modified variable name does not exist,
@@ -575,33 +575,33 @@ keyword.
   is equivalent to
   <pre>    ndtset 6 ecut: 10 ecut+ 5
 </pre>
-  <p>In both cases, there are six datasets, with increasing values of <a href="../../input_variables/generated_files/varbas.html#ecut">ecut</a>.
+  <p>In both cases, there are six datasets, with increasing values of <a href="../../input_variables/generated_files/basic.html#ecut">ecut</a>.
   </p>
   <h4>&nbsp; </h4>
 
 <h4><a name="loop"></a>3.5. Defining a double loop dataset </h4>
   <p>To define a double loop dataset, one has first to define the upper limit
-    of two loop counters, thanks to the variable <a href="../../input_variables/generated_files/varbas.html#udtset">udtset</a>.
-    The inner loop will execute from 1 to <a href="../../input_variables/generated_files/varbas.html#udtset">udtset</a>(2),
-    and the outer loop will execute from 1 to <a href="../../input_variables/generated_files/varbas.html#udtset">udtset</a>(1).
-    Note that the largest value for <a href="../../input_variables/generated_files/varbas.html#udtset">udtset</a>(1) is presently 999,
-    while it is 9 for <a href="../../input_variables/generated_files/varbas.html#udtset">udtset</a>(2) (so, only the last digit for the inner loop). </p>
-  <p>The value of <a href="../../input_variables/generated_files/varbas.html#ndtset">ndtset</a> must
-    be coherent with <a href="../../input_variables/generated_files/varbas.html#udtset">udtset</a> (it
+    of two loop counters, thanks to the variable <a href="../../input_variables/generated_files/basic.html#udtset">udtset</a>.
+    The inner loop will execute from 1 to <a href="../../input_variables/generated_files/basic.html#udtset">udtset</a>(2),
+    and the outer loop will execute from 1 to <a href="../../input_variables/generated_files/basic.html#udtset">udtset</a>(1).
+    Note that the largest value for <a href="../../input_variables/generated_files/basic.html#udtset">udtset</a>(1) is presently 999,
+    while it is 9 for <a href="../../input_variables/generated_files/basic.html#udtset">udtset</a>(2) (so, only the last digit for the inner loop). </p>
+  <p>The value of <a href="../../input_variables/generated_files/basic.html#ndtset">ndtset</a> must
+    be coherent with <a href="../../input_variables/generated_files/basic.html#udtset">udtset</a> (it
     must equal the product <code>udtset(1)*udtset(2)</code> ). </p>
   <p>A dataset index is created by the concatenation of the outer loop index and
     the inner loop index. <br>
-    For example, if <a href="../../input_variables/generated_files/varbas.html#udtset">udtset</a>(1)
-    is 2 and <a href="../../input_variables/generated_files/varbas.html#udtset">udtset</a>(2) is 4,
+    For example, if <a href="../../input_variables/generated_files/basic.html#udtset">udtset</a>(1)
+    is 2 and <a href="../../input_variables/generated_files/basic.html#udtset">udtset</a>(2) is 4,
     the index will assume the following values : <code>11, 12, 13, 14, 21, 22,
     23, and 24</code>.
-  <p> Independently of the use of <a href="../../input_variables/generated_files/varbas.html#udtset">udtset</a>,
+  <p> Independently of the use of <a href="../../input_variables/generated_files/basic.html#udtset">udtset</a>,
     rules (2a) and (2c) will be used to define the value of an input variable: </p>
   <p><a name="ref8_2a"></a>(2a) The question mark "<b>?</b>" can be used as a
     metacharacter, replacing any digit from 1 to 9, to define an index of a dataset.
     <br>
     For example, <b>ecut?</b>1 means that the input value that follows it can
-    be used for <a href="../../input_variables/generated_files/varbas.html#ecut">ecut</a> for the datasets
+    be used for <a href="../../input_variables/generated_files/basic.html#ecut">ecut</a> for the datasets
     <code>01, 11, 21, 31, 41, 51, 61, 71, 81, and 91</code>. </p>
   <p><a name="ref8_2c"></a>(2c) If the variable name appended with the index of
     the dataset does not exist, the code looks whether a double-loop series has
@@ -652,23 +652,23 @@ keyword.
     and so on) will receive an appendix : '<b>_DS</b>' followed by the index of
     the dataset. See <a href="#4">section 4</a>. </p>
   <p><a name="get">The '<b>get</b>' variables</a> can be used to chain the calculations. </p>
-  <p>Until now, there are eight of them : <a href="../../input_variables/generated_files/varfil.html#getwfk">getwfk</a>,
-    <a href="../../input_variables/generated_files/varfil.html#getwfq">getwfq</a>, <a href="../../input_variables/generated_files/varfil.html#getddk">getddk</a>,
-    <a href="../../input_variables/generated_files/varfil.html#get1wf">get1wf</a>, <a href="../../input_variables/generated_files/varfil.html#getden">getden</a>,
-    <a href="../../input_variables/generated_files/varrlx.html#getcell">getcell</a>, <a href="../../input_variables/generated_files/varrlx.html#getxred">getxred</a>
-    and <a href="../../input_variables/generated_files/varrlx.html#getxcart">getxcart</a>.</p>
+  <p>Until now, there are eight of them : <a href="../../input_variables/generated_files/files.html#getwfk">getwfk</a>,
+    <a href="../../input_variables/generated_files/files.html#getwfq">getwfq</a>, <a href="../../input_variables/generated_files/files.html#getddk">getddk</a>,
+    <a href="../../input_variables/generated_files/files.html#get1wf">get1wf</a>, <a href="../../input_variables/generated_files/files.html#getden">getden</a>,
+    <a href="../../input_variables/generated_files/rlx.html#getcell">getcell</a>, <a href="../../input_variables/generated_files/rlx.html#getxred">getxred</a>
+    and <a href="../../input_variables/generated_files/rlx.html#getxcart">getxcart</a>.</p>
   <p>
   <ul>
-    <li><a href="../../input_variables/generated_files/varfil.html#getwfk">getwfk</a> allows to take
+    <li><a href="../../input_variables/generated_files/files.html#getwfk">getwfk</a> allows to take
       the output wavefunctions of a previous dataset and use them as input wavefunctions
-    <li> <a href="../../input_variables/generated_files/varfil.html#getwfq">getwfq</a>, <a href="../../input_variables/generated_files/varfil.html#getddk">getddk</a>
-      and <a href="../../input_variables/generated_files/varfil.html#get1wf">get1wf</a> do similar things
+    <li> <a href="../../input_variables/generated_files/files.html#getwfq">getwfq</a>, <a href="../../input_variables/generated_files/files.html#getddk">getddk</a>
+      and <a href="../../input_variables/generated_files/files.html#get1wf">get1wf</a> do similar things
       for response function calculations
-    <li><a href="../../input_variables/generated_files/varfil.html#getden">getden</a> does the same
-      for the density ; <a href="../../input_variables/generated_files/varrlx.html#getcell">getcell</a>
-      does the same for <a href="../../input_variables/generated_files/varbas.html#acell">acell</a>
-      and <a href="../../input_variables/generated_files/varbas.html#rprim">rprim</a>
-    <li><a href="../../input_variables/generated_files/varrlx.html#getxred">getxred</a> and <a href="../../input_variables/generated_files/varrlx.html#getxcart">getxcart</a>
+    <li><a href="../../input_variables/generated_files/files.html#getden">getden</a> does the same
+      for the density ; <a href="../../input_variables/generated_files/rlx.html#getcell">getcell</a>
+      does the same for <a href="../../input_variables/generated_files/basic.html#acell">acell</a>
+      and <a href="../../input_variables/generated_files/basic.html#rprim">rprim</a>
+    <li><a href="../../input_variables/generated_files/rlx.html#getxred">getxred</a> and <a href="../../input_variables/generated_files/rlx.html#getxcart">getxcart</a>
       do the same for the atomic positions, either in reduced coordinates, or
       in cartesian coordinates.
   </ul>
@@ -718,15 +718,15 @@ keyword.
     <li>
       <p><b>abi_WFK</b> <br>
         filename of file containing input wavefunction coefficients created from
-        an earlier run (with <a href="../../input_variables/generated_files/vargs.html#nqpt">nqpt</a>=0).
-        Will be opened and read if <a href="../../input_variables/generated_files/varfil.html#irdwfk">irdwfk</a>
+        an earlier run (with <a href="../../input_variables/generated_files/gstate.html#nqpt">nqpt</a>=0).
+        Will be opened and read if <a href="../../input_variables/generated_files/files.html#irdwfk">irdwfk</a>
         is 1 . The wavefunction file is unformatted and can be very large.
         <b>Warning</b> : in the multi dataset mode, if getwfk is non-zero, a wavefunction
         file build from <b>abo</b> will be read. </p>
     <li>
       <p><b>abi_WFQ</b> <br>
         filename of file containing input wavefunction coefficients created from
-        an earlier run (with <a href="../../input_variables/generated_files/vargs.html#nqpt">nqpt</a>=1),
+        an earlier run (with <a href="../../input_variables/generated_files/gstate.html#nqpt">nqpt</a>=1),
         as needed for response function calculations.
         The wavefunction file is unformatted and can be very large.
         <b>Warning</b> : in the multi dataset mode, if getwfk is non-zero, a wavefunction
@@ -738,7 +738,7 @@ keyword.
     <li>
       <p><b>abi_DEN</b> <br>
         filename of file containing density created from an earlier run. See explanations
-        related to negative values of <a href="../../input_variables/generated_files/varbas.html#iscf">iscf</a>.
+        related to negative values of <a href="../../input_variables/generated_files/basic.html#iscf">iscf</a>.
         This file is also unformatted.
         <b>Warning</b> : in the multi dataset mode, if getwfk is non-zero, a density
         file build from <b>abo</b> will be read.</p>
@@ -746,7 +746,7 @@ keyword.
       <p><b>abi_HES</b> <br>
         filename of file containing an approximate hessian, for eventual (re)initialisation
         of Broyden minimisation. See brdmin.F90 routine.
-        The use of <a href="../../input_variables/generated_files/varrlx.html#restartxf">restartxf</a>
+        The use of <a href="../../input_variables/generated_files/rlx.html#restartxf">restartxf</a>
         is preferred.</p>
   </ul>
   <p><b>abo</b> <br>
@@ -763,11 +763,11 @@ keyword.
   <ul>
     <li>
       <p><b>abo_WFK</b> <br>
-        Filename of file containing output wavefunction coefficients, if <a href="../../input_variables/generated_files/vargs.html#nqpt">nqpt</a>=0.
+        Filename of file containing output wavefunction coefficients, if <a href="../../input_variables/generated_files/gstate.html#nqpt">nqpt</a>=0.
         The wavefunction file is unformatted and can be very large. </p>
     <li>
       <p><b>abo_WFQ</b> <br>
-        Same as <b>abo_WFK</b>, but for the case <a href="../../input_variables/generated_files/vargs.html#nqpt">nqpt</a>=1.
+        Same as <b>abo_WFK</b>, but for the case <a href="../../input_variables/generated_files/gstate.html#nqpt">nqpt</a>=1.
         The wavefunctions are always output, either with the name <b>abo_WFK</b>,
         or with the name <b>abo_WFQ</b>. </p>
     <li>
@@ -782,53 +782,53 @@ keyword.
         <a href="../../users/generated_files/help_respfn.html#">respfn help file</a>
     <li>
       <p><b>abo_DEN</b> <br>
-        filename of file containing density, in the case <a href="../../input_variables/generated_files/varrlx.html#ionmov">ionmov</a>=0.
-        See the keyword <a href="../../input_variables/generated_files/varfil.html#prtden">prtden</a>.
+        filename of file containing density, in the case <a href="../../input_variables/generated_files/rlx.html#ionmov">ionmov</a>=0.
+        See the keyword <a href="../../input_variables/generated_files/files.html#prtden">prtden</a>.
         This file is unformatted, but can be read by cut3d. </p>
     <li>
       <p><b>abo_TIMx_DEN</b> <br>
-        filenames of files containing density, in the case <a href="../../input_variables/generated_files/varrlx.html#ionmov">ionmov</a>/=0.
+        filenames of files containing density, in the case <a href="../../input_variables/generated_files/rlx.html#ionmov">ionmov</a>/=0.
         The value of "x" after "<b>TIM</b>" is described hereafter. See the keyword
-        <a href="../../input_variables/generated_files/varfil.html#prtden">prtden</a>. This file is
+        <a href="../../input_variables/generated_files/files.html#prtden">prtden</a>. This file is
         unformatted, but can be read by cut3d. </p>
     <li>
       <p><b>abo_POT</b> <br>
-        filename of file containing Kohn-Sham potential See the keyword <a href="../../input_variables/generated_files/varfil.html#prtpot">prtpot</a>.
+        filename of file containing Kohn-Sham potential See the keyword <a href="../../input_variables/generated_files/files.html#prtpot">prtpot</a>.
         This file is unformatted, but can be read by cut3d. </p>
     <li>
       <p><b>abo_TIMx_POT</b> <br>
-        filenames of files containing Kohn-Sham potential in the case <a href="../../input_variables/generated_files/varrlx.html#ionmov">ionmov</a>/=0.
-        The value of "x" after "TIM" is described hereafter. See the keyword <a href="../../input_variables/generated_files/varfil.html#prtpot">prtpot</a>.
+        filenames of files containing Kohn-Sham potential in the case <a href="../../input_variables/generated_files/rlx.html#ionmov">ionmov</a>/=0.
+        The value of "x" after "TIM" is described hereafter. See the keyword <a href="../../input_variables/generated_files/files.html#prtpot">prtpot</a>.
         This file is unformatted, but can be read by cut3d. </p>
     <li>
       <p><b>abo_DOS</b> <br>
         filename of file containing density of states. See the keyword
-        <a href="../../input_variables/generated_files/varfil.html#prtdos">prtdos</a>. This file is
+        <a href="../../input_variables/generated_files/files.html#prtdos">prtdos</a>. This file is
         formatted. </p>
     <li>
       <p><b>abo_TIMx_DOS</b> <br>
         filenames of files containing the density of states
-        in the case  <a href="../../input_variables/generated_files/varfil.html#prtdos">prtdos</a>=2
-        and <a href="../../input_variables/generated_files/varrlx.html#ionmov">ionmov</a>=1
+        in the case  <a href="../../input_variables/generated_files/files.html#prtdos">prtdos</a>=2
+        and <a href="../../input_variables/generated_files/rlx.html#ionmov">ionmov</a>=1
         or 2. The value of "x" after "TIM" is described hereafter. See also the
-        keyword <a href="../../input_variables/generated_files/varfil.html#prtdos">prtdos</a>. This
+        keyword <a href="../../input_variables/generated_files/files.html#prtdos">prtdos</a>. This
         file is formatted. </p>
     <li>
       <p><b>abo_GEO</b> <br>
         filename of file containing the geometrical analysis (bond lengths and
-        bond angles) in the case <a href="../../input_variables/generated_files/varrlx.html#ionmov">ionmov</a>=0.
-        See the keyword <a href="../../input_variables/generated_files/varfil.html#prtgeo">prtgeo</a>.
+        bond angles) in the case <a href="../../input_variables/generated_files/rlx.html#ionmov">ionmov</a>=0.
+        See the keyword <a href="../../input_variables/generated_files/files.html#prtgeo">prtgeo</a>.
         This file is formatted. </p>
     <li>
       <p><b>abo_TIMx_GEO</b> <br>
         filenames of files containing the geometrical analysis (bond lengths and
-        bond angles) in the case <a href="../../input_variables/generated_files/varrlx.html#ionmov">ionmov</a>=1
+        bond angles) in the case <a href="../../input_variables/generated_files/rlx.html#ionmov">ionmov</a>=1
         or 2. The value of "x" after "TIM" is described hereafter. See also the
-        keyword <a href="../../input_variables/generated_files/varfil.html#prtgeo">prtgeo</a>. This
+        keyword <a href="../../input_variables/generated_files/files.html#prtgeo">prtgeo</a>. This
         file is formatted. </p>
     <li>
       <p><b>abo_KSS</b> <br>
-        filename of file containing output wavefunction coefficients, if <a href="../../input_variables/generated_files/vargw.html#nbandkss">nbandkss</a>/=0.
+        filename of file containing output wavefunction coefficients, if <a href="../../input_variables/generated_files/gw.html#nbandkss">nbandkss</a>/=0.
         This wavefunction file is unformatted and can be very large.
         Its purpose is to start a GW calculation using M.Torrent's code.
         A different format than for <b>abo_WFK</b> is used, see the file ~abinit/doc/developers/format_KSS.txt .</p>
@@ -836,17 +836,17 @@ keyword.
       <p><b>abo_EIG</b> <br>
         A file containing the electronic eigenvalues, for subsequent plotting of band structure.</p>
   </ul>
-  <p>When <a href="../../input_variables/generated_files/varrlx.html#ionmov">ionmov</a>/=0,
+  <p>When <a href="../../input_variables/generated_files/rlx.html#ionmov">ionmov</a>/=0,
     the <b>POT</b>, <b>DEN</b>, or <b>GEO</b> files are output
     each time that a SCF cycle is finished. The "<b>x</b>" of <b>TIMx</b> aims
     at giving each of these files a different name. It is attributed as follows:<br>
     - case ionmov==1 : there is an initialization phase, that takes 4 calls
     to the SCF calculation. The value of x will be A, B, C, and D. Then, x will
     be 1, 2, 3 ... , actually in agreement with the value of itime (see the keyword
-    <a href="../../input_variables/generated_files/varrlx.html#ntime">ntime</a>) <br>
+    <a href="../../input_variables/generated_files/rlx.html#ntime">ntime</a>) <br>
     - other ionmov cases : the initialisation phase take only one SCF call.
     The value of x will be 0 for that call. Then, the value of x is 1, 2, 3 ...
-    in agreement with the value of itime (see the keyword <a href="../../input_variables/generated_files/varrlx.html#ntime">ntime</a>)
+    in agreement with the value of itime (see the keyword <a href="../../input_variables/generated_files/rlx.html#ntime">ntime</a>)
   </p>
   <p><b>tmp</b> <br>
     The temporary files created by the codes will have a name that is constructed
@@ -967,11 +967,11 @@ keyword.
     <li>the ratio between linear dimension of the FFT box and the sphere of plane
       waves, called "<b>boxcut</b>". <br>
       It must be above 2 for exact treatment of convolutions by FFT.
-      <a href="../../input_variables/generated_files/vargs.html#ngfft">ngfft</a>
+      <a href="../../input_variables/generated_files/gstate.html#ngfft">ngfft</a>
       has been automatically chosen to give a boxcut value larger than 2, but
       not much larger, since more CPU time is needed for larger FFT grids; </li>
     <li> the code also mention that for the same FFT grid you might treat (slightly)
-      larger <a href="../../input_variables/generated_files/varbas.html#ecut">ecut</a>
+      larger <a href="../../input_variables/generated_files/basic.html#ecut">ecut</a>
       (so, with a rather small increase of CPU time) </li>
     <li>the heading for each pseudopotential which has been input
     <li>from the inwffil subroutine, a description of the wavefunction initialization
@@ -1000,16 +1000,16 @@ keyword.
       (maxfor, in Hartree).<br>
       <i>The latter two are directly related to forces on each atom.</i>
     <li>Then comes an assessment of the SCF convergence : the criterion for fulfillment
-      of the SCF criterion (defined by <a href="../../input_variables/generated_files/varbas.html#toldfe">toldfe</a>,
-      <a href="../../input_variables/generated_files/varbas.html#toldff">toldff</a>, <a href="../../input_variables/generated_files/varbas.html#tolwfr">tolwfr</a>
-      or <a href="../../input_variables/generated_files/varbas.html#tolvrs">tolvrs</a>) might be satisfied
+      of the SCF criterion (defined by <a href="../../input_variables/generated_files/basic.html#toldfe">toldfe</a>,
+      <a href="../../input_variables/generated_files/basic.html#toldff">toldff</a>, <a href="../../input_variables/generated_files/basic.html#tolwfr">tolwfr</a>
+      or <a href="../../input_variables/generated_files/basic.html#tolvrs">tolvrs</a>) might be satisfied
       or not ...
     <li>Then the stresses are reported.
   </ul>
   <p>This ends the content of a fixed atomic position calculation. </p>
   <p>Many such blocks can follow. </p>
   <p>When the atomic positions have been eventually relaxed, according to the
-    value of <a href="../../input_variables/generated_files/varrlx.html#ntime">ntime</a>, the code output
+    value of <a href="../../input_variables/generated_files/rlx.html#ntime">ntime</a>, the code output
     more information:
   <ul>
     <li>The squared residuals for each band are reported, k point by k point.
@@ -1021,7 +1021,7 @@ keyword.
       of any force component (<b>max</b>).
     <li>Next are the length scales of the unit cell in Bohr and in Angstroms.
     <li>Next are the eigenvalues of each band for each k point, in eV or Hartree
-      or both depending on the choice of <a href="../../input_variables/generated_files/vargs.html#enunit">enunit</a>. <br>
+      or both depending on the choice of <a href="../../input_variables/generated_files/gstate.html#enunit">enunit</a>. <br>
       <a name="averagepot"> NOTE </a>
       that the average electrostatic potential of a periodically repeated
       cell is UNDEFINED. <br>
@@ -1065,8 +1065,8 @@ keyword.
   </ul>
   <p>Having finished all the calculations for the different datasets, the code
     echoes the parameters listed in the input file, using the latest values e.g.
-    for <a href="../../input_variables/generated_files/varbas.html#xred">xred</a>, <a href="../../input_variables/generated_files/varrlx.html#vel">vel</a>,
-    and <a href="../../input_variables/generated_files/varbas.html#xcart">xcart</a>, and supplement
+    for <a href="../../input_variables/generated_files/basic.html#xred">xred</a>, <a href="../../input_variables/generated_files/rlx.html#vel">vel</a>,
+    and <a href="../../input_variables/generated_files/basic.html#xcart">xcart</a>, and supplement
     them with the values obtained for the total energy, the forces and stresses,
     as well as occupation numbers. <br>
     The latter echoes are very convenient for a quick look at the result of calculation
@@ -1098,7 +1098,7 @@ keyword.
     share, and the sum of the times for the principal time-consuming subroutine
     calls will not make 90% of the run time.. </p>
   <p></p>
-  <p>If the long printing option has been selected (<a href="../../input_variables/generated_files/varfil.html#prtvol">prtvol</a>=1),
+  <p>If the long printing option has been selected (<a href="../../input_variables/generated_files/files.html#prtvol">prtvol</a>=1),
     the code gives much more information in the whole output file. These should
     be rather self-explanatory, usually. Some need more explanation. <br>
     In particular the cpu and wall times for major subroutines which are NOT independent
@@ -1132,7 +1132,7 @@ keyword.
     unformatted disk file, echoing a header to a formatted disk file, cleaning
     a header datastructure.
     <p>
-    The header is made of 4+<a href="../../input_variables/generated_files/varbas.html#ntypat">ntypat</a> unformatted records,
+    The header is made of 4+<a href="../../input_variables/generated_files/basic.html#ntypat">ntypat</a> unformatted records,
     obtained by the following Fortran90 instructions (format 5.7):
   <pre>
  write(unit=header) codvsn,headform,fform
@@ -1227,14 +1227,14 @@ enddo
   where <b>rhor</b> is the electron density in electrons/Bohr^3, and cplex
   is the number of complex components of the density (cplex=1 for
   GS calculations -the density is real-, and cplex=1 or 2 for RF).
-  The input variable <a href="../../input_variables/generated_files/vargs.html#nspden">nspden</a>
+  The input variable <a href="../../input_variables/generated_files/gstate.html#nspden">nspden</a>
   describes the number of components of the density.
   The first component (the only one present when
-  <a href="../../input_variables/generated_files/vargs.html#nspden">nspden</a>=1) is always the total
+  <a href="../../input_variables/generated_files/gstate.html#nspden">nspden</a>=1) is always the total
   charge density. When
-  <a href="../../input_variables/generated_files/vargs.html#nspden">nspden</a>=2, the second
+  <a href="../../input_variables/generated_files/gstate.html#nspden">nspden</a>=2, the second
   component is the density associated with spin-up electrons. When
-  <a href="../../input_variables/generated_files/vargs.html#nspden">nspden</a>=4, the
+  <a href="../../input_variables/generated_files/gstate.html#nspden">nspden</a>=4, the
   second, third and fourth components correspond to the x, y and z projections
   of the local magnetization, in units of hbar/2 .
   Note that the meaning of the different components
@@ -1245,22 +1245,22 @@ enddo
     The first array value (ir=1) corresponds with the first grid point which is
     at the origin of the unit cell, (x=0, y=0, z=0). <br>
     The next grid point (ir=2) lies along the first primitive translation at the
-    next fft grid point, which is (1/<a href="../../input_variables/generated_files/vargs.html#ngfft">ngfft</a>(1))*<a href="../../input_variables/generated_files/varbas.html#acell">acell</a>(1)*<a href="../../input_variables/generated_files/varbas.html#rprim">rprim</a>(mu,1).
-    This is 1/<a href="../../input_variables/generated_files/vargs.html#ngfft">ngfft</a>(1) of the
+    next fft grid point, which is (1/<a href="../../input_variables/generated_files/gstate.html#ngfft">ngfft</a>(1))*<a href="../../input_variables/generated_files/basic.html#acell">acell</a>(1)*<a href="../../input_variables/generated_files/basic.html#rprim">rprim</a>(mu,1).
+    This is 1/<a href="../../input_variables/generated_files/gstate.html#ngfft">ngfft</a>(1) of the
     way along the first primitive translation. <br>
-    The rest of the values up to ir=<a href="../../input_variables/generated_files/vargs.html#ngfft">ngfft</a>(1)
-    lie along this vector, at (ir-1)/<a href="../../input_variables/generated_files/vargs.html#ngfft">ngfft</a>(1)
-    of the way along the first primitive translation. The point at ir=<a href="../../input_variables/generated_files/vargs.html#ngfft">ngfft</a>(1)+1
-    lies at 1/<a href="../../input_variables/generated_files/vargs.html#ngfft">ngfft</a>(2) along the
+    The rest of the values up to ir=<a href="../../input_variables/generated_files/gstate.html#ngfft">ngfft</a>(1)
+    lie along this vector, at (ir-1)/<a href="../../input_variables/generated_files/gstate.html#ngfft">ngfft</a>(1)
+    of the way along the first primitive translation. The point at ir=<a href="../../input_variables/generated_files/gstate.html#ngfft">ngfft</a>(1)+1
+    lies at 1/<a href="../../input_variables/generated_files/gstate.html#ngfft">ngfft</a>(2) along the
     second primitive translation. <br>
-    The next points up to ir=<a href="../../input_variables/generated_files/vargs.html#ngfft">ngfft</a>(1)+<a href="../../input_variables/generated_files/vargs.html#ngfft">ngfft</a>(1)
-    are displaced in the direction of the second primitive translation by 1/<a href="../../input_variables/generated_files/vargs.html#ngfft">ngfft</a>(2)
-    and in the first translation by (ir-<a href="../../input_variables/generated_files/vargs.html#ngfft">ngfft</a>(1)-1)/<a href="../../input_variables/generated_files/vargs.html#ngfft">ngfft</a>(1).
+    The next points up to ir=<a href="../../input_variables/generated_files/gstate.html#ngfft">ngfft</a>(1)+<a href="../../input_variables/generated_files/gstate.html#ngfft">ngfft</a>(1)
+    are displaced in the direction of the second primitive translation by 1/<a href="../../input_variables/generated_files/gstate.html#ngfft">ngfft</a>(2)
+    and in the first translation by (ir-<a href="../../input_variables/generated_files/gstate.html#ngfft">ngfft</a>(1)-1)/<a href="../../input_variables/generated_files/gstate.html#ngfft">ngfft</a>(1).
     <br>
-    This pattern continues until ir=<a href="../../input_variables/generated_files/vargs.html#ngfft">ngfft</a>(1)*<a href="../../input_variables/generated_files/vargs.html#ngfft">ngfft</a>(2).
+    This pattern continues until ir=<a href="../../input_variables/generated_files/gstate.html#ngfft">ngfft</a>(1)*<a href="../../input_variables/generated_files/gstate.html#ngfft">ngfft</a>(2).
     <br>
     The next point after that is displaced along the third primitive translation
-    by 1/ngfft(3), and so forth until ir varies all the way from 1 to <a href="../../input_variables/generated_files/vargs.html#ngfft">ngfft</a>(1)*<a href="../../input_variables/generated_files/vargs.html#ngfft">ngfft</a>(2)*<a href="../../input_variables/generated_files/vargs.html#ngfft">ngfft</a>(3).
+    by 1/ngfft(3), and so forth until ir varies all the way from 1 to <a href="../../input_variables/generated_files/gstate.html#ngfft">ngfft</a>(1)*<a href="../../input_variables/generated_files/gstate.html#ngfft">ngfft</a>(2)*<a href="../../input_variables/generated_files/gstate.html#ngfft">ngfft</a>(3).
     This last point is in the corner diagonally opposite from the origin, or right
     alongside the origin if the whole grid is viewed as being periodically repeated.
   <p>&nbsp;</p>
@@ -1275,19 +1275,19 @@ enddo
 </pre>
   <p>where <b>potential</b> can be either
     the sum of the Hartree potential, exchange-correlation
-    and local pseudopotential (see <a href="../../input_variables/generated_files/varfil.html#prtpot">prtpot</a>),
-    the Hartree potential (see <a href="../../input_variables/generated_files/varfil.html#prtvha">prtvha</a>),
-    the Hartree+XC potential (see <a href="../../input_variables/generated_files/varfil.html#prtvhxc">prtvhxc</a>),
-    the local pseudopotential (see <a href="../../input_variables/generated_files/varfil.html#prtvpsp">prtvpsp</a>)
+    and local pseudopotential (see <a href="../../input_variables/generated_files/files.html#prtpot">prtpot</a>),
+    the Hartree potential (see <a href="../../input_variables/generated_files/files.html#prtvha">prtvha</a>),
+    the Hartree+XC potential (see <a href="../../input_variables/generated_files/files.html#prtvhxc">prtvhxc</a>),
+    the local pseudopotential (see <a href="../../input_variables/generated_files/files.html#prtvpsp">prtvpsp</a>)
     or
-    the XC potential (see <a href="../../input_variables/generated_files/varfil.html#prtvxc">prtvxc</a>),
+    the XC potential (see <a href="../../input_variables/generated_files/files.html#prtvxc">prtvxc</a>),
     These are defined
     on the real space grid in Hartree energy units.
     The underlying grid is as described above.
-    If <a href="../../input_variables/generated_files/vargs.html#nspden">nspden</a>=2, the
+    If <a href="../../input_variables/generated_files/gstate.html#nspden">nspden</a>=2, the
     different components are the spin-up potential and the
     spin-down potential. In the case
-    <a href="../../input_variables/generated_files/vargs.html#nspden">nspden</a>=4,
+    <a href="../../input_variables/generated_files/gstate.html#nspden">nspden</a>=4,
     the components correspond to the up-up potential, the down-down potential,
     the real part of the up-down potential, and the imaginary part of the up-down potential.
     Note that the Hartree potential is NOT spin-dependent, but in order
@@ -1367,7 +1367,7 @@ while the planewave coordinate record was not present (in both GS and RF cases).
 
 <p> Note that there is an alternative format (_KSS) for the output
 of the wavefunction coefficients, activated by a non-zero
-value of <a href="../../input_variables/generated_files/vargw.html#nbandkss">nbandkss</a>.
+value of <a href="../../input_variables/generated_files/gw.html#nbandkss">nbandkss</a>.
 
   <p>&nbsp;
   <p><b><a name="other_output"></a>6.8. Other output files.</b>
@@ -1412,18 +1412,18 @@ See src/95_drive/iofn1.F90 for more explanation.
     and the numerical quality of calculations.
   <p>The list of these input parameters is
   <ul>
-    <li><a href="#ref11_1">(1)</a> <a href="../../input_variables/generated_files/varbas.html#ecut">ecut</a>
-    <li><a href="#ref11_2">(2)</a> <a href="../../input_variables/generated_files/varbas.html#toldfe">toldfe</a>,
-      <a href="../../input_variables/generated_files/varbas.html#toldff">toldff</a>, <a href="../../input_variables/generated_files/varbas.html#tolwfr">tolwfr</a>,
-      and <a href="../../input_variables/generated_files/varbas.html#tolvrs">tolvrs</a>, as well as
-      <a href="../../input_variables/generated_files/varbas.html#nstep">nstep</a>
-    <li><a href="#ref11_3">(3)</a> <a href="../../input_variables/generated_files/varbas.html#nkpt">nkpt</a>
-    <li><a href="#ref11_4">(4)</a> <a href="../../input_variables/generated_files/vargs.html#ngfft">ngfft</a>
-    <li><a href="#ref11_5">(5)</a> <a href="../../input_variables/generated_files/varrlx.html#tolmxf">tolmxf</a>,
-      as well as <a href="../../input_variables/generated_files/varrlx.html#amu">amu</a>, <a href="../../input_variables/generated_files/varrlx.html#dtion">dtion</a>,
-      <a href="../../input_variables/generated_files/varrlx.html#vis">vis</a>, <a href="../../input_variables/generated_files/varrlx.html#ntime">ntime</a>
-    <li><a href="#ref11_6">(6)</a> <a href="../../input_variables/generated_files/varbas.html#acell">acell</a>
-      and <a href="../../input_variables/generated_files/varbas.html#rprim">rprim</a>
+    <li><a href="#ref11_1">(1)</a> <a href="../../input_variables/generated_files/basic.html#ecut">ecut</a>
+    <li><a href="#ref11_2">(2)</a> <a href="../../input_variables/generated_files/basic.html#toldfe">toldfe</a>,
+      <a href="../../input_variables/generated_files/basic.html#toldff">toldff</a>, <a href="../../input_variables/generated_files/basic.html#tolwfr">tolwfr</a>,
+      and <a href="../../input_variables/generated_files/basic.html#tolvrs">tolvrs</a>, as well as
+      <a href="../../input_variables/generated_files/basic.html#nstep">nstep</a>
+    <li><a href="#ref11_3">(3)</a> <a href="../../input_variables/generated_files/basic.html#nkpt">nkpt</a>
+    <li><a href="#ref11_4">(4)</a> <a href="../../input_variables/generated_files/gstate.html#ngfft">ngfft</a>
+    <li><a href="#ref11_5">(5)</a> <a href="../../input_variables/generated_files/rlx.html#tolmxf">tolmxf</a>,
+      as well as <a href="../../input_variables/generated_files/rlx.html#amu">amu</a>, <a href="../../input_variables/generated_files/rlx.html#dtion">dtion</a>,
+      <a href="../../input_variables/generated_files/rlx.html#vis">vis</a>, <a href="../../input_variables/generated_files/rlx.html#ntime">ntime</a>
+    <li><a href="#ref11_6">(6)</a> <a href="../../input_variables/generated_files/basic.html#acell">acell</a>
+      and <a href="../../input_variables/generated_files/basic.html#rprim">rprim</a>
   </ul>
   <br>
   The technical design of the pseudopotential also affects the quality of the
@@ -1434,22 +1434,22 @@ See src/95_drive/iofn1.F90 for more explanation.
     of planewaves in the basis for a given set of atoms. Some atoms (notably those
     in the first row or first transition series row) have relatively deep pseudopotentials
     which require many planewaves for convergence. In contrast are atoms like
-    Si for which fewer planewaves are needed. A typical value of <a href="../../input_variables/generated_files/varbas.html#ecut">ecut</a>
+    Si for which fewer planewaves are needed. A typical value of <a href="../../input_variables/generated_files/basic.html#ecut">ecut</a>
     for silicon might be 5-10 Hartree for quite good convergence, while the value
     for oxygen might be 25-35 Hartree or more depending on the convergence desired
     and the design of the pseudo- potential.
   <p>NOTE: It is necessary in every new problem to <b>TEST</b> the convergence
-    by <b>RAISING</b> <a href="../../input_variables/generated_files/varbas.html#ecut">ecut</a> for
+    by <b>RAISING</b> <a href="../../input_variables/generated_files/basic.html#ecut">ecut</a> for
     a given calculation until the results being computed are constant to within
     some tolerance. This is up to the user and is very important. For a given
-    <a href="../../input_variables/generated_files/varbas.html#acell">acell</a> and <a href="../../input_variables/generated_files/varbas.html#rprim">rprim</a>,
-    <a href="../../input_variables/generated_files/varbas.html#ecut">ecut</a> is the parameter which
-    controls the number of planewaves. Of course if <a href="../../input_variables/generated_files/varbas.html#rprim">rprim</a>
-    or <a href="../../input_variables/generated_files/varbas.html#acell">acell</a> is varied then the
+    <a href="../../input_variables/generated_files/basic.html#acell">acell</a> and <a href="../../input_variables/generated_files/basic.html#rprim">rprim</a>,
+    <a href="../../input_variables/generated_files/basic.html#ecut">ecut</a> is the parameter which
+    controls the number of planewaves. Of course if <a href="../../input_variables/generated_files/basic.html#rprim">rprim</a>
+    or <a href="../../input_variables/generated_files/basic.html#acell">acell</a> is varied then the
     number of planewaves will also change.
   <p>Let us reiterate that extremely careful pseudopotential design can optimize
     the convergence of <i>e.g.</i> the total energy within some range of planewave
-    number or <a href="../../input_variables/generated_files/varbas.html#ecut">ecut</a>. It is appropriate
+    number or <a href="../../input_variables/generated_files/basic.html#ecut">ecut</a>. It is appropriate
     to attempt to optimize this convergence, especially for difficult atoms like
     oxygen or copper, as long as one does not significantly compromise the quality
     or transferability of the pseudopotential. There are many people working on
@@ -1464,12 +1464,12 @@ See src/95_drive/iofn1.F90 for more explanation.
   <p><a name="ref11_2"></a>(2) In addition to achieving convergence in the number
     of planewaves in the basis, one must ensure that the SCF iterations which
     solve the electronic structure for a given set of atomic coordinates are also
-    converged. This convergence is controlled by the parameters <a href="../../input_variables/generated_files/varbas.html#toldfe">toldfe</a>,
-    <a href="../../input_variables/generated_files/varbas.html#toldff">toldff</a>, <a href="../../input_variables/generated_files/varbas.html#tolwfr">tolwfr</a>,
-    and <a href="../../input_variables/generated_files/varbas.html#tolvrs">tolvrs</a>, as well as the
-    parameter <a href="../../input_variables/generated_files/varbas.html#nstep">nstep</a>. One of the
+    converged. This convergence is controlled by the parameters <a href="../../input_variables/generated_files/basic.html#toldfe">toldfe</a>,
+    <a href="../../input_variables/generated_files/basic.html#toldff">toldff</a>, <a href="../../input_variables/generated_files/basic.html#tolwfr">tolwfr</a>,
+    and <a href="../../input_variables/generated_files/basic.html#tolvrs">tolvrs</a>, as well as the
+    parameter <a href="../../input_variables/generated_files/basic.html#nstep">nstep</a>. One of the
     "tolerance" parameters must be chosen, and, when the required level of tolerance
-    is fulfilled, the SCF cycles will stop. The <a href="../../input_variables/generated_files/varbas.html#nstep">nstep</a>
+    is fulfilled, the SCF cycles will stop. The <a href="../../input_variables/generated_files/basic.html#nstep">nstep</a>
     variable also controls convergence in preconditioned conjugate gradient iterations
     by forcing the calculation to stop whenever the number of such iterations
     exceeds nstep. Usually one wants nstep to be set larger than needed to reach
@@ -1483,14 +1483,14 @@ See src/95_drive/iofn1.F90 for more explanation.
     such a closure.
 
 
-  <p><a name="ref11_3"></a>(3) For self consistent calculations (<a href="../../input_variables/generated_files/varbas.html#iscf">iscf</a>
+  <p><a name="ref11_3"></a>(3) For self consistent calculations (<a href="../../input_variables/generated_files/basic.html#iscf">iscf</a>
     positive) it is important to test the adequacy of the k point integration.
     If symmetry is used then one usually tests a set of "special point" grids.
     Otherwise one tests the addition of more and more k points, presumably on
     uniform grids, to ensure that a sufficient number has been included for good
     k point integration. The parameter nkpt indicates how many k points are being
     used, and their coordinates are given by kpt and kptnrm, described above.
-    The weight given to each k point is provided by input variable <a href="../../input_variables/generated_files/varbas.html#wtk">wtk</a>.
+    The weight given to each k point is provided by input variable <a href="../../input_variables/generated_files/basic.html#wtk">wtk</a>.
     Systematic tests of k point integration are much more difficult than tests
     of the adequacy of the number of planewaves. The difficulty I refer to is
     simply the lack of a very systematic method for generating k point grids for
@@ -1502,38 +1502,38 @@ See src/95_drive/iofn1.F90 for more explanation.
     of the fft box side to the planewave basis sphere diameter. If this ratio
     is 2 or larger then e.g. the calculation of the Hartree potential from the
     charge density is done without approximation. <br>
-    NOTE : the values of <a href="../../input_variables/generated_files/vargs.html#ngfft">ngfft</a>(1:3)
-    are chosen automatically by the code to give boxcut > 2, if <a href="../../input_variables/generated_files/vargs.html#ngfft">ngfft</a>
+    NOTE : the values of <a href="../../input_variables/generated_files/gstate.html#ngfft">ngfft</a>(1:3)
+    are chosen automatically by the code to give boxcut > 2, if <a href="../../input_variables/generated_files/gstate.html#ngfft">ngfft</a>
     has not been set by hand. At ratios smaller than 2, certain of the highest
     Fourier components are corrupted in the convolution. If the basis is nearly
     complete, this Fourier filter can be an excellent approximation. In this case
     values of boxcut can be as small as about 1.5 without incurring significant
-    error. For a given <a href="../../input_variables/generated_files/varbas.html#ecut">ecut</a>, <a href="../../input_variables/generated_files/varbas.html#acell">acell</a>,
-    and <a href="../../input_variables/generated_files/varbas.html#rprim">rprim</a>, one should run
-    tests for which <a href="../../input_variables/generated_files/vargs.html#ngfft">ngfft</a> is large
-    enough to give boxcut >= 2, and then one may try smaller values of <a href="../../input_variables/generated_files/vargs.html#ngfft">ngfft</a>
+    error. For a given <a href="../../input_variables/generated_files/basic.html#ecut">ecut</a>, <a href="../../input_variables/generated_files/basic.html#acell">acell</a>,
+    and <a href="../../input_variables/generated_files/basic.html#rprim">rprim</a>, one should run
+    tests for which <a href="../../input_variables/generated_files/gstate.html#ngfft">ngfft</a> is large
+    enough to give boxcut >= 2, and then one may try smaller values of <a href="../../input_variables/generated_files/gstate.html#ngfft">ngfft</a>
     if the results are not significantly altered. See the descriptions of these
     variables above.
   <p><a name="ref11_5"></a>(5) If you are running calculations to relax or equilibrate
-    structures, i.e. with <a href="../../input_variables/generated_files/varrlx.html#ionmov">ionmov</a>=1
-    and possibly <a href="../../input_variables/generated_files/varrlx.html#vis">vis</a>>0, then the
+    structures, i.e. with <a href="../../input_variables/generated_files/rlx.html#ionmov">ionmov</a>=1
+    and possibly <a href="../../input_variables/generated_files/rlx.html#vis">vis</a>>0, then the
     quality of your molecular dynamics or relaxation will be affected by the parameters
-    <a href="../../input_variables/generated_files/varrlx.html#amu">amu</a>, <a href="../../input_variables/generated_files/varrlx.html#dtion">dtion</a>,
-    <a href="../../input_variables/generated_files/varrlx.html#vis">vis</a>, <a href="../../input_variables/generated_files/varrlx.html#ntime">ntime</a>,
-    <a href="../../input_variables/generated_files/varrlx.html#tolmxf">tolmxf</a>. Clearly if you want
+    <a href="../../input_variables/generated_files/rlx.html#amu">amu</a>, <a href="../../input_variables/generated_files/rlx.html#dtion">dtion</a>,
+    <a href="../../input_variables/generated_files/rlx.html#vis">vis</a>, <a href="../../input_variables/generated_files/rlx.html#ntime">ntime</a>,
+    <a href="../../input_variables/generated_files/rlx.html#tolmxf">tolmxf</a>. Clearly if you want
     a relaxed structure you must either run long enough or make repeated runs
     until the largest force in the problem (output as fmax) is smaller than what
-    you will tolerate (see <a href="../../input_variables/generated_files/varrlx.html#tolmxf">tolmxf</a>).
+    you will tolerate (see <a href="../../input_variables/generated_files/rlx.html#tolmxf">tolmxf</a>).
     <br>
-    If <a href="../../input_variables/generated_files/varrlx.html#dtion">dtion</a> is too large for
-    the given values of masses (<a href="../../input_variables/generated_files/varrlx.html#amu">amu</a>)
-    and viscosity (<a href="../../input_variables/generated_files/varrlx.html#vis">vis</a>) then the
-    molecular dynamics will be unstable. If <a href="../../input_variables/generated_files/varrlx.html#dtion">dtion</a>
+    If <a href="../../input_variables/generated_files/rlx.html#dtion">dtion</a> is too large for
+    the given values of masses (<a href="../../input_variables/generated_files/rlx.html#amu">amu</a>)
+    and viscosity (<a href="../../input_variables/generated_files/rlx.html#vis">vis</a>) then the
+    molecular dynamics will be unstable. If <a href="../../input_variables/generated_files/rlx.html#dtion">dtion</a>
     is too small, then the molecular dynamics will move inefficiently slowly.
     A consensus exists in the community that forces larger than about 0.1 eV/Angstrom
     are really too large to consider the relaxation to be converged. It is best
     for the user to get experience with this in his/her own application. <br>
-    The option <a href="../../input_variables/generated_files/varrlx.html#ionmov">ionmov</a>=2, 3 or
+    The option <a href="../../input_variables/generated_files/rlx.html#ionmov">ionmov</a>=2, 3 or
     7 are also available This uses the Broyden (BFGS) scheme for structural optimization
     and is much more efficient than viscous damping for structural relaxation.
   <p><a name="ref11_6"></a>(6) If you are running supercell calculations (i.e.
@@ -1542,7 +1542,7 @@ See src/95_drive/iofn1.F90 for more explanation.
     to the supercell and system size.
   <ul>
     <li>For an isolated molecule in a big box : increase concurrently the three
-      dimensions of your supercell (<a href="../../input_variables/generated_files/varbas.html#acell">acell</a>),
+      dimensions of your supercell (<a href="../../input_variables/generated_files/basic.html#acell">acell</a>),
       and check the convergence of your physical property.
     <li>For a defect in a solid : your supercell must be a multiple of the primitive
       cell of the bulk solid, so you have less freedom. Still, be sure that your

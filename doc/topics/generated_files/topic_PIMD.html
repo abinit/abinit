@@ -39,16 +39,16 @@ At each time step, a ground state DFT calculation is performed for each image. P
 <p>
 <p>PIMD in ABINIT follows the set of numerical schemes developed by several authors in the 90's <a href="../../bibliography/generated_files/bibliography.html#Marx1996">[Marx1996]</a>,<a href="../../bibliography/generated_files/bibliography.html#Tuckerman1996">[Tuckerman1996]</a>. 
 PIMD in the canonical ensemble needs specific thermostats to ensure that the trajectories are ergodic:
-the Nose-Hoover chains are implemented, as well as the Langevin thermostat (controlled by the value of <a href="../../input_variables/generated_files/varrlx.html#imgmov">imgmov</a>).
-Also, it is possible to use coordinate transformations (staging and normal mode), that are controlled by the keyword <a href="../../input_variables/generated_files/varrlx.html#pitransform">pitransform</a>.
+the Nose-Hoover chains are implemented, as well as the Langevin thermostat (controlled by the value of <a href="../../input_variables/generated_files/rlx.html#imgmov">imgmov</a>).
+Also, it is possible to use coordinate transformations (staging and normal mode), that are controlled by the keyword <a href="../../input_variables/generated_files/rlx.html#pitransform">pitransform</a>.
 In standard equilibrium PIMD, only static observables are relevant (quantum time-correlation functions are not accessible): the
-masses associated to the motion of the beads are controlled by the keyword <a href="../../input_variables/generated_files/varrlx.html#pimass">pimass</a>, whereas the true masses of the atoms
-are given by <a href="../../input_variables/generated_files/varrlx.html#amu">amu</a>. The values given in <a href="../../input_variables/generated_files/varrlx.html#pimass">pimass</a> are used to fix the so-called fictitious masses <a href="../../bibliography/generated_files/bibliography.html#Marx1996">[Marx1996]</a>. In the case
+masses associated to the motion of the beads are controlled by the keyword <a href="../../input_variables/generated_files/rlx.html#pimass">pimass</a>, whereas the true masses of the atoms
+are given by <a href="../../input_variables/generated_files/rlx.html#amu">amu</a>. The values given in <a href="../../input_variables/generated_files/rlx.html#pimass">pimass</a> are used to fix the so-called fictitious masses <a href="../../bibliography/generated_files/bibliography.html#Marx1996">[Marx1996]</a>. In the case
 where a coordinate transformation is used, the fictitious masses are automatically fixed in the code to match the so-called
 staging masses or normal mode masses. 
-The number of time steps of the trajectory is controlled by <a href="../../input_variables/generated_files/varrlx.html#ntimimage">ntimimage</a>, the initial and thermostat temperature by <a href="../../input_variables/generated_files/varrlx.html#mdtemp">mdtemp</a>.
+The number of time steps of the trajectory is controlled by <a href="../../input_variables/generated_files/rlx.html#ntimimage">ntimimage</a>, the initial and thermostat temperature by <a href="../../input_variables/generated_files/rlx.html#mdtemp">mdtemp</a>.
 Except if specified, the images in the initial configuration are assumed to be at the same position, and a random distribution
-of velocities is applied (governed by <a href="../../input_variables/generated_files/varrlx.html#mdtemp">mdtemp</a>) to start the dynamics.
+of velocities is applied (governed by <a href="../../input_variables/generated_files/rlx.html#mdtemp">mdtemp</a>) to start the dynamics.
 
 <p>
 <p>At each time step, ABINIT delivers in the output file: 
@@ -56,7 +56,7 @@ of velocities is applied (governed by <a href="../../input_variables/generated_f
 <li>(ii) the instantaneous temperature, the instantaneous energy as given by 
 the primitive and virial estimators, and the pressure tensor as given by the primitive estimator.</li>
 <p>
-<p>The number of images (keyword <a href="../../input_variables/generated_files/varrlx.html#nimage">nimage</a>) is associated to a specific parallelization level (keyword <a href="../../input_variables/generated_files/varpar.html#npimage">npimage</a>).
+<p>The number of images (keyword <a href="../../input_variables/generated_files/rlx.html#nimage">nimage</a>) is associated to a specific parallelization level (keyword <a href="../../input_variables/generated_files/paral.html#npimage">npimage</a>).
 
 <p>
 <p>PIMD has been used with ABINIT to reproduce the large isotope effect on the phase transition between phase I and phase II of
@@ -72,33 +72,33 @@ PIMD in the NPT ensemble is not available yet.
 <h3><b>2. Related input variables.</b></h3>
 
 
-<p>Compulsory input variables:<p>... <a href="../../input_variables/generated_files/varrlx.html#dtion">dtion</a>   [Delta Time for IONs]<br>
-... <a href="../../input_variables/generated_files/varrlx.html#imgmov">imgmov</a>   [IMaGe MOVEs]<br>
-... <a href="../../input_variables/generated_files/varrlx.html#mdtemp">mdtemp</a>   [Molecular Dynamics TEMPeratures]<br>
-... <a href="../../input_variables/generated_files/varrlx.html#nimage">nimage</a>   [Number of IMAGEs]<br>
-... <a href="../../input_variables/generated_files/varrlx.html#ntimimage">ntimimage</a>   [Number of TIME steps for IMAGE propagation]<br>
-<p>Basic input variables:<p>... <a href="../../input_variables/generated_files/varrlx.html#nnos">nnos</a>   [Number of NOSe masses]<br>
-... <a href="../../input_variables/generated_files/varrlx.html#optcell">optcell</a>   [OPTimize the CELL shape and dimensions]<br>
-... <a href="../../input_variables/generated_files/varrlx.html#qmass">qmass</a>   [Q thermostat MASS]<br>
-... <a href="../../input_variables/generated_files/varrlx.html#vis">vis</a>   [VIScosity]<br>
-<p>Useful input variables:<p>... <a href="../../input_variables/generated_files/varrlx.html#amu">amu</a>   [Atomic Mass Units]<br>
-... <a href="../../input_variables/generated_files/varrlx.html#iatcon">iatcon</a>   [Indices of AToms in CONstraint equations]<br>
-... <a href="../../input_variables/generated_files/varrlx.html#natcon">natcon</a>   [Number of AToms in CONstraint equations]<br>
-... <a href="../../input_variables/generated_files/varrlx.html#nconeq">nconeq</a>   [Number of CONstraint EQuations]<br>
-... <a href="../../input_variables/generated_files/varpar.html#npimage">npimage</a>   [Number of Processors at the IMAGE level]<br>
-... <a href="../../input_variables/generated_files/varrlx.html#pimass">pimass</a>   [Path Integral fictitious MASSes]<br>
-... <a href="../../input_variables/generated_files/varrlx.html#pimd_constraint">pimd_constraint</a>   [Path-Integral Molecular Dynamics: CONSTRAINT to be applied on a reaction coordinate]<br>
-... <a href="../../input_variables/generated_files/varrlx.html#pitransform">pitransform</a>   [Path Integral coordinate TRANSFORMation]<br>
-... <a href="../../input_variables/generated_files/varrlx.html#restartxf">restartxf</a>   [RESTART from (X,F) history]<br>
-... <a href="../../input_variables/generated_files/varrlx.html#vel">vel</a>   [VELocity]<br>
-... <a href="../../input_variables/generated_files/varrlx.html#wtatcon">wtatcon</a>   [WeighTs for AToms in CONstraint equations]<br>
-<p>Relevant internal variables:<p>... <a href="../../input_variables/generated_files/varint.html#ndynimage">%ndynimage</a>   [Number of DYNamical IMAGEs]<br>
-<p>Input variables for experts:<p>... <a href="../../input_variables/generated_files/varrlx.html#adpimd">adpimd</a>   [ADiabatic Path-Integral Molecular Dynamics]<br>
-... <a href="../../input_variables/generated_files/varrlx.html#adpimd_gamma">adpimd_gamma</a>   [ADiabatic Path-Integral Molecular Dynamics: GAMMA factor]<br>
-... <a href="../../input_variables/generated_files/varrlx.html#dynimage">dynimage</a>   [DYNamics of the IMAGE]<br>
-... <a href="../../input_variables/generated_files/vardev.html#irandom">irandom</a>   [Integer for the choice of the RANDOM number generator]<br>
-... <a href="../../input_variables/generated_files/varrlx.html#istatimg">istatimg</a>   [Integer governing the computation of STATic IMaGes]<br>
-... <a href="../../input_variables/generated_files/varrlx.html#vel_cell">vel_cell</a>   [VELocity of the CELL parameters]<br>
+<p>Compulsory input variables:<p>... <a href="../../input_variables/generated_files/rlx.html#dtion">dtion</a>   [Delta Time for IONs]<br>
+... <a href="../../input_variables/generated_files/rlx.html#imgmov">imgmov</a>   [IMaGe MOVEs]<br>
+... <a href="../../input_variables/generated_files/rlx.html#mdtemp">mdtemp</a>   [Molecular Dynamics TEMPeratures]<br>
+... <a href="../../input_variables/generated_files/rlx.html#nimage">nimage</a>   [Number of IMAGEs]<br>
+... <a href="../../input_variables/generated_files/rlx.html#ntimimage">ntimimage</a>   [Number of TIME steps for IMAGE propagation]<br>
+<p>Basic input variables:<p>... <a href="../../input_variables/generated_files/rlx.html#nnos">nnos</a>   [Number of NOSe masses]<br>
+... <a href="../../input_variables/generated_files/rlx.html#optcell">optcell</a>   [OPTimize the CELL shape and dimensions]<br>
+... <a href="../../input_variables/generated_files/rlx.html#qmass">qmass</a>   [Q thermostat MASS]<br>
+... <a href="../../input_variables/generated_files/rlx.html#vis">vis</a>   [VIScosity]<br>
+<p>Useful input variables:<p>... <a href="../../input_variables/generated_files/rlx.html#amu">amu</a>   [Atomic Mass Units]<br>
+... <a href="../../input_variables/generated_files/rlx.html#iatcon">iatcon</a>   [Indices of AToms in CONstraint equations]<br>
+... <a href="../../input_variables/generated_files/rlx.html#natcon">natcon</a>   [Number of AToms in CONstraint equations]<br>
+... <a href="../../input_variables/generated_files/rlx.html#nconeq">nconeq</a>   [Number of CONstraint EQuations]<br>
+... <a href="../../input_variables/generated_files/paral.html#npimage">npimage</a>   [Number of Processors at the IMAGE level]<br>
+... <a href="../../input_variables/generated_files/rlx.html#pimass">pimass</a>   [Path Integral fictitious MASSes]<br>
+... <a href="../../input_variables/generated_files/rlx.html#pimd_constraint">pimd_constraint</a>   [Path-Integral Molecular Dynamics: CONSTRAINT to be applied on a reaction coordinate]<br>
+... <a href="../../input_variables/generated_files/rlx.html#pitransform">pitransform</a>   [Path Integral coordinate TRANSFORMation]<br>
+... <a href="../../input_variables/generated_files/rlx.html#restartxf">restartxf</a>   [RESTART from (X,F) history]<br>
+... <a href="../../input_variables/generated_files/rlx.html#vel">vel</a>   [VELocity]<br>
+... <a href="../../input_variables/generated_files/rlx.html#wtatcon">wtatcon</a>   [WeighTs for AToms in CONstraint equations]<br>
+<p>Relevant internal variables:<p>... <a href="../../input_variables/generated_files/internal.html#ndynimage">%ndynimage</a>   [Number of DYNamical IMAGEs]<br>
+<p>Input variables for experts:<p>... <a href="../../input_variables/generated_files/rlx.html#adpimd">adpimd</a>   [ADiabatic Path-Integral Molecular Dynamics]<br>
+... <a href="../../input_variables/generated_files/rlx.html#adpimd_gamma">adpimd_gamma</a>   [ADiabatic Path-Integral Molecular Dynamics: GAMMA factor]<br>
+... <a href="../../input_variables/generated_files/rlx.html#dynimage">dynimage</a>   [DYNamics of the IMAGE]<br>
+... <a href="../../input_variables/generated_files/dev.html#irandom">irandom</a>   [Integer for the choice of the RANDOM number generator]<br>
+... <a href="../../input_variables/generated_files/rlx.html#istatimg">istatimg</a>   [Integer governing the computation of STATic IMaGes]<br>
+... <a href="../../input_variables/generated_files/rlx.html#vel_cell">vel_cell</a>   [VELocity of the CELL parameters]<br>
 
 
 &nbsp; 
