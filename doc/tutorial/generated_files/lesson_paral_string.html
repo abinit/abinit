@@ -149,8 +149,7 @@ and
 used to keep fixed the positions of the O and N atoms. The
 cell is tetragonal and its size is larger along <span style="font-style: italic;">x</span>
 so that the periodic images of the system are separated by 4.0 &#196; of
-vacuum in the three directions. The keyword <a href="../../input_variables/generated_files/vargs.html#charge" target="_blank">charge
-</a>is used to
+vacuum in the three directions. The keyword <a href="../../input_variables/generated_files/varset_gstate.html#charge">charge</a> is used to
 remove an
 electron of the system and thus obtain a protonated molecule
 (neutrality is recovered by adding a uniform compensating charge
@@ -159,9 +158,7 @@ background). <br>
 The exchange-correlation functional uses the external
 library <span style="font-style: italic;">libxc</span>.
 You have to compile ABINIT using the <span style="font-style: italic;">libxc</span> plugin (if
-not, simply replace <a href="../../input_variables/generated_files/varbas.html#ixc" target="_blank">ixc
-</a>-001009 by <a href="../../input_variables/generated_files/varset_basic.html#ixc">ixc</a>
-7). This input file has to be
+not, simply replace <a href="../../input_variables/generated_files/varset_basic.html#ixc">ixc</a>=-001009 by <a href="../../input_variables/generated_files/varset_basic.html#ixc">ixc</a> 7). This input file has to be
 run in parallel using 20 CPU cores. You might use the <span style="color: rgb(204, 0, 0);">tstring.files</span>
 file.
 Edit it and adapt it with the appropriate file names.<br>
@@ -264,8 +261,7 @@ method</span>.&nbsp;</p>
 <p>Open the&nbsp;<span style="color: rgb(204, 0, 0);">tstring_03.in</span>
 file
 and look at it. The initial and final configurations are specified at
-the end through the keywords <a href="../../input_variables/generated_files/varset_basic.html#xangst">xangst</a>
-and <a href="../../input_variables/generated_files/varrlx.html#nimage" target="_blank">xangst_lastimg</a>.
+the end through the keywords [[xangst] and <a href="../../input_variables/generated_files/varset_rlx.html#nimage">xangst_lastimg</a>.
 By default,
 ABINIT generates the intermediate images by a linear interpolation
 between these two configurations. In this first calculation, we will
@@ -399,10 +395,7 @@ to 0.00001 and recompute the MEP. To gain CPU time, you can start your
 calculation by using the 12 images obtained at the end of the
 calculation that used <a href="../../input_variables/generated_files/varset_rlx.html#tolimg">tolimg</a>=0.0001.
 In your input file, these starting images will be specified by the
-keywords <a href="../../input_variables/generated_files/varset_basic.html#xangst">xangst</a>,
-<a href="../../input_variables/generated_files/varrlx.html#nimage" target="_blank">xangst_2img</a>,
-<a href="../../input_variables/generated_files/varrlx.html#nimage" target="_blank">xangst_3img</a>,
-... <a href="../../input_variables/generated_files/varrlx.html#nimage">xangst_12img</a>.
+keywords <a href="../../input_variables/generated_files/varset_basic.html#xangst">xangst</a>, <a href="../../input_variables/generated_files/varset_rlx.html#nimage">xangst_2img</a>, <a href="../../input_variables/generated_files/varset_rlx.html#nimage">xangst_3img</a> ... <a href="../../input_variables/generated_files/varset_rlx.html#nimage">xangst_12img</a>.
 You can copy them directly from the output file obtained at the
 previous section. The graph below superimposes the path obtained with 12 images and <a href="../../input_variables/generated_files/varset_rlx.html#tolimg">tolimg</a>=0.001 (red curve) and the one with 12 images and <a href="../../input_variables/generated_files/varset_rlx.html#tolimg">tolimg</a>=0.0001 (black curve).<br>
 <div style="text-align: center;"><img style="width: 705px; height: 545px;" alt="image" src="../documents/lesson_paral_string/curve3.png" hspace="100"><br></div><small><span style="font-style: italic;">Total energy as a function of OH distance for the path computed with 12 images and tolimg=0.0001 (black curve) and the one </span></small><small><span style="font-style: italic;">computed with 12 images and tolimg=0.001 (red curve).<br></span></small>

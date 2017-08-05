@@ -66,10 +66,8 @@ body : |
   variables:<br>
   </p>
   <ul>
-    <li><a href="../../input_variables/generated_files/varbas.html#nsppol" target="kwimg"><span style="text-decoration: underline;">nsppol</span></a><br>
-    </li>
-    <li><a href="../../input_variables/generated_files/vargs.html#spinat" target="kwimg"><span style="text-decoration: underline;">spinat</span></a><br>
-    </li>
+    <li>[[nsppol]]</li>
+    <li>[[spinat]]</li>
   </ul>
   Please, read their description in the help file.
   <br>
@@ -371,8 +369,7 @@ body : |
   <ul>
     <li>[[natsph]]</li>
     <li>[[iatsph]]</li>
-    <li><a href="../../input_variables/generated_files/vargs.html#ratsph" target="kwimg">ratsph<br>
-      </a></li>
+    <li>[[ratsph]]</li>
   </ul>
   <br>
   This will specify the atoms around which the calculation will be

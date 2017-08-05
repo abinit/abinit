@@ -403,8 +403,8 @@ body : |
     </pre>
       The use of the atomic units is mandatory for other dimensioned input variables, like
       the tolerance on forces ([[toldff]]),
-      parameters that define an 'object' (<a href="../../input_variables/generated_files/vargeo.html#objaax" target="kwimg">objaax, objbax</a>, 
-      <a href="../../input_variables/generated_files/vargeo.html#objatr" target="kwimg">objatr, objbtr</a>),
+      parameters that define an 'object' ([[objaax|objaax, objbax]], 
+      [[objatr|objatr, objbtr]]),
       and the initial velocity of atoms ([[vel]]
       - if needed). </p>
     <p>The initial atomic positions can be input in Bohr or Angstrom through '[[xcart]]',

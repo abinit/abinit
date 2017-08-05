@@ -68,10 +68,8 @@ body : |
   1.&nbsp;&nbsp;</b></b>Performing molecular dynamics<b><b> with ABINIT</b></b></h3>
   <br>
   <p style="text-align: justify;">There are different algorithms to do molecular dynamics.
-    See the input variable "<a href="../../input_variables/generated_files/varrlx.html#ionmov" target="kwimg" onclick="return (false);">ionmov</a>",
-    with values 1, 6, 7, 8, 9, 12, 13 and 14.<span style="text-decoration: underline;"></span><a href="../../input_variables/generated_files/varrlx.html#dtion" onclick="return (false);"><br>
-  </a></p>
-  [[dtion]] controls the ion time steps&nbsp;in
+    See the input variable [[ionmov]],
+    with values 1, 6, 7, 8, 9, 12, 13 and 14.  [[dtion]] controls the ion time steps&nbsp;in
   atomic units of time (one atomic time unit is
   2.418884e-17 seconds, which is the value of
   Planck's constant in hartree*sec). The default value is 100. You should try several values
@@ -96,7 +94,8 @@ body : |
   
   Open the <span style="color: red;">tmoldyn_01.in</span><span style="color: rgb(204, 0, 0);"></span>
   file and look at it carefully. The
-  unit cell is defined at the end. It is a <span style="font-weight: bold;">2x2x2 fcc supercell</span> containing 32 atoms of Al. <a href="../../input_variables/generated_files/varrlx.html#ionmov" target="kwimg" onclick="return (false);">ionmov</a> is&nbsp;set to 12 for the isokinetic ensemble, and since&nbsp;[[ntime]] is set to 50, ABINIT
+  unit cell is defined at the end. It is a <span style="font-weight: bold;">2x2x2 fcc supercell</span> containing 32 atoms of Al. 
+  [[ionmov]] is&nbsp;set to 12 for the isokinetic ensemble, and since&nbsp;[[ntime]] is set to 50, ABINIT
   will carry on 50 time steps of molecular dynamics. The calculation will
   be performed for a temperature of 3000 K, see the key variable [[mdtemp]].<span style="font-weight: bold;"> </span>It
   gives the initial and final temperature in Kelvin of the
@@ -106,7 +105,8 @@ body : |
   the final temperature <b>mdtemp(2)</b> at the end of the
   [[ntime]] timesteps.
   Here the temperature will stay constant during the whole simulation.<br>
-  Note that we use the same temperature for the ions and the electrons : [[occopt]] has been set to 3 for a Fermi-Dirac smearing and [[tsmear]]<a href="../../input_variables/generated_files/vargs.html#tsmear" onclick="return (false);">r</a>
+  Note that we use the same temperature for the ions and the electrons : 
+  [[occopt]] has been set to 3 for a Fermi-Dirac smearing and [[tsmear]]
   has been set to 3000 Kelvin. Nothing prevent you to use different
   electronic and ionic temperature, you just have to know why you are
   doing so!</p>
@@ -115,7 +115,8 @@ body : |
   supercells of hundreds to thousands of atoms. Therefore they are always
   performed in parallel. In <span style="color: red;">tmoldyn_01.in<span style="color: black;">,</span> <span style="color: black;">[[paral_kgb]] has been set to 1 </span></span>to activate the parallelisation over K-points, G-vectors and bands. The three following keywords&nbsp;give
   the number of processors for each level of parallelisation. Since we
-  have only one K-point in the simulation (the gamma point), <a href="../../input_variables/generated_files/varpar.html#npkpt" onclick="return (false);">nkpt</a> has been set to 1. [[npfft]] is set to 3 and [[npband]] to 10, for a total number of 3x10=30 processors.&nbsp;You might use the <span style="color: rgb(204, 0, 0);">tmoldyn.files</span>
+  have only one K-point in the simulation (the gamma point), 
+  [[nkpt]] has been set to 1. [[npfft]] is set to 3 and [[npband]] to 10, for a total number of 3x10=30 processors.&nbsp;You might use the <span style="color: rgb(204, 0, 0);">tmoldyn.files</span>
   file.
   Edit it and adapt it with the appropriate file names.</p>
   <p style="text-align: justify;"><span style="color: black;">Then</span> run the
@@ -169,7 +170,7 @@ body : |
   </b></p>
   <p><b>1.a</b><b> Computing the convergence in K-points</b></p>
   <p style="text-align: justify;">The files <span style="color: red;">tmoldyn_02.in <span style="color: black;">and</span> </span><span style="color: red;">tmoldyn_03.in&nbsp;<span style="color: black;">are input files for 2x2x2 and 3x3x3 K-points grid respectively, or 4 and 14 K-points in the </span></span>irreducible
-  Brillouin zone<span style="color: red;"><span style="color: black;">. Since the parallelisation is the most efficient&nbsp;</span></span>over the k-point level you should always put <a href="../../input_variables/generated_files/varpar.html#npkpt" onclick="return (false);">nkpt</a> to the largest possible value before increasing&nbsp;[[npfft]] and [[npband]]<span style="color: black;">.
+  Brillouin zone<span style="color: red;"><span style="color: black;">. Since the parallelisation is the most efficient&nbsp;</span></span>over the k-point level you should always put [[nkpt]] to the largest possible value before increasing&nbsp;[[npfft]] and [[npband]]<span style="color: black;">.
   We have followed this rule in the input files. Change the name of the
   previous file PRESS&nbsp;to PRESS01 to save it. Run now ABINIT&nbsp;</span>in parallel over <span style="font-weight: bold;">120
   CPU cores</span> with&nbsp;<span style="color: red;">tmoldyn_02.in&nbsp;</span><span style="color: black;"> and</span> over <span style="font-weight: bold;">140

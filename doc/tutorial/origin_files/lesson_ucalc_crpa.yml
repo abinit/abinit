@@ -461,8 +461,7 @@ body : |
   <li> First we see that diagonal interactions are larger than off-diagonal terms, which is logical, because
   electron interaction is larger if electrons are located in the same orbital.
   <li>We recover in these interaction matrix the degeneracy of <i>d</i> orbitals in the cubic symmetry
-  (we remind, as listed in this 
-  <a href="../../input_variables/generated_files/varpaw.html#dmatpawu" target="dmatpawu">page</a>, 
+  (we remind, as listed in [[dmatpawu]],
   that the order of orbitals in ABINIT are xy, yz, z2, xy, x2-y2). 
   <li> We note also
   that the interaction for <i>t<SUB>2g</SUB></i> and <i>e<SUB>g</SUB></i> orbitals are not the same. This effect is 

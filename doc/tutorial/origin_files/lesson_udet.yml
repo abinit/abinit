@@ -14,7 +14,7 @@ body : |
   <ul>
   <li><a href="#0">0.</a> Summary of linear response method to determine U</li>
   <li><a href="#1">1.</a> Determine U in ABINIT</li>
-  <li><a href="#2">2.</a> The ujdet utility  (<a  href="../../input_variables/generated_files/varbas.html#ecut" target="kwimg" >ecut</a>)</li>
+  <li><a href="#2">2.</a> The ujdet utility</li>
   </ul>
   <hr>
   

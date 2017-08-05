@@ -146,8 +146,7 @@ body : |
   kind of computations.  Notice also that the displacements are given using
   [[xcart]],
   that is, explicitly in Cartesian directions, rather than the primitive
-  cell axes (using <a href="../../input_variables/generated_files/varbas.html#xred"
-  target="kwimg">xred</a>).  This makes the correspondence with the
+  cell axes (using [[xred]]).  This makes the correspondence with the
   polarization output in Cartesian directions much simpler to understand.
   
   <p> There are two implementations of the Berry phase
@@ -161,8 +160,7 @@ body : |
   reports them in reduced coordinates).  Second the implementation of Marek
   Veithen is the one to be used for the finite electric field calculation
   as described in the next Section.  Finally, note also that Veithen's
-  implementation works with <a href="../../input_variables/generated_files/varbas.html#kptopt"
-  target="kwimg">kptopt</a> = 1 or 2 while Na Sai implementation is restricted
+  implementation works with [[kptopt]] = 1 or 2 while Na Sai implementation is restricted
   to [[kptopt]]
   = 2, which is less convenient.
   

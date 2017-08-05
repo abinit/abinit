@@ -91,7 +91,7 @@ to obtain the Fermi velocities for the transport calculations in
 </p>
 <p>
 Once these are done, abinit calculates the wave functions on the full grid of
-k-points (using <a href="../../input_variables/generated_files/varbas.html#kptopt">kptopt 3</a>)
+k-points (using <a href="../../input_variables/generated_files/varset_basic.html#kptopt">kptopt</a>=3)
 in DS 6: these will be used to calculate the electron-phonon matrix elements.
 In a full calculation the density of k-points should be increased significantly
 here and for the following datasets.  For DS 1-5 only the normal convergence of
@@ -131,8 +131,7 @@ convergence on your own.
 Edit the file teph_1.in. We now examine several variables.
 The kinetic energy cutoff <a href="../../input_variables/generated_files/varset_basic.html#ecut">ecut</a>
 	is a bit low, and the number of k-points
-(determined by <a href="../../input_variables/generated_files/varbas.html#ngkpt"
-	target="kwimg">ngkpt</a>) is much too low. Electron-phonon calculations
+(determined by <a href="../../input_variables/generated_files/varset_basic.html#ngkpt">ngkpt</a>) is much too low. Electron-phonon calculations
 require a very precise determination of the Fermi surface of the metal. This
 implies a very dense k-point mesh, and the convergence of the grid must be
 checked. In our case, for Al, we will use a (non-shifted) 4x4x4 k-point grid,
