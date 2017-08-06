@@ -37,41 +37,18 @@ and also a bit about preconditioning the SCF cycle.
 <a name="list"></a>
 <h3><b> Fourth (basic) lesson. Table of content:</b></h3>
 
-<ul>
-  <li><a href="#41">4.1.</a>
-    Computing the total energy and lattice parameters of aluminum
-    for a fixed smearing and number of k points.</li>
-  <li><a href="#42">4.2.</a>
-    The convergence study with respect to k points.</li>
-  <li><a href="#43">4.3.</a>
-    The convergence study with respect to both number of k points AND
-    broadening factor (tsmear).</li>
-  <li><a href="#44">4.4.</a>
-    Determination of the surface energy of aluminum (100):
-    changing the orientation of the unit cell.</li>
-  <li><a href="#45">4.5.</a>
-    Determination of the surface energy:
-    a (3 aluminum layer + 1 vacuum layer) slab calculation.</li>
-  <li><a href="#46">4.6.</a>
-    Determination of the surface energy:
-    increasing the number of vacuum layers.</li>
-  <li><a href="#47">4.7.</a>
-    Determination of the surface energy:
-    increasing the number of aluminum layers.</li>
-</ul>
+<ul> 
+  <li><a href="#fixed">1.</a> Total energy and lattice parameters at fixed smearing and k-point grid</li>
+  <li><a href="#conv_wrt_kpt">2.</a> The convergence study with respect to k points</li>
+  <li><a href="#conv_tsmear">3.</a> The convergence study with respect to both number of k points AND broadening factor (tsmear)</li>
+  <li><a href="#surf">4.</a> Surface energy of aluminum (100): changing the orientation of the unit cell</li>
+  <li><a href="#slab">5.</a> Surface energy : a (3 aluminum layer + 1 vacuum layer) slab calculation</li>
+  <li><a href="#vacuum">6.</a> Surface energy: increasing the number of vacuum layers</li>
+  <li><a href="#layers">7.</a> Surface energy: increasing the number of aluminum layers</li>
 
-<hr>
-
-
-
-
-<a name="41">&nbsp;</a>
-<h3><b>
-4.1.
-Computing the total energy and lattice parameters of aluminum
-for a fixed smearing and number of k points.
-</b></h3>
-
+ </ul> 
+ <hr><p><a name="fixed"> </a><br><h3><b>1. Total energy and lattice parameters at fixed smearing and k-point grid</b></h3>
+ <p><a name="41">&nbsp;</a>
 <p><i>Before beginning, you might consider to work in a different
 subdirectory as for lesson 1, 2 or 3 . Why not "Work4" ?
 </i>
@@ -135,15 +112,10 @@ include an entropy term:
  Other information on the energy :
     Total energy(eV)= -5.70889598417024E+01 ; Band energy (Ha)=   3.6059822203E-01
 </pre>
-
+<br><br><a href=#top>Go to the top</a>
 <hr>
-
-<a name="42">&nbsp;</a>
-<h3><b>
-4.2.
-The convergence study with respect to k points
-</b></h3>
-
+<p><a name="conv_wrt_kpt"> </a><br><h3><b>2. The convergence study with respect to k points</b></h3>
+ <p><a name="42">&nbsp;</a>
 <p>There is of course a convergence study associated to the sampling
 of the Brillouin zone. You should examine different grids,
 of increasing resolution. You might try the following series
@@ -183,19 +155,10 @@ to get the convergence with respect to the number of k points, then to compare
 the k-point converged values for different values of <a href="../../input_variables/generated_files/varset_gstate.html#tsmear">tsmear</a>.
 <p>In what follows, we will restrict ourselves to the grids with <a href="../../input_variables/generated_files/varset_basic.html#nkpt">nkpt</a>=2,
   10 and 28.
-
-<p>
-
+<br><br><a href=#top>Go to the top</a>
 <hr>
-
-
-<p> <a name="43">&nbsp;</a>
-<h3><b>
-4.3.
-The convergence study with respect to both number of k points AND
-broadening factor (tsmear).
-</b></h3>
-
+<p><a name="conv_tsmear"> </a><br><h3><b>3. The convergence study with respect to both number of k points AND broadening factor (tsmear)</b></h3>
+ <p><p> <a name="43">&nbsp;</a>
 <p>The theoretical convergence rate for <a href="../../input_variables/generated_files/varset_gstate.html#tsmear">tsmear</a>
   ending to 0, in the case of <a href="../../input_variables/generated_files/varset_basic.html#occopt">occopt</a>=4,
   is quartic. This is obtained in the hypothesis of infinitely dense k point grid.
@@ -275,16 +238,10 @@ different value, of 7.5056 Bohr, that is 3.9718 Angstrom.
            etotal34   -2.0984218116E+00
 </pre>
 <p><b>etotal</b>24 is -2.0979980153E+00 Ha, with an accuracy of 0.0005 Ha .</p>
-
+<br><br><a href=#top>Go to the top</a>
 <hr>
-
-<p> <a name="44">&nbsp;</a> </p>
-<h3><b>
-4.4.
-Determination of the surface energy of aluminum (100):
-changing the orientation of the unit cell.
-</b></h3>
-
+<p><a name="surf"> </a><br><h3><b>4. Surface energy of aluminum (100): changing the orientation of the unit cell</b></h3>
+ <p><p> <a name="44">&nbsp;</a> </p>
 <p>In order to study the Aluminum (100) surface, we will have to set up
 a supercell representing a slab. This supercell should be chosen
 as to be compatible with the primitive surface unit cell.
@@ -331,15 +288,10 @@ valuable intermediate step towards the study of the surface.
   These grids are always homogeneous primitive 3D grids, so that changing the
   orientation of the lattice will give mutually incompatible lattices. Increasing
   the size of the FFT grid would improve the agreement.</p>
-
+<br><br><a href=#top>Go to the top</a>
 <hr>
-
-<p> <a name="45">&nbsp;</a> </p>
-<h3><b>
-4.5.
-Determination of the surface energy :
-a (3 aluminum layer + 1 vacuum layer) slab calculation.
-</b></h3>
+<p><a name="slab"> </a><br><h3><b>5. Surface energy : a (3 aluminum layer + 1 vacuum layer) slab calculation</b></h3>
+ <p><a name="45">&nbsp;</a>
 
 <p>We will first compute the total energy associated with only three layers of
   aluminum, separated by only one layer of vacuum. This is kind of a minimal slab:
@@ -393,17 +345,10 @@ so that the relaxed surface energy, per surface unit cell is
 </pre>
 <p>It seems that the relaxation energy is very small, compared to the surface
   energy, but we need to do the convergence studies.</p>
-<p>
-
+<br><br><a href=#top>Go to the top</a>
 <hr>
-
-
-<p> <a name="46">&nbsp;</a> </p>
-<h3><b>
-4.6.
-Determination of the surface energy:
-increasing the number of vacuum layers.
-</b></h3>
+<p><a name="vacuum"> </a><br><h3><b>6. Surface energy: increasing the number of vacuum layers</b></h3>
+ <p><a name="46">&nbsp;</a>
 
 <p>One should now increase the number of vacuum layers: 2 and 3 layers
 instead of only 1.
@@ -466,17 +411,10 @@ rather small 0.018 eV difference with the 2 vacuum layer case.
   accuracy of the coming calculation cannot be better than 0.016 eV. One might
   investigate the 4 vacuum layer case, but this is not worth, in the present tutorial
   ...
-
-<p>
+<br><br><a href=#top>Go to the top</a>
 <hr>
-
-<p> <a name="47">&nbsp;</a>
-<h3><b>
-4.7.
-Determination of the surface energy:
-increasing the number of aluminum layers.
-</b></h3>
-
+<p><a name="layers"> </a><br><h3><b>7. Surface energy: increasing the number of aluminum layers</b></h3>
+ <p><a name="47">&nbsp;</a>
 <p>One should now increase the number of aluminum layers, while keeping 2 vacuum
   layers. We will consider 4 and 5 aluminum layers. This is rather straightforward
   to set up, but will also change the preconditioner. One
@@ -619,6 +557,8 @@ kind of accuracy that is needed.
 
 <p>Experimental data give a surface energy around 0.55 eV (sorry,
 the reference is to be provided).
+<br><br><a href=#top>Go to the top</a>
+<hr>
 <script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
 
 </body>
