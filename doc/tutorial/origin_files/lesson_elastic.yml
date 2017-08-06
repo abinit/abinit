@@ -92,8 +92,7 @@ sec1:
   files,  as will [[acell]].</p>
   
   <p>We will work with a fixed plane wave cutoff [[ecut]] (=6 Ha), but introduce [[ecutsm]]
-                                     (=0.5 Ha)as in <a href="lesson_base3.html">
-   lesson    3</a>
+                                     (=0.5 Ha)as in <a href="lesson_base3.html">lesson 3</a>
           to smear the cutoff, which    produces     smoothly     varying
   stresses    as the lattice parameters are    optimized.    We will keep
     the same   value of [[ecutsm]] for the response-function calculations
@@ -103,17 +102,14 @@ sec1:
     shifted     so  as  to  break    hexagonal    symmetry.  The RF strain
   calculations     check   this,   and  will  exit  with  an   error message
   if the grid does    not have   the proper   symmetry.   The  self-consistency
-    procedures  follow   <a href="lesson_rf1.html">lesson RF1</a>
-         .</p>
+    procedures  follow   <a href="lesson_rf1.html">lesson RF1</a> .</p>
   
   <p>Dataset 1 optimizes the atomic positions keeping the lattice parameters
-                   fixed, setting [[ionmov]]=2 as in <a href="lesson_base1.html">lesson
-  1</a>
+                   fixed, setting [[ionmov]]=2 as in <a href="lesson_base1.html">lesson 1</a>
          .  The optimization steps proceed   until    the   maximum      force
     component  on any atom is less than [[tolmxf]]. It is always advised to relax the forces
     before    beginning      the   lattice     parameter optimization.  Dataset
-    2 optimizes    the lattice      parameters    with [[optcell]]=2 as in <a href="lesson_base3.html">lesson
-  3</a>
+    2 optimizes    the lattice      parameters    with [[optcell]]=2 as in <a href="lesson_base3.html">lesson 3</a>
          .  However, lesson 3 treated cubic    Si,   and   the   atom    positions
      in reduced coordinates remained fixed.     In  the present,     more  general
      case, the reduced atomic coordinates   must be reoptimized  as   the lattice
@@ -203,9 +199,9 @@ sec2:
  body: |
   <p> We will now compute second derivatives of the total energy (2DTE's) with
                  respect to all the perturbations we need to compute elastic
-   and    piezoelectric          properties.   You may want to review  <a href="../../users/generated_files/help_respfn.html#0" target="kwimg">
-                                 sections  0 and  the first paragraph of section
-     1</a>
+   and    piezoelectric          properties.   
+  You may want to review 
+  <a href="../../users/generated_files/help_respfn.html#0" target="kwimg"> sections  0 and  the first paragraph of section 1</a>
                                   of the respfn_help file which you studied
   in lesson     RF1.    We  will     introduce only one new input variable
     for the  strain   perturbation,     </p>
@@ -262,7 +258,7 @@ sec2:
     We set a tight   limit  on the  convergence  of the self-consistent potential
      with [[tolvrs]]. Since we have specified [[nband]]=8, all the bands are occupied and the potential
      test   also   assures     us  that  all the wave functions are well converged.
-       This issue   will come     up again in section <a href="#6">6</a>
+       This issue   will come     up again in the <a href="#metal">section on metals</a>
                 .  We could have used the output wave  functions     telast_1o_DS2_WFK
      as  input   for our RF calculations and skipped dataset  1, but     redoing
       the  GS calculation   takes relatively little time for this  simple
@@ -558,13 +554,12 @@ sec2:
 ## Note the small (one space) indentation for the title and body keys.
 sec3:
  title: "ANADDB calculation of atom-relaxation effects"
- tag: 
+ tag: relaxation
  body: |
   <p>In this section, we will run the program anaddb, which analyzes DDB files
                  generated in prior RF calculations.  You should copy telast_3.in
      and  telast_3.files          in your Work_elast directory.  You should
-  now   go to the <a href="../../users/generated_files/help_anaddb.html" target="kwimg">
-            anaddb help file</a>
+  now   go to the <a href="../../users/generated_files/help_anaddb.html" target="kwimg">anaddb help file</a>
                                 , and read the short introduction.  The bulk
    of  the   material     in  this     help file is contained in the description
     of the   variables.     You  should     read the descriptions of<br>
@@ -747,7 +742,7 @@ sec4:
   zone.     In GS calculations,    the gradients are approximated by   finite-difference
     expressions constructed    from neighboring points in the   <b>k</b> mesh.
    These   are closely related    to the ddk wave functions used   in RF calculations
-  in  <a href="#2">   2</a>
+  in  <a href="#2DTE">section 2</a>
                             and introduced in <a href="lesson_rf1.html#5" target="kwimg">
                lesson RF1, section 5</a>
                            .  We will use [[berryopt]] = -1, which utilizes an improved coding of the calculation,
@@ -790,9 +785,8 @@ sec4:
       Recalling      that    our dimensionless strains were &plusmn;0.0001,
   we   find 182.5853    GPa.   This   compares  very well with the value <font face="Times New Roman, Times, serif">
                         182.58575</font>   GPa, the 3,3 element of the Rigid-ion
-     elastic     tensor    we  found from our  anaddb calculation in <a href="#3">
-        3</a>
-                          .  (Recall that our strain and stress were both 3
+     elastic     tensor    we  found from our  anaddb calculation in <a href="#relaxation">section 3</a>.  
+   (Recall that our strain and stress were both 3
   3  or  z  z  or  Voigt    3.)  Similarly, the numerical derivative of <small><font face="Courier New, Courier, monospace">
                           sigma(1 1)</font></small>is 21.09026 GPa, compared
    to  <font face="Times New Roman, Times, serif">                   21.09029</font>
@@ -826,7 +820,7 @@ sec4:
   within       numerical     accuracy as they must be from symmetry.  Numerical
   differentiation       of  the  z component yields -0.745589 C/m^2.  This
   is to be compared  with      the  z,3  element of our rigid-ion piezoelectric
-  tensor  from <a href="#3">3</a>, <font face="Times New Roman, Times, serif">-0.73943025</font>
+  tensor  from <a href="#relaxation">section 3</a>, <font face="Times New Roman, Times, serif">-0.73943025</font>
                  C/m^2,    and  the two results do not compare as well as we
    might    wish.</p>
   
@@ -847,10 +841,9 @@ sec5:
  title: "Alternative response-function calculation of some piezoelectric constants"
  tag: alternative
  body: |
-  <p>Our GS calculation of the polarization in <a href="#4">4</a>
+  <p>Our GS calculation of the polarization in <a href="#elastic_piezo">section 4</a>
                            used, in effect, a finite-difference approximation
-   to  ddk   wave   functions,     while our RF calculations in <a href="#2">
-     2</a>
+   to  ddk   wave   functions,     while our RF calculations in <a href="#2DTE">section 2</a>
                            used analytic results based on the RF approach.
    Since    the   <b>k</b> grid determined by [[ngkpt]] = 4 4 4 and [[nshiftk]] = 1 is rather coarse, this is a probable source of
    discrepancy.             Since     this issue was noted previously in connection
@@ -893,13 +886,13 @@ sec5:
   of the literature,    or better yet out of the source code, we will cheat
      and tell you that 1a.u.=57.2147606 C/m^2   Thus the new RF result for the
    3,3 rigid-ion piezoelectric   constant is -0.7455887 C/m^2 compared to the
-   result  found in <a href="#4">     4</a>
+   result  found in <a href="#elastic_piezo">section 4</a>
                            by a completely-GS finite difference calculation,
    -0.745589      C/m^2.     The   agreement is now excellent!
   
   <p></p>
   
-  <p>The fully RF calculation in <a href="#2">2</a>
+  <p>The fully RF calculation in <a href="#2DTE">section 2</a>
                            in fact will converge much more rapidly with <b>
   k</b>      sample    than   the   partial-finite-difference  method introduced
   here.   &nbsp;Is   it worthwhile   to have  learned how to do this?  We believe
@@ -942,9 +935,9 @@ sec6:
     <li>RF run for symmetry-inequivalent elastic constants.</li>
   
   </ol>
-                   In Section<a href="#1"> 1</a>
+                   In Section<a href="#AlAs">section 1</a>
                    , we did a separate GS structural optimization run and transferred
-       the  results  by hand to RF&nbsp; run <a href="#2">2</a>
+       the  results  by hand to RF&nbsp; run <a href="#2DTE">section 2</a>
                    . &nbsp;Because we are doing a convergence test here, we
   have   combined     these  steps, and use [[getcell]]
                     to transfer the optimized coordinates from the first dataset
@@ -986,8 +979,8 @@ sec6:
     it is  not recommended.     &nbsp;These same considerations apply to phonon
     calculations   for metals,    or in particular to [[qpt]]= 0 0 0 phonon calculations for the interatomic force   constants
      needed    to find atom-relaxation contributions to the elastic constants
-      for non-trivial    structures as in <a href="#2">2</a>
-                    and <a href="#3">3</a>
+      for non-trivial    structures as in <a href="#2DTE">section 2</a>
+                    and <a href="#relaxation">section 3</a>
                    .<br>
                    <br>
                    The data specific to the elastic-tensor RF calculation in

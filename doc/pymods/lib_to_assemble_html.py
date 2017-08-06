@@ -400,7 +400,8 @@ def assemble_html(origin_yml_files,suppl_components,dir_name,root_filname,allowe
       # Body
       for label in labels:
          secj="sec"+label
-         sec_html='<p><a name="%s"> </a><br>' %(doc_yml[secj]["tag"])
+         sec_html='<p><a name="%s"> </a><br>\n' %(doc_yml[secj]["tag"])
+         sec_html+='<p><a name="%s"> </a><br>\n' %(label)
          sec_html+='<h3><b>%s. %s</b></h3>\n <p>' %(label,doc_yml[secj]["title"])
          sec_html+=doc_yml[secj]["body"]
          sec_html+="<br><br><a href=#top>Go to the top</a>\n<hr>\n"

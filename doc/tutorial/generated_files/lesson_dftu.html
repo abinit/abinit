@@ -49,7 +49,9 @@ complete.</p>
   <li><a href="#proj_DOS">5.</a> Projected density of states in LDA+U</li>
 
  </ul> 
- <hr><p><a name="summary"> </a><br><h3><b>0. Short summary of the DFT+U method</b></h3>
+ <hr><p><a name="summary"> </a><br>
+<p><a name="0"> </a><br>
+<h3><b>0. Short summary of the DFT+U method</b></h3>
  <p><p>The standard Local Density Approximation
 (LDA), where the exchange and correlation energy is fit to homogeneous
 electron gas results, is a functional that works well for a vast number of compounds.
@@ -85,7 +87,9 @@ double-counting method. However, the two
 methods generally give similar results. </p>
 <br><br><a href=#top>Go to the top</a>
 <hr>
-<p><a name="LDA"> </a><br><h3><b>1. Ground state calculation of NiO using LDA</b></h3>
+<p><a name="LDA"> </a><br>
+<p><a name="1"> </a><br>
+<h3><b>1. Ground state calculation of NiO using LDA</b></h3>
  <p><p>You might create a subdirectory of the
 ~abinit/tests/tutorial directory, and use it for the tutorial. In what follows,
 the names of files will be mentioned as if you were in this subdirectory</p>
@@ -163,7 +167,9 @@ Ni atom.  That is why we want to improve our functional, and be able
 to manage the strong correlation in NiO.</p>
 <br><br><a href=#top>Go to the top</a>
 <hr>
-<p><a name="FLL"> </a><br><h3><b>2. DFT+U with the FLL double-counting</b></h3>
+<p><a name="FLL"> </a><br>
+<p><a name="2"> </a><br>
+<h3><b>2. DFT+U with the FLL double-counting</b></h3>
  <p><p>As seen previously, the LDA does not gives
 good results for the magnetization and band gap compared to experiments.</p>
 
@@ -244,7 +250,9 @@ in order to guide the SCF algorithm.</p>
 for NiO comes from the relative simplicity of this system.
 <br><br><a href=#top>Go to the top</a>
 <hr>
-<p><a name="density_matrix"> </a><br><h3><b>3. Initialization of the density matrix</b></h3>
+<p><a name="density_matrix"> </a><br>
+<p><a name="3"> </a><br>
+<h3><b>3. Initialization of the density matrix</b></h3>
  <p><p><i>You should begin by running the
 tdftu_3.in file before continuing.</i></p>
 
@@ -303,7 +311,9 @@ usual LDA or GGA functionals. One often gets trapped in a local minimum. Trying 
 points might be important...
 <br><br><a href=#top>Go to the top</a>
 <hr>
-<p><a name="AMF"> </a><br><h3><b>4. AMF double-counting method</b></h3>
+<p><a name="AMF"> </a><br>
+<p><a name="4"> </a><br>
+<h3><b>4. AMF double-counting method</b></h3>
  <p><p>Now we will use the other implementation
 for the double-counting term in LDA+U (in Abinit), known as AMF. As the FLL method, this method uses the number
 of electrons for each spin independently and
@@ -335,7 +345,9 @@ occupation matrix with 0 or 1 for each spin. The AMF should be used when
 orbital occupations are near the average occupancies.</p>
 <br><br><a href=#top>Go to the top</a>
 <hr>
-<p><a name="proj_DOS"> </a><br><h3><b>5. Projected density of states in LDA+U</b></h3>
+<p><a name="proj_DOS"> </a><br>
+<p><a name="5"> </a><br>
+<h3><b>5. Projected density of states in LDA+U</b></h3>
  <p>Using prtdos 3, you can now compute the projected d and f density of states.
 For more information about projected density of states, for more details see the
 <a href="lesson_paw1.html">PAW1</a> tutorial.
