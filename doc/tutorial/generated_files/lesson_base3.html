@@ -36,26 +36,16 @@ as the smearing of the plane-wave kinetic energy cut-off.
 <a name="list"></a>
 <h3><b> Third (basic) lesson. Table of content:</b></h3>
 
-<ul>
-  <li><a href="#31">3.1</a> Computing the total energy of silicon at
-    fixed number of k points.</li>
-  <li><a href="#32">3.2</a> Starting the convergence study with respect
-    to k points</li>
-  <li><a href="#33">3.3</a> Actually performing the convergence study
-    with respect to k points</li>
-  <li><a href="#34">3.4</a> Determination of the lattice parameters</li>
-  <li><a href="#35">3.5</a> Computing the band structure</li>
-</ul>
+<ul> 
+  <li><a href="#energy">1.</a> Computing the total energy of silicon at fixed number of k points</li>
+  <li><a href="#convergence">2.</a> Starting the convergence study with respect to k points</li>
+  <li><a href="#kpts_conv">3.</a> Actually performing the convergence study with respect to k points</li>
+  <li><a href="#lattice">4.</a> Determination of the lattice parameters</li>
+  <li><a href="#bands">5.</a> Computing the band structure</li>
 
-<br>
-<hr>
-
-<a name="31">&nbsp;</a>
-<h3><b>
-3.1.
-Computing the total energy of silicon at fixed number of k points.
-</b></h3>
-
+ </ul> 
+ <hr><p><a name="energy"> </a><br><h3><b>1. Computing the total energy of silicon at fixed number of k points</b></h3>
+ <p><a name="31">&nbsp;</a>
 <p><i>Before beginning, you might consider to work in a different subdirectory
   as for lesson_base1 or lesson_base2 . Why not "Work3" ?</i>
 
@@ -92,14 +82,10 @@ to you. It will allow to obtain 0.2% relative accuracy on lattice parameters.
 <pre>
    etotal   -8.8662238960E+00
 </pre>
-
+<br><br><a href=#top>Go to the top</a>
 <hr>
-<a name="32">&nbsp;</a>
-<h3><b>
-3.2.
-Starting the convergence study with respect to k points
-</b></h3>
-
+<p><a name="convergence"> </a><br><h3><b>2. Starting the convergence study with respect to k points</b></h3>
+ <p><a name="32">&nbsp;</a>
 <p>There is of course a convergence study associated with the sampling
 of the Brillouin zone. You should examine different grids,
 of increasing resolution. You might try the following series
@@ -179,15 +165,10 @@ it might be easy to generate a grid
 that will fold to 10 k points in the irreducible Brillouin zone, as well as
 one that will fold to 2 k points in the irreducible Brillouin zone.
 The latter is clearly to be preferred !
-<p>
+<br><br><a href=#top>Go to the top</a>
 <hr>
-
-<p> <a name="33">&nbsp;</a> </p>
-<h3><b>
-3.3.
-Actually performing the convergence study with respect to k points
-</b></h3>
-
+<p><a name="kpts_conv"> </a><br><h3><b>3. Actually performing the convergence study with respect to k points</b></h3>
+ <p><a name="33">&nbsp;</a>
 <p>In order to understand k-point grids, you should read the Monkhorst and Pack
   paper, <cite>Phys. Rev. B 13, 5188 (1976)</cite> ... Well, maybe not immediately
   ... In the meantime, you can try the above-mentioned convergence study.
@@ -212,18 +193,10 @@ Actually performing the convergence study with respect to k points
   2 gives an accuracy of about 0.0001 Ha <br>
   So, our converged value for the total energy, at fixed <a href="../../input_variables/generated_files/varset_basic.html#acell">acell</a>,
   fixed <a href="../../input_variables/generated_files/varset_basic.html#ecut">ecut</a>, is -8.8726 Ha .
-
-<p>
+<br><br><a href=#top>Go to the top</a>
 <hr>
-
-
-
-<p> <a name="34">&nbsp;</a>
-<h3><b>
-3.4.
-Determination of the lattice parameters.
-</b></h3>
-
+<p><a name="lattice"> </a><br><h3><b>4. Determination of the lattice parameters</b></h3>
+ <p><a name="34">&nbsp;</a>
 <p>The input variable <a href="../../input_variables/generated_files/varset_rlx.html#optcell">optcell</a>
   governs the automatic optimisation of cell shape and volume. <br>
   For the automatic optimisation of cell volume, use:
@@ -268,12 +241,10 @@ of the components is
   Bohr (actually 10.21644...), that is 5.406 Angstrom. The experimental value is <code>5.431 Angstrom
   at 25 degree Celsius</code>, see <cite>R.W.G. Wyckoff, Crystal structures
   Ed. Wiley and sons, New-York (1963).</cite>
-<p>
+<br><br><a href=#top>Go to the top</a>
 <hr>
-<a name="35">&nbsp;</a>
-<h3><b>3.5.
-Computing the band structure</b></h3>
-
+<p><a name="bands"> </a><br><h3><b>5. Computing the band structure</b></h3>
+ <p><a name="35">&nbsp;</a>
 <p>We fix the parameters <a href="../../input_variables/generated_files/varset_basic.html#acell">acell</a>
   to the theoretical value of 3*10.216, and we fix also the grid of k points (the
   4x4x4 FCC grid, equivalent to a 8x8x8 Monkhorst-pack grid) <br>
@@ -414,6 +385,8 @@ two upper bands are less converged (still sufficiently for graphical representat
 of the band structure). In order to achieve the same convergence
 for all 8 bands, it is advised to use
 <a href="../../input_variables/generated_files/varset_basic.html#nband">nband</a>=10 (that is, 8 + 2).
+<br><br><a href=#top>Go to the top</a>
+<hr>
 <script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
 
 </body>
