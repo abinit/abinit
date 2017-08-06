@@ -54,7 +54,7 @@ for path in filelist:
         file_new.append(line)
         i_new+=1
       elif "This is the body" in line:
-        line="\n## Now comes the different sections, numbered."+text_section
+        line="\n## Now come the different sections, numbered."+text_section
         file_new.append(line)
         i_new+=1
       elif "body : |" in line:

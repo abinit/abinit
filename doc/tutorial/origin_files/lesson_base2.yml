@@ -1,6 +1,7 @@
-# This YAML file contains the introduction as well as the body (including the table of content) of the html lesson.
-# In order to modify the other parts, modify the file lessons.html .
-# This is the introduction ...
+## This YAML file contains the introduction as well as the body of the html lesson.
+## In order to modify the other parts, modify the file lessons.html .
+
+## This is the introduction ...
 intro : |
   <p>This lesson aims at showing how to get converged values
   for the following physical properties:
@@ -19,21 +20,17 @@ intro : |
   <p>You will also finish to read the abinit_help file.
   
   <p>This lesson should take about 1 hour.
-# This is the body, including the table of content ...
-body : |
-  <ul>
-    <li><a href="#20">2.0</a> Summary of the previous lesson</li>
-    <li><a href="#21">2.1</a> The convergence in [[ecut]]</li>
-    <li><a href="#22">2.2</a> The convergence in [[ecut]]</li>
-    <li><a href="#23">2.3</a> The convergence in [[acell]]</li>
-    <li><a href="#24">2.4</a> The final calculation in Local (Spin)
-      Density Approximation.</li>
-    <li><a href="#25">2.5</a> The use of the Generalized Gradient Approximation.</li>
-  </ul>
-  <hr>
-  <h4><a name="20"></a></h4>
-  <h3><b>2.0. Summary of the previous lesson.</b></h3>
-  
+
+## Now come the different sections, numbered.
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec1:
+ title: "Summary of the previous lesson"
+ tag: summary
+ body: |
+  <a name="20"></a>
   <p>We studied the H2 molecule in a big box.
     We used 10 Ha as cut-off energy, a 10x10x10 Bohr^3 supercell, the local-density
     approximation (as well as the local-spin-density approximation) in the Teter
@@ -52,14 +49,15 @@ body : |
   </ul>
   The bond length is awful (nearly 10% off), and the atomisation energy is a bit
   too low, 5 % off.
-  <h3><br>
-  
-  <hr>
-    <a name="21">&nbsp;</a> <a name="22">&nbsp;</a> </h3>
-  
-  <p><h3><b>2.1 and 2.2
-  The convergence in ecut</b></h3>
-  
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec2:
+ title: "The convergence in ecut (I)"
+ tag: ecut1
+ body: |
+  <a name="21">&nbsp;</a>
   <p><b>2.1.a</b><b>
   Computing the bond length and corresponding atomisation energy
   in one run.</b>
@@ -119,6 +117,15 @@ body : |
     <li> we are using [[ionmov]]=2
       for the determination of the geometry.</li>
   </ul>
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec3:
+ title: "The convergence in ecut (II)"
+ tag: ecut2
+ body: |
+  <a name="22"></a>
   
   For the check of convergence with respect to [[ecut]],
   you have the choice between doing different runs of the tbase2_1.in
@@ -187,12 +194,14 @@ body : |
   <p>Well, 30 Ha is a large kinetic energy cut-off! The pseudopotential
   that we are using for Hydrogen is rather "hard" ...
   
-  <p>
-  <hr>
-  
-  
-  <h3><p><b><a name="23">2.3</a>
-  The convergence in acell</b></h3>
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec4:
+ title: "The convergence in acell"
+ tag: acell
+ body: |
+  <a name="23"></a>
   
   <p>The same technique as for [[ecut]]
     should be now used for the convergence in [[acell]].
@@ -331,14 +340,15 @@ body : |
   So, the H2 study, with this pseudopotential, turns out to be not
   really easy. Of course, the number of states to be treated is
   minimal! This allows to have reasonable CPU time still.
-  
-  <p>
-  
-  <hr>
-  
-  <p><h3><b><a name="24">2.4</a>
-  The final calculation in Local (Spin) Density Approximation.</b></h3>
-  
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec5:
+ title: "The final calculation in Local (Spin) Density Approximation"
+ tag: LDA
+ body: |
+  <a name="24"></a>
   <p>We now use the correct values of both [[ecut]]
     and [[acell]]. Well, you should
     modify the tbase2_3.in file to make a calculation
@@ -378,14 +388,15 @@ body : |
   Other possibilities <code>[[ixc]]=4,
   5, 6</code> are older local density functionals, that could not rely on these
   data.
-  
-  <p>
-  
-  <hr>
-  
-  <p><h3><b><a name="25">2.5</a>
-  The use of the Generalized Gradient Approximation.</b></h3>
-  
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec6:
+ title: "The use of the Generalized Gradient Approximation"
+ tag: GGA
+ body: |
+  <a name="25"></a>
   <p>We will use the Perdew-Burke-Ernzerhof functional, proposed in
   <cite>Phys. Rev. Lett. 77, 3865 (1996)</cite>.
   
