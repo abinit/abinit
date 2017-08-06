@@ -1,6 +1,7 @@
-# This YAML file contains the introduction as well as the body (including the table of content) of the html lesson.
-# In order to modify the other parts, modify the file lessons.html .
-# This is the introduction ...
+## This YAML file contains the introduction as well as the body of the html lesson.
+## In order to modify the other parts, modify the file lessons.html .
+
+## This is the introduction ...
 intro : |
   <p>This lesson aims at showing how to get the following physical properties:
     <ul>
@@ -19,24 +20,19 @@ intro : |
     more freedom after that first step ... <br>
     It is supposed that you have some good knowledge of UNIX/Linux. </p>
   <p>This lesson should take about 2 hours. </p>
-# This is the body, including the table of content ...
-body : |
-  <ul>
-    <li><a href="#11">1.1.</a> Computing the (pseudo) total energy, and some associated quantities.
-    <li><a href="#12">1.2.</a> Computation of the interatomic distance (first method)
-    <li><a href="#13">1.3.</a> Computation of the interatomic distance (second method)
-    <li><a href="#14">1.4.</a> Computation of the charge density
-    <li><a href="#15">1.5.</a> Computation of the atomisation energy
-    <li><a href="#answers">Answers</a> to questions
-  </ul>
-  <hr>
-  <p><a name="11"></a><br>
-  
-  
-  
-  <h3><b>1.1. The first step (the most important, and the most difficult !): <br>
-    Computing the (pseudo) total energy, and some associated quantities.</b> </h3>
-  <h3>&nbsp;</h3>
+
+## Now comes the different sections, numbered.
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec1:
+ title: "Computing the (pseudo) total energy, and some associated quantities"
+ tag: total_energy
+ body: |
+  <a name="11"></a>
+  The first step (the most important, and the most difficult !).
+  <p>
   
   Note that the present tutorial will use four different windows:
   one to visualize the text of the tutorial (the present window),
@@ -73,7 +69,9 @@ body : |
     code to build other file names ... You will discover more about this file in
     the <a href="../../users/generated_files/help_abinit.html#intro1" target="helpsimg">section 1.1</a>
     of the abinit_help file. Please, read it now (it will take one minute or so).
-    <a name="ref1"></a></p>
+
+
+  <a name="ref1"></a></p>
   
   <p><b>1.1.d</b> Modify the first and second lines of tbase1_x.files file, so that they read:<br>
    tbase1_1.in <br>
@@ -182,7 +180,6 @@ body : |
     through it, you should read general explanation about its content, and
     the format of such input files in the
     <a href="../../users/generated_files/help_abinit.html#intro3" target="helpsimg">section 3.1</a> of the abinit_help file.
-    <a name="ref3"></a></p>
   
   <p><b>1.1.g</b> You might now examine in more details some input variables. An
     alphabetically ordered [[varset:allvars|index of all variables]] is
@@ -313,15 +310,15 @@ body : |
   </ul>
   
   <p>(<a href="#answers">answers</a> are given at the end of the present file) </p>
-  <p><hr>
-  
-  
-  
-  
-  <h3><b><a name="12"></a>1.2. Computation
-    of the interatomic distance (method 1). </b></h3>
-  <p><br>
-    <b>1.2.a</b> <i>Starting from now, everytime a new input variable is mentioned,
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec2:
+ title: "Computation of the interatomic distance (method 1)"
+ tag: interatomic
+ body: |
+  <b>1.2.a</b> <i>Starting from now, everytime a new input variable is mentioned,
     you should read the corresponding descriptive section in the ABINIT help.</i>
   </p>
   <p>We will now complete the description of the meaning of each term: there are
@@ -425,11 +422,14 @@ body : |
     Note that <i>the number of SCF cycles drops from 6 to 5 when the wavefunctions
     are read from the previous dataset.</i> </p>
   
-  <hr>
-  
-  <h3><b><a name="13"></a>1.3 Computation of the interatomic distance (method 2). </b></h3>
-  
-  <p><br><b>1.3.a</b> The other methodology is based on an automatic computation of
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec3:
+ title: "Computation of the interatomic distance (method 2)"
+ tag: interatomic2
+ body: |
+  <b>1.3.a</b> The other methodology is based on an automatic computation of
     the minimum. <br>
     There are different algorithms to do that.
     See the input variable [[ionmov]],
@@ -479,14 +479,14 @@ body : |
   often observed for a value converging to zero (remember, we ask the code
   to determine the equilibrium geometry, that is, forces should be zero)
   when the same computation is done on different platforms.
-  <hr>
-  
-  
-  
-  
-  <h3><b><a name="14"></a>1.4. Computation of the charge density.</b>
-  </h3>
-  
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec4:
+ title: "Computation of the charge density"
+ tag: density
+ body: |
   The charge density has already been computed, for all geometries, in the above-mentioned runs.
   Here, we will print this quantity.
   
@@ -536,10 +536,14 @@ body : |
    3-Dimensional isosurfaces. Another option might be to use the XCrysDen software,
    for which you need to use option 9.
   
-  <hr>
-  <h3><b><a name="15"></a>1.5. Computation of the atomisation energy.</b>
-  </h3>
-  <p><b>1.5.a</b>
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec5:
+ title: "Computation of the atomisation energy"
+ tag: atomisation
+ body: |
+  <b>1.5.a</b>
   The atomisation energy is the energy needed to separate a molecule
   in its constituent atoms, each being neutral.
   <br>
@@ -669,8 +673,14 @@ body : |
   B 54, 1703 (1996)</cite>).
   <p>We will see in the <a href="lesson_base2.html">next lesson</a> how to address the
     choice of these parameters (except the pseudopotential).
-  <p>
-  <hr>
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec6:
+ title: "Answers to the questions"
+ tag: answers
+ body: |
   <a name="answers">&nbsp;</a>
   <p><b>Answers to the questions, section <a href=#1.1.j >1.1.j </a> </b>:
   <ul>
@@ -686,7 +696,6 @@ body : |
   <p>NOTE: <i>there might be numerical differences, from platform to platform,
   in the quoted results !</i>
   <p>&nbsp;
-  
   <a name="aq1">&nbsp;</a>
   <p><b>Q1.</b> 6 SCF cycles were needed:
   <pre>
@@ -714,7 +723,6 @@ body : |
   before the required tolerance.
   
   <p>&nbsp;
-  
   <a name="aq2">&nbsp;</a>
   <p><b>Q2.</b> The information is contained in the same piece of the output file. Yes, the energy is more converged than [[toldfe]],
     since the stopping criterion asked for the difference between successive evaluations
@@ -723,7 +731,6 @@ body : |
     by smaller and smaller amounts.
   
   <p>&nbsp;
-  
   <a name="aq3">&nbsp;</a>
   <p><b>Q3.</b> These values are:
   <pre>

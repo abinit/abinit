@@ -72,16 +72,17 @@ for path in filelist:
     #####################################################
 
   #Open the new file, and write the content of file_new
+  f_old.close()
   f_new=open(path+"_new","w")
   for line in file_new:
      f_new.write(line)
 
   #Finishes by possibly moving the new file at the new place
   print(" Changes done")
-  if 0:
+  if 1:
     os.system("mv %s %s_old"%(path,path))
     os.system("mv %s_new %s"%(path,path))
-    os.system("rm %s_old"%(path))
+    #os.system("rm %s_old"%(path))
     print(" New file %s written"%path)
   else:
     print(" New file %s_new written"%path)
