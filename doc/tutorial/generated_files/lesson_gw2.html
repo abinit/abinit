@@ -65,17 +65,17 @@ as well as the <a href="lesson_gw1.html">first lesson on GW</a>.
 <a name="list"></a>
 <h3><b> Second lesson on GW. Table of content:</b></h3>
 
-<ul>
-  <li><a href="#1">1.</a> The preliminary Kohn-Sham band structure calculation.
-  <li><a href="#2">2.</a> Calculation of the screening file.
-  <li><a href="#3">3.</a> Finding the Fermi energy and the bottom of the valence band.
-  <li><a href="#4">4.</a> Computing a GW spectral function, and the plasmon satellite of Aluminum.
-</ul>
-<hr>
-<h4><a name="1"></a></h4>
-<h3><b> 1. The preliminary Kohn-Sham band structure calculation. </b></h3>
+<ul> 
+  <li><a href="#KS">1.</a> The preliminary Kohn-Sham band structure calculation</li>
+  <li><a href="#screening">2.</a> Calculation of the screening file</li>
+  <li><a href="#fermi">3.</a> Finding the Fermi energy and the bottom of the valence band</li>
+  <li><a href="#spectral">4.</a> Computing a GW spectral function, and the plasmon satellite of Aluminum</li>
 
-<p><i>Before beginning, you might consider to work in a different subdirectory
+ </ul> 
+ <hr><br><a name="KS"> </a>
+<a name="1"> </a>
+<h3><b>1. The preliminary Kohn-Sham band structure calculation</b></h3>
+ <p><i>Before beginning, you might consider to work in a different subdirectory
   as for the other lessons. Why not "Work_gw2" ?</i>
 
 <p>
@@ -119,11 +119,12 @@ This is to be compared to the experimental value of 10.6 eV (see references in B
 <p>
 
 <hr>
-<h3><p><b><a name="2">2.</a>
-Calculation of the screening file.
-</b></h3>
-<p>
-In order not to lose time, let us start the calculation of the screening file before
+<br><br><a href=#top>Go to the top</a>
+<hr>
+<br><a name="screening"> </a>
+<a name="2"> </a>
+<h3><b>2. Calculation of the screening file</b></h3>
+ <p>In order not to lose time, let us start the calculation of the screening file before
 the examination of the corresponding input file.
 So, copy the file tgw2_2.in, and modify the tgw2_x.files file as usual (replace occurrences of twg2_x by tgw2_2).
 Also, copy the WFK file (tgw2_1o_WFK) to tgw2_2i_WFK.
@@ -171,11 +172,12 @@ along the real axis set with the variable <a href="../../input_variables/generat
 is usually larger.
 
 <hr>
-<h3><p><b><a name="3">3.</a>
-Finding the Fermi energy and the bottom of the valence band.
-</b></h3>
-<p>
-In order not to lose time, let us start the calculation of the band width before the study of the input file.
+<br><br><a href=#top>Go to the top</a>
+<hr>
+<br><a name="fermi"> </a>
+<a name="3"> </a>
+<h3><b>3. Finding the Fermi energy and the bottom of the valence band</b></h3>
+ <p>In order not to lose time, let us start the calculation of the band width before the study of the input file.
 So, copy the file tgw2_3.in, and modify the tgw3_x.files file as usual (replace occurrences of twg2_x by tgw2_3).
 Also, copy the WFK file (tgw2_1o_WFK) to tgw2_3i_WFK, and the screening
 file (tgw2_2o_SCR) to tgw2_3i_SCR.
@@ -239,12 +241,12 @@ Using converged parameters, the band width will be 10.54 eV (see Bruneval[2006])
 This is in excellent agreement with the experimental value of 10.6 eV.
 
 <hr>
-<h3><p><b><a name="4">4.</a>
-Computing a GW spectral function, and the plasmon satellite of Aluminum.
-</b></h3>
-
-<p>
-The access to the non-plasmon-pole-model self-energy (real and imaginary part) has additional benefit,
+<br><br><a href=#top>Go to the top</a>
+<hr>
+<br><a name="spectral"> </a>
+<a name="4"> </a>
+<h3><b>4. Computing a GW spectral function, and the plasmon satellite of Aluminum</b></h3>
+ <p>The access to the non-plasmon-pole-model self-energy (real and imaginary part) has additional benefit,
 e.g. an accurate spectral function can be computed, see Lebegue[2003].
 You may be interested to see the plasmon satellite of Aluminum, which can be accounted for within the GW approximation.
 Remember the spectral function is almost (except some matrix elements) the spectrum which is measured in photoemission spectroscopy (PES).
@@ -287,6 +289,8 @@ Another file, tgw2_4o_GW, is worth to mention: it contains information to be use
 subsequent calculation of excitonic effects by the
 EXC code (usually available at http://theory.polytechnique.fr/codes/exc ; if not, 
 see the <a href="http://www.etsf.eu/resources/software/codes">ETSF software page</a> and further links).
+<br><br><a href=#top>Go to the top</a>
+<hr>
 <script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
 
 </body>
