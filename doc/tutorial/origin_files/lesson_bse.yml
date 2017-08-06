@@ -1,6 +1,7 @@
-# This YAML file contains the introduction as well as the body (including the table of content) of the html lesson.
-# In order to modify the other parts, modify the file lessons.html .
-# This is the introduction ...
+## This YAML file contains the introduction as well as the body of the html lesson.
+## In order to modify the other parts, modify the file lessons.html .
+
+## This is the introduction ...
 intro : |
   <p>
   This lesson discusses how to calculate the macroscopic dielectric function including excitonic effects 
@@ -13,23 +14,17 @@ intro : |
   and the first lesson of the GW tutorial, see the <a href="lesson_welcome.html">tutorial home page</a>.
   
   <p>This lesson should take about one hour to be completed.
-# This is the body, including the table of content ...
-body : |
-  <ul>
-    <li><a href="#wfk_scr"              >1.</a> Preparatory steps (generating the WFK and the SCR file)
-    <li><a href="#first_bsrun"          >2.</a> Computing the absorption spectrum with different approximations
-    <li><a href="#conv_on_bands"        >3.</a> Convergence with respect to the number of bands in the transition space
-    <li><a href="#conv_on_ecuteps"      >4.</a> Convergence with respect to the number of planewaves in the screening
-    <li><a href="#conv_on_k"            >5.</a> Convergence with respect to the number of k-points
-    <li><a href="#additional_exercises" >6.</a> Additional exercises (optional)
-    <li><a href="#BS_MPI"               >7.</a> Notes on the MPI implementation
-  </ul>
-  
-  <p>
-  <p><a name="wfk_scr"></a><br>
-  <h3><b> 1. Preparatory steps (generating the WFK and the SCR file).</b></h3>
-  
-  <p><i>Before beginning, you might consider to work in a different subdirectory
+
+## Now come the different sections, numbered.
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec1:
+ title: "Preparatory steps (generating the WFK and the SCR file)"
+ tag: wfk_scr
+ body: |
+  <i>Before beginning, you might consider to work in a different subdirectory
   as for the other lessons. Why not "Work_bs" ?</i>
   
   <p>
@@ -149,12 +144,13 @@ body : |
   Two new WFK files and a new SCR file must be generated from scratch if we want to change the k-point
   sampling used to construct the transition space.
   
-  <hr>
-  <h3><p><b><a name="first_bsrun">2.</a>
-  Computing the absorption spectrum within the Tamm-Dancoff approximation.
-  </b></h3>
-  
-  <p>
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec2:
+ title: "Computing the absorption spectrum within the Tamm-Dancoff approximation"
+ tag: first_bsrun
+ body: |
   This section is intended to show how to perform a standard excitonic calculation within the Tamm-Dancoff approximation (TDA) 
   using the Haydock iterative technique. 
   The input file is ~abinit/tests/tutorial/Input/tbs_2.in.
@@ -184,7 +180,7 @@ body : |
   Now open ~abinit/tests/tutorial/Input/tbs_2.in
   in your preferred editor and go to the next section where we discuss 
   the most important variables governing a typical BS computation.
-  
+
   <h4><a name="2a"></a></h4>
   <h4><b> 2.a The structure of the input file.</b></h4>
   
@@ -573,12 +569,14 @@ body : |
   As already stated: optical spectra converge slowly with the Brillouin zone sampling.
   The convergence in the number of k-points thus represents the most important and tedious part of our convergence study. 
   For this reason, this study should be done once converged values for the other parameters have been already found.
-  
-  <hr>
-  <h3><p><b><a name="conv_on_bands">3.</a>
-  Convergence with respect to the number of bands in the transition space
-  </b></h3>
-  
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec3:
+ title: "Convergence with respect to the number of bands in the transition space"
+ tag: conv_on_bands
+ body: |
   In this section we take advantage of the multi-dataset capabilities of ABINIT to perform calculations 
   with different values for 
   [[bs_loband]]
@@ -721,10 +719,15 @@ body : |
   </div>
   
   <hr>
-  <h3><p><b><a name="conv_on_ecuteps">5.</a>
-  Convergence with respect to the number of planewaves in the screening
-  </b></h3>
-  <p>
+
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec4:
+ title: "Convergence with respect to the number of planewaves in the screening"
+ tag: conv_on_ecuteps
+ body: |
   First of all, before running the calculation, take some time to understand what is done in 
   ~abinit/tests/tutorial/Input/tbs_4.in. 
   <p>
@@ -804,12 +807,14 @@ body : |
   Note also how the two peaks are affected in a different way by the change of [[ecuteps]],
   with the first peak affected the most.
   This behavior is consistent with our affirmation that the first peak of silicon has a strong excitonic character.
-  
-  <hr>
-  <h3><p><b><a name="conv_on_k">6.</a>
-  Convergence with respect to the number of k-points
-  </b></h3>
-  
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec5:
+ title: "Convergence with respect to the number of k-points"
+ tag: conv_on_k
+ body: |
   The last parameter that should be checked for convergence is the number of k-points.
   This convergence study represents the most tedious and difficult part since it requires the generation of new WFK files
   and of the new SCR file for each k-mesh (the list of k-points for the wavefunctions and the set of q-points 
@@ -878,11 +883,13 @@ body : |
   frequency dependence in the screening, temperature effects, electron-phonon interaction ...
   -->
   
-  <hr>
-  <h3><p><b><a name="additional_exercises">6.</a>
-  Additional exercises (optional)
-  </b></h3>
-  
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec6:
+ title: "Additional exercises (optional)"
+ tag: additional_exercises
+ body: |
   <ul>
     <li>
     <!--
@@ -906,13 +913,14 @@ body : |
     Calculate the one-shot GW corrections for silicon following the <a href="lesson_gw1.html">first lesson</a>
     of the GW tutorial. Then use the _GW file produced by the code to calculate the absorption spectrum.
   </ul>
-  
-  <hr>
-  
-  <p><a name="BS_MPI"></a><br>
-  <h3><b> 7. Notes on the MPI implementation.</b></h3>
-  
-  <p>
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec7:
+ title: "Notes on the MPI implementation"
+ tag: BS_MPI
+ body: |
   In this section, we discuss the approach used to parallelize the two steps of the BS run, 
   <i>i.e.</i> the construction of the H matrix and the evaluation of the macroscopic dielectric function.
   <p>
@@ -953,21 +961,3 @@ body : |
   For a balanced  distribution of computational work, the number of processors should divide the total number of resonant transitions. 
   
   <p align="center"><img src=../documents/lesson_paral_mbt/MPI_mv.png></p>
-  
-  <!--
-  <hr>
-  <h3><p><b><a name="references">References</a>
-  </b></h3>
-  
-  <ol>
-  <li><a name="onida_rmp">G. Onida, L. Reining, and A. Rubio, Rev. Mod. Phys. <b>48</b>, 601 (2002)
-  and references therein</a> </li>
-  <li><a name="albrecth">S. Albrecht, Ph.D. thesis, Ecole Polytechnique, Palaiseau (Paris), 1999</a> </li>
-  <li><a name="haydock2">R. Haydock, Comput. Phys. Comm. <b>20</b>, 11 (1980)</a> </li>
-  <li><a name="gruning">M. Gruning, A. Marini and X. Gonze, Nano Letters <b>9</b>, 2820 (2009) </li>
-  <li><a name="baroni1986">S. Baroni and R. Resta, Phys. Rev. B <b>33</b>, 7017 (1986) </li>
-  <li><a name="benedict">L. X. Benedict and E. L. Shirley, Phys. Rev. B <b>59</b>, 5441 (1999)</a> </li>
-  <li><a name="adler">S. L. Adler, Phys. Rev. <b>126</b>, 413 (1962)</a> </li>
-  <li><a name="wiser">N. Wiser, Phys. Rev. <b>129</b>, 72 (1963)</a> </li>
-  </ol>
-  -->
