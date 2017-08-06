@@ -40,22 +40,19 @@ phonon calculation, which will be reviewed succinctly.
 <a name="list"></a>
 <h3><b> Electron-phonon lesson. Table of content:</b></h3>
 
-<ul>
-	<li><a href="#E1">1</a> Calculation of the ground state and phonon structure of fcc Al.</li>
-	<li><a href="#E2">2</a> Merging of the 2DTE DDB files using MRGDDB.</li>
-	<li><a href="#E3">3</a> Merging of the electron-phonon matrix elements using MRGGKK.</li>
-	<li><a href="#E4">4</a> Basic ANADDB calculation of electron-phonon quantities.</li>
-	<li><a href="#E5">5</a> Convergence tests of the integration techniques.</li>
-	<li><a href="#E6">6</a> Transport quantities within Boltzmann theory.</li>
-</ul>
+<ul> 
+  <li><a href="#fccAl">1.</a> Calculation of the ground state and phonon structure of fcc Al</li>
+  <li><a href="#mrgddb">2.</a> Merging of the 2DTE _DDB files using MRGDDB</li>
+  <li><a href="#mrggkk">3.</a> Extraction and merging of the electron-phonon matrix elements using MRGGKK</li>
+  <li><a href="#anaddb">4.</a> Basic ANADDB calculation of electron-phonon quantities</li>
+  <li><a href="#convergence">5.</a> Convergence tests of the integration techniques</li>
+  <li><a href="#transport">6.</a> Transport quantities within Boltzmann theory</li>
 
-<hr>
-
-<p><a name="E1"></a><br> </p>
-
-<h3><b>1. Calculation of the ground state and phonon structure of fcc Al.</b> </h3>
-<h3>&nbsp;</h3>
-
+ </ul> 
+ <hr><p><a name="fccAl"> </a><br>
+<p><a name="1"> </a><br>
+<h3><b>1. Calculation of the ground state and phonon structure of fcc Al</b></h3>
+ <p><a name="E1"></a>
 <p> <i>Before beginning, you might consider making a different subdirectory to
 	work in.
 Why not create "Work_eph" in ~abinit/tests/tutorespfn/Input ?
@@ -198,15 +195,12 @@ each of the three q-points. The _GKK files contain the matrix elements of the el
 interaction, which we will extract and use in the following. Besides the _GKK
 files there are the _DDB files for each perturbation which contain the 2DTE for
 the different phonons wavevectors q.</p>
-
-<p></p>
-
+<br><br><a href=#top>Go to the top</a>
 <hr>
-<p><a name="E2"></a><br></p>
-
-<h3><b>2. Merging of the 2DTE _DDB files using MRGDDB.</b> </h3>
-<h3>&nbsp;</h3>
-
+<p><a name="mrgddb"> </a><br>
+<p><a name="2"> </a><br>
+<h3><b>2. Merging of the 2DTE _DDB files using MRGDDB</b></h3>
+ <p><a name="E2"></a>
 <p> You can copy the following content to a file teph_2.in within your working directory:</p>
 <pre>
 teph_2.ddb.out
@@ -227,17 +221,12 @@ names.</p>
 </p><a href="../../users/generated_files/help_mrgddb.html"
 target="kwimg">MRGDDB</a> is run with the command <pre> mrgddb < teph_2.in </pre>
 It runs in a few seconds.<p>
-
-<p>
-</p><hr>
-
-
-
-<p><a name="E3"></a><br>
-
-</p><h3><b>3. Extraction and merging of the electron-phonon matrix elements using MRGGKK.</b> </h3>
-<h3>&nbsp;</h3>
-
+<br><br><a href=#top>Go to the top</a>
+<hr>
+<p><a name="mrggkk"> </a><br>
+<p><a name="3"> </a><br>
+<h3><b>3. Extraction and merging of the electron-phonon matrix elements using MRGGKK</b></h3>
+ <p><a name="E3"></a>
 <p> A merge similar to that in the last section must be carried out for the
 electron-phonon matrix elements. This is done using the MRGGKK utility, and its
 input file is ~abinit/tests/tutorespfn/Input/teph_3.in, shown below
@@ -266,14 +255,12 @@ Finally, the names of the different _1WF and _GKK files are listed.</p>
 runtime will depend on the size of the system, and for a large number of bands or
 k-points can extend up to 20 minutes or more. </p>
 </p>
-
+<br><br><a href=#top>Go to the top</a>
 <hr>
-
-<p><a name="E4"></a><br>
-
-</p><h3><b>4. Basic ANADDB calculation of electron-phonon quantities.</b> </h3>
-<h3>&nbsp;</h3>
-
+<p><a name="anaddb"> </a><br>
+<p><a name="4"> </a><br>
+<h3><b>4. Basic ANADDB calculation of electron-phonon quantities</b></h3>
+ <p><a name="E4"></a>
 <p>The general theory of electron-phonon coupling and Eliashberg
 superconductivity is reviewed in <i>Theory of Superconducting Tc, P.B. Allen
 	and B. Mitrovic in Sol. State Phys. <b>37</b> (1982) ed. Ehrenreich,
@@ -353,16 +340,12 @@ K. The coupling strength is severely overestimated (experiment gives 0.44), and
 the logarithmic average frequency is too low, but not nearly enough to
 compensate &lambda;. Aluminum is a good case in which things can be improved,
 easily because its Fermi surface is isotropic and the coupling is weak.</p>
-
-</p><hr>
-
-
-
-<p><a name="E5"></a><br>
-
-</p><h3><b>5. Convergence tests of the integration techniques.</b> </h3>
-<h3>&nbsp;</h3>
-
+<br><br><a href=#top>Go to the top</a>
+<hr>
+<p><a name="convergence"> </a><br>
+<p><a name="5"> </a><br>
+<h3><b>5. Convergence tests of the integration techniques</b></h3>
+ <p><a name="E5"></a>
 <p> In section <a href="#E4">4</a>, we used the default
 method for integration on the Fermi surface, which employs a smearing of the
 DOS and attributes Gaussian weights to each k-point as a function of its
@@ -386,13 +369,12 @@ the main difference with teph_4.in is the choice of the tetrahedron
 integration method. If you are patient, save the output _LWD and _A2F files and
 run the full lesson again with a denser k-point grid (say, 6x6x6) and you will
 be able to observe the differences in convergence.</p>
-
+<br><br><a href=#top>Go to the top</a>
 <hr>
-<p><a name="E6"></a><br>
-<h3><b>6. Transport quantities within Boltzmann theory.</b> </h3>
-<h3>&nbsp;</h3>
-
-<p>
+<p><a name="transport"> </a><br>
+<p><a name="6"> </a><br>
+<h3><b>6. Transport quantities within Boltzmann theory</b></h3>
+ <p><a name="E6"></a>
 The electron-phonon interaction is also responsible for the resistivity of
 normal metals and related phenomena.  Even in a perfect crystal, interaction
 with phonons will limit electron life times (and vice versa). This can be
@@ -487,6 +469,8 @@ an estimate of the numerical error.
 
 <br>
 <br>
+<br><br><a href=#top>Go to the top</a>
+<hr>
 <script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
 
 </body>

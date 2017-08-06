@@ -1,6 +1,7 @@
-# This YAML file contains the introduction as well as the body (including the table of content) of the html lesson.
-# In order to modify the other parts, modify the file lessons.html .
-# This is the introduction ...
+## This YAML file contains the introduction as well as the body of the html lesson.
+## In order to modify the other parts, modify the file lessons.html .
+
+## This is the introduction ...
 intro : |
   <p>This lesson demonstrates how to obtain
   the following physical properties, for a metal :
@@ -17,24 +18,17 @@ intro : |
   phonon calculation, which will be reviewed succinctly.
   
   <p>This lesson should take about 1 hour.
-# This is the body, including the table of content ...
-body : |
-  <ul>
-  	<li><a href="#E1">1</a> Calculation of the ground state and phonon structure of fcc Al.</li>
-  	<li><a href="#E2">2</a> Merging of the 2DTE DDB files using MRGDDB.</li>
-  	<li><a href="#E3">3</a> Merging of the electron-phonon matrix elements using MRGGKK.</li>
-  	<li><a href="#E4">4</a> Basic ANADDB calculation of electron-phonon quantities.</li>
-  	<li><a href="#E5">5</a> Convergence tests of the integration techniques.</li>
-  	<li><a href="#E6">6</a> Transport quantities within Boltzmann theory.</li>
-  </ul>
-  
-  <hr>
-  
-  <p><a name="E1"></a><br> </p>
-  
-  <h3><b>1. Calculation of the ground state and phonon structure of fcc Al.</b> </h3>
-  <h3>&nbsp;</h3>
-  
+
+## Now come the different sections, numbered.
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec1:
+ title: "Calculation of the ground state and phonon structure of fcc Al"
+ tag: fccAl
+ body: |
+  <a name="E1"></a>
   <p> <i>Before beginning, you might consider making a different subdirectory to
   	work in.
   Why not create "Work_eph" in ~abinit/tests/tutorespfn/Input ?
@@ -177,15 +171,15 @@ body : |
   interaction, which we will extract and use in the following. Besides the _GKK
   files there are the _DDB files for each perturbation which contain the 2DTE for
   the different phonons wavevectors q.</p>
-  
-  <p></p>
-  
-  <hr>
-  <p><a name="E2"></a><br></p>
-  
-  <h3><b>2. Merging of the 2DTE _DDB files using MRGDDB.</b> </h3>
-  <h3>&nbsp;</h3>
-  
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec2:
+ title: "Merging of the 2DTE _DDB files using MRGDDB"
+ tag: mrgddb
+ body: |
+  <a name="E2"></a>
   <p> You can copy the following content to a file teph_2.in within your working directory:</p>
   <pre>
   teph_2.ddb.out
@@ -206,17 +200,15 @@ body : |
   </p><a href="../../users/generated_files/help_mrgddb.html"
   target="kwimg">MRGDDB</a> is run with the command <pre> mrgddb < teph_2.in </pre>
   It runs in a few seconds.<p>
-  
-  <p>
-  </p><hr>
-  
-  
-  
-  <p><a name="E3"></a><br>
-  
-  </p><h3><b>3. Extraction and merging of the electron-phonon matrix elements using MRGGKK.</b> </h3>
-  <h3>&nbsp;</h3>
-  
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec3:
+ title: "Extraction and merging of the electron-phonon matrix elements using MRGGKK"
+ tag:  mrggkk
+ body: |
+  <a name="E3"></a>
   <p> A merge similar to that in the last section must be carried out for the
   electron-phonon matrix elements. This is done using the MRGGKK utility, and its
   input file is ~abinit/tests/tutorespfn/Input/teph_3.in, shown below
@@ -245,14 +237,15 @@ body : |
   runtime will depend on the size of the system, and for a large number of bands or
   k-points can extend up to 20 minutes or more. </p>
   </p>
-  
-  <hr>
-  
-  <p><a name="E4"></a><br>
-  
-  </p><h3><b>4. Basic ANADDB calculation of electron-phonon quantities.</b> </h3>
-  <h3>&nbsp;</h3>
-  
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec4:
+ title: "Basic ANADDB calculation of electron-phonon quantities"
+ tag: anaddb
+ body: |
+  <a name="E4"></a>
   <p>The general theory of electron-phonon coupling and Eliashberg
   superconductivity is reviewed in <i>Theory of Superconducting Tc, P.B. Allen
   	and B. Mitrovic in Sol. State Phys. <b>37</b> (1982) ed. Ehrenreich,
@@ -332,16 +325,15 @@ body : |
   the logarithmic average frequency is too low, but not nearly enough to
   compensate &lambda;. Aluminum is a good case in which things can be improved,
   easily because its Fermi surface is isotropic and the coupling is weak.</p>
-  
-  </p><hr>
-  
-  
-  
-  <p><a name="E5"></a><br>
-  
-  </p><h3><b>5. Convergence tests of the integration techniques.</b> </h3>
-  <h3>&nbsp;</h3>
-  
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec5:
+ title: "Convergence tests of the integration techniques"
+ tag: convergence
+ body: |
+  <a name="E5"></a>
   <p> In section <a href="#E4">4</a>, we used the default
   method for integration on the Fermi surface, which employs a smearing of the
   DOS and attributes Gaussian weights to each k-point as a function of its
@@ -365,13 +357,15 @@ body : |
   integration method. If you are patient, save the output _LWD and _A2F files and
   run the full lesson again with a denser k-point grid (say, 6x6x6) and you will
   be able to observe the differences in convergence.</p>
-  
-  <hr>
-  <p><a name="E6"></a><br>
-  <h3><b>6. Transport quantities within Boltzmann theory.</b> </h3>
-  <h3>&nbsp;</h3>
-  
-  <p>
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec6:
+ title: "Transport quantities within Boltzmann theory"
+ tag: transport
+ body: |
+  <a name="E6"></a>
   The electron-phonon interaction is also responsible for the resistivity of
   normal metals and related phenomena.  Even in a perfect crystal, interaction
   with phonons will limit electron life times (and vice versa). This can be
