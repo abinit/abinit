@@ -25,6 +25,7 @@ intro : |
 # Note the small (one space) indentation for the title and body keys.
 sec1:
  title: "The DFT+DMFT method: summary and key parameters"
+ tag : summary
  body: |
   <p> The DFT+DMFT method aims at improving the description of
   strongly correlated systems.  Generally, these highly correlated
@@ -106,12 +107,12 @@ sec1:
   are 100000 and 100, but convergence should be studied). A large number of informations are given in the log file using
   [[pawprtvol]]=3.
   </UL>
-  <hr>
 
 # Each section must have a title, that will form the table of content.
 # Note the small (one space) indentation for the title and body keys.
 sec2:
  title: "Electronic Structure of SrVO<sub>3</sub> in LDA"
+ tag : LDA
  body: |
   <p>You might create a subdirectory of the
   ~abinit/tests/tutoparal directory, and use it for the tutorial. In what follows,
@@ -181,12 +182,11 @@ sec2:
   <p>
   In the next section, we will thus use the <i>t<SUB>2g</SUB></i>-like bands to built Wannier functions and do the DFT+DMFT calculation.
   
-  <hr>
-  
 # Each section must have a title, that will form the table of content.
 # Note the small (one space) indentation for the title and body keys.
 sec3:
  title: "Electronic Structure of SrVO<sub>3</sub>: DFT+DMFT calculation"
+ tag: "DFT+DMFT"
  body: |
   <h4>3.1. The input file for DMFT calculation: correlated orbitals, screened Coulomb interaction and  frequency mesh </h4>
   
@@ -510,12 +510,11 @@ sec3:
   the quasiparticle peak as well as Hubbard bands at -2 eV and +2.5 eV
   as in  Fig.4 of [[Amadon2008]].
   
-  <hr>
-  
 # Each section must have a title, that will form the table of content.
 # Note the small (one space) indentation for the title and body keys.
 sec4:
  title: "Electronic Structure of SrVO<sub>3</sub>: Choice of correlated orbitals"
+ tag: orbitals
  body: |
   Previously, only the  <i>t<SUB>2g</SUB></i>-like bands were used in the
   definition of Wannier functions. 
@@ -599,12 +598,11 @@ sec4:
    the Wannier functions are more localized
   (see discussion in [[Amadon2008]]).
   
-  <hr>
-  
 # Each section must have a title, that will form the table of content.
 # Note the small (one space) indentation for the title and body keys.
 sec5:
  title: "Electronic Structure of SrVO<sub>3</sub>: The internal energy"
+ tag: energy
  body: |
   <p>  The internal energy can be obtained with </p>
    
@@ -643,12 +641,11 @@ sec5:
   to do an average over the last values of the internal energy.
   Note that in version 7.10.5, only the Internal energy has a physical meaning in DFT+DMFT and not Etotal or ETOT.
   
-  <hr>
-  
 # Each section must have a title, that will form the table of content.
 # Note the small (one space) indentation for the title and body keys.
 sec6:
  title: "Electronic Structure of SrVO<sub>3</sub> in DFT+DMFT: Equilibrium volume"
+ tag: volume
  body: |
   We focus now on the total energy.
   
@@ -671,12 +668,11 @@ sec6:
    
   You will notice that the equilibrium volume is very weakly modified by the  strong correlations is this case.
   
-  <hr>
-  
 # Each section must have a title, that will form the table of content.
 # Note the small (one space) indentation for the title and body keys.
 sec7:
  title: "Electronic Structure of SrVO<sub>3</sub>: Conclusion"
+ tag: conclusion
  body: |
   To sum up, the important physical parameters for DFT+DMFT are the definition
   of correlated orbitals, the choice of U and J (and double counting). The important technical parameters are 

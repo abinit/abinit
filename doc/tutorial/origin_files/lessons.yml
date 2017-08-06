@@ -158,9 +158,9 @@
     subtitle : Introducing ABINIT to new developers (might be outdated ...).
 - !components
     name : spin
-    keyword : Lesson in the spin
+    keyword : Lesson about the spin
     authors : GZ,MT
-    subtitle : Properties related to spin (spin polarized calculations and spin-orbit coupling).
+    subtitle : Properties related to spin (spin polarized calculations, ferro- ferri- magnetic materials, and spin-orbit coupling).
 - !components
     name : tddft
     keyword : Lesson on TDDFT
@@ -217,7 +217,7 @@
       <script type="text/javascript" src="__JS_PATH__list_internal_links_for_generated_files.js"> </script>
     tofcontent_header : |
       <a name="list"></a>
-      <h3><b> __KEYWORD__, table of content:</b></h3>
+      <h3><b> __KEYWORD__. Table of content:</b></h3>
     end : |
       </body>
       </html>

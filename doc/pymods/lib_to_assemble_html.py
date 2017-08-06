@@ -394,14 +394,16 @@ def assemble_html(origin_yml_files,suppl_components,dir_name,root_filname,allowe
       # Table of content
       for label in labels:
          secj="sec"+label
-         secs_html+='  <li><a href="#%s">%s.</a> %s</li>\n' %(label,label,doc_yml[secj]["title"])
+         #secs_html+='  <li><a href="#%s">%s.</a> %s</li>\n' %(label,label,doc_yml[secj]["title"])
+         secs_html+='  <li><a href="#%s">%s.</a> %s</li>\n' %(doc_yml[secj]["tag"],label,doc_yml[secj]["title"])
       secs_html+="\n </ul> \n <hr>"
       # Body
       for label in labels:
          secj="sec"+label
-         sec_html='<p><a name="%s"> </a><br>' %(label)
+         sec_html='<p><a name="%s"> </a><br>' %(doc_yml[secj]["tag"])
          sec_html+='<h3><b>%s. %s</b></h3>\n <p>' %(label,doc_yml[secj]["title"])
          sec_html+=doc_yml[secj]["body"]
+         sec_html+="<br><br><a href=#top>Go to the top</a>\n<hr>\n"
          full_filname=origin_yml.name
          if root_filname != "":
            full_filname=root_filname+"_"+origin_yml.name

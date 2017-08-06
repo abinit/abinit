@@ -3,7 +3,7 @@
 <!-- It is useless to modify it. Modify the related .yml  or .bib files instead.         -->
 <!--                                                                                     -->
 <html>
-<head><title>Lesson in the spin</title>
+<head><title>Lesson about the spin</title>
 <link rel=stylesheet type="text/css" href="../formabinit.css">
 </head>
 <body bgcolor="#ffffff">
@@ -11,9 +11,9 @@
 <hr>
 <a name="top"></a>
 
-<h1>ABINIT tutorial. Lesson in the spin...</h1>
+<h1>ABINIT tutorial. Lesson about the spin...</h1>
 
-<h2>Properties related to spin (spin polarized calculations and spin-orbit coupling).</h2>
+<h2>Properties related to spin (spin polarized calculations, ferro- ferri- magnetic materials, and spin-orbit coupling).</h2>
 <hr>
 <p>This lesson aims at showing how to get the following physical
 properties:
@@ -45,32 +45,19 @@ You will learn to use of&nbsp; features of ABINIT which deal with spin.<br>
 <script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
 
 <a name="list"></a>
-<h3><b> Lesson in the spin, table of content:</b></h3>
+<h3><b> Lesson about the spin. Table of content:</b></h3>
 
-<ul>
-  <li><a href="#gz1">1</a> <b>A ferromagnetic
-material: the&nbsp; bcc Fe</b></li>
-  <li><a href="#gz2">2</a> <b>An antiferromagnetic
-example: fcc Fe</b></li>
-  <li><a href="#gz3">3</a> <b>Another look at fcc Fe</b>
-  </li>
-  <li><a href="#gz4">4</a> <b>A ferrimagnetic example
-(</b>Mn<sub>4</sub>N<b>)</b><small style="font-style: italic;">(not yet)</small> </li>
-  <li><a href="#gz5">5</a> <b>The spin-orbit coupling</b>
-  </li>
-  <li><a href="#gz6">6</a> <b>Rotation of the
-magnetization and Spin-orbit </b><small style="font-style: italic;">(not yet)</small></li><span style="font-weight: bold;"><br>
-  <br>
-  </span>
-</ul>
-<hr>
-<p><a name="gz1"></a><big><b>1. A ferromagnetic material: the&nbsp; <span style="font-style: italic;">bcc</span> Fe</b></big>&nbsp;</p>
+<ul> 
+  <li><a href="#ferromagnetic">1.</a> A ferromagnetic material: <i>bcc</i> Fe</li>
+  <li><a href="#antiferromagnetic">2.</a> An antiferromagnetic example: <i>fcc</i> Fe</li>
+  <li><a href="#fccFe2">3.</a> Another look at <i>fcc</i> Fe</li>
+  <li><a href="#ferrimagnetic">4.</a> Ferrimagnetic (not yet)</li>
+  <li><a href="#spin-orbit">5.</a> The spin-orbit coupling</li>
+  <li><a href="#rotation">6.</a> Rotation of the magnetization and spin-orbit</li>
 
-
-<p>
-<i><br>
-</i></p>
-<p><i>Before beginning, you might consider to work in a different
+ </ul> 
+ <hr><p><a name="ferromagnetic"> </a><br><h3><b>1. A ferromagnetic material: <i>bcc</i> Fe</b></h3>
+ <p><i>Before beginning, you might consider to work in a different
 subdirectory as
 for the other lessons. Why not "Work_spin" (<small>so ~abinit/tests/tutorial/Input/Work_spin</small>) ? </i> <br>
 </p>
@@ -214,13 +201,10 @@ If we start with a <a href="../../input_variables/generated_files/varset_gstate.
 of 0, the magnetization
 remains 0. <a href="../../input_variables/generated_files/varset_gstate.html#spinat">spinat</a> gives
 indeed a way to initially break the spin symmetry.<br>
-<br>
-<br>
-<br>
+<br><br><a href=#top>Go to the top</a>
 <hr>
-<p><big><a name="gz2"></a><b>2. An antiferromagnetic example: <span style="font-style: italic;">fcc</span> Fe</b></big></p>
-<h3> </h3>
-<span style="font-style: italic;">
+<p><a name="antiferromagnetic"> </a><br><h3><b>2. An antiferromagnetic example: <i>fcc</i> Fe</b></h3>
+ <p><span style="font-style: italic;">
 Well sort of.... </span><br>
 <br>
 Actually, <span style="font-style: italic;">fcc</span> Fe, displays many complicated structures, in particular
@@ -356,13 +340,10 @@ which shows that the magnetization of each atom are actually opposite.
 <br>With the next input file <span style="color: rgb(51, 102, 255);">tspin_3.in</span>, we will consider this same problem, but in a
 different way, and note, for future record that the total energy is:
 <span style="font-family: monospace;">Etotal=-4.92489592898935E+01</span><br>
-<br>
-<br>
-<br>
+<br><br><a href=#top>Go to the top</a>
 <hr>
-<p><a name="gz3"></a><big><b>3. Another look at <span style="font-style: italic;">fcc</span> Fe</b></big></p>
-<h3> </h3>
-Instead of treating <span style="font-style: italic;">fcc</span> Fe directly as an antiferromagnetic material,
+<p><a name="fccFe2"> </a><br><h3><b>3. Another look at <i>fcc</i> Fe</b></h3>
+ <p>Instead of treating <span style="font-style: italic;">fcc</span> Fe directly as an antiferromagnetic material,
 we will not make any hypotheses on its magnetic structure, and run the calculation like the one for <span style="font-style: italic;">fcc</span>
 Fe, anticipating only that the two spin directions are going to be different.<br>
 We will not even assume
@@ -451,14 +432,10 @@ the corner atom and the face atom possess opposite magnetizations,
 which roughly cancel each other. The density of states computed with
 the tetrahedron method is not as smooth as by the smearing
 method, and a running average allows for a better view.<br>
-<br>
-<br>
-<br>
+<br><br><a href=#top>Go to the top</a>
 <hr>
-<p><a name="gz4"></a><big><b>4. A ferrimagnetic example </b><span style="font-style: italic;">(not yet)</span></big></p>
-<h3 style="font-weight: normal; font-style: italic;">
-</h3>
-Some materials can display a particular form of ferromagnetism, which
+<p><a name="ferrimagnetic"> </a><br><h3><b>4. Ferrimagnetic (not yet)</b></h3>
+ <p>Some materials can display a particular form of ferromagnetism, which
 also can be viewed as non
 compensated antiferromagnetism, called ferrimagnetism.<br>
 Some atoms possess up spin and other possess down spin, but the
@@ -466,13 +443,10 @@ total spin magnetization is non zero.<br>
 This happens generally for system with different type of atoms, and
 sometimes in
 rather complicated structures such as the magnetite. <br>
-<br>
-<br>
-<br>
+<br><br><a href=#top>Go to the top</a>
 <hr>
-<p><a name="gz5"></a><big><b>5. The spin-orbit coupling</b></big></p>
-<h3> </h3>
-<h3><small><span style="font-weight: normal;">For heavy atoms a
+<p><a name="spin-orbit"> </a><br><h3><b>5. The spin-orbit coupling</b></h3>
+ <p>For heavy atoms a
 relativistic description of the electronic structure becomes necessary,
 and this can be accomplished through the relativistic LDA
 approximation.</span></small></h3><br>
@@ -649,27 +623,20 @@ Ha</span><br>
 <span style="font-family: monospace;"></span></div>
 <br>
 A perfect agreement even with a small simulation cell and very small values of plane-wave cut-offs...<br>
-<br>
-<br>
-<span style="font-family: sans-serif;"><br>
-</span>
+<br><br><a href=#top>Go to the top</a>
 <hr>
-<p><big><a name="gz6"></a><b>6. Rotation of the magnetization and Spin-orbit </b><span style="font-style: italic;">(not yet)</span></big></p>
-<h3>
-</h3>
-The most spectacular manifestation of the spin-orbit coupling is the
+<p><a name="rotation"> </a><br><h3><b>6. Rotation of the magnetization and spin-orbit</b></h3>
+ <p>The most spectacular manifestation of the spin-orbit coupling is the
 energy associated with a rotation of the magntisation with respect with
 the cristal axis. It is at the origin of the magneto cristalline
 anisotropy of paramount technological importance.<br>
 <hr>
 <br>
 <p>This ABINIT tutorial is now finished... <br>
+GZ would like to thank B. Siberchicot for useful comments.
 </p>
-<p><small><span style="font-style: italic;"><br>
-</span></small></p>
-<p><small><span style="font-style: italic;">
-GZ would like to thank B. Siberchicot for useful comments.</span></small><br>
-</p>
+<br><br><a href=#top>Go to the top</a>
+<hr>
 <script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
 
 </body>
