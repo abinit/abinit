@@ -41,6 +41,7 @@ for path in filelist:
 
     file_new=[]
     i_new=0
+    sec_num=0
     text_section="\n\n## Each section must have a title, that will form the table of content."
     text_section+="\n## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links."
     text_section+="\n## Note the small (one space) indentation for the title and body keys.\n"
@@ -57,13 +58,14 @@ for path in filelist:
         file_new.append(line)
         i_new+=1
       elif "body : |" in line:
-        line='sec1:'+title_tag
+        line='sec0:'+title_tag
         file_new.append(line)
-        i_new+=1
+        sec_num=1
       elif "name=" in line:
-        line=text_section+'secX:'+title_tag+line
+        line=text_section+'sec%s:'%(sec_num)+title_tag+line
         file_new.append(line)
         i_new+=1
+        sec_num+=1
       else:
         file_new.append(line)
         i_new+=1

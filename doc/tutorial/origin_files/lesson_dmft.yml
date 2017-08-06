@@ -1,7 +1,7 @@
-# This YAML file contains the introduction as well as the body of the html lesson.
-# In order to modify the other parts, modify the file lessons.html .
+## This YAML file contains the introduction as well as the body of the html lesson.
+## In order to modify the other parts, modify the file lessons.html .
 
-# This is the introduction ...
+## This is the introduction ...
 intro : |
   <p>This lesson aims at showing how to perform
   a DFT+DMFT calculation using Abinit.</p>
@@ -19,10 +19,11 @@ intro : |
   <p>This lesson should take one hour to
   complete (especially if you have access to several processors).</p>
 
-# Now comes the different sections, numbered. 
+## Now comes the different sections, numbered.
 
-# Each section must have a title, that will form the table of content.
-# Note the small (one space) indentation for the title and body keys.
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
 sec1:
  title: "The DFT+DMFT method: summary and key parameters"
  tag : summary
@@ -108,8 +109,9 @@ sec1:
   [[pawprtvol]]=3.
   </UL>
 
-# Each section must have a title, that will form the table of content.
-# Note the small (one space) indentation for the title and body keys.
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
 sec2:
  title: "Electronic Structure of SrVO<sub>3</sub> in LDA"
  tag : LDA
@@ -182,8 +184,9 @@ sec2:
   <p>
   In the next section, we will thus use the <i>t<SUB>2g</SUB></i>-like bands to built Wannier functions and do the DFT+DMFT calculation.
   
-# Each section must have a title, that will form the table of content.
-# Note the small (one space) indentation for the title and body keys.
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
 sec3:
  title: "Electronic Structure of SrVO<sub>3</sub>: DFT+DMFT calculation"
  tag: "DFT+DMFT"
@@ -510,8 +513,9 @@ sec3:
   the quasiparticle peak as well as Hubbard bands at -2 eV and +2.5 eV
   as in  Fig.4 of [[Amadon2008]].
   
-# Each section must have a title, that will form the table of content.
-# Note the small (one space) indentation for the title and body keys.
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
 sec4:
  title: "Electronic Structure of SrVO<sub>3</sub>: Choice of correlated orbitals"
  tag: orbitals
@@ -598,8 +602,9 @@ sec4:
    the Wannier functions are more localized
   (see discussion in [[Amadon2008]]).
   
-# Each section must have a title, that will form the table of content.
-# Note the small (one space) indentation for the title and body keys.
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
 sec5:
  title: "Electronic Structure of SrVO<sub>3</sub>: The internal energy"
  tag: energy
@@ -641,8 +646,9 @@ sec5:
   to do an average over the last values of the internal energy.
   Note that in version 7.10.5, only the Internal energy has a physical meaning in DFT+DMFT and not Etotal or ETOT.
   
-# Each section must have a title, that will form the table of content.
-# Note the small (one space) indentation for the title and body keys.
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
 sec6:
  title: "Electronic Structure of SrVO<sub>3</sub> in DFT+DMFT: Equilibrium volume"
  tag: volume
@@ -668,8 +674,9 @@ sec6:
    
   You will notice that the equilibrium volume is very weakly modified by the  strong correlations is this case.
   
-# Each section must have a title, that will form the table of content.
-# Note the small (one space) indentation for the title and body keys.
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
 sec7:
  title: "Electronic Structure of SrVO<sub>3</sub>: Conclusion"
  tag: conclusion
