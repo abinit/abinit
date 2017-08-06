@@ -51,48 +51,17 @@ tensor   </li>
 <a name="list"></a>
 <h3><b> Lesson on elastic properties. Table of content:</b></h3>
 
-<ul>
+<ul> 
+  <li><a href="#AlAs">1.</a> The ground-state geometry of (hypothetical) wurtzite AlAs</li>
+  <li><a href="#2DTE">2.</a> Response-function calculations of several second derivatives of the total energy</li>
+  <li><a href="#None">3.</a> ANADDB calculation of atom-relaxation effects</li>
+  <li><a href="#elastic_piezo">4.</a> Finite-difference calculation of elastic and piezoelectric constants</li>
+  <li><a href="#alternative">5.</a> Alternative response-function calculation of some piezoelectric constants</li>
+  <li><a href="#metal">6.</a> Response-function calculation of the elastic constants of Al metal</li>
 
-
-  <li><a href="#1">1</a>
-                                   The ground-state geometry of (hypothetical)
-   wurtzite     AlAs.</li>
-
-
-  <li><a href="#2">2</a>
-                               Response-function calculation of several second
-   derivatives       of  the   total   energy.</li>
-
-
-  <li><a href="#3">3</a>
-                               anaddb calculation to incorporate atom-relaxation
-    effects.</li>
-
-
-  <li><a href="#4">4</a>
-                  Finite-difference calculation of elastic and piezoelectric
-  constants.</li>
-
-
-  <li><a href="#5">5</a>
-                  Alternative response-function calculation of some piezoelectric
-    constants.</li>
-
-
-  <li><a href="#6">6</a>
-                                   Response-function calculation of the elastic
-   constants      for Al metal.</li>
-
-</ul>
-
-<hr>
-<p><a name="1"></a>
-                    <br>
-                    </p>
-
-<h3><b>1. The ground-state geometry of (hypothetical) wurtzite AlAs.</b></h3>
-
-<p><i>Before beginning, you might consider working in a different subdirectory
+ </ul> 
+ <hr><p><a name="AlAs"> </a><br><h3><b>1. The ground-state geometry of (hypothetical) wurtzite AlAs</b></h3>
+ <p><i>Before beginning, you might consider working in a different subdirectory
                  as for the other lessons.
 Why not create "Work_elast" in ~abinit/tests/tutorespfn/Input ? </i><br>
                     </p>
@@ -246,16 +215,10 @@ atomic   coordinates        near the end of telast_1.out:</p>
  acell2  and   xred2         to acell and xred since these common values will
  apply  to all  datasets      in   the next set of calculations.<br>
                     </p>
-
+<br><br><a href=#top>Go to the top</a>
 <hr>
-<p><a name="2"></a>
-                    <br>
-                    </p>
-
-<h3><b>2. Response-function calculations of several second derivatives of
-    the total energy.</b></h3>
-
-<p> We will now compute second derivatives of the total energy (2DTE's) with
+<p><a name="2DTE"> </a><br><h3><b>2. Response-function calculations of several second derivatives of the total energy</b></h3>
+ <p><p> We will now compute second derivatives of the total energy (2DTE's) with
                respect to all the perturbations we need to compute elastic
  and    piezoelectric          properties.   You may want to review  <a href="../../users/generated_files/help_respfn.html#0" target="kwimg">
                                sections  0 and  the first paragraph of section
@@ -606,15 +569,10 @@ of the piezoelectric tensor.</p>
                strain and one uniform electric field component. &nbsp;(Yes,
   there    are non-zero elements.)<br>
                     </p>
-
+<br><br><a href=#top>Go to the top</a>
 <hr>
-<p><a name="3"></a>
-                    <br>
-                    </p>
-
-<h3><b>3. anaddb calculation of atom-relaxation effects.</b></h3>
-
-<p>In this section, we will run the program anaddb, which analyzes DDB files
+<p><a name="None"> </a><br><h3><b>3. ANADDB calculation of atom-relaxation effects</b></h3>
+ <p><p>In this section, we will run the program anaddb, which analyzes DDB files
                generated in prior RF calculations.  You should copy telast_3.in
    and  telast_3.files          in your Work_elast directory.  You should
 now   go to the <a href="../../users/generated_files/help_anaddb.html" target="kwimg">
@@ -766,15 +724,10 @@ seen   here can be removed by setting  tolvrs3=1.0d-18 in telast_2.in.)
  there    is  no  experimental      data with which to compare our results.
   In the    next  section,  we will  calculate    a few of these numbers by
  a finite-difference     method  to gain  confidence  in  the RF approach.<br>
-                    <br>
-
+<br><br><a href=#top>Go to the top</a>
 <hr>
-<p><a name="4"></a>
-                    <br>
-                    </p>
-
-<h3><b>4. Finite-difference calculation of elastic and piezoelectric constants.</b></h3>
-                         You should copy telast_4.in and telast_4.files into
+<p><a name="elastic_piezo"> </a><br><h3><b>4. Finite-difference calculation of elastic and piezoelectric constants</b></h3>
+ <p>You should copy telast_4.in and telast_4.files into
   your  Work_elast directory.      Editing     telast_4.in, you will see
 that   it has four datasets, the first  two   with the  c-axis   contracted
 0.01%   and the second two with it expanded    0.01%,  which  we specified
@@ -893,19 +846,10 @@ tensor  from <a href="#3">3</a>, <font face="Times New Roman, Times, serif">-0.7
 tensor   elements,   however, and for   our particular combination   of crystal
  symmetry   and choice  of strain there   is no correction.  The  second
  possibility   is the subject  of the next section.</p>
-
-<p><br>
-                    </p>
-
+<br><br><a href=#top>Go to the top</a>
 <hr>
-<p><a name="5"></a>
-                    <br>
-                    </p>
-
-<h3><b>5. Alternative response-function calculation of some piezoelectric
-            constants.</b></h3>
-
-<p>Our GS calculation of the polarization in <a href="#4">4</a>
+<p><a name="alternative"> </a><br><h3><b>5. Alternative response-function calculation of some piezoelectric constants</b></h3>
+ <p><p>Our GS calculation of the polarization in <a href="#4">4</a>
                          used, in effect, a finite-difference approximation
  to  ddk   wave   functions,     while our RF calculations in <a href="#2">
    2</a>
@@ -965,17 +909,10 @@ here.   &nbsp;Is   it worthwhile   to have  learned how to do this?  We believe
 besides,    this didn't   take much time.   (Have you   found the conversion
 factor  on  your own yet?)<br>
                     </p>
-
-<p><br>
-                    </p>
-
+<br><br><a href=#top>Go to the top</a>
 <hr>
-<p><a name="6"></a>
-                    <br>
-                    </p>
-
-<h3><b>6. Response-function calculation of the elastic constants of Al metal.</b></h3>
-                 For metals, the existence of partially occupied bands is
+<p><a name="metal"> </a><br><h3><b>6. Response-function calculation of the elastic constants of Al metal</b></h3>
+ <p>For metals, the existence of partially occupied bands is
 a  complicating       feature for RF as well as GS calculations. &nbsp;Now
 would  be a good  time     to review <a href="lesson_base4.html">lesson 4</a> which dealt in detail with
 the interplay between   <b>       k</b>-sample convergence and Fermi-surface
@@ -1159,6 +1096,8 @@ aligned as much as possible with a standard laboratory frame.
 <hr>
 <p>&nbsp;          <br>
                This ABINIT lesson is now finished...    </p>
+<br><br><a href=#top>Go to the top</a>
+<hr>
 <script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
 
 </body>

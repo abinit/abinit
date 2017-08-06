@@ -1,6 +1,7 @@
-# This YAML file contains the introduction as well as the body (including the table of content) of the html lesson.
-# In order to modify the other parts, modify the file lessons.html .
-# This is the introduction ...
+## This YAML file contains the introduction as well as the body of the html lesson.
+## In order to modify the other parts, modify the file lessons.html .
+
+## This is the introduction ...
 intro : |
   <p>This lesson shows how to calculate physical properties related to strain,
                    for an insulator and a metal : </p>
@@ -28,50 +29,17 @@ intro : |
      features of ABINIT, and to use   relevant     parts of the  associated
     codes Mrgddb and Anaddb.
   <p>This lesson should take about two hours.  </p>
-# This is the body, including the table of content ...
-body : |
-  <ul>
-  
-  
-    <li><a href="#1">1</a>
-                                     The ground-state geometry of (hypothetical)
-     wurtzite     AlAs.</li>
-  
-  
-    <li><a href="#2">2</a>
-                                 Response-function calculation of several second
-     derivatives       of  the   total   energy.</li>
-  
-  
-    <li><a href="#3">3</a>
-                                 anaddb calculation to incorporate atom-relaxation
-      effects.</li>
-  
-  
-    <li><a href="#4">4</a>
-                    Finite-difference calculation of elastic and piezoelectric
-    constants.</li>
-  
-  
-    <li><a href="#5">5</a>
-                    Alternative response-function calculation of some piezoelectric
-      constants.</li>
-  
-  
-    <li><a href="#6">6</a>
-                                     Response-function calculation of the elastic
-     constants      for Al metal.</li>
-  
-  </ul>
-  
-  <hr>
-  <p><a name="1"></a>
-                      <br>
-                      </p>
-  
-  <h3><b>1. The ground-state geometry of (hypothetical) wurtzite AlAs.</b></h3>
-  
-  <p><i>Before beginning, you might consider working in a different subdirectory
+
+## Now come the different sections, numbered.
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec1:
+ title: "The ground-state geometry of (hypothetical) wurtzite AlAs"
+ tag: AlAs
+ body: |
+  <i>Before beginning, you might consider working in a different subdirectory
                    as for the other lessons.
   Why not create "Work_elast" in ~abinit/tests/tutorespfn/Input ? </i><br>
                       </p>
@@ -225,15 +193,14 @@ body : |
    acell2  and   xred2         to acell and xred since these common values will
    apply  to all  datasets      in   the next set of calculations.<br>
                       </p>
-  
-  <hr>
-  <p><a name="2"></a>
-                      <br>
-                      </p>
-  
-  <h3><b>2. Response-function calculations of several second derivatives of
-      the total energy.</b></h3>
-  
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec2:
+ title: "Response-function calculations of several second derivatives of the total energy"
+ tag: 2DTE
+ body: |
   <p> We will now compute second derivatives of the total energy (2DTE's) with
                  respect to all the perturbations we need to compute elastic
    and    piezoelectric          properties.   You may want to review  <a href="../../users/generated_files/help_respfn.html#0" target="kwimg">
@@ -586,13 +553,13 @@ body : |
     there    are non-zero elements.)<br>
                       </p>
   
-  <hr>
-  <p><a name="3"></a>
-                      <br>
-                      </p>
-  
-  <h3><b>3. anaddb calculation of atom-relaxation effects.</b></h3>
-  
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec3:
+ title: "ANADDB calculation of atom-relaxation effects"
+ tag: 
+ body: |
   <p>In this section, we will run the program anaddb, which analyzes DDB files
                  generated in prior RF calculations.  You should copy telast_3.in
      and  telast_3.files          in your Work_elast directory.  You should
@@ -745,15 +712,15 @@ body : |
    there    is  no  experimental      data with which to compare our results.
     In the    next  section,  we will  calculate    a few of these numbers by
    a finite-difference     method  to gain  confidence  in  the RF approach.<br>
-                      <br>
   
-  <hr>
-  <p><a name="4"></a>
-                      <br>
-                      </p>
-  
-  <h3><b>4. Finite-difference calculation of elastic and piezoelectric constants.</b></h3>
-                           You should copy telast_4.in and telast_4.files into
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec4:
+ title: "Finite-difference calculation of elastic and piezoelectric constants"
+ tag: elastic_piezo
+ body: |
+  You should copy telast_4.in and telast_4.files into
     your  Work_elast directory.      Editing     telast_4.in, you will see
   that   it has four datasets, the first  two   with the  c-axis   contracted
   0.01%   and the second two with it expanded    0.01%,  which  we specified
@@ -872,18 +839,14 @@ body : |
   tensor   elements,   however, and for   our particular combination   of crystal
    symmetry   and choice  of strain there   is no correction.  The  second
    possibility   is the subject  of the next section.</p>
-  
-  <p><br>
-                      </p>
-  
-  <hr>
-  <p><a name="5"></a>
-                      <br>
-                      </p>
-  
-  <h3><b>5. Alternative response-function calculation of some piezoelectric
-              constants.</b></h3>
-  
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec5:
+ title: "Alternative response-function calculation of some piezoelectric constants"
+ tag: alternative
+ body: |
   <p>Our GS calculation of the polarization in <a href="#4">4</a>
                            used, in effect, a finite-difference approximation
    to  ddk   wave   functions,     while our RF calculations in <a href="#2">
@@ -944,17 +907,15 @@ body : |
   besides,    this didn't   take much time.   (Have you   found the conversion
   factor  on  your own yet?)<br>
                       </p>
-  
-  <p><br>
-                      </p>
-  
-  <hr>
-  <p><a name="6"></a>
-                      <br>
-                      </p>
-  
-  <h3><b>6. Response-function calculation of the elastic constants of Al metal.</b></h3>
-                   For metals, the existence of partially occupied bands is
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec6:
+ title: "Response-function calculation of the elastic constants of Al metal"
+ tag: metal
+ body: |
+  For metals, the existence of partially occupied bands is
   a  complicating       feature for RF as well as GS calculations. &nbsp;Now
   would  be a good  time     to review <a href="lesson_base4.html">lesson 4</a> which dealt in detail with
   the interplay between   <b>       k</b>-sample convergence and Fermi-surface

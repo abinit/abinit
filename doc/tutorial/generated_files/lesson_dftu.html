@@ -40,23 +40,17 @@ complete.</p>
 <a name="list"></a>
 <h3><b> Lesson on DFT+U. Table of content:</b></h3>
 
-<ul>
-  <li><a href="#0">0.</a> Short summary of the DFT+U method
-  <li><a href="#1">1.</a> Ground state calculation of NiO using LDA
-  <li><a href="#2">2.</a> Ground state calculation of NiO using
-DFT+U with the FLL double-counting method.
-  <li><a href="#3">3.</a> Initialization of the density matrix in
-DFT+U for the NiO crystal
-  <li><a href="#4">4.</a> Ground state calculation of NiO using
-DFT+U with the AMF double-counting method.
-  <li><a href="#5">5.</a> Projected density of states in DFT+U
-</ul>
-<hr>
+<ul> 
+  <li><a href="#summary">0.</a> Short summary of the DFT+U method</li>
+  <li><a href="#LDA">1.</a> Ground state calculation of NiO using LDA</li>
+  <li><a href="#FLL">2.</a> DFT+U with the FLL double-counting</li>
+  <li><a href="#density_matrix">3.</a> Initialization of the density matrix</li>
+  <li><a href="#AMF">4.</a> AMF double-counting method</li>
+  <li><a href="#proj_DOS">5.</a> Projected density of states in LDA+U</li>
 
-<h3><b><a name="0">0.</a> Short summary
-of the DFT+U method</b></h3>
-
-<p>The standard Local Density Approximation
+ </ul> 
+ <hr><p><a name="summary"> </a><br><h3><b>0. Short summary of the DFT+U method</b></h3>
+ <p><p>The standard Local Density Approximation
 (LDA), where the exchange and correlation energy is fit to homogeneous
 electron gas results, is a functional that works well for a vast number of compounds.
 But, for some crystals, the interactions between electrons are so important that
@@ -89,15 +83,10 @@ and G. A. Sawatzky PRB 49, 14211 (1994))</p>
 <p>For some systems, the result might depend on the choice of the
 double-counting method. However, the two
 methods generally give similar results. </p>
-
-
+<br><br><a href=#top>Go to the top</a>
 <hr>
-
-<h3><b><a name="1">1.</a>
-Ground state
-calculation of NiO using LDA</b></h3>
-
-<p>You might create a subdirectory of the
+<p><a name="LDA"> </a><br><h3><b>1. Ground state calculation of NiO using LDA</b></h3>
+ <p><p>You might create a subdirectory of the
 ~abinit/tests/tutorial directory, and use it for the tutorial. In what follows,
 the names of files will be mentioned as if you were in this subdirectory</p>
 
@@ -172,16 +161,10 @@ the lack of correlation of the LDA. Alone, the homogeneous
 electron gas cannot correctly represent the interactions among d electrons of the
 Ni atom.  That is why we want to improve our functional, and be able
 to manage the strong correlation in NiO.</p>
-
-
-
+<br><br><a href=#top>Go to the top</a>
 <hr>
-
-<h3><b><a name="2">2.</a>
-Ground state
-calculation of NiO using DFT+U with the FLL double-counting</b></h3>
-
-<p>As seen previously, the LDA does not gives
+<p><a name="FLL"> </a><br><h3><b>2. DFT+U with the FLL double-counting</b></h3>
+ <p><p>As seen previously, the LDA does not gives
 good results for the magnetization and band gap compared to experiments.</p>
 
 <p>At this stage, we will try to improve the
@@ -259,13 +242,10 @@ is too primitive, and one needs to be able to initialize a spin-density matrix o
 in order to guide the SCF algorithm.</p> 
 <p>The fact that <a href="../../input_variables/generated_files/varset_gstate.html#spinat">spinat</a> works
 for NiO comes from the relative simplicity of this system.
-
+<br><br><a href=#top>Go to the top</a>
 <hr>
-
-<h3><b><a name="3">3.</a>
-Initialization of the density matrix in LDA+U for the NiO crystal</b></h3>
-
-<p><i>You should begin by running the
+<p><a name="density_matrix"> </a><br><h3><b>3. Initialization of the density matrix</b></h3>
+ <p><p><i>You should begin by running the
 tdftu_3.in file before continuing.</i></p>
 
 <p>In order to help the LDA+U find the ground state,
@@ -321,15 +301,10 @@ and equal to initial one !
 <p> Generally, the LDA+U functional meets the problem of multiple local minima, much more than the
 usual LDA or GGA functionals. One often gets trapped in a local minimum. Trying different starting
 points might be important...
-
-
+<br><br><a href=#top>Go to the top</a>
 <hr>
-
-<h3><b><a name="4">4.</a>
-Ground state
-calculation of NiO using LDA+U with the AMF double-counting method.</b></h3>
-
-<p>Now we will use the other implementation
+<p><a name="AMF"> </a><br><h3><b>4. AMF double-counting method</b></h3>
+ <p><p>Now we will use the other implementation
 for the double-counting term in LDA+U (in Abinit), known as AMF. As the FLL method, this method uses the number
 of electrons for each spin independently and
 the complete interactions U(m1,m2,m3,m4) and J(m1,m2,m3,m4). </p>
@@ -358,18 +333,16 @@ fact, this system is not very complex. But for other systems, the difference
 can be more important. FLL is designed to work well for crystal with diagonal
 occupation matrix with 0 or 1 for each spin. The AMF should be used when
 orbital occupations are near the average occupancies.</p>
-
-
+<br><br><a href=#top>Go to the top</a>
 <hr>
-
-<h3><b><a name="5">5.</a>
-Projected density of states in LDA+U </b></h3>
-<p>
-Using prtdos 3, you can now compute the projected d and f density of states.
+<p><a name="proj_DOS"> </a><br><h3><b>5. Projected density of states in LDA+U</b></h3>
+ <p>Using prtdos 3, you can now compute the projected d and f density of states.
 For more information about projected density of states, for more details see the
 <a href="lesson_paw1.html">PAW1</a> tutorial.
 </p>
 </div>
+<br><br><a href=#top>Go to the top</a>
+<hr>
 <script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
 
 </body>
