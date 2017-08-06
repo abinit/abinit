@@ -51,17 +51,16 @@ on the basis of the linear-response part of ABINIT, i.e. :
 <a name="list"></a>
 <h3><b> Parallelism in the linear-response case. Table of content:</b></h3>
 
-<ul>
-  <li><a href="#1">1</a>. The structure of the parallelism for the linear-response (Density-Functional Perturbation Theory) part of ABINIT
-  <li><a href="#2">2</a>. Computation of one dynamical matrix (q =0.25 -0.125 0.125) for FCC aluminum 
-  <li><a href="#3">3</a>. Computation of one perturbation for a slab of 29 atoms of barium titanate
-</ul>
-<hr>
-<h3><b>
-<a name="1">1. The structure of the parallelism for the linear-response (Density-Functional Perturbation Theory) part of ABINIT</a> 
-</b> </h3>
+<ul> 
+  <li><a href="#structure">1.</a> The structure of the parallelism for the linear-response (Density-Functional Perturbation Theory) part of ABINIT</li>
+  <li><a href="#aluminum">2.</a> Computation of one dynamical matrix (q =0.25 -0.125 0.125) for FCC aluminum</li>
+  <li><a href="#BaTiO3">3.</a> Computation of one perturbation for a slab of 29 atoms of barium titanate</li>
 
-<b>1.1.</b> Let us recall first the basic structure of typical linear-response calculations. This is summarized in box 1.
+ </ul> 
+ <hr><br><a name="structure"> </a>
+<a name="1"> </a>
+<h3><b>1. The structure of the parallelism for the linear-response (Density-Functional Perturbation Theory) part of ABINIT</b></h3>
+ <p><b>1.1.</b> Let us recall first the basic structure of typical linear-response calculations. This is summarized in box 1.
 <br>
 <img style="height: 550px; width: 900px;" alt="Schema 1"
  src="../documents/lesson_paral_dfpt/DFPT_Structure.png"><br>
@@ -131,13 +130,12 @@ to use a specific command line according to the operating system and
 architecture of the computer you are using. This can be for instance:
 mpirun -np 16 abinit <br>
 </span><span style="font-weight: bold;"></span>
-
-<p><hr>
-<h3><b>
-<a name="2">2. Computation of one dynamical matrix (q =0.25 -0.125 0.125) for FCC aluminum</a>
-</b> </h3>
-
-We start by treating the case of a small systems, namely FCC aluminum, for which there is only one atom
+<br><br><a href=#top>Go to the top</a>
+<hr>
+<br><a name="aluminum"> </a>
+<a name="2"> </a>
+<h3><b>2. Computation of one dynamical matrix (q =0.25 -0.125 0.125) for FCC aluminum</b></h3>
+ <p>We start by treating the case of a small systems, namely FCC aluminum, for which there is only one atom
 per unit cell. Of course, many k points are needed. 
 <br>
 The input files can be found in the directory ~abinit/tests/tutoparal/Input .
@@ -288,12 +286,12 @@ In the output file provided as a reference (with four computing cores), the "inw
 is 7.387 seconds, on a total of 48.211 secs. By increasing the number of computing cores, it will be
 possible to decrease the total time, but not below the value of 7.387 seconds in any case.
 You should observe a similar behaviour with your own tests.
+<br><br><a href=#top>Go to the top</a>
 <hr>
-<h3><b>
-<a name="3">3. Computation of one perturbation for a slab of 29 atoms of barium titanate</a>
-</b> </h3>
-
-<b>3.1.</b> This test, with 29 atoms, is slower, but scales better than the Al FCC case. It consists in the
+<br><a name="BaTiO3"> </a>
+<a name="3"> </a>
+<h3><b>3. Computation of one perturbation for a slab of 29 atoms of barium titanate</b></h3>
+ <p><b>3.1.</b> This test, with 29 atoms, is slower, but scales better than the Al FCC case. It consists in the
 computation of one perturbation at qpt 0.0 0.25 0.0 for a 29 atom slab of barium titanate, artificially terminated
 by a double TiO2 layer on each face, with a reasonable
 k-point sampling of the Brillouin zone.
@@ -427,6 +425,8 @@ basics of the current implementation of the parallelism for the linear-response
 part of ABINIT, then you have explored two test cases : one for a small cell materials,
 with lots of k points, and another one, medium-size, in which the k point and band parallelism
 can be used efficiently even for more than one hundred computing cores.
+<br><br><a href=#top>Go to the top</a>
+<hr>
 <script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
 
 </body>
