@@ -15,8 +15,8 @@
 
 <h2>Explore the various features of the KGB parallelization scheme</h2>
 <hr>
-<hr><p>This tutorial will indicate how to perform GS calculations on hundreds processors using ABINIT.
-</p><p>You will learn how to use some keywords related to the "KGB"
+This tutorial will indicate how to perform GS calculations on hundreds processors using ABINIT.
+<p>You will learn how to use some keywords related to the "KGB"
 parallelization scheme. "K" stands for "k-point", "G" refers to the wavevector of a planewave, and "B" stands for a "Band".
 On one hand, you will see how to improve the
 speed-up of your calculations and, on the other hand, how to increase
@@ -25,7 +25,7 @@ the convergence speed of a self consistent field calculation. <br>
       access to at least a 200 CPU core parallel computer.<i> </i> </p>
 <p>You are supposed to know already some basics of parallelism in ABINIT, explained in the tutorial 
 <a href="lesson_basepar.html">A first introduction to ABINIT in parallel</a>.
-</p><p>On the contrary, the present tutorial is not a prerequisite for other tutorials about parallelism in ABINIT.</p><p>
+</p><p>On the contrary, the present tutorial is not a prerequisite for other tutorials about parallelism in ABINIT.
 <hr>
 <h5>Copyright (C) 2000-2017 ABINIT group (FB)
 <script type="text/javascript" src="../../js_files/copyright.js"> </script>
@@ -36,28 +36,21 @@ the convergence speed of a self consistent field calculation. <br>
 <a name="list"></a>
 <h3><b> Parallelism for the ground state. Table of content:</b></h3>
 
-<ul>
+<ul> 
+  <li><a href="#None">1.</a> Introduction</li>
+  <li><a href="#simple">2.</a> A simple way to begin...</li>
+  <li><a href="#sophisticated">3.</a> ... which is however coherent with a more sophisticated method</li>
+  <li><a href="#bandpp">4.</a> Meaning of <a href="../../input_variables/generated_files/varset_paral.html#bandpp">bandpp</a>: part 1 (convergence)</li>
+  <li><a href="#efficiency">5.</a> Meaning of <a href="../../input_variables/generated_files/varset_paral.html#bandpp">bandpp</a>: part 2 (efficiency)</li>
+  <li><a href="#KGB">6.</a> The KGB parallelization</li>
 
-<li><a href="#0">0.</a> Introduction<br>
-</li>
-  <li><a href="#1">1.</a> A simple way to begin...<br>
-  </li>
-
-<li><a href="#2">2.</a> ... which is coherent with a more sophisticated way <br>
-</li>
-<li><a href="#3">3.</a> Meaning of <a href="../../input_variables/generated_files/varset_paral.html#bandpp">bandpp</a>: part 1<br>
- </li>
-<li><a href="#4">4.</a> Meaning of <a href="../../input_variables/generated_files/varset_paral.html#bandpp">bandpp</a>: part 2  </li>
-  <li><a href="#5">5.</a> The KGB parallelization</li></ul>
-
-
-<hr>
-<h3>Notice:&nbsp;</h3>
-
-<p>
-<i>Before continuing you might work in a different subdirectory, as for the other lessons. 
-Why not "work_paral_gspw" ? All the input files can be found in the ~abinit/tests/tutoparal/Input directory. 
-You might have to adapt them to the path of the directory in which you have decided to perform your runs. 
+ </ul> 
+ <hr><br><a name="None"> </a>
+<a name="1"> </a>
+<h3><b>1. Introduction</b></h3>
+ <p><i>Before continuing you might work in a different subdirectory, as for the other lessons.
+Why not "work_paral_gspw" ? All the input files can be found in the ~abinit/tests/tutoparal/Input directory.
+You might have to adapt them to the path of the directory in which you have decided to perform your runs.
 You can compare your results with reference output files located in ~abinit/tests/tutoparal/Refs.
 </i></p><p><i>In the following, when "run ABINIT
       over nn CPU cores" appears, you have
@@ -66,16 +59,10 @@ You can compare your results with reference output files located in ~abinit/test
       instance,</i></p>
 <pre><i>mpirun -n nn abinit &lt; abinit.files <br></i></pre>
 <p><i>or the use of a specific
-      submission file. Some scripts are given as examples in the directory ~abinit/doc/tutorial/lesson_paral_gspw/. 
+      submission file. Some scripts are given as examples in the directory ~abinit/doc/tutorial/lesson_paral_gspw/.
       You can adapt them to your own calculations.<br>
 </i>
-</p>
-<hr><a name="0">&nbsp;</a>
-<p>
-</p>
 
-
-<h3><b>0. Introduction</b></h3>
 
 <p>When the size of the system increases up to 100 or 1000 atoms, it is
 usually impossible to perform ab initio calculations on a single computing core. This is
@@ -138,14 +125,12 @@ However, </font>even if you scan them with attention<font id="text">,&nbsp;
 you won't learn the answer to the most frequently asked question. Why
 this parallelization is named KGB? We don't know. Some people say that the reason comes from the <span style="font-weight: bold;">K</span>-point, the plane waves <span style="font-weight: bold;">G</span> and the <span style="font-weight: bold;">B</span>ands, but you can imagine everything you want.<br>
 </font>
-<p><br>
-</p>
-
-
-<hr><a name="1">&nbsp;</a>
-<h3><b>1. A simple way to begin... <br>
-</b></h3>
-<p>One of the most simple way to launch the KGB parallelization in ABINIT is to add
+<br><br><a href=#top>Go to the top</a>
+<hr>
+<br><a name="simple"> </a>
+<a name="2"> </a>
+<h3><b>2. A simple way to begin...</b></h3>
+ <p>One of the most simple way to launch the KGB parallelization in ABINIT is to add
 just one input variable to the sequential input file. 
 This is <a href="../../input_variables/generated_files/varset_paral.html#paral_kgb">paral_kgb</a> and controls everything concerning the KGB parallelization: 
 the use of the LOBPCG eigensolver (<a href="../../input_variables/generated_files/varset_dev.html#wfoptalg">wfoptalg</a>=4 or 14) <font id="text">of A. Knyazev</font>, the parallel 3dim-FFT (<a href="../../input_variables/generated_files/varset_dev.html#fftalg">fftalg</a>=401) <font id="text">written by S. Goedecker</font>,
@@ -186,13 +171,12 @@ In a second step you can launch ABINIT in parallel on 108 processors by changing
 <br>
 You can now perform your calculations using the KGB parallelization
 in ABINIT. But somehow, you did it without understanding how you got the result... <br>
-<br>
-<hr><a name="2">&nbsp;</a>
-<h3><b>2. ... which is however coherent with a more sophisticated method<br>
-</b></h3>
-
-
-In this part we will try to recover the previous result, but with a
+<br><br><a href=#top>Go to the top</a>
+<hr>
+<br><a name="sophisticated"> </a>
+<a name="3"> </a>
+<h3><b>3. ... which is however coherent with a more sophisticated method</b></h3>
+ <p>In this part we will try to recover the previous result, but with a
 more comprehensive understanding of what is happening. As shown above, the
 couple (<a href="../../input_variables/generated_files/varset_paral.html#npband">npband</a>x<a href="../../input_variables/generated_files/varset_paral.html#npfft">npfft</a>) of
 input variables can have various values: (108x1), (54x2), (36x3),
@@ -221,7 +205,7 @@ calculation can be retrieved using the shell command:<span style="font-family: m
 <pre><span style="font-family: monospace;">&gt;&gt; </span>grep Proc *out<br>&gt;&gt; tgspw_02.009-12.out:- Proc.   0 individual time (sec): cpu=         88.3  wall=         88.3<br>&gt;&gt; tgspw_02.012-09.out:- Proc.   0 individual time (sec): cpu=         75.2  wall=         75.2<br>&gt;&gt; tgspw_02.018-06.out:- Proc.   0 individual time (sec): cpu=         63.7  wall=         63.7<br>&gt;&gt; tgspw_02.027-04.out:- Proc.   0 individual time (sec): cpu=         69.9  wall=         69.9<br>&gt;&gt; tgspw_02.036-03.out:- Proc.   0 individual time (sec): cpu=        116.0  wall=        116.0<br>&gt;&gt; tgspw_02.054-02.out:- Proc.   0 individual time (sec): cpu=        104.7  wall=        104.7<br>&gt;&gt; tgspw_02.108-01.out:- Proc.   0 individual time (sec): cpu=        141.5  wall=        141.5<br></pre>
 
 
-<p>As far as the timing is concerned, the best distributions are then the ones proposed above in section <a href="#1">1.</a>: that is to say the couples (18x6) and (27x4). So the prediction was pretty good.<br>
+<p>As far as the timing is concerned, the best distributions are then the ones proposed above in section <a href="#2">2.</a>: that is to say the couples (18x6) and (27x4). So the prediction was pretty good.<br>
 </p>Up to now, we have not learned more than in section <a href="#1">1.</a>. We have so far only considered the timing (the efficiency) of one
 electronic step, or 10 electronic steps as this is limited in the input
 file. However, when the <a href="../../input_variables/generated_files/varset_paral.html#npband">npband</a>
@@ -257,9 +241,12 @@ slightly quicker per electronic step.<br>
  <br>
 Note: you can verify that the convergence is not changed when the
 <a href="../../input_variables/generated_files/varset_paral.html#npfft">npfft</a> value is modified. The same results will be obtained, step by step.<br>
-<hr><a name="3">&nbsp;</a>
-<h3><b>3. Meaning of </b><a href="../../input_variables/generated_files/varset_paral.html#bandpp">bandpp</a><b>: part 1 (convergence)<br>
-</b></h3>We have seen in the previous section that the best convergence
+<br><br><a href=#top>Go to the top</a>
+<hr>
+<br><a name="bandpp"> </a>
+<a name="4"> </a>
+<h3><b>4. Meaning of <a href="../../input_variables/generated_files/varset_paral.html#bandpp">bandpp</a>: part 1 (convergence)</b></h3>
+ <p>We have seen in the previous section that the best convergence
 is obtained when the size of the block is the largest. This size is
 related to the <a href="../../input_variables/generated_files/varset_paral.html#npband">npband</a>
 input variable. But not only. It is possible to increase the size of
@@ -305,16 +292,17 @@ does not affect the convergence. <br>
 <p><span style="font-weight: bold; font-style: italic;">It is possible to modify the distribution of processors,
 without changing the convergence, by reducing npband and increasing bandpp proportionally. <br>
 </span></p>
-
-<hr><a name="4">&nbsp;</a>
-<h3><b>4. Meaning of&nbsp;</b><a href="../../input_variables/generated_files/varset_paral.html#bandpp">bandpp</a><b>: part 2 (efficiency)<br>
-</b></h3>
-<p>In the previous section, we showed that the convergence doesn't change if
+<br><br><a href=#top>Go to the top</a>
+<hr>
+<br><a name="efficiency"> </a>
+<a name="5"> </a>
+<h3><b>5. Meaning of <a href="../../input_variables/generated_files/varset_paral.html#bandpp">bandpp</a>: part 2 (efficiency)</b></h3>
+ <p>In the previous section, we showed that the convergence doesn't change if
 <a href="../../input_variables/generated_files/varset_paral.html#bandpp">bandpp</a> and
 <a href="../../input_variables/generated_files/varset_paral.html#npband">npband</a> change in inverse proportions.
 What about the influence of&nbsp;<a href="../../input_variables/generated_files/varset_paral.html#bandpp">bandpp</a> 
 if&nbsp; you fix the distribution? Two cases have to be treated separately.</p>
-<p>You can see, in the previous calculations of section <a href="#3">3.</a>,
+<p>You can see, in the previous calculations of section <a href="#4">4</a>,
 that the timing increases when <a href="../../input_variables/generated_files/varset_paral.html#bandpp">bandpp</a> increases:</p>
 <pre>&gt;&gt; grep Proc tgspw_03.bandpp1.out tgspw_03.bandpp2.out<br>&gt;&gt; tgspw_03.bandpp1.out:- Proc.   0 individual time (sec): cpu=        121.4  wall=        121.4<br>&gt;&gt; tgspw_03.bandpp2.out:- Proc.   0 individual time (sec): cpu=        150.7  wall=        150.7<br></pre>
 <p>while there are fewer electronic iterations for
@@ -371,9 +359,12 @@ performed at the Gamma point, you are strongly encouraged to use bandpp=2...
 or more </span><span style="font-weight: bold; font-style: italic;">if you need
 to improve the convergence whatever the timing</span><span style="font-weight: bold; font-style: italic;">.</span><br>
 <br>
-<hr><a name="5">&nbsp;</a>
-<h3><b>5. The KGB parallelization.</b></h3>
-<p>Up to now, we only performed a GB parallelization. This implies
+<br><br><a href=#top>Go to the top</a>
+<hr>
+<br><a name="KGB"> </a>
+<a name="6"> </a>
+<h3><b>6. The KGB parallelization</b></h3>
+ <p>Up to now, we only performed a GB parallelization. This implies
 parallelization over 2 levels of PWs or over 2 levels of bands and FFTs,
 for different sections of the code (see the <a href="https://arxiv.org/abs/0707.3405">paper</a>
 or <a href="http://www.abinit.org/community/events/program3rd">presentation</a>). If the system
@@ -381,7 +372,7 @@ has more than 1 <span style="font-weight: bold;">k</span>-point,
 one can add a third level of parallelization and perform a real KBG
 parallelization. There is no additional difficulty in adding 
 processors on this level. In order to explain the procedure, we
-restart with the same input file that was used in section <a href="#2">2.</a>
+restart with the same input file that was used in section <a href="#3">3</a>
 and add a denser M-P grid (see the input
 file tgspw_05.in). In
 this case, the system has 4 <span style="font-weight: bold;">k</span>-points in
@@ -455,6 +446,8 @@ To do in the future:<span style="font-weight: bold; font-style: italic;"></span>
 <ul>
 <li><a href="">6.</a> What else about the convergency: wfoptalg, nline 
   </li><li><a href="">7.</a> MPI-IO is direct </li><li><a href="">8.</a> Future: only one keyword, then ... none.</li></ul>
+<br><br><a href=#top>Go to the top</a>
+<hr>
 <script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
 
 </body>
