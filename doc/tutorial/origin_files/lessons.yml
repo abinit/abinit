@@ -110,7 +110,7 @@
     name : paral_gswvl
     keyword : Parallelism for the ground state using wavelets
     authors : DC
-    subtitle : Boron cluster, alkane.u 
+    subtitle : Boron cluster, alkane molecule...
 - !components
     name : paral_mbt
     keyword : Parallelism for many-body calculations
