@@ -33,7 +33,7 @@
     subtitle : Aluminum, the bulk and the surface.
 - !components
     name : basepar
-    keyword : Lesson on basic parallelism.
+    keyword : Lesson on basic parallelism
     authors : YP,XG
     subtitle : Parallelism in ABINIT, generalities and environments.
 - !components

@@ -3,7 +3,7 @@
 <!-- It is useless to modify it. Modify the related .yml  or .bib files instead.         -->
 <!--                                                                                     -->
 <html>
-<head><title>Lesson on basic parallelism.</title>
+<head><title>Lesson on basic parallelism</title>
 <link rel=stylesheet type="text/css" href="../formabinit.css">
 </head>
 <body bgcolor="#ffffff">
@@ -11,7 +11,7 @@
 <hr>
 <a name="top"></a>
 
-<h1>ABINIT tutorial. Lesson on basic parallelism....</h1>
+<h1>ABINIT tutorial. Lesson on basic parallelism...</h1>
 
 <h2>Parallelism in ABINIT, generalities and environments.</h2>
 <hr>
@@ -45,43 +45,18 @@ limitation to the maximal speed-up that can be achieved.</p>
 <script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
 
 <a name="list"></a>
-<h3><b> Lesson on basic parallelism.. Table of content:</b></h3>
+<h3><b> Lesson on basic parallelism. Table of content:</b></h3>
 
-<ul>
-<li><a href="#1">1.</a> Generalities</li>
-<li><a href="#2">2.</a> Parallel environments
+<ul> 
+  <li><a href="#generalities">1.</a> Generalities</li>
+  <li><a href="#environments">2.</a> Characteristics of parallel environments</li>
+  <li><a href="#parts">3.</a> What parts of ABINIT are parallel?</li>
+  <li><a href="#example">4.</a> A simple example of parallelism in ABINIT</li>
+  <li><a href="#implementation">5.</a> Details of the implementation</li>
 
-<ul>
-<li>Generalities</li>
-<li>MPI</li>
-<li>OpenMP</li>
-<li>Scalapack</li>
-<li>Fast/slow communications</li>
-</ul></li>
-<li><a href="#3">3.</a> What parts of ABINIT are parallel?</li>
-<li><a href="#4">4.</a> A simple example of parallelism in ABINIT
-<ul>
-<li>Running a job</li>
-<li>Parallelism over the k-points</li>
-<li>Parallelism over the spins</li>
-<li>Number of computing cores to accomplish a task</li>
-<li>Evidencing overhead</li>
-</ul></li>
-
-<li><a href="#5">5.</a> Details of the implementation
-
-<ul>
-<li>The MPI toolbox in ABINIT</li>
-<li>How to parallelize a routine: some hints</li>
-</ul></li>
-
-</ul>
-
-
-<hr>
-
-<h2><a name="1"></a>1. Generalities</h2>
-
+ </ul> 
+ <hr><p><a name="generalities"> </a><br><h3><b>1. Generalities</b></h3>
+ <p><a name="1"></a>
 <p>With the broad availability of multi-core processors, everybody 
 now has a parallel machine at hand. ABINIT will be able to take advantage of
 the availability of several cores for most of its capabilities, be it
@@ -113,12 +88,10 @@ program and that you are familiar with the peculiarities of your system.
 Please remember that, as there is no standard way of setting up a
 parallel environment, we are not able to provide you with support beyond
 ABINIT itself.</p>
-
+<br><br><a href=#top>Go to the top</a>
 <hr>
-
-<h2><a name="2"></a>2. Characteristics of parallel environments</h2>
-
-<h3>Generalities</h3>
+<p><a name="environments"> </a><br><h3><b>2. Characteristics of parallel environments</b></h3>
+ <p><a name="2"></a>
 <p>Different software solutions can be used to benefit from parallelism.
 Most of ABINIT parallelism is based on MPI, but some additional speed-up
 (or a better distribution of data, allowing to run bigger calculations)
@@ -209,11 +182,10 @@ linked using a fast network, but includes some connections based e.g. on
 Ethernet, then, you might not be able to benefit from the speed-up
 announced in the tutorials. You have to perform some tests on your
 actual machine to gain knowledge of it.</p>
-
+<br><br><a href=#top>Go to the top</a>
 <hr>
-
-<h2><a name="3"></a>3. What parts of ABINIT are parallel?</h2>
-
+<p><a name="parts"> </a><br><h3><b>3. What parts of ABINIT are parallel?</b></h3>
+ <p><a name="3"></a>
 <p>Parallelizing a code is a very delicate and complicated task, thus
 do not expect that things will systematically go faster just because you
 are using a parallel version of ABINIT. Please keep also in mind that in
@@ -242,13 +214,11 @@ hundreds of processors.</p>
 </ul>
 <p>are, on the contrary, quite easy to use. An example of such parallelism
 will be given in the next section.</p>
-
+<br><br><a href=#top>Go to the top</a>
 <hr>
-
-<h2><a name="4"></a>4. A simple example of parallelism in ABINIT</h2>
-
+<p><a name="example"> </a><br><h3><b>4. A simple example of parallelism in ABINIT</b></h3>
+ <p><a name="4"></a>
 <h3>Running a job</h3>
-
 <p><i>Before starting, you might consider working in a different
 subdirectory as for the other lessons. Why not "Work_paral" ?</i></p>
 
@@ -460,11 +430,10 @@ resulting from the increasing amount of communication between the
 processors. The loss of efficiency is highly dependent on the
 implementation and linked to the decreasing charge on each processor
 too.</p>
-
+<br><br><a href=#top>Go to the top</a>
 <hr>
-
-<h2><a name="5"></a>5. Details of the implementation</h2>
-
+<p><a name="implementation"> </a><br><h3><b>5. Details of the implementation</b></h3>
+ <p><a name="5"></a>
 <h3>The MPI toolbox in ABINIT</h3>
 
 <p>The ABINIT-specific MPI routines are located in different
@@ -539,6 +508,8 @@ in all cases, and have their own pre-processed sections. The cleaning and closin
 stuff is done in a central part of abinit at the end of the run.</p>
 
 &nbsp;<br />
+<br><br><a href=#top>Go to the top</a>
+<hr>
 <script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
 
 </body>
