@@ -53,19 +53,16 @@ and the
 <a name="list"></a>
 <h3><b> Lesson on static non-linear properties. Table of content:</b></h3>
 
-<ul>
-  <li><a href="#0">Part-0. Ground-state properties of AlAs and general parameters</a>
-  <li><a href="#1">Part-1. Linear and non-linear responses from density functional perturbation theory</a>
-  <li><a href="#2">Part-2. Finite difference computation of the Raman tensor</a>
-</ul>
-<hr>
+<ul> 
+  <li><a href="#AlAs">1.</a> Ground-state properties of AlAs and general parameters</li>
+  <li><a href="#DFPT">2.</a> Linear and non-linear responses from density functional perturbation theory (DFPT)</li>
+  <li><a href="#Raman_finite">3.</a> Finite difference calculation of the Raman tensor</li>
 
-<a name="0">&nbsp;</a>
-<h3><b>
-Part-0. Ground-state properties of AlAs and general parameters
-</b></h3>
-
-<p><i>Before beginning, you might consider to work in a different
+ </ul> 
+ <hr><br><a name="AlAs"> </a>
+<a name="1"> </a>
+<h3><b>1. Ground-state properties of AlAs and general parameters</b></h3>
+ <p><i>Before beginning, you might consider to work in a different
 subdirectory as for the other lessons.
 Why not create "Work-NLO" in ~abinit/tests/tutorespfn/Input ?
 </i>
@@ -128,15 +125,12 @@ Before going further, you might refresh your mind concerning the other variables
 <a href="../../input_variables/generated_files/varset_rlx.html#ecutsm">ecutsm</a>,
 <a href="../../input_variables/generated_files/varset_rlx.html#dilatmx">dilatmx</a>,
 <a href="../../input_variables/generated_files/varset_gstate.html#nbdbuf">nbdbuf</a>.
-
+<br><br><a href=#top>Go to the top</a>
 <hr>
-
-<a name="1">&nbsp;</a>
-<h3><b>
-Part-1. Linear and non-linear responses from density functional perturbation theory (DFPT)
-</b></h3>
-
-<p>As a theoretical support to this section of the tutorial, you might consider reading the following article:
+<br><a name="DFPT"> </a>
+<a name="2"> </a>
+<h3><b>2. Linear and non-linear responses from density functional perturbation theory (DFPT)</b></h3>
+ <p>As a theoretical support to this section of the tutorial, you might consider reading the following article:
 <cite> <br>M. Veithen, X. Gonze, and Ph. Ghosez,
        <br>Nonlinear optical susceptibilities, Raman efficiencies,
            and electro-optic tensors from first-principles density functional perturbation theory
@@ -382,19 +376,12 @@ and mu is the reduced mass of the system (1/mu = 1/m_Al + 1/m_As). From the prev
         a(TO) (Unit: Ang^2)= -7.7233 (-8.4222112)  [-8.48]
         a(LO) (Unit: Ang^2)= -10.4317 (-12.418168) [-12.48] </pre>
 </ul>
-
-
-
-
+<br><br><a href=#top>Go to the top</a>
 <hr>
-
-<a name="2">&nbsp;</a>
-<h3><b>
-Part-2. Finite difference calculation of the Raman tensor.
-</b></h3>
-
-<p>
-For comparison with the DPFT calculation,
+<br><a name="Raman_finite"> </a>
+<a name="3"> </a>
+<h3><b>3. Finite difference calculation of the Raman tensor</b></h3>
+ <p>For comparison with the DPFT calculation,
 we can compute dchi/dtau for the Al nucleus from finite differences.
 In practice, this is achieved by computing the linear optical susceptibility for 3 different positions of  the Al nucleus.
 This is done with the file ~abinit/tests/tutorespfn/Input/tnlo_6.in, however with the unrealistic cutoff of 2.8 Ha.
@@ -508,6 +495,8 @@ The DFPT approach is the most convenient and avoid a lot of human work.
 Everything is reported together (not only dchi/dtau but also the full Raman polarizability tensors)
 and in appropriate units.
 It should therefore be considered as the best choice (when available, as in ABINIT).
+<br><br><a href=#top>Go to the top</a>
+<hr>
 <script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
 
 </body>

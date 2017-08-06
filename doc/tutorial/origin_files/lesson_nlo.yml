@@ -1,6 +1,7 @@
-# This YAML file contains the introduction as well as the body (including the table of content) of the html lesson.
-# In order to modify the other parts, modify the file lessons.html .
-# This is the introduction ...
+## This YAML file contains the introduction as well as the body of the html lesson.
+## In order to modify the other parts, modify the file lessons.html .
+
+## This is the introduction ...
 intro : |
   <p>This lesson aims at showing how to get the following non-linear physical properties, for an insulator :
   <ul>
@@ -30,21 +31,17 @@ intro : |
   
   
   <p>This lesson should take about 1 hour and 30 minutes. </p>
-# This is the body, including the table of content ...
-body : |
-  <ul>
-    <li><a href="#0">Part-0. Ground-state properties of AlAs and general parameters</a>
-    <li><a href="#1">Part-1. Linear and non-linear responses from density functional perturbation theory</a>
-    <li><a href="#2">Part-2. Finite difference computation of the Raman tensor</a>
-  </ul>
-  <hr>
-  
-  <a name="0">&nbsp;</a>
-  <h3><b>
-  Part-0. Ground-state properties of AlAs and general parameters
-  </b></h3>
-  
-  <p><i>Before beginning, you might consider to work in a different
+
+## Now come the different sections, numbered.
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec1:
+ title: "Ground-state properties of AlAs and general parameters"
+ tag: AlAs
+ body: |
+  <i>Before beginning, you might consider to work in a different
   subdirectory as for the other lessons.
   Why not create "Work-NLO" in ~abinit/tests/tutorespfn/Input ?
   </i>
@@ -107,15 +104,15 @@ body : |
   [[ecutsm]],
   [[dilatmx]],
   [[nbdbuf]].
-  
-  <hr>
-  
-  <a name="1">&nbsp;</a>
-  <h3><b>
-  Part-1. Linear and non-linear responses from density functional perturbation theory (DFPT)
-  </b></h3>
-  
-  <p>As a theoretical support to this section of the tutorial, you might consider reading the following article:
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec2:
+ title: "Linear and non-linear responses from density functional perturbation theory (DFPT)"
+ tag: DFPT
+ body: |
+  As a theoretical support to this section of the tutorial, you might consider reading the following article:
   <cite> <br>M. Veithen, X. Gonze, and Ph. Ghosez,
          <br>Nonlinear optical susceptibilities, Raman efficiencies,
              and electro-optic tensors from first-principles density functional perturbation theory
@@ -361,18 +358,14 @@ body : |
           a(TO) (Unit: Ang^2)= -7.7233 (-8.4222112)  [-8.48]
           a(LO) (Unit: Ang^2)= -10.4317 (-12.418168) [-12.48] </pre>
   </ul>
-  
-  
-  
-  
-  <hr>
-  
-  <a name="2">&nbsp;</a>
-  <h3><b>
-  Part-2. Finite difference calculation of the Raman tensor.
-  </b></h3>
-  
-  <p>
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec3:
+ title: "Finite difference calculation of the Raman tensor"
+ tag: Raman_finite
+ body: |
   For comparison with the DPFT calculation,
   we can compute dchi/dtau for the Al nucleus from finite differences.
   In practice, this is achieved by computing the linear optical susceptibility for 3 different positions of  the Al nucleus.
