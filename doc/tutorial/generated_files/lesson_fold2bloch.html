@@ -40,20 +40,17 @@ See also the <a href="../../users/generated_files/help_fold2bloch.html#">fold2bl
 <a name="list"></a>
 <h3><b> Lesson on fold2bloch. Table of content:</b></h3>
 
-<ul>
-  <li><a href="#1">1.</a> Creating the structure.
-  <li><a href="#2">2.</a> Plotting the supercell band structure.
-  <li><a href="#3">3.</a> Running fold2Bloch.
-  <li><a href="#4">4.</a> Plotting the unfolded band structure using a MatLab script (provided).
-</ul>
+<ul> 
+  <li><a href="#supercell">1.</a> Creating a Hydrogen supercell structure</li>
+  <li><a href="#band">2.</a> Folded band structure</li>
+  <li><a href="#spectral">3.</a> Bloch spectral weights with fold2Bloch</li>
+  <li><a href="#unfolded">4.</a> Unfolded band structure</li>
 
-<hr>
-<a name="1">&nbsp;</a>
-<h3><b>
-1. Creating a Hydrogen supercell structure.
-</b></h3>
- <p>
-Let's begin with the simplest structure: a lattice of hydrogen atoms. It is a convenient starting point since the hybridization between s-orbitals results in a well known dispersion relation for the energy eigenvalues as a function of the wave vector <I>"k"</I>
+ </ul> 
+ <hr><br><a name="supercell"> </a>
+<a name="1"> </a>
+<h3><b>1. Creating a Hydrogen supercell structure</b></h3>
+ <p>Let's begin with the simplest structure: a lattice of hydrogen atoms. It is a convenient starting point since the hybridization between s-orbitals results in a well known dispersion relation for the energy eigenvalues as a function of the wave vector <I>"k"</I>
 </p>
 
 <p align="center"><I>
@@ -99,13 +96,12 @@ and <a href="../../tests/tutorial/Input/tfold2bloch_1.in">&#126;abinit/tests/tut
 <p>Now you are ready to run Abinit. Issue the following :
 <li><i> abinit tfold2bloch_1.files >& tfold1bloch_1.log &  </i></li>
 <p>This will generate a self consistent charge density for the 6 Hydrogen atom supercell structure, and the wave function file, tfold2bloch_1o_WFK, which is needed for unfolding with fold2Bloch.
-
+<br><br><a href=#top>Go to the top</a>
 <hr>
-<a name="2">&nbsp;</a>
-<h3><b>
-2. Plotting the band structure
-</b></h3>
-Before we proceed with the unfolding, let's plot the "standard" band structure of a supercell. 
+<br><a name="band"> </a>
+<a name="2"> </a>
+<h3><b>2. Folded band structure</b></h3>
+ <p>Before we proceed with the unfolding, let's plot the "standard" band structure of a supercell. 
 We will be looking for signatures of the zone folding. In order to do this you will need the following scripts:
 <pre>
 <p style="padding:6px; color: black; background-color: lightsteelblue">
@@ -132,15 +128,12 @@ This will generate an output file: tfold2bloch_1o_DS2_EIG.dat
 </p>
 <p>
 Here you can see that the band structure does not look like a cosine function along directions Y-Gamma and Z-Gamma. The band structure is folded according to the multiplicity along those directions used when constructing the supercell (Fig. 1b).
-<p>
-
+<br><br><a href=#top>Go to the top</a>
 <hr>
-<a name="3">&nbsp;</a>
-<h3><b>
-3. Calculation of Bloch spectral weights with fold2Bloch.
-</b></h3>
-
-Next step is to execute fold2Bloch using the wave function file from the 2nd dataset, and  multiplicity in the corresponding directions, used when constructing the super-cell (x:y:z), included as part of the command line arguments. For this example the multiplicity used was (1:2:3)
+<br><a name="spectral"> </a>
+<a name="3"> </a>
+<h3><b>3. Bloch spectral weights with fold2Bloch</b></h3>
+ <p>Next step is to execute fold2Bloch using the wave function file from the 2nd dataset, and  multiplicity in the corresponding directions, used when constructing the super-cell (x:y:z), included as part of the command line arguments. For this example the multiplicity used was (1:2:3)
 
 <p>Execute the following command:
 <li><i> fold2Bloch tfold2bloch_WFK 1:2:3 </i></li>
@@ -214,13 +207,12 @@ This can have some interesting consequences for transport or optical properties,
 <p>
 Note: the whole output is much bigger than the sample provided above. For the band structure visualization proceed to the next step.
 </p>
-
+<br><br><a href=#top>Go to the top</a>
 <hr>
-<a name="4">&nbsp;</a>
-<h3><b> 
-4. Plotting unfolded band structure.
-</b></h3>
-Lets visualize the unfolded band structure. It is different from a regular band structure plot, though. Now we have one additional dimension -- the Bloch spectral weight. There are several alternative visualization strategies. Here we use the scatter plot with the point size proportional to the spectral weight. The following MatLab script will help you build a graph for any fold2Bloch output:  <a href="../documents/lesson_fold2Bloch/ubs_dots.m" target="helpsimg">ubs_dots.m</a>
+<br><a name="unfolded"> </a>
+<a name="4"> </a>
+<h3><b>4. Unfolded band structure</b></h3>
+ <p>Lets visualize the unfolded band structure. It is different from a regular band structure plot, though. Now we have one additional dimension -- the Bloch spectral weight. There are several alternative visualization strategies. Here we use the scatter plot with the point size proportional to the spectral weight. The following MatLab script will help you build a graph for any fold2Bloch output:  <a href="../documents/lesson_fold2Bloch/ubs_dots.m" target="helpsimg">ubs_dots.m</a>
 </p>
 
 <p>Make sure the following parameters in ubs_dots.m are set as follows: 
@@ -258,7 +250,9 @@ finpt='tfold2bloch_1o.f2b';
 As you can see the unfolded band structure perfectly reproduces the anticipated dispersion relation <I><font size="4">E(k) = E<font size=2>0 </font>- 2A cos(k b)</font></I>. We can even estimate the magnitude of the hopping matrix element between adjacent atoms Vss<font size=1>G</font> = -A. The band width is 4A = (-1) - (-12) = 11 eV which results in Vss<font size=1>G</font> = -2.75 eV.
 </p>
 
-<p>You reached the end of the lesson on how to unfold a simplest band structure.
+<p>You reached the end of the lesson on how to unfold a simplest band structure. 
+<br><br><a href=#top>Go to the top</a>
+<hr>
 <script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
 
 </body>
