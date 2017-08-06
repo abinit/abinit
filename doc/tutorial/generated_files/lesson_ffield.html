@@ -66,19 +66,16 @@ Zwanziger <i>et al.,</i> <i>Comp. Mater. Sci.</i> <b> 58</b>, 113 (2012).
 <a name="list"></a>
 <h3><b> Lesson on polarization and finite electric fields. Table of content:</b></h3>
 
-<ul>
-  <li><a href="#0">Part-0. Ground-state properties of AlAs and general parameters</a>
-  <li><a href="#1">Part-1. Finite difference of polarization from Berry phase calculations in zero field</a>
-  <li><a href="#2">Part-2. Finite electric field calculations</a>
-</ul>
-<hr>
+<ul> 
+  <li><a href="#AlAs">1.</a> Ground-state properties of AlAs and general parameters</li>
+  <li><a href="#berry">2.</a> Berry phase calculation of polarization in zero field</li>
+  <li><a href="#finite_field">3.</a> Finite electric field calculations</li>
 
-<a name="0">&nbsp;</a>
-<h3><b>
-Part-0. Ground-state properties of AlAs and general parameters
-</b></h3>
-
-<p><i>Before beginning, you might consider working in a different
+ </ul> 
+ <hr><p><a name="AlAs"> </a><br>
+<p><a name="1"> </a><br>
+<h3><b>1. Ground-state properties of AlAs and general parameters</b></h3>
+ <p><i>Before beginning, you might consider working in a different
 subdirectory, as for the other lessons.
 Why not create "Work-ffield" in ~abinit/tests/tutorespfn/Input ?
 </i>
@@ -124,16 +121,12 @@ Before going further, you might refresh your memory concerning the other variabl
 <a href="../../input_variables/generated_files/varset_basic.html#ixc">ixc</a>,
 <a href="../../input_variables/generated_files/varset_rlx.html#ecutsm">ecutsm</a>,
 <a href="../../input_variables/generated_files/varset_rlx.html#dilatmx">dilatmx</a>.
-<p>
-
+<br><br><a href=#top>Go to the top</a>
 <hr>
-
-<a name="1">&nbsp;</a>
-<h3><b>
-Part-1. Berry phase calculation in zero field
-</b></h3>
-
-<p> In this section, you will learn how to perform a Berry phase calculation
+<p><a name="berry"> </a><br>
+<p><a name="2"> </a><br>
+<h3><b>2. Berry phase calculation of polarization in zero field</b></h3>
+ <p><p> In this section, you will learn how to perform a Berry phase calculation
 of the polarization.  As a practical problem we will try to compute the
 Born effective charges from finite difference of the polarization (under
 finite atomic displacements), for AlAs.
@@ -392,16 +385,12 @@ Proper piezoelectric constants(clamped ion)(Unit:c/m^2) = -0.6841215
 Proper piezoelectric constants(relaxed ion)(Unit:c/m^2) =  0.0313915
 </pre>
 in excellent agreement with the above-mentioned DFPT values.
-
+<br><br><a href=#top>Go to the top</a>
 <hr>
-
-<a name="2">&nbsp;</a>
-<h3><b>
-Part-2. Finite electric field calculations
-</b></h3>
-
-<br>
-In this section, you will learn how to perform a calculation with a finite electric field.
+<p><a name="finite_field"> </a><br>
+<p><a name="3"> </a><br>
+<h3><b>3. Finite electric field calculations</b></h3>
+ <p>In this section, you will learn how to perform a calculation with a finite electric field.
 <p>
 You can now copy the file ~abinit/tests/tutorespfn/Input/tffield_6.in in Work-ffield,
 and modify the tffield_x.files accordingly.
@@ -604,6 +593,8 @@ when allowing the ions to relax
 one can access the relaxed ion proper piezoelectric constant.
 At
 <a href="../../input_variables/generated_files/varset_basic.html#ecut">ecut</a>=5 the result is -0.03259.
+<br><br><a href=#top>Go to the top</a>
+<hr>
 <script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
 
 </body>
