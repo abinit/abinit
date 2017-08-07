@@ -465,6 +465,10 @@ for i, varset_info in enumerate(varsets):
   allowed_link_seeds[varset]="varset"
   allowed_link_seeds["varset_"+varset]="varset"
 
+for i, bibfile_info in enumerate(yml_in["bibfiles"]):
+  bibfile = bibfile_info.name
+  allowed_link_seeds["bib_"+bibfile]="bib"
+
 for i, lesson_info in enumerate(yml_in["lessons"]):
   lesson = lesson_info.name
   allowed_link_seeds["lesson_"+lesson]="lesson"

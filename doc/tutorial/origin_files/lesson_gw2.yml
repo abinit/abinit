@@ -26,18 +26,9 @@ intro : |
   A brief description of the equations implemented in the code can be found in the <a href="../../theory/generated_files/theorydoc_mbt.html">GW_notes</a>.
   <p>
   Also, it is suggested to
-  <a href="../../bibliography/generated_files/acknowledgments.html">acknowledge<a> the efforts of developers of the GW part of ABINIT,
-  by citing
-  <ul><li>
-  <cite>
-  X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon,
-  R. Caracas, F. Jollet, M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez,
-  M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval, L. Reining,
-  R. Godby, G. Onida, D.R. Hamann, and D.C. Allan.
-  Zeit. Kristallogr. 220, 558-562 (2005).</cite>
-  </ul>
-  
-  
+  [[bib:acknow#b|acknowledge]] the efforts of developers of the GW part of ABINIT,
+  by citing [[Gonze2005|2005 ABINIT publication]].
+
   <p>
   The user should be familiarized with the four basic lessons of ABINIT, see the <a href="lesson_welcome.html">tutorial home page</a>,
   as well as the <a href="lesson_gw1.html">first lesson on GW</a>.
