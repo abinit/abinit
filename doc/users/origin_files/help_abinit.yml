@@ -92,7 +92,7 @@ sec2:
  title: "The underlying theoretical framework and algorithms"
  tag: theory
  body: |
-    See the "<a href="../../bibliography/generated_files/bibliography.html">bibliography</a>" file.
+    See the [[bib:biblio|bibliography]] file.
     <p>The methods employed in this computer code to solve the electronic structure
       problem are described in part in different review papers as well as research
       papers. The code is an implementation of the Local Density Approximation to
@@ -119,7 +119,7 @@ sec2:
       (1992)</cite>. <br>
       This paper does NOT reflect the present status of the code. ABINIT is closer
       in spirit to the paper of of Kresse and Furthmuller, see the 
-     <a href="../../bibliography/generated_files/bibliography.html">bibliography</a> list.
+      [[bib:biblio|bibliography]] list.
     <p> If you have never used another electronic structure code
       or a Quantum Chemistry package, you should browse through the Chaps. 1 to 13 , and appendices L and M
       of the book <cite>Electronic Structure. Basic Theory and Practical Methods. R. M. Martin.
@@ -1015,8 +1015,7 @@ sec6:
         The stress tensor is given in cartesian coordinates in Hartree/Bohr<sup>3</sup> and GPa.
         <br>
         The basics of the stress tensor are described in O. H. Nielsen and Richard
-        M. Martin, see the <a href="../../bibliography/generated_files/bibliography.html" target="filesimg">bibliography</a>
-        file.
+        M. Martin, see the [[bib:biblio|bibliography]] file.
     </ul>
     <p>Having finished all the calculations for the different datasets, the code
       echoes the parameters listed in the input file, using the latest values e.g.

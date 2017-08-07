@@ -22,23 +22,6 @@ intro : |
 ## Each section must have a title, that will form the table of content.
 ## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
 ## Note the small (one space) indentation for the title and body keys.
-sec0:
- title: "To be filled"
- tag: 
- body: |
-  <ul>
-  <li><a href="#1">1.</a> Introduction - the quantities to be compared</li>
-  <li><a href="#2">2.</a> Prerequisites, code components and scripts</li>
-  <li><a href="#3">3.</a> Carbon (diamond) - a first dataset</li>
-  <li><a href="#4">4.</a> Magnesium - issues for metals</li>
-  <li><a href="#5">5.</a> PAW datasets for GW calculations</li>
-  <li><a href="#6">6.</a> Submitting PAW datasets to the ABINIT database</li>
-  </ul>
-
-
-## Each section must have a title, that will form the table of content.
-## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
-## Note the small (one space) indentation for the title and body keys.
 sec1:
  title: "Introduction - the quantities to be compared"
  tag: intro
