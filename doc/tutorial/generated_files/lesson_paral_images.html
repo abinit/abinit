@@ -23,7 +23,7 @@ You will learn how to run the <span style="font-style: italic;">string
 method</span> on a parallel architecture and what are
 the main
 input
-variables that govern convergence and numerical efficiency.&nbsp;<br>
+variables that govern convergence and numerical efficiency of the parallelism on "images".&nbsp;<br>
 <p>This lesson should take about 1.5 hour and requires
 to have at least a 200 CPU cores parallel computer. </p>
 <p>You are supposed to know already some basics of parallelism in ABINIT, explained in the tutorial
@@ -124,7 +124,7 @@ You
 can visualize the initial and final states of the reaction below (H
 atoms are in white, the O atom is in red and the N atom in grey). <br>
 <br>
-<img style="width: 419px; height: 338px;" alt="initial state" src="../documents/lesson_paral_string/Initial1.png" hspace="20"><img style="width: 469px; height: 338px;" alt="final state" src="../documents/lesson_paral_string/Initial2.png" hspace="50"><br>
+<img style="width: 419px; height: 338px;" alt="initial state" src="../documents/lesson_paral_images/Initial1.png" hspace="20"><img style="width: 469px; height: 338px;" alt="final state" src="../documents/lesson_paral_images/Initial2.png" hspace="50"><br>
 <br>
 Before
 using the<span style="font-style: italic;"> string method</span>,
@@ -254,8 +254,7 @@ intermediate; 2: minimum output).
  <p>You can now start with the <span style="font-style: italic;">string method</span>.&nbsp;</p>
 <p>First, for
 test purpose, we will not use the parallelism over images and will thus
-only perform one step of <span style="font-style: italic;">string
-method</span>.&nbsp;</p>
+only perform one step of <span style="font-style: italic;">string method</span>.&nbsp;</p>
 <p>Open the&nbsp;<span style="color: rgb(204, 0, 0);">tstring_03.in</span>
 file
 and look at it. The initial and final configurations are specified at
@@ -296,8 +295,7 @@ increased to 50. <br>
 This calculation has thus to be run over <span style="font-weight: bold;">200 CPU
 cores</span>. Note that the output file is very big, so that no reference file is provided in the ABINIT package.<br>
 <br>
-The convergence of the <span style="font-style: italic;">string
-method</span> algorithm is controlled by <a href="../../input_variables/generated_files/varset_rlx.html#tolimg">tolimg</a>,
+The convergence of the <span style="font-style: italic;">string method</span> algorithm is controlled by <a href="../../input_variables/generated_files/varset_rlx.html#tolimg">tolimg</a>,
 which has
 been set to 0.0001 Ha. In order to obtain a more lisible output file,
 you can decrease
@@ -335,7 +333,7 @@ cell can be found at the end of the output file in the section:<br>
 The total energies are printed out as: <span style="font-family: monospace; font-weight: bold;">etotal_1img, etotal_2img, ...., etotal_12img</span>.<br>
 Also, you can can have a look at the atomic positions in each image: in cartesian coordinates (<span style="font-family: monospace;">xcart_1img, xcart_2img</span>, ...) or in reduced coordinates (<span style="font-family: monospace;">xred_1img, xred_2img,</span> ...). Similarly, the forces are printed out: <span style="font-family: monospace;">fcart_1img, fcart_2img, ..., fcart_12img</span>.<br>
 <br>
-<div style="text-align: center;"><img style="width: 705px; height: 545px;" alt="courbe 1" src="../documents/lesson_paral_string/curve1.png"><br></div><small><span style="font-style: italic;">Total
+<div style="text-align: center;"><img style="width: 705px; height: 545px;" alt="courbe 1" src="../documents/lesson_paral_images/curve1.png"><br></div><small><span style="font-style: italic;">Total
 energy as a function of OH distance for the path computed with 12
 images and tolimg=0.0001 (which is very close to the x coordinate of
 the proton: first coordinate of xangst for the 8th atom in the output
@@ -373,13 +371,13 @@ MEP. The graph below superimposes the previous MEP (black curve,
 calculated with 12 images) and the new one obtained by using 22 images
 (red curve). You can see that the global profile is almost not modified
 as well as the energy barrier.<br>
-<div style="text-align: center;"><img style="width: 705px; height: 545px;" alt="curve 2" src="../documents/lesson_paral_string/curve2.png" hspace="100"><br></div><small><span style="font-style: italic;">Total energy as a function of OH distance for the path computed with 12 images and tolimg=0.0001 (black curve) and the one </span></small><small><span style="font-style: italic;">computed with 22 images and tolimg=0.0001 (red curve).</span></small><br><br>The
+<div style="text-align: center;"><img style="width: 705px; height: 545px;" alt="curve 2" src="../documents/lesson_paral_images/curve2.png" hspace="100"><br></div><small><span style="font-style: italic;">Total energy as a function of OH distance for the path computed with 12 images and tolimg=0.0001 (black curve) and the one </span></small><small><span style="font-style: italic;">computed with 22 images and tolimg=0.0001 (red curve).</span></small><br><br>The
 following animation (animated gif file) is made by putting together the
 22 images obtained
 at the end of this calculation, from (i) to (f) and then from (f) to
 (i). It allows to visualize the MEP.<br>
 <br>
-<div style="text-align: center;"><a href="../documents/lesson_paral_string/stringvideo.gif" target="_blank"><img style="border: 0px solid ; width: 308px; height: 320px;" alt="image" src="../documents/lesson_paral_string/start.gif"></a><br></div>
+<div style="text-align: center;"><a href="../documents/lesson_paral_images/stringvideo.gif" target="_blank"><img style="border: 0px solid ; width: 308px; height: 320px;" alt="image" src="../documents/lesson_paral_images/start.gif"></a><br></div>
 <br><div style="text-align: center;"><small><span style="font-style: italic;">Click on the above image to visualize the animation (that should open in another window).</span></small><br></div><br>
 2) <a href="../../input_variables/generated_files/varset_rlx.html#tolimg">tolimg</a><br>Come back to <a href="../../input_variables/generated_files/varset_rlx.html#nimage">nimage</a>=12.
 First you can increase <a href="../../input_variables/generated_files/varset_rlx.html#tolimg">tolimg</a>
@@ -392,7 +390,7 @@ In your input file, these starting images will be specified by the
 keywords <a href="../../input_variables/generated_files/varset_basic.html#xangst">xangst</a>, <a href="../../input_variables/generated_files/varset_rlx.html#nimage">xangst_2img</a>, <a href="../../input_variables/generated_files/varset_rlx.html#nimage">xangst_3img</a> ... <a href="../../input_variables/generated_files/varset_rlx.html#nimage">xangst_12img</a>.
 You can copy them directly from the output file obtained at the
 previous section. The graph below superimposes the path obtained with 12 images and <a href="../../input_variables/generated_files/varset_rlx.html#tolimg">tolimg</a>=0.001 (red curve) and the one with 12 images and <a href="../../input_variables/generated_files/varset_rlx.html#tolimg">tolimg</a>=0.0001 (black curve).<br>
-<div style="text-align: center;"><img style="width: 705px; height: 545px;" alt="image" src="../documents/lesson_paral_string/curve3.png" hspace="100"><br></div><small><span style="font-style: italic;">Total energy as a function of OH distance for the path computed with 12 images and tolimg=0.0001 (black curve) and the one </span></small><small><span style="font-style: italic;">computed with 12 images and tolimg=0.001 (red curve).<br></span></small>
+<div style="text-align: center;"><img style="width: 705px; height: 545px;" alt="image" src="../documents/lesson_paral_iimages/curve3.png" hspace="100"><br></div><small><span style="font-style: italic;">Total energy as a function of OH distance for the path computed with 12 images and tolimg=0.0001 (black curve) and the one </span></small><small><span style="font-style: italic;">computed with 12 images and tolimg=0.001 (red curve).<br></span></small>
 <br><br><a href=#top>Go to the top</a>
 <hr>
 <script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>

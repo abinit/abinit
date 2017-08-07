@@ -16,7 +16,7 @@
 <h2>Atomic displacements, homogeneous electric fields, strain.</h2>
 <hr>
 <p>This lesson aims at showing how to use the parallelism for all the properties that are computed
-on the basis of the linear-response part of ABINIT, i.e. :
+on the basis of the density-functional perturbation theory (DFPT) part of ABINIT, i.e. :
   <ul>
     <li>responses to atomic displacements (to compute phonon frequencies, band structures, ... )
     <li>responses to homogeneous electric fields (dielectric constant, Born effective charges, Infra-red characteristics )
@@ -29,7 +29,7 @@ on the basis of the linear-response part of ABINIT, i.e. :
   See the input variables described  in the file <a href="#">[[FAKE LINK:varrf]]</a>
   and the tutorial <a href="lesson_rf1.html">Response-Function 1</a> and subsequent tutorials.
 <p>
-  You will learn about the basic implementation of parallelism for linear-response calculations,
+  You will learn about the basic implementation of parallelism for DFPT calculations,
   then will execute a very simple, quick calculation for one dynamical matrix for FCC aluminum, whose
   scaling is limited to a few dozen computing cores, then you will execute
   a calculation whose scaling is much better, but that would take
@@ -52,24 +52,24 @@ on the basis of the linear-response part of ABINIT, i.e. :
 <h3><b> Parallelism in the DFPT formalism. Table of content:</b></h3>
 
 <ul> 
-  <li><a href="#structure">1.</a> The structure of the parallelism for the linear-response (Density-Functional Perturbation Theory) part of ABINIT</li>
+  <li><a href="#structure">1.</a> The structure of the parallelism for the DFPT part of ABINIT</li>
   <li><a href="#aluminum">2.</a> Computation of one dynamical matrix (q =0.25 -0.125 0.125) for FCC aluminum</li>
   <li><a href="#BaTiO3">3.</a> Computation of one perturbation for a slab of 29 atoms of barium titanate</li>
 
  </ul> 
  <hr><br><a name="structure"> </a>
 <a name="1"> </a>
-<h3><b>1. The structure of the parallelism for the linear-response (Density-Functional Perturbation Theory) part of ABINIT</b></h3>
- <p><b>1.1.</b> Let us recall first the basic structure of typical linear-response calculations. This is summarized in box 1.
+<h3><b>1. The structure of the parallelism for the DFPT part of ABINIT</b></h3>
+ <p><b>1.1.</b> Let us recall first the basic structure of typical DFPT calculations. This is summarized in box 1.
 <br>
 <img style="height: 550px; width: 900px;" alt="Schema 1"
  src="../documents/lesson_paral_dfpt/DFPT_Structure.png"><br>
 The step 1 is done in a preliminary ground-state calculation (either by an independent run,
-or by computing them using an earlier dataset before the linear-response calculation).
+or by computing them using an earlier dataset before the DFPT calculation).
 The parallelisation of this step is examined in a separate lesson.
 <br>
 <p>
-The step 2 and step 3 are the time-consuming linear-response steps, to which the present tutorial is dedicated,
+The step 2 and step 3 are the time-consuming DFPT steps, to which the present tutorial is dedicated,
 and for which the implementation of the parallelism will be explained. They generate different files, and in particular,
 one (or several) DDB file(s). As explained in related tutorials (see e.g. <a href="lesson_rf1.html">Response-Function 1</a>), 
 several perturbations are usually treated in one dataset (hence the "Do for each perturbation"-loop in step 2 of this Schema). For example, 
@@ -82,12 +82,12 @@ sections. No parallelism is needed.
 <p>
 
 <b>1.2.</b> The equations to be considered for the computation of the first-order wavefunctions and potentials (step 2 of box 1),
-which is the really time-consuming part of any linear-response calculation, are presented in box 2.
+which is the really time-consuming part of any DFPT calculation, are presented in box 2.
 <br>
 <img style="height: 550px; width: 900px;" alt="Schema 2"
  src="../documents/lesson_paral_dfpt/DFPT_Equations.png"><br>
 
-The parallelism currently implemented for the linear-response part of ABINIT is based on
+The parallelism currently implemented for the DFPT part of ABINIT is based on
 the parallel distribution of the most important arrays: the set of first-order and ground-state wavefunctions.
 <br>
 While each such wavefunction is stored completely in the memory linked to one computing core (there is no splitting
@@ -100,7 +100,7 @@ This easily achieves a combined k point, spin and band index parallelism, as exp
 
 <b>1.3.</b> The parallelism over k points, band index and spin for the set of wavefunctions is implemented in all relevant steps,
 except for the reading (initialisation) of the ground-state wavefunctions (from an external file). Thus, the most CPU time-consuming
-parts of the linear-response computations are parallelized. 
+parts of the DFPT computations are parallelized. 
 <br>
 The following are not parallelized :
 <ul>
@@ -159,7 +159,7 @@ A reference output file is available in ~abinit/tests/tutoparal/Refs , under the
 It was obtained using 4 computing cores, and took a few seconds.
 
 <p>
-<b>2.2.</b> The second step is the linear-response calculation, for which the files are 
+<b>2.2.</b> The second step is the DFPT calculation, for which the files are 
 tdfpt_02.files	(and tdfpt_02.in).
 <br>
 There are three perturbations (three atomic displacements). For the two first perturbations, no symmetry can be used,
@@ -171,7 +171,7 @@ Indeed, the sequential parts is actually a few percents of the
 code on one processor, depending on the machine you run. The speed-up might saturate beyond 4 and 8 (depending on the machine).
 <br>
 First copy the output of the ground-state calculation so that it can be used as the input of the 
-linear-response calculation :
+DFPT calculation :
 <pre>
 cp tdfpt_01.o_WFK tdfpt_02.i_WFK
 cp tdfpt_01.o_WFK tdfpt_02.i_WFQ
@@ -280,7 +280,7 @@ parallelism.
 <br>
 "inwffil" is a subroutine whose job is to read the ground-state wavefunctions
 (you can find the source of the "inwffil" routine in <a href="http://www.abinit.org/robodoc">the latest ABINIT sources</a>).
-As mentioned in the section 1, the reading of the ground-state wavefunctions is not done in parallel in the case of the linear-response
+As mentioned in the section 1, the reading of the ground-state wavefunctions is not done in parallel in the case of the DFPT
 computations (note that the reading is actually parallelized for e.g. ground-state calculations).
 In the output file provided as a reference (with four computing cores), the "inwffil" wall clock time 
 is 7.387 seconds, on a total of 48.211 secs. By increasing the number of computing cores, it will be
@@ -297,9 +297,9 @@ by a double TiO2 layer on each face, with a reasonable
 k-point sampling of the Brillouin zone.
 The symmetry of the system and perturbation will allow to decrease this sampling to one quarter of the Brillouin zone.
 E.g. with the k-point sampling ngkpt 4 4 1 , there will be actually 4 k-points in the irreducible Brillouin zone for the Ground state calculations.
-For the response-function case, only one symmetry will survive, so that, after the calculation of the frozen-wavefunction part
+For the DFPT case, only one symmetry will survive, so that, after the calculation of the frozen-wavefunction part
 (for which no symmetry is used), the self-consistent part will be done with 8 k points in the corresponding irreducible Brillouin zone.
-With the sampling 8 8 1, there will be 32 k points in the irreducible Brillouin zone for the linear-response case.
+With the sampling 8 8 1, there will be 32 k points in the irreducible Brillouin zone for the DFPT case.
 There are 120 bands.
 Note that the value of <a href="../../input_variables/generated_files/varset_basic.html#ecut">ecut</a> that is used in the present
 tutorial is too low to obtain physical results (it should be around 40 Hartree).
@@ -307,12 +307,12 @@ tutorial is too low to obtain physical results (it should be around 40 Hartree).
 As in the previous case, a preparatory ground-state calculation is needed.
 <p>The input files are provided, in the directory ~abinit/tests/tutoparal/Input . 
 The preparatory step is governed by tdfpt_03.files (and tdfpt_03.in). The
-real (=linear-response) test case is governed by tdfpt_04.files (and tdfpt_04.in).
+real (=DFPT) test case is governed by tdfpt_04.files (and tdfpt_04.in).
 The reference output files are present in ~abinit/tests/tutoparal/Refs :
 tdfpt_0324.out and tdfpt_0432.out . The naming convention is such that the number of cores
 used to run them is added after the name of the test : the tdfpt_03.in file was run with 24 cores,
 while the tdfpt_04.in was run with 32 cores.
-The preparatory step took about 5 minutes, and the linear-response step took about 5 minutes as well.
+The preparatory step took about 5 minutes, and the DFPT step took about 5 minutes as well.
 You can run now these test cases. For tdfpt_03, you might need to change the npband value (presently 6), if you are not
 using 24 processors. At variance, for tdfpt_04, no adaptation of the input file is needed to be able to run on an arbitrary
 number of processors.
@@ -324,7 +324,7 @@ number of processors.
 </pre>
 <p>
 then copy the output of the ground-state calculation so that it can be used as the input of the
-linear-response calculation :
+DFPT calculation :
 <pre>
 cp tdfpt_03.o_WFK tdfpt_04.i_WFK
 cp tdfpt_03.o_WFK tdfpt_04.i_WFQ
@@ -391,13 +391,13 @@ Also, set in tdfpt_04.in :
 <pre>
    ngkpt 8 8 1    ! This should replace ngkpt 4 4 1
 </pre>
-and launch again the preliminary step, then the linear-response step.
-Then, you can practice the linear-response calculation by varying the number of computing cores. For the latter,
+and launch again the preliminary step, then the DFPT step.
+Then, you can practice the DFPT calculation by varying the number of computing cores. For the latter,
 you could even consider varying the number of self-consistent iterations
 to see the initialisation effects (small value of nstep), or target a value giving converged results (nstep 50 instead of nstep 18). 
 The energy cut-off might also be increased (e.g. ecut 40 Hartree gives a much better value).
 Indeed, with a large value of k points, and large value of nstep, you should be able to obtain 
-a speed-up of more than one hundred for the linear-response calculation,
+a speed-up of more than one hundred for the DFPT calculation,
 when compared to a sequential run (see below). 
 Keep track of the time for each computing core number, to observe the scaling.
 
@@ -421,7 +421,7 @@ With more realistic computing parameters (ecut 40), they
 dominate only beyond 600 processors.
 <p>
 This last example is the end of the present tutorial. You have been explained the
-basics of the current implementation of the parallelism for the linear-response
+basics of the current implementation of the parallelism for the DFPT
 part of ABINIT, then you have explored two test cases : one for a small cell materials,
 with lots of k points, and another one, medium-size, in which the k point and band parallelism
 can be used efficiently even for more than one hundred computing cores.

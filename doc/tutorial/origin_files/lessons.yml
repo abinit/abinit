@@ -122,7 +122,7 @@
     authors : JB
     subtitle : How to perform Molecular Dynamics calculations using parallelism
 - !components
-    name : paral_string
+    name : paral_images
     keyword : Parallelism on images, the string method
     authors : MT,GG
     subtitle : String method for the computation of minimum energy paths, in parallel.

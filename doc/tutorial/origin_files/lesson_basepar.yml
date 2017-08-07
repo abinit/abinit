@@ -186,8 +186,8 @@ sec3:
   <li><a href="lesson_paral_gspw.html">ground state with plane waves</a>,</li>
   <li><a href="lesson_paral_gswvl.html">ground state with wavelets</a>,</li>
   <li><a href="lesson_paral_moldyn.html">molecular dynamics</a>,</li>
-  <li><a href="lesson_paral_string.html">parallelism on "images"</a>,</li>
-  <li><a href="lesson_paral_dfpt.html">response functions</a>,</li>
+  <li><a href="lesson_paral_images.html">parallelism on "images"</a>,</li>
+  <li><a href="lesson_paral_dfpt.html">density-functional perturbation theory (DFPT)</a>,</li>
   <li><a href="lesson_paral_mbt.html">Many-Body Perturbation Theory</a>.</li>
   </ul>
   <p>Note that the tutorial on <a href="lesson_paral_gspw.html">ground state
