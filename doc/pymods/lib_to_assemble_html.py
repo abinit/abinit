@@ -395,19 +395,19 @@ def assemble_html(origin_yml_files,suppl_components,dir_name,root_filname,allowe
       # Table of content
       for label in labels:
          secj="sec"+label
-         secs_html+='  <li><a href="#%s">%s.</a> %s</li>\n' %(doc_yml[secj]["tag"],label,doc_yml[secj]["title"])
+         secs_html+='  <li><a href="#%s">%s. %s</a></li>\n' %(doc_yml[secj]["tag"],label,doc_yml[secj]["title"])
          #Treat one level of subsections
          sublabels=[]
          for subj in doc_yml[secj].keys():
            if "sec" in subj[:3]:
              sublabels.append(subj[3:])
-           if len(sublabels)!=0:
-             sublabels.sort()
-             secs_html="\n   <ul> \n"
-             for sublabel in sublabels:
-               subsecj="sec"+sublabel
-               secs_html+='    <li><a href="#%s">%s.</a> %s</li>\n' %(doc_yml[secj][subsecj]["tag"],sublabel,doc_yml[secj][subsecj]["title"])
-             secs_html+="\n   </ul> \n <hr>"
+         if len(sublabels)!=0:
+           sublabels.sort()
+           secs_html+="\n   <ul> \n"
+           for sublabel in sublabels:
+             subsecj="sec"+sublabel
+             secs_html+='    <li><a href="#%s">%s. %s</a></li>\n' %(doc_yml[secj][subsecj]["tag"],sublabel,doc_yml[secj][subsecj]["title"])
+           secs_html+="\n   </ul> \n"
       secs_html+="\n </ul> \n <hr>"
       # Body
       for label in labels:
@@ -415,30 +415,31 @@ def assemble_html(origin_yml_files,suppl_components,dir_name,root_filname,allowe
          sec_html='<br><a name="%s"> </a>\n' %(doc_yml[secj]["tag"])
          sec_html+='<a name="%s"> </a>\n' %(label)
          sec_html+='<h3><b>%s. %s</b></h3>\n <p>' %(label,doc_yml[secj]["title"])
-         sec_html+=doc_yml[secj]["body"]
-         full_filname=origin_yml.name
-         if root_filname != "":
-           full_filname=root_filname+"_"+origin_yml.name
-         backlink=' &nbsp; <a href="../../%s/generated_files/%s.html#%s">%s#%s</a> &nbsp; ' %(dir_name,full_filname,label,full_filname,label)
-         sec_html = make_links(sec_html,None,allowed_link_seeds,backlinks,backlink)
+         if "body" in doc_yml[secj].keys():
+           sec_html+=doc_yml[secj]["body"]
+           full_filname=origin_yml.name
+           if root_filname != "":
+             full_filname=root_filname+"_"+origin_yml.name
+           backlink=' &nbsp; <a href="../../%s/generated_files/%s.html#%s">%s#%s</a> &nbsp; ' %(dir_name,full_filname,label,full_filname,label)
+           sec_html = make_links(sec_html,None,allowed_link_seeds,backlinks,backlink)
          #Treat one level of subsections
          sublabels=[]
          for subj in doc_yml[secj].keys():
            if "sec" in subj[:3]:
              sublabels.append(subj[3:])
-           if len(sublabels)!=0:
-             sublabels.sort()
-             for sublabel in sublabels:
-               subsecj="sec"+sublabel
-               sec_html+='<br><a name="%s"> </a>\n' %(doc_yml[secj][subsecj]["tag"])
-               sec_html+='<a name="%s"> </a>\n' %(sublabel)
-               sec_html+='<h3><b>%s. %s</b></h3>\n <p>' %(sublabel,doc_yml[secj][subsecj]["title"])
-               sec_html+=doc_yml[secj][subsecj]["body"]
-               full_filname=origin_yml.name
-               if root_filname != "":
-                 full_filname=root_filname+"_"+origin_yml.name
-               backlink=' &nbsp; <a href="../../%s/generated_files/%s.html#%s">%s#%s</a> &nbsp; ' %(dir_name,full_filname,sublabel,full_filname,sublabel)
-               sec_html = make_links(sec_html,None,allowed_link_seeds,backlinks,backlink)
+         if len(sublabels)!=0:
+           sublabels.sort()
+           for sublabel in sublabels:
+             subsecj="sec"+sublabel
+             sec_html+='<br><a name="%s"> </a>\n' %(doc_yml[secj][subsecj]["tag"])
+             sec_html+='<a name="%s"> </a>\n' %(sublabel)
+             sec_html+='<h4><b>%s. %s</b></h4>\n <p>' %(sublabel,doc_yml[secj][subsecj]["title"])
+             sec_html+=doc_yml[secj][subsecj]["body"]
+             full_filname=origin_yml.name
+             if root_filname != "":
+               full_filname=root_filname+"_"+origin_yml.name
+             backlink=' &nbsp; <a href="../../%s/generated_files/%s.html#%s">%s#%s</a> &nbsp; ' %(dir_name,full_filname,sublabel,full_filname,sublabel)
+             sec_html = make_links(sec_html,None,allowed_link_seeds,backlinks,backlink)
          sec_html+="<br><br><a href=#top>Go to the top</a>\n<hr>\n"
          secs_html+=sec_html
 
