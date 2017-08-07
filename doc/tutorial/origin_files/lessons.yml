@@ -155,7 +155,7 @@
     name : source_code
     keyword : Developing for ABINIT
     authors : YP
-    subtitle : Introducing ABINIT to new developers (might be outdated ...).
+    subtitle : "Introducing ABINIT to new developers (WARNING : some parts are severely outdated ...)."
 - !components
     name : spin
     keyword : Lesson about the spin
