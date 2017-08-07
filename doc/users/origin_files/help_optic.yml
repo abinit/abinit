@@ -1,6 +1,7 @@
-# This YAML file contains the introduction as well as the body (including the table of content) of the html help document.
-# In order to modify the other parts, modify the file helps.yml .
-# This is the introduction ...
+## This YAML file contains the introduction as well as the body of the html lesson.
+## In order to modify the other parts, modify the file lessons.html .
+
+## This is the introduction ...
 intro : |
   <a name="top"></a>
   <p>
@@ -21,21 +22,16 @@ intro : |
   <p>
   It will be easier to discover the present file with the help of the tutorial ([[lesson_optic]]).
   <br>It is worthwhile to print this help file, for ease of reading.
-# This is the body, including the table of content ...
-body : |
-  <ul>
-    <li><a href="#1">1. Introduction</a>
-    <li><a href="#2">2. How to run optic ?</a>
-    <li><a href="#3">3. Optic input file and input variables</a>
-    <li><a href="#4">4. Optic output files</a>
-    <li><a href="#5">5. Trouble shooting</a>
-    <!--  <li><a href="#6">6. Results for GaAs</a> -->
-  </ul>
-  
-  <hr>
-  <h3>&nbsp;</h3>
-  
-  <h3><b><a name="1"></a>1. Introduction </b></h3>
+
+## Now come the different sections, numbered.
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec1:
+ title: "Introduction"
+ tag: introduction
+ body: |
   Optic allows to compute the
   frequency dependent linear optical dielectric function and second order
   nonlinear optical susceptibility.
@@ -66,12 +62,14 @@ body : |
   to determine the
   linear and Eqs. 49, 50 and 51 in <a href="#Ref1">Ref. 1</a> to determine the nonlinear
   optical response of the material under investigation.
-  
-  <hr>
-  
-  <h3><b><a name="2"></a>2. How to run Optic ? </b></h3>
-  
-  <p>
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec2:
+ title: "How to run Optic ?"
+ tag: run
+ body: |
   The use of Optic is quite simple :
   <pre>
   optic < optic.files > optic.log
@@ -135,12 +133,14 @@ body : |
   HERE, I SHOULD GIVE EXPLICITLY THE SENSITIVE INPUT VARIABLES FOR ABINIT.
   AND ALSO I SHOULD EXPLAIN SUBTLETIES RELATED TO THE USE OF SYMMETRIES.
   -->
-  
-  <hr>
-  
-  
-  <h3><b><a name="3"></a>3. Optic input file and input variables </b></h3>
-  
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec3:
+ title: "Optic input file and input variables"
+ tag: input
+ body: |
   A typical optic.files file is presented below :
   <pre>
   optic.in     ! Name of input file
@@ -179,15 +179,15 @@ body : |
   <!--
   YG(20160421) Here I should describe the new possibilities for LEO and SHG with antiresonant approximation
   -->
-  
-  
-  <hr>
-  
-  
-  
-  
-  <h3><b><a name="4"></a>4. Optic output files </b></h3>
-  
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec4:
+ title: "Optic output files"
+ tag: output
+ body: |
+
   <h4><b><a name="4.1"></a>4.1. Linear optical response data files</b></h4>
   <p>
   Name: case_a_b-linopt.out
@@ -204,7 +204,7 @@ body : |
   In the header of the file you can find information about the calculation. Some
   results for GaAs(LiF???) are presented in this document to show what can be
   expected.
-  
+
   <h4><b><a name="4.2"></a>4.2. Non-linear optical response data files</b></h4>
   
   <p>
@@ -236,14 +236,13 @@ body : |
   Some results of nonlinear optical spectrum for
   GaAs(LiF???) are presented in this document to show what can be expected.
   
-  <hr>
-  
-  
-  
-  
-  <h3><b><a name="5"></a>5. Trouble shooting </b></h3>
-  
-  <p>
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec5:
+ title: "Trouble shooting"
+ tag: troubleshooting
+ body: |
   1) All I get is zeros in my *-linopt.out file. Why?
   
   <p>
@@ -277,24 +276,3 @@ body : |
    <li>(ii) Most components out of the 27 are zero due to the symmetry of the crystal.
        Please calculate a different component.</li>
   </ul>
-  
-  
-  <hr>
-  
-  <!--
-  <h3><b><a name="6"></a>6. Results for GaAs </b></h3>
-  
-  <pre>
-  SHOULD STILL BE DONE !
-  A small description of results.
-  excitonic effects!!!
-  
-  Fig LO
-  
-  Fig NLO
-  </pre>
-  
-  For details about how to identify peaks and get information from them see
-  <a href="#Ref4">Ref. 4</a>
-  -->
-  
