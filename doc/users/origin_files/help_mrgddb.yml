@@ -1,46 +1,58 @@
-# This YAML file contains the introduction as well as the body (including the table of content) of the html help document.
-# In order to modify the other parts, modify the file helps.yml .
-# This is the introduction ...
+## This YAML file contains the introduction as well as the body of the html lesson.
+## In order to modify the other parts, modify the file lessons.html .
+
+## This is the introduction ...
 intro : |
   <br>The user is advised to be familiar with the main [[help:abinit]] help file
   before reading the present file.
   It is important to read also the 
   <A href="help_anaddb.html"><B>Analysis of Derivative DataBase code (Anaddb) help file</B></A>
   to complement the present reading.</h3>
-# This is the body, including the table of content ...
-body : |
-  
-  <pre>
-  
+
+## Now come the different sections, numbered.
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec1:
+ title: "Introduction"
+ tag: introduction
+ body: |
   The mrgddb code has the purpose to merge "transfer" DDBs
   (that were generated from the ABINIT code) to make a complete DDB
   that can be exploited by the Anaddb code.
   
-  The input is very simple, and could be given directly at the screen,
+  <p>The input is very simple, and could be given directly at the screen,
   or more conveniently, piped from a file.
   The user should provide first the name of the new (output) DDB.
   He/she should then give a short description (one line) of this new DDB
   that will be created. This line will be printed at the beginning
   of the DDB.
   
-  The user should then give the number of DDBs that will be merged, then
+  <p>The user should then give the number of DDBs that will be merged, then
   the whole set of filenames for the DDBs to be merged, one on each line.
   
-  --------------------------------------------------------------------
-  
-  Is a merging code really useful ?
-  
-  The ABINIT code in its present
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec2:
+ title: "What is the usefulness of a merging code ?"
+ tag: usefulness
+ body: |
+  <p> The ABINIT code in its present
   version is only able to produce results for one q wavevector
   for each dataset.  A database for more than one q point can thus be created
   using MRGDDB. Also, it is useful to be able to merge different DDBs
   if they are produced independently on different machines.
   
-  -------------------------------------------------------------------
-  
-  How does the merging code work ?
-  
-  The DDBs are made of two parts. The first
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec3:
+ title: "How does the merging code work ?"
+ tag: work
+ body: |
+  <p>The DDBs are made of two parts. The first
   part is a list of the parameters that were used to make the DDB,
   and the second part lists the 2DTEs and 3DTEs.
   
@@ -82,4 +94,3 @@ body : |
   
   Finally, the summary of the block content of the DDB is provided
   at the end of the DDB file.
-  </pre>
