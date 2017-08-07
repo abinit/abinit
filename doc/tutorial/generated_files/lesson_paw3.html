@@ -38,7 +38,19 @@ before attempting to do similar comparisons with their own datasets.<br>
 <a name="list"></a>
 <h3><b> Third lesson on the projector-augmented wave (PAW) technique. Table of content:</b></h3>
 
-<ul>
+<ul> 
+  <li><a href="#None">0.</a> To be filled</li>
+  <li><a href="#intro">1.</a> Introduction - the quantities to be compared</li>
+  <li><a href="#prerequisites">2.</a> Prerequisites, code components and scripts</li>
+  <li><a href="#diamond">3.</a> Carbon (diamond)</li>
+  <li><a href="#magnesium">4.</a> Magnesium - dealing with the Fermi energy of a metallic system</li>
+  <li><a href="#GW">5.</a> PAW datasets for GW calculations</li>
+
+ </ul> 
+ <hr><br><a name="None"> </a>
+<a name="0"> </a>
+<h3><b>0. To be filled</b></h3>
+ <p><ul>
 <li><a href="#1">1.</a> Introduction - the quantities to be compared</li>
 <li><a href="#2">2.</a> Prerequisites, code components and scripts</li>
 <li><a href="#3">3.</a> Carbon (diamond) - a first dataset</li>
@@ -46,9 +58,12 @@ before attempting to do similar comparisons with their own datasets.<br>
 <li><a href="#5">5.</a> PAW datasets for GW calculations</li>
 <li><a href="#6">6.</a> Submitting PAW datasets to the ABINIT database</li>
 </ul>
-<hr><a name="1">&#160;</a>
-<h3><b>1. The quantities to be compared</b></h3>
-<p>When comparing results between all-electron and pseudopotential codes,
+<br><br><a href=#top>Go to the top</a>
+<hr>
+<br><a name="intro"> </a>
+<a name="1"> </a>
+<h3><b>1. Introduction - the quantities to be compared</b></h3>
+ <p>When comparing results between all-electron and pseudopotential codes,
 it is usually impossible to compare total energies. This is because the total
 energy of an all-electron code includes the contribution from the kinetic energy
 of the core orbitals, while in the pseudopotential approach, the only information
@@ -80,10 +95,12 @@ For instance, for oxygen, one could compare results for ZnO, MgO and MnO, provid
 the time. However, doing this consistently in ABINIT requires a supercell approach and 
 would make this tutorial very long, so we shall not do it here. We will now discuss the 
 prerequisites for this tutorial.</p>
-
-<hr><a name="2">&#160;</a>
+<br><br><a href=#top>Go to the top</a>
+<hr>
+<br><a name="prerequisites"> </a>
+<a name="2"> </a>
 <h3><b>2. Prerequisites, code components and scripts</b></h3>
-<p>It is assumed that you are already familiar with the contents and procedures in tutorials <a href="./lesson_paw1.html">PAW1</a> and <a href="./lesson_paw2.html">PAW2</a>, and so have some familiarity with input files for <span style="font-weight: bold; font-style: italic;">atompaw</span>, and the issues in creating PAW datasets. To exactly reproduce the results in this tutorial, you will need:
+ <p>It is assumed that you are already familiar with the contents and procedures in tutorials <a href="./lesson_paw1.html">PAW1</a> and <a href="./lesson_paw2.html">PAW2</a>, and so have some familiarity with input files for <span style="font-weight: bold; font-style: italic;">atompaw</span>, and the issues in creating PAW datasets. To exactly reproduce the results in this tutorial, you will need:
 <br>
 <ul><li>The <span style="font-weight: bold; font-style: italic;">atompaw</span> code for 
 generating PAW datasets. This code is bundled as a plugin in abinit, and it is assumed 
@@ -114,10 +131,12 @@ By the time that you are doing this tutorial there will probably be newer versio
 these programs available. It is of course better to use the latest versions, 
 and we simply state the versions of codes used when this tutorial was written so that specific 
 numerical results can be reproduced if necessary.</span></p>
-
-<hr><a name="3">&#160;</a>
+<br><br><a href=#top>Go to the top</a>
+<hr>
+<br><a name="diamond"> </a>
+<a name="3"> </a>
 <h3><b>3. Carbon (diamond)</b></h3>
-<a name="3.1"></a>
+ <p><a name="3.1"></a>
 <h4><b>3.1 Carbon - a simple datatset</b></h4>
 <p>Make a working directory for the atompaw generation (you could call it 
 <span style="font-family: monospace;">C_atompaw</span>) 
@@ -330,7 +349,8 @@ The statistics at the end of the <span style="font-family: monospace;">bands_20H
 # maximum diff:     0.000272  eV
 ...
 </pre></p>
-<hr><a name="3.2">&#160;</a>
+
+<a name="3.2">&#160;</a>
 <h4><b>3.2 Carbon - calculating the equilibrium lattice parameter</b></h4>
 <p>That we have converged the dataset on its own does of course not mean that the
 dataset is good, i.e. that it reproduces the same results as an all-electron calculation.
@@ -441,7 +461,8 @@ alatt = (4*75.50872614)^(1/3) = 6.7095 Bohr (3.5505 &#197)
 </pre>
 at equilibrium for this dataset.</p>
 </pre></p>
-<hr><a name="3.3">&#160;</a>
+
+<a name="3.3">&#160;</a>
 <h4><b>3.3 Carbon - the all-electron calculation</b></h4>
 <p>In order to estimate whether these values are good or not, we need independent 
 verification, and this will be provided by the all-electron elk code. There is an 
@@ -803,7 +824,7 @@ So we see that the initial, primitive, abinit dataset is about
 correct value for the lattice parameter. In principle, these should 
 be about an order of magnitude better, so let us see if we can make it so.
 
-<hr><a name="3.4">&#160;</a>
+<a name="3.4">&#160;</a>
 <h4><b>3.4 Carbon - improving the dataset</b></h4>
 <p>Now that you know the target values, is up to you to experiment and see 
 if you can improve this dataset. The techniques are well documented in 
@@ -966,11 +987,12 @@ but probably by no means the best possible. It is likely that one can construct
 a dataset for carbon that has even better convergence properties, and is even 
 more accurate. You are encouraged to experiment and try to make a better one.
 </span></p>
-
-<hr><a name="4">&#160;</a>
+<br><br><a href=#top>Go to the top</a>
+<hr>
+<br><a name="magnesium"> </a>
+<a name="4"> </a>
 <h3><b>4. Magnesium - dealing with the Fermi energy of a metallic system</b></h3>
-<p>
-There is added complication if the system is metallic, and that is the treatment 
+ <p>There is added complication if the system is metallic, and that is the treatment 
 of the smearing used in order to eliminated the sharp peaks in the density of 
 states (DOS) near the Fermi energy. The DOS is technically integrated over in 
 any ground-state calculation, and for a metal this requires, in principle, an 
@@ -995,7 +1017,8 @@ Then we make sure to match the automatically determined smearing width, and
 most importantly, make sure that we match the smearing function used between 
 the elk and the abinit calculation.
 </p>
-<hr><a name="4.1">&#160;</a>
+
+<a name="4.1">&#160;</a>
 <h4><b>4.1 Magnesium - The all-electron calculation</b></h4>
 <p>
 There is an elk input file prepared at: <a href="../documents/lesson_paw3/inputs/elk_Mg_band.in">
@@ -1163,7 +1186,8 @@ vectors with this scale factor, we have that:
 </pre>
 Now we have all the information needed to proceed with the abinit calculation.
 </p>
-<hr><a name="4.2">&#160;</a>
+
+<a name="4.2">&#160;</a>
 <h4><b>4.2 Magnesium - The abinit calculation</b></h4>
 <p>
 As usual, it's best to prepare a separate subdirectory for the atomic data
@@ -1332,11 +1356,12 @@ Which is very close.
 dataset for ground-state calculations, but it can probably be made even better. 
 You are encouraged to try and do this.
 </span></p>
-
-<hr><a name="5">&#160;</a>
+<br><br><a href=#top>Go to the top</a>
+<hr>
+<br><a name="GW"> </a>
+<a name="5"> </a>
 <h3><b>5. PAW datasets for GW calculations</b></h3>
-<p>
-There are a number of issues to consider when making datasets for GW calculations, 
+ <p>There are a number of issues to consider when making datasets for GW calculations, 
 here is a list of a few:
 <br>
 <ul>
@@ -1354,11 +1379,8 @@ plane-wave part in terms of the on-site basis. This can be checked by using the 
 of states (DOS), as described in the first PAW <a href="lesson_paw1.html#5">tutorial</a>.</li>
 </ul>
 </br>
-
-<hr><a name="6">&#160;</a>
-<h3><b>6. Submitting your datasets to the ABINIT database</b></h3>
-
-<p><span style="font-weight: bold; font-style: italic;"><span style="color: red">TODO:</span> Comments/Discussion with Marc Torrent and Alain Jacques</span></p>
+<br><br><a href=#top>Go to the top</a>
+<hr>
 <script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
 
 </body>
