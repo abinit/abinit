@@ -85,6 +85,7 @@ def make_links(text,cur_key,allowed_link_seeds,backlinks,backlink):
 
   def replace_link(mymatch):
     dokukey = mymatch.group()[2:-2].strip()
+
     if cur_key != None:
       if dokukey == cur_key.strip():
         return "<b>"+dokukey+"</b>"
@@ -158,7 +159,7 @@ def make_links(text,cur_key,allowed_link_seeds,backlinks,backlink):
       value=allowed_link_seeds[linkseed]
 
       #DEBUG
-      #if "gwencomp" in dokukey:
+      #if "help:respfn" in dokukey:
       #  print(" ")
       #  print(" dokukey:",dokukey)
       #  print(" value:",value)
@@ -192,7 +193,7 @@ def make_links(text,cur_key,allowed_link_seeds,backlinks,backlink):
 
     return '<a href="#">[[FAKE LINK:'+dokukey+']]</a>'
 
-  p=re.compile("\\[\\[([a-zA-Z0-9_ */<>.|:+#@]*)\\]\\]")
+  p=re.compile("\\[\\[([a-zA-Z0-9_ */<>.|:+#@-]*)\\]\\]")
   if text is None:
     return ""
   new_text=p.sub(replace_link,text)

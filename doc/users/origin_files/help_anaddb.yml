@@ -15,7 +15,7 @@ intro : |
   If he/she is interested in the generation of DDB, and wants to know more about this
   topic, he/she will read different help files of the ABINIT package, related to the
   [[help:abinit|main ABINIT executable]], to the
-  [[help:respfn|response-function features of ABINIT]],
+  [[help:respfn|DFPT features of ABINIT]],
   and to the [[help:mrgddb|DDB merge tool]].
   </h3>
 
