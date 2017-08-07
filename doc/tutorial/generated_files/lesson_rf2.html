@@ -21,6 +21,7 @@
     <li>Phonon band structures
     <li>Thermodynamical properties
   </ul>
+<p> The calculations will be based on density-functional perturbation theory (DFPT).
 <p>This lesson should take about 1 hour. </p>
 <hr>
 <h5>Copyright (C) 2000-2017 ABINIT group (XG)
@@ -32,7 +33,20 @@
 <a name="list"></a>
 <h3><b> Second lesson on DFPT. Table of content:</b></h3>
 
-<ul>
+<ul> 
+  <li><a href="#None">0.</a> To be filled</li>
+  <li><a href="#DDB">1.</a>  Generation of a derivative database</li>
+  <li><a href="#mrgddb">2.</a> Manipulation of the derivative databases (the MRGDDB utility)</li>
+  <li><a href="#anaddb">3.</a> Analysis of the derivative databases (the ANADDB utility)</li>
+  <li><a href="#ifcs">4.</a>  The computation of interatomic force constants</li>
+  <li><a href="#phonon_bands">5.</a> The efficient computation of phonon band structures</li>
+  <li><a href="#thermodynamical">6.</a> Thermodynamical properties</li>
+
+ </ul> 
+ <hr><br><a name="None"> </a>
+<a name="0"> </a>
+<h3><b>0. To be filled</b></h3>
+ <p><ul>
   <li><a href="#1">1.</a> Generation of a derivative database
   <li><a href="#2">2.</a> Manipulation of the derivative databases (the MRGDDB utility)
   <li><a href="#3">3.</a> Analysis of the derivative databases (the ANADDB utility)
@@ -41,13 +55,12 @@
   <li><a href="#6">6.</a> Thermodynamical properties.
 </ul>
 <hr>
-
-<a name="1">&nbsp;</a>
-<h3><b>
-1. Generation of the derivative databases
-</b></h3>
-
-<p><i>Before beginning, you might consider to work in a different
+<br><br><a href=#top>Go to the top</a>
+<hr>
+<br><a name="DDB"> </a>
+<a name="1"> </a>
+<h3><b>1.  Generation of a derivative database</b></h3>
+ <p><i>Before beginning, you might consider to work in a different
 subdirectory as for the other lessons.
 Why not create "Work_rf2" in ~abinit/tests/tutorespfn/Input ?
 </i>
@@ -67,7 +80,7 @@ phonon band structure and thermodynamical properties,
 you should first have some theoretical background.
 <br>
 Let us assume that you have read the litterature relative to the
-<a href="lesson_rf1.html">first lesson on response functions</a>.
+<a href="lesson_rf1.html">first lesson on DFPT</a>.
 You might find additional material, related to the present section,
 in the following references:
 <br>
@@ -82,7 +95,7 @@ are needed in all the Brillouin zone, one can use an elaborate Fourier interpola
 only few dynamical matrices need to be computed directly. Others will be computed by interpolation.
 <p>
 Let us have a look at the input file trf2_1.in . The calculation is done for AlAs,
-the same crystalline material as for the previous lesson on response functions.
+the same crystalline material as for the previous lesson on DFPT.
 Many input parameters are also quite similar, both at the level of the
 description of the unit cell, as for the choice of cut-off energy and k point grid.
 <p>
@@ -152,14 +165,12 @@ instead of the one that would result from the section 2.
 Copy this file to the present directory,
 then go to section <a href="#3">section 3</a> of this tutorial.
 You might come back to section 2 afterwards.
+<br><br><a href=#top>Go to the top</a>
 <hr>
-
-<a name="2">&nbsp;</a>
-<h3><b>
-2.  Manipulation of the derivative databases (the MRGDDB utility)
-</b></h3>
-
-<p>The use of the MRGDDB utility is described in its
+<br><a name="mrgddb"> </a>
+<a name="2"> </a>
+<h3><b>2. Manipulation of the derivative databases (the MRGDDB utility)</b></h3>
+ <p>The use of the MRGDDB utility is described in its
 <a href="../../users/generated_files/help_mrgddb.html" target="helpimg">help file</a>.
 Please, read it carefully now.
 
@@ -179,14 +190,12 @@ in the Work_rf2 directory, and run the merge as follows :
 mrgddb < trf2_3.in
 </pre>
 It takes less than one second on a typical PC.
+<br><br><a href=#top>Go to the top</a>
 <hr>
-
-<a name="3">&nbsp;</a>
-<h3><b>
-3. Analysis of the derivative databases (the ANADDB utility)
-</b></h3>
-
-<p>An introduction to the use of the ANADDB utility is described in its
+<br><a name="anaddb"> </a>
+<a name="3"> </a>
+<h3><b>3. Analysis of the derivative databases (the ANADDB utility)</b></h3>
+ <p>An introduction to the use of the ANADDB utility is described in its
 <a href="../../users/generated_files/help_anaddb.html" target="helpimg">help file</a>.
 Please, read it carefully now.
 
@@ -211,15 +220,12 @@ Note that some of these flags might be required to allow to run another task.
 <p>
 In this tutorial, we will focus on the flags
 <a href="../../input_variables/generated_files/varset_anaddb.html#ifcflag@anaddb">ifcflag</a> and <a href="../../input_variables/generated_files/varset_anaddb.html#thmflag@anaddb">thmflag</a>.
+<br><br><a href=#top>Go to the top</a>
 <hr>
-
-
-<a name="4">&nbsp;</a>
-<h3><b>
-4. The computation of interatomic force constants
-</b></h3>
-
-<p>You can copy the files ~abinit/tests/tutorespfn/Input/trf2_4.in and ~abinit/tests/tutorespfn/Input/trf2_4.files to the Work_rf2 directory.
+<br><a name="ifcs"> </a>
+<a name="4"> </a>
+<h3><b>4.  The computation of interatomic force constants</b></h3>
+ <p>You can copy the files ~abinit/tests/tutorespfn/Input/trf2_4.in and ~abinit/tests/tutorespfn/Input/trf2_4.files to the Work_rf2 directory.
 <br>
 Edit the file trf2_4.in .
 Note that <a href="../../input_variables/generated_files/varset_anaddb.html#ifcflag@anaddb">ifcflag</a>
@@ -291,17 +297,12 @@ The latter is chosen such as to diagonalize the IFC tensor, in case
 of the self-force constant, and in the other cases, the first vector is
 the vector joining the two nuclei, in order to decompose the IFC
 into a longitudinal and a transverse component.
-
+<br><br><a href=#top>Go to the top</a>
 <hr>
-
-
-<a name="5">&nbsp;</a>
-<h3><b>
-5. The efficient computation of phonon band structures
-</b></h3>
-
-<p>
-<p>You can copy the files ~abinit/tests/tutorespfn/Input/trf2_5.in and ~abinit/tests/tutorespfn/Input/trf2_5.files to the Work_rf2 directory.
+<br><a name="phonon_bands"> </a>
+<a name="5"> </a>
+<h3><b>5. The efficient computation of phonon band structures</b></h3>
+ <p>You can copy the files ~abinit/tests/tutorespfn/Input/trf2_5.in and ~abinit/tests/tutorespfn/Input/trf2_5.files to the Work_rf2 directory.
 <br>
 Edit the file trf2_5.in .
 Note that <a href="../../input_variables/generated_files/varset_anaddb.html#ifcflag@anaddb">ifcflag</a> is again activated. Indeed, in order to compute a phonon band structure
@@ -375,15 +376,12 @@ It can be compared with the AlAs phonon band structure published by
 <p>
 Of course, one should make a convergence study, on the k and q point grids (separately !),
 as well as on the energy cut-off, and also test LDA and GGA ... But this is left to the user !
+<br><br><a href=#top>Go to the top</a>
 <hr>
-
-
-<a name="6">&nbsp;</a>
-<h3><b>
-6. Thermodynamical properties.
-</b></h3>
-
-<p>We will give only a very short example of the use of ANADDB to compute thermodynamical properties.
+<br><a name="thermodynamical"> </a>
+<a name="6"> </a>
+<h3><b>6. Thermodynamical properties</b></h3>
+ <p>We will give only a very short example of the use of ANADDB to compute thermodynamical properties.
 This is because this part of ANADDB is likely the farthest from a clean, stable, usage.
 By exploring the input variables, the user should be able to produce figures and data like the ones for SiO2
 quartz and stishovite, published in
@@ -432,6 +430,8 @@ beyond some temperature, anharmonic effects will have a sizeable contributions.
 <p>
 The atomic temperature factors can also be computed. An example is presented
 in tests/v5 , test 22 .
+<br><br><a href=#top>Go to the top</a>
+<hr>
 <script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
 
 </body>
