@@ -13,7 +13,7 @@
 import os,sys
 
 # TO BE CUSTOMIZED BY USER
-ABINIT_EXE='~/PROGRAM/abinit/nonlop-test/build/atlas-fftw3/src/98_main/abinit'
+ABINIT_EXE='../../../build/atlas-fftw3/src/98_main/abinit'
 GENERIC_INPUT_DIR='TEST1'
 
 #Read argument(s)
