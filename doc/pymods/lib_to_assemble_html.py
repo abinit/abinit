@@ -383,7 +383,7 @@ def assemble_html(origin_yml_files,suppl_components,dir_name,root_filname,allowe
       doc_yml=read_yaml(path_ymlfile)
  
     # If there are some sections in this yml file, constitute the body of the file using these sections,
-    # and also make a table of content
+    # and also make a table of content. Allows (only) two levels for the table of content.
     labels=[]
     for j in doc_yml.keys(): 
       if "sec" in j[:3]:
@@ -395,8 +395,19 @@ def assemble_html(origin_yml_files,suppl_components,dir_name,root_filname,allowe
       # Table of content
       for label in labels:
          secj="sec"+label
-         #secs_html+='  <li><a href="#%s">%s.</a> %s</li>\n' %(label,label,doc_yml[secj]["title"])
          secs_html+='  <li><a href="#%s">%s.</a> %s</li>\n' %(doc_yml[secj]["tag"],label,doc_yml[secj]["title"])
+         #Treat one level of subsections
+         sublabels=[]
+         for subj in doc_yml[secj].keys():
+           if "sec" in subj[:3]:
+             sublabels.append(subj[3:])
+           if len(sublabels)!=0:
+             sublabels.sort()
+             secs_html="\n   <ul> \n"
+             for sublabel in sublabels:
+               subsecj="sec"+sublabel
+               secs_html+='    <li><a href="#%s">%s.</a> %s</li>\n' %(doc_yml[secj][subsecj]["tag"],sublabel,doc_yml[secj][subsecj]["title"])
+             secs_html+="\n   </ul> \n <hr>"
       secs_html+="\n </ul> \n <hr>"
       # Body
       for label in labels:
@@ -405,14 +416,32 @@ def assemble_html(origin_yml_files,suppl_components,dir_name,root_filname,allowe
          sec_html+='<a name="%s"> </a>\n' %(label)
          sec_html+='<h3><b>%s. %s</b></h3>\n <p>' %(label,doc_yml[secj]["title"])
          sec_html+=doc_yml[secj]["body"]
-         sec_html+="<br><br><a href=#top>Go to the top</a>\n<hr>\n"
          full_filname=origin_yml.name
          if root_filname != "":
            full_filname=root_filname+"_"+origin_yml.name
          backlink=' &nbsp; <a href="../../%s/generated_files/%s.html#%s">%s#%s</a> &nbsp; ' %(dir_name,full_filname,label,full_filname,label)
          sec_html = make_links(sec_html,None,allowed_link_seeds,backlinks,backlink)
+         #Treat one level of subsections
+         sublabels=[]
+         for subj in doc_yml[secj].keys():
+           if "sec" in subj[:3]:
+             sublabels.append(subj[3:])
+           if len(sublabels)!=0:
+             sublabels.sort()
+             for sublabel in sublabels:
+               subsecj="sec"+sublabel
+               sec_html+='<br><a name="%s"> </a>\n' %(doc_yml[secj][subsecj]["tag"])
+               sec_html+='<a name="%s"> </a>\n' %(sublabel)
+               sec_html+='<h3><b>%s. %s</b></h3>\n <p>' %(sublabel,doc_yml[secj][subsecj]["title"])
+               sec_html+=doc_yml[secj][subsecj]["body"]
+               full_filname=origin_yml.name
+               if root_filname != "":
+                 full_filname=root_filname+"_"+origin_yml.name
+               backlink=' &nbsp; <a href="../../%s/generated_files/%s.html#%s">%s#%s</a> &nbsp; ' %(dir_name,full_filname,sublabel,full_filname,sublabel)
+               sec_html = make_links(sec_html,None,allowed_link_seeds,backlinks,backlink)
+         sec_html+="<br><br><a href=#top>Go to the top</a>\n<hr>\n"
          secs_html+=sec_html
- 
+
     # Try to complete the information from suppl_components
     suppl={}
     if name in suppl_components.keys():

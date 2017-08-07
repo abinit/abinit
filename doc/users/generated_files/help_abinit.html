@@ -24,7 +24,7 @@
 <p>When the user will be sufficiently familiarized with ABINIT, reading the
   ~abinit/doc/users/tuning.txt file might be useful (this file, as many additional
   documentation files, is not available on the Web, but is available in the package).
-  For response-function calculations using
+  For calculating response properties using
   abinit, the complementary <a href="../../users/generated_files/help_respfn.html#">respfn help file</a>
   is needed.
 <hr>
@@ -37,7 +37,22 @@
 <a name="list"></a>
 <h3><b> Content of the help file:</b></h3>
 
-<ul>
+<ul> 
+  <li><a href="#None">0.</a> To be filled</li>
+  <li><a href="#run">1.</a> How to run the code?</li>
+  <li><a href="#theory">2.</a> The underlying theoretical framework and algorithms</li>
+  <li><a href="#input_file">3.</a> The input file</li>
+  <li><a href="#files_file">4.</a> The 'files' file</li>
+  <li><a href="#pseudopotentials">5.</a> The pseudopotential files and atmic data files</li>
+  <li><a href="#output">6.</a> The different output files</li>
+  <li><a href="#quality">7.</a> Numerical quality of the calculations</li>
+  <li><a href="#final">8.</a> Final remarks</li>
+
+ </ul> 
+ <hr><br><a name="None"> </a>
+<a name="0"> </a>
+<h3><b>0. To be filled</b></h3>
+ <p><ul>
   <li><a href="#1">1. How to run the code</a>
     <ul>
       <li><a href="#intro1">1.1. Introducing the files file.</a>
@@ -80,10 +95,12 @@
 <h3>&nbsp;</h3>
 <hr>
 <h3>&nbsp;</h3>
-<h3><b><a name="1"></a>1. How to run the code </b></h3>
-
-
-  <p><b><a name="intro1"></a>1.1. Introducing the files file.</b>
+<br><br><a href=#top>Go to the top</a>
+<hr>
+<br><a name="run"> </a>
+<a name="1"> </a>
+<h3><b>1. How to run the code?</b></h3>
+ <p><p><b><a name="intro1"></a>1.1. Introducing the files file.</b>
   <p>Given an input file (parameters described below) and the required pseudopotential
     files, the user must create a "files" file which lists names for the files
     the job will require, including the main input file, the main output file,
@@ -116,9 +133,6 @@
     different character strings.
   <p> <i>If you follow the tutorial, you should go back to the tutorial window now. </i>
 
-
-
-  <h4>&nbsp;</h4>
   <h4><a name="exec"></a>1.2. Running the code</h4>
   <p>The main executable file is called abinit. 
     Supposing that the "files" file is called ab.files,
@@ -141,56 +155,49 @@
     that is considered for running the code.
     <br>
   <p> <i>If you follow the tutorial, you should go back to the tutorial window now. </i>
-
-  <p>&nbsp;
-  <hr>
-
-
- <p><a name="2">&nbsp;</a></p>
- <h3><b>2. The underlying theoretical framework and algorithms</b> </h3>
-
-  <p>See the "<a href="../../bibliography/generated_files/bibliography.html">bibliography</a>" file.
-  <p>The methods employed in this computer code to solve the electronic structure
-    problem are described in part in different review papers as well as research
-    papers. The code is an implementation of the Local Density Approximation to
-    the Density Functional Theory, based upon a plane wave basis set and separable
-    pseudopotentials. The iterative minimization algorithm is a combination of
-    fixed potential preconditioned conjugate gradient optimization of wavefunction
-    and a choice of different algorithms for the update of the potential, one
-    of which is a potential-based conjugate gradient algorithm.
-  <p>The representation of potential, density and wavefunctions in real space
-    will be done on a regular 3D grid of points. Its spacing will be determined
-    by the cut-off energy (see the input variable <a href="../../input_variables/generated_files/varset_basic.html#ecut">ecut</a>)
-    of the planewave basis in reciprocal space. This grid of points will also
-    be the starting point of Fast Fourier Transforms between real and reciprocal
-    space. The number of such points, called <a href="../../input_variables/generated_files/varset_gstate.html#ngfft">ngfft</a>,
-    should be sufficiently large for adequate representation of the functions,
-    but not too large, for reasons of computational efficiency. The trade-off between
-    accuracy and computational efficiency is present in many places of the code,
-    and addressed briefly at the end of the present help file.
-  <p>We recommend a good introduction to many different concepts valid for this
-    code, available in a Reviews of Modern Physics article, ``<cite>Iterative
-    minimization techniques for ab initio total-energy calculations: molecular
-    dynamics and conjugate gradients</cite>'', <cite>M. C. Payne, M. P. Teter,
-    D. C. Allan, T. A. Arias, and J. D. Joannopoulos, Rev. Mod. Phys. 64, 1045-1097
-    (1992)</cite>. <br>
-    This paper does NOT reflect the present status of the code. ABINIT is closer
-    in spirit to the paper of of Kresse and Furthmuller, see the 
-   <a href="../../bibliography/generated_files/bibliography.html">bibliography</a> list.
-  <p> If you have never used another electronic structure code
-    or a Quantum Chemistry package, you should browse through the Chaps. 1 to 13 , and appendices L and M
-    of the book <cite>Electronic Structure. Basic Theory and Practical Methods. R. M. Martin.
-    Cambridge University Press (2004) ISBN 0 521 78285 6.</cite>
-  <p>&nbsp;
-  <hr>
-  <p>&nbsp;</p>
-
-
-
- <h3><a name="3">&nbsp;</a>3. The input file </h3>
-
-
-  <p><b><a name="intro3"></a>3.1. Format of the input file.</b></p>
+<br><br><a href=#top>Go to the top</a>
+<hr>
+<br><a name="theory"> </a>
+<a name="2"> </a>
+<h3><b>2. The underlying theoretical framework and algorithms</b></h3>
+ <p>See the "<a href="../../bibliography/generated_files/bibliography.html">bibliography</a>" file.
+<p>The methods employed in this computer code to solve the electronic structure
+  problem are described in part in different review papers as well as research
+  papers. The code is an implementation of the Local Density Approximation to
+  the Density Functional Theory, based upon a plane wave basis set and separable
+  pseudopotentials. The iterative minimization algorithm is a combination of
+  fixed potential preconditioned conjugate gradient optimization of wavefunction
+  and a choice of different algorithms for the update of the potential, one
+  of which is a potential-based conjugate gradient algorithm.
+<p>The representation of potential, density and wavefunctions in real space
+  will be done on a regular 3D grid of points. Its spacing will be determined
+  by the cut-off energy (see the input variable <a href="../../input_variables/generated_files/varset_basic.html#ecut">ecut</a>)
+  of the planewave basis in reciprocal space. This grid of points will also
+  be the starting point of Fast Fourier Transforms between real and reciprocal
+  space. The number of such points, called <a href="../../input_variables/generated_files/varset_gstate.html#ngfft">ngfft</a>,
+  should be sufficiently large for adequate representation of the functions,
+  but not too large, for reasons of computational efficiency. The trade-off between
+  accuracy and computational efficiency is present in many places of the code,
+  and addressed briefly at the end of the present help file.
+<p>We recommend a good introduction to many different concepts valid for this
+  code, available in a Reviews of Modern Physics article, ``<cite>Iterative
+  minimization techniques for ab initio total-energy calculations: molecular
+  dynamics and conjugate gradients</cite>'', <cite>M. C. Payne, M. P. Teter,
+  D. C. Allan, T. A. Arias, and J. D. Joannopoulos, Rev. Mod. Phys. 64, 1045-1097
+  (1992)</cite>. <br>
+  This paper does NOT reflect the present status of the code. ABINIT is closer
+  in spirit to the paper of of Kresse and Furthmuller, see the 
+ <a href="../../bibliography/generated_files/bibliography.html">bibliography</a> list.
+<p> If you have never used another electronic structure code
+  or a Quantum Chemistry package, you should browse through the Chaps. 1 to 13 , and appendices L and M
+  of the book <cite>Electronic Structure. Basic Theory and Practical Methods. R. M. Martin.
+  Cambridge University Press (2004) ISBN 0 521 78285 6.</cite>
+<br><br><a href=#top>Go to the top</a>
+<hr>
+<br><a name="input_file"> </a>
+<a name="3"> </a>
+<h3><b>3. The input file</b></h3>
+ <p><p><b><a name="intro3"></a>3.1. Format of the input file.</b></p>
 
   <p>Note that this input file was called ab_in in the example of
     <a href=#intro1> section 1.1</a> .<br>
@@ -216,14 +223,14 @@
   </ul>
   <p>The names of all the parameters can be found in the <a href="../../input_variables/generated_files/varset_allvars.html#">input variable database</a>.
     The list of input variables present in the latter file links them to their definitions,
-    contained in different files, of which some are listed here:
+    contained in different "variable set" files, some of which are listed here:
 <ul>
-<li> Basic variables, <a href="#">[[FAKE LINK:varbas]]</a></li>
-<li> Files handling variables, <a href="#">[[FAKE LINK:varfil]]</a></li>
-<li> Ground-state calculation variables, <a href="#">[[FAKE LINK:vargs]]</a></li>
-<li> GW variables, <a href="#">[[FAKE LINK:vargw]]</a></li>
-<li> Parallelisation variables, <a href="#">[[FAKE LINK:varpar]]</a></li>
-<li> Response Function variables, <a href="#">[[FAKE LINK:varrf]]</a></li>
+<li> Basic variables, <a href="../../input_variables/generated_files/varset_basic.html#">varset_basic</a></li>
+<li> Files handling variables, <a href="../../input_variables/generated_files/varset_files.html#">varset_files</a></li>
+<li> Ground-state calculation variables, <a href="../../input_variables/generated_files/varset_gstate.html#">varset_gstate</a></li>
+<li> GW variables, <a href="../../input_variables/generated_files/varset_gw.html#">varset_gw</a></li>
+<li> Parallelisation variables, <a href="../../input_variables/generated_files/varset_paral.html#">varset_paral</a></li>
+<li> Density Functional Perturbation Theory variables, <a href="../../input_variables/generated_files/varset_dfpt.html#">varset_dfpt</a></li>
 </ul>
     In the actual input file, these parameters may be given in any desired order,
     and more than one may be given per line. Spaces are used to separate values
@@ -293,6 +300,7 @@
 
 
   <p>&nbsp;</p>
+
   <p><a name="parameters"></a><b>3.2. More about ABINIT input variables.</b></p>
 
   <p>In each section of the ABINIT input variables files,
@@ -434,7 +442,6 @@
     Reduced cartesian coordinates must be used for the eventual translations accompanying
     symmetry operations (<a href="../../input_variables/generated_files/varset_basic.html#tnons">tnons</a>).
   </p>
-
   <p><a name="chkexit">In addition to giving the input variables</a>,
      the input file can be useful
      for another purpose : placing the word "<b>exit</b>" on the top line
@@ -457,7 +464,6 @@
   <p> <i>If you follow the tutorial, you should go back to the tutorial window now. </i>
 
   <p>&nbsp;
-
 
   <p><b><a name="multidataset"></a>3.3. The multi-dataset mode.</b>
   <p>Until now, we have assumed that the user wants to make computations corresponding
@@ -543,6 +549,7 @@
 Rule (2) is split in three parts : (2a), (2b) and (2c).
 <br> Series relate with (2b):
 <p>
+
 (<a name="ref8_2b"></a>2b) If the variable name appended with the index of the
 dataset does not exist, the code looks whether a series has been defined for this
 keyword.
@@ -597,12 +604,14 @@ keyword.
     23, and 24</code>.
   <p> Independently of the use of <a href="../../input_variables/generated_files/varset_basic.html#udtset">udtset</a>,
     rules (2a) and (2c) will be used to define the value of an input variable: </p>
+
   <p><a name="ref8_2a"></a>(2a) The question mark "<b>?</b>" can be used as a
     metacharacter, replacing any digit from 1 to 9, to define an index of a dataset.
     <br>
     For example, <b>ecut?</b>1 means that the input value that follows it can
     be used for <a href="../../input_variables/generated_files/varset_basic.html#ecut">ecut</a> for the datasets
     <code>01, 11, 21, 31, 41, 51, 61, 71, 81, and 91</code>. </p>
+
   <p><a name="ref8_2c"></a>(2c) If the variable name appended with the index of
     the dataset does not exist, the code looks whether a double-loop series has
     been defined for this keyword. Series can be defined for the inner loop index
@@ -651,6 +660,7 @@ keyword.
   <p>The root names for input and output files (potential, density, wavefunctions
     and so on) will receive an appendix : '<b>_DS</b>' followed by the index of
     the dataset. See <a href="#4">section 4</a>. </p>
+
   <p><a name="get">The '<b>get</b>' variables</a> can be used to chain the calculations. </p>
   <p>Until now, there are eight of them : <a href="../../input_variables/generated_files/varset_files.html#getwfk">getwfk</a>,
     <a href="../../input_variables/generated_files/varset_files.html#getwfq">getwfq</a>, <a href="../../input_variables/generated_files/varset_files.html#getddk">getddk</a>,
@@ -683,12 +693,12 @@ keyword.
   </ul>
   <p>
   <p> <i>If you follow the tutorial, you should go back to the tutorial window now. </i>
-
-
-<p>&nbsp;</p><hr>
-<p>&nbsp;</p>
-<h3><a name="4"></a>4. The "files" file</h3>
-  <p>Note: <i>This "files" file is called ab.files in
+<br><br><a href=#top>Go to the top</a>
+<hr>
+<br><a name="files_file"> </a>
+<a name="4"> </a>
+<h3><b>4. The 'files' file</b></h3>
+ <p><p>Note: <i>This "files" file is called ab.files in
   <a href=#intro1>section 1.1</a> .</i>
   </p>
   <p>Contains the file names or root names needed to build file names.
@@ -864,41 +874,38 @@ keyword.
     ... )
   <p>&nbsp;
   <p> <i>If you follow the tutorial, you should go back to the tutorial window now. </i>
-
-  <p>&nbsp;
-  <hr>
-  <p>&nbsp;
-  <h3><a name="5">&nbsp;</a> <b>5. The pseudopotential files</b></h3>
-  <p>Actually, no real understanding of these files
-    is needed to run the code, but for different other reasons, it might be useful
-    to be able to understand the file structures. Different format are possible
-    (labelled 1 to 7 presently) The associated internal variable is called pspcod.
-    Examples of use are found in ~abinit/test/v1 . Information on the file structure
-    can be found in the ~abinit/doc/psp_infos directory.
-  <ul>
-    <li>pspcod=1 : Troullier-Martins pseudopotentials, generated by DC Allan and
-      A Khein, see ~abinit/doc/psp_infos/psp1_info.txt ;
-    <li>pspcod=2 : Goedecker-Teter-Hutter (GTH) pseudopotentials. See Phys. Rev.
-      B 54, 1703 (1996) if needed ;
-    <li>pspcod=3 : Hartwigsen-Goedecker-Hutter pseudopotentials. See Phys. Rev.
-      B 58, 3641 (1998) if needed, and the file ~abinit/doc/psp_infos/psp3_info.txt ;
-    <li>pspcod=4 or 5 : old format pseudopotentials, see ~abinit/doc/psp_infos/psp45_info.txt ;
-    <li>pspcod=6 : pseudopotentials from the fhi98pp code, see ~abinit/doc/psp_infos/psp6_info.txt ;
-    <li>pspcod=7 : pseudo atomic data for PAW ;
-    <li>pspcod=8 : pseudopotential file format from Don Hamann, providing additional flexibility.
-  </ul>
-  <p>&nbsp;
-  <hr>
-
-
-
-
-  <p> <a name="6">&nbsp;</a>
-  <h3><b>6. The different output files</b></h3>
-  <p>Explanation of the output from the code
+<br><br><a href=#top>Go to the top</a>
+<hr>
+<br><a name="pseudopotentials"> </a>
+<a name="5"> </a>
+<h3><b>5. The pseudopotential files and atmic data files</b></h3>
+ <p><h3><a name="5">&nbsp;</a> <b>5. The pseudopotential files</b></h3>
+<p>Actually, no real understanding of these files
+  is needed to run the code, but for different other reasons, it might be useful
+  to be able to understand the file structures. For norm-conserving pseudopotentials different format are possible
+  (labelled 1 to 8 presently). The associated internal variable is called pspcod.
+  Examples of use are found in ~abinit/test/v1 . Information on the file structure
+  can be found in the ~abinit/doc/psp_infos directory.
+<ul>
+  <li>pspcod=1 : Troullier-Martins pseudopotentials, generated by DC Allan and
+    A Khein, see ~abinit/doc/psp_infos/psp1_info.txt ;
+  <li>pspcod=2 : Goedecker-Teter-Hutter (GTH) pseudopotentials. See Phys. Rev.
+    B 54, 1703 (1996) if needed ;
+  <li>pspcod=3 : Hartwigsen-Goedecker-Hutter pseudopotentials. See Phys. Rev.
+    B 58, 3641 (1998) if needed, and the file ~abinit/doc/psp_infos/psp3_info.txt ;
+  <li>pspcod=4 or 5 : old format pseudopotentials, see ~abinit/doc/psp_infos/psp45_info.txt ;
+  <li>pspcod=6 : pseudopotentials from the fhi98pp code, see ~abinit/doc/psp_infos/psp6_info.txt ;
+  <li>pspcod=7 : pseudo atomic data for PAW ;
+  <li>pspcod=8 : pseudopotential file format from Don Hamann, providing additional flexibility.
+</ul>
+<br><br><a href=#top>Go to the top</a>
+<hr>
+<br><a name="output"> </a>
+<a name="6"> </a>
+<h3><b>6. The different output files</b></h3>
+ <p><p>Explanation of the output from the code
   <p>Output from the code goes to several places listed below.
   <p>&nbsp;
-
 
   <p><b><a name="logfile"></a>6.1. The log file</b> </p>
   <p>The "log" file (this is the standard UNIX output file, and corresponds to
@@ -928,6 +935,7 @@ keyword.
 
 
   <p>&nbsp;
+
   <p><a name="outputfile"></a><b>6.2. The main output file </b>
   <p>The <b>main output file</b> is a formatted output file to be kept as the permanent
     record of the run. </p>
@@ -1214,8 +1222,6 @@ with the exception of wavefunction files for which the <a href="../../input_vari
 
   <h3>&nbsp;</h3>
 
-
-
   <b><a name="densoutputfile"></a>6.5. The density output file</b>
   <p>This is an unformatted data file containing the electron density on the real
     space FFT grid. It consists of the header records followed by
@@ -1265,7 +1271,6 @@ enddo
     alongside the origin if the whole grid is viewed as being periodically repeated.
   <p>&nbsp;</p>
 
-
   <b> <a name="localpotfile"></a>6.6. The potential files  </b>
   <p>Also unformatted files consisting of the header records and
   <pre>
@@ -1298,6 +1303,7 @@ enddo
 
 
   <p>&nbsp;
+
   <p><b><a name="wavefctfile"></a>6.7. The wavefunction output file  </b>
   <p>This is an unformatted data file containing the planewaves coefficients of
     all the wavefunctions, and different supplementary data.
@@ -1370,6 +1376,7 @@ of the wavefunction coefficients, activated by a non-zero
 value of <a href="../../input_variables/generated_files/varset_gw.html#nbandkss">nbandkss</a>.
 
   <p>&nbsp;
+
   <p><b><a name="other_output"></a>6.8. Other output files.</b>
 
   <p>There are many other output files, optionally written, all formatted files at present.
@@ -1390,6 +1397,7 @@ value of <a href="../../input_variables/generated_files/varset_gw.html#nbandkss"
   <p>&nbsp;
 
   <p>&nbsp;
+
   <p><b><a name="parallel_case"></a>6.9. Control of output in the parallel case.</b>
 
   <p>For massively parallel runs, one cannot afford to have some of the output files that are usually created. Explicitly,
@@ -1403,162 +1411,165 @@ Alternatively, if a file named "_MAINLOG" exists and there are less than N proce
   <p>In ABINITv7, N was set at N=100. However, with ABINITv8, N has been switched to 2. 
 It can be changed "by hand", though : modify NPROC_NO_EXTRA_LOG in src/10_defs/defs_basis.F90 and recompile. 
 See src/95_drive/iofn1.F90 for more explanation.
-
-  <hr>
-  <h3>&nbsp;</h3>
-
-  <h3><a name="7"></a>7. Numerical quality of the calculations</h3>
-  <p>The following section describes various parameters which affect convergence
-    and the numerical quality of calculations.
-  <p>The list of these input parameters is
-  <ul>
-    <li><a href="#ref11_1">(1)</a> <a href="../../input_variables/generated_files/varset_basic.html#ecut">ecut</a>
-    <li><a href="#ref11_2">(2)</a> <a href="../../input_variables/generated_files/varset_basic.html#toldfe">toldfe</a>,
-      <a href="../../input_variables/generated_files/varset_basic.html#toldff">toldff</a>, <a href="../../input_variables/generated_files/varset_basic.html#tolwfr">tolwfr</a>,
-      and <a href="../../input_variables/generated_files/varset_basic.html#tolvrs">tolvrs</a>, as well as
-      <a href="../../input_variables/generated_files/varset_basic.html#nstep">nstep</a>
-    <li><a href="#ref11_3">(3)</a> <a href="../../input_variables/generated_files/varset_basic.html#nkpt">nkpt</a>
-    <li><a href="#ref11_4">(4)</a> <a href="../../input_variables/generated_files/varset_gstate.html#ngfft">ngfft</a>
-    <li><a href="#ref11_5">(5)</a> <a href="../../input_variables/generated_files/varset_rlx.html#tolmxf">tolmxf</a>,
-      as well as <a href="../../input_variables/generated_files/varset_rlx.html#amu">amu</a>, <a href="../../input_variables/generated_files/varset_rlx.html#dtion">dtion</a>,
-      <a href="../../input_variables/generated_files/varset_rlx.html#vis">vis</a>, <a href="../../input_variables/generated_files/varset_rlx.html#ntime">ntime</a>
-    <li><a href="#ref11_6">(6)</a> <a href="../../input_variables/generated_files/varset_basic.html#acell">acell</a>
-      and <a href="../../input_variables/generated_files/varset_basic.html#rprim">rprim</a>
-  </ul>
-  <br>
-  The technical design of the pseudopotential also affects the quality of the
-  results.
-
-
-  <p><a name="ref11_1"></a>(1) The first issue regarding convergence is the number
-    of planewaves in the basis for a given set of atoms. Some atoms (notably those
-    in the first row or first transition series row) have relatively deep pseudopotentials
-    which require many planewaves for convergence. In contrast are atoms like
-    Si for which fewer planewaves are needed. A typical value of <a href="../../input_variables/generated_files/varset_basic.html#ecut">ecut</a>
-    for silicon might be 5-10 Hartree for quite good convergence, while the value
-    for oxygen might be 25-35 Hartree or more depending on the convergence desired
-    and the design of the pseudo- potential.
-  <p>NOTE: It is necessary in every new problem to <b>TEST</b> the convergence
-    by <b>RAISING</b> <a href="../../input_variables/generated_files/varset_basic.html#ecut">ecut</a> for
-    a given calculation until the results being computed are constant to within
-    some tolerance. This is up to the user and is very important. For a given
-    <a href="../../input_variables/generated_files/varset_basic.html#acell">acell</a> and <a href="../../input_variables/generated_files/varset_basic.html#rprim">rprim</a>,
-    <a href="../../input_variables/generated_files/varset_basic.html#ecut">ecut</a> is the parameter which
-    controls the number of planewaves. Of course if <a href="../../input_variables/generated_files/varset_basic.html#rprim">rprim</a>
-    or <a href="../../input_variables/generated_files/varset_basic.html#acell">acell</a> is varied then the
-    number of planewaves will also change.
-  <p>Let us reiterate that extremely careful pseudopotential design can optimize
-    the convergence of <i>e.g.</i> the total energy within some range of planewave
-    number or <a href="../../input_variables/generated_files/varset_basic.html#ecut">ecut</a>. It is appropriate
-    to attempt to optimize this convergence, especially for difficult atoms like
-    oxygen or copper, as long as one does not significantly compromise the quality
-    or transferability of the pseudopotential. There are many people working on
-    new techniques for optimizing convergence.
-  <p>For information on extended norm conservation, see <cite>E. L. Shirley, D.
-    C. Allan, R. M. Martin, and J. D. Joannopoulos, Phys. Rev. B 40, 3652 (1989)</cite>.
-  <p>For information on optimizing the convergence of pseudopotentials, see <cite>A.
-    M. Rappe, K. M. Rabe, E. Kaxiras, and J. D. Joannopoulos, Phys. Rev. B 41,
-    1227 (1990)</cite>.
-
-
-  <p><a name="ref11_2"></a>(2) In addition to achieving convergence in the number
-    of planewaves in the basis, one must ensure that the SCF iterations which
-    solve the electronic structure for a given set of atomic coordinates are also
-    converged. This convergence is controlled by the parameters <a href="../../input_variables/generated_files/varset_basic.html#toldfe">toldfe</a>,
+<br><br><a href=#top>Go to the top</a>
+<hr>
+<br><a name="quality"> </a>
+<a name="7"> </a>
+<h3><b>7. Numerical quality of the calculations</b></h3>
+ <p>The following section describes various parameters which affect convergence
+  and the numerical quality of calculations.
+<p>The list of these input parameters is
+<ul>
+  <li><a href="#ref11_1">(1)</a> <a href="../../input_variables/generated_files/varset_basic.html#ecut">ecut</a>
+  <li><a href="#ref11_2">(2)</a> <a href="../../input_variables/generated_files/varset_basic.html#toldfe">toldfe</a>,
     <a href="../../input_variables/generated_files/varset_basic.html#toldff">toldff</a>, <a href="../../input_variables/generated_files/varset_basic.html#tolwfr">tolwfr</a>,
-    and <a href="../../input_variables/generated_files/varset_basic.html#tolvrs">tolvrs</a>, as well as the
-    parameter <a href="../../input_variables/generated_files/varset_basic.html#nstep">nstep</a>. One of the
-    "tolerance" parameters must be chosen, and, when the required level of tolerance
-    is fulfilled, the SCF cycles will stop. The <a href="../../input_variables/generated_files/varset_basic.html#nstep">nstep</a>
-    variable also controls convergence in preconditioned conjugate gradient iterations
-    by forcing the calculation to stop whenever the number of such iterations
-    exceeds nstep. Usually one wants nstep to be set larger than needed to reach
-    a given tolerance, or else one wants to restart insufficiently converged calculations
-    until the required tolerance is reached.
-  <p>Note that, if the gap in the system closes (e.g. due to defect formation
-    or if the system is metallic in the first place), the presently coded algorithm
-    will be slower to converge than for insulating materials. Convergence trouble
-    during iterations usually signals closure of the gap. The code will suggest
-    to treat at least one unoccupied state (or band) in order to be able to monitor
-    such a closure.
+    and <a href="../../input_variables/generated_files/varset_basic.html#tolvrs">tolvrs</a>, as well as
+    <a href="../../input_variables/generated_files/varset_basic.html#nstep">nstep</a>
+  <li><a href="#ref11_3">(3)</a> <a href="../../input_variables/generated_files/varset_basic.html#nkpt">nkpt</a>
+  <li><a href="#ref11_4">(4)</a> <a href="../../input_variables/generated_files/varset_gstate.html#ngfft">ngfft</a>
+  <li><a href="#ref11_5">(5)</a> <a href="../../input_variables/generated_files/varset_rlx.html#tolmxf">tolmxf</a>,
+    as well as <a href="../../input_variables/generated_files/varset_rlx.html#amu">amu</a>, <a href="../../input_variables/generated_files/varset_rlx.html#dtion">dtion</a>,
+    <a href="../../input_variables/generated_files/varset_rlx.html#vis">vis</a>, <a href="../../input_variables/generated_files/varset_rlx.html#ntime">ntime</a>
+  <li><a href="#ref11_6">(6)</a> <a href="../../input_variables/generated_files/varset_basic.html#acell">acell</a>
+    and <a href="../../input_variables/generated_files/varset_basic.html#rprim">rprim</a>
+</ul>
+<br>
+The technical design of the pseudopotential also affects the quality of the
+results.
 
+<p><a name="ref11_1"></a>(1) The first issue regarding convergence is the number
+  of planewaves in the basis for a given set of atoms. Some atoms (notably those
+  in the first row or first transition series row) have relatively deep pseudopotentials
+  which require many planewaves for convergence. In contrast are atoms like
+  Si for which fewer planewaves are needed. A typical value of <a href="../../input_variables/generated_files/varset_basic.html#ecut">ecut</a>
+  for silicon might be 5-10 Hartree for quite good convergence, while the value
+  for oxygen might be 25-35 Hartree or more depending on the convergence desired
+  and the design of the pseudo- potential.
+<p>NOTE: It is necessary in every new problem to <b>TEST</b> the convergence
+  by <b>RAISING</b> <a href="../../input_variables/generated_files/varset_basic.html#ecut">ecut</a> for
+  a given calculation until the results being computed are constant to within
+  some tolerance. This is up to the user and is very important. For a given
+  <a href="../../input_variables/generated_files/varset_basic.html#acell">acell</a> and <a href="../../input_variables/generated_files/varset_basic.html#rprim">rprim</a>,
+  <a href="../../input_variables/generated_files/varset_basic.html#ecut">ecut</a> is the parameter which
+  controls the number of planewaves. Of course if <a href="../../input_variables/generated_files/varset_basic.html#rprim">rprim</a>
+  or <a href="../../input_variables/generated_files/varset_basic.html#acell">acell</a> is varied then the
+  number of planewaves will also change.
+<p>Let us reiterate that extremely careful pseudopotential design can optimize
+  the convergence of <i>e.g.</i> the total energy within some range of planewave
+  number or <a href="../../input_variables/generated_files/varset_basic.html#ecut">ecut</a>. It is appropriate
+  to attempt to optimize this convergence, especially for difficult atoms like
+  oxygen or copper, as long as one does not significantly compromise the quality
+  or transferability of the pseudopotential. There are many people working on
+  new techniques for optimizing convergence.
+<p>For information on extended norm conservation, see <cite>E. L. Shirley, D.
+  C. Allan, R. M. Martin, and J. D. Joannopoulos, Phys. Rev. B 40, 3652 (1989)</cite>.
+<p>For information on optimizing the convergence of pseudopotentials, see <cite>A.
+  M. Rappe, K. M. Rabe, E. Kaxiras, and J. D. Joannopoulos, Phys. Rev. B 41,
+  1227 (1990)</cite>.
 
-  <p><a name="ref11_3"></a>(3) For self consistent calculations (<a href="../../input_variables/generated_files/varset_basic.html#iscf">iscf</a>
-    positive) it is important to test the adequacy of the k point integration.
-    If symmetry is used then one usually tests a set of "special point" grids.
-    Otherwise one tests the addition of more and more k points, presumably on
-    uniform grids, to ensure that a sufficient number has been included for good
-    k point integration. The parameter nkpt indicates how many k points are being
-    used, and their coordinates are given by kpt and kptnrm, described above.
-    The weight given to each k point is provided by input variable <a href="../../input_variables/generated_files/varset_basic.html#wtk">wtk</a>.
-    Systematic tests of k point integration are much more difficult than tests
-    of the adequacy of the number of planewaves. The difficulty I refer to is
-    simply the lack of a very systematic method for generating k point grids for
-    tests.
-  <p><a name="ref11_4"></a>(4) It is possible to run calculations for which the
-    fft box is not quite large enough to avoid aliasing error in fft convolutions.
-    An aliasing error, or a Fourier filter approximation, is occurring when the
-    output variable "<b>boxcut</b>" is less than 2. boxcut is the smallest ratio
-    of the fft box side to the planewave basis sphere diameter. If this ratio
-    is 2 or larger then e.g. the calculation of the Hartree potential from the
-    charge density is done without approximation. <br>
-    NOTE : the values of <a href="../../input_variables/generated_files/varset_gstate.html#ngfft">ngfft</a>(1:3)
-    are chosen automatically by the code to give boxcut > 2, if <a href="../../input_variables/generated_files/varset_gstate.html#ngfft">ngfft</a>
-    has not been set by hand. At ratios smaller than 2, certain of the highest
-    Fourier components are corrupted in the convolution. If the basis is nearly
-    complete, this Fourier filter can be an excellent approximation. In this case
-    values of boxcut can be as small as about 1.5 without incurring significant
-    error. For a given <a href="../../input_variables/generated_files/varset_basic.html#ecut">ecut</a>, <a href="../../input_variables/generated_files/varset_basic.html#acell">acell</a>,
-    and <a href="../../input_variables/generated_files/varset_basic.html#rprim">rprim</a>, one should run
-    tests for which <a href="../../input_variables/generated_files/varset_gstate.html#ngfft">ngfft</a> is large
-    enough to give boxcut >= 2, and then one may try smaller values of <a href="../../input_variables/generated_files/varset_gstate.html#ngfft">ngfft</a>
-    if the results are not significantly altered. See the descriptions of these
-    variables above.
-  <p><a name="ref11_5"></a>(5) If you are running calculations to relax or equilibrate
-    structures, i.e. with <a href="../../input_variables/generated_files/varset_rlx.html#ionmov">ionmov</a>=1
-    and possibly <a href="../../input_variables/generated_files/varset_rlx.html#vis">vis</a>>0, then the
-    quality of your molecular dynamics or relaxation will be affected by the parameters
-    <a href="../../input_variables/generated_files/varset_rlx.html#amu">amu</a>, <a href="../../input_variables/generated_files/varset_rlx.html#dtion">dtion</a>,
-    <a href="../../input_variables/generated_files/varset_rlx.html#vis">vis</a>, <a href="../../input_variables/generated_files/varset_rlx.html#ntime">ntime</a>,
-    <a href="../../input_variables/generated_files/varset_rlx.html#tolmxf">tolmxf</a>. Clearly if you want
-    a relaxed structure you must either run long enough or make repeated runs
-    until the largest force in the problem (output as fmax) is smaller than what
-    you will tolerate (see <a href="../../input_variables/generated_files/varset_rlx.html#tolmxf">tolmxf</a>).
-    <br>
-    If <a href="../../input_variables/generated_files/varset_rlx.html#dtion">dtion</a> is too large for
-    the given values of masses (<a href="../../input_variables/generated_files/varset_rlx.html#amu">amu</a>)
-    and viscosity (<a href="../../input_variables/generated_files/varset_rlx.html#vis">vis</a>) then the
-    molecular dynamics will be unstable. If <a href="../../input_variables/generated_files/varset_rlx.html#dtion">dtion</a>
-    is too small, then the molecular dynamics will move inefficiently slowly.
-    A consensus exists in the community that forces larger than about 0.1 eV/Angstrom
-    are really too large to consider the relaxation to be converged. It is best
-    for the user to get experience with this in his/her own application. <br>
-    The option <a href="../../input_variables/generated_files/varset_rlx.html#ionmov">ionmov</a>=2, 3 or
-    7 are also available This uses the Broyden (BFGS) scheme for structural optimization
-    and is much more efficient than viscous damping for structural relaxation.
-  <p><a name="ref11_6"></a>(6) If you are running supercell calculations (i.e.
-    an isolated atom or molecule in a big box, or a defect in a solid, or a slab
-    calculation) you must check the convergence of your calculation with respect
-    to the supercell and system size.
-  <ul>
-    <li>For an isolated molecule in a big box : increase concurrently the three
-      dimensions of your supercell (<a href="../../input_variables/generated_files/varset_basic.html#acell">acell</a>),
-      and check the convergence of your physical property.
-    <li>For a defect in a solid : your supercell must be a multiple of the primitive
-      cell of the bulk solid, so you have less freedom. Still, be sure that your
-      supercell is large enough for your properties of interest to be accurate
-      at the level you want it to be.
-    <li>For a slab calculation : you must increase the vacuum in the cell, but
-      also the thickness of your slab systematically...
-  </ul>
-  <p> <i>If you follow the tutorial, you should go back to the tutorial window now. </i>
+<p><a name="ref11_2"></a>(2) In addition to achieving convergence in the number
+  of planewaves in the basis, one must ensure that the SCF iterations which
+  solve the electronic structure for a given set of atomic coordinates are also
+  converged. This convergence is controlled by the parameters <a href="../../input_variables/generated_files/varset_basic.html#toldfe">toldfe</a>,
+  <a href="../../input_variables/generated_files/varset_basic.html#toldff">toldff</a>, <a href="../../input_variables/generated_files/varset_basic.html#tolwfr">tolwfr</a>,
+  and <a href="../../input_variables/generated_files/varset_basic.html#tolvrs">tolvrs</a>, as well as the
+  parameter <a href="../../input_variables/generated_files/varset_basic.html#nstep">nstep</a>. One of the
+  "tolerance" parameters must be chosen, and, when the required level of tolerance
+  is fulfilled, the SCF cycles will stop. The <a href="../../input_variables/generated_files/varset_basic.html#nstep">nstep</a>
+  variable also controls convergence in preconditioned conjugate gradient iterations
+  by forcing the calculation to stop whenever the number of such iterations
+  exceeds nstep. Usually one wants nstep to be set larger than needed to reach
+  a given tolerance, or else one wants to restart insufficiently converged calculations
+  until the required tolerance is reached.
+<p>Note that, if the gap in the system closes (e.g. due to defect formation
+  or if the system is metallic in the first place), the presently coded algorithm
+  will be slower to converge than for insulating materials. Convergence trouble
+  during iterations usually signals closure of the gap. The code will suggest
+  to treat at least one unoccupied state (or band) in order to be able to monitor
+  such a closure.
 
-  <p>&nbsp;</p><hr>
+<p><a name="ref11_3"></a>(3) For self consistent calculations (<a href="../../input_variables/generated_files/varset_basic.html#iscf">iscf</a>
+  positive) it is important to test the adequacy of the k point integration.
+  If symmetry is used then one usually tests a set of "special point" grids.
+  Otherwise one tests the addition of more and more k points, presumably on
+  uniform grids, to ensure that a sufficient number has been included for good
+  k point integration. The parameter nkpt indicates how many k points are being
+  used, and their coordinates are given by kpt and kptnrm, described above.
+  The weight given to each k point is provided by input variable <a href="../../input_variables/generated_files/varset_basic.html#wtk">wtk</a>.
+  Systematic tests of k point integration are much more difficult than tests
+  of the adequacy of the number of planewaves. The difficulty I refer to is
+  simply the lack of a very systematic method for generating k point grids for
+  tests.
 
-<h3><b><a name="8"></a>8. Final remarks</b></h3>
-<p>The ABINIT package is developed by the ABINIT group. The status of this package
+<p><a name="ref11_4"></a>(4) It is possible to run calculations for which the
+  fft box is not quite large enough to avoid aliasing error in fft convolutions.
+  An aliasing error, or a Fourier filter approximation, is occurring when the
+  output variable "<b>boxcut</b>" is less than 2. boxcut is the smallest ratio
+  of the fft box side to the planewave basis sphere diameter. If this ratio
+  is 2 or larger then e.g. the calculation of the Hartree potential from the
+  charge density is done without approximation. <br>
+  NOTE : the values of <a href="../../input_variables/generated_files/varset_gstate.html#ngfft">ngfft</a>(1:3)
+  are chosen automatically by the code to give boxcut > 2, if <a href="../../input_variables/generated_files/varset_gstate.html#ngfft">ngfft</a>
+  has not been set by hand. At ratios smaller than 2, certain of the highest
+  Fourier components are corrupted in the convolution. If the basis is nearly
+  complete, this Fourier filter can be an excellent approximation. In this case
+  values of boxcut can be as small as about 1.5 without incurring significant
+  error. For a given <a href="../../input_variables/generated_files/varset_basic.html#ecut">ecut</a>, <a href="../../input_variables/generated_files/varset_basic.html#acell">acell</a>,
+  and <a href="../../input_variables/generated_files/varset_basic.html#rprim">rprim</a>, one should run
+  tests for which <a href="../../input_variables/generated_files/varset_gstate.html#ngfft">ngfft</a> is large
+  enough to give boxcut >= 2, and then one may try smaller values of <a href="../../input_variables/generated_files/varset_gstate.html#ngfft">ngfft</a>
+  if the results are not significantly altered. See the descriptions of these
+  variables above.
+
+<p><a name="ref11_5"></a>(5) If you are running calculations to relax or equilibrate
+  structures, i.e. with <a href="../../input_variables/generated_files/varset_rlx.html#ionmov">ionmov</a>=1
+  and possibly <a href="../../input_variables/generated_files/varset_rlx.html#vis">vis</a>>0, then the
+  quality of your molecular dynamics or relaxation will be affected by the parameters
+  <a href="../../input_variables/generated_files/varset_rlx.html#amu">amu</a>, <a href="../../input_variables/generated_files/varset_rlx.html#dtion">dtion</a>,
+  <a href="../../input_variables/generated_files/varset_rlx.html#vis">vis</a>, <a href="../../input_variables/generated_files/varset_rlx.html#ntime">ntime</a>,
+  <a href="../../input_variables/generated_files/varset_rlx.html#tolmxf">tolmxf</a>. Clearly if you want
+  a relaxed structure you must either run long enough or make repeated runs
+  until the largest force in the problem (output as fmax) is smaller than what
+  you will tolerate (see <a href="../../input_variables/generated_files/varset_rlx.html#tolmxf">tolmxf</a>).
+  <br>
+  If <a href="../../input_variables/generated_files/varset_rlx.html#dtion">dtion</a> is too large for
+  the given values of masses (<a href="../../input_variables/generated_files/varset_rlx.html#amu">amu</a>)
+  and viscosity (<a href="../../input_variables/generated_files/varset_rlx.html#vis">vis</a>) then the
+  molecular dynamics will be unstable. If <a href="../../input_variables/generated_files/varset_rlx.html#dtion">dtion</a>
+  is too small, then the molecular dynamics will move inefficiently slowly.
+  A consensus exists in the community that forces larger than about 0.1 eV/Angstrom
+  are really too large to consider the relaxation to be converged. It is best
+  for the user to get experience with this in his/her own application. <br>
+  The option <a href="../../input_variables/generated_files/varset_rlx.html#ionmov">ionmov</a>=2, 3 or
+  7 are also available This uses the Broyden (BFGS) scheme for structural optimization
+  and is much more efficient than viscous damping for structural relaxation.
+
+<p><a name="ref11_6"></a>(6) If you are running supercell calculations (i.e.
+  an isolated atom or molecule in a big box, or a defect in a solid, or a slab
+  calculation) you must check the convergence of your calculation with respect
+  to the supercell and system size.
+<ul>
+  <li>For an isolated molecule in a big box : increase concurrently the three
+    dimensions of your supercell (<a href="../../input_variables/generated_files/varset_basic.html#acell">acell</a>),
+    and check the convergence of your physical property.
+  <li>For a defect in a solid : your supercell must be a multiple of the primitive
+    cell of the bulk solid, so you have less freedom. Still, be sure that your
+    supercell is large enough for your properties of interest to be accurate
+    at the level you want it to be.
+  <li>For a slab calculation : you must increase the vacuum in the cell, but
+    also the thickness of your slab systematically...
+</ul>
+<p> <i>If you follow the tutorial, you should go back to the tutorial window now. </i>
+<br><br><a href=#top>Go to the top</a>
+<hr>
+<br><a name="final"> </a>
+<a name="8"> </a>
+<h3><b>8. Final remarks</b></h3>
+ <p>The ABINIT package is developed by the ABINIT group. The status of this package
   and the ABINIT group are explained in the file ~abinit/doc/users/context.txt and ~abinit/doc/developers/planning.txt ,
   or some recent version of them.
+<br><br><a href=#top>Go to the top</a>
+<hr>
 <script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
 
 </body>
