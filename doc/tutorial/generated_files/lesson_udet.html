@@ -32,15 +32,16 @@ and likely the lesson <a href="lesson_paw2.html">PAW2</a>, to generate PAW atomi
 <a name="list"></a>
 <h3><b> Calculation of U and J using Cococcioni's approach. Table of content:</b></h3>
 
-<ul>
-<li><a href="#0">0.</a> Summary of linear response method to determine U</li>
-<li><a href="#1">1.</a> Determine U in ABINIT</li>
-<li><a href="#2">2.</a> The ujdet utility</li>
-</ul>
-<hr>
+<ul> 
+  <li><a href="#sumary">1.</a> Summary of linear response method to determine U</li>
+  <li><a href="#ABINIT">2.</a> Determine U in ABINIT</li>
+  <li><a href="#ujdet">3.</a> The ujdet utility</li>
 
-<h3><a name="0"></a><b><br>0. Summary of linear response to determine U</b></h3>
-<p>The linear response method has been introduced by several authors [1-6]. It is based on the fact that U corresponds to the energy to localize 
+ </ul> 
+ <hr><br><a name="sumary"> </a>
+<a name="1"> </a>
+<h3><b>1. Summary of linear response method to determine U</b></h3>
+ <p>The linear response method has been introduced by several authors [1-6]. It is based on the fact that U corresponds to the energy to localize 
 an additional electron on the same site: U=E[n+1]+E[n-1]-2E[n] [4]. This can be reformulated as the response to an infinitesimal change of
 of occupation of the orbital by the electrons dn. Then U is the second derivative 
 of the energy with respect to the occupation U=d^2E/ d^2n. The first method fixed the occupation by cutting 
@@ -63,12 +64,12 @@ occupation by +/-1 electron. Note that the occupation need not to vary by 1 elec
 </p>
 [7] "<span style="font-style: italic;">Consistent determination of U in the PAW approximation</span>", D. Adams, B. Amadon, S. Biermann<span
  style="font-weight: bold;"></span>, unpublished (2010)&#160;&#160;</p>
-
-
-
-<h3><hr> <a name="1"></a>&#160;<b><b><br>
-1.&#160; Determine U in ABINIT</b></b></h3>
-<p><i>Before continuing, you might consider to work in a different subdirectory as for the other lessons. Why not "Work_udet" ?
+<br><br><a href=#top>Go to the top</a>
+<hr>
+<br><a name="ABINIT"> </a>
+<a name="2"> </a>
+<h3><b>2. Determine U in ABINIT</b></h3>
+ <p><i>Before continuing, you might consider to work in a different subdirectory as for the other lessons. Why not "Work_udet" ?
 </i><i>In what follows, the name of files are mentioned as if you were in this subdirectory.<br>
 All the input files can be found in the </i><i><span  style="color: rgb(0, 102, 0);">~abinit/tests/tutorial/Input</span>
 directory.</i></p><p><i>You can compare your results with reference output files located in </i><i><span style="color: rgb(0, 102, 0);">~abinit/tests/tutorial/Refs</span>
@@ -152,12 +153,12 @@ with a potential shift of 0.1 eV. If you wish to determine U on the second atom 
 To change the size of the potential shift use 
 e.g. "<a href="../../input_variables/generated_files/varset_dev.html#pawujv">pawujv</a> 0.05 eV". 
 Our tests show that 0.1 eV is the optimal value, but the linear response is linear in a wide range (1-0.001 eV).</p>  
-
-
-<h3><hr> <a name="2"></a>&#160;<b><b><br>
-2.&#160; The ujdet utility </b></b></h3>
-
-In general the calculation of U with abinit as described above is sufficient. 
+<br><br><a href=#top>Go to the top</a>
+<hr>
+<br><a name="ujdet"> </a>
+<a name="3"> </a>
+<h3><b>3. The ujdet utility</b></h3>
+ <p>In general the calculation of U with abinit as described above is sufficient. 
 For some post-treatment that goes beyond the standard applications, a separate executable ujdet 
 was created. The output of abinit is formatted so that you can easily "cut" the part with the ujdet input variables : 
 you can generate the standard input file for the ujdet utility by typing: 
@@ -200,7 +201,9 @@ Running
 
 <pre style="margin-left: 40px;"><span style="color: rgb(153, 0, 0);">rm ujdet.[ol]* ; ujdet > ujdet.log   </span> </pre> 
 
-gives now higher values in the column U_ASA than in the runs before (8.07 eV compared to 7.21 eV): For more localized projectors the U value has to be bigger.
+gives now higher values in the column U_ASA than in the runs before (8.07 eV compared to 7.21 eV): For more localized projectors the U value has to be bigger. 
+<br><br><a href=#top>Go to the top</a>
+<hr>
 <script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
 
 </body>
