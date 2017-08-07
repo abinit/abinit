@@ -44,9 +44,9 @@ or Fermi contact interaction. Such concerns turn out to be unwarranted,
 however, as our experience and others have shown that the PAW formalism
 together with a typical chemical valence/core separation are sufficient
 for accurate description of nuclear point properties such as the electric
-field gradient <a href="../../bibliography/generated_files/bibliography.html#Petrilli1998">[Petrilli1998]</a>,<a href="../../bibliography/generated_files/bibliography.html#Profeta2003">[Profeta2003]</a>,<a href="../../bibliography/generated_files/bibliography.html#Zwanziger2008">[Zwanziger2008]</a>, 
-Fermi contact interaction <a href="../../bibliography/generated_files/bibliography.html#Zwanziger2009">[Zwanziger2009]</a> and magnetic chemical
-shielding <a href="../../bibliography/generated_files/bibliography.html#Pickard2001">[Pickard2001]</a>.
+field gradient <a href="../../biblio/generated_files/bib_biblio.html#Petrilli1998">[Petrilli1998]</a>,<a href="../../biblio/generated_files/bib_biblio.html#Profeta2003">[Profeta2003]</a>,<a href="../../biblio/generated_files/bib_biblio.html#Zwanziger2008">[Zwanziger2008]</a>, 
+Fermi contact interaction <a href="../../biblio/generated_files/bib_biblio.html#Zwanziger2009">[Zwanziger2009]</a> and magnetic chemical
+shielding <a href="../../biblio/generated_files/bib_biblio.html#Pickard2001">[Pickard2001]</a>.
 
 <p>Both the electric field gradient and Fermi contact interaction are
 ground-state observables, and their computation adds negligible time to
@@ -59,7 +59,7 @@ density is computed in reciprocal space, and the gradient due to the
 sphere charge densities contribute matrix elements of (3x<sub>&alpha;</sub> x<sub>&beta;</sub>
 -r<sup>2</sup>&delta;<sub>&alpha;&beta;</sub>)/r<sup>5</sup>, weighted by the charge densities in each
 channel determined by the self-consistent minimization procedure. This
-treatment <a href="../../bibliography/generated_files/bibliography.html#Zwanziger2008">[Zwanziger2008]</a> is more flexible than for example assuming
+treatment <a href="../../biblio/generated_files/bib_biblio.html#Zwanziger2008">[Zwanziger2008]</a> is more flexible than for example assuming
 all bands are doubly occupied, and permits the current approach to be used
 with more complex electronic and magnetic states than just insulators.
 
@@ -75,7 +75,7 @@ principal directions may be determined with respect to the crystal axes. Finally
 for comparison purposes. The point charges by atom are supplied through the additional
 variable <a href="../../input_variables/generated_files/varset_paw.html#ptcharge">ptcharge</a>.
 Detailed examples of the use of ABINIT to compute EFG's can be found in 
-<a href="../../bibliography/generated_files/bibliography.html#Zwanziger2008">[Zwanziger2008]</a>,<a href="../../bibliography/generated_files/bibliography.html#Zwanziger2009a">[Zwanziger2009a]</a>. 
+<a href="../../biblio/generated_files/bib_biblio.html#Zwanziger2008">[Zwanziger2008]</a>,<a href="../../biblio/generated_files/bib_biblio.html#Zwanziger2009a">[Zwanziger2009a]</a>. 
 
 <p>The Fermi contact interaction, which is just the electron density evaluated
 precisely at the nuclear location, is an important component of the isomer
@@ -87,7 +87,7 @@ by treating &delta;(<b>r</b>-<b>R</b>) as the observable, that is, the
 three-dimensional Dirac delta function centered on the nuclear position
 <b>R</b>. Because of the short-range nature of the delta function, in the
 PAW-transformed version of the observable only matrix elements of the on-site
-all-electron valence functions are required <a href="../../bibliography/generated_files/bibliography.html#Zwanziger2009">[Zwanziger2009]</a>, and these
+all-electron valence functions are required <a href="../../biblio/generated_files/bib_biblio.html#Zwanziger2009">[Zwanziger2009]</a>, and these
 are evaluated from a linear fit to the first few points of the PAW radial
 functions.
 
@@ -107,7 +107,7 @@ radius for the transition. The electronic densities n<sub>abs</sub> and n<sub>sr
 to the absorber and source respectively. Because of the linearity of this formula in the density
 at the absorber (sample) nucleus, the only unknown (&Delta;&lang;r<sup>2</sup>&rang;) can be obtained
 by comparing the calculated values in several standards to experiment and then the computations
-can be used to interpret the measurements of new materials. In <a href="../../bibliography/generated_files/bibliography.html#Zwanziger2009">[Zwanziger2009]</a> 
+can be used to interpret the measurements of new materials. In <a href="../../biblio/generated_files/bib_biblio.html#Zwanziger2009">[Zwanziger2009]</a> 
 it is showed how to perform such studies on a variety of compounds.
 
 
@@ -145,12 +145,12 @@ The user can find some related example input files in the ABINIT package in the 
 <h3><b>4. References.</b></h3>
 
 
-<br> <a href="../../bibliography/generated_files/bibliography.html#Petrilli1998">[Petrilli1998]</a>  Helena M. Petrilli, Peter E. Bl&ouml;chl, Peter Blaha and Karlheinz Schwarz, "Electric-field-gradient calculations using the projector augmented wave method", Phys. Rev. B 57, 14690&ndash;14697 (1998). <br> DOI: <a href="https://doi.org/10.1103/PhysRevB.57.14690">10.1103/PhysRevB.57.14690</a>.<br>
-<br> <a href="../../bibliography/generated_files/bibliography.html#Pickard2001">[Pickard2001]</a>  Chris J. Pickard and Francesco Mauri, "All-electron magnetic response with pseudopotentials: NMR chemical shifts", Phys. Rev. B 63, 245101 (2001). <br> DOI: <a href="https://doi.org/10.1103/PhysRevB.63.245101">10.1103/PhysRevB.63.245101</a>.<br>
-<br> <a href="../../bibliography/generated_files/bibliography.html#Profeta2003">[Profeta2003]</a>  M. Profeta, F. Mauri and C. J. Pickard, "Accurate First Principles Prediction of 17 O NMR Parameters in SiO2:? Assignment of the Zeolite Ferrierite Spectrum", J. Am. Chem. Soc. 125, 541 (2003). <br> DOI: <a href="https://doi.org/10.1021/ja027124r">10.1021/ja027124r</a>.<br>
-<br> <a href="../../bibliography/generated_files/bibliography.html#Zwanziger2008">[Zwanziger2008]</a>  J. W.and Torrent, M. Zwanziger, "First-Principles Calculation of Electric Field Gradients in Metals, Semiconductors, and Insulators", Applied Magnetic Resonance 33, 447&ndash;456 (2008). <br> DOI: <a href="https://doi.org/10.1007/s00723-008-0080-1">10.1007/s00723-008-0080-1</a>.<br>
-<br> <a href="../../bibliography/generated_files/bibliography.html#Zwanziger2009">[Zwanziger2009]</a>  J W Zwanziger, "Computation of M&ouml;ssbauer isomer shifts from first principles", Journal of Physics: Condensed Matter 21, 195501 (2009). <br> DOI: <a href="https://doi.org/10.1088/0953-8984/21/19/195501">10.1088/0953-8984/21/19/195501</a>.<br>
-<br> <a href="../../bibliography/generated_files/bibliography.html#Zwanziger2009a">[Zwanziger2009a]</a>  J. W. Zwanziger, "First-principles study of the nuclear quadrupole resonance parameters and orbital ordering in LaTiO<sub>3</sub>", Phys. Rev. B 79, 033112 (2009). <br> DOI: <a href="https://doi.org/10.1103/PhysRevB.79.033112">10.1103/PhysRevB.79.033112</a>.<br>
+<br> <a href="../../biblio/generated_files/bib_biblio.html#Petrilli1998">[Petrilli1998]</a>  Helena M. Petrilli, Peter E. Bl&ouml;chl, Peter Blaha and Karlheinz Schwarz, "Electric-field-gradient calculations using the projector augmented wave method", Phys. Rev. B 57, 14690&ndash;14697 (1998). <br> DOI: <a href="https://doi.org/10.1103/PhysRevB.57.14690">10.1103/PhysRevB.57.14690</a>.<br>
+<br> <a href="../../biblio/generated_files/bib_biblio.html#Pickard2001">[Pickard2001]</a>  Chris J. Pickard and Francesco Mauri, "All-electron magnetic response with pseudopotentials: NMR chemical shifts", Phys. Rev. B 63, 245101 (2001). <br> DOI: <a href="https://doi.org/10.1103/PhysRevB.63.245101">10.1103/PhysRevB.63.245101</a>.<br>
+<br> <a href="../../biblio/generated_files/bib_biblio.html#Profeta2003">[Profeta2003]</a>  M. Profeta, F. Mauri and C. J. Pickard, "Accurate First Principles Prediction of 17 O NMR Parameters in SiO2:? Assignment of the Zeolite Ferrierite Spectrum", J. Am. Chem. Soc. 125, 541 (2003). <br> DOI: <a href="https://doi.org/10.1021/ja027124r">10.1021/ja027124r</a>.<br>
+<br> <a href="../../biblio/generated_files/bib_biblio.html#Zwanziger2008">[Zwanziger2008]</a>  J. W.and Torrent, M. Zwanziger, "First-Principles Calculation of Electric Field Gradients in Metals, Semiconductors, and Insulators", Applied Magnetic Resonance 33, 447&ndash;456 (2008). <br> DOI: <a href="https://doi.org/10.1007/s00723-008-0080-1">10.1007/s00723-008-0080-1</a>.<br>
+<br> <a href="../../biblio/generated_files/bib_biblio.html#Zwanziger2009">[Zwanziger2009]</a>  J W Zwanziger, "Computation of M&ouml;ssbauer isomer shifts from first principles", Journal of Physics: Condensed Matter 21, 195501 (2009). <br> DOI: <a href="https://doi.org/10.1088/0953-8984/21/19/195501">10.1088/0953-8984/21/19/195501</a>.<br>
+<br> <a href="../../biblio/generated_files/bib_biblio.html#Zwanziger2009a">[Zwanziger2009a]</a>  J. W. Zwanziger, "First-principles study of the nuclear quadrupole resonance parameters and orbital ordering in LaTiO<sub>3</sub>", Phys. Rev. B 79, 033112 (2009). <br> DOI: <a href="https://doi.org/10.1103/PhysRevB.79.033112">10.1103/PhysRevB.79.033112</a>.<br>
 <p>
 <script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
 

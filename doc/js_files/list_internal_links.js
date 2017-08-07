@@ -9,9 +9,9 @@ document.write(' <A href="'+docpath+'tutorial/generated_files/all_files.html"><B
 document.write(' <B> | </B> ');
 document.write(' <A href="'+docpath+'topics/generated_files/all_topics.html"><B>"How to" list</B></A> ');
 document.write(' <B> | </B> ');
-document.write(' <A href="'+docpath+'bibliography/generated_files/bibliography.html"><B>Bibliography</B></A> ');
+document.write(' <A href="'+docpath+'biblio/generated_files/bib_biblio.html"><B>Bibliography</B></A> ');
 document.write(' <B> | </B> ');
-document.write(' <A href="'+docpath+'bibliography/generated_files/acknowledgments.html"><B>Suggested acknowledgments</B></A> ');
+document.write(' <A href="'+docpath+'biblio/generated_files/bib_acknow.html"><B>Suggested acknowledgments</B></A> ');
 document.write(' <HR ALIGN=left> ');
 document.write(' Global help files : ');
 document.write(' <A href="'+docpath+'users/generated_files/help_new_user.html"><B>Help for new users</B></A> ');

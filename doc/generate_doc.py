@@ -952,7 +952,7 @@ if 0:
 
 backlink= ' &nbsp; <a href="../../biblio/generated_files/bib_acknow.html">bib_acknow.html</a> &nbsp; ' 
 for i, bibfile_info in enumerate(yml_in["bibfiles"]):
-  if bibfile_info.name.strip()=="bib_acknow":
+  if bibfile_info.name.strip()=="acknow":
     bibfile_intro=bibfile_info.introduction
     bibfile_ack_intro = make_links(bibfile_intro,None,allowed_link_seeds,backlinks,backlink)
 
@@ -997,7 +997,7 @@ for ref in bibtex_dics:
     bibliography_content+=('<a id="%s"></a>')%(cur_let)
     if cur_let==ID[0]:
       bibliography_content+=alphalinks+('<hr><hr><h2>%s</h2> \n \n')%(cur_let)
-  bibliography_content+= ('<hr><a id="%s">[%s]</a> (<a href="./bibtex.html#%s">bibtex</a>)\n <br> %s\n') %(ID,ID,ID,reference_dic[ID])
+  bibliography_content+= ('<hr><a id="%s">[%s]</a> (<a href="./bib_bibtex.html#%s">bibtex</a>)\n <br> %s\n') %(ID,ID,ID,reference_dic[ID])
   if len(backlinksID)!=0:
     bibliography_content+= "<br> Referred to in " 
     for link in backlinksID:
@@ -1020,13 +1020,13 @@ bibliography_content=bibtex2html(bibliography_content)
 # Assemble the html files in the biblio directory
 
 suppl={"introduction":bibfile_ack_intro}
-suppl_components={"acknowledgments":suppl}
+suppl_components={"acknow":suppl}
 suppl={"content":bibtex_content}
 suppl_components['bibtex']=suppl
 suppl={"content":bibliography_content}
-suppl_components['bibliography']=suppl
+suppl_components['biblio']=suppl
 
-rc=assemble_html(yml_in["bibfiles"],suppl_components,"biblio","",allowed_link_seeds,backlinks)
+rc=assemble_html(yml_in["bibfiles"],suppl_components,"biblio","bib",allowed_link_seeds,backlinks)
 
 ################################################################################
 
