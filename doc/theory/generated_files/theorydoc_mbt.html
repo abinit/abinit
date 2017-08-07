@@ -32,7 +32,26 @@ Green's function and self-energy can be found in any standard textbook on Many-B
 <a name="list"></a>
 <h3><b> Many-Body Theory in ABINIT. Table of content:</b></h3>
 
-<ul>
+<ul> 
+  <li><a href="#None">0. To be filled</a></li>
+  <li><a href="#green_self_intro">1. Green's function and self-energy</a></li>
+  <li><a href="#hedins_equations">2. Hedin's equations</a></li>
+  <li><a href="#gw_approximation">3. The GW approximation</a></li>
+  <li><a href="#perturbative">4. Perturbative approach</a></li>
+  <li><a href="#RPA_Fourier_space">5. The RPA polarizability in Fourier space</a></li>
+  <li><a href="#oscillator_notes">6. Notes on the calculation of the oscillator matrix elements</a></li>
+  <li><a href="#hilbert_transform">7. Hilbert transform method</a></li>
+  <li><a href="#evaluation_gw_sigma">8. Evaluation of the GW self-energy</a></li>
+  <li><a href="#plasmonpole_models">9. Plasmon-pole models</a></li>
+  <li><a href="#contour_deformation">10. Contour deformation technique</a></li>
+  <li><a href="#notations">11. Notation</a></li>
+  <li><a href="#references">12. References</a></li>
+
+ </ul> 
+ <hr><br><a name="None"> </a>
+<a name="0"> </a>
+<h3><b>0. To be filled</b></h3>
+ <p><ul>
 <li><a href="#green_self_intro">1</a> The Green's function and the self-energy 
   </li><li><a href="#hedins_equations">2</a> Hedin's equations
   </li><li><a href="#gw_approximation">3</a> The GW approximation 
@@ -48,15 +67,12 @@ Green's function and self-energy can be found in any standard textbook on Many-B
 </ul>
 
 <hr>
-
-
-<h4><a name="green_self_intro"></a></h4>
-
-<h3><b>1. Green's function and self-energy.</b></h3>
-
-
-<p>
-The time-ordered Green's function <i>G</i>(12), also called the propagator, 
+<br><br><a href=#top>Go to the top</a>
+<hr>
+<br><a name="green_self_intro"> </a>
+<a name="1"> </a>
+<h3><b>1. Green's function and self-energy</b></h3>
+ <p>The time-ordered Green's function <i>G</i>(12), also called the propagator, 
 defines the probability amplitude for the propagation of an added or removed electron in a many-body system. 
 Since the probability amplitude is simply given by the overlap between the final and the initial state, 
 <i>G</i>(12) can be expressed as 
@@ -191,19 +207,12 @@ departs from the Kohn Sham equation since the QP eigenvectors and
 eigenvalues do have a direct physical meaning: they can be used to
 obtain both the charge density of the interacting system and to
 describe the properties of charged excitations.
-<br>
-<br>
-<br>
-<hr><br>
-
-
-<h3><a name="hedins_equations"></a></h3>
-
-<h3><b> 2. Hedin's equations.</b></h3>
-
-
-<p>
-In 1965 Hedin[6] showed how to derive a set of coupled integro-differential equations
+<br><br><a href=#top>Go to the top</a>
+<hr>
+<br><a name="hedins_equations"> </a>
+<a name="2"> </a>
+<h3><b>2. Hedin's equations</b></h3>
+ <p>In 1965 Hedin[6] showed how to derive a set of coupled integro-differential equations
 whose self-consistent solution, in principle, gives the exact self-energy of the system and
 therefore the exact <i>G</i>.
 <!--
@@ -264,17 +273,12 @@ which describe the interactions between virtual hole and electron excitations [5
 are the essential ingredients for the determination of &#931;(12). 
 <p>
 The iteration starts by setting <i>G</i> = <i>G<sub>0</sub></i>. Then the set of equations should in principle be iterated until self-consistency in all terms is reached. 
-
-<br><br><br></p>
-<hr><br>
-
-
-<h3><a name="gw_approximation"></a></h3>
-
-<h3><b> 3. The GW approximation.</b></h3>
-
-
-<p>The practical solution of Hedin's equations is extremely complicated
+<br><br><a href=#top>Go to the top</a>
+<hr>
+<br><a name="gw_approximation"> </a>
+<a name="3"> </a>
+<h3><b>3. The GW approximation</b></h3>
+ <p>The practical solution of Hedin's equations is extremely complicated
 as
 they are not just numerical relations but contain a functional
 derivative in the equation for the vertex.
@@ -393,20 +397,12 @@ and the screened interaction is approximated with the RPA calculated with KS ene
     <img src="../documents/theory_mbt/G0G0.png">
      
 </p>
-
-
-<br>
-<br>
-<br>
-<hr><br>
-
-
-<h3><a name="perturbative"></a></h3>
-
-<h3><b>4. Perturbative approach.</b></h3>
-
-
-Despite all the fundamental differences between many-body theory and DFT, 
+<br><br><a href=#top>Go to the top</a>
+<hr>
+<br><a name="perturbative"> </a>
+<a name="4"> </a>
+<h3><b>4. Perturbative approach</b></h3>
+ <p>Despite all the fundamental differences between many-body theory and DFT, 
 the Kohn-Sham exchange-correlation potential can be seen as a static, local and 
 Hermitian approximation to the self-energy. 
 Indeed, in many cases the Kohn-Sham energies already provide a reasonable estimate of the band structure
@@ -451,24 +447,12 @@ energy, as depicted below.
 <p align="center">
 
     <img src="../documents/theory_mbt/self_energy_taylor.png">
-
-    
-</p>
-
-
-
-<br>
-<br>
-<br>
-<hr><br>
-
-
-<h4><a name="RPA_Fourier_space"></a></h4>
-
-<h4><b>5. The RPA polarizability in Fourier space.</b></h4>
-
-
-In the reciprocal space and frequency domain (implying a Fourier transform (FT) of 
+<br><br><a href=#top>Go to the top</a>
+<hr>
+<br><a name="RPA_Fourier_space"> </a>
+<a name="5"> </a>
+<h3><b>5. The RPA polarizability in Fourier space</b></h3>
+ <p>In the reciprocal space and frequency domain (implying a Fourier transform (FT) of 
 the real space coordinates and time variables), the independent-particle 
 polarizability assumes the form:
 
@@ -572,19 +556,12 @@ due to the so called local-field effects introduced by the presence of the cryst
 These spectra, if calculated, are typically output as ...<b>_LF</b> and ...<b>_NLF</b> 
 
 files during the course of a calculation.
-
-<br>
-<br>
-<br>
-<hr><br>
-
-
-<h3><a name="oscillator_notes"></a></h3>
-
-<h3><b>6. Notes on the calculation of the oscillator matrix elements.</b></h3>
-
-
-Many body calculations require the evaluation of integrals involving the oscillator matrix elements
+<br><br><a href=#top>Go to the top</a>
+<hr>
+<br><a name="oscillator_notes"> </a>
+<a name="6"> </a>
+<h3><b>6. Notes on the calculation of the oscillator matrix elements</b></h3>
+ <p>Many body calculations require the evaluation of integrals involving the oscillator matrix elements
 
 <p align="center">
 
@@ -653,18 +630,12 @@ how to setup the FFT box for the oscillators and should be used to test how the 
 errors affect the final results. The default setting of <b>fftgw 21</b> is safe, a setting 
 of <b>fftgw 11</b> is fast but can be inaccurate, and a setting of <b>fftgw 31</b> gives 
 the maximum possible accuracy at a significant computational cost.
-
-<br><br><br></p>
-<hr><br>
-
-
-<h3><a name="hilbert_transform"></a></h3>
-
-<h3><b>7. The Hilbert transform method.</b></h3>
-
-
-<p>
-The computational effort for the evaluation of the RPA polarizability 
+<br><br><a href=#top>Go to the top</a>
+<hr>
+<br><a name="hilbert_transform"> </a>
+<a name="7"> </a>
+<h3><b>7. Hilbert transform method</b></h3>
+ <p>The computational effort for the evaluation of the RPA polarizability 
 with the Adler-Wiser expression scales linearly with the number of frequencies computed 
 (<a href="../../input_variables/generated_files/varset_gw.html#nfreqre">nfreqre</a> and
 <a href="../../input_variables/generated_files/varset_gw.html#nfreqim">nfreqim</a>),
@@ -734,18 +705,12 @@ A theoretical estimate of the crossover point is hard to give because it depends
 factors. However, if many frequencies are needed, such as for the evaluation of optical spectra, 
 or accurate contour deformation integrations, or even mapping full grids in the complex plane, 
 the Hilbert transform method can be significantly faster, and its use is well worth considering.
-
-<br><br><br></p>
-<hr><br>
-
-
-<h3><a name="evaluation_gw_sigma"></a></h3>
-
-<h3><b>8. Evaluation of the GW self-energy.</b></h3>
-
-
-<p>
-Following the standard approach, we separate the screened interaction into the static bare Coulomb term 
+<br><br><a href=#top>Go to the top</a>
+<hr>
+<br><a name="evaluation_gw_sigma"> </a>
+<a name="8"> </a>
+<h3><b>8. Evaluation of the GW self-energy</b></h3>
+ <p>Following the standard approach, we separate the screened interaction into the static bare Coulomb term 
 and a frequency-dependent contribution according to:
 
 </p>
@@ -875,14 +840,12 @@ can be used (specified by <a href="../../input_variables/generated_files/varset_
 
 <br><br><br></p>
 <hr><br>
-
-
-<h3><a name="plasmonpole_models"></a></h3>
-
-<h3><b>9 Plasmon-pole models</b></h3>
-
-
-One of the major computational efforts in self-energy calculations is represented by the calculation
+<br><br><a href=#top>Go to the top</a>
+<hr>
+<br><a name="plasmonpole_models"> </a>
+<a name="9"> </a>
+<h3><b>9. Plasmon-pole models</b></h3>
+ <p>One of the major computational efforts in self-energy calculations is represented by the calculation
 of the frequency dependence of the screened interaction, which is needed for the evaluation of the convolution.
 Due to the ragged behavior of <i>G</i>(&#969;) and <i>W</i>(&#969;)
 along the real axis, numerous real frequencies are in principle
@@ -936,17 +899,12 @@ dielectric matrix to the plasma frequency and the charge density [12]
 <p>
 For a discussion of the models corresponding to <a href="../../input_variables/generated_files/varset_gw.html#ppmodel">ppmodel</a>=3,4 we refer the reader to the original papers cited in the documentation
 of the variable.
-
-<br><br><br></p>
-<hr><br>
-
-
-<h3><a name="contour_deformation"></a></h3>
-
-<h3><b>9. Contour deformation technique.</b></h3>
-
-
-The contour deformation method was proposed in order to avoid having to deal with quantities close
+<br><br><a href=#top>Go to the top</a>
+<hr>
+<br><a name="contour_deformation"> </a>
+<a name="10"> </a>
+<h3><b>10. Contour deformation technique</b></h3>
+ <p>The contour deformation method was proposed in order to avoid having to deal with quantities close
 to the real axis as much as possible [15].
 The integral over the real frequency axis can be transformed into an integral over the contour 
 depicted in red in the figure below. The integral over real frequency is traded with an integration 
@@ -985,19 +943,12 @@ The integration along the imaginary axis is expected to converge quickly with re
 number of  sampled frequencies since the integrand is typically very smooth.
 Only the residues of the integrand have to be evaluated at the complex poles contributed 
 by the Green's function whose frequency dependence is known.
-
-<br>
-<br>
-<br>
-<hr><br>
-
-
-<h3><a name="notations"></a></h3>
-
-<h3><b>10. Notation.</b></h3>
-
-
-The following shorthand notations are employed:
+<br><br><a href=#top>Go to the top</a>
+<hr>
+<br><a name="notations"> </a>
+<a name="11"> </a>
+<h3><b>11. Notation</b></h3>
+ <p>The following shorthand notations are employed:
 
 <p align="center">
 
@@ -1023,14 +974,12 @@ The Fourier transforms for periodic lattice quantities are defined as
 The volume of the unit cell is denoted with &#937;, while <i>V</i> is the
 total volume of the crystal simulated employing Born-von Karman periodic boundary condition.
 Unless otherwise specified, Hartree atomic units will be used throughout.
-
+<br><br><a href=#top>Go to the top</a>
 <hr>
-
-<h3><p><b><a name="references">References</a>
-</b></p></h3>
-
-
-<ol>
+<br><a name="references"> </a>
+<a name="12"> </a>
+<h3><b>12. References</b></h3>
+ <p><ol>
 <li><a name="Abrikosov1975">
   Abrikosov, Gorkov, and Dzyaloshinskii.
   Methods of quantum field theory in statistical physics,
@@ -1046,7 +995,6 @@ Unless otherwise specified, Hartree atomic units will be used throughout.
   A guide to Feynman diagrams in the many-body problem,
   Dover, New York,
   (1992)
-
 </a> </li><li><a name="Aulbur2000">
   W. G. Aulbur, 
   L. J&ouml;nsson 
@@ -1058,7 +1006,6 @@ Unless otherwise specified, Hartree atomic units will be used throughout.
   <b>75</b>, 818
   (1995)
 </a> </li><li><a name="Hedin1965">
-
 L. Hedin
 Phys. Rev.
 <b>139</b>, 
@@ -1079,7 +1026,6 @@ Phys. Rev. Lett.
 <b>55</b>,
 1418
 (1985)
-
 </a></li><li><a name="Hybertsen1986">
 M.S. Hybertsen, and S.G Louie.
 Phys. Rev. B
@@ -1098,7 +1044,6 @@ Phys. Rev. B,
 <b>74</b>,
 035101
 (2006)
-
 </a></li><li><a name="Lebegue2003">
 S. Lebegue, B. Arnaud, M. Alouani, and P.E. Bloechl.
 Phys. Rev. B,
@@ -1107,6 +1052,8 @@ Phys. Rev. B,
 (2003)
 </a></li>
 </ol>
+<br><br><a href=#top>Go to the top</a>
+<hr>
 <script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
 
 </body>

@@ -390,7 +390,8 @@ def assemble_html(origin_yml_files,suppl_components,dir_name,root_filname,allowe
         labels.append(j[3:])
     secs_html=""
     if len(labels)!=0:
-      labels.sort() 
+      #Trick (not perfect ...) to sort numbers and digits together. Will not work with strings longer than 9 digits.
+      labels=sorted(labels, key= lambda item: str(len(item))+item)
       secs_html="\n <ul> \n"
       # Table of content
       for label in labels:
@@ -402,7 +403,7 @@ def assemble_html(origin_yml_files,suppl_components,dir_name,root_filname,allowe
            if "sec" in subj[:3]:
              sublabels.append(subj[3:])
          if len(sublabels)!=0:
-           sublabels.sort()
+           sublabels=sorted(sublabels, key= lambda item: str(len(item))+item)
            secs_html+="\n   <ul> \n"
            for sublabel in sublabels:
              subsecj="sec"+sublabel
@@ -428,7 +429,7 @@ def assemble_html(origin_yml_files,suppl_components,dir_name,root_filname,allowe
            if "sec" in subj[:3]:
              sublabels.append(subj[3:])
          if len(sublabels)!=0:
-           sublabels.sort()
+           sublabels=sorted(sublabels, key= lambda item: str(len(item))+item)
            for sublabel in sublabels:
              subsecj="sec"+sublabel
              sec_html+='<br><a name="%s"> </a>\n' %(doc_yml[secj][subsecj]["tag"])
