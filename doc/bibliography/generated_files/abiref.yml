@@ -1269,6 +1269,16 @@
   refid : 10.1103/RevModPhys.78.865
 -
   ENTRYTYPE : article
+  ID : Kresse1999
+  author : Kresse, G. and Joubert, D.
+  title : From ultrasoft pseudopotentials to the projector augmented-wave method
+  journal : Phys. Rev. B
+  year : 1999
+  volume : 59
+  pages : 1758--1775
+  doi : 10.1103/PhysRevB.59.1758
+-
+  ENTRYTYPE : article
   ID : Laflamme2016
   author : Laflamme Janssen, J. and Gillet, Y. and Ponc\'e, S. and Martin, A. and Torrent, M. and Gonze, X.
   title : Precise Effective Masses from Density Functional Perturbation Theory
