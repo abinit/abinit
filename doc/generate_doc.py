@@ -67,7 +67,7 @@ if cmdline_params != [] :
 ################################################################################
 
 list_infos_dir=[]
-list_infos_dir.append({"dir_name":"bibliography","root_filname":"",
+list_infos_dir.append({"dir_name":"biblio","root_filname":"bib",
                                                     "yml_files":["bibfiles"]})
 list_infos_dir.append({"dir_name":"input_variables","root_filname":"",
                                                     "yml_files":["abinit_vars","characteristics","list_externalvars","varsets"]})
@@ -79,7 +79,7 @@ list_infos_dir.append({"dir_name":"tutorial","root_filname":"lesson",
                                                     "yml_files":["lessons"]})
 list_infos_dir.append({"dir_name":"users","root_filname":"help",
                                                     "yml_files":["helps"]})
-msgs={"bibfiles"       :"as database input file for the list of generated files in the bibliography directory ...",
+msgs={"bibfiles"       :"as database input file for the list of generated files in the biblio directory ...",
       "abinit_vars"    :"as database input file for the input variables and their characteristics ...",
       "characteristics":"as database input file for the list of allowed characteristics ...",
       "list_externalvars"  :"as database input file for the list of external parameters (known at compile or run time) ...",
@@ -92,7 +92,7 @@ msgs={"bibfiles"       :"as database input file for the list of generated files 
       "lessons"        :"as database input file for the list of lessons ...",
       "helps"          :"as database input file for the list of help files in the users directory ..."}
       
-path_file='bibliography/origin_files/abiref.bib'
+path_file='biblio/origin_files/abiref.bib'
 with open(path_file) as f:
   print("Read "+path_file+" as database input file for the bibliography references ...")
   bibtex_str = f.read()
@@ -402,7 +402,7 @@ for ref in bibtex_dics:
   lines_txt+= ("[%s] %s\n") %(ID,reference_dic[ID])
 
 # Open, write and close the txt file
-file_txt = 'bibliography/generated_files/abiref.txt'
+file_txt = 'biblio/generated_files/abiref.txt'
 f_txt = open(file_txt,'w')
 f_txt.write(lines_txt)
 f_txt.close()
@@ -438,7 +438,7 @@ for ref in bibtex_dics:
   lines_yml+=lines
 
 # Open, write and close the yml file
-file_yml = 'bibliography/generated_files/abiref.yml'
+file_yml = 'biblio/generated_files/abiref.yml'
 f_yml = open(file_yml,'w')
 f_yml.write(lines_yml)
 f_yml.close()
@@ -950,9 +950,9 @@ if 0:
 ################################################################################
 # Treat the links within the "introduction" of the acknowledgment component first.
 
-backlink= ' &nbsp; <a href="../../bibliography/generated_files/acknowledgments.html">acknowledgments.html</a> &nbsp; ' 
+backlink= ' &nbsp; <a href="../../biblio/generated_files/bib_acknow.html">bib_acknow.html</a> &nbsp; ' 
 for i, bibfile_info in enumerate(yml_in["bibfiles"]):
-  if bibfile_info.name.strip()=="acknowledgments":
+  if bibfile_info.name.strip()=="bib_acknow":
     bibfile_intro=bibfile_info.introduction
     bibfile_ack_intro = make_links(bibfile_intro,None,allowed_link_seeds,backlinks,backlink)
 
@@ -1004,20 +1004,20 @@ for ref in bibtex_dics:
       bibliography_content+= link
 
 # Open, write and close the txt file
-file_txt = 'bibliography/generated_files/ordered_abiref.bib'
+file_txt = 'biblio/generated_files/ordered_abiref.bib'
 f_txt = open(file_txt,'w')
 f_txt.write(lines_txt)
 f_txt.close()
 print("File %s has been written ..." %file_txt)
 
 ################################################################################
-#Global operation on the bibliography html file : conversion from bibtex notation to html notation.
+#Global operation on the bib_biblio html file : conversion from bibtex notation to html notation.
 #This should cover most of the cases. 
  
 bibliography_content=bibtex2html(bibliography_content)
 
 ################################################################################
-# Assemble the html files in the bibliography directory
+# Assemble the html files in the biblio directory
 
 suppl={"introduction":bibfile_ack_intro}
 suppl_components={"acknowledgments":suppl}
@@ -1026,7 +1026,7 @@ suppl_components['bibtex']=suppl
 suppl={"content":bibliography_content}
 suppl_components['bibliography']=suppl
 
-rc=assemble_html(yml_in["bibfiles"],suppl_components,"bibliography","",allowed_link_seeds,backlinks)
+rc=assemble_html(yml_in["bibfiles"],suppl_components,"biblio","",allowed_link_seeds,backlinks)
 
 ################################################################################
 

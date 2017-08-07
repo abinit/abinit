@@ -8,7 +8,7 @@
 # some minor adjustments are needed, so that the default list # is less adequate.
 
 - !components
-    name : bibliography
+    name : biblio
     keyword : bibliography
     purpose : |
       <p>This document lists all the bibliographical references mentioned in the ABINIT documentation, 
@@ -21,7 +21,7 @@
       This document gives the bibtex data for all the bibliographical references mentioned in the ABINIT documentation.
 
 - !components
-    name : acknowledgments
+    name : acknow
     keyword : acknowledgments
     purpose : |
       This file provides a description of suggested acknowledgments and references to be inserted in scientific papers 
@@ -29,13 +29,13 @@
     introduction : |
       <h3><b>Content:</b></h3>
       <ul>
-        <li><a href="acknowledgments.html#a">A. Introduction</a>
-        <li><a href="acknowledgments.html#b">B. List of suggestions</a>
+        <li><a href="bib_acknow.html#a">A. Introduction</a>
+        <li><a href="bib_acknow.html#b">B. List of suggestions</a>
       </ul>
       <hr>
       <h3><b><a name="a"></a>A. Introduction</b></h3>
  
-      In the section <a href="acknowledgments.html#b">B. List of suggestions</a>, you will find
+      In the section <a href="bib_acknow.html#b">B. List of suggestions</a>, you will find
       several references we suggest you to cite in your papers that have benefited from ABINIT.
       However, we wish first to clarify the spirit in which the present document (Acknowledgments) has
       been written. The users of the code have no formal obligations
@@ -70,12 +70,12 @@
       <h3><b><a name="b"></a>B. List of suggestions</b></h3>
 
       <p>
-      The first general ABINIT paper [<a href="acknowledgments.html#1">B.1</a>],
+      The first general ABINIT paper [<a href="bib_acknow.html#1">B.1</a>],
       in the list of suggestions below, should be cited
       in papers that have benefited from the ABINIT project, irrespective of their content.
       There are three other ABINIT papers,
-      [<a href="acknowledgments.html#2">B.2</a>],
-      [<a href="acknowledgments.html#3">B.3</a>],[<a href="acknowledgments.html#4">B.4</a>],
+      [<a href="bib_acknow.html#2">B.2</a>],
+      [<a href="bib_acknow.html#3">B.3</a>],[<a href="bib_acknow.html#4">B.4</a>],
       that might as well be considered,
       irrespective of the content of the paper, because these papers are quite general as well,
       although they are older (2009, 2005 and 2002).
