@@ -48,20 +48,20 @@ complete (you should have access to more than 8 processors).</p>
 <a name="list"></a>
 <h3><b> Calculation of U and J using cRPA. Table of content:</b></h3>
 
-<ul>
-  <li><a href="#1">1.</a> The cRPA method: summary and key parameters.
-  <li><a href="#2">2.</a> Electronic structure calculation of SrVO<SUB>3</SUB> in LDA.
-  <li><a href="#3">3.</a> Definition of screening and orbitals in cRPA: models, input file and log file.
-  <li><a href="#4">4.</a> Convergence studies
-  <li><a href="#5">5.</a> Effective interactions for different models
-  <li><a href="#6">6.</a> Self-consistent cRPA calculation
-  <li><a href="#7">7.</a> Conclusion
-</ul>
-<hr>
+<ul> 
+  <li><a href="#method">1.</a> The cRPA method to compute effective interaction: summary and key parameters</li>
+  <li><a href="#LDA">2.</a> Electronic Structure of SrVO<SUB>3</SUB> in LDA</li>
+  <li><a href="#definition">3.</a> Definition of screening and orbitals in cRPA: models, input file and log file</li>
+  <li><a href="#convergence">4.</a> Convergence studies</li>
+  <li><a href="#eff_interactions">5.</a> Effective interactions for different models</li>
+  <li><a href="#freq">6.</a> Frequency dependent interactions</li>
+  <li><a href="#conclusion">7.</a> Conclusion</li>
 
-<h3><b><a name="1">1.</a> The cRPA method to compute effective interaction: summary and key parameters</b></h3>
-
-<p> The cRPA method aims at computing the effective interactions
+ </ul> 
+ <hr><br><a name="method"> </a>
+<a name="1"> </a>
+<h3><b>1. The cRPA method to compute effective interaction: summary and key parameters</b></h3>
+ <p>The cRPA method aims at computing the effective interactions
 among correlated electrons. Generally, these highly correlated
 materials contain rare-earth metals or transition metals, which have partially
 filled <i>d</i> or <i>f</i> bands and thus localized electrons.
@@ -146,14 +146,13 @@ It is recommended, as discussed in appendix A of <a href="../../bibliography/gen
 to use <a href="../../input_variables/generated_files/varset_paw.html#pawoptosc">pawoptosc</a>=1.
 If the calculation is carried out with several atoms, use <a href="../../input_variables/generated_files/varset_basic.html#nsym">nsym</a>=1, the calculation is not symmetrized over atoms
 in this case.
-
 </UL>
+<br><br><a href=#top>Go to the top</a>
 <hr>
-
-<h3><b><a name="2">2.</a>
-Electronic Structure of SrVO<SUB>3</SUB> in LDA </b></h3>
-
-<p>You might create a subdirectory of the
+<br><a name="LDA"> </a>
+<a name="2"> </a>
+<h3><b>2. Electronic Structure of SrVO<SUB>3</SUB> in LDA</b></h3>
+ <p>You might create a subdirectory of the
 ~abinit/tests/tutoparal directory, and use it for the tutorial. In what follows,
 the names of files will be mentioned as if you were in this subdirectory</p>
 
@@ -219,12 +218,12 @@ in energy and filled with one electron, whereas  <i>e<SUB>g</SUB></i>-like bands
 <p>
 In the next section, we will thus use the <i>d</i>-like bands to built Wannier functions and compute effective interactions
 for these orbitals.
-
-
-<h3><b><a name="3">3.</a>
-Definition of screening and orbitals, input and log file  </b></h3>
-
-<h4><a name="3.1">3.1.  The constrained polarization calculation. </h4>
+<br><br><a href=#top>Go to the top</a>
+<hr>
+<br><a name="definition"> </a>
+<a name="3"> </a>
+<h3><b>3. Definition of screening and orbitals in cRPA: models, input file and log file</b></h3>
+ <p><h4><a name="3.1">3.1.  The constrained polarization calculation. </h4>
 As discussed briefly in Appendix A of <a href="../../bibliography/generated_files/bibliography.html#Amadon2014">[Amadon2014]</a>
 as well as in section III B of <a href="../../bibliography/generated_files/bibliography.html#Vaugier2012">[Vaugier2012]</a> and Section II B of <a href="../../bibliography/generated_files/bibliography.html#Sakuma2013">[Sakuma2013]</a>,  one
 can use different schemes for the cRPA calculations. Let us discuss these different models namely the (<i>d-d</i>), (<i>dp-dp</i>), (<i>d-dp</i>(a)), and (<i>d-dp</i>(b)) models. In the notation (A-B), A and B refers respectively to some bands of A-like and B-like character.
@@ -561,12 +560,12 @@ The first frequency is zero and the cRPA interactions are:
 </pre>
 
 </ul>
-
-
-<h3><b><a name="4">4.</a> Convergence studies  </b></h3>
-
-
-We give here the results of some convergence studies, than can be 
+<br><br><a href=#top>Go to the top</a>
+<hr>
+<br><a name="convergence"> </a>
+<a name="4"> </a>
+<h3><b>4. Convergence studies</b></h3>
+ <p>We give here the results of some convergence studies, than can be 
 made by the readers. Some are computationally expensive. It
 is recommanded to use at least 32 processors. Input files are provided in tucrpa_3.in and tucrpa_3.files for the first case.
 
@@ -634,10 +633,12 @@ The converged parameters are thus <a href="../../input_variables/generated_files
 an expected precision of 0.1 eV.
 We will use instead <a href="../../input_variables/generated_files/varset_gw.html#ecuteps">ecuteps</a>=5,<a href="../../input_variables/generated_files/varset_gw.html#ecutsigx">ecutsigx</a>=30,ngkpt=4 4 4, <a href="../../input_variables/generated_files/varset_basic.html#nband">nband</a>=50 to lower the computational cost.
 In this case, we find values of <i>U</i> and <i>J</i> of  2.75 eV and 0.41 eV and <i>U</i> is probably underestimated by 0.1 eV.
-
-<h3><b><a name="5">5.</a> Effective interactions for different models </b></h3>
-
-In this section, we compute, using the converged values of parameters, the
+<br><br><a href=#top>Go to the top</a>
+<hr>
+<br><a name="eff_interactions"> </a>
+<a name="5"> </a>
+<h3><b>5. Effective interactions for different models</b></h3>
+ <p>In this section, we compute, using the converged values of parameters, the
 value of effective interactions for the models discussed in section
 and <a href="#3.1">3.1</a>. The table
 below gives for each model, the values
@@ -685,11 +686,12 @@ which are very efficient to screen the interaction (A similar effect is discusse
 </ul>
 Finally, fully screened interactions (not discussed here) could also be computed for each definition
 correlated orbitals by using the default values of <a href="../../input_variables/generated_files/varset_gw.html#ucrpa_bands">ucrpa_bands</a> .
-
-
-<h3><b><a name="6">6.</a> Frequency dependent interactions </b></h3>
-
-In this section, we are going to compute frequency dependent effective interactions.
+<br><br><a href=#top>Go to the top</a>
+<hr>
+<br><a name="freq"> </a>
+<a name="6"> </a>
+<h3><b>6. Frequency dependent interactions</b></h3>
+ <p>In this section, we are going to compute frequency dependent effective interactions.
 Just change the following input variables in order to compute effective interaction between 0 and 30 eV.
 We use <a href="../../input_variables/generated_files/varset_basic.html#nsym">nsym</a>=0
 in order to decrease the computational cost.
@@ -721,13 +723,16 @@ Remove the first line, and plot the data:
 
 We recover in the picture the main results found in the Fig. 3 of <a href="../../bibliography/generated_files/bibliography.html#Aryasetiawan2006">[Aryasetiawan2006]</a> . Indeed, the frequency
  dependent effective interactions exhibits a plasmon excitation.
-
-
-<h3><b><a name="7">7.</a> Conclusion</b></h3>
-
-This simple tutorial showed how to compute effective interactions for SrVO<sub>3</sub>.
+<br><br><a href=#top>Go to the top</a>
+<hr>
+<br><a name="conclusion"> </a>
+<a name="7"> </a>
+<h3><b>7. Conclusion</b></h3>
+ <p>This simple tutorial showed how to compute effective interactions for SrVO<sub>3</sub>.
 It emphasized the importance of the definition of correlated
 orbitals and the definition of constrained polarizability.
+<br><br><a href=#top>Go to the top</a>
+<hr>
 <script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
 
 </body>
