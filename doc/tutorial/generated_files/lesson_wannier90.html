@@ -38,20 +38,18 @@ not converged they are just examples to show how to use the code. </p>
 <a name="list"></a>
 <h3><b> Lesson on the use of Wannier90 library. Table of content:</b></h3>
 
-<ul>
-  <li><a href="#0">0.</a> Summary of Wannier90 in
-  ABINIT</li>
-  <li><a href="#1">1.</a> A first example: the
-  silicon case</li>
-  <li><a href="#2">2.</a> A PAW case </li>
-  <li><a href="#3">3.</a> Defining the initial
-  projections </li>
-  <li><a href="#4">4.</a> More on Wannier90 + ABINIT </li>
-</ul>
-<hr>
-<h4><a name="0"></a></h4>
-<h3><b>0. Summary of Wannier90 in ABINIT</b></h3>
-<p> Wannier90 is a code that computes MLWFs (see <A
+<ul> 
+  <li><a href="#summary">1.</a> Summary of Wannier90 in ABINIT</li>
+  <li><a href="#silicon">2.</a> A first example: the silicon case</li>
+  <li><a href="#PAW">3.</a> A PAW case</li>
+  <li><a href="#initial">4.</a> Defining the initial projections</li>
+  <li><a href="#more">5.</a> More on Wannier90 + ABINIT</li>
+
+ </ul> 
+ <hr><br><a name="summary"> </a>
+<a name="1"> </a>
+<h3><b>1. Summary of Wannier90 in ABINIT</b></h3>
+ <p>Wannier90 is a code that computes MLWFs (see <A
 href="http://www.wannier.org"><B>www.wannier.org</B></A>
 ). Wannier90 uses the
 methodology  introduced by N. Marzari and
@@ -99,12 +97,12 @@ calculation and compute these two ingredients. Then, Wannier90 is run.
 Wannier90 is included as a library and ABINIT and the process is
 automatic, so that in a single run you can do both the ground state
 calculation and the computation of MLWFs.
-
+<br><br><a href=#top>Go to the top</a>
 <hr>
-<h4><a name="1"></a></h4>
-<h3><b>1. A first example: the silicon case</b></h3>
-
-Before starting make sure that you compiled abinit enabling Wannier90.
+<br><a name="silicon"> </a>
+<a name="2"> </a>
+<h3><b>2. A first example: the silicon case</b></h3>
+ <p>Before starting make sure that you compiled abinit enabling Wannier90.
 You may have to recompile it using the flag <i> --enable-wannier90</i>.
 
 <p>Now we will compute a set of MLWFs for the silicon case. We are going
@@ -234,10 +232,12 @@ and <b>abo</b><i>_w90</i>, where <b>abo</b> is the fourth line on your .file fil
 for a file named <b>abo</b><i>_w90.win</i>
 if it is not found then it will look for <i>w90.win</i> and finally for <i>wannier90.win</i>.
 </ul>
+<br><br><a href=#top>Go to the top</a>
 <hr>
-<h4><a name="2"></a></h4>
-<h3><b>2. A PAW case</b></h3>
-Before starting it is assumed that you have already completed the
+<br><a name="PAW"> </a>
+<a name="3"> </a>
+<h3><b>3. A PAW case</b></h3>
+ <p>Before starting it is assumed that you have already completed the
 tutorials <a href="lesson_paw1.html">PAW1</a> and <a
 href="lesson_paw1.html">PAW2</a>.
 <p> The PAW method is implemented in such a way that it is very easy
@@ -255,11 +255,12 @@ example. Now, just run abinit again
 As it is expected, the results should be similar than those of the PW case.
 <p>
 <b> Important </b> For the PAW case the UNK files are not those of the real wavefunctions. The contribution inside the spheres is not computed, however, they can be used to plot the Wannier functions.
-
+<br><br><a href=#top>Go to the top</a>
 <hr>
-<h4><a name="3"></a></h4>
-<h3><b>3. Defining the initial projections</b></h3>
-Up to now we have obtained the MLWF for the four valence
+<br><a name="initial"> </a>
+<a name="4"> </a>
+<h3><b>4. Defining the initial projections</b></h3>
+ <p>Up to now we have obtained the MLWF for the four valence
 bands of silicon. It is important to note that for valence states the
 MLWF can be
 obtained starting from a random initial position. However, for conduction
@@ -306,12 +307,12 @@ or rotate
 the axis.  Please refer to the Wannier90 user guide and see the part
 related to projections (see <A
 href="http://www.wannier.org"><B>www.wannier90.org</B></A>).
-
+<br><br><a href=#top>Go to the top</a>
 <hr>
-<h4><a name="4"></a></h4>
-<h3><b>4. More on Wannier90 + ABINIT</b></h3>
-<p>
-Now we will going to redo the silicon case but defining different initial projections.
+<br><a name="more"> </a>
+<a name="5"> </a>
+<h3><b>5. More on Wannier90 + ABINIT</b></h3>
+ <p>Now we will going to redo the silicon case but defining different initial projections.
 
 <p>This calculation will be more time consuming, so you can start by running the calculation while reading:
 <li><i>cp ../tw90_4.in . </i></li>
@@ -354,6 +355,8 @@ tw90_4o_DS3_w90_band.dat
 <p>
 Now you can continue discovering the capabilities of Wannier90.
 </p>
+<br><br><a href=#top>Go to the top</a>
+<hr>
 <script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
 
 </body>

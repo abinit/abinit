@@ -1,6 +1,7 @@
-# This YAML file contains the introduction as well as the body (including the table of content) of the html lesson.
-# In order to modify the other parts, modify the file lessons.html .
-# This is the introduction ...
+## This YAML file contains the introduction as well as the body of the html lesson.
+## In order to modify the other parts, modify the file lessons.html .
+
+## This is the introduction ...
 intro : |
   <p>This lesson aims at showing how to use the Wannier90 interface to
   compute Maximally Localized Wannier Functions (MLWFs). </p>
@@ -15,22 +16,17 @@ intro : |
   <p>This lesson should take about 1 hour.
   And it is important to note that all the cases in the tutorial are
   not converged they are just examples to show how to use the code. </p>
-# This is the body, including the table of content ...
-body : |
-  <ul>
-    <li><a href="#0">0.</a> Summary of Wannier90 in
-    ABINIT</li>
-    <li><a href="#1">1.</a> A first example: the
-    silicon case</li>
-    <li><a href="#2">2.</a> A PAW case </li>
-    <li><a href="#3">3.</a> Defining the initial
-    projections </li>
-    <li><a href="#4">4.</a> More on Wannier90 + ABINIT </li>
-  </ul>
-  <hr>
-  <h4><a name="0"></a></h4>
-  <h3><b>0. Summary of Wannier90 in ABINIT</b></h3>
-  <p> Wannier90 is a code that computes MLWFs (see <A
+
+## Now come the different sections, numbered.
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec1:
+ title: "Summary of Wannier90 in ABINIT"
+ tag: summary
+ body: |
+  Wannier90 is a code that computes MLWFs (see <A
   href="http://www.wannier.org"><B>www.wannier.org</B></A>
   ). Wannier90 uses the
   methodology  introduced by N. Marzari and
@@ -78,11 +74,14 @@ body : |
   Wannier90 is included as a library and ABINIT and the process is
   automatic, so that in a single run you can do both the ground state
   calculation and the computation of MLWFs.
-  
-  <hr>
-  <h4><a name="1"></a></h4>
-  <h3><b>1. A first example: the silicon case</b></h3>
-  
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec2:
+ title: "A first example: the silicon case"
+ tag: silicon
+ body: |
   Before starting make sure that you compiled abinit enabling Wannier90.
   You may have to recompile it using the flag <i> --enable-wannier90</i>.
   
@@ -213,9 +212,14 @@ body : |
   for a file named <b>abo</b><i>_w90.win</i>
   if it is not found then it will look for <i>w90.win</i> and finally for <i>wannier90.win</i>.
   </ul>
-  <hr>
-  <h4><a name="2"></a></h4>
-  <h3><b>2. A PAW case</b></h3>
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec3:
+ title: "A PAW case"
+ tag: PAW
+ body: |
   Before starting it is assumed that you have already completed the
   tutorials <a href="lesson_paw1.html">PAW1</a> and <a
   href="lesson_paw1.html">PAW2</a>.
@@ -235,9 +239,13 @@ body : |
   <p>
   <b> Important </b> For the PAW case the UNK files are not those of the real wavefunctions. The contribution inside the spheres is not computed, however, they can be used to plot the Wannier functions.
   
-  <hr>
-  <h4><a name="3"></a></h4>
-  <h3><b>3. Defining the initial projections</b></h3>
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec4:
+ title: "Defining the initial projections"
+ tag: initial
+ body: |
   Up to now we have obtained the MLWF for the four valence
   bands of silicon. It is important to note that for valence states the
   MLWF can be
@@ -286,10 +294,13 @@ body : |
   related to projections (see <A
   href="http://www.wannier.org"><B>www.wannier90.org</B></A>).
   
-  <hr>
-  <h4><a name="4"></a></h4>
-  <h3><b>4. More on Wannier90 + ABINIT</b></h3>
-  <p>
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec5:
+ title: "More on Wannier90 + ABINIT"
+ tag: more
+ body: |
   Now we will going to redo the silicon case but defining different initial projections.
   
   <p>This calculation will be more time consuming, so you can start by running the calculation while reading:
