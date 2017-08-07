@@ -1,8 +1,8 @@
-# This YAML file contains the introduction as well as the body (including the table of content) of the html help document.
-# In order to modify the other parts, modify the file helps.yml .
-# This is the introduction ...
+## This YAML file contains the introduction as well as the body of the html lesson.
+## In order to modify the other parts, modify the file lessons.html .
+
+## This is the introduction ...
 intro : |
-  <a name="top"></a>
   <p>This code is able to compute interatomic force constants,
   but also, more generally, many different physical properties
   from databases containing derivatives of the total energy
@@ -16,26 +16,24 @@ intro : |
   topic, he/she will read different help files of the ABINIT package, related to the
   [[help:abinit|main ABINIT executable]], to the
   [[help:respfn|response-function features of ABINIT]],
-  to the [[help:mrgddb|DDB merge tool]].
+  and to the [[help:mrgddb|DDB merge tool]].
   </h3>
-  
-  <p> 
+
+  <p>
   It will be easier to discover the
   present file with the help of the tutorial ([[lesson_welcome]]), especially
   the lesson on response functions ([[lesson_rf2]]).
   <br>It is worthwhile to print this help file, for ease of reading.
-# This is the body, including the table of content ...
-body : |
-  <ul>
-    <li><a href="#1">1. Introduction</a> </li>
-    <li><a href="#2">2. Input variables</a> </li>
-  </ul>
-  <hr>
-  <h3>&nbsp;</h3>
-  <h3><b><a name="1"></a>1. Introduction </b></h3>
 
-  <p>
-  
+## Now come the different sections, numbered.
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec1:
+ title: "Introduction"
+ tag: introduction
+ body: |
   In short, a Derivative DataBase contains a list of derivatives
   of the total energy with respect to three kind of perturbations:
   phonons, electric field and stresses. The present code analyses
@@ -92,12 +90,14 @@ body : |
   the main abinit input files: the file is parsed, keywords are identified,
   comments are also identified. However, the multidataset mode is not available.
   </p>
-  <h3>&nbsp;</h3>
-  <h3><b><a name="2"></a>2. Input variables </b></h3>
 
-
-
-  <p>
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec2:
+ title: "Input variables"
+ tag: input_vars
+ body: |
   This ANADDB utility is able to perform many different tasks, each governed by a
   selected set of input variables, with also some input variables common to many of the
   different tasks. 
@@ -105,9 +105,8 @@ body : |
   <li> <a href="../../topics/generated_files/topic_anaddbSpec.html"> anaddb tasks</a></li>
   <li> <a href="../../topics/generated_files/topic_anaddbEPC.html"> anaddb electron-phonon input variables</a> </li>
 
-
   <p>
-  <p>The list of input variables for the anaddb input file are presented in [[varanaddb]]. In order
+  <p>The list of input variables for the anaddb input file are presented in the [[varset:anaddb]] variable set. In order
   to discover them, it is easier to use the different lessons of the tutorial:
   start with the second lesson on response functions ([[lesson_rf2]]),
   then follow the lesson on elasticity and piezoelectricity ([[lesson_elastic]]),
@@ -116,4 +115,3 @@ body : |
   <i>If you are discovering this file with the help of the tutorial,
   you can go back to the tutorial window.</i>
   </p>
-  <hr>
