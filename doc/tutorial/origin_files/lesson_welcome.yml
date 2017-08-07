@@ -25,54 +25,58 @@ body : |
   
   <center>
   <map id="map1" name="map1"> 
-  <area shape="rect" coords="144  ,39 ,264 ,110 " href="lesson_base1.html" /> <!--2,3,4-->
+  <area shape="rect" coords="120  ,10 ,260 , 80 " href="lesson_base1.html" /> <!--2,3,4-->
   
-  <area shape="rect" coords="56  ,160 ,192 ,182 " href="lesson_spin.html" />
+  <area shape="rect" coords="30  ,135 ,170 ,165 " href="lesson_spin.html" />
   
-  <area shape="rect" coords="56  ,199 ,130 ,224 " href="lesson_paw1.html" />
-  <area shape="rect" coords="131 ,199 ,147 ,224 " href="lesson_paw2.html" />
-  <area shape="rect" coords="148 ,199 ,192 ,224 " href="lesson_paw3.html" />
-  <area shape="rect" coords="56  ,225 ,192 ,264 " href="lesson_nuc.html" /> 
+  <area shape="rect" coords="30  ,170 , 99 ,199 " href="lesson_paw1.html" />
+  <area shape="rect" coords="100 ,170 ,129 ,199 " href="lesson_paw2.html" />
+  <area shape="rect" coords="130 ,170 ,170 ,199 " href="lesson_paw3.html" />
+  <area shape="rect" coords="30  ,200 ,170 ,250 " href="lesson_nuc.html" /> 
   
-  <area shape="rect" coords="56  ,280 ,192 ,304 " href="lesson_wannier90.html" />
+  <area shape="rect" coords="30  ,260 , 99 ,289 " href="lesson_dftu.html" />
+  <area shape="rect" coords="100 ,260 ,170 ,289 " href="lesson_dmft.html" />
+  <area shape="rect" coords="30  ,290 ,100 ,320 " href="lesson_ucalc_crpa.html" />
+  <area shape="rect" coords="100 ,290 ,170 ,320 " href="lesson_detu" />
+
+  <area shape="rect" coords="30  ,330 ,170 ,355 " href="lesson_ffield.html" />
   
-  <area shape="rect" coords="56  ,318 ,192 ,341 " href="lesson_ffield.html" />
+  <area shape="rect" coords="30  ,360 ,170 ,385 " href="lesson_tddft.html" />
+
+  <area shape="rect" coords="30  ,390 ,170 ,415 " href="lesson_analysis_tools.html" />
+
+  <area shape="rect" coords="30  ,420 ,170 ,445 " href="lesson_fold2bloch.html" />
+
+  <area shape="rect" coords="30  ,450 ,170 ,485 " href="lesson_wannier90.html" />
   
-  <area shape="rect" coords="56  ,352 ,192 ,375 " href="lesson_analysis_tools.html" />
+  <area shape="rect" coords="30  ,480 ,170 ,505 " href="lesson_source_code.html" />
   
-  <area shape="rect" coords="56  ,387 ,127 ,413 " href="lesson_dftu.html" />
-  <area shape="rect" coords="56  ,387 ,192 ,413 " href="lesson_dmft.html" />
-  <area shape="rect" coords="56  ,414 ,192 ,439 " href="lesson_ucalc_crpa.html" />
+  <area shape="rect" coords="230  ,135 ,376 ,199 " href="lesson_rf1.html" />
+  <area shape="rect" coords="230  ,220 ,376 ,255 " href="lesson_optic.html" />
+  <area shape="rect" coords="230  ,270 ,376 ,294 " href="lesson_rf2.html" />
+  <area shape="rect" coords="230  ,295 ,376 ,314 " href="lesson_eph.html" /> 
+  <area shape="rect" coords="230  ,315 ,376 ,339 " href="lesson_tdepes.html" /> 
+  <area shape="rect" coords="230  ,340 ,327 ,370 " href="lesson_elastic.html" /> 
+  <area shape="rect" coords="328  ,340 ,376 ,370 " href="lesson_nlo.html" /> 
   
-  <area shape="rect" coords="56  ,453 ,192 ,477 " href="lesson_tddft.html" />
+  <area shape="rect" coords="360  ,415 ,456 ,460 " href="lesson_gw1.html" />
+  <area shape="rect" coords="360  ,470 ,456 ,499 " href="lesson_gw2.html" /> 
+  <area shape="rect" coords="360  ,500 ,456 ,525 " href="lesson_bse.html" /> 
   
-  <area shape="rect" coords="56  ,492 ,192 ,514 " href="lesson_source_code.html" />
+  <area shape="rect" coords="530  ,10 ,670 , 80 " href="lesson_basepar.html" />
   
-  <area shape="rect" coords="249  ,159 ,376 ,224 " href="lesson_rf1.html" />
-  <area shape="rect" coords="249  ,234 ,376 ,267 " href="lesson_optic.html" />
-  <area shape="rect" coords="249  ,281 ,376 ,307 " href="lesson_rf2.html" />
-  <area shape="rect" coords="249  ,308 ,376 ,324 " href="lesson_eph.html" /> 
-  <area shape="rect" coords="249  ,325 ,327 ,345 " href="lesson_elastic.html" /> 
-  <area shape="rect" coords="328  ,325 ,376 ,345 " href="lesson_nlo.html" /> 
+  <area shape="rect" coords="520  ,100 ,695 ,200 " href="lesson_paral_gspw.html" />
+  <area shape="rect" coords="520  ,211 ,695 ,236 " href="lesson_paral_moldyn.html" />
+  <area shape="rect" coords="520  ,211 ,695 ,236 " href="lesson_paral_images.html" />
   
-  <area shape="rect" coords="360  ,395 ,453 ,436 " href="lesson_gw1.html" />
-  <area shape="rect" coords="360  ,449 ,409 ,490 " href="lesson_gw2.html" /> 
-  <area shape="rect" coords="410  ,449 ,453 ,490 " href="lesson_bse.html" /> 
+  <area shape="rect" coords="520  ,246 ,695 ,300 " href="lesson_paral_gswvl.html" />
   
-  <area shape="rect" coords="520  ,39 ,643 ,110 " href="lesson_basepar.html" />
+  <area shape="rect" coords="520  ,317 ,695 ,371 " href="lesson_paral_dfpt.html" />
   
-  <area shape="rect" coords="505  ,182 ,668 ,210 " href="lesson_paral_gspw.html" />
-  <area shape="rect" coords="505  ,211 ,578 ,236 " href="lesson_paral_moldyn.html" />
-  <area shape="rect" coords="579  ,211 ,668 ,236 " href="lesson_paral_images.html" />
-  
-  <area shape="rect" coords="505  ,246 ,668 ,300 " href="lesson_paral_gswvl.html" />
-  
-  <area shape="rect" coords="505  ,317 ,668 ,371 " href="lesson_paral_dfpt.html" />
-  
-  <area shape="rect" coords="505  ,387 ,668 ,440 " href="lesson_paral_mbt.html" />
+  <area shape="rect" coords="520  ,387 ,695 ,440 " href="lesson_paral_mbt.html" />
   </map>
   
-  <img style="height: 540px; width: 720px;" alt="Schema 1" src="../documents/lesson_welcome/tutorial_flowchart_v2.png" usemap="#map1"/>
+  <img style="height: 540px; width: 720px;" alt="Schema 1" src="../documents/lesson_welcome/tutorial_flowchart_v3.png" usemap="#map1"/>
   </center>
   
   <p>Before following the tutorials, you should have read the <a
