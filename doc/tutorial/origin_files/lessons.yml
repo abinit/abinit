@@ -98,7 +98,7 @@
     subtitle : Frequency-dependent linear and second order nonlinear optical response.
 - !components
     name : paral_dfpt
-    keyword : Parallelism in the linear-response case
+    keyword : Parallelism in the DFPT formalism
     authors : XG,RC
     subtitle : Atomic displacements, homogeneous electric fields, strain.
 - !components
@@ -143,12 +143,12 @@
     subtitle : Testing PAW datasets against an all-electron code
 - !components
     name : rf1
-    keyword : First lesson on response functions
+    keyword : First lesson on DFPT
     authors : XG,RC
     subtitle : Dynamical and dielectric properties of AlAs.
 - !components
     name : rf2
-    keyword : Second lesson on response functions
+    keyword : Second lesson on DFPT
     authors : XG
     subtitle : Phonon band structures, thermodynamical properties.
 - !components
