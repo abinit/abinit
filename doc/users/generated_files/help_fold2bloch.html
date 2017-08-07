@@ -15,7 +15,28 @@
 
 <h2>This file explains the use and i/o parameters needed for the "fold2Bloch" post-processor of the ABINIT package.</h2>
 <hr>
-<a name="top"></a>
+<hr>
+<h5>Copyright (C) 1998-2017 ABINIT group (AB, OR)
+<script type="text/javascript" src="../../js_files/copyright.js"> </script>
+</h5> 
+
+<script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
+
+<a name="list"></a>
+<h3><b> Content of the help file:</b></h3>
+
+<ul> 
+  <li><a href="#None">0. To be filled</a></li>
+  <li><a href="#compile">1. Compiling instructions</a></li>
+  <li><a href="#execution">2. Execution</a></li>
+  <li><a href="#output">3. Output sample</a></li>
+  <li><a href="#subroutine_functions">4. Subroutines and functions</a></li>
+
+ </ul> 
+ <hr><br><a name="None"> </a>
+<a name="0"> </a>
+<h3><b>0. To be filled</b></h3>
+ <p><a name="top"></a>
 This program generates an unfolded spectrum in a small cell, from a folded spectrum  of eigenvalues in a supercell.
 The new k-wavevectors and the weights for the range of energies 
 (standard postscript file <b><i>fold2Bloch.out</B></I>)
@@ -29,38 +50,20 @@ about the element structure which is used for our calculations.</P>
 <p>
 It will be easier to discover the present file with the help of the tutorial (<a href="../../tutorial/generated_files/lesson_fold2bloch.html#">lesson_fold2bloch</a>).
 <br>It is worthwhile to print this help file, for ease of reading.
+<br><br><a href=#top>Go to the top</a>
 <hr>
-<h5>Copyright (C) 1998-2017 ABINIT group (AB, OR)
-<script type="text/javascript" src="../../js_files/copyright.js"> </script>
-</h5> 
-
-<script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
-
-<a name="list"></a>
-<h3><b> Content of the help file:</b></h3>
-
-<ul>
-  <li><a href="#1">1. Compiling instructions</a>
-  <li><a href="#2">2. Execution</a>
-  <li><a href="#3">3. Output sample</a>
-  <li><a href="#4">4. Subroutines and functions</a>
-</ul>
-
-<hr>
-<h3>&nbsp;</h3>
-
-<h3><b><a name="1"></a>1. Compiling instructions</b></h3>
-
-
-<P ALIGN=LEFT STYLE="margin-bottom: 0.14in; line-height: 0.19in"><FONT COLOR="#00000a"><FONT FACE="Arial, serif"><FONT SIZE=3><SPAN STYLE="background: #ffffff">Compiled
-as part of abinit package. Fold2Bloch does not differentiate between
+<br><a name="compile"> </a>
+<a name="1"> </a>
+<h3><b>1. Compiling instructions</b></h3>
+ <p>Compiled as part of abinit package. Fold2Bloch does not differentiate between
 parallel and serial configuration so it always compiles for serial
-operation.</SPAN></FONT></FONT></FONT></P>
-
+operation.
+<br><br><a href=#top>Go to the top</a>
 <hr>
-<h3><b><a name="2"></a>2. Execution</b></h3>
-
-The program fold2Bloch is executed by invoking the following command </SPAN></FONT></FONT></FONT><FONT COLOR="#00000a"><FONT FACE="Arial, serif"><FONT SIZE=3><U><SPAN STYLE="background: #ffffff">from
+<br><a name="execution"> </a>
+<a name="2"> </a>
+<h3><b>2. Execution</b></h3>
+ <p>The program fold2Bloch is executed by invoking the following command </SPAN></FONT></FONT></FONT><FONT COLOR="#00000a"><FONT FACE="Arial, serif"><FONT SIZE=3><U><SPAN STYLE="background: #ffffff">from
 the directory of the case file</SPAN></U></FONT></FONT></FONT><FONT COLOR="#00000a"><FONT FACE="Arial, serif"><FONT SIZE=3><SPAN STYLE="background: #ffffff">:</SPAN></FONT></FONT></FONT></P>
 <P ALIGN=LEFT STYLE="margin-bottom: 0.14in; line-height: 0.19in"><FONT COLOR="#00000a"><FONT FACE="Arial, serif"><FONT SIZE=3><SPAN STYLE="background: #ffffff">	</SPAN></FONT></FONT></FONT><FONT COLOR="#00000a"><FONT FACE="Arial, serif"><FONT SIZE=3><B><SPAN STYLE="background: #ffffff">fold2Bloch
 case_WFK x:y:z</SPAN></B></FONT></FONT></FONT></P>
@@ -82,13 +85,12 @@ files:<BR>	</SPAN></FONT></FONT></FONT><FONT COLOR="#00000a"><FONT FACE="Arial, 
 and </SPAN></FONT></FONT></FONT><FONT COLOR="#00000a"><FONT FACE="Arial, serif"><FONT SIZE=3><B><SPAN STYLE="background: #ffffff">fold2Bloch_down.out
 </SPAN></B></FONT></FONT></FONT>
 </P>
-<P ALIGN=LEFT STYLE="margin-bottom: 0.14in; line-height: 0.19in"><BR><BR>
-</P>
-
+<br><br><a href=#top>Go to the top</a>
 <hr>
-<h3><b><a name="3"></a>3. Output sample</b></h3>
-
-<P ALIGN=LEFT STYLE="margin-bottom: 0.14in; line-height: 0.19in"><FONT COLOR="#00000a"><FONT FACE="Arial, serif"><FONT SIZE=3><U><B><SPAN STYLE="background: #ffffff">Output
+<br><a name="output"> </a>
+<a name="3"> </a>
+<h3><b>3. Output sample</b></h3>
+ <p><P ALIGN=LEFT STYLE="margin-bottom: 0.14in; line-height: 0.19in"><FONT COLOR="#00000a"><FONT FACE="Arial, serif"><FONT SIZE=3><U><B><SPAN STYLE="background: #ffffff">Output
 Sample</SPAN></B></U></FONT></FONT></FONT></P>
 <P ALIGN=LEFT STYLE="margin-bottom: 0.14in; line-height: 0.19in"><FONT COLOR="#00000a"><FONT FACE="Arial, serif"><FONT SIZE=3><SPAN STYLE="background: #ffffff">Below
 are three randomly selected parts from an output file. The data is
@@ -236,15 +238,12 @@ K Values (x, y, z) 	      Eigenvalue(Ht)   Weight</SPAN></FONT></FONT></FONT></P
  -0.166667  -1.000000   0.040617   0.500003</SPAN></FONT></FONT></FONT></P>
 <P ALIGN=LEFT STYLE="margin-bottom: 0in; line-height: 0.17in"><BR>
 </P>
-<P ALIGN=LEFT STYLE="margin-bottom: 0.14in; line-height: 0.19in"><BR><BR>
-</P>
-<P ALIGN=LEFT STYLE="margin-bottom: 0.14in; line-height: 0.19in"><BR><BR>
-</P>
-
+<br><br><a href=#top>Go to the top</a>
 <hr>
-<h3><b><a name="4"></a>4. Subroutines and functions</b></h3>
-
-<P ALIGN=LEFT STYLE="margin-bottom: 0.14in; line-height: 0.19in"><FONT COLOR="#00000a"><FONT FACE="Arial, serif"><FONT SIZE=4><U><B><SPAN STYLE="background: #ffffff">Subroutines
+<br><a name="subroutine_functions"> </a>
+<a name="4"> </a>
+<h3><b>4. Subroutines and functions</b></h3>
+ <p><P ALIGN=LEFT STYLE="margin-bottom: 0.14in; line-height: 0.19in"><FONT COLOR="#00000a"><FONT FACE="Arial, serif"><FONT SIZE=4><U><B><SPAN STYLE="background: #ffffff">Subroutines
 and Functions</SPAN></B></U></FONT></FONT></FONT></P>
 <P ALIGN=LEFT STYLE="margin-bottom: 0.14in; line-height: 0.19in"><FONT COLOR="#00000a"><FONT FACE="Arial, serif"><FONT SIZE=4><B><SPAN STYLE="background: #ffffff">Subroutine
 Getargs (getargs.F90)</SPAN></B></FONT></FONT></FONT></P>
@@ -405,6 +404,8 @@ number<BR>outfile		: integer output file number<BR>coefc		: array
 containing coefficient for the band being processed<BR>mband	:
 integer maximum number of bands<BR>mcg		: integer maximum possible
 number of coefficients to allocate them all<BR></SPAN></FONT></FONT></FONT><FONT COLOR="#00000a"><FONT FACE="Arial, serif"><FONT SIZE=3><B><SPAN STYLE="background: #ffffff"><BR></SPAN></B></FONT></FONT></FONT><BR><BR>
+<br><br><a href=#top>Go to the top</a>
+<hr>
 <script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
 
 </body>

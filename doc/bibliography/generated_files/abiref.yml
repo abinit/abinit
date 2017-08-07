@@ -572,6 +572,25 @@
   number : 
 -
   ENTRYTYPE : article
+  ID : Casida1998
+  author : Mark E. Casida and Christine Jamorski and Kim C. Casida and Dennis R. Salahub
+  title : Molecular excitation energies to high-lying bound states from time-dependent density-functional response theory: Characterization and correction of the time-dependent local density approximation ionization threshold
+  journal : J. Chem. Phys.
+  year : 1998
+  volume : 108
+  pages : 4439
+  doi : 10.1063/1.475855
+-
+  ENTRYTYPE : article
+  ID : Casida1998a
+  author : Mark E. Casida and Kim C. Casida and Dennis R. Salahub
+  title : Excited-state potential energy curves from time-dependent density-functional theory: A cross section of formaldehyde's 1A1 manifold
+  journal : International Journal of Quantum Chemistry
+  year : 1998
+  volume : 70
+  pages : 933
+-
+  ENTRYTYPE : article
   ID : Cococcioni2005
   author : Cococcioni, M. and de Gironcoli, S.
   title : Linear response approach to the calculation of the effective interaction parameters in the {LDA}+{U} method
@@ -1267,6 +1286,16 @@
   file : :/media/disk_iomega/BIBLIO/Review/RMP2006.pdf:PDF
   owner : amadonb
   refid : 10.1103/RevModPhys.78.865
+-
+  ENTRYTYPE : article
+  ID : Kresse1999
+  author : Kresse, G. and Joubert, D.
+  title : From ultrasoft pseudopotentials to the projector augmented-wave method
+  journal : Phys. Rev. B
+  year : 1999
+  volume : 59
+  pages : 1758--1775
+  doi : 10.1103/PhysRevB.59.1758
 -
   ENTRYTYPE : article
   ID : Laflamme2016
@@ -2026,6 +2055,16 @@
   year : 2016
   volume : 93
   pages : 144304
+-
+  ENTRYTYPE : article
+  ID : Vasiliev1998
+  author : I. Vasiliev and S. Ogut and J. R. Chelikowsky
+  title : Ab initio Excitation Spectra and Collective Electronic Response in Atoms and Clusters
+  journal : Phys. Rev. Lett.
+  year : 1999
+  volume : 82
+  pages : 1919
+  doi : 10.1103/PhysRevLett.82.1919
 -
   ENTRYTYPE : article
   ID : Vaugier2012

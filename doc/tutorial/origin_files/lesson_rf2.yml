@@ -1,6 +1,7 @@
-# This YAML file contains the introduction as well as the body (including the table of content) of the html lesson.
-# In order to modify the other parts, modify the file lessons.html .
-# This is the introduction ...
+## This YAML file contains the introduction as well as the body of the html lesson.
+## In order to modify the other parts, modify the file lessons.html .
+
+## This is the introduction ...
 intro : |
   <p>This lesson aims at showing how to get the following physical properties, for periodic solids :
     <ul>
@@ -8,9 +9,18 @@ intro : |
       <li>Phonon band structures
       <li>Thermodynamical properties
     </ul>
+  <p> The calculations will be based on density-functional perturbation theory (DFPT).
   <p>This lesson should take about 1 hour. </p>
-# This is the body, including the table of content ...
-body : |
+
+## Now come the different sections, numbered.
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec0:
+ title: "To be filled"
+ tag: 
+ body: |
   <ul>
     <li><a href="#1">1.</a> Generation of a derivative database
     <li><a href="#2">2.</a> Manipulation of the derivative databases (the MRGDDB utility)
@@ -21,12 +31,16 @@ body : |
   </ul>
   <hr>
   
-  <a name="1">&nbsp;</a>
-  <h3><b>
-  1. Generation of the derivative databases
-  </b></h3>
-  
-  <p><i>Before beginning, you might consider to work in a different
+
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec1:
+ title: " Generation of a derivative database"
+ tag: DDB
+ body: |
+  <i>Before beginning, you might consider to work in a different
   subdirectory as for the other lessons.
   Why not create "Work_rf2" in ~abinit/tests/tutorespfn/Input ?
   </i>
@@ -46,7 +60,7 @@ body : |
   you should first have some theoretical background.
   <br>
   Let us assume that you have read the litterature relative to the
-  <a href="lesson_rf1.html">first lesson on response functions</a>.
+  <a href="lesson_rf1.html">first lesson on DFPT</a>.
   You might find additional material, related to the present section,
   in the following references:
   <br>
@@ -61,7 +75,7 @@ body : |
   only few dynamical matrices need to be computed directly. Others will be computed by interpolation.
   <p>
   Let us have a look at the input file trf2_1.in . The calculation is done for AlAs,
-  the same crystalline material as for the previous lesson on response functions.
+  the same crystalline material as for the previous lesson on DFPT.
   Many input parameters are also quite similar, both at the level of the
   description of the unit cell, as for the choice of cut-off energy and k point grid.
   <p>
@@ -131,14 +145,15 @@ body : |
   Copy this file to the present directory,
   then go to section <a href="#3">section 3</a> of this tutorial.
   You might come back to section 2 afterwards.
-  <hr>
-  
-  <a name="2">&nbsp;</a>
-  <h3><b>
-  2.  Manipulation of the derivative databases (the MRGDDB utility)
-  </b></h3>
-  
-  <p>The use of the MRGDDB utility is described in its
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec2:
+ title: "Manipulation of the derivative databases (the MRGDDB utility)"
+ tag: mrgddb
+ body: |
+  The use of the MRGDDB utility is described in its
   <a href="../../users/generated_files/help_mrgddb.html" target="helpimg">help file</a>.
   Please, read it carefully now.
   
@@ -158,14 +173,15 @@ body : |
   mrgddb < trf2_3.in
   </pre>
   It takes less than one second on a typical PC.
-  <hr>
-  
-  <a name="3">&nbsp;</a>
-  <h3><b>
-  3. Analysis of the derivative databases (the ANADDB utility)
-  </b></h3>
-  
-  <p>An introduction to the use of the ANADDB utility is described in its
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec3:
+ title: "Analysis of the derivative databases (the ANADDB utility)"
+ tag: anaddb
+ body: |
+  An introduction to the use of the ANADDB utility is described in its
   <a href="../../users/generated_files/help_anaddb.html" target="helpimg">help file</a>.
   Please, read it carefully now.
   
@@ -190,15 +206,15 @@ body : |
   <p>
   In this tutorial, we will focus on the flags
   [[anaddb:ifcflag]] and [[anaddb:thmflag]].
-  <hr>
-  
-  
-  <a name="4">&nbsp;</a>
-  <h3><b>
-  4. The computation of interatomic force constants
-  </b></h3>
-  
-  <p>You can copy the files ~abinit/tests/tutorespfn/Input/trf2_4.in and ~abinit/tests/tutorespfn/Input/trf2_4.files to the Work_rf2 directory.
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec4:
+ title: " The computation of interatomic force constants"
+ tag: ifcs
+ body: |
+  You can copy the files ~abinit/tests/tutorespfn/Input/trf2_4.in and ~abinit/tests/tutorespfn/Input/trf2_4.files to the Work_rf2 directory.
   <br>
   Edit the file trf2_4.in .
   Note that [[anaddb:ifcflag]]
@@ -270,17 +286,15 @@ body : |
   of the self-force constant, and in the other cases, the first vector is
   the vector joining the two nuclei, in order to decompose the IFC
   into a longitudinal and a transverse component.
-  
-  <hr>
-  
-  
-  <a name="5">&nbsp;</a>
-  <h3><b>
-  5. The efficient computation of phonon band structures
-  </b></h3>
-  
-  <p>
-  <p>You can copy the files ~abinit/tests/tutorespfn/Input/trf2_5.in and ~abinit/tests/tutorespfn/Input/trf2_5.files to the Work_rf2 directory.
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec5:
+ title: "The efficient computation of phonon band structures"
+ tag: phonon_bands
+ body: |
+  You can copy the files ~abinit/tests/tutorespfn/Input/trf2_5.in and ~abinit/tests/tutorespfn/Input/trf2_5.files to the Work_rf2 directory.
   <br>
   Edit the file trf2_5.in .
   Note that [[anaddb:ifcflag]] is again activated. Indeed, in order to compute a phonon band structure
@@ -354,15 +368,15 @@ body : |
   <p>
   Of course, one should make a convergence study, on the k and q point grids (separately !),
   as well as on the energy cut-off, and also test LDA and GGA ... But this is left to the user !
-  <hr>
-  
-  
-  <a name="6">&nbsp;</a>
-  <h3><b>
-  6. Thermodynamical properties.
-  </b></h3>
-  
-  <p>We will give only a very short example of the use of ANADDB to compute thermodynamical properties.
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec6:
+ title: "Thermodynamical properties"
+ tag: thermodynamical
+ body: |
+  We will give only a very short example of the use of ANADDB to compute thermodynamical properties.
   This is because this part of ANADDB is likely the farthest from a clean, stable, usage.
   By exploring the input variables, the user should be able to produce figures and data like the ones for SiO2
   quartz and stishovite, published in

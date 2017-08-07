@@ -1,6 +1,7 @@
-# This YAML file contains the introduction as well as the body (including the table of content) of the html lesson.
-# In order to modify the other parts, modify the file lessons.html .
-# This is the introduction ...
+## This YAML file contains the introduction as well as the body of the html lesson.
+## In order to modify the other parts, modify the file lessons.html .
+
+## This is the introduction ...
 intro : |
   <p>
   This tutorial introduces ABINIT to the new developers.
@@ -13,27 +14,17 @@ intro : |
   Fortran&nbsp;90, 95 or 2003 will be truly welcome.
   Familiarity with the command line will be wonderful too.
   </p>
-# This is the body, including the table of content ...
-body : |
-  <ul>
-   <li><a href="#context">Context</a></li>
-   <li><a href="#objectives">Objectives</a></li>
-   <li><a href="#tasks">Tasks</a></li>
-   <ul>
-    <li><a href="#get">Get the source and compile the code</a></li>
-    <li><a href="#identify">Identify the subroutines to modify</a></li>
-    <li><a href="#new_routine">Add the new input variable and its
-     associated routine</a></li>
-    <li><a href="#test">Add a test to the test suite</a></li>
-    <li><a href="#patch">Create a patch for the project leader</a></li>
-   </ul>
-  </ul>
-  
-  <hr>
-  
-  <h2><a name="context">Context</a></h2>
-  
-  <p>
+  <p>WARNING : some parts are severely outdated.
+
+## Now come the different sections, numbered.
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec1:
+ title: "Context"
+ tag: context
+ body: |
   The ABINIT package is aimed at being used
   by different groups of people, without mandatory control by the
   main contributors of the ABINIT group. In the same
@@ -77,12 +68,14 @@ body : |
   and
   <a href="http://dev.abinit.org/doc/particulars">Specificities</a>,
   </p>
-  
-  <hr>
-  
-  <h2><a name="objectives">Objectives</a></h2>
-  
-  <p>
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec2:
+ title: "Objectives"
+ tag: objective
+ body: |
   The main goals of this lesson are to provide you with a useful understanding
   of the source tree structure and the build process, as well as sensibilize
   you to the rules and procedures followed for the development of ABINIT.
@@ -105,12 +98,15 @@ body : |
   "<i>lesson</i>". The task devoted to your routine is just to print
   this variable.
   </p>
-  
-  <hr>
-  
-  <h2><a name="tasks">Tasks</a></h2>
-  
-  <h3><a name="get">Get the source and compile the code</a></h3>
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec3:
+ title: "Tasks"
+ tag: tasks
+ body: |
+  <h4><a name="get">Get the source and compile the code</a></h4>
   
   <p>
   There are two ways of getting the source code of ABINIT:
@@ -189,7 +185,7 @@ body : |
   you can proceed to the next task.
   </p>
   
-  <h3><a name="identify">Identify the subroutines to modify</a></h3>
+  <h4><a name="identify">Identify the subroutines to modify</a></h4>
   
   <p>
   At this point, you have to discover what parts of the code will have to
@@ -218,8 +214,8 @@ body : |
   it work?
   </p>
   
-  <h3><a name="new_routine">Add the new input variable and its
-  associated routine</a></h3>
+  <h4><a name="new_routine">Add the new input variable and its
+  associated routine</a></h4>
   
   <p>
   Please examine the file
@@ -245,7 +241,7 @@ body : |
   Last but not least, rebuild <i>abinit</i>.
   </p>
   
-  <h3><a name="test">Add a test to the test suite</a></h3>
+  <h4><a name="test">Add a test to the test suite</a></h4>
   
   <p>
   Since your contribution is to be integrated into the version 7 (8, 9 ...) of ABINIT,
@@ -270,7 +266,7 @@ body : |
   in the <i>tests/</i> subdirectory, to check that it works fine.
   </p>
   
-  <h3><a name="patch">Create a patch for the project leader</a></h3>
+  <h4><a name="patch">Create a patch for the project leader</a></h4>
   
   <p>
   There are two ways of creating a patch, depending on whether you are
@@ -296,12 +292,14 @@ body : |
   <p>
   Q12. How will you proceed exactly to create it ?
   </p>
-  
-  <hr>
-  
-  <h3><a name="solutions">Solutions</a></h3>
-  
-  <p>
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec4:
+ title: "Solutions"
+ tag: solutions
+ body: |
   Even if we provide you here with the answers to some of the questions,
   we highly recommend you to try by yourself before looking at them. Please
   read this section only as a last resort.
@@ -373,12 +371,10 @@ body : |
    <li><tt>mv abinit-7.4.1 abinit-7.4.1-lesson</tt></li>
    <li><tt>tar xvzf /path/to/abinit/tarball/abinit-7.4.1.tar.gz</tt></li>
    <li><tt>mv abinit-7.4.1 abinit-7.4.1-orig</tt></li>
-   <li><tt><tt>diff -urN abinit-7.4.1-orig abinit-7.4.1-lesson &gt;
-    abinit-7.4.1-lesson.patch</tt></li>
+   <li><tt>diff -urN abinit-7.4.1-orig abinit-7.4.1-lesson &gt; abinit-7.4.1-lesson.patch</tt></li>
    <li><tt>gzip --best abinit-7.4.1-lesson.patch</tt></li>
   </ul>
   
   <p><i>Note: in case you are using Bazaar, you will have to exclude the '.bzr*'
   files from the diff by adding "<tt>-x '.bzr*'</tt>" to the other
   options.</i></p>
-  

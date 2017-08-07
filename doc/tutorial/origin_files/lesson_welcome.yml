@@ -25,51 +25,55 @@ body : |
   
   <center>
   <map id="map1" name="map1"> 
-  <area shape="rect" coords="144  ,39 ,264 ,110 " href="lesson_base1.html" /> <!--2,3,4-->
+  <area shape="rect" coords="120  ,10 ,260 , 80 " href="lesson_base1.html" /> <!--2,3,4-->
   
-  <area shape="rect" coords="56  ,160 ,192 ,182 " href="lesson_spin.html" />
+  <area shape="rect" coords="30  ,135 ,170 ,165 " href="lesson_spin.html" />
   
-  <area shape="rect" coords="56  ,199 ,130 ,224 " href="lesson_paw1.html" />
-  <area shape="rect" coords="131 ,199 ,147 ,224 " href="lesson_paw2.html" />
-  <area shape="rect" coords="148 ,199 ,192 ,224 " href="lesson_paw3.html" />
-  <area shape="rect" coords="56  ,225 ,192 ,264 " href="lesson_nuc.html" /> 
+  <area shape="rect" coords="30  ,170 , 99 ,199 " href="lesson_paw1.html" />
+  <area shape="rect" coords="100 ,170 ,129 ,199 " href="lesson_paw2.html" />
+  <area shape="rect" coords="130 ,170 ,170 ,199 " href="lesson_paw3.html" />
+  <area shape="rect" coords="30  ,200 ,170 ,250 " href="lesson_nuc.html" /> 
   
-  <area shape="rect" coords="56  ,280 ,192 ,304 " href="lesson_wannier90.html" />
+  <area shape="rect" coords="30  ,260 , 99 ,289 " href="lesson_dftu.html" />
+  <area shape="rect" coords="100 ,260 ,170 ,289 " href="lesson_dmft.html" />
+  <area shape="rect" coords="30  ,290 ,100 ,320 " href="lesson_ucalc_crpa.html" />
+  <area shape="rect" coords="100 ,290 ,170 ,320 " href="lesson_detu" />
+
+  <area shape="rect" coords="30  ,330 ,170 ,355 " href="lesson_ffield.html" />
   
-  <area shape="rect" coords="56  ,318 ,192 ,341 " href="lesson_ffield.html" />
+  <area shape="rect" coords="30  ,360 ,170 ,385 " href="lesson_tddft.html" />
+
+  <area shape="rect" coords="30  ,390 ,170 ,415 " href="lesson_analysis_tools.html" />
+
+  <area shape="rect" coords="30  ,420 ,170 ,445 " href="lesson_fold2bloch.html" />
+
+  <area shape="rect" coords="30  ,450 ,170 ,485 " href="lesson_wannier90.html" />
   
-  <area shape="rect" coords="56  ,352 ,192 ,375 " href="lesson_analysis_tools.html" />
+  <area shape="rect" coords="30  ,480 ,170 ,505 " href="lesson_source_code.html" />
   
-  <area shape="rect" coords="56  ,387 ,127 ,413 " href="lesson_dftu.html" />
-  <area shape="rect" coords="56  ,387 ,192 ,413 " href="lesson_dmft.html" />
-  <area shape="rect" coords="56  ,414 ,192 ,439 " href="lesson_ucalc_crpa.html" />
+  <area shape="rect" coords="230  ,135 ,376 ,199 " href="lesson_rf1.html" />
+  <area shape="rect" coords="230  ,220 ,376 ,255 " href="lesson_optic.html" />
+  <area shape="rect" coords="230  ,270 ,376 ,294 " href="lesson_rf2.html" />
+  <area shape="rect" coords="230  ,295 ,376 ,314 " href="lesson_eph.html" /> 
+  <area shape="rect" coords="230  ,315 ,376 ,339 " href="lesson_tdepes.html" /> 
+  <area shape="rect" coords="230  ,340 ,327 ,370 " href="lesson_elastic.html" /> 
+  <area shape="rect" coords="328  ,340 ,376 ,370 " href="lesson_nlo.html" /> 
   
-  <area shape="rect" coords="56  ,453 ,192 ,477 " href="lesson_tddft.html" />
+  <area shape="rect" coords="360  ,415 ,456 ,460 " href="lesson_gw1.html" />
+  <area shape="rect" coords="360  ,470 ,456 ,499 " href="lesson_gw2.html" /> 
+  <area shape="rect" coords="360  ,500 ,456 ,525 " href="lesson_bse.html" /> 
   
-  <area shape="rect" coords="56  ,492 ,192 ,514 " href="lesson_source_code.html" />
+  <area shape="rect" coords="530  ,10 ,670 , 80 " href="lesson_basepar.html" />
   
-  <area shape="rect" coords="249  ,159 ,376 ,224 " href="lesson_rf1.html" />
-  <area shape="rect" coords="249  ,234 ,376 ,267 " href="lesson_optic.html" />
-  <area shape="rect" coords="249  ,281 ,376 ,307 " href="lesson_rf2.html" />
-  <area shape="rect" coords="249  ,308 ,376 ,324 " href="lesson_eph.html" /> 
-  <area shape="rect" coords="249  ,325 ,327 ,345 " href="lesson_elastic.html" /> 
-  <area shape="rect" coords="328  ,325 ,376 ,345 " href="lesson_nlo.html" /> 
+  <area shape="rect" coords="520  ,100 ,695 ,200 " href="lesson_paral_gspw.html" />
+  <area shape="rect" coords="520  ,211 ,695 ,236 " href="lesson_paral_moldyn.html" />
+  <area shape="rect" coords="520  ,211 ,695 ,236 " href="lesson_paral_images.html" />
   
-  <area shape="rect" coords="360  ,395 ,453 ,436 " href="lesson_gw1.html" />
-  <area shape="rect" coords="360  ,449 ,409 ,490 " href="lesson_gw2.html" /> 
-  <area shape="rect" coords="410  ,449 ,453 ,490 " href="lesson_bse.html" /> 
+  <area shape="rect" coords="520  ,246 ,695 ,300 " href="lesson_paral_gswvl.html" />
   
-  <area shape="rect" coords="520  ,39 ,643 ,110 " href="lesson_basepar.html" />
+  <area shape="rect" coords="520  ,317 ,695 ,371 " href="lesson_paral_dfpt.html" />
   
-  <area shape="rect" coords="505  ,182 ,668 ,210 " href="lesson_paral_gspw.html" />
-  <area shape="rect" coords="505  ,211 ,578 ,236 " href="lesson_paral_moldyn.html" />
-  <area shape="rect" coords="579  ,211 ,668 ,236 " href="lesson_paral_string.html" />
-  
-  <area shape="rect" coords="505  ,246 ,668 ,300 " href="lesson_paral_gswvl.html" />
-  
-  <area shape="rect" coords="505  ,317 ,668 ,371 " href="lesson_paral_dfpt.html" />
-  
-  <area shape="rect" coords="505  ,387 ,668 ,440 " href="lesson_paral_mbt.html" />
+  <area shape="rect" coords="520  ,387 ,695 ,440 " href="lesson_paral_mbt.html" />
   </map>
   
   <img style="height: 540px; width: 720px;" alt="Schema 1" src="../documents/lesson_welcome/tutorial_flowchart_v4.png" usemap="#map1"/>
@@ -100,7 +104,7 @@ body : |
   
   <h3>Brief description of each lesson's content</h3>
   
-  <p><b>The lessons 1-4 present the basic concepts, and form a global
+  <p><b>I. The lessons 1-4 present the basic concepts, and form a global
   entity: you should not skip any of these.</b></p>
   <ul>
     <li><a href="lesson_base1.html">The lesson 1</a> deals with the H2
@@ -120,7 +124,7 @@ body : |
   
   <p><b>Other lessons present more specialized topics.</b></p>
   
-  <p><b>There is a group of lessons that can be started without any other prerequisite than the lessons 1 to 4, and that you can do in any order (there are some exceptions, though):</b></p>
+  <p><b>II. There is a group of lessons that can be started without any other prerequisite than the lessons 1 to 4, and that you can do in any order (there are some exceptions, though):</b></p>
   <ul>
     <li><a href="lesson_spin.html">The lesson on spin in ABINIT</a>
     presents the properties related to spin: spin-polarized calculations
@@ -172,35 +176,43 @@ body : |
     ...</li>
   </ul>
   
-  <p><b>There is an additional group of lessons on response functions
+  <p><b>III. There is an additional group of lessons on density-functional perturbation theory
   (phonons, optics, dielectric constant, electron-phonon interaction,
   elastic response, non-linear optics, Raman coefficients,
   piezoelectricity ...), for which some common additional information are
   needed:</b></p>
   <ul>
-    <li><a href="lesson_rf1.html">The lesson Response-Function 1 (RF1)</a>
-    presents the basics of response-functions within ABINIT. The example
+    <li><a href="lesson_rf1.html">The lesson DFPT 1 (RF1 - response function 1)</a>
+    presents the basics of DFPT within ABINIT. The example
     given is the study of dynamical and dielectric properties of AlAs (an
     insulator): phonons at Gamma, dielectric constant, Born effective
     charges, LO-TO splitting, phonons in the whole Brillouin zone. The
     creation of the "Derivative Data Base" (DDB) is presented.</li>
-    <li><a href="lesson_rf2.html">The lesson Response-Function 2 (RF2)</a>
+    <li><a href="lesson_rf2.html">The lesson DFPT 2 (RF2 - response function 2)</a>
     presents the analysis of the DDBs that have been introduced in the
     preceeding lesson RF1.  The computation of the interatomic forces and
     the computation of thermodynamical properties is an outcome of this
     lesson.</li>
-    <li><b>The additional information given by lesson RF1 opens the door to</b>
+  </ul>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b><i>The additional information given by lesson DFPT1 opens the door to</i></b>
+  <ul>
     <a href="lesson_optic.html">The lesson on Optic</a>, the utility that
     allows to obtain the frequency dependent linear optical dielectric
     function and the frequency dependent second order nonlinear optical
     susceptibility, in the simple "Sum-Over-State" approximation.</li>
-    <li><b>The additional information given by lesson RF1 and RF2 opens
+  </ul>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b><i>The additional information given by lesson DFPT1 and DFPT2 opens
     the door to a group of lessons that can be followed independently of
-    each other: </b> <a href="lesson_eph.html">The lesson on the
+    each other: </i></b> 
+  <ul>
+    <li><a href="lesson_eph.html">The lesson on the
     electron-phonon interaction</a> presents the use of the utility MRGKK
     and ANADDB to examine the electron-phonon interaction and the
     subsequent calculation of superconductivity temperature (for bulk
     systems).</li>
+    <li><a href="lesson_tdepes.html">The lesson on temperature dependence of the electronic structure</a>
+    presents the computation of the temperature dependence of the electronic structure, 
+    the zero-point motion effect, the lifetim/broadening of eigenenergies.</li>
     <li><a href="lesson_elastic.html">The lesson on the elastic
     properties</a> presents the computation with respect to the strain
     perturbation and its responses: elastic constants,
@@ -211,17 +223,14 @@ body : |
     simple Sum-Over-State approximation): Raman scattering efficiencies
     (non-resonant case), non-linear electronic susceptibility,
     electro-optic effect.  Comparison with the finite field technique
-    (combining the computation of linear response functions with finite
+    (combining DFPT calculatons with finite
     difference calculations), is also provided.</li>
   </ul>
-  An additional lesson has been developed outside the standard structure of the ABINIT tutorial,
-  in the experimental Wiki of ABINIT, <a href="https://wiki.abinit.org/doku.php?id=howto:temperature">
-  the lesson on temperature dependence of the electronic structure</a>.
-  
-  <p><b>There is another additional group of lessons on many-body 
+  <p><b>IV. There is another additional group of lessons on many-body 
   perturbation theory (GW approximation, Bethe-Salpeter equation),
   to be done sequentially):
   </b></p>
+  <ul>
    <li><a href="lesson_gw1.html">The first lesson on GW (GW1)</a> deals with
     the computation of the quasi-particle band gap of Silicon 
     (semiconductor), in the GW approximation (much better than the
@@ -233,9 +242,8 @@ body : |
     <li><a href="lesson_bse.html">The lesson on the Bethe-Salpeter Equation (BSE)</a> deals with the
     computation of the macroscopic dielectric function of Silicon within
     the Bethe-Salpeter equation. </li>
-  
-  
-  <p><b>Concerning parallelism, there is another set of specialized
+  </ul>
+  <p><b>V. Concerning parallelism, there is another set of specialized
   lessons. For each of these lessons, you are supposed to be familiarized
   with the corresponding tutorial for the sequential calculation.</b></p>
   <ul>
@@ -250,18 +258,18 @@ body : |
     ground state properties </li>
     <li><a href="lesson_paral_moldyn.html">Parallelism for molecular
     dynamics calculations</a></li>
-    <li><a href="lesson_paral_string.html">Parallelism based on "images",
-    e.g. for the determination of transitions paths (string method)</a>,
-    that can be activated on top of the "KGB" parallelism for force
+    <li><a href="lesson_paral_images.html">Parallelism based on "images"</a>,
+    e.g. for the determination of transitions paths (NEB or string method), or for PIMD,
+    that can be activated alone, or on top of other parallelisms, e.g. the "KGB" parallelism for force
     calculations.</li>
     <li><a href="lesson_paral_gswvl.html">Parallelism for ground-state
     calculations, with wavelets</a> presents the parallelism of ABINIT,
     when wavelets are used as a basis function instead of planewaves, for
     the computation of total energy, density, and ground state properties</li>
-    <li><a href="lesson_paral_dfpt.html">Parallelism of response-function
+    <li><a href="lesson_paral_dfpt.html">Parallelism of DFPT
     calculations</a> - you need to be familiarized with the calculation of
-    linear-response properties within ABINIT, see the tutorial <a
-    href="lesson_rf1.html"> Response-Function 1 (RF1)</a></li>
+    response properties within ABINIT, see the tutorial <a
+    href="lesson_rf1.html"> DFPT 1 (RF1)</a></li>
     <li><a href="lesson_paral_mbt.html">Parallelism of Many-Body
     Perturbation calculations (GW)</a> allows to speed up the calculation of
     accurate electronic structures (quasi-particle band structure,

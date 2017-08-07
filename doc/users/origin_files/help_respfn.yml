@@ -1,6 +1,7 @@
-# This YAML file contains the introduction as well as the body (including the table of content) of the html help document.
-# In order to modify the other parts, modify the file helps.yml .
-# This is the introduction ...
+## This YAML file contains the introduction as well as the body of the html lesson.
+## In order to modify the other parts, modify the file lessons.html .
+
+## This is the introduction ...
 intro : |
   <br>The user is advised to be familiar with
   the main [[help_abinit]] before reading the present file. </h3>
@@ -8,34 +9,20 @@ intro : |
   <p> It will be easier to discover the
     present file with the help of the tutorial, see [[lesson_welcome]] and [[lesson_rf1]].
   <br>It is worthwhile to print this help file, for ease of reading.
-# This is the body, including the table of content ...
-body : |
-  <ul>
-    <li><a href="#0">0. Introducing the computation of responses</a>
-    <li><a href="#1">1. Description of perturbations</a>
-    <li><a href="#2">2. Filenames and input of ground-state wavefunctions</a>
-    <li><a href="#3">3. The use of symmetries</a>
-    <li><a href="#4">4. Organisation of response-function computations</a>
-    <li><a href="#5">5. List of relevant input variables</a>
-    <li><a href="#6">6. The different output files</a>
-      <ul>
-        <li><a href="#6.1">6.1. The log file</a>
-        <li><a href="#6.2">6.2. The main output file</a>
-        <li><a href="#6.3">6.3. The first-order wavefunction files</a>
-        <li><a href="#6.4">6.4. The first-order density files</a>
-        <li><a href="#6.5">6.5. The derivative database</a>
-      </ul>
-    <li><a href="#7">7. Numerical quality of the calculations</a>
-  </ul>
-  
-  <hr>
-  <h3>&nbsp;</h3>
-  <h3><b><a name="0"></a>0. Introducing the computation of responses</b></h3>
-  
-  <p>ABINIT can give direct access to various response functions,
+
+## Now come the different sections, numbered.
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec0:
+ title: "Introducing the computation of responses"
+ tag: introduction
+ body: |
+  ABINIT can compute the response to different perturbations, and provide access to quantities
   that are second derivatives of total energy (2DTE)
-  with respect to different perturbations.
-  Presently, these perturbations can be of three types : (1) phonons,
+  with respect to these perturbations.
+  Presently, they can be of three types : (1) phonons,
   (2) static homogeneous electric field, and (3) strain.
   The physical properties connected to 2DTE with
   respect to perturbations (1) and (2) are the phonon dynamical matrices,
@@ -84,13 +71,14 @@ body : |
   (<A href="help_mrgddb.html">Mrgddb help file</A>,
   and
   <A href="help_anaddb.html">Anaddb help file</A>).
-  
-  <h3>&nbsp;</h3>
-  <hr>
-  <h3>&nbsp;</h3>
-  <h3><b><a name="1"></a>1. Description of perturbations</b></h3>
-  
-  <p>
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec1:
+ title: "Description of perturbations"
+ tag: perturbations
+ body: |
   The perturbation of the <b>phonon</b> type is the displacement of one
   atom along one of the axis of the unit cell, by a unit of length
   (in reduced coordinates). It is characterized by two integer
@@ -210,14 +198,14 @@ body : |
   the perturbation that gives the derivative of the
   potential, and the second pertcase corresponds to the perturbation
   that gives the derivative of the wavefunctions.
-  
-  
-  <h3>&nbsp;</h3>
-  <hr>
-  <h3>&nbsp;</h3>
-  <h3><b><a name="2"></a>2. Filenames and input of ground-state wavefunctions</b></h3>
-  
-  <p>
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec2:
+ title: "Filenames and input of ground-state wavefunctions"
+ tag: groundtstate
+ body: |
   The same 'files' file as for GS calculations is used for RF calculations.
   Actually, in the multi-dataset mode, one will be able to make in one
   ABINIT run, ground-state computations as well as response-function
@@ -292,15 +280,15 @@ body : |
   [[irdddk]], as well as
   [[get1wf]], and
   [[getddk]], in the multi-dataset mode.
-  
-  
-  
-  <h3>&nbsp;</h3>
-  <hr>
-  <h3>&nbsp;</h3>
-  <h3><b><a name="3"></a>3. The use of symmetries</b></h3>
-  
-  <p>In order to understand correctly the behaviour
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec3:
+ title: "The use of symmetries"
+ tag: symmetries
+ body: |
+  In order to understand correctly the behaviour
   of response-function runs, some information on the use of symmetries
   must be given.
   <p>
@@ -338,14 +326,14 @@ body : |
    <li> [[kptopt]]=2 for response functions at q=0 </li>
    <li> [[kptopt]]=3 for response functions at non-zero q </li>
   </ul>
-  
-  
-  <h3>&nbsp;</h3>
-  <hr>
-  <h3>&nbsp;</h3>
-  <h3><b><a name="4"></a>4. Organisation of response-function computations</b></h3>
-  
-  <p>
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec4:
+ title: "Organisation of response-function computations"
+ tag: organisation
+ body: |
   In agreement with the information provided in the previous sections,
   different cases can be distinguished.
   
@@ -480,13 +468,14 @@ body : |
    <li>The first-order wavefunctions (1WF) are written
       as well as the first-order density or potential (if requested).</li>
   </ul>
-  
-  <h3>&nbsp;</h3>
-  <hr>
-  <h3>&nbsp;</h3>
-  <h3><b><a name="5"></a>5. List of relevant input variables</b></h3>
-  
-  <p>
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec5:
+ title: "List of relevant input variables"
+ tag: input
+ body: |
   A subset of the ABINIT input variables have a modified
   meaning or a modified behaviour in case of
   RF calculations. Here is the list of these input variables,
@@ -528,21 +517,18 @@ body : |
   </ul>
   
   <p>
-  
-  
-  <h3>&nbsp;</h3>
-  <hr>
-  <h3>&nbsp;</h3>
-  <h3><b><a name="6"></a>6. The different output files</b></h3>
-  
-  <p>
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec6:
+ title: "The different output files"
+ tag: output
+ body: |
   Output from the code goes to several places listed below.
-  
-  
   <p>&nbsp;</p>
+
   <p><b><a name="6.1"></a>6.1. The log file</b></p>
-  
-  
   <p>
   This file is the same as the log file
   of the abinit code when computing ground state (GS) results.
@@ -552,8 +538,8 @@ body : |
   case, and the use of error messages is unchanged.
   
   <p>&nbsp;</p>
+
   <p><b><a name="6.2"></a>6.2. The main output file</b></p>
-  
   <p>
   This file is the same as the main output file
   of the abinit code when computing ground state (GS) results.
@@ -633,11 +619,9 @@ body : |
           cannot be trusted.
   <p>
   Finally, the code provides the timing information.
-  
-  
   <p>&nbsp;</p>
+
   <p><b><a name="6.3"></a>6.3. The first-order wavefunction (1WF) files</b></p>
-  
   <p>
   These are unformatted data
       files containing the planewaves coefficients of all the
@@ -680,8 +664,8 @@ body : |
       before the writing of all wf for one k point.
   
   <p>&nbsp;</p>
+
   <p><b><a name="6.4"></a>6.4. The first-order density files</b></p>
-  
   <p>
       They consist of the header lines, followed by
   
@@ -697,8 +681,8 @@ body : |
   
   
   <p>&nbsp;</p>
+
   <p><b><a name="6.5"></a>6.5. The derivative database (DDB)</b></p>
-  
   <p>
       It is made of two parts. The first should allow one to
       unambiguously identify the run that has generated the DDB,
@@ -761,13 +745,13 @@ body : |
   
     <p> <i>If you follow the tutorial, you should go back to the tutorial window now. </i>
   
-  
-  <h3>&nbsp;</h3>
-  <hr>
-  <h3>&nbsp;</h3>
-  <h3><b><a name="7"></a>7. Numerical quality of the calculations</b></h3>
-  
-  <p>
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec7:
+ title: "Numerical quality of the calculations"
+ tag: 
+ body: |
   It is possible to get from the RF calculations essentially EXACT
   derivatives of the total energy with respect to perturbations.
   There is a published account of this fact in

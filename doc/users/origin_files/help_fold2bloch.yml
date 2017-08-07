@@ -1,7 +1,17 @@
-# This YAML file contains the introduction as well as the body (including the table of content) of the html help document.
-# In order to modify the other parts, modify the file helps.yml .
-# This is the introduction ...
+## This YAML file contains the introduction as well as the body of the html lesson.
+## In order to modify the other parts, modify the file lessons.html .
+
+## This is the introduction ...
 intro : |
+
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec0:
+ title: "To be filled"
+ tag: 
+ body: |
   <a name="top"></a>
   This program generates an unfolded spectrum in a small cell, from a folded spectrum  of eigenvalues in a supercell.
   The new k-wavevectors and the weights for the range of energies 
@@ -17,30 +27,26 @@ intro : |
   It will be easier to discover the present file with the help of the tutorial ([[lesson_fold2bloch]]).
   <br>It is worthwhile to print this help file, for ease of reading.
 
+## Now come the different sections, numbered.
 
-# This is the body, including the table of content ...
-body : |
-  <ul>
-    <li><a href="#1">1. Compiling instructions</a>
-    <li><a href="#2">2. Execution</a>
-    <li><a href="#3">3. Output sample</a>
-    <li><a href="#4">4. Subroutines and functions</a>
-  </ul>
-  
-  <hr>
-  <h3>&nbsp;</h3>
-  
-  <h3><b><a name="1"></a>1. Compiling instructions</b></h3>
-
-
-  <P ALIGN=LEFT STYLE="margin-bottom: 0.14in; line-height: 0.19in"><FONT COLOR="#00000a"><FONT FACE="Arial, serif"><FONT SIZE=3><SPAN STYLE="background: #ffffff">Compiled
-  as part of abinit package. Fold2Bloch does not differentiate between
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec1:
+ title: "Compiling instructions"
+ tag: compile
+ body: |
+  Compiled as part of abinit package. Fold2Bloch does not differentiate between
   parallel and serial configuration so it always compiles for serial
-  operation.</SPAN></FONT></FONT></FONT></P>
+  operation.
 
-  <hr>
-  <h3><b><a name="2"></a>2. Execution</b></h3>
-
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec2:
+ title: "Execution"
+ tag: execution
+ body: |
   The program fold2Bloch is executed by invoking the following command </SPAN></FONT></FONT></FONT><FONT COLOR="#00000a"><FONT FACE="Arial, serif"><FONT SIZE=3><U><SPAN STYLE="background: #ffffff">from
   the directory of the case file</SPAN></U></FONT></FONT></FONT><FONT COLOR="#00000a"><FONT FACE="Arial, serif"><FONT SIZE=3><SPAN STYLE="background: #ffffff">:</SPAN></FONT></FONT></FONT></P>
   <P ALIGN=LEFT STYLE="margin-bottom: 0.14in; line-height: 0.19in"><FONT COLOR="#00000a"><FONT FACE="Arial, serif"><FONT SIZE=3><SPAN STYLE="background: #ffffff">	</SPAN></FONT></FONT></FONT><FONT COLOR="#00000a"><FONT FACE="Arial, serif"><FONT SIZE=3><B><SPAN STYLE="background: #ffffff">fold2Bloch
@@ -63,12 +69,14 @@ body : |
   and </SPAN></FONT></FONT></FONT><FONT COLOR="#00000a"><FONT FACE="Arial, serif"><FONT SIZE=3><B><SPAN STYLE="background: #ffffff">fold2Bloch_down.out
   </SPAN></B></FONT></FONT></FONT>
   </P>
-  <P ALIGN=LEFT STYLE="margin-bottom: 0.14in; line-height: 0.19in"><BR><BR>
-  </P>
 
-  <hr>
-  <h3><b><a name="3"></a>3. Output sample</b></h3>
-
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec3:
+ title: "Output sample"
+ tag: output
+ body: |
   <P ALIGN=LEFT STYLE="margin-bottom: 0.14in; line-height: 0.19in"><FONT COLOR="#00000a"><FONT FACE="Arial, serif"><FONT SIZE=3><U><B><SPAN STYLE="background: #ffffff">Output
   Sample</SPAN></B></U></FONT></FONT></FONT></P>
   <P ALIGN=LEFT STYLE="margin-bottom: 0.14in; line-height: 0.19in"><FONT COLOR="#00000a"><FONT FACE="Arial, serif"><FONT SIZE=3><SPAN STYLE="background: #ffffff">Below
@@ -217,14 +225,14 @@ body : |
    -0.166667  -1.000000   0.040617   0.500003</SPAN></FONT></FONT></FONT></P>
   <P ALIGN=LEFT STYLE="margin-bottom: 0in; line-height: 0.17in"><BR>
   </P>
-  <P ALIGN=LEFT STYLE="margin-bottom: 0.14in; line-height: 0.19in"><BR><BR>
-  </P>
-  <P ALIGN=LEFT STYLE="margin-bottom: 0.14in; line-height: 0.19in"><BR><BR>
-  </P>
 
-  <hr>
-  <h3><b><a name="4"></a>4. Subroutines and functions</b></h3>
-
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec4:
+ title: "Subroutines and functions"
+ tag: subroutine_functions
+ body: |
   <P ALIGN=LEFT STYLE="margin-bottom: 0.14in; line-height: 0.19in"><FONT COLOR="#00000a"><FONT FACE="Arial, serif"><FONT SIZE=4><U><B><SPAN STYLE="background: #ffffff">Subroutines
   and Functions</SPAN></B></U></FONT></FONT></FONT></P>
   <P ALIGN=LEFT STYLE="margin-bottom: 0.14in; line-height: 0.19in"><FONT COLOR="#00000a"><FONT FACE="Arial, serif"><FONT SIZE=4><B><SPAN STYLE="background: #ffffff">Subroutine

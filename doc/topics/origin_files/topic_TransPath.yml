@@ -33,7 +33,7 @@
         </br>
         <p>As in the PIMD, each of the images can be treated in parallel and the requested parallelization mode is set with the keyword [[npimage]].
     tutorials  : |-
-           <li><a href="../../tutorial/generated_files/lesson_paral_string.html">Parallelism based on "images",
+           <li><a href="../../tutorial/generated_files/lesson_paral_images.html">Parallelism based on "images",
            e.g. for the determination of transitions paths (string method)</a>,
            that can be activated on top of the "KGB" parallelism for force
            calculations.</li>

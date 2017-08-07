@@ -24,8 +24,8 @@ intro : |
   </ul>
             You should complete lessons <a href="lesson_rf1.html">RF1</a>
           and <a href="lesson_rf2.html">RF2</a>
-           to introduce the response-function    features     of ABINIT before
-    starting  this lesson.  You will learn    to   use   additional     response-function
+           to introduce the density-functional perturbation theory (DFPT) features     of ABINIT before
+    starting  this lesson.  You will learn    to   use   additional DFPT 
      features of ABINIT, and to use   relevant     parts of the  associated
     codes Mrgddb and Anaddb.
   <p>This lesson should take about two hours.  </p>
@@ -55,7 +55,7 @@ sec1:
   but    has    a  hexagonal       lattice.  It was chosen for this lesson
   because    the atomic     positions   are   not completely determined by
   symmetry.   Both the atomic     positions  and the   lattice constants should
-  be optimized     before beginning     response-function      calculations,
+  be optimized     before beginning     DFPT  calculations,
   especially those     related to strain   properties.   While GS   structural
     optimization  was   treated in lessons   1-3, we are introducing  a few
   new features   here,  and you should look at  the following new input  variables
@@ -95,7 +95,7 @@ sec1:
                                      (=0.5 Ha)as in <a href="lesson_base3.html">lesson 3</a>
           to smear the cutoff, which    produces     smoothly     varying
   stresses    as the lattice parameters are    optimized.    We will keep
-    the same   value of [[ecutsm]] for the response-function calculations
+    the same   value of [[ecutsm]] for the DFPTcalculations
   as  well,    since    changing     it  from   the optimization run value could
    reintroduce    non-zero    forces   and  stresses.     For the k-point grid,
    we must explicitly    specify  [[shiftk]] since the default value results in a grid
@@ -252,7 +252,7 @@ sec2:
   
   <p>This has been set up as a self-contained calculation with three datasets.
                   The first is simply a GS run to obtain the GS wave functions
-     we   will        need for the response function (RF) calculations.  We
+     we   will        need for the DFPT calculations.  We
   have   removed     the     convergence test from the common input data to
   remind   ourselves   that  different    tests are needed for different datasets.
     We set a tight   limit  on the  convergence  of the self-consistent potential
@@ -838,7 +838,7 @@ sec4:
 ## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
 ## Note the small (one space) indentation for the title and body keys.
 sec5:
- title: "Alternative response-function calculation of some piezoelectric constants"
+ title: "Alternative DFPT calculation of some piezoelectric constants"
  tag: alternative
  body: |
   <p>Our GS calculation of the polarization in <a href="#elastic_piezo">section 4</a>

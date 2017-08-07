@@ -85,6 +85,7 @@ def make_links(text,cur_key,allowed_link_seeds,backlinks,backlink):
 
   def replace_link(mymatch):
     dokukey = mymatch.group()[2:-2].strip()
+
     if cur_key != None:
       if dokukey == cur_key.strip():
         return "<b>"+dokukey+"</b>"
@@ -158,7 +159,7 @@ def make_links(text,cur_key,allowed_link_seeds,backlinks,backlink):
       value=allowed_link_seeds[linkseed]
 
       #DEBUG
-      #if "gwencomp" in dokukey:
+      #if "help:respfn" in dokukey:
       #  print(" ")
       #  print(" dokukey:",dokukey)
       #  print(" value:",value)
@@ -192,7 +193,7 @@ def make_links(text,cur_key,allowed_link_seeds,backlinks,backlink):
 
     return '<a href="#">[[FAKE LINK:'+dokukey+']]</a>'
 
-  p=re.compile("\\[\\[([a-zA-Z0-9_ */<>.|:+#@]*)\\]\\]")
+  p=re.compile("\\[\\[([a-zA-Z0-9_ */<>.|:+#@-]*)\\]\\]")
   if text is None:
     return ""
   new_text=p.sub(replace_link,text)
@@ -382,20 +383,32 @@ def assemble_html(origin_yml_files,suppl_components,dir_name,root_filname,allowe
       doc_yml=read_yaml(path_ymlfile)
  
     # If there are some sections in this yml file, constitute the body of the file using these sections,
-    # and also make a table of content
+    # and also make a table of content. Allows (only) two levels for the table of content.
     labels=[]
     for j in doc_yml.keys(): 
       if "sec" in j[:3]:
         labels.append(j[3:])
     secs_html=""
     if len(labels)!=0:
-      labels.sort() 
+      #Trick (not perfect ...) to sort numbers and digits together. Will not work with strings longer than 9 digits.
+      labels=sorted(labels, key= lambda item: str(len(item))+item)
       secs_html="\n <ul> \n"
       # Table of content
       for label in labels:
          secj="sec"+label
-         #secs_html+='  <li><a href="#%s">%s.</a> %s</li>\n' %(label,label,doc_yml[secj]["title"])
-         secs_html+='  <li><a href="#%s">%s.</a> %s</li>\n' %(doc_yml[secj]["tag"],label,doc_yml[secj]["title"])
+         secs_html+='  <li><a href="#%s">%s. %s</a></li>\n' %(doc_yml[secj]["tag"],label,doc_yml[secj]["title"])
+         #Treat one level of subsections
+         sublabels=[]
+         for subj in doc_yml[secj].keys():
+           if "sec" in subj[:3]:
+             sublabels.append(subj[3:])
+         if len(sublabels)!=0:
+           sublabels=sorted(sublabels, key= lambda item: str(len(item))+item)
+           secs_html+="\n   <ul> \n"
+           for sublabel in sublabels:
+             subsecj="sec"+sublabel
+             secs_html+='    <li><a href="#%s">%s. %s</a></li>\n' %(doc_yml[secj][subsecj]["tag"],sublabel,doc_yml[secj][subsecj]["title"])
+           secs_html+="\n   </ul> \n"
       secs_html+="\n </ul> \n <hr>"
       # Body
       for label in labels:
@@ -403,15 +416,34 @@ def assemble_html(origin_yml_files,suppl_components,dir_name,root_filname,allowe
          sec_html='<br><a name="%s"> </a>\n' %(doc_yml[secj]["tag"])
          sec_html+='<a name="%s"> </a>\n' %(label)
          sec_html+='<h3><b>%s. %s</b></h3>\n <p>' %(label,doc_yml[secj]["title"])
-         sec_html+=doc_yml[secj]["body"]
+         if "body" in doc_yml[secj].keys():
+           sec_html+=doc_yml[secj]["body"]
+           full_filname=origin_yml.name
+           if root_filname != "":
+             full_filname=root_filname+"_"+origin_yml.name
+           backlink=' &nbsp; <a href="../../%s/generated_files/%s.html#%s">%s#%s</a> &nbsp; ' %(dir_name,full_filname,label,full_filname,label)
+           sec_html = make_links(sec_html,None,allowed_link_seeds,backlinks,backlink)
+         #Treat one level of subsections
+         sublabels=[]
+         for subj in doc_yml[secj].keys():
+           if "sec" in subj[:3]:
+             sublabels.append(subj[3:])
+         if len(sublabels)!=0:
+           sublabels=sorted(sublabels, key= lambda item: str(len(item))+item)
+           for sublabel in sublabels:
+             subsecj="sec"+sublabel
+             sec_html+='<br><a name="%s"> </a>\n' %(doc_yml[secj][subsecj]["tag"])
+             sec_html+='<a name="%s"> </a>\n' %(sublabel)
+             sec_html+='<h4><b>%s. %s</b></h4>\n <p>' %(sublabel,doc_yml[secj][subsecj]["title"])
+             sec_html+=doc_yml[secj][subsecj]["body"]
+             full_filname=origin_yml.name
+             if root_filname != "":
+               full_filname=root_filname+"_"+origin_yml.name
+             backlink=' &nbsp; <a href="../../%s/generated_files/%s.html#%s">%s#%s</a> &nbsp; ' %(dir_name,full_filname,sublabel,full_filname,sublabel)
+             sec_html = make_links(sec_html,None,allowed_link_seeds,backlinks,backlink)
          sec_html+="<br><br><a href=#top>Go to the top</a>\n<hr>\n"
-         full_filname=origin_yml.name
-         if root_filname != "":
-           full_filname=root_filname+"_"+origin_yml.name
-         backlink=' &nbsp; <a href="../../%s/generated_files/%s.html#%s">%s#%s</a> &nbsp; ' %(dir_name,full_filname,label,full_filname,label)
-         sec_html = make_links(sec_html,None,allowed_link_seeds,backlinks,backlink)
          secs_html+=sec_html
- 
+
     # Try to complete the information from suppl_components
     suppl={}
     if name in suppl_components.keys():

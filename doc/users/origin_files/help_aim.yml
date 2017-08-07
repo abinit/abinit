@@ -1,6 +1,7 @@
-# This YAML file contains the introduction as well as the body (including the table of content) of the html help document.
-# In order to modify the other parts, modify the file helps.yml .
-# This is the introduction ...
+## This YAML file contains the introduction as well as the body of the html lesson.
+## In order to modify the other parts, modify the file lessons.html .
+
+## This is the introduction ...
 intro : |
   <p>
   The AIM utility allows to analyse charge densities
@@ -11,8 +12,16 @@ intro : |
   The charge density of each region is attributed to the
   corresponding nucleus, hence the concept of Atom-In-Molecule.
   </h3>
-# This is the body, including the table of content ...
-body : |
+
+## Now come the different sections, numbered.
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec0:
+ title: "To be filled"
+ tag: 
+ body: |
   <ul>
     <li><a href="#1">1. Introduction</a>
     <li><a href="#2">2. Input and output files</a>
@@ -21,9 +30,15 @@ body : |
   
   <hr>
   <h3>&nbsp;</h3>
-  <h3><b><a name="1"></a>1. Introduction </b></h3>
-  
-  <p>
+
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec1:
+ title: "Introduction"
+ tag: introduction
+ body: |
   The Bader technique allows to partition the space in
   attraction regions. Each of these regions
   is centered on one atom. The only input for this technique
@@ -130,13 +145,14 @@ body : |
   for one given angular direction, or determine the density
   and laplacian at several, given, points in space, according
   to the user will.
-  
-  <p>
-  <hr>
-  <h3>&nbsp;</h3>
-  <h3><b><a name="2"></a>2. Input and output files.</b></h3>
-  
-  <p>
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec2:
+ title: "Input and output files"
+ tag: 
+ body: |
   To run the program one needs to prepare two files:
   <ul>
    <li>[files-file] file which contains the name of the input file, the
@@ -272,11 +288,13 @@ body : |
   </pre> (quotes are necessary).
   Note, that this isn't considered as
   the visualization (it is only for working purpose)!
-  
-  <p>&nbsp;
 
-  <hr>
-  <h3>&nbsp;</h3>
-  <h3><b><a name="3"></a>3. List of input variables </b></h3>
-  <p>The list of input variables for the aim input file is presented in <a href="../../topics/generated_files/topic_Bader.html">AIM input variables</a>.
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec3:
+ title: "List of input variables"
+ tag: 
+ body: |
+  The list of input variables for the aim input file is presented in the [[varset:aim|aim set of input variables]].
 

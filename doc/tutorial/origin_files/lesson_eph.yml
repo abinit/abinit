@@ -37,7 +37,7 @@ sec1:
   <p> It is presumed that the user has already followed the Tutorials
         <a href="lesson_rf1.html" target="kwimg">RF1</a>
   and <a href="lesson_rf2.html" target="kwimg">RF2</a>, and understands the calculation of
-  ground state and response function (phonon) properties with ABINIT.</p>
+  ground state and response (phonon using density-functional perturbation theory (DFPT)) properties with ABINIT.</p>
   
   <p> The file ~abinit/tests/tutorespfn/Input/teph_1.files lists the file names and root names for the first run
   (GS+perturbations). You can copy it to the working directory.

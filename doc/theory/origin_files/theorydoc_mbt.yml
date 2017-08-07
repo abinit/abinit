@@ -1,6 +1,7 @@
-# This YAML file contains the introduction as well as the body (including the table of content) of the html theory document.
-# In order to modify the other parts, modify the file theorydocs.yml .
-# This is the introduction ...
+## This YAML file contains the introduction as well as the body of the html lesson.
+## In order to modify the other parts, modify the file lessons.html .
+
+## This is the introduction ...
 intro : |
   <p>
   The aim of this section is to introduce the Green's function formalism, the concept of self-energy
@@ -11,8 +12,16 @@ intro : |
   A much more consistent and rigorous introduction to the physical concept of 
   Green's function and self-energy can be found in any standard textbook on Many-Body theory, see for example [1,2,3].
   </p>
-# This is the body, including the table of content ...
-body : |
+
+## Now come the different sections, numbered.
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec0:
+ title: "To be filled"
+ tag: 
+ body: |
   <ul>
   <li><a href="#green_self_intro">1</a> The Green's function and the self-energy 
     </li><li><a href="#hedins_equations">2</a> Hedin's equations
@@ -31,12 +40,15 @@ body : |
   <hr>
   
   
-  <h4><a name="green_self_intro"></a></h4>
-  
-  <h3><b>1. Green's function and self-energy.</b></h3>
-  
-  
-  <p>
+
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec1:
+ title: "Green's function and self-energy"
+ tag: green_self_intro
+ body: |
   The time-ordered Green's function <i>G</i>(12), also called the propagator, 
   defines the probability amplitude for the propagation of an added or removed electron in a many-body system. 
   Since the probability amplitude is simply given by the overlap between the final and the initial state, 
@@ -172,18 +184,14 @@ body : |
   eigenvalues do have a direct physical meaning: they can be used to
   obtain both the charge density of the interacting system and to
   describe the properties of charged excitations.
-  <br>
-  <br>
-  <br>
-  <hr><br>
-  
-  
-  <h3><a name="hedins_equations"></a></h3>
-  
-  <h3><b> 2. Hedin's equations.</b></h3>
-  
-  
-  <p>
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec2:
+ title: "Hedin's equations"
+ tag: hedins_equations
+ body: |
   In 1965 Hedin[6] showed how to derive a set of coupled integro-differential equations
   whose self-consistent solution, in principle, gives the exact self-energy of the system and
   therefore the exact <i>G</i>.
@@ -245,17 +253,15 @@ body : |
   are the essential ingredients for the determination of &#931;(12). 
   <p>
   The iteration starts by setting <i>G</i> = <i>G<sub>0</sub></i>. Then the set of equations should in principle be iterated until self-consistency in all terms is reached. 
-  
-  <br><br><br></p>
-  <hr><br>
-  
-  
-  <h3><a name="gw_approximation"></a></h3>
-  
-  <h3><b> 3. The GW approximation.</b></h3>
-  
-  
-  <p>The practical solution of Hedin's equations is extremely complicated
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec3:
+ title: "The GW approximation"
+ tag: gw_approximation
+ body: |
+  The practical solution of Hedin's equations is extremely complicated
   as
   they are not just numerical relations but contain a functional
   derivative in the equation for the vertex.
@@ -374,19 +380,14 @@ body : |
       <img src="../documents/theory_mbt/G0G0.png">
        
   </p>
-  
-  
-  <br>
-  <br>
-  <br>
-  <hr><br>
-  
-  
-  <h3><a name="perturbative"></a></h3>
-  
-  <h3><b>4. Perturbative approach.</b></h3>
-  
-  
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec4:
+ title: "Perturbative approach"
+ tag: perturbative
+ body: |
   Despite all the fundamental differences between many-body theory and DFT, 
   the Kohn-Sham exchange-correlation potential can be seen as a static, local and 
   Hermitian approximation to the self-energy. 
@@ -432,23 +433,14 @@ body : |
   <p align="center">
   
       <img src="../documents/theory_mbt/self_energy_taylor.png">
-  
-      
-  </p>
-  
-  
-  
-  <br>
-  <br>
-  <br>
-  <hr><br>
-  
-  
-  <h4><a name="RPA_Fourier_space"></a></h4>
-  
-  <h4><b>5. The RPA polarizability in Fourier space.</b></h4>
-  
-  
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec5:
+ title: "The RPA polarizability in Fourier space"
+ tag: RPA_Fourier_space
+ body: |
   In the reciprocal space and frequency domain (implying a Fourier transform (FT) of 
   the real space coordinates and time variables), the independent-particle 
   polarizability assumes the form:
@@ -553,18 +545,14 @@ body : |
   These spectra, if calculated, are typically output as ...<b>_LF</b> and ...<b>_NLF</b> 
   
   files during the course of a calculation.
-  
-  <br>
-  <br>
-  <br>
-  <hr><br>
-  
-  
-  <h3><a name="oscillator_notes"></a></h3>
-  
-  <h3><b>6. Notes on the calculation of the oscillator matrix elements.</b></h3>
-  
-  
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec6:
+ title: "Notes on the calculation of the oscillator matrix elements"
+ tag: oscillator_notes
+ body: |
   Many body calculations require the evaluation of integrals involving the oscillator matrix elements
   
   <p align="center">
@@ -634,17 +622,14 @@ body : |
   errors affect the final results. The default setting of <b>fftgw 21</b> is safe, a setting 
   of <b>fftgw 11</b> is fast but can be inaccurate, and a setting of <b>fftgw 31</b> gives 
   the maximum possible accuracy at a significant computational cost.
-  
-  <br><br><br></p>
-  <hr><br>
-  
-  
-  <h3><a name="hilbert_transform"></a></h3>
-  
-  <h3><b>7. The Hilbert transform method.</b></h3>
-  
-  
-  <p>
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec7:
+ title: "Hilbert transform method"
+ tag: hilbert_transform
+ body: |
   The computational effort for the evaluation of the RPA polarizability 
   with the Adler-Wiser expression scales linearly with the number of frequencies computed 
   ([[nfreqre]] and
@@ -715,17 +700,14 @@ body : |
   factors. However, if many frequencies are needed, such as for the evaluation of optical spectra, 
   or accurate contour deformation integrations, or even mapping full grids in the complex plane, 
   the Hilbert transform method can be significantly faster, and its use is well worth considering.
-  
-  <br><br><br></p>
-  <hr><br>
-  
-  
-  <h3><a name="evaluation_gw_sigma"></a></h3>
-  
-  <h3><b>8. Evaluation of the GW self-energy.</b></h3>
-  
-  
-  <p>
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec8:
+ title: "Evaluation of the GW self-energy"
+ tag: evaluation_gw_sigma
+ body: |
   Following the standard approach, we separate the screened interaction into the static bare Coulomb term 
   and a frequency-dependent contribution according to:
   
@@ -858,11 +840,15 @@ body : |
   <hr><br>
   
   
-  <h3><a name="plasmonpole_models"></a></h3>
-  
-  <h3><b>9 Plasmon-pole models</b></h3>
-  
-  
+
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec9:
+ title: "Plasmon-pole models"
+ tag: plasmonpole_models
+ body: |
   One of the major computational efforts in self-energy calculations is represented by the calculation
   of the frequency dependence of the screened interaction, which is needed for the evaluation of the convolution.
   Due to the ragged behavior of <i>G</i>(&#969;) and <i>W</i>(&#969;)
@@ -917,16 +903,14 @@ body : |
   <p>
   For a discussion of the models corresponding to [[ppmodel]]=3,4 we refer the reader to the original papers cited in the documentation
   of the variable.
-  
-  <br><br><br></p>
-  <hr><br>
-  
-  
-  <h3><a name="contour_deformation"></a></h3>
-  
-  <h3><b>9. Contour deformation technique.</b></h3>
-  
-  
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec10:
+ title: "Contour deformation technique"
+ tag: contour_deformation
+ body: |
   The contour deformation method was proposed in order to avoid having to deal with quantities close
   to the real axis as much as possible [15].
   The integral over the real frequency axis can be transformed into an integral over the contour 
@@ -966,18 +950,14 @@ body : |
   number of  sampled frequencies since the integrand is typically very smooth.
   Only the residues of the integrand have to be evaluated at the complex poles contributed 
   by the Green's function whose frequency dependence is known.
-  
-  <br>
-  <br>
-  <br>
-  <hr><br>
-  
-  
-  <h3><a name="notations"></a></h3>
-  
-  <h3><b>10. Notation.</b></h3>
-  
-  
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec11:
+ title: "Notation"
+ tag: notations
+ body: |
   The following shorthand notations are employed:
   
   <p align="center">
@@ -1004,13 +984,14 @@ body : |
   The volume of the unit cell is denoted with &#937;, while <i>V</i> is the
   total volume of the crystal simulated employing Born-von Karman periodic boundary condition.
   Unless otherwise specified, Hartree atomic units will be used throughout.
-  
-  <hr>
-  
-  <h3><p><b><a name="references">References</a>
-  </b></p></h3>
-  
-  
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec12:
+ title: "References"
+ tag: references
+ body: |
   <ol>
   <li><a name="Abrikosov1975">
     Abrikosov, Gorkov, and Dzyaloshinskii.
@@ -1027,7 +1008,6 @@ body : |
     A guide to Feynman diagrams in the many-body problem,
     Dover, New York,
     (1992)
-  
   </a> </li><li><a name="Aulbur2000">
     W. G. Aulbur, 
     L. J&ouml;nsson 
@@ -1039,7 +1019,6 @@ body : |
     <b>75</b>, 818
     (1995)
   </a> </li><li><a name="Hedin1965">
-  
   L. Hedin
   Phys. Rev.
   <b>139</b>, 
@@ -1060,7 +1039,6 @@ body : |
   <b>55</b>,
   1418
   (1985)
-  
   </a></li><li><a name="Hybertsen1986">
   M.S. Hybertsen, and S.G Louie.
   Phys. Rev. B
@@ -1079,7 +1057,6 @@ body : |
   <b>74</b>,
   035101
   (2006)
-  
   </a></li><li><a name="Lebegue2003">
   S. Lebegue, B. Arnaud, M. Alouani, and P.E. Bloechl.
   Phys. Rev. B,
@@ -1088,4 +1065,3 @@ body : |
   (2003)
   </a></li>
   </ol>
-  

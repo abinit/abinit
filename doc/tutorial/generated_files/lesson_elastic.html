@@ -36,8 +36,8 @@ tensor   </li>
 </ul>
           You should complete lessons <a href="lesson_rf1.html">RF1</a>
         and <a href="lesson_rf2.html">RF2</a>
-         to introduce the response-function    features     of ABINIT before
-  starting  this lesson.  You will learn    to   use   additional     response-function
+         to introduce the density-functional perturbation theory (DFPT) features     of ABINIT before
+  starting  this lesson.  You will learn    to   use   additional DFPT 
    features of ABINIT, and to use   relevant     parts of the  associated
   codes Mrgddb and Anaddb.
 <p>This lesson should take about two hours.  </p>
@@ -52,12 +52,12 @@ tensor   </li>
 <h3><b> Lesson on elastic properties. Table of content:</b></h3>
 
 <ul> 
-  <li><a href="#AlAs">1.</a> The ground-state geometry of (hypothetical) wurtzite AlAs</li>
-  <li><a href="#2DTE">2.</a> Response-function calculations of several second derivatives of the total energy</li>
-  <li><a href="#relaxation">3.</a> ANADDB calculation of atom-relaxation effects</li>
-  <li><a href="#elastic_piezo">4.</a> Finite-difference calculation of elastic and piezoelectric constants</li>
-  <li><a href="#alternative">5.</a> Alternative response-function calculation of some piezoelectric constants</li>
-  <li><a href="#metal">6.</a> Response-function calculation of the elastic constants of Al metal</li>
+  <li><a href="#AlAs">1. The ground-state geometry of (hypothetical) wurtzite AlAs</a></li>
+  <li><a href="#2DTE">2. Response-function calculations of several second derivatives of the total energy</a></li>
+  <li><a href="#relaxation">3. ANADDB calculation of atom-relaxation effects</a></li>
+  <li><a href="#elastic_piezo">4. Finite-difference calculation of elastic and piezoelectric constants</a></li>
+  <li><a href="#alternative">5. Alternative DFPT calculation of some piezoelectric constants</a></li>
+  <li><a href="#metal">6. Response-function calculation of the elastic constants of Al metal</a></li>
 
  </ul> 
  <hr><br><a name="AlAs"> </a>
@@ -79,7 +79,7 @@ as   you read this discussion.  </p>
 but    has    a  hexagonal       lattice.  It was chosen for this lesson
 because    the atomic     positions   are   not completely determined by
 symmetry.   Both the atomic     positions  and the   lattice constants should
-be optimized     before beginning     response-function      calculations,
+be optimized     before beginning     DFPT  calculations,
 especially those     related to strain   properties.   While GS   structural
   optimization  was   treated in lessons   1-3, we are introducing  a few
 new features   here,  and you should look at  the following new input  variables
@@ -119,7 +119,7 @@ files,  as will <a href="../../input_variables/generated_files/varset_basic.html
                                    (=0.5 Ha)as in <a href="lesson_base3.html">lesson 3</a>
         to smear the cutoff, which    produces     smoothly     varying
 stresses    as the lattice parameters are    optimized.    We will keep
-  the same   value of <a href="../../input_variables/generated_files/varset_rlx.html#ecutsm">ecutsm</a> for the response-function calculations
+  the same   value of <a href="../../input_variables/generated_files/varset_rlx.html#ecutsm">ecutsm</a> for the DFPTcalculations
 as  well,    since    changing     it  from   the optimization run value could
  reintroduce    non-zero    forces   and  stresses.     For the k-point grid,
  we must explicitly    specify  <a href="../../input_variables/generated_files/varset_basic.html#shiftk">shiftk</a> since the default value results in a grid
@@ -273,7 +273,7 @@ last  section.</p>
 
 <p>This has been set up as a self-contained calculation with three datasets.
                 The first is simply a GS run to obtain the GS wave functions
-   we   will        need for the response function (RF) calculations.  We
+   we   will        need for the DFPT calculations.  We
 have   removed     the     convergence test from the common input data to
 remind   ourselves   that  different    tests are needed for different datasets.
   We set a tight   limit  on the  convergence  of the self-consistent potential
@@ -852,7 +852,7 @@ tensor   elements,   however, and for   our particular combination   of crystal
 <hr>
 <br><a name="alternative"> </a>
 <a name="5"> </a>
-<h3><b>5. Alternative response-function calculation of some piezoelectric constants</b></h3>
+<h3><b>5. Alternative DFPT calculation of some piezoelectric constants</b></h3>
  <p><p>Our GS calculation of the polarization in <a href="#elastic_piezo">section 4</a>
                          used, in effect, a finite-difference approximation
  to  ddk   wave   functions,     while our RF calculations in <a href="#2DTE">section 2</a>
