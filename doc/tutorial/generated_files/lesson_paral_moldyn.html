@@ -35,11 +35,17 @@ variables that govern convergence and numerical efficiency.<br>
 <a name="list"></a>
 <h3><b> Parallelism for molecular dynamics. Table of content:</b></h3>
 
-<ul><li><a href="lesson_paw1.html#0" target="_blank">0.</a> Summary of the molecular dynamics method</li><li><a href="lesson_paw1.html#1" target="_blank">1.</a> Performing molecular dynamics with ABINIT</li><li><a href="lesson_paw1.html#2" target="_blank">2.</a> The convergence on K-points and supercell size</li><li><a href="lesson_paw1.html#3" target="_blank">3.</a>&nbsp;Compute the melting temperature of Al at a given pressure</li></ul>
-<hr>
+<ul> 
+  <li><a href="#summary">1.</a> Summary of </b>the molecular dynamics<b> method</b></li>
+  <li><a href="#moldyn">2.</a> Performing molecular dynamics with ABINIT</li>
+  <li><a href="#convergence">3.</a> The convergence on K-points and supercell size</li>
+  <li><a href="#melting">4.</a> Compute the melting temperature of Al at a given pressure</li>
 
-<h3><a name="1334abc7eee58317_0"></a><b><br>0. Summary of </b>the molecular dynamics<b> method</b></h3>
-<p style="text-align: justify;">The basic idea underlying <span style="font-style: italic;">Ab Initio Molecular Dynamics</span> (AIMD) is to
+ </ul> 
+ <hr><br><a name="summary"> </a>
+<a name="1"> </a>
+<h3><b>1. Summary of </b>the molecular dynamics<b> method</b></b></h3>
+ <p>The basic idea underlying <span style="font-style: italic;">Ab Initio Molecular Dynamics</span> (AIMD) is to
 compute
 the forces acting on the nuclei from electronic structure calculations
 that are performed as the molecular dynamics trajectory is
@@ -82,13 +88,12 @@ output files located in </i><i><span style="color: rgb(0, 102, 0);">~abinit/test
 and </i><i><span style="color: rgb(0, 102, 0);">~abinit/tests/tutorial/Refs/<wbr>
 </span></i><i>directories (for the present tutorial they are named tmoldyn_*.out). <br>
 </i></p>
-
-
-<h3><hr> </h3>
-<h3><a name="1334abc7eee58317_1"></a>&nbsp;<b><b><br>
-1.&nbsp;&nbsp;</b></b>Performing molecular dynamics<b><b> with ABINIT</b></b></h3>
-<br>
-<p style="text-align: justify;">There are different algorithms to do molecular dynamics.
+<br><br><a href=#top>Go to the top</a>
+<hr>
+<br><a name="moldyn"> </a>
+<a name="2"> </a>
+<h3><b>2. Performing molecular dynamics with ABINIT</b></h3>
+ <p>There are different algorithms to do molecular dynamics.
   See the input variable <a href="../../input_variables/generated_files/varset_rlx.html#ionmov">ionmov</a>,
   with values 1, 6, 7, 8, 9, 12, 13 and 14.  <a href="../../input_variables/generated_files/varset_rlx.html#dtion">dtion</a> controls the ion time steps&nbsp;in
 atomic units of time (one atomic time unit is
@@ -182,14 +187,18 @@ the quantities during the molecular dynamics. Note that 100 time steps
 is far from being sufficient to equilibrate physical quantities as
 pressure. 2000 or 3000 are more common numbers to reach this goal but it
 would exceed the time alloted to this tutorial.</span></span></p>
-<h3><hr> <a name="1334abc7eee58317_2"></a>&nbsp;<b><b><br>
-2.&nbsp; The convergence on K-points and supercell size</b></b></h3>In the previous section you have learned to perform molecular dynamics
+<br><br><a href=#top>Go to the top</a>
+<hr>
+<br><a name="convergence"> </a>
+<a name="3"> </a>
+<h3><b>3. The convergence on K-points and supercell size</b></h3>
+ <p>In the previous section you have learned to perform molecular dynamics
 with abinit. We used a fcc supercell of 32 atoms with only one K-point.
 In this section we will make convergence studies
 with respect to these parameters.&nbsp;
 <p><b><br>
 </b></p>
-<p><b>1.a</b><b> Computing the convergence in K-points</b></p>
+<p><b>3.a</b><b> Computing the convergence in K-points</b></p>
 <p style="text-align: justify;">The files <span style="color: red;">tmoldyn_02.in <span style="color: black;">and</span> </span><span style="color: red;">tmoldyn_03.in&nbsp;<span style="color: black;">are input files for 2x2x2 and 3x3x3 K-points grid respectively, or 4 and 14 K-points in the </span></span>irreducible
 Brillouin zone<span style="color: red;"><span style="color: black;">. Since the parallelisation is the most efficient&nbsp;</span></span>over the k-point level you should always put <a href="../../input_variables/generated_files/varset_basic.html#nkpt">nkpt</a> to the largest possible value before increasing&nbsp;<a href="../../input_variables/generated_files/varset_paral.html#npfft">npfft</a> and <a href="../../input_variables/generated_files/varset_paral.html#npband">npband</a><span style="color: black;">.
 We have followed this rule in the input files. Change the name of the
@@ -208,7 +217,7 @@ convincing but you can see that you need at least a 2x2x2 K-points grid
 for a 32 atoms cell. If you have some time, increase ntime to 300 and run again ABINIT.</span></span></p>
 <p><b><br>
 </b></p>
-<p><b>1.b</b><b> Computing the convergence in cell size</b></p>
+<p><b>3.b</b><b> Computing the convergence in cell size</b></p>
 <p style="text-align: justify;">We
 also have to check if our cell is sufficiently large to give reliable
 physical quantities. In the previous section we used a 2x2x2 <span style="font-style: italic;">fcc</span>
@@ -245,15 +254,14 @@ Always check if your cell is large enough and give the corresponding
 uncertainty.<br>
 
 Also, to reduce the time necessary to do this tutorial we set the value
-of ecut to 3Ha. This is too small, for Al, it should be closer to 8 Ha.<br>
-<br>
-
-</span><hr>
-
-<h3><a name="1334abc7eee58317_3">&nbsp;</a><b><b><br>
-3. Compute the melting temperature of Al at a given pressure
-</b></b></h3>
-<div style="text-align: justify;">As an exemple of what can be done in molecular dynamics,
+of ecut to 3Ha. This is too small, for Al, it should be closer to 8 Ha.
+</span>
+<br><br><a href=#top>Go to the top</a>
+<hr>
+<br><a name="melting"> </a>
+<a name="4"> </a>
+<h3><b>4. Compute the melting temperature of Al at a given pressure</b></h3>
+ <p>As an exemple of what can be done in molecular dynamics,
 we are going to calculate the melting temperature of aluminum using the
 so-called <span style="font-style: italic;">Heat Until it Melts</span> (HUM) method. In this method the solid
 phase is heated gradually until melting occurs. Let us start with a
@@ -292,6 +300,8 @@ initiates in the bulk and this results in an overheating effect.<br>
 
 
 </div>
+<br><br><a href=#top>Go to the top</a>
+<hr>
 <script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
 
 </body>
