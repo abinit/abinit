@@ -1,29 +1,19 @@
-# This YAML file contains the introduction as well as the body (including the table of content) of the html help document.
-# In order to modify the other parts, modify the file helps.yml .
-# This is the introduction ...
+## This YAML file contains the introduction as well as the body of the html lesson.
+## In order to modify the other parts, modify the file lessons.html .
+
+## This is the introduction ...
 intro : |
-# This is the body, including the table of content ...
-body : |
-  <ul>
-  <li><a href="#0">0.</a> Foreword
-  <li><a href="#1">1.</a> Introduction
-  <li><a href="#2">2.</a> The ABINIT executable : abinit
-  <li><a href="#3">3.</a> Other programs in the ABINIT package.
-  <li><a href="#4">4.</a> Other resources outside the ABINIT package.
-  <li><a href="#5">5.</a> Input variables to abinit.
-  <li><a href="#6">6.</a> Output files.
-  <li><a href="#7">7.</a> What does the code do?
-  <li><a href="#8">8.</a> Versioning logic.
-  </ul>
-  
-  <HR ALIGN=left>
-  
-  <p>
-  <a name="0">&nbsp;</a>
-  <h3><b>0. Foreword</b></h3>
-  
-  
-  <p>The ABINIT project is a group effort of dozens of people worldwide, whose central
+
+## Now come the different sections, numbered.
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec1:
+ title: "Foreword"
+ tag: foreword
+ body: |
+  The ABINIT project is a group effort of dozens of people worldwide, whose central
   outcome is the main ABINIT application, delivered with many other files in the
   ABINIT package. The ABINIT project includes also resources provided on the 
   <a href="http://www.abinit.org">ABINIT Web site</a>
@@ -48,15 +38,15 @@ body : |
   
   <p>After having gone through the present New User's Guide, you should
   follow the ABINIT tutorial ([[lesson_welcome]]).
-  
-  <p>&nbsp;</p>
-  <HR ALIGN=left>
-  
-  <p><a name="1">&nbsp;</a> </p>
-  <h3><b>1. Introduction</b></h3>
-  
-  
-   <p> ABINIT is a package whose main program allows
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec2:
+ title: "Introduction"
+ tag: introduction
+ body: |
+  ABINIT is a package whose main program allows
   to find the total energy, charge density and electronic structure
   of systems made of electrons and nuclei (molecules and periodic solids)
   within Density Functional Theory,
@@ -85,18 +75,21 @@ body : |
     package after download. In practice, a version number is appended to this name, to give for
     example : abinit-8.4.0 . 
     The ABINIT package versioning scheme is explained 
-    <a href="#8">later in this file</a>.
+    <a href="#9">later in this file</a>.
   
   <p>
     ~abinit contains different subdirectories. For example,
     the present file, as well as other descriptive files, should be found in ~abinit/doc/users .
     Other subdirectories will be described later.
-  <p>&nbsp;
-  <HR ALIGN=left>
-  <p> <a name="2">&nbsp;</a>
-  <h3><b>2. The ABINIT executable : abinit . </b></h3>
-  
-   <p>After compilation, the main code will be present in the package as
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec3:
+ title: "The ABINIT executable : abinit"
+ tag: abinit
+ body: |
+  After compilation, the main code will be present in the package as
     ~abinit/src/98_main/abinit (or perhaps at another place, depending on your installation).
   
    <p> To run abinit you need four things:
@@ -110,14 +103,14 @@ body : |
   
    <p> The full list of input variables, all of which are provided in the
   single input file, is given in the ABINIT [[varset:allvars|list of all variable]].
-  <br>The detailed description of input variables is given in many "VAR*" files, including:
+  <br>The detailed description of input variables is given in many "Variable Set" files, including:
   <ul>
-  <li> Basic variables, [[varbas]]</li>
-  <li> Ground-state calculation variables, [[vargs]]</li>
-  <li> GW variables, [[vargw]]</li>
-  <li> Files handling variables, [[varfil]]</li>
-  <li> Parallelisation variables, [[varpar]]</li>
-  <li> Response Function variables, [[varrf]]</li>
+  <li> Basic variables, [[varset_basic]]</li>
+  <li> Ground-state calculation variables, [[varset_gstate]]</li>
+  <li> GW variables, [[varset_gw]]</li>
+  <li> Files handling variables, [[varset_files]]</li>
+  <li> Parallelisation variables, [[varset_paral]]</li>
+  <li> Density Functional Perturbation Theory variables, [[varset_dfpt]]</li>
   <li>  ... </li>
   </ul>
   
@@ -139,15 +132,15 @@ body : |
     Information on pseudopotential
     files can be found in the <a href="help_abinit.html#5">ABINIT help file</a> and
     the ~abinit/doc/psp_infos directory.
-  <p>&nbsp;
-  <HR ALIGN=left>
-  
-  
-  <p> <a name="3">&nbsp;</a>
-  <h3><b>3. Other programs in the ABINIT package.</b></h3>
-  
-  
-  <p> In addition to abinit, there are utility programs provided in the ABINIT package. 
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec4:
+ title: "Other programs in the ABINIT package"
+ tag: other_programs
+ body: |
+  In addition to abinit, there are utility programs provided in the ABINIT package. 
   <p>
   <p> Some utility programs are written in F90 (like the main abinit program), and their 
      sources is also in ~abinit/src/98_main . <br> These include :
@@ -175,13 +168,15 @@ body : |
   <p> Some utility programs are not written in F90, but in Python. They are contained in ~abinit/scripts,
     where post-processing (numerous tools) and pre-processing scripts are distinguished.
     Some allows one to visualize ABINIT outputs, like abinit_eignc_to_bandstructure.py .
-  <p>&nbsp;
-  <HR ALIGN=left>
-  
-  <p> <a name="4">&nbsp;</a>
-  <h3><b>4. Other resources outside the ABINIT package.</b></h3>
-  
-  <p> In addition to the ABINIT package, other resources can be obtained from the 
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec5:
+ title: "Other resources outside the ABINIT package"
+ tag: other_resources
+ body: |
+  In addition to the ABINIT package, other resources can be obtained from the 
   <a href="https://github.com/abinit">ABINIT GitHub site</a>. The sources
   of the latest version of the ABINIT package are actually mirrored on this site,
   but for other resources (not in the package) this is the only download point. 
@@ -210,14 +205,14 @@ body : |
   We provide a (not very well maintained) list of links in 
   <a href="http://www.abinit.org/community/links">http://www.abinit.org/community/links</a>.
   Of course, you might get more by browsing the Web...
-  <p>&nbsp;
-  <HR ALIGN=left>
-  
-  <p> <a name="5">&nbsp;</a>
-  <h3><b>5. Input variables to abinit.</b></h3>
-  
-  
-  <p> 
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec6:
+ title: "Input variables to abinit"
+ tag: input_variables
+ body: |
   As an overview, the most important input variables, to be provided in the input file, are listed below:
   <pre>
   Specification of the geometry of the problem, and types of atoms :
@@ -263,13 +258,15 @@ body : |
   [[ntime]]           number of molecular dynamics or relaxation steps
   [[tolmxf]]          force tolerance for structural relaxation in Hartree/Bohr
   </pre>
-  
-  <p>&nbsp;
-  <HR ALIGN=left>
-  <a name="6">&nbsp;</a>
-  <h3><b> 6. Output files.</b></h3>
-  
-   <p> Output from an abinit run shows up in several files and
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec7:
+ title: "Output files"
+ tag: 
+ body: |
+  <p> Output from an abinit run shows up in several files and
   in the standard output.  Usually one runs the command with
   a pipe of standard output to a log file, which can
   be inspected for warnings or error messages if anything goes wrong or otherwise
@@ -297,14 +294,15 @@ body : |
   a full name. Amongst these files, there is a "status" file,
   summarizing the current status of advancement of the code,
   in long jobs. The <a href="help_abinit.html">ABINIT help file</a> contains more details.
-  
-  <p>&nbsp;
-  
-  <HR ALIGN=left>
-  <a name="7">&nbsp;</a>
-  <h3><b> 7. What does the code do?</b></h3>
-  
-   <p> The simplest sort of job computes an electronic structure for a fixed set
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec8:
+ title: "What does the code do?"
+ tag: do
+ body: |
+  The simplest sort of job computes an electronic structure for a fixed set
   of atomic positions within a periodic unit cell.  By electronic structure, we
   mean a set of eigenvalues and wavefunctions which achieve the lowest (DFT)
   energy possible for that basis set (that number of planewaves).  The code
@@ -321,13 +319,15 @@ body : |
   It can performs molecular dynamics. It can also be used to find responses
   to atomic displacements and homogeneous electric field, so that
   the full phonon band structure can be constructed...
-  
-  <p>&nbsp;
-  <HR ALIGN=left>
-  <a name="8">&nbsp;</a>
-  <h3><b> 8. Versioning logic.</b></h3>
-  
-  <p> We finish this "new user guide" with a brief explanation of the logic of ABINIT version releases.
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec9:
+ title: "Versioning logic"
+ tag: versioning
+ body: |
+  We finish this "help for new user" with a brief explanation of the logic of ABINIT version releases.
   <p>
   The full name of a version has three digits (for example, 8.4.0). 
   The first digit is the slowly varying one (in average, it is changed after two or three years). 
