@@ -1,6 +1,6 @@
 - !components 
     name      : anaddbEPC 
-    keyword   : anaddb EPC 
+    keyword   : Anaddb EPC 
     authors   : MV
     howto     : set anaddb electron-phonon input variables
     header    : default

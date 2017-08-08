@@ -1,0 +1,13 @@
+- !components 
+    name      : SCFAlgorithms
+    keyword   : SCFAlgorithms
+    authors   : XG
+    howto     : select the SCF algorithm
+    header    : default
+    title     : <h1>Algorithms for SCF calculations</h1>
+    subtitle  : default
+    copyright : default
+    links     : default
+    introduction: |
+      To be written ...
+    end : default 

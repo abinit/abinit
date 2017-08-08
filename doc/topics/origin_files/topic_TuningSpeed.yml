@@ -1,0 +1,11 @@
+- !components 
+    name      : TuningSpeed
+    keyword   : TuningSpeed
+    authors   : XG
+    howto     : tune the speed of the calculation
+    header    : default
+    title     : <h1>Parameters that have an impact on the speed of the calculation</h1>
+    subtitle  : default
+    copyright : default
+    links     : default
+    end : default 

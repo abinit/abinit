@@ -1,0 +1,11 @@
+- !components 
+    name      : SCF
+    keyword   : SCF
+    authors   : XG
+    howto     : tune the SCF cycle
+    header    : default
+    title     : <h1>Self-consistent field (SCF) cycles - tolerances, stopping criteria</h1>
+    subtitle  : default
+    copyright : default
+    links     : default
+    end : default 

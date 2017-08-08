@@ -1,0 +1,11 @@
+- !components 
+    name      : STM
+    keyword   : STM
+    authors   : XG
+    howto     : obtain a Scanning Tunneling Microscopy map
+    header    : default
+    title     : <h1>Computing a Scanning Tunneling Microscopy - STM - map</h1>
+    subtitle  : default
+    copyright : default
+    links     : default
+    end : default 

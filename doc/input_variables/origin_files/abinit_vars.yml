@@ -742,7 +742,7 @@
         <p>
          Note that alchemical mixing cannot be used with PAW.
         </p>
-    topics: otherGS_alch
+    topics: PseudosPAW_expert
     varset: gstate
     vartype: integer
 - !variable
@@ -824,7 +824,7 @@
         cells with different atomic characteristics can thus be considered,
         and can be made to evolve, e.g. with a genetic algorithm (not coded in v7.0.0 though).
         </p>
-    topics: GSgeneral_useful, PIMD_useful
+    topics: PIMD_useful, DFPT_useful
     varset: rlx
     vartype: real
 - !variable
@@ -2364,7 +2364,7 @@
         whether ABINIT fallbacks have been connected or not (bigdft, etsf_io, libxc, wannier90).
         At present, [[builtintest]]=1 ... 7 are allowed. See more information in tests/built-in/README .
         </p>
-    topics: otherGS_expert
+    topics: OtherControl_expert
     varset: dev
     vartype: integer
 - !variable
@@ -2980,7 +2980,7 @@
         use [[charge]]=0.  To treat a system missing one electron
         per unit cell, set [[charge]]=+1.
         </p>
-    topics: GSgeneral_useful
+    topics: ChargedCell_compulsory
     varset: gstate
     vartype: real
 - !variable
@@ -3008,7 +3008,7 @@
         When the spatial chemical potential is defined only for one type of atom (and no chemical potential is present for the other atoms), simply set the related values to *0.0 in the [[chempot]] array.
 
         In the present input array, reduced positions, energies and derivatives of energies are mixed. Hence, although the chemical potential is an energy, one cannot use the usual energy definitions (i.e. the chemical potential is always to be input in Hartree atomic units).
-    topics: otherGS_expert
+    topics: Artificial_useful
     varset: geo
     vartype: real
 - !variable
@@ -3043,7 +3043,7 @@
         <p>
          In all cases, the check is performed at most every 2 seconds of CPU time.
         </p>
-    topics: otherGS_expert
+    topics: Control_useful
     varset: gstate
     vartype: integer
 - !variable
@@ -3263,7 +3263,7 @@
          <br />
         A zero value has no action of the job.
         </p>
-    topics: otherGS_job
+    topics: Control_useful
     varset: gstate
     vartype: real
 - !variable
@@ -3289,7 +3289,7 @@
          <br />
         A zero value has no action of the job.
         </p>
-    topics: otherGS_job
+    topics: Control_useful
     varset: gstate
     vartype: real
 - !variable
@@ -3315,7 +3315,7 @@
          <br />
         A zero value has no action of the job.
         </p>
-    topics: otherGS_job
+    topics: Control_useful
     varset: gstate
     vartype: real
 - !variable
@@ -5907,7 +5907,7 @@
          This parameter allows to change the electron mass, with respect to its
         experimental value.
         </p>
-    topics: GSgeneral_expert
+    topics: Artificial_expert
     varset: dev
     vartype: real
 - !variable
@@ -6235,7 +6235,7 @@
         For B-spline interpolation:
 
         einterp(2:4): Order of B-spline for the three reduced directions. Cubic spline (3) is the recomended value.
-    topics: otherGS_expert, GW_expert
+    topics: BandStructureDOS_useful,GW_expert
     varset: basic
     vartype: real
 - !variable
@@ -6441,7 +6441,7 @@
           </li>
          </ul>
         </p>
-    topics: GSgeneral_useful
+    topics: Output_useful
     varset: gstate
     vartype: integer
 - !variable
@@ -6843,7 +6843,7 @@
         '[[ENERGY]]' characteristics.
         (1 Ha=27.2113845 eV)
         </p>
-    topics: otherGS_expert
+    topics: SCFAlgorithms_expert
     varset: dev
     vartype: real
 - !variable
@@ -7026,7 +7026,7 @@
         neglect higher bands. It is difficult to automate
         this, so a fixed default value has been chosen.
         </p>
-    topics: GSgeneral_useful
+    topics: BandOcc_useful
     varset: gstate
     vartype: real
 - !variable
@@ -7157,7 +7157,7 @@
          <br />
          Internal representation as [[ngfft]](8).
         </p>
-    topics: otherGS_expert
+    topics: TuningSpeed_expert
     varset: dev
     vartype: integer
 - !variable
@@ -12154,7 +12154,7 @@
          <br />
          <br />
         </p>
-    topics: GSgeneral_useful
+    topics: multidtset_useful
     varset: files
     vartype: integer
 - !variable
@@ -12421,7 +12421,7 @@
           </li>
          </ul>
         </p>
-    topics: GSgeneral_useful
+    topics: multidtset_useful
     varset: files
     vartype: integer
 - !variable
@@ -12498,7 +12498,7 @@
         <b>
          This variable is experimental. In development.
         </b>
-    topics: GSgeneral_useful, TDep_useful
+    topics: multidtset_useful, TDep_useful
     varset: dev
     vartype: integer
 - !variable
@@ -12936,7 +12936,7 @@
         it is written once every '[[istatr]]' call.
         When '[[istatr]]'=0, there is no writing of a status file (which is the default).
         </p>
-    topics: otherGS_expert
+    topics: Output_expert
     varset: dev
     vartype: integer
 - !variable
@@ -12969,7 +12969,7 @@
         There is also a writing for each of the 5 first calls,
         and the 10th call.
         </p>
-    topics: otherGS_expert
+    topics: Output_expert
     varset: dev
     vartype: integer
 - !variable
@@ -14337,7 +14337,7 @@
         while the position of the slab edges along z is defined through
         the input variables [[slabzbeg]] and [[slabzend]].
         </p>
-    topics: otherGS_slab
+    topics: Artificial_expert
     varset: gstate
     vartype: integer
 - !variable
@@ -15343,7 +15343,7 @@
          <br />
          For the moment it is imposed to be 5.
         </p>
-    topics: otherGS_lotf
+    topics: LOTF_expert
     varset: dev
     vartype: integer
 - !variable
@@ -15361,7 +15361,7 @@
         <p>
          Set the number of Molecular Dynamics iterations which are computed by LOTF.
         </p>
-    topics: otherGS_lotf
+    topics: LOTF_expert
     varset: dev
     vartype: integer
 - !variable
@@ -15381,7 +15381,7 @@
          <br />
          For the moment it is imposed to be 40.
         </p>
-    topics: otherGS_lotf
+    topics: LOTF_expert
     varset: dev
     vartype: integer
 - !variable
@@ -15401,7 +15401,7 @@
          <br />
          For the moment it is imposed to be 2.
         </p>
-    topics: otherGS_lotf
+    topics: LOTF_expert
     varset: dev
     vartype: integer
 - !variable
@@ -15681,7 +15681,7 @@
         over all k-points and spin-polarisation from
         [[nband]](1:nkpt*nsppol).
         </p>
-    topics: GSgeneral_internal
+    topics: BandOcc_internal
     varset: internal
     vartype: integer
 - !variable
@@ -15818,7 +15818,7 @@
           </li>
          </ul>
         </p>
-    topics: otherGS_expert
+    topics: Control_expert
     varset: dev
     vartype: integer
 - !variable
@@ -16086,7 +16086,7 @@
         There is one restriction to this possibility : the value of [[ziontypat]] for the atoms that are mixed should be
         identical.
         </p>
-    topics: otherGS_alch
+    topics: PseudosPAW_expert
     varset: gstate
     vartype: real
 - !variable
@@ -16347,7 +16347,7 @@
         to specify only the irreducible set of atoms, use the
         symmetriser, see the input variable [[natrd]].
         </p>
-    topics: GSgeneral_basic
+    topics: crystal_basic
     varset: basic
     vartype: integer
 - !variable
@@ -16536,7 +16536,7 @@
         file (see [[kssform]])
         the relevant number of bands is given by [[nbandkss]].
         </p>
-    topics: GSgeneral_basic
+    topics: BandOcc_basic
     varset: basic
     vartype: integer
 - !variable
@@ -17136,7 +17136,7 @@
          <br />
          [[nelect]]=zion-[[charge]].
         </p>
-    topics: GSgeneral_internal
+    topics: BandOcc_internal
     varset: internal
     vartype: real
 - !variable
@@ -17928,7 +17928,7 @@
          </i>
          . See also [[nloc_mem]] for the tuning of the memory used in the non-local operator application.
         </p>
-    topics: otherGS_expert
+    topics: TuningSpeed_expert
     varset: dev
     vartype: integer
 - !variable
@@ -17977,7 +17977,7 @@
          </i>
          . See also [[nloc_alg]] for the algorithm for the non-local operator application.
         </p>
-    topics: otherGS_expert
+    topics: TuningSpeed_expert
     varset: dev
     vartype: integer
 - !variable
@@ -18603,7 +18603,7 @@
         [[mixalch]], to understand how
         to use alchemical potentials in ABINIT.
         </p>
-    topics: otherGS_alch
+    topics: PseudosPAW_expert
     varset: gstate
     vartype: integer
 - !variable
@@ -18624,7 +18624,7 @@
         <p>
          [[npspalch]]=[[npsp]]-[[ntyppure]]
         </p>
-    topics: otherGS_alch
+    topics: PseudosPAW_expert
     varset: gstate
     vartype: integer
 - !variable
@@ -19496,7 +19496,7 @@
         [[mixalch]], to understand how
         to use alchemical potentials in ABINIT.
         </p>
-    topics: otherGS_alch
+    topics: PseudosPAW_expert
     varset: gstate
     vartype: integer
 - !variable
@@ -19520,7 +19520,7 @@
          The first pseudopotential is assigned type number 1, and so
         on ...
         </p>
-    topics: GSgeneral_basic
+    topics: crystal_basic
     varset: basic
     vartype: integer
 - !variable
@@ -19541,7 +19541,7 @@
         <p>
          [[ntyppure]]=[[ntypat]]-[[ntypalch]]
         </p>
-    topics: otherGS_alch
+    topics: PseudosPAW_expert
     varset: gstate
     vartype: integer
 - !variable
@@ -19658,7 +19658,7 @@
     requires: null
     text: |-
         Defines the number of z reduced coordinates that defines the spatially varying chemical potential. See the input variable [[chempot]], of which [[nzchempot]] is the second dimension.
-    topics: otherGS_expert
+    topics: Artificial_expert
     varset: geo
     vartype: integer
 - !variable
@@ -20181,7 +20181,7 @@
          The occupation numbers evolve only for metallic occupations,
         that is, [[occopt]] &ge; 3 .
         </p>
-    topics: GSgeneral_basic
+    topics: BandOcc_basic
     varset: gstate
     vartype: real
 - !variable
@@ -20321,7 +20321,7 @@
         three possible values of the Fermi energy, and the
         bissection algorithm find one or the other.
         </p>
-    topics: GSgeneral_basic
+    topics: BandOcc_basic
     varset: basic
     vartype: integer
 - !variable
@@ -20503,7 +20503,7 @@
           </li>
          </ul>
         </p>
-    topics: GSgeneral_basic
+    topics: ForcesStresses_basic
     varset: dev
     vartype: integer
 - !variable
@@ -20556,7 +20556,7 @@
         one can skip the computation of stresses. The CPU time saving might be interesting
         for some PAW calculations.
         </p>
-    topics: GSgeneral_basic
+    topics: ForcesStresses_basic
     varset: gstate
     vartype: integer
 - !variable
@@ -20671,7 +20671,7 @@
         then done with PAPI values. The measurements are more accurate and
         give also access to the flops of the calculation.
         </p>
-    topics: otherGS_expert
+    topics: Control_expert
     varset: dev
     vartype: integer
 - !variable
@@ -25686,7 +25686,7 @@
         sum of the covalent bonds between the atoms (note : this is incompatible with the definition of alchemical mixing, in which
         [[ntypat]] differs from [[npsp]])
         </p>
-    topics: otherGS_expert
+    topics: crystal_expert
     varset: rlx
     vartype: integer
 - !variable
@@ -27245,7 +27245,7 @@
         <br />
         By default, given in Bohr atomic units (1 Bohr=0.5291772108 Angstroms).
         </p>
-    topics: otherGS_slab
+    topics: Artificial_expert
     varset: gstate
     vartype: real
 - !variable
@@ -27273,7 +27273,7 @@
          </pre>
         so the positive charge density is invariant along the xy plane as well as the electrostatic potential generated by it.
         </p>
-    topics: otherGS_slab
+    topics: Artificial_expert
     varset: gstate
     vartype: real
 - !variable
@@ -27301,7 +27301,7 @@
          </pre>
         so the positive charge density is invariant along the xy plane as well as the electrostatic potential generated by it.
         </p>
-    topics: otherGS_slab
+    topics: Artificial_expert
     varset: gstate
     vartype: real
 - !variable
@@ -27882,7 +27882,7 @@
         With [[occopt]]=7,
         one has also to specify an independent broadening [[tsmear]].
         </p>
-    topics: GSgeneral_useful
+    topics: STM_compulsory
     varset: gstate
     vartype: real
 - !variable
@@ -28002,7 +28002,7 @@
         of the unit cell). In case there is an instability, decrease the
         default value, e.g. set it to 0.1 .
         </p>
-    topics: GSgeneral_useful, GeoOpt_useful
+    topics: ForcesStresses_useful, GeoOpt_useful
     varset: rlx
     vartype: real
 - !variable
@@ -28031,7 +28031,7 @@
         between Ha/Bohr**3 and GPa is : 1 Ha/Bohr**3 = 29421.033d0 GPa.
         <br />
         Not used if [[optcell]]==0.
-    topics: GSgeneral_useful, GeoOpt_useful
+    topics: ForcesStresses_useful, GeoOpt_useful
     varset: rlx
     vartype: real
 - !variable
@@ -28687,7 +28687,7 @@
         (this takes time, and is discouraged for too small runs - the timing would take more time than the run !). The timer is timed.
         The sum of the independent parts is closer to 100% than for [[timopt]]=-3.
         </p>
-    topics: GSgeneral_expert
+    topics: Output_expert
     varset: gstate
     vartype: integer
 - !variable
@@ -28861,7 +28861,7 @@
         However, a non-zero value for one such variable for one dataset will have precedence on the non-zero value for another
         input variable defined generically.
         </p>
-    topics: GSgeneral_useful
+    topics: SCF_useful
     varset: basic
     vartype: real
 - !variable
@@ -29041,7 +29041,7 @@
         However, a non-zero value for one such variable for one dataset will have precedence on the non-zero value for another
         input variable defined generically.
         </p>
-    topics: convergency_basic, GSgeneral_useful
+    topics: convergency_basic, SCF_useful
     varset: basic
     vartype: real
 - !variable
@@ -29245,7 +29245,7 @@
         [[tsmear]] as a prefactor of the entropy,
         to define the entropy contribution to the free energy.
         </p>
-    topics: GSgeneral_useful
+    topics: BandOcc_useful
     varset: gstate
     vartype: real
 - !variable
@@ -29286,7 +29286,7 @@
         [[tphysel]]. See the paper
         by M. Verstraete and X. Gonze, Phys. Rev. B (2002).
         </p>
-    topics: GSgeneral_basic
+    topics: BandOcc_basic
     varset: gstate
     vartype: real
 - !variable
@@ -29340,7 +29340,7 @@
         together. This should be transparent to the
         user, while keeping efficiency.
         </p>
-    topics: GSgeneral_basic
+    topics: crystal_basic
     varset: basic
     vartype: integer
 - !variable
@@ -29939,7 +29939,7 @@
           </li>
          </ul>
         </p>
-    topics: otherGS_expert
+    topics: ChargedCell_useful
     varset: paw
     vartype: integer
 - !variable
@@ -29983,7 +29983,7 @@
          Internally, they are available in the dtset structured datatype,
         e.g. dtset%useria .
         </p>
-    topics: otherGS_expert
+    topics: Control_expert
     varset: dev
     vartype: integer
 - !variable
@@ -30008,7 +30008,7 @@
          Internally, they are available in the dtset structured datatype,
         e.g. dtset%useria .
         </p>
-    topics: otherGS_expert
+    topics: Control_expert
     varset: dev
     vartype: integer
 - !variable
@@ -30033,7 +30033,7 @@
          Internally, they are available in the dtset structured datatype,
         e.g. dtset%useria .
         </p>
-    topics: otherGS_expert
+    topics: Control_expert
     varset: dev
     vartype: integer
 - !variable
@@ -30058,7 +30058,7 @@
          Internally, they are available in the dtset structured datatype,
         e.g. dtset%useria .
         </p>
-    topics: otherGS_expert
+    topics: Control_expert
     varset: dev
     vartype: integer
 - !variable
@@ -30083,7 +30083,7 @@
          Internally, they are available in the dtset structured datatype,
         e.g. dtset%useria .
         </p>
-    topics: otherGS_expert
+    topics: Control_expert
     varset: dev
     vartype: integer
 - !variable
@@ -30100,7 +30100,7 @@
         <p>
          These are user-definable with the same purpose as [[useria]] and cie.
         </p>
-    topics: otherGS_expert
+    topics: Control_expert
     varset: dev
     vartype: real
 - !variable
@@ -30117,7 +30117,7 @@
         <p>
          These are user-definable with the same purpose as [[useria]] and cie.
         </p>
-    topics: otherGS_expert
+    topics: Control_expert
     varset: dev
     vartype: real
 - !variable
@@ -30134,7 +30134,7 @@
         <p>
          These are user-definable with the same purpose as [[useria]] and cie.
         </p>
-    topics: otherGS_expert
+    topics: Control_expert
     varset: dev
     vartype: real
 - !variable
@@ -30151,7 +30151,7 @@
         <p>
          These are user-definable with the same purpose as [[useria]] and cie.
         </p>
-    topics: otherGS_expert
+    topics: Control_expert
     varset: dev
     vartype: real
 - !variable
@@ -30168,7 +30168,7 @@
         <p>
          These are user-definable with the same purpose as [[useria]] and cie.
         </p>
-    topics: otherGS_expert
+    topics: Control_expert
     varset: dev
     vartype: real
 - !variable
@@ -30272,7 +30272,7 @@
          <br />
          When [[useylm]]=0, the sum over Y_lm can be reduced to a Legendre polynomial form.
         </p>
-    topics: GSgeneral_expert
+    topics: TuningSpeed_expert
     varset: dev
     vartype: integer
 - !variable
@@ -32267,7 +32267,7 @@
          Charge of the pseudo-ion (=number of valence electrons
         that are needed to screen exactly the pseudopotential).
         </p>
-    topics: GSgeneral_internal
+    topics: PseudosPAW_internal
     varset: internal
     vartype: real
 - !variable
@@ -32298,7 +32298,7 @@
          For a "dummy" atom, with [[znucl]]=0 , as used in the case of calculations
         with only a jellium surface, ABINIT sets arbitrarily the covalent radius to one.
         </p>
-    topics: GSgeneral_basic
+    topics: crystal_basic, PseudosPAW_basic
     varset: basic
     vartype: real
 

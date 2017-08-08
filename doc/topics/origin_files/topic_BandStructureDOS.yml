@@ -1,0 +1,13 @@
+- !components 
+    name      : BandStructureDOS
+    keyword   : BandStructureDOS
+    authors   : XG
+    howto     : manipulate the electronic band structure and DOS
+    header    : default
+    title     : <h1>Electronic band structure and DOS</h1>
+    subtitle  : default
+    copyright : default
+    links     : default
+    introduction: |
+      To be written ...
+    end : default 

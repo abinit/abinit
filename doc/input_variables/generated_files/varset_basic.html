@@ -850,7 +850,7 @@ smoothing of the kinetic energy, needed to optimize unit cell parameters.
 <br><font id="title"><a name="einterp">einterp</a></font>
 <br><font id="mnemonics">Mnemonics: Electron bands INTERPolation</font>
 <br><font id="mnemonics">Executable: abinit</font>
-<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_otherGS.html">otherGS</a> <a href="../../topics/generated_files/topic_GW.html">GW</a> </font>
+<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_BandStructureDOS.html">BandStructureDOS</a> <a href="../../topics/generated_files/topic_GW.html">GW</a> </font>
 <br><font id="vartype">Variable type: real(4)</font>
 <br><font id="default">Default is [0, 0, 0, 0]</font>
 <br><font id="text">
@@ -2326,7 +2326,7 @@ you to select the optimal grid.
 <br><font id="title"><a name="natom">natom</a></font>
 <br><font id="mnemonics">Mnemonics: Number of ATOMs</font>
 <br><font id="mnemonics">Executable: abinit</font>
-<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_GSgeneral.html">GSgeneral</a> </font>
+<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_crystal.html">crystal</a> </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 1</font>
 <br><font id="text">
@@ -2351,7 +2351,7 @@ symmetriser, see the input variable <a href="../../input_variables/generated_fil
 <br><font id="title"><a name="nband">nband</a></font>
 <br><font id="mnemonics">Mnemonics: Number of BANDs</font>
 <br><font id="mnemonics">Executable: abinit</font>
-<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_GSgeneral.html">GSgeneral</a> </font>
+<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_BandOcc.html">BandOcc</a> </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">No default (Comment:  the estimated number of occupied bands +1 (TODO provide the mathematical formulation))</font>
 <br><font id="text">
@@ -2806,7 +2806,7 @@ is zero. This can be done with the help of the input variable
 <br><font id="mnemonics">Mnemonics: Number of TYPes of AToms</font>
 <br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#NO_MULTI">NO_MULTI</a></font>
-<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_GSgeneral.html">GSgeneral</a> </font>
+<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_crystal.html">crystal</a> </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 1</font>
 <br><font id="text">
@@ -2829,7 +2829,7 @@ on ...
 <br><font id="title"><a name="occopt">occopt</a></font>
 <br><font id="mnemonics">Mnemonics: OCCupation OPTion</font>
 <br><font id="mnemonics">Executable: abinit</font>
-<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_GSgeneral.html">GSgeneral</a> </font>
+<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_BandOcc.html">BandOcc</a> </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 1</font>
 <br><font id="text">
@@ -3404,7 +3404,7 @@ input variable defined generically.
 <br><font id="title"><a name="toldff">toldff</a></font>
 <br><font id="mnemonics">Mnemonics: TOLerance on the DiFference of Forces</font>
 <br><font id="mnemonics">Executable: abinit</font>
-<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_GSgeneral.html">GSgeneral</a> </font>
+<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_SCF.html">SCF</a> </font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 0.0 (Comment: The default value implies that this stopping condition is ignored. For the SCF case, one and only one of the input tolerance criteria <a href="../../input_variables/generated_files/varset_basic.html#tolwfr">tolwfr</a>, <b>toldff</b>, <a href="../../input_variables/generated_files/varset_basic.html#tolrff">tolrff</a>, <a href="../../input_variables/generated_files/varset_basic.html#toldfe">toldfe</a> or <a href="../../input_variables/generated_files/varset_basic.html#tolvrs">tolvrs</a> must differ from zero.)</font>
 <br><br><font id="excludes">
@@ -3453,7 +3453,7 @@ input variable defined generically.
 <br><font id="title"><a name="tolrff">tolrff</a></font>
 <br><font id="mnemonics">Mnemonics: TOLerance on the Relative diFference of Forces</font>
 <br><font id="mnemonics">Executable: abinit</font>
-<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_convergency.html">convergency</a> <a href="../../topics/generated_files/topic_GSgeneral.html">GSgeneral</a> </font>
+<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_convergency.html">convergency</a> <a href="../../topics/generated_files/topic_SCF.html">SCF</a> </font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 0.0 (Comment: The default value implies that this stopping condition is ignored. For the SCF case, one and only one of the input tolerance criteria <a href="../../input_variables/generated_files/varset_basic.html#tolwfr">tolwfr</a>, <a href="../../input_variables/generated_files/varset_basic.html#toldff">toldff</a>, <b>tolrff</b>, <a href="../../input_variables/generated_files/varset_basic.html#toldfe">toldfe</a> or <a href="../../input_variables/generated_files/varset_basic.html#tolvrs">tolvrs</a> must differ from zero.)</font>
 <br><br><font id="excludes">
@@ -3651,7 +3651,7 @@ input variable defined generically.
 <br><font id="title"><a name="typat">typat</a></font>
 <br><font id="mnemonics">Mnemonics: TYPe of AToms</font>
 <br><font id="mnemonics">Executable: abinit</font>
-<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_GSgeneral.html">GSgeneral</a> </font>
+<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_crystal.html">crystal</a> </font>
 <br><font id="vartype">Variable type: integer[3, '<a href="../../input_variables/generated_files/varset_geo.html#natrd">natrd</a>'] if <a href="../../input_variables/generated_files/varset_geo.html#natrd">natrd</a><<a href="../../input_variables/generated_files/varset_basic.html#natom">natom</a>,
 [3, '<a href="../../input_variables/generated_files/varset_basic.html#natom">natom</a>'] otherwise.
 </font>
@@ -3943,7 +3943,7 @@ which case <b>xred</b> must be absent from the input file.
 <br><font id="mnemonics">Mnemonics: charge -Z- of the NUCLeus</font>
 <br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#NO_MULTI">NO_MULTI</a></font>
-<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_GSgeneral.html">GSgeneral</a> </font>
+<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_crystal.html">crystal</a> <a href="../../topics/generated_files/topic_PseudosPAW.html">PseudosPAW</a> </font>
 <br><font id="vartype">Variable type: real(<a href="../../input_variables/generated_files/varset_gstate.html#npsp">npsp</a>)</font>
 <br><font id="default">No default</font>
 <br><font id="text">

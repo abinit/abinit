@@ -1,6 +1,6 @@
 - !components 
     name      : anaddbSpec 
-    keyword   : anaddb special tasks 
+    keyword   : Anaddb special tasks 
     authors   : FJ
     howto     : perform special anaddb tasks
     header    : default

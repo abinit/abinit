@@ -18,23 +18,6 @@ intro : |
 ## Each section must have a title, that will form the table of content.
 ## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
 ## Note the small (one space) indentation for the title and body keys.
-sec0:
- title: "To be filled"
- tag: 
- body: |
-  <ul>
-    <li><a href="#1">1. Introduction</a>
-    <li><a href="#2">2. Input and output files</a>
-    <li><a href="#3">3. List of input variables</a>
-  </ul>
-  
-  <hr>
-  <h3>&nbsp;</h3>
-
-
-## Each section must have a title, that will form the table of content.
-## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
-## Note the small (one space) indentation for the title and body keys.
 sec1:
  title: "Introduction"
  tag: introduction

@@ -1,0 +1,10 @@
+- !components
+    name      : Output
+    keyword   : Output
+    authors   : FJ
+    howto     : to tune the output of computed quantities
+    header    : default
+    title     : <h1>Tuning the output</h1>
+    subtitle  : default
+    copyright : default
+    links     : default

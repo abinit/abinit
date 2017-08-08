@@ -1,0 +1,30 @@
+- !components
+    name      : BandOcc
+    keyword   : Metal/insulators - bands and occupations
+    authors   : FJ
+    howto     : to specify a metal or an insulators, and the related bands and occupation numbers 
+    header    : default
+    title     : <h1>General settings</h1>
+    subtitle  : default
+    copyright : default
+    links     : default
+    introduction : |-
+      <br/>Metallic as well as insulating systems can be treated. Schemes for
+      determination of the occupation number include the Fermi broadening,
+      the Gaussian broadening, the Gaussian-Hermite broadening, as well as
+      the modifications proposed by Marzari. Finite temperatures
+      can also be treated using a smearing scheme (Verstraete scheme).
+    tutorials  : |-
+      <li><a href="../../tutorial/generated_files/lesson_base1.html">The lesson 1</a> deals with the H2
+      molecule : get the total energy, the electronic energies, the charge
+      density, the bond length, the atomisation energy </li>
+      <li><a href="../../tutorial/generated_files/lesson_base2.html">The lesson 2</a> deals again with the H2
+      molecule: convergence studies, LDA versus GGA </li>
+      <li><a href="../../tutorial/generated_files/lesson_base3.html">The lesson 3</a> deals with crystalline
+      silicon (an insulator): the definition of a k-point grid, the smearing
+      of the cut-off energy, the computation of a band structure, and again,
+      convergence studies ...</li>
+      <li><a href="../../tutorial/generated_files/lesson_base4.html">The lesson 4</a> deals with crystalline
+      aluminum (a metal), and its surface: occupation numbers, smearing the
+      Fermi-Dirac distribution, the surface energy, and again, convergence
+      studies ...</li>

@@ -1,0 +1,11 @@
+- !components 
+    name      : Artificial
+    keyword   : Artificial modification of the physics
+    authors   : XG
+    howto     : perform some artificial modifications of the physics
+    header    : default
+    title     : <h1>Some artificial modifications of the physics - modify nuclear or electronic masses, chemical potential ...</h1>
+    subtitle  : default
+    copyright : default
+    links     : default
+    end : default 

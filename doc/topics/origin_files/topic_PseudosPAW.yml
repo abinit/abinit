@@ -1,0 +1,13 @@
+- !components 
+    name      : PseudosPAW
+    keyword   : PseudosPAW
+    authors   : XG
+    howto     : master the use of pseudopotentials and PAW atomic data, and their consequences
+    header    : default
+    title     : <h1>Pseudopotentials and PAW atomic data</h1>
+    subtitle  : default
+    copyright : default
+    links     : default
+    introduction: |
+      To be written ...
+    end : default 

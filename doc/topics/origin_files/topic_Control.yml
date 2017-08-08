@@ -1,0 +1,13 @@
+- !components 
+    name      : Control
+    keyword   : Control
+    authors   : XG
+    howto     : control the flow of ABINIT
+    header    : default
+    title     : <h1>Controlling the flow of ABINIT</h1>
+    subtitle  : default
+    copyright : default
+    links     : default
+    introduction: |
+      To be written ...
+    end : default 

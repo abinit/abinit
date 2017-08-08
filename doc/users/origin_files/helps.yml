@@ -1,4 +1,4 @@
-# Thi file provides the information needed to generate the "help" documentation files.
+# This file provides the information needed to generate the "help" documentation files.
 # Each paragraph of such documentation file has a mix of formatting html information and real content.
 
 # The present file contains the formatting html information.
@@ -63,12 +63,12 @@
       This file complements the main [[help_abinit]], for matters related to responses to perturbations (computed using DFPT)
 - !components
     name : features
-    keyword : features
+    keyword : ABINIT features
     authors : FJ
     title : |
-      <h1> ABINIT features.</h1>
+      <h1> ABINIT settings and features.</h1>
     subtitle : |
-      An overview of ABINIT features, for beginners and more experienced users.
+      An overview of ABINIT settings and features, for beginners and more experienced users.
     tofcontent_header : |
       <a name="list"></a>
       <h3><b> Table of contents:</b></h3>
