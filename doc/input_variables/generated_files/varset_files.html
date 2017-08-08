@@ -662,8 +662,8 @@ As an example :
 <br><font id="title"><a name="getqps">getqps</a></font>
 <br><font id="mnemonics">Mnemonics: GET QuasiParticle Structure</font>
 <br><font id="mnemonics">Executable: abinit</font>
-<br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#GW">GW</a></font>
-<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_multidtset.html">multidtset</a> </font>
+<br><font id="characteristic">Characteristic: <a href="#"><a href="#">[[FAKE LINK:FAKE LINK:GW]]</a></a></font>
+<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_multidtset.html">multidtset</a> <a href="../../topics/generated_files/topic_GW.html">GW</a> </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
 <br><font id="text">
@@ -671,7 +671,7 @@ As an example :
 <p>
  Used when <a href="../../input_variables/generated_files/varset_basic.html#ndtset">ndtset</a>&gt;0
 (multi-dataset mode) and <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>=3, or 4
-(screening or sigma step of a <a href="../../users/generated_files/help_abinit.html#GW">GW</a> calculation),
+(screening or sigma step of a <a href="#"><a href="#">[[FAKE LINK:FAKE LINK:GW]]</a></a> calculation),
 to indicate that the eigenvalues and possibly the wavefunctions have to be
 taken from a previous quasiparticle calculation (instead of the usual LDA starting
 point). This is to achieve quasiparticle self-consistency.
@@ -694,8 +694,7 @@ As an example :
 <br><font id="title"><a name="getscr">getscr</a></font>
 <br><font id="mnemonics">Mnemonics: GET SCReening (the inverse dielectric matrix) from ...</font>
 <br><font id="mnemonics">Executable: abinit</font>
-<br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#GW">GW</a></font>
-<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_multidtset.html">multidtset</a> </font>
+<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_multidtset.html">multidtset</a> <a href="../../topics/generated_files/topic_GW.html">GW</a> </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
 <br><font id="text">
@@ -703,7 +702,7 @@ As an example :
 <p>
  Used when <a href="../../input_variables/generated_files/varset_basic.html#ndtset">ndtset</a>&gt;0
 (multi-dataset mode) and <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>=4
-(sigma step of a <a href="../../users/generated_files/help_abinit.html#GW">GW</a> calculation),
+(sigma step of a GW calculation),
 to indicate that the dielectric matrix (_SCR file) is to be taken
 from the output of a previous dataset.
 It is used to chain the calculations,
@@ -743,8 +742,7 @@ As an example :
 <br><font id="title"><a name="getsuscep">getsuscep</a></font>
 <br><font id="mnemonics">Mnemonics: GET SUSCEPtibility (the irreducible polarizability) from ...</font>
 <br><font id="mnemonics">Executable: abinit</font>
-<br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#GW">GW</a></font>
-<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_multidtset.html">multidtset</a> </font>
+<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_multidtset.html">multidtset</a> <a href="../../topics/generated_files/topic_GW.html">GW</a> </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
 <br><font id="text">
@@ -752,16 +750,16 @@ As an example :
 <p>
  Used when <a href="../../input_variables/generated_files/varset_basic.html#ndtset">ndtset</a>&gt;0
 (multi-dataset mode) and <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>=4
-(sigma step of a <a href="../../users/generated_files/help_abinit.html#GW">GW</a> calculation),
+(sigma step of a GW calculation),
 to indicate that the irreducible polarizability (_SUSC file) is to be taken
 from the output of a previous dataset.
 It is used to chain the calculations, since it describes from which dataset the OUTPUT susceptibility
 is to be taken, as INPUT of the present dataset.
-Performing a <a href="../../users/generated_files/help_abinit.html#GW">GW</a> calculations starting from the _SUSC file instead of the _SCR file presents
+Performing a GW calculations starting from the _SUSC file instead of the _SCR file presents
 the advantage that starting from the irreducible polarizability, one can calculate the screened interaction
 using different expressions without having to perform a screening calculation from scratch.
 For example, it is possible to apply a cutoff to the Coulomb interaction in order
-to facilitate the convergence of the <a href="../../users/generated_files/help_abinit.html#GW">GW</a> correction with respect to the size of the supercell
+to facilitate the convergence of the GW correction with respect to the size of the supercell
 (see <a href="../../input_variables/generated_files/varset_gw.html#vcutgeo">vcutgeo</a> and <a href="../../input_variables/generated_files/varset_gw.html#icutcoul">icutcoul</a>)
  <br />
  If <b>getsuscep</b>==0, no such use of previously computed output _SUSC file is done.
@@ -1485,8 +1483,7 @@ see the
 <br><font id="title"><a name="irdqps">irdqps</a></font>
 <br><font id="mnemonics">Mnemonics: Integer that governs the ReaDing of QuasiParticle Structure</font>
 <br><font id="mnemonics">Executable: abinit</font>
-<br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#GW">GW</a></font>
-<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_GW.html">GW</a> </font>
+<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_GW.html">GW</a> <a href="../../topics/generated_files/topic_multidtset.html">multidtset</a> </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
 <br><font id="text">
@@ -1506,8 +1503,7 @@ See also <a href="../../input_variables/generated_files/varset_files.html#getqps
 <br><font id="title"><a name="irdscr">irdscr</a></font>
 <br><font id="mnemonics">Mnemonics: Integer that governs the ReaDing of the SCReening</font>
 <br><font id="mnemonics">Executable: abinit</font>
-<br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#GW">GW</a></font>
-<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_GW.html">GW</a> </font>
+<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_GW.html">GW</a> <a href="../../topics/generated_files/topic_multidtset.html">multidtset</a> </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
 <br><font id="text">
@@ -1540,8 +1536,7 @@ see the
 <br><font id="title"><a name="irdsuscep">irdsuscep</a></font>
 <br><font id="mnemonics">Mnemonics: Integer that governs the ReaDing of the SUSCEPtibility</font>
 <br><font id="mnemonics">Executable: abinit</font>
-<br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#GW">GW</a></font>
-<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_GW.html">GW</a> </font>
+<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_GW.html">GW</a> <a href="../../topics/generated_files/topic_multidtset.html">multidtset</a> </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
 <br><font id="text">
@@ -1869,7 +1864,7 @@ previous response function calculation (see the
 <p>
  Governs the choice of the format for the file that
 contains the Kohn-Sham electronic structure information,
-for use in <a href="../../users/generated_files/help_abinit.html#GW">GW</a> calculations, see the input variables
+for use in GW calculations, see the input variables
 <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a> and
 <a href="../../input_variables/generated_files/varset_gw.html#nbandkss">nbandkss</a>.
  <ul>
@@ -3106,10 +3101,7 @@ and ABINIT. See <a href="../../input_variables/generated_files/varset_w90.html#"
     ABINIT- Wannier90
    </b>
    interface after converting the
-input wavefunctions to
-   <b>
-    <a href="../../users/generated_files/help_abinit.html#GW">GW</a> quasiparticle
-   </b>
+input wavefunctions to <b>quasiparticle</b>
    wavefunctions.
    <p>
     ABINIT will produce the input files required by Wannier90  and it will
@@ -3125,7 +3117,7 @@ run Wannier90 to produce the Maximally-localized Wannier functions
     <ul>
      <li>
       An input file of LDA wave functions is required which is completely
-consistent with the _KSS file used in the self-consistent <a href="../../users/generated_files/help_abinit.html#GW">GW</a> calculation.
+consistent with the _KSS file used in the self-consistent GW calculation.
 This means that <a href="../../input_variables/generated_files/varset_files.html#kssform">kssform</a> 3 must be used
 to create the _KSS file and the output _WFK file from the same run must
 be used as input here.
@@ -3133,7 +3125,7 @@ be used as input here.
      <li>
       Wannier90 requires <a href="../../input_variables/generated_files/varset_basic.html#nshiftk">nshiftk</a>=1, and
 <a href="../../input_variables/generated_files/varset_basic.html#shiftk">shiftk</a>= 0 0 0 is recommended.  The k-point
-set used for the <a href="../../users/generated_files/help_abinit.html#GW">GW</a> calculation, typically the irreducible BZ set created
+set used for the GW calculation, typically the irreducible BZ set created
 using <a href="../../input_variables/generated_files/varset_basic.html#kptopt">kptopt</a>=1, and that for the Abinit-
 Wannier90 interface must be consistent.
      </li>
@@ -3143,10 +3135,10 @@ interface by setting <a href="../../input_variables/generated_files/varset_basic
 <a href="../../input_variables/generated_files/varset_basic.html#iscf">iscf</a>=-2, and
 <a href="../../input_variables/generated_files/varset_basic.html#nstep">nstep</a>=3.  This will simply use symmetry to
 transform the input IBZ wavefunctions to the full BZ set, still consistent
-with the <a href="../../users/generated_files/help_abinit.html#GW">GW</a> _KSS input.
+with the GW _KSS input.
      </li>
      <li>
-      The final _QPS file created by the self-consistent <a href="../../users/generated_files/help_abinit.html#GW">GW</a> run is required
+      The final _QPS file created by the self-consistent GW run is required
 as input.
      </li>
      <li>

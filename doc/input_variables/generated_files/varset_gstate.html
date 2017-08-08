@@ -397,17 +397,17 @@ to shift the atomic coordinates such as to obtain symmetry operations with the a
  <br />
  In the ground-state calculation, such breaking of the symmetry is usually harmless. However, if the user is doing a
 calculation of phonons using DFPT (<a href="../../input_variables/generated_files/varset_dfpt.html#rfphon">rfphon</a>=1), the convergence with respect to the number of k points will
-be much worse with a non-symmetric grid than with a symmetric one. Also, if the user is doing a <a href="../../users/generated_files/help_abinit.html#GW">GW</a> calculation, the
+be much worse with a non-symmetric grid than with a symmetric one. Also, if the user is doing a GW calculation, the
 presence of non-symmorphic translations that are not coherent with the FFT grid might cause
 problems.
-In the <a href="../../users/generated_files/help_abinit.html#GW">GW</a> part, indeed, one needs to reconstruct the wavefunctions in the full Brillouin zone for
+In the GW part, indeed, one needs to reconstruct the wavefunctions in the full Brillouin zone for
 calculating both the polarizability and the self-energy.
 The wavefunctions in the full Brillouin zone are obtained from the irreducible wedge by applying the symmetry
 operations of the space group of the crystal.
 In the present implementation, the symmetrization of the wavefunctions is done in real space on the FFT mesh
 that, therefore, has to be coherent both with the rotational part as well as with the fractional translation
 of each symmetry operation.
-If the condition (2) is met, the <a href="../../users/generated_files/help_abinit.html#GW">GW</a> code will not be able to find a symmetry-preserving FFT mesh.
+If the condition (2) is met, the GW code will not be able to find a symmetry-preserving FFT mesh.
  <br />
  So, it was decided to warn the user about these possible problems already at the level of the ground state calculations,
 although such warning might be irrelevant.

@@ -283,7 +283,6 @@ automatically set to 14 which corresponds to the use of LOBPCG algorithm for the
 <br><font id="title"><a name="gwpara">gwpara</a></font>
 <br><font id="mnemonics">Mnemonics: GW PARAllelization level</font>
 <br><font id="mnemonics">Executable: abinit</font>
-<br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#GW">GW</a></font>
 <br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_parallelism.html">parallelism</a> <a href="../../topics/generated_files/topic_GW.html">GW</a> </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 2 (Comment: The default value has been changed in v8. From 1 to 2 )</font>
@@ -294,7 +293,7 @@ Only relevant if <a href="../../input_variables/generated_files/varset_gstate.ht
 <p>
 <p>
  <b>gwpara</b> is used to choose between the two different parallelization levels
-available in the <a href="../../users/generated_files/help_abinit.html#GW">GW</a> code. The available options are:
+available in the GW code. The available options are:
  <ul>
   <li>
    =1 =&gt; parallelisation on k points
@@ -330,7 +329,7 @@ irrespectively of the number of CPUs used.
 <p>
 <p>
  This input variable is used only when running abinit in parallel.
-If <b>localrdwf</b>=1, the input wavefunction disk file or the KSS/SCR file in case of <a href="../../users/generated_files/help_abinit.html#GW">GW</a>
+If <b>localrdwf</b>=1, the input wavefunction disk file or the KSS/SCR file in case of GW
 calculations, is read locally by each processor, while
 if <b>localrdwf</b>=0, only one processor reads it, and
 broadcast the data to the other processors.

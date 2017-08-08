@@ -993,7 +993,7 @@ the Kerker mixing: <a href="../../input_variables/generated_files/varset_gstate.
 <br><font id="text">
 <p>
 <p>
-Only relevant for <a href="../../users/generated_files/help_abinit.html#GW">GW</a> or <a href="../../users/generated_files/help_abinit.html#BETHE_SALPETER">BETHE_SALPETER</a> calculations with PAW.
+Only relevant for GW or <a href="../../users/generated_files/help_abinit.html#BETHE_SALPETER">BETHE_SALPETER</a> calculations with PAW.
  <br />
  This variable defines the approach used for the evaluation of the oscillator matrix elements within the PAW formalism.
 Possible values are 0,1,2.
@@ -1608,23 +1608,23 @@ to <a href="../../input_variables/generated_files/varset_paw.html#lpawu">lpawu</
 <a href="../../input_variables/generated_files/varset_paw.html#lpawu">lpawu</a>
 =-1, the value is not used.
  <br />
- In the case of a <a href="../../users/generated_files/help_abinit.html#GW">GW</a> calculation, the U interaction defined by <b>upawu</b> will be REMOVED from the self energy.
+ In the case of a GW calculation, the U interaction defined by <b>upawu</b> will be REMOVED from the self energy.
 In particular, for G0 W0 calculations (perturbative calculations), the energy eigenvalues obtained
 after an underlying DFT+U calculation will be
  <br />
- E_<a href="../../users/generated_files/help_abinit.html#GW">GW</a> = E_DFT+U + &lt; phi | Self-energy - U | phi&gt;
+ E_GW = E_DFT+U + &lt; phi | Self-energy - U | phi&gt;
  <br />
- Actually, in order to perform a <a href="../../users/generated_files/help_abinit.html#GW">GW</a> @ DFT+U calculation, one should define the same value of U in the self-energy calculation,
+ Actually, in order to perform a GW @ DFT+U calculation, one should define the same value of U in the self-energy calculation,
 than the one defined in the DFT calculation.
 The easiest is actually to define the value of U for the whole set of calculations (for the different datasets),
 including the screening, even if the U value does not play explicitly a role in the computation of the latter (well, the input
 wavefunctions will be different anyhow).
  <br />
- It is possible to perform calculations of the type <a href="../../users/generated_files/help_abinit.html#GW">GW</a>+U_prime @ DFT+U , so keeping a U interaction  (usually smaller than the initial U)
-in the <a href="../../users/generated_files/help_abinit.html#GW">GW</a> calculation, by defining a smaller U than the one used in the DFT calculation. This value will be subtracted in the <a href="../../users/generated_files/help_abinit.html#GW">GW</a> correction calculation,
+ It is possible to perform calculations of the type GW+U_prime @ DFT+U , so keeping a U interaction  (usually smaller than the initial U)
+in the GW calculation, by defining a smaller U than the one used in the DFT calculation. This value will be subtracted in the GW correction calculation,
 as outlined above.
  <br />
- Explicitly, in order to do a calculation of a material with a DFT U value of 7.5 eV, followed by a <a href="../../users/generated_files/help_abinit.html#GW">GW</a> calculation where there is a residual
+ Explicitly, in order to do a calculation of a material with a DFT U value of 7.5 eV, followed by a GW calculation where there is a residual
 U value of 2 eV, one has to define :
  <pre>
   upawu1   7.5 eV   ! This is for the DFT calculation
@@ -1700,7 +1700,7 @@ in PAW, inside PAW spheres only, and only for correlated orbitals given by
 <br><font id="title"><a name="usepawu">usepawu</a></font>
 <br><font id="mnemonics">Mnemonics: USE PAW+U (spherical part)</font>
 <br><font id="mnemonics">Executable: abinit</font>
-<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_DFT+U.html">DFT+U</a> </font>
+<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_DFT+U.html">DFT+U</a> <a href="../../topics/generated_files/topic_GW.html">GW</a> </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
 <br><br><font id="requires">
@@ -1709,7 +1709,7 @@ Only relevant if <a href="../../input_variables/generated_files/varset_internal.
 <br><font id="text">
 <p>
 <p>
- Must be non-zero if a DFT+U calculation is done, or if a <a href="../../users/generated_files/help_abinit.html#GW">GW</a> calculation following a DFT+U calculation is done (important !).
+ Must be non-zero if a DFT+U calculation is done, or if a GW calculation following a DFT+U calculation is done (important !).
  <ul>
   <li>
    If set to 0, the LDA+U method is not used.
@@ -1748,18 +1748,18 @@ The expression of the density matrix is chosen thanks to
  .
 for some informations.
  <br />
- In the case of a <a href="../../users/generated_files/help_abinit.html#GW">GW</a> calculation on top of a DFT+U, the absence of definition of a U value in the self-energy
+ In the case of a <a href="#"><a href="#">[[FAKE LINK:FAKE LINK:GW]]</a></a> calculation on top of a DFT+U, the absence of definition of a U value in the self-energy
 will LEAVE the underlying U from the DFT calculation.
-Thus, the code will actually do a <a href="../../users/generated_files/help_abinit.html#GW">GW</a>+U @ DFT+U calculation.
+Thus, the code will actually do a <a href="#"><a href="#">[[FAKE LINK:FAKE LINK:GW]]</a></a>+U @ DFT+U calculation.
 Note that the screening calculation will not be affected by the presence/absence of a U value.
  <br />
- Actually, in order to perform a <a href="../../users/generated_files/help_abinit.html#GW">GW</a> @ DFT+U calculation, one should define the same value of U in the self-energy calculation,
+ Actually, in order to perform a <a href="#"><a href="#">[[FAKE LINK:FAKE LINK:GW]]</a></a> @ DFT+U calculation, one should define the same value of U in the self-energy calculation,
 than the one defined in the DFT calculation. The code will know that the interaction corresponding to that value has to be
 SUBTRACTED inside the self-energy. The easiest is actually to define the presence of U for the whole set of calculations (for the different datasets),
 including the screening, even if the U value does not play explicitly a role in the computation of the latter (well, the input
 wavefunctions will be different anyhow).
  <br />
- It is possible to perform calculations of the type <a href="../../users/generated_files/help_abinit.html#GW">GW</a>+U_prime @ DFT+U , so keeping a smaller U interaction in the <a href="../../users/generated_files/help_abinit.html#GW">GW</a> calculation, by subtracting
+ It is possible to perform calculations of the type <a href="#"><a href="#">[[FAKE LINK:FAKE LINK:GW]]</a></a>+U_prime @ DFT+U , so keeping a smaller U interaction in the <a href="#"><a href="#">[[FAKE LINK:FAKE LINK:GW]]</a></a> calculation, by subtracting
 a smaller U than the one used in the DFT calculation. See the description of the <a href="../../input_variables/generated_files/varset_paw.html#upawu">upawu</a> input variable.
  <br />
  References:

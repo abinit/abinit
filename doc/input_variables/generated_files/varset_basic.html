@@ -2381,7 +2381,7 @@ will not be used.
 each k point.
 </p>
 <p>
- In the case of a <a href="../../users/generated_files/help_abinit.html#GW">GW</a> calculation (<a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>=3 or 4),
+ In the case of a GW calculation (<a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>=3 or 4),
 <b>nband</b> gives the number of bands to be treated to generate the screening (susceptibility
 and dielectric matrix), as well as the self-energy. However, to generate the _KSS
 file (see <a href="../../input_variables/generated_files/varset_files.html#kssform">kssform</a>)
@@ -2736,7 +2736,7 @@ the previous run only if the latter is done with <a href="../../input_variables/
 <br><font id="mnemonics">Mnemonics: Number of SYMmetry operations</font>
 <br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#SYMMETRY_FINDER">SYMMETRY_FINDER</a></font>
-<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_crystal.html">crystal</a> </font>
+<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_crystal.html">crystal</a> <a href="../../topics/generated_files/topic_GW.html">GW</a> </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
 <br><font id="text">
@@ -2791,7 +2791,7 @@ change the initialization of "msym" in the abinit.F90 main routine,
 then recompile the code.
 </p>
 <p>
- For <a href="../../users/generated_files/help_abinit.html#GW">GW</a> calculation, the user might want to select only the symmetry operations whose
+ For GW calculation, the user might want to select only the symmetry operations whose
 non-symmorphic translation vector <a href="../../input_variables/generated_files/varset_basic.html#tnons">tnons</a>
 is zero. This can be done with the help of the input variable
 <a href="../../input_variables/generated_files/varset_dev.html#symmorphi">symmorphi</a>

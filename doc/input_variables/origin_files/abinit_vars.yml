@@ -1195,7 +1195,6 @@
 - !variable
     abivarname: awtr
     characteristics:
-    - '[[GW]]'
     commentdefault: null
     commentdims: null
     defaultval: 1
@@ -1355,7 +1354,6 @@
 - !variable
     abivarname: bdgw
     characteristics:
-    - '[[GW]]'
     commentdefault: null
     commentdims: null
     defaultval: !multiplevalue
@@ -1375,12 +1373,12 @@
          <b>
           bdgw(1,ikptgw,isppol)
          </b>
-         is the number of the lowest band for which the [[GW]] computation must be done,
+         is the number of the lowest band for which the GW computation must be done,
         and
          <b>
           bdgw(2,ikptgw,isppol)
          </b>
-         is the number of the highest band for which the [[GW]] computation must be done.
+         is the number of the highest band for which the GW computation must be done.
         </p>
         <p>
          When [[gwcalctyp]] &#62;&#61; 20,
@@ -1400,14 +1398,14 @@
         Note that the initial values given in the input file might be changed inside the code so that all
         the degenerate states at a given k-point and spin are included.
         This might happen when [[symsigma]]=1 is used or in the case of
-        self-consistent [[GW]] calculations.
+        self-consistent GW calculations.
         </p>
         <p>
          When [[symsigma]]=1, the diagonal matrix elements of the
         self-energy are obtained by averaging the unsymmetrized results in the subspace spanned by the degenerate states.
         </p>
         <p>
-         For self-consistent calculations, on the other hand, the basis set used to expand the [[GW]]
+         For self-consistent calculations, on the other hand, the basis set used to expand the GW
         wavefunctions should include all the degenerate states belonging to the same irreducible
         representation. Only in this case, indeed, the initial symmetries and energy degenerations are preserved.
         </p>
@@ -1896,7 +1894,7 @@
           </li>
           <li>
            2 =&gt; The transition space is constructed with Kohn-Sham orbitals
-        but the energies are read from the external [[GW]] file
+        but the energies are read from the external GW file
           </li>
           <li>
            3 =&gt; QP amplitudes and energies will be read from the QPS file and used to construct H_ex.
@@ -2401,7 +2399,6 @@
 - !variable
     abivarname: cd_customnimfrqs
     characteristics:
-    - '[[GW]]'
     commentdefault: null
     commentdims: null
     defaultval: 0
@@ -2420,7 +2417,6 @@
 - !variable
     abivarname: cd_frqim_method
     characteristics:
-    - '[[GW]]'
     commentdefault: null
     commentdims: null
     defaultval: 1
@@ -2756,7 +2752,6 @@
 - !variable
     abivarname: cd_full_grid
     characteristics:
-    - '[[GW]]'
     commentdefault: null
     commentdims: null
     defaultval: 0
@@ -2793,7 +2788,6 @@
 - !variable
     abivarname: cd_halfway_freq
     characteristics:
-    - '[[GW]]'
     - '[[ENERGY]]'
     commentdefault: null
     commentdims: null
@@ -2816,7 +2810,6 @@
 - !variable
     abivarname: cd_imfrqs
     characteristics:
-    - '[[GW]]'
     commentdefault: null
     commentdims: null
     defaultval: null
@@ -2861,7 +2854,6 @@
 - !variable
     abivarname: cd_max_freq
     characteristics:
-    - '[[GW]]'
     - '[[ENERGY]]'
     commentdefault: null
     commentdims: null
@@ -2884,7 +2876,6 @@
 - !variable
     abivarname: cd_subset_freq
     characteristics:
-    - '[[GW]]'
     commentdefault: null
     commentdims: null
     defaultval:
@@ -3114,17 +3105,17 @@
          <br />
          In the ground-state calculation, such breaking of the symmetry is usually harmless. However, if the user is doing a
         calculation of phonons using DFPT ([[rfphon]]=1), the convergence with respect to the number of k points will
-        be much worse with a non-symmetric grid than with a symmetric one. Also, if the user is doing a [[GW]] calculation, the
+        be much worse with a non-symmetric grid than with a symmetric one. Also, if the user is doing a GW calculation, the
         presence of non-symmorphic translations that are not coherent with the FFT grid might cause
         problems.
-        In the [[GW]] part, indeed, one needs to reconstruct the wavefunctions in the full Brillouin zone for
+        In the GW part, indeed, one needs to reconstruct the wavefunctions in the full Brillouin zone for
         calculating both the polarizability and the self-energy.
         The wavefunctions in the full Brillouin zone are obtained from the irreducible wedge by applying the symmetry
         operations of the space group of the crystal.
         In the present implementation, the symmetrization of the wavefunctions is done in real space on the FFT mesh
         that, therefore, has to be coherent both with the rotational part as well as with the fractional translation
         of each symmetry operation.
-        If the condition (2) is met, the [[GW]] code will not be able to find a symmetry-preserving FFT mesh.
+        If the condition (2) is met, the GW code will not be able to find a symmetry-preserving FFT mesh.
          <br />
          So, it was decided to warn the user about these possible problems already at the level of the ground state calculations,
         although such warning might be irrelevant.
@@ -5710,7 +5701,6 @@
 - !variable
     abivarname: ecuteps
     characteristics:
-    - '[[GW]]'
     - '[[ENERGY]]'
     commentdefault: null
     commentdims: null
@@ -5736,7 +5726,6 @@
 - !variable
     abivarname: ecutsigx
     characteristics:
-    - '[[GW]]'
     - '[[ENERGY]]'
     commentdefault: null
     commentdims: null
@@ -5859,7 +5848,6 @@
 - !variable
     abivarname: ecutwfn
     characteristics:
-    - '[[GW]]'
     - '[[ENERGY]]'
     commentdefault: null
     commentdims: null
@@ -7163,7 +7151,6 @@
 - !variable
     abivarname: fftgw
     characteristics:
-    - '[[GW]]'
     commentdefault: null
     commentdims: null
     defaultval: 21
@@ -7341,7 +7328,6 @@
 - !variable
     abivarname: freqim_alpha
     characteristics:
-    - '[[GW]]'
     commentdefault: null
     commentdims: null
     defaultval: 5.0
@@ -7387,7 +7373,6 @@
 - !variable
     abivarname: freqremax
     characteristics:
-    - '[[GW]]'
     - '[[ENERGY]]'
     commentdefault: null
     commentdims: null
@@ -7398,11 +7383,11 @@
     requires: '[[optdriver]]==3'
     text: |-
         <p>
-         [[freqremax]] is used only for numerical integration of the [[GW]] self-energy
+         [[freqremax]] is used only for numerical integration of the GW self-energy
         ([[gwcalctyp]]= 2, 12, 22, 9, 19, 29).
          <br />
          [[freqremax]] sets the maximum real frequency used to calculate the dielectric matrix in order
-        to perform the numerical integration of the [[GW]] self-energy.
+        to perform the numerical integration of the GW self-energy.
         [[freqremax]], [[freqremin]] and [[nfreqre]]
         define the spacing of the frequency mesh along the real axis.
         </p>
@@ -7412,7 +7397,6 @@
 - !variable
     abivarname: freqremin
     characteristics:
-    - '[[GW]]'
     - '[[ENERGY]]'
     commentdefault: null
     commentdims: null
@@ -7423,11 +7407,11 @@
     requires: '[[optdriver]]==3'
     text: |-
         <p>
-         [[freqremin]] is used only for numerical integration of the [[GW]] self-energy
+         [[freqremin]] is used only for numerical integration of the GW self-energy
         ([[gwcalctyp]]= 2, 12, 22, 9, 19, 29).
          <br />
          [[freqremin]] sets the minimum real frequency used to calculate the dielectric matrix in order
-        to perform the numerical integration of the [[GW]] self-energy.
+        to perform the numerical integration of the GW self-energy.
         [[freqremin]] can be used to split a wide frequency interval into smaller subintervals that
         can be calculated independently.
         The different subintervals can then be merged together with the
@@ -7446,7 +7430,6 @@
 - !variable
     abivarname: freqspmax
     characteristics:
-    - '[[GW]]'
     - '[[ENERGY]]'
     commentdefault: null
     commentdims: null
@@ -7458,7 +7441,7 @@
     text: |-
         <p>
          [[freqspmax]] sets the maximum real frequency used to calculate the spectral function
-        from the [[GW]] Green's function. [[freqspmin]], [[freqspmax]] and
+        from the GW Green's function. [[freqspmin]], [[freqspmax]] and
         [[nfreqsp]] define the spacing of an equidistant frequency mesh along
         the real axis. Alternatively, the variables [[gw_customnfreqsp]] and
         [[gw_freqsp]] can be used to make a user-defined grid.
@@ -7469,7 +7452,6 @@
 - !variable
     abivarname: freqspmin
     characteristics:
-    - '[[GW]]'
     - '[[ENERGY]]'
     commentdefault: null
     commentdims: null
@@ -7481,7 +7463,7 @@
     text: |-
         <p>
          [[freqspmin]] sets the minimum real frequency used to calculate the spectral function
-        from the [[GW]] Green's function. [[freqspmin]] is set to -[[freqspmax]]
+        from the GW Green's function. [[freqspmin]] is set to -[[freqspmax]]
         if left undefined. [[freqspmin]], [[freqspmax]], and
         [[nfreqsp]] define the spacing of an equidistant frequency mesh along
         the real axis. Alternatively, the variables [[gw_customnfreqsp]] and
@@ -8440,13 +8422,12 @@
          </pre>
          refers to dataset 2 when dataset 4 is initialized.
         </p>
-    topics: multidtset_useful
+    topics: multidtset_useful, GW_useful
     varset: files
     vartype: integer
 - !variable
     abivarname: getscr
     characteristics:
-    - '[[GW]]'
     commentdefault: null
     commentdims: null
     defaultval: 0
@@ -8458,7 +8439,7 @@
         <p>
          Used when [[ndtset]]&gt;0
         (multi-dataset mode) and [[optdriver]]=4
-        (sigma step of a [[GW]] calculation),
+        (sigma step of a GW calculation),
         to indicate that the dielectric matrix (_SCR file) is to be taken
         from the output of a previous dataset.
         It is used to chain the calculations,
@@ -8489,13 +8470,12 @@
          </pre>
          refers to dataset 2 when dataset 4 is initialized.
         </p>
-    topics: multidtset_useful
+    topics: multidtset_useful, GW_useful
     varset: files
     vartype: integer
 - !variable
     abivarname: getsuscep
     characteristics:
-    - '[[GW]]'
     commentdefault: null
     commentdims: null
     defaultval: 0
@@ -8507,16 +8487,16 @@
         <p>
          Used when [[ndtset]]&gt;0
         (multi-dataset mode) and [[optdriver]]=4
-        (sigma step of a [[GW]] calculation),
+        (sigma step of a GW calculation),
         to indicate that the irreducible polarizability (_SUSC file) is to be taken
         from the output of a previous dataset.
         It is used to chain the calculations, since it describes from which dataset the OUTPUT susceptibility
         is to be taken, as INPUT of the present dataset.
-        Performing a [[GW]] calculations starting from the _SUSC file instead of the _SCR file presents
+        Performing a GW calculations starting from the _SUSC file instead of the _SCR file presents
         the advantage that starting from the irreducible polarizability, one can calculate the screened interaction
         using different expressions without having to perform a screening calculation from scratch.
         For example, it is possible to apply a cutoff to the Coulomb interaction in order
-        to facilitate the convergence of the [[GW]] correction with respect to the size of the supercell
+        to facilitate the convergence of the GW correction with respect to the size of the supercell
         (see [[vcutgeo]] and [[icutcoul]])
          <br />
          If [[getsuscep]]==0, no such use of previously computed output _SUSC file is done.
@@ -8542,7 +8522,7 @@
          </pre>
          refers to dataset 2 when dataset 4 is initialized.
         </p>
-    topics: multidtset_useful
+    topics: multidtset_useful, GW_useful
     varset: files
     vartype: integer
 - !variable
@@ -9232,7 +9212,6 @@
 - !variable
     abivarname: gw_customnfreqsp
     characteristics:
-    - '[[GW]]'
     commentdefault: null
     commentdims: null
     defaultval: 0
@@ -9252,7 +9231,6 @@
 - !variable
     abivarname: gw_freqsp
     characteristics:
-    - '[[GW]]'
     commentdefault: null
     commentdims: null
     defaultval: !range
@@ -9284,7 +9262,6 @@
 - !variable
     abivarname: gw_frqim_inzgrid
     characteristics:
-    - '[[GW]]'
     commentdefault: null
     commentdims: null
     defaultval: 0
@@ -9331,7 +9308,6 @@
 - !variable
     abivarname: gw_frqre_inzgrid
     characteristics:
-    - '[[GW]]'
     commentdefault: null
     commentdims: null
     defaultval: 0
@@ -9404,7 +9380,6 @@
 - !variable
     abivarname: gw_frqre_tangrid
     characteristics:
-    - '[[GW]]'
     commentdefault: null
     commentdims: null
     defaultval: 0
@@ -9427,7 +9402,6 @@
 - !variable
     abivarname: gw_invalid_freq
     characteristics:
-    - '[[GW]]'
     commentdefault: null
     commentdims: null
     defaultval: 0
@@ -9456,7 +9430,6 @@
 - !variable
     abivarname: gw_nqlwl
     characteristics:
-    - '[[GW]]'
     commentdefault: null
     commentdims: null
     defaultval: 1
@@ -9512,7 +9485,6 @@
 - !variable
     abivarname: gw_nstep
     characteristics:
-    - '[[GW]]'
     commentdefault: null
     commentdims: null
     defaultval: 30
@@ -9522,7 +9494,7 @@
     requires: '[[optdriver]]==8'
     text: |-
         <p>
-         Gives the maximum number of self-consistent [[GW]] cycles (or "iterations").
+         Gives the maximum number of self-consistent GW cycles (or "iterations").
         in which G and/or W will be updated until the quasi-particle energies are converged
         within [[gw_toldfeig]].
         [[gwcalctyp]] and [[gw_sctype]] are
@@ -9534,7 +9506,6 @@
 - !variable
     abivarname: gw_qlwl
     characteristics:
-    - '[[GW]]'
     commentdefault: null
     commentdims: null
     defaultval:
@@ -9562,7 +9533,6 @@
 - !variable
     abivarname: gw_qprange
     characteristics:
-    - '[[GW]]'
     commentdefault: null
     commentdims: null
     defaultval: 0
@@ -9594,8 +9564,8 @@
         on the k-mesh used for the WFK file. Therefore the computed gaps might differ from the correct ones that can only be
         obtained with an appropriate sampling of the irreducible zone.
 
-        Positive values are useful if we do not know the position of the [[GW]] HOMO, LOMO and we want to investigate
-        the effect of the [[GW]] corrections on the states close to the gap
+        Positive values are useful if we do not know the position of the GW HOMO, LOMO and we want to investigate
+        the effect of the GW corrections on the states close to the gap
         Negative values are usually used for self-consistent calculations
 
         Note that, in the case of self-consistency or symsigma=1, the code might change the bands range
@@ -9613,7 +9583,6 @@
 - !variable
     abivarname: gw_sctype
     characteristics:
-    - '[[GW]]'
     commentdefault: null
     commentdims: null
     defaultval: 1
@@ -9623,14 +9592,14 @@
     requires: '[[optdriver]] in [3,4]'
     text: |-
         <p>
-         This variable is used to partially define the kind of self-consistency for [[GW]] calculations.
+         This variable is used to partially define the kind of self-consistency for GW calculations.
         The other piece of information is given by [[gwcalctyp]]
         that defines the particular approximation for the self-energy operator as well as whether the
         wavefunctions have to replaced by quasi-particle amplitudes.
         </p>
         <p>
          If [[gw_sctype]] is specified in the input file, the code will perform an iterative update
-        of the quantities entering the [[GW]] equations until the quasi-particle energies are converged
+        of the quantities entering the GW equations until the quasi-particle energies are converged
         within [[gw_toldfeig]]. The maximum number of iterations is
         specified by [[gw_nstep]].
         Possible values are:
@@ -9662,7 +9631,6 @@
 - !variable
     abivarname: gw_sigxcore
     characteristics:
-    - '[[GW]]'
     commentdefault: null
     commentdims: null
     defaultval: 0
@@ -9675,12 +9643,12 @@
          Only available for PAW and relevant if [[optdriver]]=4 that is, sigma calculations.
         </p>
         <p>
-         Theoretical introduction: [[GW]] calculations performed on top of electronic calculations relying
+         Theoretical introduction: GW calculations performed on top of electronic calculations relying
         when the frozen-core approximation is used to separate inner-core electrons from valence electrons,
         only the contribution to the self-energy arising from valence electrons is explicitly accounted for.
         In the standard approach based on pseudopotentials the contribution to the self-energy due to core electrons is approximated
         by means of the KS exchange-correlation potential generated by the core density.
-        In the case of [[GW]] calculations employing the PAW method, the core contribution to the self-energy
+        In the case of GW calculations employing the PAW method, the core contribution to the self-energy
         can be more accurately estimated in terms of the Fock operator generated by the core wavefunctions.
         In the simplest approach, the only ingredients required for this more refined treatment are the wave
         functions of the core electrons in the reference atomic configuration that are calculated during the
@@ -9706,7 +9674,6 @@
 - !variable
     abivarname: gw_toldfeig
     characteristics:
-    - '[[GW]]'
     - '[[ENERGY]]'
     commentdefault: null
     commentdims: null
@@ -9719,7 +9686,7 @@
     requires: '[[optdriver]]==8'
     text: |-
         <p>
-         Sets a tolerance for absolute differences of QP energies that will cause one self-consistent [[GW]] cycle to stop.
+         Sets a tolerance for absolute differences of QP energies that will cause one self-consistent GW cycle to stop.
          <br />
          Can be specified in Ha (the default), Ry, eV or Kelvin, since
          <b>
@@ -9734,7 +9701,6 @@
 - !variable
     abivarname: gwcalctyp
     characteristics:
-    - '[[GW]]'
     commentdefault: null
     commentdims: null
     defaultval: 0
@@ -9744,7 +9710,7 @@
     requires: '[[optdriver]] in [3,4]'
     text: |-
         <p>
-         [[gwcalctyp]] governs the choice between the different capabilities of the [[GW]] code.
+         [[gwcalctyp]] governs the choice between the different capabilities of the GW code.
          <ul>
           <li>
            0 &#60;&#61; [[gwcalctyp]] &#60;&#61;  9 : standard "1 shot" quasiparticle method
@@ -9760,13 +9726,13 @@
         <p>
          <ul>
           <li>
-           [[gwcalctyp]] &#61; 0, 10, or 20 : standard Plasmon-Pole model [[GW]] calculation
+           [[gwcalctyp]] &#61; 0, 10, or 20 : standard Plasmon-Pole model GW calculation
           </li>
           <li>
-           [[gwcalctyp]] &#61; 1 : [[GW]] calculation where the self-energy along the real axis is obtained by performing the analytic continuation from the imaginary axis to the full complex plane via the Pade approximant. Only available for standard "1 shot" quasiparticle method.
+           [[gwcalctyp]] &#61; 1 : GW calculation where the self-energy along the real axis is obtained by performing the analytic continuation from the imaginary axis to the full complex plane via the Pade approximant. Only available for standard "1 shot" quasiparticle method.
           </li>
           <li>
-           [[gwcalctyp]] &#61; 2, 12, or 22 : [[GW]] calculation using numerical integration
+           [[gwcalctyp]] &#61; 2, 12, or 22 : GW calculation using numerical integration
         (contour deformation method, see e.g. S. Lebegue
            <i>
             et al.
@@ -9787,7 +9753,7 @@
            [[gwcalctyp]] &#61; 7, 17, or 27 : COHSEX calculation
           </li>
           <li>
-           [[gwcalctyp]] &#61; 8, 18, or 28 : model [[GW]] calculation
+           [[gwcalctyp]] &#61; 8, 18, or 28 : model GW calculation
         following S. Faleev
            <i>
             et al.
@@ -9799,7 +9765,7 @@
            , 126406 (2004) using a Plasmon-Pole model
           </li>
           <li>
-           [[gwcalctyp]] &#61; 9, 19, or 29 : model [[GW]] calculation
+           [[gwcalctyp]] &#61; 9, 19, or 29 : model GW calculation
         following S. Faleev
            <i>
             et al.
@@ -9833,7 +9799,6 @@
 - !variable
     abivarname: gwcomp
     characteristics:
-    - '[[GW]]'
     commentdefault: null
     commentdims: null
     defaultval: 0
@@ -9856,7 +9821,6 @@
 - !variable
     abivarname: gwencomp
     characteristics:
-    - '[[GW]]'
     commentdefault: null
     commentdims: null
     defaultval: 2.0
@@ -9878,7 +9842,6 @@
 - !variable
     abivarname: gwfockmix
     characteristics:
-    - '[[GW]]'
     commentdefault: null
     commentdims: null
     defaultval: 0.25
@@ -9894,7 +9857,6 @@
 - !variable
     abivarname: gwgamma
     characteristics:
-    - '[[GW]]'
     commentdefault: null
     commentdims: null
     defaultval: 0
@@ -9904,7 +9866,7 @@
     requires: '[[optdriver]]=3 or 4 (Sigma calculations)'
     text: |-
         <p>
-         If [[gwgamma]] is 1, the vertex correction will be included leading to what is known as "[[GW]]Gamma" approximation.
+         If [[gwgamma]] is 1, the vertex correction will be included leading to what is known as "GW-Gamma" approximation.
         see R. Del Sole, L. Reining, and R. W. Godby, Phys. Rev. B  49, 8024 (1994).
         Note that, in order to include the vertex correction in W, one has to start the sigma calculation
         from the susceptibility file_SUSC instead of the _SCR file (see [[getsuscep]]&nbsp;&nbsp;
@@ -9924,7 +9886,6 @@
 - !variable
     abivarname: gwls_band_index
     characteristics:
-    - '[[GW]]'
     commentdefault: null
     commentdims: null
     defaultval: 1
@@ -9943,7 +9904,6 @@
 - !variable
     abivarname: gwls_correlation
     characteristics:
-    - '[[GW]]'
     commentdefault: null
     commentdims: null
     defaultval: 3
@@ -9974,7 +9934,6 @@
 - !variable
     abivarname: gwls_diel_model
     characteristics:
-    - '[[GW]]'
     commentdefault: null
     commentdims: null
     defaultval: 2
@@ -9990,7 +9949,6 @@
 - !variable
     abivarname: gwls_exchange
     characteristics:
-    - '[[GW]]'
     commentdefault: null
     commentdims: null
     defaultval: 1
@@ -10008,7 +9966,6 @@
 - !variable
     abivarname: gwls_first_seed
     characteristics:
-    - '[[GW]]'
     commentdefault: null
     commentdims: null
     defaultval: '[[gwls_band_index]]'
@@ -10033,7 +9990,6 @@
 - !variable
     abivarname: gwls_kmax_analytic
     characteristics:
-    - '[[GW]]'
     commentdefault: null
     commentdims: null
     defaultval: 8
@@ -10052,7 +10008,6 @@
 - !variable
     abivarname: gwls_kmax_complement
     characteristics:
-    - '[[GW]]'
     commentdefault: null
     commentdims: null
     defaultval: 1
@@ -10077,7 +10032,6 @@
 - !variable
     abivarname: gwls_kmax_numeric
     characteristics:
-    - '[[GW]]'
     commentdefault: null
     commentdims: null
     defaultval: 16
@@ -10096,7 +10050,6 @@
 - !variable
     abivarname: gwls_kmax_poles
     characteristics:
-    - '[[GW]]'
     commentdefault: null
     commentdims: null
     defaultval: 4
@@ -10121,7 +10074,6 @@
 - !variable
     abivarname: gwls_list_proj_freq
     characteristics:
-    - '[[GW]]'
     commentdefault: null
     commentdims: null
     defaultval: '*0.0'
@@ -10140,7 +10092,6 @@
 - !variable
     abivarname: gwls_model_parameter
     characteristics:
-    - '[[GW]]'
     - '[[ENERGY]]'
     commentdefault: null
     commentdims: null
@@ -10168,7 +10119,6 @@
 - !variable
     abivarname: gwls_n_proj_freq
     characteristics:
-    - '[[GW]]'
     commentdefault: null
     commentdims: null
     defaultval: 0
@@ -10186,7 +10136,6 @@
 - !variable
     abivarname: gwls_npt_gauss_quad
     characteristics:
-    - '[[GW]]'
     commentdefault: null
     commentdims: null
     defaultval: 10
@@ -10204,7 +10153,6 @@
 - !variable
     abivarname: gwls_nseeds
     characteristics:
-    - '[[GW]]'
     commentdefault: null
     commentdims: null
     defaultval: 1
@@ -10222,7 +10170,6 @@
 - !variable
     abivarname: gwls_print_debug
     characteristics:
-    - '[[GW]]'
     commentdefault: null
     commentdims: null
     defaultval: 0
@@ -10238,7 +10185,6 @@
 - !variable
     abivarname: gwls_recycle
     characteristics:
-    - '[[GW]]'
     commentdefault: null
     commentdims: null
     defaultval: 2
@@ -10270,7 +10216,6 @@
 - !variable
     abivarname: gwls_stern_kmax
     characteristics:
-    - '[[GW]]'
     commentdefault: null
     commentdims: null
     defaultval: 1
@@ -10287,7 +10232,6 @@
 - !variable
     abivarname: gwmem
     characteristics:
-    - '[[GW]]'
     commentdefault: null
     commentdims: null
     defaultval: 11
@@ -10325,7 +10269,6 @@
 - !variable
     abivarname: gwpara
     characteristics:
-    - '[[GW]]'
     commentdefault: 'The default value has been changed in v8. From 1 to 2 '
     commentdims: null
     defaultval: 2
@@ -10336,7 +10279,7 @@
     text: |-
         <p>
          [[gwpara]] is used to choose between the two different parallelization levels
-        available in the [[GW]] code. The available options are:
+        available in the GW code. The available options are:
          <ul>
           <li>
            =1 =&gt; parallelisation on k points
@@ -10361,7 +10304,6 @@
 - !variable
     abivarname: gwrpacorr
     characteristics:
-    - '[[GW]]'
     commentdefault: null
     commentdims: null
     defaultval: 0
@@ -10687,7 +10629,6 @@
 - !variable
     abivarname: icutcoul
     characteristics:
-    - '[[GW]]'
     commentdefault: null
     commentdims: null
     defaultval: 6
@@ -10991,7 +10932,6 @@
 - !variable
     abivarname: inclvkb
     characteristics:
-    - '[[GW]]'
     commentdefault: null
     commentdims: null
     defaultval: 2
@@ -12177,7 +12117,6 @@
 - !variable
     abivarname: irdqps
     characteristics:
-    - '[[GW]]'
     commentdefault: null
     commentdims: null
     defaultval: 0
@@ -12192,13 +12131,12 @@
         in order to achieve a self-consistent quasiparticle calculations.
         See also [[getqps]]
         </p>
-    topics: GW_useful
+    topics: GW_useful, multidtset_useful
     varset: files
     vartype: integer
 - !variable
     abivarname: irdscr
     characteristics:
-    - '[[GW]]'
     commentdefault: null
     commentdims: null
     defaultval: 0
@@ -12226,13 +12164,12 @@
          </a>
          of the [[help_abinit]].
         </p>
-    topics: GW_useful
+    topics: GW_useful, multidtset_useful
     varset: files
     vartype: integer
 - !variable
     abivarname: irdsuscep
     characteristics:
-    - '[[GW]]'
     commentdefault: null
     commentdims: null
     defaultval: 0
@@ -12260,7 +12197,7 @@
          </a>
          of the [[help_abinit]].
         </p>
-    topics: GW_useful
+    topics: GW_useful, multidtset_useful
     varset: files
     vartype: integer
 - !variable
@@ -14793,7 +14730,6 @@
 - !variable
     abivarname: kptgw
     characteristics:
-    - '[[GW]]'
     commentdefault: null
     commentdims: null
     defaultval: !multiplevalue
@@ -15155,7 +15091,7 @@
         <p>
          Governs the choice of the format for the file that
         contains the Kohn-Sham electronic structure information,
-        for use in [[GW]] calculations, see the input variables
+        for use in GW calculations, see the input variables
         [[optdriver]] and
         [[nbandkss]].
          <ul>
@@ -15300,7 +15236,7 @@
     text: |-
         <p>
          This input variable is used only when running abinit in parallel.
-        If [[localrdwf]]=1, the input wavefunction disk file or the KSS/SCR file in case of [[GW]]
+        If [[localrdwf]]=1, the input wavefunction disk file or the KSS/SCR file in case of GW
         calculations, is read locally by each processor, while
         if [[localrdwf]]=0, only one processor reads it, and
         broadcast the data to the other processors.
@@ -15687,7 +15623,6 @@
 - !variable
     abivarname: mbpt_sciss
     characteristics:
-    - '[[GW]]'
     - '[[ENERGY]]'
     commentdefault: null
     commentdims: null
@@ -15699,7 +15634,7 @@
     text: |-
         <p>
          The Scissors operator energy added to the conductions states.
-        In some cases, it mimics a second iteration self-consistent [[GW]] calculation.
+        In some cases, it mimics a second iteration self-consistent GW calculation.
         </p>
     topics: GW_useful
     varset: gw
@@ -16530,7 +16465,7 @@
         each k point.
         </p>
         <p>
-         In the case of a [[GW]] calculation ([[optdriver]]=3 or 4),
+         In the case of a GW calculation ([[optdriver]]=3 or 4),
         [[nband]] gives the number of bands to be treated to generate the screening (susceptibility
         and dielectric matrix), as well as the self-energy. However, to generate the _KSS
         file (see [[kssform]])
@@ -16569,12 +16504,12 @@
     requires: null
     text: |-
         <p>
-         This input variable is used for the preparation of a [[GW]] calculation :
+         This input variable is used for the preparation of a GW calculation :
         it is used in a GS run (where [[optdriver]]=0) to generate a _KSS file.
         In this run, [[nbandkss]] should be non-zero.
         The generated _KSS file can be subsequently used to calculate the irreducible polarizabilty
         $\chi^{(0)}_{KS}$ using [[optdriver]]=3
-        or to calculate [[GW]] corrections setting [[optdriver]]=4.
+        or to calculate GW corrections setting [[optdriver]]=4.
         </p>
         <p>
          <ul>
@@ -16598,7 +16533,7 @@
          <br />
          The input variable [[iomode]] can be used
         to read and write KSS files according to different fileformat
-        (presently only [[iomode]]=0 and 3 are available in the [[GW]] part).
+        (presently only [[iomode]]=0 and 3 are available in the GW part).
          <br />
          The precision of the KSS file can be tuned through the input variable [[kssform]].
          <br />
@@ -17226,7 +17161,7 @@
     text: |-
         <p>
          [[nfreqim]] sets the number of pure imaginary frequencies used to calculate
-        the dielectric matrix in order to perform the numerical integration of the [[GW]] self-energy.
+        the dielectric matrix in order to perform the numerical integration of the GW self-energy.
         </p>
     topics: GW_basic
     varset: gw
@@ -17271,7 +17206,7 @@
     text: |-
         <p>
          [[nfreqre]] sets the number of real frequencies used to calculate
-        the dielectric matrix in order to perform the numerical integration of the [[GW]] self-energy.
+        the dielectric matrix in order to perform the numerical integration of the GW self-energy.
         </p>
         <p>
          It can be used also in case of [[GW]] calculations with plasmon-pole models,
@@ -17307,7 +17242,7 @@
     text: |-
         <p>
          [[nfreqsp]] defines the number of real frequencies used to calculate the spectral function
-        of the [[GW]] Green's function.
+        of the GW Green's function.
         </p>
     topics: GW_basic
     varset: gw
@@ -17804,7 +17739,6 @@
 - !variable
     abivarname: nkptgw
     characteristics:
-    - '[[GW]]'
     commentdefault: null
     commentdims: null
     defaultval: 0
@@ -17814,7 +17748,7 @@
     requires: '[[optdriver]]==4'
     text: |-
         <p>
-         [[nkptgw]] gives the number of k-points for which the [[GW]] calculation must be done.
+         [[nkptgw]] gives the number of k-points for which the GW calculation must be done.
         It is used to dimension [[kptgw]]
         </p>
     topics: GW_basic
@@ -18144,7 +18078,6 @@
 - !variable
     abivarname: nomegasf
     characteristics:
-    - '[[GW]]'
     - '[[ENERGY]]'
     commentdefault: null
     commentdims: null
@@ -18173,7 +18106,6 @@
 - !variable
     abivarname: nomegasi
     characteristics:
-    - '[[GW]]'
     commentdefault: null
     commentdims: null
     defaultval: 12
@@ -18193,7 +18125,6 @@
 - !variable
     abivarname: nomegasrd
     characteristics:
-    - '[[GW]]'
     commentdefault: null
     commentdims: null
     defaultval: 9
@@ -18683,7 +18614,6 @@
 - !variable
     abivarname: npvel
     characteristics:
-    - '[[GW]]'
     commentdefault: null
     commentdims: null
     defaultval: 0
@@ -18707,7 +18637,6 @@
 - !variable
     abivarname: npweps
     characteristics:
-    - '[[GW]]'
     - '[[INTERNAL_ONLY]]'
     commentdefault: null
     commentdims: null
@@ -18738,7 +18667,7 @@
     requires: null
     text: |-
         <p>
-         This input variable is used for the preparation of a [[GW]] calculation:
+         This input variable is used for the preparation of a GW calculation:
         the GS run (where [[optdriver]]=1 and
          <b>
           nbandkss
@@ -18758,13 +18687,12 @@
         <p>
          Very important : for the time being, [[istwfk]] must be 1 for all the k-points.
         </p>
-    topics: GW_useful
+    topics: GW_expert
     varset: gw
     vartype: integer
 - !variable
     abivarname: npwsigx
     characteristics:
-    - '[[GW]]'
     - '[[INTERNAL_ONLY]]'
     commentdefault: null
     commentdims: null
@@ -18786,7 +18714,6 @@
 - !variable
     abivarname: npwwfn
     characteristics:
-    - '[[GW]]'
     - '[[INTERNAL_ONLY]]'
     commentdefault: null
     commentdims: null
@@ -19348,12 +19275,12 @@
         then recompile the code.
         </p>
         <p>
-         For [[GW]] calculation, the user might want to select only the symmetry operations whose
+         For GW calculation, the user might want to select only the symmetry operations whose
         non-symmorphic translation vector [[tnons]]
         is zero. This can be done with the help of the input variable
         [[symmorphi]]
         </p>
-    topics: crystal_useful
+    topics: crystal_useful, GW_useful
     varset: basic
     vartype: integer
 - !variable
@@ -20327,7 +20254,6 @@
 - !variable
     abivarname: omegasimax
     characteristics:
-    - '[[GW]]'
     - '[[ENERGY]]'
     commentdefault: null
     commentdims: null
@@ -20351,7 +20277,6 @@
 - !variable
     abivarname: omegasrdmax
     characteristics:
-    - '[[GW]]'
     - '[[ENERGY]]'
     commentdefault: null
     commentdims: null
@@ -21236,7 +21161,7 @@
     requires: null
     text: |-
         <p>
-        Only relevant for [[GW]] or [[BETHE_SALPETER]] calculations with PAW.
+        Only relevant for GW or [[BETHE_SALPETER]] calculations with PAW.
          <br />
          This variable defines the approach used for the evaluation of the oscillator matrix elements within the PAW formalism.
         Possible values are 0,1,2.
@@ -22710,7 +22635,6 @@
 - !variable
     abivarname: ppmfrq
     characteristics:
-    - '[[GW]]'
     - '[[ENERGY]]'
     commentdefault: null
     commentdims: null
@@ -22779,7 +22703,6 @@
 - !variable
     abivarname: ppmodel
     characteristics:
-    - '[[GW]]'
     commentdefault: null
     commentdims: null
     defaultval: 1
@@ -24729,10 +24652,7 @@
             ABINIT- Wannier90
            </b>
            interface after converting the
-        input wavefunctions to
-           <b>
-            [[GW]] quasiparticle
-           </b>
+        input wavefunctions to <b>quasiparticle</b>
            wavefunctions.
            <p>
             ABINIT will produce the input files required by Wannier90  and it will
@@ -24748,7 +24668,7 @@
             <ul>
              <li>
               An input file of LDA wave functions is required which is completely
-        consistent with the _KSS file used in the self-consistent [[GW]] calculation.
+        consistent with the _KSS file used in the self-consistent GW calculation.
         This means that [[kssform]] 3 must be used
         to create the _KSS file and the output _WFK file from the same run must
         be used as input here.
@@ -24756,7 +24676,7 @@
              <li>
               Wannier90 requires [[nshiftk]]=1, and
         [[shiftk]]= 0 0 0 is recommended.  The k-point
-        set used for the [[GW]] calculation, typically the irreducible BZ set created
+        set used for the GW calculation, typically the irreducible BZ set created
         using [[kptopt]]=1, and that for the Abinit-
         Wannier90 interface must be consistent.
              </li>
@@ -24766,10 +24686,10 @@
         [[iscf]]=-2, and
         [[nstep]]=3.  This will simply use symmetry to
         transform the input IBZ wavefunctions to the full BZ set, still consistent
-        with the [[GW]] _KSS input.
+        with the GW _KSS input.
              </li>
              <li>
-              The final _QPS file created by the self-consistent [[GW]] run is required
+              The final _QPS file created by the self-consistent GW run is required
         as input.
              </li>
              <li>
@@ -25335,7 +25255,6 @@
 - !variable
     abivarname: qptdm
     characteristics:
-    - '[[GW]]'
     commentdefault: null
     commentdims: null
     defaultval: !multiplevalue
@@ -25796,7 +25715,6 @@
 - !variable
     abivarname: rcut
     characteristics:
-    - '[[GW]]'
     commentdefault: null
     commentdims: null
     defaultval: 0.0
@@ -26640,7 +26558,6 @@
 - !variable
     abivarname: rhoqpmix
     characteristics:
-    - '[[GW]]'
     commentdefault: null
     commentdims: null
     defaultval: 1.0
@@ -26650,7 +26567,7 @@
     requires: null
     text: |-
         <p>
-         For self-consistent [[GW]] runs, [[rhoqpmix]] sets the mixing coefficient between the new and the previous
+         For self-consistent GW runs, [[rhoqpmix]] sets the mixing coefficient between the new and the previous
         electronic densities.
         This mixing damps the spurious oscillations in the Hartree potential when achieving self-consistency.
         [[rhoqpmix]] is meaningful only when doing self-consistency on the wavefunctions with
@@ -27393,7 +27310,6 @@
 - !variable
     abivarname: spbroad
     characteristics:
-    - '[[GW]]'
     - '[[ENERGY]]'
     commentdefault: null
     commentdims: null
@@ -27768,7 +27684,6 @@
 - !variable
     abivarname: spmeth
     characteristics:
-    - '[[GW]]'
     commentdefault: null
     commentdims: null
     defaultval: 0
@@ -28102,7 +28017,6 @@
     abivarname: symchi
     characteristics:
     - '[[DEVELOP]]'
-    - '[[GW]]'
     commentdefault: null
     commentdims: null
     defaultval: 1
@@ -28192,7 +28106,6 @@
     abivarname: symmorphi
     characteristics:
     - '[[DEVELOP]]'
-    - '[[GW]]'
     commentdefault: null
     commentdims: null
     defaultval: 1
@@ -28216,7 +28129,7 @@
         to the IBZ. In order to prepare [[GW]] calculations, and to perform [[GW]] calculations,
         [[symmorphi]]=0 was to be used, together with [[nsym]]=0.
         </p>
-    topics: crystal_expert
+    topics: crystal_expert, GW_useful
     varset: dev
     vartype: integer
 - !variable
@@ -28279,7 +28192,6 @@
 - !variable
     abivarname: symsigma
     characteristics:
-    - '[[GW]]'
     commentdefault: null
     commentdims: null
     defaultval: 0
@@ -28296,7 +28208,7 @@
         </p>
         <p>
          The symmetrized expression leads to a considerable speedup of the run but, unfortunately,
-        this option is not yet compatible with self-consistent [[GW]] calculations
+        this option is not yet compatible with self-consistent GW calculations
         (see [[gwcalctyp]]).
         </p>
         <p>
@@ -28305,7 +28217,7 @@
         by simply averaging the [[GW]] results within the degenerate subspace.
 
         Therefore particular care has to be taken in the presence of accidental degeneracies.
-        since [[GW]] calculations performed with [[symsigma]]=1 will not be able to remove
+        since GW calculations performed with [[symsigma]]=1 will not be able to remove
         the initial accidental degeneracy.
         </p>
     topics: GW_expert
@@ -29346,7 +29258,6 @@
 - !variable
     abivarname: ucrpa
     characteristics:
-    - '[[GW]]'
     commentdefault: null
     commentdims: null
     defaultval: 0
@@ -29393,7 +29304,6 @@
 - !variable
     abivarname: ucrpa_bands
     characteristics:
-    - '[[GW]]'
     commentdefault: That is, the default includes no band.
     commentdims: null
     defaultval:
@@ -29416,7 +29326,6 @@
 - !variable
     abivarname: ucrpa_window
     characteristics:
-    - '[[GW]]'
     commentdefault: That is, the energy window is empty by default.
     commentdims: null
     defaultval:
@@ -29499,23 +29408,23 @@
         [[lpawu]]
         =-1, the value is not used.
          <br />
-         In the case of a [[GW]] calculation, the U interaction defined by [[upawu]] will be REMOVED from the self energy.
+         In the case of a GW calculation, the U interaction defined by [[upawu]] will be REMOVED from the self energy.
         In particular, for G0 W0 calculations (perturbative calculations), the energy eigenvalues obtained
         after an underlying DFT+U calculation will be
          <br />
-         E_[[GW]] = E_DFT+U + &lt; phi | Self-energy - U | phi&gt;
+         E_GW = E_DFT+U + &lt; phi | Self-energy - U | phi&gt;
          <br />
-         Actually, in order to perform a [[GW]] @ DFT+U calculation, one should define the same value of U in the self-energy calculation,
+         Actually, in order to perform a GW @ DFT+U calculation, one should define the same value of U in the self-energy calculation,
         than the one defined in the DFT calculation.
         The easiest is actually to define the value of U for the whole set of calculations (for the different datasets),
         including the screening, even if the U value does not play explicitly a role in the computation of the latter (well, the input
         wavefunctions will be different anyhow).
          <br />
-         It is possible to perform calculations of the type [[GW]]+U_prime @ DFT+U , so keeping a U interaction  (usually smaller than the initial U)
-        in the [[GW]] calculation, by defining a smaller U than the one used in the DFT calculation. This value will be subtracted in the [[GW]] correction calculation,
+         It is possible to perform calculations of the type GW+U_prime @ DFT+U , so keeping a U interaction  (usually smaller than the initial U)
+        in the GW calculation, by defining a smaller U than the one used in the DFT calculation. This value will be subtracted in the GW correction calculation,
         as outlined above.
          <br />
-         Explicitly, in order to do a calculation of a material with a DFT U value of 7.5 eV, followed by a [[GW]] calculation where there is a residual
+         Explicitly, in order to do a calculation of a material with a DFT U value of 7.5 eV, followed by a GW calculation where there is a residual
         U value of 2 eV, one has to define :
          <pre>
           upawu1   7.5 eV   ! This is for the DFT calculation
@@ -29842,7 +29751,7 @@
     requires: '[[usepaw]]==1'
     text: |-
         <p>
-         Must be non-zero if a DFT+U calculation is done, or if a [[GW]] calculation following a DFT+U calculation is done (important !).
+         Must be non-zero if a DFT+U calculation is done, or if a GW calculation following a DFT+U calculation is done (important !).
          <ul>
           <li>
            If set to 0, the LDA+U method is not used.
@@ -29912,7 +29821,7 @@
          - B. Amadon, F. Jollet and M. Torrent, Phys. Rev. B 77, 155104 (2008).
          <br />
         </p>
-    topics: DFT+U_compulsory
+    topics: DFT+U_compulsory, GW_useful
     varset: paw
     vartype: integer
 - !variable
@@ -30394,7 +30303,6 @@
 - !variable
     abivarname: vcutgeo
     characteristics:
-    - '[[GW]]'
     commentdefault: null
     commentdims: null
     defaultval: !multiplevalue
@@ -32198,7 +32106,6 @@
 - !variable
     abivarname: zcut
     characteristics:
-    - '[[GW]]'
     - '[[ENERGY]]'
     commentdefault: 0.0036749326 Ha = 0.1 eV
     commentdims: null
