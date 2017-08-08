@@ -67,7 +67,7 @@ subroutine initrhoij(cplex,lexexch,lpawu,my_natom,natom,&
  use m_xmpi, only : xmpi_comm_self
 
  use m_pawtab,      only : pawtab_type
- use m_pawrhoij,    only : pawrhoij_type, pawrhoij_alloc
+ use m_pawrhoij,    only : pawrhoij_type, pawrhoij_alloc, pawrhoij_get_nspden
  use m_paral_atom,  only : get_my_atmtab, free_my_atmtab
 
 !This section has been created automatically by the script Abilint (TD).
@@ -119,7 +119,7 @@ subroutine initrhoij(cplex,lexexch,lpawu,my_natom,natom,&
  my_comm_atom=xmpi_comm_self;if (present(comm_atom)) my_comm_atom=comm_atom
  call get_my_atmtab(my_comm_atom,my_atmtab,my_atmtab_allocated,paral_atom,natom,my_natom_ref=my_natom)
 
- nspden_rhoij=nspden;if (pawspnorb>0.and.nspinor==2) nspden_rhoij=4
+ nspden_rhoij=pawrhoij_get_nspden(nspden,nspinor,pawspnorb)
  ratio=one;if (nspden_rhoij==2) ratio=half
 
  if (my_natom>0) then

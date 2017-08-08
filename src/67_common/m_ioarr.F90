@@ -1084,10 +1084,10 @@ subroutine read_rhor(fname, cplex, nspden, nfft, ngfft, pawread, mpi_enreg, orho
      if (ohdr%usepaw == 1) then
        ABI_DT_MALLOC(pawrhoij_file, (ohdr%natom))
        call pawrhoij_nullify(pawrhoij_file)
-       call pawrhoij_alloc(pawrhoij_file, ohdr%pawcpxocc, ohdr%nspden, ohdr%nspinor, ohdr%nsppol, ohdr%typat, &
-         lmnsize=ohdr%lmn_size)
+       call pawrhoij_alloc(pawrhoij_file, ohdr%pawrhoij(1)%cplex, ohdr%pawrhoij(1)%nspden, ohdr%pawrhoij(1)%nspinor, &
+&           ohdr%pawrhoij(1)%nsppol, ohdr%typat, lmnsize=ohdr%lmn_size)
        call pawrhoij_copy(ohdr%pawrhoij, pawrhoij_file)
-       !call pawrhoij_io(pawrhoij_file, unt, ohdr%nsppol, ohdr%nspinor, ohdr%nspden, ohdr%lmn_size, ohdr%typat, ohdr%headform, "Read")
+       !call pawrhoij_io(pawrhoij_file, unt, ohdr%pawrhoij(1)%nsppol, ohdr%pawrhoij(1)%nspinor, ohdr%pawrhoij(1)%nspden, & !& ohdr%lmn_size, ohdr%typat, ohdr%headform, "Read")
      end if
 
      ! Read FFT array (full box)
@@ -1117,11 +1117,11 @@ subroutine read_rhor(fname, cplex, nspden, nfft, ngfft, pawread, mpi_enreg, orho
      if (ohdr%usepaw == 1) then
        ABI_DT_MALLOC(pawrhoij_file, (ohdr%natom))
        call pawrhoij_nullify(pawrhoij_file)
-       call pawrhoij_alloc(pawrhoij_file, ohdr%pawcpxocc, ohdr%nspden, ohdr%nspinor, ohdr%nsppol, ohdr%typat, &
-         lmnsize=ohdr%lmn_size)
+       call pawrhoij_alloc(pawrhoij_file, ohdr%pawrhoij(1)%cplex, ohdr%pawrhoij(1)%nspden, ohdr%pawrhoij(1)%nspinor, &
+&           ohdr%pawrhoij(1)%nsppol, ohdr%typat, lmnsize=ohdr%lmn_size)
        call pawrhoij_copy(ohdr%pawrhoij, pawrhoij_file)
-       !call pawrhoij_io(pawrhoij_file, unt, ohdr%nsppol, ohdr%nspinor, ohdr%nspden, ohdr%lmn_size, ohdr%typat, ohdr%headform, &
-       ! "Read", form="netcdf")
+       !call pawrhoij_io(pawrhoij_file, unt, ohdr%pawrhoij(1)%nsppol, ohdr%pawrhoij(1)%nspinor, ohdr%pawrhoij(1)%nspden, &
+       !& ohdr%lmn_size, ohdr%typat, ohdr%headform, "Read", form="netcdf")
      end if
 
      NCF_CHECK(nf90_close(unt))
@@ -1183,8 +1183,8 @@ subroutine read_rhor(fname, cplex, nspden, nfft, ngfft, pawread, mpi_enreg, orho
      if (my_rank /= master) then
        ABI_DT_MALLOC(pawrhoij_file, (ohdr%natom))
        call pawrhoij_nullify(pawrhoij_file)
-       call pawrhoij_alloc(pawrhoij_file, ohdr%pawcpxocc, ohdr%nspden, ohdr%nspinor, ohdr%nsppol, ohdr%typat, &
-         lmnsize=ohdr%lmn_size)
+       call pawrhoij_alloc(pawrhoij_file, ohdr%pawrhoij(1)%cplex, ohdr%pawrhoij(1)%nspden, ohdr%pawrhoij(1)%nspinor, &
+&           ohdr%pawrhoij(1)%nsppol, ohdr%typat, lmnsize=ohdr%lmn_size)
      end if
 #if 0
      ! FIXME: This code segfaults, likely due to pawrhoij_bcast

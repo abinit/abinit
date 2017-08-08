@@ -55,6 +55,7 @@ MODULE m_pawrhoij
  public :: pawrhoij_unpack
  public :: pawrhoij_init_unpacked
  public :: pawrhoij_free_unpacked
+ public :: pawrhoij_get_nspden
  public :: symrhoij
 
  public :: pawrhoij_mpisum_unpacked
@@ -2190,6 +2191,7 @@ subroutine pawrhoij_io(pawrhoij,unitfi,nsppol_in,nspinor_in,nspden_in,nlmn_type,
 ! *************************************************************************
 
  my_natom=SIZE(pawrhoij);if (my_natom==0) return
+ my_nspden=nspden_in
  natom=size(typat)
  paral_atom=(my_natom/=natom)
  if (present(mpi_atmtab)) then
@@ -2277,7 +2279,6 @@ subroutine pawrhoij_io(pawrhoij,unitfi,nsppol_in,nspinor_in,nspden_in,nlmn_type,
           NCF_CHECK(nf90_get_var(ncid, nsel56_id, nsel56))
 #endif
          end if
-         my_nspden=nspden_in
        else
          if (iomode == fort_binary) then
            read(unitfi  ) (nsel56(iatom),iatom=1,natom),my_cplex,my_nspden
@@ -2300,7 +2301,7 @@ subroutine pawrhoij_io(pawrhoij,unitfi,nsppol_in,nspinor_in,nspden_in,nlmn_type,
        end do
        bsize=sum(nsel56)
        LIBPAW_ALLOCATE(ibuffer,(bsize))
-       LIBPAW_ALLOCATE(buffer,(bsize*nspden_in*my_cplex))
+       LIBPAW_ALLOCATE(buffer,(bsize*my_nspden*my_cplex))
        if (iomode == fort_binary) then
          read(unitfi  ) ibuffer(:),buffer(:)
        else if (iomode == fort_formatted) then
@@ -2320,7 +2321,7 @@ subroutine pawrhoij_io(pawrhoij,unitfi,nsppol_in,nspinor_in,nspden_in,nlmn_type,
          nselect=nsel56(iatom)
          pawrhoij(iatom)%rhoijselect(1:nselect)=ibuffer(ii+1:ii+nselect)
          ii=ii+nselect
-         do ispden=1,nspden_in
+         do ispden=1,my_nspden
            pawrhoij(iatom)%rhoijp(1:my_cplex*nselect,ispden)=buffer(jj+1:jj+my_cplex*nselect)
            jj=jj+my_cplex*nselect
          end do
@@ -2876,6 +2877,58 @@ subroutine pawrhoij_mpisum_unpacked_2D(pawrhoij,comm1,comm2)
  LIBPAW_DEALLOCATE(dimlmn)
 
 end subroutine pawrhoij_mpisum_unpacked_2D
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_pawrhoij/pawrhoij_get_nspden
+!! NAME
+!! pawrhoij_get_nspden
+!!
+!! FUNCTION
+!! Compute the value of nspden (number of spin component) for a pawrhoij datastructure.
+!! This one depends on the number of spinorial components, the number of components
+!! of the density and use of the spin-orbit coupling.
+!!
+!! INPUTS
+!!  nspden= number of spin-density components
+!!  nspinor= number of spinorial components
+!!  spnorb= flag: 1 if spin-orbit coupling is activated
+!!
+!! OUTPUT
+!!  pawrhoij_get_nspden= value of nspden associated to pawrhoij
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+function pawrhoij_get_nspden(nspden,nspinor,spnorb)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'pawrhoij_get_nspden'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ---------------------------------------------
+!scalars
+ integer,intent(in) :: nspden,nspinor,spnorb
+ integer :: pawrhoij_get_nspden
+!arrays
+
+!Local variables ---------------------------------------
+
+!************************************************************************
+
+ pawrhoij_get_nspden=nspden
+ if (nspinor==2.and.spnorb>0) pawrhoij_get_nspden=4
+
+end function pawrhoij_get_nspden
 !!***
 
 !----------------------------------------------------------------------
