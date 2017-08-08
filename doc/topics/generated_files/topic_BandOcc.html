@@ -1,0 +1,87 @@
+<!--                                                                                     -->
+<!-- This file has been produced by generate_doc.py using different .yml  or .bib files. -->
+<!-- It is useless to modify it. Modify the related .yml  or .bib files instead.         -->
+<!--                                                                                     -->
+<html>
+<head><title>Metal/insulators - bands and occupations </title>
+<link rel=stylesheet type="text/css" href="../formabinit.css">
+</head>
+<body bgcolor="#ffffff">
+
+<hr>
+<a name="top"></a>
+
+<h1>General settings</h1>
+<h3>This file gives hints on how to to specify a metal or an insulators, and the related bands and occupation numbers with the ABINIT package.
+<hr>
+
+<h5>Copyright (C) 2016-2017 ABINIT group (FJ)
+<script type="text/javascript" src="../../js_files/copyright.js"> </script>
+</h5>
+
+<script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
+
+ <h3><b>Table of content: </b></h3> 
+ <ul> <li><a href="topic_BandOcc.html#1">1</a>. Introduction.<li><a href="topic_BandOcc.html#2">2</a>. Related lesson(s) of the tutorial.<li><a href="topic_BandOcc.html#3">3</a>. Related input variables.</ul>
+
+&nbsp; 
+<HR ALIGN=left> 
+<a name="1">&nbsp;</a>
+<h3><b>1. Introduction.</b></h3>
+
+
+<br/>Metallic as well as insulating systems can be treated. Schemes for
+determination of the occupation number include the Fermi broadening,
+the Gaussian broadening, the Gaussian-Hermite broadening, as well as
+the modifications proposed by Marzari. Finite temperatures
+can also be treated using a smearing scheme (Verstraete scheme).
+<br><br><a href=#top>Go to the top</a>
+
+
+
+&nbsp; 
+<HR ALIGN=left> 
+<a name="2">&nbsp;</a>
+<h3><b>2. Related lesson(s) of the tutorial.</b></h3>
+
+
+<li><a href="../../tutorial/generated_files/lesson_base1.html">The lesson 1</a> deals with the H2
+molecule : get the total energy, the electronic energies, the charge
+density, the bond length, the atomisation energy </li>
+<li><a href="../../tutorial/generated_files/lesson_base2.html">The lesson 2</a> deals again with the H2
+molecule: convergence studies, LDA versus GGA </li>
+<li><a href="../../tutorial/generated_files/lesson_base3.html">The lesson 3</a> deals with crystalline
+silicon (an insulator): the definition of a k-point grid, the smearing
+of the cut-off energy, the computation of a band structure, and again,
+convergence studies ...</li>
+<li><a href="../../tutorial/generated_files/lesson_base4.html">The lesson 4</a> deals with crystalline
+aluminum (a metal), and its surface: occupation numbers, smearing the
+Fermi-Dirac distribution, the surface energy, and again, convergence
+studies ...</li>
+<br><br><a href=#top>Go to the top</a>
+
+
+&nbsp; 
+<hr> 
+<a name="3">&nbsp;</a>
+<h3><b>3. Related input variables.</b></h3>
+
+
+<p>Basic input variables:<p>... <a href="../../input_variables/generated_files/varset_basic.html#nband">nband</a>   [Number of BANDs]<br>
+... <a href="../../input_variables/generated_files/varset_gstate.html#occ">occ</a>   [OCCupation numbers]<br>
+... <a href="../../input_variables/generated_files/varset_basic.html#occopt">occopt</a>   [OCCupation OPTion]<br>
+... <a href="../../input_variables/generated_files/varset_gstate.html#tsmear">tsmear</a>   [Temperature of SMEARing]<br>
+<p>Useful input variables:<p>... <a href="../../input_variables/generated_files/varset_gstate.html#fband">fband</a>   [Factor for the number of BANDs]<br>
+... <a href="../../input_variables/generated_files/varset_gstate.html#tphysel">tphysel</a>   [Temperature (PHYSical) of the ELectrons]<br>
+<p>Relevant internal variables:<p>... <a href="../../input_variables/generated_files/varset_internal.html#mband">%mband</a>   [Maximum number of BANDs]<br>
+... <a href="../../input_variables/generated_files/varset_internal.html#nelect">%nelect</a>   [Number of ELECTrons]<br>
+
+<br><br><a href=#top>Go to the top</a>
+
+
+
+<script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
+
+</body>
+</html>
+
