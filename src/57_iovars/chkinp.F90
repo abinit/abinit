@@ -864,23 +864,18 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
      end if
    end if
 
-!  gwls_sternheimer_kmax
-   call chkint_ge(0,0,cond_string,cond_values,ierr,'gwls_sternheimer_kmax',dt%gwls_sternheimer_kmax,1,iout)
+!  gwls_stern_kmax
+   call chkint_ge(0,0,cond_string,cond_values,ierr,'gwls_stern_kmax',dt%gwls_stern_kmax,1,iout)
 
 !  gwls_npt_gauss_quad
    call chkint_ge(0,0,cond_string,cond_values,ierr,'gwls_npt_gauss_quad',dt%gwls_npt_gauss_quad,1,iout)
 
-! gwls_dielectric_model
-   call chkint_ge(0,0,cond_string,cond_values,ierr,'gwls_dielectric_model',dt%gwls_dielectric_model,1,iout)
-   call chkint_le(0,0,cond_string,cond_values,ierr,'gwls_dielectric_model',dt%gwls_dielectric_model,3,iout)
+! gwls_diel_model
+   call chkint_ge(0,0,cond_string,cond_values,ierr,'gwls_diel_model',dt%gwls_diel_model,1,iout)
+   call chkint_le(0,0,cond_string,cond_values,ierr,'gwls_diel_model',dt%gwls_diel_model,3,iout)
 
 ! gwls_model_parameter
    call chkdpr(0,0,cond_string,cond_values,ierr,'gwls_model_parameter',dt%gwls_model_parameter,1,zero,iout)
-
-! gwls_second_model_parameter
-   call chkdpr(0,0,cond_string,cond_values,ierr,'gwls_second_model_parameter',  &
-   dt%gwls_second_model_parameter,1,-1000.0_dp,iout)
-
 
 ! gwls_print_debug
    call chkint_ge(0,0,cond_string,cond_values,ierr,'gwls_print_debug',dt%gwls_print_debug,0,iout)

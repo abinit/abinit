@@ -50,4 +50,5 @@
 #%% description = 
 #%%    Chebyshev, C-diamond, Bulk, 2 atoms, paral_kgb, with PAW.
 #%%    Also test gemm_nonlop
+#%% topics = parallelism
 #%%<END TEST_INFO>

@@ -1,0 +1,101 @@
+<!--                                                                                     -->
+<!-- This file has been produced by generate_doc.py using different .yml  or .bib files. -->
+<!-- It is useless to modify it. Modify the related .yml  or .bib files instead.         -->
+<!--                                                                                     -->
+<html>
+<head><title>Constrained RPA </title>
+<link rel=stylesheet type="text/css" href="../formabinit.css">
+</head>
+<body bgcolor="#ffffff">
+
+<hr>
+<a name="top"></a>
+
+<h1>Calculation of the effective Coulomb interaction.</h1>
+<h3>This file gives hints on how to calculate the effective Coulomb interaction with the ABINIT package.
+<hr>
+
+<h5>Copyright (C) 2016-2017 ABINIT group (BAmadon)
+<script type="text/javascript" src="../../js_files/copyright.js"> </script>
+</h5>
+
+<script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
+
+ <h3><b>Table of content: </b></h3> 
+ <ul> <li><a href="topic_CRPA.html#1">1</a>. Introduction.<li><a href="topic_CRPA.html#2">2</a>. Related lesson(s) of the tutorial.<li><a href="topic_CRPA.html#3">3</a>. Related input variables.<li><a href="topic_CRPA.html#4">4</a>. Selected input files.<li><a href="topic_CRPA.html#5">5</a>. References.</ul>
+
+&nbsp; 
+<HR ALIGN=left> 
+<a name="1">&nbsp;</a>
+<h3><b>1. Introduction.</b></h3>
+
+
+<p>LDA+U as well as DFT+DMFT requires as input values the effective Coulomb interaction. Two ways to compute them are available in ABINIT.
+
+<p>Firstly, the constrained Random Phase Approximation <a href="../../bibliography/generated_files/bibliography.html#Aryasetiawan2004">[Aryasetiawan2004]</a> <a href="../../input_variables/generated_files/vargw.html#ucrpa">ucrpa</a> allows one to take into account 
+the screening of the Coulomb interaction between correlated electrons, by non-interacting electrons. For non-entangled bands (<a href="../../input_variables/generated_files/vargw.html#ucrpa">ucrpa</a>= 1), the bands excluded from the polarisability
+can be specified either by a band index (<a href="../../input_variables/generated_files/vargw.html#ucrpa_bands">ucrpa_bands</a>) or an energy window (<a href="../../input_variables/generated_files/vargw.html#ucrpa_window">ucrpa_window</a>) <a href="../../bibliography/generated_files/bibliography.html#Amadon2014">[Amadon2014]</a>.
+<p>For entangled bands (<a href="../../input_variables/generated_files/vargw.html#ucrpa">ucrpa</a>= 2}), the scheme used in ABINIT <a href="../../bibliography/generated_files/bibliography.html#Shih2012">[Shih2012]</a>,<a href="../../bibliography/generated_files/bibliography.html#Sakuma2013">[Sakuma2013]</a>,<a href="../../bibliography/generated_files/bibliography.html#Amadon2014">[Amadon2014]</a> uses a band and k-point dependent
+weight to define the polarisability, using Wannier orbitals as correlated orbitals.
+<p>This method is well adapted to compute the effective interaction for the same orbitals used in DFT+DMFT. To
+use the same orbitals as in DFT+U, the Wannier functions should be defined with a very large energy window <a href="../../bibliography/generated_files/bibliography.html#Amadon2014">[Amadon2014]</a>,<a href="../../bibliography/generated_files/bibliography.html#Amadon2012">[Amadon2012]</a>.
+
+<p>Secondly, a linear response method <a href="../../bibliography/generated_files/bibliography.html#Cococcioni2005">[Cococcioni2005]</a> is implemented. The implementation is not
+yet in production. The implementation in ABINIT takes into account the truncated atomic orbitals from PAW and therefore differs from the original work <a href="../../bibliography/generated_files/bibliography.html#Cococcioni2005">[Cococcioni2005]</a> treating full atomic orbitals. In particular, considerably higher effective values for U are found.
+
+
+&nbsp; 
+<HR ALIGN=left> 
+<a name="2">&nbsp;</a>
+<h3><b>2. Related lesson(s) of the tutorial.</b></h3>
+
+
+<li><a href="../../tutorial/generated_files/lesson_ucalc_crpa.html">The lesson on the calculation of effective interactions U and J by the cRPA method</a> shows how to determine the U value with the constrained Random Phase Approximation <a href="../../bibliography/generated_files/bibliography.html#Aryasetiawan2004">[Aryasetiawan2004]</a> using projected Wannier orbitals.  Prerequisite : DFT+U.</li>
+<li><a href="../../tutorial/generated_files/lesson_udet.html">The lesson on the determination of U
+for DFT+U</a> shows how to determine the U value with the linear response method <a href="../../bibliography/generated_files/bibliography.html#Cococcioni2005">[Cococcioni2005]</a>, to be used in the
+DFT+U approach. Prerequisite : DFT+U.</li>
+
+&nbsp; 
+<HR ALIGN=left> 
+<a name="3">&nbsp;</a>
+<h3><b>3. Related input variables.</b></h3>
+
+
+<p>Compulsory input variables:<p>... <a href="../../input_variables/generated_files/vargw.html#ucrpa">ucrpa</a>   [calculation of the screened interaction U with the Constrained RPA method]<br>
+<p>Basic input variables:<p>... <a href="../../input_variables/generated_files/vargw.html#ucrpa_bands">ucrpa_bands</a>   [For the calculation of U with the Constrained RPA method, gives correlated BANDS]<br>
+... <a href="../../input_variables/generated_files/vargw.html#ucrpa_window">ucrpa_window</a>   [For the calculation of U with the Constrained RPA method, gives energy WINDOW]<br>
+
+
+&nbsp; 
+<HR ALIGN=left> 
+<a name="4">&nbsp;</a>
+<h3><b>4. Selected input files.</b></h3>
+
+
+The user can find some related example input files in the ABINIT package in the directory /tests, or on the Web:
+<p> tests/v7/Input: <a href="../../tests/v7/Input/t23.in">t23.in</a> 
+<a href="../../tests/v7/Input/t24.in">t24.in</a> 
+<a href="../../tests/v7/Input/t25.in">t25.in</a> 
+<a href="../../tests/v7/Input/t78.in">t78.in</a> 
+<a href="../../tests/v7/Input/t79.in">t79.in</a> 
+<br>
+
+
+&nbsp; 
+<HR ALIGN=left> 
+<a name="5">&nbsp;</a>
+<h3><b>5. References.</b></h3>
+
+
+<br> <a href="../../bibliography/generated_files/bibliography.html#Amadon2012">[Amadon2012]</a>  B. Amadon, "A self-consistent DFT+DMFT scheme in the projector augmented wave method: applications to cerium, Ce<sub>2</sub>O<sub>3</sub> and Pu<sub>2</sub>O<sub>3</sub> with the Hubbard I solver and comparison to DFT+U", J. Phys.: Cond. Matt. 24, 075604 (2012). <br> URL: <a href="http://iopscience.iop.org/article/10.1088/0953-8984/24/7/075604"> http://iopscience.iop.org/article/10.1088/0953-8984/24/7/075604</a>.<br>
+<br> <a href="../../bibliography/generated_files/bibliography.html#Amadon2014">[Amadon2014]</a>  B. Amadon, T. Applencourt and F. Bruneval, "Screened Coulomb interaction calculations: cRPA implementation and applications to dynamical screening and self-consistency in uranium dioxide and cerium", Phys. Rev. B 89, 125110 (2014). <br> DOI: <a href="https://doi.org/10.1103/PhysRevB.89.125110">10.1103/PhysRevB.89.125110</a>.<br>
+<br> <a href="../../bibliography/generated_files/bibliography.html#Aryasetiawan2004">[Aryasetiawan2004]</a>  F. Aryasetiawan, M. Imada, A. Georges, G. Kotliar, S. Biermann and A. I. Liechtenstein, "Frequency-dependent local interactions and low-energy effective models from electronic structure calculations", Phys. Rev. B 70, 195104&ndash; (2004). <br> DOI: <a href="https://doi.org/10.1103/PhysRevB.70.195104">10.1103/PhysRevB.70.195104</a>.<br>
+<br> <a href="../../bibliography/generated_files/bibliography.html#Cococcioni2005">[Cococcioni2005]</a>  M. Cococcioni and S. de Gironcoli, "Linear response approach to the calculation of the effective interaction parameters in the LDA+U method", Phys. Rev. B 71, 035105 (2005). <br> DOI: <a href="https://doi.org/10.1103/PhysRevB.71.035105">10.1103/PhysRevB.71.035105</a>.<br>
+<br> <a href="../../bibliography/generated_files/bibliography.html#Sakuma2013">[Sakuma2013]</a>  R. Sakuma and F. Aryasetiawan, "First-principles calculations of dynamical screened interactions for the transition metal oxides MO (M=Mn, Fe, Co, Ni)", Phys. Rev. B 87, 165118 (2013). <br> DOI: <a href="https://doi.org/10.1103/PhysRevB.87.165118">10.1103/PhysRevB.87.165118</a>.<br>
+<br> <a href="../../bibliography/generated_files/bibliography.html#Shih2012">[Shih2012]</a>  B.-C. Shih, Y. Zhang, W. Zhang and P. Zhang, "Screened Coulomb interaction of localized electrons in solids from first principles", Phys. Rev. B 85, 045132 (2012). <br> DOI: <a href="https://doi.org/10.1103/PhysRevB.85.045132">10.1103/PhysRevB.85.045132</a>.<br>
+<p>
+<script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
+
+</body>
+</html>
+

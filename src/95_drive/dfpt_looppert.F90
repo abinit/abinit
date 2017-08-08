@@ -105,9 +105,10 @@
 !!      littlegroup_pert,localfilnam,localrdfile,localredirect,localwrfile
 !!      metric,mkrdim,outbsd,outgkk,outwf,pawang_free,pawang_init,pawcprj_alloc
 !!      pawcprj_copy,pawcprj_free,pawcprj_getdim,pawrhoij_alloc,pawrhoij_copy
-!!      pawrhoij_free,pawrhoij_nullify,prteigrs,psddb8,read_rhor,rf2_getidirs
+!!      pawrhoij_free,pawrhoij_nullify,prteigrs,read_rhor,rf2_getidirs
 !!      rotate_rho,set_pert_comm,set_pert_paw,setsym,setsymrhoij,status,symkpt
 !!      timab,transgrid,unset_pert_comm,unset_pert_paw,vlocalstr,wffclose
+!!      ddb_hdr_init, ddb_hdr_free, ddb_hdr_open_write
 !!      wfk_open_read,wfk_read_eigenvalues,wrtout,xmpi_sum
 !!
 !! SOURCE
@@ -151,6 +152,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  use m_hdr
  use m_ebands
 
+ use m_ddb_hdr,    only : ddb_hdr_type, ddb_hdr_init, ddb_hdr_free, ddb_hdr_open_write
  use m_io_tools,   only : file_exists
  use m_fstrings,   only : strcat
  use m_exit,       only : exit_check, disable_timelimit
@@ -280,6 +282,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  type(eigr2d_t)  :: eigr2d,eigi2d
  type(gkk_t)     :: gkk2d
  type(hdr_type) :: hdr,hdr_den
+ type(ddb_hdr_type) :: ddb_hdr
  type(pawang_type) :: pawang1
  type(wffile_type) :: wff1,wffgs,wffkq,wffnow,wfftgs,wfftkq
  type(wfk_t) :: ddk_f(4)
@@ -2010,47 +2013,26 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      if (dtset%ieig2rf==1.or.dtset%ieig2rf==2) then
        if (me==master) then
 !        print _EIGR2D file for this perturbation
+         dscrpt=' Note : temporary (transfer) database '
          unitout = dtfil%unddb
          vrsddb=100401
-         dscrpt=' Note : temporary (transfer) database '
-!        tolwfr must be initialized here, but it is a dummy value
-         tolwfr=1.0_dp
-         call ddb_io_out (dscrpt,dtfil%fnameabo_eigr2d,dtset%natom,dtset%mband,&
-&         dtset%nkpt,dtset%nsym,dtset%ntypat,dtfil%unddb,vrsddb,&
-&         dtset%acell_orig(1:3,1),dtset%amu_orig(:,1),dtset%dilatmx,dtset%ecut,dtset%ecutsm,&
-&         dtset%intxc,dtset%iscf,dtset%ixc,dtset%kpt,dtset%kptnrm,&
-&         dtset%natom,dtset%nband,dtset%ngfft,dtset%nkpt,dtset%nspden,dtset%nspinor,&
-&         dtset%nsppol,dtset%nsym,dtset%ntypat,occ_pert,dtset%occopt,dtset%pawecutdg,&
-&         dtset%rprim_orig(1:3,1:3,1),dtset%dfpt_sciss,dtset%spinat,dtset%symafm,dtset%symrel,&
-&         dtset%tnons,tolwfr,dtset%tphysel,dtset%tsmear,&
-&         dtset%typat,dtset%usepaw,dtset%wtk,xred,psps%ziontypat,dtset%znucl)
-         nblok=1 ; fullinit=1 ; choice=2
-         call psddb8 (choice,psps%dimekb,psps%ekb,fullinit,psps%indlmn,&
-&         psps%lmnmax,nblok,ntypat,dtfil%unddb,pawtab,&
-&         psps%pspso,psps%usepaw,psps%useylm,vrsddb)
+
+         call ddb_hdr_init(ddb_hdr,dtset,psps,pawtab,DDB_VERSION,dscrpt,&
+&                          1,xred=xred,occ=occ_pert)
+
+         call ddb_hdr_open_write(ddb_hdr, dtfil%fnameabo_eigr2d, dtfil%unddb)
+
          call outbsd(bdeigrf,dtset,eig2nkq,dtset%natom,nkpt_rbz,unitout)
 !        print _EIGI2D file for this perturbation
          if(smdelta>0) then
+
            unitout = dtfil%unddb
-           vrsddb=100401
-           dscrpt=' Note : temporary (transfer) database '
-!          tolwfr must be initialized here, but it is a dummy value
-           tolwfr=1.0_dp
-           call ddb_io_out (dscrpt,dtfil%fnameabo_eigi2d,dtset%natom,dtset%mband,&
-&           dtset%nkpt,dtset%nsym,dtset%ntypat,dtfil%unddb,vrsddb,&
-&           dtset%acell_orig(1:3,1),dtset%amu_orig(:,1),dtset%dilatmx,dtset%ecut,dtset%ecutsm,&
-&           dtset%intxc,dtset%iscf,dtset%ixc,dtset%kpt,dtset%kptnrm,&
-&           dtset%natom,dtset%nband,dtset%ngfft,dtset%nkpt,dtset%nspden,dtset%nspinor,&
-&           dtset%nsppol,dtset%nsym,dtset%ntypat,occ_pert,dtset%occopt,dtset%pawecutdg,&
-&           dtset%rprim_orig(1:3,1:3,1),dtset%dfpt_sciss,dtset%spinat,dtset%symafm,dtset%symrel,&
-&           dtset%tnons,tolwfr,dtset%tphysel,dtset%tsmear,&
-&           dtset%typat,dtset%usepaw,dtset%wtk,xred,psps%ziontypat,dtset%znucl)
-           nblok=1 ; fullinit=1 ; choice=2
-           call psddb8 (choice,psps%dimekb,psps%ekb,fullinit,psps%indlmn,&
-&           psps%lmnmax,nblok,ntypat,dtfil%unddb,pawtab,&
-&           psps%pspso,psps%usepaw,psps%useylm,vrsddb)
+           call ddb_hdr_open_write(ddb_hdr, dtfil%fnameabo_eigi2d, unitout)
+
            call outbsd(bdeigrf,dtset,eigbrd,dtset%natom,nkpt_rbz,unitout)
          end if !smdelta
+
+         call ddb_hdr_free(ddb_hdr)
 
 !        Output of the EIGR2D.nc file.
          fname = strcat(dtfil%filnam_ds(4),"_EIGR2D.nc")

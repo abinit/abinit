@@ -113,4 +113,5 @@ jdtset  11
 #%%   using the WF of a previous one.
 #%%   I consider both positive and negative electric fields.
 #%%   WARNING : HAS BEEN TRANSFERRED TO tests/seq
+#%% topics = Berry
 #%%<END TEST_INFO>

@@ -73,4 +73,5 @@ toldfe 1.0d-6
 #%%   H based fake crystals.
 #%%   Test the generation and recognition of the
 #%%   trigonal and hexagonal space groups, from spgroup 143 to 194.
+#%% topics = crystal
 #%%<END TEST_INFO>

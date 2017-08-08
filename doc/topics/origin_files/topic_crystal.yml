@@ -1,0 +1,33 @@
+- !components 
+    name      : crystal 
+    keyword   : Crystal structure and symmetries
+    authors   : FJ
+    howto     : specify a crystal
+    header    : default
+    title     : <h1>Crystalline structure and symmetries</h1>
+    subtitle  : default
+    copyright : default
+    links     : default
+    introduction : |- 
+         The cell may be orthogonal or non-orthogonal.
+         Any kind of symmetries and corresponding sets of k-point can be input,
+         and taken into account in the computation. The crystal structure and the position of the atoms in the unit cell must be specified.
+         Details about the way the crystal structure is defined in ABINIT can be found <a href="../documents/geometry.pdf">here</a>.
+         <br/>The code can automatically generate symmetries from the primitive cell and the position of atoms. In this case, it identifies automatically the Bravais lattice, point group and space group.
+         Alternatively, it can start from the symmetries and generate the atomic positions from the irreducible set. Also, a database of the 230 spatial groups of symmetry
+         is built inside ABINIT.
+    tutorials  : |-
+         <li><a href="../../tutorial/generated_files/lesson_base1.html">The lesson 1</a> deals with the H2
+         molecule : get the total energy, the electronic energies, the charge
+         density, the bond length, the atomisation energy </li>
+         <li><a href="../../tutorial/generated_files/lesson_base2.html">The lesson 2</a> deals again with the H2
+         molecule: convergence studies, LDA versus GGA </li>
+         <li><a href="../../tutorial/generated_files/lesson_base3.html">The lesson 3</a> deals with crystalline
+         silicon (an insulator): the definition of a k-point grid, the smearing
+         of the cut-off energy, the computation of a band structure, and again,
+         convergence studies ...</li>
+         <li><a href="../../tutorial/generated_files/lesson_base4.html">The lesson 4</a> deals with crystalline
+         aluminum (a metal), and its surface: occupation numbers, smearing the
+         Fermi-Dirac distribution, the surface energy, and again, convergence
+         studies ...</li>
+    end : default 

@@ -77,4 +77,5 @@
 #%% keywords = NC, XML 
 #%% description = 
 #%%   Make a simple geometry relaxation and validate the XML output (testing prtxml).
+#%% topics = GeoOpt
 #%%<END TEST_INFO>

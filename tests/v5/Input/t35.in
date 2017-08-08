@@ -67,4 +67,5 @@ diemac 3.0
 #%%   Stishovite, high-pressure polymorph of SiO2. LDA.
 #%%   Computation of the electric field gradient at each site using both PAW and
 #%%   a simple point charge model. Coded and contributed by J. Zwanziger.
+#%% topics = EFG
 #%%<END TEST_INFO>

@@ -1,0 +1,787 @@
+<!--                                                                                     -->
+<!-- This file has been produced by generate_doc.py using different .yml  or .bib files. -->
+<!-- It is useless to modify it. Modify the related .yml  or .bib files instead.         -->
+<!--                                                                                     -->
+<html>
+<head><title>First (basic) lesson</title>
+<link rel=stylesheet type="text/css" href="../formabinit.css">
+</head>
+<body bgcolor="#ffffff">
+
+<hr>
+<a name="top"></a>
+
+<h1>ABINIT tutorial. First (basic) lesson...</h1>
+
+<h2>The H<sub>2</sub> molecule, without convergence studies.</h2>
+<hr>
+<p>This lesson aims at showing how to get the following physical properties:
+  <ul>
+    <li>the (pseudo)total energy
+    <li>the bond length
+    <li>the charge density
+    <li>the atomisation energy
+  </ul>
+  You will learn about the two input files, the basic input variables, the existence
+  of defaults, the actions of the parser, and the use of the multi-dataset
+  feature. You will also learn about the two output files as well as the density
+  file. <p></p>
+<p>This first lesson covers the sections 1, 3, 4 and 6 of the <a href="../../users/generated_files/help_abinit.html#">abinit help file</a>.</p>
+<p>The very first step is a detailed tour of the input and output files: you
+  are like a tourist, and you discover a town in a coach. You will have a bit
+  more freedom after that first step ... <br>
+  It is supposed that you have some good knowledge of UNIX/Linux. </p>
+<p>This lesson should take about 2 hours. </p>
+<hr>
+<h5>Copyright (C) 2000-2017 ABINIT group (XG,RC)
+<script type="text/javascript" src="../../js_files/copyright.js"> </script>
+</h5> 
+
+<script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
+
+<a name="list"></a>
+<h3><b> First (basic) lesson, table of content:</b></h3>
+
+<ul>
+  <li><a href="#11">1.1.</a> Computing the (pseudo) total energy, and some associated quantities.
+  <li><a href="#12">1.2.</a> Computation of the interatomic distance (first method)
+  <li><a href="#13">1.3.</a> Computation of the interatomic distance (second method)
+  <li><a href="#14">1.4.</a> Computation of the charge density
+  <li><a href="#15">1.5.</a> Computation of the atomisation energy
+  <li><a href="#answers">Answers</a> to questions
+</ul>
+<hr>
+<p><a name="11"></a><br>
+
+
+
+<h3><b>1.1. The first step (the most important, and the most difficult !): <br>
+  Computing the (pseudo) total energy, and some associated quantities.</b> </h3>
+<h3>&nbsp;</h3>
+
+Note that the present tutorial will use four different windows:
+one to visualize the text of the tutorial (the present window),
+a second to run the code, a third to visualize
+sections of the <a href="../../users/generated_files/help_abinit.html#">abinit help file</a> (that will open automatically),
+and a fourth one for the description of input variables (that will also open automatically).
+Try to manage adequately these four windows ...
+
+<p><b>1.1.a</b> In addition to the present window,
+open the second window. Go to the Tutorial directory (that we refer as ~abinit/tests/tutorial/Input).
+<li> <i>cd ~abinit/tests/tutorial/Input</i></li><br>
+In that directory, you will find the necessary input files to run the examples
+related to this tutorial.
+Take a few seconds to read the names of the files already
+present in ~abinit/tests/tutorial/Input. Compare with the lessons mentioned in
+the index of the <a href="lesson_welcome.html"><B>Tutorial home page</B></A>.
+You will find other input files,
+specific for the Density Functional Perturbation Theory
+("Response functions") capabilities of ABINIT
+in the directory <i>~abinit/tests/tutorespfn/Input</i>.<br>
+
+<p><b>1.1.b </b>You also need a working directory.
+So, you should create a subdirectory
+of this directory, whose name might be "Work" (so ~abinit/tests/tutorial/Input/Work).
+Change the working directory of windows 2 to "Work":
+<li> <i>mkdir Work</i> </li>
+<li> <i>cd Work</i> </li>
+<p> You will do most of the actions of this tutorial in this working directory.
+  Copy the file tbase1_x.files in "Work":
+<li><i>cp ../tbase1_x.files . </i></li>
+
+<p><b>1.1.c</b> Edit the tbase1_x.files.
+  It is not very long (only 6 lines). It gives the information needed for the
+  code to build other file names ... You will discover more about this file in
+  the <a href="../../users/generated_files/help_abinit.html#intro1" target="helpsimg">section 1.1</a>
+  of the abinit_help file. Please, read it now (it will take one minute or so).
+  <a name="ref1"></a></p>
+
+<p><b>1.1.d</b> Modify the first and second lines of tbase1_x.files file, so that they read:<br>
+ tbase1_1.in <br>
+ tbase1_1.out<br>
+ Later, you will again modify these lines, to treat more cases. Make sure that the last line,
+ gives the correct location of the pseudopotential. Close the tbase1_x.files file.
+ Then, copy the file <a href="../../tests/tutorial/Input/tbase1_1.in">&#126;abinit/tests/tutorial/Input/tbase1_1.in</a> in "Work":<br>
+<li><i> cp ../tbase1_1.in . </i></li>
+
+<p>
+  Also later, we will look at this file, and learn about its content. For now,
+  you will try to run the code. Its name is 'abinit'. The place where it can be
+  found varies, according to the installation procedure. We will denote the
+  directory where you have installed the package ~abinit. Supposing that
+  you dumped the binaries from the Web site, then 'abinit' is to be found
+  in the package, with location ~abinit/opt . If you dumped the sources
+  from the Web site, and issued ./configure in the ~abinit directory,
+  then it is located in ~abinit/src/98_main . In what follows, we will suppose
+  that you can call it by simply typing "abinit", even if the
+  actual command must be something like ../../../../opt/abinit or
+  ../../../../src/98_main/abinit. (Suggestion: create an alias with `ln -s`, or copy the abinit executable, 
+  or declare the path with the shell command `export PATH=~abinit/src/98_main:$PATH`).
+<p>
+  So, in the Work directory, type: <br>
+  <li><i> abinit < tbase1_x.files >& log </i></li> <br>
+  Wait a few seconds ... it's done !
+  You can look at the content of the Work directory.
+  <li><i> ls </i></li>
+  <br>
+  You should get something like
+  <pre>
+  abinit  log  tbase1_1.in  tbase1_1.out  tbase1_x.files  tbase1_xo_DDB  tbase1_xo_DEN  tbase1_xo_EIG.nc  tbase1_xo_GSR.nc  tbase1_xo_OUT.nc  tbase1_xo_WFK
+  </pre>
+  (if you declared the path, you will not find 'abinit' in the list)
+  Different output files have been created, including a "log" file and the
+  output file "tbase1_1.out".
+  To check that everything is correct, you
+  can make a diff of tbase1_1.out with a reference file <a href="../../tests/tutorial/Refs/tbase1_1.out">&#126;abinit/tests/tutorial/Refs/tbase1_1.out</a> contained in the
+  ~abinit/tests/tutorial/Refs directory:
+ <li><i>diff tbase1_1.out ../../Refs/tbase1_1.out | more</i></li>
+<p>(Perhaps you will need to ignore the blanks, with the command "diff -b" instead of "diff")
+<p>That reference file uses slightly different file names. You should get some difference,
+ but rather inoffensive ones, like differences in the name of input
+  files or timing differences, e.g.: </p>
+<p>
+<pre>
+2,3c2,3
+< .Version 8.0.8 of ABINIT
+< .(MPI version, prepared for a x86_64_linux_gnu5.4 computer)
+---
+> .Version 8.0.7  of ABINIT
+> .(MPI version, prepared for a x86_64_linux_gnu5.3 computer)
+17c17
+< .Starting date : Fri 27 May 2016.
+---
+> .Starting date : Thu 26 May 2016.
+27c27
+< - input  file    -> tbase1_1.in
+---
+> - input  file    -> ../tbase1_1.in
+29,30c29,30
+< - root for input  files -> tbase1_xi
+< - root for output files -> tbase1_xo
+---
+> - root for input  files -> tbase1_1i
+> - root for output files -> tbase1_1o
+92,93c92,93
+< - pspini: atom type   1  psp file is ../../../Psps_for_tests/01h.pspgth
+< - pspatm: opening atomic psp file    ../../../Psps_for_tests/01h.pspgth
+---
+> - pspini: atom type   1  psp file is /home/gonze/ABINIT/ABINITv8.0.7/trunk/8.0.7-private/tests/Psps_for_tests/01h.pspgth
+> - pspatm: opening atomic psp file    /home/gonze/ABINIT/ABINITv8.0.7/trunk/8.0.7-private/tests/Psps_for_tests/01h.pspgth
+166c166
+<  prteigrs : about to open file tbase1_xo_EIG
+---
+>  prteigrs : about to open file tbase1_1o_EIG
+214c214
+< - Total cpu        time (s,m,h):          4.7        0.08      0.001
+---
+> - Total cpu        time (s,m,h):          4.6        0.08      0.001
+221,229c221,228
+</pre>
+(... and what comes after that is related only to timing
+  ...). 
+
+<p> If you do not run on a PC under Linux with GNU Fortran compiler, e.g. the Intel compiler, you might also have small numerical
+differences, on the order of 1.0d-10 at most. You might also have other differences
+in the paths of files. Finally, it might also be that the default FFT algorithm differs from the one of the reference machine, 
+in which case the line mentioning fftalg will differ (ifftalg will not be 312). If you get something else, you should ask for help! </p>
+<p>In this part of the output file, note the dash "-" that is inserted
+in the first column. This is not important for the user: it is used to post-process the
+output file using some automatic tool. As a rule, you should ignore symbols placed
+in the first column of the ABINIT output file. 
+<p>Supposing everything went well, we will now detail the different
+  steps that took place: how to run the code, what is in the "tbase1_1.in"
+  input file, and, later, what is in the "tbase1_1.out"
+  and "log" output files.</p>
+
+<p><b>1.1.e</b> Running the code is described in the
+  <a href="../../users/generated_files/help_abinit.html#exec" target="helpsimg">section 1.2</a>
+  of the abinit_help file. Please, read it now (it will take 30 seconds or less).<a name="ref2"></a></p>
+
+<p><b>1.1.f</b> It is now time to edit the tbase1_1.in file.
+  You can have a first glance at it. It is not very long: about 50 lines, mostly
+  comments. Do not try to understand everything immediately. After having gone
+  through it, you should read general explanation about its content, and
+  the format of such input files in the
+  <a href="../../users/generated_files/help_abinit.html#intro3" target="helpsimg">section 3.1</a> of the abinit_help file.
+  <a name="ref3"></a></p>
+
+<p><b>1.1.g</b> You might now examine in more details some input variables. An
+  alphabetically ordered <a href="#">[[FAKE LINK:invars:all|index of all variables]]</a> is
+  provided, and their description is found in different files (non-exhaustive list):
+<ul>
+<li> Basic variables, <a href="../../input_variables/generated_files/varbas.html">VARBAS</a></li>
+<li> Files handling variables, <a href="../../input_variables/generated_files/varfil.html">VARFIL</a></li>
+<li> Ground-state calculation variables, <a href="../../input_variables/generated_files/vargs.html">VARGS</a></li>
+<li> GW variables, <a href="../../input_variables/generated_files/vargw.html">VARGW</a></li>
+<li> Parallelisation variables, <a href="../../input_variables/generated_files/varpar.html">VARPAR</a></li>
+<li> Response Function variables, <a href="../../input_variables/generated_files/varrf.html">VARRF</a></li>
+</ul>
+  However, the number of such variables is rather large! Note that
+  a dozen of input variables were needed to run the first test case. This is possible
+  because there are defaults values for the other input variables. When
+  it exists, the default
+  value is mentioned at the fourth line of the section related to each input variable,
+  in the corresponding input variables file.
+  Some input variables are also preprocessed, in order to derive
+  convenient values for other input variables. Defaults are not existing or were
+  avoided for the few input variables that you find in tbase1_1.in . These
+  are particularly important input variables.
+  So, take a few minutes to have a look at the input variables of tbase1_1.in:
+  <ul>
+  <li><a href="../../input_variables/generated_files/varbas.html#acell">acell</a></li>
+  <li><a href="../../input_variables/generated_files/varbas.html#ntypat">ntypat</a></li>
+  <li><a href="../../input_variables/generated_files/varbas.html#znucl">znucl</a></li>
+  <li><a href="../../input_variables/generated_files/varbas.html#natom">natom</a></li>
+  <li><a href="../../input_variables/generated_files/varbas.html#typat">typat</a></li>
+  <li><a href="../../input_variables/generated_files/varbas.html#xcart">xcart</a></li>
+  <li><a href="../../input_variables/generated_files/varbas.html#ecut">ecut</a></li>
+  <li><a href="../../input_variables/generated_files/varbas.html#nkpt">nkpt</a></li>
+  <li><a href="../../input_variables/generated_files/varbas.html#nstep">nstep</a></li>
+  <li><a href="../../input_variables/generated_files/varbas.html#toldfe">toldfe</a></li>
+  <li><a href="../../input_variables/generated_files/vargs.html#diemac">diemac</a></li>
+  </ul>
+  Have also a look at <a href="../../input_variables/generated_files/varbas.html#kpt">kpt</a>
+  and <a href="../../input_variables/generated_files/varbas.html#iscf">iscf</a>.
+
+  <p> It is now time to have a look at the two output files of the run. </p>
+
+<p><b>1.1.h</b> First, open the "log" file. You
+  can begin to read it. It is nasty. Jump to its end. You will find
+  there the number of WARNINGS and COMMENTS that were issued by the code
+  during execution. You might try to find them in the file
+  (localize the keywords "WARNING" or "COMMENT" in this file). Some of them
+  are for the experienced user. For the present time, we will ignore them. You
+  can find more information about messages in the log file in the
+  <a href="../../users/generated_files/help_abinit.html#logfile" target="helpsimg">section 6.1</a>
+  of the abinit_help file.<a name="ref4"></a></p>
+
+<p><b>1.1.i</b> Then, open the <a href="../../tests/tutorial/Refs/tbase1_1.out">&#126;abinit/tests/tutorial/Refs/tbase1_1.out</a> file.
+  You find some general information about the output file
+  in <a href="../../users/generated_files/help_abinit.html#outputfile" target="helpsimg"> section 6.2</a>
+  of the abinit_help file. You should also:
+<ul>
+    <li> examine the header of "tbase1_1.out"
+    <li> examine the report on memory needs (do not read each value of parameters)
+    <li> examine the echo of preprocessed input data,
+  </ul>
+  until you reach the message: <b><br>
+  chkinp </b>: Checking input parameters for consistency. <p></p>
+<p>If the code does not stop there, the input parameters are consistent. At this
+  stage, many default values have been provided, and the preprocessing is finished.
+</p>
+<p>It is worth to come back to the echo of preprocessed input data. You should
+  first examine the "tbase1_1.in" file in more
+  details, and read the meaning of each of its variables in the
+  corresponding input variables
+  file, if it has not yet been done. Then, you should examine some variables
+  that were NOT defined in the input file, but that appear in the echo written
+  in "tbase1_1.out": <br>
+  <br>
+  - <a href="../../input_variables/generated_files/varbas.html#nband">nband</a>: its value is 2.
+  <br>
+  It is the number of electronic states that will be treated by the code. It has
+  been computed by counting the number of valence electrons in the unit cell (summing
+  the valence electrons brought by each pseudopotential) then occupying the lowest
+  states (look at the <a href="../../input_variables/generated_files/vargs.html#occ">occ</a> variable),
+  and adding some states (at least one, maybe more, depending on the size of the
+  system). <br>
+  <br>
+  - <a href="../../input_variables/generated_files/vargs.html#ngfft">ngfft</a>: its value is 30
+  30 30 . <br>
+  It is the number of points of the three-dimensional FFT grid. It has been derived
+  from <a href="../../input_variables/generated_files/varbas.html#ecut">ecut</a> and the dimension
+  of the cell (<a href="../../input_variables/generated_files/varbas.html#acell">acell</a>). <br>
+  <br>
+  The maximal number of plane waves "<b>mpw</b>" is mentioned in the memory evaluation
+  section: it is <b>752</b>. <br>
+  Well, this is not completely right, as the code took advantage of the time-reversal
+  symmetry, valid for the k-point (0 0 0), to decrease the number of planewave
+  by about a factor of two. <br>
+  The full set of plane waves is <b>1503</b> (see later in the "tbase1_1.out" file). <br>
+  The code indicates the time-reversal symmetry by a value of <a href="../../input_variables/generated_files/vardev.html#istwfk">istwfk</a>=2
+  , instead of the usual <a href="../../input_variables/generated_files/vardev.html#istwfk">istwfk</a>=1
+  default. <br>
+  <br>
+  - <a href="../../input_variables/generated_files/varbas.html#nsym">nsym</a>: its value is 16. <br>
+  It is the number of symmetries of the system. The 3x3 matrices <a href="../../input_variables/generated_files/varbas.html#symrel">symrel</a>
+  define the symmetries operation. In this case, none of the symmetries is accompanied
+  by a translation, that would appear in the variable <a href="../../input_variables/generated_files/varbas.html#tnons">tnons</a>.
+  The code did an automatic analysis of symmetries. <br>
+  They could alternatively be set by hand, or using the symmetry builder (to be
+  described later). <br>
+  <br>
+  - <a href="../../input_variables/generated_files/varbas.html#xangst">xangst</a> and <a href="../../input_variables/generated_files/varbas.html#xred">xred</a>
+  are alternative ways to <a href="../../input_variables/generated_files/varbas.html#xcart">xcart</a>
+  to specify the positions of atoms within the primitive cell. </p>
+  <p>Now, you can start reading the description of the remaining
+  of the tbase1_1.out file, in the <a href="../../users/generated_files/help_abinit.html#6.3" target="helpsimg"> section 6.3
+  </a> of the abinit_help file.
+  <a name="ref6"></a>Look at the tbase1_1.out
+  file at the same time. </p>
+
+<p><b><a name=1.1.j> 1.1.j </a> </b> You have read completely an output file! </p>
+<p>Could you answer the following questions? </p>
+<p>
+
+<ul>
+  <li><a name="q1">Q1</a>. How many SCF cycles were needed to have the <a href="../../input_variables/generated_files/varbas.html#toldfe">toldfe</a>
+    criterion satisfied?
+  <li><a name="q2">Q2</a>. Is the energy likely more converged than <a href="../../input_variables/generated_files/varbas.html#toldfe">toldfe</a>?
+  <li><a name="q3">Q3</a>. What is the value of the force on each atom, in Ha/Bohr?
+  <li><a name="q4">Q4</a>. What is the difference of eigenenergies between the two electronic states?
+  <li><a name="q5">Q5</a>. Can you insert '<a href="../../input_variables/generated_files/varfil.html#prtvol">prtvol</a> 2' in the input file, 
+        run again abinit, and find where is located the maximum of the electronic density, and how much is it, in electrons/Bohr^3 ?
+</ul>
+
+<p>(<a href="#answers">answers</a> are given at the end of the present file) </p>
+<p><hr>
+
+
+
+
+<h3><b><a name="12"></a>1.2. Computation
+  of the interatomic distance (method 1). </b></h3>
+<p><br>
+  <b>1.2.a</b> <i>Starting from now, everytime a new input variable is mentioned,
+  you should read the corresponding descriptive section in the ABINIT help.</i>
+</p>
+<p>We will now complete the description of the meaning of each term: there are
+  still a few indications that you should be aware of, even if you will not use
+  them in the tutorial. These might appear in the description of some input variables
+  ...
+  For this, you should read the <a href="../../users/generated_files/help_abinit.html#parameters" target="helpsimg">
+  section 3.2</a> of the abinit_help file.<a name="ref7"></a></p>
+<p><b>1.2.b</b> There are three methodologies to compute the optimal distance
+  between the two Hydrogen atoms:
+  <ul>
+    <li> one could compute the <b>TOTAL ENERGY</b> for different values of the
+      interatomic distance, make a fit through the different points, and determine
+      the minimum of the fitting function;
+    <li> one could compute the <b>FORCES</b> for different values of the interatomic
+      distance, make a fit through the different values, and determine the zero
+      of the fitting function;
+    <li> one could use an automatic algorithm for minimizing the energy (or finding
+      the zero of forces).
+  </ul>
+  We will begin with the computation of energy and forces for different values
+  of the interatomic distance. This exercise will allow you to learn how to use
+  multiple datasets. <p></p>
+<p>The interatomic distance in the tbase1_1.in file was 1.4 Bohr. Suppose you decide
+  to examine the interatomic distances from 1.0 Bohr to 2.0 Bohr, by steps of
+  0.05 Bohr. That is, 21 calculations. <br>
+  If you are a UNIX guru, it will be easy for you to write a script that will
+  drive these 21 calculations, changing automatically the variable <a href="../../input_variables/generated_files/varbas.html#xcart">xcart</a>
+  in the input file, and then gather all the data, in a convenient form to be
+  plotted. <br>
+  Well, are you a UNIX guru? If not, there is an easier path, all within ABINIT! </p>
+<p>This is the multi-dataset mode. Detailed explanations about it can be found in
+  sections <a href="../../users/generated_files/help_abinit.html#multidataset" target="helpsimg">3.3</a>,
+  <a href="../../users/generated_files/help_abinit.html#series" target="helpsimg">3.4</a>,
+  <a href="../../users/generated_files/help_abinit.html#loop" target="helpsimg">3.5</a>
+  and <a href="../../users/generated_files/help_abinit.html#3.6" target="helpsimg">3.6</a>,
+  of the abinit_help file.<a name="ref8"></a></p>
+<p><b>1.2.c</b> Now, can you write an input file that will do the computation
+  described above (interatomic distances from 1.0 Bohr to 2.0 Bohr, by steps of
+  0.05 Bohr)? You might start from tbase1_1.in.
+  Try to define a series, and to use
+  the <a href="../../input_variables/generated_files/varfil.html#getwfk">getwfk</a>
+  input variable (the latter will make the computation much faster). </p>
+<p>You should likely have a look at the section that describes the <a href="../../input_variables/generated_files/varfil.html#irdwfk">irdwfk</a>
+  and <a href="../../input_variables/generated_files/varfil.html#getwfk">getwfk</a> input variables:
+  in particular, look at the meaning of <i><b>getwfk -1</b></i> </p>
+<p>Also, define explicitly the number of states (or supercell "bands") to be
+  one, using the input variable <a href="../../input_variables/generated_files/varbas.html#nband">nband</a>.
+  The input file <a href="../../tests/tutorial/Input/tbase1_2.in">&#126;abinit/tests/tutorial/Input/tbase1_2.in</a> is an example of
+  file that will do the job, while <a href="../../tests/tutorial/Refs/tbase1_2.out">&#126;abinit/tests/tutorial/Refs/tbase1_2.out</a>
+  is an example of output file. If you decide to use the ~abinit/tests/tutorial/Input/tbase1_2.in file,
+  do not forget to change the file names in the "tbase1_x.files" file ... </p>
+<p>So, you run the code with your input file (this might take fifteen seconds or so on a PC at 3 GHz),
+  examine the output file quickly
+  (there are many repetition of sections, for the different datasets), and get
+  the output energies gathered in the final echo of variables:</p>
+<pre>
+    etotal1  -1.0368223891E+00
+    etotal2  -1.0538645433E+00
+    etotal3  -1.0674504851E+00
+    etotal4  -1.0781904896E+00
+    etotal5  -1.0865814785E+00
+    etotal6  -1.0930286804E+00
+    etotal7  -1.0978628207E+00
+    etotal8  -1.1013539124E+00
+    etotal9  -1.1037224213E+00
+    etotal10 -1.1051483730E+00
+    etotal11 -1.1057788247E+00
+    etotal12 -1.1057340254E+00
+    etotal13 -1.1051125108E+00
+    etotal14 -1.1039953253E+00
+    etotal15 -1.1024495225E+00
+    etotal16 -1.1005310615E+00
+    etotal17 -1.0982871941E+00
+    etotal18 -1.0957584182E+00
+    etotal19 -1.0929800578E+00
+    etotal20 -1.0899835224E+00
+    etotal21 -1.0867972868E+00
+</pre>
+<p> You might try to <a href="../documents/lesson_base1/Plot1.jpg" target="helpsimg">plot</a>
+  these data. The minimum of energy in the above list is clearly between dataset
+  11 and 12, that is: </p>
+<pre>
+     xcart11 -7.5000000000E-01  0.0000000000E+00  0.0000000000E+00
+              7.5000000000E-01  0.0000000000E+00  0.0000000000E+00
+     xcart12 -7.7500000000E-01  0.0000000000E+00  0.0000000000E+00
+              7.7500000000E-01  0.0000000000E+00  0.0000000000E+00
+</pre>
+<p>corresponding to a distance of H atoms between 1.5 Bohr and 1.55 Bohr.
+The forces vanish also between 1.5 Bohr and
+  1.55 Bohr:</p>
+<pre>
+     fcart11 -5.4945071285E-03  0.0000000000E+00  0.0000000000E+00
+              5.4945071285E-03  0.0000000000E+00  0.0000000000E+00
+     fcart12  6.9603067838E-03  0.0000000000E+00  0.0000000000E+00
+             -6.9603067838E-03  0.0000000000E+00  0.0000000000E+00
+</pre>
+
+<p>From these two values, using a linear interpolation, one get the optimal value
+  of 1.522 Bohr . <br>
+  Note that <i>the number of SCF cycles drops from 6 to 5 when the wavefunctions
+  are read from the previous dataset.</i> </p>
+
+<hr>
+
+<h3><b><a name="13"></a>1.3 Computation of the interatomic distance (method 2). </b></h3>
+
+<p><br><b>1.3.a</b> The other methodology is based on an automatic computation of
+  the minimum. <br>
+  There are different algorithms to do that.
+  See the input variable <a href="../../input_variables/generated_files/varrlx.html#ionmov">ionmov</a>,
+  with values 2 and 7. In the present case, with only one degree of freedom
+  to be optimized, the best choice
+  is <a href="../../input_variables/generated_files/varrlx.html#ionmov">ionmov</a> 2 . </p>
+<p>You have also to define the maximal number of timesteps for this optimization.
+  Set the input variable <a href="../../input_variables/generated_files/varrlx.html#ntime">ntime</a> to 10, it will be largely enough.
+  For the stopping criterion <a href="../../input_variables/generated_files/varrlx.html#tolmxf">tolmxf</a>,
+  use the reasonable value of 5.0d-4 Ha/Bohr. This defines the force threshold
+  to consider that the geometry is converged. The code will stop if the residual
+  forces are below that value before
+  reaching <a href="../../input_variables/generated_files/varrlx.html#ntime">ntime</a>.
+</p>
+<p>It is also worth to change the stopping criterion for the SCF cycle, in order
+  to be sure that the forces generated for each trial interatomic distance are
+  sufficiently converged. Indeed, the value used for <a href="../../input_variables/generated_files/varbas.html#toldfe">toldfe</a>, namely 1.0d-6,
+  might be sufficient for total energy calculations, but definitely not for
+  the accurate computation of other properties.
+  So, change <a href="../../input_variables/generated_files/varbas.html#toldfe">toldfe</a> in <a href="../../input_variables/generated_files/varbas.html#toldff">toldff</a>, and set the latter
+  input variable to ten times smaller than <a href="../../input_variables/generated_files/varrlx.html#tolmxf">tolmxf</a>.
+  The input file <a href="../../tests/tutorial/Input/tbase1_3.in">&#126;abinit/tests/tutorial/Input/tbase1_3.in</a> is an example of
+  file that will do the job, while <a href="../../tests/tutorial/Refs/tbase1_3.out">&#126;abinit/tests/tutorial/Refs/tbase1_3.out</a>
+  is an example of output file. If you decide to use these files, do not forget
+  to change the file names in the "tbase1_x.files"
+  file ... So, you run the code with your input file (a few seconds),
+  examine quietly this file (which
+  is much smaller than the tbase1_2.out file), and get some significant output data gathered in the
+  final echo of variables: </p>
+<pre>
+    etotal   -1.1058360644E+00
+     fcart    1.8270533893E-04  0.0000000000E+00  0.0000000000E+00
+             -1.8270533893E-04  0.0000000000E+00  0.0000000000E+00
+      ...
+     xcart   -7.6091015760E-01  0.0000000000E+00  0.0000000000E+00
+              7.6091015760E-01  0.0000000000E+00  0.0000000000E+00
+</pre>
+
+<p> According to these data (see <a href="../../input_variables/generated_files/varbas.html#xcart">xcart</a>),
+  the optimal interatomic distance is about 1.522 Bohr, in good agreement
+  with the estimation of tbase1_2.out .
+  If you have time (this is to be done at home), you might try to change the
+  stopping criteria, and redo the calculation, to see the level of convergence
+  of the interatomic distance. </p>
+<p> Note that the final value of fcart in your run might differ slightly from the one
+shown above (less than one percent change). Such a fluctuation is quite
+often observed for a value converging to zero (remember, we ask the code
+to determine the equilibrium geometry, that is, forces should be zero)
+when the same computation is done on different platforms.
+<hr>
+
+
+
+
+<h3><b><a name="14"></a>1.4. Computation of the charge density.</b>
+</h3>
+
+The charge density has already been computed, for all geometries, in the above-mentioned runs.
+Here, we will print this quantity.
+
+<p><b>1.4.a</b> We start from the optimized interatomic distance 1.522 Bohr,
+  and make a run at fixed geometry.
+  The input variable <a href="../../input_variables/generated_files/varfil.html#prtden">prtden</a>
+  must be set to 1.
+  To understand correctly the content of the <a href="../../input_variables/generated_files/varfil.html#prtden">prtden</a>
+  description, it is worth to read a much more detailed description of the "files" file,
+  in <a href="../../users/generated_files/help_abinit.html#4" target="helpsimg">section 4 </a> of the abinit_help file.
+  <a name="ref9"></a></p>
+
+<p><b>1.4.b</b> The input file <a href="../../tests/tutorial/Input/tbase1_4.in">&#126;abinit/tests/tutorial/Input/tbase1_4.in</a> is
+  an example of input file for a run that will print a density.
+  If you decide to use this file,
+  do not forget to change the file names in tbase1_x.files.
+  The run will take a few seconds. </p>
+<p>The density will be output in the <b>tbase1_xo_DEN</b> file. Try to edit it ...
+  No luck ! This file is unformatted, not written using the ASCII code. Even if
+  you cannot read it, its description is provided in the abinit_help. It contains
+  first a header, then the density numbers. The description of the header
+  is presented in <a href="../../users/generated_files/help_abinit.html#header" target="helpsimg">section 6.4</a>
+  of the abinit_help file, while the body of the _DEN file is presented
+  in <a href="../../users/generated_files/help_abinit.html#densoutputfile" target="helpsimg">section 6.5</a>.
+  It is the appropriate time to read also the description of the potential
+  files and wavefunctions files, as these files contain the same header as the
+  density file, see sections
+  <a href="../../users/generated_files/help_abinit.html#localpotfile" target="helpsimg">6.6</a>
+  and
+  <a href="../../users/generated_files/help_abinit.html#wavefctfile" target="helpsimg">6.7</a>
+  <a name="ref10"></a></p>
+
+<p><b>1.4.c</b> Such a density file can be read by ABINIT, to restart a calculation
+  (see the input variable <a href="../../input_variables/generated_files/varbas.html#iscf">iscf</a>,
+  when its value is -2), but more usually, by an utility called "cut3d". This
+  utility is available in the ABINIT package.
+  You might try to use it now, to generate two-dimensional
+  cuts in the density, and visualize the charge density contours.
+<br>Read the corresponding <a href="../../users/generated_files/help_cut3d.html" target="helpsimg">Cut3D help file</a>.
+  Then, try to run cut3d to analyse <b>tbase1_xo_DEN</b>.
+  You should first try to translate the unformatted density data to indexed formatted data,
+  by using option 6 in the adequate menu. Save the indexed formatted data to file <b>tbase1_xo_DEN_indexed</b>.
+  Then, edit this file, to have an idea of the content of the _DEN files.
+<br>For further treatment, you might choose to select another option than 6. In particular,
+ if you have access to MATLAB, choose option 5. With minor modifications (set ngx=ngy=ngz to 30)
+ you will be able to use the file dim.m present in ~abinit/doc/tutorial/documents/lesson_base1 to visualize the
+ 3-Dimensional isosurfaces. Another option might be to use the XCrysDen software,
+ for which you need to use option 9.
+
+<hr>
+<h3><b><a name="15"></a>1.5. Computation of the atomisation energy.</b>
+</h3>
+<p><b>1.5.a</b>
+The atomisation energy is the energy needed to separate a molecule
+in its constituent atoms, each being neutral.
+<br>
+  In the present case, one must compute first the total energy of an isolated
+  hydrogen atom. The atomisation energy will be the difference between the total
+  energy of H<sub>2</sub> and twice the total energy of H. <br>
+  There are some subtleties in the calculation of an isolated atom.
+<ul>
+  <li>in many cases, the ground state of an isolated atom is spin-polarized, see
+    the variables <a href="../../input_variables/generated_files/varbas.html#nsppol">nsppol</a> and <a href="../../input_variables/generated_files/vargs.html#spinat">spinat</a> ;
+  <li>the highest occupied level might be degenerate with the lowest unoccupied
+    level of the same spin, in which case the techniques usually appropriate for metals
+    are to be used (see <a href="lesson_base4.html">lesson_base4</a>)
+  <li>also often, the symmetry of the ground-state charge density will NOT be
+    spherical, so that the automatic determination of symmetries by the code,
+    based on the atomic coordinates, should be disabled, see the input variable
+    <a href="../../input_variables/generated_files/varbas.html#nsym">nsym</a>, to be set to 1 in this
+    case.
+</ul>
+<br>
+For Hydrogen, we are lucky that the ground state is spherical (1s orbital), and
+that the highest occupied level and lowest unoccupied level, although degenerate,
+have a different spin. We will define by hand the occupation of each spin, see
+the input variables <a href="../../input_variables/generated_files/varbas.html#occopt">occopt</a> (to be set to 2), and <a href="../../input_variables/generated_files/vargs.html#occ">occ</a> . <br>
+Finally, in order to make numerical errors cancel, it is important
+to compute the above-mentioned difference in the same box, for the same
+cut-off, and even for a location in the box that is similar to the
+molecule case (although the latter might not be so important).
+
+<p>The input file <a href="../../tests/tutorial/Input/tbase1_5.in">&#126;abinit/tests/tutorial/Input/tbase1_5.in</a> is an example
+  of file that will do the job, while <a href="../../tests/tutorial/Refs/tbase1_5.out">&#126;abinit/tests/tutorial/Refs/tbase1_5.out</a>
+  is an example of output file. If you decide to use the tbase1_5.in file, do not forget
+  to change the file names in the tbase1_x.files file. The run lasts a few seconds.
+
+<p>You should read the output file, and note the tiny differences
+related with the spin-polarisation:
+<ul>
+<li>the electronic eigenvalues are now given for both spin up and
+ spin down cases:
+<pre>
+ Eigenvalues (hartree) for nkpt=   1  k points, SPIN UP:
+ kpt#   1, nband=  1, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
+  -0.26414
+ Eigenvalues (hartree) for nkpt=   1  k points, SPIN DOWN:
+ kpt#   1, nband=  1, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
+  -0.11112
+</pre>
+<li>If you run again, while having inserted in the input file '<a href="../../input_variables/generated_files/varfil.html#prtvol">prtvol</a> 2',
+because <a href="../../input_variables/generated_files/varbas.html#occopt">occopt</a>,
+the charge density and spin polarisation at each point of the FFT grid is also analyzed:
+<pre>
+ Total charge density [el/Bohr^3]
+      Maximum=    1.4053E-01  at reduced coord.    0.0000    0.0000    0.0000
+ Next maximum=    1.2019E-01  at reduced coord.    0.0000    0.0000    0.9667
+      Minimum=    3.4544E-06  at reduced coord.    0.4667    0.4333    0.4333
+ Next minimum=    3.4544E-06  at reduced coord.    0.5333    0.4333    0.4333
+ Spin up density      [el/Bohr^3]
+      Maximum=    1.4053E-01  at reduced coord.    0.0000    0.0000    0.0000
+ Next maximum=    1.2019E-01  at reduced coord.    0.0000    0.0000    0.9667
+      Minimum=    3.4544E-06  at reduced coord.    0.4667    0.4333    0.4333
+ Next minimum=    3.4544E-06  at reduced coord.    0.5333    0.4333    0.4333
+ Spin down density    [el/Bohr^3]
+      Maximum=    0.0000E+00  at reduced coord.    0.9667    0.9667    0.9667
+ Next maximum=    0.0000E+00  at reduced coord.    0.9333    0.9667    0.9667
+      Minimum=    0.0000E+00  at reduced coord.    0.0000    0.0000    0.0000
+ Next minimum=    0.0000E+00  at reduced coord.    0.0333    0.0000    0.0000
+ Magnetization (spin up - spin down) [el/Bohr^3]
+      Maximum=    1.4053E-01  at reduced coord.    0.0000    0.0000    0.0000
+ Next maximum=    1.2019E-01  at reduced coord.    0.0000    0.0000    0.9667
+      Minimum=    3.4544E-06  at reduced coord.    0.4667    0.4333    0.4333
+ Next minimum=    3.4544E-06  at reduced coord.    0.5333    0.4333    0.4333
+ Relative magnetization (=zeta, between -1 and 1)
+      Maximum=    1.0000E+00  at reduced coord.    0.9667    0.9667    0.9667
+ Next maximum=    1.0000E+00  at reduced coord.    0.9333    0.9667    0.9667
+      Minimum=    1.0000E+00  at reduced coord.    0.0000    0.0000    0.0000
+ Next minimum=    1.0000E+00  at reduced coord.    0.0333    0.0000    0.0000
+</pre>
+</ul>
+<br>
+The <b>zeta</b> variable is the ratio between the spin-density difference and
+the charge density. It varies between +1 and -1. In the present case of Hydrogen,
+there is no spin down density, so the zeta variable is +1.
+<br>(Comment: in this part of the output file, note the comma "," that is inserted
+in the first column. This is not important for the user: it is used to post-process the
+output file using some automatic tool. As a rule, you should ignore symbols placed
+in the first column of the ABINIT output file.)
+<p>The total energy is
+<pre>
+    etotal   -4.7010531489E-01
+</pre>
+while the total energy of the H<sub>2</sub> molecule is (see test 13):
+<pre>
+    etotal   -1.1058360644E+00
+</pre>
+
+<p>The atomisation energy is thus 0.1656 Ha (The difference between the total energy of the H<sub>2</sub> molecule and twice the energy of an isolated Hydrogen atom).
+
+<p>At this stage, we can compare our results:
+<ul>
+<li>bond length: 1.522 Bohr
+<li>atomisation energy at that bond length: 0.1656 Ha = 4.506 eV
+</ul>
+
+with the experimental data as well as theoretical data using
+a much more accurate technique
+(see <cite>Kolos and Roothaan, Rev. Mod. Phys. 32, 219 (1960)</cite>, especially p.225)
+<ul>
+<li>bond length: 1.401 Bohr
+<li>atomisation energy: 4.747 eV
+</ul>
+<br>The bond length is awful (nearly 10% off),
+and the atomisation energy is a bit too low, 5 % off.
+
+<p>What is wrong??
+<br>Well, are you sure that the input parameters that we did not discuss
+are correct? These are:
+<ul>
+  <li><a href="../../input_variables/generated_files/varbas.html#ecut">ecut</a> (the plane-wave kinetic energy cut-off)
+  <li><a href="../../input_variables/generated_files/varbas.html#acell">acell</a> (the supercell size)
+  <li><a href="../../input_variables/generated_files/varbas.html#ixc">ixc</a> (not even mentioned until now, this input variable specifies what kind of exchange-correlation functional is to be used ...)
+  <li>the pseudopotential
+</ul>
+<br>
+We used 10 Ha as cut-off energy, a 10x10x10 Bohr^3 supercell, the local-density
+approximation (as well as the local-spin-density approximation) in the Teter parametrization,
+and a pseudopotential from the Goedecker-Hutter-Teter table (<cite>Phys. Rev.
+B 54, 1703 (1996)</cite>).
+<p>We will see in the <a href="lesson_base2.html">next lesson</a> how to address the
+  choice of these parameters (except the pseudopotential).
+<p>
+<hr>
+<a name="answers">&nbsp;</a>
+<p><b>Answers to the questions, section <a href=#1.1.j >1.1.j </a> </b>:
+<ul>
+  <li><a href="#aq1">Q1</a>. How many SCF cycles were needed to have
+    the <a href="../../input_variables/generated_files/varbas.html#toldfe">toldfe</a> criterion satisfied?
+  <li><a href="#aq2">Q2</a>. Is the energy likely more converged than
+    <a href="../../input_variables/generated_files/varbas.html#toldfe">toldfe</a>?
+  <li><a href="#aq3">Q3</a>. What is the value of the force on each atom, in Ha/Bohr?
+  <li><a href="#aq4">Q4</a>. What is the difference of eigenenergies between the two electronic states?
+  <li><a href="#aq5">Q5</a>. Where is located the maximum of the electronic density, and how much is it, in electrons/Bohr^3 ?
+</ul>
+
+<p>NOTE: <i>there might be numerical differences, from platform to platform,
+in the quoted results !</i>
+<p>&nbsp;
+
+<a name="aq1">&nbsp;</a>
+<p><b>Q1.</b> 6 SCF cycles were needed:
+<pre>
+     iter   Etot(hartree)      deltaE(h)  residm     vres2
+ ETOT  1  -1.1013391225242    -1.101E+00 4.220E-04 8.396E+00
+ ETOT  2  -1.1036939626391    -2.355E-03 7.374E-09 2.840E-01
+ ETOT  3  -1.1037170965209    -2.313E-05 7.389E-08 1.549E-02
+ ETOT  4  -1.1037223548790    -5.258E-06 4.146E-07 2.715E-04
+ ETOT  5  -1.1037224212232    -6.634E-08 4.091E-09 5.700E-06
+ ETOT  6  -1.1037224213136    -9.037E-11 5.808E-12 3.076E-07
+
+ At SCF step    6, etot is converged :
+  for the second time, diff in etot=  9.038E-11 &lt; toldfe=  1.000E-06
+</pre>
+Note that the number of steps that were allowed, <a href="../../input_variables/generated_files/varbas.html#nstep">nstep</a>=10,
+is larger than the number of steps effectively needed to reach the stopping criterion.
+As a rule, you should always check that the number of steps that you allowed
+was sufficient to reach the target tolerance. You might now play a bit with nstep, as e.g. set it
+to 5, to see how ABINIT reacts.
+<p>Side note: in most of the tutorial examples, <a href="../../input_variables/generated_files/varbas.html#nstep">nstep</a>
+will be enough to reach the
+target tolerance, defined by one of the "tolXXX" input variables. However, this is not always the case
+(e.g. the test case 1 of the <a href="lesson_rf1.html">lesson response-function 1</a>),
+because of some portability problems, that could only be solved by stopping the SCF cycles
+before the required tolerance.
+
+<p>&nbsp;
+
+<a name="aq2">&nbsp;</a>
+<p><b>Q2.</b> The information is contained in the same piece of the output file. Yes, the energy is more converged than <a href="../../input_variables/generated_files/varbas.html#toldfe">toldfe</a>,
+  since the stopping criterion asked for the difference between successive evaluations
+  of the energy to be smaller than <a href="../../input_variables/generated_files/varbas.html#toldfe">toldfe</a>
+  twice in a row, while the evolution of the energy is nice, and always decreasing
+  by smaller and smaller amounts.
+
+<p>&nbsp;
+
+<a name="aq3">&nbsp;</a>
+<p><b>Q3.</b> These values are:
+<pre>
+ cartesian forces (hartree/bohr) at end:
+    1     -0.03740558871217     0.00000000000000     0.00000000000000
+    2      0.03740558871217     0.00000000000000     0.00000000000000
+ frms,max,avg= 2.1596127E-02 3.7405589E-02   0.000E+00  0.000E+00  0.000E+00 h/b
+</pre>
+<p><br>
+  On the first atom (located at -0.7 0 0 in cartesian coordinates, in Bohr), the
+  force vector is pointing in the minus x direction, and in the plus x direction
+  for the second atom located at +0.7 0 0 . <br>
+  The H<sub>2</sub> molecule would like to expand ...</p>
+<p> <a name="aq4">&nbsp;</a> </p>
+<p><b>Q4.</b> The eigenvalues (in Hartree) are mentioned at the lines
+<pre>
+ Eigenvalues (hartree) for nkpt=   1  k points:
+ kpt#   1, nband=  2, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
+  -0.36525  -0.01379
+</pre>
+<p><br>
+  As mentioned in the <a href="../../users/generated_files/help_abinit.html#averagepot">abinit_help</a> file, the
+  absolute value of eigenenergies is not meaningful. Only differences of eigenenergies,
+  as well as differences with the potential. <br>
+  The difference is 0.35147 Hartree, that is 9.564 eV . <br>
+  Moreover, remember that Kohn-Sham eigenenergies are formally NOT connected to
+  experimental excitation energies ! <br>
+  (Well, more is to be said later about this ...).</p>
+<p> <a name="aq5">&nbsp;</a> </p>
+<p><b>Q5.</b> The maximum electronic density in electron per Bohr cube
+is reached at the mid-point between the two H atoms :
+<pre>
+ Total charge density [el/Bohr^3]
+,     Maximum=    2.6907E-01  at reduced coord.    0.0000    0.0000    0.0000
+</pre>
+<script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
+
+</body>
+</html>
+

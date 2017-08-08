@@ -98,4 +98,5 @@ pitransform6 2  #staging
 #%%    together with the three coordinate systems (primitive, normal mode, staging).
 #%%    NOTE: MPI run with 2 procs is ok but fldiff comparison fails due to an extra section with
 #%%    --- Pseudopotential description --
+#%% topics = PIMD
 #%%<END TEST_INFO>

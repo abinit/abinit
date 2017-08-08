@@ -52,7 +52,6 @@ subroutine dfptnl_doutput(blkflg,d3,mband,mpert,nkpt,natom,ntypat,unddb)
 #undef ABI_FUNC
 #define ABI_FUNC 'dfptnl_doutput'
  use interfaces_14_hidewrite
- use interfaces_72_response, except_this_one => dfptnl_doutput
 !End of the abilint section
 
  implicit none

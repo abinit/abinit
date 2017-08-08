@@ -248,5 +248,5 @@ optforces 1
 #%%   3- antiferro-magnetic        nsppol/nspden/nspinor=1/2/1
 #%%   4- non-collinear magnetism   nsppol/nspden/nspinor=1/4/2
 #%%   Cut-off and k-points are unrealistic.
-#%% topics = DFT+U
+#%% topics = DFT+U, spinpolarisation
 #%%<END TEST_INFO>

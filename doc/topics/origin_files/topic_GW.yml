@@ -1,0 +1,67 @@
+- !components 
+    name      : GW 
+    keyword   : GW calculations 
+    authors   : MG
+    howto     : perform a GW calculation
+    header    : default
+    title     : <h1>GW calculations</h1>
+    subtitle  : default
+    copyright : default
+    links     : default
+    introduction : |- 
+        <p>DFT performs reasonably well for the determination of structural properties,
+        but fails to predict accurate band gaps.
+        A more rigorous framework for the description of excited states
+        is provided by many-body perturbation theory (MBPT)  [[Fetter1971]],[[Abrikosov1975]], 
+        based on the Green's functions
+        formalism and the concept of quasi-particles [[Onida2002]].
+        <p>Within MBPT, one can calculate the quasi-particle (QP) energies, E, and amplitudes, &Psi;, 
+        by solving a nonlinear equation involving the non-Hermitian, nonlocal and frequency dependent self-energy operator &Sigma;.
+        <p>This equation goes beyond the mean-field approximation of independent KS particles as
+        it accounts for the dynamic many-body effects in the electron-electron interaction.
+        <p>In principle, the exact self-energy can be obtained by solving self-consistently the set of coupled integro-differential equations
+        proposed by Hedin [[Hedin1965]]. The fundamental building blocks of Hedin's equations are, besides &Sigma;(1,2), 
+        the Green's function of the interacting many-body system, G(1,2), the Green's function of an appropriate noninteracting system, G<sub>0</sub>(1,2),
+        and the irreducible polarizability, &chi;(1,2), which, through the inverse dielectric matrix &epsilon;<sup>-1</sup>(1,2),
+        re-normalizes the static Coulomb potential, resulting in the dynamical screened interaction W(1,2). 
+        Finally, the vertex function &Gamma;(1,2,3) describes the interactions between virtual holes and electrons.
+        <p>Details about the GW implementation in ABINIT can be found <a href="../../theory/generated_files/theorydoc_mbt.html">here</a>.
+        <p>A typical GW calculation consists of two different steps (following a DFT calculation): first &epsilon;<sup>-1</sup> is calculated and stored on disk ([[optdriver]]=3), then the KS band structure and W are used to evaluate the matrix elements of &Sigma;, finally obtaining the QP corrections ([[optdriver]]=4). 
+        <p>In the frequency domain, the GW self-energy &Sigma;(&omega;) can be evaluated in ABINIT with two different, more effective, techniques: 
+        <li>integration with a plasmon-pole model (PPM)</li>
+        <li>integration with contour deformation (CD).</li>
+        <p>In the former case, the frequency dependence of &epsilon;<sup>-1</sup>(&omega;) is modeled with a simple analytic form,
+        and the frequency convolution is carried out analytically.
+        <p>In the latter approach, the integral is evaluated numerically extending the functions in the complex 
+        plane in order have a smoother integrand.
+
+        <p>Four different plasmon pole models (PPMs) are available in ABINIT.
+        The choice of the particular PPM to be used is controlled by the variable [[ppmodel]].
+        The first two options ([[ppmodel]]=1,2) refer to approximations employed in the pioneering implementations 
+        of the GW formalism: the plasmon-pole models of Godby-Needs [[Godby1989]] (GN) 
+        and Hybertsen and Louie [[Hybertsen1986]] (HL).
+        <p>The contour deformation technique is activated by setting the input variable [[gwcalctyp]] to 2.
+        The integration along the imaginary axis requires the calculation of &epsilon;<sup>-1</sup>(&omega;) for purely imaginary frequencies.
+        The frequency mesh for the quadrature is governed by the input variable [[nfreqim]], and can be very coarse 
+        since the integrands is very smooth in this region.
+        <p>The evaluation of the residue of the poles requires the calculation of &epsilon;<sup>-1</sup>(&omega;) on a fine mesh along the real axis.
+        This regular mesh, sampling the interval [0,+&infin;], is defined by the two input variables [[nfreqre]] and [[freqremax]].
+        <p>The CD approach requires many evaluations of &epsilon;<sup>-1</sup>(&omega;) and can therefore be computationally highly demanding. 
+        On the other hand, it is the preferred approach for calculating the QP correction of low-lying states.
+        Moreover, it is the only technique available in ABINIT to compute the imaginary part of &Sigma;(&omega;) 
+        and the spectral function A(&omega;).
+    tutorials  : |-
+       <li><a href="../../tutorial/generated_files/lesson_gw1.html">The first lesson on GW (GW1)</a> deals with
+       the computation of the quasi-particle band gap of Silicon 
+       (semiconductor), in the GW approximation (much better than the
+       Kohn-Sham LDA band structure), with a plasmon-pole model. </li>
+       <li><a href="../../tutorial/generated_files/lesson_gw2.html">The second lesson on GW (GW2)</a> deals with
+       the computation of the quasi-particle band structure of Aluminum, in
+       the GW approximation (so, much better than the Kohn-Sham LDA band
+       structure) without using the plasmon-pole model. </li>
+       <li><a href="../../tutorial/generated_files/lesson_paral_mbt.html">Parallelism of Many-Body
+       Perturbation calculations (GW)</a> allows to speed up the calculation of
+       accurate electronic structures (quasi-particle band structure,
+       including many-body effects).</li>
+    
+    end : default
