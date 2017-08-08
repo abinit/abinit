@@ -1,6 +1,6 @@
 
-.Version 8.5.3 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
+.Version 8.5.2 of ABINIT 
+.(sequential version, prepared for a x86_64_linux_gnu5.4 computer) 
 
 .Copyright (C) 1998-2018 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,15 +14,15 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun 17 Sep 2017.
-- ( at 06h08 )
+.Starting date : Tue  8 Aug 2017.
+- ( at 11h23 )
   
 - input  file    -> t13.in
 - output file    -> t13.out
 - root for input  files -> t13i
 - root for output files -> t13o
 
-- inpspheads : Reading pseudopotential header in XML form from /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/pouillon_psml-new/tests/Psps_for_tests/79_Au_oncv.psml
+- inpspheads : Reading pseudopotential header in XML form from /home/pouillon/abinit/pouillon/tests/Psps_for_tests/79_Au_oncv.psml
 - psxml2ab: ps_Number_of_Projectors not relativistic     0
 - psxml2ab: ps_Number_of_Projectors scalar relativistic     7
 - psxml2ab: ps_Projector_L     0
@@ -69,7 +69,7 @@ _ WF disk file :      3.393 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
 --------------------------------------------------------------------------------
 -
 - outvars: echo of selected default values                                      
--   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+-   iomode0 =  0 , fftalg0 =112 , wfoptalg0 =  0
 -
 - outvars: echo of global parameters not present in the input file              
 -  max_nthreads =    0
@@ -80,7 +80,7 @@ _ WF disk file :      3.393 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
           dilatmx      1.10000000E+00
              ecut      8.97000000E+00 Hartree
            ecutsm      5.00000000E-01 Hartree
--          fftalg         312
+-          fftalg         112
            iatfix        1
              iscf           5
               ixc       -1009
@@ -319,15 +319,16 @@ P           mkmem         110
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/pouillon_psml-new/tests/Psps_for_tests/79_Au_oncv.psml
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/pouillon_psml-new/tests/Psps_for_tests/79_Au_oncv.psml
+- pspini: atom type   1  psp file is /home/pouillon/abinit/pouillon/tests/Psps_for_tests/79_Au_oncv.psml
+- pspatm: opening atomic psp file    /home/pouillon/abinit/pouillon/tests/Psps_for_tests/79_Au_oncv.psml
 - Au    ONCVPSP-3.3.0+psml-3.3.0-72 (s
 - 79.00000  19.00000    170720                znucl, zion, pspdat
     9 -101130    3   -1        -1   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
     5.98000000000000    1.00000000000000    0.00000000000000   rchrg,fchrg,qchrg
      nproj     2     2     2     1
-  psp9in : mmax, amesh, rad(mmax) =   600    1.000000E-02    5.990000E+00
-  pspatm : epsatm=   32.23452742
+  psp9in : irelt =            0
+  psp9in : mmax, amesh, rad(mmax) =          600   1.0000000000000000E-002   5.9900000000000002     
+ pspatm: epsatm=   32.23452742
          --- l  ekb(1:nproj) -->
              0    9.407884   -0.195253
              1    2.390567   -1.849848
@@ -402,7 +403,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     195.636     195.592
  Components of total free energy (in Hartree) :
 
     Kinetic energy  =  3.90273795594771E+01
-    Hartree energy  =  2.21326955165957E+01
+    Hartree energy  =  2.21326955165958E+01
     XC energy       = -2.50607331836789E+01
     Ewald energy    = -1.07335763432358E+02
     PspCore energy  =  5.34512423321609E+00
@@ -438,7 +439,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     195.636     195.592
            ecutsm      5.00000000E-01 Hartree
            etotal     -1.4546231411E+02
             fcart     -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
--          fftalg         312
+-          fftalg         112
            iatfix        1
              iscf           5
               ixc       -1009
@@ -655,10 +656,45 @@ P           mkmem         110
 
 ================================================================================
 
+- Total cpu        time (s,m,h):        353.3        5.89      0.098
+- Total wall clock time (s,m,h):        464.8        7.75      0.129
+-
+- For major independent code sections, cpu and wall times (sec),
+-  as well as % of the time and number of calls for node 0-
+-<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = 0>
+- cpu_time =          353.3, wall_time =          464.8
+-
+- routine                        cpu     %       wall     %      number of calls  Gflops    Speedup Efficacity
+-                                                                  (-1=no count)
+- fourwf%(pot)                 207.682  58.8    279.644  60.2          50708      -1.00        0.74       0.74
+- vtowfk(ssdiag)                77.817  22.0     69.146  14.9             -1      -1.00        1.13       1.13
+- nonlop(apply)                 32.855   9.3     43.946   9.5          50708      -1.00        0.75       0.75
+- fourwf%(den)                   8.238   2.3     27.656   6.0           8799      -1.00        0.30       0.30
+- getghc-other                   6.429   1.8      7.934   1.7             -1      -1.00        0.81       0.81
+- projbd                         4.058   1.1      5.030   1.1          79416      -1.00        0.81       0.81
+- others (107)                   4.404   1.2     13.403   2.9             -1      -1.00        0.33       0.33
+-<END_TIMER>
+-
+- subtotal                     341.483  96.6    446.759  96.1                                  0.76       0.76
 
-- Timing analysis has been suppressed with timopt=0
+- For major independent code sections, cpu and wall times (sec),
+- as well as % of the total time and number of calls 
 
+-<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = world>
+- cpu_time =         353.3, wall_time =         464.8
+-
+- routine                         cpu     %       wall     %      number of calls Gflops    Speedup Efficacity
+-                                                                  (-1=no count)
+- fourwf%(pot)                 207.682  58.8    279.644  60.2          50708      -1.00        0.74       0.74
+- vtowfk(ssdiag)                77.817  22.0     69.146  14.9             -1      -1.00        1.13       1.13
+- nonlop(apply)                 32.855   9.3     43.946   9.5          50708      -1.00        0.75       0.75
+- fourwf%(den)                   8.238   2.3     27.656   6.0           8799      -1.00        0.30       0.30
+- getghc-other                   6.429   1.8      7.934   1.7             -1      -1.00        0.81       0.81
+- projbd                         4.058   1.1      5.030   1.1          79416      -1.00        0.81       0.81
+- others (107)                   4.404   1.2     13.403   2.9             -1      -1.00        0.33       0.33
+-<END_TIMER>
 
+- subtotal                     341.483  96.6    446.759  96.1                                  0.76       0.76
 
 ================================================================================
 
@@ -729,10 +765,10 @@ P           mkmem         110
 - Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7
 - Comment : the original paper describing the ABINIT project.
 -
-- Proc.   0 individual time (sec): cpu=         20.0  wall=         20.2
+- Proc.   0 individual time (sec): cpu=        353.3  wall=        464.8
 
 ================================================================================
 
  Calculation completed.
 .Delivered   6 WARNINGs and   2 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         20.0  wall=         20.2
++Overall time at end (sec) : cpu=        353.3  wall=        464.8
