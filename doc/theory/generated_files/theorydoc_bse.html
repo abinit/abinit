@@ -33,7 +33,20 @@ equation can be found in [1].
 <a name="list"></a>
 <h3><b> Bethe-Salpeter equation in ABINIT. Table of content:</b></h3>
 
-<p>
+<ul> 
+  <li><a href="#None">0. To be filled</a></li>
+  <li><a href="#optical_properties">1. Optical properties and local field effects</a></li>
+  <li><a href="#BS_equation">2. The Bethe-Salpeter equation in a nutshell</a></li>
+  <li><a href="#BS_solvers">3. Solving the Bethe-Salpeter problem</a></li>
+  <li><a href="#kernel_mel">4. Kernel matrix elements in reciprocal space</a></li>
+  <li><a href="#dipole_mel">5. Matrix elements of the dipole operator</a></li>
+  <li><a href="#references">6. References</a></li>
+
+ </ul> 
+ <hr><br><a name="None"> </a>
+<a name="0"> </a>
+<h3><b>0. To be filled</b></h3>
+ <p><p>
 </p>
 <ul>
 <li><a href="#optical_properties">1.</a> Optical properties and local field effects
@@ -44,15 +57,12 @@ equation can be found in [1].
 </li>
 </ul>
 <hr>
-
-
-
-<h4><a name="optical_properties"></a></h4>
-
-<h3><b> 1. Optical properties and local field effects.</b></h3>
-
-<p>
-Before discussing the Bethe-Salpeter problem, it is worth reminding some basic results concerning
+<br><br><a href=#top>Go to the top</a>
+<hr>
+<br><a name="optical_properties"> </a>
+<a name="1"> </a>
+<h3><b>1. Optical properties and local field effects</b></h3>
+ <p>Before discussing the Bethe-Salpeter problem, it is worth reminding some basic results concerning
 the <i>ab initio</i> description of optical properties.
 </p>
 <p>
@@ -128,20 +138,12 @@ unrealistic approximation for the many-body polarizability.
 In the next section we will discuss how to obtain an improved approximation for the vertex 
 and therefore an improved approximation for the polarizability that takes into account many-body effects 
 due to the electron-hole interaction
-
-<br><br><br></p>
-<hr><br>
-
-
-<h4><a name="BS_equation"></a></h4>
-
-
-
-
-<h3><b> 2. The Bethe-Salpeter equation in a nutshell.</b></h3>
-
-<p>
-A schematic picture of the different levels of the description of optical 
+<br><br><a href=#top>Go to the top</a>
+<hr>
+<br><a name="BS_equation"> </a>
+<a name="2"> </a>
+<h3><b>2. The Bethe-Salpeter equation in a nutshell</b></h3>
+ <p>A schematic picture of the different levels of the description of optical 
 spectra available in ABINIT is given below.
 </p>
 <p style="text-align: center;">
@@ -422,23 +424,13 @@ is the matrix element of the dipole operator in transition space.
 By default the code calculates the macroscopic dielectric function taking the limit along 
 six different directions in <b>q</b>-space (the three basis vectors of the reciprocal lattice and the three Cartesian
 axis). It is possible to change the default directions using the variables
-<a href="../../input_variables/generated_files/varset_gw.html#gw_nqlwl">gw_nqlwl</a> and 
-
-<a href="../../input_variables/generated_files/varset_gw.html#gw_qlwl">gw_qlwl</a>. 
-
-<br><br><br></p>
-<hr><br>
-
-
-<h4><a name="BS_solvers"></a></h4>
-
-<h3><b> 3. Solving the Bethe-Salpeter problem.</b></h3>
-
-
-
-
-<p>
-At this point it is clear that the evaluation of the macroscopic dielectric function within
+<a href="../../input_variables/generated_files/varset_gw.html#gw_nqlwl">gw_nqlwl</a> and <a href="../../input_variables/generated_files/varset_gw.html#gw_qlwl">gw_qlwl</a>. 
+<br><br><a href=#top>Go to the top</a>
+<hr>
+<br><a name="BS_solvers"> </a>
+<a name="3"> </a>
+<h3><b>3. Solving the Bethe-Salpeter problem</b></h3>
+ <p>At this point it is clear that the evaluation of the macroscopic dielectric function within
 the BS formalism is a two-step process:
 
 </p>
@@ -555,16 +547,12 @@ cannot be used for calculations in which the coupling term is included.
 <a href="../../input_variables/generated_files/varset_bse.html#bs_algorithm">bs_algorithm</a>=3 employs the conjugate-gradient method
 to calculate the lowest eigenstates of the Hamiltonian. 
 At present, this method is still under testing and does not support calculations with the coupling term.
-
-
-</p>
-<h4><a name="kernel_mel"></a></h4>
-
-<h3><b> 4. Kernel matrix elements in reciprocal space.</b></h3>
-
-
-
-Our implementation employs planewaves to expand the periodic part of the Bloch states, <i>u</i>,
+<br><br><a href=#top>Go to the top</a>
+<hr>
+<br><a name="kernel_mel"> </a>
+<a name="4"> </a>
+<h3><b>4. Kernel matrix elements in reciprocal space</b></h3>
+ <p>Our implementation employs planewaves to expand the periodic part of the Bloch states, <i>u</i>,
 and the two-point function <i>W(r,r')</i> that becomes a <b>q</b>-dependent matrix in reciprocal-space.
 The conventions used for the transforms are documented in <a href="theorydoc_mbt.html#notations">this
 section</a> of the <i>GW</i> notes.
@@ -605,14 +593,12 @@ Brillouin zone hence the size of the Hamiltonian is defined by the number of poi
 Brillouin zone and not by the number of points in the irreducible wedge.
 
 </p>
-<h4><a name="dipole_mel"></a></h4>
-
-<h3><b> 3 Matrix elements of the dipole operator.</b></h3>
-
-
-
-
-The accurate calculation of optical properties require the correct treatment 
+<br><br><a href=#top>Go to the top</a>
+<hr>
+<br><a name="dipole_mel"> </a>
+<a name="5"> </a>
+<h3><b>5. Matrix elements of the dipole operator</b></h3>
+ <p>The accurate calculation of optical properties require the correct treatment 
 of the optical limit (<b>G</b>=0, <b>q</b> &#8594; 0) of the oscillator matrix elements. 
 The computation of these terms deserves some  clarification, due to the presence of the fully nonlocal pseudopotential 
 term in the Kohn-Sham Hamiltonian.
@@ -674,13 +660,12 @@ when studying optical properties, both at the RPA and at the BS level.
 We suggest the use of <a href="../../input_variables/generated_files/varset_gw.html#inclvkb">inclvkb</a>=2 that is 
 faster and less memory demanding than the algorithm coded for
 <a href="../../input_variables/generated_files/varset_gw.html#inclvkb">inclvkb</a>=1.
-
-</p>
-<h3><p><b><a name="references">References</a>
-</b></p></h3>
-
-
-<ol>
+<br><br><a href=#top>Go to the top</a>
+<hr>
+<br><a name="references"> </a>
+<a name="6"> </a>
+<h3><b>6. References</b></h3>
+ <p><ol>
 <li><a name="onida_rmp">G. Onida, L. Reining, and A. Rubio, Rev. Mod. Phys. <b>48</b>, 601 (2002)
 and references therein</a> </li><li><a name="albrecth">S. Albrecht, Ph.D. thesis, Ecole Polytechnique, Palaiseau (Paris), 1999</a> </li><li><a name="haydock2">R. Haydock, Comput. Phys. Comm. <b>20</b>, 11 (1980)</a> </li><li><a name="gruning">M. Gruning, A. Marini and X. Gonze, Nano Letters <b>9</b>, 2820 (2009) </a></li><li><a name="baroni1986">S. Baroni and R. Resta, Phys. Rev. B <b>33</b>, 7017 (1986) </a></li><!--
 <li><a name="benedict">L. X. Benedict and E. L. Shirley, Phys. Rev. B <b>59</b>, 5441 (1999)</a> </li>
@@ -688,6 +673,8 @@ and references therein</a> </li><li><a name="albrecth">S. Albrecht, Ph.D. thesis
 <li><a name="wiser">N. Wiser, Phys. Rev. <b>129</b>, 72 (1963)</a> </li>
 -->
 </ol>
+<br><br><a href=#top>Go to the top</a>
+<hr>
 <script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
 
 </body>
