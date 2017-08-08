@@ -2364,7 +2364,7 @@
         whether ABINIT fallbacks have been connected or not (bigdft, etsf_io, libxc, wannier90).
         At present, [[builtintest]]=1 ... 7 are allowed. See more information in tests/built-in/README .
         </p>
-    topics: OtherControl_expert
+    topics: Control_expert
     varset: dev
     vartype: integer
 - !variable
