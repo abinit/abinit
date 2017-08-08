@@ -1330,7 +1330,6 @@
 - !variable
     abivarname: bdeigrf
     characteristics:
-    - '[[RESPFN]]'
     commentdefault: null
     commentdims: null
     defaultval: -1
@@ -3923,7 +3922,6 @@
 - !variable
     abivarname: dfpt_sciss
     characteristics:
-    - '[[RESPFN]]'
     - '[[ENERGY]]'
     commentdefault: null
     commentdims: null
@@ -5934,7 +5932,6 @@
 - !variable
     abivarname: efmas
     characteristics:
-    - '[[RESPFN]]'
     commentdefault: null
     commentdims: null
     defaultval: 0
@@ -5971,7 +5968,6 @@
 - !variable
     abivarname: efmas_bands
     characteristics:
-    - '[[RESPFN]]'
     commentdefault: null
     commentdims: null
     defaultval: The full range of band available in the calculation for each k-point.
@@ -5993,7 +5989,6 @@
 - !variable
     abivarname: efmas_calc_dirs
     characteristics:
-    - '[[RESPFN]]'
     commentdefault: null
     commentdims: null
     defaultval: 0
@@ -6026,7 +6021,6 @@
 - !variable
     abivarname: efmas_deg
     characteristics:
-    - '[[RESPFN]]'
     commentdefault: null
     commentdims: null
     defaultval: 1
@@ -6046,7 +6040,6 @@
 - !variable
     abivarname: efmas_deg_tol
     characteristics:
-    - '[[RESPFN]]'
     commentdefault: null
     commentdims: null
     defaultval: 1.0E-5
@@ -6066,7 +6059,6 @@
 - !variable
     abivarname: efmas_dim
     characteristics:
-    - '[[RESPFN]]'
     commentdefault: null
     commentdims: null
     defaultval: 3
@@ -6099,7 +6091,6 @@
 - !variable
     abivarname: efmas_dirs
     characteristics:
-    - '[[RESPFN]]'
     commentdefault: null
     commentdims: null
     defaultval: 0
@@ -6121,7 +6112,6 @@
 - !variable
     abivarname: efmas_n_dirs
     characteristics:
-    - '[[RESPFN]]'
     commentdefault: null
     commentdims: null
     defaultval: 0
@@ -6139,7 +6129,6 @@
 - !variable
     abivarname: efmas_ntheta
     characteristics:
-    - '[[RESPFN]]'
     commentdefault: null
     commentdims: null
     defaultval: 1000
@@ -6293,7 +6282,6 @@
 - !variable
     abivarname: elph2_imagden
     characteristics:
-    - '[[RESPFN]]'
     - '[[ENERGY]]'
     commentdefault: null
     commentdims: null
@@ -6819,7 +6807,6 @@
 - !variable
     abivarname: esmear
     characteristics:
-    - '[[RESPFN]]'
     - '[[ENERGY]]'
     commentdefault: null
     commentdims: null
@@ -7562,7 +7549,6 @@
 - !variable
     abivarname: frzfermi
     characteristics:
-    - '[[RESPFN]]'
     commentdefault: null
     commentdims: null
     defaultval: 0
@@ -10675,7 +10661,6 @@
 - !variable
     abivarname: ieig2rf
     characteristics:
-    - '[[RESPFN]]'
     commentdefault: null
     commentdims: null
     defaultval: 0
@@ -10705,7 +10690,6 @@
          This option is preferable for large system to [[ieig2rf]]=4 as the GKK files take less much less disk space and memory (but run a little bit slower).
          Note that [[ieig2rf]]=5 can only be used if Abinit is compiled with NETCDF support.
          <br />
-         Related variables : [[bdeigrf]],[[elph2_imagden]],[[getgam_eig2nkq]],[[smdelta]]
          Related variables : [[bdeigrf]],[[elph2_imagden]],[[getgam_eig2nkq]],[[smdelta]]
         </p>
     topics: TDep_compulsory
@@ -21679,7 +21663,6 @@
 - !variable
     abivarname: ph_ndivsm
     characteristics:
-    - '[[RESPFN]]'
     commentdefault: null
     commentdims: null
     defaultval: 20
@@ -22734,7 +22717,6 @@
 - !variable
     abivarname: prepanl
     characteristics:
-    - '[[RESPFN]]'
     commentdefault: null
     commentdims: null
     defaultval: 0
@@ -22770,7 +22752,6 @@
 - !variable
     abivarname: prepgkk
     characteristics:
-    - '[[RESPFN]]'
     commentdefault: null
     commentdims: null
     defaultval: 0
@@ -22879,7 +22860,6 @@
 - !variable
     abivarname: prtbbb
     characteristics:
-    - '[[RESPFN]]'
     commentdefault: null
     commentdims: null
     defaultval: 0
@@ -26118,7 +26098,6 @@
 - !variable
     abivarname: rf2_dkdk
     characteristics:
-    - '[[RESPFN]]'
     commentdefault: null
     commentdims: null
     defaultval: 0
@@ -26157,7 +26136,6 @@
 - !variable
     abivarname: rfasr
     characteristics:
-    - '[[RESPFN]]'
     commentdefault: null
     commentdims: null
     defaultval: 0
@@ -26194,7 +26172,6 @@
 - !variable
     abivarname: rfatpol
     characteristics:
-    - '[[RESPFN]]'
     commentdefault: null
     commentdims: null
     defaultval:
@@ -26242,7 +26219,6 @@
 - !variable
     abivarname: rfddk
     characteristics:
-    - '[[RESPFN]]'
     commentdefault: null
     commentdims: null
     defaultval: 0
@@ -26274,7 +26250,6 @@
 - !variable
     abivarname: rfdir
     characteristics:
-    - '[[RESPFN]]'
     commentdefault: null
     commentdims: null
     defaultval:
@@ -26315,7 +26290,6 @@
 - !variable
     abivarname: rfelfd
     characteristics:
-    - '[[RESPFN]]'
     commentdefault: null
     commentdims: null
     defaultval: 0
@@ -26368,7 +26342,6 @@
 - !variable
     abivarname: rfmagn
     characteristics:
-    - '[[RESPFN]]'
     commentdefault: null
     commentdims: null
     defaultval: 0
@@ -26383,13 +26356,12 @@
          Currently, orbital magnetism is not taken into account and the perturbing potential
          has Zeeman form.
         </p>
-    topics: DFPT_compulsory
+    topics: DFPT_basic
     varset: dfpt
     vartype: integer
 - !variable
     abivarname: rfmeth
     characteristics:
-    - '[[RESPFN]]'
     commentdefault: null
     commentdims: null
     defaultval: 1
@@ -26433,7 +26405,6 @@
 - !variable
     abivarname: rfphon
     characteristics:
-    - '[[RESPFN]]'
     commentdefault: null
     commentdims: null
     defaultval: 0
@@ -26446,13 +26417,12 @@
          It must be equal to 1
         to run phonon response function calculations.
         </p>
-    topics: DFPT_compulsory
+    topics: DFPT_basic
     varset: dfpt
     vartype: integer
 - !variable
     abivarname: rfstrs
     characteristics:
-    - '[[RESPFN]]'
     commentdefault: null
     commentdims: null
     defaultval: 0
@@ -26485,13 +26455,12 @@
          </a>
          .
         </p>
-    topics: DFPT_compulsory
+    topics: DFPT_basic
     varset: dfpt
     vartype: integer
 - !variable
     abivarname: rfuser
     characteristics:
-    - '[[RESPFN]]'
     commentdefault: null
     commentdims: null
     defaultval: 0
@@ -27204,7 +27173,6 @@
 - !variable
     abivarname: smdelta
     characteristics:
-    - '[[RESPFN]]'
     commentdefault: null
     commentdims: null
     defaultval: 0
