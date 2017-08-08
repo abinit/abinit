@@ -31,7 +31,7 @@
 
 
 <p>A high performance G<sub>0</sub>W<sub>0</sub> implementation <a href="../../biblio/generated_files/bib_biblio.html#Janssen2015">[Janssen2015]</a> has been developed within ABINIT.
-It is more efficient than the traditional implementation <a href="../../biblio/generated_files/bib_biblio.html#Gonze2009">[Gonze2009]</a>,<a href="../../biblio/generated_files/bib_biblio.html#Giantomassi2011">[Giantomassi2011]</a> thanks to the treatment of the two major bottlenecks: the summations over conduction states and the inversion of the dielectric matrix.
+It is more efficient than the traditional implementation <a href="../../biblio/generated_files/bib_biblio.html#Gonze2009">[Gonze2009]</a>,<a href="../../biblio/generated_files/bib_biblio.html#Giantomassi2011">[Giantomassi2011]</a> thanks to the treatment of the two major bottlenecks: the summations over conduction states and the inversion of the dielectric matrix. However, note that this implementation has only limited applicability at present (see below).
 <li>The first bottleneck is circumvented by converting the summations into Sternheimer equations.
 Note that the introduction of approximations beyond the G<sub>0</sub>W<sub>0</sub> (such as analytic continuation <a href="../../biblio/generated_files/bib_biblio.html#Rieger1999">[Rieger1999]</a>) is avoided thanks to use of the simplified quasiminimal residual (SQMR) algorithm <a href="../../biblio/generated_files/bib_biblio.html#Freund1995">[Freund1995]</a>.</li>
 <li>Then, the second bottleneck is assessed by expressing the dielectric matrix in a Lanczos basis, which reduces the matrix size by orders of magnitude with respect to a plane wave basis.</li>
