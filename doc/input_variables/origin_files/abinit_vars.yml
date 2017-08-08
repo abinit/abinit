@@ -1830,7 +1830,6 @@
 - !variable
     abivarname: bs_algorithm
     characteristics:
-    - '[[BETHE_SALPETER]]'
     commentdefault: null
     commentdims: null
     defaultval: 2
@@ -1876,7 +1875,6 @@
 - !variable
     abivarname: bs_calctype
     characteristics:
-    - '[[BETHE_SALPETER]]'
     commentdefault: null
     commentdims: null
     defaultval: 1
@@ -1909,7 +1907,6 @@
 - !variable
     abivarname: bs_coulomb_term
     characteristics:
-    - '[[BETHE_SALPETER]]'
     commentdefault: null
     commentdims: null
     defaultval: 11
@@ -1920,7 +1917,7 @@
     text: |-
         <p>
         This variable governs the choice among the different options that are available for the treatment
-        of Coulomb term of the [[BETHE_SALPETER]] Hamiltonian.
+        of Coulomb term of the Bethe-Salpeter Hamiltonian.
         [[bs_coulomb_term]] is the concatenation of two digits, labelled (A) and (B).
         </p>
         <p>
@@ -1960,7 +1957,6 @@
 - !variable
     abivarname: bs_coupling
     characteristics:
-    - '[[BETHE_SALPETER]]'
     commentdefault: null
     commentdims: null
     defaultval: 0
@@ -1971,7 +1967,7 @@
     text: |-
         <p>
          The [[bs_coupling]] input variable defines the treatment of the coupling block of the
-        [[BETHE_SALPETER]] Hamiltonian. Possible values are 0,1.
+        Bethe-Salpeter Hamiltonian. Possible values are 0,1.
          <ul>
           <li>
            0 =&gt;
@@ -1992,7 +1988,6 @@
 - !variable
     abivarname: bs_eh_cutoff
     characteristics:
-    - '[[BETHE_SALPETER]]'
     commentdefault: null
     commentdims: null
     defaultval:
@@ -2015,7 +2010,6 @@
 - !variable
     abivarname: bs_exchange_term
     characteristics:
-    - '[[BETHE_SALPETER]]'
     commentdefault: null
     commentdims: null
     defaultval: 1
@@ -2035,7 +2029,6 @@
 - !variable
     abivarname: bs_freq_mesh
     characteristics:
-    - '[[BETHE_SALPETER]]'
     - '[[ENERGY]]'
     commentdefault: null
     commentdims: null
@@ -2063,7 +2056,6 @@
 - !variable
     abivarname: bs_hayd_term
     characteristics:
-    - '[[BETHE_SALPETER]]'
     commentdefault: null
     commentdims: null
     defaultval: 1
@@ -2096,7 +2088,6 @@
 - !variable
     abivarname: bs_haydock_niter
     characteristics:
-    - '[[BETHE_SALPETER]]'
     commentdefault: null
     commentdims: null
     defaultval: 100
@@ -2116,7 +2107,6 @@
 - !variable
     abivarname: bs_haydock_tol
     characteristics:
-    - '[[BETHE_SALPETER]]'
     commentdefault: null
     commentdims: null
     defaultval:
@@ -2165,7 +2155,6 @@
 - !variable
     abivarname: bs_interp_kmult
     characteristics:
-    - '[[BETHE_SALPETER]]'
     commentdefault: null
     commentdims: null
     defaultval:
@@ -2192,7 +2181,6 @@
 - !variable
     abivarname: bs_interp_m3_width
     characteristics:
-    - '[[BETHE_SALPETER]]'
     commentdefault: null
     commentdims: null
     defaultval: 1.0
@@ -2208,7 +2196,6 @@
 - !variable
     abivarname: bs_interp_method
     characteristics:
-    - '[[BETHE_SALPETER]]'
     commentdefault: null
     commentdims: null
     defaultval: 1
@@ -2234,7 +2221,6 @@
 - !variable
     abivarname: bs_interp_mode
     characteristics:
-    - '[[BETHE_SALPETER]]'
     commentdefault: null
     commentdims: null
     defaultval: 0
@@ -2247,7 +2233,7 @@
          [[bs_interp_mode]] selects the mode of interpolation:
          <ul>
           <li>
-           0 =&gt; No interpolation. Standard [[BETHE_SALPETER]] computation is performed
+           0 =&gt; No interpolation. Standard Bethe-Salpeter computation is performed
           </li>
           <li>
            1 =&gt; Simple interpolation
@@ -2266,7 +2252,6 @@
 - !variable
     abivarname: bs_interp_prep
     characteristics:
-    - '[[BETHE_SALPETER]]'
     commentdefault: null
     commentdims: null
     defaultval: 0
@@ -2285,7 +2270,6 @@
 - !variable
     abivarname: bs_interp_rl_nb
     characteristics:
-    - '[[BETHE_SALPETER]]'
     commentdefault: null
     commentdims: null
     defaultval: 1
@@ -2302,7 +2286,6 @@
 - !variable
     abivarname: bs_loband
     characteristics:
-    - '[[BETHE_SALPETER]]'
     commentdefault: null
     commentdims: null
     defaultval: 0
@@ -2323,7 +2306,6 @@
 - !variable
     abivarname: bs_nstates
     characteristics:
-    - '[[BETHE_SALPETER]]'
     commentdefault: null
     commentdims: null
     defaultval: 0
@@ -9439,7 +9421,7 @@
     requires: '[[optdriver]] in [3,4,99]'
     text: |-
         <p>
-         Only relevant if [[optdriver]]=3,4,99 that is, screening, sigma or [[BETHE_SALPETER]]
+         Only relevant if [[optdriver]]=3,4,99 that is, screening, sigma or Bethe-Salpeter
         calculations, although the actual meaning of the variable depends on the particular run-level (see
         discussion below).
         </p>
@@ -9476,7 +9458,7 @@
          </b>
          define
         the set of directions in q-space along which the macroscopic dielectric function is evaluated.
-        By default the [[BETHE_SALPETER]] code calculates the macroscopic dielectric function using six different
+        By default the Bethe-Salpeter code calculates the macroscopic dielectric function using six different
         directions in q-space (the three basis vectors of the reciprocal lattice and the three Cartesian axis).
         </p>
     topics: GW_expert, BSE_expert
@@ -15642,7 +15624,6 @@
 - !variable
     abivarname: mdf_epsinf
     characteristics:
-    - '[[BETHE_SALPETER]]'
     commentdefault: null
     commentdims: null
     defaultval: 0.0
@@ -21161,13 +21142,13 @@
     requires: null
     text: |-
         <p>
-        Only relevant for GW or [[BETHE_SALPETER]] calculations with PAW.
+        Only relevant for GW or Bethe-Salpeter calculations with PAW.
          <br />
          This variable defines the approach used for the evaluation of the oscillator matrix elements within the PAW formalism.
         Possible values are 0,1,2.
          <br />
          If [[pawoptosc]]=0 the code uses its internal
-         default value (2 for SCREENING calculations, 1 for SIGMA calculations, 2 for [[BETHE_SALPETER]])
+         default value (2 for SCREENING calculations, 1 for SIGMA calculations, 2 for Bethe-Salpeter
          <br />
          If [[pawoptosc]]=1 the matrix elements are computed with the expression given by Arnaud and Alouani in PRB 62. 4464
         The equation is exact provided that the set of PAW partial waves is complete.
