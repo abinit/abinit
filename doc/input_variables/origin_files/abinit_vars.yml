@@ -8378,7 +8378,6 @@
 - !variable
     abivarname: getqps
     characteristics:
-    - '[[GW]]'
     commentdefault: null
     commentdims: null
     defaultval: 0
@@ -12753,13 +12752,13 @@
           <li>
            = -1 =&gt; like -2, but the non-self-consistent calculation
         is followed by the determination of excited states
-        within [[TDDFT]]. This is only possible for [[nkpt]]=1,
+        within TDDFT. This is only possible for [[nkpt]]=1,
         with [[kpt]]=0 0 0.
         Note that the oscillator strength needs to be defined with respect to
         an origin of coordinate, thanks to the input variable
         [[boxcenter]]. The maximal
         number of Kohn-Sham excitations to be used to build the
-        excited state [[TDDFT]] matrix can be defined by [[td_mexcit]],
+        excited state TDDFT matrix can be defined by [[td_mexcit]],
         or indirectly by the maximum Kohn-Sham excitation energy
         [[td_maxene]].
           </li>
@@ -13175,16 +13174,16 @@
           <li>
            20=&gt; Fermi-Amaldi xc ( -1/N Hartree energy, where N is the
         number of electrons per cell ; G=0 is not taken
-        into account however), for [[TDDFT]] tests.
+        into account however), for TDDFT tests.
         No spin-pol. Does not work for RF.
           </li>
           <li>
            21=&gt; same as 20, except that the xc-kernel is the LDA ([[ixc]]=1) one,
-        for [[TDDFT]] tests.
+        for TDDFT tests.
           </li>
           <li>
            22=&gt; same as 20, except that the xc-kernel is the Burke-Petersilka-Gross
-        hybrid, for [[TDDFT]] tests.
+        hybrid, for TDDFT tests.
           </li>
           <li>
            23=&gt; GGA of Z. Wu and R.E. Cohen, Phys. Rev. 73, 235116 (2006).
@@ -14054,7 +14053,7 @@
           </li>
          </ul>
         </p>
-    topics: xc_basic, Hybrids_compulsory
+    topics: xc_basic, Hybrids_compulsory, TDDFT_useful
     varset: basic
     vartype: integer
 - !variable
@@ -28225,7 +28224,6 @@
 - !variable
     abivarname: td_maxene
     characteristics:
-    - '[[TDDFT]]'
     commentdefault: null
     commentdims: null
     defaultval: 0.0
@@ -28257,7 +28255,6 @@
 - !variable
     abivarname: td_mexcit
     characteristics:
-    - '[[TDDFT]]'
     commentdefault: null
     commentdims: null
     defaultval: 0
@@ -31988,11 +31985,11 @@
            2 =&gt; GGA functional or hybrid functional based on GGA.
           </li>
           <li>
-           3 =&gt; Functional for [[TDDFT]].
+           3 =&gt; Functional for TDDFT.
           </li>
          </ul>
         </p>
-    topics: xc_internal
+    topics: xc_internal, TDDFT_useful
     varset: internal
     vartype: integer
 - !variable
