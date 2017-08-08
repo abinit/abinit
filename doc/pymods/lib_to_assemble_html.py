@@ -397,7 +397,7 @@ def assemble_html(origin_yml_files,suppl_components,dir_name,root_filname,allowe
       # Table of content
       for label in labels:
          secj="sec"+label
-         secs_html+='  <li><a href="#%s">%s. %s</a></li>\n' %(doc_yml[secj]["tag"],label,doc_yml[secj]["title"])
+         secs_html+='  <li>%s. <a href="#%s">%s</a></li>\n' %(label,doc_yml[secj]["tag"],doc_yml[secj]["title"])
          #Treat one level of subsections
          sublabels=[]
          for subj in doc_yml[secj].keys():
@@ -408,7 +408,7 @@ def assemble_html(origin_yml_files,suppl_components,dir_name,root_filname,allowe
            secs_html+="\n   <ul> \n"
            for sublabel in sublabels:
              subsecj="sec"+sublabel
-             secs_html+='    <li><a href="#%s">%s. %s</a></li>\n' %(doc_yml[secj][subsecj]["tag"],sublabel,doc_yml[secj][subsecj]["title"])
+             secs_html+='    <li>%s. <a href="#%s">%s</a></li>\n' %(sublabel,doc_yml[secj][subsecj]["tag"],doc_yml[secj][subsecj]["title"])
            secs_html+="\n   </ul> \n"
       secs_html+="\n </ul> \n <hr>"
       # Body

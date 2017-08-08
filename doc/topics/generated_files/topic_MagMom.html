@@ -42,6 +42,8 @@
 <p>The constraint is managed by the keyword <a href="../../input_variables/generated_files/varset_gstate.html#magconon">magconon</a>. Value 1 gives a constraint on the direction (<b>c</b> = <b>m</b> - <b>s</b><sub>i</sub> (<b>s</b><sub>i</sub>.<b>m</b>), value 2 gives a full constraint on the vector (<b>c</b> = <b>m</b> - <b>s</b><sub>i</sub>), with respect to the keyword <a href="../../input_variables/generated_files/varset_gstate.html#spinat">spinat</a> (<b>s</b><sub>i</sub> above), giving a 3-vector for each atom. The latter is quite a stringent constraint, and often may not converge. The former value usually works, provided sufficient precision is given for the calculation of the magnetic moment (kinetic energy cutoff in particular).
 
 <p>The strength of the constraint is given by the keyword <a href="../../input_variables/generated_files/varset_gstate.html#magcon_lambda">magcon_lambda</a> (&lambda; above - real valued). Typical values are 10<sup>-2</sup> but vary strongly with system type: this value should be started small (here the constraint may not be enforced fully) and increased. A too large value leads to oscillations of the magnetization (the equivalent of charge sloshing) which do not converge.  A corresponding Lagrange penalty term is added to the total energy, and is printed to the log file, along with the effective magnetic field being applied. In an ideal case the energy penalty term should go to 0 (the constraint is fully satisfied).
+<br><br><a href=#top>Go to the top</a>
+
 
 
 
@@ -56,6 +58,8 @@ The user can find some related example input files in the ABINIT package in the 
 <p> tests/v7/Input: <a href="../../tests/v7/Input/t05.in">t05.in</a> 
 <br>
 
+<br><br><a href=#top>Go to the top</a>
+
 
 &nbsp; 
 <HR ALIGN=left> 
@@ -66,6 +70,8 @@ The user can find some related example input files in the ABINIT package in the 
 <br> <a href="../../biblio/generated_files/bib_biblio.html#Ma2015">[Ma2015]</a>  Pui-Wai Ma and S. L. Dudarev, "Constrained density functional for noncollinear magnetism", Phys. Rev. B 91, 054420 (2015).<br>
 <br> <a href="../../biblio/generated_files/bib_biblio.html#Moscaconte2007">[Moscaconte2007]</a>  A. Mosca Conte, "Quantum mechanical modeling of nano magnetism", PhD thesis (SISSA, Trieste Italy, 2007). <br> URL: <a href="http://hdl.handle.net/20.500.11767/3935"> http://hdl.handle.net/20.500.11767/3935</a>.<br>
 <p>
+<br><br><a href=#top>Go to the top</a>
+
 <script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
 
 </body>

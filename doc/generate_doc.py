@@ -824,7 +824,7 @@ for topic_name in list_of_topics:
       topic_html += toc
     elif j == "input_variables":
       if sec_number[j]!="0" :
-        topic_html+= '\n&nbsp; \n<HR ALIGN=left> \n<a name=\"'+sec_number[j]+'\">&nbsp;</a>\n<h3><b>'+sec_number[j]+'. '+title[j]+'</b></h3>\n\n\n'
+        topic_html+= '\n&nbsp; \n<hr> \n<a name=\"'+sec_number[j]+'\">&nbsp;</a>\n<h3><b>'+sec_number[j]+'. '+title[j]+'</b></h3>\n\n\n'
         topic_html+= topic_invars[topic_name]
     elif j == "input_files":
       if sec_number[j]!="0" :
@@ -846,6 +846,11 @@ for topic_name in list_of_topics:
         if j in title.keys():
           topic_html+= '\n&nbsp; \n<HR ALIGN=left> \n<a name=\"'+sec_number[j]+'\">&nbsp;</a>\n<h3><b>'+sec_number[j]+'. '+title[j]+'</b></h3>\n\n\n'
         topic_html += extract_j
+    try:
+      if sec_number[j]!="0" :
+        topic_html += "\n<br><br><a href=#top>Go to the top</a>\n"
+    except:
+      pass
     topic_html += "\n"
 
   dir_root="topics"

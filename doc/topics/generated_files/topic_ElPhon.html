@@ -36,6 +36,8 @@
 
 <p>Basic calculations of electron-phonon interaction in ABINIT: One performs a normal ground state, then phonon calculations, with an added keyword <a href="../../input_variables/generated_files/varset_files.html#prtgkk">prtgkk</a> which saves the matrix elements to files suffixed GKK. The main change in this respect is that <a href="../../input_variables/generated_files/varset_files.html#prtgkk">prtgkk</a> now disables the use of symmetry in reducing k-points and perturbations. This avoids ambiguities in wave function phases due to band degeneracies. The resulting GKK files are merged using the mrggkk utility, and processed by anaddb. With the implementation of phonons in PAW DFPT, the electron phonon coupling is also available in PAW, though this has not yet been tested extensively. The input variables for electron-phonon coupling in anaddb are described in <a href="../../biblio/generated_files/bib_biblio.html#Gonze2009">[Gonze2009]</a> and <a href="../../biblio/generated_files/bib_biblio.html#Gonze2016">[Gonze2016]</a>.
 <p>Some details about the calculation of electron-phonon quantities in ABINIT and ANADDB can be found <a href="../documents/elphon_manual.pdf">here</a>.
+<br><br><a href=#top>Go to the top</a>
+
 
 
 &nbsp; 
@@ -49,9 +51,11 @@ electron-phonon interaction</a> presents the use of the utility MRGKK
 and ANADDB to examine the electron-phonon interaction and the
 subsequent calculation of superconductivity temperature (for bulk
 systems).</li>
+<br><br><a href=#top>Go to the top</a>
+
 
 &nbsp; 
-<HR ALIGN=left> 
+<hr> 
 <a name="3">&nbsp;</a>
 <h3><b>3. Related input variables.</b></h3>
 
@@ -77,6 +81,8 @@ systems).</li>
 ... <a href="../../input_variables/generated_files/varset_eph.html#eph_transport">eph_transport</a>   [Electron-PHonon: TRANSPORT flag]<br>
 ... <a href="../../input_variables/generated_files/varset_dev.html#use_nonscf_gkk">use_nonscf_gkk</a>   [USE NON-SCF calculation of GKK matrix elements (electron phonon)]<br>
 
+<br><br><a href=#top>Go to the top</a>
+
 
 &nbsp; 
 <HR ALIGN=left> 
@@ -94,6 +100,8 @@ The user can find some related example input files in the ABINIT package in the 
 <a href="../../tests/v7/Input/t94.in">t94.in</a> 
 <br>
 
+<br><br><a href=#top>Go to the top</a>
+
 
 &nbsp; 
 <HR ALIGN=left> 
@@ -106,6 +114,8 @@ The user can find some related example input files in the ABINIT package in the 
 <br> <a href="../../biblio/generated_files/bib_biblio.html#Grimvall1981">[Grimvall1981]</a>  G. Grimvall, "The electron phonon interaction in metals" (North-Holland, Amsterdam, 1981).<br>
 <br> <a href="../../biblio/generated_files/bib_biblio.html#Savrasov1996">[Savrasov1996]</a>  S.Y. Savrasov and D.Y. Savrasov, "Electron-phonon interactions and related physical properties of metals from linear-response theory", Phys. Rev. B 54, 16487 (1996).<br>
 <p>
+<br><br><a href=#top>Go to the top</a>
+
 <script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
 
 </body>
