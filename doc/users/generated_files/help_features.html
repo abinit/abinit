@@ -27,13 +27,16 @@ grouped in different topics, also answering the question "How to ... with ABINIT
 <h3><b> Table of contents:</b></h3>
 <ul> 
   <li><a href="#introduction">1. Introduction</a></li>
-  <li><a href="#groundstate">2. Ground state static calculations</a></li>
-  <li><a href="#moldyn">3. Molecular dynamics, geometry optimization, transition paths</a></li>
-  <li><a href="#correlated">4. Correlated electrons</a></li>
-  <li><a href="#response">5. Response properties (phonon, dielectric, Raman, effective mass ...)</a></li>
-  <li><a href="#excited">6. Excited state calculations</a></li>
-  <li><a href="#practical">7. Practical settings</a></li>
-  <li><a href="#others">8. Others</a></li>
+  <li><a href="#atoms">2. Specifications for atoms : cell, symmetries, atomic positions</a></li>
+  <li><a href="#electrons">3. Physical specifications for electrons : atomic potentials, functionals ...</a></li>
+  <li><a href="#added">4. Physical specifications for electrons : added electric/magnetic field, external potential, artificial constraints ...</a></li>
+  <li><a href="#numerical">5. Numerical specifications for electrons : basis set, wavevector sampling, ...</a></li>
+  <li><a href="#control">6. Control parameters : flow, SCF and stopping criteria, parallelism, I/O, ...</a></li>
+  <li><a href="#moldyn">7. Molecular dynamics, geometry optimization, transition paths</a></li>
+  <li><a href="#correlated">8. Correlated electrons</a></li>
+  <li><a href="#dfpt">9. Response properties (phonon, dielectric, Raman, effective mass ...)</a></li>
+  <li><a href="#excited">10. Excited state calculations</a></li>
+  <li><a href="#others">11. Others</a></li>
 
  </ul> 
  <hr><br><a name="introduction"> </a>
@@ -74,81 +77,121 @@ to atomic displacements and homogeneous electric field, so that
 the full phonon band structure can be constructed...
 <br><br><a href=#top>Go to the top</a>
 <hr>
-<br><a name="groundstate"> </a>
+<br><a name="atoms"> </a>
 <a name="2"> </a>
-<h3><b>2. Ground state static calculations</b></h3>
- <p><li><a href="../../topics/generated_files/topic_GSintroduction.html#">1. Building an input file</a>.
-<li><a href="../../topics/generated_files/topic_GSgeneral.html#">2. General settings</a>.
-<li><a href="../../topics/generated_files/topic_crystal.html#">3. Crystalline structure and symmetries</a>.
-<li><a href="../../topics/generated_files/topic_k-points.html#">4. k-points</a>.
-<li><a href="../../topics/generated_files/topic_xc.html#">5. Exchange and correlation functionals</a>.
-<li><a href="../../topics/generated_files/topic_convergency.html#">6. Convergency settings</a>.
-<li><a href="../../topics/generated_files/topic_PAW.html#">7. PAW special settings</a>.
-<li><a href="../../topics/generated_files/topic_spinpolarisation.html#">8. Spin-polarised systems and spin-orbit coupling</a>
-<li><a href="../../topics/generated_files/topic_otherGS.html#">9. Other settings</a>.
+<h3><b>2. Specifications for atoms : cell, symmetries, atomic positions</b></h3>
+ <p><ol>
+ <li><a href="../../topics/generated_files/topic_crystal.html#">Crystalline structure and symmetries</a></li>
+ <li>Primitive cell spec</li>
+ <li>Reading atomic positions</li>
+ <li>Specification of symmetries</li>
+</ol>
+<br><br><a href=#top>Go to the top</a>
+<hr>
+<br><a name="electrons"> </a>
+<a name="3"> </a>
+<h3><b>3. Physical specifications for electrons : atomic potentials, functionals ...</b></h3>
+ <p><ol>
+ <li><a href="../../topics/generated_files/topic_GSintroduction.html#">Building an input file</a> (should be linked from the introduction and point toward an automatically tested file !) </li>
+ <li><a href="../../topics/generated_files/topic_GSgeneral.html#">General settings</a></li>
+ <li><a href="../../topics/generated_files/topic_xc.html#">Exchange and correlation functionals</a></li>
+ <li>Should have a topics on pseudos and PAW atomic datasets</li>
+ <li><a href="../../topics/generated_files/topic_spinpolarisation.html#">Spin-polarised systems and spin-orbit coupling</a></li>
+ <li><a href="../../topics/generated_files/topic_ChargedCell.html#">Charged cells</a></li>
+ <li><a href="../../topics/generated_files/topic_otherGS.html#">Other settings</a></li>
+ <li><a href="../../topics/generated_files/topic_RPACorrEn.html#">Correlation energy within RPA</a></li>
+</ol>
+<br><br><a href=#top>Go to the top</a>
+<hr>
+<br><a name="added"> </a>
+<a name="4"> </a>
+<h3><b>4. Physical specifications for electrons : added electric/magnetic field, external potential, artificial constraints ...</b></h3>
+ <p><ol>
+ <li><a href="../../topics/generated_files/topic_Berry.html#">Finite electric field</a></li>
+ <li><a href="../../topics/generated_files/topic_MagField.html#">External magnetic field</a></li>
+ <li><a href="../../topics/generated_files/topic_MagMom.html#">Constrained atomic magnetic moment</a></li>
+ <li><a href="../../topics/generated_files/topic_EFG.html#">Electric field gradients</a></li>
+ <li><a href="../../topics/generated_files/topic_RandStopPow.html#">Random electronic stopping power</a></li>
+</ol>
+<br><br><a href=#top>Go to the top</a>
+<hr>
+<br><a name="numerical"> </a>
+<a name="5"> </a>
+<h3><b>5. Numerical specifications for electrons : basis set, wavevector sampling, ...</b></h3>
+ <p><ol>
+ <li><a href="../../topics/generated_files/topic_PAW.html#">PAW special settings</a></li>
+ <li><a href="../../topics/generated_files/topic_Wavelets.html#">Wavelets in ABINIT</a></li>
+ <li><a href="../../topics/generated_files/topic_k-points.html#">k-points</a></li>
+ <li><a href="../../topics/generated_files/topic_convergency.html#">Convergency settings</a></li>
+ <li><a href="../../topics/generated_files/topic_recursion.html#">Recursion methods and orbital free calculations</a></li>
+</ol>
+<br><br><a href=#top>Go to the top</a>
+<hr>
+<br><a name="control"> </a>
+<a name="6"> </a>
+<h3><b>6. Control parameters : flow, SCF and stopping criteria, parallelism, I/O, ...</b></h3>
+ <p><ol>
+ <li><a href="../../topics/generated_files/topic_multidtset.html#">Multi-dataset calculations</a></li>
+ <li>Should have a topic on SCF and stoppinc criteria</li>
+ <li><a href="../../topics/generated_files/topic_parallelism.html#">Parallelism and ABINIT</a></li>
+ <li><a href="../../topics/generated_files/topic_printing.html#">Printing options</a></li>
+</ol>
 <br><br><a href=#top>Go to the top</a>
 <hr>
 <br><a name="moldyn"> </a>
-<a name="3"> </a>
-<h3><b>3. Molecular dynamics, geometry optimization, transition paths</b></h3>
- <p><li><a href="../../topics/generated_files/topic_MolecularDynamics.html#">1. Molecular dynamics calculations</a>.
-<li><a href="../../topics/generated_files/topic_GeoOpt.html#">2. Geometry optimization calculations</a>.
-<li><a href="../../topics/generated_files/topic_TransPath.html#">3. Transition path calculations: NEB and string method</a>.
-<li><a href="../../topics/generated_files/topic_PIMD.html#">4. PIMD calculations</a>.
+<a name="7"> </a>
+<h3><b>7. Molecular dynamics, geometry optimization, transition paths</b></h3>
+ <p><ol>
+<li><a href="../../topics/generated_files/topic_MolecularDynamics.html#">Molecular dynamics calculations</a></li>
+<li><a href="../../topics/generated_files/topic_GeoOpt.html#">Geometry optimization calculations</a></li>
+<li><a href="../../topics/generated_files/topic_TransPath.html#">Transition path calculations: NEB and string method</a></li>
+<li>[[topic:PIMD|Path-integral molecular dynamics (PIMD)]]</li>
+</ol>
 <br><br><a href=#top>Go to the top</a>
 <hr>
 <br><a name="correlated"> </a>
-<a name="4"> </a>
-<h3><b>4. Correlated electrons</b></h3>
- <p><p> When correlated electrons are to be considered, it is necessary to go beyond the DFT framework. ABINIT enables the following possibilities:
-<li><a href="../../topics/generated_files/topic_Hybrids.html#">1. The use of hybrid functionals</a>.
-<li><a href="../../topics/generated_files/topic_CRPA.html#">2. Calculation of the effective Coulomb interaction</a>.
-<li><a href="../../topics/generated_files/topic_DFT+U.html#">3. The use of the DFT+U approximation</a>.
-<li><a href="../../topics/generated_files/topic_DMFT.html#">4. The use of the DMFT framework</a>.
+<a name="8"> </a>
+<h3><b>8. Correlated electrons</b></h3>
+ <p><ol>
+ <p> When correlated electrons are to be considered, it is necessary to go beyond the DFT framework. ABINIT enables the following possibilities:
+ <li><a href="../../topics/generated_files/topic_Hybrids.html#">The use of hybrid functionals</a></li>
+ <li><a href="../../topics/generated_files/topic_CRPA.html#">Calculation of the effective Coulomb interaction</a></li>
+ <li><a href="../../topics/generated_files/topic_DFT+U.html#">The use of the DFT+U approximation</a></li>
+ <li><a href="../../topics/generated_files/topic_DMFT.html#">The use of the DMFT framework</a></li>
+</ol>
 <br><br><a href=#top>Go to the top</a>
 <hr>
-<br><a name="response"> </a>
-<a name="5"> </a>
-<h3><b>5. Response properties (phonon, dielectric, Raman, effective mass ...)</b></h3>
- <p><li><a href="../../topics/generated_files/topic_DFPT.html#">1. DFPT: phonon modes, elastic tensors, effective charges, dielectric tensors,...</a>.
-<li><a href="../../topics/generated_files/topic_nonlinear.html#">2. Raman intensities and electro-optic properties</a>.
-<li><a href="../../topics/generated_files/topic_ElPhon.html#">3. Electron-phonon calculations</a>.
-<li><a href="../../topics/generated_files/topic_TDep.html#">4. Temperature dependence of the eigenenergies</a>.
-<li><a href="../../topics/generated_files/topic_EffMass.html#">5. Effective mass calculations</a>.
+<br><a name="dfpt"> </a>
+<a name="9"> </a>
+<h3><b>9. Response properties (phonon, dielectric, Raman, effective mass ...)</b></h3>
+ <p><ol>
+ <li><a href="../../topics/generated_files/topic_DFPT.html#">DFPT: phonon modes, elastic tensors, effective charges, dielectric tensors,...</a></li>
+ <li><a href="../../topics/generated_files/topic_nonlinear.html#">Raman intensities and electro-optic properties</a></li>
+ <li><a href="../../topics/generated_files/topic_ElPhon.html#">Electron-phonon calculations</a></li>
+ <li><a href="../../topics/generated_files/topic_TDep.html#">Temperature dependence of the eigenenergies</a></li>
+ <li><a href="../../topics/generated_files/topic_EffMass.html#">Effective mass calculations</a></li>
+</ol>
 <br><br><a href=#top>Go to the top</a>
 <hr>
 <br><a name="excited"> </a>
-<a name="6"> </a>
-<h3><b>6. Excited state calculations</b></h3>
- <p><li><a href="../../topics/generated_files/topic_GW.html#">1. GW calculations</a>.
-<li><a href="../../topics/generated_files/topic_BSE.html#">2. Bethe-Salpeter calculations</a>.
-<li><a href="../../topics/generated_files/topic_GWls.html#">3. GW- Lanczos-Sternheimer method</a>.
-<li><a href="../../topics/generated_files/topic_RandStopPow.html#">4. Random electronic stopping power</a>.
-<li><a href="../../topics/generated_files/topic_RPACorrEn.html#">5. Correlation energy within RPA</a>.
-<li><a href="../../topics/generated_files/topic_TDDFT.html#">6. TDDFT calculations</a>.
-<br><br><a href=#top>Go to the top</a>
-<hr>
-<br><a name="practical"> </a>
-<a name="7"> </a>
-<h3><b>7. Practical settings</b></h3>
- <p><li><a href="../../topics/generated_files/topic_multidtset.html#">1. Multi-dataset calculations</a>.
-<li><a href="../../topics/generated_files/topic_parallelism.html#">2. Parallelism and ABINIT</a>.
-<li><a href="../../topics/generated_files/topic_printing.html#">3. Printing options</a>.
+<a name="10"> </a>
+<h3><b>10. Excited state calculations</b></h3>
+ <p><ol>
+ <li><a href="../../topics/generated_files/topic_GW.html#">GW calculations</a></li>
+ <li><a href="../../topics/generated_files/topic_BSE.html#">Bethe-Salpeter calculations</a></li>
+ <li><a href="../../topics/generated_files/topic_GWls.html#">GW- Lanczos-Sternheimer method</a></li>
+ <li><a href="../../topics/generated_files/topic_TDDFT.html#">TDDFT calculations</a></li>
+</ol>
 <br><br><a href=#top>Go to the top</a>
 <hr>
 <br><a name="others"> </a>
-<a name="8"> </a>
-<h3><b>8. Others</b></h3>
- <p><li><a href="../../topics/generated_files/topic_positron.html#">1. Positron calculations</a>.
-<li><a href="../../topics/generated_files/topic_Wavelets.html#">2. Wavelets in ABINIT</a>.
-<li><a href="../../topics/generated_files/topic_Wannier.html#">3. Wannier functions in ABINIT</a>.
-<li><a href="../../topics/generated_files/topic_recursion.html#">4. Recursion methods and orbital free calculations</a>.
-<li><a href="../../topics/generated_files/topic_Berry.html#">5. Finite electric field</a>.
-<li><a href="../../topics/generated_files/topic_MagField.html#">6. External magnetic field</a>.
-<li><a href="../../topics/generated_files/topic_MagMom.html#">7. Constrained atomic magnetic moment</a>
-<li><a href="../../topics/generated_files/topic_ChargedCell.html#">8. Charged cells</a>
-<li><a href="../../topics/generated_files/topic_Unfolding.html#">9. Unfolding supercell band structures</a>
-<li><a href="../../topics/generated_files/topic_EFG.html#">10. Electric field gradients</a>
+<a name="11"> </a>
+<h3><b>11. Others</b></h3>
+ <p><ol>
+ <li><a href="../../topics/generated_files/topic_positron.html#">Positron calculations</a></li>
+ <li><a href="../../topics/generated_files/topic_Wannier.html#">Wannier functions in ABINIT</a></li>
+ <li><a href="../../topics/generated_files/topic_Unfolding.html#">Unfolding supercell band structures</a></li>
+</ol>
 <br><br><a href=#top>Go to the top</a>
 <hr>
 <script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
