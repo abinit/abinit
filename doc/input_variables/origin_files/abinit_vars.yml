@@ -629,7 +629,7 @@
          Note that [[acell]] is NOT the length of the conventional orthogonal basis vectors, but the scaling factors of the primitive vectors.
         Use [[scalecart]] to scale the cartesian coordinates.
         </p>
-    topics: crystal_compulsory
+    topics: UnitCell_basic
     varset: basic
     vartype: real
 - !variable
@@ -893,7 +893,7 @@
          where each of the vectors is normalized,
         and form the desired angles with the others.
         </p>
-    topics: crystal_useful
+    topics: UnitCell_useful
     varset: basic
     vartype: real
 - !variable
@@ -1194,7 +1194,7 @@
     vartype: integer
 - !variable
     abivarname: awtr
-    characteristics:
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval: 1
@@ -1329,7 +1329,7 @@
     vartype: integer
 - !variable
     abivarname: bdeigrf
-    characteristics:
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval: -1
@@ -1352,7 +1352,7 @@
     vartype: integer
 - !variable
     abivarname: bdgw
-    characteristics:
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval: !multiplevalue
@@ -1828,7 +1828,7 @@
     vartype: integer
 - !variable
     abivarname: bs_algorithm
-    characteristics:
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval: 2
@@ -1873,7 +1873,7 @@
     vartype: integer
 - !variable
     abivarname: bs_calctype
-    characteristics:
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval: 1
@@ -1905,7 +1905,7 @@
     vartype: integer
 - !variable
     abivarname: bs_coulomb_term
-    characteristics:
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval: 11
@@ -1955,7 +1955,7 @@
     vartype: integer
 - !variable
     abivarname: bs_coupling
-    characteristics:
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval: 0
@@ -1986,7 +1986,7 @@
     vartype: integer
 - !variable
     abivarname: bs_eh_cutoff
-    characteristics:
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval:
@@ -2008,7 +2008,7 @@
     vartype: integer
 - !variable
     abivarname: bs_exchange_term
-    characteristics:
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval: 1
@@ -2054,7 +2054,7 @@
     vartype: real
 - !variable
     abivarname: bs_hayd_term
-    characteristics:
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval: 1
@@ -2086,7 +2086,7 @@
     vartype: integer
 - !variable
     abivarname: bs_haydock_niter
-    characteristics:
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval: 100
@@ -2105,7 +2105,7 @@
     vartype: integer
 - !variable
     abivarname: bs_haydock_tol
-    characteristics:
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval:
@@ -2153,7 +2153,7 @@
     vartype: real
 - !variable
     abivarname: bs_interp_kmult
-    characteristics:
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval:
@@ -2179,7 +2179,7 @@
     vartype: integer
 - !variable
     abivarname: bs_interp_m3_width
-    characteristics:
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval: 1.0
@@ -2194,7 +2194,7 @@
     vartype: real
 - !variable
     abivarname: bs_interp_method
-    characteristics:
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval: 1
@@ -2219,7 +2219,7 @@
     vartype: integer
 - !variable
     abivarname: bs_interp_mode
-    characteristics:
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval: 0
@@ -2250,7 +2250,7 @@
     vartype: integer
 - !variable
     abivarname: bs_interp_prep
-    characteristics:
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval: 0
@@ -2268,7 +2268,7 @@
     vartype: integer
 - !variable
     abivarname: bs_interp_rl_nb
-    characteristics:
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval: 1
@@ -2284,7 +2284,7 @@
     vartype: integer
 - !variable
     abivarname: bs_loband
-    characteristics:
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval: 0
@@ -2304,7 +2304,7 @@
     vartype: integer
 - !variable
     abivarname: bs_nstates
-    characteristics:
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval: 0
@@ -2379,7 +2379,7 @@
     vartype: real
 - !variable
     abivarname: cd_customnimfrqs
-    characteristics:
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval: 0
@@ -2397,7 +2397,7 @@
     vartype: integer
 - !variable
     abivarname: cd_frqim_method
-    characteristics:
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval: 1
@@ -2732,7 +2732,7 @@
     vartype: integer
 - !variable
     abivarname: cd_full_grid
-    characteristics:
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval: 0
@@ -2790,7 +2790,7 @@
     vartype: real
 - !variable
     abivarname: cd_imfrqs
-    characteristics:
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval: null
@@ -2856,7 +2856,7 @@
     vartype: real
 - !variable
     abivarname: cd_subset_freq
-    characteristics:
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval:
@@ -3043,7 +3043,7 @@
         generate a PRIMITIVE cell using
         [[brvltt]]=-1 .
         </p>
-    topics: crystal_useful
+    topics: crystal_useful, UnitCell_useful
     varset: gstate
     vartype: integer
 - !variable
@@ -3330,7 +3330,7 @@
     vartype: integer
 - !variable
     abivarname: d3e_pert1_atpol
-    characteristics:
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval:
@@ -3355,7 +3355,7 @@
     vartype: integer
 - !variable
     abivarname: d3e_pert1_dir
-    characteristics:
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval:
@@ -3381,7 +3381,7 @@
     vartype: integer
 - !variable
     abivarname: d3e_pert1_elfd
-    characteristics:
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval: 0
@@ -3401,7 +3401,7 @@
     vartype: integer
 - !variable
     abivarname: d3e_pert1_phon
-    characteristics:
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval: 0
@@ -3419,7 +3419,7 @@
     vartype: integer
 - !variable
     abivarname: d3e_pert2_atpol
-    characteristics:
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval:
@@ -3444,7 +3444,7 @@
     vartype: integer
 - !variable
     abivarname: d3e_pert2_dir
-    characteristics:
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval:
@@ -3470,7 +3470,7 @@
     vartype: integer
 - !variable
     abivarname: d3e_pert2_elfd
-    characteristics:
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval: 0
@@ -3490,7 +3490,7 @@
     vartype: integer
 - !variable
     abivarname: d3e_pert2_phon
-    characteristics:
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval: 0
@@ -3508,7 +3508,7 @@
     vartype: integer
 - !variable
     abivarname: d3e_pert3_atpol
-    characteristics:
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval:
@@ -3533,7 +3533,7 @@
     vartype: integer
 - !variable
     abivarname: d3e_pert3_dir
-    characteristics:
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval:
@@ -3559,7 +3559,7 @@
     vartype: integer
 - !variable
     abivarname: d3e_pert3_elfd
-    characteristics:
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval: 0
@@ -3579,7 +3579,7 @@
     vartype: integer
 - !variable
     abivarname: d3e_pert3_phon
-    characteristics:
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval: 0
@@ -5919,7 +5919,7 @@
     vartype: real
 - !variable
     abivarname: efmas
-    characteristics:
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval: 0
@@ -5955,7 +5955,7 @@
     vartype: integer
 - !variable
     abivarname: efmas_bands
-    characteristics:
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval: The full range of band available in the calculation for each k-point.
@@ -5976,7 +5976,7 @@
     vartype: integer
 - !variable
     abivarname: efmas_calc_dirs
-    characteristics:
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval: 0
@@ -6008,7 +6008,7 @@
     vartype: integer
 - !variable
     abivarname: efmas_deg
-    characteristics:
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval: 1
@@ -6027,7 +6027,7 @@
     vartype: integer
 - !variable
     abivarname: efmas_deg_tol
-    characteristics:
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval: 1.0E-5
@@ -6046,7 +6046,7 @@
     vartype: real
 - !variable
     abivarname: efmas_dim
-    characteristics:
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval: 3
@@ -6078,7 +6078,7 @@
     vartype: integer
 - !variable
     abivarname: efmas_dirs
-    characteristics:
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval: 0
@@ -6099,7 +6099,7 @@
     vartype: real
 - !variable
     abivarname: efmas_n_dirs
-    characteristics:
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval: 0
@@ -6116,7 +6116,7 @@
     vartype: integer
 - !variable
     abivarname: efmas_ntheta
-    characteristics:
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval: 1000
@@ -7107,7 +7107,7 @@
     vartype: integer
 - !variable
     abivarname: fftgw
-    characteristics:
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval: 21
@@ -7284,7 +7284,7 @@
     vartype: real
 - !variable
     abivarname: freqim_alpha
-    characteristics:
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval: 5.0
@@ -7536,7 +7536,7 @@
     vartype: real
 - !variable
     abivarname: frzfermi
-    characteristics:
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval: 0
@@ -8351,7 +8351,7 @@
     vartype: integer
 - !variable
     abivarname: getqps
-    characteristics:
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval: 0
@@ -8382,7 +8382,7 @@
     vartype: integer
 - !variable
     abivarname: getscr
-    characteristics:
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval: 0
@@ -8430,7 +8430,7 @@
     vartype: integer
 - !variable
     abivarname: getsuscep
-    characteristics:
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval: 0
@@ -9166,7 +9166,7 @@
     vartype: integer
 - !variable
     abivarname: gw_customnfreqsp
-    characteristics:
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval: 0
@@ -9185,7 +9185,7 @@
     vartype: integer
 - !variable
     abivarname: gw_freqsp
-    characteristics:
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval: !range
@@ -9216,7 +9216,7 @@
     vartype: real
 - !variable
     abivarname: gw_frqim_inzgrid
-    characteristics:
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval: 0
@@ -9262,7 +9262,7 @@
     vartype: integer
 - !variable
     abivarname: gw_frqre_inzgrid
-    characteristics:
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval: 0
@@ -9334,7 +9334,7 @@
     vartype: integer
 - !variable
     abivarname: gw_frqre_tangrid
-    characteristics:
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval: 0
@@ -9356,7 +9356,7 @@
     vartype: integer
 - !variable
     abivarname: gw_invalid_freq
-    characteristics:
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval: 0
@@ -9384,7 +9384,7 @@
     vartype: integer
 - !variable
     abivarname: gw_nqlwl
-    characteristics:
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval: 1
@@ -9439,7 +9439,7 @@
     vartype: integer
 - !variable
     abivarname: gw_nstep
-    characteristics:
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval: 30
@@ -9460,7 +9460,7 @@
     vartype: integer
 - !variable
     abivarname: gw_qlwl
-    characteristics:
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval:
@@ -9487,7 +9487,7 @@
     vartype: real
 - !variable
     abivarname: gw_qprange
-    characteristics:
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval: 0
@@ -9537,7 +9537,7 @@
     vartype: integer
 - !variable
     abivarname: gw_sctype
-    characteristics:
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval: 1
@@ -9585,7 +9585,7 @@
     vartype: integer
 - !variable
     abivarname: gw_sigxcore
-    characteristics:
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval: 0
@@ -9655,7 +9655,7 @@
     vartype: real
 - !variable
     abivarname: gwcalctyp
-    characteristics:
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval: 0
@@ -9753,7 +9753,7 @@
     vartype: integer
 - !variable
     abivarname: gwcomp
-    characteristics:
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval: 0
@@ -9775,7 +9775,7 @@
     vartype: integer
 - !variable
     abivarname: gwencomp
-    characteristics:
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval: 2.0
@@ -9796,7 +9796,7 @@
     vartype: real
 - !variable
     abivarname: gwfockmix
-    characteristics:
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval: 0.25
@@ -9811,7 +9811,7 @@
     vartype: real
 - !variable
     abivarname: gwgamma
-    characteristics:
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval: 0
@@ -9840,7 +9840,7 @@
     vartype: integer
 - !variable
     abivarname: gwls_band_index
-    characteristics:
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval: 1
@@ -9858,7 +9858,7 @@
     vartype: integer
 - !variable
     abivarname: gwls_correlation
-    characteristics:
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval: 3
@@ -9888,7 +9888,7 @@
     vartype: integer
 - !variable
     abivarname: gwls_diel_model
-    characteristics:
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval: 2
@@ -9903,7 +9903,7 @@
     vartype: integer
 - !variable
     abivarname: gwls_exchange
-    characteristics:
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval: 1
@@ -9920,7 +9920,7 @@
     vartype: integer
 - !variable
     abivarname: gwls_first_seed
-    characteristics:
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval: '[[gwls_band_index]]'
@@ -9944,7 +9944,7 @@
     vartype: integer
 - !variable
     abivarname: gwls_kmax_analytic
-    characteristics:
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval: 8
@@ -9962,7 +9962,7 @@
     vartype: integer
 - !variable
     abivarname: gwls_kmax_complement
-    characteristics:
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval: 1
@@ -9986,7 +9986,7 @@
     vartype: integer
 - !variable
     abivarname: gwls_kmax_numeric
-    characteristics:
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval: 16
@@ -10004,7 +10004,7 @@
     vartype: integer
 - !variable
     abivarname: gwls_kmax_poles
-    characteristics:
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval: 4
@@ -10028,7 +10028,7 @@
     vartype: integer
 - !variable
     abivarname: gwls_list_proj_freq
-    characteristics:
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval: '*0.0'
@@ -10073,7 +10073,7 @@
     vartype: real
 - !variable
     abivarname: gwls_n_proj_freq
-    characteristics:
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval: 0
@@ -10090,7 +10090,7 @@
     vartype: integer
 - !variable
     abivarname: gwls_npt_gauss_quad
-    characteristics:
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval: 10
@@ -10107,7 +10107,7 @@
     vartype: integer
 - !variable
     abivarname: gwls_nseeds
-    characteristics:
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval: 1
@@ -10124,7 +10124,7 @@
     vartype: integer
 - !variable
     abivarname: gwls_print_debug
-    characteristics:
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval: 0
@@ -10139,7 +10139,7 @@
     vartype: integer
 - !variable
     abivarname: gwls_recycle
-    characteristics:
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval: 2
@@ -10170,7 +10170,7 @@
     vartype: integer
 - !variable
     abivarname: gwls_stern_kmax
-    characteristics:
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval: 1
@@ -10186,7 +10186,7 @@
     vartype: integer
 - !variable
     abivarname: gwmem
-    characteristics:
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval: 11
@@ -10223,7 +10223,7 @@
     vartype: integer
 - !variable
     abivarname: gwpara
-    characteristics:
+    characteristics: null
     commentdefault: 'The default value has been changed in v8. From 1 to 2 '
     commentdims: null
     defaultval: 2
@@ -10258,7 +10258,7 @@
     vartype: integer
 - !variable
     abivarname: gwrpacorr
-    characteristics:
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval: 0
@@ -10583,7 +10583,7 @@
     vartype: integer
 - !variable
     abivarname: icutcoul
-    characteristics:
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval: 6
@@ -10648,7 +10648,7 @@
     vartype: integer
 - !variable
     abivarname: ieig2rf
-    characteristics:
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval: 0
@@ -10884,7 +10884,7 @@
     vartype: integer
 - !variable
     abivarname: inclvkb
-    characteristics:
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval: 2
@@ -12069,7 +12069,7 @@
     vartype: integer
 - !variable
     abivarname: irdqps
-    characteristics:
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval: 0
@@ -12089,7 +12089,7 @@
     vartype: integer
 - !variable
     abivarname: irdscr
-    characteristics:
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval: 0
@@ -12122,7 +12122,7 @@
     vartype: integer
 - !variable
     abivarname: irdsuscep
-    characteristics:
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval: 0
@@ -14682,7 +14682,7 @@
     vartype: real
 - !variable
     abivarname: kptgw
-    characteristics:
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval: !multiplevalue
@@ -15594,7 +15594,7 @@
     vartype: real
 - !variable
     abivarname: mdf_epsinf
-    characteristics:
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval: 0.0
@@ -17690,7 +17690,7 @@
     vartype: integer
 - !variable
     abivarname: nkptgw
-    characteristics:
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval: 0
@@ -18057,7 +18057,7 @@
     vartype: integer
 - !variable
     abivarname: nomegasi
-    characteristics:
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval: 12
@@ -18076,7 +18076,7 @@
     vartype: integer
 - !variable
     abivarname: nomegasrd
-    characteristics:
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval: 9
@@ -18565,7 +18565,7 @@
     vartype: integer
 - !variable
     abivarname: npvel
-    characteristics:
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval: 0
@@ -21650,7 +21650,7 @@
     vartype: integer
 - !variable
     abivarname: ph_ndivsm
-    characteristics:
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval: 20
@@ -22653,7 +22653,7 @@
     vartype: real
 - !variable
     abivarname: ppmodel
-    characteristics:
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval: 1
@@ -22704,7 +22704,7 @@
     vartype: integer
 - !variable
     abivarname: prepanl
-    characteristics:
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval: 0
@@ -22739,7 +22739,7 @@
     vartype: integer
 - !variable
     abivarname: prepgkk
-    characteristics:
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval: 0
@@ -22847,7 +22847,7 @@
     vartype: integer
 - !variable
     abivarname: prtbbb
-    characteristics:
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval: 0
@@ -25202,7 +25202,7 @@
     vartype: real
 - !variable
     abivarname: qptdm
-    characteristics:
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval: !multiplevalue
@@ -25662,7 +25662,7 @@
     vartype: real
 - !variable
     abivarname: rcut
-    characteristics:
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval: 0.0
@@ -26085,7 +26085,7 @@
     vartype: integer
 - !variable
     abivarname: rf2_dkdk
-    characteristics:
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval: 0
@@ -26123,7 +26123,7 @@
     vartype: integer
 - !variable
     abivarname: rfasr
-    characteristics:
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval: 0
@@ -26159,7 +26159,7 @@
     vartype: integer
 - !variable
     abivarname: rfatpol
-    characteristics:
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval:
@@ -26206,7 +26206,7 @@
     vartype: integer
 - !variable
     abivarname: rfddk
-    characteristics:
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval: 0
@@ -26237,7 +26237,7 @@
     vartype: integer
 - !variable
     abivarname: rfdir
-    characteristics:
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval:
@@ -26277,7 +26277,7 @@
     vartype: integer
 - !variable
     abivarname: rfelfd
-    characteristics:
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval: 0
@@ -26329,7 +26329,7 @@
     vartype: integer
 - !variable
     abivarname: rfmagn
-    characteristics:
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval: 0
@@ -26349,7 +26349,7 @@
     vartype: integer
 - !variable
     abivarname: rfmeth
-    characteristics:
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval: 1
@@ -26392,7 +26392,7 @@
     vartype: integer
 - !variable
     abivarname: rfphon
-    characteristics:
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval: 0
@@ -26410,7 +26410,7 @@
     vartype: integer
 - !variable
     abivarname: rfstrs
-    characteristics:
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval: 0
@@ -26448,7 +26448,7 @@
     vartype: integer
 - !variable
     abivarname: rfuser
-    characteristics:
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval: 0
@@ -26494,7 +26494,7 @@
     vartype: integer
 - !variable
     abivarname: rhoqpmix
-    characteristics:
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval: 1.0
@@ -26677,7 +26677,7 @@
         the echo of [[rprim]] in the output file is not the value contained in the input file,
         but the value rescaled by [[scalecart]].
         </p>
-    topics: crystal_compulsory
+    topics: UnitCell_basic
     varset: basic
     vartype: real
 - !variable
@@ -26714,7 +26714,7 @@
         </p>
         It is [[EVOLVING]] only if [[ionmov]]==2 and [[optcell]]/=0, otherwise it is fixed.
         <br />
-    topics: crystal_internal
+    topics: UnitCell_internal
     varset: basic
     vartype: real
 - !variable
@@ -26803,7 +26803,7 @@
          Note that this input variable is [[INPUT_ONLY]] : its content will be immediately applied to rprim, at parsing time,
         and then scalecart will be set to the default values. So, it will not be echoed.
         </p>
-    topics: crystal_useful
+    topics: UnitCell_useful
     varset: basic
     vartype: real
 - !variable
@@ -27160,7 +27160,7 @@
     vartype: real
 - !variable
     abivarname: smdelta
-    characteristics:
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval: 0
@@ -27619,7 +27619,7 @@
     vartype: real
 - !variable
     abivarname: spmeth
-    characteristics:
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval: 0
@@ -28127,7 +28127,7 @@
     vartype: integer
 - !variable
     abivarname: symsigma
-    characteristics:
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval: 0
@@ -28179,7 +28179,7 @@
     vartype: real
 - !variable
     abivarname: td_maxene
-    characteristics:
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval: 0.0
@@ -28210,7 +28210,7 @@
     vartype: real
 - !variable
     abivarname: td_mexcit
-    characteristics:
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval: 0
@@ -29191,7 +29191,7 @@
     vartype: integer
 - !variable
     abivarname: ucrpa
-    characteristics:
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval: 0
@@ -29237,7 +29237,7 @@
     vartype: integer
 - !variable
     abivarname: ucrpa_bands
-    characteristics:
+    characteristics: null
     commentdefault: That is, the default includes no band.
     commentdims: null
     defaultval:
@@ -29259,7 +29259,7 @@
     vartype: integer
 - !variable
     abivarname: ucrpa_window
-    characteristics:
+    characteristics: null
     commentdefault: That is, the energy window is empty by default.
     commentdims: null
     defaultval:
@@ -30236,7 +30236,7 @@
     vartype: real
 - !variable
     abivarname: vcutgeo
-    characteristics:
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval: !multiplevalue

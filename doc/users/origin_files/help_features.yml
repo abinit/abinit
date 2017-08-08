@@ -56,10 +56,9 @@ sec2:
   tag: atoms
   body: |
    <ol>
+   <li>[[topic:UnitCell|Unit cell]]</li>
+   <li>[[topic:AtomTypes|Atomic types]]</li>
    <li>[[topic:crystal|Crystalline structure and symmetries]]</li>
-   <li>Primitive cell spec</li>
-   <li>Reading atomic positions</li>
-   <li>Symmetries</li>
    </ol>
 
 ## Each section must have a title, that will form the table of content.
