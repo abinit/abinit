@@ -37,7 +37,7 @@ body : |
   <area shape="rect" coords="30  ,260 , 99 ,284 " href="lesson_dftu.html" />
   <area shape="rect" coords="100 ,260 ,170 ,284 " href="lesson_dmft.html" />
   <area shape="rect" coords="30  ,285 ,100 ,310 " href="lesson_ucalc_crpa.html" />
-  <area shape="rect" coords="100 ,285 ,170 ,310 " href="lesson_detu" />
+  <area shape="rect" coords="100 ,285 ,170 ,310 " href="lesson_detu.html" />
 
   <area shape="rect" coords="30  ,320 ,170 ,345 " href="lesson_ffield.html" />
   
