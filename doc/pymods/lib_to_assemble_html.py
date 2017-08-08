@@ -194,7 +194,7 @@ def make_links(text,cur_key,allowed_link_seeds,backlinks,backlink):
 
     return '<a href="#">[[FAKE LINK:'+dokukey+']]</a>'
 
-  p=re.compile("\\[\\[([a-zA-Z0-9_ */<>.|:+#@-]*)\\]\\]")
+  p=re.compile("\\[\\[([a-zA-Z0-9_ ,*/<>.|:+#@-]*)\\]\\]")
   if text is None:
     return ""
   new_text=p.sub(replace_link,text)

@@ -56,15 +56,15 @@ sec2:
  title: "Ground state static calculations"
  tag: groundstate
  body: |
-  <li>[[topic:GSintroduction|1.]] Building an input file.
-  <li>[[topic:GSgeneral|2.]] General settings.
-  <li>[[topic:crystal|3.]] Crystalline structure and symmetries.
-  <li>[[topic:k-points|4.]] k-points.
-  <li>[[topic:xc|5.]] Exchange and correlation functionals.
-  <li>[[topic:convergency|6.]] Convergency settings.
-  <li>[[topic:PAW|7.]] PAW special settings.
-  <li>[[topic:spinpolarisation|8.]] Spin-polarised systems and spin-orbit coupling
-  <li>[[topic:otherGS|9.]] Other settings.
+  <li>[[topic:GSintroduction|1. Building an input file]].
+  <li>[[topic:GSgeneral|2. General settings]].
+  <li>[[topic:crystal|3. Crystalline structure and symmetries]].
+  <li>[[topic:k-points|4. k-points]].
+  <li>[[topic:xc|5. Exchange and correlation functionals]].
+  <li>[[topic:convergency|6. Convergency settings]].
+  <li>[[topic:PAW|7. PAW special settings]].
+  <li>[[topic:spinpolarisation|8. Spin-polarised systems and spin-orbit coupling]]
+  <li>[[topic:otherGS|9. Other settings]].
 
 ## Each section must have a title, that will form the table of content.
 ## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
@@ -73,10 +73,10 @@ sec3:
  title: "Molecular dynamics, geometry optimization, transition paths"
  tag: moldyn
  body: |
-  <li>[[topic:MolecularDynamics|1.]] Molecular dynamics calculations.
-  <li>[[topic:GeoOpt|2.]] Geometry optimization calculations.
-  <li>[[topic:TransPath|3.]] Transition path calculations: NEB and string method.
-  <li>[[topic:PIMD|4.]] PIMD calculations.
+  <li>[[topic:MolecularDynamics|1. Molecular dynamics calculations]].
+  <li>[[topic:GeoOpt|2. Geometry optimization calculations]].
+  <li>[[topic:TransPath|3. Transition path calculations: NEB and string method]].
+  <li>[[topic:PIMD|4. PIMD calculations]].
 
 ## Each section must have a title, that will form the table of content.
 ## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
@@ -86,10 +86,10 @@ sec4:
  tag: correlated
  body: |
    <p> When correlated electrons are to be considered, it is necessary to go beyond the DFT framework. ABINIT enables the following possibilities:
-   <li>[[topic:Hybrids|1.]] The use of hybrid functionals.
-   <li>[[topic:CRPA|2.]] Calculation of the effective Coulomb interaction.
-   <li>[[topic:DFT+U|3.]] The use of the DFT+U approximation.
-   <li>[[topic:DMFT|4.]] The use of the DMFT framework.
+   <li>[[topic:Hybrids|1. The use of hybrid functionals]].
+   <li>[[topic:CRPA|2. Calculation of the effective Coulomb interaction]].
+   <li>[[topic:DFT+U|3. The use of the DFT+U approximation]].
+   <li>[[topic:DMFT|4. The use of the DMFT framework]].
 
 ## Each section must have a title, that will form the table of content.
 ## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
@@ -98,11 +98,11 @@ sec5:
  title: "Response properties (phonon, dielectric, Raman, effective mass ...)"
  tag: response
  body: |
-   <li>[[topic:DFPT|1.]] DFPT: phonon modes, elastic tensors, effective charges, dielectric tensors,...
-   <li>[[topic:nonlinear|2.]] Raman intensities and electro-optic properties.
-   <li>[[topic:ElPhon|3.]] Electron-phonon calculations.
-   <li>[[topic:TDep|4.]] Temperature dependence of the eigenenergies.
-   <li>[[topic:EffMass|5.]] Effective mass calculations.
+   <li>[[topic:DFPT|1. DFPT: phonon modes, elastic tensors, effective charges, dielectric tensors,...]].
+   <li>[[topic:nonlinear|2. Raman intensities and electro-optic properties]].
+   <li>[[topic:ElPhon|3. Electron-phonon calculations]].
+   <li>[[topic:TDep|4. Temperature dependence of the eigenenergies]].
+   <li>[[topic:EffMass|5. Effective mass calculations]].
 
 ## Each section must have a title, that will form the table of content.
 ## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
@@ -111,12 +111,12 @@ sec6:
  title: "Excited state calculations"
  tag: excited
  body: |
-   <li>[[topic:GW|1.]] GW calculations.
-   <li>[[topic:BSE|2.]] Bethe-Salpeter calculations.
-   <li>[[topic:GWls|3.]] GW- Lanczos-Sternheimer method.
-   <li>[[topic:RandStopPow|4.]] Random electronic stopping power.
-   <li>[[topic:RPACorrEn|5.]] Correlation energy within RPA.
-   <li>[[topic:TDDFT|6.]] TDDFT calculations.
+   <li>[[topic:GW|1. GW calculations]].
+   <li>[[topic:BSE|2. Bethe-Salpeter calculations]].
+   <li>[[topic:GWls|3. GW- Lanczos-Sternheimer method]].
+   <li>[[topic:RandStopPow|4. Random electronic stopping power]].
+   <li>[[topic:RPACorrEn|5. Correlation energy within RPA]].
+   <li>[[topic:TDDFT|6. TDDFT calculations]].
 
 ## Each section must have a title, that will form the table of content.
 ## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
@@ -125,9 +125,9 @@ sec7:
  title: "Practical settings"
  tag: practical
  body: |
-   <li>[[topic:multidtset|1.]] Multi-dataset calculations.
-   <li>[[topic:parallelism|2.]] Parallelism and ABINIT.
-   <li>[[topic:printing|3.]] Printing options.
+   <li>[[topic:multidtset|1. Multi-dataset calculations]].
+   <li>[[topic:parallelism|2. Parallelism and ABINIT]].
+   <li>[[topic:printing|3. Printing options]].
 
 ## Each section must have a title, that will form the table of content.
 ## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
@@ -136,13 +136,13 @@ sec8:
  title: "Others"
  tag: others
  body: |
-   <li>[[topic:positron|1.]] Positron calculations.
-   <li>[[topic:Wavelets|2.]] Wavelets in ABINIT.
-   <li>[[topic:Wannier|3.]] Wannier functions in ABINIT.
-   <li>[[topic:recursion|4.]] Recursion methods and orbital free calculations.
-   <li>[[topic:Berry|5.]] Finite electric field
-   <li>[[topic:MagField|6.]] External magnetic field
-   <li>[[topic:MagMom|7.]] Constrained atomic magnetic moment
-   <li>[[topic:ChargedCell|8.]] Charged cells
-   <li>[[topic:Unfolding|9.]] Unfolding supercell band structures
-   <li>[[topic:EFG|10.]] Electric field gradients
+   <li>[[topic:positron|1. Positron calculations]].
+   <li>[[topic:Wavelets|2. Wavelets in ABINIT]].
+   <li>[[topic:Wannier|3. Wannier functions in ABINIT]].
+   <li>[[topic:recursion|4. Recursion methods and orbital free calculations]].
+   <li>[[topic:Berry|5. Finite electric field]].
+   <li>[[topic:MagField|6. External magnetic field]].
+   <li>[[topic:MagMom|7. Constrained atomic magnetic moment]]
+   <li>[[topic:ChargedCell|8. Charged cells]]
+   <li>[[topic:Unfolding|9. Unfolding supercell band structures]]
+   <li>[[topic:EFG|10. Electric field gradients]]
