@@ -2,7 +2,7 @@
     name      : nonlinear 
     keyword   : Non Linear calculations
     authors   : RC, XG
-    howto     : perform a Raman intensities calculation
+    howto     : compute Raman intensity, and the related electro-optic coefficients
     header    : default
     title     : <h1>Raman intensities and electro-optic properties calculation </h1>
     subtitle  : default

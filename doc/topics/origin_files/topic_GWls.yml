@@ -11,7 +11,7 @@
     introduction : |- 
 
         <p>A high performance G<sub>0</sub>W<sub>0</sub> implementation [[Janssen2015]] has been developed within ABINIT.
-        It is more efficient than the traditional implementation [[Gonze2009]],[[Giantomassi2011]] thanks to the treatment of the two major bottlenecks: the summations over conduction states and the inversion of the dielectric matrix.
+        It is more efficient than the traditional implementation [[Gonze2009]],[[Giantomassi2011]] thanks to the treatment of the two major bottlenecks: the summations over conduction states and the inversion of the dielectric matrix. However, note that this implementation has only limited applicability at present (see below).
         <li>The first bottleneck is circumvented by converting the summations into Sternheimer equations.
         Note that the introduction of approximations beyond the G<sub>0</sub>W<sub>0</sub> (such as analytic continuation [[Rieger1999]]) is avoided thanks to use of the simplified quasiminimal residual (SQMR) algorithm [[Freund1995]].</li>
         <li>Then, the second bottleneck is assessed by expressing the dielectric matrix in a Lanczos basis, which reduces the matrix size by orders of magnitude with respect to a plane wave basis.</li>
