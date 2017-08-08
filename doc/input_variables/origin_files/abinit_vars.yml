@@ -3331,7 +3331,6 @@
 - !variable
     abivarname: d3e_pert1_atpol
     characteristics:
-    - '[[NONLINEAR]]'
     commentdefault: null
     commentdims: null
     defaultval:
@@ -3357,7 +3356,6 @@
 - !variable
     abivarname: d3e_pert1_dir
     characteristics:
-    - '[[NONLINEAR]]'
     commentdefault: null
     commentdims: null
     defaultval:
@@ -3384,7 +3382,6 @@
 - !variable
     abivarname: d3e_pert1_elfd
     characteristics:
-    - '[[NONLINEAR]]'
     commentdefault: null
     commentdims: null
     defaultval: 0
@@ -3405,7 +3402,6 @@
 - !variable
     abivarname: d3e_pert1_phon
     characteristics:
-    - '[[NONLINEAR]]'
     commentdefault: null
     commentdims: null
     defaultval: 0
@@ -3424,7 +3420,6 @@
 - !variable
     abivarname: d3e_pert2_atpol
     characteristics:
-    - '[[NONLINEAR]]'
     commentdefault: null
     commentdims: null
     defaultval:
@@ -3450,7 +3445,6 @@
 - !variable
     abivarname: d3e_pert2_dir
     characteristics:
-    - '[[NONLINEAR]]'
     commentdefault: null
     commentdims: null
     defaultval:
@@ -3477,7 +3471,6 @@
 - !variable
     abivarname: d3e_pert2_elfd
     characteristics:
-    - '[[NONLINEAR]]'
     commentdefault: null
     commentdims: null
     defaultval: 0
@@ -3498,7 +3491,6 @@
 - !variable
     abivarname: d3e_pert2_phon
     characteristics:
-    - '[[NONLINEAR]]'
     commentdefault: null
     commentdims: null
     defaultval: 0
@@ -3517,7 +3509,6 @@
 - !variable
     abivarname: d3e_pert3_atpol
     characteristics:
-    - '[[NONLINEAR]]'
     commentdefault: null
     commentdims: null
     defaultval:
@@ -3543,7 +3534,6 @@
 - !variable
     abivarname: d3e_pert3_dir
     characteristics:
-    - '[[NONLINEAR]]'
     commentdefault: null
     commentdims: null
     defaultval:
@@ -3570,7 +3560,6 @@
 - !variable
     abivarname: d3e_pert3_elfd
     characteristics:
-    - '[[NONLINEAR]]'
     commentdefault: null
     commentdims: null
     defaultval: 0
@@ -3591,7 +3580,6 @@
 - !variable
     abivarname: d3e_pert3_phon
     characteristics:
-    - '[[NONLINEAR]]'
     commentdefault: null
     commentdims: null
     defaultval: 0
