@@ -146,6 +146,7 @@ def make_links(text,cur_key,allowed_link_seeds,backlinks,backlink):
     #The allowed namespaces are:
     dic_namespaces={"aim":"input_variables/generated_files",
                     "anaddb":"input_variables/generated_files",
+                    "bib":"biblio/generated_files",
                     "help":"users/generated_files",
                     "lesson":"tutorial/generated_files",
                     "optic":"input_variables/generated_files",
@@ -189,11 +190,11 @@ def make_links(text,cur_key,allowed_link_seeds,backlinks,backlink):
         result=get_year(key)
         if result != -9999 :
           backlinks[key]+=backlink+";;"
-          return '<a href="../../bibliography/generated_files/bibliography.html#%s">[%s]</a>' %(key,webtext)
+          return '<a href="../../biblio/generated_files/bib_biblio.html#%s">[%s]</a>' %(key,webtext)
 
     return '<a href="#">[[FAKE LINK:'+dokukey+']]</a>'
 
-  p=re.compile("\\[\\[([a-zA-Z0-9_ */<>.|:+#@-]*)\\]\\]")
+  p=re.compile("\\[\\[([a-zA-Z0-9_ ,*/<>.|:+#@-]*)\\]\\]")
   if text is None:
     return ""
   new_text=p.sub(replace_link,text)
@@ -351,7 +352,7 @@ def assemble_html(origin_yml_files,suppl_components,dir_name,root_filname,allowe
       is situated in dir_name+"/origin_files".
       When there is a list of sections, a table of content is constituted automatically.
       The dictionary allowed_link_seeds allows one to set up the links to relevant keywords.
-      The backlinks are accumulated, to be mentioned in the bibliography.html file.
+      The backlinks are accumulated, to be mentioned in the bib_biblio.html file.
       WARNING : not all files are assembled using this function ! In particular, the "topics" files are assembled in the main code ...
   """
 
@@ -518,7 +519,7 @@ def assemble_html(origin_yml_files,suppl_components,dir_name,root_filname,allowe
 
   all_files_html=""
   spec={'users':'help files','tutorial':'lessons of the tutorial',
-        'theory':'theory documents','input_variables':'varsets','bibliography':'generated files in the bibliography directory'}
+        'theory':'theory documents','input_variables':'varsets','biblio':'generated files in the biblio directory'}
   for j in ["header","title","subtitle","copyright","links","toc_all","links","end"]:
     if j == "toc_all":
       all_files_html += toc_all

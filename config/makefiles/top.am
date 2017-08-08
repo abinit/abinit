@@ -155,7 +155,7 @@ infos_html:
 	cp -fr tmp-infos-$(VERSION)/release_notes/rel*_v$(ABINIT_VERSION_MAJOR).$(ABINIT_VERSION_MINOR).html tmp-infos-$(VERSION)/release_notes/release_notes.html
 	cp -fr tmp-infos-$(VERSION)/inst*_notes/inst*_v$(ABINIT_VERSION_MAJOR).$(ABINIT_VERSION_MINOR).html tmp-infos-$(VERSION)/install_notes/install.html
 	tar -cvf infos_html-$(VERSION).tar                \
-          tmp-infos-$(VERSION)/bibliography \
+          tmp-infos-$(VERSION)/biblio \
           tmp-infos-$(VERSION)/input_variables \
           tmp-infos-$(VERSION)/tests \
           tmp-infos-$(VERSION)/theory \
