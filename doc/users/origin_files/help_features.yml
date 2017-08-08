@@ -5,7 +5,7 @@
 intro : |
   This document gives an overview of the features implemented in the ABINIT package,
   grouped in different topics, for the beginner as well as more experienced user. 
-  It might also answer the question "How to ... with ABINIT ?"
+  It might answer the question "How to ... with ABINIT ?", to some extent.
   <br>It also gives a synthetic view on the needed settings.
 
 ## Now come the different sections, numbered.
@@ -35,7 +35,7 @@ sec1:
   <p> Care is taken not to duplicate existing more complete documentation in ABINIT, but to point to it if appropriate.
   Not all the ABINIT documentation is covered by the Web-accessible documents, there are still a few unlinked documents 
   in the subdirectories of ~abinit/doc (work is in progress to make it all available). 
-  Discussions on the [[http://forum.abinit.org|ABINIT forum]] might also allow to get information.
+  Discussions on the [[https://forum.abinit.org|ABINIT forum]] might also allow to get information.
 
 ## Each section must have a title, that will form the table of content.
 ## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
