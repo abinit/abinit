@@ -4,7 +4,7 @@
     authors   : FJ
     howto     : to specify a metal or an insulators, and the related bands and occupation numbers 
     header    : default
-    title     : <h1>General settings</h1>
+    title     : <h1>Bands and occupation numbers</h1>
     subtitle  : default
     copyright : default
     links     : default

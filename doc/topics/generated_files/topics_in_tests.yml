@@ -241,7 +241,7 @@
 - tests/v6/Input/t19.in:#%% topics = Bader
 - tests/v6/Input/t24.in:#%% topics = TransPath
 - tests/v6/Input/t25.in:#%% topics = TransPath
-- tests/v6/Input/t27.in:#%% topics = GeoOpt, crystal
+- tests/v6/Input/t27.in:#%% topics = GeoOpt_expert, crystal_expert
 - tests/v6/Input/t28.in:#%% topics = AtomTypes
 - tests/v6/Input/t30.in:#%% topics = UnitCell, SmartSymm
 - tests/v6/Input/t37.in:#%% topics = TDep

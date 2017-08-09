@@ -1610,7 +1610,7 @@
         <p>
          Perform finite magnetic field calculation. <br><b>THIS CODE IS UNDER DEVELOPMENT AND IS NOT READY FOR USE.</b>
         </p>
-    topics: spinpolarisation_expert
+    topics: MagField_expert
     varset: ffield
     vartype: real
 - !variable
@@ -15407,7 +15407,7 @@
         <p>
          This variable gives the amplitude of the constraint imposed on the magnetization vectors on each atom (turned on with flag variable [[magconon]]). Typical values for lambda are 10 to a few hundred. The energy will vary strongly and convergence will be difficult if lambda is too large. The constraint will be weak and the magnetization will not be close to [[spinat]] if lambda is too small. See variable [[magconon]] for more details.
         </p>
-    topics: spinpolarisation_useful
+    topics: MagMom_useful
     varset: gstate
     vartype: real
 - !variable
@@ -15424,7 +15424,7 @@
         <p>
          Turns on the imposition of a Lagrangian constraint on the magnetization. For each atom, the magnetization is calculated in a sphere (radius [[ratsph]]) and a constraint is applied to bring it closer to the input values of [[spinat]]. The constraint can be either on the direction only (magconon 1) or on the full vector (magconon 2). The Lagrangian constraint has an amplitude [[magcon_lambda]] which should be neither too big (bad or impossible convergence) nor too small (no effect).
         </p>
-    topics: spinpolarisation_useful
+    topics: MagMom_useful
     varset: gstate
     vartype: integer
 - !variable
@@ -19432,7 +19432,7 @@
     requires: '[[usepaw]] = 1; [[pawcpxocc]] = 2; [[kptopt]] > 2'
     text: |-
         Places an array of nuclear magnetic dipole moments on the atomic positions, useful for computing the magnetization in the presence of nuclear dipoles and thus the chemical shielding by the converse method. The presence of these dipoles breaks time reversal symmetry and lowers the overall spatial symmetry.
-    topics: spinpolarisation_expert
+    topics: MagField_expert
     varset: gstate
     vartype: real
 - !variable
@@ -24855,7 +24855,7 @@
         [[spgroupma]],
         [[genafm]]
         </p>
-    topics: spinpolarisation_useful, SmartSymm_internal
+    topics: spinpolarisation_internal, SmartSymm_internal
     varset: geo
     vartype: integer
 - !variable
@@ -25619,7 +25619,7 @@
          In case of PAW, [[ratsph]] radius has to be greater or equal to
         PAW radius of considered atom type (which is read from the PAW dataset file; see rc_sph or r_paw).
         </p>
-    topics: printing_prdos
+    topics: printing_prdos, MagMom_useful
     varset: gstate
     vartype: real
 - !variable
@@ -27552,7 +27552,7 @@
         also used to determine the direction of the integrated magnetization matrix.
          </li>
         </p>
-    topics: spinpolarisation_basic, crystal_useful
+    topics: spinpolarisation_basic, crystal_useful, MagMom_useful
     varset: gstate
     vartype: real
 - !variable
@@ -32065,7 +32065,7 @@
         Note that Tesla are admitted. This sets the magnitude of mu_0*H, in Tesla,
         with H in Amperes/metre.
         </p>
-    topics: spinpolarisation_expert
+    topics: MagField_basic
     varset: ffield
     vartype: real
 - !variable
