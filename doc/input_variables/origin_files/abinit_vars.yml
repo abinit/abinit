@@ -824,7 +824,7 @@
         cells with different atomic characteristics can thus be considered,
         and can be made to evolve, e.g. with a genetic algorithm (not coded in v7.0.0 though).
         </p>
-    topics: PIMD_useful, DFPT_useful, AtomTypes_basic
+    topics: PIMD_useful, DFPT_useful, AtomTypes_basic, Artificial_basic
     varset: rlx
     vartype: real
 - !variable
@@ -22824,7 +22824,7 @@
         "HIST.nc", those are NetCDF files containing the information about
         all the atoms.
         </p>
-    topics: printing_prgeo
+    topics: printing_prgeo, Output_useful
     varset: rlx
     vartype: integer
 - !variable
@@ -22843,7 +22843,7 @@
         Born effective charges and localization tensor, in case they are computed.
         See Ph. Ghosez and X. Gonze, J. Phys.: Condens. Matter 12, 9179 (2000).
         </p>
-    topics: printing_prngs
+    topics: printing_prngs, Output_useful
     varset: dfpt
     vartype: integer
 - !variable
@@ -23348,7 +23348,7 @@
           </li>
          </ul>
         </p>
-    topics: printing_prngs
+    topics: printing_prngs, EFG_basic
     varset: paw
     vartype: integer
 - !variable
@@ -23431,7 +23431,7 @@
           </li>
          </ul>
         </p>
-    topics: printing_prfermi
+    topics: printing_prfermi, EFG_basic
     varset: paw
     vartype: integer
 - !variable
@@ -23705,7 +23705,7 @@
         if set to -2, the code stops in invars1 after the computation of the irreducible set and
         a file named kpts.nc with the list of the k-points and the corresponding weights is produced
         </p>
-    topics: printing_prden
+    topics: printing_prden, Output_useful
     varset: files
     vartype: integer
 - !variable
@@ -24332,7 +24332,7 @@
         </ul>
         This debugging feature is not yet activated in the RF routines.
         Note that [[fftalg]] offers another option for debugging.</p>
-    topics: printing_prgs
+    topics: printing_prgs, Output_basic
     varset: files
     vartype: integer
 - !variable
@@ -24383,7 +24383,7 @@
          , the printing volume, for each image,
         is reduced to total energy and convergence residuals only.
         </p>
-    topics: printing_prgs
+    topics: printing_prgs, Output_useful
     varset: files
     vartype: integer
 - !variable
@@ -24818,7 +24818,7 @@
           </li>
          </ul>
         </p>
-    topics: DFPT_useful
+    topics: EFG_basic
     varset: paw
     vartype: real
 - !variable
@@ -25462,7 +25462,7 @@
           </li>
          </ul>
         </p>
-    topics: DFPT_useful
+    topics: EFG_basic
     varset: paw
     vartype: real
 - !variable
@@ -28510,7 +28510,7 @@
         (this takes time, and is discouraged for too small runs - the timing would take more time than the run !). The timer is timed.
         The sum of the independent parts is closer to 100% than for [[timopt]]=-3.
         </p>
-    topics: Output_expert
+    topics: Control_expert
     varset: gstate
     vartype: integer
 - !variable
@@ -29803,7 +29803,7 @@
          Internally, they are available in the dtset structured datatype,
         e.g. dtset%useria .
         </p>
-    topics: Control_expert
+    topics: Dev_expert
     varset: dev
     vartype: integer
 - !variable
@@ -29828,7 +29828,7 @@
          Internally, they are available in the dtset structured datatype,
         e.g. dtset%useria .
         </p>
-    topics: Control_expert
+    topics: Dev_expert
     varset: dev
     vartype: integer
 - !variable
@@ -29853,7 +29853,7 @@
          Internally, they are available in the dtset structured datatype,
         e.g. dtset%useria .
         </p>
-    topics: Control_expert
+    topics: Dev_expert
     varset: dev
     vartype: integer
 - !variable
@@ -29878,7 +29878,7 @@
          Internally, they are available in the dtset structured datatype,
         e.g. dtset%useria .
         </p>
-    topics: Control_expert
+    topics: Dev_expert
     varset: dev
     vartype: integer
 - !variable
@@ -29903,7 +29903,7 @@
          Internally, they are available in the dtset structured datatype,
         e.g. dtset%useria .
         </p>
-    topics: Control_expert
+    topics: Dev_expert
     varset: dev
     vartype: integer
 - !variable
@@ -29920,7 +29920,7 @@
         <p>
          These are user-definable with the same purpose as [[useria]] and cie.
         </p>
-    topics: Control_expert
+    topics: Dev_expert
     varset: dev
     vartype: real
 - !variable
@@ -29937,7 +29937,7 @@
         <p>
          These are user-definable with the same purpose as [[useria]] and cie.
         </p>
-    topics: Control_expert
+    topics: Dev_expert
     varset: dev
     vartype: real
 - !variable
@@ -29954,7 +29954,7 @@
         <p>
          These are user-definable with the same purpose as [[useria]] and cie.
         </p>
-    topics: Control_expert
+    topics: Dev_expert
     varset: dev
     vartype: real
 - !variable
@@ -29971,7 +29971,7 @@
         <p>
          These are user-definable with the same purpose as [[useria]] and cie.
         </p>
-    topics: Control_expert
+    topics: Dev_expert
     varset: dev
     vartype: real
 - !variable
@@ -29988,7 +29988,7 @@
         <p>
          These are user-definable with the same purpose as [[useria]] and cie.
         </p>
-    topics: Control_expert
+    topics: Dev_expert
     varset: dev
     vartype: real
 - !variable

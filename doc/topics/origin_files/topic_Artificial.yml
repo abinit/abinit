@@ -8,4 +8,8 @@
     subtitle  : default
     copyright : default
     links     : default
+    introduction : |
+      With a computer, one can consider non-physical modifications of the system to help the understanding the physics ...
+      <p>The nuclear masses and free electron mass can be modified. A fake space dependent chemical potenial can be added, 
+      as well as the electrostatic potential of a slab.
     end : default 

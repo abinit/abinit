@@ -129,15 +129,15 @@ sec2:
 ## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
 ## Note the small (one space) indentation for the title and body keys.
 sec3:
- title: "Global control parameters : flow, timing, echo, parallelism, I/O, ..."
+ title: "Global control parameters : flow, parallelism, output files, output content, timing and memory control, ..."
  tag: control
  body: |
   <ol>
    <li>[[topic:multidtset|Multi-dataset calculations]]</li>
    <li>[[topic:parallelism|Parallelism and ABINIT]]</li>
    <li>[[topic:printing|Printing files]]</li>
-   <li>[[topic:Output|Tuning the output in different files]]</li>
-   <li>[[topic:Control|Controlling the ABINIT execution]]</li>
+   <li>[[topic:Output|Tuning the output content in different files]]</li>
+   <li>[[topic:Control|Time and memory control]]</li>
   </ol>
 
 ## Each section must have a title, that will form the table of content.
@@ -223,5 +223,6 @@ sec9:
  tag: miscellaneous
  body: |
   <ol>
+   <li>[[topic:Dev|Miscellaneous for developers]]</li>
   </ol>
 
