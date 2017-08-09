@@ -285,63 +285,22 @@ or, in the background, with the command
 <h4><b>3.2. More about ABINIT input variables</b></h4>
  <p>In each section of the ABINIT input variables files,
    a generic information on the input variable is given :
-   a mnemonics, some "characteristics",
-   the variable type, and the default. Then, follows the description of the variable.
- <p>The <b>mnemonics</b> is indicated when available. </p>
- <p>The "characteristics" can be of different types : <b>DEVELOP</b>,
-   <b>GEOMETRY_BUILDER</b>,
-   <b>SYMMETRY_FINDER</b>, <b>NO MULTI</b>, <b>INTERNAL_ONLY</b>, <b>INPUT_ONLY</b>, <b>EVOLVING</b>, <b>ENERGY</b>, <b>LENGTH</b>,
-   <b>MAGNETIC FIELD</b>.
-   We now explain each of these classes.
- <a name="DEVELOP"></a>
- <p> '<b>DEVELOP</b>' refers to input variables that are not used in production runs,
-   but only during development time.
-   For non developers, it is strongly advised to skip them. </p>
- <a name="GEOMETRY_BUILDER"></a>
- <p>There are also parameters related to the geometry builder, a preprocessor
-   of the input file, aimed at easing the work of the user when there are molecules
-   to be manipulated (rotation and translation), or group of atoms to be repeated.
-   The indication '<b>GEOMETRY_BUILDER</b>' is given for them. These can also
-   be skipped for the first few steps in the use of the code. <br>
-   Indeed, it should be <i>easy to set up the geometry of systems with less than
-   20-40 atoms without this geometry builder</i>. Even for larger systems, its
-   functionalities could eventually be of no help. For a step-to-step description
-   of this geometry builder, look at the variable '<a href="../../input_variables/generated_files/varset_geo.html#nobj">nobj</a>'.
-   The related input variables being used for preprocessing of the input file, they are not echoed
-   in the output file.
- </p>
- <a name="SYMMETRY_FINDER"></a>
- <p>Still as an alternative to the geometry builder and the symmetriser, if all
-   the coordinates of the atoms are given, the code is able to deduce all symmetry
-   operations leaving the lattice and atomic sublattices invariant, see '<b>SYMMETRY_FINDER</b>'. 
-   Note that the default tolerance on the coordinates that are provided
-   by the user, for a symmetry to be recognized, is on the order of 1.e-8 . If the
-   provided coordinates are rather inaccurate, ABINIT will not recognize the symmetry,
-   unless the input variable <a href="../../input_variables/generated_files/varset_geo.html#tolsym">tolsym</a>
-   is changed.</p>
- <a name="NO_MULTI"></a>
- <p>Most of the variables can be used in the multi-dataset mode (see
-   <a href=#multidataset>section 3.3</a>),
-   but those that must have a unique value throughout all the
-   datasets are signaled with the indication '<b>NO_MULTI</b>' </p>
- <a name="INPUT_ONLY"></a>
- <p>Some of the input variables, with characteristics '<b>INPUT_ONLY</b>' are only used by the parser, 
-   to initialize other input variables, but are not
-   transmitted inside the code, beyond the parser. In particular, they are not echoed in the output file.
- <a name="INTERNAL_ONLY"></a>
- <p>At variance, some internal variables, with characteristics '<b>INTERNAL_ONLY</b>' 
-   are documented in the help files, but are not accessible as input variables. The documentation is provided
-   because such variables are sometimes mentioned in the output file.
- <a name="EVOLVING"></a>
- <p>Most of the input variables do not change while a run is performed. Some
-   of them, by contrast, may evolve, like the atomic positions, the atomic velocities,
-   the cell shape, and the occupation numbers. Their echo, after the run has
-   proceeded, will of course differ from their input value. They are signaled
-   by the indication '<b>EVOLVING</b>'. </p>
+   a <b>mnemonics</b>, possibly some <b>characteristics</b>,
+   the <b>variable type</b> (integer, real, string), and the <b>default value</b>. 
+   Then, follows the description of the variable.
+ <p>The <b>characteristics</b> can be one of the following : <b>DEVELOP</b>,
+   <b>NO MULTI</b>, <b>INTERNAL_ONLY</b>, <b>INPUT_ONLY</b>, <b>EVOLVING</b>, <b>ENERGY</b>, <b>LENGTH</b>,
+   <b>MAGNETIC FIELD</b>, as described now. 
+ <p>
+ <b><h4>Physical information</h4></b>
  <a name="dimensions"></a>
  <a name="ENERGY"></a>
  <a name="LENGTH"></a>
  <a name="MAGNETIC_FIELD"></a>
+ <p>
+   The <b>ENERGY</b>, <b>LENGTH</b> and <b>MAGNETIC FIELD</b> characteristics indicate
+   that the physical meaning of the variable is known by ABINIT, so that ABINIT can treat 
+   its physical dimensions with some units.
  <p>The use of the atomic unit system (e.g. the Hartree for energy, about 27.211
    eV, and the Bohr for lengths about 0.529 Angstroms) is strictly
    enforced within the code. However, the dimension of some input variables
@@ -391,9 +350,35 @@ or, in the background, with the command
  <p>The initial atomic positions can be input in Bohr or Angstrom through '<a href="../../input_variables/generated_files/varset_basic.html#xcart">xcart</a>',
    but also, independently, in Angstrom through '<a href="../../input_variables/generated_files/varset_basic.html#xangst">xangst</a>',
    or even in reduced coordinates, through '<a href="../../input_variables/generated_files/varset_basic.html#xred">xred</a>'.
-   Reduced cartesian coordinates must be used for the eventual translations accompanying
-   symmetry operations (<a href="../../input_variables/generated_files/varset_basic.html#tnons">tnons</a>).
  </p>
+ <p>
+ <b><h4>Flow information</h4></b>
+ <a name="NO_MULTI"></a>
+ <p>Most of the variables can be used in the multi-dataset mode (see
+   <a href=#multidataset>section 3.3</a>),
+   but those that must have a unique value throughout all the
+   datasets are signaled with the indication '<b>NO_MULTI</b>'.</p>
+ <a name="INPUT_ONLY"></a>
+ <p>Some of the input variables, with characteristics '<b>INPUT_ONLY</b>' are only used by the parser,
+   to initialize other input variables, but are not
+   transmitted inside the code, beyond the parser. In particular, they are not echoed in the output file.
+ <a name="INTERNAL_ONLY"></a>
+ <p>At variance, some internal variables, with characteristics '<b>INTERNAL_ONLY</b>'
+   are documented in the help files, but are not accessible as input variables. The documentation is provided
+   because such variables are sometimes mentioned in the output file.
+ <a name="EVOLVING"></a>
+ <p>Most of the input variables do not change while a run is performed. Some
+   of them, by contrast, may evolve, like the atomic positions, the atomic velocities,
+   the cell shape, and the occupation numbers. Their echo, after the run has
+   proceeded, will of course differ from their input value. They are signaled
+   by the indication '<b>EVOLVING</b>'. </p>
+ <p>
+ <b><h4>Other information</h4></b>
+ <a name="DEVELOP"></a>
+ <p> '<b>DEVELOP</b>' refers to input variables that are not used in production runs,
+   but have been introduced during development time, of a feature that is likely not finalized.
+   For non ABINIT developers, it is strongly advised to skip them. </p>
+
  <p><a name="chkexit">In addition to giving the input variables</a>,
     the input file can be useful
     for another purpose : placing the word "<b>exit</b>" on the top line

@@ -240,7 +240,6 @@ or define by hand the set of symmetries, using <a href="../../input_variables/ge
 <br><font id="title"><a name="natrd">natrd</a></font>
 <br><font id="mnemonics">Mnemonics: Number of AToms ReaD</font>
 <br><font id="mnemonics">Executable: abinit</font>
-<br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#GEOMETRY_BUILDER">GEOMETRY_BUILDER</a></font>
 <br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_AtomManipulator.html">AtomManipulator</a> <a href="../../topics/generated_files/topic_SmartSymm.html">SmartSymm</a> </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is <a href="../../input_variables/generated_files/varset_basic.html#natom">natom</a></font>
@@ -248,8 +247,8 @@ or define by hand the set of symmetries, using <a href="../../input_variables/ge
 <p>
 <p>
  Gives the number of atoms to be
-read from the input file, in the case the geometry builder
-or the symmetriser is used. In this case,
+read from the input file, in the case the atom manipulator
+or the smart symmetriser is used. In this case,
 <b>natrd</b> is also used to dimension
 the array <a href="../../input_variables/generated_files/varset_basic.html#typat">typat</a>,
 and the arrays <a href="../../input_variables/generated_files/varset_basic.html#xred">xred</a>,
@@ -269,15 +268,15 @@ and the arrays <a href="../../input_variables/generated_files/varset_basic.html#
 <br><font id="title"><a name="nobj">nobj</a></font>
 <br><font id="mnemonics">Mnemonics: Number of OBJects</font>
 <br><font id="mnemonics">Executable: abinit</font>
-<br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#GEOMETRY_BUILDER">GEOMETRY_BUILDER</a>, <a href="../../users/generated_files/help_abinit.html#INPUT_ONLY">INPUT_ONLY</a></font>
+<br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#INPUT_ONLY">INPUT_ONLY</a></font>
 <br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_crystal.html">crystal</a> <a href="../../topics/generated_files/topic_AtomManipulator.html">AtomManipulator</a> </font>
 <br><font id="vartype">Variable type: integer</font>
-<br><font id="default">Default is 0 (Comment: (no use of the geometry builder))</font>
+<br><font id="default">Default is 0</font>
 <br><font id="text">
 <p>
 <p>
  Gives the number of 'objects'
-to be used by the geometry builder in order to find the full
+to be used by the atom manipulator in order to find the full
 set of atoms. At present, only one or two objects
 can be defined, identified as objects 'a' and 'b'.
  <br />
@@ -299,7 +298,7 @@ for object 'b' are :
   <a href="../../input_variables/generated_files/varset_geo.html#objbax">objbax</a>
  .
  <br />
- <p>More detailed explanation : when the geometry builder
+ <p>More detailed explanation : when the atom manipulator
 is used (i.e. when <b>nobj</b>==1 or <b>nobj</b>==2), the code
 will be given a primitive set of atoms, from which it
 will have to deduce the full set of atoms.
@@ -315,7 +314,7 @@ and the list of these atoms (<a href="../../input_variables/generated_files/vars
  Examples of physical realisation of an object can be a molecule,
 or a group of atom to be repeated, or a part of a molecule
 to be rotated.
-The geometry builder can indeed repeat these objects (<a href="../../input_variables/generated_files/varset_geo.html#objarf">objarf</a>
+The atom amnipulator can indeed repeat these objects (<a href="../../input_variables/generated_files/varset_geo.html#objarf">objarf</a>
 or
   <a href="../../input_variables/generated_files/varset_geo.html#objbrf">objbrf</a>
  ), rotate them (<a href="../../input_variables/generated_files/varset_geo.html#objaro">objaro</a> or
@@ -369,7 +368,7 @@ Defines the number of z reduced coordinates that defines the spatially varying c
 <br><font id="title"><a name="objaat">objaat</a></font>
 <br><font id="mnemonics">Mnemonics: OBJect A : list of AToms</font>
 <br><font id="mnemonics">Executable: abinit</font>
-<br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#GEOMETRY_BUILDER">GEOMETRY_BUILDER</a>, <a href="../../users/generated_files/help_abinit.html#INPUT_ONLY">INPUT_ONLY</a></font>
+<br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#INPUT_ONLY">INPUT_ONLY</a></font>
 <br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_AtomManipulator.html">AtomManipulator</a> </font>
 <br><font id="vartype">Variable type: integer(<a href="../../input_variables/generated_files/varset_geo.html#objan">objan</a>)</font>
 <br><font id="default">No default</font>
@@ -398,7 +397,7 @@ of atoms.
 <br><font id="title"><a name="objaax">objaax</a></font>
 <br><font id="mnemonics">Mnemonics: OBJect A : AXis</font>
 <br><font id="mnemonics">Executable: abinit</font>
-<br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#GEOMETRY_BUILDER">GEOMETRY_BUILDER</a>, <a href="../../users/generated_files/help_abinit.html#INPUT_ONLY">INPUT_ONLY</a>, <a href="../../users/generated_files/help_abinit.html#LENGTH">LENGTH</a></font>
+<br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#INPUT_ONLY">INPUT_ONLY</a>, <a href="../../users/generated_files/help_abinit.html#LENGTH">LENGTH</a></font>
 <br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_AtomManipulator.html">AtomManipulator</a> </font>
 <br><font id="vartype">Variable type: real(6)</font>
 <br><font id="default">No default (Comment: <b>objaax</b> must be provided if (<a href="../../input_variables/generated_files/varset_geo.html#nobj">nobj</a>==1 and one component of <a href="../../input_variables/generated_files/varset_geo.html#objaro">objaro</a> != 0). Moreover,
@@ -435,7 +434,7 @@ toward point 2 (coordinates 4:6).
 <br><font id="title"><a name="objan">objan</a></font>
 <br><font id="mnemonics">Mnemonics: OBJect A : Number of atoms</font>
 <br><font id="mnemonics">Executable: abinit</font>
-<br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#GEOMETRY_BUILDER">GEOMETRY_BUILDER</a>, <a href="../../users/generated_files/help_abinit.html#INPUT_ONLY">INPUT_ONLY</a></font>
+<br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#INPUT_ONLY">INPUT_ONLY</a></font>
 <br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_AtomManipulator.html">AtomManipulator</a> </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">No default (Comment:  <b>objan</b> MUST be provided if <a href="../../input_variables/generated_files/varset_geo.html#nobj">nobj</a>==1.
@@ -456,7 +455,7 @@ variables <a href="../../input_variables/generated_files/varset_geo.html#objaat"
 <br><font id="title"><a name="objarf">objarf</a></font>
 <br><font id="mnemonics">Mnemonics: OBJect A : Repetition Factors</font>
 <br><font id="mnemonics">Executable: abinit</font>
-<br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#GEOMETRY_BUILDER">GEOMETRY_BUILDER</a>, <a href="../../users/generated_files/help_abinit.html#INPUT_ONLY">INPUT_ONLY</a></font>
+<br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#INPUT_ONLY">INPUT_ONLY</a></font>
 <br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_AtomManipulator.html">AtomManipulator</a> </font>
 <br><font id="vartype">Variable type: integer(3)</font>
 <br><font id="default">Default is [1, 1, 1]</font>
@@ -478,7 +477,7 @@ as well as the increment of rotation or translation
 from one object to the next are specified by
 the variables <a href="../../input_variables/generated_files/varset_geo.html#objaro">objaro</a> and <a href="../../input_variables/generated_files/varset_geo.html#objatr">objatr</a>, for object a,
  <br />
- Note that the geometry builder will generate the full set
+ Note that the atom manipulator will generate the full set
 of atoms from the primitive set of atoms using the
 following order : it will process each atom in the
 primitive list one by one, determine whether it belongs
@@ -492,7 +491,7 @@ find the atoms generated from atom 1 in the primitive list,
 then those generated from atom 2 in the primitive list, and
 so on.
  <br />
- If the geometry builder is only used to rotate
+ If the atom manipulator is only used to rotate
 or translate an object, without repeating it,
 simply use 1 1 1, which is also the Default value.
  <br />
@@ -506,7 +505,7 @@ simply use 1 1 1, which is also the Default value.
 <br><font id="title"><a name="objaro">objaro</a></font>
 <br><font id="mnemonics">Mnemonics: OBJect A : ROtations</font>
 <br><font id="mnemonics">Executable: abinit</font>
-<br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#GEOMETRY_BUILDER">GEOMETRY_BUILDER</a>, <a href="../../users/generated_files/help_abinit.html#INPUT_ONLY">INPUT_ONLY</a></font>
+<br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#INPUT_ONLY">INPUT_ONLY</a></font>
 <br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_AtomManipulator.html">AtomManipulator</a> </font>
 <br><font id="vartype">Variable type: real(4)</font>
 <br><font id="default">Default is 4*0.0d0 (Comment: (no rotation))</font>
@@ -544,7 +543,7 @@ different rotation angles.
 <br><font id="title"><a name="objatr">objatr</a></font>
 <br><font id="mnemonics">Mnemonics: OBJect A : TRanslations</font>
 <br><font id="mnemonics">Executable: abinit</font>
-<br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#GEOMETRY_BUILDER">GEOMETRY_BUILDER</a>, <a href="../../users/generated_files/help_abinit.html#INPUT_ONLY">INPUT_ONLY</a>, <a href="../../users/generated_files/help_abinit.html#LENGTH">LENGTH</a></font>
+<br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#INPUT_ONLY">INPUT_ONLY</a>, <a href="../../users/generated_files/help_abinit.html#LENGTH">LENGTH</a></font>
 <br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_AtomManipulator.html">AtomManipulator</a> </font>
 <br><font id="vartype">Variable type: real(12)</font>
 <br><font id="default">Default is 12*0.0d0 (Comment: (no translation))</font>
@@ -586,7 +585,7 @@ which case, only rotations are needed.
 <br><font id="title"><a name="objbat">objbat</a></font>
 <br><font id="mnemonics">Mnemonics: OBJect B : list of AToms</font>
 <br><font id="mnemonics">Executable: abinit</font>
-<br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#GEOMETRY_BUILDER">GEOMETRY_BUILDER</a>, <a href="../../users/generated_files/help_abinit.html#INPUT_ONLY">INPUT_ONLY</a></font>
+<br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#INPUT_ONLY">INPUT_ONLY</a></font>
 <br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_AtomManipulator.html">AtomManipulator</a> </font>
 <br><font id="vartype">Variable type: integer(<a href="../../input_variables/generated_files/varset_geo.html#objbn">objbn</a>)</font>
 <br><font id="default">No default</font>
@@ -618,7 +617,7 @@ of atoms.
 <br><font id="title"><a name="objbax">objbax</a></font>
 <br><font id="mnemonics">Mnemonics: OBJect B : AXis</font>
 <br><font id="mnemonics">Executable: abinit</font>
-<br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#GEOMETRY_BUILDER">GEOMETRY_BUILDER</a>, <a href="../../users/generated_files/help_abinit.html#INPUT_ONLY">INPUT_ONLY</a>, <a href="../../users/generated_files/help_abinit.html#LENGTH">LENGTH</a></font>
+<br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#INPUT_ONLY">INPUT_ONLY</a>, <a href="../../users/generated_files/help_abinit.html#LENGTH">LENGTH</a></font>
 <br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_AtomManipulator.html">AtomManipulator</a> </font>
 <br><font id="vartype">Variable type: real(6)</font>
 <br><font id="default">No default (Comment: <b>objbax</b> must be provided if (<a href="../../input_variables/generated_files/varset_geo.html#nobj">nobj</a>==1 and one component of <a href="../../input_variables/generated_files/varset_geo.html#objaro">objaro</a> != 0). Moreover,
@@ -655,7 +654,7 @@ toward point 2 (coordinates 4:6).
 <br><font id="title"><a name="objbn">objbn</a></font>
 <br><font id="mnemonics">Mnemonics: OBJect B : Number of atoms</font>
 <br><font id="mnemonics">Executable: abinit</font>
-<br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#GEOMETRY_BUILDER">GEOMETRY_BUILDER</a>, <a href="../../users/generated_files/help_abinit.html#INPUT_ONLY">INPUT_ONLY</a></font>
+<br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#INPUT_ONLY">INPUT_ONLY</a></font>
 <br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_AtomManipulator.html">AtomManipulator</a> </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">No default (Comment:  <a href="../../input_variables/generated_files/varset_geo.html#objan">objan</a> and <b>objbn</b> MUST be provided if <a href="../../input_variables/generated_files/varset_geo.html#nobj">nobj</a>==2.)</font>
@@ -676,7 +675,7 @@ variables <a href="../../input_variables/generated_files/varset_geo.html#objbat"
 <br><font id="title"><a name="objbrf">objbrf</a></font>
 <br><font id="mnemonics">Mnemonics: OBJect B : Repetition Factors</font>
 <br><font id="mnemonics">Executable: abinit</font>
-<br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#GEOMETRY_BUILDER">GEOMETRY_BUILDER</a>, <a href="../../users/generated_files/help_abinit.html#INPUT_ONLY">INPUT_ONLY</a></font>
+<br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#INPUT_ONLY">INPUT_ONLY</a></font>
 <br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_AtomManipulator.html">AtomManipulator</a> </font>
 <br><font id="vartype">Variable type: integer(3)</font>
 <br><font id="default">Default is [1, 1, 1]</font>
@@ -697,7 +696,7 @@ as well as the increment of rotation or translation
 from one object to the next are specified by
 the variables <a href="../../input_variables/generated_files/varset_geo.html#objbro">objbro</a> and <a href="../../input_variables/generated_files/varset_geo.html#objbtr">objbtr</a>, for object b.
  <br />
- Note that the geometry builder will generate the full set
+ Note that the atom manipulator will generate the full set
 of atoms from the primitive set of atoms using the
 following order : it will process each atom in the
 primitive list one by one, determine whether it belongs
@@ -711,7 +710,7 @@ find the atoms generated from atom 1 in the primitive list,
 then those generated from atom 2 in the primitive list, and
 so on.
  <br />
- If the geometry builder is only used to rotate
+ If the atom manipulator is only used to rotate
 or translate an object, without repeating it,
 simply use 1 1 1, which is also the Default value.
  <br />
@@ -725,7 +724,7 @@ simply use 1 1 1, which is also the Default value.
 <br><font id="title"><a name="objbro">objbro</a></font>
 <br><font id="mnemonics">Mnemonics: OBJect B : ROtations</font>
 <br><font id="mnemonics">Executable: abinit</font>
-<br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#GEOMETRY_BUILDER">GEOMETRY_BUILDER</a>, <a href="../../users/generated_files/help_abinit.html#INPUT_ONLY">INPUT_ONLY</a></font>
+<br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#INPUT_ONLY">INPUT_ONLY</a></font>
 <br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_AtomManipulator.html">AtomManipulator</a> </font>
 <br><font id="vartype">Variable type: real(4)</font>
 <br><font id="default">Default is 4*0.0d0 (Comment: (no rotation))</font>
@@ -763,7 +762,7 @@ different rotation angles.
 <br><font id="title"><a name="objbtr">objbtr</a></font>
 <br><font id="mnemonics">Mnemonics: OBJect B : TRanslations</font>
 <br><font id="mnemonics">Executable: abinit</font>
-<br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#GEOMETRY_BUILDER">GEOMETRY_BUILDER</a>, <a href="../../users/generated_files/help_abinit.html#INPUT_ONLY">INPUT_ONLY</a>, <a href="../../users/generated_files/help_abinit.html#LENGTH">LENGTH</a></font>
+<br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#INPUT_ONLY">INPUT_ONLY</a>, <a href="../../users/generated_files/help_abinit.html#LENGTH">LENGTH</a></font>
 <br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_AtomManipulator.html">AtomManipulator</a> </font>
 <br><font id="vartype">Variable type: real(12)</font>
 <br><font id="default">Default is 12*0.0d0 (Comment: (no translation))</font>
@@ -1090,7 +1089,7 @@ will be automatically symmetrized by the symmetry operations that will have been
 <br><font id="title"><a name="vaclst">vaclst</a></font>
 <br><font id="mnemonics">Mnemonics: VACancies LiST</font>
 <br><font id="mnemonics">Executable: abinit</font>
-<br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#GEOMETRY_BUILDER">GEOMETRY_BUILDER</a>, <a href="../../users/generated_files/help_abinit.html#INPUT_ONLY">INPUT_ONLY</a></font>
+<br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#INPUT_ONLY">INPUT_ONLY</a></font>
 <br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_AtomManipulator.html">AtomManipulator</a> </font>
 <br><font id="vartype">Variable type: integer(<a href="../../input_variables/generated_files/varset_geo.html#vacnum">vacnum</a>)</font>
 <br><font id="default">No default</font>
@@ -1112,7 +1111,6 @@ after having rotated, translated and repeated the objects.
 <br><font id="title"><a name="vacnum">vacnum</a></font>
 <br><font id="mnemonics">Mnemonics: VACancies NUMber</font>
 <br><font id="mnemonics">Executable: abinit</font>
-<br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#GEOMETRY_BUILDER">GEOMETRY_BUILDER</a></font>
 <br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_AtomManipulator.html">AtomManipulator</a> </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
