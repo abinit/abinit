@@ -1,0 +1,18 @@
+- !components 
+    name      : UnitCell
+    keyword   : UnitCell
+    authors   : FJ
+    howto     : specify the unit cell
+    header    : default
+    title     : <h1>Specification of the unit cell</h1>
+    subtitle  : default
+    copyright : default
+    links     : default
+    introduction : |- 
+         An initial set of three vectors, specified in real space by [[rprim]] or as unit vectors with angles [[angdeg]],
+         are renormalized afterwards using scaling factors as specified by [[acell]] or by rescaling their cartesian coordinates, 
+         as specified by [[scalecart]]. Internally, only the final result, [[rprimd]] matters.
+         THe more detailed explanation can be found by looking at [[rprim]].
+
+         <br>Details about the way the real space lattice, the reciprocal lattice, and symmetries are defined in ABINIT can be found <a href="../documents/geometry.pdf">here</a>.
+    end : default 

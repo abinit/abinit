@@ -1,0 +1,65 @@
+<!--                                                                                     -->
+<!-- This file has been produced by generate_doc.py using different .yml  or .bib files. -->
+<!-- It is useless to modify it. Modify the related .yml  or .bib files instead.         -->
+<!--                                                                                     -->
+<html>
+<head><title>UnitCell </title>
+<link rel=stylesheet type="text/css" href="../formabinit.css">
+</head>
+<body bgcolor="#ffffff">
+
+<hr>
+<a name="top"></a>
+
+<h1>Specification of the unit cell</h1>
+<h3>This file gives hints on how to specify the unit cell with the ABINIT package.
+<hr>
+
+<h5>Copyright (C) 2016-2017 ABINIT group (FJ)
+<script type="text/javascript" src="../../js_files/copyright.js"> </script>
+</h5>
+
+<script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
+
+ <h3><b>Table of content: </b></h3> 
+ <ul> <li><a href="topic_UnitCell.html#1">1</a>. Introduction.<li><a href="topic_UnitCell.html#2">2</a>. Related input variables.</ul>
+
+&nbsp; 
+<HR ALIGN=left> 
+<a name="1">&nbsp;</a>
+<h3><b>1. Introduction.</b></h3>
+
+
+An initial set of three vectors, specified in real space by <a href="../../input_variables/generated_files/varset_basic.html#rprim">rprim</a> or as unit vectors with angles <a href="../../input_variables/generated_files/varset_basic.html#angdeg">angdeg</a>,
+are renormalized afterwards using scaling factors as specified by <a href="../../input_variables/generated_files/varset_basic.html#acell">acell</a> or by rescaling their cartesian coordinates, 
+as specified by <a href="../../input_variables/generated_files/varset_basic.html#scalecart">scalecart</a>. Internally, only the final result, <a href="../../input_variables/generated_files/varset_basic.html#rprimd">rprimd</a> matters.
+THe more detailed explanation can be found by looking at <a href="../../input_variables/generated_files/varset_basic.html#rprim">rprim</a>.
+
+<br>Details about the way the real space lattice, the reciprocal lattice, and symmetries are defined in ABINIT can be found <a href="../documents/geometry.pdf">here</a>.
+<br><br><a href=#top>Go to the top</a>
+
+
+
+
+&nbsp; 
+<hr> 
+<a name="2">&nbsp;</a>
+<h3><b>2. Related input variables.</b></h3>
+
+
+<p>Basic input variables:<p>... <a href="../../input_variables/generated_files/varset_basic.html#acell">acell</a>   [CELL lattice vector scaling]<br>
+... <a href="../../input_variables/generated_files/varset_basic.html#rprim">rprim</a>   [Real space PRIMitive translations]<br>
+<p>Useful input variables:<p>... <a href="../../input_variables/generated_files/varset_basic.html#angdeg">angdeg</a>   [ANGles in DEGrees]<br>
+... <a href="../../input_variables/generated_files/varset_gstate.html#chkprim">chkprim</a>   [CHecK whether the cell is PRIMitive]<br>
+... <a href="../../input_variables/generated_files/varset_basic.html#scalecart">scalecart</a>   [SCALE CARTesian coordinates]<br>
+<p>Relevant internal variables:<p>... <a href="../../input_variables/generated_files/varset_basic.html#rprimd">%rprimd</a>   [Real space PRIMitive translations, Dimensional]<br>
+
+<br><br><a href=#top>Go to the top</a>
+
+
+
+<script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
+
+</body>
+</html>
+
