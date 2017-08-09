@@ -61,7 +61,7 @@
 - tests/v1/Input/t22.in:#%% topics = xc
 - tests/v1/Input/t23.in:#%% topics = xc
 - tests/v1/Input/t24.in:#%% topics = xc
-- tests/v1/Input/t25.in:#%% topics = xc
+- tests/v1/Input/t25.in:#%% topics = xc, Artificial
 - tests/v1/Input/t28.in:#%% topics = xc
 - tests/v1/Input/t29.in:#%% topics = xc
 - tests/v1/Input/t30.in:#%% topics = xc

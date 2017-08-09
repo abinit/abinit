@@ -5845,7 +5845,7 @@
     varset: gw
     vartype: real
 - !variable
-    abivarname: effmass
+    abivarname: effmass_free
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
