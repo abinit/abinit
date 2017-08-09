@@ -5853,14 +5853,13 @@
     defaultval: 1
     dimensions: scalar
     excludes: null
-    mnemonics: EFFective MASS
+    mnemonics: EFFective MASS for the FREE electron
     requires: null
     text: |-
-        <p>
-         <br />
-         This parameter allows to change the electron mass, with respect to its
-        experimental value.
+        This parameter allows to change the free electron mass, with respect to its experimental value.
+        <p>The electron mass is simply changed in the Schr&ouml;dinger equation.
         </p>
+        Only for testing purposes, of course.
     topics: Artificial_expert
     varset: dev
     vartype: real
@@ -14674,7 +14673,7 @@
         </p>
         <p>
         </p>
-    topics: k-points_expert
+    topics: k-points_useful
     varset: gstate
     vartype: real
 - !variable
@@ -16795,7 +16794,7 @@
         by just specifying the number of divisions for the smallest segment.
         See the related input variable [[ndivsm]].
         </p>
-    topics: k-points_expert
+    topics: k-points_useful
     varset: gstate
     vartype: integer
 - !variable
@@ -16825,7 +16824,7 @@
         In this case, the absolute value of
         [[kptopt]] is the number of such segments.
         </p>
-    topics: k-points_expert
+    topics: k-points_useful
     varset: gstate
     vartype: integer
 - !variable
@@ -17615,7 +17614,7 @@
         also [[einterp]])
         In a nutshell, nkpath replaces [[kptopt]] when we are not performing a NSCF calculation.
         Note that, unlike [[kptopt]], nkpath represents the total number of points in the [[kptbounds]] array.
-    topics: k-points_expert
+    topics: k-points_useful
     varset: basic
     vartype: integer
 - !variable
@@ -21408,7 +21407,7 @@
          <br />
          An artificial scaling of the spin-orbit can be introduced thanks to the [[spnorbscl]] input variable.
         </p>
-    topics: PAW_useful
+    topics: PAW_useful, spinpolarisation_useful
     varset: paw
     vartype: integer
 - !variable
@@ -27222,7 +27221,7 @@
          was used, in place of [[so_psp]]. Because the values 0 and 1 have been switched
         between [[so_psp]] and so_typat, it was dangerous to continue to allow the use of so_typat.
         </p>
-    topics: spinpolarisation_basic
+    topics: spinpolarisation_useful
     varset: gstate
     vartype: integer
 - !variable
@@ -27675,7 +27674,7 @@
         other values are used for the analysis of the effect of the spin-orbit interaction,
         but are not expected to correspond to any physical situation.
         </p>
-    topics: PAW_useful
+    topics: PAW_useful, spinpolarisation_useful
     varset: paw
     vartype: real
 - !variable

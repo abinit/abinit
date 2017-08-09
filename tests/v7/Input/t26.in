@@ -59,4 +59,5 @@ diemac    2.0
 #%% description = 
 #%%    LiH rocksalt structure with a negative lithium vacancy
 #%%    test thee potential alignement usepotzero=0,1
+#%% topics = ChargedCell
 #%%<END TEST_INFO>

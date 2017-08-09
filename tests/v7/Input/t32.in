@@ -79,4 +79,5 @@ natom 2
 #%% authors = J. Zwanziger
 #%% keywords = PAW
 #%% description = Test presence of nuclear magnetic dipole moments on atomic sites
+#%% topics = MagField
 #%%<END TEST_INFO>
