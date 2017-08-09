@@ -218,7 +218,7 @@ subroutine ks_ddiago(Diago_ctl,nband_k,nfftc,mgfftc,ngfftc,natom,&
  nloalg  = Diago_ctl%nloalg
  ecut    = Diago_ctl%ecut
  ecutsm  = Diago_ctl%ecutsm
- effmass_free = Diago_ctl%effmass
+ effmass_free = Diago_ctl%effmass_free
  prtvol  = Diago_ctl%prtvol
 
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)

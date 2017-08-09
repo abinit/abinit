@@ -2288,10 +2288,10 @@ subroutine shirley_interp(Wsh,jobz,Dtset,Cryst,Psps,Pawtab,Pawfgr,Pawang,Pawrad,
        ! FIXME here there is a problem with Wd%ecut and Dtset%ecut.
        !if (ikpt==1) write(std_out,*)" CHECK: Dtset%ecut=",Dtset%ecut," Wsh%ecut= ",Wsh%ecut
        !call init_ddiago_ctl(Diago_ctl,"No Vectors",spin,nspinor,Wsh%ecut,kpoint,nloalg,Cryst%gmet,&
-       !&   nband_k=nband_k,effmass_free=Dtset%effmass,istwf_k=istwf1,prtvol=prtvol)
+       !&   nband_k=nband_k,effmass_free=Dtset%effmass_free,istwf_k=istwf1,prtvol=prtvol)
 
        call init_ddiago_ctl(Diago_ctl,"No Vectors",spin,nspinor,Dtset%ecut,kpoint,nloalg,Cryst%gmet,&
-&        nband_k=nband_k,effmass_free=Dtset%effmass,istwf_k=istwf1,prtvol=prtvol)
+&        nband_k=nband_k,effmass_free=Dtset%effmass_free,istwf_k=istwf1,prtvol=prtvol)
 
        nullify(diag_ene)
        nullify(diag_vec)
