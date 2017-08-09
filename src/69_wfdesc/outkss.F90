@@ -647,7 +647,7 @@ subroutine outkss(crystal,Dtfil,Dtset,ecut,gmet,gprimd,Hdr,&
          call timab(936,1,tsec)
 
          call init_ddiago_ctl(Diago_ctl,"Vectors",isppol,dtset%nspinor,ecut_eff,Dtset%kptns(:,ikpt),Dtset%nloalg,gmet,&
-&         nband_k=nbandkssk(ikpt),effmass=Dtset%effmass,istwf_k=Dtset%istwfk(ikpt),prtvol=Dtset%prtvol)
+&         nband_k=nbandkssk(ikpt),effmass_free=Dtset%effmass,istwf_k=Dtset%istwfk(ikpt),prtvol=Dtset%prtvol)
 
          call ks_ddiago(Diago_ctl,nbandkssk(ikpt),Dtset%nfft,mgfft,Dtset%ngfft,natom,&
 &         Dtset%typat,nfft,dtset%nspinor,nspden,nsppol,Pawtab,Pawfgr,Paw_ij_all,&

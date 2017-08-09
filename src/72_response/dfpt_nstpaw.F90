@@ -919,8 +919,8 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
        ABI_ALLOCATE(kinpw1,(npw1_k))
        dkinpw=zero
 !      Compute (1/2) (2 Pi)**2 (k+q+G)**2:
-!       call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass,gmet,kg1_k,kinpw1,kpq,npw1_k)
-       call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass,gmet,kg1_k,kinpw1,kpq,npw1_k,0,0)
+!       call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass_free,gmet,kg1_k,kinpw1,kpq,npw1_k)
+       call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass_free,gmet,kg1_k,kinpw1,kpq,npw1_k,0,0)
 
 !      Compute nonlocal form factors ffnl at (k+G), for all atoms
        ider=0;idir0=0
@@ -1129,9 +1129,9 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
 
 !          Eventually compute 1st-order kinetic operator
            if (ipert1==dtset%natom+1) then
-             call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass,gmet,kg_k,dkinpw,kpoint,npw_k,idir1,0)
+             call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass_free,gmet,kg_k,dkinpw,kpoint,npw_k,idir1,0)
            else if (ipert1==dtset%natom+3.or.ipert1==dtset%natom+4) then
-             call kpgstr(dkinpw,dtset%ecut,dtset%ecutsm,dtset%effmass,gmet,gprimd,istr1,kg_k,kpoint,npw_k)
+             call kpgstr(dkinpw,dtset%ecut,dtset%ecutsm,dtset%effmass_free,gmet,gprimd,istr1,kg_k,kpoint,npw_k)
            end if
 
 !          Finalize initialization of 1st-order NL hamiltonian

@@ -9,7 +9,7 @@ for file in "$@"
 do
  echo "working on $file"
  rm -f tmp.file
- sed -e 's!varset: varw90!varset: w90!' $file > tmp.file
+ sed -e 's!effmass!effmass_free!' $file > tmp.file
  echo "changes done "
  # put the modified file at the correct place
  mv tmp.file $file

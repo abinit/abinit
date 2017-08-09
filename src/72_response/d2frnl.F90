@@ -553,8 +553,8 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
        ABI_ALLOCATE(ddkinpw,(npw_k,3,3))
        do mu=1,3
          do nu=1,3
-!           call d2kpg(ddkinpw(:,mu,nu),dtset%ecut,dtset%ecutsm,dtset%effmass,gmet,mu,nu,kg_k,kpoint,npw_k)
-           call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass,gmet,kg_k,ddkinpw(:,mu,nu),kpoint,npw_k,mu,nu)
+!           call d2kpg(ddkinpw(:,mu,nu),dtset%ecut,dtset%ecutsm,dtset%effmass_free,gmet,mu,nu,kg_k,kpoint,npw_k)
+           call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass_free,gmet,kg_k,ddkinpw(:,mu,nu),kpoint,npw_k,mu,nu)
          end do
        end do
      end if
