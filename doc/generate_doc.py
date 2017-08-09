@@ -812,7 +812,8 @@ for topic_name in list_of_topics:
       item_toc += 1
       item_num="%d" % item_toc
       sec_number[j]=item_num
-      toc += '<li><a href="topic_'+topic_name+'.html#'+item_num+'">'+item_num+'</a>. '+title[j]
+      #toc += '<li><a href="topic_'+topic_name+'.html#'+item_num+'">'+item_num+'</a>. '+title[j]
+      toc += '<li>%s. <a href="topic_%s.html#%s">%s</a>'%(item_num,topic_name,item_num,title[j])
 
   toc+= "</ul>"
 
