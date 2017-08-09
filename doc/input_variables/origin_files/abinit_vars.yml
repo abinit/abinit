@@ -1739,8 +1739,7 @@
     vartype: real
 - !variable
     abivarname: brvltt
-    characteristics:
-    - '[[SYMMETRISER]]'
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval: 0
@@ -1823,7 +1822,7 @@
          </a>
          .
         </p>
-    topics: crystal_expert
+    topics: crystal_expert, UnitCell_useful, SmartSymm_basic
     varset: geo
     vartype: integer
 - !variable
@@ -3043,7 +3042,7 @@
         generate a PRIMITIVE cell using
         [[brvltt]]=-1 .
         </p>
-    topics: crystal_useful, UnitCell_useful
+    topics: crystal_useful, UnitCell_useful, SmartSymm_useful
     varset: gstate
     vartype: integer
 - !variable
@@ -7700,8 +7699,7 @@
     vartype: integer
 - !variable
     abivarname: genafm
-    characteristics:
-    - '[[SYMMETRISER]]'
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval: !multiplevalue
@@ -7731,7 +7729,7 @@
         or define by hand the set of symmetries, using [[symrel]],
         [[tnons]] and [[symafm]]
         </p>
-    topics: spinpolarisation_useful
+    topics: spinpolarisation_useful, SmartSymm_useful
     varset: geo
     vartype: real
 - !variable
@@ -16234,7 +16232,7 @@
         to specify only the irreducible set of atoms, use the
         symmetriser, see the input variable [[natrd]].
         </p>
-    topics: crystal_basic
+    topics: crystal_basic, SmartSymm_basic
     varset: basic
     vartype: integer
 - !variable
@@ -16277,7 +16275,6 @@
     abivarname: natrd
     characteristics:
     - '[[GEOMETRY_BUILDER]]'
-    - '[[SYMMETRISER]]'
     commentdefault: null
     commentdims: null
     defaultval: '[[natom]]'
@@ -16300,7 +16297,7 @@
          <br />
          Despite possible vacancies, cannot be bigger than [[natom]].
         </p>
-    topics: crystal_expert
+    topics: crystal_expert, SmartSymm_basic
     varset: geo
     vartype: integer
 - !variable
@@ -24844,7 +24841,6 @@
 - !variable
     abivarname: ptgroupma
     characteristics:
-    - '[[SYMMETRISER]]'
     - '[[INTERNAL_ONLY]]'
     commentdefault: null
     commentdims: null
@@ -24875,7 +24871,7 @@
         [[spgroupma]],
         [[genafm]]
         </p>
-    topics: spinpolarisation_useful
+    topics: spinpolarisation_useful, SmartSymm_internal
     varset: geo
     vartype: integer
 - !variable
@@ -27265,8 +27261,7 @@
     vartype: real
 - !variable
     abivarname: spgaxor
-    characteristics:
-    - '[[SYMMETRISER]]'
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval: 1
@@ -27362,13 +27357,12 @@
           </li>
          </ol>
         </p>
-    topics: crystal_expert
+    topics: crystal_expert, SmartSymm_useful
     varset: geo
     vartype: integer
 - !variable
     abivarname: spgorig
-    characteristics:
-    - '[[SYMMETRISER]]'
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval: 1
@@ -27392,13 +27386,12 @@
          </a>
          .
         </p>
-    topics: crystal_expert
+    topics: crystal_expert, SmartSymm_useful
     varset: geo
     vartype: integer
 - !variable
     abivarname: spgroup
-    characteristics:
-    - '[[SYMMETRISER]]'
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval: 0
@@ -27439,13 +27432,12 @@
          </a>
          .
         </p>
-    topics: crystal_expert
+    topics: crystal_expert, UnitCell_useful, SmartSymm_basic
     varset: geo
     vartype: integer
 - !variable
     abivarname: spgroupma
     characteristics:
-    - '[[SYMMETRISER]]'
     - '[[INPUT_ONLY]]'
     commentdefault: null
     commentdims: null
@@ -27486,7 +27478,7 @@
         define by hand the set of symmetries, using [[symrel]],
         [[tnons]] and [[symafm]].
         </p>
-    topics: spinpolarisation_useful
+    topics: spinpolarisation_useful, SmartSymm_useful
     varset: geo
     vartype: integer
 - !variable

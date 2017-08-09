@@ -43,6 +43,7 @@
 - tests/paral/Input/t93.in:#%% topics = Hybrids
 - tests/paral/Input/t94.in:#%% topics = Hybrids
 - tests/tutorial/Input/tbase4_4.in:#%% topics = UnitCell
+- tests/tutorial/Input/tnuc_1.in:#%% topics = SmartSymm
 - tests/v1/Input/t02.in:#%% topics = GSgeneral
 - tests/v1/Input/t04.in:#%% topics = GSgeneral
 - tests/v1/Input/t10.in:#%% topics = xc
@@ -102,6 +103,8 @@
 - tests/v2/Input/t48.in:#%% topics = GeoOpt
 - tests/v2/Input/t50.in:#%% topics = GSgeneral
 - tests/v2/Input/t51.in:#%% topics = GSgeneral
+- tests/v2/Input/t59.in:#%% topics = UnitCell, SmartSymm
+- tests/v2/Input/t60.in:#%% topics = UnitCell, SmartSymm
 - tests/v2/Input/t61.in:#%% topics = k-points
 - tests/v2/Input/t62.in:#%% topics = k-points
 - tests/v2/Input/t63.in:#%% topics = k-points
@@ -115,7 +118,7 @@
 - tests/v3/Input/t20.in:#%% topics = spinpolarisation
 - tests/v3/Input/t21.in:#%% topics = crystal
 - tests/v3/Input/t22.in:#%% topics = spinpolarisation
-- tests/v3/Input/t23.in:#%% topics = crystal, spinpolarisation
+- tests/v3/Input/t23.in:#%% topics = crystal, spinpolarisation, UnitCell
 - tests/v3/Input/t24.in:#%% topics = crystal, spinpolarisation
 - tests/v3/Input/t25.in:#%% topics = crystal
 - tests/v3/Input/t26.in:#%% topics = crystal
@@ -215,7 +218,7 @@
 - tests/v5/Input/t69.in:#%% topics = GW
 - tests/v5/Input/t75.in:#%% topics = recursion
 - tests/v5/Input/t76.in:#%% topics = recursion
-- tests/v5/Input/t77.in:#%% topics = GeoOpt
+- tests/v5/Input/t77.in:#%% topics = GeoOpt, UnitCell, SmartSymm
 - tests/v5/Input/t79.in:#%% topics = GeoOpt
 - tests/v5/Input/t88.in:#%% topics = anaddbEPC
 - tests/v5/Input/t89.in:#%% topics = anaddbEPC
@@ -240,6 +243,7 @@
 - tests/v6/Input/t25.in:#%% topics = TransPath
 - tests/v6/Input/t27.in:#%% topics = TransPath
 - tests/v6/Input/t28.in:#%% topics = AtomTypes
+- tests/v6/Input/t30.in:#%% topics = UnitCell, SmartSymm
 - tests/v6/Input/t37.in:#%% topics = TDep
 - tests/v6/Input/t40.in:#%% topics = anaddbSpec, anaddbCommon
 - tests/v6/Input/t43.in:#%% topics = Berry

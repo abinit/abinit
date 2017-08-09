@@ -289,7 +289,7 @@ or, in the background, with the command
    the variable type, and the default. Then, follows the description of the variable.
  <p>The <b>mnemonics</b> is indicated when available. </p>
  <p>The "characteristics" can be of different types : <b>DEVELOP</b>,
-   <b>GEOMETRY_BUILDER</b>, <b>SYMMETRISER</b>,
+   <b>GEOMETRY_BUILDER</b>,
    <b>SYMMETRY_FINDER</b>, <b>NO MULTI</b>, <b>INTERNAL_ONLY</b>, <b>INPUT_ONLY</b>, <b>EVOLVING</b>, <b>ENERGY</b>, <b>LENGTH</b>,
    <b>MAGNETIC FIELD</b>.
    We now explain each of these classes.
@@ -310,19 +310,6 @@ or, in the background, with the command
    The related input variables being used for preprocessing of the input file, they are not echoed
    in the output file.
  </p>
- <a name="SYMMETRISER"></a>
- <p>Alternatively to the geometry builder, there is also a symmetriser. It allows
-   to generate the full set of atoms in the primitive cell from the knowledge
-   of the symmetry operations and the atoms in the asymmetric cell. It also allows
-   to generate the symmetry operations from the knowledge of the number of the
-   space group according to the international crystallographic tables. The indication
-   '<b>SYMMETRISER</b>' is given for the variables related to its use. Look at
-   the variable '<a href="../../input_variables/generated_files/varset_geo.html#spgroup">spgroup</a>'.
-   <br>
-   You may find in the space group <a href="../spacegrouphelpfile.html">help file</a>
-   the crystallographic equivalence of the parameters belonging to the symmetriser.
-   The related input variables being used for preprocessing of the input file, they are not echoed
-   in the output file.</p>
  <a name="SYMMETRY_FINDER"></a>
  <p>Still as an alternative to the geometry builder and the symmetriser, if all
    the coordinates of the atoms are given, the code is able to deduce all symmetry

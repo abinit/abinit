@@ -59,6 +59,7 @@ sec2:
    <li>[[topic:UnitCell|Unit cell]]</li>
    <li>[[topic:AtomTypes|Types of atoms and alchemy]]</li>
    <li>[[topic:crystal|Crystalline structure and symmetries]]</li>
+   <li>[[topic:SmartSymm|Smart symmetrizer]]</li>
    </ol>
 
 ## Each section must have a title, that will form the table of content.

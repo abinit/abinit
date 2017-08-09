@@ -21,6 +21,13 @@
          <p>
          More information about the way the real space lattice, 
          the reciprocal lattice, and symmetries are defined in ABINIT can be found <a href="../documents/geometry.pdf">here</a>.
+         <p><b>Smart symmetriser</b><p>
+         ABINIT has also a smart symmetriser capability, when [[spgroup]]!=0 and [[brvltt]]=-1. 
+         In this case, the CONVENTIONAL unit cell must be input through the usual 
+         input variables [[rprim]], [[angdeg]], [[acell]] and/or [[scalecart]]. 
+         ABINIT will fold the conventional unit to the primitive cell, 
+         and also generate all the nuclei positions from the irreducible ones. 
+         See [[topic:SmartSymm]].
     tutorials : |
          <li>[[lesson:base4#44|Fourth basic lesson]] Determination of the surface energy of aluminum (100): changing the orientation of the unit cell.
     end : default 
