@@ -21,4 +21,6 @@
          <p>
          More information about the way the real space lattice, 
          the reciprocal lattice, and symmetries are defined in ABINIT can be found <a href="../documents/geometry.pdf">here</a>.
+    tutorials : |
+         <li>[[lesson:base4#44|Fourth basic lesson]] Determination of the surface energy of aluminum (100): changing the orientation of the unit cell.
     end : default 

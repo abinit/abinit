@@ -52,12 +52,12 @@ sec2:
 ## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
 ## Note the small (one space) indentation for the title and body keys.
  sec2.1:
-  title: "Settings for atoms : cell, symmetries, atomic positions"
+  title: "Settings for atoms : cell, atoms, atomic positions, and symmetries"
   tag: atoms
   body: |
    <ol>
    <li>[[topic:UnitCell|Unit cell]]</li>
-   <li>[[topic:AtomTypes|Atomic types]]</li>
+   <li>[[topic:AtomTypes|Types of atoms and alchemy]]</li>
    <li>[[topic:crystal|Crystalline structure and symmetries]]</li>
    </ol>
 
@@ -124,7 +124,7 @@ sec2:
 ## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
 ## Note the small (one space) indentation for the title and body keys.
 sec3:
- title: "Control parameters : flow, timing, echo, parallelism, I/O, ..."
+ title: "Global control parameters : flow, timing, echo, parallelism, I/O, ..."
  tag: control
  body: |
   <ol>

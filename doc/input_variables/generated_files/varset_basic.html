@@ -2806,20 +2806,22 @@ is zero. This can be done with the help of the input variable
 <br><font id="mnemonics">Mnemonics: Number of TYPes of AToms</font>
 <br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#NO_MULTI">NO_MULTI</a></font>
-<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_crystal.html">crystal</a> </font>
+<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_AtomTypes.html">AtomTypes</a> <a href="../../topics/generated_files/topic_PseudosPAW.html">PseudosPAW</a> <a href="../../topics/generated_files/topic_crystal.html">crystal</a> </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 1</font>
 <br><font id="text">
 <p>
 <p>
- Gives the number of types of atoms. E.g. for
+ Gives the number of types of atoms.
+<br />
+E.g. for
 a homopolar system (e.g. pure Si) <b>ntypat</b> is 1.
- <br />
+ <p>
  The code tries to read the same number of pseudopotential files.
- <br />
  The first pseudopotential is assigned type number 1, and so
 on ...
 </p>
+<p> There is an exception in the case of alchemical mixing of potentials, for which there is a different number of pseudopotentials atomic types. See <a href="../../input_variables/generated_files/varset_gstate.html#mixalch">mixalch</a>.
 </font>
 
 <br><br><a href=#top>Go to the top</a>
@@ -3651,7 +3653,7 @@ input variable defined generically.
 <br><font id="title"><a name="typat">typat</a></font>
 <br><font id="mnemonics">Mnemonics: TYPe of AToms</font>
 <br><font id="mnemonics">Executable: abinit</font>
-<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_crystal.html">crystal</a> </font>
+<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_crystal.html">crystal</a> <a href="../../topics/generated_files/topic_AtomTypes.html">AtomTypes</a> </font>
 <br><font id="vartype">Variable type: integer[3, '<a href="../../input_variables/generated_files/varset_geo.html#natrd">natrd</a>'] if <a href="../../input_variables/generated_files/varset_geo.html#natrd">natrd</a><<a href="../../input_variables/generated_files/varset_basic.html#natom">natom</a>,
 [3, '<a href="../../input_variables/generated_files/varset_basic.html#natom">natom</a>'] otherwise.
 </font>
@@ -3943,7 +3945,7 @@ which case <b>xred</b> must be absent from the input file.
 <br><font id="mnemonics">Mnemonics: charge -Z- of the NUCLeus</font>
 <br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#NO_MULTI">NO_MULTI</a></font>
-<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_crystal.html">crystal</a> <a href="../../topics/generated_files/topic_PseudosPAW.html">PseudosPAW</a> </font>
+<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_crystal.html">crystal</a> <a href="../../topics/generated_files/topic_AtomTypes.html">AtomTypes</a> <a href="../../topics/generated_files/topic_PseudosPAW.html">PseudosPAW</a> </font>
 <br><font id="vartype">Variable type: real(<a href="../../input_variables/generated_files/varset_gstate.html#npsp">npsp</a>)</font>
 <br><font id="default">No default</font>
 <br><font id="text">

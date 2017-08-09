@@ -742,7 +742,7 @@
         <p>
          Note that alchemical mixing cannot be used with PAW.
         </p>
-    topics: PseudosPAW_expert
+    topics: AtomTypes_expert
     varset: gstate
     vartype: integer
 - !variable
@@ -824,7 +824,7 @@
         cells with different atomic characteristics can thus be considered,
         and can be made to evolve, e.g. with a genetic algorithm (not coded in v7.0.0 though).
         </p>
-    topics: PIMD_useful, DFPT_useful
+    topics: PIMD_useful, DFPT_useful, AtomTypes_basic
     varset: rlx
     vartype: real
 - !variable
@@ -15973,7 +15973,7 @@
         There is one restriction to this possibility : the value of [[ziontypat]] for the atoms that are mixed should be
         identical.
         </p>
-    topics: PseudosPAW_expert
+    topics: AtomTypes_useful
     varset: gstate
     vartype: real
 - !variable
@@ -18486,7 +18486,7 @@
         [[mixalch]], to understand how
         to use alchemical potentials in ABINIT.
         </p>
-    topics: PseudosPAW_expert
+    topics: AtomTypes_useful, PseudosPAW_expert
     varset: gstate
     vartype: integer
 - !variable
@@ -18507,7 +18507,7 @@
         <p>
          [[npspalch]]=[[npsp]]-[[ntyppure]]
         </p>
-    topics: PseudosPAW_expert
+    topics: AtomTypes_internal
     varset: gstate
     vartype: integer
 - !variable
@@ -19375,7 +19375,7 @@
         [[mixalch]], to understand how
         to use alchemical potentials in ABINIT.
         </p>
-    topics: PseudosPAW_expert
+    topics: AtomTypes_useful
     varset: gstate
     vartype: integer
 - !variable
@@ -19391,15 +19391,17 @@
     requires: null
     text: |-
         <p>
-         Gives the number of types of atoms. E.g. for
+         Gives the number of types of atoms.
+        <br />
+        E.g. for
         a homopolar system (e.g. pure Si) [[ntypat]] is 1.
-         <br />
+         <p>
          The code tries to read the same number of pseudopotential files.
-         <br />
          The first pseudopotential is assigned type number 1, and so
         on ...
         </p>
-    topics: crystal_basic
+        <p> There is an exception in the case of alchemical mixing of potentials, for which there is a different number of pseudopotentials atomic types. See [[mixalch]].
+    topics: AtomTypes_compulsory, PseudosPAW_compulsory, crystal_basic
     varset: basic
     vartype: integer
 - !variable
@@ -19420,7 +19422,7 @@
         <p>
          [[ntyppure]]=[[ntypat]]-[[ntypalch]]
         </p>
-    topics: PseudosPAW_expert
+    topics: AtomTypes_internal
     varset: gstate
     vartype: integer
 - !variable
@@ -29186,7 +29188,7 @@
         together. This should be transparent to the
         user, while keeping efficiency.
         </p>
-    topics: crystal_basic
+    topics: crystal_basic, AtomTypes_basic
     varset: basic
     vartype: integer
 - !variable
@@ -32094,7 +32096,8 @@
     vartype: real
 - !variable
     abivarname: ziontypat
-    characteristics: null
+    characteristics:
+    - '[[INTERNAL_ONLY]]'
     commentdefault: null
     commentdims: null
     defaultval: '[[AUTO_FROM_PSP]]'
@@ -32108,7 +32111,7 @@
          Charge of the pseudo-ion (=number of valence electrons
         that are needed to screen exactly the pseudopotential).
         </p>
-    topics: PseudosPAW_internal
+    topics: AtomTypes_internal, PseudosPAW_internal
     varset: internal
     vartype: real
 - !variable
@@ -32139,7 +32142,7 @@
          For a "dummy" atom, with [[znucl]]=0 , as used in the case of calculations
         with only a jellium surface, ABINIT sets arbitrarily the covalent radius to one.
         </p>
-    topics: crystal_basic, PseudosPAW_basic
+    topics: crystal_compulsory, AtomTypes_compulsory, PseudosPAW_compulsory
     varset: basic
     vartype: real
 

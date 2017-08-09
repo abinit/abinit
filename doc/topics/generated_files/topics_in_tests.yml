@@ -42,6 +42,7 @@
 - tests/paral/Input/t77.in:#%% topics = GWls
 - tests/paral/Input/t93.in:#%% topics = Hybrids
 - tests/paral/Input/t94.in:#%% topics = Hybrids
+- tests/tutorial/Input/tbase4_4.in:#%% topics = UnitCell
 - tests/v1/Input/t02.in:#%% topics = GSgeneral
 - tests/v1/Input/t04.in:#%% topics = GSgeneral
 - tests/v1/Input/t10.in:#%% topics = xc
@@ -78,6 +79,7 @@
 - tests/v1/Input/t83.in:#%% topics = multidtset
 - tests/v1/Input/t84.in:#%% topics = multidtset
 - tests/v1/Input/t87.in:#%% topics = multidtset
+- tests/v1/Input/t96.in:#%% topics = UnitCell
 - tests/v2/Input/t13.in:#%% topics = anaddbSpec, anaddbCommon
 - tests/v2/Input/t15.in:#%% topics = anaddbSpec, anaddbCommon
 - tests/v2/Input/t16.in:#%% topics = anaddbSpec
@@ -135,10 +137,12 @@
 - tests/v3/Input/t56.in:#%% topics = Bader
 - tests/v3/Input/t57.in:#%% topics = Bader
 - tests/v3/Input/t83.in:#%% topics = nonlinear
-- tests/v3/Input/t92.in:#%% topics = otherGS
-- tests/v3/Input/t93.in:#%% topics = otherGS
-- tests/v3/Input/t94.in:#%% topics = otherGS
-- tests/v3/Input/t95.in:#%% topics = otherGS
+- tests/v3/Input/t92.in:#%% topics = AtomTypes
+- tests/v3/Input/t93.in:#%% topics = AtomTypes
+- tests/v3/Input/t94.in:#%% topics = AtomTypes
+- tests/v3/Input/t95.in:#%% topics = AtomTypes
+- tests/v3/Input/t96.in:#%% topics = AtomTypes
+- tests/v3/Input/t97.in:#%% topics = AtomTypes
 - tests/v4/Input/t06.in:#%% topics = PAW
 - tests/v4/Input/t08.in:#%% topics = PAW
 - tests/v4/Input/t17.in:#%% topics = PAW
@@ -202,6 +206,7 @@
 - tests/v5/Input/t38.in:#%% topics = DFT+U
 - tests/v5/Input/t39.in:#%% topics = DFT+U
 - tests/v5/Input/t40.in:#%% topics = DFT+U
+- tests/v5/Input/t44.in:#%% topics = AtomTypes
 - tests/v5/Input/t51.in:#%% topics = spinpolarisation
 - tests/v5/Input/t61.in:#%% topics = TDDFT
 - tests/v5/Input/t62.in:#%% topics = TDDFT
@@ -227,12 +232,14 @@
 - tests/v6/Input/t124.in:#%% topics = Berry
 - tests/v6/Input/t125.in:#%% topics = Berry
 - tests/v6/Input/t126.in:#%% topics = Berry
+- tests/v6/Input/t16.in:#%% topics = UnitCell
 - tests/v6/Input/t17.in:#%% topics = MagField
 - tests/v6/Input/t18.in:#%% topics = Bader
 - tests/v6/Input/t19.in:#%% topics = Bader
 - tests/v6/Input/t24.in:#%% topics = TransPath
 - tests/v6/Input/t25.in:#%% topics = TransPath
 - tests/v6/Input/t27.in:#%% topics = TransPath
+- tests/v6/Input/t28.in:#%% topics = AtomTypes
 - tests/v6/Input/t37.in:#%% topics = TDep
 - tests/v6/Input/t40.in:#%% topics = anaddbSpec, anaddbCommon
 - tests/v6/Input/t43.in:#%% topics = Berry

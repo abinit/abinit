@@ -67,5 +67,5 @@
 #%%   mixing coefficients are 0.2 and 0.8 , then, in a second
 #%%   dataset, they are 0.5 and 0.5 .
 #%%   Should give same numerical results as the previous test.
-#%% topics = otherGS
+#%% topics = AtomTypes
 #%%<END TEST_INFO>
