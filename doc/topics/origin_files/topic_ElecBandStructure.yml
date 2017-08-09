@@ -15,5 +15,8 @@
       sampling. 
       <p>A band structure can even be represented using weights proportional to the orbital content (so-called "Fat Bands"),
       in case of PAW calculation, see [[pawfatbnd]], and related variables.
-      <p>Different interpolation schemes for the band energies can be defined thanks to [[einterp]].
+      <p>Different interpolation schemes for the band energies can be defined thanks to [[einterp]]. 
+      The Wannier interpolation is also available through the use of the [[lesson:wannier90]] post-processor.
+      <p>The band structure from a supercell calculation can be unfolded to the (large) Brillouin zone of the (small) primitive cell 
+      thanks to the [[help:fold2bloch]] post-processor. See the related [[topic_Unfolding]].
     end : default 
