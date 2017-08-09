@@ -44,8 +44,10 @@
 - tests/paral/Input/t94.in:#%% topics = Hybrids
 - tests/tutorial/Input/tbase4_4.in:#%% topics = UnitCell
 - tests/tutorial/Input/tnuc_1.in:#%% topics = SmartSymm
+- tests/tutorial/Input/tspin_3.in:#%% topics = ElecDOS
 - tests/v1/Input/t02.in:#%% topics = GSgeneral
 - tests/v1/Input/t04.in:#%% topics = GSgeneral
+- tests/v1/Input/t07.in:#%% topics = ElecDOS
 - tests/v1/Input/t10.in:#%% topics = xc
 - tests/v1/Input/t11.in:#%% topics = xc
 - tests/v1/Input/t12.in:#%% topics = xc
@@ -124,6 +126,7 @@
 - tests/v3/Input/t40.in:#%% topics = GSgeneral, MolecularDynamics
 - tests/v3/Input/t42.in:#%% topics = GeoOpt
 - tests/v3/Input/t43.in:#%% topics = convergency
+- tests/v3/Input/t46.in:#%% topics = ElecDOS
 - tests/v3/Input/t51.in:#%% topics = spinpolarisation
 - tests/v3/Input/t55.in:#%% topics = TDDFT
 - tests/v3/Input/t56.in:#%% topics = Bader
@@ -279,6 +282,7 @@
 - tests/v7/Input/t10.in:#%% topics = GeoOpt
 - tests/v7/Input/t11.in:#%% topics = recursion
 - tests/v7/Input/t16.in:#%% topics = RandStopPow
+- tests/v7/Input/t17.in:#%% topics = ElecDOS
 - tests/v7/Input/t21.in:#%% topics = DFT+U, DMFT
 - tests/v7/Input/t22.in:#%% topics = DFT+U
 - tests/v7/Input/t23.in:#%% topics = CRPA
