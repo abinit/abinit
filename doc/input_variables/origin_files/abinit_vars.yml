@@ -16272,7 +16272,7 @@
     vartype: integer
 - !variable
     abivarname: natrd
-    characteristics:
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval: '[[natom]]'
@@ -18018,7 +18018,7 @@
         Go to [[objan]], for example.
          <br />
         </p>
-    topics: crystal_expert, AtomManipulator_compulsory
+    topics: AtomManipulator_compulsory
     varset: geo
     vartype: integer
 - !variable
@@ -27416,7 +27416,7 @@
          </a>
          .
         </p>
-    topics: crystal_expert, UnitCell_useful, SmartSymm_basic
+    topics: crystal_useful, UnitCell_useful, SmartSymm_basic
     varset: geo
     vartype: integer
 - !variable
@@ -27552,7 +27552,7 @@
         also used to determine the direction of the integrated magnetization matrix.
          </li>
         </p>
-    topics: spinpolarisation_basic
+    topics: spinpolarisation_basic, crystal_useful
     varset: gstate
     vartype: real
 - !variable
@@ -30121,7 +30121,7 @@
     vartype: integer
 - !variable
     abivarname: vacnum
-    characteristics:
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval: 0

@@ -12,7 +12,7 @@
 <a name="top"></a>
 
 <h1>Crystalline structure, atomic positions and symmetries</h1>
-<h3>This file gives hints on how to specify a crystal with the ABINIT package.
+<h3>This file gives hints on how to to specify a crystal, with atomic positions and symmetries with the ABINIT package.
 <hr>
 
 <h5>Copyright (C) 2016-2017 ABINIT group (FJ)
@@ -37,6 +37,8 @@ This is described by <a href="../../input_variables/generated_files/varset_basic
 ABINIT can automatically detect the Bravais lattice and space group,
 and generate symmetries (e.g. <a href="../../input_variables/generated_files/varset_basic.html#nsym">nsym</a>,<a href="../../input_variables/generated_files/varset_basic.html#symrel">symrel</a>,<a href="../../input_variables/generated_files/varset_basic.html#tnons">tnons</a>), 
 from the primitive cell and the position of atoms (provided they are not too inaccurate, see <a href="../../input_variables/generated_files/varset_geo.html#tolsym">tolsym</a>). 
+For this purpose, in the magnetic case, ABINIT will also take into account the input atomic spin, through 
+the knowledge of <a href="../../input_variables/generated_files/varset_gstate.html#spinat">spinat</a>.
 <p>
 Alternatively, ABINIT can start from the specification of symmetries (either from <a href="../../input_variables/generated_files/varset_geo.html#spgroup">spgroup</a> or from the
 list of symmetries - <a href="../../input_variables/generated_files/varset_basic.html#nsym">nsym</a>,<a href="../../input_variables/generated_files/varset_basic.html#symrel">symrel</a>,<a href="../../input_variables/generated_files/varset_basic.html#tnons">tnons</a>) 
@@ -48,6 +50,7 @@ In ABINIT, a database with the 230 spatial groups of symmetry (see <a href="../.
 and the 1191 Shubnikov anti-ferromagnetic space groups is present (see also <a href="../../input_variables/generated_files/varset_geo.html#spgroupma">spgroupma</a> and <a href="../../input_variables/generated_files/varset_geo.html#genafm">genafm</a>).
 <p>There is also a (non-graphical) atom manipulator in ABINIT, see <a href="../../topics/generated_files/topic_AtomManipulator.html#">AtomManipulator</a>.
 <p>ABINIT can read XYZ files, see <a href="../../input_variables/generated_files/varset_geo.html#xyzfile">xyzfile</a>.
+<p>Atomic positions can also be generated at random, see <a href="../../input_variables/generated_files/varset_rlx.html#random_atpos">random_atpos</a>.
 <p>Details about the way the crystal structure is defined in ABINIT can be found <a href="../documents/geometry.pdf">here</a>.
 <br><br><a href=#top>Go to the top</a>
 
@@ -89,14 +92,14 @@ studies ...</li>
 ... <a href="../../input_variables/generated_files/varset_basic.html#typat">typat</a>   [TYPe of AToms]<br>
 <p>Useful input variables:<p>... <a href="../../input_variables/generated_files/varset_gstate.html#chkprim">chkprim</a>   [CHecK whether the cell is PRIMitive]<br>
 ... <a href="../../input_variables/generated_files/varset_basic.html#nsym">nsym</a>   [Number of SYMmetry operations]<br>
+... <a href="../../input_variables/generated_files/varset_geo.html#spgroup">spgroup</a>   [SPace GROUP number]<br>
+... <a href="../../input_variables/generated_files/varset_gstate.html#spinat">spinat</a>   [SPIN for AToms]<br>
 ... <a href="../../input_variables/generated_files/varset_basic.html#symrel">symrel</a>   [SYMmetry in REaL space]<br>
 ... <a href="../../input_variables/generated_files/varset_basic.html#tnons">tnons</a>   [Translation NON-Symmorphic vectors]<br>
 ... <a href="../../input_variables/generated_files/varset_geo.html#tolsym">tolsym</a>   [TOLERANCE for SYMmetries]<br>
 ... <a href="../../input_variables/generated_files/varset_geo.html#xyzfile">xyzfile</a>   [XYZ FILE input for geometry]<br>
 <p>Input variables for experts:<p>... <a href="../../input_variables/generated_files/varset_dev.html#maxnsym">maxnsym</a>   [MAXimum Number of SYMetries]<br>
-... <a href="../../input_variables/generated_files/varset_geo.html#nobj">nobj</a>   [Number of OBJects]<br>
 ... <a href="../../input_variables/generated_files/varset_rlx.html#random_atpos">random_atpos</a>   [RANDOM ATomic POSitions]<br>
-... <a href="../../input_variables/generated_files/varset_geo.html#spgroup">spgroup</a>   [SPace GROUP number]<br>
 ... <a href="../../input_variables/generated_files/varset_dev.html#symmorphi">symmorphi</a>   [SYMMORPHIc symmetry operation selection]<br>
 
 <br><br><a href=#top>Go to the top</a>
