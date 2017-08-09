@@ -66,9 +66,9 @@
 - tests/v1/Input/t29.in:#%% topics = xc
 - tests/v1/Input/t30.in:#%% topics = xc
 - tests/v1/Input/t39.in:#%% topics = spinpolarisation
-- tests/v1/Input/t40.in:#%% topics = crystal
-- tests/v1/Input/t42.in:#%% topics = crystal
-- tests/v1/Input/t43.in:#%% topics = crystal
+- tests/v1/Input/t40.in:#%% topics = AtomManipulator
+- tests/v1/Input/t42.in:#%% topics = AtomManipulator
+- tests/v1/Input/t43.in:#%% topics = AtomManipulator
 - tests/v1/Input/t44.in:#%% topics = GeoOpt
 - tests/v1/Input/t69.in:#%% topics = TDDFT
 - tests/v1/Input/t70.in:#%% topics = TDDFT
@@ -241,7 +241,7 @@
 - tests/v6/Input/t19.in:#%% topics = Bader
 - tests/v6/Input/t24.in:#%% topics = TransPath
 - tests/v6/Input/t25.in:#%% topics = TransPath
-- tests/v6/Input/t27.in:#%% topics = TransPath
+- tests/v6/Input/t27.in:#%% topics = GeoOpt, crystal
 - tests/v6/Input/t28.in:#%% topics = AtomTypes
 - tests/v6/Input/t30.in:#%% topics = UnitCell, SmartSymm
 - tests/v6/Input/t37.in:#%% topics = TDep

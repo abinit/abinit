@@ -60,6 +60,7 @@ sec2:
    <li>[[topic:AtomTypes|Types of atoms and alchemy]]</li>
    <li>[[topic:crystal|Crystalline structure and symmetries]]</li>
    <li>[[topic:SmartSymm|Smart symmetrizer]]</li>
+   <li>[[topic:AtomManipulator|Atom manipulator]] (advanced topic)</li>
    </ol>
 
 ## Each section must have a title, that will form the table of content.
@@ -70,11 +71,14 @@ sec2:
   tag: electrons
   body: |
    <ol>
-   <li>[[topic:xc|Exchange and correlation functionals]]</li>
+   <li>[[topic:xc|Overview of available exchange and correlation functionals]]</li>
+   <li>[[topic:Hybrids|Hybrid functionals]]</li>
+   <li>[[topic:vdw|Van der Waals functionals]]</li>
+   <li>[[topic:RPACorrEn|Correlation energy within RPA]]</li>
    <li>[[topic:PseudosPAW|Pseudopotentials and PAW atomic datasets]]</li>
+   <li>[[topic:BandOcc|Bands and occupation numbers for metals and insulators]]</li>
    <li>[[topic:spinpolarisation|Spin-polarised systems and spin-orbit coupling]]</li>
    <li>[[topic:ChargedCell|Charged cells]]</li>
-   <li>[[topic:RPACorrEn|Correlation energy within RPA]]</li>
    </ol>
 
 ## Each section must have a title, that will form the table of content.

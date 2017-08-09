@@ -1822,7 +1822,7 @@
          </a>
          .
         </p>
-    topics: crystal_expert, UnitCell_useful, SmartSymm_basic
+    topics: UnitCell_useful, SmartSymm_basic
     varset: geo
     vartype: integer
 - !variable
@@ -3019,7 +3019,7 @@
     vartype: integer
 - !variable
     abivarname: chkprim
-    characteristics:
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval: 1
@@ -15526,7 +15526,7 @@
         <p>
          Gives the maximum number of spatial symetries allowed in the memory.
          <br />
-         The default value is sufficient for most applications; it has to be increase in the case of the use of a supercell (unit cell identically repeated).
+         The default value is sufficient for most applications. It might have to be increased in the case of the use of a supercell (unit cell identically repeated).
         </p>
     topics: crystal_expert
     varset: dev
@@ -16296,7 +16296,7 @@
          <br />
          Despite possible vacancies, cannot be bigger than [[natom]].
         </p>
-    topics: crystal_expert, SmartSymm_basic
+    topics: AtomManipulator_basic, SmartSymm_basic
     varset: geo
     vartype: integer
 - !variable
@@ -17974,7 +17974,7 @@
           [[objbax]]
          .
          <br />
-         More detailed explanation : when the geometry builder
+         <p>More detailed explanation : when the geometry builder
         is used (i.e. when [[nobj]]==1 or [[nobj]]==2), the code
         will be given a primitive set of atoms, from which it
         will have to deduce the full set of atoms.
@@ -18020,7 +18020,7 @@
         Go to [[objan]], for example.
          <br />
         </p>
-    topics: crystal_expert
+    topics: crystal_expert, AtomManipulator_compulsory
     varset: geo
     vartype: integer
 - !variable
@@ -19163,7 +19163,7 @@
     vartype: integer
 - !variable
     abivarname: nsym
-    characteristics:
+    characteristics: null
     commentdefault: null
     commentdims: null
     defaultval: 0
@@ -19562,7 +19562,7 @@
          Look at [[objarf]] for further explanations.
         <br />
         </p>
-    topics: crystal_expert
+    topics: AtomManipulator_basic
     varset: geo
     vartype: integer
 - !variable
@@ -19603,7 +19603,7 @@
         toward point 2 (coordinates 4:6).
          <br />
         </p>
-    topics: crystal_expert
+    topics: AtomManipulator_useful
     varset: geo
     vartype: real
 - !variable
@@ -19626,7 +19626,7 @@
         variables [[objaat]].
          <br />
         </p>
-    topics: crystal_expert
+    topics: AtomManipulator_basic
     varset: geo
     vartype: integer
 - !variable
@@ -19681,7 +19681,7 @@
         simply use 1 1 1, which is also the Default value.
          <br />
         </p>
-    topics: crystal_expert
+    topics: AtomManipulator_basic
     varset: geo
     vartype: integer
 - !variable
@@ -19723,7 +19723,7 @@
         different rotation angles.
          <br />
         </p>
-    topics: crystal_expert
+    topics: AtomManipulator_useful
     varset: geo
     vartype: real
 - !variable
@@ -19770,7 +19770,7 @@
          <br />
          Not present in the dtset array (no internal).
         </p>
-    topics: crystal_expert
+    topics: AtomManipulator_useful
     varset: geo
     vartype: real
 - !variable
@@ -19801,7 +19801,7 @@
          Look at [[objbrf]] for further explanations.
          <br />
         </p>
-    topics: crystal_expert
+    topics: AtomManipulator_useful
     varset: geo
     vartype: integer
 - !variable
@@ -19842,7 +19842,7 @@
         toward point 2 (coordinates 4:6).
          <br />
         </p>
-    topics: crystal_expert
+    topics: AtomManipulator_useful
     varset: geo
     vartype: real
 - !variable
@@ -19864,7 +19864,7 @@
         variables [[objbat]].
          <br />
         </p>
-    topics: crystal_expert
+    topics: AtomManipulator_useful
     varset: geo
     vartype: integer
 - !variable
@@ -19918,7 +19918,7 @@
         simply use 1 1 1, which is also the Default value.
          <br />
         </p>
-    topics: crystal_expert
+    topics: AtomManipulator_useful
     varset: geo
     vartype: integer
 - !variable
@@ -19960,7 +19960,7 @@
         different rotation angles.
          <br />
         </p>
-    topics: crystal_expert
+    topics: AtomManipulator_useful
     varset: geo
     vartype: real
 - !variable
@@ -20006,7 +20006,7 @@
         which case, only rotations are needed.
          <br />
         </p>
-    topics: crystal_expert
+    topics: AtomManipulator_useful
     varset: geo
     vartype: real
 - !variable
@@ -25543,13 +25543,13 @@
          <br />
          (0) if zero, no random generation and xred are taken as they have been introduced by the user
          <br />
-         (1) if one, particles are generated completly random within the unit cell.
+         (1) if one, particles are generated completely random within the unit cell.
          <br />
          (2) if two, particles are generated randomly but the inner particle distance is always larger than a factor of the
         sum of the covalent bonds between the atoms (note : this is incompatible with the definition of alchemical mixing, in which
         [[ntypat]] differs from [[npsp]])
         </p>
-    topics: crystal_expert
+    topics: crystal_expert, GeoOpt_expert
     varset: rlx
     vartype: integer
 - !variable
@@ -27355,7 +27355,7 @@
           </li>
          </ol>
         </p>
-    topics: crystal_expert, SmartSymm_useful
+    topics: SmartSymm_useful
     varset: geo
     vartype: integer
 - !variable
@@ -27384,7 +27384,7 @@
          </a>
          .
         </p>
-    topics: crystal_expert, SmartSymm_useful
+    topics: SmartSymm_useful
     varset: geo
     vartype: integer
 - !variable
@@ -30131,7 +30131,7 @@
          <br />
          Useful to created vacancies.
         </p>
-    topics: crystal_expert
+    topics: AtomManipulator_useful
     varset: geo
     vartype: integer
 - !variable
@@ -30152,7 +30152,7 @@
         and repetitions have been done. The list of these
         atoms is contained in [[vaclst]].
         </p>
-    topics: crystal_expert
+    topics: AtomManipulator_useful
     varset: geo
     vartype: integer
 - !variable
@@ -32026,7 +32026,7 @@
         <p>
          Notes: do not quote the file name in the abinit input file, simply leave a space after xyzfile. The xyz format is the number of atoms on the first line, a comment line, then one line per atom, with the element as a 2 letter symbol ("As" "O" or "Pu") and the three cartesian coordinates in Angstrom.
         </p>
-    topics: crystal_expert
+    topics: crystal_useful
     varset: geo
     vartype: string
 - !variable
