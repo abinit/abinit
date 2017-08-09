@@ -105,7 +105,7 @@ sec2:
   body: |
    <ol>
    <li>[[topic:SCFAlgorithms|SCF algorithms]]</li>
-   <li>[[topic:SCF|SCF control, tolerances and stopping criteria]]</li>
+   <li>[[topic:SCFControl|SCF control, tolerances and stopping criteria]]</li>
    <li>[[topic:TuningSpeed|Tuning the speed of the calculation]]</li>
    </ol>
 

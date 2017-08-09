@@ -1,8 +1,8 @@
 - !components 
-    name      : SCF
-    keyword   : SCF
+    name      : SCFControl
+    keyword   : SCFControl
     authors   : XG
-    howto     : tune the SCF cycle
+    howto     : control the SCF cycle
     header    : default
     title     : <h1>Self-consistent field (SCF) cycles - tolerances, stopping criteria</h1>
     subtitle  : default

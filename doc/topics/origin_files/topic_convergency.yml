@@ -2,7 +2,7 @@
     name      : convergency 
     keyword   : Convergency 
     authors   : FJ
-    howto     : set parameters to tune the convergency of a calculation
+    howto     : set parameters to tune the numerical precision of a calculation
     header    : default
     title     : <h1>Convergency settings</h1>
     subtitle  : default
