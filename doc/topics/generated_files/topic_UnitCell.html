@@ -30,12 +30,18 @@
 <h3><b>1. Introduction.</b></h3>
 
 
+ABINIT needs three dimensioned non-coplanar vectors, forming the unit cell, to set up the real space lattice.
+<p>
 An initial set of three vectors, specified in real space by <a href="../../input_variables/generated_files/varset_basic.html#rprim">rprim</a> or as unit vectors with angles <a href="../../input_variables/generated_files/varset_basic.html#angdeg">angdeg</a>,
-are renormalized afterwards using scaling factors as specified by <a href="../../input_variables/generated_files/varset_basic.html#acell">acell</a> or by rescaling their cartesian coordinates, 
+are dimensioned in a second step using scaling factors as specified by <a href="../../input_variables/generated_files/varset_basic.html#acell">acell</a> or by rescaling their cartesian coordinates, 
 as specified by <a href="../../input_variables/generated_files/varset_basic.html#scalecart">scalecart</a>. Internally, only the final result, <a href="../../input_variables/generated_files/varset_basic.html#rprimd">rprimd</a> matters.
-THe more detailed explanation can be found by looking at <a href="../../input_variables/generated_files/varset_basic.html#rprim">rprim</a>.
-
-<br>Details about the way the real space lattice, the reciprocal lattice, and symmetries are defined in ABINIT can be found <a href="../documents/geometry.pdf">here</a>.
+The most detailed explanation can be found by looking at <a href="../../input_variables/generated_files/varset_basic.html#rprim">rprim</a>.
+<p>
+Note that ABINIT expects the mixed product of the three vectors (R1xR2).R3 to be positive. 
+If it is not the case, exchange two of them.
+<p>
+More information about the way the real space lattice, 
+the reciprocal lattice, and symmetries are defined in ABINIT can be found <a href="../documents/geometry.pdf">here</a>.
 <br><br><a href=#top>Go to the top</a>
 
 
