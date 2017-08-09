@@ -4571,7 +4571,7 @@
          </ul>
          <br />
         </p>
-    topics: DFT+U_useful
+    topics: DFT+U_useful, ElecDOS_useful
     varset: paw
     vartype: real
 - !variable
@@ -6178,8 +6178,8 @@
 
         For B-spline interpolation:
 
-        einterp(2:4): Order of B-spline for the three reduced directions. Cubic spline (3) is the recomended value.
-    topics: BandStructureDOS_useful,GW_expert
+        einterp(2:4): Order of B-spline for the three reduced directions. Cubic spline (3) is the recommended value.
+    topics: ElecBandStructure_useful,GW_expert
     varset: basic
     vartype: real
 - !variable
@@ -10521,7 +10521,7 @@
          <br />
          If [[pawfatbnd]]=1 or 2, it gives the number of the [[natsph]] atoms around which atom-projected band structure will be built.
         </p>
-    topics: printing_prdos
+    topics: printing_prdos, ElecBandStructure_useful
     varset: gstate
     vartype: integer
 - !variable
@@ -12732,7 +12732,7 @@
           </li>
          </ul>
         </p>
-    topics: convergency_useful, TDDFT_compulsory
+    topics: convergency_useful, TDDFT_compulsory, ElecBandStructure_basic
     varset: basic
     vartype: integer
 - !variable
@@ -14673,7 +14673,7 @@
         </p>
         <p>
         </p>
-    topics: k-points_useful
+    topics: k-points_useful, ElecBandStructure_basic
     varset: gstate
     vartype: real
 - !variable
@@ -14878,7 +14878,7 @@
         [[prtkpt]] might help
         you to select the optimal grid.
         </p>
-    topics: k-points_basic
+    topics: k-points_basic, ElecBandStructure_basic
     varset: basic
     vartype: integer
 - !variable
@@ -16318,7 +16318,7 @@
          If [[pawfatbnd]]=1 or 2, it gives the number of atoms around which atom-projected band structure will be
         built (the indices of these atoms are given by  [[iatsph]]).
         </p>
-    topics: printing_prdos
+    topics: printing_prdos, ElecBandStructure_useful
     varset: gstate
     vartype: integer
 - !variable
@@ -16794,7 +16794,7 @@
         by just specifying the number of divisions for the smallest segment.
         See the related input variable [[ndivsm]].
         </p>
-    topics: k-points_useful
+    topics: k-points_useful, ElecBandStructure_useful
     varset: gstate
     vartype: integer
 - !variable
@@ -16824,7 +16824,7 @@
         In this case, the absolute value of
         [[kptopt]] is the number of such segments.
         </p>
-    topics: k-points_useful
+    topics: k-points_useful, ElecBandStructure_basic
     varset: gstate
     vartype: integer
 - !variable
@@ -20182,7 +20182,7 @@
         three possible values of the Fermi energy, and the
         bissection algorithm find one or the other.
         </p>
-    topics: BandOcc_basic
+    topics: BandOcc_basic, STM_compulsory
     varset: basic
     vartype: integer
 - !variable
@@ -20824,7 +20824,7 @@
           </li>
          </ul>
         </p>
-    topics: PAW_useful
+    topics: PAW_useful, ElecBandStructure_useful
     varset: paw
     vartype: integer
 - !variable
@@ -23232,7 +23232,7 @@
         <p>
          [[prtdos]]=5 delivers the spin-spin DOS in the [[nspinor]]==2 case, using the tetrahedron method (as [[prtdos]]=2).
         </p>
-    topics: printing_prdos
+    topics: printing_prdos, ElecDOS_basic
     varset: files
     vartype: integer
 - !variable
@@ -23290,7 +23290,7 @@
          In this case, [[prtdosm]] computes the M-resolved partial dos for real spherical harmonics
         in the same basis as the LDA+U occupation matrix.
         </p>
-    topics: printing_prdos
+    topics: printing_prdos, ElecDOS_basic
     varset: files
     vartype: integer
 - !variable
@@ -24118,7 +24118,7 @@
          <br />
          No other printing variables for density or potentials should be activated (e.g. [[prtden]] has to be set to zero).
         </p>
-    topics: printing_prgs
+    topics: printing_prgs, STM_compulsory
     varset: files
     vartype: integer
 - !variable
@@ -25618,7 +25618,7 @@
          In case of PAW, [[ratsph]] radius has to be greater or equal to
         PAW radius of considered atom type (which is read from the PAW dataset file; see rc_sph or r_paw).
         </p>
-    topics: printing_prdos, MagMom_useful
+    topics: printing_prdos, MagMom_useful, ElecBandStructure_useful
     varset: gstate
     vartype: real
 - !variable
@@ -29109,7 +29109,7 @@
         [[tphysel]]. See the paper
         by M. Verstraete and X. Gonze, Phys. Rev. B (2002).
         </p>
-    topics: BandOcc_basic
+    topics: BandOcc_basic, STM_basic
     varset: gstate
     vartype: real
 - !variable

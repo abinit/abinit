@@ -8,4 +8,6 @@
     subtitle  : default
     copyright : default
     links     : default
+    introduction : |
+      See input variable [[prtstm]] and [[stmbias]] for explanations. The example input file will also be useful.
     end : default 

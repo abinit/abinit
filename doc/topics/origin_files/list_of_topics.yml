@@ -7,7 +7,6 @@
 - Bader
 - Berry
 - BandOcc
-- BandStructureDOS
 - BSE
 - ChargedCell
 - convergency
@@ -21,6 +20,8 @@
 - EffMass
 - EFG
 - ElPhon
+- ElecDOS
+- ElecBandStructure
 - ForcesStresses
 - GeoOpt
 - GSintroduction

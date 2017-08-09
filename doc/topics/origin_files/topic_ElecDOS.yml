@@ -1,10 +1,10 @@
 - !components 
-    name      : BandStructureDOS
-    keyword   : BandStructureDOS
+    name      : ElecDOS
+    keyword   : Electronic DOS
     authors   : XG
-    howto     : manipulate the electronic band structure and DOS
+    howto     : generate the electronic DOS and related topics
     header    : default
-    title     : <h1>Electronic band structure and DOS</h1>
+    title     : <h1>Electronic DOS and related topics</h1>
     subtitle  : default
     copyright : default
     links     : default

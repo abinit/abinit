@@ -204,15 +204,16 @@ sec7:
 ## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
 ## Note the small (one space) indentation for the title and body keys.
 sec8:
- title: "Other accessible physical properties and analysis tools"
+ title: "Other relevant physical properties and analysis tools"
  tag: other_physics
  body: |
   <ol>
+   <li>[[topic:ElecBandStructure|Electronic band structure and related topics]]</li>
+   <li>[[topic:ElecDOS|Electronic DOS and related topics]]</li>
+   <li>[[topic:Unfolding|Unfolding supercell band structures]]</li>
+   <li>[[topic:STM|Scanning Tunneling Microscopy map]]</li>
    <li>[[topic:positron|Positron calculations]]</li>
    <li>[[topic:Wannier|Wannier functions]]</li>
-   <li>[[topic:Unfolding|Unfolding supercell band structures]]</li>
-   <li>[[topic:BandStructureDOS|Topics related to Electronic band structure and DOS]]</li>
-   <li>[[topic:STM|Scanning Tunneling Microscopy map]]</li>
   </ol>
 
 ## Each section must have a title, that will form the table of content.

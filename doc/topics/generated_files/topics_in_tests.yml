@@ -143,6 +143,7 @@
 - tests/v4/Input/t32.in:#%% topics = Bader
 - tests/v4/Input/t33.in:#%% topics = Bader
 - tests/v4/Input/t34.in:#%% topics = Bader
+- tests/v4/Input/t46.in:#%% topics = STM
 - tests/v4/Input/t52.in:#%% topics = nonlinear
 - tests/v4/Input/t54.in:#%% topics = anaddbSpec, anaddbCommon
 - tests/v4/Input/t55.in:#%% topics = Berry
@@ -184,7 +185,7 @@
 - tests/v5/Input/t17.in:#%% topics = PAW
 - tests/v5/Input/t18.in:#%% topics = xc
 - tests/v5/Input/t19.in:#%% topics = DFT+U
-- tests/v5/Input/t20.in:#%% topics = DFT+U
+- tests/v5/Input/t20.in:#%% topics = DFT+U, ElecBandStructure
 - tests/v5/Input/t23.in:#%% topics = Berry
 - tests/v5/Input/t28.in:#%% topics = anaddbSpec, anaddbCommon
 - tests/v5/Input/t30.in:#%% topics = DFPT
@@ -224,6 +225,7 @@
 - tests/v6/Input/t124.in:#%% topics = Berry
 - tests/v6/Input/t125.in:#%% topics = Berry
 - tests/v6/Input/t126.in:#%% topics = Berry
+- tests/v6/Input/t14.in:#%% topics = ElecBandStructure
 - tests/v6/Input/t16.in:#%% topics = UnitCell
 - tests/v6/Input/t17.in:#%% topics = MagField
 - tests/v6/Input/t18.in:#%% topics = Bader
@@ -306,8 +308,8 @@
 - tests/v7/Input/t59.in:#%% topics = TDep
 - tests/v7/Input/t65.in:#%% topics = Hybrids
 - tests/v7/Input/t66.in:#%% topics = Hybrids
-- tests/v7/Input/t71.in:#%% topics = Wannier
-- tests/v7/Input/t72.in:#%% topics = Wannier
+- tests/v7/Input/t71.in:#%% topics = Wannier, ElecBandStructure
+- tests/v7/Input/t72.in:#%% topics = Wannier, ElecBandStructure
 - tests/v7/Input/t78.in:#%% topics = CRPA
 - tests/v7/Input/t79.in:#%% topics = CRPA
 - tests/v7/Input/t80.in:#%% topics = EffMass
@@ -324,6 +326,7 @@
 - tests/v7/Input/t97.in:#%% topics = vdw
 - tests/v7/Input/t98.in:#%% topics = vdw
 - tests/v7/Input/t99.in:#%% topics = vdw
+- tests/v8/Input/t04.in:#%% topics = ElecBandStructure
 - tests/v8/Input/t07.in:#%% topics = DFPT
 - tests/v8/Input/t12.in:#%% topics = MolecularDynamics
 - tests/v8/Input/t20.in:#%% topics = DFPT
