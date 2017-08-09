@@ -25677,7 +25677,7 @@
          Used in Recursion method ([[tfkinfunc]]=2).
         In the first  SCF calculation it fixes the initial guess for the Fermi energy.
         </p>
-    topics: recursion_useful
+    topics: Recursion_useful
     varset: dev
     vartype: real
 - !variable
@@ -25703,7 +25703,7 @@
         FFT interpolation.  Note that ngfft/recgratio=number of points of the
         coarse grid has to be compatible with the parallelization parameters.
         </p>
-    topics: recursion_useful
+    topics: Recursion_useful
     varset: dev
     vartype: integer
 - !variable
@@ -25725,7 +25725,7 @@
         compute the entropy and the eigenvalues energy. during the latest SFC
         cycles.
         </p>
-    topics: recursion_expert
+    topics: Recursion_expert
     varset: dev
     vartype: integer
 - !variable
@@ -25747,7 +25747,7 @@
         [[rectolden]] is reached before that order, the recursion method
         automatically stops.
         </p>
-    topics: recursion_expert
+    topics: Recursion_expert
     varset: dev
     vartype: integer
 - !variable
@@ -25775,7 +25775,7 @@
         error of the green kernel exp((recptrott/beta*|r|^2)) on the ngfft
         grid.
         </p>
-    topics: recursion_expert
+    topics: Recursion_expert
     varset: dev
     vartype: integer
 - !variable
@@ -25797,7 +25797,7 @@
         cell: the density at a point will be computed with taking account only of
         a sphere of radius [[recrcut]].
         </p>
-    topics: recursion_useful
+    topics: Recursion_useful
     varset: dev
     vartype: integer
 - !variable
@@ -25817,7 +25817,7 @@
         It is used to test an electron gas by putting the ion potential
         equal to zero.
         </p>
-    topics: recursion_expert
+    topics: Recursion_expert
     varset: dev
     vartype: integer
 - !variable
@@ -25839,7 +25839,7 @@
         density difference is computed in the infinity norm (that is, it is
         computed point-by-point, and then the maximum difference is computed).
         </p>
-    topics: recursion_basic
+    topics: Recursion_basic
     varset: dev
     vartype: real
 - !variable
@@ -28333,7 +28333,7 @@
           </li>
          </ul>
         </p>
-    topics: recursion_compulsory
+    topics: Recursion_compulsory
     varset: dev
     vartype: integer
 - !variable
@@ -28353,7 +28353,7 @@
         It sets a tolerance for absolute differences of total energy that, reached TWICE successively, will cause the
         initialization steps (without gradient correction) to stop and the gradient correction to be added.<br/>
         Can be specified in Ha (the default), Ry, eV or Kelvin, since it has the 'ENERGY' characteristics.
-    topics: recursion_useful
+    topics: Recursion_useful
     varset: dev
     vartype: real
 - !variable
@@ -29778,7 +29778,7 @@
          This internal variable is set to 1 when the recursion method is
         activated (see [[tfkinfunc]]).
         </p>
-    topics: recursion_internal
+    topics: Recursion_internal
     varset: internal
     vartype: integer
 - !variable

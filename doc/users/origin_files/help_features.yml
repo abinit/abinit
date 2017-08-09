@@ -93,7 +93,7 @@ sec2:
    <li>[[topic:Wavelets|Wavelets in ABINIT]]</li>
    <li>[[topic:k-points|Wavevector sampling - k point grid]]</li>
    <li>[[topic:convergency|Convergency settings]]</li>
-   <li>[[topic:recursion|Recursion methods and orbital free calculations]]</li>
+   <li>[[topic:Recursion|Recursion methods and orbital free calculations]]</li>
    </ol>
 
 ## Each section must have a title, that will form the table of content.
