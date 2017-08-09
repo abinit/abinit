@@ -3020,7 +3020,6 @@
 - !variable
     abivarname: chkprim
     characteristics:
-    - '[[SYMMETRY_FINDER]]'
     commentdefault: null
     commentdims: null
     defaultval: 1
@@ -19165,7 +19164,6 @@
 - !variable
     abivarname: nsym
     characteristics:
-    - '[[SYMMETRY_FINDER]]'
     commentdefault: null
     commentdims: null
     defaultval: 0
@@ -19193,7 +19191,8 @@
         computed.
         </p>
         <p>
-         [[SYMMETRY_FINDER]] mode (Default mode).
+         <b>Symmetry finder mode</b> (Default mode).
+        <br>
         If [[nsym]] is 0, all the atomic coordinates must be
         explicitely given (one cannot use the geometry builder
         and the symmetrizer): the code will then find automatically
@@ -19220,8 +19219,7 @@
         undistorted supercell. Going beyond
         that number will make the code stop very rapidly. If you want
         nevertheless, for testing purposes, to treat a larger number of symmetries,
-        change the initialization of "msym" in the abinit.F90 main routine,
-        then recompile the code.
+        change [[maxnsym]].
         </p>
         <p>
          For GW calculation, the user might want to select only the symmetry operations whose
@@ -32134,7 +32132,7 @@
          For a "dummy" atom, with [[znucl]]=0 , as used in the case of calculations
         with only a jellium surface, ABINIT sets arbitrarily the covalent radius to one.
         </p>
-    topics: crystal_compulsory, AtomTypes_compulsory, PseudosPAW_compulsory
+    topics: AtomTypes_compulsory, PseudosPAW_compulsory
     varset: basic
     vartype: real
 

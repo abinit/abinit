@@ -4,18 +4,30 @@
     authors   : FJ
     howto     : specify a crystal
     header    : default
-    title     : <h1>Crystalline structure and symmetries</h1>
+    title     : <h1>Crystalline structure, atomic positions and symmetries</h1>
     subtitle  : default
     copyright : default
     links     : default
     introduction : |- 
-         The cell may be orthogonal or non-orthogonal.
-         Any kind of symmetries and corresponding sets of k-point can be input,
-         and taken into account in the computation. The crystal structure and the position of the atoms in the unit cell must be specified.
-         Details about the way the crystal structure is defined in ABINIT can be found <a href="../documents/geometry.pdf">here</a>.
-         <br/>The code can automatically generate symmetries from the primitive cell and the position of atoms. In this case, it identifies automatically the Bravais lattice, point group and space group.
-         Alternatively, it can start from the symmetries and generate the atomic positions from the irreducible set. Also, a database of the 230 spatial groups of symmetry
-         is built inside ABINIT.
+         In addition to the [[topic:UnitCell|Specification of the unit cell]] and [[topic:AtomTypes|Atom types]], ABINIT must know
+         the number of atoms inside the cell, their type, and position. 
+         This is described by [[natom]], [[typat]] and one of [[xred]], [[xcart]] and [[xangst]].
+         <p>
+         ABINIT can automatically detect the Bravais lattice and space group,
+         and generate symmetries (e.g. [[nsym]],[[symrel]],[[tnons]]), 
+         from the primitive cell and the position of atoms (provided they are not too inaccurate, see [[tolsym]]). 
+         <p>
+         Alternatively, ABINIT can start from the specification of symmetries (either from [[spgroup]] or from the
+         list of symmetries - [[nsym]],[[symrel]],[[tnons]]) 
+         and generate the atomic positions from the asymmetric (irreducible) 
+         part of the primitive cell. This is described in the [[topic:SmartSymm|Smart Symmetrizer]] topic.
+         <p>ABINIT can treat antiferromagnetic symmetry operations, see [[symafm]].
+         <p>
+         In ABINIT, a database with the 230 spatial groups of symmetry (see [[spgroup]]) 
+         and the 1191 Shubnikov anti-ferromagnetic space groups is present (see also [[spgroupma]] and [[genafm]]).
+         <p>There is also a (non-graphical) atom manipulator in ABINIT, see [[topic:AtomManipulator]].
+         <p>ABINIT can read XYZ files, see [[xyzfile]].
+         <p>Details about the way the crystal structure is defined in ABINIT can be found <a href="../documents/geometry.pdf">here</a>.
     tutorials  : |-
          <li><a href="../../tutorial/generated_files/lesson_base1.html">The lesson 1</a> deals with the H2
          molecule : get the total energy, the electronic energies, the charge

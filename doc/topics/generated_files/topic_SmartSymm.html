@@ -1,0 +1,92 @@
+<!--                                                                                     -->
+<!-- This file has been produced by generate_doc.py using different .yml  or .bib files. -->
+<!-- It is useless to modify it. Modify the related .yml  or .bib files instead.         -->
+<!--                                                                                     -->
+<html>
+<head><title>Smart Symmetrizer </title>
+<link rel=stylesheet type="text/css" href="../formabinit.css">
+</head>
+<body bgcolor="#ffffff">
+
+<hr>
+<a name="top"></a>
+
+<h1>Smart symmetrizer</h1>
+<h3>This file gives hints on how to use the symetry information to build the system from the irreducible part of the primitive cell with the ABINIT package.
+<hr>
+
+<h5>Copyright (C) 2016-2017 ABINIT group (FJ)
+<script type="text/javascript" src="../../js_files/copyright.js"> </script>
+</h5>
+
+<script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
+
+ <h3><b>Table of content: </b></h3> 
+ <ul> <li>1. <a href="topic_SmartSymm.html#1">Introduction.</a><li>2. <a href="topic_SmartSymm.html#2">Related input variables.</a><li>3. <a href="topic_SmartSymm.html#3">Selected input files.</a></ul>
+
+&nbsp; 
+<HR ALIGN=left> 
+<a name="1">&nbsp;</a>
+<h3><b>1. Introduction.</b></h3>
+
+
+Sometimes, the user knows the space group of the system, the conventional cell vectors,
+as well as the positions of atoms in the asymmetric (irreducible) part of the cell. 
+From such data, ABINIT can generate the usual primitive cell vectors, as well as the coordinates of all the atoms in this cell.
+<p>
+This is activated if <a href="../../input_variables/generated_files/varset_geo.html#spgroup">spgroup</a>!=0 and <a href="../../input_variables/generated_files/varset_geo.html#brvltt">brvltt</a>=-1. 
+The user needs to specify the number of atoms to be read <a href="../../input_variables/generated_files/varset_geo.html#natrd">natrd</a> in the asymmetric part of the cell, 
+as well as the expected number of atoms <a href="../../input_variables/generated_files/varset_basic.html#natom">natom</a> in the primitive cell. 
+Some additional information on the axes orientation <a href="../../input_variables/generated_files/varset_geo.html#spgaxor">spgaxor</a> and the cell origin <a href="../../input_variables/generated_files/varset_geo.html#spgorig">spgorig</a> 
+might also have to be given. See <a href="../../users/spacegrouphelpfile.html">the space group help file</a>.
+<p>
+The specification of a magnetic space group is even possible (antiferromagnetic). See <a href="../../input_variables/generated_files/varset_geo.html#spgroupma">spgroupma</a> and <a href="../../input_variables/generated_files/varset_geo.html#genafm">genafm</a>.
+<p>
+See also the <a href="../../topics/generated_files/topic_UnitCell.html#">topic_UnitCell</a>.
+<br><br><a href=#top>Go to the top</a>
+
+
+
+
+&nbsp; 
+<hr> 
+<a name="2">&nbsp;</a>
+<h3><b>2. Related input variables.</b></h3>
+
+
+<p>Basic input variables:<p>... <a href="../../input_variables/generated_files/varset_geo.html#brvltt">brvltt</a>   [BRaVais LaTTice type]<br>
+... <a href="../../input_variables/generated_files/varset_basic.html#natom">natom</a>   [Number of ATOMs]<br>
+... <a href="../../input_variables/generated_files/varset_geo.html#natrd">natrd</a>   [Number of AToms ReaD]<br>
+... <a href="../../input_variables/generated_files/varset_geo.html#spgroup">spgroup</a>   [SPace GROUP number]<br>
+<p>Useful input variables:<p>... <a href="../../input_variables/generated_files/varset_gstate.html#chkprim">chkprim</a>   [CHecK whether the cell is PRIMitive]<br>
+... <a href="../../input_variables/generated_files/varset_geo.html#genafm">genafm</a>   [GENerator of the translation for Anti-FerroMagnetic space group]<br>
+... <a href="../../input_variables/generated_files/varset_geo.html#spgaxor">spgaxor</a>   [SPace Group : AXes ORientation]<br>
+... <a href="../../input_variables/generated_files/varset_geo.html#spgorig">spgorig</a>   [SPace Group : ORIGin]<br>
+... <a href="../../input_variables/generated_files/varset_geo.html#spgroupma">spgroupma</a>   [SPace GROUP number defining a MAgnetic space group]<br>
+<p>Relevant internal variables:<p>... <a href="../../input_variables/generated_files/varset_geo.html#ptgroupma">%ptgroupma</a>   [PoinT GROUP number for the MAgnetic space group]<br>
+
+<br><br><a href=#top>Go to the top</a>
+
+
+&nbsp; 
+<HR ALIGN=left> 
+<a name="3">&nbsp;</a>
+<h3><b>3. Selected input files.</b></h3>
+
+
+The user can find some related example input files in the ABINIT package in the directory /tests, or on the Web:
+<p> tests/v6/Input: <a href="../../tests/v6/Input/t30.in">t30.in</a> 
+<p> tests/v2/Input: <a href="../../tests/v2/Input/t59.in">t59.in</a> 
+<a href="../../tests/v2/Input/t60.in">t60.in</a> 
+<p> tests/v5/Input: <a href="../../tests/v5/Input/t77.in">t77.in</a> 
+<p> tests/tutorial/Input: <a href="../../tests/tutorial/Input/tnuc_1.in">tnuc_1.in</a> 
+<br>
+
+<br><br><a href=#top>Go to the top</a>
+
+
+<script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
+
+</body>
+</html>
+
