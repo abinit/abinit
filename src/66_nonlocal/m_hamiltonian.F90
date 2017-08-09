@@ -2252,7 +2252,7 @@ subroutine init_ddiago_ctl(Dctl,jobz,isppol,nspinor,ecut,kpoint,nloalg,gmet,&
 
  Dctl%ecut = ecut
  Dctl%ecutsm = zero; if (PRESENT(ecutsm)) Dctl%ecutsm = ecutsm
- Dctl%effmass_free = one; if (PRESENT(effmass)) Dctl%effmass = effmass
+ Dctl%effmass_free = one; if (PRESENT(effmass_free)) Dctl%effmass_free = effmass_free
  Dctl%nloalg  = nloalg
  Dctl%prtvol = 0; if (PRESENT(prtvol)) Dctl%prtvol = prtvol
  Dctl%abstol = -tol8; if (PRESENT(abstol)) Dctl%abstol = abstol
