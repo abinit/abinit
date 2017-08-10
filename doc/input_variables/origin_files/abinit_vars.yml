@@ -3853,7 +3853,7 @@
          </sup>
          ).
         </p>
-    topics: SFCAlgorithm_expert, MolecularDynamics_expert
+    topics: SCFAlgorithms_expert, MolecularDynamics_expert
     varset: dev
     vartype: integer
 - !variable

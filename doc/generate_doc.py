@@ -528,6 +528,7 @@ for (key, value) in list_externalvars:
 ################################################################################
 # Constitute the body of information for all variables, stored for the appropriate varset in all_contents[varset]
 
+topic_error=0
 for i, var in enumerate(abinit_vars):
   # Constitute the body of information related to one input variable
   varset = var.varset
@@ -555,18 +556,34 @@ for i, var in enumerate(abinit_vars):
       if chars!="":
         cur_content += '<br><font id="characteristic">Characteristic: '+make_links(chars,var.abivarname,allowed_link_seeds,backlinks,backlink)+'</font>\n'
     # Topics
-    try:
-      if var.topics is not None :
-        cur_content += '<br><font id="characteristic">Mentioned in "Topic": '
-        vartopics=var.topics
-        topics_name_tribe = vartopics.split(',')
+    list_tribenames=[]
+    for tribe in yml_in["list_tribes"]:
+      list_tribenames.append(tribe[0].strip())
+    if var.topics is not None :
+      cur_content += '<br><font id="characteristic">Mentioned in topic: '
+      vartopics=var.topics
+      topics_name_tribe = vartopics.split(',')
+      if len(topics_name_tribe)==0:
+        print("\n Missing topic_tribe for abivarname %s."%(var.abivarname))
+        topic_error+=1
+      else:
         for i, topic_name_tribe in enumerate(topics_name_tribe):
           name_tribe = topic_name_tribe.split('_')
-          cur_content += '<a href="../../topics/generated_files/topic_'+name_tribe[0].strip()+'.html">'+name_tribe[0].strip()+'</a> '
-        cur_content += "</font>\n"
-    except:
-      if debug==1 :
-        print(" No topic_tribe for abivarname "+var.abivarname)
+          if not len(name_tribe)==2:
+            print("\n Ill-formed topic_name_tribe %s for abivarname %s."%(topic_name_tribe,var.abivarname))
+            topic_error+=1
+          else:
+            if not name_tribe[0].strip() in list_of_topics:
+              print("\n For input variable %s, name of topic '%s' is given. However this name of topic is not in list_of_topics.yml ."%(var.abivarname.strip(),name_tribe[0].strip()))
+              topic_error+=1
+            if not name_tribe[1].strip() in list_tribenames:
+              print("\n For input variable %s, name of tribe '%s' is given. However this name of tribe is not in list_tribes.yml ."%(var.abivarname.strip(),name_tribe[1].strip()))
+              topic_error+=1
+            cur_content += '<a href="../../topics/generated_files/topic_'+name_tribe[0].strip()+'.html">'+name_tribe[0].strip()+'</a> '
+      cur_content += "</font>\n"
+    else:
+      print(" No topic_tribe for abivarname %s"%(var.abivarname))
+      topic_error+=1
     # Variable type, including dimensions
     cur_content += "<br><font id=\"vartype\">Variable type: "+var.vartype
     if var.dimensions is not None:
@@ -597,6 +614,9 @@ for i, var in enumerate(abinit_vars):
   except AttributeError as e:
     print(e)
     print('For variable : ',abivarname)
+if topic_error>0:
+  print("")
+  sys.exit()
 
 ################################################################################
 # Generate the files that document all the variables (all such files : var* as well as allvars and external).
