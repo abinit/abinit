@@ -20,7 +20,8 @@
          More precise tuning might be done by using [[boxcutmin]] and [[ngfft]].
          <p> Avoiding discontinuity issues with changing the size of the planewave basis set is made possible thanks to [[ecutsm]].
          <p> The [[accuracy]] variable enables to tune the accuracy of a calculation by setting automatically up to seventeen variables.
-         <p> For the similar settings related to wavelets, see [[topic:Wavelets]].
+         <p> Many more parameters govern a PAW computation than a norm-conserving pseudopotential calculation. They are described 
+         in a specific page [[topic_PAW]]. For the settings related to wavelets, see [[topic:Wavelets]].
     tutorials  : |-
          <li><a href="../../tutorial/generated_files/lesson_base2.html">The lesson 2</a> deals again with the H2
          molecule: convergence studies, LDA versus GGA </li>

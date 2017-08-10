@@ -9,5 +9,9 @@
     copyright : default
     links     : default
     introduction: |
-      To be written ...
+      Self-Consistent Field calculations allow to determine the solution of the Kohn-Sham equations, ending with converged
+      "self-consistent" wavefunctions, density, and Kohn-Sham potentials. Different algorithms can be chosen to converge
+      to the solution of this set of equations, governed by the input variable [[iscf]].
+      The same [[iscf]] allows one also to choose to make non-self-consistent calculations of wavefunctions and corresponding eigenvalues
+      in a fixed potential.
     end : default 

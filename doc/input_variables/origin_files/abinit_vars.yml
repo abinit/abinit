@@ -3978,7 +3978,7 @@
          <br />
          No meaning for RF calculations yet.
         </p>
-    topics: SCFAlgorithm_useful
+    topics: SCFAlgorithms_useful
     varset: gstate
     vartype: real
 - !variable
@@ -4077,7 +4077,7 @@
          <br />
          No meaning for RF calculations yet.
         </p>
-    topics: SCFAlgorithm_useful
+    topics: SCFAlgorithms_useful
     varset: gstate
     vartype: real
 - !variable
@@ -4098,7 +4098,7 @@
          <br />
          No meaning for RF calculations yet.
         </p>
-    topics: SCFAlgorithm_useful
+    topics: SCFAlgorithms_useful
     varset: gstate
     vartype: real
 - !variable
@@ -4158,7 +4158,7 @@
          <br />
          This works for GS and RF calculations.
         </p>
-    topics: SCFAlgorithm_useful
+    topics: SCFAlgorithms_useful
     varset: gstate
     vartype: real
 - !variable
@@ -4212,7 +4212,7 @@
         values as for GS. The improvement in speed can be considerable
         for small (but non-zero) values of the wavevector.
         </p>
-    topics: SCFAlgorithm_useful
+    topics: SCFAlgorithms_useful
     varset: gstate
     vartype: real
 - !variable
@@ -4253,7 +4253,7 @@
          Also note that a different value of diemix can be used for the magnetization
         (see [[diemixmag]]).
         </p>
-    topics: SCFAlgorithm_useful
+    topics: SCFAlgorithms_useful
     varset: gstate
     vartype: real
 - !variable
@@ -11451,7 +11451,7 @@
           </li>
          </ul>
         </p>
-    topics: SCFAlgorithm_useful
+    topics: SCFAlgorithms_useful
     varset: gstate
     vartype: integer
 - !variable
@@ -12732,7 +12732,7 @@
           </li>
          </ul>
         </p>
-    topics: SCFAlgorithm_basic, TDDFT_compulsory, ElecBandStructure_basic
+    topics: SCFAlgorithms_basic, TDDFT_compulsory, ElecBandStructure_basic
     varset: basic
     vartype: integer
 - !variable
@@ -12769,7 +12769,7 @@
          <br />
          No meaning for RF calculations yet.
         </p>
-    topics: SCFAlgorithm_expert
+    topics: SCFAlgorithms_expert
     varset: dev
     vartype: integer
 - !variable
@@ -18553,7 +18553,7 @@
          Gives the  number of previous iterations involved in Pulay mixing (mixing
         during electronic SC iterations).
         </p>
-    topics: SCFAlgorithm_useful
+    topics: SCFAlgorithms_useful
     varset: dev
     vartype: integer
 - !variable
@@ -31459,7 +31459,7 @@
           </li>
          </ul>
         </p>
-    topics: SCFAlgorithm_basic
+    topics: SCFAlgorithms_basic
     varset: dev
     vartype: integer
 - !variable
