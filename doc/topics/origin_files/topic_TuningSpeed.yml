@@ -2,9 +2,9 @@
     name      : TuningSpeed
     keyword   : TuningSpeed
     authors   : XG
-    howto     : tune the speed of the calculation
+    howto     : tune the speed and memory usage
     header    : default
-    title     : <h1>Parameters that have an impact on the speed of the calculation</h1>
+    title     : <h1>Speed of the calculation and memory usage</h1>
     subtitle  : default
     copyright : default
     links     : default
@@ -28,5 +28,5 @@
       lowering [[boxcutmin]] below its theoretically needed value of 2.0 .
       <p>The choice of the FFT algorithm implementation, see [[fftalg]] might also lead to significant speed up, 
       on specific machines.
-      <p>Other input variables related to tuning the speed are for expert users only.
+      <p>Other input variables related to tuning the speed or the memory usage are for expert users only.
     end : default 

@@ -105,6 +105,7 @@ sec2:
    <ol>
    <li>[[topic:SCFAlgorithms|SCF algorithms]]</li>
    <li>[[topic:SCFControl|SCF control, tolerances and stopping criteria]]</li>
+   <li>[[topic:ForcesStresses|Forces and stresses]]</li>
    <li>[[topic:TuningSpeed|Tuning the speed of the calculation]]</li>
    <li>[[topic:Recursion|Recursion methods and orbital free calculations]]</li>
    </ol>

@@ -28684,7 +28684,7 @@
         However, a non-zero value for one such variable for one dataset will have precedence on the non-zero value for another
         input variable defined generically.
         </p>
-    topics: SCFControl_basic
+    topics: SCFControl_basic, ForcesStresses_basic
     varset: basic
     vartype: real
 - !variable
@@ -28864,7 +28864,7 @@
         However, a non-zero value for one such variable for one dataset will have precedence on the non-zero value for another
         input variable defined generically.
         </p>
-    topics: SCFControl_basic
+    topics: SCFControl_basic, ForcesStresses_basic
     varset: basic
     vartype: real
 - !variable
