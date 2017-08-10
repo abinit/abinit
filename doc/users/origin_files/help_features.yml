@@ -78,22 +78,21 @@ sec2:
    <li>[[topic:PseudosPAW|Pseudopotentials and PAW atomic datasets]]</li>
    <li>[[topic:BandOcc|Bands and occupation numbers for metals and insulators]]</li>
    <li>[[topic:spinpolarisation|Spin-polarised systems and spin-orbit coupling]]</li>
-   <li>[[topic:ChargedCell|Charged cells]]</li>
+   <li>[[topic:ChargedCell|Charged cells and treatment of Coulomb interaction]]</li>
    </ol>
 
 ## Each section must have a title, that will form the table of content.
 ## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
 ## Note the small (one space) indentation for the title and body keys.
  sec2.3:
-  title: "Numerical settings for electrons : basis set, wavevector sampling, ..."
+  title: "Numerical settings for electrons : basis set, planewaves and real space sampling, Brillouin zone sampling, ..."
   tag: numerical
   body: |
    <ol>
+   <li>[[topic:Planewaves|Planewaves and real space sampling]]</li>
    <li>[[topic:PAW|PAW special settings]]</li>
    <li>[[topic:Wavelets|Wavelets in ABINIT]]</li>
    <li>[[topic:k-points|Wavevector sampling - k point grid]]</li>
-   <li>[[topic:convergency|Convergency settings]]</li>
-   <li>[[topic:Recursion|Recursion methods and orbital free calculations]]</li>
    </ol>
 
 ## Each section must have a title, that will form the table of content.
@@ -107,6 +106,7 @@ sec2:
    <li>[[topic:SCFAlgorithms|SCF algorithms]]</li>
    <li>[[topic:SCFControl|SCF control, tolerances and stopping criteria]]</li>
    <li>[[topic:TuningSpeed|Tuning the speed of the calculation]]</li>
+   <li>[[topic:Recursion|Recursion methods and orbital free calculations]]</li>
    </ol>
 
 ## Each section must have a title, that will form the table of content.

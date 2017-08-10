@@ -594,7 +594,7 @@
         [[accuracy]]=0 means that this input variable is desactivated.
 
         <p>
-    topics: convergency_basic
+    topics: Planewaves_basic, SCFControl_basic
     varset: basic
     vartype: integer
 - !variable
@@ -1681,7 +1681,7 @@
         the wavefunctions that are obtained CANNOT be used for starting response function
         calculation.
         </p>
-    topics: convergency_expert
+    topics: Planewaves_useful, TuningSpeed_basic
     varset: gstate
     vartype: real
 - !variable
@@ -3853,7 +3853,7 @@
          </sup>
          ).
         </p>
-    topics: convergency_expert
+    topics: SFCAlgorithm_expert, MolecularDynamics_expert
     varset: dev
     vartype: integer
 - !variable
@@ -3978,7 +3978,7 @@
          <br />
          No meaning for RF calculations yet.
         </p>
-    topics: convergency_useful
+    topics: SCFAlgorithm_useful
     varset: gstate
     vartype: real
 - !variable
@@ -4077,7 +4077,7 @@
          <br />
          No meaning for RF calculations yet.
         </p>
-    topics: convergency_useful
+    topics: SCFAlgorithm_useful
     varset: gstate
     vartype: real
 - !variable
@@ -4098,7 +4098,7 @@
          <br />
          No meaning for RF calculations yet.
         </p>
-    topics: convergency_useful
+    topics: SCFAlgorithm_useful
     varset: gstate
     vartype: real
 - !variable
@@ -4158,7 +4158,7 @@
          <br />
          This works for GS and RF calculations.
         </p>
-    topics: convergency_useful
+    topics: SCFAlgorithm_useful
     varset: gstate
     vartype: real
 - !variable
@@ -4212,7 +4212,7 @@
         values as for GS. The improvement in speed can be considerable
         for small (but non-zero) values of the wavevector.
         </p>
-    topics: convergency_useful
+    topics: SCFAlgorithm_useful
     varset: gstate
     vartype: real
 - !variable
@@ -4253,7 +4253,7 @@
          Also note that a different value of diemix can be used for the magnetization
         (see [[diemixmag]]).
         </p>
-    topics: convergency_useful
+    topics: SCFAlgorithm_useful
     varset: gstate
     vartype: real
 - !variable
@@ -5661,7 +5661,7 @@
          See the input variable [[ecutsm]], for the
         smoothing of the kinetic energy, needed to optimize unit cell parameters.
         </p>
-    topics: convergency_compulsory
+    topics: Planewaves_compulsory
     varset: basic
     vartype: real
 - !variable
@@ -5808,7 +5808,7 @@
         to get smooth curves. It is likely that this value is OK
         as soon as [[ecut]] is larger than 4Ha.
         </p>
-    topics: convergency_basic
+    topics: Planewaves_basic
     varset: rlx
     vartype: real
 - !variable
@@ -6856,7 +6856,7 @@
         third dimensions have been switched. This is to allow to be coherent with the
         [[exchn2n3d]]=4xx FFT treatment.
         </p>
-    topics: convergency_expert
+    topics: TuningSpeed_expert
     varset: dev
     vartype: integer
 - !variable
@@ -6880,7 +6880,7 @@
          if a consistent density extrapolation is activated (see [[densfor_pred]]).<br>
         ABINIT 7.10: this option is <b>under development</b> and might give wrong results.
         </p>
-    topics: convergency_expert
+    topics: TuningSpeed_expert, MolecularDynamics_expert
     varset: dev
     vartype: integer
 - !variable
@@ -7078,7 +7078,7 @@
          </ul>
          Internal representation as [[ngfft]](7).
         </p>
-    topics: convergency_expert
+    topics: TuningSpeed_useful
     varset: dev
     vartype: integer
 - !variable
@@ -10549,7 +10549,7 @@
           </li>
          </ul>
         </p>
-    topics: convergency_expert
+    topics: TuningSpeed_expert
     varset: paw
     vartype: integer
 - !variable
@@ -10574,7 +10574,7 @@
           [[icoulomb]]=1 : free boundary conditions are used when the Hartree potential is computed, real space expressions of pseudo-potentials are involved (restricted to GTH pseudo-potentials) and simple coulomb interaction gives the ion-ion energy.
          </li>
         </ul>
-    topics: convergency_expert
+    topics: ChargedCell_useful
     varset: gstate
     vartype: integer
 - !variable
@@ -10639,7 +10639,7 @@
         In the latter case, use a negative value for the cutoff radius of the sphere ([[rcut]]&lt;0),
         which is automatically calculated so that the volume enclosed in the sphere is equal to the volume of the solid.
         </p>
-    topics: GWls_compulsory, GW_basic
+    topics: GWls_compulsory, GW_basic, ChargedCell_useful
     varset: gw
     vartype: integer
 - !variable
@@ -11451,7 +11451,7 @@
           </li>
          </ul>
         </p>
-    topics: convergency_useful
+    topics: SCFAlgorithm_useful
     varset: gstate
     vartype: integer
 - !variable
@@ -11495,7 +11495,7 @@
          </ul>
          No meaning for RF calculations.
         </p>
-    topics: convergency_expert
+    topics: GeoOpt_useful
     varset: dev
     vartype: integer
 - !variable
@@ -12732,7 +12732,7 @@
           </li>
          </ul>
         </p>
-    topics: convergency_useful, TDDFT_compulsory, ElecBandStructure_basic
+    topics: SCFAlgorithm_basic, TDDFT_compulsory, ElecBandStructure_basic
     varset: basic
     vartype: integer
 - !variable
@@ -12769,7 +12769,7 @@
          <br />
          No meaning for RF calculations yet.
         </p>
-    topics: convergency_expert
+    topics: SCFAlgorithm_expert
     varset: dev
     vartype: integer
 - !variable
@@ -15865,7 +15865,7 @@
          This internal variable contains the maximum of
         [[ngfft]](1:3).
         </p>
-    topics: convergency_internal
+    topics: Planewaves_internal
     varset: internal
     vartype: integer
 - !variable
@@ -15884,7 +15884,7 @@
          This internal variable contains the maximum of
         [[ngfftdg]](1:3).
         </p>
-    topics: convergency_internal
+    topics: Planewaves_internal
     varset: internal
     vartype: integer
 - !variable
@@ -15993,7 +15993,7 @@
         [[rprim]], and/or
         [[angdeg]].
         </p>
-    topics: convergency_internal
+    topics: Planewaves_internal
     varset: internal
     vartype: integer
 - !variable
@@ -16013,7 +16013,7 @@
         related to pseudopotentials, in reciprocal space :
         potentials, or projector functions.
         </p>
-    topics: convergency_expert
+    topics: Planewaves_expert
     varset: dev
     vartype: integer
 - !variable
@@ -16516,7 +16516,7 @@
           </li>
          </ul>
         </p>
-    topics: convergency_expert
+    topics: TuningSpeed_expert
     varset: dev
     vartype: integer
 - !variable
@@ -16589,7 +16589,7 @@
          Also, the number of active bands, in all cases, is imposed
         to be at least 1, irrespective of the value of [[nbdbuf]].
         </p>
-    topics: convergency_expert
+    topics: SCFControl_useful, BandOcc_useful
     varset: gstate
     vartype: integer
 - !variable
@@ -16654,7 +16654,7 @@
         should be used only in conjunction with NC pseudos whose model core charge that decays quickly in
         G-space. Several NC pseudos available in the Abinit table are not optimized for the G-space formalism and users are strongly invited to perform
         convergence studies with respect to ecut before using this option.
-    topics: convergency_expert
+    topics: Planewaves_expert
     varset: dev
     vartype: integer
 - !variable
@@ -17045,7 +17045,7 @@
         but a number usually close to this product divided by the
         number of processors on which the space is shared.
         </p>
-    topics: convergency_internal
+    topics: Planewaves_internal
     varset: internal
     vartype: integer
 - !variable
@@ -17073,7 +17073,7 @@
         but a number usually close to this product divided by the
         number of processors on which the space is shared.
         </p>
-    topics: convergency_internal
+    topics: Planewaves_internal
     varset: internal
     vartype: integer
 - !variable
@@ -17304,7 +17304,7 @@
          The number of points stored by this processor in real space is n1*n2*n3proc, while in reciprocal
         space, it is n1*n2proc*n3.
         </p>
-    topics: convergency_basic
+    topics: Planewaves_useful
     varset: gstate
     vartype: integer
 - !variable
@@ -17768,7 +17768,7 @@
          Note that [[nline]]=0 can be used to diagonalize the Hamiltonian
         matrix in the subspace spanned by the input wavefunctions.
         </p>
-    topics: convergency_expert
+    topics: SCFControl_expert
     varset: gstate
     vartype: integer
 - !variable
@@ -17907,7 +17907,7 @@
         2 steps with 3 non-self consistent loops , 2 steps with 2 non-self consistent loops,
         then the next ones with 1 non-self consistent loop.
         </p>
-    topics: convergency_expert
+    topics: SCFControl_expert
     varset: dev
     vartype: integer
 - !variable
@@ -18553,7 +18553,7 @@
          Gives the  number of previous iterations involved in Pulay mixing (mixing
         during electronic SC iterations).
         </p>
-    topics: convergency_useful
+    topics: SCFAlgorithm_useful
     varset: dev
     vartype: integer
 - !variable
@@ -18870,7 +18870,7 @@
         <p>
          This variable controls the order of used scaling functions when the Hartree potential is computed using the Poisson solver (see [[icoulomb]] imput variable). This variable is of seldom use since the default value is large enough. Nonetheless, possible values are 8, 14, 16, 20, 24, 30, 40, 50, 60, 100. Values greater than 20 are included in ABINIT for test purposes only.
         </p>
-    topics: convergency_expert
+    topics: ChargedCell_expert
     varset: dev
     vartype: integer
 - !variable
@@ -19138,7 +19138,7 @@
          <br />
          The forces and stress tensor are computed with [[nstep]]=0.
         </p>
-    topics: convergency_basic
+    topics: SCFControl_basic
     varset: basic
     vartype: integer
 - !variable
@@ -20460,7 +20460,7 @@
          Tests have shown that [[ortalg]]=2 or -2 is suitable for
         use on the available platforms.
         </p>
-    topics: convergency_expert
+    topics: TuningSpeed_expert
     varset: dev
     vartype: integer
 - !variable
@@ -20782,7 +20782,7 @@
         or derived quantities, like forces, but also on the two values of the
         "Compensation charge inside spheres", a quantity written in the log file.
         </p>
-    topics: convergency_compulsory, PAW_compulsory
+    topics: Planewaves_compulsory, PAW_compulsory
     varset: paw
     vartype: real
 - !variable
@@ -28638,7 +28638,7 @@
         However, a non-zero value for one such variable for one dataset will have precedence on the non-zero value for another
         input variable defined generically.
         </p>
-    topics: convergency_basic
+    topics: SCFControl_basic
     varset: basic
     vartype: real
 - !variable
@@ -28819,7 +28819,7 @@
         In RF calculations, [[tolrde]] is actually doubled before comparing with the above-mentioned
         ratio, for historical reasons.
         </p>
-    topics: convergency_expert
+    topics: SCFControl_expert
     varset: dev
     vartype: real
 - !variable
@@ -28864,7 +28864,7 @@
         However, a non-zero value for one such variable for one dataset will have precedence on the non-zero value for another
         input variable defined generically.
         </p>
-    topics: convergency_basic, SCF_useful
+    topics: SCFControl_basic
     varset: basic
     vartype: real
 - !variable
@@ -28939,7 +28939,7 @@
         However, a non-zero value for one such variable for one dataset will have precedence on the non-zero value for another
         input variable defined generically.
         </p>
-    topics: convergency_basic
+    topics: SCFControl_basic
     varset: basic
     vartype: real
 - !variable
@@ -29033,7 +29033,7 @@
         have non-zero values for the same dataset, or generically (for all datasets).
         However, a non-zero value for one such variable for one dataset will have precedence on the non-zero value for another
         input variable defined generically.
-    topics: convergency_basic
+    topics: SCFControl_basic
     varset: basic
     vartype: real
 - !variable
@@ -31459,7 +31459,7 @@
           </li>
          </ul>
         </p>
-    topics: convergency_expert
+    topics: SCFAlgorithm_basic
     varset: dev
     vartype: integer
 - !variable

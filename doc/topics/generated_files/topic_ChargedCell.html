@@ -11,8 +11,8 @@
 <hr>
 <a name="top"></a>
 
-<h1>Charged cells</h1>
-<h3>This file gives hints on how to perform a calculation on a charged cell with the ABINIT package.
+<h1>Charged cells and Coulomb interaction</h1>
+<h3>This page gives hints on how to perform a calculation on a charged cell, and treat adequately the Coulomb interaction with the ABINIT package.
 <hr>
 
 <h5>Copyright (C) 2016-2017 ABINIT group (FB)
@@ -32,7 +32,9 @@
 
 <p>ABINIT can treat charged systems (e.g. either for molecules, or for dopants in a supercell), 
 using the <a href="../../input_variables/generated_files/varset_gstate.html#charge">charge</a> input variable. A careful convergence study with respect to the cell size must however be done.
-<p>It is well known that the electrostatic potential (arising from ion-ion, ion-electron, and electron-electron interactions) is ill-defined within periodic boundary conditions.
+<p>Depending on the dimension, different treatment of the Coulomb interaction can be enforced, governed by <a href="../../input_variables/generated_files/varset_gstate.html#icoulomb">icoulomb</a>.
+
+<p>Additional information concerning <a href="../../input_variables/generated_files/varset_paw.html#usepotzero">usepotzero</a>. It is well known that the electrostatic potential (arising from ion-ion, ion-electron, and electron-electron interactions) is ill-defined within periodic boundary conditions.
 However, it is less well known that the total energy of a charged cell is also ill-defined.
 In fact, after a careful derivation in <a href="../../biblio/generated_files/bib_biblio.html#Bruneval2014">[Bruneval2014]</a>, it was shown that the above two statements are tightly linked:
 when the number of electrons differs from the number of protons in a cell, the necessary compensating background that enforces the overall charge neutrality
@@ -59,7 +61,10 @@ is sensitive to the arbitrary average electrostatic potential.
 
 
 <p>Compulsory input variables:<p>... <a href="../../input_variables/generated_files/varset_gstate.html#charge">charge</a>   [CHARGE]<br>
-<p>Useful input variables:<p>... <a href="../../input_variables/generated_files/varset_paw.html#usepotzero">usepotzero</a>   [USE POTential ZERO]<br>
+<p>Useful input variables:<p>... <a href="../../input_variables/generated_files/varset_gstate.html#icoulomb">icoulomb</a>   [Index for the Coulomb TReaTMenT]<br>
+... <a href="../../input_variables/generated_files/varset_gw.html#icutcoul">icutcoul</a>   [Integer that governs the CUT-off for COULomb interaction]<br>
+... <a href="../../input_variables/generated_files/varset_paw.html#usepotzero">usepotzero</a>   [USE POTential ZERO]<br>
+<p>Input variables for experts:<p>... <a href="../../input_variables/generated_files/varset_dev.html#nscforder">nscforder</a>   [Nth - SCaling Function ORDER]<br>
 
 <br><br><a href=#top>Go to the top</a>
 

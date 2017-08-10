@@ -109,7 +109,7 @@ variables to be used in the main input file of the abinit code.
 <br><font id="title"><a name="accuracy">accuracy</a></font>
 <br><font id="mnemonics">Mnemonics: ACCURACY</font>
 <br><font id="mnemonics">Executable: abinit</font>
-<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_convergency.html">convergency</a> </font>
+<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_Planewaves.html">Planewaves</a> <a href="../../topics/generated_files/topic_SCFControl.html">SCFControl</a> </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
 <br><font id="text">
@@ -789,7 +789,7 @@ and form the desired angles with the others.
 <br><font id="mnemonics">Mnemonics: Energy CUToff</font>
 <br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#ENERGY">ENERGY</a></font>
-<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_convergency.html">convergency</a> </font>
+<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_Planewaves.html">Planewaves</a> </font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">No default</font>
 <br><font id="text">
@@ -895,7 +895,7 @@ einterp(2:4): Order of B-spline for the three reduced directions. Cubic spline (
 <br><font id="title"><a name="iscf">iscf</a></font>
 <br><font id="mnemonics">Mnemonics: Integer for Self-Consistent-Field cycles</font>
 <br><font id="mnemonics">Executable: abinit</font>
-<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_convergency.html">convergency</a> <a href="../../topics/generated_files/topic_TDDFT.html">TDDFT</a> <a href="../../topics/generated_files/topic_ElecBandStructure.html">ElecBandStructure</a> </font>
+<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_SCFAlgorithm.html">SCFAlgorithm</a> <a href="../../topics/generated_files/topic_TDDFT.html">TDDFT</a> <a href="../../topics/generated_files/topic_ElecBandStructure.html">ElecBandStructure</a> </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0 if <a href="../../input_variables/generated_files/varset_basic.html#usewvl">usewvl</a>==1,
 17 if <a href="../../input_variables/generated_files/varset_internal.html#usepaw">usepaw</a>==1,
@@ -2681,7 +2681,7 @@ the spin-polarization.
 <br><font id="title"><a name="nstep">nstep</a></font>
 <br><font id="mnemonics">Mnemonics: Number of (non-)self-consistent field STEPS</font>
 <br><font id="mnemonics">Executable: abinit</font>
-<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_convergency.html">convergency</a> </font>
+<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_SCFControl.html">SCFControl</a> </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 30</font>
 <br><font id="text">
@@ -3354,7 +3354,7 @@ is computed automatically.
 <br><font id="mnemonics">Mnemonics: TOLerance on the DiFference of total Energy</font>
 <br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#ENERGY">ENERGY</a></font>
-<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_convergency.html">convergency</a> </font>
+<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_SCFControl.html">SCFControl</a> </font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 0.0 (Comment: The default value implies that this stopping condition is ignored. For the SCF case, one and only one of the input tolerance criteria <a href="../../input_variables/generated_files/varset_basic.html#tolwfr">tolwfr</a>, <a href="../../input_variables/generated_files/varset_basic.html#toldff">toldff</a>, <a href="../../input_variables/generated_files/varset_basic.html#tolrff">tolrff</a>, <b>toldfe</b> or <a href="../../input_variables/generated_files/varset_basic.html#tolvrs">tolvrs</a> must differ from zero.)</font>
 <br><br><font id="excludes">
@@ -3454,7 +3454,7 @@ input variable defined generically.
 <br><font id="title"><a name="tolrff">tolrff</a></font>
 <br><font id="mnemonics">Mnemonics: TOLerance on the Relative diFference of Forces</font>
 <br><font id="mnemonics">Executable: abinit</font>
-<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_convergency.html">convergency</a> <a href="../../topics/generated_files/topic_SCF.html">SCF</a> </font>
+<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_SCFControl.html">SCFControl</a> </font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 0.0 (Comment: The default value implies that this stopping condition is ignored. For the SCF case, one and only one of the input tolerance criteria <a href="../../input_variables/generated_files/varset_basic.html#tolwfr">tolwfr</a>, <a href="../../input_variables/generated_files/varset_basic.html#toldff">toldff</a>, <b>tolrff</b>, <a href="../../input_variables/generated_files/varset_basic.html#toldfe">toldfe</a> or <a href="../../input_variables/generated_files/varset_basic.html#tolvrs">tolvrs</a> must differ from zero.)</font>
 <br><br><font id="excludes">
@@ -3502,7 +3502,7 @@ input variable defined generically.
 <br><font id="title"><a name="tolvrs">tolvrs</a></font>
 <br><font id="mnemonics">Mnemonics: TOLerance on the potential V(r) ReSidual</font>
 <br><font id="mnemonics">Executable: abinit</font>
-<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_convergency.html">convergency</a> </font>
+<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_SCFControl.html">SCFControl</a> </font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 0.0 (Comment: The default value implies that this stopping condition is ignored. For the SCF case, one and only one of the input tolerance criteria <a href="../../input_variables/generated_files/varset_basic.html#tolwfr">tolwfr</a>, <a href="../../input_variables/generated_files/varset_basic.html#toldff">toldff</a>, <a href="../../input_variables/generated_files/varset_basic.html#tolrff">tolrff</a>, <a href="../../input_variables/generated_files/varset_basic.html#toldfe">toldfe</a> or <b>tolvrs</b> must differ from zero.)</font>
 <br><br><font id="excludes">
@@ -3555,7 +3555,7 @@ input variable defined generically.
 <br><font id="title"><a name="tolwfr">tolwfr</a></font>
 <br><font id="mnemonics">Mnemonics: TOLerance on WaveFunction squared Residual</font>
 <br><font id="mnemonics">Executable: abinit</font>
-<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_convergency.html">convergency</a> </font>
+<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_SCFControl.html">SCFControl</a> </font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 0.0 (Comment: The default value implies that this stopping condition is ignored. For the SCF case, one and only one of the input tolerance criteria <b>tolwfr</b>, <a href="../../input_variables/generated_files/varset_basic.html#toldff">toldff</a>, <a href="../../input_variables/generated_files/varset_basic.html#tolrff">tolrff</a>, <a href="../../input_variables/generated_files/varset_basic.html#toldfe">toldfe</a> or <a href="../../input_variables/generated_files/varset_basic.html#tolvrs">tolvrs</a> must differ from zero.)</font>
 <br><br><font id="excludes">

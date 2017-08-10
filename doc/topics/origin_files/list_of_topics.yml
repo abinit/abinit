@@ -9,7 +9,6 @@
 - BandOcc
 - BSE
 - ChargedCell
-- convergency
 - Control
 - CRPA
 - crystal
@@ -40,6 +39,7 @@
 - parallelism
 - PAW
 - PIMD
+- Planewaves
 - positron
 - printing
 - PseudosPAW

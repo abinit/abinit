@@ -2,16 +2,18 @@
     name      : ChargedCell 
     keyword   : Charged cell 
     authors   : FB
-    howto     : perform a calculation on a charged cell
+    howto     : perform a calculation on a charged cell, and treat adequately the Coulomb interaction
     header    : default
-    title     : <h1>Charged cells</h1>
+    title     : <h1>Charged cells and Coulomb interaction</h1>
     subtitle  : default
     copyright : default
     links     : default
     introduction : |- 
         <p>ABINIT can treat charged systems (e.g. either for molecules, or for dopants in a supercell), 
         using the [[charge]] input variable. A careful convergence study with respect to the cell size must however be done.
-        <p>It is well known that the electrostatic potential (arising from ion-ion, ion-electron, and electron-electron interactions) is ill-defined within periodic boundary conditions.
+        <p>Depending on the dimension, different treatment of the Coulomb interaction can be enforced, governed by [[icoulomb]].
+
+        <p>Additional information concerning [[usepotzero]]. It is well known that the electrostatic potential (arising from ion-ion, ion-electron, and electron-electron interactions) is ill-defined within periodic boundary conditions.
         However, it is less well known that the total energy of a charged cell is also ill-defined.
         In fact, after a careful derivation in [[Bruneval2014]], it was shown that the above two statements are tightly linked:
         when the number of electrons differs from the number of protons in a cell, the necessary compensating background that enforces the overall charge neutrality
