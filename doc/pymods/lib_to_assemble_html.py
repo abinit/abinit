@@ -256,16 +256,17 @@ def bibtex2html(str_input):
 
   str=str_input
 
-  #Subscripts
+  #Subscripts/superscripts without parentheses
   for i in string.digits:
     string_old='$_'+i+'$'
     string_new="<sub>"+i+"</sub>"
     str=str.replace(string_old,string_new)
-    string_old='$_{'+i+'}$'
+    string_old='$^'+i+'$'
+    string_new="<sup>"+i+"</sup>"
     str=str.replace(string_old,string_new)
 
   #Superscripts
-  converted_str=str
+  converted_str=convert_subscripts(str)
   str=convert_superscripts(converted_str)
 
   #Greek letters
@@ -334,10 +335,24 @@ def suppress_parentheses(text):
 
 def convert_superscripts(text):
   def strip_text(mymatch):
-    stripped_text = <sub>+mymatch.group()[2:-1].strip()+</sub>
+    stripped_text = "<sup>"+mymatch.group()[2:-1].strip()+"</sup>"
     return stripped_text
 
-  p=re.compile("$_([a-zA-Z0-9_ */<>.|:+#@]*)$")
+  p=re.compile("\\$\\^\\{([a-zA-Z0-9_ */<>.|:+#@]*)\\}\\$")
+  if text is None:
+    return ""
+  stripped_text=p.sub(strip_text,text)
+
+  return stripped_text
+
+################################################################################
+
+def convert_subscripts(text):
+  def strip_text(mymatch):
+    stripped_text = "<sub>"+mymatch.group()[2:-1].strip()+"</sub>"
+    return stripped_text
+
+  p=re.compile("\\$_\\{([a-zA-Z0-9_ */<>.|:+#@]*)\\}\\$")
   if text is None:
     return ""
   stripped_text=p.sub(strip_text,text)
