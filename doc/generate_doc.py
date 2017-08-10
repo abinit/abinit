@@ -39,8 +39,8 @@ sys.path.insert(0,pack_dir)
 import doc
 
 from doc.pymods.variables import *
-from doc.pymods.lib_assemble_html import *
-from doc.pymods.lib_tex2html import *
+from doc.pymods.assemble_html_fcts import *
+from doc.pymods.tex2html_fcts import *
 
 debug = 0
 
