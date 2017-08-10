@@ -30,11 +30,23 @@
 <h3><b>1. Introduction.</b></h3>
 
 
-<br/>Metallic as well as insulating systems can be treated. Schemes for
-determination of the occupation number include the Fermi broadening,
+<br/>Metallic as well as insulating systems can be treated, depending on the
+value of <a href="../../input_variables/generated_files/varset_basic.html#occopt">occopt</a>. The default value of <a href="../../input_variables/generated_files/varset_basic.html#occopt">occopt</a> corresponds to an insulator (or finite molecule): 
+the number of bands (or states for a molecule) is deduced from the number of electrons brought
+by each pseudopotential ion, and then all the bands are occupied (by two electrons in case of a non-spin-polarized
+system, or by 1 electron in the cas of a spin-polarized system), and a small number of empty bands are added,
+e.g. to obtain the band gap. 
+<p>For a metallic system, use a value of <a href="../../input_variables/generated_files/varset_basic.html#occopt">occopt</a> between 3 and 7. ABINIT will compute a default number
+of bands, including some nearly unoccupied ones, and find the occupation numbers.
+The different values of <a href="../../input_variables/generated_files/varset_basic.html#occopt">occopt</a> correspond to different smearing schemes (smearning defined by <a href="../../input_variables/generated_files/varset_gstate.html#tsmear">tsmear</a> 
+for defining the occupation
+numbers, e.g. Fermi broadening,
 the Gaussian broadening, the Gaussian-Hermite broadening, as well as
 the modifications proposed by Marzari. Finite temperatures
-can also be treated using a smearing scheme (Verstraete scheme).
+can also be treated thanks to a smearing scheme (Verstraete scheme) using <a href="../../input_variables/generated_files/varset_gstate.html#tphysel">tphysel</a>.
+<p>It is possible to define manually the number of bands (input variable <a href="../../input_variables/generated_files/varset_basic.html#nband">nband</a>) as well as the
+occupation numbers (input variable <a href="../../input_variables/generated_files/varset_gstate.html#occ">occ</a>). This might be useful to perform a &Delta;-SCF calculation
+for excited states.
 <br><br><a href=#top>Go to the top</a>
 
 

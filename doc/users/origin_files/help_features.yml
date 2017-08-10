@@ -197,8 +197,9 @@ sec7:
   <ol>
    <li>[[topic:GW|GW calculations]]</li>
    <li>[[topic:BSE|Bethe-Salpeter calculations]]</li>
-   <li>[[topic:GWls|GW- Lanczos-Sternheimer method]]</li>
    <li>[[topic:TDDFT|TDDFT calculations]]</li>
+   <li>[[topic:DeltaSCF|DeltaSCF calculations]]</li>
+   <li>[[topic:GWls|GW- Lanczos-Sternheimer method]]</li>
   </ol>
 
 ## Each section must have a title, that will form the table of content.

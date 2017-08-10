@@ -264,6 +264,10 @@ def bibtex2html(str_input):
     string_old='$_{'+i+'}$'
     str=str.replace(string_old,string_new)
 
+  #Superscripts
+  converted_str=str
+  str=convert_superscripts(converted_str)
+
   #Greek letters
   list_signs=["alpha","beta","gamma","epsilon","delta","zeta","eta","theta","iota","kappa","lambda","mu","nu","xi","omicron","pi","rho","sigma","tau","upsilon","phi","chi","psi","omega"]
   list_signs_uplower=[]
@@ -325,6 +329,21 @@ def suppress_parentheses(text):
   stripped_text=p.sub(strip_text,text)
 
   return stripped_text
+
+################################################################################
+
+def convert_superscripts(text):
+  def strip_text(mymatch):
+    stripped_text = <sub>+mymatch.group()[2:-1].strip()+</sub>
+    return stripped_text
+
+  p=re.compile("$_([a-zA-Z0-9_ */<>.|:+#@]*)$")
+  if text is None:
+    return ""
+  stripped_text=p.sub(strip_text,text)
+
+  return stripped_text
+
 
 ################################################################################
 

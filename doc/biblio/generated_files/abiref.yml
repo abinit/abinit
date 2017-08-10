@@ -1212,6 +1212,15 @@
   number : 12
 -
   ENTRYTYPE : article
+  ID : Jia2017
+  author : Yongchao Jia and Samuel Ponc\'e and Anna Miglio and Masayoshi Mikami and Xavier Gonze
+  title : Assessment of First-Principles and Semiempirical Methodologies for Absorption and Emission Energies of Ce$^3$$^+$-Doped Luminescent Materials
+  journal : Adv. Optical Mater.
+  year : 2017
+  volume : 5
+  pages : 1600997
+-
+  ENTRYTYPE : article
   ID : Jollet2009
   author : F. Jollet and G. Jomard and B. Amadon and J.P. Crocombette and D. Torumba
   title : Hybrid functional for correlated electrons in the projector augmented-wave formalism: Study of multiple minima for actinide oxides
