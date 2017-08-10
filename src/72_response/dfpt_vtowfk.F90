@@ -125,7 +125,7 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
 & dim_eig2rf,dtfil,dtset,&
 & edocc_k,eeig0_k,eig0_k,eig0_kq,eig1_k,&
 & ek0_k,ek1_k,eloc0_k,enl0_k,enl1_k,&
-& fermie1,gh0c1_set,gh1c_set,grad_berry,gs_hamkq,&
+& fermie1,ffnl1,ffnl1_test,gh0c1_set,gh1c_set,grad_berry,gs_hamkq,&
 & ibg,ibgq,ibg1,icg,icgq,icg1,idir,ikpt,ipert,&
 & isppol,mband,mcgq,mcprjq,mkmem,mk1mem,&
 & mpi_enreg,mpw,mpw1,natom,nband_k,ncpgr,&
@@ -181,6 +181,7 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
 !arrays
  real(dp),intent(in) :: cg(2,mpw*nspinor*mband*mkmem*nsppol),cgq(2,mcgq)
  real(dp),intent(in) :: eig0_k(nband_k),eig0_kq(nband_k)
+ real(dp),intent(in) :: ffnl1(:,:,:,:),ffnl1_test(:,:,:,:)
  real(dp),intent(in) :: grad_berry(2,mpw1*nspinor,nband_k)
  real(dp),intent(in) :: occ_k(nband_k),rocceig(nband_k,nband_k)
  real(dp),intent(inout) :: cg1(2,mpw1*nspinor*mband*mk1mem*nsppol)
@@ -302,7 +303,7 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
 
 !For rf2 perturbation :
  if(ipert==natom+10.or.ipert==natom+11) then
-   call rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,gs_hamkq,ibg,icg,idir,ikpt,ipert,isppol,mkmem,&
+   call rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,ffnl1,ffnl1_test,gs_hamkq,ibg,icg,idir,ikpt,ipert,isppol,mkmem,&
    mpi_enreg,mpw,nband_k,nsppol,rf_hamkq,rf_hamk_dir2,occ_k,rocceig,ddk_f)
  end if
 

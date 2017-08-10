@@ -71,7 +71,7 @@
 #include "abi_common.h"
 
 subroutine getgh2c(cwavef,cwaveprj,gh2c,gs2c,gs_hamkq,gvnl2,idir,ipert,lambda,&
-&                  mpi_enreg,optlocal,optnl,opt_gvnl2,rf_hamkq,sij_opt,tim_getgh2c,usevnl,conj,enl)
+&                  mpi_enreg,optlocal,optnl,opt_gvnl2,rf_hamkq,sij_opt,tim_getgh2c,usevnl,conj,enl,optkin)
 
  use defs_basis
  use defs_abitypes
@@ -94,6 +94,7 @@ subroutine getgh2c(cwavef,cwaveprj,gh2c,gs2c,gs_hamkq,gvnl2,idir,ipert,lambda,&
 !scalars
  logical,intent(in),optional :: conj
  integer,intent(in) :: idir,ipert,optlocal,optnl,opt_gvnl2,sij_opt,tim_getgh2c,usevnl
+ integer,intent(in),optional :: optkin
  real(dp),intent(in) :: lambda
  type(MPI_type),intent(in) :: mpi_enreg
  type(gs_hamiltonian_type),intent(inout),target :: gs_hamkq
@@ -231,17 +232,6 @@ subroutine getgh2c(cwavef,cwaveprj,gh2c,gs2c,gs_hamkq,gvnl2,idir,ipert,lambda,&
  compute_conjugate = .false.
  if(present(conj)) compute_conjugate = conj
 
-!LTEST
-! write(msg,'(a,7i3)') ' getgh2c inputs : ',idir,ipert,optlocal,optnl,opt_gvnl2,sij_opt,usevnl
-! call wrtout(std_out,msg,'COLL')
-! write(msg,'(2(a,es17.8E3))') ' getgh2c inputs (1) : ',sum(abs(cwavef)),',',sum(abs(gvnl2))
-! call wrtout(std_out,msg,'COLL')
-! if (present(enl)) then
-!   write(msg,'(a,es17.8E3)') ' getgh2c inputs (2) : ',sum(abs(enl))
-!   call wrtout(std_out,msg,'COLL')
-! end if
-!LTEST
-
 !======================================================================
 !== Apply the 2nd-order local potential to the wavefunction
 !======================================================================
@@ -330,8 +320,7 @@ subroutine getgh2c(cwavef,cwaveprj,gh2c,gs2c,gs_hamkq,gvnl2,idir,ipert,lambda,&
 
 !      Compute part of H^(2) due to derivative of projectors (idir1) and derivative of Dij (idir2)
 !      sum_{i,j} chi_ij(idir2) d(|p_i><p_j|)/dk(idir1) | psi^(0) >
-       cpopt=4*usecprj
-       choice=5 ; paw_opt=1 ; signs=2
+       cpopt=4*usecprj ; choice=5 ; paw_opt=1 ; signs=2
        call nonlop(choice,cpopt,cwaveprj_ptr,enlout_dum,gs_hamkq,idir1,(/zero/),mpi_enreg,1,nnlout,&
 &       paw_opt,signs,svectout_dum,tim_nonlop,cwavef,nonlop_out,enl=enl_ptr)
 
@@ -351,9 +340,8 @@ subroutine getgh2c(cwavef,cwaveprj,gh2c,gs2c,gs_hamkq,gvnl2,idir,ipert,lambda,&
 
 !    Compute derivatives due to projectors |d^2[p_i]/dk1dk2>,|d[p_i]/dk1>,|d[p_i]/dk2>
 !    i * sum_{i,j} (d(|p_i><dp_j/dk(idir2)|)/dk(idir1) | psi^(0) >
-     cpopt=-1+5*usecprj
-     choice=81 ; paw_opt=3 ; signs=2
-     call nonlop(choice,cpopt,cwaveprj_ptr,enlout_dum,gs_hamkq,idirc,(/lambda/),mpi_enreg,1,nnlout,&
+     cpopt=-1+5*usecprj ; choice=81 ; paw_opt=3 ; signs=2
+     call nonlop(choice,cpopt,cwaveprj_ptr,enlout_dum,gs_hamkq,idirc,(/zero/),mpi_enreg,1,nnlout,&
 &     paw_opt,signs,nonlop_out,tim_nonlop,cwavef,vectout_dum)
 
      if(compute_conjugate) then
@@ -411,8 +399,7 @@ subroutine getgh2c(cwavef,cwaveprj,gh2c,gs2c,gs_hamkq,gvnl2,idir,ipert,lambda,&
 
 !      Compute part of H^(2) due to derivative of projectors (idir1) and derivative of Dij (idir2)
 !      sum_{i,j} chi_ij(idir2) d(|p_i><p_j|)/dtau(idir1) | psi^(0) >
-       cpopt=4*usecprj
-       choice=2 ; paw_opt=1 ; signs=2
+       cpopt=4*usecprj ; choice=2 ; paw_opt=1 ; signs=2
        call nonlop(choice,cpopt,cwaveprj_ptr,enlout_dum,gs_hamkq,idir1,(/zero/),mpi_enreg,1,nnlout,&
 &       paw_opt,signs,svectout_dum,tim_nonlop,cwavef,nonlop_out,enl=enl_ptr,iatom_only=iatm)
 
@@ -432,9 +419,8 @@ subroutine getgh2c(cwavef,cwaveprj,gh2c,gs2c,gs_hamkq,gvnl2,idir,ipert,lambda,&
 
 !    Compute derivatives due to projectors |d^2[p_i]/dtau1dk2>,|d[p_i]/dtau1>,|d[p_i]/dk2>
 !    i * sum_{i,j} (d(|p_i><dp_j/dk(idir2)|)/dtau(idir1) | psi^(0) >
-     cpopt=-1+5*usecprj
-     choice=54 ; paw_opt=3 ; signs=2
-     call nonlop(choice,cpopt,cwaveprj_ptr,enlout_dum,gs_hamkq,idirc,(/lambda/),mpi_enreg,1,nnlout,&
+     cpopt=-1+5*usecprj ; choice=54 ; paw_opt=3 ; signs=2
+     call nonlop(choice,cpopt,cwaveprj_ptr,enlout_dum,gs_hamkq,idirc,(/zero/),mpi_enreg,1,nnlout,&
 &     paw_opt,signs,nonlop_out,tim_nonlop,cwavef,vectout_dum,iatom_only=iatm)
 
      if(compute_conjugate) then
@@ -487,7 +473,11 @@ subroutine getgh2c(cwavef,cwaveprj,gh2c,gs2c,gs_hamkq,gvnl2,idir,ipert,lambda,&
 !== Apply the 2nd-order kinetic operator to the wavefunction
 !======================================================================
 
- has_kin=(ipert==natom+10)
+ if (present(optkin)) then
+   has_kin=(optkin/=0.and.ipert==natom+10)
+ else
+   has_kin=(ipert==natom+10)
+ end if
 
 !k-point perturbation
 !-------------------------------------------

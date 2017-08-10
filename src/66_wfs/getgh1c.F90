@@ -908,8 +908,8 @@ end subroutine rf_transgrid_and_pack
 
 subroutine getgh1c_setup(gs_hamkq,rf_hamkq,dtset,psps,kpoint,kpq,idir,ipert,&           ! In
 &                natom,rmet,gprimd,gmet,istwf_k,npw_k,npw1_k,&                          ! In
-&                useylmgr1,kg_k,ylm_k,kg1_k,ylm1_k,ylmgr1_k,&                           ! In
-&                dkinpw,nkpg,nkpg1,kpg_k,kpg1_k,kinpw1,ffnlk,ffnl1,ph3d,ph3d1,&         ! Out
+&                useylmgr1,kg_k,ylm_k,kg1_k,ylm1_k,ylmgr1_k,dkinpw,nkpg,&               ! In
+&                nkpg1,kpg_k,kpg1_k,kinpw1,ffnlk,ffnl1,ffnl1_test,ph3d,ph3d1,&          ! Out
 &                ddkinpw,dkinpw2,rf_hamk_dir2)                                          ! Optional
 
  use defs_basis
@@ -947,13 +947,13 @@ subroutine getgh1c_setup(gs_hamkq,rf_hamkq,dtset,psps,kpoint,kpq,idir,ipert,&   
  real(dp),intent(in) :: ylm_k(npw_k,psps%mpsang*psps%mpsang*psps%useylm)
  real(dp),intent(in) :: ylmgr1_k(npw1_k,3+6*((ipert-natom)/10),psps%mpsang*psps%mpsang*psps%useylm*useylmgr1)
  real(dp),intent(in) :: ylm1_k(npw1_k,psps%mpsang*psps%mpsang*psps%useylm)
- real(dp),allocatable,intent(out) :: dkinpw(:),kinpw1(:),ffnlk(:,:,:,:),ffnl1(:,:,:,:)
+ real(dp),allocatable,intent(out) :: dkinpw(:),kinpw1(:),ffnlk(:,:,:,:),ffnl1(:,:,:,:),ffnl1_test(:,:,:,:)
  real(dp),allocatable,intent(out),optional :: dkinpw2(:),ddkinpw(:)
  real(dp),allocatable,intent(out) :: kpg_k(:,:),kpg1_k(:,:),ph3d(:,:,:),ph3d1(:,:,:)
 
 !Local variables-------------------------------
 !scalars
- integer :: dimffnl1,dimffnlk,ider,idir0,idir1,idir2,istr,ntypat
+ integer :: dimffnl1,dimffnlk,ider,idir0,idir1,idir2,istr,ntypat,print_info
  logical :: qne0
 !arrays
  real(dp) :: ylmgr_dum(1,1,1)
@@ -1037,6 +1037,17 @@ subroutine getgh1c_setup(gs_hamkq,rf_hamkq,dtset,psps,kpoint,kpq,idir,ipert,&   
  call mkffnl(psps%dimekb,dimffnl1,psps%ekb,ffnl1,psps%ffspl,gmet,gprimd,ider,idir0,&
 & psps%indlmn,kg1_k,kpg1_k,kpq,psps%lmnmax,psps%lnmax,psps%mpsang,psps%mqgrid_ff,nkpg1,&
 & npw1_k,ntypat,psps%pspso,psps%qgrid_ff,rmet,psps%usepaw,psps%useylm,ylm1_k,ylmgr1_k)
+
+!Compute ffnl for nonlop with signs = 1
+ print_info = 0
+ if (dtset%prtvol==-19.or.dtset%prtvol==-20.or.dtset%prtvol==-21) print_info = 1
+ if (print_info/=0.and.(ipert==natom+10.or.ipert==natom+11)) then
+   ABI_ALLOCATE(ffnl1_test,(npw1_k,dimffnl1,psps%lmnmax,psps%ntypat))
+   idir0 = 0 ! for nonlop with signs = 1
+   call mkffnl(psps%dimekb,dimffnl1,psps%ekb,ffnl1_test,psps%ffspl,gs_hamkq%gmet,gs_hamkq%gprimd,ider,idir0,&
+&   psps%indlmn,kg1_k,kpg1_k,kpq,psps%lmnmax,psps%lnmax,psps%mpsang,psps%mqgrid_ff,nkpg1,&
+&   npw1_k,psps%ntypat,psps%pspso,psps%qgrid_ff,rmet,psps%usepaw,psps%useylm,ylm1_k,ylmgr1_k)
+ end if
 
 !===== Preparation of the kinetic contributions
 

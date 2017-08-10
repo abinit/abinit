@@ -290,7 +290,7 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
  real(dp),allocatable :: doccde_k(:),doccde_kq(:)
  real(dp),allocatable :: edocc_k(:),eeig0_k(:),eig0_k(:),eig0_kq(:),eig1_k(:)
  real(dp),allocatable :: ek0_k(:),ek1_k(:),eloc0_k(:),enl0_k(:),enl1_k(:)
- real(dp),allocatable :: ffnl1(:,:,:,:),ffnlk(:,:,:,:)
+ real(dp),allocatable :: ffnl1(:,:,:,:),ffnl1_test(:,:,:,:),ffnlk(:,:,:,:)
  real(dp),allocatable :: grad_berry(:,:,:),kinpw1(:),kpg1_k(:,:)
  real(dp),allocatable :: kpg_k(:,:),occ_k(:),occ_kq(:)
  real(dp),allocatable :: ph3d(:,:,:),ph3d1(:,:,:),resid_k(:)
@@ -549,7 +549,7 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
      call getgh1c_setup(gs_hamkq,rf_hamkq,dtset,psps,&                              ! In
      kpoint,kpq,idir,ipert,natom,rmet,gprimd,gmet,istwf_k,&                         ! In
      npw_k,npw1_k,useylmgr1,kg_k,ylm_k,kg1_k,ylm1_k,ylmgr1_k,&                      ! In
-     dkinpw,nkpg,nkpg1,kpg_k,kpg1_k,kinpw1,ffnlk,ffnl1,ph3d,ph3d1,&                 ! Out
+     dkinpw,nkpg,nkpg1,kpg_k,kpg1_k,kinpw1,ffnlk,ffnl1,ffnl1_test,ph3d,ph3d1,&      ! Out
      ddkinpw=ddkinpw,dkinpw2=dkinpw2,rf_hamk_dir2=rf_hamk_dir2)                     ! Out
 
 !    Compute the gradient of the Berry-phase term
@@ -579,7 +579,7 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
 !    Note that dfpt_vtowfk is called with kpoint, while kpt is used inside vtowfk3
      call dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dim_eig2rf,dtfil,&
 &     dtset,edocc_k,eeig0_k,eig0_k,eig0_kq,eig1_k,ek0_k,ek1_k,eloc0_k,enl0_k,enl1_k,fermie1,&
-&     gh0c1_set,gh1c_set,grad_berry,gs_hamkq,ibg,ibgq,ibg1,icg,icgq,icg1,idir,ikpt,ipert,isppol,&
+&     ffnl1,ffnl1_test,gh0c1_set,gh1c_set,grad_berry,gs_hamkq,ibg,ibgq,ibg1,icg,icgq,icg1,idir,ikpt,ipert,isppol,&
 &     mband,mcgq,mcprjq,mkmem,mk1mem,mpi_enreg,mpw,mpw1,natom,nband_k,ncpgr,nnsclo_now,&
 &     npw_k,npw1_k,dtset%nspinor,nsppol,n4,n5,n6,occ_k,pawrhoij1_unsym,prtvol,psps,resid_k,&
 &     rf_hamkq,rf_hamk_dir2,rhoaug1,rocceig,ddk_f,wtk_k,nlines_done,cg1_out)
@@ -599,6 +599,9 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
      end if
      ABI_DEALLOCATE(ffnlk)
      ABI_DEALLOCATE(ffnl1)
+     if (allocated(ffnl1_test)) then
+       ABI_DEALLOCATE(ffnl1_test)
+     end if
      ABI_DEALLOCATE(eig0_k)
      ABI_DEALLOCATE(eig0_kq)
      ABI_DEALLOCATE(rocceig)

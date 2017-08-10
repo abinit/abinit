@@ -454,12 +454,10 @@ end subroutine rf2_accumulate_bands
 !!
 !! SOURCE
 
-!subroutine rf2_apply_hamiltonian(rf2,cg_jband,cprj_jband,cwave,cwaveprj,h_cwave,s_cwave,dtfil,eig0,eig1_k_jband,&
-!&                                jband,gs_hamkq,gvnl1,idir,ipert,ikpt,isppol,mband,mkmem,mpi_enreg,nsppol,&
-!                                 print_info,prtvol,rf_hamk_idir)
 subroutine rf2_apply_hamiltonian(cg_jband,cprj_jband,cwave,cwaveprj,h_cwave,s_cwave,eig0,eig1_k_jband,&
 &                                jband,gs_hamkq,gvnl1,idir,ipert,ikpt,isppol,mkmem,mpi_enreg,nband_k,nsppol,&
-                                 print_info,prtvol,rf_hamk_idir,size_cprj,size_wf,conj,enl)
+&                                print_info,prtvol,rf_hamk_idir,size_cprj,size_wf,&
+&                                conj,enl,ffnl1,ffnl1_test) ! optional
 
  use defs_basis
  use defs_abitypes
@@ -492,6 +490,7 @@ subroutine rf2_apply_hamiltonian(cg_jband,cprj_jband,cwave,cwaveprj,h_cwave,s_cw
 !arrays
  real(dp),intent(in),target :: cg_jband(2,size_wf*print_info*nband_k,2)
  real(dp),intent(in),optional,target :: enl(gs_hamkq%dimekb1,gs_hamkq%dimekb2,gs_hamkq%nspinor**2)
+ real(dp),intent(in),optional :: ffnl1(:,:,:,:),ffnl1_test(:,:,:,:)
  real(dp),intent(in) :: eig0(nband_k),eig1_k_jband(2*nband_k)
  real(dp),intent(inout) :: gvnl1(2,size_wf)
  real(dp),intent(inout) :: cwave(2,size_wf),h_cwave(2,size_wf),s_cwave(2,size_wf)
@@ -499,12 +498,14 @@ subroutine rf2_apply_hamiltonian(cg_jband,cprj_jband,cwave,cwaveprj,h_cwave,s_cw
 
 !Local variables ---------------------------------------
 !scalars
- integer,parameter :: berryopt=0,tim_getghc=1,tim_getgh1c=1,tim_getgh2c=1 ! to change
+ integer,parameter :: berryopt=0,tim_getghc=0,tim_getgh1c=0,tim_getgh2c=0,tim_nonlop=0
  integer,parameter :: alpha(9)=(/1,2,3,2,1,1,3,3,2/),beta(9)=(/1,2,3,3,3,2,2,1,1/)
- integer :: choice,cpopt,iband,idirc,idir1,idir2,natom,nnlout,paw_opt,signs,sij_opt
+ integer :: choice,cpopt,iatom,iband,idirc,idir1,idir2,idir_dum,natom,nnlout,paw_opt,signs,sij_opt
  integer :: opt_gvnl1,opt_gvnl2,optlocal,optnl,usevnl
  logical :: compute_conjugate,has_cprj_jband,has_cwaveprj,pert_phon_elfd
  real(dp) :: dotr,doti,dotr2,doti2,enlout(18*gs_hamkq%natom),tol_test
+ real(dp), pointer :: enl_ptr(:,:,:)
+ real(dp),allocatable,target :: enl_temp(:,:,:)
  character(len=500) :: msg
 
 !arrays
@@ -646,74 +647,167 @@ subroutine rf2_apply_hamiltonian(cg_jband,cprj_jband,cwave,cwaveprj,h_cwave,s_cw
 ! *******************************************************************************************
  else if (ipert==natom+10.or.ipert==natom+11.or.pert_phon_elfd) then
 
+! *******************************************************************************************
 !  Test if < u^(0) | H^(2) | u^(0) > from getgh2c is equal to nonlop with signs=1
-   if(print_info/=0) then !.and.pert_phon_elfd) then
+   if(print_info/=0.and.present(ffnl1).and.present(ffnl1_test)) then
 
-!LTEST
-     write(99,'(a)') ' *** TEST RF2 APPLY HAM *** '
-!LTEST
      cwave_j => cg_jband(:,1+(jband-1)*size_wf:jband*size_wf,1)
+
      ABI_ALLOCATE(iddk,(2,size_wf))
-     iddk(:,:) = zero;if (ipert==natom+11.or.pert_phon_elfd) iddk(:,:)=cg_jband(:,1+(jband-1)*size_wf:jband*size_wf,2)
-!LTEST
-     write(99,'(a,i3)') ' *** getgh2c ipert =',ipert
-!LTEST
+     iddk(:,:) = cwave_j(:,:)
+
      call getgh2c(cwave_j,cprj_empty,h_cwave,s_cwave,gs_hamkq,iddk,idir,ipert,zero,&
                   mpi_enreg,optlocal,optnl,opt_gvnl2,rf_hamk_idir,sij_opt,tim_getgh2c,usevnl,&
-                  conj=compute_conjugate)
-!LTEST
-!     write(msg,'(2(a,es17.8E3))') 'RF2 TEST GETGH2C : |h_cwave| = ',sum(abs(h_cwave)),' |s_cwave| = ',sum(abs(s_cwave))
-!     call wrtout(std_out,msg,'COLL')
-!LTEST
+                  conj=compute_conjugate,optkin=0,enl=enl)
+     ABI_DEALLOCATE(iddk)
+
      call dotprod_g(dotr,doti,gs_hamkq%istwf_k,size_wf,2,cwave_j,h_cwave,mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
-!LTEST
-     write(msg,'(2(a,es17.8E3))') 'RF2 TEST GETGH2C : dotr = ',dotr,' doti = ',doti
-     call wrtout(std_out,msg,'COLL')
-!LTEST
+
      idir1=alpha(idir);idir2=beta(idir)
      idirc=3*(idir1-1)+idir2
+
      enlout = zero
+
+!    Change the pointer ffnl_k to ffnl1_test (idir_ffnl=0, for nonlop with signs=1)
+     call load_k_hamiltonian(gs_hamkq,ffnl_k=ffnl1_test)
+
+     signs=1
+     dotr2 = 0
+     doti2 = 0
+
+!    ************************
+!    IPERT == NATOM+10
+!    ************************
      if (ipert==natom+10) then
-       cpopt=-1; choice=8; signs=1; paw_opt=1; if (gs_hamkq%usepaw==0) paw_opt=0
-       nnlout = 6
-!LTEST
-       write(99,'(a,i3)')       ' *** nonlop ipert =',ipert
-!LTEST
+
+       cpopt=-1; choice=8; paw_opt=1; if (gs_hamkq%usepaw==0) paw_opt=0 ; nnlout = 6
+
        call nonlop(choice,cpopt,cprj_empty,enlout,gs_hamkq,idirc,(/zero/),mpi_enreg,1,nnlout,&
-&       paw_opt,signs,svectout_dum,tim_getgh2c,cwave_j,iddk)
-       write(99,'(a)') ch10
-       write(99,'(a,es17.8E3)') ' enlout(1) = ',enlout(1)
-       write(99,'(a,es17.8E3)') ' enlout(2) = ',enlout(2)
-       write(99,'(a,es17.8E3)') ' enlout(3) = ',enlout(3)
-       write(99,'(a,es17.8E3)') ' enlout(4) = ',enlout(4)
-       write(99,'(a,es17.8E3)') ' enlout(5) = ',enlout(5)
-       write(99,'(a,es17.8E3)') ' enlout(6) = ',enlout(6)
+&       paw_opt,signs,svectout_dum,tim_getgh2c,cwave_j,svectout_dum)
+!       write(99,'(a)') ch10
+!       write(99,'(a,es17.8E3)') ' enlout(1) = ',enlout(1)
+!       write(99,'(a,es17.8E3)') ' enlout(2) = ',enlout(2)
+!       write(99,'(a,es17.8E3)') ' enlout(3) = ',enlout(3)
+!       write(99,'(a,es17.8E3)') ' enlout(4) = ',enlout(4)
+!       write(99,'(a,es17.8E3)') ' enlout(5) = ',enlout(5)
+!       write(99,'(a,es17.8E3)') ' enlout(6) = ',enlout(6)
        dotr2 = enlout(idir)
-       write(msg,'(2(a,es17.8E3))') 'RF2 TEST GETGH2C : dotr = ',dotr,' dotr2 = ',dotr2
+       write(msg,'(2(a,es17.8E3))') 'RF2 TEST GETGH2C : dotr2 = ',dotr2,' doti2 = ',zero
        call wrtout(std_out,msg,'COLL')
-     end if
+
+     end if ! IPERT == NATOM+10
+
+!    ************************
+!    IPERT == NATOM+11
+!    ************************
+     if (ipert==natom+11) then
+
+       if (present(enl)) then
+         enl_ptr => enl
+       else if (associated(rf_hamk_idir%e1kbfr).and.associated(rf_hamk_idir%e1kbsc).and.optnl==2) then
+         ABI_ALLOCATE(enl_temp,(gs_hamkq%dimekb1,gs_hamkq%dimekb2,gs_hamkq%nspinor**2))
+         enl_temp = rf_hamk_idir%e1kbfr + rf_hamk_idir%e1kbsc
+         enl_ptr => enl_temp
+       else if (associated(rf_hamk_idir%e1kbfr)) then
+         enl_ptr => rf_hamk_idir%e1kbfr
+       end if
+
+!      Compute application of dS/dk1 to cwavef
+!      sum_{i,j} s_ij  < psi^(0) | d(|p_i><p_j|)/dk(idir1) | psi^(0) >
+       cpopt=-1 ; choice=5 ; paw_opt=3 ; nnlout=3
+       call nonlop(choice,cpopt,cprj_empty,enlout,gs_hamkq,idir_dum,(/zero/),mpi_enreg,1,nnlout,&
+&       paw_opt,signs,svectout_dum,tim_nonlop,cwave_j,svectout_dum)
+       dotr2 = enlout(idir1)
+
+!      Compute part of H^(2) due to derivative of projectors (idir1) and derivative of Dij (idir2)
+!      sum_{i,j} chi_ij(idir2) < psi^(0) | d(|p_i><p_j|)/dk(idir1) | psi^(0) >
+       cpopt=-1 ; choice=5 ; paw_opt=1 ; nnlout=3
+       call nonlop(choice,cpopt,cprj_empty,enlout,gs_hamkq,idir_dum,(/zero/),mpi_enreg,1,nnlout,&
+&       paw_opt,signs,svectout_dum,tim_nonlop,cwave_j,svectout_dum,enl=enl_ptr)
+       dotr2 = dotr2 + enlout(idir1)
+
+!      Compute derivatives due to projectors |d^2[p_i]/dk1dk2>,|d[p_i]/dk1>,|d[p_i]/dk2>
+!      i * sum_{i,j} < psi^(0) | (d(|p_i><dp_j/dk(idir2)|)/dk(idir1) | psi^(0) >
+       cpopt=-1 ; choice=81 ; paw_opt=3 ; nnlout=18
+       call nonlop(choice,cpopt,cprj_empty,enlout,gs_hamkq,idir_dum,(/zero/),mpi_enreg,1,nnlout,&
+&       paw_opt,signs,svectout_dum,tim_nonlop,cwave_j,svectout_dum)
+       dotr2 = dotr2 - enlout(2*idirc  )
+       doti2 = doti2 + enlout(2*idirc-1)
+
+       write(msg,'(2(a,es17.8E3))') 'RF2 TEST GETGH2C : dotr2 = ',dotr2,' doti2 = ',doti2
+       call wrtout(std_out,msg,'COLL')
+
+     end if ! IPERT == NATOM+11
+
+!    ************************
+!    PERT_PHON_ELFD
+!    ************************
+     if (pert_phon_elfd) then
+
+       if (present(enl)) then
+         enl_ptr => enl
+       else if (associated(rf_hamk_idir%e1kbfr).and.associated(rf_hamk_idir%e1kbsc).and.optnl==2) then
+         ABI_ALLOCATE(enl_temp,(gs_hamkq%dimekb1,gs_hamkq%dimekb2,gs_hamkq%nspinor**2))
+         enl_temp = rf_hamk_idir%e1kbfr + rf_hamk_idir%e1kbsc
+         enl_ptr => enl_temp
+       else if (associated(rf_hamk_idir%e1kbfr)) then
+         enl_ptr => rf_hamk_idir%e1kbfr
+       end if
+
+       iatom = ipert - natom - 11
+
+!      Compute application of dS/dtau1 to i*d[cwavef]/dk2
+!      sum_{i,j} s_ij < psi^(0) | d(|p_i><p_j|)/dtau(idir1) | i*psi^(k(idir2)) >
+       cpopt=-1 ; choice=2 ; paw_opt=3 ; nnlout=3*natom
+       call nonlop(choice,cpopt,cprj_empty,enlout,gs_hamkq,idir_dum,(/zero/),mpi_enreg,1,nnlout,&
+&       paw_opt,signs,svectout_dum,tim_nonlop,cwave_j,svectout_dum)
+       dotr2 = enlout(3*(iatom-1)+idir1)
+
+!      Compute part of H^(2) due to derivative of projectors (idir1) and derivative of Dij (idir2)
+!      sum_{i,j} chi_ij(idir2) < psi^(0) | d(|p_i><p_j|)/dtau(idir1) | psi^(0) >
+       cpopt=-1 ; choice=2 ; paw_opt=1 ; nnlout=3*natom
+       call nonlop(choice,cpopt,cprj_empty,enlout,gs_hamkq,idir_dum,(/zero/),mpi_enreg,1,nnlout,&
+&       paw_opt,signs,svectout_dum,tim_nonlop,cwave_j,svectout_dum,enl=enl_ptr)
+       dotr2 = dotr2 + enlout(3*(iatom-1)+idir1)
+
+!      Compute derivatives due to projectors |d^2[p_i]/dtau1dk2>,|d[p_i]/dtau1>,|d[p_i]/dk2>
+!      i * sum_{i,j} < psi^(0) | (d(|p_i><dp_j/dk(idir2)|)/dtau(idir1) | psi^(0) >
+       cpopt=-1 ; choice=54 ; paw_opt=3 ; nnlout=18*natom
+       call nonlop(choice,cpopt,cprj_empty,enlout,gs_hamkq,idir_dum,(/zero/),mpi_enreg,1,nnlout,&
+&       paw_opt,signs,svectout_dum,tim_nonlop,cwave_j,svectout_dum)
+       dotr2 = dotr2 - enlout(18*(iatom-1)+2*idirc  )
+       doti2 = doti2 + enlout(18*(iatom-1)+2*idirc-1)
+
+       write(msg,'(2(a,es17.8E3))') 'RF2 TEST GETGH2C : dotr2 = ',dotr2,' doti2 = ',doti2
+       call wrtout(std_out,msg,'COLL')
+
+     end if ! PERT_PHON_ELFD
+
      dotr = dotr - dotr2
+     doti = doti - doti2
      dotr = sqrt(dotr**2+doti**2)
-     if (dotr > tol_test) then
+     if (dotr > 10*tol_test) then
        write(msg,'(a,es17.8E3)') 'RF2 TEST GETGH2C : NOT PASSED dotr = ',dotr
        call wrtout(std_out,msg,'COLL')
      end if
-     ABI_DEALLOCATE(iddk)
+
+!    Change the pointer ffnl_k back to ffnl1 (idir_ffnl=4, for nonlop with signs=2)
+     call load_k_hamiltonian(gs_hamkq,ffnl_k=ffnl1)
+
+     if (associated(enl_ptr)) nullify(enl_ptr)
+     if (allocated(enl_temp)) ABI_DEALLOCATE(enl_temp)
 
    end if ! end tests
+! *******************************************************************************************
 
    call getgh2c(cwave,cwaveprj,h_cwave,s_cwave,gs_hamkq,gvnl1,idir,ipert,zero,&
                 mpi_enreg,optlocal,optnl,opt_gvnl2,rf_hamk_idir,sij_opt,tim_getgh2c,usevnl,&
                 conj=compute_conjugate,enl=enl)
-!LTEST
-!   write(msg,'(2(a,es17.8E3))') 'RF2 TEST GETGH2C : |h_cwave| = ',sum(abs(h_cwave)),' |s_cwave| = ',sum(abs(s_cwave))
-!   call wrtout(std_out,msg,'COLL')
-!LTEST
 
  else
 
    h_cwave = zero
-   MSG_ERROR(" rf2_apply_hamiltonian can be used for ipert=0,<=natom+2,natom+10 or natom+11 only.")
+   MSG_ERROR(" rf2_apply_hamiltonian can be used only for : 0<=ipert<=natom+2 and natom+10<=ipert<=2*natom+11.")
    return
 
  end if

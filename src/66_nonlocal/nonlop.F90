@@ -342,18 +342,6 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
 
  DBG_ENTER("COLL")
 
-!LTEST
- if(choice==8) then
-!   write(99,'(a)') ch10
-   write(99,'(a,i3)')       ' *** NONLOP : choice = ',choice
-   write(99,'(a,i3)')       '    signs = ',signs
-   write(99,'(a,i3)')       '    cpopt = ',cpopt
-   write(99,'(a,i3)')       '     idir = ',idir
-!   write(99,'(a,i3)')       '  paw_opt = ',paw_opt
-   write(99,'(a,es17.8E3)') ' |vectin| = ',sum(abs(vectin))
- end if
-!LTEST
-
 !Keep track of time spent in this routine (selection of different slots for different choices)
  call timab(220+tim_nonlop,1,tsec)
 
@@ -480,20 +468,10 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
    ABI_ALLOCATE(kpgout,(npwout,0))
  end if
 
-!LTEST
- if(choice==8) then
-   write(99,'(a,es17.8E3)') ' |ffnlin| = ',sum(abs(ffnlin))
- end if
-!LTEST
-
 !Check some sizes for safety
 !if (paw_opt==0.or.cpopt<2.or.((cpopt==2.or.cpopt==3).and.choice>1)) then
  if (size(ffnlin,1)/=npwin.or.size(ffnlin,3)/=hamk%lmnmax) then
-!LTEST
-   write(msg,'(4(a,i6))') 'Incorrect size for ffnlin! size(ffnlin,1) = ',size(ffnlin,1),&
-   '/',npwin,' size(ffnlin,3) = ',size(ffnlin,3),'/',hamk%lmnmax
-!   msg = 'Incorrect size for ffnlin!'
-!LTEST
+   msg = 'Incorrect size for ffnlin!'
 !   MSG_BUG(msg)
  end if
  if(signs==2) then

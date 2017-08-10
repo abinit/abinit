@@ -66,7 +66,7 @@
 
 #include "abi_common.h"
 
-subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,gs_hamkq,ibg,icg,idir,ikpt,ipert,isppol,mkmem,&
+subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,ffnl1,ffnl1_test,gs_hamkq,ibg,icg,idir,ikpt,ipert,isppol,mkmem,&
                      mpi_enreg,mpw,nband_k,nsppol,rf_hamkq,rf_hamk_dir2,occ_k,rocceig,ddk_f)
 
  use defs_basis
@@ -107,6 +107,7 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,gs_hamkq,ibg,icg,idir,
  real(dp),intent(in),target :: cg(2,mpw*gs_hamkq%nspinor*dtset%mband*mkmem*nsppol)
  real(dp),intent(in) :: eig0_k(dtset%mband)
  real(dp),intent(inout) :: eig1_k(2*dtset%mband**2) ! Here eig1_k contains 2nd order eigenvalues...
+ real(dp),intent(in) :: ffnl1(:,:,:,:),ffnl1_test(:,:,:,:)
  real(dp),intent(in) :: occ_k(nband_k),rocceig(nband_k,nband_k)
  type(pawcprj_type),intent(in) :: cprj(gs_hamkq%natom,gs_hamkq%nspinor*dtset%mband*mkmem*nsppol*gs_hamkq%usecprj)
  type(rf2_t),intent(inout) :: rf2
@@ -588,7 +589,8 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,gs_hamkq,ibg,icg,idir,
 !      and      : d^2S/(dpert1 dpert2)|u^(0)>  (in s_cwave)
        call rf2_apply_hamiltonian(cg_jband,cprj_jband,cwave_j,cprj_j,h_cwave,s_cwave,&
 &       eig0_k,eig1_k_jband,jband,gs_hamkq,gvnl1,idir,ipert,ikpt,isppol,&
-&       mkmem,mpi_enreg,nband_k,nsppol,print_info,dtset%prtvol,rf_hamk_idir,size_cprj,size_wf)
+&       mkmem,mpi_enreg,nband_k,nsppol,print_info,dtset%prtvol,rf_hamk_idir,size_cprj,size_wf,&
+&       ffnl1=ffnl1,ffnl1_test=ffnl1_test)
 !       call rf2_apply_hamiltonian(rf2,cg_jband,cprj_jband,cwave_j,cprj_j,h_cwave,s_cwave,dtfil,&
 !&       eig0_k,eig1_k_jband,jband,gs_hamkq,gvnl1,idir,ipert,ikpt,isppol,dtset%mband,&
 !&       mkmem,mpi_enreg,nsppol,print_info,dtset%prtvol,rf_hamk_idir)
