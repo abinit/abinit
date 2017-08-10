@@ -97,7 +97,7 @@ subroutine initrhoij(cplex,lexexch,lpawu,my_natom,natom,&
  integer :: iatom,iatom_rhoij,ilmn,ispden,itypat,j0lmn,jl,jlmn,jspden,klmn,klmn1,my_comm_atom
  integer :: ngrhoij0,nlmnmix0,nselect,nselect1,nspden_rhoij,use_rhoij_0,use_rhoijres0
  real(dp) :: ratio,ro,roshift,zratio,zz
- logical :: my_atmtab_allocated,paral_atom,test_exexch,test_pawu
+ logical :: my_atmtab_allocated,paral_atom,spinat_zero,test_exexch,test_pawu
 !arrays
  integer,pointer :: my_atmtab(:)
 
@@ -121,6 +121,7 @@ subroutine initrhoij(cplex,lexexch,lpawu,my_natom,natom,&
 
  nspden_rhoij=pawrhoij_get_nspden(nspden,nspinor,pawspnorb)
  ratio=one;if (nspden_rhoij==2) ratio=half
+ spinat_zero=all(abs(spinat(:,:))<tol10)
 
  if (my_natom>0) then
    ngrhoij0=0;if (present(ngrhoij)) ngrhoij0=ngrhoij
@@ -165,7 +166,7 @@ subroutine initrhoij(cplex,lexexch,lpawu,my_natom,natom,&
      if (nspden_rhoij==2) then
        ratio=half
        if ((spinat(3,iatom)>zero.and.ispden==1).or.&
-&       (spinat(3,iatom)<zero.and.ispden==2)) then
+&          (spinat(3,iatom)<zero.and.ispden==2)) then
          if(abs(zz)>tol12)then
            zratio=two*abs(spinat(3,iatom))/zz
          else
@@ -218,6 +219,12 @@ subroutine initrhoij(cplex,lexexch,lpawu,my_natom,natom,&
 
    end do
    pawrhoij(iatom_rhoij)%nrhoijsel=nselect
+
+!  Non-collinear magnetism: avoid zero magnetization, because it produces numerical instabilities
+!    Add a small real to the magnetization
+   if (pawrhoij(iatom_rhoij)%nspden==4.and.spinat_zero) then
+     pawrhoij(iatom_rhoij)%rhoijp(:,4)=pawrhoij(iatom_rhoij)%rhoijp(:,4)+tol10
+   end if
 
  end do ! iatom_rhoij
 

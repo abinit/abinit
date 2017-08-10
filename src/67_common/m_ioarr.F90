@@ -1291,6 +1291,17 @@ subroutine read_rhor(fname, cplex, nspden, nfft, ngfft, pawread, mpi_enreg, orho
    ABI_DT_FREE(pawrhoij_file)
  end if
 
+!Non-collinear magnetism: avoid zero magnetization, because it produces numerical instabilities
+!  Add a small real to the magnetization
+ if (nspden==4) orhor(:,4)=orhor(:,4)+tol14
+ if (ohdr%usepaw==1.and.size(pawrhoij)>0) then
+   if (pawrhoij(1)%nspden==4) then
+     do i1=1,size(pawrhoij)
+       pawrhoij(i1)%rhoijp(:,4)=pawrhoij(i1)%rhoijp(:,4)+tol10
+     end do
+   end if
+ end if
+
  call cwtime(cputime, walltime, gflops, "stop")
  write(msg,'(2(a,f9.1),a)')" IO operation completed. cpu_time: ",cputime," [s], walltime: ",walltime," [s]"
  call wrtout(std_out, msg, "COLL", do_flush=.True.)
