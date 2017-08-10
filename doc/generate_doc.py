@@ -557,7 +557,7 @@ for i, var in enumerate(abinit_vars):
     # Topics
     try:
       if var.topics is not None :
-        cur_content += '<br><font id="characteristic">Mentioned in "How to": '
+        cur_content += '<br><font id="characteristic">Mentioned in "Topic": '
         vartopics=var.topics
         topics_name_tribe = vartopics.split(',')
         for i, topic_name_tribe in enumerate(topics_name_tribe):
