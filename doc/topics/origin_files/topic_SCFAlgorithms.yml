@@ -25,4 +25,9 @@
       <p>
       Among the algorithms to find the wavefunctions, selected by [[wfoptalg]], 
       the conjugate-gradient and the LOBPCG ones are the favourite. Use the Chebyshev filtering for massive parallel runs.
+
+      <p>
+      Inner electronic eigenvalues can be computed thanks to the minimisation of the residual with respect to a 
+      target energy value, see [[eshift]]. 
+
     end : default 

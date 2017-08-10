@@ -25,6 +25,8 @@
        <p>In the NCPP case, the electric field has no additional contribution to the Hellmann-Feynman forces, because the electronic
        states do not depend explicitly on ionic position [[Souza2002]].  In the PAW case however, as the projectors do depend on ion location, an additional force and additional stresses terms arise [[Zwanziger2012]]. 
 
+       <p>The generalisation to fixed D-field or fixed reduced fields are also available, as described in M. Stengel, N.A. Spaldin and D. Vanderbilt, Nat. Phys. 5,304 (2009).
+
        <p>The polarization and finite electric field calculation in ABINIT is accessed through the variables [[berryopt]] and [[efield]]. In addition, 
        displacement fields and mixed boundary conditions (a mix of electric field and displacement field) can be computed as well. 
 

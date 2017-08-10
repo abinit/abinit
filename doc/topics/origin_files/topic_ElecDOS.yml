@@ -9,8 +9,9 @@
     copyright : default
     links     : default
     introduction: |
-      A _DOS file is produced when a non-zero value is given for [[prtdos]]. See the explanation in the latter input variable.
+      A _DOS file can be produced either using the tetrahedron method or smearing approaches.
       The partial (orbital weighted) DOS can also be obtained.
+      See the detailed explanation in [[prtdos]].
     tutorials : |
       <li>PAW1 lesson, section on [[lesson:paw1#dos|Plotting PAW contributions to the Density of States]]</li>
     end : default 
