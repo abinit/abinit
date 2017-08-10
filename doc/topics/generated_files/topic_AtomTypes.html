@@ -12,7 +12,7 @@
 <a name="top"></a>
 
 <h1>Types of atoms, and alchemical potentials.</h1>
-<h3>This page gives hints on how to specify the type of atoms that form the system with the ABINIT package.
+<h3>This page gives hints on how to specify the types of atoms that form the system with the ABINIT package.
 <hr>
 
 <h5>Copyright (C) 2016-2017 ABINIT group (FJ)
@@ -37,11 +37,13 @@ nuclear charge (and their mass for dynamical properties).
 <p>
 However, in a pseudopotential
 or PAW approach, the knowledge of the nuclear charge does not define the potential felt by the electron,
-only the atomic data (pseudopotential or PAW) defines it. Thus, in addition to the number of types
+only the atomic data file (pseudopotential or PAW) defines it. Thus, in addition to the number of types
 of atoms <a href="../../input_variables/generated_files/varset_basic.html#ntypat">ntypat</a>, and their nuclear charge <a href="../../input_variables/generated_files/varset_basic.html#znucl">znucl</a>,
 ABINIT requires to know the pseudopotential/PAW to use for each type of atom. 
-The latters are specified in the "files" file. Unless alchemical potentials are used (see later),
+The latters are specified in the <a href="../../users/generated_files/help_abinit.html#intro1">"files" file</a>. Unless alchemical potentials are used (see later),
 the number of pseudopotentials to be read, <a href="../../input_variables/generated_files/varset_gstate.html#npsp">npsp</a>, is the same as <a href="../../input_variables/generated_files/varset_basic.html#ntypat">ntypat</a>.
+Note that one cannot mix norm-conserving pseudopotentials with PAW atomic data files in a single ABINIT run,
+even for different datasets. One has to stick either to norm-conserving pseudopotentials or to PAW.
 <br>More on the pseudos/PAW in <a href="../../topics/generated_files/topic_PseudosPAW.html#">PseudosPAW</a>.
 <p>ABINIT also has a default table of the atomic masses, but this can be superceded by specifying <a href="../../input_variables/generated_files/varset_rlx.html#amu">amu</a>.
 <p><b>Alchemical potentials</b></p> 

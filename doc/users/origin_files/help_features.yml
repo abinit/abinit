@@ -92,7 +92,7 @@ sec2:
    <li>[[topic:Planewaves|Planewaves and real space sampling]]</li>
    <li>[[topic:PAW|PAW special settings]]</li>
    <li>[[topic:Wavelets|Wavelets in ABINIT]]</li>
-   <li>[[topic:k-points|Wavevector sampling - k point grid]]</li>
+   <li>[[topic:k-points|Wavevector sampling (k point grid)]]</li>
    </ol>
 
 ## Each section must have a title, that will form the table of content.
@@ -152,8 +152,8 @@ sec4:
   <li>[[topic:GeoOpt|Geometry optimization calculations]]</li>
   <li>[[topic:MolecularDynamics|Molecular dynamics calculations]]</li>
   <li>[[topic:TransPath|Transition path calculations: NEB and string method]]</li>
-  <li>[[topic:PIMD|Path-integral molecular dynamics - PIMD]]</li>
-  <li>[[topic:LOTF|Learn-on-the-flight - LOTF]]</li>
+  <li>[[topic:PIMD|Path-integral molecular dynamics (PIMD)]]</li>
+  <li>[[topic:LOTF|Learn-on-the-flight (LOTF)]]</li>
   </ol>
 
 ## Each section must have a title, that will form the table of content.

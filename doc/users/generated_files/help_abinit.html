@@ -57,8 +57,8 @@
     <li>3.6. <a href="#filenames_multidataset">File names in the multi-dataset mode</a></li>
 
    </ul> 
-  <li>4. <a href="#files_file">The 'files' file</a></li>
-  <li>5. <a href="#pseudopotentials">The pseudopotential files and atomic data files</a></li>
+  <li>4. <a href="#files_file">More detailed presentation of the 'files' file</a></li>
+  <li>5. <a href="#pseudopotentials">The pseudopotential files and PAW atomic data files</a></li>
   <li>6. <a href="#output">The different output files</a></li>
 
    <ul> 
@@ -85,8 +85,8 @@
  <p><p>Given an input file (parameters described below) and the required pseudopotential
    files, the user must create a "files" file which lists names for the files
    the job will require, including the main input file, the main output file,
-   root names for other input, output, or temporary files, and different pseudopotential
-   file names.
+   root names for other input, output, or temporary files, and the names
+   of different pseudopotential or PAW atomic data files (one per line).
  <p>The files file (called for example ab.files) could look like: </p>
  <p>
  <pre>
@@ -95,7 +95,8 @@
    abi
    abo
    tmp
-   14si.psp
+   Si-GGA.psp8
+   O-GGA.psp8
  </pre>
  <p>In this example:<br>
    - The main input file is called "ab_in". <br>
@@ -106,7 +107,7 @@
    might be build from this root. <br>
    - The temporary files will have a name that use the root "tmp".
  (for example tmp_STATUS).<br>
-   - The pseudopotential needed for this job is "14si.psp". <br>
+   - The pseudopotentials needed for this job are "Si-GGA.psp8" and "O-GGA.psp8". <br>
    <br>
    Other examples are given in the subdirectories of the ~abinit/tests directory. The maximal length
    of names for the main input or output files is presently 132 characters. It
@@ -596,7 +597,7 @@ keyword.
    the dataset. See <a href="#4">section 4</a>. </p>
 
  <p><a name="get">The '<b>get</b>' variables</a> can be used to chain the calculations. </p>
- <p>Until now, there are eight of them : <a href="../../input_variables/generated_files/varset_files.html#getwfk">getwfk</a>,
+ <p>Let us mention a few of them : <a href="../../input_variables/generated_files/varset_files.html#getwfk">getwfk</a>,
    <a href="../../input_variables/generated_files/varset_files.html#getwfq">getwfq</a>, <a href="../../input_variables/generated_files/varset_files.html#getddk">getddk</a>,
    <a href="../../input_variables/generated_files/varset_files.html#get1wf">get1wf</a>, <a href="../../input_variables/generated_files/varset_files.html#getden">getden</a>,
    <a href="../../input_variables/generated_files/varset_rlx.html#getcell">getcell</a>, <a href="../../input_variables/generated_files/varset_rlx.html#getxred">getxred</a>
@@ -631,13 +632,14 @@ keyword.
 <hr>
 <br><a name="files_file"> </a>
 <a name="4"> </a>
-<h3><b>4. The 'files' file</b></h3>
- <p>Note: <i>This "files" file is called ab.files in
-  <a href=#intro1>section 1.1</a> .</i>
+<h3><b>4. More detailed presentation of the 'files' file</b></h3>
+ <p>Note: <i>This "files" file is called <i>ab.files</i> in
+  <a href=#run>section 1</a> .</i>
   </p>
-  <p>Contains the file names or root names needed to build file names.
+  <p>As mentioned in <a href=#run>section 1</a> (you might read it again if needed), the "files" file contains 
+    the file names or root names needed to build file names.
     These are listed below : there are 5 names or root names for input,
-    output and temporaries, and then a list of pseudopotentials.
+    output and temporaries, and then a list of pseudopotentials (one per line).
     These names may be provided from unit 05 interactively during the run but
     are more typically provided by piping from a file in Unix (the "files" file). </p>
   <p> <b>ab_in</b> <br>
@@ -812,25 +814,22 @@ keyword.
 <hr>
 <br><a name="pseudopotentials"> </a>
 <a name="5"> </a>
-<h3><b>5. The pseudopotential files and atomic data files</b></h3>
+<h3><b>5. The pseudopotential files and PAW atomic data files</b></h3>
  <p>Actually, no real understanding of these files
-    is needed to run the code, but for different other reasons, it might be useful
-    to be able to understand the file structures. For norm-conserving pseudopotentials different format are possible
+    is needed to run the code. The recommended 
+    pseudopotentials can be downloaded from the ABINIT Web site at <a href="http://www.abinit.org/downloads/atomic-data-files">http://www.abinit.org/downloads/atomic-data-files</a>.
+    Documentation is provided there as well as in the dedicated <a href="../../topics/generated_files/topic_PseudosPAW.html#">topic_PseudosPAW</a>.
+    Note that it is not possible to mix norm-conserving pseudopotentials and PAW atomic data sets in the same run.
+    Also, every such file has been generated for a particular choice of the exchange-correlation functional <a href="../../input_variables/generated_files/varset_basic.html#ixc">ixc</a>.
+    It is in principle incorrect to use a pseudopotential (or PAW data) with another
+    exchange-correlation functional than the one it has been generated for, but ABINIT will only send a warning.
+<p> For different other reasons, it might nevertheless be useful
+    to be able to grasp some information from the file. 
+    For norm-conserving pseudopotentials different format are possible
     (labelled 1 to 8 presently). The associated internal variable is called pspcod.
-    Examples of use are found in ~abinit/test/v1 . Information on the file structure
-    can be found in the ~abinit/doc/psp_infos directory.
-<ul>
-    <li>pspcod=1 : Troullier-Martins pseudopotentials, generated by DC Allan and
-      A Khein, see ~abinit/doc/psp_infos/psp1_info.txt ;
-    <li>pspcod=2 : Goedecker-Teter-Hutter (GTH) pseudopotentials. See Phys. Rev.
-      B 54, 1703 (1996) if needed ;
-    <li>pspcod=3 : Hartwigsen-Goedecker-Hutter pseudopotentials. See Phys. Rev.
-      B 58, 3641 (1998) if needed, and the file ~abinit/doc/psp_infos/psp3_info.txt ;
-    <li>pspcod=4 or 5 : old format pseudopotentials, see ~abinit/doc/psp_infos/psp45_info.txt ;
-    <li>pspcod=6 : pseudopotentials from the fhi98pp code, see ~abinit/doc/psp_infos/psp6_info.txt ;
-    <li>pspcod=7 : pseudo atomic data for PAW ;
-    <li>pspcod=8 : pseudopotential file format from Don Hamann, providing additional flexibility.
-</ul>
+    Information on the header of these pseudopotential files
+    can be found in the abinit wiki at <a href="https://wiki.abinit.org/doku.php?id=developers:pseudos">https://wiki.abinit.org/doku.php?id=developers:pseudos</a>,
+    that you should read now (do not pursue with the description of each format, though).
 <br><br><a href=#top>Go to the top</a>
 <hr>
 <br><a name="output"> </a>
