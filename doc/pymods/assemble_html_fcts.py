@@ -89,6 +89,34 @@ def get_year(name):
 
 ################################################################################
 
+def format_backlinks(backlinks_str):
+  """ Post-process the list of backlinks accumulated for a particular reference 
+  """
+  backlinks_list=backlinks_str.split(";;")
+  backlinks_newlist=[]
+  if len(backlinks_list)!=0:
+    list_stripped=[]
+    for link in backlinks_list:
+      stripped=link.strip()
+      if stripped!="":
+        list_stripped.append(stripped)
+    if len(list_stripped)!=0:
+      set_stripped=set(list_stripped)
+      if len(set_stripped)!=0:
+        backlinks_newlist=list(set_stripped)
+        backlinks_newlist.sort()
+      else:
+        backlinks_newlist=[]
+    else:
+      backlinks_newlist=[]
+  backlinks_formatted=""
+  if len(backlinks_newlist)!=0:
+    for link in backlinks_newlist:
+      backlinks_formatted+=link
+  return backlinks_formatted
+
+################################################################################
+
 def make_links(text,cur_key,allowed_link_seeds,backlinks,backlink):
   """ Interpreter for the address contained in [[...]], following dokuwiki conventions,
       with translation to HTML links. The allowed link seeds are given.
@@ -188,6 +216,10 @@ def make_links(text,cur_key,allowed_link_seeds,backlinks,backlink):
         #Specific formatting treatment
         if value=="help" and namespace=="":
           webtext=key[5:]+' help file'
+        
+        #Set up backlink for topic (might be generalized to all ?)
+        if value=="topic":
+          backlinks[linkseed]+=backlink+";;"
 
         return '<a href="../../%s/%s.html#%s">%s</a>' %(dir,linkseed,section,webtext)
 

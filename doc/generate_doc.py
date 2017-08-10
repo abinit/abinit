@@ -393,6 +393,8 @@ backlinks=dict()
 for ref in bibtex_dics:
   ID=ref["ID"]
   backlinks[ID]=" "
+for topic in list_of_topics:
+  backlinks["topic_"+topic]=" "
 
 ################################################################################
 # Write a txt file, for checking purposes
@@ -693,6 +695,23 @@ rc=assemble_html(varsets,suppl_components,"input_variables","varset",allowed_lin
 ################################################################################
 ################################################################################
 
+# Assemble the html files to be generated from the yml information.
+# In order : tutorial, files lessons_*
+#            theory, files theorydoc_*
+#            users,  files help_*
+
+################################################################################
+
+suppl_components={}
+for list_infos in list_infos_dir:
+  yml_files=list_infos["yml_files"]
+  for yml_file in yml_files:
+    if yml_file in ["lessons","theorydocs","helps"]:
+      rc=assemble_html(yml_in[yml_file],suppl_components,list_infos["dir_name"],yml_file[:-1],allowed_link_seeds,backlinks)
+
+################################################################################
+################################################################################
+
 # Generate the different "topic" files
 
 ################################################################################
@@ -841,8 +860,13 @@ for topic_name in list_of_topics:
   #Generate a first version of the html file, in the order "header" ... up to the "end"
   #Take the info from the component "default" if there is no information on the specific component provided in the yml file.
   topic_html=""
-  for j in ["header","title","subtitle","copyright","links","toc","introduction","examples","tutorials","input_variables","input_files","references","links","end"]:
-    if j == "toc":
+  for j in ["header","title","subtitle","copyright","links","backlinks","toc","introduction","examples","tutorials","input_variables","input_files","references","links","end"]:
+    if j == "backlinks":
+      backlinks_str=backlinks["topic_"+topic_name]
+      backlinks_formatted=format_backlinks(backlinks_str)
+      if len(backlinks_formatted)!=0:
+        topic_html += " Mentioned in "+backlinks_formatted+"\n <hr>"
+    elif j == "toc":
       topic_html += toc
     elif j == "input_variables":
       if sec_number[j]!="0" :
@@ -927,16 +951,15 @@ rc=finalize_html(all_topics_html,default_topic,dir_root,name_root,allowed_link_s
  
 ################################################################################
 
-suppl_components={}
-for list_infos in list_infos_dir:
-  yml_files=list_infos["yml_files"]
-  for yml_file in yml_files:
-    if yml_file in ["lessons","theorydocs","helps"]:
-      rc=assemble_html(yml_in[yml_file],suppl_components,list_infos["dir_name"],yml_file[:-1],allowed_link_seeds,backlinks)
+#suppl_components={}
+#for list_infos in list_infos_dir:
+#  yml_files=list_infos["yml_files"]
+#  for yml_file in yml_files:
+#    if yml_file in ["lessons","theorydocs","helps"]:
+#      rc=assemble_html(yml_in[yml_file],suppl_components,list_infos["dir_name"],yml_file[:-1],allowed_link_seeds,backlinks)
 
 ################################################################################
 # Temporary coding, to translate all URL to input variables that are "old-style" ...
-# HERE
 
 if 0:
  for list_infos in list_infos_dir:
@@ -1003,22 +1026,8 @@ bibliography_content+=('<a id="%s"></a>')%(cur_let)+alphalinks+('<hr><hr><h2>%s<
 for ref in bibtex_dics:
   entrytype=ref["ENTRYTYPE"]
   ID=ref["ID"]
-  backlinksID=backlinks[ID].split(";;")
-  if len(backlinksID)!=0:
-    list_stripped=[]
-    for (i,link) in enumerate(backlinksID):
-      stripped=link.strip()
-      if stripped!="":
-        list_stripped.append(stripped)
-    if len(list_stripped)!=0:
-      set_stripped=set(list_stripped)
-      if len(set_stripped)!=0:
-        backlinksID=list(set_stripped)
-        backlinksID.sort()
-      else:
-        backlinksID=[]
-    else:
-      backlinksID=[]
+  backlinks_str=backlinks[ID]
+  backlinks_formatted=format_backlinks(backlinks_str)
   line=("@%s{%s,%s") %(entrytype,ID,ref['body'])
   lines_txt+= line
   bibtex_content+= ('<hr><a id="%s">%s</a> \n <pre>' ) %(ID,ID)
@@ -1029,10 +1038,8 @@ for ref in bibtex_dics:
     if cur_let==ID[0]:
       bibliography_content+=alphalinks+('<hr><hr><h2>%s</h2> \n \n')%(cur_let)
   bibliography_content+= ('<hr><a id="%s">[%s]</a> (<a href="./bib_bibtex.html#%s">bibtex</a>)\n <br> %s\n') %(ID,ID,ID,reference_dic[ID])
-  if len(backlinksID)!=0:
-    bibliography_content+= "<br> Referred to in " 
-    for link in backlinksID:
-      bibliography_content+= link
+  if len(backlinks_formatted)!=0:
+    bibliography_content+= "<br> Referred to in "+backlinks_formatted 
 
 # Open, write and close the txt file
 file_txt = 'biblio/generated_files/ordered_abiref.bib'
