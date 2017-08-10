@@ -2951,7 +2951,7 @@
         use [[charge]]=0.  To treat a system missing one electron
         per unit cell, set [[charge]]=+1.
         </p>
-    topics: ChargedCell_compulsory
+    topics: Coulomb_basic
     varset: gstate
     vartype: real
 - !variable
@@ -3978,7 +3978,7 @@
          <br />
          No meaning for RF calculations yet.
         </p>
-    topics: SCFAlgorithms_useful
+    topics: SCFAlgorithms_expert
     varset: gstate
     vartype: real
 - !variable
@@ -4077,7 +4077,7 @@
          <br />
          No meaning for RF calculations yet.
         </p>
-    topics: SCFAlgorithms_useful
+    topics: SCFAlgorithms_expert
     varset: gstate
     vartype: real
 - !variable
@@ -4098,7 +4098,7 @@
          <br />
          No meaning for RF calculations yet.
         </p>
-    topics: SCFAlgorithms_useful
+    topics: SCFAlgorithms_expert
     varset: gstate
     vartype: real
 - !variable
@@ -10574,7 +10574,7 @@
           [[icoulomb]]=1 : free boundary conditions are used when the Hartree potential is computed, real space expressions of pseudo-potentials are involved (restricted to GTH pseudo-potentials) and simple coulomb interaction gives the ion-ion energy.
          </li>
         </ul>
-    topics: ChargedCell_useful
+    topics: Coulomb_useful
     varset: gstate
     vartype: integer
 - !variable
@@ -10639,7 +10639,7 @@
         In the latter case, use a negative value for the cutoff radius of the sphere ([[rcut]]&lt;0),
         which is automatically calculated so that the volume enclosed in the sphere is equal to the volume of the solid.
         </p>
-    topics: GWls_compulsory, GW_basic, ChargedCell_useful
+    topics: GWls_compulsory, GW_basic, Coulomb_useful
     varset: gw
     vartype: integer
 - !variable
@@ -11451,7 +11451,7 @@
           </li>
          </ul>
         </p>
-    topics: SCFAlgorithms_useful
+    topics: SCFAlgorithms_expert
     varset: gstate
     vartype: integer
 - !variable
@@ -18870,7 +18870,7 @@
         <p>
          This variable controls the order of used scaling functions when the Hartree potential is computed using the Poisson solver (see [[icoulomb]] imput variable). This variable is of seldom use since the default value is large enough. Nonetheless, possible values are 8, 14, 16, 20, 24, 30, 40, 50, 60, 100. Values greater than 20 are included in ABINIT for test purposes only.
         </p>
-    topics: ChargedCell_expert
+    topics: Coulomb_expert
     varset: dev
     vartype: integer
 - !variable
@@ -29759,7 +29759,7 @@
           </li>
          </ul>
         </p>
-    topics: ChargedCell_useful
+    topics: Coulomb_useful
     varset: paw
     vartype: integer
 - !variable

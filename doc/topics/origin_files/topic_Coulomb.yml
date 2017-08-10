@@ -1,17 +1,17 @@
 - !components 
-    name      : ChargedCell 
-    keyword   : Charged cell 
+    name      : Coulomb
+    keyword   : Coulomb
     authors   : FB
-    howto     : perform a calculation on a charged cell, and treat adequately the Coulomb interaction
+    howto     : treat adequately the Coulomb interaction, especially in charged cells,
     header    : default
-    title     : <h1>Charged cells and Coulomb interaction</h1>
+    title     : <h1>Coulomb interaction and charged cells</h1>
     subtitle  : default
     copyright : default
     links     : default
     introduction : |- 
         <p>ABINIT can treat charged systems (e.g. either for molecules, or for dopants in a supercell), 
         using the [[charge]] input variable. A careful convergence study with respect to the cell size must however be done.
-        <p>Depending on the dimension, different treatment of the Coulomb interaction can be enforced, governed by [[icoulomb]].
+        <p>Depending on the dimension, different treatment of the Coulomb interaction can be enforced, governed by [[icoulomb]] and [[icutcoul]] for GW calculations. Some development effort is needed in ABINIT to rationalize the situation.
 
         <p>Additional information concerning [[usepotzero]]. It is well known that the electrostatic potential (arising from ion-ion, ion-electron, and electron-electron interactions) is ill-defined within periodic boundary conditions.
         However, it is less well known that the total energy of a charged cell is also ill-defined.

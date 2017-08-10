@@ -3,7 +3,7 @@
 <!-- It is useless to modify it. Modify the related .yml  or .bib files instead.         -->
 <!--                                                                                     -->
 <html>
-<head><title>Charged cell </title>
+<head><title>Coulomb </title>
 <link rel=stylesheet type="text/css" href="../formabinit.css">
 </head>
 <body bgcolor="#ffffff">
@@ -11,8 +11,8 @@
 <hr>
 <a name="top"></a>
 
-<h1>Charged cells and Coulomb interaction</h1>
-<h3>This page gives hints on how to perform a calculation on a charged cell, and treat adequately the Coulomb interaction with the ABINIT package.
+<h1>Coulomb interaction and charged cells</h1>
+<h3>This page gives hints on how to treat adequately the Coulomb interaction, especially in charged cells, with the ABINIT package.
 <hr>
 
 <h5>Copyright (C) 2016-2017 ABINIT group (FB)
@@ -22,7 +22,7 @@
 <script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
 
  <h3><b>Table of content: </b></h3> 
- <ul> <li>1. <a href="topic_ChargedCell.html#1">Introduction.</a><li>2. <a href="topic_ChargedCell.html#2">Related input variables.</a><li>3. <a href="topic_ChargedCell.html#3">Selected input files.</a><li>4. <a href="topic_ChargedCell.html#4">References.</a></ul>
+ <ul> <li>1. <a href="topic_Coulomb.html#1">Introduction.</a><li>2. <a href="topic_Coulomb.html#2">Related input variables.</a><li>3. <a href="topic_Coulomb.html#3">References.</a></ul>
 
 &nbsp; 
 <HR ALIGN=left> 
@@ -32,7 +32,7 @@
 
 <p>ABINIT can treat charged systems (e.g. either for molecules, or for dopants in a supercell), 
 using the <a href="../../input_variables/generated_files/varset_gstate.html#charge">charge</a> input variable. A careful convergence study with respect to the cell size must however be done.
-<p>Depending on the dimension, different treatment of the Coulomb interaction can be enforced, governed by <a href="../../input_variables/generated_files/varset_gstate.html#icoulomb">icoulomb</a>.
+<p>Depending on the dimension, different treatment of the Coulomb interaction can be enforced, governed by <a href="../../input_variables/generated_files/varset_gstate.html#icoulomb">icoulomb</a> and <a href="../../input_variables/generated_files/varset_gw.html#icutcoul">icutcoul</a> for GW calculations. Some development effort is needed in ABINIT to rationalize the situation.
 
 <p>Additional information concerning <a href="../../input_variables/generated_files/varset_paw.html#usepotzero">usepotzero</a>. It is well known that the electrostatic potential (arising from ion-ion, ion-electron, and electron-electron interactions) is ill-defined within periodic boundary conditions.
 However, it is less well known that the total energy of a charged cell is also ill-defined.
@@ -60,7 +60,7 @@ is sensitive to the arbitrary average electrostatic potential.
 <h3><b>2. Related input variables.</b></h3>
 
 
-<p>Compulsory input variables:<p>... <a href="../../input_variables/generated_files/varset_gstate.html#charge">charge</a>   [CHARGE]<br>
+<p>Basic input variables:<p>... <a href="../../input_variables/generated_files/varset_gstate.html#charge">charge</a>   [CHARGE]<br>
 <p>Useful input variables:<p>... <a href="../../input_variables/generated_files/varset_gstate.html#icoulomb">icoulomb</a>   [Index for the Coulomb TReaTMenT]<br>
 ... <a href="../../input_variables/generated_files/varset_gw.html#icutcoul">icutcoul</a>   [Integer that governs the CUT-off for COULomb interaction]<br>
 ... <a href="../../input_variables/generated_files/varset_paw.html#usepotzero">usepotzero</a>   [USE POTential ZERO]<br>
@@ -69,23 +69,11 @@ is sensitive to the arbitrary average electrostatic potential.
 <br><br><a href=#top>Go to the top</a>
 
 
+
 &nbsp; 
 <HR ALIGN=left> 
 <a name="3">&nbsp;</a>
-<h3><b>3. Selected input files.</b></h3>
-
-
-The user can find some related example input files in the ABINIT package in the directory /tests, or on the Web:
-<p> tests/v7/Input: <a href="../../tests/v7/Input/t26.in">t26.in</a> 
-<br>
-
-<br><br><a href=#top>Go to the top</a>
-
-
-&nbsp; 
-<HR ALIGN=left> 
-<a name="4">&nbsp;</a>
-<h3><b>4. References.</b></h3>
+<h3><b>3. References.</b></h3>
 
 
 <br> <a href="../../biblio/generated_files/bib_biblio.html#Bruneval2014">[Bruneval2014]</a>  F. Bruneval, J.-P. Crocombette, X. Gonze, B. Dorado, M. Torrent and F. Jollet, "Consistent treatment of charged systems within periodic boundary conditions: The projector augmented-wave and pseudopotential methods revisited", Phys. Rev. B 89, 045116 (2014). <br> DOI: <a href="https://doi.org/10.1103/PhysRevB.89.045116">10.1103/PhysRevB.89.045116</a>.<br>

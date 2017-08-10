@@ -32,9 +32,20 @@
 
 Self-Consistent Field calculations allow to determine the solution of the Kohn-Sham equations, ending with converged
 "self-consistent" wavefunctions, density, and Kohn-Sham potentials. Different algorithms can be chosen to converge
-to the solution of this set of equations, governed by the input variable <a href="../../input_variables/generated_files/varset_basic.html#iscf">iscf</a>.
-The same <a href="../../input_variables/generated_files/varset_basic.html#iscf">iscf</a> allows one also to choose to make non-self-consistent calculations of wavefunctions and corresponding eigenvalues
-in a fixed potential.
+to the solution of this set of equations, governed by the input variable <a href="../../input_variables/generated_files/varset_basic.html#iscf">iscf</a> and <a href="../../input_variables/generated_files/varset_dev.html#wfoptalg">wfoptalg</a>.
+<a href="../../input_variables/generated_files/varset_basic.html#iscf">iscf</a> focuses on the density/potential self-consistency algorithms, while <a href="../../input_variables/generated_files/varset_dev.html#wfoptalg">wfoptalg</a> focuses on the
+determination of the wavefunction through the solution of the Shr&ouml;dinger equation with fixed Kohn-Sham potential.
+<p>
+The algorithm selected by <a href="../../input_variables/generated_files/varset_basic.html#iscf">iscf</a> are the iterative kind, among which Pulay mixing is one of the most efficient.
+Also, an efficient preconditioner will speed up the convergence.
+Among different choices, a generalized Kerker preconditioner is implemented, see <a href="../../input_variables/generated_files/varset_gstate.html#diemac">diemac</a>, <a href="../../input_variables/generated_files/varset_gstate.html#diemix">diemix</a> and <a href="../../input_variables/generated_files/varset_gstate.html#dielng">dielng</a>.
+<br/>
+In order to perform a non-self-consistent calculations of wavefunctions and corresponding eigenvalues
+in a fixed potential, as for representing a full band structure, the loop over density/potentials self-consistency
+must be disabled, for which <a href="../../input_variables/generated_files/varset_basic.html#iscf">iscf</a>=-2 must be chosen.
+<p>
+Among the algorithms to find the wavefunctions, selected by <a href="../../input_variables/generated_files/varset_dev.html#wfoptalg">wfoptalg</a>, 
+the conjugate-gradient and the LOBPCG ones are the favourite. Use the Chebyshev filtering for massive parallel runs.
 <br><br><a href=#top>Go to the top</a>
 
 
@@ -48,15 +59,15 @@ in a fixed potential.
 
 <p>Basic input variables:<p>... <a href="../../input_variables/generated_files/varset_basic.html#iscf">iscf</a>   [Integer for Self-Consistent-Field cycles]<br>
 ... <a href="../../input_variables/generated_files/varset_dev.html#wfoptalg">wfoptalg</a>   [WaveFunction OPTimisation ALGorithm]<br>
-<p>Useful input variables:<p>... <a href="../../input_variables/generated_files/varset_gstate.html#diecut">diecut</a>   [DIElectric matrix energy CUToff]<br>
-... <a href="../../input_variables/generated_files/varset_gstate.html#diegap">diegap</a>   [DIElectric matrix GAP]<br>
-... <a href="../../input_variables/generated_files/varset_gstate.html#dielam">dielam</a>   [DIElectric matrix LAMbda]<br>
-... <a href="../../input_variables/generated_files/varset_gstate.html#dielng">dielng</a>   [model DIElectric screening LeNGth]<br>
+<p>Useful input variables:<p>... <a href="../../input_variables/generated_files/varset_gstate.html#dielng">dielng</a>   [model DIElectric screening LeNGth]<br>
 ... <a href="../../input_variables/generated_files/varset_gstate.html#diemac">diemac</a>   [model DIElectric MACroscopic constant]<br>
 ... <a href="../../input_variables/generated_files/varset_gstate.html#diemix">diemix</a>   [model DIElectric MIXing factor]<br>
-... <a href="../../input_variables/generated_files/varset_gstate.html#iprcel">iprcel</a>   [Integer for PReConditioning of ELectron response]<br>
 ... <a href="../../input_variables/generated_files/varset_dev.html#npulayit">npulayit</a>   [Number of PULAY ITerations for SC mixing]<br>
-<p>Input variables for experts:<p>... <a href="../../input_variables/generated_files/varset_dev.html#eshift">eshift</a>   [Energy SHIFT]<br>
+<p>Input variables for experts:<p>... <a href="../../input_variables/generated_files/varset_gstate.html#diecut">diecut</a>   [DIElectric matrix energy CUToff]<br>
+... <a href="../../input_variables/generated_files/varset_gstate.html#diegap">diegap</a>   [DIElectric matrix GAP]<br>
+... <a href="../../input_variables/generated_files/varset_gstate.html#dielam">dielam</a>   [DIElectric matrix LAMbda]<br>
+... <a href="../../input_variables/generated_files/varset_dev.html#eshift">eshift</a>   [Energy SHIFT]<br>
+... <a href="../../input_variables/generated_files/varset_gstate.html#iprcel">iprcel</a>   [Integer for PReConditioning of ELectron response]<br>
 ... <a href="../../input_variables/generated_files/varset_dev.html#isecur">isecur</a>   [Integer for level of SECURity choice]<br>
 
 <br><br><a href=#top>Go to the top</a>

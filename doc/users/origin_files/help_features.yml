@@ -67,7 +67,7 @@ sec2:
 ## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
 ## Note the small (one space) indentation for the title and body keys.
  sec2.2:
-  title: "Physical settings for electrons : XC functionals, atomic/pseudo potentials, metal/insulator, spin ..."
+  title: "Physical settings for electrons : XC functionals, atomic/pseudo potentials, metal/insulator, spin, Coulomb interaction ..."
   tag: electrons
   body: |
    <ol>
@@ -78,7 +78,7 @@ sec2:
    <li>[[topic:PseudosPAW|Pseudopotentials and PAW atomic datasets]]</li>
    <li>[[topic:BandOcc|Bands and occupation numbers for metals and insulators]]</li>
    <li>[[topic:spinpolarisation|Spin-polarised systems and spin-orbit coupling]]</li>
-   <li>[[topic:ChargedCell|Charged cells and treatment of Coulomb interaction]]</li>
+   <li>[[topic:Coulomb|Coulomb interaction and charged cells]]</li>
    </ol>
 
 ## Each section must have a title, that will form the table of content.
