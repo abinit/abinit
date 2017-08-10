@@ -165,10 +165,10 @@ sec5:
   <ol>
    <p> When correlated electrons are to be considered, it is necessary to go beyond the standard DFT framework. 
    ABINIT enables the following possibilities:
-   <li>[[topic:Hybrids|The use of hybrid functionals]]</li>
+   <li>[[topic:Hybrids|Hybrid functionals]]</li>
+   <li>[[topic:DFT+U|DFT+U approximation]]</li>
+   <li>[[topic:DMFT|Dynamical Mean Field Theory (DMFT)]]</li>
    <li>[[topic:CRPA|Calculation of the effective Coulomb interaction]]</li>
-   <li>[[topic:DFT+U|The use of the DFT+U approximation]]</li>
-   <li>[[topic:DMFT|The use of the DMFT framework]]</li>
   </ol>
 
 ## Each section must have a title, that will form the table of content.
@@ -205,7 +205,7 @@ sec7:
 ## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
 ## Note the small (one space) indentation for the title and body keys.
 sec8:
- title: "Other relevant physical properties and analysis tools"
+ title: "Electronic properties and analysis tools (DOS, STM, Wannier, band plotting and interpolating...)"
  tag: other_physics
  body: |
   <ol>
@@ -213,14 +213,25 @@ sec8:
    <li>[[topic:ElecDOS|Electronic DOS and related topics]]</li>
    <li>[[topic:Unfolding|Unfolding supercell band structures]]</li>
    <li>[[topic:STM|Scanning Tunneling Microscopy map]]</li>
-   <li>[[topic:positron|Positron calculations]]</li>
    <li>[[topic:Wannier|Wannier functions]]</li>
+   <li>[[topic:Bader|Bader Atom-In-Molecule analysis]]</li>
   </ol>
 
 ## Each section must have a title, that will form the table of content.
 ## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
 ## Note the small (one space) indentation for the title and body keys.
 sec9:
+ title: "Other properties and analysis tools (positron)"
+ tag: other_physics
+ body: |
+  <ol>
+   <li>[[topic:positron|Positron calculations]]</li>
+  </ol>
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec10:
  title: "Miscellaneous topics"
  tag: miscellaneous
  body: |

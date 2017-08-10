@@ -866,6 +866,9 @@ for topic_name in list_of_topics:
       backlinks_formatted=format_backlinks(backlinks_str)
       if len(backlinks_formatted)!=0:
         topic_html += " Mentioned in "+backlinks_formatted+"\n <hr>"
+      if not "help_features" in backlinks_formatted:
+        print(" Topic %s not (yet) mentioned in the file help_feature.yml. Please correct this omission.")
+        #raise
     elif j == "toc":
       topic_html += toc
     elif j == "input_variables":
