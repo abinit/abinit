@@ -8,7 +8,7 @@
 !! evaluate special functions frequently needed in Abinit.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2016 ABINIT group (MG,MT,FB,XG,MVer,FJ,NH,GZ)
+!! Copyright (C) 2008-2017 ABINIT group (MG,MT,FB,XG,MVer,FJ,NH,GZ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -51,6 +51,9 @@ MODULE m_special_funcs
                              !                       1                        , if m=0
  public :: k_fermi           ! Fermi wave vector corresponding to the local value of the real space density rhor.
  public :: k_thfermi         ! Thomas-Fermi wave vector corresponding to the local value of the real space density rhor
+
+ public :: fermi_dirac        ! Fermi Dirac distribution
+ public :: bose_einstein      ! Bose Einstein distribution
 
  type,public :: jlspline_t
 
@@ -979,9 +982,10 @@ end function abi_derfc
 !! use a rational polynomial approximation.
 !!
 !! PARENTS
-!!      jlspline_new,mlwfovlp_radial,psp1nl
+!!      m_special_funcs,mlwfovlp_radial,psp1nl
 !!
 !! CHILDREN
+!!      splint
 !!
 !! SOURCE
 
@@ -1253,6 +1257,122 @@ pure function phim(costheta,sintheta,mm)
 
 !----------------------------------------------------------------------
 
+!!****f* m_special_funcs/fermi_dirac
+!! NAME
+!!  fermi_dirac
+!!
+!! FUNCTION
+!!  Returns the Fermi Dirac distribution for T and energy wrt Fermi level
+!!  presumes everything is in Hartree!!!! Not Kelvin for T
+!!
+!! INPUTS
+!!  energy = electron energy level
+!!  mu = chemical potential
+!!  temperature = T
+!!
+!! PARENTS
+!!
+!! SOURCE
+
+function fermi_dirac(energy, mu, temperature)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'fermi_dirac'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ real(dp),intent(in) :: energy, mu, temperature
+ real(dp) :: fermi_dirac
+
+!Local variables-------------------------------
+!scalars
+ real(dp) :: arg
+ character(len=500) :: message
+
+! *************************************************************************
+
+ fermi_dirac = zero
+ if (temperature > tol12) then
+   arg = (energy-mu)/temperature
+   if(arg < -600._dp)then ! far below Ef
+     fermi_dirac = one
+   else if (arg < 600._dp)then ! around Ef
+     fermi_dirac = one / (exp(arg)  + one)
+   end if
+ else  ! T is too small - just step function
+   if (mu-energy > tol12) fermi_dirac = one
+ end if
+
+end function fermi_dirac
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_special_funcs/bose_einstein
+!! NAME
+!!  bose_einstein
+!!
+!! FUNCTION
+!!  Returns the Bose Einstein distribution for T and energy 
+!!  presumes everything is in Hartree!!!! Not Kelvin for T
+!!
+!! INPUTS
+!!  energy = electron energy level
+!!  temperature = T
+!!
+!! PARENTS
+!!
+!! SOURCE
+
+function bose_einstein(energy, temperature)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'bose_einstein'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ real(dp),intent(in) :: energy, temperature
+ real(dp) :: bose_einstein
+
+!Local variables-------------------------------
+!scalars
+ real(dp) :: arg
+ character(len=500) :: message
+
+! *************************************************************************
+
+ bose_einstein = zero
+ if (temperature > tol12) then
+   arg = energy/temperature
+   if(arg > tol12 .and. arg < 600._dp)then
+     bose_einstein = one / (exp(arg)  - one)
+   else if (arg < tol12) then
+     write(message,'(a)') 'No Bose Einstein for negative energies'
+     MSG_WARNING(message)
+   end if
+ else if (arg < tol12) then
+   write(message,'(a)') 'No Bose Einstein for negative or 0 T'
+   MSG_WARNING(message)
+ end if
+ 
+
+end function bose_einstein
+!!***
+
+!----------------------------------------------------------------------
+
 !!****f* m_special_funcs/k_fermi
 !! NAME
 !!  k_fermi
@@ -1443,6 +1563,10 @@ end function jlspline_new
 !!  deallocate memory
 !!
 !! PARENTS
+!!      m_cut3d,partial_dos_fractions
+!!
+!! CHILDREN
+!!      splint
 !!
 !! SOURCE
 

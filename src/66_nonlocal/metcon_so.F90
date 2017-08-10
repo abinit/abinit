@@ -11,7 +11,7 @@
 !! tensors.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (DCA, XG, GMR, GZ)
+!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR, GZ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -313,7 +313,7 @@ subroutine metcon_so(rank,gmet,amet,aa,bb)
  end function cona_metso
 
 
- function con_metso(ii,i1,i2,i3)
+   function con_metso(ii,i1,i2,i3)
 
 
 !This section has been created automatically by the script Abilint (TD).

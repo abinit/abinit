@@ -10,7 +10,7 @@
 !! Only for norm-conserving pseudopotentials (no PAW)
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (XG, DCA, GMR, MM, AR, MV, MB, MT)
+!! Copyright (C) 1998-2017 ABINIT group (XG, DCA, GMR, MM, AR, MV, MB, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -83,9 +83,9 @@
 !!
 !! CHILDREN
 !!      appdig,destroy_hamiltonian,dfpt_mkcore,dfpt_mkvxc,dfpt_mkvxc_noncoll
-!!      dfpt_nstwf,dfpt_sygra,dfpt_vlocal,dotprod_vn,hdr_skip,init_hamiltonian
-!!      load_spin_hamiltonian,mati3inv,timab,wffclose,wffopen,wffreadnpwrec
-!!      wffreadskipk,wffreadskiprec,wfk_close,wfk_open_read,wrtout,xmpi_sum
+!!      dfpt_nstwf,dfpt_sygra,dfpt_vlocal,dotprod_vn,init_hamiltonian
+!!      load_spin_hamiltonian,mati3inv,timab,wfk_close,wfk_open_read,wrtout
+!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -114,7 +114,6 @@ subroutine dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eig
  use m_io_tools,  only : file_exists
  use m_hdr,       only : hdr_skip
  use m_pawtab,    only : pawtab_type
- use m_paw_ij,    only : paw_ij_type
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -181,7 +180,6 @@ subroutine dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eig
  real(dp),allocatable :: eig1_k(:),eig_k(:),occ_k(:)
  real(dp) :: rhodummy(0,0)
  real(dp),allocatable :: vpsp1(:),vxc1(:,:),work1(:,:,:),xccc3d1(:),ylm1_k(:,:),ylm_k(:,:)
- type(paw_ij_type) :: paw_ij(dtset%natom*psps%usepaw)
  type(pawtab_type) :: pawtab(dtset%ntypat*psps%usepaw)
  type(wfk_t) :: ddks(3)
 
@@ -277,7 +275,7 @@ subroutine dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eig
 !1) Allocate all arrays and initialize quantities that do not depend on k and spin.
 !2) Perform the setup needed for the non-local factors:
 !3) Constant kleimann-Bylander energies are copied from psps to gs_hamk.
- call init_hamiltonian(gs_hamkq,psps,pawtab,dtset%nspinor,nspden,dtset%natom,&
+ call init_hamiltonian(gs_hamkq,psps,pawtab,dtset%nspinor,nsppol,nspden,dtset%natom,&
 & dtset%typat,xred,nfft,dtset%mgfft,ngfft,rprimd,dtset%nloalg,ph1d=ph1d,&
 & use_gpu_cuda=dtset%use_gpu_cuda)
 
@@ -289,7 +287,7 @@ subroutine dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eig
    ikg=0;ikg1=0
 
 !  Continue to initialize the Hamiltonian
-   call load_spin_hamiltonian(gs_hamkq,isppol,paw_ij=paw_ij)
+   call load_spin_hamiltonian(gs_hamkq,isppol,with_nonlocal=.true.)
 
 !  BIG FAT k POINT LOOP
    do ikpt=1,nkpt_rbz

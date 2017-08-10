@@ -9,7 +9,7 @@
 !! Container type is defined
 !! 
 !! COPYRIGHT
-!! Copyright (C) 2010-2015 ABINIT group (AM)
+!! Copyright (C) 2010-2017 ABINIT group (AM)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -85,9 +85,10 @@ CONTAINS  !=====================================================================
 !!  strain = structure with all information of strain
 !!
 !! PARENTS
-!!   anharmonic_terms_compute
+!!      compute_anharmonics,m_effective_potential,mover_effpot
 !!
 !! CHILDREN
+!!      wrtout
 !!
 !! SOURCE
  
@@ -151,9 +152,10 @@ end subroutine strain_init
 !! OUTPUT
 !!
 !! PARENTS
-!!   anharmonic_terms_compute
+!!      compute_anharmonics,m_effective_potential
 !!
 !! CHILDREN
+!!      wrtout
 !!
 !! SOURCE
  
@@ -198,18 +200,20 @@ end subroutine strain_free
 !!
 !!
 !! INPUTS
+!!  symmetrized = (optional) symmetrize the output
 !!
 !! OUTPUT
 !!  strain = structure with all information of strain
 !!
 !! PARENTS
-!!   anharmonic_terms_compute
+!!      compute_anharmonics,m_effective_potential,mover_effpot
 !!
 !! CHILDREN
+!!      wrtout
 !!
 !! SOURCE
  
-subroutine strain_get(strain,rprim,rprim_def,mat_delta)
+subroutine strain_get(strain,rprim,rprim_def,mat_delta,symmetrized)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -226,9 +230,11 @@ subroutine strain_get(strain,rprim,rprim_def,mat_delta)
 !array
  type(strain_type),intent(inout) :: strain
  real(dp),optional,intent(in) :: rprim(3,3),rprim_def(3,3), mat_delta(3,3)
+ logical,optional,intent(in) :: symmetrized
 !Local variables-------------------------------
 !scalar
  integer :: i,j
+ logical :: symmetrized_in
  character(len=500) :: message
 !arrays
  real(dp) :: mat_delta_tmp(3,3),rprim_inv(3,3)
@@ -236,6 +242,11 @@ subroutine strain_get(strain,rprim,rprim_def,mat_delta)
 ! *************************************************************************
 
 !check inputs 
+ symmetrized_in = .FALSE.
+ if(present(symmetrized)) then
+   symmetrized_in = symmetrized
+ end if
+
  if((present(rprim_def).and..not.present(rprim)).or.&
 &   (present(rprim).and..not.present(rprim_def))) then
     write(message, '(a)' )&
@@ -251,16 +262,15 @@ subroutine strain_get(strain,rprim,rprim_def,mat_delta)
    
    call matr3inv(rprim,rprim_inv)
    mat_delta_tmp =  matmul(transpose(rprim_inv),rprim_def)-identity
-   
    identity = zero
    do i=1,3
      do j=1,3
        if (abs(mat_delta_tmp(i,j))>tol10) then 
-         identity(i,j) = ANINT(mat_delta_tmp(i,j)*1000)/1000
+         identity(i,j) = mat_delta_tmp(i,j)
        end if
      end do
    end do
-  
+
    mat_delta_tmp = identity
 
  else if (present(mat_delta)) then
@@ -270,6 +280,17 @@ subroutine strain_get(strain,rprim,rprim_def,mat_delta)
    write(message, '(a)' )&
 &     ' strain_get: should give rprim_def or mat_delta as input of the routines'
    MSG_BUG(message)
+ end if
+
+ if(symmetrized_in)then
+   mat_delta_tmp(2,3) = (mat_delta_tmp(2,3) + mat_delta_tmp(3,2)) / 2
+   mat_delta_tmp(3,1) = (mat_delta_tmp(3,1) + mat_delta_tmp(1,3)) / 2
+   mat_delta_tmp(2,1) = (mat_delta_tmp(2,1) + mat_delta_tmp(1,2)) / 2
+
+   mat_delta_tmp(3,2) = mat_delta_tmp(2,3)
+   mat_delta_tmp(1,3) = mat_delta_tmp(3,1)
+   mat_delta_tmp(1,2) = mat_delta_tmp(2,1)
+
  end if
 
  call strain_def2strain(mat_delta_tmp,strain)
@@ -323,11 +344,12 @@ subroutine strain_apply(rprim,rprim_def,strain)
  real(dp) :: identity(3,3)
 ! *************************************************************************
 
+ rprim_def(:,:) = zero
 ! Fill the identity matrix
  identity = zero
  forall(i=1:3)identity(i,i)=1
  
- rprim_def(:,:) = matmul(rprim(:,:),strain%strain(:,:))
+ rprim_def(:,:) = matmul(rprim(:,:),identity(:,:)+strain%strain(:,:))
 
 end subroutine strain_apply
 !!***
@@ -387,7 +409,8 @@ subroutine strain_def2strain(mat_strain,strain)
    if(abs(mat_strain(1,1))>tol10.and.abs(mat_strain(1,2))<tol10.and.abs(mat_strain(1,3))<tol10.and.&
 &   abs(mat_strain(2,1))<tol10.and.abs(mat_strain(2,2))>tol10.and.abs(mat_strain(2,3))<tol10.and.&
 &   abs(mat_strain(3,1))<tol10.and.abs(mat_strain(3,2))<tol10.and.abs(mat_strain(3,3))>tol10) then
-     if(mat_strain(1,1)==mat_strain(2,2).and.mat_strain(1,1)==mat_strain(3,3)) then
+     if((mat_strain(1,1)-mat_strain(2,2))< tol10.and.&
+&       (mat_strain(1,1)-mat_strain(3,3))< tol10) then
        strain%name = "isostatic"
        strain%delta = mat_strain(1,1)
        strain%direction = -1
@@ -421,7 +444,7 @@ subroutine strain_def2strain(mat_strain,strain)
     if(abs(mat_strain(1,1))<tol10.and.abs(mat_strain(1,2))<tol10.and.abs(mat_strain(1,3))<tol10.and.&
 &    abs(mat_strain(2,1))<tol10.and.abs(mat_strain(2,2))<tol10.and.abs(mat_strain(2,3))>tol10.and.&
 &    abs(mat_strain(3,1))<tol10.and.abs(mat_strain(3,2))>tol10.and.abs(mat_strain(3,3))<tol10) then
-      if (mat_strain(3,2)==mat_strain(3,2)) then 
+      if (abs(mat_strain(3,2)-mat_strain(3,2))<tol10) then 
         strain%name = "shear"
         strain%delta = mat_strain(3,2) * 2
         strain%direction = 4
@@ -431,7 +454,7 @@ subroutine strain_def2strain(mat_strain,strain)
     if(abs(mat_strain(1,1))<tol10.and.abs(mat_strain(1,2))<tol10.and.abs(mat_strain(1,3))>tol10.and.&
 &    abs(mat_strain(2,1))<tol10.and.abs(mat_strain(2,2))<tol10.and.abs(mat_strain(2,3))<tol10.and.&
 &    abs(mat_strain(3,1))>tol10.and.abs(mat_strain(3,2))<tol10.and.abs(mat_strain(3,3))<tol10) then
-      if (mat_strain(3,1)==mat_strain(1,3)) then 
+      if (abs(mat_strain(3,1)-mat_strain(1,3))<tol10) then 
         strain%name = "shear"
         strain%delta = mat_strain(3,1) * 2
         strain%direction = 5
@@ -441,7 +464,7 @@ subroutine strain_def2strain(mat_strain,strain)
     if(abs(mat_strain(1,1))<tol10.and.abs(mat_strain(1,2))>tol10.and.abs(mat_strain(1,3))<tol10.and.&
 &    abs(mat_strain(2,1))>tol10.and.abs(mat_strain(2,2))<tol10.and.abs(mat_strain(2,3))<tol10.and.&
 &    abs(mat_strain(3,1))<tol10.and.abs(mat_strain(3,2))<tol10.and.abs(mat_strain(3,3))<tol10) then
-      if (mat_strain(1,2)==mat_strain(2,1)) then 
+      if (abs(mat_strain(1,2)-mat_strain(2,1))<tol10) then 
         strain%name = "shear"
         strain%delta = mat_strain(2,1) * 2
         strain%direction = 6
@@ -541,9 +564,10 @@ end subroutine strain_strain2def
 !! eff_pot = supercell structure with data to be output
 !!
 !! PARENTS
-!!   multibinit
+!!      m_effective_potential,mover_effpot
 !!
 !! CHILDREN
+!!      wrtout
 !!
 !! SOURCE
  
@@ -571,29 +595,26 @@ subroutine strain_print(strain)
 ! *************************************************************************
 
  if(strain%name == "reference") then 
-   write(message,'(a,a,a)') ch10,' no strain found:',&
-&  ' This structure is equivalent to the reference structure'
+   write(message,'(4a)') ch10,' no strain found:',&
+&  ' This structure is equivalent to the reference structure',ch10
    call wrtout(std_out,message,'COLL')
  else
    if(strain%name /= "") then 
-     write(message,'(4a,I2,a,(ES10.2),a)') ch10,&
+     write(message,'(3a,I2,a,(ES10.2),a)') &
 &      ' The strain is ',trim(strain%name),' type in the direction ',&
 &      strain%direction,' with delta of ',strain%delta, ':'
      call wrtout(std_out,message,'COLL')
      call wrtout(ab_out,message,'COLL')
      do ii = 1,3
-       write(message,'(3es12.2)') strain%strain(1,ii),strain%strain(2,ii),strain%strain(3,ii)
+       write(message,'(3es17.8)') strain%strain(ii,1),strain%strain(ii,2),strain%strain(ii,3)
        call wrtout(std_out,message,'COLL')
-       call wrtout(ab_out,message,'COLL')
      end do
    else
-     write(message,'(a,a,a)') ch10,' Strain does not correspond to standard strain:'
-     call wrtout(ab_out,message,'COLL')
+     write(message,'(a)') ' Strain does not correspond to standard strain:'
      call wrtout(std_out,message,'COLL')
      do ii = 1,3
-       write(message,'(3es12.2)') strain%strain(1,ii),strain%strain(2,ii),strain%strain(3,ii)
+       write(message,'(3es17.8)') strain%strain(ii,1),strain%strain(ii,2),strain%strain(ii,3)
        call wrtout(std_out,message,'COLL')
-       call wrtout(ab_out,message,'COLL')
      end do
    end if
  end if

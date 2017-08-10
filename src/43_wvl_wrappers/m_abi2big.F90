@@ -7,7 +7,7 @@
 !!  Module to copy objects from ABINIT to BigDFT and viceversa.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2012-2016 ABINIT group (TR,DC,MT)
+!!  Copyright (C) 2012-2017 ABINIT group (TR,DC,MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -197,7 +197,7 @@ end subroutine wvl_vtrial_abi2big
 !! It uses the generic routine wvl_rhov_abi2big.
 !!
 !! PARENTS
-!!      newrho,vtorho,wvl_mkrho
+!!      afterscfloop,mklocl,newrho,vtorho,wvl_mkrho
 !!
 !! CHILDREN
 !!
@@ -286,7 +286,6 @@ end subroutine wvl_rho_abi2big
 !! It uses the generic routine wvl_rhov_abi2big.
 !!
 !! PARENTS
-!!      psolver_rhohxc
 !!
 !! CHILDREN
 !!
@@ -378,7 +377,7 @@ end subroutine wvl_vhartr_abi2big
 !! It uses the generic routine wvl_rhov_abi2big.
 !!
 !! PARENTS
-!!      psolver_rhohxc,wvl_psitohpsi
+!!      wvl_psitohpsi
 !!
 !! CHILDREN
 !!

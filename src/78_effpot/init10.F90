@@ -8,7 +8,7 @@
 !! Initialize the code multibinit: write heading and make the first i/os
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2015 ABINIT group (XG)
+!! Copyright (C) 1999-2017 ABINIT group (XG)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -24,13 +24,16 @@
 !! 2. File names refer to following files, in order:
 !!     (1) Formatted input file
 !!     (2) Formatted output file
-!!     (3) Input Derivative Database (DDB file)
-!!     (4-12) Input Derivative Database (XML format)
+!!     (3) Input for reference structure and harmonic part (DDB file or XML)
+!!     (4) Input for XML with polynomial coefficients (DDB file)
+!!     (5) Input for HIST file
+!!     (6-14) Input Derivative Database (XML format)
 !! 
 !! PARENTS
-!!      anaddb
+!!      multibinit
 !!
 !! CHILDREN
+!!      xmpi_bcast
 !!
 !! SOURCE
 
@@ -63,7 +66,7 @@ subroutine init10(filnam,comm)
 !scalars
  integer,intent(in) :: comm
 !arrays
- character(len=*),intent(out) :: filnam(15)
+ character(len=*),intent(out) :: filnam(17)
 
 !Local variables--------------------------
 !scalars
@@ -91,8 +94,17 @@ subroutine init10(filnam,comm)
 &                  ' (DDB or XML file): '
    read(std_in, '(a)',IOSTAT=io) filnam(3)
    write(std_out,'(a,a)' )'-   ',trim(filnam(3))
-   ii = 4
-   do while (io>=0 .and. ii<16)
+   write(std_out,*)' Give name for input coefficients from fitted polynomial',&
+&                  ' (XML file or enter no): '
+   read(std_in, '(a)',IOSTAT=io) filnam(4)
+   write(std_out,'(a,a)' )'-   ',trim(filnam(4))
+   write(std_out,*)' Give name for molecular dynamics',&
+&                  ' (netcdf file or enter no): '
+   read(std_in, '(a)',IOSTAT=io) filnam(5)
+   write(std_out,'(a,a)' )'-   ',trim(filnam(5))
+
+   ii = 6
+   do while (io>=0 .and. ii<18)
      write(std_out,*)' Give name for input derivative database (DDB or XML file): '
      read(std_in, '(a)',IOSTAT=io) filnam(ii)
      write(std_out,'(a,a)' )'-   ',trim(filnam(ii))

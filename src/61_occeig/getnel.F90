@@ -22,7 +22,7 @@
 !! compute the entropy only when the fermi energy is well converged
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (XG, AF)
+!! Copyright (C) 1998-2017 ABINIT group (XG, AF)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -82,6 +82,8 @@ subroutine getnel(doccde,dosdeltae,eigen,entropy,fermie,maxocc,mband,nband,&
  use m_errors
  use m_splines
 
+ use m_fstrings,   only : sjoin, itoa
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -137,8 +139,7 @@ subroutine getnel(doccde,dosdeltae,eigen,entropy,fermie,maxocc,mband,nband,&
  DBG_ENTER("COLL")
 
  if(option/=1 .and. option/=2)then
-   write(message,'(a,i0,a)')' Option must be either 1 or 2. It is ',option,'.'
-   MSG_BUG(message)
+   MSG_BUG(sjoin('Option must be either 1 or 2. It is:', itoa(option)))
  end if
 
 !Initialize the occupation function and generalized entropy function,
@@ -217,25 +218,25 @@ subroutine getnel(doccde,dosdeltae,eigen,entropy,fermie,maxocc,mband,nband,&
  else if(option==2)then
   ! evaluate DOS for smearing, half smearing, and double.
 
-  buffer=limit/tsmearinv*.5_dp
+   buffer=limit/tsmearinv*.5_dp
 
   ! A Similar section is present is dos_calcnwrite. Should move all DOS stuff to m_ebands
   ! Choose the lower and upper energies
-  enemax=maxval(eigen(1:bantot))+buffer
-  enemin=minval(eigen(1:bantot))-buffer
+   enemax=maxval(eigen(1:bantot))+buffer
+   enemin=minval(eigen(1:bantot))-buffer
 
   ! Extend the range to a nicer value
-  enemax=0.1_dp*ceiling(enemax*10._dp)
-  enemin=0.1_dp*floor(enemin*10._dp)
+   enemax=0.1_dp*ceiling(enemax*10._dp)
+   enemin=0.1_dp*floor(enemin*10._dp)
 
   ! Choose the energy increment
-  if(abs(dosdeltae)<tol10)then
-    deltaene=0.001_dp
-    if(prtdos1>=2)deltaene=0.0005_dp ! Higher resolution possible (and wanted) for tetrahedron
-  else
-    deltaene=dosdeltae
-  end if
-  nene=nint((enemax-enemin)/deltaene)+1
+   if(abs(dosdeltae)<tol10)then
+     deltaene=0.001_dp
+     if(prtdos1>=2)deltaene=0.0005_dp ! Higher resolution possible (and wanted) for tetrahedron
+   else
+     deltaene=dosdeltae
+   end if
+   nene=nint((enemax-enemin)/deltaene)+1
 
 !  Write the header of the DOS file, and also decides the energy range and increment
    call dos_hdr_write(buffer,deltaene,dosdeltae,eigen,enemax,enemin,fermie,mband,nband,nene,&

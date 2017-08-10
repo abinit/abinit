@@ -9,7 +9,7 @@
 !!  displacements.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2014-2016 ABINIT group (SP)
+!! Copyright (C) 2014-2017 ABINIT group (SP)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -446,7 +446,7 @@ end subroutine fan_init
 !! SIDE EFFECTS
 !!
 !! PARENTS
-!!      dfpt_looppert,eig2tot
+!!      dfpt_looppert,eig2tot,m_gkk
 !!
 !! CHILDREN
 !!
@@ -604,7 +604,7 @@ end subroutine fan_ncwrite
 !! OUTPUT
 !!  
 !! PARENTS
-!!      dfpt_looppert,eig2tot
+!!      dfpt_looppert,eig2tot,m_gkk
 !!
 !! CHILDREN
 !!
@@ -759,7 +759,7 @@ end subroutine fan_free
 !!  (only deallocate)
 !!
 !! PARENTS
-!!      dfpt_looppert,eig2tot
+!!      dfpt_looppert,eig2tot,m_gkk
 !!
 !! CHILDREN
 !!

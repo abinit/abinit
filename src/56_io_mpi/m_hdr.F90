@@ -11,7 +11,7 @@
 !!   hdr_mpio_skip, hdr_fort_read, hdr_fort_write, hdr_ncread, hdr_ncwrite
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2016 ABINIT group (XG, MB, MT, DC, MG)
+!! Copyright (C) 2008-2017 ABINIT group (XG, MB, MT, DC, MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -171,7 +171,7 @@ MODULE m_hdr
  !    Moreover the files produced by the DFPT code do not have a well-defined extension and, as a consequence,
  !    they require a special treatment. In python I would use regexp but Fortran is not python!
 
- type(abifile_t),private,parameter :: all_abifiles(41) = [ &
+ type(abifile_t),private,parameter :: all_abifiles(45) = [ &
 
     ! Files with wavefunctions:
     abifile_t(varname="coefficients_of_wavefunctions", fform=2, ext="WFK", class="wf_planewave"), &
@@ -218,6 +218,10 @@ MODULE m_hdr
     ! fform 111 contains an extra record with rhog1_q(G=0) after the DFPT potential(r).
     abifile_t(varname="first_order_potential", fform=111, ext="POT(\d+)", class="potential"), &
 
+    abifile_t(varname="first_order_vhartree", fform=112, ext="VHA(\d+)", class="potential"), &
+    abifile_t(varname="first_order_vpsp", fform=113, ext="VPSP(\d+)", class="potential"), &
+    abifile_t(varname="first_order_vxc", fform=114, ext="VXC(\d+)", class="potential"), &
+
    ! Data used in conducti
     abifile_t(varname="pawnabla", fform=610, ext="OPT1", class="data"), &
     abifile_t(varname="pawnabla_core", fform=611, ext="OPT2", class="data"), &
@@ -238,7 +242,8 @@ MODULE m_hdr
    !abifile_t(varname="bse_ucoupling_q0", fform=1002, ext="BSC", class="bscoup"), &
 
    ! Miscellaneous
-   abifile_t(varname="dos_fractions", fform=3000, ext="FATBANDS", class="None") &
+   abifile_t(varname="dos_fractions", fform=3000, ext="FATBANDS", class="data"), &
+   abifile_t(varname="spectral_weights", fform=5000, ext="FOLD2BLOCH", class="data") &
   ]
 
  type(abifile_t),public,parameter :: abifile_none = abifile_t(varname="None", fform=0, ext="None", class="None")
@@ -360,7 +365,8 @@ character(len=nctk_slen) function varname_from_fname(filename) result(varname)
  if (endswith(filename, ".nc")) then
    ind = index(filename, ".nc", back=.True.)
  else
-   MSG_ERROR(sjoin("Don't know how to handle: ", filename))
+   !MSG_ERROR(sjoin("Don't know how to handle: ", filename))
+   ind = len_trim(filename) + 1
  end if
 
  ext = filename(:ind-1)
@@ -429,6 +435,30 @@ character(len=nctk_slen) function varname_from_fname(filename) result(varname)
    read(ext(4:), *, iostat=ierr) pertcase
    if (ierr == 0) then
       varname = "first_order_potential"; return
+   end if
+ end if
+
+ ! Handle VXC[pertcase]
+ if (startswith(ext, "VXC")) then
+   read(ext(4:), *, iostat=ierr) pertcase
+   if (ierr == 0) then
+      varname = "first_order_vxc"; return
+   end if
+ end if
+
+ ! Handle VHA[pertcase]
+ if (startswith(ext, "VHA")) then
+   read(ext(4:), *, iostat=ierr) pertcase
+   if (ierr == 0) then
+      varname = "first_order_vhartree"; return
+   end if
+ end if
+
+ ! Handle VPSP[pertcase]
+ if (startswith(ext, "VPSP")) then
+   read(ext(4:), *, iostat=ierr) pertcase
+   if (ierr == 0) then
+      varname = "first_order_vpsp"; return
    end if
  end if
 
@@ -850,11 +880,11 @@ end subroutine hdr_init
 !!
 !! PARENTS
 !!      bethe_salpeter,conducti_nc,conducti_paw,conducti_paw_core,cut3d
-!!      dfpt_looppert,elphon,emispec_paw,eph,finddistrproc,gstate,initaim
-!!      inpgkk,inwffil,ioprof,linear_optics_paw,m_bse_io,m_cut3d,m_ddk,m_dvdb
-!!      m_hdr,m_io_kss,m_io_screening,m_ioarr,m_wfd,m_wfk,macroave,mrggkk
-!!      mrgscr,nonlinear,optic,read_el_veloc,read_gkk,respfn,screening,sigma
-!!      wfk_analyze
+!!      dfpt_looppert,dfptnl_loop,elphon,emispec_paw,eph,finddistrproc,gstate
+!!      initaim,inpgkk,inwffil,ioprof,linear_optics_paw,m_bse_io,m_cut3d,m_ddk
+!!      m_dvdb,m_hdr,m_io_kss,m_io_screening,m_ioarr,m_wfd,m_wfk,macroave
+!!      mrggkk,mrgscr,nonlinear,optic,read_el_veloc,read_gkk,respfn,screening
+!!      sigma,wfk_analyze
 !!
 !! CHILDREN
 !!
@@ -1466,7 +1496,7 @@ subroutine hdr_read_from_fname(Hdr,fname,fform,comm)
      end if
 
      call hdr_fort_read(Hdr,fh,fform,rewind=(rdwr1==1))
-     ABI_CHECK(fform /= 0, sjoin("Error while reading:", my_fname))
+     ABI_CHECK(fform /= 0, sjoin("fform == 0 while reading:", my_fname))
      close(fh)
 
    else
@@ -2031,8 +2061,7 @@ end subroutine hdr_io_int
 !!  Only writing
 !!
 !! PARENTS
-!!      cut3d,initaim,ioprof,m_ddk,m_dvdb,m_hdr,m_io_kss,m_wfd,m_wfk,mrggkk
-!!      rchkgsheader
+!!      cut3d,initaim,ioprof,m_ddk,m_dvdb,m_hdr,m_wfd,m_wfk,mrggkk,rchkgsheader
 !!
 !! CHILDREN
 !!
@@ -2436,8 +2465,8 @@ end subroutine hdr_skip_wfftype
 !!   it, contain its definite values, except for evolving variables
 !!
 !! PARENTS
-!!      afterscfloop,dfpt_looppert,gstate,nonlinear,respfn,scfcv,setup_bse
-!!      setup_screening,setup_sigma
+!!      afterscfloop,dfpt_looppert,dfpt_scfcv,gstate,nonlinear,respfn,scfcv
+!!      setup_bse,setup_screening,setup_sigma
 !!
 !! CHILDREN
 !!
@@ -2522,8 +2551,7 @@ end subroutine hdr_update
 !! This routine is called only in the case of MPI version of the code.
 !!
 !! PARENTS
-!!      elphon,initaim,m_ddk,m_dvdb,m_hdr,m_io_kss,m_io_screening,m_ioarr,m_wfk
-!!      optic,read_gkk
+!!      elphon,initaim,m_dvdb,m_hdr,m_io_screening,m_ioarr,m_wfk,optic,read_gkk
 !!
 !! CHILDREN
 !!
@@ -2851,8 +2879,8 @@ end subroutine hdr_bcast
 !! The file is supposed to be open already
 !!
 !! PARENTS
-!!      elphon,initaim,inpgkk,m_bse_io,m_cut3d,m_dvdb,m_hdr,m_io_kss
-!!      m_io_screening,m_ioarr,macroave,mrggkk,rchkgsheader,read_gkk
+!!      elphon,initaim,inpgkk,m_bse_io,m_cut3d,m_dvdb,m_hdr,m_io_screening
+!!      m_ioarr,macroave,mrggkk,rchkgsheader,read_gkk
 !!
 !! CHILDREN
 !!
@@ -2983,7 +3011,7 @@ end subroutine hdr_fort_read
 !!  fform=kind of the array in the file. if the reading fails, return fform=0
 !!
 !! PARENTS
-!!      initaim,inwffil,m_dvdb,m_hdr,m_io_kss,m_io_screening,m_ioarr,macroave
+!!      initaim,inwffil,m_dvdb,m_hdr,m_io_screening,m_ioarr,macroave
 !!
 !! CHILDREN
 !!
@@ -3401,7 +3429,7 @@ integer function hdr_ncwrite(hdr, ncid, fform, nc_define) result(ncerr)
    NCF_CHECK(ncerr)
 
    ! Define states section. TODO: write smearing_scheme
-   ncerr = nctk_def_arrays(ncid, [&
+   ncerr = nctk_def_arrays(ncid, [ &
      nctkarr_t("number_of_states", "int", "number_of_kpoints, number_of_spins"), &
      nctkarr_t("eigenvalues", "dp", "max_number_of_states, number_of_kpoints, number_of_spins"), &
      nctkarr_t("occupations", "dp", "max_number_of_states, number_of_kpoints, number_of_spins"), &
@@ -3413,6 +3441,7 @@ integer function hdr_ncwrite(hdr, ncid, fform, nc_define) result(ncerr)
    NCF_CHECK(ncerr)
    ncerr = nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: "fermi_energy", "smearing_width"])
    NCF_CHECK(ncerr)
+   NCF_CHECK(nctk_set_atomic_units(ncid, "smearing_width"))
 
    ! Some variables require the specifications of units.
    NCF_CHECK(nctk_set_atomic_units(ncid, "eigenvalues"))
@@ -3527,6 +3556,8 @@ integer function hdr_ncwrite(hdr, ncid, fform, nc_define) result(ncerr)
 
  ! Write electrons
  NCF_CHECK(nf90_put_var(ncid, vid("fermi_energy"), hdr%fermie))
+ NCF_CHECK(nf90_put_var(ncid, vid("smearing_width"), hdr%tsmear))
+ NCF_CHECK(nf90_put_var(ncid, vid("smearing_scheme"), nctk_string_from_occopt(hdr%occopt)))
 
  ! transfer data from (stupid) 1d hdr%nband and hdr%occ in packed form to 2d - 3d matrix with stride
  ! native support for array and array syntax is one of the reasons why we still use Fortran
@@ -3610,6 +3641,8 @@ integer function hdr_ncwrite(hdr, ncid, fform, nc_define) result(ncerr)
    "nelect", "charge"],[hdr%nelect, hdr%charge])
  NCF_CHECK(ncerr)
 
+ ! FIXME: in etsf_io the number of electrons is declared as integer!!!
+ NCF_CHECK(nf90_put_var(ncid, vid("number_of_electrons"), nint(hdr%nelect)))
  NCF_CHECK(nf90_put_var(ncid, vid("kptrlatt_orig"), hdr%kptrlatt_orig))
  NCF_CHECK(nf90_put_var(ncid, vid("kptrlatt"), hdr%kptrlatt))
  NCF_CHECK(nf90_put_var(ncid, vid("shiftk_orig"), hdr%shiftk_orig))

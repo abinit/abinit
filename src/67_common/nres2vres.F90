@@ -10,7 +10,7 @@
 !!     V^res(r)=dV/dn.n^res(r)
 !!             =V_hartree(n^res)(r) + Kxc.n^res(r)
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (MT)
+!! Copyright (C) 1998-2017 ABINIT group (MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -116,6 +116,7 @@ subroutine nres2vres(dtset,gsqcut,izero,kxc,mpi_enreg,my_natom,nfft,ngfft,nhat,&
 !Local variables-------------------------------
 !scalars
  integer :: cplex,ider,idir,ipert,ispden,nhatgrdim,nkxc_cur,option,me,nproc,comm,usexcnhat
+ logical :: has_nkxc_gga
  real(dp) :: dum,energy,m_norm_min,ucvol,vxcavg
  character(len=500) :: message
 !arrays
@@ -127,6 +128,8 @@ subroutine nres2vres(dtset,gsqcut,izero,kxc,mpi_enreg,my_natom,nfft,ngfft,nhat,&
 ! *************************************************************************
 
 !Compatibility tests:
+ has_nkxc_gga=(nkxc==7.or.nkxc==19)
+
  if(optxc<-1.or.optxc>1)then
    write(message,'(a,i0)')' Wrong value for optxc ',optxc
    MSG_BUG(message)
@@ -142,7 +145,7 @@ subroutine nres2vres(dtset,gsqcut,izero,kxc,mpi_enreg,my_natom,nfft,ngfft,nhat,&
    MSG_BUG(message)
  end if
 
- if(dtset%nspden==4.and.dtset%xclevel==2.and.optxc==1.and.nkxc/=23)then
+ if(dtset%nspden==4.and.dtset%xclevel==2.and.optxc==1.and.(.not.has_nkxc_gga))then
    MSG_ERROR(' Wrong values for optxc and nkxc !')
  end if
 
@@ -150,8 +153,8 @@ subroutine nres2vres(dtset,gsqcut,izero,kxc,mpi_enreg,my_natom,nfft,ngfft,nhat,&
  nkxc_cur=0
  m_norm_min=EPSILON(0.0_dp)**2
  usexcnhat=0;if (usepaw==1) usexcnhat=maxval(pawtab(1:dtset%ntypat)%usexcnhat)
- if (dtset%xclevel==1.or.optxc==0) nkxc_cur=3-2*mod(dtset%nspden,2)
- if (dtset%xclevel==2.and.optxc==1) nkxc_cur=23
+ if (dtset%xclevel==1.or.optxc==0) nkxc_cur= 2*min(dtset%nspden,2)-1 ! LDA: nkxc=1,3
+ if (dtset%xclevel==2.and.optxc==1)nkxc_cur=12*min(dtset%nspden,2)-5 ! GGA: nkxc=7,19
  ABI_ALLOCATE(vhres,(nfft))
 
 !Compute different geometric tensor, as well as ucvol, from rprimd
@@ -168,7 +171,7 @@ subroutine nres2vres(dtset,gsqcut,izero,kxc,mpi_enreg,my_natom,nfft,ngfft,nhat,&
 
 !For GGA, has to recompute gradients of nhat
  nhatgrdim=0
- if ((nkxc==nkxc_cur.and.nkxc==23).or.(optxc==-1.and.nkxc==23).or.&
+ if ((nkxc==nkxc_cur.and.has_nkxc_gga).or.(optxc==-1.and.has_nkxc_gga).or.&
 & (optxc/=-1.and.nkxc/=nkxc_cur)) then
    if (usepaw==1.and.dtset%xclevel==2.and.usexcnhat>0.and.dtset%pawnhatxc>0) then
      nhatgrdim=1

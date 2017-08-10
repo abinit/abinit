@@ -7,7 +7,7 @@
 !! Module containing all the functions related to the PAW radial meshes
 !!
 !! COPYRIGHT
-!! Copyright (C) 2013-2016 ABINIT group (MT,FJ,MG)
+!! Copyright (C) 2013-2017 ABINIT group (MT,FJ,MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -181,7 +181,7 @@ CONTAINS
 !!
 !! PARENTS
 !!      dfpt_eltfrxc,m_atom,m_paw_gaussfit,m_pawpsp,m_pawpwij,m_pawxmlps,m_psps
-!!      mkcore_paw,mkcore_wvl,psp8in,wvl_initro
+!!      mkcore,mkcore_paw,mkcore_wvl,psp8in,wvl_initro
 !!
 !! CHILDREN
 !!      poisson,simp_gen
@@ -853,17 +853,17 @@ subroutine pawrad_bcast(pawrad,comm_mpi)
    indx=5
    if (if_rad==1) then
      isz1=pawrad%mesh_size
-     list_dpr(indx:indx+isz1-1)=pawrad%rad(:)
+     list_dpr(indx:indx+isz1-1)=pawrad%rad(1:isz1)
      indx=indx+isz1
    end if
    if (if_radfact==1) then
      isz1=pawrad%mesh_size
-     list_dpr(indx:indx+isz1-1)=pawrad%radfact(:)
+     list_dpr(indx:indx+isz1-1)=pawrad%radfact(1:isz1)
      indx=indx+isz1
    end if
    if (if_simfact==1) then
      isz1=pawrad%mesh_size
-     list_dpr(indx:indx+isz1-1)=pawrad%simfact(:)
+     list_dpr(indx:indx+isz1-1)=pawrad%simfact(1:isz1)
      indx=indx+isz1
    end if
  end if
@@ -888,19 +888,19 @@ subroutine pawrad_bcast(pawrad,comm_mpi)
    if(if_rad==1) then
      isz1=pawrad%mesh_size
      LIBPAW_ALLOCATE(pawrad%rad,(isz1))
-     pawrad%rad(:)=list_dpr(indx:indx+isz1-1)
+     pawrad%rad(1:isz1)=list_dpr(indx:indx+isz1-1)
      indx=indx+isz1
    end if
    if(if_radfact==1) then
      isz1=pawrad%mesh_size
      LIBPAW_ALLOCATE(pawrad%radfact,(isz1))
-     pawrad%radfact(:)=list_dpr(indx:indx+isz1-1)
+     pawrad%radfact(1:isz1)=list_dpr(indx:indx+isz1-1)
      indx=indx+isz1
    end if
    if(if_simfact==1) then
      isz1=pawrad%mesh_size
      LIBPAW_ALLOCATE(pawrad%simfact,(isz1))
-     pawrad%simfact(:)=list_dpr(indx:indx+isz1-1)
+     pawrad%simfact(1:isz1)=list_dpr(indx:indx+isz1-1)
      indx=indx+isz1
    end if
  end if

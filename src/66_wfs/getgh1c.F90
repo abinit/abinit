@@ -12,7 +12,7 @@
 !! If required, <G|S^(1)|C> is returned in gs1c (S=overlap - PAW only)
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (XG, DRH, MT)
+!! Copyright (C) 1998-2017 ABINIT group (XG, DRH, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -62,7 +62,8 @@
 !!  gs1c(2,npw1*nspinor)=<G|S^(1)|C> (S=overlap) on the k+q sphere.
 !!
 !! PARENTS
-!!      dfpt_cgwf,dfpt_nstpaw,dfpt_nstwf,dfpt_wfkfermi,m_phgamma,m_rf2
+!!      dfpt_cgwf,dfpt_nstpaw,dfpt_nstwf,dfpt_wfkfermi,m_gkk,m_phgamma,m_phpi
+!!      m_rf2,m_sigmaph
 !!
 !! CHILDREN
 !!      kpgstr,load_k_hamiltonian,load_k_rf_hamiltonian,load_kprime_hamiltonian
@@ -136,6 +137,8 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
 
 ! *********************************************************************
 
+ DBG_ENTER("COLL")
+
 !Keep track of total time spent in getgh1c
  call timab(196+tim_getgh1c,1,tsec)
 
@@ -149,15 +152,15 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
 
 !Compatibility tests
  if(gs_hamkq%usepaw==1.and.(ipert>=0.and.(ipert<=natom.or.ipert==natom+3.or.ipert==natom+4))) then
-   if ((optnl>=1.and.(.not.allocated(rf_hamkq%e1kbfr))).or. &
-&   (optnl>=2.and.(.not.allocated(rf_hamkq%e1kbsc))))then
+   if ((optnl>=1.and.(.not.associated(rf_hamkq%e1kbfr))).or. &
+&   (optnl>=2.and.(.not.associated(rf_hamkq%e1kbsc))))then
      msg='ekb derivatives must be allocated for ipert<=natom or natom+3/4 !'
      MSG_BUG(msg)
    end if
  end if
  if(gs_hamkq%usepaw==1.and.(ipert==natom+2)) then
-   if ((optnl>=1.and.(.not.allocated(rf_hamkq%e1kbfr))).or. &
-&   (optnl>=2.and.(.not.allocated(rf_hamkq%e1kbsc))))then
+   if ((optnl>=1.and.(.not.associated(rf_hamkq%e1kbfr))).or. &
+&   (optnl>=2.and.(.not.associated(rf_hamkq%e1kbsc))))then
      msg='ekb derivatives must be allocated for ipert=natom+2 !'
      MSG_BUG(msg)
    end if
@@ -247,7 +250,7 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
 !or Electric field perturbation
 !or Strain perturbation
 !-------------------------------------------
- if (ipert<=natom+4.and.ipert/=natom+1.and.optlocal>0) then
+ if (ipert<=natom+5.and.ipert/=natom+1.and.optlocal>0) then !SPr deb
 
    ABI_ALLOCATE(work,(2,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6))
 
@@ -747,6 +750,8 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
 
  call timab(196+tim_getgh1c,1,tsec)
 
+ DBG_EXIT("COLL")
+
 end subroutine getgh1c
 !!***
 
@@ -778,7 +783,7 @@ end subroutine getgh1c
 !!  vlocal1(cplex*n4,n5,n6,nvloc)= RF local potential in real space, on the augmented coarse fft grid
 !!
 !! PARENTS
-!!      dfpt_vtorho,m_phgamma
+!!      dfpt_vtorho,m_gkk,m_phgamma,m_phpi,m_sigmaph
 !!
 !! CHILDREN
 !!      kpgstr,load_k_hamiltonian,load_k_rf_hamiltonian,load_kprime_hamiltonian
@@ -893,7 +898,7 @@ end subroutine rf_transgrid_and_pack
 !! OUTPUT
 !!
 !! PARENTS
-!!      dfpt_vtorho,m_phgamma
+!!      dfpt_vtorho,m_gkk,m_phgamma,m_phpi,m_sigmaph
 !!
 !! CHILDREN
 !!      kpgstr,load_k_hamiltonian,load_k_rf_hamiltonian,load_kprime_hamiltonian
@@ -1019,6 +1024,9 @@ subroutine getgh1c_setup(gs_hamkq,rf_hamkq,dtset,psps,kpoint,kpq,idir,ipert,&   
    if (ipert==natom+3) istr=idir
    if (ipert==natom+4) istr=idir+3
    ider=1;idir0=-istr
+ !-- Magnetic field perturbation ( SPr, Zeeman )
+ else if(ipert==natom+5)then
+   ider=0;idir0=0
  end if
 
 !Compute nonlocal form factors ffnl1 at (k+q+G), for all atoms

@@ -9,7 +9,7 @@
 !! and strconv.F90 are also called by other routines.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (TD)
+!! Copyright (C) 1998-2017 ABINIT group (TD)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -30,10 +30,10 @@
 !! dfpt_mkffkg.F90
 !! getcprj.F90
 !! interfaces_66_nonlocal.F90
-!! m_commutator_vkbr.F90
 !! m_fock.F90
 !! m_gemm_nonlop.F90
 !! m_hamiltonian.F90
+!! m_vkbr.F90
 !! metcon.F90
 !! metcon_so.F90
 !! metric_so.F90

@@ -17,7 +17,7 @@
 !!                   (dtaudE) : mixed 2nd derivative w.r.t atom. displ. and eletric field (nonlocal only)
 !!
 !! COPYRIGHT
-!! Copyright (C) 2015-2016 ABINIT group (MT,JLJ,LB)
+!! Copyright (C) 2015-2017 ABINIT group (MT,JLJ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -126,6 +126,8 @@ subroutine getgh2c(cwavef,cwaveprj,gh2c,gs2c,gs_hamkq,gvnl2,idir,ipert,lambda,&
 
 ! *********************************************************************
 
+ DBG_ENTER("COLL")
+
 !Keep track of total time spent in getgh2c
 !call timab(196+tim_getgh2c,1,tsec)
 
@@ -155,14 +157,14 @@ subroutine getgh2c(cwavef,cwaveprj,gh2c,gs2c,gs_hamkq,gvnl2,idir,ipert,lambda,&
  if((ipert==natom+11.or.pert_phon_elfd).and.gs_hamkq%usepaw==1.and.optnl>=1) then
    if (present(enl)) then
      enl_ptr => enl
-   else if (allocated(rf_hamkq%e1kbfr).and.allocated(rf_hamkq%e1kbsc).and.optnl==2) then
+   else if (associated(rf_hamkq%e1kbfr).and.associated(rf_hamkq%e1kbsc).and.optnl==2) then
      ABI_ALLOCATE(enl_temp,(gs_hamkq%dimekb1,gs_hamkq%dimekb2,gs_hamkq%nspinor**2))
      enl_temp = rf_hamkq%e1kbfr + rf_hamkq%e1kbsc
      enl_ptr => enl_temp
-   else if (allocated(rf_hamkq%e1kbfr)) then
+   else if (associated(rf_hamkq%e1kbfr)) then
      enl_ptr => rf_hamkq%e1kbfr
    else
-     msg='For ipert=natom+11/pert_phon_elfd : e1kbfr and/or e1kbsc must be allocated or enl optional input must be present.'
+     msg='For ipert=natom+11/pert_phon_elfd : e1kbfr and/or e1kbsc must be associated or enl optional input must be present.'
      MSG_BUG(msg)
    end if
    if (usevnl==0) then
@@ -547,6 +549,8 @@ subroutine getgh2c(cwavef,cwaveprj,gh2c,gs2c,gs_hamkq,gvnl2,idir,ipert,lambda,&
  end if
 
 !call timab(196+tim_getgh2c,2,tsec)
+
+ DBG_EXIT("COLL")
 
 end subroutine getgh2c
 !!***

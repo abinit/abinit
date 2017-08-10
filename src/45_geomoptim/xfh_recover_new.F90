@@ -8,7 +8,7 @@
 !! from xred, acell, rprim, fred_corrected and strten
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (DCA, XG, GMR, JCC, SE)
+!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR, JCC, SE)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -24,7 +24,7 @@
 !!
 !!
 !! PARENTS
-!!      pred_bfgs
+!!      pred_bfgs,pred_lbfgs
 !!
 !! CHILDREN
 !!      hessupdt,xfpack_f2vout,xfpack_x2vin

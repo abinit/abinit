@@ -6,7 +6,7 @@
 !! Loop over perturbations
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2016 ABINIT group (XG, DRH, MB, XW, MT)
+!! Copyright (C) 1999-2017 ABINIT group (XG, DRH, MB, XW, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -105,10 +105,11 @@
 !!      littlegroup_pert,localfilnam,localrdfile,localredirect,localwrfile
 !!      metric,mkrdim,outbsd,outgkk,outwf,pawang_free,pawang_init,pawcprj_alloc
 !!      pawcprj_copy,pawcprj_free,pawcprj_getdim,pawrhoij_alloc,pawrhoij_copy
-!!      pawrhoij_free,pawrhoij_nullify,prteigrs,psddb8,read_rhor,rf2_getidirs
+!!      pawrhoij_free,pawrhoij_nullify,prteigrs,read_rhor,rf2_getidirs
 !!      rotate_rho,set_pert_comm,set_pert_paw,setsym,setsymrhoij,status,symkpt
 !!      timab,transgrid,unset_pert_comm,unset_pert_paw,vlocalstr,wffclose
-!!      wffopen,wfk_open_read,wfk_read_eigenvalues,wrtout,xmpi_sum
+!!      ddb_hdr_init, ddb_hdr_free, ddb_hdr_open_write
+!!      wfk_open_read,wfk_read_eigenvalues,wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -151,6 +152,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  use m_hdr
  use m_ebands
 
+ use m_ddb_hdr,    only : ddb_hdr_type, ddb_hdr_init, ddb_hdr_free, ddb_hdr_open_write
  use m_io_tools,   only : file_exists
  use m_fstrings,   only : strcat
  use m_exit,       only : exit_check, disable_timelimit
@@ -262,8 +264,8 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  integer :: iscf_mod,iscf_mod_save,isppol,istr,isym,mcg,mcgq,mcg1,mcprj,mcprjq,mband
  integer :: maxidir,me,mgfftf,mkmem_rbz,mk1mem_rbz,mkqmem_rbz,mpw,mpw1,my_nkpt_rbz
  integer :: n3xccc,nband_k,nblok,ncpgr,ndir,nkpt_eff,nkpt_max,nline_save,nmatel,npert_io,npert_me,nspden_rhoij
- integer :: nstep_save,nsym1,ntypat,nwffile,nylmgr,old_comm_atom,openexit,option,optorth,optthm,pertcase,rdwr,ncid
- integer :: rdwrpaw,spaceComm,smdelta,timrev_pert,to_compute_this_pert
+ integer :: nstep_save,nsym1,ntypat,nwffile,nylmgr,nylmgr1,old_comm_atom,openexit,option,optorth,optthm,pertcase
+ integer :: rdwr,ncid,rdwrpaw,spaceComm,smdelta,timrev_pert,to_compute_this_pert
  integer :: unitout,useylmgr,useylmgr1,vrsddb,dfpt_scfcv_retcode,optn2
  real(dp) :: boxcut,dosdeltae,eberry,ecore,ecut_eff,ecutf,edocc,eei,eeig0,eew,efrhar,efrkin,efrloc
  real(dp) :: efrnl,efrx1,efrx2,ehart,ehart01,ehart1,eii,ek,ek0,ek1,ek2,eloc0
@@ -280,6 +282,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  type(eigr2d_t)  :: eigr2d,eigi2d
  type(gkk_t)     :: gkk2d
  type(hdr_type) :: hdr,hdr_den
+ type(ddb_hdr_type) :: ddb_hdr
  type(pawang_type) :: pawang1
  type(wffile_type) :: wff1,wffgs,wffkq,wffnow,wfftgs,wfftkq
  type(wfk_t) :: ddk_f(4)
@@ -476,8 +479,8 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      to_compute_this_pert = 0
      if(ipert<dtset%natom+10 .and. rfpert(ipert)==1 .and. rfdir(idir) == 1 ) then
        if ((pertsy(idir,ipert)==1).or.&
-&         ((dtset%prepanl == 1).and.(ipert == dtset%natom+2)).or.&
-&         ((dtset%prepgkk == 1).and.(ipert <= dtset%natom))  ) then
+&       ((dtset%prepanl == 1).and.(ipert == dtset%natom+2)).or.&
+&       ((dtset%prepgkk == 1).and.(ipert <= dtset%natom))  ) then
          to_compute_this_pert = 1
        else
          write(message, '(a,a,i4,a,i4,a,a,a,a,a,a)' )ch10,&
@@ -852,7 +855,8 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      if(ipert==dtset%natom+1.or.ipert==dtset%natom+2.or.&
 &     ipert==dtset%natom+10.or.ipert==dtset%natom+11.or. &
 &     dtset%berryopt== 4.or.dtset%berryopt== 6.or.dtset%berryopt== 7.or.  &
-&     dtset%berryopt==14.or.dtset%berryopt==16.or.dtset%berryopt==17) timrev_pert=0
+&     dtset%berryopt==14.or.dtset%berryopt==16.or.dtset%berryopt==17.or.  &
+&     ipert==dtset%natom+5.or.dtset%kptopt==3) timrev_pert=0
      call symkpt(0,gmet,indkpt1_tmp,ab_out,dtset%kptns,nkpt,nkpt_rbz,&
      nsym1,symrc1,timrev_pert,dtset%wtk,wtk_folded)
    end if
@@ -1001,8 +1005,18 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 !  Initialize GS wavefunctions at k
    ireadwf0=1; formeig=0 ; ask_accurate=1 ; optorth=0
    mcg=mpw*dtset%nspinor*dtset%mband*mkmem_rbz*dtset%nsppol
+   if (one*mpw*dtset%nspinor*dtset%mband*mkmem_rbz*dtset%nsppol > huge(1)) then
+     write (message,'(4a, 5(a,i0), 2a)')&
+&     "Default integer is not wide enough to store the size of the GS wavefunction array (WF0, mcg).",ch10,&
+&     "Action: increase the number of processors. Consider also OpenMP threads.",ch10,&
+&     "nspinor: ",dtset%nspinor, "mpw: ",mpw, "mband: ",dtset%mband, "mkmem_rbz: ",&
+&     mkmem_rbz, "nsppol: ",dtset%nsppol,ch10,&
+&     'Note: Compiling with large int (int64) requires a full software stack (MPI/FFTW/BLAS/LAPACK...) compiled in int64 mode'
+     MSG_ERROR(message)
+   end if
    ABI_STAT_ALLOCATE(cg,(2,mcg), ierr)
    ABI_CHECK(ierr==0, "out-of-memory in cg")
+
    ABI_ALLOCATE(eigen0,(dtset%mband*nkpt_rbz*dtset%nsppol))
    call timab(144,1,tsec)
    call status(0,dtfil%filstat,iexit,level,'call inwffil-k')
@@ -1048,8 +1062,8 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
        call ctocprj(atindx,cg,choice,cprj,gmet,gprimd,-1,idir0,iorder_cprj,istwfk_rbz,&
 &       kg,kpt_rbz,dtset%mband,mcg,mcprj,dtset%mgfft,mkmem_rbz,mpi_enreg,psps%mpsang,mpw,&
 &       dtset%natom,nattyp,nband_rbz,dtset%natom,dtset%ngfft,nkpt_rbz,dtset%nloalg,&
-&       npwarr,dtset%nspinor,dtset%nsppol,ntypat,nylmgr,dtset%paral_kgb,ph1d,psps,&
-&       rmet,dtset%typat,ucvol,dtfil%unpaw,useylmgr,xred,ylm,ylmgr)
+&       npwarr,dtset%nspinor,dtset%nsppol,ntypat,dtset%paral_kgb,ph1d,psps,&
+&       rmet,dtset%typat,ucvol,dtfil%unpaw,xred,ylm,ylmgr)
      end if
    end if
 
@@ -1073,16 +1087,16 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
    call timab(142,2,tsec)
 
 !  Set up the spherical harmonics (Ylm) at k+q
-   useylmgr1=0; option=0
+   useylmgr1=0; option=0 ; ; nylmgr1=0
    if (psps%useylm==1.and. &
 &   (ipert==dtset%natom+1.or.ipert==dtset%natom+3.or.ipert==dtset%natom+4.or. &
 &   (psps%usepaw==1.and.ipert==dtset%natom+2))) then
-     useylmgr1=1; option=1
+     useylmgr1=1; option=1 ;  ; nylmgr1=3
    else if (psps%useylm==1.and.(ipert==dtset%natom+10.or.ipert==dtset%natom+11)) then
-     useylmgr1=1; option=2
+     useylmgr1=1; option=2 ;  ; nylmgr1=9
    end if
    ABI_ALLOCATE(ylm1,(mpw1*mk1mem_rbz,psps%mpsang*psps%mpsang*psps%useylm))
-   ABI_ALLOCATE(ylmgr1,(mpw1*mk1mem_rbz,nylmgr,psps%mpsang*psps%mpsang*psps%useylm*useylmgr1))
+   ABI_ALLOCATE(ylmgr1,(mpw1*mk1mem_rbz,nylmgr1,psps%mpsang*psps%mpsang*psps%useylm*useylmgr1))
    if (psps%useylm==1) then
      call initylmg(gprimd,kg1,kpq_rbz,mk1mem_rbz,mpi_enreg,psps%mpsang,mpw1,nband_rbz,nkpt_rbz,&
 &     npwar1,dtset%nsppol,option,rprimd,ylm1,ylmgr1)
@@ -1112,6 +1126,16 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 !  MG: Here it is possible to avoid the extra reading if the same k mesh can be used.
    ireadwf0=1 ; formeig=0 ; ask_accurate=1 ; optorth=0
    mcgq=mpw1*dtset%nspinor*dtset%mband*mkqmem_rbz*dtset%nsppol
+   if (one*mpw1*dtset%nspinor*dtset%mband*mkqmem_rbz*dtset%nsppol > huge(1)) then
+     write (message,'(4a, 5(a,i0), 2a)')&
+&     "Default integer is not wide enough to store the size of the GS wavefunction array (WFKQ, mcgq).",ch10,&
+&     "Action: increase the number of processors. Consider also OpenMP threads.",ch10,&
+&     "nspinor: ",dtset%nspinor, "mpw1: ",mpw1, "mband: ",dtset%mband, "mkqmem_rbz: ",&
+&     mkqmem_rbz, "nsppol: ",dtset%nsppol,ch10,&
+&     'Note: Compiling with large int (int64) requires a full software stack (MPI/FFTW/BLAS/LAPACK...) compiled in int64 mode'
+     MSG_ERROR(message)
+   end if
+
    ABI_STAT_ALLOCATE(cgq,(2,mcgq), ierr)
    ABI_CHECK(ierr==0, "out-of-memory in cgq")
    ABI_ALLOCATE(eigenq,(dtset%mband*nkpt_rbz*dtset%nsppol))
@@ -1152,8 +1176,8 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
          call ctocprj(atindx,cgq,choice,cprjq,gmet,gprimd,-1,idir0,0,istwfk_rbz,&
 &         kg1,kpq_rbz,dtset%mband,mcgq,mcprjq,dtset%mgfft,mkqmem_rbz,mpi_enreg,psps%mpsang,mpw1,&
 &         dtset%natom,nattyp,nband_rbz,dtset%natom,dtset%ngfft,nkpt_rbz,dtset%nloalg,&
-&         npwar1,dtset%nspinor,dtset%nsppol,ntypat,nylmgr,dtset%paral_kgb,ph1d,&
-&         psps,rmet,dtset%typat,ucvol,dtfil%unpawq,useylmgr1,xred,ylm1,ylmgr1)
+&         npwar1,dtset%nspinor,dtset%nsppol,ntypat,dtset%paral_kgb,ph1d,&
+&         psps,rmet,dtset%typat,ucvol,dtfil%unpawq,xred,ylm1,ylmgr1)
        else if (mcprjq>0) then
          call pawcprj_copy(cprj,cprjq)
        end if
@@ -1232,7 +1256,8 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
    if (psps%usepaw==1) then
      ABI_DATATYPE_ALLOCATE(pawrhoij1,(my_natom))
      call pawrhoij_nullify(pawrhoij1)
-     cplex_rhoij=max(cplex,dtset%pawcpxocc);nspden_rhoij=dtset%nspden
+     cplex_rhoij=max(cplex,dtset%pawcpxocc)
+     nspden_rhoij=dtset%nspden;if (dtset%pawspnorb>0.and.dtset%nspinor==2) nspden_rhoij=4
      call pawrhoij_alloc(pawrhoij1,cplex_rhoij,nspden_rhoij,dtset%nspinor,dtset%nsppol,&
 &     dtset%typat,pawtab=pawtab,comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
      if (cplex_rhoij/=hdr%pawrhoij(1)%cplex) then
@@ -1253,8 +1278,18 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      dim_eig2rf=1
    end if
    mcg1=mpw1*dtset%nspinor*dtset%mband*mk1mem_rbz*dtset%nsppol
+   if (one*mpw1*dtset%nspinor*dtset%mband*mk1mem_rbz*dtset%nsppol > huge(1)) then
+     write (message,'(4a, 5(a,i0), 2a)')&
+&     "Default integer is not wide enough to store the size of the GS wavefunction array (WFK1, mcg1).",ch10,&
+&     "Action: increase the number of processors. Consider also OpenMP threads.",ch10,&
+&     "nspinor: ",dtset%nspinor, "mpw1: ",mpw1, "mband: ",dtset%mband, "mk1mem_rbz: ",&
+&     mk1mem_rbz, "nsppol: ",dtset%nsppol,ch10,&
+&     'Note: Compiling with large int (int64) requires a full software stack (MPI/FFTW/BLAS/LAPACK...) compiled in int64 mode'
+     MSG_ERROR(message)
+   end if
    ABI_STAT_ALLOCATE(cg1,(2,mcg1), ierr)
    ABI_CHECK(ierr==0, "out of memory in cg1")
+
    ABI_ALLOCATE(cg1_active,(2,mpw1*dtset%nspinor*dtset%mband*mk1mem_rbz*dtset%nsppol*dim_eig2rf))
    ABI_ALLOCATE(gh1c_set,(2,mpw1*dtset%nspinor*dtset%mband*mk1mem_rbz*dtset%nsppol*dim_eig2rf))
    ABI_ALLOCATE(gh0c1_set,(2,mpw1*dtset%nspinor*dtset%mband*mk1mem_rbz*dtset%nsppol*dim_eig2rf))
@@ -1713,6 +1748,8 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 &     dtset%symrel,dtset%tnons,dtset%symafm)
 
      ! Initialize Bands to write in the GKK.nc file
+     ! MG FIXME: Here there's a bug because eigen0 is dimensioned with nkpt_rbz i.e. IBZ(q)
+     ! but the ebands_t object is constructed with dimensions taken from hdr0 i.e. the IBZ(q=0).
      bantot= dtset%mband*dtset%nkpt*dtset%nsppol
      call ebands_init(bantot,Bands,dtset%nelect,doccde,eigen0,hdr0%istwfk,hdr0%kptns,&
 &     hdr0%nband, hdr0%nkpt,hdr0%npwarr,hdr0%nsppol,hdr0%nspinor,&
@@ -1976,47 +2013,26 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      if (dtset%ieig2rf==1.or.dtset%ieig2rf==2) then
        if (me==master) then
 !        print _EIGR2D file for this perturbation
+         dscrpt=' Note : temporary (transfer) database '
          unitout = dtfil%unddb
          vrsddb=100401
-         dscrpt=' Note : temporary (transfer) database '
-!        tolwfr must be initialized here, but it is a dummy value
-         tolwfr=1.0_dp
-         call ddb_io_out (dscrpt,dtfil%fnameabo_eigr2d,dtset%natom,dtset%mband,&
-&         dtset%nkpt,dtset%nsym,dtset%ntypat,dtfil%unddb,vrsddb,&
-&         dtset%acell_orig(1:3,1),dtset%amu_orig(:,1),dtset%dilatmx,dtset%ecut,dtset%ecutsm,&
-&         dtset%intxc,dtset%iscf,dtset%ixc,dtset%kpt,dtset%kptnrm,&
-&         dtset%natom,dtset%nband,dtset%ngfft,dtset%nkpt,dtset%nspden,dtset%nspinor,&
-&         dtset%nsppol,dtset%nsym,dtset%ntypat,occ_pert,dtset%occopt,dtset%pawecutdg,&
-&         dtset%rprim_orig(1:3,1:3,1),dtset%dfpt_sciss,dtset%spinat,dtset%symafm,dtset%symrel,&
-&         dtset%tnons,tolwfr,dtset%tphysel,dtset%tsmear,&
-&         dtset%typat,dtset%usepaw,dtset%wtk,xred,psps%ziontypat,dtset%znucl)
-         nblok=1 ; fullinit=1 ; choice=2
-         call psddb8 (choice,psps%dimekb,psps%ekb,fullinit,psps%indlmn,&
-&         psps%lmnmax,nblok,ntypat,dtfil%unddb,pawtab,&
-&         psps%pspso,psps%usepaw,psps%useylm,vrsddb)
+
+         call ddb_hdr_init(ddb_hdr,dtset,psps,pawtab,DDB_VERSION,dscrpt,&
+&                          1,xred=xred,occ=occ_pert)
+
+         call ddb_hdr_open_write(ddb_hdr, dtfil%fnameabo_eigr2d, dtfil%unddb)
+
          call outbsd(bdeigrf,dtset,eig2nkq,dtset%natom,nkpt_rbz,unitout)
 !        print _EIGI2D file for this perturbation
          if(smdelta>0) then
+
            unitout = dtfil%unddb
-           vrsddb=100401
-           dscrpt=' Note : temporary (transfer) database '
-!          tolwfr must be initialized here, but it is a dummy value
-           tolwfr=1.0_dp
-           call ddb_io_out (dscrpt,dtfil%fnameabo_eigi2d,dtset%natom,dtset%mband,&
-&           dtset%nkpt,dtset%nsym,dtset%ntypat,dtfil%unddb,vrsddb,&
-&           dtset%acell_orig(1:3,1),dtset%amu_orig(:,1),dtset%dilatmx,dtset%ecut,dtset%ecutsm,&
-&           dtset%intxc,dtset%iscf,dtset%ixc,dtset%kpt,dtset%kptnrm,&
-&           dtset%natom,dtset%nband,dtset%ngfft,dtset%nkpt,dtset%nspden,dtset%nspinor,&
-&           dtset%nsppol,dtset%nsym,dtset%ntypat,occ_pert,dtset%occopt,dtset%pawecutdg,&
-&           dtset%rprim_orig(1:3,1:3,1),dtset%dfpt_sciss,dtset%spinat,dtset%symafm,dtset%symrel,&
-&           dtset%tnons,tolwfr,dtset%tphysel,dtset%tsmear,&
-&           dtset%typat,dtset%usepaw,dtset%wtk,xred,psps%ziontypat,dtset%znucl)
-           nblok=1 ; fullinit=1 ; choice=2
-           call psddb8 (choice,psps%dimekb,psps%ekb,fullinit,psps%indlmn,&
-&           psps%lmnmax,nblok,ntypat,dtfil%unddb,pawtab,&
-&           psps%pspso,psps%usepaw,psps%useylm,vrsddb)
+           call ddb_hdr_open_write(ddb_hdr, dtfil%fnameabo_eigi2d, unitout)
+
            call outbsd(bdeigrf,dtset,eigbrd,dtset%natom,nkpt_rbz,unitout)
          end if !smdelta
+
+         call ddb_hdr_free(ddb_hdr)
 
 !        Output of the EIGR2D.nc file.
          fname = strcat(dtfil%filnam_ds(4),"_EIGR2D.nc")

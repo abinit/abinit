@@ -2,7 +2,7 @@
 .Version 8.0.3 of ANADDB 
 .(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
 
-.Copyright (C) 1998-2016 ABINIT group . 
+.Copyright (C) 1998-2017 ABINIT group . 
  ANADDB comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -42,8 +42,6 @@
 ================================================================================
 
  read the DDB information and perform some checks
-
--begin at tcpu      0.016  and twall      0.017 sec
 
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  5.3050000  5.3050000  G(1)= -0.0942507  0.0942507  0.0942507
@@ -91,7 +89,6 @@
 
  Treat the first list of vectors 
 
--begin at tcpu      0.019  and twall      0.019 sec
  
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
  Phonon energies in Hartree :
@@ -115,7 +112,6 @@
 
  Treat the second list of vectors 
 
--begin at tcpu      0.020  and twall      0.020 sec
  
   Phonon at Gamma, with non-analyticity in the
   direction (cartesian coordinates)  0.00000  0.00000  1.00000
@@ -174,7 +170,6 @@
 
  Calculation of the internal-strain  tensor
 
--begin at tcpu      0.020   and twall      0.021sec
 
  Force-response internal strain tensor(Unit:Hartree/bohr)
 
@@ -200,7 +195,6 @@
 
  Calculation of the elastic and compliances tensor (Voigt notation)
 
--begin at tcpu      0.021   and twall      0.021sec
 
  Elastic Tensor (relaxed ion) (unit:10^2GP):
   (at fixed electric field boundary condition)
@@ -227,7 +221,6 @@
  Calculation of the tensor related to piezoelectric effetc
   (Elastic indices in Voigt notation)
 
--begin at tcpu      0.021   and twall      0.022sec
 
  Proper piezoelectric constants (clamped ion) (unit:c/m^2)
 

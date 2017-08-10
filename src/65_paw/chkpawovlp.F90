@@ -7,7 +7,7 @@
 !! Verify that the paw spheres are not overlapping
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (FJ, MT)
+!! Copyright (C) 1998-2017 ABINIT group (FJ, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -207,7 +207,7 @@ subroutine chkpawovlp(natom,ntypat,pawovlp,pawtab,rmet,typat,xred)
 
  contains
 
-    function sqnrm_pawovlp(u1,u2,u3)
+   function sqnrm_pawovlp(u1,u2,u3)
 !squared norm of a vector
 
 !This section has been created automatically by the script Abilint (TD).

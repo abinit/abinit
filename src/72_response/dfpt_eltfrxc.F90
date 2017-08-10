@@ -10,7 +10,7 @@
 !! and internal strain tensors
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (DRH, DCA, XG, GMR)
+!! Copyright (C) 1998-2017 ABINIT group (DRH, DCA, XG, GMR)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -186,11 +186,7 @@ subroutine dfpt_eltfrxc(atindx,dtset,eltfrxc,enxc,gsqcut,kxc,mpi_enreg,mgfft,&
    n3xccc_loc=n3xccc
  end if
 
- if(nkxc==23) then
-   fgga=1
- else 
-   fgga=0
- end if
+ fgga=0 ; if(nkxc==7.or.nkxc==19) fgga=1
 
  ABI_ALLOCATE(eltfrxc_tmp,(6+3*dtset%natom,6))
  ABI_ALLOCATE(eltfrxc_tmp2,(6+3*dtset%natom,6))
@@ -327,16 +323,14 @@ subroutine dfpt_eltfrxc(atindx,dtset,eltfrxc,enxc,gsqcut,kxc,mpi_enreg,mgfft,&
    else
      xccc3d1(:)=zero
    end if
-   
+
 !  Compute the first-order potentials.
 !  Standard first-order potential for LDA and GGA with core charge
    if(fgga==0 .or. (fgga==1 .and. n1xccc/=0)) then
      option=0
-     
      call dfpt_mkvxcstr(cplex,idir,ipert,kxc,mpi_enreg,dtset%natom,nfft,ngfft,nhat,&
 &     dummy_in,nkxc,dtset%nspden,n3xccc_loc,option,mpi_enreg%paral_kgb,qphon,rhor,rhor,&
 &     rprimd,dtset%usepaw,usexcnhat,vxc10,xccc3d1)
-     
      if(n1xccc/=0)then
        if(dtset%nspden==1) then
          vxc10_core(:)=vxc10(:,1)
@@ -347,7 +341,7 @@ subroutine dfpt_eltfrxc(atindx,dtset,eltfrxc,enxc,gsqcut,kxc,mpi_enreg,mgfft,&
        end if
      end if
    end if
-   
+
 !  For GGA, first-order potential with doubled gradient operator strain
 !  derivative terms needed for elastic tensor but not internal strain.
    if(fgga==1) then
@@ -377,67 +371,97 @@ subroutine dfpt_eltfrxc(atindx,dtset,eltfrxc,enxc,gsqcut,kxc,mpi_enreg,mgfft,&
 !  For GGA, compute the contributions from the strain derivatives acting
 !  on the gradient operators.
    if(fgga==1) then
-     do ispden=1,dtset%nspden
-       ispden_c=dtset%nspden-ispden+1
 
+     if (dtset%nspden==1) then
        do ifft=1,nfft
-
 !        Collect the needed derivatives of Exc.  The factors introduced
 !        deal with the difference between density as used here and
 !        spin density as used with these kxc terms in other contexts.
-         dexdgs=0.25_dp*kxc(ifft,2+ispden)
-         d2exdgs2=0.03125_dp*kxc(ifft,6+ispden)
-         decdgs=0.125_dp*kxc(ifft,12)
-         d2ecdgs2=0.015625_dp*kxc(ifft,15)
-         
+         dexdgs  =half   *kxc(ifft,2)
+         d2exdgs2=quarter*kxc(ifft,4)
 !        Loop over 1st strain index
          do is1=1,6
-
 !          The notation here is .gs... for the derivatives of the squared-
-!          gradient of (2X) each spin density, and .gst... for the total
-!          density.  Note the hack that the the total density is given
-!          by the same expression for either the non-polarized or spin-
-!          polarized case, implemented with the "complementary" index ispden_c
-!          in the expression for tmp0t below.
+!          gradient of (2X) each spin density, and .gst... for the total density.
            dgsds10=zero;dgsds20=zero;d2gsds1ds2=zero
-           dgstds10=zero;dgstds20=zero;d2gstds1ds2=zero
            do jj=1,3
              do ii=1,3
-               tmp0=rho0_redgr(ii,ifft,ispden)*rho0_redgr(jj,ifft,ispden)
-
-               tmp0t=(rho0_redgr(ii,ifft,ispden)+rho0_redgr(ii,ifft,ispden_c))&
-&               *(rho0_redgr(jj,ifft,ispden)+rho0_redgr(jj,ifft,ispden_c))
-
+               tmp0=rho0_redgr(ii,ifft,1)*rho0_redgr(jj,ifft,1)
                dgsds10=dgsds10+dgm(ii,jj,is1)*tmp0
                dgsds20=dgsds20+dgm(ii,jj,is2)*tmp0
-
-               dgstds10=dgstds10+dgm(ii,jj,is1)*tmp0t
-               dgstds20=dgstds20+dgm(ii,jj,is2)*tmp0t
-
                d2gsds1ds2=d2gsds1ds2+d2gm(ii,jj,is1,is2)*tmp0
-
-               d2gstds1ds2=d2gstds1ds2+d2gm(ii,jj,is1,is2)*tmp0t
              end do
            end do
-
 !          Volume derivative terms added
-           if(is1<=3) then
-             d2gsds1ds2=d2gsds1ds2+dgsds20
-             d2gstds1ds2=d2gstds1ds2+dgstds20
-           end if
-           if(is2<=3) then
-             d2gsds1ds2=d2gsds1ds2+dgsds10
-             d2gstds1ds2=d2gstds1ds2+dgstds10
-           end if
-
+           if(is1<=3) d2gsds1ds2=d2gsds1ds2+dgsds20
+           if(is2<=3) d2gsds1ds2=d2gsds1ds2+dgsds10
 !          Add the gradient derivative terms to eltfrxc.
-           eltfrxc(is1,is2)=eltfrxc(is1,is2)+spnorm*&
-&           (d2exdgs2*(dgsds10*dgsds20)+ dexdgs*d2gsds1ds2&
-&           +d2ecdgs2*(dgstds10*dgstds20)+ decdgs*d2gstds1ds2)
+           eltfrxc(is1,is2)=eltfrxc(is1,is2)+d2exdgs2*dgsds10*dgsds20+dexdgs*d2gsds1ds2
          end do !is1
        end do !ifft
-     end do !ispden
+
+     else ! nspden==2
+
+       do ispden=1,dtset%nspden
+         ispden_c=dtset%nspden-ispden+1
+
+         do ifft=1,nfft
+
+!          Collect the needed derivatives of Exc.  The factors introduced
+!          deal with the difference between density as used here and
+!          spin density as used with these kxc terms in other contexts.
+           dexdgs  =quarter       *kxc(ifft,3+ispden)
+           d2exdgs2=quarter*eighth*kxc(ifft,7+ispden)
+           decdgs  =eighth        *kxc(ifft,10)
+           d2ecdgs2=eighth*eighth *kxc(ifft,13)
+
+!          Loop over 1st strain index
+           do is1=1,6
+
+!            The notation here is .gs... for the derivatives of the squared-
+!            gradient of (2X) each spin density, and .gst... for the total
+!            density.  Note the hack that the the total density is given
+!            by the same expression for either the non-polarized or spin-
+!            polarized case, implemented with the "complementary" index ispden_c
+!            in the expression for tmp0t below.
+             dgsds10=zero;dgsds20=zero;d2gsds1ds2=zero
+             dgstds10=zero;dgstds20=zero;d2gstds1ds2=zero
+             do jj=1,3
+               do ii=1,3
+                 tmp0=rho0_redgr(ii,ifft,ispden)*rho0_redgr(jj,ifft,ispden)
+                 tmp0t=(rho0_redgr(ii,ifft,ispden)+rho0_redgr(ii,ifft,ispden_c))&
+&                 *(rho0_redgr(jj,ifft,ispden)+rho0_redgr(jj,ifft,ispden_c))
+                 dgsds10=dgsds10+dgm(ii,jj,is1)*tmp0
+                 dgsds20=dgsds20+dgm(ii,jj,is2)*tmp0
+                 dgstds10=dgstds10+dgm(ii,jj,is1)*tmp0t
+                 dgstds20=dgstds20+dgm(ii,jj,is2)*tmp0t
+                 d2gsds1ds2=d2gsds1ds2+d2gm(ii,jj,is1,is2)*tmp0
+                 d2gstds1ds2=d2gstds1ds2+d2gm(ii,jj,is1,is2)*tmp0t
+               end do
+             end do
+!            Volume derivative terms added
+             if(is1<=3) then
+               d2gsds1ds2=d2gsds1ds2+dgsds20
+               d2gstds1ds2=d2gstds1ds2+dgstds20
+             end if
+             if(is2<=3) then
+               d2gsds1ds2=d2gsds1ds2+dgsds10
+               d2gstds1ds2=d2gstds1ds2+dgstds10
+             end if
+
+!            Add the gradient derivative terms to eltfrxc.
+             eltfrxc(is1,is2)=eltfrxc(is1,is2)+spnorm*&
+&             (d2exdgs2*(dgsds10 *dgsds20) + dexdgs*d2gsds1ds2&
+&             +d2ecdgs2*(dgstds10*dgstds20)+ decdgs*d2gstds1ds2)
+
+           end do !is1
+         end do !ifft
+       end do !ispden
+
+     end if ! nspden
+
    end if !GGA
+
 !  Compute valence electron 1st-order charge contributions.  Recall that
 !  the diagonal strain derivatives of the valence charge are minus the
 !  zero-order density.  The explicit symmetrization avoids the need
@@ -460,14 +484,14 @@ subroutine dfpt_eltfrxc(atindx,dtset,eltfrxc,enxc,gsqcut,kxc,mpi_enreg,mgfft,&
        ABI_ALLOCATE(vxc10_coreg,(2,nfft))
        ABI_ALLOCATE(vxc_coreg,(2,nfft))
        ABI_ALLOCATE(vxc1is_coreg,(2,nfft))
-       
+
        vxc10_coreg(:,:)=zero;vxc10_coreg(:,:)=zero;vxc1is_coreg(:,:)=zero;
 
 !      Fourier transform of Vxc_core/vxc10_core to use in atm2fft (reciprocal space calculation) 
        call fourdp(1,vxc10_coreg,vxc10_core,-1,mpi_enreg,nfft,ngfft,mpi_enreg%paral_kgb,0)
        call fourdp(1,vxc_coreg,vxc_core,-1,mpi_enreg,nfft,ngfft,mpi_enreg%paral_kgb,0)
        call fourdp(1,vxc1is_coreg,vxc1is_core,-1,mpi_enreg,nfft,ngfft,mpi_enreg%paral_kgb,0)
-       
+
        call atm2fft(atindx,dummy_out1,dummy_out2,dummy_out3,dummy_out4,eltfrxc_tmp2,dummy_in,gmet,gprimd,&
 &       dummy_out5,dummy_out6,gsqcut,mgfft,psps%mqgrid_vl,dtset%natom,nattyp,nfft,ngfft,dtset%ntypat,&
 &       optatm,optdyfr,opteltfr,optgr,optn,optn2,optstr,optv,psps,pawtab,ph1d,psps%qgrid_vl,dtset%qprtrb,&
@@ -493,7 +517,7 @@ subroutine dfpt_eltfrxc(atindx,dtset,eltfrxc,enxc,gsqcut,kxc,mpi_enreg,mgfft,&
        eltfrxc(:,:)= eltfrxc(:,:) + eltfrxc_tmp2(:,:)
 
      else
-       
+
        call eltxccore(eltfrxc,is2,mpi_enreg%my_natom,dtset%natom,nfft,dtset%ntypat,&
 &       n1,n1xccc,n2,n3,rprimd,dtset%typat,ucvol,vxc_core,vxc10_core,vxc1is_core,&
 &       xcccrc,xccc1d,xred,mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
@@ -547,7 +571,7 @@ subroutine dfpt_eltfrxc(atindx,dtset,eltfrxc,enxc,gsqcut,kxc,mpi_enreg,mgfft,&
 
      end if
    end if
-   
+
 !  Additional term for diagonal strains
    if(is2<=3) then
      do is1=1,3
@@ -560,7 +584,7 @@ subroutine dfpt_eltfrxc(atindx,dtset,eltfrxc,enxc,gsqcut,kxc,mpi_enreg,mgfft,&
  call timab(48,1,tsec)
  call xmpi_sum(eltfrxc,mpi_enreg%comm_fft,ierr)
  call timab(48,2,tsec)
- 
+
  !Normalize accumulated 2nd derivatives in NC case
  if(psps%usepaw==1)then
    eltfrxc(:,:)=eltfrxc_tmp(:,:)+eltfrxc

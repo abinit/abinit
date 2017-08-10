@@ -2,7 +2,7 @@
 .Version 8.0.3 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
 
-.Copyright (C) 1998-2016 ABINIT group . 
+.Copyright (C) 1998-2017 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -52,12 +52,12 @@ _ WF disk file :      0.021 Mbytes ; DEN or POT disk file :      0.208 Mbytes.
  -outvars: echo values of preprocessed input variables --------
             acell      3.3844700000E+00  3.3844700000E+00  3.3844700000E+00 Bohr
               amu      1.08113000E+01
+     densfor_pred           0
            diemix      5.00000000E-01
             dtion      6.93000000E+00
              ecut      7.50000000E+01 Hartree
 -          fftalg         312
            ionmov          12
-     densfor_pred           0
            istwfk        1
               ixc          50
            kptopt           0
@@ -959,6 +959,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    1213.000    1213.000
  -outvars: echo values of variables after computation  --------
             acell      3.3844700000E+00  3.3844700000E+00  3.3844700000E+00 Bohr
               amu      1.08113000E+01
+     densfor_pred           0
            diemix      5.00000000E-01
             dtion      6.93000000E+00
              ecut      7.50000000E+01 Hartree
@@ -997,7 +998,6 @@ _setup2: Arith. and geom. avg. npw (full set) are    1213.000    1213.000
                        4.4058692949E-02  3.2240071043E-02 -1.0838557963E-01
 -          fftalg         312
            ionmov          12
-     densfor_pred           0
            istwfk        1
               ixc          50
            kptopt           0

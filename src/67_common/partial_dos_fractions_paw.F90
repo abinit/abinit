@@ -7,7 +7,7 @@
 !!  Calculate PAW contributions to the partial DOS fractions (tetrahedron method)
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (SM,MT)
+!! Copyright (C) 1998-2017 ABINIT group (SM,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -197,8 +197,8 @@ subroutine partial_dos_fractions_paw(dos,cprj,dimcprj,dtset,mcprj,mkmem,mpi_enre
        do iband=1,dtset%mband
          do ikpt=1,dtset%nkpt
            dos%fractions(ikpt,iband,isppol,ilang)= &
-&            one_over_nproc*dos%fractions(ikpt,iband,isppol,ilang)
-         enddo
+&           one_over_nproc*dos%fractions(ikpt,iband,isppol,ilang)
+         end do
        end do
      end do
    end do
@@ -211,8 +211,8 @@ subroutine partial_dos_fractions_paw(dos,cprj,dimcprj,dtset,mcprj,mkmem,mpi_enre
          do iband=1,dtset%mband
            do ikpt=1,dtset%nkpt
              dos%fractions_m(ikpt,iband,isppol,ilang)= &
-  &            one_over_nproc*dos%fractions_m(ikpt,iband,isppol,ilang)
-           enddo
+&             one_over_nproc*dos%fractions_m(ikpt,iband,isppol,ilang)
+           end do
          end do
        end do
      end do

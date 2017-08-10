@@ -121,7 +121,7 @@ TODO list for the documentation of ABINIT
 	* Is it up-to-date?
 	* Reformat for markdown.
 
-* allvariables.html:
+* varset_allvars.html:
 
 	* Is it up-to-date?
 	* Should be generated automatically from a database.

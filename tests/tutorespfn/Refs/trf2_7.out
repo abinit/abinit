@@ -2,7 +2,7 @@
 .Version 8.0.3 of ANADDB 
 .(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
 
-.Copyright (C) 1998-2016 ABINIT group . 
+.Copyright (C) 1998-2017 ABINIT group . 
  ANADDB comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -55,8 +55,6 @@
 
  read the DDB information and perform some checks
 
--begin at tcpu      0.014  and twall      0.014 sec
-
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  5.3050000  5.3050000  G(1)= -0.0942507  0.0942507  0.0942507
  R(2)=  5.3050000  0.0000000  5.3050000  G(2)=  0.0942507 -0.0942507  0.0942507
@@ -103,7 +101,6 @@
 
  Calculation of the interatomic forces 
 
--begin at tcpu      0.018  and twall      0.018 sec
        Homogeneous q point set in the B.Z.
  Grid q points  :       32
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -147,7 +144,6 @@
     thermodynamical properties, 
     and Debye-Waller factors.
 
--begin at tcpu      4.975  and twall      1.444 sec
        Homogeneous q point set in the B.Z.
  Grid q points  :       32
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -299,19 +295,19 @@ iatom,iwchan,igqpt2(i),gij error=   3  1     4     4     4   0.00000
  DOS  with channel width=    4 newly converged
    with maximal error =    0.23193
 
- # At  T     F(J/mol-c)     E(J/mol-c)     S(J/(mol-c.K)) C(J/(mol-c.K))
+ # At  T     F(J/mol-c)     E(J/mol-c)     S(J/(mol-c.K)) C(J/(mol-c.K)) Omega_mean(cm-1)
  # (A mol-c is the abbreviation of a mole-cell, that is, the
  #  number of Avogadro times the atoms in a unit cell)
-  2.000E+01  8.1384755E+03  8.1463588E+03  3.9416455E-01  1.4169104E+00
-  4.000E+01  8.1061318E+03  8.2368069E+03  3.2668770E+00  7.8985031E+00
-  6.000E+01  7.9980215E+03  8.4575659E+03  7.6590742E+00  1.3992228E+01
-  8.000E+01  7.7974375E+03  8.7915524E+03  1.2426436E+01  1.9325166E+01
-  1.000E+02  7.5004822E+03  9.2274431E+03  1.7269609E+01  2.4175006E+01
-  1.200E+02  7.1069991E+03  9.7544364E+03  2.2061978E+01  2.8411189E+01
-  1.400E+02  6.6189291E+03  1.0359248E+04  2.6716565E+01  3.1955267E+01
-  1.600E+02  6.0396227E+03  1.1028289E+04  3.1179167E+01  3.4847423E+01
-  1.800E+02  5.3732223E+03  1.1749439E+04  3.5423427E+01  3.7183864E+01
-  2.000E+02  4.6241910E+03  1.2512641E+04  3.9442251E+01  3.9069448E+01
+  2.000E+01  8.1384755E+03  8.1463588E+03  3.9416455E-01  1.4169104E+00  7.2630811E+01
+  4.000E+01  8.1061318E+03  8.2368069E+03  3.2668770E+00  7.8985031E+00  9.4251803E+01
+  6.000E+01  7.9980215E+03  8.4575659E+03  7.6590742E+00  1.3992228E+01  1.1299274E+02
+  8.000E+01  7.7974375E+03  8.7915524E+03  1.2426436E+01  1.9325166E+01  1.3590734E+02
+  1.000E+02  7.5004822E+03  9.2274431E+03  1.7269609E+01  2.4175006E+01  1.5702795E+02
+  1.200E+02  7.1069991E+03  9.7544364E+03  2.2061978E+01  2.8411189E+01  1.7337123E+02
+  1.400E+02  6.6189291E+03  1.0359248E+04  2.6716565E+01  3.1955267E+01  1.8528503E+02
+  1.600E+02  6.0396227E+03  1.1028289E+04  3.1179167E+01  3.4847423E+01  1.9390808E+02
+  1.800E+02  5.3732223E+03  1.1749439E+04  3.5423427E+01  3.7183864E+01  2.0022938E+02
+  2.000E+02  4.6241910E+03  1.2512641E+04  3.9442251E+01  3.9069448E+01  2.0495243E+02
 -
 - Proc.   0 individual time (sec): cpu=         36.5  wall=          6.7
 

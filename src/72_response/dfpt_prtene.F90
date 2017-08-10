@@ -8,7 +8,7 @@
 !! Print components of second derivative of total energy in nice format
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2016 ABINIT group (XG, DRH, MT)
+!! Copyright (C) 1999-2017 ABINIT group (XG, DRH, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -111,6 +111,7 @@ subroutine dfpt_prtene(berryopt,eberry,edocc,eeig0,eew,efrhar,efrkin,efrloc,efrn
  berry_activated=(berryopt== 4.or.berryopt== 6.or.berryopt== 7.or. &
 & berryopt==14.or.berryopt==16.or.berryopt==17)
  if (ipert==natom+1) nn=8
+ if (ipert==natom+5) nn=8
  if (ipert==natom+2) nn=7
  if (ipert>=1.and.ipert<=natom) nn=13
  if (ipert==natom+3.or.ipert==natom+4) nn=17
@@ -175,6 +176,7 @@ subroutine dfpt_prtene(berryopt,eberry,edocc,eeig0,eew,efrhar,efrkin,efrloc,efrn
  end if
 
  if(ipert/=natom+10 .and.ipert/=natom+11) then
+   erelax=0.0_dp
    if(ipert>=1.and.ipert<=natom)then
      erelax=ek0+edocc+eeig0+eloc0+elpsp1+ehart1+exc1+enl0+enl1+epaw1
    else if(ipert==natom+1.or.ipert==natom+2)then

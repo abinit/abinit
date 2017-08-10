@@ -8,15 +8,15 @@
 !! The output is this quantity for the input k point.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2016 ABINIT group (PB, XG)
+!! Copyright (C) 1999-2017 ABINIT group (PB, XG, GA)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !! For the initials of contributors, see ~abinit/doc/developers/contributors .
 !!
 !! INPUTS
-!!  filnam = root filename for outputs
-!!  filnam5 = name of the eig2 database file
+!!  elph_base_name = root filename for outputs
+!!  eig2_filnam = name of the eig2 database file
 !!  comm=MPI communicator
 !!
 !! OUTPUT
@@ -34,22 +34,21 @@
 
 #include "abi_common.h"
 
-subroutine thmeig(g2fsmear,acell,amu,anaddb_dtset,d2asr,&
-& filnam,mband,mpert,msize,natom,nkpt,ntemper,&
-& ntypat,rprim,telphint,temperinc,&
-& tempermin,thmflag,typat,xred,&
-& ddb,ddbun,dimekb,filnam5,iout,& !new
-& lmnmax,msym,nblok2,nsym,occopt,symrel,tnons,usepaw,zion,&
-& symrec,natifc,gmet,gprim,indsym,rmet,atifc,ucvol,xcart,comm) !new
+subroutine thmeig(inp, ddb, crystal, &
+&                 elph_base_name, eig2_filnam, ddbun, iout, &
+&                 natom, mpert, msize, d2asr, &
+&                 comm)
 
  use defs_basis
  use m_profiling_abi
  use m_tetrahedron
  use m_errors
  use m_ddb
+ use m_ddb_hdr
  use m_xmpi
  use m_sort
 
+ use m_crystal,        only : crystal_t
  use m_io_tools,       only : open_file
  use m_dynmat,         only : asria_corr, dfpt_phfrq
  use m_anaddb_dataset, only : anaddb_dataset_type
@@ -69,36 +68,36 @@ subroutine thmeig(g2fsmear,acell,amu,anaddb_dtset,d2asr,&
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: mband,mpert,msize,ntemper,telphint,thmflag,comm
- real(dp),intent(in) :: g2fsmear,temperinc,tempermin
- character(len=*),intent(in) :: filnam
- real(dp),intent(out) :: ucvol !new
- integer,intent(in) :: ddbun,dimekb,iout,lmnmax,msym
- integer,intent(in) :: usepaw,natifc !new
- character(len=*),intent(in) :: filnam5 !new
- integer,intent(inout) :: natom,nkpt,nsym,ntypat,occopt,nblok2 !new in ==> inout
- type(anaddb_dataset_type),intent(in) :: anaddb_dtset
- type(ddb_type),intent(in) :: ddb
+ integer,intent(inout) :: natom
+ integer,intent(in) :: mpert,msize
+ integer,intent(in) :: comm
+ character(len=*),intent(in) :: elph_base_name, eig2_filnam
+ integer,intent(in) :: ddbun,iout
+ type(crystal_t), intent(inout) :: crystal
+ type(anaddb_dataset_type),intent(inout) :: inp
+ type(ddb_type),intent(inout) :: ddb
 !arrays
  real(dp),intent(inout) :: d2asr(2,3,natom,3,natom)
- integer,intent(out) :: symrel(3,3,msym)
- integer,intent(out) :: indsym(4,nsym,natom),symrec(3,3,msym) !new
- integer,intent(inout) :: typat(natom),atifc(natom)! new in ==> inout
- real(dp),intent(out) :: zion(ntypat),tnons(3,msym),gmet(3,3) !new
- real(dp),intent(out) :: gprim(3,3),rmet(3,3),xcart(3,natom) !new
- real(dp),intent(inout) :: acell(3),amu(ntypat),rprim(3,3),xred(3,natom)! new in ==> inout
+
 
 !Local variables-------------------------------
 !scalars
  integer,parameter :: msppol=2,master=0,bcorr0=0
- integer :: brav,chksymbreak,found,gqpt,iatom1,iatom2,iband,iblok,iblok2,idir1,idir2,ii,ikpt,ilatt,imod,index
+ integer :: msym
+ integer :: nkpt,mband,ntypat
+ integer :: usepaw,natifc
+ integer :: nsym,occopt,nblok2
+ integer :: ntemper,telphint,thmflag
+ integer :: brav,chksymbreak,found,gqpt,iatom1,iatom2,iband,iblok,iblok2,idir1,idir2,ii,jj,ikpt,ilatt,imod,index
  integer :: iomega,iqpt,iqpt1,iqpt2,iqpt2_previous,iqpt3,iscf_fake,itemper
  integer :: mpert_eig2,msize2,nene,ng2f,nqshft,nsym_new,unit_g2f,nqpt,nqpt_computed,qptopt,rftyp
 !integer :: mqpt,nqpt2,option
  integer :: unit_phdos,unitout
- integer :: choice,fullinit,intxc,iscf,isym,ixc,natom_,nkpt_,ntypat_
- integer :: nspden,nspinor,nsppol,nptsym,nunit,use_inversion,useylm,vrsddb !new
+ integer :: intxc,iscf,isym,ixc,natom_,nkpt_,ntypat_
+ integer :: nspden,nspinor,nsppol,nptsym,use_inversion,useylm
  integer :: ierr
+ real(dp) :: ucvol
+ real(dp) :: g2fsmear,temperinc,tempermin
  real(dp) :: bosein,deltaene,det,domega,enemax,enemin,fact2i,fact2r,factr
  real(dp) :: gaussfactor,gaussprefactor,gaussval,invdet,omega,omega_max,omega_min,qnrm,qptrlen
  real(dp) :: rcvol,tmp,tol,vec1i,vec1r,vec2i,vec2r,veci,vecr,xx
@@ -107,36 +106,44 @@ subroutine thmeig(g2fsmear,acell,amu,anaddb_dtset,d2asr,&
  character(len=500) :: message
  character(len=fnlen) :: outfile
  type(ddb_type) :: ddb_eig2
+ type(ddb_hdr_type) :: ddb_hdr
 !arrays
+ ! FIXME now these must be allocated
  integer :: ngqpt(9),qptrlatt(3,3),rfelfd(4),rfphon(4),rfstrs(4),vacuum(3)
  integer :: bravais(11)
+ integer,allocatable :: typat(:),atifc(:)
+ integer,allocatable :: symrel(:,:,:),symrec(:,:,:)
+ integer,allocatable :: indsym(:,:,:)
  integer,allocatable :: indqpt(:)
- integer,allocatable :: symafm(:),symafm_new(:),pspso(:),nband(:),indlmn(:,:,:) !new
- integer, allocatable :: carflg_eig2(:,:,:,:)
- integer, allocatable :: ptsymrel(:,:,:),symrel_new(:,:,:)
-!integer, allocatable :: symrec_new(:,:,:)
- real(dp) :: deigi(mband,nkpt)
- real(dp) :: deigr(mband,nkpt),diff_qpt(3),dwtermi(mband,nkpt),dwtermr(mband,nkpt)
- real(dp) :: gprimd(3,3),mesh(3,3),multi(mband,nkpt),multr(mband,nkpt)
+ integer,allocatable :: symafm(:),symafm_new(:)
+ integer,allocatable :: carflg_eig2(:,:,:,:)
+ integer,allocatable :: ptsymrel(:,:,:),symrel_new(:,:,:)
+!integer,allocatable :: symrec_new(:,:,:)
+ real(dp) :: rprim(3,3),gprim(3,3),rmet(3,3),gmet(3,3)
+ real(dp) :: acell(3)
+ real(dp) :: diff_qpt(3)
+ real(dp) :: gprimd(3,3),mesh(3,3)
  real(dp) :: qlatt(3,3),qphnrm(3),qpt_search(3,3)
- real(dp) :: rprimd(3,3),shiftq(3,210),slope(2,mband,nkpt),tempqlatt(3),thmeigen(2,mband,nkpt)
- real(dp) :: zeropoint(2,mband,nkpt)!new
+ real(dp) :: rprimd(3,3),shiftq(3,210),tempqlatt(3)
  real(dp) :: dummy(0),dummy2(0,0)
+ real(dp),allocatable :: xcart(:,:),xred(:,:)
+ real(dp),allocatable :: amu(:),zion(:)
+ real(dp),allocatable :: tnons(:,:)
+ real(dp),allocatable :: deigi(:,:), deigr(:,:), multi(:,:), multr(:,:)
+ real(dp),allocatable :: dwtermi(:,:), dwtermr(:,:)
+ real(dp),allocatable :: slope(:,:,:),thmeigen(:,:,:),zeropoint(:,:,:)
  real(dp),allocatable :: displ(:)
  real(dp),allocatable :: dos_phon(:),dtweightde(:,:),d2cart(:,:)
  real(dp),allocatable :: eigvec(:,:,:,:),eigval(:,:),g2f(:,:,:),intweight(:,:,:)
  real(dp),allocatable :: indtweightde(:,:,:),tmpg2f(:,:,:),tmpphondos(:),total_dos(:),tweight(:,:)
- real(dp),allocatable :: phfreq(:,:),spinat(:,:),wtk(:),occ(:),znucl(:),kpt(:,:),ekb(:,:) !new
+ real(dp),allocatable :: phfreq(:,:)
  real(dp),allocatable :: blkval2(:,:,:,:),blkval2gqpt(:,:,:,:),kpnt(:,:,:)
  real(dp),allocatable :: dedni(:,:,:,:),dednr(:,:,:,:)
  real(dp),allocatable :: eigen_in(:)
  real(dp),allocatable :: qpt_full(:,:),qptnrm(:)
-!real(dp),allocatable :: qpt2(:,:)
- real(dp),allocatable :: spqpt(:,:),tnons_new(:,:)
+ real(dp),allocatable :: spqpt(:,:),tnons_new(:,:),spinat(:,:)
  real(dp),allocatable :: wghtq(:)
-!real(dp),allocatable :: wtq_folded(:)
 
- type(pawtab_type),allocatable :: pawtab(:) !new
  integer :: ngfft(18) !new
 
  type(t_tetrahedron) :: tetrahedra
@@ -145,7 +152,7 @@ subroutine thmeig(g2fsmear,acell,amu,anaddb_dtset,d2asr,&
 ! *********************************************************************
 
 !DEBUG
- write(std_out,*)'-thmeig : enter '
+! write(std_out,*)'-thmeig : enter '
 !call flush(6)
 !ENDDEBUG
 
@@ -157,27 +164,64 @@ subroutine thmeig(g2fsmear,acell,amu,anaddb_dtset,d2asr,&
  call wrtout(ab_out,message,'COLL')
  call wrtout(std_out,message,'COLL')
 
+
 !=========================================================================
 !0) Initializations
 !=========================================================================
 
-!Current version. This is needed for ioddb8_in (see mrgddb.F90)
- vrsddb=100401
-!The checking of pseudopotentials is not done presently
-!so that dimensions are fake
- ABI_ALLOCATE(ekb,(dimekb,ntypat))
- ABI_ALLOCATE(indlmn,(6,lmnmax,ntypat))
- ABI_ALLOCATE(pspso,(ntypat))
- ABI_DATATYPE_ALLOCATE(pawtab,(ntypat*usepaw))
- call pawtab_nullify(pawtab)
+ 
+ g2fsmear = inp%a2fsmear
+ 
+ telphint = inp%telphint
+ temperinc = inp%temperinc
+ tempermin = inp%tempermin
+ thmflag = inp%thmflag
+ 
+ ntemper = inp%ntemper
+ natifc = inp%natifc
 
- ABI_ALLOCATE(kpt,(3,nkpt))
- ABI_ALLOCATE(nband,(nkpt))
- ABI_ALLOCATE(occ,(nkpt*mband*msppol))
+!Open Derivative DataBase then r/w Derivative DataBase preliminary information.
+
+ write(std_out, '(a)' )  '- thmeig: Initialize the second-order electron-phonon file with name :'
+ write(std_out, '(a,a)' )'-         ',trim(eig2_filnam)
+
+ call ddb_hdr_open_read(ddb_hdr, eig2_filnam, ddbun, DDB_VERSION)
+
+ mband = ddb_hdr%mband
+ nkpt = ddb_hdr%nkpt  
+ ntypat = ddb_hdr%ntypat  
+ 
+ msym = ddb_hdr%msym
+ nblok2 = ddb_hdr%nblok
+ nsym = ddb_hdr%nsym
+ occopt = ddb%occopt
+ usepaw = ddb_hdr%usepaw
+
+ ABI_ALLOCATE(typat, (natom))
+ ABI_ALLOCATE(atifc, (natom))
+ ABI_ALLOCATE(zion, (ntypat))
+ ABI_ALLOCATE(amu, (ntypat))
+
+ ABI_ALLOCATE(xcart,(3,natom))
+ ABI_ALLOCATE(xred,(3,natom))
+
+ ABI_ALLOCATE(symafm, (nsym))
  ABI_ALLOCATE(spinat,(3,natom))
- ABI_ALLOCATE(symafm,(msym))
- ABI_ALLOCATE(wtk,(nkpt))
- ABI_ALLOCATE(znucl,(ntypat))
+
+ ABI_ALLOCATE(symrel, (3,3,nsym))
+ ABI_ALLOCATE(symrec, (3,3,nsym))
+ ABI_ALLOCATE(tnons, (3,nsym))
+ ABI_ALLOCATE(indsym, (4,nsym,natom))
+
+ ABI_ALLOCATE(deigi, (mband,nkpt))
+ ABI_ALLOCATE(deigr, (mband,nkpt))
+ ABI_ALLOCATE(dwtermi, (mband,nkpt))
+ ABI_ALLOCATE(dwtermr, (mband,nkpt))
+ ABI_ALLOCATE(multi, (mband,nkpt))
+ ABI_ALLOCATE(multr, (mband,nkpt))
+ ABI_ALLOCATE(slope, (2,mband,nkpt))
+ ABI_ALLOCATE(thmeigen, (2,mband,nkpt))
+ ABI_ALLOCATE(zeropoint, (2,mband,nkpt))
 
 !At present, only atom-type perturbations are allowed for eig2 type matrix elements.
  mpert_eig2=natom
@@ -191,23 +235,27 @@ subroutine thmeig(g2fsmear,acell,amu,anaddb_dtset,d2asr,&
  ABI_ALLOCATE(eigvec,(2,3,natom,3*natom))
  ABI_ALLOCATE(phfreq,(3*natom,ddb%nblok))
 
-!Open Derivative DataBase then r/w Derivative DataBase preliminary information.
+ atifc = inp%atifc
 
- write(std_out, '(a)' )  '- thmeig: Initialize the second-order electron-phonon file with name :'
- write(std_out, '(a,a)' )'-         ',trim(filnam5)
+ !amu = ddb%amu
+ amu(:) = ddb_hdr%amu(1:ntypat)
+ typat(:) = ddb_hdr%typat(1:natom)
+ zion(:) = ddb_hdr%zion(1:ntypat)
+ symrel(:,:,1:nsym) = ddb_hdr%symrel(:,:,1:nsym)
+ tnons(:,1:nsym) = ddb_hdr%tnons(:,1:nsym)
 
-! To avoid aliasing
- nunit=ddbun ; natom_=natom ; nkpt_=nkpt ; ntypat_=ntypat
- call ioddb8_in(filnam5,natom_,mband,&
-& nkpt_,msym,ntypat_,nunit,vrsddb,&
-& acell,amu,dilatmx,ecut,ecutsm,intxc,iscf,ixc,kpt,kptnrm,&
-& natom,nband,ngfft,nkpt,nspden,nspinor,nsppol,nsym,ntypat,occ,occopt,&
-& pawecutdg,rprim,dfpt_sciss,spinat,symafm,symrel,tnons,tolwfr,tphysel,tsmear,&
-& typat,usepaw,wtk,xred,zion,znucl)
+ xred(:,:) = ddb_hdr%xred(:,:)
 
-!DEBUG
-!write(std_out,*)"after first ioddb8"
-!ENDDEBUG
+ symafm(:) = ddb_hdr%symafm(1:nsym)
+ spinat(:,:) = ddb_hdr%spinat(:,1:natom)
+
+ !symrel = ddb_hdr%symrel  ! out
+ !tnons = ddb_hdr%tnons  ! out
+
+ !acell = ddb%acell
+ !natom = ddb_hdr%natom  
+ acell = ddb_hdr%acell
+ rprim = ddb_hdr%rprim
 
 !Compute different matrices in real and reciprocal space, also
 !checks whether ucvol is positive.
@@ -215,7 +263,6 @@ subroutine thmeig(g2fsmear,acell,amu,anaddb_dtset,d2asr,&
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
 
 !Obtain reciprocal space primitive transl g from inverse trans of r
-!(Unlike in abinit, gprim is used throughout ifc; should be changed, later)
  call matr3inv(rprim,gprim)
 
 !Generate atom positions in cartesian coordinates
@@ -231,12 +278,7 @@ subroutine thmeig(g2fsmear,acell,amu,anaddb_dtset,d2asr,&
 !on which the referenced one is sent and also the translation bringing
 !back this atom to the referenced unit cell
  tolsym8=tol8
- call symatm(indsym,natom,nsym,symrec,tnons,tolsym8,typat,xred)
-
-!Read the psp information of the input DDB
- useylm=usepaw;choice=1
- call psddb8 (choice,dimekb,ekb,fullinit,indlmn,lmnmax,&
-& nblok2,ntypat,nunit,pawtab,pspso,usepaw,useylm,vrsddb)
+ call symatm(indsym,natom,nsym,symrec(:,:,1:nsym),tnons(:,1:nsym),tolsym8,typat,xred)
 
 !Check the correctness of some input parameters,
 !and perform small treatment if needed.
@@ -247,12 +289,19 @@ subroutine thmeig(g2fsmear,acell,amu,anaddb_dtset,d2asr,&
  ABI_ALLOCATE(carflg_eig2,(3,mpert_eig2,3,mpert_eig2))
  ABI_ALLOCATE(kpnt,(3,nkpt,1))
 
-!DEBUG
-!write(std_out,*)'-thmeig : 1 '
-!write(std_out,*)' nblok2=',nblok2
-!write(std_out,*)' thmflag=',thmflag
-!call flush(6)
-!ENDDEBUG
+ ! Copy a bunch of stuff back into crystal (to retain old behavior)
+ ! TODO comment these: doesnt make a difference
+ crystal%xcart = xcart
+ crystal%ucvol = ucvol
+ crystal%zion = zion
+ crystal%gmet = gmet
+ crystal%rmet = rmet
+ crystal%nsym = nsym
+ crystal%symrel = symrel
+ crystal%symrec = symrec
+ crystal%tnons = tnons
+ crystal%indsym = indsym
+
 
 !=========================================================================
 !1) Take care of the Gamma point for thmflag=3, 5 or 7
@@ -262,24 +311,9 @@ subroutine thmeig(g2fsmear,acell,amu,anaddb_dtset,d2asr,&
    found=0
    do iblok2=1,nblok2
 
-!    DEBUG
-!    write(std_out,*)'-thmeig : 1a '
-!    write(std_out,*)' iblok2=',iblok2
-!    call flush(6)
-!    ENDDEBUG
-
-     choice=1
-     nunit=ddbun
-
      call read_blok8(ddb_eig2,iblok2,mband,mpert_eig2,msize2,&
-&     nkpt,nunit,blkval2(:,:,:,:),kpnt(:,:,1))
+&     nkpt,ddbun,blkval2(:,:,:,:),kpnt(:,:,1))
 
-     !write (std_out,*) 'blkval2 in thmeig'
-     !write (std_out,*) blkval2
-!    DEBUG
-!    write(std_out,*)'-thmeig : iblok2,ddb_eig2%typ(iblok2)=',iblok2,ddb_eig2%typ(iblok2)
-!    call flush(6)
-!    ENDDEBUG
 
      qnrm = ddb_eig2%qpt(1,iblok2)*ddb_eig2%qpt(1,iblok2)+ &
 &     ddb_eig2%qpt(2,iblok2)*ddb_eig2%qpt(2,iblok2)+ &
@@ -308,15 +342,6 @@ subroutine thmeig(g2fsmear,acell,amu,anaddb_dtset,d2asr,&
 
  close(ddbun)
 
-!DEBUG
-!write(std_out,*)"blkval2gqpt=",blkval2gqpt(1,1,1,1)
-!ENDDEBUG
-
-!DEBUG
-!write(std_out,*)'-thmeig : 2 '
-!call flush(6)
-!ENDDEBUG
-
 !=========================================================================
 !2) Calculation of dE(n,k)/dn(Q,j) : consider all q and modes
 !=========================================================================
@@ -325,10 +350,10 @@ subroutine thmeig(g2fsmear,acell,amu,anaddb_dtset,d2asr,&
 
 
 !  Use the first list of q wavevectors
-   nqpt=anaddb_dtset%nph1l
+   nqpt=inp%nph1l
    ABI_ALLOCATE(spqpt,(3,nqpt))
-   do iqpt=1,anaddb_dtset%nph1l
-     spqpt(:,iqpt)=anaddb_dtset%qph1l(:,iqpt)/anaddb_dtset%qnrml1(iqpt)
+   do iqpt=1,inp%nph1l
+     spqpt(:,iqpt)=inp%qph1l(:,iqpt)/inp%qnrml1(iqpt)
    end do
    ABI_ALLOCATE(wghtq,(nqpt))
    wghtq(:)=one/nqpt
@@ -336,8 +361,8 @@ subroutine thmeig(g2fsmear,acell,amu,anaddb_dtset,d2asr,&
  else if(thmflag>=5 .and. thmflag<=8)then
 
 !  Generates the q point grid
-   ngqpt(1:3)=anaddb_dtset%ngqpt(1:3)
-   nqshft=anaddb_dtset%nqshft
+   ngqpt(1:3)=inp%ngqpt(1:3)
+   nqshft=inp%nqshft
    qptrlatt(:,:)=0
    qptrlatt(1,1)=ngqpt(1)
    qptrlatt(2,2)=ngqpt(2)
@@ -352,7 +377,7 @@ subroutine thmeig(g2fsmear,acell,amu,anaddb_dtset,d2asr,&
      tolsym=tol8
      call symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tolsym)
      use_inversion=1
-     call symfind(0,(/zero,zero,zero/),gprimd,0,msym,natom,0,nptsym,nsym_new,&
+     call symfind(0,(/zero,zero,zero/),gprimd,0,msym,natom,0,nptsym,nsym_new,0,&
 &     ptsymrel,spinat,symafm_new,symrel_new,tnons_new,tolsym,typat,use_inversion,xred)
      write(std_out,*)' thmeig : found ',nsym_new,' symmetries ',ch10
      qptopt=1
@@ -364,19 +389,18 @@ subroutine thmeig(g2fsmear,acell,amu,anaddb_dtset,d2asr,&
      qptopt=3
    end if
 
-   brav=anaddb_dtset%brav
+   brav=inp%brav
 
    if(brav/=1)then
      message = ' The possibility to have brav/=1 for thmeig was disabled.'
      MSG_ERROR(message)
    end if
 
-!  ----NEW CODING
 !  Prepare to compute the q-point grid in the ZB or IZB
    iscf_fake=5 ! Need the weights
    chksymbreak=0
    vacuum=0
-   shiftq(:,1:nqshft)=anaddb_dtset%q1shft(:,1:nqshft)
+   shiftq(:,1:nqshft)=inp%q1shft(:,1:nqshft)
 !  Compute the final number of q points
    call getkgrid(chksymbreak,0,iscf_fake,dummy2,qptopt,qptrlatt,qptrlen,&
 &   nsym_new,0,nqpt,nqshft,nsym_new,rprimd,&
@@ -387,56 +411,15 @@ subroutine thmeig(g2fsmear,acell,amu,anaddb_dtset,d2asr,&
 &   nsym_new,nqpt,nqpt_computed,nqshft,nsym_new,rprimd,&
 &   shiftq,symafm_new,symrel_new,vacuum,wghtq)
 
-
-!  -----OLD CODING
-!  call chkrp9(brav,rprim)
-!  option=1
-!  mqpt=ngqpt(1)*ngqpt(2)*ngqpt(3)*nqshft
-!  if(brav==2)mqpt=mqpt/2
-!  if(brav==3)mqpt=mqpt/4
-!  allocate(spqpt(3,mqpt))
-!  call smpbz(brav,iout,qptrlatt,mqpt,nqpt,nqshft,option,anaddb_dtset%q1shft,spqpt)
-!  allocate(wghtq(nqpt))
-!  wghtq(:)=one/nqpt
-
-!  write(std_out,*)' after smpbz, nqpt=',nqpt
-!  do iqpt=1,nqpt
-!  write(std_out,*)iqpt,spqpt(:,iqpt),wghtq(iqpt)
-!  end do
-
-!  if(thmflag==7 .or. thmflag==8)then
-
-!  Fold the q point set inside de IBZ
-!  allocate(indqpt(nqpt),symrec_new(3,3,nsym_new),wtq_folded(nqpt),qpt2(3,nqpt))
-!  do isym=1,nsym_new
-!  call mati3inv(symrel_new(:,:,isym),symrec_new(:,:,isym))
-!  end do
-!  call symkpt_(0,gmet,indqpt,ab_out,spqpt,nqpt,nqpt2,nsym_new,&
-!  &     symrec_new,use_inversion,wghtq,wtq_folded)
-
-!  write(std_out,*)' after symkpt, nqpt2=',nqpt2
-
-!  do iqpt=1,nqpt2
-!  wghtq(iqpt)=wtq_folded(indqpt(iqpt))
-!  qpt2(:,iqpt)=spqpt(:,indqpt(iqpt))
-!  end do
-!  nqpt=nqpt2
-!  spqpt(:,1:nqpt)=qpt2(:,1:nqpt)
-!  deallocate(qpt2,wtq_folded,symrec_new)
-
-!  write(std_out,*)ch10,' after symkpt, nqpt=',nqpt
-!  do iqpt=1,nqpt
-!  write(std_out,*)iqpt,spqpt(:,iqpt),wghtq(iqpt)
-!  end do
-
-!  end if ! thmflag=7 or 8
-
    ABI_DEALLOCATE(ptsymrel)
    ABI_DEALLOCATE(symafm_new)
    ABI_DEALLOCATE(symrel_new)
    ABI_DEALLOCATE(tnons_new)
 
  end if
+
+ call ddb_hdr_free(ddb_hdr)
+
 
  write(message,'(a,a)')ch10,' thmeig : list of q wavevectors, with integration weights '
  call wrtout(ab_out,message,'COLL')
@@ -459,20 +442,10 @@ subroutine thmeig(g2fsmear,acell,amu,anaddb_dtset,d2asr,&
  dednr(:,:,:,:) = zero
  dedni(:,:,:,:) = zero
 
-!Prepare the reading of the EIG2 files
- choice=1
- nunit=ddbun ; natom_=natom ; nkpt_=nkpt ; ntypat_=ntypat
- call ioddb8_in(filnam5,natom_,mband,&
-& nkpt_,msym,ntypat_,nunit,vrsddb,&
-& acell,amu,dilatmx,ecut,ecutsm,intxc,iscf,ixc,kpt,kptnrm,&
-& natom,nband,ngfft,nkpt,nspden,nspinor,nsppol,nsym,ntypat,occ,occopt,&
-& pawecutdg,rprim,dfpt_sciss,spinat,symafm,symrel,tnons,tolwfr,tphysel,tsmear,&
-& typat,usepaw,wtk,xred,zion,znucl)
+!!Prepare the reading of the EIG2 files
+ call ddb_hdr_open_read(ddb_hdr, eig2_filnam, ddbun, DDB_VERSION, msym=msym)
 
-!Read the psp information of the input EIG2 file
- useylm=usepaw;choice=1
- call psddb8 (choice,dimekb,ekb,fullinit,indlmn,lmnmax,&
-& nblok2,ntypat,nunit,pawtab,pspso,usepaw,useylm,vrsddb)
+ call ddb_hdr_free(ddb_hdr)
 
 !iqpt2 will be the index of the q point bloks inside the EIG2 file
  iqpt2=0
@@ -504,42 +477,31 @@ subroutine thmeig(g2fsmear,acell,amu,anaddb_dtset,d2asr,&
    ABI_ALLOCATE(d2cart,(2,msize))
 !  Copy the dynamical matrix in d2cart
    d2cart(:,1:msize)=ddb%val(:,:,iblok)
-   !write (100,*) 'dynmat in thmeig'
-   !write (100,*) d2cart(:,1:msize)
 
 !  Eventually impose the acoustic sum rule based on previously calculated d2asr
    !call asrq0_apply(asrq0, natom, mpert, msize, crystal%xcart, d2cart)
-   if (anaddb_dtset%asr==1 .or. anaddb_dtset%asr==2 .or. anaddb_dtset%asr==5) then
-     call asria_corr(anaddb_dtset%asr,d2asr,d2cart,mpert,natom)
+   if (inp%asr==1 .or. inp%asr==2 .or. inp%asr==5) then
+     call asria_corr(inp%asr,d2asr,d2cart,mpert,natom)
    end if
-
-!  DEBUG
-!  do ii=1,msize
-!  write(std_out,*)' thmeig : d2cart(:,ii)=',d2cart(:,ii)
-!  enddo
-!  ENDDEBUG
 
 !  Calculation of the eigenvectors and eigenvalues
 !  of the dynamical matrix
    ABI_ALLOCATE(displ,(2*3*natom*3*natom))
    ABI_ALLOCATE(eigval,(3,natom))
    call dfpt_phfrq(amu,displ,d2cart,eigval,eigvec,indsym,&
-&   mpert,msym,natom,nsym,ntypat,phfreq(:,iqpt),qphnrm(1),spqpt(:,iqpt),rprimd,anaddb_dtset%symdynmat,&
+&   mpert,msym,natom,nsym,ntypat,phfreq(:,iqpt),qphnrm(1),spqpt(:,iqpt),rprimd,inp%symdynmat,&
 &   symrel,symafm,typat,ucvol)
    ABI_DEALLOCATE(displ)
    ABI_DEALLOCATE(eigval)
    ABI_DEALLOCATE(d2cart)
 
-!  DEBUG
-!  write(std_out,*)"iqpt=",iqpt,"/",nqpt
-!  ENDDEBUG
 
 !  Read the next bloks to find the next q point.
    found=0 ; iqpt2_previous=iqpt2
    do while (iqpt2<nblok2)
      iqpt2=iqpt2+1
      call read_blok8(ddb_eig2,iqpt2,mband,mpert_eig2,msize2,&
-&     nkpt,nunit,blkval2(:,:,:,:),kpnt(:,:,1))
+&     nkpt,ddbun,blkval2(:,:,:,:),kpnt(:,:,1))
      !write (300,*) 'blkval2 _bis_ in thmeig'
      !write (300,*) blkval2
      diff_qpt(:)=ddb_eig2%qpt(1:3,iqpt2)/ddb_eig2%nrm(1,iqpt2)-spqpt(:,iqpt)
@@ -556,24 +518,14 @@ subroutine thmeig(g2fsmear,acell,amu,anaddb_dtset,d2asr,&
 !    from the beginning of the file
      close(ddbun)
 
-     natom_=natom ; nkpt_=nkpt ; ntypat_=ntypat
-     call ioddb8_in(filnam5,natom_,mband,&
-&     nkpt_,msym,ntypat_,nunit,vrsddb,&
-&     acell,amu,dilatmx,ecut,ecutsm,intxc,iscf,ixc,kpt,kptnrm,&
-&     natom,nband,ngfft,nkpt,nspden,nspinor,nsppol,nsym,ntypat,occ,occopt,&
-&     pawecutdg,rprim,dfpt_sciss,spinat,symafm,symrel,tnons,tolwfr,tphysel,tsmear,&
-&     typat,usepaw,wtk,xred,zion,znucl)
-
-!    Read the psp information of the input DDB
-     useylm=usepaw;choice=1
-     call psddb8 (choice,dimekb,ekb,fullinit,indlmn,lmnmax,&
-&     nblok2,ntypat,nunit,pawtab,pspso,usepaw,useylm,vrsddb)
+     call ddb_hdr_open_read(ddb_hdr, eig2_filnam, ddbun, DDB_VERSION, msym=msym)
+     call ddb_hdr_free(ddb_hdr)
 
 !    And examine again the EIG2 file. Still, not beyond the previously examined value.
      found=0
      do iqpt2=1,iqpt2_previous
        call read_blok8(ddb_eig2,iqpt2,mband,mpert_eig2,msize2,&
-&       nkpt,nunit,blkval2(:,:,:,:),kpnt(:,:,1))
+&       nkpt,ddbun,blkval2(:,:,:,:),kpnt(:,:,1))
        diff_qpt(:)=ddb_eig2%qpt(1:3,iqpt2)/ddb_eig2%nrm(1,iqpt2)-spqpt(:,iqpt)
        if(diff_qpt(1)**2+diff_qpt(2)**2+diff_qpt(3)**2 < DDB_QTOL )then
          found=1
@@ -645,11 +597,6 @@ subroutine thmeig(g2fsmear,acell,amu,anaddb_dtset,d2asr,&
              multr(:,:) =(blkval2(1,index,:,:)*vecr - blkval2(2,index,:,:)*veci) !/(norm(idir1)*norm(idir2))
              multi(:,:) =(blkval2(1,index,:,:)*veci + blkval2(2,index,:,:)*vecr) !/(norm(idir1)*norm(idir2))
 
-!            DEBUG
-!            write(std_out,*) 'factr et facti',factr,facti
-!            write(std_out,*) 'fact2r et fact2i',fact2r,fact2i
-!            write(std_out,*) 'multr et multi', multr, multi
-!            ENDDEBUG
 
 !            Debye-Waller Term
              if(thmflag==3 .or. thmflag==5 .or. thmflag==7) then
@@ -678,13 +625,6 @@ subroutine thmeig(g2fsmear,acell,amu,anaddb_dtset,d2asr,&
  end do !iqpt
 
  close(ddbun)
-
-!DEBUG
-!write(std_out,*)'mband, nkpt, nqpt',mband,nkpt,nqpt
-!write(std_out,*)'dednr ',dednr(5,50,1,50)
-!write(std_out,*)'dednr ',dednr(4,54,1,55)
-!write(std_out,*)'dedni ',dedni(5,50,1,50)
-!ENDDEBUG
 
 
 !=============================================================================
@@ -744,11 +684,11 @@ subroutine thmeig(g2fsmear,acell,amu,anaddb_dtset,d2asr,&
 
 !  output the g2f
    unit_g2f = 108
-   call outg2f(domega,omega_min,omega_max,filnam,g2f,g2fsmear,kpnt,mband,ng2f,nkpt,nqpt,1,telphint,unit_g2f)
+   call outg2f(domega,omega_min,omega_max,elph_base_name,g2f,g2fsmear,kpnt,mband,ng2f,nkpt,nqpt,1,telphint,unit_g2f)
 
 !  output the phonon DOS
    unit_phdos = 108
-   call outphdos(domega,dos_phon,omega_min,omega_max,filnam,g2fsmear,ng2f,nqpt,1,telphint,unit_g2f)
+   call outphdos(domega,dos_phon,omega_min,omega_max,elph_base_name,g2fsmear,ng2f,nqpt,1,telphint,unit_g2f)
 
 
    ABI_DEALLOCATE(dos_phon)
@@ -894,11 +834,11 @@ subroutine thmeig(g2fsmear,acell,amu,anaddb_dtset,d2asr,&
 
 !  output the g2f
    unit_g2f = 108
-   call outg2f(deltaene,enemin,enemax,filnam,g2f,g2fsmear,kpnt,mband,nene,nkpt,nqpt,tetrahedra%ntetra,telphint,unit_g2f)
+   call outg2f(deltaene,enemin,enemax,elph_base_name,g2f,g2fsmear,kpnt,mband,nene,nkpt,nqpt,tetrahedra%ntetra,telphint,unit_g2f)
 
 !  output the phonon DOS
    unit_phdos = 108
-   call outphdos(deltaene,total_dos,enemin,enemax,filnam,g2fsmear,nene,nqpt,tetrahedra%ntetra,telphint,unit_g2f)
+   call outphdos(deltaene,total_dos,enemin,enemax,elph_base_name,g2fsmear,nene,nqpt,tetrahedra%ntetra,telphint,unit_g2f)
 
    ABI_DEALLOCATE(tweight)
    ABI_DEALLOCATE(dtweightde)
@@ -913,7 +853,7 @@ subroutine thmeig(g2fsmear,acell,amu,anaddb_dtset,d2asr,&
 !=======================================================================
 
 !open TBS file
- outfile = trim(filnam)//"_TBS"
+ outfile = trim(elph_base_name)//"_TBS"
  if (open_file(outfile,message,newunit=unitout,form='formatted',status='unknown') /= 0) then
    MSG_ERROR(message)
  end if
@@ -955,10 +895,6 @@ subroutine thmeig(g2fsmear,acell,amu,anaddb_dtset,d2asr,&
          zeropoint(1,1:mband,1:nkpt) = zeropoint(1,1:mband,1:nkpt) + dednr(1:mband,1:nkpt,imod,iqpt)*half
          zeropoint(2,1:mband,1:nkpt) = zeropoint(2,1:mband,1:nkpt) + dedni(1:mband,1:nkpt,imod,iqpt)*half
 
-!        DEBUG
-!        write(std_out,*)' For iqpt,imod=',iqpt,imod
-!        write(std_out,'(a,8f12.5)' )'  contribution to ZPM correction of ikpt=20, 1:mband',dednr(1:mband,20,imod,iqpt)*half*Ha_eV
-!        ENDDEBUG
        end if
      end do ! imod
    end do !iqpt
@@ -1002,18 +938,27 @@ subroutine thmeig(g2fsmear,acell,amu,anaddb_dtset,d2asr,&
    end do
  end do
 
- ABI_DEALLOCATE(ekb)
- ABI_DEALLOCATE(indlmn)
- ABI_DEALLOCATE(kpt)
- ABI_DEALLOCATE(nband)
- ABI_DEALLOCATE(occ)
- ABI_DEALLOCATE(pspso)
- ABI_DEALLOCATE(spinat)
+ ABI_DEALLOCATE(typat)
+ ABI_DEALLOCATE(atifc)
+ ABI_DEALLOCATE(zion)
+ ABI_DEALLOCATE(amu)
+ ABI_DEALLOCATE(xcart)
+ ABI_DEALLOCATE(xred)
  ABI_DEALLOCATE(symafm)
- ABI_DEALLOCATE(wtk)
- ABI_DEALLOCATE(znucl)
- call pawtab_free(pawtab)
- ABI_DATATYPE_DEALLOCATE(pawtab)
+ ABI_DEALLOCATE(spinat)
+ ABI_DEALLOCATE(symrel)
+ ABI_DEALLOCATE(symrec)
+ ABI_DEALLOCATE(indsym)
+ ABI_DEALLOCATE(tnons)
+ ABI_DEALLOCATE(deigi)
+ ABI_DEALLOCATE(deigr)
+ ABI_DEALLOCATE(dwtermi)
+ ABI_DEALLOCATE(dwtermr)
+ ABI_DEALLOCATE(multi)
+ ABI_DEALLOCATE(multr)
+ ABI_DEALLOCATE(slope)
+ ABI_DEALLOCATE(thmeigen)
+ ABI_DEALLOCATE(zeropoint)
 
  ABI_DEALLOCATE(dedni)
  ABI_DEALLOCATE(dednr)
@@ -1033,10 +978,11 @@ subroutine thmeig(g2fsmear,acell,amu,anaddb_dtset,d2asr,&
  ABI_DEALLOCATE(kpnt)
  ABI_DEALLOCATE(carflg_eig2)
 
+
+
  call ddb_free(ddb_eig2)
 
  call destroy_tetra(tetrahedra)
-!close(ddbun)
 
  contains
 !!***

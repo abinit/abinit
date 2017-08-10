@@ -8,7 +8,7 @@
 !! non linear response functions.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2002-2016 ABINIT group (MVeithen,MB,LB)
+!! Copyright (C) 2002-2017 ABINIT group (MVeithen,MB,LB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -60,9 +60,10 @@
 !!      driver
 !!
 !! CHILDREN
-!!      d3sym,ddb_io_out,dfptnl_doutput,dfptnl_loop,ebands_free,fourdp,getcut
+!!      d3sym,dfptnl_doutput,dfptnl_loop,ebands_free,fourdp,getcut
 !!      getkgrid,getshell,hdr_free,hdr_init,hdr_update,initmv,inwffil,kpgio
-!!      mkcore,nlopt,psddb8,pspini,read_rhor,rhohxc,setsym,setup1,status
+!!      mkcore,nlopt,pspini,read_rhor,rhohxc,setsym,setup1,status
+!!      ddb_hdr_init, ddb_hdr_free, ddb_hdr_open_write
 !!      symmetrize_xred,sytens,timab,wffclose,wrtout
 !!
 !! SOURCE
@@ -87,8 +88,9 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
  use m_hdr
  use m_ebands
 
- use m_dynmat,      only : d3sym
- use m_ddb,         only : psddb8, nlopt, DDB_VERSION
+ use m_dynmat,      only : d3sym, sytens
+ use m_ddb,         only : nlopt, DDB_VERSION
+ use m_ddb_hdr,     only : ddb_hdr_type, ddb_hdr_init, ddb_hdr_free, ddb_hdr_open_write
  use m_ioarr,       only : read_rhor
  use m_pawfgr,      only : pawfgr_type,pawfgr_init, pawfgr_destroy
  use m_pawang,      only : pawang_type, pawang_init, pawang_free
@@ -112,7 +114,6 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
  use interfaces_18_timing
  use interfaces_32_util
  use interfaces_41_geometry
- use interfaces_41_xc_lowlevel
  use interfaces_53_ffts
  use interfaces_56_recipspace
  use interfaces_56_xc
@@ -169,6 +170,7 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
  type(pawang_type) :: pawang1
  type(ebands_t) :: bstruct
  type(hdr_type) :: hdr,hdr_den
+ type(ddb_hdr_type) :: ddb_hdr
  type(wffile_type) :: wffgs,wfftgs
  type(wvl_data) :: wvl
 !arrays
@@ -199,6 +201,8 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
  type(paw_dmft_type) :: paw_dmft
  
 ! ***********************************************************************
+
+ DBG_ENTER("COLL")
 
  call timab(501,1,tsec)
  call status(0,dtfil%filstat,iexit,level,'enter         ')
@@ -379,6 +383,7 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
  end if
 
 !Check if the perturbations asked in the input file can be computed
+
  if (((dtset%d3e_pert1_phon == 1).and.(dtset%d3e_pert2_phon == 1)).or. &
 & ((dtset%d3e_pert1_phon == 1).and.(dtset%d3e_pert3_phon == 1)).or. &
 & ((dtset%d3e_pert2_phon == 1).and.(dtset%d3e_pert3_phon == 1))) then
@@ -471,7 +476,7 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
 & ch10,' optical susceptibility tensors is:',ch10
  call wrtout(ab_out,message,'COLL')
  call wrtout(std_out,message,'COLL')
- 
+
  write(message,'(12x,a)')&
 & 'i1pert  i1dir   i2pert  i2dir   i3pert  i3dir'
  call wrtout(ab_out,message,'COLL')
@@ -516,7 +521,6 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
  call wrtout(ab_out,message,'COLL')
  call wrtout(std_out,message,'COLL')
 
-
  call status(0,dtfil%filstat,iexit,level,'call inwffil(1')
 
 !Generate an index table of atoms, in order for them to be used
@@ -536,6 +540,37 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
      end if
    end do
  end do
+
+ !if (dtset%paral_rf == -1) then
+ write(std_out,'(a)')"--- !IrredPerts"
+ write(std_out,'(a)')'# List of irreducible perturbations for nonlinear'
+ write(std_out,'(a)')'irred_perts:'
+
+ n1 = 0
+ do i1pert = 1, natom + 2
+   do i1dir = 1, 3
+     do i2pert = 1, natom + 2
+       do i2dir = 1, 3
+         do i3pert = 1, natom + 2
+           do i3dir = 1,3
+             if (rfpert(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)==1) then
+               n1 = n1 + 1
+               write(std_out,'(a,i0)')"   - i1pert: ",i1pert
+               write(std_out,'(a,i0)')"     i1dir: ",i1dir
+               write(std_out,'(a,i0)')"     i2pert: ",i2pert
+               write(std_out,'(a,i0)')"     i2dir: ",i2dir
+               write(std_out,'(a,i0)')"     i3pert: ",i3pert
+               write(std_out,'(a,i0)')"     i3dir: ",i3dir
+             end if
+           end do
+         end do
+       end do
+     end do
+   end do
+ end do
+ write(std_out,'(a)')"..."
+   !MSG_ERROR_NODUMP("aborting now")
+ !end if
 
 !Compute structure factor phases for current atomic pos:
  ABI_ALLOCATE(ph1d,(2,3*(2*dtset%mgfft+1)*natom))
@@ -783,9 +818,10 @@ end if
 
 !Set up hartree and xc potential. Compute kxc here.
  option=3
- nkxc=2*min(dtset%nspden,2)-1;if(dtset%xclevel==2)nkxc=23
- nk3xc=3*min(dtset%nspden,2)-2
- call check_kxc(dtset%ixc,dtset%optdriver)
+ nkxc=2*dtset%nspden-1 ! LDA
+ if(dtset%xclevel==2.and.dtset%nspden==1) nkxc=7  ! non-polarized GGA
+ if(dtset%xclevel==2.and.dtset%nspden==2) nkxc=19 ! polarized GGA
+ nk3xc=3*dtset%nspden-2
  ABI_ALLOCATE(kxc,(nfftf,nkxc))
  ABI_ALLOCATE(k3xc,(nfftf,nk3xc))
  ABI_ALLOCATE(vhartr,(nfftf))
@@ -968,10 +1004,12 @@ end if
 &   dtset%tnons,tolwfr,dtset%tphysel,dtset%tsmear,&
 &   dtset%typat,dtset%usepaw,dtset%wtk,xred,psps%ziontypat,dtset%znucl)
 
-   nblok=1 ; fullinit=1 ; choice=2
-   call psddb8 (choice,psps%dimekb,psps%ekb,fullinit,psps%indlmn,&
-&   psps%lmnmax,nblok,psps%ntypat,dtfil%unddb,&
-&   pawtab,psps%pspso,psps%usepaw,psps%useylm,DDB_VERSION)
+   call ddb_hdr_init(ddb_hdr,dtset,psps,pawtab,DDB_VERSION,dscrpt,&
+&                    1,xred=xred,occ=occ)
+
+   call ddb_hdr_open_write(ddb_hdr, dtfil%fnameabo_ddb, dtfil%unddb)
+
+   call ddb_hdr_free(ddb_hdr)
 
 !  Call main output routine
    call dfptnl_doutput(blkflg,d3etot,dtset%mband,mpert,dtset%nkpt,dtset%natom,dtset%ntypat,dtfil%unddb)
@@ -1143,6 +1181,8 @@ end if
 
  call status(0,dtfil%filstat,iexit,level,' exit         ')
  call timab(501,2,tsec)
+
+ DBG_EXIT("COLL")
 
 end subroutine nonlinear
 !!***

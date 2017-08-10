@@ -10,7 +10,7 @@
 !! iimage and itime loops).
 !!
 !! COPYRIGHT
-!! Copyright (C) 2010-2016 ABINIT group (XG)
+!! Copyright (C) 2010-2017 ABINIT group (XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -422,7 +422,10 @@ subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset
  dtfil%fnameabo_sig=trim(dtfil%filnam_ds(4))//'_SIG'
  dtfil%fnameabo_spcur=trim(dtfil%filnam_ds(4))//'_SPCUR'
  dtfil%fnameabo_sus=trim(dtfil%filnam_ds(4))//'_SUS'
+ dtfil%fnameabo_vha=trim(dtfil%filnam_ds(4))//'_VHA'
+ dtfil%fnameabo_vpsp=trim(dtfil%filnam_ds(4))//'_VPSP'
  dtfil%fnameabo_vso=trim(dtfil%filnam_ds(4))//'_VSO'
+ dtfil%fnameabo_vxc=trim(dtfil%filnam_ds(4))//'_VXC'
  dtfil%fnameabo_wan=trim(dtfil%filnam_ds(4))//'_WAN'
  dtfil%fnameabo_wfk=trim(dtfil%filnam_ds(4))//'_WFK'
  dtfil%fnameabo_wfq=trim(dtfil%filnam_ds(4))//'_WFQ'

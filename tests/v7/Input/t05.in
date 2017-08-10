@@ -72,7 +72,7 @@ rprim
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t05.out,      tolnlines = 2, tolabs = 2.0e-4, tolrel = 3.0e-3, fld_options = -easy
+#%%   t05.out,      tolnlines = 4, tolabs = 2.0e-4, tolrel = 3.0e-3, fld_options = -easy
 #%% psp_files = 26fe.pspnc
 #%% [paral_info]
 #%% max_nprocs = 4
@@ -81,5 +81,6 @@ rprim
 #%% keywords = magnetic_constraint
 #%% description = Test magnetic constraint code. Variables magconon and magcon_lambda. BCC iron with low cutoff
 #%%   and kpts, non collinear spin case with nspden=4 imposed. First normal case then constrain direction only
-#%%   (DS2) and full value of vector (DS3) 
+#%%   (DS2) and full value of vector (DS3)
+#%% topics = spinpolarisation, MagMom
 #%%<END TEST_INFO>

@@ -7,7 +7,7 @@
 !!  .
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2016 ABINIT group (JLJ, BR, MC)
+!! Copyright (C) 2009-2017 ABINIT group (JLJ, BR, MC)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -56,7 +56,7 @@ use m_xmpi
 use m_pawang
 use m_errors
 
-use m_io_tools,         only : get_unit
+use m_io_tools,         only : get_unit,open_file
 use m_paw_dmft,         only : paw_dmft_type
 use m_ebands,           only : ebands_init, ebands_free
 use m_gaussian_quadrature, only: gaussian_quadrature_gegenbauer, gaussian_quadrature_legendre
@@ -202,6 +202,7 @@ real(dp)       :: second_model_parameter
 
 real(dp):: tsec(2)
 integer :: GWLS_TIMAB, OPTION_TIMAB
+character(500) :: msg
 
 ! *************************************************************************
 
@@ -213,7 +214,7 @@ integer :: GWLS_TIMAB, OPTION_TIMAB
 
 call cpu_time(total_time1)
 !Variable allocation and initialization
-model_number        = dtset%gwls_dielectric_model
+model_number        = dtset%gwls_diel_model
 model_parameter     = dtset%gwls_model_parameter
 npt_gauss           = dtset%gwls_npt_gauss_quad
 print_debug         = dtset%gwls_print_debug
@@ -222,11 +223,13 @@ first_seed          = dtset%gwls_first_seed
 e                   = dtset%gwls_band_index
 
 
-second_model_parameter  = dtset%gwls_second_model_parameter
+!second_model_parameter  = dtset%gwls_second_model_parameter
+second_model_parameter  = zero
+
 
 
 ! set variables from gwls_GenerateEpsilon module
-kmax   = dtset%gwls_sternheimer_kmax
+kmax   = dtset%gwls_stern_kmax
 nseeds = dtset%gwls_nseeds
 
 kmax_model    = dtset%gwls_kmax_complement
@@ -287,12 +290,11 @@ if(dtset%gwls_recycle == 2) then
   inquire(file='local_tmp', exist=local_tmp_exist)
   if(local_tmp_exist) recy_name = 'local_tmp/' // recy_name(1:118)
 
-#ifdef FC_NAG
-  open(newunit=recy_unit,file=recy_name,access='direct',form='unformatted',status='replace',recl=recy_line_size)
-#else
-  recy_unit = get_unit()
-  open(unit=recy_unit,file=recy_name,access='direct',form='unformatted',status='replace',recl=recy_line_size)
-#endif
+  if (open_file(file=recy_name,iomsg=msg,newunit=recy_unit,access='direct',form='unformatted',&
+&               status='replace',recl=recy_line_size)/=0) then
+    MSG_ERROR(msg)
+  end if
+
   write_solution = .true.
 end if
 
@@ -1008,6 +1010,7 @@ character(256)  :: timing_string
 integer :: recy_line_size
 character(128) :: recy_name
 logical :: local_tmp_exist
+character(500) :: msg
 
 ! Energy contributions
 
@@ -1033,7 +1036,7 @@ logical :: use_model
 !--------------------------------------------------------------------------------
 
 !Variable allocation and initialization
-model_number        = dtset%gwls_dielectric_model
+model_number        = dtset%gwls_diel_model
 model_parameter     = dtset%gwls_model_parameter
 npt_gauss           = dtset%gwls_npt_gauss_quad
 print_debug         = dtset%gwls_print_debug
@@ -1043,7 +1046,7 @@ e                   = dtset%gwls_band_index
 
 
 ! set variables from gwls_GenerateEpsilon module
-kmax   = dtset%gwls_sternheimer_kmax
+kmax   = dtset%gwls_stern_kmax
 nseeds = dtset%gwls_nseeds
 
 kmax_poles  = dtset%gwls_kmax_poles
@@ -1105,12 +1108,10 @@ if(dtset%gwls_recycle == 2) then
   inquire(file='local_tmp', exist=local_tmp_exist)
   if(local_tmp_exist) recy_name = 'local_tmp/' // recy_name(1:118)
 
-#ifdef FC_NAG
-  open(newunit=recy_unit,file=recy_name,access='direct',form='unformatted',status='replace',recl=recy_line_size)
-#else
-  recy_unit = get_unit()
-  open(unit=recy_unit,file=recy_name,access='direct',form='unformatted',status='replace',recl=recy_line_size)
-#endif
+  if (open_file(file=recy_name,iomsg=msg,newunit=recy_unit,access='direct',form='unformatted',&
+&               status='replace',recl=recy_line_size)/=0) then
+    MSG_ERROR(msg)
+  end if
 
   write_solution = .true.
 end if

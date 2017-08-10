@@ -9,7 +9,7 @@
 !!  Can also compute derivatives of <Proj_i|Cnk> wrt to several parameters
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (MT)
+!! Copyright (C) 1998-2017 ABINIT group (MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~ABINIT/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -68,17 +68,16 @@
 !!  tim_ctocprj=timing code of the calling routine
 !!  typat(natom)= types of atoms
 !!  uncp=unit number for <P_lmn|Cnk> data (if used)
-!!  useylmgr=1 if gradients of spherical harmonics are used (see ylmgr)
 !!  xred(3,natom)=reduced dimensionless atomic coordinates
 !!  ylm(mpw*mkmem,mpsang*mpsang)=real spherical harmonics for each G and k point
-!!  ylmgr(npw*mkmem,3,mpsang*mpsang*useylmgr)=gradients of real spherical harmonics wrt (k+G)
+!!  ylmgr(npw*mkmem,nylmgr,mpsang*mpsang*useylmgr)=gradients of real spherical harmonics wrt (k+G)
 !!!
 !! OUTPUT
 !!  cprj(ncprj,mcprj) <type(pawcprj_type)>= projected input wave functions <Proj_i|Cnk> with NL projectors
 !!                                       Usually ncprj=natom
 !!
 !! PARENTS
-!!      dfpt_looppert,extrapwf,scfcv,update_e_field_vars,vtorho
+!!      dfpt_looppert,extrapwf,forstr,scfcv,update_e_field_vars,vtorho
 !!
 !! CHILDREN
 !!      getcprj,mkffnl,mkkpg,pawcprj_alloc,pawcprj_free,pawcprj_mpi_sum
@@ -96,8 +95,7 @@
  subroutine ctocprj(atindx,cg,choice,cprj,gmet,gprimd,iatom,idir,&
 & iorder_cprj,istwfk,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_enreg,mpsang,&
 & mpw,natom,nattyp,nband,ncprj,ngfft,nkpt,nloalg,npwarr,nspinor,&
-& nsppol,ntypat,nylmgr,paral_kgb,ph1d,psps,rmet,typat,ucvol,uncp,&
-& useylmgr,xred,ylm,ylmgr)
+& nsppol,ntypat,paral_kgb,ph1d,psps,rmet,typat,ucvol,uncp,xred,ylm,ylmgr)
 
  use defs_basis
  use defs_datatypes
@@ -124,8 +122,7 @@
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: choice,iatom,idir,iorder_cprj,mband,mcg,mcprj,mgfft,mkmem,mpsang,mpw
- integer,intent(in) :: natom,ncprj,nkpt,nspinor,nsppol,ntypat,nylmgr,paral_kgb
- integer,intent(in) :: uncp,useylmgr
+ integer,intent(in) :: natom,ncprj,nkpt,nspinor,nsppol,ntypat,paral_kgb,uncp
  real(dp),intent(in) :: ucvol
  type(MPI_type),intent(in) :: mpi_enreg
  type(pseudopotential_type),target,intent(in) :: psps
@@ -135,8 +132,7 @@
  integer,intent(in),target :: atindx(natom),nattyp(ntypat)
  real(dp),intent(in) :: cg(2,mcg)
  real(dp),intent(in) :: gmet(3,3),gprimd(3,3),kpt(3,nkpt),rmet(3,3)
- real(dp),intent(in) :: xred(3,natom),ylm(mpw*mkmem,mpsang*mpsang)
- real(dp),intent(in) :: ylmgr(mpw*mkmem,nylmgr,mpsang*mpsang*useylmgr)
+ real(dp),intent(in) :: xred(3,natom),ylm(:,:),ylmgr(:,:,:)
  real(dp),intent(in),target :: ph1d(2,3*(2*mgfft+1)*natom)
  type(pawcprj_type),intent(inout) :: cprj(ncprj,mcprj)
 
@@ -144,11 +140,11 @@
 !scalars
  integer :: blocksz,cg_bandpp,counter,cpopt,cprj_bandpp,dimffnl,ia,iatm,iatom1,iatom2
  integer :: iband_max,iband_min,iband_start,ibg,ibgb,iblockbd,ibp,icg,icgb,icp1,icp2
- integer :: ider,idir0,ierr,ig,ii,ikg,ikpt,ilm,ipw,isize,isppol,istwf_k,itypat,iwf1,iwf2
+ integer :: ider,idir0,iend,ierr,ig,ii,ikg,ikpt,ilm,ipw,isize,isppol,istart,istwf_k,itypat,iwf1,iwf2,jdir
  integer :: matblk,mband_cprj,me_distrb,my_nspinor,n1,n1_2p1,n2,n2_2p1,n3,n3_2p1
  integer :: nband_k,nband_cprj_k,nblockbd,ncpgr,nkpg,npband_bandfft,npws,npw_k,npw_nk,ntypat0
  integer :: shift1,shift1b,shift2,shift2b,shift3,shift3b
- integer :: spaceComm,spaceComm_band,spaceComm_fft
+ integer :: spaceComm,spaceComm_band,spaceComm_fft,useylmgr
  logical :: cg_band_distributed,cprj_band_distributed,one_atom
  real(dp) :: arg
  character(len=500) :: msg
@@ -170,24 +166,31 @@
 
  DBG_ENTER('COLL')
 
+!Nothing to do if current MPI process does treat kpoints or plane-waves
+ if (mcg==0.or.mcprj==0) return
+
 !Preliminary tests
  if (psps%useylm==0) then
-   MSG_ERROR('Not available for useylm=0 !')
+   msg='Not available for useylm=0!'
+   MSG_ERROR(msg)
  end if
  if ((choice<1.or.choice>6).and.choice/=23.and.choice/=24) then
-   MSG_BUG('Bad choice!')
+   msg='Bad choice!'
+   MSG_BUG(msg)
  end if
  if (idir>0.and.choice/=2.and.choice/=3.and.choice/=5) then
-   msg='Does not support idir>0 for that choice.'
+   msg='Does not support idir>0 for that choice!'
    MSG_BUG(msg)
  end if
+ if (size(ylm)/=mpw*mkmem*mpsang*mpsang) then
+   msg='Wrong size for Ylm!'
+   MSG_BUG(msg)
+ end if
+ useylmgr=merge(0,1,(size(ylmgr)==0))
  if (useylmgr==0.and.(choice==3.or.choice==5.or.choice==23)) then
-   msg=' Ylm gradients has to be in memory for choice=3, 5, or 23  !'
+   msg=' Ylm gradients have to be in memory for choice=3, 5, or 23!'
    MSG_BUG(msg)
  end if
-
-!Nothing to do if current MPI process does treat kpoints
- if (mcg==0.or.mcprj==0) return
 
 !Init parallelism
  if (paral_kgb==1) then
@@ -234,7 +237,7 @@
  n1=ngfft(1);n2=ngfft(2);n3=ngfft(3)
  n1_2p1=2*n1+1;n2_2p1=2*n2+1;n3_2p1=2*n3+1
  ibg=0;icg=0;cpopt=0
- ider=0;idir0=0
+ ider=0;idir0=0;istart=idir;iend=idir
  if (choice==3.or.choice==5.or.choice==23) ider=1
  if (idir>0) then
    if (choice==3) idir0=-idir
@@ -250,6 +253,9 @@
    dimffnl=1+ider
  else
    dimffnl=1+6*ider
+   if(choice==3)then
+     istart=ider;iend=6*ider
+   end if
  end if
  nkpg=0
  if (choice==3.or.choice==2.or.choice==23) nkpg=3*nloalg(3)
@@ -528,10 +534,12 @@
        do ibp=1,cg_bandpp   ! Note: we suppose cp_bandpp=cprj_bandpp
          iwf1=1+(ibp-1)*npw_nk*my_nspinor;iwf2=ibp*npw_nk*my_nspinor
          icp1=1+(ibp-1)*my_nspinor;icp2=ibp*my_nspinor
-         call getcprj(choice,cpopt,cwavef(:,iwf1:iwf2),cwaveprj(:,icp1:icp2),&
-&         ffnl,idir,indlmn_atm,istwf_k,kg_k,kpg_k,kpoint,psps%lmnmax,&
-&         mgfft,mpi_enreg,ncprj,nattyp_atm,ngfft,nloalg,&
-&         npw_nk,my_nspinor,ntypat0,phkxred,ph1d_atm,ph3d,ucvol,psps%useylm)
+         do jdir=istart,iend
+           call getcprj(choice,cpopt,cwavef(:,iwf1:iwf2),cwaveprj(:,icp1:icp2),&
+&           ffnl,jdir,indlmn_atm,istwf_k,kg_k,kpg_k,kpoint,psps%lmnmax,&
+&           mgfft,mpi_enreg,ncprj,nattyp_atm,ngfft,nloalg,&
+&           npw_nk,my_nspinor,ntypat0,phkxred,ph1d_atm,ph3d,ucvol,psps%useylm)
+         end do
        end do
 
 !      Export cwaveprj to big array cprj

@@ -9,7 +9,7 @@
 !! - compute the memory needs for this data set.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2016 ABINIT group ()
+!! Copyright (C) 1999-2017 ABINIT group ()
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -222,7 +222,8 @@ subroutine memory_eval(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
    response=0
    if(dtsets(idtset)%rfddk/=0  .or. dtsets(idtset)%rf2_dkdk/=0 .or. dtsets(idtset)%rf2_dkde/=0 .or. &
 &   dtsets(idtset)%rfphon/=0 .or. dtsets(idtset)%rfelfd/=0 .or. &
-&   dtsets(idtset)%rfstrs/=0 .or. dtsets(idtset)%rfuser/=0    ) response=1
+&   dtsets(idtset)%rfstrs/=0 .or. dtsets(idtset)%rfuser/=0 .or. &
+&   dtsets(idtset)%rfmagn/=0    ) response=1
 
 !  Compute mgfftdiel,npwdiel,nfftdiel for this data set
    if((modulo(iprcel,100)>=20 .and.modulo(iprcel,100) < 71).or. iscf==-1)then

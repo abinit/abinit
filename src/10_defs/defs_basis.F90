@@ -8,7 +8,7 @@
 !! physical constants, as well as associated datatypes and methods.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2000-2016 ABINIT group (HM, XG,XW, EB)
+!! Copyright (C) 2000-2017 ABINIT group (HM, XG,XW, EB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -196,6 +196,7 @@ module defs_basis
 !Revised fundamental constants from http://physics.nist.gov/cuu/Constants/index.html
 !(from 2006 least squares adjustment)
  real(dp), parameter :: Bohr_Ang=0.52917720859_dp    ! 1 Bohr, in Angstrom
+ real(dp), parameter :: Bohr_meter=Bohr_Ang * 1.d-10 ! 1 Bohr in meter
  real(dp), parameter :: Ha_cmm1=219474.6313705_dp  ! 1 Hartree, in cm^-1
  real(dp), parameter :: Ha_eV=27.21138386_dp ! 1 Hartree, in eV
  real(dp), parameter :: eV_Ha=one/Ha_eV      ! 1 eV in Hartree
@@ -205,6 +206,7 @@ module defs_basis
  real(dp), parameter :: Ha_J=4.35974394d-18    !1 Hartree, in J
  real(dp), parameter :: e_Cb=1.602176487d-19 ! minus the electron charge, in Coulomb
  real(dp), parameter :: kb_HaK=8.617343d-5/Ha_eV ! Boltzmann constant in Ha/K
+ real(dp), parameter :: kb_THzK=kb_HaK*Ha_THz ! Boltzmann constant in THz/K
  real(dp), parameter :: amu_emass=1.660538782d-27/9.10938215d-31 ! 1 atomic mass unit, in electronic mass
  real(dp), parameter :: HaBohr3_GPa=Ha_eV/Bohr_Ang**3*e_Cb*1.0d+21 ! 1 Ha/Bohr^3, in GPa
  real(dp), parameter :: Avogadro=6.02214179d23 ! per mole
@@ -304,18 +306,18 @@ module defs_basis
  character(len=fnlen),parameter :: ABI_MAIN_LOG_FILE="_MAINLOG"
 
 ! Arrays
- integer,parameter :: identity_3d(3,3)=reshape([1,0,0,0,1,0,0,0,1], [3,3])
-
+ integer,parameter :: identity_3d(3,3) = reshape([1,0,0,0,1,0,0,0,1], [3,3])
+ integer,parameter :: inversion_3d(3,3) = reshape([-1,0,0,0,-1,0,0,0,-1], [3,3])
 
 !A collection of small datatypes for ragged arrays
 !A small datatype for ragged real 1D-arrays
  type coeff1_type
-  real(dp), allocatable :: value(:) 
+  real(dp), allocatable :: value(:)
  end type coeff1_type
 !A small datatype for ragged integer 1D-arrays
  type coeffi1_type
   !integer :: size
-  integer, allocatable :: value(:) 
+  integer, allocatable :: value(:)
  end type coeffi1_type
 !A small datatype for ragged integer 2D-arrays
  type coeffi2_type
@@ -324,23 +326,23 @@ module defs_basis
  end type coeffi2_type
 !A small datatype for ragged real 2D-arrays
  type coeff2_type
-  real(dp), allocatable :: value(:,:)  
+  real(dp), allocatable :: value(:,:)
  end type coeff2_type
 !A small datatype for ragged complex 2D-arrays
  type coeff2c_type
-  complex(dpc), allocatable :: value(:,:) 
+  complex(dpc), allocatable :: value(:,:)
  end type coeff2c_type
 !A small datatype for ragged real 3D-arrays
  type coeff3_type
-  real(dp), allocatable :: value(:,:,:) 
+  real(dp), allocatable :: value(:,:,:)
  end type coeff3_type
 !A small datatype for ragged real 4D-arrays
  type coeff4_type
-  real(dp), allocatable :: value(:,:,:,:)  
+  real(dp), allocatable :: value(:,:,:,:)
  end type coeff4_type
 !A small datatype for ragged real 5D-arrays
  type coeff5_type
-  real(dp), allocatable :: value(:,:,:,:,:)  
+  real(dp), allocatable :: value(:,:,:,:,:)
  end type coeff5_type
 !A small datatype for ragged real 6D-arrays
  type coeff6_type
@@ -416,7 +418,7 @@ CONTAINS  !=====================================================================
 !! PARENTS
 !!      abinit,aim,anaddb,band2eps,bsepostproc,conducti,cut3d,driver,fftprof
 !!      fold2Bloch,initmpi_world,ioprof,lapackprof,m_io_redirect,macroave
-!!      memory_eval,mpi_setup,mrgddb,mrgdv,mrggkk,mrgscr,optic,ujdet
+!!      memory_eval,mpi_setup,mrgddb,mrgdv,mrggkk,mrgscr,multibinit,optic,ujdet
 !!      vdw_kernelgen
 !!
 !! CHILDREN
@@ -463,7 +465,7 @@ CONTAINS  !=====================================================================
 !!   Only printing.
 !!
 !! PARENTS
-!!      abinit,leave_new,m_errors
+!!      abinit,leave_new,m_argparse
 !!
 !! CHILDREN
 !!

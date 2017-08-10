@@ -62,4 +62,5 @@
 #%% description = 
 #%%   PAW: test of some variables reserved to experienced users
 #%%   Silicon with few k-points and low cut-off
+#%% topics = PAW
 #%%<END TEST_INFO>

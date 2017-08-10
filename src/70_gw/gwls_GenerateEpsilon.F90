@@ -7,7 +7,7 @@
 !!  .
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2016 ABINIT group (JLJ, BR, MC)
+!! Copyright (C) 2009-2017 ABINIT group (JLJ, BR, MC)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -489,10 +489,11 @@ character(50)  :: debug_filename
 
 
 
-kmax_exact   = dtset%gwls_sternheimer_kmax
+kmax_exact   = dtset%gwls_stern_kmax
 kmax_model   = dtset%gwls_kmax_complement
 
-second_model_parameter  = dtset%gwls_second_model_parameter
+!second_model_parameter  = dtset%gwls_second_model_parameter
+second_model_parameter  = zero
 
 
 ! global stuff

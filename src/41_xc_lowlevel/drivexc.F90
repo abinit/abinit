@@ -10,7 +10,7 @@
 !! of the XC kernel (the third derivative of the XC energy)
 !!
 !! COPYRIGHT
-!! Copyright (C) 2002-2016 ABINIT group (XG)
+!! Copyright (C) 2002-2017 ABINIT group (XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -119,11 +119,11 @@
 !!  [fxcT(npts)]=XC free energy of the electron gaz at finite temperature (to be used for plasma systems)
 !!
 !! PARENTS
-!!      pawxc,pawxcsph,rhohxc
+!!      drivexc_main
 !!
 !! CHILDREN
-!!      invcb,leave_new,libxc_functionals_getvxc,wrtout,xchcth,xchelu,xclb
-!!      xcpbe,xcpzca,xcspol,xctetr,xcwign,xcxalp
+!!      invcb,libxc_functionals_getvxc,xchcth,xchelu,xciit,xclb,xcpbe,xcpzca
+!!      xcspol,xctetr,xcwign,xcxalp
 !!
 !! SOURCE
 
@@ -236,7 +236,7 @@ subroutine drivexc(exc,ixc,npts,nspden,order,rho_updn,vxcrho,ndvxc,ngr2,nd2vxc,n
 !Check libXC
  if (ixc<0) then
    libxc_test=libxc_functionals_check(stop_if_error=.true.)
-!  Check is all the necessary arrays are present and have the correct dimensions
+!  Check whether all the necessary arrays are present and have the correct dimensions
    if (libxc_functionals_isgga() .or. libxc_functionals_ismgga()) then
      if ( (.not. present(grho2_updn)) .or. (.not. present(vxcgrho)))  then
        write(message, '(5a,i7,a,i6,a,i6)' )&

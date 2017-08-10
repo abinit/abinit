@@ -9,7 +9,7 @@
 !!  |Proj_i> are non-local projectors (for each atom and each l,m,n)
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (MT)
+!! Copyright (C) 1998-2017 ABINIT group (MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~ABINIT/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -67,6 +67,7 @@
 !!
 !! PARENTS
 !!      cgwf,ctocprj,debug_tools,dfpt_accrho,dfpt_nstpaw,ks_ddiago,m_wfd
+!!      rf2_init
 !!
 !! CHILDREN
 !!      mkkpg,opernla_ylm,ph1d3d
@@ -117,7 +118,7 @@
 
 !Local variables-------------------------------
 !scalars
- integer :: choice_,cplex,dimffnl,ia,ia1,ia2,ia3,ia4,iatm,ic,ii,ilmn,ispinor,itypat
+ integer :: choice_,cplex,dimffnl,ia,ia1,ia2,ia3,ia4,iatm,ic,ii,ilmn,ishift,ispinor,itypat
  integer :: jc,matblk,mincat,nd2gxdt,ndgxdt,nincat,nkpg,nkpg_,nlmn,signs
 !arrays
  integer,allocatable :: cplex_dgxdt(:),cplex_d2gxdt(:),indlmn_typ(:,:)
@@ -183,7 +184,9 @@
  else
    ndgxdt=1
  end if
-
+ if(cwaveprj(1,1)%ncpgr<ndgxdt+nd2gxdt) then
+   MSG_BUG('Incorrect size for ncpgr')
+ end if
 !Eventually re-compute (k+G) vectors (and related data)
  if (nkpg==0) then
    nkpg_=0
@@ -198,20 +201,20 @@
    kpg_ => kpg
  end if
 
-!Eventually allocate temporary array for ph3d
- if (nloalg(2)<=0) then
-   matblk=NLO_MINCAT
-   ABI_ALLOCATE(ph3d_,(2,npw_k,matblk))
- else
-   matblk=size(ph3d,3)
-   ph3d_ => ph3d
- end if
-
 !Some other dims
  mincat=min(NLO_MINCAT,maxval(nattyp))
  cplex=2;if (istwf_k>1) cplex=1
  choice_=choice;if (cpopt==1) choice_=-choice
  signs=1;if (idir>0) signs=2
+
+!Eventually allocate temporary array for ph3d
+ if (nloalg(2)<=0) then
+   matblk=mincat
+   ABI_ALLOCATE(ph3d_,(2,npw_k,matblk))
+ else
+   matblk=size(ph3d,3)
+   ph3d_ => ph3d
+ end if
 
 !Loop over atom types
  ia1=1;iatm=0
@@ -228,7 +231,6 @@
 !  Loop on blocks of atoms inside type
    do ia3=ia1,ia2,mincat
      ia4=min(ia2,ia3+mincat-1);nincat=ia4-ia3+1
-
 !     Prepare the phase factors if they were not already computed
      if (nloalg(2)<=0) then
        call ph1d3d(ia3,ia4,kg_k,matblk,natom,npw_k,ngfft(1),ngfft(2),ngfft(3),&
@@ -267,13 +269,15 @@
        end do
      end if
      if (cpopt>=0.and.choice>1) then
+       ishift=0
+       if ((idir>0).and.(cwaveprj(1,1)%ncpgr>ndgxdt)) ishift=idir-1
        if(cplex==2)then
          do ispinor=1,nspinor
            do ia=1,nincat
-             cwaveprj(iatm+ia,ispinor)%ncpgr=ndgxdt+nd2gxdt
-             if (ndgxdt>0) cwaveprj(iatm+ia,ispinor)%dcp(1:2,1:ndgxdt,1:nlmn)=&
+!             cwaveprj(iatm+ia,ispinor)%ncpgr=ndgxdt+nd2gxdt
+             if (ndgxdt>0) cwaveprj(iatm+ia,ispinor)%dcp(1:2,1+ishift:ndgxdt+ishift,1:nlmn)=&
 &             dgxdt(1:2,1:ndgxdt,1:nlmn,ia,ispinor)
-             if (nd2gxdt>0)cwaveprj(iatm+ia,ispinor)%dcp(1:2,ndgxdt+1:ndgxdt+nd2gxdt,1:nlmn)=&
+             if (nd2gxdt>0)cwaveprj(iatm+ia,ispinor)%dcp(1:2,ndgxdt+1+ishift:ndgxdt+nd2gxdt+ishift,1:nlmn)=&
 &             d2gxdt(1:2,1:nd2gxdt,1:nlmn,ia,ispinor)
            end do
          end do
@@ -282,13 +286,13 @@
 !        cplex_d2gxdt(i) = 1 if d2gxdt(1,i,:,:) is real, 2 if it is pure imaginary
          do ispinor=1,nspinor
            do ia=1,nincat
-             cwaveprj(iatm+ia,ispinor)%ncpgr=ndgxdt+nd2gxdt
+!             cwaveprj(iatm+ia,ispinor)%ncpgr=ndgxdt+nd2gxdt
              if (ndgxdt>0) then
                do ilmn =1,nlmn
                  do ii = 1,ndgxdt
                    ic = cplex_dgxdt(ii) ; jc = 3 - ic
-                   cwaveprj(iatm+ia,ispinor)%dcp(ic,ii,ilmn)=dgxdt(1,ii,ilmn,ia,ispinor)
-                   cwaveprj(iatm+ia,ispinor)%dcp(jc,ii,ilmn)=zero
+                   cwaveprj(iatm+ia,ispinor)%dcp(ic,ii+ishift,ilmn)=dgxdt(1,ii,ilmn,ia,ispinor)
+                   cwaveprj(iatm+ia,ispinor)%dcp(jc,ii+ishift,ilmn)=zero
                  end do
                end do
              end if
@@ -296,8 +300,8 @@
                do ilmn =1,nlmn
                  do ii = 1,nd2gxdt
                    ic = cplex_d2gxdt(ii) ; jc = 3 - ic
-                   cwaveprj(iatm+ia,ispinor)%dcp(ic,ndgxdt+ii,ilmn)=d2gxdt(1,ii,ilmn,ia,ispinor)
-                   cwaveprj(iatm+ia,ispinor)%dcp(jc,ndgxdt+ii,ilmn)=zero
+                   cwaveprj(iatm+ia,ispinor)%dcp(ic,ndgxdt+ii+ishift,ilmn)=d2gxdt(1,ii,ilmn,ia,ispinor)
+                   cwaveprj(iatm+ia,ispinor)%dcp(jc,ndgxdt+ii+ishift,ilmn)=zero
                  end do
                end do
              end if

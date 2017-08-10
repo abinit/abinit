@@ -8,7 +8,7 @@
 !! The output eig2nkq is this quantity for the input k points.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2016 ABINIT group (SP,PB,XG)
+!! Copyright (C) 1999-2017 ABINIT group (SP,PB,XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -70,9 +70,10 @@
 !!      respfn
 !!
 !! CHILDREN
-!!      crystal_free,crystal_init,ddb_io_out,distrb2,ebands_free,ebands_init
+!!      crystal_free,crystal_init,distrb2,ebands_free,ebands_init
 !!      eigr2d_free,eigr2d_init,eigr2d_ncwrite,fan_free,fan_init,fan_ncwrite
-!!      gkk_free,gkk_init,gkk_ncwrite,kptfine_av,outbsd,psddb8,smeared_delta
+!!      gkk_free,gkk_init,gkk_ncwrite,kptfine_av,outbsd,smeared_delta
+!!      ddb_hdr_init, ddb_hdr_free, ddb_hdr_open_write
 !!      timab,xmpi_sum
 !!
 !! SOURCE
@@ -106,8 +107,9 @@ subroutine eig2tot(dtfil,xred,psps,pawtab,natom,bdeigrf,clflg,dim_eig2nkq,eigen0
                           & gkk_ncwrite,gkk_free
  use m_crystal,    only : crystal_init, crystal_free, crystal_t
  use m_crystal_io, only : crystal_ncwrite
- use m_pawtab,   only : pawtab_type
- use m_ddb,      only : psddb8
+ use m_pawtab,     only : pawtab_type
+ use m_ddb,        only : DDB_VERSION
+ use m_ddb_hdr,    only : ddb_hdr_type, ddb_hdr_init, ddb_hdr_free, ddb_hdr_open_write
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -166,6 +168,7 @@ subroutine eig2tot(dtfil,xred,psps,pawtab,natom,bdeigrf,clflg,dim_eig2nkq,eigen0
  type(eigr2d_t)  :: eigr2d,eigi2d
  type(fan_t)     :: fan2d
  type(gkk_t)     :: gkk2d
+ type(ddb_hdr_type) :: ddb_hdr
 !arrays
  integer, allocatable :: nband_rbz(:)
  integer,pointer      :: kpt_fine_sub(:)
@@ -517,24 +520,17 @@ subroutine eig2tot(dtfil,xred,psps,pawtab,natom,bdeigrf,clflg,dim_eig2nkq,eigen0
  if (me==master) then
 !  print _EIGR2D file for this perturbation in the case of ieig2rf 3 or 4 or 5
    if (ieig2rf == 3 .or. ieig2rf == 4 .or. ieig2rf == 5) then 
-     unitout = dtfil%unddb
-     vrsddb=100401
+
      dscrpt=' Note : temporary (transfer) database '
-!    tolwfr must be initialized here, but it is a dummy value
-     tolwfr=1.0_dp
-     call ddb_io_out (dscrpt,dtfil%fnameabo_eigr2d,dtset%natom,dtset%mband,&
-&     dtset%nkpt,dtset%nsym,dtset%ntypat,dtfil%unddb,vrsddb,&
-&     dtset%acell_orig(1:3,1),dtset%amu_orig(:,1),dtset%dilatmx,dtset%ecut,dtset%ecutsm,&
-&     dtset%intxc,dtset%iscf,dtset%ixc,dtset%kpt,dtset%kptnrm,&
-&     dtset%natom,dtset%nband,dtset%ngfft,dtset%nkpt,dtset%nspden,dtset%nspinor,&
-&     dtset%nsppol,dtset%nsym,dtset%ntypat,occ_rbz,dtset%occopt,dtset%pawecutdg,&
-&     dtset%rprim_orig(1:3,1:3,1),dtset%dfpt_sciss,dtset%spinat,dtset%symafm,dtset%symrel,&
-&     dtset%tnons,tolwfr,dtset%tphysel,dtset%tsmear,&
-&     dtset%typat,dtset%usepaw,dtset%wtk,xred,psps%ziontypat,dtset%znucl)
-     nblok=1 ; fullinit=1 ; choice=2
-     call psddb8 (choice,psps%dimekb,psps%ekb,fullinit,psps%indlmn,&
-&     psps%lmnmax,nblok,dtset%ntypat,dtfil%unddb,pawtab,&
-&     psps%pspso,psps%usepaw,psps%useylm,vrsddb)
+     unitout = dtfil%unddb
+
+     call ddb_hdr_init(ddb_hdr,dtset,psps,pawtab,DDB_VERSION,dscrpt,&
+&                      1,xred=xred,occ=occ_rbz)
+
+     call ddb_hdr_open_write(ddb_hdr, dtfil%fnameabo_eigr2d, unitout)
+
+     call ddb_hdr_free(ddb_hdr)
+
    end if
    if(ieig2rf == 3 ) then
      call outbsd(bdeigrf,dtset,eig2nkq,dtset%natom,nkpt_rbz,unitout)
@@ -618,24 +614,14 @@ subroutine eig2tot(dtfil,xred,psps,pawtab,natom,bdeigrf,clflg,dim_eig2nkq,eigen0
    if (ieig2rf /= 5 ) then
      if(smdelta>0) then
        unitout = dtfil%unddb
-       vrsddb=100401
        dscrpt=' Note : temporary (transfer) database '
-!      tolwfr must be initialized here, but it is a dummy value
-       tolwfr=1.0_dp
-       call ddb_io_out (dscrpt,dtfil%fnameabo_eigi2d,dtset%natom,dtset%mband,&
-&       dtset%nkpt,dtset%nsym,dtset%ntypat,dtfil%unddb,vrsddb,&
-&       dtset%acell_orig(1:3,1),dtset%amu_orig(:,1),dtset%dilatmx,dtset%ecut,dtset%ecutsm,&
-&       dtset%intxc,dtset%iscf,dtset%ixc,dtset%kpt,dtset%kptnrm,&
-&       dtset%natom,dtset%nband,dtset%ngfft,dtset%nkpt,dtset%nspden,dtset%nspinor,&
-&       dtset%nsppol,dtset%nsym,dtset%ntypat,occ_rbz,dtset%occopt,dtset%pawecutdg,&
-&       dtset%rprim_orig(1:3,1:3,1),dtset%dfpt_sciss,dtset%spinat,dtset%symafm,dtset%symrel,&
-&       dtset%tnons,tolwfr,dtset%tphysel,dtset%tsmear,&
-&       dtset%typat,dtset%usepaw,dtset%wtk,xred,psps%ziontypat,dtset%znucl)
 
-       nblok=1 ; fullinit=1 ; choice=2
-       call psddb8 (choice,psps%dimekb,psps%ekb,fullinit,psps%indlmn,&
-&       psps%lmnmax,nblok,dtset%ntypat,dtfil%unddb,pawtab,&
-&       psps%pspso,psps%usepaw,psps%useylm,vrsddb)
+       call ddb_hdr_init(ddb_hdr,dtset,psps,pawtab,DDB_VERSION,dscrpt,&
+&                        1,xred=xred,occ=occ_rbz)
+
+       call ddb_hdr_open_write(ddb_hdr, dtfil%fnameabo_eigi2d, unitout)
+
+       call ddb_hdr_free(ddb_hdr)
 
        call outbsd(bdeigrf,dtset,eigbrd,dtset%natom,nkpt_rbz,unitout)
 

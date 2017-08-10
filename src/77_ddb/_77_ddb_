@@ -8,7 +8,7 @@
 !! within the main programs anaddb and mrgddb of ABINIT.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (TD)
+!! Copyright (C) 1998-2017 ABINIT group (TD)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -16,7 +16,6 @@
 !!
 !! CHILDREN
 !! alignph.F90
-!! anaddb_init.F90
 !! complete_gamma.F90
 !! complete_gamma_tr.F90
 !! complete_gkk.F90
@@ -61,6 +60,8 @@
 !! lin_interpq_gam.F90
 !! m_anaddb_dataset.F90
 !! m_atprj.F90
+!! m_band2eps_dataset.F90
+!! m_gruneisen.F90
 !! m_ifc.F90
 !! m_phonon_supercell.F90
 !! m_phonons.F90
@@ -77,7 +78,6 @@
 !! mkfsqgrid.F90
 !! mkph_linwid.F90
 !! mkqptequiv.F90
-!! mrgddb_init.F90
 !! nmsq_gam.F90
 !! nmsq_gam_sumfs.F90
 !! nmsq_pure_gkk.F90
@@ -85,7 +85,6 @@
 !! normsq_gkq.F90
 !! order_fs_kpts.F90
 !! outelph.F90
-!! printvtk.F90
 !! prt_gkk_yambo.F90
 !! ramansus.F90
 !! rchkgsheader.F90

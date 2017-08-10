@@ -1,6 +1,6 @@
 # -*- Python -*-
 #
-# Copyright (C) 2005-2016 ABINIT Group (Yann Pouillon)
+# Copyright (C) 2005-2017 ABINIT Group (Yann Pouillon)
 #
 # This file is part of the ABINIT software package. For license information,
 # please see the COPYING file in the top-level directory of the ABINIT source
@@ -26,10 +26,10 @@ sources = [
  "completeperts.F90",
  "d2c_weights.F90",
  "d2c_wtq.F90",
- "ddb_compare.F90",
  "defs_elphon.F90",
  "ddb_diel.F90",
  "ddb_elast.F90",
+ "ddb_interpolate.F90",
  "electrooptic.F90",
  "eliashberg_1d.F90",
  "elphon.F90",
@@ -51,7 +51,6 @@ sources = [
  "get_tau_k.F90",
  "harmonic_thermo.F90",
  "ddb_hybrid.F90",
- "anaddb_init.F90",
  "ddb_internalstr.F90",
  "integrate_gamma.F90",
  "integrate_gamma_alt.F90",
@@ -72,6 +71,7 @@ sources = [
  "m_anaddb_dataset.F90",
  "m_atprj.F90",
  "m_band2eps_dataset.F90",
+ "m_gruneisen.F90",
  "m_ifc.F90",
  "m_phonons.F90",
  "m_phonon_supercell.F90",
@@ -87,7 +87,6 @@ sources = [
  "order_fs_kpts.F90",
  "outelph.F90",
  "ddb_piezo.F90",
- "printvtk.F90",
  "prt_gkk_yambo.F90",
  "ramansus.F90",
  "rchkgsheader.F90",

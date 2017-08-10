@@ -12,7 +12,7 @@
 !!  of the point group that preserve the external q-point.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2016 ABINIT group (MG, GMR, VO, LR, RWG, MT)
+!! Copyright (C) 2008-2017 ABINIT group (MG, GMR, VO, LR, RWG, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -28,6 +28,10 @@
 !!  wrt time-reversal (i.e., do itim; do isym).
 !!  Note that this particular ordering should be used in any routine used to
 !!  symmetrize k-dependent quantities in the full BZ zone to avoid possible errors.
+!!
+!! NOTES
+!!  This module is deprecated and should be used only in the GW/BSE part.
+!!  Some of the routines will be gradually moved to m_kpts
 !!
 !! PARENTS
 !!
@@ -48,11 +52,10 @@ MODULE m_bz_mesh
  use m_profiling_abi
  use m_sort
 
- use m_fstrings,       only : ltoa, itoa, sjoin
+ use m_fstrings,       only : ltoa, itoa, sjoin, ktoa
  use m_numeric_tools,  only : is_zero, isinteger, imin_loc, imax_loc, bisect, wrap2_pmhalf
  use m_geometry,       only : normv
  use m_crystal,        only : crystal_t
- use m_tetrahedron,    only : t_tetrahedron, init_tetra, destroy_tetra
 
  implicit none
 
@@ -191,7 +194,6 @@ MODULE m_bz_mesh
  public :: findq                 ! Helper routine returning the list of q-points.
  public :: findqg0               ! Identify q + G0 = k1-k2.
  public :: box_len               ! Return the length of the vector connecting the origin with one the faces of the unit cell.
- public :: tetra_from_kptrlatt   ! Create an instance of `t_tetrahedron` from kptrlatt and shiftk
 !!***
 
 !----------------------------------------------------------------------
@@ -207,23 +209,28 @@ MODULE m_bz_mesh
 
 type,public :: kpath_t
 
-  integer :: nbounds
+  integer :: nbounds=0
     ! Number of extrema defining the path.
 
-  integer :: ndiv_small
-    ! ndiv_small=Number of divisions used to sample the smallest segment.
+  integer :: ndivsm=0
+    ! Number of divisions used to sample the smallest segment.
 
-  integer :: npts
-    ! Number of points in the path
+  integer :: npts=0
+    ! Total number of points in the path.
 
   real(dp) :: gprimd(3,3)
    ! Reciprocal lattice vectors.
 
   real(dp) :: gmet(3,3)
-   ! gmet(3,3)=Metric matrix in G space.
+   ! Metric matrix in G space.
 
   integer,allocatable :: ndivs(:)
-  ! ndivs(nbounds-1)=Number of division for each segment.
+   ! ndivs(nbounds-1)
+   ! Number of division for each segment.
+
+  integer,allocatable :: bounds2kpt(:)
+   ! bounds2kpt(nbounds)
+   ! bounds2kpt(i): Index of the i-th extrema in the pts(:) array.
 
   real(dp),allocatable :: bounds(:,:)
     ! bounds(3,nbounds)
@@ -231,13 +238,18 @@ type,public :: kpath_t
 
   real(dp),allocatable :: points(:,:)
     ! points(3,npts)
-    ! The points in reduced coordinates.
+    ! The points of the path in reduced coordinates.
+
+  real(dp),allocatable :: dl(:)
+    ! dl(npts)
+    ! dl(i) = Distance between the (i-1)-th and the i-th k-point. dl(1) = zero
 
  end type kpath_t
 
- public :: kpath_init   ! Construct the path
- public :: kpath_free   ! Free memory
- public :: make_path    ! Construct a normalized path.
+ public :: kpath_new        ! Construct a new path
+ public :: kpath_free       ! Free memory
+ public :: make_path        ! Construct a normalized path. TODO: Remove
+ public :: kpath_print      ! Print the path.
 !!***
 
 !----------------------------------------------------------------------
@@ -264,7 +276,7 @@ type,public :: kpath_t
 !!
 !! TODO
 !! Rationalize most of the arrays, in particular the tables
-!! This structre shoud be rewritten almost from scratch, thus avoid using it
+!! This structure shoud be rewritten almost from scratch, thus avoid using it
 !! for your developments.
 !!
 !! SOURCE
@@ -374,7 +386,6 @@ CONTAINS  !=====================================================================
 !!      setup_bse,setup_bse_interp,setup_screening,setup_sigma
 !!
 !! CHILDREN
-!!      init_tetra,listkk,smpbz
 !!
 !! SOURCE
 
@@ -551,7 +562,6 @@ end subroutine kmesh_init
 !!      mrgscr,screening,sigma
 !!
 !! CHILDREN
-!!      init_tetra,listkk,smpbz
 !!
 !! SOURCE
 
@@ -639,7 +649,6 @@ end subroutine kmesh_free
 !!      setup_sigma
 !!
 !! CHILDREN
-!!      init_tetra,listkk,smpbz
 !!
 !! SOURCE
 
@@ -765,7 +774,6 @@ end subroutine kmesh_print
 !!      m_bz_mesh
 !!
 !! CHILDREN
-!!      init_tetra,listkk,smpbz
 !!
 !! SOURCE
 
@@ -931,7 +939,6 @@ end subroutine setup_k_rotation
 !!      setup_bse,setup_screening,setup_sigma
 !!
 !! CHILDREN
-!!      init_tetra,listkk,smpbz
 !!
 !! SOURCE
 
@@ -1005,7 +1012,6 @@ end subroutine get_bz_item
 !!      paw_symcprj
 !!
 !! CHILDREN
-!!      init_tetra,listkk,smpbz
 !!
 !! SOURCE
 
@@ -1069,7 +1075,6 @@ end subroutine get_IBZ_item
 !!      cchi0
 !!
 !! CHILDREN
-!!      init_tetra,listkk,smpbz
 !!
 !! SOURCE
 
@@ -1459,7 +1464,6 @@ end function bz_mesh_isirred
 !!      m_shirley,setup_bse,setup_bse_interp
 !!
 !! CHILDREN
-!!      init_tetra,listkk,smpbz
 !!
 !! SOURCE
 
@@ -1620,7 +1624,6 @@ end subroutine make_mesh
 !!      m_bz_mesh
 !!
 !! CHILDREN
-!!      init_tetra,listkk,smpbz
 !!
 !! SOURCE
 
@@ -1822,7 +1825,6 @@ end subroutine identk
 !!      setup_bse,setup_screening,setup_sigma
 !!
 !! CHILDREN
-!!      init_tetra,listkk,smpbz
 !!
 !! SOURCE
 
@@ -1965,7 +1967,6 @@ end subroutine get_ng0sh
 !!      m_bz_mesh
 !!
 !! CHILDREN
-!!      init_tetra,listkk,smpbz
 !!
 !! SOURCE
 
@@ -2012,14 +2013,15 @@ end subroutine getkptnorm_bycomponent
 !! make_path
 !!
 !! FUNCTION
-!!  Create a normalized path given the extrema.
+!!  Generate a normalized path given the extrema.
+!!  See also kpath_t and kpath_new (recommended API).
 !!
 !! INPUTS
 !!  nbounds=Number of extrema defining the path.
 !!  bounds(3,nbounds)=The points defining the path in reduced coordinates.
 !!  met(3,3)=Metric matrix.
 !!  space='R' for real space, G for reciprocal space.
-!!  ndiv_small=Number of divisions to be used for the smallest segment.
+!!  ndivsm=Number of divisions to be used for the smallest segment.
 !!  [unit]=Fortran unit for formatted output. Default: dev_null
 !!
 !! OUTPUT
@@ -2029,14 +2031,13 @@ end subroutine getkptnorm_bycomponent
 !!    contain the path in reduced coordinates.
 !!
 !! PARENTS
-!!      m_bz_mesh,m_nesting,m_phgamma,m_phonons,mkph_linwid
+!!      m_bz_mesh,m_nesting,m_phonons,mkph_linwid
 !!
 !! CHILDREN
-!!      init_tetra,listkk,smpbz
 !!
 !! SOURCE
 
-subroutine make_path(nbounds,bounds,met,space,ndiv_small,ndivs,npts,path,unit)
+subroutine make_path(nbounds,bounds,met,space,ndivsm,ndivs,npts,path,unit)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -2050,7 +2051,7 @@ subroutine make_path(nbounds,bounds,met,space,ndiv_small,ndivs,npts,path,unit)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: nbounds,ndiv_small
+ integer,intent(in) :: nbounds,ndivsm
  integer,optional,intent(in) :: unit
  integer,intent(out) :: npts
  character(len=1),intent(in) :: space
@@ -2061,6 +2062,7 @@ subroutine make_path(nbounds,bounds,met,space,ndiv_small,ndivs,npts,path,unit)
 
 !Local variables-------------------------------
 !scalars
+ integer,parameter :: prtvol=0
  integer :: idx,ii,jp,ount
  real(dp) :: nfact
  character(len=500) :: msg
@@ -2069,7 +2071,7 @@ subroutine make_path(nbounds,bounds,met,space,ndiv_small,ndivs,npts,path,unit)
 
 ! *************************************************************************
 
- ABI_CHECK(ndiv_small>0,'ndiv_small <=0')
+ ABI_CHECK(ndivsm > 0, sjoin('ndivsm', itoa(ndivsm)))
 
  ount = dev_null; if (present(unit)) ount = unit
 
@@ -2087,7 +2089,7 @@ subroutine make_path(nbounds,bounds,met,space,ndiv_small,ndivs,npts,path,unit)
    MSG_ERROR(msg)
  end if
 
- nfact=nfact/ndiv_small
+ nfact=nfact/ndivsm
  ndivs(:)=NINT(lng(:)/nfact)
  npts=SUM(ndivs)+1 !1 for the first point
 
@@ -2105,21 +2107,24 @@ subroutine make_path(nbounds,bounds,met,space,ndiv_small,ndivs,npts,path,unit)
  ! Allocate and construct the path.
  ABI_MALLOC(path,(3,npts))
 
- call wrtout(ount,' Normalized Path: ','COLL')
+ if (prtvol > 0) call wrtout(ount,' Normalized Path: ','COLL')
  idx=0
  do ii=1,nbounds-1
    do jp=1,ndivs(ii)
      idx=idx+1
      path(:,idx)=bounds(:,ii)+(jp-1)*(bounds(:,ii+1)-bounds(:,ii))/ndivs(ii)
-     write(msg,'(i4,4x,3(f8.5,1x))')idx,path(:,idx)
-     call wrtout(ount,msg,'COLL')
+     if (prtvol > 0) then
+       write(msg,'(i4,4x,3(f8.5,1x))')idx,path(:,idx)
+       call wrtout(ount,msg,'COLL')
+     end if
    end do
  end do
-
  path(:,npts)=bounds(:,nbounds)
 
- write(msg,'(i4,4x,3(f8.5,1x))')npts,path(:,npts)
- call wrtout(ount,msg,'COLL')
+ if (prtvol > 0) then
+   write(msg,'(i0,4x,3(f8.5,1x))')npts,path(:,npts)
+   call wrtout(ount,msg,'COLL')
+ end if
 
 end subroutine make_path
 !!***
@@ -2149,7 +2154,6 @@ end subroutine make_path
 !!      setup_sigma
 !!
 !! CHILDREN
-!!      init_tetra,listkk,smpbz
 !!
 !! SOURCE
 
@@ -2220,7 +2224,6 @@ end subroutine find_qmesh
 !!      m_bz_mesh
 !!
 !! CHILDREN
-!!      init_tetra,listkk,smpbz
 !!
 !! SOURCE
 
@@ -2327,7 +2330,6 @@ end subroutine findnq
 !!      m_bz_mesh
 !!
 !! CHILDREN
-!!      init_tetra,listkk,smpbz
 !!
 !! SOURCE
 
@@ -2433,11 +2435,10 @@ end subroutine findq
 !!  g0(3)=reciprocal space vector, to be used in igfft
 !!
 !! PARENTS
-!!      calc_sigc_me,calc_sigx_me,cohsex_me,exc_build_block,gw_tools
-!!      prep_calc_ucrpa
+!!      calc_sigc_me,calc_sigx_me,cohsex_me,exc_build_block,gw_tools,m_gkk
+!!      m_phpi,prep_calc_ucrpa
 !!
 !! CHILDREN
-!!      init_tetra,listkk,smpbz
 !!
 !! SOURCE
 
@@ -2628,7 +2629,6 @@ end subroutine findqg0
 !!      cchi0q0_intraband,setup_screening,sigma
 !!
 !! CHILDREN
-!!      init_tetra,listkk,smpbz
 !!
 !! SOURCE
 
@@ -2725,8 +2725,8 @@ subroutine littlegroup_init(ext_pt,Kmesh,Cryst,use_umklp,Ltg,npwe,gvec)
 &    'To run a GW calculation with an old KSS file, use version < 5.5 '
    MSG_ERROR(msg)
  end if
- !
- ! === Find operations in the little group as well as umklapp vectors G0 ===
+
+ ! Find operations in the little group as well as umklapp vectors G0 ===
  call littlegroup_q(nsym,ext_pt,symxpt,symrec,symafm,dummy_timrev,prtvol=0)
 
  Ltg%preserve(:,:)=0; Ltg%g0(:,:,:)=0; Ltg%flag_umklp(:,:)=0; mG0len=zero
@@ -2753,8 +2753,8 @@ subroutine littlegroup_init(ext_pt,Kmesh,Cryst,use_umklp,Ltg,npwe,gvec)
    nopg0(itim)=SUM(Ltg%flag_umklp(itim,:))
  end do
  nsym_Ltg=SUM(nop(:))
- !
- ! === Store little group operations, include time-reversal if present ===
+
+ ! Store little group operations, include time-reversal if present ===
  Ltg%nsym_Ltg=nsym_Ltg
  ABI_MALLOC(symrec_Ltg,(3,3,Ltg%nsym_Ltg))
 
@@ -2768,8 +2768,8 @@ subroutine littlegroup_init(ext_pt,Kmesh,Cryst,use_umklp,Ltg,npwe,gvec)
      end if
    end do
  end do
- !
- ! === Check the closure of the (ferromagnetic) little group ===
+
+ ! Check the closure of the (ferromagnetic) little group ===
  ABI_MALLOC(symafm_ltg,(Ltg%nsym_Ltg))
  symafm_ltg(:)=1
  call chkgrp(Ltg%nsym_Ltg,symafm_ltg,symrec_Ltg,ierr)
@@ -2777,8 +2777,8 @@ subroutine littlegroup_init(ext_pt,Kmesh,Cryst,use_umklp,Ltg,npwe,gvec)
 
  ABI_FREE(symafm_ltg)
  !
- ! === Find the irreducible zone associated to ext_pt ===
- ! * Do not use time-reversal since it has been manually introduced previously
+ ! Find the irreducible zone associated to ext_pt
+ ! Do not use time-reversal since it has been manually introduced previously
  ABI_MALLOC(indkpt1,(nbz))
  ABI_MALLOC(wtk_folded,(nbz))
  ABI_MALLOC(wtk,(nbz))
@@ -2807,11 +2807,11 @@ subroutine littlegroup_init(ext_pt,Kmesh,Cryst,use_umklp,Ltg,npwe,gvec)
  end do
  ABI_CHECK(ind==Ltg%nibz_Ltg," BUG ind/=Ltg%nibz_Ltg")
  !
- ! === Reconstruct full BZ starting from IBZ_q  ===
+ ! Reconstruct full BZ starting from IBZ_q.
  ! Calculate appropriate weight for each item (point,symmetry operation,time-reversal)
  Ltg%tab=0; Ltg%tabo=0; Ltg%tabi=0; Ltg%wtksym(:,:,:)=0
 
- ! === Zero no. of k-points found ===
+ ! Start with zero no. of k-points found
  ntest=0
  ABI_MALLOC(ktest,(3,nbz))
  ktest=zero
@@ -2886,11 +2886,11 @@ subroutine littlegroup_init(ext_pt,Kmesh,Cryst,use_umklp,Ltg,npwe,gvec)
    ABI_MALLOC(Ltg%igmG0,(npwe,timrev,nsym))
    Ltg%igmG0(:,:,:)=0
    max_kin=zero
-   !
-   ! === Loop over symmetry operations S and time-reversal ===
+
+   ! Loop over symmetry operations S and time-reversal
    do itim=1,timrev
      do isym=1,nsym
-       ! * Form IS k only for (IS) pairs in the little group
+       ! Form IS k only for (IS) pairs in the little group
        if (symafm(isym)==-1) CYCLE
        if (Ltg%preserve(itim,isym)/=0) then
          g0(:)=Ltg%g0(:,itim,isym)
@@ -2966,7 +2966,6 @@ end subroutine littlegroup_init
 !!      m_bz_mesh
 !!
 !! CHILDREN
-!!      init_tetra,listkk,smpbz
 !!
 !! SOURCE
 
@@ -3042,7 +3041,6 @@ end subroutine littlegroup_free_0D
 !! PARENTS
 !!
 !! CHILDREN
-!!      init_tetra,listkk,smpbz
 !!
 !! SOURCE
 
@@ -3095,7 +3093,6 @@ end subroutine littlegroup_free_1D
 !!      calc_sigc_me,calc_sigx_me,cchi0,cchi0q0,cchi0q0_intraband,cohsex_me
 !!
 !! CHILDREN
-!!      init_tetra,listkk,smpbz
 !!
 !! SOURCE
 
@@ -3259,9 +3256,9 @@ end function box_len
 
 !----------------------------------------------------------------------
 
-!!****f* m_bz_mesh/kpath_init
+!!****f* m_bz_mesh/kpath_new
 !! NAME
-!! kpath_init
+!! kpath_new
 !!
 !! FUNCTION
 !!  Create a normalized path given the extrema.
@@ -3269,7 +3266,7 @@ end function box_len
 !! INPUTS
 !!  bounds(3,nbounds)=The points defining the path in reduced coordinates.
 !!  gprimd(3,3)=Reciprocal lattice vectors
-!!  ndiv_small=Number of divisions to be used for the smallest segment.
+!!  ndivsm=Number of divisions to be used for the smallest segment.
 !!
 !! OUTPUT
 !!  Kpath<type(kpath_t)>=Object with the normalized path.
@@ -3278,45 +3275,44 @@ end function box_len
 !!      wfk_analyze
 !!
 !! CHILDREN
-!!      init_tetra,listkk,smpbz
 !!
 !! SOURCE
 
-subroutine kpath_init(Kpath,bounds,gprimd,ndiv_small)
+type(kpath_t) function kpath_new(bounds, gprimd, ndivsm) result(kpath)
 
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'kpath_init'
+#define ABI_FUNC 'kpath_new'
 !End of the abilint section
 
  implicit none
 
 !Arguments ------------------------------------
 !scalars
- type(kpath_t),intent(out) :: Kpath
- integer,intent(in) :: ndiv_small
+ integer,intent(in) :: ndivsm
 !!arrays
  real(dp),intent(in) :: bounds(:,:),gprimd(3,3)
-!
-!!Local variables-------------------------------
-!!arrays
+
+!Local variables-------------------------------
+ integer :: ii
+!arrays
+ real(dp) :: dk(3)
  real(dp),allocatable :: pts(:,:)
 
 ! *************************************************************************
 
  ABI_CHECK(size(bounds, dim=1) == 3, "Wrong dim1 in bounds")
+ ABI_CHECK(ndivsm > 0, sjoin("ndivsm:", itoa(ndivsm)))
  Kpath%nbounds = size(bounds, dim=2)
- Kpath%ndiv_small = ndiv_small
+ Kpath%ndivsm = ndivsm
 
-!Compute reciprocal space metric.
- Kpath%gprimd = gprimd
- Kpath%gmet = MATMUL(TRANSPOSE(gprimd),gprimd)
+ ! Compute reciprocal space metric.
+ Kpath%gprimd = gprimd; Kpath%gmet = matmul(transpose(gprimd), gprimd)
 
  ABI_MALLOC(Kpath%ndivs, (Kpath%nbounds-1))
-
- call make_path(Kpath%nbounds,bounds,Kpath%gmet,"G",ndiv_small,Kpath%ndivs,Kpath%npts,pts,unit=dev_null)
+ call make_path(Kpath%nbounds,bounds,Kpath%gmet,"G",ndivsm,Kpath%ndivs,Kpath%npts,pts,unit=dev_null)
 
  ABI_MALLOC(Kpath%bounds, (3,Kpath%nbounds))
  Kpath%bounds = bounds
@@ -3325,7 +3321,21 @@ subroutine kpath_init(Kpath,bounds,gprimd,ndiv_small)
  Kpath%points = pts
  ABI_FREE(pts)
 
-end subroutine kpath_init
+ ! Compute distance between point i-1 and i
+ ABI_CALLOC(kpath%dl, (kpath%npts))
+ do ii=2,kpath%npts
+   dk = kpath%points(:, ii-1) - kpath%points(:,ii)
+   kpath%dl(ii) = normv(dk, kpath%gmet, "G")
+ end do
+
+ ! Mapping bounds --> points
+ ABI_MALLOC(kpath%bounds2kpt, (kpath%nbounds))
+ kpath%bounds2kpt(1) = 1
+ do ii=1,kpath%nbounds-1
+   kpath%bounds2kpt(ii+1) = sum(kpath%ndivs(:ii)) + 1
+ end do
+
+end function kpath_new
 !!***
 
 !----------------------------------------------------------------------
@@ -3338,10 +3348,9 @@ end subroutine kpath_init
 !!  Free memory allocated in the object
 !!
 !! PARENTS
-!!      wfk_analyze
+!!      m_ebands,m_gruneisen,m_ifc,m_phgamma,m_phonons,wfk_analyze
 !!
 !! CHILDREN
-!!      init_tetra,listkk,smpbz
 !!
 !! SOURCE
 
@@ -3366,6 +3375,10 @@ subroutine kpath_free(Kpath)
    ABI_FREE(Kpath%ndivs)
  end if
 
+ if (allocated(Kpath%bounds2kpt)) then
+   ABI_FREE(Kpath%bounds2kpt)
+ end if
+
  if (allocated(Kpath%bounds)) then
    ABI_FREE(Kpath%bounds)
  end if
@@ -3374,155 +3387,81 @@ subroutine kpath_free(Kpath)
    ABI_FREE(Kpath%points)
  end if
 
+ if (allocated(Kpath%dl)) then
+   ABI_FREE(Kpath%dl)
+ end if
+
 end subroutine kpath_free
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* m_bz_mesh/tetra_from_kptrlatt
+!!****f* m_bz_mesh/kpath_print
 !! NAME
-!! tetra_from_kptrlatt
+!! kpath_print
 !!
 !! FUNCTION
-!!  Create an instance of `t_tetrahedron` from kptrlatt and shiftk
+!!  Print info on the path.
 !!
 !! INPUTS
-!!  cryst<cryst_t>=Crystalline structure.
-!!  kptopt=Option for the k-point generation.
-!!  kptrlatt(3,3)=k-point lattice specification
-!!  nshiftk= number of shift vectors.
-!!  shiftk(3,nshiftk)=shift vectors for k point generation
-!!  nkibz=Number of points in the IBZ
-!!  kibz(3,nkibz)=Reduced coordinates of the k-points in the IBZ.
+!!  [unit]=Unit number for output. Defaults to std_out
+!!  [prtvol]=Verbosity level.
+!!  [header]=String to be printed as header for additional info.
+!!  [pre]=Optional string prepended to output e.g. #. Default: " "
 !!
 !! OUTPUT
-!!  tetra<t_tetrahedron>=Tetrahedron object, fully initialized if ierr == 0.
-!!  msg=Error message if ierr /= 0
-!!  ierr=Exit status
+!!  Only printing
 !!
 !! PARENTS
-!!      gstate,wfk_analyze
+!!      m_ebands,m_gruneisen,m_phgamma
 !!
 !! CHILDREN
-!!      init_tetra,listkk,smpbz
 !!
 !! SOURCE
 
-type(t_tetrahedron) function tetra_from_kptrlatt( &
-&  cryst, kptopt, kptrlatt, nshiftk, shiftk, nkibz, kibz, msg, ierr) result (tetra)
+subroutine kpath_print(kpath, header, unit, prtvol, pre)
 
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'tetra_from_kptrlatt'
- use interfaces_56_recipspace
+#define ABI_FUNC 'kpath_print'
 !End of the abilint section
 
  implicit none
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: kptopt,nshiftk,nkibz
- integer,intent(out) :: ierr
- character(len=*),intent(out) :: msg
- type(crystal_t),intent(in) :: cryst
-!arrays
- integer,intent(in) :: kptrlatt(3,3)
- real(dp),intent(in) :: shiftk(3,nshiftk),kibz(3,nkibz)
+ integer,optional,intent(in) :: unit,prtvol
+ character(len=*),optional,intent(in) :: header,pre
+ type(kpath_t),intent(in) :: kpath
 
 !Local variables-------------------------------
-!scalars
- integer,parameter :: brav1=1,option0=0
- integer :: mkpt,nkfull,timrev,sppoldbl
- real(dp) :: dksqmax
- character(len=80) :: errorstring
-!arrays
- integer,allocatable :: indkk(:,:)
- real(dp) :: rlatt(3,3),klatt(3,3)
- real(dp),allocatable :: kfull(:,:)
+ integer :: unt,my_prtvol,ii
+ character(len=500) :: msg,my_pre
 
 ! *************************************************************************
 
- ierr = 0
+ unt = std_out; if (present(unit)) unt = unit
+ my_prtvol = 0; if (present(prtvol)) my_prtvol = prtvol
+ my_pre = " "; if (present(pre)) my_pre = pre
+ if (unt <= 0) return
 
- ! Refuse only 1 kpoint: the algorithms are no longer valid. DOH !
- if (nkibz == 1) then
-   msg = 'You need at least 2 kpoints to use the tetrahedron method.'
-   ierr = 1; goto 10
- end if
- if (all(kptrlatt == 0)) then
-   msg = 'Cannot generate tetrahedron because input kptrlatt == 0.'
-   ierr = 1; goto 10
- end if
- if (kptopt <= 0) then
-   msg = sjoin("Cannot generate tetrahedron because input kptopt:", itoa(kptopt))
-   ierr = 1; goto 10
- end if
+ if (present(header)) write(unt,"(a)") sjoin(my_pre, '==== '//trim(adjustl(header))//' ==== ')
+ write(unt, "(a)") sjoin(my_pre, "Number of points:", itoa(kpath%npts), ", ndivsmall:", itoa(kpath%ndivsm))
+ write(unt, "(a)") sjoin(my_pre, "Boundaries and corresponding index in the k-points array:")
+ do ii=1,kpath%nbounds
+   write(unt, "(a)") sjoin(my_pre, itoa(kpath%bounds2kpt(ii)), ktoa(kpath%bounds(:,ii)))
+ end do
+ write(unt, "(a)") sjoin(my_pre, " ")
 
- ! Call smpbz to get the full grid of k-points `kfull`
- ! brav1=1 is able to treat all bravais lattices (same option used in getkgrid)
- mkpt= kptrlatt(1,1)*kptrlatt(2,2)*kptrlatt(3,3) &
-   +kptrlatt(1,2)*kptrlatt(2,3)*kptrlatt(3,1) &
-   +kptrlatt(1,3)*kptrlatt(2,1)*kptrlatt(3,2) &
-   -kptrlatt(1,2)*kptrlatt(2,1)*kptrlatt(3,3) &
-   -kptrlatt(1,3)*kptrlatt(2,2)*kptrlatt(3,1) &
-   -kptrlatt(1,1)*kptrlatt(2,3)*kptrlatt(3,2)
- mkpt = mkpt * nshiftk
-
- ! TODO: Replace with getkgrid.
- ABI_MALLOC(kfull, (3,mkpt))
- call smpbz(brav1,std_out,kptrlatt,mkpt,nkfull,nshiftk,option0,shiftk,kfull)
-
- ! Do not support nshiftk > 1: lattice must be decomposed into boxes
- ! and this is not always possible (I think) with bizzare shiftks
- ! normally at this point we have incorporated everything into
- ! kptrlatt, and only 1 shift is needed (in particular for MP grids).
- if (nshiftk > 1) then
-   write(msg, "(9a)") &
-     'Cannot create tetrahedron object...',ch10, &
-     'Only simple lattices are supported. Action: use nshiftk=1.',ch10, &
-     'shiftk: ', trim(ltoa(reshape(shiftk, [3*nshiftk]))),ch10, &
-     'kptrlatt: ', trim(ltoa(reshape(kptrlatt, [9])))
-   ierr = 2; goto 10
+ if (my_prtvol > 10) then
+   do ii=1,kpath%npts
+     write(unt, "(a)") sjoin(my_pre, ktoa(kpath%points(:,ii)))
+   end do
  end if
 
- ! Costruct full BZ and create mapping BZ --> IBZ
- ! Note:
- !   - we don't change the value of nsppol hence sppoldbl is set to 1
- !   - we use symrec (operations in reciprocal space)
- !
- sppoldbl = 1
- timrev = 1; if (kptopt == 4) timrev = 0
- ABI_MALLOC(indkk, (nkfull*sppoldbl,6))
-
- ! Compute k points from input file closest to the output file
- call listkk(dksqmax,cryst%gmet,indkk,kibz,kfull,nkibz,nkfull,cryst%nsym,&
-    sppoldbl,cryst%symafm,cryst%symrec,timrev,use_symrec=.True.)
-
- if (dksqmax > tol12) then
-   write(msg, '(3a,es16.6,6a)' )&
-   'At least one of the k points could not be generated from a symmetrical one.',ch10,&
-   'dksqmax=',dksqmax,ch10,&
-   'kptrkatt= ',trim(ltoa(reshape(kptrlatt, [9]))),ch10,&
-   'shiftk= ',trim(ltoa(reshape(shiftk, [3*nshiftk])))
-   ierr = 2; goto 10
- end if
-
- rlatt = kptrlatt; call matr3inv(rlatt,klatt)
-
- call init_tetra(indkk(:,1), cryst%gprimd, klatt, kfull, nkfull, tetra, ierr, errorstring)
- if (ierr /= 0) msg = errorstring
-
- 10 continue
- if (allocated(indkk)) then
-   ABI_FREE(indkk)
- end if
- if (allocated(kfull)) then
-   ABI_FREE(kfull)
- end if
-
-end function tetra_from_kptrlatt
+end subroutine kpath_print
 !!***
 
 !----------------------------------------------------------------------

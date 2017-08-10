@@ -63,4 +63,5 @@ znucl   28
 #%%   We also test the treatment of the core charge in G-space in the case of GS calculations 
 #%%   By default, abinit handles XCCC in real space, here we use nc_xccc_gspace==1 to treat it 
 #%%   in G-space using the same approach as the one used in PAW.
+#%% topics = GeoOpt
 #%%<END TEST_INFO>

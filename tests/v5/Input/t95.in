@@ -40,6 +40,7 @@ nqshft 1
 q1shft 0.0 0.0 0.0
 #
 ifcflag 1
+ifcout 0
 ifcana 1
 #  ifc for all atoms?
 natifc 0
@@ -75,7 +76,7 @@ qph1l
 #%% test_chain = t85.in, t86.in, t87.in, t88.in, t89.in, t90.in, t91.in, t92.in, t93.in, t94.in, t95.in
 #%% [files]
 #%% files_to_test = 
-#%%   t95.out, tolnlines = 18, tolabs = 1.100e-04, tolrel = 2.000e-03
+#%%   t95.out, tolnlines = 18, tolabs = 2.0e-04, tolrel = 4.5e-05
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

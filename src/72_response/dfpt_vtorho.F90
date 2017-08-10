@@ -9,7 +9,7 @@
 !! The main part of it is a wf update over all k points
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (DCA, XG, GMR, AR, DRH, MB, XW, MT)
+!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR, AR, DRH, MB, XW, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -142,12 +142,12 @@
 !!      dfpt_scfcv
 !!
 !! CHILDREN
-!!      clsopn,destroy_hamiltonian,destroy_rf_hamiltonian,dfpt_vtowfk
-!!      dfptff_gbefd,dfptff_gradberry,fftpac,getgh1c_setup,hdr_skip
-!!      init_hamiltonian,init_rf_hamiltonian,load_spin_hamiltonian
-!!      load_spin_rf_hamiltonian,occeig,pawmkrho,pawrhoij_alloc,pawrhoij_free
-!!      pawrhoij_init_unpacked,pawrhoij_mpisum_unpacked,rf_transgrid_and_pack
-!!      sqnorm_v,symrhg,timab,wffreadskipk,xmpi_sum
+!!      destroy_hamiltonian,destroy_rf_hamiltonian,dfpt_vtowfk,dfptff_gbefd
+!!      dfptff_gradberry,fftpac,getgh1c_setup,init_hamiltonian
+!!      init_rf_hamiltonian,load_spin_hamiltonian,load_spin_rf_hamiltonian
+!!      occeig,pawmkrho,pawrhoij_alloc,pawrhoij_free,pawrhoij_init_unpacked
+!!      pawrhoij_mpisum_unpacked,rf_transgrid_and_pack,sqnorm_v,symrhg,timab
+!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -392,13 +392,16 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
 !* Norm-conserving: Constant kleimann-Bylander energies are copied from psps to gs_hamk.
 !* PAW: Initialize the overlap coefficients and allocate the Dij coefficients.
 
- call init_hamiltonian(gs_hamkq,psps,pawtab,dtset%nspinor,nspden,natom,&
+ call init_hamiltonian(gs_hamkq,psps,pawtab,dtset%nspinor,nsppol,nspden,natom,&
 & dtset%typat,xred,dtset%nfft,dtset%mgfft,dtset%ngfft,rprimd,dtset%nloalg,&
+& paw_ij=paw_ij,comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab,&
 & usecprj=usecprj,ph1d=ph1d,nucdipmom=dtset%nucdipmom,use_gpu_cuda=dtset%use_gpu_cuda)
 
- call init_rf_hamiltonian(cplex,gs_hamkq,ipert,rf_hamkq,has_e1kbsc=1)
+ call init_rf_hamiltonian(cplex,gs_hamkq,ipert,rf_hamkq,has_e1kbsc=.true.,paw_ij1=paw_ij1,&
+& comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab)
  if ((ipert==natom+10.and.idir>3).or.ipert==natom+11) then
-   call init_rf_hamiltonian(cplex,gs_hamkq,ipert,rf_hamk_dir2,has_e1kbsc=1)
+   call init_rf_hamiltonian(cplex,gs_hamkq,ipert,rf_hamk_dir2,has_e1kbsc=.true.,paw_ij1=paw_ij1,&
+&   comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab)
  end if
 
 !PAW:allocate memory for non-symetrized 1st-order occupancies matrix (pawrhoij1)
@@ -434,18 +437,17 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
 &   gs_hamkq%nvloc,pawfgr,mpi_enreg,vtrial,vtrial1,vlocal,vlocal1)
 
 !  Continue to initialize the Hamiltonian
-   call load_spin_hamiltonian(gs_hamkq,isppol,paw_ij=paw_ij,vlocal=vlocal, &
-&   comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
-
-   call load_spin_rf_hamiltonian(rf_hamkq,gs_hamkq,isppol,paw_ij1=paw_ij1,vlocal1=vlocal1, &
-   comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
+   call load_spin_hamiltonian(gs_hamkq,isppol,vlocal=vlocal,with_nonlocal=.true.)
+   call load_spin_rf_hamiltonian(rf_hamkq,gs_hamkq,isppol,vlocal1=vlocal1,with_nonlocal=.true.)
    if ((ipert==natom+10.and.idir>3).or.ipert==natom+11) then
-     call load_spin_rf_hamiltonian(rf_hamk_dir2,gs_hamkq,isppol,paw_ij1=paw_ij1,&
-     comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
+     call load_spin_rf_hamiltonian(rf_hamk_dir2,gs_hamkq,isppol,with_nonlocal=.true.)
      if (ipert==natom+11) then ! load vlocal1
-       call load_spin_rf_hamiltonian(rf_hamk_dir2,gs_hamkq,isppol,vlocal1=vlocal1,&
-       comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
+       call load_spin_rf_hamiltonian(rf_hamk_dir2,gs_hamkq,isppol,vlocal1=vlocal1)
      end if
+   end if
+
+   if (ipert==natom+5) then !SPr deb, in case of magnetic field perturbation, no non-local
+     call load_spin_rf_hamiltonian(rf_hamkq,gs_hamkq,isppol,vlocal1=vlocal1)
    end if
 
 !  Nullify contribution to 1st-order density from this k-point
@@ -787,12 +789,12 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
 !  In order to have the symrhg working in parallel on FFT coefficients, the size
 !  of irzzon1 and phnons1 should be set to nfftot. Therefore, nsym\=1 does not work.
 
- if(nspden==4) then
+   if(nspden==4) then
 ! FR symrhg will manage correctly this rearrangement
-   rhor1(:,2)=rhor1(:,2)+(rhor1(:,1)+rhor1(:,4))    !(n+mx)
-   rhor1(:,3)=rhor1(:,3)+(rhor1(:,1)+rhor1(:,4))    !(n+my)
-   call timab(17,2,tsec)
- end if
+     rhor1(:,2)=rhor1(:,2)+(rhor1(:,1)+rhor1(:,4))    !(n+mx)
+     rhor1(:,3)=rhor1(:,3)+(rhor1(:,1)+rhor1(:,4))    !(n+my)
+     call timab(17,2,tsec)
+   end if
 !
    if (psps%usepaw==0) then
      call symrhg(cplex,gprimd,irrzon1,mpi_enreg,dtset%nfft,dtset%nfft,dtset%ngfft,&

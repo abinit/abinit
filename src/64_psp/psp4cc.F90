@@ -12,7 +12,7 @@
 !! It has been produced on 7 May 1992 by M. Teter.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (XG, DCA)
+!! Copyright (C) 1998-2017 ABINIT group (XG, DCA)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -191,7 +191,7 @@ subroutine psp4cc(fchrg,n1xccc,xccc1d)
 &   x**2*(a18+x**2*(a20)))))))))))          *(1.0d0-x**2)**2
  end function gg_psp4
 
- function gp_psp4(x)
+   function gp_psp4(x)
 !gp(x) is the derivative of gg(x) wrt x
 
 !This section has been created automatically by the script Abilint (TD).
@@ -230,7 +230,7 @@ subroutine psp4cc(fchrg,n1xccc,xccc1d)
 &   ))))))))*(2.d0*x*(1.d0-x**2))**2
  end function gpp_1_psp4
 
- function gpp_2_psp4(x)
+   function gpp_2_psp4(x)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -248,7 +248,7 @@ subroutine psp4cc(fchrg,n1xccc,xccc1d)
 &   )))))))))*(1.d0-x**2)*2*(1.d0-9.d0*x**2)
  end function gpp_2_psp4
 
- function gpp_3_psp4(x)
+   function gpp_3_psp4(x)
 
 
 !This section has been created automatically by the script Abilint (TD).

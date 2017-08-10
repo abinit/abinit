@@ -8,7 +8,7 @@
 !!  As the type contains MPI-dependent fields, it has to be declared in a MPI-managed directory.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2016 ABINIT group (MT,MB,MVer,ZL,MD)
+!! Copyright (C) 2009-2017 ABINIT group (MT,MB,MVer,ZL,MD)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -942,7 +942,6 @@ end subroutine xderiveRRecInit
 !! SIDE EFFECTS
 !!
 !! PARENTS
-!!      d2frnl,dfpt_nstpaw,dfpt_vtorho
 !!
 !! CHILDREN
 !!
@@ -1150,9 +1149,9 @@ end function wff_ireadf90
 !! wff= structured info about the wavefunction file
 !!
 !! PARENTS
-!!      conducti_paw,conducti_paw_core,d2frnl,dfpt_looppert,dfpt_nstdy
-!!      dfpt_nstpaw,emispec_paw,inwffil,linear_optics_paw,m_ioarr,m_iowf,m_wfk
-!!      optics_paw,optics_paw_core,optics_vloc,posdoppler,uderiv
+!!      conducti_paw,conducti_paw_core,emispec_paw,inwffil,linear_optics_paw
+!!      m_ioarr,m_iowf,m_wfk,optics_paw,optics_paw_core,optics_vloc,posdoppler
+!!      uderiv
 !!
 !! CHILDREN
 !!
@@ -1312,10 +1311,9 @@ end subroutine WffOpen
 !! ierr=error code
 !!
 !! PARENTS
-!!      conducti_paw,conducti_paw_core,d2frnl,dfpt_looppert,dfpt_nstdy
-!!      dfpt_nstpaw,dfpt_scfcv,dfptnl_loop,emispec_paw,gstate,m_ioarr,m_iowf
-!!      m_wfk,nonlinear,optics_paw,optics_paw_core,optics_vloc,posdoppler
-!!      respfn,uderiv
+!!      conducti_paw,conducti_paw_core,dfpt_looppert,dfptnl_loop,emispec_paw
+!!      gstate,m_ioarr,m_iowf,m_wfk,nonlinear,optics_paw,optics_paw_core
+!!      optics_vloc,posdoppler,respfn,uderiv
 !!
 !! CHILDREN
 !!
@@ -1711,7 +1709,7 @@ end subroutine WffReadDataRec_dp2d
 !! SIDE EFFECTS
 !!
 !! PARENTS
-!!      d2frnl,dfpt_nstdy,dfpt_nstpaw,dfpt_nstwf,dfpt_vtowfk,rwwf
+!!      rwwf
 !!
 !! CHILDREN
 !!
@@ -1805,7 +1803,7 @@ end subroutine WffReadNpwRec
 !! For the future : one should treat the possible errors of backspace
 !!
 !! PARENTS
-!!      d2frnl,dfpt_nstdy,dfpt_nstpaw,dfpt_nstwf,dfpt_vtowfk,gstate,randac,rwwf
+!!      gstate,randac,rwwf
 !!
 !! CHILDREN
 !!

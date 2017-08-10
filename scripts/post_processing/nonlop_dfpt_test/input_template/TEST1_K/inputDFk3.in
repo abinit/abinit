@@ -1,0 +1,63 @@
+#Definition of the different datasets 
+#***********************************
+
+ndtset 6 jdtset 10 11 1 2 3 4 
+
+nstep10 100
+kptopt10 1
+toldfe10 1.0d-12
+ngkpt10   4 4 4
+optforces10 0
+optstress10 0
+prtden10 1
+
+nstep11 100
+getden11 10
+prtwf11 1
+iscf11 -2
+optforces11 0
+optstress11 0
+
+kpt2    0.23 0.2 0.1999
+getwfk2 11
+
+kpt3    0.23 0.2 0.2001
+getwfk3 11
+
+getwfk1 11
+getwfk4 11
+
+#  --------------------------------------------------------------------
+#  Variables globales
+#  --------------------------------------------------------------------
+   xred   0.0 0.0 0.0
+          0.6 0.5 0.5
+    kpt 0.23 0.2 0.2
+
+   acell 3*6 
+   rprim  1  0  0
+          0  1  0
+          0  0  1  
+# Types des atomes
+   ntypat   2         # 2 types d'atomes
+    znucl   20 8      # Ca-O
+#Definition of the atoms
+    natom   2  
+    typat   1 2
+#Nombre de bandes
+   nband   9
+# Energie de coupure
+  ecut   10           # En Hartree
+  pawecutdg 10         # energie de coupure PAW
+#Definition of the SCF procedure
+   nstep 0
+   tolwfr 1.0d-22
+   iscf 7
+   prtwf 0
+   istwfk *1
+   optforces 2
+   useylm 1
+   chksymbreak 0
+   shiftk   0 0 0
+   nshiftk 1
+   kptopt 0

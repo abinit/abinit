@@ -107,4 +107,5 @@
 #%%   Test of geometry optimization using using ionmov=1,4,5 and 7
 #%%   Hydrogen molecule inside a box of 12 Bohr
 #%%   This test was created to test ionmov=5
+#%% topics = GeoOpt
 #%%<END TEST_INFO>

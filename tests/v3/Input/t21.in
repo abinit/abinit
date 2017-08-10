@@ -83,4 +83,5 @@ toldfe 1.0d-6
 #%%   H based fake crystals.
 #%%   Test the recognition of several enantiomorph space groups :
 #%%   76, 151, 152, 178 and 180.
+#%% topics = crystal
 #%%<END TEST_INFO>

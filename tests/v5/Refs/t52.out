@@ -2,7 +2,7 @@
 .Version 8.0.3 of CUT3D 
 .(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
 
-.Copyright (C) 1998-2016 ABINIT group . 
+.Copyright (C) 1998-2017 ABINIT group . 
  CUT3D comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -168,6 +168,7 @@
    9 => output .xsf file for XCrysDen
   11 => compute atomic charge using the Hirshfeld method
   14 => Gaussian/cube wavefunction module
+  15 => Write data to netcdf file
 
  Your choice is  2
 
@@ -229,6 +230,7 @@
    9 => output .xsf file for XCrysDen
   11 => compute atomic charge using the Hirshfeld method
   14 => Gaussian/cube wavefunction module
+  15 => Write data to netcdf file
 
  Your choice is  5
 
@@ -251,6 +253,7 @@
    9 => output .xsf file for XCrysDen
   11 => compute atomic charge using the Hirshfeld method
   14 => Gaussian/cube wavefunction module
+  15 => Write data to netcdf file
 
  Your choice is  1
 
@@ -285,6 +288,7 @@
    9 => output .xsf file for XCrysDen
   11 => compute atomic charge using the Hirshfeld method
   14 => Gaussian/cube wavefunction module
+  15 => Write data to netcdf file
 
  Your choice is  1
 

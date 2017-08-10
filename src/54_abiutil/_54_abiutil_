@@ -10,7 +10,7 @@
 !! physics data.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (TD)
+!! Copyright (C) 1998-2017 ABINIT group (TD)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -20,6 +20,7 @@
 !! calcdensph.F90
 !! find_getdtset.F90
 !! interfaces_54_abiutil.F90
+!! m_dens.F90
 !! m_dtset.F90
 !! m_results_out.F90
 !! m_scf_history.F90

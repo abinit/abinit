@@ -6,7 +6,7 @@
 !!  FIXME: Description is missing
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group
+!! Copyright (C) 1998-2017 ABINIT group
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -23,6 +23,7 @@
 !! m_abimover.F90
 !! m_bfgs.F90
 !! m_ga.F90
+!! m_lbfgs.F90
 !! m_mep.F90
 !! m_pimd.F90
 !! m_use_ga.F90
@@ -38,6 +39,7 @@
 !! pred_isokinetic.F90
 !! pred_isothermal.F90
 !! pred_langevin.F90
+!! pred_lbfgs.F90
 !! pred_moldyn.F90
 !! pred_nose.F90
 !! pred_simple.F90

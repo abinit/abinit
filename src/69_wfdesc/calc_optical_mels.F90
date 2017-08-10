@@ -6,7 +6,7 @@
 !!  Calculate all optical matrix elements in the BZ.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2016 ABINIT group (L.Reining, V.Olevano, F.Sottile, S.Albrecht, G.Onida, M.Giantomassi)
+!! Copyright (C) 2009-2017 ABINIT group (L.Reining, V.Olevano, F.Sottile, S.Albrecht, G.Onida, M.Giantomassi)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -39,9 +39,8 @@
 !!      m_exc_spectra,m_haydock
 !!
 !! CHILDREN
-!!      vkbr_free,get_bz_item,vkbr_init,matrginv
-!!      pawcprj_alloc,pawcprj_free,wfd_distribute_bbp,wfd_get_cprj,wrtout
-!!      xmpi_barrier,xmpi_sum
+!!      get_bz_item,matrginv,pawcprj_alloc,pawcprj_free,vkbr_free,vkbr_init
+!!      wfd_distribute_bbp,wfd_get_cprj,wrtout,xmpi_barrier,xmpi_sum
 !!
 !! SOURCE
 

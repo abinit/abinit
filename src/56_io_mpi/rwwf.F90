@@ -13,7 +13,7 @@
 !!  outside of this routine, in order to read or write the correct records.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (DCA,XG,GMR,MVer,MB,MT)
+!! Copyright (C) 1998-2017 ABINIT group (DCA,XG,GMR,MVer,MB,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -181,7 +181,7 @@ end subroutine rwwf
 !!  The disk file unitwf should have been prepared outside of this routine, in order to read the correct records.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (DCA,XG,GMR,MVer,MB,MT)
+!! Copyright (C) 1998-2017 ABINIT group (DCA,XG,GMR,MVer,MB,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -703,7 +703,7 @@ end subroutine readwf
 !!  outside of this routine, in order to write the correct records.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (DCA,XG,GMR,MVer,MB,MT)
+!! Copyright (C) 1998-2017 ABINIT group (DCA,XG,GMR,MVer,MB,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -741,7 +741,7 @@ end subroutine readwf
 !!  WARNING : writing the two first records is also done in the dfpt_vtowfk routine
 !!
 !! PARENTS
-!!      m_io_kss,rwwf
+!!      rwwf
 !!
 !! CHILDREN
 !!      mpi_bcast,wffreadwrite_mpio,wffwritenpwrec,xderivewrecend

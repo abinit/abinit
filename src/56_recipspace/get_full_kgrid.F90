@@ -9,7 +9,7 @@
 !! of kpt_fullbz, and indkpt
 !!
 !! COPYRIGHT
-!! Copyright (C) 2002-2016 ABINIT group (MVer,XG)
+!! Copyright (C) 2002-2017 ABINIT group (MVer,XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -35,7 +35,7 @@
 !! TODO: This routine should be removed
 !!
 !! PARENTS
-!!      m_ebands,m_phgamma,m_phonons,tetrahedron
+!!      m_phonons
 !!
 !! CHILDREN
 !!      destroy_kptrank,get_kpt_fullbz,get_rank_1kpt,mati3inv,mkkptrank

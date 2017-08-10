@@ -38,6 +38,7 @@ q1shft 0.0 0.0 0.0
 #
 ifcflag 1
 ifcana 1
+ifcout 0
 #  ifc for all atoms?
 natifc 0
 atifc 1 2 3
@@ -79,4 +80,5 @@ iatprj_bs 1 1
 #%% keywords = 
 #%% description = 
 #%%   anaddb test electron phonon coupling transport in inelastic Variational Approximation, on bcc Li
+#%% topics = ElPhon
 #%%<END TEST_INFO>

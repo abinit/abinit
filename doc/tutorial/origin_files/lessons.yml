@@ -1,0 +1,223 @@
+# This file provides the information needed to generate the documentation files that describes the lessons of the tutorial.
+# Each paragraph of such documentation file has a mix of formatting html information and real content.
+
+# The present file contains the formatting html information.
+# The "default" html information is presented in the section "default", at the bottom of the file. 
+# For most of the lesson*.html files, the default html formatting is hardly changed, so only minimal information
+# is needed to generate them. 
+
+- !components
+    name : analysis_tools
+    keyword : Lesson on analysis tools
+    authors : MC,SP
+    subtitle : How to use the program <em>cut3d</em>.
+- !components
+    name : base1
+    keyword : First (basic) lesson 
+    authors : XG,RC
+    subtitle : The H<sub>2</sub> molecule, without convergence studies.
+- !components
+    name : base2
+    keyword : Second (basic) lesson
+    authors : XG,RC
+    subtitle : The H<sub>2</sub> molecule, with convergence studies.
+- !components
+    name : base3
+    keyword : Third (basic) lesson
+    authors : XG,RC
+    subtitle : Crystalline silicon.
+- !components
+    name : base4
+    keyword : Fourth (basic) lesson
+    authors : XG,RC
+    subtitle : Aluminum, the bulk and the surface.
+- !components
+    name : basepar
+    keyword : Lesson on basic parallelism.
+    authors : YP,XG
+    subtitle : Parallelism in ABINIT, generalities and environments.
+- !components
+    name : bse
+    keyword : Lesson on Bethe-Salpeter calculations
+    authors : MG,MS
+    subtitle : Absorption spectra including excitonic effects.
+- !components
+    name : dmft
+    keyword : Lesson on DFT+DMFT
+    authors : BAmadon
+    subtitle : A DFT+DMFT calculation for SrVO<sub>3</sub>.
+- !components
+    name : eph
+    keyword : Electron-phonon lesson
+    authors : MVer
+    subtitle : Electron-Phonon interaction and superconducting properties of Al.
+- !components
+    name : elastic
+    keyword : Lesson on elastic properties
+    authors : DRH
+    subtitle : Elastic and piezoelectric properties.
+- !components
+    name : ffield
+    keyword : Lesson on polarization and finite electric fields
+    authors : PhG, MVeithen, XG
+    subtitle : Polarization, and responses to finite electric fields for AlAs.
+- !components
+    name : fold2Bloch
+    keyword : Lesson on fold2Bloch
+    authors : SS,XG
+    subtitle : Unfolding the electronic structure of a lattice of Hydrogen atoms.
+- !components
+    name : gw1
+    keyword : First lesson on GW
+    authors : VOlevano,XG
+    subtitle : The quasi-particle band structure of Silicon, in the GW approximation.
+- !components
+    name : gw2
+    keyword : Second lesson on GW
+    authors : FBruneval,XG
+    subtitle : Treatment of metals.
+- !components
+    name : dftu
+    keyword : Lesson on DFT+U
+    authors : SPesant,MCote,XG,BAmadon
+    subtitle : The projected density of states of NiO.
+- !components
+    name : nlo
+    keyword : Lesson on static non-linear properties
+    authors : PhG, MVeithen, XG
+    subtitle : Electronic non-linear susceptibility, non-resonant Raman tensor, electro-optic effect.
+- !components
+    name : nuc
+    keyword : Lesson on properties at the nuclei
+    authors : JWZ,XG
+    subtitle : Observables near the atomic nuclei.
+- !components
+    name : optic
+    keyword : Lesson on optical properties 
+    authors : SS,XG,YG
+    subtitle : Frequency-dependent linear and second order nonlinear optical response.
+- !components
+    name : paral_dfpt
+    keyword : Parallelism in the linear-response case
+    authors : XG,RC
+    subtitle : Atomic displacements, homogeneous electric fields, strain.
+- !components
+    name : paral_gspw
+    keyword : Parallelism for the ground state
+    authors : FB
+    subtitle : Explore the various features of the KGB parallelization scheme
+- !components
+    name : paral_gswvl
+    keyword : Parallelism for the ground state using wavelets
+    authors : DC
+    subtitle : Boron cluster, alkane.u 
+- !components
+    name : paral_mbt
+    keyword : Parallelism for many-body calculations
+    authors : MG,MS
+    subtitle : G<sub>0</sub>W<sub>0</sub> corrections in &alpha;-quartz SiO<sub>2</sub>.
+- !components
+    name : paral_moldyn
+    keyword : Parallelism for molecular dynamics
+    authors : JB
+    subtitle : How to perform Molecular Dynamics calculations using parallelism
+- !components
+    name : paral_string
+    keyword : Parallelism on images, the string method
+    authors : MT,GG
+    subtitle : String method for the computation of minimum energy paths, in parallel.
+- !components
+    name : paw1
+    keyword : First lesson on the projector-augmented wave (PAW) technique
+    authors : MT,FJ
+    subtitle : Projector Augmented-Wave technique, how to use it ?
+- !components
+    name : paw2
+    keyword : Second lesson on the projector-augmented wave (PAW) technique
+    authors : MT
+    subtitle : The generation of atomic data.
+- !components
+    name : paw3
+    keyword : Third lesson on the projector-augmented wave (PAW) technique
+    authors : MS,MT
+    subtitle : Testing PAW datasets against an all-electron code
+- !components
+    name : rf1
+    keyword : First lesson on response functions
+    authors : XG,RC
+    subtitle : Dynamical and dielectric properties of AlAs.
+- !components
+    name : rf2
+    keyword : Second lesson on response functions
+    authors : XG
+    subtitle : Phonon band structures, thermodynamical properties.
+- !components
+    name : source_code
+    keyword : Developing for ABINIT
+    authors : YP
+    subtitle : Introducing ABINIT to new developers (might be outdated ...).
+- !components
+    name : spin
+    keyword : Lesson in the spin
+    authors : GZ,MT
+    subtitle : Properties related to spin (spin polarized calculations and spin-orbit coupling).
+- !components
+    name : tddft
+    keyword : Lesson on TDDFT
+    authors : XG
+    subtitle : Time-Dependent Density Functional Theory, Casida's approach.
+- !components
+    name : tdepes
+    keyword : Lesson TDepES
+    authors : SP
+    subtitle : Temperature-DEPendence of the Electronic Structure.
+- !components
+    name : ucalc_crpa
+    keyword : Calculation of U and J using cRPA
+    authors : BAmadon
+    subtitle : Using the constrained RPA to compute the U and J in the case of SrVO<sub>3</sub>.
+- !components
+    name : udet
+    keyword : Calculation of U and J using Cococcioni's approach
+    authors : DJA
+    subtitle : How to determine U for DFT+U in ABINIT ? Cococcioni's approach.
+- !components
+    name : wannier90
+    keyword : Lesson on the use of Wannier90 library 
+    authors : TRangel
+    subtitle : The Wannier90 interface tutorial.
+- !components
+    name : welcome
+    keyword : Welcome
+    authors : XG
+    subtitle : Overview of the ABINIT tutorial.
+- !components
+    name : default
+    keyword : All files
+    authors : XG
+    header : |
+      <html>
+      <head><title>__KEYWORD__</title>
+      <link rel=stylesheet type="text/css" href="../formabinit.css">
+      </head>
+      <body bgcolor="#ffffff">
+
+      <hr>
+      <a name="top"></a>
+    title : |
+      <h1>ABINIT tutorial. __KEYWORD__...</h1>
+    subtitle : |
+      Default subtitle ... this is an error
+    copyright : |
+      <hr>
+      <h5>Copyright (C) 2000-2017 ABINIT group (__AUTHORS__)
+      <script type="text/javascript" src="__JS_PATH__copyright.js"> </script>
+      </h5> 
+    links : |
+      <script type="text/javascript" src="__JS_PATH__list_internal_links_for_generated_files.js"> </script>
+    tofcontent_header : |
+      <a name="list"></a>
+      <h3><b> __KEYWORD__, table of content:</b></h3>
+    end : |
+      </body>
+      </html>

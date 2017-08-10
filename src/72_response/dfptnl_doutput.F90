@@ -7,7 +7,7 @@
 !! Write the matrix of third-order derivatives to the output file and the DDB
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2016 ABINIT group (MVeithen)
+!! Copyright (C) 1999-2017 ABINIT group (MVeithen)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -52,7 +52,6 @@ subroutine dfptnl_doutput(blkflg,d3,mband,mpert,nkpt,natom,ntypat,unddb)
 #undef ABI_FUNC
 #define ABI_FUNC 'dfptnl_doutput'
  use interfaces_14_hidewrite
- use interfaces_72_response, except_this_one => dfptnl_doutput
 !End of the abilint section
 
  implicit none

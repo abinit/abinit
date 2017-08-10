@@ -6,7 +6,7 @@
 !! This code merges the derivative databases.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (DCA, XG, GMR, SP)
+!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR, SP)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -38,9 +38,8 @@
 !! PARENTS
 !!
 !! CHILDREN
-!!      abi_io_redirect,abimem_init,abinit_doctor,ddb_getdims,destroy_mpi_enreg
-!!      flush_unit,get_command_argument,herald,initmpi_seq,mblktyp1,mblktyp5
-!!      mrgddb_init,timein,wrtout,xmpi_end,xmpi_init
+!!      abi_io_redirect,abimem_init,abinit_doctor
+!!      get_command_argument,herald,mblktyp1,mblktyp5,timein,wrtout,xmpi_init
 !!
 !! SOURCE
 
@@ -57,11 +56,12 @@ program mrgddb
  use m_profiling_abi
  use m_errors
  use m_xmpi
+ use m_ddb_hdr
 
  use m_time ,        only : asctime
  use m_io_tools,     only : file_exists
  use m_fstrings,     only : sjoin
- use m_ddb,          only : ddb_getdims, DDB_VERSION
+ use m_ddb,          only : DDB_VERSION
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -78,12 +78,13 @@ program mrgddb
 !Local variables-------------------------------
 !scalars
  integer,parameter :: mddb=5000,ddbun=2 ! mddb=maximum number of databases (cannot be made dynamic)
- integer :: chkopt,dummy,dummy1,dummy2,dummy3,dummy4,dummy5,dummy6,dummy7
+ integer :: chkopt
  integer :: iddb,ii,mblktyp,mblktyptmp,nddb,nfiles_cli,nargs,msym,comm,my_rank,fcnt
  real(dp) :: tcpu,tcpui,twall,twalli
  logical :: cannot_overwrite=.True.
  character(len=24) :: codename
  character(len=fnlen) :: dscrpt
+ type(ddb_hdr_type) :: ddb_hdr
 !arrays
  real(dp) :: tsec(2)
  character(len=fnlen) :: filnam(mddb+1)
@@ -147,8 +148,8 @@ program mrgddb
      nfiles_cli = nfiles_cli + 1
      if (nfiles_cli > mddb+1) then
        write(msg, '(a,i0,2a)')&
-         'Number of files should be lower than mddb+1= ',mddb+1,ch10,&
-         'Action: change mddb in mrgddb.f90 and recompile.'
+       'Number of files should be lower than mddb+1= ',mddb+1,ch10,&
+       'Action: change mddb in mrgddb.f90 and recompile.'
        MSG_ERROR(msg)
      end if
      filnam(nfiles_cli) = arg
@@ -219,10 +220,13 @@ program mrgddb
  ! msym = maximum number of symmetry elements in space group
  mblktyptmp=1
  do iddb=1,nddb
-   call ddb_getdims(dummy,filnam(iddb+1),dummy1,dummy2,mblktyp,&
-&   msym,dummy3,dummy4,dummy5,dummy6,ddbun,dummy7,DDB_VERSION,comm)
+   call ddb_hdr_open_read(ddb_hdr,filnam(iddb+1),ddbun,DDB_VERSION,&
+&                         dimonly=1)
 
-   if(mblktyp > mblktyptmp) mblktyptmp = mblktyp
+   if(ddb_hdr%mblktyp > mblktyptmp) mblktyptmp = ddb_hdr%mblktyp
+
+   call ddb_hdr_free(ddb_hdr)
+
  end do
 
  mblktyp = mblktyptmp
@@ -249,7 +253,7 @@ program mrgddb
 
  call abinit_doctor("__mrgddb")
 
-100 call xmpi_end()
+ 100 call xmpi_end()
 
  end program mrgddb
 !!***

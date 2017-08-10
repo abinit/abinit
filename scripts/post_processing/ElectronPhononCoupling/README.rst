@@ -2,20 +2,18 @@
 ElectronPhononCoupling
 ======================
 
-Python module to analyze electron-phonon related quantities from ABINIT.
+ElectronPhononCoupling (EPC) is a python module
+to analyze electron-phonon related quantities computed with Abinit.
 
 
 Istallation
 -----------
 
-Simply issue
+Issue
 
     >$ python setup.py install
 
-This should install the module somewhere in your $PYTHONPATH
-and the script "ElectronPhononCoupling/scripts/pp-temperature" in your $PATH
-
-requires
+Requires
 
     * numpy >= 1.8.1
     * mpi4py >= 2.0.0
@@ -24,27 +22,32 @@ requires
 Usage
 -----
 
-Interactive usage:
+Example:
 
-    >$ electron-phonon-coupling
+    import ElectronPhononCoupling as epc
 
-or in parallel, e.g.:
+    epc.compute(
+        renormalization=True,
+        broadening=True,
+        self_energy=True,
+        spectral_function=True,
+        temperature=True,
+        ...
 
-    >$ mpirun -n 4 electron-phonon-coupling
 
-As a python module:
+You can run such python script in parallel with, e.g.:
 
-    from ElectronPhononCoupling import compute_epc
+    mpirun -n 4 python myscript.py
 
-    ...
+Documentation
+-------------
+ 
+* For how to use this module, see the Examples directory.
 
-You can run a python script that calls the function 'compute_epc' 
-in serial or in parallel with e.g.:
+* For the theory pertaining the electronic self-energy
+    due to electron-phonon coupling, and temperature dependence
+    of electronic structure, see [PRB 92, 085137 (2015)].
 
-    mpirun -n 4 python my_script.py
+* For the advanced user and developer, see the Doc directory.
 
-See the examples in ElectronPhononCoupling/data/inputs_for_tests/
-for how to use this module.
-The generation of the data with Abinit is explained in the
-input file located in ElectronPhononCoupling/data/data_LiF/.
 

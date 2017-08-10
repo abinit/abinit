@@ -1,0 +1,98 @@
+<!--                                                                                     -->
+<!-- This file has been produced by generate_doc.py using different .yml  or .bib files. -->
+<!-- It is useless to modify it. Modify the related .yml  or .bib files instead.         -->
+<!--                                                                                     -->
+<html>
+<head><title>Ground State- other settings </title>
+<link rel=stylesheet type="text/css" href="../formabinit.css">
+</head>
+<body bgcolor="#ffffff">
+
+<hr>
+<a name="top"></a>
+
+<h1>Other general settings</h1>
+<h3>This file gives hints on how to set other parameters for ground state calculations with the ABINIT package.
+<hr>
+
+<h5>Copyright (C) 2016-2017 ABINIT group (FJ)
+<script type="text/javascript" src="../../js_files/copyright.js"> </script>
+</h5>
+
+<script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
+
+ <h3><b>Table of content: </b></h3> 
+ <ul> <li><a href="topic_otherGS.html#1">1</a>. Related input variables.<li><a href="topic_otherGS.html#2">2</a>. Selected input files.</ul>
+
+
+
+
+&nbsp; 
+<HR ALIGN=left> 
+<a name="1">&nbsp;</a>
+<h3><b>1. Related input variables.</b></h3>
+
+
+<p>Input variables related to alchemical mixing:<p>... <a href="../../input_variables/generated_files/vargs.html#algalch">algalch</a>   [ALGorithm for generating ALCHemical pseudopotentials]<br>
+... <a href="../../input_variables/generated_files/vargs.html#mixalch">mixalch</a>   [MIXing coefficients for ALCHemical potentials]<br>
+... <a href="../../input_variables/generated_files/vargs.html#npsp">npsp</a>   [Number of PSeudoPotentials]<br>
+... <a href="../../input_variables/generated_files/vargs.html#npspalch">%npspalch</a>   [Number of PSeudoPotentials that are "ALCHemical"]<br>
+... <a href="../../input_variables/generated_files/vargs.html#ntypalch">ntypalch</a>   [Number of TYPe of atoms that are "ALCHemical"]<br>
+... <a href="../../input_variables/generated_files/vargs.html#ntyppure">%ntyppure</a>   [Number of TYPe of atoms that are "PURe"]<br>
+<p>Input variables for job time limits:<p>... <a href="../../input_variables/generated_files/vargs.html#cpuh">cpuh</a>   [CPU time limit in Hours]<br>
+... <a href="../../input_variables/generated_files/vargs.html#cpum">cpum</a>   [CPU time limit in Minutes]<br>
+... <a href="../../input_variables/generated_files/vargs.html#cpus">cpus</a>   [CPU time limit in seconds]<br>
+<p>Input variables to insert a slab:<p>... <a href="../../input_variables/generated_files/vargs.html#jellslab">jellslab</a>   [include a JELLium SLAB in the cell]<br>
+... <a href="../../input_variables/generated_files/vargs.html#slabwsrad">slabwsrad</a>   [jellium SLAB Wigner-Seitz RADius]<br>
+... <a href="../../input_variables/generated_files/vargs.html#slabzbeg">slabzbeg</a>   [jellium SLAB BEGinning edge along the Z direction]<br>
+... <a href="../../input_variables/generated_files/vargs.html#slabzend">slabzend</a>   [jellium SLAB ENDing edge along the Z direction]<br>
+<p>Input variables for Learn On The Fly calculations:<p>... <a href="../../input_variables/generated_files/vardev.html#lotf_classic">lotf_classic</a>   [LOTF CLASSIC model for glue model]<br>
+... <a href="../../input_variables/generated_files/vardev.html#lotf_nitex">lotf_nitex</a>   [LOTF Number of ITerations]<br>
+... <a href="../../input_variables/generated_files/vardev.html#lotf_nneigx">lotf_nneigx</a>   [LOTF max Number of NEIGhbours]<br>
+... <a href="../../input_variables/generated_files/vardev.html#lotf_version">lotf_version</a>   [LOTF VERSION of MD algorithm]<br>
+<p>Input variables for experts:<p>... <a href="../../input_variables/generated_files/vardev.html#builtintest">builtintest</a>   [BUIT-IN TEST number]<br>
+... <a href="../../input_variables/generated_files/vargeo.html#chempot">chempot</a>   [spatially varying CHEMical POTential]<br>
+... <a href="../../input_variables/generated_files/vargs.html#chkexit">chkexit</a>   [CHecK whether the user want to EXIT]<br>
+... <a href="../../input_variables/generated_files/varbas.html#einterp">einterp</a>   [Electron bands INTERPolation]<br>
+... <a href="../../input_variables/generated_files/vardev.html#eshift">eshift</a>   [Energy SHIFT]<br>
+... <a href="../../input_variables/generated_files/vardev.html#fftcache">fftcache</a>   [Fast Fourier Transform CACHE size]<br>
+... <a href="../../input_variables/generated_files/vardev.html#istatr">istatr</a>   [Integer for STATus file rate]<br>
+... <a href="../../input_variables/generated_files/vardev.html#istatshft">istatshft</a>   [Integer for STATus file SHiFT]<br>
+... <a href="../../input_variables/generated_files/vardev.html#mem_test">mem_test</a>   [MEMory TEST]<br>
+... <a href="../../input_variables/generated_files/vardev.html#nloc_alg">nloc_alg</a>   [Non LOCal ALGorithm]<br>
+... <a href="../../input_variables/generated_files/vardev.html#nloc_mem">nloc_mem</a>   [Non LOCal MEMOry]<br>
+... <a href="../../input_variables/generated_files/vargeo.html#nzchempot">nzchempot</a>   [Number of Z reduced coordinates that define the spatial CHEMical POTential]<br>
+... <a href="../../input_variables/generated_files/vardev.html#papiopt">papiopt</a>   [PAPI OPTion]<br>
+... <a href="../../input_variables/generated_files/varrlx.html#random_atpos">random_atpos</a>   [RANDOM ATomic POSitions]<br>
+... <a href="../../input_variables/generated_files/varpaw.html#usepotzero">usepotzero</a>   [USE POTential ZERO]<br>
+... <a href="../../input_variables/generated_files/vardev.html#useria">useria</a>   [USER Integer variable A]<br>
+... <a href="../../input_variables/generated_files/vardev.html#userib">userib</a>   [USER Integer variable B]<br>
+... <a href="../../input_variables/generated_files/vardev.html#useric">useric</a>   [USER Integer variable C]<br>
+... <a href="../../input_variables/generated_files/vardev.html#userid">userid</a>   [USER Integer variable D]<br>
+... <a href="../../input_variables/generated_files/vardev.html#userie">userie</a>   [USER Integer variable E]<br>
+... <a href="../../input_variables/generated_files/vardev.html#userra">userra</a>   [USER Real variable A]<br>
+... <a href="../../input_variables/generated_files/vardev.html#userrb">userrb</a>   [USER Real variable B]<br>
+... <a href="../../input_variables/generated_files/vardev.html#userrc">userrc</a>   [USER Real variable C]<br>
+... <a href="../../input_variables/generated_files/vardev.html#userrd">userrd</a>   [USER Real variable D]<br>
+... <a href="../../input_variables/generated_files/vardev.html#userre">userre</a>   [USER Real variable E]<br>
+
+
+&nbsp; 
+<HR ALIGN=left> 
+<a name="2">&nbsp;</a>
+<h3><b>2. Selected input files.</b></h3>
+
+
+The user can find some related example input files in the ABINIT package in the directory /tests, or on the Web:
+<p> tests/v3/Input: <a href="../../tests/v3/Input/t92.in">t92.in</a> 
+<a href="../../tests/v3/Input/t93.in">t93.in</a> 
+<a href="../../tests/v3/Input/t94.in">t94.in</a> 
+<a href="../../tests/v3/Input/t95.in">t95.in</a> 
+<br>
+
+
+<script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
+
+</body>
+</html>
+

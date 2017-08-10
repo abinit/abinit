@@ -10,7 +10,7 @@
 !! the exchange-correlation kernel.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2016 ABINIT group (XG, DRH)
+!! Copyright (C) 2001-2017 ABINIT group (XG, DRH)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -19,7 +19,7 @@
 !!  cplex= if 1, real space 1-order functions on FFT grid are REAL,
 !!         if 2, COMPLEX
 !!  ixc= choice of exchange-correlation scheme
-!!  kxc(nfft,nkxc)=exchange and correlation kernel (see rhohxc.f)
+!!  kxc(nfft,nkxc)=exchange and correlation kernel (see below)
 !!  mpi_enreg=information about MPI parallelization
 !!  nfft=(effective) number of FFT grid points (for this processor)
 !!  ngfft(18)=contain all needed information about 3D FFT,
@@ -47,6 +47,42 @@
 !! SIDE EFFECTS
 !!
 !! NOTES
+!!  Content of Kxc array:
+!!   ===== if LDA
+!!    if nspden==1: kxc(:,1)= d2Exc/drho2
+!!                 (kxc(:,2)= d2Exc/drho_up drho_dn)
+!!    if nspden>=2: kxc(:,1)= d2Exc/drho_up drho_up
+!!                  kxc(:,2)= d2Exc/drho_up drho_dn
+!!                  kxc(:,3)= d2Exc/drho_dn drho_dn
+!!   ===== if GGA
+!!    if nspden==1:
+!!       kxc(:,1)= d2Exc/drho2
+!!       kxc(:,2)= 1/|grad(rho)| dExc/d|grad(rho)|
+!!       kxc(:,3)= 1/|grad(rho)| d2Exc/d|grad(rho)| drho
+!!       kxc(:,4)= 1/|grad(rho)| * d/d|grad(rho)| ( 1/|grad(rho)| dExc/d|grad(rho)| )
+!!       kxc(:,5)= gradx(rho)
+!!       kxc(:,6)= grady(rho)
+!!       kxc(:,7)= gradz(rho)
+!!    if nspden>=2:
+!!       kxc(:,1)= d2Exc/drho_up drho_up
+!!       kxc(:,2)= d2Exc/drho_up drho_dn
+!!       kxc(:,3)= d2Exc/drho_dn drho_dn
+!!       kxc(:,4)= 1/|grad(rho_up)| dEx/d|grad(rho_up)|
+!!       kxc(:,5)= 1/|grad(rho_dn)| dEx/d|grad(rho_dn)|
+!!       kxc(:,6)= 1/|grad(rho_up)| d2Ex/d|grad(rho_up)| drho_up
+!!       kxc(:,7)= 1/|grad(rho_dn)| d2Ex/d|grad(rho_dn)| drho_dn
+!!       kxc(:,8)= 1/|grad(rho_up)| * d/d|grad(rho_up)| ( 1/|grad(rho_up)| dEx/d|grad(rho_up)| )
+!!       kxc(:,9)= 1/|grad(rho_dn)| * d/d|grad(rho_dn)| ( 1/|grad(rho_dn)| dEx/d|grad(rho_dn)| )
+!!       kxc(:,10)=1/|grad(rho)| dEc/d|grad(rho)|
+!!       kxc(:,11)=1/|grad(rho)| d2Ec/d|grad(rho)| drho_up
+!!       kxc(:,12)=1/|grad(rho)| d2Ec/d|grad(rho)| drho_dn
+!!       kxc(:,13)=1/|grad(rho)| * d/d|grad(rho)| ( 1/|grad(rho)| dEc/d|grad(rho)| )
+!!       kxc(:,14)=gradx(rho_up)
+!!       kxc(:,15)=gradx(rho_dn)
+!!       kxc(:,16)=grady(rho_up)
+!!       kxc(:,17)=grady(rho_dn)
+!!       kxc(:,18)=gradz(rho_up)
+!!       kxc(:,19)=gradz(rho_dn)
 !!
 !! PARENTS
 !!      dfpt_dyxc1,dfpt_mkvxc_noncoll,dfpt_nstdy,dfpt_nstpaw,dfpt_rhotov
@@ -89,8 +125,8 @@ subroutine dfpt_mkvxc(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat1,nhat1dim,nhat1gr,
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: ngfft(18)
- real(dp),intent(in) :: nhat1(cplex*nfft,nspden*nhat1dim)
- real(dp),intent(in) :: nhat1gr(cplex*nfft,nspden,3*nhat1grdim)
+ real(dp),intent(in),target :: nhat1(cplex*nfft,nspden*nhat1dim)
+ real(dp),intent(in),target :: nhat1gr(cplex*nfft,nspden,3*nhat1grdim)
  real(dp),intent(in) :: kxc(nfft,nkxc),qphon(3)
  real(dp),intent(in),target :: rhor1(cplex*nfft,nspden)
  real(dp),intent(in) :: rprimd(3,3),xccc3d1(cplex*n3xccc)
@@ -98,13 +134,12 @@ subroutine dfpt_mkvxc(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat1,nhat1dim,nhat1gr,
 
 !Local variables-------------------------------
 !scalars
- integer :: ii,ir,nhat1dim_tmp,nhat1grdim_tmp
+ integer :: ii,ir,ispden,nhat1dim_,nhat1rgdim_
  real(dp) :: rho1_dn,rho1_up,rho1im_dn,rho1im_up,rho1re_dn,rho1re_up
- !character(len=500) :: message
+ real(dp) :: spin_scale
 !arrays
  real(dp) :: gprimd(3,3),tsec(2)
- real(dp),allocatable :: nhat1tmp(:,:),nhat1grtmp(:,:,:),rhor1tmp(:,:)
- real(dp),pointer :: rhor1_(:,:)
+ real(dp), ABI_CONTIGUOUS pointer :: nhat1_(:,:),nhat1gr_(:,:,:),rhor1_(:,:)
 
 ! *************************************************************************
 
@@ -124,7 +159,7 @@ subroutine dfpt_mkvxc(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat1,nhat1dim,nhat1gr,
  end if
 
 !Treat first LDA
- if(nkxc/=23)then
+ if(nkxc==1.or.nkxc==3)then
 
 !  PAW: eventually substract compensation density
    if (option/=0) then
@@ -256,88 +291,88 @@ subroutine dfpt_mkvxc(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat1,nhat1dim,nhat1gr,
    end if
 
 !  Treat GGA
- else
+ else if (nkxc==7.or.nkxc==19) then
 
-   ABI_ALLOCATE(rhor1tmp,(cplex*nfft,2))
+! Transfer the data to spin-polarized storage
 
-!  Generates gprimd
-   call matr3inv(rprimd,gprimd)
-
-!  First transfer the data to spin-polarized storage
-   if(option==1 .or. option==2)then   ! Treat the density change
-     if(nspden==1)then
+! Treat the density change
+   ABI_ALLOCATE(rhor1_,(cplex*nfft,nspden))
+   if (option==1 .or. option==2) then
+     if (nspden==1) then
        do ir=1,cplex*nfft
-         rhor1tmp(ir,1)=rhor1(ir,1)*half
-         rhor1tmp(ir,2)=rhor1(ir,1)*half
-       end do
+         rhor1_(ir,1)=rhor1(ir,1)
+       end do 
      else
        do ir=1,cplex*nfft
          rho1_dn=rhor1(ir,1)-rhor1(ir,2)
-         rhor1tmp(ir,1)=rhor1(ir,2)
-         rhor1tmp(ir,2)=rho1_dn
+         rhor1_(ir,1)=rhor1(ir,2)
+         rhor1_(ir,2)=rho1_dn
        end do
-     end if ! nspden==1
+     end if
    else
-     do ir=1,cplex*nfft
-       rhor1tmp(ir,1)=zero
-       rhor1tmp(ir,2)=zero
+     do ispden=1,nspden
+       do ir=1,cplex*nfft
+         rhor1_(ir,ispden)=zero
+       end do 
      end do
    end if
    if( (option==0 .or. option==1) .and. n3xccc/=0)then
-     do ir=1,cplex*nfft
-       rhor1tmp(ir,1)=rhor1tmp(ir,1)+xccc3d1(ir)*half
-       rhor1tmp(ir,2)=rhor1tmp(ir,2)+xccc3d1(ir)*half
-     end do
+     spin_scale=one;if (nspden==2) spin_scale=half   
+     do ispden=1,nspden
+       do ir=1,cplex*nfft
+         rhor1_(ir,ispden)=rhor1_(ir,ispden)+xccc3d1(ir)*spin_scale
+       end do 
+     end do       
    end if
 
 !  PAW: treat also compensation density (and gradients)
-   if (option/=0.and.nhat1dim==1) then
-     ABI_ALLOCATE(nhat1tmp,(cplex*nfft,2))
-     nhat1dim_tmp=1
-     if (nspden==1)then
-       nhat1tmp(:,1)=nhat1(:,1)*half
-       nhat1tmp(:,2)=nhat1(:,1)*half
-     else
+   nhat1dim_=nhat1dim ; nhat1rgdim_=nhat1grdim
+   if (option/=0.and.nhat1dim==1.and.nspden==2) then
+     ABI_ALLOCATE(nhat1_,(cplex*nfft,nspden))
+     do ir=1,cplex*nfft
+       rho1_dn=nhat1(ir,1)-nhat1(ir,2)
+       nhat1_(ir,1)=nhat1(ir,2)
+       nhat1_(ir,2)=rho1_dn
+     end do
+   else if (option==0) then
+     ABI_ALLOCATE(nhat1_,(0,0))
+     nhat1dim_=0
+   else
+     nhat1_ => nhat1
+   end if
+   if (option/=0.and.nhat1grdim==1.and.nspden==2) then
+     ABI_ALLOCATE(nhat1gr_,(cplex*nfft,nspden,3))
+     do ii=1,3
        do ir=1,cplex*nfft
-         rho1_dn=nhat1(ir,1)-nhat1(ir,2)
-         nhat1tmp(ir,1)=nhat1(ir,2)
-         nhat1tmp(ir,2)=rho1_dn
+         rho1_dn=nhat1gr(ir,1,ii)-nhat1gr(ir,2,ii)
+         nhat1gr_(ir,1,ii)=nhat1gr(ir,2,ii)
+         nhat1gr_(ir,2,ii)=rho1_dn
        end do
-     end if
+     end do
+   else if (option==0) then
+     ABI_ALLOCATE(nhat1gr_,(0,0,0))
+     nhat1rgdim_=0
    else
-     ABI_ALLOCATE(nhat1tmp,(0,0))
-     nhat1dim_tmp=0
-   end if
-   if (option/=0.and.nhat1grdim==1) then
-     ABI_ALLOCATE(nhat1grtmp,(cplex*nfft,2,3))
-     nhat1grdim_tmp=1
-     if (nspden==1)then
-       do ii=1,3
-         nhat1grtmp(:,1,ii)=nhat1gr(:,1,ii)*half
-         nhat1grtmp(:,2,ii)=nhat1gr(:,1,ii)*half
-       end do
-     else
-       do ii=1,3
-         do ir=1,cplex*nfft
-           rho1_dn=nhat1gr(ir,1,ii)-nhat1gr(ir,2,ii)
-           nhat1grtmp(ir,1,ii)=nhat1gr(ir,2,ii)
-           nhat1grtmp(ir,2,ii)=rho1_dn
-         end do
-       end do
-     end if
-   else
-     ABI_ALLOCATE(nhat1grtmp,(0,0,0))
-     nhat1grdim_tmp=0
+     nhat1gr_ => nhat1gr
    end if
 
-   call dfpt_mkvxcgga(cplex,gprimd,kxc,mpi_enreg,nfft,ngfft,nhat1tmp,nhat1dim_tmp,&
-&   nhat1grtmp,nhat1grdim_tmp,nkxc,nspden,paral_kgb,qphon,rhor1tmp,usexcnhat,vxc1)
+   call matr3inv(rprimd,gprimd)
 
-   ABI_DEALLOCATE(rhor1tmp)
-   ABI_DEALLOCATE(nhat1tmp)
-   ABI_DEALLOCATE(nhat1grtmp)
+   call dfpt_mkvxcgga(cplex,gprimd,kxc,mpi_enreg,nfft,ngfft,nhat1_,nhat1dim_,&
+&   nhat1gr_,nhat1rgdim_,nkxc,nspden,paral_kgb,qphon,rhor1_,usexcnhat,vxc1)  
 
- end if
+   ABI_DEALLOCATE(rhor1_)
+   if ((option==0).or.(nhat1dim==1.and.nspden==2)) then
+     ABI_DEALLOCATE(nhat1_)
+   end if
+   if ((option==0).or.(nhat1grdim==1.and.nspden==2)) then
+     ABI_DEALLOCATE(nhat1gr_)
+   end if
+
+ else
+   MSG_BUG('Invalid nkxc!')
+
+ end if ! LDA or GGA
 
  call timab(181,2,tsec)
 

@@ -15,7 +15,7 @@
 !! use in the Brillouin-zone interpolation
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2016 ABINIT group (XG, DRH, MT)
+!! Copyright (C) 1999-2017 ABINIT group (XG, DRH, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -62,9 +62,9 @@
 !!  eltfrxc(6+3*natom,6)=exchange-correlation contribution to the elastic tensor
 !!  eltvdw(6+3*natom,6*usevdw)=vdw DFT-D part of the elastic tensor
 !!  has_full_piezo=the full calculation of the piezoelectric tensor from electric field perturbation
-!!                 is only available if nsym=1 (strain perturbation is not symmetrized) 
+!!                 is only available if nsym=1 (strain perturbation is not symmetrized)
 !!  has_allddk= True if all ddk file are present on disk, so the effective charge or piezzo
-!!              electric tensor are correctly computed (PAW ONLY)  
+!!              electric tensor are correctly computed (PAW ONLY)
 !!  iout=unit number for long write-up
 !!  mband=maximum number of bands
 !!  mpert =maximum number of ipert
@@ -375,7 +375,7 @@ subroutine dfpt_dyout(becfrnl,berryopt,blkflg,carflg,ddboun,ddkfil,dyew,dyfrlo,d
        end do
      end do
    end if
-   
+
 !  In case of strain
    if (rfstrs/=0)then
 
@@ -948,11 +948,9 @@ subroutine dfpt_dyout(becfrnl,berryopt,blkflg,carflg,ddboun,ddkfil,dyew,dyfrlo,d
  end do
 
  if(outd2==2)then
-   write(ddboun, '(/,a,i8)' ) &
-&   ' 2nd derivatives (stationary) - # elements :',nelmts
+   write(ddboun, '(/,a,i8)' ) ' 2nd derivatives (stationary) - # elements :',nelmts
  else if(outd2==1)then
-   write(ddboun, '(/,a,i8)' ) &
-&   ' 2nd derivatives (non-stat.)  - # elements :',nelmts
+   write(ddboun, '(/,a,i8)' ) ' 2nd derivatives (non-stat.)  - # elements :',nelmts
  end if
 
 !Phonon wavevector
@@ -965,8 +963,7 @@ subroutine dfpt_dyout(becfrnl,berryopt,blkflg,carflg,ddboun,ddkfil,dyew,dyfrlo,d
 !Now the whole 2nd-order matrix, but not in cartesian coordinates,
 !and masses not included
  write(iout,*)' '
- write(iout,*)' 2nd-order matrix (non-cartesian coordinates,',&
-& ' masses not included,'
+ write(iout,*)' 2nd-order matrix (non-cartesian coordinates,',' masses not included,'
  write(iout,*)'  asr not included )'
  if(rfstrs/=0) then
    write(iout,*)' cartesian coordinates for strain terms (1/ucvol factor '
@@ -1355,8 +1352,8 @@ subroutine dfpt_dyout(becfrnl,berryopt,blkflg,carflg,ddboun,ddkfil,dyew,dyfrlo,d
      end do
    end if
  end if
- 
- write(std_out,*)' dfpt_dyout : exit '
+
+ !write(std_out,*)' dfpt_dyout : exit '
 
 end subroutine dfpt_dyout
 !!***

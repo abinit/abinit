@@ -12,7 +12,7 @@
 !! Note that left and right k points can be different, i.e. ghc=<k^prime+G|H|C_k>.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (DCA, XG, GMR, LSI, MT)
+!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR, LSI, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -69,7 +69,7 @@
 !!
 !! PARENTS
 !!      cgwf,chebfi,dfpt_cgwf,gwls_hamiltonian,ks_ddiago,lobpcgwf,m_io_kss
-!!      m_rf2,mkresi,prep_getghc
+!!      m_rf2,mkresi,multithreaded_getghc
 !!
 !! CHILDREN
 !!      fourwf
@@ -121,7 +121,8 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlc,lambda,mpi_enreg,nd
 !arrays
  integer,intent(in),optional,target :: kg_fft_k(:,:),kg_fft_kp(:,:)
  real(dp),intent(out),target :: gsc(:,:)
- real(dp),intent(inout) :: cwavef(:,:),ghc(:,:),gvnlc(:,:)
+ real(dp),intent(inout) :: cwavef(:,:)
+ real(dp),intent(out) :: ghc(:,:),gvnlc(:,:)
  type(pawcprj_type),intent(inout),target :: cwaveprj(:,:)
 
 !Local variables-------------------------------
@@ -152,6 +153,8 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlc,lambda,mpi_enreg,nd
  type(pawcprj_type),pointer :: cwaveprj_fock(:,:),cwaveprj_idat(:,:),cwaveprj_nonlop(:,:)
 
 ! *********************************************************************
+
+ DBG_ENTER("COLL")
 
 !Keep track of total time spent in getghc:
  call timab(200+tim_getghc,1,tsec)
@@ -568,10 +571,8 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlc,lambda,mpi_enreg,nd
 
      if (gs_ham%usepaw==0) gsc_ptr => nonlop_dum
      if (gs_ham%usepaw==1) gsc_ptr => gsc
-
      call nonlop(choice,cpopt_here,cwaveprj_nonlop,enlout,gs_ham,idir,lambda_ndat,mpi_enreg,ndat,&
 &     nnlout,paw_opt,signs,gsc_ptr,tim_nonlop,cwavef,gvnlc,select_k=select_k_)
-
    end if ! end type_calc 0 or 2 for nonlop application
 
 
@@ -584,7 +585,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlc,lambda,mpi_enreg,nd
    if(prtvol/=-level)then
      do idat=1,ndat
        if (k1_eq_k2) then
-!      !$OMP PARALLEL DO PRIVATE(igspinor) COLLAPSE(2)
+!      !!$OMP PARALLEL DO PRIVATE(igspinor) COLLAPSE(2)
          do ispinor=1,my_nspinor
            do ig=1,npw_k2
              igspinor=ig+npw_k2*(ispinor-1)+npw_k2*my_nspinor*(idat-1)
@@ -601,8 +602,9 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlc,lambda,mpi_enreg,nd
              end if
            end do ! ig
          end do ! ispinor
+
        else
-!      !$OMP PARALLEL DO PRIVATE(igspinor) COLLAPSE(2)
+!      !!$OMP PARALLEL DO PRIVATE(igspinor) COLLAPSE(2)
          do ispinor=1,my_nspinor
            do ig=1,npw_k2
              igspinor=ig+npw_k2*(ispinor-1)+npw_k2*my_nspinor*(idat-1)
@@ -699,6 +701,8 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlc,lambda,mpi_enreg,nd
 
  call timab(200+tim_getghc,2,tsec)
 
+ DBG_EXIT("COLL")
+
 end subroutine getghc
 !!***
 
@@ -714,7 +718,7 @@ end subroutine getghc
 !! Compute metaGGA contribution to <G|H|C> for input vector |C> expressed in reciprocal space.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (DCA, XG, GMR, LSI, MT)
+!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR, LSI, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -826,7 +830,7 @@ subroutine getghc_mGGA(cwavef,ghc_mGGA,gbound_k,gprimd,istwf_k,kg_k,kpt,mgfft,mp
 !  STEP1: Compute grad of cwavef and Laplacian of cwavef
    ABI_ALLOCATE(gcwavef,(2,npw_k*ndat,3))
    ABI_ALLOCATE(lcwavef,(2,npw_k*ndat))
-!$OMP PARALLEL DO
+!!$OMP PARALLEL DO
    do idat=1,ndat
      do ipw=1,npw_k
        gcwavef(:,ipw+(idat-1)*npw_k,1:3)=zero
@@ -854,7 +858,7 @@ subroutine getghc_mGGA(cwavef,ghc_mGGA,gbound_k,gprimd,istwf_k,kg_k,kpt,mgfft,mp
    call fourwf(1,vxctaulocal(:,:,:,:,1),lcwavef,ghc1,work,gbound_k,gbound_k,&
 &   istwf_k,kg_k,kg_k,mgfft,mpi_enreg,ndat,ngfft,npw_k,npw_k,n4,n5,n6,2,&
 &   mpi_enreg%paral_kgb,tim_fourwf,weight,weight,use_gpu_cuda=use_gpu_cuda)
-!$OMP PARALLEL DO
+!!$OMP PARALLEL DO
    do idat=1,ndat
      do ipw=1,npw_k
        ghc_mGGA(:,ipw+(idat-1)*npw_k)=ghc_mGGA(:,ipw+(idat-1)*npw_k)-half*ghc1(:,ipw+(idat-1)*npw_k)
@@ -866,7 +870,7 @@ subroutine getghc_mGGA(cwavef,ghc_mGGA,gbound_k,gprimd,istwf_k,kg_k,kpt,mgfft,mp
      call fourwf(1,vxctaulocal(:,:,:,:,1+idir),gcwavef(:,:,idir),ghc1,work,gbound_k,gbound_k,&
      istwf_k,kg_k,kg_k,mgfft,mpi_enreg,ndat,ngfft,npw_k,npw_k,n4,n5,n6,2,&
 &     mpi_enreg%paral_kgb,tim_fourwf,weight,weight,use_gpu_cuda=use_gpu_cuda)
-!$OMP PARALLEL DO
+!!$OMP PARALLEL DO
      do idat=1,ndat
        do ipw=1,npw_k
          ghc_mGGA(:,ipw+(idat-1)*npw_k)=ghc_mGGA(:,ipw+(idat-1)*npw_k)-half*ghc1(:,ipw+(idat-1)*npw_k)
@@ -898,7 +902,7 @@ subroutine getghc_mGGA(cwavef,ghc_mGGA,gbound_k,gprimd,istwf_k,kg_k,kpt,mgfft,mp
 !    STEP1: Compute grad of cwavef and Laplacian of cwavef
      ABI_ALLOCATE(gcwavef1,(2,npw_k*ndat,3))
      ABI_ALLOCATE(lcwavef1,(2,npw_k*ndat))
-!$OMP PARALLEL DO
+!!$OMP PARALLEL DO
      do idat=1,ndat
        do ipw=1,npw_k
          gcwavef1(:,ipw+(idat-1)*npw_k,1:3)=zero
@@ -926,7 +930,7 @@ subroutine getghc_mGGA(cwavef,ghc_mGGA,gbound_k,gprimd,istwf_k,kg_k,kpt,mgfft,mp
      call fourwf(1,vxctaulocal(:,:,:,:,1),lcwavef1,ghc1,work,gbound_k,gbound_k,&
 &     istwf_k,kg_k,kg_k,mgfft,mpi_enreg,ndat,ngfft,npw_k,npw_k,n4,n5,n6,2,&
 &     mpi_enreg%paral_kgb,tim_fourwf,weight,weight,use_gpu_cuda=use_gpu_cuda)
-!$OMP PARALLEL DO
+!!$OMP PARALLEL DO
      do idat=1,ndat
        do ipw=1,npw_k
          ghc_mGGA(:,ipw+(idat-1)*my_nspinor*npw_k)=ghc_mGGA(:,ipw+(idat-1)*my_nspinor*npw_k)-half*ghc1(:,ipw+(idat-1)*npw_k)
@@ -938,7 +942,7 @@ subroutine getghc_mGGA(cwavef,ghc_mGGA,gbound_k,gprimd,istwf_k,kg_k,kpt,mgfft,mp
        call fourwf(1,vxctaulocal(:,:,:,:,1+idir),gcwavef1(:,:,idir),ghc1,work,gbound_k,gbound_k,&
        istwf_k,kg_k,kg_k,mgfft,mpi_enreg,ndat,ngfft,npw_k,npw_k,n4,n5,n6,2,&
 &       mpi_enreg%paral_kgb,tim_fourwf,weight,weight,use_gpu_cuda=use_gpu_cuda)
-!$OMP PARALLEL DO
+!!$OMP PARALLEL DO
        do idat=1,ndat
          do ipw=1,npw_k
            ghc_mGGA(:,ipw+(idat-1)*my_nspinor*npw_k) = ghc_mGGA(:,ipw+(idat-1)*my_nspinor*npw_k)-half*ghc1(:,ipw+(idat-1)*npw_k)
@@ -958,7 +962,7 @@ subroutine getghc_mGGA(cwavef,ghc_mGGA,gbound_k,gprimd,istwf_k,kg_k,kpt,mgfft,mp
 !    STEP1: Compute grad of cwavef and Laplacian of cwavef
      ABI_ALLOCATE(gcwavef2,(2,npw_k*ndat,3))
      ABI_ALLOCATE(lcwavef2,(2,npw_k*ndat))
-!$OMP PARALLEL DO
+!!$OMP PARALLEL DO
      do idat=1,ndat
        do ipw=1,npw_k
          gcwavef2(:,ipw+(idat-1)*npw_k,1:3)=zero
@@ -986,7 +990,7 @@ subroutine getghc_mGGA(cwavef,ghc_mGGA,gbound_k,gprimd,istwf_k,kg_k,kpt,mgfft,mp
      call fourwf(1,vxctaulocal(:,:,:,:,1),lcwavef2,ghc2,work,gbound_k,gbound_k,&
 &     istwf_k,kg_k,kg_k,mgfft,mpi_enreg,ndat,ngfft,npw_k,npw_k,n4,n5,n6,2,&
 &     mpi_enreg%paral_kgb,tim_fourwf,weight,weight,use_gpu_cuda=use_gpu_cuda)
-!$OMP PARALLEL DO
+!!$OMP PARALLEL DO
      do idat=1,ndat
        do ipw=1,npw_k
          ghc_mGGA(:,ipw+(idat-1)*my_nspinor*npw_k)=ghc_mGGA(:,ipw+(idat-1)*my_nspinor*npw_k)-half*ghc2(:,ipw+(idat-1)*npw_k)
@@ -998,7 +1002,7 @@ subroutine getghc_mGGA(cwavef,ghc_mGGA,gbound_k,gprimd,istwf_k,kg_k,kpt,mgfft,mp
        call fourwf(1,vxctaulocal(:,:,:,:,1+idir),gcwavef2(:,:,idir),ghc2,work,gbound_k,gbound_k,&
        istwf_k,kg_k,kg_k,mgfft,mpi_enreg,ndat,ngfft,npw_k,npw_k,n4,n5,n6,2,&
 &       mpi_enreg%paral_kgb,tim_fourwf,weight,weight,use_gpu_cuda=use_gpu_cuda)
-!$OMP PARALLEL DO
+!!$OMP PARALLEL DO
        do idat=1,ndat
          do ipw=1,npw_k
            ghc_mGGA(:,ipw+(idat-1)*my_nspinor*npw_k)=ghc_mGGA(:,ipw+(idat-1)*my_nspinor*npw_k)-half*ghc2(:,ipw+(idat-1)*npw_k)

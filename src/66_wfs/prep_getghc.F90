@@ -7,7 +7,7 @@
 !! this routine prepares the data to the call of getghc.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (FBottin,MT,GZ,MD,FDahm)
+!! Copyright (C) 1998-2017 ABINIT group (FBottin,MT,GZ,MD,FDahm)
 !! this file is distributed under the terms of the
 !! gnu general public license, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -37,10 +37,10 @@
 !!  cwaveprj(natom,my_nspinor*bandpp)= wave functions at k projected with nl projectors
 !!
 !! PARENTS
-!!      chebfi,lobpcgwf,mkresi
+!!      chebfi,lobpcgwf,m_lobpcgwf,mkresi
 !!
 !! CHILDREN
-!!      dcopy,getghc,prep_index_wavef_bandpp,prep_sort_wavef_spin
+!!      dcopy,multithreaded_getghc,prep_index_wavef_bandpp,prep_sort_wavef_spin
 !!      prep_wavef_sym_do,prep_wavef_sym_undo,timab,xmpi_alltoallv
 !!
 !! SOURCE
@@ -260,7 +260,7 @@ subroutine prep_getghc(cwavef,gs_hamk,gvnlc,gwavef,swavef,lambda,blocksize,&
    end if
 
    call timab(635,3,tsec)
-   call getghc(cpopt,cwavef_alltoall2,cwaveprj,gwavef_alltoall2,swavef_alltoall2(:,1:nbval),&
+   call multithreaded_getghc(cpopt,cwavef_alltoall2,cwaveprj,gwavef_alltoall2,swavef_alltoall2(:,1:nbval),&
 &   gs_hamk,gvnlc_alltoall2,lambda,mpi_enreg,1,prtvol,sij_opt,tim_getghc,0)
    call timab(635,2,tsec)
 
@@ -293,7 +293,7 @@ subroutine prep_getghc(cwavef,gs_hamk,gvnlc,gwavef,swavef,lambda,blocksize,&
 !  Fourier transformation
 !  ----------------------
    call timab(636,3,tsec)
-   call getghc(cpopt,cwavef_alltoall2,cwaveprj,gwavef_alltoall2,swavef_alltoall2,gs_hamk,&
+   call multithreaded_getghc(cpopt,cwavef_alltoall2,cwaveprj,gwavef_alltoall2,swavef_alltoall2,gs_hamk,&
 &   gvnlc_alltoall2,lambda,mpi_enreg,bandpp,prtvol,sij_opt,tim_getghc,0)
    call timab(636,2,tsec)
 
@@ -302,11 +302,9 @@ subroutine prep_getghc(cwavef,gs_hamk,gvnlc,gwavef,swavef,lambda,blocksize,&
 !  -----------------------------------------------------
    if(do_transpose) then
      call timab(634,3,tsec)
-!    cwavef_alltoall(:,index_wavef_band) = cwavef_alltoall(:,:)   ! NOT NEEDED
      gwavef_alltoall1(:,index_wavef_band) = gwavef_alltoall2(:,:)
      if (sij_opt==1) swavef_alltoall1(:,index_wavef_band) = swavef_alltoall2(:,:)
      gvnlc_alltoall1(:,index_wavef_band)  = gvnlc_alltoall2(:,:)
-
      ABI_DEALLOCATE(index_wavef_band)
      call timab(634,2,tsec)
    end if
@@ -359,7 +357,7 @@ subroutine prep_getghc(cwavef,gs_hamk,gvnlc,gwavef,swavef,lambda,blocksize,&
 !  Fourier calculation
 !  ------------------------------------------------------------
    call timab(637,3,tsec)
-   call getghc(cpopt,ewavef_alltoall_sym,cwaveprj,gwavef_alltoall_sym,swavef_alltoall_sym,gs_hamk,&
+   call multithreaded_getghc(cpopt,ewavef_alltoall_sym,cwaveprj,gwavef_alltoall_sym,swavef_alltoall_sym,gs_hamk,&
 &   gvnlc_alltoall_sym,lambda,mpi_enreg,bandpp_sym,prtvol,sij_opt,tim_getghc,1,&
 &   kg_fft_k=kg_k_gather_sym)
    call timab(637,2,tsec)
@@ -418,7 +416,7 @@ subroutine prep_getghc(cwavef,gs_hamk,gvnlc,gwavef,swavef,lambda,blocksize,&
    call timab(633,2,tsec)
 
    call timab(638,3,tsec)
-   call getghc(cpopt,cwavef_alltoall2,cwaveprj,gwavef_alltoall2,swavef_alltoall2,gs_hamk,&
+   call multithreaded_getghc(cpopt,cwavef_alltoall2,cwaveprj,gwavef_alltoall2,swavef_alltoall2,gs_hamk,&
 &   gvnlc_alltoall2,lambda,mpi_enreg,bandpp,prtvol,sij_opt,tim_getghc,2)
    call timab(638,2,tsec)
 

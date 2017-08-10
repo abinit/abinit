@@ -2,7 +2,7 @@
 .Version 8.0.3 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
 
-.Copyright (C) 1998-2016 ABINIT group . 
+.Copyright (C) 1998-2017 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -45,7 +45,7 @@ _ WF disk file :      0.026 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 --------------------------------------------------------------------------------
 -
 - outvars: echo of selected default values                                      
--   accesswff0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+-   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
 -
 - outvars: echo of global parameters not present in the input file              
 -  max_nthreads =    0
@@ -54,6 +54,7 @@ _ WF disk file :      0.026 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
             acell      3.0000000000E+00  3.0000000000E+00  3.0000000000E+00 Bohr
               amu      1.00794000E+00  1.00794000E+00
       chksymbreak           0
+     densfor_pred           1
          dynimage        0    1    1    1    1    0
              ecut      1.50000000E+01 Hartree
            ecutsm      5.00000000E-01 Hartree
@@ -61,7 +62,6 @@ _ WF disk file :      0.026 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
      fxcartfactor      1.00000000E+01
            iatfix        1
            imgmov           2
-     densfor_pred           1
          istatimg           0
               kpt      1.25000000E-01  1.25000000E-01  1.25000000E-01
                        3.75000000E-01  1.25000000E-01  1.25000000E-01
@@ -99,6 +99,7 @@ P           mkmem          20
            ntypat           2
         optforces           1
            prtden           0
+        prtebands           0
            prteig           0
             prtwf           0
            shiftk      5.00000000E-01  5.00000000E-01  5.00000000E-01
@@ -6822,6 +6823,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.625      74.598
             acell      3.0000000000E+00  3.0000000000E+00  3.0000000000E+00 Bohr
               amu      1.00794000E+00  1.00794000E+00
       chksymbreak           0
+     densfor_pred           1
          dynimage        0    1    1    1    1    0
              ecut      1.50000000E+01 Hartree
            ecutsm      5.00000000E-01 Hartree
@@ -6841,7 +6843,6 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.625      74.598
      fxcartfactor      1.00000000E+01
            iatfix        1
            imgmov           2
-     densfor_pred           1
          istatimg           0
               kpt      1.25000000E-01  1.25000000E-01  1.25000000E-01
                        3.75000000E-01  1.25000000E-01  1.25000000E-01
@@ -6879,6 +6880,7 @@ P           mkmem          20
            ntypat           2
         optforces           1
            prtden           0
+        prtebands           0
            prteig           0
             prtwf           0
            shiftk      5.00000000E-01  5.00000000E-01  5.00000000E-01

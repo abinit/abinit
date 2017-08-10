@@ -15,7 +15,7 @@
 !! 08seqpar directory
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (TD)
+!! Copyright (C) 1998-2017 ABINIT group (TD)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -31,7 +31,6 @@
 !! chkint_le.F90
 !! chkint_ne.F90
 !! chkint_prt.F90
-!! chkneu.F90
 !! chkvars.F90
 !! compute_kgb_indicator.F90
 !! create_nc_file.F90

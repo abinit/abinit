@@ -9,7 +9,7 @@
 !! mixed strain derivatives.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (DRH, XG, DCA, GMR, MM, AR, MV, MB)
+!! Copyright (C) 1998-2017 ABINIT group (DRH, XG, DCA, GMR, MM, AR, MV, MB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -237,7 +237,7 @@ subroutine dfpt_nselt(blkflg,cg,cg1,cplex,&
  nfftot=n1*n2*n3
 
 !Initialize Hamiltonian (k-independent terms) - NCPP only
- call init_hamiltonian(gs_hamk,psps,pawtab_dum,nspinor,nspden,natom,&
+ call init_hamiltonian(gs_hamk,psps,pawtab_dum,nspinor,nsppol,nspden,natom,&
 & typat,xred,nfft,mgfft,ngfft,rprimd,nloalg,ph1d=ph1d)
 
  bantot = 0

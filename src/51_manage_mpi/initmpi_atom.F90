@@ -7,7 +7,7 @@
 !!  Initializes the mpi informations for parallelism over atoms (PAW).
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2016 ABINIT group (MT)
+!!  Copyright (C) 2008-2017 ABINIT group (MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -81,7 +81,12 @@ subroutine initmpi_atom(dtset,mpi_enreg)
  end if
  nullify(mpi_enreg%my_atmtab)
 
- if (xmpi_paral==0) return
+ if (xmpi_paral==0) then 
+   mpi_enreg%nproc_atom=0
+   ABI_ALLOCATE(mpi_enreg%my_atmtab,(0))
+   return
+ end if
+
 
 !Check compatibility
  if (dtset%paral_atom>0) then

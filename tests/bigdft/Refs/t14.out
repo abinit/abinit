@@ -2,7 +2,7 @@
 .Version 8.0.2 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu4.7 computer) 
 
-.Copyright (C) 1998-2016 ABINIT group . 
+.Copyright (C) 1998-2017 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -182,8 +182,8 @@
 ================================================================================
 
      iter   Etot(hartree)      deltaE(h)  grdnorm    nres2
- ETOT  1  -58.271557620551    -5.827E+01 1.648E-01 0.000E+00
- ETOT  2  -58.439575024301    -1.680E-01 5.511E-02 2.682E-06
+ ETOT  1  -58.271557620551    -5.827E+01 1.648E-01 3.615E+01
+ ETOT  2  -58.439575024301    -1.680E-01 5.511E-02 8.009E-02
 
  scprqt:  WARNING -
   nstep=    2 was not enough SCF cycles to converge;

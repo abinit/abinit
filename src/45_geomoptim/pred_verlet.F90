@@ -9,18 +9,17 @@
 !! IONMOV 6:
 !! Given a starting point xred that is a vector of length 3*natom
 !! (reduced nuclei coordinates), a velocity vector (in cartesian
-!! coordinates), and unit cell parameters (acell and rprim -
+!! coordinates), and unit cell parameters (acell and rprimd -
 !! without velocities in the present implementation), the Verlet
 !! dynamics is performed, using the gradient of the energy
-!! (atomic forces and stress : fred or fcart and stress) as
-!! calculated by the routine scfcv.
+!! (atomic forces and stresses) as calculated by the routine scfcv.
 !!
 !! Some atoms can be kept fixed, while the propagation of unit cell
 !! parameters is only performed if optcell/=0.
 !! No more than ab_mover%ntime steps are performed.
 !! The time step is governed by dtion, contained in ab_mover
 !! (coming from dtset).
-!! Returned quantities are xred, and eventually acell and rprim
+!! Returned quantities are xred, and eventually acell and rprimd
 !! (new ones!).
 !!
 !! IONMOV 7:
@@ -30,7 +29,7 @@
 !! allows an early exit.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (DCA, XG, GMR, JCC, SE)
+!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR, JCC, SE)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -57,8 +56,8 @@
 !!      mover
 !!
 !! CHILDREN
-!!      hist2var,metric,mkrdim,var2hist,wrtout,xcart2xred,xfpack_f2vout
-!!      xfpack_vin2x,xfpack_x2vin,xred2xcart
+!!      fcart2fred,hist2var,metric,mkrdim,var2hist,wrtout,xcart2xred
+!!      xfpack_f2vout,xfpack_vin2x,xfpack_x2vin,xred2xcart
 !!
 !! SOURCE
 
@@ -105,7 +104,7 @@ subroutine pred_verlet(ab_mover,hist,ionmov,itime,ntime,zDEBUG,iexit)
 !arrays
  integer  :: stopped(ab_mover%natom)
  real(dp) :: acell0(3),fcart(3,ab_mover%natom)
- real(dp) :: fred(3,ab_mover%natom),fred_corrected(3,ab_mover%natom)
+ real(dp) :: fred_corrected(3,ab_mover%natom)
  real(dp) :: gprimd(3,3),gmet(3,3),rmet(3,3), strten(6)
  real(dp) :: xcart(3,ab_mover%natom),xcart_next(3,ab_mover%natom)
  real(dp) :: xred(3,ab_mover%natom),xred_next(3,ab_mover%natom)
@@ -202,22 +201,23 @@ subroutine pred_verlet(ab_mover,hist,ionmov,itime,ntime,zDEBUG,iexit)
 !##########################################################
 !### 03. Obtain the present values from the history
 
- call hist2var(acell,hist,ab_mover%natom,rprim,rprimd,xcart,xred,zDEBUG)
+ call hist2var(acell,hist,ab_mover%natom,rprimd,xred,zDEBUG)
 
- fcart(:,:) =hist%histXF(:,:,3,hist%ihist)
- fred(:,:)  =hist%histXF(:,:,4,hist%ihist)
- vel(:,:)   =hist%histV(:,:,hist%ihist)
- strten(:)  =hist%histS(:,hist%ihist)
- etotal     =hist%histE(hist%ihist)
+ call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
+ do ii=1,3
+   rprim(ii,1:3)=rprimd(ii,1:3)/acell(1:3)
+ end do
+
+ call xred2xcart(ab_mover%natom,rprimd,xcart,xred)
+ fcart(:,:)  =hist%fcart(:,:,hist%ihist)
+ strten(:)  =hist%strten(:,hist%ihist)
+ vel(:,:)   =hist%vel(:,:,hist%ihist)
+ etotal     =hist%etot(hist%ihist)
 
  if(zDEBUG)then
    write (std_out,*) 'fcart:'
    do kk=1,ab_mover%natom
      write (std_out,*) fcart(:,kk)
-   end do
-   write (std_out,*) 'fred:'
-   do kk=1,ab_mover%natom
-     write (std_out,*) fred(:,kk)
    end do
    write (std_out,*) 'vel:'
    do kk=1,ab_mover%natom
@@ -229,23 +229,19 @@ subroutine pred_verlet(ab_mover,hist,ionmov,itime,ntime,zDEBUG,iexit)
    write (std_out,*) etotal
  end if
 
- call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
  acell0=acell ; ucvol0=ucvol
 
 !Get rid of mean force on whole unit cell, but only if no
 !generalized constraints are in effect
+ call fcart2fred(fcart,fred_corrected,rprimd,ab_mover%natom)
  if(ab_mover%nconeq==0)then
    amass_tot=sum(ab_mover%amass(:))
-   do ii=1,3
-     favg=sum(fred(ii,:))/dble(ab_mover%natom)
-!    Note that the masses are used, in order to weight the repartition of the average force.
-!    This procedure is adequate for dynamics, as pointed out by Hichem Dammak (2012 Jan 6)..
-     fred_corrected(ii,:)=fred(ii,:)-favg*ab_mover%amass(:)/amass_tot
-     if(ab_mover%jellslab/=0.and.ii==3)&
-&     fred_corrected(ii,:)=fred(ii,:)
+   do kk=1,3
+     if (kk/=3.or.ab_mover%jellslab==0) then
+       favg=sum(fred_corrected(kk,:))/dble(ab_mover%natom)
+       fred_corrected(kk,:)=fred_corrected(kk,:)-favg*ab_mover%amass(:)/amass_tot
+     end if
    end do
- else
-   fred_corrected(:,:)=fred(:,:)
  end if
 
 !write(std_out,*) 'verlet 04'
@@ -342,7 +338,6 @@ subroutine pred_verlet(ab_mover,hist,ionmov,itime,ntime,zDEBUG,iexit)
  if(zDEBUG)then
    write(std_out,*) 'Shifted data ENTER'
    write(std_out,*) 'acell(:)',acell(:)
-   write(std_out,*) 'rprim(:,:)',rprim(:,:)
    write(std_out,*) 'rprimd(:,:)',rprimd(:,:)
    write(std_out,*) 'ucvol',ucvol
    write(std_out,*) 'vel_prevhalf(:,:)',vel_prevhalf(:,:)
@@ -362,8 +357,6 @@ subroutine pred_verlet(ab_mover,hist,ionmov,itime,ntime,zDEBUG,iexit)
  else
 !  Initialisation : no vin_prev is available, but the ionic velocity
 !  is available, in cartesian coordinates
-!  Convert input xred (reduced coordinates) to xcart (cartesian)
-   call xred2xcart(ab_mover%natom,rprimd,xcart,xred)
 !  Uses the velocity
    xcart_next(:,:)=xcart(:,:)+ab_mover%dtion*vel(:,:)
 !  Convert back to xred_next (reduced coordinates)
@@ -374,7 +367,6 @@ subroutine pred_verlet(ab_mover,hist,ionmov,itime,ntime,zDEBUG,iexit)
    rprim_next(:,:)=rprim(:,:)
    rprimd_next(:,:)=rprimd(:,:)
    write(std_out,*) 'ucvol',ucvol
-!  write(std_out,*) 'ucvol',ucvol_next
 !  Store all these next values in vin_next
    call xfpack_x2vin(acell_next,acell0,ab_mover%natom,&
 &   ndim,ab_mover%nsym,ab_mover%optcell,rprim_next,&
@@ -519,7 +511,6 @@ subroutine pred_verlet(ab_mover,hist,ionmov,itime,ntime,zDEBUG,iexit)
 
 !acell(:)=acell_next(:)
 !rprim(:,:)=rprim_next(:,:)
-!rprimd(:,:)=rprimd_next(:,:)
 !ucvol=ucvol_next
  vel_prevhalf(:,:)=vel_nexthalf(:,:)
  vin_prev(:)=vin(:)
@@ -535,7 +526,6 @@ subroutine pred_verlet(ab_mover,hist,ionmov,itime,ntime,zDEBUG,iexit)
  write(std_out,*) 'vel_prevhalf(:,:)',vel_prevhalf(:,:)
  write(std_out,*) 'vin_prev(:)',vin_prev(:)
  write(std_out,*) 'vin(:)',vin(:)
- write(std_out,*) 'xcart(:,:)',xcart(:,:)
  write(std_out,*) 'xred(:,:)',xred(:,:)
 
 
@@ -546,12 +536,11 @@ subroutine pred_verlet(ab_mover,hist,ionmov,itime,ntime,zDEBUG,iexit)
 !Increase indexes
  hist%ihist=hist%ihist+1
 
-!Compute xcart from xred, and rprimd
- call xred2xcart(ab_mover%natom,rprimd,xcart,xred)
-
 !Fill the history with the variables
-!xcart, xred, acell, rprimd
- call var2hist(acell,hist,ab_mover%natom,rprim,rprimd,xcart,xred,zDEBUG)
+!xred, acell, rprimd, vel
+ call var2hist(acell,hist,ab_mover%natom,rprimd,xred,zDEBUG)
+ hist%vel(:,:,hist%ihist)=vel(:,:)
+ hist%time(hist%ihist)=real(itime,kind=dp)*ab_mover%dtion
 
  if(zDEBUG)then
    write (std_out,*) 'vel:'
@@ -560,24 +549,7 @@ subroutine pred_verlet(ab_mover,hist,ionmov,itime,ntime,zDEBUG,iexit)
    end do
  end if
 
- hist%histV(:,:,hist%ihist)=vel(:,:)
- hist%histT(hist%ihist)=itime*ab_mover%dtion
-
-!write(std_out,*) 'verlet 09'
-!##########################################################
-!### 09. Deallocate in the last iteration
-
-!Temporarily deactivated (MT sept. 2011)
  if (.false.) write(std_out,*) ntime
-!if(itime==ntime-1)then
-!if (allocated(vin))          deallocate(vin)
-!if (allocated(vin_next))     deallocate(vin_next)
-!if (allocated(vout))         deallocate(vout)
-!if (allocated(vin_prev))     deallocate(vin_prev)
-!if (allocated(vout_prev))    deallocate(vout_prev)
-!if (allocated(hessin))       deallocate(hessin)
-!if (allocated(vel_prevhalf)) deallocate(vel_prevhalf)
-!end if
 
 end subroutine pred_verlet
 !!***

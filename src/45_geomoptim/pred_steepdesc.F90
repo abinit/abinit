@@ -15,7 +15,7 @@
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (DCA, XG, GMR, SE)
+!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR, SE)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -35,19 +35,8 @@
 !! OUTPUT
 !!
 !! SIDE EFFECTS
-!! hist<type abihist>=Historical record of positions, forces
-!!      |                    acell, stresses, and energies,
-!!      |                    contains:
-!!      | mxhist:  Maximun number of records
-!!      | histA:   Historical record of acell(A) and rprimd(R)
-!!      | histE:   Historical record of energy(E)
-!!      | histEk:  Historical record of Ionic kinetic energy(Ek)
-!!      | histEnt: Historical record of Entropy
-!!      | histT:   Historical record of time(T) (For MD or iteration for GO)
-!!      | histR:   Historical record of rprimd(R)
-!!      | histS:   Historical record of strten(S)
-!!      | histV:   Historical record of velocity(V)
-!!      | histXF:  Historical record of positions(X) and forces(F)
+!! hist<type abihist>=Historical record of positions, forces,
+!!                               stresses, cell and energies.
 !!
 !! ncycle: Number of cycles of a particular time step
 !!
@@ -60,7 +49,7 @@
 !!      mover
 !!
 !! CHILDREN
-!!      hist2var,metric,mkradim,mkrdim,var2hist,xcart2xred
+!!      hist2var,mkradim,mkrdim,var2hist,xcart2xred,xred2xcart
 !!
 !! SOURCE
 
@@ -91,7 +80,7 @@ implicit none
 !Arguments ------------------------------------
 !scalars
 type(abimover),intent(in)       :: ab_mover
-type(abihist),intent(inout) :: hist
+type(abihist),intent(inout),target :: hist
 type(abiforstr),intent(in) :: forstr
 integer,intent(in)    :: itime,iexit
 logical,intent(in)    :: zDEBUG
@@ -100,18 +89,16 @@ logical,intent(in)    :: zDEBUG
 !scalars
 integer  :: kk,jj
 real(dp) :: em
-real(dp) :: fcart
-real(dp) :: xc,str,ucvol
+real(dp) :: f_cart
+real(dp) :: xc,str
 real(dp) :: xnow,lambda
 real(dp),save :: hh
 !arrays
-real(dp) :: gprimd(3,3)
-real(dp) :: gmet(3,3)
-real(dp) :: rmet(3,3)
 real(dp) :: acell(3),strten(6)
-real(dp) :: rprimd(3,3),rprim(3,3)
+real(dp) :: rprim(3,3),rprimd(3,3)
 real(dp) :: xred(3,ab_mover%natom),xcart(3,ab_mover%natom)
 real(dp) :: residual(3,ab_mover%natom)
+real(dp), ABI_CONTIGUOUS pointer :: fcart(:,:),vel(:,:)
 
 !***************************************************************************
 !Beginning of executable session
@@ -124,13 +111,21 @@ real(dp) :: residual(3,ab_mover%natom)
 !write(std_out,*) '01'
 !##########################################################
 !### 01. Copy from the history to the variables
- call hist2var(acell,hist,ab_mover%natom,rprim,rprimd,xcart,xred,zDEBUG)
- strten(:)=hist%histS(:,hist%ihist)
+ call hist2var(acell,hist,ab_mover%natom,rprimd,xred,zDEBUG)
+
+ do jj=1,3
+   rprim(jj,1:3)=rprimd(jj,1:3)/acell(1:3)
+ end do
+
+ call xred2xcart(ab_mover%natom,rprimd,xcart,xred)
+ strten(:)=hist%strten(:,hist%ihist)
+ fcart => hist%fcart(:,:,hist%ihist)
+ vel => hist%vel(:,:,hist%ihist)
 
 !Fill the residual with forces (No preconditioning)
 !Or the preconditioned forces
  if (ab_mover%goprecon==0)then
-   residual(:,:)= hist%histXF(:,:,3,hist%ihist)
+   residual(:,:)=fcart(:,:)
  else
    residual(:,:)= forstr%fcart(:,:)
  end if
@@ -142,7 +137,7 @@ real(dp) :: residual(3,ab_mover%natom)
  if (ab_mover%dtion>0)then
    hh = ab_mover%dtion
  else
-   hh=fdtion(ab_mover,hist,itime)
+   hh=fdtion(ab_mover,itime,xcart,fcart,vel)
  end if
 
  lambda=hh
@@ -161,7 +156,7 @@ real(dp) :: residual(3,ab_mover%natom)
 !    write(std_out,*) '03'
 !    ##########################################################
 !    ### 03. Filling other values from history (forces and vel)
-     fcart=residual(jj,kk)
+     f_cart=residual(jj,kk)
      xc=xcart(jj,kk)
 !    This lambda is taken from the kinematical equation
 !    lambda=hh*hh/(2*em)
@@ -177,7 +172,7 @@ real(dp) :: residual(3,ab_mover%natom)
      else
 
 !      This is the main expresion (1)
-       xnow=xc+lambda*fcart
+       xnow=xc+lambda*f_cart
 
      end if !if(ab_mover%iatfix(jj,kk)==1)
 
@@ -218,8 +213,6 @@ real(dp) :: residual(3,ab_mover%natom)
      call mkradim(acell,rprim,rprimd)
    end if
 
-   call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
-
  end if
 
 
@@ -233,8 +226,8 @@ real(dp) :: residual(3,ab_mover%natom)
 !Compute xred from xcart, and rprimd
  call xcart2xred(ab_mover%natom,rprimd,xcart,xred)
 
- call var2hist(acell,hist,ab_mover%natom,rprim,rprimd,xcart,xred,zDEBUG)
- hist%histV(:,:,hist%ihist)=hist%histV(:,:,hist%ihist-1)
+ call var2hist(acell,hist,ab_mover%natom,rprimd,xred,zDEBUG)
+ hist%vel(:,:,hist%ihist)=hist%vel(:,:,hist%ihist-1)
 
 end subroutine pred_steepdesc
 !!***

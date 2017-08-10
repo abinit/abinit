@@ -12,7 +12,7 @@
 !! If eivec==4, generate output files for band2eps (drawing tool for the phonon band structure
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2016 ABINIT group (XG)
+!! Copyright (C) 1999-2017 ABINIT group (XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -41,7 +41,7 @@
 !! called by one processor only
 !!
 !! PARENTS
-!!      anaddb,m_ifc,m_phonons,respfn
+!!      anaddb,m_effective_potential_file,m_ifc,m_phonons,respfn
 !!
 !! CHILDREN
 !!      wrtout
@@ -85,7 +85,7 @@ subroutine dfpt_prtph(displ,eivec,enunit,iout,natom,phfrq,qphnrm,qphon)
  character(len=500) :: message
 !arrays
  real(dp) :: vecti(3),vectr(3)
- character(len=1),allocatable :: metacharacter(:)
+ character(len=1) :: metacharacter(3*natom)
 
 ! *********************************************************************
 
@@ -128,7 +128,7 @@ subroutine dfpt_prtph(displ,eivec,enunit,iout,natom,phfrq,qphnrm,qphon)
 &     '  direction (cartesian coordinates)',qphon(1:3)+tol10
    end if
    call wrtout(iout,message,'COLL')
-   
+
 !  Write it, in different units.
    if(enunit/=1)then
      write(iout, '(a)' )' Phonon energies in Hartree :'
@@ -201,7 +201,6 @@ subroutine dfpt_prtph(displ,eivec,enunit,iout,natom,phfrq,qphnrm,qphon)
 
 !  Examine the degeneracy of each mode. The portability of the echo of the eigendisplacements
 !  is very hard to obtain, and has not been attempted.
-   ABI_ALLOCATE(metacharacter,(3*natom))
    do imode=1,3*natom
 !    The degenerate modes are not portable
      t_degenerate=.false.
@@ -211,8 +210,7 @@ subroutine dfpt_prtph(displ,eivec,enunit,iout,natom,phfrq,qphnrm,qphon)
      if(imode<3*natom)then
        if(phfrq(imode+1)-phfrq(imode)<tol6)t_degenerate=.true.
      end if
-     metacharacter(imode)=';'
-     if(t_degenerate)metacharacter(imode)='-'
+     metacharacter(imode)=';'; if(t_degenerate)metacharacter(imode)='-'
    end do
 
    do imode=1,3*natom
@@ -226,11 +224,11 @@ subroutine dfpt_prtph(displ,eivec,enunit,iout,natom,phfrq,qphnrm,qphon)
      if(abs(phfrq(imode))<1.0d-5)tolerance=2.0d-7
      if(phfrq(imode)<1.0d-5)then
        write(message,'(3a)' )' Attention : low frequency mode.',ch10,&
-&                           '   (Could be unstable or acoustic mode)'
+&       '   (Could be unstable or acoustic mode)'
        call wrtout(std_out,message,'COLL')
        if(iout>=0)then
          write(iout, '(3a)' )' Attention : low frequency mode.',ch10,&
-&                            '   (Could be unstable or acoustic mode)'
+&         '   (Could be unstable or acoustic mode)'
        end if
      end if
      do ii=1,natom
@@ -244,13 +242,11 @@ subroutine dfpt_prtph(displ,eivec,enunit,iout,natom,phfrq,qphnrm,qphon)
        call wrtout(std_out,message,'COLL')
        if(iout>=0)then
          write(message,'(a,i3,3es16.8,2a,3x,3es16.8)') metacharacter(imode),ii,vectr(:),ch10,&
-&                                                      metacharacter(imode),   vecti(:)
+&         metacharacter(imode),   vecti(:)
          call wrtout(iout,message,'COLL')
        end if
      end do
    end do
-
-   ABI_DEALLOCATE(metacharacter)
  end if
 
 end subroutine dfpt_prtph

@@ -8,7 +8,7 @@
 !! (strain and/or phonon)
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (DCA, XG, GM, AR, MB, MT, AM)
+!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GM, AR, MB, MT, AM)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnuC.org/copyleft/gpl.txt .
@@ -82,14 +82,13 @@
 !!      respfn
 !!
 !! CHILDREN
-!!      appdig,check_degeneracies,clsopn,destroy_hamiltonian,dotprod_g,hdr_skip
+!!      appdig,check_degeneracies,destroy_hamiltonian,dotprod_g
 !!      init_hamiltonian,load_k_hamiltonian,load_spin_hamiltonian,metric,mkffnl
 !!      mkkin,mkkpg,nonlop,paw_ij_free,paw_ij_init,paw_ij_nullify
 !!      paw_ij_reset_flags,pawaccrhoij,pawcprj_alloc,pawcprj_free,pawdij2e1kb
 !!      pawdijfr,pawfgrtab_free,pawfgrtab_init,pawgrnl,pawrhoij_free
 !!      pawrhoij_gather,pawrhoij_nullify,pawtab_get_lsize,strconv,symrhoij
-!!      timab,wffclose,wffopen,wffreaddatarec,wffreadnpwrec,wffreadskipk
-!!      wffreadskiprec,wfk_close,wfk_open_read,wfk_read_bks,wrtout,xmpi_sum
+!!      timab,wfk_close,wfk_open_read,wfk_read_bks,wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -359,8 +358,9 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
  end if
 
 !Initialize Hamiltonian (k-independent terms)
- call init_hamiltonian(gs_ham,psps,pawtab,dtset%nspinor,dtset%nspden,natom,&
+ call init_hamiltonian(gs_ham,psps,pawtab,dtset%nspinor,dtset%nsppol,dtset%nspden,natom,&
 & dtset%typat,xred,dtset%nfft,dtset%mgfft,dtset%ngfft,rprimd,dtset%nloalg,&
+& paw_ij=paw_ij,comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab,&
 & usecprj=usecprj,ph1d=ph1d,nucdipmom=dtset%nucdipmom)
 
 !===== PAW specific section
@@ -404,7 +404,7 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
 &       (/zero,zero,zero/),rprimd,ucvol,vtrial,vtrial,vxc,xred,&
 &       comm_atom=my_comm_atom, mpi_atmtab=my_atmtab ) ! vtrial not used here
        do isppol=1,dtset%nspinor**2
-         call pawdij2e1kb(paw_ij_tmp(:),nsp,my_atmtab,my_comm_atom,e1kbfr=becij(:,:,:,ii))
+         call pawdij2e1kb(paw_ij_tmp(:),nsp,my_comm_atom,e1kbfr=becij(:,:,:,ii),mpi_atmtab=my_atmtab)
        end do
      end do
      call paw_ij_free(paw_ij_tmp)
@@ -455,8 +455,7 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
  do isppol=1,dtset%nsppol
 
 !  Continue to initialize the Hamiltonian (PAW DIJ coefficients)
-   call load_spin_hamiltonian(gs_ham,isppol,paw_ij=paw_ij,&
-&   comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
+   call load_spin_hamiltonian(gs_ham,isppol,with_nonlocal=.true.)
 
 !  Rewind (k+G) data if needed
    ikg=0
@@ -991,7 +990,7 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
    ABI_ALLOCATE(nhat_dum,(1,0))
    call pawgrnl(gs_ham%atindx1,dimnhat,dyfrnl,dyfr_cplex,eltfrnl,dummy,gsqcut,mgfftf,my_natom,natom,&
 &   gs_ham%nattyp,nfftf,ngfftf,nhat_dum,dummy,dtset%nspden,dtset%nsym,psps%ntypat,optgr,optgr2,optstr,optstr2,&
-&   pawang,pawfgrtab,pawrhoij_tot,pawtab,ph1df,psps,dtset%qptn,rprimd,symrec,dtset%typat,vtrial,vxc,xred,&
+&   pawang,pawfgrtab,pawrhoij_tot,pawtab,ph1df,psps,dtset%qptn,rprimd,symrec,dtset%typat,ucvol,vtrial,vxc,xred,&
 &   mpi_atmtab=my_atmtab,comm_atom=my_comm_atom)
    ABI_DEALLOCATE(nhat_dum)
  end if !PAW

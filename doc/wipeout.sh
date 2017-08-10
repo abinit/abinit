@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Copyright (C) 2011-2016 ABINIT group (Yann Pouillon)
+# Copyright (C) 2011-2017 ABINIT group (Yann Pouillon)
 #
 # This file is part of the Abinit Documentation software package. For license
 # information, please see the COPYING file in the top-level directory of
@@ -46,7 +46,7 @@ find . -name Makefile.am -exec rm {} \;
 rm -f config/m4/auto-*.m4
 
 # Remove compiled files
-echo "[docclean]   Removing compiled files and auxilliary data"
+echo "[docclean]   Removing compiled files and auxiliary data"
 for ext in aux blg dvi fdb_latexmk fls ilg log nav snm tmp toc vrb; do
   find . -name "*.${ext}" -exec rm {} \;
 done

@@ -39,6 +39,7 @@ q1shft 0.0 0.0 0.0
 #
 ifcflag 1
 ifcana 1
+ifcout 0
 #  ifc for all atoms?
 natifc 0
 atifc 1
@@ -72,7 +73,7 @@ iatprj_bs 1
 #%% [files]
 #%% files_to_test = 
 #%%   t94.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00;
-#%%   t94.out_ep_SBK, tolnlines = 43, tolabs = 4.0e-07, tolrel = 4.0e-05
+#%%   t94.out_ep_SBK, tolnlines = 49, tolabs = 7.0e-07, tolrel = 7.0e-05
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]
@@ -80,4 +81,5 @@ iatprj_bs 1
 #%% keywords = 
 #%% description = 
 #%%   anaddb test electron phonon coupling electron lifetime calculation, on bcc Li
+#%% topics = ElPhon
 #%%<END TEST_INFO>

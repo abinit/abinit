@@ -1,0 +1,103 @@
+<!--                                                                                     -->
+<!-- This file has been produced by generate_doc.py using different .yml  or .bib files. -->
+<!-- It is useless to modify it. Modify the related .yml  or .bib files instead.         -->
+<!--                                                                                     -->
+<html>
+<head><title>Geometry Optimization </title>
+<link rel=stylesheet type="text/css" href="../formabinit.css">
+</head>
+<body bgcolor="#ffffff">
+
+<hr>
+<a name="top"></a>
+
+<h1>Geometry optimization calculations</h1>
+<h3>This file gives hints on how to perform a geometry optimization with the ABINIT package.
+<hr>
+
+<h5>Copyright (C) 2016-2017 ABINIT group (GG)
+<script type="text/javascript" src="../../js_files/copyright.js"> </script>
+</h5>
+
+<script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
+
+ <h3><b>Table of content: </b></h3> 
+ <ul> <li><a href="topic_GeoOpt.html#1">1</a>. Introduction.<li><a href="topic_GeoOpt.html#2">2</a>. Related input variables.<li><a href="topic_GeoOpt.html#3">3</a>. Selected input files.</ul>
+
+&nbsp; 
+<HR ALIGN=left> 
+<a name="1">&nbsp;</a>
+<h3><b>1. Introduction.</b></h3>
+
+
+<p> Different algorithms (Broyden; modified Broyden; Verlet with sudden
+stop of atoms) allows to find the equilibrium configuration
+of the nuclei, for which the forces vanish. The cell parameters
+can also be optimized concurently with the atomic positions.
+Specified lattice parameters, or angles, or atomic positions,
+can be kept fixed if needed.
+
+
+
+&nbsp; 
+<HR ALIGN=left> 
+<a name="2">&nbsp;</a>
+<h3><b>2. Related input variables.</b></h3>
+
+
+<p>Compulsory input variables:<p>... <a href="../../input_variables/generated_files/varrlx.html#ionmov">ionmov</a>   [IONic MOVEs]<br>
+... <a href="../../input_variables/generated_files/varrlx.html#optcell">optcell</a>   [OPTimize the CELL shape and dimensions]<br>
+<p>Basic input variables:<p>... <a href="../../input_variables/generated_files/varrlx.html#dilatmx">dilatmx</a>   [lattice DILATation : MaXimal value]<br>
+... <a href="../../input_variables/generated_files/varrlx.html#ntime">ntime</a>   [Number of TIME steps]<br>
+... <a href="../../input_variables/generated_files/varrlx.html#strfact">strfact</a>   [STRess FACTor]<br>
+... <a href="../../input_variables/generated_files/varrlx.html#tolmxde">tolmxde</a>   [TOLerance on the MaXimal Difference in Energy]<br>
+... <a href="../../input_variables/generated_files/varrlx.html#tolmxf">tolmxf</a>   [TOLerance on the MaXimal Force]<br>
+<p>Useful input variables:<p>... <a href="../../input_variables/generated_files/varrlx.html#iatcon">iatcon</a>   [Indices of AToms in CONstraint equations]<br>
+... <a href="../../input_variables/generated_files/varrlx.html#iatfix">iatfix</a>   [Indices of AToms that are FIXed ]<br>
+... <a href="../../input_variables/generated_files/varrlx.html#iatfixx">iatfixx</a>   [Indices of AToms that are FIXed along the X direction]<br>
+... <a href="../../input_variables/generated_files/varrlx.html#iatfixy">iatfixy</a>   [Indices of AToms that are FIXed along the Y direction]<br>
+... <a href="../../input_variables/generated_files/varrlx.html#iatfixz">iatfixz</a>   [Indices of AToms that are FIXed along the Z direction]<br>
+... <a href="../../input_variables/generated_files/varrlx.html#natcon">natcon</a>   [Number of AToms in CONstraint equations]<br>
+... <a href="../../input_variables/generated_files/varrlx.html#natfix">natfix</a>   [Number of Atoms that are FIXed]<br>
+... <a href="../../input_variables/generated_files/varrlx.html#natfixx">natfixx</a>   [Number of Atoms that are FIXed along the X direction]<br>
+... <a href="../../input_variables/generated_files/varrlx.html#natfixy">natfixy</a>   [Number of Atoms that are FIXed along the Y direction]<br>
+... <a href="../../input_variables/generated_files/varrlx.html#natfixz">natfixz</a>   [Number of Atoms that are FIXed along the Z direction]<br>
+... <a href="../../input_variables/generated_files/varrlx.html#nconeq">nconeq</a>   [Number of CONstraint EQuations]<br>
+... <a href="../../input_variables/generated_files/varrlx.html#restartxf">restartxf</a>   [RESTART from (X,F) history]<br>
+... <a href="../../input_variables/generated_files/varrlx.html#strprecon">strprecon</a>   [STRess PRECONditioner]<br>
+... <a href="../../input_variables/generated_files/varrlx.html#strtarget">strtarget</a>   [STRess TARGET]<br>
+... <a href="../../input_variables/generated_files/varrlx.html#wtatcon">wtatcon</a>   [WeighTs for AToms in CONstraint equations]<br>
+<p>Input variables for experts:<p>... <a href="../../input_variables/generated_files/varrlx.html#fxcartfactor">fxcartfactor</a>   [Forces to (X) CARTesian coordinates FACTOR]<br>
+... <a href="../../input_variables/generated_files/varrlx.html#goprecon">goprecon</a>   [Geometry Optimization PRECONditioner equations]<br>
+... <a href="../../input_variables/generated_files/varrlx.html#goprecprm">goprecprm</a>   [Geometry Optimization PREconditioner PaRaMeters equations]<br>
+
+
+&nbsp; 
+<HR ALIGN=left> 
+<a name="3">&nbsp;</a>
+<h3><b>3. Selected input files.</b></h3>
+
+
+The user can find some related example input files in the ABINIT package in the directory /tests, or on the Web:
+<p> tests/v1/Input: <a href="../../tests/v1/Input/t44.in">t44.in</a> 
+<a href="../../tests/v1/Input/t78.in">t78.in</a> 
+<a href="../../tests/v1/Input/t79.in">t79.in</a> 
+<a href="../../tests/v1/Input/t80.in">t80.in</a> 
+<a href="../../tests/v1/Input/t81.in">t81.in</a> 
+<a href="../../tests/v1/Input/t82.in">t82.in</a> 
+<p> tests/v2/Input: <a href="../../tests/v2/Input/t44.in">t44.in</a> 
+<a href="../../tests/v2/Input/t48.in">t48.in</a> 
+<a href="../../tests/v2/Input/t88.in">t88.in</a> 
+<p> tests/v3/Input: <a href="../../tests/v3/Input/t42.in">t42.in</a> 
+<p> tests/v5/Input: <a href="../../tests/v5/Input/t02.in">t02.in</a> 
+<a href="../../tests/v5/Input/t77.in">t77.in</a> 
+<a href="../../tests/v5/Input/t79.in">t79.in</a> 
+<p> tests/v7/Input: <a href="../../tests/v7/Input/t10.in">t10.in</a> 
+<br>
+
+
+<script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
+
+</body>
+</html>
+

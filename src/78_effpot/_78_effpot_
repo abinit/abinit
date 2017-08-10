@@ -1,0 +1,29 @@
+!!****d* ABINIT/78_effpot
+!! NAME
+!! 78_effpot
+!!
+!! DESCRIPTION
+!! This directory contains routines used to treat the effective potential within MULTIBINIT,
+!!
+!! COPYRIGHT
+!! Copyright (C) 2016-2017 ABINIT group (MG)
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+!!
+!! CHILDREN
+!! compute_anharmonics.F90
+!! init10.F90
+!! interfaces_78_effpot.F90
+!! m_anharmonics_terms.F90
+!! m_effective_potential.F90
+!! m_effective_potential_file.F90
+!! m_effpot_mpi.F90
+!! m_fit_polynomial_coeff.F90
+!! m_harmonics_terms.F90
+!! m_multibinit_dataset.F90
+!! m_polynomial_coeff.F90
+!! m_polynomial_term.F90
+!!
+!!***

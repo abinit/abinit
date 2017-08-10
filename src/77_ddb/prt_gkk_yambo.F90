@@ -9,7 +9,7 @@
 !!   q-point
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2016 ABINIT group (MJV)
+!! Copyright (C) 2009-2017 ABINIT group (MJV)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

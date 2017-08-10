@@ -322,6 +322,22 @@ FC="ifort"
 #
 #FCFLAGS="-O2"
 
+# Fortran flags for fixed-form source files
+#
+#FCFLAGS_FIXEDFORM="-ffixed-form"
+
+# Fortran flags for free-form source files
+#
+#FCFLAGS_FREEFORM="-ffree-form"
+
+# Fortran compiler flags to use a module directory
+#
+#FCFLAGS_MODDIR=="-J$(abinit_moddir)"
+
+# Tricky Fortran compiler flags
+#
+#FCFLAGS_HINTS="-ffree-line-length-none"
+
 # Fortran linker custom debug flags (when enable_debug=yes)
 #
 #FC_LDFLAGS_DEBUG="-Wl,-debug"
@@ -675,14 +691,13 @@ enable_mpi="no"
 # Transferable I/O (TRIO) connector                                            #
 # ---------------------------------------------------------------------------- #
 
-# Flavor of transferable I/O library to support (default is netcdf+etsf_io)
+# Flavor of transferable I/O library to support (default is netcdf)
 #
 # By transferable I/O (TRIO), we mean that the files produced by Abinit
 # will be transferable seamlessly to other computers and codes
 #
 # Supported libraries:
 #
-#   * etsf_io  : ETSF_IO file format (requires netcdf)
 #   * psml     : XML pseudopotential format io library
 #   * netcdf   : NetCDF file format
 #   * yaml     : YAML output
@@ -690,17 +705,7 @@ enable_mpi="no"
 #
 # You may specify any combination, using '+' as a separator
 #
-with_trio_flavor="netcdf+etsf_io"
-
-                       # ------------------------------ #
-
-# Include flags for the ETSF_IO library (default is unset)
-#
-with_etsf_io_incs="-I/usr/local/fallbacks/intel/15.0/serial/include"
-
-# Link flags for the ETSF_IO library (default is unset)
-#
-with_etsf_io_libs="-L/usr/local/fallbacks/intel/15.0/serial/lib -letsf_io_low_level -letsf_io_utils -letsf_io"
+with_trio_flavor="netcdf"
 
                        # ------------------------------ #
 
@@ -938,11 +943,11 @@ with_atompaw_libs="-L/usr/local/fallbacks/intel/15.0/serial/lib -latompaw"
 
 # Include flags for the BigDFT library (default is unset)
 #
-with_bigdft_incs="-I/usr/local/fallbacks/intel/15.0/serial/include"
+with_bigdft_incs="-I${FALLBACKS_PATH}/bigdft-1.7.1.24/include"
 
 # Link flags for the BigDFT library (default is unset)
 #
-with_bigdft_libs="-L/usr/local/fallbacks/intel/15.0/serial/lib -lbigdft-1 -labinit -lyaml -lrt"
+with_bigdft_libs="-L${FALLBACKS_PATH}/bigdft-1.7.1.24/lib -lbigdft-1 -labinit -lyaml -lrt"
 
                        # ------------------------------ #
 

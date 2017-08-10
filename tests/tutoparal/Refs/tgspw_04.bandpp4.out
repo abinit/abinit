@@ -2,7 +2,7 @@
 .Version 6.10.1 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_intel12.0 computer) 
 
-.Copyright (C) 1998-2016 ABINIT group . 
+.Copyright (C) 1998-2017 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -53,8 +53,8 @@ P This job should need less than                     103.595 Mbytes of memory.
             acell      2.3010000000E+01  2.3010000000E+01  2.3010000000E+01 Bohr
               amu      1.96966540E+02
            bandpp           4
+     densfor_pred           6
              ecut      1.50000000E+01 Hartree
-           densfor_pred           6
            istwfk        2
           kptrlen      2.30100000E+01
          kptrlatt      1  0  0   0  1  0   0  0  1
@@ -214,7 +214,7 @@ P           mkmem           1
                        1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1
                        1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1
                        1  1  1  1  1  1  1
-         wfoptalg          14
+         wfoptalg         114
            xangst      0.0000000000E+00  1.9879254564E+00  1.9879254564E+00
                        1.9879254564E+00  0.0000000000E+00  1.9879254564E+00
                        1.9879254564E+00  1.9879254564E+00  0.0000000000E+00
@@ -1453,6 +1453,7 @@ P newkpt: treating    648 bands with npw=     155 for ikpt=   1 by node    0
             acell      2.3010000000E+01  2.3010000000E+01  2.3010000000E+01 Bohr
               amu      1.96966540E+02
            bandpp           4
+     densfor_pred           6
              ecut      1.50000000E+01 Hartree
            etotal     -4.2923816102E+03
             fcart     -8.9168029139E-20 -6.1181807819E-03 -6.1181807819E-03
@@ -1562,7 +1563,6 @@ P newkpt: treating    648 bands with npw=     155 for ikpt=   1 by node    0
                        9.8768571200E-04  2.7574372827E-03  9.8768571200E-04
                        9.8768571200E-04  9.8768571200E-04  2.7574372827E-03
                        4.1789299675E-04  4.1789299675E-04  4.1789299675E-04
-           densfor_pred           6
            istwfk        2
           kptrlen      2.30100000E+01
          kptrlatt      1  0  0   0  1  0   0  0  1
@@ -1724,7 +1724,7 @@ P           mkmem           1
                        1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1
                        1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1
                        1  1  1  1  1  1  1
-         wfoptalg          14
+         wfoptalg         114
            xangst      0.0000000000E+00  1.9879254564E+00  1.9879254564E+00
                        1.9879254564E+00  0.0000000000E+00  1.9879254564E+00
                        1.9879254564E+00  1.9879254564E+00  0.0000000000E+00

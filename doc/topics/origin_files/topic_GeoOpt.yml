@@ -1,0 +1,20 @@
+- !components 
+    name      : GeoOpt 
+    keyword   : Geometry Optimization 
+    authors   : GG
+    howto     : perform a geometry optimization
+    header    : default
+    title     : <h1>Geometry optimization calculations</h1>
+    subtitle  : default
+    copyright : default
+    links     : default
+    introduction : |- 
+         <p> Different algorithms (Broyden; modified Broyden; Verlet with sudden
+         stop of atoms) allows to find the equilibrium configuration
+         of the nuclei, for which the forces vanish. The cell parameters
+         can also be optimized concurently with the atomic positions.
+         Specified lattice parameters, or angles, or atomic positions,
+         can be kept fixed if needed.
+    tutorials  : |-
+
+    end : default

@@ -10,7 +10,7 @@
 !!  xmpi_recv is the generic function.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2001-2016 ABINIT group
+!!  Copyright (C) 2001-2017 ABINIT group
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~ABINIT/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -18,6 +18,64 @@
 !! TODO
 !!
 !! SOURCE
+!!***
+
+!!****f* ABINIT/xmpi_recv_char
+!! NAME
+!!  xmpi_recv_char
+!!
+!! FUNCTION
+!!  Receives data from one proc sent by another.
+!!  Target: character.
+!!
+!! INPUTS
+!!  source :: rank of source process
+!!  tag :: integer message tag
+!!  spaceComm :: MPI communicator
+!!
+!! OUTPUT
+!!  ier= exit status, a non-zero value meaning there is an error
+!!
+!! SIDE EFFECTS
+!!  xval= buffer array
+!!
+!! NOTES
+!!  status of MPI_RECV is explicitly ignored
+!!
+!! SOURCE
+
+subroutine xmpi_recv_char(xval,source,tag,spaceComm,ier)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'xmpi_recv_char'
+!End of the abilint section
+
+ implicit none
+
+!Arguments-------------------------
+ character(len=*), intent(inout) :: xval
+ integer ,intent(in) :: source,tag,spaceComm
+ integer ,intent(out) :: ier
+
+!Local variables-------------------
+#if defined HAVE_MPI
+ integer :: my_tag
+#endif
+
+! *************************************************************************
+
+ ier=0
+#if defined HAVE_MPI
+ if (spaceComm /= MPI_COMM_SELF .and. spaceComm /= MPI_COMM_NULL) then
+   my_tag = MOD(tag,xmpi_tag_ub)
+   call MPI_RECV(xval,len(xval),MPI_CHARACTER,source,my_tag,spaceComm,MPI_STATUS_IGNORE,ier)
+ end if
+#endif
+
+end subroutine xmpi_recv_char
 !!***
 
 !!****f* ABINIT/xmpi_recv_intv
@@ -219,7 +277,7 @@ subroutine xmpi_recv_int2d(xval,source,tag,spaceComm,ier)
  if (spaceComm /= MPI_COMM_SELF .and. spaceComm /= MPI_COMM_NULL) then
    n1=size(xval,dim=1)
    n2=size(xval,dim=2)
-   my_tag=MOD(tag,xmpi_tag_ub+1)
+   my_tag=MOD(tag,xmpi_tag_ub)
    call MPI_RECV(xval,n1*n2,MPI_INTEGER,source,my_tag,spaceComm,MPI_STATUS_IGNORE,ier)
  end if
 #endif
@@ -227,6 +285,137 @@ subroutine xmpi_recv_int2d(xval,source,tag,spaceComm,ier)
 end subroutine xmpi_recv_int2d
 !!***
 
+!!****f* ABINIT/xmpi_recv_int3d
+!! NAME
+!!  xmpi_recv_int3d
+!!
+!! FUNCTION
+!!  Receives data from one proc sent by another.
+!!  Target: integer three-dimensional arrays.
+!!
+!! INPUTS
+!!  source :: rank of source process
+!!  tag :: integer message tag
+!!  spaceComm :: MPI communicator
+!!
+!! OUTPUT
+!!  ier= exit status, a non-zero value meaning there is an error
+!!
+!! SIDE EFFECTS
+!!  xval= buffer array
+!!
+!! NOTES
+!!  status of MPI_RECV is explicitly ignored
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!      mpi_recv
+!!
+!! SOURCE
+subroutine xmpi_recv_int3d(xval,source,tag,spaceComm,ier)
+
+
+ use defs_basis
+#if defined HAVE_MPI2 && ! defined HAVE_MPI_INCLUDED_ONCE
+ use mpi
+#endif
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'xmpi_recv_int3d'
+!End of the abilint section
+
+ implicit none
+
+#if defined HAVE_MPI1
+ include 'mpif.h'
+#endif
+
+!Arguments-------------------------
+ integer,intent(inout) :: xval(:,:,:)
+ integer ,intent(in) :: source,tag,spaceComm
+ integer ,intent(out)   :: ier
+
+!Local variables-------------------
+#if defined HAVE_MPI
+ integer :: n1,n2,n3,my_tag
+#endif
+
+! *************************************************************************
+
+ ier=0
+#if defined HAVE_MPI
+ if (spaceComm /= MPI_COMM_SELF .and. spaceComm /= MPI_COMM_NULL) then
+   n1=size(xval,dim=1)
+   n2=size(xval,dim=2)
+   n3=size(xval,dim=3)
+   my_tag=MOD(tag,xmpi_tag_ub)
+   call MPI_RECV(xval,n1*n2*n3,MPI_INTEGER,source,my_tag,spaceComm,MPI_STATUS_IGNORE,ier)
+ end if
+#endif
+
+end subroutine xmpi_recv_int3d
+!!***
+
+!!****f* ABINIT/xmpi_recv_dp
+!! NAME
+!!  xmpi_recv_dp
+!!
+!! FUNCTION
+!!  Receives data from one proc sent by another.
+!!  Target: double precision value.
+!!
+!! INPUTS
+!!  source :: rank of source process
+!!  tag :: integer message tag
+!!  spaceComm :: MPI communicator
+!!
+!! OUTPUT
+!!  ier= exit status, a non-zero value meaning there is an error
+!!
+!! SIDE EFFECTS
+!!  xval= buffer array
+!!
+!! NOTES
+!!  status of MPI_RECV is explicitly ignored
+!!
+!! SOURCE
+
+subroutine xmpi_recv_dp(xval,source,tag,spaceComm,ier)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'xmpi_recv_dp'
+!End of the abilint section
+
+ implicit none
+
+!Arguments-------------------------
+ real(dp), DEV_CONTARRD intent(inout) :: xval
+ integer ,intent(in) :: source,tag,spaceComm
+ integer ,intent(out) :: ier
+
+!Local variables-------------------
+#if defined HAVE_MPI
+ integer :: my_tag
+#endif
+
+! *************************************************************************
+
+ ier=0
+#if defined HAVE_MPI
+ if (spaceComm /= MPI_COMM_SELF .and. spaceComm /= MPI_COMM_NULL) then
+   my_tag = MOD(tag,xmpi_tag_ub)
+   call MPI_RECV(xval,1,MPI_DOUBLE_PRECISION,source,my_tag,spaceComm,MPI_STATUS_IGNORE,ier)
+ end if
+#endif
+
+end subroutine xmpi_recv_dp
+!!***
 
 !!****f* ABINIT/xmpi_recv_dp1d
 !! NAME

@@ -2,7 +2,7 @@
 .Version 7.0.1 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu4.6 computer) 
 
-.Copyright (C) 1998-2016 ABINIT group . 
+.Copyright (C) 1998-2017 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -105,6 +105,10 @@ P This job should need less than                       0.874 Mbytes of memory.
         accesswff4          0
             acell      1.0600000000E+01  1.0600000000E+01  1.0600000000E+01 Bohr
               amu      6.97200000E+01  7.49216000E+01
+     densfor_pred1          6
+     densfor_pred2          2
+     densfor_pred3          2
+     densfor_pred4          2
            diemac      6.00000000E+00
              ecut      2.00000000E+00 Hartree
            fftalg1        401
@@ -123,10 +127,6 @@ P This job should need less than                       0.874 Mbytes of memory.
            getwfk2          1
            getwfk3          2
            getwfk4          2
-           densfor_pred1          6
-           densfor_pred2          2
-           densfor_pred3          2
-           densfor_pred4          2
              iscf1          3
              iscf2         -2
              iscf3         -3
@@ -336,7 +336,7 @@ P          mk1mem4          4
            tolwfr3     1.00000000E-22
            tolwfr4     1.00000000E-16
             typat      1  2
-         wfoptalg1         14
+         wfoptalg1        114
          wfoptalg2          0
          wfoptalg3          0
          wfoptalg4          0
@@ -1952,6 +1952,10 @@ P newkpt: treating      4 bands with npw=      43 for ikpt=  32 by node    4
         accesswff4          0
             acell      1.0600000000E+01  1.0600000000E+01  1.0600000000E+01 Bohr
               amu      6.97200000E+01  7.49216000E+01
+     densfor_pred1          6
+     densfor_pred2          2
+     densfor_pred3          2
+     densfor_pred4          2
            diemac      6.00000000E+00
              ecut      2.00000000E+00 Hartree
            etotal1    -8.3602806603E+00
@@ -1977,10 +1981,6 @@ P newkpt: treating      4 bands with npw=      43 for ikpt=  32 by node    4
            getwfk2          1
            getwfk3          2
            getwfk4          2
-           densfor_pred1          6
-           densfor_pred2          2
-           densfor_pred3          2
-           densfor_pred4          2
              iscf1          3
              iscf2         -2
              iscf3         -3
@@ -2194,7 +2194,7 @@ P          mk1mem4          4
            tolwfr3     1.00000000E-22
            tolwfr4     1.00000000E-16
             typat      1  2
-         wfoptalg1         14
+         wfoptalg1        114
          wfoptalg2          0
          wfoptalg3          0
          wfoptalg4          0

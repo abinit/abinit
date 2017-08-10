@@ -10,7 +10,7 @@
 !!  Determine best choice of parameters for Scalapack and/or Magma Linear Algebra routines.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2016 ABINIT group (FD)
+!! Copyright (C) 1999-2017 ABINIT group (FD)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -136,13 +136,13 @@ subroutine compute_kgb_indicator(acc_kgb,bandpp,glb_comm,mband,mpw,npband,npfft,
 #endif
 
 !  Preselect a range of available np_slk values
-   val_npslk(1)=0 ; val_npslk(2)=1
+   val_npslk(1:)=0 ; val_npslk(2)=1
    do islk=3,np_slk_max
      np_slk=val_npslk(islk-1)*2
      do while ((modulo(npband*npfft,np_slk)>0).and.(np_slk<(npband*npfft)))
        np_slk=np_slk+1
      end do
-     if(np_slk>(npband*npfft)) exit
+     if(np_slk>(npband*npfft).or.np_slk>mband) exit
      val_npslk(islk)=np_slk
    end do
    np_slk_max=islk-1
@@ -236,7 +236,7 @@ subroutine compute_kgb_indicator(acc_kgb,bandpp,glb_comm,mband,mpw,npband,npfft,
 
 !  Final values to be sent to others process
    acc_kgb=min_ortho+four*min_eigen
-   npslk=np_slk_best
+   npslk=max(np_slk_best,1)
    uselinalggpu=keep_gpu
 
    ABI_DEALLOCATE(blockvectorx)

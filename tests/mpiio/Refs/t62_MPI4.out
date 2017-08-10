@@ -2,7 +2,7 @@
 .Version 8.1.4 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
 
-.Copyright (C) 1998-2016 ABINIT group . 
+.Copyright (C) 1998-2017 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -157,6 +157,12 @@ _ WF disk file :      1.205 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
             acell      1.0610000000E+01  1.0610000000E+01  1.0610000000E+01 Bohr
               amu      2.69815390E+01  7.49215900E+01
         autoparal           1
+     densfor_pred1          6
+     densfor_pred2          2
+     densfor_pred3          2
+     densfor_pred4          2
+     densfor_pred5          2
+     densfor_pred6          2
            diemac      9.00000000E+00
              ecut      3.00000000E+00 Hartree
 -          fftalg1        401
@@ -177,12 +183,6 @@ _ WF disk file :      1.205 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
            getwfk4          1
            getwfk5          1
            getwfk6          1
-     densfor_pred1          6
-     densfor_pred2          2
-     densfor_pred3          2
-     densfor_pred4          2
-     densfor_pred5          2
-     densfor_pred6          2
              iscf1         17
              iscf2         -3
              iscf3          7
@@ -602,7 +602,7 @@ P          mk1mem6         64
            tolvrs6     1.00000000E-08
             typat      1  2
            useylm           1
-         wfoptalg1         14
+         wfoptalg1        114
          wfoptalg2         10
          wfoptalg3         10
          wfoptalg4         10
@@ -2543,6 +2543,12 @@ _setup2: Arith. and geom. avg. npw (full set) are      37.813      37.780
             acell      1.0610000000E+01  1.0610000000E+01  1.0610000000E+01 Bohr
               amu      2.69815390E+01  7.49215900E+01
         autoparal           1
+     densfor_pred1          6
+     densfor_pred2          2
+     densfor_pred3          2
+     densfor_pred4          2
+     densfor_pred5          2
+     densfor_pred6          2
            diemac      9.00000000E+00
              ecut      3.00000000E+00 Hartree
            etotal1    -8.5615692601E+00
@@ -2579,12 +2585,6 @@ _setup2: Arith. and geom. avg. npw (full set) are      37.813      37.780
            getwfk4          1
            getwfk5          1
            getwfk6          1
-     densfor_pred1          6
-     densfor_pred2          2
-     densfor_pred3          2
-     densfor_pred4          2
-     densfor_pred5          2
-     densfor_pred6          2
              iscf1         17
              iscf2         -3
              iscf3          7
@@ -3014,7 +3014,7 @@ P          mk1mem6         64
            tolvrs6     1.00000000E-08
             typat      1  2
            useylm           1
-         wfoptalg1         14
+         wfoptalg1        114
          wfoptalg2         10
          wfoptalg3         10
          wfoptalg4         10

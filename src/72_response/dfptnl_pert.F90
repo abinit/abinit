@@ -73,7 +73,7 @@ subroutine dfptnl_pert(atindx,atindx1,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,ei
 & nspden,nspinor,nsppol,nsym1,npwarr,occ,pawang,pawang1,pawfgrtab,pawrad,pawtab,&
 & pawrhoij0,pawrhoij1_i1pert,pawrhoij1_i2pert,pawrhoij1_i3pert,&
 & paw_an0,paw_an1_i2pert,paw_ij0,paw_ij1_i2pert,pawfgr,ph1d,psps,rho1r1,rho2r1,rho3r1,rprimd,symaf1,symrc1,&
-& ucvol,vtrial,vtrial1_i2pert,ddk_f,xccc3d1,xccc3d2,xccc3d3,xred)
+& ucvol,vtrial,vhartr1_i2pert,vtrial1_i2pert,vxc1_i2pert,ddk_f,xccc3d1,xccc3d2,xccc3d3,xred)
 
  use defs_basis
  use defs_datatypes
@@ -144,6 +144,7 @@ subroutine dfptnl_pert(atindx,atindx1,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,ei
  real(dp),intent(in) :: vtrial(cplex*nfftf,nspden)
  real(dp),intent(in) :: xccc3d1(cplex*nfftf),xccc3d2(cplex*nfftf),xccc3d3(cplex*nfftf),xred(3,natom)
  real(dp),intent(inout) :: vtrial1_i2pert(cplex*nfftf,nspden),d3etot(2,3,mpert,3,mpert,3,mpert)
+ real(dp),intent(in) :: vxc1_i2pert(cplex*nfftf,nspden),vhartr1_i2pert(cplex*nfftf)
  type(pawfgrtab_type),intent(inout) :: pawfgrtab(natom*psps%usepaw)
  type(pawrad_type),intent(inout) :: pawrad(psps%ntypat*psps%usepaw)
  type(pawrhoij_type),intent(in) :: pawrhoij0(natom*psps%usepaw)
@@ -186,7 +187,7 @@ subroutine dfptnl_pert(atindx,atindx1,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,ei
  real(dp),allocatable :: ffnl1(:,:,:,:),ffnl1_idir_elfd(:,:,:,:),ffnlk(:,:,:,:),gh0(:,:),gh1(:,:),gvnl(:,:)
  real(dp),allocatable :: h_cwave(:,:),iddk(:,:),kinpw1(:),kpg_k(:,:),kpg1_k(:,:),nhat21(:,:),nhatfr21(:,:),occ_k(:)
  real(dp),allocatable :: phkxred(:,:),ph3d(:,:,:),ph3d1(:,:,:),rho1r1_tot(:,:),s_cwave(:,:)
- real(dp),allocatable :: vlocal(:,:,:,:),vlocal1_i2pert(:,:,:,:),wfraug(:,:,:,:)
+ real(dp),allocatable :: vlocal(:,:,:,:),vlocal1_i2pert(:,:,:,:),v_i2pert(:,:),wfraug(:,:,:,:)
  real(dp),allocatable :: ylm(:,:),ylm1(:,:),ylmgr(:,:,:),ylmgr1(:,:,:)
  real(dp),allocatable :: ylm_k(:,:),ylm1_k(:,:),ylmgr1_k(:,:,:)
  real(dp),allocatable :: xc_tmp(:,:)
@@ -200,6 +201,8 @@ subroutine dfptnl_pert(atindx,atindx1,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,ei
  type(rf_hamiltonian_type) :: rf_hamkq_i2pert,rf_ham_dum
 
 !***********************************************************************
+
+ DBG_ENTER("COLL")
 
  me = mpi_enreg%me
  spaceComm=mpi_enreg%comm_cell
@@ -217,7 +220,7 @@ subroutine dfptnl_pert(atindx,atindx1,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,ei
  usepaw = psps%usepaw
  size_cprj = nspinor
 
- call init_rf_hamiltonian(cplex,gs_hamkq,i2pert,rf_hamkq_i2pert,has_e1kbsc=1)
+ call init_rf_hamiltonian(cplex,gs_hamkq,i2pert,rf_hamkq_i2pert,paw_ij1=paw_ij1_i2pert,has_e1kbsc=.true.)
 
 !Acivate computation of rho^(2:1) and related energy derivatives if needed
  compute_rho21 = .false.
@@ -272,7 +275,11 @@ subroutine dfptnl_pert(atindx,atindx1,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,ei
 &     (/zero,zero,zero/),rprimd,ucvol,dummy_array2,dummy_array2,dummy_array2,xred,&
 &     comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
    ABI_ALLOCATE(chi_ij,(gs_hamkq%dimekb1,gs_hamkq%dimekb2,dtset%nspinor**2))
-   call pawdij2e1kb(paw_ij_tmp,nsp,mpi_enreg%my_atmtab,mpi_enreg%comm_atom,e1kbfr=chi_ij)
+   if(dtset%nsppol==1) then
+     call pawdij2e1kb(paw_ij_tmp,1,mpi_enreg%comm_atom,mpi_enreg%my_atmtab,e1kbfr=chi_ij)
+   else
+     MSG_ERROR("nonlinear not implemented yet for nsppol>1...")
+   end if
    call paw_ij_free(paw_ij_tmp)
    ABI_DATATYPE_DEALLOCATE(paw_ij_tmp)
  else
@@ -346,11 +353,8 @@ subroutine dfptnl_pert(atindx,atindx1,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,ei
 &   gs_hamkq%nvloc,pawfgr,mpi_enreg,vtrial,vtrial1_i2pert,vlocal,vlocal1_i2pert)
 
 !  Continue to initialize the Hamiltonian
-   call load_spin_hamiltonian(gs_hamkq,isppol,paw_ij=paw_ij0,vlocal=vlocal, &
-&   comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
-
-   call load_spin_rf_hamiltonian(rf_hamkq_i2pert,gs_hamkq,isppol,paw_ij1=paw_ij1_i2pert,vlocal1=vlocal1_i2pert, &
-   comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
+   call load_spin_hamiltonian(gs_hamkq,isppol,vlocal=vlocal,with_nonlocal=.true.)
+   call load_spin_rf_hamiltonian(rf_hamkq_i2pert,gs_hamkq,isppol,vlocal1=vlocal1_i2pert,with_nonlocal=.true.)
 
 !  Loop over k-points
 
@@ -1139,8 +1143,20 @@ subroutine dfptnl_pert(atindx,atindx1,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,ei
 !&   mpi_atmtab=my_atmtab,comm_atom=my_comm_atom
    sumi = sumi + half*eHxc21_paw(2)
 
-   call dotprod_vn(cplex,nhat21,eHxc21_nhat(1),eHxc21_nhat(2),nfftf,nfftotf,nspden,2,vtrial1_i2pert,ucvol,mpi_comm_sphgrid=mpi_enreg%comm_fft)
+   ABI_ALLOCATE(v_i2pert,(cplex*nfftf,nspden))
+   v_i2pert(:,1) = vhartr1_i2pert(:)
+   if(nspden>1) then
+     v_i2pert(:,2) = vhartr1_i2pert(:)
+   end if
+   write(msg,'(2(a,i6))') ' DFPTNL_PERT : pawtab(',ipert_phon,')%usexcnhat = ',pawtab(ipert_phon)%usexcnhat
+   call wrtout(std_out,msg,'COLL')
+   if (pawtab(ipert_phon)%usexcnhat>0) then
+     v_i2pert(:,:) = v_i2pert(:,:) + vxc1_i2pert(:,:)
+   end if
 
+   call dotprod_vn(cplex,nhat21,eHxc21_nhat(1),eHxc21_nhat(2),nfftf,nfftotf,nspden,2,v_i2pert,ucvol,mpi_comm_sphgrid=mpi_enreg%comm_fft)
+
+   ABI_DEALLOCATE(v_i2pert)
    ABI_DEALLOCATE(nhat21)
 
  end if
@@ -1209,6 +1225,8 @@ subroutine dfptnl_pert(atindx,atindx1,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,ei
  ABI_DEALLOCATE(wfraug)
 
  call status(0,dtfil%filstat,iexit,level,'exit          ')
+
+ DBG_EXIT("COLL")
 
 end subroutine dfptnl_pert
 !!***

@@ -79,4 +79,5 @@
 #%%   He FCC solid in conventional cell (4 atoms).
 #%%   Test the recursion algorithm (for high-temperature calculations).
 #%%   Only with 0 and 4 procs.
+#%% topics = recursion
 #%%<END TEST_INFO>

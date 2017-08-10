@@ -9,7 +9,7 @@
 !!        used to generate the cell.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2010-2016 ABINIT group (AHR)
+!!  Copyright (C) 2010-2017 ABINIT group (AHR)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .

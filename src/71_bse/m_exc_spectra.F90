@@ -7,7 +7,7 @@
 !!  Routines to compute the macroscopic dielectric function in the Bethe-Salpeter code.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2016 ABINIT and EXC groups (L.Reining, V.Olevano, F.Sottile, S.Albrecht, G.Onida, M.Giantomassi, Y. Gillet)
+!! Copyright (C) 2009-2017 ABINIT and EXC groups (L.Reining, V.Olevano, F.Sottile, S.Albrecht, G.Onida, M.Giantomassi, Y. Gillet)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -40,13 +40,14 @@ MODULE m_exc_spectra
 
  use defs_abitypes,     only : hdr_type
  use m_io_tools,        only : open_file
- use m_fstrings,        only : toupper, strcat, sjoin
+ use m_fstrings,        only : toupper, strcat, sjoin, int2char4
  use m_numeric_tools,   only : simpson_int
- use m_blas,            only : xdotu
+ use m_blas,            only : xdotu,xdotc
  use m_special_funcs,   only : dirac_delta
  use m_crystal,         only : crystal_t 
  use m_crystal_io,      only : crystal_ncwrite
  use m_bz_mesh,         only : kmesh_t
+ use m_eprenorms,       only : eprenorms_t, renorm_bst
  use m_pawtab,          only : pawtab_type
  use m_pawhr,           only : pawhur_t
  use m_wfd,             only : wfd_t
@@ -102,7 +103,7 @@ contains
 !!
 !! SOURCE
 
-subroutine build_spectra(BSp,BS_files,Cryst,Kmesh,KS_BSt,QP_BSt,Psps,Pawtab,Wfd,Hur,drude_plsmf,comm)
+subroutine build_spectra(BSp,BS_files,Cryst,Kmesh,KS_BSt,QP_BSt,Psps,Pawtab,Wfd,Hur,drude_plsmf,comm,Epren)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -127,6 +128,7 @@ subroutine build_spectra(BSp,BS_files,Cryst,Kmesh,KS_BSt,QP_BSt,Psps,Pawtab,Wfd,
  type(crystal_t),intent(in) :: Cryst
  type(ebands_t),intent(in) :: KS_BSt,QP_BSt
  type(wfd_t),intent(inout) :: Wfd
+ type(eprenorms_t),optional,intent(in) :: Epren
 !arrays
  type(pawtab_type),intent(in) :: Pawtab(Cryst%ntypat*Wfd%usepaw)
  type(pawhur_t),intent(in) :: Hur(Cryst%natom*Wfd%usepaw)
@@ -134,10 +136,15 @@ subroutine build_spectra(BSp,BS_files,Cryst,Kmesh,KS_BSt,QP_BSt,Psps,Pawtab,Wfd,
 !Local variables ------------------------------
 !scalars
  integer :: my_rank,master,iq,io,nsppol,lomo_min,max_band,ncid
+ integer :: itemp,ntemp
+ logical :: do_ep_renorm
  real(dp) :: omegaev
  complex(dpc) :: ks_avg,gw_avg,exc_avg
- character(len=fnlen) :: path
+ character(len=4) :: ts
+ character(len=fnlen) :: path,prefix
+ character(len=fnlen) :: filbseig, ost_fname
  !character(len=500) :: msg
+ type(ebands_t) :: EPBSt, EP_QPBSt
 !arrays
  real(dp),allocatable :: dos_exc(:),dos_gw(:),dos_ks(:)
  complex(dpc),allocatable :: eps_rpanlf(:,:),eps_gwnlf(:,:)
@@ -148,6 +155,14 @@ subroutine build_spectra(BSp,BS_files,Cryst,Kmesh,KS_BSt,QP_BSt,Psps,Pawtab,Wfd,
  my_rank = Wfd%my_rank
  master  = Wfd%master
  nsppol  = Wfd%nsppol
+
+ do_ep_renorm = .False.
+ ntemp = 1
+ if (BSp%do_ep_renorm .and. PRESENT(Epren)) then
+   do_ep_renorm = .True.
+   ntemp = Epren%ntemp
+ end if
+
  !
  ! =====================================================
  ! === Calculate fcv(k)=<c k s|e^{-iqr}|v k s> in BZ ===
@@ -168,77 +183,110 @@ subroutine build_spectra(BSp,BS_files,Cryst,Kmesh,KS_BSt,QP_BSt,Psps,Pawtab,Wfd,
    ABI_MALLOC(eps_exc,(BSp%nomega,BSp%nq))
    ABI_MALLOC(dos_exc,(BSp%nomega))
 
-   if (BSp%use_coupling==0) then
-     call exc_eps_resonant(BSp,BS_files,lomo_min,max_band,BSp%nkbz,nsppol,opt_cvk,Cryst%ucvol,BSp%nomega,BSp%omega,eps_exc,dos_exc)
-   else
-     call exc_eps_coupling(Bsp,BS_files,lomo_min,max_band,BSp%nkbz,nsppol,opt_cvk,Cryst%ucvol,BSp%nomega,BSp%omega,eps_exc,dos_exc)
-   end if
-   !
-   ! =======================================================
-   ! === Make EPS RPA and GW without local-field effects ===
-   ! =======================================================
-   call wrtout(std_out," Calculating RPA NLF and QP NLF epsilon","COLL")
-
    ABI_MALLOC(eps_rpanlf,(BSp%nomega,BSp%nq))
    ABI_MALLOC(dos_ks,(BSp%nomega))
-
-   call exc_eps_rpa(BSp%nbnds,BSp%lomo_spin,Bsp%lomo_min,BSp%homo_spin,Kmesh,KS_BSt,BSp%nq,nsppol,opt_cvk,&
-&    Cryst%ucvol,BSp%broad,BSp%nomega,BSp%omega,eps_rpanlf,dos_ks)
 
    ABI_MALLOC(eps_gwnlf ,(BSp%nomega,BSp%nq))
    ABI_MALLOC(dos_gw,(BSp%nomega))
 
-   call exc_eps_rpa(BSp%nbnds,BSp%lomo_spin,Bsp%lomo_min,BSp%homo_spin,Kmesh,QP_BSt,BSp%nq,nsppol,opt_cvk,&
-&    Cryst%ucvol,Bsp%broad,BSp%nomega,BSp%omega,eps_gwnlf,dos_gw)
-   !
-   ! =========================
-   ! === Write out Epsilon ===
-   ! =========================
-   !this is just for the automatic tests, It will be removed when fldiff 
-   !will be able to compare two optical spectral
-   write(ab_out,*)" "
-   write(ab_out,*)"Macroscopic dielectric function:"
-   write(ab_out,*)"omega [eV] <KS_RPA_nlf>  <GW_RPA_nlf>  <BSE> "
-   do io=1,MIN(10,BSp%nomega)
-     omegaev = REAL(BSp%omega(io))*Ha_eV
-     ks_avg  = SUM( eps_rpanlf(io,:)) / Bsp%nq
-     gw_avg  = SUM( eps_gwnlf (io,:)) / Bsp%nq
-     exc_avg = SUM( eps_exc   (io,:)) / Bsp%nq
-     write(ab_out,'(7f9.4)')omegaev,ks_avg,gw_avg,exc_avg
-   end do
-   write(ab_out,*)" "
+   do itemp = 1, ntemp
 
-   ! Master node writes final results on file.
-   call exc_write_data(BSp,BS_files,"RPA_NLF_MDF",eps_rpanlf,dos=dos_ks)
-
-   call exc_write_data(BSp,BS_files,"GW_NLF_MDF",eps_gwnlf,dos=dos_gw)
-
-   call exc_write_data(BSp,BS_files,"EXC_MDF",eps_exc,dos=dos_exc)
+     call int2char4(itemp,ts)
  
-   call wrtout(std_out," Checking Kramers Kronig on Excitonic Macroscopic Epsilon","COLL")
-   call check_kramerskronig(BSp%nomega,REAL(BSp%omega),eps_exc(:,1))
+     if(do_ep_renorm) then
+       prefix = TRIM("_T") // ts
+     else
+       prefix = ""
+     end if
 
-   call wrtout(std_out," Checking Kramers Kronig on RPA NLF Macroscopic Epsilon","COLL")
-   call check_kramerskronig(BSp%nomega,REAL(BSp%omega),eps_rpanlf(:,1))
+     ost_fname = strcat(BS_files%out_basename,prefix,"_EXC_OST")
 
-   call wrtout(std_out," Checking Kramers Kronig on GW NLF Macroscopic Epsilon","COLL")
-   call check_kramerskronig(BSp%nomega,REAL(BSp%omega),eps_gwnlf(:,1))
+     !TODO for RPA
+     call ebands_copy(KS_BST, EPBSt)
+     call ebands_copy(QP_BST, EP_QPBSt)
 
-   call wrtout(std_out," Checking f-sum rule on Excitonic Macroscopic Epsilon","COLL")
+     if (BS_files%in_eig /= BSE_NOFILE) then
+       filbseig = strcat(BS_files%in_eig,prefix)
+     else 
+       filbseig = strcat(BS_files%out_eig,prefix)
+     end if
 
-   if (BSp%exchange_term>0) then 
-     MSG_COMMENT(' f-sum rule should be checked without LF')
-   end if
-   call check_fsumrule(BSp%nomega,REAL(BSp%omega),AIMAG(eps_exc(:,1)),drude_plsmf)
+     if(do_ep_renorm) then
+       ! No scissor with KSBST
+       call renorm_bst(Epren, EPBSt, Cryst, itemp, do_lifetime=.TRUE.,do_check=.TRUE.)
+      
+       call renorm_bst(Epren, EP_QPBSt, Cryst, itemp, do_lifetime=.TRUE.,do_check=.FALSE.)
+     end if
 
-   call wrtout(std_out," Checking f-sum rule on RPA NLF Macroscopic Epsilon","COLL")
-   call check_fsumrule(BSp%nomega,REAL(BSp%omega),AIMAG(eps_rpanlf(:,1)),drude_plsmf)
 
-   call wrtout(std_out," Checking f-sum rule on GW NLF Macroscopic Epsilon","COLL")
-   call check_fsumrule(BSp%nomega,REAL(BSp%omega),AIMAG(eps_gwnlf(:,1)),drude_plsmf)
+     if (BSp%use_coupling==0) then
+       call exc_eps_resonant(BSp,filbseig,ost_fname,lomo_min,max_band,BSp%nkbz,nsppol,opt_cvk,&
+&        Cryst%ucvol,BSp%nomega,BSp%omega,eps_exc,dos_exc,elph_lifetime=do_ep_renorm)
+     else
+       call exc_eps_coupling(Bsp,BS_files,lomo_min,max_band,BSp%nkbz,nsppol,opt_cvk,&
+&        Cryst%ucvol,BSp%nomega,BSp%omega,eps_exc,dos_exc)
+     end if
+     !
+     ! =======================================================
+     ! === Make EPS RPA and GW without local-field effects ===
+     ! =======================================================
+     call wrtout(std_out," Calculating RPA NLF and QP NLF epsilon","COLL")
+
+     call exc_eps_rpa(BSp%nbnds,BSp%lomo_spin,Bsp%lomo_min,BSp%homo_spin,Kmesh,EPBSt,BSp%nq,nsppol,opt_cvk,&
+&      Cryst%ucvol,BSp%broad,BSp%nomega,BSp%omega,eps_rpanlf,dos_ks)
+
+     call exc_eps_rpa(BSp%nbnds,BSp%lomo_spin,Bsp%lomo_min,BSp%homo_spin,Kmesh,EP_QPBSt,BSp%nq,nsppol,opt_cvk,&
+&      Cryst%ucvol,Bsp%broad,BSp%nomega,BSp%omega,eps_gwnlf,dos_gw)
+     !
+     ! =========================
+     ! === Write out Epsilon ===
+     ! =========================
+     !this is just for the automatic tests, It will be removed when fldiff 
+     !will be able to compare two optical spectral
+     write(ab_out,*)" "
+     write(ab_out,*)"Macroscopic dielectric function:"
+     write(ab_out,*)"omega [eV] <KS_RPA_nlf>  <GW_RPA_nlf>  <BSE> "
+     do io=1,MIN(10,BSp%nomega)
+       omegaev = REAL(BSp%omega(io))*Ha_eV
+       ks_avg  = SUM( eps_rpanlf(io,:)) / Bsp%nq
+       gw_avg  = SUM( eps_gwnlf (io,:)) / Bsp%nq
+       exc_avg = SUM( eps_exc   (io,:)) / Bsp%nq
+       write(ab_out,'(7f9.4)')omegaev,ks_avg,gw_avg,exc_avg
+     end do
+     write(ab_out,*)" "
+
+     !
+     ! Master node writes final results on file.
+     call exc_write_data(BSp,BS_files,"RPA_NLF_MDF",eps_rpanlf,prefix=prefix,dos=dos_ks)
+
+     call exc_write_data(BSp,BS_files,"GW_NLF_MDF",eps_gwnlf,prefix=prefix,dos=dos_gw)
+
+     call exc_write_data(BSp,BS_files,"EXC_MDF",eps_exc,prefix=prefix,dos=dos_exc)
+ 
+     call wrtout(std_out," Checking Kramers Kronig on Excitonic Macroscopic Epsilon","COLL")
+     call check_kramerskronig(BSp%nomega,REAL(BSp%omega),eps_exc(:,1))
+
+     call wrtout(std_out," Checking Kramers Kronig on RPA NLF Macroscopic Epsilon","COLL")
+     call check_kramerskronig(BSp%nomega,REAL(BSp%omega),eps_rpanlf(:,1))
+
+     call wrtout(std_out," Checking Kramers Kronig on GW NLF Macroscopic Epsilon","COLL")
+     call check_kramerskronig(BSp%nomega,REAL(BSp%omega),eps_gwnlf(:,1))
+
+     call wrtout(std_out," Checking f-sum rule on Excitonic Macroscopic Epsilon","COLL")
+
+     if (BSp%exchange_term>0) then 
+       MSG_COMMENT(' f-sum rule should be checked without LF')
+     end if
+     call check_fsumrule(BSp%nomega,REAL(BSp%omega),AIMAG(eps_exc(:,1)),drude_plsmf)
+
+     call wrtout(std_out," Checking f-sum rule on RPA NLF Macroscopic Epsilon","COLL")
+     call check_fsumrule(BSp%nomega,REAL(BSp%omega),AIMAG(eps_rpanlf(:,1)),drude_plsmf)
+
+     call wrtout(std_out," Checking f-sum rule on GW NLF Macroscopic Epsilon","COLL")
+     call check_fsumrule(BSp%nomega,REAL(BSp%omega),AIMAG(eps_gwnlf(:,1)),drude_plsmf)
 
 #ifdef HAVE_NETCDF
-     path = strcat(BS_files%out_basename, "_MDF.nc")
+     path = strcat(BS_files%out_basename, strcat(prefix,"_MDF.nc"))
      NCF_CHECK_MSG(nctk_open_create(ncid, path, xmpi_comm_self), sjoin("Creating MDF file:", path))
      ! Write structure
      NCF_CHECK(crystal_ncwrite(Cryst, ncid))
@@ -250,6 +298,12 @@ subroutine build_spectra(BSp,BS_files,Cryst,Kmesh,KS_BSt,QP_BSt,Psps,Pawtab,Wfd,
 #else
      ABI_UNUSED(ncid)
 #endif
+
+     !TODO
+     call ebands_free(EPBSt)
+     call ebands_free(EP_QPBSt)
+
+   end do
 
    ABI_FREE(eps_rpanlf)
    ABI_FREE(eps_gwnlf)
@@ -296,7 +350,7 @@ end subroutine build_spectra
 !!
 !! SOURCE
 
-subroutine exc_write_data(BSp,BS_files,what,eps,dos)
+subroutine exc_write_data(BSp,BS_files,what,eps,prefix,dos)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -313,6 +367,7 @@ subroutine exc_write_data(BSp,BS_files,what,eps,dos)
  character(len=*),intent(in) :: what
  type(excparam),intent(in) :: BSp
  type(excfiles),intent(in) :: BS_files
+ character(len=*),optional,intent(in) :: prefix
 !arrays
  real(dp),optional,intent(in) :: dos(BSp%nomega)
  complex(dpc),intent(in) :: eps(BSp%nomega,BSp%nq)
@@ -330,7 +385,11 @@ subroutine exc_write_data(BSp,BS_files,what,eps,dos)
 
 !************************************************************************
 
- fname = strcat(BS_files%out_basename,'_',toupper(what))
+ if (PRESENT(prefix)) then
+   fname = strcat(BS_files%out_basename,prefix,'_',toupper(what))
+ else
+   fname = strcat(BS_files%out_basename,'_',toupper(what))
+ end if
 
  if (open_file(fname,msg,newunit=funt,form="formatted", action="write") /= 0) then
    MSG_ERROR(msg)
@@ -501,7 +560,9 @@ subroutine exc_eps_rpa(nbnds,lomo_spin,lomo_min,homo_spin,Kmesh,Bst,nq,nsppol,op
 !scalars
  integer :: iw,ib_v,ib_c,ik_bz,ik_ibz,spin,iq
  real(dp) :: fact,arg,ediff
+ real(dp) :: lifetime
  complex(dpc) :: ctemp
+ logical :: do_lifetime
 
 !************************************************************************
 
@@ -511,6 +572,9 @@ subroutine exc_eps_rpa(nbnds,lomo_spin,lomo_min,homo_spin,Kmesh,Bst,nq,nsppol,op
  if (nsppol==1) fact=two*fact ! two accounts for the occupation factors.
 
  eps_rpa=czero; dos=zero
+
+ do_lifetime = .FALSE.
+ do_lifetime = allocated(BSt%lifetime)
 
  !write(std_out,*)nsppol,Kmesh%nbz,lomo_min,homo,nbnds
  !
@@ -523,23 +587,46 @@ subroutine exc_eps_rpa(nbnds,lomo_spin,lomo_min,homo_spin,Kmesh,Bst,nq,nsppol,op
          !
          ! TODO here energies are always assumed to be real.
          ediff = BSt%eig(ib_c,ik_ibz,spin) - BSt%eig(ib_v,ik_ibz,spin)
-         !
-         do iq=1,nq
-           ctemp = opt_cvk(ib_c,ib_v,ik_bz,spin,iq)
-           do iw=1,nomega
-             eps_rpa(iw,iq) = eps_rpa(iw,iq)  + ctemp * CONJG(ctemp) * (one/(ediff-omega(iw)) + one/(ediff+omega(iw)))
-           end do
-         end do
-         !
-         ! The JDOS at q=0
-         !if (ediff*Ha_eV < 0.3) then
-         !  write(std_out,*)"Small transition ",ik_ibz,ib_v,ib_c
-         !end if
 
-         do iw=1,nomega
-           arg = DBLE(omega(iw)) - ediff
-           dos(iw) = dos(iw) + dirac_delta(arg,broad)        
-         end do
+         !
+         if(do_lifetime) then
+           lifetime = BSt%lifetime(ib_c,ik_ibz,spin) + BSt%lifetime(ib_v,ik_ibz,spin)
+           do iq=1,nq
+             ctemp = opt_cvk(ib_c,ib_v,ik_bz,spin,iq)
+             do iw=1,nomega
+               eps_rpa(iw,iq) = eps_rpa(iw,iq)  + ctemp * CONJG(ctemp) *&
+&             (one/(ediff-j_dpc*lifetime-omega(iw)) + one/(ediff+j_dpc*lifetime+omega(iw)))
+             end do
+           end do
+           !
+           ! The JDOS at q=0
+           !if (ediff*Ha_eV < 0.3) then
+           !  write(std_out,*)"Small transition ",ik_ibz,ib_v,ib_c
+           !end if
+
+           do iw=1,nomega
+             arg = DBLE(omega(iw)) - ediff
+             dos(iw) = dos(iw) + dirac_delta(arg,lifetime)        
+           end do
+         else
+           do iq=1,nq
+             ctemp = opt_cvk(ib_c,ib_v,ik_bz,spin,iq)
+             do iw=1,nomega
+               eps_rpa(iw,iq) = eps_rpa(iw,iq)  + ctemp * CONJG(ctemp) *&
+&             (one/(ediff-omega(iw)) + one/(ediff+omega(iw)))
+             end do
+           end do
+           !
+           ! The JDOS at q=0
+           !if (ediff*Ha_eV < 0.3) then
+           !  write(std_out,*)"Small transition ",ik_ibz,ib_v,ib_c
+           !end if
+
+           do iw=1,nomega
+             arg = DBLE(omega(iw)) - ediff
+             dos(iw) = dos(iw) + dirac_delta(arg,broad)        
+           end do
+         end if
          !
        end do !ib_c
      end do !ib_v
@@ -584,7 +671,8 @@ end subroutine exc_eps_rpa
 !! SOURCE
 
 
-subroutine exc_eps_resonant(Bsp,BS_files,lomo_min,max_band,nkbz,nsppol,opt_cvk,ucvol,nomega,omega,eps_exc,dos_exc)
+subroutine exc_eps_resonant(Bsp,filbseig,ost_fname,lomo_min,max_band,nkbz,nsppol,opt_cvk,&
+&    ucvol,nomega,omega,eps_exc,dos_exc,elph_lifetime)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -600,8 +688,9 @@ subroutine exc_eps_resonant(Bsp,BS_files,lomo_min,max_band,nkbz,nsppol,opt_cvk,u
 !scalars
  integer,intent(in) :: lomo_min,max_band,nkbz,nomega,nsppol
  real(dp),intent(in) :: ucvol
- type(excfiles),intent(in) :: BS_files
  type(excparam),intent(in) :: BSp
+ character(len=fnlen),intent(in) :: filbseig,ost_fname
+ logical,optional,intent(in) :: elph_lifetime
 !arrays
  real(dp),intent(out) :: dos_exc(nomega)
  complex(dpc),intent(in) :: opt_cvk(lomo_min:max_band,lomo_min:max_band,nkbz,nsppol,BSp%nq),omega(nomega)
@@ -611,14 +700,15 @@ subroutine exc_eps_resonant(Bsp,BS_files,lomo_min,max_band,nkbz,nsppol,opt_cvk,u
 !scalars
  integer :: ll,it,iw,ib_v,ib_c,ik_bz,neig_read,eig_unt,exc_size,iq !fform,
  integer :: spin,spad,hsize_read,nstates,ost_unt
+ logical :: do_ep_lifetime, file_do_lifetime
  real(dp) :: fact,arg
+ complex(dpc) :: dotprod
  character(len=500) :: msg,frm,errmsg
- character(len=fnlen) :: filbseig,ost_fname
  !type(Hdr_type) :: tmp_Hdr
 !arrays
- real(dp),allocatable :: exc_ene(:),ostrength(:,:)
- complex(dpc) :: ctemp(BSp%nq)
- complex(dpc),allocatable :: exc_ene_cplx(:),exc_state(:)
+ real(dp),allocatable :: exc_ene(:)
+ complex(dpc) :: ctemp(BSp%nq),dtemp(BSp%nq)
+ complex(dpc),allocatable :: ostrength(:,:),exc_ene_cplx(:),exc_state(:),exc_state2(:)
 
 !************************************************************************
 
@@ -631,6 +721,11 @@ subroutine exc_eps_resonant(Bsp,BS_files,lomo_min,max_band,nkbz,nsppol,opt_cvk,u
  exc_size = SUM(BSp%nreh) 
  nstates  = BSp%nstates
 
+ do_ep_lifetime = .FALSE.
+ if(PRESENT(elph_lifetime)) then
+   do_ep_lifetime = elph_lifetime
+ end if
+
  if (ANY(Bsp%nreh/=Bsp%nreh(1))) then
    write(msg,'(a,2(i0,1x))')"BSE does not support different number of transitions for the two spin channels. nreh: ",Bsp%nreh
    MSG_WARNING(msg)
@@ -641,15 +736,15 @@ subroutine exc_eps_resonant(Bsp,BS_files,lomo_min,max_band,nkbz,nsppol,opt_cvk,u
  ! present implementation is not compatible with the cutoff technique.
  fact=four_pi/(ucvol*nkbz); if (nsppol==1) fact=two*fact ! two to account for the occupation numbers.
 
- if (BS_files%in_eig /= BSE_NOFILE) then
-   filbseig = BS_files%in_eig
- else 
-   filbseig = BS_files%out_eig
- end if
-
  call wrtout(std_out," Reading excitonic eigenstates from file: "//TRIM(filbseig),"COLL")
  if (open_file(filbseig,msg,newunit=eig_unt,form="unformatted",status="old",action="read") /= 0) then
    MSG_ERROR(msg)
+ end if
+ 
+ read(eig_unt, err=10, iomsg=errmsg) file_do_lifetime
+
+ if(do_ep_lifetime .and. .not. file_do_lifetime) then
+  MSG_ERROR("Cannot do lifetime as the data is not present in the file !")
  end if
 
  read(eig_unt, err=10, iomsg=errmsg) hsize_read,neig_read
@@ -669,56 +764,105 @@ subroutine exc_eps_resonant(Bsp,BS_files,lomo_min,max_band,nkbz,nsppol,opt_cvk,u
  read(eig_unt, err=10, iomsg=errmsg) exc_ene_cplx 
 
  ABI_MALLOC(exc_ene,(neig_read))
- exc_ene = exc_ene_cplx
- ABI_FREE(exc_ene_cplx)
+ exc_ene = DBLE(exc_ene_cplx)
+ !ABI_FREE(exc_ene_cplx)
  !
  ! Calculate oscillator strength.
  ABI_MALLOC(exc_state,(exc_size))
  ABI_MALLOC(ostrength,(neig_read,BSp%nq))
 
- do ll=1,neig_read ! Loop over excitonic eigenstates reported on file.
-   read(eig_unt, err=10, iomsg=errmsg) exc_state(:)
+ if (do_ep_lifetime) then
+   ABI_MALLOC(exc_state2,(exc_size))
+   do ll=1,neig_read ! Loop over excitonic eigenstates reported on file.
+     read(eig_unt, err=10, iomsg=errmsg) exc_state(:) ! Righteigenvector
+     read(eig_unt, err=10, iomsg=errmsg) exc_state2(:) ! Lefteigenvector
 
-   ctemp(:) = czero 
-   do spin=1,nsppol
-     spad=(spin-1)*BSp%nreh(1) ! Loop over spin channels.
-     do it=1,BSp%nreh(spin)    ! Loop over resonant transition t = (k,v,c,s)
-       ik_bz = Bsp%Trans(it,spin)%k
-       ib_v  = Bsp%Trans(it,spin)%v
-       ib_c  = Bsp%Trans(it,spin)%c
-       do iq=1,BSp%nq
-         ctemp(iq) = ctemp(iq) + CONJG(opt_cvk(ib_c,ib_v,ik_bz,spin,iq)) * exc_state(it+spad)
-       end do
-     end do ! it
-   end do
-   ostrength(ll,:) = ctemp(:)*CONJG(ctemp(:))
- end do ! ll
+     ! Here assuming that eigenvectors are such as Xl_i' Xr_j = delta_ij 
+     ! Otherwise, I need to invert the overlap matrix !
+
+     ! Rescale the vectors so that they are "normalized" with respect to the other one !
+     dotprod = xdotc(exc_size,exc_state2(:),1,exc_state(:),1)
+     exc_state2(:) = exc_state2(:)/CONJG(dotprod)
+
+     ctemp(:) = czero 
+     dtemp(:) = czero 
+     do spin=1,nsppol
+       spad=(spin-1)*BSp%nreh(1) ! Loop over spin channels.
+       do it=1,BSp%nreh(spin)    ! Loop over resonant transition t = (k,v,c,s)
+         ik_bz = Bsp%Trans(it,spin)%k
+         ib_v  = Bsp%Trans(it,spin)%v
+         ib_c  = Bsp%Trans(it,spin)%c
+         do iq=1,BSp%nq
+           ctemp(iq) = ctemp(iq) + CONJG(opt_cvk(ib_c,ib_v,ik_bz,spin,iq)) * exc_state(it+spad)
+           dtemp(iq) = dtemp(iq) + CONJG(opt_cvk(ib_c,ib_v,ik_bz,spin,iq)) * exc_state2(it+spad)
+         end do
+       end do ! it
+     end do
+     ostrength(ll,:) = ctemp(:)*CONJG(dtemp(:))
+   end do ! ll
+   ABI_FREE(exc_state2)
+ else
+   do ll=1,neig_read ! Loop over excitonic eigenstates reported on file.
+     read(eig_unt, err=10, iomsg=errmsg) exc_state(:)
+     if(file_do_lifetime) read(eig_unt, err=10, iomsg=errmsg)
+
+     ctemp(:) = czero 
+     do spin=1,nsppol
+       spad=(spin-1)*BSp%nreh(1) ! Loop over spin channels.
+       do it=1,BSp%nreh(spin)    ! Loop over resonant transition t = (k,v,c,s)
+         ik_bz = Bsp%Trans(it,spin)%k
+         ib_v  = Bsp%Trans(it,spin)%v
+         ib_c  = Bsp%Trans(it,spin)%c
+         do iq=1,BSp%nq
+           ctemp(iq) = ctemp(iq) + CONJG(opt_cvk(ib_c,ib_v,ik_bz,spin,iq)) * exc_state(it+spad)
+         end do
+       end do ! it
+     end do
+     ostrength(ll,:) = ctemp(:)*CONJG(ctemp(:))
+   end do ! ll
+ end if
+
 
  close(eig_unt, err=10, iomsg=errmsg)
  ABI_FREE(exc_state)
 
- eps_exc = one
- do ll=1,neig_read ! Sum over all excitonic eigenstates read from file.
-   do iq=1,BSp%nq
-      do iw=1,nomega
-        eps_exc(iw,iq) = eps_exc(iw,iq) +  &
-&         fact * ostrength(ll,iq) * (one/(exc_ene(ll) - omega(iw)) - one/(-exc_ene(ll) - omega(iw)))
-      end do
-   end do !ll
- end do !iw
+ if(do_ep_lifetime) then
+   eps_exc = one
+   do ll=1,neig_read ! Sum over all excitonic eigenstates read from file.
+     do iq=1,BSp%nq
+        do iw=1,nomega
+          eps_exc(iw,iq) = eps_exc(iw,iq) +  &
+  &         fact * ostrength(ll,iq) * (one/(exc_ene_cplx(ll) - omega(iw)) - one/(-DCONJG(exc_ene_cplx(ll)) - omega(iw)))
+        end do
+     end do !ll
+   end do !iw
+ else
+   eps_exc = one
+   do ll=1,neig_read ! Sum over all excitonic eigenstates read from file.
+     do iq=1,BSp%nq
+        do iw=1,nomega
+          eps_exc(iw,iq) = eps_exc(iw,iq) +  &
+  &         fact * ostrength(ll,iq) * (one/(exc_ene(ll) - omega(iw)) - one/(-exc_ene(ll) - omega(iw)))
+        end do
+     end do !ll
+   end do !iw
+ end if
+
  !
  ! The excitonic DOS.
  dos_exc=zero
  do ll=1,neig_read ! Sum over the calculate excitonic eigenstates.
    do iw=1,nomega
      arg = ( DBLE(omega(iw)) - exc_ene(ll))
-     dos_exc(iw) = dos_exc(iw) + dirac_delta(arg,Bsp%broad)
+     if(do_ep_lifetime) then
+       dos_exc(iw) = dos_exc(iw) + dirac_delta(arg,AIMAG(exc_ene_cplx(ll)))
+     else
+       dos_exc(iw) = dos_exc(iw) + dirac_delta(arg,Bsp%broad)
+     end if
    end do
  end do
  !
  ! Write the oscillator strengths to file.
- ost_fname = strcat(BS_files%out_basename,"_EXC_OST")
-
  if (open_file(ost_fname,msg,newunit=ost_unt,form="formatted",action="write") /= 0) then
    MSG_ERROR(msg)
  end if
@@ -741,6 +885,7 @@ subroutine exc_eps_resonant(Bsp,BS_files,lomo_min,max_band,nkbz,nsppol,opt_cvk,u
 
  ABI_FREE(ostrength)
  ABI_FREE(exc_ene)
+ ABI_FREE(exc_ene_cplx)
 
  !call exc_amplitude(Bsp,filbseig,1,(/(ll,ll=1,10)/),"TEST_AMPLITUDE")
  !call exc_amplitude(Bsp,filbseig,1,(/30/),"TEST_AMPLITUDE")
@@ -818,6 +963,7 @@ subroutine exc_eps_coupling(Bsp,BS_files,lomo_min,max_band,nkbz,nsppol,opt_cvk,u
  complex(dpc) :: eps,fam,famp
  character(len=500) :: msg,errmsg
  character(len=fnlen) :: filbseig
+ logical :: do_lifetime
  !type(Hdr_type) :: tmp_Hdr
 !arrays
  complex(dpc),allocatable :: Ami(:),exc_ene(:),Sm1mi(:)
@@ -849,6 +995,12 @@ subroutine exc_eps_coupling(Bsp,BS_files,lomo_min,max_band,nkbz,nsppol,opt_cvk,u
  call wrtout(std_out," Reading excitonic eigenstates from file: "//trim(filbseig),"COLL")
  if (open_file(filbseig,msg,newunit=eig_unt,form="unformatted", status="old", action="read") /= 0) then
    MSG_ERROR(msg)
+ end if
+ 
+ read(eig_unt, err=10, iomsg=errmsg) do_lifetime
+
+ if (do_lifetime) then
+   ABI_CHECK(.not. do_lifetime, "Finite lifetime with coupling is not supported yet !")
  end if
 
  read(eig_unt, err=10, iomsg=errmsg) exc_size_read, nstates_read

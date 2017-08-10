@@ -8,7 +8,7 @@
 !! space at a given k point
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (DCA, XG, GMR, DRH)
+!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR, DRH)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -49,7 +49,7 @@
 !!
 !! PARENTS
 !!      calc_vhxc_me,d2frnl,dfpt_nsteltwf,dfpt_nstpaw,dfpt_rhofermi,energy
-!!      getgh1c,ks_ddiago,m_commutator_vkbr,m_io_kss,mkffnl,vtorho
+!!      getgh1c,ks_ddiago,m_io_kss,m_vkbr,mkffnl,vtorho
 !!
 !! CHILDREN
 !!

@@ -1,8 +1,8 @@
 
-.Version 8.0.3 of ABINIT 
+.Version 8.1.5 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
 
-.Copyright (C) 1998-2016 ABINIT group . 
+.Copyright (C) 1998-2017 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see http://www.abinit.org .
 
-.Starting date : Mon  4 Apr 2016.
-- ( at 06h20 )
+.Starting date : Wed  7 Dec 2016.
+- ( at 20h15 )
   
 - input  file    -> t49.in
 - output file    -> t49.out
@@ -59,7 +59,7 @@ _ WF disk file :      0.043 Mbytes ; DEN or POT disk file :      0.185 Mbytes.
 --------------------------------------------------------------------------------
 -
 - outvars: echo of selected default values                                      
--   accesswff0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+-   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
 -
 - outvars: echo of global parameters not present in the input file              
 -  max_nthreads =    0
@@ -67,6 +67,7 @@ _ WF disk file :      0.043 Mbytes ; DEN or POT disk file :      0.185 Mbytes.
  -outvars: echo values of preprocessed input variables --------
             acell      1.2000000000E+01  8.0000000000E+00  8.0000000000E+00 Bohr
               amu      2.80855000E+01
+     densfor_pred           3
            diemac      1.00000000E+00
            diemix      3.33333333E-01
              ecut      7.00000000E+00 Hartree
@@ -74,7 +75,6 @@ _ WF disk file :      0.043 Mbytes ; DEN or POT disk file :      0.185 Mbytes.
 -          fftalg         312
             intxc           1
            ionmov           4
-     densfor_pred           3
            iprcfc           1
              iscf           2
            istwfk        2
@@ -132,8 +132,8 @@ P           mkmem           1
          ecut(hartree)=      7.000   => boxcut(ratio)=   2.09906
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gonze/ABINIT/ABINITv8.0.3/gonze/8.0.3-private/tests/Psps_for_tests/14si.pspnc
-- pspatm: opening atomic psp file    /home/gonze/ABINIT/ABINITv8.0.3/gonze/8.0.3-private/tests/Psps_for_tests/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -515,8 +515,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     675.000     675.000
  -1.77488665747300E-02 -2.31900113764885E-06 -3.53916270475808E-06
   1.77488665747300E-02  2.31900113764885E-06  3.53916270475808E-06
  Reduced forces (fred)
-  2.12989322822797E-01  1.91085604265009E-05  3.00464094872898E-05
- -2.12983474970723E-01 -1.79954577758807E-05 -2.65801937888395E-05
+  2.12986398896760E-01  1.85520091011908E-05  2.83133016380647E-05
+ -2.12986398896760E-01 -1.85520091011908E-05 -2.83133016380647E-05
  Total energy (etotal) [Ha]= -8.67163154094171E+00
 
 --- Iteration: ( 2/10) Internal Cycle: (1/1)
@@ -967,8 +967,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     675.000     675.000
  -3.14188831776508E-05  6.70232726221043E-08  9.66457844008931E-08
   3.14188831776508E-05 -6.70232726221043E-08 -9.66457844008931E-08
  Reduced forces (fred)
-  3.77026763247128E-04 -5.34325847830596E-07 -7.69897537404921E-07
- -3.77026433016491E-04  5.38046514123073E-07  7.76435013009368E-07
+  3.77026598131810E-04 -5.36186180976834E-07 -7.73166275207144E-07
+ -3.77026598131810E-04  5.36186180976834E-07  7.73166275207144E-07
  Total energy (etotal) [Ha]= -8.67317544582666E+00
 
  Difference of energy with previous step (new-old):
@@ -1076,8 +1076,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     675.000     675.000
  -2.63520431135657E-05  7.21605403734205E-08  1.03999882577792E-07
   2.63520431135657E-05 -7.21605403734205E-08 -1.03999882577792E-07
  Reduced forces (fred)
-  3.16224259558030E-04 -5.76826009876458E-07 -8.31294859262595E-07
- -3.16224775167547E-04  5.77742636098271E-07  8.32703261982077E-07
+  3.16224517362789E-04 -5.77284322987364E-07 -8.31999060622336E-07
+ -3.16224517362789E-04  5.77284322987364E-07  8.31999060622336E-07
  Total energy (etotal) [Ha]= -8.67317545190415E+00
 
  Difference of energy with previous step (new-old):
@@ -1194,8 +1194,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     675.000     675.000
  -1.39939873867793E-05  5.96654504775610E-08  8.59806256316339E-08
   1.39939873867793E-05 -5.96654504775610E-08 -8.59806256316339E-08
  Reduced forces (fred)
-  1.67927847878257E-04 -4.77272925779099E-07 -6.87764823334555E-07
- -1.67927849404446E-04  4.77374281861877E-07  6.87925186771587E-07
+  1.67927848641352E-04 -4.77323603820488E-07 -6.87845005053071E-07
+ -1.67927848641352E-04  4.77323603820488E-07  6.87845005053071E-07
  Total energy (etotal) [Ha]= -8.67317545563347E+00
 
  Difference of energy with previous step (new-old):
@@ -1303,8 +1303,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     675.000     675.000
  -1.32400170508959E-05  6.21249585006014E-08  8.95224212667744E-08
   1.32400170508959E-05 -6.21249585006014E-08 -8.95224212667744E-08
  Reduced forces (fred)
-  1.58880203683970E-04 -4.96986910979130E-07 -7.16160460730070E-07
- -1.58880205537531E-04  4.97012425030493E-07  7.16198279538320E-07
+  1.58880204610751E-04 -4.96999668004811E-07 -7.16179370134195E-07
+ -1.58880204610751E-04  4.96999668004811E-07  7.16179370134195E-07
  Total energy (etotal) [Ha]= -8.67317545567811E+00
 
  Difference of energy with previous step (new-old):
@@ -1421,8 +1421,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     675.000     675.000
  -6.89709269135455E-06  5.06622271954898E-08  7.30043277599778E-08
   6.89709269135455E-06 -5.06622271954898E-08 -7.30043277599778E-08
  Reduced forces (fred)
-  8.27651122143608E-05 -4.05296526538285E-07 -5.84032636012756E-07
- -8.27651123781485E-05  4.05299108589551E-07  5.84036608146888E-07
+  8.27651122962546E-05 -4.05297817563918E-07 -5.84034622079822E-07
+ -8.27651122962546E-05  4.05297817563918E-07  5.84034622079822E-07
  Total energy (etotal) [Ha]= -8.67317545659372E+00
 
  Difference of energy with previous step (new-old):
@@ -1530,8 +1530,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     675.000     675.000
  -6.52290392210927E-06  5.26302482727764E-08  7.58400616348095E-08
   6.52290392210927E-06 -5.26302482727764E-08 -7.58400616348095E-08
  Reduced forces (fred)
-  7.82748470490943E-05 -4.21041629127083E-07 -6.06719972355178E-07
- -7.82748470815281E-05  4.21042343237340E-07  6.06721013801775E-07
+  7.82748470653112E-05 -4.21041986182211E-07 -6.06720493078476E-07
+ -7.82748470653112E-05  4.21041986182211E-07  6.06720493078476E-07
  Total energy (etotal) [Ha]= -8.67317545660477E+00
 
  Difference of energy with previous step (new-old):
@@ -1550,7 +1550,6 @@ _setup2: Arith. and geom. avg. npw (full set) are     675.000     675.000
   1.01E-14 2.77E-16 1.01E-14 5.30E-16 5.30E-16
    0.0000  0.0000  0.0000    2  9.52137E-15 kpt; spin; max resid(k); each band:
   9.52E-15 2.31E-16 9.46E-15
-- nxfh > 0 in outwf is deprecated and will be removed in ABINIT8
  reduced coordinates (array xred) for    2 atoms
       -0.184688373146     -0.000000162923     -0.000000234771
        0.184688373146      0.000000162923      0.000000234771
@@ -1670,6 +1669,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     675.000     675.000
  -outvars: echo values of variables after computation  --------
             acell      1.2000000000E+01  8.0000000000E+00  8.0000000000E+00 Bohr
               amu      2.80855000E+01
+     densfor_pred           3
            diemac      1.00000000E+00
            diemix      3.33333333E-01
              ecut      7.00000000E+00 Hartree
@@ -1680,7 +1680,6 @@ _setup2: Arith. and geom. avg. npw (full set) are     675.000     675.000
 -          fftalg         312
             intxc           1
            ionmov           4
-     densfor_pred           3
            iprcfc           1
              iscf           2
            istwfk        2
@@ -1738,23 +1737,40 @@ P           mkmem           1
  of the ABINIT implementation.
  For information on why they are suggested, see also http://www.abinit.org/about/?text=acknowledgments.
 -
-- [1] ABINIT : First-principles approach of materials and nanosystem properties.
+- [1] Recent developments in the ABINIT software package.
+- Computer Phys. Comm. 205, 106 (2016).
+- X.Gonze, F.Jollet, F.Abreu Araujo, D.Adams, B.Amadon, T.Applencourt,
+- C.Audouze, J.-M.Beuken, J.Bieder, A.Bokhanchuk, E.Bousquet, F.Bruneval
+- D.Caliste, M.Cote, F.Dahm, F.Da Pieve, M.Delaveau, M.Di Gennaro,
+- B.Dorado, C.Espejo, G.Geneste, L.Genovese, A.Gerossier, M.Giantomassi,
+- Y.Gillet, D.R.Hamann, L.He, G.Jomard, J.Laflamme Janssen, S.Le Roux,
+- A.Levitt, A.Lherbier, F.Liu, I.Lukacevic, A.Martin, C.Martins,
+- M.J.T.Oliveira, S.Ponce, Y.Pouillon, T.Rangel, G.-M.Rignanese,
+- A.H.Romero, B.Rousseau, O.Rubel, A.A.Shukri, M.Stankovski, M.Torrent,
+- M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
+- B.Xue, A.Zhou, J.W.Zwanziger.
+- Comment : the fourth generic paper describing the ABINIT project.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- is available at http://www.abinit.org/about/ABINIT16.pdf .
+- The licence allows the authors to put it on the Web.
+-
+- [2] ABINIT : First-principles approach of materials and nanosystem properties.
+- Computer Phys. Comm. 180, 2582-2615 (2009).
 - X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
 - D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
 - S. Goedecker, D.R. Hamann, P. Hermet, F. Jollet, G. Jomard, S. Leroux, M. Mancini, S. Mazevet,
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
-- Computer Phys. Comm. 180, 2582-2615 (2009).
 - Comment : the third generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at http://www.abinit.org/about/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 -
-- [2] A brief introduction to the ABINIT software package.
+- [3] A brief introduction to the ABINIT software package.
+- Z. Kristallogr. 220, 558-562 (2005).
 - X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
 - M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
 - L. Reining, R. Godby, G. Onida, D.R. Hamann, and D.C. Allan.
-- Z. Kristallogr. 220, 558-562 (2005).
 - Comment : the second generic paper describing the ABINIT project. Note that this paper
 - should be cited especially if you are using the GW part of ABINIT, as several authors
 - of this part are not in the list of authors of the first or third paper.
@@ -1764,20 +1780,16 @@ P           mkmem           1
 -
 - And optionally:
 -
-- [3] First-principles computation of material properties : the ABINIT software project. 
+- [4] First-principles computation of material properties : the ABINIT software project. 
 - X. Gonze, J.-M. Beuken, R. Caracas, F. Detraux, M. Fuchs, G.-M. Rignanese, L. Sindic,
 - M. Verstraete, G. Zerah, F. Jollet, M. Torrent, A. Roy, M. Mikami, Ph. Ghosez, J.-Y. Raty, D.C. Allan.
 - Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7
 - Comment : the original paper describing the ABINIT project.
 -
-- [4] Fast radix 2, 3, 4 and 5 kernels for Fast Fourier Transformations
-- on computers with overlapping multiply-add instructions.
-- S. Goedecker, SIAM J. on Scientific Computing 18, 1605 (1997).
--
-- Proc.   0 individual time (sec): cpu=          5.0  wall=          2.3
+- Proc.   0 individual time (sec): cpu=          2.4  wall=          2.6
 
 ================================================================================
 
  Calculation completed.
-.Delivered  11 WARNINGs and   3 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          5.0  wall=          2.3
+.Delivered  11 WARNINGs and   2 COMMENTs to log file.
++Overall time at end (sec) : cpu=          2.4  wall=          2.6

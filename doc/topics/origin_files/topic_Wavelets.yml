@@ -1,0 +1,24 @@
+ - !components 
+    name      : Wavelets 
+    keyword   : Wavelets 
+    authors   : MT
+    howto     : perform calculations on a wavelet basis
+    header    : default
+    title     : <h1>Wavelets</h1>
+    subtitle  : default
+    copyright : default
+    links     : default
+    introduction : |- 
+         <p> The use of wavelets (instead of plane waves) is available in ABINIT.
+         At present, it works for the SCF cycles : one can get density, total energy
+         and forces, in some basic cases (HGH or GTH pseudopotentials only [[Genovese2008]], or PAW [[Rangel2016]]- in v7.2).
+         Available also : the finite size corrections to the
+         total energy, restart on wavefunctions following the ETSF norm and geometry
+         relaxation using BFGS. Molecular dynamic is also available for
+         test purposes.
+    tutorials  : |-
+          <li><a href="../../tutorial/generated_files/lesson_paral_gswvl.html">Parallelism for ground-state
+          calculations, with wavelets</a> presents the parallelism of ABINIT,
+          when wavelets are used as a basis function instead of planewaves, for
+          the computation of total energy, density, and ground state properties</li>
+    end : default

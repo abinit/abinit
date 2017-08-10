@@ -7,7 +7,7 @@
 !! Compute the linear response part to the 3dte
 !!
 !! COPYRIGHT
-!! Copyright (C) 2002-2016 ABINIT group (MVeithen)
+!! Copyright (C) 2002-2017 ABINIT group (MVeithen)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -153,8 +153,10 @@ subroutine pead_nl_resp(cg,cg1,cg3,cplex,dtfil,dtset,d3lo,&
  ABI_ALLOCATE(wfraug,(2,n4,n5,n6))
 
 !Initialize Hamiltonian (k-independent terms) - NCPP only
- call init_hamiltonian(gs_hamk,psps,pawtab_dum,nspinor,nspden,natom,&
-& dtset%typat,xred,nfft,mgfft,dtset%ngfft,rprimd,dtset%nloalg,ph1d=ph1d)
+ call init_hamiltonian(gs_hamk,psps,pawtab_dum,nspinor,nsppol,nspden,natom,&
+& dtset%typat,xred,nfft,mgfft,dtset%ngfft,rprimd,dtset%nloalg,ph1d=ph1d,&
+& comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab)
+!& paw_ij=paw_ij)
  rmet = MATMUL(TRANSPOSE(rprimd),rprimd)
 
  sumr = zero ; sumi = zero

@@ -7,7 +7,7 @@
 !! output gkk file for one perturbation (used for elphon calculations in anaddb)
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2016 ABINIT group (MVer)
+!! Copyright (C) 2008-2017 ABINIT group (MVer)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

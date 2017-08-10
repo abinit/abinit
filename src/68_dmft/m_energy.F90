@@ -6,7 +6,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2016 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2017 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -684,6 +684,10 @@ end subroutine compute_band_energy
 !! SOURCE
 
 subroutine compute_migdal_energy(cryst_struc,e_hu_migdal,e_hu_migdal_tot,green,paw_dmft,pawprtvol,self)
+
+#ifdef FC_INTEL
+!DEC$ NOOPTIMIZE
+#endif
 
  use defs_basis
  use m_crystal, only : crystal_t

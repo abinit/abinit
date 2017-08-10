@@ -8,7 +8,7 @@
 !! using the "cg" convention, namely real array of shape cg(2,...)
 !!
 !! COPYRIGHT
-!! Copyright (C) 1992-2016 ABINIT group (MG, MT, XG, DCA, GZ, FB, MVer)
+!! Copyright (C) 1992-2017 ABINIT group (MG, MT, XG, DCA, GZ, FB, MVer)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -46,7 +46,7 @@ MODULE m_cgtools
  use m_errors
  use m_xmpi
 
- use m_fstrings,  only : toupper
+ use m_fstrings,   only : toupper
 
  implicit none
 
@@ -135,7 +135,6 @@ CONTAINS  !=====================================================================
 !! PARENTS
 !!
 !! CHILDREN
-!!      timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -196,7 +195,6 @@ end subroutine cg_setval
 !! PARENTS
 !!
 !! CHILDREN
-!!      timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -252,7 +250,6 @@ end subroutine cg_tocplx
 !! PARENTS
 !!
 !! CHILDREN
-!!      timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -420,7 +417,6 @@ end subroutine cg_setaug_zero
 !! PARENTS
 !!
 !! CHILDREN
-!!      timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -469,7 +465,6 @@ end subroutine cg_to_reim
 !! PARENTS
 !!
 !! CHILDREN
-!!      timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -524,7 +519,6 @@ end subroutine cg_from_reim
 !!      cgwf,corrmetalwf1,dfpt_cgwf,dfpt_mkrho,dfpt_vtowfk,lapackprof,m_iowf
 !!
 !! CHILDREN
-!!      timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -572,10 +566,9 @@ end subroutine cg_zcopy
 !! OUTPUT
 !!
 !! PARENTS
-!!      cgwf,m_cgtools,rf2_init
+!!      cgwf,m_cgtools
 !!
 !! CHILDREN
-!!      timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -857,7 +850,6 @@ end function cg_zdotu
 !!      cgwf,dfpt_cgwf,lapackprof,rf2_init
 !!
 !! CHILDREN
-!!      timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -917,7 +909,6 @@ end subroutine cg_zaxpy
 !! PARENTS
 !!
 !! CHILDREN
-!!      timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -977,7 +968,6 @@ end subroutine cg_zaxpby
 !!      lapackprof,m_cgtools
 !!
 !! CHILDREN
-!!      timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -1060,7 +1050,6 @@ end subroutine cg_zgemv
 !!      lapackprof,m_cgtools
 !!
 !! CHILDREN
-!!      timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -1214,10 +1203,9 @@ end function set_istwfk
 !!  dotr= <vect|vect>
 !!
 !! PARENTS
-!!      cgwf,dens_in_sph,dfpt_cgwf,dfpt_vtowfk,mkresi
+!!      cgwf,dfpt_cgwf,dfpt_vtowfk,m_epjdos,mkresi,rf2_init
 !!
 !! CHILDREN
-!!      timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -1304,11 +1292,10 @@ end subroutine sqnorm_g
 !! PARENTS
 !!      cgwf,chebfi,corrmetalwf1,d2frnl,dfpt_cgwf,dfpt_nsteltwf,dfpt_nstpaw
 !!      dfpt_nstwf,dfpt_vtowfk,dfpt_wfkfermi,dfptnl_resp,eig2stern,extrapwf
-!!      fock_getghc,m_efmas,m_phgamma,m_rf2,mkresi,nonlop_gpu,recip_ylm
-!!      rf2_init
+!!      fock_getghc,m_efmas,m_gkk,m_phgamma,m_phpi,m_rf2,m_sigmaph,mkresi
+!!      nonlop_gpu,rf2_init
 !!
 !! CHILDREN
-!!      timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -1406,7 +1393,6 @@ end subroutine dotprod_g
 !!      dfpt_vtowfk
 !!
 !! CHILDREN
-!!      timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -1569,10 +1555,9 @@ end subroutine matrixelmt_g
 !!  dotr= value of the dot product
 !!
 !! PARENTS
-!!      dens_in_sph
+!!      m_epjdos
 !!
 !! CHILDREN
-!!      timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -1669,7 +1654,6 @@ end subroutine dotprod_v
 !!      dfpt_rhotov,dfpt_vtorho,rhotov,vtorho
 !!
 !! CHILDREN
-!!      timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -1762,11 +1746,10 @@ end subroutine sqnorm_v
 !!  meansp(nspden)=mean value for each nspden component
 !!
 !! PARENTS
-!!      fresid,multipoles_fftr,newvtr,pawmknhat,prcref,prcref_PMA
-!!      psolver_rhohxc,rhohxc,rhohxcpositron,rhotov
+!!      fresid,newvtr,pawmknhat,prcref,prcref_PMA,psolver_rhohxc,rhohxc
+!!      rhohxcpositron,rhotov
 !!
 !! CHILDREN
-!!      timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -1838,7 +1821,6 @@ end subroutine mean_fftr
 !!      m_cut3d,partial_dos_fractions
 !!
 !! CHILDREN
-!!      cg_outer_spin_product
 !!
 !! SOURCE
 
@@ -1923,7 +1905,6 @@ end subroutine cg_getspin
 !! PARENTS
 !!
 !! CHILDREN
-!!      timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -2093,7 +2074,6 @@ end subroutine cg_gsph2box
 !!      fourwf,m_dfti,m_fftw3
 !!
 !! CHILDREN
-!!      timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -2208,7 +2188,6 @@ end subroutine cg_box2gsph
 !!      fourwf,m_dfti,m_fftw3
 !!
 !! CHILDREN
-!!      timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -2296,7 +2275,6 @@ end subroutine cg_addtorho
 !!      m_dfti,m_fftw3
 !!
 !! CHILDREN
-!!      timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -2419,7 +2397,6 @@ end subroutine cg_vlocpsi
 !!      pw_orthon
 !!
 !! CHILDREN
-!!      timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -2581,7 +2558,6 @@ end subroutine cgnc_cholesky
 !!      pw_orthon
 !!
 !! CHILDREN
-!!      timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -2697,7 +2673,6 @@ end subroutine cgpaw_cholesky
 !!      m_cgtools
 !!
 !! CHILDREN
-!!      timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -2798,7 +2773,6 @@ end subroutine cgnc_normalize
 !!      m_cgtools
 !!
 !! CHILDREN
-!!      timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -2967,7 +2941,6 @@ end subroutine cgnc_gramschmidt
 !!      m_cgtools
 !!
 !! CHILDREN
-!!      timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -3074,7 +3047,6 @@ end subroutine cgpaw_normalize
 !!      m_cgtools
 !!
 !! CHILDREN
-!!      timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -3278,7 +3250,6 @@ end subroutine cgpaw_gramschmidt
 !!      cgwf,dfpt_cgwf,dfpt_nstpaw,getdc1,lapackprof
 !!
 !! CHILDREN
-!!      timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -3427,7 +3398,6 @@ end subroutine projbd
 !!      wfconv
 !!
 !! CHILDREN
-!!      timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -3528,7 +3498,6 @@ end subroutine cg_envlop
 !!      subdiago
 !!
 !! CHILDREN
-!!      timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -3631,7 +3600,6 @@ end subroutine cg_normev
 !!      cgwf,dfpt_cgwf
 !!
 !! CHILDREN
-!!      timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -3780,7 +3748,6 @@ end subroutine cg_precon
 !!      m_lobpcg
 !!
 !! CHILDREN
-!!      timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -4082,7 +4049,6 @@ end subroutine cg_precon_block
 !!      m_lobpcg
 !!
 !! CHILDREN
-!!      timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -4259,7 +4225,7 @@ end subroutine cg_zprecon_block
 !! This should be cleared up.
 !!
 !! PARENTS
-!!      dfpt_phfrq,rayleigh_ritz
+!!      m_dynmat,rayleigh_ritz
 !!
 !! CHILDREN
 !!

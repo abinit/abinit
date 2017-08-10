@@ -52,4 +52,5 @@ toldfe 1.0d-6
 #%%   H based fake crystals.
 #%%   Test the generation and recognition of the
 #%%   orthorhombic space groups, from spgroup 16 to 74.
+#%% topics = crystal
 #%%<END TEST_INFO>

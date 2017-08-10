@@ -7,7 +7,7 @@
 !!  This module contains basic tools to operate on vectors expressed in reduced coordinates.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2016 ABINIT group (AB)
+!! Copyright (C) 2008-2017 ABINIT group (AB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -42,7 +42,7 @@ CONTAINS  !===========================================================
 !!
 !! FUNCTION
 !! Part of fold2Bloch that unfolds the wavefunction and calculates
-!! the weight of each band. 
+!! the weight of each band.
 !!
 !! INPUTS
 !! FX, FY, FZ= Number of folds in each dimention
@@ -95,12 +95,12 @@ CONTAINS  !===========================================================
  ABI_ALLOCATE(TGroupC,(FX, FY, FZ, NV))
  ABI_ALLOCATE(Sums,(FX*FY*FZ))
  ABI_ALLOCATE(counter,(FX,FY,FZ))
- ABI_ALLOCATE(coefsqr,(NV)) 
+ ABI_ALLOCATE(coefsqr,(NV))
 
  !Convert to sum of squares
  do jj=1, NV
    coefsqr(jj)=coefc(1,jj)*coefc(1,jj)+coefc(2,jj)*coefc(2,jj)
- end do 
+ end do
 
  !Initiates the counter and TGroupC elements at 0
  do jj=1,FX
@@ -113,7 +113,7 @@ CONTAINS  !===========================================================
      end do
    end do
  end do
- 
+
  !Sorts the energy coeeficients
  do jj=1, (NV)
    remainder_x=MODULO(Vector(1,jj), FX)
@@ -122,7 +122,7 @@ CONTAINS  !===========================================================
    counter(remainder_x+1, remainder_y+1, remainder_z+1)=counter(remainder_x+1, remainder_y+1, remainder_z+1)+1
    TGroupC(remainder_x+1, remainder_y+1, remainder_z+1, counter(remainder_x+1, remainder_y+1, remainder_z+1))=Coefsqr(jj)
  end do
- 
+
  !Sums the squares  of all coefficients per group
  el=1
  do jj=1, FX
@@ -131,7 +131,7 @@ CONTAINS  !===========================================================
        if (counter(jj, kk, ll)>0) then
          Sums(el)=SUM(TGroupC(jj, kk, ll,1:counter(jj, kk, ll)))
          el=el+1
-       else 
+       else
          Sums(el)=0.0
          el=el+1
        end if
@@ -143,7 +143,7 @@ CONTAINS  !===========================================================
  sumtot=SUM(Sums)
  do jj=1, (FX*FY*FZ)
    Weights(jj)=Sums(jj)/sumtot
- end do 
+ end do
  ABI_DEALLOCATE(TGroupC)
  ABI_DEALLOCATE(Sums)
  ABI_DEALLOCATE(counter)
@@ -158,7 +158,7 @@ CONTAINS  !===========================================================
 !!
 !! FUNCTION
 !! Part of fold2Bloch that determines the unfolded
-!! positions of each K point. 
+!! positions of each K point.
 !!
 !! INPUTS
 !! FX, FY, FZ= Number of folds in each dimention
@@ -197,7 +197,7 @@ CONTAINS  !===========================================================
 !scalars
  real(dp) :: field_x, field_y, field_z
  real(dp) :: TX, TY, TZ
- integer :: loop, ii, jj, kk, size 
+ integer :: loop, ii, jj, kk, size
 !arrays
 
 ! *************************************************************************
@@ -208,25 +208,25 @@ CONTAINS  !===========================================================
  field_x=0.5*FX
  field_y=0.5*FY
  field_z=0.5*FZ
- loop=1 
+ loop=1
 
  !Determine new K point states
  do ii=0, (FX-1)
    if ((XX+ii)>(field_x)) then !if falls outside of field, loop it around
      TX=XX-(field_x*2)+ii
-   else 
+   else
      TX=XX+ii
    end if
    do jj=0, (FY-1)
      if ((YY+jj)>(field_y)) then
        TY=YY-(field_y*2)+jj
-     else 
+     else
        TY=YY+jj
      end if
      do kk=0,(FZ-1)
        if ((ZZ+kk)>(field_z)) then
          TZ=ZZ-(field_z*2)+kk
-       else 
+       else
          TZ=ZZ+kk
        end if
        NKVal(1,loop)=TX !Assign to an output array
@@ -235,7 +235,7 @@ CONTAINS  !===========================================================
        loop=loop+1
      end do
    end do
- end do   
+ end do
 
  !reduce the values to fit in Brillouin zone
  do ii=1, FX*FY*FZ
@@ -280,7 +280,7 @@ subroutine getargs(folds, fname)
 !End of the abilint section
 
  implicit none
- 
+
 !Arguments ------------------------------------
 !scalars
  character(len=fnlen), intent(inout) :: fname
@@ -290,19 +290,19 @@ subroutine getargs(folds, fname)
 !Local variables-------------------------------
 !scalars
  integer :: num_args, argcount, ii, ios
- character(len=10) :: argfolds
+ character(len=fnlen) :: argfolds
  logical :: dir
 !arrays
- character(len=30), allocatable :: args(:)
+ character(len=fnlen), allocatable :: args(:)
 
 ! *************************************************************************
 
  !get number of args
  num_args=command_argument_count()
  ABI_ALLOCATE(args,(num_args))
- 
+
  !Check for errors in arguments
- if (num_args>2) then 
+ if (num_args>2) then
    write(std_out,*) "     Too many arguments."
    write(std_out,*) "     Usage: $fold2Bloch file_WFK x:y:z (folds)"
    MSG_ERROR("Aborting now")
@@ -316,13 +316,13 @@ subroutine getargs(folds, fname)
        write(std_out,*) "     in the corresponding directions used when constructing the supercell."
        MSG_ERROR("Aborting now")
      else
-       write(std_out,*) "     Not all arguments are present." 
+       write(std_out,*) "     Not all arguments are present."
        write(std_out,*) "     Make sure that file name and number of folds are indicated."
        write(std_out,*) "     Usage: $fold2Bloch file_WFK x:y:z (folds)"
        MSG_ERROR("Aborting now")
      end if
    else
-     write(std_out,*) "     Not all arguments are present." 
+     write(std_out,*) "     Not all arguments are present."
      write(std_out,*) "     Make sure that file name and number of folds are indicated."
      write(std_out,*) "     Usage: $fold2Bloch file_WFK x:y:z (folds)"
      MSG_ERROR("Aborting now")
@@ -331,9 +331,9 @@ subroutine getargs(folds, fname)
    do argcount=1, num_args
      call get_command_argument(argcount,args(argcount))
      if (argcount==1) then
-       read(args(argcount),*) fname !read first argument
+       read(args(argcount), "(a)") fname !read first argument
      else
-       read(args(argcount),*) argfolds !read second argument
+       read(args(argcount), "(a)") argfolds !read second argument
      end if
    end do
  end if
@@ -345,7 +345,7 @@ subroutine getargs(folds, fname)
    write(std_out,*) "     Usage: $fold2Bloch file_WFK x:y:z (folds)"
    MSG_ERROR("Aborting now")
  end if
- 
+
  !Was the number of folds entered in correct format?
  ii=0
  ii=INDEX(argfolds, ':') !look for first ":" to differentiate between axis
@@ -388,7 +388,7 @@ end subroutine getargs
 !!
 !! FUNCTION
 !! Part of fold2Bloch that unfolds the wavefunction and calculates
-!! the weight of each band. 
+!! the weight of each band.
 !!
 !! INPUTS
 !! ikpt: K point index
