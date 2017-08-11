@@ -516,7 +516,7 @@ end subroutine energies_to_array
    if (wvlbigdft .and. dtset%iscf > 0) optdc=1
  else
    ipositron=2
-   if (abs(energies%e_ewald)<1.e-15_dp.and.abs(energies%e_hartree)<1.e-15_dp) ipositron=1
+   !if (abs(energies%e_ewald)<1.e-15_dp.and.abs(energies%e_hartree)<1.e-15_dp) ipositron=1
    if (abs(energies%edc_electronpositron)<1.e-15_dp) optdc=0
    if (abs(energies%e_electronpositron)<1.e-15_dp.and.abs(energies%edc_electronpositron)>1.e-15_dp) optdc=1
    if (abs(energies%e_electronpositron)>1.e-15_dp.and.abs(energies%edc_electronpositron)>1.e-15_dp) optdc=2

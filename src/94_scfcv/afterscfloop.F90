@@ -921,7 +921,7 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 !get electronic quantities in global variables
  if (dtset%positron/=0) then
    electronpositron%scf_converged=.false.
-   if ((dtset%positron<0.and.electronpositron_calctype(electronpositron)==1).or.(dtset%positron==1)) then
+   if (dtset%positron<0.and.electronpositron_calctype(electronpositron)==1) then
      call exchange_electronpositron(cg,cprj,dtset,eigen,electronpositron,energies,fred,mcg,mcprj,&
 &     mpi_enreg,my_natom,nfftf,ngfftf,nhat,npwarr,occ,paw_an,pawrhoij,rhog,rhor,strten,usecprj,vhartr)
    end if
