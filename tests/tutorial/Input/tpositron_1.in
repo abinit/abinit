@@ -39,7 +39,7 @@
     nband 6
 
     posocc2 1  ! Occupation number for the positron (should be set <1 for bulk calculation with a small cell).
-                 ! Here the zero positron density limit is used, so results do not depend on posocc.
+               ! Here the zero positron density limit is used, so results do not depend on posocc.
 
   ! Convergence parameters
     ecut 8. pawecutdg 15.

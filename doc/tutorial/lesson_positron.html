@@ -111,6 +111,10 @@ We find the positron lifetime calculated in the RPA limit:
 The lifetime of 223 ps agrees well with the value of 225 ps calculated with the same number of valence electrons in [Phys. Rev. B 92, 125113 (2015)] 
 and with the experimental value of about 219 ps [Phys. Rev. B 56, 7356 (1997)].
 </p>
+<p><small><em>
+Note: if we had not used the "zero positron density limit" approximation (using, for example, another value of <a href="../input_variables/html_automatically_generated/vargs.html#ixcpositron" target="kwimg">ixcpositron</a>), we would theoretically have needed a box of infinite size for the positron to completely delocalise itself in the crystal. This can be avoided by the use of the <a href="../input_variables/html_automatically_generated/vargs.html#posocc" target="kwimg">posocc</a> input parameter. Numerically, it is equivalent to calculate the density of 1 positron in a box of size N and that of x positron in a box of size N * x. Thus, we can calculate the lifetime of a positron in a primitive cell by setting <a href="../input_variables/html_automatically_generated/vargs.html#posocc" target="kwimg">posocc</a> to a small value (0.0001 ...); This value must obviously be tested ...
+</em></small></p>
+
 <br/><hr/>
 <h3><b><a name="2">2. The second step: <br />
   Computing the positron lifetime in a Si monovacancy.</b></h3>
@@ -249,7 +253,7 @@ Once the calculation is complete, you will find a file <font color="#298A08">tpo
 The positron lifetime and momentum distribution calculations within the PAW method are very sensitive to the number of valence electrons in the PAW dataset. It is due to the fact that it is not easy to describe the positron wavefunction, tending to zero at the nucleus, using the electron atomic orbitals. The PAW basis set in this case needs to be more complete than only for describing the electron wavefunctions. The simplest way to make the PAW dataset more complete is to include semicore electrons. It is also possible to add the partial waves corresponding to the semicore electrons in the basis used only for the positron wave function description, while keeping the initial number of valence electrons (as done in [Phys. Rev. B 92, 125113 (2015)]). However, the second method is less straightforward.
 </p>
 <p>
-The previous calculations were done with only 4 valence electrons (3s and 3p). We will now see what happens if we include the 2s and 2p states in the PAW dataset. In tpositron_12el_x.files we have replaced the <font face="Courier">Si.LDA-PW-paw.abinit</font> dataset with <font face="Courier">Si.12el.LDA-PW-paw.abinit</font>. We can now rerun the lifetime calculation:
+The previous calculations were done with only 4 valence electrons (3s and 3p). We will now see what happens if we include the 2s and 2p states in the PAW dataset. In <font color="#298A08">tpositron_12el_x.files</font> we have replaced the <font face="Courier">Si.LDA-PW-paw.abinit</font> dataset with <font face="Courier">Si.12el.LDA-PW-paw.abinit</font>. We can now rerun the lifetime calculation:
 </p><pre>
 abinit < tpositron_12el_x.files >& tpositron_6.log
 </pre>

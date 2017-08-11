@@ -467,13 +467,13 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
 &             Crystal%gprimd(:,2)*real(ig2+dtset%kpt(2,ikpt))+&
 &             Crystal%gprimd(:,3)*real(ig3+dtset%kpt(3,ikpt))
              pnorm=dsqrt(dot_product(pcart,pcart))
-             pbn(:) = pcart(:)/pnorm ! unit vector
 
              if (pnorm < tol12) then
                pbn(:) = zero
                ylmp(:) = zero
                ylmp(1) = 1.d0/sqrt(four_pi)
              else
+               pbn(:) = pcart(:)/pnorm ! unit vector
                call initylmr(l_size,ylmr_normchoice,ylmr_npts,ylmr_nrm,ylmr_option,pbn(:),ylmp(:),ylmgr)
              end if
 
