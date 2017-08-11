@@ -6311,9 +6311,9 @@
     requires: null
     text: |-
         <p>If non-zero, will fix artificially the value of the Fermi energy
-        (e.g. for semiconductors), in the electron-phonon case. Note that elph_fermie and [[anaddb:ep_extrael]]
+        (e.g. for semiconductors), in the electron-phonon case. Note that [[anaddb:elph_fermie]] and [[anaddb:ep_extrael]]
         should not be used at the same time. ([[anaddb:elphflag]]=1).
-    topics: anaddbEPC_useful
+    topics: ElPhonTransport_useful
     varset: anaddb
     vartype: real
 - !variable
@@ -6328,7 +6328,7 @@
     requires: null
     text: |-
         <p>If <b>elphflag</b> is 1, anaddb performs an analysis of the electron-phonon coupling.
-    topics: anaddbEPC_compulsory, PhononWidth_compulsory
+    topics: PhononWidth_compulsory, ElPhonTransport_compulsory
     varset: anaddb
     vartype: integer
 - !variable
@@ -6423,7 +6423,7 @@
     requires: null
     text: |-
         <p>When set, and [[anaddb:telphint]] is equal to 2, this variable determines the k-point integration weights which are used in the electron-phonon part of the code. Instead of weighting according to a distance from the Fermi surface, an equal weight is given to all k-points, for all bands between [[anaddb:ep_b_min]] and <b>ep_b_max</b>.
-    topics: anaddbEPC_useful
+    topics: ElPhonTransport_useful
     varset: anaddb
     vartype: integer
 - !variable
@@ -6438,7 +6438,7 @@
     requires: null
     text: |-
         <p>As for [[anaddb:ep_b_max]], but <b>ep_b_min</b> is the lower bound on the band integration, instead of the upper bound. See also [[anaddb:telphint]].
-    topics: anaddbEPC_useful
+    topics: ElPhonTransport_useful
     varset: anaddb
     vartype: integer
 - !variable
@@ -6457,7 +6457,7 @@
         This field can also be filled with doping concentration, in the units of cm-3 (negative for electron doping).
         Note that <b>ep_extrael</b> and [[anaddb:elph_fermie]] should not be used at the same time.
         ([[anaddb:elphflag]]=1).
-    topics: anaddbEPC_useful
+    topics: ElPhonTransport_useful
     varset: anaddb
     vartype: real
 - !variable
@@ -6493,7 +6493,7 @@
         elements on the electron band index is kept (<b>ep_keepbands</b> 1), or whether
         it is summed over immediately with appropriate Fermi Surface weights. For
         transport calculations <b>ep_keepbands</b> must be set to 1.
-    topics: anaddbEPC_basic
+    topics: ElPhonTransport_basic
     varset: anaddb
     vartype: integer
 - !variable
@@ -6511,7 +6511,7 @@
         of the electron-phonon quantities without interpolation, this specifies the
         number of q-points to be found in the GKK file, independently of the normal
         anaddb input (ngqpt)
-    topics: anaddbEPC_expert
+    topics: ElPhonTransport_expert
     varset: anaddb
     vartype: integer
 - !variable
@@ -6526,7 +6526,7 @@
     requires: null
     text: |-
         <p>The scale factor for cubic spline interpolation, only used in the relaxation time approximation ([[anaddb:ifltransport]]=3).
-    topics: anaddbEPC_useful
+    topics: ElPhonTransport_useful
     varset: anaddb
     vartype: integer
 - !variable
@@ -8985,7 +8985,7 @@
     text: |-
         <p>Flag to write out the reciprocal space matrix elements to a disk file named
         gkqfile. This reduces strongly the memory needed for an electron-phonon run.
-    topics: anaddbEPC_useful
+    topics: ElPhonInt_useful
     varset: anaddb
     vartype: integer
 - !variable
@@ -10794,7 +10794,7 @@
         properties: electrical and thermal resistivities from electron-phonon
         interactions in the variational approach. If ifltransport=3, anaddb calculates the
         k-dependent relaxation time. (needs[[anaddb:elphflag]] = 1)
-    topics: anaddbEPC_basic
+    topics: ElPhonTransport_basic
     varset: anaddb
     vartype: integer
 - !variable
@@ -14941,7 +14941,7 @@
         (see [[kptrlatt]] abinit variable definitionas well).
         Input needed in electron-phonon calculations
         using nesting functions or tetrahedron integration.
-    topics: anaddbEPC_basic, PhononWidth_basic
+    topics: ElPhonTransport_basic, PhononWidth_basic
     varset: anaddb
     vartype: integer
 - !variable
@@ -16049,7 +16049,7 @@
     requires: null
     text: |-
         <p>Average electron-electron interaction strength, for the computation of the superconducting Tc using Mc-Millan's formula.
-    topics: anaddbEPC_useful
+    topics: ElPhonTransport_useful
     varset: anaddb
     vartype: real
 - !variable
@@ -16267,7 +16267,7 @@
         <p>Give the number of atoms for which atomic-projected phonon
         band structures will be output. The list of these atoms is provided
         by [[iatprj_bs@anaddb]].
-    topics: anaddbEPC_useful
+    topics: PhononBands_useful
     varset: anaddb
     vartype: integer
 - !variable
@@ -28236,7 +28236,7 @@
           <li>1 = Gaussian smearing (see [[anaddb:elphsmear]])</li>
           <li>2 = uniformly weighted band window between [[anaddb:ep_b_min]] and [[anaddb:ep_b_max]], for all k-points</li>
         </ul>
-    topics: anaddbEPC_basic, PhononWidth_basic
+    topics: ElPhonTransport_basic, PhononWidth_basic
     varset: anaddb
     vartype: integer
 - !variable
