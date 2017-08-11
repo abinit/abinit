@@ -2,7 +2,7 @@
     name      : printing 
     keyword   : Printing settings
     authors   : FJ
-    howto     : set parameters to print some useful quantities
+    howto     : print some useful quantities
     header    : default
     title     : <h1>General printing options</h1>
     subtitle  : default

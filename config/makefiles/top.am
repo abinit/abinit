@@ -88,7 +88,6 @@ infos_html:
 	-rm -fr infos_htm* tmp-infos*
 	cp -fr doc tmp-infos-$(VERSION)
 	rm tmp-infos-$(VERSION)/tests
-	cp developers/various/var-file-index.py tmp-infos-$(VERSION)
 	cp -fr KNOWN_PROBLEMS tmp-infos-$(VERSION)/known_problems
 	mkdir tmp-infos-$(VERSION)/tests
 	mkdir tmp-infos-$(VERSION)/tests/atompaw
@@ -148,8 +147,6 @@ infos_html:
 	cp -fr tests/v7/Input tmp-infos-$(VERSION)/tests/v7/Input
 	cp -fr tests/v8/Input tmp-infos-$(VERSION)/tests/v8/Input
 	cp -fr tests/vdwxc/Input tmp-infos-$(VERSION)/tests/vdwxc/Input
-	cd tmp-infos-$(VERSION) ; python var-file-index.py
-	cp tmp-infos-$(VERSION)/developers/contributing.html tmp-infos-$(VERSION)
 	-rm -f tmp-infos-$(VERSION)/features/features.html tmp-infos-$(VERSION)/release_notes/release_notes.html tmp-infos-$(VERSION)/installation_notes/install.html
 	cp -fr tmp-infos-$(VERSION)/features/features_v$(ABINIT_VERSION_MAJOR).$(ABINIT_VERSION_MINOR).html tmp-infos-$(VERSION)/features/features.html
 	cp -fr tmp-infos-$(VERSION)/release_notes/rel*_v$(ABINIT_VERSION_MAJOR).$(ABINIT_VERSION_MINOR).html tmp-infos-$(VERSION)/release_notes/release_notes.html
@@ -165,7 +162,6 @@ infos_html:
           tmp-infos-$(VERSION)/js_files \
           tmp-infos-$(VERSION)/known_problems \
           tmp-infos-$(VERSION)/gallery/Plot1.jpg tmp-infos-$(VERSION)/gallery/pcpm.gif tmp-infos-$(VERSION)/gallery/mode.png  \
-          tmp-infos-$(VERSION)/*/*.css \
           tmp-infos-$(VERSION)/install_notes/install.html \
           tmp-infos-$(VERSION)/release_notes/release_notes.html \
           tmp-infos-$(VERSION)/features/features.html \
