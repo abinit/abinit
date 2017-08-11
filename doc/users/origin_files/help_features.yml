@@ -197,7 +197,7 @@ sec6:
    <li>[[topic:ElPhonInt|Electron-phonon interaction]]</li>
    <li>[[topic:PhononWidth|Phonon linewidth due to the electron-phonon interaction]]</li>
    <li>[[topic:ElPhonTransport|Electronic transport properties from electron-phonon interaction (resistivity, superconductivity, thermal)]]</li>
-   <li>[[topic:TDep|Temperature dependence of the eigenenergies from electron-phonon interaction]]</li>
+   <li>[[topic:TDepES|Temperature dependence of the electronic structure from electron-phonon interaction]]</li>
    <li>[[topic:ConstrainedPol|Constrained polarization geometry optimization]] (advanced topic)</li>
   </ol>
   TO BE SUPPRESSED :

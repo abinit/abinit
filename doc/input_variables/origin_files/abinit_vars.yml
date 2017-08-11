@@ -1347,7 +1347,7 @@
          <br />
          If [[bdeigrf]] is set to -1, the code will automatically set [[bdeigrf]] equal to nband.
         </p>
-    topics: TDep_basic
+    topics: TDepES_basic
     varset: dfpt
     vartype: integer
 - !variable
@@ -6294,7 +6294,7 @@
         '[[ENERGY]]' characteristics.
         (1 Ha=27.2113845 eV)
         </p>
-    topics: TDep_basic
+    topics: TDepES_basic
     varset: dfpt
     vartype: real
 - !variable
@@ -6816,7 +6816,7 @@
         '[[ENERGY]]' characteristics.
         (1 Ha=27.2113845 eV)
         </p>
-    topics: TDep_useful
+    topics: TDepES_useful
     varset: dfpt
     vartype: real
 - !variable
@@ -8061,7 +8061,7 @@
          </pre>
          refers to dataset 2 when dataset 4 is initialized.
         </p>
-    topics: ElPhonInt_expert, TDep_useful
+    topics: ElPhonInt_expert, TDepES_useful
     varset: files
     vartype: integer
 - !variable
@@ -8262,7 +8262,7 @@
         eigenvalues for q=Gamma from the dataset where the calculation at Gamma was done, to the datasets
         for other wavevectors.
         </p>
-    topics: multidtset_useful, TDep_useful
+    topics: multidtset_useful, TDepES_useful
     varset: dev
     vartype: integer
 - !variable
@@ -8728,7 +8728,7 @@
         <b>
          This variable is experimental. In development.
         </b>
-    topics: multidtset_useful, DFPT_useful, TDep_useful
+    topics: multidtset_useful, DFPT_useful, TDepES_useful
     varset: dev
     vartype: integer
 - !variable
@@ -10676,7 +10676,7 @@
          <br />
          Related variables : [[bdeigrf]],[[elph2_imagden]],[[getgam_eig2nkq]],[[smdelta]]
         </p>
-    topics: TDep_compulsory
+    topics: TDepES_compulsory
     varset: dfpt
     vartype: integer
 - !variable
@@ -12384,7 +12384,7 @@
         <b>
          This variable is experimental. In development.
         </b>
-    topics: multidtset_useful, TDep_useful
+    topics: multidtset_useful, TDepES_useful
     varset: dev
     vartype: integer
 - !variable
@@ -27171,7 +27171,7 @@
           </li>
          </ul>
         </p>
-    topics: TDep_compulsory
+    topics: TDepES_compulsory
     varset: dfpt
     vartype: integer
 - !variable

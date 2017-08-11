@@ -1,10 +1,10 @@
 - !components 
-    name      : TDep 
-    keyword   : Temperature dependence of the eigenenergies 
+    name      : TDepES
+    keyword   : Temperature dependence of the electronic structure
     authors   : SP
-    howto     : calculate the temperature dependence of the eigenenergies
+    howto     : calculate the temperature dependence of the electronic structure
     header    : default
-    title     : <h1>Temperature dependence of the eigenenergies</h1>
+    title     : <h1>Temperature dependence of the electronic structure</h1>
     subtitle  : default
     copyright : default
     links     : default
