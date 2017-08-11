@@ -684,16 +684,7 @@ subroutine rf2_apply_hamiltonian(cg_jband,cprj_jband,cwave,cwaveprj,h_cwave,s_cw
 
        call nonlop(choice,cpopt,cprj_empty,enlout,gs_hamkq,idirc,(/zero/),mpi_enreg,1,nnlout,&
 &       paw_opt,signs,svectout_dum,tim_getgh2c,cwave_j,svectout_dum)
-!       write(99,'(a)') ch10
-!       write(99,'(a,es17.8E3)') ' enlout(1) = ',enlout(1)
-!       write(99,'(a,es17.8E3)') ' enlout(2) = ',enlout(2)
-!       write(99,'(a,es17.8E3)') ' enlout(3) = ',enlout(3)
-!       write(99,'(a,es17.8E3)') ' enlout(4) = ',enlout(4)
-!       write(99,'(a,es17.8E3)') ' enlout(5) = ',enlout(5)
-!       write(99,'(a,es17.8E3)') ' enlout(6) = ',enlout(6)
        dotr2 = enlout(idir)
-       write(msg,'(2(a,es17.8E3))') 'RF2 TEST GETGH2C : dotr2 = ',dotr2,' doti2 = ',zero
-       call wrtout(std_out,msg,'COLL')
 
      end if ! IPERT == NATOM+10
 
@@ -733,9 +724,6 @@ subroutine rf2_apply_hamiltonian(cg_jband,cprj_jband,cwave,cwaveprj,h_cwave,s_cw
 &       paw_opt,signs,svectout_dum,tim_nonlop,cwave_j,svectout_dum)
        dotr2 = dotr2 - enlout(2*idirc  )
        doti2 = doti2 + enlout(2*idirc-1)
-
-       write(msg,'(2(a,es17.8E3))') 'RF2 TEST GETGH2C : dotr2 = ',dotr2,' doti2 = ',doti2
-       call wrtout(std_out,msg,'COLL')
 
      end if ! IPERT == NATOM+11
 
@@ -777,9 +765,6 @@ subroutine rf2_apply_hamiltonian(cg_jband,cprj_jband,cwave,cwaveprj,h_cwave,s_cw
 &       paw_opt,signs,svectout_dum,tim_nonlop,cwave_j,svectout_dum)
        dotr2 = dotr2 - enlout(18*(iatom-1)+2*idirc  )
        doti2 = doti2 + enlout(18*(iatom-1)+2*idirc-1)
-
-       write(msg,'(2(a,es17.8E3))') 'RF2 TEST GETGH2C : dotr2 = ',dotr2,' doti2 = ',doti2
-       call wrtout(std_out,msg,'COLL')
 
      end if ! PERT_PHON_ELFD
 
