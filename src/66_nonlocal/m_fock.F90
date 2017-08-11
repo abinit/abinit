@@ -42,10 +42,11 @@ module m_fock
  use m_pawfgr
  use m_pawfgrtab
  use m_pawcprj
+ use m_paw_ij,          only : paw_ij_type
 
  use m_mpinfo,          only : ptabs_fourdp
  use m_fstrings,        only : itoa, ftoa, sjoin
- use m_cgtools,         only : set_istwfk
+ use m_cgtools         
 
  implicit none
 
@@ -114,6 +115,10 @@ module m_fock
   integer :: ixc
     ! XC option (abinit input variable)
 
+  integer :: use_ACE
+    ! option to use the ACE method of Lin Lin
+    !==1 in fock2ACE and 2 in vtorho
+
   integer ABI_PRIVATE :: getghc_call_ = 1
   ! 1 if fock_getghc should be called in getghc, 0 otherwise
 
@@ -124,6 +129,7 @@ module m_fock
   logical :: optstr
     ! option to calculate stresses
 
+ 
 ! Real(dp) scalars
 
   real(dp) :: gsqcut
@@ -299,15 +305,32 @@ module m_fock
   type(pawfgr_type),pointer :: pawfgr 
   type(pawfgrtab_type),allocatable :: pawfgrtab(:)
   type(pawcprj_type), allocatable :: cwaveocc_prj(:,:)
-  type(pawrhoij_type),pointer :: pawrhoij(:)
-    ! (natom,mcprj))
-
+  type(fock_ACE_type), pointer :: fockACE(:)
  end type fock_type
+
+
+!----------------------------------------------------------------------
+
+ type,public :: fock_ACE_type
+! ===== Integer scalars
+ integer :: nband_k
+ integer :: nkpt
+ integer :: ikpt
+   ! Number of bands to be calculated.
+! ===== Real pointers
+  real(dp), allocatable :: xi(:,:,:) 
+
+ end type fock_ACE_type
+!----------------------------------------------------------------------
+
+
+
 
  public :: fock_init                  ! Initialize the object.
  public :: fock_set_ieigen            ! Set the value of ieigen to the value given in argument.
  public :: fock_updateikpt            ! Update the value of energies%e_xc and energies%e_xcdc with Fock contribution.
  public :: fock_destroy               ! Free memory.
+ public :: fock_ACE_destroy           ! Free memory.
  public :: fock_calc_ene              ! Calculate the Fock contribution to the total energy.
  public :: fock_update_exc            ! Update the value of energies%e_xc and energies%e_xcdc with Fock contribution.
  public :: fock_updatecwaveocc        ! Update in the fock datastructure the fields relative to the occupied states.
@@ -557,7 +580,7 @@ subroutine fock_init(atindx,cplex,dtset,fock,gsqcut,indsym,kg,mpi_enreg,nattyp,n
 !scalars
  integer :: iatom,ibg,icg,icp,ier,ik,ikg,ikpt,isppol,isym,itypat,jkpt,jpw,jsym,mband,mgfft,mkpt,mkptband
  integer :: n1,n2,n3,n4,n5,n6,nband,ncpgr,nkpt,nkpt_bz,nproc_hf,npwj,timrev,v1,v2,v3
- integer :: my_jkpt,jkg_this_proc,my_nsppol
+ integer :: my_jkpt,jkg_this_proc,my_nsppol,my_nspinor
  real(dp) :: dksqmax,arg
  character(len=500) :: msg
 !arrays
@@ -703,17 +726,23 @@ subroutine fock_init(atindx,cplex,dtset,fock,gsqcut,indsym,kg,mpi_enreg,nattyp,n
    end if
    fock%optfor=.FALSE.; fock%optstr=.false.
    if(dtset%optforces==1) fock%optfor=.true.
-
+   fock%use_ACE=0!if (dtset%use_ACE==1)
    call fock_create(fock,mgfft,dtset%mpw,mkpt,mkptband,my_nsppol,dtset%natom,n4,n5,n6,nband,dtset%userid)
 
 
-!* Initialize %mabnd, %mkpt, %mkptband = size of arrays
+!* Initialize %mband, %mkpt, %mkptband = size of arrays
    fock%mband=mband
    fock%mkpt=mkpt
    fock%mkptband=mkptband
    fock%my_nsppol = my_nsppol
    fock%nsppol = dtset%nsppol
-
+   if (fock%use_ACE/=0) then
+     ABI_DATATYPE_ALLOCATE(fock%fockACE,(dtset%nkpt))
+     my_nspinor=max(1,dtset%nspinor/mpi_enreg%nproc_spinor)
+     do ikpt=1,dtset%nkpt
+       ABI_ALLOCATE(fock%fockACE(ikpt)%xi,(2,npwarr(ikpt)*my_nspinor,nband))
+     end do
+   end if
 !========Initialze PAW data========
    fock%ntypat=dtset%ntypat
    fock%natom=dtset%natom
@@ -1515,6 +1544,7 @@ subroutine fock_destroy(fock)
  if (allocated(fock%symrec)) then
     ABI_DEALLOCATE(fock%symrec)
  endif
+
 !* [description of divergence in |q+G|=0]
 !* Put the real (dp) to 0
  fock%gsqcut=zero
@@ -1526,14 +1556,64 @@ subroutine fock_destroy(fock)
 !* Put the integer to 0
  fock%mkpt=0
  fock%mkptband=0
-
+ if (fock%use_ACE/=0) then
+   ABI_DATATYPE_DEALLOCATE(fock%fockACE)
+ end if
  ABI_DATATYPE_DEALLOCATE(fock)
 
  DBG_EXIT("COLL")
 
 end subroutine fock_destroy
 !!***
+!!****f* m_fock/fock_ACE_destroy
+!! NAME
+!!  fock_ACE_destroy
+!!
+!! FUNCTION
+!!  Clean and destroy fock datastructure.
+!!
+!! INPUTS
+!!  fockACE <type(fock_ACE_type)>= all the quantities to calculate Fock exact exchange in the ACE context
+!!
+!! PARENTS
+!!      fock_destroy
+!!
+!! CHILDREN
+!!      ptabs_fourdp,timab,xmpi_sum
+!!
+!! SOURCE
 
+subroutine fock_ACE_destroy(fockACE)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'fock_ACE_destroy'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+ type(fock_ACE_type),pointer :: fockACE(:)
+!Local variables-------------------------------
+ integer :: dim1,ii
+! *************************************************************************
+ DBG_ENTER("COLL")
+
+ dim1=size(fockACE,1)
+
+ do ii=1,dim1
+   if (allocated(fockACE(ii)%xi)) then
+    ABI_DEALLOCATE(fockACE(ii)%xi)
+   end if
+ end do
+ DBG_EXIT("COLL")
+
+end subroutine fock_ACE_destroy
+!!***
+
+ 
 !!****f* m_fock/fock_calc_ene
 !! NAME
 !!  fock_calc_ene
@@ -2074,6 +2154,7 @@ subroutine fock_updatecwaveocc(cg,cprj,dtset,fock,fock_energy,indsym,istep,mcg,m
 !* Set the Fock contribution to total energy to zero
    fock_energy=zero
    if (fock%usepaw==1)fock%edc=zero
+
  end if
 
  call timab(1502,2,tsec)
@@ -2642,6 +2723,7 @@ subroutine strfock(gprimd,gsqcut,fockstr,hybrid_mixing,hybrid_mixing_sr,hybrid_r
 
 end subroutine strfock
 !!***
+
 
 
 end module m_fock

@@ -166,7 +166,7 @@ use m_cgtools
  integer :: idir,idir_str,ierr,ii,ikg,ikpt,ilm,ipositron,ipw,ishift,isppol,istwf_k
  integer :: mband_cprj,me_distrb,my_ikpt,my_nspinor,nband_k,nband_cprj_k,ndat,nkpg
  integer :: nnlout,npw_k,paw_opt,signs,spaceComm
- integer :: tim_nonlop,tim_nonlop_prep,usecprj_local
+ integer :: tim_nonlop,tim_nonlop_prep,usecprj_local,use_ACE_old
  integer :: blocksize,iblock,iblocksize,ibs,nblockbd
  real(dp) :: ar,renorm_factor,dfsm,ecutsm_inv,fact_kin,fsm,htpisq,kgc1
  real(dp) :: kgc2,kgc3,kin,xx
@@ -239,6 +239,8 @@ use m_cgtools
  if (usefock_loc) then
    fock%optfor=.false.
    fock%optstr=.false.
+   use_ACE_old=fock%use_ACE
+   fock%use_ACE=0
  end if
  if (stress_needed==1) then
    kinstr(:)=zero;npsstr(:)=zero
@@ -267,7 +269,7 @@ use m_cgtools
  end if
 
 !Initialize Hamiltonian (k-independent terms)
-
+ 
 
  call init_hamiltonian(gs_hamk,psps,pawtab,nspinor,nsppol,nspden,natom,&
 & typat,xred,nfft,mgfft,ngfft,rprimd,nloalg,usecprj=usecprj_local,&
@@ -928,7 +930,9 @@ use m_cgtools
  end if
 !Deallocate temporary space
  call destroy_hamiltonian(gs_hamk)
-
+ if (usefock_loc) then
+   fock%use_ACE=use_ACE_old
+ end if
  call timab(925,2,tsec)
  call timab(920,2,tsec)
 
