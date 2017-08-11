@@ -34,7 +34,9 @@
 
 <p>ABINIT can treat charged systems (e.g. either for molecules, or for dopants in a supercell), 
 using the <a href="../../input_variables/generated_files/varset_gstate.html#charge">charge</a> input variable. A careful convergence study with respect to the cell size must however be done.
-<p>Depending on the dimension, different treatment of the Coulomb interaction can be enforced, governed by <a href="../../input_variables/generated_files/varset_gstate.html#icoulomb">icoulomb</a> and <a href="../../input_variables/generated_files/varset_gw.html#icutcoul">icutcoul</a> for GW calculations. Some development effort is needed in ABINIT to rationalize the situation.
+<p>Depending on the dimension, different treatment of the Coulomb interaction can be enforced, 
+governed by <a href="../../input_variables/generated_files/varset_gstate.html#icoulomb">icoulomb</a> for grouns-state calculations, 
+and by <a href="../../input_variables/generated_files/varset_gw.html#icutcoul">icutcoul</a> for GW calculations. Some development effort is needed in ABINIT to rationalize the situation.
 
 <p>Additional information concerning <a href="../../input_variables/generated_files/varset_paw.html#usepotzero">usepotzero</a>. It is well known that the electrostatic potential (arising from ion-ion, ion-electron, and electron-electron interactions) is ill-defined within periodic boundary conditions.
 However, it is less well known that the total energy of a charged cell is also ill-defined.
