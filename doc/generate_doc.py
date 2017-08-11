@@ -800,40 +800,58 @@ for i, topic_name in enumerate(inputs_for_topic):
 # Assemble the "topic" files 
 # Also collect the keywords and howto 
 
-default_topic=yml_in["default_topic"][0]
-dic_keyword_name={}
-dic_keyword_howto={}
-
-# For each "topic" file
+all_topics={}
+all_topic_refs={}
+# Need to read first all topic yml files in order to extract the backlinks and references.
 for topic_name in list_of_topics:
   path_ymlfile="topics/origin_files/topic_"+topic_name+".yml"
   print("Read "+path_ymlfile+" to initiate the topic '"+topic_name+"' ... ",end="")
-  topic_yml=read_yaml(path_ymlfile) 
+  topic_yml=read_yaml(path_ymlfile)
   topic=topic_yml[0]
-  dic_keyword_name[topic.keyword]=topic_name
-  dic_keyword_howto[topic.keyword]=topic.howto
-
-  #Find the bibliographical references
+  #Construct the backlinks and reference list 
   reflist=[]
   for j in ["introduction","examples"] :
     try :
       extract_j=getattr(topic,j).strip()
     except :
       extract_j=""
+
     linklist=re.findall("\\[\\[([a-zA-Z0-9_ */<>]*)\\]\\]",extract_j,flags=0)
     for ref in linklist:
       m=re.search("\d{4}",ref,flags=0)
       if m!=None:
         reflist.append(ref)
+    backlink=' &nbsp; <a href="../../topics/generated_files/topic_%s.html">topic_%s</a> &nbsp; ' %(topic_name,topic_name)
+    extract_j = make_links(extract_j,None,allowed_link_seeds,backlinks,backlink)
+    setattr(topic,j,extract_j)
 
-  reflist=list(set(reflist))
-  reflist.sort()
+  #Store the modified topic for further use
+  all_topics[topic_name]=topic
 
+  #Store the references for further use
   topic_refs=""
-  for (i,ID) in enumerate(reflist):
-    topic_refs+="<br> [["+ID+"]] "+reference_dic[ID]+"<br>\n"
-  topic_refs+="<p>"
-  topic_refs=bibtex2html(topic_refs)
+  if len(reflist)!=0:
+    reflist=list(set(reflist))
+    reflist.sort()
+    topic_refs=""
+    for (i,ID) in enumerate(reflist):
+      topic_refs+="<br> [["+ID+"]] "+reference_dic[ID]+"<br>\n"
+    topic_refs+="<p>"
+    topic_refs=bibtex2html(topic_refs)
+  all_topic_refs[topic_name]=topic_refs
+
+default_topic=yml_in["default_topic"][0]
+dic_keyword_name={}
+dic_keyword_howto={}
+
+# For each "topic" file
+for topic_name in list_of_topics:
+
+  topic=all_topics[topic_name]
+  topic_refs=all_topic_refs[topic_name]
+
+  dic_keyword_name[topic.keyword]=topic_name
+  dic_keyword_howto[topic.keyword]=topic.howto
 
   #Generate the table of content
   item_toc=0
@@ -848,7 +866,7 @@ for topic_name in list_of_topics:
       extract_j=getattr(topic,j).strip()
     except :
       extract_j=""
-    if (extract_j != "" and extract_j!= "default") or (j=="input_variables" and topic_invars[topic_name]!="") or (j=="input_files" and topic_infiles[topic_name]!="") or (j=="references" and reflist!=[]):
+    if (extract_j != "" and extract_j!= "default") or (j=="input_variables" and topic_invars[topic_name]!="") or (j=="input_files" and topic_infiles[topic_name]!="") or (j=="references" and topic_refs!=""):
       item_toc += 1
       item_num="%d" % item_toc
       sec_number[j]=item_num
@@ -880,7 +898,7 @@ for topic_name in list_of_topics:
         topic_html+= "The user can find some related example input files in the ABINIT package in the directory /tests, or on the Web:\n"
         topic_html+= topic_infiles[topic_name]
     elif j == "references":
-      if sec_number[j]!="0" :
+      if sec_number[j]!="0" and topic_refs!="" :
         topic_html+= '\n&nbsp; \n<HR ALIGN=left> \n<a name=\"'+sec_number[j]+'\">&nbsp;</a>\n<h3><b>'+sec_number[j]+'. '+title[j]+'</b></h3>\n\n\n'
         topic_html+= topic_refs
     else:
