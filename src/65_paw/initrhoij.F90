@@ -221,10 +221,10 @@ subroutine initrhoij(cplex,lexexch,lpawu,my_natom,natom,&
    pawrhoij(iatom_rhoij)%nrhoijsel=nselect
 
 !  Non-collinear magnetism: avoid zero magnetization, because it produces numerical instabilities
-!    Add a small real to the magnetization
-   if (pawrhoij(iatom_rhoij)%nspden==4.and.spinat_zero) then
-     pawrhoij(iatom_rhoij)%rhoijp(:,4)=pawrhoij(iatom_rhoij)%rhoijp(:,4)+tol10
-   end if
+!    Add a small real to the magnetization ; not yet activated => must be tested.
+!   if (pawrhoij(iatom_rhoij)%nspden==4.and.spinat_zero) then
+!     pawrhoij(iatom_rhoij)%rhoijp(:,4)=pawrhoij(iatom_rhoij)%rhoijp(:,4)+tol10
+!   end if
 
  end do ! iatom_rhoij
 
