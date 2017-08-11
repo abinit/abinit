@@ -9,8 +9,6 @@
     copyright : default
     links     : default
     introduction : |- 
-
-
           <p>The electronic structure changes with temperature. In most materials, such changes are mainly driven by the electron-phonon interaction, 
           which is also present at zero Kelvin, inducing the so-called  zero-point motion renormalization (ZPR) of the eigenvalues. These effects can be computed thanks to the Allen-Heine-Cardona (AHC) theory [[Allen1976]],[[Allen1981]],[[Allen1983]], which is based on diagrammatic method of many-body perturbation theory. An extension to the standard AHC theory also gives access to the electronic lifetime and decay rates. These physical properties are available from ABINIT since v7.10.4. 
 
@@ -35,6 +33,7 @@
 
           <p>The outputs of the script are provided in text and NetCDF format to allow for later reading inside ABINIT. This could be used in the future developments of ABINIT to compute temperature-dependent optical properties for example. 
 
+          <p>For the temperature dependence of the Fermi energy, see [[topic_ElPhonTransport]].
     tutorials  : |-
 
         <li>A lesson has been developed on <a href="../../tutorial/generated_files/lesson_tdepes.html">

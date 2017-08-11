@@ -1,0 +1,55 @@
+- !components 
+    name      : ElPhonTransport
+    keyword   : Electron-phonon Transport
+    authors   : MV
+    howto     : compute transport properties that are determined by the electron-phonon interaction (electrical resistivity, superconductivity, thermal conductivity)
+    header    : default
+    title     : <h1>Transport properties from electron-phonon interaction</h1>
+    subtitle  : default
+    copyright : default
+    links     : default
+    introduction : |- 
+        <p>This topic concerns metals only.
+        <p>After generating a GKK file (see [[topic_ElPhonInt]]), 
+        the Electron-Phonon Coupling (EPC) analysis is performed in anaddb, setting elphflag variable to 1. 
+        Most of the procedure is automatic, but can be lengthy if a large number of k-points is being used. 
+        <p>The main Electron-Phonon Coupling (EPC) analysis is performed in anaddb, setting [[anaddb:elphflag]]
+        variable to 1. 
+
+        <p>After interpolation (in reciprocal space), the quantities must be integrated over the Fermi
+        surface. Several quadrature methods are available. The default ([[anaddb:telphint]]=1) is to use Gaussian weighting,
+        with a width [[anaddb:elphsmear]]. Another option is the improved
+        tetrahedron [[Bloechl1994a]] ([[anaddb:telphint]]=0).
+        Finally ([[anaddb:telphint]]=2), one can integrate a given set of electron bands,
+        between [[anaddb:ep_b_max]] and [[anaddb:ep_b_min]].
+        The resulting integrated quantities are the Eliashberg function (in a file
+        suffixed _A2F), and the EPC strength &lambda;
+        which is printed in the main output file.
+
+        <p>The calculation of bulk transport quantities (electrical and thermal
+        conductivities) is possible using anaddb. Analogous quantities are
+        obtained from the conducti post-processor, but due to electron-electron
+        scattering, instead of electron-phonon. A
+        preliminary calculation of the derivatives of the wavefunctions with respect to
+        k-vector must be carried out. The transport calculation is turned on by setting
+        [[anaddb:ifltransport]] to 1 in anaddb. The transport quantities depend on
+        the Fermi velocity for each band, and the electronic band-dependence of the
+        matrix elements must be
+        preserved before integration, by setting [[anaddb:ep_keepbands]] to 1.
+        This increases the memory used,
+        by the square of the number of bands crossing E<sub>F</sub>. The results are the
+        transport Eliashberg function (in file _A2F_TR), the
+        electrical resistivity (in file _RHO), and the thermal
+        conductivity (in file _WTH).
+
+        <p>It is also possible to consider the temperature dependence of the Fermi energy: cubic spline interpolation ([[anaddb:ep_nspline]]) enables to linearly interpolate the transport arrays and reduce the memory usage. Besides setting the Fermi level with [[anaddb:elph_fermie]] (in Hartree), it is also possible to specify the extra electrons per unit cell, (i.e., the doping concentration often expressed in cm<sup>-3</sup>)  with [[anaddb:ep_extrael]].
+        <p>Some details about the calculation of electron-phonon quantities in ABINIT and ANADDB can be found <a href="../documents/elphon_manual.pdf">here</a>.
+         <p>
+    tutorials  : |-
+        <li> <a href="../../tutorial/generated_files/lesson_eph.html">The lesson on the
+         electron-phonon interaction</a> presents the use of the utility MRGKK
+         and ANADDB to examine the electron-phonon interaction and the
+         subsequent calculation of superconductivity temperature (for bulk
+         systems).</li>
+
+    end : default

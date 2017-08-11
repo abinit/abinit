@@ -194,9 +194,10 @@ sec6:
    <li>[[topic:Temperature|Temperature dependent properties (free energy, entropy, specific heat, atomic temperature factors, thermal expansion)]]</li>
    <li>[[topic:Elastic|Elasticity and piezoelectricity]]</li>
    <li>[[topic:nonlinear|Raman intensities and electro-optic properties]]</li>
-   <li>[[topic:ElPhon|Electron-phonon calculations]]</li>
+   <li>[[topic:ElPhonInt|Electron-phonon interaction]]</li>
    <li>[[topic:PhononWidth|Phonon linewidth due to the electron-phonon interaction]]</li>
-   <li>[[topic:TDep|Temperature dependence of the eigenenergies]]</li>
+   <li>[[topic:ElPhonTransport|Electronic transport properties from electron-phonon interaction (resistivity, superconductivity, thermal)]]</li>
+   <li>[[topic:TDep|Temperature dependence of the eigenenergies from electron-phonon interaction]]</li>
    <li>[[topic:ConstrainedPol|Constrained polarization geometry optimization]] (advanced topic)</li>
   </ol>
   TO BE SUPPRESSED :

@@ -1,0 +1,105 @@
+<!--                                                                                     -->
+<!-- This file has been produced by generate_doc.py using different .yml  or .bib files. -->
+<!-- It is useless to modify it. Modify the related .yml  or .bib files instead.         -->
+<!--                                                                                     -->
+<html>
+<head><title>Electron-phonon Transport </title>
+<link rel=stylesheet type="text/css" href="../formabinit.css">
+</head>
+<body bgcolor="#ffffff">
+
+<hr>
+<a name="top"></a>
+
+<h1>Transport properties from electron-phonon interaction</h1>
+<h3>This page gives hints on how to compute transport properties that are determined by the electron-phonon interaction (electrical resistivity, superconductivity, thermal conductivity) with the ABINIT package.
+<hr>
+
+<h5>Copyright (C) 2016-2017 ABINIT group (MV)
+<script type="text/javascript" src="../../js_files/copyright.js"> </script>
+</h5>
+
+<script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
+
+ Mentioned in &nbsp; <a href="../../topics/generated_files/topic_ElPhonInt.html">topic_ElPhonInt</a> &nbsp;&nbsp; <a href="../../users/generated_files/help_features.html#6">help_features#6</a> &nbsp;
+ <hr>
+ <h3><b>Table of content: </b></h3> 
+ <ul> <li>1. <a href="topic_ElPhonTransport.html#1">Introduction.</a><li>2. <a href="topic_ElPhonTransport.html#2">Related lesson(s) of the tutorial.</a><li>3. <a href="topic_ElPhonTransport.html#3">References.</a></ul>
+
+&nbsp; 
+<HR ALIGN=left> 
+<a name="1">&nbsp;</a>
+<h3><b>1. Introduction.</b></h3>
+
+
+<p>This topic concerns metals only.
+<p>After generating a GKK file (see <a href="../../topics/generated_files/topic_ElPhonInt.html#">topic_ElPhonInt</a>), 
+the Electron-Phonon Coupling (EPC) analysis is performed in anaddb, setting elphflag variable to 1. 
+Most of the procedure is automatic, but can be lengthy if a large number of k-points is being used. 
+<p>The main Electron-Phonon Coupling (EPC) analysis is performed in anaddb, setting <a href="../../input_variables/generated_files/varset_anaddb.html#elphflag@anaddb">elphflag</a>
+variable to 1. 
+
+<p>After interpolation (in reciprocal space), the quantities must be integrated over the Fermi
+surface. Several quadrature methods are available. The default (<a href="../../input_variables/generated_files/varset_anaddb.html#telphint@anaddb">telphint</a>=1) is to use Gaussian weighting,
+with a width <a href="../../input_variables/generated_files/varset_anaddb.html#elphsmear@anaddb">elphsmear</a>. Another option is the improved
+tetrahedron <a href="../../biblio/generated_files/bib_biblio.html#Bloechl1994a">[Bloechl1994a]</a> (<a href="../../input_variables/generated_files/varset_anaddb.html#telphint@anaddb">telphint</a>=0).
+Finally (<a href="../../input_variables/generated_files/varset_anaddb.html#telphint@anaddb">telphint</a>=2), one can integrate a given set of electron bands,
+between <a href="../../input_variables/generated_files/varset_anaddb.html#ep_b_max@anaddb">ep_b_max</a> and <a href="../../input_variables/generated_files/varset_anaddb.html#ep_b_min@anaddb">ep_b_min</a>.
+The resulting integrated quantities are the Eliashberg function (in a file
+suffixed _A2F), and the EPC strength &lambda;
+which is printed in the main output file.
+
+<p>The calculation of bulk transport quantities (electrical and thermal
+conductivities) is possible using anaddb. Analogous quantities are
+obtained from the conducti post-processor, but due to electron-electron
+scattering, instead of electron-phonon. A
+preliminary calculation of the derivatives of the wavefunctions with respect to
+k-vector must be carried out. The transport calculation is turned on by setting
+<a href="../../input_variables/generated_files/varset_anaddb.html#ifltransport@anaddb">ifltransport</a> to 1 in anaddb. The transport quantities depend on
+the Fermi velocity for each band, and the electronic band-dependence of the
+matrix elements must be
+preserved before integration, by setting <a href="../../input_variables/generated_files/varset_anaddb.html#ep_keepbands@anaddb">ep_keepbands</a> to 1.
+This increases the memory used,
+by the square of the number of bands crossing E<sub>F</sub>. The results are the
+transport Eliashberg function (in file _A2F_TR), the
+electrical resistivity (in file _RHO), and the thermal
+conductivity (in file _WTH).
+
+<p>It is also possible to consider the temperature dependence of the Fermi energy: cubic spline interpolation (<a href="../../input_variables/generated_files/varset_anaddb.html#ep_nspline@anaddb">ep_nspline</a>) enables to linearly interpolate the transport arrays and reduce the memory usage. Besides setting the Fermi level with <a href="../../input_variables/generated_files/varset_anaddb.html#elph_fermie@anaddb">elph_fermie</a> (in Hartree), it is also possible to specify the extra electrons per unit cell, (i.e., the doping concentration often expressed in cm<sup>-3</sup>)  with <a href="../../input_variables/generated_files/varset_anaddb.html#ep_extrael@anaddb">ep_extrael</a>.
+<p>Some details about the calculation of electron-phonon quantities in ABINIT and ANADDB can be found <a href="../documents/elphon_manual.pdf">here</a>.
+ <p>
+<br><br><a href=#top>Go to the top</a>
+
+
+
+&nbsp; 
+<HR ALIGN=left> 
+<a name="2">&nbsp;</a>
+<h3><b>2. Related lesson(s) of the tutorial.</b></h3>
+
+
+<li> <a href="../../tutorial/generated_files/lesson_eph.html">The lesson on the
+ electron-phonon interaction</a> presents the use of the utility MRGKK
+ and ANADDB to examine the electron-phonon interaction and the
+ subsequent calculation of superconductivity temperature (for bulk
+ systems).</li>
+<br><br><a href=#top>Go to the top</a>
+
+
+
+
+&nbsp; 
+<HR ALIGN=left> 
+<a name="3">&nbsp;</a>
+<h3><b>3. References.</b></h3>
+
+
+<br> <a href="../../biblio/generated_files/bib_biblio.html#Bloechl1994a">[Bloechl1994a]</a>  Peter E. Bl&ouml;chl, O. Jepsen and O. K. Andersen, "Improved tetrahedron method for Brillouin-zone integrations", Phys. Rev. B 49, 16223&ndash;16233 (1994). <br> DOI: <a href="https://doi.org/10.1103/PhysRevB.49.16223">10.1103/PhysRevB.49.16223</a>.<br>
+<p>
+<br><br><a href=#top>Go to the top</a>
+
+<script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
+
+</body>
+</html>
+

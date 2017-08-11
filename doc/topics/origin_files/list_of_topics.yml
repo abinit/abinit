@@ -20,7 +20,8 @@
 - EffMass
 - EFG
 - Elastic
-- ElPhon
+- ElPhonInt
+- ElPhonTransport
 - ElecDOS
 - ElecBandStructure
 - ForcesStresses

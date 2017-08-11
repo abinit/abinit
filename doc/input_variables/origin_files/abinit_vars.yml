@@ -3632,13 +3632,13 @@
     dimensions:
     - 3
     excludes: null
-    mnemonics: 'Derivative DatabBase: Number of Grid points for Q-PoinTs'
+    mnemonics: 'Derivative DataBase: Number of Grid points for Q-PoinTs'
     requires: null
     text: |-
         This variable is mandatory when [[optdriver]]==7.
         It defines the number of divisions in the (homogeneous) q-mesh
         used to generate the DDB file. See also the description of the [[getddb]] input variable.
-    topics: ElPhon_compulsory
+    topics: ElPhonInt_expert
     varset: eph
     vartype: integer
 - !variable
@@ -3660,7 +3660,7 @@
         It defines the shift in the q-mesh used to generate the DDB file,
         which is defined by the [[ddb_ngqpt]] input variable.
         See [[shiftk]] for more information on the definition.
-    topics: ElPhon_useful
+    topics: ElPhonInt_expert
     varset: eph
     vartype: real
 - !variable
@@ -6596,7 +6596,7 @@
     mnemonics: 'Electron-PHonon: EXTRA ELectrons'
     requires: null
     text: null
-    topics: ElPhon_expert
+    topics: ElPhonInt_expert
     varset: eph
     vartype: real
 - !variable
@@ -6615,7 +6615,7 @@
         when performing electron-phonon calculations with [[optdriver]]==7.
         This variable has effect only if set to a non-zero value.
         See also [[eph_extrael]].
-    topics: ElPhon_useful
+    topics: ElPhonInt_expert
     varset: eph
     vartype: real
 - !variable
@@ -6638,7 +6638,7 @@
         <p>
         Related input variables: [[eph_intmeth]], [[eph_fsmear]], [[eph_extrael]] and [[eph_fermie]].
         </p>
-    topics: ElPhon_useful
+    topics: ElPhonInt_expert
     varset: eph
     vartype: real
 - !variable
@@ -6655,7 +6655,7 @@
     text: |-
         This variable defines the gaussian broadening used for the
         integration over the Fermi surface when [[eph_intmeth]] == 1.
-    topics: ElPhon_useful
+    topics: ElPhonInt_expert
     varset: eph
     vartype: real
 - !variable
@@ -6676,7 +6676,7 @@
         </p>
 
         See also [[eph_fsewin]], [[eph_extrael]] and [[eph_fermie]].
-    topics: ElPhon_useful
+    topics: ElPhonInt_expert
     varset: eph
     vartype: integer
 - !variable
@@ -6691,7 +6691,7 @@
     requires: null
     text: |-
         Average electron-electron interaction strength, for the computation of the superconducting Tc using Mc-Millan's formula.
-    topics: ElPhon_useful
+    topics: ElPhonInt_expert
     varset: eph
     vartype: real
 - !variable
@@ -6715,7 +6715,7 @@
         the DDB file. This approach is similar to the one used
         to interpolate the interatomic force constants in q-space.
         If eph_ngqpt_fine is not given, the EPH code uses the list of irreducible q-points reported in the DDB file (default behavior).
-    topics: ElPhon_useful
+    topics: ElPhonInt_expert
     varset: eph
     vartype: integer
 - !variable
@@ -6738,7 +6738,7 @@
          <br />
          [[eph_task]]=2 : electron-phonon coupling elements
         </p>
-    topics: ElPhon_basic
+    topics: ElPhonInt_expert
     varset: dfpt
     vartype: integer
 - !variable
@@ -6756,7 +6756,7 @@
         This variable can be used to turn on the calculation of transport
         quantities in the eph module of abinit. Value of 1 corresponds to
         elastic LOVA as in the PRB by Savrasov and Savrasov
-    topics: ElPhon_expert
+    topics: ElPhonInt_expert
     varset: eph
     vartype: integer
 - !variable
@@ -7756,7 +7756,7 @@
          </pre>
          refers to dataset 2 when dataset 4 is initialized.
         </p>
-    topics: nonlinear_useful, ElPhon_useful
+    topics: nonlinear_useful, ElPhonInt_useful
     varset: files
     vartype: integer
 - !variable
@@ -8061,7 +8061,7 @@
          </pre>
          refers to dataset 2 when dataset 4 is initialized.
         </p>
-    topics: ElPhon_useful, TDep_useful
+    topics: ElPhonInt_expert, TDep_useful
     varset: files
     vartype: integer
 - !variable
@@ -11859,7 +11859,7 @@
          <br />
          <br />
         </p>
-    topics: ElPhon_useful
+    topics: ElPhonInt_useful
     varset: files
     vartype: integer
 - !variable
@@ -20328,7 +20328,7 @@
         and [[rfstrs]]) must be
         zero if [[optdriver]] is not set to 1.
         </p>
-    topics: nonlinear_compulsory, GWls_compulsory, ElPhon_compulsory, GW_compulsory, BSE_compulsory
+    topics: nonlinear_compulsory, GWls_compulsory, ElPhonInt_compulsory, GW_compulsory, BSE_compulsory, DFPT_compulsory
     varset: gstate
     vartype: integer
 - !variable
@@ -22737,7 +22737,7 @@
         symmetry to reduce the number of perturbations, set [[prepgkk]] to 1.
         Use in conjunction with [[prtgkk]].
         </p>
-    topics: ElPhon_compulsory
+    topics: ElPhonInt_compulsory
     varset: dfpt
     vartype: integer
 - !variable
@@ -23592,7 +23592,7 @@
         information on electron-phonon treatment in ABINIT is given in the tutorial
         ~abinit/doc/tutorial/lesson_eph.html and in ~abinit/doc/users/elphon_manual.ps
         </p>
-    topics: printing_prngs, ElPhon_compulsory
+    topics: printing_prngs, ElPhonInt_compulsory
     varset: files
     vartype: integer
 - !variable
@@ -23906,7 +23906,7 @@
         Print the phonon density of states.
         It is activated by default when [[optdriver]]==7.
         </p>
-    topics: printing_prngs, DFPT_useful, ElPhon_useful
+    topics: printing_prngs, ElPhonInt_expert
     varset: eph
     vartype: integer
 - !variable
@@ -23924,7 +23924,7 @@
         phonon frequencies computed of the q-mesh determined by [[ph_ngqpt]]. The file can be use to visualize isosurfaces with Xcrysden or other similar tools supporting the bxsf format.
         Note that the (dense) q-mesh must be Gamma-centered, shifted meshs are not supported by Xcrysden.
         This variable requires [[optdriver]]==7.
-    topics: printing_prngs, ElPhon_useful
+    topics: printing_prngs, ElPhonInt_useful
     varset: eph
     vartype: integer
 - !variable
@@ -29435,7 +29435,7 @@
         <p>
          Caveat: Note that very tight convergence of ground state and phonon calculations is necessary to get good GKK matrix elements! [[tolwfr]] = 1.e-24 or so is recommended everywhere. There may be problems using use_nonscf_gkk = 1 with non-symmorphic symmetries - please check (at least) that lifetimes for phonons go to 0 for acoustic modes at Gamma.
         </p>
-    topics: ElPhon_expert
+    topics: ElPhonInt_useful
     varset: dev
     vartype: integer
 - !variable
