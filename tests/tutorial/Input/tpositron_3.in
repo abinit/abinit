@@ -5,7 +5,7 @@
 #              Si monovacancy, self-consistent scheme           #
 #################################################################
 
-# Self-consistant positron lifetime calculation
+# Self-consistent positron lifetime calculation
 
   positron  -10     ! We perform automatic calculation of electrons and positron densities in the two-component DFT context
   postoldfe  1d-5   ! We will repeat the electon and positron steps until the energy difference is lower than 1d-5
@@ -62,3 +62,19 @@
 !   Miscelaneous
     prtwf 0 prteig 0           ! To save disk space
     optforces 0 optstress 0    ! Not relevant here
+
+## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test =
+#%%   tpositron_3.out, tolnlines=  0, tolabs= 0.0, tolrel= 0.0, fld_options= -medium
+#%% psp_files = Si.LDA-PW-paw.abinit
+#%% [paral_info]
+#%% max_nprocs = 10
+#%% [extra_info]
+#%% authors = J. Wiktor
+#%% keywords = POSITRON,PAW
+#%% description = Third step of the tutorial on electron-positron annihilation
+#%%<END TEST_INFO>
