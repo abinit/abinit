@@ -165,7 +165,8 @@ sec5:
  title: "Correlated electrons"
  tag: correlated
  body: |
-  When correlated electrons are to be considered, it is necessary to go beyond the standard DFT framework. 
+  When correlated electrons are to be considered (in most cases, when <b>d and f orbitals</b> plpay an active role), 
+  it is necessary to go beyond the standard DFT framework. 
   ABINIT enables the following possibilities:
   <ol>
    <li>[[topic:Hybrids|Hybrid functionals]]</li>
@@ -178,21 +179,30 @@ sec5:
 ## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
 ## Note the small (one space) indentation for the title and body keys.
 sec6: 
- title: "Static  or low-frequency response properties (phonon, dielectric, Raman, effective mass ...)"
+ title: "Adiabatic response properties (phonons, low-frequency dielectric, Raman, elasticity, temperature dependence ...)"
  tag: dfpt
  body: |
-  Many properties can be obtained in the approximation that the electrons stay in their ground state. The poweful
-  Density-Functional Perturbation Theory (DFPT) framework allows ABINIT to address directly all such properties that are
-  connected to derivatives of the total energy with respect to some perturbation. This includes all dynamical
-  effects due to phonons and their coupling, thus also temperature-dependent properties due to phonons.
+  Many properties can be obtained in the approximation that the electrons <b>stay in their ground state</b> (adiabatic responses). 
+  The poweful Density-Functional Perturbation Theory (DFPT) framework allows ABINIT to address directly all such properties 
+  in the case that are connected to derivatives of the total energy with respect to some perturbation. 
+  This includes all dynamical effects due to phonons and their coupling, 
+  thus also temperature-dependent properties due to phonons.
   <ol>
-   <li>[[topic:DFPT|DFPT: phonon modes, elastic tensors, effective charges, dielectric tensors,...]]</li>
-   <li>[[topic:Thermodynamic|Vibrational thermodynamic properties (free energy, entropy)]]</li>
+   <li>[[topic:Phonons|Vibrational and dielectric properties (phonon frequencies and modes, IR and Raman spectra, Born effective charges)]]</li>
+   <li>[[topic:PhononBands|Phonon bands and DOS, interatomic force constants, sound velocity]]</li>
+   <li>[[topic:Temperature|Temperature dependent properties (free energy, entropy, specific heat, atomic temperature factors)]]</li>
    <li>[[topic:Elastic|Elasticity and piezoelectricity]]</li>
    <li>[[topic:nonlinear|Raman intensities and electro-optic properties]]</li>
    <li>[[topic:ElPhon|Electron-phonon calculations]]</li>
    <li>[[topic:TDep|Temperature dependence of the eigenenergies]]</li>
   </ol>
+  TO BE SUPPRESSED :
+  <ul>
+   <li>[[topic:DFPT]]
+   <li>[[topic:anaddbCommon]]
+   <li>[[topic:anaddbEPC]]
+   <li>[[topic:anaddbSpec]]
+  </ul>
 
 ## Each section must have a title, that will form the table of content.
 ## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.

@@ -42,7 +42,7 @@ It might answer the question "How to ... with ABINIT ?", to some extent.
   <li>3. <a href="#control">Global control parameters : flow, parallelism, output files, output content, timing and memory control, ...</a></li>
   <li>4. <a href="#moldyn">Molecular dynamics, geometry optimization, transition paths</a></li>
   <li>5. <a href="#correlated">Correlated electrons</a></li>
-  <li>6. <a href="#dfpt">Static  or low-frequency response properties (phonon, dielectric, Raman, effective mass ...)</a></li>
+  <li>6. <a href="#dfpt">Adiabatic response properties (phonons, low-frequency dielectric, Raman, elasticity, temperature dependence ...)</a></li>
   <li>7. <a href="#excited">Excited state calculations and frequency-dependent electronic and optical properties</a></li>
   <li>8. <a href="#other_physics">Electronic properties and analysis tools (DOS, STM, Wannier, band plotting and interpolating...)</a></li>
   <li>9. <a href="#other_physics">Other properties and analysis tools (positron)</a></li>
@@ -163,7 +163,8 @@ are explained later.
 <br><a name="correlated"> </a>
 <a name="5"> </a>
 <h3><b>5. Correlated electrons</b></h3>
- <p>When correlated electrons are to be considered, it is necessary to go beyond the standard DFT framework. 
+ <p>When correlated electrons are to be considered (in most cases, when <b>d and f orbitals</b> plpay an active role), 
+it is necessary to go beyond the standard DFT framework. 
 ABINIT enables the following possibilities:
 <ol>
  <li><a href="../../topics/generated_files/topic_Hybrids.html#">Hybrid functionals</a></li>
@@ -175,19 +176,28 @@ ABINIT enables the following possibilities:
 <hr>
 <br><a name="dfpt"> </a>
 <a name="6"> </a>
-<h3><b>6. Static  or low-frequency response properties (phonon, dielectric, Raman, effective mass ...)</b></h3>
- <p>Many properties can be obtained in the approximation that the electrons stay in their ground state. The poweful
-Density-Functional Perturbation Theory (DFPT) framework allows ABINIT to address directly all such properties that are
-connected to derivatives of the total energy with respect to some perturbation. This includes all dynamical
-effects due to phonons and their coupling, thus also temperature-dependent properties due to phonons.
+<h3><b>6. Adiabatic response properties (phonons, low-frequency dielectric, Raman, elasticity, temperature dependence ...)</b></h3>
+ <p>Many properties can be obtained in the approximation that the electrons <b>stay in their ground state</b> (adiabatic responses). 
+The poweful Density-Functional Perturbation Theory (DFPT) framework allows ABINIT to address directly all such properties 
+in the case that are connected to derivatives of the total energy with respect to some perturbation. 
+This includes all dynamical effects due to phonons and their coupling, 
+thus also temperature-dependent properties due to phonons.
 <ol>
- <li><a href="../../topics/generated_files/topic_DFPT.html#">DFPT: phonon modes, elastic tensors, effective charges, dielectric tensors,...</a></li>
- <li><a href="../../topics/generated_files/topic_Thermodynamic.html#">Vibrational thermodynamic properties (free energy, entropy)</a></li>
+ <li><a href="../../topics/generated_files/topic_Phonons.html#">Vibrational and dielectric properties (phonon frequencies and modes, IR and Raman spectra, Born effective charges)</a></li>
+ <li><a href="../../topics/generated_files/topic_PhononBands.html#">Phonon bands and DOS, interatomic force constants, sound velocity</a></li>
+ <li><a href="../../topics/generated_files/topic_Temperature.html#">Temperature dependent properties (free energy, entropy, specific heat, atomic temperature factors)</a></li>
  <li><a href="../../topics/generated_files/topic_Elastic.html#">Elasticity and piezoelectricity</a></li>
  <li><a href="../../topics/generated_files/topic_nonlinear.html#">Raman intensities and electro-optic properties</a></li>
  <li><a href="../../topics/generated_files/topic_ElPhon.html#">Electron-phonon calculations</a></li>
  <li><a href="../../topics/generated_files/topic_TDep.html#">Temperature dependence of the eigenenergies</a></li>
 </ol>
+TO BE SUPPRESSED :
+<ul>
+ <li><a href="../../topics/generated_files/topic_DFPT.html#">DFPT</a>
+ <li><a href="../../topics/generated_files/topic_anaddbCommon.html#">anaddbCommon</a>
+ <li><a href="../../topics/generated_files/topic_anaddbEPC.html#">anaddbEPC</a>
+ <li><a href="../../topics/generated_files/topic_anaddbSpec.html#">anaddbSpec</a>
+</ul>
 <br><br><a href=#top>Go to the top</a>
 <hr>
 <br><a name="excited"> </a>

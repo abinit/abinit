@@ -852,7 +852,6 @@ for topic_name in list_of_topics:
       item_toc += 1
       item_num="%d" % item_toc
       sec_number[j]=item_num
-      #toc += '<li><a href="topic_'+topic_name+'.html#'+item_num+'">'+item_num+'</a>. '+title[j]
       toc += '<li>%s. <a href="topic_%s.html#%s">%s</a>'%(item_num,topic_name,item_num,title[j])
 
   toc+= "</ul>"
@@ -868,7 +867,7 @@ for topic_name in list_of_topics:
         topic_html += " Mentioned in "+backlinks_formatted+"\n <hr>"
       if not "help_features" in backlinks_formatted:
         print(" Topic %s not (yet) mentioned in the file help_feature.yml. Please correct this omission.")
-        #raise
+        raise
     elif j == "toc":
       topic_html += toc
     elif j == "input_variables":
@@ -943,23 +942,6 @@ for j in ["header","title","subtitle","copyright","links","toc_all","links","end
 dir_root="topics"
 name_root=""
 rc=finalize_html(all_topics_html,default_topic,dir_root,name_root,allowed_link_seeds,backlinks)
-
-################################################################################
-################################################################################
-
-# Assemble the html files to be generated from the yml information.
-# In order : tutorial, files lessons_*
-#            theory, files theorydoc_*
-#            users,  files help_*
- 
-################################################################################
-
-#suppl_components={}
-#for list_infos in list_infos_dir:
-#  yml_files=list_infos["yml_files"]
-#  for yml_file in yml_files:
-#    if yml_file in ["lessons","theorydocs","helps"]:
-#      rc=assemble_html(yml_in[yml_file],suppl_components,list_infos["dir_name"],yml_file[:-1],allowed_link_seeds,backlinks)
 
 ################################################################################
 # Temporary coding, to translate all URL to input variables that are "old-style" ...

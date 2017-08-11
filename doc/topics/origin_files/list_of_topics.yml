@@ -42,6 +42,8 @@
 - PAW
 - PIMD
 - Planewaves
+- Phonons
+- PhononBands
 - positron
 - printing
 - PseudosPAW
@@ -55,7 +57,7 @@
 - STM
 - TDDFT
 - TDep
-- Thermodynamic
+- Temperature
 - TransPath
 - TuningSpeed
 - Unfolding
