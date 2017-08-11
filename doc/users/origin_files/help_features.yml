@@ -182,11 +182,13 @@ sec6:
  tag: dfpt
  body: |
   Many properties can be obtained in the approximation that the electrons stay in their ground state. The poweful
-  Density-Functional Perturbation Theory framework allows ABINIT to address all such properties that are
+  Density-Functional Perturbation Theory (DFPT) framework allows ABINIT to address directly all such properties that are
   connected to derivatives of the total energy with respect to some perturbation. This includes all dynamical
   effects due to phonons and their coupling, thus also temperature-dependent properties due to phonons.
   <ol>
    <li>[[topic:DFPT|DFPT: phonon modes, elastic tensors, effective charges, dielectric tensors,...]]</li>
+   <li>[[topic:Thermodynamic|Vibrational thermodynamic properties (free energy, entropy)]]</li>
+   <li>[[topic:Elastic|Elasticity and piezoelectricity]]</li>
    <li>[[topic:nonlinear|Raman intensities and electro-optic properties]]</li>
    <li>[[topic:ElPhon|Electron-phonon calculations]]</li>
    <li>[[topic:TDep|Temperature dependence of the eigenenergies]]</li>

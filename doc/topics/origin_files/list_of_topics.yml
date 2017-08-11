@@ -19,6 +19,7 @@
 - DMFT
 - EffMass
 - EFG
+- Elastic
 - ElPhon
 - ElecDOS
 - ElecBandStructure
@@ -54,6 +55,7 @@
 - STM
 - TDDFT
 - TDep
+- Thermodynamic
 - TransPath
 - TuningSpeed
 - Unfolding
