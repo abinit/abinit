@@ -12,7 +12,7 @@
 <a name="top"></a>
 
 <h1>Phonon bands and related topics</h1>
-<h3>This page gives hints on how to comopute phonon bands, density of states, interatomic force constants, sound velocity ... with the ABINIT package.
+<h3>This page gives hints on how to compute phonon bands, density of states, interatomic force constants, sound velocity ... with the ABINIT package.
 <hr>
 
 <h5>Copyright (C) 2016-2017 ABINIT group (MT)
@@ -24,7 +24,7 @@
  Mentioned in &nbsp; <a href="../../users/generated_files/help_features.html#6">help_features#6</a> &nbsp;
  <hr>
  <h3><b>Table of content: </b></h3> 
- <ul> <li>1. <a href="topic_PhononBands.html#1">Introduction.</a><li>2. <a href="topic_PhononBands.html#2">Related lesson(s) of the tutorial.</a><li>3. <a href="topic_PhononBands.html#3">Related input variables.</a><li>4. <a href="topic_PhononBands.html#4">Selected input files.</a></ul>
+ <ul> <li>1. <a href="topic_PhononBands.html#1">Introduction.</a><li>2. <a href="topic_PhononBands.html#2">Related lesson(s) of the tutorial.</a><li>3. <a href="topic_PhononBands.html#3">Related input variables.</a><li>4. <a href="topic_PhononBands.html#4">Selected input files.</a><li>5. <a href="topic_PhononBands.html#5">References.</a></ul>
 
 &nbsp; 
 <HR ALIGN=left> 
@@ -32,22 +32,10 @@
 <h3><b>1. Introduction.</b></h3>
 
 
-<p>Density-Functional Perturbation Theory (DFPT) allows one to address a large variety of physical observables. Many properties of interest can be computed directly from the derivatives of the energy, without the use of finite differences: phonons modes, elastic tensors, effective charges, dielectric tensors, etc... 
-<p>A DFPT calculation workflow is conducted as follows:
-<li> Run a Ground-State calculation in order to extract the Kohn-Sham pseudo wave-functions; these must be extremely well converged.</li>
-
-<li>If necessary, e.g., for the application of the derivative of the Hamiltonian with respect to an electric field, determine the derivatives of the wave functions with respect to the wave vector <b>k</b>, and keep them in a file. The keyword <a href="../../input_variables/generated_files/varset_dfpt.html#rfddk">rfddk</a> is used to perform this type of calculation.</li>
-
-<li>Compute the 2nd-order derivative matrix (i.e., 2nd derivatives of the energy with respect to different perturbations &lambda;). This can be done thanks to the keywords <a href="../../input_variables/generated_files/varset_dfpt.html#rfphon">rfphon</a> (&lambda;=atomic displacement), <a href="../../input_variables/generated_files/varset_dfpt.html#rfstrs">rfstrs</a> (&lambda;=strain), <a href="../../input_variables/generated_files/varset_dfpt.html#rfelfd">rfelfd</a> (&lambda;=electric field) or <a href="../../input_variables/generated_files/varset_dfpt.html#rfmagn">rfmagn</a> (&lambda;=magnetic field). </li>
-
-<li>Launch the anaddb tool (distributed with ABINIT) to analyse the derivative database and compute relaxed tensors and thermodynamical properties.</li>
-
-<p>Note that for PAW calculation, when performing the post-processing with anaddb, it is recommended to include all the keywords enforcing the sum rules (acoustic sum and charge neutrality). Indeed the PAW formalism involves, for each atom, the calculation of a large number of real space integrals, whose numerical effect may be to break the translational invariance.
-
-<p>Thanks to the locality provided by PAW partial wave basis, it is possible to perform response function calculations for correlated electron materials. The LDA+U formalism is usable without any restriction for the PAW+DFPT calculations.
-
-<p> All the tutorials dedicated to response functions can be followed both with norm-conserving pseudopotentials and with PAW atomic datasets.
-<p> More detailed explanations to perform a response calculation are given in the <a href="../../users/generated_files/help_respfn.html">help_respfn </a>file.
+The Fourier transformation of the phonon dynamical matrices generates interatomic force constants in real space,
+as explained in <a href="../../biblio/generated_files/bib_biblio.html#Gonze1997a">[Gonze1997a]</a>. Backtransforming to reciprocal space gives the Fourier interpolation
+of the initial phonon band structure. After such Fourier interpolation, the DOS can be produced (see <a href="../../biblio/generated_files/bib_biblio.html#Lee1995">[Lee1995]</a>),
+the phonon eigenenergies plotted along lines, the slope of the energy versus cristalline momentum evaluated (to give sound velocity).
 <br><br><a href=#top>Go to the top</a>
 
 
@@ -58,30 +46,11 @@
 <h3><b>2. Related lesson(s) of the tutorial.</b></h3>
 
 
-<li><a href="../../tutorial/generated_files/lesson_rf1.html">The lesson Response-Function 1 (RF1)</a>
-presents the basics of response-functions within ABINIT. The example
-given is the study of dynamical and dielectric properties of AlAs (an
-insulator): phonons at Gamma, dielectric constant, Born effective
-charges, LO-TO splitting, phonons in the whole Brillouin zone. The
-creation of the "Derivative Data Base" (DDB) is presented.</li>
 <li><a href="../../tutorial/generated_files/lesson_rf2.html">The lesson Response-Function 2 (RF2)</a>
 presents the analysis of the DDBs that have been introduced in the
-preceeding lesson RF1.  The computation of the interatomic forces and
+<a href="#">[[FAKE LINK:lesson_RF1]]</a>.  The computation of the interatomic forces and
 the computation of thermodynamical properties is an outcome of this
 lesson.</li>
-<li>The additional information given by lesson RF1 opens the door to
-<a href="../../tutorial/generated_files/lesson_optic.html">The lesson on Optic</a>, the utility that
-allows to obtain the frequency dependent linear optical dielectric
-function and the frequency dependent second order nonlinear optical
-susceptibility, in the simple "Sum-Over-State" approximation.</li>
-<li><a href="../../tutorial/generated_files/lesson_elastic.html">The lesson on the elastic
-properties</a> presents the computation with respect to the strain
-perturbation and its responses: elastic constants,
-piezoelectricity.</li>
-<li><a href="../../tutorial/generated_files/lesson_paral_dfpt.html">Parallelism of response-function
-calculations</a> - you need to be familiarized with the calculation of
-linear-response properties within ABINIT, see the tutorial <a
-href="../../tutorial/generated_files/lesson_rf1.html"> Response-Function 1 (RF1)</a></li>
 <br><br><a href=#top>Go to the top</a>
 
 
@@ -94,13 +63,14 @@ href="../../tutorial/generated_files/lesson_rf1.html"> Response-Function 1 (RF1)
 <p>Compulsory input variables:<p>... <a href="../../input_variables/generated_files/varset_anaddb.html#ifcflag@anaddb">ifcflag@anaddb</a>   [Interatomic Force Constants FLAG]<br>
 <p>Basic input variables:<p>... <a href="../../input_variables/generated_files/varset_anaddb.html#atifc@anaddb">atifc@anaddb</a>   [AToms for IFC analysis]<br>
 ... <a href="../../input_variables/generated_files/varset_anaddb.html#dipdip@anaddb">dipdip@anaddb</a>   [DIPole-DIPole interaction]<br>
+... <a href="../../input_variables/generated_files/varset_anaddb.html#nqpath@anaddb">nqpath@anaddb</a>   [Number of Q wavevectors defining a PATH]<br>
+... <a href="../../input_variables/generated_files/varset_anaddb.html#qpath@anaddb">qpath@anaddb</a>   [Q wavevectors defining a PATH]<br>
 <p>Useful input variables:<p>... <a href="../../input_variables/generated_files/varset_anaddb.html#ifcana@anaddb">ifcana@anaddb</a>   [IFC ANAlysis]<br>
 ... <a href="../../input_variables/generated_files/varset_anaddb.html#ifcout@anaddb">ifcout@anaddb</a>   [IFC OUTput]<br>
 ... <a href="../../input_variables/generated_files/varset_anaddb.html#natifc@anaddb">natifc@anaddb</a>   [Number of AToms for IFC analysis]<br>
 ... <a href="../../input_variables/generated_files/varset_anaddb.html#nsphere@anaddb">nsphere@anaddb</a>   [Number of atoms in SPHERe]<br>
 ... <a href="../../input_variables/generated_files/varset_anaddb.html#prt_ifc@anaddb">prt_ifc@anaddb</a>   [PRinT the Interatomic Force Constants]<br>
 ... <a href="../../input_variables/generated_files/varset_anaddb.html#rifcsph@anaddb">rifcsph@anaddb</a>   [Radius of the Interatomic Force Constant SPHere]<br>
-... <a href="../../input_variables/generated_files/varset_anaddb.html#thmtol@anaddb">thmtol@anaddb</a>   [THerModynamic TOLerance]<br>
 ... <a href="../../input_variables/generated_files/varset_anaddb.html#vs_qrad_tolkms@anaddb">vs_qrad_tolkms@anaddb</a>   [Speed of Sound Q-radius, TOLerance KiloMeter/Second]<br>
 
 <br><br><a href=#top>Go to the top</a>
@@ -128,6 +98,17 @@ The user can find some related example input files in the ABINIT package in the 
 
 <br><br><a href=#top>Go to the top</a>
 
+
+&nbsp; 
+<HR ALIGN=left> 
+<a name="5">&nbsp;</a>
+<h3><b>5. References.</b></h3>
+
+
+<br> <a href="../../biblio/generated_files/bib_biblio.html#Gonze1997a">[Gonze1997a]</a>  X. Gonze and C. Lee, "Dynamical matrices, Born effective charges, dielectric permittivity tensors, and interatomic force constants from density-functional perturbation theory", Phys. Rev. B 55, 10355 (1997).<br>
+<br> <a href="../../biblio/generated_files/bib_biblio.html#Lee1995">[Lee1995]</a>  C. Lee and X. Gonze, "Ab-initio calculation of the thermodynamic properties and atomic temperature factors of SiO<sub>2</sub> &alpha;-quartz and stishovite", Phys. Rev. B 51, 8610 (1995).<br>
+<p>
+<br><br><a href=#top>Go to the top</a>
 
 <script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
 

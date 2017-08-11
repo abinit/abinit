@@ -6327,7 +6327,7 @@
     requires: null
     text: |-
         <p>If <b>elphflag</b> is 1, anaddb performs an analysis of the electron-phonon coupling.
-    topics: anaddbEPC_compulsory
+    topics: anaddbEPC_compulsory, PhononWidth_compulsory
     varset: anaddb
     vartype: integer
 - !variable
@@ -14940,7 +14940,7 @@
         (see [[kptrlatt]] abinit variable definitionas well).
         Input needed in electron-phonon calculations
         using nesting functions or tetrahedron integration.
-    topics: anaddbEPC_basic
+    topics: anaddbEPC_basic, PhononWidth_basic
     varset: anaddb
     vartype: integer
 - !variable
@@ -18690,7 +18690,7 @@
         <p>Number of q-points in the array [[anaddb:qpath]]
         defining the path along which the phonon band structure and phonon linewidths
         are interpolated.
-    topics: anaddbCommon_basic
+    topics: PhononBands_basic, PhononWidth_basic
     varset: anaddb
     vartype: integer
 - !variable
@@ -25052,7 +25052,7 @@
         inside the code to respect the proportion between the segments.
         The same circuit is used for the output of the nesting function if
         [[anaddb:prtnest]]=1.
-    topics: anaddbCommon_basic
+    topics: PhononBands_basic, PhononWidth_basic
     varset: anaddb
     vartype: real
 - !variable
@@ -28235,7 +28235,7 @@
           <li>1 = Gaussian smearing (see [[anaddb:elphsmear]])</li>
           <li>2 = uniformly weighted band window between [[anaddb:ep_b_min]] and [[anaddb:ep_b_max]], for all k-points</li>
         </ul>
-    topics: anaddbEPC_basic
+    topics: anaddbEPC_basic, PhononWidth_basic
     varset: anaddb
     vartype: integer
 - !variable
@@ -28463,7 +28463,7 @@
         with which the DOS is calculated can be stopped, i.e.
         the mean of the relative change going from one grid
         to the next bigger is smaller than <b>thmtol</b>.
-    topics: PhononBands_useful
+    topics: Temperature_useful
     varset: anaddb
     vartype: real
 - !variable

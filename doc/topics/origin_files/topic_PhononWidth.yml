@@ -1,0 +1,31 @@
+- !components 
+    name      : PhononWidth
+    keyword   : Phonon linewidth
+    authors   : MV
+    howto     : compute the linewidth (or lifetime) of phonons, due to the electron-phonon interaction
+    header    : default
+    title     : <h1>Phonon linewidth</h1>
+    subtitle  : default
+    copyright : default
+    links     : default
+    introduction : |- 
+        <p>This topic concerns metals only.
+        <p>After generating a GKK file (see [[topic_ElPhonMat]], the Electron-Phonon Coupling (EPC) 
+        analysis is performed in anaddb, setting [[anaddb:elphflag]]
+        variable to 1. Most of the procedure is automatic, but can be
+        lengthy if a large number of k-points is being used. The [[anaddb:nqpath]] and
+        [[anaddb:qpath]] variables must be set, specifying a path in reciprocal space.
+        anaddb generates files containing the
+        phonon linewidths (suffixed _LWD) and frequencies &omega;<sub>qj</sub> (suffixed _BST)
+        along [[anaddb:qpath]]. One can calculate the nesting function n(q) =
+        &sum;<sub>kii'</sub> &delta;(&epsilon;<sub>k,i</sub>) &delta;(&epsilon;<sub>k+q,i'</sub>) by
+        setting [[anaddb:prtnest]] to 1 (output to _NEST).
+         <p>
+    tutorials  : |-
+        <li> <a href="../../tutorial/generated_files/lesson_eph.html">The lesson on the
+         electron-phonon interaction</a> presents the use of the utility MRGKK
+         and ANADDB to examine the electron-phonon interaction and the
+         subsequent calculation of superconductivity temperature (for bulk
+         systems).</li>
+
+    end : default

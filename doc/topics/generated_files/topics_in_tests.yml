@@ -42,6 +42,8 @@
 - tests/paral/Input/t77.in:#%% topics = GWls
 - tests/paral/Input/t93.in:#%% topics = Hybrids
 - tests/paral/Input/t94.in:#%% topics = Hybrids
+- tests/tutorespfn/Input/teph_4.in:#%% topics = PhononWidth
+- tests/tutorespfn/Input/teph_5.in:#%% topics = PhononWidth
 - tests/tutorial/Input/tbase4_4.in:#%% topics = UnitCell
 - tests/tutorial/Input/tnuc_1.in:#%% topics = SmartSymm
 - tests/tutorial/Input/tspin_3.in:#%% topics = ElecDOS
