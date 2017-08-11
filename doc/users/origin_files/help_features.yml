@@ -205,7 +205,7 @@ sec6:
 ## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
 ## Note the small (one space) indentation for the title and body keys.
 sec7:
- title: "Excited state calculations and frequency-dependent electronic and optical properties"
+ title: "Excited state calculations, and frequency-dependent electronic and optical properties"
  tag: excited
  body: |
   Excited-state calculations and frequency-dependent properties (for frequencies that are non-negligible with respect to the

@@ -11,7 +11,7 @@
     introduction : |- 
          ABINIT needs to know the different types of atoms that form the system.
          <p>
-         The atoms assembled in a molecule or a solid are usually entirely specified by their 
+         The atoms assembled in a molecule or a solid are physically specified by their 
          nuclear charge (and their mass for dynamical properties). 
          <p>
          However, in a pseudopotential
@@ -33,6 +33,7 @@
          similar ions are present, and whose specific chemical properties are not crucial for the property of interest.
          Usually it is done only for isovalent species, and ions of quite similar radii. It is a reasonable interpolation 
          technique for the electronic properties.
-    tutorials  : |-
-       <li>[[lesson_ffield|Lesson on polarization and finite electric fields]]. Polarization, and responses to finite electric fields for AlAs.</li>
+    tutorials  : |-        
+         <li>[[lesson_ffield|Lesson on polarization and finite electric fields]]. 
+         Polarization, and responses to finite electric fields for AlAs. In the present topic, it is an example of the definition of several atom types ... </li>
     end : default 
