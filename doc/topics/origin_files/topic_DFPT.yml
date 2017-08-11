@@ -2,7 +2,7 @@
     name      : DFPT 
     keyword   : DFPT 
     authors   : MT
-    howto     : perform a DFPT calculation to obtain phonons modes, elastic tensors,...
+    howto     : generically perform DFPT calculations
     header    : default
     title     : <h1>Density Functional Perturbation Theory calculations</h1>
     subtitle  : default

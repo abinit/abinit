@@ -26182,7 +26182,7 @@
          </a>
          ).
         </p>
-    topics: DFPT_basic
+    topics: DFPT_basic, Elastic_compulsory, Phonons_compulsory
     varset: dfpt
     vartype: integer
 - !variable
@@ -26253,7 +26253,7 @@
         for the corresponding direction. If 0, this direction
         should not be considered.
         </p>
-    topics: DFPT_compulsory
+    topics: DFPT_compulsory, Elastic_compulsory, Phonons_compulsory
     varset: dfpt
     vartype: integer
 - !variable
@@ -26424,7 +26424,7 @@
          </a>
          .
         </p>
-    topics: DFPT_basic
+    topics: DFPT_basic, Elastic_compulsory
     varset: dfpt
     vartype: integer
 - !variable

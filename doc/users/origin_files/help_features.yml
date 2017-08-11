@@ -188,6 +188,7 @@ sec6:
   This includes all dynamical effects due to phonons and their coupling, 
   thus also temperature-dependent properties due to phonons.
   <ol>
+   <li>[[topic:DFPT|Generalities about DFPT]]
    <li>[[topic:Phonons|Vibrational and dielectric properties (phonon frequencies and modes, IR and Raman spectra, Born effective charges)]]</li>
    <li>[[topic:PhononBands|Phonon bands and DOS, interatomic force constants, sound velocity]]</li>
    <li>[[topic:Temperature|Temperature dependent properties (free energy, entropy, specific heat, atomic temperature factors, thermal expansion)]]</li>
@@ -199,7 +200,6 @@ sec6:
   </ol>
   TO BE SUPPRESSED :
   <ul>
-   <li>[[topic:DFPT]]
    <li>[[topic:anaddbCommon]]
    <li>[[topic:anaddbEPC]]
   </ul>
