@@ -2,7 +2,7 @@
     name      : Temperature
     keyword   : Temperature
     authors   : XG
-    howto     : compute vibrational free energy, entropy and specirfic heat, as well as atomic temperature factors
+    howto     : compute vibrational free energy, entropy, specific heat, thermal expansion, as well as atomic temperature factors
     header    : default
     title     : <h1>Vibrational temperature-dependent properties (e.g. thermodynamical properties)</h1>
     subtitle  : default

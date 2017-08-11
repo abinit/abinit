@@ -762,7 +762,7 @@
         This option is useful in the mode-by-mode decomposition of the electrooptic tensor, and to compute
         the Raman susceptibilities of individual phonon modes.
         In case of uniaxial crystals, the z-axis should be chosen along the optical axis.
-    topics: anaddbSpec_basic
+    topics: nonlinear_basic
     varset: anaddb
     vartype: integer
 - !variable
@@ -1029,7 +1029,7 @@
         <br>
         <p>WARNING: there will be an in-place change of meaning of atifc (this is
         confusing, and should be taken away in one future version - sorry for this).
-    topics: anaddbSpec_basic
+    topics: PhononBands_basic
     varset: anaddb
     vartype: integer
 - !variable
@@ -4049,7 +4049,7 @@
            [[anaddb:elaflag]]=2,3,4 or 5  and
            [[anaddb:instrflag]]=1
          </ul>
-    topics: anaddbSpec_compulsory
+    topics: Phonons_basic
     varset: anaddb
     vartype: integer
 - !variable
@@ -4408,7 +4408,7 @@
          the interatomic force constants have to be analysed in real space.</li>
          </ul>
         The abinit input variable [[dipdip]] has a similar meaning.
-    topics: anaddbSpec_useful
+    topics: PhononBands_basic
     varset: anaddb
     vartype: integer
 - !variable
@@ -6261,7 +6261,7 @@
          can contain both information. And the program will also check for the users.
         </li>
         </ul>
-    topics: anaddbSpec_compulsory
+    topics: Elastic_basic
     varset: anaddb
     vartype: integer
 - !variable
@@ -7513,7 +7513,7 @@
     requires: null
     text: |-
         <p>Value of the largest frequency for the frequency-dependent dielectric tensor, in Hartree.
-    topics: anaddbSpec_basic
+    topics: Phonons_useful
     varset: anaddb
     vartype: real
 - !variable
@@ -7528,7 +7528,7 @@
     requires: null
     text: |-
         <p>Value of the lowest frequency for the frequency-dependent dielectric tensor, in Hartree.
-    topics: anaddbSpec_basic
+    topics: Phonons_useful
     varset: anaddb
     vartype: real
 - !variable
@@ -9141,7 +9141,7 @@
         of the equilibrium volume). The DDB files must be ordered according to the volume of the unit cell
         (the DDB with smallest volume comes first) and the volume increment must be constant.
         The code computes the derivative of the dynamical matrix wrt the volume using central finite difference.
-    topics: anaddbSpec_basic
+    topics: Temperature_useful
     varset: anaddb
     vartype: string
 - !variable
@@ -9157,7 +9157,7 @@
     text: |-
         <p>This variable defines the number of DDB files (read from [[anaddb:gruns_ddbs]])
         used for the calculation of the Gruneisen parameters.
-    topics: anaddbSpec_basic
+    topics: Temperature_basic
     varset: anaddb
     vartype: integer
 - !variable
@@ -10402,7 +10402,7 @@
     text: |-
         <p>Indices of the atoms that are fixed during a structural relaxation at constrained polarization.
         See [[anaddb:polflag]].
-    topics: anaddbSpec_basic
+    topics: ConstrainedPol_useful
     varset: anaddb
     vartype: integer
 - !variable
@@ -10713,7 +10713,7 @@
         also calculate ratios with respect to the
         longitudinal force constant ( the (1,1) element of
         the matrix in local coordinates).
-    topics: anaddbSpec_basic
+    topics: PhononBands_useful
     varset: anaddb
     vartype: integer
 - !variable
@@ -10755,7 +10755,7 @@
            set of interatomic force constants. It is suggested to
            always use <b>ifcflag</b>=1. The <b>ifcflag</b>=0 option
            is available for checking purpose, and if there is not enough information in the DDB.
-    topics: anaddbSpec_compulsory
+    topics: PhononBands_compulsory
     varset: anaddb
     vartype: integer
 - !variable
@@ -10775,7 +10775,7 @@
         output (written) and eventually analysed. The
         neighbouring atoms are selected by decreasing distance with respect to
         the generic atom.
-    topics: anaddbSpec_basic
+    topics: PhononBands_useful
     varset: anaddb
     vartype: integer
 - !variable
@@ -10948,7 +10948,7 @@
               phonons at Q=0.
           </li>
         </ul>
-    topics: anaddbSpec_compulsory
+    topics: Elastic_basic
     varset: anaddb
     vartype: integer
 - !variable
@@ -12909,7 +12909,7 @@
         check for the users. </li>
         </ul>
         See [[anaddb:polflag]].
-    topics: anaddbSpec_basic
+    topics: ConstrainedPol_useful
     varset: anaddb
     vartype: integer
 - !variable
@@ -16119,7 +16119,7 @@
     text: |-
         <p>Number of atoms that are fixed during a structural optimisation at constrained polarization.
         See [[anaddb:polflag]].
-    topics: anaddbSpec_basic
+    topics: ConstrainedPol_useful
     varset: anaddb
     vartype: integer
 - !variable
@@ -16205,7 +16205,7 @@
     text: |-
         <p> Give the number of atoms for which IFCs are written and eventually analysed. The list of these atoms is provided
         by [[anaddb:atifc]].
-    topics: anaddbSpec_basic
+    topics: PhononBands_useful
     varset: anaddb
     vartype: integer
 - !variable
@@ -17091,7 +17091,7 @@
         See [[anaddb:dieflag]].
 
         The code will take <b>nfreq</b> equidistant values from [[anaddb:frmin]] to [[anaddb:frmax]].
-    topics: anaddbSpec_basic
+    topics: Phonons_useful
     varset: anaddb
     vartype: integer
 - !variable
@@ -17738,7 +17738,7 @@
             changes of the dielectric tensor induced by an atomic displacement are calculated;</li>
           <li>3 => only the non-linear optical susceptibility is calculated.</li>
         </ul>
-    topics: anaddbSpec_compulsory
+    topics: nonlinear_compulsory
     varset: anaddb
     vartype: integer
 - !variable
@@ -18999,7 +18999,7 @@
         (evaluate the range of the interatomic force constants), because
         the acoustic sum rule will be violated if some atoms are no more
         included in the inverse Fourier Transform.
-    topics: anaddbSpec_useful
+    topics: PhononBands_useful
     varset: anaddb
     vartype: integer
 - !variable
@@ -19155,7 +19155,7 @@
         <p> Number of strain component that are fixed during a
         structural optimisation at constrained polarization.
         See [[anaddb:polflag]].
-    topics: anaddbSpec_basic
+    topics: ConstrainedPol_useful
     varset: anaddb
     vartype: integer
 - !variable
@@ -19244,7 +19244,7 @@
         with the [[anaddb:tempermin]] and
         [[anaddb:temperinc]] variables.
         The default temperature grid goes from 100K to 1000K by step of 100K. For the largest temperatures, for most solids, anharmonic effects not accounted in the harmonic approximation implemented in anaddb will be important. For weakly bounded systems (e.g. Van der Waals solids), such anharmonic effects might be important already at room temperature.
-    topics: anaddbSpec_basic
+    topics: Temperature_basic
     varset: anaddb
     vartype: integer
 - !variable
@@ -21871,7 +21871,7 @@
         including e (clamped and relaxed ion), d, g and h tensors. The flags
         should be set to satisfy the above rules from 1 to 6.</li>
         </ul>
-    topics: anaddbSpec_compulsory
+    topics: Elastic_basic
     varset: anaddb
     vartype: integer
 - !variable
@@ -22290,7 +22290,7 @@
         <p><As described in the Na Sai's paper, it is important to use the
         finite difference expression of the ddk ([[berryopt]]=2 or -2)
         in the linear response calculation of the effective charges and the piezoelectric tensor.
-    topics: anaddbSpec_compulsory
+    topics: ConstrainedPol_compulsory
     varset: anaddb
     vartype: integer
 - !variable
@@ -22798,7 +22798,7 @@
          <li>0 =&gt; do nothing (IFC are printed to the log file);</li>
          <li>1 =&gt; write out the IFC in file ifcinfo.out (the name is fixed) to be used by AI2PS from John Rehr's group</li>
         </ul>
-    topics: anaddbSpec_basic
+    topics: PhononBands_useful
     varset: anaddb
     vartype: integer
 - !variable
@@ -23751,7 +23751,7 @@
         <li>1 =&gt; write out the contribution of the individual zone-center
         phonon modes to the electrooptic tensor.</li>
         </ul>
-    topics: anaddbSpec_basic
+    topics: nonlinear_useful
     varset: anaddb
     vartype: integer
 - !variable
@@ -25508,7 +25508,7 @@
         contribution to the Raman tensor.</li>
         </ul>
         For the time being, <b>ramansr</b>=1 is the preferred choice.
-    topics: anaddbSpec_basic
+    topics: nonlinear_basic
     varset: anaddb
     vartype: integer
 - !variable
@@ -25932,7 +25932,7 @@
         <p>If <b>relaxat</b>=1, relax atomic positions during a
         structural relaxation at constrained polarization.
         See [[anaddb:polflag]].
-    topics: anaddbSpec_basic
+    topics: ConstrainedPol_useful
     varset: anaddb
     vartype: integer
 - !variable
@@ -25949,7 +25949,7 @@
         <p>If <b>relaxat</b>=1, relax lattice constants
         (lengths/angles) during a structural relaxation
          at constrained polarization. See [[anaddb:polflag]].
-    topics: anaddbSpec_basic
+    topics: ConstrainedPol_useful
     varset: anaddb
     vartype: integer
 - !variable
@@ -26512,7 +26512,7 @@
         <p>This number defines the atoms for which the
         short range part of the interatomic force constants, after
         imposition of the acoustic sum rule, will not be put to zero.
-    topics: anaddbSpec_basic
+    topics: PhononBands_useful
     varset: anaddb
     vartype: real
 - !variable
@@ -28151,7 +28151,7 @@
         <p>Target value of the polarization in cartesian
         coordinates and in C/m^2.
         See [[anaddb:polflag]].
-    topics: anaddbSpec_basic
+    topics: ConstrainedPol_useful
     varset: anaddb
     vartype: real
 - !variable
@@ -28253,7 +28253,7 @@
         transport properties. See the associated
         [[anaddb:tempermin]] and [[anaddb:ntemper]] variables.
         The default temperature grid goes from 100K to 1000K by step of 100K. For the largest temperatures, for most solids, anharmonic effects not accounted in the harmonic approximation implemented in anaddb will be important. For weakly bounded systems (e.g. Van der Waals solids), such anharmonic effects might be important already at room temperature.
-    topics: anaddbSpec_basic
+    topics: Temperature_basic
     varset: anaddb
     vartype: real
 - !variable
@@ -28273,7 +28273,7 @@
         [[anaddb:temperinc]] and [[anaddb:ntemper]].
         The default temperature grid goes from 100K to 1000K by step of 100K. For the largest temperatures, for most solids, anharmonic effects not accounted in the harmonic approximation implemented in anaddb will be important. For weakly bounded systems (e.g. Van der Waals solids),
         such anharmonic effects might be important already at room temperature.
-    topics: anaddbSpec_basic
+    topics: Temperature_basic
     varset: anaddb
     vartype: real
 - !variable
@@ -28444,7 +28444,7 @@
         Input variables that may be needed if this flag is activated:
         [[anaddb:dostol]], [[anaddb:nchan]], [[anaddb:ntemper]], [[anaddb:temperinc]], [[anaddb:tempermin]],
         as well as the wavevector grid number 2 definition,  [[anaddb:ng2qpt]], [[anaddb:ngrids]], [[anaddb:q2shft]].
-    topics: anaddbSpec_compulsory
+    topics: Temperature_compulsory
     varset: anaddb
     vartype: integer
 - !variable
@@ -28463,7 +28463,7 @@
         with which the DOS is calculated can be stopped, i.e.
         the mean of the relative change going from one grid
         to the next bigger is smaller than <b>thmtol</b>.
-    topics: anaddbSpec_basic
+    topics: PhononBands_useful
     varset: anaddb
     vartype: real
 - !variable
@@ -31173,7 +31173,7 @@
         The number of radial points is increased until the integration converges twice withing the tolerance
         specified by the user (typical values for tolkms: 0.05 km/s).
         <p>The default values will not work.
-    topics: anaddbSpec_useful
+    topics: PhononBands_useful
     varset: anaddb
     vartype: real
 - !variable
