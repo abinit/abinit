@@ -150,6 +150,7 @@ _tsuite_dirs = [
     "libxc",
     "mpiio",
     "paral",
+    #"hpc",
     #"physics",
     "seq",
     "tutoparal",
