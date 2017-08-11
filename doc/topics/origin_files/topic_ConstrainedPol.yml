@@ -1,10 +1,10 @@
 - !components 
-    name      : Elastic
-    keyword   : Elastic+Piezoelectricity
+    name      : ConstrainedPol
+    keyword   : ConstrainedPolarization
     authors   : MT
-    howto     : compute elastic, piezoelectric and internal strain tensors from DFPT
+    howto     : optimize the geometry under constrained polarization
     header    : default
-    title     : <h1>Elasticity and piezoelectricity</h1>
+    title     : <h1>Constrained polarization calculations (Na Sai formalism)</h1>
     subtitle  : default
     copyright : default
     links     : default
