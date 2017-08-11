@@ -15,7 +15,7 @@
  For more information, see http://www.abinit.org .
 
 .Starting date : Fri 11 Aug 2017.
-- ( at 17h26 )
+- ( at 23h58 )
   
 - input  file    -> tpositron_5.in
 - output file    -> tpositron_5.out
@@ -398,6 +398,10 @@ TC-DFT STEP   2 - POSITRONIC GROUND-STATE CALCULATION IN PRESENCE OF ELECTRONS A
     PspCore energy  =  2.32215214290181E-01
     Loc. psp. energy= -2.48760557118152E+00
     Spherical terms =  3.64385166872600E+00
+    >>> Electronic E= -7.94215269433535E+00
+
+    Positronic ener.= -1.97233948736393E-01
+    EP interaction E= -1.19362610979955E-01
     >>>>>>>>> Etotal= -8.25874925405170E+00
 
   >Total energy in eV           = -2.24731996155489E+02
@@ -583,10 +587,10 @@ P           mkmem           8
 - Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
 - the licence allows the authors to put it on the Web).
 -
-- Proc.   0 individual time (sec): cpu=         69.4  wall=         69.6
+- Proc.   0 individual time (sec): cpu=         85.7  wall=         86.2
 
 ================================================================================
 
  Calculation completed.
-.Delivered  29 WARNINGs and   4 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         69.4  wall=         69.6
+.Delivered  29 WARNINGs and   2 COMMENTs to log file.
++Overall time at end (sec) : cpu=         85.7  wall=         86.2

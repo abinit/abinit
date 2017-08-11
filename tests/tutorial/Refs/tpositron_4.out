@@ -15,7 +15,7 @@
  For more information, see http://www.abinit.org .
 
 .Starting date : Fri 11 Aug 2017.
-- ( at 16h57 )
+- ( at 23h58 )
   
 - input  file    -> tpositron_4.in
 - output file    -> tpositron_4.out
@@ -1954,6 +1954,10 @@ TC-DFT STEP   7 - ELECTRONIC GROUND-STATE CALCULATION IN PRESENCE OF A POSITRON
     PspCore energy  =  1.63276322547783E+00
     Loc. psp. energy= -2.28950558730748E+01
     Spherical terms =  2.76659961709084E+01
+    >>> Electronic E= -6.00937979232527E+01
+
+    Positronic ener.= -8.79622414491841E-01
+    EP interaction E=  3.58587339473693E-01
     >>>>>>>>> Etotal= -6.06148329982709E+01
 
  "Double-counting" decomposition of free energy:
@@ -1962,6 +1966,11 @@ TC-DFT STEP   7 - ELECTRONIC GROUND-STATE CALCULATION IN PRESENCE OF A POSITRON
     PspCore energy  =  1.63276322547783E+00
     Dble-C XC-energy= -1.57527717117979E+01
     Spherical terms =  1.44575915112684E+01
+    - EP dble-ct En.= -6.00777287317542E-01
+    >>> Electronic E= -6.00938279216269E+01
+
+    Positronic ener.= -8.79622414491841E-01
+    EP interaction E=  3.58587339473693E-01
     >>>> Etotal (DC)= -6.06148629966451E+01
 
   >Total energy in eV           = -1.64941348832574E+03
@@ -2194,10 +2203,10 @@ P           mkmem           3
 - Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
 - the licence allows the authors to put it on the Web).
 -
-- Proc.   0 individual time (sec): cpu=        439.6  wall=        441.0
+- Proc.   0 individual time (sec): cpu=        444.0  wall=        447.1
 
 ================================================================================
 
  Calculation completed.
 .Delivered 599 WARNINGs and  49 COMMENTs to log file.
-+Overall time at end (sec) : cpu=        439.6  wall=        441.0
++Overall time at end (sec) : cpu=        444.0  wall=        447.1
