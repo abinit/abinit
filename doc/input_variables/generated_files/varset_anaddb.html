@@ -162,7 +162,7 @@ variables to be used in the input file for the ANADDB executable of the ABINIT p
 <br><font id="mnemonics">Mnemonics: Alpha2F SMEARing factor</font>
 <br><font id="mnemonics">Executable: anaddb</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#ENERGY">ENERGY</a></font>
-<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_anaddbEPC.html">anaddbEPC</a> </font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_ElPhonTransport.html">ElPhonTransport</a> </font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 2e-05</font>
 <br><font id="text">
@@ -321,13 +321,14 @@ confusing, and should be taken away in one future version - sorry for this).
 <br><font id="mnemonics">Mnemonics: BAND GAP</font>
 <br><font id="mnemonics">Executable: anaddb</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#ENERGY">ENERGY</a></font>
-<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_anaddbEPC.html">anaddbEPC</a> </font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_ElPhonTransport.html">ElPhonTransport</a> </font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 999.0</font>
 <br><font id="text">
 <p>
 <p>Allow setting the target band gap, in eV.
 (<a href="../../input_variables/generated_files/varset_anaddb.html#elphflag@anaddb">elphflag@anaddb</a>=1).
+<p>NOTE XG20170811 : apparently no effective test for this input variable. Also, the descirption is strange ...!
 </font>
 
 <br><br><a href=#top>Go to the top</a>
@@ -685,7 +686,7 @@ should not be used at the same time. (<a href="../../input_variables/generated_f
 <br><font id="mnemonics">Mnemonics: ELectron-PHonon SMEARing factor</font>
 <br><font id="mnemonics">Executable: anaddb</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#ENERGY">ENERGY</a></font>
-<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_anaddbEPC.html">anaddbEPC</a> </font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_ElPhonTransport.html">ElPhonTransport</a> </font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 0.01 Hartree</font>
 <br><font id="text">
@@ -772,7 +773,7 @@ Note that <b>ep_extrael</b> and <a href="../../input_variables/generated_files/v
 <br><font id="title"><a name="ep_int_gkk@anaddb">ep_int_gkk</a></font>
 <br><font id="mnemonics">Mnemonics: Electron-Phonon INTerpolation of GKK</font>
 <br><font id="mnemonics">Executable: anaddb</font>
-<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_anaddbEPC.html">anaddbEPC</a> </font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_PhononWidth.html">PhononWidth</a> </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
 <br><font id="text">
@@ -841,7 +842,7 @@ anaddb input (ngqpt)
 <br><font id="title"><a name="ep_prt_yambo@anaddb">ep_prt_yambo</a></font>
 <br><font id="mnemonics">Mnemonics: Electron Phonon PRinTout YAMBO data</font>
 <br><font id="mnemonics">Executable: anaddb</font>
-<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_anaddbEPC.html">anaddbEPC</a> </font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_ElPhonInt.html">ElPhonInt</a> </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
 <br><font id="text">
@@ -856,7 +857,7 @@ anaddb input (ngqpt)
 <br><font id="title"><a name="ep_qptlist@anaddb">ep_qptlist</a></font>
 <br><font id="mnemonics">Mnemonics: Electron Phonon Q PoinT LIST</font>
 <br><font id="mnemonics">Executable: anaddb</font>
-<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_anaddbEPC.html">anaddbEPC</a> </font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_PhononWidth.html">PhononWidth</a> </font>
 <br><font id="vartype">Variable type: real(3,<a href="../../input_variables/generated_files/varset_anaddb.html#ep_nqpt@anaddb">ep_nqpt</a>)</font>
 <br><font id="default">Default is (3*<a href="../../input_variables/generated_files/varset_anaddb.html#ep_nqpt@anaddb">ep_nqpt</a>)*0</font>
 <br><font id="text">
@@ -874,7 +875,7 @@ anaddb input (ngqpt), in reduced coordinates of the reciprocal space lattice.
 <br><font id="title"><a name="ep_scalprod@anaddb">ep_scalprod</a></font>
 <br><font id="mnemonics">Mnemonics: DO SCALar PRODuct for gkk matrix elements</font>
 <br><font id="mnemonics">Executable: anaddb</font>
-<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_anaddbEPC.html">anaddbEPC</a> </font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_PhononWidth.html">PhononWidth</a> </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
 <br><font id="text">
@@ -1025,7 +1026,7 @@ See <a href="../../input_variables/generated_files/varset_anaddb.html#polflag@an
 <br><font id="title"><a name="iatprj_bs@anaddb">iatprj_bs</a></font>
 <br><font id="mnemonics">Mnemonics: Indices of the AToms for the PRoJection of the phonon Band Structure</font>
 <br><font id="mnemonics">Executable: anaddb</font>
-<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_anaddbEPC.html">anaddbEPC</a> </font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_PhononBands.html">PhononBands</a> </font>
 <br><font id="vartype">Variable type: integer(<a href="../../input_variables/generated_files/varset_anaddb.html#natprj_bs@anaddb">natprj_bs</a>)</font>
 <br><font id="default">Default is 0*'<a href="../../input_variables/generated_files/varset_anaddb.html#natprj_bs@anaddb">natprj_bs</a>'</font>
 <br><font id="text">
@@ -1256,7 +1257,7 @@ using nesting functions or tetrahedron integration.
 <br><font id="title"><a name="kptrlatt_fine@anaddb">kptrlatt_fine</a></font>
 <br><font id="mnemonics">Mnemonics: K PoinT Reciprocal LATTice for FINE grid</font>
 <br><font id="mnemonics">Executable: anaddb</font>
-<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_anaddbEPC.html">anaddbEPC</a> </font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_ElPhonTransport.html">ElPhonTransport</a> </font>
 <br><font id="vartype">Variable type: integer(3,3)</font>
 <br><font id="default">Default is 9*0</font>
 <br><font id="text">
@@ -1881,7 +1882,7 @@ can be defined through the input variable <a href="../../input_variables/generat
 <br><font id="title"><a name="prtfsurf@anaddb">prtfsurf</a></font>
 <br><font id="mnemonics">Mnemonics: PRinT the Fermi SURFace</font>
 <br><font id="mnemonics">Executable: anaddb</font>
-<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_anaddbEPC.html">anaddbEPC</a> </font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_ElPhonTransport.html">ElPhonTransport</a> </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
 <br><font id="text">
@@ -1937,7 +1938,7 @@ phonon modes to the electrooptic tensor.</li>
 <br><font id="title"><a name="prtnest@anaddb">prtnest</a></font>
 <br><font id="mnemonics">Mnemonics: PRinT the NESTing function</font>
 <br><font id="mnemonics">Executable: anaddb</font>
-<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_anaddbEPC.html">anaddbEPC</a> </font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_PhononWidth.html">PhononWidth</a> </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
 <br><font id="text">
@@ -2125,9 +2126,9 @@ for this series of grids corresponds to 1.
 
 
 <br><font id="title"><a name="qgrid_type@anaddb">qgrid_type</a></font>
-<br><font id="mnemonics">Mnemonics: Q wavevectors defining a PATH</font>
+<br><font id="mnemonics">Mnemonics: Q GRID TYPE</font>
 <br><font id="mnemonics">Executable: anaddb</font>
-<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_anaddbEPC.html">anaddbEPC</a> </font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_PhononWidth.html">PhononWidth</a> </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
 <br><font id="text">
@@ -2418,7 +2419,7 @@ additional symmetrization.
 <br><font id="title"><a name="symgkq@anaddb">symgkq</a></font>
 <br><font id="mnemonics">Mnemonics: SYMmetrize the GKk matrix elements for each Q</font>
 <br><font id="mnemonics">Executable: anaddb</font>
-<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_anaddbEPC.html">anaddbEPC</a> </font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_ElPhonInt.html">ElPhonInt</a> </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 1</font>
 <br><font id="text">
@@ -2581,7 +2582,7 @@ to the next bigger is smaller than <b>thmtol</b>.
 <br><font id="title"><a name="use_k_fine@anaddb">use_k_fine</a></font>
 <br><font id="mnemonics">Mnemonics: USE K-grid FINEr than the coarse k-grid</font>
 <br><font id="mnemonics">Executable: anaddb</font>
-<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_anaddbEPC.html">anaddbEPC</a> </font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_PhononWidth.html">PhononWidth</a> </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
 <br><font id="text">

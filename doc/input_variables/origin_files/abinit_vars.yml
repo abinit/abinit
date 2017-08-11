@@ -14,7 +14,7 @@
         (similar to a phonon DOS), which is sampled on a finite q and k grid. The Dirac delta
         functions in energy are replaced by Gaussians of width <b>a2fsmear</b>
         (by default in Hartree).
-    topics: anaddbEPC_expert
+    topics: ElPhonTransport_useful
     varset: anaddb
     vartype: real
 - !variable
@@ -1240,7 +1240,8 @@
     text: |-
         <p>Allow setting the target band gap, in eV.
         ([[elphflag@anaddb]]=1).
-    topics: anaddbEPC_expert
+        <p>NOTE XG20170811 : apparently no effective test for this input variable. Also, the descirption is strange ...!
+    topics: ElPhonTransport_expert
     varset: anaddb
     vartype: real
 - !variable
@@ -6343,7 +6344,7 @@
     requires: null
     text: |-
         <p>Smearing width for the Fermi surface integration (in Hartree by default).
-    topics: anaddbEPC_expert
+    topics: ElPhonTransport_useful
     varset: anaddb
     vartype: real
 - !variable
@@ -6474,7 +6475,7 @@
         elements over the coarse k-grid is done (<b>ep_int_gkk</b> 1) before summing
         with appropriate Fermi Surface weights. In this way, the two integration weights
         are treated symmetrically.
-    topics: anaddbEPC_expert
+    topics: PhononWidth_useful
     varset: anaddb
     vartype: integer
 - !variable
@@ -6540,7 +6541,7 @@
     requires: null
     text: |-
         <p>For electron-phonon calculations, print out matrix elements for use by the yambo code.
-    topics: anaddbEPC_expert
+    topics: ElPhonInt_expert
     varset: anaddb
     vartype: integer
 - !variable
@@ -6560,7 +6561,7 @@
         of the electron-phonon quantities without interpolation, this specifies the
         q-points to be found in the GKK file, independently of the normal
         anaddb input (ngqpt), in reduced coordinates of the reciprocal space lattice.
-    topics: anaddbEPC_expert
+    topics: PhononWidth_useful
     varset: anaddb
     vartype: real
 - !variable
@@ -6582,7 +6583,7 @@
         Doing so afterwards (<b>ep_scalprod</b> 0) eliminates the diagonalization error,
         but sometimes gives small spikes in the phonon linewidths near band crossings
         or high symmetry points. I do not know why...
-    topics: anaddbEPC_expert
+    topics: PhononWidth_useful
     varset: anaddb
     vartype: integer
 - !variable
@@ -10496,7 +10497,7 @@
     requires: null
     text: |-
         <p>Indices of the atoms that are chosen for projection of the phonon eigenvectors, giving a weighted phonon band structure file.
-    topics: anaddbEPC_useful
+    topics: PhononBands_useful
     varset: anaddb
     vartype: integer
 - !variable
@@ -14957,7 +14958,7 @@
     requires: null
     text: |-
         <p>As kptrlatt above, but for a finer grid of k-points. Under development. Does not work yet, as of June 2010.
-    topics: anaddbEPC_expert
+    topics: ElPhonTransport_expert
     varset: anaddb
     vartype: integer
 - !variable
@@ -23498,7 +23499,7 @@
         with [[nshiftk]]=1. Furthermore if [[kptrlatt]]
         is used to generate the k-grid, all the off-diagonal elements of this
         array must be zero.</p>
-    topics: anaddbEPC_useful
+    topics: ElPhonTransport_useful
     varset: anaddb
     vartype: integer
 - !variable
@@ -23830,7 +23831,7 @@
           <li>1 =&gt; write only the nesting function along the q-path in the X-Y format;</li>
           <li>2 =&gt; write out the nesting function both in the X-Y and in the XSF format.</li>
         </ul>
-    topics: anaddbEPC_useful
+    topics: PhononWidth_useful
     varset: anaddb
     vartype: integer
 - !variable
@@ -23924,7 +23925,7 @@
         phonon frequencies computed of the q-mesh determined by [[ph_ngqpt]]. The file can be use to visualize isosurfaces with Xcrysden or other similar tools supporting the bxsf format.
         Note that the (dense) q-mesh must be Gamma-centered, shifted meshs are not supported by Xcrysden.
         This variable requires [[optdriver]]==7.
-    topics: printing_prngs, ElPhonInt_useful
+    topics: printing_prngs, ElPhonInt_expert
     varset: eph
     vartype: integer
 - !variable
@@ -24991,14 +24992,14 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    mnemonics: Q wavevectors defining a PATH
+    mnemonics: Q GRID TYPE
     requires: null
     text: |-
         <p>If <b>qgrid_type</b> is set to 1, the electron-phonon part of anaddb will use
         the [[anaddb:ep_nqpt]] and [[anaddb:ep_qptlist]] variables to determine
         which q-points to calculate the electron-phonon coupling for. This is an alternative
         to a regular grid as in the rest of anaddb (using [[anaddb:ngqpt]]).
-    topics: anaddbEPC_expert
+    topics: PhononWidth_expert
     varset: anaddb
     vartype: integer
 - !variable
@@ -28012,7 +28013,7 @@
         <p>If <b>symgkq</b> is equal to 1, the electron-phonon matrix elements are symmetrized
         over the small group of the q-point they correspond to. This should always be used,
         except for debugging or test purposes.
-    topics: anaddbEPC_expert
+    topics: ElPhonInt_expert
     varset: anaddb
     vartype: integer
 - !variable
@@ -29414,7 +29415,7 @@
     requires: null
     text: |-
         <p>When set, [[anaddb:kptrlatt_fine]] is suggested to be given. For the present version, both eigenvalues (densergridGKK, obtained from mrggkk with only the GS WFK file) and electronic velocities(GKK files from DDK calculation) are needed. Note that the coarse k-grid must be a subset of the fine k-grid.
-    topics: anaddbEPC_expert
+    topics: PhononWidth_expert
     varset: anaddb
     vartype: integer
 - !variable
