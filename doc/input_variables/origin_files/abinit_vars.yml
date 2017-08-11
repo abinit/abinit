@@ -990,7 +990,7 @@
         routine for non-hermitian matrices. So, at the present status of
         understanding, one should always use the <b>asr</b>=2 option ).
         <br>
-    topics: anaddbCommon_basic
+    topics: Phonons_basic, PhononBands_basic
     varset: anaddb
     vartype: integer
 - !variable
@@ -1009,7 +1009,7 @@
         with which the DOS is calculated can be stopped, i.e.
         the mean of the relative change going from one grid
         to the next bigger is smaller than <b>wtol2</b>.
-    topics: anaddbCommon_expert
+    topics: Temperature_expert
     varset: anaddb
     vartype: real
 - !variable
@@ -1712,7 +1712,7 @@
         in order for the code to work properly.
         <p> Warning: the generation of q-points in anaddb is rather
         old-fashioned, and should be replaced by routines used by the main abinit code.
-    topics: anaddbCommon_basic
+    topics: PhononBands_useful
     varset: anaddb
     vartype: integer
 - !variable
@@ -3119,7 +3119,7 @@
     text: |-
         Set the treatment of the Charge Neutrality requirement for the effective charges.
         Same meaning as the corresponding anaddb variable.
-    topics: DFPT_useful
+    topics: Phonons_useful
     varset: eph
     vartype: integer
 - !variable
@@ -3152,7 +3152,7 @@
         in the DDB, and this sum rule is sometimes strongly violated.
         In particular, this will make the lowest frequencies at Gamma
         non-zero. There is no "best" way of imposing the ASR on effective charges.
-    topics: anaddbCommon_useful
+    topics: Phonons_useful
     varset: anaddb
     vartype: integer
 - !variable
@@ -5450,7 +5450,7 @@
     text: |-
         <p>The input variable <b>dosdeltae</b> is used to define the step of the frequency grid used to
         calculate the phonon density of states when [[anaddb:prtdos]]=1.
-    topics: anaddbCommon_useful
+    topics: PhononBands_useful
     varset: anaddb
     vartype: real
 - !variable
@@ -5467,7 +5467,7 @@
     text: |-
         <p><b>dossmear</b> defines the gaussian broadening used to calculate the phonon density
         of states when [[anaddb:prtdos]]=1.
-    topics: anaddbCommon_useful
+    topics: PhononBands_useful
     varset: anaddb
     vartype: real
 - !variable
@@ -5484,7 +5484,7 @@
         <p>Set the flag to calculate the two phonon dos density of states. Sum and Difference for
         the Gamma point. The DOS is converged and based on that, the sum and different is
         reported in the output file <b>dossum</b>.
-    topics: anaddbCommon_basic
+    topics: PhononBands_basic
     varset: anaddb
     vartype: integer
 - !variable
@@ -5503,7 +5503,7 @@
         with which the DOS is calculated can be stopped, i.e.
         the mean of the relative change going from one grid
         to the next bigger is smaller than <b>dostol</b>.
-    topics: anaddbCommon_useful
+    topics: PhononBands_useful
     varset: anaddb
     vartype: real
 - !variable
@@ -6199,7 +6199,7 @@
         <li> 1 or 2 => write the phonon eigenvectors;</li>
         <li> 4 => generate output files for band2eps (drawing tool for the phonon band structure);</li>
         </ul>
-    topics: anaddbCommon_useful
+    topics: Phonons_useful, PhononBands_useful
     varset: anaddb
     vartype: integer
 - !variable
@@ -6408,7 +6408,7 @@
          <li> 1 => meV and Thz;</li>
          <li> 2 => Hartree, cm-1, meV, Thz, and Kelvin.</li>
         </ul>
-    topics: anaddbCommon_useful
+    topics: Phonons_useful, PhononBands_useful
     varset: anaddb
     vartype: integer
 - !variable
@@ -7277,7 +7277,7 @@
         <br>
         <b>WARNING</b>: this will create a <i>lot</i> of files (3*natom*nph1l), so it should be used with a small number
         [[anaddb:nph1l]] of q-points for interpolation.
-    topics: anaddbCommon_expert
+    topics: PhononBands_expert
     varset: anaddb
     vartype: real
 - !variable
@@ -16671,7 +16671,7 @@
     text: |-
         <p>The number of channels of width 1 cm-1 used in calculating the phonon density of states through the histogram method,
         or, equivalently, the largest frequency sampled. The first channel begins at 0.
-    topics: anaddbCommon_expert
+    topics: PhononBands_expert
     varset: anaddb
     vartype: integer
 - !variable
@@ -16841,7 +16841,7 @@
     text: |-
         <p>This variable defines the number of divisions used to sample the smallest segment of the q-path used
         for the phonon band structure. If ndivsm is specified in the input file, the code will automatically generate the points along the path using the coordinates given in the array [[anaddb:qpath]].
-    topics: anaddbCommon_basic
+    topics: PhononBands_basic, PhononWidth_useful
     varset: anaddb
     vartype: integer
 - !variable
@@ -17210,7 +17210,7 @@
         series of fine grids. Used for the integration
         of thermodynamical functions (Bose-Einstein distribution)
         or for the DOS.
-    topics: anaddbCommon_useful
+    topics: PhononBands_useful
     varset: anaddb
     vartype: integer
 - !variable
@@ -17435,7 +17435,7 @@
     requires: null
     text: |-
         <p>The Monkhorst-Pack grid linear dimensions, for the DDB (coarse grid).
-    topics: anaddbCommon_basic
+    topics: Phonons_basic, PhononBands_basic
     varset: anaddb
     vartype: integer
 - !variable
@@ -17477,7 +17477,7 @@
         The intermediate grids are defined
         for igrid=1... <b>ngrids</b>,
         by the numbers ngqpt_igrid(ii)=(ng2qpt(ii)*igrid)/<b>ngrids</b>
-    topics: anaddbCommon_expert
+    topics: PhononBands_expert
     varset: anaddb
     vartype: integer
 - !variable
@@ -18268,7 +18268,7 @@
         [[anaddb:ifcflag]]=1 -),
         will be diagonalized, and the corresponding eigenfrequencies
         will be printed.
-    topics: anaddbCommon_basic
+    topics: PhononBands_basic
     varset: anaddb
     vartype: integer
 - !variable
@@ -18306,7 +18306,7 @@
            Note that if the three first numbers are zero, then
            the code will do a calculation at Gamma without
            non-analyticities.
-    topics: anaddbCommon_basic
+    topics: PhononBands_basic
     varset: anaddb
     vartype: integer
 - !variable
@@ -18770,7 +18770,7 @@
         Usually, put it to 1.
         Use 2 if BCC sampling (Warning: not BCC lattice, BCC *sampling*),
         and 4 for FCC sampling (Warning: not FCC lattice, FCC *sampling*).
-    topics: anaddbCommon_useful
+    topics: PhononBands_useful
     varset: anaddb
     vartype: integer
 - !variable
@@ -19488,7 +19488,7 @@
         with decreasing widths (by step of 1 cm-1), from
         this channel width to 1, eventually. It considers to
         have converged when the convergence criterion based on [[anaddb:dostol]] and [[anaddb:thmtol]] have been fulfilled.
-    topics: anaddbCommon_expert
+    topics: PhononBands_useful
     varset: anaddb
     vartype: integer
 - !variable
@@ -20477,7 +20477,7 @@
     text: |-
         <p> If set to 1, the phonon frequencies on the ngqpt grid are output in a format legible by the BoltzTrap code,
         which does band interpolation and gets group velocities. The output file will be appended _BTRAP
-    topics: anaddbCommon_expert
+    topics: PhononBands_expert
     varset: anaddb
     vartype: integer
 - !variable
@@ -20494,7 +20494,7 @@
         <p>If set to 1, the phonon frequency and eigenvector files needed for a Self Consistent
         phonon run (as in Souvatzis PRL <b>100</b> 095901) will be output to files appended _PHFRQ and _PHVEC.
         The third file needed is appended _PCINFO for Primitive Cell INFOrmation.
-    topics: anaddbCommon_expert
+    topics: PhononBands_expert
     varset: anaddb
     vartype: integer
 - !variable
@@ -22882,7 +22882,7 @@
           <li>0 =&gt; do not write the BoltzTraP input files;</li>
           <li>1 =&gt; write out the input files for BoLTZTRaP code.</li>
         </ul>
-    topics: anaddbCommon_expert
+    topics: PhononBands_expert
     varset: anaddb
     vartype: integer
 - !variable
@@ -22923,7 +22923,7 @@
           <li>0 =&gt; no output of DDB (default);</li>
           <li>1 =&gt; Interpolate the DDB and write out the DDB and DDB.nc files. </li>
         </ul>
-    topics: anaddbCommon_useful
+    topics: PhononBands_useful
     varset: anaddb
     vartype: integer
 - !variable
@@ -23263,7 +23263,7 @@
 
         The step of the frequency grid employed to calculate the DOS
         can be defined through the input variable [[anaddb:dosdeltae]].
-    topics: anaddbCommon_basic
+    topics: PhononBands_basic
     varset: anaddb
     vartype: integer
 - !variable
@@ -23888,7 +23888,7 @@
         The code produces a `PHBANDS.dat` file with the eigenvalues and a `PHBANDS.gnuplot` script.
         Use `gnuplot file_PHBANDS.gnuplot` to visualize the phonon band structure.</li>
         </ul>
-    topics: anaddbCommon_useful
+    topics: PhononBands_useful
     varset: anaddb
     vartype: integer
 - !variable
@@ -24045,7 +24045,7 @@
         </ul>
         <p> For details see <I>Europhys. Lett., 33 (9), pp. 713-718 (1996)</I>.
         See also [[anaddb:ifcflag]], [[anaddb:ifcflag]] and [[anaddb:dipdip]].
-    topics: anaddbCommon_useful
+    topics: PhononBands_useful
     varset: anaddb
     vartype: integer
 - !variable
@@ -24348,7 +24348,7 @@
     requires: null
     text: |-
         <p>Control the volume of printed output.
-    topics: anaddbCommon_useful
+    topics: Phonons_useful, PhononBands_useful, Temperature_useful, PhononWidth_useful, ElPhonTransport_useful
     varset: anaddb
     vartype: integer
 - !variable
@@ -24962,7 +24962,7 @@
            For a FCC lattice, it is possible to sample only the Gamma point
            by using a 1x1x1 BCC sampling (nqshft=2).
         <p>
-    topics: anaddbCommon_useful
+    topics: Phonons_useful, PhononBands_useful
     varset: anaddb
     vartype: real
 - !variable
@@ -24981,7 +24981,7 @@
         but for the series of fine grids.
         <p>Note that [[anaddb:nqshft]]
         for this series of grids corresponds to 1.
-    topics: anaddbCommon_useful
+    topics: PhononBands_useful
     varset: anaddb
     vartype: real
 - !variable
@@ -25084,7 +25084,7 @@
         for each wavevector, the three first numbers are stored
         in the array qph1l(3,nph1l), while the fourth is stored
         in the array qnrml1(nph1l).
-    topics: anaddbCommon_basic
+    topics: PhononBands_basic
     varset: anaddb
     vartype: real
 - !variable
@@ -25122,7 +25122,7 @@
         for each wavevector, the three first numbers are stored
         in the array qph2l(3,nph2l), while the fourth is stored
         in the array qnrml2(nph2l).
-    topics: anaddbCommon_basic
+    topics: PhononBands_basic
     varset: anaddb
     vartype: real
 - !variable
@@ -25435,7 +25435,7 @@
         grid and any additional information found in the DDB file is imposed, before proceeding
         to normal band structure and other interpolations. Should implement Gaal-Nagy's algorithm in
         PRB <b>73</b> 014117.
-    topics: anaddbCommon_expert
+    topics: PhononBands_expert
     varset: anaddb
     vartype: integer
 - !variable
@@ -26369,7 +26369,7 @@
         For more detailed explanations, see [[help_abinit]]
         If the information in the DDB is available, always use
         the option 2. If not, you can try option 1, which is less accurate.
-    topics: anaddbCommon_expert
+    topics: Phonons_expert
     varset: anaddb
     vartype: integer
 - !variable
@@ -26889,7 +26889,7 @@
         Note: this is for analysis the effect of anisotropy
         in the effective charge. The result with non-zero <b>selectz</b>
         are unphysical.</p>
-    topics: anaddbCommon_expert
+    topics: Phonons_expert
     varset: anaddb
     vartype: integer
 - !variable
@@ -27996,7 +27996,7 @@
         procedure based on interatomic force constant is used: there are some
         slight symmetry breaking effects. The latter can be bypassed by this
         additional symmetrization.
-    topics: anaddbCommon_useful
+    topics: Phonons_useful, PhononBands_useful
     varset: anaddb
     vartype: integer
 - !variable

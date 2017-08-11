@@ -200,10 +200,6 @@ sec6:
    <li>[[topic:TDepES|Temperature dependence of the electronic structure from electron-phonon interaction]]</li>
    <li>[[topic:ConstrainedPol|Constrained polarization geometry optimization]] (advanced topic)</li>
   </ol>
-  TO BE SUPPRESSED :
-  <ul>
-   <li>[[topic:anaddbCommon]]
-  </ul>
 
 ## Each section must have a title, that will form the table of content.
 ## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
