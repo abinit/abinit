@@ -64,7 +64,7 @@
 - !components
     name : features
     keyword : ABINIT features
-    authors : FJ
+    authors : FJ,XG
     title : |
       <h1> ABINIT settings and features.</h1>
     subtitle : |

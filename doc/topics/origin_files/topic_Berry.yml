@@ -1,10 +1,10 @@
 - !components 
     name      : Berry 
-    keyword   : Finite electric field 
+    keyword   : Berry phase
     authors   : JZ
-    howto     : take into account a finite electric field in a calculation
+    howto     : compute the polarisation and take into account a finite homogeneous electric field
     header    : default
-    title     : <h1>Finite electric field</h1>
+    title     : <h1>Berry phase computation of electric polarisation and finite electric field</h1>
     subtitle  : default
     copyright : default
     links     : default

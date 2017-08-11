@@ -44,8 +44,12 @@ sec2:
  tag: atoms
  body: |
   The topic [[topic:GSintroduction|Building an input file]] briefly explains the content of an ABINIT input file.
-  The following topics go more into the details, however restricting to static DFT calclations. Going beyond these is left 
-  for other sections ([[help:features#3|Sec. 3]] and beyond)
+  The following topics go more into the details, however restricting to <b>static DFT calculations</b>, without
+  doing anything fancy with the exchange-correlation functionals. Going beyond these is left 
+  for other sections ([[help:features#3|Sec. 3]] and beyond). In particular, for any accurate electronic properties, e.g.
+  correct band structure, optical response, or for strongly correlated electrons, please go beyond the present sec. 2.
+  Also, topics related to global control parameters, that apply, generally speaking, to all types of calculations
+  are explained later.
 
 ## Each section must have a title, that will form the table of content.
 ## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
@@ -117,11 +121,10 @@ sec2:
   tag: added
   body: |
    <ol>
-   <li>[[topic:Berry|Finite electric field]]</li>
+   <li>[[topic:Berry|Electric polarization and finite electric field]]</li>
    <li>[[topic:MagField|External magnetic field]]</li>
    <li>[[topic:MagMom|Constrained atomic magnetic moment]]</li>
    <li>[[topic:EFG|Electric field gradients]]</li>
-   <li>[[topic:RandStopPow|Random electronic stopping power]]</li>
    <li>[[topic:Artificial|Artificial modifications of the system]]</li>
    </ol>
 
@@ -162,9 +165,9 @@ sec5:
  title: "Correlated electrons"
  tag: correlated
  body: |
+  When correlated electrons are to be considered, it is necessary to go beyond the standard DFT framework. 
+  ABINIT enables the following possibilities:
   <ol>
-   <p> When correlated electrons are to be considered, it is necessary to go beyond the standard DFT framework. 
-   ABINIT enables the following possibilities:
    <li>[[topic:Hybrids|Hybrid functionals]]</li>
    <li>[[topic:DFT+U|DFT+U approximation]]</li>
    <li>[[topic:DMFT|Dynamical Mean Field Theory (DMFT)]]</li>
@@ -175,30 +178,42 @@ sec5:
 ## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
 ## Note the small (one space) indentation for the title and body keys.
 sec6: 
- title: "Response properties (phonon, dielectric, Raman, effective mass ...)"
+ title: "Static  or low-frequency response properties (phonon, dielectric, Raman, effective mass ...)"
  tag: dfpt
  body: |
+  Many properties can be obtained in the approximation that the electrons stay in their ground state. The poweful
+  Density-Functional Perturbation Theory framework allows ABINIT to address all such properties that are
+  connected to derivatives of the total energy with respect to some perturbation. This includes all dynamical
+  effects due to phonons and their coupling, thus also temperature-dependent properties due to phonons.
   <ol>
    <li>[[topic:DFPT|DFPT: phonon modes, elastic tensors, effective charges, dielectric tensors,...]]</li>
    <li>[[topic:nonlinear|Raman intensities and electro-optic properties]]</li>
    <li>[[topic:ElPhon|Electron-phonon calculations]]</li>
    <li>[[topic:TDep|Temperature dependence of the eigenenergies]]</li>
-   <li>[[topic:EffMass|Effective mass calculations]]</li>
   </ol>
 
 ## Each section must have a title, that will form the table of content.
 ## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
 ## Note the small (one space) indentation for the title and body keys.
 sec7:
- title: "Excited state calculations"
+ title: "Excited state calculations and frequency-dependent electronic and optical properties"
  tag: excited
  body: |
+  Excited-state calculations and frequency-dependent properties (for frequencies that are non-negligible with respect to the
+  electronic gap), can be addressed by a variety of methodologies, usually trading accuracy for speed. At the lowest level,
+  one encounters the independent-particle approximation, building upon some previously obtained band structure (e.g. Kohn-Sham
+  band structure from DFT). For charged excitations, allowing to obtain a quasiparticle band structure without the 
+  well-known DFT band gap problem, one has to resort to (costly) GW calculations. For neutral excitations (i.e. optical),
+  the (costly) Bethe-Salpeter approach is the most accurate formalism presently available. TDDFT and &Delta;-SCF calculations
+  are cheaper but will work well for molecules and for isolated defects in a solid, not for e.g. correcting the band gap.
   <ol>
-   <li>[[topic:GW|GW calculations]]</li>
-   <li>[[topic:BSE|Bethe-Salpeter calculations]]</li>
+   <li>[[topic:Optic|Linear and non-linear optical properties in the independent-particle approximation]]</li>
+   <li>[[topic:GW|GW calculations for accurate band structure]]</li>
+   <li>[[topic:BSE|Bethe-Salpeter calculations for accurate optical properties]]</li>
    <li>[[topic:TDDFT|TDDFT calculations]]</li>
    <li>[[topic:DeltaSCF|DeltaSCF calculations]]</li>
    <li>[[topic:GWls|GW- Lanczos-Sternheimer method]]</li>
+   <li>[[topic:RandStopPow|Random electronic stopping power]]</li>
   </ol>
 
 ## Each section must have a title, that will form the table of content.
@@ -208,13 +223,14 @@ sec8:
  title: "Electronic properties and analysis tools (DOS, STM, Wannier, band plotting and interpolating...)"
  tag: other_physics
  body: |
-  <p>Many properties are directly deduced from the knowledge of the electronic wavefunctions, eigenenergies, density, potential, etc.
+  Many properties are directly deduced from the knowledge of the electronic wavefunctions, eigenenergies, density, potential, etc.
   Some necessitates additional tuning parameters or are linked to postprocessing tools and are described in the following topics. 
   Some others are actually activated through a single printing parameter, such as the Electron Localization Function (ELF - see [[prtelf]]). 
   See the list of "printing" input variables in [[topic_printing]].
   <ol>
    <li>[[topic:ElecBandStructure|Electronic band structure and related topics]]</li>
    <li>[[topic:ElecDOS|Electronic DOS and related topics]]</li>
+   <li>[[topic:EffMass|Effective mass calculations]]</li>
    <li>[[topic:Unfolding|Unfolding supercell band structures]]</li>
    <li>[[topic:STM|Scanning Tunneling Microscopy map]]</li>
    <li>[[topic:Wannier|Wannier functions]]</li>

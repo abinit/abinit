@@ -19,7 +19,7 @@ grouped in different topics, for the beginner as well as more experienced user.
 It might answer the question "How to ... with ABINIT ?", to some extent.
 <br>It also gives a synthetic view on the needed settings.
 <hr>
-<h5>Copyright (C) 1998-2017 ABINIT group (FJ)
+<h5>Copyright (C) 1998-2017 ABINIT group (FJ,XG)
 <script type="text/javascript" src="../../js_files/copyright.js"> </script>
 </h5> 
 
@@ -42,8 +42,8 @@ It might answer the question "How to ... with ABINIT ?", to some extent.
   <li>3. <a href="#control">Global control parameters : flow, parallelism, output files, output content, timing and memory control, ...</a></li>
   <li>4. <a href="#moldyn">Molecular dynamics, geometry optimization, transition paths</a></li>
   <li>5. <a href="#correlated">Correlated electrons</a></li>
-  <li>6. <a href="#dfpt">Response properties (phonon, dielectric, Raman, effective mass ...)</a></li>
-  <li>7. <a href="#excited">Excited state calculations</a></li>
+  <li>6. <a href="#dfpt">Static  or low-frequency response properties (phonon, dielectric, Raman, effective mass ...)</a></li>
+  <li>7. <a href="#excited">Excited state calculations and frequency-dependent electronic and optical properties</a></li>
   <li>8. <a href="#other_physics">Electronic properties and analysis tools (DOS, STM, Wannier, band plotting and interpolating...)</a></li>
   <li>9. <a href="#other_physics">Other properties and analysis tools (positron)</a></li>
   <li>10. <a href="#miscellaneous">Miscellaneous topics</a></li>
@@ -76,8 +76,12 @@ Discussions on the <a href="https://forum.abinit.org">ABINIT forum</a> might als
 <a name="2"> </a>
 <h3><b>2. ABINIT specifications for static DFT calculations</b></h3>
  <p>The topic <a href="../../topics/generated_files/topic_GSintroduction.html#">Building an input file</a> briefly explains the content of an ABINIT input file.
-The following topics go more into the details, however restricting to static DFT calclations. Going beyond these is left 
-for other sections (<a href="../../users/generated_files/help_features.html#3">Sec. 3</a> and beyond)
+The following topics go more into the details, however restricting to <b>static DFT calculations</b>, without
+doing anything fancy with the exchange-correlation functionals. Going beyond these is left 
+for other sections (<a href="../../users/generated_files/help_features.html#3">Sec. 3</a> and beyond). In particular, for any accurate electronic properties, e.g.
+correct band structure, optical response, or for strongly correlated electrons, please go beyond the present sec. 2.
+Also, topics related to global control parameters, that apply, generally speaking, to all types of calculations
+are explained later.
 <br><a name="atoms"> </a>
 <a name="2.1"> </a>
 <h4><b>2.1. Settings for atoms : cell, atoms, atomic positions, and symmetries</b></h4>
@@ -124,11 +128,10 @@ for other sections (<a href="../../users/generated_files/help_features.html#3">S
 <a name="2.5"> </a>
 <h4><b>2.5. Added electric/magnetic field, other artificial constraints/modifications, and related properties ...</b></h4>
  <p><ol>
-<li><a href="../../topics/generated_files/topic_Berry.html#">Finite electric field</a></li>
+<li><a href="../../topics/generated_files/topic_Berry.html#">Electric polarization and finite electric field</a></li>
 <li><a href="../../topics/generated_files/topic_MagField.html#">External magnetic field</a></li>
 <li><a href="../../topics/generated_files/topic_MagMom.html#">Constrained atomic magnetic moment</a></li>
 <li><a href="../../topics/generated_files/topic_EFG.html#">Electric field gradients</a></li>
-<li><a href="../../topics/generated_files/topic_RandStopPow.html#">Random electronic stopping power</a></li>
 <li><a href="../../topics/generated_files/topic_Artificial.html#">Artificial modifications of the system</a></li>
 </ol>
 <br><br><a href=#top>Go to the top</a>
@@ -160,9 +163,9 @@ for other sections (<a href="../../users/generated_files/help_features.html#3">S
 <br><a name="correlated"> </a>
 <a name="5"> </a>
 <h3><b>5. Correlated electrons</b></h3>
- <p><ol>
- <p> When correlated electrons are to be considered, it is necessary to go beyond the standard DFT framework. 
- ABINIT enables the following possibilities:
+ <p>When correlated electrons are to be considered, it is necessary to go beyond the standard DFT framework. 
+ABINIT enables the following possibilities:
+<ol>
  <li><a href="../../topics/generated_files/topic_Hybrids.html#">Hybrid functionals</a></li>
  <li><a href="../../topics/generated_files/topic_DFT+U.html#">DFT+U approximation</a></li>
  <li><a href="../../topics/generated_files/topic_DMFT.html#">Dynamical Mean Field Theory (DMFT)</a></li>
@@ -172,38 +175,51 @@ for other sections (<a href="../../users/generated_files/help_features.html#3">S
 <hr>
 <br><a name="dfpt"> </a>
 <a name="6"> </a>
-<h3><b>6. Response properties (phonon, dielectric, Raman, effective mass ...)</b></h3>
- <p><ol>
+<h3><b>6. Static  or low-frequency response properties (phonon, dielectric, Raman, effective mass ...)</b></h3>
+ <p>Many properties can be obtained in the approximation that the electrons stay in their ground state. The poweful
+Density-Functional Perturbation Theory framework allows ABINIT to address all such properties that are
+connected to derivatives of the total energy with respect to some perturbation. This includes all dynamical
+effects due to phonons and their coupling, thus also temperature-dependent properties due to phonons.
+<ol>
  <li><a href="../../topics/generated_files/topic_DFPT.html#">DFPT: phonon modes, elastic tensors, effective charges, dielectric tensors,...</a></li>
  <li><a href="../../topics/generated_files/topic_nonlinear.html#">Raman intensities and electro-optic properties</a></li>
  <li><a href="../../topics/generated_files/topic_ElPhon.html#">Electron-phonon calculations</a></li>
  <li><a href="../../topics/generated_files/topic_TDep.html#">Temperature dependence of the eigenenergies</a></li>
- <li><a href="../../topics/generated_files/topic_EffMass.html#">Effective mass calculations</a></li>
 </ol>
 <br><br><a href=#top>Go to the top</a>
 <hr>
 <br><a name="excited"> </a>
 <a name="7"> </a>
-<h3><b>7. Excited state calculations</b></h3>
- <p><ol>
- <li><a href="../../topics/generated_files/topic_GW.html#">GW calculations</a></li>
- <li><a href="../../topics/generated_files/topic_BSE.html#">Bethe-Salpeter calculations</a></li>
+<h3><b>7. Excited state calculations and frequency-dependent electronic and optical properties</b></h3>
+ <p>Excited-state calculations and frequency-dependent properties (for frequencies that are non-negligible with respect to the
+electronic gap), can be addressed by a variety of methodologies, usually trading accuracy for speed. At the lowest level,
+one encounters the independent-particle approximation, building upon some previously obtained band structure (e.g. Kohn-Sham
+band structure from DFT). For charged excitations, allowing to obtain a quasiparticle band structure without the 
+well-known DFT band gap problem, one has to resort to (costly) GW calculations. For neutral excitations (i.e. optical),
+the (costly) Bethe-Salpeter approach is the most accurate formalism presently available. TDDFT and &Delta;-SCF calculations
+are cheaper but will work well for molecules and for isolated defects in a solid, not for e.g. correcting the band gap.
+<ol>
+ <li><a href="../../topics/generated_files/topic_Optic.html#">Linear and non-linear optical properties in the independent-particle approximation</a></li>
+ <li><a href="../../topics/generated_files/topic_GW.html#">GW calculations for accurate band structure</a></li>
+ <li><a href="../../topics/generated_files/topic_BSE.html#">Bethe-Salpeter calculations for accurate optical properties</a></li>
  <li><a href="../../topics/generated_files/topic_TDDFT.html#">TDDFT calculations</a></li>
  <li><a href="../../topics/generated_files/topic_DeltaSCF.html#">DeltaSCF calculations</a></li>
  <li><a href="../../topics/generated_files/topic_GWls.html#">GW- Lanczos-Sternheimer method</a></li>
+ <li><a href="../../topics/generated_files/topic_RandStopPow.html#">Random electronic stopping power</a></li>
 </ol>
 <br><br><a href=#top>Go to the top</a>
 <hr>
 <br><a name="other_physics"> </a>
 <a name="8"> </a>
 <h3><b>8. Electronic properties and analysis tools (DOS, STM, Wannier, band plotting and interpolating...)</b></h3>
- <p><p>Many properties are directly deduced from the knowledge of the electronic wavefunctions, eigenenergies, density, potential, etc.
+ <p>Many properties are directly deduced from the knowledge of the electronic wavefunctions, eigenenergies, density, potential, etc.
 Some necessitates additional tuning parameters or are linked to postprocessing tools and are described in the following topics. 
 Some others are actually activated through a single printing parameter, such as the Electron Localization Function (ELF - see <a href="../../input_variables/generated_files/varset_files.html#prtelf">prtelf</a>). 
 See the list of "printing" input variables in <a href="../../topics/generated_files/topic_printing.html#">topic_printing</a>.
 <ol>
  <li><a href="../../topics/generated_files/topic_ElecBandStructure.html#">Electronic band structure and related topics</a></li>
  <li><a href="../../topics/generated_files/topic_ElecDOS.html#">Electronic DOS and related topics</a></li>
+ <li><a href="../../topics/generated_files/topic_EffMass.html#">Effective mass calculations</a></li>
  <li><a href="../../topics/generated_files/topic_Unfolding.html#">Unfolding supercell band structures</a></li>
  <li><a href="../../topics/generated_files/topic_STM.html#">Scanning Tunneling Microscopy map</a></li>
  <li><a href="../../topics/generated_files/topic_Wannier.html#">Wannier functions</a></li>
