@@ -54,5 +54,5 @@
 #%%   obtained from a 2x2x2 non-shifted grid (referred to as M1
 #%%   in the above-mentioned paper by Ghosez et al).
 #%%   At q(1/8 1/8 1/8), the lowest frequency is  i 178.8 cm-1 .
-#%% topics = anaddbSpec
+#%% topics = Phonons, PhononBands
 #%%<END TEST_INFO>

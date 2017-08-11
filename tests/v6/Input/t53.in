@@ -51,5 +51,5 @@
 #%%   For the HOMO,               with  0.09747 Ha, ZP correction is  1.970638E-03  (kpt 1, band 1)
 #%%   For the LUMO,               with  0.46242 Ha, ZP correction is -3.291344E-03  (kpt 1, bands 2 to 4)
 #%%   Note that the k point grid is shifted, but not the q point grid.
-#%% topics = anaddbSpec, anaddbCommon
+#%% topics = TDepES
 #%%<END TEST_INFO>

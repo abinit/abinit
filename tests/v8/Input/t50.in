@@ -31,5 +31,5 @@
 #%%   AlAs, zinc-blende structure. Code anaddb
 #%%   Analyse the DDB from test 48, for the generation of
 #%%   the nonlinear coefficients only.
-#%% topics = anaddbSpec
+#%% topics = nonlinear
 #%%<END TEST_INFO>

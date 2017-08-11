@@ -34,6 +34,6 @@
 #%% [extra_info]
 #%% authors = S. Ponc\'e 
 #%% keywords = 
-#%% description = Use anaddb to compute the T-dependent correction.
-#%% topics = TDep, anaddbSpec, anaddbCommon
+#%% description = Use anaddb to compute the T-dependent correction of electronic structure.
+#%% topics = TDepES
 #%%<END TEST_INFO>

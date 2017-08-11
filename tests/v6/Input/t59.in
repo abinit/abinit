@@ -45,5 +45,5 @@
 #%%   For the lowest eigenenergy, with -0.19671 Ha, ZP correction is -1.775401E-03  (bands 1 to 6)
 #%%   For the HOMO,               with  0.09747 Ha, ZP correction is  1.970636E-03  (bands 7 and 8)
 #%%   For the LUMO,               with  0.46242 Ha, ZP correction is -3.291344E-03  (bands 9 to 14)
-#%% topics = anaddbSpec, anaddbCommon
+#%% topics = TDepES
 #%%<END TEST_INFO>

@@ -39,5 +39,5 @@ qph1l   0.00000000E+00  0.00000000E+00  0.00000000E+00   1.0
 #%% description = 
 #%%   H2 molecule in a reasonably large box
 #%%   Analysis of the test 68 results, using anaddb.
-#%% topics = anaddbSpec, anaddbCommon
+#%% topics = TDepES
 #%%<END TEST_INFO>

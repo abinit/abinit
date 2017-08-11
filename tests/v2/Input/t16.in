@@ -95,5 +95,5 @@
 #%%   also missing), that is only 1.25% of the cohesive energy.
 #%%   The output of the code is now more clear than in 1995, and this
 #%%   kind of error should not appear anymore.
-#%% topics = anaddbSpec
+#%% topics = Phonons, PhononBands, Temperature
 #%%<END TEST_INFO>

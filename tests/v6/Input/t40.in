@@ -40,5 +40,5 @@ qph1l
 #%% authors = Unknown
 #%% keywords = 
 #%% description = Use anaddb to compute the T-dependent correction.
-#%% topics = anaddbSpec, anaddbCommon
+#%% topics = TDepES
 #%%<END TEST_INFO>

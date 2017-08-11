@@ -84,5 +84,5 @@ targetpol 0.0 0.0 0.45
 #%% keywords = 
 #%% description = 
 #%%   Tetragonal PbTiO3. Use ANADDB to impose a polarization with fixed in-plane lattice constant
-#%% topics = anaddbSpec, anaddbCommon
+#%% topics = ConstrainedPol
 #%%<END TEST_INFO>

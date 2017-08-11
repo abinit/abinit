@@ -38,5 +38,5 @@
 #%%   Analyze a simple DDB for quartz, but do not test interatomic
 #%%   force constants (see test 15 for this). Compute phonon frequencies
 #%%   at gamma with and without LO-TO splitting.
-#%% topics = anaddbSpec, anaddbCommon
+#%% topics = Phonons
 #%%<END TEST_INFO>
