@@ -88,7 +88,7 @@ subroutine prtene(dtset,energies,iout,usepaw)
 
 !============= Evaluate some parts of the energy ===========
 
- optdc=-1;ipositron=0
+ optdc=-1;ipositron=merge(0,2,dtset%positron==0)
  if (abs(energies%e_ewald)<1.e-15_dp.and.abs(energies%e_hartree)<1.e-15_dp) ipositron=1
  call energies_eval_eint(energies,dtset,usepaw,optdc,etotal,etotaldc)
 

@@ -500,7 +500,7 @@ end subroutine energies_to_array
 !Local variables-------------------------------
 ! Do not modify the length of this string
 !scalars
- integer :: ipositron
+ logical :: positron
  logical :: wvlbigdft=.false.
 
 ! *************************************************************************
@@ -508,15 +508,13 @@ end subroutine energies_to_array
 !If usewvl: wvlbigdft indicates that the BigDFT workflow will be followed
  wvlbigdft=(dtset%usewvl==1.and.dtset%wvl_bigdft_comp==1)
 
- optdc=-1;ipositron=0
- if (dtset%positron==0) then
+ optdc=-1;positron=(dtset%positron/=0)
+ if (.not.positron) then
    if ((abs(energies%e_xcdc)<1.e-15_dp).and.(abs(energies%e_fockdc)<1.e-15_dp)) optdc=0
    if (abs(energies%e_localpsp)<1.e-15_dp.and.(abs(energies%e_xcdc)>1.e-15_dp.or.abs(energies%e_fockdc)>1.e-15_dp)) optdc=1
    if (abs(energies%e_localpsp)>1.e-15_dp.and.(abs(energies%e_xcdc)>1.e-15_dp.or.abs(energies%e_fockdc)>1.e-15_dp)) optdc=2
    if (wvlbigdft .and. dtset%iscf > 0) optdc=1
  else
-   ipositron=2
-   !if (abs(energies%e_ewald)<1.e-15_dp.and.abs(energies%e_hartree)<1.e-15_dp) ipositron=1
    if (abs(energies%edc_electronpositron)<1.e-15_dp) optdc=0
    if (abs(energies%e_electronpositron)<1.e-15_dp.and.abs(energies%edc_electronpositron)>1.e-15_dp) optdc=1
    if (abs(energies%e_electronpositron)>1.e-15_dp.and.abs(energies%edc_electronpositron)>1.e-15_dp) optdc=2
@@ -535,7 +533,7 @@ end subroutine energies_to_array
    if (dtset%berryopt==4 .or. dtset%berryopt==6 .or. dtset%berryopt==7 .or.  &
 &   dtset%berryopt==14 .or. dtset%berryopt==16 .or. dtset%berryopt==17) eint=eint+energies%e_elecfield    !!HONG
    eint = eint + energies%e_ewald + energies%e_chempot + energies%e_vdw_dftd
-   if (ipositron/=0) eint=eint+energies%e0_electronpositron+energies%e_electronpositron
+   if (positron) eint=eint+energies%e0_electronpositron+energies%e_electronpositron
  end if
  if (optdc>=1) then
    eintdc = energies%e_eigenvalues - energies%e_hartree + energies%e_xc - &
@@ -544,7 +542,7 @@ end subroutine energies_to_array
    if (dtset%berryopt==4 .or. dtset%berryopt==6 .or. dtset%berryopt==7 .or.  &
 &   dtset%berryopt==14 .or. dtset%berryopt==16 .or. dtset%berryopt==17) eintdc = eintdc + energies%e_elecfield
    eintdc = eintdc + energies%e_ewald + energies%e_chempot + energies%e_vdw_dftd
-   if (ipositron/=0) eintdc=eintdc-energies%edc_electronpositron &
+   if (positron) eintdc=eintdc-energies%edc_electronpositron &
 &   +energies%e0_electronpositron+energies%e_electronpositron
  end if
 
