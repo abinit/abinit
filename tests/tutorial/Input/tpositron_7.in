@@ -57,7 +57,7 @@
     ecut 12. pawecutdg 15.
     iscf 17
     nstep 100 tolvrs 1.d-8
-    nline 6  ! This is to help the convergency
+    nline 8 nnsclo 2 nbdbuf 8  ! This is to help the convergency (and portability)
 
 !   Miscelaneous
     prtwf 0 prteig 0           ! To save disk space
@@ -69,7 +69,7 @@
 #%% executable = abinit
 #%% [files]
 #%% files_to_test =
-#%%   tpositron_7.out, tolnlines= 5, tolabs= 2.0e-2, tolrel= 3.0e-2, fld_options= -easy
+#%%   tpositron_7.out, tolnlines= 5, tolabs= 8.0e-1, tolrel= 3.0e-2, fld_options= -easy
 #%% psp_files = Si.12el.LDA-PW-paw.abinit
 #%% [paral_info]
 #%% max_nprocs = 10

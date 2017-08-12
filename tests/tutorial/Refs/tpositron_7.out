@@ -1,5 +1,5 @@
 
-.Version 8.4.1 of ABINIT 
+.Version 8.4.3 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
 
 .Copyright (C) 1998-2017 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see http://www.abinit.org .
 
-.Starting date : Sat 12 Aug 2017.
-- ( at 02h51 )
+.Starting date : Sun 13 Aug 2017.
+- ( at 00h57 )
   
 - input  file    -> tpositron_7.in
 - output file    -> tpositron_7.out
@@ -70,10 +70,12 @@ _ WF disk file :      1.065 Mbytes ; DEN or POT disk file :      0.152 Mbytes.
 P           mkmem           8
             natom           2
             nband          16
+           nbdbuf           8
             ngfft          24      24      24
           ngfftdg          27      27      27
              nkpt           8
-            nline           6
+            nline           8
+           nnsclo           2
             nstep         100
              nsym          48
            ntypat           1
@@ -83,7 +85,6 @@ P           mkmem           8
         optforces           0
         optstress           0
         pawecutdg      1.50000000E+01 Hartree
-       posdoppler        1
          positron         -10
          posnstep        2
            prteig           0
@@ -140,7 +141,7 @@ P           mkmem           8
                        0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
                        0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
                        0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
-           tolvrs      1.00000000E-08
+           tolvrs      1.00000000E-10
             typat      1  1
            useylm           1
               wtk        0.12500    0.12500    0.12500    0.12500    0.12500    0.12500
@@ -216,44 +217,30 @@ _setup2: Arith. and geom. avg. npw (full set) are     535.625     535.544
 
      iter   Etot(hartree)      deltaE(h)  residm     nres2
 TC-DFT STEP   1 - ELECTRONIC GROUND-STATE CALCULATION
- ETOT  1  -202.79748708499    -2.028E+02 1.908E+01 3.005E-01
- ETOT  2  -204.32847828258    -1.531E+00 2.889E-01 9.923E-01
- ETOT  3  -204.33525743437    -6.779E-03 5.870E-02 1.427E+00
- ETOT  4  -204.31630849325     1.895E-02 3.707E-02 6.593E-02
- ETOT  5  -204.31749580545    -1.187E-03 8.967E-03 2.092E-02
- ETOT  6  -204.31743960798     5.620E-05 1.981E-03 4.327E-03
- ETOT  7  -204.31746552386    -2.592E-05 1.297E-03 4.159E-03
- ETOT  8  -204.31743846446     2.706E-05 8.348E-04 1.748E-04
- ETOT  9  -204.31744430269    -5.838E-06 1.228E-04 1.374E-04
- ETOT 10  -204.31744344784     8.548E-07 1.028E-05 1.538E-05
- ETOT 11  -204.31744339323     5.462E-08 6.428E-06 8.723E-06
- ETOT 12  -204.31744331962     7.360E-08 1.993E-06 4.532E-07
- ETOT 13  -204.31744332271    -3.083E-09 2.789E-07 4.922E-08
- ETOT 14  -204.31744332290    -1.961E-10 8.410E-08 3.152E-08
- ETOT 15  -204.31744332353    -6.299E-10 1.857E-08 9.174E-08
- ETOT 16  -204.31744332329     2.414E-10 9.962E-09 7.427E-08
- ETOT 17  -204.31744332284     4.461E-10 2.024E-09 2.667E-08
- ETOT 18  -204.31744332275     9.152E-11 3.751E-09 1.122E-08
- ETOT 19  -204.31744332288    -1.252E-10 9.018E-10 2.289E-08
- ETOT 20  -204.31744332265     2.242E-10 1.250E-09 1.099E-09
+ ETOT  1  -203.13170259382    -2.031E+02 3.396E+00 4.212E-01
+ ETOT  2  -204.32809669163    -1.196E+00 1.916E-04 8.810E-01
+ ETOT  3  -204.33213933427    -4.043E-03 5.079E-08 1.151E+00
+ ETOT  4  -204.31802317267     1.412E-02 8.572E-08 4.684E-02
+ ETOT  5  -204.31744390006     5.793E-04 6.450E-09 1.463E-03
+ ETOT  6  -204.31744415666    -2.566E-07 5.776E-11 8.887E-05
+ ETOT  7  -204.31744338699     7.697E-07 9.556E-12 6.605E-06
+ ETOT  8  -204.31744332270     6.430E-08 1.034E-12 1.210E-08
+ ETOT  9  -204.31744332264     5.659E-11 1.258E-15 2.466E-10
+ ETOT 10  -204.31744332265    -1.100E-11 4.918E-17 2.569E-12
 
- At SCF step   20       nres2   =  1.10E-09 < tolvrs=  1.00E-08 =>converged.
+ At SCF step   10       nres2   =  2.57E-12 < tolvrs=  1.00E-10 =>converged.
 
 TC-DFT STEP   2 - POSITRONIC GROUND-STATE CALCULATION IN PRESENCE OF ELECTRONS AND IONS
- ETOT 21  -204.56482575089    -2.474E-01 1.341E+03 2.113E-02
- ETOT 22  -204.66343712307    -9.861E-02 8.629E+02 7.416E-02
- ETOT 23  -204.67693604357    -1.350E-02 2.383E+03 7.832E-02
- ETOT 24  -204.67742567026    -4.896E-04 3.105E+02 7.450E-02
- ETOT 25  -204.67770510593    -2.794E-04 4.148E+02 2.928E-02
- ETOT 26  -204.68228400988    -4.579E-03 2.772E+02 4.462E-02
- ETOT 27  -204.67759927081     4.685E-03 1.786E+02 2.942E-03
- ETOT 28  -204.67746104052     1.382E-04 1.300E+02 9.458E-04
- ETOT 29  -204.67745930509     1.735E-06 3.651E+02 4.375E-04
- ETOT 30  -204.67745806285     1.242E-06 4.922E+02 1.215E-05
- ETOT 31  -204.67745808516    -2.231E-08 2.172E+01 6.499E-07
- ETOT 32  -204.67745808715    -1.996E-09 1.792E+02 7.879E-09
+ ETOT 11  -204.66249974747    -3.451E-01 9.169E+00 8.810E-02
+ ETOT 12  -204.67744410189    -1.494E-02 1.144E+00 4.664E-02
+ ETOT 13  -204.67758334948    -1.392E-04 2.456E-02 1.875E-04
+ ETOT 14  -204.67746529704     1.181E-04 7.344E-05 7.499E-05
+ ETOT 15  -204.67745792779     7.369E-06 5.202E-06 3.451E-07
+ ETOT 16  -204.67745792783    -4.553E-11 3.398E-08 1.693E-08
+ ETOT 17  -204.67745792783    -5.684E-14 1.779E-11 1.830E-09
+ ETOT 18  -204.67745792783     2.842E-14 2.785E+00 1.226E-12
 
- At SCF step   32       nres2   =  7.88E-09 < tolvrs=  1.00E-08 =>converged.
+ At SCF step   18       nres2   =  1.23E-12 < tolvrs=  1.00E-10 =>converged.
 
  scprqt:  WARNING -
   posnstep=    2 was not enough SCF cycles to converge difference between
@@ -262,14 +249,14 @@ TC-DFT STEP   2 - POSITRONIC GROUND-STATE CALCULATION IN PRESENCE OF ELECTRONS A
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
-    1        1.60149          8.86515835
-    2        1.60149          8.86470924
+    1        1.60149          8.86515891
+    2        1.60149          8.86470982
 
  PAW TEST:
  ==== Compensation charge inside spheres ============
  The following values must be close to each other ...
- Compensation charge over spherical meshes =      0.000117143871046
- Compensation charge over fine fft grid    =      0.000117607438754
+ Compensation charge over spherical meshes =      0.000117548151788
+ Compensation charge over fine fft grid    =      0.000117602920647
 
  ==== Results concerning PAW augmentation regions ====
 
@@ -309,12 +296,12 @@ TC-DFT STEP   2 - POSITRONIC GROUND-STATE CALCULATION IN PRESENCE OF ELECTRONS A
    2.00009   0.00130  -0.00023   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
    0.00130   1.48670  -0.03686   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
   -0.00023  -0.03686   0.00102   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
-   0.00000   0.00000   0.00000   1.99922   0.00000   0.00000  -0.00758   0.00000   0.00000   0.00186   0.00000   0.00000
-   0.00000   0.00000   0.00000   0.00000   1.99922   0.00000   0.00000  -0.00758   0.00000   0.00000   0.00186   0.00000
-   0.00000   0.00000   0.00000   0.00000   0.00000   1.99922   0.00000   0.00000  -0.00758   0.00000   0.00000   0.00186
-   0.00000   0.00000   0.00000  -0.00758   0.00000   0.00000   1.32659   0.00000   0.00000  -0.01245   0.00000   0.00000
-   0.00000   0.00000   0.00000   0.00000  -0.00758   0.00000   0.00000   1.32659   0.00000   0.00000  -0.01245   0.00000
-   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00758   0.00000   0.00000   1.32659   0.00000   0.00000  -0.01245
+   0.00000   0.00000   0.00000   1.99922   0.00000   0.00000  -0.00759   0.00000   0.00000   0.00186   0.00000   0.00000
+   0.00000   0.00000   0.00000   0.00000   1.99922   0.00000   0.00000  -0.00759   0.00000   0.00000   0.00186   0.00000
+   0.00000   0.00000   0.00000   0.00000   0.00000   1.99922   0.00000   0.00000  -0.00759   0.00000   0.00000   0.00186
+   0.00000   0.00000   0.00000  -0.00759   0.00000   0.00000   1.32659   0.00000   0.00000  -0.01245   0.00000   0.00000
+   0.00000   0.00000   0.00000   0.00000  -0.00759   0.00000   0.00000   1.32659   0.00000   0.00000  -0.01245   0.00000
+   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00759   0.00000   0.00000   1.32659   0.00000   0.00000  -0.01245
    0.00000   0.00000   0.00000   0.00186   0.00000   0.00000  -0.01245   0.00000   0.00000   0.00015   0.00000   0.00000
    0.00000   0.00000   0.00000   0.00000   0.00186   0.00000   0.00000  -0.01245   0.00000   0.00000   0.00015   0.00000
    0.00000   0.00000   0.00000   0.00000   0.00000   0.00186   0.00000   0.00000  -0.01245   0.00000   0.00000   0.00015
@@ -322,12 +309,12 @@ TC-DFT STEP   2 - POSITRONIC GROUND-STATE CALCULATION IN PRESENCE OF ELECTRONS A
    2.00009   0.00130  -0.00023   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
    0.00130   1.48670  -0.03686   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
   -0.00023  -0.03686   0.00102   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
-   0.00000   0.00000   0.00000   1.99922   0.00000   0.00000  -0.00758   0.00000   0.00000   0.00186   0.00000   0.00000
-   0.00000   0.00000   0.00000   0.00000   1.99922   0.00000   0.00000  -0.00758   0.00000   0.00000   0.00186   0.00000
-   0.00000   0.00000   0.00000   0.00000   0.00000   1.99922   0.00000   0.00000  -0.00758   0.00000   0.00000   0.00186
-   0.00000   0.00000   0.00000  -0.00758   0.00000   0.00000   1.32659   0.00000   0.00000  -0.01245   0.00000   0.00000
-   0.00000   0.00000   0.00000   0.00000  -0.00758   0.00000   0.00000   1.32659   0.00000   0.00000  -0.01245   0.00000
-   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00758   0.00000   0.00000   1.32659   0.00000   0.00000  -0.01245
+   0.00000   0.00000   0.00000   1.99922   0.00000   0.00000  -0.00759   0.00000   0.00000   0.00186   0.00000   0.00000
+   0.00000   0.00000   0.00000   0.00000   1.99922   0.00000   0.00000  -0.00759   0.00000   0.00000   0.00186   0.00000
+   0.00000   0.00000   0.00000   0.00000   0.00000   1.99922   0.00000   0.00000  -0.00759   0.00000   0.00000   0.00186
+   0.00000   0.00000   0.00000  -0.00759   0.00000   0.00000   1.32659   0.00000   0.00000  -0.01245   0.00000   0.00000
+   0.00000   0.00000   0.00000   0.00000  -0.00759   0.00000   0.00000   1.32659   0.00000   0.00000  -0.01245   0.00000
+   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00759   0.00000   0.00000   1.32659   0.00000   0.00000  -0.01245
    0.00000   0.00000   0.00000   0.00186   0.00000   0.00000  -0.01245   0.00000   0.00000   0.00015   0.00000   0.00000
    0.00000   0.00000   0.00000   0.00000   0.00186   0.00000   0.00000  -0.01245   0.00000   0.00000   0.00015   0.00000
    0.00000   0.00000   0.00000   0.00000   0.00000   0.00186   0.00000   0.00000  -0.01245   0.00000   0.00000   0.00015
@@ -346,23 +333,23 @@ TC-DFT STEP   2 - POSITRONIC GROUND-STATE CALCULATION IN PRESENCE OF ELECTRONS A
  # Enhancement factor of Boronski & Nieminen
    Ref.: Boronski and R.M. Nieminen, Phys. Rev. B 34, 3820 (1986)
 
- Positron lifetime                         (ps)   =  2.79179992E+02
- Positron lifetime with IPM for core elec. (ps)   =  2.79187307E+02
- Annihilation rate                         (ns-1) =  3.58191858E+00
- Annihilation rate with IPM for core elec. (ns-1) =  3.58182472E+00
+ Positron lifetime                         (ps)   =  2.79179762E+02
+ Positron lifetime with IPM for core elec. (ps)   =  2.79187080E+02
+ Annihilation rate                         (ns-1) =  3.58192153E+00
+ Annihilation rate with IPM for core elec. (ns-1) =  3.58182765E+00
 
  Annihilation rate core/valence decomposition:
-   Core    contribution to ann.rate          (ns-1) =  9.06848768E-04
-   Valence contribution to ann.rate          (ns-1) =  3.58101173E+00
-   Core    contribution to ann.rate with IPM (ns-1) =  7.96486225E-04
-   Valence contribution to ann.rate with IPM (ns-1) =  3.58102824E+00
+   Core    contribution to ann.rate          (ns-1) =  9.07191011E-04
+   Valence contribution to ann.rate          (ns-1) =  3.58101434E+00
+   Core    contribution to ann.rate with IPM (ns-1) =  7.96793398E-04
+   Valence contribution to ann.rate with IPM (ns-1) =  3.58103085E+00
 
  Annihilation rate PAW decomposition:
-   Plane-wave contribution to ann.rate          (ns-1) =  3.54314069E+00
-   Plane-wave valence contribution to ann.rate  (ns-1) =  3.54314069E+00
-   On-site core contribution to ann.rate        (ns-1) =  9.06848768E-04
-   On-site valence contribution to ann.rate     (ns-1) =  3.78710454E-02
-   Plane-wave contribution to ann.rate with IPM (ns-1) =  3.54314069E+00
+   Plane-wave contribution to ann.rate          (ns-1) =  3.54313928E+00
+   Plane-wave valence contribution to ann.rate  (ns-1) =  3.54313928E+00
+   On-site core contribution to ann.rate        (ns-1) =  9.07191011E-04
+   On-site valence contribution to ann.rate     (ns-1) =  3.78750598E-02
+   Plane-wave contribution to ann.rate with IPM (ns-1) =  3.54313928E+00
    Plane-wave core contrb. to ann.rate with IPM (ns-1) =  0.00000000E+00
 
 ########## Lifetime computation 2
@@ -372,39 +359,32 @@ TC-DFT STEP   2 - POSITRONIC GROUND-STATE CALCULATION IN PRESENCE OF ELECTRONS A
  # Enhancement factor of Boronski & Nieminen IN THE RPA LIMIT
    Ref.: Boronski and R.M. Nieminen, Phys. Rev. B 34, 3820 (1986)
 
- Positron lifetime                         (ps)   =  2.29666380E+02
- Positron lifetime with IPM for core elec. (ps)   =  2.29671330E+02
- Annihilation rate                         (ns-1) =  4.35414187E+00
- Annihilation rate with IPM for core elec. (ns-1) =  4.35404801E+00
+ Positron lifetime                         (ps)   =  2.29666202E+02
+ Positron lifetime with IPM for core elec. (ps)   =  2.29671155E+02
+ Annihilation rate                         (ns-1) =  4.35414523E+00
+ Annihilation rate with IPM for core elec. (ns-1) =  4.35405135E+00
 
  Annihilation rate core/valence decomposition:
-   Core    contribution to ann.rate          (ns-1) =  9.06848786E-04
-   Valence contribution to ann.rate          (ns-1) =  4.35323502E+00
-   Core    contribution to ann.rate with IPM (ns-1) =  7.96486225E-04
-   Valence contribution to ann.rate with IPM (ns-1) =  4.35325153E+00
+   Core    contribution to ann.rate          (ns-1) =  9.07191030E-04
+   Valence contribution to ann.rate          (ns-1) =  4.35323804E+00
+   Core    contribution to ann.rate with IPM (ns-1) =  7.96793398E-04
+   Valence contribution to ann.rate with IPM (ns-1) =  4.35325455E+00
 
  Annihilation rate PAW decomposition:
-   Plane-wave contribution to ann.rate          (ns-1) =  4.31536343E+00
-   Plane-wave valence contribution to ann.rate  (ns-1) =  4.31536343E+00
-   On-site core contribution to ann.rate        (ns-1) =  9.06848786E-04
-   On-site valence contribution to ann.rate     (ns-1) =  3.78715887E-02
-   Plane-wave contribution to ann.rate with IPM (ns-1) =  4.31536343E+00
+   Plane-wave contribution to ann.rate          (ns-1) =  4.31536244E+00
+   Plane-wave valence contribution to ann.rate  (ns-1) =  4.31536244E+00
+   On-site core contribution to ann.rate        (ns-1) =  9.07191030E-04
+   On-site valence contribution to ann.rate     (ns-1) =  3.78756029E-02
+   Plane-wave contribution to ann.rate with IPM (ns-1) =  4.31536244E+00
    Plane-wave core contrb. to ann.rate with IPM (ns-1) =  0.00000000E+00
 
       (*) IPM=Independent particle Model
-
- Computation of electron-positron pairs momentum distribution completed.
--File tpositron_7o_DOPPLER has been created.
--Use ~abinit/scripts/post_processing/posdopspectra.F90 to process it.
-
- Annihilation rate obtained from integration of e-p pairs momentum distribution:
-   lambda=    5.082832105995E+00 ns-1
 
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   2.4264E+00; max=  1.7921E+02
+ Mean square residual over all n,k,spin=   3.9077E-01; max=  4.6868E+01
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.250000000000      0.250000000000      0.250000000000
@@ -420,7 +400,7 @@ TC-DFT STEP   2 - POSITRONIC GROUND-STATE CALCULATION IN PRESENCE OF ELECTRONS A
  Fermi (or HOMO) energy (hartree) =   0.22765   Average Vxc (hartree)=  -0.31503
  Eigenvalues (hartree) for nkpt=   8  k points:
  kpt#   1, nband= 16, wtk=  0.12500, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-  -4.64961   -4.64930   -3.06306   -3.06306   -3.06306   -3.06253   -3.06253   -3.06253
+  -4.64961   -4.64930   -3.06307   -3.06307   -3.06307   -3.06254   -3.06254   -3.06254
   -0.21550    0.22765    0.22765    0.22765    0.31563    0.31563    0.31563    0.34384
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
@@ -428,20 +408,20 @@ TC-DFT STEP   2 - POSITRONIC GROUND-STATE CALCULATION IN PRESENCE OF ELECTRONS A
 --------------------------------------------------------------------------------
  Components of total free energy (in Hartree) :
 
-    Kinetic energy  =  7.01888255755199E+00
-    Hartree energy  =  5.84386969131781E+01
-    XC energy       = -3.25177441340793E+00
+    Kinetic energy  =  7.01888288261715E+00
+    Hartree energy  =  5.84387041523808E+01
+    XC energy       = -3.25177487448278E+00
     Ewald energy    = -7.55952464681649E+01
     PspCore energy  =  1.70691039262478E+00
-    Loc. psp. energy= -1.71894418477390E+02
-    Spherical terms = -2.07404734587157E+01
-    >>> Electronic E= -2.04317422954324E+02
+    Loc. psp. energy= -1.71894427761971E+02
+    Spherical terms = -2.07404910692404E+01
+    >>> Electronic E= -2.04317442746237E+02
 
-    Positronic ener.= -9.45604274874472E-01
-    EP interaction E=  5.85589510375509E-01
-    >>>>>>>>> Etotal= -2.04677437718823E+02
+    Positronic ener.= -9.45445646538370E-01
+    EP interaction E=  5.85431041355459E-01
+    >>>>>>>>> Etotal= -2.04677457351419E+02
 
-  >Total energy in eV           = -5.56955632524813E+03
+  >Total energy in eV           = -5.56955685947826E+03
 --------------------------------------------------------------------------------
 
 == END DATASET(S) ==============================================================
@@ -451,7 +431,7 @@ TC-DFT STEP   2 - POSITRONIC GROUND-STATE CALCULATION IN PRESENCE OF ELECTRONS A
             acell      1.0261212902E+01  1.0261212902E+01  1.0261212902E+01 Bohr
               amu      2.80855000E+01
              ecut      1.20000000E+01 Hartree
-           etotal     -2.0467745809E+02
+           etotal     -2.0467745793E+02
             fcart      9.9999999999E+99  9.9999999999E+99  9.9999999999E+99
                        9.9999999999E+99  9.9999999999E+99  9.9999999999E+99
 -          fftalg         312
@@ -469,10 +449,12 @@ TC-DFT STEP   2 - POSITRONIC GROUND-STATE CALCULATION IN PRESENCE OF ELECTRONS A
 P           mkmem           8
             natom           2
             nband          16
+           nbdbuf           8
             ngfft          24      24      24
           ngfftdg          27      27      27
              nkpt           8
-            nline           6
+            nline           8
+           nnsclo           2
             nstep         100
              nsym          48
            ntypat           1
@@ -482,7 +464,6 @@ P           mkmem           8
         optforces           0
         optstress           0
         pawecutdg      1.50000000E+01 Hartree
-       posdoppler        1
          positron         -10
          posnstep        2
            prteig           0
@@ -541,7 +522,7 @@ P           mkmem           8
                        0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
                        0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
                        0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
-           tolvrs      1.00000000E-08
+           tolvrs      1.00000000E-10
             typat      1  1
            useylm           1
               wtk        0.12500    0.12500    0.12500    0.12500    0.12500    0.12500
@@ -627,10 +608,10 @@ P           mkmem           8
 - Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
 - the licence allows the authors to put it on the Web).
 -
-- Proc.   0 individual time (sec): cpu=        108.0  wall=        108.1
+- Proc.   0 individual time (sec): cpu=         17.4  wall=         17.5
 
 ================================================================================
 
  Calculation completed.
 .Delivered   1 WARNINGs and   4 COMMENTs to log file.
-+Overall time at end (sec) : cpu=        108.0  wall=        108.1
++Overall time at end (sec) : cpu=         17.4  wall=         17.5
