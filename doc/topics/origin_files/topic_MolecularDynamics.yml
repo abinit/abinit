@@ -15,7 +15,8 @@
          Newton's law, or by adding a friction force to it.
          Nose-Hoover thermostat is available with Verlet algorithm.
          Langevin dynamics is also available.
-         
+         <p> Specified lattice parameters, or angles, or atomic positions,
+         can be kept fixed if needed, see [[topic_GeoConstraints]].
     tutorials  : |-
               <li><a href="../../tutorial/generated_files/lesson_paral_moldyn.html">Parallelism for molecular
               dynamics calculations</a></li>

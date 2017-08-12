@@ -21,7 +21,7 @@
 
 <script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
 
- Mentioned in &nbsp; <a href="../../users/generated_files/help_features.html#4">help_features#4</a> &nbsp;
+ Mentioned in &nbsp; <a href="../../topics/generated_files/topic_GeoConstraints.html">topic_GeoConstraints</a> &nbsp;&nbsp; <a href="../../users/generated_files/help_features.html#4">help_features#4</a> &nbsp;
  <hr>
  <h3><b>Table of content: </b></h3> 
  <ul> <li>1. <a href="topic_MolecularDynamics.html#1">Introduction.</a><li>2. <a href="topic_MolecularDynamics.html#2">Related lesson(s) of the tutorial.</a><li>3. <a href="topic_MolecularDynamics.html#3">Related input variables.</a><li>4. <a href="topic_MolecularDynamics.html#4">Selected input files.</a></ul>
@@ -38,6 +38,8 @@ allow to perform simulations in real
 Newton's law, or by adding a friction force to it.
 Nose-Hoover thermostat is available with Verlet algorithm.
 Langevin dynamics is also available.
+<p> Specified lattice parameters, or angles, or atomic positions,
+can be kept fixed if needed, see <a href="../../topics/generated_files/topic_GeoConstraints.html#">topic_GeoConstraints</a>.
 <br><br><a href=#top>Go to the top</a>
 
 
@@ -68,21 +70,9 @@ dynamics calculations</a></li>
 ... <a href="../../input_variables/generated_files/varset_rlx.html#vel">vel</a>   [VELocity]<br>
 ... <a href="../../input_variables/generated_files/varset_rlx.html#vis">vis</a>   [VIScosity]<br>
 <p>Useful input variables:<p>... <a href="../../input_variables/generated_files/varset_rlx.html#friction">friction</a>   [internal FRICTION coefficient]<br>
-... <a href="../../input_variables/generated_files/varset_rlx.html#iatcon">iatcon</a>   [Indices of AToms in CONstraint equations]<br>
-... <a href="../../input_variables/generated_files/varset_rlx.html#iatfix">iatfix</a>   [Indices of AToms that are FIXed ]<br>
-... <a href="../../input_variables/generated_files/varset_rlx.html#iatfixx">iatfixx</a>   [Indices of AToms that are FIXed along the X direction]<br>
-... <a href="../../input_variables/generated_files/varset_rlx.html#iatfixy">iatfixy</a>   [Indices of AToms that are FIXed along the Y direction]<br>
-... <a href="../../input_variables/generated_files/varset_rlx.html#iatfixz">iatfixz</a>   [Indices of AToms that are FIXed along the Z direction]<br>
-... <a href="../../input_variables/generated_files/varset_rlx.html#natcon">natcon</a>   [Number of AToms in CONstraint equations]<br>
-... <a href="../../input_variables/generated_files/varset_rlx.html#natfix">natfix</a>   [Number of Atoms that are FIXed]<br>
-... <a href="../../input_variables/generated_files/varset_rlx.html#natfixx">natfixx</a>   [Number of Atoms that are FIXed along the X direction]<br>
-... <a href="../../input_variables/generated_files/varset_rlx.html#natfixy">natfixy</a>   [Number of Atoms that are FIXed along the Y direction]<br>
-... <a href="../../input_variables/generated_files/varset_rlx.html#natfixz">natfixz</a>   [Number of Atoms that are FIXed along the Z direction]<br>
-... <a href="../../input_variables/generated_files/varset_rlx.html#nconeq">nconeq</a>   [Number of CONstraint EQuations]<br>
 ... <a href="../../input_variables/generated_files/varset_dev.html#nctime">nctime</a>   [NetCdf TIME between output of molecular dynamics informations]<br>
 ... <a href="../../input_variables/generated_files/varset_rlx.html#noseinert">noseinert</a>   [NOSE thermostat INERTia factor]<br>
 ... <a href="../../input_variables/generated_files/varset_rlx.html#restartxf">restartxf</a>   [RESTART from (X,F) history]<br>
-... <a href="../../input_variables/generated_files/varset_rlx.html#wtatcon">wtatcon</a>   [WeighTs for AToms in CONstraint equations]<br>
 <p>Input variables for experts:<p>... <a href="../../input_variables/generated_files/varset_rlx.html#bmass">bmass</a>   [Barostat MASS]<br>
 ... <a href="../../input_variables/generated_files/varset_rlx.html#delayperm">delayperm</a>   [DELAY between trials to PERMUTE atoms]<br>
 ... <a href="../../input_variables/generated_files/varset_dev.html#densfor_pred">densfor_pred</a>   [DENSity and FORces PREDictor]<br>

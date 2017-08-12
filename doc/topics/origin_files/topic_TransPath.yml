@@ -20,7 +20,7 @@
         <p>The energy path that joins the series of 
         images is then modified at each step to allow the search over the lowest energy path joining the reactants and products. 
         </br>
-        <p>In the Nudge Elastic Band method (NEB), the images are connected through springs, with a spring constant that has to be chosen such that the images are uniformly spaced
+        <p>In the Nudged Elastic Band method (NEB), the images are connected through springs, with a spring constant that has to be chosen such that the images are uniformly spaced
         during the path search. The
         forces on each image come from the potential energy surface of that configuration and a spring force from the two closest configurations. The change in images 
         is calculated by projecting out the true force perpendicular to the path and the 
@@ -32,6 +32,8 @@
         or the tolerance convergence criteria ([[tolimg]]) is reached.
         </br>
         <p>As in the PIMD, each of the images can be treated in parallel and the requested parallelization mode is set with the keyword [[npimage]].
+        <p> Specified lattice parameters, or angles, or atomic positions,
+         can be kept fixed if needed, see [[topic_GeoConstraints]].
     tutorials  : |-
            <li><a href="../../tutorial/generated_files/lesson_paral_images.html">Parallelism based on "images",
            e.g. for the determination of transitions paths (string method)</a>,

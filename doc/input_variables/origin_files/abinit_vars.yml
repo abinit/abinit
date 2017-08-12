@@ -10321,7 +10321,7 @@
          (Note : combined with wtatcon to give internal representation of the
         latter - this should be described)
         </p>
-    topics: PIMD_useful, MolecularDynamics_useful, GeoOpt_useful
+    topics: GeoConstraints_useful
     varset: rlx
     vartype: integer
 - !variable
@@ -10386,7 +10386,7 @@
         atom manipulator. The user must thus foresee the effect
         of this atom manipulator (see [[objarf]]).
         </p>
-    topics: MolecularDynamics_useful, GeoOpt_useful
+    topics: GeoConstraints_basic
     varset: rlx
     vartype: integer
 - !variable
@@ -10429,7 +10429,7 @@
         x, y or z directions, or a combination of these.
         See the variable [[iatfix]] for more information.
         </p>
-    topics: MolecularDynamics_useful, GeoOpt_useful
+    topics: GeoConstraints_basic
     varset: rlx
     vartype: integer
 - !variable
@@ -10455,7 +10455,7 @@
         x, y or z directions, or a combination of these.
         See the variable [[iatfix]] for more information.
         </p>
-    topics: MolecularDynamics_useful, GeoOpt_useful
+    topics: GeoConstraints_basic
     varset: rlx
     vartype: integer
 - !variable
@@ -10481,7 +10481,7 @@
         x, y or z directions, or a combination of these.
         See the variable [[iatfix]] for more information.
         </p>
-    topics: MolecularDynamics_useful, GeoOpt_useful
+    topics: GeoConstraints_basic
     varset: rlx
     vartype: integer
 - !variable
@@ -16075,7 +16075,7 @@
          , [[iatcon]],
         and [[wtatcon]]).
         </p>
-    topics: PIMD_useful, MolecularDynamics_useful, GeoOpt_useful
+    topics: GeoConstraints_useful
     varset: rlx
     vartype: integer
 - !variable
@@ -16104,7 +16104,7 @@
         [[iatfix]]
          .
         </p>
-    topics: MolecularDynamics_useful, GeoOpt_useful
+    topics: GeoConstraints_basic
     varset: rlx
     vartype: integer
 - !variable
@@ -16144,7 +16144,7 @@
          When [[natfixx]] &gt; 0, [[natfixx]] entries should be provided
         in array [[iatfixx]].
         </p>
-    topics: MolecularDynamics_useful, GeoOpt_useful
+    topics: GeoConstraints_basic
     varset: rlx
     vartype: integer
 - !variable
@@ -16167,7 +16167,7 @@
          <br />
          When [[natfixy]] &gt; 0, [[natfixy]] entries should be provided in array [[iatfixy]]
         </p>
-    topics: MolecularDynamics_useful, GeoOpt_useful
+    topics: GeoConstraints_basic
     varset: rlx
     vartype: integer
 - !variable
@@ -16190,7 +16190,7 @@
          <br />
          When [[natfixz]] &gt; 0, [[natfixz]] entries should be provided in array [[iatfixz]].
         </p>
-    topics: MolecularDynamics_useful, GeoOpt_useful
+    topics: GeoConstraints_basic
     varset: rlx
     vartype: integer
 - !variable
@@ -16694,7 +16694,7 @@
          , [[iatcon]],
         and [[wtatcon]]).
         </p>
-    topics: PIMD_useful, MolecularDynamics_useful, GeoOpt_useful
+    topics: GeoConstraints_useful
     varset: rlx
     vartype: integer
 - !variable
@@ -31554,7 +31554,7 @@
          </sub>
          = constant.
         </p>
-    topics: PIMD_useful, MolecularDynamics_useful, GeoOpt_useful
+    topics: GeoConstraints_useful
     varset: rlx
     vartype: real
 - !variable
