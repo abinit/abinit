@@ -73,5 +73,5 @@ qph1l
 #%% authors = Unknown
 #%% keywords = 
 #%% description = anaddb electron-phonon run with transport
-#%% topics = anaddbEPC
+#%% topics = PhononWidth, ElPhonTransport
 #%%<END TEST_INFO>

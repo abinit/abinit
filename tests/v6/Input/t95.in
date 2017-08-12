@@ -89,5 +89,5 @@ iatprj_bs 1 2
 #%% keywords = 
 #%% description = 
 #%%   anaddb test electron phonon coupling transport in inelastic Variational Approximation, on hcp TiNb
-#%% topics = anaddbEPC
+#%% topics = PhononWidth, ElPhonTransport
 #%%<END TEST_INFO>

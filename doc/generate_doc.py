@@ -771,10 +771,10 @@ for str in topics_in_tests:
   list_topics = str_topics.split(',')
   for topic in list_topics:
     topic = topic.strip()
-    if topic not in inputs_for_topic.keys():
-      if topic not in list_of_topics:
+    if topic not in list_of_topics:
         print("\n Error : file %s mentions topic %s, not in list_of_topics.yml"%(str2[0],topic))
         topic_error+=1
+    if topic not in inputs_for_topic.keys():
       inputs_for_topic[topic] = []
     inputs_for_topic[topic].append(str2[0])
 if topic_error!=0:

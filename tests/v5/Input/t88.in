@@ -77,5 +77,5 @@ qph1l
 #%% keywords = 
 #%% description = 
 #%%   anaddb run for Al, from t85 t86 t87. Calculate e-p coupling
-#%% topics = anaddbEPC
+#%% topics = PhononWidth, ElPhonTransport
 #%%<END TEST_INFO>

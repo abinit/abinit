@@ -7597,7 +7597,7 @@
         plan to include, energy, electronic band gap and alchemical potentials. Right now only value of 1 (enthalpy)
         works.
         </p>
-    topics: TransPath_expert
+    topics: GeoOpt_expert
     varset: rlx
     vartype: integer
 - !variable
@@ -7622,7 +7622,7 @@
          <br />
          3. F = (1/n_i) / Sum (1/n_i). Where n_i is the position in the ordered list of enthalpies
         </p>
-    topics: TransPath_expert
+    topics: GeoOpt_expert
     varset: rlx
     vartype: integer
 - !variable
@@ -7641,7 +7641,7 @@
         Right now we have 4 rules. See
         [[ga_rules]]
         </p>
-    topics: TransPath_expert
+    topics: GeoOpt_expert
     varset: rlx
     vartype: integer
 - !variable
@@ -7659,7 +7659,7 @@
          Percentage of the population that according to the fitness function passes
         to the following iteration.
         </p>
-    topics: TransPath_expert
+    topics: GeoOpt_expert
     varset: rlx
     vartype: real
 - !variable
@@ -7693,7 +7693,7 @@
          4) Coordinates mutation of 1/4 of the whole coordinates.
          <br />
         </p>
-    topics: TransPath_expert
+    topics: GeoOpt_expert
     varset: rlx
     vartype: integer
 - !variable

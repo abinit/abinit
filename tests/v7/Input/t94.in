@@ -81,5 +81,5 @@ iatprj_bs 1
 #%% keywords = 
 #%% description = 
 #%%   anaddb test electron phonon coupling electron lifetime calculation, on bcc Li
-#%% topics = ElPhon, anaddbEPC
+#%% topics = PhononWidth, ElPhonTransport
 #%%<END TEST_INFO>

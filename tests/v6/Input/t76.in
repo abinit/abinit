@@ -93,5 +93,5 @@ iatprj_bs 1 2
 #%% description = 
 #%%   anaddb run using standard integration method
 #%%   also tests the *atprj_bs variables, for atomic projections of the phonon band structure
-#%% topics = anaddbEPC
+#%% topics = PhononBands, ElPhonTransport
 #%%<END TEST_INFO>
