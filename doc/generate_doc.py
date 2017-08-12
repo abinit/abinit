@@ -762,7 +762,8 @@ for topic_name in list_of_topics:
   topic_infiles[topic_name] = ""
  
 # Create a dictionary to contain the list of tests for each topic
-inputs_for_topic = dict()
+inputs_for_topic = {} 
+topic_error=0
 for str in topics_in_tests:
   str2 = str.split(':')
   listt=str2[1]
@@ -771,8 +772,14 @@ for str in topics_in_tests:
   for topic in list_topics:
     topic = topic.strip()
     if topic not in inputs_for_topic.keys():
+      if topic not in list_of_topics:
+        print("\n Error : file %s mentions topic %s, not in list_of_topics.yml"%(str2[0],topic))
+        topic_error+=1
       inputs_for_topic[topic] = []
     inputs_for_topic[topic].append(str2[0])
+if topic_error!=0:
+  print("\n")
+  sys.exit()
 
 if debug==1 :
   print(inputs_for_topic)
@@ -792,7 +799,7 @@ for i, topic_name in enumerate(inputs_for_topic):
     for dirname, testnames in dir.items():
       line="<p> tests/"+dirname+"/Input: "
       for testname in testnames:
-        line+="<a href=\"../../tests/"+dirname+"/Input/"+testname+"\">"+testname+"</a> \n"
+        line+='<a href="../../tests/%s/Input/%s">%s</a> \n'%(dirname,testname,testname)
       topic_infiles[topic_name]+= line
     topic_infiles[topic_name] += "<br>\n"
 
