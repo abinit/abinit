@@ -756,9 +756,10 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
                call nonlop(choice_efmas,cpopt,cwaveprj,enlout_efmas,gs_ham,idir,(/eig_k/),mpi_enreg,&
                1,nnlout_efmas,paw_opt_efmas,signs,gs2c,tim_nonlop,cwavef,gh2c)
                do ispinor=1,dtset%nspinor
+                 ii = 1+(ispinor-1)*npw_k
                  do icplx=1,2
-                   gh2c(icplx,1+(ispinor-1)*npw_k:ispinor*npw_k) = gh2c(icplx,1+(ispinor-1)*npw_k:ispinor*npw_k) +  &
-&                   ddkinpw(1:npw_k,mu,nu)*cwavef(icplx,1+(ispinor-1)*npw_k:ispinor*npw_k)
+                   gh2c(icplx,ii:ispinor*npw_k) = gh2c(icplx,ii:ispinor*npw_k) +  &
+&                   ddkinpw(1:npw_k,mu,nu)*cwavef(icplx,ii:ispinor*npw_k)
                  end do
                end do
                gh2c = gh2c - eig_k*gs2c
