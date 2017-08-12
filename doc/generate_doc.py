@@ -111,35 +111,43 @@ abinit_vars=yml_in["abinit_vars"]
 list_externalvars=yml_in["list_externalvars"]
 varsets=yml_in["varsets"]
 list_of_topics=yml_in["list_of_topics"]
-  
-################################################################################
-# Parse the ABINIT input files, in order to find the possible topics to which they are linked -> topics_in_tests
-# Also constitute the list of allowed links to tests files.
 
+################################################################################
+# Parse the ABINIT input files, in order to identify :
+# - the corresponding executable
+# - the topics that are mentioned
+# - the input variables that are exemplified.
+
+infil_dic={}
+path_itemfile="topics/generated_files/item_in_tests.txt" 
 try :
-  rm_cmd = "rm topics/generated_files/topics_in_tests.txt"
+  rm_cmd = "rm "+path_itemfile
   retcode = os.system(rm_cmd)
 except :
   if debug==1 :
     print(rm_cmd+"failed")
     print("the file was likely non existent")
-try :
-  rm_cmd = "rm topics/generated_files/topics_in_tests.yml"
+for item in ["executable","topics"]:
+  for tests_dir in yml_in["tests_dirs"] :
+    grep_cmd = "grep %s tests/%s/Input/*.in | grep '#%%' >> %s"%(item,tests_dir,path_itemfile)
+    retcode = os.system(grep_cmd)
+  with open(path_itemfile, 'r') as f: 
+    item_in_tests=f.readlines()
+  for line in item_in_tests:
+    line_split = line.split(':')
+    infil_name=line_split[0].strip()    
+    line_split2=line_split[1].split('=')
+    item_values=line_split2[1].split(',')
+    if not infil_name in infil_dic.keys():
+      infil_dic[infil_name]={}
+    infil_dic[infil_name][item]=item_values
   retcode = os.system(rm_cmd)
-except :
-  if debug==1 :
-    print(rm_cmd+"failed")
-    print("the file was likely non existent")
+
+################################################################################
+# Constitutes the list of allowed links to tests files.
 
 allowed_links_in_tests=[]
 for tests_dir in yml_in["tests_dirs"] :
-
-  grep_cmd = "grep topics tests/%s/Input/*.in > topics/generated_files/topics_in_tests.txt"%(tests_dir)
-  retcode = os.system(grep_cmd)
-  if retcode == 0 :
-    sed_cmd = "sed -e 's/^/- /' topics/generated_files/topics_in_tests.txt >> topics/generated_files/topics_in_tests.yml"
-    retcode = os.system(sed_cmd)
-
   # Allowed links
   path_dir_input="tests/%s/Input"%(tests_dir)
   list_files=os.listdir(path_dir_input)
@@ -150,21 +158,6 @@ for tests_dir in yml_in["tests_dirs"] :
     list_files=os.listdir(path_dir_refs)
     for file in list_files:
       allowed_links_in_tests.append(path_dir_refs+'/'+file)
-
-path_ymlfile="topics/generated_files/topics_in_tests.yml"
-print("Generated "+path_ymlfile+", to contain the list of automatic test input files relevant for each topic ...")
-topics_in_tests=read_yaml(path_ymlfile)
-try :
-  rm_cmd = "rm topics/generated_files/topics_in_tests.txt"
-  retcode = os.system(rm_cmd)
-except :
-  if debug==1 :
-    print(rm_cmd+"failed")
-    print("the file was likely non existent")
-
-if debug==1 :
-  print(" topics_in_tests :")
-  print(topics_in_tests)
 
 ################################################################################
 # Constitutes a list of bib items, each being a dictionary
@@ -764,19 +757,17 @@ for topic_name in list_of_topics:
 # Create a dictionary to contain the list of tests for each topic
 inputs_for_topic = {} 
 topic_error=0
-for str in topics_in_tests:
-  str2 = str.split(':')
-  listt=str2[1]
-  str_topics = listt[listt.index('=')+1:]
-  list_topics = str_topics.split(',')
-  for topic in list_topics:
-    topic = topic.strip()
-    if topic not in list_of_topics:
-        print("\n Error : file %s mentions topic %s, not in list_of_topics.yml"%(str2[0],topic))
-        topic_error+=1
-    if topic not in inputs_for_topic.keys():
-      inputs_for_topic[topic] = []
-    inputs_for_topic[topic].append(str2[0])
+for infil_name in infil_dic.keys() :
+  if "topics" in infil_dic[infil_name].keys():
+    list_topics=infil_dic[infil_name]["topics"]
+    for topic in list_topics:
+      topic = topic.strip()
+      if topic not in list_of_topics:
+          print("\n Error : file %s mentions topic %s, not in list_of_topics.yml"%(str2[0],topic))
+          topic_error+=1
+      if topic not in inputs_for_topic.keys():
+        inputs_for_topic[topic] = []
+      inputs_for_topic[topic].append(infil_name)
 if topic_error!=0:
   print("\n")
   sys.exit()
@@ -798,6 +789,7 @@ for i, topic_name in enumerate(inputs_for_topic):
       dir[dirname].append(testname)
     for dirname, testnames in dir.items():
       line="<p> tests/"+dirname+"/Input: "
+      testnames.sort()
       for testname in testnames:
         line+='<a href="../../tests/%s/Input/%s">%s</a> \n'%(dirname,testname,testname)
       topic_infiles[topic_name]+= line
@@ -812,7 +804,7 @@ all_topic_refs={}
 # Need to read first all topic yml files in order to extract the backlinks and references.
 for topic_name in list_of_topics:
   path_ymlfile="topics/origin_files/topic_"+topic_name+".yml"
-  print("Read "+path_ymlfile+" to initiate the topic '"+topic_name+"' ... ",end="")
+  print("Read "+path_ymlfile+" to initiate the topic '"+topic_name+"' ... ")
   topic_yml=read_yaml(path_ymlfile)
   topic=topic_yml[0]
   #Construct the backlinks and reference list 
@@ -1056,7 +1048,7 @@ file_txt = 'biblio/generated_files/ordered_abiref.bib'
 f_txt = open(file_txt,'w')
 f_txt.write(lines_txt)
 f_txt.close()
-print("File %s has been written ..." %file_txt)
+print("File %s written ..." %file_txt)
 
 ################################################################################
 #Global operation on the bib_biblio html file : conversion from bibtex notation to html notation.
