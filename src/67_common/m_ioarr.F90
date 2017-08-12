@@ -1457,6 +1457,7 @@ end function fort_denpot_skip
 subroutine denpot_spin_convert(denpot_in,nspden_in,denpot_out,nspden_out,fform,&
 &                              istart_in,istart_out,nelem) ! optional arguments
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
