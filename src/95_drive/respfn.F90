@@ -136,7 +136,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  use m_paw_ij,      only : paw_ij_type, paw_ij_init, paw_ij_free, paw_ij_nullify
  use m_pawfgrtab,   only : pawfgrtab_type, pawfgrtab_init, pawfgrtab_free
  use m_pawrhoij,    only : pawrhoij_type, pawrhoij_alloc, pawrhoij_free, pawrhoij_copy, &
-&                          pawrhoij_bcast, pawrhoij_nullify
+&                          pawrhoij_bcast, pawrhoij_nullify, pawrhoij_get_nspden
  use m_pawdij,      only : pawdij, symdij
  use m_pawfgr,      only : pawfgr_type, pawfgr_init, pawfgr_destroy
  use m_paw_finegrid,only : pawexpiqr
@@ -666,8 +666,8 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
      if(dtset%xclevel==2.and.dtset%nspden==1) nkxc1=7   ! GGA non-polarized
      if(dtset%xclevel==2.and.dtset%nspden==2) nkxc1=19  ! GGA polarized
    end if
-   call paw_an_init(paw_an,dtset%natom,dtset%ntypat,nkxc1,dtset%nspden,cplex,dtset%pawxcdev,&
-&   dtset%typat,pawang,pawtab,has_vxc=1,has_vxc_ex=1,has_kxc=has_kxc,&
+   call paw_an_init(paw_an,dtset%natom,dtset%ntypat,nkxc1,dtset%nspden,&
+&   cplex,dtset%pawxcdev,dtset%typat,pawang,pawtab,has_vxc=1,has_vxc_ex=1,has_kxc=has_kxc,&
 &   mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
    call paw_ij_init(paw_ij,cplex,dtset%nspinor,dtset%nsppol,dtset%nspden,dtset%pawspnorb,&
 &   natom,dtset%ntypat,dtset%typat,pawtab,has_dij=1,has_dijhartree=1,has_dijnd=has_dijnd,&
@@ -696,7 +696,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
    if (rdwrpaw/=0) then
      ABI_DATATYPE_ALLOCATE(pawrhoij_read,(natom))
      call pawrhoij_nullify(pawrhoij_read)
-     nspden_rhoij=dtset%nspden;if (dtset%pawspnorb>0.and.dtset%nspinor==2) nspden_rhoij=4
+     nspden_rhoij=pawrhoij_get_nspden(dtset%nspden,dtset%nspinor,dtset%pawspnorb)
      call pawrhoij_alloc(pawrhoij_read,dtset%pawcpxocc,nspden_rhoij,dtset%nspinor,&
 &     dtset%nsppol,dtset%typat,pawtab=pawtab)
    else
