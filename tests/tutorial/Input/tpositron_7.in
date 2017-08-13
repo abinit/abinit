@@ -56,7 +56,7 @@
   ! Convergence parameters
     ecut 12. pawecutdg 15.
     iscf 17
-    nstep 100 tolvrs 1.d-8
+    nstep 100 tolvrs 1.d-10
     nline 8 nnsclo 2 nbdbuf 8  ! This is to help the convergency (and portability)
 
 !   Miscelaneous
