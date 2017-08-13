@@ -658,10 +658,6 @@ for i, varset_info in enumerate(varsets):
 ################################################################################
 # Constitute the body of information for the external parameters, stored for the appropriate varset in all_contents[varset]
 
-cur_external = []
-for (key,value) in list_externalvars:
-  cur_external.append(key)
-
 for (key, value) in list_externalvars:
   backlink= ' &nbsp; <a href="../../input_variables/generated_files/varset_external.html#%s">%s</a> &nbsp; ' %(key,key)
   cur_content = '<br><font id="title"><a name="%s">%s</a></font>\n'%(key,key)
