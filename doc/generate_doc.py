@@ -118,7 +118,7 @@ list_of_topics=yml_in["list_of_topics"]
 # - the topics that are mentioned
 # - the input variables that are exemplified.
 
-infil_dic={}
+inptests_dic={}
 path_itemfile="topics/generated_files/item_in_tests.txt" 
 try :
   rm_cmd = "rm "+path_itemfile
@@ -136,7 +136,7 @@ for item in ["executable","topics"]:
     lines=item_in_tests.splitlines()
   for line in lines:
     line_split = line.split(':')
-    infil_name=line_split[0].strip()    
+    inptests_name=line_split[0].strip()    
     line_split2=line_split[1].split('=')
     item_values=line_split2[1].split(',')
     item_values_stripped=[]
@@ -144,10 +144,10 @@ for item in ["executable","topics"]:
       value_stripped=value.strip()
       if len(value_stripped)>0:
         item_values_stripped.append(value_stripped)
-    if not infil_name in infil_dic.keys():
-      infil_dic[infil_name]={}
+    if not inptests_name in inptests_dic.keys():
+      inptests_dic[inptests_name]={}
     #Warning for later use : item_values_stripped is a list !
-    infil_dic[infil_name][item]=item_values_stripped
+    inptests_dic[inptests_name][item]=item_values_stripped
   retcode = os.system(rm_cmd)
 
 #Prepare a dictionary to host the list of variables for the different executables for which the input variables are part of the database
@@ -160,7 +160,7 @@ for executable in executables:
 for var in abinit_vars:
   abivarname=var.abivarname
   tests_for_abivars[abivarname]={}
-  tests_for_abivars[abivarname]["list"]=[]
+  tests_for_abivars[abivarname]["inptests"]=[]
   executable="abinit"
   if "@" in abivarname:
     executable=abivarname.split("@")[1]
@@ -169,49 +169,135 @@ for var in abinit_vars:
     invars_for_executable[executable].append(abivarname)
 
 #Collect the input variables in each input test file
-for infil_name in infil_dic.keys():
-  infil_dic[infil_name]["invars"]=[]
-  executable=infil_dic[infil_name]["executable"][0]
+for inptests_name in inptests_dic.keys():
+  inptests_dic[inptests_name]["invars"]=[]
+  executable=inptests_dic[inptests_name]["executable"][0]
   if executable in executables:
-    with open(infil_name,'r') as f:
-      infil_str=f.read()
-      infil_content=infil_str.splitlines()
-    infil_text=""
-    for line in infil_content:
+    with open(inptests_name,'r') as f:
+      inptests_str=f.read()
+      inptests_content=inptests_str.splitlines()
+    inptests_text=""
+    for line in inptests_content:
       #Remove all comments
       line_split1=line.split("#")
       if line_split1[0]!="":
         line_split2=line_split1[0].split("!")
         if line_split2[0]!="":
-          infil_text+=line_split2[0]+" "
-    infil_text_words=infil_text.split()
-    words=[]
-    for word in infil_text_words:
+          inptests_text+=line_split2[0]+" "
+    inptests_text_words=inptests_text.split()
+    trialnames=[]
+    for word in inptests_text_words:
       if word[0].isalpha():
         word_rstripped=word.rstrip('0123456789:+*?')
         if len(word)>0:
-          words.append(word_rstripped)
-    #Eliminate duplicate words
-    words=list(set(words))
+          trialname=word_rstripped
+          if executable!="abinit":
+            trialname+="@"+executable
+          trialnames.append(trialname)
+    #Eliminate duplicate trialnames
+    trialnames=list(set(trialnames))
 
     #Constitute the list of input variables in the input test file
     for abivarname in invars_for_executable[executable]:
-      if abivarname in words:
-        infil_dic[infil_name]["invars"].append(abivarname)
-        tests_for_abivars[abivarname]["list"].append(infil_name)
+      if abivarname in trialnames:
+        inptests_dic[inptests_name]["invars"].append(abivarname)
+        tests_for_abivars[abivarname]["inptests"].append(inptests_name)
 
-#Work on the list of tests for each input variable : statistics
-for abivarname in tests_for_abivars.keys():
-  tests_for_abivars[abivarname]["number"]=len(tests_for_abivars[abivarname]["list"])
+#Prepare a dictionary with the list of tests for each executable, their number, and the number of tests in tuto dirs.
+tests_for_executables={}
+for inptests_name in inptests_dic.keys():
+  executable=inptests_dic[inptests_name]["executable"][0]
+  if not executable in tests_for_executables.keys():
+    tests_for_executables[executable]={}
+    tests_for_executables[executable]["inptests"]=[]
+  tests_for_executables[executable]["inptests"].append(inptests_name)
+
+for executable in tests_for_executables.keys():
+  tests_for_executables[executable]["ntests"]=len(tests_for_executables[executable]["inptests"])
+  ntests_in_tuto=0
+  for inptest in tests_for_executables[executable]["inptests"]:
+    inptest_split=inptest.split("/")
+    dirname=inptest_split[1]
+    if "tuto"==dirname[:4]: 
+      ntests_in_tuto+=1
+  tests_for_executables[executable]["ntests_in_tuto"]=ntests_in_tuto
 
   #DEBUG
+  #print("")
+  #print(" executable",executable)
+  #print(" ntests",tests_for_executables[executable]["ntests"])
+  #print(" ntests_in_tuto",tests_for_executables[executable]["ntests_in_tuto"])
+  #print("")
+  #ENDDEBUG
+
+#Work on the list of tests for each input variable including counters
+for abivarname in tests_for_abivars.keys():
+  dir_ID_for_tests={}
+  for tests_dir in yml_in["tests_dirs"] :
+    dir_ID_for_tests[tests_dir]=[]
+  ntests_abivarname=len(tests_for_abivars[abivarname]["inptests"])
+  tests_for_abivars[abivarname]["ntests"]=ntests_abivarname
+  for inptest in tests_for_abivars[abivarname]["inptests"]: 
+    inptest_split=inptest.split("/")
+    dirname=inptest_split[1]
+    testname=inptest_split[3]
+    testID=testname[1:].split(".")[0]
+    dir_ID_for_tests[dirname].append(testID)
+  ntests_abivarname_in_tuto=0
+  for tests_dir in yml_in["tests_dirs"] :
+    dir_ID_for_tests[tests_dir].sort()
+    if tests_dir[:4]=="tuto":
+      ntests_abivarname_in_tuto+=len(dir_ID_for_tests[tests_dir])
+  tests_for_abivars[abivarname]["dir_ID"]=dir_ID_for_tests
+  tests_for_abivars[abivarname]["ntests_in_tuto"]=ntests_abivarname_in_tuto
+
+  #Now compares to the number of tests related to this executable, if there is some ...
+  executable=tests_for_abivars[abivarname]["executable"]
+  if executable in tests_for_executables.keys():
+    ntests_executable=tests_for_executables[executable]["ntests"]
+    if ntests_executable!=0:
+      ratio_all=ntests_abivarname/ntests_executable
+    else :
+      ratio_all="None"
+    ntests_executable_in_tuto=tests_for_executables[executable]["ntests_in_tuto"]
+    if ntests_executable_in_tuto!=0:
+      ratio_in_tuto=ntests_abivarname_in_tuto/ntests_executable_in_tuto
+    else:
+      ratio_in_tuto="None"
+  else:
+    ratio_all="None"
+    ratio_tuto="None"
+  tests_for_abivars[abivarname]["ratio_all"]=ratio_all
+  tests_for_abivars[abivarname]["ratio_in_tuto"]=ratio_in_tuto
+  frequency="Rarely used."
+  if ratio_all>0.5:
+    frequency="Very frequently used."
+  elif ratio_all>0.05:
+    frequency="Moderately used."
+  usage_report=frequency
+  usage_report+=" Usage ratio in all %s tests:[%s/%s]. Usage ratio in tuto %s tests:[%s/%s]."%(executable,ntests_abivarname,ntests_executable,executable,ntests_abivarname_in_tuto,ntests_executable_in_tuto)
+  tests_for_abivars[abivarname]["usage_report"]=usage_report
+
+#DEBUG
+counter=0
+for abivarname in tests_for_abivars.keys():
   print("")
   print(" abivarname:",abivarname)
   print(" tests_for_abivars[abivarname]['executable']:",tests_for_abivars[abivarname]["executable"])
-  print(" tests_for_abivars[abivarname]['number']:",tests_for_abivars[abivarname]["number"])
-  print(" tests_for_abivars[abivarname]['list']:",tests_for_abivars[abivarname]["list"])
+  print(" tests_for_abivars[abivarname]['ntests']:",tests_for_abivars[abivarname]["ntests"])
+  print(" tests_for_abivars[abivarname]['ntests_in_tuto']:",tests_for_abivars[abivarname]["ntests_in_tuto"])
+  print(" tests_for_abivars[abivarname]['ratio_all']:",tests_for_abivars[abivarname]["ratio_all"])
+  print(" tests_for_abivars[abivarname]['ratio_in_tuto']:",tests_for_abivars[abivarname]["ratio_in_tuto"])
+  print(" tests_for_abivars[abivarname]['usage_report']:",tests_for_abivars[abivarname]["usage_report"])
+  #print(" tests_for_abivars[abivarname]['inptests']:",tests_for_abivars[abivarname]["inptests"])
+  #print(" tests_for_abivars[abivarname]:",tests_for_abivars[abivarname])
+  #print(" tests_for_abivars[abivarname]['dir_ID']:",tests_for_abivars[abivarname]["dir_ID"])
   print("")
-  #ENDDEBUG
+  counter+=1
+  if (counter==5):
+    sys.exit()
+#ENDDEBUG
+# SHould generate : Usage ratio : in all abinit tests ..., in tuto abinit tests ... XXX
 
 ################################################################################
 # Constitutes the list of allowed links to tests files.
@@ -827,9 +913,9 @@ for topic_name in list_of_topics:
 # Create a dictionary to contain the list of tests for each topic
 inputs_for_topic = {} 
 topic_error=0
-for infil_name in infil_dic.keys() :
-  if "topics" in infil_dic[infil_name].keys():
-    list_topics=infil_dic[infil_name]["topics"]
+for inptests_name in inptests_dic.keys() :
+  if "topics" in inptests_dic[inptests_name].keys():
+    list_topics=inptests_dic[inptests_name]["topics"]
     for topic in list_topics:
       topic = topic.strip()
       if topic not in list_of_topics:
@@ -837,7 +923,7 @@ for infil_name in infil_dic.keys() :
           topic_error+=1
       if topic not in inputs_for_topic.keys():
         inputs_for_topic[topic] = []
-      inputs_for_topic[topic].append(infil_name)
+      inputs_for_topic[topic].append(inptests_name)
 if topic_error!=0:
   print("\n")
   sys.exit()
