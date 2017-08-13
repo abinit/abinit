@@ -272,10 +272,36 @@ for abivarname in tests_for_abivars.keys():
   frequency="Rarely used."
   if ratio_all>0.5:
     frequency="Very frequently used."
-  elif ratio_all>0.05:
+  elif ratio_all>0.01:
     frequency="Moderately used."
   usage_report=frequency
-  usage_report+=" Usage ratio in all %s tests:[%s/%s]. Usage ratio in tuto %s tests:[%s/%s]."%(executable,ntests_abivarname,ntests_executable,executable,ntests_abivarname_in_tuto,ntests_executable_in_tuto)
+  usage_report+=" Usage ratio in all %s tests [%s/%s]."%(executable,ntests_abivarname,ntests_executable)
+  usage_report+=" Usage ratio in tuto %s tests [%s/%s]."%(executable,ntests_abivarname_in_tuto,ntests_executable_in_tuto)
+  maxtests=20
+  if ntests_abivarname>0 :
+    if ntests_abivarname<maxtests or ntests_abivarname_in_tuto<maxtests :
+      only_tuto=0
+      if not ntests_abivarname<maxtests:
+        only_tuto=1
+        usage_report+=" Tuto test list {"
+      else:
+        only_tuto=0
+        usage_report+=" All test list {"
+      counter=0
+      for tests_dir in yml_in["tests_dirs"]:
+        if len(dir_ID_for_tests[tests_dir])>0 and (only_tuto==0 or "tuto"==tests_dir[:4]):
+          if counter>0: 
+            usage_report+=","
+          counter+=1 
+          usage_report+="%s:["%(tests_dir)
+          for (i,test) in enumerate(dir_ID_for_tests[tests_dir]):
+            usage_report+='<a href="../../tests/%s/Input/%s.in">%s</a>'%(tests_dir,test,test[1:])
+            if not i==len(dir_ID_for_tests[tests_dir]):
+              usage_report+=','
+          usage_report+=']'
+      usage_report+="}"
+    else:
+      usage_report+=" Too many tests to report."
   tests_for_abivars[abivarname]["usage_report"]=usage_report
 
 #DEBUG
@@ -735,6 +761,8 @@ for i, var in enumerate(abinit_vars):
     else:
       print(" No topic_tribe for abivarname %s"%(var.abivarname))
       topic_error+=1
+    # Occurence
+    cur_content += "<br>"+tests_for_abivars[var.abivarname]["usage_report"]
     # Variable type, including dimensions
     cur_content += "<br><font id=\"vartype\">Variable type: "+var.vartype
     if var.dimensions is not None:
