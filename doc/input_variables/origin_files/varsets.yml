@@ -79,6 +79,9 @@
     purpose : |
       This document lists the input variables for ABINIT and three post-processors of ABINIT,
       in order of occurence in the input files provided with the package.
+      <br>For each executable, and each input variable for this executable, the first given number
+      is the number of input file that use the input variable, and the second number (in parentheses) gives
+      the number of input file in the tests/tuto* directories that use the input variable.
     advice : |
       <hr>
     tofcontent_header : |

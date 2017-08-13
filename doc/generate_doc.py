@@ -653,7 +653,7 @@ all_contents = dict()
 for i, varset_info in enumerate(varsets):
   varset = varset_info.name
   all_vars[varset] = []
-  all_contents[varset]= "<br><br><br><br><hr>\n"
+  all_contents[varset]= "<br><br><hr>\n"
 
 ################################################################################
 # Constitute the body of information for the external parameters, stored for the appropriate varset in all_contents[varset]
@@ -668,6 +668,19 @@ for (key, value) in list_externalvars:
   cur_content += '<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>\n'
   #
   all_contents["external"] = all_contents["external"] + cur_content + '\n\n'
+
+################################################################################
+# Constitute the body of information for the stats, stored for the appropriate varset in all_contents[varset]
+
+for executable in executables:
+  ntests=tests_for_executables[executable]["ntests"]
+  ntests_in_tuto=tests_for_executables[executable]["ntests_in_tuto"]
+  cur_content = '<br><h2><a name="%s">%s</a></h2>\n'%(executable,executable.upper())
+  cur_content += ' %s tests of %s (%s tests of %s in the tests/tuto* directories)'%(ntests,executable,ntests_in_tuto,executable)
+  cur_content += '<br><br><a href=#top>Go to the top</a>\n'
+  cur_content += '<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>\n'
+  #
+  all_contents["stats"] = all_contents["stats"] + cur_content + '\n\n'
 
 ################################################################################
 # Constitute the body of information for all variables, stored for the appropriate varset in all_contents[varset]
@@ -828,7 +841,7 @@ defaultClick(true);\n\
   elif varset == "stats":
     toc_body += '<ul>\n'
     for executable in executables:
-      toc_body += ' <li><a href="#%s">%s</a>\n'%(executable,executable)
+      toc_body += ' <li><a href="#%s">%s</a>\n'%(executable,executable.upper())
     toc_body += '</ul>\n'
     #HERE
   else:
