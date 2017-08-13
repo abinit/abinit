@@ -222,14 +222,6 @@ for executable in tests_for_executables.keys():
       ntests_in_tuto+=1
   tests_for_executables[executable]["ntests_in_tuto"]=ntests_in_tuto
 
-  #DEBUG
-  #print("")
-  #print(" executable",executable)
-  #print(" ntests",tests_for_executables[executable]["ntests"])
-  #print(" ntests_in_tuto",tests_for_executables[executable]["ntests_in_tuto"])
-  #print("")
-  #ENDDEBUG
-
 #Work on the list of tests for each input variable including counters
 for abivarname in tests_for_abivars.keys():
   dir_ID_for_tests={}
@@ -256,12 +248,12 @@ for abivarname in tests_for_abivars.keys():
   if executable in tests_for_executables.keys():
     ntests_executable=tests_for_executables[executable]["ntests"]
     if ntests_executable!=0:
-      ratio_all=ntests_abivarname/ntests_executable
+      ratio_all=float(ntests_abivarname)/float(ntests_executable)
     else :
       ratio_all="None"
     ntests_executable_in_tuto=tests_for_executables[executable]["ntests_in_tuto"]
     if ntests_executable_in_tuto!=0:
-      ratio_in_tuto=ntests_abivarname_in_tuto/ntests_executable_in_tuto
+      ratio_in_tuto=float(ntests_abivarname_in_tuto)/float(ntests_executable_in_tuto)
     else:
       ratio_in_tuto="None"
   else:
@@ -271,13 +263,13 @@ for abivarname in tests_for_abivars.keys():
   tests_for_abivars[abivarname]["ratio_in_tuto"]=ratio_in_tuto
   frequency="Rarely used."
   if ratio_all>0.5:
-    frequency="Very frequently used."
+    frequency="Very frequently used,"
   elif ratio_all>0.01:
-    frequency="Moderately used."
+    frequency="Moderately used,"
   usage_report=frequency
-  usage_report+=" Usage ratio in all %s tests [%s/%s]."%(executable,ntests_abivarname,ntests_executable)
-  usage_report+=" Usage ratio in tuto %s tests [%s/%s]."%(executable,ntests_abivarname_in_tuto,ntests_executable_in_tuto)
-  maxtests=20
+  usage_report+=" in all %s tests [%s/%s],"%(executable,ntests_abivarname,ntests_executable)
+  usage_report+=" in tuto %s tests [%s/%s]."%(executable,ntests_abivarname_in_tuto,ntests_executable_in_tuto)
+  maxtests=10
   if ntests_abivarname>0 :
     if ntests_abivarname<maxtests or ntests_abivarname_in_tuto<maxtests :
       only_tuto=0
@@ -295,35 +287,14 @@ for abivarname in tests_for_abivars.keys():
           counter+=1 
           usage_report+="%s:["%(tests_dir)
           for (i,test) in enumerate(dir_ID_for_tests[tests_dir]):
-            usage_report+='<a href="../../tests/%s/Input/%s.in">%s</a>'%(tests_dir,test,test[1:])
-            if not i==len(dir_ID_for_tests[tests_dir]):
+            usage_report+='<a href="../../tests/%s/Input/t%s.in">%s</a>'%(tests_dir,test,test)
+            if not i==len(dir_ID_for_tests[tests_dir])-1:
               usage_report+=','
           usage_report+=']'
-      usage_report+="}"
+      usage_report+="}."
     else:
-      usage_report+=" Too many tests to report."
+      usage_report+=" Too many tests to report (>%s)."%(maxtests)
   tests_for_abivars[abivarname]["usage_report"]=usage_report
-
-#DEBUG
-counter=0
-for abivarname in tests_for_abivars.keys():
-  print("")
-  print(" abivarname:",abivarname)
-  print(" tests_for_abivars[abivarname]['executable']:",tests_for_abivars[abivarname]["executable"])
-  print(" tests_for_abivars[abivarname]['ntests']:",tests_for_abivars[abivarname]["ntests"])
-  print(" tests_for_abivars[abivarname]['ntests_in_tuto']:",tests_for_abivars[abivarname]["ntests_in_tuto"])
-  print(" tests_for_abivars[abivarname]['ratio_all']:",tests_for_abivars[abivarname]["ratio_all"])
-  print(" tests_for_abivars[abivarname]['ratio_in_tuto']:",tests_for_abivars[abivarname]["ratio_in_tuto"])
-  print(" tests_for_abivars[abivarname]['usage_report']:",tests_for_abivars[abivarname]["usage_report"])
-  #print(" tests_for_abivars[abivarname]['inptests']:",tests_for_abivars[abivarname]["inptests"])
-  #print(" tests_for_abivars[abivarname]:",tests_for_abivars[abivarname])
-  #print(" tests_for_abivars[abivarname]['dir_ID']:",tests_for_abivars[abivarname]["dir_ID"])
-  print("")
-  counter+=1
-  if (counter==5):
-    sys.exit()
-#ENDDEBUG
-# SHould generate : Usage ratio : in all abinit tests ..., in tuto abinit tests ... XXX
 
 ################################################################################
 # Constitutes the list of allowed links to tests files.
@@ -737,13 +708,16 @@ for i, var in enumerate(abinit_vars):
     for tribe in yml_in["list_tribes"]:
       list_tribenames.append(tribe[0].strip())
     if var.topics is not None :
-      cur_content += '<br><font id="characteristic">Mentioned in topic: '
       vartopics=var.topics
       topics_name_tribe = vartopics.split(',')
       if len(topics_name_tribe)==0:
         print("\n Missing topic_tribe for abivarname %s."%(var.abivarname))
         topic_error+=1
       else:
+        if len(topics_name_tribe)>1:
+          cur_content += '<br><font id="characteristic">Mentioned in topics: '
+        else:
+          cur_content += '<br><font id="characteristic">Mentioned in topic: '
         for i, topic_name_tribe in enumerate(topics_name_tribe):
           name_tribe = topic_name_tribe.split('_')
           if not len(name_tribe)==2:
@@ -762,7 +736,7 @@ for i, var in enumerate(abinit_vars):
       print(" No topic_tribe for abivarname %s"%(var.abivarname))
       topic_error+=1
     # Occurence
-    cur_content += "<br>"+tests_for_abivars[var.abivarname]["usage_report"]
+    cur_content += '<br><font id="characteristic">'+tests_for_abivars[var.abivarname]["usage_report"]+"</font>\n"
     # Variable type, including dimensions
     cur_content += "<br><font id=\"vartype\">Variable type: "+var.vartype
     if var.dimensions is not None:
