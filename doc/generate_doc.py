@@ -132,16 +132,86 @@ for item in ["executable","topics"]:
     grep_cmd = "grep %s tests/%s/Input/*.in | grep '#%%' >> %s"%(item,tests_dir,path_itemfile)
     retcode = os.system(grep_cmd)
   with open(path_itemfile, 'r') as f: 
-    item_in_tests=f.readlines()
-  for line in item_in_tests:
+    item_in_tests=f.read()
+    lines=item_in_tests.splitlines()
+  for line in lines:
     line_split = line.split(':')
     infil_name=line_split[0].strip()    
     line_split2=line_split[1].split('=')
     item_values=line_split2[1].split(',')
+    item_values_stripped=[]
+    for value in item_values:
+      value_stripped=value.strip()
+      if len(value_stripped)>0:
+        item_values_stripped.append(value_stripped)
     if not infil_name in infil_dic.keys():
       infil_dic[infil_name]={}
-    infil_dic[infil_name][item]=item_values
+    #Warning for later use : item_values_stripped is a list !
+    infil_dic[infil_name][item]=item_values_stripped
   retcode = os.system(rm_cmd)
+
+#Prepare a dictionary to host the list of variables for the different executables for which the input variables are part of the database
+#Prepare a dictionary to host the list of tests for each variable
+executables=["abinit","aim","anaddb","optic"]
+invars_for_executable={}
+tests_for_abivars={}
+for executable in executables:
+  invars_for_executable[executable]=[]
+for var in abinit_vars:
+  abivarname=var.abivarname
+  tests_for_abivars[abivarname]={}
+  tests_for_abivars[abivarname]["list"]=[]
+  executable="abinit"
+  if "@" in abivarname:
+    executable=abivarname.split("@")[1]
+  tests_for_abivars[abivarname]["executable"]=executable
+  if executable in executables:
+    invars_for_executable[executable].append(abivarname)
+
+#Collect the input variables in each input test file
+for infil_name in infil_dic.keys():
+  infil_dic[infil_name]["invars"]=[]
+  executable=infil_dic[infil_name]["executable"][0]
+  if executable in executables:
+    with open(infil_name,'r') as f:
+      infil_str=f.read()
+      infil_content=infil_str.splitlines()
+    infil_text=""
+    for line in infil_content:
+      #Remove all comments
+      line_split1=line.split("#")
+      if line_split1[0]!="":
+        line_split2=line_split1[0].split("!")
+        if line_split2[0]!="":
+          infil_text+=line_split2[0]+" "
+    infil_text_words=infil_text.split()
+    words=[]
+    for word in infil_text_words:
+      if word[0].isalpha():
+        word_rstripped=word.rstrip('0123456789:+*?')
+        if len(word)>0:
+          words.append(word_rstripped)
+    #Eliminate duplicate words
+    words=list(set(words))
+
+    #Constitute the list of input variables in the input test file
+    for abivarname in invars_for_executable[executable]:
+      if abivarname in words:
+        infil_dic[infil_name]["invars"].append(abivarname)
+        tests_for_abivars[abivarname]["list"].append(infil_name)
+
+#Work on the list of tests for each input variable : statistics
+for abivarname in tests_for_abivars.keys():
+  tests_for_abivars[abivarname]["number"]=len(tests_for_abivars[abivarname]["list"])
+
+  #DEBUG
+  print("")
+  print(" abivarname:",abivarname)
+  print(" tests_for_abivars[abivarname]['executable']:",tests_for_abivars[abivarname]["executable"])
+  print(" tests_for_abivars[abivarname]['number']:",tests_for_abivars[abivarname]["number"])
+  print(" tests_for_abivars[abivarname]['list']:",tests_for_abivars[abivarname]["list"])
+  print("")
+  #ENDDEBUG
 
 ################################################################################
 # Constitutes the list of allowed links to tests files.
