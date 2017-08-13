@@ -8,6 +8,6 @@ document.write(' <A href="varset_geo.html">geo</a>,&nbsp;<A href="varset_gstate.
 document.write(' <A href="varset_internal.html">internal</a>,&nbsp;<A href="varset_optic.html">optic</a>,');
 document.write(' <A href="varset_paral.html">paral</a>,&nbsp;<A href="varset_paw.html">paw</a>,');
 document.write(' <A href="varset_rlx.html">rlx</a>,&nbsp;<A href="varset_vdw.html">vdw</a>,&nbsp;<A href="varset_w90.html">w90</a>.');
-document.write(' <br> See also the <a href="../../users/spacegrouphelpfile.html">Space group table</a> and the <a href="varset_external.html">list of external parameters</a>.');
+document.write(' <br> See also the <a href="../../users/spacegrouphelpfile.html">Space group table</a>, the <a href="varset_external.html">list of external parameters</a>, and the <a href="varset_stats.html">statistics</a>.');
 document.write(' <hr> ');
 document.write(' ');

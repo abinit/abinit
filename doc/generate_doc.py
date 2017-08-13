@@ -800,7 +800,7 @@ for i, varset_info in enumerate(varsets):
   toc_body=""
   if varset=="allvars":
     toc_body+=scriptTab+alphalinks
-  else :
+  elif varset!="stats":
     toc_body += " <br><a id='%s'></a>"%(cur_let)+cur_let+".\n"
 
   if varset=="allvars":
@@ -826,9 +826,15 @@ defaultClick(true);\n\
     for (key, value) in list_externalvars:
       while not key.lower().startswith(cur_let.lower()):
         cur_let = chr(ord(cur_let)+1)
-        toc_body += " <br><a id='%s'></a>"%(cur_let)+cur_let+".\n"
-      curlink = ' <a href="#'+key+'">'+key+'</a>&nbsp;&nbsp;\n'
+        toc_body += ' <br><a id="%s"></a>%s.\n'%(cur_let,cur_let)
+      curlink = ' <a href="#%s">%s</a>&nbsp;&nbsp;\n'%(key,key)
       toc_body += curlink
+  elif varset == "stats":
+    toc_body += '<ul>\n'
+    for executable in executables:
+      toc_body += ' <li><a href="#%s">%s</a>\n'%(executable,executable)
+    toc_body += '</ul>\n'
+    #HERE
   else:
     for abivarname,defi in all_vars[varset]:
       while not abivarname.startswith(cur_let.lower()):

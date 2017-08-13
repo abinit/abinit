@@ -50,12 +50,12 @@
     subtitle : |
       Complete list.
     purpose : |
-      This document lists the names of all input variables for ABINIT and the main three post-processors of the ABINIT package.
+      This document lists the names of all input variables for ABINIT and three post-processors of ABINIT.
       <p>
       The internal variables (see the varset_[[varset:internal]] web page) are prepended with the sign %.
     tofcontent_header : |
       <a name="list"></a>
-      <h3><b> Alphabetical list of all input variables for ABINIT and the other executables of the ABINIT package.</b></h3>
+      <h3><b> Alphabetical list of all input variables for ABINIT, AIM, ANADDB and OPTICS.</b></h3>
       See [[varset:aim]], [[varset:anaddb]] or [[varset:optic]] for the subset of input variables for the executables AIM(Bader), ANADDB and OPTIC. Such input variables are specifically
       labelled @aim, @anaddb, or @optic in the input variable database.
       <p>Enter any string to search in the database. Clicking without any request will give all variables.
@@ -77,14 +77,13 @@
     subtitle : |
       occurences in the input files provided with the package 
     purpose : |
-      This document lists the input variables for ABINIT and the other executables of the ABINIT package,
+      This document lists the input variables for ABINIT and three post-processors of ABINIT,
       in order of occurence in the input files provided with the package.
+    advice : |
+      <hr>
     tofcontent_header : |
       <a name="list"></a>
-      <h3><b> Alphabetical list of all input variables for ABINIT and the other executables of the ABINIT package.</b></h3>
-      See [[varset:aim]], [[varset:anaddb]] or [[varset:optic]] for the subset of input variables for the executables AIM(Bader), ANADDB and OPTIC. Such input variables are specifically
-      labelled @aim, @anaddb, or @optic in the input variable database.
-      <p>Enter any string to search in the database. Clicking without any request will give all variables.
+      <h3><b> List of all input variables for ABINIT, AIM, ANADDB and OPTICS, in order of decreasing occurence.</b></h3>
 
 - !components
     name : aim
