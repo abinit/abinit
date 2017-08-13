@@ -15,7 +15,7 @@
  For more information, see http://www.abinit.org .
 
 .Starting date : Sun 13 Aug 2017.
-- ( at 00h57 )
+- ( at 03h32 )
   
 - input  file    -> tpositron_7.in
 - output file    -> tpositron_7.out
@@ -85,6 +85,7 @@ P           mkmem           8
         optforces           0
         optstress           0
         pawecutdg      1.50000000E+01 Hartree
+       posdoppler        1
          positron         -10
          posnstep        2
            prteig           0
@@ -380,6 +381,13 @@ TC-DFT STEP   2 - POSITRONIC GROUND-STATE CALCULATION IN PRESENCE OF ELECTRONS A
 
       (*) IPM=Independent particle Model
 
+ Computation of electron-positron pairs momentum distribution completed.
+-File tpositron_7o_DOPPLER has been created.
+-Use ~abinit/scripts/post_processing/posdopspectra.F90 to process it.
+
+ Annihilation rate obtained from integration of e-p pairs momentum distribution:
+   lambda=    5.082828041413E+00 ns-1
+
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -464,6 +472,7 @@ P           mkmem           8
         optforces           0
         optstress           0
         pawecutdg      1.50000000E+01 Hartree
+       posdoppler        1
          positron         -10
          posnstep        2
            prteig           0
@@ -608,10 +617,10 @@ P           mkmem           8
 - Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
 - the licence allows the authors to put it on the Web).
 -
-- Proc.   0 individual time (sec): cpu=         17.4  wall=         17.5
+- Proc.   0 individual time (sec): cpu=        135.3  wall=        135.8
 
 ================================================================================
 
  Calculation completed.
-.Delivered   1 WARNINGs and   4 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         17.4  wall=         17.5
+.Delivered   1 WARNINGs and   2 COMMENTs to log file.
++Overall time at end (sec) : cpu=        135.3  wall=        135.8
