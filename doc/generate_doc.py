@@ -267,7 +267,7 @@ for abivarname in tests_for_abivars.keys():
   elif ratio_all>0.01:
     frequency="Moderately used,"
   usage_report=frequency
-  usage_report+=" in all %s tests [%s/%s],"%(executable,ntests_abivarname,ntests_executable)
+  usage_report+=" in %s tests [%s/%s],"%(executable,ntests_abivarname,ntests_executable)
   usage_report+=" in tuto %s tests [%s/%s]."%(executable,ntests_abivarname_in_tuto,ntests_executable_in_tuto)
   maxtests=10
   if ntests_abivarname>0 :
