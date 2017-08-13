@@ -57,7 +57,8 @@
     ecut 12. pawecutdg 15.
     iscf 17
     nstep 100 tolvrs 1.d-10
-    nline 8 nnsclo 2 nbdbuf 8  ! This is to help the convergency (and portability)
+    nline 8 nnsclo 2 ! This is to help the convergency
+    nbdbuf 16  ! This is to make the test portable (don't use this usually)
 
 !   Miscelaneous
     prtwf 0 prteig 0           ! To save disk space
