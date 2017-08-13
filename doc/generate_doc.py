@@ -664,14 +664,14 @@ for (key,value) in list_externalvars:
 
 for (key, value) in list_externalvars:
   backlink= ' &nbsp; <a href="../../input_variables/generated_files/varset_external.html#%s">%s</a> &nbsp; ' %(key,key)
-  cur_content = "<br><font id=\"title\"><a name=\""+key+"\">"+key+"</a></font>\n"
-  cur_content += "<br><font id=\"text\">\n"
-  cur_content += "<p>\n"+make_links(value,key,allowed_link_seeds,backlinks,backlink)+"\n"
-  cur_content += "</font>"
-  cur_content += "<br><br><a href=#top>Go to the top</a>\n"
-  cur_content += "<B> | </B><a href=\"varset_allvars.html#top\">Complete list of input variables</a><hr>\n"
+  cur_content = '<br><font id="title"><a name="%s">%s</a></font>\n'%(key,key)
+  cur_content += '<br><font id="text">\n'
+  cur_content += '<p>\n'+make_links(value,key,allowed_link_seeds,backlinks,backlink)+'\n'
+  cur_content += '</font>'
+  cur_content += '<br><br><a href=#top>Go to the top</a>\n'
+  cur_content += '<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>\n'
   #
-  all_contents["external"] = all_contents["external"] + cur_content + "\n\n"
+  all_contents["external"] = all_contents["external"] + cur_content + '\n\n'
 
 ################################################################################
 # Constitute the body of information for all variables, stored for the appropriate varset in all_contents[varset]
@@ -738,32 +738,32 @@ for i, var in enumerate(abinit_vars):
     # Occurence
     cur_content += '<br><font id="characteristic">'+tests_for_abivars[var.abivarname]["usage_report"]+"</font>\n"
     # Variable type, including dimensions
-    cur_content += "<br><font id=\"vartype\">Variable type: "+var.vartype
+    cur_content += '<br><font id="vartype">Variable type: '+var.vartype
     if var.dimensions is not None:
       cur_content += make_links(format_dimensions(var.dimensions),var.abivarname,allowed_link_seeds,backlinks,backlink)
     if var.commentdims is not None and var.commentdims != "":
       cur_content += " (Comment: "+make_links(var.commentdims,var.abivarname,allowed_link_seeds,backlinks,backlink)+")"
-    cur_content += "</font>\n" 
+    cur_content += '</font>\n' 
     # Default
-    cur_content += "<br><font id=\"default\">"+make_links(format_default(var.defaultval),var.abivarname,allowed_link_seeds,backlinks,backlink)
+    cur_content += '<br><font id="default">'+make_links(format_default(var.defaultval),var.abivarname,allowed_link_seeds,backlinks,backlink)
     if var.commentdefault is not None and var.commentdefault != "":
-      cur_content += " (Comment: "+make_links(var.commentdefault,var.abivarname,allowed_link_seeds,backlinks,backlink)+")"
-    cur_content += "</font>\n" 
+      cur_content += ' (Comment: '+make_links(var.commentdefault,var.abivarname,allowed_link_seeds,backlinks,backlink)+")"
+    cur_content += '</font>\n' 
     # Requires
     if var.requires is not None and var.requires != "":
-      cur_content += "<br><br><font id=\"requires\">\nOnly relevant if "+make_links(var.requires,var.abivarname,allowed_link_seeds,backlinks,backlink)+"\n</font>\n"
+      cur_content += '<br><br><font id="requires">\nOnly relevant if '+make_links(var.requires,var.abivarname,allowed_link_seeds,backlinks,backlink)+"\n</font>\n"
     # Excludes
     if var.excludes is not None and var.excludes != "":
-      cur_content += "<br><br><font id=\"excludes\">\nThe use of this variable forbids the use of "+make_links(var.excludes,var.abivarname,allowed_link_seeds,backlinks,backlink)+"\n</font>\n"
+      cur_content += '<br><br><font id="excludes">\nThe use of this variable forbids the use of '+make_links(var.excludes,var.abivarname,allowed_link_seeds,backlinks,backlink)+'\n</font>\n'
     # Text
-    cur_content += "<br><font id=\"text\">\n"
-    cur_content += "<p>\n"+make_links(var.text,var.abivarname,allowed_link_seeds,backlinks,backlink)+"\n"
+    cur_content += '<br><font id="text">\n'
+    cur_content += '<p>\n'+make_links(var.text,var.abivarname,allowed_link_seeds,backlinks,backlink)+'\n'
     # End the section for one variable
-    cur_content += "</font>\n\n"
-    cur_content += "<br><br><a href=#top>Go to the top</a>\n"
-    cur_content += "<B> | </B><a href=\"varset_allvars.html#top\">Complete list of input variables</a><hr>\n"
+    cur_content += '</font>\n\n'
+    cur_content += '<br><br><a href=#top>Go to the top</a>\n'
+    cur_content += '<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>\n'
     #
-    all_contents[varset] = all_contents[varset] + cur_content + "\n\n"
+    all_contents[varset] = all_contents[varset] + cur_content + '\n\n'
   except AttributeError as e:
     print(e)
     print('For variable : ',abivarname)
@@ -790,10 +790,10 @@ for i, varset_info in enumerate(varsets):
   scriptTab = "\n\
 <input type=\"text\" id=\"InputSearch\" onkeyup=\"searchInput()\" onClick=\"searchInput()\" onblur=\"defaultClick()\" placeholder=\"Search\">\n\
 "
-  alphalinks="\n \n <div class=\"TabsLetter\">"
+  alphalinks='\n \n <div class="TabsLetter">'
   for i in string.ascii_uppercase:
-    alphalinks+=('<a class=\"TabLetterLink" href=\"#%s\" onClick=\"openLetter(event,\'%s\')\" id="click%s">%s</a> ')%(i,i,i,i)
-  alphalinks+="</div>\n \n"
+    alphalinks+=('<a class="TabLetterLink" href="#%s" onClick="openLetter(event,\'%s\')" id="click%s">%s</a> ')%(i,i,i,i)
+  alphalinks+='</div>\n \n'
 
   #Generate the body of the table of content 
   cur_let = 'A'
