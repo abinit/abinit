@@ -278,7 +278,7 @@ for abivarname in tests_for_abivars.keys():
         usage_report+=" Tuto test list {"
       else:
         only_tuto=0
-        usage_report+=" All test list {"
+        usage_report+=" Test list {"
       counter=0
       for tests_dir in yml_in["tests_dirs"]:
         if len(dir_ID_for_tests[tests_dir])>0 and (only_tuto==0 or "tuto"==tests_dir[:4]):
