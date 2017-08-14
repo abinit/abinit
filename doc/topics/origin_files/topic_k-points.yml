@@ -2,23 +2,43 @@
     name      : k-points 
     keyword   : k-points 
     authors   : FJ
-    howto     : set parameters related to the k-points
+    howto     : set parameters related to the electronic wavevectors 
     header    : default
     title     : <h1>k-points</h1>
     subtitle  : default
     copyright : default
     links     : default
     introduction : |- 
-          <p> Any kind of symmetries and corresponding sets of k-point can be input,
-          and taken into account in the computation.
-          <br/>Since ABINIT is based on periodic boundary conditions, the Brillouin
-          zone must be sampled adequately. The number of k-points to be used
+          <p>Since ABINIT is based on periodic boundary conditions, 
+          every wavefunction is characterized by a wavevector, usually denoted k-point.
+          <p>Any list of k-point can be specified, thanks to the keywords [[nkpt]] and [[kpt]].
+          <p>Still, k-points are used in two different contexts in the vast majority of cases: 
+            <ul>
+              <li>the sampling of the Brillouin Zone,
+          with the goal to produce integrated quantities (e.g. the charge density, the electronic energy,
+          the electronic DOS ...) that are numerically precise;</li> 
+              <li>or the specific computation of wavefunctions and eigenenergies e.g. to get an electronic band structure.  
+            </ul>
+          In the first case, please complete the present topic
+          by reading [[topic_BandOcc]], while in the second case, please read [[topic_ElecBandStructure]].
+          <p>In the first case, the Brillouin zone must be sampled adequately, with
+          grids that, in general will be homogeneous distributions of k-points throughout the Brillouin Zone (e.g. Monkhorst-Pack
+          grids, or their generalisations)..
+          For such grids, see [[ngkpt]], [[nshiftk]], [[shiftk]] or even the more general [[kptrlatt]].
+          A list of interesting k point sets can be generated automatically,
+          including a measure of their accuracy in term of integration
+          within the Brillouin Zone, see [[prtkpt]], [[kptrlen]]. For metals, a joint convergenc study on [[tsmear]] AND the
+          k-point grid is important.
+          <p>For the definition of a path of k-points, see [[topic_ElecBandStructure]].
+          <br>
+          <p>More detailed explanation concerning the convergence with respect to the k-point sampling.
+          The number of k-points to be used
           for this sampling, in the full Brillouin zone, is inversely
-          proportional to ucvol, but may also
+          proportional to the unit cell volume, but may also
           vary a lot from system to system. As a rule of thumb, a system
           with a large band gap will need few k-points, while metals will need
           lot of k-points to produce converged results.
-          For large systems, the inverse scale with respect to ucvol
+          For large systems, the inverse scale with respect to the unit cell volume
           is unfortunately stopped because at least one k-point must be
           used. The effective number of k-points to be used will be strongly
           influenced by the symmetries of the system, since only the
@@ -27,7 +47,7 @@
           ground-state calculations,
           to reduce sometimes even further the portion of the brillouin zone
           to be sampled. The number of k points to be used in a calculation
-          is named nkpt. There is another way to take advantage of the
+          is named [[nkpt]]. There is another way to take advantage of the
           time-reversal symmetry, in the specific case of k-points that are
           invariant under k => -k , or are sent to another vector distant
           of the original one by some vector of the reciprocal lattice.
@@ -42,12 +62,6 @@
           tsmear. As soon as there is some vacuum in the system, the product
           natom * nkpt can be much smaller than this (for an isolated molecule
           in a sufficiently large supercell, one k-point is enough).
-
-          <br/>The generation of special k point sets (Monkhorst-Pack sets)
-          and band structure k points can be done directly inside ABINIT.
-          A list of interesting k point sets, can be generated automatically,
-          including a measure of their accuracy in term of integration
-          within the Brillouin Zone.
     tutorials  : |-
           <li><a href="../../tutorial/generated_files/lesson_base3.html">The lesson 3</a> deals with crystalline
           silicon (an insulator): the definition of a k-point grid, the smearing

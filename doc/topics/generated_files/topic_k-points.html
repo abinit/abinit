@@ -12,7 +12,7 @@
 <a name="top"></a>
 
 <h1>k-points</h1>
-<h3>This page gives hints on how to set parameters related to the k-points with the ABINIT package.
+<h3>This page gives hints on how to set parameters related to the electronic wavevectors with the ABINIT package.
 <hr>
 
 <h5>Copyright (C) 2016-2017 ABINIT group (FJ)
@@ -32,16 +32,36 @@
 <h3><b>1. Introduction.</b></h3>
 
 
-<p> Any kind of symmetries and corresponding sets of k-point can be input,
-and taken into account in the computation.
-<br/>Since ABINIT is based on periodic boundary conditions, the Brillouin
-zone must be sampled adequately. The number of k-points to be used
+<p>Since ABINIT is based on periodic boundary conditions, 
+every wavefunction is characterized by a wavevector, usually denoted k-point.
+<p>Any list of k-point can be specified, thanks to the keywords <a href="../../input_variables/generated_files/varset_basic.html#nkpt">nkpt</a> and <a href="../../input_variables/generated_files/varset_basic.html#kpt">kpt</a>.
+<p>Still, k-points are used in two different contexts in the vast majority of cases: 
+  <ul>
+    <li>the sampling of the Brillouin Zone,
+with the goal to produce integrated quantities (e.g. the charge density, the electronic energy,
+the electronic DOS ...) that are numerically precise;</li> 
+    <li>or the specific computation of wavefunctions and eigenenergies e.g. to get an electronic band structure.  
+  </ul>
+In the first case, please complete the present topic
+by reading <a href="../../topics/generated_files/topic_BandOcc.html#">topic_BandOcc</a>, while in the second case, please read <a href="../../topics/generated_files/topic_ElecBandStructure.html#">topic_ElecBandStructure</a>.
+<p>In the first case, the Brillouin zone must be sampled adequately, with
+grids that, in general will be homogeneous distributions of k-points throughout the Brillouin Zone (e.g. Monkhorst-Pack
+grids, or their generalisations)..
+For such grids, see <a href="../../input_variables/generated_files/varset_basic.html#ngkpt">ngkpt</a>, <a href="../../input_variables/generated_files/varset_basic.html#nshiftk">nshiftk</a>, <a href="../../input_variables/generated_files/varset_basic.html#shiftk">shiftk</a> or even the more general <a href="../../input_variables/generated_files/varset_gstate.html#kptrlatt">kptrlatt</a>.
+A list of interesting k point sets can be generated automatically,
+including a measure of their accuracy in term of integration
+within the Brillouin Zone, see <a href="../../input_variables/generated_files/varset_files.html#prtkpt">prtkpt</a>, <a href="../../input_variables/generated_files/varset_gstate.html#kptrlen">kptrlen</a>. For metals, a joint convergenc study on <a href="../../input_variables/generated_files/varset_gstate.html#tsmear">tsmear</a> AND the
+k-point grid is important.
+<p>For the definition of a path of k-points, see <a href="../../topics/generated_files/topic_ElecBandStructure.html#">topic_ElecBandStructure</a>.
+<br>
+<p>More detailed explanation concerning the convergence with respect to the k-point sampling.
+The number of k-points to be used
 for this sampling, in the full Brillouin zone, is inversely
-proportional to ucvol, but may also
+proportional to the unit cell volume, but may also
 vary a lot from system to system. As a rule of thumb, a system
 with a large band gap will need few k-points, while metals will need
 lot of k-points to produce converged results.
-For large systems, the inverse scale with respect to ucvol
+For large systems, the inverse scale with respect to the unit cell volume
 is unfortunately stopped because at least one k-point must be
 used. The effective number of k-points to be used will be strongly
 influenced by the symmetries of the system, since only the
@@ -50,7 +70,7 @@ the time-reversal symmetry (k equivalent to -k) can be used for
 ground-state calculations,
 to reduce sometimes even further the portion of the brillouin zone
 to be sampled. The number of k points to be used in a calculation
-is named nkpt. There is another way to take advantage of the
+is named <a href="../../input_variables/generated_files/varset_basic.html#nkpt">nkpt</a>. There is another way to take advantage of the
 time-reversal symmetry, in the specific case of k-points that are
 invariant under k => -k , or are sent to another vector distant
 of the original one by some vector of the reciprocal lattice.
@@ -65,12 +85,6 @@ and beyond 500 for metals, depending on the value of the input variable
 tsmear. As soon as there is some vacuum in the system, the product
 natom * nkpt can be much smaller than this (for an isolated molecule
 in a sufficiently large supercell, one k-point is enough).
-
-<br/>The generation of special k point sets (Monkhorst-Pack sets)
-and band structure k points can be done directly inside ABINIT.
-A list of interesting k point sets, can be generated automatically,
-including a measure of their accuracy in term of integration
-within the Brillouin Zone.
 <br><br><a href=#top>Go to the top</a>
 
 
@@ -108,6 +122,7 @@ convergence studies ...</li>
 ... <a href="../../input_variables/generated_files/varset_basic.html#nkpath">nkpath</a>   [Number of K-points defining the PATH]<br>
 ... <a href="../../input_variables/generated_files/varset_basic.html#nkpt">nkpt</a>   [Number of K - Points]<br>
 ... <a href="../../input_variables/generated_files/varset_basic.html#nshiftk">nshiftk</a>   [Number of SHIFTs for K point grids]<br>
+... <a href="../../input_variables/generated_files/varset_files.html#prtkpt">prtkpt</a>   [PRinT the K-PoinTs sets]<br>
 ... <a href="../../input_variables/generated_files/varset_basic.html#shiftk">shiftk</a>   [SHIFT for K points]<br>
 ... <a href="../../input_variables/generated_files/varset_basic.html#wtk">wtk</a>   [WeighTs for K points]<br>
 <p>Relevant internal variables:<p>... <a href="../../input_variables/generated_files/varset_internal.html#kptns">%kptns</a>   [K-PoinTs re-Normalized and Shifted]<br>

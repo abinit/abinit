@@ -32,13 +32,14 @@
 <h3><b>1. Introduction.</b></h3>
 
 
-<p> The use of wavelets (instead of plane waves) is available in ABINIT.
-At present, it works for the SCF cycles : one can get density, total energy
-and forces, in some basic cases (HGH or GTH pseudopotentials only <a href="../../biblio/generated_files/bib_biblio.html#Genovese2008">[Genovese2008]</a>, or PAW <a href="../../biblio/generated_files/bib_biblio.html#Rangel2016">[Rangel2016]</a>- in v7.2).
+<p> A wavelet basis (instead of a plane wave basis) can be used in ABINIT.
+With a wavelet basis, one can perform basic static DFT calculations 
+with selected norm-conserving pseudopotentials (HGH or GTH pseudopotentials <a href="../../biblio/generated_files/bib_biblio.html#Genovese2008">[Genovese2008]</a>), 
+but also with PAW atomic data <a href="../../biblio/generated_files/bib_biblio.html#Rangel2016">[Rangel2016]</a>).
 Available also : the finite size corrections to the
 total energy, restart on wavefunctions following the ETSF norm and geometry
-relaxation using BFGS. Molecular dynamic is also available for
-test purposes.
+relaxation using BFGS. Molecular dynamic is also available for test purposes.
+<p>However, DFPT or excited-state calculations (except &Delta;-SCF) cannot be performed.
 <br><br><a href=#top>Go to the top</a>
 
 

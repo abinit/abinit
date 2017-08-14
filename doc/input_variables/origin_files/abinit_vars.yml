@@ -23706,7 +23706,7 @@
         if set to -2, the code stops in invars1 after the computation of the irreducible set and
         a file named kpts.nc with the list of the k-points and the corresponding weights is produced
         </p>
-    topics: printing_prden, Output_useful
+    topics: printing_prden, Output_useful, k-points_useful
     varset: files
     vartype: integer
 - !variable
