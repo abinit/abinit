@@ -75,18 +75,15 @@
     title : |
       <h1>Input variables, statistics :</h1>
     subtitle : |
-      occurences in the input files provided with the package 
+      occurrences in the input files provided with the package 
     purpose : |
       This document lists the input variables for ABINIT and three post-processors of ABINIT,
-      in order of occurence in the input files provided with the package.
-      <br>For each executable, and each input variable for this executable, the first given number
-      is the number of input file that use the input variable, and the second number (in parentheses) gives
-      the number of input file in the tests/tuto* directories that use the input variable.
+      in order of number of occurrence in the input files provided with the package.
     advice : |
       <hr>
     tofcontent_header : |
       <a name="list"></a>
-      <h3><b> List of all input variables for ABINIT, AIM, ANADDB and OPTICS, in order of decreasing occurence.</b></h3>
+      <h3><b> List of all input variables for ABINIT, AIM, ANADDB and OPTICS, in order of decreasing occurrence.</b></h3>
 
 - !components
     name : aim

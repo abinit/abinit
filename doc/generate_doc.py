@@ -20,6 +20,13 @@
    Also, only selected classes of tags can be expanded. Other strings will be declared "FAKE_LINK" on the screen.
    More on this topics at https://wiki.abinit.org/doku.php?id=developers:link_shortcuts.
 """
+# XG 20170814 : sorry, awfully written ... I should have used classes, etc. It developed from Yannick script,
+# having in mind a small generalisation to give input variables for topics, then was further enlarged to bibliography, etc, etc,
+# without any global view at any time, except at the very end.
+# So : TODO 
+# Define an enlarged class for abivars, that includes attributes for tests, abivarID, etc ...
+# What are the other classes ? Likely "bibitem" ... But also "executable", "test" ...
+# Define for each class the corresponding functions.
 
 from __future__ import print_function
 
@@ -153,24 +160,26 @@ for item in ["executable","topics"]:
 #Prepare a dictionary to host the list of variables for the different executables for which the input variables are part of the database
 #Prepare a dictionary to host the list of tests for each variable
 executables=["abinit","aim","anaddb","optic"]
-invars_for_executable={}
+abivars_for_executable={}
 tests_for_abivars={}
 for executable in executables:
-  invars_for_executable[executable]=[]
+  abivars_for_executable[executable]=[]
 for var in abinit_vars:
   abivarname=var.abivarname
   tests_for_abivars[abivarname]={}
   tests_for_abivars[abivarname]["inptests"]=[]
   executable="abinit"
+  abivarID=abivarname
   if "@" in abivarname:
-    executable=abivarname.split("@")[1]
+    (abivarID,executable)=abivarname.split("@")
   tests_for_abivars[abivarname]["executable"]=executable
+  tests_for_abivars[abivarname]["abivarID"]=abivarID
   if executable in executables:
-    invars_for_executable[executable].append(abivarname)
+    abivars_for_executable[executable].append(abivarname)
 
 #Collect the input variables in each input test file
 for inptests_name in inptests_dic.keys():
-  inptests_dic[inptests_name]["invars"]=[]
+  inptests_dic[inptests_name]["abivars"]=[]
   executable=inptests_dic[inptests_name]["executable"][0]
   if executable in executables:
     with open(inptests_name,'r') as f:
@@ -198,9 +207,9 @@ for inptests_name in inptests_dic.keys():
     trialnames=list(set(trialnames))
 
     #Constitute the list of input variables in the input test file
-    for abivarname in invars_for_executable[executable]:
+    for abivarname in abivars_for_executable[executable]:
       if abivarname in trialnames:
-        inptests_dic[inptests_name]["invars"].append(abivarname)
+        inptests_dic[inptests_name]["abivars"].append(abivarname)
         tests_for_abivars[abivarname]["inptests"].append(inptests_name)
 
 #Prepare a dictionary with the list of tests for each executable, their number, and the number of tests in tuto dirs.
@@ -261,6 +270,8 @@ for abivarname in tests_for_abivars.keys():
     ratio_tuto="None"
   tests_for_abivars[abivarname]["ratio_all"]=ratio_all
   tests_for_abivars[abivarname]["ratio_in_tuto"]=ratio_in_tuto
+
+  # Constitutes an usage report
   frequency="Rarely used."
   if ratio_all>0.5:
     frequency="Very frequently used,"
@@ -295,6 +306,12 @@ for abivarname in tests_for_abivars.keys():
     else:
       usage_report+=" Too many tests to report (>%s)."%(maxtests)
   tests_for_abivars[abivarname]["usage_report"]=usage_report
+
+#For each executable with input variables, prepare an ordered list of the input variables, according to their usage frequency
+abivars_sorted_frequency={}
+for executable in executables:
+  abivars=abivars_for_executable[executable]
+  abivars_sorted_frequency[executable]=sorted(abivars, key = lambda x: tests_for_abivars[x]["ntests"], reverse=True)
 
 ################################################################################
 # Constitutes the list of allowed links to tests files.
@@ -676,7 +693,17 @@ for executable in executables:
   ntests=tests_for_executables[executable]["ntests"]
   ntests_in_tuto=tests_for_executables[executable]["ntests_in_tuto"]
   cur_content = '<br><h2><a name="%s">%s</a></h2>\n'%(executable,executable.upper())
-  cur_content += ' %s tests of %s (%s tests of %s in the tests/tuto* directories)'%(ntests,executable,ntests_in_tuto,executable)
+  cur_content += '%s tests of %s (%s tests of %s in the tests/tuto* directories)\n <p>\n'%(ntests,executable,ntests_in_tuto,executable)
+  cur_ntests=ntests+1
+  for abivarname in abivars_sorted_frequency[executable]:
+    abivarID=tests_for_abivars[abivarname]["abivarID"]
+    ntests=tests_for_abivars[abivarname]["ntests"]
+    if cur_ntests>ntests:
+      if executable=="abinit" and ntests<12:
+        cur_content += '\n<br>'
+      cur_content += '\n<br> %s :'%(ntests)
+      cur_ntests=ntests
+    cur_content += ' [[%s|%s]] &nbsp;'%(abivarname,abivarID)
   cur_content += '<br><br><a href=#top>Go to the top</a>\n'
   cur_content += '<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>\n'
   #
@@ -843,7 +870,6 @@ defaultClick(true);\n\
     for executable in executables:
       toc_body += ' <li><a href="#%s">%s</a>\n'%(executable,executable.upper())
     toc_body += '</ul>\n'
-    #HERE
   else:
     for abivarname,defi in all_vars[varset]:
       while not abivarname.startswith(cur_let.lower()):
@@ -882,13 +908,13 @@ for list_infos in list_infos_dir:
 
 ################################################################################
 # Constitute the component "Related input variables" for all topic files. 
-# This component in input variables is stored, for each topic_name, in topic_invars[topic_name]
+# This component in input variables is stored, for each topic_name, in topic_abivars[topic_name]
 
-topic_invars = dict()
+topic_abivars = dict()
 found = dict()
 
 for topic_name in list_of_topics:
-  topic_invars[topic_name] = ""
+  topic_abivars[topic_name] = ""
 
 for (tribekey, tribeval) in yml_in["list_tribes"]:
 
@@ -907,13 +933,13 @@ for (tribekey, tribeval) in yml_in["list_tribes"]:
           if tribekey==name_tribe[1].strip() :
             topic_name=name_tribe[0].strip()
             if found[topic_name]==0 :
-              topic_invars[topic_name] += "<p>"+tribeval+":<p>"
+              topic_abivars[topic_name] += "<p>"+tribeval+":<p>"
               found[topic_name] = 1
             abivarname=var.abivarname
             if var.characteristics is not None and '[[INTERNAL_ONLY]]' in var.characteristics:
               abivarname = '%'+abivarname
-            topic_invars[topic_name] += '... <a href="../../input_variables/generated_files/varset_'+var.varset+'.html#'+var.abivarname+'">'+abivarname+'</a>   '
-            topic_invars[topic_name] += "["+var.mnemonics+"]<br>\n"
+            topic_abivars[topic_name] += '... <a href="../../input_variables/generated_files/varset_'+var.varset+'.html#'+var.abivarname+'">'+abivarname+'</a>   '
+            topic_abivars[topic_name] += "["+var.mnemonics+"]<br>\n"
     except:
       if debug==1 :
        print(" No topics for abivarname "+var.abivarname) 
@@ -1038,7 +1064,7 @@ for topic_name in list_of_topics:
       extract_j=getattr(topic,j).strip()
     except :
       extract_j=""
-    if (extract_j != "" and extract_j!= "default") or (j=="input_variables" and topic_invars[topic_name]!="") or (j=="input_files" and topic_infiles[topic_name]!="") or (j=="references" and topic_refs!=""):
+    if (extract_j != "" and extract_j!= "default") or (j=="input_variables" and topic_abivars[topic_name]!="") or (j=="input_files" and topic_infiles[topic_name]!="") or (j=="references" and topic_refs!=""):
       item_toc += 1
       item_num="%d" % item_toc
       sec_number[j]=item_num
@@ -1063,7 +1089,7 @@ for topic_name in list_of_topics:
     elif j == "input_variables":
       if sec_number[j]!="0" :
         topic_html+= '\n&nbsp; \n<hr> \n<a name=\"'+sec_number[j]+'\">&nbsp;</a>\n<h3><b>'+sec_number[j]+'. '+title[j]+'</b></h3>\n\n\n'
-        topic_html+= topic_invars[topic_name]
+        topic_html+= topic_abivars[topic_name]
     elif j == "input_files":
       if sec_number[j]!="0" :
         topic_html+= '\n&nbsp; \n<HR ALIGN=left> \n<a name=\"'+sec_number[j]+'\">&nbsp;</a>\n<h3><b>'+sec_number[j]+'. '+title[j]+'</b></h3>\n\n\n'
