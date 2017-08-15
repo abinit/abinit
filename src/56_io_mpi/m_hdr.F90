@@ -181,7 +181,7 @@ MODULE m_hdr
 
     ! Files with density-like data.
     abifile_t(varname="density", fform=52, ext="DEN", class="density"), &    ! Official
-    abifile_t(varname="ep_density", fform=53, ext="POSITRON", class="density"), &
+    abifile_t(varname="positron_density", fform=53, ext="POSITRON", class="density"), &
     abifile_t(varname="first_order_density", fform=54, ext="DEN(\d+)", class="density"), &
     abifile_t(varname="pawrhor", fform=55, ext="PAWDEN", class="density"), &
     abifile_t(varname="pawrhor_core", fform=56, ext="ATMDEN_CORE", class="density"), &
@@ -382,7 +382,7 @@ character(len=nctk_slen) function varname_from_fname(filename) result(varname)
  !case ("DEN1")
  !  varname = "first_order_density"
  case ("POSITRON")
-   varname = "ep_density"
+   varname = "positron_density"
  case ("PAWDEN")
    varname = "pawrhor"
    ! TODO: Other paw densities

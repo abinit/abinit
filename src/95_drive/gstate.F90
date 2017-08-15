@@ -1080,7 +1080,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 !    Warning : should check the use of results_gs%residm
 !    One might make them separate variables.
 
-    ! Read densiry and get Fermi level from hdr_den
+    ! Read density and get Fermi level from hdr_den
      call read_rhor(dtfil%fildensin, cplex1, dtset%nspden, nfftf, ngfftf, rdwrpaw, &
      mpi_enreg, rhor, hdr_den, pawrhoij, comm, check_hdr=hdr)
      results_gs%etotal = hdr_den%etot; results_gs%energies%e_fermie = hdr_den%fermie
