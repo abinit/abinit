@@ -276,6 +276,7 @@ sec10:
   <ol>
    <li>[[topic:Verification|Verification of the implementation]]</li>
    <li>[[topic:PortabilityNonRegression|Portability and non-regression tests]]</li>
+   <li>[[topic:Git|Git, gitlab and github for the ABINIT project]]</li>
    <li>[[topic:Dev|Miscellaneous for developers]]</li>
   </ol>
 
