@@ -274,6 +274,7 @@ sec10:
  tag: miscellaneous
  body: |
   <ol>
+   <li>[[topic:Verification|Verification of the implemntation]]</li>
    <li>[[topic:Dev|Miscellaneous for developers]]</li>
   </ol>
 
