@@ -246,6 +246,7 @@ sec8:
    <li>[[topic:ElecDOS|Electronic DOS and related topics]]</li>
    <li>[[topic:EffMass|Effective mass calculations]]</li>
    <li>[[topic:Unfolding|Unfolding supercell band structures]]</li>
+   <li>[[topic:DensityPotential|Manipulating the density and potentials]]</li>
    <li>[[topic:STM|Scanning Tunneling Microscopy map]]</li>
    <li>[[topic:Wannier|Wannier functions]]</li>
    <li>[[topic:Bader|Bader Atom-In-Molecule analysis]]</li>
