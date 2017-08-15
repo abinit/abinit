@@ -223,8 +223,8 @@ sec7:
    <li>[[topic:BSE|Bethe-Salpeter calculations for accurate optical properties]]</li>
    <li>[[topic:TDDFT|TDDFT calculations]]</li>
    <li>[[topic:DeltaSCF|DeltaSCF calculations]]</li>
-   <li>[[topic:GWls|GW- Lanczos-Sternheimer method]]</li>
    <li>[[topic:RandStopPow|Random electronic stopping power]]</li>
+   <li>[[topic:GWls|GW- Lanczos-Sternheimer method]] (not in production)</li>
   </ol>
 
 ## Each section must have a title, that will form the table of content.

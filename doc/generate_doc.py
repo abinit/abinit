@@ -1093,7 +1093,8 @@ for topic_name in list_of_topics:
     elif j == "input_files":
       if sec_number[j]!="0" :
         topic_html+= '\n&nbsp; \n<HR ALIGN=left> \n<a name=\"'+sec_number[j]+'\">&nbsp;</a>\n<h3><b>'+sec_number[j]+'. '+title[j]+'</b></h3>\n\n\n'
-        topic_html+= "The user can find some related example input files in the ABINIT package in the directory /tests, or on the Web:\n"
+        topic_html+= "<i><b>WARNING</b> : as of ABINITv8.6.x, the list of input files provided in the specific section of the topics Web pages is still to be reviewed/tuned. In some cases, it will be adequate, and in other cases, it might be incomplete, or perhaps even useless.</i>\n"
+        topic_html+= "<br><br>The user can find some related example input files in the ABINIT package in the directory /tests, or on the Web:\n"
         topic_html+= topic_infiles[topic_name]
     elif j == "references":
       if sec_number[j]!="0" and topic_refs!="" :

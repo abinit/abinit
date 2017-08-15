@@ -9,7 +9,7 @@
     copyright : default
     links     : default
     introduction : |- 
-
+        <p><b> This functionality is not in production.</b>
         <p>A high performance G<sub>0</sub>W<sub>0</sub> implementation [[Janssen2015]] has been developed within ABINIT.
         It is more efficient than the traditional implementation [[Gonze2009]],[[Giantomassi2011]] thanks to the treatment of the two major bottlenecks: the summations over conduction states and the inversion of the dielectric matrix. However, note that this implementation has only limited applicability at present (see below).
         <li>The first bottleneck is circumvented by converting the summations into Sternheimer equations.
@@ -27,8 +27,6 @@
         Note that a convergence study on the latter value is required to check the accuracy of the results. 
         Since only molecular systems are currently supported, the calculation also requires that the Coulomb potential be spherically truncated ([[icutcoul]]= 0) with a radius [[rcut]] that should be validated with a convergence study. 
         </br>
-        <p><b> This functionality is under development.</b>
-
  
     tutorials  : |-
 
