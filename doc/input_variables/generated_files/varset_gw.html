@@ -986,7 +986,7 @@ Only relevant if <a href="../../input_variables/generated_files/varset_gstate.ht
 <br><font id="text">
 <p>
 <p>
- <b>freqim_alpha</b> is used only for numerical integration of the <a href="#"><a href="#">[[FAKE LINK:FAKE LINK:GW]]</a></a> self-energy
+ <b>freqim_alpha</b> is used only for numerical integration of the GW self-energy
 (<a href="../../input_variables/generated_files/varset_gw.html#gwcalctyp">gwcalctyp</a>= 2, 12, 22, 9, 19, 29).
  <br />
  <b>freqim_alpha</b> determines the location of the maximum frequency point along the imaginary axis
@@ -2493,7 +2493,7 @@ Only relevant if <a href="../../input_variables/generated_files/varset_gstate.ht
 <p>
  For each k-point with number igwpt in the range (1:<a href="../../input_variables/generated_files/varset_gw.html#nkptgw">nkptgw</a>),
 <b>kptgw</b>(1,igwpt)
- is the reduced coordinate of the k-point where <a href="#"><a href="#">[[FAKE LINK:FAKE LINK:GW]]</a></a> corrections are required.
+ is the reduced coordinate of the k-point where GW corrections are required.
 while <a href="../../input_variables/generated_files/varset_gw.html#bdgw">bdgw</a> (1:2,igwpt) specifies the range of bands to be considered.
 </p>
 <p>
@@ -2680,7 +2680,7 @@ Only relevant if <a href="../../input_variables/generated_files/varset_gstate.ht
 the dielectric matrix in order to perform the numerical integration of the GW self-energy.
 </p>
 <p>
- It can be used also in case of <a href="#"><a href="#">[[FAKE LINK:FAKE LINK:GW]]</a></a> calculations with plasmon-pole models,
+ It can be used also in case of GW calculations with plasmon-pole models,
  <i>
   i.e
  </i>
@@ -2984,11 +2984,11 @@ Only relevant if <a href="../../input_variables/generated_files/varset_gstate.ht
  </b>
 </p>
 <p>
- Usually only effective if <a href="#"><a href="#">[[FAKE LINK:FAKE LINK:GW]]</a></a> corrections are evaluated using the plasmon-pole model of Godby-Needs
+ Usually only effective if GW corrections are evaluated using the plasmon-pole model of Godby-Needs
 (<a href="../../input_variables/generated_files/varset_gw.html#ppmodel">ppmodel</a>==1).
  <br />
  <br />
- In the present status of the <a href="#"><a href="#">[[FAKE LINK:FAKE LINK:GW]]</a></a> code, the convolution in frequency space
+ In the present status of the GW code, the convolution in frequency space
 defining the self-energy operator can be evaluated using two different approaches:
 numerical integration and plasmon-pole models.
  <br />
@@ -3333,7 +3333,7 @@ this option is not yet compatible with self-consistent GW calculations
 <p>
  The algorithm implemented in <b>symsigma</b>=1
 constructs a symmetric invariant for the diagonal matrix elements of the self-energy
-by simply averaging the <a href="#"><a href="#">[[FAKE LINK:FAKE LINK:GW]]</a></a> results within the degenerate subspace.
+by simply averaging the GW results within the degenerate subspace.
 
 Therefore particular care has to be taken in the presence of accidental degeneracies.
 since GW calculations performed with <b>symsigma</b>=1 will not be able to remove
@@ -3360,7 +3360,7 @@ Only relevant if <a href="../../input_variables/generated_files/varset_gstate.ht
 <p>
  When equal to one or two, this variable allows for the calculation of U with the cRPA method.
 An explicit test is shown in automatic tests v7/t23-t24-t25 and in v7/t68-t69.
-The present implementation is parallelized (as for usual <a href="#"><a href="#">[[FAKE LINK:FAKE LINK:GW]]</a></a> calculations), use symetry over k-points only for calculations involving one correlated atom,
+The present implementation is parallelized (as for usual GW calculations), use symetry over k-points only for calculations involving one correlated atom,
 and can be use when correlated bands are entangled or not.
 The constrained calculation of the polarisability can be done by eliminating
 transition betweens correlated bands (and not orbitals) with the variable <a href="../../input_variables/generated_files/varset_gw.html#ucrpa_bands">ucrpa_bands</a>.

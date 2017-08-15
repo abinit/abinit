@@ -7292,7 +7292,7 @@
     requires: '[[optdriver]]==4'
     text: |-
         <p>
-         [[freqim_alpha]] is used only for numerical integration of the [[GW]] self-energy
+         [[freqim_alpha]] is used only for numerical integration of the GW self-energy
         ([[gwcalctyp]]= 2, 12, 22, 9, 19, 29).
          <br />
          [[freqim_alpha]] determines the location of the maximum frequency point along the imaginary axis
@@ -14695,7 +14695,7 @@
         <p>
          For each k-point with number igwpt in the range (1:[[nkptgw]]),
         [[kptgw]](1,igwpt)
-         is the reduced coordinate of the k-point where [[GW]] corrections are required.
+         is the reduced coordinate of the k-point where GW corrections are required.
         while [[bdgw]] (1:2,igwpt) specifies the range of bands to be considered.
         </p>
         <p>
@@ -17156,7 +17156,7 @@
         the dielectric matrix in order to perform the numerical integration of the GW self-energy.
         </p>
         <p>
-         It can be used also in case of [[GW]] calculations with plasmon-pole models,
+         It can be used also in case of GW calculations with plasmon-pole models,
          <i>
           i.e
          </i>
@@ -22586,11 +22586,11 @@
          </b>
         </p>
         <p>
-         Usually only effective if [[GW]] corrections are evaluated using the plasmon-pole model of Godby-Needs
+         Usually only effective if GW corrections are evaluated using the plasmon-pole model of Godby-Needs
         ([[ppmodel]]==1).
          <br />
          <br />
-         In the present status of the [[GW]] code, the convolution in frequency space
+         In the present status of the GW code, the convolution in frequency space
         defining the self-energy operator can be evaluated using two different approaches:
         numerical integration and plasmon-pole models.
          <br />
@@ -28038,9 +28038,9 @@
         not include the non-symmorphic operations.
         </p>
         <p>
-         Note : this feature exist because in a previous status of the [[GW]] calculations, non-symmorphic
+         Note : this feature exist because in a previous status of the GW calculations, non-symmorphic
         symmetry operations could not be exploited. Thus, the k points were restricted
-        to the IBZ. In order to prepare [[GW]] calculations, and to perform [[GW]] calculations,
+        to the IBZ. In order to prepare GW calculations, and to perform GW calculations,
         [[symmorphi]]=0 was to be used, together with [[nsym]]=0.
         </p>
     topics: crystal_expert, GW_useful
@@ -28128,7 +28128,7 @@
         <p>
          The algorithm implemented in [[symsigma]]=1
         constructs a symmetric invariant for the diagonal matrix elements of the self-energy
-        by simply averaging the [[GW]] results within the degenerate subspace.
+        by simply averaging the GW results within the degenerate subspace.
 
         Therefore particular care has to be taken in the presence of accidental degeneracies.
         since GW calculations performed with [[symsigma]]=1 will not be able to remove
@@ -29181,7 +29181,7 @@
         <p>
          When equal to one or two, this variable allows for the calculation of U with the cRPA method.
         An explicit test is shown in automatic tests v7/t23-t24-t25 and in v7/t68-t69.
-        The present implementation is parallelized (as for usual [[GW]] calculations), use symetry over k-points only for calculations involving one correlated atom,
+        The present implementation is parallelized (as for usual GW calculations), use symetry over k-points only for calculations involving one correlated atom,
         and can be use when correlated bands are entangled or not.
         The constrained calculation of the polarisability can be done by eliminating
         transition betweens correlated bands (and not orbitals) with the variable [[ucrpa_bands]].
@@ -29702,18 +29702,18 @@
          .
         for some informations.
          <br />
-         In the case of a [[GW]] calculation on top of a DFT+U, the absence of definition of a U value in the self-energy
+         In the case of a GW calculation on top of a DFT+U, the absence of definition of a U value in the self-energy
         will LEAVE the underlying U from the DFT calculation.
-        Thus, the code will actually do a [[GW]]+U @ DFT+U calculation.
+        Thus, the code will actually do a GW+U @ DFT+U calculation.
         Note that the screening calculation will not be affected by the presence/absence of a U value.
          <br />
-         Actually, in order to perform a [[GW]] @ DFT+U calculation, one should define the same value of U in the self-energy calculation,
+         Actually, in order to perform a GW @ DFT+U calculation, one should define the same value of U in the self-energy calculation,
         than the one defined in the DFT calculation. The code will know that the interaction corresponding to that value has to be
         SUBTRACTED inside the self-energy. The easiest is actually to define the presence of U for the whole set of calculations (for the different datasets),
         including the screening, even if the U value does not play explicitly a role in the computation of the latter (well, the input
         wavefunctions will be different anyhow).
          <br />
-         It is possible to perform calculations of the type [[GW]]+U_prime @ DFT+U , so keeping a smaller U interaction in the [[GW]] calculation, by subtracting
+         It is possible to perform calculations of the type GW+U_prime @ DFT+U , so keeping a smaller U interaction in the GW calculation, by subtracting
         a smaller U than the one used in the DFT calculation. See the description of the [[upawu]] input variable.
          <br />
          References:

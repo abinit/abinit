@@ -1793,18 +1793,18 @@ The expression of the density matrix is chosen thanks to
  .
 for some informations.
  <br />
- In the case of a <a href="#"><a href="#">[[FAKE LINK:FAKE LINK:GW]]</a></a> calculation on top of a DFT+U, the absence of definition of a U value in the self-energy
+ In the case of a GW calculation on top of a DFT+U, the absence of definition of a U value in the self-energy
 will LEAVE the underlying U from the DFT calculation.
-Thus, the code will actually do a <a href="#"><a href="#">[[FAKE LINK:FAKE LINK:GW]]</a></a>+U @ DFT+U calculation.
+Thus, the code will actually do a GW+U @ DFT+U calculation.
 Note that the screening calculation will not be affected by the presence/absence of a U value.
  <br />
- Actually, in order to perform a <a href="#"><a href="#">[[FAKE LINK:FAKE LINK:GW]]</a></a> @ DFT+U calculation, one should define the same value of U in the self-energy calculation,
+ Actually, in order to perform a GW @ DFT+U calculation, one should define the same value of U in the self-energy calculation,
 than the one defined in the DFT calculation. The code will know that the interaction corresponding to that value has to be
 SUBTRACTED inside the self-energy. The easiest is actually to define the presence of U for the whole set of calculations (for the different datasets),
 including the screening, even if the U value does not play explicitly a role in the computation of the latter (well, the input
 wavefunctions will be different anyhow).
  <br />
- It is possible to perform calculations of the type <a href="#"><a href="#">[[FAKE LINK:FAKE LINK:GW]]</a></a>+U_prime @ DFT+U , so keeping a smaller U interaction in the <a href="#"><a href="#">[[FAKE LINK:FAKE LINK:GW]]</a></a> calculation, by subtracting
+ It is possible to perform calculations of the type GW+U_prime @ DFT+U , so keeping a smaller U interaction in the GW calculation, by subtracting
 a smaller U than the one used in the DFT calculation. See the description of the <a href="../../input_variables/generated_files/varset_paw.html#upawu">upawu</a> input variable.
  <br />
  References:
