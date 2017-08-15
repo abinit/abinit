@@ -261,7 +261,7 @@ sec9:
   <ol>
    <li>[[topic:positron|Positron calculations]]</li>
    <li>[[topic:Abipy|Abipy]]</li>
-   <li>[[topic:APPA|APPA]]</li>
+   <li>[[topic:APPA|Abinit Post-Processor Application (APPA), for molecular-dynamics trajectory analysis]]</li>
   </ol>
 
 ## Each section must have a title, that will form the table of content.

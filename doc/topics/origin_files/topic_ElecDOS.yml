@@ -12,6 +12,7 @@
       A _DOS file can be produced either using the tetrahedron method or smearing approaches.
       The partial (orbital weighted) DOS can also be obtained.
       See the detailed explanation in [[prtdos]].
+      <p>Different plotting post-processor allows one to represent the DOS, including [[topic:Abipy|Abipy]].
     tutorials : |
       <li>PAW1 lesson, section on [[lesson:paw1#dos|Plotting PAW contributions to the Density of States]]</li>
     end : default 

@@ -17,6 +17,7 @@
          Langevin dynamics is also available.
          <p> Specified lattice parameters, or angles, or atomic positions,
          can be kept fixed if needed, see [[topic_GeoConstraints]].
+         <p> The trajectories can be analyzed thanks to the [[topic:APPA|APPA postprocessor]].
     tutorials  : |-
               <li><a href="../../tutorial/generated_files/lesson_paral_moldyn.html">Parallelism for molecular
               dynamics calculations</a></li>
