@@ -824,7 +824,7 @@
         cells with different atomic characteristics can thus be considered,
         and can be made to evolve, e.g. with a genetic algorithm (not coded in v7.0.0 though).
         </p>
-    topics: PIMD_useful, DFPT_useful, AtomTypes_basic, Artificial_basic
+    topics: PIMD_useful, Phonons_useful, AtomTypes_basic, Artificial_basic
     varset: rlx
     vartype: real
 - !variable
@@ -2980,7 +2980,7 @@
         When the spatial chemical potential is defined only for one type of atom (and no chemical potential is present for the other atoms), simply set the related values to *0.0 in the [[chempot]] array.
 
         In the present input array, reduced positions, energies and derivatives of energies are mixed. Hence, although the chemical potential is an energy, one cannot use the usual energy definitions (i.e. the chemical potential is always to be input in Hartree atomic units).
-    topics: Artificial_useful
+    topics: Artificial_expert
     varset: geo
     vartype: real
 - !variable
@@ -4380,7 +4380,7 @@
     text: |-
         This variable defines the treatment of the dipole-dipole interaction.
         Same meaning as the corresponding anaddb variable [[dipdip@anaddb]]
-    topics: DFPT_useful
+    topics: Phonons_useful
     varset: eph
     vartype: integer
 - !variable
@@ -11539,7 +11539,7 @@
          </b>
          ).
         </p>
-    topics: DFPT_useful
+    topics: q-points_basic
     varset: gstate
     vartype: integer
 - !variable
@@ -12823,7 +12823,7 @@
         it is written once every '[[istatr]]' call.
         When '[[istatr]]'=0, there is no writing of a status file (which is the default).
         </p>
-    topics: Output_expert
+    topics: printing_prmisc
     varset: dev
     vartype: integer
 - !variable
@@ -12856,7 +12856,7 @@
         There is also a writing for each of the 5 first calls,
         and the 10th call.
         </p>
-    topics: Output_expert
+    topics: printing_prmisc
     varset: dev
     vartype: integer
 - !variable
@@ -17419,7 +17419,7 @@
         <p>
          For more information on Monkhorst-Pack grids, see [[ngkpt]].
         </p>
-    topics: DFPT_compulsory
+    topics: q-points_basic
     varset: gstate
     vartype: integer
 - !variable
@@ -18723,7 +18723,7 @@
         Also, if 1 and a RF calculation is done, defines the
         wavevector of the perturbation.
         </p>
-    topics: DFPT_compulsory
+    topics: q-points_basic
     varset: gstate
     vartype: integer
 - !variable
@@ -18922,7 +18922,7 @@
         The maximum allowed value of [[nshiftq]] is 8.
         The values of the shifts are given by [[shiftq]].
         </p>
-    topics: DFPT_useful
+    topics: q-points_useful
     varset: gstate
     vartype: integer
 - !variable
@@ -21628,7 +21628,7 @@
         2 for tetrahedron method (no other input is needed but requires at least 4 q-points in the BZ)
         </br>
         </p>
-    topics: DFPT_useful
+    topics: q-points_useful
     varset: eph
     vartype: integer
 - !variable
@@ -21643,7 +21643,7 @@
     requires: null
     text: |-
         This variable is used in conjunction with [[ph_nqpath]] and [[ph_qpath]] to define the q-path used for phonon band structures and phonon linewidths. It gives the number of points used to sample the smallest segment in the q-path specified by [[ph_qpath]].
-    topics: DFPT_useful
+    topics: q-points_useful
     varset: eph
     vartype: integer
 - !variable
@@ -21663,7 +21663,7 @@
     text: |-
         This variable defines the q-mesh used to compute the phonon DOS and the Eliashberg function via Fourier interpolation.
         Related input variables: [[ph_qshift]] and [[ph_nqshift]].
-    topics: DFPT_useful
+    topics: q-points_useful
     varset: dfpt
     vartype: integer
 - !variable
@@ -21678,7 +21678,7 @@
     requires: null
     text: |-
         This integer defines the number of points in the [[ph_qpath]] array.
-    topics: DFPT_useful
+    topics: q-points_useful
     varset: eph
     vartype: integer
 - !variable
@@ -21696,7 +21696,7 @@
         for the phonon DOS and for the Eliashberg functions (see [[ph_ngqpt]]).
         If not given, the code assumes a Gamma-centered mesh. The shifts
         are specified by [[ph_qshift]].
-    topics: DFPT_useful
+    topics: q-points_useful
     varset: eph
     vartype: integer
 - !variable
@@ -21714,7 +21714,7 @@
     text: |-
         This array contains the list of special q-points used to construct the q-path for phonon band structures and phonon linewidths.
         See also [[ph_nqpath]] and [[[ph_ndivsm]].
-    topics: DFPT_useful
+    topics: q-points_useful
     varset: dfpt
     vartype: real
 - !variable
@@ -21735,7 +21735,7 @@
     text: |-
         This array gives the shifts to be used to construct the q-mesh for
         computing the phonon DOS and the Eliashberg functions (see also [[ph_nqshift]]. If not given, a Gamma-centered mesh is used.
-    topics: DFPT_useful
+    topics: q-points_useful
     varset: eph
     vartype: real
 - !variable
@@ -21752,7 +21752,7 @@
     text: |-
         The gaussian broadening used for the integration of the phonon
         DOS and the Eliashberg function. See also [[ph_intmeth]] and [[ph_ngqpt]].
-    topics: DFPT_useful
+    topics: q-points_useful
     varset: eph
     vartype: real
 - !variable
@@ -21769,7 +21769,7 @@
     text: |-
         The step used to generate the (linear) frequency mesh for the phonon DOS and the Eliashberg function.
         The extrema of the mesh are automatically computed by the code.
-    topics: DFPT_useful
+    topics: q-points_useful
     varset: eph
     vartype: real
 - !variable
@@ -22246,7 +22246,7 @@
         this non-zero polarization should be specified as [[polcen]] (in REDUCED coordinates, in atomic units) in the input file.
         See Eq.(24) in the Suppl. of Nat. Phys. (M. Stengel, N.A. Spaldin and D. Vanderbilt, Nat. Phys. 5,304 (2009))
         </p>
-    topics: DFPT_useful
+    topics: Berry_useful
     varset: ffield
     vartype: real
 - !variable
@@ -23432,7 +23432,7 @@
           </li>
          </ul>
         </p>
-    topics: printing_prfermi, EFG_basic
+    topics: printing_prden, EFG_basic
     varset: paw
     vartype: integer
 - !variable
@@ -25147,7 +25147,7 @@
         of a perturbing potential of strength [[vprtrb]].  See [[vprtrb]]
         for more explanation.
         </p>
-    topics: DFPT_expert
+    topics: Artificial_useful
     varset: ffield
     vartype: integer
 - !variable
@@ -25179,7 +25179,7 @@
         instead), but is used to echo the value of [[qptn]](1:3),
         with renormalisation factor one.
         </p>
-    topics: ' DFPT_useful'
+    topics: q-points_useful
     varset: gstate
     vartype: real
 - !variable
@@ -25285,7 +25285,7 @@
         [[qptn]](1:3)=
         [[qpt]](1:3)/[[qptnrm]].
         </p>
-    topics: DFPT_useful
+    topics: q-points_useful
     varset: gstate
     vartype: real
 - !variable
@@ -25370,7 +25370,7 @@
         [[prtkpt]] might help
         you to select the optimal grid, similarly to the case of the K point grid.
         </p>
-    topics: DFPT_compulsory
+    topics: q-points_basic
     varset: gstate
     vartype: integer
 - !variable
@@ -25413,7 +25413,7 @@
         See this latter variable for a complete description of this
         procedure.
         </p>
-    topics: DFPT_useful
+    topics: q-points_useful
     varset: gstate
     vartype: integer
 - !variable
@@ -26136,7 +26136,7 @@
          The treatment of the acoustic sum rule and charge neutrality sum rule is finer at the level of the ANADDB utility,
         with the two independent input variables [[anaddb:asr]] and [[anaddb:chneut]].
         </p>
-    topics: DFPT_basic
+    topics: Phonons_basic
     varset: dfpt
     vartype: integer
 - !variable
@@ -26306,7 +26306,7 @@
         also, in case a scissor shift is to be used,
         it is usually not applied for the d/dk response).
         </p>
-    topics: EffMass_compulsory, DFPT_compulsory
+    topics: EffMass_compulsory, DFPT_basic
     varset: dfpt
     vartype: integer
 - !variable
@@ -27041,7 +27041,7 @@
          See [[shiftk]] for more information on the definition,
         use, and suitable values for these shifts.
         </p>
-    topics: DFPT_useful
+    topics: q-points_useful
     varset: gstate
     vartype: real
 - !variable
@@ -27971,7 +27971,7 @@
     text: |-
         If symdynmat is equal to 1, the dynamical matrix is symmetrized before the diagonalization (same meaning as the corresponding anaddb variable).
         Note that symdynmat==1 will automatically enable the symmetrization of the electron-phonon linewidths.
-    topics: DFPT_useful
+    topics: Phonons_useful
     varset: eph
     vartype: integer
 - !variable
@@ -31127,7 +31127,7 @@
           </li>
          </ul>
         </p>
-    topics: DFPT_expert
+    topics: Artificial_useful
     varset: ffield
     vartype: real
 - !variable
@@ -31603,7 +31603,7 @@
         <p>
          Gives the current q-point weight.
         </p>
-    topics: DFPT_useful
+    topics: q-points_useful
     varset: gstate
     vartype: real
 - !variable

@@ -9,5 +9,5 @@
     copyright : default
     links     : default
     introduction: |
-      To be written ...
+      A few input variables governs the possible stopping of ABINIT, or modify details of the ABINIT flow for specific cases.
     end : default 

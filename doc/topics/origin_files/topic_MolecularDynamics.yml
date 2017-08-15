@@ -11,7 +11,7 @@
     introduction : |- 
          <p> Three molecular dynamics algorithm (Numerov, Verlet, Blanes and Moanes)
          allow to perform simulations in real
-         (simulated) time. The displacement of atoms may be computed according to
+         (simulated) time, see [[ionmov]]. The displacement of atoms may be computed according to
          Newton's law, or by adding a friction force to it.
          Nose-Hoover thermostat is available with Verlet algorithm.
          Langevin dynamics is also available.

@@ -33,7 +33,7 @@
 
 
 <p>The theory and details of the implementation are described in <a href="../../biblio/generated_files/bib_biblio.html#Gonze2009">[Gonze2009]</a> and <a href="../../biblio/generated_files/bib_biblio.html#Gonze2016">[Gonze2016]</a>.
-<p>Basic calculations of electron-phonon interaction in ABINIT: one performs a normal ground state, then phonon calculations (using <a href="../../input_variables/generated_files/varset_dfpt.html#rfphon">rfphon</a>, 
+<p>Basic calculations of electron-phonon interaction in ABINIT: one performs a normal ground state, then DFPT phonon calculations (using <a href="../../input_variables/generated_files/varset_dfpt.html#rfphon">rfphon</a>, 
 with added keywords <a href="../../input_variables/generated_files/varset_dfpt.html#prepgkk">prepgkk</a> and <a href="../../input_variables/generated_files/varset_files.html#prtgkk">prtgkk</a>, which saves the matrix elements to files suffixed GKK. 
 The main change in this respect is that <a href="../../input_variables/generated_files/varset_files.html#prtgkk">prtgkk</a> now disables the use of symmetry in reducing q-points and perturbations. 
 This avoids ambiguities in wave function phases due to band degeneracies. 
@@ -53,6 +53,13 @@ for experts, with <a href="../../input_variables/generated_files/varset_gstate.h
 <a name="2">&nbsp;</a>
 <h3><b>2. Related lesson(s) of the tutorial.</b></h3>
 
+
+<li><a href="../../tutorial/generated_files/lesson_rf1.html#">The lesson Response-Function 1 (RF1)</a>
+presents the basics of DFPT calculations within ABINIT. The example
+given is the study of dynamical and dielectric properties of AlAs (an
+insulator): phonons at Gamma, dielectric constant, Born effective
+charges, LO-TO splitting, phonons in the whole Brillouin zone. The
+creation of the "Derivative Data Base" (DDB) is presented.</li>
 
 <li> <a href="../../tutorial/generated_files/lesson_eph.html">The lesson on the
 electron-phonon interaction</a> presents the use of the utility MRGKK

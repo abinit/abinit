@@ -1,10 +1,10 @@
 - !components
     name      : BandOcc
-    keyword   : Metal/insulators - bands and occupations
+    keyword   : Bands and occupations -  Metal/insulators
     authors   : FJ
-    howto     : to specify a metal or an insulators, and the related bands and occupation numbers 
+    howto     : to specify bands and occupation numbers, for metals or insulators
     header    : default
-    title     : <h1>Metal/insulators - Bands and occupation numbers</h1>
+    title     : <h1>Bands and occupation numbers for metals and insulators</h1>
     subtitle  : default
     copyright : default
     links     : default

@@ -9,5 +9,5 @@
     copyright : default
     links     : default
     introduction : |
-      The following input variables can be used to trigger the output of some quantities in the main output file.
+      The following input variables can be used to trigger or modify the output of some quantities in the main output file.
     end : default

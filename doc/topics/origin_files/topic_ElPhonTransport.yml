@@ -9,12 +9,19 @@
     copyright : default
     links     : default
     introduction : |- 
-        <p>This topic concerns metals only.
-        <p>After generating a GKK file (see [[topic_ElPhonInt]]), 
+        Warning : this topic concerns metals only.
+        <p>The calculation of bulk transport quantities (electrical and thermal
+        resistivities - the part that is determined by the electron-phonon interaction) is possible using anaddb. 
+        Analogous quantities are obtained from the conducti post-processor, but due to electron-electron
+        scattering, instead of electron-phonon.
+        <p>A preliminary calculation of the derivatives of the wavefunctions with respect to
+        k-vector must be carried out. After generating a GKK file (see [[topic_ElPhonInt]]), 
         the Electron-Phonon Coupling (EPC) analysis is performed in anaddb, setting [[anaddb:elphflag]] variable to 1. 
         Most of the procedure is automatic, but can be lengthy if a large number of k-points is being used. 
-        <p>The electron-phonon interaction is interpolated in reciprocal space,
-        then integrated over the Fermi surface. Several quadrature methods are available. The default ([[anaddb:telphint]]=1) is to use Gaussian weighting,
+        <p>For the superconductivity calculations, The electron-phonon interaction is interpolated in reciprocal space,
+        then integrated over the Fermi surface to give the Eliashberg function. 
+        Several quadrature methods are available. 
+        The default ([[anaddb:telphint]]=1) is to use Gaussian weighting,
         with a width [[anaddb:elphsmear]]. Another option is the improved
         tetrahedron [[Bloechl1994a]] ([[anaddb:telphint]]=0).
         Finally ([[anaddb:telphint]]=2), one can integrate a given set of electron bands,
@@ -22,13 +29,8 @@
         The resulting integrated quantities are the Eliashberg function (in a file
         suffixed _A2F), and the EPC strength &lambda;
         which is printed in the main output file.
-
-        <p>The calculation of bulk transport quantities (electrical and thermal
-        conductivities) is possible using anaddb. Analogous quantities are
-        obtained from the conducti post-processor, but due to electron-electron
-        scattering, instead of electron-phonon. A
-        preliminary calculation of the derivatives of the wavefunctions with respect to
-        k-vector must be carried out. The transport calculation is turned on by setting
+        <p>
+        The transport calculation is turned on by setting
         [[anaddb:ifltransport]] to 1 in anaddb. The transport quantities depend on
         the Fermi velocity for each band, and the electronic band-dependence of the
         matrix elements must be

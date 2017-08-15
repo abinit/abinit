@@ -9,48 +9,31 @@
     copyright : default
     links     : default
     introduction : |- 
-
-       <p>Density-Functional Perturbation Theory (DFPT) allows one to address a large variety of physical observables. Many properties of interest can be computed directly from the derivatives of the energy, without the use of finite differences: phonons modes, elastic tensors, effective charges, dielectric tensors, etc... 
-       <p>A DFPT calculation workflow is conducted as follows:
-       <li> Run a Ground-State calculation in order to extract the Kohn-Sham pseudo wave-functions; these must be extremely well converged.</li>
-
-       <li>If necessary, e.g., for the application of the derivative of the Hamiltonian with respect to an electric field, determine the derivatives of the wave functions with respect to the wave vector <b>k</b>, and keep them in a file. The keyword [[rfddk]] is used to perform this type of calculation.</li>
-
-       <li>Compute the 2nd-order derivative matrix (i.e., 2nd derivatives of the energy with respect to different perturbations &lambda;). This can be done thanks to the keywords [[rfphon]] (&lambda;=atomic displacement), [[rfstrs]] (&lambda;=strain), [[rfelfd]] (&lambda;=electric field) or [[rfmagn]] (&lambda;=magnetic field). </li>
-
-       <li>Launch the anaddb tool (distributed with ABINIT) to analyse the derivative database and compute relaxed tensors and thermodynamical properties.</li>
-
-       <p>Note that for PAW calculation, when performing the post-processing with anaddb, it is recommended to include all the keywords enforcing the sum rules (acoustic sum and charge neutrality). Indeed the PAW formalism involves, for each atom, the calculation of a large number of real space integrals, whose numerical effect may be to break the translational invariance.
-
-       <p>Thanks to the locality provided by PAW partial wave basis, it is possible to perform response function calculations for correlated electron materials. The LDA+U formalism is usable without any restriction for the PAW+DFPT calculations.
-
-       <p> All the tutorials dedicated to response functions can be followed both with norm-conserving pseudopotentials and with PAW atomic datasets.
-       <p> More detailed explanations to perform a response calculation are given in the <a href="../../users/generated_files/help_respfn.html">help_respfn </a>file. 
-
+       The computation of the second-order derivative of the total energy with respect to atomic displacements at an arbitrary 
+       wavevector, using [[topic:DFPT]], opens the possibility to compute the dynamical matrix at that wavevector, and hence, to compute the
+       phonon eigenfrequency and eigendisplacements. When the wavevector is (0,0,0), usually denoted as the Gamma point,
+       the combination of the atomic displacements and electric field type perturbations opens also the access to
+       Born effective charges, electronic (for frequencies lower than the electronic band gap) dielectric constants,
+       and then, to infra-red reflectivity of materials (in the infinite lifetime approximation).
+       See [[Gonze1997a]] for the presentation of the theory with DFPT.
+       <p> In ABINIT, with one dataset for a fixed wavevector (see [[topic_q-points]]), one can compute all such 
+       second-order derivatives. ABINIT will already perform some post-processing treatment of the
+       second-order derivatives (e.g. computation of the dynamical matrix, and corresponding eigenenergies and eigendisplacements), 
+       although the most extended post-processing treatment is provided by ANADDB. Thus, there is some overlap of the two executables, with some
+       common input variables. Usually, the action of an input variable with the same name in the two executables
+       is very similar, although there are some input variables that govern more options in ANADDB then in ABINIT,
+       because of the previously mentioned difference in capabilities. In the database of input variables, 
+       the input variables related to ABINIT or ANADDB are clearly distinguished.
+       <p>It will be the easiest to discover the capabilities of these two executables through the
+       [[lesson_rf1]] of the tutorial.
+       <p>See [[topic_DFPT]] for the general information about DFPT, [[topic_q-points]] for the specification of q-points,
+       and [[topic_PhononBands]] for the computation of full phonon bands.
     tutorials  : |-
-       <li><a href="../../tutorial/generated_files/lesson_rf1.html">The lesson Response-Function 1 (RF1)</a>
-       presents the basics of response-functions within ABINIT. The example
+       <li>[[lesson_rf1|The lesson Response-Function 1 (RF1)]]
+       presents the basics of DFPT calculations within ABINIT. The example
        given is the study of dynamical and dielectric properties of AlAs (an
        insulator): phonons at Gamma, dielectric constant, Born effective
        charges, LO-TO splitting, phonons in the whole Brillouin zone. The
        creation of the "Derivative Data Base" (DDB) is presented.</li>
-       <li><a href="../../tutorial/generated_files/lesson_rf2.html">The lesson Response-Function 2 (RF2)</a>
-       presents the analysis of the DDBs that have been introduced in the
-       preceeding lesson RF1.  The computation of the interatomic forces and
-       the computation of thermodynamical properties is an outcome of this
-       lesson.</li>
-       <li>The additional information given by lesson RF1 opens the door to
-       <a href="../../tutorial/generated_files/lesson_optic.html">The lesson on Optic</a>, the utility that
-       allows to obtain the frequency dependent linear optical dielectric
-       function and the frequency dependent second order nonlinear optical
-       susceptibility, in the simple "Sum-Over-State" approximation.</li>
-       <li><a href="../../tutorial/generated_files/lesson_elastic.html">The lesson on the elastic
-       properties</a> presents the computation with respect to the strain
-       perturbation and its responses: elastic constants,
-       piezoelectricity.</li>
-       <li><a href="../../tutorial/generated_files/lesson_paral_dfpt.html">Parallelism of response-function
-       calculations</a> - you need to be familiarized with the calculation of
-       linear-response properties within ABINIT, see the tutorial <a
-       href="../../tutorial/generated_files/lesson_rf1.html"> Response-Function 1 (RF1)</a></li>
 
     end : default

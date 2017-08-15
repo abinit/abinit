@@ -33,8 +33,9 @@
 
 
 With a computer, one can consider non-physical modifications of the system to help the understanding the physics ...
-<p>The nuclear masses and free electron mass can be modified. A fake space dependent chemical potenial can be added, 
-as well as the electrostatic potential of a slab.
+<p>The nuclear masses and free electron mass can be modified. A fake space dependent chemical potenial can be added, see <a href="../../input_variables/generated_files/varset_geo.html#chempot">chempot</a>, 
+as well as the electrostatic potential of a slab, <a href="../../input_variables/generated_files/varset_gstate.html#jellslab">jellslab</a>. A simple sine/cosine potential with a wavevector compatible 
+with the (super)call can also be added, see <a href="../../input_variables/generated_files/varset_ffield.html#qprtrb">qprtrb</a>.
 <br><br><a href=#top>Go to the top</a>
 
 
@@ -47,8 +48,10 @@ as well as the electrostatic potential of a slab.
 
 
 <p>Basic input variables:<p>... <a href="../../input_variables/generated_files/varset_rlx.html#amu">amu</a>   [Atomic Mass Units]<br>
-<p>Useful input variables:<p>... <a href="../../input_variables/generated_files/varset_geo.html#chempot">chempot</a>   [spatially varying CHEMical POTential]<br>
-<p>Input variables for experts:<p>... <a href="../../input_variables/generated_files/varset_dev.html#effmass_free">effmass_free</a>   [EFFective MASS for the FREE electron]<br>
+<p>Useful input variables:<p>... <a href="../../input_variables/generated_files/varset_ffield.html#qprtrb">qprtrb</a>   [Q-wavevector of the PERTurbation]<br>
+... <a href="../../input_variables/generated_files/varset_ffield.html#vprtrb">vprtrb</a>   [potential -V- for the PeRTuRBation]<br>
+<p>Input variables for experts:<p>... <a href="../../input_variables/generated_files/varset_geo.html#chempot">chempot</a>   [spatially varying CHEMical POTential]<br>
+... <a href="../../input_variables/generated_files/varset_dev.html#effmass_free">effmass_free</a>   [EFFective MASS for the FREE electron]<br>
 ... <a href="../../input_variables/generated_files/varset_gstate.html#jellslab">jellslab</a>   [include a JELLium SLAB in the cell]<br>
 ... <a href="../../input_variables/generated_files/varset_geo.html#nzchempot">nzchempot</a>   [Number of Z reduced coordinates that define the spatial CHEMical POTential]<br>
 ... <a href="../../input_variables/generated_files/varset_gstate.html#slabwsrad">slabwsrad</a>   [jellium SLAB Wigner-Seitz RADius]<br>

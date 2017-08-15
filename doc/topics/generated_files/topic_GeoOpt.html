@@ -11,7 +11,7 @@
 <hr>
 <a name="top"></a>
 
-<h1>Geometry optimization calculations</h1>
+<h1>Geometry optimization</h1>
 <h3>This page gives hints on how to perform a geometry optimization with the ABINIT package.
 <hr>
 
@@ -34,8 +34,9 @@
 
 <p> Different algorithms (Broyden; modified Broyden; Verlet with sudden
 stop of atoms) allows to find the equilibrium configuration
-of the nuclei, for which the forces vanish. The cell parameters
-can also be optimized concurently with the atomic positions.
+of the nuclei, for which the forces vanish, see <a href="../../input_variables/generated_files/varset_rlx.html#ionmov">ionmov</a>. The cell parameters
+can also be optimized concurently with the atomic positions <a href="../../input_variables/generated_files/varset_rlx.html#optcell">optcell</a>,
+possibly with a state of given stress as a target, <a href="../../input_variables/generated_files/varset_rlx.html#strtarget">strtarget</a>.
 <p> Specified lattice parameters, or angles, or atomic positions,
 can be kept fixed if needed, see <a href="../../topics/generated_files/topic_GeoConstraints.html#">topic_GeoConstraints</a>.
 <p> A genetic algorithm has been coded, for global optimisation. Not in production yet. See <a href="../../input_variables/generated_files/varset_rlx.html#ga_rules">ga_rules</a>.

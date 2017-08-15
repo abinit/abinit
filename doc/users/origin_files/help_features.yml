@@ -110,7 +110,7 @@ sec2:
    <li>[[topic:SCFControl|SCF control, tolerances and stopping criteria]]</li>
    <li>[[topic:ForcesStresses|Forces and stresses]]</li>
    <li>[[topic:TuningSpeed|Tuning the speed of the calculation]]</li>
-   <li>[[topic:Recursion|Recursion methods and orbital free calculations]]</li>
+   <li>[[topic:Recursion|Recursion methods and orbital free calculations]] (not in production)</li>
    </ol>
 
 ## Each section must have a title, that will form the table of content.
@@ -156,7 +156,7 @@ sec4:
   <li>[[topic:TransPath|Transition path searches: NEB and string method]]</li>
   <li>[[topic:GeoConstraints|Geometry constraints]]</li>
   <li>[[topic:PIMD|Path-integral molecular dynamics (PIMD)]]</li>
-  <li>[[topic:LOTF|Learn-on-the-flight (LOTF)]]</li>
+  <li>[[topic:LOTF|Learn-on-the-flight (LOTF)]] (not in production)</li>
   </ol>
 
 ## Each section must have a title, that will form the table of content.
@@ -190,6 +190,7 @@ sec6:
   thus also temperature-dependent properties due to phonons.
   <ol>
    <li>[[topic:DFPT|Generalities about DFPT]]
+   <li>[[topic:q-points|Wavevectors for phonons (q-points)]]
    <li>[[topic:Phonons|Vibrational and dielectric properties (phonon frequencies and modes, IR and Raman spectra, Born effective charges)]]</li>
    <li>[[topic:PhononBands|Phonon bands and DOS, interatomic force constants, sound velocity]]</li>
    <li>[[topic:Temperature|Temperature dependent properties (free energy, entropy, specific heat, atomic temperature factors, thermal expansion)]]</li>

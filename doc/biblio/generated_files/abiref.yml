@@ -842,6 +842,15 @@
   owner : yannick
 -
   ENTRYTYPE : article
+  ID : Gillet2017
+  author : Yannick Gillet and Stefan Kontur and Matteo Giantomassi and Claudia Draxl and Xavier Gonze
+  title : Ab Initio Approach to Second-order Resonant Raman Scattering Including Exciton-Phonon Interaction
+  journal : Scientific Reports
+  year : 2017
+  volume : 7
+  pages : 7344
+-
+  ENTRYTYPE : article
   ID : Godby1989
   author : R. W. Godby and R. J. Needs
   title : Metal-insulator transition in Kohn-Sham theory and quasiparticle theory

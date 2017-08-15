@@ -2,9 +2,9 @@
     name      : k-points 
     keyword   : k-points 
     authors   : FJ
-    howto     : set parameters related to the electronic wavevectors 
+    howto     : set parameters related to the electronic wavevectors (k-points)
     header    : default
-    title     : <h1>k-points</h1>
+    title     : <h1>Electronic wavevectors</h1>
     subtitle  : default
     copyright : default
     links     : default

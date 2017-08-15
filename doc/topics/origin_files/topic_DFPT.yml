@@ -10,7 +10,7 @@
     links     : default
     introduction : |- 
 
-       <p>Density-Functional Perturbation Theory (DFPT) allows one to address a large variety of physical observables. Many properties of interest can be computed directly from the derivatives of the energy, without the use of finite differences: phonons modes, elastic tensors, effective charges, dielectric tensors, etc... 
+       <p>Density-Functional Perturbation Theory (DFPT) allows one to address a large variety of physical observables. Many properties of interest can be computed directly from the derivatives of the energy, without the use of finite differences: phonons modes, elastic tensors, effective charges, dielectric tensors, etc... Even non-linear properties can be computed, like the Raman intensities (for the latter, see [[topic_nonlinear]])..
        <p>A DFPT calculation workflow is conducted as follows:
        <li> Run a Ground-State calculation in order to extract the Kohn-Sham pseudo wave-functions; these must be extremely well converged.</li>
 
@@ -28,29 +28,27 @@
        <p> More detailed explanations to perform a response calculation are given in the <a href="../../users/generated_files/help_respfn.html">help_respfn </a>file. 
 
     tutorials  : |-
-       <li><a href="../../tutorial/generated_files/lesson_rf1.html">The lesson Response-Function 1 (RF1)</a>
-       presents the basics of response-functions within ABINIT. The example
+       <li>[[lesson_rf1|The lesson Response-Function 1 (RF1)]]
+       presents the basics of DFPT calculations within ABINIT. The example
        given is the study of dynamical and dielectric properties of AlAs (an
        insulator): phonons at Gamma, dielectric constant, Born effective
        charges, LO-TO splitting, phonons in the whole Brillouin zone. The
        creation of the "Derivative Data Base" (DDB) is presented.</li>
-       <li><a href="../../tutorial/generated_files/lesson_rf2.html">The lesson Response-Function 2 (RF2)</a>
+
+       <li>[[lesson_rf2||The lesson Response-Function 2 (RF2)]]
        presents the analysis of the DDBs that have been introduced in the
        preceeding lesson RF1.  The computation of the interatomic forces and
        the computation of thermodynamical properties is an outcome of this
        lesson.</li>
-       <li>The additional information given by lesson RF1 opens the door to
-       <a href="../../tutorial/generated_files/lesson_optic.html">The lesson on Optic</a>, the utility that
-       allows to obtain the frequency dependent linear optical dielectric
-       function and the frequency dependent second order nonlinear optical
-       susceptibility, in the simple "Sum-Over-State" approximation.</li>
-       <li><a href="../../tutorial/generated_files/lesson_elastic.html">The lesson on the elastic
-       properties</a> presents the computation with respect to the strain
-       perturbation and its responses: elastic constants,
+
+       <li>[[lesson_elastic|The lesson on the elastic properties]] 
+       presents the computation with respect to the strain perturbation and its responses: elastic constants,
        piezoelectricity.</li>
-       <li><a href="../../tutorial/generated_files/lesson_paral_dfpt.html">Parallelism of response-function
-       calculations</a> - you need to be familiarized with the calculation of
-       linear-response properties within ABINIT, see the tutorial <a
-       href="../../tutorial/generated_files/lesson_rf1.html"> Response-Function 1 (RF1)</a></li>
+
+       <li>[[lesson_paral_dfpt|Parallelism of response-function calculations]].
+       Additional information to use the DFPT in parallel.</li>
+
+       <li>[[lesson_nlo|Lesson on static non-linear properties]].
+       Electronic non-linear susceptibility, non-resonant Raman tensor, electro-optic effect.</li>
 
     end : default

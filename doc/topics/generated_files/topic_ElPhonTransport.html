@@ -32,12 +32,19 @@
 <h3><b>1. Introduction.</b></h3>
 
 
-<p>This topic concerns metals only.
-<p>After generating a GKK file (see <a href="../../topics/generated_files/topic_ElPhonInt.html#">topic_ElPhonInt</a>), 
+Warning : this topic concerns metals only.
+<p>The calculation of bulk transport quantities (electrical and thermal
+resistivities - the part that is determined by the electron-phonon interaction) is possible using anaddb. 
+Analogous quantities are obtained from the conducti post-processor, but due to electron-electron
+scattering, instead of electron-phonon.
+<p>A preliminary calculation of the derivatives of the wavefunctions with respect to
+k-vector must be carried out. After generating a GKK file (see <a href="../../topics/generated_files/topic_ElPhonInt.html#">topic_ElPhonInt</a>), 
 the Electron-Phonon Coupling (EPC) analysis is performed in anaddb, setting <a href="../../input_variables/generated_files/varset_anaddb.html#elphflag@anaddb">elphflag</a> variable to 1. 
 Most of the procedure is automatic, but can be lengthy if a large number of k-points is being used. 
-<p>The electron-phonon interaction is interpolated in reciprocal space,
-then integrated over the Fermi surface. Several quadrature methods are available. The default (<a href="../../input_variables/generated_files/varset_anaddb.html#telphint@anaddb">telphint</a>=1) is to use Gaussian weighting,
+<p>For the superconductivity calculations, The electron-phonon interaction is interpolated in reciprocal space,
+then integrated over the Fermi surface to give the Eliashberg function. 
+Several quadrature methods are available. 
+The default (<a href="../../input_variables/generated_files/varset_anaddb.html#telphint@anaddb">telphint</a>=1) is to use Gaussian weighting,
 with a width <a href="../../input_variables/generated_files/varset_anaddb.html#elphsmear@anaddb">elphsmear</a>. Another option is the improved
 tetrahedron <a href="../../biblio/generated_files/bib_biblio.html#Bloechl1994a">[Bloechl1994a]</a> (<a href="../../input_variables/generated_files/varset_anaddb.html#telphint@anaddb">telphint</a>=0).
 Finally (<a href="../../input_variables/generated_files/varset_anaddb.html#telphint@anaddb">telphint</a>=2), one can integrate a given set of electron bands,
@@ -45,13 +52,8 @@ between <a href="../../input_variables/generated_files/varset_anaddb.html#ep_b_m
 The resulting integrated quantities are the Eliashberg function (in a file
 suffixed _A2F), and the EPC strength &lambda;
 which is printed in the main output file.
-
-<p>The calculation of bulk transport quantities (electrical and thermal
-conductivities) is possible using anaddb. Analogous quantities are
-obtained from the conducti post-processor, but due to electron-electron
-scattering, instead of electron-phonon. A
-preliminary calculation of the derivatives of the wavefunctions with respect to
-k-vector must be carried out. The transport calculation is turned on by setting
+<p>
+The transport calculation is turned on by setting
 <a href="../../input_variables/generated_files/varset_anaddb.html#ifltransport@anaddb">ifltransport</a> to 1 in anaddb. The transport quantities depend on
 the Fermi velocity for each band, and the electronic band-dependence of the
 matrix elements must be

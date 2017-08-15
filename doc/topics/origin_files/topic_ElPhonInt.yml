@@ -10,7 +10,7 @@
     links     : default
     introduction : |- 
         <p>The theory and details of the implementation are described in [[Gonze2009]] and [[Gonze2016]].
-        <p>Basic calculations of electron-phonon interaction in ABINIT: one performs a normal ground state, then phonon calculations (using [[rfphon]], 
+        <p>Basic calculations of electron-phonon interaction in ABINIT: one performs a normal ground state, then DFPT phonon calculations (using [[rfphon]], 
         with added keywords [[prepgkk]] and [[prtgkk]], which saves the matrix elements to files suffixed GKK. 
         The main change in this respect is that [[prtgkk]] now disables the use of symmetry in reducing q-points and perturbations. 
         This avoids ambiguities in wave function phases due to band degeneracies. 
@@ -23,6 +23,13 @@
         for experts, with [[optdriver]]==7 are related to this development, that is not yet operational as of v8.5 .
 
     tutorials  : |-
+       <li>[[lesson_rf1|The lesson Response-Function 1 (RF1)]]
+       presents the basics of DFPT calculations within ABINIT. The example
+       given is the study of dynamical and dielectric properties of AlAs (an
+       insulator): phonons at Gamma, dielectric constant, Born effective
+       charges, LO-TO splitting, phonons in the whole Brillouin zone. The
+       creation of the "Derivative Data Base" (DDB) is presented.</li>
+ 
        <li> <a href="../../tutorial/generated_files/lesson_eph.html">The lesson on the
        electron-phonon interaction</a> presents the use of the utility MRGKK
        and ANADDB to examine the electron-phonon interaction and the

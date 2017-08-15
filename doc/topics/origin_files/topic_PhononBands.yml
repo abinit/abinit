@@ -13,8 +13,9 @@
        as explained in [[Gonze1997a]]. Backtransforming to reciprocal space gives the Fourier interpolation
        of the initial phonon band structure. After such Fourier interpolation, the DOS can be produced (see [[Lee1995]]),
        the phonon eigenenergies plotted along lines, the slope of the energy versus cristalline momentum evaluated (to give sound velocity).
+       <p>For the related computation of temperature-dependent properties, see [[topic_Temperature]].
     tutorials  : |-
-       <li>[[lesson_rf2|The lesson Response-Function 2 (RF2)</a>
+       <li>[[lesson_rf2|The lesson Response-Function 2 (RF2)]]
        presents the analysis of the DDBs that have been introduced in the
        [[lesson_rf1]].  The computation of the interatomic forces and
        the computation of thermodynamical properties is an outcome of this

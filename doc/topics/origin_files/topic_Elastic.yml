@@ -15,8 +15,10 @@
        For the preliminary runs of ABINIT, see [[rfstrs]], while for ANADDB, see [[anaddb:elaflag]] for the
        elastic tensor, and [[anaddb:piezoflag]] for the piezoelectric tensor.
     tutorials  : |-
-       <li><a href="../../tutorial/generated_files/lesson_elastic.html">The lesson on the elastic
-       properties</a> presents the computation with respect to the strain
-       perturbation and its responses: elastic constants,
+       <li>[[lesson_elastic|The lesson on the elastic properties]] 
+       presents the computation with respect to the strain perturbation and its responses: elastic constants,
        piezoelectricity.</li>
+       <li>[[lesson_paral_dfpt|Parallelism of response-function calculations]].
+       Additional information to use the DFPT in parallel.</li>
+
     end : default
