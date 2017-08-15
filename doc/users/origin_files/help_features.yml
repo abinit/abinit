@@ -219,9 +219,10 @@ sec7:
   are cheaper but will work well for molecules and for isolated defects in a solid, not for e.g. correcting the band gap.
   <ol>
    <li>[[topic:Optic|Linear and non-linear optical properties in the independent-particle approximation]]</li>
+   <li>[[topic:FrequencyMeshMBPT|Definition of frequency meshes for Many-body perturbation theory]]</li>
    <li>[[topic:Susceptibility|Frequency-dependent susceptibility matrix, and related dielectric matrix and screened Coulomb interaction]]</li>
    <li>[[topic:SelfEnergy|Electronic self-energy]]</li>
-   <li>[[topic:GW|GW calculations for accurate band structure]]</li>
+   <li>[[topic:GW|GW calculations for accurate band structure, including self-consistency]]</li>
    <li>[[topic:BSE|Bethe-Salpeter calculations for accurate optical properties]]</li>
    <li>[[topic:TDDFT|TDDFT calculations]]</li>
    <li>[[topic:DeltaSCF|DeltaSCF calculations]]</li>

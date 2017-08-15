@@ -35,6 +35,8 @@
 <p>In the independent-particle approximation, the frequency-dependent susceptibility matrix, and 
 related screened interaction matrix, and inverse dielectric matrix can be computed.
 <p>This is a prerequisite to many-body perturbation theory calculations, see <a href="../../topics/generated_files/topic_GW.html#">topic_GW</a> and <a href="../../topics/generated_files/topic_BSE.html#">topic_BSE</a>, to which we refer.
+<p>The frequency meshes, used e.g. for integration along the real and imaginary axes, on which the 
+ susceptibility matrices (and related matrices) have to be computed are described in <a href="../../topics/generated_files/topic_FrequencyMeshMBPT.html#">topic_FrequencyMeshMBPT</a>.
 <br><br><a href=#top>Go to the top</a>
 
 
@@ -49,13 +51,8 @@ related screened interaction matrix, and inverse dielectric matrix can be comput
 <p>Compulsory input variables:<p>... <a href="../../input_variables/generated_files/varset_gw.html#ecuteps">ecuteps</a>   [Energy CUT-off for EPSilon (the dielectric matrix)]<br>
 ... <a href="../../input_variables/generated_files/varset_gw.html#ecutwfn">ecutwfn</a>   [Energy CUT-off for WaveFunctioNs]<br>
 ... <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>   [OPTions for the DRIVER]<br>
-<p>Basic input variables:<p>... <a href="../../input_variables/generated_files/varset_gw.html#freqremax">freqremax</a>   [FREQuencies along the Real axis MAXimum]<br>
-... <a href="../../input_variables/generated_files/varset_gw.html#freqremin">freqremin</a>   [FREQuencies along the Real axis MINimum]<br>
-... <a href="../../input_variables/generated_files/varset_paral.html#gwpara">gwpara</a>   [GW PARAllelization level]<br>
+<p>Basic input variables:<p>... <a href="../../input_variables/generated_files/varset_paral.html#gwpara">gwpara</a>   [GW PARAllelization level]<br>
 ... <a href="../../input_variables/generated_files/varset_gw.html#icutcoul">icutcoul</a>   [Integer that governs the CUT-off for COULomb interaction]<br>
-... <a href="../../input_variables/generated_files/varset_gw.html#nfreqim">nfreqim</a>   [Number of FREQuencies along the IMaginary axis]<br>
-... <a href="../../input_variables/generated_files/varset_gw.html#nfreqmidm">nfreqmidm</a>   [Nth FREQuency Moment of the Imaginary part of the Dielectric Matrix]<br>
-... <a href="../../input_variables/generated_files/varset_gw.html#nfreqre">nfreqre</a>   [Number of FREQuencies along the REal axis]<br>
 ... <a href="../../input_variables/generated_files/varset_gw.html#nomegasf">nomegasf</a>   [Number of OMEGA to evaluate the Spectral Function]<br>
 ... <a href="../../input_variables/generated_files/varset_gw.html#rcut">rcut</a>   [Radius of the CUT-off for coulomb interaction]<br>
 ... <a href="../../input_variables/generated_files/varset_gw.html#vcutgeo">vcutgeo</a>   [V (potential) CUT-off GEOmetry]<br>
@@ -71,17 +68,7 @@ related screened interaction matrix, and inverse dielectric matrix can be comput
 ... <a href="../../input_variables/generated_files/varset_gw.html#spmeth">spmeth</a>   [SPectral METHod]<br>
 <p>Relevant internal variables:<p>... <a href="../../input_variables/generated_files/varset_internal.html#npweps">%npweps</a>   [Number of PlaneWaves for EPSilon (the dielectric matrix)]<br>
 ... <a href="../../input_variables/generated_files/varset_internal.html#npwwfn">%npwwfn</a>   [Number of PlaneWaves for WaveFunctioNs]<br>
-<p>Input variables for experts:<p>... <a href="../../input_variables/generated_files/varset_gw.html#cd_customnimfrqs">cd_customnimfrqs</a>   [Contour Deformation CUSTOM IMaginary FReQuencieS]<br>
-... <a href="../../input_variables/generated_files/varset_gw.html#cd_frqim_method">cd_frqim_method</a>   [Contour Deformation FReQuency integration on IMaginary axis Method]<br>
-... <a href="../../input_variables/generated_files/varset_gw.html#cd_full_grid">cd_full_grid</a>   [Contour Deformation FULL GRID in complex plane]<br>
-... <a href="../../input_variables/generated_files/varset_gw.html#cd_halfway_freq">cd_halfway_freq</a>   [Contour Deformation tangent grid HALFWAY FREQuency]<br>
-... <a href="../../input_variables/generated_files/varset_gw.html#cd_imfrqs">cd_imfrqs</a>   [Contour Deformation IMaginary FReQuencieS]<br>
-... <a href="../../input_variables/generated_files/varset_gw.html#cd_max_freq">cd_max_freq</a>   [Contour Deformation grid MAXimum FREQuency]<br>
-... <a href="../../input_variables/generated_files/varset_gw.html#cd_subset_freq">cd_subset_freq</a>   [Contour Deformation grid calculate SUBSET of FREQuencies]<br>
-... <a href="../../input_variables/generated_files/varset_gw.html#fftgw">fftgw</a>   [FFT for GW calculation]<br>
-... <a href="../../input_variables/generated_files/varset_gw.html#gw_frqim_inzgrid">gw_frqim_inzgrid</a>   [GW Contour Deformation FReQuencies on IMaginary axis Inverse Z Grid]<br>
-... <a href="../../input_variables/generated_files/varset_gw.html#gw_frqre_inzgrid">gw_frqre_inzgrid</a>   [GW Contour Deformation FReQuencies on REal axis Inverse Z Grid]<br>
-... <a href="../../input_variables/generated_files/varset_gw.html#gw_frqre_tangrid">gw_frqre_tangrid</a>   [GW Contour Deformation FReQencies on REal axis - Use Tangent Grid]<br>
+<p>Input variables for experts:<p>... <a href="../../input_variables/generated_files/varset_gw.html#fftgw">fftgw</a>   [FFT for GW calculation]<br>
 ... <a href="../../input_variables/generated_files/varset_gw.html#gw_invalid_freq">gw_invalid_freq</a>   [GW treatment of INVALID FREQuency for Hybertsen-Louie PPM]<br>
 ... <a href="../../input_variables/generated_files/varset_gw.html#gw_nqlwl">gw_nqlwl</a>   [GW, Number of Q-points for the Long Wave-Length Limit]<br>
 ... <a href="../../input_variables/generated_files/varset_gw.html#gw_qlwl">gw_qlwl</a>   [GW, Q-points for the Long Wave-Length limit]<br>

@@ -2392,7 +2392,7 @@
          [[cd_customnimfrqs]] lets the user define the grid points along the imaginary axis by hand. Set this
         to the number of frequencies you want. The frequencies are specified with [[cd_imfrqs]].
         </p>
-    topics: Susceptibility_expert, SelfEnergy_expert
+    topics: FrequencyMeshMBPT_expert
     varset: gw
     vartype: integer
 - !variable
@@ -2727,7 +2727,7 @@
          on the dense mesh for a given convergence study. One can also use the utility to
         merge independent screening calculations over q-points and frequency sections.
         </p>
-    topics: Susceptibility_expert, SelfEnergy_expert
+    topics: FrequencyMeshMBPT_expert
     varset: gw
     vartype: integer
 - !variable
@@ -2763,7 +2763,7 @@
          </b>
          utility.
         </p>
-    topics: Susceptibility_expert, SelfEnergy_expert
+    topics: FrequencyMeshMBPT_expert
     varset: gw
     vartype: integer
 - !variable
@@ -2785,7 +2785,7 @@
         [[nfreqre]] are used up. The tangent transformed grid is approximately
         linear up to this point. To be used in conjunction with [[gw_frqre_tangrid]].
         </p>
-    topics: Susceptibility_expert, SelfEnergy_expert
+    topics: FrequencyMeshMBPT_expert
     varset: gw
     vartype: real
 - !variable
@@ -2829,7 +2829,7 @@
         </p>
         <p>
         </p>
-    topics: Susceptibility_expert
+    topics: FrequencyMeshMBPT_expert
     varset: gw
     vartype: real
 - !variable
@@ -2851,7 +2851,7 @@
         [[nfreqre]] are used up. To be used in conjunction with
         [[gw_frqre_tangrid]].
         </p>
-    topics: Susceptibility_expert, SelfEnergy_expert
+    topics: FrequencyMeshMBPT_expert
     varset: gw
     vartype: real
 - !variable
@@ -2886,7 +2886,7 @@
          </b>
          utility.
         </p>
-    topics: Susceptibility_expert
+    topics: FrequencyMeshMBPT_expert
     varset: gw
     vartype: integer
 - !variable
@@ -7346,7 +7346,7 @@
         [[freqremax]], [[freqremin]] and [[nfreqre]]
         define the spacing of the frequency mesh along the real axis.
         </p>
-    topics: Susceptibility_basic
+    topics: FrequencyMeshMBPT_basic
     varset: gw
     vartype: real
 - !variable
@@ -7379,7 +7379,7 @@
         Note that [[freqremax]], [[freqremin]]
         and [[nfreqre]] define the spacing of the frequency mesh along the real axis.
         </p>
-    topics: Susceptibility_basic
+    topics: FrequencyMeshMBPT_basic
     varset: gw
     vartype: real
 - !variable
@@ -9177,7 +9177,7 @@
         for the calculation of the self-energy along the real axis. Set this to the number of frequencies
         you want. The frequencies are specified with [[gw_freqsp]].
         </p>
-    topics: SelfEnergy_expert
+    topics: FrequencyMeshMBPT_expert
     varset: gw
     vartype: integer
 - !variable
@@ -9208,7 +9208,7 @@
          If [[nfreqsp]] is not equal to
         [[gw_customnfreqsp]] a warning will be issued.
         </p>
-    topics: SelfEnergy_expert
+    topics: FrequencyMeshMBPT_expert
     varset: gw
     vartype: real
 - !variable
@@ -9254,7 +9254,7 @@
         The equidistant grid in z is determined uniquely by [[nfreqim]]) and
         the points are distributed so that half of them lie below the plasma frequency.
         </p>
-    topics: Susceptibility_expert, SelfEnergy_expert
+    topics: FrequencyMeshMBPT_expert
     varset: gw
     vartype: integer
 - !variable
@@ -9326,7 +9326,7 @@
         origin is required. The maximum value needed along the real frequency axis is output in the
         logfile during Contour Deformation sigma calculations.
         </p>
-    topics: Susceptibility_expert, SelfEnergy_expert
+    topics: FrequencyMeshMBPT_expert
     varset: gw
     vartype: integer
 - !variable
@@ -9348,7 +9348,7 @@
         [[cd_max_freq]] and [[cd_halfway_freq]]
          which determine the parameters of the transformed grid.
         </p>
-    topics: Susceptibility_expert, SelfEnergy_expert
+    topics: FrequencyMeshMBPT_expert
     varset: gw
     vartype: integer
 - !variable
@@ -17110,7 +17110,7 @@
          [[nfreqim]] sets the number of pure imaginary frequencies used to calculate
         the dielectric matrix in order to perform the numerical integration of the GW self-energy.
         </p>
-    topics: Susceptibility_basic
+    topics: FrequencyMeshMBPT_basic
     varset: gw
     vartype: integer
 - !variable
@@ -17137,7 +17137,7 @@
 
         see M. Taut, J. Phys. C: Solid State Phys. 18 (1985) 2677-2690.
         </p>
-    topics: Susceptibility_basic
+    topics: FrequencyMeshMBPT_basic
     varset: gw
     vartype: integer
 - !variable
@@ -17173,7 +17173,7 @@
         to use this input variable.
         Using the default values, one must be able to get a screening file that can be used with any ppmodel.
         </p>
-    topics: Susceptibility_basic
+    topics: FrequencyMeshMBPT_basic
     varset: gw
     vartype: integer
 - !variable
