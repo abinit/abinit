@@ -42,37 +42,13 @@ formalism and the concept of quasi-particles <a href="../../biblio/generated_fil
 by solving a nonlinear equation involving the non-Hermitian, nonlocal and frequency dependent self-energy operator &Sigma;.
 <p>This equation goes beyond the mean-field approximation of independent KS particles as
 it accounts for the dynamic many-body effects in the electron-electron interaction.
-<p>In principle, the exact self-energy can be obtained by solving self-consistently the set of coupled integro-differential equations
-proposed by Hedin <a href="../../biblio/generated_files/bib_biblio.html#Hedin1965">[Hedin1965]</a>. The fundamental building blocks of Hedin's equations are, besides &Sigma;(1,2), 
-the Green's function of the interacting many-body system, G(1,2), the Green's function of an appropriate noninteracting system, G<sub>0</sub>(1,2),
-and the irreducible polarizability, &chi;(1,2), which, through the inverse dielectric matrix &epsilon;<sup>-1</sup>(1,2),
-re-normalizes the static Coulomb potential, resulting in the dynamical screened interaction W(1,2). 
-Finally, the vertex function &Gamma;(1,2,3) describes the interactions between virtual holes and electrons.
 <p>Details about the GW implementation in ABINIT can be found <a href="../../theory/generated_files/theorydoc_mbt.html">here</a>.
-<p>A typical GW calculation consists of two different steps (following a DFT calculation): first &epsilon;<sup>-1</sup> is calculated and stored on disk (<a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>=3), then the KS band structure and W are used to evaluate the matrix elements of &Sigma;, finally obtaining the QP corrections (<a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>=4). 
-<p>In the frequency domain, the GW self-energy &Sigma;(&omega;) can be evaluated in ABINIT with two different, more effective, techniques: 
-<li>integration with a plasmon-pole model (PPM)</li>
-<li>integration with contour deformation (CD).</li>
-<p>In the former case, the frequency dependence of &epsilon;<sup>-1</sup>(&omega;) is modeled with a simple analytic form,
-and the frequency convolution is carried out analytically.
-<p>In the latter approach, the integral is evaluated numerically extending the functions in the complex 
-plane in order have a smoother integrand.
-
-<p>Four different plasmon pole models (PPMs) are available in ABINIT.
-The choice of the particular PPM to be used is controlled by the variable <a href="../../input_variables/generated_files/varset_gw.html#ppmodel">ppmodel</a>.
-The first two options (<a href="../../input_variables/generated_files/varset_gw.html#ppmodel">ppmodel</a>=1,2) refer to approximations employed in the pioneering implementations 
-of the GW formalism: the plasmon-pole models of Godby-Needs <a href="../../biblio/generated_files/bib_biblio.html#Godby1989">[Godby1989]</a> (GN) 
-and Hybertsen and Louie <a href="../../biblio/generated_files/bib_biblio.html#Hybertsen1986">[Hybertsen1986]</a> (HL).
-<p>The contour deformation technique is activated by setting the input variable <a href="../../input_variables/generated_files/varset_gw.html#gwcalctyp">gwcalctyp</a> to 2.
-The integration along the imaginary axis requires the calculation of &epsilon;<sup>-1</sup>(&omega;) for purely imaginary frequencies.
-The frequency mesh for the quadrature is governed by the input variable <a href="../../input_variables/generated_files/varset_gw.html#nfreqim">nfreqim</a>, and can be very coarse 
-since the integrands is very smooth in this region.
-<p>The evaluation of the residue of the poles requires the calculation of &epsilon;<sup>-1</sup>(&omega;) on a fine mesh along the real axis.
-This regular mesh, sampling the interval [0,+&infin;], is defined by the two input variables <a href="../../input_variables/generated_files/varset_gw.html#nfreqre">nfreqre</a> and <a href="../../input_variables/generated_files/varset_gw.html#freqremax">freqremax</a>.
-<p>The CD approach requires many evaluations of &epsilon;<sup>-1</sup>(&omega;) and can therefore be computationally highly demanding. 
-On the other hand, it is the preferred approach for calculating the QP correction of low-lying states.
-Moreover, it is the only technique available in ABINIT to compute the imaginary part of &Sigma;(&omega;) 
-and the spectral function A(&omega;).
+<p>A typical GW calculation consists of two different steps (following a DFT calculation):
+first the screened interaction &epsilon;<sup>-1</sup> is calculated and stored on disk (<a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>=3), 
+then the KS band structure and W are used to evaluate the matrix elements of &Sigma;, 
+finally obtaining the QP corrections (<a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>=4). 
+<p>The computation of the screened interaction is described in <a href="../../topics/generated_files/topic_Susceptibility.html#">topic_Susceptibility</a>, while the 
+computation of the self-energy is described in <a href="../../topics/generated_files/topic_SelfEnergy.html#">topic_SelfEnergy</a>.
 <br><br><a href=#top>Go to the top</a>
 
 
@@ -104,55 +80,24 @@ including many-body effects).</li>
 <h3><b>3. Related input variables.</b></h3>
 
 
-<p>Compulsory input variables:<p>... <a href="../../input_variables/generated_files/varset_gw.html#ecuteps">ecuteps</a>   [Energy CUT-off for EPSilon (the dielectric matrix)]<br>
-... <a href="../../input_variables/generated_files/varset_gw.html#ecutsigx">ecutsigx</a>   [Energy CUT-off for SIGma eXchange]<br>
-... <a href="../../input_variables/generated_files/varset_gw.html#ecutwfn">ecutwfn</a>   [Energy CUT-off for WaveFunctioNs]<br>
-... <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>   [OPTions for the DRIVER]<br>
+<p>Compulsory input variables:<p>... <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>   [OPTions for the DRIVER]<br>
 <p>Basic input variables:<p>... <a href="../../input_variables/generated_files/varset_gw.html#bdgw">bdgw</a>   [BanDs for GW calculation]<br>
-... <a href="../../input_variables/generated_files/varset_gw.html#freqremax">freqremax</a>   [FREQuencies along the Real axis MAXimum]<br>
-... <a href="../../input_variables/generated_files/varset_gw.html#freqremin">freqremin</a>   [FREQuencies along the Real axis MINimum]<br>
-... <a href="../../input_variables/generated_files/varset_gw.html#freqspmax">freqspmax</a>   [FREQuencies for the SPectral function MAXimum]<br>
-... <a href="../../input_variables/generated_files/varset_gw.html#freqspmin">freqspmin</a>   [FREQuencies for the SPectral function MINimum]<br>
 ... <a href="../../input_variables/generated_files/varset_gw.html#gw_nstep">gw_nstep</a>   [GW Number of self-consistent STEPs]<br>
 ... <a href="../../input_variables/generated_files/varset_gw.html#gw_sctype">gw_sctype</a>   [GW, Self-Consistency TYPE]<br>
 ... <a href="../../input_variables/generated_files/varset_gw.html#gw_toldfeig">gw_toldfeig</a>   [GW TOLerance on the DiFference of the EIGenvalues]<br>
 ... <a href="../../input_variables/generated_files/varset_gw.html#gwcalctyp">gwcalctyp</a>   [GW CALCulation TYPe]<br>
 ... <a href="../../input_variables/generated_files/varset_paral.html#gwpara">gwpara</a>   [GW PARAllelization level]<br>
-... <a href="../../input_variables/generated_files/varset_gw.html#icutcoul">icutcoul</a>   [Integer that governs the CUT-off for COULomb interaction]<br>
-... <a href="../../input_variables/generated_files/varset_gw.html#kptgw">kptgw</a>   [K-PoinTs for GW calculations]<br>
-... <a href="../../input_variables/generated_files/varset_gw.html#nfreqim">nfreqim</a>   [Number of FREQuencies along the IMaginary axis]<br>
-... <a href="../../input_variables/generated_files/varset_gw.html#nfreqmidm">nfreqmidm</a>   [Nth FREQuency Moment of the Imaginary part of the Dielectric Matrix]<br>
-... <a href="../../input_variables/generated_files/varset_gw.html#nfreqre">nfreqre</a>   [Number of FREQuencies along the REal axis]<br>
-... <a href="../../input_variables/generated_files/varset_gw.html#nfreqsp">nfreqsp</a>   [Number of FREQuencies for the SPectral function]<br>
-... <a href="../../input_variables/generated_files/varset_gw.html#nkptgw">nkptgw</a>   [Number of K-PoinTs for GW corrections]<br>
-... <a href="../../input_variables/generated_files/varset_gw.html#nomegasf">nomegasf</a>   [Number of OMEGA to evaluate the Spectral Function]<br>
-... <a href="../../input_variables/generated_files/varset_gw.html#nomegasi">nomegasi</a>   [Number of OMEGA(S) along the Imaginary axis]<br>
-... <a href="../../input_variables/generated_files/varset_gw.html#omegasimax">omegasimax</a>   [OMEGA to evaluate Sigma along the Imaginary axis D: MAXimal value]<br>
-... <a href="../../input_variables/generated_files/varset_gw.html#omegasrdmax">omegasrdmax</a>   [OMEGA to evaluate the Sigma Real axis Derivative : MAXimal value]<br>
-... <a href="../../input_variables/generated_files/varset_gw.html#ppmfrq">ppmfrq</a>   [Plasmon Pole Model FReQuency]<br>
-... <a href="../../input_variables/generated_files/varset_gw.html#ppmodel">ppmodel</a>   [Plasmon Pole MODEL]<br>
-... <a href="../../input_variables/generated_files/varset_gw.html#rcut">rcut</a>   [Radius of the CUT-off for coulomb interaction]<br>
-... <a href="../../input_variables/generated_files/varset_gw.html#vcutgeo">vcutgeo</a>   [V (potential) CUT-off GEOmetry]<br>
-<p>Useful input variables:<p>... <a href="../../input_variables/generated_files/varset_gw.html#awtr">awtr</a>   [evaluate the Adler-Wiser expression of $\chi^{0}_{KS}$ assuming Time-Reversal]<br>
-... <a href="../../input_variables/generated_files/varset_files.html#getqps">getqps</a>   [GET QuasiParticle Structure]<br>
+<p>Useful input variables:<p>... <a href="../../input_variables/generated_files/varset_files.html#getqps">getqps</a>   [GET QuasiParticle Structure]<br>
 ... <a href="../../input_variables/generated_files/varset_files.html#getscr">getscr</a>   [GET SCReening (the inverse dielectric matrix) from ...]<br>
 ... <a href="../../input_variables/generated_files/varset_files.html#getsuscep">getsuscep</a>   [GET SUSCEPtibility (the irreducible polarizability) from ...]<br>
-... <a href="../../input_variables/generated_files/varset_gw.html#gw_qprange">gw_qprange</a>   [GW QuasiParticle RANGE policy]<br>
-... <a href="../../input_variables/generated_files/varset_gw.html#gwcomp">gwcomp</a>   [GW COMPleteness]<br>
-... <a href="../../input_variables/generated_files/varset_gw.html#gwencomp">gwencomp</a>   [GW ENergy for COMPleteness]<br>
 ... <a href="../../input_variables/generated_files/varset_gw.html#gwfockmix">gwfockmix</a>   [GW FOCK exchange MIXing parameter]<br>
 ... <a href="../../input_variables/generated_files/varset_files.html#irdqps">irdqps</a>   [Integer that governs the ReaDing of QuasiParticle Structure]<br>
 ... <a href="../../input_variables/generated_files/varset_files.html#irdscr">irdscr</a>   [Integer that governs the ReaDing of the SCReening]<br>
 ... <a href="../../input_variables/generated_files/varset_files.html#irdsuscep">irdsuscep</a>   [Integer that governs the ReaDing of the SUSCEPtibility]<br>
 ... <a href="../../input_variables/generated_files/varset_gw.html#mbpt_sciss">mbpt_sciss</a>   [Many Body Perturbation Theory SCISSor operator]<br>
 ... <a href="../../input_variables/generated_files/varset_gw.html#nbandkss">nbandkss</a>   [Number of BANDs in the KSS file]<br>
-... <a href="../../input_variables/generated_files/varset_gw.html#nomegasrd">nomegasrd</a>   [Number of OMEGA to evaluate the Sigma Real axis Derivative]<br>
-... <a href="../../input_variables/generated_files/varset_gw.html#nqptdm">nqptdm</a>   [Number of Q-PoinTs for the Dielectric Matrix]<br>
 ... <a href="../../input_variables/generated_files/varset_basic.html#nsym">nsym</a>   [Number of SYMmetry operations]<br>
-... <a href="../../input_variables/generated_files/varset_gw.html#qptdm">qptdm</a>   [Q-PoinTs for the Dielectric Matrix]<br>
 ... <a href="../../input_variables/generated_files/varset_gw.html#rhoqpmix">rhoqpmix</a>   [RHO QuasiParticle MIXing]<br>
-... <a href="../../input_variables/generated_files/varset_gw.html#spbroad">spbroad</a>   [SPectral BROADening]<br>
-... <a href="../../input_variables/generated_files/varset_gw.html#spmeth">spmeth</a>   [SPectral METHod]<br>
 ... <a href="../../input_variables/generated_files/varset_dev.html#symmorphi">symmorphi</a>   [SYMMORPHIc symmetry operation selection]<br>
 ... <a href="../../input_variables/generated_files/varset_paw.html#usepawu">usepawu</a>   [USE PAW+U (spherical part)]<br>
 <p>Relevant internal variables:<p>... <a href="../../input_variables/generated_files/varset_internal.html#npweps">%npweps</a>   [Number of PlaneWaves for EPSilon (the dielectric matrix)]<br>
@@ -179,7 +124,6 @@ including many-body effects).</li>
 ... <a href="../../input_variables/generated_files/varset_gw.html#gw_sigxcore">gw_sigxcore</a>   [GW, SIGma (self-energy) for the CORE contribution]<br>
 ... <a href="../../input_variables/generated_files/varset_gw.html#gwgamma">gwgamma</a>   [GW GAMMA]<br>
 ... <a href="../../input_variables/generated_files/varset_gw.html#gwmem">gwmem</a>   [GW MEMory]<br>
-... <a href="../../input_variables/generated_files/varset_gw.html#gwrpacorr">gwrpacorr</a>   [GW RPA CORRelation energy]<br>
 ... <a href="../../input_variables/generated_files/varset_gw.html#inclvkb">inclvkb</a>   [INCLude VKB]<br>
 ... <a href="../../input_variables/generated_files/varset_files.html#kssform">kssform</a>   [Kohn Sham Structure file FORMat]<br>
 ... <a href="../../input_variables/generated_files/varset_gw.html#npwkss">npwkss</a>   [Number of PlaneWaves in the KSS file]<br>
@@ -219,9 +163,6 @@ including many-body effects).</li>
 
 <br> <a href="../../biblio/generated_files/bib_biblio.html#Abrikosov1975">[Abrikosov1975]</a>  A.A. Abrikosov, L.P. Gorkov and E. Dzyaloshinskii, "Methods of quantum field theory in statistical physics", Dover, New-York ,  (1975).<br>
 <br> <a href="../../biblio/generated_files/bib_biblio.html#Fetter1971">[Fetter1971]</a>  A.L. Fetter and J.D. Walecka, "Quantum Theory of Many-Particle Systems", McGraw-Hill, New York ,  (1971).<br>
-<br> <a href="../../biblio/generated_files/bib_biblio.html#Godby1989">[Godby1989]</a>  R. W. Godby and R. J. Needs, "Metal-insulator transition in Kohn-Sham theory and quasiparticle theory", Phys. Rev. Lett. 62, 1169 (1989). <br> DOI: <a href="https://doi.org/10.1103/PhysRevLett.62.1169">10.1103/PhysRevLett.62.1169</a>.<br>
-<br> <a href="../../biblio/generated_files/bib_biblio.html#Hedin1965">[Hedin1965]</a>  L. Hedin, "New Method for Calculating the One-Particle Green's Function with Application to the Electron-Gas Problem", Phys. Rev. A 139, 796 (1965).<br>
-<br> <a href="../../biblio/generated_files/bib_biblio.html#Hybertsen1986">[Hybertsen1986]</a>  M. S. Hybertsen and S. G. Louie, "Electron correlation in semiconductors and insulators: Band gaps and quasiparticle energies", Phys. Rev. B 34, 5390 (1986). <br> DOI: <a href="https://doi.org/10.1103/PhysRevB.34.5390">10.1103/PhysRevB.34.5390</a>.<br>
 <br> <a href="../../biblio/generated_files/bib_biblio.html#Onida2002">[Onida2002]</a>  G. Onida, L. Reining and A. Rubio, "Electronic excitations: density-functional versus many-body Green's-function approaches", Rev. Mod. Phys. 74, 601&ndash;659 (2002). <br> DOI: <a href="https://doi.org/10.1103/RevModPhys.74.601">10.1103/RevModPhys.74.601</a>.<br>
 <p>
 <br><br><a href=#top>Go to the top</a>

@@ -1223,7 +1223,7 @@
          Note that the parallel algorithm [[gwpara]]=2 is not compatible with
         the choice [[awtr]]=0.
         </p>
-    topics: GW_useful
+    topics: Susceptibility_useful
     varset: gw
     vartype: integer
 - !variable
@@ -1409,7 +1409,7 @@
         wavefunctions should include all the degenerate states belonging to the same irreducible
         representation. Only in this case, indeed, the initial symmetries and energy degenerations are preserved.
         </p>
-    topics: GW_basic
+    topics: GW_basic, SelfEnergy_basic
     varset: gw
     vartype: integer
 - !variable
@@ -5687,7 +5687,7 @@
         between 5 and 10 Hartree often (but not always) leads to converged results (at the level of 0.01 eV for the energy gap).
         In any case, a convergence study is worth.
         </p>
-    topics: GW_compulsory, RandStopPow_compulsory
+    topics: Susceptibility_compulsory, RandStopPow_compulsory
     varset: gw
     vartype: real
 - !variable
@@ -5711,7 +5711,7 @@
         values. If you want to spare some CPU time, you might try to use a value between [[ecut]] and these
         upper limits.
         </p>
-    topics: GW_compulsory
+    topics: SelfEnergy_compulsory
     varset: gw
     vartype: real
 - !variable
@@ -5842,7 +5842,7 @@
         <p>
          The size of this set of planewaves is [[npwwfn]].
         </p>
-    topics: GW_compulsory
+    topics: Susceptibility_compulsory, SelfEnergy_compulsory
     varset: gw
     vartype: real
 - !variable
@@ -7346,7 +7346,7 @@
         [[freqremax]], [[freqremin]] and [[nfreqre]]
         define the spacing of the frequency mesh along the real axis.
         </p>
-    topics: GW_basic
+    topics: Susceptibility_basic
     varset: gw
     vartype: real
 - !variable
@@ -7379,7 +7379,7 @@
         Note that [[freqremax]], [[freqremin]]
         and [[nfreqre]] define the spacing of the frequency mesh along the real axis.
         </p>
-    topics: GW_basic
+    topics: Susceptibility_basic
     varset: gw
     vartype: real
 - !variable
@@ -7401,7 +7401,7 @@
         the real axis. Alternatively, the variables [[gw_customnfreqsp]] and
         [[gw_freqsp]] can be used to make a user-defined grid.
         </p>
-    topics: GW_basic
+    topics: SelfEnergy_basic
     varset: gw
     vartype: real
 - !variable
@@ -7424,7 +7424,7 @@
         the real axis. Alternatively, the variables [[gw_customnfreqsp]] and
         [[gw_freqsp]] can be used to make a user-defined grid.
         </p>
-    topics: GW_basic
+    topics: SelfEnergy_basic
     varset: gw
     vartype: real
 - !variable
@@ -8360,7 +8360,7 @@
         <p>
          Used when [[ndtset]]&gt;0
         (multi-dataset mode) and [[optdriver]]=3, or 4
-        (screening or sigma step of a [[GW]] calculation),
+        (screening or sigma step of a GW calculation),
         to indicate that the eigenvalues and possibly the wavefunctions have to be
         taken from a previous quasiparticle calculation (instead of the usual LDA starting
         point). This is to achieve quasiparticle self-consistency.
@@ -8374,7 +8374,7 @@
          </pre>
          refers to dataset 2 when dataset 4 is initialized.
         </p>
-    topics: multidtset_useful, GW_useful
+    topics: multidtset_useful, GW_useful, Susceptibility_useful, SelfEnergy_useful
     varset: files
     vartype: integer
 - !variable
@@ -8422,7 +8422,7 @@
          </pre>
          refers to dataset 2 when dataset 4 is initialized.
         </p>
-    topics: multidtset_useful, GW_useful
+    topics: multidtset_useful, GW_useful, SelfEnergy_useful
     varset: files
     vartype: integer
 - !variable
@@ -8474,7 +8474,7 @@
          </pre>
          refers to dataset 2 when dataset 4 is initialized.
         </p>
-    topics: multidtset_useful, GW_useful
+    topics: multidtset_useful, GW_useful, SelfEnergy_useful
     varset: files
     vartype: integer
 - !variable
@@ -9529,7 +9529,7 @@
         If you want to select manually the list of k-points and bands, you have
         to provide the three variables [[nkptgw]], [[kptgw]], and [[bdgw]].
         </p>
-    topics: GW_useful
+    topics: SelfEnergy_useful
     varset: gw
     vartype: integer
 - !variable
@@ -9745,7 +9745,7 @@
           </li>
          </ul>
         </p>
-    topics: GW_basic
+    topics: GW_basic, SelfEnergy_basic
     varset: gw
     vartype: integer
 - !variable
@@ -9767,7 +9767,7 @@
         needed in the extrapolar approximation is set by [[gwencomp]].
         See F. Bruneval, X. Gonze, Phys. Rev. B 78, 085125 (2008) for a description of the methodology.
         </p>
-    topics: GW_useful
+    topics: SelfEnergy_useful
     varset: gw
     vartype: integer
 - !variable
@@ -9788,7 +9788,7 @@
         <p>
          See F. Bruneval, X. Gonze, Phys. Rev. B 78, 085125 (2008) for a description of the methodology.
         </p>
-    topics: GW_useful
+    topics: SelfEnergy_useful, Susceptibility_useful
     varset: gw
     vartype: real
 - !variable
@@ -10250,7 +10250,7 @@
          Using [[gwpara]]=1, indeed, requires the same amount of memory as a sequential run,
         irrespectively of the number of CPUs used.
         </p>
-    topics: parallelism_useful, GW_basic
+    topics: parallelism_useful, GW_basic, Susceptibility_basic, SelfEnergy_basic
     varset: paral
     vartype: integer
 - !variable
@@ -10292,7 +10292,7 @@
         </p>
         <p>
         </p>
-    topics: GW_expert
+    topics: RPACorrEn_expert
     varset: gw
     vartype: integer
 - !variable
@@ -10640,7 +10640,7 @@
         In the latter case, use a negative value for the cutoff radius of the sphere ([[rcut]]&lt;0),
         which is automatically calculated so that the volume enclosed in the sphere is equal to the volume of the solid.
         </p>
-    topics: GWls_compulsory, GW_basic, Coulomb_useful
+    topics: GWls_compulsory, Susceptibility_basic, Coulomb_useful, SelfEnergy_basic
     varset: gw
     vartype: integer
 - !variable
@@ -12081,7 +12081,7 @@
         in order to achieve a self-consistent quasiparticle calculations.
         See also [[getqps]]
         </p>
-    topics: GW_useful, multidtset_useful
+    topics: GW_useful, multidtset_useful, Susceptibility_useful, SelfEnergy_useful
     varset: files
     vartype: integer
 - !variable
@@ -12114,7 +12114,7 @@
          </a>
          of the [[help_abinit]].
         </p>
-    topics: GW_useful, multidtset_useful
+    topics: GW_useful, multidtset_useful, SelfEnergy_useful
     varset: files
     vartype: integer
 - !variable
@@ -12147,7 +12147,7 @@
          </a>
          of the [[help_abinit]].
         </p>
-    topics: GW_useful, multidtset_useful
+    topics: GW_useful, multidtset_useful, SelfEnergy_useful
     varset: files
     vartype: integer
 - !variable
@@ -14704,7 +14704,7 @@
         [[kptrlatt]], or [[ngkpt]]
          ) than the GS one, but WITHOUT any shift, are allowed.
         </p>
-    topics: GW_basic
+    topics: SelfEnergy_basic
     varset: gw
     vartype: real
 - !variable
@@ -15586,7 +15586,7 @@
          The Scissors operator energy added to the conductions states.
         In some cases, it mimics a second iteration self-consistent GW calculation.
         </p>
-    topics: GW_useful
+    topics: GW_useful, Susceptibility_useful, SelfEnergy_useful
     varset: gw
     vartype: real
 - !variable
@@ -16490,7 +16490,7 @@
          Very important : for the time being, [[istwfk]] must be 1 for all the k-points
         in order to generate a _KSS file.
         </p>
-    topics: GW_useful
+    topics: GW_useful, Susceptibility_useful, SelfEnergy_useful
     varset: gw
     vartype: integer
 - !variable
@@ -17110,7 +17110,7 @@
          [[nfreqim]] sets the number of pure imaginary frequencies used to calculate
         the dielectric matrix in order to perform the numerical integration of the GW self-energy.
         </p>
-    topics: GW_basic
+    topics: Susceptibility_basic
     varset: gw
     vartype: integer
 - !variable
@@ -17137,7 +17137,7 @@
 
         see M. Taut, J. Phys. C: Solid State Phys. 18 (1985) 2677-2690.
         </p>
-    topics: GW_basic
+    topics: Susceptibility_basic
     varset: gw
     vartype: integer
 - !variable
@@ -17173,7 +17173,7 @@
         to use this input variable.
         Using the default values, one must be able to get a screening file that can be used with any ppmodel.
         </p>
-    topics: GW_basic
+    topics: Susceptibility_basic
     varset: gw
     vartype: integer
 - !variable
@@ -17191,7 +17191,7 @@
          [[nfreqsp]] defines the number of real frequencies used to calculate the spectral function
         of the GW Green's function.
         </p>
-    topics: GW_basic
+    topics: SelfEnergy_basic
     varset: gw
     vartype: integer
 - !variable
@@ -17698,7 +17698,7 @@
          [[nkptgw]] gives the number of k-points for which the GW calculation must be done.
         It is used to dimension [[kptgw]]
         </p>
-    topics: GW_basic
+    topics: SelfEnergy_basic
     varset: gw
     vartype: integer
 - !variable
@@ -18046,7 +18046,7 @@
         requires an extremely dense frequency mesh. It should be kept in mind, however, that the memory required
         grows fast with the value of [[nomegasf]].
         </p>
-    topics: GW_basic
+    topics: Susceptibility_basic
     varset: gw
     vartype: integer
 - !variable
@@ -18065,7 +18065,7 @@
         imaginary axis. The frequency mesh is linear and covers the interval between OMEGASIMIN=0.01 Hartree and
         [[omegasimax]].
         </p>
-    topics: GW_basic
+    topics: SelfEnergy_basic
     varset: gw
     vartype: integer
 - !variable
@@ -18083,7 +18083,7 @@
          The number of real frequencies around the KS energy where the self-energy Sigma is evaluated.
         From these values, the derivative of Sigma at the KS energy is numerically estimated through linear interpolation.
         </p>
-    topics: GW_useful
+    topics: SelfEnergy_useful
     varset: gw
     vartype: integer
 - !variable
@@ -18750,7 +18750,7 @@
          utility.
         If [[nqptdm]] is equal to -1, the code reports the list of q-points in the log file (YAML format) and then stops.
         </p>
-    topics: GW_useful
+    topics: Susceptibility_useful
     varset: gw
     vartype: integer
 - !variable
@@ -20206,7 +20206,7 @@
         In conjunction with [[nomegasi]],
         [[omegasimax]] uniquely defines the linear mesh employed to sample the self-energy along the imaginary axis.
         </p>
-    topics: GW_basic
+    topics: SelfEnergy_basic
     varset: gw
     vartype: real
 - !variable
@@ -20228,7 +20228,7 @@
          The maximum distance from the KS energy where to evaluate Sigma. Sigma is evaluated at
         [KS_energy - [[omegasrdmax]], KS_energy + [[omegasrdmax]]] sampled [[nomegasrd]] times.
         </p>
-    topics: GW_basic
+    topics: SelfEnergy_basic
     varset: gw
     vartype: real
 - !variable
@@ -20329,7 +20329,7 @@
         and [[rfstrs]]) must be
         zero if [[optdriver]] is not set to 1.
         </p>
-    topics: nonlinear_compulsory, GWls_compulsory, ElPhonInt_compulsory, GW_compulsory, BSE_compulsory, DFPT_compulsory
+    topics: nonlinear_compulsory, GWls_compulsory, ElPhonInt_compulsory, GW_compulsory, BSE_compulsory, DFPT_compulsory, Susceptibility_compulsory, SelfEnergy_compulsory
     varset: gstate
     vartype: integer
 - !variable
@@ -22631,7 +22631,7 @@
         real frequency axes. See
         [[cd_frqim_method]], [[gw_frqim_inzgrid]] and [[gw_frqre_inzgrid]] for more details.
         </p>
-    topics: GW_basic
+    topics: SelfEnergy_basic
     varset: gw
     vartype: real
 - !variable
@@ -22682,7 +22682,7 @@
         Thus the calculated plasmon band structure (plasmon energy vs q vector) is reported in the output file for the
         lowest 10 bands.
         </p>
-    topics: GW_basic
+    topics: SelfEnergy_basic
     varset: gw
     vartype: integer
 - !variable
@@ -25203,7 +25203,7 @@
         These q points are given in terms of reciprocal space primitive translations (NOT in cartesian coordinates!).
         For further explanation, see the input variable [[nqptdm]].
         </p>
-    topics: GW_useful
+    topics: Susceptibility_useful
     varset: gw
     vartype: real
 - !variable
@@ -25659,7 +25659,7 @@
         <p>
          If [[rcut]] is negative, the cutoff is automatically calculated so to enclose the same volume inside the cutoff as the volume of the primitive cell.
         </p>
-    topics: GWls_compulsory, GW_basic
+    topics: GWls_compulsory, Susceptibility_basic, SelfEnergy_basic
     varset: gw
     vartype: real
 - !variable
@@ -27240,7 +27240,7 @@
         When a screening calculation ([[optdriver]]==3) uses a spectral representation of the irreducible polarizability in which
         the delta function is replaced by the gaussian approximant ([[spmeth]]==2), the standard deviation of the gaussian
         is given by [[spbroad]].
-    topics: GW_useful
+    topics: Susceptibility_useful
     varset: gw
     vartype: real
 - !variable
@@ -27656,7 +27656,7 @@
           </li>
          </ul>
         </p>
-    topics: GW_useful
+    topics: Susceptibility_useful
     varset: gw
     vartype: integer
 - !variable
@@ -29733,7 +29733,7 @@
          - B. Amadon, F. Jollet and M. Torrent, Phys. Rev. B 77, 155104 (2008).
          <br />
         </p>
-    topics: DFT+U_compulsory, GW_useful
+    topics: DFT+U_compulsory, GW_useful, SelfEnergy_useful
     varset: paw
     vartype: integer
 - !variable
@@ -30283,7 +30283,7 @@
 
         defines ....
         </p>
-    topics: GWls_compulsory, GW_basic
+    topics: GWls_compulsory, Susceptibility_basic, SelfEnergy_basic
     varset: gw
     vartype: real
 - !variable

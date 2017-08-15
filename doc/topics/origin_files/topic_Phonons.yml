@@ -24,8 +24,9 @@
        is very similar, although there are some input variables that govern more options in ANADDB then in ABINIT,
        because of the previously mentioned difference in capabilities. In the database of input variables, 
        the input variables related to ABINIT or ANADDB are clearly distinguished.
-       <p>The band-by-band decomposition of the Born effective charge tensors can be computed thanks to [[prtbbb]. 
+       <p>The band-by-band decomposition of the Born effective charge tensors can be computed thanks to [[prtbbb]]. 
        The related localization tensor (see [[Veithen2002]] can also be computed.  
+       <p>Phonon calculations are arbitrary q-points can be done under finite electric field ([[topic_Berry]]).
        <p>It will be the easiest to discover the capabilities of these two executables through the
        [[lesson_rf1]] of the tutorial.
        <p>See [[topic_DFPT]] for the general information about DFPT, [[topic_q-points]] for the specification of q-points,
