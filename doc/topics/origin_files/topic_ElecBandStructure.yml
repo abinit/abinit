@@ -19,4 +19,6 @@
       The Wannier interpolation is also available through the use of the [[lesson:wannier90]] post-processor.
       <p>The band structure from a supercell calculation can be unfolded to the (large) Brillouin zone of the (small) primitive cell 
       thanks to the [[help:fold2bloch]] post-processor. See the related [[topic_Unfolding]].
+      <p>Different plotting postprocessors exist to produce graphical representations of electronic band structures from ABINIT. The most 
+      powerful is based on [[topic:Abipy]]. Simpler tools also exist, and can be found in ~abinit/scripts/post_processing
     end : default 

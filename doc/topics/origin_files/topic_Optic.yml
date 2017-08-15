@@ -25,8 +25,12 @@
       of each other, and thus overlap significantly.
       The first one permits to cover the linear and non-linear optical properties as a function of the frequency. 
       It provides the optical dielectric tensor, the second-harmonic generation (SHG) as well as the optical rectification
-      tensor (or electro-optic tensor - without the contribution from the nuclei displacements, see [[topic_nonlinear]].
-      The second one "conducti" has more restricted capabilities, only at the linear level. 
+      tensor (or electro-optic tensor) - without the contribution from the nuclei displacements. For the further inclusion
+      of the contribution from nuclei displacements, see [[topic_nonlinear]].
+      <p>The second utility "conducti" has more capabilities only at the linear level, but provides
+      electronic conductivity, dielectric tensor, index of refraction, reflectivity, absorption, 
+      the thermal conductivity, and the thermopower 
+      (electron transport, high temperature, Kubo-Greenwood formalism) real as well as imaginary part.
     tutorials  : |-
        <li>See 
        <a href="../../tutorial/generated_files/lesson_optic.html">The lesson on Optic</a>, the utility that

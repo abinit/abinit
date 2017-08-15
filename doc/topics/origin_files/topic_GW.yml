@@ -2,9 +2,9 @@
     name      : GW 
     keyword   : GW calculations 
     authors   : MG
-    howto     : perform a GW calculation
+    howto     : perform a GW calculation, including self-consistency
     header    : default
-    title     : <h1>GW calculations</h1>
+    title     : <h1>GW calculations, including self-consistency</h1>
     subtitle  : default
     copyright : default
     links     : default

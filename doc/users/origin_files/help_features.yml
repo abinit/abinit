@@ -255,11 +255,13 @@ sec8:
 ## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
 ## Note the small (one space) indentation for the title and body keys.
 sec9:
- title: "Other properties and analysis tools (positron)"
+ title: "Other properties (e.g. positron) and analysis/postprocessing tools"
  tag: other_physics
  body: |
   <ol>
    <li>[[topic:positron|Positron calculations]]</li>
+   <li>[[topic:Abipy|Abipy]]</li>
+   <li>[[topic:APPA|APPA]]</li>
   </ol>
 
 ## Each section must have a title, that will form the table of content.
