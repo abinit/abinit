@@ -1,0 +1,16 @@
+- !components 
+    name      : Susceptibility
+    keyword   : Susceptibility
+    authors   : MT
+    howto     : compute the frequency-dependent susceptibility matrix, and related screened interaction matrix, and inverse dielectric marix
+    header    : default
+    title     : <h1>Frequency-dependent susceptibility matrix and related topics</h1>
+    subtitle  : default
+    copyright : default
+    links     : default
+    introduction : |- 
+       <p>In the independent-particle approximation, the frequency-dependent susceptibility matrix, and 
+       related screened interaction matrix, and inverse dielectric matrix can be computed.
+       <p>This is a prerequisite to many-body perturbation theory calculations, see [[topic_GW]] and [[topic_BSE]], to which we refer.
+    tutorials  : |-
+    end : default
