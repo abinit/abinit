@@ -2392,7 +2392,7 @@
          [[cd_customnimfrqs]] lets the user define the grid points along the imaginary axis by hand. Set this
         to the number of frequencies you want. The frequencies are specified with [[cd_imfrqs]].
         </p>
-    topics: GW_expert
+    topics: Susceptibility_expert, SelfEnergy_expert
     varset: gw
     vartype: integer
 - !variable
@@ -2727,7 +2727,7 @@
          on the dense mesh for a given convergence study. One can also use the utility to
         merge independent screening calculations over q-points and frequency sections.
         </p>
-    topics: GW_expert
+    topics: Susceptibility_expert, SelfEnergy_expert
     varset: gw
     vartype: integer
 - !variable
@@ -2763,7 +2763,7 @@
          </b>
          utility.
         </p>
-    topics: GW_expert
+    topics: Susceptibility_expert, SelfEnergy_expert
     varset: gw
     vartype: integer
 - !variable
@@ -2785,7 +2785,7 @@
         [[nfreqre]] are used up. The tangent transformed grid is approximately
         linear up to this point. To be used in conjunction with [[gw_frqre_tangrid]].
         </p>
-    topics: GW_expert
+    topics: Susceptibility_expert, SelfEnergy_expert
     varset: gw
     vartype: real
 - !variable
@@ -2829,7 +2829,7 @@
         </p>
         <p>
         </p>
-    topics: GW_expert
+    topics: Susceptibility_expert
     varset: gw
     vartype: real
 - !variable
@@ -2851,7 +2851,7 @@
         [[nfreqre]] are used up. To be used in conjunction with
         [[gw_frqre_tangrid]].
         </p>
-    topics: GW_expert
+    topics: Susceptibility_expert, SelfEnergy_expert
     varset: gw
     vartype: real
 - !variable
@@ -2886,7 +2886,7 @@
          </b>
          utility.
         </p>
-    topics: GW_expert
+    topics: Susceptibility_expert
     varset: gw
     vartype: integer
 - !variable
@@ -6180,7 +6180,7 @@
         For B-spline interpolation:
 
         einterp(2:4): Order of B-spline for the three reduced directions. Cubic spline (3) is the recommended value.
-    topics: ElecBandStructure_useful,GW_expert
+    topics: ElecBandStructure_useful, SelfEnergy_expert
     varset: basic
     vartype: real
 - !variable
@@ -7196,7 +7196,7 @@
          </ul>
          The behaviour of ABINIT before v5.5 corresponds to the default value 11.
         </p>
-    topics: GW_expert
+    topics: GW_expert, Susceptibility_expert, SelfEnergy_expert
     varset: gw
     vartype: integer
 - !variable
@@ -7322,7 +7322,7 @@
          is the plasma frequency
         determined by the average density of the system (this can be set by hand by using the variable [[ppmfrq]]). See the section on grids in the descriptive text for [[cd_frqim_method]] for a detailed description of the formula.
         </p>
-    topics: GW_expert
+    topics: SelfEnergy_expert
     varset: gw
     vartype: real
 - !variable
@@ -9177,7 +9177,7 @@
         for the calculation of the self-energy along the real axis. Set this to the number of frequencies
         you want. The frequencies are specified with [[gw_freqsp]].
         </p>
-    topics: GW_expert
+    topics: SelfEnergy_expert
     varset: gw
     vartype: integer
 - !variable
@@ -9208,7 +9208,7 @@
          If [[nfreqsp]] is not equal to
         [[gw_customnfreqsp]] a warning will be issued.
         </p>
-    topics: GW_expert
+    topics: SelfEnergy_expert
     varset: gw
     vartype: real
 - !variable
@@ -9254,7 +9254,7 @@
         The equidistant grid in z is determined uniquely by [[nfreqim]]) and
         the points are distributed so that half of them lie below the plasma frequency.
         </p>
-    topics: GW_expert
+    topics: Susceptibility_expert, SelfEnergy_expert
     varset: gw
     vartype: integer
 - !variable
@@ -9326,7 +9326,7 @@
         origin is required. The maximum value needed along the real frequency axis is output in the
         logfile during Contour Deformation sigma calculations.
         </p>
-    topics: GW_expert
+    topics: Susceptibility_expert, SelfEnergy_expert
     varset: gw
     vartype: integer
 - !variable
@@ -9348,7 +9348,7 @@
         [[cd_max_freq]] and [[cd_halfway_freq]]
          which determine the parameters of the transformed grid.
         </p>
-    topics: GW_expert
+    topics: Susceptibility_expert, SelfEnergy_expert
     varset: gw
     vartype: integer
 - !variable
@@ -9376,7 +9376,7 @@
             </li>
           </ul>
         </p>
-    topics: GW_expert
+    topics: Susceptibility_expert, SelfEnergy_expert
     varset: gw
     vartype: integer
 - !variable
@@ -9431,7 +9431,7 @@
         By default the Bethe-Salpeter code calculates the macroscopic dielectric function using six different
         directions in q-space (the three basis vectors of the reciprocal lattice and the three Cartesian axis).
         </p>
-    topics: GW_expert, BSE_expert
+    topics: GW_expert, BSE_expert, Susceptibility_expert, SelfEnergy_expert
     varset: gw
     vartype: integer
 - !variable
@@ -9469,7 +9469,7 @@
     - '[[gw_nqlwl]]'
     excludes: null
     mnemonics: GW, Q-points for the Long Wave-Length limit
-    requires: '[[optdriver]]==3'
+    requires: '[[optdriver]] in [3,4,99]'
     text: |-
         <p>
          When [[optdriver]]=3,
@@ -9479,7 +9479,7 @@
         </p>
         <p>
         </p>
-    topics: GW_expert
+    topics: Susceptibility_expert, SelfEnergy_expert, BSE_expert
     varset: gw
     vartype: real
 - !variable
@@ -9620,7 +9620,7 @@
         </p>
         <p>
         </p>
-    topics: GW_expert
+    topics: SelfEnergy_expert
     varset: gw
     vartype: integer
 - !variable
@@ -9832,7 +9832,7 @@
         [[gwgamma]]=-8 uses the RPA bootstrap-like kernel (one-shot) [Phys. Rev.  Lett. 115, 137402 (2015), ibid. 114, 146402 (2015)].
         </p>
         </p>
-    topics: GW_expert
+    topics: Susceptibility_expert, SelfEnergy_expert
     varset: gw
     vartype: integer
 - !variable
@@ -10215,7 +10215,7 @@
         </p>
         <p>
         </p>
-    topics: GW_expert
+    topics: Susceptibility_expert, SelfEnergy_expert
     varset: gw
     vartype: integer
 - !variable
@@ -10901,11 +10901,11 @@
          The importance of this contribution depends on the number of k points. Turning off [[inclvkb]] is let to the choice of the user.
         </p>
         <p>
-        In general, the use of [[inclvkb]]=0 is fine for [[GW]] calculations in crystalline systems provided that the k-point sampling is sufficiently converged.
+        In general, the use of [[inclvkb]]=0 is fine for GW calculations in crystalline systems provided that the k-point sampling is sufficiently converged.
         <p>
         The use of [[inclvkb]]=2 is strongly recommended for the calculation of optical properties.
         </p>
-    topics: GW_expert
+    topics: Susceptibility_expert, BSE_expert
     varset: gw
     vartype: integer
 - !variable
@@ -15065,7 +15065,7 @@
          Very important : for the time being, [[istwfk]]
         must be 1 for all the k-points.
         </p>
-    topics: GW_expert
+    topics: Susceptibility_expert, SelfEnergy_expert
     varset: files
     vartype: integer
 - !variable
@@ -18598,7 +18598,7 @@
          <br />
         It is an internal variable, determined from [[ecuteps]].
         </p>
-    topics: GW_internal
+    topics: Susceptibility_internal
     varset: internal
     vartype: integer
 - !variable
@@ -18633,7 +18633,7 @@
         <p>
          Very important : for the time being, [[istwfk]] must be 1 for all the k-points.
         </p>
-    topics: GW_expert
+    topics: Susceptibility_expert, SelfEnergy_expert
     varset: gw
     vartype: integer
 - !variable
@@ -18654,7 +18654,7 @@
          <br />
         It is an internal variable, determed from [[ecutsigx]].
         </p>
-    topics: GW_internal
+    topics: SelfEnergy_internal
     varset: internal
     vartype: integer
 - !variable
@@ -18674,7 +18674,7 @@
         in the formula that generates the independent-particle susceptibility $\chi^{(0)}_{KS}$.
         It is an internal variable, determined from [[ecutwfn]].
         </p>
-    topics: GW_internal
+    topics: Susceptibility_internal, SelfEnergy_internal
     varset: internal
     vartype: integer
 - !variable
@@ -21110,7 +21110,7 @@
          If [[pawoptosc]]=2  the matrix elements are computed with the approximated expression proposed by Shishkin and
         Kresse in PRB 74. 035101
         </p>
-    topics: GW_expert, BSE_expert
+    topics: Susceptibility_expert, BSE_expert, SelfEnergy_expert
     varset: paw
     vartype: integer
 - !variable
@@ -27955,7 +27955,7 @@
           </li>
          </ul>
         </p>
-    topics: GW_expert
+    topics: Susceptibility_expert
     varset: gw
     vartype: integer
 - !variable
@@ -28134,7 +28134,7 @@
         since GW calculations performed with [[symsigma]]=1 will not be able to remove
         the initial accidental degeneracy.
         </p>
-    topics: GW_expert
+    topics: SelfEnergy_expert
     varset: gw
     vartype: integer
 - !variable
@@ -32044,7 +32044,7 @@
          <br />
          Ideally, one should make a convergence study decreasing the value of [[zcut]] for increasing number of k-points.
         </p>
-    topics: GW_expert, BSE_expert
+    topics: Susceptibility_expert, BSE_expert, SelfEnergy_expert
     varset: gw
     vartype: real
 - !variable
