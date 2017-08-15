@@ -28,5 +28,8 @@
       lowering [[boxcutmin]] below its theoretically needed value of 2.0 .
       <p>The choice of the FFT algorithm implementation, see [[fftalg]] might also lead to significant speed up, 
       on specific machines.
+      <p>For specific k-points, time-reversal symmetry can be used to represent the wavefunctions with their 
+      real part, instead of both their real and complex parts. This allows halving the memory needs, as well as
+      the CPU time. See [[istwfk]].
       <p>Other input variables related to tuning the speed or the memory usage are for expert users only.
     end : default 

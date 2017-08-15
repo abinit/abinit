@@ -275,6 +275,7 @@ sec10:
  body: |
   <ol>
    <li>[[topic:Verification|Verification of the implementation]]</li>
+   <li>[[topic:PortabilityNonRegression|Portability and non-regression tests]]</li>
    <li>[[topic:Dev|Miscellaneous for developers]]</li>
   </ol>
 

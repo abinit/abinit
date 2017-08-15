@@ -12990,7 +12990,7 @@
           </li>
          </ul>
         </p>
-    topics: k-points_useful
+    topics: k-points_useful, TuningSpeed_basic
     varset: dev
     vartype: integer
 - !variable

@@ -51,6 +51,9 @@ fine details to be taken into account (actually, filtering such quantities). Thi
 lowering <a href="../../input_variables/generated_files/varset_gstate.html#boxcutmin">boxcutmin</a> below its theoretically needed value of 2.0 .
 <p>The choice of the FFT algorithm implementation, see <a href="../../input_variables/generated_files/varset_dev.html#fftalg">fftalg</a> might also lead to significant speed up, 
 on specific machines.
+<p>For specific k-points, time-reversal symmetry can be used to represent the wavefunctions with their 
+real part, instead of both their real and complex parts. This allows halving the memory needs, as well as
+the CPU time. See <a href="../../input_variables/generated_files/varset_dev.html#istwfk">istwfk</a>.
 <p>Other input variables related to tuning the speed or the memory usage are for expert users only.
 <br><br><a href=#top>Go to the top</a>
 
@@ -64,6 +67,7 @@ on specific machines.
 
 
 <p>Basic input variables:<p>... <a href="../../input_variables/generated_files/varset_gstate.html#boxcutmin">boxcutmin</a>   [BOX CUT-off MINimum]<br>
+... <a href="../../input_variables/generated_files/varset_dev.html#istwfk">istwfk</a>   [Integer for choice of STorage of WaveFunction at each k point]<br>
 <p>Useful input variables:<p>... <a href="../../input_variables/generated_files/varset_dev.html#fftalg">fftalg</a>   [Fast Fourier Transform ALGorithm]<br>
 <p>Input variables for experts:<p>... <a href="../../input_variables/generated_files/varset_dev.html#exchn2n3d">exchn2n3d</a>   [EXCHange N2 and N3 Dimensions]<br>
 ... <a href="../../input_variables/generated_files/varset_dev.html#extrapwf">extrapwf</a>   [flag - EXTRAPolation of the Wave-Functions]<br>
