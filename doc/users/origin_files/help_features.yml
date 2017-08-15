@@ -263,6 +263,7 @@ sec9:
    <li>[[topic:positron|Positron calculations]]</li>
    <li>[[topic:Abipy|Abipy]]</li>
    <li>[[topic:APPA|Abinit Post-Processor Application (APPA), for molecular-dynamics trajectory analysis]]</li>
+   <li>[[topic:Band2eps|Band2eps for phonon dispersion curves]]</li>
   </ol>
 
 ## Each section must have a title, that will form the table of content.
