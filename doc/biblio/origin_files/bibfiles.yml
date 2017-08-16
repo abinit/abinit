@@ -125,6 +125,7 @@
         <li><b>B.15<a name="15">.</b> If the Van Der Waals DFT-D (Grimme) functionals are used, cite [[Vantroeye2016]].
         <li><b>B.16<a name="16">.</b> If the temperature dependence of the electronic structure or the zero-point motion effect 
             on the electronic structure are computed, cite [[Ponce2014]] and [[Ponce2015]].
+        <li><b>B.17<a name="17">.</b> If the direct (DFPT) computation of effective masses is used, see [[topic_EffMass]], cite [[Laflamme2016]].
       </ul>
 
 - !components

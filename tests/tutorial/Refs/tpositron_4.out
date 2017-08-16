@@ -1,5 +1,5 @@
 
-.Version 8.4.1 of ABINIT 
+.Version 8.5.2 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
 
 .Copyright (C) 1998-2017 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see http://www.abinit.org .
 
-.Starting date : Fri 11 Aug 2017.
-- ( at 23h58 )
+.Starting date : Wed 16 Aug 2017.
+- ( at 13h51 )
   
 - input  file    -> tpositron_4.in
 - output file    -> tpositron_4.out
@@ -85,7 +85,7 @@ P           mkmem           3
         pawecutdg      1.50000000E+01 Hartree
          positron         -10
          posnstep       20
-        postoldfe      1.00000000E-05 Hartree
+        postoldfe      9.50000000E-06 Hartree
            prteig           0
             prtwf           0
             rprim      0.0000000000E+00  1.0000000000E+00  1.0000000000E+00
@@ -198,8 +198,8 @@ P           mkmem           3
          ecut(hartree)=     15.000   => boxcut(ratio)=   2.13510
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/torrent_tutopositron/tests/Psps_for_tests/Si.LDA-PW-paw.abinit
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/torrent_tutopositron/tests/Psps_for_tests/Si.LDA-PW-paw.abinit
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_input-web/tests/Psps_for_tests/Si.LDA-PW-paw.abinit
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_input-web/tests/Psps_for_tests/Si.LDA-PW-paw.abinit
 - Paw atomic data for element Si - Generated with atompaw v3.1.0.3
 - 14.00000   4.00000  20170718                znucl, zion, pspdat
     7    7    1    0      1390   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -449,7 +449,7 @@ TC-DFT STEP  19 - ELECTRONIC GROUND-STATE CALCULATION IN PRESENCE OF A POSITRON
 
  At SCF step  114, the difference between
  etotal from electronic calculation and etotal from positronic calculation
- is converged :  diff(etot_el-etot_pos)=  8.970E-06 < postoldfe=  1.000E-05
+ is converged :  diff(etot_el-etot_pos)=  8.970E-06 < postoldfe=  9.500E-06
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
@@ -737,7 +737,7 @@ TC-DFT STEP   7 - ELECTRONIC GROUND-STATE CALCULATION IN PRESENCE OF A POSITRON
 
  At SCF step   44, the difference between
  etotal from electronic calculation and etotal from positronic calculation
- is converged :  diff(etot_el-etot_pos)=  5.341E-06 < postoldfe=  1.000E-05
+ is converged :  diff(etot_el-etot_pos)=  5.341E-06 < postoldfe=  9.500E-06
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
@@ -1059,7 +1059,7 @@ TC-DFT STEP   9 - ELECTRONIC GROUND-STATE CALCULATION IN PRESENCE OF A POSITRON
 
  At SCF step   64, the difference between
  etotal from electronic calculation and etotal from positronic calculation
- is converged :  diff(etot_el-etot_pos)=  8.571E-06 < postoldfe=  1.000E-05
+ is converged :  diff(etot_el-etot_pos)=  8.571E-06 < postoldfe=  9.500E-06
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
@@ -1343,7 +1343,7 @@ TC-DFT STEP   7 - ELECTRONIC GROUND-STATE CALCULATION IN PRESENCE OF A POSITRON
 
  At SCF step   36, the difference between
  etotal from electronic calculation and etotal from positronic calculation
- is converged :  diff(etot_el-etot_pos)=  1.309E-06 < postoldfe=  1.000E-05
+ is converged :  diff(etot_el-etot_pos)=  1.309E-06 < postoldfe=  9.500E-06
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
@@ -1630,56 +1630,64 @@ TC-DFT STEP   7 - ELECTRONIC GROUND-STATE CALCULATION IN PRESENCE OF A POSITRON
  At SCF step   41, etot is converged : 
   for the second time, diff in etot=  8.292E-10 < toldfe=  1.000E-08
 
- At SCF step   41, the difference between
+TC-DFT STEP   8 - POSITRONIC GROUND-STATE CALCULATION IN PRESENCE OF ELECTRONS AND IONS
+ ETOT 42  -60.614854870355     8.126E-06 5.993E-05 4.428E-09 2.041E-06 4.175E-04
+ ETOT 43  -60.614854870380    -2.521E-11 1.865E-04 2.859E-09 8.406E-08 4.174E-04
+ ETOT 44  -60.614854870381    -5.471E-13 5.662E-05 3.641E-10 1.902E-09 4.174E-04
+
+ At SCF step   44, etot is converged : 
+  for the second time, diff in etot=  5.471E-13 < toldfe=  1.000E-08
+
+ At SCF step   44, the difference between
  etotal from electronic calculation and etotal from positronic calculation
- is converged :  diff(etot_el-etot_pos)=  9.761E-06 < postoldfe=  1.000E-05
+ is converged :  diff(etot_el-etot_pos)=  8.126E-06 < postoldfe=  9.500E-06
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
-    1        1.90945          1.56984439
-    2        1.90945          1.56984439
-    3        1.90945          1.56984439
-    4        1.90945          1.56984439
-    5        1.90945          1.52869746
-    6        1.90945          1.52869746
-    7        1.90945          1.52869746
-    8        1.90945          1.52869746
-    9        1.90945          1.57900935
-   10        1.90945          1.57075045
-   11        1.90945          1.57075045
-   12        1.90945          1.57075045
-   13        1.90945          1.57075045
-   14        1.90945          1.57075045
-   15        1.90945          1.57075045
+    1        1.90945          1.56984274
+    2        1.90945          1.56984274
+    3        1.90945          1.56984274
+    4        1.90945          1.56984274
+    5        1.90945          1.52869819
+    6        1.90945          1.52869819
+    7        1.90945          1.52869819
+    8        1.90945          1.52869819
+    9        1.90945          1.57900684
+   10        1.90945          1.57074994
+   11        1.90945          1.57074994
+   12        1.90945          1.57074994
+   13        1.90945          1.57074994
+   14        1.90945          1.57074994
+   15        1.90945          1.57074994
 
  PAW TEST:
  ==== Compensation charge inside spheres ============
  The following values must be close to each other ...
- Compensation charge over spherical meshes =     -1.539303166875729
- Compensation charge over fine fft grid    =     -1.539306890535865
+ Compensation charge over spherical meshes =     -0.000342648849836
+ Compensation charge over fine fft grid    =     -0.000342622011266
 
  ==== Results concerning PAW augmentation regions ====
 
  Total pseudopotential strength Dij (hartree):
- -Note: these are the electronic Dij
+ -Note: these are the positronic Dij
  Atom #  1
-   0.47271  73.82222   0.00002   0.00002   0.00002  -0.00020  -0.00020  -0.00020
-  73.82222 *********   0.00355   0.00355   0.00355  -0.03495  -0.03495  -0.03495
-   0.00002   0.00355   0.13270  -0.00000  -0.00000  -1.07040   0.00003   0.00003
-   0.00002   0.00355  -0.00000   0.13270  -0.00000   0.00003  -1.07040   0.00003
-   0.00002   0.00355  -0.00000  -0.00000   0.13270   0.00003   0.00003  -1.07040
-  -0.00020  -0.03495  -1.07040   0.00003   0.00003   7.67265  -0.00030  -0.00030
-  -0.00020  -0.03495   0.00003  -1.07040   0.00003  -0.00030   7.67265  -0.00030
-  -0.00020  -0.03495   0.00003   0.00003  -1.07040  -0.00030  -0.00030   7.67265
+   2.28193 266.95615  -0.00006  -0.00006  -0.00006   0.00059   0.00059   0.00059
+ 266.95615 *********  -0.01032  -0.01032  -0.01032   0.10717   0.10717   0.10717
+  -0.00006  -0.01032   1.10689   0.00000   0.00000  -7.71412  -0.00002  -0.00002
+  -0.00006  -0.01032   0.00000   1.10689   0.00000  -0.00002  -7.71412  -0.00002
+  -0.00006  -0.01032   0.00000   0.00000   1.10689  -0.00002  -0.00002  -7.71412
+   0.00059   0.10717  -7.71412  -0.00002  -0.00002  52.02047   0.00019   0.00019
+   0.00059   0.10717  -0.00002  -7.71412  -0.00002   0.00019  52.02047   0.00019
+   0.00059   0.10717  -0.00002  -0.00002  -7.71412   0.00019   0.00019  52.02047
  Atom # 15
-   0.47281  73.84473   0.00000   0.00010   0.00000   0.00000  -0.00095   0.00000
-  73.84473 *********   0.00000   0.01668   0.00000   0.00000  -0.16094   0.00000
-   0.00000   0.00000   0.13272   0.00000   0.00002  -1.07073   0.00000  -0.00019
-   0.00010   0.01668   0.00000   0.13270   0.00000   0.00000  -1.07057   0.00000
-   0.00000   0.00000   0.00002   0.00000   0.13272  -0.00019   0.00000  -1.07073
-   0.00000   0.00000  -1.07073   0.00000  -0.00019   7.67703   0.00000   0.00194
-  -0.00095  -0.16094   0.00000  -1.07057   0.00000   0.00000   7.67537   0.00000
-   0.00000   0.00000  -0.00019   0.00000  -1.07073   0.00194   0.00000   7.67703
+   2.28242 267.06737   0.00000  -0.00003   0.00000   0.00000   0.00031   0.00000
+ 267.06737 *********   0.00000  -0.00558   0.00000   0.00000   0.05179   0.00000
+   0.00000   0.00000   1.10695   0.00000  -0.00001  -7.71546   0.00000   0.00010
+  -0.00003  -0.00558   0.00000   1.10696   0.00000   0.00000  -7.71550   0.00000
+   0.00000   0.00000  -0.00001   0.00000   1.10695   0.00010   0.00000  -7.71546
+   0.00000   0.00000  -7.71546   0.00000   0.00010  52.03900   0.00000  -0.00111
+   0.00031   0.05179   0.00000  -7.71550   0.00000   0.00000  52.03956   0.00000
+   0.00000   0.00000   0.00010   0.00000  -7.71546  -0.00111   0.00000  52.03900
 
 
  Augmentation waves occupancies Rhoij:
@@ -1717,24 +1725,24 @@ TC-DFT STEP   7 - ELECTRONIC GROUND-STATE CALCULATION IN PRESENCE OF A POSITRON
  # Enhancement factor of Boronski & Nieminen
    Ref.: Boronski and R.M. Nieminen, Phys. Rev. B 34, 3820 (1986)
 
- Positron lifetime                         (ps)   =  3.53282772E+02
- Positron lifetime with IPM for core elec. (ps)   =  3.55098576E+02
- Annihilation rate                         (ns-1) =  2.83059373E+00
- Annihilation rate with IPM for core elec. (ns-1) =  2.81611943E+00
+ Positron lifetime                         (ps)   =  3.53224377E+02
+ Positron lifetime with IPM for core elec. (ps)   =  3.55046265E+02
+ Annihilation rate                         (ns-1) =  2.83106169E+00
+ Annihilation rate with IPM for core elec. (ns-1) =  2.81653435E+00
 
  Annihilation rate core/valence decomposition:
-   Core    contribution to ann.rate          (ns-1) =  5.49327326E-02
-   Valence contribution to ann.rate          (ns-1) =  2.77566100E+00
-   Core    contribution to ann.rate with IPM (ns-1) =  3.83197347E-02
-   Valence contribution to ann.rate with IPM (ns-1) =  2.77779970E+00
+   Core    contribution to ann.rate          (ns-1) =  5.50551660E-02
+   Valence contribution to ann.rate          (ns-1) =  2.77600652E+00
+   Core    contribution to ann.rate with IPM (ns-1) =  3.83760037E-02
+   Valence contribution to ann.rate with IPM (ns-1) =  2.77815835E+00
 
  Annihilation rate PAW decomposition:
-   Plane-wave contribution to ann.rate          (ns-1) =  2.80549293E+00
-   Plane-wave valence contribution to ann.rate  (ns-1) =  2.77713977E+00
-   On-site core contribution to ann.rate        (ns-1) =  2.65795723E-02
-   On-site valence contribution to ann.rate     (ns-1) = -1.47877369E-03
-   Plane-wave contribution to ann.rate with IPM (ns-1) =  2.79321407E+00
-   Plane-wave core contrb. to ann.rate with IPM (ns-1) =  1.30545083E-02
+   Plane-wave contribution to ann.rate          (ns-1) =  2.80596074E+00
+   Plane-wave valence contribution to ann.rate  (ns-1) =  2.77748547E+00
+   On-site core contribution to ann.rate        (ns-1) =  2.65798954E-02
+   On-site valence contribution to ann.rate     (ns-1) = -1.47894526E-03
+   Plane-wave contribution to ann.rate with IPM (ns-1) =  2.79362841E+00
+   Plane-wave core contrb. to ann.rate with IPM (ns-1) =  1.31099032E-02
 
 ########## Lifetime computation 2
 
@@ -1743,24 +1751,24 @@ TC-DFT STEP   7 - ELECTRONIC GROUND-STATE CALCULATION IN PRESENCE OF A POSITRON
  # Enhancement factor of Boronski & Nieminen IN THE RPA LIMIT
    Ref.: Boronski and R.M. Nieminen, Phys. Rev. B 34, 3820 (1986)
 
- Positron lifetime                         (ps)   =  2.86660064E+02
- Positron lifetime with IPM for core elec. (ps)   =  2.87854355E+02
- Annihilation rate                         (ns-1) =  3.48845244E+00
- Annihilation rate with IPM for core elec. (ns-1) =  3.47397905E+00
+ Positron lifetime                         (ps)   =  2.86630931E+02
+ Positron lifetime with IPM for core elec. (ps)   =  2.87829375E+02
+ Annihilation rate                         (ns-1) =  3.48880701E+00
+ Annihilation rate with IPM for core elec. (ns-1) =  3.47428055E+00
 
  Annihilation rate core/valence decomposition:
-   Core    contribution to ann.rate          (ns-1) =  5.48624938E-02
-   Valence contribution to ann.rate          (ns-1) =  3.43358995E+00
-   Core    contribution to ann.rate with IPM (ns-1) =  3.83197347E-02
-   Valence contribution to ann.rate with IPM (ns-1) =  3.43565932E+00
+   Core    contribution to ann.rate          (ns-1) =  5.49849317E-02
+   Valence contribution to ann.rate          (ns-1) =  3.43382207E+00
+   Core    contribution to ann.rate with IPM (ns-1) =  3.83760037E-02
+   Valence contribution to ann.rate with IPM (ns-1) =  3.43590455E+00
 
  Annihilation rate PAW decomposition:
-   Plane-wave contribution to ann.rate          (ns-1) =  3.46335272E+00
-   Plane-wave valence contribution to ann.rate  (ns-1) =  3.43506871E+00
-   On-site core contribution to ann.rate        (ns-1) =  2.65784893E-02
-   On-site valence contribution to ann.rate     (ns-1) = -1.47876269E-03
-   Plane-wave contribution to ann.rate with IPM (ns-1) =  3.45107240E+00
-   Plane-wave core contrb. to ann.rate with IPM (ns-1) =  1.30545083E-02
+   Plane-wave contribution to ann.rate          (ns-1) =  3.46370713E+00
+   Plane-wave valence contribution to ann.rate  (ns-1) =  3.43530101E+00
+   On-site core contribution to ann.rate        (ns-1) =  2.65788122E-02
+   On-site valence contribution to ann.rate     (ns-1) = -1.47893436E-03
+   Plane-wave contribution to ann.rate with IPM (ns-1) =  3.45137332E+00
+   Plane-wave core contrb. to ann.rate with IPM (ns-1) =  1.31099032E-02
 
       (*) IPM=Independent particle Model
 
@@ -1799,53 +1807,53 @@ TC-DFT STEP   7 - ELECTRONIC GROUND-STATE CALCULATION IN PRESENCE OF A POSITRON
   1.19903204034453E-01  6.30096795965548E-01  6.30096795965548E-01
   6.30096795965548E-01  1.19903204034453E-01  6.30096795965548E-01
   6.30096795965548E-01  6.30096795965548E-01  1.19903204034453E-01
- Cartesian forces (fcart) [Ha/bohr]; max,rms= 4.16667E-04 2.86908E-04 (free atoms)
-  4.09863869739965E-04  4.09863869739965E-04  4.09863869739965E-04
- -4.09863869739965E-04 -4.09863869739965E-04  4.09863869739965E-04
- -4.09863869739965E-04  4.09863869739965E-04 -4.09863869739965E-04
-  4.09863869739965E-04 -4.09863869739965E-04 -4.09863869739965E-04
- -2.32146540990385E-04  2.32146540990385E-04  2.32146540990385E-04
-  2.32146540990385E-04 -2.32146540990385E-04  2.32146540990385E-04
-  2.32146540990385E-04  2.32146540990385E-04 -2.32146540990385E-04
- -2.32146540990385E-04 -2.32146540990385E-04 -2.32146540990385E-04
- -3.39980512008332E-21  1.06249509100699E-20 -7.22801574280486E-21
- -3.35676254550553E-21  1.05819074957800E-20  4.16667127795230E-04
- -3.44284853437321E-21  4.16667127795230E-04 -7.18497148880286E-21
-  4.16667127795230E-04 -3.16821867350188E-20  3.50791227419959E-20
- -4.16667127795230E-04 -4.35421151396276E-20  4.69390511466047E-20
- -3.35676254550553E-21 -4.16667127795230E-04 -7.27105747767053E-21
- -6.65587405955786E-21  1.38810190098323E-20 -4.16667127795230E-04
+ Cartesian forces (fcart) [Ha/bohr]; max,rms= 4.17440E-04 2.86664E-04 (free atoms)
+  4.09933237782579E-04  4.09933237782579E-04  4.09933237782579E-04
+ -4.09933237782579E-04 -4.09933237782579E-04  4.09933237782579E-04
+ -4.09933237782579E-04  4.09933237782579E-04 -4.09933237782579E-04
+  4.09933237782579E-04 -4.09933237782579E-04 -4.09933237782579E-04
+ -2.30191414873904E-04  2.30191414873904E-04  2.30191414873904E-04
+  2.30191414873904E-04 -2.30191414873904E-04  2.30191414873904E-04
+  2.30191414873904E-04  2.30191414873904E-04 -2.30191414873904E-04
+ -2.30191414873904E-04 -2.30191414873904E-04 -2.30191414873904E-04
+  8.12121688272855E-21 -1.28093765407059E-20 -0.00000000000000E+00
+  2.07114952755477E-20 -2.53996549335251E-20  4.17439803391041E-04
+ -4.46906151009059E-21  4.17439803391041E-04  1.25902783928191E-20
+  4.17439803391041E-04 -5.25047092456627E-20  3.96953327049568E-20
+ -4.17439803391041E-04  2.68859561642508E-20 -3.96953327049568E-20
+  2.07114952755477E-20 -4.17439803391041E-04 -1.25902783928191E-20
+ -1.26287314751019E-19  1.25121162945608E-19 -4.17439803391041E-04
  Reduced forces (fred)
- -8.41140085612548E-03 -8.41140085612548E-03 -8.41140085612548E-03
- -2.18403257741943E-19 -2.18403257741943E-19  8.41140085612548E-03
- -9.26970142355880E-20  8.41140085612548E-03 -9.26970142355880E-20
-  8.41140085612548E-03 -9.26970142355880E-20  9.26970142355880E-20
- -4.76421016293033E-03  3.56280470919208E-20 -3.56280470919208E-20
-  3.56280470919208E-20 -4.76421016293033E-03  3.56280470919208E-20
-  2.42502685913515E-19 -1.91178183080687E-19 -4.76421016293033E-03
-  4.76421016293033E-03  4.76421016293033E-03  4.76421016293033E-03
- -3.48566749641333E-20  1.09054332553833E-19 -7.41387591959272E-20
- -4.27551010739213E-03 -4.27551010739213E-03 -7.41387505794625E-20
- -4.27551010739213E-03  1.09054323937368E-19 -4.27551010739213E-03
- -3.48566835805980E-20 -4.27551010739213E-03 -4.27551010739213E-03
- -3.48566835805980E-20  4.27551010739213E-03  4.27551010739213E-03
-  4.27551010739213E-03  1.09054323937368E-19  4.27551010739213E-03
-  4.27551010739213E-03  4.27551010739213E-03 -7.41387505794625E-20
- Total energy (etotal) [Ha]= -6.06148629966451E+01
+ -8.41282445663315E-03 -8.41282445663315E-03 -8.41282445663315E-03
+ -6.05447531133492E-21 -6.05447531133492E-21  8.41282445663315E-03
+  6.05447531133492E-21  8.41282445663315E-03  6.05447531133492E-21
+  8.41282445663315E-03  6.05447531133492E-21 -6.05447531133492E-21
+ -4.72408623226907E-03 -6.39677444962177E-20  6.39677444962177E-20
+ -6.39677444962177E-20 -4.72408623226907E-03 -6.39677444962177E-20
+  9.69372834683131E-20  9.69372834683131E-20 -4.72408623226907E-03
+  4.72408623226907E-03  4.72408623226907E-03  4.72408623226907E-03
+  1.31439739820548E-19 -8.33335354534946E-20  4.81062043670531E-20
+ -4.28343869618459E-03 -4.28343869618459E-03  4.81062043670532E-20
+ -4.28343869618459E-03 -8.33335354534946E-20 -4.28343869618459E-03
+  1.31439739820548E-19 -4.28343869618459E-03 -4.28343869618459E-03
+  1.31439739820548E-19  4.28343869618459E-03  4.28343869618459E-03
+  4.28343869618459E-03 -8.33335354534945E-20  4.28343869618459E-03
+  4.28343869618459E-03  4.28343869618459E-03  1.19661319508699E-20
+ Total energy (etotal) [Ha]= -6.06148548703808E+01
 
  Difference of energy with previous step (new-old):
-           Absolute (Ha)=-1.44637E-03
-           Relative     =-2.38620E-05
+           Absolute (Ha)=-1.43825E-03
+           Relative     =-2.37279E-05
 
  fconv : WARNING -
   ntime=    5 was not enough Broyd/MD steps to converge gradients: 
-  max grad (force/stress) = 4.1667E-04 > tolmxf= 5.0000E-05 ha/bohr (free atoms)
+  max grad (force/stress) = 4.1744E-04 > tolmxf= 5.0000E-05 ha/bohr (free atoms)
 
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   1.2692E-12; max=  4.9686E-12
+ Mean square residual over all n,k,spin=   5.3067E-07; max=  5.6624E-05
  reduced coordinates (array xred) for   15 atoms
        0.000816646605      0.000816646605      0.000816646605
        0.000816646605      0.000816646605      0.497550060185
@@ -1862,22 +1870,22 @@ TC-DFT STEP   7 - ELECTRONIC GROUND-STATE CALCULATION IN PRESENCE OF A POSITRON
        0.119903204034      0.630096795966      0.630096795966
        0.630096795966      0.119903204034      0.630096795966
        0.630096795966      0.630096795966      0.119903204034
- rms dE/dt=  4.1635E-03; max dE/dt=  8.4114E-03; dE/dt below (all hartree)
-    1      -0.008411400856     -0.008411400856     -0.008411400856
-    2      -0.000000000000      0.000000000000      0.008411400856
-    3       0.000000000000      0.008411400856     -0.000000000000
-    4       0.008411400856      0.000000000000      0.000000000000
-    5      -0.004764210163      0.000000000000     -0.000000000000
-    6      -0.000000000000     -0.004764210163     -0.000000000000
-    7       0.000000000000      0.000000000000     -0.004764210163
-    8       0.004764210163      0.004764210163      0.004764210163
-    9       0.000000000000      0.000000000000     -0.000000000000
-   10      -0.004275510107     -0.004275510107      0.000000000000
-   11      -0.004275510107      0.000000000000     -0.004275510107
-   12      -0.000000000000     -0.004275510107     -0.004275510107
-   13      -0.000000000000      0.004275510107      0.004275510107
-   14       0.004275510107      0.000000000000      0.004275510107
-   15       0.004275510107      0.004275510107      0.000000000000
+ rms dE/dt=  4.1599E-03; max dE/dt=  8.4128E-03; dE/dt below (all hartree)
+    1      -0.008412824457     -0.008412824457     -0.008412824457
+    2      -0.000000000000      0.000000000000      0.008412824457
+    3       0.000000000000      0.008412824457     -0.000000000000
+    4       0.008412824457      0.000000000000      0.000000000000
+    5      -0.004724086232     -0.000000000000      0.000000000000
+    6       0.000000000000     -0.004724086232      0.000000000000
+    7      -0.000000000000     -0.000000000000     -0.004724086232
+    8       0.004724086232      0.004724086232      0.004724086232
+    9       0.000000000000      0.000000000000      0.000000000000
+   10      -0.004283438696     -0.004283438696      0.000000000000
+   11      -0.004283438696      0.000000000000     -0.004283438696
+   12      -0.000000000000     -0.004283438696     -0.004283438696
+   13       0.000000000000      0.004283438696      0.004283438696
+   14       0.004283438696      0.000000000000      0.004283438696
+   15       0.004283438696      0.004283438696     -0.000000000000
 
  cartesian coordinates (angstrom) at end:
     1      0.00886878213043     0.00886878213043     0.00886878213043
@@ -1897,43 +1905,43 @@ TC-DFT STEP   7 - ELECTRONIC GROUND-STATE CALCULATION IN PRESENCE OF A POSITRON
    15      4.07250000000001     4.07250000000001     6.84285120418585
 
  cartesian forces (hartree/bohr) at end:
-    1      0.00040986386974     0.00040986386974     0.00040986386974
-    2     -0.00040986386974    -0.00040986386974     0.00040986386974
-    3     -0.00040986386974     0.00040986386974    -0.00040986386974
-    4      0.00040986386974    -0.00040986386974    -0.00040986386974
-    5     -0.00023214654099     0.00023214654099     0.00023214654099
-    6      0.00023214654099    -0.00023214654099     0.00023214654099
-    7      0.00023214654099     0.00023214654099    -0.00023214654099
-    8     -0.00023214654099    -0.00023214654099    -0.00023214654099
-    9     -0.00000000000000     0.00000000000000    -0.00000000000000
-   10     -0.00000000000000     0.00000000000000     0.00041666712780
-   11     -0.00000000000000     0.00041666712780    -0.00000000000000
-   12      0.00041666712780    -0.00000000000000     0.00000000000000
-   13     -0.00041666712780    -0.00000000000000     0.00000000000000
-   14     -0.00000000000000    -0.00041666712780    -0.00000000000000
-   15     -0.00000000000000     0.00000000000000    -0.00041666712780
- frms,max,avg= 2.8690819E-04 4.1666713E-04   0.000E+00  0.000E+00  0.000E+00 h/b
+    1      0.00040993323778     0.00040993323778     0.00040993323778
+    2     -0.00040993323778    -0.00040993323778     0.00040993323778
+    3     -0.00040993323778     0.00040993323778    -0.00040993323778
+    4      0.00040993323778    -0.00040993323778    -0.00040993323778
+    5     -0.00023019141487     0.00023019141487     0.00023019141487
+    6      0.00023019141487    -0.00023019141487     0.00023019141487
+    7      0.00023019141487     0.00023019141487    -0.00023019141487
+    8     -0.00023019141487    -0.00023019141487    -0.00023019141487
+    9      0.00000000000000    -0.00000000000000    -0.00000000000000
+   10      0.00000000000000    -0.00000000000000     0.00041743980339
+   11     -0.00000000000000     0.00041743980339     0.00000000000000
+   12      0.00041743980339    -0.00000000000000     0.00000000000000
+   13     -0.00041743980339     0.00000000000000    -0.00000000000000
+   14      0.00000000000000    -0.00041743980339    -0.00000000000000
+   15     -0.00000000000000     0.00000000000000    -0.00041743980339
+ frms,max,avg= 2.8666419E-04 4.1743980E-04   0.000E+00  0.000E+00  0.000E+00 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1      0.02107604580998     0.02107604580998     0.02107604580998
-    2     -0.02107604580998    -0.02107604580998     0.02107604580998
-    3     -0.02107604580998     0.02107604580998    -0.02107604580998
-    4      0.02107604580998    -0.02107604580998    -0.02107604580998
-    5     -0.01193745410066     0.01193745410066     0.01193745410066
-    6      0.01193745410066    -0.01193745410066     0.01193745410066
-    7      0.01193745410066     0.01193745410066    -0.01193745410066
-    8     -0.01193745410066    -0.01193745410066    -0.01193745410066
-    9     -0.00000000000000     0.00000000000000    -0.00000000000000
-   10     -0.00000000000000     0.00000000000000     0.02142588337561
-   11     -0.00000000000000     0.02142588337561    -0.00000000000000
-   12      0.02142588337561    -0.00000000000000     0.00000000000000
-   13     -0.02142588337561    -0.00000000000000     0.00000000000000
-   14     -0.00000000000000    -0.02142588337561    -0.00000000000000
-   15     -0.00000000000000     0.00000000000000    -0.02142588337561
- frms,max,avg= 1.4753411E-02 2.1425883E-02   0.000E+00  0.000E+00  0.000E+00 e/A
+    1      0.02107961285785     0.02107961285785     0.02107961285785
+    2     -0.02107961285785    -0.02107961285785     0.02107961285785
+    3     -0.02107961285785     0.02107961285785    -0.02107961285785
+    4      0.02107961285785    -0.02107961285785    -0.02107961285785
+    5     -0.01183691748195     0.01183691748195     0.01183691748195
+    6      0.01183691748195    -0.01183691748195     0.01183691748195
+    7      0.01183691748195     0.01183691748195    -0.01183691748195
+    8     -0.01183691748195    -0.01183691748195    -0.01183691748195
+    9      0.00000000000000    -0.00000000000000    -0.00000000000000
+   10      0.00000000000000    -0.00000000000000     0.02146561594892
+   11     -0.00000000000000     0.02146561594892     0.00000000000000
+   12      0.02146561594892    -0.00000000000000     0.00000000000000
+   13     -0.02146561594892     0.00000000000000    -0.00000000000000
+   14      0.00000000000000    -0.02146561594892    -0.00000000000000
+   15     -0.00000000000000     0.00000000000000    -0.02146561594892
+ frms,max,avg= 1.4740864E-02 2.1465616E-02   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales= 10.261212901569 10.261212901569 10.261212901569 bohr
               =  5.430000000000  5.430000000000  5.430000000000 angstroms
- Fermi (or HOMO) energy (hartree) =   0.19117   Average Vxc (hartree)=  -0.34801
+ Fermi (or HOMO) energy (hartree) =   0.19117   Average Vxc (hartree)=  -0.31483
  Eigenvalues (hartree) for nkpt=   3  k points:
  kpt#   1, nband= 36, wtk=  0.12500, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -0.26477   -0.18417   -0.18417   -0.18417   -0.16648   -0.11926   -0.11926   -0.11319
@@ -1948,33 +1956,33 @@ TC-DFT STEP   7 - ELECTRONIC GROUND-STATE CALCULATION IN PRESENCE OF A POSITRON
  Components of total free energy (in Hartree) :
 
     Kinetic energy  =  2.24332621359959E+01
-    Hartree energy  =  5.84778090329278E+00
-    XC energy       = -3.56795091929495E+01
+    Hartree energy  =  5.84779019946754E+00
+    XC energy       = -3.56795094081722E+01
     Ewald energy    = -5.90990352929034E+01
     PspCore energy  =  1.63276322547783E+00
-    Loc. psp. energy= -2.28950558730748E+01
+    Loc. psp. energy= -2.28950705999267E+01
     Spherical terms =  2.76659961709084E+01
-    >>> Electronic E= -6.00937979232527E+01
+    >>> Electronic E= -6.00938035691526E+01
 
-    Positronic ener.= -8.79622414491841E-01
-    EP interaction E=  3.58587339473693E-01
-    >>>>>>>>> Etotal= -6.06148329982709E+01
+    Positronic ener.= -8.79553303627211E-01
+    EP interaction E=  3.58526354873368E-01
+    >>>>>>>>> Etotal= -6.06148305179064E+01
 
  "Double-counting" decomposition of free energy:
     Band energy     = -7.31598366354323E-01
     Ewald energy    = -5.90990352929034E+01
     PspCore energy  =  1.63276322547783E+00
-    Dble-C XC-energy= -1.57527717117979E+01
+    Dble-C XC-energy= -1.57527809831466E+01
     Spherical terms =  1.44575915112684E+01
     - EP dble-ct En.= -6.00777287317542E-01
-    >>> Electronic E= -6.00938279216269E+01
+    >>> Electronic E= -6.00938371929756E+01
 
-    Positronic ener.= -8.79622414491841E-01
-    EP interaction E=  3.58587339473693E-01
-    >>>> Etotal (DC)= -6.06148629966451E+01
+    Positronic ener.= -8.79553303627211E-01
+    EP interaction E=  3.58526354873368E-01
+    >>>> Etotal (DC)= -6.06148641417295E+01
 
-  >Total energy in eV           = -1.64941348832574E+03
-  >Total DC energy in eV        = -1.64941430462302E+03
+  >Total energy in eV           = -1.64941342083159E+03
+  >Total DC energy in eV        = -1.64941433578235E+03
 --------------------------------------------------------------------------------
  rms coord change=  1.3424E-02   atom, delta coord (reduced):
      1        0.000816646605      0.000816646605      0.000816646605
@@ -2000,22 +2008,22 @@ TC-DFT STEP   7 - ELECTRONIC GROUND-STATE CALCULATION IN PRESENCE OF A POSITRON
             acell      1.0261212902E+01  1.0261212902E+01  1.0261212902E+01 Bohr
               amu      2.80855000E+01
              ecut      8.00000000E+00 Hartree
-           etotal     -6.0614862997E+01
-            fcart      4.0986386974E-04  4.0986386974E-04  4.0986386974E-04
-                      -4.0986386974E-04 -4.0986386974E-04  4.0986386974E-04
-                      -4.0986386974E-04  4.0986386974E-04 -4.0986386974E-04
-                       4.0986386974E-04 -4.0986386974E-04 -4.0986386974E-04
-                      -2.3214654099E-04  2.3214654099E-04  2.3214654099E-04
-                       2.3214654099E-04 -2.3214654099E-04  2.3214654099E-04
-                       2.3214654099E-04  2.3214654099E-04 -2.3214654099E-04
-                      -2.3214654099E-04 -2.3214654099E-04 -2.3214654099E-04
-                      -3.3998051201E-21  1.0624950910E-20 -7.2280157428E-21
-                      -3.3567625455E-21  1.0581907496E-20  4.1666712780E-04
-                      -3.4428485344E-21  4.1666712780E-04 -7.1849714888E-21
-                       4.1666712780E-04 -3.1682186735E-20  3.5079122742E-20
-                      -4.1666712780E-04 -4.3542115140E-20  4.6939051147E-20
-                      -3.3567625455E-21 -4.1666712780E-04 -7.2710574777E-21
-                      -6.6558740596E-21  1.3881019010E-20 -4.1666712780E-04
+           etotal     -6.0614854870E+01
+            fcart      4.0993323778E-04  4.0993323778E-04  4.0993323778E-04
+                      -4.0993323778E-04 -4.0993323778E-04  4.0993323778E-04
+                      -4.0993323778E-04  4.0993323778E-04 -4.0993323778E-04
+                       4.0993323778E-04 -4.0993323778E-04 -4.0993323778E-04
+                      -2.3019141487E-04  2.3019141487E-04  2.3019141487E-04
+                       2.3019141487E-04 -2.3019141487E-04  2.3019141487E-04
+                       2.3019141487E-04  2.3019141487E-04 -2.3019141487E-04
+                      -2.3019141487E-04 -2.3019141487E-04 -2.3019141487E-04
+                       8.1212168827E-21 -1.2809376541E-20 -0.0000000000E+00
+                       2.0711495276E-20 -2.5399654934E-20  4.1743980339E-04
+                      -4.4690615101E-21  4.1743980339E-04  1.2590278393E-20
+                       4.1743980339E-04 -5.2504709246E-20  3.9695332705E-20
+                      -4.1743980339E-04  2.6885956164E-20 -3.9695332705E-20
+                       2.0711495276E-20 -4.1743980339E-04 -1.2590278393E-20
+                      -1.2628731475E-19  1.2512116295E-19 -4.1743980339E-04
 -          fftalg         312
            ionmov           2
            istwfk        2    3    7
@@ -2046,7 +2054,7 @@ P           mkmem           3
         pawecutdg      1.50000000E+01 Hartree
          positron         -10
          posnstep       20
-        postoldfe      1.00000000E-05 Hartree
+        postoldfe      9.50000000E-06 Hartree
            prteig           0
             prtwf           0
             rprim      0.0000000000E+00  1.0000000000E+00  1.0000000000E+00
@@ -2203,10 +2211,10 @@ P           mkmem           3
 - Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
 - the licence allows the authors to put it on the Web).
 -
-- Proc.   0 individual time (sec): cpu=        444.0  wall=        447.1
+- Proc.   0 individual time (sec): cpu=        380.0  wall=        380.2
 
 ================================================================================
 
  Calculation completed.
-.Delivered 599 WARNINGs and  49 COMMENTs to log file.
-+Overall time at end (sec) : cpu=        444.0  wall=        447.1
+.Delivered 605 WARNINGs and  50 COMMENTs to log file.
++Overall time at end (sec) : cpu=        380.0  wall=        380.2
