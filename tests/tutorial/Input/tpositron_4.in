@@ -8,8 +8,7 @@
 # Self-consistent positron lifetime calculation
 
   positron  -10     ! We perform automatic calculation of electrons and positron densities in the two-component DFT context
-  postoldfe  0.95d-5 ! We will repeat the electron and positron steps until the energy difference is lower than 0.95d-5
-                    ! (might be 1.0d-5 as well, but was slightly tuned for reason of stability of the automatic test procedure).
+  postoldfe  1.0d-5 ! We will repeat the electron and positron steps until the energy difference is lower than 1.0d-5
   posnstep   20     ! Maximum number of electon and positron steps
 
   ixcpositron  1  ! We are using the Boronski and Nieminen parametrization
@@ -17,7 +16,7 @@
 
 # We now include the effect of the atomic relaxation
   ionmov 2
-  ntime 5 ! We will perform only 5 steps of relaxation, in reality more steps may be required
+  ntime 4 ! We will perform only 4 steps of relaxation, in reality more steps are required
 
 # Common input parameters
   ! Unit cell
