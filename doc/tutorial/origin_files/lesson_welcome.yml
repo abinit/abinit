@@ -29,27 +29,29 @@ body : |
   
   <area shape="rect" coords="30  ,135 ,170 ,160 " href="lesson_spin.html" />
   
-  <area shape="rect" coords="30  ,170 , 99 ,194 " href="lesson_paw1.html" />
-  <area shape="rect" coords="100 ,170 ,129 ,194 " href="lesson_paw2.html" />
-  <area shape="rect" coords="130 ,170 ,170 ,194 " href="lesson_paw3.html" />
-  <area shape="rect" coords="30  ,195 ,170 ,245 " href="lesson_nuc.html" /> 
+  <area shape="rect" coords="30  ,165 , 99 ,189 " href="lesson_paw1.html" />
+  <area shape="rect" coords="100 ,165 ,129 ,189 " href="lesson_paw2.html" />
+  <area shape="rect" coords="130 ,165 ,170 ,189 " href="lesson_paw3.html" />
+  <area shape="rect" coords="30  ,190 ,170 ,240 " href="lesson_nuc.html" /> 
   
-  <area shape="rect" coords="30  ,260 , 99 ,284 " href="lesson_dftu.html" />
-  <area shape="rect" coords="100 ,260 ,170 ,284 " href="lesson_dmft.html" />
-  <area shape="rect" coords="30  ,285 ,100 ,310 " href="lesson_ucalc_crpa.html" />
-  <area shape="rect" coords="100 ,285 ,170 ,310 " href="lesson_udet.html" />
+  <area shape="rect" coords="30  ,245 , 99 ,272 " href="lesson_dftu.html" />
+  <area shape="rect" coords="100 ,245 ,170 ,272 " href="lesson_dmft.html" />
+  <area shape="rect" coords="30  ,273 ,100 ,300 " href="lesson_ucalc_crpa.html" />
+  <area shape="rect" coords="100 ,273 ,170 ,300 " href="lesson_udet.html" />
 
-  <area shape="rect" coords="30  ,320 ,170 ,345 " href="lesson_ffield.html" />
+  <area shape="rect" coords="30  ,305 ,170 ,330 " href="lesson_ffield.html" />
+
+  <area shape="rect" coords="30  ,335 ,170 ,360 " href="lesson_positron.html" />
   
-  <area shape="rect" coords="30  ,355 ,170 ,380 " href="lesson_tddft.html" />
+  <area shape="rect" coords="30  ,370 ,170 ,395 " href="lesson_tddft.html" />
 
-  <area shape="rect" coords="30  ,385 ,170 ,410 " href="lesson_analysis_tools.html" />
+  <area shape="rect" coords="30  ,400 ,170 ,425 " href="lesson_analysis_tools.html" />
 
-  <area shape="rect" coords="30  ,420 ,170 ,445 " href="lesson_fold2bloch.html" />
+  <area shape="rect" coords="30  ,430 ,170 ,455 " href="lesson_fold2bloch.html" />
 
-  <area shape="rect" coords="30  ,455 ,170 ,479 " href="lesson_wannier90.html" />
+  <area shape="rect" coords="30  ,460 ,170 ,485 " href="lesson_wannier90.html" />
   
-  <area shape="rect" coords="30  ,480 ,170 ,510" href="lesson_source_code.html" />
+  <area shape="rect" coords="30  ,490 ,170 ,515" href="lesson_source_code.html" />
   
   <area shape="rect" coords="230  ,135 ,376 ,199 " href="lesson_rf1.html" />
   <area shape="rect" coords="230  ,215 ,376 ,245 " href="lesson_optic.html" />
@@ -60,8 +62,8 @@ body : |
   <area shape="rect" coords="328  ,335 ,376 ,365 " href="lesson_nlo.html" /> 
   
   <area shape="rect" coords="360  ,420 ,456 ,465 " href="lesson_gw1.html" />
-  <area shape="rect" coords="360  ,480 ,407 ,525 " href="lesson_gw2.html" /> 
-  <area shape="rect" coords="408  ,480 ,456 ,525 " href="lesson_bse.html" /> 
+  <area shape="rect" coords="360  ,480 ,456 ,502 " href="lesson_gw2.html" /> 
+  <area shape="rect" coords="360  ,503 ,456 ,525 " href="lesson_bse.html" /> 
   
   <area shape="rect" coords="530  , 5 ,670 , 80 " href="lesson_basepar.html" />
   
@@ -75,7 +77,7 @@ body : |
   <area shape="rect" coords="520  ,445 ,695 ,500 " href="lesson_paral_mbt.html" />
   </map>
   
-  <img style="height: 540px; width: 720px;" alt="Schema 1" src="../documents/lesson_welcome/tutorial_flowchart_v4.png" usemap="#map1"/>
+  <img style="height: 540px; width: 720px;" alt="Schema 1" src="../documents/lesson_welcome/tutorial_flowchart_v5.png" usemap="#map1"/>
   </center>
   
   <p>Before following the tutorials, you should have read the <a
