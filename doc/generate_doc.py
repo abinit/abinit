@@ -272,7 +272,7 @@ for abivarname in tests_for_abivars.keys():
   tests_for_abivars[abivarname]["ratio_in_tuto"]=ratio_in_tuto
 
   # Constitutes an usage report
-  frequency="Rarely used."
+  frequency="Rarely used,"
   if ratio_all>0.5:
     frequency="Very frequently used,"
   elif ratio_all>0.01:
@@ -772,7 +772,7 @@ for i, var in enumerate(abinit_vars):
       print(" No topic_tribe for abivarname %s"%(var.abivarname))
       topic_error+=1
     # Occurence
-    cur_content += '<br><font id="characteristic">'+tests_for_abivars[var.abivarname]["usage_report"]+"</font>\n"
+    cur_content += '<br><font id="smalltext">'+tests_for_abivars[var.abivarname]["usage_report"]+"</font>\n"
     # Variable type, including dimensions
     cur_content += '<br><font id="vartype">Variable type: '+var.vartype
     if var.dimensions is not None:
