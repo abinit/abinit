@@ -142,6 +142,11 @@
     authors : MS,MT
     subtitle : Testing PAW datasets against an all-electron code
 - !components
+    name : positron
+    keyword : Electron-positron annihilation
+    authors : JW,MT
+    subtitle : Calculation of positron lifetime and momentum distribution in Si
+- !components
     name : rf1
     keyword : First lesson on DFPT
     authors : XG,RC

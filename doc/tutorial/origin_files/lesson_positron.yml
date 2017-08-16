@@ -26,34 +26,10 @@ intro : |
 ## Each section must have a title, that will form the table of content.
 ## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
 ## Note the small (one space) indentation for the title and body keys.
-sec0:
- title: "To be filled"
- tag: 
- body: |
-    <h3><b>Contents of lesson Positron:</b></h3>
-    
-    <ul>
-      <li><a href="#1">1.</a> Computing the positron lifetime in Si lattice.
-      <li><a href="#2">2.</a> Computing the positron lifetime in a Si monovacancy.
-      <li><a href="#3">3.</a> Performing self consistent electron-positron calculations for a vacancy.
-      <li><a href="#4">4.</a> Relaxing the vacancy according to forces due to electrons and the positron.
-      <li><a href="#5">5.</a> Computing the electron-positron momentum distribution (Doppler spectrum) of a Si lattice.
-      <li><a href="#6">6.</a> Studying the effect of the PAW dataset completeness.
-    </ul>
-    
-    <br/><hr/>
-
-
-## Each section must have a title, that will form the table of content.
-## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
-## Note the small (one space) indentation for the title and body keys.
 sec1:
- title: "To be filled"
- tag: 
+ title: "Computing the positron lifetime in Si lattice"
+ tag: lattice
  body: |
-    <h3><b><a name="1">1. The first step: <br />
-      Computing the positron lifetime in Si lattice.</b></h3>
-    
     <i>Before beginning, you might consider to work in a different subdirectory
       as for the other lessons. Why not "<font color="#0431B4">Work_positron</font>" ?</i>
     <p>
@@ -126,20 +102,14 @@ sec1:
     Thus, we can calculate the lifetime of a positron in a primitive cell by setting [[posocc]] to a small value (0.0001 ...). 
     This value must obviously be tested ...
     </em></small></p>
-    
-    <br/><hr/>
-
 
 ## Each section must have a title, that will form the table of content.
 ## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
 ## Note the small (one space) indentation for the title and body keys.
 sec2:
- title: "To be filled"
- tag: 
+ title: "Computing the positron lifetime in a Si monovacancy"
+ tag: monovacancy
  body: |
-    <h3><b><a name="2">2. The second step: <br />
-      Computing the positron lifetime in a Si monovacancy.</b></h3>
-    
     <p>
     We will now perform a positron lifetime calculation for a monovacancy in silicon in the conventional scheme (which we applied to the perfect lattice previously). 
     Note that when the positron localizes inside a vacancy, the zero-positron density limit does not apply anymore. However, in some cases, the conventional scheme proved to yield results in agreement with experiments.
@@ -170,20 +140,14 @@ sec2:
     <font color="#298A08">tpositron_2o_DS2_DEN_POSITRON</font> file, containing the positron density. Visualizing this file (using e.g. <em>cut3d</em> and <em>XcrysDen</em> or <em>VMD</em>) you can see that the positron is localized inside the vacancy. You can see below how the positron (in <font color="#FF0000">red</font>, isodensity at 30% of the maximum density) localized the silicon monovacancy looks like:
     </p>
     <p align="center"><img src="../documents/lesson_positron/posdensity.png" width="400" /></p>
-    
-    <br/><hr/>
-
 
 ## Each section must have a title, that will form the table of content.
 ## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
 ## Note the small (one space) indentation for the title and body keys.
 sec3:
- title: "To be filled"
- tag: 
+ title: "Performing self consistent electron-positron calculations for a vacancy"
+ tag: self-consistent
  body: |
-    <h3><b><a name="3">3. The third step: <br />
-      Performing self consistent electron-positron calculations for a vacancy.</b></h3>
-    
     <p>We will now perform a self-consistent calculation of the positron and electron densities. As this calculation will take a few minutes, you can already issue (putting <font face="Courier" color="#298A08">tpositron_3.in</font> in <font color="#298A08">tpositron_x.files</font>):</p>
     <pre>
     abinit < tpositron_x.files >& tpositron_3.log
@@ -213,20 +177,14 @@ sec3:
     <p>
     Including the self-consistency increases the positron lifetime, because its localization inside the vacancy becomes stronger when the positron and the electron densities are allowed to relax.
     </p>
-    
-    <br/><hr/>
-
 
 ## Each section must have a title, that will form the table of content.
 ## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
 ## Note the small (one space) indentation for the title and body keys.
 sec4:
- title: "To be filled"
- tag: 
+ title: "Relaxing the vacancy according to forces due to electrons and the positron"
+ tag: relaxing
  body: |
-    <h3><b><a name="4">4. The fourfth step: <br />
-      Relaxing the vacancy according to forces due to electrons and the positron.</b></h3>
-    
     <p>In addition to the self-consistency, the lifetime of a positron inside a vacancy can be strongly affected by the relaxation of the atoms due to the forces coming from both the electrons and the positron. You can already start the relaxation of the vacancy by issuing:<br />
     <em><small>Don't forget to put <font face="Courier" color="#298A08">tpositron_4.in</font> in <font color="#298A08">tpositron_x.files</font>.</small></em>
     </p>
@@ -250,20 +208,14 @@ sec4:
     <p>
     As the vacancy relaxes outwards, the positron lifetime increases. 5 steps were not enough to relax the defect completely, as the lifetime still changes. Also, remember that the 16-atom supercell is not large enough to get converged results. In Table IV of [Phys. Rev. B 92, 125113 (2015)] you can see converged results of the positron lifetime of Si monovacancy in various methods.
     </p>
-    
-    <br/><hr/>
-
 
 ## Each section must have a title, that will form the table of content.
 ## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
 ## Note the small (one space) indentation for the title and body keys.
 sec5:
- title: "To be filled"
- tag: 
+ title: "Computing the electron-positron momentum distribution (Doppler spectrum) of a Si lattice"
+ tag: Doppler
  body: |
-    <h3><b><a name="5">5. The fifth step: <br />
-      Computing the electron-positron momentum distribution (Doppler spectrum) of a Si lattice.</b></h3>
-    
     <p>
     In the last part of the tutorial we will calculate the electron-positron momentum distribution (Doppler spectrum) of a Si lattice in the conventional scheme. This type of calculation is much more time and memory consuming than the lifetime calculation, as it is calculated using the electron and positron wavefunctions and not densities.
     </p>
@@ -312,19 +264,13 @@ sec5:
     <font face="Courier"><b>~abinit/scripts/post_processing/posdopspectra.F90</b></font> tool to generate 1D projections (Doppler spectra) in (001), (011) and (111) directions and to calculate the low- and high-momentum contributions to the contributions  to  the momentum distributiom (so called S and W parameters, see [Phys. Rev. B 92, 125113 (2015)]).
     </p>
     
-    <br/><hr/>
-
-
 ## Each section must have a title, that will form the table of content.
 ## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
 ## Note the small (one space) indentation for the title and body keys.
 sec6:
- title: "To be filled"
- tag: 
+ title: "Studying the effect of the PAW dataset completeness"
+ tag: PAW
  body: |
-    <h3><b><a name="6">6. The sixth step: <br />
-      Studying the effect of the PAW dataset completeness.</b></h3>
-    
     <p>
     The positron lifetime and momentum distribution calculations within the PAW method are very sensitive to the number of valence electrons in the PAW dataset. It is due to the fact that it is not easy to describe the positron wavefunction, tending to zero at the nucleus, using the electron atomic orbitals. The PAW basis set in this case needs to be more complete than only for describing the electron wavefunctions. The simplest way to make the PAW dataset more complete is to include semicore electrons. It is also possible to add the partial waves corresponding to the semicore electrons in the basis used only for the positron wave function description, while keeping the initial number of valence electrons (as done in [Phys. Rev. B 92, 125113 (2015)]). However, the second method is less straightforward.
     </p>
