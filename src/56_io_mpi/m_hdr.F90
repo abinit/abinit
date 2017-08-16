@@ -59,7 +59,7 @@ MODULE m_hdr
  use defs_datatypes,  only : ebands_t, pseudopotential_type
  use defs_abitypes,   only : hdr_type, dataset_type
  use m_pawtab,        only : pawtab_type
- use m_pawrhoij,      only : pawrhoij_type, pawrhoij_alloc, pawrhoij_copy, pawrhoij_free, pawrhoij_io
+ use m_pawrhoij,      only : pawrhoij_type, pawrhoij_alloc, pawrhoij_copy, pawrhoij_free, pawrhoij_io, pawrhoij_get_nspden
 
  implicit none
 
@@ -171,7 +171,7 @@ MODULE m_hdr
  !    Moreover the files produced by the DFPT code do not have a well-defined extension and, as a consequence,
  !    they require a special treatment. In python I would use regexp but Fortran is not python!
 
- type(abifile_t),private,parameter :: all_abifiles(44) = [ &
+ type(abifile_t),private,parameter :: all_abifiles(45) = [ &
 
     ! Files with wavefunctions:
     abifile_t(varname="coefficients_of_wavefunctions", fform=2, ext="WFK", class="wf_planewave"), &
@@ -242,7 +242,8 @@ MODULE m_hdr
    !abifile_t(varname="bse_ucoupling_q0", fform=1002, ext="BSC", class="bscoup"), &
 
    ! Miscellaneous
-   abifile_t(varname="dos_fractions", fform=3000, ext="FATBANDS", class="None") &
+   abifile_t(varname="dos_fractions", fform=3000, ext="FATBANDS", class="data"), &
+   abifile_t(varname="spectral_weights", fform=5000, ext="FOLD2BLOCH", class="data") &
   ]
 
  type(abifile_t),public,parameter :: abifile_none = abifile_t(varname="None", fform=0, ext="None", class="None")
@@ -364,7 +365,8 @@ character(len=nctk_slen) function varname_from_fname(filename) result(varname)
  if (endswith(filename, ".nc")) then
    ind = index(filename, ".nc", back=.True.)
  else
-   MSG_ERROR(sjoin("Don't know how to handle: ", filename))
+   !MSG_ERROR(sjoin("Don't know how to handle: ", filename))
+   ind = len_trim(filename) + 1
  end if
 
  ext = filename(:ind-1)
@@ -832,8 +834,8 @@ subroutine hdr_init(ebands,codvsn,dtset,hdr,pawtab,pertcase,psps,wvl, &
    if (present(mpi_atmtab)) then
      call hdr_init_lowlvl(hdr,ebands,psps,pawtab,wvl,codvsn,pertcase,&
 &     dtset%natom,dtset%nsym,dtset%nspden,dtset%ecut,dtset%pawecutdg,dtset%ecutsm,dtset%dilatmx,&
-&     dtset%intxc,dtset%ixc,dtset%stmbias,dtset%usewvl,dtset%pawcpxocc,dtset%ngfft,dtset%ngfftdg,dtset%so_psp,&
-&     dtset%qptn, dtset%rprimd_orig(:,:,image),dtset%xred_orig(:,:,image),&
+&     dtset%intxc,dtset%ixc,dtset%stmbias,dtset%usewvl,dtset%pawcpxocc,dtset%pawspnorb,dtset%ngfft,dtset%ngfftdg,&
+&     dtset%so_psp,dtset%qptn, dtset%rprimd_orig(:,:,image),dtset%xred_orig(:,:,image),&
 &     dtset%symrel,dtset%tnons,dtset%symafm,dtset%typat,dtset%amu_orig(:,image),dtset%icoulomb,&
 &     dtset%kptopt,dtset%nelect,dtset%charge,dtset%kptrlatt_orig,dtset%kptrlatt,&
 &     dtset%nshiftk_orig,dtset%nshiftk,dtset%shiftk_orig,dtset%shiftk,&
@@ -841,8 +843,8 @@ subroutine hdr_init(ebands,codvsn,dtset,hdr,pawtab,pertcase,psps,wvl, &
    else
      call hdr_init_lowlvl(hdr,ebands,psps,pawtab,wvl,codvsn,pertcase,&
 &     dtset%natom,dtset%nsym,dtset%nspden,dtset%ecut,dtset%pawecutdg,dtset%ecutsm,dtset%dilatmx,&
-&     dtset%intxc,dtset%ixc,dtset%stmbias,dtset%usewvl,dtset%pawcpxocc,dtset%ngfft,dtset%ngfftdg,dtset%so_psp,&
-&     dtset%qptn, dtset%rprimd_orig(:,:,image),dtset%xred_orig(:,:,image),&
+&     dtset%intxc,dtset%ixc,dtset%stmbias,dtset%usewvl,dtset%pawcpxocc,dtset%pawspnorb,dtset%ngfft,dtset%ngfftdg,&
+&     dtset%so_psp,dtset%qptn, dtset%rprimd_orig(:,:,image),dtset%xred_orig(:,:,image),&
 &     dtset%symrel,dtset%tnons,dtset%symafm,dtset%typat,dtset%amu_orig(:,image),dtset%icoulomb,&
 &     dtset%kptopt,dtset%nelect,dtset%charge,dtset%kptrlatt_orig,dtset%kptrlatt,&
 &     dtset%nshiftk_orig,dtset%nshiftk,dtset%shiftk_orig,dtset%shiftk,&
@@ -851,8 +853,8 @@ subroutine hdr_init(ebands,codvsn,dtset,hdr,pawtab,pertcase,psps,wvl, &
  else
    call hdr_init_lowlvl(hdr,ebands,psps,pawtab,wvl,codvsn,pertcase,&
 &   dtset%natom,dtset%nsym,dtset%nspden,dtset%ecut,dtset%pawecutdg,dtset%ecutsm,dtset%dilatmx,&
-&   dtset%intxc,dtset%ixc,dtset%stmbias,dtset%usewvl,dtset%pawcpxocc,dtset%ngfft,dtset%ngfftdg,dtset%so_psp,&
-&   dtset%qptn, dtset%rprimd_orig(:,:,image),dtset%xred_orig(:,:,image),dtset%symrel,&
+&   dtset%intxc,dtset%ixc,dtset%stmbias,dtset%usewvl,dtset%pawcpxocc,dtset%pawspnorb,dtset%ngfft,dtset%ngfftdg,&
+&   dtset%so_psp,dtset%qptn, dtset%rprimd_orig(:,:,image),dtset%xred_orig(:,:,image),dtset%symrel,&
 &   dtset%tnons,dtset%symafm,dtset%typat,dtset%amu_orig(:,image),dtset%icoulomb,&
 &   dtset%kptopt,dtset%nelect,dtset%charge,dtset%kptrlatt_orig,dtset%kptrlatt,&
 &   dtset%nshiftk_orig,dtset%nshiftk,dtset%shiftk_orig,dtset%shiftk)
@@ -1239,7 +1241,7 @@ end function hdr_nelect_fromocc
 
 subroutine hdr_init_lowlvl(hdr,ebands,psps,pawtab,wvl,&
 &  codvsn,pertcase,natom,nsym,nspden,ecut,pawecutdg,ecutsm,dilatmx,&
-&  intxc,ixc,stmbias,usewvl,pawcpxocc,ngfft,ngfftdg,so_psp,qptn,&
+&  intxc,ixc,stmbias,usewvl,pawcpxocc,pawspnorb,ngfft,ngfftdg,so_psp,qptn,&
 &  rprimd,xred,symrel,tnons,symafm,typat,amu,icoulomb,&
 &  kptopt,nelect,charge,kptrlatt_orig,kptrlatt,&
 &  nshiftk_orig,nshiftk,shiftk_orig,shiftk,&
@@ -1256,7 +1258,7 @@ subroutine hdr_init_lowlvl(hdr,ebands,psps,pawtab,wvl,&
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: natom,nsym,nspden,intxc,ixc,usewvl,pawcpxocc,pertcase
+ integer,intent(in) :: natom,nsym,nspden,intxc,ixc,usewvl,pawcpxocc,pawspnorb,pertcase
  integer,intent(in) :: kptopt,nshiftk_orig,nshiftk,icoulomb
  integer, intent(in),optional :: comm_atom
  real(dp),intent(in) :: ecut,ecutsm,dilatmx,stmbias,pawecutdg,nelect,charge
@@ -1264,7 +1266,7 @@ subroutine hdr_init_lowlvl(hdr,ebands,psps,pawtab,wvl,&
  type(ebands_t),intent(in) :: ebands
  type(pseudopotential_type),intent(in) :: psps
  type(wvl_internal_type),intent(in) :: wvl
- type(hdr_type),intent(inout) :: hdr !vz_i
+ type(hdr_type),intent(inout) :: hdr
 !arrays
  integer,intent(in) :: typat(natom)
  integer,intent(in) :: so_psp(psps%npsp)
@@ -1279,7 +1281,7 @@ subroutine hdr_init_lowlvl(hdr,ebands,psps,pawtab,wvl,&
 
 !Local variables-------------------------------
 !scalars
- integer :: bantot,date,nkpt,npsp,ntypat,nsppol,nspinor
+ integer :: bantot,date,nkpt,npsp,ntypat,nsppol,nspinor,nspden_rhoij
  integer :: idx,isppol,ikpt,iband,ipsp
  character(len=8) :: date_time
 
@@ -1375,18 +1377,19 @@ subroutine hdr_init_lowlvl(hdr,ebands,psps,pawtab,wvl,&
  hdr%amu = amu
 
  if (psps%usepaw==1)then
+   nspden_rhoij=pawrhoij_get_nspden(nspden,nspinor,pawspnorb)
    ABI_DT_MALLOC(hdr%pawrhoij,(natom))
    !Values of nspden/nspinor/nsppol are dummy ones; they are overwritten later (by hdr_update)
    if (present(comm_atom)) then
      if (present(mpi_atmtab)) then
-       call pawrhoij_alloc(hdr%pawrhoij,pawcpxocc,nspden,nspinor,nsppol,typat, &
+       call pawrhoij_alloc(hdr%pawrhoij,pawcpxocc,nspden_rhoij,nspinor,nsppol,typat, &
 &                       pawtab=pawtab,comm_atom=comm_atom,mpi_atmtab=mpi_atmtab)
      else
-       call pawrhoij_alloc(hdr%pawrhoij,pawcpxocc,nspden,nspinor,nsppol,typat, &
+       call pawrhoij_alloc(hdr%pawrhoij,pawcpxocc,nspden_rhoij,nspinor,nsppol,typat, &
 &                       pawtab=pawtab,comm_atom=comm_atom)
      end if
    else
-     call pawrhoij_alloc(hdr%pawrhoij,pawcpxocc,nspden,nspinor,nsppol,typat,pawtab=pawtab)
+     call pawrhoij_alloc(hdr%pawrhoij,pawcpxocc,nspden_rhoij,nspinor,nsppol,typat,pawtab=pawtab)
    end if
  end if
 

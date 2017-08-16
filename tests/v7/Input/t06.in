@@ -49,4 +49,5 @@ xred 0 0 0
 #%% keywords = PARTIAL_DOS
 #%% description = test partial dos calculation with spinors (previously not enabled) and spin 
 #%%    polarization while we are at it
+#%% topics = spinpolarisation
 #%%<END TEST_INFO>

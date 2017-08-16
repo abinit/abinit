@@ -83,10 +83,11 @@ robodoc:
 	rm -rf robodoc-html tmp-robodoc
 	cat $(top_srcdir)/doc/developers/robodoc.doc.txt >> robodoc.err
 
-# infos_html-x.x.x.tar contains all html files needed for the Web site
+# infos_html-x.x.x.tar contains all html files needed for the Web site ... Should be generated in python !
 infos_html:
 	-rm -fr infos_htm* tmp-infos*
 	cp -fr doc tmp-infos-$(VERSION)
+	rm tmp-infos-$(VERSION)/tests
 	cp developers/various/var-file-index.py tmp-infos-$(VERSION)
 	cp -fr KNOWN_PROBLEMS tmp-infos-$(VERSION)/known_problems
 	mkdir tmp-infos-$(VERSION)/tests
@@ -129,9 +130,13 @@ infos_html:
 	cp -fr tests/psml/Input tmp-infos-$(VERSION)/tests/psml/Input
 	cp -fr tests/seq/Input tmp-infos-$(VERSION)/tests/seq/Input
 	cp -fr tests/tutoparal/Input tmp-infos-$(VERSION)/tests/tutoparal/Input
+	cp -fr tests/tutoparal/Refs tmp-infos-$(VERSION)/tests/tutoparal/Refs 
 	cp -fr tests/tutoplugs/Input tmp-infos-$(VERSION)/tests/tutoplugs/Input
+	cp -fr tests/tutoplugs/Refs tmp-infos-$(VERSION)/tests/tutoplugs/Refs
 	cp -fr tests/tutorespfn/Input tmp-infos-$(VERSION)/tests/tutorespfn/Input
+	cp -fr tests/tutorespfn/Refs tmp-infos-$(VERSION)/tests/tutorespfn/Refs
 	cp -fr tests/tutorial/Input tmp-infos-$(VERSION)/tests/tutorial/Input
+	cp -fr tests/tutorial/Refs tmp-infos-$(VERSION)/tests/tutorial/Refs
 	cp -fr tests/unitary/Input tmp-infos-$(VERSION)/tests/unitary/Input
 	cp -fr tests/v1/Input tmp-infos-$(VERSION)/tests/v1/Input
 	cp -fr tests/v2/Input tmp-infos-$(VERSION)/tests/v2/Input
@@ -150,13 +155,20 @@ infos_html:
 	cp -fr tmp-infos-$(VERSION)/release_notes/rel*_v$(ABINIT_VERSION_MAJOR).$(ABINIT_VERSION_MINOR).html tmp-infos-$(VERSION)/release_notes/release_notes.html
 	cp -fr tmp-infos-$(VERSION)/inst*_notes/inst*_v$(ABINIT_VERSION_MAJOR).$(ABINIT_VERSION_MINOR).html tmp-infos-$(VERSION)/install_notes/install.html
 	tar -cvf infos_html-$(VERSION).tar                \
+          tmp-infos-$(VERSION)/bibliography \
+          tmp-infos-$(VERSION)/input_variables \
           tmp-infos-$(VERSION)/tests \
-          tmp-infos-$(VERSION)/input_variables tmp-infos-$(VERSION)/users tmp-infos-$(VERSION)/tutorial tmp-infos-$(VERSION)/known_problems \
+          tmp-infos-$(VERSION)/theory \
+          tmp-infos-$(VERSION)/topics \
+          tmp-infos-$(VERSION)/tutorial \
+          tmp-infos-$(VERSION)/users \
+          tmp-infos-$(VERSION)/js_files \
+          tmp-infos-$(VERSION)/known_problems \
           tmp-infos-$(VERSION)/gallery/Plot1.jpg tmp-infos-$(VERSION)/gallery/pcpm.gif tmp-infos-$(VERSION)/gallery/mode.png  \
           tmp-infos-$(VERSION)/*/*.css \
-          tmp-infos-$(VERSION)/install_notes/install.html tmp-infos-$(VERSION)/install_notes/list_internal_links.js \
+          tmp-infos-$(VERSION)/install_notes/install.html \
           tmp-infos-$(VERSION)/release_notes/release_notes.html \
-          tmp-infos-$(VERSION)/features/features.html tmp-infos-$(VERSION)/features/list_internal_links.js \
+          tmp-infos-$(VERSION)/features/features.html \
           tmp-infos-$(VERSION)/presentation/presentation.pdf
 	gzip infos_html-$(VERSION).tar
 	-rm -fr tmp-infos-$(VERSION)

@@ -70,7 +70,17 @@ def main(top):
 
           #Transform line to lower case + eliminate whitespaces
           line_lower=line_orig.lower()
-          line = re.sub(" ","",line_lower)
+          try:
+            line = re.sub(" ","",line_lower)
+          except (UnicodeDecodeError) as error:
+            print(" filename:")
+            print(filename)
+            print(" line_orig:")
+            print(line_orig)
+            print(" line_lower:")
+            print(line_lower)
+            print(error)
+            sys.exit()
 
           #Look for forbidden string
           if ACTIVATE_TEST1:
@@ -111,7 +121,7 @@ def main(top):
 if __name__ == "__main__":
 
   if len(sys.argv) == 1: 
-    top = "../../../doc"
+    top = "../../doc"
   else:
     top = sys.argv[1] 
 

@@ -114,4 +114,5 @@ diemac 12.0
 #%%   keywords = NC, GW, BSE
 #%%   description = 
 #%%     Bethe-Salpeter equation (BSE) with norm-conserving pseudopotentials.
+#%% topics = BSE
 #%%<END TEST_INFO>

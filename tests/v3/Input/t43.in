@@ -61,4 +61,5 @@ diemix 0.5        # function used as the standard preconditioner
 #%% [extra_info]
 #%% authors = Unknown
 #%% keywords = 
+#%% topics = convergency
 #%%<END TEST_INFO>

@@ -67,4 +67,5 @@
 #%%   converges to a saddle point of the energy !
 #%%   This test was hard to make portable. This is why the tolerance
 #%%   for fldiff is very large.
+#%% topics = GeoOpt
 #%%<END TEST_INFO>

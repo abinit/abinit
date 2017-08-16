@@ -83,7 +83,7 @@
 !!
 !! CHILDREN
 !!      alloc_hamilt_gpu,atm2fft,check_kxc,chkpawovlp,chkph3,d2frnl,d2sym3
-!!      ddb_io_out,dealloc_hamilt_gpu,dfpt_dyfro,dfpt_dyout,dfpt_dyxc1
+!!      dealloc_hamilt_gpu,dfpt_dyfro,dfpt_dyout,dfpt_dyxc1
 !!      dfpt_eltfrhar,dfpt_eltfrkin,dfpt_eltfrloc,dfpt_eltfrxc,dfpt_ewald
 !!      dfpt_gatherdy,dfpt_looppert,dfpt_phfrq,dfpt_prtph,ebands_free
 !!      efmasdeg_free_array,efmasfr_free_array,eig2tot,eigen_meandege
@@ -94,9 +94,10 @@
 !!      paw_ij_nullify,pawdenpot,pawdij,pawexpiqr,pawfgr_destroy,pawfgr_init
 !!      pawfgrtab_free,pawfgrtab_init,pawinit,pawmknhat,pawpuxinit
 !!      pawrhoij_alloc,pawrhoij_bcast,pawrhoij_copy,pawrhoij_free
-!!      pawrhoij_nullify,pawtab_get_lsize,prteigrs,psddb8,pspini,q0dy3_apply
+!!      pawrhoij_nullify,pawtab_get_lsize,prteigrs,pspini,q0dy3_apply
 !!      q0dy3_calc,read_rhor,rhohxc,setsym,setsymrhoij,setup1,status,symdij
 !!      symmetrize_xred,sytens,timab,transgrid,vdw_dftd2,vdw_dftd3,wffclose
+!!      ddb_hdr_init, ddb_hdr_free, ddb_hdr_open_write
 !!      wings3,wrtloctens,wrtout,xmpi_bcast
 !!
 !! SOURCE
@@ -123,9 +124,12 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  use m_ebands
  use m_results_respfn
  use m_hdr
+ use m_crystal
 
+ use m_fstrings,    only : strcat
  use m_dynmat,      only : chkph3, d2sym3, q0dy3_apply, q0dy3_calc, wings3, dfpt_phfrq, sytens
- use m_ddb,         only : psddb8, DDB_VERSION
+ use m_ddb,         only : DDB_VERSION
+ use m_ddb_hdr,     only : ddb_hdr_type, ddb_hdr_init, ddb_hdr_free, ddb_hdr_open_write
  use m_efmas,       only : efmasdeg_free_array, efmasfr_free_array
  use m_wfk,         only : wfk_read_eigenvalues
  use m_ioarr,       only : read_rhor
@@ -136,7 +140,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  use m_paw_ij,      only : paw_ij_type, paw_ij_init, paw_ij_free, paw_ij_nullify
  use m_pawfgrtab,   only : pawfgrtab_type, pawfgrtab_init, pawfgrtab_free
  use m_pawrhoij,    only : pawrhoij_type, pawrhoij_alloc, pawrhoij_free, pawrhoij_copy, &
-&                          pawrhoij_bcast, pawrhoij_nullify
+&                          pawrhoij_bcast, pawrhoij_nullify, pawrhoij_get_nspden
  use m_pawdij,      only : pawdij, symdij
  use m_pawfgr,      only : pawfgr_type, pawfgr_init, pawfgr_destroy
  use m_paw_finegrid,only : pawexpiqr
@@ -211,13 +215,16 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  real(dp) :: tolwfr
  real(dp) :: ucvol,vxcavg
  character(len=fnlen) :: dscrpt
+ character(len=fnlen) :: filename
  character(len=500) :: message
  type(ebands_t) :: bstruct
  type(hdr_type) :: hdr,hdr_fine,hdr0,hdr_den
+ type(ddb_hdr_type) :: ddb_hdr
  type(paw_dmft_type) :: paw_dmft
  type(pawfgr_type) :: pawfgr
  type(wffile_type) :: wffgs,wfftgs
  type(wvl_data) :: wvl
+ type(crystal_t) :: Crystal
  integer :: ddkfil(3),ngfft(18),ngfftf(18),rfdir(3),rf2_dirs_from_rfpert_nl(3,3)
  integer,allocatable :: atindx(:),atindx1(:),blkflg(:,:,:,:),blkflgfrx1(:,:,:,:),blkflg1(:,:,:,:)
  integer,allocatable :: blkflg2(:,:,:,:),carflg(:,:,:,:),clflg(:,:),indsym(:,:,:)
@@ -666,8 +673,8 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
      if(dtset%xclevel==2.and.dtset%nspden==1) nkxc1=7   ! GGA non-polarized
      if(dtset%xclevel==2.and.dtset%nspden==2) nkxc1=19  ! GGA polarized
    end if
-   call paw_an_init(paw_an,dtset%natom,dtset%ntypat,nkxc1,dtset%nspden,cplex,dtset%pawxcdev,&
-&   dtset%typat,pawang,pawtab,has_vxc=1,has_vxc_ex=1,has_kxc=has_kxc,&
+   call paw_an_init(paw_an,dtset%natom,dtset%ntypat,nkxc1,dtset%nspden,&
+&   cplex,dtset%pawxcdev,dtset%typat,pawang,pawtab,has_vxc=1,has_vxc_ex=1,has_kxc=has_kxc,&
 &   mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
    call paw_ij_init(paw_ij,cplex,dtset%nspinor,dtset%nsppol,dtset%nspden,dtset%pawspnorb,&
 &   natom,dtset%ntypat,dtset%typat,pawtab,has_dij=1,has_dijhartree=1,has_dijnd=has_dijnd,&
@@ -696,7 +703,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
    if (rdwrpaw/=0) then
      ABI_DATATYPE_ALLOCATE(pawrhoij_read,(natom))
      call pawrhoij_nullify(pawrhoij_read)
-     nspden_rhoij=dtset%nspden;if (dtset%pawspnorb>0.and.dtset%nspinor==2) nspden_rhoij=4
+     nspden_rhoij=pawrhoij_get_nspden(dtset%nspden,dtset%nspinor,dtset%pawspnorb)
      call pawrhoij_alloc(pawrhoij_read,dtset%pawcpxocc,nspden_rhoij,dtset%nspinor,&
 &     dtset%nsppol,dtset%typat,pawtab=pawtab)
    else
@@ -1350,27 +1357,6 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
    call wrtout(std_out,message,'COLL')
    call wrtout(ab_out,message,'COLL')
 
-!  Open the formatted derivative database file, and write the
-!  preliminary information
-   call status(0,dtfil%filstat,iexit,level,'call ddb_io_out')
-   dscrpt=' Note : temporary (transfer) database '
-!  tolwfr must be initialized here, but it is a dummy value
-   tolwfr=1.0_dp
-   call ddb_io_out (dscrpt,dtfil%fnameabo_ddb,natom,dtset%mband,&
-&   dtset%nkpt,dtset%nsym,ntypat,dtfil%unddb,DDB_VERSION,&
-&   dtset%acell_orig(1:3,1),dtset%amu_orig(:,1),dtset%dilatmx,dtset%ecut,dtset%ecutsm,&
-&   dtset%intxc,iscf,dtset%ixc,dtset%kpt,dtset%kptnrm,&
-&   natom,dtset%nband,ngfft,dtset%nkpt,dtset%nspden,dtset%nspinor,&
-&   dtset%nsppol,dtset%nsym,ntypat,occ,dtset%occopt,dtset%pawecutdg,&
-&   dtset%rprim_orig(1:3,1:3,1),dtset%dfpt_sciss,dtset%spinat,dtset%symafm,dtset%symrel,&
-&   dtset%tnons,tolwfr,dtset%tphysel,dtset%tsmear,&
-&   dtset%typat,dtset%usepaw,dtset%wtk,xred,psps%ziontypat,dtset%znucl)
-
-   nblok=1 ; fullinit=1 ; choice=2
-   call psddb8 (choice,psps%dimekb,psps%ekb,fullinit,psps%indlmn,&
-&   psps%lmnmax,nblok,ntypat,dtfil%unddb,pawtab,&
-&   psps%pspso,psps%usepaw,psps%useylm,DDB_VERSION)
-
 !  In the RESPFN code, dfpt_nstdy and stady3 were called here
    d2nfr(:,:,:,:,:)=d2lo(:,:,:,:,:)+d2nl(:,:,:,:,:)
    if (psps%usepaw==1) d2nfr(:,:,:,:,:)=d2nfr(:,:,:,:,:)+d2ovl(:,:,:,:,:)
@@ -1432,8 +1418,20 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 &   eltcore,elteew,eltfrhar,eltfrkin,eltfrloc,eltfrnl,eltfrxc,eltvdw,&
 &   gprimd,dtset%mband,mpert,natom,ntypat,outd2,pawbec,pawpiezo,piezofrnl,dtset%prtbbb,&
 &   rfasr,rfpert,rprimd,dtset%typat,ucvol,usevdw,psps%ziontypat)
-!  Output of the dynamical matrix
-!  (Note : remember, previously, the processor me=0 has been selected)
+
+   dscrpt=' Note : temporary (transfer) database '
+
+!  Initialize the header of the DDB file
+   call ddb_hdr_init(ddb_hdr,dtset,psps,pawtab,DDB_VERSION,dscrpt,&
+&                    1,xred=xred,occ=occ,ngfft=ngfft)
+
+!  Open the formatted derivative database file, and write the header
+   call status(0,dtfil%filstat,iexit,level,'call ddb_hdr_open_write')
+   call ddb_hdr_open_write(ddb_hdr, dtfil%fnameabo_ddb, dtfil%unddb)
+
+   call ddb_hdr_free(ddb_hdr)
+
+!  Output of the dynamical matrix (master only)
    call status(0,dtfil%filstat,iexit,level,'call dfpt_dyout   ')
    call dfpt_dyout(becfrnl,dtset%berryopt,blkflg,carflg,dtfil%unddb,ddkfil,dyew,dyfrlo,&
 &   dyfrnl,dyfrx1,dyfrx2,dyfr_cplex,dyfr_nondiag,dyvdw,d2cart,d2cart_bbb,d2eig0,&
@@ -1447,7 +1445,18 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 
 #ifdef HAVE_NETCDF
    ! Output dynamical matrix in NetCDF format.
-   call outddbnc(dtfil, dtset, hdr, psps, natom, mpert, rprimd, xred, dtset%qptn, d2matr, blkflg)
+   call crystal_init(dtset%amu_orig(:,1), Crystal, &
+   & dtset%spgroup, dtset%natom, dtset%npsp, psps%ntypat, &
+   & dtset%nsym, rprimd, dtset%typat, xred, dtset%ziontypat, dtset%znucl, 1, &
+   & dtset%nspden==2.and.dtset%nsppol==1, .false., hdr%title, &
+   & dtset%symrel, dtset%tnons, dtset%symafm)
+
+   filename = strcat(dtfil%filnam_ds(4),"_DDB.nc")
+
+   call outddbnc(filename, mpert, d2matr, blkflg, dtset%qptn, Crystal)
+
+   call crystal_free(Crystal)
+
 #endif
 
 

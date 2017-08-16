@@ -109,4 +109,5 @@ xred
 #%% description = 
 #%%   Silicon: Solution of the Bethe-Salpeter equation (BSE) with PAW and nsppol = 2.
 #%%   Use model dielectric function computed from AE PAW density (denfgr.F90).
+#%% topics = BSE
 #%%<END TEST_INFO>

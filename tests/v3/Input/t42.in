@@ -70,4 +70,5 @@
 #%%   Magnesium HCP. Optimize the cell volume and shape using different constraints.
 #%%   Checks whether the stresses are symmetric, and whether the optimisation algorithm does
 #%%   not break the symmetry.
+#%% topics = GeoOpt
 #%%<END TEST_INFO>

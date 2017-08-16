@@ -130,4 +130,5 @@ nbdbuf 0
 #%%   DFPT: 0.040052
 #%%   Finite-differences: 0.040054
 #%%   The DFPT with ngkpt 320 1 1 gives 0.040055.
+#%% topics = nonlinear
 #%%<END TEST_INFO>

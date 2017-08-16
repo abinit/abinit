@@ -125,4 +125,5 @@
 #%%   Test the geometry builder, and the non-ordering of atoms  :
 #%%   Same thing as test 42, but with an other order for the input of atoms.
 #%%   Also permutes objects a and b , to check whether everything is OK.
+#%% topics = crystal
 #%%<END TEST_INFO>

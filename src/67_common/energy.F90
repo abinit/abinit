@@ -177,7 +177,7 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
  use m_paw_ij,           only : paw_ij_type
  use m_pawfgrtab,        only : pawfgrtab_type
  use m_pawrhoij,         only : pawrhoij_type,pawrhoij_alloc,pawrhoij_free,pawrhoij_init_unpacked,&
-&                               pawrhoij_mpisum_unpacked,pawrhoij_free_unpacked,symrhoij
+&                               pawrhoij_mpisum_unpacked,pawrhoij_free_unpacked,pawrhoij_get_nspden,symrhoij
  use m_pawcprj,          only : pawcprj_type,pawcprj_alloc,pawcprj_free,pawcprj_gather_spin
  use m_pawfgr,           only : pawfgr_type
  use m_paw_dmft,         only : paw_dmft_type
@@ -497,7 +497,7 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
    end if
    if (paral_atom) then
      ABI_DATATYPE_ALLOCATE(pawrhoij_unsym,(dtset%natom))
-     nspden_rhoij=dtset%nspden;if (dtset%pawspnorb>0.and.dtset%nspinor==2) nspden_rhoij=4
+     nspden_rhoij=pawrhoij_get_nspden(dtset%nspden,dtset%nspinor,dtset%pawspnorb)
      call pawrhoij_alloc(pawrhoij_unsym,dtset%pawcpxocc,nspden_rhoij,dtset%nspinor,&
 &     dtset%nsppol,dtset%typat,pawtab=pawtab,use_rhoijp=0,use_rhoij_=1)
    else

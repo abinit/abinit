@@ -68,4 +68,5 @@
 #%%   The first psp is Ge, the second one is Si, but the
 #%%   mixing coefficients are 0.0 and 1.0 .
 #%%   See previous test, except GS only, and the two atoms are switched.
+#%% topics = otherGS
 #%%<END TEST_INFO>
