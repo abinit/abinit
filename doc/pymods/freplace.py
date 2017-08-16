@@ -42,7 +42,8 @@ for path in filelist:
     file_new=[]
     i_new=0
     for i_old,line in enumerate(file_old):
-      #if 1 :
+      if 1 :
+        line="  "+line
         #line=line.replace("anavarname","abivarname").rstrip()+"@anaddb\n"
       file_new.append("  "+line)
       i_new+=1

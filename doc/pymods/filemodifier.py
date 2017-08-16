@@ -48,9 +48,9 @@ for path in filelist:
     title_tag='\n title: "To be filled"\n tag: \n body: |\n'
     for i_old,line in enumerate(file_old):
       if "intro : |" in line:
-        file_new[0]="## This YAML file contains the introduction as well as the body of the html lesson.\n"
-        file_new[1]="## In order to modify the other parts, modify the file lessons.html .\n"
-        file_new[2]="\n## This is the introduction ...\n"
+        file_new.append("## This YAML file contains the introduction as well as the body of the html lesson.\n")
+        file_new.append("## In order to modify the other parts, modify the file lessons.html .\n")
+        file_new.append("\n## This is the introduction ...\n")
         file_new.append(line)
         i_new+=1
       elif "This is the body" in line:
