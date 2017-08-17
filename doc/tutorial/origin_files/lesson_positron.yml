@@ -194,7 +194,8 @@ sec4:
     <p> 
     In this calculation we switched on the atomic relaxation by setting [[ionmov]]=2. 
     We need to calculate forces to be able to move the atoms, so we set 
-    [[optforces]]=1. We only perform 5 relaxation steps ([[ntime]]=5) to save time, 
+    [[optforces]]=1. In the provided <font face="Courier" color="#298A08">tpositron_4.in</font> file,
+    We only perform 4 relaxation steps ([[ntime]]=4) to save time, 
     but more steps would be needed to converge the positron lifetime.
     </p>
     <p>Look at the positron lifetime in the RPA limit after each ionic step:</p>
@@ -203,10 +204,27 @@ sec4:
      Positron lifetime                         (ps)   =  2.56981105E+02
      Positron lifetime                         (ps)   =  2.81986785E+02
      Positron lifetime                         (ps)   =  2.82826327E+02
-     Positron lifetime                         (ps)   =  2.86660072E+02
     </pre></font>
+    </p>
     <p>
-    As the vacancy relaxes outwards, the positron lifetime increases. 5 steps were not enough to relax the defect completely, as the lifetime still changes. Also, remember that the 16-atom supercell is not large enough to get converged results. In Table IV of [Phys. Rev. B 92, 125113 (2015)] you can see converged results of the positron lifetime of Si monovacancy in various methods.
+    As the vacancy relaxes outwards, the positron lifetime increases. 4 steps were not enough to relax the defect completely, as the lifetime still changes. 
+    Indeed, setting [[ntime]] to 10 delivers:
+    <font color="#8A2908"><pre>
+    Positron lifetime                         (ps)   =  2.55617112E+02
+    Positron lifetime                         (ps)   =  2.56981106E+02
+    Positron lifetime                         (ps)   =  2.81986782E+02
+    Positron lifetime                         (ps)   =  2.82826326E+02
+    Positron lifetime                         (ps)   =  2.86660064E+02
+    Positron lifetime                         (ps)   =  2.87040831E+02
+    Positron lifetime                         (ps)   =  2.87284438E+02
+    Positron lifetime                         (ps)   =  2.87360829E+02
+    Positron lifetime                         (ps)   =  2.87302206E+02
+    </pre></font>
+    </p>
+    Although the results at ionic steps 3 and 4 differ from each other by less than one percent, 
+    they differ by more from the final result. The one percent convergence is only reached at ionic step 5 and after.
+    <p>
+    Also, remember that the 16-atom supercell is not large enough to get converged results. In Table IV of [Phys. Rev. B 92, 125113 (2015)] you can see converged results of the positron lifetime of Si monovacancy in various methods.
     </p>
 
 ## Each section must have a title, that will form the table of content.
