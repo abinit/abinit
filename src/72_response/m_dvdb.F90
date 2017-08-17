@@ -242,6 +242,9 @@ MODULE m_dvdb
  public :: dvdb_ftinterp_qpt      ! Fourier interpolation of potentials for given q-point
  public :: dvdb_merge_files       ! Merge a list of POT1 files.
  public :: dvdb_v1r_long_range    ! Long-range part of the phonon potential
+ public :: dvdb_interpolate_v1scf ! Fourier interpolation of the phonon potentials
+ public :: dvdb_get_v1scf_rpt     ! Fourier transform of the phonon potential from qpt to R
+ public :: dvdb_get_v1scf_qpt     ! Fourier transform of the phonon potential from R to qpt
 
 ! Debugging tools.
  public :: dvdb_test_v1rsym       ! Check symmetries of the DFPT potentials.
@@ -2258,6 +2261,587 @@ subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r, comm)
 
 
 end subroutine dvdb_ftinterp_qpt
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_dvdb/dvdb_get_v1scf_rpt
+!! NAME
+!!  dvdb_get_v1scf_rpt
+!!
+!! FUNCTION
+!!  Compute the phonon perturbation potential in real space lattice
+!!  representation.
+!!  This routine is meant to replace dvdb_ftinterp_setup
+!!  and performs the potential interpolation one perturbation at a time. 
+!!
+!! INPUTS
+!!  ngqpt(3)=Divisions of the ab-initio q-mesh.
+!!  nqshift=Number of shifts used to generated the ab-initio q-mesh.
+!!  qshift(3,nqshift)=The shifts of the ab-initio q-mesh.
+!!  nfft=Number of fft-points treated by this processors
+!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  nrpt=Number of R-points = number of q-points in the full BZ
+!!  nspden=Number of spin densities.
+!!  ipert=index of the perturbation to be treated [1,natom3]
+!!  comm=MPI communicator
+!!
+!! OUTPUT
+!!  v1scf_rpt(2,nrpt,nfft,nspden)
+!!
+!! PARENTS
+!!      m_dvdb,m_gkk
+!!
+!! CHILDREN
+!!      dvdb_free,dvdb_ftinterp_qpt,dvdb_ftinterp_setup,dvdb_init
+!!      dvdb_open_read,dvdb_print,dvdb_readsym_allv1,ngfft_seq,vdiff_print
+!!
+!! SOURCE
+
+subroutine dvdb_get_v1scf_rpt(db, cryst, ngqpt, nqshift, qshift, nfft, ngfft, &
+&                             nrpt, nspden, ipert, v1scf_rpt, comm)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'dvdb_get_v1scf_rpt'
+ use interfaces_56_recipspace
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: nqshift,nfft,nrpt,nspden,ipert,comm
+ type(dvdb_t),target,intent(inout) :: db
+!arrays
+ integer,intent(in) :: ngqpt(3),ngfft(18)
+ real(dp),intent(in) :: qshift(3,nqshift)
+ real(dp),intent(out) :: v1scf_rpt(2,nrpt,nfft,nspden)
+ type(crystal_t),intent(in) :: cryst
+
+!Local variables-------------------------------
+!scalars
+ integer,parameter :: sppoldbl1=1,timrev1=1,tim_fourdp0=0
+ integer :: my_qptopt,iq_ibz,nqibz,iq_bz,nqbz
+ integer :: ii,iq_dvdb,cplex_qibz,ispden,mu,irpt,idir,iat
+ integer :: iqst,nqst,itimrev,tsign,isym,ix,iy,iz,nq1,nq2,nq3,r1,r2,r3
+ integer :: nproc,my_rank,ifft,cnt,ierr
+ real(dp) :: dksqmax,phre,phim
+ logical :: isirr_q, found
+ type(mpi_type) :: mpi_enreg_seq
+!arrays
+ integer :: qptrlatt(3,3),g0q(3),ngfft_qspace(18)
+ integer,allocatable :: indqq(:,:),iperm(:),bz2ibz_sort(:),nqsts(:),iqs_dvdb(:)
+ real(dp) :: qpt_bz(3),shift(3) !,qpt_ibz(3)
+ real(dp),allocatable :: qibz(:,:),qbz(:,:),wtq(:),emiqr(:,:)
+ real(dp),allocatable :: v1r_qibz(:,:,:,:),v1r_qbz(:,:,:,:), v1r_lr(:,:)
+
+! *************************************************************************
+
+ nproc = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
+
+ nq1 = ngqpt(1); nq2 = ngqpt(2); nq3 = ngqpt(3); my_qptopt = 1 !; if (present(qptopt)) my_qptopt = qptopt
+
+ ! Generate the q-mesh by finding the IBZ and the corresponding weights.
+ qptrlatt = 0
+ do ii=1,3
+   qptrlatt(ii,ii) = ngqpt(ii)
+ end do
+
+ ! Get IBZ and BZ.
+ call kpts_ibz_from_kptrlatt(cryst, qptrlatt, my_qptopt, nqshift, qshift, &
+   nqibz, qibz, wtq, nqbz, qbz) ! new_kptrlatt, new_shiftk)
+
+ !write(std_out,*)"Irreducible q-points:"
+ !do iq_ibz=1,nqibz; write(std_out,*)trim(ktoa(qibz(:,iq_ibz))),wtq(iq_ibz)*nqbz; end do
+ ABI_CHECK(nqbz == product(ngqpt) * nqshift, "nqbz /= product(ngqpt) * nqshift")
+ ABI_CHECK(nqbz == nrpt, "nqbz /= nrpt")
+
+ db%nrpt = nqbz
+
+ ABI_CHECK(nspden == db%nspden, "nspden /= db%nspden")
+
+ ! We want a gamma centered q-mesh for FFT.
+ ABI_CHECK(nqshift == 1, "nshift > 1 not supported")
+ ABI_CHECK(all(qshift(:,1) == zero), "qshift != 0 not supported")
+
+ ABI_FREE(qbz)
+ ABI_MALLOC(qbz, (3, nqbz))
+ ii = 0
+ do iz=0,nq3-1
+   do iy=0,nq2-1
+     do ix=0,nq1-1
+       ii = ii + 1
+       qbz(:, ii) = [ix/dble(nq1), iy/dble(nq2), iz/dble(nq3)]
+       call wrap2_pmhalf([ix/dble(nq1), iy/dble(nq2), iz/dble(nq3)], qbz(:,ii), shift)
+     end do
+   end do
+ end do
+
+
+ ! Compute real-space points.
+ ! Use the following indexing (N means ngfft of the adequate direction)
+ ! 0 1 2 3 ... N/2    -(N-1)/2 ... -1    <= gc
+ ! 1 2 3 4 ....N/2+1  N/2+2    ...  N    <= index ig
+ ABI_MALLOC(db%rpt, (3, db%nrpt))
+ ii = 0
+ do iz=1,nq3
+   r3 = ig2gfft(iz,nq3) !* nq3
+   do iy=1,nq2
+     r2 = ig2gfft(iy,nq2) !* nq2
+     do ix=1,nq1
+       r1 = ig2gfft(ix,nq1) !* nq1
+       ii = ii + 1
+       db%rpt(:,ii) = [r1, r2, r3]
+     end do
+   end do
+ end do
+
+ ! Find correspondence BZ --> IBZ. Note:
+ !   * q --> -q symmetry is always used for phonons.
+ !   * we use symrec instead of symrel
+ ABI_MALLOC(indqq, (nqbz*sppoldbl1,6))
+ call listkk(dksqmax,cryst%gmet,indqq,qibz,qbz,nqibz,nqbz,cryst%nsym,&
+   sppoldbl1,cryst%symafm,cryst%symrec,timrev1,use_symrec=.True.)
+
+ if (dksqmax > tol12) then
+   MSG_BUG("Something wrong in the generation of the q-points in the BZ! Cannot map BZ --> IBZ")
+ end if
+
+ ! Construct sorted mapping BZ --> IBZ to speedup qbz search below.
+ ABI_MALLOC(iperm, (nqbz))
+ ABI_MALLOC(bz2ibz_sort, (nqbz))
+ iperm = [(ii, ii=1,nqbz)]
+ bz2ibz_sort = indqq(:,1)
+ call sort_int(nqbz,bz2ibz_sort,iperm)
+
+ ! Reconstruct the IBZ according to what is present in the DVDB .
+ ABI_MALLOC(nqsts, (nqibz))
+ ABI_MALLOC(iqs_dvdb, (nqibz))
+
+ ABI_MALLOC(v1r_lr, (2,nfft))
+
+ iqst = 0
+ do iq_ibz=1,nqibz
+
+   ! In each q-point star, count the number of q-points
+   ! and find the one present in DVDB.
+   nqst = 0
+   found = .false.
+   do ii=iqst+1,nqbz
+     if (bz2ibz_sort(ii) /= iq_ibz) exit
+     nqst = nqst + 1
+
+     iq_bz = iperm(ii)
+     if (.not. found) then
+       iq_dvdb = dvdb_findq(db, qbz(:,iq_bz))
+       if (iq_dvdb /= -1) then
+         qibz(:,iq_ibz) = qbz(:,iq_bz)
+         iqs_dvdb(iq_ibz) = iq_dvdb
+         found = .true.
+       end if
+     end if
+   end do
+
+   ! Check that nqst has been counted properly.
+   ABI_CHECK(nqst > 0 .and. bz2ibz_sort(iqst+1) == iq_ibz, "Wrong iqst")
+   if (abs(nqst - wtq(iq_ibz) * nqbz) > tol12) then
+     write(std_out,*)nqst, wtq(iq_ibz) * nqbz
+     MSG_ERROR("Error in counting q-point star or in the weights.")
+   end if
+
+   ! Check that the q-point has been found in DVDB.
+   if (.not. found) then
+     MSG_ERROR(sjoin("Cannot find symmetric q-point of:", ktoa(qibz(:,iq_ibz)), "in DVDB file"))
+   end if
+   !write(std_out,*)sjoin("qpt irred:",ktoa(qibz(:,iq_ibz)))
+
+   iqst = iqst + nqst
+   nqsts(iq_ibz) = nqst
+
+ end do
+
+ ! Redo the mapping with the new IBZ
+ call listkk(dksqmax,cryst%gmet,indqq,qibz,qbz,nqibz,nqbz,cryst%nsym,&
+   sppoldbl1,cryst%symafm,cryst%symrec,timrev1,use_symrec=.True.)
+
+ ABI_MALLOC(emiqr, (2,db%nrpt))
+ v1scf_rpt = zero
+
+ ABI_MALLOC(v1r_qbz, (2, nfft, db%nspden, db%natom3))
+ !v1r_qbz = huge(one)
+
+ iqst = 0
+ do iq_ibz=1,nqibz
+
+   ! Get potentials for this IBZ q-point on the real-space FFT mesh.
+   ! This call allocates v1r_qibz(cplex_qibz, nfft, nspden, 3*natom)
+   call dvdb_readsym_allv1(db, iqs_dvdb(iq_ibz), cplex_qibz, nfft, ngfft, v1r_qibz, comm)
+
+   ! Reconstruct by symmetry the potentials for the star of this q-point, perform FT and accumulate
+   ! Be careful with the gamma point.
+   do ii=1,nqsts(iq_ibz)
+     iqst = iqst + 1
+     iq_bz = iperm(iqst)
+     ABI_CHECK(iq_ibz == indqq(iq_bz,1), "iq_ibz !/ ind qq(1)")
+     isym = indqq(iq_bz,2); itimrev = indqq(iq_bz,6) + 1; g0q = indqq(iq_bz,3:5) ! IS(q_ibz) + g0q = q_bz
+     tsign = 3-2*itimrev
+
+     qpt_bz = qbz(:, iq_bz)
+     !write(std_out,*)"  treating:",trim(ktoa(qpt_bz))
+     isirr_q = (isym == 1 .and. itimrev == 1 .and. all(g0q == 0))
+     !ABI_CHECK(all(g0q == 0), "g0q /= 0")
+
+     ! Compute long-range part of the coupling potential
+     v1r_lr = zero; cnt = 0
+     if (db%has_dielt_zeff) then
+       idir = mod(ipert-1, 3) + 1; iat = (ipert - idir) / 3 + 1
+       call dvdb_v1r_long_range(db,qpt_bz,iat,idir,nfft,ngfft,v1r_lr)
+     end if
+
+     if (cplex_qibz == 1) then
+       ! Gamma point.
+       ABI_CHECK(nqsts(iq_ibz) == 1, "cplex_qibz == 1 and nq nqst /= 1 (should be gamma)")
+       ABI_CHECK(all(g0q == 0), "gamma point with g0q /= 0")
+
+       ! Substract the long-range part of the potential
+       do ispden=1,db%nspden
+         v1r_qibz(1,:,ispden,ipert) = v1r_qibz(1,:,ispden,ipert) - v1r_lr(1,:)
+       end do
+
+       ! Slow FT.
+       cnt = 0
+       do ispden=1,db%nspden
+         do irpt=1,db%nrpt
+           ! MPI-parallelism
+           cnt = cnt + 1; if (mod(cnt, nproc) /= my_rank) cycle
+           do ifft=1,nfft
+             v1scf_rpt(1,irpt,ifft,ispden) = v1scf_rpt(1,irpt,ifft,ispden) + &
+                                             v1r_qibz(1, ifft, ispden, ipert)
+           end do
+         end do
+       end do
+
+     else
+       ! Get the periodic part of the potential in BZ (v1r_qbz)
+       if (isirr_q) then
+         !write(std_out,*)sjoin("qpt irred:",ktoa(qpt_bz))
+         v1r_qbz = v1r_qibz
+       else
+         call v1phq_rotate(cryst, qibz(:,iq_ibz), isym, itimrev, g0q,&
+           ngfft, cplex_qibz, nfft, db%nspden, db%nsppol, db%mpi_enreg, v1r_qibz, v1r_qbz)
+         !v1r_qbz = zero; v1r_qbz = v1r_qibz
+
+         !call times_eigr(-tsign * g0q, ngfft, nfft, db%nspden*db%natom3, v1r_qbz)
+         !call times_eigr(+tsign * g0q, ngfft, nfft, db%nspden*db%natom3, v1r_qbz)
+         !if (itimrev == 2) v1r_qbz(2,:,:,:) = -v1r_qbz(2,:,:,:)
+         !call times_eigr(-tsign * g0q, ngfft, nfft, db%nspden*db%natom3, v1r_qbz)
+         !call times_eigr(+tsign * g0q, ngfft, nfft, db%nspden*db%natom3, v1r_qbz)
+       end if
+
+       ! Multiply by e^{iqpt_bz.r}
+       call times_eikr(qpt_bz, ngfft, nfft, db%nspden*db%natom3, v1r_qbz)
+
+       ! Substract the long-range part of the potential
+       do ispden=1,db%nspden
+         v1r_qbz(1,:,ispden,ipert) = v1r_qbz(1,:,ispden,ipert) - v1r_lr(1,:)
+         v1r_qbz(2,:,ispden,ipert) = v1r_qbz(2,:,ispden,ipert) - v1r_lr(2,:)
+       end do
+
+       ! Compute FT phases for this qpt_bz.
+       call calc_eiqr(-qpt_bz,db%nrpt,db%rpt,emiqr)
+
+       ! Slow FT.
+       cnt = 0
+       do ispden=1,db%nspden
+         do irpt=1,db%nrpt
+           cnt = cnt + 1; if (mod(cnt, nproc) /= my_rank) cycle ! MPI parallelism.
+           phre = emiqr(1,irpt); phim = emiqr(2,irpt)
+
+           do ifft=1,nfft
+             v1scf_rpt(1,irpt,ifft,ispden) = v1scf_rpt(1,irpt,ifft,ispden) &
+             &                      + phre * v1r_qbz(1, ifft, ispden, ipert) &
+             &                      - phim * v1r_qbz(2, ifft, ispden, ipert)
+
+             v1scf_rpt(2,irpt,ifft,ispden) = v1scf_rpt(2,irpt,ifft,ispden) &
+             &                      + phre * v1r_qbz(2, ifft, ispden, ipert) &
+             &                      + phim * v1r_qbz(1, ifft, ispden, ipert)
+           end do
+
+         end do
+       end do
+     end if
+
+   end do ! iqst
+
+   ABI_FREE(v1r_qibz)
+ end do ! iq_ibz
+ ABI_CHECK(iqst == nqbz, "iqst /= nqbz")
+
+ v1scf_rpt = v1scf_rpt / nqbz
+ call xmpi_sum(v1scf_rpt, comm, ierr)
+
+ !! Build mpi_type for executing fourdp in sequential.
+ !call ngfft_seq(ngfft_qspace, [nq1, nq2, nq3])
+ !call initmpi_seq(mpi_enreg_seq)
+ !call init_distribfft_seq(mpi_enreg_seq%distribfft,'c',ngfft_qspace(2),ngfft_qspace(3),'all')
+ !call init_distribfft_seq(mpi_enreg_seq%distribfft,'f',ngfft_qspace(2),ngfft_qspace(3),'all')
+
+ !!ABI_STAT_MALLOC(all_v1qr, (nqbz, 2, nfft, db%nspden, db%natom3), ierr)
+ !!ABI_CHECK(ierr==0, "oom in all_v1qr")
+ !!all_v1qr = zero
+
+ !cnt = 0
+ !do mu=1,db%natom3
+ !  do ispden=1,db%nspden
+ !    do ifft=1,nfft
+ !      !cnt = cnt + 1; if (mod(cnt, nproc) /= my_rank) cycle
+ !      !call fourdp(1,all_v1qr(:,:,ifft,ispden,mu),db%v1scf_rpt(:,ifft,ispden,mu),+1,&
+ !      ! mpi_enreg_seq,nqbz,ngfft_qspace,paral_kgb0,tim_fourdp0)
+ !    end do
+ !  end do
+ !end do
+
+ !!ABI_FREE(all_v1qr)
+ !call destroy_mpi_enreg(mpi_enreg_seq)
+
+ ABI_FREE(emiqr)
+ ABI_FREE(qibz)
+ ABI_FREE(wtq)
+ ABI_FREE(qbz)
+ ABI_FREE(indqq)
+ ABI_FREE(iperm)
+ ABI_FREE(bz2ibz_sort)
+ ABI_FREE(iqs_dvdb)
+ ABI_FREE(nqsts)
+ ABI_FREE(v1r_qbz)
+ ABI_FREE(v1r_lr)
+
+
+end subroutine dvdb_get_v1scf_rpt
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_dvdb/dvdb_get_v1scf_qpt
+!! NAME
+!!  dvdb_get_v1scf_qpt
+!!
+!! FUNCTION
+!!  Fourier interpolation of potentials for a given q-point
+!!  This routine is meant to replace dvdb_ftinterp_qpt
+!!  by performing the interpolation one perturbation at a time.
+!!
+!! INPUTS
+!!  qpt(3)=q-point in reduced coordinates.
+!!  nfft=Number of fft-points treated by this processors
+!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  nrpt=Number of R-points = number of q-points in the full BZ
+!!  nspden=Number of spin densities.
+!!  ipert=index of the perturbation to be treated [1,natom3]
+!!  v1scf_rpt(2,nrpt,nfft,nspden)=phonon perturbation potential
+!!                                in real space lattice representation.
+!!  comm=MPI communicator
+!!
+!! OUTPUT
+!!  v1scf_qpt(2*nfft, nspden)=Interpolated DFPT potentials at the given q-point.
+!!
+!! PARENTS
+!!      m_dvdb,m_gkk
+!!
+!! CHILDREN
+!!      dvdb_free,dvdb_ftinterp_qpt,dvdb_ftinterp_setup,dvdb_init
+!!      dvdb_open_read,dvdb_print,dvdb_readsym_allv1,ngfft_seq,vdiff_print
+!!
+!! SOURCE
+
+subroutine dvdb_get_v1scf_qpt(db, cryst, qpt, nfft, ngfft, nrpt, nspden, &
+&                             ipert, v1scf_rpt, v1scf_qpt, comm)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'dvdb_get_v1scf_qpt'
+ use interfaces_32_util
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: nfft,nrpt,nspden,ipert,comm
+ type(dvdb_t),intent(in) :: db
+ type(crystal_t),intent(in) :: cryst
+!arrays
+ integer,intent(in) :: ngfft(18)
+ real(dp),intent(in) :: qpt(3)
+ real(dp),intent(out) :: v1scf_rpt(2,nrpt,nfft,db%nspden)
+ real(dp),intent(out) :: v1scf_qpt(2,nfft,db%nspden)
+
+!Local variables-------------------------------
+!scalars
+ integer,parameter :: cplex2=2
+ integer :: ir,ispden,ifft,mu,idir,iat,timerev_q,nproc,my_rank,cnt,ierr
+ real(dp) :: wr,wi
+!arrays
+ integer :: symq(4,2,db%cryst%nsym)
+ real(dp),allocatable :: eiqr(:,:), v1r_lr(:,:)
+
+! *************************************************************************
+
+ my_rank = xmpi_comm_rank(comm); nproc = xmpi_comm_size(comm)
+
+ ABI_MALLOC(v1r_lr, (2,nfft))
+
+ ! Examine the symmetries of the q wavevector
+ call littlegroup_q(db%cryst%nsym,qpt,symq,db%cryst%symrec,db%cryst%symafm,timerev_q,prtvol=db%prtvol)
+
+ ! Compute FT phases for this q-point.
+ ABI_MALLOC(eiqr, (2,db%nrpt))
+ call calc_eiqr(qpt,db%nrpt,db%rpt,eiqr)
+
+ idir = mod(ipert-1, 3) + 1; iat = (ipert - idir) / 3 + 1
+
+ ! Compute long-range part of the coupling potential
+ v1r_lr = zero; cnt = 0
+ if (db%has_dielt_zeff) then
+   call dvdb_v1r_long_range(db,qpt,iat,idir,nfft,ngfft,v1r_lr)
+ end if
+
+ ! TODO: If high-symmetry q-points, one could save flops by FFT interpolating the independent
+ ! perturbations and then rotate ...
+ v1scf_qpt = zero; cnt = 0
+ do ispden=1,db%nspden
+   do ifft=1,nfft
+     cnt = cnt + 1; if (mod(cnt, nproc) /= my_rank) cycle ! MPI-parallelism
+
+     do ir=1,db%nrpt
+       wr = v1scf_rpt(1, ir,ifft,ispden)
+       wi = v1scf_rpt(2, ir,ifft,ispden)
+       v1scf_qpt(1,ifft,ispden) = v1scf_qpt(1,ifft,ispden) + wr*eiqr(1,ir) - wi * eiqr(2,ir)
+       v1scf_qpt(2,ifft,ispden) = v1scf_qpt(2,ifft,ispden) + wr*eiqr(2,ir) + wi * eiqr(1,ir)
+     end do
+
+     ! Add the long-range part of the potential
+     v1scf_qpt(1,ifft,ispden) = v1scf_qpt(1,ifft,ispden) + v1r_lr(1,ifft)
+     v1scf_qpt(2,ifft,ispden) = v1scf_qpt(2,ifft,ispden) + v1r_lr(2,ifft)
+
+   end do
+
+   ! Remove the phase.
+   call times_eikr(-qpt, ngfft, nfft, 1, v1scf_qpt(:,:,ispden))
+ end do
+
+ ! Be careful with gamma and cplex!
+ if (db%symv1) then
+   call v1phq_symmetrize(db%cryst,idir,iat,symq,ngfft,cplex2,nfft,db%nspden,db%nsppol,db%mpi_enreg,v1scf_qpt(:,:,:))
+ end if
+
+ call xmpi_sum(v1scf_qpt, comm, ierr)
+
+ ABI_FREE(eiqr)
+ ABI_FREE(v1r_lr)
+
+
+end subroutine dvdb_get_v1scf_qpt
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_dvdb/dvdb_interpolate_v1scf
+!! NAME
+!!  dvdb_interpolate_v1scf
+!!
+!! FUNCTION
+!!  Interpolate the phonon perturbation potential.
+!!  This routine is meant to replace dvdb_ftinterp_setup and dvdb_ftinterp_qpt.
+!!  It performs the interpolation one perturbation at a time. 
+!!
+!! INPUTS
+!!  ngqpt(3)=Divisions of the ab-initio q-mesh.
+!!  nqshift=Number of shifts used to generated the ab-initio q-mesh.
+!!  qshift(3,nqshift)=The shifts of the ab-initio q-mesh.
+!!  nfft=Number of fft-points treated by this processors
+!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  nfftf=Number of fft-points on the fine grid for interpolated potential
+!!  ngfftf(18)=information on 3D FFT for interpolated potential
+!!  comm=MPI communicator
+!!
+!! OUTPUT
+!!  v1scf(2, nfft, nspden, 3*natom)= v1scf potentials on the real-space FFT mesh for the 3*natom perturbations.
+!!
+!! PARENTS
+!!      m_dvdb,m_gkk
+!!
+!! CHILDREN
+!!      dvdb_free,dvdb_ftinterp_qpt,dvdb_ftinterp_setup,dvdb_init
+!!      dvdb_open_read,dvdb_print,dvdb_readsym_allv1,ngfft_seq,vdiff_print
+!!
+!! SOURCE
+
+subroutine dvdb_interpolate_v1scf(db, cryst, qpt, ngqpt, nqshift, qshift, &
+&                                 nfft, ngfft, nfftf, ngfftf, v1scf, comm)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'dvdb_interpolate_v1scf'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: nqshift,nfft,nfftf,comm
+ type(dvdb_t),target,intent(inout) :: db
+!arrays
+ real(dp),intent(in) :: qpt(3)
+ integer,intent(in) :: ngqpt(3),ngfft(18),ngfftf(18)
+ real(dp),intent(in) :: qshift(3,nqshift)
+ real(dp),allocatable,intent(out) :: v1scf(:,:,:,:)
+ type(crystal_t),intent(in) :: cryst
+
+!Local variables-------------------------------
+!scalars
+ integer :: ipert, nqbz
+ integer :: nproc,my_rank
+!arrays
+ real(dp),allocatable :: v1scf_rpt(:,:,:,:)
+
+! *************************************************************************
+
+ nproc = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
+
+ nqbz = product(ngqpt) * nqshift
+ db%nrpt = nqbz
+
+ ABI_MALLOC(v1scf, (2,nfftf,db%nspden,db%natom3))
+
+ ABI_MALLOC(v1scf_rpt, (2,db%nrpt,nfft,db%nspden))
+
+ do ipert=1,db%natom3
+
+   write(std_out, "(a,i4,a,i4,a)") "Interpolating potential for perturbation ", &
+   &                           ipert, " / ", db%natom3, ch10
+
+   call dvdb_get_v1scf_rpt(db, cryst, ngqpt, nqshift, qshift, nfft, ngfft, &
+   &                       db%nrpt, db%nspden, ipert, v1scf_rpt, comm)
+
+   call dvdb_get_v1scf_qpt(db, cryst, qpt, nfftf, ngfftf, db%nrpt, db%nspden, & 
+   &                       ipert, v1scf_rpt, v1scf(:,:,:,ipert), comm)
+
+   ABI_FREE(db%rpt)
+
+ end do
+
+ ABI_FREE(v1scf_rpt)
+
+
+end subroutine dvdb_interpolate_v1scf
 !!***
 
 !----------------------------------------------------------------------

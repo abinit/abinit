@@ -214,6 +214,7 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
  i_am_master = (my_rank == master)
 
  ! Copy important dimensions
+ cplex = 2
  natom = cryst%natom
  natom3 = 3 * natom
  nsppol = ebands_k%nsppol
@@ -360,10 +361,11 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
    if (dtset%prtvol > 0) call wrtout(std_out, sjoin("Could not find: ",ktoa(qpt), "in DVDB - interpolating"))
    ! Fourier interpolate of the potential
    ABI_CHECK(any(abs(qpt) > tol12), "qpt cannot be zero if Fourier interpolation is used")
-   cplex = 2
-   call dvdb_ftinterp_setup(dvdb,ifc%ngqpt,ifc%nqshft,ifc%qshft,nfft,ngfft,comm,cryst)
-   ABI_MALLOC(v1scf, (cplex,nfftf,nspden,natom3))
-   call dvdb_ftinterp_qpt(dvdb, qpt, nfftf, ngfftf, v1scf, comm)
+
+   ! This call allocates v1scf(cplex, nfftf, nspden, 3*natom))
+   call dvdb_interpolate_v1scf(dvdb,cryst,qpt,ifc%ngqpt,ifc%nqshft,ifc%qshft, &
+   &                           nfft, ngfft, nfftf, ngfftf, v1scf, comm)
+
  end if
 
  ! Examine the symmetries of the q wavevector
