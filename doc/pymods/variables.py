@@ -31,21 +31,22 @@ class Variable(yaml.YAMLObject):
     abivarname = None  # Name of the variable (str)
     commentdefault = None
     commentdims = None
-    section = None
+    varset = None
     range = None
     requires = None
     excludes = None
+    executables = None
     topics = None
 
     yaml_tag = u'!variable'
 
     def attrs(self):
         return ['vartype', 'characteristic', 'mnemonics', 'dimensions', 'defaultval', 'text',
-                'abivarname', 'section', 'topics']
+                'abivarname', 'varset', 'executables', 'topics']
 
     def __init__(self, vartype=None, characteristic=None,
                  mnemonics=None, dimensions=None, default=None,
-                 text=None, abivarname=None, section=None, range=None,
+                 text=None, abivarname=None, executables=None, varset=None, range=None,
                  commentdefault=None, commentdims=None, topics=None):
         self.vartype = vartype
         self.characteristic = characteristic
@@ -54,7 +55,8 @@ class Variable(yaml.YAMLObject):
         self.defaultval = default
         self.text = literal(text)
         self.abivarname = abivarname
-        self.section = section
+        self.varset = varset 
+        self.executables = executables
         self.commentdefault = commentdefault
         self.commentdims = commentdims
         self.range = range
@@ -65,7 +67,8 @@ class Variable(yaml.YAMLObject):
         return Variable(vartype=array["vartype"], characteristic=array["characteristic"],
                         mnemonics=array["mnemonics"], dimensions=array["dimensions"],
                         default=array["default"], text=array["text"], abivarname=array["abivarname"],
-                        section=array["section"], range=array["range"], commentdefault=array["commentdefault"],
+                        executables=array["executables"], 
+                        varset=array["varset"], range=array["range"], commentdefault=array["commentdefault"],
                         commentdims=array["commentdims"], topics=array["topics"])
 
     def __str__(self):

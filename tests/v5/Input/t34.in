@@ -64,4 +64,5 @@ diemac 3.0
 #%%   Stishovite, high-pressure polymorph of SiO2. LDA.
 #%%   Computation of the Fermi contact term at each atomic site.
 #%%   Coded and contributed by J. Zwanziger.
+#%% topics = EFG
 #%%<END TEST_INFO>

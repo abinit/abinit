@@ -1,3 +1,7 @@
+<!--                                                                                     -->
+<!-- This file has been produced by generate_doc.py using different .yml  or .bib files. -->
+<!-- It is useless to modify it. Modify the related .yml  or .bib files instead.         -->
+<!--                                                                                     -->
 <html>
 <head><title>Description of basic variables.</title>
 <link rel=stylesheet type="text/css" href="../formabinit.css">
@@ -104,7 +108,7 @@ variables to be used in the main input file of the abinit code.
 <br><br><br><br><hr>
 <br><font id="title"><a name="accuracy">accuracy</a></font>
 <br><font id="mnemonics">Mnemonics: ACCURACY</font>
-<br><font id="characteristic">Characteristic: </font>
+<br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_convergency.html">convergency</a> </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
@@ -679,12 +683,13 @@ Allows to tune the accuracy of a calculation by setting automatically the variab
 </font>
 
 <br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
 
 
 <br><font id="title"><a name="acell">acell</a></font>
 <br><font id="mnemonics">Mnemonics: CELL lattice vector scaling</font>
-<br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#evolving">EVOLVING</a>, <a href="../../users/generated_files/help_abinit.html#length">LENGTH</a></font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#EVOLVING">EVOLVING</a>, <a href="../../users/generated_files/help_abinit.html#LENGTH">LENGTH</a></font>
 <br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_crystal.html">crystal</a> </font>
 <br><font id="vartype">Variable type: real(3) (Comment: represented internally as acell(3,<a href="../../input_variables/generated_files/varrlx.html#nimage">nimage</a>))</font>
 <br><font id="default">Default is 3*1</font>
@@ -696,7 +701,7 @@ dimensionless primitive translations (in <a href="../../input_variables/generate
 to be multiplied.  By default, given in Bohr atomic units
 (1 Bohr=0.5291772108 Angstroms), although Angstrom can be specified,
 if preferred, since <b>acell</b> has the
-'<a href="../../users/generated_files/help_abinit.html#length">LENGTH</a>' characteristics.
+'<a href="../../users/generated_files/help_abinit.html#LENGTH">LENGTH</a>' characteristics.
 See further description of <b>acell</b> related to the
 <a href="../../input_variables/generated_files/varbas.html#rprim">rprim</a> input variable,
 the <a href="../../input_variables/generated_files/varbas.html#scalecart">scalecart</a> input variable,
@@ -709,12 +714,13 @@ Use <a href="../../input_variables/generated_files/varbas.html#scalecart">scalec
 </font>
 
 <br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
 
 
 <br><font id="title"><a name="angdeg">angdeg</a></font>
 <br><font id="mnemonics">Mnemonics: ANGles in DEGrees</font>
-<br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#input_only">INPUT_ONLY</a></font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#INPUT_ONLY">INPUT_ONLY</a></font>
 <br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_crystal.html">crystal</a> </font>
 <br><font id="vartype">Variable type: real(3)</font>
 <br><font id="default">No default (Comment: deduced from '<a href="../../input_variables/generated_files/varbas.html#rprim">rprim</a>')</font>
@@ -776,12 +782,13 @@ and form the desired angles with the others.
 </font>
 
 <br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
 
 
 <br><font id="title"><a name="ecut">ecut</a></font>
 <br><font id="mnemonics">Mnemonics: Energy CUToff</font>
-<br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#energy">ENERGY</a></font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#ENERGY">ENERGY</a></font>
 <br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_convergency.html">convergency</a> </font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">No default</font>
@@ -804,7 +811,7 @@ is defined).
  <br />
  Can be specified in Ha (the default), Ry, eV or Kelvin, since
 <b>ecut</b> has the
-'<a href="../../users/generated_files/help_abinit.html#energy">ENERGY</a>' characteristics.
+'<a href="../../users/generated_files/help_abinit.html#ENERGY">ENERGY</a>' characteristics.
 (1 Ha=27.2113845 eV)
  <br />
  This is the single parameter which can have an enormous
@@ -837,12 +844,13 @@ smoothing of the kinetic energy, needed to optimize unit cell parameters.
 </font>
 
 <br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
 
 
 <br><font id="title"><a name="einterp">einterp</a></font>
 <br><font id="mnemonics">Mnemonics: Electron bands INTERPolation</font>
-<br><font id="characteristic">Characteristic: </font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_otherGS.html">otherGS</a> <a href="../../topics/generated_files/topic_GW.html">GW</a> </font>
 <br><font id="vartype">Variable type: real(4)</font>
 <br><font id="default">Default is [0, 0, 0, 0]</font>
 <br><font id="text">
@@ -857,7 +865,7 @@ The first element specificies the interpolation method.
 <ul>
 <li> 0 --> No interpolation (default) </li>
 <li> 1 --> Star-function interpolation (Shankland-Koelling-Wood Fourier interpolation scheme,
-    see [<a href="../../bibliography/generated_files/bibliography.html#Pickett1988">Pickett1988</a>]
+    see <a href="../../bibliography/generated_files/bibliography.html#Pickett1988">[Pickett1988]</a>
 </li>
 <li> 2 --> B-spline interpolation. </li>
 </ul>
@@ -869,7 +877,7 @@ In the case of star-function interpolation:
 
 <ul>
 <li> einterp(2): Number of star-functions per ab-initio k-point </li>
-<li> einterp(3): If non-zero, activate Fourier filtering according to Eq 9 of [<a href="../../bibliography/generated_files/bibliography.html#Uehara2000">Uehara2000</a>].
+<li> einterp(3): If non-zero, activate Fourier filtering according to Eq 9 of <a href="../../bibliography/generated_files/bibliography.html#Uehara2000">[Uehara2000]</a>.
 In this case, rcut is given by einterp(2) * Rmax where Rmax is the maximum length of the lattice vectors included in the star expansion </li>
 <li> einterp(4): Used if einterp(2) /= 0. It defines rsigma in Eq 9</li>
 </ul>
@@ -881,12 +889,12 @@ einterp(2:4): Order of B-spline for the three reduced directions. Cubic spline (
 </font>
 
 <br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
 
 
 <br><font id="title"><a name="iscf">iscf</a></font>
 <br><font id="mnemonics">Mnemonics: Integer for Self-Consistent-Field cycles</font>
-<br><font id="characteristic">Characteristic: </font>
+<br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_convergency.html">convergency</a> <a href="../../topics/generated_files/topic_TDDFT.html">TDDFT</a> </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0 if <a href="../../input_variables/generated_files/varbas.html#usewvl">usewvl</a>==1,
@@ -910,7 +918,7 @@ The choice between different algorithms for SCF is possible :
   <li>
    =1 =&gt; get the largest eigenvalue of the SCF cycle
    <br />
-   (<a href="../../users/generated_files/help_abinit.html#develop">DEVELOP</a> option, used with
+   (<a href="../../users/generated_files/help_abinit.html#DEVELOP">DEVELOP</a> option, used with
 <a href="../../input_variables/generated_files/varfil.html#irdwfk">irdwfk</a>=1 or
    <a href="../../input_variables/generated_files/varfil.html#irdwfq">irdwfq</a>=1)
   </li>
@@ -1000,7 +1008,7 @@ in the
    <a href="../../users/generated_files/help_abinit.html#4">
     section 4
    </a>
-   of <a href="../../users/generated_files/help_abinit.html">abinit help file</a>.
+   of <a href="../../users/generated_files/help_abinit.html#">abinit help file</a>.
 <b>iscf</b>=-2 would be used for
 band structure calculations, to permit computation of
 the eigenvalues of occupied and unoccupied states at
@@ -1042,13 +1050,13 @@ or to produce STM charge density map (thanks to <a href="../../input_variables/g
   <li>
    = -1 =&gt; like -2, but the non-self-consistent calculation
 is followed by the determination of excited states
-within <a href="../../users/generated_files/help_abinit.html#tddft">TDDFT</a>. This is only possible for <a href="../../input_variables/generated_files/varbas.html#nkpt">nkpt</a>=1,
+within <a href="../../users/generated_files/help_abinit.html#TDDFT">TDDFT</a>. This is only possible for <a href="../../input_variables/generated_files/varbas.html#nkpt">nkpt</a>=1,
 with <a href="../../input_variables/generated_files/varbas.html#kpt">kpt</a>=0 0 0.
 Note that the oscillator strength needs to be defined with respect to
 an origin of coordinate, thanks to the input variable
 <a href="../../input_variables/generated_files/vargs.html#boxcenter">boxcenter</a>. The maximal
 number of Kohn-Sham excitations to be used to build the
-excited state <a href="../../users/generated_files/help_abinit.html#tddft">TDDFT</a> matrix can be defined by <a href="../../input_variables/generated_files/varrf.html#td_mexcit">td_mexcit</a>,
+excited state <a href="../../users/generated_files/help_abinit.html#TDDFT">TDDFT</a> matrix can be defined by <a href="../../input_variables/generated_files/varrf.html#td_mexcit">td_mexcit</a>,
 or indirectly by the maximum Kohn-Sham excitation energy
 <a href="../../input_variables/generated_files/varrf.html#td_maxene">td_maxene</a>.
   </li>
@@ -1057,12 +1065,12 @@ or indirectly by the maximum Kohn-Sham excitation energy
 </font>
 
 <br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
 
 
 <br><font id="title"><a name="ixc">ixc</a></font>
 <br><font id="mnemonics">Mnemonics: Integer for eXchange-Correlation choice</font>
-<br><font id="characteristic">Characteristic: </font>
+<br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_xc.html">xc</a> <a href="../../topics/generated_files/topic_Hybrids.html">Hybrids</a> </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 1 (Comment: Default corresponds to Teter parametrization. However, if all the pseudopotentials have the same value of pspxc, the initial value of ixc will be that common value)</font>
@@ -1114,11 +1122,11 @@ have an even smaller effect on differences of energies, or derivatives.
  </ul>
  <ul>
   <li>
-   1=&gt; LDA or LSD, Teter Pade parametrization (4/93, published in [<a href="../../bibliography/generated_files/bibliography.html#Goedecker1996">Goedecker1996</a>], which
+   1=&gt; LDA or LSD, Teter Pade parametrization (4/93, published in <a href="../../bibliography/generated_files/bibliography.html#Goedecker1996">[Goedecker1996]</a>, which
 reproduces Perdew-Wang (which reproduces Ceperley-Alder!).
   </li>
   <li>
-   2=&gt; LDA, Perdew-Zunger-Ceperley-Alder (no spin-polarization) [<a href="../../bibliography/generated_files/bibliography.html#Perdew1981">Perdew1981</a>]
+   2=&gt; LDA, Perdew-Zunger-Ceperley-Alder (no spin-polarization) <a href="../../bibliography/generated_files/bibliography.html#Perdew1981">[Perdew1981]</a>
   </li>
   <li>
    3=&gt; LDA, old Teter rational polynomial parametrization (4/91)
@@ -1188,16 +1196,16 @@ available from the
   <li>
    20=&gt; Fermi-Amaldi xc ( -1/N Hartree energy, where N is the
 number of electrons per cell ; G=0 is not taken
-into account however), for <a href="../../users/generated_files/help_abinit.html#tddft">TDDFT</a> tests.
+into account however), for <a href="../../users/generated_files/help_abinit.html#TDDFT">TDDFT</a> tests.
 No spin-pol. Does not work for RF.
   </li>
   <li>
    21=&gt; same as 20, except that the xc-kernel is the LDA (<b>ixc</b>=1) one,
-for <a href="../../users/generated_files/help_abinit.html#tddft">TDDFT</a> tests.
+for <a href="../../users/generated_files/help_abinit.html#TDDFT">TDDFT</a> tests.
   </li>
   <li>
    22=&gt; same as 20, except that the xc-kernel is the Burke-Petersilka-Gross
-hybrid, for <a href="../../users/generated_files/help_abinit.html#tddft">TDDFT</a> tests.
+hybrid, for <a href="../../users/generated_files/help_abinit.html#TDDFT">TDDFT</a> tests.
   </li>
   <li>
    23=&gt; GGA of Z. Wu and R.E. Cohen, Phys. Rev. 73, 235116 (2006).
@@ -1308,11 +1316,11 @@ F Bloch, Zeitschrift fuer Physik 57, 545 (1929)
   </li>
   <li>
    009=&gt; XC_LDA_C_PZ !  Perdew &amp; Zunger
-[<a href="../../bibliography/generated_files/bibliography.html#Perdew1981">Perdew1981</a>]
+<a href="../../bibliography/generated_files/bibliography.html#Perdew1981">[Perdew1981]</a>
   </li>
   <li>
    010=&gt; XC_LDA_C_PZ_MOD !  Perdew &amp; Zunger (Modified)
-[<a href="../../bibliography/generated_files/bibliography.html#Perdew1981">Perdew1981</a>]
+<a href="../../bibliography/generated_files/bibliography.html#Perdew1981">[Perdew1981]</a>
 Modified to improve the matching between the low and high rs part
 ]
   </li>
@@ -1320,7 +1328,7 @@ Modified to improve the matching between the low and high rs part
    011=&gt; XC_LDA_C_OB_PZ !  Ortiz &amp; Ballone (PZ)
 [G Ortiz and P Ballone, Phys. Rev. B 50, 1391 (1994) ;
 G Ortiz and P Ballone, Phys. Rev. B 56, 9970(E) (1997) ;
-[<a href="../../bibliography/generated_files/bibliography.html#Perdew1981">Perdew1981</a>]
+<a href="../../bibliography/generated_files/bibliography.html#Perdew1981">[Perdew1981]</a>
 ]
   </li>
   <li>
@@ -2070,12 +2078,13 @@ Y Zhao and DG Truhlar, Theor. Chem. Account 120, 215 (2008)
 </font>
 
 <br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
 
 
 <br><font id="title"><a name="jdtset">jdtset</a></font>
 <br><font id="mnemonics">Mnemonics: index -J- for DaTaSETs</font>
-<br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#no_multi">NO_MULTI</a></font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#NO_MULTI">NO_MULTI</a></font>
 <br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_multidtset.html">multidtset</a> </font>
 <br><font id="vartype">Variable type: integer(<a href="../../input_variables/generated_files/varbas.html#ndtset">ndtset</a>)</font>
 <br><font id="default">Default is [1 .. <a href="../../input_variables/generated_files/varbas.html#ndtset">ndtset</a>]</font>
@@ -2116,12 +2125,12 @@ be used.
 </font>
 
 <br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
 
 
 <br><font id="title"><a name="kpt">kpt</a></font>
 <br><font id="mnemonics">Mnemonics: K - PoinTs</font>
-<br><font id="characteristic">Characteristic: </font>
+<br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_k-points.html">k-points</a> </font>
 <br><font id="vartype">Variable type: real(3,<a href="../../input_variables/generated_files/varbas.html#nkpt">nkpt</a>)</font>
 <br><font id="default">Default is [0, 0, 0] (Comment: Adequate for one molecule in a supercell)</font>
@@ -2177,12 +2186,12 @@ each component must lie in [-<a href="../../input_variables/generated_files/varb
 </font>
 
 <br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
 
 
 <br><font id="title"><a name="kptnrm">kptnrm</a></font>
 <br><font id="mnemonics">Mnemonics: K - PoinTs NoRMalization</font>
-<br><font id="characteristic">Characteristic: </font>
+<br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_k-points.html">k-points</a> </font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 1</font>
@@ -2206,12 +2215,12 @@ the need for many digits in representing numbers such as 1/3.
 </font>
 
 <br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
 
 
 <br><font id="title"><a name="kptopt">kptopt</a></font>
 <br><font id="mnemonics">Mnemonics: KPoinTs OPTion</font>
-<br><font id="characteristic">Characteristic: </font>
+<br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_k-points.html">k-points</a> </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 4 if <a href="../../input_variables/generated_files/vargs.html#nspden">nspden</a>==4,
@@ -2311,12 +2320,12 @@ you to select the optimal grid.
 </font>
 
 <br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
 
 
 <br><font id="title"><a name="natom">natom</a></font>
 <br><font id="mnemonics">Mnemonics: Number of ATOMs</font>
-<br><font id="characteristic">Characteristic: </font>
+<br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_GSgeneral.html">GSgeneral</a> </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 1</font>
@@ -2336,12 +2345,12 @@ symmetriser, see the input variable <a href="../../input_variables/generated_fil
 </font>
 
 <br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
 
 
 <br><font id="title"><a name="nband">nband</a></font>
 <br><font id="mnemonics">Mnemonics: Number of BANDs</font>
-<br><font id="characteristic">Characteristic: </font>
+<br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_GSgeneral.html">GSgeneral</a> </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">No default (Comment:  the estimated number of occupied bands +1 (TODO provide the mathematical formulation))</font>
@@ -2372,7 +2381,7 @@ will not be used.
 each k point.
 </p>
 <p>
- In the case of a <a href="../../users/generated_files/help_abinit.html#gw">GW</a> calculation (<a href="../../input_variables/generated_files/vargs.html#optdriver">optdriver</a>=3 or 4),
+ In the case of a <a href="../../users/generated_files/help_abinit.html#GW">GW</a> calculation (<a href="../../input_variables/generated_files/vargs.html#optdriver">optdriver</a>=3 or 4),
 <b>nband</b> gives the number of bands to be treated to generate the screening (susceptibility
 and dielectric matrix), as well as the self-energy. However, to generate the _KSS
 file (see <a href="../../input_variables/generated_files/varfil.html#kssform">kssform</a>)
@@ -2381,12 +2390,12 @@ the relevant number of bands is given by <a href="../../input_variables/generate
 </font>
 
 <br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
 
 
 <br><font id="title"><a name="nbandhf">nbandhf</a></font>
 <br><font id="mnemonics">Mnemonics: Number of BANDs for (Hartree)-Fock exact exchange</font>
-<br><font id="characteristic">Characteristic: </font>
+<br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_Hybrids.html">Hybrids</a> </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">No default (Comment: the estimated number of occupied bands (TODO : provide the mathematical formulation))</font>
@@ -2398,12 +2407,13 @@ the relevant number of bands is given by <a href="../../input_variables/generate
 </font>
 
 <br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
 
 
 <br><font id="title"><a name="ndtset">ndtset</a></font>
 <br><font id="mnemonics">Mnemonics: Number of DaTaSETs</font>
-<br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#no_multi">NO_MULTI</a></font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#NO_MULTI">NO_MULTI</a></font>
 <br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_multidtset.html">multidtset</a> </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
@@ -2423,12 +2433,13 @@ Otherwise, <b>ndtset</b>=0 is equivalent to <b>ndtset</b>=1.
 </font>
 
 <br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
 
 
 <br><font id="title"><a name="ngkpt">ngkpt</a></font>
 <br><font id="mnemonics">Mnemonics: Number of Grid points for K PoinTs generation</font>
-<br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#input_only">INPUT_ONLY</a></font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#INPUT_ONLY">INPUT_ONLY</a></font>
 <br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_k-points.html">k-points</a> </font>
 <br><font id="vartype">Variable type: integer(3)</font>
 <br><font id="default">Default is [0, 0, 0]</font>
@@ -2479,12 +2490,13 @@ For a measure of the efficiency, see the input variable
 </font>
 
 <br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
 
 
 <br><font id="title"><a name="nkpath">nkpath</a></font>
 <br><font id="mnemonics">Mnemonics: Number of K-points defining the PATH</font>
-<br><font id="characteristic">Characteristic: </font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_k-points.html">k-points</a> </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
 <br><font id="text">
@@ -2504,12 +2516,12 @@ Note that, unlike <a href="../../input_variables/generated_files/varbas.html#kpt
 </font>
 
 <br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
 
 
 <br><font id="title"><a name="nkpt">nkpt</a></font>
 <br><font id="mnemonics">Mnemonics: Number of K - Points</font>
-<br><font id="characteristic">Characteristic: </font>
+<br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_k-points.html">k-points</a> </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 1 if <a href="../../input_variables/generated_files/varbas.html#kptopt">kptopt</a>==0,
@@ -2569,12 +2581,12 @@ the total number of k points of the circuit will be
 </font>
 
 <br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
 
 
 <br><font id="title"><a name="nkpthf">nkpthf</a></font>
 <br><font id="mnemonics">Mnemonics: Number of K - Points for (Hartree) Fock exact exchange</font>
-<br><font id="characteristic">Characteristic: </font>
+<br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_Hybrids.html">Hybrids</a> </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">No default (Comment:  the total number of k-point in the full Brillouin zone (TODO : provide the mathematical formulation))</font>
@@ -2586,12 +2598,12 @@ the total number of k points of the circuit will be
 </font>
 
 <br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
 
 
 <br><font id="title"><a name="nshiftk">nshiftk</a></font>
 <br><font id="mnemonics">Mnemonics: Number of SHIFTs for K point grids</font>
-<br><font id="characteristic">Characteristic: </font>
+<br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_k-points.html">k-points</a> </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 1</font>
@@ -2611,12 +2623,12 @@ The values of the shifts are given by <a href="../../input_variables/generated_f
 </font>
 
 <br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
 
 
 <br><font id="title"><a name="nsppol">nsppol</a></font>
 <br><font id="mnemonics">Mnemonics: Number of SPin POLarization</font>
-<br><font id="characteristic">Characteristic: </font>
+<br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_spinpolarisation.html">spinpolarisation</a> </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 1</font>
@@ -2663,12 +2675,12 @@ the spin-polarization.
 </font>
 
 <br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
 
 
 <br><font id="title"><a name="nstep">nstep</a></font>
 <br><font id="mnemonics">Mnemonics: Number of (non-)self-consistent field STEPS</font>
-<br><font id="characteristic">Characteristic: </font>
+<br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_convergency.html">convergency</a> </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 30</font>
@@ -2717,12 +2729,13 @@ the previous run only if the latter is done with <a href="../../input_variables/
 </font>
 
 <br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
 
 
 <br><font id="title"><a name="nsym">nsym</a></font>
 <br><font id="mnemonics">Mnemonics: Number of SYMmetry operations</font>
-<br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#symmetry_finder">SYMMETRY_FINDER</a></font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#SYMMETRY_FINDER">SYMMETRY_FINDER</a></font>
 <br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_crystal.html">crystal</a> </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
@@ -2747,7 +2760,7 @@ possible elements of the 2DTE from those already
 computed.
 </p>
 <p>
- <a href="../../users/generated_files/help_abinit.html#symmetry_finder">SYMMETRY_FINDER</a> mode (Default mode).
+ <a href="../../users/generated_files/help_abinit.html#SYMMETRY_FINDER">SYMMETRY_FINDER</a> mode (Default mode).
 If <b>nsym</b> is 0, all the atomic coordinates must be
 explicitely given (one cannot use the geometry builder
 and the symmetrizer): the code will then find automatically
@@ -2778,7 +2791,7 @@ change the initialization of "msym" in the abinit.F90 main routine,
 then recompile the code.
 </p>
 <p>
- For <a href="../../users/generated_files/help_abinit.html#gw">GW</a> calculation, the user might want to select only the symmetry operations whose
+ For <a href="../../users/generated_files/help_abinit.html#GW">GW</a> calculation, the user might want to select only the symmetry operations whose
 non-symmorphic translation vector <a href="../../input_variables/generated_files/varbas.html#tnons">tnons</a>
 is zero. This can be done with the help of the input variable
 <a href="../../input_variables/generated_files/vardev.html#symmorphi">symmorphi</a>
@@ -2786,12 +2799,13 @@ is zero. This can be done with the help of the input variable
 </font>
 
 <br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
 
 
 <br><font id="title"><a name="ntypat">ntypat</a></font>
 <br><font id="mnemonics">Mnemonics: Number of TYPes of AToms</font>
-<br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#no_multi">NO_MULTI</a></font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#NO_MULTI">NO_MULTI</a></font>
 <br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_GSgeneral.html">GSgeneral</a> </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 1</font>
@@ -2809,12 +2823,12 @@ on ...
 </font>
 
 <br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
 
 
 <br><font id="title"><a name="occopt">occopt</a></font>
 <br><font id="mnemonics">Mnemonics: OCCupation OPTion</font>
-<br><font id="characteristic">Characteristic: </font>
+<br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_GSgeneral.html">GSgeneral</a> </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 1</font>
@@ -2911,7 +2925,7 @@ with a=-.8165 (monotonic function in the tail)
    <li>
     <b>occopt</b>=6:
     <br />
-    Smearing of Methfessel and Paxton [<a href="../../bibliography/generated_files/bibliography.html#Methfessel1989">Methfessel1989</a>]
+    Smearing of Methfessel and Paxton <a href="../../bibliography/generated_files/bibliography.html#Methfessel1989">[Methfessel1989]</a>
 with Hermite polynomial of degree 2, corresponding
 to "Cold smearing" of N. Marzari with a=0
 (so, same smeared delta function as <b>occopt</b>=4, with different a).
@@ -2949,12 +2963,13 @@ bissection algorithm find one or the other.
 </font>
 
 <br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
 
 
 <br><font id="title"><a name="rprim">rprim</a></font>
 <br><font id="mnemonics">Mnemonics: Real space PRIMitive translations</font>
-<br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#evolving">EVOLVING</a></font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#EVOLVING">EVOLVING</a></font>
 <br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_crystal.html">crystal</a> </font>
 <br><font id="vartype">Variable type: real(3,3) (Comment: Internally, it is represented as rprim(3,3,<a href="../../input_variables/generated_files/varrlx.html#nimage">nimage</a>))</font>
 <br><font id="default">Default is [[1, 0, 0], [0, 1, 0], [0, 0, 1]]</font>
@@ -2965,7 +2980,7 @@ bissection algorithm find one or the other.
 the three dimensionless primitive translations in real space, to be rescaled by
 <a href="../../input_variables/generated_files/varbas.html#acell">acell</a> and <a href="../../input_variables/generated_files/varbas.html#scalecart">scalecart</a>.
 <br />
-It is <a href="../../users/generated_files/help_abinit.html#evolving">EVOLVING</a> only if <a href="../../input_variables/generated_files/varrlx.html#ionmov">ionmov</a>==2 and <a href="../../input_variables/generated_files/varrlx.html#optcell">optcell</a>/=0, otherwise it is fixed.
+It is <a href="../../users/generated_files/help_abinit.html#EVOLVING">EVOLVING</a> only if <a href="../../input_variables/generated_files/varrlx.html#ionmov">ionmov</a>==2 and <a href="../../input_variables/generated_files/varrlx.html#optcell">optcell</a>/=0, otherwise it is fixed.
 <br />
  If the Default is used, that is, <b>rprim</b> is the unity matrix,
 the three dimensionless primitive vectors are three
@@ -3074,7 +3089,7 @@ acell 3*1     scalecart 3*1    !  ( These are default values)
 are defined by the scaling factor "a".
  <br />
  As another difference between <a href="../../input_variables/generated_files/varbas.html#scalecart">scalecart</a> or <a href="../../input_variables/generated_files/varbas.html#acell">acell</a>,
-note that <a href="../../input_variables/generated_files/varbas.html#scalecart">scalecart</a> is <a href="../../users/generated_files/help_abinit.html#input_only">INPUT_ONLY</a> :
+note that <a href="../../input_variables/generated_files/varbas.html#scalecart">scalecart</a> is <a href="../../users/generated_files/help_abinit.html#INPUT_ONLY">INPUT_ONLY</a> :
 its content will be immediately applied to rprim, at parsing time,
 and then scalecart will be set to the default values (3*1). So, in case <a href="../../input_variables/generated_files/varbas.html#scalecart">scalecart</a> is used,
 the echo of <b>rprim</b> in the output file is not the value contained in the input file,
@@ -3083,12 +3098,14 @@ but the value rescaled by <a href="../../input_variables/generated_files/varbas.
 </font>
 
 <br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
 
 
 <br><font id="title"><a name="rprimd">rprimd</a></font>
 <br><font id="mnemonics">Mnemonics: Real space PRIMitive translations, Dimensional</font>
-<br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#internal_only">INTERNAL_ONLY</a>, <a href="../../users/generated_files/help_abinit.html#evolving">EVOLVING</a></font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#INTERNAL_ONLY">INTERNAL_ONLY</a>, <a href="../../users/generated_files/help_abinit.html#EVOLVING">EVOLVING</a></font>
+<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_crystal.html">crystal</a> </font>
 <br><font id="vartype">Variable type: real(3,3) (Comment: Internally, it is represented as rprimd(3,3,<a href="../../input_variables/generated_files/varrlx.html#nimage">nimage</a>).)</font>
 <br><font id="default">No default</font>
 <br><font id="text">
@@ -3110,17 +3127,18 @@ and <a href="../../input_variables/generated_files/varbas.html#rprim">rprim</a>.
   </li>
  </ul>
 </p>
-It is <a href="../../users/generated_files/help_abinit.html#evolving">EVOLVING</a> only if <a href="../../input_variables/generated_files/varrlx.html#ionmov">ionmov</a>==2 and <a href="../../input_variables/generated_files/varrlx.html#optcell">optcell</a>/=0, otherwise it is fixed.
+It is <a href="../../users/generated_files/help_abinit.html#EVOLVING">EVOLVING</a> only if <a href="../../input_variables/generated_files/varrlx.html#ionmov">ionmov</a>==2 and <a href="../../input_variables/generated_files/varrlx.html#optcell">optcell</a>/=0, otherwise it is fixed.
 <br />
 </font>
 
 <br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
 
 
 <br><font id="title"><a name="scalecart">scalecart</a></font>
 <br><font id="mnemonics">Mnemonics: SCALE CARTesian coordinates</font>
-<br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#input_only">INPUT_ONLY</a></font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#INPUT_ONLY">INPUT_ONLY</a></font>
 <br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_crystal.html">crystal</a> </font>
 <br><font id="vartype">Variable type: real(3)</font>
 <br><font id="default">Default is 3*1</font>
@@ -3137,18 +3155,18 @@ and the associated internal <a href="../../input_variables/generated_files/varba
  Especially useful for body-centered and face-centered tetragonal lattices, as well as
 body-centered and face-centered orthorhombic lattices, see <a href="../../input_variables/generated_files/varbas.html#rprimd">rprimd</a>.
  <br />
- Note that this input variable is <a href="../../users/generated_files/help_abinit.html#input_only">INPUT_ONLY</a> : its content will be immediately applied to rprim, at parsing time,
+ Note that this input variable is <a href="../../users/generated_files/help_abinit.html#INPUT_ONLY">INPUT_ONLY</a> : its content will be immediately applied to rprim, at parsing time,
 and then scalecart will be set to the default values. So, it will not be echoed.
 </p>
 </font>
 
 <br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
 
 
 <br><font id="title"><a name="shiftk">shiftk</a></font>
 <br><font id="mnemonics">Mnemonics: SHIFT for K points</font>
-<br><font id="characteristic">Characteristic: </font>
+<br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_k-points.html">k-points</a> </font>
 <br><font id="vartype">Variable type: real(3,<a href="../../input_variables/generated_files/varbas.html#nshiftk">nshiftk</a>)</font>
 <br><font id="default">Default is None if <a href="../../input_variables/generated_files/varbas.html#nshiftk">nshiftk</a>>1,
@@ -3254,12 +3272,12 @@ symmetry axis.
 </font>
 
 <br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
 
 
 <br><font id="title"><a name="symrel">symrel</a></font>
 <br><font id="mnemonics">Mnemonics: SYMmetry in REaL space</font>
-<br><font id="characteristic">Characteristic: </font>
+<br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_crystal.html">crystal</a> </font>
 <br><font id="vartype">Variable type: integer(3,3,<a href="../../input_variables/generated_files/varbas.html#nsym">nsym</a>)</font>
 <br><font id="default">Default is [[1, 0, 0], [0, 1, 0], [0, 0, 1]] if <a href="../../input_variables/generated_files/varbas.html#nsym">nsym</a>==1,
@@ -3299,12 +3317,12 @@ will be computed automatically.
 </font>
 
 <br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
 
 
 <br><font id="title"><a name="tnons">tnons</a></font>
 <br><font id="mnemonics">Mnemonics: Translation NON-Symmorphic vectors</font>
-<br><font id="characteristic">Characteristic: </font>
+<br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_crystal.html">crystal</a> </font>
 <br><font id="vartype">Variable type: real(3,<a href="../../input_variables/generated_files/varbas.html#nsym">nsym</a>)</font>
 <br><font id="default">No default</font>
@@ -3328,12 +3346,13 @@ is computed automatically.
 </font>
 
 <br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
 
 
 <br><font id="title"><a name="toldfe">toldfe</a></font>
 <br><font id="mnemonics">Mnemonics: TOLerance on the DiFference of total Energy</font>
-<br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#energy">ENERGY</a></font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#ENERGY">ENERGY</a></font>
 <br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_convergency.html">convergency</a> </font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 0.0 (Comment: The default value implies that this stopping condition is ignored. For the SCF case, one and only one of the input tolerance criteria <a href="../../input_variables/generated_files/varbas.html#tolwfr">tolwfr</a>, <a href="../../input_variables/generated_files/varbas.html#toldff">toldff</a>, <a href="../../input_variables/generated_files/varbas.html#tolrff">tolrff</a>, <b>toldfe</b> or <a href="../../input_variables/generated_files/varbas.html#tolvrs">tolvrs</a> must differ from zero.)</font>
@@ -3349,7 +3368,7 @@ will cause one SCF cycle to stop (and ions to be moved).
  <br />
  Can be specified in Ha (the default), Ry, eV or Kelvin, since
 <b>toldfe</b> has the
-'<a href="../../users/generated_files/help_abinit.html#energy">ENERGY</a>' characteristics.
+'<a href="../../users/generated_files/help_abinit.html#ENERGY">ENERGY</a>' characteristics.
 (1 Ha=27.2113845 eV)
  <br />
  If set to zero, this stopping condition is ignored.
@@ -3379,12 +3398,12 @@ input variable defined generically.
 </font>
 
 <br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
 
 
 <br><font id="title"><a name="toldff">toldff</a></font>
 <br><font id="mnemonics">Mnemonics: TOLerance on the DiFference of Forces</font>
-<br><font id="characteristic">Characteristic: </font>
+<br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_GSgeneral.html">GSgeneral</a> </font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 0.0 (Comment: The default value implies that this stopping condition is ignored. For the SCF case, one and only one of the input tolerance criteria <a href="../../input_variables/generated_files/varbas.html#tolwfr">tolwfr</a>, <b>toldff</b>, <a href="../../input_variables/generated_files/varbas.html#tolrff">tolrff</a>, <a href="../../input_variables/generated_files/varbas.html#toldfe">toldfe</a> or <a href="../../input_variables/generated_files/varbas.html#tolvrs">tolvrs</a> must differ from zero.)</font>
@@ -3428,12 +3447,12 @@ input variable defined generically.
 </font>
 
 <br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
 
 
 <br><font id="title"><a name="tolrff">tolrff</a></font>
 <br><font id="mnemonics">Mnemonics: TOLerance on the Relative diFference of Forces</font>
-<br><font id="characteristic">Characteristic: </font>
+<br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_convergency.html">convergency</a> <a href="../../topics/generated_files/topic_GSgeneral.html">GSgeneral</a> </font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 0.0 (Comment: The default value implies that this stopping condition is ignored. For the SCF case, one and only one of the input tolerance criteria <a href="../../input_variables/generated_files/varbas.html#tolwfr">tolwfr</a>, <a href="../../input_variables/generated_files/varbas.html#toldff">toldff</a>, <b>tolrff</b>, <a href="../../input_variables/generated_files/varbas.html#toldfe">toldfe</a> or <a href="../../input_variables/generated_files/varbas.html#tolvrs">tolvrs</a> must differ from zero.)</font>
@@ -3476,12 +3495,12 @@ input variable defined generically.
 </font>
 
 <br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
 
 
 <br><font id="title"><a name="tolvrs">tolvrs</a></font>
 <br><font id="mnemonics">Mnemonics: TOLerance on the potential V(r) ReSidual</font>
-<br><font id="characteristic">Characteristic: </font>
+<br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_convergency.html">convergency</a> </font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 0.0 (Comment: The default value implies that this stopping condition is ignored. For the SCF case, one and only one of the input tolerance criteria <a href="../../input_variables/generated_files/varbas.html#tolwfr">tolwfr</a>, <a href="../../input_variables/generated_files/varbas.html#toldff">toldff</a>, <a href="../../input_variables/generated_files/varbas.html#tolrff">tolrff</a>, <a href="../../input_variables/generated_files/varbas.html#toldfe">toldfe</a> or <b>tolvrs</b> must differ from zero.)</font>
@@ -3529,12 +3548,12 @@ input variable defined generically.
 </font>
 
 <br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
 
 
 <br><font id="title"><a name="tolwfr">tolwfr</a></font>
 <br><font id="mnemonics">Mnemonics: TOLerance on WaveFunction squared Residual</font>
-<br><font id="characteristic">Characteristic: </font>
+<br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_convergency.html">convergency</a> </font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 0.0 (Comment: The default value implies that this stopping condition is ignored. For the SCF case, one and only one of the input tolerance criteria <b>tolwfr</b>, <a href="../../input_variables/generated_files/varbas.html#toldff">toldff</a>, <a href="../../input_variables/generated_files/varbas.html#tolrff">tolrff</a>, <a href="../../input_variables/generated_files/varbas.html#toldfe">toldfe</a> or <a href="../../input_variables/generated_files/varbas.html#tolvrs">tolvrs</a> must differ from zero.)</font>
@@ -3626,12 +3645,12 @@ input variable defined generically.
 </font>
 
 <br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
 
 
 <br><font id="title"><a name="typat">typat</a></font>
 <br><font id="mnemonics">Mnemonics: TYPe of AToms</font>
-<br><font id="characteristic">Characteristic: </font>
+<br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_GSgeneral.html">GSgeneral</a> </font>
 <br><font id="vartype">Variable type: integer[3, '<a href="../../input_variables/generated_files/vargeo.html#natrd">natrd</a>'] if <a href="../../input_variables/generated_files/vargeo.html#natrd">natrd</a><<a href="../../input_variables/generated_files/varbas.html#natom">natom</a>,
 [3, '<a href="../../input_variables/generated_files/varbas.html#natom">natom</a>'] otherwise.
@@ -3676,12 +3695,12 @@ user, while keeping efficiency.
 </font>
 
 <br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
 
 
 <br><font id="title"><a name="udtset">udtset</a></font>
 <br><font id="mnemonics">Mnemonics: Upper limit on DaTa SETs</font>
-<br><font id="characteristic">Characteristic: </font>
+<br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_multidtset.html">multidtset</a> </font>
 <br><font id="vartype">Variable type: integer(2)</font>
 <br><font id="default">No default (Comment: It is not used when it is not defined)</font>
@@ -3712,12 +3731,12 @@ looping on the two indices defined by <b>udtset</b>(1) and  <b>udtset</b>(2) as 
 </font>
 
 <br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
 
 
 <br><font id="title"><a name="usewvl">usewvl</a></font>
 <br><font id="mnemonics">Mnemonics: Use WaVeLet basis set</font>
-<br><font id="characteristic">Characteristic: </font>
+<br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_Wavelets.html">Wavelets</a> </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0 (Comment: use plane-wave basis set)</font>
@@ -3748,12 +3767,12 @@ metalic systems may be slow to converge.
 </font>
 
 <br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
 
 
 <br><font id="title"><a name="wtk">wtk</a></font>
 <br><font id="mnemonics">Mnemonics: WeighTs for K points</font>
-<br><font id="characteristic">Characteristic: </font>
+<br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_k-points.html">k-points</a> </font>
 <br><font id="vartype">Variable type: real(<a href="../../input_variables/generated_files/varbas.html#nkpt">nkpt</a>)</font>
 <br><font id="default">Default is <a href="../../input_variables/generated_files/varbas.html#nkpt">nkpt</a>*1.0 (Comment: Except when <a href="../../input_variables/generated_files/varbas.html#kptopt">kptopt</a>/=0)</font>
@@ -3777,12 +3796,13 @@ except if <a href="../../input_variables/generated_files/varbas.html#iscf">iscf<
 </font>
 
 <br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
 
 
 <br><font id="title"><a name="wvl_hgrid">wvl_hgrid</a></font>
 <br><font id="mnemonics">Mnemonics: WaVeLet H step GRID</font>
-<br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#length">LENGTH</a></font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#LENGTH">LENGTH</a></font>
 <br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_Wavelets.html">Wavelets</a> </font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 0.5</font>
@@ -3797,12 +3817,13 @@ computation. The value is a length in atomic units.
 </font>
 
 <br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
 
 
 <br><font id="title"><a name="xangst">xangst</a></font>
 <br><font id="mnemonics">Mnemonics: vectors (X) of atom positions in cartesian coordinates -length in ANGSTrom-</font>
-<br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#input_only">INPUT_ONLY</a></font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#INPUT_ONLY">INPUT_ONLY</a></font>
 <br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_crystal.html">crystal</a> </font>
 <br><font id="vartype">Variable type: real(3,min(<a href="../../input_variables/generated_files/varbas.html#natom">natom</a>,<a href="../../input_variables/generated_files/vargeo.html#natrd">natrd</a>))</font>
 <br><font id="default">No default</font>
@@ -3836,12 +3857,13 @@ In constrast with <a href="../../input_variables/generated_files/varbas.html#xre
 </font>
 
 <br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
 
 
 <br><font id="title"><a name="xcart">xcart</a></font>
 <br><font id="mnemonics">Mnemonics: vectors (X) of atom positions in CARTesian coordinates</font>
-<br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#evolving">EVOLVING</a>, <a href="../../users/generated_files/help_abinit.html#length">LENGTH</a></font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#EVOLVING">EVOLVING</a>, <a href="../../users/generated_files/help_abinit.html#LENGTH">LENGTH</a></font>
 <br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_crystal.html">crystal</a> </font>
 <br><font id="vartype">Variable type: real(3,min(<a href="../../input_variables/generated_files/varbas.html#natom">natom</a>,<a href="../../input_variables/generated_files/vargeo.html#natrd">natrd</a>))</font>
 <br><font id="default">No default</font>
@@ -3854,7 +3876,7 @@ redundant with that supplied by array <a href="../../input_variables/generated_f
 By default, <b>xcart</b> is given in Bohr atomic units
 (1 Bohr=0.5291772108 Angstroms), although Angstrom can be specified,
 if preferred, since <b>xcart</b> has the
-'<a href="../../users/generated_files/help_abinit.html#length">LENGTH</a>' characteristics.
+'<a href="../../users/generated_files/help_abinit.html#LENGTH">LENGTH</a>' characteristics.
  <br />
  If <a href="../../input_variables/generated_files/varbas.html#xred">xred</a> and <a href="../../input_variables/generated_files/varbas.html#xangst">xangst</a> are
 ABSENT from the input file and <b>xcart</b> is
@@ -3874,12 +3896,13 @@ and
 </font>
 
 <br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
 
 
 <br><font id="title"><a name="xred">xred</a></font>
 <br><font id="mnemonics">Mnemonics: vectors (X) of atom positions in REDuced coordinates</font>
-<br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#evolving">EVOLVING</a></font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#EVOLVING">EVOLVING</a></font>
 <br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_crystal.html">crystal</a> </font>
 <br><font id="vartype">Variable type: real(3,min(<a href="../../input_variables/generated_files/varbas.html#natom">natom</a>,<a href="../../input_variables/generated_files/vargeo.html#natrd">natrd</a>)) (Comment: represented internally as xred(3,<a href="../../input_variables/generated_files/varbas.html#natom">natom</a>,<a href="../../input_variables/generated_files/varrlx.html#nimage">nimage</a>))</font>
 <br><font id="default">Default is *0.0</font>
@@ -3913,12 +3936,13 @@ which case <b>xred</b> must be absent from the input file.
 </font>
 
 <br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
 
 
 <br><font id="title"><a name="znucl">znucl</a></font>
 <br><font id="mnemonics">Mnemonics: charge -Z- of the NUCLeus</font>
-<br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#no_multi">NO_MULTI</a></font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#NO_MULTI">NO_MULTI</a></font>
 <br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_GSgeneral.html">GSgeneral</a> </font>
 <br><font id="vartype">Variable type: real(<a href="../../input_variables/generated_files/vargs.html#npsp">npsp</a>)</font>
 <br><font id="default">No default</font>
@@ -3942,7 +3966,7 @@ with only a jellium surface, ABINIT sets arbitrarily the covalent radius to one.
 </font>
 
 <br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
 <script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
 
 </body>

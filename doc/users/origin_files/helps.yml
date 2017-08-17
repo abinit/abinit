@@ -8,7 +8,7 @@
 
 - !components
     name : abinit
-    keyword : the main code
+    keyword : ABINIT, the main code
     authors : DCA, XG
     subtitle : This document explains the i/o parameters and format needed for the main code (abinit) in the ABINIT package.
 - !components
@@ -53,7 +53,7 @@
     keyword : response functions
     authors : XG,DCA
     title : | 
-      <h1>Auxiliary help file for the main code of the ABINIT package : response functions.</h1>
+      <h1>Auxiliary help file for response functions.</h1>
     subtitle : |
       This file complements the main [[help_abinit]], for matters related to response functions.
 - !components

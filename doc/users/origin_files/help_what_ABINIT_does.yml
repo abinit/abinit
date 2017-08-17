@@ -96,19 +96,22 @@ body : |
   <HR ALIGN=left>
   <a name="5">&nbsp;</a>
   <h3><b> 5.Response functions. </b></h3>
-   <li><a href="#1">1.</a> First-order responses: phonons,....
-   <li><a href="#1">2.</a> Second-order responses: elastic constants, ....
-   <li><a href="../../topics/generated_files/topic_nonlinear.html">3.</a> Raman intensities and electro-optic properties.
-   <li><a href="#1">4.</a> Electron-phonon calculations.
-   <li><a href="../../topics/generated_files/topic_EffMass.html">5.</a> Effective mass calculations.
+   <li><a href="../../topics/generated_files/topic_DFPT.html">1.</a> DFPT: phonon modes, elastic tensors, effective charges, dielectric tensors,...
+   <li><a href="../../topics/generated_files/topic_nonlinear.html">2.</a> Raman intensities and electro-optic properties.
+   <li><a href="../../topics/generated_files/topic_ElPhon.html">3.</a> Electron-phonon calculations.
+   <li><a href="../../topics/generated_files/topic_TDep.html">3.</a> Temperature dependence of the eigenenergies.
+   <li><a href="../../topics/generated_files/topic_EffMass.html">4.</a> Effective mass calculations.
   <p>&nbsp;
   
   <HR ALIGN=left>
   <a name="6">&nbsp;</a>
   <h3><b> 6.Excited state calculations. </b></h3>
-   <li><a href="#1">1.</a> GW calculations.
-   <li><a href="#1">2.</a> Bethe-Salpeter calculations.
-   <li><a href="../../topics/generated_files/topic_TDDFT.html">3.</a> TDDFT calculations.
+   <li><a href="../../topics/generated_files/topic_GW.html">1.</a> GW calculations.
+   <li><a href="../../topics/generated_files/topic_BSE.html">2.</a> Bethe-Salpeter calculations.
+   <li><a href="../../topics/generated_files/topic_GWls.html">3.</a> GW- Lanczos-Sternheimer method.
+   <li><a href="../../topics/generated_files/topic_RandStopPow.html">4.</a> Random electronic stopping power.
+   <li><a href="../../topics/generated_files/topic_RPACorrEn.html">5.</a> Correlation energy within RPA.
+   <li><a href="../../topics/generated_files/topic_TDDFT.html">6.</a> TDDFT calculations.
   <p>&nbsp;
   
   <HR ALIGN=left>
@@ -125,3 +128,10 @@ body : |
    <li><a href="../../topics/generated_files/topic_Wavelets.html">2.</a> Wavelets in ABINIT.
    <li><a href="../../topics/generated_files/topic_Wannier.html">3.</a> Wannier functions in ABINIT.
    <li><a href="../../topics/generated_files/topic_recursion.html">4.</a> Recursion methods and orbital free calculations.
+   <li><a href="../../topics/generated_files/topic_Berry.html">5.</a> Finite electric field
+   <li><a href="../../topics/generated_files/topic_MagField.html">6.</a> External magnetic field
+   <li><a href="../../topics/generated_files/topic_MagMom.html">7.</a> Constrained atomic magnetic moment
+   <li><a href="../../topics/generated_files/topic_ChargedCell.html">8.</a> Charged cells
+   <li><a href="../../topics/generated_files/topic_Unfolding.html">9.</a> Unfolding supercell band structures
+   <li><a href="../../topics/generated_files/topic_EFG.html">10.</a> Electric field gradients
+

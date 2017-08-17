@@ -3,7 +3,7 @@ document.write(' <HR ALIGN=left> ');
 document.write(' Goto :          ');
 document.write(' <A href="http://www.abinit.org"><B>ABINIT home page</B></A>          ');
 document.write(' <B> | </B> ');
-document.write(' <A href="'+docpath+'input_variables/generated_files/allvariables.html"><B>Input variable list</B></A> ');
+document.write(' <A href="'+docpath+'input_variables/generated_files/varset_allvars.html"><B>Input variable list</B></A> ');
 document.write(' <B> | </B> ');
 document.write(' <A href="'+docpath+'tutorial/generated_files/all_files.html"><B>List of lessons</B></A> ');
 document.write(' <B> | </B> ');

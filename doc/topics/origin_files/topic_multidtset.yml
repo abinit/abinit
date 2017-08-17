@@ -1,7 +1,7 @@
 - !components 
     name      : multidtset 
-    keyword   : multidtset 
-    authors   : FJ
+    keyword   : Multi datsets 
+    authors   : XG
     howto     : set parameters for a multi dataset calculation
     header    : default
     title     : <h1>Multi-dataset calculations</h1>

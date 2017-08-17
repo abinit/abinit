@@ -1,7 +1,7 @@
 - !components 
     name      : MolecularDynamics 
-    keyword   : MolecularDynamics 
-    authors   : BAmadon
+    keyword   : Molecular Dynamics 
+    authors   : GG
     howto     : perform a molecular dynamics calculation
     header    : default
     title     : <h1>Molecular dynamics calculations</h1>

@@ -1,0 +1,66 @@
+<!--                                                                                     -->
+<!-- This file has been produced by generate_doc.py using different .yml  or .bib files. -->
+<!-- It is useless to modify it. Modify the related .yml  or .bib files instead.         -->
+<!--                                                                                     -->
+<html>
+<head><title>External magnetic field </title>
+<link rel=stylesheet type="text/css" href="../formabinit.css">
+</head>
+<body bgcolor="#ffffff">
+
+<hr>
+<a name="top"></a>
+
+<h1>External magnetic field</h1>
+<h3>This file gives hints on how to take into account an external magnetic field with the ABINIT package.
+<hr>
+
+<h5>Copyright (C) 2016-2017 ABINIT group (EB)
+<script type="text/javascript" src="../../js_files/copyright.js"> </script>
+</h5>
+
+<script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
+
+ <h3><b>Table of content: </b></h3> 
+ <ul> <li><a href="topic_MagField.html#1">1</a>. Introduction.<li><a href="topic_MagField.html#2">2</a>. Selected input files.<li><a href="topic_MagField.html#3">3</a>. References.</ul>
+
+&nbsp; 
+<HR ALIGN=left> 
+<a name="1">&nbsp;</a>
+<h3><b>1. Introduction.</b></h3>
+
+
+<p>An applied external magnetic field has been implemented in ABINIT by considering the Zeeman spin response only (i.e., neglecting the orbital contribution).
+<p>Following the procedure of Bousquet et al.,<a href="../../bibliography/generated_files/bibliography.html#Bousquet2011">[Bousquet2011]</a> the applied <b>B</b> field is introduced by adding the "Zeeman term" term in the non-collinear Kohn-Sham potential:
+<p>This contribution is trivial to implement, and also dominant in amplitude, but has historically been neglected with respect to the orbital responses, which are rich in more complex physics. 
+<p>Unlike an applied electric field, such a Zeeman term in the potential is compatible with periodic boundary conditions. It is also compatible with collinear calculations by reducing its application on ``up'' and ``down'' spin channels with <b>B</b>=B<b>e</b><sub>z</sub>.
+<p>In ABINIT, the finite Zeeman field is controlled by the keyword <a href="../../input_variables/generated_files/varff.html#zeemanfield">zeemanfield</a> which allows to control the amplitude of the applied <b>B</b>-field (in Tesla) along the three cartesian directions.
+<p>Such an applied Zeeman field allows one to calculate the spin contribution of the magnetic and magnetoelectric susceptibilities, and to observe phase transitions under finite magnetic field, if present.
+
+
+
+
+&nbsp; 
+<HR ALIGN=left> 
+<a name="2">&nbsp;</a>
+<h3><b>2. Selected input files.</b></h3>
+
+
+The user can find some related example input files in the ABINIT package in the directory /tests, or on the Web:
+<p> tests/v6/Input: <a href="../../tests/v6/Input/t17.in">t17.in</a> 
+<br>
+
+
+&nbsp; 
+<HR ALIGN=left> 
+<a name="3">&nbsp;</a>
+<h3><b>3. References.</b></h3>
+
+
+<br> <a href="../../bibliography/generated_files/bibliography.html#Bousquet2011">[Bousquet2011]</a>  E. Bousquet, N. A. Spaldin and K. T. Delaney, "Unexpectedly Large Electronic Contribution to Linear Magnetoelectricity", Phys. Rev. Lett. 106, 107202 (2011). <br> DOI: <a href="https://doi.org/10.1103/PhysRevLett.106.107202">10.1103/PhysRevLett.106.107202</a>.<br>
+<p>
+<script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
+
+</body>
+</html>
+

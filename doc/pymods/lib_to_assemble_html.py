@@ -27,6 +27,20 @@ from doc.pymods.variables import *
 
 ###############################################################################
 
+def read_yaml(path_ymlfile):
+
+  with open(path_ymlfile, 'r') as f:
+    try:
+      yml_content = yaml.load(f)
+    except:
+      print("\n\n... ERROR ...\n[Complement of information from generate_doc.py]")
+      print("Look for ... a forbidden ':' sign in the line and file mentioned below,")
+      print("      or ... an incorrect indentation in the line and file mentioned below.\n")
+      raise
+    return yml_content
+
+###############################################################################
+
 def format_dimensions(dimensions):
 
   if dimensions is None:
@@ -49,18 +63,6 @@ def format_dimensions(dimensions):
 
 ################################################################################
 
-def doku2html(text):
-
-  def replace_link(mymatch):
-    abivarname = mymatch.group()[2:-2]
-    return "<b>"+abivarname+"</b>"
-
-  p = re.compile("\*\*([a-zA-Z0-9_ */<>.]*)\*\*")
-  text2 = p.sub(replace_link,text)
-
-  return text2
-
-################################################################################
 
 def format_default(defaultval):
 
@@ -74,42 +76,116 @@ def format_default(defaultval):
 ################################################################################
 
 def make_links(text,cur_key,allowed_link_seeds,backlinks,backlink):
+  """ Interpreter for the address contained in [[...]], following dokuwiki conventions,
+      with translation to HTML links. The allowed link seeds are given.
+      Exceptions to doku conventions : 
+      - the cur_key matching yields simple bold emphasis of the text ;
+      - bibliographical references keep one pair of square brackets.
+  """
 
   def replace_link(mymatch):
-    key = mymatch.group()[2:-2]
-    if key == cur_key:
-      return "<b>"+key+"</b>"
-    if key in allowed_link_seeds.keys():
-      value=allowed_link_seeds[key]
-      if "input_variable in " in value:
+    dokukey = mymatch.group()[2:-2].strip()
+    if cur_key != None:
+      if dokukey == cur_key.strip():
+        return "<b>"+dokukey+"</b>"
+
+    #Extract the four possible parts of a dokukey, with separators :, # and |
+    #Explicitly : namespace:key#section|dokutext
+    #First, the namespace
+    if ':' in dokukey:
+      p1234=dokukey.split(':',1)
+      namespace=p1234[0].strip()
+      p234=p1234[1].strip()
+    else:
+      namespace=""
+      p234=dokukey
+    #Then, the dokutext
+    if '|' in p234:
+      p234_split=p234.split('|',1) 
+      p23=p234_split[0].strip()
+      dokutext=p234_split[1].strip()
+    else:
+      p23=p234
+      dokutext=""
+    #Finally, the key (often a filename, but not for input variables) and section
+    if '#' in p23:
+      p23_split=p23.split('#',1)
+      key=p23_split[0].strip()
+      section=p23_split[1].strip()
+    else:
+      key=p23
+      section=""
+
+    #Detect cases of external namespace
+    external_namespace=0
+    if namespace!="" and namespace in ["http","https","ftp","file"]:
+      external_namespace=1
+
+    #Prepare the webtext in the simple cases, note the namespace is echoed only when it is external
+    webtext=dokutext
+    if webtext=="":
+      if external_namespace==1:
+        webtext+=namespace+":"
+      webtext+=p23
+
+    #Finalize the cases of external links
+    if external_namespace==1:
+      return '<a href="%s:%s">%s</a>' %(namespace,p23,webtext)
+    if namespace=="" and key[:4]=="www.":
+      return '<a href="http://%s">%s</a>' %(p23,webtext)
+
+    #Treat the internal links
+    if namespace=="":
+      linkseed=key
+    elif namespace in ["aim","anaddb","optic"]:
+      linkseed=key+"@"+namespace
+    else:
+      linkseed=namespace+'_'+key
+
+    #The allowed namespaces are (varfile is an exception, see later):
+    dic_namespaces={"aim":"input_variables/generated_files",
+                    "anaddb":"input_variables/generated_files",
+                    "help":"users/generated_files",
+                    "lesson":"tutorial/generated_files",
+                    "optic":"input_variables/generated_files",
+                    "theorydoc":"theory/generated_files",
+                    "topic":"topics/generated_files",
+                    "varfile":"input_variables/generated_files",
+                    "varset":"input_variables/generated_files"}
+
+    #Actually for the internal links, make the selection on the linkseed at present ... which allows the varfile , which is not really a namespace ...
+    #Might be changed, later ...
+    if linkseed in allowed_link_seeds.keys():
+      value=allowed_link_seeds[linkseed]
+
+      #Treat first the allowed namespaces
+      if value in dic_namespaces.keys():
+        dir=dic_namespaces[value]
+
+        #Specific formatting treatment
+        if value=="help" and namespace=="":
+          webtext=key[5:]+' help file'
+
+        return '<a href="../../%s/%s.html#%s">%s</a>' %(dir,linkseed,section,webtext)
+
+      #Treat everything else
+      elif "input_variable in " in value:
         # This is a link to an input variable
-        varfile=value[18:]
-        return '<a href="../../input_variables/generated_files/'+varfile+".html#"+key+'">'+key+'</a>'
+        filename=value[18:]
+        return '<a href="../../input_variables/generated_files/%s.html#%s">%s</a>' %(filename,linkseed,webtext)
       elif value=="characteristic":
-        return '<a href="../../users/generated_files/help_abinit.html#'+str.replace(key.lower()," ","_")+'">'+key+'</a>'
-      elif value=="special":
-        return '<a href="../../input_variables/generated_files/specials.html#'+key+'">'+key+'</a>'
-      elif value=="varfile":
-        return '<a href="../../input_variables/generated_files/'+key+'.html">'+key+'</a>'
-      elif value=="lesson":
-        return '<a href="../../tutorial/generated_files/'+key+'.html">'+key+'</a>'
-      elif value=="theorydoc":
-        return '<a href="../../theory/generated_files/'+key+'.html">'+key+'</a>'
-      elif value=="helpfile":
-        return '<a href="../../users/generated_files/'+key+'.html">'+key[5:]+' help file</a>'
+        return '<a href="../../users/generated_files/help_abinit.html#%s">%s</a>' %(key,webtext)
       elif value=="in_tests":
-        return '<a href="../../'+key+'">&#126;abinit/'+key+'</a>'
-      elif value=="allvariables":
-        return '<a href="../../input_variables/generated_files/allvariables.html">'+key+'</a>'
+        return '<a href="../../%s">&#126;abinit/%s</a>' %(key,key)
       elif value=="bibID":
         result=get_year(key)
         if result != -9999 :
           backlinks[key]+=backlink+";;"
-          return '[<a href="../../bibliography/generated_files/bibliography.html#'+key+'">'+key+'</a>]'
+          return '<a href="../../bibliography/generated_files/bibliography.html#%s">[%s]</a>' %(key,webtext)
 
-    return '<a href="#">[[FAKE LINK:'+key+']]</a>'
+    return '<a href="#">[[FAKE LINK:'+dokukey+']]</a>'
 
-  p=re.compile("\\[\\[([a-zA-Z0-9_ */<>.]*)\\]\\]")
+  p=re.compile("\\[\\[([a-zA-Z0-9_ */<>.|:+#@]*)\\]\\]")
   if text is None:
     return ""
   new_text=p.sub(replace_link,text)
@@ -164,7 +240,10 @@ def get_year(name):
 ################################################################################
 
 def bibtex2html(str_input):
-  """ Convert the bibtex notations to html notations inside the string str """
+  """ Convert the bibtex notations to html notations inside the string str 
+      The coding is often primitive and very specialized ... The goal is not to write a complete BibTex parser !
+      If it does not work, modify the *.bibtex entry ...
+  """
 
   str=str_input
 
@@ -172,6 +251,8 @@ def bibtex2html(str_input):
   for i in string.digits:
     string_old='$_'+i+'$'
     string_new="<sub>"+i+"</sub>"
+    str=str.replace(string_old,string_new)
+    string_old='$_{'+i+'}$'
     str=str.replace(string_old,string_new)
 
   #Greek letters
@@ -211,6 +292,9 @@ def bibtex2html(str_input):
   str=str.replace(r"\c c","&ccedil;")
   str=str.replace(r"\c{c}","&ccedil;")
 
+  converted_str=convert_textit(str)
+  cleaned_str=suppress_parentheses(converted_str)
+
   #Get rid of uneeded parentheses. One is however left with the {XYZ..} case, that should be handled with a regular expression. (TO BE DONE)
   for i in string.letters:
     string_old='{'+i+'}'
@@ -223,9 +307,11 @@ def bibtex2html(str_input):
     string_new=i
     str=str.replace(string_old,string_new)
 
+  str=cleaned_str
+
   str=str.replace("--","&ndash;")
 
-  #Suppose all remaining parenthesis are present to avoid BibTex to switch automatically from uppercase to lowercase,
+  #Suppose remaining parentheses are present to avoid BibTex to switch automatically from uppercase to lowercase,
   #which will not happen in HTML...
   str=str.replace('"{','"')
   str=str.replace('}"','"')
@@ -234,13 +320,43 @@ def bibtex2html(str_input):
 
 ################################################################################
 
+def suppress_parentheses(text):
+  def strip_text(mymatch):
+    stripped_text = mymatch.group()[1:-1].strip()
+    return stripped_text
+
+  p=re.compile("\\{([a-zA-Z0-9_ */<>.|:+#@]*)\\}")
+  if text is None:
+    return ""
+  stripped_text=p.sub(strip_text,text)
+
+  return stripped_text
+
+################################################################################
+
+def convert_textit(text):
+  def convert_text(mymatch):
+    converted_text = "<i>"+mymatch.group()[8:-1].strip()+"</i>"
+    return converted_text
+
+  #Look for \textit{...}
+  p=re.compile("\\\\textit\\{([a-zA-Z0-9_ */<>.|:+#@]*)\\}")
+  if text is None:
+    return ""
+  converted_text=p.sub(convert_text,text)
+
+  return converted_text
+
+################################################################################
+
 def assemble_html(origin_yml_files,suppl_components,dir_name,root_filname,allowed_link_seeds,backlinks):
   """ Use the list of dictionaries "origin_yml_files" as well as the
       supplementary components "suppl_components", to produce html files,
       situated in dir_name (e.g. "tutorial") directories dir_name+"/generated_files".
       The root name of the files is "root_filname" (e.g. "lesson").
-      The complementary yml information (intro, body) for each file
+      The complementary yml information (intro, body, and possibly secX) for each file
       is situated in dir_name+"/origin_files".
+      When there is a list of sections, a table of content is constituted automatically.
       The dictionary allowed_link_seeds allows one to set up the links to relevant keywords.
       The backlinks are accumulated, to be mentioned in the bibliography.html file.
       WARNING : not all files are assembled using this function ! In particular, the "topics" files are assembled in the main code ...
@@ -253,13 +369,13 @@ def assemble_html(origin_yml_files,suppl_components,dir_name,root_filname,allowe
 
   # Generate each "normal" file : assemble the content, apply global transformations, then write.
   list_names=[]
-  list_subtitles=[]
+  dic_subtitles={}
   for i, origin_yml in enumerate(origin_yml_files):
     name = origin_yml.name
     if name=="default":
       continue
     list_names.append(name)
-    list_subtitles.append(origin_yml.keyword+' - '+origin_yml.subtitle)
+    dic_subtitles[name]=origin_yml.keyword+' - '+origin_yml.subtitle 
   
     if root_filname != "":
       full_filname=root_filname+"_"+name
@@ -271,8 +387,35 @@ def assemble_html(origin_yml_files,suppl_components,dir_name,root_filname,allowe
     doc_yml={}
     if os.path.isfile(path_ymlfile):
       print("Read "+path_ymlfile+" to build "+full_filname+".html ... ",end="")
-      with open(path_ymlfile, 'r') as f:
-        doc_yml = yaml.load(f)
+      doc_yml=read_yaml(path_ymlfile)
+ 
+    # If there are some sections in this yml file, constitute the body of the file using these sections,
+    # and also make a table of content
+    labels=[]
+    for j in doc_yml.keys(): 
+      if "sec" in j[:3]:
+        labels.append(j[3:])
+    secs_html=""
+    if len(labels)!=0:
+      labels.sort() 
+      secs_html="\n <ul> \n"
+      # Table of content
+      for label in labels:
+         secj="sec"+label
+         secs_html+='  <li><a href="#%s">%s.</a> %s</li>\n' %(label,label,doc_yml[secj]["title"])
+      secs_html+="\n </ul> \n <hr>"
+      # Body
+      for label in labels:
+         secj="sec"+label
+         sec_html='<p><a name="%s"> </a><br>' %(label)
+         sec_html+='<h3><b>%s. %s</b></h3>\n <p>' %(label,doc_yml[secj]["title"])
+         sec_html+=doc_yml[secj]["body"]
+         full_filname=origin_yml.name
+         if root_filname != "":
+           full_filname=root_filname+"_"+origin_yml.name
+         backlink=' &nbsp; <a href="../../%s/generated_files/%s.html#%s">%s#%s</a> &nbsp; ' %(dir_name,full_filname,label,full_filname,label)
+         sec_html = make_links(sec_html,None,allowed_link_seeds,backlinks,backlink)
+         secs_html+=sec_html
  
     # Try to complete the information from suppl_components
     suppl={}
@@ -287,20 +430,23 @@ def assemble_html(origin_yml_files,suppl_components,dir_name,root_filname,allowe
     for j in ["header","title","subtitle","purpose","advice","intro","copyright","links","menu",
               "tofcontent_header","toc",
               "introduction","examples","tutorials","input_variables","input_files","references",
-              "content","body",
+              "content","body","sections",
               "links","end"]:
 
       item=""
       # Try to get the item from different sources
-      if j in doc_yml.keys() :
+      if j in doc_yml.keys() and (not "sec" in j or j=="sections"):
         item+=doc_yml[j]
       elif j in suppl.keys() :
         item+=suppl[j]
+      elif j =="sections":
+        item+=secs_html
       else:
         try:
           item+=getattr(origin_yml,j)
         except:
           pass
+
       item=item.strip()
       if item=="" or item=="default":
         try:
@@ -335,14 +481,17 @@ def assemble_html(origin_yml_files,suppl_components,dir_name,root_filname,allowe
 
     if root_filname != "":
       full_filname=root_filname+"_"+name
+    #This is exceptional, should be soon removed
+    elif name=="external" or name=="allvars":
+      full_filname="varset_"+name
     else:
       full_filname=name
 
-    toc_all = toc_all + '<br><a href="%s.html"/>%s</a> [%s] \n' %(full_filname,name,list_subtitles[ii])
+    toc_all = toc_all + '<br><a href="%s.html"/>%s</a> [%s] \n' %(full_filname,name,dic_subtitles[name])
 
   all_files_html=""
   spec={'users':'help files','tutorial':'lessons of the tutorial',
-        'theory':'theory documents','input_variables':'varfiles','bibliography':'generated files in the bibliography directory'}
+        'theory':'theory documents','input_variables':'varsets','bibliography':'generated files in the bibliography directory'}
   for j in ["header","title","subtitle","copyright","links","toc_all","links","end"]:
     if j == "toc_all":
       all_files_html += toc_all
@@ -352,6 +501,7 @@ def assemble_html(origin_yml_files,suppl_components,dir_name,root_filname,allowe
       all_files_html += getattr(origin_yml_default,j)
 
   root_filname_all="all_files"
+  html_section=""
   rc=finalize_html(all_files_html,origin_yml_default,dir_name,root_filname_all,allowed_link_seeds,backlinks)
 
   return "Exit assemble_html"
@@ -385,11 +535,21 @@ def finalize_html(doc_html,origin_yml,dir_name,root_filname,allowed_link_seeds,b
   if origin_yml.authors != "":
     doc_html=doc_html.replace("__AUTHORS__",origin_yml.authors)
 
-  doc_html = doku2html(make_links(doc_html,None,allowed_link_seeds,backlinks,backlink))
+  doc_html = make_links(doc_html,None,allowed_link_seeds,backlinks,backlink)
+
+  #This must be temporary !
+  if full_filname=='allvars':
+    full_filname='varset_allvars'
+  if full_filname=='external':
+    full_filname='varset_external'
 
   #Write the finalized html file.
   path_html = "%s/generated_files/%s.html" %(dir_name,full_filname)
   file_html = open(path_html,'w')
+  file_html.write("<!--                                                                                     -->\n")
+  file_html.write("<!-- This file has been produced by generate_doc.py using different .yml  or .bib files. -->\n")
+  file_html.write("<!-- It is useless to modify it. Modify the related .yml  or .bib files instead.         -->\n")
+  file_html.write("<!--                                                                                     -->\n")
   file_html.write(doc_html)
   file_html.close()
   print("File %s written ..."%path_html)

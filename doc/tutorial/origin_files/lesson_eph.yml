@@ -287,21 +287,16 @@ body : |
    1/2 1/2 1/2
   
   # Coulomb pseudopotential parameter
-  mustar 0.136</pre> <a
-  href="../../users/generated_files/help_anaddb.html#elphflag"
-  target="kwimg"> elphflag</a> is a flag to turn on the calculation of the
+  mustar 0.136</pre> [[anaddb:elphflag]] is a flag to turn on the calculation of the
   electron-phonon quantities. The first quantities which will be calculated are
   the phonon linewidths along a path in reciprocal space (exactly like the band
   structure in <a
   	href="lesson_base3.html#35"
   	target="kwimg">Lesson 3.5</a>). The path is specified by the variable
-  <a href="../../users/generated_files/help_anaddb.html#qpath"
-  	target="kwimg">qpath</a> giving the apexes of the path in reciprocal
+  [[anaddb:qpath]] giving the apexes of the path in reciprocal
   space, which are usually special points of high symmetry. The number of points
-  is given by <a href="../../users/generated_files/help_anaddb.html#nqpath"
-  	target="kwimg">nqpath</a>. Note that qpath can be used in normal phonon
-  band structure calculations as well, provided that <a href="../../users/generated_files/help_anaddb.html#qpath"
-          target="kwimg">q1phl</a> is omitted from the
+  is given by [[anaddb:nqpath]]. Note that qpath can be used in normal phonon
+  band structure calculations as well, provided that [[anaddb:q1phl]] is omitted from the
   input file (the latter overrides qpath). The phonon linewidths are printed to a file
   suffixed _LWD.</p>
   
@@ -321,9 +316,7 @@ body : |
   (1968)</i>) as modified by Allen and Dynes (<i>Phys. Rev. B <b>12</b> 905
   (1975)</i>), ANADDB calculates the critical temperature for superconductivity.
   The formula contains an adjustable parameter &mu;* which approximates the effect
-  of Coulomb interactions, and is given by the input variable <a
-  	href="../../users/generated_files/help_anaddb.html#mustar"
-  	target="kwimg">mustar</a>. For Al with the k-point grid given and a
+  of Coulomb interactions, and is given by the input variable [[anaddb:mustar]]. For Al with the k-point grid given and a
   value of &mu;=0.136 the ANADDB output file shows the following values
   <pre>
    mka2f: lambda &lt;omega^2&gt; =     8.891284E-07
@@ -355,25 +348,16 @@ body : |
   DOS and attributes Gaussian weights to each k-point as a function of its
   distance from the Fermi surface. Another efficient method of integration in
   k-space is the tetrahedron method, which is also implemented in ANADDB, and can
-  be used by setting <a
-  	href="../../users/generated_files/help_anaddb.html#telphint"
-  	target="kwimg">telphint</a> = 0. In this case the k-point grid must be
-  specified explicitly in the input, repeating the variable <a
-  	href="../../users/generated_files/help_anaddb.html#kptrlatt"
-  	target="kwimg">kptrlatt</a> from the ABINIT output, so that ANADDB can
+  be used by setting [[anaddb:telphint]] = 0. In this case the k-point grid must be
+  specified explicitly in the input, repeating the variable [[anaddb:kptrlatt]] from the ABINIT output, so that ANADDB can
   re-construct the different tetrahedra which fill the reciprocal unit cell. In
   the Gaussian case, the width of the smearing can be controlled using the input
-  variable <a href="../../users/generated_files/help_anaddb.html#elphsmear"
-  	target="kwimg">elphsmear</a>. </p>
+  variable [[anaddb:elphsmear]]. </p>
   
   <p> To test our calculations, they should be re-done with a denser k-point grid
   and a denser q-point grid, until the results (&alpha;&#178;F or &lambda;) are
-  converged. The value of <a
-  	href="../../users/generated_files/help_anaddb.html#elphsmear"
-  	target="kwimg">elphsmear</a> should also be checked, to make sure that
-  it does not affect results. Normally, the limit for a very small <a
-  	href="../../users/generated_files/help_anaddb.html#elphsmear"
-  	target="kwimg">elphsmear</a> and a very dense k-point grid is
+  converged. The value of [[anaddb:elphsmear]] should also be checked, to make sure that
+  it does not affect results. Normally, the limit for a very small [[anaddb:elphsmear]] and a very dense k-point grid is
   the same as the value obtained with the tetrahedron method (which usually converges
   with a sparser k-point grid). </p>
   

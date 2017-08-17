@@ -1,5 +1,9 @@
+<!--                                                                                     -->
+<!-- This file has been produced by generate_doc.py using different .yml  or .bib files. -->
+<!-- It is useless to modify it. Modify the related .yml  or .bib files instead.         -->
+<!--                                                                                     -->
 <html>
-<head><title>the main code</title>
+<head><title>ABINIT, the main code</title>
 <link rel=stylesheet type="text/css" href="../formabinit.css">
 </head>
 <body bgcolor="#ffffff">
@@ -7,21 +11,21 @@
 <hr>
 <a name="top"></a>
 
-<h1>Help file for the main code of the ABINIT package.</h1>
+<h1>Help file for ABINIT, the main code of the ABINIT package.</h1>
 
 <h2>This document explains the i/o parameters and format needed for the main code (abinit) in the ABINIT package.</h2>
 <hr>
 <p>The new user is advised to read first the
-  <a href="../../users/generated_files/help_new_user.html">new_user help file</a>,
+  <a href="../../users/generated_files/help_new_user.html#">new user helpfile</a>,
   before reading the present file. It will be easier to discover the
-  present file with the help of the <a href="../../tutorial/generated_files/lesson_welcome.html">lesson_welcome</a> file.
+  present file with the help of the <a href="../../tutorial/generated_files/lesson_welcome.html#">tutorial</a>.
 <p>It is worthwhile to print this help file, for ease of reading.
 
 <p>When the user will be sufficiently familiarized with ABINIT, reading the
   ~abinit/doc/users/tuning.txt file might be useful (this file, as many additional
   documentation files, is not available on the Web, but is available in the package).
   For response-function calculations using
-  abinit, the complementary <a href="../../users/generated_files/help_respfn.html">respfn help file</a>
+  abinit, the complementary <a href="../../users/generated_files/help_respfn.html#">respfn help file</a>
   is needed.
 <hr>
 <h5>Copyright (C) 1998-2017 ABINIT group (DCA, XG)
@@ -210,16 +214,16 @@
       only the first 132 characters of each line of the input file will be read
       and parsed for input variables and their values. </li>
   </ul>
-  <p>The names of all the parameters can be found in the <a href="../../input_variables/generated_files/allvariables.html">allvariables</a>.
+  <p>The names of all the parameters can be found in the <a href="../../input_variables/generated_files/varset_allvars.html#">input variable database</a>.
     The list of input variables present in the latter file links them to their definitions,
     contained in different files, of which some are listed here:
 <ul>
-<li> Basic variables, <a href="../../input_variables/generated_files/varbas.html">varbas</a></li>
-<li> Files handling variables, <a href="../../input_variables/generated_files/varfil.html">varfil</a></li>
-<li> Ground-state calculation variables, <a href="../../input_variables/generated_files/vargs.html">vargs</a></li>
-<li> GW variables, <a href="../../input_variables/generated_files/vargw.html">vargw</a></li>
-<li> Parallelisation variables, <a href="../../input_variables/generated_files/varpar.html">varpar</a></li>
-<li> Response Function variables, <a href="../../input_variables/generated_files/varrf.html">varrf</a></li>
+<li> Basic variables, <a href="../../input_variables/generated_files/varbas.html#">varbas</a></li>
+<li> Files handling variables, <a href="../../input_variables/generated_files/varfil.html#">varfil</a></li>
+<li> Ground-state calculation variables, <a href="../../input_variables/generated_files/vargs.html#">vargs</a></li>
+<li> GW variables, <a href="../../input_variables/generated_files/vargw.html#">vargw</a></li>
+<li> Parallelisation variables, <a href="../../input_variables/generated_files/varpar.html#">varpar</a></li>
+<li> Response Function variables, <a href="../../input_variables/generated_files/varrf.html#">varrf</a></li>
 </ul>
     In the actual input file, these parameters may be given in any desired order,
     and more than one may be given per line. Spaces are used to separate values
@@ -301,26 +305,26 @@
     <b>SYMMETRY_FINDER</b>, <b>NO MULTI</b>, <b>INTERNAL_ONLY</b>, <b>INPUT_ONLY</b>, <b>EVOLVING</b>, <b>ENERGY</b>, <b>LENGTH</b>,
     <b>MAGNETIC FIELD</b>.
     We now explain each of these classes.
-  <a name="develop"></a>
+  <a name="DEVELOP"></a>
   <p> '<b>DEVELOP</b>' refers to input variables that are not used in production runs,
     but only during development time.
     For non developers, it is strongly advised to skip them. </p>
-  <a name="respfn"></a>
-  <a name="nonlinear"></a>
+  <a name="RESPFN"></a>
+  <a name="NONLINEAR"></a>
   <p>Some input variables are related to response function features, or non-linear features, and are indicated
     '<b>RESPFN</b>' and '<b>NONLINEAR</b>'. Detailed explanations related to response function  and non linear features
-    are to be found in the complementary <a href="../../users/generated_files/help_respfn.html">respfn help file</a>.
+    are to be found in the complementary <a href="../../users/generated_files/help_respfn.html#">respfn help file</a>.
     The initials RF are used for 'response
     function', and non-response-function are often referred to as GS (for ground-state),
     although this latter designation is not really satisfactory. </p>
-  <a name="gw"></a>
-  <a name="bethe_salpeter"></a>
-  <a name="tddft"></a>
+  <a name="GW"></a>
+  <a name="BETHE_SALPETER"></a>
+  <a name="TDDFT"></a>
   <p>Some input variables are related to excited state calculations, and are indicated
     '<b>GW</b>', '<b>BETHE_SALPETER</b>', or '<b>TDDFT</b>'. 
     No complementary help file is yet provided for such calculations. Please refer to the tutorial 
-    (<a href="../../tutorial/generated_files/lesson_gw1.html">lesson_gw1</a>, <a href="../../tutorial/generated_files/lesson_gw2.html">lesson_gw2</a>, <a href="../../tutorial/generated_files/lesson_tddft.html">lesson_tddft</a>, and <a href="../../tutorial/generated_files/lesson_bse.html">lesson_bse</a>).
-  <a name="geometry_builder"></a>
+    (<a href="../../tutorial/generated_files/lesson_gw1.html#">lesson_gw1</a>, <a href="../../tutorial/generated_files/lesson_gw2.html#">lesson_gw2</a>, <a href="../../tutorial/generated_files/lesson_tddft.html#">lesson_tddft</a>, and <a href="../../tutorial/generated_files/lesson_bse.html#">lesson_bse</a>).
+  <a name="GEOMETRY_BUILDER"></a>
   <p>There are also parameters related to the geometry builder, a preprocessor
     of the input file, aimed at easing the work of the user when there are molecules
     to be manipulated (rotation and translation), or group of atoms to be repeated.
@@ -333,7 +337,7 @@
     The related input variables being used for preprocessing of the input file, they are not echoed
     in the output file.
   </p>
-  <a name="symmetriser"></a>
+  <a name="SYMMETRISER"></a>
   <p>Alternatively to the geometry builder, there is also a symmetriser. It allows
     to generate the full set of atoms in the primitive cell from the knowledge
     of the symmetry operations and the atoms in the asymmetric cell. It also allows
@@ -346,7 +350,7 @@
     the crystallographic equivalence of the parameters belonging to the symmetriser.
     The related input variables being used for preprocessing of the input file, they are not echoed
     in the output file.</p>
-  <a name="symmetry_finder"></a>
+  <a name="SYMMETRY_FINDER"></a>
   <p>Still as an alternative to the geometry builder and the symmetriser, if all
     the coordinates of the atoms are given, the code is able to deduce all symmetry
     operations leaving the lattice and atomic sublattices invariant, see '<b>SYMMETRY_FINDER</b>'. 
@@ -355,29 +359,29 @@
     provided coordinates are rather inaccurate, ABINIT will not recognize the symmetry,
     unless the input variable <a href="../../input_variables/generated_files/vargeo.html#tolsym">tolsym</a>
     is changed.</p>
-  <a name="no_multi"></a>
+  <a name="NO_MULTI"></a>
   <p>Most of the variables can be used in the multi-dataset mode (see
     <a href=#multidataset>section 3.3</a>),
     but those that must have a unique value throughout all the
     datasets are signaled with the indication '<b>NO_MULTI</b>' </p>
-  <a name="input_only"></a>
+  <a name="INPUT_ONLY"></a>
   <p>Some of the input variables, with characteristics '<b>INPUT_ONLY</b>' are only used by the parser, 
     to initialize other input variables, but are not
     transmitted inside the code, beyond the parser. In particular, they are not echoed in the output file.
-  <a name="internal_only"></a>
+  <a name="INTERNAL_ONLY"></a>
   <p>At variance, some internal variables, with characteristics '<b>INTERNAL_ONLY</b>' 
     are documented in the help files, but are not accessible as input variables. The documentation is provided
     because such variables are sometimes mentioned in the output file.
-  <a name="evolving"></a>
+  <a name="EVOLVING"></a>
   <p>Most of the input variables do not change while a run is performed. Some
     of them, by contrast, may evolve, like the atomic positions, the atomic velocities,
     the cell shape, and the occupation numbers. Their echo, after the run has
     proceeded, will of course differ from their input value. They are signaled
     by the indication '<b>EVOLVING</b>'. </p>
   <a name="dimensions"></a>
-  <a name="energy"></a>
-  <a name="length"></a>
-  <a name="magnetic_field"></a>
+  <a name="ENERGY"></a>
+  <a name="LENGTH"></a>
+  <a name="MAGNETIC_FIELD"></a>
   <p>The use of the atomic unit system (e.g. the Hartree for energy, about 27.211
     eV, and the Bohr for lengths about 0.529 Angstroms) is strictly
     enforced within the code. However, the dimension of some input variables
@@ -770,12 +774,12 @@ keyword.
       <p><b>abo_1WFxx</b> <br>
         Same as <b>abo_WFK</b>, but for first-order wavefunctions, xx is the index
         of the perturbation, see the section <a href="help_respfn.html#6.3">6.3</a>
-        of the <a href="../../users/generated_files/help_respfn.html">respfn help file</a>. </p>
+        of the <a href="../../users/generated_files/help_respfn.html#">respfn help file</a>. </p>
     <li>
       <p><b>abo_DDB</b> <br>
         The derivative database, produced by a response-function dataset,
         see the section <a href="help_respfn.html#6.5">6.5</a> of the
-        <a href="../../users/generated_files/help_respfn.html">respfn help file</a>
+        <a href="../../users/generated_files/help_respfn.html#">respfn help file</a>
     <li>
       <p><b>abo_DEN</b> <br>
         filename of file containing density, in the case <a href="../../input_variables/generated_files/varrlx.html#ionmov">ionmov</a>=0.
@@ -979,7 +983,7 @@ keyword.
   </ul>
   Until here, the output of a ground-state computation is identical
   to the one of a response-function calculation.
-  See the <a href="../../users/generated_files/help_respfn.html">respfn help file</a> for the latter,
+  See the <a href="../../users/generated_files/help_respfn.html#">respfn help file</a> for the latter,
   especially section <a href="help_respfn.html#6.2">6.2</a>.
   <p>
   Next the code reports information for each SCF iteration:

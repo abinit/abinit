@@ -1,7 +1,7 @@
 - !components 
     name      : parallelism 
-    keyword   : parallelism 
-    authors   : FJ
+    keyword   : Parallelism 
+    authors   : MT,FJ
     howto     : set parameters for a parallel calculation
     header    : default
     title     : <h1>Parallelism</h1>

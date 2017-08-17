@@ -1,6 +1,6 @@
 - !components 
     name      : vdw 
-    keyword   : vdw 
+    keyword   : Van der Waals functionals 
     authors   : YPouillon, BVanTroeye
     howto     : use Van der Waals functionals
     header    : default

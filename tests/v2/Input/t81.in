@@ -72,4 +72,5 @@ tolwfr3   1.0d-9
 #%% 81. Nitrogen atom in a big box, spin-polarized.
 #%% Compute Berry phase for atom at different positions.
 #%% WARNING : HAS BEEN TRANSFERRED TO tests/seq
+#%% topics = Berry
 #%%<END TEST_INFO>

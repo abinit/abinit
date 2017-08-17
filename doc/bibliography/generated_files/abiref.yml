@@ -1,5 +1,17 @@
 -
   ENTRYTYPE : article
+  ID : Abrikosov1975
+  author : A.A. Abrikosov and L.P. Gorkov and E. Dzyaloshinskii
+  title :  Methods of quantum field theory in statistical physics
+  journal : Dover, New-York
+  year : 1975
+  volume : 
+  pages : 
+  numpages : 
+  doi : 
+  publisher : Dover, New-York
+-
+  ENTRYTYPE : article
   ID : Albrecht1998
   author : Albrecht, S. and Reining, L. and Del Sole, R. and Onida, G.
   title : Ab Initio Calculation of Excitonic Effects in the Optical Spectra of Semiconductors
@@ -224,6 +236,15 @@
   refid : 10.1103/PhysRevB.70.195104
 -
   ENTRYTYPE : article
+  ID : Aryasetiawan2006
+  author : F. Aryasetiawan, K. Karlsson, O. Jepsen, and U. Sch\"onberger
+  title : Calculations of Hubbard U from first-principles
+  journal : Phys. Rev. B
+  year : 2006
+  volume : 74
+  pages : 125106
+-
+  ENTRYTYPE : article
   ID : Audouze2006
   author : Audouze,C. and Jollet,F. and Torrent,M. and Gonze,X.
   title : Projector augmented-wave approach to density-functional perturbation theory
@@ -301,7 +322,7 @@
   ENTRYTYPE : article
   ID : Benedict1998
   author : Benedict, L. X. and Shirley, E. L. and Bohn, R. B.
-  title : Optical Absorption of Insulators and the Electron-Hole Interaction: An     \textit{Ab Initio}   Calculation
+  title : Optical Absorption of Insulators and the Electron-Hole Interaction: An \textit{Ab Initio} Calculation
   journal : Phys. Rev. Lett.
   year : 1998
   volume : 80
@@ -333,6 +354,15 @@
   archiveprefix : arXiv:cond-mat.str-el
 -
   ENTRYTYPE : article
+  ID : Bergeron2016
+  author : D. Bergeron and A.-M.S. Tremblay
+  title : Algorithms for optimized maximum entropy and diagnostic tools for analytic continuation
+  journal : Phys. Rev. E
+  year : 2016
+  volume : 94
+  pages : 023303
+-
+  ENTRYTYPE : article
   ID : Bieder2014
   author : Bieder, J. and Amadon, B.
   title : Thermodynamics of the $\alpha$-$\gamma$ transition in cerium from first principles
@@ -344,6 +374,15 @@
   doi : 10.1103/PhysRevB.89.195132
   publisher : American Physical Society
   issue : 19
+-
+  ENTRYTYPE : article
+  ID : Blancoa1997
+  author : Miguel A. Blancoa and M. Floreza and M. Bermejo
+  title : Evaluation of the rotation matrices in the basis of real spherical harmonics"
+  journal : Journal of Molecular Structure (Theochem)
+  year : 1997
+  volume : 419
+  pages : 19
 -
   ENTRYTYPE : article
   ID : Bloechl1994
@@ -534,6 +573,13 @@
   keywords : DFTU interaction, cRPA
   refid : 10.1103/PhysRevB.71.035105
 -
+  ENTRYTYPE : book
+  ID : Coleman2015
+  author : Piers Coleman
+  title : Introduction to Many-Body Physics
+  year : 2015
+  publisher : Cambridge University Press
+-
   ENTRYTYPE : article
   ID : Czyzyk1994
   author : M. T. Czyzyk and G. A. Sawatzky
@@ -574,6 +620,16 @@
   pages : 480
 -
   ENTRYTYPE : article
+  ID : Fetter1971
+  author : A.L. Fetter and J.D. Walecka
+  title : Quantum Theory of Many-Particle Systems
+  journal : McGraw-Hill, New York
+  year : 1971
+  volume : 
+  pages : 
+  publisher : McGraw-Hill, New York
+-
+  ENTRYTYPE : article
   ID : Folegati2007
   author : Folegati, P. and Makkonen, I. and Ferragut, R. and Puska, M.J.
   title : Analysis of electron-positron momentum spectra of metallic alloys as supported by first-principles calculations
@@ -583,6 +639,15 @@
   pages : 054201
   publisher : APS
   number : 5
+-
+  ENTRYTYPE : article
+  ID : Fresard1997
+  author : Raymond Fr\'esard and Gabriel Kotliar
+  title : Interplay of Mott transition and ferromagnetism in the orbitally degenerate Hubbard model
+  journal : Phys. Rev. B
+  year : 1997
+  volume : 56
+  pages : 12909
 -
   ENTRYTYPE : article
   ID : Freund1995
@@ -640,6 +705,11 @@
   year : 2015
   volume : 17
   pages : 19104
+-
+  ENTRYTYPE : unpublished
+  ID : Geneste2016
+  author : G. Geneste and B. Amadon and M. Torrent and G. Dezanneau
+  year : 2016
 -
   ENTRYTYPE : article
   ID : Genovese2008
@@ -738,6 +808,19 @@
   owner : yannick
 -
   ENTRYTYPE : article
+  ID : Godby1989
+  author : R. W. Godby and R. J. Needs
+  title : Metal-insulator transition in Kohn-Sham theory and quasiparticle theory
+  journal : Phys. Rev. Lett.
+  year : 1989
+  volume : 62
+  pages : 1169
+  numpages : 0
+  doi : 10.1103/PhysRevLett.62.1169
+  publisher : American Physical Society
+  issue : 
+-
+  ENTRYTYPE : article
   ID : Goedecker1996
   author : Goedecker, S. and Teter, M. and H\"utter, J.
   title : Separable dual-space Gaussian pseudopotentials
@@ -809,7 +892,7 @@
 -
   ENTRYTYPE : article
   ID : Gonze2009
-  author : X. Gonze and B. Amadon and P.-M. Anglade and  J.-M. Beuken and F. Bottin and P. Boulanger and F. Bruneval and D. Caliste and R. Caracas and M. C\^{o}t\'{e} and T. Deutsch and L. Genovese and Ph. Ghosez and M. Giantomassi and S. Goedecker and D.R. Hamann and P. Hermet and F. Jollet and G. Jomard and S. Leroux and M. Mancini and S. Mazevet and M.J.T. Oliveira and G. Onida and Y. Pouillon and T. Rangel and G.-M. Rignanese and D. Sangalli and R. Shaltaf and M. Torrent and M.J. Verstraete and G. Zerah and J.W. Zwanziger 
+  author : X. Gonze and B. Amadon and P.-M. Anglade and  J.-M. Beuken and F. Bottin and P. Boulanger and F. Bruneval and D. Caliste and R. Caracas and M. C\^{o}t\'{e} and T. Deutsch and L. Genovese and Ph. Ghosez and M. Giantomassi and S. Goedecker and D.R. Hamann and P. Hermet and F. Jollet and G. Jomard and S. Leroux and M. Mancini and S. Mazevet and M.J.T. Oliveira and G. Onida and Y. Pouillon and T. Rangel and G.-M. Rignanese and D. Sangalli and R. Shaltaf and M. Torrent and M.J. Verstraete and G. Zerah and J.W. Zwanziger
   title : {ABINIT}: First-Principle approach to material and nanosystem properties
   journal : Comp. Phys. Comm.
   year : 2009
@@ -1073,6 +1156,17 @@
   issue : 16
 -
   ENTRYTYPE : article
+  ID : Hybertsen1986
+  author : M. S. Hybertsen and S. G. Louie
+  title : Electron correlation in semiconductors and insulators: Band gaps and quasiparticle energies
+  journal : Phys. Rev. B
+  year : 1986
+  volume : 34
+  pages : 5390
+  doi : 10.1103/PhysRevB.34.5390
+  number : 
+-
+  ENTRYTYPE : article
   ID : Janssen2015
   author : Laflamme Janssen, J. and Rousseau, B. and C{\^o}t{\'e}, M.
   title : Efficient dielectric matrix calculations using the {L}anczos algorithm for fast many-body {G}$_0${W}$_0$ implementations
@@ -1176,6 +1270,15 @@
   year : 2010
   volume : 105
   pages : 196401
+-
+  ENTRYTYPE : article
+  ID : Lechermann2006
+  author : F. Lechermann, A. Georges, A. Poteryaev, S. Biermann, M. Posternak, A. Yamasaki, and O. K. Andersen
+  title : Dynamical mean-field theory using Wannier functions: A flexible route to electronic structure calculations of strongly correlated materials
+  journal : Phys. Rev. B
+  year : 2006
+  volume : 74
+  pages : 125120
 -
   ENTRYTYPE : article
   ID : Lee1995
@@ -1433,6 +1536,36 @@
   pages : 586-594
 -
   ENTRYTYPE : article
+  ID : Petrilli1998
+  author : Petrilli, Helena M. and Bl\"ochl, Peter E. and Blaha, Peter and Schwarz, Karlheinz
+  title : Electric-field-gradient calculations using the projector augmented wave method
+  journal : Phys. Rev. B
+  year : 1998
+  volume : 57
+  pages : 14690--14697
+  numpages : 0
+  doi : 10.1103/PhysRevB.57.14690
+  url : https://link.aps.org/doi/10.1103/PhysRevB.57.14690
+  publisher : American Physical Society
+  month : Jun
+  issue : 23
+-
+  ENTRYTYPE : article
+  ID : Pickard2001
+  author : Pickard, Chris J. and Mauri, Francesco
+  title : All-electron magnetic response with pseudopotentials: NMR chemical shifts
+  journal : Phys. Rev. B
+  year : 2001
+  volume : 63
+  pages : 245101
+  numpages : 13
+  doi : 10.1103/PhysRevB.63.245101
+  url : https://link.aps.org/doi/10.1103/PhysRevB.63.245101
+  publisher : American Physical Society
+  month : May
+  issue : 24
+-
+  ENTRYTYPE : article
   ID : Pickett1988
   author : Warren E. Pickett, Henry Krakauer, and Philip B. Allen
   title : Smooth Fourier interpolation of periodic functions
@@ -1494,6 +1627,18 @@
   year : 2011
   volume : 13
   pages : 62
+-
+  ENTRYTYPE : article
+  ID : Profeta2003
+  author : M. Profeta and F. Mauri and C. J. Pickard
+  title : Accurate First Principles Prediction of 17 O NMR Parameters in SiO2:? Assignment of the Zeolite Ferrierite Spectrum
+  journal : J. Am. Chem. Soc.
+  year : 2003
+  volume : 125
+  pages : 541
+  publisher : 
+  doi : 10.1021/ja027124r
+  issue : 
 -
   ENTRYTYPE : article
   ID : Puska1994
@@ -1609,7 +1754,7 @@
   pages : 096102
   doi : 10.1103/PhysRevLett.103.096102
 -
-  ENTRYTYPE : masterthesis
+  ENTRYTYPE : mastersthesis
   ID : Rostgaard2006
   author : C. Rostgaard
   title : Exact exchange in density functional calculations
@@ -1646,14 +1791,8 @@
   year : 2013
   volume : 87
   pages : 165118
-  publisher : American Physical Society
   doi : 10.1103/PhysRevB.87.165118
-  timestamp : 2013.06.04
   number : 16
-  owner : amadonb
-  file : :/media/disk_iomega/BIBLIO/Interaction/PhysRevB.87.165118.pdf:PDF
-  keywords : cRPA
-  refid : 10.1103/PhysRevB.87.165118
 -
   ENTRYTYPE : article
   ID : Savin1992
@@ -1684,8 +1823,6 @@
   volume : 67
   pages : 165332
   doi : 10.1103/PhysRevB.67.165332
-  url : http://link.aps.org/doi/10.1103/PhysRevB.67.165332
-  issue : 16
 -
   ENTRYTYPE : article
   ID : Sharma2004
@@ -1705,14 +1842,7 @@
   year : 2012
   volume : 85
   pages : 045132
-  publisher : American Physical Society
-  url : http://link.aps.org/doi/10.1103/PhysRevB.85.045132
-  timestamp : 2012.06.19
-  number : 4
-  owner : amadonb
-  file : :/media/disk_iomega/BIBLIO/Interaction/PhysRevB.85.045132.pdf:PDF
-  keywords : cRPA pseudopotentials
-  refid : 10.1103/PhysRevB.85.045132
+  doi : 10.1103/PhysRevB.85.045132
 -
   ENTRYTYPE : article
   ID : Silvestrelli2008
@@ -1815,6 +1945,15 @@
   publisher : American Physical Society
   issue : 22
 -
+  ENTRYTYPE : misc
+  ID : Tremblay2017
+  author : Andr\'e-Marie Tremblay
+  title : Probl\`eme \`a N-corps
+  year : 2017
+  url : https://www.physique.usherbrooke.ca/pages/en/node/3436
+  note : Notes de cours
+  howpublished : available <a href="https://www.physique.usherbrooke.ca/pages/en/node/3436">here</a>
+-
   ENTRYTYPE : article
   ID : Troullier1991
   author : Troullier,N. and Martins,J.L.
@@ -1872,6 +2011,15 @@
   year : 2016
   volume : 93
   pages : 144304
+-
+  ENTRYTYPE : article
+  ID : Vaugier2012
+  author : L. Vaugier and H. Jiang and S. Biermann
+  title : Hubbard {U} and Hund exchange {J} in transition metal oxides: Screening versus localization trends from constrained random phase approximation
+  journal : Phys. Rev. B
+  year : 2012
+  volume : 86
+  pages : 165105
 -
   ENTRYTYPE : article
   ID : Veithen2005
@@ -1942,7 +2090,7 @@
   volume : 97
   pages : 076405
   publisher : American Physical Society
-  url : http://link.aps.org/doi/10.1103/PhysRevLett.97.076405
+  doi : 10.1103/PhysRevLett.97.076405
   timestamp : 2013.05.22
   number : 7
   owner : amadonb
@@ -2052,6 +2200,44 @@
   title : Electrons and phonons
   year : 1960
   publisher : Oxford University Press
+-
+  ENTRYTYPE : article
+  ID : Zwanziger2008
+  author : Zwanziger, J. W.and Torrent, M.
+  title : First-Principles Calculation of Electric Field Gradients in Metals, Semiconductors, and Insulators
+  journal : Applied Magnetic Resonance
+  year : 2008
+  volume : 33
+  pages : 447--456
+  issn : 1613-7507
+  url : 10.1007/s00723-008-0080-1
+  number : 4
+  doi : 10.1007/s00723-008-0080-1
+-
+  ENTRYTYPE : article
+  ID : Zwanziger2009
+  author : J W Zwanziger
+  title : Computation of M\"ossbauer isomer shifts from first principles
+  journal : Journal of Physics: Condensed Matter
+  year : 2009
+  volume : 21
+  pages : 195501
+  doi : 10.1088/0953-8984/21/19/195501
+-
+  ENTRYTYPE : article
+  ID : Zwanziger2009a
+  author : Zwanziger, J. W.
+  title : First-principles study of the nuclear quadrupole resonance parameters and orbital ordering in {LaTiO}$_3$
+  journal : Phys. Rev. B
+  year : 2009
+  volume : 79
+  pages : 033112
+  numpages : 4
+  doi : 10.1103/PhysRevB.79.033112
+  url : https://link.aps.org/doi/10.1103/PhysRevB.79.033112
+  publisher : American Physical Society
+  month : Jan
+  issue : 3
 -
   ENTRYTYPE : article
   ID : Zwanziger2012

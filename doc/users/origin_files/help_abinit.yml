@@ -3,9 +3,9 @@
 # This is the introduction ...
 intro : |
   <p>The new user is advised to read first the
-    [[help_new_user]],
+    [[help:new_user|new user helpfile]],
     before reading the present file. It will be easier to discover the
-    present file with the help of the [[lesson_welcome]] file.
+    present file with the help of the [[lesson:welcome|tutorial]].
   <p>It is worthwhile to print this help file, for ease of reading.
   
   <p>When the user will be sufficiently familiarized with ABINIT, reading the
@@ -193,7 +193,7 @@ body : |
         only the first 132 characters of each line of the input file will be read
         and parsed for input variables and their values. </li>
     </ul>
-    <p>The names of all the parameters can be found in the [[allvariables]].
+    <p>The names of all the parameters can be found in the [[varset:allvars|input variable database]].
       The list of input variables present in the latter file links them to their definitions,
       contained in different files, of which some are listed here:
   <ul>
@@ -284,26 +284,26 @@ body : |
       <b>SYMMETRY_FINDER</b>, <b>NO MULTI</b>, <b>INTERNAL_ONLY</b>, <b>INPUT_ONLY</b>, <b>EVOLVING</b>, <b>ENERGY</b>, <b>LENGTH</b>,
       <b>MAGNETIC FIELD</b>.
       We now explain each of these classes.
-    <a name="develop"></a>
+    <a name="DEVELOP"></a>
     <p> '<b>DEVELOP</b>' refers to input variables that are not used in production runs,
       but only during development time.
       For non developers, it is strongly advised to skip them. </p>
-    <a name="respfn"></a>
-    <a name="nonlinear"></a>
+    <a name="RESPFN"></a>
+    <a name="NONLINEAR"></a>
     <p>Some input variables are related to response function features, or non-linear features, and are indicated
       '<b>RESPFN</b>' and '<b>NONLINEAR</b>'. Detailed explanations related to response function  and non linear features
       are to be found in the complementary [[help_respfn]].
       The initials RF are used for 'response
       function', and non-response-function are often referred to as GS (for ground-state),
       although this latter designation is not really satisfactory. </p>
-    <a name="gw"></a>
-    <a name="bethe_salpeter"></a>
-    <a name="tddft"></a>
+    <a name="GW"></a>
+    <a name="BETHE_SALPETER"></a>
+    <a name="TDDFT"></a>
     <p>Some input variables are related to excited state calculations, and are indicated
       '<b>GW</b>', '<b>BETHE_SALPETER</b>', or '<b>TDDFT</b>'. 
       No complementary help file is yet provided for such calculations. Please refer to the tutorial 
       ([[lesson_gw1]], [[lesson_gw2]], [[lesson_tddft]], and [[lesson_bse]]).
-    <a name="geometry_builder"></a>
+    <a name="GEOMETRY_BUILDER"></a>
     <p>There are also parameters related to the geometry builder, a preprocessor
       of the input file, aimed at easing the work of the user when there are molecules
       to be manipulated (rotation and translation), or group of atoms to be repeated.
@@ -316,7 +316,7 @@ body : |
       The related input variables being used for preprocessing of the input file, they are not echoed
       in the output file.
     </p>
-    <a name="symmetriser"></a>
+    <a name="SYMMETRISER"></a>
     <p>Alternatively to the geometry builder, there is also a symmetriser. It allows
       to generate the full set of atoms in the primitive cell from the knowledge
       of the symmetry operations and the atoms in the asymmetric cell. It also allows
@@ -329,7 +329,7 @@ body : |
       the crystallographic equivalence of the parameters belonging to the symmetriser.
       The related input variables being used for preprocessing of the input file, they are not echoed
       in the output file.</p>
-    <a name="symmetry_finder"></a>
+    <a name="SYMMETRY_FINDER"></a>
     <p>Still as an alternative to the geometry builder and the symmetriser, if all
       the coordinates of the atoms are given, the code is able to deduce all symmetry
       operations leaving the lattice and atomic sublattices invariant, see '<b>SYMMETRY_FINDER</b>'. 
@@ -338,29 +338,29 @@ body : |
       provided coordinates are rather inaccurate, ABINIT will not recognize the symmetry,
       unless the input variable [[tolsym]]
       is changed.</p>
-    <a name="no_multi"></a>
+    <a name="NO_MULTI"></a>
     <p>Most of the variables can be used in the multi-dataset mode (see
       <a href=#multidataset>section 3.3</a>),
       but those that must have a unique value throughout all the
       datasets are signaled with the indication '<b>NO_MULTI</b>' </p>
-    <a name="input_only"></a>
+    <a name="INPUT_ONLY"></a>
     <p>Some of the input variables, with characteristics '<b>INPUT_ONLY</b>' are only used by the parser, 
       to initialize other input variables, but are not
       transmitted inside the code, beyond the parser. In particular, they are not echoed in the output file.
-    <a name="internal_only"></a>
+    <a name="INTERNAL_ONLY"></a>
     <p>At variance, some internal variables, with characteristics '<b>INTERNAL_ONLY</b>' 
       are documented in the help files, but are not accessible as input variables. The documentation is provided
       because such variables are sometimes mentioned in the output file.
-    <a name="evolving"></a>
+    <a name="EVOLVING"></a>
     <p>Most of the input variables do not change while a run is performed. Some
       of them, by contrast, may evolve, like the atomic positions, the atomic velocities,
       the cell shape, and the occupation numbers. Their echo, after the run has
       proceeded, will of course differ from their input value. They are signaled
       by the indication '<b>EVOLVING</b>'. </p>
     <a name="dimensions"></a>
-    <a name="energy"></a>
-    <a name="length"></a>
-    <a name="magnetic_field"></a>
+    <a name="ENERGY"></a>
+    <a name="LENGTH"></a>
+    <a name="MAGNETIC_FIELD"></a>
     <p>The use of the atomic unit system (e.g. the Hartree for energy, about 27.211
       eV, and the Bohr for lengths about 0.529 Angstroms) is strictly
       enforced within the code. However, the dimension of some input variables

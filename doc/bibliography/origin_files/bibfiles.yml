@@ -82,7 +82,7 @@
       <br>
       There are also many articles that are more focused: they describe some specific capability of ABINIT.
       The following list is actually not complete ... More references will be proposed by ABINIT itself (see the end of the output file),
-      in the files explaining <a href="../../input_variables/generated_files/allvariables.html">the input variables</a>,
+      see the [[varset:allvars|database]] of information on the input variables,
       in the <a href="../../topics/generated_files/all_topics.html">"topics" files</a>,
       as well as in the references of the four general papers ...
 

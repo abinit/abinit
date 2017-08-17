@@ -68,4 +68,5 @@ znucl  13
 #%% keywords = NC, DFPT, EPH
 #%% description = 
 #%%    Calculation of e-ph coupling matrix elements
+#%% topics = ElPhon
 #%%<END TEST_INFO>

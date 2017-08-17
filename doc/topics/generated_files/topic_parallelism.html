@@ -1,5 +1,9 @@
+<!--                                                                                     -->
+<!-- This file has been produced by generate_doc.py using different .yml  or .bib files. -->
+<!-- It is useless to modify it. Modify the related .yml  or .bib files instead.         -->
+<!--                                                                                     -->
 <html>
-<head><title>parallelism </title>
+<head><title>Parallelism </title>
 <link rel=stylesheet type="text/css" href="../formabinit.css">
 </head>
 <body bgcolor="#ffffff">
@@ -11,7 +15,7 @@
 <h3>This file gives hints on how to set parameters for a parallel calculation with the ABINIT package.
 <hr>
 
-<h5>Copyright (C) 2016-2017 ABINIT group (FJ)
+<h5>Copyright (C) 2016-2017 ABINIT group (MT,FJ)
 <script type="text/javascript" src="../../js_files/copyright.js"> </script>
 </h5>
 
@@ -35,7 +39,7 @@ For the k-point and spin parallelisations (using MPI), the communication
 load is generally very small. This allows it to be used on a cluster of workstations.
 However, the number of nodes that can be used in parallel might
 be small, and depends strongly on the physics of the problem.
-A combined FFT / band parallelisation (LOBPCG)is available [<a href="../../bibliography/generated_files/bibliography.html#Bottin2008">Bottin2008</a>], and has shown
+A combined FFT / band parallelisation (LOBPCG)is available <a href="../../bibliography/generated_files/bibliography.html#Bottin2008">[Bottin2008]</a>, and has shown
 very large speed up (>1000) on powerful computers with a large number of processors
 and high-speed interconnect. The combination of FFT / band / k point and spin
 parallelism is also available, and quite efficient for such computers.
@@ -46,7 +50,7 @@ Use of MPIIO is mandatory for the largest speed ups to be observed.
 <li>
 Chebyshev filtering (Chebfi) is a method to solve the linear
 eigenvalue problem, and can be used as a SCF solver in Abinit. It is
-implemented in Abinit [<a href="../../bibliography/generated_files/bibliography.html#Levitt2015">Levitt2015</a>]. The design goal is for Chebfi to replace LOBPCG as the solver of
+implemented in Abinit <a href="../../bibliography/generated_files/bibliography.html#Levitt2015">[Levitt2015]</a>. The design goal is for Chebfi to replace LOBPCG as the solver of
 choice for large-scale computations in Abinit. By performing less
 orthogonalizations and diagonalizations than LOBPCG, scaling to higher
 processor counts is possible. A manual to use Chebfi is available <a href="../documents/howto_chebfi.pdf">here</a>. 
@@ -154,6 +158,7 @@ including many-body effects).</li>
 ... <a href="../../input_variables/generated_files/varpar.html#pw_unbal_thresh">pw_unbal_thresh</a>   [Plane Wave UNBALancing: THRESHold for balancing procedure]<br>
 ... <a href="../../input_variables/generated_files/vardev.html#use_gemm_nonlop">use_gemm_nonlop</a>   [USE the GEMM routine for the application of the NON-Local OPerator]<br>
 ... <a href="../../input_variables/generated_files/varpar.html#use_gpu_cuda">use_gpu_cuda</a>   [activate USE of GPU accelerators with CUDA (nvidia)]<br>
+... <a href="../../input_variables/generated_files/varpar.html#use_slk">use_slk</a>   [USE ScaLapacK]<br>
 
 
 &nbsp; 
@@ -182,8 +187,8 @@ The user can find some related example input files in the ABINIT package in the 
 <h3><b>5. References.</b></h3>
 
 
-<br> [<a href="../../bibliography/generated_files/bibliography.html#Bottin2008">Bottin2008</a>]  F. Bottin, S. Leroux, A. Knyazev and G. Z&eacute;rah, "Large-scale ab initio calculations based on three levels of parallelization", Comp. Mat. Sci. 42, 329&ndash;336 (2008).<br> 
-<br> [<a href="../../bibliography/generated_files/bibliography.html#Levitt2015">Levitt2015</a>]  A. Levitt and M. Torrent, "Parallel eigensolvers in plane-wave Density Functional Theory", Comp. Phys. Comm. 187, 98&ndash;105 (2015).<br> 
+<br> <a href="../../bibliography/generated_files/bibliography.html#Bottin2008">[Bottin2008]</a>  F. Bottin, S. Leroux, A. Knyazev and G. Z&eacute;rah, "Large-scale ab initio calculations based on three levels of parallelization", Comp. Mat. Sci. 42, 329&ndash;336 (2008).<br>
+<br> <a href="../../bibliography/generated_files/bibliography.html#Levitt2015">[Levitt2015]</a>  A. Levitt and M. Torrent, "Parallel eigensolvers in plane-wave Density Functional Theory", Comp. Phys. Comm. 187, 98&ndash;105 (2015).<br>
 <p>
 <script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
 

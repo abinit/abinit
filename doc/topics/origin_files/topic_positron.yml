@@ -1,7 +1,7 @@
 - !components 
     name      : positron 
-    keyword   : positron 
-    authors   : FJ
+    keyword   : Positron 
+    authors   : MT
     howto     : set parameters for a calculation with a positron in the system.
     header    : default
     title     : <h1>Positron calculations</h1>

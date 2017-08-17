@@ -1,3 +1,7 @@
+<!--                                                                                     -->
+<!-- This file has been produced by generate_doc.py using different .yml  or .bib files. -->
+<!-- It is useless to modify it. Modify the related .yml  or .bib files instead.         -->
+<!--                                                                                     -->
 <html>
 <head><title>Lesson on static non-linear properties</title>
 <link rel=stylesheet type="text/css" href="../formabinit.css">
@@ -47,7 +51,7 @@ and the
 <script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
 
 <a name="list"></a>
-<h3><b> Lesson on static non-linear properties table of content:</b></h3>
+<h3><b> Lesson on static non-linear properties, table of content:</b></h3>
 
 <ul>
   <li><a href="#0">Part-0. Ground-state properties of AlAs and general parameters</a>
@@ -262,9 +266,9 @@ for the analysis of dynamical and dielectric responses except that some new flag
 
 <p>
 For the strain perturbation you need to specify
-<a href="../../users/generated_files/help_anaddb.html#elaflag" target="kwimg">elaflag</a>,
-<a href="../../users/generated_files/help_anaddb.html#piezoflag" target="kwimg">piezoflag</a>, and
-<a href="../../users/generated_files/help_anaddb.html#instrflag" target="kwimg">instrflag</a> :
+<a href="../../input_variables/generated_files/varanaddb.html#elaflag@anaddb">elaflag</a>,
+<a href="../../input_variables/generated_files/varanaddb.html#piezoflag@anaddb">piezoflag</a>, and
+<a href="../../input_variables/generated_files/varanaddb.html#instrflag@anaddb">instrflag</a> :
 <pre>
         elaflag 3
         piezoflag  3
@@ -280,35 +284,34 @@ For the non-linear responses you need
         prtmbm  1
 </pre>
 <p>
-<a href="../../users/generated_files/help_anaddb.html#nlflag" target="kwimg">nlflag</a>=1 activates the non-linear response.
+<a href="../../input_variables/generated_files/varanaddb.html#nlflag@anaddb">nlflag</a>=1 activates the non-linear response.
 
 <p>
-<a href="../../users/generated_files/help_anaddb.html#ramansr" target="kwimg">ramansr</a>=1 will impose the sum rule on the first-order change
+<a href="../../input_variables/generated_files/varanaddb.html#ramansr@anaddb">ramansr</a>=1 will impose the sum rule on the first-order change
 of the electronic dielectric susceptibility under atomic displacement,
 hereafter referred to as dchi/dtau .
 It is a condition of invariance of chi under translation of the whole crystal,
 similar to the acoustic sum rules for phonons at Gamma or the charge neutrality sum rule on Z*.
 
 <p>
-<a href="../../users/generated_files/help_anaddb.html#prtmbm" target="kwimg">prtmbm</a>=1 will allow
+<a href="../../input_variables/generated_files/varanaddb.html#prtmbm@anaddb">prtmbm</a>=1 will allow
 to get the mode by mode phonon contributions of the ions to the electro-optic coefficients.
 
 <p>
-<a href="../../users/generated_files/help_anaddb.html#alphon" target="kwimg">alphon</a>=1 will allow
+<a href="../../input_variables/generated_files/varanaddb.html#alphon@anaddb">alphon</a>=1 will allow
 to get the previous mode by mode contribution when aligning
 the eigenvectors with the cartesian axis of coordinates
 (in the input, the principal axis should always be aligned with z for a convenient analysis of the results).
 
 <p>
 Finally, the second list of phonon, specified with
-<a href="../../users/generated_files/help_anaddb.html#nph2l" target="kwimg">nph2l</a> and
-<a href="../../users/generated_files/help_anaddb.html#qph2l" target="kwimg">qph2l</a>, must also be explicitely considered
+<a href="../../input_variables/generated_files/varanaddb.html#nph2l@anaddb">nph2l</a> and <a href="../../input_variables/generated_files/varanaddb.html#qph2l@anaddb">qph2l</a>, must also be explicitely considered
 to obtain the Raman efficiencies of longitudinal modes
 (in a way similar to the computation of frequencies of longitudinal mode frequencies at Gamma):
 
 <pre>
         # Wave vector list no. 2
-        #<b>*******************</b>
+        #***********************
                nph2l  1
                qph2l  1.0 0.0 0.0 0.0
 </pre>
