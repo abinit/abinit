@@ -128,5 +128,5 @@ ndtset 8 jdtset 1 2 3 4 5 6 12 13
 #%%   DFPT is computed
 #%%   Comparaison with Finite Diferrences give excellent agreement ~1e-5%
 #%%   DFPT is computed with usexcnhat==0 (Just for test)
-#%% topics = DFPT
+#%% topics = Elastic
 #%%<END TEST_INFO>

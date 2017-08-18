@@ -1,0 +1,98 @@
+<!--                                                                                     -->
+<!-- This file has been produced by generate_doc.py using different .yml  or .bib files. -->
+<!-- It is useless to modify it. Modify the related .yml  or .bib files instead.         -->
+<!--                                                                                     -->
+<html>
+<head><title>Frequency meshes for MBPT </title>
+<link rel=stylesheet type="text/css" href="../formabinit.css">
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  jax: ["input/TeX","output/HTML-CSS"],
+  tex2jax: {inlineMath: [['$','$']]},
+  displayAlign: "center",
+  TeX: { equationNumbers: { autoNumber: "AMS" } }
+});
+</script>
+<script type="text/javascript" async
+src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+</head>
+<body bgcolor="#ffffff">
+
+<hr>
+<a name="top"></a>
+
+<h1>Frequency meshes</h1>
+<h3>This page gives hints on how to define frequency meshes (on the imaginary and real axes) for MBPT calculations with the ABINIT package.
+<hr>
+
+<h5>Copyright (C) 2016-2017 ABINIT group (MG)
+<script type="text/javascript" src="../../js_files/copyright.js"> </script>
+</h5>
+
+<script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
+
+ Mentioned in &nbsp; <a href="../../topics/generated_files/topic_GW.html">topic_GW</a> &nbsp;&nbsp; <a href="../../topics/generated_files/topic_SelfEnergy.html">topic_SelfEnergy</a> &nbsp;&nbsp; <a href="../../topics/generated_files/topic_Susceptibility.html">topic_Susceptibility</a> &nbsp;&nbsp; <a href="../../users/generated_files/help_features.html#7">help_features#7</a> &nbsp;
+ <hr>
+ <h3><b>Table of content: </b></h3> 
+ <ul> <li>1. <a href="topic_FrequencyMeshMBPT.html#1">Introduction.</a><li>2. <a href="topic_FrequencyMeshMBPT.html#2">Related lesson(s) of the tutorial.</a><li>3. <a href="topic_FrequencyMeshMBPT.html#3">Related input variables.</a></ul>
+
+&nbsp; 
+<HR ALIGN=left> 
+<a name="1">&nbsp;</a>
+<h3><b>1. Introduction.</b></h3>
+
+
+In the contour deformation technique, and other cases, one has to define a set of frequencies on which different numerical operations
+will be performed (computation of susceptibility matrices, integration along the real+imaginary axes).
+In the present topic, the input variables connected to such definitions are gathered.
+<br><br><a href=#top>Go to the top</a>
+
+
+
+&nbsp; 
+<HR ALIGN=left> 
+<a name="2">&nbsp;</a>
+<h3><b>2. Related lesson(s) of the tutorial.</b></h3>
+
+
+<li><a href="../../tutorial/generated_files/lesson_gw2.html">The second lesson on GW (GW2)</a> deals with
+the computation of the quasi-particle band structure of Aluminum, in
+the GW approximation (so, much better than the Kohn-Sham LDA band
+structure) without using the plasmon-pole model. </li>
+<br><br><a href=#top>Go to the top</a>
+
+
+&nbsp; 
+<hr> 
+<a name="3">&nbsp;</a>
+<h3><b>3. Related input variables.</b></h3>
+
+
+<p>Basic input variables:<p>... <a href="../../input_variables/generated_files/varset_gw.html#freqremax">freqremax</a>   [FREQuencies along the Real axis MAXimum]<br>
+... <a href="../../input_variables/generated_files/varset_gw.html#freqremin">freqremin</a>   [FREQuencies along the Real axis MINimum]<br>
+... <a href="../../input_variables/generated_files/varset_gw.html#nfreqim">nfreqim</a>   [Number of FREQuencies along the IMaginary axis]<br>
+... <a href="../../input_variables/generated_files/varset_gw.html#nfreqmidm">nfreqmidm</a>   [Nth FREQuency Moment of the Imaginary part of the Dielectric Matrix]<br>
+... <a href="../../input_variables/generated_files/varset_gw.html#nfreqre">nfreqre</a>   [Number of FREQuencies along the REal axis]<br>
+<p>Input variables for experts:<p>... <a href="../../input_variables/generated_files/varset_gw.html#cd_customnimfrqs">cd_customnimfrqs</a>   [Contour Deformation CUSTOM IMaginary FReQuencieS]<br>
+... <a href="../../input_variables/generated_files/varset_gw.html#cd_frqim_method">cd_frqim_method</a>   [Contour Deformation FReQuency integration on IMaginary axis Method]<br>
+... <a href="../../input_variables/generated_files/varset_gw.html#cd_full_grid">cd_full_grid</a>   [Contour Deformation FULL GRID in complex plane]<br>
+... <a href="../../input_variables/generated_files/varset_gw.html#cd_halfway_freq">cd_halfway_freq</a>   [Contour Deformation tangent grid HALFWAY FREQuency]<br>
+... <a href="../../input_variables/generated_files/varset_gw.html#cd_imfrqs">cd_imfrqs</a>   [Contour Deformation IMaginary FReQuencieS]<br>
+... <a href="../../input_variables/generated_files/varset_gw.html#cd_max_freq">cd_max_freq</a>   [Contour Deformation grid MAXimum FREQuency]<br>
+... <a href="../../input_variables/generated_files/varset_gw.html#cd_subset_freq">cd_subset_freq</a>   [Contour Deformation grid calculate SUBSET of FREQuencies]<br>
+... <a href="../../input_variables/generated_files/varset_gw.html#gw_customnfreqsp">gw_customnfreqsp</a>   [GW CUSTOM FREQuencies for SPectral function]<br>
+... <a href="../../input_variables/generated_files/varset_gw.html#gw_freqsp">gw_freqsp</a>   [GW SPectral FREQuencies]<br>
+... <a href="../../input_variables/generated_files/varset_gw.html#gw_frqim_inzgrid">gw_frqim_inzgrid</a>   [GW Contour Deformation FReQuencies on IMaginary axis Inverse Z Grid]<br>
+... <a href="../../input_variables/generated_files/varset_gw.html#gw_frqre_inzgrid">gw_frqre_inzgrid</a>   [GW Contour Deformation FReQuencies on REal axis Inverse Z Grid]<br>
+... <a href="../../input_variables/generated_files/varset_gw.html#gw_frqre_tangrid">gw_frqre_tangrid</a>   [GW Contour Deformation FReQencies on REal axis - Use Tangent Grid]<br>
+
+<br><br><a href=#top>Go to the top</a>
+
+
+
+<script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
+
+</body>
+</html>
+

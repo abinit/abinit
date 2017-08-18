@@ -1110,7 +1110,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 & (ipert==dtset%natom+3.or.ipert==dtset%natom+4)) then
    call status(0,dtfil%filstat,iexit,level,'enter dfpt_nselt  ')
    call dfpt_nselt(blkflg,cg,cg1,cplex,&
-&   d2bbb,d2lo,d2nl,ecut,dtset%ecutsm,dtset%effmass,&
+&   d2bbb,d2lo,d2nl,ecut,dtset%ecutsm,dtset%effmass_free,&
 &   gmet,gprimd,gsqcut,idir,&
 &   ipert,istwfk_rbz,kg,kg1,kpt_rbz,kxc,dtset%mband,mgfftf,&
 &   mkmem,mk1mem,mpert,mpi_enreg,psps%mpsang,mpw,mpw1,&

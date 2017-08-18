@@ -16,7 +16,7 @@
 !! INPUTS
 !!  ecut=cut-off energy for plane wave basis sphere (Ha)
 !!  ecutsm=smearing energy for plane wave kinetic energy (Ha)
-!!  effmass=effective mass for electrons (1. in common case)
+!!  effmass_free=effective mass for electrons (1. in common case)
 !!  gmet(3,3)=reciprocal lattice metric tensor ($\textrm{Bohr}^{-2}$)
 !!  idir1 = 1st direction of the derivative (if 1 <= idir1 <= 3, not used otherwise)
 !!  idir2 = 2st direction of the derivative (if 1 <= idir1,idir2 <= 3, not used otherwise))
@@ -62,7 +62,7 @@
 #include "abi_common.h"
 
 
-subroutine mkkin (ecut,ecutsm,effmass,gmet,kg,kinpw,kpt,npw,idir1,idir2)
+subroutine mkkin (ecut,ecutsm,effmass_free,gmet,kg,kinpw,kpt,npw,idir1,idir2)
 
  use defs_basis
  use m_profiling_abi
@@ -79,7 +79,7 @@ subroutine mkkin (ecut,ecutsm,effmass,gmet,kg,kinpw,kpt,npw,idir1,idir2)
 !scalars
  integer,intent(in) :: npw
  integer,intent(in) :: idir1,idir2
- real(dp),intent(in) :: ecut,ecutsm,effmass
+ real(dp),intent(in) :: ecut,ecutsm,effmass_free
 
 !arrays
  integer,intent(in) :: kg(3,npw)
@@ -180,7 +180,7 @@ subroutine mkkin (ecut,ecutsm,effmass,gmet,kg,kinpw,kpt,npw,idir1,idir2)
        end select
      end if
    end if
-   kinpw(ig)=kinetic/effmass
+   kinpw(ig)=kinetic/effmass_free
  end do
 !$OMP END PARALLEL DO
 

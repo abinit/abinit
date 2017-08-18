@@ -42,4 +42,5 @@
 #%%   MgO molecule, with low cut-off, in a big box, and one k point.
 #%%   Pseudopotentials WITHOUT a non-linear core correction.
 #%%   Prepare the Bader density analysis
+#%% topics = Bader
 #%%<END TEST_INFO>

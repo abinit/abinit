@@ -1,6 +1,6 @@
-# This YAML file contains the introduction as well as the body (including the table of content) of the html lesson.
-# In order to modify the other parts, modify the file lessons.html .
-# This is the introduction ...
+## In order to modify the other parts, modify the file lessons.html .
+
+## This is the introduction ...
 intro : |
   <p>
   This lesson aims at showing how to calculate self-energy corrections to the DFT Kohn-Sham eigenvalues in the GW approximation.
@@ -23,14 +23,7 @@ intro : |
   
   <p>
   It is suggested to
-  <a href="../../bibliography/generated_files/acknowledgments.html">acknowledge</a> the efforts of developers of the GW part of ABINIT, by citing
-  <br><cite>
-  X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon,
-  R. Caracas, F. Jollet, M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez,
-  M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval, L. Reining,
-  R. Godby, G. Onida, D.R. Hamann, and D.C. Allan.
-  Zeit. Kristallogr. 220, 558-562 (2005).</cite>
-  <br>
+  [[bib:acknow#b|acknowledge]] the efforts of developers of the GW part of ABINIT, by citing the [[Gonze2005|2005 ABINIT publication]].
   
   <p>
   The user should be familiarized with the four basic lessons of ABINIT, see the <a href="lesson_welcome.html">tutorial home page</a>.
@@ -39,25 +32,17 @@ intro : |
   
   <p>
   This lesson should take about 2 hours.
-# This is the body, including the table of content ...
-body : |
-  <ul>
-    <li><a href="#1">1.</a> General example of well converged GW calculation.
-    <li><a href="#2">2.</a> Calculation of the WFK and of the screening (SCR file).
-    <li><a href="#3">3.</a> Convergence on the number of planewaves in the wavefunctions to calculate the Self-Energy.
-    <li><a href="#4">4.</a> Convergence on the number of planewaves to calculate &Sigma;<sub>x</sub>.
-    <li><a href="#5">5.</a> Convergence on the number of bands to calculate &Sigma;<sub>c</sub>.
-    <li><a href="#6">6.</a> Convergence on the number of planewaves in the wavefunctions to calculate &epsilon;<sup>-1</sup>.
-    <li><a href="#7">7.</a> Convergence on the number of bands to calculate &epsilon;<sup>-1</sup>.
-    <li><a href="#8">8.</a> Convergence on the dimension of the &epsilon;<sup>-1</sup> matrix.
-    <li><a href="#9">9.</a> Calculation of the GW corrections for the band gap in &Gamma;.
-    <li><a href="#10">10.</a> Advanced features: calculations without plasmon-pole models, and self-consistency.
-  </ul>
-  <hr>
-  <h4><a name="1"></a></h4>
-  <h3><b> 1. Computation of the Silicon band gap at &Gamma;, using a GW calculation. </b></h3>
-  
-  <p><i>Before beginning, you might consider to work in a different subdirectory
+
+## Now come the different sections, numbered.
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec1:
+ title: "General example of well converged GW calculation"
+ tag: silicon
+ body: |
+  <i>Before beginning, you might consider to work in a different subdirectory
     as for the other lessons. Why not "Work_gw1" ?</i>
   
   <p>
@@ -86,7 +71,6 @@ body : |
   <p>
   It is very important to run this job in background because it takes about 1 minute.
   In the meantime, you should read the following.
-  
   <h4><a name="1a"></a></h4>
   <h4><b> 1.a The four steps of a GW calculation.</b></h4>
   
@@ -150,7 +134,7 @@ body : |
   atom types, number, position, planewave cut-off energy, SCF convergence
   parameters driving the Kohn-Sham band structure calculation. 
   Then, for the fourth datasets, you will find specialized additional input variables.
-  
+
   <h4><a name="1b"></a></h4>
   <h4><b> 1.b Generating the Kohn-Sham band structure: the WFK file.</b></h4>
   
@@ -403,13 +387,14 @@ body : |
   correction is much larger than for state 4. On the whole, the
   difference between Kohn-Sham and GW energies is not very large, but nevertheless,
   it is quite important when compared with the size of the gap.
-  <hr>
-  
-  
-  <h3><p><b><a name="2">2</a>
-  Preparing convergence studies: Kohn-Sham structure (WFK file) and screening (SCR file).
-  </b></h3>
-  
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec2:
+ title: "Preparing convergence studies: Kohn-Sham structure (WFK file) and screening (SCR file)"
+ tag: prepare
+ body: |
   In the following sections, we will perform different convergence studies.
   In order to keep the CPU time at a reasonable level, we will use fake WFK and SCR data.
   Moreover we will only consider the correction at the &Gamma; point only. 
@@ -435,12 +420,12 @@ body : |
   <p>
   The next sections are intended to show you how to find the converged parameters for a GW calculation.
   In principle, the following parameters might be used to decrease the CPU time and/or the memory requirements:
-  <a href="../../input_variables/generated_files/vargs.html#optdriver"target="kwimg">optdriver</a>=3
+  [[optdriver]]=3
   [[ecutwfn]],
   [[ecuteps]],
   [[nband]].
   and
-  for <a href="../../input_variables/generated_files/vargs.html#optdriver"target="kwimg">optdriver</a>=4, 
+  for [[optdriver]]=4, 
   [[ecutwfn]],
   [[ecutsigx]],
   [[nband]].
@@ -451,7 +436,7 @@ body : |
   and the input variable [[gwcomp]]),
   standard calculations nowadays only need the tuning of [[nband]]
   [[ecuteps]],
-  simultaneously for <a href="../../input_variables/generated_files/vargs.html#optdriver"target="kwimg">optdriver</a>=3 and =4.
+  simultaneously for [[optdriver]]=3 and =4.
   Indeed, [[ecutwfn]] and
   can have the default value
   of [[ecut]], while
@@ -461,18 +446,20 @@ body : |
   Actually, the present tutorial needs to be updated to account for the current practice.
   <p>
   We begin by the convergence study on the three parameters needed in the self-energy
-  calculation (<a href="../../input_variables/generated_files/vargs.html#optdriver"target="kwimg">optdriver</a>=4): 
+  calculation ([[optdriver]]=4): 
   [[ecutwfn]],
   [[ecutsigx]],
   [[nband]].
   This is because for these, we will not need a double dataset loop to check this convergence,
   and we will rely on the previously determined SCR file.
   
-  <hr>
-  <h3><p><b><a name="3">3</a>
-  Convergence on the number of planewaves in the wavefunctions to calculate the Self-Energy (optional).
-  </b></h3>
-  
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec3:
+ title: "Convergence on the number of planewaves in the wavefunctions to calculate the Self-Energy (optional)"
+ tag: npw
+ body: |
   The convergence study is done in the input file tgw1_3.in.
   First, we check the convergence on the number of planewaves used to describe
   the wavefunctions, in the calculation of the Self-Energy.
@@ -540,13 +527,14 @@ body : |
   [[ecutwfn]]=5.0 
   ([[npwwfn]]=137) 
   can be considered to lead to eigenenergies converged within 0.01 eV.
-  
-  <hr>
-  <h3><p><b><a name="4">4</a>
-  Convergence on the number of planewaves to calculate &Sigma;<sub>x</sub> (optional).
-  </b></h3>
-  
-  <p>
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec4:
+ title: "Convergence on the number of planewaves to calculate &Sigma;<sub>x</sub> (optional)"
+ tag: npw_sigma
+ body: |
   Second, we check the convergence on the number of planewaves in the calculation of &Sigma;<sub>x</sub>.
   This study in done in tgw1_4.in
   As mentioned in the documentation [[ecutsigx]],
@@ -631,13 +619,14 @@ body : |
   </pre>
   
   So that ecutsigx=6.0 (npwsigx=169) can be considered converged within 0.01 eV.
-  
-  <hr>
-  <h3><p><b><a name="5">5</a>
-  Convergence on the number of bands to calculate  &Sigma;<sub>c</sub> (important).
-  </b></h3>
-  
-  <p>
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec5:
+ title: "Convergence on the number of bands to calculate  &Sigma;<sub>c</sub> (important)"
+ tag: conv_nband
+ body: |
   At last, as concerns the computation of the self-energy,
   we check the convergence on the number of bands in the calculation of &Sigma;<sub>c</sub>.
   This convergence study is rather important, usually, BUT it can be done at the same time
@@ -704,13 +693,14 @@ body : |
   [[ecutwfn]]=5.0
   [[ecutsigx]]=6.0,
   [[nband]]=100 .
-  
-  
-  <hr>
-  <h3><p><b><a name="6">6</a>
-  Convergence on the number of planewaves in the wavefunctions to calculate the screening (&epsilon;<sup>-1</sup>) (optional).
-  </b></h3>
-  
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec6:
+ title: "Convergence on the number of planewaves in the wavefunctions to calculate the screening (&epsilon;<sup>-1</sup>) (optional)"
+ tag: conv_npwwn
+ body: |
   Now, we come back to the calculation of the screening.
   Adequate convergence studies will couple the change of parameters for
   [[optdriver]]=3 with
@@ -812,12 +802,14 @@ body : |
   [[ecutwfn]]=4.0 
   ([[npwwfn]]=113) 
   can be considered to lead to eigenenergies converged within 0.01 eV.
-  
-  <hr>
-  <h3><p><b><a name="7">7</a>
-  Convergence on the number of bands to calculate the screening (important).
-  </b></h3>
-  
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec7:
+ title: "Convergence on the number of bands to calculate the screening (&epsilon;<sup>-1</sup>) (important)"
+ tag: conv_nband_scr
+ body: |
   This convergence study is rather important. 
   It can be done at the same time as the convergence study for the number of bands for the self-energy.
   Note that the number of bands used to calculate both the screening
@@ -895,13 +887,14 @@ body : |
   </pre>
   
   So that the computation using 100 bands can be considered converged within 0.01 eV.
-  
-  <hr>
-  <h3><p><b><a name="8">8</a>
-  Convergence on the dimension of the &epsilon;<sup>-1</sup> matrix (important).
-  </b></h3>
-  
-  <p>
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec8:
+ title: "Convergence on the dimension of the screening &epsilon;<sup>-1</sup> matrix (important)"
+ tag: conv_npw_diel
+ body: |
   Third, we check the convergence on the number of plane waves in the calculation of the screening.
   This will be done by defining six datasets,
   with increasing [[ecuteps]]:
@@ -986,12 +979,14 @@ body : |
   number of k points (roughly), and the number of k-points can increase very rapidly from one 
   possible grid to the next denser one. This is why we will leave this out of the present
   tutorial, and consider that we already know a sufficient k-point grid, for the last calculation.
-  
-  <hr>
-  <h3><p><b><a name="9">9</a>
-  Calculation of the GW corrections for the band gap in &Gamma;.
-  </b></h3>
-  
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec9:
+ title: "Calculation of the GW corrections for the band gap in &Gamma;"
+ tag: gw_corr
+ body: |
   Now we try to perform a GW calculation for a real problem:
   the calculation of the GW corrections for the direct band gap of bulk Silicon in &Gamma;.
   
@@ -1113,11 +1108,14 @@ body : |
   This is evident when reporting on a plot the GW correction with respect to the 0-order LDA energy for each state. 
   One can then simply correct the Kohn-Sham band structure at any point, by using a GW correction for the k-points 
   where it has not been calculated explicitly, using a fit of the GW correction at a sparse set of points.
-  <hr>
-  
-  
-  <h3><b><a name="10">10</a> Advanced features in the GW code  </b></h3>
-  
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+secAppendix:
+ title: "Advanced features in the GW code"
+ tag: advanced
+ body: |
   The user might switch to the <a href="lesson_gw2.html">second GW tutorial</a>
   before coming back to the present section.
   

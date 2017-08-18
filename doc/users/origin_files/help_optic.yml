@@ -1,6 +1,7 @@
-# This YAML file contains the introduction as well as the body (including the table of content) of the html help document.
-# In order to modify the other parts, modify the file helps.yml .
-# This is the introduction ...
+## This YAML file contains the introduction as well as the body of the html lesson.
+## In order to modify the other parts, modify the file lessons.html .
+
+## This is the introduction ...
 intro : |
   <a name="top"></a>
   <p>
@@ -21,21 +22,16 @@ intro : |
   <p>
   It will be easier to discover the present file with the help of the tutorial ([[lesson_optic]]).
   <br>It is worthwhile to print this help file, for ease of reading.
-# This is the body, including the table of content ...
-body : |
-  <ul>
-    <li><a href="#1">1. Introduction</a>
-    <li><a href="#2">2. How to run optic ?</a>
-    <li><a href="#3">3. Optic input file and input variables</a>
-    <li><a href="#4">4. Optic output files</a>
-    <li><a href="#5">5. Trouble shooting</a>
-    <!--  <li><a href="#6">6. Results for GaAs</a> -->
-  </ul>
-  
-  <hr>
-  <h3>&nbsp;</h3>
-  
-  <h3><b><a name="1"></a>1. Introduction </b></h3>
+
+## Now come the different sections, numbered.
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec1:
+ title: "Introduction"
+ tag: introduction
+ body: |
   Optic allows to compute the
   frequency dependent linear optical dielectric function and second order
   nonlinear optical susceptibility.
@@ -66,12 +62,14 @@ body : |
   to determine the
   linear and Eqs. 49, 50 and 51 in <a href="#Ref1">Ref. 1</a> to determine the nonlinear
   optical response of the material under investigation.
-  
-  <hr>
-  
-  <h3><b><a name="2"></a>2. How to run Optic ? </b></h3>
-  
-  <p>
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec2:
+ title: "How to run Optic ?"
+ tag: run
+ body: |
   The use of Optic is quite simple :
   <pre>
   optic < optic.files > optic.log
@@ -135,12 +133,14 @@ body : |
   HERE, I SHOULD GIVE EXPLICITLY THE SENSITIVE INPUT VARIABLES FOR ABINIT.
   AND ALSO I SHOULD EXPLAIN SUBTLETIES RELATED TO THE USE OF SYMMETRIES.
   -->
-  
-  <hr>
-  
-  
-  <h3><b><a name="3"></a>3. Optic input file and input variables </b></h3>
-  
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec3:
+ title: "Optic input file and input variables"
+ tag: input
+ body: |
   A typical optic.files file is presented below :
   <pre>
   optic.in     ! Name of input file
@@ -154,173 +154,40 @@ body : |
   
   <pre>
   &amp;FILES
-   <a href="#ddkfile">ddkfile_1</a> = 'toptic_1o_DS4_1WF7',
-   <a href="#ddkfile">ddkfile_2</a> = 'toptic_1o_DS5_1WF8',
-   <a href="#ddkfile">ddkfile_3</a> = 'toptic_1o_DS6_1WF9',
-   <a href="#wfkfile">wfkfile</a> = 'toptic_1o_DS3_WFK'
+   [[optic:ddkfile]]_1 = 'toptic_1o_DS4_1WF7',
+   [[optic:ddkfile]]_2 = 'toptic_1o_DS5_1WF8',
+   [[optic:ddkfile]]_3 = 'toptic_1o_DS6_1WF9',
+   [[optic:wfkfile]] = 'toptic_1o_DS3_WFK'
   /
   &amp;PARAMETERS
-   <a href="#broadening">broadening</a> = 0.002,
-   <a href="#domega">domega</a> = 0.0003,
-   <a href="#maxomega">maxomega</a> = 0.3,
-   <a href="#scissor">scissor</a> = 0.000,
-   <a href="#tolerance">tolerance</a> = 0.002
+   [[optic:broadening]] = 0.002,
+   [[optic:domega]] = 0.0003,
+   [[optic:maxomega]] = 0.3,
+   [[optic:scissor]] = 0.000,
+   [[optic:tolerance]] = 0.002
   /
   &amp;COMPUTATIONS
-   <a href="#num_lin_comp">num_lin_comp</a> = 1,
-   <a href="#lin_comp">lin_comp</a> = 11,
-   <a href="#num_nonlin_comp">num_nonlin_comp</a> = 2,
-   <a href="#nonlin_comp">nonlin_comp</a> = 123,222,
+   [[optic:num_lin_comp]] = 1,
+   [[optic:lin_comp]] = 11,
+   [[optic:num_nonlin_comp]] = 2,
+   [[optic:nonlin_comp]] = 123,222,
   /
   </pre>
   
-  <p>
-  <hr>
-  
-  <font id="title"><a name="ddkfile">ddkfile_X : name of the ddk file on the direction X (no default)</a></font>
-  <br><font id="vartype">Variable type: string with the filename</font>
-  <br><br><font id="text">
-  Specify the filename that has been produced by the preparatory Abinit run.
-  This file must contain the matrix elements of the d/dk operator along direction X.
-  It must not contain the first-order wavefunctions and may be generated using prtwf 3.<br />
-  You should make sure that the number of bands, of spin channels and of k-points are the same in all the files.
-  </font>
-  <br><br><a href=#top>Go to the top</a>
-  <hr>
-  
-  <font id="title"><a name="wfkfile">wfkfile : name of the wfk file (no default)</a></font>
-  <br><font id="vartype">Variable type: string with the filename</font>
-  <br><br><font id="text">
-  Specify the filename that has been produced by the preparatory Abinit run.
-  This file must contain the eigenenergies on the set of k-points and bands to be included in the calculation.<br/>
-  You should make sure that the number of bands, of spin channels and of k-points are the same in all the files.
-  </font>
-  <br><br><a href=#top>Go to the top</a>
-  <hr>
-  
-  <font id="title"><a name="broadening">broadening (default = 1.0d-3 Ha)</a></font>
-  <br><font id="vartype">Variable type: real parameter, given in Hartree </font>
-  <br><br><font id="text">
-  In Eq. 46 of <a href="#Ref1">Ref. 1</a>, it is clear that when ever wnm(k) is equal to w,
-  there is a resonance. Numerically this would lead to an infinity. In order to
-  avoid this one could do two things. You could change the sum over k-points to
-  integration and then use linear tetrahedron method (see <a href="#Ref2">Ref. 2</a> for
-  details). Another way to get around the problem is, like we do in the present
-  case, avoid this singularity by adding a small complex number to the denominator.
-  This prevents the denominator from ever going to 0 and acts as a broadening to
-  the spectrum. The broadening should not be too large as this would wash out the
-  features in the spectrum.
-  </font>
-  <br><br><a href=#top>Go to the top</a>
-  <hr>
-  
-  <font id="title"><a name="domega">domega : Frequency grid step (default = 1.0d-3 Ha)</a></font>
-  <br><font id="vartype">Variable type: two real parameters, given in Hartree </font>
-  <br><br><font id="text">
-  The step and maximum sets your energy grid for the calculation using the formula
-  number of energy mesh points=maximum/step (zero excluded). So  in order to capture more
-  features you can decrease the step size to get a finer energy grid. In order
-  to go to higher frequency, increase the maximum.
-  </font>
-  <br><br><a href=#top>Go to the top</a>
-  <hr>
-  
-  
-  <font id="title"><a name="maxomega">maxomega : Maximum of frequency grid (default = 1 Ha)</a></font>
-  <br><font id="vartype">Variable type: two real parameters, given in Hartree </font>
-  <br><br><font id="text">
-  The step and maximum sets your energy grid for the calculation using the formula
-  number of energy mesh points=maximum/step (zero excluded). So  in order to capture more
-  features you can decrease the step size to get a finer energy grid. In order
-  to go to higher frequency, increase the maximum.
-  </font>
-  <br><br><a href=#top>Go to the top</a>
-  <hr>
-  
-  
-  <font id="title"><a name="scissor">scissor : Scissors shift (default = 0.0 [ no scissor ])</a></font>
-  <br><font id="vartype">Variable type: real parameter, given in Hartree </font>
-  <br><br><font id="text">
-  LDA/GGA are well known to underestimate the band-gap by up to 100%. In order
-  to get the optical spectrum and make a realistic comparison with experiments
-  one needs to correct for this. This can be achieved in two ways. The scissors
-  shift is normally chosen to be the difference between the experimental and
-  theoretical band-gap and is used to shift the conduction bands only. Another
-  way in which you do not have to rely on experimental data is to determine the
-  self energy using the <a href="../../tutorial/generated_files/lesson_gw1.html">GW approach</a>.
-  In this case the opening of the gap due to the GW correction can be used as
-  scissor shift.
-  </font>
-  <br><br><a href=#top>Go to the top</a>
-  <hr>
-  
-  
-  <font id="title"><a name="tolerance">tolerance (default = 1.0d-3 Ha)</a></font>
-  <br><font id="vartype">Variable type: real parameter, given in Hartree </font>
-  <br><br><font id="text">
-  When energy denominators are smaller than <a href="#tolerance">tolerance</a>, the term
-  is discarded from the sum. 
-  </font>
-  <br><br><a href=#top>Go to the top</a>
-  <hr>
-  
-  
-  <font id="title"><a name="num_lin_comp">num_lin_comp: Number of components for linear response</a></font>
-  <br><font id="vartype">Variable type: integer</font>
-  <br><br><font id="text">
-  How many components out of 9 of the linear optical dielectric tensor do you
-  want to calculate. Most of these are either equal or zero depending upon the
-  symmetry of the material (for detail see <a href="#Ref3">Ref. 3</a>).
-  <br>Note that the directions are along the Cartesian axis.
-  </font>
-  <br><br><a href=#top>Go to the top</a>
-  <hr>
-  
-  
-  <font id="title"><a name="lin_comp">lin_comp: Components of the linear response</a></font>
-  <br><font id="vartype">Variable type: integers(<a href="#num_lin_comp">num_lin_comp</a>)</font>
-  <br><br><font id="text">
-  This tells which component of the dielectric tensor you want to calculate.
-  These numbers are called a and b Eqs. 46 in <a href="#Ref1">Ref. 1</a>. 1 2 3 represent x y
-  and z respectively. For example 11 would be xx and 32 would mean zy.
-  </font>
-  <br><br><a href=#top>Go to the top</a>
-  <hr>
-  
-  <font id="title"><a name="num_nonlin_comp">num_nonlin_comp: Number of components for nonlinear response</a></font>
-  <br><font id="vartype">Variable type: integer</font>
-  <br><br><font id="text">
-  How many components out of 27 of the non-linear optical dielectric tensor do you
-  want to calculate. Most of these are either equal or zero depending upon the
-  symmetry of the material (for detail see <a href="#Ref3">Ref. 3</a>).
-  <br>Note that the directions are along the Cartesian axis.
-  </font>
-  <br><br><a href=#top>Go to the top</a>
-  <hr>
-  
-  
-  <font id="title"><a name="nonlin_comp">nonlin_comp: Components of the nonlinear response</a></font>
-  <br><font id="vartype">Variable type: integers(<a href="#num_nonlin_comp">num_nonlin_comp</a>)</font>
-  <br><br><font id="text">
-  This tells which component of the dielectric tensor you want to calculate.
-  These numbers are called a, b and c in <a href="#Ref1">Ref. 1</a>. 1 2 3 represent x y
-  and z respectively. For example 111 would be xxx and 321 would mean zyx.
-  </font>
-  <br><br><a href=#top>Go to the top</a>
-  <hr>
+  <p>The list of input variables for the optic input file is presented in <a href="../../topics/generated_files/topic_Optic.html">Optic input variables</a>.
   
   <!--
   YG(20160421) Here I should describe the new possibilities for LEO and SHG with antiresonant approximation
   -->
-  
-  
-  <hr>
-  
-  
-  
-  
-  <h3><b><a name="4"></a>4. Optic output files </b></h3>
-  
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec4:
+ title: "Optic output files"
+ tag: output
+ body: |
+
   <h4><b><a name="4.1"></a>4.1. Linear optical response data files</b></h4>
   <p>
   Name: case_a_b-linopt.out
@@ -337,7 +204,7 @@ body : |
   In the header of the file you can find information about the calculation. Some
   results for GaAs(LiF???) are presented in this document to show what can be
   expected.
-  
+
   <h4><b><a name="4.2"></a>4.2. Non-linear optical response data files</b></h4>
   
   <p>
@@ -369,14 +236,13 @@ body : |
   Some results of nonlinear optical spectrum for
   GaAs(LiF???) are presented in this document to show what can be expected.
   
-  <hr>
-  
-  
-  
-  
-  <h3><b><a name="5"></a>5. Trouble shooting </b></h3>
-  
-  <p>
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec5:
+ title: "Trouble shooting"
+ tag: troubleshooting
+ body: |
   1) All I get is zeros in my *-linopt.out file. Why?
   
   <p>
@@ -410,24 +276,3 @@ body : |
    <li>(ii) Most components out of the 27 are zero due to the symmetry of the crystal.
        Please calculate a different component.</li>
   </ul>
-  
-  
-  <hr>
-  
-  <!--
-  <h3><b><a name="6"></a>6. Results for GaAs </b></h3>
-  
-  <pre>
-  SHOULD STILL BE DONE !
-  A small description of results.
-  excitonic effects!!!
-  
-  Fig LO
-  
-  Fig NLO
-  </pre>
-  
-  For details about how to identify peaks and get information from them see
-  <a href="#Ref4">Ref. 4</a>
-  -->
-  

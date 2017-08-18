@@ -5,6 +5,17 @@
 <html>
 <head><title>Lesson on TDDFT</title>
 <link rel=stylesheet type="text/css" href="../formabinit.css">
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  jax: ["input/TeX","output/HTML-CSS"],
+  tex2jax: {inlineMath: [['$','$']]},
+  displayAlign: "center",
+  TeX: { equationNumbers: { autoNumber: "AMS" } }
+});
+</script>
+<script type="text/javascript" async
+src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
 </head>
 <body bgcolor="#ffffff">
 
@@ -31,29 +42,19 @@
 <script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
 
 <a name="list"></a>
-<h3><b> Lesson on TDDFT, table of content:</b></h3>
+<h3><b> Lesson on TDDFT. Table of content:</b></h3>
 
-<ul>
-  <li><a href="#1">1.</a> Brief theoretical introduction
-  <li><a href="#2">2.</a> A first computation of electronic excitation energies and oscillator strengths
-  <li><a href="#2">3.</a> Convergence studies
-  <li><a href="#2">4.</a> The choice of the exchange-correlation potential
-</ul>
-<hr>
+<ul> 
+  <li>1. <a href="#intro">Brief theoretical introduction</a></li>
+  <li>2. <a href="#N2">A first computation of electronic excitation energies and oscillator strengths, for N2</a></li>
+  <li>3. <a href="#convergence">Convergence studies</a></li>
+  <li>4. <a href="#xc">The choice of the exchange-correlation potential</a></li>
 
-<a name="1">&nbsp;</a>
-<h3><b>
-1. Brief theoretical introduction
-</b></h3>
-
-<div id="content" style="background-color:#FFFFFF;height:220px;width:200px;float:right;">
-<a href="https://sites.google.com/site/markcasida/">
-<img src="http://dcm.ujf-grenoble.fr/DCM-SITE/Trombinoscope/ccasma.jpg" align="center" /><br>
-Mark E. Casida
-</a>
-</div>
-
-<p>In order to do Time-Dependent Density Functional Theory calculations (TDDFT) of electronic excitations
+ </ul> 
+ <hr><br><a name="intro"> </a>
+<a name="1"> </a>
+<h3><b>1. Brief theoretical introduction</b></h3>
+ <p>In order to do Time-Dependent Density Functional Theory calculations (TDDFT) of electronic excitations
 and oscillator strengths, in the Casida's approach, you should first have some theoretical background.
 <br>
 TDDFT was first developed in the eighties, but the direct calculation of electronic excitations
@@ -68,36 +69,10 @@ formalism is given in
  <a href="http://dx.doi.org/10.1016/S1380-7323(96)80093-8" >http://dx.doi.org/10.1016/S1380-7323(96)80093-8</a>
 </pre>
 However this reference might be hard to get, that is why we have based the tutorial
-instead on the following (also early) papers :
+instead on the following (also early) papers : <a href="../../biblio/generated_files/bib_biblio.html#Casida1998">[Casida1998]</a>, <a href="../../biblio/generated_files/bib_biblio.html#Casida1998a">[Casida1998a]</a>, and <a href="#"><a href="#">[[FAKE LINK:FAKE LINK:Vasiliev1999]]</a></a>.
 <p>
-<a name="CasidaJCP1998">CasidaJCP1998:</a>
-<pre>
-"Molecular excitation energies to high-lying bound states from time-dependent density-functional response theory: 
- Characterization and correction of the time-dependent local density approximation ionization threshold"
- Mark E. Casida, Christine Jamorski, Kim C. Casida, and Dennis R. Salahub 
- J. Chem. Phys. 108, 4439 (1998)
- <a href="http://dx.doi.org/10.1063/1.475855">http://dx.doi.org/10.1063/1.475855</a>
-</pre>
-<p>
-<a name="CasidaIJQC1998">CasidaIJQC1998:</a>
-<pre>
-"Excited-state potential energy curves from time-dependent density-functional theory: 
- A cross section of formaldehyde's 1A1 manifold"
- Mark E. Casida, Kim C. Casida, Dennis R. Salahub
- International Journal of Quantum Chemistry Volume 70, Issue 4-5, pages 933-941, 1998
- <a href="http://dx.doi.org/10.1002/(SICI)1097-461X(1998)70:4/5<933::AID-QUA39>3.0.CO;2-Z">http://dx.doi.org/10.1002/(SICI)1097-461X(1998)70:4/5<933::AID-QUA39>3.0.CO;2-Z</a>
-</pre>
-<p>
-<a name="Vasiliev1999">Vasiliev1999:</a>
-<pre>
-"Ab initio Excitation Spectra and Collective Electronic Response in Atoms and Clusters"
- I. Vasiliev, S. Ogut, and J. R. Chelikowsky
- Phys. Rev. Lett. 82, 1919-1922 (1999) 
- <a href="http://dx.doi.org/10.1103/PhysRevLett.82.1919">http://dx.doi.org/10.1103/PhysRevLett.82.1919</a>
-</pre>
-The first of these papers, <a href="#CasidaJCP1998">CasidaJCP1998</a>,
+The first of these papers, <a href="../../biblio/generated_files/bib_biblio.html#Casida1998">[Casida1998]</a>,
 will be used as main reference for our tutorial.
-
 <p>
 From these papers, you will learn that a TDDFT calculation of electronic excitation
 energies start first from a usual ground-state calculation, with a chosen XC functional.
@@ -116,15 +91,15 @@ four-wavefunction integrals of the Coulomb and Exchange-Correlation kernel.
 The exchange-correlation kernel contribution will differ in the
 spin-singlet and in the spin-triplet states, this being the only difference between
 spin-singlet and spin-triplet states.
-See Eqs.(1.3) and (1.4) of <a href="#CasidaIJQC1998">CasidaIJQC1998</a>,
-and Eqs.(1-2) of <a href="#Vasiliev1999">Vasiliev1999</a>
+See Eqs.(1.3) and (1.4) of <a href="#"><a href="#">[[FAKE LINK:FAKE LINK:Casida1998b]]</a></a>,
+and Eqs.(1-2) of <a href="../../biblio/generated_files/bib_biblio.html#Vasiliev1998">[Vasiliev1998]</a>.
 <p>
 The construction of the coupling matrix can be done on the basis of an exchange-correlation
 kernel that is derived from the exchange-correlation functional used for the ground-state,
 but this is not a requirement of the theory, since such a correspondance only holds
 for the exact functional. In practice, the approximation to the XC potential and the one
 to the XC kernel are often different.
-See section III of <a href="#CasidaJCP1998">CasidaJCP1998</a>.
+See section III of <a href="../../biblio/generated_files/bib_biblio.html#Casida1998">[Casida1998]</a>.
 <p>
 A big drawback of the currently known XC potentials and XC kernels is observed when the
 system is infinite in at least one direction (e.g. polymers, slabs, or solids).
@@ -144,27 +119,23 @@ In the ABINIT implementation, the oscillators strengths are given as a second-ra
 in cartesian coordinates, as well as the average over all directions usually
 used for molecules and clusters. It is left to the user to generate the
 polarisability spectrum, according to e.g. Eq.(1.2) of
-<a href="#CasidaIJQC1998">CasidaIJQC1998</a>.
+<a href="../../biblio/generated_files/bib_biblio.html#Casida1998a">[Casida1998a]</a>.
 <p>
 One can also combine the ground state total energy with the electronic excitation energies
 to obtain Born-Oppenheimer potential energy curves for excited states. This is illustrated
-for formaldehyde in <a href="#CasidaIJQC1998">CasidaIJQC1998</a>.
+for formaldehyde in <a href="../../biblio/generated_files/bib_biblio.html#Casida1998a">[Casida1998a]</a>.
 <p>
 Given its simplicity, and the relatively modest CPU cost of this type of calculation,
 Casida's approach enjoys a wide popularity. There has been hundreds of papers published
 on the basis of methodology. Still, its accuracy might be below the expectations,
 as you will see. As often, test this method to see if it suits your needs,
 and read the recent literature ...
-
+<br><br><a href=#top>Go to the top</a>
 <hr>
-
-<a name="2">&nbsp;</a>
-<h3><b>
-2. A first computation of electronic excitation energies and oscillator strengths
-</b></h3>
-
-<p>
-We will now compute and analyse the excitation energies of the diatomic molecule N2.
+<br><a name="N2"> </a>
+<a name="2"> </a>
+<h3><b>2. A first computation of electronic excitation energies and oscillator strengths, for N2</b></h3>
+ <p>We will now compute and analyse the excitation energies of the diatomic molecule N2.
 This is
 a rather simple system, with cylindrical symmetry, allowing interesting
 understanding. Although we will suppose that you are familiarized with quantum numbers
@@ -196,14 +167,14 @@ are written, for use in the second data set. The second dataset is the one
 where the TDDFT calculation is done. Moreover, the non-self-consistent
 calculation of the occupied eigenfunctions and corresponding eigenenergies
 is also accomplished. This is obtained by setting
-<a href="../../input_variables/generated_files/varbas.html#iscf">iscf</a> to -1.
+<a href="../../input_variables/generated_files/varset_basic.html#iscf">iscf</a> to -1.
 Please, take now some time to read the information about this value of
-<a href="../../input_variables/generated_files/varbas.html#iscf">iscf</a>, and the
+<a href="../../input_variables/generated_files/varset_basic.html#iscf">iscf</a>, and the
 few input variables that acquire some meaning in this context
 (namely,
-<a href="../../input_variables/generated_files/vargs.html#boxcenter">boxcenter</a>,
-<a href="../../input_variables/generated_files/varrf.html#td_mexcit">td_mexcit</a>,
-and <a href="../../input_variables/generated_files/varrf.html#td_maxene">td_maxene</a>).
+<a href="../../input_variables/generated_files/varset_gstate.html#boxcenter">boxcenter</a>,
+<a href="../../input_variables/generated_files/varset_dfpt.html#td_mexcit">td_mexcit</a>,
+and <a href="../../input_variables/generated_files/varset_dfpt.html#td_maxene">td_maxene</a>).
 Actually,
 this is most of the information that should be known
 to use the TDDFT in ABINIT !
@@ -215,7 +186,7 @@ The box is not very large
 for the Casida's formalism, only one k point is used.
 We have chosen the Perdew-Wang 92 LDA functional for both the self-consistent
 and non-self-consistent calculations
-(<a href="../../input_variables/generated_files/varbas.html#ixc">ixc</a>=7).
+(<a href="../../input_variables/generated_files/varset_basic.html#ixc">ixc</a>=7).
 
 <p>
 We can now examine the output file ttddft_1.out.
@@ -361,7 +332,7 @@ could not be attributed on the sole basis of the knowledge of Kohn-Sham orbitals
 quantum numbers.
 <p>
 The lowest-lying experimental spin-singlet excitation energies,
-see table III of <a href="#CasidaJCP1998">CasidaJCP1998</a>, are as follows :
+see table III of <a href="../../biblio/generated_files/bib_biblio.html#Casida1998">[Casida1998]</a>, are as follows :
 <pre>
 9.31 eV   m=+1,-1  even parity (Pi_g state)
 9.92 eV   m=0      odd parity  (Sigma_u- state)
@@ -392,16 +363,12 @@ of Kohn-Sham energy differences, that are (for spin-singlet and -triplet) :
 9.91 eV   m=0(twice),+2,-2 odd parity  (Sigma_u and Delta_u states)
 10.81 eV  m=+1,-1   odd parity  (Pi_u state)
 </pre>
-
-
+<br><br><a href=#top>Go to the top</a>
 <hr>
-
-<a name="3">&nbsp;</a>
-<h3><b>
-3. Convergence studies.
-</b></h3>
-
-There are several parameters subject to convergence studies in this context :
+<br><a name="convergence"> </a>
+<a name="3"> </a>
+<h3><b>3. Convergence studies</b></h3>
+ <p>There are several parameters subject to convergence studies in this context :
 the energy cut-off, the box size, and the number of unoccupied bands.
 <p>
 We will start with the number of unoccupied states. The only input parameter
@@ -484,7 +451,7 @@ At this stage, we will simply stop this convergence study,
 and give the results of an ABINIT calculation
 using ecut 45 Hartree, acell 12 11 11, and  30 bands (not fully converged, though !),
 then compare the results with other LDA/TDLDA results
-(from <a href="#CasidaJCP1998">CasidaJCP1998</a>)
+(from <a href="../../biblio/generated_files/bib_biblio.html#Casida1998">[Casida1998]</a>)
 and experimental results :
 <pre>
                     present Casida experimental
@@ -507,13 +474,12 @@ In particular,
 we note that LDA/TDLDA is not able to get the correct ordering of
 the lower two triplet states ... One of our problems was intrinsic
 to the LDA/TDLDA approximation ...
-
-
-<a name="4">&nbsp;</a>
-<h3><b>
-4. The choice of the exchange-correlation potential.
-</b></h3>
-As emphasized in <a href="#CasidaJCP1998">CasidaJCP1998</a>,
+<br><br><a href=#top>Go to the top</a>
+<hr>
+<br><a name="xc"> </a>
+<a name="4"> </a>
+<h3><b>4. The choice of the exchange-correlation potential</b></h3>
+ <p>As emphasized in <a href="../../biblio/generated_files/bib_biblio.html#Casida1998">[Casida1998]</a>,
 choosing a different functional for the self-consistent part (XC potential)
 and the generation of the coupling matrix (XC kernel) can give a better description
 of the higher-lying states. Indeed, a potential with a -1/r tail (unlike the LDA
@@ -525,6 +491,8 @@ In order to activate this procedure,
 set the value of ixc in dataset 1 to the SCF functional, and the value
 of ixc in dataset 2 to the XC functional to be used for the kernel.
 Use pseudopotentials that agree with the SCF functional.
+<br><br><a href=#top>Go to the top</a>
+<hr>
 <script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
 
 </body>

@@ -1,6 +1,7 @@
-# This YAML file contains the introduction as well as the body (including the table of content) of the html lesson.
-# In order to modify the other parts, modify the file lessons.html .
-# This is the introduction ...
+## This YAML file contains the introduction as well as the body of the html lesson.
+## In order to modify the other parts, modify the file lessons.html .
+
+## This is the introduction ...
 intro : |
   <p>This lesson aims at showing how to perform a calculation in
   the
@@ -12,22 +13,17 @@ intro : |
   It is supposed that you already know how to use ABINIT in the
   norm-conserving pseudopotential case.<br>
   <p>This lesson should take about 1.5 hour. </p>
-# This is the body, including the table of content ...
-body : |
-  <ul>
-  <li><a href="#0">0.</a> Summary of the PAW method</li>
-  <li><a href="#1">1.</a> Using PAW with ABINIT</li>
-  <li><a href="#2">2.</a> The convergence on plane-wave cut-off ([[ecut]])</li>
-  <li><a href="#3">3.</a> The convergence on double FFT grid cut-off ([[pawecutdg]])&nbsp;</li>
-  <li><a href="#4">4.</a> Plotting PAW contributions to the DOS</li>
-  <li><a href="#5">5.</a> Testing the completeness of the PAW partial wave basis</li>
-  <li><a href="#6">6.</a> Checking the validity of PAW results</li>
-  <li><a href="#7">7.</a> Additional comments about PAW in ABINIT</li>
-  </ul>
-  <hr>
-  
-  <h3><a name="0"></a><b><br>0. Summary of the PAW method</b></h3>
-  <p>The PAW (Projector Augmented-Wave) method has been
+
+## Now come the different sections, numbered.
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec1:
+ title: "Summary of the PAW method"
+ tag: summary
+ body: |
+  The PAW (Projector Augmented-Wave) method has been
   introduced by Peter Bl&ouml;chl in 1994. As he says, "<span style="font-style: italic;">The projector
   augmented-wave method is an extension of augmented wave methods and the
   pseudopotential approach, which combines their traditions into a
@@ -81,30 +77,19 @@ body : |
   the same role as a pseudopotential file.
   </p><p>It is highly recommended to read the following papers to
   understand
-  correctly the basic concepts of the PAW method:</p>
-  <span style="font-weight: bold;">[1]</span> "<span style="font-style: italic;">Projector augmented-wave
-  method</span>", P.E.
-  Blochl, Physical Review B <span style="font-weight: bold;">50</span>,
-  17953
-  (1994)<br>
-  <span style="font-weight: bold;">[2]</span> "<span style="font-style: italic;">From ultrasoft pseudopotentials
-  to
-  the projector augmented-wave method</span>", G. Kresse and D.
-  Joubert, Physical Review
-  B <span style="font-weight: bold;">59</span>, 1758
-  (1999)<br>
+  correctly the basic concepts of the PAW method:
+  [[Bloechl1994]] and [[Kresse1999]].
   <p>The implementation of the PAW method in <span style="font-weight: bold;">ABINIT</span> is detailed
-  in the following paper, describing specific notations and formulations:</p>
-  <p style="color: rgb(153, 0, 0);"><span style="font-weight: bold;">[3]</span>
-  "<span style="font-style: italic;">Implementation of the
-  projector augmented-wave method in the ABINIT code: Application to the
-  study of iron under pressure</span>", M. Torrent, F. Jollet, F.
-  Bottin, G. Zerah, and X. Gonze, Computational Materials Science <span style="font-weight: bold;">42</span>, 337
-  (2008)&nbsp;&nbsp;</p>
-  
-  <h3><hr> <a name="1"></a>&nbsp;<b><b><br>
-  1.&nbsp; Using PAW with ABINIT</b></b></h3>
-  <p><i>Before continuing, you might
+  in  [[Torrent2008]], describing specific notations and formulations
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec2:
+ title: "Using PAW with ABINIT"
+ tag: pawABINIT
+ body: |
+  <i>Before continuing, you might
   consider to work in a different
   subdirectory as for the other lessons. Why not "Work_paw1" ?
   </i><i>In what follows, the name of files are
@@ -324,11 +309,18 @@ body : |
   in general you should be able to compare numbers for (valence)<i> energies</i>
   between different PAW potentials or
   different codes.</p>
-  <h3><hr> <a name="2"></a>&nbsp;<b><b><br>
-  2.&nbsp; The convergence on plane-wave cut-off ([[ecut]])</b></b></h3>
+
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec3:
+ title: "The convergence on plane-wave cut-off"
+ tag: ecut
+ body: |
   As in the usual case, the critical convergence parameter is the cut-off
   defining the size of the plane-wave basis...
-  <p><b>1.a</b><b> Computing the convergence in
+  <p><b>3.a</b><b> Computing the convergence in
   ecut for&nbsp;<span style="color: rgb(153, 0, 0);">diamond</span>
   in
   the norm-conserving case</b></p>
@@ -367,7 +359,7 @@ body : |
   etotal</span>
   convergence (at the 1 mHartree level) is not achieved for&nbsp;<span style="font-style: italic; font-weight: bold;">ecut</span>=24
   Hartree.</p>
-  <p><b>1.b</b><b> Computing the convergence in
+  <p><b>3.b</b><b> Computing the convergence in
   ecut for <span style="color: rgb(153, 0, 0);">diamond</span>
   in
   the PAW case</b></p>
@@ -398,12 +390,15 @@ body : |
   diamond needs a lower cutoff, compared to a norm-conserving
   pseudopotential
   calculation. </p>
-  
-  <hr>
-  
-  <h3><a name="3">&nbsp;</a><b><b><br>
-  3. The convergence on the double grid FFT cut-off ([[pawecutdg]])
-  </b></b></h3><p>In a<span style="font-style: italic;">
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec4:
+ title: "The convergence on the double grid FFT cut-off"
+ tag: pawecutdg
+ body: |
+  In a<span style="font-style: italic;">
   norm-conserving pseudopotential</span> calculation, the (plane wave) density
   grid is (at least)
   twice
@@ -528,10 +523,16 @@ body : |
   there is no need for a high&nbsp;[[pawecutdg]].<span style="text-decoration: underline;"></span><br>
   Last warning: when testing [[ecut]]
   convergency, <span style="text-decoration: underline;"></span>[[pawecutdg]]
-  has to remain constant to obtain consistent results.<br>
-  <br><hr><h3><p><b><a name="4"><br>4.</a> Plotting PAW contributions to
-  the Density of States (DOS)</b></p>
-  </h3><p>We use now the input file&nbsp;<span style="color: rgb(0, 102, 0); font-weight: bold;">tpaw1_4.in</span>
+  has to remain constant to obtain consistent results.
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec5:
+ title: "Plotting PAW contributions to the Density of States (DOS)"
+ tag: dos
+ body: |
+  We use now the input file&nbsp;<span style="color: rgb(0, 102, 0); font-weight: bold;">tpaw1_4.in</span>
   and the associated <span style="color: rgb(0, 102, 0); font-weight: bold;">tpaw1_4.files</span>
   file.<br>
   ABINIT is now asked to compute the Density Of State (DOS) (see
@@ -616,10 +617,16 @@ body : |
   is mainly contained in the sphere defined by [[ratsph]].
   </span></div>
 
-  <br><hr><h3><p><b><a name="5"><br>5.</a> Testing the
-  completeness of the PAW
-  partial wave basis</b></p>
-  </h3>Note that, in the previous section, we used a "standard" PAW
+
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec6:
+ title: "Testing the completeness of the PAW partial wave basis"
+ tag: completeness
+ body: |
+  Note that, in the previous section, we used a "standard" PAW
   dataset,
   with 2 partial waves per angular momentum. It is generally the best
   compromise between the completeness of the partial wave basis and the
@@ -696,9 +703,16 @@ body : |
   you might
   follow
   the tutorial PAW2.</span>
-  <br><hr><h3><p><b><a name="6"><br>6.</a> Checking the validity of PAW
-  results</b></p>
-  </h3>As usual, the validity of a "pseudopotential" (PAW dataset) has to
+
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec7:
+ title: "Checking the validity of PAW results"
+ tag: checking
+ body: |
+  As usual, the validity of a "pseudopotential" (PAW dataset) has to
   be
   checked by comparison, on known structures, with known results. In the
   case of <span style="font-weight: bold; color: rgb(153, 0, 0);">diamond</span>,
@@ -750,18 +764,16 @@ body : |
   = 3.535 angstrom</span>
   <span style="color: rgb(153, 0, 0); font-weight: bold;">B
   = 465 GPa</span>
-  </div><br>These results are in excellent agreement with FP-LAPW ones !<br>
-  <br>
-  
-  <hr>
-  
-  <h3><p><b><a name="7"><br>7.</a>&nbsp;Additional comments about
-  PAW in ABINIT</b></p>
-  </h3>
-  
-  <p>
-  
-  <b>7.a</b><b> Mixing scheme for
+  </div><br>These results are in excellent agreement with FP-LAPW ones !
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec8:
+ title: "Additional comments about PAW in ABINIT"
+ tag: additional
+ body: |
+  <b>8.a</b><b> Mixing scheme for
   the Self-Consistent cycle; decomposition of the total energy.</b></p>
   The use of an efficient mixing scheme in the self-consistent loop is a
   crucial point to minimize
@@ -804,7 +816,9 @@ body : |
   (occupancies of
   partial
   waves) also are mixed during the SC cycle; by default, the mixing is
-  done in the same way as the density.<br><br><p><b>7.b</b><b> Overlap of
+  done in the same way as the density.
+
+  <br><br><p><b>8.b</b><b> Overlap of
   PAW spheres</b></p><p>In
   principle, the PAW formalism is only valid for non-overlapping
   augmentation
@@ -821,15 +835,18 @@ body : |
   related to the compensation charge radius is checked by ABINIT and a
   WARNING is eventually printed...</p><p>Also note that you can control
   the compensation charge radius and shape function while generating the
-  PAW dataset (see tutorial PAW2).</p><b></b><p><b>7.c</b><b>
+  PAW dataset (see tutorial PAW2).
+
+  </p><b></b><p><b>8.c</b><b>
   Printing volume for PAW</b></p>If you want to get more detailed output
   concerning the PAW computation, you can use the&nbsp;[[pawprtvol]] input keyword. See its
   description in the user's manual...<br>It is particularly useful to
   print details about pseudopotential strength (<span style="font-style: italic; font-weight: bold;">D</span><sub style="font-style: italic; font-weight: bold;">ij</sub>) or partial
   waves occupancies (<span style="font-style: italic; font-weight: bold;">&#961;</span><sub style="font-style: italic; font-weight: bold;">ij</sub>).
-  <br><p><b>7.d</b><b>
-  Additional PAW input variables</b></p>Looking at the <a href="../../input_variables/generated_files/varbas.html" target="kwimg">~abinit/doc/input_variables/varbas.html</a>
-  file, you can find input ABINIT keywords specific to PAW. They are to
+
+  <br><p><b>8.d</b><b>
+  Additional PAW input variables</b></p>Looking at the 
+  [[varset:basic|~abinit/doc/input_variables/varset_basic.html]] file, you can find input ABINIT keywords specific to PAW. They are to
   be used when tuning the computation, in order to gain accuracy or save
   CPU time.<br>
   <span style="font-weight: bold;">Warning : in a standard computation, these
@@ -842,9 +859,8 @@ body : |
   exchange-correlation on-site potentials (try pawxcdev=2 to increase
   accuracy).<br> [[mqgriddg]]: control the
   accuracy of spline fits to transfer densities/potentials from FFT grid
-  to spherical grid.<br> <a href="../../input_variables/generated_files/varpaw.html#pawnzlm" target="kwimgk">pawnzlm</a>: control the
-  computation of moments of spherical densities that should be zero by
-  symmetry. </div>
+  to spherical grid.
+  <br> [[pawnzlm]]: control the computation of moments of spherical densities that should be zero by symmetry. </div>
   
   <br> Variables that can be used to save memory (in
   ascending order of importance):<br>
@@ -866,7 +882,7 @@ body : |
   size of fine FFT grid for a given value of pawecutdg. </div><div style="margin-left: 40px;"> </div><p>The above list is not exhaustive. several other keywords can be used to tune ABINIT PAW calculations.</p>
   <p><b><br>
   </b></p>
-  <p><b>7.e</b><b> PAW+U</b></p>
+  <p><b>8.e</b><b> PAW+U</b></p>
   If the system under study contains strongly correlated electrons, 
   the&nbsp;<span style="font-style: italic; font-weight: bold;">LDA+U</span> method can be useful. 
   It is controlled by the&nbsp;

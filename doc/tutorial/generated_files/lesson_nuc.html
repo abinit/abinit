@@ -5,6 +5,17 @@
 <html>
 <head><title>Lesson on properties at the nuclei</title>
 <link rel=stylesheet type="text/css" href="../formabinit.css">
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  jax: ["input/TeX","output/HTML-CSS"],
+  tex2jax: {inlineMath: [['$','$']]},
+  displayAlign: "center",
+  TeX: { equationNumbers: { autoNumber: "AMS" } }
+});
+</script>
+<script type="text/javascript" async
+src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
 </head>
 <body bgcolor="#ffffff">
 
@@ -20,8 +31,8 @@ observables of interest in Moessbauer, NMR, and NQR spectroscopy,
 namely:
 <ul>
 <li>the electric field gradient,
-<li>the isomer shift,
-<li>and the electronic density itself.
+<li>the isomer shift (not yet available),
+<li>and the electronic density itself (not yet available).
 </ul>
 
 <p>This lesson should take about 1 hour.
@@ -33,34 +44,16 @@ namely:
 <script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
 
 <a name="list"></a>
-<h3><b> Lesson on properties at the nuclei, table of content:</b></h3>
+<h3><b> Lesson on properties at the nuclei. Table of content:</b></h3>
 
-<ul>
-  <li><a href="#efg">1.</a>
-    Electric field gradient
-<!--
-  <li><a href="#isomer">2.</a>
-    Moessbauer isomer shift
-  <li><a href="#density">3.</a>
-    Electronic density
--->
-</ul>
+<ul> 
+  <li>1. <a href="#efg">Electric field gradient</a></li>
 
-<p><i>Before beginning, you might consider working in a different
-subdirectory than the other tutorials, for example "work_nuc".
-</i>
-
-<hr>
-
-<a name="efg">&nbsp;</a>
-<h3><b>
-1.
-Computing the electric field gradient at the
-nuclear positions.
-</b></h3>
-
-<p>
-Various spectroscopies, including nuclear magnetic resonance and nuclear quadrupole
+ </ul> 
+ <hr><br><a name="efg"> </a>
+<a name="1"> </a>
+<h3><b>1. Electric field gradient</b></h3>
+ <p>Various spectroscopies, including nuclear magnetic resonance and nuclear quadrupole
 resonance (NMR and NQR), as well as Moessbauer spectroscopy, show spectral features
 arising from the electric field gradient at the nuclear sites. Note that the electric
 field gradient (EFG) considered here arises from the distribution of charge within the
@@ -171,6 +164,8 @@ valence part, efg_el, is quite small, while the ionic part and
 the on-site PAW part are larger. In fact, the PAW part is largest--this
 is why these calculations give very poor results with norm-conserving
 pseudopotentials, and need the full accuracy of PAW.
+<br><br><a href=#top>Go to the top</a>
+<hr>
 <script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
 
 </body>

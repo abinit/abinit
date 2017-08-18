@@ -1,6 +1,7 @@
-# This YAML file contains the introduction as well as the body (including the table of content) of the html lesson.
-# In order to modify the other parts, modify the file lessons.html .
-# This is the introduction ...
+## This YAML file contains the introduction as well as the body of the html lesson.
+## In order to modify the other parts, modify the file lessons.html .
+
+## This is the introduction ...
 intro : |
   <p>This lesson aims at showing how to obtain self-energy corrections to the DFT Kohn-Sham eigenvalues 
   within the GW approximation, in the metallic case, without the use of a plasmon-pole model. 
@@ -25,36 +26,25 @@ intro : |
   A brief description of the equations implemented in the code can be found in the <a href="../../theory/generated_files/theorydoc_mbt.html">GW_notes</a>.
   <p>
   Also, it is suggested to
-  <a href="../../bibliography/generated_files/acknowledgments.html">acknowledge<a> the efforts of developers of the GW part of ABINIT,
-  by citing
-  <ul><li>
-  <cite>
-  X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon,
-  R. Caracas, F. Jollet, M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez,
-  M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval, L. Reining,
-  R. Godby, G. Onida, D.R. Hamann, and D.C. Allan.
-  Zeit. Kristallogr. 220, 558-562 (2005).</cite>
-  </ul>
-  
-  
+  [[bib:acknow#b|acknowledge]] the efforts of developers of the GW part of ABINIT,
+  by citing [[Gonze2005|2005 ABINIT publication]].
+
   <p>
   The user should be familiarized with the four basic lessons of ABINIT, see the <a href="lesson_welcome.html">tutorial home page</a>,
   as well as the <a href="lesson_gw1.html">first lesson on GW</a>.
   
   <p>This lesson should take about one hour to be completed (also including the reading of Bruneval[2006] and Lebegue[2003]).
-# This is the body, including the table of content ...
-body : |
-  <ul>
-    <li><a href="#1">1.</a> The preliminary Kohn-Sham band structure calculation.
-    <li><a href="#2">2.</a> Calculation of the screening file.
-    <li><a href="#3">3.</a> Finding the Fermi energy and the bottom of the valence band.
-    <li><a href="#4">4.</a> Computing a GW spectral function, and the plasmon satellite of Aluminum.
-  </ul>
-  <hr>
-  <h4><a name="1"></a></h4>
-  <h3><b> 1. The preliminary Kohn-Sham band structure calculation. </b></h3>
-  
-  <p><i>Before beginning, you might consider to work in a different subdirectory
+
+## Now come the different sections, numbered.
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec1:
+ title: "The preliminary Kohn-Sham band structure calculation"
+ tag: KS
+ body: |
+  <i>Before beginning, you might consider to work in a different subdirectory
     as for the other lessons. Why not "Work_gw2" ?</i>
   
   <p>
@@ -98,10 +88,15 @@ body : |
   <p>
   
   <hr>
-  <h3><p><b><a name="2">2.</a>
-  Calculation of the screening file.
-  </b></h3>
-  <p>
+
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec2:
+ title: "Calculation of the screening file"
+ tag: screening
+ body: |
   In order not to lose time, let us start the calculation of the screening file before
   the examination of the corresponding input file.
   So, copy the file tgw2_2.in, and modify the tgw2_x.files file as usual (replace occurrences of twg2_x by tgw2_2).
@@ -150,10 +145,15 @@ body : |
   is usually larger.
   
   <hr>
-  <h3><p><b><a name="3">3.</a>
-  Finding the Fermi energy and the bottom of the valence band.
-  </b></h3>
-  <p>
+
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec3:
+ title: "Finding the Fermi energy and the bottom of the valence band"
+ tag: fermi
+ body: |
   In order not to lose time, let us start the calculation of the band width before the study of the input file.
   So, copy the file tgw2_3.in, and modify the tgw3_x.files file as usual (replace occurrences of twg2_x by tgw2_3).
   Also, copy the WFK file (tgw2_1o_WFK) to tgw2_3i_WFK, and the screening
@@ -218,11 +218,15 @@ body : |
   This is in excellent agreement with the experimental value of 10.6 eV.
   
   <hr>
-  <h3><p><b><a name="4">4.</a>
-  Computing a GW spectral function, and the plasmon satellite of Aluminum.
-  </b></h3>
-  
-  <p>
+
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec4:
+ title: "Computing a GW spectral function, and the plasmon satellite of Aluminum"
+ tag: spectral
+ body: |
   The access to the non-plasmon-pole-model self-energy (real and imaginary part) has additional benefit,
   e.g. an accurate spectral function can be computed, see Lebegue[2003].
   You may be interested to see the plasmon satellite of Aluminum, which can be accounted for within the GW approximation.
@@ -256,7 +260,7 @@ body : |
   the real part of the self-energy, the imaginary part of the self-energy, and the spectral function.
   You can visualize it using your preferred software. For instance, issue
   <pre>
-  $ gnuplot
+  >>> gnuplot
   gnuplot&#62  p'tgw2_4o_SIG' u 1:4 w l
   </pre>
   You should be able to distinguish the main quasiparticle peak located at the GW energy (-3.7 eV) and

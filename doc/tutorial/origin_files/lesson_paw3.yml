@@ -1,6 +1,7 @@
-# This YAML file contains the introduction as well as the body (including the table of content) of the html lesson.
-# In order to modify the other parts, modify the file lessons.html .
-# This is the introduction ...
+## This YAML file contains the introduction as well as the body of the html lesson.
+## In order to modify the other parts, modify the file lessons.html .
+
+## This is the introduction ...
 intro : |
   <p>This tutorial will demonstrate how to test a generated
   PAW dataset against an all-electron code. We will be comparing results with
@@ -15,19 +16,17 @@ intro : |
   it is strongly advised that the users familiarise themselves a bit with this code
   before attempting to do similar comparisons with their own datasets.<br>
   <br>This lesson should take about 3h-4h. </p>
-# This is the body, including the table of content ...
-body : |
-  <ul>
-  <li><a href="#1">1.</a> Introduction - the quantities to be compared</li>
-  <li><a href="#2">2.</a> Prerequisites, code components and scripts</li>
-  <li><a href="#3">3.</a> Carbon (diamond) - a first dataset</li>
-  <li><a href="#4">4.</a> Magnesium - issues for metals</li>
-  <li><a href="#5">5.</a> PAW datasets for GW calculations</li>
-  <li><a href="#6">6.</a> Submitting PAW datasets to the ABINIT database</li>
-  </ul>
-  <hr><a name="1">&#160;</a>
-  <h3><b>1. The quantities to be compared</b></h3>
-  <p>When comparing results between all-electron and pseudopotential codes,
+
+## Now come the different sections, numbered.
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec1:
+ title: "Introduction - the quantities to be compared"
+ tag: intro
+ body: |
+  When comparing results between all-electron and pseudopotential codes,
   it is usually impossible to compare total energies. This is because the total
   energy of an all-electron code includes the contribution from the kinetic energy
   of the core orbitals, while in the pseudopotential approach, the only information
@@ -60,9 +59,14 @@ body : |
   would make this tutorial very long, so we shall not do it here. We will now discuss the 
   prerequisites for this tutorial.</p>
   
-  <hr><a name="2">&#160;</a>
-  <h3><b>2. Prerequisites, code components and scripts</b></h3>
-  <p>It is assumed that you are already familiar with the contents and procedures in tutorials <a href="./lesson_paw1.html">PAW1</a> and <a href="./lesson_paw2.html">PAW2</a>, and so have some familiarity with input files for <span style="font-weight: bold; font-style: italic;">atompaw</span>, and the issues in creating PAW datasets. To exactly reproduce the results in this tutorial, you will need:
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec2:
+ title: "Prerequisites, code components and scripts"
+ tag: prerequisites
+ body: |
+  It is assumed that you are already familiar with the contents and procedures in tutorials <a href="./lesson_paw1.html">PAW1</a> and <a href="./lesson_paw2.html">PAW2</a>, and so have some familiarity with input files for <span style="font-weight: bold; font-style: italic;">atompaw</span>, and the issues in creating PAW datasets. To exactly reproduce the results in this tutorial, you will need:
   <br>
   <ul><li>The <span style="font-weight: bold; font-style: italic;">atompaw</span> code for 
   generating PAW datasets. This code is bundled as a plugin in abinit, and it is assumed 
@@ -93,9 +97,14 @@ body : |
   these programs available. It is of course better to use the latest versions, 
   and we simply state the versions of codes used when this tutorial was written so that specific 
   numerical results can be reproduced if necessary.</span></p>
-  
-  <hr><a name="3">&#160;</a>
-  <h3><b>3. Carbon (diamond)</b></h3>
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec3:
+ title: "Carbon (diamond)"
+ tag: diamond
+ body: |
   <a name="3.1"></a>
   <h4><b>3.1 Carbon - a simple datatset</b></h4>
   <p>Make a working directory for the atompaw generation (you could call it 
@@ -309,7 +318,8 @@ body : |
   # maximum diff:     0.000272  eV
   ...
   </pre></p>
-  <hr><a name="3.2">&#160;</a>
+
+  <a name="3.2">&#160;</a>
   <h4><b>3.2 Carbon - calculating the equilibrium lattice parameter</b></h4>
   <p>That we have converged the dataset on its own does of course not mean that the
   dataset is good, i.e. that it reproduces the same results as an all-electron calculation.
@@ -420,7 +430,8 @@ body : |
   </pre>
   at equilibrium for this dataset.</p>
   </pre></p>
-  <hr><a name="3.3">&#160;</a>
+
+  <a name="3.3">&#160;</a>
   <h4><b>3.3 Carbon - the all-electron calculation</b></h4>
   <p>In order to estimate whether these values are good or not, we need independent 
   verification, and this will be provided by the all-electron elk code. There is an 
@@ -782,7 +793,7 @@ body : |
   correct value for the lattice parameter. In principle, these should 
   be about an order of magnitude better, so let us see if we can make it so.
   
-  <hr><a name="3.4">&#160;</a>
+  <a name="3.4">&#160;</a>
   <h4><b>3.4 Carbon - improving the dataset</b></h4>
   <p>Now that you know the target values, is up to you to experiment and see 
   if you can improve this dataset. The techniques are well documented in 
@@ -946,9 +957,13 @@ body : |
   more accurate. You are encouraged to experiment and try to make a better one.
   </span></p>
   
-  <hr><a name="4">&#160;</a>
-  <h3><b>4. Magnesium - dealing with the Fermi energy of a metallic system</b></h3>
-  <p>
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec4:
+ title: "Magnesium - dealing with the Fermi energy of a metallic system"
+ tag: magnesium
+ body: |
   There is added complication if the system is metallic, and that is the treatment 
   of the smearing used in order to eliminated the sharp peaks in the density of 
   states (DOS) near the Fermi energy. The DOS is technically integrated over in 
@@ -974,7 +989,8 @@ body : |
   most importantly, make sure that we match the smearing function used between 
   the elk and the abinit calculation.
   </p>
-  <hr><a name="4.1">&#160;</a>
+
+  <a name="4.1">&#160;</a>
   <h4><b>4.1 Magnesium - The all-electron calculation</b></h4>
   <p>
   There is an elk input file prepared at: <a href="../documents/lesson_paw3/inputs/elk_Mg_band.in">
@@ -1142,7 +1158,8 @@ body : |
   </pre>
   Now we have all the information needed to proceed with the abinit calculation.
   </p>
-  <hr><a name="4.2">&#160;</a>
+
+  <a name="4.2">&#160;</a>
   <h4><b>4.2 Magnesium - The abinit calculation</b></h4>
   <p>
   As usual, it's best to prepare a separate subdirectory for the atomic data
@@ -1312,9 +1329,13 @@ body : |
   You are encouraged to try and do this.
   </span></p>
   
-  <hr><a name="5">&#160;</a>
-  <h3><b>5. PAW datasets for GW calculations</b></h3>
-  <p>
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec5:
+ title: "PAW datasets for GW calculations"
+ tag: GW
+ body: |
   There are a number of issues to consider when making datasets for GW calculations, 
   here is a list of a few:
   <br>
@@ -1333,8 +1354,3 @@ body : |
   of states (DOS), as described in the first PAW <a href="lesson_paw1.html#5">tutorial</a>.</li>
   </ul>
   </br>
-  
-  <hr><a name="6">&#160;</a>
-  <h3><b>6. Submitting your datasets to the ABINIT database</b></h3>
-  
-  <p><span style="font-weight: bold; font-style: italic;"><span style="color: red">TODO:</span> Comments/Discussion with Marc Torrent and Alain Jacques</span></p>

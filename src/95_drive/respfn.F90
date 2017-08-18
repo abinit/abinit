@@ -1009,7 +1009,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
    end if
 
 !  Calculate the kinetic part of the elastic tensor
-   call dfpt_eltfrkin(cg,eltfrkin,dtset%ecut,dtset%ecutsm,dtset%effmass,&
+   call dfpt_eltfrkin(cg,eltfrkin,dtset%ecut,dtset%ecutsm,dtset%effmass_free,&
 &   dtset%istwfk,kg,dtset%kptns,dtset%mband,dtset%mgfft,dtset%mkmem,mpi_enreg,&
 &   dtset%mpw,dtset%nband,dtset%nkpt,ngfft,npwarr,&
 &   dtset%nspinor,dtset%nsppol,occ,rprimd,dtset%wtk)

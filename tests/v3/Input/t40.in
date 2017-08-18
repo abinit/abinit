@@ -79,5 +79,5 @@
 #%%   and 7 and 8 are grouped by pair, such as
 #%%   the sum of their relative separations along y is constrained to 8.0 .
 #%%   This is a crazy constraint, just to show that it can be done !
-#%% topics = GSgeneral, MolecularDynamics
+#%% topics = GeoOpt, MolecularDynamics
 #%%<END TEST_INFO>

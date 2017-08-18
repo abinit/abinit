@@ -108,5 +108,5 @@
 #%%  The temperature-dependent shifts must be averaged over degenerate states.
 #%%  This temperature-dependent calculation make use of a k-point interpolation to speed up
 #%%  the convergence study with respect to the q-points integration. Two q-points are computed.
-#%% topics = TDep
+#%% topics = TDepES
 #%%<END TEST_INFO>

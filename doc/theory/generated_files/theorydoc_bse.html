@@ -5,6 +5,17 @@
 <html>
 <head><title>Bethe-Salpeter equation in ABINIT</title>
 <link rel=stylesheet type="text/css" href="../formabinit.css">
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  jax: ["input/TeX","output/HTML-CSS"],
+  tex2jax: {inlineMath: [['$','$']]},
+  displayAlign: "center",
+  TeX: { equationNumbers: { autoNumber: "AMS" } }
+});
+</script>
+<script type="text/javascript" async
+src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
 </head>
 <body bgcolor="#ffffff">
 
@@ -33,26 +44,19 @@ equation can be found in [1].
 <a name="list"></a>
 <h3><b> Bethe-Salpeter equation in ABINIT. Table of content:</b></h3>
 
-<p>
-</p>
-<ul>
-<li><a href="#optical_properties">1.</a> Optical properties and local field effects
-  </li><li><a href="#BS_equation">2.</a> The Bethe-Salpeter equation in a nutshell
-  </li><li><a href="#BS_solvers">3.</a> Solving the Bethe-Salpeter problem.
-  </li><li><a href="#kernel_mel">4.</a> Kernel matrix elements in reciprocal space 
+<ul> 
+  <li>1. <a href="#optical_properties">Optical properties and local field effects</a></li>
+  <li>2. <a href="#BS_equation">The Bethe-Salpeter equation in a nutshell</a></li>
+  <li>3. <a href="#BS_solvers">Solving the Bethe-Salpeter problem</a></li>
+  <li>4. <a href="#kernel_mel">Kernel matrix elements in reciprocal space</a></li>
+  <li>5. <a href="#dipole_mel">Matrix elements of the dipole operator</a></li>
+  <li>6. <a href="#references">References</a></li>
 
-</li>
-</ul>
-<hr>
-
-
-
-<h4><a name="optical_properties"></a></h4>
-
-<h3><b> 1. Optical properties and local field effects.</b></h3>
-
-<p>
-Before discussing the Bethe-Salpeter problem, it is worth reminding some basic results concerning
+ </ul> 
+ <hr><br><a name="optical_properties"> </a>
+<a name="1"> </a>
+<h3><b>1. Optical properties and local field effects</b></h3>
+ <p>Before discussing the Bethe-Salpeter problem, it is worth reminding some basic results concerning
 the <i>ab initio</i> description of optical properties.
 </p>
 <p>
@@ -128,20 +132,12 @@ unrealistic approximation for the many-body polarizability.
 In the next section we will discuss how to obtain an improved approximation for the vertex 
 and therefore an improved approximation for the polarizability that takes into account many-body effects 
 due to the electron-hole interaction
-
-<br><br><br></p>
-<hr><br>
-
-
-<h4><a name="BS_equation"></a></h4>
-
-
-
-
-<h3><b> 2. The Bethe-Salpeter equation in a nutshell.</b></h3>
-
-<p>
-A schematic picture of the different levels of the description of optical 
+<br><br><a href=#top>Go to the top</a>
+<hr>
+<br><a name="BS_equation"> </a>
+<a name="2"> </a>
+<h3><b>2. The Bethe-Salpeter equation in a nutshell</b></h3>
+ <p>A schematic picture of the different levels of the description of optical 
 spectra available in ABINIT is given below.
 </p>
 <p style="text-align: center;">
@@ -325,7 +321,7 @@ although the operator possesses a real spectrum.
 <p>
 The inclusion of spin in the formalism would require an extensive discussion on its own. 
 Here, for simplicity, we limit the analysis to the case of spin unpolarized semiconductors
-(<a href="../../input_variables/generated_files/varbas.html#nsppol">nsppol</a>=1).
+(<a href="../../input_variables/generated_files/varset_basic.html#nsppol">nsppol</a>=1).
 In this particular case, the matrix elements of the resonant block are given by
 
 </p>
@@ -388,7 +384,7 @@ Under this assumption the excitonic Hamiltonian is given by a Hermitian operator
 </p>
 
 
-The variable <a href="../../input_variables/generated_files/varbse.html#bs_coupling">bs_coupling</a> defines
+The variable <a href="../../input_variables/generated_files/varset_bse.html#bs_coupling">bs_coupling</a> defines
 whether the coupling block should be included in the calculation.
 
 <p>
@@ -422,23 +418,13 @@ is the matrix element of the dipole operator in transition space.
 By default the code calculates the macroscopic dielectric function taking the limit along 
 six different directions in <b>q</b>-space (the three basis vectors of the reciprocal lattice and the three Cartesian
 axis). It is possible to change the default directions using the variables
-<a href="../../input_variables/generated_files/vargw.html#gw_nqlwl">gw_nqlwl</a> and 
-
-<a href="../../input_variables/generated_files/vargw.html#gw_qlwl">gw_qlwl</a>. 
-
-<br><br><br></p>
-<hr><br>
-
-
-<h4><a name="BS_solvers"></a></h4>
-
-<h3><b> 3. Solving the Bethe-Salpeter problem.</b></h3>
-
-
-
-
-<p>
-At this point it is clear that the evaluation of the macroscopic dielectric function within
+<a href="../../input_variables/generated_files/varset_gw.html#gw_nqlwl">gw_nqlwl</a> and <a href="../../input_variables/generated_files/varset_gw.html#gw_qlwl">gw_qlwl</a>. 
+<br><br><a href=#top>Go to the top</a>
+<hr>
+<br><a name="BS_solvers"> </a>
+<a name="3"> </a>
+<h3><b>3. Solving the Bethe-Salpeter problem</b></h3>
+ <p>At this point it is clear that the evaluation of the macroscopic dielectric function within
 the BS formalism is a two-step process:
 
 </p>
@@ -468,7 +454,7 @@ The flowchart of a typical Bethe-Salpeter run is schematically depicted in the d
 
 The KSS file is represented with an ellipsis. 
 The path on the left indicated with blue arrows represents the RPA calculation 
-(<a href="../../input_variables/generated_files/vargs.html#optdriver">optdriver</a>=3)
+(<a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>=3)
 that produces the SCR file (see also the <a href="../../tutorial/generated_files/lesson_gw1.html">first lesson</a> of the GW tutorial).
 Once the KSS and the SCR file are available, we can finally contruct the Hamiltonian and solve the
 Bethe-Salpeter problem (the rectangle at the bottom of the flowchart).
@@ -481,7 +467,7 @@ The scissors operator allows one to avoid a costly <i>GW</i> calculation that sh
 
 <b>k</b>-points and bands included in the transition space
 (the optional path on the right indicated with yellow arrows that 
-corresponds to <a href="../../input_variables/generated_files/vargs.html#optdriver">optdriver</a>=4).
+corresponds to <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>=4).
 </p>
 <p>
 The construction of the Hamiltonian matrix represents a significant portion of the overall CPU time 
@@ -493,11 +479,11 @@ numerical difficulties since an expensive matrix inversion should be performed f
 </p>
 <p>
 The code implements different methods proposed in the literature to avoid the matrix inversion for each frequency.
-The variable <a href="../../input_variables/generated_files/varbse.html#bs_algorithm">bs_algorithm</a> is used to select 
+The variable <a href="../../input_variables/generated_files/varset_bse.html#bs_algorithm">bs_algorithm</a> is used to select 
 among the different possibilities.
 </p>
 <p>
-<a href="../../input_variables/generated_files/varbse.html#bs_algorithm">bs_algorithm</a>=1
+<a href="../../input_variables/generated_files/varset_bse.html#bs_algorithm">bs_algorithm</a>=1
 employs standard (Sca)LAPACK routines to obtain the spectral representation of <i>H</i> 
 in terms of eigenvalues and right eigenvectors of <i>H</i>:
 
@@ -513,7 +499,7 @@ Then, as discussed in [2], the inverse of [<i>H</i>-&#969;] is obtained accordin
 We do not elaborate this point further since the direct diagonalization is advantageous only in particular circumstances, 
 as explained in the documentation.
 <p>
-<a href="../../input_variables/generated_files/varbse.html#bs_algorithm">bs_algorithm</a>=2
+<a href="../../input_variables/generated_files/varset_bse.html#bs_algorithm">bs_algorithm</a>=2
 avoids the diagonalization using an iterative algorithm that constructs a basis
 set in which <i>H</i> is represented by a real symmetric tridiagonal matrix [3].
 Without entering into detail, one can schematically represent the Haydock technique as an algorithmic procedure 
@@ -529,7 +515,7 @@ evaluated in terms of the continued fraction:
 <p align="center"><img style="width: 380px; height: 147px;" src="../documents/theory_bse/cfact.png"></p>
 
 
-where a small complex shift, defined by <a href="../../input_variables/generated_files/vargw.html#zcut">zcut</a>,
+where a small complex shift, defined by <a href="../../input_variables/generated_files/varset_gw.html#zcut">zcut</a>,
 is used to avoid the singularities along the real axis.
 The number of iteration required to converge is almost independent on the size of the problem, usually of the 
 order of 100-200 iterations.
@@ -548,23 +534,19 @@ The main drawback of the method is that it does not give direct access
 to the excitonic spectrum
 hence it cannot be used to calculate binding energies or to plot the
 excitonic wavefunctions.
-Moreover, for the time being, <a href="../../input_variables/generated_files/varbse.html#bs_algorithm">bs_algorithm</a>=2
+Moreover, for the time being, <a href="../../input_variables/generated_files/varset_bse.html#bs_algorithm">bs_algorithm</a>=2
 cannot be used for calculations in which the coupling term is included.
 </p>
 <p>
-<a href="../../input_variables/generated_files/varbse.html#bs_algorithm">bs_algorithm</a>=3 employs the conjugate-gradient method
+<a href="../../input_variables/generated_files/varset_bse.html#bs_algorithm">bs_algorithm</a>=3 employs the conjugate-gradient method
 to calculate the lowest eigenstates of the Hamiltonian. 
 At present, this method is still under testing and does not support calculations with the coupling term.
-
-
-</p>
-<h4><a name="kernel_mel"></a></h4>
-
-<h3><b> 4. Kernel matrix elements in reciprocal space.</b></h3>
-
-
-
-Our implementation employs planewaves to expand the periodic part of the Bloch states, <i>u</i>,
+<br><br><a href=#top>Go to the top</a>
+<hr>
+<br><a name="kernel_mel"> </a>
+<a name="4"> </a>
+<h3><b>4. Kernel matrix elements in reciprocal space</b></h3>
+ <p>Our implementation employs planewaves to expand the periodic part of the Bloch states, <i>u</i>,
 and the two-point function <i>W(r,r')</i> that becomes a <b>q</b>-dependent matrix in reciprocal-space.
 The conventions used for the transforms are documented in <a href="theorydoc_mbt.html#notations">this
 section</a> of the <i>GW</i> notes.
@@ -583,19 +565,19 @@ while the Coulomb term is calculated according to
 
 
 The number of <b>G</b>-vectors in W and in the modified Coulomb interaction is specified through 
-<a href="../../input_variables/generated_files/vargw.html#ecuteps">ecuteps</a>
+<a href="../../input_variables/generated_files/varset_gw.html#ecuteps">ecuteps</a>
 while the wavefuctions entering the oscillator matrix elements are expanded on a <b>G</b>-sphere of energy  
-<a href="../../input_variables/generated_files/vargw.html#ecutwfn">ecutwfn</a>.
+<a href="../../input_variables/generated_files/varset_gw.html#ecutwfn">ecutwfn</a>.
 The computation of the oscillator matrix elements is discussed in 
 
 <a href="theorydoc_mbt.html#oscillator_notes">this section</a> of the <i>GW</i> Notes.
 
 <p>
-The input variable <a href="../../input_variables/generated_files/varbse.html#bs_exchange_term">bs_exchange_term</a>
+The input variable <a href="../../input_variables/generated_files/varset_bse.html#bs_exchange_term">bs_exchange_term</a>
 can be used to disable the computation of the exchange term, this
 option is mainly used for performing optical calculations without local
 field effects.
-The variable <a href="../../input_variables/generated_files/varbse.html#bs_coulomb_term">bs_coulomb_term</a> governs 
+The variable <a href="../../input_variables/generated_files/varset_bse.html#bs_coulomb_term">bs_coulomb_term</a> governs 
 the computation of the Coulomb term, the most CPU-demanding part due to the presence of the double sum over <b>G</b>-vectors.
 </p>
 <p>
@@ -605,14 +587,12 @@ Brillouin zone hence the size of the Hamiltonian is defined by the number of poi
 Brillouin zone and not by the number of points in the irreducible wedge.
 
 </p>
-<h4><a name="dipole_mel"></a></h4>
-
-<h3><b> 3 Matrix elements of the dipole operator.</b></h3>
-
-
-
-
-The accurate calculation of optical properties require the correct treatment 
+<br><br><a href=#top>Go to the top</a>
+<hr>
+<br><a name="dipole_mel"> </a>
+<a name="5"> </a>
+<h3><b>5. Matrix elements of the dipole operator</b></h3>
+ <p>The accurate calculation of optical properties require the correct treatment 
 of the optical limit (<b>G</b>=0, <b>q</b> &#8594; 0) of the oscillator matrix elements. 
 The computation of these terms deserves some  clarification, due to the presence of the fully nonlocal pseudopotential 
 term in the Kohn-Sham Hamiltonian.
@@ -647,7 +627,7 @@ For this reason, the first order contribution has to be evaluated using the equi
 
 
 The term involving the momentum operator is efficiently evaluated in reciprocal space with linear
-scaling in <a href="../../input_variables/generated_files/varint.html#npwwfn">npwwfn</a>
+scaling in <a href="../../input_variables/generated_files/varset_internal.html#npwwfn">npwwfn</a>
 while the treatment of the nonlocal part of the pseudopotential is more involved and much more CPU-demanding.
 <p>
 
@@ -660,7 +640,7 @@ part of the  pseudopotential.
 </p>
 <p>
 For this reason it is common practice, especially during the <i>GW</i> convergence tests,
-to neglect this contribution by setting <a href="../../input_variables/generated_files/vargw.html#inclvkb">inclvkb</a>=0.
+to neglect this contribution by setting <a href="../../input_variables/generated_files/varset_gw.html#inclvkb">inclvkb</a>=0.
 Strictly speaking, however, this approximation is justified only in the case of calculations in
 bulk crystals provided that the BZ sampling is well converged.
 Particular care has to be taken when performing <i>GW</i> calculations in non-periodic systems due to the 
@@ -671,16 +651,15 @@ reduced dimensionality of the BZ.
 
 Please note that the commutator of the nonlocal part should ALWAYS be included
 when studying optical properties, both at the RPA and at the BS level.
-We suggest the use of <a href="../../input_variables/generated_files/vargw.html#inclvkb">inclvkb</a>=2 that is 
+We suggest the use of <a href="../../input_variables/generated_files/varset_gw.html#inclvkb">inclvkb</a>=2 that is 
 faster and less memory demanding than the algorithm coded for
-<a href="../../input_variables/generated_files/vargw.html#inclvkb">inclvkb</a>=1.
-
-</p>
-<h3><p><b><a name="references">References</a>
-</b></p></h3>
-
-
-<ol>
+<a href="../../input_variables/generated_files/varset_gw.html#inclvkb">inclvkb</a>=1.
+<br><br><a href=#top>Go to the top</a>
+<hr>
+<br><a name="references"> </a>
+<a name="6"> </a>
+<h3><b>6. References</b></h3>
+ <p><ol>
 <li><a name="onida_rmp">G. Onida, L. Reining, and A. Rubio, Rev. Mod. Phys. <b>48</b>, 601 (2002)
 and references therein</a> </li><li><a name="albrecth">S. Albrecht, Ph.D. thesis, Ecole Polytechnique, Palaiseau (Paris), 1999</a> </li><li><a name="haydock2">R. Haydock, Comput. Phys. Comm. <b>20</b>, 11 (1980)</a> </li><li><a name="gruning">M. Gruning, A. Marini and X. Gonze, Nano Letters <b>9</b>, 2820 (2009) </a></li><li><a name="baroni1986">S. Baroni and R. Resta, Phys. Rev. B <b>33</b>, 7017 (1986) </a></li><!--
 <li><a name="benedict">L. X. Benedict and E. L. Shirley, Phys. Rev. B <b>59</b>, 5441 (1999)</a> </li>
@@ -688,6 +667,8 @@ and references therein</a> </li><li><a name="albrecth">S. Albrecht, Ph.D. thesis
 <li><a name="wiser">N. Wiser, Phys. Rev. <b>129</b>, 72 (1963)</a> </li>
 -->
 </ol>
+<br><br><a href=#top>Go to the top</a>
+<hr>
 <script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
 
 </body>

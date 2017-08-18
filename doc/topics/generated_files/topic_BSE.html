@@ -5,6 +5,17 @@
 <html>
 <head><title>Bethe-Salpeter calculations </title>
 <link rel=stylesheet type="text/css" href="../formabinit.css">
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  jax: ["input/TeX","output/HTML-CSS"],
+  tex2jax: {inlineMath: [['$','$']]},
+  displayAlign: "center",
+  TeX: { equationNumbers: { autoNumber: "AMS" } }
+});
+</script>
+<script type="text/javascript" async
+src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
 </head>
 <body bgcolor="#ffffff">
 
@@ -12,7 +23,7 @@
 <a name="top"></a>
 
 <h1>Bethe-Salpeter calculations</h1>
-<h3>This file gives hints on how to perform a Bethe-Salpeter calculation with the ABINIT package.
+<h3>This page gives hints on how to perform a Bethe-Salpeter calculation of neutral excitation energies and dielectric function with the ABINIT package.
 <hr>
 
 <h5>Copyright (C) 2016-2017 ABINIT group (MG)
@@ -21,8 +32,10 @@
 
 <script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
 
+ Mentioned in &nbsp; <a href="../../topics/generated_files/topic_Optic.html">topic_Optic</a> &nbsp;&nbsp; <a href="../../topics/generated_files/topic_Susceptibility.html">topic_Susceptibility</a> &nbsp;&nbsp; <a href="../../users/generated_files/help_features.html#7">help_features#7</a> &nbsp;
+ <hr>
  <h3><b>Table of content: </b></h3> 
- <ul> <li><a href="topic_BSE.html#1">1</a>. Introduction.<li><a href="topic_BSE.html#2">2</a>. Related lesson(s) of the tutorial.<li><a href="topic_BSE.html#3">3</a>. Related input variables.<li><a href="topic_BSE.html#4">4</a>. Selected input files.<li><a href="topic_BSE.html#5">5</a>. References.</ul>
+ <ul> <li>1. <a href="topic_BSE.html#1">Introduction.</a><li>2. <a href="topic_BSE.html#2">Related lesson(s) of the tutorial.</a><li>3. <a href="topic_BSE.html#3">Related input variables.</a><li>4. <a href="topic_BSE.html#4">Selected input files.</a><li>5. <a href="topic_BSE.html#5">References.</a></ul>
 
 &nbsp; 
 <HR ALIGN=left> 
@@ -30,44 +43,44 @@
 <h3><b>1. Introduction.</b></h3>
 
 
-<p>Many-Body Perturbation Theory (MBPT <a href="../../bibliography/generated_files/bibliography.html#Onida2002">[Onida2002]</a>) defines a rigorous framework for the description of 
+<p>Many-Body Perturbation Theory (MBPT <a href="../../biblio/generated_files/bib_biblio.html#Onida2002">[Onida2002]</a>) defines a rigorous framework for the description of 
 excited-state properties based on the Green's function formalism.
 Within MBPT, one can calculate charged excitations (i.e. electron addition and removal energies), 
-using for example Hedin's GW approximation <a href="../../bibliography/generated_files/bibliography.html#Hedin1965">[Hedin1965]</a> for the electron self-energy. 
+using for example Hedin's GW approximation <a href="../../biblio/generated_files/bib_biblio.html#Hedin1965">[Hedin1965]</a> for the electron self-energy. 
 In the same framework, neutral excitations (experimentally related to optical absorption spectra) 
-are also well described through the solution of the Bethe-Salpeter equation (BSE <a href="../../bibliography/generated_files/bibliography.html#Onida2002">[Onida2002]</a>,<a href="../../bibliography/generated_files/bibliography.html#Albrecht1998">[Albrecht1998]</a>).
+are also well described through the solution of the Bethe-Salpeter equation (BSE <a href="../../biblio/generated_files/bib_biblio.html#Onida2002">[Onida2002]</a>,<a href="../../biblio/generated_files/bib_biblio.html#Albrecht1998">[Albrecht1998]</a>).
 At present, the BSE represents the most accurate approach for the ab initio study of neutral excitations
 in crystalline systems as it includes the attractive interaction between electrons and holes
 thus going beyond the random-phase approximation (RPA) employed in the GW approximation.
-<p>The BSE implementation in ABINIT is discussed in the review article <a href="../../bibliography/generated_files/bibliography.html#Giantomassi2011">[Giantomassi2011]</a>.
-<p>BSE calculations are activated by setting <a href="../../input_variables/generated_files/vargs.html#optdriver">optdriver</a>= 99.
+<p>The BSE implementation in ABINIT is discussed in the review article <a href="../../biblio/generated_files/bib_biblio.html#Giantomassi2011">[Giantomassi2011]</a>.
+<p>BSE calculations are activated by setting <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>= 99.
 The number of valence and conduction states in the e-h basis set is controlled by 
-the variables <a href="../../input_variables/generated_files/varbse.html#bs_loband">bs_loband</a> and <a href="../../input_variables/generated_files/varbas.html#nband">nband</a>, respectively.
+the variables <a href="../../input_variables/generated_files/varset_bse.html#bs_loband">bs_loband</a> and <a href="../../input_variables/generated_files/varset_basic.html#nband">nband</a>, respectively.
 By default, the code solves the BSE in the so-called Tamm-Dancoff approximation (TDA) in which 
 the coupling between resonant and anti-resonant transitions is ignored.
-A full BSE calculation including the coupling term can be done by setting <a href="../../input_variables/generated_files/varbse.html#bs_coupling">bs_coupling</a>= 1 in the input file.
-The variable <a href="../../input_variables/generated_files/varbse.html#bs_coulomb_term">bs_coulomb_term</a> specifies the treatment of the screened interaction in the BSE kernel. 
-By default, the code reads the W matrix from the SCR file generated by the GW code (<a href="../../input_variables/generated_files/vargs.html#optdriver">optdriver</a>= 3).
+A full BSE calculation including the coupling term can be done by setting <a href="../../input_variables/generated_files/varset_bse.html#bs_coupling">bs_coupling</a>= 1 in the input file.
+The variable <a href="../../input_variables/generated_files/varset_bse.html#bs_coulomb_term">bs_coulomb_term</a> specifies the treatment of the screened interaction in the BSE kernel. 
+By default, the code reads the W matrix from the SCR file generated by the GW code (<a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>= 3).
 Alternatively, one can model the spatial dependency of W with the model dielectric 
-function proposed by Cappellini <a href="../../bibliography/generated_files/bibliography.html#Cappellini1993">[Cappellini1993]</a>.
-This option requires the specification of <a href="../../input_variables/generated_files/varbse.html#bs_coulomb_term">bs_coulomb_term</a>= 21 and <a href="../../input_variables/generated_files/vargw.html#mdf_epsinf">mdf_epsinf</a>.
-The contribution due to the exchange term can be optionally excluded by using <a href="../../input_variables/generated_files/varbse.html#bs_exchange_term">bs_exchange_term</a>= 0.
+function proposed by Cappellini <a href="../../biblio/generated_files/bib_biblio.html#Cappellini1993">[Cappellini1993]</a>.
+This option requires the specification of <a href="../../input_variables/generated_files/varset_bse.html#bs_coulomb_term">bs_coulomb_term</a>= 21 and <a href="../../input_variables/generated_files/varset_gw.html#mdf_epsinf">mdf_epsinf</a>.
+The contribution due to the exchange term can be optionally excluded by using <a href="../../input_variables/generated_files/varset_bse.html#bs_exchange_term">bs_exchange_term</a>= 0.
 This is equivalent to computing the macroscopic dielectric function without local field effects.
-The frequency mesh for the macroscopic dielectric function is specified by <a href="../../input_variables/generated_files/varbse.html#bs_freq_mesh">bs_freq_mesh</a>
-while <a href="../../input_variables/generated_files/vargw.html#zcut">zcut</a> defines the complex shift to avoid the divergences due to the presence 
+The frequency mesh for the macroscopic dielectric function is specified by <a href="../../input_variables/generated_files/varset_bse.html#bs_freq_mesh">bs_freq_mesh</a>
+while <a href="../../input_variables/generated_files/varset_gw.html#zcut">zcut</a> defines the complex shift to avoid the divergences due to the presence 
 of poles along the real axis (from a physical standpoint, this parameter is related to the electron lifetimes).
-In addition, a scissor operator of energy <a href="../../input_variables/generated_files/vargw.html#mbpt_sciss">mbpt_sciss</a> can be used to correct the initial band energies and mimic
+In addition, a scissor operator of energy <a href="../../input_variables/generated_files/varset_gw.html#mbpt_sciss">mbpt_sciss</a> can be used to correct the initial band energies and mimic
 the opening of the KS gap introduced by the GW approximation.
 <p>Three different algorithms for the solution of the BSE are implemented:
 <li>(1) Direct diagonalization,</li> 
 <li>(2) Haydock recursive algorithm,</li>
 <li>(3) Conjugate gradient eigensolver.</li>
-The <a href="../../input_variables/generated_files/varbse.html#bs_algorithm">bs_algorithm</a> input variable allows the user to choose among them.
-The Haydock algorithm <a href="../../bibliography/generated_files/bibliography.html#Haydock1980">[Haydock1980]</a>,<a href="../../bibliography/generated_files/bibliography.html#Benedict1998">[Benedict1998]</a> is the recommended approach for the computation of optical spectra.
-The variables <a href="../../input_variables/generated_files/varbse.html#bs_haydock_niter">bs_haydock_niter</a> and <a href="../../input_variables/generated_files/varbse.html#bs_haydock_tol">bs_haydock_tol</a> control the Haydock iterative method.
+The <a href="../../input_variables/generated_files/varset_bse.html#bs_algorithm">bs_algorithm</a> input variable allows the user to choose among them.
+The Haydock algorithm <a href="../../biblio/generated_files/bib_biblio.html#Haydock1980">[Haydock1980]</a>,<a href="../../biblio/generated_files/bib_biblio.html#Benedict1998">[Benedict1998]</a> is the recommended approach for the computation of optical spectra.
+The variables <a href="../../input_variables/generated_files/varset_bse.html#bs_haydock_niter">bs_haydock_niter</a> and <a href="../../input_variables/generated_files/varset_bse.html#bs_haydock_tol">bs_haydock_tol</a> control the Haydock iterative method.
 <p>Unfortunately, the Haydock solver does not give direct access to the eigenstates of the Hamiltonian, hence 
 it cannot be used for the study of the excitonic wavefunctions.
-The conjugate gradient (CG) method employs standard iterative techniques <a href="../../bibliography/generated_files/bibliography.html#Payne1992">[Payne1992]</a> to compute the lowest eigenstates 
+The conjugate gradient (CG) method employs standard iterative techniques <a href="../../biblio/generated_files/bib_biblio.html#Payne1992">[Payne1992]</a> to compute the lowest eigenstates 
 of the BSE Hamiltonian.
 This solver is more memory demanding than the Haydock approach since the eigenstates must be stored in memory, but it gives 
 direct access to the excitonic states.
@@ -75,18 +88,20 @@ direct access to the excitonic states.
 smaller than the size of the BSE Hamiltonian.
 <p>Note, however, that CG has been implemented only for TDA calculations (Hermitian matrices).
 
-
 <p>The most important results of the calculation are saved in five different files.
 The BSR file stores the upper triangle of the BSE resonant block in Fortran binary format (BSC for the coupling matrix).
 The HAYDR_SAVE file contains the coefficients of the tridiagonal matrix and the three vectors employed in the
 iterative algorithm. This file can be used to restart the calculation if convergence has not been achieved 
-(related input variables <a href="../../input_variables/generated_files/varfil.html#gethaydock">gethaydock</a> and <a href="../../input_variables/generated_files/varfil.html#irdhaydock">irdhaydock</a>). 
+(related input variables <a href="../../input_variables/generated_files/varset_files.html#gethaydock">gethaydock</a> and <a href="../../input_variables/generated_files/varset_files.html#irdhaydock">irdhaydock</a>). 
 Finally, the macroscopic dielectric function with excitonic effects is reported in the EXC_MDF file while
 RPA_NLF_MDF and GW_NLF_MDF contain the RPA spectrum without local field effects 
 obtained with KS energies and the GW energies, respectively. 
 <p>Different schemes with different degrees of accuracy and computational load are
-available in ABINIT [[Gillet2015] in order to improve the convergence rate of BSE calculations. They are are available in ABINITv8 with the
-bs_interp_* input variables.
+available in ABINIT <a href="../../biblio/generated_files/bib_biblio.html#Gillet2015">[Gillet2015]</a> in order to improve the convergence rate of BSE calculations. 
+They are are available in ABINITv8 with the bs_interp_* input variables.
+<p> In the non-spin-polarized case, spin-singlet as well as spin-triplet excitations are computed. Spin-polarized case is also available.
+<br><br><a href=#top>Go to the top</a>
+
 
 
 &nbsp; 
@@ -98,40 +113,46 @@ bs_interp_* input variables.
 <li><a href="../../tutorial/generated_files/lesson_bse.html">The lesson on the Bethe-Salpeter Equation (BSE)</a> deals with the
 computation of the macroscopic dielectric function of Silicon within
 the Bethe-Salpeter equation. </li>
+<br><br><a href=#top>Go to the top</a>
+
 
 &nbsp; 
-<HR ALIGN=left> 
+<hr> 
 <a name="3">&nbsp;</a>
 <h3><b>3. Related input variables.</b></h3>
 
 
-<p>Compulsory input variables:<p>... <a href="../../input_variables/generated_files/varbse.html#bs_loband">bs_loband</a>   [Bethe-Salpeter Lowest Occupied BAND]<br>
-... <a href="../../input_variables/generated_files/vargs.html#optdriver">optdriver</a>   [OPTions for the DRIVER]<br>
-<p>Basic input variables:<p>... <a href="../../input_variables/generated_files/varbse.html#bs_algorithm">bs_algorithm</a>   [Bethe-Salpeter ALGORITHM]<br>
-... <a href="../../input_variables/generated_files/varbse.html#bs_freq_mesh">bs_freq_mesh</a>   [Bethe-Salpeter FREQuency MESH]<br>
-... <a href="../../input_variables/generated_files/varbse.html#bs_interp_mode">bs_interp_mode</a>   [Bethe-Salpeter INTERPolation MODE]<br>
-... <a href="../../input_variables/generated_files/varbse.html#bs_nstates">bs_nstates</a>   [Bethe-Salpeter Number of STATES]<br>
-<p>Useful input variables:<p>... <a href="../../input_variables/generated_files/varbse.html#bs_coupling">bs_coupling</a>   [Bethe-Salpeter COUPLING]<br>
-... <a href="../../input_variables/generated_files/varbse.html#bs_interp_kmult">bs_interp_kmult</a>   [Bethe-Salpeter INTERPolation K-point MULTiplication factors]<br>
-... <a href="../../input_variables/generated_files/varbse.html#bs_interp_m3_width">bs_interp_m3_width</a>   [Bethe-Salpeter INTERPolation Method3 WIDTH]<br>
-... <a href="../../input_variables/generated_files/varbse.html#bs_interp_method">bs_interp_method</a>   [Bethe-Salpeter INTERPolation METHOD]<br>
-... <a href="../../input_variables/generated_files/varbse.html#bs_interp_prep">bs_interp_prep</a>   [Bethe-Salpeter INTERPolation PREParation]<br>
-... <a href="../../input_variables/generated_files/varbse.html#bs_interp_rl_nb">bs_interp_rl_nb</a>   [Bethe-Salpeter INTERPolation Rohlfing & Louie NeighBour]<br>
-... <a href="../../input_variables/generated_files/varfil.html#irdbscoup">irdbscoup</a>   [Integer that governs the ReaDing of COUPling block]<br>
-... <a href="../../input_variables/generated_files/varfil.html#irdbseig">irdbseig</a>   [Integer that governs the ReaDing of BS_EIG file]<br>
-... <a href="../../input_variables/generated_files/varfil.html#irdbsreso">irdbsreso</a>   [Integer that governs the ReaDing of RESOnant block]<br>
-... <a href="../../input_variables/generated_files/varfil.html#irdhaydock">irdhaydock</a>   [Integer that governs the ReaDing of the HAYDOCK restart file]<br>
-... <a href="../../input_variables/generated_files/vargw.html#mdf_epsinf">mdf_epsinf</a>   [Model Dielectric Function, EPSilon INFinity]<br>
-<p>Input variables for experts:<p>... <a href="../../input_variables/generated_files/varbse.html#bs_calctype">bs_calctype</a>   [Bethe-Salpeter CALCulation TYPE]<br>
-... <a href="../../input_variables/generated_files/varbse.html#bs_coulomb_term">bs_coulomb_term</a>   [Bethe-Salpeter COULOMB TERM]<br>
-... <a href="../../input_variables/generated_files/varbse.html#bs_eh_cutoff">bs_eh_cutoff</a>   [Bethe-Salpeter Electron-Hole CUTOFF]<br>
-... <a href="../../input_variables/generated_files/varbse.html#bs_exchange_term">bs_exchange_term</a>   [Bethe-Salpeter EXCHANGE TERM]<br>
-... <a href="../../input_variables/generated_files/varbse.html#bs_hayd_term">bs_hayd_term</a>   [Bethe-Salpeter HAYdock TERMinator]<br>
-... <a href="../../input_variables/generated_files/varbse.html#bs_haydock_niter">bs_haydock_niter</a>   [Bethe-Salpeter HAYDOCK Number of ITERations]<br>
-... <a href="../../input_variables/generated_files/varbse.html#bs_haydock_tol">bs_haydock_tol</a>   [Bethe-Salpeter HAYDOCK TOLerance]<br>
-... <a href="../../input_variables/generated_files/vargw.html#gw_nqlwl">gw_nqlwl</a>   [GW, Number of Q-points for the Long Wave-Length Limit]<br>
-... <a href="../../input_variables/generated_files/varpaw.html#pawoptosc">pawoptosc</a>   [PAW - OPTion for the computation of the OSCillator matrix elements]<br>
-... <a href="../../input_variables/generated_files/vargw.html#zcut">zcut</a>   [Z-CUT]<br>
+<p>Compulsory input variables:<p>... <a href="../../input_variables/generated_files/varset_bse.html#bs_loband">bs_loband</a>   [Bethe-Salpeter Lowest Occupied BAND]<br>
+... <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>   [OPTions for the DRIVER]<br>
+<p>Basic input variables:<p>... <a href="../../input_variables/generated_files/varset_bse.html#bs_algorithm">bs_algorithm</a>   [Bethe-Salpeter ALGORITHM]<br>
+... <a href="../../input_variables/generated_files/varset_bse.html#bs_freq_mesh">bs_freq_mesh</a>   [Bethe-Salpeter FREQuency MESH]<br>
+... <a href="../../input_variables/generated_files/varset_bse.html#bs_interp_mode">bs_interp_mode</a>   [Bethe-Salpeter INTERPolation MODE]<br>
+... <a href="../../input_variables/generated_files/varset_bse.html#bs_nstates">bs_nstates</a>   [Bethe-Salpeter Number of STATES]<br>
+<p>Useful input variables:<p>... <a href="../../input_variables/generated_files/varset_bse.html#bs_coupling">bs_coupling</a>   [Bethe-Salpeter COUPLING]<br>
+... <a href="../../input_variables/generated_files/varset_bse.html#bs_interp_kmult">bs_interp_kmult</a>   [Bethe-Salpeter INTERPolation K-point MULTiplication factors]<br>
+... <a href="../../input_variables/generated_files/varset_bse.html#bs_interp_m3_width">bs_interp_m3_width</a>   [Bethe-Salpeter INTERPolation Method3 WIDTH]<br>
+... <a href="../../input_variables/generated_files/varset_bse.html#bs_interp_method">bs_interp_method</a>   [Bethe-Salpeter INTERPolation METHOD]<br>
+... <a href="../../input_variables/generated_files/varset_bse.html#bs_interp_prep">bs_interp_prep</a>   [Bethe-Salpeter INTERPolation PREParation]<br>
+... <a href="../../input_variables/generated_files/varset_bse.html#bs_interp_rl_nb">bs_interp_rl_nb</a>   [Bethe-Salpeter INTERPolation Rohlfing & Louie NeighBour]<br>
+... <a href="../../input_variables/generated_files/varset_files.html#irdbscoup">irdbscoup</a>   [Integer that governs the ReaDing of COUPling block]<br>
+... <a href="../../input_variables/generated_files/varset_files.html#irdbseig">irdbseig</a>   [Integer that governs the ReaDing of BS_EIG file]<br>
+... <a href="../../input_variables/generated_files/varset_files.html#irdbsreso">irdbsreso</a>   [Integer that governs the ReaDing of RESOnant block]<br>
+... <a href="../../input_variables/generated_files/varset_files.html#irdhaydock">irdhaydock</a>   [Integer that governs the ReaDing of the HAYDOCK restart file]<br>
+... <a href="../../input_variables/generated_files/varset_gw.html#mdf_epsinf">mdf_epsinf</a>   [Model Dielectric Function, EPSilon INFinity]<br>
+<p>Input variables for experts:<p>... <a href="../../input_variables/generated_files/varset_bse.html#bs_calctype">bs_calctype</a>   [Bethe-Salpeter CALCulation TYPE]<br>
+... <a href="../../input_variables/generated_files/varset_bse.html#bs_coulomb_term">bs_coulomb_term</a>   [Bethe-Salpeter COULOMB TERM]<br>
+... <a href="../../input_variables/generated_files/varset_bse.html#bs_eh_cutoff">bs_eh_cutoff</a>   [Bethe-Salpeter Electron-Hole CUTOFF]<br>
+... <a href="../../input_variables/generated_files/varset_bse.html#bs_exchange_term">bs_exchange_term</a>   [Bethe-Salpeter EXCHANGE TERM]<br>
+... <a href="../../input_variables/generated_files/varset_bse.html#bs_hayd_term">bs_hayd_term</a>   [Bethe-Salpeter HAYdock TERMinator]<br>
+... <a href="../../input_variables/generated_files/varset_bse.html#bs_haydock_niter">bs_haydock_niter</a>   [Bethe-Salpeter HAYDOCK Number of ITERations]<br>
+... <a href="../../input_variables/generated_files/varset_bse.html#bs_haydock_tol">bs_haydock_tol</a>   [Bethe-Salpeter HAYDOCK TOLerance]<br>
+... <a href="../../input_variables/generated_files/varset_gw.html#gw_nqlwl">gw_nqlwl</a>   [GW, Number of Q-points for the Long Wave-Length Limit]<br>
+... <a href="../../input_variables/generated_files/varset_gw.html#gw_qlwl">gw_qlwl</a>   [GW, Q-points for the Long Wave-Length limit]<br>
+... <a href="../../input_variables/generated_files/varset_gw.html#inclvkb">inclvkb</a>   [INCLude VKB]<br>
+... <a href="../../input_variables/generated_files/varset_paw.html#pawoptosc">pawoptosc</a>   [PAW - OPTion for the computation of the OSCillator matrix elements]<br>
+... <a href="../../input_variables/generated_files/varset_gw.html#zcut">zcut</a>   [Z-CUT]<br>
+
+<br><br><a href=#top>Go to the top</a>
 
 
 &nbsp; 
@@ -140,7 +161,8 @@ the Bethe-Salpeter equation. </li>
 <h3><b>4. Selected input files.</b></h3>
 
 
-The user can find some related example input files in the ABINIT package in the directory /tests, or on the Web:
+<i><b>WARNING</b> : as of ABINITv8.6.x, the list of input files provided in the specific section of the topics Web pages is still to be reviewed/tuned. In some cases, it will be adequate, and in other cases, it might be incomplete, or perhaps even useless.</i>
+<br><br>The user can find some related example input files in the ABINIT package in the directory /tests, or on the Web:
 <p> tests/v67mbpt/Input: <a href="../../tests/v67mbpt/Input/t11.in">t11.in</a> 
 <a href="../../tests/v67mbpt/Input/t14.in">t14.in</a> 
 <a href="../../tests/v67mbpt/Input/t15.in">t15.in</a> 
@@ -154,6 +176,8 @@ The user can find some related example input files in the ABINIT package in the 
 <p> tests/paral/Input: <a href="../../tests/paral/Input/t76.in">t76.in</a> 
 <br>
 
+<br><br><a href=#top>Go to the top</a>
+
 
 &nbsp; 
 <HR ALIGN=left> 
@@ -161,15 +185,18 @@ The user can find some related example input files in the ABINIT package in the 
 <h3><b>5. References.</b></h3>
 
 
-<br> <a href="../../bibliography/generated_files/bibliography.html#Albrecht1998">[Albrecht1998]</a>  S. Albrecht, L. Reining, R. Del Sole and G. Onida, "Ab Initio Calculation of Excitonic Effects in the Optical Spectra of Semiconductors", Phys. Rev. Lett. 80, 4510&ndash;4513 (1998). <br> DOI: <a href="https://doi.org/10.1103/PhysRevLett.80.4510">10.1103/PhysRevLett.80.4510</a>.<br>
-<br> <a href="../../bibliography/generated_files/bibliography.html#Benedict1998">[Benedict1998]</a>  L. X. Benedict, E. L. Shirley and R. B. Bohn, "Optical Absorption of Insulators and the Electron-Hole Interaction: An <i>Ab Initio</i> Calculation", Phys. Rev. Lett. 80, 4514&ndash;4517 (1998). <br> DOI: <a href="https://doi.org/10.1103/PhysRevLett.80.4514">10.1103/PhysRevLett.80.4514</a>.<br>
-<br> <a href="../../bibliography/generated_files/bibliography.html#Cappellini1993">[Cappellini1993]</a>  G. Cappellini, R. Del Sole, L. Reining and F. Bechstedt, "Model dielectric function for semiconductors", Phys. Rev. B 47, 9892&ndash;9895 (1993). <br> DOI: <a href="https://doi.org/10.1103/PhysRevB.47.9892">10.1103/PhysRevB.47.9892</a>.<br>
-<br> <a href="../../bibliography/generated_files/bibliography.html#Giantomassi2011">[Giantomassi2011]</a>  M. Giantomassi, M. Stankovski, R. Shaltaf, M. Gruning, F. Bruneval, P. Rinke and G.M. Rignanese, "Electronic properties of interfaces and defects from many-body perturbation theory: Recent developments and applications", Physica Status Solidi B 248, 275&ndash;289 (2011). <br> DOI: <a href="https://doi.org/10.1002/pssb.201046094">10.1002/pssb.201046094</a>.<br>
-<br> <a href="../../bibliography/generated_files/bibliography.html#Haydock1980">[Haydock1980]</a>  R. Haydock, "The recursive solution of the Schr&ouml;dinger equation", Comp. Phys. Comm. 20, 11 - 16 (1980). <br> DOI: <a href="https://doi.org/10.1016/0010-4655(80)90101-0">10.1016/0010-4655(80)90101-0</a>.<br>
-<br> <a href="../../bibliography/generated_files/bibliography.html#Hedin1965">[Hedin1965]</a>  L. Hedin, "New Method for Calculating the One-Particle Green's Function with Application to the Electron-Gas Problem", Phys. Rev. A 139, 796 (1965).<br>
-<br> <a href="../../bibliography/generated_files/bibliography.html#Onida2002">[Onida2002]</a>  G. Onida, L. Reining and A. Rubio, "Electronic excitations: density-functional versus many-body Green's-function approaches", Rev. Mod. Phys. 74, 601&ndash;659 (2002). <br> DOI: <a href="https://doi.org/10.1103/RevModPhys.74.601">10.1103/RevModPhys.74.601</a>.<br>
-<br> <a href="../../bibliography/generated_files/bibliography.html#Payne1992">[Payne1992]</a>  M. C. Payne, M. P. Teter, D. C. Allan, T. A. Arias and J. D. Joannopoulos, "Iterative minimization techniques for <i>ab initio</i>   total-energy calculations: molecular dynamics and conjugate gradients", Rev. Mod. Phys. 64, 1045&ndash;1097 (1992). <br> DOI: <a href="https://doi.org/10.1103/RevModPhys.64.1045">10.1103/RevModPhys.64.1045</a>.<br>
+<br> <a href="../../biblio/generated_files/bib_biblio.html#Albrecht1998">[Albrecht1998]</a>  S. Albrecht, L. Reining, R. Del Sole and G. Onida, "Ab Initio Calculation of Excitonic Effects in the Optical Spectra of Semiconductors", Phys. Rev. Lett. 80, 4510&ndash;4513 (1998). <br> DOI: <a href="https://doi.org/10.1103/PhysRevLett.80.4510">10.1103/PhysRevLett.80.4510</a>.<br>
+<br> <a href="../../biblio/generated_files/bib_biblio.html#Benedict1998">[Benedict1998]</a>  L. X. Benedict, E. L. Shirley and R. B. Bohn, "Optical Absorption of Insulators and the Electron-Hole Interaction: An <i>Ab Initio</i> Calculation", Phys. Rev. Lett. 80, 4514&ndash;4517 (1998). <br> DOI: <a href="https://doi.org/10.1103/PhysRevLett.80.4514">10.1103/PhysRevLett.80.4514</a>.<br>
+<br> <a href="../../biblio/generated_files/bib_biblio.html#Cappellini1993">[Cappellini1993]</a>  G. Cappellini, R. Del Sole, L. Reining and F. Bechstedt, "Model dielectric function for semiconductors", Phys. Rev. B 47, 9892&ndash;9895 (1993). <br> DOI: <a href="https://doi.org/10.1103/PhysRevB.47.9892">10.1103/PhysRevB.47.9892</a>.<br>
+<br> <a href="../../biblio/generated_files/bib_biblio.html#Giantomassi2011">[Giantomassi2011]</a>  M. Giantomassi, M. Stankovski, R. Shaltaf, M. Gruning, F. Bruneval, P. Rinke and G.M. Rignanese, "Electronic properties of interfaces and defects from many-body perturbation theory: Recent developments and applications", Physica Status Solidi B 248, 275&ndash;289 (2011). <br> DOI: <a href="https://doi.org/10.1002/pssb.201046094">10.1002/pssb.201046094</a>.<br>
+<br> <a href="../../biblio/generated_files/bib_biblio.html#Gillet2015">[Gillet2015]</a>  Y. Gillet, M. Giantomassi and X. Gonze, "Efficient Interpolation Technique for Bethe-Salpeter Calculation of Optical Spectra", Comput. Phys. Comm. 203C, 83-93 (2016). <br> DOI: <a href="https://doi.org/10.1016/j.cpc.2016.02.008">10.1016/j.cpc.2016.02.008</a>.<br>
+<br> <a href="../../biblio/generated_files/bib_biblio.html#Haydock1980">[Haydock1980]</a>  R. Haydock, "The recursive solution of the Schr&ouml;dinger equation", Comp. Phys. Comm. 20, 11 - 16 (1980). <br> DOI: <a href="https://doi.org/10.1016/0010-4655(80)90101-0">10.1016/0010-4655(80)90101-0</a>.<br>
+<br> <a href="../../biblio/generated_files/bib_biblio.html#Hedin1965">[Hedin1965]</a>  L. Hedin, "New Method for Calculating the One-Particle Green's Function with Application to the Electron-Gas Problem", Phys. Rev. A 139, 796 (1965).<br>
+<br> <a href="../../biblio/generated_files/bib_biblio.html#Onida2002">[Onida2002]</a>  G. Onida, L. Reining and A. Rubio, "Electronic excitations: density-functional versus many-body Green's-function approaches", Rev. Mod. Phys. 74, 601&ndash;659 (2002). <br> DOI: <a href="https://doi.org/10.1103/RevModPhys.74.601">10.1103/RevModPhys.74.601</a>.<br>
+<br> <a href="../../biblio/generated_files/bib_biblio.html#Payne1992">[Payne1992]</a>  M. C. Payne, M. P. Teter, D. C. Allan, T. A. Arias and J. D. Joannopoulos, "Iterative minimization techniques for <i>ab initio</i>   total-energy calculations: molecular dynamics and conjugate gradients", Rev. Mod. Phys. 64, 1045&ndash;1097 (1992). <br> DOI: <a href="https://doi.org/10.1103/RevModPhys.64.1045">10.1103/RevModPhys.64.1045</a>.<br>
 <p>
+<br><br><a href=#top>Go to the top</a>
+
 <script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
 
 </body>

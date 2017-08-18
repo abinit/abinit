@@ -2,7 +2,7 @@
     name      : BSE 
     keyword   : Bethe-Salpeter calculations 
     authors   : MG
-    howto     : perform a Bethe-Salpeter calculation
+    howto     : perform a Bethe-Salpeter calculation of neutral excitation energies and dielectric function
     header    : default
     title     : <h1>Bethe-Salpeter calculations</h1>
     subtitle  : default
@@ -54,7 +54,6 @@
           smaller than the size of the BSE Hamiltonian.
           <p>Note, however, that CG has been implemented only for TDA calculations (Hermitian matrices).
 
-
           <p>The most important results of the calculation are saved in five different files.
           The BSR file stores the upper triangle of the BSE resonant block in Fortran binary format (BSC for the coupling matrix).
           The HAYDR_SAVE file contains the coefficients of the tridiagonal matrix and the three vectors employed in the
@@ -64,8 +63,9 @@
           RPA_NLF_MDF and GW_NLF_MDF contain the RPA spectrum without local field effects 
           obtained with KS energies and the GW energies, respectively. 
           <p>Different schemes with different degrees of accuracy and computational load are
-          available in ABINIT [[Gillet2015] in order to improve the convergence rate of BSE calculations. They are are available in ABINITv8 with the
-          bs_interp_* input variables.
+          available in ABINIT [[Gillet2015]] in order to improve the convergence rate of BSE calculations. 
+          They are are available in ABINITv8 with the bs_interp_* input variables.
+          <p> In the non-spin-polarized case, spin-singlet as well as spin-triplet excitations are computed. Spin-polarized case is also available.
 
     tutorials  : |-
         <li><a href="../../tutorial/generated_files/lesson_bse.html">The lesson on the Bethe-Salpeter Equation (BSE)</a> deals with the
