@@ -44,7 +44,7 @@
 !!
 !! CHILDREN
 !!      h_potential,mean_fftr,metric,mkdenpos,psolver_kernel,wrtout
-!!      wvl_rhov_abi2big,wvl_vhartr_abi2big,wvl_vxc_abi2big,xc_potential
+!!      wvl_rhov_abi2big,xc_potential
 !!
 !! SOURCE
 
@@ -73,9 +73,7 @@ subroutine psolver_rhohxc(enhartr, enxc, envxc, icoulomb, ixc, &
  use m_xmpi, only: xmpi_comm_rank,xmpi_comm_size,xmpi_sum
 
 #if defined HAVE_BIGDFT
- use BigDFT_API,     only : CHARGE_DENSITY,HARTREE_POTENTIAL,xc_potential,&
-&                           ELECTRONIC_DENSITY,deallocate_coulomb_operator,&
-&                           copy_coulomb_operator,coulomb_operator
+ use BigDFT_API, only : XC_potential,ELECTRONIC_DENSITY,coulomb_operator
  use poisson_solver, only : H_potential
 #endif
 
@@ -136,8 +134,6 @@ subroutine psolver_rhohxc(enhartr, enxc, envxc, icoulomb, ixc, &
   real(dp), dimension(6) :: xcstr
   type(coulomb_operator) ::  kernel
 #endif
-! debug
-!  integer :: i1,i2,i3
 
 ! *********************************************************************
 
@@ -165,6 +161,8 @@ subroutine psolver_rhohxc(enhartr, enxc, envxc, icoulomb, ixc, &
 
  if (ixc==0) then
    vxcavg=zero
+   test_nhat=.false.
+
 !  No xc at all is applied (usually for testing)
    MSG_WARNING('Note that no xc is applied (ixc=0).')
 
@@ -216,8 +214,6 @@ subroutine psolver_rhohxc(enhartr, enxc, envxc, icoulomb, ixc, &
    hgrid=(/ rprimd(1,1) / ngfft(1), rprimd(2,2) / ngfft(2), rprimd(3,3) / ngfft(3) /)
  end if
 
-
-
  if (usewvl == 0) then
 !  We get the kernel.
    call psolver_kernel( hgrid, 2, icoulomb, me, kernel, comm, ngfft, nproc, nscforder)
@@ -227,7 +223,6 @@ subroutine psolver_rhohxc(enhartr, enxc, envxc, icoulomb, ixc, &
    kernel = wvl_den%denspot%pkernel
  end if
 
-!  
  if(usewvl==1) then
    if(wvl_den%denspot%rhov_is .ne. ELECTRONIC_DENSITY) then
      message= "psolver_rhohxc: rhov should contain the electronic density"
@@ -459,15 +454,13 @@ subroutine psolver_rhohxc(enhartr, enxc, envxc, icoulomb, ixc, &
    end do
  end if
 
-!Pass vhartr and vxc to BigDFT objects
- if(usewvl==1) then
+!Pass vhartr and vxc to BigDFT objects (useless?)
+!if(usewvl==1) then
 !  write(message, '(a,a,a,a)' ) ch10, ' rhohxc_wvlpaw : but why are you copying me :..o('
-   call wvl_vhartr_abi2big(1,vhartr,wvl_den)
-!  
+! call wvl_vhartr_abi2big(1,vhartr,wvl_den)
 !  (this can be commented out, since we do not use denspot%v_xc
-   call wvl_vxc_abi2big(1,vxc,wvl_den)
-!  
- end if
+! call wvl_vxc_abi2big(1,vxc,wvl_den)
+!end if
 
 !Compute vxcavg
  call mean_fftr(vxc, vxcmean, nfft, nfftot, nspden,mpi_comm_sphgrid=comm)

@@ -333,9 +333,7 @@ subroutine dtset_chkneu(charge,dtset,occopt)
      end if
 
    end if
-
-!  End the condition dtset%iscf>0 or -1 or -3 .
- end if
+ end if !  End the condition dtset%iscf>0 or -1 or -3 .
 
 end subroutine dtset_chkneu
 !!***
@@ -556,6 +554,7 @@ subroutine dtset_copy(dtout, dtin)
  dtout%gwpara             = dtin%gwpara
  dtout%gwgamma            = dtin%gwgamma
  dtout%gwrpacorr          = dtin%gwrpacorr
+ dtout%gwfockmix          = dtin%gwfockmix
  dtout%gw_customnfreqsp   = dtin%gw_customnfreqsp
  dtout%gw_nqlwl           = dtin%gw_nqlwl
  dtout%gw_nstep           = dtin%gw_nstep
@@ -590,7 +589,7 @@ subroutine dtset_copy(dtout, dtin)
  dtout%inclvkb            = dtin%inclvkb
  dtout%intxc              = dtin%intxc
  dtout%ionmov             = dtin%ionmov
- dtout%densfor_pred             = dtin%densfor_pred
+ dtout%densfor_pred       = dtin%densfor_pred
  dtout%iprcel             = dtin%iprcel
  dtout%iprcfc             = dtin%iprcfc
  dtout%irandom            = dtin%irandom
@@ -709,6 +708,7 @@ subroutine dtset_copy(dtout, dtin)
  dtout%ntypat             = dtin%ntypat
  dtout%ntyppure           = dtin%ntyppure
  dtout%nwfshist           = dtin%nwfshist
+ dtout%nzchempot          = dtin%nzchempot
  dtout%occopt             = dtin%occopt
  dtout%optcell            = dtin%optcell
  dtout%optdriver          = dtin%optdriver
@@ -744,6 +744,7 @@ subroutine dtset_copy(dtout, dtin)
  dtout%pawujrad           = dtin%pawujrad
  dtout%pawujv             = dtin%pawujv
  dtout%pawxcdev           = dtin%pawxcdev
+ dtout%pimd_constraint    = dtin%pimd_constraint
  dtout%pitransform        = dtin%pitransform
  dtout%plowan_compute     = dtin%plowan_compute
  dtout%plowan_bandi       = dtin%plowan_bandi
@@ -765,6 +766,7 @@ subroutine dtset_copy(dtout, dtin)
  dtout%prtdipole          = dtin%prtdipole
  dtout%prtdos             = dtin%prtdos
  dtout%prtdosm            = dtin%prtdosm
+ dtout%prtebands          = dtin%prtebands    ! TODO prteig could be replaced by prtebands...
  dtout%prtefg             = dtin%prtefg
  dtout%prteig             = dtin%prteig
  dtout%prtelf             = dtin%prtelf
@@ -779,6 +781,7 @@ subroutine dtset_copy(dtout, dtin)
  dtout%prtlden            = dtin%prtlden
  dtout%prtnabla           = dtin%prtnabla
  dtout%prtnest            = dtin%prtnest
+ dtout%prtphbands         = dtin%prtphbands
  dtout%prtphdos           = dtin%prtphdos
  dtout%prtphsurf          = dtin%prtphsurf
  dtout%prtposcar          = dtin%prtposcar
@@ -812,6 +815,7 @@ subroutine dtset_copy(dtout, dtin)
  dtout%rfasr              = dtin%rfasr
  dtout%rfddk              = dtin%rfddk
  dtout%rfelfd             = dtin%rfelfd
+ dtout%rfmagn             = dtin%rfmagn
  dtout%rfmeth             = dtin%rfmeth
  dtout%rfphon             = dtin%rfphon
  dtout%rfstrs             = dtin%rfstrs
@@ -1098,6 +1102,8 @@ subroutine dtset_copy(dtout, dtin)
 
  call alloc_copy( dtin%cd_imfrqs, dtout%cd_imfrqs)
 
+ call alloc_copy( dtin%chempot, dtout%chempot)
+
  call alloc_copy( dtin%corecs, dtout%corecs)
 
  call alloc_copy( dtin%densty, dtout%densty)
@@ -1171,6 +1177,11 @@ subroutine dtset_copy(dtout, dtin)
  call alloc_copy( dtin%znucl, dtout%znucl)
 
  DBG_EXIT("COLL")
+
+ dtout%ndivsm = dtin%ndivsm
+ dtout%nkpath = dtin%nkpath
+ dtout%einterp = dtin%einterp
+ call alloc_copy(dtin%kptbounds, dtout%kptbounds)
 
 end subroutine dtset_copy
 !!***
@@ -1303,6 +1314,9 @@ subroutine dtset_free(dtset)
  if (allocated(dtset%cd_imfrqs))   then
    ABI_DEALLOCATE(dtset%cd_imfrqs)
  end if
+ if (allocated(dtset%chempot))    then
+   ABI_DEALLOCATE(dtset%chempot)
+ end if
  if (allocated(dtset%corecs))      then
    ABI_DEALLOCATE(dtset%corecs)
  end if
@@ -1335,6 +1349,9 @@ subroutine dtset_free(dtset)
  end if
  if (allocated(dtset%kpt))         then
    ABI_DEALLOCATE(dtset%kpt)
+ end if
+ if (allocated(dtset%kptbounds)) then
+   ABI_DEALLOCATE(dtset%kptbounds)
  end if
  if (allocated(dtset%kptgw))       then
    ABI_DEALLOCATE(dtset%kptgw)
@@ -1408,7 +1425,7 @@ subroutine dtset_free(dtset)
  if (allocated(dtset%ziontypat))   then
    ABI_DEALLOCATE(dtset%ziontypat)
  end if
- if (allocated(dtset%znucl))       then
+ if (allocated(dtset%znucl)) then
    ABI_DEALLOCATE(dtset%znucl)
  end if
 

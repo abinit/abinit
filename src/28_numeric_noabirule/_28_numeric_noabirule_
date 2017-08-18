@@ -13,7 +13,6 @@
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! CHILDREN
-!! coeffs_gausslegint.F90
 !! cspint.F90
 !! dzgedi.F90
 !! dzgefa.F90
@@ -27,7 +26,6 @@
 !! jacobi.F90
 !! k0.F90
 !! k1.F90
-!! lebedev_laikov.F90
 !! lib_four.F90
 !! ludcmp.F90
 !! m_abi_linalg.F90
@@ -37,6 +35,7 @@
 !! m_bspline.F90
 !! m_cgtools.F90
 !! m_cplxtools.F90
+!! m_elpa.F90
 !! m_gaussian_quadrature.F90
 !! m_lebedev.F90
 !! m_levenberg_marquardt.F90
@@ -44,10 +43,8 @@
 !! m_per_cond.F90
 !! m_random_zbq.F90
 !! m_slk.F90
+!! m_sort.F90
 !! m_splines.F90
-!! smooth.F90
-!! sort_dp.F90
-!! sort_int.F90
 !! test_spline_integrate.F90
 !! uniformrandom.F90
 !!

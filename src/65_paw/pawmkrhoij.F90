@@ -47,7 +47,7 @@
 !!          Sum_{n,k} {occ(n,k)*conjugate[cprj_nk(ii)].cprj_nk(jj)} (non symetrized)
 !!
 !! PARENTS
-!!      vtorho
+!!      afterscfloop,vtorho
 !!
 !! CHILDREN
 !!      pawaccrhoij,pawcprj_alloc,pawcprj_free,pawcprj_gather_spin,pawcprj_get
@@ -322,7 +322,6 @@
 &             nspinor,occup(1),option,pawrhoij_all,usetimerev,wtk_k)
            end if
          end if
-
        end do ! ib1c
      end do ! ib
 

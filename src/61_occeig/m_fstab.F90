@@ -486,9 +486,9 @@ subroutine fstab_init(fstab, ebands, cryst, fsewin, integ_method, kptrlatt, nshi
            fs%tetra_wtk(ib,ik_ibz) = bdelta(ifermi,ik_ibz) * nkibz
            fs%tetra_wtk_ene(ib,ik_ibz,1:fs%nene) = bdelta(1:fs%nene,ik_ibz) * nkibz
          end if
-       end do
-     end do
-   end do
+       end do ! ik_ibz
+     end do ! band
+   end do ! sppol
 
    ABI_FREE(tmp_eigen)
    ABI_FREE(btheta)
@@ -549,15 +549,14 @@ integer function fstab_findkg0(fstab, kpt, g0) result(ikfs)
  integer,intent(out) :: g0(3)
  real(dp),intent(in) :: kpt(3)
 
-!Local variables-------------------------------
-!scalars
- integer :: kpt_rank
-
 ! *************************************************************************
 
- call get_rank_1kpt(kpt, kpt_rank, fstab%krank)
- ikfs = fstab%krank%invrank(kpt_rank); if (ikfs == -1) return
- g0 = nint(kpt - fstab%kpts(:, ikfs))
+ ikfs = kptrank_index(fstab%krank, kpt)
+ if (ikfs /= -1) then
+   g0 = nint(kpt - fstab%kpts(:, ikfs))
+ else
+   g0 = huge(1)
+ end if
 
 end function fstab_findkg0
 !!***
@@ -570,6 +569,7 @@ end function fstab_findkg0
 !!
 !! FUNCTION
 !!  Return the weights for the integration on the Fermi-surface
+!!  NB: single spin version - should have an array (nsppol) of the fstab objects
 !!
 !! INPUTS
 !!  ebands<ebands_type>=GS band structure.

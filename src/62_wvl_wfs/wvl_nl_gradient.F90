@@ -21,7 +21,7 @@
 !! NOTES
 !!
 !! PARENTS
-!!      afterscfloop,vtorho
+!!      forstr,vtorho
 !!
 !! CHILDREN
 !!      nonlocal_forces,wrtout,xmpi_sum
@@ -80,7 +80,7 @@ subroutine wvl_nl_gradient(grnl, mpi_enreg, natom, rprimd, wvl, xcart)
 #if defined HAVE_BIGDFT
 
 !Compute forces
- write(message, '(a,a)' ) 'wvl_nl_gradient(): compute non-local part to gradient.'
+ write(message, '(a,a)' ) ' wvl_nl_gradient(): compute non-local part to gradient.'
  call wrtout(std_out,message,'COLL')
 
 !Nullify output arrays.
@@ -97,7 +97,8 @@ subroutine wvl_nl_gradient(grnl, mpi_enreg, natom, rprimd, wvl, xcart)
  call nonlocal_forces(wvl%descr%Glr, &
 & wvl%descr%h(1), wvl%descr%h(2), wvl%descr%h(3), wvl%descr%atoms, &
 & xcart, wvl%wfs%ks%orbs, wvl%projectors%nlpsp, wvl%wfs%ks%Lzd%Glr%wfd, &
-& wvl%wfs%ks%psi, gxyz, .true.,strtens(1,2))
+& wvl%wfs%ks%psi, gxyz, .true.,strtens(1,2), &
+& proj_G=wvl%projectors%G,paw=wvl%descr%paw)
 
  if (nproc > 1) then
    call xmpi_sum(gxyz, spaceComm, ierr)

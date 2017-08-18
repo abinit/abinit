@@ -82,6 +82,8 @@ subroutine getnel(doccde,dosdeltae,eigen,entropy,fermie,maxocc,mband,nband,&
  use m_errors
  use m_splines
 
+ use m_fstrings,   only : sjoin, itoa
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -137,8 +139,7 @@ subroutine getnel(doccde,dosdeltae,eigen,entropy,fermie,maxocc,mband,nband,&
  DBG_ENTER("COLL")
 
  if(option/=1 .and. option/=2)then
-   write(message,'(a,i0,a)')' Option must be either 1 or 2. It is ',option,'.'
-   MSG_BUG(message)
+   MSG_BUG(sjoin('Option must be either 1 or 2. It is:', itoa(option)))
  end if
 
 !Initialize the occupation function and generalized entropy function,

@@ -232,11 +232,11 @@ CONTAINS  !=====================================================================
 !!
 !! PARENTS
 !!      dfpt_looppert,eig2tot,gwls_hamiltonian,m_crystal_io,m_ddb
-!!      m_effective_potential,m_effective_potential_file,mover,outddbnc
+!!      m_effective_potential,m_effective_potential_file,mover,optic,outddbnc
 !!      outscfcv,vtorho
 !!
 !! CHILDREN
-!!      mati3inv
+!!      mati3inv,sg_multable
 !!
 !! SOURCE
 
@@ -335,12 +335,6 @@ subroutine crystal_init(amu,Cryst,space_group,natom,npsp,ntypat,nsym,rprimd,typa
    end do
  end do
 
- ! Be careful when we have alchemy.
- !if isalchemical(Cryst)
- !ABI_MALLOC(Cryst%amu, (ntypat))
- !call atomdata_from_znucl(atom,znucl)
- !atom%amu
-
  Cryst%timrev = timrev
 
  if (PRESENT(symrel).and.PRESENT(tnons).and.PRESENT(symafm)) then
@@ -423,12 +417,12 @@ end subroutine crystal_init
 !!
 !! PARENTS
 !!      anaddb,bethe_salpeter,dfpt_looppert,eig2tot,eph,gstate,gwls_hamiltonian
-!!      m_ddk,m_dvdb,m_effective_potential,m_effective_potential_file,m_ioarr
-!!      m_iowf,m_wfd,m_wfk,mlwfovlp_qp,mover,mrgscr,outddbnc,outscfcv,screening
-!!      sigma,vtorho,wfk_analyze
+!!      m_ddk,m_dvdb,m_effective_potential,m_effective_potential_file
+!!      m_gruneisen,m_ioarr,m_iowf,m_wfd,m_wfk,mlwfovlp_qp,mover,mrgscr,optic
+!!      outddbnc,outscfcv,screening,sigma,vtorho,wfk_analyze
 !!
 !! CHILDREN
-!!      mati3inv
+!!      mati3inv,sg_multable
 !!
 !! SOURCE
 
@@ -523,7 +517,7 @@ end subroutine crystal_free
 !! INPUTS
 !!  Cryst<crystal_t>=The structure.
 !!  [unit]=Unit number for output. Defaults to std_out
-!!  [prtvol]=Verbosity level
+!!  [prtvol]=Verbosity level. If prtvol== -1, only lattice parameters are printed. Defaults to 0
 !!  [mode_paral]=Either "COLL" or "PERS"
 !!  [header]=String to be printed as header for additional info.
 !!
@@ -531,11 +525,11 @@ end subroutine crystal_free
 !!  Only printing
 !!
 !! PARENTS
-!!      eph,gwls_hamiltonian,m_effective_potential,setup_bse,setup_screening
-!!      setup_sigma,wfk_analyze
+!!      eph,gwls_hamiltonian,m_dvdb,m_effective_potential,m_gruneisen,setup_bse
+!!      setup_screening,setup_sigma,wfk_analyze
 !!
 !! CHILDREN
-!!      mati3inv
+!!      mati3inv,sg_multable
 !!
 !! SOURCE
 
@@ -595,6 +589,7 @@ subroutine crystal_print(Cryst,header,unit,mode_paral,prtvol)
    MSG_BUG('Wrong value for timrev')
  end if
  call wrtout(my_unt,msg,my_mode)
+ if (my_prtvol == -1) return
 
  call print_symmetries(Cryst%nsym,Cryst%symrel,Cryst%tnons,Cryst%symafm,unit=my_unt,mode_paral=my_mode)
 
@@ -626,7 +621,7 @@ end subroutine crystal_print
 !!      gensymspgr,hdr_vs_dtset,m_crystal
 !!
 !! CHILDREN
-!!      mati3inv
+!!      mati3inv,sg_multable
 !!
 !! SOURCE
 
@@ -893,6 +888,10 @@ end function symbol_type
 !! FUNCTION
 !!  Return the symmetries of the point group of the crystal.
 !!
+!! INPUTS
+!!  [include_timrev]=If True, time-reversal symmetry is included in the point group unless
+!!    the system has spatial inversion. Default: False
+!!
 !! OUTPUT
 !!  ptg_nsym=Number of symmetries in the point group
 !!  ptg_symrel(3,3,ptg_nsym)=Rotations in real space
@@ -900,13 +899,14 @@ end function symbol_type
 !!  has_inversion=True if spatial inversion is present in the point group.
 !!
 !! PARENTS
+!!      m_skw
 !!
 !! CHILDREN
-!!      mati3inv
+!!      mati3inv,sg_multable
 !!
 !! SOURCE
 
-subroutine crystal_point_group(cryst, ptg_nsym, ptg_symrel, ptg_symrec, has_inversion)
+subroutine crystal_point_group(cryst, ptg_nsym, ptg_symrel, ptg_symrec, has_inversion, include_timrev)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -914,6 +914,7 @@ subroutine crystal_point_group(cryst, ptg_nsym, ptg_symrel, ptg_symrec, has_inve
 #undef ABI_FUNC
 #define ABI_FUNC 'crystal_point_group'
  use interfaces_32_util
+ use interfaces_41_geometry
 !End of the abilint section
 
  implicit none
@@ -922,41 +923,72 @@ subroutine crystal_point_group(cryst, ptg_nsym, ptg_symrel, ptg_symrec, has_inve
 !scalars
  type(crystal_t),intent(in) :: cryst
  integer,intent(out) :: ptg_nsym
+ logical,optional,intent(in) :: include_timrev
  logical,intent(out) :: has_inversion
 !arrays
  integer,allocatable,intent(out) :: ptg_symrel(:,:,:),ptg_symrec(:,:,:)
 
 !Local variables-------------------------------
 !scalars
- integer :: isym,search
- logical :: found
+ logical :: debug
+ integer :: isym,search,tmp_nsym,ierr
+ logical :: found,my_include_timrev
 !arrays
  integer :: work_symrel(3,3,cryst%nsym)
+ integer,allocatable :: symafm(:)
+ real(dp),allocatable :: tnons(:,:)
 
 ! *************************************************************************
 
- ptg_nsym = 1; work_symrel(:,:,1) = cryst%symrel(:,:,1)
- do isym=1,cryst%nsym
+ my_include_timrev = .False.; if (present(include_timrev)) my_include_timrev = include_timrev
+
+ tmp_nsym = 1; work_symrel(:,:,1) = cryst%symrel(:,:,1)
+ do isym=2,cryst%nsym
    if (cryst%symafm(isym) == -1) cycle
-   do search=1,ptg_nsym
+   do search=1,tmp_nsym
      found = all(work_symrel(:,:,search) == cryst%symrel(:,:,isym))
      if (found) exit
    end do
    if (.not. found) then
-     ptg_nsym = ptg_nsym + 1
-     work_symrel(:,:,ptg_nsym) = cryst%symrel(:,:,isym)
+     tmp_nsym = tmp_nsym + 1
+     work_symrel(:,:,tmp_nsym) = cryst%symrel(:,:,isym)
+   end if
+ end do
+
+ has_inversion = .False.
+ do isym=1,tmp_nsym
+   if (all(work_symrel(:,:,isym) == inversion_3d) ) then
+     has_inversion = .True.; exit
    end if
  end do
 
  ! Now we know the symmetries of the point group.
+ ptg_nsym = tmp_nsym; if (.not. has_inversion .and. my_include_timrev) ptg_nsym = 2 * tmp_nsym
  ABI_MALLOC(ptg_symrel, (3,3,ptg_nsym))
  ABI_MALLOC(ptg_symrec, (3,3,ptg_nsym))
- ptg_symrel = work_symrel(:,:,1:ptg_nsym)
- has_inversion = .False.
- do isym=1,ptg_nsym
-   if (all(ptg_symrel(:,:,isym) == inversion_3d) ) has_inversion = .True.
+
+ ptg_symrel(:,:,1:tmp_nsym) = work_symrel(:,:,1:tmp_nsym)
+ do isym=1,tmp_nsym
    call mati3inv(ptg_symrel(:,:,isym), ptg_symrec(:,:,isym))
  end do
+
+ if (.not. has_inversion .and. my_include_timrev) then
+   ptg_symrel(:,:,tmp_nsym+1:) = -work_symrel(:,:,1:tmp_nsym)
+   do isym=tmp_nsym+1,ptg_nsym
+     call mati3inv(ptg_symrel(:,:,isym), ptg_symrec(:,:,isym))
+   end do
+ end if
+
+ debug = .False.
+ if (debug) then
+   ABI_CALLOC(tnons, (3, ptg_nsym))
+   ABI_MALLOC(symafm, (ptg_nsym))
+   symafm = 1
+   call sg_multable(ptg_nsym, symafm, ptg_symrel, tnons, tol12, ierr)
+   ABI_CHECK(ierr == 0, "point group is not a group! See messages above")
+   ABI_FREE(tnons)
+   ABI_FREE(symafm)
+ end if
 
 end subroutine crystal_point_group
 !!***

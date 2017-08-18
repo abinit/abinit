@@ -72,7 +72,7 @@
 !!  (in that case pawrhoij_unsym should not be distributed over atomic sites).
 !!
 !! PARENTS
-!!      dfpt_nstpaw,dfpt_rhofermi,dfpt_vtorho,vtorho
+!!      afterscfloop,dfpt_nstpaw,dfpt_rhofermi,dfpt_vtorho,vtorho
 !!
 !! CHILDREN
 !!      fourdp,pawmknhat,pawrhoij_copy,pawrhoij_free,pawrhoij_free_unpacked

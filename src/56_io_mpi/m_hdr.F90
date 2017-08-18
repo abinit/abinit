@@ -171,7 +171,7 @@ MODULE m_hdr
  !    Moreover the files produced by the DFPT code do not have a well-defined extension and, as a consequence,
  !    they require a special treatment. In python I would use regexp but Fortran is not python!
 
- type(abifile_t),private,parameter :: all_abifiles(41) = [ &
+ type(abifile_t),private,parameter :: all_abifiles(44) = [ &
 
     ! Files with wavefunctions:
     abifile_t(varname="coefficients_of_wavefunctions", fform=2, ext="WFK", class="wf_planewave"), &
@@ -217,6 +217,10 @@ MODULE m_hdr
     abifile_t(varname="first_order_potential", fform=109, ext="POT(\d+)", class="potential"), &
     ! fform 111 contains an extra record with rhog1_q(G=0) after the DFPT potential(r).
     abifile_t(varname="first_order_potential", fform=111, ext="POT(\d+)", class="potential"), &
+
+    abifile_t(varname="first_order_vhartree", fform=112, ext="VHA(\d+)", class="potential"), &
+    abifile_t(varname="first_order_vpsp", fform=113, ext="VPSP(\d+)", class="potential"), &
+    abifile_t(varname="first_order_vxc", fform=114, ext="VXC(\d+)", class="potential"), &
 
    ! Data used in conducti
     abifile_t(varname="pawnabla", fform=610, ext="OPT1", class="data"), &
@@ -429,6 +433,30 @@ character(len=nctk_slen) function varname_from_fname(filename) result(varname)
    read(ext(4:), *, iostat=ierr) pertcase
    if (ierr == 0) then
       varname = "first_order_potential"; return
+   end if
+ end if
+
+ ! Handle VXC[pertcase]
+ if (startswith(ext, "VXC")) then
+   read(ext(4:), *, iostat=ierr) pertcase
+   if (ierr == 0) then
+      varname = "first_order_vxc"; return
+   end if
+ end if
+
+ ! Handle VHA[pertcase]
+ if (startswith(ext, "VHA")) then
+   read(ext(4:), *, iostat=ierr) pertcase
+   if (ierr == 0) then
+      varname = "first_order_vhartree"; return
+   end if
+ end if
+
+ ! Handle VPSP[pertcase]
+ if (startswith(ext, "VPSP")) then
+   read(ext(4:), *, iostat=ierr) pertcase
+   if (ierr == 0) then
+      varname = "first_order_vpsp"; return
    end if
  end if
 
@@ -2031,8 +2059,7 @@ end subroutine hdr_io_int
 !!  Only writing
 !!
 !! PARENTS
-!!      cut3d,initaim,ioprof,m_ddk,m_dvdb,m_hdr,m_io_kss,m_wfd,m_wfk,mrggkk
-!!      rchkgsheader
+!!      cut3d,initaim,ioprof,m_ddk,m_dvdb,m_hdr,m_wfd,m_wfk,mrggkk,rchkgsheader
 !!
 !! CHILDREN
 !!
@@ -2522,8 +2549,7 @@ end subroutine hdr_update
 !! This routine is called only in the case of MPI version of the code.
 !!
 !! PARENTS
-!!      elphon,initaim,m_dvdb,m_hdr,m_io_kss,m_io_screening,m_ioarr,m_wfk,optic
-!!      read_gkk
+!!      elphon,initaim,m_dvdb,m_hdr,m_io_screening,m_ioarr,m_wfk,optic,read_gkk
 !!
 !! CHILDREN
 !!
@@ -2851,8 +2877,8 @@ end subroutine hdr_bcast
 !! The file is supposed to be open already
 !!
 !! PARENTS
-!!      elphon,initaim,inpgkk,m_bse_io,m_cut3d,m_dvdb,m_hdr,m_io_kss
-!!      m_io_screening,m_ioarr,macroave,mrggkk,rchkgsheader,read_gkk
+!!      elphon,initaim,inpgkk,m_bse_io,m_cut3d,m_dvdb,m_hdr,m_io_screening
+!!      m_ioarr,macroave,mrggkk,rchkgsheader,read_gkk
 !!
 !! CHILDREN
 !!
@@ -2983,7 +3009,7 @@ end subroutine hdr_fort_read
 !!  fform=kind of the array in the file. if the reading fails, return fform=0
 !!
 !! PARENTS
-!!      initaim,inwffil,m_dvdb,m_hdr,m_io_kss,m_io_screening,m_ioarr,macroave
+!!      initaim,inwffil,m_dvdb,m_hdr,m_io_screening,m_ioarr,macroave
 !!
 !! CHILDREN
 !!
@@ -3401,7 +3427,7 @@ integer function hdr_ncwrite(hdr, ncid, fform, nc_define) result(ncerr)
    NCF_CHECK(ncerr)
 
    ! Define states section. TODO: write smearing_scheme
-   ncerr = nctk_def_arrays(ncid, [&
+   ncerr = nctk_def_arrays(ncid, [ &
      nctkarr_t("number_of_states", "int", "number_of_kpoints, number_of_spins"), &
      nctkarr_t("eigenvalues", "dp", "max_number_of_states, number_of_kpoints, number_of_spins"), &
      nctkarr_t("occupations", "dp", "max_number_of_states, number_of_kpoints, number_of_spins"), &
@@ -3413,6 +3439,7 @@ integer function hdr_ncwrite(hdr, ncid, fform, nc_define) result(ncerr)
    NCF_CHECK(ncerr)
    ncerr = nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: "fermi_energy", "smearing_width"])
    NCF_CHECK(ncerr)
+   NCF_CHECK(nctk_set_atomic_units(ncid, "smearing_width"))
 
    ! Some variables require the specifications of units.
    NCF_CHECK(nctk_set_atomic_units(ncid, "eigenvalues"))
@@ -3527,6 +3554,8 @@ integer function hdr_ncwrite(hdr, ncid, fform, nc_define) result(ncerr)
 
  ! Write electrons
  NCF_CHECK(nf90_put_var(ncid, vid("fermi_energy"), hdr%fermie))
+ NCF_CHECK(nf90_put_var(ncid, vid("smearing_width"), hdr%tsmear))
+ NCF_CHECK(nf90_put_var(ncid, vid("smearing_scheme"), nctk_string_from_occopt(hdr%occopt)))
 
  ! transfer data from (stupid) 1d hdr%nband and hdr%occ in packed form to 2d - 3d matrix with stride
  ! native support for array and array syntax is one of the reasons why we still use Fortran
@@ -3610,6 +3639,8 @@ integer function hdr_ncwrite(hdr, ncid, fform, nc_define) result(ncerr)
    "nelect", "charge"],[hdr%nelect, hdr%charge])
  NCF_CHECK(ncerr)
 
+ ! FIXME: in etsf_io the number of electrons is declared as integer!!!
+ NCF_CHECK(nf90_put_var(ncid, vid("number_of_electrons"), nint(hdr%nelect)))
  NCF_CHECK(nf90_put_var(ncid, vid("kptrlatt_orig"), hdr%kptrlatt_orig))
  NCF_CHECK(nf90_put_var(ncid, vid("kptrlatt"), hdr%kptrlatt))
  NCF_CHECK(nf90_put_var(ncid, vid("shiftk_orig"), hdr%shiftk_orig))

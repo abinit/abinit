@@ -29,7 +29,7 @@
 !!     anaddb_dtset%gkk_rptwrite= flag to write out real space gkk_rpt matrix elements to disk
 !!     anaddb_dtset%gkqwrite= flag to write out gkq matrix elements to disk
 !!     anaddb_dtset%ep_b_min= first band taken into account in FS integration (if telphint==2)
-!!     anaddb_dtset%ep_b_max= last band taken into account in FS integration (if telphint==2) 
+!!     anaddb_dtset%ep_b_max= last band taken into account in FS integration (if telphint==2)
 !!     anaddb_dtset%prtfsurf = integer flag for the output of the Fermi surface (XCrysden file format)
 !!     anaddb_dtset%prtnest = integer flag for the calculation of the nesting function
 !!     anaddb_dtset%ifcflag = flag for IFC matrices in anaddb calling routine
@@ -42,7 +42,7 @@
 !!     anaddb_dtset%nqpath=number of vertices in the path in reciprocal space, for band structure
 !!           and phonon linewidth output
 !!     anaddb_dtset%nqshft= number of shift vectors for defining the sampling of q points
-!!     anaddb_dtset%ntemper = number of temperature points to calculate, from tempermin to 
+!!     anaddb_dtset%ntemper = number of temperature points to calculate, from tempermin to
 !!           tempermin+ntemper*temperinc
 !!     anaddb_dtset%qpath=vertices in the path in reciprocal space, for band structure
 !!           and phonon linewidth output
@@ -58,6 +58,7 @@
 !!     nrpt =number of real space points used to integrate IFC (for interpolation of dynamical matrices)
 !!     wghatm(natom,natom,nrpt) =Weight for the pair of atoms and the R vector
 !! filnam(7)=character strings giving file names
+!! comm=MPI communicator.
 !!
 !! OUTPUT
 !!
@@ -95,7 +96,7 @@
 
 #include "abi_common.h"
 
-subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam)
+subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
 
  use defs_basis
  use defs_datatypes
@@ -103,13 +104,14 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam)
  use defs_elphon
  use m_profiling_abi
  use m_kptrank
- use m_errors   
+ use m_errors
  use m_xmpi
  use m_hdr
  use m_ebands
 
  use m_io_tools,        only : open_file, is_open
  use m_numeric_tools,   only : wrap2_pmhalf
+ use m_pptools,         only : printvtk
  use m_dynmat,          only : ftgam_init, ftgam
  use m_crystal,         only : crystal_t
  use m_ifc,             only : ifc_type
@@ -133,8 +135,9 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam)
  type(anaddb_dataset_type),intent(inout) :: anaddb_dtset
  type(crystal_t),intent(in) :: Cryst
  type(ifc_type),intent(inout) :: Ifc
+ integer,intent(in) :: comm
 !arrays
- character(len=fnlen),intent(in) :: filnam(7) 
+ character(len=fnlen),intent(in) :: filnam(7)
 
 !Local variables-------------------------------
 !scalars
@@ -145,7 +148,7 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam)
  integer :: timrev,unitfskgrid,qtor,idir,iFSkpq,symrankkpt,ikpt_irr
  integer :: ep_prt_wtk ! eventually to be made into an input variable
  integer :: fform,ie,ie1,ie2,i_start,i_end
- integer :: ssp,s1,s2,comm,tmp_nenergy, top_vb,nproc,me
+ integer :: ssp,s1,s2,tmp_nenergy, top_vb,nproc,me
  integer :: nkpt_tmp
  real(dp) :: max_occ,realdp_ex,res !,ss
  real(dp) :: tcpu, twall, tcpui, twalli
@@ -187,7 +190,6 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam)
 & '-begin elphon at tcpu',tcpui,'  and twall',twalli,' sec'
  call wrtout(std_out,message,'COLL')
 
- comm = xmpi_world
  nproc = xmpi_comm_size(comm); me = xmpi_comm_rank(comm)
 
  write(message, '(a,i0,a,i0)' )'- running on ', nproc,'  cpus me = ', me
@@ -202,7 +204,7 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam)
    gkk_fname = filnam(5)
    if (open_file(gkk_fname,message,newunit=unitgkk,form="unformatted",status="old",action="read") /=0) then
      MSG_ERROR(message)
-   end if 
+   end if
  end if
 
  elph_base_name=trim(filnam(2))//"_ep"
@@ -297,7 +299,7 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam)
  if (anaddb_dtset%ifcflag/=1) then
    write(message,'(a,i0)')&
 &   ' ifcflag should be set to 1 since the IFC matrices are supposed to exist but ifcflag= ',anaddb_dtset%ifcflag
-   MSG_ERROR(message)        
+   MSG_ERROR(message)
  end if
 
  call timein(tcpu,twall)
@@ -500,7 +502,7 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam)
  ABI_ALLOCATE(elph_ds%k_phon%irredtoGS,(elph_ds%k_phon%nkptirr))
 
 !====================================================================
-!2) order irred k-points 
+!2) order irred k-points
 !====================================================================
  if (master == me) then
    call order_fs_kpts(hdr%kptns, hdr%nkpt, elph_ds%k_phon%kptirr,elph_ds%k_phon%nkptirr,elph_ds%k_phon%irredtoGS)
@@ -512,19 +514,17 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam)
 !==========================================
 !3) reconstruct full kgrid from irred kpoints,
 !==========================================
- call mkFSkgrid (elph_ds%k_phon, Cryst%nsym, Cryst%symrec, timrev) 
+ call mkFSkgrid (elph_ds%k_phon, Cryst%nsym, Cryst%symrec, timrev)
 
 ! check that kptrlatt is coherent with kpt found here
  nkpt_tmp = elph_ds%kptrlatt(1,1)*elph_ds%kptrlatt(2,2)*elph_ds%kptrlatt(3,3)
  if (sum(abs(elph_ds%kptrlatt(:,:))) /= nkpt_tmp) then
-   write(message,'(a)')&
-&   ' the input kptrlatt is not diagonal... '
-   MSG_WARNING(message)
+   MSG_WARNING(' the input kptrlatt is not diagonal... ')
  end if
  if (anaddb_dtset%ifltransport > 1 .and. nkpt_tmp /= elph_ds%k_phon%nkpt) then
    write(message,'(a,i0,a,i0)')&
 &   ' the input kptrlatt is inconsistent  ', nkpt_tmp, " /= ", elph_ds%k_phon%nkpt
-   MSG_ERROR(message)        
+   MSG_ERROR(message)
  end if
 
  if (anaddb_dtset%ifltransport==3 ) then
@@ -560,14 +560,14 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam)
      write (message,'(a)')' The number of irred nkpt does not match! '
      MSG_ERROR(message)
    end if
-   
+
    ABI_DEALLOCATE(indkpt1)
    ABI_DEALLOCATE(wtk_fullbz)
    ABI_DEALLOCATE(wtk_folded)
  end if
 
 !====================================================================
-!4) setup weights for integration (gaussian or tetrahedron method) 
+!4) setup weights for integration (gaussian or tetrahedron method)
 !====================================================================
  elph_ds%k_phon%nband = elph_ds%nFSband
  elph_ds%k_phon%nsppol = elph_ds%nsppol
@@ -582,7 +582,7 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam)
  call elph_k_procs(nproc, elph_ds%k_phon)
 
 !=====================================================
-!get kpt info from the fine grid part 
+!get kpt info from the fine grid part
 !=====================================================
  if (anaddb_dtset%use_k_fine == 1) then
 
@@ -599,7 +599,7 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam)
      call hdr_fort_read(hdr1, unitfskgrid, fform)
      ABI_CHECK(fform/=0,'denser grid GKK header was mis-read. fform == 0')
    end if
-   call hdr_bcast(hdr1,master,me,comm) 
+   call hdr_bcast(hdr1,master,me,comm)
 
    ABI_ALLOCATE(eigenGS_fine,(nband,hdr1%nkpt,elph_ds%nsppol))
 
@@ -769,13 +769,13 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam)
    if (ebands_write_bxsf(Bst, Cryst, fname) /= 0) then
      MSG_WARNING("Cannot produce file for Fermi surface, check log file for more info")
    end if
- end if 
+ end if
 
-!=========================================================    
+!=========================================================
 !Get equivalence between a kpt_phon pair and a qpt in qpt_full
 !only works if the qpt grid is complete (identical to
 !the kpt one, with a basic shift of (0,0,0)
-!=========================================================    
+!=========================================================
 
 !mapping of k + q onto k' for k and k' in full BZ
  ABI_ALLOCATE(FSfullpqtofull,(elph_ds%k_phon%nkpt,elph_ds%nqpt_full))
@@ -817,7 +817,7 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam)
        do ibandp = 1, elph_ds%ngkkband
          res = res + elph_ds%gkk_intweight(iband,ikpt_fine,1)*elph_ds%gkk_intweight(ibandp,iFSkpq,1)
        end do
-     end do 
+     end do
    end do
  end do
  res = res / elph_ds%k_phon%nkpt/elph_ds%k_phon%nkpt
@@ -934,7 +934,7 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam)
    end do
 
    use_afm=(hdr%nsppol==1.and.hdr%nspden==2)
-!  MG FIXME warning time reversal is always assumed to be present. 
+!  MG FIXME warning time reversal is always assumed to be present.
 !  the header should report this information.
 
    use_tr=(timrev==1)
@@ -984,9 +984,9 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam)
  end if
 
 !========================================================
-!Get FS averaged gamma matrices and Fourier transform to real space 
+!Get FS averaged gamma matrices and Fourier transform to real space
 !========================================================
- 
+
  ABI_ALLOCATE(coskr, (elph_ds%nqpt_full,Ifc%nrpt))
  ABI_ALLOCATE(sinkr, (elph_ds%nqpt_full,Ifc%nrpt))
  call ftgam_init(ifc%gprim, elph_ds%nqpt_full,Ifc%nrpt, elph_ds%qpt_full, Ifc%rpt, coskr, sinkr)
@@ -1011,7 +1011,7 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam)
 !to be consistent with the dimensions of the rpt, which come from anaddb.
  ABI_ALLOCATE(elph_ds%gamma_rpt, (2,elph_ds%nbranch**2,elph_ds%nsppol,Ifc%nrpt))
  elph_ds%gamma_rpt = zero
- 
+
  qtor = 1 ! q --> r
  do isppol=1,elph_ds%nsppol
    call ftgam(Ifc%wghatm,elph_ds%gamma_qpt(:,:,isppol,:),elph_ds%gamma_rpt(:,:,isppol,:),natom,&
@@ -1090,7 +1090,7 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam)
    ABI_ALLOCATE(elph_tr_ds%tmp_velocwtk2,(elph_ds%ngkkband,elph_ds%k_phon%nkpt,3,elph_ds%nsppol))
    ABI_ALLOCATE(elph_tr_ds%tmp_vvelocwtk1,(elph_ds%ngkkband,elph_ds%k_phon%nkpt,3,3,elph_ds%nsppol))
    ABI_ALLOCATE(elph_tr_ds%tmp_vvelocwtk2,(elph_ds%ngkkband,elph_ds%k_phon%nkpt,3,3,elph_ds%nsppol))
-   
+
    tmp_veloc_sq1 = zero
    tmp_veloc_sq2 = zero
    elph_tr_ds%tmp_gkk_intweight1 = zero
@@ -1152,7 +1152,7 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam)
      end do
    end do
 
-!  symmetrize paire2red     
+!  symmetrize paire2red
    elph_ds%n_pair = 0
    do ie1 = 1, tmp_nenergy
      do ie2 = 1, tmp_nenergy
@@ -1251,7 +1251,7 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam)
 &   elph_ds%k_phon%wtk,anaddb_dtset%nqpath,anaddb_dtset%qpath,elph_ds%nqpt_full, &
 &   elph_ds%qpt_full,nestname,cryst%gprimd,cryst%gmet,anaddb_dtset%prtnest,qptrlatt)
  end if
- 
+
 !======================================================
 !Calculate alpha^2 F integrating over fine kpt_phon grid
 !======================================================
@@ -1305,7 +1305,7 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam)
 !Now gkk contains the matrix elements of dH(1)/dxi i=1,2,3
 !for kpoints on the FS but qpoints only in the given grid {Q}.
 !
-!1.) Need to complete the gkk elements for q and k\prime=k+q not 
+!1.) Need to complete the gkk elements for q and k\prime=k+q not
 !in the set of {k+Q} by Fourier interpolation on the Q.
 !
 !2.) Need to complete the dynamical matrices and phonon freqs for
@@ -1319,7 +1319,7 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam)
 !=======================================================================
 
  make_gkk2=.false.
- 
+
  if (.not. make_gkk2) then
    call wrtout(std_out,' elphon : skipping full g(k,k") interpolation ',"COLL")
  else
@@ -1343,7 +1343,7 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam)
    write(message,'(2a)')ch10,&
 &   ' elphon : Calling get_all_gkk2 to calculate gkk2 for q points over the full k grid'
    call wrtout(std_out,message,'COLL')
-   
+
    call get_all_gkk2(cryst,ifc,elph_ds,elph_ds%k_phon%kptirr,elph_ds%k_phon%kpt)
  end if
 
@@ -1359,7 +1359,7 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam)
 
  ABI_DEALLOCATE(coskr)
  ABI_DEALLOCATE(sinkr)
- 
+
  if (is_open(elph_ds%unitgkq)) close(elph_ds%unitgkq)
 
 end subroutine elphon

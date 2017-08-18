@@ -93,6 +93,7 @@
 !!  electronpositron <type(electronpositron_type)>=quantities for the electron-positron annihilation (optional argument)
 !!  energies <type(energies_type)>=all part of total energy.
 !!   | entropy(IN)=entropy due to the occupation number smearing (if metal)
+!!   | e_chempot(IN)=energy from spatially varying chemical potential (hartree)
 !!   | e_ewald(IN)=Ewald energy (hartree)
 !!   | e_vdw_dftd(IN)=VdW DFT-D energy
 !!   | e_corepsp(IN)=psp core-core energy
@@ -307,11 +308,11 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
  if (dtset%usewvl == 0) then
    ucvol_local = ucvol
+#if defined HAVE_BIGDFT
  else
 !  We need to tune the volume when wavelets are used because, not
 !  all FFT points are used.
 !  ucvol_local = (half * dtset%wvl_hgrid) ** 3 * ngfft(1)*ngfft(2)*ngfft(3)
-#if defined HAVE_BIGDFT
    ucvol_local = product(wvl_den%denspot%dpbox%hgrids) * real(product(wvl_den%denspot%dpbox%ndims), dp)
 #endif
  end if
@@ -575,8 +576,8 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
        my_bandfft_kpt => bandfft_kpt(my_ikpt)
      else
        my_ikpt=ikpt
-       nblockbd=nband_k/mpi_enreg%nproc_fft
-       if (nband_k/=nblockbd*mpi_enreg%nproc_fft) nblockbd=nblockbd+1
+       nblockbd=nband_k/mpi_enreg%bandpp
+       !if (nband_k/=nblockbd*mpi_enreg%nproc_fft) nblockbd=nblockbd+1
      end if
      blocksize=nband_k/nblockbd
 
@@ -653,7 +654,9 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
 !    Setup gemm_nonlop
      if (gemm_nonlop_use_gemm) then
        gemm_nonlop_ikpt_this_proc_being_treated = my_ikpt
-       call make_gemm_nonlop(my_ikpt,gs_hamk)
+       call make_gemm_nonlop(my_ikpt,gs_hamk%npw_fft_k,gs_hamk%lmnmax, &
+&       gs_hamk%ntypat, gs_hamk%indlmn, gs_hamk%nattyp, gs_hamk%istwf_k, gs_hamk%ucvol, gs_hamk%ffnl_k,&
+&       gs_hamk%ph3d_k)
      end if
 
 #if defined HAVE_GPU_CUDA
@@ -680,7 +683,7 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
 
          if (mpi_enreg%paral_kgb/=1) then
            tim_nonlop=3
-           call nonlop(choice,cpopt,cwaveprj,enlout,gs_hamk,idir,(/zero/),mpi_enreg,1,nnlout,&
+           call nonlop(choice,cpopt,cwaveprj,enlout,gs_hamk,idir,(/zero/),mpi_enreg,blocksize,nnlout,&
 &           paw_opt,signs,nonlop_out,tim_nonlop,cwavef,cwavef)
          else
            tim_nonlop=14
@@ -688,15 +691,10 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
 &           mpi_enreg,nnlout,paw_opt,signs,nonlop_out,tim_nonlop,cwavef,cwavef)
          end if
 
-         if (psps%usepaw==0) then
-           do iblocksize=1,blocksize
-             iband=(iblock-1)*blocksize+iblocksize
-             energies%e_nonlocalpsp=energies%e_nonlocalpsp+dtset%wtk(ikpt)*occ_k(iband)*enlout(iblocksize)
-           end do
-         end if
          do iblocksize=1,blocksize
            iband=(iblock-1)*blocksize+iblocksize
            energies%e_eigenvalues=energies%e_eigenvalues+dtset%wtk(ikpt)*occ_k(iband)*eig_k(iband)
+           energies%e_nonlocalpsp=energies%e_nonlocalpsp+dtset%wtk(ikpt)*occ_k(iband)*enlout(iblocksize)
          end do
 
 !        PAW: accumulate rhoij
@@ -779,23 +777,16 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
 
 !Compute total (free) energy
  if (optene==0.or.optene==2) then
-   if (psps%usepaw==0) then
-     etotal = energies%e_kinetic + energies%e_hartree + energies%e_xc + &
-&     energies%e_localpsp + energies%e_corepsp + energies%e_nonlocalpsp
-   else
-     etotal = energies%e_kinetic + energies%e_hartree + energies%e_xc + &
-&     energies%e_localpsp + energies%e_corepsp + energies%e_paw
-   end if
+   etotal = energies%e_kinetic + energies%e_hartree + energies%e_xc + &
+&   energies%e_localpsp + energies%e_corepsp
+   if (psps%usepaw==0) etotal=etotal + energies%e_nonlocalpsp
+   if (psps%usepaw==1) etotal=etotal + energies%e_paw
  else if (optene==1.or.optene==3) then
-   if (psps%usepaw==0) then
-     etotal = energies%e_eigenvalues - energies%e_hartree + energies%e_xc - &
-&     energies%e_xcdc + energies%e_corepsp - energies%e_corepspdc
-   else
-     etotal = energies%e_eigenvalues - energies%e_hartree + energies%e_xc - &
-&     energies%e_xcdc + energies%e_corepsp - energies%e_corepspdc + energies%e_pawdc
-   end if
+   etotal = energies%e_eigenvalues - energies%e_hartree + energies%e_xc - &
+&   energies%e_xcdc + energies%e_corepsp - energies%e_corepspdc
+   if (psps%usepaw==1) etotal=etotal + energies%e_pawdc
  end if
- etotal = etotal + energies%e_ewald + energies%e_vdw_dftd
+ etotal = etotal + energies%e_ewald + energies%e_chempot + energies%e_vdw_dftd
  if(dtset%occopt>=3 .and. dtset%occopt<=8) etotal=etotal-dtset%tsmear*energies%entropy
 
 !Additional stuff for electron-positron

@@ -5,8 +5,8 @@
 !! mblktyp1
 !!
 !! FUNCTION
-!! This routine merges the derivative databases of type 0-4: 
-!! Total energy, (2nd derivatives (non-stat.),2nd derivatives (stationary), 
+!! This routine merges the derivative databases of type 0-4:
+!! Total energy, (2nd derivatives (non-stat.),2nd derivatives (stationary),
 !! 3rd derivatives, 1st derivatives
 !!
 !! COPYRIGHT
@@ -32,7 +32,7 @@
 !!     mddb=maximum number of databases (cannot be made dynamic)
 !!     nddb=number of input DDBs
 !!     vrsddb=current version of the DDB
-!!     
+!!
 !! OUTPUT
 !!     msym=maximum number of symmetry elements in space group
 !!     Merge the file
@@ -127,7 +127,7 @@ subroutine mblktyp1(chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
 
    dimekb=max(dimekb,dimekb_tmp)
    lmnmax=max(lmnmax,lmnmax_tmp)
-   matom=max(matom,natom)          ! MG Why this! I dont' understand why we always like to complicate things! 
+   matom=max(matom,natom)          ! MG Why this! I dont' understand why we always like to complicate things!
    mband=max(mband,mband_tmp)
    mblok=mblok+nblok
    mblktyp=max(mblktyp,mblktyp_tmp)
@@ -148,10 +148,7 @@ subroutine mblktyp1(chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
  msize=3*mpert*3*mpert
  if(mblktyp==3)msize=msize*3*mpert
 
-!Debug
 !write(std_out,*),'msize',msize,'mpert',mpert,'mblktyp',mblktyp
-!endebug
-
  call ddb_malloc(ddb,msize,mblok,matom,mtypat)
 
 !Allocate arrays
@@ -206,10 +203,10 @@ subroutine mblktyp1(chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
  if(nddb==1)then
 
    write(message, '(a,a,a,a,a)' )&
-&   'The initialisation mode of MRGDDB, that uses nddb=1,',&
+&   'The initialisation mode of MRGDDB, that uses nddb=1 ,',&
 &   'has been disabled in version 2.1 of ABINIT.',&
-&   'Action : you should use DDBs that include the symmetry',&
-&   'information (and that can be used and merged without',&
+&   'Action : you should use DDBs that include the symmetry ',&
+&   'information (and that can be used and merged without ',&
 &   'initialisation), or you should use ABINITv2.0.'
    MSG_ERROR(message)
 
@@ -413,10 +410,7 @@ subroutine mblktyp1(chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
 !Write the preliminary informations
  write(message, '(a,a)' )' open the output database, write the',' preliminary information '
  call wrtout(std_out,message,'COLL')
-
-!DEBUG
 !write(std_out,*)' occopt=',occopt
-!ENDDEBUG
 
  nunit=ddbun
  call ddb_io_out (dscrpt,filnam(1),matom,mband,&
@@ -425,11 +419,6 @@ subroutine mblktyp1(chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
 & natom,nband,ngfft,nkpt,nspden,nspinor,nsppol,nsym,ntypat,occ,occopt,&
 & pawecutdg,rprim,dfpt_sciss,spinat,symafm,symrel,tnons,tolwfr,&
 & tphysel,tsmear,typat,usepaw,wtk,xred,zion,znucl)
-
-!DEBUG
-!write(std_out,*)' mrgddb : after ioddb8 '
-!stop
-!ENDDEBUG
 
 !Write the psp information in the output DDB
 !as well as the value of the number of blocks.

@@ -66,7 +66,6 @@ subroutine chkgrp(nsym,symafm,symrel,ierr)
  character(len=500) :: msg
 !arrays
  integer :: chk(3,3)
- integer :: identity(3,3) 
 
 ! *************************************************************************
 
@@ -79,10 +78,9 @@ subroutine chkgrp(nsym,symafm,symrel,ierr)
 !ENDDEBUG
 
  ierr = 0
- identity = RESHAPE( (/1,0,0,0,1,0,0,0,1/), (/3,3/))
 
 !1) Identity must be the first symmetry.
- if (ANY(symrel(:,:,1) /= identity .or. symafm(1)/=1 )) then
+ if (ANY(symrel(:,:,1) /= identity_3d .or. symafm(1)/=1 )) then
    MSG_WARNING("First operation must be the identity operator")
    ierr = ierr+1
  end if
@@ -111,24 +109,24 @@ subroutine chkgrp(nsym,symafm,symrel,ierr)
 !Closure relation under composition.
  do isym=1,nsym
    do jsym=1,nsym
-!    
+!
 !    Compute the product of the two symmetries
      chk = MATMUL(symrel(:,:,jsym), symrel(:,:,isym))
      symafmchk=symafm(jsym)*symafm(isym)
-!    
+!
 !    Check that product array is one of the original symmetries.
      do ksym=1,nsym
        testeq=1
        if ( ANY(chk/=symrel(:,:,ksym) )) testeq=0
 #if 0
-!      FIXME this check make v4/t26 and v4/t27 fails. 
+!      FIXME this check make v4/t26 and v4/t27 fails.
 !      The rotational part is in the group but with different magnetic part!
        if (symafmchk/=symafm(ksym))testeq=0
 #endif
        if (testeq==1) exit ! The test is positive
      end do
-!    
-     if(testeq==0) then ! The test is negative 
+!
+     if(testeq==0) then ! The test is negative
        write(msg, '(a,2i3,a,7a)' )&
 &       'product of symmetries',isym,jsym,' is not in group.',ch10,&
 &       'This indicates that the input symmetry elements',ch10,&
@@ -164,17 +162,17 @@ end subroutine chkgrp
 !!    multable(1,sym1,sym2) gives the index of the symmetry product S1 * S2 in the symrel array. 0 if not found.
 !!    multable(2:4,sym1,sym2)= the lattice vector that has to added to the fractional translation
 !!      of the operation of index multable(1,sym1,sym2) to obtain the fractional traslation of the product S1 * S2.
-!!  [toinv(4,nsym)]= Optional output. 
-!!    toinv(1,sym1)=Gives the index of the inverse of the symmetry operation. 
+!!  [toinv(4,nsym)]= Optional output.
+!!    toinv(1,sym1)=Gives the index of the inverse of the symmetry operation.
 !!     S1 * S1^{-1} = {E, L} with E identity and L a lattice vector
-!!    toinv(2:4,sym1)=The lattice vector L 
+!!    toinv(2:4,sym1)=The lattice vector L
 !!      Note that toinv can be easily obtained from multable but sometimes we do not need the full table.
 !!
 !! TODO
 !!  This improved version should replace chkgrp.
 !!
 !! PARENTS
-!!      m_shirley
+!!      m_crystal,m_shirley
 !!
 !! CHILDREN
 !!
@@ -213,16 +211,15 @@ subroutine sg_multable(nsym,symafm,symrel,tnons,tnons_tol,ierr,multable,toinv)
  logical :: found_inv,iseq
  character(len=500) :: msg
 !arrays
- integer :: prd_symrel(3,3),identity(3,3) 
+ integer :: prd_symrel(3,3)
  real(dp) :: prd_tnons(3)
 
 ! *************************************************************************
 
  ierr = 0
- identity = RESHAPE( (/1,0,0,0,1,0,0,0,1/), (/3,3/))
 
 !1) Identity must be the first symmetry. Do not check tnons, cell might not be primitive.
- if (ANY(symrel(:,:,1) /= identity .or. symafm(1)/=1 )) then
+ if (ANY(symrel(:,:,1) /= identity_3d .or. symafm(1)/=1 )) then
    MSG_WARNING("First operation must be the identity operator")
    ierr = ierr+1
  end if
@@ -234,9 +231,7 @@ subroutine sg_multable(nsym,symafm,symrel,tnons,tnons_tol,ierr,multable,toinv)
      prd_symrel = MATMUL(symrel(:,:,sym1), symrel(:,:,sym2))
      prd_tnons = tnons(:,sym1) + MATMUL(symrel(:,:,sym1),tnons(:,sym2))
      prd_symafm = symafm(sym1)*symafm(sym2)
-     if ( ALL(prd_symrel == identity)    .and. &
-&     isinteger(prd_tnons,tnons_tol) .and. &
-&     prd_symafm == 1 ) then
+     if ( ALL(prd_symrel == identity_3d) .and. isinteger(prd_tnons,tnons_tol) .and. prd_symafm == 1 ) then
        found_inv = .TRUE.
        if (PRESENT(toinv)) then
          toinv(1,sym1) = sym2
@@ -258,19 +253,19 @@ subroutine sg_multable(nsym,symafm,symrel,tnons,tnons_tol,ierr,multable,toinv)
 !Check closure relation under composition and construct multiplication table.
  do sym1=1,nsym
    do sym2=1,nsym
-!    
+!
 !    Compute the product of the two symmetries. Convention {A,a} {B,b} = {AB, a+Ab}
      prd_symrel = MATMUL(symrel(:,:,sym1), symrel(:,:,sym2))
      prd_symafm = symafm(sym1)*symafm(sym2)
      prd_tnons = tnons(:,sym1) + MATMUL(symrel(:,:,sym1),tnons(:,sym2))
-!    
+!
      iseq=.FALSE.
      do sym3=1,nsym ! Check that product array is one of the original symmetries.
        iseq = ( ALL(prd_symrel==symrel(:,:,sym3) )           .and. &
 &       isinteger(prd_tnons-tnons(:,sym3),tnons_tol) .and. &
-&       prd_symafm==symafm(sym3) )  ! Here v4/t26 and v4/t27 will fail. 
+&       prd_symafm==symafm(sym3) )  ! Here v4/t26 and v4/t27 will fail.
 !      The rotational part is in the group but with different magnetic part!
-       
+
        if (iseq) then ! The test is positive
          if (PRESENT(multable)) then
            multable(1,sym1,sym2) = sym3
@@ -279,10 +274,10 @@ subroutine sg_multable(nsym,symafm,symrel,tnons,tnons_tol,ierr,multable,toinv)
          EXIT
        end if
      end do
-!    
-     if (.not.iseq) then ! The test is negative 
-       write(msg, '(a,2i3,a,7a)' )&
-&       'product of symmetries',sym1,sym2,' is not in group.',ch10,&
+!
+     if (.not.iseq) then ! The test is negative
+       write(msg, '(a,2(i0,1x),a,7a)' )&
+&       'product of symmetries:',sym1,sym2,' is not in group.',ch10,&
 &       'This indicates that the input symmetry elements',ch10,&
 &       'do not possess closure under group composition.',ch10,&
 &       'Action: check symrel, symafm and fix them.'

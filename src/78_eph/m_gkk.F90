@@ -85,9 +85,9 @@ contains  !=====================================================================
 !!
 !! CHILDREN
 !!      appdig,cwtime,destroy_hamiltonian,destroy_rf_hamiltonian,dotprod_g
-!!      dvdb_ftinterp_qpt,dvdb_open_read,dvdb_readsym_allv1,findqg0,get_kg
-!!      getgh1c,getgh1c_setup,getph,gkk_free,gkk_init,gkk_ncwrite
-!!      init_hamiltonian,init_rf_hamiltonian,littlegroup_q
+!!      dvdb_ftinterp_qpt,dvdb_ftinterp_setup,dvdb_open_read,dvdb_readsym_allv1
+!!      findqg0,get_kg,getgh1c,getgh1c_setup,getph,gkk_free,gkk_init
+!!      gkk_ncwrite,init_hamiltonian,init_rf_hamiltonian,littlegroup_q
 !!      load_spin_hamiltonian,load_spin_rf_hamiltonian,pawcprj_free
 !!      rf_transgrid_and_pack,wfd_copy_cg,wfd_free,wfd_init,wfd_print
 !!      wfd_read_wfk,wfd_test_ortho,wrtout,xmpi_split_work,xmpi_sum_master
@@ -378,6 +378,7 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
    ! Fourier interpolate of the potential
    ABI_CHECK(any(abs(qpt) > tol12), "qpt cannot be zero if Fourier interpolation is used")
    cplex = 2
+   call dvdb_ftinterp_setup(dvdb,ifc%ngqpt,ifc%nqshft,ifc%qshft,nfft,ngfft,comm,cryst)
    ABI_MALLOC(v1scf, (cplex,nfftf,nspden,natom3))
    call dvdb_ftinterp_qpt(dvdb, qpt, nfftf, ngfftf, v1scf, comm)
  end if

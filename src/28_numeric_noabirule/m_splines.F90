@@ -29,13 +29,13 @@ module m_splines
  use defs_basis
  use m_profiling_abi
  use m_errors
-    
+
  implicit none
 
- public :: splfit 
- public :: spline 
- public :: spline_bicubic 
- public :: spline_c 
+ public :: splfit
+ public :: spline
+ public :: spline_bicubic
+ public :: spline_c
  public :: spline_complex
  public :: spline_integrate
  public :: splint
@@ -43,7 +43,7 @@ module m_splines
 
 ! *************************************************************************
 
-contains 
+contains
 !!***
 
 !----------------------------------------------------------------------
@@ -58,9 +58,9 @@ contains
 !!  Optionally gives derivatives (first and second) at those points too.
 !!  If point lies outside the range of arg, assign the extremal
 !!  point values to these points, and zero derivative.
-!! 
+!!
 !! INPUTS
-!!  arg(numarg)=equally spaced arguments (spacing delarg) for data 
+!!  arg(numarg)=equally spaced arguments (spacing delarg) for data
 !!   to which spline was fit.
 !!  fun(numarg,2)=function values to which spline was fit and spline
 !!   fit to second derivatives (from Numerical Recipes spline).
@@ -205,8 +205,6 @@ subroutine splfit(arg,derfun,fun,ider,newarg,newfun,numarg,numnew)
 
  end if
 
- return
-
 end subroutine splfit
 !!***
 
@@ -221,9 +219,9 @@ end subroutine splfit
 !!  of a cubic spline.
 !!
 !! INPUTS
-!!    Input, integer N, the number of data points; N must be at least 2. 
-!!    In the special case where N = 2 and IBCBEG = IBCEND = 0, the 
-!!    spline will actually be linear. 
+!!    Input, integer N, the number of data points; N must be at least 2.
+!!    In the special case where N = 2 and IBCBEG = IBCEND = 0, the
+!!    spline will actually be linear.
 !!
 !!    Input, double precision T(N), the knot values, that is, the points where data
 !!    is specified.  The knot values should be distinct, and increasing.
@@ -239,7 +237,7 @@ end subroutine splfit
 !!
 !! PARENTS
 !!      atomden,calc_sigc_cd,calc_sigc_pole_cd,cc_derivatives,denfgr,get_tau_k
-!!      init_occ_ent,integrho,m_atom,m_dens,m_entropyDMFT,m_paw_slater
+!!      init_occ_ent,integrho,m_atom,m_dens,m_entropyDMFT,m_ewald,m_paw_slater
 !!      m_special_funcs,m_splines,outscfcv,pawinit,predict_string,psp10in
 !!      psp10nl,psp11nl,psp1cc,psp1in,psp1nl,psp2in,psp2nl,psp3in,psp3nl,psp4cc
 !!      psp5in,psp5nl,psp6cc,psp6in,psp8in,psp8lo,psp8nl,psp9in
@@ -255,24 +253,24 @@ subroutine spline( t, y, n, ybcbeg, ybcend, ypp )
 !
 !  Discussion:
 !
-!    For data interpolation, the user must call SPLINE_CUBIC_SET to 
-!    determine the second derivative data, passing in the data to be 
+!    For data interpolation, the user must call SPLINE_CUBIC_SET to
+!    determine the second derivative data, passing in the data to be
 !    interpolated, and the desired boundary conditions.
 !
-!    The data to be interpolated, plus the SPLINE_CUBIC_SET output, 
-!    defines the spline.  The user may then call SPLINE_CUBIC_VAL to 
+!    The data to be interpolated, plus the SPLINE_CUBIC_SET output,
+!    defines the spline.  The user may then call SPLINE_CUBIC_VAL to
 !    evaluate the spline at any point.
 !
 !    The cubic spline is a piecewise cubic polynomial.  The intervals
 !    are determined by the "knots" or abscissas of the data to be
 !    interpolated.  The cubic spline has continous first and second
-!    derivatives over the entire interval of interpolation.  
+!    derivatives over the entire interval of interpolation.
 !
 !    For any point T in the interval T(IVAL), T(IVAL+1), the form of
 !    the spline is
 !
 !      SPL(T) = A(IVAL)
-!             + B(IVAL) * ( T - T(IVAL) ) 
+!             + B(IVAL) * ( T - T(IVAL) )
 !             + C(IVAL) * ( T - T(IVAL) )**2
 !             + D(IVAL) * ( T - T(IVAL) )**3
 !
@@ -295,7 +293,7 @@ subroutine spline( t, y, n, ybcbeg, ybcend, ypp )
 !    the requirement that the first derivative be continuous at interior
 !    knot I results in a total of N-2 equations, of the form:
 !
-!      B(IVAL-1) + 2 C(IVAL-1) * (T(IVAL)-T(IVAL-1)) 
+!      B(IVAL-1) + 2 C(IVAL-1) * (T(IVAL)-T(IVAL-1))
 !      + 3 * D(IVAL-1) * (T(IVAL) - T(IVAL-1))**2 = B(IVAL)
 !
 !    or, setting H(IVAL) = T(IVAL+1) - T(IVAL)
@@ -304,19 +302,19 @@ subroutine spline( t, y, n, ybcbeg, ybcend, ypp )
 !      - ( YPP(IVAL) + 2 * YPP(IVAL-1) ) * H(IVAL-1) / 6
 !      + YPP(IVAL-1) * H(IVAL-1)
 !      + ( YPP(IVAL) - YPP(IVAL-1) ) * H(IVAL-1) / 2
-!      = 
+!      =
 !      ( Y(IVAL+1) - Y(IVAL) ) / H(IVAL)
 !      - ( YPP(IVAL+1) + 2 * YPP(IVAL) ) * H(IVAL) / 6
 !
 !    or
 !
 !      YPP(IVAL-1) * H(IVAL-1) + 2 * YPP(IVAL) * ( H(IVAL-1) + H(IVAL) )
-!      + YPP(IVAL) * H(IVAL) 
+!      + YPP(IVAL) * H(IVAL)
 !      =
 !      6 * ( Y(IVAL+1) - Y(IVAL) ) / H(IVAL)
-!      - 6 * ( Y(IVAL) - Y(IVAL-1) ) / H(IVAL-1)    
+!      - 6 * ( Y(IVAL) - Y(IVAL-1) ) / H(IVAL-1)
 !
-!    Boundary conditions must be applied at the first and last knots.  
+!    Boundary conditions must be applied at the first and last knots.
 !    The resulting tridiagonal system can be solved for the YPP values.
 !
 !  Modified:
@@ -333,9 +331,9 @@ subroutine spline( t, y, n, ybcbeg, ybcend, ypp )
 !
 !  Parameters:
 !
-!    Input, integer N, the number of data points; N must be at least 2. 
-!    In the special case where N = 2 and IBCBEG = IBCEND = 0, the 
-!    spline will actually be linear. 
+!    Input, integer N, the number of data points; N must be at least 2.
+!    In the special case where N = 2 and IBCBEG = IBCEND = 0, the
+!    spline will actually be linear.
 !
 !    Input, double precision T(N), the knot values, that is, the points where data
 !    is specified.  The knot values should be distinct, and increasing.
@@ -619,13 +617,13 @@ end subroutine spline_c
 !!  spline_complex
 !!
 !! FUNCTION
-!!  spline_complex interfaces the usual spline routine in a case of a 
+!!  spline_complex interfaces the usual spline routine in a case of a
 !!  complex function
 !!
 !! INPUTS
-!!    Input, integer N, the number of data points; N must be at least 2. 
-!!    In the special case where N = 2 and IBCBEG = IBCEND = 0, the 
-!!    spline will actually be linear. 
+!!    Input, integer N, the number of data points; N must be at least 2.
+!!    In the special case where N = 2 and IBCBEG = IBCEND = 0, the
+!!    spline will actually be linear.
 !!
 !!    Input, double precision T(N), the knot values, that is, the points where data
 !!    is specified.  The knot values should be distinct, and increasing.
@@ -690,8 +688,6 @@ subroutine spline_complex( t, y, n, ybcbeg, ybcend, ypp )
  ABI_DEALLOCATE(y_i)
  ABI_DEALLOCATE(ypp_i)
 
- return
-
 end subroutine spline_complex
 !!***
 
@@ -721,9 +717,8 @@ end subroutine spline_complex
 !! PARENTS
 !!      atomden,calc_sigc_cd,calc_sigc_pole_cd,cc_derivatives,denfgr,get_tau_k
 !!      m_atom,m_cut3d,m_entropyDMFT,m_paw_slater,m_special_funcs,m_splines
-!!      mkcore_inner,mklocl_realspace,outscfcv,partial_dos_fractions
-!!      predict_string,psp6cc,random_stopping_power,spline_paw_fncs
-!!      vso_realspace_local,wvl_initro
+!!      outscfcv,partial_dos_fractions,predict_string,psp6cc
+!!      random_stopping_power,spline_paw_fncs,vso_realspace_local,wvl_initro
 !!
 !! CHILDREN
 !!
@@ -746,9 +741,7 @@ subroutine splint(nspline,xspline,yspline,ysplin2,nfit,xfit,yfit,ierr)
  real(dp), intent(in) :: yspline(nspline)
  real(dp), intent(in) :: ysplin2(nspline)
  real(dp), intent(in) :: xfit(nfit)
-
  real(dp), intent(out) :: yfit(nfit)
-
 
 !local
  integer :: left,i,k,right,my_err
@@ -788,7 +781,7 @@ subroutine splint(nspline,xspline,yspline,ysplin2,nfit,xfit,yfit,ierr)
      end if
    end do ! k
    !
-   if (k==nspline+1) my_err=my_err+1 ! xfit not found 
+   if (k==nspline+1) my_err=my_err+1 ! xfit not found
  end do ! i
 
  if (PRESENT(ierr)) ierr=my_err
@@ -872,12 +865,11 @@ subroutine splint_complex (nspline,xspline,yspline,ysplin2,nfit,xfit,yfit)
  ABI_DEALLOCATE(ysplin2_i)
  ABI_DEALLOCATE(yfit_r)
  ABI_DEALLOCATE(yfit_i)
- return
 
 end subroutine splint_complex
 !!***
 
-!!****f* ABINIT/m_splines/spline_integrate
+!!****f* m_splines/spline_integrate
 !! NAME
 !!  spline_integrate
 !!

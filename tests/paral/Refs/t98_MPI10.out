@@ -1,5 +1,5 @@
 
-.Version 8.1.7 of MULTIBINIT 
+.Version 8.3.1 of MULTIBINIT 
 .(MPI version, prepared for a x86_64_linux_gnu4.8 computer) 
 
 .Copyright (C) 1998-2017 ABINIT group . 
@@ -14,15 +14,15 @@
  acknowledgments of the ABINIT effort.
  For more information, see http://www.abinit.org .
 
-.Starting date : Thu 15 Dec 2016.
-- ( at 09h59 )
+.Starting date : Fri 17 Feb 2017.
+- ( at 11h33 )
   
 -  nproc =   10
 
 ================================================================================
 
  Read the information in the reference structure in 
--system.xml
+-t98_sys.xml
  to initialize the multibinit input
 
 ================================================================================
@@ -32,15 +32,12 @@
  Flags :
      ifcflag         1
    prt_effpo         3
+     strcpli        -1
  Molecular Dynamics :
         temp    1000.0
        ntime        50
        ncell         2         2         2
        dtion       100
-     optcell         0
-       bmass         1.0
-        nnos         5
-        qmass             50        50        50        50        50
  Miscellaneous information :
          asr         2
  Interatomic Force Constants Inputs :
@@ -62,8 +59,8 @@
 
 ================================================================================
 
- Opening the file system.xml
--Reading the file system.xml with LibXML library
+-Opening the file t98_sys.xml
+-Reading the file t98_sys.xml with LibXML library
 
 ================================================================================
 
@@ -129,11 +126,11 @@
 
 ================================================================================
 
-There is no file for the coefficients from polynomial fitting
+ There is no file for the coefficients from polynomial fitting
 
 ================================================================================
 
- Generation of the xml file for the reference structure in system.xml
+ Generation of the xml file for the reference structure in t98_MPI10_sys.xml
 
 ================================================================================
 
@@ -239,7 +236,6 @@ There is no file for the coefficients from polynomial fitting
 ---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
 
  Calculation of the energy with effective potential
-
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
@@ -261,15 +257,12 @@ There is no file for the coefficients from polynomial fitting
 --------------------------------------------------------------------------------
 
 
----OUTPUT-----------------------------------------------------------------------
-
 --- Iteration: ( 2/50) Internal Cycle: (1/1)
 --------------------------------------------------------------------------------
 
 ---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
 
  Calculation of the energy with effective potential
-
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
@@ -291,15 +284,12 @@ There is no file for the coefficients from polynomial fitting
 --------------------------------------------------------------------------------
 
 
----OUTPUT-----------------------------------------------------------------------
-
 --- Iteration: ( 3/50) Internal Cycle: (1/1)
 --------------------------------------------------------------------------------
 
 ---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
 
  Calculation of the energy with effective potential
-
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
@@ -321,15 +311,12 @@ There is no file for the coefficients from polynomial fitting
 --------------------------------------------------------------------------------
 
 
----OUTPUT-----------------------------------------------------------------------
-
 --- Iteration: ( 4/50) Internal Cycle: (1/1)
 --------------------------------------------------------------------------------
 
 ---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
 
  Calculation of the energy with effective potential
-
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
@@ -351,15 +338,12 @@ There is no file for the coefficients from polynomial fitting
 --------------------------------------------------------------------------------
 
 
----OUTPUT-----------------------------------------------------------------------
-
 --- Iteration: ( 5/50) Internal Cycle: (1/1)
 --------------------------------------------------------------------------------
 
 ---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
 
  Calculation of the energy with effective potential
-
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
@@ -381,15 +365,12 @@ There is no file for the coefficients from polynomial fitting
 --------------------------------------------------------------------------------
 
 
----OUTPUT-----------------------------------------------------------------------
-
 --- Iteration: ( 6/50) Internal Cycle: (1/1)
 --------------------------------------------------------------------------------
 
 ---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
 
  Calculation of the energy with effective potential
-
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
@@ -411,15 +392,12 @@ There is no file for the coefficients from polynomial fitting
 --------------------------------------------------------------------------------
 
 
----OUTPUT-----------------------------------------------------------------------
-
 --- Iteration: ( 7/50) Internal Cycle: (1/1)
 --------------------------------------------------------------------------------
 
 ---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
 
  Calculation of the energy with effective potential
-
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
@@ -441,15 +419,12 @@ There is no file for the coefficients from polynomial fitting
 --------------------------------------------------------------------------------
 
 
----OUTPUT-----------------------------------------------------------------------
-
 --- Iteration: ( 8/50) Internal Cycle: (1/1)
 --------------------------------------------------------------------------------
 
 ---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
 
  Calculation of the energy with effective potential
-
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
@@ -471,15 +446,12 @@ There is no file for the coefficients from polynomial fitting
 --------------------------------------------------------------------------------
 
 
----OUTPUT-----------------------------------------------------------------------
-
 --- Iteration: ( 9/50) Internal Cycle: (1/1)
 --------------------------------------------------------------------------------
 
 ---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
 
  Calculation of the energy with effective potential
-
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
@@ -501,15 +473,12 @@ There is no file for the coefficients from polynomial fitting
 --------------------------------------------------------------------------------
 
 
----OUTPUT-----------------------------------------------------------------------
-
 --- Iteration: (10/50) Internal Cycle: (1/1)
 --------------------------------------------------------------------------------
 
 ---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
 
  Calculation of the energy with effective potential
-
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
@@ -531,15 +500,12 @@ There is no file for the coefficients from polynomial fitting
 --------------------------------------------------------------------------------
 
 
----OUTPUT-----------------------------------------------------------------------
-
 --- Iteration: (11/50) Internal Cycle: (1/1)
 --------------------------------------------------------------------------------
 
 ---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
 
  Calculation of the energy with effective potential
-
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
@@ -561,15 +527,12 @@ There is no file for the coefficients from polynomial fitting
 --------------------------------------------------------------------------------
 
 
----OUTPUT-----------------------------------------------------------------------
-
 --- Iteration: (12/50) Internal Cycle: (1/1)
 --------------------------------------------------------------------------------
 
 ---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
 
  Calculation of the energy with effective potential
-
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
@@ -591,15 +554,12 @@ There is no file for the coefficients from polynomial fitting
 --------------------------------------------------------------------------------
 
 
----OUTPUT-----------------------------------------------------------------------
-
 --- Iteration: (13/50) Internal Cycle: (1/1)
 --------------------------------------------------------------------------------
 
 ---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
 
  Calculation of the energy with effective potential
-
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
@@ -621,15 +581,12 @@ There is no file for the coefficients from polynomial fitting
 --------------------------------------------------------------------------------
 
 
----OUTPUT-----------------------------------------------------------------------
-
 --- Iteration: (14/50) Internal Cycle: (1/1)
 --------------------------------------------------------------------------------
 
 ---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
 
  Calculation of the energy with effective potential
-
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
@@ -651,15 +608,12 @@ There is no file for the coefficients from polynomial fitting
 --------------------------------------------------------------------------------
 
 
----OUTPUT-----------------------------------------------------------------------
-
 --- Iteration: (15/50) Internal Cycle: (1/1)
 --------------------------------------------------------------------------------
 
 ---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
 
  Calculation of the energy with effective potential
-
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
@@ -681,15 +635,12 @@ There is no file for the coefficients from polynomial fitting
 --------------------------------------------------------------------------------
 
 
----OUTPUT-----------------------------------------------------------------------
-
 --- Iteration: (16/50) Internal Cycle: (1/1)
 --------------------------------------------------------------------------------
 
 ---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
 
  Calculation of the energy with effective potential
-
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
@@ -711,15 +662,12 @@ There is no file for the coefficients from polynomial fitting
 --------------------------------------------------------------------------------
 
 
----OUTPUT-----------------------------------------------------------------------
-
 --- Iteration: (17/50) Internal Cycle: (1/1)
 --------------------------------------------------------------------------------
 
 ---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
 
  Calculation of the energy with effective potential
-
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
@@ -741,15 +689,12 @@ There is no file for the coefficients from polynomial fitting
 --------------------------------------------------------------------------------
 
 
----OUTPUT-----------------------------------------------------------------------
-
 --- Iteration: (18/50) Internal Cycle: (1/1)
 --------------------------------------------------------------------------------
 
 ---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
 
  Calculation of the energy with effective potential
-
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
@@ -771,15 +716,12 @@ There is no file for the coefficients from polynomial fitting
 --------------------------------------------------------------------------------
 
 
----OUTPUT-----------------------------------------------------------------------
-
 --- Iteration: (19/50) Internal Cycle: (1/1)
 --------------------------------------------------------------------------------
 
 ---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
 
  Calculation of the energy with effective potential
-
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
@@ -801,15 +743,12 @@ There is no file for the coefficients from polynomial fitting
 --------------------------------------------------------------------------------
 
 
----OUTPUT-----------------------------------------------------------------------
-
 --- Iteration: (20/50) Internal Cycle: (1/1)
 --------------------------------------------------------------------------------
 
 ---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
 
  Calculation of the energy with effective potential
-
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
@@ -831,15 +770,12 @@ There is no file for the coefficients from polynomial fitting
 --------------------------------------------------------------------------------
 
 
----OUTPUT-----------------------------------------------------------------------
-
 --- Iteration: (21/50) Internal Cycle: (1/1)
 --------------------------------------------------------------------------------
 
 ---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
 
  Calculation of the energy with effective potential
-
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
@@ -861,15 +797,12 @@ There is no file for the coefficients from polynomial fitting
 --------------------------------------------------------------------------------
 
 
----OUTPUT-----------------------------------------------------------------------
-
 --- Iteration: (22/50) Internal Cycle: (1/1)
 --------------------------------------------------------------------------------
 
 ---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
 
  Calculation of the energy with effective potential
-
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
@@ -891,15 +824,12 @@ There is no file for the coefficients from polynomial fitting
 --------------------------------------------------------------------------------
 
 
----OUTPUT-----------------------------------------------------------------------
-
 --- Iteration: (23/50) Internal Cycle: (1/1)
 --------------------------------------------------------------------------------
 
 ---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
 
  Calculation of the energy with effective potential
-
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
@@ -921,15 +851,12 @@ There is no file for the coefficients from polynomial fitting
 --------------------------------------------------------------------------------
 
 
----OUTPUT-----------------------------------------------------------------------
-
 --- Iteration: (24/50) Internal Cycle: (1/1)
 --------------------------------------------------------------------------------
 
 ---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
 
  Calculation of the energy with effective potential
-
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
@@ -951,15 +878,12 @@ There is no file for the coefficients from polynomial fitting
 --------------------------------------------------------------------------------
 
 
----OUTPUT-----------------------------------------------------------------------
-
 --- Iteration: (25/50) Internal Cycle: (1/1)
 --------------------------------------------------------------------------------
 
 ---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
 
  Calculation of the energy with effective potential
-
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
@@ -981,15 +905,12 @@ There is no file for the coefficients from polynomial fitting
 --------------------------------------------------------------------------------
 
 
----OUTPUT-----------------------------------------------------------------------
-
 --- Iteration: (26/50) Internal Cycle: (1/1)
 --------------------------------------------------------------------------------
 
 ---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
 
  Calculation of the energy with effective potential
-
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
@@ -1011,15 +932,12 @@ There is no file for the coefficients from polynomial fitting
 --------------------------------------------------------------------------------
 
 
----OUTPUT-----------------------------------------------------------------------
-
 --- Iteration: (27/50) Internal Cycle: (1/1)
 --------------------------------------------------------------------------------
 
 ---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
 
  Calculation of the energy with effective potential
-
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
@@ -1041,15 +959,12 @@ There is no file for the coefficients from polynomial fitting
 --------------------------------------------------------------------------------
 
 
----OUTPUT-----------------------------------------------------------------------
-
 --- Iteration: (28/50) Internal Cycle: (1/1)
 --------------------------------------------------------------------------------
 
 ---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
 
  Calculation of the energy with effective potential
-
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
@@ -1071,15 +986,12 @@ There is no file for the coefficients from polynomial fitting
 --------------------------------------------------------------------------------
 
 
----OUTPUT-----------------------------------------------------------------------
-
 --- Iteration: (29/50) Internal Cycle: (1/1)
 --------------------------------------------------------------------------------
 
 ---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
 
  Calculation of the energy with effective potential
-
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
@@ -1101,15 +1013,12 @@ There is no file for the coefficients from polynomial fitting
 --------------------------------------------------------------------------------
 
 
----OUTPUT-----------------------------------------------------------------------
-
 --- Iteration: (30/50) Internal Cycle: (1/1)
 --------------------------------------------------------------------------------
 
 ---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
 
  Calculation of the energy with effective potential
-
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
@@ -1131,15 +1040,12 @@ There is no file for the coefficients from polynomial fitting
 --------------------------------------------------------------------------------
 
 
----OUTPUT-----------------------------------------------------------------------
-
 --- Iteration: (31/50) Internal Cycle: (1/1)
 --------------------------------------------------------------------------------
 
 ---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
 
  Calculation of the energy with effective potential
-
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
@@ -1161,15 +1067,12 @@ There is no file for the coefficients from polynomial fitting
 --------------------------------------------------------------------------------
 
 
----OUTPUT-----------------------------------------------------------------------
-
 --- Iteration: (32/50) Internal Cycle: (1/1)
 --------------------------------------------------------------------------------
 
 ---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
 
  Calculation of the energy with effective potential
-
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
@@ -1191,15 +1094,12 @@ There is no file for the coefficients from polynomial fitting
 --------------------------------------------------------------------------------
 
 
----OUTPUT-----------------------------------------------------------------------
-
 --- Iteration: (33/50) Internal Cycle: (1/1)
 --------------------------------------------------------------------------------
 
 ---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
 
  Calculation of the energy with effective potential
-
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
@@ -1221,15 +1121,12 @@ There is no file for the coefficients from polynomial fitting
 --------------------------------------------------------------------------------
 
 
----OUTPUT-----------------------------------------------------------------------
-
 --- Iteration: (34/50) Internal Cycle: (1/1)
 --------------------------------------------------------------------------------
 
 ---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
 
  Calculation of the energy with effective potential
-
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
@@ -1251,15 +1148,12 @@ There is no file for the coefficients from polynomial fitting
 --------------------------------------------------------------------------------
 
 
----OUTPUT-----------------------------------------------------------------------
-
 --- Iteration: (35/50) Internal Cycle: (1/1)
 --------------------------------------------------------------------------------
 
 ---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
 
  Calculation of the energy with effective potential
-
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
@@ -1281,15 +1175,12 @@ There is no file for the coefficients from polynomial fitting
 --------------------------------------------------------------------------------
 
 
----OUTPUT-----------------------------------------------------------------------
-
 --- Iteration: (36/50) Internal Cycle: (1/1)
 --------------------------------------------------------------------------------
 
 ---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
 
  Calculation of the energy with effective potential
-
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
@@ -1311,15 +1202,12 @@ There is no file for the coefficients from polynomial fitting
 --------------------------------------------------------------------------------
 
 
----OUTPUT-----------------------------------------------------------------------
-
 --- Iteration: (37/50) Internal Cycle: (1/1)
 --------------------------------------------------------------------------------
 
 ---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
 
  Calculation of the energy with effective potential
-
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
@@ -1341,15 +1229,12 @@ There is no file for the coefficients from polynomial fitting
 --------------------------------------------------------------------------------
 
 
----OUTPUT-----------------------------------------------------------------------
-
 --- Iteration: (38/50) Internal Cycle: (1/1)
 --------------------------------------------------------------------------------
 
 ---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
 
  Calculation of the energy with effective potential
-
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
@@ -1371,15 +1256,12 @@ There is no file for the coefficients from polynomial fitting
 --------------------------------------------------------------------------------
 
 
----OUTPUT-----------------------------------------------------------------------
-
 --- Iteration: (39/50) Internal Cycle: (1/1)
 --------------------------------------------------------------------------------
 
 ---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
 
  Calculation of the energy with effective potential
-
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
@@ -1401,15 +1283,12 @@ There is no file for the coefficients from polynomial fitting
 --------------------------------------------------------------------------------
 
 
----OUTPUT-----------------------------------------------------------------------
-
 --- Iteration: (40/50) Internal Cycle: (1/1)
 --------------------------------------------------------------------------------
 
 ---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
 
  Calculation of the energy with effective potential
-
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
@@ -1431,15 +1310,12 @@ There is no file for the coefficients from polynomial fitting
 --------------------------------------------------------------------------------
 
 
----OUTPUT-----------------------------------------------------------------------
-
 --- Iteration: (41/50) Internal Cycle: (1/1)
 --------------------------------------------------------------------------------
 
 ---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
 
  Calculation of the energy with effective potential
-
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
@@ -1461,15 +1337,12 @@ There is no file for the coefficients from polynomial fitting
 --------------------------------------------------------------------------------
 
 
----OUTPUT-----------------------------------------------------------------------
-
 --- Iteration: (42/50) Internal Cycle: (1/1)
 --------------------------------------------------------------------------------
 
 ---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
 
  Calculation of the energy with effective potential
-
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
@@ -1491,15 +1364,12 @@ There is no file for the coefficients from polynomial fitting
 --------------------------------------------------------------------------------
 
 
----OUTPUT-----------------------------------------------------------------------
-
 --- Iteration: (43/50) Internal Cycle: (1/1)
 --------------------------------------------------------------------------------
 
 ---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
 
  Calculation of the energy with effective potential
-
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
@@ -1521,15 +1391,12 @@ There is no file for the coefficients from polynomial fitting
 --------------------------------------------------------------------------------
 
 
----OUTPUT-----------------------------------------------------------------------
-
 --- Iteration: (44/50) Internal Cycle: (1/1)
 --------------------------------------------------------------------------------
 
 ---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
 
  Calculation of the energy with effective potential
-
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
@@ -1551,15 +1418,12 @@ There is no file for the coefficients from polynomial fitting
 --------------------------------------------------------------------------------
 
 
----OUTPUT-----------------------------------------------------------------------
-
 --- Iteration: (45/50) Internal Cycle: (1/1)
 --------------------------------------------------------------------------------
 
 ---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
 
  Calculation of the energy with effective potential
-
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
@@ -1581,15 +1445,12 @@ There is no file for the coefficients from polynomial fitting
 --------------------------------------------------------------------------------
 
 
----OUTPUT-----------------------------------------------------------------------
-
 --- Iteration: (46/50) Internal Cycle: (1/1)
 --------------------------------------------------------------------------------
 
 ---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
 
  Calculation of the energy with effective potential
-
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
@@ -1611,15 +1472,12 @@ There is no file for the coefficients from polynomial fitting
 --------------------------------------------------------------------------------
 
 
----OUTPUT-----------------------------------------------------------------------
-
 --- Iteration: (47/50) Internal Cycle: (1/1)
 --------------------------------------------------------------------------------
 
 ---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
 
  Calculation of the energy with effective potential
-
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
@@ -1641,15 +1499,12 @@ There is no file for the coefficients from polynomial fitting
 --------------------------------------------------------------------------------
 
 
----OUTPUT-----------------------------------------------------------------------
-
 --- Iteration: (48/50) Internal Cycle: (1/1)
 --------------------------------------------------------------------------------
 
 ---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
 
  Calculation of the energy with effective potential
-
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
@@ -1671,15 +1526,12 @@ There is no file for the coefficients from polynomial fitting
 --------------------------------------------------------------------------------
 
 
----OUTPUT-----------------------------------------------------------------------
-
 --- Iteration: (49/50) Internal Cycle: (1/1)
 --------------------------------------------------------------------------------
 
 ---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
 
  Calculation of the energy with effective potential
-
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
@@ -1701,15 +1553,12 @@ There is no file for the coefficients from polynomial fitting
 --------------------------------------------------------------------------------
 
 
----OUTPUT-----------------------------------------------------------------------
-
 --- Iteration: (50/50) Internal Cycle: (1/1)
 --------------------------------------------------------------------------------
 
 ---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
 
  Calculation of the energy with effective potential
-
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
@@ -1731,8 +1580,6 @@ There is no file for the coefficients from polynomial fitting
 --------------------------------------------------------------------------------
 
 
----OUTPUT-----------------------------------------------------------------------
-
 ================================================================================
 
 
@@ -1743,6 +1590,6 @@ There is no file for the coefficients from polynomial fitting
 
 ================================================================================
 
-+Total cpu time      0.748  and wall time      0.821 sec
++Total cpu time      0.618  and wall time      0.634 sec
 
  multibinit : the run completed succesfully.

@@ -94,12 +94,11 @@ subroutine pred_isothermal(ab_mover,hist,itime,mttk_vars,ntime,zDEBUG,iexit)
 !scalars
  integer  :: ii,kk,iatom,idim,idum=5,ierr
  integer,parameter :: lwork=8
- real(dp) :: ucvol,ucvol0,ucvol_next,mttk_aloc,mttk_aloc2,mttk_bloc,ekin,amass_tot
+ real(dp) :: ucvol,ucvol0,ucvol_next,mttk_aloc,mttk_aloc2,mttk_bloc,ekin
  real(dp) :: massvol=0
  real(dp),parameter :: esh2=one/six,esh4=esh2/20._dp,esh6=esh4/42._dp
  real(dp),parameter :: esh8=esh6/72._dp,nosetol=tol10,v2tol=tol8
  real(dp) :: etotal,rescale_vel,polysh,s1,s2,sigma2,v2gauss,vtest
- real(dp) :: favg
  real(dp),save :: ktemp,vlogv
  character(len=5000) :: message
 !arrays
@@ -108,13 +107,13 @@ subroutine pred_isothermal(ab_mover,hist,itime,mttk_vars,ntime,zDEBUG,iexit)
  real(dp) :: mttk_alc(3),mttk_alc2(3),mttk_blc(3),mttk_psh(3)
  real(dp) :: mttk_tv(3,3),mttk_vt(3,3),mttk_ubox(3,3)
  real(dp) :: mttk_uu(3),mttk_uv(3),mttk_veig(3)
- real(dp) :: acell(3),acell0(3),acell_next(3)
+ real(dp) :: acell(3),acell0(3),acell_next(3),favg_(3)
  real(dp) :: rprimd(3,3),rprimd0(3,3),rprim(3,3),rprimd_next(3,3),rprim_next(3,3)
  real(dp) :: gprimd(3,3)
  real(dp) :: gmet(3,3)
  real(dp) :: rmet(3,3)
  real(dp) :: fcart(3,ab_mover%natom)
- real(dp) :: fred(3,ab_mover%natom),fred_corrected(3,ab_mover%natom)
+!real(dp) :: fred_corrected(3,ab_mover%natom)
  real(dp) :: xcart(3,ab_mover%natom),xcart_next(3,ab_mover%natom)
  real(dp) :: xred(3,ab_mover%natom),xred_next(3,ab_mover%natom)
  real(dp) :: vel(3,ab_mover%natom)
@@ -171,22 +170,24 @@ subroutine pred_isothermal(ab_mover,hist,itime,mttk_vars,ntime,zDEBUG,iexit)
 !##########################################################
 !### 02. Obtain the present values from the history
 
- call hist2var(acell,hist,ab_mover%natom,rprim,rprimd,xcart,xred,zDEBUG)
+ call hist2var(acell,hist,ab_mover%natom,rprimd,xred,zDEBUG)
 
- fcart(:,:) =hist%histXF(:,:,3,hist%ihist)
- fred(:,:)  =hist%histXF(:,:,4,hist%ihist)
- vel(:,:)   =hist%histV(:,:,hist%ihist)
- strten(:)  =hist%histS(:,hist%ihist)
- etotal     =hist%histE(hist%ihist)
+ fcart(:,:)=hist%fcart(:,:,hist%ihist)
+ strten(:) =hist%strten(:,hist%ihist)
+ vel(:,:)  =hist%vel(:,:,hist%ihist)
+ etotal    =hist%etot(hist%ihist)
+
+ do ii=1,3
+   rprim(ii,1:3)=rprimd(ii,1:3)/acell(1:3)
+ end do
+ call xred2xcart(ab_mover%natom,rprimd,xcart,xred)
+
+ call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
 
  if(zDEBUG)then
    write (std_out,*) 'fcart:'
    do kk=1,ab_mover%natom
      write (std_out,*) fcart(:,kk)
-   end do
-   write (std_out,*) 'fred:'
-   do kk=1,ab_mover%natom
-     write (std_out,*) fred(:,kk)
    end do
    write (std_out,*) 'vel:'
    do kk=1,ab_mover%natom
@@ -198,8 +199,6 @@ subroutine pred_isothermal(ab_mover,hist,itime,mttk_vars,ntime,zDEBUG,iexit)
    write (std_out,*) etotal
  end if
 
- call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
-
 !Save initial values
  acell0(:)=acell(:)
  rprimd0(:,:)=rprimd(:,:)
@@ -207,19 +206,16 @@ subroutine pred_isothermal(ab_mover,hist,itime,mttk_vars,ntime,zDEBUG,iexit)
 
 !Get rid of mean force on whole unit cell, but only if no
 !generalized constraints are in effect
- if(ab_mover%nconeq==0)then
-   amass_tot=sum(ab_mover%amass(:))
-   do ii=1,3
-     favg=sum(fred(ii,:))/dble(ab_mover%natom)
-!    Note that the masses are used, in order to weight the repartition of the average force.
-!    This procedure is adequate for dynamics, as pointed out by Hichem Dammak (2012 Jan 6)..
-     fred_corrected(ii,:)=fred(ii,:)-favg*ab_mover%amass(:)/amass_tot
-     if(ab_mover%jellslab/=0.and.ii==3)&
-&     fred_corrected(ii,:)=fred(ii,:)
-   end do
- else
-   fred_corrected(:,:)=fred(:,:)
- end if
+!  call fcart2fred(hist%fcart(:,:,hist%ihist),fred_corrected,rprimd,ab_mover%natom)
+!  if(ab_mover%nconeq==0)then
+!    amass_tot=sum(ab_mover%amass(:))
+!    do ii=1,3
+!      if (ii/=3.or.ab_mover%jellslab==0) then
+!        favg=sum(fred_corrected(ii,:))/dble(ab_mover%natom)
+!        fred_corrected(ii,:)=fred_corrected(ii,:)-favg*ab_mover%amass(:)/amass_tot
+!      end if
+!    end do
+!  end if
 
 !write(std_out,*) 'isothermal 03'
 !##########################################################
@@ -577,21 +573,16 @@ subroutine pred_isothermal(ab_mover,hist,itime,mttk_vars,ntime,zDEBUG,iexit)
 !Increase indexes
  hist%ihist=hist%ihist+1
 
-!Compute xcart from xred, and rprimd
- call xred2xcart(ab_mover%natom,rprimd,xcart,xred)
-
 !Fill the history with the variables
-!xcart, xred, acell, rprimd
- call var2hist(acell,hist,ab_mover%natom,rprim,rprimd,xcart,xred,zDEBUG)
+!xred, acell, rprimd, vel
+ call var2hist(acell,hist,ab_mover%natom,rprimd,xred,zDEBUG)
+ hist%vel(:,:,hist%ihist)=vel(:,:)
+ hist%time(hist%ihist)=real(itime,kind=dp)*ab_mover%dtion
 
  if(zDEBUG)then
    write (std_out,*) 'fcart:'
    do kk=1,ab_mover%natom
      write (std_out,*) fcart(:,kk)
-   end do
-   write (std_out,*) 'fred:'
-   do kk=1,ab_mover%natom
-     write (std_out,*) fred(:,kk)
    end do
    write (std_out,*) 'vel:'
    do kk=1,ab_mover%natom
@@ -602,20 +593,6 @@ subroutine pred_isothermal(ab_mover,hist,itime,mttk_vars,ntime,zDEBUG,iexit)
    write (std_out,*) 'etotal:'
    write (std_out,*) etotal
  end if
-
- hist%histV(:,:,hist%ihist)=vel(:,:)
- hist%histT(hist%ihist)=itime*ab_mover%dtion
-
-!write(std_out,*) 'isothermal 07'
-!##########################################################
-!### 07. Deallocate in the last iteration
-!###     When itime==ntime the predictor will be no called
-
-!Temporarily deactivated (MT sept. 2011)
-!if(itime==ntime-1)then
-!if (allocated(fcart_m))      deallocate(fcart_m)
-!if (allocated(vel_nexthalf)) deallocate(vel_nexthalf)
-!end if
 
 end subroutine pred_isothermal
 !!***

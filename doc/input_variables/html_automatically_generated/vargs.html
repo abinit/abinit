@@ -99,6 +99,7 @@ variables to be used in the main input file of the abinit code.
  <a href="#postoldfe">postoldfe</a>&nbsp;&nbsp;
  <a href="#postoldff">postoldff</a>&nbsp;&nbsp;
  <a href="#prtdensph">prtdensph</a>&nbsp;&nbsp;
+ <a href="#prtebands">prtebands</a>&nbsp;&nbsp;
  <br>Q.
  <a href="#qpt">qpt</a>&nbsp;&nbsp;
  <a href="#qptnrm">qptnrm</a>&nbsp;&nbsp;
@@ -358,7 +359,7 @@ source of symmetry breaking, related e.g. to the k point grid or the presence of
 non-symmorphic translations which might not be coherent with the exchange-correlation grid.
 </p>
 <p>
- When <b>chksymbreak</b>=1, the code stops if :
+ When <b>chksymbreak</b>=1, the code stops (or issue a warning) if :
  <ul>
   <li>
    (1) The k point grid is non-symmetric, in case
@@ -2790,6 +2791,31 @@ However, since the purpose of this output is to get a rough idea of the repartit
 this is not a real problem. If you are interested in a more accurate estimation
 of the density within a sphere, you should use the cut3d postprocessor.
 </p>
+</font>
+
+<br><br><br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="prtebands">prtebands</a></font>
+<br><font id="definition">Mnemonics: PRinT Electron BANDS</font>
+<br><font id="characteristic">Characteristic: </font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0 if <a href="varrlx.html#nimage">nimage</a> > 1,
+1 otherwise.
+</font>
+<br><font id="text">
+<p>
+This option activates the output of the electron eigenvalues.
+Possible values:
+
+<ul>
+<li>0 Disable the output of the band energies.</li>
+<li>1 Write eigenvalues in xmgrace format.  A file with extension `EBANDS.agr` is produced at the end of the run.
+Use `xmgrace file_EBANDS.agr` to visualize the band energies</li>
+<li>2 Write eigenvalues in gnuplot format. The code produces a `EBANDS.dat` file with the eigenvalues and a `EBANDS.gnuplot` script.
+Use `gnuplot file_EBANDS.gnuplot` to visualize the band energies.</li>
+</ul>
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>

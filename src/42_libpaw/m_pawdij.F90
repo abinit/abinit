@@ -643,7 +643,6 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
        end do
      end if   
      LIBPAW_DEALLOCATE(dij0)
-
    end if
 
 !  ------------------------------------------------------------------------
@@ -674,7 +673,6 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
        LIBPAW_DEALLOCATE(dijfock_cv)
      end if
    end if
-
 
 !  ----------- Add Dij_Hartree to Dij
 !  ------------------------------------------------------------------------
@@ -747,7 +745,7 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
        if (dij_need) paw_ij(iatom)%dij(:,:)=paw_ij(iatom)%dij(:,:)+dijxc(:,:)
        LIBPAW_DEALLOCATE(dijxc)
      end if
- 
+
    end if
 
 !  ------------------------------------------------------------------------

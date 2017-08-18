@@ -29,8 +29,6 @@
 !! iout =unit number for output
 !! natom=number of atoms in the unit cell
 !! outfilename_radix=radix of anaddb output file name: append _THERMO for thermodynamic quantities
-!! tcpui=initial cpu time
-!! twalli=initial wall clock time
 !! comm=MPI communicator
 !!
 !! OUTPUT
@@ -42,7 +40,7 @@
 !!      anaddb
 !!
 !! CHILDREN
-!!      end_sortph,ifc_fourq,matr3inv,mkrdim,smpbz,sortph,symkpt,timein,wrtout
+!!      end_sortph,ifc_fourq,matr3inv,mkrdim,smpbz,sortph,symkpt,wrtout
 !!
 !! SOURCE
 
@@ -53,7 +51,7 @@
 #include "abi_common.h"
 
 
-subroutine harmonic_thermo(Ifc,Crystal,amu,anaddb_dtset,iout,outfilename_radix,tcpui,twalli,comm,&
+subroutine harmonic_thermo(Ifc,Crystal,amu,anaddb_dtset,iout,outfilename_radix,comm,&
 & thmflag)
 
  use defs_basis
@@ -73,7 +71,6 @@ subroutine harmonic_thermo(Ifc,Crystal,amu,anaddb_dtset,iout,outfilename_radix,t
 #undef ABI_FUNC
 #define ABI_FUNC 'harmonic_thermo'
  use interfaces_14_hidewrite
- use interfaces_18_timing
  use interfaces_32_util
  use interfaces_41_geometry
  use interfaces_56_recipspace
@@ -85,7 +82,6 @@ subroutine harmonic_thermo(Ifc,Crystal,amu,anaddb_dtset,iout,outfilename_radix,t
 !scalars
  integer,intent(in) :: iout,comm
  integer,intent(in),optional :: thmflag
- real(dp),intent(in) :: tcpui,twalli
  character(len=*),intent(in) :: outfilename_radix
  type(anaddb_dataset_type),intent(in) :: anaddb_dtset
  type(crystal_t),intent(in) :: Crystal
@@ -96,18 +92,24 @@ subroutine harmonic_thermo(Ifc,Crystal,amu,anaddb_dtset,iout,outfilename_radix,t
 !Local variables -------------------------
 !scalars
  integer,parameter :: master=0
- integer :: convth,facbrv,iatom,iavfrq,ichan,icomp,igrid,iii,iiii,ij,ind
+ integer :: convth,facbrv,iatom,ichan,icomp,igrid,iii,iiii,ij,ind
  integer :: iqpt2,isym,itemper,iwchan,jjj,mqpt2,nchan,ngrids,natom
  integer :: nqpt2,nspqpt,ntemper,nwchan,option,timrev
  integer :: thermal_unit
+ integer :: bij_unit
+ integer :: vij_unit
+ integer :: nomega, iomega
  real(dp) :: change,cothx,diffbb,dosinc,expm2x,factor,factorw,factorv,gerr
  real(dp) :: ggsum,ggsumsum,ggrestsum
- real(dp) :: gijerr,gijsum,gnorm,ln2shx,qphnrm,relchg,tcpu,tmp,twall,wovert,thmtol
+ real(dp) :: gijerr,gijsum,gnorm,ln2shx,qphnrm,relchg,tmp,wovert,thmtol
  logical :: part1,part2
  character(len=500) :: msg
  character(len=fnlen) :: thermal_filename
+ character(len=fnlen) :: bij_filename
+ character(len=fnlen) :: vij_filename
 !arrays
  integer :: symrec(3,3,Crystal%nsym),symrel(3,3,Crystal%nsym)
+ real(dp) :: symrec_cart(3,3,Crystal%nsym)
  integer :: igqpt2(3),ii(6),jj(6),qptrlatt(3,3)
  integer,allocatable :: indqpt1(:),nchan2(:)
  real(dp) :: gprimd(3,3),qphon(3),rprimd(3,3),tens1(3,3),tens2(3,3)
@@ -119,6 +121,7 @@ subroutine harmonic_thermo(Ifc,Crystal,amu,anaddb_dtset,iout,outfilename_radix,t
  real(dp),allocatable :: ggij(:,:,:,:),gij(:,:,:,:),gw(:,:),qpt2(:,:),spheat(:)
  real(dp),allocatable :: spheat0(:),spqpt2(:,:),wme(:),wtq(:),wtq2(:)
  real(dp),allocatable :: wtq_folded(:),vij(:,:,:)
+ real(dp),allocatable :: phon_dos(:)
  logical,allocatable :: wgcnv(:),wgijcnv(:)
 
 ! *********************************************************************
@@ -126,16 +129,16 @@ subroutine harmonic_thermo(Ifc,Crystal,amu,anaddb_dtset,iout,outfilename_radix,t
  ! For the time being, this routine can use only 1 MPI process
  if (xmpi_comm_rank(comm) /= master) return
 
-!If timing is needed at some point ...
- call timein(tcpu,twall)
- write(msg, '(a,f11.4,a,f11.4,a)' )&
-& ' harmonic_thermo : begin at tcpu',tcpu-tcpui,&
-& '  and twall',twall-twalli,' sec'
- call wrtout(std_out,msg,'COLL')
-
  natom = Crystal%natom
  symrel = Crystal%symrel
  symrec = Crystal%symrec
+
+ call mkrdim(Ifc%acell,Ifc%rprim,rprimd)
+ call matr3inv(rprimd,gprimd)
+ do isym = 1, Crystal%nsym
+   symrec_cart(:,:,isym) = matmul( gprimd, matmul(dble(symrec(:,:,isym)), transpose(rprimd)) )
+! net result is tens1 = rprimd symrec^T gprimd^T   tens1   gprimd symrec rprimd^T
+ end do
 
  thermal_filename=trim(outfilename_radix)//"_THERMO"
  if (open_file(thermal_filename, msg, newunit=thermal_unit) /= 0) then
@@ -146,12 +149,21 @@ subroutine harmonic_thermo(Ifc,Crystal,amu,anaddb_dtset,iout,outfilename_radix,t
  write(thermal_unit,*) '#  Thermodynamical quantities calculated by ANADDB'
  write(thermal_unit,*) '#'
 
+ bij_filename=trim(outfilename_radix)//"_DEBYE_WALLER"
+ if (open_file(bij_filename, msg, newunit=bij_unit) /= 0) then
+   MSG_ERROR(msg)
+ end if
+
+ vij_filename=trim(outfilename_radix)//"_VELOC_SQUARED"
+ if (open_file(vij_filename, msg, newunit=vij_unit) /= 0) then
+   MSG_ERROR(msg)
+ end if
+
  thmtol = anaddb_dtset%thmtol
  nchan=anaddb_dtset%nchan
  ntemper=anaddb_dtset%ntemper
  nwchan=anaddb_dtset%nwchan
  ngrids=anaddb_dtset%ngrids
- iavfrq=anaddb_dtset%iavfrq
 
  ABI_ALLOCATE(bbij,(6,natom,ntemper))
  ABI_ALLOCATE(bij,(6,natom,ntemper))
@@ -176,12 +188,9 @@ subroutine harmonic_thermo(Ifc,Crystal,amu,anaddb_dtset,iout,outfilename_radix,t
  ABI_ALLOCATE(spheat0,(ntemper))
  ABI_ALLOCATE(wgcnv,(nwchan))
  ABI_ALLOCATE(wgijcnv,(nwchan))
- if (iavfrq>0)  then
-   ABI_ALLOCATE(wme,(ntemper))
-   ABI_ALLOCATE(gw,(nchan,nwchan))
- end if
+ ABI_ALLOCATE(wme,(ntemper))
+ ABI_ALLOCATE(gw,(nchan,nwchan))
 
- call mkrdim(Ifc%acell,Ifc%rprim,rprimd)
 
 !initialize ii and jj arrays
  ii(1)=1 ; ii(2)=2 ; ii(3)=3
@@ -227,7 +236,7 @@ subroutine harmonic_thermo(Ifc,Crystal,amu,anaddb_dtset,iout,outfilename_radix,t
 !Loops on the q point grids
  do igrid=1,ngrids
 
-   igqpt2(:)=(anaddb_dtset%ng2qpt(:)*igrid)/ngrids
+   igqpt2(:)=max((anaddb_dtset%ng2qpt(:)*igrid)/ngrids, 1)
    mqpt2=(igqpt2(1)*igqpt2(2)*igqpt2(3))/facbrv
    ABI_ALLOCATE(qpt2,(3,mqpt2))
    ABI_ALLOCATE(spqpt2,(3,mqpt2))
@@ -246,7 +255,7 @@ subroutine harmonic_thermo(Ifc,Crystal,amu,anaddb_dtset,iout,outfilename_radix,t
 !  Reduce the number of such points by symmetrization
    wtq(:)=1.0_dp
 
-   timrev=1 
+   timrev=1
    call symkpt(0,Crystal%gmet,indqpt1,ab_out,spqpt2,nspqpt,nqpt2,Crystal%nsym,symrec,timrev,wtq,wtq_folded)
    ABI_ALLOCATE(wtq2,(nqpt2))
    do iqpt2=1,nqpt2
@@ -255,18 +264,12 @@ subroutine harmonic_thermo(Ifc,Crystal,amu,anaddb_dtset,iout,outfilename_radix,t
      !write(std_out,*)' harmonic_thermo : iqpt2, wtq2 :',iqpt2,wtq2(iqpt2)
    end do
    ABI_DEALLOCATE(wtq_folded)
-   call timein(tcpu,twall)
-
-   write(msg, '(a,a,a,f11.4,a,f11.4,a)' )&
-&   ' harmonic_thermo : in the loop over grids, after symkpt',ch10,&
-&   '  tcpu',tcpu-tcpui,' twall',twall-twalli,' sec'
-   call wrtout(std_out,msg,'COLL')
 
 !  Temporary counters are put zero.
 
    gg(:,:)=zero
    ggij(:,:,:,:)=zero
-   if (iavfrq>0) gw(:,:)=zero
+   gw(:,:)=zero
 
 !  Sum over the sampled q points
    do iqpt2=1,nqpt2
@@ -308,7 +311,7 @@ subroutine harmonic_thermo(Ifc,Crystal,amu,anaddb_dtset,iout,outfilename_radix,t
 
            gg(ichan,iwchan)=gg(ichan,iwchan)+wtq2(iqpt2)
 
-           if (iavfrq>0) gw(ichan,iwchan)=gw(ichan,iwchan)+wtq2(iqpt2)*phfrq(iii)*Ha_cmm1
+           gw(ichan,iwchan)=gw(ichan,iwchan)+wtq2(iqpt2)*phfrq(iii)*Ha_cmm1
 
 !          to calculate two phonon DOS for qshift = 0.0
            do iiii=1,3*natom
@@ -357,7 +360,6 @@ subroutine harmonic_thermo(Ifc,Crystal,amu,anaddb_dtset,iout,outfilename_radix,t
    call end_sortph()
 
 !  Symmetrize the gij
-   call matr3inv(rprimd,gprimd)
    do ichan=1,nchan
      do iwchan=nwchan,1,-1
        do iatom=1,natom
@@ -374,61 +376,37 @@ subroutine harmonic_thermo(Ifc,Crystal,amu,anaddb_dtset,iout,outfilename_radix,t
            do ij=1,6
              tens1(ii(ij),jj(ij))=bbij(ij,ind,1)
            end do
+!          complete the 3x3 tensor from the upper triangle
            tens1(2,1)=tens1(1,2)
            tens1(3,1)=tens1(1,3)
            tens1(3,2)=tens1(2,3)
 !          Here acomplishes the tensorial operations
-!          1) Goto reduced coordinates for both indices
+!!          make this a BLAS call, or better yet batch the whole thing?
+!          2) Apply the symmetry operation on both indices   USING symrec in
+!          cartesian coordinates
            do iii=1,3
              do jjj=1,3
-               tens2(iii,jjj)=tens1(iii,1)*gprimd(1,jjj)&
-&               +tens1(iii,2)*gprimd(2,jjj)&
-&               +tens1(iii,3)*gprimd(3,jjj)
+               tens2(iii,jjj)=tens1(iii,1)*symrec_cart(1,jjj,isym)&
+&               +tens1(iii,2)*symrec_cart(2,jjj,isym)&
+&               +tens1(iii,3)*symrec_cart(3,jjj,isym)
              end do
            end do
            do jjj=1,3
              do iii=1,3
-               tens1(iii,jjj)=tens2(1,jjj)*gprimd(1,iii)&
-&               +tens2(2,jjj)*gprimd(2,iii)&
-&               +tens2(3,jjj)*gprimd(3,iii)
+               tens1(iii,jjj)=tens2(1,jjj)*symrec_cart(1,iii,isym)&
+&               +tens2(2,jjj)*symrec_cart(2,iii,isym)&
+&               +tens2(3,jjj)*symrec_cart(3,iii,isym)
              end do
            end do
-!          2) Apply the symmetry operation on both indices
-           do iii=1,3
-             do jjj=1,3
-               tens2(iii,jjj)=tens1(iii,1)*symrec(1,jjj,isym)&
-&               +tens1(iii,2)*symrec(2,jjj,isym)&
-&               +tens1(iii,3)*symrec(3,jjj,isym)
-             end do
-           end do
-           do jjj=1,3
-             do iii=1,3
-               tens1(iii,jjj)=tens2(1,jjj)*symrec(1,iii,isym)&
-&               +tens2(2,jjj)*symrec(2,iii,isym)&
-&               +tens2(3,jjj)*symrec(3,iii,isym)
-             end do
-           end do
-!          3) Go back to cartesian coordinates
-           do iii=1,3
-             do jjj=1,3
-               tens2(iii,jjj)=tens1(iii,1)*rprimd(jjj,1)&
-&               +tens1(iii,2)*rprimd(jjj,2)&
-&               +tens1(iii,3)*rprimd(jjj,3)
-             end do
-           end do
-           do jjj=1,3
-             do iii=1,3
-               tens1(iii,jjj)=tens2(1,jjj)*rprimd(iii,1)&
-&               +tens2(2,jjj)*rprimd(iii,2)&
-&               +tens2(3,jjj)*rprimd(iii,3)
-             end do
-           end do
+! net result is tens1 = rprimd symrec^T gprimd^T   tens1   gprimd symrec rprimd^T
 
+!          This accumulates over atoms, to account for all symmetric ones
            do ij=1,6
              ggij(ij,iatom,ichan,iwchan)=ggij(ij,iatom,ichan,iwchan) + tens1(ii(ij),jj(ij))
            end do
 
          end do
+!        Each one will be replicated nsym times in the end:
          do ij=1,6
            ggij(ij,iatom,ichan,iwchan)=ggij(ij,iatom,ichan,iwchan)/dble(Crystal%nsym)
          end do
@@ -490,11 +468,9 @@ subroutine harmonic_thermo(Ifc,Crystal,amu,anaddb_dtset,iout,outfilename_radix,t
          gg_sum(ichan,iwchan)=gg_sum(ichan,iwchan)/ggsumsum
          gg_rest(ichan,iwchan)=gg_rest(ichan,iwchan)/ggrestsum
        end do
-       if (iavfrq>0) then
-         do ichan=1,nchan2(iwchan)
-           gw(ichan,iwchan)=gw(ichan,iwchan)/ggsum
-         end do
-       end if
+       do ichan=1,nchan2(iwchan)
+         gw(ichan,iwchan)=gw(ichan,iwchan)/ggsum
+       end do
 
 !      Write gerr for each q sampling and w width
        write(msg,'(a,a,i3,3i6,f10.1,f10.5)') ch10, &
@@ -519,7 +495,7 @@ subroutine harmonic_thermo(Ifc,Crystal,amu,anaddb_dtset,iout,outfilename_radix,t
              write(msg,'(a25,i5,a16)') ' DOS  with channel width=  ',iwchan,' newly converged'
            end if
          end if
-         
+
          call wrtout(std_out,msg,'COLL')
          call wrtout(iout,msg,'COLL')
          do ichan=1,nchan2(iwchan)
@@ -540,29 +516,34 @@ subroutine harmonic_thermo(Ifc,Crystal,amu,anaddb_dtset,iout,outfilename_radix,t
            call wrtout(iout,msg,'COLL')
          end if
 
+         nomega = nchan2(iwchan)
+         dosinc=dble(iwchan)
+
+         ABI_ALLOCATE(phon_dos,(nomega))
+         phon_dos = gdos(1:nomega,iwchan)
+
+!Put zeroes for F, E, S, Cv
+         free(:)=zero
+         energy(:)=zero
+         entropy(:)=zero
+         spheat(:)=zero
+         wme(:)=zero
+
          do itemper=1,ntemper
 
            tmp=anaddb_dtset%tempermin+anaddb_dtset%temperinc*dble(itemper-1)
 !          The temperature (tmp) is given in Kelvin
+           if (tmp < tol6) cycle
 
-!          Put zeroes for F, E, S, Cv
-           free(itemper)=zero
-           energy(itemper)=zero
-           entropy(itemper)=zero
-           spheat(itemper)=zero
-           if (iavfrq>0) wme(itemper)=zero
-
-           dosinc=dble(iwchan)
-
-           do ichan=1,nchan2(iwchan)
+           do iomega=1,nomega
 
 !            wovert= hbar*w / 2kT dimensionless
-             wovert=dosinc*(dble(ichan)-0.5_dp)/Ha_cmm1/(2._dp*kb_HaK*tmp)
+             wovert=dosinc*(dble(iomega)-0.5_dp)/Ha_cmm1/(2._dp*kb_HaK*tmp)
              expm2x=exp(-2.0_dp*wovert)
              ln2shx=wovert+log(1.0_dp-expm2x)
              cothx=(1.0_dp+expm2x)/(1.0_dp-expm2x)
-             factor=dble(3*natom)*gdos(ichan,iwchan)
-             if (iavfrq>0) factorw=3*natom*gw(ichan,iwchan)
+             factor=dble(3*natom)*phon_dos(iomega)
+             factorw=3*natom*gw(iomega,iwchan)
 
 !            This matches the equations published in Lee & Gonze, PRB 51, 8610 (1995)
              free(itemper)=free(itemper) +factor*kb_HaK*tmp*ln2shx
@@ -573,12 +554,13 @@ subroutine harmonic_thermo(Ifc,Crystal,amu,anaddb_dtset,iout,outfilename_radix,t
              if(wovert<100.0_dp)then
                spheat(itemper)=spheat(itemper)+factor*kb_HaK*wovert**2/sinh(wovert)**2
              end if
-             if (iavfrq>0) wme(itemper)=wme(itemper)+factorw*kb_HaK*wovert**2/sinh(wovert)**2
+             wme(itemper)=wme(itemper)+factorw*kb_HaK*wovert**2/sinh(wovert)**2
 
-           end do
+           end do ! iomega
 
-           if (iavfrq>0.and.abs(spheat(itemper))>tol8) wme(itemper)=wme(itemper)/spheat(itemper)
-         end do
+           if (abs(spheat(itemper))>tol8) wme(itemper)=wme(itemper)/spheat(itemper)
+         end do ! itemper
+         ABI_DEALLOCATE(phon_dos)
 
 !        Check if the thermodynamic functions change within tolerance,
          if (ngrids>1) then
@@ -636,13 +618,8 @@ subroutine harmonic_thermo(Ifc,Crystal,amu,anaddb_dtset,iout,outfilename_radix,t
 !        Update F,E,S,C and eventually write them if converged
          if(convth==1)then
            part1=.true.
-           if (iavfrq>0) then
-             write(msg,'(a,a,a)') ch10,&
-&             ' # At  T     F(J/mol-c)     E(J/mol-c)     S(J/(mol-c.K)) C(J/(mol-c.K)) Omega_mean(cm-1)'
-           else
-             write(msg,'(a,a,a)') ch10,&
-&             ' # At  T     F(J/mol-c)     E(J/mol-c)     S(J/(mol-c.K)) C(J/(mol-c.K))'
-           end if
+           write(msg,'(a,a,a)') ch10,&
+&           ' # At  T     F(J/mol-c)     E(J/mol-c)     S(J/(mol-c.K)) C(J/(mol-c.K)) Omega_mean(cm-1)'
            call wrtout(iout,msg,'COLL')
            call wrtout(thermal_unit,msg,'COLL')
            msg = ' # (A mol-c is the abbreviation of a mole-cell, that is, the'
@@ -666,20 +643,12 @@ subroutine harmonic_thermo(Ifc,Crystal,amu,anaddb_dtset,iout,outfilename_radix,t
 
            if(convth==1)then
              tmp=anaddb_dtset%tempermin+anaddb_dtset%temperinc*dble(itemper-1)
-             if (iavfrq>0) then
-               write(msg,'(es11.3,5es15.7)') tmp+tol8,&
-&               Ha_eV*e_Cb*Avogadro*free(itemper),&
-&               Ha_eV*e_Cb*Avogadro*energy(itemper),&
-&               Ha_eV*e_Cb*Avogadro*entropy(itemper),&
-&               Ha_eV*e_Cb*Avogadro*spheat(itemper),&
-&               wme(itemper)
-             else
-               write(msg,'(es11.3,4es15.7)') tmp+tol8,&
-&               Ha_eV*e_Cb*Avogadro*free(itemper),&
-&               Ha_eV*e_Cb*Avogadro*energy(itemper),&
-&               Ha_eV*e_Cb*Avogadro*entropy(itemper),&
-&               Ha_eV*e_Cb*Avogadro*spheat(itemper)
-             end if
+             write(msg,'(es11.3,5es15.7)') tmp+tol8,&
+&             Ha_eV*e_Cb*Avogadro*free(itemper),&
+&             Ha_eV*e_Cb*Avogadro*energy(itemper),&
+&             Ha_eV*e_Cb*Avogadro*entropy(itemper),&
+&             Ha_eV*e_Cb*Avogadro*spheat(itemper),&
+&             wme(itemper)
              call wrtout(iout,msg,'COLL')
              call wrtout(thermal_unit,msg,'COLL')
            end if
@@ -707,7 +676,7 @@ subroutine harmonic_thermo(Ifc,Crystal,amu,anaddb_dtset,iout,outfilename_radix,t
                gijsum = gijsum + gij(ij,iatom,ichan,iwchan)
                gijerr=gijerr&
 &               +abs(ggij(ij,iatom,ichan,iwchan)/gnorm&
-&               -gij(ij,iatom,ichan,iwchan))
+&               -     gij(ij,iatom,ichan,iwchan))
              end do
              if(gijerr>anaddb_dtset%dostol) then
                wgijcnv(iwchan)=.false.
@@ -726,6 +695,7 @@ subroutine harmonic_thermo(Ifc,Crystal,amu,anaddb_dtset,iout,outfilename_radix,t
            do ij=1,6
              gij(ij,iatom,ichan,iwchan)=ggij(ij,iatom,ichan,iwchan)/(gnorm/(3*natom))
            end do
+!if (iwchan==1) write (200+iatom,'(I6,6(E20.10,2x))') ichan, gij(1:6,iatom,ichan,iwchan)
          end do
        end do
 
@@ -753,9 +723,6 @@ subroutine harmonic_thermo(Ifc,Crystal,amu,anaddb_dtset,iout,outfilename_radix,t
 
          do itemper=1,ntemper
 
-           tmp=anaddb_dtset%tempermin+anaddb_dtset%temperinc*dble(itemper-1)
-!          tmp in K
-
 !          Put zeroes for Bij(k)
            do iatom=1,natom
              do ij=1,6
@@ -764,19 +731,24 @@ subroutine harmonic_thermo(Ifc,Crystal,amu,anaddb_dtset,iout,outfilename_radix,t
              end do
            end do
 
-           dosinc=dble(iwchan)
-!          
-           do ichan=1,nchan2(iwchan)
-!            
-!$wovert= \hbar*w / 2kT$, dimensionless
-             wovert=dosinc*(dble(ichan)-0.5_dp)/Ha_cmm1/(2.*kb_HaK*tmp)
-             expm2x=exp(-2.0_dp*wovert)
-             do iatom=1,natom
-               factor=Ha_cmm1/(2.*dosinc*(dble(ichan)-0.5))    &
-&               *(1.0_dp+expm2x)/(1.0_dp-expm2x) /amu(Crystal%typat(iatom))/amu_emass
+           tmp=anaddb_dtset%tempermin+anaddb_dtset%temperinc*dble(itemper-1)
+!          tmp in K
+           if (tmp < tol6) cycle
 
-               factorv=(0.5*dosinc*(float(ichan)-0.5)/Ha_cmm1)    &
-&               *(1.0_dp+expm2x)/(1.0_dp-expm2x) /amu(Crystal%typat(iatom))/amu_emass
+           dosinc=dble(iwchan)
+!
+           do ichan=1,nchan2(iwchan)
+!
+!$wovert= \hbar*w / 2kT$, dimensionless
+             wovert=dosinc*(dble(ichan)-half)/Ha_cmm1/(two*kb_HaK*tmp)
+             expm2x=exp(-two*wovert)
+             do iatom=1,natom
+!   factor contains 1/2 omega
+               factor=Ha_cmm1/(two*dosinc*(dble(ichan)-half))    &
+&               *(one+expm2x)/(one-expm2x) /amu(Crystal%typat(iatom))/amu_emass
+
+               factorv=(half*dosinc*(float(ichan)-half)/Ha_cmm1)    &
+&               *(one+expm2x)/(one-expm2x) /amu(Crystal%typat(iatom))/amu_emass
 
                do ij=1,6
                  bbij(ij,iatom,itemper)=bbij(ij,iatom,itemper) + factor*gij(ij,iatom,ichan,iwchan)
@@ -809,26 +781,22 @@ subroutine harmonic_thermo(Ifc,Crystal,amu,anaddb_dtset,iout,outfilename_radix,t
            end do
          end if
 
+         bij=bbij ! save for next iteration
+
          !Update Bij(k) and write them. B matrix printed in angstrom^2
+         !TODO : get rid of this version in the log and output file. Prefer
+         !external files
          if (convth==1) then
            write(msg, '(a,a,a)' )&
 &           ' B matrix elements as a function of T',ch10,&
 &           '    Angstrom^2, cartesian coordinates'
            call wrtout(std_out,msg,'COLL')
            call wrtout(iout,msg,'COLL')
-         end if
-
-         do itemper=1,ntemper
-
-!          tmp in K
-           tmp=anaddb_dtset%tempermin+anaddb_dtset%temperinc*dble(itemper-1)
-           do iatom=1,natom
-
-             do ij=1,6
-               bij(ij,iatom,itemper)=bbij(ij,iatom,itemper)
-             end do
-
-             if(convth==1)then
+           
+           do itemper=1,ntemper
+!            tmp in K
+             tmp=anaddb_dtset%tempermin+anaddb_dtset%temperinc*dble(itemper-1)
+             do iatom=1,natom
                write(iout,'(2i3,es11.3,6es12.4)')&
 &               iwchan,iatom,tmp+tol10,&
 &               Bohr_Ang**2*bij(1,iatom,itemper)+tol10,&
@@ -837,32 +805,26 @@ subroutine harmonic_thermo(Ifc,Crystal,amu,anaddb_dtset,iout,outfilename_radix,t
 &               Bohr_Ang**2*bij(4,iatom,itemper)+tol10,&
 &               Bohr_Ang**2*bij(5,iatom,itemper)+tol10,&
 &               Bohr_Ang**2*bij(6,iatom,itemper)+tol10
-             end if
-
-           end do ! end loop over natom
-         end do ! end loop over ntemper
+             end do ! end loop over natom
+           end do ! end loop over ntemper
 
 !        Mean square velocity matrix printed in angstrom^2/picosec^2
-         if(convth==1)then
            write(msg, '(a,a,a)' )&
 &           ' <vel^2> matrix elements as a function of T',ch10,&
 &           '    Angstrom^2/(picosec)^2, cartesian coordinates'
            call wrtout(std_out,msg,'COLL')
            call wrtout(iout,msg,'COLL')
-         end if
 
-         do itemper=1,ntemper
-!          tmp in K
-           tmp=anaddb_dtset%tempermin+anaddb_dtset%temperinc*float(itemper-1)
-           do iatom=1,natom
-             if(convth==1)then
+           do itemper=1,ntemper
+!            tmp in K
+             tmp=anaddb_dtset%tempermin+anaddb_dtset%temperinc*float(itemper-1)
+             do iatom=1,natom
                vij(:,iatom,itemper)=Bohr_Ang**2*vij(:,iatom,itemper)/(Time_Sec*1.0e12)**2
-
 !              The following check zeros out <v^2> if it is very small, in order to 
 !              avoid numerical noise being interpreted by the automatic tests as
 !              something real. Note also that we compare it in
 !              absolute value, that's because if any of the phonon frequencies are
-!              computed as negative, <v^2> can take a negative value.      
+!              computed as negative, <v^2> can take a negative value.
                do icomp=1, 6
                  if (abs(vij(icomp,iatom,itemper)) < 1.0e-12) vij(icomp,iatom,itemper)=zero
                end do
@@ -874,19 +836,74 @@ subroutine harmonic_thermo(Ifc,Crystal,amu,anaddb_dtset,iout,outfilename_radix,t
 &               vij(4,iatom,itemper),&
 &               vij(5,iatom,itemper),&
 &               vij(6,iatom,itemper)
-             end if ! end check on convergence
+             end do ! end loop over natom
+           end do ! end loop over ntemper
+         end if ! end check on convergence
+
+
+         ! keep this one !!!!!!!!!!!!!!!!!!
+         if (convth==1) then
+           write(msg, '(a,a,a)' )&
+&           '# B matrix elements as a function of T, for each atom, and smallest omega channel width',ch10,&
+&           '#    Angstrom^2, cartesian coordinates'
+           call wrtout(bij_unit,msg,'COLL')
+           do iatom=1,natom
+             write(msg, '(2a,i10)' ) ch10, '# for atom ', iatom
+             call wrtout(bij_unit,msg,'COLL')
+             do itemper=1,ntemper
+!              tmp in K
+               tmp=anaddb_dtset%tempermin+anaddb_dtset%temperinc*dble(itemper-1)
+               write(msg,'(es11.3,6es12.4)')&
+&               tmp,&
+&               Bohr_Ang**2*bij(1,iatom,itemper),&
+&               Bohr_Ang**2*bij(2,iatom,itemper),&
+&               Bohr_Ang**2*bij(3,iatom,itemper),&
+&               Bohr_Ang**2*bij(4,iatom,itemper),&
+&               Bohr_Ang**2*bij(5,iatom,itemper),&
+&               Bohr_Ang**2*bij(6,iatom,itemper)
+               call wrtout(bij_unit,msg,'COLL')
+             end do ! end loop over ntemper
            end do ! end loop over natom
-         end do ! end loop over ntemper
+
+!        Mean square velocity matrix printed in angstrom^2/picosec^2
+           write(msg, '(a,a,a)' )&
+&           '# <vel^2> matrix elements as a function of T, for each atom, and smallest channel width',ch10,&
+&           '#    Angstrom^2/(picosec)^2, cartesian coordinates'
+           call wrtout(vij_unit,msg,'COLL')
+
+           do iatom=1,natom
+             write(msg, '(2a,i10)' ) ch10, '# for atom ', iatom
+             call wrtout(vij_unit,msg,'COLL')
+             do itemper=1,ntemper
+!            tmp in K
+               tmp=anaddb_dtset%tempermin+anaddb_dtset%temperinc*float(itemper-1)
+               vij(:,iatom,itemper)=Bohr_Ang**2*vij(:,iatom,itemper)/(Time_Sec*1.0e12)**2
+
+!            The following check zeros out <v^2> if it is very small, in order to 
+!            avoid numerical noise being interpreted by the automatic tests as
+!            something real. Note also that we compare it in
+!            absolute value, that's because if any of the phonon frequencies are
+!            computed as negative, <v^2> can take a negative value.      
+               do icomp=1, 6
+                 if (abs(vij(icomp,iatom,itemper)) < 1.0e-12) vij(icomp,iatom,itemper)=zero
+               end do
+               write(vij_unit,'(es11.3,6es12.4)')&
+&               tmp,&
+&               vij(1,iatom,itemper),&
+&               vij(2,iatom,itemper),&
+&               vij(3,iatom,itemper),&
+&               vij(4,iatom,itemper),&
+&               vij(5,iatom,itemper),&
+&               vij(6,iatom,itemper)
+             end do ! end loop over ntemper
+           end do ! end loop over natom
+         end if ! end check on convergence
 
          if(convth==1)part2=.true.
 
        end if ! End of test on wgijcnv
      end do ! End of loop over iwchan
    end if ! End of part2
-
-   call timein(tcpu,twall)
-   write(msg, '(a,f11.4,a,f11.4,a)' )' tcpu',tcpu-tcpui,' twall',twall-twalli,' sec'
-   call wrtout(std_out,msg,'COLL')
 
    if(part1.and.part2)exit
 
@@ -933,10 +950,8 @@ subroutine harmonic_thermo(Ifc,Crystal,amu,anaddb_dtset,iout,outfilename_radix,t
  if(allocated(wtq2)) then
    ABI_DEALLOCATE(wtq2)
  end if
- if (iavfrq>0)  then
-   ABI_DEALLOCATE(gw)
-   ABI_DEALLOCATE(wme)
- end if
+ ABI_DEALLOCATE(gw)
+ ABI_DEALLOCATE(wme)
 
  if(.not.part1)then
    write(msg, '(a,a,a,a,a,a,a,a,a)' )&
@@ -959,6 +974,8 @@ subroutine harmonic_thermo(Ifc,Crystal,amu,anaddb_dtset,iout,outfilename_radix,t
  end if
 
  close (thermal_unit)
+ close (bij_unit)
+ close (vij_unit)
 
 end subroutine harmonic_thermo
 !!***

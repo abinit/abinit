@@ -84,7 +84,7 @@ use defs_abitypes
 
 !We need the integrated magnetic moments
  call calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,std_out,ratsph,rhor,rprimd,typat,ucvol,xred,&
-& intgden)
+& 1,intgden)
 
  Epen=0
  Econstr=0

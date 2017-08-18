@@ -18,7 +18,7 @@ instrflag  1  !the flag for the internal strain tensor
 #%%   telast_3.out, tolnlines=  0, tolabs=  0.000e+00, tolrel=  0.000e+00, fld_options = -easy
 #%% psp_files =  13al.pspnc, 33as.pspnc
 #%% [paral_info]
-#%% max_nprocs = 1
+#%% max_nprocs = 4
 #%% [extra_info]
 #%% authors = Unknown
 #%% keywords =  NC, DFPT

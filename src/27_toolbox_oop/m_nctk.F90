@@ -178,6 +178,7 @@ MODULE m_nctk
 
  public :: nctk_idname              ! Return the nc identifier from the name of the variable.
  public :: nctk_ncify               ! Append ".nc" to ipath if ipath does not end with ".nc"
+ public :: nctk_string_from_occopt  ! Return human-readable string with the smearing scheme.
  public :: nctk_fort_or_ncfile      ! Test wheter a path exists (fortran or nc file) and
                                     ! select iomode depending on file extension.
  public :: nctk_try_fort_or_ncfile  ! Return fortran or netcdf filename depending on the existence of the file.
@@ -224,6 +225,8 @@ MODULE m_nctk
 
  public :: nctk_write_datar
  public :: nctk_read_datar
+ public :: nctk_defwrite_nonana_terms  ! Write phonon frequencies and displacements for q-->0
+                                       ! in the presence of non-analytical behaviour.
 #endif
 
  !integer,save ABI_PROTECTED, public :: nctk_cache_size = 32000000
@@ -331,6 +334,51 @@ function nctk_ncify(ipath) result(opath)
 end function nctk_ncify
 !!***
 
+
+!----------------------------------------------------------------------
+
+!!****f* m_nctk/nctk_string_from_occopt
+!! NAME
+!!  nctk_string_from_occopt
+!!
+!! FUNCTION
+!!
+!! SOURCE
+
+pure function nctk_string_from_occopt(occopt) result(smearing)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'nctk_string_from_occopt'
+!End of the abilint section
+
+ integer,intent(in) :: occopt
+ character(len=etsfio_charlen) :: smearing
+
+! *********************************************************************
+
+ select case (occopt)
+ case (3)
+   smearing = "Fermi-Dirac"
+ case (4)
+   smearing = "cold smearing of N. Marzari with minimization of the bump"
+ case (5)
+   smearing = "cold smearing of N. Marzari with monotonic function in the tail"
+ case (6)
+   smearing = "Methfessel and Paxton"
+ case (7)
+   smearing = "gaussian"
+ case (8)
+   smearing = "uniform"
+ case default
+   smearing = "none"
+ end select
+
+end function nctk_string_from_occopt
+!!***
+
 !----------------------------------------------------------------------
 
 !!****f* m_nctk/nctk_fort_or_ncfile
@@ -358,7 +406,6 @@ end function nctk_ncify
 !!      conducti_nc,optic
 !!
 !! CHILDREN
-!!      var_from_id
 !!
 !! SOURCE
 
@@ -478,7 +525,6 @@ end function nctk_try_fort_or_ncfile
 !!      abinit
 !!
 !! CHILDREN
-!!      var_from_id
 !!
 !! SOURCE
 
@@ -1325,6 +1371,7 @@ integer function nctk_def_basedims(ncid, defmode) result(ncerr)
    nctkdim_t("complex", 2), nctkdim_t("symbol_length", 2), nctkdim_t("character_string_length", etsfio_charlen),&
    nctkdim_t("number_of_cartesian_directions", 3), nctkdim_t("number_of_reduced_dimensions", 3),&
    nctkdim_t("number_of_vectors", 3)])
+ NCF_CHECK(ncerr)
 
  ! Useful integers.
  ncerr = nctk_def_dims(ncid, [&
@@ -1360,7 +1407,6 @@ end function nctk_def_basedims
 !!      m_abihist,m_bse_io,m_effective_potential,write_eig
 !!
 !! CHILDREN
-!!      var_from_id
 !!
 !! SOURCE
 
@@ -2499,7 +2545,6 @@ end function nctk_read_datar
 !!      m_nctk
 !!
 !! CHILDREN
-!!      var_from_id
 !!
 !! SOURCE
 
@@ -2590,7 +2635,6 @@ end subroutine collect_datar
 !!      m_nctk
 !!
 !! CHILDREN
-!!      var_from_id
 !!
 !! SOURCE
 
@@ -2668,7 +2712,6 @@ end subroutine distrib_datar
 !!      m_nctk
 !!
 !! CHILDREN
-!!      var_from_id
 !!
 !! SOURCE
 
@@ -2737,7 +2780,6 @@ end subroutine var_from_id
 !! PARENTS
 !!
 !! CHILDREN
-!!      var_from_id
 !!
 !! SOURCE
 
@@ -2759,8 +2801,7 @@ subroutine var_from_name(ncid, name, var)
 
 !Local variables-------------------------------
 !scalars
- integer :: varid !ncerr
-!arrays
+ integer :: varid
 
 ! *********************************************************************
 
@@ -2770,9 +2811,92 @@ subroutine var_from_name(ncid, name, var)
 end subroutine var_from_name
 !!***
 
-#endif
+!!****f* n_nctk/nctk_defwrite_nonana_terms
+!! NAME
+!! nctk_defwrite_nonana_terms
+!!
+!! FUNCTION
+!!  Write phonon frequencies and displacements for q-->0 in the presence of non-analytical behaviour.
+!!
+!! INPUTS
+!!  ncid=netcdf file id.
+!!  iphl2=Index of the q-point to be written to file
+!!  nph2l=Number of qpoints.
+!!  qph2l(3,nph2l)=List of phonon wavevector directions along which the non-analytical correction
+!!    to the Gamma-point phonon frequencies will be calculated
+!!    The direction is in CARTESIAN COORDINATES
+!!  natom=Number of atoms
+!!  phfrq(3*natom)=Phonon frequencies in Ha
+!!  cart_displ(2,3*natom,3*natom)=displacements in CARTESIAN coordinates.
+!!
+!! OUTPUT
+!!  Only writing.
+!!
+!! PARENTS
+!!      anaddb,m_ifc
+!!
+!! CHILDREN
+!!
+!! SOURCE
 
-!----------------------------------------------------------------------
+subroutine nctk_defwrite_nonana_terms(ncid, iphl2, nph2l, qph2l, natom, phfrq, cart_displ, mode)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'nctk_defwrite_nonana_terms'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: ncid,iphl2,nph2l,natom
+ character(len=*),intent(in) :: mode
+!arrays
+ real(dp),intent(in) :: qph2l(3, nph2l)
+ real(dp),intent(in) :: phfrq(3*natom)
+ real(dp),intent(in) :: cart_displ(2,3*natom,3*natom)
+
+!Local variables-------------------------------
+!scalars
+ integer :: ncerr, na_phmodes_varid, na_phdispl_varid
+
+! *************************************************************************
+
+ select case (mode)
+ case ("define")
+   !NCF_CHECK(nctk_def_basedims(ncid, defmode=.True.))
+   ncerr = nctk_def_dims(ncid, [nctkdim_t("number_of_non_analytical_directions", nph2l)], defmode=.True.)
+   NCF_CHECK(ncerr)
+
+   ncerr = nctk_def_arrays(ncid, [&
+   nctkarr_t('non_analytical_directions', "dp", "number_of_cartesian_directions, number_of_non_analytical_directions"),&
+   nctkarr_t('non_analytical_phonon_modes', "dp", "number_of_phonon_modes, number_of_non_analytical_directions"),&
+   nctkarr_t('non_analytical_phdispl_cart', "dp", &
+   "two, number_of_phonon_modes, number_of_phonon_modes, number_of_non_analytical_directions")])
+   NCF_CHECK(ncerr)
+
+   NCF_CHECK(nctk_set_datamode(ncid))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "non_analytical_directions"), qph2l))
+
+ case ("write")
+
+   NCF_CHECK(nf90_inq_varid(ncid, "non_analytical_phonon_modes", na_phmodes_varid))
+   NCF_CHECK(nf90_put_var(ncid,na_phmodes_varid,phfrq*Ha_eV,start=[1, iphl2], count=[3*natom, 1]))
+   NCF_CHECK(nf90_inq_varid(ncid, "non_analytical_phdispl_cart", na_phdispl_varid))
+   ncerr = nf90_put_var(ncid,na_phdispl_varid,cart_displ*Bohr_Ang,&
+   start=[1,1,1,iphl2], count=[2,3*natom,3*natom, 1])
+   NCF_CHECK(ncerr)
+
+ case default
+   MSG_ERROR(sjoin("Wrong value for mode", mode))
+ end select
+
+end subroutine nctk_defwrite_nonana_terms
+
+#endif
 
 END MODULE m_nctk
 !!***

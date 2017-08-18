@@ -188,6 +188,7 @@ type dataset_type
  integer :: cineb_start
  integer :: cgtyphf
  integer :: delayperm
+ integer :: diismemory
  integer :: dmatpuopt
  integer :: dmatudiag
  integer :: dmft_dc
@@ -364,6 +365,7 @@ type dataset_type
  integer :: natsph
  integer :: natsph_extra
  integer :: natvshift
+ integer :: nbandhf
  integer :: nbandkss
  integer :: nbdblock
  integer :: nbdbuf
@@ -379,11 +381,9 @@ type dataset_type
  integer :: nfreqim
  integer :: nfreqre
  integer :: nfreqsp
- integer :: diismemory
  integer :: nimage
- integer :: nbandhf
- integer :: nkptgw
  integer :: nkpt
+ integer :: nkptgw
  integer :: nkpthf
  integer :: nline
  integer :: nnsclo
@@ -423,6 +423,7 @@ type dataset_type
  integer :: ntypat
  integer :: ntyppure
  integer :: nwfshist
+ integer :: nzchempot
  integer :: occopt
  integer :: optcell
  integer :: optdriver
@@ -457,6 +458,7 @@ type dataset_type
  integer :: macro_uj
  integer :: pawujat
  integer :: pawxcdev
+ integer :: pimd_constraint
  integer :: pitransform
  integer :: plowan_bandi
  integer :: plowan_bandf
@@ -478,6 +480,7 @@ type dataset_type
  integer :: prtdipole
  integer :: prtdos
  integer :: prtdosm
+ integer :: prtebands=1
  integer :: prtefg
  integer :: prteig
  integer :: prtelf
@@ -495,6 +498,7 @@ type dataset_type
  integer :: prtpmp
  integer :: prtposcar
  integer :: prtphdos
+ integer :: prtphbands=1
  integer :: prtphsurf=0
  integer :: prtpot
  integer :: prtpsps=0
@@ -525,6 +529,7 @@ type dataset_type
  integer :: rfasr
  integer :: rfddk
  integer :: rfelfd
+ integer :: rfmagn
  integer :: rfmeth
  integer :: rfphon
  integer :: rfstrs
@@ -558,11 +563,11 @@ type dataset_type
  integer :: usepawu
  integer :: usepotzero
  integer :: userec
- integer :: useria
- integer :: userib
- integer :: useric
- integer :: userid
- integer :: userie
+ integer :: useria=0
+ integer :: userib=0
+ integer :: useric=0
+ integer :: userid=0
+ integer :: userie=0
  integer :: usewvl
  integer :: usexcnhat_orig
  integer :: useylm
@@ -685,6 +690,7 @@ type dataset_type
  real(dp) :: fxcartfactor
  real(dp) :: ga_opt_percent
  real(dp) :: gwencomp
+ real(dp) :: gwfockmix
  real(dp) :: gwls_model_parameter         ! Parameter used in modelization of dielectric function
  real(dp) :: gwls_second_model_parameter  ! another Parameter used in modelization of dielectric function
  real(dp) :: gw_toldfeig
@@ -739,11 +745,11 @@ type dataset_type
  real(dp) :: tolwfr
  real(dp) :: tphysel
  real(dp) :: tsmear
- real(dp) :: userra
- real(dp) :: userrb
- real(dp) :: userrc
- real(dp) :: userrd
- real(dp) :: userre
+ real(dp) :: userra=zero
+ real(dp) :: userrb=zero
+ real(dp) :: userrc=zero
+ real(dp) :: userrd=zero
+ real(dp) :: userre=zero
  real(dp) :: vacwidth
  real(dp) :: vdw_tol
  real(dp) :: vdw_tol_3bt
@@ -800,6 +806,7 @@ type dataset_type
  real(dp), allocatable :: amu_orig(:,:)     !SET2NULL  ! amu(ntypat,nimage)
  real(dp), allocatable :: atvshift(:,:,:)   !SET2NULL  ! atvshift(16,nsppol,natom)
  real(dp), allocatable :: cd_imfrqs(:)      !SET2NULL  ! cd_imfrqs(cd_customnimfrqs)
+ real(dp), allocatable :: chempot(:,:,:)    !SET2NULL  ! chempot(3,nzchempot,ntypat)
  real(dp), allocatable :: corecs(:)         !SET2NULL  ! corecs(ntypat)
  real(dp), allocatable :: densty(:,:)       !SET2NULL  ! densty(ntypat,4)
  real(dp), allocatable :: dmatpawu(:,:,:,:,:) !SET2NULL  ! dmatpawu(2*lpawu+1,2*lpawu+1,nsppol*nspinor,natpu,nimage)
@@ -904,9 +911,13 @@ type dataset_type
  real(dp) :: ddb_shiftq(3)
 !END EPH
 
+ integer :: ndivsm=0
+ integer :: nkpath=0
+ real(dp) :: einterp(4)=zero
+ real(dp),allocatable :: kptbounds(:,:)
+
  end type dataset_type
 !!***
-
 
 !----------------------------------------------------------------------
 
@@ -1458,7 +1469,10 @@ type dataset_type
   character(len=fnlen) :: fnameabo_sig
   character(len=fnlen) :: fnameabo_spcur
   character(len=fnlen) :: fnameabo_sus
+  character(len=fnlen) :: fnameabo_vha
+  character(len=fnlen) :: fnameabo_vpsp
   character(len=fnlen) :: fnameabo_vso
+  character(len=fnlen) :: fnameabo_vxc
   character(len=fnlen) :: fnameabo_wan
   character(len=fnlen) :: fnameabo_wfk
   character(len=fnlen) :: fnameabo_wfq
@@ -1733,6 +1747,7 @@ type dataset_type
     integer :: nsym
     integer :: ntypalch
     integer :: ntypat
+    integer :: nzchempot
 
  end type ab_dimensions
 !!***

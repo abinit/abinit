@@ -46,8 +46,6 @@
 
  read the DDB information and perform some checks
 
--begin at tcpu      0.015  and twall      0.015 sec
-
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  9.0985400  0.0000000  0.0000000  G(1)=  0.1099077  0.0634553  0.0000000
  R(2)= -4.5492700  7.8795668  0.0000000  G(2)=  0.0000000  0.1269105  0.0000000
@@ -115,7 +113,6 @@
 
  Treat the first list of vectors 
 
--begin at tcpu      0.020  and twall      0.020 sec
  
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
  Phonon energies in Hartree :
@@ -182,7 +179,6 @@
 
  Treat the second list of vectors 
 
--begin at tcpu      0.021  and twall      0.022 sec
  
   Phonon at Gamma, with non-analyticity in the
   direction (cartesian coordinates)  1.00000  0.00000  0.00000

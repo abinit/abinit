@@ -40,6 +40,7 @@
 !!         nsppol     =maximal value of input nsppol for all the datasets
 !!         nsym       =maximum number of symmetries
 !!         ntypat     =maximum number of type of atoms
+!!         nzchempot  =maximal value of input nzchempot for all the datasets
 !!  ncid= NetCDF handler
 !!  ndtset=number of datasets
 !!  ndtset_alloc=number of datasets, corrected for allocation of at least
@@ -107,7 +108,7 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
 !Local variables-------------------------------
 !scalars
  integer,parameter :: nkpt_max=50
- integer :: idtset,ii,iimage,ga_n_rules
+ integer :: idtset,ii,iimage,ga_n_rules,nn
  integer :: lpawu1,narr,mxnsp
  integer :: natom,nimfrqs,nimage
  integer :: ntypalch,ntypat,size1,size2,tmpimg0
@@ -211,6 +212,9 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
  call prttagm_images(dprarr_images,iout,jdtset_,1,marr,narrm,ncid,ndtset_alloc,'amu','DPR',&
 & mxvals%nimage,nimagem,ndtset,prtimg,strimg,forceprint=2)
 
+ intarr(1,:)=dtsets(:)%asr
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'asr','INT',0)
+
 !atvshift
  if(mxvals%natpawu>0)then
    narr=dtsets(1)%natvshift*dtsets(1)%nsppol*mxvals%natom ! default size for all datasets
@@ -235,9 +239,6 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
 &   narrm,ncid,ndtset_alloc,'atvshift','DPR',&
 &   multivals%natvshift+multivals%nsppol+multivals%natom)
  end if
-
- intarr(1,:)=dtsets(:)%asr
- call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'asr','INT',0)
 
  intarr(1,:)=dtsets(:)%autoparal
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'autoparal','INT',0)
@@ -431,6 +432,29 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
  dprarr(1,:)=dtsets(:)%charge
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'charge','DPR',0)
 
+!chempot 
+ narr=3*mxvals%nzchempot*mxvals%ntypat ! default size for all datasets
+ if(narr/=0)then
+   do idtset=0,ndtset_alloc       ! specific size for each dataset
+     if(idtset/=0)then
+       narrm(idtset)=3*dtsets(idtset)%nzchempot*dtsets(idtset)%ntypat
+       if(narrm(idtset)/=0)&
+&       dprarr(1:narrm(idtset),idtset)=&
+&       reshape(dtsets(idtset)%chempot(1:3,1:dtsets(idtset)%nzchempot,&
+&       1:dtsets(idtset)%ntypat),&
+&       (/ narrm(idtset) /) )
+     else
+       narrm(idtset)=3*mxvals%nzchempot*mxvals%ntypat
+       if(narrm(idtset)/=0)&
+&       dprarr(1:narrm(idtset),idtset)=&
+&       reshape(dtsets(idtset)%chempot(1:3,1:mxvals%nzchempot,1:mxvals%ntypat),&
+&       (/ narrm(idtset) /) )
+     end if
+   end do
+   call prttagm(dprarr,intarr,iout,jdtset_,1,marr,narr,&
+&   narrm,ncid,ndtset_alloc,'chempot','DPR',1) 
+ end if
+ 
  intarr(1,:)=dtsets(:)%chkexit
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'chkexit','INT',0)
 
@@ -575,7 +599,7 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
 
  intarr(1,:)=dtsets(:)%dmft_solv
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'dmft_solv','INT',0)
- 
+
  dprarr(1,:)=dtsets(:)%dmft_tolfreq
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'dmft_tolfreq','DPR',0)
 
@@ -670,6 +694,12 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
  dprarr(2,:)=dtsets(:)%efield(2)
  dprarr(3,:)=dtsets(:)%efield(3)
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,3,narrm,ncid,ndtset_alloc,'efield','DPR',0)
+
+ nn = size(dtsets(0)%einterp)
+ do ii=1,nn
+   dprarr(ii,:)=dtsets(:)%einterp(ii)
+ end do
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,nn,narrm,ncid,ndtset_alloc,'einterp','DPR',0)
 
  dprarr(1,:)=dtsets(:)%elph2_imagden
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'elph2_imagden','ENE',0)
@@ -1007,6 +1037,9 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
 
  dprarr(1,:)=dtsets(:)%gwencomp
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'gwencomp','ENE',0)
+
+ dprarr(1,:)=dtsets(:)%gwfockmix
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'gwfockmix','DPR',0)
 
  intarr(1,:)=dtsets(:)%gwgamma
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'gwgamma','INT',0)

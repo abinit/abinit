@@ -80,8 +80,6 @@
 
  read the DDB information and perform some checks
 
--begin at tcpu      0.024  and twall      0.025 sec
-
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  9.1698100  0.0000000  0.0000000  G(1)=  0.1090535  0.0629621  0.0000000
  R(2)= -4.5849050  7.9412884  0.0000000  G(2)=  0.0000000  0.1259242  0.0000000
@@ -149,7 +147,6 @@
 
  Calculation of the interatomic forces 
 
--begin at tcpu      0.060  and twall      0.060 sec
        Homogeneous q point set in the B.Z.
  Grid q points  :        8
   1)   0.00000000E+00  0.00000000E+00  2.50000000E-01
@@ -865,7 +862,6 @@
     thermodynamical properties, 
     and Debye-Waller factors.
 
--begin at tcpu      0.526  and twall      0.528 sec
        Homogeneous q point set in the B.Z.
  Grid q points  :     8000
  greater than 80, so only write 20 of them
@@ -893,19 +889,19 @@
  is reduced to   770 .
  DOS  with channel width=    5               :
 
- # At  T     F(J/mol-c)     E(J/mol-c)     S(J/(mol-c.K)) C(J/(mol-c.K))
+ # At  T     F(J/mol-c)     E(J/mol-c)     S(J/(mol-c.K)) C(J/(mol-c.K)) Omega_mean(cm-1)
  # (A mol-c is the abbreviation of a mole-cell, that is, the
  #  number of Avogadro times the atoms in a unit cell)
-  1.000E+02  8.9266489E+04  9.2214173E+04  2.9476841E+01  4.7619794E+01
-  2.000E+02  8.3844408E+04  9.9669181E+04  7.9123867E+01  9.8257476E+01
-  3.000E+02  7.3548416E+04  1.1135167E+05  1.2601084E+02  1.3340805E+02
-  4.000E+02  5.8806622E+04  1.2600881E+05  1.6800547E+02  1.5824192E+02
-  5.000E+02  4.0105100E+04  1.4274367E+05  2.0527715E+02  1.7538179E+02
-  6.000E+02  1.7890829E+04  1.6090790E+05  2.3836178E+02  1.8718230E+02
-  7.000E+02 -7.4481917E+03  1.8006265E+05  2.6787263E+02  1.9543785E+02
-  8.000E+02 -3.5583571E+04  1.9991779E+05  2.9437671E+02  2.0134905E+02
-  9.000E+02 -6.6239447E+04  2.2028030E+05  3.1835527E+02  2.0568643E+02
-  1.000E+03 -9.9183679E+04  2.4101927E+05  3.4020294E+02  2.0894377E+02
+  1.000E+02  8.9266489E+04  9.2214173E+04  2.9476841E+01  4.7619794E+01  1.8754572E+02
+  2.000E+02  8.3844408E+04  9.9669181E+04  7.9123867E+01  9.8257476E+01  2.9149640E+02
+  3.000E+02  7.3548416E+04  1.1135167E+05  1.2601084E+02  1.3340805E+02  3.7282014E+02
+  4.000E+02  5.8806622E+04  1.2600881E+05  1.6800547E+02  1.5824192E+02  4.3047566E+02
+  5.000E+02  4.0105100E+04  1.4274367E+05  2.0527715E+02  1.7538179E+02  4.6772802E+02
+  6.000E+02  1.7890829E+04  1.6090790E+05  2.3836178E+02  1.8718230E+02  4.9180080E+02
+  7.000E+02 -7.4481917E+03  1.8006265E+05  2.6787263E+02  1.9543785E+02  5.0784203E+02
+  8.000E+02 -3.5583571E+04  1.9991779E+05  2.9437671E+02  2.0134905E+02  5.1892385E+02
+  9.000E+02 -6.6239447E+04  2.2028030E+05  3.1835527E+02  2.0568643E+02  5.2684317E+02
+  1.000E+03 -9.9183679E+04  2.4101927E+05  3.4020294E+02  2.0894377E+02  5.3267404E+02
  gij with channel width=      5:
 iatom,iwchan,igqpt2(i),gij error=  10  5    20    20    20   0.00000
  B matrix elements as a function of T
@@ -1841,7 +1837,6 @@ iatom,iwchan,igqpt2(i),gij error=  10  1    20    20    20   0.00000
 
  Treat the first list of vectors 
 
--begin at tcpu     15.179  and twall     15.197 sec
  
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
  Phonon energies in Hartree :
@@ -2017,7 +2012,6 @@ iatom,iwchan,igqpt2(i),gij error=  10  1    20    20    20   0.00000
 -  5.409015E+02  6.370279E+02  7.391258E+02  7.907167E+02  8.065634E+02
 -  8.097761E+02  1.044369E+03  1.061794E+03  1.087162E+03  1.096497E+03
 -  1.143837E+03  1.197222E+03
- Found acoustic mode      1 for |q| in red coord < 0.25 ; q =       0.0000      0.0000      0.2000
  Speed of sound for this q and mode:
    in atomic units:     0.1563092282E-02
    in SI units m/s:           3419.56332
@@ -2025,7 +2019,6 @@ iatom,iwchan,igqpt2(i),gij error=  10  1    20    20    20   0.00000
    in atomic units:     0.6798663860E-03
    in SI units K  :            214.68457
 
- Found acoustic mode      2 for |q| in red coord < 0.25 ; q =       0.0000      0.0000      0.2000
  Speed of sound for this q and mode:
    in atomic units:     0.2288869933E-02
    in SI units m/s:           5007.34073
@@ -2033,7 +2026,6 @@ iatom,iwchan,igqpt2(i),gij error=  10  1    20    20    20   0.00000
    in atomic units:     0.9955430954E-03
    in SI units K  :            314.36727
 
- Found acoustic mode      3 for |q| in red coord < 0.25 ; q =       0.0000      0.0000      0.2000
  Speed of sound for this q and mode:
    in atomic units:     0.2825777228E-02
    in SI units m/s:           6181.92813
@@ -2057,7 +2049,6 @@ iatom,iwchan,igqpt2(i),gij error=  10  1    20    20    20   0.00000
 -  5.388315E+02  6.504355E+02  7.282537E+02  7.900359E+02  8.075778E+02
 -  8.103803E+02  1.045937E+03  1.059187E+03  1.088021E+03  1.101853E+03
 -  1.137770E+03  1.198994E+03
- Found acoustic mode      1 for |q| in red coord < 0.25 ; q =       0.0000      0.0000      0.1500
  Speed of sound for this q and mode:
    in atomic units:     0.1662741290E-02
    in SI units m/s:           3637.56458
@@ -2065,7 +2056,6 @@ iatom,iwchan,igqpt2(i),gij error=  10  1    20    20    20   0.00000
    in atomic units:     0.7232086835E-03
    in SI units K  :            228.37097
 
- Found acoustic mode      2 for |q| in red coord < 0.25 ; q =       0.0000      0.0000      0.1500
  Speed of sound for this q and mode:
    in atomic units:     0.2217882766E-02
    in SI units m/s:           4852.04273
@@ -2073,7 +2063,6 @@ iatom,iwchan,igqpt2(i),gij error=  10  1    20    20    20   0.00000
    in atomic units:     0.9646672545E-03
    in SI units K  :            304.61746
 
- Found acoustic mode      3 for |q| in red coord < 0.25 ; q =       0.0000      0.0000      0.1500
  Speed of sound for this q and mode:
    in atomic units:     0.2898116169E-02
    in SI units m/s:           6340.18340
@@ -2097,7 +2086,6 @@ iatom,iwchan,igqpt2(i),gij error=  10  1    20    20    20   0.00000
 -  5.373407E+02  6.640025E+02  7.164654E+02  7.895787E+02  8.085488E+02
 -  8.106137E+02  1.047729E+03  1.056649E+03  1.088633E+03  1.107518E+03
 -  1.131650E+03  1.200264E+03
- Found acoustic mode      1 for |q| in red coord < 0.25 ; q =       0.0000      0.0000      0.1000
  Speed of sound for this q and mode:
    in atomic units:     0.1760160468E-02
    in SI units m/s:           3850.68766
@@ -2105,7 +2093,6 @@ iatom,iwchan,igqpt2(i),gij error=  10  1    20    20    20   0.00000
    in atomic units:     0.7655811176E-03
    in SI units K  :            241.75111
 
- Found acoustic mode      2 for |q| in red coord < 0.25 ; q =       0.0000      0.0000      0.1000
  Speed of sound for this q and mode:
    in atomic units:     0.2133781772E-02
    in SI units m/s:           4668.05572
@@ -2113,7 +2100,6 @@ iatom,iwchan,igqpt2(i),gij error=  10  1    20    20    20   0.00000
    in atomic units:     0.9280875596E-03
    in SI units K  :            293.06652
 
- Found acoustic mode      3 for |q| in red coord < 0.25 ; q =       0.0000      0.0000      0.1000
  Speed of sound for this q and mode:
    in atomic units:     0.2948800334E-02
    in SI units m/s:           6451.06470
@@ -2137,7 +2123,6 @@ iatom,iwchan,igqpt2(i),gij error=  10  1    20    20    20   0.00000
 -  5.364335E+02  6.775581E+02  7.039630E+02  7.893178E+02  8.094055E+02
 -  8.104988E+02  1.049722E+03  1.054207E+03  1.089000E+03  1.113398E+03
 -  1.125518E+03  1.201028E+03
- Found acoustic mode      1 for |q| in red coord < 0.25 ; q =       0.0000      0.0000      0.0500
  Speed of sound for this q and mode:
    in atomic units:     0.1847450311E-02
    in SI units m/s:           4041.65089
@@ -2145,7 +2130,6 @@ iatom,iwchan,igqpt2(i),gij error=  10  1    20    20    20   0.00000
    in atomic units:     0.8035478012E-03
    in SI units K  :            253.74003
 
- Found acoustic mode      2 for |q| in red coord < 0.25 ; q =       0.0000      0.0000      0.0500
  Speed of sound for this q and mode:
    in atomic units:     0.2029788486E-02
    in SI units m/s:           4440.55052
@@ -2153,7 +2137,6 @@ iatom,iwchan,igqpt2(i),gij error=  10  1    20    20    20   0.00000
    in atomic units:     0.8828557201E-03
    in SI units K  :            278.78346
 
- Found acoustic mode      3 for |q| in red coord < 0.25 ; q =       0.0000      0.0000      0.0500
  Speed of sound for this q and mode:
    in atomic units:     0.2977591481E-02
    in SI units m/s:           6514.05084
@@ -2166,7 +2149,6 @@ iatom,iwchan,igqpt2(i),gij error=  10  1    20    20    20   0.00000
 
  Treat the second list of vectors 
 
--begin at tcpu     15.328  and twall     15.347 sec
  
   Phonon at Gamma, with non-analyticity in the
   direction (cartesian coordinates)  0.00000  0.00000  1.00000

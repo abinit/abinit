@@ -22,8 +22,13 @@ import reading.input as Input
 #Utility
 import utility.write as Write
 import utility.analysis as Analysis
-import utility.canvas as Canvas
 import utility.complet as Completer
+
+try:
+    import utility.canvas as Canvas
+    canv = True
+except:
+    canv = False
 
 #Fortran code
 import fortran.math as Math
@@ -43,18 +48,11 @@ from numpy import linspace,zeros,where
 readline.parse_and_bind("tab: complete")
 
 #Units array (in progress):
-units  = {'Pressure':['GPa',1],'Energy':["Ha",1],'Temperature':['K',0],'Volume':["Bohr^3",1],'Lengh':["Bohr",1]}
+units  = {'Pressure':['GPa',1],'Energy':["Ha",1],'Temperature':['K',0],'Volume':["Bohr^3",1],'Lengh':["Bohr",1],'Distance':["Angstrom",0.5291772085936]}
 
 
 def displayData(data,deviation):
-    if(abs(data) < 1e-03 and deviation < 1e-03):
-        return str("%.3g" %data) + ' +/- ' + str("%.3g" %deviation)
-    if(abs(data) > 1e-03 and deviation < 1e-03 ):
-        return str(round(data,2)) + ' +/- ' + str("%.3g" %deviation)
-    if(abs(data) > 1e-03 and deviation > 1e-03 ):
-        return str(round(data,2)) + ' +/- ' + str(round(deviation,2))
-    return ''
-
+    return str("%.10e" %data) + ' +/- ' + str("%.1e" %deviation)
 
 def openFile(choose = 'please choose file (help):'):
     while True :
@@ -136,7 +134,8 @@ def showData(file,units):
     print 'Number of atoms : ' +  str(file.getNatom())        
     
     print 'Step: ' + str(file.getNbTime())
-                
+    print "initial step :  " + str(file.getNi())
+    print "final   step :  " + str(file.getNf())                
                                
     E_tot = units['Energy'][1] *  Math.average(file.getE_Tot())
     deviation = file.getStandardDeviation(units['Energy'][1] * file.getE_Tot(), E_tot)        
@@ -144,22 +143,32 @@ def showData(file,units):
         
         
     Vol = units['Volume'][1] * Math.average(file.getVol())
-    print 'Volume ('+str(units['Volume'][0])+'): ' + str("%.4g" % Vol)
-
+    deviation = file.getStandardDeviation( file.getVol() * units['Volume'][1] , Vol)
+    print 'Volume ('+str(units['Volume'][0])+")  : " + displayData(Vol,deviation)
     
     Temp = file.getTemp()        
     ATemp =  Math.average(Temp) - units['Temperature'][1]        
     deviation = file.getStandardDeviation( Temp - units['Temperature'][1] , ATemp)
-    print 'Temperature ('+str(units['Temperature'][0])+"): " + displayData(ATemp,deviation)
+    print 'Temperature ('+str(units['Temperature'][0])+")  : " + displayData(ATemp,deviation)
         
                 
                        
     Press =  Math.average(file.getPress() ) * units['Pressure'][1]
     deviation = file.getStandardDeviation(units['Pressure'][1] * file.getPress(), Press)
-    print 'Pressure ('+str(units['Pressure'][0])+"): "  + displayData(Press,deviation)    
+    print 'Pressure ('+str(units['Pressure'][0])+")   : "  + displayData(Press,deviation)    
+
+    Acell =  Math.average(file.getAcell()[:,0]) * units['Distance'][1]
+    deviation = file.getStandardDeviation(units['Distance'][1] * file.getAcell()[:,0], Acell)
+    print 'a ('+str(units['Distance'][0])+")     : "  + displayData(Acell,deviation)    
+
+    Acell =  Math.average(file.getAcell()[:,1]) * units['Distance'][1]
+    deviation = file.getStandardDeviation(units['Distance'][1] * file.getAcell()[:,1], Acell)
+    print 'b ('+str(units['Distance'][0])+")     : "  + displayData(Acell,deviation)    
+
+    Acell =  Math.average(file.getAcell()[:,2]) * units['Distance'][1]
+    deviation = file.getStandardDeviation(units['Distance'][1] * file.getAcell()[:,2], Acell)
+    print 'c ('+str(units['Distance'][0])+")     : "  + displayData(Acell,deviation)    
     
-    print "initial step :  " + str(file.getNi())
-    print "final   step :  " + str(file.getNf())
     print "-----------------------------------------"
         
 def logo():
@@ -327,12 +336,17 @@ while i<size_input :
                 break;
         while 2:
             try :
-                nf = input("Choose final step (ni<nf) : ")
+                nf = input("Choose final step (ni<nf or 0=max) : ")
             except :
-                pass; 
-            if nf <= MD_file.getNbTime() and ni < nf : 
-                MD_file.setNf(int(nf))
-                break;            
+                pass;
+            if nf==0:
+                nf = MD_file.getNbTime()
+                MD_file.setNf(int(MD_file.getNbTime()))
+                break;
+            else:
+                if nf <= MD_file.getNbTime() and ni < nf : 
+                    MD_file.setNf(int(nf))
+                    break;            
         MD_file.setNf(int(nf))
         clear()
         
@@ -365,11 +379,12 @@ while i<size_input :
                 print "4  => Temperature" 
                 print "5  => Pressure" 
                 print "6  => Stress" 
-                print "7  => VACF" 
-                print "8  => VDOS"  
-                print "9  => RDF"
-                print "10 => Help"
-                print "11 => Return"
+                print "7  => Acell" 
+                print "8  => VACF" 
+                print "9  => VDOS"  
+                print "10 => RDF"
+                print "11 => Help"
+                print "12 => Return"
                 print " "
         
                 try:
@@ -381,15 +396,22 @@ while i<size_input :
                     print " "
                     print "Choose format:"
                     print "1  => ASCII" 
-                    print "2  => PDF"
-                    print "3  => PDF+ASCII"
+                    if canv==True:
+                        print "2  => PDF"
+                        print "3  => PDF+ASCII"
+                    else:
+                        print "No canvas library to plot PDF"
                     print "4  => Return"
+
                     while True:        
                         try:
                             choiceformat = input("Choose your format: ")
                             if choiceformat == 4 :
                                 choiceQuantitie = 0
                             break
+                            if (canv==False and (choiceformat==3 or choiceformat==2)):
+                                choiceQuantitie = 0
+                                break
                         except :
                             pass; 
             else:
@@ -406,10 +428,12 @@ while i<size_input :
                     choiceQuantitie=5
                 elif calculation == "stress":
                     choiceQuantitie=6
-                elif calculation == "vacf":
+                elif calculation == "acell":
                     choiceQuantitie=7
-                elif calculation == "vdos":
+                elif calculation == "vacf":
                     choiceQuantitie=8
+                elif calculation == "vdos":
+                    choiceQuantitie=9
                     res = 0
                     if "vdosres" in input_data[input_name].keys():
                         res = input_data[input_name]["vdosres"]
@@ -548,9 +572,25 @@ while i<size_input :
                     pdf.print_figure(fname)
                     print  fname 
                     print 'File save sucessful!'
+
+            elif choiceQuantitie == 7:
+                x = linspace(MD_file.getNi(),MD_file.getNf()-1,MD_file.getNf()-MD_file.getNi())
+                y = MD_file.getAcell() * units['Distance'][1]
+                if choiceformat == 1 or choiceformat == 3:
+                    fname = saveFile('dat',name_quantitie)        
+                    Write.SaveFile(fname).saveGraph(x,y,'Step',"acell")
+                    print  fname 
+                    print 'File save sucessful!'
+                if choiceformat == 2 or choiceformat == 3:
+                    fname = saveFile('pdf',name_quantitie)
+                    pdf = Canvas.Canvas(width=10, height=8, dpi=100,x=x,y=y,pxlbl='Step',pylbl="Acell"+" ("+str(units['Distance'][0])+")")
+                    pdf.addLegend([r'$a$',r'$b$',r'$c$'],markerscale=1)
+                    pdf.print_figure(fname)        
+                    print  fname 
+                    print 'File save sucessful!'
                     
                         
-            elif choiceQuantitie == 7:
+            elif choiceQuantitie == 8:
                 y = Analysis.Correlation(MD_file.getVel()).getCorrelationFunction(normalize = True)
                 x = linspace(MD_file.getNi(),MD_file.getNf()-1,MD_file.getNf()-MD_file.getNi())# Temporarily !!!
                     
@@ -567,7 +607,7 @@ while i<size_input :
                     print 'File save sucessful!'
                 
                 
-            elif choiceQuantitie == 8:
+            elif choiceQuantitie == 9:
                 if input_file == False:
                     res = 0
                     while res<1 or res>100:
@@ -595,7 +635,7 @@ while i<size_input :
                     print 'File save sucessful!'            
             
 
-            elif choiceQuantitie == 9:
+            elif choiceQuantitie == 10:
                     
                 PTOE = Analysis.PeriodicTableElement()
                 nameAtom = MD_file.getAtomName()
@@ -667,7 +707,7 @@ while i<size_input :
                 break;
 
 
-            elif choiceQuantitie == 11:
+            elif choiceQuantitie == 12:
               break;
 
             if (input_file==True):

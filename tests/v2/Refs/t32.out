@@ -67,8 +67,6 @@
 
  read the DDB information and perform some checks
 
--begin at tcpu      0.019  and twall      0.019 sec
-
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  5.3000000  5.3000000  G(1)= -0.0943396  0.0943396  0.0943396
  R(2)=  5.3000000  0.0000000  5.3000000  G(2)=  0.0943396 -0.0943396  0.0943396
@@ -115,7 +113,6 @@
 
  Calculation of the interatomic forces 
 
--begin at tcpu      0.022  and twall      0.022 sec
        Homogeneous q point set in the B.Z.
  Grid q points  :       32
   1)   2.50000000E-01  2.50000000E-01  2.50000000E-01
@@ -472,7 +469,6 @@
 
  Treat the first list of vectors 
 
--begin at tcpu      0.035  and twall      0.035 sec
  
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
  Phonon energies in Hartree :
@@ -499,7 +495,6 @@
  Phonon frequencies in cm-1    :
 -  4.054039E+00  4.054039E+00  5.903672E+01  4.574203E+02  4.589365E+02
 -  4.589365E+02
- Found acoustic mode      1 for |q| in red coord < 0.25 ; q =       0.1000      0.0000      0.0000
  Speed of sound for this q and mode:
    in atomic units:     0.1799156583E-03
    in SI units m/s:            393.59991
@@ -507,7 +502,6 @@
    in atomic units:     0.1050187293E-03
    in SI units K  :             33.16225
 
- Found acoustic mode      2 for |q| in red coord < 0.25 ; q =       0.1000      0.0000      0.0000
  Speed of sound for this q and mode:
    in atomic units:     0.1799156583E-03
    in SI units m/s:            393.59991
@@ -515,7 +509,6 @@
    in atomic units:     0.1050187293E-03
    in SI units K  :             33.16225
 
- Found acoustic mode      3 for |q| in red coord < 0.25 ; q =       0.1000      0.0000      0.0000
  Speed of sound for this q and mode:
    in atomic units:     0.2620011858E-02
    in SI units m/s:           5731.77703
@@ -531,7 +524,6 @@
  Phonon frequencies in cm-1    :
 - -1.024109E+01 -1.024109E+01  1.165103E+02  4.459549E+02  4.553285E+02
 -  4.553285E+02
- Found acoustic mode      1 for |q| in red coord < 0.25 ; q =       0.2000      0.0000      0.0000
  Speed of sound for this q and mode:
    in atomic units:    -0.2272466054E-03
    in SI units m/s:           -497.14541
@@ -539,7 +531,6 @@
    in atomic units:    -0.1326463187E-03
    in SI units K  :            -41.88634
 
- Found acoustic mode      2 for |q| in red coord < 0.25 ; q =       0.2000      0.0000      0.0000
  Speed of sound for this q and mode:
    in atomic units:    -0.2272466054E-03
    in SI units m/s:           -497.14541
@@ -547,7 +538,6 @@
    in atomic units:    -0.1326463187E-03
    in SI units K  :            -41.88634
 
- Found acoustic mode      3 for |q| in red coord < 0.25 ; q =       0.2000      0.0000      0.0000
  Speed of sound for this q and mode:
    in atomic units:     0.2585325770E-02
    in SI units m/s:           5655.89458
@@ -691,7 +681,6 @@
  Phonon frequencies in cm-1    :
 -  4.054039E+00  4.054039E+00  5.903672E+01  4.574203E+02  4.589365E+02
 -  4.589365E+02
- Found acoustic mode      1 for |q| in red coord < 0.25 ; q =       0.1000      0.1000      0.1000
  Speed of sound for this q and mode:
    in atomic units:     0.1799156583E-03
    in SI units m/s:            393.59991
@@ -699,7 +688,6 @@
    in atomic units:     0.1050187293E-03
    in SI units K  :             33.16225
 
- Found acoustic mode      2 for |q| in red coord < 0.25 ; q =       0.1000      0.1000      0.1000
  Speed of sound for this q and mode:
    in atomic units:     0.1799156583E-03
    in SI units m/s:            393.59991
@@ -707,7 +695,6 @@
    in atomic units:     0.1050187293E-03
    in SI units K  :             33.16225
 
- Found acoustic mode      3 for |q| in red coord < 0.25 ; q =       0.1000      0.1000      0.1000
  Speed of sound for this q and mode:
    in atomic units:     0.2620011858E-02
    in SI units m/s:           5731.77703

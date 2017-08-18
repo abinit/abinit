@@ -1,0 +1,39 @@
+
+A test constists of an Abinit calculation producing the data files
+    used by EPC, and a call to EPC which produces data in NetCDF format.
+
+We use nosetests to run the test suite.
+nosetests in a nutshell: If it looks like a test, it is executed.
+                        
+
+Follow these steps to create a new test:
+
+1)
+    Place the Abinit inputs, outputs, and  data files produced
+    in a subdirectory of ElectronPhononCoupling/data/
+    (including pseudopotentials).
+    
+    Create __init__.py file in this subdirectory,
+    which defines the file names to be used.
+    See for example ElectronPhononCoupling/data/LiF_g4/__init__.py
+    
+    Also place a reference directory containing the data file produced by EPC,
+    for all the tests of this suite.
+
+2)
+    In the ElectronPhononCoupling/tests/ directory,
+    create a python file whose name starts with 'test_'. 
+    See for example ElectronPhononCoupling/tests/test_LiF_g4.py
+    
+    This file defines a test class with a series of tests
+    to be run on this set of data.
+
+3)
+    If the new test is able to generate its reference data
+    edit the file ElectronPhononCoupling/tests/generate.py 
+    to add the generating function of the new test.
+
+4)
+    Edit the setup.py file to add the data files of the new test
+    among the package data.
+

@@ -34,8 +34,6 @@
 
  read the DDB information and perform some checks
 
--begin at tcpu      0.023  and twall      0.023 sec
-
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  5.2650000  5.2650000  G(1)= -0.0949668  0.0949668  0.0949668
  R(2)=  5.2650000  0.0000000  5.2650000  G(2)=  0.0949668 -0.0949668  0.0949668
@@ -48,7 +46,6 @@
 
  Calculation of the internal-strain  tensor
 
--begin at tcpu      0.030   and twall      0.030sec
 
  Force-response internal strain tensor(Unit:Hartree/bohr)
 
@@ -74,7 +71,6 @@
 
  Calculation of the elastic and compliances tensor (Voigt notation)
 
--begin at tcpu      0.040   and twall      0.033sec
 
  Elastic Tensor (clamped ion) (unit:10^2GP):
 
@@ -119,7 +115,6 @@
  Calculation of the tensor related to piezoelectric effetc
   (Elastic indices in Voigt notation)
 
--begin at tcpu      0.049   and twall      0.034sec
 
  Proper piezoelectric constants (clamped ion) (unit:c/m^2)
 
