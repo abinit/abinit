@@ -169,7 +169,10 @@ def make_links(text,cur_key,allowed_link_seeds,backlinks,backlink):
     if webtext=="":
       if external_namespace==1:
         webtext+=namespace+":"
-      webtext+=p23
+      if key!="":
+        webtext+=p23
+      else:
+        webtext+=section
 
     #Finalize the cases of external links
     if external_namespace==1:
@@ -180,6 +183,9 @@ def make_links(text,cur_key,allowed_link_seeds,backlinks,backlink):
     #Treat the internal links
     if namespace=="":
       linkseed=key
+      if key=="":
+        #This is the own file, no need to establish backlinks or further processing, the section is the reference
+        return '<a href="#%s">%s</a>' %(section,webtext)
     elif namespace in ["aim","anaddb","optic"]:
       linkseed=key+"@"+namespace
     else:

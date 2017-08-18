@@ -45,8 +45,7 @@ sec1:
   
   where the matrix element is taken in the Heisenberg representation, $\hat{T}$ is the time-ordering operator 
   and the creation and annihilation field operators act on the ground state of the $N$-electron many-body Hamiltonian
-  (the conventions used in the equations are explained in the section on
-  <a href="#notations">notations</a>).
+  (the conventions used in the equations are explained in the section on [[#notations]]).
   The propagator contains only part of the full information carried by 
   the many-body wave function, but it includes the relevant part
   for the study of charged excitations. Also, any single-particle operator
@@ -447,7 +446,7 @@ sec5:
   
   where only the transitions between valence (<i>v</i>) and conduction states (<i>c</i>) contribute
   (for simplicity we have assumed a semiconductor with time-reversal invariance, 
-  the conventions used for the Fourier transform are discussed in the <a href="#notations">notation</a> section).
+  the conventions used for the Fourier transform are discussed in the [[#notations|notation]] section).
   <p>
   The number of bands used to compute the polarizability is specified by [[nband]],
   while [[zcut]] gives the small complex
@@ -472,7 +471,7 @@ sec5:
   determined by [[ecuteps]].
   The oscillators are ubiquitous in the Many-Body part of ABINIT and their 
   calculation represents one of the most CPU intensive part of the execution.
-  For this reason we devote section <a href="theorydoc_mbt.html#oscillator_notes">6</a> 
+  For this reason we devote [[#6|section 6]] 
   to the discussion of some important technical details concerning their computation.
   </p>
   <p>
@@ -633,7 +632,7 @@ sec7:
   </p>
   <p>
   This linear scaling represents a serious problem, especially when many frequencies are wanted, for
-  example when computing QP corrections within the contour deformation technique described in the <a href="../../tutorial/generated_files/lesson_gw2.html">second lesson</a> of the GW tutorial.
+  example when computing QP corrections within the contour deformation technique described in the [[lesson_gw2|second lesson]] of the GW tutorial.
   
   </p>
   <p>
@@ -939,7 +938,7 @@ sec10:
 ## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
 ## Note the small (one space) indentation for the title and body keys.
 sec11:
- title: "Notation"
+ title: "Notations"
  tag: notations
  body: |
   The following shorthand notations are employed:
