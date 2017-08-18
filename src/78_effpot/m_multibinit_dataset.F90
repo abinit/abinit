@@ -70,6 +70,7 @@ module m_multibinit_dataset
   integer :: eivec
   integer :: elphflag
   integer :: enunit
+  integer :: fit_bound
   integer :: fit_coeff
   integer :: fit_option
   integer :: fit_ncycle
@@ -959,6 +960,17 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
  end if
 
 !F
+ multibinit_dtset%fit_bound=0
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'fit_bound',tread,'INT')
+ if(tread==1) multibinit_dtset%fit_bound=intarr(1)
+ if(multibinit_dtset%fit_bound<0.and.multibinit_dtset%fit_bound>1)then
+   write(message, '(a,i8,a,a,a,a,a)' )&
+&   'fit_bound is',multibinit_dtset%fit_bound,', but the only allowed values',ch10,&
+&   'are 0 or 1 for multibinit.',ch10,&
+&   'Action: correct fit_bound in your input file.'
+   MSG_ERROR(message)
+ end if
+
  multibinit_dtset%fit_coeff=0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'fit_coeff',tread,'INT')
  if(tread==1) multibinit_dtset%fit_coeff=intarr(1)
@@ -1339,6 +1351,7 @@ subroutine outvars_multibinit (multibinit_dtset,nunit)
 
  if(multibinit_dtset%fit_coeff/=0)then
    write(nunit,'(a)')' Fit the coefficients :'
+   write(nunit,'(3x,a14,I10.1)')'     fit_bound',multibinit_dtset%fit_bound
    write(nunit,'(3x,a14,I10.1)')'     fit_coeff',multibinit_dtset%fit_coeff
    write(nunit,'(3x,a14,F10.1)')'    fit_cutoff',multibinit_dtset%fit_cutoff
    write(nunit,'(3x,a14,I10.1)')'    fit_option',multibinit_dtset%fit_option

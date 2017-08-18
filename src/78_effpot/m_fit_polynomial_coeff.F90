@@ -47,6 +47,7 @@ module m_fit_polynomial_coeff
  public :: fit_polynomial_coeff_getList 
  public :: fit_polynomial_coeff_getNorder
  public :: fit_polynomial_coeff_getFS
+ public :: fit_polynomial_coeff_getPositive
  public :: fit_polynomial_coeff_getOrder1
  public :: fit_polynomial_coeff_mapHistToRef
  public :: fit_polynomial_coeff_solve
@@ -223,7 +224,7 @@ subroutine fit_polynomial_coeff_getList(cell,cutoff,dist,eff_pot,list_symcoeff,l
          end if
        end do
      end do
-!     Remove the symetric
+!    Remove the symetric
 !TEST_AM
 !      if(list_symstr_tmp(ia,isym) > ia) then
 !        list_symstr_tmp(list_symstr_tmp(ia,isym),:) = zero
@@ -1131,9 +1132,12 @@ end subroutine computeNorder
 !!
 !! INPUTS
 !! eff_pot<type(effective_potential)> = effective potential
+!! bancoeff(nbancoeff) = list of bannned coeffcients, these coefficients will NOT be 
+!!                       used during the fit process
 !! fixcoeff(nfixcoeff) = list of fixed coefficient, these coefficients will be 
 !!                       imposed during the fit process
 !! hist<type(abihist)> = The history of the MD (or snapshot of DFT)
+!! nbancoeff = number of banned coeffcients 
 !! ncycle_in = number of maximum cycle (maximum coefficient to be fitted)
 !! nfixcoeff = Number of coefficients imposed during the fit process
 !! powers(2) = array with the minimal and maximal power to be computed
@@ -1156,8 +1160,8 @@ end subroutine computeNorder
 !!
 !! SOURCE
 
-subroutine fit_polynomial_coeff_fit(eff_pot,fixcoeff,hist,powers,ncycle_in,nfixcoeff,&
-&                                  comm,cutoff_in,positive,verbose,anharmstr)
+subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,powers,nbancoeff,ncycle_in,&
+&                                   nfixcoeff,comm,cutoff_in,positive,verbose,anharmstr)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1173,8 +1177,9 @@ subroutine fit_polynomial_coeff_fit(eff_pot,fixcoeff,hist,powers,ncycle_in,nfixc
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ncycle_in,nfixcoeff,comm
+ integer,intent(in) :: nbancoeff
 !arrays
- integer,intent(in) :: fixcoeff(nfixcoeff)
+ integer,intent(in) :: fixcoeff(nfixcoeff), bancoeff(nbancoeff)
  integer,intent(in) :: powers(2)
  type(effective_potential_type),intent(inout) :: eff_pot
  type(abihist),intent(inout) :: hist
@@ -1252,6 +1257,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,fixcoeff,hist,powers,ncycle_in,nfixc
    call wrtout(ab_out,message,'COLL')
    call wrtout(std_out,message,'COLL')
  end if
+
 !Get the list of coefficients to fit:
 ! get from the eff_pot type (from the input)
 ! or
@@ -1590,7 +1596,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,fixcoeff,hist,powers,ncycle_in,nfixc
  ABI_DEALLOCATE(strten_fixed)
 
 !Get the decomposition for each coefficients of the forces,stresses and energy for 
-!each atoms and each step  (see equations 11 & 12 of  PRB95,094115(2017)) + allocatio
+!each atoms and each step  (see equations 11 & 12 of  PRB95,094115(2017)) + allocation
 
  ABI_ALLOCATE(energy_coeffs,(my_ncoeff,ntime))
  ABI_ALLOCATE(fcart_coeffs,(3,natom_sc,my_ncoeff,ntime))
@@ -1747,7 +1753,11 @@ subroutine fit_polynomial_coeff_fit(eff_pot,fixcoeff,hist,powers,ncycle_in,nfixc
 !  Reset gf_values
    gf_values(:,:) = zero
    do icoeff=1,my_ncoeff
+!    cycle if this coefficient is not allowed
      if(any(list_coeffs==my_coeffindexes(icoeff)).or.singular_coeffs(icoeff) == 1) cycle
+     if(nbancoeff >= 1)then
+       if(any(bancoeff==my_coeffindexes(icoeff))) cycle
+     end if
      list_coeffs(icycle) = my_coeffindexes(icoeff)
 
 !    Fill the temporary arrays
@@ -1975,6 +1985,312 @@ subroutine fit_polynomial_coeff_fit(eff_pot,fixcoeff,hist,powers,ncycle_in,nfixc
 end subroutine fit_polynomial_coeff_fit
 !!***
 
+!!****f* m_fit_polynomial_coeff/fit_polynomial_coeff_getPositive
+!!
+!! NAME
+!! fit_polynomial_coeff_getPositive
+!!
+!! FUNCTION
+!! Check 
+!!
+!! INPUTS
+!!
+!!
+!! OUTPUT
+!! eff_pot = effective potential datatype with new fitted coefficients
+!!
+!! PARENTS
+!!      m_fit_polynomial_coeff
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine fit_polynomial_coeff_getPositive(eff_pot,hist,coeff_values,isPositive,list_coeff,ncoeff,&
+&                                           nfixcoeff,nmodel,comm,verbose)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'fit_polynomial_coeff_getPositive'
+ use interfaces_14_hidewrite
+ use interfaces_41_geometry
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: ncoeff,nfixcoeff,nmodel,comm
+!arrays
+ integer,intent(in)  :: list_coeff(nmodel,ncoeff)
+ integer,intent(out) :: isPositive(nmodel)
+ real(dp),intent(out) :: coeff_values(nmodel,ncoeff)
+ type(effective_potential_type),intent(inout) :: eff_pot
+ type(abihist),intent(inout) :: hist
+ logical,optional,intent(in) :: verbose
+!Local variables-------------------------------
+!scalar
+ integer :: ierr,ii,info,itime,imodel,my_nmodel,nmodel_alone
+ integer :: master,my_rank,ncoeff_tot,natom_sc,ncell
+ integer :: nproc,ntime
+ real(dp) :: energy
+ real(dp),parameter :: HaBohr_meVAng = 27.21138386 / 0.529177249
+ logical :: iam_master,need_verbose
+!arrays
+ real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3),strain_mat_inv(3,3)
+ integer :: ipiv(3)
+ integer,allocatable  :: list_coeffs(:),my_modelindexes(:),my_modellist(:)
+ real(dp),allocatable :: du_delta(:,:,:,:),displacement(:,:,:),energy_coeffs(:,:)
+ real(dp),allocatable :: energy_diff(:),fcart_fixed(:,:,:)
+ real(dp),allocatable :: fcart_diff(:,:,:),fred_fixed(:,:,:)
+ real(dp),allocatable :: fcart_coeffs(:,:,:,:)
+ real(dp),allocatable :: strain(:,:),strten_coeffs(:,:,:)
+ real(dp),allocatable :: strten_diff(:,:),strten_fixed(:,:),sqomega(:),ucvol(:)
+ real(dp),allocatable :: work(:),work2(:,:)
+ type(polynomial_coeff_type),allocatable :: coeffs_in(:)
+ type(strain_type) :: strain_t
+ character(len=500) :: message
+! *************************************************************************
+
+!MPI variables
+ master = 0
+ nproc = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
+ iam_master = (my_rank == master)
+
+!Initialisation of optional arguments
+ need_verbose = .TRUE.
+ if(present(verbose)) need_verbose = verbose
+
+!Initialisation of constants
+ ntime      = hist%mxhist
+ natom_sc   = eff_pot%supercell%natom_supercell
+
+!Get the list of coefficients from the eff_pot
+ if(eff_pot%anharmonics_terms%ncoeff > zero)then
+!  Copy the initial coefficients array
+   ncoeff_tot = eff_pot%anharmonics_terms%ncoeff
+   ABI_DATATYPE_ALLOCATE(coeffs_in,(ncoeff_tot))
+   do ii=1,ncoeff_tot
+     call polynomial_coeff_init(eff_pot%anharmonics_terms%coefficients(ii)%coefficient,&
+&                               eff_pot%anharmonics_terms%coefficients(ii)%nterm,&
+&                               coeffs_in(ii),&
+&                               eff_pot%anharmonics_terms%coefficients(ii)%terms,&
+&                               eff_pot%anharmonics_terms%coefficients(ii)%name,&
+&                               check=.false.) 
+   end do
+ end if
+
+!Reset the output (we free the memory)
+ call effective_potential_freeCoeffs(eff_pot)
+
+!if the number of atoms in reference supercell into effpot is not corret,
+!wrt to the number of atom in the hist, we set map the hist and set the good 
+!supercell
+ if (size(hist%xred,2) /= eff_pot%supercell%natom_supercell) then
+   call fit_polynomial_coeff_mapHistToRef(eff_pot,hist,comm)
+ end if
+
+
+!Initialisation of arrays:
+ ABI_ALLOCATE(displacement,(3,natom_sc,ntime))
+ ABI_ALLOCATE(du_delta,(6,3,natom_sc,ntime))
+ ABI_ALLOCATE(list_coeffs,(ncoeff_tot))
+ ABI_ALLOCATE(energy_diff,(ntime))
+ ABI_ALLOCATE(strain,(6,ntime))
+ ABI_ALLOCATE(fcart_fixed,(3,natom_sc,ntime))
+ ABI_ALLOCATE(fcart_diff,(3,natom_sc,ntime))
+ ABI_ALLOCATE(fred_fixed,(3,natom_sc,ntime))
+ ABI_ALLOCATE(strten_fixed,(6,ntime))
+ ABI_ALLOCATE(strten_diff,(6,ntime))
+ ABI_ALLOCATE(sqomega,(ntime))
+ ABI_ALLOCATE(ucvol,(ntime))
+
+ displacement = zero
+ list_coeffs  = zero
+ strain       = zero
+ fcart_fixed  = zero
+ fred_fixed   = zero
+ strten_fixed = zero
+ sqomega      = zero
+
+ do ii = 1,ncoeff_tot
+   list_coeffs(ii) = ii
+ end do
+ 
+
+!Get the decomposition for each coefficients of the forces and stresses for 
+!each atoms and each step  equations 11 & 12 of  PRB95,094115(2017) 
+ if(need_verbose)then
+   write(message, '(a)' ) ' Initialisation of the fit process...'
+   call wrtout(std_out,message,'COLL')
+ end if
+!Before the fit, compute constants.
+!Conpute the strain of each configuration.
+!Compute the displacmeent of each configuration.
+!Compute the variation of the displacement due to strain of each configuration.
+!Compute fixed forces and stresse and get the standard deviation.
+!Compute Shepard and al Factors  \Omega^{2} see J.Chem Phys 136, 074103 (2012).
+ do itime=1,ntime
+!  Get strain
+   call strain_get(strain_t,rprim=eff_pot%supercell%rprimd_supercell,&
+&                  rprim_def=hist%rprimd(:,:,itime),symmetrized=.FALSE.)
+    if (strain_t%name /= "reference")  then
+      do ii=1,3
+        strain(ii,itime) = strain_t%strain(ii,ii)
+      end do
+      strain(4,itime) = (strain_t%strain(2,3) + strain_t%strain(3,2))
+      strain(5,itime) = (strain_t%strain(3,1) + strain_t%strain(1,3))
+      strain(6,itime) = (strain_t%strain(2,1) + strain_t%strain(1,2))
+    else
+      strain(:,itime) = zero
+    end if
+
+!  Get displacement
+   call effective_potential_getDisp(displacement(:,:,itime),natom_sc,hist%rprimd(:,:,itime),&
+&                                   eff_pot%supercell%rprimd_supercell,&
+&                                   xred_hist=hist%xred(:,:,itime),&
+&                                   xcart_ref=eff_pot%supercell%xcart_supercell)
+
+!  Get the variation of the displacmeent wr to strain
+!  See formula A4  in PRB 95,094115
+   strain_mat_inv = strain_t%strain(:,:)
+   do ii=1,3
+     strain_mat_inv(ii,ii) = strain_mat_inv(ii,ii) + one
+     ipiv(ii) = ii
+   end do
+
+   ABI_ALLOCATE(work,(3))
+   ABI_ALLOCATE(work2,(3,natom_sc))
+
+   call DGETRI(3,strain_mat_inv, 3, ipiv, work, 3, ii)
+
+   do ii=1,natom_sc
+     work2(:,ii) = MATMUL(strain_mat_inv,displacement(:,ii,itime))
+     du_delta(1,:,ii,itime) = (/work2(1,ii),zero,zero/)
+     du_delta(2,:,ii,itime) = (/zero,work2(2,ii),zero/)
+     du_delta(3,:,ii,itime) = (/zero,zero,work2(3,ii)/)
+     du_delta(4,:,ii,itime) = (/zero,work2(3,ii),work2(2,ii)/)
+     du_delta(5,:,ii,itime) = (/work2(3,ii),zero,work2(1,ii)/)
+     du_delta(6,:,ii,itime) = (/work2(2,ii),work2(1,ii),zero/)
+   end do
+
+   ABI_DEALLOCATE(work)
+   ABI_DEALLOCATE(work2)
+    
+!  Get forces and stresses from harmonic part (fixed part)     
+   call effective_potential_evaluate(eff_pot,energy,fcart_fixed(:,:,itime),fred_fixed(:,:,itime),&
+&                                    strten_fixed(:,itime),natom_sc,hist%rprimd(:,:,itime),&
+&                                    displacement=displacement(:,:,itime),&
+&                                    du_delta=du_delta(:,:,:,itime),strain=strain(:,itime),&
+&                                    compute_anharmonic=.FALSE.,verbose=.FALSE.)
+
+!  Compute \Omega^{2} and ucvol for each time
+   call metric(gmet,gprimd,-1,rmet,hist%rprimd(:,:,itime),ucvol(itime))
+!  Formula:
+!   sqomega(itime) = (((ucvol(itime)**(-2.))* ((natom_sc)**(0.5)))**(-1.0/3.0))**2
+!  Compact form:
+   sqomega(itime) = ((ucvol(itime)**(4.0/3.0)) / ((natom_sc)**(1/3.0)))
+!  Compute also normalisation factors
+   ncell      = product(eff_pot%supercell%qphon(:))
+
+!  Compute the difference between History and model (fixed part)
+   fcart_diff(:,:,itime) =  hist%fcart(:,:,itime) - fcart_fixed(:,:,itime) 
+   strten_diff(:,itime)  =  hist%strten(:,itime)  - strten_fixed(:,itime)
+   energy_diff(itime)    =  hist%etot(itime) - energy
+
+ end do
+
+!Free space
+ ABI_DEALLOCATE(fred_fixed)
+ ABI_DEALLOCATE(strten_fixed)
+
+!Get the decomposition for each coefficients of the forces,stresses and energy for 
+!each atoms and each step  (see equations 11 & 12 of  PRB95,094115(2017)) + allocation
+
+ ABI_ALLOCATE(energy_coeffs,(ncoeff_tot,ntime))
+ ABI_ALLOCATE(fcart_coeffs,(3,natom_sc,ncoeff_tot,ntime))
+ ABI_ALLOCATE(strten_coeffs,(6,ntime,ncoeff_tot))
+
+ call fit_polynomial_coeff_getFS(coeffs_in,du_delta,displacement,&
+&                                energy_coeffs,fcart_coeffs,natom_sc,eff_pot%crystal%natom,&
+&                                ncoeff_tot,ntime,int(eff_pot%supercell%qphon(:)),strain,&
+&                                strten_coeffs,ucvol,list_coeffs,ncoeff_tot)
+
+!Free space
+ ABI_DEALLOCATE(displacement)
+ ABI_DEALLOCATE(du_delta)
+ ABI_DEALLOCATE(strain)
+
+!set MPI, really basic stuff...
+ nmodel_alone = mod(nmodel,nproc)
+ my_nmodel = aint(real(nmodel,sp)/(nproc))
+
+ if(my_rank >= (nproc-nmodel_alone)) then
+   my_nmodel = my_nmodel  + 1
+ end if
+
+ ABI_ALLOCATE(my_modelindexes,(my_nmodel))
+ ABI_ALLOCATE(my_modellist,(my_nmodel))
+
+!2:compute the number of model and the list of the corresponding for each CPU.
+ do imodel=1,my_nmodel
+   if(my_rank >= (nproc-nmodel_alone))then
+     my_modelindexes(imodel)=(aint(real(nmodel,sp)/nproc))*(my_rank)+&
+&                              (my_rank - (nproc-nmodel_alone)) + imodel
+     my_modellist(imodel) = imodel
+   else
+     my_modelindexes(imodel)=(my_nmodel)*(my_rank)  + imodel
+     my_modellist(imodel) = imodel
+  end if
+ end do
+
+
+!Start fit process
+ isPositive   = zero
+ coeff_values = zero
+ do ii=1,my_nmodel
+   imodel = my_modelindexes(ii)
+   call fit_polynomial_coeff_solve(coeff_values(imodel,1:ncoeff),fcart_coeffs,fcart_diff,&
+&                                  info,list_coeff(imodel,1:ncoeff),natom_sc,ncoeff,&
+&                                  ncoeff_tot,ntime,strten_coeffs,strten_diff,sqomega,ucvol)
+   if(info==0)then
+     if (any(coeff_values(imodel,nfixcoeff+1:ncoeff) < zero))then
+       coeff_values(imodel,:) = zero
+       isPositive(imodel) = zero
+     else
+       isPositive(imodel) = one
+     end if
+   end if
+ end do
+
+ call xmpi_sum(isPositive, comm, ierr)
+ call xmpi_sum(coeff_values, comm, ierr)
+
+!Deallocation of arrays
+ do ii=1,ncoeff_tot
+   call polynomial_coeff_free(coeffs_in(ii))
+ end do
+ ABI_DATATYPE_DEALLOCATE(coeffs_in)
+
+ ABI_DEALLOCATE(energy_coeffs)
+ ABI_DEALLOCATE(energy_diff)
+ ABI_DEALLOCATE(fcart_fixed)
+ ABI_DEALLOCATE(fcart_diff)
+ ABI_DEALLOCATE(fcart_coeffs)
+ ABI_DEALLOCATE(list_coeffs)
+ ABI_DEALLOCATE(my_modelindexes)
+ ABI_DEALLOCATE(my_modellist)
+ ABI_DEALLOCATE(strten_diff)
+ ABI_DEALLOCATE(strten_coeffs)
+ ABI_DEALLOCATE(sqomega)
+ ABI_DEALLOCATE(ucvol)
+
+end subroutine fit_polynomial_coeff_getPositive
+!!***
+
+
 !!****f* m_fit_polynomial_coeff/fit_polynomial_coeff_solve
 !!
 !! NAME
@@ -2139,10 +2455,10 @@ subroutine fit_polynomial_coeff_solve(coefficients,fcart_coeffs,fcart_diff,&
    coefficients = zero
  end if
 
-! if(any(abs(coefficients)>1.0E10))then
-!   INFO = 1
-!   coefficients = zero
-! end if
+ if(any(abs(coefficients)>1.0E10))then
+   INFO = 1
+   coefficients = zero
+ end if
 
  info_out = INFO
 
@@ -2345,7 +2661,7 @@ subroutine fit_polynomial_coeff_getFS(coefficients,du_delta,displacement,energy_
  integer,intent(in) :: ncoeff
 !arrays
  integer,intent(in) :: sc_size(3)
- integer,intent(in) :: coeffs(ncoeff)
+ integer,intent(in) :: coeffs(ncoeff_max)
  real(dp),intent(in) :: du_delta(6,3,natom_sc,ntime)
  real(dp),intent(in) :: displacement(3,natom_sc,ntime)
  real(dp),intent(in) :: strain(6,ntime),ucvol(ntime)
@@ -3478,6 +3794,7 @@ end subroutine fit_polynomial_coeff_getOrder1
 
 
 recursive subroutine genereList(i,m,m_max,n_max,list,list_out,size)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

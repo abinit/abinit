@@ -34,6 +34,7 @@
    prt_model         1
      strcpli        -1
  Fit the coefficients :
+        fit_bound         0
         fit_coeff         1
        fit_cutoff       0.0
        fit_option         0

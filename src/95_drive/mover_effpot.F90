@@ -65,6 +65,7 @@ subroutine mover_effpot(inp,filnam,effective_potential,option,comm,hist)
  use m_abihist, only : abihist
  use m_fit_polynomial_coeff, only : fit_polynomial_coeff_getNorder,polynomial_coeff_writeXML
  use m_fit_polynomial_coeff, only : fit_polynomial_coeff_fit,genereList
+ use m_fit_polynomial_coeff, only : fit_polynomial_coeff_getPositive
  use m_phonon_supercell
  use m_ifc
  use m_ewald
@@ -95,7 +96,7 @@ implicit none
  type(abihist),optional,intent(inout):: hist
 !Local variables-------------------------------
 !scalar
- integer :: ii,istep,jj,kk,ll,nproc,ncoeff,ncoeff_list,ncoeff_bound,ncoeff_max,nstep
+ integer :: icoeff_bound,ii,jj,kk,nproc,ncoeff,nmodels,ncoeff_bound,ncoeff_max,nstep
  integer :: my_rank,option_fit = zero
  real(dp):: cutoff,freq_q,freq_b,qmass,bmass
  logical :: iam_master
@@ -120,10 +121,11 @@ implicit none
 !no_abirules
  integer :: sc_size(3)
  integer,pointer :: indsym(:,:,:)
- integer,allocatable :: listcoeff(:),listcoeff_bound(:,:),list_tmp(:)
+ integer,allocatable :: listcoeff(:),listcoeff_bound(:,:),list_tmp(:),list_bound(:,:)
+ integer,allocatable :: isPositive(:)
  integer,allocatable :: symrel(:,:,:)
  real(dp) :: acell(3)
- real(dp),allocatable :: amass(:) 
+ real(dp),allocatable :: amass(:) ,coeff_values(:,:)
  real(dp),pointer :: rhog(:,:),rhor(:,:)
  real(dp),allocatable :: tnons(:,:)
  real(dp),allocatable :: xred(:,:),xred_old(:,:),xcart(:,:)
@@ -267,8 +269,8 @@ implicit none
      dtset%ionmov = 13  ! Number for the dynamic
      dtset%ntime = 1000  ! Number of TIME steps 
      dtset%optcell = 2    ! OPTimize the CELL shape and dimensions Characteristic 
-     dtset%mdtemp(1) = 100   !Molecular Dynamics Temperatures 
-     dtset%mdtemp(2) = 100 !Molecular Dynamics Temperatures 
+     dtset%mdtemp(1) = 200   !Molecular Dynamics Temperatures 
+     dtset%mdtemp(2) = 200 !Molecular Dynamics Temperatures 
      dtset%strtarget(1:6) = zero
    end if
 
@@ -293,8 +295,8 @@ implicit none
      end if
 
 !TEST_AM
-     freq_q = 0.1
-     freq_b = 0.01
+!     freq_q = 0.1
+!     freq_b = 0.01
 !TEST_AM
      qmass=(abs(1+product(inp%strtarget(1:3)/3))*dtset%natom* kb_THzK * dtset%mdtemp(1)) / (freq_q**2)
      bmass=(abs(1+product(inp%strtarget(1:3)/3))*dtset%natom* kb_THzK * dtset%mdtemp(1)) / (freq_b**2)
@@ -426,7 +428,7 @@ implicit none
        call wrtout(ab_out,message,'COLL')
        call wrtout(std_out,message,'COLL')
 
-!    Get the list of possible coefficients to bound the model
+!      Get the list of possible coefficients to bound the model
        cutoff = zero
        do ii=1,3
          cutoff = cutoff + effective_potential%crystal%rprimd(ii,ii)
@@ -454,87 +456,138 @@ implicit none
 
        do ii=1,ncoeff_bound
          call polynomial_coeff_init(coeffs_bound(ii)%coefficient,&
-&                                    coeffs_bound(ii)%nterm,&
-&                                    coeffs_tmp(ncoeff+ii),&
-&                                    coeffs_bound(ii)%terms,&
-&                                    coeffs_bound(ii)%name,&
-&                                    check=.false.)        
+&                                   coeffs_bound(ii)%nterm,&
+&                                   coeffs_tmp(ncoeff+ii),&
+&                                   coeffs_bound(ii)%terms,&
+&                                   coeffs_bound(ii)%name,&
+&                                   check=.false.)
        end do
 
        ncoeff_max = ncoeff+ncoeff_bound              
        ABI_ALLOCATE(listcoeff,(ncoeff_max))
-    
        listcoeff = zero
        do jj=1,ncoeff
          listcoeff(jj) = jj
        end do
-            
-       do ii=2,ncoeff+ncoeff_bound
-
+       
+       do ii=1,3!ncoeff_bound
 !        Compute the number of possible combination         
-         ncoeff_list = factorial(ncoeff_bound) / (factorial(ii)*factorial(ncoeff_bound-ii))
-         
-         ABI_ALLOCATE(listcoeff_bound,(ncoeff_list,ii))
+         nmodels = factorial(ncoeff_bound) / (factorial(ii)*factorial(ncoeff_bound-ii))
+
+         write(message, '(5a,I0,a,I0,a)')ch10,'--',ch10,' Try to bound the model ',&
+&                                 'with ', ii,' additional positive terms (',nmodels,') possibilities'
+         call wrtout(std_out,message,'COLL')
+
+         ABI_ALLOCATE(coeff_values,(nmodels,ncoeff+ii))         
+         ABI_ALLOCATE(listcoeff_bound,(nmodels,ncoeff+ii))
+         ABI_ALLOCATE(list_bound,(nmodels,ii))
          ABI_ALLOCATE(list_tmp,(ii))
+         ABI_ALLOCATE(isPositive,(nmodels))
+         list_bound = zero
          listcoeff_bound = zero
          list_tmp = zero
+         isPositive = zero
          kk = one
          jj = one
+
+
 !        Generate the list of possible combinaison
-         call genereList(kk,jj,ii,ncoeff_bound,list_tmp,listcoeff_bound,ncoeff_list)
-       
-         listcoeff_bound(:,:) = listcoeff_bound(:,:) + ncoeff
+         call genereList(kk,jj,ii,ncoeff_bound,list_tmp,list_bound,nmodels)
+         do jj=1,nmodels
+           listcoeff_bound(jj,1:ncoeff) = listcoeff(1:ncoeff)
+           listcoeff_bound(jj,ncoeff+1:ncoeff+ii) = list_bound(jj,:) + ncoeff
+         end do
+         
+!        Reset the simulation
+         call effective_potential_setCoeffs(coeffs_tmp,effective_potential,ncoeff+ncoeff_bound)
 
-          do jj=1,ncoeff_list
-            listcoeff(ncoeff+1:ncoeff+ii) = listcoeff_bound(jj,:)
-            
-!           Reset the simulation
-            call effective_potential_setCoeffs(coeffs_tmp,effective_potential,ncoeff+ncoeff_bound)
-            call xcart2xred(dtset%natom,effective_potential%supercell%rprimd_supercell,&
+         call fit_polynomial_coeff_getPositive(effective_potential,hist,coeff_values,&
+&                                              isPositive,listcoeff_bound,ncoeff+ii,&
+&                                              ncoeff,nmodels,comm,verbose=.false.)
+         
+         if(all(isPositive == zero)) then
+           write(message, '(5a,I0,a)')ch10,'--',ch10,' No possible model ',&
+&                                  'with ', ii,' found'
+           call wrtout(std_out,message,'COLL')
+         else
+
+           do jj=1,nmodels
+             if(isPositive(jj) == one) then
+               write(message, '(a,I0,a)') ' The model number: ',jj,' ['
+               do kk=1,ncoeff+ii
+                 if(kk<ncoeff+ii)then
+                   write(message, '(a,I0,a)') trim(message),listcoeff_bound(jj,kk),','
+                 else
+                   write(message, '(a,I0)') trim(message),listcoeff_bound(jj,kk)
+                 end if
+               end do
+               write(message, '(2a)') trim(message),'] is positive'             
+               call wrtout(std_out,message,'COLL')
+               write(message, '(3a,I0,a)')ch10,' Try if the models ',&
+&                                  'number ', jj,' is bounded...'
+               call wrtout(std_out,message,'COLL')
+
+!              Set the coefficients of the model
+               do kk=1,ncoeff+ii
+                 if(kk<=ncoeff)then
+!                  just set the values of the coefficient
+                   if(iam_master)print*,"set values",kk,coeff_values(jj,kk)
+                   call polynomial_coeff_setCoefficient(coeff_values(jj,kk),coeffs_tmp(kk))
+                 else
+!                  Set the good coefficient
+                   icoeff_bound = listcoeff_bound(jj,kk)
+                   if(iam_master)print*,"set coeff",kk,'with coeff',icoeff_bound,coeff_values(jj,kk)
+                   call polynomial_coeff_free(coeffs_tmp(kk))
+                   call polynomial_coeff_init(coeff_values(jj,kk),&
+&                                   coeffs_bound(icoeff_bound)%nterm,&
+&                                   coeffs_tmp(kk),&
+&                                   coeffs_bound(icoeff_bound)%terms,&
+&                                   coeffs_bound(icoeff_bound)%name,&
+&                                   check=.false.)
+                                      
+                 end if
+               end do
+
+!              Reset the simulation and set the coefficients of the model 
+               call effective_potential_setCoeffs(coeffs_tmp(1:ncoeff+ii),effective_potential,&
+&                                                 ncoeff+ii)
+
+               if(iam_master) print*,"tutu",effective_potential%anharmonics_terms%coefficients(:)%coefficient
+
+               call xcart2xred(dtset%natom,effective_potential%supercell%rprimd_supercell,&
 &                      effective_potential%supercell%xcart_supercell,xred)
-            xred_old = xred
-            vel_cell(:,:) = zero
-            vel(:,:)      = zero
-
-            call fit_polynomial_coeff_fit(effective_potential,listcoeff(1:ncoeff+ii),hist,(/0,0/),&
-&                                        0,ncoeff+ii,&
-&                                        comm,cutoff_in=zero,verbose=.false.,positive=.true.)
-            
-            write(message, '(a,I0,a)' )' The model with ',ii,' additional terms ['
-            do kk=1,ncoeff+ii
-              if(kk<ncoeff+ii)then
-                write(message, '(a,I0,a)') trim(message),listcoeff(kk),','
-              else
-                write(message, '(a,I0)') trim(message),listcoeff(kk)
-              end if
-            end do
-            write(message, '(2a)') trim(message),'] '
-            if(all(effective_potential%anharmonics_terms%coefficients(:)%coefficient==zero).or. &
-&              any(effective_potential%anharmonics_terms%coefficients(ncoeff+1:ncoeff+ii)%coefficient < zero)) then
-              write(message, '(2a)' ) trim(message),' is not possible (negative values)'
-              call wrtout(std_out,message,'COLL')
-              cycle
-            else
-              call mover(scfcv_args,ab_xfh,acell,amass,dtfil,electronpositron,&
+               xred_old = xred
+               vel_cell(:,:) = zero
+               vel(:,:)      = zero
+!              Run mover
+               call mover(scfcv_args,ab_xfh,acell,amass,dtfil,electronpositron,&
 &                        rhog,rhor,dtset%rprimd_orig,vel,vel_cell,xred,xred_old,&
 &                        effective_potential=effective_potential,verbose=.false.,writeHIST=writeHIST)
 
               
-              if(.not.effective_potential%anharmonics_terms%bounded)then
-                write(message, '(2a)' ) trim(message),' is not bound'
-              else
-                write(message, '(2a)' ) trim(message),' is bound'
-              end if             
-            end if
-            call wrtout(std_out,message,'COLL')
-            if(effective_potential%anharmonics_terms%bounded) exit
-          end do
-          ABI_DEALLOCATE(list_tmp)
-          ABI_DEALLOCATE(listcoeff_bound)
-          if(effective_potential%anharmonics_terms%bounded) exit
-        end do
-        ABI_DEALLOCATE(listcoeff)
-      end if
+               if(.not.effective_potential%anharmonics_terms%bounded)then
+                 write(message, '(2a)' ) ' => The model is not bounded'
+               else
+                 write(message, '(2a)' ) ' => The model is bounded'
+               end if
+               call wrtout(std_out,message,'COLL')
+!              Exit if the model is bounded
+               if(effective_potential%anharmonics_terms%bounded) exit
+             end if
+           end do
+         end if
+
+         ABI_DEALLOCATE(coeff_values)
+         ABI_DEALLOCATE(list_tmp)
+         ABI_DEALLOCATE(listcoeff_bound)
+         ABI_DEALLOCATE(list_bound)
+         ABI_DEALLOCATE(isPositive)
+
+!        Exit if the model is bounded
+         if(effective_potential%anharmonics_terms%bounded) exit
+       end do
+       ABI_DEALLOCATE(listcoeff)
+   end if
       
     do ii=1,ncoeff+ncoeff_bound
       call polynomial_coeff_free(coeffs_tmp(ii))
