@@ -60,8 +60,8 @@ sec1:
   <p>
   First of all, you should copy the files file tmbt_1.files in the working directory Work_mbt:
   <pre>
-  $ cd Work_mbt
-  $ cp ../tmbt_1.files . 
+  >>> cd Work_mbt
+  >>> cp ../tmbt_1.files . 
   </pre>
   <p>
   
@@ -113,7 +113,7 @@ sec1:
   With three nodes, the wall clock time is around 1.5 minutes.
   
   <pre>
-  $ tail tmbt_1.out
+  >>> tail tmbt_1.out
   
   -
   - Proc.   0 individual time (sec): cpu=        209.0  wall=        209.0
@@ -145,7 +145,7 @@ sec2:
   then create a symbolic link pointing to the WFK file we have generated in the previous step:
   
   <pre>
-  $ ln -s tmbt_1o_DS2_WFK tmbt_2i_WFK
+  >>> ln -s tmbt_1o_DS2_WFK tmbt_2i_WFK
   </pre>
   
   <!--
@@ -347,7 +347,7 @@ sec2:
   You can use the grep utility to extract this information from the log file.
   For a calculation in sequential, we have:
   <pre>
-  $ grep "Memory needed" tmbt_2.log
+  >>> grep "Memory needed" tmbt_2.log
   
     Memory needed for storing ug=         29.5 [Mb]
     Memory needed for storing ur=        180.2 [Mb]
@@ -361,7 +361,7 @@ sec2:
   ([[npwwfn]]).
   The number of FFT divisions used in the GW code can be extracted from the main output file using
   <pre>
-  $ grep setmesh tmbt_2.out  -A 1
+  >>> grep setmesh tmbt_2.out  -A 1
    setmesh: FFT mesh size selected  =  27x 27x 36
             total number of points  =    26244
   </pre>
@@ -433,7 +433,7 @@ sec3:
   then create a symbolic link pointing to the WFK file.
   
   <pre>
-  $ ln -s tmbt_1o_DS2_WFK tmbt_3i_WFK
+  >>> ln -s tmbt_1o_DS2_WFK tmbt_3i_WFK
   </pre>
   
   The input file is ~abinit/tests/tutoparal/Input/tmbt_3.in.
@@ -517,7 +517,7 @@ sec3:
   The memory needed to store the spectral function is reported in the log file:
   
   <pre>
-  $ grep "sf_chi0q0" tmbt_3.log
+  >>> grep "sf_chi0q0" tmbt_3.log
    memory required by sf_chi0q0:           1.0036 [Gb]
   </pre>
   

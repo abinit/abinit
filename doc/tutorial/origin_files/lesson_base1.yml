@@ -1,5 +1,5 @@
 ## This YAML file contains the introduction as well as the body of the html lesson.
-## In order to modify the other parts, modify the file lessons.html .
+## In order to modify the other parts, modify the file lessons.html
 
 ## This is the introduction ...
 intro : |
@@ -93,7 +93,7 @@ sec1:
     that you can call it by simply typing "abinit", even if the
     actual command must be something like ../../../../opt/abinit or
     ../../../../src/98_main/abinit. (Suggestion: create an alias with `ln -s`, or copy the abinit executable, 
-    or declare the path with the shell command `export PATH=~abinit/src/98_main:$PATH`).
+    or declare the path with the shell command `export PATH=~abinit/src/98_main:\$PATH`).
   <p>
     So, in the Work directory, type: <br>
     <li><i> abinit < tbase1_x.files >& log </i></li> <br>
