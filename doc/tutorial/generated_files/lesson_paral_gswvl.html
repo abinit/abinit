@@ -5,6 +5,17 @@
 <html>
 <head><title>Parallelism for the ground state using wavelets</title>
 <link rel=stylesheet type="text/css" href="../formabinit.css">
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  jax: ["input/TeX","output/HTML-CSS"],
+  tex2jax: {inlineMath: [['$','$']]},
+  displayAlign: "center",
+  TeX: { equationNumbers: { autoNumber: "AMS" } }
+});
+</script>
+<script type="text/javascript" async
+src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
 </head>
 <body bgcolor="#ffffff">
 
@@ -83,11 +94,11 @@ Proc.   0 individual time (sec): cpu=        172.6  wall=        172.6
     <p>Read the output file to find the number of orbitals in the calculation (given by the keyword <a href="../../input_variables/generated_files/varset_basic.html#nband">nband</a>). With the distribution scheme of the wavelet mode, the best distribution over processors will be obtained for, 1, 3, 7 and 21 processors. Create four different directories (with the number of processors for instance) and run four times ABINIT with the same input file, varying the number of processors in {1, 3, 7, 21}. The speed-up is the ratio between the time with one processor and the time of a run with N processors.</p>
     <p>Assuming that the directories are called {01, 03, 07, 21}, one can grep the over-all time of a run and plot it in gnuplot with:</p>
     <pre>
-plot "< grep 'individual time' */log | tr '/' ' '&quot; u 1:(ttt/\$11) w lp t "Boron cluster", x t "Ideal speed-up"
+plot "< grep 'individual time' */log | tr '/' ' '&quot; u 1:(ttt/$11) w lp t "Boron cluster", x t "Ideal speed-up"
 </pre>
     <p>where <code>ttt</code> represents the time on one processor. The efficiency (in percent) of the parallelization process is the ratio between the speed-up and the number of processors. One can plot it with:</p>
     <pre>
-plot &quot;< grep 'individual time' */log | tr '/' ' '&quot; u 1:(ttt/\$11/\$1*100) w lp t "Boron cluster"
+plot &quot;< grep 'individual time' */log | tr '/' ' '&quot; u 1:(ttt/$11/$1*100) w lp t "Boron cluster"
 </pre>
     <p>The first conclusion is that the efficiency is not so good when one use one orbital per processor. This is a general rule with the wavelet mode: due to the implementation, a good balance between speed and efficiency is obtained for two orbitals per processor. One can also see that the efficiency generally decreases with the number of processors.</p>
     <p>This system is rather small and the amount of time spent in the overhead (read the input file, initialise arrays...) is impacting the performance. Let's see how to focus on the calculation parts.</p>

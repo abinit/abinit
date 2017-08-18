@@ -5,6 +5,17 @@
 <html>
 <head><title>the AIM utility</title>
 <link rel=stylesheet type="text/css" href="../formabinit.css">
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  jax: ["input/TeX","output/HTML-CSS"],
+  tex2jax: {inlineMath: [['$','$']]},
+  displayAlign: "center",
+  TeX: { equationNumbers: { autoNumber: "AMS" } }
+});
+</script>
+<script type="text/javascript" async
+src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
 </head>
 <body bgcolor="#ffffff">
 
@@ -257,14 +268,13 @@ and then the total Bader charge.
 <li> [*.crit] - the file with the critical points (CPs) -
 they are listed in the order Bond CPs (BCPs), Ring CPs (RCPs)
 and Cage CPs (CCPs).
-The line of the output contains these informations (in latex, sorry for this):
-<pre>
-$$ position \quad \frac{eigen\  values}{of\  Hessian} \quad \frac{index\
-of\  the}{bonded\  atom}\footnote{BCPs only} \quad \Delta \rho_c \quad \rho_c, $$
-</pre>
-where position is done with respect to the considered atom.
+The line of the output contains these informations:
+$$ position \quad \frac{eigenvalues}{of\  Hessian} \quad \frac{index\
+of}{bonded\  atom} \quad \Delta \rho_c \quad \rho_c $$
+(note: position is evaluated with respect to the considered atom, 
+while the index of bonded atom is listed only for BCPs).
 <li> [*.surf] - the file with the Bader surface - there is a head
-of the form (again in latex):
+of the form (in latex):
 <pre>
 \begin{tabular}{ccc}
 index of the atom & \multicolumn{2}{c}{position} \\
@@ -273,10 +283,9 @@ nphi & phimin & phimax \\
 \end{tabular}
 </pre>
 and the list of the Bader surface radii:
-<pre>
 $$ \theta \quad \phi \quad r(\theta,\phi) \quad
-W(\theta,\phi)\footnote{the weight for the Gauss quadrature}. $$
-</pre>
+W(\theta,\phi)$$
+(note : $W(\theta,\phi)$ is the weight for the Gauss quadrature).
 The minimal and maximal radii are given at the last line.
 <li> [*.log] - the log file - a lot of informations but it is not
 very nice actually.

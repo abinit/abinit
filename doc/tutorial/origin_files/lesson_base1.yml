@@ -92,8 +92,11 @@ sec1:
     then it is located in ~abinit/src/98_main . In what follows, we will suppose
     that you can call it by simply typing "abinit", even if the
     actual command must be something like ../../../../opt/abinit or
-    ../../../../src/98_main/abinit. (Suggestion: create an alias with `ln -s`, or copy the abinit executable, 
-    or declare the path with the shell command `export PATH=~abinit/src/98_main:\$PATH`).
+    ../../../../src/98_main/abinit. 
+    <br>To ease your life, you might copy the abinit executable, or create an alias with `ln -s`, 
+    or declare the path with the shell command 
+    <li><i> export PATH=~abinit/src/98_main:$PATH </i></li>
+    where ~abinit is the absolute path to your abinit top directory.
   <p>
     So, in the Work directory, type: <br>
     <li><i> abinit < tbase1_x.files >& log </i></li> <br>
@@ -105,7 +108,7 @@ sec1:
     <pre>
     abinit  log  tbase1_1.in  tbase1_1.out  tbase1_x.files  tbase1_xo_DDB  tbase1_xo_DEN  tbase1_xo_EIG.nc  tbase1_xo_GSR.nc  tbase1_xo_OUT.nc  tbase1_xo_WFK
     </pre>
-    (if you declared the path, you will not find 'abinit' in the list)
+    (if you declared the path, you will not find 'abinit' in the list).
     Different output files have been created, including a "log" file and the
     output file "tbase1_1.out".
     To check that everything is correct, you
