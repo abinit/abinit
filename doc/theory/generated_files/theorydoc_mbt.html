@@ -5,6 +5,17 @@
 <html>
 <head><title>Many-Body Theory in ABINIT</title>
 <link rel=stylesheet type="text/css" href="../formabinit.css">
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  jax: ["input/TeX","output/HTML-CSS"],
+  tex2jax: {inlineMath: [['$','$']]},
+  displayAlign: "center",
+  TeX: { equationNumbers: { autoNumber: "AMS" } }
+});
+</script>
+<script type="text/javascript" async
+src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
 </head>
 <body bgcolor="#ffffff">
 
@@ -33,7 +44,6 @@ Green's function and self-energy can be found in any standard textbook on Many-B
 <h3><b> Many-Body Theory in ABINIT. Table of content:</b></h3>
 
 <ul> 
-  <li>0. <a href="#None">To be filled</a></li>
   <li>1. <a href="#green_self_intro">Green's function and self-energy</a></li>
   <li>2. <a href="#hedins_equations">Hedin's equations</a></li>
   <li>3. <a href="#gw_approximation">The GW approximation</a></li>
@@ -44,51 +54,37 @@ Green's function and self-energy can be found in any standard textbook on Many-B
   <li>8. <a href="#evaluation_gw_sigma">Evaluation of the GW self-energy</a></li>
   <li>9. <a href="#plasmonpole_models">Plasmon-pole models</a></li>
   <li>10. <a href="#contour_deformation">Contour deformation technique</a></li>
-  <li>11. <a href="#notations">Notation</a></li>
+  <li>11. <a href="#notations">Notations</a></li>
   <li>12. <a href="#references">References</a></li>
 
  </ul> 
- <hr><br><a name="None"> </a>
-<a name="0"> </a>
-<h3><b>0. To be filled</b></h3>
- <p><ul>
-<li><a href="#green_self_intro">1</a> The Green's function and the self-energy 
-  </li><li><a href="#hedins_equations">2</a> Hedin's equations
-  </li><li><a href="#gw_approximation">3</a> The GW approximation 
-  </li><li><a href="#perturbative">4</a> Perturbative approach 
-  </li><li><a href="#RPA_Fourier_space">5</a> The RPA polarizability in Fourier space
-  </li><li><a href="#oscillator_notes">6</a>  Notes on the calculation of oscillator matrix elements
-  </li><li><a href="#hilbert_transform">7</a>  Hilbert transform method 
-  </li><li><a href="#evaluation_gw_sigma">8</a> Evaluation of the GW self-energy
-  </li><li><a href="#contour_deformation">9</a> The contour deformation technique
-  </li><li><a href="#references">10</a> References
-
-</li>
-</ul>
-
-<hr>
-<br><br><a href=#top>Go to the top</a>
-<hr>
-<br><a name="green_self_intro"> </a>
+ <hr><br><a name="green_self_intro"> </a>
 <a name="1"> </a>
 <h3><b>1. Green's function and self-energy</b></h3>
- <p>The time-ordered Green's function <i>G</i>(12), also called the propagator, 
+ <p>The time-ordered Green's function $G(12)$, also called the propagator, 
 defines the probability amplitude for the propagation of an added or removed electron in a many-body system. 
 Since the probability amplitude is simply given by the overlap between the final and the initial state, 
-<i>G</i>(12) can be expressed as 
-
+$G(12)$ can be expressed as 
+$$
+\begin{equation}
+G(1,2)=-i\left\langle \Theta_0^N \left| \hat{T}
+\left[ \hat{\psi}(1)\hat{\psi}^{\dagger}(2) \right]
+\right| \Theta_0^N \right\rangle,
+\end{equation}
+$$
 </p>
+<!--
 <p align="center">
 
     <img src="../documents/theory_mbt/G_def.png">
     
 </p>
+-->
 
 
-where the matrix element is taken in the Heisenberg representation, T is the time-ordering operator 
-and the creation and annihilation field operators act on the ground state of the <i>N</i>-electron many-body Hamiltonian
-(the conventions used in the equations are explained in the section on
-<a href="#notations">notation</a>).
+where the matrix element is taken in the Heisenberg representation, $\hat{T}$ is the time-ordering operator 
+and the creation and annihilation field operators act on the ground state of the $N$-electron many-body Hamiltonian
+(the conventions used in the equations are explained in the section on <a href="#notations">notations</a>).
 The propagator contains only part of the full information carried by 
 the many-body wave function, but it includes the relevant part
 for the study of charged excitations. Also, any single-particle operator
@@ -97,14 +93,25 @@ acting on the system can be evaluated once the Green's function is known.
 Useful physical information about the charged excitation energies 
 of the many-body system can be obtained by expressing the propagator in the so-called Lehmann representation [1-2-3].
 To this purpose it is useful to introduce the following notation to denote the 
-charged excitation energies of the <i>N</i>-electron system[5]:
-
+charged excitation energies of the $N$-electron system[5]:
+$$
+\begin{equation}
+\varepsilon_i =
+\begin{cases}
+E_i^{(N+1)}-E_0^N  & \text{if $\varepsilon_i$ > $\mu$} \\
+E_0^N-E_i^{(N-1)}  & \text{if $\varepsilon_i$ < $\mu$} ,
+\end{cases}
+\end{equation}
+$$
 </p>
+
+<!--
 <p align="center">
 
     <img src="../documents/theory_mbt/charged_exc_ene.png">
     
 </p>
+-->
 
 
 where <i>E<sub>0</sub><sup>N</sup></i> is the ground state energy of the electron system with <i>N</i>
@@ -347,7 +354,7 @@ The self-energy, a simple product in the space-time domain, becomes a convolutio
 <p>
 <!--dressed 
 In practice, the electron propagator $G(12)$ is never explicitly known and has to be
-approximated with the Green's function, $\Go(12)$, of an appropriate non-interacting system. 
+approximated with the Green's function, $\G(12)$, of an appropriate non-interacting system. 
 -->
 </p>
 <p>
@@ -491,7 +498,7 @@ while the number of <i>G</i>-vectors used to describe the polarizability
 determined by <a href="../../input_variables/generated_files/varset_gw.html#ecuteps">ecuteps</a>.
 The oscillators are ubiquitous in the Many-Body part of ABINIT and their 
 calculation represents one of the most CPU intensive part of the execution.
-For this reason we devote section <a href="theorydoc_mbt.html#oscillator_notes">6</a> 
+For this reason we devote <a href="#6">section 6</a> 
 to the discussion of some important technical details concerning their computation.
 </p>
 <p>
@@ -646,7 +653,7 @@ has to be performed separately for each frequency.
 </p>
 <p>
 This linear scaling represents a serious problem, especially when many frequencies are wanted, for
-example when computing QP corrections within the contour deformation technique described in the <a href="../../tutorial/generated_files/lesson_gw2.html">second lesson</a> of the GW tutorial.
+example when computing QP corrections within the contour deformation technique described in the <a href="../../tutorial/generated_files/lesson_gw2.html#">second lesson</a> of the GW tutorial.
 
 </p>
 <p>
@@ -942,7 +949,7 @@ by the Green's function whose frequency dependence is known.
 <hr>
 <br><a name="notations"> </a>
 <a name="11"> </a>
-<h3><b>11. Notation</b></h3>
+<h3><b>11. Notations</b></h3>
  <p>The following shorthand notations are employed:
 
 <p align="center">
