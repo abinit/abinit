@@ -11,8 +11,8 @@
 <hr>
 <a name="top"></a>
 
-<h1>Geometry optimization calculations</h1>
-<h3>This file gives hints on how to perform a geometry optimization with the ABINIT package.
+<h1>Geometry optimization</h1>
+<h3>This page gives hints on how to perform a geometry optimization with the ABINIT package.
 <hr>
 
 <h5>Copyright (C) 2016-2017 ABINIT group (GG)
@@ -21,8 +21,10 @@
 
 <script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
 
+ Mentioned in &nbsp; <a href="../../topics/generated_files/topic_GeoConstraints.html">topic_GeoConstraints</a> &nbsp;&nbsp; <a href="../../users/generated_files/help_features.html#4">help_features#4</a> &nbsp;
+ <hr>
  <h3><b>Table of content: </b></h3> 
- <ul> <li><a href="topic_GeoOpt.html#1">1</a>. Introduction.<li><a href="topic_GeoOpt.html#2">2</a>. Related input variables.<li><a href="topic_GeoOpt.html#3">3</a>. Selected input files.</ul>
+ <ul> <li>1. <a href="topic_GeoOpt.html#1">Introduction.</a><li>2. <a href="topic_GeoOpt.html#2">Related input variables.</a><li>3. <a href="topic_GeoOpt.html#3">Selected input files.</a></ul>
 
 &nbsp; 
 <HR ALIGN=left> 
@@ -32,44 +34,45 @@
 
 <p> Different algorithms (Broyden; modified Broyden; Verlet with sudden
 stop of atoms) allows to find the equilibrium configuration
-of the nuclei, for which the forces vanish. The cell parameters
-can also be optimized concurently with the atomic positions.
-Specified lattice parameters, or angles, or atomic positions,
-can be kept fixed if needed.
+of the nuclei, for which the forces vanish, see <a href="../../input_variables/generated_files/varset_rlx.html#ionmov">ionmov</a>. The cell parameters
+can also be optimized concurently with the atomic positions <a href="../../input_variables/generated_files/varset_rlx.html#optcell">optcell</a>,
+possibly with a state of given stress as a target, <a href="../../input_variables/generated_files/varset_rlx.html#strtarget">strtarget</a>.
+<p> Specified lattice parameters, or angles, or atomic positions,
+can be kept fixed if needed, see <a href="../../topics/generated_files/topic_GeoConstraints.html#">topic_GeoConstraints</a>.
+<p> A genetic algorithm has been coded, for global optimisation. Not in production yet. See <a href="../../input_variables/generated_files/varset_rlx.html#ga_rules">ga_rules</a>.
+<br><br><a href=#top>Go to the top</a>
+
 
 
 
 &nbsp; 
-<HR ALIGN=left> 
+<hr> 
 <a name="2">&nbsp;</a>
 <h3><b>2. Related input variables.</b></h3>
 
 
-<p>Compulsory input variables:<p>... <a href="../../input_variables/generated_files/varrlx.html#ionmov">ionmov</a>   [IONic MOVEs]<br>
-... <a href="../../input_variables/generated_files/varrlx.html#optcell">optcell</a>   [OPTimize the CELL shape and dimensions]<br>
-<p>Basic input variables:<p>... <a href="../../input_variables/generated_files/varrlx.html#dilatmx">dilatmx</a>   [lattice DILATation : MaXimal value]<br>
-... <a href="../../input_variables/generated_files/varrlx.html#ntime">ntime</a>   [Number of TIME steps]<br>
-... <a href="../../input_variables/generated_files/varrlx.html#strfact">strfact</a>   [STRess FACTor]<br>
-... <a href="../../input_variables/generated_files/varrlx.html#tolmxde">tolmxde</a>   [TOLerance on the MaXimal Difference in Energy]<br>
-... <a href="../../input_variables/generated_files/varrlx.html#tolmxf">tolmxf</a>   [TOLerance on the MaXimal Force]<br>
-<p>Useful input variables:<p>... <a href="../../input_variables/generated_files/varrlx.html#iatcon">iatcon</a>   [Indices of AToms in CONstraint equations]<br>
-... <a href="../../input_variables/generated_files/varrlx.html#iatfix">iatfix</a>   [Indices of AToms that are FIXed ]<br>
-... <a href="../../input_variables/generated_files/varrlx.html#iatfixx">iatfixx</a>   [Indices of AToms that are FIXed along the X direction]<br>
-... <a href="../../input_variables/generated_files/varrlx.html#iatfixy">iatfixy</a>   [Indices of AToms that are FIXed along the Y direction]<br>
-... <a href="../../input_variables/generated_files/varrlx.html#iatfixz">iatfixz</a>   [Indices of AToms that are FIXed along the Z direction]<br>
-... <a href="../../input_variables/generated_files/varrlx.html#natcon">natcon</a>   [Number of AToms in CONstraint equations]<br>
-... <a href="../../input_variables/generated_files/varrlx.html#natfix">natfix</a>   [Number of Atoms that are FIXed]<br>
-... <a href="../../input_variables/generated_files/varrlx.html#natfixx">natfixx</a>   [Number of Atoms that are FIXed along the X direction]<br>
-... <a href="../../input_variables/generated_files/varrlx.html#natfixy">natfixy</a>   [Number of Atoms that are FIXed along the Y direction]<br>
-... <a href="../../input_variables/generated_files/varrlx.html#natfixz">natfixz</a>   [Number of Atoms that are FIXed along the Z direction]<br>
-... <a href="../../input_variables/generated_files/varrlx.html#nconeq">nconeq</a>   [Number of CONstraint EQuations]<br>
-... <a href="../../input_variables/generated_files/varrlx.html#restartxf">restartxf</a>   [RESTART from (X,F) history]<br>
-... <a href="../../input_variables/generated_files/varrlx.html#strprecon">strprecon</a>   [STRess PRECONditioner]<br>
-... <a href="../../input_variables/generated_files/varrlx.html#strtarget">strtarget</a>   [STRess TARGET]<br>
-... <a href="../../input_variables/generated_files/varrlx.html#wtatcon">wtatcon</a>   [WeighTs for AToms in CONstraint equations]<br>
-<p>Input variables for experts:<p>... <a href="../../input_variables/generated_files/varrlx.html#fxcartfactor">fxcartfactor</a>   [Forces to (X) CARTesian coordinates FACTOR]<br>
-... <a href="../../input_variables/generated_files/varrlx.html#goprecon">goprecon</a>   [Geometry Optimization PRECONditioner equations]<br>
-... <a href="../../input_variables/generated_files/varrlx.html#goprecprm">goprecprm</a>   [Geometry Optimization PREconditioner PaRaMeters equations]<br>
+<p>Compulsory input variables:<p>... <a href="../../input_variables/generated_files/varset_rlx.html#ionmov">ionmov</a>   [IONic MOVEs]<br>
+... <a href="../../input_variables/generated_files/varset_rlx.html#optcell">optcell</a>   [OPTimize the CELL shape and dimensions]<br>
+<p>Basic input variables:<p>... <a href="../../input_variables/generated_files/varset_rlx.html#dilatmx">dilatmx</a>   [lattice DILATation : MaXimal value]<br>
+... <a href="../../input_variables/generated_files/varset_rlx.html#ntime">ntime</a>   [Number of TIME steps]<br>
+... <a href="../../input_variables/generated_files/varset_rlx.html#strfact">strfact</a>   [STRess FACTor]<br>
+... <a href="../../input_variables/generated_files/varset_rlx.html#tolmxde">tolmxde</a>   [TOLerance on the MaXimal Difference in Energy]<br>
+... <a href="../../input_variables/generated_files/varset_rlx.html#tolmxf">tolmxf</a>   [TOLerance on the MaXimal Force]<br>
+<p>Useful input variables:<p>... <a href="../../input_variables/generated_files/varset_dev.html#iprcfc">iprcfc</a>   [Integer for PReConditioner of Force Constants]<br>
+... <a href="../../input_variables/generated_files/varset_rlx.html#restartxf">restartxf</a>   [RESTART from (X,F) history]<br>
+... <a href="../../input_variables/generated_files/varset_rlx.html#strprecon">strprecon</a>   [STRess PRECONditioner]<br>
+... <a href="../../input_variables/generated_files/varset_rlx.html#strtarget">strtarget</a>   [STRess TARGET]<br>
+<p>Input variables for experts:<p>... <a href="../../input_variables/generated_files/varset_rlx.html#fxcartfactor">fxcartfactor</a>   [Forces to (X) CARTesian coordinates FACTOR]<br>
+... <a href="../../input_variables/generated_files/varset_rlx.html#ga_algor">ga_algor</a>   [Genetic Algorithm - ALGOrithm selection]<br>
+... <a href="../../input_variables/generated_files/varset_rlx.html#ga_fitness">ga_fitness</a>   [Genetic Algorithm FITNESS function selection]<br>
+... <a href="../../input_variables/generated_files/varset_rlx.html#ga_n_rules">ga_n_rules</a>   [Genetic Algorithm Number of RULES]<br>
+... <a href="../../input_variables/generated_files/varset_rlx.html#ga_opt_percent">ga_opt_percent</a>   [Genetic Algorithm OPTimal PERCENT]<br>
+... <a href="../../input_variables/generated_files/varset_rlx.html#ga_rules">ga_rules</a>   [Genetic Algorithm RULES]<br>
+... <a href="../../input_variables/generated_files/varset_rlx.html#goprecon">goprecon</a>   [Geometry Optimization PRECONditioner equations]<br>
+... <a href="../../input_variables/generated_files/varset_rlx.html#goprecprm">goprecprm</a>   [Geometry Optimization PREconditioner PaRaMeters equations]<br>
+... <a href="../../input_variables/generated_files/varset_rlx.html#random_atpos">random_atpos</a>   [RANDOM ATomic POSitions]<br>
+
+<br><br><a href=#top>Go to the top</a>
 
 
 &nbsp; 
@@ -78,7 +81,8 @@ can be kept fixed if needed.
 <h3><b>3. Selected input files.</b></h3>
 
 
-The user can find some related example input files in the ABINIT package in the directory /tests, or on the Web:
+<i><b>WARNING</b> : as of ABINITv8.6.x, the list of input files provided in the specific section of the topics Web pages is still to be reviewed/tuned. In some cases, it will be adequate, and in other cases, it might be incomplete, or perhaps even useless.</i>
+<br><br>The user can find some related example input files in the ABINIT package in the directory /tests, or on the Web:
 <p> tests/v1/Input: <a href="../../tests/v1/Input/t44.in">t44.in</a> 
 <a href="../../tests/v1/Input/t78.in">t78.in</a> 
 <a href="../../tests/v1/Input/t79.in">t79.in</a> 
@@ -88,12 +92,16 @@ The user can find some related example input files in the ABINIT package in the 
 <p> tests/v2/Input: <a href="../../tests/v2/Input/t44.in">t44.in</a> 
 <a href="../../tests/v2/Input/t48.in">t48.in</a> 
 <a href="../../tests/v2/Input/t88.in">t88.in</a> 
-<p> tests/v3/Input: <a href="../../tests/v3/Input/t42.in">t42.in</a> 
+<p> tests/v3/Input: <a href="../../tests/v3/Input/t40.in">t40.in</a> 
+<a href="../../tests/v3/Input/t42.in">t42.in</a> 
 <p> tests/v5/Input: <a href="../../tests/v5/Input/t02.in">t02.in</a> 
 <a href="../../tests/v5/Input/t77.in">t77.in</a> 
 <a href="../../tests/v5/Input/t79.in">t79.in</a> 
+<p> tests/v6/Input: <a href="../../tests/v6/Input/t27.in">t27.in</a> 
 <p> tests/v7/Input: <a href="../../tests/v7/Input/t10.in">t10.in</a> 
 <br>
+
+<br><br><a href=#top>Go to the top</a>
 
 
 <script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>

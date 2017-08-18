@@ -95,5 +95,5 @@ diemac 2.0
 #%%   Computation of the electronic eigenvalues as well as phonon eigenfrequencies,
 #%%   and corresponding ingredients for the computation of the electron-phonon effect, in the
 #%%   next tests 51-53.
-#%% topics = TDep
+#%% topics = TDepES
 #%%<END TEST_INFO>

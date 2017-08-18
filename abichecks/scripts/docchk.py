@@ -54,18 +54,19 @@ def main(home_dir, verbose=False):
   print( " ABINIT Input variables: Regenerate html from abinit_vars.yml  ")
   print( " ============================================================= ")
   pathdocdir = os.path.join(home_dir, "doc")
-  cmd = "cd " + pathdocdir + " ; rm -f input_variables/generated_files/varset_allvars.html ; python generate_doc.py > generate_doc.log"
+  cmd = "cd " + pathdocdir + " ; rm -f input_variables/generated_files/varset_allvars.html ; ./generate_doc.py > generate_doc.log"
   os.system(cmd)
-  pathlogfile = os.path.join(home_dir, "doc/generate_doc.log")
   pathpymodsdir = os.path.join(home_dir, "doc/pymods")
   cmd = "cd " + pathpymodsdir + " ; python abi_check.py > abi_check.log"
   os.system(cmd)
 
-  with open(pathlogfile) as logfile:
+  pathlogfile = os.path.join(home_dir, "doc/generate_doc.log")
+  with open(pathlogfile) as f:
+    logfile=f.readlines()
     for line in logfile:
-        print(line)
-  pathcheckfile = os.path.join(home_dir, "doc/pymods/abi_check.log")
+        print(line[:-2])
 
+  pathcheckfile = os.path.join(home_dir, "doc/pymods/abi_check.log")
   with open(pathcheckfile) as checkfile:
     for line in checkfile:
         print(line)

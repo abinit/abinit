@@ -33,9 +33,25 @@ PAW case<br>
 <script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
 
 <a name="list"></a>
-<h3><b> Second lesson on the projector-augmented wave (PAW) technique, table of content:</b></h3>
+<h3><b> Second lesson on the projector-augmented wave (PAW) technique. Table of content:</b></h3>
 
-<ul> <li><a href="#1">1.</a> The PAW
+<ul> 
+  <li>0. <a href="#None">To be filled</a></li>
+  <li>1. <a href="#intro">The PAW atomic dataset - introduction</a></li>
+  <li>2. <a href="#generation">Use of the generation code</a></li>
+  <li>3. <a href="#nickel">First (and basic) PAW dataset for Nickel</a></li>
+  <li>4. <a href="#checking">Checking the sensitivity of results to some parameters</a></li>
+  <li>5. <a href="#partial_waves">Adjusting partial waves and projectors</a></li>
+  <li>6. <a href="#log_der">Examine the logarithmic derivatives</a></li>
+  <li>7. <a href="#efficiency">Testing efficiency of PAW dataset</a></li>
+  <li>8. <a href="#physical">Testing against physical quantities</a></li>
+  <li>9. <a href="#RSO">The Real Space Optimization (RSO) - experienced users</a></li>
+
+ </ul> 
+ <hr><br><a name="None"> </a>
+<a name="0"> </a>
+<h3><b>0. To be filled</b></h3>
+ <p><ul> <li><a href="#1">1.</a> The PAW
 atomic dataset - introduction</li><li><a href="#2">2.</a>
 Use of the generation code</li><li><a href="#3">3.</a>
 First (and basic) PAW
@@ -46,9 +62,12 @@ waves and projectors</li><li><a href="#6">6.</a>
 Examine the logarithmic derivatives</li><li><a href="#7">7.</a> Testing efficiency of
 PAW dataset</li><li><a href="#8">8.</a>Calculate physical quantities</li><li><a href="#9">9.</a> The Real Space Optimization (RSO) -
 experienced users</li></ul>
-<hr><a name="1">&nbsp;</a>
-<h3><b>1. The PAW atomic dataset - introduction
-</b></h3>The PAW method is based on the definition of
+<br><br><a href=#top>Go to the top</a>
+<hr>
+<br><a name="intro"> </a>
+<a name="1"> </a>
+<h3><b>1. The PAW atomic dataset - introduction</b></h3>
+ <p>The PAW method is based on the definition of
 atomic spheres (augmentation regions) of radius <span style="font-style: italic;">r</span><sub style="font-style: italic;">PAW</sub>
 around the
 atoms of the system in which a base of atomic partial waves &phi;<sub>i</sub>,
@@ -147,9 +166,12 @@ Communications 181, 1862 (2010) (might also be available at http://www.wfu.edu/%
 <br>[5]
 "Notes for revised form of atompaw code", by N.  Holzwarth, available at http://www.wfu.edu/%7Enatalie/papers/pwpaw/notes/atompaw/atompawEqns.pdf
 </div><br>
-<hr><a name="2">&nbsp;</a>
-<h3><b>2. Use of the generation code
-</b></h3><p><i>Before continuing, you might
+<br><br><a href=#top>Go to the top</a>
+<hr>
+<br><a name="generation"> </a>
+<a name="2"> </a>
+<h3><b>2. Use of the generation code</b></h3>
+ <p><i>Before continuing, you might
 consider to work in a different
 subdirectory as for the other lessons. Why not "Work_paw2" ?
 </i></p>
@@ -183,9 +205,12 @@ file
 (normalized
 XML
 file according to specifications from <a href="https://wiki.fysik.dtu.dk/gpaw/setups/pawxml.html">https://wiki.fysik.dtu.dk/gpaw/setups/pawxml.html</a>).<br><span style="color: rgb(51, 102, 255);"></span></div></div><span style="font-style: italic;"></span>
-<hr style="width: 100%; height: 2px;"><a name="3">&nbsp;</a>
-<h3><b>3. First (and basic) PAW dataset for Nickel
-</b></h3><p style="margin-bottom: 0in;" align="justify">Our test case
+<br><br><a href=#top>Go to the top</a>
+<hr>
+<br><a name="nickel"> </a>
+<a name="3"> </a>
+<h3><b>3. First (and basic) PAW dataset for Nickel</b></h3>
+ <p>Our test case
 will be <span style="font-weight: bold;">NICKEL</span>
 (<span style="font-style: italic;">1s</span><sup style="font-style: italic;">2</sup><span style="font-style: italic;">
 2s</span><sup style="font-style: italic;">2</sup><span style="font-style: italic;"> </span><span style="font-style: italic;">2p</span><sup style="font-style: italic;">6</sup><span style="font-style: italic;">
@@ -376,9 +401,12 @@ first draft.<br>Several parameters have
 to be adjusted, in order to get accurate results and efficient DFT
 calculations.</p><p style="margin-left: -0.02in; margin-bottom: 0in;" align="justify" lang="en-US">Note that only&nbsp;<span style="color: rgb(51, 102, 255);"></span><span style="color: rgb(51, 102, 255);">Ni.GGA-PBE-paw.abinit</span>
 file is directly usable by <span style="font-weight: bold;">ABINIT</span>.</p>
-<br><hr style="width: 100%; height: 2px;"><a name="4">&nbsp;</a>
-<br><h3>4. Checking the sensitivity of results to some
-parameters</h3><ul><li><p style="margin-top: 0.08in; margin-bottom: 0in;" align="justify" lang="en-US"> <span style="text-decoration: underline;">The
+<br><br><a href=#top>Go to the top</a>
+<hr>
+<br><a name="checking"> </a>
+<a name="4"> </a>
+<h3><b>4. Checking the sensitivity of results to some parameters</b></h3>
+ <p><ul><li><p style="margin-top: 0.08in; margin-bottom: 0in;" align="justify" lang="en-US"> <span style="text-decoration: underline;">The
 radial grid:</span></p>
 </li></ul><p style="margin-left: 0.45in; margin-bottom: 0in;" align="justify" lang="en-US">Try to select 700 points in the
 logarithmic
@@ -428,10 +456,14 @@ check the
 file, especially the values of valence energy ("<span style="font-style: italic;">evale</span>"). You can
 find the valence energy computed for the exact atomic problem and the
 valence energy computed with the PAW parameters ("<span style="font-style: italic;">evale from matrix
-elements</span>"). These two results should be in close agreement!</big></p><br><hr style="width: 100%; height: 2px;"><a name="5">&nbsp;</a>
-<br><h3>5. Adjusting partial waves and projectors
-</h3><p style="margin-top: 0.08in; margin-bottom: 0in; margin-left: 0.103in;" align="justify"><span style="color: rgb(153, 0, 0);">Examine 
-the partial-waves, PS partial-waves and projectors. </span><br> These are 
+elements</span>"). These two results should be in close agreement!</big></p>
+<br><br><a href=#top>Go to the top</a>
+<hr>
+<br><a name="partial_waves"> </a>
+<a name="5"> </a>
+<h3><b>5. Adjusting partial waves and projectors</b></h3>
+ <p>Examine 
+the partial-waves, PS partial-waves and projectors.<br> These are 
 saved in files named 
 <span style="color: rgb(51, 102, 255);">wfni</span>, where 
 <span style="font-style: italic;">i</span> ranges over the number of partial
@@ -485,9 +517,13 @@ the <span style="font-style: italic;">evale</span>
 values in&nbsp;<span style="color: rgb(51, 102, 255);">Ni</span>
 file and make sure they are as close as
 possible.<br>If not, choices for projectors and/or partial waves
-certainly are not judicious.</big></p><br><hr style="width: 100%; height: 2px;"><a name="6">&nbsp;</a>
-<br><h3>6. Examine the logarithmic derivatives</h3><p style="margin-top: 0.08in; margin-bottom: 0in;" align="justify"><span style="color: rgb(153, 0, 0);">
-Examine the </span><span style="font-style: italic; font-weight: bold; color: rgb(153, 0, 0);">logarithmic
+certainly are not judicious.</big></p>
+<br><br><a href=#top>Go to the top</a>
+<hr>
+<br><a name="log_der"> </a>
+<a name="6"> </a>
+<h3><b>6. Examine the logarithmic derivatives</b></h3>
+ <p>Examine the </span><span style="font-style: italic; font-weight: bold; color: rgb(153, 0, 0);">logarithmic
 derivatives</span>, i.e., derivatives of an <span style="font-style: italic;">l</span>-state <span style="font-weight: bold;">d(log(</span><span style="font-style: italic; font-weight: bold;">&psi;</span><sub style="font-style: italic; font-weight: bold;">l</sub><span style="font-weight: bold;">(</span><span style="font-style: italic; font-weight: bold;">E</span><span style="font-weight: bold;">))/dE</span> computed
 for the exact atomic problem and with the PAW dataset.<br>They are
 printed
@@ -622,9 +658,13 @@ from
 the original state of</span>&nbsp;</span><span style="color: rgb(51, 102, 255);">Ni.ghost.atompaw.input</span><span style="color: rgb(153, 0, 0);">
 <span style="color: black;">file and <span style="color: rgb(153, 0, 0);">put 1.8 for the matching radius of </span></span></span><span style="font-style: italic; color: rgb(153, 0, 0);">p</span><span style="color: black;"><span style="color: rgb(153, 0, 0);">- states </span>(put 1.8
 on lines 31 and 32). Run <span style="font-weight: bold;">ATOMPAW</span></span><span style="font-weight: bold;">:</span> the ghost state
-disappears !<br><br><hr style="width: 100%; height: 2px;"><a name="7">&nbsp;</a>
-<br><h3>7. Testing efficiency of PAW dataset</h3><span style="color: rgb(153, 0, 0);">
-Let's use again our </span><span style="color: rgb(51, 102, 255);">Ni.atompaw.input1</span>
+disappears !
+<br><br><a href=#top>Go to the top</a>
+<hr>
+<br><a name="efficiency"> </a>
+<a name="7"> </a>
+<h3><b>7. Testing efficiency of PAW dataset</b></h3>
+ <p>Let's use again our </span><span style="color: rgb(51, 102, 255);">Ni.atompaw.input1</span>
 file for Nickel (with all our modifications).<br><span style="color: rgb(153, 0, 0);"></span>You
 get a file <span style="color: rgb(51, 102, 255);">Ni.GGA-PBE-paw.abinit</span><span style="color: rgb(51, 102, 255);"></span>
 containing the PAW dataset designated for <span style="font-weight: bold;">ABINIT</span>.<br><br>Now,
@@ -766,8 +806,11 @@ Hartree<span style="font-weight: bold; font-style: italic;"></span><br><span sty
 convergence (at 0,1 mHartree) is achieve for <span style="font-style: italic;">20&lt;=</span><span style="font-style: italic; font-weight: bold;">ecut</span>&lt;=22
 Hartree<br><span style="font-style: italic;">Note:
 You could have tried the "bessel" keyword instead of "ultrasoft"...</span></div><div style="text-align: left;"></div><p><span style="text-decoration: underline; font-style: italic;">Summary
-of convergency results:</span></p><p><span style="text-decoration: underline; font-style: italic;"></span></p><span style="text-decoration: underline; font-style: italic;"><img alt="ecut convergence" src="../documents/lesson_paw2/ecut.jpg"></span><br><br><span style="text-decoration: underline; font-style: italic;">Final
-remarks:</span><ul><ul><li style="font-style: italic;"><p style="margin-top: 0.08in; margin-bottom: 0in;" align="justify">The
+of convergency results:</span></p><p><span style="text-decoration: underline; font-style: italic;"></span></p><span style="text-decoration: underline; font-style: italic;"><img alt="ecut convergence" src="../documents/lesson_paw2/ecut.jpg"></span>
+<br><br>
+<span style="text-decoration: underline; font-style: italic;">Final
+remarks:</span>
+<ul><li style="font-style: italic;"><p style="margin-top: 0.08in; margin-bottom: 0in;" align="justify">The
 localization of projectors in reciprocal space can (generally) be
 predicted by a look at <span style="color: rgb(51, 102, 255);">tprod.i</span>
 files. Such a file contains the curve of
@@ -785,11 +828,16 @@ any convergence problem and DFT calculations run without any divergence
 (but they need high plane wave cut-off). Vanderbilt projectors (and
 even more "custom" projectors) sometimes produce
 instabilities during the PAW dataset generation process and/or the DFT
-calculations...</p></li><li><p style="margin-top: 0.08in; margin-bottom: 0in; margin-left: 0.0366in; font-style: italic;" align="justify">In most cases, after having changed the
-projector generation scheme, one has to restart the procedure from
-step 5.</p></li></ul></ul><br><hr style="width: 100%; height: 2px;"><a name="8">&nbsp;</a>
-<br><h3>8. Testing against physical quantities</h3> <p style="margin-bottom: 0in;" align="justify" lang="en-US">Finally,
-the last step is to examine carefully
+calculations...</p></li>
+<li><p style="margin-top: 0.08in; margin-bottom: 0in; margin-left: 0.0366in; font-style: italic;" align="justify">In most cases, after having changed the
+projector generation scheme, one has to restart the procedure from step 5.
+</ul>
+<br><br><a href=#top>Go to the top</a>
+<hr>
+<br><a name="physical"> </a>
+<a name="8"> </a>
+<h3><b>8. Testing against physical quantities</b></h3>
+ <p>Finally, the last step is to examine carefully
 the physical quantities obtained with the PAW
 dataset.<br><span style="color: rgb(153, 0, 0);"></span></p><p style="margin-bottom: 0in;" align="justify" lang="en-US"><span style="color: rgb(153, 0, 0);">Copy&nbsp;</span><span style="color: rgb(51, 102, 255);"></span><span style="color: rgb(153, 0, 0);"></span><span style="color: rgb(51, 102, 255);">~abinit/tests/tutorial/Input/tpaw2_2.in</span><span style="color: rgb(153, 0, 0);">
 in your working directory. Edit it, to activate the eight datasets (instead of one). <br>Use the&nbsp; </span>
@@ -850,10 +898,15 @@ the procedure (</span><span style="font-weight: bold; color: rgb(153, 0, 0);">AT
 <span style="color: rgb(153, 0, 0);">file...<br><span style="color: rgb(0, 0, 0);">The run is a bit longer as more electrons
 have to be treated by <span style="font-weight: bold;">ABINIT</span>.</span></span><span style="color: rgb(153, 0, 0);"><br>Look at </span><span style="font-style: italic; color: rgb(153, 0, 0);">a</span><sub style="font-style: italic; color: rgb(153, 0, 0);">0</sub><span style="color: rgb(153, 0, 0);">, </span><span style="font-style: italic; color: rgb(153, 0, 0);">B</span><span style="color: rgb(153, 0, 0);"> or&nbsp;&mu; variation.</span></div>
 <div style="margin-left: 40px;">Note: this new PAW dataset has a
-smaller
-<span style="font-style: italic;">r</span><sub style="font-style: italic;">PAW</sub> radius (because semi-core states are localized).</div><div style="margin-left: 80px;"><span style="color: rgb(153, 0, 0);"></span><span style="font-style: italic;">a</span><sub style="font-style: italic;">0</sub> = 3.519 angstrom<br><span style="font-style: italic;">B</span> = 194 GPa<br>&mu; = 0.60</div><br><hr style="width: 100%; height: 2px;"><a name="9">&nbsp;</a>
-<br><h3>8. The Real Space Optimization (RSO) - experienced users</h3>In
-this section, an additional optimization of the atomic data
+smaller r<sub style="font-style: italic;">PAW</sub> radius (because semi-core states are localized).
+<br>
+a<sub style="font-style: italic;">0</sub> = 3.519 angstrom<br><span style="font-style: italic;">B</span> = 194 GPa<br>&mu; = 0.60</div>
+<br><br><a href=#top>Go to the top</a>
+<hr>
+<br><a name="RSO"> </a>
+<a name="9"> </a>
+<h3><b>9. The Real Space Optimization (RSO) - experienced users</b></h3>
+ <p>In this section, an additional optimization of the atomic data
 is proposed which can contribute, in some cases, to an acceleration of
 the convergence on&nbsp;<span style="font-style: italic;">ecut</span>.
 This
@@ -923,6 +976,8 @@ to choose the RSO parameters ?</p><div style="margin-left: 80px;"><small><span s
 adjusted. The lower&nbsp;<small><span style="font-weight: bold; font-style: italic;">g</span><sub style="font-weight: bold; font-style: italic;">max</sub></small>&nbsp;the
 faster the convergence is ; but too low&nbsp;<small><span style="font-weight: bold; font-style: italic;"></span></small><small><span style="font-weight: bold; font-style: italic;">g</span><sub style="font-weight: bold; font-style: italic;">max</sub></small><span style="font-weight: bold; font-style: italic;"></span> can produce
 unphysical results.</div><p style="margin-top: 0.08in; margin-bottom: 0in;" align="justify"></p></div></div>
+<br><br><a href=#top>Go to the top</a>
+<hr>
 <script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
 
 </body>

@@ -57,4 +57,5 @@
 #%%   BaTiO3 (see tests 18 to 21), but the DDB contains the q-wavevectors
 #%%   on a 2x2x2 FCC grid, finer than those tested for BaTiO3.
 #%%   Output : analysis of IFCs, as well as a few phonon frequencies.
+#%% topics = PhononBands
 #%%<END TEST_INFO>

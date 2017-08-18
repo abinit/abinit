@@ -1,6 +1,7 @@
-# This YAML file contains the introduction as well as the body (including the table of content) of the html help document.
-# In order to modify the other parts, modify the file helps.yml .
-# This is the introduction ...
+## This YAML file contains the introduction as well as the body of the html lesson.
+## In order to modify the other parts, modify the file lessons.html .
+
+## This is the introduction ...
 intro : |
   <p>This code is able to analyse the files produced by ABINIT,
   that contain 3-Dimensional real space data, like all types of potential
@@ -20,9 +21,16 @@ intro : |
   with respect to any given atom, computation
   of the Hirshfeld atomic charge (starting from a density file).
   </h3>
-# This is the body, including the table of content ...
-body : |
-  
+
+## Now come the different sections, numbered.
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec1:
+ title: "How to run cut3d"
+ tag: run
+ body: |
   To run cut3d, simply type :
   <pre>
        cut3d
@@ -30,9 +38,14 @@ body : |
   <br>
        then, provide answer to the questions.
   <br>You will have to give first the name of the unformatted file. For example, t1xo_DEN.
-  
-  <h4>1. Most types of files, excluding wavefunction files</h4>
-  
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec2:
+ title: "Analyze most types of files, excluding wavefunction files"
+ tag: files
+ body: |
   Supposing that you are not treating a wavefunction file, you will have to choose between different possibilities :
   <ul>
    <li>1) computation of data for a point, to be specified</li>
@@ -63,8 +76,13 @@ body : |
   <br> To continue the analysis, simply answer the questions of the code, that
        should be sufficiently self-explanatory.
   
-  <h4>2. Wavefunction files</h4>
-  
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec3:
+ title: "Analyze wavefunction files"
+ tag: wavefunction
+ body: |
   Instead, supposing that you are treating a wavefunction file, you will be able 
      to perform the analysis of one wave function.
      You will have to define
@@ -74,7 +92,3 @@ body : |
      for which the angular analysis will be performed.
   <br>Finally, you will be given the choice between different formatting
       of the wavefunction real-space data, including bare files, or XCrysDen formatted file.
-  <p>
-  
-  <HR ALIGN=left>
-  </pre>

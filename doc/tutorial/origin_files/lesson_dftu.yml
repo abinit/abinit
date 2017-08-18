@@ -1,6 +1,7 @@
-# This YAML file contains the introduction as well as the body (including the table of content) of the html lesson.
-# In order to modify the other parts, modify the file lessons.html .
-# This is the introduction ...
+## This YAML file contains the introduction as well as the body of the html lesson.
+## In order to modify the other parts, modify the file lessons.html .
+
+## This is the introduction ...
 intro : |
   <p>This lesson aims at showing how to perform
   a DFT+U calculation using Abinit.</p>
@@ -17,24 +18,16 @@ intro : |
   
   <p>This lesson should take about 1 hour to
   complete.</p>
-# This is the body, including the table of content ...
-body : |
-  <ul>
-    <li><a href="#0">0.</a> Short summary of the DFT+U method
-    <li><a href="#1">1.</a> Ground state calculation of NiO using LDA
-    <li><a href="#2">2.</a> Ground state calculation of NiO using
-  DFT+U with the FLL double-counting method.
-    <li><a href="#3">3.</a> Initialization of the density matrix in
-  DFT+U for the NiO crystal
-    <li><a href="#4">4.</a> Ground state calculation of NiO using
-  DFT+U with the AMF double-counting method.
-    <li><a href="#5">5.</a> Projected density of states in DFT+U
-  </ul>
-  <hr>
-  
-  <h3><b><a name="0">0.</a> Short summary
-  of the DFT+U method</b></h3>
-  
+
+## Now come the different sections, numbered.
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec0:
+ title: "Short summary of the DFT+U method"
+ tag: summary
+ body: |
   <p>The standard Local Density Approximation
   (LDA), where the exchange and correlation energy is fit to homogeneous
   electron gas results, is a functional that works well for a vast number of compounds.
@@ -68,14 +61,14 @@ body : |
   <p>For some systems, the result might depend on the choice of the
   double-counting method. However, the two
   methods generally give similar results. </p>
-  
-  
-  <hr>
-  
-  <h3><b><a name="1">1.</a>
-  Ground state
-  calculation of NiO using LDA</b></h3>
-  
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec1:
+ title: "Ground state calculation of NiO using LDA"
+ tag: LDA
+ body: |
   <p>You might create a subdirectory of the
   ~abinit/tests/tutorial directory, and use it for the tutorial. In what follows,
   the names of files will be mentioned as if you were in this subdirectory</p>
@@ -152,14 +145,13 @@ body : |
   Ni atom.  That is why we want to improve our functional, and be able
   to manage the strong correlation in NiO.</p>
   
-  
-  
-  <hr>
-  
-  <h3><b><a name="2">2.</a>
-  Ground state
-  calculation of NiO using DFT+U with the FLL double-counting</b></h3>
-  
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec2:
+ title: "DFT+U with the FLL double-counting"
+ tag: FLL
+ body: |
   <p>As seen previously, the LDA does not gives
   good results for the magnetization and band gap compared to experiments.</p>
   
@@ -239,18 +231,20 @@ body : |
   <p>The fact that [[spinat]] works
   for NiO comes from the relative simplicity of this system.
   
-  <hr>
-  
-  <h3><b><a name="3">3.</a>
-  Initialization of the density matrix in LDA+U for the NiO crystal</b></h3>
-  
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec3:
+ title: "Initialization of the density matrix"
+ tag: density_matrix
+ body: |
   <p><i>You should begin by running the
   tdftu_3.in file before continuing.</i></p>
   
   <p>In order to help the LDA+U find the ground state,
   you can define the initial density matrix for correlated orbitals with
   [[dmatpawu]]
-  To enable this feature, [[usedmatu]]
+  To enable this feature, [[usedmatpu]]
   must be set to a non-zero value (default is 0). When positive, the density
   matrix is kept to the [[dmatpawu]]
   value for the [[usedmatpu]] value steps. For our calculation(tdftu_3.in) , [[usedmatpu]]
@@ -301,13 +295,13 @@ body : |
   usual LDA or GGA functionals. One often gets trapped in a local minimum. Trying different starting
   points might be important...
   
-  
-  <hr>
-  
-  <h3><b><a name="4">4.</a>
-  Ground state
-  calculation of NiO using LDA+U with the AMF double-counting method.</b></h3>
-  
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec4:
+ title: "AMF double-counting method"
+ tag: AMF
+ body: |
   <p>Now we will use the other implementation
   for the double-counting term in LDA+U (in Abinit), known as AMF. As the FLL method, this method uses the number
   of electrons for each spin independently and
@@ -338,12 +332,13 @@ body : |
   occupation matrix with 0 or 1 for each spin. The AMF should be used when
   orbital occupations are near the average occupancies.</p>
   
-  
-  <hr>
-  
-  <h3><b><a name="5">5.</a>
-  Projected density of states in LDA+U </b></h3>
-  <p>
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec5:
+ title: "Projected density of states in LDA+U"
+ tag: proj_DOS
+ body: |
   Using prtdos 3, you can now compute the projected d and f density of states.
   For more information about projected density of states, for more details see the
   <a href="lesson_paw1.html">PAW1</a> tutorial.

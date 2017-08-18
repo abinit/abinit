@@ -93,5 +93,5 @@
 #%%   The first psp is Si, the second one is Ge, but the
 #%%   mixing coefficients are 1.0 and 0.0 .
 #%%   See test 4 of v2, except with alchemy.
-#%% topics = otherGS
+#%% topics = AtomTypes
 #%%<END TEST_INFO>

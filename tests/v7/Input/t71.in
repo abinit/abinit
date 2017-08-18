@@ -142,5 +142,5 @@ kptbounds4  0.0 0.0 0.0 #Gamma
 #%% description = 
 #%%    Calculation of Projected Wannier functions and compute band structure 
 #%%    in the d orbital Wannier basis
-#%% topics = Wannier
+#%% topics = Wannier, ElecBandStructure
 #%%<END TEST_INFO>

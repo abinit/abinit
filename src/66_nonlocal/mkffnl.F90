@@ -184,7 +184,7 @@ subroutine mkffnl(dimekb,dimffnl,ekb,ffnl,ffspl,gmet,gprimd,ider,idir,indlmn,&
 !scalars
  integer :: ider_tmp,iffnl,ig,ig0,il,ilm,ilmn,iln,iln0,im,itypat,mu,mua,mub,nlmn,nu,nua,nub
  real(dp),parameter :: renorm_factor=0.5d0/pi**2,tol_norm=tol10
- real(dp) :: ecut,ecutsm,effmass,fact,kpg1,kpg2,kpg3,kpgc1,kpgc2,kpgc3,rmetab,yp1
+ real(dp) :: ecut,ecutsm,effmass_free,fact,kpg1,kpg2,kpg3,kpgc1,kpgc2,kpgc3,rmetab,yp1
  logical :: testnl=.false.
  character(len=500) :: message
 !arrays
@@ -291,10 +291,10 @@ subroutine mkffnl(dimekb,dimffnl,ekb,ffnl,ffspl,gmet,gprimd,ider,idir,indlmn,&
    end if
  else
    if (nkpg<3) then
-     ecut=huge(0.0d0)*0.1d0;ecutsm=zero;effmass=one
+     ecut=huge(0.0d0)*0.1d0;ecutsm=zero;effmass_free=one
 !    Note that with ecutsm=0, the right kinetic energy is computed
-!     call mkkin(ecut,ecutsm,effmass,gmet,kg,kpgnorm,kpt,npw)
-     call mkkin(ecut,ecutsm,effmass,gmet,kg,kpgnorm,kpt,npw,0,0)
+!     call mkkin(ecut,ecutsm,effmass_free,gmet,kg,kpgnorm,kpt,npw)
+     call mkkin(ecut,ecutsm,effmass_free,gmet,kg,kpgnorm,kpt,npw,0,0)
 !$OMP PARALLEL DO
      do ig=1,npw
        kpgnorm(ig)=sqrt(renorm_factor*kpgnorm(ig))

@@ -61,5 +61,6 @@ lstep2 1.0d-4  #
 #%%   primitive one.
 #%%   Get 2 core electrons, 7.6796 valence electrons.
 #%%   The nucleus charge is +8. The Oxygen atom-in-molecule
-#%%   has a net charge of -1.6796. 
+#%%   has a net charge of -1.6796.
+#%% topics = Bader
 #%%<END TEST_INFO>

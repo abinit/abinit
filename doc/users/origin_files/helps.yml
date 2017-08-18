@@ -25,7 +25,12 @@
     name : cut3d
     keyword : the Cut3D utility
     authors : XG,RC,GMR,JFB,MCote
-    subtitle : This file explains the use and i/o parameters needed for the "Cut 3-Dimensional files" code of the ABINIT package.
+    subtitle : This file explains the use and i/o parameters needed for the "Cut 3-Dimensional files" post-processor of the ABINIT package.
+- !components
+    name : fold2bloch
+    keyword : the Fold2Bloch utility
+    authors : AB, OR
+    subtitle : This file explains the use and i/o parameters needed for the "fold2Bloch" post-processor of the ABINIT package.
 - !components
     name : mrgddb
     keyword : the Mrgddb utility
@@ -50,20 +55,20 @@
     subtitle : Frequency dependent linear optical dielectric function and second order nonlinear optical susceptibility.
 - !components
     name : respfn
-    keyword : response functions
+    keyword : DFPT
     authors : XG,DCA
     title : | 
-      <h1>Auxiliary help file for response functions.</h1>
+      <h1>Auxiliary help file for responses to perturbations.</h1>
     subtitle : |
-      This file complements the main [[help_abinit]], for matters related to response functions.
+      This file complements the main [[help_abinit]], for matters related to responses to perturbations (computed using DFPT)
 - !components
-    name : what_ABINIT_does
-    keyword : what_ABINIT_does
-    authors : FJ
+    name : features
+    keyword : ABINIT features
+    authors : FJ,XG
     title : |
-      <h1> What ABINIT does ...</h1>
+      <h1> ABINIT settings and features.</h1>
     subtitle : |
-      A beginner's overview.
+      An overview of ABINIT settings and features, for beginners and more experienced users.
     tofcontent_header : |
       <a name="list"></a>
       <h3><b> Table of contents:</b></h3>

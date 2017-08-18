@@ -52,31 +52,26 @@ or the use of a specific submission file.
 <script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
 
 <a name="list"></a>
-<h3><b> Parallelism for many-body calculations, table of content:</b></h3>
+<h3><b> Parallelism for many-body calculations. Table of content:</b></h3>
 
-<ul>
-  <li><a href="#WFK_gen"      >1</a> Generating the WFK file in parallel.
-  <li><a href="#SCR_AW"       >2</a> Computing the screening in parallel using the Adler-Wiser expression
-  <li><a href="#SCR_Hilbert"  >3</a> Computing the screening in parallel using the Hilbert transform method 
-  <li><a href="#G0W0"         >4</a> Computing the one-shot GW corrections in parallel
-  <li><a href="#Rules_for_MPI">5</a> Basic rules for efficient parallel calculations
-</ul>
-<hr>
+<ul> 
+  <li>1. <a href="#WFK_gen">Generating the WFK file in parallel</a></li>
+  <li>2. <a href="#SCR_AW"">Computing the screening in parallel using the Adler-Wiser expression</a></li>
+  <li>3. <a href="#SCR_Hilbert">Computing the screening in parallel using the Hilbert transform method</a></li>
+  <li>4. <a href="#G0W0">Computing the one-shot GW corrections in parallel</a></li>
+  <li>5. <a href="#Rules_for_MPI">Basic rules for efficient parallel calculations</a></li>
 
-<p>
-
-</b>
-The input files necessary to run the examples related to this tutorial are located
+ </ul> 
+ <hr><br><a name="WFK_gen"> </a>
+<a name="1"> </a>
+<h3><b>1. Generating the WFK file in parallel</b></h3>
+ <p>The input files necessary to run the examples related to this tutorial are located
 in the directory ~abinit/tests/tutoparal/Input.
 <p>
 Before beginning, you should create a working directory  whose name might be "Work_mbt" (so ~abinit/tests/tutoparal/Input/Work_mbt).
 <p>
 We will do most of the actions of this tutorial in this working directory.
 
-<p><a name="WFK_gen"></a><br>
-<h3><b>1 Generating the WFK file in parallel.</b> </h3>
-
-<p>
 In the <a href="lesson_gw1.html">first lesson</a> of the GW tutorial, we have learned how to 
 generate the WFK file  with the sequential version of the code.
 Now we will perform a similar calculation taking advantage of the k-point parallelism
@@ -122,8 +117,8 @@ The only thing worth stressing is that this calculation solves the NSCF cycle
 with the conjugate-gradient method (paral_kgb == 0)
 <p>
 The NSCF cycle is executed in parallel using the standard parallelism over k-points and spin in which the 
-(<a href="../../input_variables/generated_files/varbas.html#nkpt">nkpt</a> x
- <a href="../../input_variables/generated_files/varbas.html#nsppol">nsppol</a>) blocks of bands are 
+(<a href="../../input_variables/generated_files/varset_basic.html#nkpt">nkpt</a> x
+ <a href="../../input_variables/generated_files/varset_basic.html#nsppol">nsppol</a>) blocks of bands are 
 distributed among the nodes.
 This test uses an unshifted 4x4x3 grid (48 k points in the full Brillouin Zone, folding to 9
 k-points in the irreducible wedge) hence the theoretical maximum speedup is 9.
@@ -158,13 +153,12 @@ A reference output file is given in ~tests/tutoparal/Refs, under the name tmbt_1
 <p>
 Note that 150 bands are not enough to obtain converged GW results, you might increase the number 
 of bands in proportion to your computing resources.
-
+<br><br><a href=#top>Go to the top</a>
 <hr>
-<p><a name="SCR_AW"></a><br>
-<h3>2. Computing the screening in parallel using the Adler-Wiser expression</b> </h3>
-
-<p>
-In this part of the tutorial, we will compute the RPA polarizability with the Adler-Wiser approach.
+<br><a name="SCR_AW""> </a>
+<a name="2"> </a>
+<h3><b>2. Computing the screening in parallel using the Adler-Wiser expression</b></h3>
+ <p>In this part of the tutorial, we will compute the RPA polarizability with the Adler-Wiser approach.
 The basic equations are discussed in this <a href="../../theory/generated_files/theorydoc_mbt.html#RPA_Fourier_space">section</a> of the GW notes.
 <p>
 First copy the files file tmbt_2.file in the working directory, 
@@ -196,21 +190,21 @@ inclvkb     2   # Correct treatment of the optical limit.
 <p>
 Most of the variables have been already discussed in the <a href="lesson_gw1.html">first</a> lesson
 of the GW tutorial. The only variables that deserve some additional explanation are
-<a href="../../input_variables/generated_files/varpar.html#gwpara">gwpara</a> and 
-<a href="../../input_variables/generated_files/vargw.html#awtr">awtr</a>.
+<a href="../../input_variables/generated_files/varset_paral.html#gwpara">gwpara</a> and 
+<a href="../../input_variables/generated_files/varset_gw.html#awtr">awtr</a>.
 <!--
 The screening is computed for two frequencies (the static limit and an purely imaginary frequency)
 hence this SCR file can only be used for performing GW calculations within the plasmon-pole approximation.
 The number of planewaves in the screning 
-(<a href="../../input_variables/generated_files/vargw.html#ecuteps">ecuteps</a>)
+(<a href="../../input_variables/generated_files/varset_gw.html#ecuteps">ecuteps</a>)
 is already reasonable whereas the number of bands should be subject to converge tests (left to the user)
 -->
 <!--
-<li><a href="../../input_variables/generated_files/vargw.html#symchi">symchi</a></li>
+<li><a href="../../input_variables/generated_files/varset_gw.html#symchi">symchi</a></li>
 -->
 <!--
 <p>
-The value <a href="../../input_variables/generated_files/vargw.html#symchi">symchi</a>=1 
+The value <a href="../../input_variables/generated_files/varset_gw.html#symchi">symchi</a>=1 
 tells the program that we want to take advantage of the symmetry properties of the
 oscillator matrix elements to reduce the number of k-points 
 that have to be explicitly considered in the integrals over the BZ.
@@ -221,23 +215,24 @@ As a consequence the computational gain depends on the symmetries of the externa
 
 <!--
 Note that <b>awtr</b>=2 is the mandatory prerequisite for using the MPI algorithm corresponding to
-<a href="../../input_variables/generated_files/vargw.html#gwpara" target="kwimg">gwpara</a>=2, algorithm that is
+<a href="../../input_variables/generated_files/varset_paral.html#gwpara">gwpara</a>=2, algorithm that is
 documented
 <p>
 Here we just want to discuss some important technical details concerning
 the implementation of the parallel algorithms used in the screening part
-(<a href="../../input_variables/generated_files/vargs.html#optdriver">optdriver</a>=3).
+(<a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>=3).
+
 <h4><a name="2a"></a></h4>
 <h4><b> 2.a Adler-Wiser formula for the RPA polarizability.</b></h4>
 <p>
 Screening calculations are very CPU and memory demanding due to the large number of bande required to converge.
 For this reason the code implements two different parallel algorithms, selected with the input variable 
-<a href="../../input_variables/generated_files/varpar.html#gwpara">gwpara</a>, 
+<a href="../../input_variables/generated_files/varset_paral.html#gwpara">gwpara</a>, 
 that allow  a substancial descrease of the computational effort. 
 Each method presents advantages and drawbacks that are extensively discussed in the documentation of the variable.
 -->
 <p>
-<a href="../../input_variables/generated_files/varpar.html#gwpara">gwpara</a> selects the parallel algorithm used to compute the screening.
+<a href="../../input_variables/generated_files/varset_paral.html#gwpara">gwpara</a> selects the parallel algorithm used to compute the screening.
 Two different approaches are implemented:
 <ul>
 <li>
@@ -254,16 +249,16 @@ In this tutorial, we will be focusing on <b>gwpara</b>=2 since this is the algor
 the best  MPI-scalability and, mostly important, it is the only one that allows for a significant reduction 
 of the memory requirement.
 <p>
-The option <a href="../../input_variables/generated_files/vargw.html#awtr">awtr</a>=1 
+The option <a href="../../input_variables/generated_files/varset_gw.html#awtr">awtr</a>=1 
 specifies that the system presents time reversal symmetry so that it is possible
 to halve the number of transitions that have to be calculated explicitly 
 (only resonant transitions are needed).
-Note that <a href="../../input_variables/generated_files/vargw.html#awtr">awtr</a>=1
-is MANDATORY when <a href="../../input_variables/generated_files/varpar.html#gwpara">gwpara</a>=2 is used.
+Note that <a href="../../input_variables/generated_files/varset_gw.html#awtr">awtr</a>=1
+is MANDATORY when <a href="../../input_variables/generated_files/varset_paral.html#gwpara">gwpara</a>=2 is used.
 <p>
 Before running the calculation in parallel, it is worth discussing some important technical details of the implementation. 
 For our purposes, it suffices to say that, 
-when <a href="../../input_variables/generated_files/varpar.html#gwpara">gwpara</a>=2 is used in the
+when <a href="../../input_variables/generated_files/varset_paral.html#gwpara">gwpara</a>=2 is used in the
 screening part,  the code distributes the wavefunctions such that each processing unit 
 owns the FULL set of occupied bands while the empty states are distributed among the nodes.
 The parallel computation of the inverse dielectric matrix is done in three different steps that can 
@@ -290,14 +285,14 @@ The master node performs the matrix inversion to obtain the inverse dielectric m
 Both the first and second step of the algorithm are expected to scale well with the number of processors.
 Step 3, on the contrary, is performed in sequential thus it will have a detrimental effect 
 on the overall scaling, especially in the case of large screening matrices
-(large <a href="../../input_variables/generated_files/varint.html#npweps">npweps</a> or large number of frequency points &omega;).
+(large <a href="../../input_variables/generated_files/varset_internal.html#npweps">npweps</a> or large number of frequency points &omega;).
 <p>
 Note that the maximum number of CPUs that can be used is dictated by the number of empty states
 used to compute the polarizability.
 Most importantly, a balanced distribution of the computing time is obtained when the number of
 processors divides the number of conduction states.
 <!--
-i.e. the difference between <a href="../../input_variables/generated_files/varbas.html#nband">nband</a> and the number of valence bands.
+i.e. the difference between <a href="../../input_variables/generated_files/varset_basic.html#nband">nband</a> and the number of valence bands.
 -->
 <p>
 The main limitation of the present implementation is represented by the storage of the polarizability.
@@ -346,7 +341,7 @@ You might modify the input files to perform the standard converge tests
 following the procedure described in the <a href="lesson_gw1.html">first lesson</a> of the GW tutorial.
 <!--
 calculate different SCR files with different values 
-of <a href="../../input_variables/generated_files/varbas.html#nband">nband</a>.
+of <a href="../../input_variables/generated_files/varset_basic.html#nband">nband</a>.
 The SCR files can then be used to check the convergence of the QP corrections in the self-energy part.
 We strongly suggest to use different input files since the calculations can be run independently 
 and moreover one can easily tune the number of processors for each calculation in order to 
@@ -379,11 +374,11 @@ $ grep "Memory needed" tmbt_2.log
 </pre>
 
 <i>ug</i> denotes the internal buffer used to store the Fourier components of the orbitals whose size
-scales linearly with <a href="../../input_variables/generated_files/varint.html#npwwfn"  target="kwimg">npwwfn</a>.
+scales linearly with <a href="../../input_variables/generated_files/varset_internal.html#npwwfn">npwwfn</a>.
 <i>ur</i> is the array storing the orbitals on the real space FFT mesh. 
 Keep in mind that the size of <i>ur</i> scales linearly with the total number of points in the FFT box,
 number that is usually much larger than the number of planewaves 
-(<a href="../../input_variables/generated_files/varint.html#npwwfn"  target="kwimg">npwwfn</a>).
+(<a href="../../input_variables/generated_files/varset_internal.html#npwwfn">npwwfn</a>).
 The number of FFT divisions used in the GW code can be extracted from the main output file using
 <pre>
 $ grep setmesh tmbt_2.out  -A 1
@@ -394,9 +389,9 @@ $ grep setmesh tmbt_2.out  -A 1
 As discussed in this <a href="../../theory/generated_files/theorydoc_mbt.html#oscillator_notes">section</a> of the GW notes,
 the Fast Fourier Transform represents one of the most CPU intensive part of the execution.
 For this reason the code provides 
-the input variable <a href="../../input_variables/generated_files/vargw.html#fftgw">fftgw</a> that 
+the input variable <a href="../../input_variables/generated_files/varset_gw.html#fftgw">fftgw</a> that 
 can be used to decrease the number of FFT points for better efficiency.
-The second digit of the input variable <a href="../../input_variables/generated_files/vargw.html#gwmem">gwmem</a>, 
+The second digit of the input variable <a href="../../input_variables/generated_files/varset_gw.html#gwmem">gwmem</a>, 
 instead, governs the storage of the real space orbitals and can used to avoid the storage of 
 the costly array <i>ur</i> at the price of an increase in computational time.
 <p>
@@ -429,8 +424,8 @@ Typical examples are GW calculations in metals or optical properties within the 
 <p>
 If enough processing units are available, the linear factor due to the q-point sampling can be trivially 
 absorbed by splitting the calculation of the q-points into several independent runs using the variables
-<a href="../../input_variables/generated_files/vargw.html#nqptdm">nqptdm</a> and
-<a href="../../input_variables/generated_files/vargw.html#qptdm">qptdm</a>.
+<a href="../../input_variables/generated_files/varset_gw.html#nqptdm">nqptdm</a> and
+<a href="../../input_variables/generated_files/varset_gw.html#qptdm">qptdm</a>.
 The results can then be gathered in a unique binary file by means of the <b>mrgscr</b> utility 
 (see also the automatic tests v3/t87, v3/t88 and v3/t89).
 <p>
@@ -440,13 +435,12 @@ TODO
 It is also possible to merge different frequencies 
 <p>
 -->
+<br><br><a href=#top>Go to the top</a>
 <hr>
-
-<a name="SCR_Hilbert"></a>
-<h3>3. Computing the screening in parallel using the Hilbert transform method</b> </h3>
-
-
-As discussed in the <a href="../../theory/generated_files/theorydoc_mbt.html#RPA_Fourier_space">GW_notes</a>,
+<br><a name="SCR_Hilbert"> </a>
+<a name="3"> </a>
+<h3><b>3. Computing the screening in parallel using the Hilbert transform method</b></h3>
+ <p>As discussed in the <a href="../../theory/generated_files/theorydoc_mbt.html#RPA_Fourier_space">GW_notes</a>,
 the algorithm based on the Adler-Wiser expression is not optimal when many frequencies are wanted. 
 In this paragraph, we therefore discuss how to use the Hilbert transform method
 to calculate the RPA polarizability on a dense frequency mesh.
@@ -478,26 +472,26 @@ nfreqim     5
 
 <!--
 The main difference is in the value used for
-<a href="../../input_variables/generated_files/vargw.html#gwcalctyp">gwcalctyp</a>, value that instructs the 
+<a href="../../input_variables/generated_files/varset_gw.html#gwcalctyp">gwcalctyp</a>, value that instructs the 
 code to calculate the inverse dielectric matric for many frequencies both along the real and the imaginary axis.
 The real frequency mesh is defined by
-<a href="../../input_variables/generated_files/vargw.html#nfreqre">nfreqre</a>, and
-<a href="../../input_variables/generated_files/vargw.html#freqremax">freqremax</a>,
+<a href="../../input_variables/generated_files/varset_gw.html#nfreqre">nfreqre</a>, and
+<a href="../../input_variables/generated_files/varset_gw.html#freqremax">freqremax</a>,
 while the sampling along the imaginary axis is specified by
-<a href="../../input_variables/generated_files/vargw.html#nfreqim">nfreqim</a>
+<a href="../../input_variables/generated_files/varset_gw.html#nfreqim">nfreqim</a>
 (a more detailed discussion can be found in the <a href="lesson_gw2.html">second lesson</a> of the GW tutorial).
 -->
 <p>
 The input file is similar to the one we used for the Adler-Wiser calculation.
-The input variable <a href="../../input_variables/generated_files/vargw.html#spmeth">spmeth</a> enables the spectral method.
-<a href="../../input_variables/generated_files/vargw.html#nomegasf">nomegasf</a> 
+The input variable <a href="../../input_variables/generated_files/varset_gw.html#spmeth">spmeth</a> enables the spectral method.
+<a href="../../input_variables/generated_files/varset_gw.html#nomegasf">nomegasf</a> 
 defines the number of &omega;&prime;  points in the linear mesh used for the spectral function i.e. the number 
 of &omega;&prime; in the 
 <a href="../../theory/generated_files/theorydoc_mbt.html#hilbert_transform">equation</a> for the spectral function.
 <!--
 The mesh is automatically calculated inside the code so that the entire set of resonant transitions is covered.
 
-Note that <a href="../../input_variables/generated_files/vargw.html#nomegasf">nomegasf</a> 
+Note that <a href="../../input_variables/generated_files/varset_gw.html#nomegasf">nomegasf</a> 
 should be subject to an accurate converge test since a dense sampling is required for an 
 accurate representation of the delta function appearing in the expression for the spectral function.
 -->
@@ -505,21 +499,21 @@ accurate representation of the delta function appearing in the expression for th
 As discussed in the <a href="../../theory/generated_files/theorydoc_mbt.html#hilbert_transform">GW notes</a>,
 the Hilbert transform method is much more memory demanding that the Adler-Wiser approach,
 mainly because of the large value of 
-<a href="../../input_variables/generated_files/vargw.html#nomegasf">nomegasf</a> that is usually needed to converge the results.
-Fortunately, the particular distribution of the data employed in <a href="../../input_variables/generated_files/varpar.html#gwpara">gwpara</a>=2
+<a href="../../input_variables/generated_files/varset_gw.html#nomegasf">nomegasf</a> that is usually needed to converge the results.
+Fortunately, the particular distribution of the data employed in <a href="../../input_variables/generated_files/varset_paral.html#gwpara">gwpara</a>=2
 turns out to be well suited for the calculation of the spectral function since each processor has to store and treat 
 only a subset of the entire range of transition energies. 
 The algorithm therefore presents good MPI-scalability since the number of &omega;&prime; frequencies that have to be stored 
 and considered in the Hilbert transform decreases with the number of processors.
 <!--
 <p>
-Choosing <a href="../../input_variables/generated_files/vargw.html#nomegasf">nomegasf</a> so that 
+Choosing <a href="../../input_variables/generated_files/varset_gw.html#nomegasf">nomegasf</a> so that 
 it is a multiple of the number of processors will facilitate the optimization of the 
 Hilbert transform.
 -->
 <!--
 An optimal distribution of both computing load and memory is achieved if 
-<a href="../../input_variables/generated_files/varpar.html#gwpara">gwpara</a>=2
+<a href="../../input_variables/generated_files/varset_paral.html#gwpara">gwpara</a>=2
 is used since, by virtue of the particular distribution of the data, 
 for example for calculating QP corrections 
 with the countor deformation method or for obtaining the absorption spectrum withing the RPA.
@@ -609,14 +603,13 @@ A less stringent tests would be to compare the macroscopic dielectric function o
 assuming that also the other matrix elements of the dielectric matrix have the same convergence
 behavior as the head (the macroscopic dielectric function).
 -->
+<br><br><a href=#top>Go to the top</a>
 <hr>
-  
-<p><a name="G0W0"></a><br>
-<h3>4. Computing the one-shot GW corrections in parallel</b> </h3>
-
-<p>
-In this last paragraph, we discuss how to calculate G<sub>0</sub>W<sub>0</sub> corrections in parallel with 
-<a href="../../input_variables/generated_files/varpar.html#gwpara">gwpara</a>=2.
+<br><a name="G0W0"> </a>
+<a name="4"> </a>
+<h3><b>4. Computing the one-shot GW corrections in parallel</b></h3>
+ <p>In this last paragraph, we discuss how to calculate G<sub>0</sub>W<sub>0</sub> corrections in parallel with 
+<a href="../../input_variables/generated_files/varset_paral.html#gwpara">gwpara</a>=2.
 The basic equations used to compute the self-energy matrix elements are discussed in 
 <a href="../../theory/generated_files/theorydoc_mbt.html#evaluation_gw_sigma">this part</a> of the GW notes.
 <p>
@@ -682,7 +675,7 @@ since GW calculations performed with <a href="vargw.html#symsigma">symsigma</a>=
 the initial accidental degeneracy.
 -->
 <p>
-Also in this case, we use <a href="../../input_variables/generated_files/varpar.html#gwpara">gwpara</a>=2
+Also in this case, we use <a href="../../input_variables/generated_files/varset_paral.html#gwpara">gwpara</a>=2
 to perform the calculation in parallel.
 Note, however, that the distribution of the orbitals employed in the self-energy part 
 significantly differs from the one used to compute the screening.
@@ -692,12 +685,12 @@ In what follows, we briefly describe the two-step procedure used to distribute t
 <ol>
 <li>
 Each node reads and stores in memory the states where the QP corrections are computed 
-(the list of states specified by <a href="../../input_variables/generated_files/vargw.html#kptgw">kptgw</a> and 
-<a href="../../input_variables/generated_files/vargw.html#bdgw">bdgw</a>). 
+(the list of states specified by <a href="../../input_variables/generated_files/varset_gw.html#kptgw">kptgw</a> and 
+<a href="../../input_variables/generated_files/varset_gw.html#bdgw">bdgw</a>). 
 </li>
 <br>
 <li>
-The <a href="../../input_variables/generated_files/varbas.html#nband">nband</a> bands
+The <a href="../../input_variables/generated_files/varset_basic.html#nband">nband</a> bands
 are distributed using the following partition scheme:
 <p align="center"><img src=../documents/lesson_paral_mbt/band_distribution_sigma.png></p>
 
@@ -710,7 +703,7 @@ where we have assumed a calculation done with four nodes (the index in the box d
 By virtue of the particular distribution adopted,
 the computation of the correlation part is expected to scale well with the number CPUs.
 The maximum number of processors that can be used is limited by
-<a href="../../input_variables/generated_files/varbas.html#nband">nband</a>.
+<a href="../../input_variables/generated_files/varset_basic.html#nband">nband</a>.
 
 Note, however, that only a subset of processors will receive the occupied states when
 the bands are distributed in step 2. 
@@ -736,7 +729,7 @@ the more expected correlation part.
 Each node owns the states for which the QP corrections will be calculated, then the nband bands 
 are distributed.
 We use alternating planes of bands to facilitate the calculation of the exchange part,
-It's worth stressing that <a href="../../input_variables/generated_files/varpar.html#gwpara">gwpara</a>=2
+It's worth stressing that <a href="../../input_variables/generated_files/varset_paral.html#gwpara">gwpara</a>=2
 is also memory distributed since each node will keep in memory only the states 
 needed to calculate the partial contribution to the final matrix element. 
 -->
@@ -747,8 +740,8 @@ Optimal scaling in the exchange part is obtained only when each node possesses
 the full set of occupied states.
 <!--
 stored when the list of states specified by 
-<a href="../../input_variables/generated_files/vargw.html#kptgw">kptgw</a> and
-<a href="../../input_variables/generated_files/vargw.html#bdgw">bdgw</a>
+<a href="../../input_variables/generated_files/varset_gw.html#kptgw">kptgw</a> and
+<a href="../../input_variables/generated_files/varset_gw.html#bdgw">bdgw</a>
 -->
 
 <p>
@@ -786,7 +779,7 @@ By default each CPU stores in memory the entire screening matrix for all the q-p
 in order to optimize the computation.
 In the case of large matrices, however, it possible to opt for an out-of-core solution in which only a single
 q-point is stored in memory and the data is read from the external SCR file  (slower but less memory demanding). 
-This option is controlled by the first digit of <a href="../../input_variables/generated_files/vargw.html#gwmem">gwmem</a>.
+This option is controlled by the first digit of <a href="../../input_variables/generated_files/varset_gw.html#gwmem">gwmem</a>.
 <!--
 Only the memory for the occupied states 
 used for the exchange part won't scale with the number of processors.
@@ -822,16 +815,15 @@ while the experimental structure is used in all the input files of this tutorial
 
 
 <!--
-<a href="../../input_variables/generated_files/vargw.html#ppmodel">ppmodel</a>=1 is used.
+<a href="../../input_variables/generated_files/varset_gw.html#ppmodel">ppmodel</a>=1 is used.
 You are invited to reproduce this result.
 -->
-
+<br><br><a href=#top>Go to the top</a>
 <hr>
-
-<a name="Rules_for_MPI"></a>
-<h3><b>5. Basic rules for efficient parallel calculations:</b></h3>
-
-<ol>
+<br><a name="Rules_for_MPI"> </a>
+<a name="5"> </a>
+<h3><b>5. Basic rules for efficient parallel calculations</b></h3>
+ <p><ol>
 <li>
 Remember that "Anything that can possibly go wrong, does" so, when writing your input file, try to "Keep It Short and Simple".
 </li>
@@ -839,7 +831,7 @@ Remember that "Anything that can possibly go wrong, does" so, when writing your 
 <li>
 Do one thing and do it well:
 <br>
-Avoid using different values of <a href="../../input_variables/generated_files/vargs.html#optdriver">optdriver</a>
+Avoid using different values of <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>
 in the same input file.
 Each runlevel employs different approaches to distribute memory and CPU time, hence
 it is almost impossible to find the number of processors that will produce a balanced run in each dataset.
@@ -851,7 +843,7 @@ Prime number theorem:
 <br>
 Convergence studies should be executed in parallel only when the parameters that are tested do not interfere with the MPI algorithm.
 For example, the convergence study in the number of bands in the screening should be 
-done in separated input files when  <a href="../../input_variables/generated_files/varpar.html#gwpara">gwpara</a>=2 is used.
+done in separated input files when  <a href="../../input_variables/generated_files/varset_paral.html#gwpara">gwpara</a>=2 is used.
 </li>
 <br>
 <li>
@@ -860,8 +852,8 @@ Less is more:
 Split big calculations into smaller runs whenever possible. 
 For example, screening calculations can be split over q-points.
 The calculation of the self-energy can be easily split over
-<a href="../../input_variables/generated_files/vargw.html#kptgw">kptgw</a>  and 
-<a href="../../input_variables/generated_files/vargw.html#bdgw">bdgw</a>.
+<a href="../../input_variables/generated_files/varset_gw.html#kptgw">kptgw</a>  and 
+<a href="../../input_variables/generated_files/varset_gw.html#bdgw">bdgw</a>.
 </li>
 <br>
 <li>
@@ -873,6 +865,8 @@ Having an estimate of the computing resources is very helpful when one has to la
 calculation with converged parameters.
 </li>
 </ol>
+<br><br><a href=#top>Go to the top</a>
+<hr>
 <script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
 
 </body>

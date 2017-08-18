@@ -1,6 +1,7 @@
-# This YAML file contains the introduction as well as the body (including the table of content) of the html theory document.
-# In order to modify the other parts, modify the file theorydocs.yml .
-# This is the introduction ...
+## This YAML file contains the introduction as well as the body of the html lesson.
+## In order to modify the other parts, modify the file lessons.html .
+
+## This is the introduction ...
 intro : |
   <p>
   These notes provide a brief introduction to the Bethe-Salpeter (BS) formalism
@@ -12,27 +13,16 @@ intro : |
   The conventions used in the equations are explained in the Many-body theory notes ([[theorydoc_mbt]]).
   A much more consistent discussion of the theoretical aspects of the Bethe-Salpeter 
   equation can be found in [1].
-# This is the body, including the table of content ...
-body : |
-  <p>
-  </p>
-  <ul>
-  <li><a href="#optical_properties">1.</a> Optical properties and local field effects
-    </li><li><a href="#BS_equation">2.</a> The Bethe-Salpeter equation in a nutshell
-    </li><li><a href="#BS_solvers">3.</a> Solving the Bethe-Salpeter problem.
-    </li><li><a href="#kernel_mel">4.</a> Kernel matrix elements in reciprocal space 
-  
-  </li>
-  </ul>
-  <hr>
-  
-  
-  
-  <h4><a name="optical_properties"></a></h4>
-  
-  <h3><b> 1. Optical properties and local field effects.</b></h3>
-  
-  <p>
+
+## Now come the different sections, numbered.
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec1:
+ title: "Optical properties and local field effects"
+ tag: optical_properties
+ body: |
   Before discussing the Bethe-Salpeter problem, it is worth reminding some basic results concerning
   the <i>ab initio</i> description of optical properties.
   </p>
@@ -109,19 +99,14 @@ body : |
   In the next section we will discuss how to obtain an improved approximation for the vertex 
   and therefore an improved approximation for the polarizability that takes into account many-body effects 
   due to the electron-hole interaction
-  
-  <br><br><br></p>
-  <hr><br>
-  
-  
-  <h4><a name="BS_equation"></a></h4>
-  
-  
-  
-  
-  <h3><b> 2. The Bethe-Salpeter equation in a nutshell.</b></h3>
-  
-  <p>
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec2:
+ title: "The Bethe-Salpeter equation in a nutshell"
+ tag: BS_equation
+ body: |
   A schematic picture of the different levels of the description of optical 
   spectra available in ABINIT is given below.
   </p>
@@ -403,22 +388,15 @@ body : |
   By default the code calculates the macroscopic dielectric function taking the limit along 
   six different directions in <b>q</b>-space (the three basis vectors of the reciprocal lattice and the three Cartesian
   axis). It is possible to change the default directions using the variables
-  [[gw_nqlwl]] and 
-  
-  [[gw_qlwl]]. 
-  
-  <br><br><br></p>
-  <hr><br>
-  
-  
-  <h4><a name="BS_solvers"></a></h4>
-  
-  <h3><b> 3. Solving the Bethe-Salpeter problem.</b></h3>
-  
-  
-  
-  
-  <p>
+  [[gw_nqlwl]] and [[gw_qlwl]]. 
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec3:
+ title: "Solving the Bethe-Salpeter problem"
+ tag: BS_solvers
+ body: |
   At this point it is clear that the evaluation of the macroscopic dielectric function within
   the BS formalism is a two-step process:
   
@@ -536,15 +514,14 @@ body : |
   [[bs_algorithm]]=3 employs the conjugate-gradient method
   to calculate the lowest eigenstates of the Hamiltonian. 
   At present, this method is still under testing and does not support calculations with the coupling term.
-  
-  
-  </p>
-  <h4><a name="kernel_mel"></a></h4>
-  
-  <h3><b> 4. Kernel matrix elements in reciprocal space.</b></h3>
-  
-  
-  
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec4:
+ title: "Kernel matrix elements in reciprocal space"
+ tag: kernel_mel
+ body: |
   Our implementation employs planewaves to expand the periodic part of the Bloch states, <i>u</i>,
   and the two-point function <i>W(r,r')</i> that becomes a <b>q</b>-dependent matrix in reciprocal-space.
   The conventions used for the transforms are documented in <a href="theorydoc_mbt.html#notations">this
@@ -586,13 +563,15 @@ body : |
   Brillouin zone and not by the number of points in the irreducible wedge.
   
   </p>
-  <h4><a name="dipole_mel"></a></h4>
-  
-  <h3><b> 3 Matrix elements of the dipole operator.</b></h3>
-  
-  
-  
-  
+
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec5:
+ title: "Matrix elements of the dipole operator"
+ tag: dipole_mel
+ body: |
   The accurate calculation of optical properties require the correct treatment 
   of the optical limit (<b>G</b>=0, <b>q</b> &#8594; 0) of the oscillator matrix elements. 
   The computation of these terms deserves some  clarification, due to the presence of the fully nonlocal pseudopotential 
@@ -655,12 +634,14 @@ body : |
   We suggest the use of [[inclvkb]]=2 that is 
   faster and less memory demanding than the algorithm coded for
   [[inclvkb]]=1.
-  
-  </p>
-  <h3><p><b><a name="references">References</a>
-  </b></p></h3>
-  
-  
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec6:
+ title: "References"
+ tag: references
+ body: |
   <ol>
   <li><a name="onida_rmp">G. Onida, L. Reining, and A. Rubio, Rev. Mod. Phys. <b>48</b>, 601 (2002)
   and references therein</a> </li><li><a name="albrecth">S. Albrecht, Ph.D. thesis, Ecole Polytechnique, Palaiseau (Paris), 1999</a> </li><li><a name="haydock2">R. Haydock, Comput. Phys. Comm. <b>20</b>, 11 (1980)</a> </li><li><a name="gruning">M. Gruning, A. Marini and X. Gonze, Nano Letters <b>9</b>, 2820 (2009) </a></li><li><a name="baroni1986">S. Baroni and R. Resta, Phys. Rev. B <b>33</b>, 7017 (1986) </a></li><!--

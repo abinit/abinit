@@ -12,7 +12,7 @@
 <a name="top"></a>
 
 <h1>Density Functional Perturbation Theory calculations</h1>
-<h3>This file gives hints on how to perform a DFPT calculation to obtain phonons modes, elastic tensors,... with the ABINIT package.
+<h3>This page gives hints on how to generically perform DFPT calculations with the ABINIT package.
 <hr>
 
 <h5>Copyright (C) 2016-2017 ABINIT group (MT)
@@ -21,8 +21,10 @@
 
 <script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
 
+ Mentioned in &nbsp; <a href="../../topics/generated_files/topic_Berry.html">topic_Berry</a> &nbsp;&nbsp; <a href="../../topics/generated_files/topic_EffMass.html">topic_EffMass</a> &nbsp;&nbsp; <a href="../../topics/generated_files/topic_Elastic.html">topic_Elastic</a> &nbsp;&nbsp; <a href="../../topics/generated_files/topic_Phonons.html">topic_Phonons</a> &nbsp;&nbsp; <a href="../../users/generated_files/help_features.html#6">help_features#6</a> &nbsp;
+ <hr>
  <h3><b>Table of content: </b></h3> 
- <ul> <li><a href="topic_DFPT.html#1">1</a>. Introduction.<li><a href="topic_DFPT.html#2">2</a>. Related lesson(s) of the tutorial.<li><a href="topic_DFPT.html#3">3</a>. Related input variables.<li><a href="topic_DFPT.html#4">4</a>. Selected input files.</ul>
+ <ul> <li>1. <a href="topic_DFPT.html#1">Introduction.</a><li>2. <a href="topic_DFPT.html#2">Related lesson(s) of the tutorial.</a><li>3. <a href="topic_DFPT.html#3">Related input variables.</a><li>4. <a href="topic_DFPT.html#4">Selected input files.</a></ul>
 
 &nbsp; 
 <HR ALIGN=left> 
@@ -30,13 +32,13 @@
 <h3><b>1. Introduction.</b></h3>
 
 
-<p>Density-Functional Perturbation Theory (DFPT) allows one to address a large variety of physical observables. Many properties of interest can be computed directly from the derivatives of the energy, without the use of finite differences: phonons modes, elastic tensors, effective charges, dielectric tensors, etc... 
+<p>Density-Functional Perturbation Theory (DFPT) allows one to address a large variety of physical observables. Many properties of interest can be computed directly from the derivatives of the energy, without the use of finite differences: phonons modes, elastic tensors, effective charges, dielectric tensors, etc... Even non-linear properties can be computed, like the Raman intensities (for the latter, see <a href="../../topics/generated_files/topic_nonlinear.html#">topic_nonlinear</a>)..
 <p>A DFPT calculation workflow is conducted as follows:
 <li> Run a Ground-State calculation in order to extract the Kohn-Sham pseudo wave-functions; these must be extremely well converged.</li>
 
-<li>If necessary, e.g., for the application of the derivative of the Hamiltonian with respect to an electric field, determine the derivatives of the wave functions with respect to the wave vector <b>k</b>, and keep them in a file. The keyword <a href="../../input_variables/generated_files/varrf.html#rfddk">rfddk</a> is used to perform this type of calculation.</li>
+<li>If necessary, e.g., for the application of the derivative of the Hamiltonian with respect to an electric field, determine the derivatives of the wave functions with respect to the wave vector <b>k</b>, and keep them in a file. The keyword <a href="../../input_variables/generated_files/varset_dfpt.html#rfddk">rfddk</a> is used to perform this type of calculation.</li>
 
-<li>Compute the 2nd-order derivative matrix (i.e., 2nd derivatives of the energy with respect to different perturbations &lambda;). This can be done thanks to the keywords <a href="../../input_variables/generated_files/varrf.html#rfphon">rfphon</a> (&lambda;=atomic displacement), <a href="../../input_variables/generated_files/varrf.html#rfstrs">rfstrs</a> (&lambda;=strain), <a href="../../input_variables/generated_files/varrf.html#rfelfd">rfelfd</a> (&lambda;=electric field) or <a href="../../input_variables/generated_files/varrf.html#rfmagn">rfmagn</a> (&lambda;=magnetic field). </li>
+<li>Compute the 2nd-order derivative matrix (i.e., 2nd derivatives of the energy with respect to different perturbations &lambda;). This can be done thanks to the keywords <a href="../../input_variables/generated_files/varset_dfpt.html#rfphon">rfphon</a> (&lambda;=atomic displacement), <a href="../../input_variables/generated_files/varset_dfpt.html#rfstrs">rfstrs</a> (&lambda;=strain), <a href="../../input_variables/generated_files/varset_dfpt.html#rfelfd">rfelfd</a> (&lambda;=electric field) or <a href="../../input_variables/generated_files/varset_dfpt.html#rfmagn">rfmagn</a> (&lambda;=magnetic field). </li>
 
 <li>Launch the anaddb tool (distributed with ABINIT) to analyse the derivative database and compute relaxed tensors and thermodynamical properties.</li>
 
@@ -45,6 +47,9 @@
 <p>Thanks to the locality provided by PAW partial wave basis, it is possible to perform response function calculations for correlated electron materials. The LDA+U formalism is usable without any restriction for the PAW+DFPT calculations.
 
 <p> All the tutorials dedicated to response functions can be followed both with norm-conserving pseudopotentials and with PAW atomic datasets.
+<p> More detailed explanations to perform a response calculation are given in the <a href="../../users/generated_files/help_respfn.html">help_respfn </a>file.
+<br><br><a href=#top>Go to the top</a>
+
 
 
 &nbsp; 
@@ -53,87 +58,61 @@
 <h3><b>2. Related lesson(s) of the tutorial.</b></h3>
 
 
-<li><a href="../../tutorial/generated_files/lesson_rf1.html">The lesson Response-Function 1 (RF1)</a>
-presents the basics of response-functions within ABINIT. The example
+<li><a href="../../tutorial/generated_files/lesson_rf1.html#">The lesson Response-Function 1 (RF1)</a>
+presents the basics of DFPT calculations within ABINIT. The example
 given is the study of dynamical and dielectric properties of AlAs (an
 insulator): phonons at Gamma, dielectric constant, Born effective
 charges, LO-TO splitting, phonons in the whole Brillouin zone. The
 creation of the "Derivative Data Base" (DDB) is presented.</li>
-<li><a href="../../tutorial/generated_files/lesson_rf2.html">The lesson Response-Function 2 (RF2)</a>
+
+<li><a href="../../tutorial/generated_files/lesson_rf2.html#">|The lesson Response-Function 2 (RF2)</a>
 presents the analysis of the DDBs that have been introduced in the
 preceeding lesson RF1.  The computation of the interatomic forces and
 the computation of thermodynamical properties is an outcome of this
 lesson.</li>
-<li>The additional information given by lesson RF1 opens the door to
-<a href="../../tutorial/generated_files/lesson_optic.html">The lesson on Optic</a>, the utility that
-allows to obtain the frequency dependent linear optical dielectric
-function and the frequency dependent second order nonlinear optical
-susceptibility, in the simple "Sum-Over-State" approximation.</li>
-<li><a href="../../tutorial/generated_files/lesson_elastic.html">The lesson on the elastic
-properties</a> presents the computation with respect to the strain
-perturbation and its responses: elastic constants,
+
+<li><a href="../../tutorial/generated_files/lesson_elastic.html#">The lesson on the elastic properties</a> 
+presents the computation with respect to the strain perturbation and its responses: elastic constants,
 piezoelectricity.</li>
-<li><a href="../../tutorial/generated_files/lesson_paral_dfpt.html">Parallelism of response-function
-calculations</a> - you need to be familiarized with the calculation of
-linear-response properties within ABINIT, see the tutorial <a
-href="../../tutorial/generated_files/lesson_rf1.html"> Response-Function 1 (RF1)</a></li>
+
+<li><a href="../../tutorial/generated_files/lesson_paral_dfpt.html#">Parallelism of response-function calculations</a>.
+Additional information to use the DFPT in parallel.</li>
+
+<li><a href="../../tutorial/generated_files/lesson_nlo.html#">Lesson on static non-linear properties</a>.
+Electronic non-linear susceptibility, non-resonant Raman tensor, electro-optic effect.</li>
+<br><br><a href=#top>Go to the top</a>
+
 
 &nbsp; 
-<HR ALIGN=left> 
+<hr> 
 <a name="3">&nbsp;</a>
 <h3><b>3. Related input variables.</b></h3>
 
 
-<p>Compulsory input variables:<p>... <a href="../../input_variables/generated_files/vargs.html#ngqpt">ngqpt</a>   [Number of Grid pointsfor Q PoinTs generation]<br>
-... <a href="../../input_variables/generated_files/vargs.html#nqpt">nqpt</a>   [Number of Q - POINTs]<br>
-... <a href="../../input_variables/generated_files/vargs.html#qptopt">qptopt</a>   [QPoinTs OPTion]<br>
-... <a href="../../input_variables/generated_files/varrf.html#rfdir">rfdir</a>   [Response Function : DIRections]<br>
-... <a href="../../input_variables/generated_files/varrf.html#rfelfd">rfelfd</a>   [Response Function with respect to the ELectric FielD]<br>
-... <a href="../../input_variables/generated_files/varrf.html#rfmagn">rfmagn</a>   [Response Function with respect to MAGNetic B-field perturbation]<br>
-... <a href="../../input_variables/generated_files/varrf.html#rfphon">rfphon</a>   [Response Function with respect to PHONons]<br>
-... <a href="../../input_variables/generated_files/varrf.html#rfstrs">rfstrs</a>   [Response Function with respect to STRainS]<br>
-<p>Basic input variables:<p>... <a href="../../input_variables/generated_files/varrf.html#rfasr">rfasr</a>   [Response Function : Acoustic Sum Rule]<br>
-... <a href="../../input_variables/generated_files/varrf.html#rfatpol">rfatpol</a>   [Response Function : ATomic POLarisation]<br>
-... <a href="../../input_variables/generated_files/varrf.html#rfddk">rfddk</a>   [Response Function with respect to Derivative with respect to K]<br>
-<p>Useful input variables:<p>... <a href="../../input_variables/generated_files/vareph.html#asr">asr</a>   [Acoustic Sum Rule]<br>
-... <a href="../../input_variables/generated_files/vareph.html#chneut">chneut</a>   [CHarge NEUTrality treatment ]<br>
-... <a href="../../input_variables/generated_files/varrf.html#dfpt_sciss">dfpt_sciss</a>   [DFPT SCISSor operator]<br>
-... <a href="../../input_variables/generated_files/vareph.html#dipdip">dipdip</a>   [DIPole-DIPole interaction ]<br>
-... <a href="../../input_variables/generated_files/vardev.html#getwfkfine">getwfkfine</a>   [GET the fine grid wavefunctions from _WFK file]<br>
-... <a href="../../input_variables/generated_files/vargs.html#iqpt">iqpt</a>   [Index for QPoinT generation]<br>
-... <a href="../../input_variables/generated_files/varfil.html#ird1wf">ird1wf</a>   [Integer that governs the ReaDing of _1WF files ]<br>
-... <a href="../../input_variables/generated_files/varfil.html#irdddk">irdddk</a>   [Integer that governs the ReaDing of DDK wavefunctions, in _1WF files]<br>
-... <a href="../../input_variables/generated_files/varfil.html#irdwfq">irdwfq</a>   [Integer that governs the ReaDing of _WFQ files]<br>
-... <a href="../../input_variables/generated_files/vargs.html#nshiftq">nshiftq</a>   [Number of SHIFTs for Q point grids]<br>
-... <a href="../../input_variables/generated_files/vareph.html#ph_intmeth">ph_intmeth</a>   [PHonons: INTegration METHod]<br>
-... <a href="../../input_variables/generated_files/vareph.html#ph_ndivsm">ph_ndivsm</a>   [PHonons: Number of DIVisions for sampling the SMallest segment]<br>
-... <a href="../../input_variables/generated_files/varrf.html#ph_ngqpt">ph_ngqpt</a>   [PHonons: Number of Grid points for Q-PoinT mesh.]<br>
-... <a href="../../input_variables/generated_files/vareph.html#ph_nqpath">ph_nqpath</a>   [PHonons: Number of Q-points defining the PATH]<br>
-... <a href="../../input_variables/generated_files/vareph.html#ph_nqshift">ph_nqshift</a>   [PHonons: Number of Q-SHIFTs]<br>
-... <a href="../../input_variables/generated_files/varrf.html#ph_qpath">ph_qpath</a>   [Phonons: Q-PATH]<br>
-... <a href="../../input_variables/generated_files/vareph.html#ph_qshift">ph_qshift</a>   [PHonons: Q-SHIFTs for mesh.]<br>
-... <a href="../../input_variables/generated_files/vareph.html#ph_smear">ph_smear</a>   [PHonons: SMEARing factor]<br>
-... <a href="../../input_variables/generated_files/vareph.html#ph_wstep">ph_wstep</a>   [PHonons: frequency(W)  STEP.]<br>
-... <a href="../../input_variables/generated_files/varff.html#polcen">polcen</a>   [POLarization for CENtrosymmetric geometry]<br>
-... <a href="../../input_variables/generated_files/vareph.html#prtphdos">prtphdos</a>   [PRinT the PHonon Density Of States]<br>
-... <a href="../../input_variables/generated_files/varpaw.html#ptcharge">ptcharge</a>   [PoinT CHARGEs]<br>
-... <a href="../../input_variables/generated_files/vargs.html#qpt">qpt</a>   [Q PoinT]<br>
-... <a href="../../input_variables/generated_files/vargs.html#qptnrm">qptnrm</a>   [Q PoinTs NoRMalization]<br>
-... <a href="../../input_variables/generated_files/vargs.html#qptrlatt">qptrlatt</a>   [Q - PoinTs grid : Real space LATTice]<br>
-... <a href="../../input_variables/generated_files/varpaw.html#quadmom">quadmom</a>   [QUADrupole MOMents]<br>
-... <a href="../../input_variables/generated_files/vargs.html#shiftq">shiftq</a>   [SHIFT for Q points]<br>
-... <a href="../../input_variables/generated_files/vareph.html#symdynmat">symdynmat</a>   [SYMmetrize the DYNamical MATrix]<br>
-... <a href="../../input_variables/generated_files/vargs.html#wtq">wtq</a>   [WeighTs for the current Q-points]<br>
-<p>Relevant internal variables:<p>... <a href="../../input_variables/generated_files/varint.html#qptn">%qptn</a>   [Q-PoinT re-Normalized]<br>
-<p>Input variables for experts:<p>... <a href="../../input_variables/generated_files/varrf.html#frzfermi">frzfermi</a>   [FReeZe FERMI energy]<br>
-... <a href="../../input_variables/generated_files/varpaw.html#pawcross">pawcross</a>   [PAW - add CROSS term in oscillator strengths]<br>
-... <a href="../../input_variables/generated_files/varff.html#qprtrb">qprtrb</a>   [Q-wavevector of the PERTurbation]<br>
-... <a href="../../input_variables/generated_files/varrf.html#rf2_dkdk">rf2_dkdk</a>   [Response Function : 2nd Derivative of wavefunctions with respect to K]<br>
-... <a href="../../input_variables/generated_files/varrf.html#rfmeth">rfmeth</a>   [Response Function METHod]<br>
-... <a href="../../input_variables/generated_files/varrf.html#rfuser">rfuser</a>   [Response Function, USER-defined]<br>
-... <a href="../../input_variables/generated_files/vargs.html#scphon_supercell">scphon_supercell</a>   [Self Consistent PHONon SUPERCELL]<br>
-... <a href="../../input_variables/generated_files/vargs.html#scphon_temp">scphon_temp</a>   [Self Consistent PHONon TEMPerature]<br>
-... <a href="../../input_variables/generated_files/varff.html#vprtrb">vprtrb</a>   [potential -V- for the PeRTuRBation]<br>
+<p>Compulsory input variables:<p>... <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>   [OPTions for the DRIVER]<br>
+... <a href="../../input_variables/generated_files/varset_dfpt.html#rfdir">rfdir</a>   [Response Function : DIRections]<br>
+<p>Basic input variables:<p>... <a href="../../input_variables/generated_files/varset_dfpt.html#rfatpol">rfatpol</a>   [Response Function : ATomic POLarisation]<br>
+... <a href="../../input_variables/generated_files/varset_dfpt.html#rfddk">rfddk</a>   [Response Function with respect to Derivative with respect to K]<br>
+... <a href="../../input_variables/generated_files/varset_dfpt.html#rfelfd">rfelfd</a>   [Response Function with respect to the ELectric FielD]<br>
+... <a href="../../input_variables/generated_files/varset_dfpt.html#rfmagn">rfmagn</a>   [Response Function with respect to MAGNetic B-field perturbation]<br>
+... <a href="../../input_variables/generated_files/varset_dfpt.html#rfphon">rfphon</a>   [Response Function with respect to PHONons]<br>
+... <a href="../../input_variables/generated_files/varset_dfpt.html#rfstrs">rfstrs</a>   [Response Function with respect to STRainS]<br>
+<p>Useful input variables:<p>... <a href="../../input_variables/generated_files/varset_eph.html#asr">asr</a>   [Acoustic Sum Rule]<br>
+... <a href="../../input_variables/generated_files/varset_dfpt.html#dfpt_sciss">dfpt_sciss</a>   [DFPT SCISSor operator]<br>
+... <a href="../../input_variables/generated_files/varset_dev.html#getwfkfine">getwfkfine</a>   [GET the fine grid wavefunctions from _WFK file]<br>
+... <a href="../../input_variables/generated_files/varset_files.html#ird1wf">ird1wf</a>   [Integer that governs the ReaDing of _1WF files ]<br>
+... <a href="../../input_variables/generated_files/varset_files.html#irdddk">irdddk</a>   [Integer that governs the ReaDing of DDK wavefunctions, in _1WF files]<br>
+... <a href="../../input_variables/generated_files/varset_files.html#irdwfq">irdwfq</a>   [Integer that governs the ReaDing of _WFQ files]<br>
+<p>Relevant internal variables:<p>... <a href="../../input_variables/generated_files/varset_internal.html#qptn">%qptn</a>   [Q-PoinT re-Normalized]<br>
+<p>Input variables for experts:<p>... <a href="../../input_variables/generated_files/varset_dfpt.html#frzfermi">frzfermi</a>   [FReeZe FERMI energy]<br>
+... <a href="../../input_variables/generated_files/varset_paw.html#pawcross">pawcross</a>   [PAW - add CROSS term in oscillator strengths]<br>
+... <a href="../../input_variables/generated_files/varset_dfpt.html#rf2_dkdk">rf2_dkdk</a>   [Response Function : 2nd Derivative of wavefunctions with respect to K]<br>
+... <a href="../../input_variables/generated_files/varset_dfpt.html#rfmeth">rfmeth</a>   [Response Function METHod]<br>
+... <a href="../../input_variables/generated_files/varset_dfpt.html#rfuser">rfuser</a>   [Response Function, USER-defined]<br>
+... <a href="../../input_variables/generated_files/varset_gstate.html#scphon_supercell">scphon_supercell</a>   [Self Consistent PHONon SUPERCELL]<br>
+... <a href="../../input_variables/generated_files/varset_gstate.html#scphon_temp">scphon_temp</a>   [Self Consistent PHONon TEMPerature]<br>
+
+<br><br><a href=#top>Go to the top</a>
 
 
 &nbsp; 
@@ -142,7 +121,8 @@ href="../../tutorial/generated_files/lesson_rf1.html"> Response-Function 1 (RF1)
 <h3><b>4. Selected input files.</b></h3>
 
 
-The user can find some related example input files in the ABINIT package in the directory /tests, or on the Web:
+<i><b>WARNING</b> : as of ABINITv8.6.x, the list of input files provided in the specific section of the topics Web pages is still to be reviewed/tuned. In some cases, it will be adequate, and in other cases, it might be incomplete, or perhaps even useless.</i>
+<br><br>The user can find some related example input files in the ABINIT package in the directory /tests, or on the Web:
 <p> tests/v8/Input: <a href="../../tests/v8/Input/t07.in">t07.in</a> 
 <a href="../../tests/v8/Input/t20.in">t20.in</a> 
 <p> tests/v4/Input: <a href="../../tests/v4/Input/t63.in">t63.in</a> 
@@ -155,10 +135,9 @@ The user can find some related example input files in the ABINIT package in the 
 <p> tests/v7/Input: <a href="../../tests/v7/Input/t43.in">t43.in</a> 
 <a href="../../tests/v7/Input/t44.in">t44.in</a> 
 <a href="../../tests/v7/Input/t45.in">t45.in</a> 
-<a href="../../tests/v7/Input/t90.in">t90.in</a> 
-<a href="../../tests/v7/Input/t95.in">t95.in</a> 
-<a href="../../tests/v7/Input/t96.in">t96.in</a> 
 <br>
+
+<br><br><a href=#top>Go to the top</a>
 
 
 <script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>

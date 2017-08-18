@@ -89,5 +89,5 @@
 #%%  Diamond.
 #%%  Diamond dynamical temperature-dependent of the electronic structure. 
 #%%  Three q-points are computed.
-#%% topics = TDep
+#%% topics = TDepES
 #%%<END TEST_INFO>

@@ -15,7 +15,7 @@
 
 <h2>This file explains the i/o parameters needed for the derivative database (DDB) merging code (MRGDDB).</h2>
 <hr>
-<br>The user is advised to be familiar with the main <a href="#">[[FAKE LINK:help_file]]</a>
+<br>The user is advised to be familiar with the main <a href="../../users/generated_files/help_abinit.html#">abinit</a> help file
 before reading the present file.
 It is important to read also the 
 <A href="help_anaddb.html"><B>Analysis of Derivative DataBase code (Anaddb) help file</B></A>
@@ -30,53 +30,60 @@ to complement the present reading.</h3>
 <a name="list"></a>
 <h3><b> Content of the help file:</b></h3>
 
-<pre>
+<ul> 
+  <li>1. <a href="#introduction">Introduction</a></li>
+  <li>2. <a href="#usefulness">What is the usefulness of a merging code ?</a></li>
+  <li>3. <a href="#work">How does the merging code work ?</a></li>
 
-The mrgddb code has the purpose to merge "transfer" DDBs
+ </ul> 
+ <hr><br><a name="introduction"> </a>
+<a name="1"> </a>
+<h3><b>1. Introduction</b></h3>
+ <p>The mrgddb code has the purpose to merge "transfer" DDBs
 (that were generated from the ABINIT code) to make a complete DDB
 that can be exploited by the Anaddb code.
 
-The input is very simple, and could be given directly at the screen,
+<p>The input is very simple, and could be given directly at the screen,
 or more conveniently, piped from a file.
 The user should provide first the name of the new (output) DDB.
 He/she should then give a short description (one line) of this new DDB
 that will be created. This line will be printed at the beginning
 of the DDB.
 
-The user should then give the number of DDBs that will be merged, then
+<p>The user should then give the number of DDBs that will be merged, then
 the whole set of filenames for the DDBs to be merged, one on each line.
-
---------------------------------------------------------------------
-
-Is a merging code really useful ?
-
-The ABINIT code in its present
+<br><br><a href=#top>Go to the top</a>
+<hr>
+<br><a name="usefulness"> </a>
+<a name="2"> </a>
+<h3><b>2. What is the usefulness of a merging code ?</b></h3>
+ <p><p> The ABINIT code in its present
 version is only able to produce results for one q wavevector
 for each dataset.  A database for more than one q point can thus be created
 using MRGDDB. Also, it is useful to be able to merge different DDBs
 if they are produced independently on different machines.
-
--------------------------------------------------------------------
-
-How does the merging code work ?
-
-The DDBs are made of two parts. The first
+<br><br><a href=#top>Go to the top</a>
+<hr>
+<br><a name="work"> </a>
+<a name="3"> </a>
+<h3><b>3. How does the merging code work ?</b></h3>
+ <p><p>The DDBs are made of two parts. The first
 part is a list of the parameters that were used to make the DDB,
 and the second part lists the 2DTEs and 3DTEs.
 
 The merging code will check if the following variables are exactly
 the same in the different input DDB : natom,
-<a href="../../input_variables/generated_files/varbas.html#ntypat">ntypat</a>, <a href="../../input_variables/generated_files/varbas.html#nband">nband</a>, <a href="../../input_variables/generated_files/varbas.html#acell">acell</a>, <a href="../../input_variables/generated_files/varrlx.html#amu">amu</a>, <a href="../../input_variables/generated_files/varbas.html#ecut">ecut</a>, <a href="../../input_variables/generated_files/varbas.html#ixc">ixc</a>, lloc, <a href="../../input_variables/generated_files/vargs.html#ngfft">ngfft</a>, <a href="../../input_variables/generated_files/vargs.html#occ">occ</a>, <a href="../../input_variables/generated_files/varbas.html#rprim">rprim</a>,
-<a href="../../input_variables/generated_files/varbas.html#typat">typat</a>, <a href="../../input_variables/generated_files/varbas.html#xred">xred</a>, zion.
+<a href="../../input_variables/generated_files/varset_basic.html#ntypat">ntypat</a>, <a href="../../input_variables/generated_files/varset_basic.html#nband">nband</a>, <a href="../../input_variables/generated_files/varset_basic.html#acell">acell</a>, <a href="../../input_variables/generated_files/varset_rlx.html#amu">amu</a>, <a href="../../input_variables/generated_files/varset_basic.html#ecut">ecut</a>, <a href="../../input_variables/generated_files/varset_basic.html#ixc">ixc</a>, lloc, <a href="../../input_variables/generated_files/varset_gstate.html#ngfft">ngfft</a>, <a href="../../input_variables/generated_files/varset_gstate.html#occ">occ</a>, <a href="../../input_variables/generated_files/varset_basic.html#rprim">rprim</a>,
+<a href="../../input_variables/generated_files/varset_basic.html#typat">typat</a>, <a href="../../input_variables/generated_files/varset_basic.html#xred">xred</a>, zion.
 
-For <a href="../../input_variables/generated_files/varbas.html#nband">nband</a> and <a href="../../input_variables/generated_files/vargs.html#occ">occ</a>, the value of <a href="../../input_variables/generated_files/varbas.html#occopt">occopt</a> is taken into account
+For <a href="../../input_variables/generated_files/varset_basic.html#nband">nband</a> and <a href="../../input_variables/generated_files/varset_gstate.html#occ">occ</a>, the value of <a href="../../input_variables/generated_files/varset_basic.html#occopt">occopt</a> is taken into account
 (see abinit help file). If possible, MRGDDB will produce
 a DDB with occopt=0.
 
 In case of two different data sets, the code will print an error message and stop.
 The code cannot merge two DDB that have been generated
 using two different geometries
-or convergence (<a href="../../input_variables/generated_files/varbas.html#ecut">ecut</a>, ...) parameters.
+or convergence (<a href="../../input_variables/generated_files/varset_basic.html#ecut">ecut</a>, ...) parameters.
 
 The only exception is connected to the possibility to use Time-reversal
 symmetry to decrease the number of special k points when the
@@ -102,7 +109,8 @@ and put new, correct data in its place)
 
 Finally, the summary of the block content of the DDB is provided
 at the end of the DDB file.
-</pre>
+<br><br><a href=#top>Go to the top</a>
+<hr>
 <script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
 
 </body>

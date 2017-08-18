@@ -126,5 +126,5 @@
 #%%  Diamond. Test the getddb variable that cancels the divergence in el-ph for small q-points
 #%%  Such divergence is induced by a residual electric field.
 #%%  Note: DATASET 7 test the irdddb that should behave exactly as getddb. 
-#%% topics = TDep
+#%% topics = TDepES
 #%%<END TEST_INFO>

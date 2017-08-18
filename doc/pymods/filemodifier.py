@@ -41,41 +41,48 @@ for path in filelist:
 
     file_new=[]
     i_new=0
+    sec_num=0
+    text_section="\n\n## Each section must have a title, that will form the table of content."
+    text_section+="\n## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links."
+    text_section+="\n## Note the small (one space) indentation for the title and body keys.\n"
+    title_tag='\n title: "To be filled"\n tag: \n body: |\n'
     for i_old,line in enumerate(file_old):
       if "intro : |" in line:
-        file_new[0]="# This YAML file contains the introduction as well as the body of the html lesson.\n"
-        file_new[1]="# In order to modify the other parts, modify the file lessons.html .\n"
-        file_new[2]="\n# This is the introduction ...\n"
+        file_new.append("## This YAML file contains the introduction as well as the body of the html lesson.\n")
+        file_new.append("## In order to modify the other parts, modify the file lessons.html .\n")
+        file_new.append("\n## This is the introduction ...\n")
         file_new.append(line)
         i_new+=1
       elif "This is the body" in line:
-        line="\n# Now comes the different sections, numbered.\n\n# Each section must have a title, that will form the table of content.\n# Note the small (one space) indentation for the title and body keys.\n"
+        line="\n## Now come the different sections, numbered."+text_section
         file_new.append(line)
         i_new+=1
       elif "body : |" in line:
-        line='sec1:\n title: "To be filled"\n body: |\n'
+        line='sec0:'+title_tag
         file_new.append(line)
-        i_new+=1
+        sec_num=1
       elif "name=" in line:
-        line='\n# Each section must have a title, that will form the table of content.\n# Note the small (one space) indentation for the title and body keys.\nsecX:\n title: "To be filled"\n body: |\n'+line
+        line=text_section+'sec%s:'%(sec_num)+title_tag+line
         file_new.append(line)
         i_new+=1
+        sec_num+=1
       else:
         file_new.append(line)
         i_new+=1
     #####################################################
 
   #Open the new file, and write the content of file_new
+  f_old.close()
   f_new=open(path+"_new","w")
   for line in file_new:
      f_new.write(line)
 
   #Finishes by possibly moving the new file at the new place
   print(" Changes done")
-  if 0:
+  if 1:
     os.system("mv %s %s_old"%(path,path))
     os.system("mv %s_new %s"%(path,path))
-    os.system("rm %s_old"%(path))
+    #os.system("rm %s_old"%(path))
     print(" New file %s written"%path)
   else:
     print(" New file %s_new written"%path)
