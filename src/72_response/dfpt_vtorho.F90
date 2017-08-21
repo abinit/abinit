@@ -549,8 +549,9 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
      call getgh1c_setup(gs_hamkq,rf_hamkq,dtset,psps,&                              ! In
      kpoint,kpq,idir,ipert,natom,rmet,gprimd,gmet,istwf_k,&                         ! In
      npw_k,npw1_k,useylmgr1,kg_k,ylm_k,kg1_k,ylm1_k,ylmgr1_k,&                      ! In
-     dkinpw,nkpg,nkpg1,kpg_k,kpg1_k,kinpw1,ffnlk,ffnl1,ffnl1_test,ph3d,ph3d1,&      ! Out
-     ddkinpw=ddkinpw,dkinpw2=dkinpw2,rf_hamk_dir2=rf_hamk_dir2)                     ! Out
+     dkinpw,nkpg,nkpg1,kpg_k,kpg1_k,kinpw1,ffnlk,ffnl1,ph3d,ph3d1,&                 ! Out
+     ddkinpw=ddkinpw,dkinpw2=dkinpw2,rf_hamk_dir2=rf_hamk_dir2,&                    ! Optional
+     ffnl1_test=ffnl1_test)                                                         ! Optional
 
 !    Compute the gradient of the Berry-phase term
      if (dtset%berryopt== 4.or.dtset%berryopt== 6.or.dtset%berryopt== 7.or.&

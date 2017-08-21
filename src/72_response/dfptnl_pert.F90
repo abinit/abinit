@@ -503,7 +503,7 @@ subroutine dfptnl_pert(atindx,atindx1,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,ei
 !    Compute (1/2) (2 Pi)**2 (k+q+G)**2:
      ABI_ALLOCATE(kinpw1,(npw1_k))
      kinpw1(:)=zero
-     call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass,gs_hamkq%gmet,kg1_k,kinpw1,kpt,npw1_k,0,0)
+     call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass_free,gs_hamkq%gmet,kg1_k,kinpw1,kpt,npw1_k,0,0)
 
      ABI_ALLOCATE(dkinpw,(npw_k)) ! 1st derivative (1st direction)
      dkinpw(:)=zero
