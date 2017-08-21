@@ -2987,6 +2987,11 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 
 !  vdw_xc
    call chkint_eq(0,1,cond_string,cond_values,ierr,'vdw_xc',dt%vdw_xc,9,(/0,1,2,5,6,7,10,11,14/),iout)
+   if (dt%usepaw==1.and.(.not.(dt%vdw_xc==0.or.dt%vdw_xc==5.or.dt%vdw_xc==6.or.dt%vdw_xc==7))) then
+     write(message,'(a,i2,a)')&
+&       'vdw_xc=',dt%vdw_xc,' is not yet available with Projector Augmented-Wave (PAW) formalism!'
+       MSG_ERROR_NOSTOP(message, ierr)
+   end if
 !  vdw DFT-D2
    if (dt%vdw_xc==5.or.dt%vdw_xc==6.or.dt%vdw_xc==7) then
 !    Only for GS or RF calculations
