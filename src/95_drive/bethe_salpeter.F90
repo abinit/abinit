@@ -133,7 +133,7 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
  use m_paw_ij,          only : paw_ij_type, paw_ij_init, paw_ij_free, paw_ij_nullify
  use m_pawfgrtab,       only : pawfgrtab_type, pawfgrtab_free, pawfgrtab_init
  use m_pawrhoij,        only : pawrhoij_type, pawrhoij_alloc, pawrhoij_copy,&
-&                              pawrhoij_free, symrhoij
+&                              pawrhoij_free, pawrhoij_get_nspden, symrhoij
  use m_pawdij,          only : pawdij, symdij
  use m_pawfgr,          only : pawfgr_type, pawfgr_init, pawfgr_destroy
  use m_pawhr,           only : pawhur_t, pawhur_free, pawhur_init
@@ -343,7 +343,7 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
    call chkpawovlp(Cryst%natom,Cryst%ntypat,Dtset%pawovlp,Pawtab,Cryst%rmet,Cryst%typat,xred)
 
    ABI_DT_MALLOC(KS_Pawrhoij,(Cryst%natom))
-   nspden_rhoij=Dtset%nspden; if (Dtset%pawspnorb>0.and.Dtset%nspinor==2) nspden_rhoij=4
+   nspden_rhoij=pawrhoij_get_nspden(Dtset%nspden,Dtset%nspinor,Dtset%pawspnorb)
    call pawrhoij_alloc(KS_Pawrhoij,Dtset%pawcpxocc,nspden_rhoij,Dtset%nspinor,Dtset%nsppol,Cryst%typat,pawtab=Pawtab)
 
    ! Initialize values for several basic arrays ===
@@ -602,8 +602,8 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
    call paw_an_nullify(KS_paw_an)
 
    nkxc1=0
-   call paw_an_init(KS_paw_an,Cryst%natom,Cryst%ntypat,nkxc1,0,Dtset%nspden,cplex1,&
-&   Dtset%pawxcdev,Cryst%typat,Pawang,Pawtab,has_vxc=1,has_vxcval=0)
+   call paw_an_init(KS_paw_an,Cryst%natom,Cryst%ntypat,nkxc1,0,Dtset%nspden,&
+&   cplex1,Dtset%pawxcdev,Cryst%typat,Pawang,Pawtab,has_vxc=1,has_vxcval=0)
 
    ! Calculate onsite vxc with and without core charge ===
    nzlmopt=-1; option=0; compch_sph=greatest_real

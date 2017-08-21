@@ -1,6 +1,7 @@
-# This YAML file contains the introduction as well as the body (including the table of content) of the html lesson.
-# In order to modify the other parts, modify the file lessons.html .
-# This is the introduction ...
+## This YAML file contains the introduction as well as the body of the html lesson.
+## In order to modify the other parts, modify the file lessons.html .
+
+## This is the introduction ...
 intro : |
   <p>This lesson aims at showing how to get
   the following physical properties, for an insulator :
@@ -11,39 +12,29 @@ intro : |
   <li>the LO-TO splitting
   <li>the phonon frequencies and eigenvectors at other q-points in the Brillouin Zone
   </ul>
-  You will learn to use of response-function features of ABINIT.
+  You will learn to use of density-functional perturbation theory (DFPT) features of ABINIT.
   In order to learn the use of the associated codes Mrgddb and Anaddb,
   to produce efficiently phonon band structures and the associated thermodynamical properties,
-  please see the <a href="lesson_rf2.html"> tutorial response-function 2</a>.
+  please see the <a href="lesson_rf2.html"> tutorial DFPT 2</a>.
   
   <p>This lesson should take about 2 hours.
-# This is the body, including the table of content ...
-body : |
-  <ul>
-    <li><a href="#1">1</a> The ground-state geometry of AlAs.</li>
-    <li><a href="#2">2</a> Frozen-phonon calculation of a second derivative of the total energy.</li>
-    <li><a href="#3">3</a> Response-function calculation of a second derivative of the total energy.</li>
-    <li><a href="#4">4</a> Response-function calculation of the dynamical matrix at Gamma.</li>
-    <li><a href="#5">5</a> Response-function calculation of the effect of an homogeneous electric field.</li>
-    <li><a href="#6">6</a> Response-function calculation of phonon frequencies at non-zero q.</li>
-  </ul>
-  
-  <hr>
-  
-  <p><a name="1"></a><br>
-  
-  <h3><b>1. The ground-state geometry of AlAs.</b> </h3>
-  <h3>&nbsp;</h3>
-  
-  <p>
-  
+
+## Now come the different sections, numbered.
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec1:
+ title: "The ground-state geometry of AlAs"
+ tag: AlAs
+ body: |
   <i>Before beginning, you might consider to work in a different subdirectory as
   for the other lessons. Why not create "Work_rf1" in ~abinit/tests/tutorespfn/Input ? </i> <br>
   
   <p>NOTE : the reference directory that contains
     the example files for the tutorial is no more ~abinit/tests/tutorial (as for the
-    basic lessons and the specialized, non-response ones), but
-    ~abinit/tests/tutorespfn . This will be the case for all the response-function
+    basic lessons and the specialized, non-DFPT ones), but
+    ~abinit/tests/tutorespfn . This will be the case for all the DFPT
     based part of the tutorial.
   
   <p>The file ~abinit/tests/tutorespfn/Input/trf1_x.files lists the file
@@ -68,7 +59,7 @@ body : |
   <p>
     Note that the value of [[tolvrs]]
     is rather stringent. This is because the wavefunctions determined by the
-    present run will be used later as starting point of the response-function
+    present run will be used later as starting point of the DFPT
     calculation. However, the number of steps, [[nstep]],
     in this example file has been set to 15, and you will see that this is not enough to reach
     the target [[tolvrs]]. In production runs,
@@ -111,7 +102,7 @@ body : |
   The output file also mentions that the forces on both atoms vanish.
   
   <p>The run that you just made will be considered as defining a ground-state
-  configuration, on top of which response functions will be computed.
+  configuration, on top of which responses to perturbations will be computed.
   The main output of this ground-state run is the wavefunction file
   trf1_1o_WFK, that you can already rename as trf1_1i_WFK.
   Indeed, it will be used in the next runs, as an input file.
@@ -119,23 +110,21 @@ body : |
   pay attention TO KEEP "trf1_1i", even if you change
   the root name for output files (fourth line) to "trf1_2o" or "trf1_3o", as well as
   the first, second and fifth lines of this file.</b>
-  
-  
-  <p>
-  <hr>
-  <p><a name="2"></a><br>
-  
-  <h3><b>2. Frozen-phonon calculation of a second derivative of the total energy.</b> </h3>
-  <h3>&nbsp;</h3>
-  
-  <p>
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec2:
+ title: "Frozen-phonon calculation of a second derivative of the total energy"
+ tag: frozen
+ body: |
   We will now aim at computing the second derivative of the total energy
   with respect to an atomic displacement by different means.
   For that purpose, you must first read
   <a href="../../users/generated_files/help_respfn.html#0" target="helpsimg">sections 0 and
   the first paragraph of section 1</a>
   of the respfn_help file (the auxiliary help file,
-  that deals specifically with the response function features).
+  that deals specifically with the DFPT features).
   
   <p>
   We will explain later, in more detail, the signification
@@ -144,7 +133,7 @@ body : |
   
   <p>
   For now, in order to be able to perform a direct comparison with the
-  result of a response-function calculation, we choose as a perturbation
+  result of a DFPT calculation, we choose as a perturbation
   the displacement of the
   Al atom along the first axis of the reduced coordinates.
   
@@ -228,7 +217,7 @@ body : |
   observed up to the 6th digit, inclusive.
   
   <p> Before comparing this result with the 2DTE directly
-  computed from the response-function capabilities of ABINIT,
+  computed from the DFPT capabilities of ABINIT,
   a last comment is in order. One can observe that the
   action-reaction law is fulfilled only approximately
   by the system. Indeed, the force created on the second atom,
@@ -262,19 +251,17 @@ body : |
   In this case also, it will be rather easy to reimpose the
   acoustic sum rule. In any case, taking a finer XC grid will
   allow one to reduce this effect.
-  
-  <p>
-  <hr>
-  
-  <p><a name="3"></a><br>
-  
-  <h3><b>3. Response-function calculation of a second derivative of the total energy.</b> </h3>
-  <h3>&nbsp;</h3>
-  
-  <p>
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec3:
+ title: "DFPT calculation of a second derivative of the total energy"
+ tag: dfpt
+ body: |
   We now compute the second derivative of the total energy
   with respect to the same atomic displacement, using
-  the response-function capabilities of ABINIT.
+  the DFPT capabilities of ABINIT.
   
   <p>
   You can copy the file ~abinit/tests/tutorespfn/Input/trf1_3.in in Work_rf1.
@@ -333,7 +320,7 @@ body : |
   </pre>
   <p>
   From these data, you can see that the 2DTE determined by the
-  response-function technique is in excellent agreement with the
+  DFPT technique is in excellent agreement with the
   higher-order finite-difference values for the 2DTE, determined
   in the previous section :
   5.007855 hartree from the energy differences,
@@ -347,20 +334,19 @@ body : |
   of the respfn_help file.
   
   <p> Finally, the excellent agreement between the finite-difference
-  formula and the response-function approach calls for
+  formula and the DFPT approach calls for
   some accuracy considerations. These can be found
   in <a href="../../users/generated_files/help_respfn.html#7" target="helpsimg"> section 7</a>
   of the respfn_help file.
-  
-  <p>
-  <hr>
-  
-  <p><a name="4"></a><br>
-  
-  <h3><b>4. Response-function calculation of the dynamical matrix at Gamma.</b> </h3>
-  <h3>&nbsp;</h3>
-  
-  <p> We are now in the position to compute the full dynamical matrix at Gamma (q=0).
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec4:
+ title: "DFPT calculation of the dynamical matrix at Gamma"
+ tag: Gamma
+ body: |
+  We are now in the position to compute the full dynamical matrix at Gamma (q=0).
   You can copy the file ~abinit/tests/tutorespfn/Input/trf1_4.in in Work_rf1.
   This is your input file. You should edit it.
   As for test rf1_3, the changes
@@ -441,17 +427,15 @@ body : |
   
   <p> Thus we have now to treat correctly the homogeneous electric
   field type perturbation.
-  
-  
-  <p>
-  <hr>
-  
-  <p><a name="5"></a><br>
-  
-  <h3><b>5. Response-function calculation of the effect of an homogeneous electric field.</b> </h3>
-  <h3>&nbsp;</h3>
-  
-  <p> The treatment of the homogeneous electric field perturbation is formally
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec5:
+ title: "DFPT calculation of the effect of an homogeneous electric field"
+ tag: electric_field
+ body: |
+  The treatment of the homogeneous electric field perturbation is formally
   much more complex than the treatment of atomic displacements. This is primarily
   because the change of potential associated with an homogeneous electric field
   is not periodic, and thus does not satisfy the Born-von Karman periodic
@@ -663,20 +647,19 @@ body : |
   and 8x8x8 Monkhorst-Pack sampling, we reach a value of 9.37 .
   This illustrates that the dielectric tensor is a much more sensitive
   quantity than the others.
-  
-  <p>
-  <hr>
-  
-  <p><a name="6"></a><br>
-  
-  <h3><b>6. Response-function calculation of phonon frequencies at non-zero q.</b> </h3>
-  <h3>&nbsp;</h3>
-  
-  <p> The computation of phonon frequencies at non-zero q is actually
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec6:
+ title: "DFPT calculation of phonon frequencies at non-zero q"
+ tag: non_zero_q
+ body: |
+  The computation of phonon frequencies at non-zero q is actually
   simpler than the one at Gamma. One must distinguish two cases.
   Either the q wavevector connects k points that belong to the
   same grid, or the wavevector q is general.
-  In any case, the computation within the response-function
+  In any case, the computation within the DFPT
   formalism is more efficient than using the frozen-phonon
   technique: the use of supercell is completely avoided.
   For an explanation of this fact, see for example
@@ -726,5 +709,5 @@ body : |
   
   <p>This ABINIT tutorial is now finished. You are advised to
   read now the
-  <a href="lesson_rf2.html"> second tutorial on response functions</a>
+  <a href="lesson_rf2.html"> second tutorial on DFPT</a>
   

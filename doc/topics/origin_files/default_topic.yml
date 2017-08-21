@@ -14,6 +14,17 @@
       <html>
       <head><title>__KEYWORD__ </title>
       <link rel=stylesheet type="text/css" href="../formabinit.css">
+      <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        jax: ["input/TeX","output/HTML-CSS"],
+        tex2jax: {inlineMath: [['$','$']]},
+        displayAlign: "center",
+        TeX: { equationNumbers: { autoNumber: "AMS" } }
+      });
+      </script>
+      <script type="text/javascript" async
+      src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML">
+      </script>
       </head>
       <body bgcolor="#ffffff">
 
@@ -22,7 +33,7 @@
     title : |
       <h1>Main ABINIT code, "How to ?" documentation topics.</h1>
     subtitle : |
-      <h3>This file gives hints on how to __HOWTO__ with the ABINIT package.
+      <h3>This page gives hints on how to __HOWTO__ with the ABINIT package.
       <hr>
     copyright : |
       <h5>Copyright (C) 2016-2017 ABINIT group (__AUTHORS__)

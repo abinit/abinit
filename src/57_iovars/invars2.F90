@@ -646,8 +646,8 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'strfact',tread,'DPR')
  if(tread==1) dtset%strfact=dprarr(1)
 
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'effmass',tread,'DPR')
- if(tread==1) dtset%effmass=dprarr(1)
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'effmass_free',tread,'DPR')
+ if(tread==1) dtset%effmass_free=dprarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,2,string(1:lenstr),'mdtemp',tread,'DPR')
  if(tread==1) dtset%mdtemp(1:2)=dprarr(1:2)

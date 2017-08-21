@@ -5,6 +5,17 @@
 <html>
 <head><title>Parallelism for molecular dynamics</title>
 <link rel=stylesheet type="text/css" href="../formabinit.css">
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  jax: ["input/TeX","output/HTML-CSS"],
+  tex2jax: {inlineMath: [['$','$']]},
+  displayAlign: "center",
+  TeX: { equationNumbers: { autoNumber: "AMS" } }
+});
+</script>
+<script type="text/javascript" async
+src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
 </head>
 <body bgcolor="#ffffff">
 
@@ -33,13 +44,19 @@ variables that govern convergence and numerical efficiency.<br>
 <script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
 
 <a name="list"></a>
-<h3><b> Parallelism for molecular dynamics, table of content:</b></h3>
+<h3><b> Parallelism for molecular dynamics. Table of content:</b></h3>
 
-<ul><li><a href="lesson_paw1.html#0" target="_blank">0.</a> Summary of the molecular dynamics method</li><li><a href="lesson_paw1.html#1" target="_blank">1.</a> Performing molecular dynamics with ABINIT</li><li><a href="lesson_paw1.html#2" target="_blank">2.</a> The convergence on K-points and supercell size</li><li><a href="lesson_paw1.html#3" target="_blank">3.</a>&nbsp;Compute the melting temperature of Al at a given pressure</li></ul>
-<hr>
+<ul> 
+  <li>1. <a href="#summary">Summary of </b>the molecular dynamics<b> method</b></a></li>
+  <li>2. <a href="#moldyn">Performing molecular dynamics with ABINIT</a></li>
+  <li>3. <a href="#convergence">The convergence on K-points and supercell size</a></li>
+  <li>4. <a href="#melting">Compute the melting temperature of Al at a given pressure</a></li>
 
-<h3><a name="1334abc7eee58317_0"></a><b><br>0. Summary of </b>the molecular dynamics<b> method</b></h3>
-<p style="text-align: justify;">The basic idea underlying <span style="font-style: italic;">Ab Initio Molecular Dynamics</span> (AIMD) is to
+ </ul> 
+ <hr><br><a name="summary"> </a>
+<a name="1"> </a>
+<h3><b>1. Summary of </b>the molecular dynamics<b> method</b></b></h3>
+ <p>The basic idea underlying <span style="font-style: italic;">Ab Initio Molecular Dynamics</span> (AIMD) is to
 compute
 the forces acting on the nuclei from electronic structure calculations
 that are performed as the molecular dynamics trajectory is
@@ -82,17 +99,14 @@ output files located in </i><i><span style="color: rgb(0, 102, 0);">~abinit/test
 and </i><i><span style="color: rgb(0, 102, 0);">~abinit/tests/tutorial/Refs/<wbr>
 </span></i><i>directories (for the present tutorial they are named tmoldyn_*.out). <br>
 </i></p>
-
-
-<h3><hr> </h3>
-<h3><a name="1334abc7eee58317_1"></a>&nbsp;<b><b><br>
-1.&nbsp;&nbsp;</b></b>Performing molecular dynamics<b><b> with ABINIT</b></b></h3>
-<br>
-<p style="text-align: justify;">There are different algorithms to do molecular dynamics.
-  See the input variable "<a href="../../input_variables/generated_files/varrlx.html#ionmov" target="kwimg" onclick="return (false);">ionmov</a>",
-  with values 1, 6, 7, 8, 9, 12, 13 and 14.<span style="text-decoration: underline;"></span><a href="../../input_variables/generated_files/varrlx.html#dtion" onclick="return (false);"><br>
-</a></p>
-<a href="../../input_variables/generated_files/varrlx.html#dtion" onclick="return (false);">dtion</a> controls the ion time steps&nbsp;in
+<br><br><a href=#top>Go to the top</a>
+<hr>
+<br><a name="moldyn"> </a>
+<a name="2"> </a>
+<h3><b>2. Performing molecular dynamics with ABINIT</b></h3>
+ <p>There are different algorithms to do molecular dynamics.
+  See the input variable <a href="../../input_variables/generated_files/varset_rlx.html#ionmov">ionmov</a>,
+  with values 1, 6, 7, 8, 9, 12, 13 and 14.  <a href="../../input_variables/generated_files/varset_rlx.html#dtion">dtion</a> controls the ion time steps&nbsp;in
 atomic units of time (one atomic time unit is
 2.418884e-17 seconds, which is the value of
 Planck's constant in hartree*sec). The default value is 100. You should try several values
@@ -101,42 +115,45 @@ choice.
 For example this value should decrease at high pressure.<br>
 <br>
 Except
-for the <span style="font-style: italic;">isothermal</span>/<span style="font-style: italic;">isenthalpic</span> (<a href="../../input_variables/generated_files/varrlx.html#ionmov" onclick="return (false);">ionmov</a> 13) ensemble the input variable "<a href="../../input_variables/generated_files/varrlx.html#optcell">optcell</a>"
+for the <span style="font-style: italic;">isothermal</span>/<span style="font-style: italic;">isenthalpic</span> (<a href="../../input_variables/generated_files/varset_rlx.html#ionmov">ionmov</a> 13) ensemble the input variable "<a href="../../input_variables/generated_files/varset_rlx.html#optcell">optcell</a>"
 must be set to 0. <br>
 You have also to define the maximal number of
 timesteps of the molecular dynamics.<br>
 <br>
 Usually you can set the input
-variable <a href="../../input_variables/generated_files/varrlx.html#ntime">ntime</a>
+variable <a href="../../input_variables/generated_files/varset_rlx.html#ntime">ntime</a>
 to a large value, 5000, since there is no "end" to a molecular dynamics
 simulation. You can always stop or restart the calculation at your
-convenience by using the input variable <a href="../../input_variables/generated_files/varrlx.html#restartxf" onclick="return (false);">restartxf</a>.&nbsp;
+convenience by using the input variable <a href="../../input_variables/generated_files/varset_rlx.html#restartxf">restartxf</a>.&nbsp;
 <p style="text-align: justify;">The input file<span style="color: red;"> tmoldyn_01.in</span>
 is an example of a file
 that contains data for a molecular dynamics simulation using the isokinetic ensemble for aluminum.
 
 Open the <span style="color: red;">tmoldyn_01.in</span><span style="color: rgb(204, 0, 0);"></span>
 file and look at it carefully. The
-unit cell is defined at the end. It is a <span style="font-weight: bold;">2x2x2 fcc supercell</span> containing 32 atoms of Al. <a href="../../input_variables/generated_files/varrlx.html#ionmov" target="kwimg" onclick="return (false);">ionmov</a> is&nbsp;set to 12 for the isokinetic ensemble, and since&nbsp;<a href="../../input_variables/generated_files/varrlx.html#ntime">ntime</a> is set to 50, ABINIT
+unit cell is defined at the end. It is a <span style="font-weight: bold;">2x2x2 fcc supercell</span> containing 32 atoms of Al. 
+<a href="../../input_variables/generated_files/varset_rlx.html#ionmov">ionmov</a> is&nbsp;set to 12 for the isokinetic ensemble, and since&nbsp;<a href="../../input_variables/generated_files/varset_rlx.html#ntime">ntime</a> is set to 50, ABINIT
 will carry on 50 time steps of molecular dynamics. The calculation will
-be performed for a temperature of 3000 K, see the key variable <a href="../../input_variables/generated_files/varrlx.html#mdtemp" onclick="return (false);">mdtemp</a>.<span style="font-weight: bold;"> </span>It
+be performed for a temperature of 3000 K, see the key variable <a href="../../input_variables/generated_files/varset_rlx.html#mdtemp">mdtemp</a>.<span style="font-weight: bold;"> </span>It
 gives the initial and final temperature in Kelvin of the
 simulation.&nbsp;The temperature will change linearly from the initial
 temperature
 <b>mdtemp(1)</b> at itime=1 to
 the final temperature <b>mdtemp(2)</b> at the end of the
-<a href="../../input_variables/generated_files/varrlx.html#ntime" onclick="return (false);">ntime</a> timesteps.
+<a href="../../input_variables/generated_files/varset_rlx.html#ntime">ntime</a> timesteps.
 Here the temperature will stay constant during the whole simulation.<br>
-Note that we use the same temperature for the ions and the electrons : <a href="../../input_variables/generated_files/varbas.html#occopt" onclick="return (false);">occopt</a> has been set to 3 for a Fermi-Dirac smearing and <a href="../../input_variables/generated_files/vargs.html#tsmear" onclick="return (false);">tsmear</a><a href="../../input_variables/generated_files/vargs.html#tsmear" onclick="return (false);">r</a>
+Note that we use the same temperature for the ions and the electrons : 
+<a href="../../input_variables/generated_files/varset_basic.html#occopt">occopt</a> has been set to 3 for a Fermi-Dirac smearing and <a href="../../input_variables/generated_files/varset_gstate.html#tsmear">tsmear</a>
 has been set to 3000 Kelvin. Nothing prevent you to use different
 electronic and ionic temperature, you just have to know why you are
 doing so!</p>
 <p style="text-align: justify;">Molecular
 dynamics simulations are always large calculations, dealing with
 supercells of hundreds to thousands of atoms. Therefore they are always
-performed in parallel. In <span style="color: red;">tmoldyn_01.in<span style="color: black;">,</span> <span style="color: black;"><a href="../../input_variables/generated_files/varpar.html#paral_kgb" onclick="return (false);">paral_kgb</a> has been set to 1 </span></span>to activate the parallelisation over K-points, G-vectors and bands. The three following keywords&nbsp;give
+performed in parallel. In <span style="color: red;">tmoldyn_01.in<span style="color: black;">,</span> <span style="color: black;"><a href="../../input_variables/generated_files/varset_paral.html#paral_kgb">paral_kgb</a> has been set to 1 </span></span>to activate the parallelisation over K-points, G-vectors and bands. The three following keywords&nbsp;give
 the number of processors for each level of parallelisation. Since we
-have only one K-point in the simulation (the gamma point), <a href="../../input_variables/generated_files/varpar.html#npkpt" onclick="return (false);">nkpt</a> has been set to 1. <a href="../../input_variables/generated_files/varpar.html#npfft" onclick="return (false);">npfft</a> is set to 3 and <a href="../../input_variables/generated_files/varpar.html#npband" onclick="return (false);">npband</a> to 10, for a total number of 3x10=30 processors.&nbsp;You might use the <span style="color: rgb(204, 0, 0);">tmoldyn.files</span>
+have only one K-point in the simulation (the gamma point), 
+<a href="../../input_variables/generated_files/varset_basic.html#nkpt">nkpt</a> has been set to 1. <a href="../../input_variables/generated_files/varset_paral.html#npfft">npfft</a> is set to 3 and <a href="../../input_variables/generated_files/varset_paral.html#npband">npband</a> to 10, for a total number of 3x10=30 processors.&nbsp;You might use the <span style="color: rgb(204, 0, 0);">tmoldyn.files</span>
 file.
 Edit it and adapt it with the appropriate file names.</p>
 <p style="text-align: justify;"><span style="color: black;">Then</span> run the
@@ -144,7 +161,7 @@ calculation in parallel over <span style="font-weight: bold;">30
 CPU cores</span>.
 You can change the distribution of processors over the level of
 parallelisation to try to find the most efficient one. Set for
-example&nbsp;<a href="../../input_variables/generated_files/varpar.html#npfft" onclick="return (false);">npfft</a>&nbsp; to 1 and <a href="../../input_variables/generated_files/varpar.html#npband" onclick="return (false);">npband</a>
+example&nbsp;<a href="../../input_variables/generated_files/varset_paral.html#npfft">npfft</a>&nbsp; to 1 and <a href="../../input_variables/generated_files/varset_paral.html#npband">npband</a>
 to 40. You can make other choices and compare the individual cpu time.
 Since
 molecular dynamics can last for weeks, it is crucial to find the
@@ -159,7 +176,7 @@ translations,
 stress tensor, energies... at each time step. This file will be used to
 restart the calculation if you want to perform more time steps or to
 extract the necessary informations to make use of the molecular
-dynamics simulation. In&nbsp;<span style="color: red;">tmoldyn_01.in </span>add the keyword&nbsp;<a href="../../input_variables/generated_files/varrlx.html#restartxf" onclick="return (false);">restartxf</a>
+dynamics simulation. In&nbsp;<span style="color: red;">tmoldyn_01.in </span>add the keyword&nbsp;<a href="../../input_variables/generated_files/varset_rlx.html#restartxf">restartxf</a>
 and set it to -1. Run the calculation again, in the same directory.
 Look at the new output file. The number of each time step are indicated
 over the total number of steps :</p>
@@ -181,16 +198,20 @@ the quantities during the molecular dynamics. Note that 100 time steps
 is far from being sufficient to equilibrate physical quantities as
 pressure. 2000 or 3000 are more common numbers to reach this goal but it
 would exceed the time alloted to this tutorial.</span></span></p>
-<h3><hr> <a name="1334abc7eee58317_2"></a>&nbsp;<b><b><br>
-2.&nbsp; The convergence on K-points and supercell size</b></b></h3>In the previous section you have learned to perform molecular dynamics
+<br><br><a href=#top>Go to the top</a>
+<hr>
+<br><a name="convergence"> </a>
+<a name="3"> </a>
+<h3><b>3. The convergence on K-points and supercell size</b></h3>
+ <p>In the previous section you have learned to perform molecular dynamics
 with abinit. We used a fcc supercell of 32 atoms with only one K-point.
 In this section we will make convergence studies
 with respect to these parameters.&nbsp;
 <p><b><br>
 </b></p>
-<p><b>1.a</b><b> Computing the convergence in K-points</b></p>
+<p><b>3.a</b><b> Computing the convergence in K-points</b></p>
 <p style="text-align: justify;">The files <span style="color: red;">tmoldyn_02.in <span style="color: black;">and</span> </span><span style="color: red;">tmoldyn_03.in&nbsp;<span style="color: black;">are input files for 2x2x2 and 3x3x3 K-points grid respectively, or 4 and 14 K-points in the </span></span>irreducible
-Brillouin zone<span style="color: red;"><span style="color: black;">. Since the parallelisation is the most efficient&nbsp;</span></span>over the k-point level you should always put <a href="../../input_variables/generated_files/varpar.html#npkpt" onclick="return (false);">nkpt</a> to the largest possible value before increasing&nbsp;<a href="../../input_variables/generated_files/varpar.html#npfft" onclick="return (false);">npfft</a> and <a href="../../input_variables/generated_files/varpar.html#npband" onclick="return (false);">npband</a><span style="color: black;">.
+Brillouin zone<span style="color: red;"><span style="color: black;">. Since the parallelisation is the most efficient&nbsp;</span></span>over the k-point level you should always put <a href="../../input_variables/generated_files/varset_basic.html#nkpt">nkpt</a> to the largest possible value before increasing&nbsp;<a href="../../input_variables/generated_files/varset_paral.html#npfft">npfft</a> and <a href="../../input_variables/generated_files/varset_paral.html#npband">npband</a><span style="color: black;">.
 We have followed this rule in the input files. Change the name of the
 previous file PRESS&nbsp;to PRESS01 to save it. Run now ABINIT&nbsp;</span>in parallel over <span style="font-weight: bold;">120
 CPU cores</span> with&nbsp;<span style="color: red;">tmoldyn_02.in&nbsp;</span><span style="color: black;"> and</span> over <span style="font-weight: bold;">140
@@ -207,11 +228,11 @@ convincing but you can see that you need at least a 2x2x2 K-points grid
 for a 32 atoms cell. If you have some time, increase ntime to 300 and run again ABINIT.</span></span></p>
 <p><b><br>
 </b></p>
-<p><b>1.b</b><b> Computing the convergence in cell size</b></p>
+<p><b>3.b</b><b> Computing the convergence in cell size</b></p>
 <p style="text-align: justify;">We
 also have to check if our cell is sufficiently large to give reliable
 physical quantities. In the previous section we used a 2x2x2 <span style="font-style: italic;">fcc</span>
-supercell.&nbsp;<span style="color: red;">tmoldyn_04.in&nbsp;<span style="color: black;">is an input file for a 3x3x3 <span style="font-style: italic;">fcc</span> supercell and therefore contains 108 atoms. <a href="../../input_variables/generated_files/varbas.html#nband" onclick="return (false);">nband</a> and <a href="../../input_variables/generated_files/varbas.html#acell" onclick="return (false);">acell</a> has been scaled accordingly to take into account the new size of the cell.&nbsp;</span></span><span style="color: black;">Run now ABINIT&nbsp;</span>in parallel over <span style="font-weight: bold;">45
+supercell.&nbsp;<span style="color: red;">tmoldyn_04.in&nbsp;<span style="color: black;">is an input file for a 3x3x3 <span style="font-style: italic;">fcc</span> supercell and therefore contains 108 atoms. <a href="../../input_variables/generated_files/varset_basic.html#nband">nband</a> and <a href="../../input_variables/generated_files/varset_basic.html#acell">acell</a> has been scaled accordingly to take into account the new size of the cell.&nbsp;</span></span><span style="color: black;">Run now ABINIT&nbsp;</span>in parallel over <span style="font-weight: bold;">45
 CPU cores</span> and then <span style="color: red;"><span style="color: black;"><span style="font-style: italic;">diag_moldyn.py</span></span></span>
 (note that the output file is very big, and no reference has been provided for comparison). 
 Save the pressure to PRESS04.&nbsp;<span style="color: red;">tmoldyn_05.in&nbsp;<span style="color: black;">has
@@ -221,7 +242,7 @@ number of cores and save the pressure to PRESS05. Plot now PRESS04 and
 PRESS05 and compare the average values. You'll see that for this size
 of cell, the gamma point is sufficient.</span></span></p>
 <p style="text-align: justify;"><span style="color: red;"><span style="color: black;">We are now going to increase
-again the cell size. With a 4x4x4 fcc cell, the file&nbsp;</span></span><span style="color: red;">tmoldyn_06.in&nbsp;<span style="color: black;">has 256 atoms. Of course,&nbsp;</span></span><span style="color: red;"><span style="color: black;"><a href="../../input_variables/generated_files/varbas.html#nband" onclick="return (false);">nband</a> and <a href="../../input_variables/generated_files/varbas.html#acell" onclick="return (false);">acell</a>
+again the cell size. With a 4x4x4 fcc cell, the file&nbsp;</span></span><span style="color: red;">tmoldyn_06.in&nbsp;<span style="color: black;">has 256 atoms. Of course,&nbsp;</span></span><span style="color: red;"><span style="color: black;"><a href="../../input_variables/generated_files/varset_basic.html#nband">nband</a> and <a href="../../input_variables/generated_files/varset_basic.html#acell">acell</a>
 has been scaled. This calculation should last for 30 min over <span style="font-weight: bold;">60 CPU cores</span>
 (note that the output file is very big, and no reference has been provided for comparison). Run
 it and save the pressure to PRESS06. Plot now PRESS02, PRESS04 and
@@ -244,15 +265,14 @@ Always check if your cell is large enough and give the corresponding
 uncertainty.<br>
 
 Also, to reduce the time necessary to do this tutorial we set the value
-of ecut to 3Ha. This is too small, for Al, it should be closer to 8 Ha.<br>
-<br>
-
-</span><hr>
-
-<h3><a name="1334abc7eee58317_3">&nbsp;</a><b><b><br>
-3. Compute the melting temperature of Al at a given pressure
-</b></b></h3>
-<div style="text-align: justify;">As an exemple of what can be done in molecular dynamics,
+of ecut to 3Ha. This is too small, for Al, it should be closer to 8 Ha.
+</span>
+<br><br><a href=#top>Go to the top</a>
+<hr>
+<br><a name="melting"> </a>
+<a name="4"> </a>
+<h3><b>4. Compute the melting temperature of Al at a given pressure</b></h3>
+ <p>As an exemple of what can be done in molecular dynamics,
 we are going to calculate the melting temperature of aluminum using the
 so-called <span style="font-style: italic;">Heat Until it Melts</span> (HUM) method. In this method the solid
 phase is heated gradually until melting occurs. Let us start with a
@@ -291,6 +311,8 @@ initiates in the bulk and this results in an overheating effect.<br>
 
 
 </div>
+<br><br><a href=#top>Go to the top</a>
+<hr>
 <script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
 
 </body>

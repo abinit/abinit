@@ -19,7 +19,7 @@
 !!  cprj(natom,mcprj*usecprj)=<p_lmn|Cnk> coefficients for each WF |Cnk> and each NL proj |p_lmn>
 !!  ecut=cut-off energy for plane wave basis sphere (Ha)
 !!  ecutsm=smearing energy for plane wave kinetic energy (Ha)
-!!  effmass=effective mass for electrons (1. in common case)
+!!  effmass_free=effective mass for electrons (1. in common case)
 !!  electronpositron <type(electronpositron_type)>=quantities for the electron-positron annihilation (optional argument)
 !!  eigen(mband*nkpt*nsppol)=array for holding eigenvalues (hartree)
 !!  fock <type(fock_type)>= quantities to calculate Fock exact exchange
@@ -92,7 +92,7 @@
 
 #include "abi_common.h"
 
-subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass,eigen,electronpositron,fock,&
+subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,fock,&
 &  grnl,istwfk,kg,kinstr,npsstr,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_enreg,mpsang,&
 &  mpw,my_natom,natom,nband,nfft,ngfft,nkpt,nloalg,npwarr,nspden,nspinor,nsppol,nsym,&
 &  ntypat,nucdipmom,occ,optfor,paw_ij,pawtab,ph1d,psps,rprimd,&
@@ -134,7 +134,7 @@ use m_cgtools
  integer,intent(in) :: mband,mcg,mcprj,mgfft,mkmem,mpsang,mpw,my_natom,natom,nfft,nkpt
  integer,intent(in) :: nspden,nsppol,nspinor,nsym,ntypat,optfor,stress_needed
  integer,intent(in) :: usecprj,usefock,use_gpu_cuda
- real(dp),intent(in) :: ecut,ecutsm,effmass
+ real(dp),intent(in) :: ecut,ecutsm,effmass_free
  type(electronpositron_type),pointer :: electronpositron
  type(MPI_type),intent(inout) :: mpi_enreg
  type(pseudopotential_type),intent(in) :: psps
@@ -655,7 +655,7 @@ use m_cgtools
 
 !Do final normalizations and symmetrizations of stress tensor contributions
  if (stress_needed==1) then
-   renorm_factor=-(two_pi**2)/effmass/gs_hamk%ucvol
+   renorm_factor=-(two_pi**2)/effmass_free/gs_hamk%ucvol
    kinstr(:)=kinstr(:)*renorm_factor
    if (nsym>1) then
      call stresssym(gs_hamk%gprimd,nsym,kinstr,symrec)

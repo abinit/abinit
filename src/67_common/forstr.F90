@@ -26,7 +26,7 @@
 !!   |  Pulay correction to stress tensor (hartree).  Should be <=0.
 !!   | ecut=cut-off energy for plane wave basis sphere (Ha)
 !!   | ecutsm=smearing energy for plane wave kinetic energy (Ha)
-!!   | effmass=effective mass for electrons (1. in common case)
+!!   | effmass_free=effective mass for electrons (1. in common case)
 !!   | efield = cartesian coordinates of the electric field in atomic units
 !!   | ionmov=governs the movement of atoms (see help file)
 !!   | densfor_pred=governs the mixed electronic-atomic part of the preconditioner
@@ -319,7 +319,7 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
 &       xred,ylm,ylmgr)
      end if
    end if
-   call forstrnps(cg,cprj,dtset%ecut,dtset%ecutsm,dtset%effmass,eigen,electronpositron,fock,grnl,&
+   call forstrnps(cg,cprj,dtset%ecut,dtset%ecutsm,dtset%effmass_free,eigen,electronpositron,fock,grnl,&
 &   dtset%istwfk,kg,kinstr,nlstr,dtset%kptns,dtset%mband,mcg,mcprj,dtset%mgfft,dtset%mkmem,&
 &   mpi_enreg,psps%mpsang,dtset%mpw,my_natom,dtset%natom,dtset%nband,dtset%nfft,dtset%ngfft,&
 &   dtset%nkpt,dtset%nloalg,npwarr,dtset%nspden,dtset%nspinor,dtset%nsppol,dtset%nsym,ntypat,&

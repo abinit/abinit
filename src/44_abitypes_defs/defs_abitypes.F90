@@ -673,7 +673,7 @@ type dataset_type
  real(dp) :: ecutsigx
  real(dp) :: ecutsm
  real(dp) :: ecutwfn
- real(dp) :: effmass
+ real(dp) :: effmass_free
  real(dp) :: efmas_deg_tol
  real(dp) :: elph2_imagden
  real(dp) :: eshift

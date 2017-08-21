@@ -947,7 +947,7 @@ subroutine dtset_copy(dtout, dtin)
  dtout%ecutsigx           = dtin%ecutsigx
  dtout%ecutsm             = dtin%ecutsm
  dtout%ecutwfn            = dtin%ecutwfn
- dtout%effmass            = dtin%effmass
+ dtout%effmass_free       = dtin%effmass_free
  dtout%efmas_deg_tol      = dtin%efmas_deg_tol
  dtout%elph2_imagden      = dtin%elph2_imagden
  dtout%eshift             = dtin%eshift

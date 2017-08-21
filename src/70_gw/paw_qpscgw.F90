@@ -80,7 +80,7 @@ subroutine paw_qpscgw(Wfd,nscf,nfftf,ngfftf,Dtset,Cryst,Kmesh,Psps,QP_BSt,&
  use m_paw_an,        only : paw_an_type, paw_an_init, paw_an_nullify
  use m_paw_ij,        only : paw_ij_type, paw_ij_init, paw_ij_nullify
  use m_pawfgrtab,     only : pawfgrtab_type
- use m_pawrhoij,      only : pawrhoij_type, pawrhoij_alloc, pawrhoij_unpack, symrhoij
+ use m_pawrhoij,      only : pawrhoij_type, pawrhoij_alloc, pawrhoij_unpack, pawrhoij_get_nspden, symrhoij
  use m_wfd,           only : wfd_t
 
 !This section has been created automatically by the script Abilint (TD).
@@ -136,7 +136,7 @@ subroutine paw_qpscgw(Wfd,nscf,nfftf,ngfftf,Dtset,Cryst,Kmesh,Psps,QP_BSt,&
  usexcnhat=MAXVAL(Pawtab(:)%usexcnhat)
  !
  ! Calculate new rhoij_qp from updated Cprj_ibz, note use_rhoij_=1.
- nspden_rhoij=Dtset%nspden; if (Dtset%pawspnorb>0.and.Dtset%nspinor==2) nspden_rhoij=4
+ nspden_rhoij=pawrhoij_get_nspden(Dtset%nspden,Dtset%nspinor,Dtset%pawspnorb)
 
  call pawrhoij_alloc(QP_pawrhoij,Dtset%pawcpxocc,nspden_rhoij,Dtset%nspinor,Dtset%nsppol,Cryst%typat,&
 &                 pawtab=Pawtab,use_rhoij_=1,use_rhoijres=1)
@@ -171,8 +171,8 @@ subroutine paw_qpscgw(Wfd,nscf,nfftf,ngfftf,Dtset,Cryst,Kmesh,Psps,QP_BSt,&
 &  has_dijso=has_dijso,has_dijU=has_dijU,has_exexch_pot=1,has_pawu_occ=1)
 
  call paw_an_nullify(QP_paw_an); nkxc1=0 ! No kernel
- call paw_an_init(QP_paw_an,Cryst%natom,Cryst%ntypat,nkxc1,0,Dtset%nspden,cplex,&
-&     Dtset%pawxcdev,Cryst%typat,Pawang,Pawtab,has_vxc=1,has_vxcval=1)
+ call paw_an_init(QP_paw_an,Cryst%natom,Cryst%ntypat,nkxc1,0,Dtset%nspden,&
+&     cplex,Dtset%pawxcdev,Cryst%typat,Pawang,Pawtab,has_vxc=1,has_vxcval=1)
 
  ! =====================================================
  ! ==== Optional mixing of the PAW onsite densities ====

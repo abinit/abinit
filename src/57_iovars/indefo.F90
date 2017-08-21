@@ -251,7 +251,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%ecutsigx=zero ! The true default value is ecut . This is defined in invars2.F90
    dtsets(idtset)%ecutsm=zero
    dtsets(idtset)%ecutwfn=zero ! The true default value is ecut . This is defined in invars2.F90
-   dtsets(idtset)%effmass=one
+   dtsets(idtset)%effmass_free=one
    dtsets(idtset)%efmas=0
    dtsets(idtset)%efmas_bands=0 ! The true default is nband. This is defined in invars2.F90
    dtsets(idtset)%efmas_deg=1

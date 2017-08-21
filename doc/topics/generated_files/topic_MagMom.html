@@ -5,6 +5,17 @@
 <html>
 <head><title>Magnetic moment </title>
 <link rel=stylesheet type="text/css" href="../formabinit.css">
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  jax: ["input/TeX","output/HTML-CSS"],
+  tex2jax: {inlineMath: [['$','$']]},
+  displayAlign: "center",
+  TeX: { equationNumbers: { autoNumber: "AMS" } }
+});
+</script>
+<script type="text/javascript" async
+src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
 </head>
 <body bgcolor="#ffffff">
 
@@ -12,7 +23,7 @@
 <a name="top"></a>
 
 <h1>Constrained atomic magnetic moments</h1>
-<h3>This file gives hints on how to perform calculation with constrained atomic magnetic moments with the ABINIT package.
+<h3>This page gives hints on how to perform calculation with constrained atomic magnetic moments with the ABINIT package.
 <hr>
 
 <h5>Copyright (C) 2016-2017 ABINIT group (EB)
@@ -21,8 +32,10 @@
 
 <script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
 
+ Mentioned in &nbsp; <a href="../../users/generated_files/help_features.html#2.5">help_features#2.5</a> &nbsp;
+ <hr>
  <h3><b>Table of content: </b></h3> 
- <ul> <li><a href="topic_MagMom.html#1">1</a>. Introduction.<li><a href="topic_MagMom.html#2">2</a>. Selected input files.<li><a href="topic_MagMom.html#3">3</a>. References.</ul>
+ <ul> <li>1. <a href="topic_MagMom.html#1">Introduction.</a><li>2. <a href="topic_MagMom.html#2">Related input variables.</a><li>3. <a href="topic_MagMom.html#3">Selected input files.</a><li>4. <a href="topic_MagMom.html#4">References.</a></ul>
 
 &nbsp; 
 <HR ALIGN=left> 
@@ -30,7 +43,7 @@
 <h3><b>1. Introduction.</b></h3>
 
 
-<p>A complementary magnetic constraint method has been implemented in the ABINIT code, wherein the magnetization around each atom is pushed to a desired (vectorial) value. The constraint can either be on the full vector quantity, $\vec{m}$, or only on the direction <b>m</b>.  This is mainly useful for non collinear systems, where the direction and amplitude of the magnetic moment can change. The method follows that used in the Quantum Espresso <a href="../../bibliography/generated_files/bibliography.html#Moscaconte2007">[Moscaconte2007]</a> and VASP <a href="../../bibliography/generated_files/bibliography.html#Ma2015">[Ma2015]</a> codes: a Lagrangian constraint is applied to the energy, and works through a resulting term in the potential, which acts on the different spin components. The magnetization in a sphere &Omega;<sub>i</sub> around atom i at position <b>R</b><sub>i</sub> is calculated as:
+<p>A complementary magnetic constraint method has been implemented in the ABINIT code, wherein the magnetization around each atom is pushed to a desired (vectorial) value. The constraint can either be on the full vector quantity, $\vec{m}$, or only on the direction <b>m</b>.  This is mainly useful for non collinear systems, where the direction and amplitude of the magnetic moment can change. The method follows that used in the Quantum Espresso <a href="../../biblio/generated_files/bib_biblio.html#Moscaconte2007">[Moscaconte2007]</a> and VASP <a href="../../biblio/generated_files/bib_biblio.html#Ma2015">[Ma2015]</a> codes: a Lagrangian constraint is applied to the energy, and works through a resulting term in the potential, which acts on the different spin components. The magnetization in a sphere &Omega;<sub>i</sub> around atom i at position <b>R</b><sub>i</sub> is calculated as:
 <p><b>m</b> =&int;<sub>&Omega;<sub>i</sub></sub> <b>m</b>(<b>r</b>) d<b>r</b>
 
 <p>and the corresponding potential for spin component &alpha; is written as:
@@ -39,33 +52,53 @@
 
 <p>The function f(x) = x<sup>2</sup>(3+x(1+x(-6+3x))), is applied to smooth the transition near the edge of the sphere around <b>R</b><sub>i</sub>, over a thickness r<sub>s</sub> (by default 0.05 bohr, and f is set to 0 for | <b>r</b>-<b>R</b><sub>i</sub>|> r<sub>s</sub>). This minimizes discontinuous variations of the potential from iteration to iteration.
 
-<p>The constraint is managed by the keyword <a href="../../input_variables/generated_files/vargs.html#magconon">magconon</a>. Value 1 gives a constraint on the direction (<b>c</b> = <b>m</b> - <b>s</b><sub>i</sub> (<b>s</b><sub>i</sub>.<b>m</b>), value 2 gives a full constraint on the vector (<b>c</b> = <b>m</b> - <b>s</b><sub>i</sub>), with respect to the keyword <a href="../../input_variables/generated_files/vargs.html#spinat">spinat</a> (<b>s</b><sub>i</sub> above), giving a 3-vector for each atom. The latter is quite a stringent constraint, and often may not converge. The former value usually works, provided sufficient precision is given for the calculation of the magnetic moment (kinetic energy cutoff in particular).
+<p>The constraint is managed by the keyword <a href="../../input_variables/generated_files/varset_gstate.html#magconon">magconon</a>. Value 1 gives a constraint on the direction (<b>c</b> = <b>m</b> - <b>s</b><sub>i</sub> (<b>s</b><sub>i</sub>.<b>m</b>), value 2 gives a full constraint on the vector (<b>c</b> = <b>m</b> - <b>s</b><sub>i</sub>), with respect to the keyword <a href="../../input_variables/generated_files/varset_gstate.html#spinat">spinat</a> (<b>s</b><sub>i</sub> above), giving a 3-vector for each atom. The latter is quite a stringent constraint, and often may not converge. The former value usually works, provided sufficient precision is given for the calculation of the magnetic moment (kinetic energy cutoff in particular).
 
-<p>The strength of the constraint is given by the keyword <a href="../../input_variables/generated_files/vargs.html#magcon_lambda">magcon_lambda</a> (&lambda; above - real valued). Typical values are 10<sup>-2</sup> but vary strongly with system type: this value should be started small (here the constraint may not be enforced fully) and increased. A too large value leads to oscillations of the magnetization (the equivalent of charge sloshing) which do not converge.  A corresponding Lagrange penalty term is added to the total energy, and is printed to the log file, along with the effective magnetic field being applied. In an ideal case the energy penalty term should go to 0 (the constraint is fully satisfied).
+<p>The strength of the constraint is given by the keyword <a href="../../input_variables/generated_files/varset_gstate.html#magcon_lambda">magcon_lambda</a> (&lambda; above - real valued). Typical values are 10<sup>-2</sup> but vary strongly with system type: this value should be started small (here the constraint may not be enforced fully) and increased. A too large value leads to oscillations of the magnetization (the equivalent of charge sloshing) which do not converge.  A corresponding Lagrange penalty term is added to the total energy, and is printed to the log file, along with the effective magnetic field being applied. In an ideal case the energy penalty term should go to 0 (the constraint is fully satisfied).
+<br><br><a href=#top>Go to the top</a>
 
 
 
 
 &nbsp; 
-<HR ALIGN=left> 
+<hr> 
 <a name="2">&nbsp;</a>
-<h3><b>2. Selected input files.</b></h3>
+<h3><b>2. Related input variables.</b></h3>
 
 
-The user can find some related example input files in the ABINIT package in the directory /tests, or on the Web:
-<p> tests/v7/Input: <a href="../../tests/v7/Input/t05.in">t05.in</a> 
-<br>
+<p>Useful input variables:<p>... <a href="../../input_variables/generated_files/varset_gstate.html#magcon_lambda">magcon_lambda</a>   [MAGnetization CONstraint LAMBDA parameter]<br>
+... <a href="../../input_variables/generated_files/varset_gstate.html#magconon">magconon</a>   [turn MAGnetization CONstraint ON]<br>
+... <a href="../../input_variables/generated_files/varset_gstate.html#ratsph">ratsph</a>   [Radii of the ATomic SPHere(s)]<br>
+... <a href="../../input_variables/generated_files/varset_gstate.html#spinat">spinat</a>   [SPIN for AToms]<br>
+
+<br><br><a href=#top>Go to the top</a>
 
 
 &nbsp; 
 <HR ALIGN=left> 
 <a name="3">&nbsp;</a>
-<h3><b>3. References.</b></h3>
+<h3><b>3. Selected input files.</b></h3>
 
 
-<br> <a href="../../bibliography/generated_files/bibliography.html#Ma2015">[Ma2015]</a>  Pui-Wai Ma and S. L. Dudarev, "Constrained density functional for noncollinear magnetism", Phys. Rev. B 91, 054420 (2015).<br>
-<br> <a href="../../bibliography/generated_files/bibliography.html#Moscaconte2007">[Moscaconte2007]</a>  A. Mosca Conte, "Quantum mechanical modeling of nano magnetism", PhD thesis (SISSA, Trieste Italy, 2007). <br> URL: <a href="http://hdl.handle.net/20.500.11767/3935"> http://hdl.handle.net/20.500.11767/3935</a>.<br>
+<i><b>WARNING</b> : as of ABINITv8.6.x, the list of input files provided in the specific section of the topics Web pages is still to be reviewed/tuned. In some cases, it will be adequate, and in other cases, it might be incomplete, or perhaps even useless.</i>
+<br><br>The user can find some related example input files in the ABINIT package in the directory /tests, or on the Web:
+<p> tests/v7/Input: <a href="../../tests/v7/Input/t05.in">t05.in</a> 
+<br>
+
+<br><br><a href=#top>Go to the top</a>
+
+
+&nbsp; 
+<HR ALIGN=left> 
+<a name="4">&nbsp;</a>
+<h3><b>4. References.</b></h3>
+
+
+<br> <a href="../../biblio/generated_files/bib_biblio.html#Ma2015">[Ma2015]</a>  Pui-Wai Ma and S. L. Dudarev, "Constrained density functional for noncollinear magnetism", Phys. Rev. B 91, 054420 (2015).<br>
+<br> <a href="../../biblio/generated_files/bib_biblio.html#Moscaconte2007">[Moscaconte2007]</a>  A. Mosca Conte, "Quantum mechanical modeling of nano magnetism", PhD thesis (SISSA, Trieste Italy, 2007). <br> URL: <a href="http://hdl.handle.net/20.500.11767/3935"> http://hdl.handle.net/20.500.11767/3935</a>.<br>
 <p>
+<br><br><a href=#top>Go to the top</a>
+
 <script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
 
 </body>

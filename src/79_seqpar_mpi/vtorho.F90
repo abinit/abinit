@@ -212,7 +212,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  use m_pawtab,             only : pawtab_type
  use m_paw_ij,             only : paw_ij_type
  use m_pawfgrtab,          only : pawfgrtab_type
- use m_pawrhoij,           only : pawrhoij_type, pawrhoij_alloc, pawrhoij_free, pawrhoij_io
+ use m_pawrhoij,           only : pawrhoij_type, pawrhoij_alloc, pawrhoij_free, pawrhoij_io, pawrhoij_get_nspden
  use m_pawcprj,            only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_getdim
  use m_pawfgr,             only : pawfgr_type
  use m_energies,           only : energies_type
@@ -779,8 +779,8 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
 !      Compute (1/2) (2 Pi)**2 (k+G)**2:
        ABI_ALLOCATE(kinpw,(npw_k))
-!       call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass,gmet,kg_k,kinpw,kpoint,npw_k)
-       call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass,gmet,kg_k,kinpw,kpoint,npw_k,0,0)
+!       call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass_free,gmet,kg_k,kinpw,kpoint,npw_k)
+       call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass_free,gmet,kg_k,kinpw,kpoint,npw_k,0,0)
 
 !      Compute (k+G) vectors (only if useylm=1)
        nkpg=3*optforces*dtset%nloalg(3)
@@ -1585,7 +1585,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
      call timab(555,1,tsec)
      if (paral_atom) then
        ABI_DATATYPE_ALLOCATE(pawrhoij_unsym,(natom))
-       nspden_rhoij=dtset%nspden;if (dtset%pawspnorb>0.and.dtset%nspinor==2) nspden_rhoij=4
+       nspden_rhoij=pawrhoij_get_nspden(dtset%nspden,dtset%nspinor,dtset%pawspnorb)
        call pawrhoij_alloc(pawrhoij_unsym,dtset%pawcpxocc,nspden_rhoij,dtset%nspinor,&
 &       dtset%nsppol,dtset%typat,pawtab=pawtab,use_rhoijp=0)
      else

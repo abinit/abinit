@@ -5,6 +5,17 @@
 <html>
 <head><title>Effective Mass </title>
 <link rel=stylesheet type="text/css" href="../formabinit.css">
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  jax: ["input/TeX","output/HTML-CSS"],
+  tex2jax: {inlineMath: [['$','$']]},
+  displayAlign: "center",
+  TeX: { equationNumbers: { autoNumber: "AMS" } }
+});
+</script>
+<script type="text/javascript" async
+src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
 </head>
 <body bgcolor="#ffffff">
 
@@ -12,7 +23,7 @@
 <a name="top"></a>
 
 <h1>Effective Mass calculations</h1>
-<h3>This file gives hints on how to perform an effective mass calculation with the ABINIT package.
+<h3>This page gives hints on how to perform an effective mass calculation with the ABINIT package.
 <hr>
 
 <h5>Copyright (C) 2016-2017 ABINIT group (JLaflamme)
@@ -21,8 +32,10 @@
 
 <script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
 
+ Mentioned in &nbsp; <a href="../../users/generated_files/help_features.html#8">help_features#8</a> &nbsp;
+ <hr>
  <h3><b>Table of content: </b></h3> 
- <ul> <li><a href="topic_EffMass.html#1">1</a>. Introduction.<li><a href="topic_EffMass.html#2">2</a>. Related input variables.<li><a href="topic_EffMass.html#3">3</a>. Selected input files.<li><a href="topic_EffMass.html#4">4</a>. References.</ul>
+ <ul> <li>1. <a href="topic_EffMass.html#1">Introduction.</a><li>2. <a href="topic_EffMass.html#2">Related input variables.</a><li>3. <a href="topic_EffMass.html#3">Selected input files.</a><li>4. <a href="topic_EffMass.html#4">References.</a></ul>
 
 &nbsp; 
 <HR ALIGN=left> 
@@ -30,39 +43,45 @@
 <h3><b>1. Introduction.</b></h3>
 
 
-<p> The direct estimation of effective masses from DFT band curvature using DFPT <a href="../../bibliography/generated_files/bibliography.html#Gonze1995">[Gonze1995]</a> has been implemented within the linear response part of ABINIT <a href="../../bibliography/generated_files/bibliography.html#Laflamme2016">[Laflamme2016]</a>.
+<p> The direct estimation of effective masses from DFT band curvature using <a href="../../topics/generated_files/topic_DFPT.html#">DFPT</a> has been implemented within the linear response part of ABINIT <a href="../../biblio/generated_files/bib_biblio.html#Laflamme2016">[Laflamme2016]</a>.
 This method avoids the use of finite differences to estimate these masses, which eliminates the associated numerical noise and convergence study. 
-To compute the effective masses, one has to set the keyword <a href="../../input_variables/generated_files/varrf.html#efmas">efmas</a> to 1 within a calculation of the derivative of ground-state wavefunctions with respect to wavevector (<a href="../../input_variables/generated_files/varrf.html#rfelfd">rfelfd</a> = 1 or 2).
+To compute the effective masses, one has to set the keyword <a href="../../input_variables/generated_files/varset_dfpt.html#efmas">efmas</a> to 1 within a calculation of the derivative of ground-state wavefunctions with respect to wavevector (<a href="../../input_variables/generated_files/varset_dfpt.html#rfelfd">rfelfd</a> = 1 or 2).
 The effective masses will then be computed for all k-points and bands present in the calculation.
-One can optionally specify the range of bands to be treated for each k-point with the keyword <a href="../../input_variables/generated_files/varrf.html#efmas_bands">efmas_bands</a>.
+One can optionally specify the range of bands to be treated for each k-point with the keyword <a href="../../input_variables/generated_files/varset_dfpt.html#efmas_bands">efmas_bands</a>.
 
 <p>An additional feature of the effective mass implementation is the correct treatment of degenerate bands. 
-Indeed, the concept of effective mass breaks down at degenerate band extrema since it is no longer possible to describe band curvature using a tensor <a href="../../bibliography/generated_files/bibliography.html#Luttinger1955">[Luttinger1955]</a>,<a href="../../bibliography/generated_files/bibliography.html#Mecholsky2014">[Mecholsky2014]</a>.
-However, using the concept of ``transport equivalent effective mass'' <a href="../../bibliography/generated_files/bibliography.html#Mecholsky2014">[Mecholsky2014]</a> and its adaptation to the <b>k.p</b> framework, the implementation is able to provide the user with effective mass tensors which, while not describing the band curvature, describe accurately the contribution of the individual bands to transport properties.
+Indeed, the concept of effective mass breaks down at degenerate band extrema since it is no longer possible to describe band curvature using a tensor <a href="../../biblio/generated_files/bib_biblio.html#Luttinger1955">[Luttinger1955]</a>,<a href="../../biblio/generated_files/bib_biblio.html#Mecholsky2014">[Mecholsky2014]</a>.
+However, using the concept of ``transport equivalent effective mass'' <a href="../../biblio/generated_files/bib_biblio.html#Mecholsky2014">[Mecholsky2014]</a> and its adaptation to the <b>k.p</b> framework, the implementation is able to provide the user with effective mass tensors which, while not describing the band curvature, describe accurately the contribution of the individual bands to transport properties.
 
 <p>The implementation supports both NCPP and PAW schemes. 
 
-<p>Spin-polarized systems (<a href="../../input_variables/generated_files/vargs.html#nspden">nspden</a> = 2) as well as spinors (<a href="../../input_variables/generated_files/vargs.html#nspinor">nspinor</a> = 2)can be treated, although the spin-orbit interaction can only be treated in the PAW case.
+<p>Spin-polarized systems (<a href="../../input_variables/generated_files/varset_gstate.html#nspden">nspden</a> = 2) as well as spinors (<a href="../../input_variables/generated_files/varset_gstate.html#nspinor">nspinor</a> = 2) can be treated, although the spin-orbit interaction can only be treated in the PAW case.
 <p>The treatment of degenerescences is limited to the extremal points of the band structure (which are the most relevant in any case).
+<p>By the way, the first derivative of the eigenenergies is also computed and printed during a d/dk calculation, 
+and corresponds to the electronic velocity.
+<br><br><a href=#top>Go to the top</a>
+
 
 
 
 &nbsp; 
-<HR ALIGN=left> 
+<hr> 
 <a name="2">&nbsp;</a>
 <h3><b>2. Related input variables.</b></h3>
 
 
-<p>Compulsory input variables:<p>... <a href="../../input_variables/generated_files/varrf.html#efmas">efmas</a>   [EFfective MASs]<br>
-... <a href="../../input_variables/generated_files/varrf.html#rfelfd">rfelfd</a>   [Response Function with respect to the ELectric FielD]<br>
-<p>Basic input variables:<p>... <a href="../../input_variables/generated_files/varrf.html#efmas_dirs">efmas_dirs</a>   [EFfective MASs, DIRectionS to be calculated]<br>
-... <a href="../../input_variables/generated_files/varrf.html#efmas_n_dirs">efmas_n_dirs</a>   [EFfective MASs, Number of DIRectionS]<br>
-... <a href="../../input_variables/generated_files/varrf.html#efmas_ntheta">efmas_ntheta</a>   [EFfective MASs, Number of points for integration w/r to THETA]<br>
-<p>Useful input variables:<p>... <a href="../../input_variables/generated_files/varrf.html#efmas_bands">efmas_bands</a>   [EFfective MASs, BANDS to be treated.]<br>
-... <a href="../../input_variables/generated_files/varrf.html#efmas_calc_dirs">efmas_calc_dirs</a>   [EFfective MASs, CALCulate along DIRectionS]<br>
-... <a href="../../input_variables/generated_files/varrf.html#efmas_deg">efmas_deg</a>   [EFfective MASs, activate DEGenerate formalism]<br>
-... <a href="../../input_variables/generated_files/varrf.html#efmas_deg_tol">efmas_deg_tol</a>   [EFfective MASs, DEGeneracy TOLerance]<br>
-... <a href="../../input_variables/generated_files/varrf.html#efmas_dim">efmas_dim</a>   [EFfective MASs, DIMension of the effective mass tensor]<br>
+<p>Compulsory input variables:<p>... <a href="../../input_variables/generated_files/varset_dfpt.html#efmas">efmas</a>   [EFfective MASs]<br>
+... <a href="../../input_variables/generated_files/varset_dfpt.html#rfelfd">rfelfd</a>   [Response Function with respect to the ELectric FielD]<br>
+<p>Basic input variables:<p>... <a href="../../input_variables/generated_files/varset_dfpt.html#efmas_dirs">efmas_dirs</a>   [EFfective MASs, DIRectionS to be calculated]<br>
+... <a href="../../input_variables/generated_files/varset_dfpt.html#efmas_n_dirs">efmas_n_dirs</a>   [EFfective MASs, Number of DIRectionS]<br>
+... <a href="../../input_variables/generated_files/varset_dfpt.html#efmas_ntheta">efmas_ntheta</a>   [EFfective MASs, Number of points for integration w/r to THETA]<br>
+<p>Useful input variables:<p>... <a href="../../input_variables/generated_files/varset_dfpt.html#efmas_bands">efmas_bands</a>   [EFfective MASs, BANDS to be treated.]<br>
+... <a href="../../input_variables/generated_files/varset_dfpt.html#efmas_calc_dirs">efmas_calc_dirs</a>   [EFfective MASs, CALCulate along DIRectionS]<br>
+... <a href="../../input_variables/generated_files/varset_dfpt.html#efmas_deg">efmas_deg</a>   [EFfective MASs, activate DEGenerate formalism]<br>
+... <a href="../../input_variables/generated_files/varset_dfpt.html#efmas_deg_tol">efmas_deg_tol</a>   [EFfective MASs, DEGeneracy TOLerance]<br>
+... <a href="../../input_variables/generated_files/varset_dfpt.html#efmas_dim">efmas_dim</a>   [EFfective MASs, DIMension of the effective mass tensor]<br>
+
+<br><br><a href=#top>Go to the top</a>
 
 
 &nbsp; 
@@ -71,10 +90,13 @@ However, using the concept of ``transport equivalent effective mass'' <a href=".
 <h3><b>3. Selected input files.</b></h3>
 
 
-The user can find some related example input files in the ABINIT package in the directory /tests, or on the Web:
+<i><b>WARNING</b> : as of ABINITv8.6.x, the list of input files provided in the specific section of the topics Web pages is still to be reviewed/tuned. In some cases, it will be adequate, and in other cases, it might be incomplete, or perhaps even useless.</i>
+<br><br>The user can find some related example input files in the ABINIT package in the directory /tests, or on the Web:
 <p> tests/v7/Input: <a href="../../tests/v7/Input/t80.in">t80.in</a> 
 <a href="../../tests/v7/Input/t81.in">t81.in</a> 
 <br>
+
+<br><br><a href=#top>Go to the top</a>
 
 
 &nbsp; 
@@ -83,11 +105,12 @@ The user can find some related example input files in the ABINIT package in the 
 <h3><b>4. References.</b></h3>
 
 
-<br> <a href="../../bibliography/generated_files/bibliography.html#Gonze1995">[Gonze1995]</a>  X. Gonze, "Adiabatic density-functional perturbation theory", Phys. Rev. A 52, 1096&ndash;1114 (1995). <br> DOI: <a href="https://doi.org/10.1103/PhysRevA.52.1096">10.1103/PhysRevA.52.1096</a>.<br>
-<br> <a href="../../bibliography/generated_files/bibliography.html#Laflamme2016">[Laflamme2016]</a>  J. Laflamme Janssen, Y. Gillet, S. Ponc&eacute;, A. Martin, M. Torrent and X. Gonze, "Precise Effective Masses from Density Functional Perturbation Theory", Phys. Rev. B 93, 205147 (2016).<br>
-<br> <a href="../../bibliography/generated_files/bibliography.html#Luttinger1955">[Luttinger1955]</a>  J.M. Luttinger and W. Kohn, "Motion of Electrons and Holes in Perturbed Periodic Fields", Phys. Rev. 97, 869&ndash;883 (1955). <br> DOI: <a href="https://doi.org/10.1103/PhysRev.97.869">10.1103/PhysRev.97.869</a>.<br>
-<br> <a href="../../bibliography/generated_files/bibliography.html#Mecholsky2014">[Mecholsky2014]</a>  N.A. Mecholsky, L. Resca, I.L. Pegg and M. Fornari, "Theory of band warping and its effects on thermoelectronic transport properties", Phys. Rev. B 89, 155131 (2014). <br> DOI: <a href="https://doi.org/10.1103/PhysRevB.89.155131">10.1103/PhysRevB.89.155131</a>.<br>
+<br> <a href="../../biblio/generated_files/bib_biblio.html#Laflamme2016">[Laflamme2016]</a>  J. Laflamme Janssen, Y. Gillet, S. Ponc&eacute;, A. Martin, M. Torrent and X. Gonze, "Precise Effective Masses from Density Functional Perturbation Theory", Phys. Rev. B 93, 205147 (2016).<br>
+<br> <a href="../../biblio/generated_files/bib_biblio.html#Luttinger1955">[Luttinger1955]</a>  J.M. Luttinger and W. Kohn, "Motion of Electrons and Holes in Perturbed Periodic Fields", Phys. Rev. 97, 869&ndash;883 (1955). <br> DOI: <a href="https://doi.org/10.1103/PhysRev.97.869">10.1103/PhysRev.97.869</a>.<br>
+<br> <a href="../../biblio/generated_files/bib_biblio.html#Mecholsky2014">[Mecholsky2014]</a>  N.A. Mecholsky, L. Resca, I.L. Pegg and M. Fornari, "Theory of band warping and its effects on thermoelectronic transport properties", Phys. Rev. B 89, 155131 (2014). <br> DOI: <a href="https://doi.org/10.1103/PhysRevB.89.155131">10.1103/PhysRevB.89.155131</a>.<br>
 <p>
+<br><br><a href=#top>Go to the top</a>
+
 <script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
 
 </body>

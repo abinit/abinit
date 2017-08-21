@@ -1,6 +1,7 @@
-# This YAML file contains the introduction as well as the body (including the table of content) of the html lesson.
-# In order to modify the other parts, modify the file lessons.html .
-# This is the introduction ...
+## This YAML file contains the introduction as well as the body of the html lesson.
+## In order to modify the other parts, modify the file lessons.html .
+
+## This is the introduction ...
 intro : |
   <p>This lesson aims at showing how to get the following physical
   properties, for periodic solids:
@@ -25,18 +26,16 @@ intro : |
 
   <p>This lesson should take about 1 hour to be done.
 
-# This is the body, including the table of content ...
-body : |
-  <ul>
-    <li><a href="#1">1</a> Calculation of the ZPR of eigenenergies at q=&Gamma; </li>
-    <li><a href="#2">2</a> Converging the calculation with the q-point grid</li>
-    <li><a href="#3">3</a> Calculation of the eigenenergies correction along high-symmetry lines </li>
-  </ul>
-  <hr>
 
-  <a name="1"></a>
-  <h3><b>1. Calculation of the ZPR of eigenenergies at q=&Gamma; </b> </h3>
-  <h3>&nbsp;</h3>
+## Now come the different sections, numbered.
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec1:
+ title: "Calculation of the ZPR of eigenenergies at q=&Gamma;"
+ tag: zpr
+ body: |
   The reference input files for this lesson are located in ~abinit/tests/tutorespfn/Input and 
   the corresponding reference output files are in ~abinit/tests/tutorespfn/Refs. The prefix is "tdepes".
 
@@ -132,11 +131,13 @@ body : |
     You can check that the results are the same as with the python script approach here above.
   </ul>
 
-  <hr>
-  <a name="2"></a>
-  <h3><b>2. Converging the calculation with the q-point grid</b> </h3>
-  <h3>&nbsp;</h3>
-
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec2:
+ title: "Converging the calculation with the q-point grid"
+ tag: converging
+ body: |
   From now on we will only describe the approach with Abinit compiled with Netcdf. 
   The approach with Anaddb is similar to what we described above. Note that Anaddb only support homogenous q-point grid integration.
 
@@ -186,11 +187,13 @@ body : |
   As a matter of fact, diamond needs an extremely dense q-point grid (40x40x40) to be converged. 
   On the bright side each q-point calculation is independent and thus the parallel scaling is ideal...
 
-  <hr>
-  <a name="3"></a>
-  <h3><b>3. Calculation of the eigenenergies correction along high-symmetry lines</b> </h3>
-  <h3>&nbsp;</h3>
-
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec3:
+ title: "Calculation of the eigenenergies correction along high-symmetry lines"
+ tag: high_symmetry
+ body: |
   The calculation of the electronic eigenvalue correction 
   due to electron-phonon coupling along high-symmetry lines requires the use of 6 datasets per q-point. 
   Different datasets are required to compute the following quantites:

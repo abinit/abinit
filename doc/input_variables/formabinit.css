@@ -38,6 +38,14 @@
 				text-decoration : none					  ;
 				text-transform  : none	 				  ;
 			}
+#smalltext      {    font-family         : Verdana,Arial,Courier       ;
+                                font-style          : regular;
+                                font-weight             : regular                                 ;
+                                font-size           : 10px                                        ;
+                                color                   : #000000                                 ;
+                                text-decoration : none                                    ;
+                                text-transform  : none                                    ;
+                        }
 
 #default    {	font-family	    : Verdana,Arial,Courier	  ;
 				font-style	    : italic;

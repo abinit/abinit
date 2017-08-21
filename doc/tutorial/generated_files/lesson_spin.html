@@ -3,17 +3,28 @@
 <!-- It is useless to modify it. Modify the related .yml  or .bib files instead.         -->
 <!--                                                                                     -->
 <html>
-<head><title>Lesson in the spin</title>
+<head><title>Lesson about the spin</title>
 <link rel=stylesheet type="text/css" href="../formabinit.css">
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  jax: ["input/TeX","output/HTML-CSS"],
+  tex2jax: {inlineMath: [['$','$']]},
+  displayAlign: "center",
+  TeX: { equationNumbers: { autoNumber: "AMS" } }
+});
+</script>
+<script type="text/javascript" async
+src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
 </head>
 <body bgcolor="#ffffff">
 
 <hr>
 <a name="top"></a>
 
-<h1>ABINIT tutorial. Lesson in the spin...</h1>
+<h1>ABINIT tutorial. Lesson about the spin...</h1>
 
-<h2>Properties related to spin (spin polarized calculations and spin-orbit coupling).</h2>
+<h2>Properties related to spin (spin polarized calculations, ferro- ferri- magnetic materials, and spin-orbit coupling).</h2>
 <hr>
 <p>This lesson aims at showing how to get the following physical
 properties:
@@ -45,32 +56,21 @@ You will learn to use of&nbsp; features of ABINIT which deal with spin.<br>
 <script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
 
 <a name="list"></a>
-<h3><b> Lesson in the spin, table of content:</b></h3>
+<h3><b> Lesson about the spin. Table of content:</b></h3>
 
-<ul>
-  <li><a href="#gz1">1</a> <b>A ferromagnetic
-material: the&nbsp; bcc Fe</b></li>
-  <li><a href="#gz2">2</a> <b>An antiferromagnetic
-example: fcc Fe</b></li>
-  <li><a href="#gz3">3</a> <b>Another look at fcc Fe</b>
-  </li>
-  <li><a href="#gz4">4</a> <b>A ferrimagnetic example
-(</b>Mn<sub>4</sub>N<b>)</b><small style="font-style: italic;">(not yet)</small> </li>
-  <li><a href="#gz5">5</a> <b>The spin-orbit coupling</b>
-  </li>
-  <li><a href="#gz6">6</a> <b>Rotation of the
-magnetization and Spin-orbit </b><small style="font-style: italic;">(not yet)</small></li><span style="font-weight: bold;"><br>
-  <br>
-  </span>
-</ul>
-<hr>
-<p><a name="gz1"></a><big><b>1. A ferromagnetic material: the&nbsp; <span style="font-style: italic;">bcc</span> Fe</b></big>&nbsp;</p>
+<ul> 
+  <li>1. <a href="#ferromagnetic">A ferromagnetic material: <i>bcc</i> Fe</a></li>
+  <li>2. <a href="#antiferromagnetic">An antiferromagnetic example: <i>fcc</i> Fe</a></li>
+  <li>3. <a href="#fccFe2">Another look at <i>fcc</i> Fe</a></li>
+  <li>4. <a href="#ferrimagnetic">Ferrimagnetic (not yet)</a></li>
+  <li>5. <a href="#spin-orbit">The spin-orbit coupling</a></li>
+  <li>6. <a href="#rotation">Rotation of the magnetization and spin-orbit</a></li>
 
-
-<p>
-<i><br>
-</i></p>
-<p><i>Before beginning, you might consider to work in a different
+ </ul> 
+ <hr><br><a name="ferromagnetic"> </a>
+<a name="1"> </a>
+<h3><b>1. A ferromagnetic material: <i>bcc</i> Fe</b></h3>
+ <p><i>Before beginning, you might consider to work in a different
 subdirectory as
 for the other lessons. Why not "Work_spin" (<small>so ~abinit/tests/tutorial/Input/Work_spin</small>) ? </i> <br>
 </p>
@@ -87,15 +87,13 @@ we are going to perform magnetic calculations, there a two new types of
 variables:<br>
 </p>
 <ul>
-  <li><a href="../../input_variables/generated_files/varbas.html#nsppol" target="kwimg"><span style="text-decoration: underline;">nsppol</span></a><br>
-  </li>
-  <li><a href="../../input_variables/generated_files/vargs.html#spinat" target="kwimg"><span style="text-decoration: underline;">spinat</span></a><br>
-  </li>
+  <li><a href="../../input_variables/generated_files/varset_basic.html#nsppol">nsppol</a></li>
+  <li><a href="../../input_variables/generated_files/varset_gstate.html#spinat">spinat</a></li>
 </ul>
 Please, read their description in the help file.
 <br>
-You will work at fixed <a href="../../input_variables/generated_files/varbas.html#ecut">ecut</a>
-(=18Ha) and k-point grid, defined by <a href="../../input_variables/generated_files/varbas.html#ngkpt">ngkpt</a>
+You will work at fixed <a href="../../input_variables/generated_files/varset_basic.html#ecut">ecut</a>
+(=18Ha) and k-point grid, defined by <a href="../../input_variables/generated_files/varset_basic.html#ngkpt">ngkpt</a>
 (the 4x4x4 Monkhorst-Pack grid). It is implicit that in "real life",
 you should do a convergence test with
 respect to both convergence parameters. <br>
@@ -187,10 +185,10 @@ It is interesting to consider in more details the distribution of
 eigenvalues for each direction of magnetization, which is best done by
 looking at the respective densities of state.<br>
 To this end we have set
-<a href="../../input_variables/generated_files/varfil.html#prtdos">prtdos</a>= 1
+<a href="../../input_variables/generated_files/varset_files.html#prtdos">prtdos</a>= 1
 in the input file, in order to obtain the density
 of states corresponding to spin-up and spin-down electrons (as soon as
-<a href="../../input_variables/generated_files/varbas.html#nsppol">nsppol</a>=2). <br>
+<a href="../../input_variables/generated_files/varset_basic.html#nsppol">nsppol</a>=2). <br>
 The values of the DOS are in the files <span style="color: rgb(51, 102, 255);">tspin_1o_DS1_DOS</span> and
 <span style="color: rgb(51, 102, 255);">tspin_1o_DS2_DOS</span> for the magnetic and non magnetic case respectively. We
 can extract the values for use in a plotting software.<br>
@@ -208,21 +206,20 @@ which arises from the fact that there are more up than down electrons
 at the Fermi level.<br>
 <br>
 That the magnetization points upwards is fortuitous,
-and we can get it pointing downwards by changing the sign of the initial <a href="../../input_variables/generated_files/vargs.html#spinat">spinat</a>.
+and we can get it pointing downwards by changing the sign of the initial <a href="../../input_variables/generated_files/varset_gstate.html#spinat">spinat</a>.
 <br>
 Indeed, in the absence of spin-orbit coupling, there is no relation
 between the direction of magnetization and the cristal axes.<br>
-If we start with a <a href="../../input_variables/generated_files/vargs.html#spinat">spinat</a>
+If we start with a <a href="../../input_variables/generated_files/varset_gstate.html#spinat">spinat</a>
 of 0, the magnetization
-remains 0. <a href="../../input_variables/generated_files/vargs.html#spinat">spinat</a> gives
+remains 0. <a href="../../input_variables/generated_files/varset_gstate.html#spinat">spinat</a> gives
 indeed a way to initially break the spin symmetry.<br>
-<br>
-<br>
-<br>
+<br><br><a href=#top>Go to the top</a>
 <hr>
-<p><big><a name="gz2"></a><b>2. An antiferromagnetic example: <span style="font-style: italic;">fcc</span> Fe</b></big></p>
-<h3> </h3>
-<span style="font-style: italic;">
+<br><a name="antiferromagnetic"> </a>
+<a name="2"> </a>
+<h3><b>2. An antiferromagnetic example: <i>fcc</i> Fe</b></h3>
+ <p><span style="font-style: italic;">
 Well sort of.... </span><br>
 <br>
 Actually, <span style="font-style: italic;">fcc</span> Fe, displays many complicated structures, in particular
@@ -240,21 +237,21 @@ magnetization etc...<br>
 To describe such a structure, we merely need two atoms, [0,0,0] and
 [1/2,0,1/2] and a unit cell comprising those two atoms.<br>
 Also, each atom will be given opposite magnetization with the help of
-the variable <a href="../../input_variables/generated_files/vargs.html#spinat">spinat</a>.<br>
+the variable <a href="../../input_variables/generated_files/varset_gstate.html#spinat">spinat</a>.<br>
 <br>
 You can copy the file <span style="color: rgb(51, 102, 255);">~abinit/tests/tutorial/Input/tspin_2.in</span> in <span style="font-style: italic;">Work_spin</span>.
 This is your input file. Modify accordingly the <span style="color: rgb(51, 102, 255);">tspin_x.files</span> file.
 You can run the calculation, then you should edit the <span style="color: rgb(51, 102, 255);">tspin_2.in</span> file,
 and briefly
 look at the two changes with respect to the file
-<span style="color: rgb(51, 102, 255);">tspin_1.in</span>: the change of unit cell basis vectors <a href="../../input_variables/generated_files/varbas.html#rprim">rprim</a>,
-the new <a href="../../input_variables/generated_files/vargs.html#spinat">spinat</a>.
+<span style="color: rgb(51, 102, 255);">tspin_1.in</span>: the change of unit cell basis vectors <a href="../../input_variables/generated_files/varset_basic.html#rprim">rprim</a>,
+the new <a href="../../input_variables/generated_files/varset_gstate.html#spinat">spinat</a>.
 <br><br>
-Note also we use now <a href="../../input_variables/generated_files/varbas.html#nsppol">nsppol</a>=1 and <a href="../../input_variables/generated_files/vargs.html#nspden">nspden</a>=2: this combination
+Note also we use now <a href="../../input_variables/generated_files/varset_basic.html#nsppol">nsppol</a>=1 and <a href="../../input_variables/generated_files/varset_gstate.html#nspden">nspden</a>=2: this combination
 of values is only valid when performing an antiferromagnetic
 calculation (<span style="font-style: italic;">nspden=2</span> means that we have 2 independent components for the charge density while <span style="font-style: italic;">nsppol=1</span> means that we have 1 independent component for the wave-functions).<br>
 In that case, ABINIT uses the so-called Shubnikov symmetries, to perform calculations twice faster
-than with <a href="../../input_variables/generated_files/varbas.html#nsppol">nsppol</a>=2 and <a href="../../input_variables/generated_files/vargs.html#nspden">nspden</a>=2.
+than with <a href="../../input_variables/generated_files/varset_basic.html#nsppol">nsppol</a>=2 and <a href="../../input_variables/generated_files/varset_gstate.html#nspden">nspden</a>=2.
 The symmetry of the
 crystal is not the full fcc symmetry anymore since the symmetry must
 now preserve the magnetization of each atom.&nbsp; ABINIT is
@@ -262,7 +259,7 @@ nevertheless able to detect such symmetry belonging to the
 Shubnikov groups and correctly detects that the cell is
 primitive,
 which would not be the case if we had the same value of
-<a href="../../input_variables/generated_files/vargs.html#spinat">spinat</a> on each
+<a href="../../input_variables/generated_files/varset_gstate.html#spinat">spinat</a> on each
 atom.<br><br>
 If we now run again the calculation, this total computation time is
 approximately 30 seconds on a recent CPU.<br>
@@ -358,13 +355,12 @@ which shows that the magnetization of each atom are actually opposite.
 <br>With the next input file <span style="color: rgb(51, 102, 255);">tspin_3.in</span>, we will consider this same problem, but in a
 different way, and note, for future record that the total energy is:
 <span style="font-family: monospace;">Etotal=-4.92489592898935E+01</span><br>
-<br>
-<br>
-<br>
+<br><br><a href=#top>Go to the top</a>
 <hr>
-<p><a name="gz3"></a><big><b>3. Another look at <span style="font-style: italic;">fcc</span> Fe</b></big></p>
-<h3> </h3>
-Instead of treating <span style="font-style: italic;">fcc</span> Fe directly as an antiferromagnetic material,
+<br><a name="fccFe2"> </a>
+<a name="3"> </a>
+<h3><b>3. Another look at <i>fcc</i> Fe</b></h3>
+ <p>Instead of treating <span style="font-style: italic;">fcc</span> Fe directly as an antiferromagnetic material,
 we will not make any hypotheses on its magnetic structure, and run the calculation like the one for <span style="font-style: italic;">fcc</span>
 Fe, anticipating only that the two spin directions are going to be different.<br>
 We will not even assume
@@ -373,7 +369,7 @@ You can copy the file <span style="color: rgb(51, 102, 255);">~abinit/tests/tuto
 This is your input file. You can modify the file <span style="color: rgb(51, 102, 255);">tspin_x.files</span> and
 immediately start running the calculation. Then, you should edit it.
 Note the values of
-<a href="../../input_variables/generated_files/vargs.html#spinat">spinat</a>. In this job,
+<a href="../../input_variables/generated_files/varset_gstate.html#spinat">spinat</a>. In this job,
 we wish again to characterize the magnetic structure.<br>
 We are not going to use zeta as in the preceding calculation, but we
 will here use another feature of abinit: atom and angular
@@ -388,12 +384,11 @@ strongly dependent on the number of kpoints and we use here only a
 reduced set.<br>
 (This will take about 1.5 minutes on a modern computer)<br><br>
 To specify this calculation we need new variables, in addition to
-<a href="../../input_variables/generated_files/varfil.html#prtdos">prtdos</a> set now to 3 :<br>
+<a href="../../input_variables/generated_files/varset_files.html#prtdos">prtdos</a> set now to 3 :<br>
 <ul>
-  <li><a href="../../input_variables/generated_files/vargs.html#natsph">natsph</a></li>
-  <li><a href="../../input_variables/generated_files/vargs.html#iatsph">iatsph</a></li>
-  <li><a href="../../input_variables/generated_files/vargs.html#ratsph" target="kwimg">ratsph<br>
-    </a></li>
+  <li><a href="../../input_variables/generated_files/varset_gstate.html#natsph">natsph</a></li>
+  <li><a href="../../input_variables/generated_files/varset_gstate.html#iatsph">iatsph</a></li>
+  <li><a href="../../input_variables/generated_files/varset_gstate.html#ratsph">ratsph</a></li>
 </ul>
 <br>
 This will specify the atoms around which the calculation will be
@@ -454,14 +449,12 @@ the corner atom and the face atom possess opposite magnetizations,
 which roughly cancel each other. The density of states computed with
 the tetrahedron method is not as smooth as by the smearing
 method, and a running average allows for a better view.<br>
-<br>
-<br>
-<br>
+<br><br><a href=#top>Go to the top</a>
 <hr>
-<p><a name="gz4"></a><big><b>4. A ferrimagnetic example </b><span style="font-style: italic;">(not yet)</span></big></p>
-<h3 style="font-weight: normal; font-style: italic;">
-</h3>
-Some materials can display a particular form of ferromagnetism, which
+<br><a name="ferrimagnetic"> </a>
+<a name="4"> </a>
+<h3><b>4. Ferrimagnetic (not yet)</b></h3>
+ <p>Some materials can display a particular form of ferromagnetism, which
 also can be viewed as non
 compensated antiferromagnetism, called ferrimagnetism.<br>
 Some atoms possess up spin and other possess down spin, but the
@@ -469,13 +462,12 @@ total spin magnetization is non zero.<br>
 This happens generally for system with different type of atoms, and
 sometimes in
 rather complicated structures such as the magnetite. <br>
-<br>
-<br>
-<br>
+<br><br><a href=#top>Go to the top</a>
 <hr>
-<p><a name="gz5"></a><big><b>5. The spin-orbit coupling</b></big></p>
-<h3> </h3>
-<h3><small><span style="font-weight: normal;">For heavy atoms a
+<br><a name="spin-orbit"> </a>
+<a name="5"> </a>
+<h3><b>5. The spin-orbit coupling</b></h3>
+ <p>For heavy atoms a
 relativistic description of the electronic structure becomes necessary,
 and this can be accomplished through the relativistic LDA
 approximation.</span></small></h3><br>
@@ -510,8 +502,8 @@ calculation. It takes about 20 secs on a recent computer.
 </big>
 
 The input file contains one new variable:<br>
-<ul><li><a href="../../input_variables/generated_files/vargs.html#nspinor">nspinor</a></li>
-</ul>Have a look at it. You should also look at<span style="text-decoration: underline;"> </span><a href="../../input_variables/generated_files/vargs.html#so_psp">so_psp</a>; it is not used here, meaning that the SO information is directly read from the pseudopotential file.<br>
+<ul><li><a href="../../input_variables/generated_files/varset_gstate.html#nspinor">nspinor</a></li>
+</ul>Have a look at it. You should also look at<span style="text-decoration: underline;"> </span><a href="../../input_variables/generated_files/varset_gstate.html#so_psp">so_psp</a>; it is not used here, meaning that the SO information is directly read from the pseudopotential file.<br>
 <br>
 In this run, we check that we recover the splitting of the atomic
 level by performing a calculation in a big box.
@@ -606,9 +598,9 @@ components).<br>
 Let's have a look at the following keyword:<br>
 </span>
 <ul>
-<li><a href="../../input_variables/generated_files/varpaw.html#pawspnorb">pawspnorb</a></li>
+<li><a href="../../input_variables/generated_files/varset_paw.html#pawspnorb">pawspnorb</a></li>
 </ul>
-It automatically activates the spin-orbit coupling within PAW (forcing <a href="../../input_variables/generated_files/vargs.html#nspinor">nspinor</a>=2).<br>
+It automatically activates the spin-orbit coupling within PAW (forcing <a href="../../input_variables/generated_files/varset_gstate.html#nspinor">nspinor</a>=2).<br>
 <br>
 Now the practice:<br>
 We consider here <span style="font-style: italic;">Bismuth</span>.<br>
@@ -621,7 +613,7 @@ You can copy the file <span style="color: rgb(51, 102, 255);">~abinit/tests/tuto
 then run the
 calculation. It takes about 10 secs on a recent computer. Two datasets
 are executed: the first one without spin-orbit coupling, the second
-one using<small><span style="font-weight: bold;">&nbsp;</span> </small></span><a href="../../input_variables/generated_files/varpaw.html#pawspnorb">pawspnorb</a><span style="font-weight: normal;">=1.</span></small><br>
+one using<small><span style="font-weight: bold;">&nbsp;</span> </small></span><a href="../../input_variables/generated_files/varset_paw.html#pawspnorb">pawspnorb</a><span style="font-weight: normal;">=1.</span></small><br>
 </h3>
 
 The results (eigenvalues) are:<br>
@@ -652,27 +644,22 @@ Ha</span><br>
 <span style="font-family: monospace;"></span></div>
 <br>
 A perfect agreement even with a small simulation cell and very small values of plane-wave cut-offs...<br>
-<br>
-<br>
-<span style="font-family: sans-serif;"><br>
-</span>
+<br><br><a href=#top>Go to the top</a>
 <hr>
-<p><big><a name="gz6"></a><b>6. Rotation of the magnetization and Spin-orbit </b><span style="font-style: italic;">(not yet)</span></big></p>
-<h3>
-</h3>
-The most spectacular manifestation of the spin-orbit coupling is the
+<br><a name="rotation"> </a>
+<a name="6"> </a>
+<h3><b>6. Rotation of the magnetization and spin-orbit</b></h3>
+ <p>The most spectacular manifestation of the spin-orbit coupling is the
 energy associated with a rotation of the magntisation with respect with
 the cristal axis. It is at the origin of the magneto cristalline
 anisotropy of paramount technological importance.<br>
 <hr>
 <br>
 <p>This ABINIT tutorial is now finished... <br>
+GZ would like to thank B. Siberchicot for useful comments.
 </p>
-<p><small><span style="font-style: italic;"><br>
-</span></small></p>
-<p><small><span style="font-style: italic;">
-GZ would like to thank B. Siberchicot for useful comments.</span></small><br>
-</p>
+<br><br><a href=#top>Go to the top</a>
+<hr>
 <script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
 
 </body>

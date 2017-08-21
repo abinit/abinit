@@ -5,6 +5,17 @@
 <html>
 <head><title>Developing for ABINIT</title>
 <link rel=stylesheet type="text/css" href="../formabinit.css">
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  jax: ["input/TeX","output/HTML-CSS"],
+  tex2jax: {inlineMath: [['$','$']]},
+  displayAlign: "center",
+  TeX: { equationNumbers: { autoNumber: "AMS" } }
+});
+</script>
+<script type="text/javascript" async
+src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
 </head>
 <body bgcolor="#ffffff">
 
@@ -13,7 +24,7 @@
 
 <h1>ABINIT tutorial. Developing for ABINIT...</h1>
 
-<h2>Introducing ABINIT to new developers (might be outdated ...).</h2>
+<h2>Introducing ABINIT to new developers (WARNING : some parts are severely outdated ...).</h2>
 <hr>
 <p>
 This tutorial introduces ABINIT to the new developers.
@@ -26,6 +37,7 @@ maximum benefit from this lesson. In particular, some ease with
 Fortran&nbsp;90, 95 or 2003 will be truly welcome.
 Familiarity with the command line will be wonderful too.
 </p>
+<p>WARNING : some parts are severely outdated.
 <hr>
 <h5>Copyright (C) 2000-2017 ABINIT group (YP)
 <script type="text/javascript" src="../../js_files/copyright.js"> </script>
@@ -34,28 +46,19 @@ Familiarity with the command line will be wonderful too.
 <script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
 
 <a name="list"></a>
-<h3><b> Developing for ABINIT, table of content:</b></h3>
+<h3><b> Developing for ABINIT. Table of content:</b></h3>
 
-<ul>
- <li><a href="#context">Context</a></li>
- <li><a href="#objectives">Objectives</a></li>
- <li><a href="#tasks">Tasks</a></li>
- <ul>
-  <li><a href="#get">Get the source and compile the code</a></li>
-  <li><a href="#identify">Identify the subroutines to modify</a></li>
-  <li><a href="#new_routine">Add the new input variable and its
-   associated routine</a></li>
-  <li><a href="#test">Add a test to the test suite</a></li>
-  <li><a href="#patch">Create a patch for the project leader</a></li>
- </ul>
-</ul>
+<ul> 
+  <li>1. <a href="#context">Context</a></li>
+  <li>2. <a href="#objective">Objectives</a></li>
+  <li>3. <a href="#tasks">Tasks</a></li>
+  <li>4. <a href="#solutions">Solutions</a></li>
 
-<hr>
-
-<h2><a name="context">Context</a></h2>
-
-<p>
-The ABINIT package is aimed at being used
+ </ul> 
+ <hr><br><a name="context"> </a>
+<a name="1"> </a>
+<h3><b>1. Context</b></h3>
+ <p>The ABINIT package is aimed at being used
 by different groups of people, without mandatory control by the
 main contributors of the ABINIT group. In the same
 way, the ABINIT development project is fundamentally open
@@ -98,13 +101,12 @@ especially,
 and
 <a href="http://dev.abinit.org/doc/particulars">Specificities</a>,
 </p>
-
+<br><br><a href=#top>Go to the top</a>
 <hr>
-
-<h2><a name="objectives">Objectives</a></h2>
-
-<p>
-The main goals of this lesson are to provide you with a useful understanding
+<br><a name="objective"> </a>
+<a name="2"> </a>
+<h3><b>2. Objectives</b></h3>
+ <p>The main goals of this lesson are to provide you with a useful understanding
 of the source tree structure and the build process, as well as sensibilize
 you to the rules and procedures followed for the development of ABINIT.
 In the example we have chosen, we will suppose that you want to add an
@@ -126,12 +128,12 @@ For this lesson, your input variable will be a real number called
 "<i>lesson</i>". The task devoted to your routine is just to print
 this variable.
 </p>
-
+<br><br><a href=#top>Go to the top</a>
 <hr>
-
-<h2><a name="tasks">Tasks</a></h2>
-
-<h3><a name="get">Get the source and compile the code</a></h3>
+<br><a name="tasks"> </a>
+<a name="3"> </a>
+<h3><b>3. Tasks</b></h3>
+ <p><h4><a name="get">Get the source and compile the code</a></h4>
 
 <p>
 There are two ways of getting the source code of ABINIT:
@@ -210,7 +212,7 @@ The compilation will likely take more than 10 minutes. In the meantime,
 you can proceed to the next task.
 </p>
 
-<h3><a name="identify">Identify the subroutines to modify</a></h3>
+<h4><a name="identify">Identify the subroutines to modify</a></h4>
 
 <p>
 At this point, you have to discover what parts of the code will have to
@@ -239,8 +241,8 @@ Q9. Where is the <i>wrtout</i> subroutine? What is its purpose? How does
 it work?
 </p>
 
-<h3><a name="new_routine">Add the new input variable and its
-associated routine</a></h3>
+<h4><a name="new_routine">Add the new input variable and its
+associated routine</a></h4>
 
 <p>
 Please examine the file
@@ -266,7 +268,7 @@ new routine.
 Last but not least, rebuild <i>abinit</i>.
 </p>
 
-<h3><a name="test">Add a test to the test suite</a></h3>
+<h4><a name="test">Add a test to the test suite</a></h4>
 
 <p>
 Since your contribution is to be integrated into the version 7 (8, 9 ...) of ABINIT,
@@ -291,7 +293,7 @@ Implement your test and issue <tt>./Runtests.py v7[999]</tt>
 in the <i>tests/</i> subdirectory, to check that it works fine.
 </p>
 
-<h3><a name="patch">Create a patch for the project leader</a></h3>
+<h4><a name="patch">Create a patch for the project leader</a></h4>
 
 <p>
 There are two ways of creating a patch, depending on whether you are
@@ -317,13 +319,12 @@ Q11. Which options will you give to the <i>diff</i> command to produce the patch
 <p>
 Q12. How will you proceed exactly to create it ?
 </p>
-
+<br><br><a href=#top>Go to the top</a>
 <hr>
-
-<h3><a name="solutions">Solutions</a></h3>
-
-<p>
-Even if we provide you here with the answers to some of the questions,
+<br><a name="solutions"> </a>
+<a name="4"> </a>
+<h3><b>4. Solutions</b></h3>
+ <p>Even if we provide you here with the answers to some of the questions,
 we highly recommend you to try by yourself before looking at them. Please
 read this section only as a last resort.
 </p>
@@ -394,14 +395,15 @@ commands will do:
  <li><tt>mv abinit-7.4.1 abinit-7.4.1-lesson</tt></li>
  <li><tt>tar xvzf /path/to/abinit/tarball/abinit-7.4.1.tar.gz</tt></li>
  <li><tt>mv abinit-7.4.1 abinit-7.4.1-orig</tt></li>
- <li><tt><tt>diff -urN abinit-7.4.1-orig abinit-7.4.1-lesson &gt;
-  abinit-7.4.1-lesson.patch</tt></li>
+ <li><tt>diff -urN abinit-7.4.1-orig abinit-7.4.1-lesson &gt; abinit-7.4.1-lesson.patch</tt></li>
  <li><tt>gzip --best abinit-7.4.1-lesson.patch</tt></li>
 </ul>
 
 <p><i>Note: in case you are using Bazaar, you will have to exclude the '.bzr*'
 files from the diff by adding "<tt>-x '.bzr*'</tt>" to the other
 options.</i></p>
+<br><br><a href=#top>Go to the top</a>
+<hr>
 <script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
 
 </body>

@@ -1,6 +1,7 @@
-# This YAML file contains the introduction as well as the body (including the table of content) of the html lesson.
-# In order to modify the other parts, modify the file lessons.html .
-# This is the introduction ...
+## This YAML file contains the introduction as well as the body of the html lesson.
+## In order to modify the other parts, modify the file lessons.html .
+
+## This is the introduction ...
 intro : |
   <p>This lesson covers some of the features available in the program <em>cut3d</em>.
   The help file of this program can be view at [[help_cut3d]].
@@ -11,15 +12,16 @@ intro : |
   In this lesson will we see how to use this program to obtain the value of the density on a line. </p>
   
   <p>This lesson should take about 15 minutes.</p>
-# This is the body, including the table of content ...
-body : |
-  <ul>
-    <li><a href="#AT.1">1.</a> Obtaining the density and wavefunctions files for Silicon.</li>
-    <li><a href="#AT.2">2.</a> Getting the density on a given line.</li>
-  </ul>
-  <hr>
-  <a name="AT.1"></a>
-  <h3><b>1. Obtain the density and wavefunctions files for Silicon.</b> </h3>
+
+## Now come the different sections, numbered.
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec1:
+ title: "Obtaining the density and wavefunctions files for Silicon"
+ tag: density_wfs
+ body: |
   <p>We will first start by a simple example: viewing Silicon density information.
   Before using the <em>cut3d</em> program, we first have to generate the density and
   the wavefunctions files by running the Abinit program.
@@ -37,9 +39,13 @@ body : |
   Careful, if you run a non-self-consistent job, you may obtain a density but it will not be physical!</p>
   <p><strong>NOTE: </strong>The wavefunctions in DS1 (file: tbase3_5o_DS1_WFK) are those of the Monkhorst and Pack grid which are good for self-consistent calculations but often not really inspiring physically. For this reason, we often have to do a non-self-consistent run to get relevant wavefunctions as it is done in this case. The DS2 (file: tbase3_5o_DS2_WFK) contains the interesting wavefunctions that we want to analyse. </p>
   
-  <hr>
-  <a name="AT.2"></a>
-  <h3><b>2. Getting the density on a given line.</b></h3>
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec2:
+ title: "Getting the density on a given line"
+ tag: line
+ body: |
   <p>Now we are ready to use the <em>cut3d</em> program.
   First we must make sure that we have compiled the program.
   If you have run the command &quot;make&quot; in the Abinit main directory, and everything went well,

@@ -183,7 +183,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
  use m_paw_ij,   only : paw_ij_type, paw_ij_init, paw_ij_free, paw_ij_nullify, paw_ij_reset_flags
  use m_pawfgrtab,only : pawfgrtab_type
  use m_pawrhoij, only : pawrhoij_type,pawrhoij_alloc,pawrhoij_free,pawrhoij_copy,pawrhoij_nullify, &
-&                       pawrhoij_init_unpacked,pawrhoij_mpisum_unpacked
+&                       pawrhoij_init_unpacked,pawrhoij_mpisum_unpacked,pawrhoij_get_nspden
  use m_pawcprj,  only : pawcprj_type,pawcprj_alloc,pawcprj_free,pawcprj_get,pawcprj_copy
  use m_pawdij,   only : pawdijfr
  use m_pawfgr,   only : pawfgr_type
@@ -730,7 +730,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
        idir1=jdir1(kdir1)
        drho1wfr(:,:,idir1)=zero
        cplex_rhoij=max(cplex,dtset%pawcpxocc)
-       nspden_rhoij=dtset%nspden;if (dtset%pawspnorb>0.and.dtset%nspinor==2) nspden_rhoij=4
+       nspden_rhoij=pawrhoij_get_nspden(dtset%nspden,dtset%nspinor,dtset%pawspnorb)
        call pawrhoij_alloc(pawdrhoij1(:,idir1),cplex_rhoij,nspden_rhoij,dtset%nspinor,&
 &       dtset%nsppol,dtset%typat,pawtab=pawtab,use_rhoijp=1,use_rhoij_=0,&
 &       comm_atom=mpi_enreg%comm_atom,mpi_atmtab=my_atmtab)
@@ -919,8 +919,8 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
        ABI_ALLOCATE(kinpw1,(npw1_k))
        dkinpw=zero
 !      Compute (1/2) (2 Pi)**2 (k+q+G)**2:
-!       call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass,gmet,kg1_k,kinpw1,kpq,npw1_k)
-       call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass,gmet,kg1_k,kinpw1,kpq,npw1_k,0,0)
+!       call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass_free,gmet,kg1_k,kinpw1,kpq,npw1_k)
+       call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass_free,gmet,kg1_k,kinpw1,kpq,npw1_k,0,0)
 
 !      Compute nonlocal form factors ffnl at (k+G), for all atoms
        ider=0;idir0=0
@@ -1129,9 +1129,9 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
 
 !          Eventually compute 1st-order kinetic operator
            if (ipert1==dtset%natom+1) then
-             call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass,gmet,kg_k,dkinpw,kpoint,npw_k,idir1,0)
+             call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass_free,gmet,kg_k,dkinpw,kpoint,npw_k,idir1,0)
            else if (ipert1==dtset%natom+3.or.ipert1==dtset%natom+4) then
-             call kpgstr(dkinpw,dtset%ecut,dtset%ecutsm,dtset%effmass,gmet,gprimd,istr1,kg_k,kpoint,npw_k)
+             call kpgstr(dkinpw,dtset%ecut,dtset%ecutsm,dtset%effmass_free,gmet,gprimd,istr1,kg_k,kpoint,npw_k)
            end if
 
 !          Finalize initialization of 1st-order NL hamiltonian

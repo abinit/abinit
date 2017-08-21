@@ -1,0 +1,106 @@
+<!--                                                                                     -->
+<!-- This file has been produced by generate_doc.py using different .yml  or .bib files. -->
+<!-- It is useless to modify it. Modify the related .yml  or .bib files instead.         -->
+<!--                                                                                     -->
+<html>
+<head><title>Atom Manipulator </title>
+<link rel=stylesheet type="text/css" href="../formabinit.css">
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  jax: ["input/TeX","output/HTML-CSS"],
+  tex2jax: {inlineMath: [['$','$']]},
+  displayAlign: "center",
+  TeX: { equationNumbers: { autoNumber: "AMS" } }
+});
+</script>
+<script type="text/javascript" async
+src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+</head>
+<body bgcolor="#ffffff">
+
+<hr>
+<a name="top"></a>
+
+<h1>Atom manipulator</h1>
+<h3>This page gives hints on how to manipulate atoms and groups of atoms to generate the set of atomic positions with the ABINIT package.
+<hr>
+
+<h5>Copyright (C) 2016-2017 ABINIT group (FJ)
+<script type="text/javascript" src="../../js_files/copyright.js"> </script>
+</h5>
+
+<script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
+
+ Mentioned in &nbsp; <a href="../../topics/generated_files/topic_crystal.html">topic_crystal</a> &nbsp;&nbsp; <a href="../../users/generated_files/help_features.html#2.1">help_features#2.1</a> &nbsp;
+ <hr>
+ <h3><b>Table of content: </b></h3> 
+ <ul> <li>1. <a href="topic_AtomManipulator.html#1">Introduction.</a><li>2. <a href="topic_AtomManipulator.html#2">Related input variables.</a><li>3. <a href="topic_AtomManipulator.html#3">Selected input files.</a></ul>
+
+&nbsp; 
+<HR ALIGN=left> 
+<a name="1">&nbsp;</a>
+<h3><b>1. Introduction.</b></h3>
+
+
+ABINIT has some (non-graphical) capabilities to manipulate atoms and group of atoms, to help establishing
+the set of atomic positions in the input file when big cells are considered.
+<p>
+Explicitly, one or two groups of atoms, forming e.g. a molecule, a cluster, or a small primitive cell, 
+can be repeated in arbitrary number, then translated and rotated. 
+Then, atoms can be removed, to form e.g. vacancies. See <a href="../../input_variables/generated_files/varset_geo.html#nobj">nobj</a> as entry point.
+<p>
+The related input variables being used for preprocessing of the input file, they are not echoed
+in the output file (<a href="#"><a href="#">[[FAKE LINK:FAKE LINK:NO_INTERNAL]]</a></a> characteristics).
+<br><br><a href=#top>Go to the top</a>
+
+
+
+
+&nbsp; 
+<hr> 
+<a name="2">&nbsp;</a>
+<h3><b>2. Related input variables.</b></h3>
+
+
+<p>Compulsory input variables:<p>... <a href="../../input_variables/generated_files/varset_geo.html#nobj">nobj</a>   [Number of OBJects]<br>
+<p>Basic input variables:<p>... <a href="../../input_variables/generated_files/varset_geo.html#natrd">natrd</a>   [Number of AToms ReaD]<br>
+... <a href="../../input_variables/generated_files/varset_geo.html#objaat">objaat</a>   [OBJect A : list of AToms]<br>
+... <a href="../../input_variables/generated_files/varset_geo.html#objan">objan</a>   [OBJect A : Number of atoms]<br>
+... <a href="../../input_variables/generated_files/varset_geo.html#objarf">objarf</a>   [OBJect A : Repetition Factors]<br>
+<p>Useful input variables:<p>... <a href="../../input_variables/generated_files/varset_geo.html#objaax">objaax</a>   [OBJect A : AXis]<br>
+... <a href="../../input_variables/generated_files/varset_geo.html#objaro">objaro</a>   [OBJect A : ROtations]<br>
+... <a href="../../input_variables/generated_files/varset_geo.html#objatr">objatr</a>   [OBJect A : TRanslations]<br>
+... <a href="../../input_variables/generated_files/varset_geo.html#objbat">objbat</a>   [OBJect B : list of AToms]<br>
+... <a href="../../input_variables/generated_files/varset_geo.html#objbax">objbax</a>   [OBJect B : AXis]<br>
+... <a href="../../input_variables/generated_files/varset_geo.html#objbn">objbn</a>   [OBJect B : Number of atoms]<br>
+... <a href="../../input_variables/generated_files/varset_geo.html#objbrf">objbrf</a>   [OBJect B : Repetition Factors]<br>
+... <a href="../../input_variables/generated_files/varset_geo.html#objbro">objbro</a>   [OBJect B : ROtations]<br>
+... <a href="../../input_variables/generated_files/varset_geo.html#objbtr">objbtr</a>   [OBJect B : TRanslations]<br>
+... <a href="../../input_variables/generated_files/varset_geo.html#vaclst">vaclst</a>   [VACancies LiST]<br>
+... <a href="../../input_variables/generated_files/varset_geo.html#vacnum">vacnum</a>   [VACancies NUMber]<br>
+
+<br><br><a href=#top>Go to the top</a>
+
+
+&nbsp; 
+<HR ALIGN=left> 
+<a name="3">&nbsp;</a>
+<h3><b>3. Selected input files.</b></h3>
+
+
+<i><b>WARNING</b> : as of ABINITv8.6.x, the list of input files provided in the specific section of the topics Web pages is still to be reviewed/tuned. In some cases, it will be adequate, and in other cases, it might be incomplete, or perhaps even useless.</i>
+<br><br>The user can find some related example input files in the ABINIT package in the directory /tests, or on the Web:
+<p> tests/v1/Input: <a href="../../tests/v1/Input/t40.in">t40.in</a> 
+<a href="../../tests/v1/Input/t42.in">t42.in</a> 
+<a href="../../tests/v1/Input/t43.in">t43.in</a> 
+<br>
+
+<br><br><a href=#top>Go to the top</a>
+
+
+<script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
+
+</body>
+</html>
+

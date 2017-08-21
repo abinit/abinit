@@ -132,7 +132,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  use m_paw_ij,        only : paw_ij_type, paw_ij_init, paw_ij_free, paw_ij_nullify
  use m_pawfgrtab,     only : pawfgrtab_type, pawfgrtab_init, pawfgrtab_free
  use m_pawrhoij,      only : pawrhoij_type, pawrhoij_alloc, pawrhoij_copy,&
-&                            pawrhoij_free, symrhoij
+&                            pawrhoij_free, symrhoij, pawrhoij_get_nspden
  use m_pawdij,        only : pawdij, symdij_all
  use m_paw_pwaves_lmn,only : paw_pwaves_lmn_t, paw_pwaves_lmn_init, paw_pwaves_lmn_free
  use m_pawpwij,       only : pawpwff_t, pawpwff_init, pawpwff_free
@@ -343,7 +343,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    call chkpawovlp(Cryst%natom,Cryst%ntypat,Dtset%pawovlp,Pawtab,Cryst%rmet,Cryst%typat,Cryst%xred)
 
    ABI_DT_MALLOC(Pawrhoij,(Cryst%natom))
-   nspden_rhoij=Dtset%nspden; if (Dtset%pawspnorb>0.and.Dtset%nspinor==2) nspden_rhoij=4
+   nspden_rhoij=pawrhoij_get_nspden(Dtset%nspden,Dtset%nspinor,Dtset%pawspnorb)
    call pawrhoij_alloc(Pawrhoij,Dtset%pawcpxocc,nspden_rhoij,Dtset%nspinor,Dtset%nsppol,&
 &   Cryst%typat,pawtab=Pawtab)
    !  
@@ -834,8 +834,8 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    nkxc1=0
    ABI_DT_MALLOC(Paw_an,(Cryst%natom))
    call paw_an_nullify(Paw_an)
-   call paw_an_init(Paw_an,Cryst%natom,Cryst%ntypat,nkxc1,0,Dtset%nspden,cplex,Dtset%pawxcdev,&
-&   Cryst%typat,Pawang,Pawtab,has_vxc=1,has_vxcval=0)
+   call paw_an_init(Paw_an,Cryst%natom,Cryst%ntypat,nkxc1,0,Dtset%nspden,&
+&   cplex,Dtset%pawxcdev,Cryst%typat,Pawang,Pawtab,has_vxc=1,has_vxcval=0)
 
    nzlmopt=-1; option=0; compch_sph=greatest_real
    call pawdenpot(compch_sph,KS_energies%e_paw,KS_energies%e_pawdc,ipert,Dtset%ixc,&

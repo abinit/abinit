@@ -3,15 +3,26 @@
 <!-- It is useless to modify it. Modify the related .yml  or .bib files instead.         -->
 <!--                                                                                     -->
 <html>
-<head><title>Lesson on basic parallelism.</title>
+<head><title>Lesson on basic parallelism</title>
 <link rel=stylesheet type="text/css" href="../formabinit.css">
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  jax: ["input/TeX","output/HTML-CSS"],
+  tex2jax: {inlineMath: [['$','$']]},
+  displayAlign: "center",
+  TeX: { equationNumbers: { autoNumber: "AMS" } }
+});
+</script>
+<script type="text/javascript" async
+src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
 </head>
 <body bgcolor="#ffffff">
 
 <hr>
 <a name="top"></a>
 
-<h1>ABINIT tutorial. Lesson on basic parallelism....</h1>
+<h1>ABINIT tutorial. Lesson on basic parallelism...</h1>
 
 <h2>Parallelism in ABINIT, generalities and environments.</h2>
 <hr>
@@ -45,43 +56,20 @@ limitation to the maximal speed-up that can be achieved.</p>
 <script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
 
 <a name="list"></a>
-<h3><b> Lesson on basic parallelism., table of content:</b></h3>
+<h3><b> Lesson on basic parallelism. Table of content:</b></h3>
 
-<ul>
-<li><a href="#1">1.</a> Generalities</li>
-<li><a href="#2">2.</a> Parallel environments
+<ul> 
+  <li>1. <a href="#generalities">Generalities</a></li>
+  <li>2. <a href="#environments">Characteristics of parallel environments</a></li>
+  <li>3. <a href="#parts">What parts of ABINIT are parallel?</a></li>
+  <li>4. <a href="#example">A simple example of parallelism in ABINIT</a></li>
+  <li>5. <a href="#implementation">Details of the implementation</a></li>
 
-<ul>
-<li>Generalities</li>
-<li>MPI</li>
-<li>OpenMP</li>
-<li>Scalapack</li>
-<li>Fast/slow communications</li>
-</ul></li>
-<li><a href="#3">3.</a> What parts of ABINIT are parallel?</li>
-<li><a href="#4">4.</a> A simple example of parallelism in ABINIT
-<ul>
-<li>Running a job</li>
-<li>Parallelism over the k-points</li>
-<li>Parallelism over the spins</li>
-<li>Number of computing cores to accomplish a task</li>
-<li>Evidencing overhead</li>
-</ul></li>
-
-<li><a href="#5">5.</a> Details of the implementation
-
-<ul>
-<li>The MPI toolbox in ABINIT</li>
-<li>How to parallelize a routine: some hints</li>
-</ul></li>
-
-</ul>
-
-
-<hr>
-
-<h2><a name="1"></a>1. Generalities</h2>
-
+ </ul> 
+ <hr><br><a name="generalities"> </a>
+<a name="1"> </a>
+<h3><b>1. Generalities</b></h3>
+ <p><a name="1"></a>
 <p>With the broad availability of multi-core processors, everybody 
 now has a parallel machine at hand. ABINIT will be able to take advantage of
 the availability of several cores for most of its capabilities, be it
@@ -113,12 +101,12 @@ program and that you are familiar with the peculiarities of your system.
 Please remember that, as there is no standard way of setting up a
 parallel environment, we are not able to provide you with support beyond
 ABINIT itself.</p>
-
+<br><br><a href=#top>Go to the top</a>
 <hr>
-
-<h2><a name="2"></a>2. Characteristics of parallel environments</h2>
-
-<h3>Generalities</h3>
+<br><a name="environments"> </a>
+<a name="2"> </a>
+<h3><b>2. Characteristics of parallel environments</b></h3>
+ <p><a name="2"></a>
 <p>Different software solutions can be used to benefit from parallelism.
 Most of ABINIT parallelism is based on MPI, but some additional speed-up
 (or a better distribution of data, allowing to run bigger calculations)
@@ -209,11 +197,12 @@ linked using a fast network, but includes some connections based e.g. on
 Ethernet, then, you might not be able to benefit from the speed-up
 announced in the tutorials. You have to perform some tests on your
 actual machine to gain knowledge of it.</p>
-
+<br><br><a href=#top>Go to the top</a>
 <hr>
-
-<h2><a name="3"></a>3. What parts of ABINIT are parallel?</h2>
-
+<br><a name="parts"> </a>
+<a name="3"> </a>
+<h3><b>3. What parts of ABINIT are parallel?</b></h3>
+ <p><a name="3"></a>
 <p>Parallelizing a code is a very delicate and complicated task, thus
 do not expect that things will systematically go faster just because you
 are using a parallel version of ABINIT. Please keep also in mind that in
@@ -225,8 +214,8 @@ include:</p>
 <li><a href="lesson_paral_gspw.html">ground state with plane waves</a>,</li>
 <li><a href="lesson_paral_gswvl.html">ground state with wavelets</a>,</li>
 <li><a href="lesson_paral_moldyn.html">molecular dynamics</a>,</li>
-<li><a href="lesson_paral_string.html">parallelism on "images"</a>,</li>
-<li><a href="lesson_paral_dfpt.html">response functions</a>,</li>
+<li><a href="lesson_paral_images.html">parallelism on "images"</a>,</li>
+<li><a href="lesson_paral_dfpt.html">density-functional perturbation theory (DFPT)</a>,</li>
 <li><a href="lesson_paral_mbt.html">Many-Body Perturbation Theory</a>.</li>
 </ul>
 <p>Note that the tutorial on <a href="lesson_paral_gspw.html">ground state
@@ -237,19 +226,18 @@ hundreds of processors.</p>
 <p>Actually, the two levels based on</p>
 <ul>
 <li>the treatment of k-points in reciprocal space;</li>
-<li>the treatment of spins, for spin-polarized collinear situations
-    (when <a href="../../input_variables/generated_files/varbas.html#nsppol"
-    target="kwimg">nsppol</a>=2);</li>
+<li>the treatment of spins, for spin-polarized collinear situations 
+    <a href="../../input_variables/generated_files/varset_basic.html#nsppol">nsppol</a>=2);</li>
 </ul>
 <p>are, on the contrary, quite easy to use. An example of such parallelism
 will be given in the next section.</p>
-
+<br><br><a href=#top>Go to the top</a>
 <hr>
-
-<h2><a name="4"></a>4. A simple example of parallelism in ABINIT</h2>
-
+<br><a name="example"> </a>
+<a name="4"> </a>
+<h3><b>4. A simple example of parallelism in ABINIT</b></h3>
+ <p><a name="4"></a>
 <h3>Running a job</h3>
-
 <p><i>Before starting, you might consider working in a different
 subdirectory as for the other lessons. Why not "Work_paral" ?</i></p>
 
@@ -292,7 +280,7 @@ wants to get an accurate description of the ground state. Examine this
 file. Note that the cut-off is realistic, as well as the grid of
 k-points (giving 60 k points in the irreducible Brillouin zone).
 However, the number of SCF steps,
-<a href="../../input_variables/generated_files/varbas.html#nstep">nstep</a>,
+<a href="../../input_variables/generated_files/varset_basic.html#nstep">nstep</a>,
 has been set to 3 only. This is to keep the CPU time reasonable for this
 tutorial, without affecting the way parallelism on the k points will be
 able to increase the speed.  Once done, your output files have likely
@@ -437,8 +425,7 @@ The timing analysis is very similar to the k-point parallelism case.
 </p>
 
 <p>If you have more than 2 processors at hand, you might increase the
-value of <a href="../../input_variables/generated_files/varbas.html#ngkpt"
-target="kwimg">ngkpt</a>, so that more than one k-point is available,
+value of <a href="../../input_variables/generated_files/varset_basic.html#ngkpt">ngkpt</a>, so that more than one k-point is available,
 and see that the k-point and spin parallelism indeed work
 concurrently.</p>
 
@@ -447,8 +434,8 @@ concurrently.</p>
 <p>Balancing efficiently the load on the processors is not always
 straightforward.  When using k-point- and spin-parallelism, the ideal
 numbers of processors to use are those that divide the product of 
-<a href="../../input_variables/generated_files/varbas.html#nsppol">nsppol</a> by <a href="../../input_variables/generated_files/varbas.html#nkpt">nkpt</a>
-(e.g. for <a href="../../input_variables/generated_files/varbas.html#nsppol">nsppol</a>*<a href="../../input_variables/generated_files/varbas.html#nkpt">nkpt</a>, it is quite efficient to use 2, 3, 4, 6 or
+<a href="../../input_variables/generated_files/varset_basic.html#nsppol">nsppol</a> by <a href="../../input_variables/generated_files/varset_basic.html#nkpt">nkpt</a>
+(e.g. for <a href="../../input_variables/generated_files/varset_basic.html#nsppol">nsppol</a>*<a href="../../input_variables/generated_files/varset_basic.html#nkpt">nkpt</a>, it is quite efficient to use 2, 3, 4, 6 or
 12 processors). ABINIT will nevertheless handle correctly other numbers
 of processors, albeit slightly less efficiently, as the final time will
 be determined by the processor that will have the biggest share of the
@@ -462,11 +449,12 @@ resulting from the increasing amount of communication between the
 processors. The loss of efficiency is highly dependent on the
 implementation and linked to the decreasing charge on each processor
 too.</p>
-
+<br><br><a href=#top>Go to the top</a>
 <hr>
-
-<h2><a name="5"></a>5. Details of the implementation</h2>
-
+<br><a name="implementation"> </a>
+<a name="5"> </a>
+<h3><b>5. Details of the implementation</b></h3>
+ <p><a name="5"></a>
 <h3>The MPI toolbox in ABINIT</h3>
 
 <p>The ABINIT-specific MPI routines are located in different
@@ -541,6 +529,8 @@ in all cases, and have their own pre-processed sections. The cleaning and closin
 stuff is done in a central part of abinit at the end of the run.</p>
 
 &nbsp;<br />
+<br><br><a href=#top>Go to the top</a>
+<hr>
 <script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
 
 </body>
