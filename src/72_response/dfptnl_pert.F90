@@ -828,8 +828,8 @@ subroutine dfptnl_pert(atindx,atindx1,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,ei
                                  print_info,dtset%prtvol,rf_hamkq_i2pert,size_cprj,size_wf,enl=chi_ij,ffnl1=ffnl1,ffnl1_test=ffnl1_test)
            call dotprod_g(enlout1(1),enlout1(2),gs_hamkq%istwf_k,npw_k*nspinor,2,cgj,s_cwave,&
 &                 mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
-           sum_psi0H2psi1a   = sum_psi0H2psi1a   + dtset%wtk(ikpt)*occ_k(jband)*enlout1(1)
-           sum_psi0H2psi1a_i = sum_psi0H2psi1a_i + dtset%wtk(ikpt)*occ_k(jband)*enlout1(2)
+           sum_psi0H2psi1a   = sum_psi0H2psi1a   + half*dtset%wtk(ikpt)*occ_k(jband)*enlout1(1) ! be careful : factor 0.5
+           sum_psi0H2psi1a_i = sum_psi0H2psi1a_i + half*dtset%wtk(ikpt)*occ_k(jband)*enlout1(2) ! be careful : factor 0.5
 
 !          Read ddk file
            if(idir_elfd==i2dir) then
@@ -845,8 +845,8 @@ subroutine dfptnl_pert(atindx,atindx1,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,ei
                                  print_info,dtset%prtvol,rf_hamkq_i2pert,size_cprj,size_wf,enl=chi_ij,ffnl1=ffnl1,ffnl1_test=ffnl1_test)
            call dotprod_g(enlout2(1),enlout2(2),gs_hamkq%istwf_k,npw_k*nspinor,2,cwavef2,s_cwave,&
 &                 mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
-           sum_psi0H2psi1b   = sum_psi0H2psi1b   + dtset%wtk(ikpt)*occ_k(jband)*enlout2(1)
-           sum_psi0H2psi1b_i = sum_psi0H2psi1b_i + dtset%wtk(ikpt)*occ_k(jband)*enlout2(2)
+           sum_psi0H2psi1b   = sum_psi0H2psi1b   + half*dtset%wtk(ikpt)*occ_k(jband)*enlout2(1) ! be careful : factor 0.5
+           sum_psi0H2psi1b_i = sum_psi0H2psi1b_i + half*dtset%wtk(ikpt)*occ_k(jband)*enlout2(2) ! be careful : factor 0.5
 
          end if ! end if compute_rho21
 
