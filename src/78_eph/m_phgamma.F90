@@ -1665,8 +1665,7 @@ subroutine phgamma_vv_interp_setup(gams,cryst,action)
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'phgamma_interp_setup'
- use interfaces_77_ddb
+#define ABI_FUNC 'phgamma_vv_interp_setup'
 !End of the abilint section
 
  implicit none

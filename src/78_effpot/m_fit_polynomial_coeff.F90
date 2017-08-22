@@ -1113,6 +1113,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,fixcoeff,hist,powers,ncycle_in,nfixc
  real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3),strain_mat_inv(3,3)
  real(dp) :: mingf(4)
  integer :: ipiv(3)
+ integer :: sc_size(3)
  integer,allocatable  :: buffsize(:),buffdisp(:)
  integer,allocatable  :: list_coeffs(:),list_coeffs_tmp(:),my_coeffindexes(:),singular_coeffs(:)
  integer,allocatable  :: my_coefflist(:) 
@@ -1214,7 +1215,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,fixcoeff,hist,powers,ncycle_in,nfixc
 !Reset the output (we free the memory)
  call effective_potential_freeCoeffs(eff_pot)
 
-!if the number of atoms in reference supercell into effpot is not corret,
+!if the number of atoms in reference supercell into effpot is not correct,
 !wrt to the number of atom in the hist, we set map the hist and set the good 
 !supercell
  if (size(hist%xred,2) /= eff_pot%supercell%natom) then
@@ -1443,7 +1444,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,fixcoeff,hist,powers,ncycle_in,nfixc
 !  Compact form:
    sqomega(itime) = ((ucvol(itime)**(4.0/3.0)) / ((natom_sc)**(1/3.0)))
 !  Compute also normalisation factors
-   ncell      = product(eff_pot%supercell%qphon(:))
+   ncell      = eff_pot%supercell%ncells
 
 !  Compute the difference between History and model (fixed part)
    fcart_diff(:,:,itime) =  hist%fcart(:,:,itime) - fcart_fixed(:,:,itime) 
@@ -1503,9 +1504,12 @@ subroutine fit_polynomial_coeff_fit(eff_pot,fixcoeff,hist,powers,ncycle_in,nfixc
  ABI_ALLOCATE(fcart_coeffs,(3,natom_sc,my_ncoeff,ntime))
  ABI_ALLOCATE(strten_coeffs,(6,ntime,my_ncoeff))
 
+ do ii = 1, 3
+   sc_size(ii) = eff_pot%supercell%rlatt(ii,ii)
+ end do
  call fit_polynomial_coeff_getFS(my_coeffs,du_delta,displacement,&
 &                                energy_coeffs,fcart_coeffs,natom_sc,eff_pot%crystal%natom,&
-&                                my_ncoeff,ntime,int(eff_pot%supercell%qphon(:)),strain,&
+&                                my_ncoeff,ntime,sc_size,strain,&
 &                                strten_coeffs,ucvol,my_coefflist,my_ncoeff)
 
 !Free space
