@@ -736,19 +736,18 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
 ! the sqrt(4pi) factor comes from the fact we are calculating the spherical moments, 
 !  and for the 00 channel the prefactor of Y_00 = 2 sqrt(pi)
      ABI_ALLOCATE(rho,(mesh_size))
-!     rho(1:mesh_size)=(rho1(1:mesh_size,1,1) + sqrt(four_pi)*pawtab(itypat)%coredens(1:mesh_size)) &
-!&       *four_pi*pawrad(itypat)%rad(1:mesh_size)**2
-
-     rho(1:mesh_size)=rho1(1:mesh_size,1,1)*four_pi*pawrad(itypat)%rad(1:mesh_size)**2
+     rho(1:mesh_size)=(rho1(1:mesh_size,1,1) + sqrt(four_pi)*pawtab(itypat)%coredens(1:mesh_size)) &
+&       *four_pi*pawrad(itypat)%rad(1:mesh_size)**2
+!     rho(1:mesh_size)=rho1(1:mesh_size,1,1)*four_pi*pawrad(itypat)%rad(1:mesh_size)**2
 
      call poisson(rho,0,pawrad(itypat),paw_an(iatom)%vh1(:,1,1))
 
-!     paw_an(iatom)%vh1(2:mesh_size,1,1)=(paw_an(iatom)%vh1(2:mesh_size,1,1) &
-!&       -sqrt(four_pi)*znucl(itypat))/pawrad(itypat)%rad(2:mesh_size)
-
+     paw_an(iatom)%vh1(2:mesh_size,1,1)=(paw_an(iatom)%vh1(2:mesh_size,1,1) &
+&       -sqrt(four_pi)*znucl(itypat))/pawrad(itypat)%rad(2:mesh_size)
 ! TODO: check this is equivalent to the previous version (commented) which explicitly recalculated VH(coredens)
-     paw_an(iatom)%vh1(2:mesh_size,1,1)=paw_an(iatom)%vh1(2:mesh_size,1,1)/pawrad(itypat)%rad(2:mesh_size) &
-&       + sqrt(four_pi) * pawtab(itypat)%VHnZC(2:mesh_size)
+! DONE: numerically there are residual differences on abiref (7th digit).
+!     paw_an(iatom)%vh1(2:mesh_size,1,1)=paw_an(iatom)%vh1(2:mesh_size,1,1)/pawrad(itypat)%rad(2:mesh_size) &
+!&       + sqrt(four_pi) * pawtab(itypat)%VHnZC(2:mesh_size)
 
      call pawrad_deducer0(paw_an(iatom)%vh1(:,1,1),mesh_size,pawrad(itypat))
 
@@ -757,14 +756,16 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
      if (usenhat /= 0) then
        rho(1:mesh_size)=nhat1(1:mesh_size,1,1)
      end if
-!     rho(1:mesh_size)=(rho(1:mesh_size) + trho1(1:mesh_size,1,1) + sqrt(four_pi)*pawtab(itypat)%tcoredens(1:mesh_size,1)) &
-!&       *four_pi*pawrad(itypat)%rad(1:mesh_size)**2
-     rho(1:mesh_size)=(rho(1:mesh_size) + trho1(1:mesh_size,1,1))*four_pi*pawrad(itypat)%rad(1:mesh_size)**2
+     rho(1:mesh_size)=(rho(1:mesh_size) + trho1(1:mesh_size,1,1) + sqrt(four_pi)*pawtab(itypat)%tcoredens(1:mesh_size,1)) &
+&       *four_pi*pawrad(itypat)%rad(1:mesh_size)**2
+!     rho(1:mesh_size)=(rho(1:mesh_size) + trho1(1:mesh_size,1,1))*four_pi*pawrad(itypat)%rad(1:mesh_size)**2
+
      call poisson(rho,0,pawrad(itypat),paw_an(iatom)%vht1(:,1,1))
-!     paw_an(iatom)%vht1(2:mesh_size,1,1)=(paw_an(iatom)%vht1(2:mesh_size,1,1) &
-!&       -sqrt(four_pi)*znucl(itypat))/pawrad(itypat)%rad(2:mesh_size)
-     paw_an(iatom)%vht1(2:mesh_size,1,1)=paw_an(iatom)%vht1(2:mesh_size,1,1)/pawrad(itypat)%rad(2:mesh_size) &
-&        + sqrt(four_pi)*pawtab(itypat)%vhtnzc(2:mesh_size)
+
+     paw_an(iatom)%vht1(2:mesh_size,1,1)=(paw_an(iatom)%vht1(2:mesh_size,1,1) &
+&       -sqrt(four_pi)*znucl(itypat))/pawrad(itypat)%rad(2:mesh_size)
+!     paw_an(iatom)%vht1(2:mesh_size,1,1)=paw_an(iatom)%vht1(2:mesh_size,1,1)/pawrad(itypat)%rad(2:mesh_size) &
+!&        + sqrt(four_pi)*pawtab(itypat)%vhtnzc(2:mesh_size)
      call pawrad_deducer0(paw_an(iatom)%vht1(:,1,1),mesh_size,pawrad(itypat))
 
      paw_an(iatom)%has_vhartree=2
