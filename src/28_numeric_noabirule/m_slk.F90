@@ -274,6 +274,7 @@ subroutine build_grid_scalapack(grid,nbprocs,comm)
  do while (MOD(nbprocs,i) /= 0)
    i = i-1
  end do
+ i=max(i,1)
 
  grid%dims(1) = i
  grid%dims(2) = INT(nbprocs/i)
