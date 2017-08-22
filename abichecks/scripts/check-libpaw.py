@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# encoding=utf8  
 from __future__ import unicode_literals, division, print_function, absolute_import
 
 import tempfile
@@ -7,6 +8,8 @@ import string
 import glob,os
 import re
 import sys
+reload(sys)  
+sys.setdefaultencoding('utf8')
 from shutil import rmtree
 
 # ---------------------------------------------------------------------------- #

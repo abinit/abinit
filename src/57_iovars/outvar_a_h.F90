@@ -690,8 +690,8 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
  dprarr(1,:)=dtsets(:)%ecutwfn
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'ecutwfn','ENE',0)
 
- dprarr(1,:)=dtsets(:)%effmass
- call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'effmass','DPR',0)
+ dprarr(1,:)=dtsets(:)%effmass_free
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'effmass_free','DPR',0)
 
  dprarr(1,:)=dtsets(:)%efield(1)
  dprarr(2,:)=dtsets(:)%efield(2)

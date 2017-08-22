@@ -75,4 +75,5 @@ diemac 12.0
 #%% description = 
 #%%   2 Silicon atoms, in a diamond structure.
 #%%   Test the computation of the DOS, using the linear tetrahedron method.
+#%% topics = ElecDOS
 #%%<END TEST_INFO>

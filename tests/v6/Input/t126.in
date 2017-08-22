@@ -73,4 +73,5 @@ polcen  1 1 1
 #%% description = 
 #%%   AlAs case, to test the "polcen" in finite reduced electric field calculation. 
 #%%   (XG120616 : tranferred to tests/seq)
+#%% topics = Berry
 #%%<END TEST_INFO>

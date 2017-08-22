@@ -1,0 +1,13 @@
+- !components 
+    name      : LOTF
+    keyword   : LOTF
+    authors   : XG
+    howto     : use the Learn-of-the-flight feature
+    header    : default
+    title     : <h1>Learn-on-the-flight (LOTF)</h1>
+    subtitle  : default
+    copyright : default
+    links     : default
+    introduction: |
+      Under development, for experts only.
+    end : default 

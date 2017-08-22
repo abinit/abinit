@@ -1,0 +1,129 @@
+<!--                                                                                     -->
+<!-- This file has been produced by generate_doc.py using different .yml  or .bib files. -->
+<!-- It is useless to modify it. Modify the related .yml  or .bib files instead.         -->
+<!--                                                                                     -->
+<html>
+<head><title>Bands and occupations -  Metal/insulators </title>
+<link rel=stylesheet type="text/css" href="../formabinit.css">
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  jax: ["input/TeX","output/HTML-CSS"],
+  tex2jax: {inlineMath: [['$','$']]},
+  displayAlign: "center",
+  TeX: { equationNumbers: { autoNumber: "AMS" } }
+});
+</script>
+<script type="text/javascript" async
+src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+</head>
+<body bgcolor="#ffffff">
+
+<hr>
+<a name="top"></a>
+
+<h1>Bands and occupation numbers for metals and insulators</h1>
+<h3>This page gives hints on how to to specify bands and occupation numbers, for metals or insulators with the ABINIT package.
+<hr>
+
+<h5>Copyright (C) 2016-2017 ABINIT group (FJ)
+<script type="text/javascript" src="../../js_files/copyright.js"> </script>
+</h5>
+
+<script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
+
+ Mentioned in &nbsp; <a href="../../topics/generated_files/topic_k-points.html">topic_k-points</a> &nbsp;&nbsp; <a href="../../users/generated_files/help_features.html#2.2">help_features#2.2</a> &nbsp;
+ <hr>
+ <h3><b>Table of content: </b></h3> 
+ <ul> <li>1. <a href="topic_BandOcc.html#1">Introduction.</a><li>2. <a href="topic_BandOcc.html#2">Related lesson(s) of the tutorial.</a><li>3. <a href="topic_BandOcc.html#3">Related input variables.</a><li>4. <a href="topic_BandOcc.html#4">Selected input files.</a></ul>
+
+&nbsp; 
+<HR ALIGN=left> 
+<a name="1">&nbsp;</a>
+<h3><b>1. Introduction.</b></h3>
+
+
+<br/>Metallic as well as insulating systems can be treated, depending on the
+value of <a href="../../input_variables/generated_files/varset_basic.html#occopt">occopt</a>. The default value of <a href="../../input_variables/generated_files/varset_basic.html#occopt">occopt</a> corresponds to an insulator (or finite molecule): 
+the number of bands (or states for a molecule) is deduced from the number of electrons brought
+by each pseudopotential ion, and then all the bands are occupied (by two electrons in case of a non-spin-polarized
+system, or by 1 electron in the cas of a spin-polarized system), and a small number of empty bands are added,
+e.g. to obtain the band gap. 
+<p>For a metallic system, use a value of <a href="../../input_variables/generated_files/varset_basic.html#occopt">occopt</a> between 3 and 7. ABINIT will compute a default number
+of bands, including some nearly unoccupied ones, and find the occupation numbers.
+The different values of <a href="../../input_variables/generated_files/varset_basic.html#occopt">occopt</a> correspond to different smearing schemes (smearning defined by <a href="../../input_variables/generated_files/varset_gstate.html#tsmear">tsmear</a> 
+for defining the occupation
+numbers, e.g. Fermi broadening,
+the Gaussian broadening, the Gaussian-Hermite broadening, as well as
+the modifications proposed by Marzari. Finite temperatures
+can also be treated thanks to a smearing scheme (Verstraete scheme) using <a href="../../input_variables/generated_files/varset_gstate.html#tphysel">tphysel</a>.
+<p>It is possible to define manually the number of bands (input variable <a href="../../input_variables/generated_files/varset_basic.html#nband">nband</a>) as well as the
+occupation numbers (input variable <a href="../../input_variables/generated_files/varset_gstate.html#occ">occ</a>). This might be useful to perform a &Delta;-SCF calculation
+for excited states.
+<br><br><a href=#top>Go to the top</a>
+
+
+
+&nbsp; 
+<HR ALIGN=left> 
+<a name="2">&nbsp;</a>
+<h3><b>2. Related lesson(s) of the tutorial.</b></h3>
+
+
+<li><a href="../../tutorial/generated_files/lesson_base1.html">The lesson 1</a> deals with the H2
+molecule : get the total energy, the electronic energies, the charge
+density, the bond length, the atomisation energy </li>
+<li><a href="../../tutorial/generated_files/lesson_base2.html">The lesson 2</a> deals again with the H2
+molecule: convergence studies, LDA versus GGA </li>
+<li><a href="../../tutorial/generated_files/lesson_base3.html">The lesson 3</a> deals with crystalline
+silicon (an insulator): the definition of a k-point grid, the smearing
+of the cut-off energy, the computation of a band structure, and again,
+convergence studies ...</li>
+<li><a href="../../tutorial/generated_files/lesson_base4.html">The lesson 4</a> deals with crystalline
+aluminum (a metal), and its surface: occupation numbers, smearing the
+Fermi-Dirac distribution, the surface energy, and again, convergence
+studies ...</li>
+<br><br><a href=#top>Go to the top</a>
+
+
+&nbsp; 
+<hr> 
+<a name="3">&nbsp;</a>
+<h3><b>3. Related input variables.</b></h3>
+
+
+<p>Basic input variables:<p>... <a href="../../input_variables/generated_files/varset_basic.html#nband">nband</a>   [Number of BANDs]<br>
+... <a href="../../input_variables/generated_files/varset_gstate.html#occ">occ</a>   [OCCupation numbers]<br>
+... <a href="../../input_variables/generated_files/varset_basic.html#occopt">occopt</a>   [OCCupation OPTion]<br>
+... <a href="../../input_variables/generated_files/varset_gstate.html#tsmear">tsmear</a>   [Temperature of SMEARing]<br>
+<p>Useful input variables:<p>... <a href="../../input_variables/generated_files/varset_gstate.html#fband">fband</a>   [Factor for the number of BANDs]<br>
+... <a href="../../input_variables/generated_files/varset_gstate.html#nbdbuf">nbdbuf</a>   [Number of BanDs for the BUFfer]<br>
+... <a href="../../input_variables/generated_files/varset_gstate.html#tphysel">tphysel</a>   [Temperature (PHYSical) of the ELectrons]<br>
+<p>Relevant internal variables:<p>... <a href="../../input_variables/generated_files/varset_internal.html#mband">%mband</a>   [Maximum number of BANDs]<br>
+... <a href="../../input_variables/generated_files/varset_internal.html#nelect">%nelect</a>   [Number of ELECTrons]<br>
+
+<br><br><a href=#top>Go to the top</a>
+
+
+&nbsp; 
+<HR ALIGN=left> 
+<a name="4">&nbsp;</a>
+<h3><b>4. Selected input files.</b></h3>
+
+
+<i><b>WARNING</b> : as of ABINITv8.6.x, the list of input files provided in the specific section of the topics Web pages is still to be reviewed/tuned. In some cases, it will be adequate, and in other cases, it might be incomplete, or perhaps even useless.</i>
+<br><br>The user can find some related example input files in the ABINIT package in the directory /tests, or on the Web:
+<p> tests/v1/Input: <a href="../../tests/v1/Input/t02.in">t02.in</a> 
+<a href="../../tests/v1/Input/t04.in">t04.in</a> 
+<p> tests/v2/Input: <a href="../../tests/v2/Input/t45.in">t45.in</a> 
+<a href="../../tests/v2/Input/t46.in">t46.in</a> 
+<br>
+
+<br><br><a href=#top>Go to the top</a>
+
+
+<script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
+
+</body>
+</html>
+

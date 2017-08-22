@@ -1,0 +1,134 @@
+<!--                                                                                     -->
+<!-- This file has been produced by generate_doc.py using different .yml  or .bib files. -->
+<!-- It is useless to modify it. Modify the related .yml  or .bib files instead.         -->
+<!--                                                                                     -->
+<html>
+<head><title>GW- Lanczos-Sternheimer </title>
+<link rel=stylesheet type="text/css" href="../formabinit.css">
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  jax: ["input/TeX","output/HTML-CSS"],
+  tex2jax: {inlineMath: [['$','$']]},
+  displayAlign: "center",
+  TeX: { equationNumbers: { autoNumber: "AMS" } }
+});
+</script>
+<script type="text/javascript" async
+src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+</head>
+<body bgcolor="#ffffff">
+
+<hr>
+<a name="top"></a>
+
+<h1>The GW- Lanczos-Sternheimer method</h1>
+<h3>This page gives hints on how to perform a GW- Lanczos-Sternheimer calculation with the ABINIT package.
+<hr>
+
+<h5>Copyright (C) 2016-2017 ABINIT group (JL)
+<script type="text/javascript" src="../../js_files/copyright.js"> </script>
+</h5>
+
+<script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
+
+ Mentioned in &nbsp; <a href="../../users/generated_files/help_features.html#7">help_features#7</a> &nbsp;
+ <hr>
+ <h3><b>Table of content: </b></h3> 
+ <ul> <li>1. <a href="topic_GWls.html#1">Introduction.</a><li>2. <a href="topic_GWls.html#2">Related input variables.</a><li>3. <a href="topic_GWls.html#3">Selected input files.</a><li>4. <a href="topic_GWls.html#4">References.</a></ul>
+
+&nbsp; 
+<HR ALIGN=left> 
+<a name="1">&nbsp;</a>
+<h3><b>1. Introduction.</b></h3>
+
+
+<p><b> This functionality is not in production.</b>
+<p>A high performance G<sub>0</sub>W<sub>0</sub> implementation <a href="../../biblio/generated_files/bib_biblio.html#Janssen2015">[Janssen2015]</a> has been developed within ABINIT.
+It is more efficient than the traditional implementation <a href="../../biblio/generated_files/bib_biblio.html#Gonze2009">[Gonze2009]</a>,<a href="../../biblio/generated_files/bib_biblio.html#Giantomassi2011">[Giantomassi2011]</a> thanks to the treatment of the two major bottlenecks: the summations over conduction states and the inversion of the dielectric matrix. However, note that this implementation has only limited applicability at present (see below).
+<li>The first bottleneck is circumvented by converting the summations into Sternheimer equations.
+Note that the introduction of approximations beyond the G<sub>0</sub>W<sub>0</sub> (such as analytic continuation <a href="../../biblio/generated_files/bib_biblio.html#Rieger1999">[Rieger1999]</a>) is avoided thanks to use of the simplified quasiminimal residual (SQMR) algorithm <a href="../../biblio/generated_files/bib_biblio.html#Freund1995">[Freund1995]</a>.</li>
+<li>Then, the second bottleneck is assessed by expressing the dielectric matrix in a Lanczos basis, which reduces the matrix size by orders of magnitude with respect to a plane wave basis.</li>
+A model dielectric operator has also been developed <a href="../../biblio/generated_files/bib_biblio.html#Janssen2015">[Janssen2015]</a> and can optionally be used to further reduce the dielectric matrix size.
+The resulting implementation exhibits a 500-fold speedup for the silane molecule, without introducing approximations beyond the G<sub>0</sub>W<sub>0</sub> formalism and the pseudopotential method.
+<p>At the time of writing, the implementation supports simulations of molecular systems only (only one k-point).
+<p>Furthermore, it does not supports PAW and spinors. 
+<p>However, it supports parallelism over bands and FFTs <a href="../../biblio/generated_files/bib_biblio.html#Bottin2008">[Bottin2008]</a>. 
+
+<p>To compute G<sub>0</sub>W<sub>0</sub> corrections to DFT eigenenergies, one needs to set <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>= 66 in the input file. 
+This type of calculation requires that the ground state density and wavefunctions be available from disk (using <a href="../../input_variables/generated_files/varset_files.html#getden">getden</a> and <a href="../../input_variables/generated_files/varset_files.html#getwfk">getwfk</a>). 
+It also requires the user to specify the state to be corrected (<a href="../../input_variables/generated_files/varset_gw.html#gwls_band_index">gwls_band_index</a>), the maximum allowed residual when solving the Sternheimer equations (<a href="../../input_variables/generated_files/varset_basic.html#tolwfr">tolwfr</a>), and the number of Lanczos vectors used to express the dielectric matrix (<a href="../../input_variables/generated_files/varset_gw.html#gwls_stern_kmax">gwls_stern_kmax</a>). 
+Note that a convergence study on the latter value is required to check the accuracy of the results. 
+Since only molecular systems are currently supported, the calculation also requires that the Coulomb potential be spherically truncated (<a href="../../input_variables/generated_files/varset_gw.html#icutcoul">icutcoul</a>= 0) with a radius <a href="../../input_variables/generated_files/varset_gw.html#rcut">rcut</a> that should be validated with a convergence study. 
+</br>
+<br><br><a href=#top>Go to the top</a>
+
+
+
+
+&nbsp; 
+<hr> 
+<a name="2">&nbsp;</a>
+<h3><b>2. Related input variables.</b></h3>
+
+
+<p>Compulsory input variables:<p>... <a href="../../input_variables/generated_files/varset_gw.html#icutcoul">icutcoul</a>   [Integer that governs the CUT-off for COULomb interaction]<br>
+... <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>   [OPTions for the DRIVER]<br>
+... <a href="../../input_variables/generated_files/varset_gw.html#rcut">rcut</a>   [Radius of the CUT-off for coulomb interaction]<br>
+... <a href="../../input_variables/generated_files/varset_gw.html#vcutgeo">vcutgeo</a>   [V (potential) CUT-off GEOmetry]<br>
+<p>Input variables for experts:<p>... <a href="../../input_variables/generated_files/varset_gw.html#gwls_band_index">gwls_band_index</a>   [GWLS BAND INDEX]<br>
+... <a href="../../input_variables/generated_files/varset_gw.html#gwls_correlation">gwls_correlation</a>   [GWLS CORRELATION]<br>
+... <a href="../../input_variables/generated_files/varset_gw.html#gwls_diel_model">gwls_diel_model</a>   [GWLS dielectric model]<br>
+... <a href="../../input_variables/generated_files/varset_gw.html#gwls_exchange">gwls_exchange</a>   [GWLS exact EXCHANGE]<br>
+... <a href="../../input_variables/generated_files/varset_gw.html#gwls_first_seed">gwls_first_seed</a>   [GWLS FIRST SEED vector]<br>
+... <a href="../../input_variables/generated_files/varset_gw.html#gwls_kmax_analytic">gwls_kmax_analytic</a>   [GWLS KMAX for the ANALYTIC term]<br>
+... <a href="../../input_variables/generated_files/varset_gw.html#gwls_kmax_complement">gwls_kmax_complement</a>   [GWLS KMAX for the COMPLEMENT space.]<br>
+... <a href="../../input_variables/generated_files/varset_gw.html#gwls_kmax_numeric">gwls_kmax_numeric</a>   [GWLS KMAX for the NUMERIC term]<br>
+... <a href="../../input_variables/generated_files/varset_gw.html#gwls_kmax_poles">gwls_kmax_poles</a>   [GWLS KMAX for the calculation of the POLES residue]<br>
+... <a href="../../input_variables/generated_files/varset_gw.html#gwls_list_proj_freq">gwls_list_proj_freq</a>   [GWLS LIST of the PROJection FREQuencies]<br>
+... <a href="../../input_variables/generated_files/varset_gw.html#gwls_model_parameter">gwls_model_parameter</a>   [GWLS MODEL PARAMETER]<br>
+... <a href="../../input_variables/generated_files/varset_gw.html#gwls_n_proj_freq">gwls_n_proj_freq</a>   [GWLS Number of PROJection FREQuencies]<br>
+... <a href="../../input_variables/generated_files/varset_gw.html#gwls_npt_gauss_quad">gwls_npt_gauss_quad</a>   [GWLS Number of PoinTs to use for the GAUSSian QUADrature ]<br>
+... <a href="../../input_variables/generated_files/varset_gw.html#gwls_nseeds">gwls_nseeds</a>   [GWLS Number of SEED vectorS]<br>
+... <a href="../../input_variables/generated_files/varset_gw.html#gwls_print_debug">gwls_print_debug</a>   [GWLS PRINT level for DEBUGging]<br>
+... <a href="../../input_variables/generated_files/varset_gw.html#gwls_recycle">gwls_recycle</a>   [GWLS RECYCLE]<br>
+... <a href="../../input_variables/generated_files/varset_gw.html#gwls_stern_kmax">gwls_stern_kmax</a>   [GWLS Kmax]<br>
+
+<br><br><a href=#top>Go to the top</a>
+
+
+&nbsp; 
+<HR ALIGN=left> 
+<a name="3">&nbsp;</a>
+<h3><b>3. Selected input files.</b></h3>
+
+
+<i><b>WARNING</b> : as of ABINITv8.6.x, the list of input files provided in the specific section of the topics Web pages is still to be reviewed/tuned. In some cases, it will be adequate, and in other cases, it might be incomplete, or perhaps even useless.</i>
+<br><br>The user can find some related example input files in the ABINIT package in the directory /tests, or on the Web:
+<p> tests/v67mbpt/Input: <a href="../../tests/v67mbpt/Input/t15.in">t15.in</a> 
+<p> tests/paral/Input: <a href="../../tests/paral/Input/t77.in">t77.in</a> 
+<br>
+
+<br><br><a href=#top>Go to the top</a>
+
+
+&nbsp; 
+<HR ALIGN=left> 
+<a name="4">&nbsp;</a>
+<h3><b>4. References.</b></h3>
+
+
+<br> <a href="../../biblio/generated_files/bib_biblio.html#Bottin2008">[Bottin2008]</a>  F. Bottin, S. Leroux, A. Knyazev and G. Z&eacute;rah, "Large-scale ab initio calculations based on three levels of parallelization", Comp. Mat. Sci. 42, 329&ndash;336 (2008).<br>
+<br> <a href="../../biblio/generated_files/bib_biblio.html#Freund1995">[Freund1995]</a>  R. W. Freund and N. M. Nachtigal, "Software for simplified Lanczos and QMR algorithms", Applied Numerical Mathematics 19, 319 (1995). <br> DOI: <a href="https://doi.org/10.1016/0168-9274(95)00089-5">10.1016/0168-9274(95)00089-5</a>.<br>
+<br> <a href="../../biblio/generated_files/bib_biblio.html#Giantomassi2011">[Giantomassi2011]</a>  M. Giantomassi, M. Stankovski, R. Shaltaf, M. Gruning, F. Bruneval, P. Rinke and G.M. Rignanese, "Electronic properties of interfaces and defects from many-body perturbation theory: Recent developments and applications", Physica Status Solidi B 248, 275&ndash;289 (2011). <br> DOI: <a href="https://doi.org/10.1002/pssb.201046094">10.1002/pssb.201046094</a>.<br>
+<br> <a href="../../biblio/generated_files/bib_biblio.html#Gonze2009">[Gonze2009]</a>  X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval, D. Caliste, R. Caracas, M. C&ocirc;t&eacute;, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi, S. Goedecker, D.R. Hamann, P. Hermet, F. Jollet, G. Jomard, S. Leroux, M. Mancini, S. Mazevet, M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf, M. Torrent, M.J. Verstraete, G. Zerah and J.W. Zwanziger, "ABINIT: First-Principle approach to material and nanosystem properties", Comp. Phys. Comm. 180, 2582-2615 (2009).<br>
+<br> <a href="../../biblio/generated_files/bib_biblio.html#Janssen2015">[Janssen2015]</a>  J. Laflamme Janssen, B. Rousseau and M. C&ocirc;t&eacute;, "Efficient dielectric matrix calculations using the Lanczos algorithm for fast many-body G<sub>0</sub>W<sub>0</sub> implementations", Phys. Rev. B 91, 125120 (2015). <br> DOI: <a href="https://doi.org/10.1103/PhysRevB.91.125120">10.1103/PhysRevB.91.125120</a>.<br>
+<br> <a href="../../biblio/generated_files/bib_biblio.html#Rieger1999">[Rieger1999]</a>  M. Rieger, L. Steinbeck, I. D. White, H. N. Rojas and R. W. Godby, "The GW space-time method for the self-energy of large systems", Comp. Phys. Comm. 117, 211&ndash;228 (1999). <br> DOI: <a href="https://doi.org/10.1016/S0010-4655(98)00174-X">10.1016/S0010-4655(98)00174-X</a>.<br>
+<p>
+<br><br><a href=#top>Go to the top</a>
+
+<script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
+
+</body>
+</html>
+

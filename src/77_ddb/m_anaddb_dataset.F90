@@ -104,6 +104,7 @@ module m_anaddb_dataset
   integer :: polflag
   integer :: prtdos
   integer :: prt_ifc
+  integer :: prtddb
   integer :: prtmbm
   integer :: prtfsurf
   integer :: prtnest
@@ -1101,6 +1102,22 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
 ! check that ifcout is set
  if (anaddb_dtset%prt_ifc /= 0 .and. anaddb_dtset%ifcout == 0) then
    anaddb_dtset%ifcout = -1 ! this forces output of all IFC
+ end if
+
+!Default is no output of the DDB to file
+ anaddb_dtset%prtddb = 0
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prtddb',tread,'INT')
+ if(tread==1) anaddb_dtset%prtddb = intarr(1)
+ if(anaddb_dtset%prtddb < 0 .or. anaddb_dtset%prtddb > 1) then
+   write(message, '(a,i0,5a)' )&
+&   'prtf_ddb is ',anaddb_dtset%prtddb,'. The only allowed values',ch10,&
+&   'are 0 (no output) or 1 (print DDB and DDB.nc files)',ch10,  &
+&   'Action: correct prtddb in your input file.'
+   MSG_ERROR(message)
+ end if
+! check that ifcflag is set
+ if (anaddb_dtset%prtddb /= 0 .and. anaddb_dtset%ifcflag == 0) then
+   anaddb_dtset%ifcflag = 1 ! this forces the use of IFC
  end if
 
  anaddb_dtset%prtmbm=0
@@ -2208,8 +2225,8 @@ subroutine anaddb_chkvars(string)
 !O
  list_vars=trim(list_vars)//' outboltztrap'
 !P
- list_vars=trim(list_vars)//' piezoflag polflag prtdos prt_ifc prtmbm prtfsurf prtnest prtphbands'
- list_vars=trim(list_vars)//' prtsrlr prtvol prtbltztrp'
+ list_vars=trim(list_vars)//' piezoflag polflag prtddb prtdos prt_ifc prtmbm prtfsurf'
+ list_vars=trim(list_vars)//' prtnest prtphbands prtsrlr prtvol prtbltztrp'
 !Q
  list_vars=trim(list_vars)//' qrefine qgrid_type q1shft q2shft qnrml1 qnrml2 qpath qph1l qph2l'
 !R

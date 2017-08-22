@@ -72,4 +72,5 @@
 #%%   The first psp is Si, the second one is Ge, the
 #%%   mixing coefficients are 0.2 and 0.8, then
 #%%   0.5 and 0.5 , then 0.001 and 0.999 .
+#%% topics = AtomTypes
 #%%<END TEST_INFO>

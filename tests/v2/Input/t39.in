@@ -47,4 +47,5 @@
 #%% description = 
 #%%   BaSr(TiO3)2 FCC unit cell. Show how to use only the q Gamma point
 #%%   to obtain symmetric IFCs using Anaddb.
+#%% topics = Phonons, PhononBands
 #%%<END TEST_INFO>

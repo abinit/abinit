@@ -84,7 +84,7 @@ nshiftk   1              # Use one copy of grid only (default)
 #%% max_nprocs = 2
 #%% [extra_info]
 #%% authors = O. Rubel
-#%% keywords = FOLD2BLOCK
+#%% keywords = FOLD2BLOCH
 #%% description = 
 #%%   H6 Supercell
 #%%   Generates a 6 atom Hydrogen supercell with the multiplicity of 1:2:3 (x:y:z)

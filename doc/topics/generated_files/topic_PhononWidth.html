@@ -1,0 +1,134 @@
+<!--                                                                                     -->
+<!-- This file has been produced by generate_doc.py using different .yml  or .bib files. -->
+<!-- It is useless to modify it. Modify the related .yml  or .bib files instead.         -->
+<!--                                                                                     -->
+<html>
+<head><title>Phonon linewidth </title>
+<link rel=stylesheet type="text/css" href="../formabinit.css">
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  jax: ["input/TeX","output/HTML-CSS"],
+  tex2jax: {inlineMath: [['$','$']]},
+  displayAlign: "center",
+  TeX: { equationNumbers: { autoNumber: "AMS" } }
+});
+</script>
+<script type="text/javascript" async
+src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+</head>
+<body bgcolor="#ffffff">
+
+<hr>
+<a name="top"></a>
+
+<h1>Phonon linewidth</h1>
+<h3>This page gives hints on how to compute the linewidth (or lifetime) of phonons, due to the electron-phonon interaction with the ABINIT package.
+<hr>
+
+<h5>Copyright (C) 2016-2017 ABINIT group (MV)
+<script type="text/javascript" src="../../js_files/copyright.js"> </script>
+</h5>
+
+<script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
+
+ Mentioned in &nbsp; <a href="../../topics/generated_files/topic_ElPhonInt.html">topic_ElPhonInt</a> &nbsp;&nbsp; <a href="../../users/generated_files/help_features.html#6">help_features#6</a> &nbsp;
+ <hr>
+ <h3><b>Table of content: </b></h3> 
+ <ul> <li>1. <a href="topic_PhononWidth.html#1">Introduction.</a><li>2. <a href="topic_PhononWidth.html#2">Related lesson(s) of the tutorial.</a><li>3. <a href="topic_PhononWidth.html#3">Related input variables.</a><li>4. <a href="topic_PhononWidth.html#4">Selected input files.</a></ul>
+
+&nbsp; 
+<HR ALIGN=left> 
+<a name="1">&nbsp;</a>
+<h3><b>1. Introduction.</b></h3>
+
+
+<p>This topic concerns metals only.
+<p>After generating a GKK file (see <a href="../../topics/generated_files/topic_ElPhonInt.html#">topic_ElPhonInt</a>), the Electron-Phonon Coupling (EPC) 
+analysis is performed in anaddb, setting <a href="../../input_variables/generated_files/varset_anaddb.html#elphflag@anaddb">elphflag</a>
+variable to 1. Most of the procedure is automatic, but can be
+lengthy if a large number of k-points is being used. The <a href="../../input_variables/generated_files/varset_anaddb.html#nqpath@anaddb">nqpath</a> and
+<a href="../../input_variables/generated_files/varset_anaddb.html#qpath@anaddb">qpath</a> variables must be set, specifying a path in reciprocal space.
+anaddb generates files containing the
+phonon linewidths (suffixed _LWD) and frequencies &omega;<sub>qj</sub> (suffixed _BST)
+along <a href="../../input_variables/generated_files/varset_anaddb.html#qpath@anaddb">qpath</a>. One can calculate the nesting function n(q) =
+&sum;<sub>kii'</sub> &delta;(&epsilon;<sub>k,i</sub>) &delta;(&epsilon;<sub>k+q,i'</sub>) by
+setting <a href="../../input_variables/generated_files/varset_anaddb.html#prtnest@anaddb">prtnest</a> to 1 (output to _NEST).
+ <p>
+<br><br><a href=#top>Go to the top</a>
+
+
+
+&nbsp; 
+<HR ALIGN=left> 
+<a name="2">&nbsp;</a>
+<h3><b>2. Related lesson(s) of the tutorial.</b></h3>
+
+
+<li> <a href="../../tutorial/generated_files/lesson_eph.html">The lesson on the
+ electron-phonon interaction</a> presents the use of the utility MRGKK
+ and ANADDB to examine the electron-phonon interaction and the
+ subsequent calculation of superconductivity temperature (for bulk
+ systems).</li>
+<br><br><a href=#top>Go to the top</a>
+
+
+&nbsp; 
+<hr> 
+<a name="3">&nbsp;</a>
+<h3><b>3. Related input variables.</b></h3>
+
+
+<p>Compulsory input variables:<p>... <a href="../../input_variables/generated_files/varset_anaddb.html#elphflag@anaddb">elphflag@anaddb</a>   [ELectron-PHonon FLAG]<br>
+<p>Basic input variables:<p>... <a href="../../input_variables/generated_files/varset_anaddb.html#kptrlatt@anaddb">kptrlatt@anaddb</a>   [K PoinT Reciprocal LATTice]<br>
+... <a href="../../input_variables/generated_files/varset_anaddb.html#nqpath@anaddb">nqpath@anaddb</a>   [Number of Q wavevectors defining a PATH]<br>
+... <a href="../../input_variables/generated_files/varset_anaddb.html#qpath@anaddb">qpath@anaddb</a>   [Q wavevectors defining a PATH]<br>
+... <a href="../../input_variables/generated_files/varset_anaddb.html#telphint@anaddb">telphint@anaddb</a>   [Technique for ELectron-PHonon INTegration]<br>
+<p>Useful input variables:<p>... <a href="../../input_variables/generated_files/varset_anaddb.html#ep_int_gkk@anaddb">ep_int_gkk@anaddb</a>   [Electron-Phonon INTerpolation of GKK]<br>
+... <a href="../../input_variables/generated_files/varset_anaddb.html#ep_qptlist@anaddb">ep_qptlist@anaddb</a>   [Electron Phonon Q PoinT LIST]<br>
+... <a href="../../input_variables/generated_files/varset_anaddb.html#ep_scalprod@anaddb">ep_scalprod@anaddb</a>   [DO SCALar PRODuct for gkk matrix elements]<br>
+... <a href="../../input_variables/generated_files/varset_anaddb.html#ndivsm@anaddb">ndivsm@anaddb</a>   [Number of DIVisions for the SMallest segment]<br>
+... <a href="../../input_variables/generated_files/varset_anaddb.html#prtnest@anaddb">prtnest@anaddb</a>   [PRinT the NESTing function]<br>
+... <a href="../../input_variables/generated_files/varset_anaddb.html#prtvol@anaddb">prtvol@anaddb</a>   [PRinT VOLume]<br>
+<p>Input variables for experts:<p>... <a href="../../input_variables/generated_files/varset_anaddb.html#qgrid_type@anaddb">qgrid_type@anaddb</a>   [Q GRID TYPE]<br>
+... <a href="../../input_variables/generated_files/varset_anaddb.html#use_k_fine@anaddb">use_k_fine@anaddb</a>   [USE K-grid FINEr than the coarse k-grid]<br>
+
+<br><br><a href=#top>Go to the top</a>
+
+
+&nbsp; 
+<HR ALIGN=left> 
+<a name="4">&nbsp;</a>
+<h3><b>4. Selected input files.</b></h3>
+
+
+<i><b>WARNING</b> : as of ABINITv8.6.x, the list of input files provided in the specific section of the topics Web pages is still to be reviewed/tuned. In some cases, it will be adequate, and in other cases, it might be incomplete, or perhaps even useless.</i>
+<br><br>The user can find some related example input files in the ABINIT package in the directory /tests, or on the Web:
+<p> tests/tutorespfn/Input: <a href="../../tests/tutorespfn/Input/teph_4.in">teph_4.in</a> 
+<a href="../../tests/tutorespfn/Input/teph_5.in">teph_5.in</a> 
+<p> tests/v5/Input: <a href="../../tests/v5/Input/t88.in">t88.in</a> 
+<a href="../../tests/v5/Input/t89.in">t89.in</a> 
+<a href="../../tests/v5/Input/t90.in">t90.in</a> 
+<a href="../../tests/v5/Input/t91.in">t91.in</a> 
+<a href="../../tests/v5/Input/t92.in">t92.in</a> 
+<a href="../../tests/v5/Input/t93.in">t93.in</a> 
+<a href="../../tests/v5/Input/t94.in">t94.in</a> 
+<a href="../../tests/v5/Input/t95.in">t95.in</a> 
+<a href="../../tests/v5/Input/t99.in">t99.in</a> 
+<p> tests/v6/Input: <a href="../../tests/v6/Input/t77.in">t77.in</a> 
+<a href="../../tests/v6/Input/t93.in">t93.in</a> 
+<a href="../../tests/v6/Input/t94.in">t94.in</a> 
+<a href="../../tests/v6/Input/t95.in">t95.in</a> 
+<p> tests/v7/Input: <a href="../../tests/v7/Input/t88.in">t88.in</a> 
+<a href="../../tests/v7/Input/t93.in">t93.in</a> 
+<a href="../../tests/v7/Input/t94.in">t94.in</a> 
+<br>
+
+<br><br><a href=#top>Go to the top</a>
+
+
+<script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
+
+</body>
+</html>
+

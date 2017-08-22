@@ -1,0 +1,375 @@
+<!--                                                                                     -->
+<!-- This file has been produced by generate_doc.py using different .yml  or .bib files. -->
+<!-- It is useless to modify it. Modify the related .yml  or .bib files instead.         -->
+<!--                                                                                     -->
+<html>
+<head><title>new user help file</title>
+<link rel=stylesheet type="text/css" href="../formabinit.css">
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  jax: ["input/TeX","output/HTML-CSS"],
+  tex2jax: {inlineMath: [['$','$']]},
+  displayAlign: "center",
+  TeX: { equationNumbers: { autoNumber: "AMS" } }
+});
+</script>
+<script type="text/javascript" async
+src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+</head>
+<body bgcolor="#ffffff">
+
+<hr>
+<a name="top"></a>
+
+<h1>ABINIT new user help file.</h1>
+<h2>This file gives a beginner's introduction to the ABINIT resources, the ABINIT package, and the main ABINIT application.</h2>
+<hr>
+<hr>
+<h5>Copyright (C) 1998-2017 ABINIT group (DCA,XG,RC)
+<script type="text/javascript" src="../../js_files/copyright.js"> </script>
+</h5> 
+
+<script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
+
+<a name="list"></a>
+<h3><b> Content of the help file:</b></h3>
+
+<ul> 
+  <li>1. <a href="#foreword">Foreword</a></li>
+  <li>2. <a href="#introduction">Introduction</a></li>
+  <li>3. <a href="#abinit">The ABINIT executable : abinit</a></li>
+  <li>4. <a href="#other_programs">Other programs in the ABINIT package</a></li>
+  <li>5. <a href="#other_resources">Other resources outside the ABINIT package</a></li>
+  <li>6. <a href="#input_variables">Input variables to abinit</a></li>
+  <li>7. <a href="#None">Output files</a></li>
+  <li>8. <a href="#do">What does the code do?</a></li>
+  <li>9. <a href="#versioning">Versioning logic</a></li>
+
+ </ul> 
+ <hr><br><a name="foreword"> </a>
+<a name="1"> </a>
+<h3><b>1. Foreword</b></h3>
+ <p>The ABINIT project is a group effort of dozens of people worldwide, whose central
+outcome is the main ABINIT application, delivered with many other files in the
+ABINIT package. The ABINIT project includes also resources provided on the 
+<a href="http://www.abinit.org">ABINIT Web site</a>
+and the 
+<a href="https://github.com/abinit">ABINIT Github repository</a>.
+
+<p>
+Before reading the present file, and get some grasp about the main ABINIT application,
+you should get some theoretical background.
+In case you have already used another electronic structure code, or a quantum
+chemistry code, it might be sufficient to read the introduction of the paper
+<cite>``Iterative minimization techniques for ab initio total-energy
+calculations: molecular dynamics and conjugate gradients''
+M. C. Payne, M. P. Teter, D. C. Allan, T. A. Arias, and J. D. Joannopoulos,
+Rev. Mod. Phys. 64, 1045-1097 (1992)</cite>.
+<p>
+If you have never used another electronic structure code
+or a Quantum Chemistry package, you should complete such reading
+by going (at your own pace) through the Chaps. 1 to 13 , and appendices L and M
+of the book <cite>Electronic Structure. Basic Theory and Practical Methods. R. M. Martin.
+Cambridge University Press (2004) ISBN 0 521 78285 6.</cite>
+
+<p>After having gone through the present New User's Guide, you should
+follow the ABINIT tutorial (<a href="../../tutorial/generated_files/lesson_welcome.html#">lesson_welcome</a>).
+<br><br><a href=#top>Go to the top</a>
+<hr>
+<br><a name="introduction"> </a>
+<a name="2"> </a>
+<h3><b>2. Introduction</b></h3>
+ <p>ABINIT is a package whose main program allows
+to find the total energy, charge density and electronic structure
+of systems made of electrons and nuclei (molecules and periodic solids)
+within Density Functional Theory,
+using pseudopotentials and a planewave basis, or
+augmented plane waves, or even wavelets.
+Some possibilities of ABINIT go beyond Density Functional Theory, i.e. the
+many-body perturbation theory (GW approximation the Bethe-Salpether equation), 
+Time-Dependent Density Functional Theory, Dynamical Mean-Field Theory, 
+the Allen-Heine-Cardona theory to find temperature-dependent electronic structure.
+
+ABINIT also includes options to optimize the geometry
+according to the DFT forces and stresses, or to perform molecular dynamics
+simulation using these forces, or to generate
+dynamical (vibrations - phonons) properties, dielectric properties,
+mechanical properties, thermodynamical properties, etc .
+In addition to the main ABINIT code, different utility programs are provided.
+
+<p>
+  We suppose that you have downloaded the ABINIT package
+  from the Web site, unpacked it and installed it.
+  If not, you might nevertheless continue reading the present Web page, just to get an overview,
+  but it might prove more fruitful to have first downloaded the ABINIT package and at least unpacked it,
+  see the <a href="http://www.abinit.org/installation">installation notes</a></li>.
+
+<p> We will use the name "~abinit" to refer to the directory that contains the ABINIT
+  package after download. In practice, a version number is appended to this name, to give for
+  example : abinit-8.4.0 . 
+  The ABINIT package versioning scheme is explained 
+  <a href="#9">later in this file</a>.
+
+<p>
+  ~abinit contains different subdirectories. For example,
+  the present file, as well as other descriptive files, should be found in ~abinit/doc/users .
+  Other subdirectories will be described later.
+<br><br><a href=#top>Go to the top</a>
+<hr>
+<br><a name="abinit"> </a>
+<a name="3"> </a>
+<h3><b>3. The ABINIT executable : abinit</b></h3>
+ <p>After compilation, the main code will be present in the package as
+  ~abinit/src/98_main/abinit (or perhaps at another place, depending on your installation).
+
+ <p> To run abinit you need four things:
+<ul>
+<li>(1) Access to the executable, abinit.
+<li>(2) An input file.
+<li>(3) A files file (list of file names in a file).
+<li>(4) A pseudopotential input file for each kind of element in the unit cell.
+</ul>
+  With these items a job can be run.
+
+ <p> The full list of input variables, all of which are provided in the
+single input file, is given in the ABINIT <a href="../../input_variables/generated_files/varset_allvars.html#">list of all variable</a>.
+<br>The detailed description of input variables is given in many "Variable Set" files, including:
+<ul>
+<li> Basic variables, <a href="../../input_variables/generated_files/varset_basic.html#">varset_basic</a></li>
+<li> Ground-state calculation variables, <a href="../../input_variables/generated_files/varset_gstate.html#">varset_gstate</a></li>
+<li> GW variables, <a href="../../input_variables/generated_files/varset_gw.html#">varset_gw</a></li>
+<li> Files handling variables, <a href="../../input_variables/generated_files/varset_files.html#">varset_files</a></li>
+<li> Parallelisation variables, <a href="../../input_variables/generated_files/varset_paral.html#">varset_paral</a></li>
+<li> Density Functional Perturbation Theory variables, <a href="../../input_variables/generated_files/varset_dfpt.html#">varset_dfpt</a></li>
+<li>  ... </li>
+</ul>
+
+<p>
+A set of examples aimed at guiding the beginner is available in 
+the tutorial (<a href="../../tutorial/generated_files/lesson_welcome.html#">lesson_welcome</a>).
+<p>Other test cases (more than 800 input files) can be found
+in the ~abinit/test subdirectories, e.g. "fast", the "vX" series (v1, v2, ... v67mbpt, v7, v8),
+"libxc", "paral", the "tutoX" series ...
+
+<p> Many different sorts of pseudopotentials can be used with ABINIT. Most of
+  them can be found on the 
+  <a href="http://www.abinit.org/downloads/atomic-data-files">atomic data files</a> page of the ABINIT web site. 
+  There are official recommended pseudopotentials tables 
+  (the PAW JTH table, and the norm-conserving table from ONCVPSP),
+  and also some older sets of pseudopotentials. 
+  A subset of existing pseudopotentials are used for test cases, and are
+  located in the ~abinit/tests/Psps_for_tests directory, but they are not recommended for production. 
+  Information on pseudopotential
+  files can be found in the <a href="help_abinit.html#5">ABINIT help file</a> and
+  the ~abinit/doc/psp_infos directory.
+<br><br><a href=#top>Go to the top</a>
+<hr>
+<br><a name="other_programs"> </a>
+<a name="4"> </a>
+<h3><b>4. Other programs in the ABINIT package</b></h3>
+ <p>In addition to abinit, there are utility programs provided in the ABINIT package. 
+<p>
+<p> Some utility programs are written in F90 (like the main abinit program), and their 
+   sources is also in ~abinit/src/98_main . <br> These include :
+  <b>mrgddb</b>, <b>anaddb</b>, <b>aim</b>, <b>conducti</b>, <b>optics</b>,
+  <b>mrgscr</b>, <b>cut3d</b>, and <b>fold2Bloch</b>.
+<p> <b>mrgddb</b> and <b>anaddb</b> allow to post-process responses to atomic displacements
+  and/or to homogeneous electric field, and/or to strain perturbation,
+  as generated by abinit, to produce full
+  phonon band structures, thermodynamical functions, piezoelectric properties,
+  superconducting properties, to name a few. "mrgddb" is for
+  "Merge of Derivative DataBases", while "anaddb" is for "Analysis of Derivative DataBases".
+<p> <b>cut3d</b> can be used to post-process the three-dimensional
+  density (or potential) files generated by abinit. It allows one to deduce charge
+  density in selected planes (for isodensity plots), along selected lines, or
+  at selected points. It allows one also to make the Hirshfeld
+  decomposition of the charge density in "atomic" contributions.
+<p> <b>fold2Bloch</b> is used for unfolding of first-principle electronic band 
+  structure obtained with ABINIT code.
+<p> <b>aim</b> is also a post-processor of the three-dimensional
+  density files generated by abinit. It performs the Bader Atom-In-Molecule
+  decomposition of the charge density in "atomic" contributions.
+<p> <b>conducti</b> allows one to compute the frequency-dependent
+  optical conductivity.
+<p>
+<p> Some utility programs are not written in F90, but in Python. They are contained in ~abinit/scripts,
+  where post-processing (numerous tools) and pre-processing scripts are distinguished.
+  Some allows one to visualize ABINIT outputs, like abinit_eignc_to_bandstructure.py .
+<br><br><a href=#top>Go to the top</a>
+<hr>
+<br><a name="other_resources"> </a>
+<a name="5"> </a>
+<h3><b>5. Other resources outside the ABINIT package</b></h3>
+ <p>In addition to the ABINIT package, other resources can be obtained from the 
+<a href="https://github.com/abinit">ABINIT GitHub site</a>. The sources
+of the latest version of the ABINIT package are actually mirrored on this site,
+but for other resources (not in the package) this is the only download point. 
+<p> <b>abipy</b> is an open-source library for analyzing the results 
+produced by ABINIT (including visualisation), and for preparing input files 
+and workflows to automate ab-initio calculations (so-called high-throughput calculations).
+It provides interface with pymatgen, developed by the Materials Project.
+Links for AbiPy :
+<a href="https://github.com/abinit/abipy">https://github.com/abinit/abipy</a>, and
+<a href="http://abinit.github.io/abipy/">http://abinit.github.io/abipy</a>.
+<p> The <b>pseudo-dojo</b> is a Python framework for generating and validating pseudopotentials (or PAW atomic data files). 
+Normal ABINIT users benefit a lot from this project, since the ABINIT recommended table 
+of norm-conserving pseudopotentials has been generated thanks to it, while the PAW recommended table
+is under control of it. Albeit, only specialized ABINIT experts use it.
+<p> <b>abiconfig</b> is a holding area for configuration files used to configure/compile Abinit on clusters.
+You might benefit from it if you have indeed to install Abinit on a cluster.
+<p> <b>abiconda</b> contains conda recipes to build Abinit-related packages (like AbiPy).
+You might benefit from it if you install Abipy on your machine.
+<p> <b>abiflows</b> provides flows for high-throughput calculations with ABINIT.
+<p>
+<p>
+In addition to the resources that the ABINIT developer provide to the community through
+the ABINIT packages, portal and Github, 
+many ABINIT-independent commercial or free applications can be used to
+visualize ABINIT outputs or interact with ABINIT.
+We provide a (not very well maintained) list of links in 
+<a href="http://www.abinit.org/community/links">http://www.abinit.org/community/links</a>.
+Of course, you might get more by browsing the Web...
+<br><br><a href=#top>Go to the top</a>
+<hr>
+<br><a name="input_variables"> </a>
+<a name="6"> </a>
+<h3><b>6. Input variables to abinit</b></h3>
+ <p>As an overview, the most important input variables, to be provided in the input file, are listed below:
+<pre>
+Specification of the geometry of the problem, and types of atoms :
+<a href="../../input_variables/generated_files/varset_basic.html#natom">natom</a>           total number of atoms in unit cell
+<a href="../../input_variables/generated_files/varset_basic.html#ntypat">ntypat</a>          number of types of atoms
+<a href="../../input_variables/generated_files/varset_basic.html#typat">typat</a>(<a href="../../input_variables/generated_files/varset_basic.html#natom">natom</a>)    sequence of integers, specifying the type of each atom.
+                NOTE: the atomic coordinates (<a href="../../input_variables/generated_files/varset_basic.html#xangst">xangst</a>, <a href="../../input_variables/generated_files/varset_basic.html#xcart">xcart</a> or <a href="../../input_variables/generated_files/varset_basic.html#xred">xred</a>)
+                must be specified in the same order
+<a href="../../input_variables/generated_files/varset_basic.html#rprim">rprim</a>(3,3)      unscaled primitive translations of periodic cell;
+                each COLUMN of this array is one primitive translation
+<a href="../../input_variables/generated_files/varset_basic.html#xangst">xangst</a>(3,<a href="../../input_variables/generated_files/varset_basic.html#natom">natom</a>)  cartesian coordinates (Angstrom) of atoms in unit cell
+                NOTE: only used when <a href="../../input_variables/generated_files/varset_basic.html#xred">xred</a> and <a href="../../input_variables/generated_files/varset_basic.html#xcart">xcart</a> are absent
+<a href="../../input_variables/generated_files/varset_basic.html#xcart">xcart</a>(3,<a href="../../input_variables/generated_files/varset_basic.html#natom">natom</a>)  cartesian coordinates (Bohr) of atoms in unit cell
+                NOTE: only used when <a href="../../input_variables/generated_files/varset_basic.html#xred">xred</a> and <a href="../../input_variables/generated_files/varset_basic.html#xangst">xangst</a> are absent
+<a href="../../input_variables/generated_files/varset_basic.html#xred">xred</a>(3,<a href="../../input_variables/generated_files/varset_basic.html#natom">natom</a>)   fractional coordinates for atomic locations;
+                NOTE: leave out if <a href="../../input_variables/generated_files/varset_basic.html#xangst">xangst</a> or <a href="../../input_variables/generated_files/varset_basic.html#xcart">xcart</a> is used
+<a href="../../input_variables/generated_files/varset_basic.html#znucl">znucl</a>(<a href="../../input_variables/generated_files/varset_basic.html#ntypat">ntypat</a>)   Nuclear charge of each type of element; must agree with
+                nuclear charge found in psp file.
+
+Specification of the planewave basis set, Brillouin zone wavevector sampling, and occupation of the bands:
+<a href="../../input_variables/generated_files/varset_basic.html#ecut">ecut</a>            planewave kinetic energy cutoff in Hartree
+<a href="../../input_variables/generated_files/varset_basic.html#kptopt">kptopt</a>          option for specifying the k-point grid
+                if <a href="../../input_variables/generated_files/varset_basic.html#kptopt">kptopt</a>=1, automatic generation, using ngkpt and shiftk.
+                (for the latter, see the <a href="help_abinit.html">help_abinit</a> file)
+<a href="../../input_variables/generated_files/varset_basic.html#ngkpt">ngkpt</a>(3)        dimensions of the three-dimensional grid of k-points
+<a href="../../input_variables/generated_files/varset_basic.html#occopt">occopt</a>          set the occupation of electronic levels :
+                 =1 for semiconductors
+                 =3 ... 7  for metals
+
+Specification of the type of calculation to be done:
+<a href="../../input_variables/generated_files/varset_rlx.html#ionmov">ionmov</a>          when <a href="../../input_variables/generated_files/varset_rlx.html#ionmov">ionmov</a> = 0 : the ions and cell shape are fixed
+                            = 2 : search for the equilibrium geometry
+                            = 6 : molecular dynamics
+<a href="../../input_variables/generated_files/varset_basic.html#iscf">iscf</a>            either a positive number for defining self-consistent
+                algorithm (usual), or -2 for band structure in fixed potential
+<a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>       when == 3 and 4 : will do GW calculations (many-body perturbation theory)
+<a href="../../input_variables/generated_files/varset_dfpt.html#rfelfd">rfelfd</a>          when /= 0 : will do response calculation to electric field
+<a href="../../input_variables/generated_files/varset_dfpt.html#rfphon">rfphon</a>          when = 1 : will do response calculation to atomic displacements
+
+Specification of the numerical convergency of the calculation:
+<a href="../../input_variables/generated_files/varset_basic.html#nstep">nstep</a>           maximal number of self-consistent cycles (on the order of 20)
+<a href="../../input_variables/generated_files/varset_basic.html#tolvrs">tolvrs</a>          tolerance on self-consistent convergence
+<a href="../../input_variables/generated_files/varset_rlx.html#ntime">ntime</a>           number of molecular dynamics or relaxation steps
+<a href="../../input_variables/generated_files/varset_rlx.html#tolmxf">tolmxf</a>          force tolerance for structural relaxation in Hartree/Bohr
+</pre>
+<br><br><a href=#top>Go to the top</a>
+<hr>
+<br><a name="None"> </a>
+<a name="7"> </a>
+<h3><b>7. Output files</b></h3>
+ <p><p> Output from an abinit run shows up in several files and
+in the standard output.  Usually one runs the command with
+a pipe of standard output to a log file, which can
+be inspected for warnings or error messages if anything goes wrong or otherwise
+can be discarded at the end of a run.  The more easily readable formatted
+output goes to the output file whose name is given in the "files" file, i.e.
+you provide the name of the formatted output file. No error
+message is reported in the latter file. On the other hand, this is
+the file that is usually kept for archival purposes.
+
+<p>In addition, wavefunctions can be input (starting point) or output (result
+of the calculation),
+and possibly, charge density and/or electrostatic potential, if they
+have been asked for. These three sets of data are stored in unformatted files.
+<br>The Density Of States (DOS) can also be an output as
+a formatted (readable) file.
+<br>An analysis of geometry can also be provided (GEO file)
+<br>The name of these files is constructed from a "root" name, that must be
+different for input files and output files, and that is provided
+by the user, to which the code will append a descriptor, like
+WFK for wavefunctions, DEN for the density, POT for the potential,
+DOS for the density of states ...
+
+<p>There are also different temporary files. A "root" name
+should be provided by the user, from which the code generates
+a full name. Amongst these files, there is a "status" file,
+summarizing the current status of advancement of the code,
+in long jobs. The <a href="help_abinit.html">ABINIT help file</a> contains more details.
+<br><br><a href=#top>Go to the top</a>
+<hr>
+<br><a name="do"> </a>
+<a name="8"> </a>
+<h3><b>8. What does the code do?</b></h3>
+ <p>The simplest sort of job computes an electronic structure for a fixed set
+of atomic positions within a periodic unit cell.  By electronic structure, we
+mean a set of eigenvalues and wavefunctions which achieve the lowest (DFT)
+energy possible for that basis set (that number of planewaves).  The code
+takes the description of the unit cell and atomic positions and assembles
+a crystal potential from the input atomic pseudopotentials, then uses
+either an input wavefunction or simple gaussians to generate the
+initial charge density and screening potential, then uses a self-consistent
+algorithm to iteratively adjust the planewave coefficients
+until a sufficient convergence is reached in the energy.
+ <p> Analytic derivatives of the energy with respect to atomic positions and
+unit cell primitive translations yield atomic forces and the stress tensor.
+The code can optionally adjust atomic positions to move the forces toward
+zero and adjust unit cell parameters to move toward zero stress.
+It can performs molecular dynamics. It can also be used to find responses
+to atomic displacements and homogeneous electric field, so that
+the full phonon band structure can be constructed...
+<br><br><a href=#top>Go to the top</a>
+<hr>
+<br><a name="versioning"> </a>
+<a name="9"> </a>
+<h3><b>9. Versioning logic</b></h3>
+ <p>We finish this "help for new user" with a brief explanation of the logic of ABINIT version releases.
+<p>
+The full name of a version has three digits (for example, 8.4.0). 
+The first digit is the slowly varying one (in average, it is changed after two or three years). 
+It indicates the major efforts and trends in that version. 
+At the level of 1.x.y ABINIT (before 2000 !), the major effort 
+was placed on the "ground-state" properties (total energy, forces, geometry optimisation, molecular dynamics ...). 
+With version 2.x.y , response-function features (phonons, dielectric response, effective charges, interatomic force constants ...) 
+were included. 
+The main additional characteristics of version 3.x.y were the distribution under the GNU General Public Licence, 
+the set-up of the documentation and help to the user through the Web site in html format, and the availability of GW capabilities. 
+The version 4.x.y put a lot of effort in the speed of ABINIT (e.g. PAW), and its parallelisation. 
+These historical developments explain why the tests are gathered in directories "v1", "v2", "v3", etc.
+
+Every 4 to 8 months, we release a "production version" of ABINIT in which the second digit, an even number, is incremented, 
+which usually goes with additional features. A release notes document is issued, with the list of
+additional capabilities, and other information with respect to modifications with the previous release.
+The odd second digits are used for internal management only, so-called "development versions" of ABINIT (for example 8.5.0). 
+
+Two versions differing by the last (third) digit have the same capabilities, 
+but the one with the largest last digit is more debugged than the other : 
+version 8.4.1 is more debugged than 8.4.0, but no new features has been added (so likely, no additional bug!).
+
+<p>&nbsp;
+<HR ALIGN=left>
+<p> In order to start using ABINIT, please follow the tutorial (<a href="../../tutorial/generated_files/lesson_welcome.html#">lesson_welcome</a>)</a>
+<br><br><a href=#top>Go to the top</a>
+<hr>
+<script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
+
+</body>
+</html>
+

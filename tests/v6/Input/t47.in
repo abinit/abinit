@@ -90,4 +90,5 @@ dmatpawu1 1.0 0.0 0.0 0.0 0.0 0.0 0.0
 #%% keywords = PAW, DMFT
 #%% description = 
 #%%   DMFT on Gd (f-orbitals) without spin-orbit coupling : compute occupations and energy.
+#%% topics = DMFT
 #%%<END TEST_INFO>

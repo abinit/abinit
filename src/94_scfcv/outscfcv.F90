@@ -223,7 +223,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  real(dp),intent(in) :: vpsp(nfft)
  real(dp),intent(inout) :: cg(2,mcg)
  real(dp),intent(inout) :: nhat(nfft,nspden*psps%usepaw)
- real(dp),intent(inout) :: rhor(nfft,nspden),vtrial(nfft,nspden)
+ real(dp),intent(inout),target :: rhor(nfft,nspden),vtrial(nfft,nspden)
  real(dp),intent(inout) :: vxc(nfft,nspden),xred(3,natom)
  real(dp),pointer :: elfr(:,:),grhor(:,:,:),lrhor(:,:),taur(:,:)
  type(pawcprj_type),intent(inout) :: cprj(natom,mcprj*usecprj)
@@ -271,6 +271,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  real(dp), allocatable :: vh1_integ(:)
  real(dp), allocatable :: vh1_corrector(:)
  real(dp), allocatable :: radii(:)
+ real(dp), ABI_CONTIGUOUS pointer :: rho_ptr(:,:)
  type(pawrhoij_type) :: pawrhoij_dum(0)
  type(pawrhoij_type),pointer :: pawrhoij_all(:)
  logical :: remove_inv
@@ -401,14 +402,18 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 
    ! output the density.
    if (dtset%prtden/=0) then
+     if (dtset%positron/=1) rho_ptr => rhor
+     if (dtset%positron==1) rho_ptr => electronpositron%rhor_ep
      call fftdatar_write("density",dtfil%fnameabo_app_den,dtset%iomode,hdr,&
-     crystal,ngfft,cplex1,nfft,nspden,rhor,mpi_enreg,ebands=ebands)
+     crystal,ngfft,cplex1,nfft,nspden,rho_ptr,mpi_enreg,ebands=ebands)
 
      if (dtset%positron/=0) then
+       if (dtset%positron/=1) rho_ptr => electronpositron%rhor_ep
+       if (dtset%positron==1) rho_ptr => rhor
        fname = trim(dtfil%fnameabo_app_den)//'_POSITRON'
        if (dtset%iomode == IO_MODE_ETSF) fname = strcat(fname, ".nc")
-       call fftdatar_write("ep_density",fname,dtset%iomode,hdr,&
-       crystal,ngfft,cplex1,nfft,nspden,electronpositron%rhor_ep,mpi_enreg,ebands=ebands)
+       call fftdatar_write("positron_density",fname,dtset%iomode,hdr,&
+       crystal,ngfft,cplex1,nfft,nspden,rho_ptr,mpi_enreg,ebands=ebands)
      end if
    end if
 

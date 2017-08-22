@@ -1,0 +1,152 @@
+<!--                                                                                     -->
+<!-- This file has been produced by generate_doc.py using different .yml  or .bib files. -->
+<!-- It is useless to modify it. Modify the related .yml  or .bib files instead.         -->
+<!--                                                                                     -->
+<html>
+<head><title>the Anaddb utility</title>
+<link rel=stylesheet type="text/css" href="../formabinit.css">
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  jax: ["input/TeX","output/HTML-CSS"],
+  tex2jax: {inlineMath: [['$','$']]},
+  displayAlign: "center",
+  TeX: { equationNumbers: { autoNumber: "AMS" } }
+});
+</script>
+<script type="text/javascript" async
+src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+</head>
+<body bgcolor="#ffffff">
+
+<hr>
+<a name="top"></a>
+
+<h1>Help file for the Anaddb utility of the ABINIT package.</h1>
+
+<h2>This file explains the use and i/o parameters needed for the "Analysis of Derivative DataBase" code of the ABINIT package.</h2>
+<hr>
+<p>This code is able to compute interatomic force constants,
+but also, more generally, many different physical properties
+from databases containing derivatives of the total energy
+(Derivative DataBases - DDB).
+<br>
+The user is not supposed to know how the Derivative
+DataBase (DBB) has been generated. He/she should simply know what
+material is described by the DDB he/she wants to use.
+<br>
+If he/she is interested in the generation of DDB, and wants to know more about this
+topic, he/she will read different help files of the ABINIT package, related to the
+<a href="../../users/generated_files/help_abinit.html#">main ABINIT executable</a>, to the
+<a href="../../users/generated_files/help_respfn.html#">DFPT features of ABINIT</a>,
+and to the <a href="../../users/generated_files/help_mrgddb.html#">DDB merge tool</a>.
+</h3>
+
+<p>
+It will be easier to discover the
+present file with the help of the tutorial (<a href="../../tutorial/generated_files/lesson_welcome.html#">lesson_welcome</a>), especially
+the lesson on response functions (<a href="../../tutorial/generated_files/lesson_rf2.html#">lesson_rf2</a>).
+<br>It is worthwhile to print this help file, for ease of reading.
+<hr>
+<h5>Copyright (C) 1998-2017 ABINIT group (XG,DCA)
+<script type="text/javascript" src="../../js_files/copyright.js"> </script>
+</h5> 
+
+<script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
+
+<a name="list"></a>
+<h3><b> Content of the help file:</b></h3>
+
+<ul> 
+  <li>1. <a href="#introduction">Introduction</a></li>
+  <li>2. <a href="#input_vars">Input variables</a></li>
+
+ </ul> 
+ <hr><br><a name="introduction"> </a>
+<a name="1"> </a>
+<h3><b>1. Introduction</b></h3>
+ <p>In short, a Derivative DataBase contains a list of derivatives
+of the total energy with respect to three kind of perturbations:
+phonons, electric field and stresses. The present code analyses
+the DDB, and directly gives properties of the material under
+investigation, like phonon spectrum, frequency-dependent dielectric tensor, thermal properties.
+
+<p>
+Given an input file (parameters described below),
+the user must create a "files" file which lists names for the files
+the job will require, including the main input file, the main output file,
+the name of the DDB, and some other file names optionally used for selected capabilities of the code.
+
+<p>The files file (called for example ab.files) could look like: </p>
+<p>
+</p>
+<pre>  anaddb.in<br>  anaddb.out<br>  ddb<br>  band_eps<br>  gkk<br>  anaddb.ep<br>  ddk<br> </pre>
+<p>In this example:<br>
+  <ul>
+  <li> the main input file is called "anaddb.in", <br></li>
+  <li> the main output will be put into the file called "anaddb.out", <br></li>
+  <li> the input DDB file is called "ddb", <br></li>
+  <li> information to draw phonon band structures will go to band_eps<br></li>
+  <li> the input GKK file is called "gkk" (used only for electron-phonon interactions)<br></li>
+  <li> the base filename for electron-phonon output "anaddb.ep" (used only for electron-phonon interactions)<br></li>
+  <li> the file name for ddk reference files: these are the GKK files generated in k-point derivative runs, using the <a href="../../input_variables/generated_files/varset_files.html#prtgkk">prtgkk</a> abinit input variable (used only for electron-phonon transport calculations)</li>
+  </ul>
+  Other examples are given in the ~abinit/test/v2 directory. The latter three filename information
+  is often not used by anaddb.
+  The maximal length of names for the main input or output files is presently 264 characters.
+
+  <p>The main executable file is called anaddb.
+    Supposing that the "files" file is called anaddb.files,
+    and that the executable is placed in your working directory, anaddb is run
+    interactively (in Unix) with the command
+  <ul>
+    <li><i>anaddb < anaddb.files >& log </i></li>
+  </ul>
+  <br>
+  or, in the background, with the command
+ <ul>
+  <li><i>anaddb < anaddb.files >& log & </i></li>
+ </ul>
+<p> where standard out and standard error are piped
+to the log file called "log"
+(piping the standard error, thanks to the '&' sign placed after '>'
+is <b>really important</b> for the analysis of eventual failures, when not due
+to ABINIT, but to other sources, like disk full problem ...).
+The user can specify any names he/she wishes for any of these files.
+Variations of the above commands could be needed,
+depending on the flavor of UNIX that is used on the platform
+that is considered for running the code.
+</p>
+<p>The syntax of the input file is strictly similar to the syntax of
+the main abinit input files: the file is parsed, keywords are identified,
+comments are also identified. However, the multidataset mode is not available.
+</p>
+<br><br><a href=#top>Go to the top</a>
+<hr>
+<br><a name="input_vars"> </a>
+<a name="2"> </a>
+<h3><b>2. Input variables</b></h3>
+ <p>This ANADDB utility is able to perform many different tasks, each governed by a
+selected set of input variables, with also some input variables common to many of the
+different tasks. 
+<li> <a href="../../topics/generated_files/topic_anaddbCommon.html"> anaddb common input variables</a></li>
+<li> <a href="../../topics/generated_files/topic_anaddbSpec.html"> anaddb tasks</a></li>
+<li> <a href="../../topics/generated_files/topic_anaddbEPC.html"> anaddb electron-phonon input variables</a> </li>
+
+<p>
+<p>The list of input variables for the anaddb input file are presented in the <a href="../../input_variables/generated_files/varset_anaddb.html#">anaddb</a> variable set. In order
+to discover them, it is easier to use the different lessons of the tutorial:
+start with the second lesson on response functions (<a href="../../tutorial/generated_files/lesson_rf2.html#">lesson_rf2</a>),
+then follow the lesson on elasticity and piezoelectricity (<a href="../../tutorial/generated_files/lesson_elastic.html#">lesson_elastic</a>),
+the lesson on electron-phonon interaction (<a href="../../tutorial/generated_files/lesson_eph.html#">lesson_eph</a>), and
+the lesson on non-linear properties (<a href="../../tutorial/generated_files/lesson_nlo.html#">lesson_nlo</a>).
+<i>If you are discovering this file with the help of the tutorial,
+you can go back to the tutorial window.</i>
+</p>
+<br><br><a href=#top>Go to the top</a>
+<hr>
+<script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
+
+</body>
+</html>
+
