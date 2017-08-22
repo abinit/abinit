@@ -6,6 +6,8 @@
 
 ndtset 10
 prtpot 1
+prtvha 1
+prtvclmb 1
 istwfk *1   # limitation of wfd_t
 nstep  50
 #nsppol 2
