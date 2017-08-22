@@ -720,6 +720,8 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
    end if
 
 !  Compute 1st moment of total Hartree potential VH(n_Z+n_core+n1)
+!  equation 10 (density) and up to 43 (Hartree potential of density)
+!    of Kresse and Joubert PRB 59 1758 (1999)
    keep_vhartree=(paw_an(iatom)%has_vhartree>0)
    if ((pawspnorb>0.and.ipert==0.and.ipositron/=1).or.keep_vhartree) then
      ! in the first clause case, would it not be simpler just to turn on has_vhartree?
@@ -731,16 +733,23 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
      end if
 
 ! construct vh1
+! the sqrt(4pi) factor comes from the fact we are calculating the spherical moments, 
+!  and for the 00 channel the prefactor of Y_00 = 2 sqrt(pi)
      ABI_ALLOCATE(rho,(mesh_size))
 !     rho(1:mesh_size)=(rho1(1:mesh_size,1,1) + sqrt(four_pi)*pawtab(itypat)%coredens(1:mesh_size)) &
 !&       *four_pi*pawrad(itypat)%rad(1:mesh_size)**2
+
      rho(1:mesh_size)=rho1(1:mesh_size,1,1)*four_pi*pawrad(itypat)%rad(1:mesh_size)**2
+
      call poisson(rho,0,pawrad(itypat),paw_an(iatom)%vh1(:,1,1))
+
 !     paw_an(iatom)%vh1(2:mesh_size,1,1)=(paw_an(iatom)%vh1(2:mesh_size,1,1) &
 !&       -sqrt(four_pi)*znucl(itypat))/pawrad(itypat)%rad(2:mesh_size)
+
 ! TODO: check this is equivalent to the previous version (commented) which explicitly recalculated VH(coredens)
      paw_an(iatom)%vh1(2:mesh_size,1,1)=paw_an(iatom)%vh1(2:mesh_size,1,1)/pawrad(itypat)%rad(2:mesh_size) &
-&       + pawtab(itypat)%VHnZC(2:mesh_size)
+&       + sqrt(four_pi) * pawtab(itypat)%VHnZC(2:mesh_size)
+
      call pawrad_deducer0(paw_an(iatom)%vh1(:,1,1),mesh_size,pawrad(itypat))
 
 ! same for vht1
@@ -755,7 +764,7 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
 !     paw_an(iatom)%vht1(2:mesh_size,1,1)=(paw_an(iatom)%vht1(2:mesh_size,1,1) &
 !&       -sqrt(four_pi)*znucl(itypat))/pawrad(itypat)%rad(2:mesh_size)
      paw_an(iatom)%vht1(2:mesh_size,1,1)=paw_an(iatom)%vht1(2:mesh_size,1,1)/pawrad(itypat)%rad(2:mesh_size) &
-&        + pawtab(itypat)%vhtnzc(2:mesh_size)
+&        + sqrt(four_pi)*pawtab(itypat)%vhtnzc(2:mesh_size)
      call pawrad_deducer0(paw_an(iatom)%vht1(:,1,1),mesh_size,pawrad(itypat))
 
      paw_an(iatom)%has_vhartree=2

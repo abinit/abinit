@@ -605,7 +605,9 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
        ABI_ALLOCATE(vh1_interp,(pawfgrtab(iatom)%nfgd))
        ABI_ALLOCATE(radii,(pawfgrtab(iatom)%nfgd))
        ABI_ALLOCATE(isort,(pawfgrtab(iatom)%nfgd))
-       vh1_corrector(:) = paw_an(iatom)%vh1(:,1,ispden)-paw_an(iatom)%vht1(:,1,ispden)
+       ! vh1 vht1 contain the spherical first moments of the Hartree potentials, so re-divide by Y_00 = sqrt(four_pi)
+       vh1_corrector(:) = (paw_an(iatom)%vh1(:,1,ispden)-paw_an(iatom)%vht1(:,1,ispden)) / sqrt(four_pi) 
+
        ! get end point derivatives
        call bound_deriv(vh1_corrector, pawrad(itypat), pawrad(itypat)%mesh_size, yp1, ypn)
        ! spline the vh1 function
