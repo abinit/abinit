@@ -173,6 +173,8 @@ subroutine paw_dfptnl_xc(cplex_1,cplex_2,cplex_3,d3exc1_iat,ixc,kxc,lm_size,lmse
 ! end if
 ! if (option<=1) vxc1(:,:,:)=zero
 
+ d3exc1_iat(:) = zero
+
 !Special case: no XC applied
  if (ixc==0) then
    msg='Note that no xc is applied (ixc=0). Returning'
@@ -196,7 +198,6 @@ subroutine paw_dfptnl_xc(cplex_1,cplex_2,cplex_3,d3exc1_iat,ixc,kxc,lm_size,lmse
    MSG_BUG(msg)
  end if
 
- d3exc1_iat(:) = zero
  ABI_ALLOCATE(ff,(nrad))
 
 !!----------------------------------------------------------------------
