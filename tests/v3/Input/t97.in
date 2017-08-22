@@ -49,4 +49,5 @@ toldfe 1.0d-8
 #%%   physically meaningful.
 #%%   4 pairs of mixing coefficients are studied, including
 #%%   one for which the occupation numbers becomes fractionary.
+#%% topics = AtomTypes
 #%%<END TEST_INFO>

@@ -122,6 +122,7 @@
    9 => output .xsf file for XCrysDen
   11 => compute atomic charge using the Hirshfeld method
   14 => Gaussian/cube wavefunction module
+  15 => Write data to netcdf file
 
  Your choice is  2
 
@@ -183,6 +184,7 @@
    9 => output .xsf file for XCrysDen
   11 => compute atomic charge using the Hirshfeld method
   14 => Gaussian/cube wavefunction module
+  15 => Write data to netcdf file
 
  Your choice is  5
 
@@ -205,6 +207,7 @@
    9 => output .xsf file for XCrysDen
   11 => compute atomic charge using the Hirshfeld method
   14 => Gaussian/cube wavefunction module
+  15 => Write data to netcdf file
 
  Your choice is  1
 
@@ -239,6 +242,7 @@
    9 => output .xsf file for XCrysDen
   11 => compute atomic charge using the Hirshfeld method
   14 => Gaussian/cube wavefunction module
+  15 => Write data to netcdf file
 
  Your choice is  1
 

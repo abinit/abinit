@@ -293,7 +293,7 @@ MODULE m_wfd
   !logical :: gamma_centered=.FALSE.
    ! .TRUE. if ug are given on the Gamma-centered G-sphere. Flag nedded to preserve the old Implementation.
 
-  !% real(dp) :: effmass
+  !% real(dp) :: effmass_free
   ! Effective mass for electrons
 
 !arrays

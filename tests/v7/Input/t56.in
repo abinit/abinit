@@ -39,4 +39,5 @@ t55o_DS11_EIG.nc
 #%%  Diamond dynamical temperature-dependent of the electronic structure using the temperature.py python script. 
 #%%  Three q-points are computed and the ZPR is calculated. The temperature between 0 and 1000K is computed
 #%%  by steps of 100K.
+#%% topics = TDepES
 #%%<END TEST_INFO>

@@ -62,4 +62,5 @@ toldfe 1.0d-6
 #%% description = 
 #%%   Set of Hydrogen atoms in a body-centered, or face-centered tetragonal, of body-centered orthorhombic lattice.
 #%%   This is to test the scalecart input variable.
+#%% topics = UnitCell
 #%%<END TEST_INFO>

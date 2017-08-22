@@ -479,7 +479,7 @@ subroutine calc_vkb(cryst,psps,kpoint,npw_k,kg_k,vkbsign,vkb,vkbd)
 !Local variables ------------------------------
 !scalars
  integer :: dimffnl,ider,idir,itypat,nkpg,in,il,ilmn,ig,iln,iln0,nlmn
- real(dp) :: effmass,ecutsm,ecut
+ real(dp) :: effmass_free,ecutsm,ecut
 !arrays
  real(dp),allocatable :: ffnl(:,:,:,:),kpg_dum(:,:),modkplusg(:),ylm_gr(:,:,:),ylm_k(:,:)
 
@@ -521,8 +521,8 @@ subroutine calc_vkb(cryst,psps,kpoint,npw_k,kg_k,vkbsign,vkb,vkbd)
  ABI_FREE(kpg_dum)
 
  ABI_MALLOC(modkplusg, (npw_k))
- effmass = one; ecutsm = zero; ecut = huge(one)
- call mkkin(ecut,ecutsm,effmass,cryst%gmet,kg_k,modkplusg,kpoint,npw_k,0,0)
+ effmass_free = one; ecutsm = zero; ecut = huge(one)
+ call mkkin(ecut,ecutsm,effmass_free,cryst%gmet,kg_k,modkplusg,kpoint,npw_k,0,0)
  modkplusg(:) = SQRT(half/pi**2*modkplusg(:))
  modkplusg(:) = MAX(modkplusg(:),tol10)
 

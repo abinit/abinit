@@ -214,7 +214,7 @@ character(500) :: msg
 
 call cpu_time(total_time1)
 !Variable allocation and initialization
-model_number        = dtset%gwls_dielectric_model
+model_number        = dtset%gwls_diel_model
 model_parameter     = dtset%gwls_model_parameter
 npt_gauss           = dtset%gwls_npt_gauss_quad
 print_debug         = dtset%gwls_print_debug
@@ -223,11 +223,13 @@ first_seed          = dtset%gwls_first_seed
 e                   = dtset%gwls_band_index
 
 
-second_model_parameter  = dtset%gwls_second_model_parameter
+!second_model_parameter  = dtset%gwls_second_model_parameter
+second_model_parameter  = zero
+
 
 
 ! set variables from gwls_GenerateEpsilon module
-kmax   = dtset%gwls_sternheimer_kmax
+kmax   = dtset%gwls_stern_kmax
 nseeds = dtset%gwls_nseeds
 
 kmax_model    = dtset%gwls_kmax_complement
@@ -1034,7 +1036,7 @@ logical :: use_model
 !--------------------------------------------------------------------------------
 
 !Variable allocation and initialization
-model_number        = dtset%gwls_dielectric_model
+model_number        = dtset%gwls_diel_model
 model_parameter     = dtset%gwls_model_parameter
 npt_gauss           = dtset%gwls_npt_gauss_quad
 print_debug         = dtset%gwls_print_debug
@@ -1044,7 +1046,7 @@ e                   = dtset%gwls_band_index
 
 
 ! set variables from gwls_GenerateEpsilon module
-kmax   = dtset%gwls_sternheimer_kmax
+kmax   = dtset%gwls_stern_kmax
 nseeds = dtset%gwls_nseeds
 
 kmax_poles  = dtset%gwls_kmax_poles

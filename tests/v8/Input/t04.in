@@ -94,4 +94,5 @@ znucl  13
 #%% keywords = NC
 #%% description = 
 #%%   Interpolation of electronic bands with two different techniques (star functions and B-spline interpolation)
+#%% topics = ElecBandStructure
 #%%<END TEST_INFO>

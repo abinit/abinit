@@ -23,7 +23,7 @@ doc_dir        = os.path.join(top_dir,"doc")
 
 # The documentation resources:
 inp_dir        = os.path.join(doc_dir, "input_variables")
-doc_index_file = os.path.join(inp_dir, "html_automatically_generated/allvariables.html")
+doc_index_file = os.path.join(inp_dir, "generated_files/varset_allvars.html")
 
 # The source resource:
 src_dir        = os.path.join(top_dir,"src")
@@ -145,7 +145,7 @@ print("There are %d variables defined in the var*.html files.\n" % len(ab_defs))
 
 print("HTML index file:")
 print("===============")
-keys = doc_parse_index("automatically_generated/allvariables.html", ab_defs, ab_stat_links)
+keys = doc_parse_index("generated_files/varset_allvars.html", ab_defs, ab_stat_links)
 print("There are %d variables in the HTML index file.\n" % len(keys))
 
 print("Intagm calls:")

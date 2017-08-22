@@ -145,4 +145,5 @@ tolwfr  1.0d-10
 #%% description = 
 #%%   Silicon
 #%%   One-shot GW calculations within the PAW formalism
+#%% topics = GW
 #%%<END TEST_INFO>

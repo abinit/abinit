@@ -87,4 +87,5 @@
 #%%   Corresponding variables: recgratio, recrcut,recefermi respectively
 #%%   Corresponding code: 68_recursion
 #%%   Other test: paral/tT,v5/t76
+#%% topics = Recursion
 #%%<END TEST_INFO>

@@ -31,4 +31,5 @@ maxcpd 10.0
 #%%   HI 8 molecule per cell, the cell is triclinic.
 #%%   Bader analysis for the first atom.
 #%%   Previously, there was a bug, not active when the cell has symmetric axes.
+#%% topics = Bader
 #%%<END TEST_INFO>

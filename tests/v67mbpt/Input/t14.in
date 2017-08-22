@@ -143,4 +143,5 @@ timopt -1
 #%% keywords = PAW, GW, BSE
 #%% description = 
 #%%   LiF. Optical properties within BSE and PAW (Haydock method).
+#%% topics = BSE
 #%%<END TEST_INFO>

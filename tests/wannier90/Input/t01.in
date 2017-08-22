@@ -55,4 +55,5 @@ istwfk 8*1
 #%% description = 
 #%%  Gallium Arsenide, zinc-blende. 8 bands. prtwant=2
 #%%  Should still be completed by the call to wannier90, and subsequent fldiff use...
+#%% topics = Wannier
 #%%<END TEST_INFO>

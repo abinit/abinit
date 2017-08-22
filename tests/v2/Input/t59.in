@@ -57,4 +57,5 @@
 #%% description = 
 #%%  Space group number 225 : FCC Aluminum, in both conventional and
 #%%  primitive unit cells.
+#%% topics = UnitCell, SmartSymm
 #%%<END TEST_INFO>

@@ -1,0 +1,591 @@
+<!--                                                                                     -->
+<!-- This file has been produced by generate_doc.py using different .yml  or .bib files. -->
+<!-- It is useless to modify it. Modify the related .yml  or .bib files instead.         -->
+<!--                                                                                     -->
+<html>
+<head><title>Fourth (basic) lesson</title>
+<link rel=stylesheet type="text/css" href="../formabinit.css">
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  jax: ["input/TeX","output/HTML-CSS"],
+  tex2jax: {inlineMath: [['$','$']]},
+  displayAlign: "center",
+  TeX: { equationNumbers: { autoNumber: "AMS" } }
+});
+</script>
+<script type="text/javascript" async
+src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+</head>
+<body bgcolor="#ffffff">
+
+<hr>
+<a name="top"></a>
+
+<h1>ABINIT tutorial. Fourth (basic) lesson...</h1>
+
+<h2>Aluminum, the bulk and the surface.</h2>
+<hr>
+<p>This lesson aims at showing how to get
+the following physical properties, for a metal, and for a surface:
+<ul>
+<li>the total energy
+<li>the lattice parameter
+<li>the relaxation of surface atoms
+<li>the surface energy
+</ul>
+You will learn about the smearing of the Brillouin zone integration,
+and also a bit about preconditioning the SCF cycle.
+
+<p>This lesson should take about 1 hour and 30 minutes.
+<hr>
+<h5>Copyright (C) 2000-2017 ABINIT group (XG,RC)
+<script type="text/javascript" src="../../js_files/copyright.js"> </script>
+</h5> 
+
+<script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
+
+<a name="list"></a>
+<h3><b> Fourth (basic) lesson. Table of content:</b></h3>
+
+<ul> 
+  <li>1. <a href="#fixed">Total energy and lattice parameters at fixed smearing and k-point grid</a></li>
+  <li>2. <a href="#conv_wrt_kpt">The convergence study with respect to k points</a></li>
+  <li>3. <a href="#conv_tsmear">The convergence study with respect to both number of k points AND broadening factor (tsmear)</a></li>
+  <li>4. <a href="#surf">Surface energy of aluminum (100): changing the orientation of the unit cell</a></li>
+  <li>5. <a href="#slab">Surface energy : a (3 aluminum layer + 1 vacuum layer) slab calculation</a></li>
+  <li>6. <a href="#vacuum">Surface energy: increasing the number of vacuum layers</a></li>
+  <li>7. <a href="#layers">Surface energy: increasing the number of aluminum layers</a></li>
+
+ </ul> 
+ <hr><br><a name="fixed"> </a>
+<a name="1"> </a>
+<h3><b>1. Total energy and lattice parameters at fixed smearing and k-point grid</b></h3>
+ <p><a name="41">&nbsp;</a>
+<p><i>Before beginning, you might consider to work in a different
+subdirectory as for lesson 1, 2 or 3 . Why not "Work4" ?
+</i>
+
+
+<p>The file ~abinit/tests/tutorial/Input/tbase4_x.files lists the file
+  names and root names. You can copy it in the Work4 directory (and change it, as usual).
+  You can also copy the file ~abinit/tests/tutorial/Input/tbase4_1.in</a> in Work4.
+  This is your input file. You
+  should edit it, read it carefully, and have a look at the following "new" input
+  variables, and their explanation:
+<ul>
+  <li><a href="../../input_variables/generated_files/varset_basic.html#occopt">occopt</a>
+  <li><a href="../../input_variables/generated_files/varset_gstate.html#tsmear">tsmear</a>
+</ul>
+
+Note also the following:
+<br>
+1) You will work at fixed <a href="../../input_variables/generated_files/varset_basic.html#ecut">ecut</a>
+(=6Ha). It is implicit that in "real life", you should do a convergence test with
+respect to <a href="../../input_variables/generated_files/varset_basic.html#ecut">ecut</a> ... Here, a suitable
+<a href="../../input_variables/generated_files/varset_basic.html#ecut">ecut</a> is given to you. It will allow
+to obtain 0.2% relative accuracy on lattice parameters. Note that this is the
+softer pseudopotential of those that we have used until now: the 01h.pspgth for
+H needed 30 Ha (it was rather hard), the 14si.pspnc for Si needed 8 Ha. <br>
+2) The input variable diemac has been suppressed. Aluminum is a metal,
+and the default is tailored for that case.
+
+
+<p> When you have read the input file, you can run the code, as usual
+(it will take a few seconds).
+Then, read the output file quietly.
+<br>You should note that the Fermi energy and occupation numbers have been
+computed automatically:
+<pre>
+ Fermi (or HOMO) energy (hartree) =   0.26847   Average Vxc (hartree)=  -0.34746
+ Eigenvalues (hartree) for nkpt=   2  k points:
+ kpt#   1, nband=  3, wtk=  0.75000, kpt= -0.2500  0.5000  0.0000 (reduced coord)
+   0.09425   0.25438   0.41909
+      occupation numbers for kpt#   1
+   2.00003   1.33307   0.00014
+ prteigrs : prtvol=0 or 1, do not print more k-points.
+</pre>
+You should also note that the components of the total energy
+include an entropy term:
+<pre>
+ Components of total free energy (in Hartree):
+
+    Kinetic energy  =  8.70954971782498E-01
+    Hartree energy  =  3.84986358590396E-03
+    XC energy       = -8.08434339502224E-01
+    Ewald energy    = -2.72948286712169E+00
+    PspCore energy  =  3.78721653637092E-02
+    Loc. psp. energy=  8.26684645838168E-02
+    NL   psp  energy=  4.52588269933839E-01
+    >>>>> Internal E= -2.08998347137414E+00
+
+    -kT*entropy     = -7.99729047978171E-03
+    >>>>>>>>> Etotal= -2.09798076185393E+00
+
+ Other information on the energy :
+    Total energy(eV)= -5.70889598417024E+01 ; Band energy (Ha)=   3.6059822203E-01
+</pre>
+<br><br><a href=#top>Go to the top</a>
+<hr>
+<br><a name="conv_wrt_kpt"> </a>
+<a name="2"> </a>
+<h3><b>2. The convergence study with respect to k points</b></h3>
+ <p><a name="42">&nbsp;</a>
+<p>There is of course a convergence study associated to the sampling
+of the Brillouin zone. You should examine different grids,
+of increasing resolution. You might try the following series
+of grids:
+<pre>
+  ngkpt1  2 2 2
+  ngkpt2  4 4 4
+  ngkpt3  6 6 6
+  ngkpt4  8 8 8
+</pre>
+with the associated <a href="../../input_variables/generated_files/varset_basic.html#nkpt">nkpt</a>:
+<pre>
+  nkpt1  2
+  nkpt2 10
+  nkpt3 28
+  nkpt4 60
+</pre>
+
+<p>The input file ~abinit/tests/tutorial/Input/tbase4_2.in is an example,
+  while ~abinit/tests/tutorial/Refs/tbase4_2.out is a reference output file.
+  The run might take about thirty seconds on a PC 3 GHz.
+
+<p>You will see that, FOR THE PARTICULAR VALUE OF <a href="../../input_variables/generated_files/varset_gstate.html#tsmear">tsmear</a>=0.05
+Ha, the lattice parameter is already converged with <a href="../../input_variables/generated_files/varset_basic.html#nkpt">nkpt</a>=10
+:
+<pre>
+            acell1     7.5588968086E+00  7.5588968086E+00  7.5588968086E+00 Bohr
+            acell2     7.5070431499E+00  7.5070431499E+00  7.5070431499E+00 Bohr
+            acell3     7.5016877756E+00  7.5016877756E+00  7.5016877756E+00 Bohr
+            acell4     7.4992662653E+00  7.4992662653E+00  7.4992662653E+00 Bohr
+</pre>
+Note that there is usually a STRONG cross-convergence effect between the number
+of k points and the value of the broadening, <a href="../../input_variables/generated_files/varset_gstate.html#tsmear">tsmear</a>.
+<br>
+The right procedure is: for each value of <a href="../../input_variables/generated_files/varset_gstate.html#tsmear">tsmear</a>,
+to get the convergence with respect to the number of k points, then to compare
+the k-point converged values for different values of <a href="../../input_variables/generated_files/varset_gstate.html#tsmear">tsmear</a>.
+<p>In what follows, we will restrict ourselves to the grids with <a href="../../input_variables/generated_files/varset_basic.html#nkpt">nkpt</a>=2,
+  10 and 28.
+<br><br><a href=#top>Go to the top</a>
+<hr>
+<br><a name="conv_tsmear"> </a>
+<a name="3"> </a>
+<h3><b>3. The convergence study with respect to both number of k points AND broadening factor (tsmear)</b></h3>
+ <p><p> <a name="43">&nbsp;</a>
+<p>The theoretical convergence rate for <a href="../../input_variables/generated_files/varset_gstate.html#tsmear">tsmear</a>
+  ending to 0, in the case of <a href="../../input_variables/generated_files/varset_basic.html#occopt">occopt</a>=4,
+  is quartic. This is obtained in the hypothesis of infinitely dense k point grid.
+  We will check the evolution of <a href="../../input_variables/generated_files/varset_basic.html#acell">acell</a>
+  as a function of <a href="../../input_variables/generated_files/varset_gstate.html#tsmear">tsmear</a>, for
+  the following values of <a href="../../input_variables/generated_files/varset_gstate.html#tsmear">tsmear</a>
+  : 0.01, 0.02, 0.03 and 0.04. Use the double-loop capability of the multi-dataset
+  mode, with the <a href="../../input_variables/generated_files/varset_gstate.html#tsmear">tsmear</a> changes
+  in the INNER loop. This will saves CPU time, as the wavefunctions of the previous
+  dataset will be excellent (no transfer to different k points).
+<p>The input file ~abinit/tests/tutorial/Input/tbase4_3.in is an example,
+  while ~abinit/tests/tutorial/Refs/tbase4_3.out is a reference output file.
+<p>From the output file, here is the evolution of <a href="../../input_variables/generated_files/varset_basic.html#acell">acell</a>
+  :
+<pre>
+            acell11    7.5587661702E+00  7.5587661702E+00  7.5587661702E+00 Bohr
+            acell12    7.5587696944E+00  7.5587696944E+00  7.5587696944E+00 Bohr
+            acell13    7.5587696871E+00  7.5587696871E+00  7.5587696871E+00 Bohr
+            acell14    7.5587710578E+00  7.5587710578E+00  7.5587710578E+00 Bohr
+            acell21    7.5055168997E+00  7.5055168997E+00  7.5055168997E+00 Bohr
+            acell22    7.5056781966E+00  7.5056781966E+00  7.5056781966E+00 Bohr
+            acell23    7.5018335937E+00  7.5018335937E+00  7.5018335937E+00 Bohr
+            acell24    7.5041510220E+00  7.5041510220E+00  7.5041510220E+00 Bohr
+            acell31    7.4963466654E+00  7.4963466654E+00  7.4963466654E+00 Bohr
+            acell32    7.4957099831E+00  7.4957099831E+00  7.4957099831E+00 Bohr
+            acell33    7.4969520318E+00  7.4969520318E+00  7.4969520318E+00 Bohr
+            acell34    7.4993529673E+00  7.4993529673E+00  7.4993529673E+00 Bohr
+</pre>
+These data should be analyzed properly.
+<p>For <a href="../../input_variables/generated_files/varset_gstate.html#tsmear">tsmear</a>=0.01, the converged
+  value, contained in acell31, must be compared to acell11 and acell21:
+  between acell21
+  and acell31, the difference
+  is below 0.2%. acell31 can be
+  considered to be converged with respect to the number of k-points, at fixed
+  <a href="../../input_variables/generated_files/varset_gstate.html#tsmear">tsmear</a>. <br>
+  This tsmear being the lowest one, it is usually the most difficult to converge,
+  and the values acell31,32,33
+  and 34 are indeed well-converged with respect to the k-point number. <br>
+  The use of the largest <a href="../../input_variables/generated_files/varset_gstate.html#tsmear">tsmear</a>(=0.04),
+  giving acell34, induces only
+  a small error in the lattice parameter.
+  For that particular value of <a href="../../input_variables/generated_files/varset_gstate.html#tsmear">tsmear</a>,
+  one can use the second k-point grid,
+  giving acell24.
+<p>So to <b>summarize</b>:<br>
+  we can choose to work with a 10 k-point grid in the irreducible Brillouin zone,
+  and the associated <a href="../../input_variables/generated_files/varset_gstate.html#tsmear">tsmear</a>=0.04,
+  with less than 0.1% error on the lattice parameter. <br>
+  NOTE that this error due to the Brillouin zone sampling could add to the error
+  due to the choice of <a href="../../input_variables/generated_files/varset_basic.html#ecut">ecut</a> (that
+  was mentioned previously to be on the order of 0.2%).
+<p>In what follows, we will stick to these values of
+  <a href="../../input_variables/generated_files/varset_basic.html#ecut">ecut</a>
+  and <a href="../../input_variables/generated_files/varset_gstate.html#tsmear">tsmear</a>, and try to use
+  k-point grids with a similar resolution.
+<p>Our final value for the aluminum lattice parameter, in the LDA,
+using the 13al.981214.fhi pseudopotential, is thus 7.5041 Bohr.
+Note: for historical reasons (consistency with older versions of the tutorial),
+we will work on the following, with a slightly
+different value, of 7.5056 Bohr, that is 3.9718 Angstrom.
+<br>The experimental value at 25 degree Celsius is 4.04958 Angstrom.
+
+<p>The associated total energy and accuracy can be deduced from
+<pre>
+           etotal11   -2.0916027819E+00
+           etotal12   -2.0931968906E+00
+           etotal13   -2.0947909992E+00
+           etotal14   -2.0963851177E+00
+           etotal21   -2.0969713557E+00
+           etotal22   -2.0975525285E+00
+           etotal23   -2.0978233733E+00
+           etotal24   -2.0979980153E+00
+           etotal31   -2.0983520905E+00
+           etotal32   -2.0983215368E+00
+           etotal33   -2.0983305960E+00
+           etotal34   -2.0984218116E+00
+</pre>
+<p><b>etotal</b>24 is -2.0979980153E+00 Ha, with an accuracy of 0.0005 Ha .</p>
+<br><br><a href=#top>Go to the top</a>
+<hr>
+<br><a name="surf"> </a>
+<a name="4"> </a>
+<h3><b>4. Surface energy of aluminum (100): changing the orientation of the unit cell</b></h3>
+ <p><p> <a name="44">&nbsp;</a> </p>
+<p>In order to study the Aluminum (100) surface, we will have to set up
+a supercell representing a slab. This supercell should be chosen
+as to be compatible with the primitive surface unit cell.
+<br>The corresponding directions are <code>[-1 1 0]</code> and <code>[1 1 0]</code>. The direction
+perpendicular to the surface is <code>[0 0 1]</code>. There is no primitive
+cell of bulk aluminum based on these vectors, but a doubled
+cell. We will first compute the total energy associated with
+this doubled cell. This is not strictly needed, but it is a
+valuable intermediate step towards the study of the surface.
+
+<p>You might start from tbase4_3.in. <br>
+  You have to change <a href="../../input_variables/generated_files/varset_basic.html#rprim">rprim</a>. Still,
+  try to keep <a href="../../input_variables/generated_files/varset_basic.html#acell">acell</a> at the values
+  of bulk aluminum that were determined previously. But it is not all: the most
+  difficult part in the passage to this doubled cell is the definition of the
+  k-point grid. Of course, one could just take a homogeneous simple cubic grid
+  of k points, but this will not correspond exactly to the k-point grid used in
+  the primitive cell in tbase4_3.in . This would not be a big problem, but you
+  would miss some error cancellation.
+<p>The answer to this problem is given in the
+  input file ~abinit/tests/tutorial/Input/tbase4_4.in.
+  <br>
+  The procedure to do the exact translation of the k-point grid will not be explained
+  here (sorry for this). If you do not see how to do it, just use homogeneous
+  simple cubic grids, with about the same resolution as for the primitive cell
+  case. There is a simple rule to estimate ROUGHLY whether two grids for different
+  cells have the same resolution: simply multiply the linear dimensions of the
+  k-point grids, by the number of sublattices, by the number of atoms in the cell.
+  For example, the corresponding product for the usual 10 k-point grid is <code>4x4x4
+  x 4 x 1 = 256</code> . In the file tbase4_4.in,
+  one has <code>4x4x4 x 2 x 2 = 256</code> . The grids of k points should not
+  be too anisotropic for this rough estimation to be valid.
+<p>Note also the input variables <a href="../../input_variables/generated_files/varset_basic.html#rprim">rprim</a>
+  and <a href="../../input_variables/generated_files/varset_gstate.html#chkprim">chkprim</a> in this input
+  file.
+<p>So, you run tbase4_4.in (only a few seconds, the reference file is ~abinit/tests/tutorial/Refs/tbase4_4.out),
+  and you find the following total energy:
+<pre>
+           etotal     -4.1962972610E+00
+</pre>
+<p>It is not exactly twice the total energy for the primitive cell, mentioned
+  above, but the difference is less than 0.0005 Ha. It is due to the different
+  FFT grids used in the two runs, and affect the exchange-correlation energy.
+  These grids are always homogeneous primitive 3D grids, so that changing the
+  orientation of the lattice will give mutually incompatible lattices. Increasing
+  the size of the FFT grid would improve the agreement.</p>
+<br><br><a href=#top>Go to the top</a>
+<hr>
+<br><a name="slab"> </a>
+<a name="5"> </a>
+<h3><b>5. Surface energy : a (3 aluminum layer + 1 vacuum layer) slab calculation</b></h3>
+ <p><a name="45">&nbsp;</a>
+
+<p>We will first compute the total energy associated with only three layers of
+  aluminum, separated by only one layer of vacuum. This is kind of a minimal slab:
+  <ul>
+    <li>one surface layer
+    <li>one "bulk" layer
+    <li>one surface layer
+    <li>one vacuum layer
+    <li>...
+  </ul>
+  It is convenient to take the vacuum region as having a multiple of the width
+  of the aluminum layers, but this is not mandatory. The supercell to use is the
+  double of the previous cell (that had two layers of Aluminum atoms along the
+  <code>[0 0 1]</code> direction). Of course, the relaxation of the surface might
+  give an important contribution to the total energy.
+<p>You should start from tbase4_4.in . <br>
+  You have to modify <a href="../../input_variables/generated_files/varset_basic.html#rprim">rprim</a> (double
+  the cell along <code>[0 0 1]</code>), the atomic positions, as well as the k
+  point mesh. For the latter, it is supposed that the electrons cannot propagate
+  from one slab to its image in the <code>[0 0 1]</code> direction, so that the
+  k_z component of the special k points can be taken 0: only one layer of k points
+  is needed along the z-direction. You should also allow the relaxation of atomic
+  positions, but not the relaxation of lattice parameters (the lattice parameters
+  along x or y must be considered fixed to the bulk value, while, for the z direction,
+  there is no interest to allow the vacuum region to collapse !
+<p>The input file ~abinit/tests/tutorial/Input/tbase4_5.in is an example,
+  while ~abinit/tests/tutorial/Refs/tbase4_5.out is a reference output
+  file. The run might last one minute.
+<p>The total energy after the first SCF cycle, when the
+atomic positions are equal to their starting values, is:
+<pre>
+ ETOT  6  -6.2619738807344
+</pre>
+Note that the total energy of three aluminum atoms in the bulk,
+(from section 4.3, etotal24 multiplied by three) is
+<pre>
+   -6.293994 Ha
+</pre>
+so that the non-relaxed surface energy, per surface unit cell (there
+are two surfaces in our simulation cell !) is
+<pre>
+  0.016010 Ha = 0.436 eV .
+</pre>
+<p>The total energy after the Broyden relaxation is:
+<pre>
+           etotal     -6.2622251508E+00
+</pre>
+so that the relaxed surface energy, per surface unit cell is
+<pre>
+0.015885 Ha = 0.432eV .
+</pre>
+<p>It seems that the relaxation energy is very small, compared to the surface
+  energy, but we need to do the convergence studies.</p>
+<br><br><a href=#top>Go to the top</a>
+<hr>
+<br><a name="vacuum"> </a>
+<a name="6"> </a>
+<h3><b>6. Surface energy: increasing the number of vacuum layers</b></h3>
+ <p><a name="46">&nbsp;</a>
+
+<p>One should now increase the number of vacuum layers: 2 and 3 layers
+instead of only 1.
+<br>It is preferable to define atomic positions in Cartesian coordinates.
+The same coordinates will work for both 2 and 3 vacuum layers, while
+this is not the case for reduced coordinates, as the cell size
+increases.
+
+<p>The input file ~abinit/tests/tutorial/Input/tbase4_6.in is an example
+  input file, while ~abinit/tests/tutorial/Refs/tbase4_6.out is a
+  reference output file. The run is on the order of thirty seconds on a PC 3 GHz.
+<p>In the Broyden step 0 of the first dataset, you will notice
+the WARNING:
+<pre>
+ scprqt:  WARNING -
+  nstep=    6 was not enough SCF cycles to converge;
+  maximum force difference=  5.493E-05 exceeds toldff=  5.000E-05
+</pre>
+The input variable <a href="../../input_variables/generated_files/varset_basic.html#nstep">nstep</a>
+was intentionally set to the rather low value of 6,
+to warn you about possible convergence difficulties.
+The SCF convergence might indeed get more and more difficult with cell size. This is because the default
+preconditioner (see the notice of the input variable <a href="../../input_variables/generated_files/varset_gstate.html#dielng">dielng</a>)
+is not very good for the metal+vacuum case. <br>
+For the interpretation of the present run, this is not critical,
+as the convergence criterion was close of being fulfilled,
+but one should keep this in mind, as you will see ...
+
+<p>For the 2 vacuum layer case, one has the non-relaxed total energy:
+<pre>
+ ETOT  6  -6.2539524271719
+</pre>
+giving the unrelaxed surface energy
+<pre>
+  0.0200 Ha = 0.544 eV ;
+</pre>and for the relaxed case:
+<pre>
+           etotal1    -6.2547006435E+00
+</pre>
+(this one is converged to the required level)
+giving the relaxed surface energy
+<pre>  0.0196 Ha = 0.533 eV</pre>
+Note that the difference between unrelaxed and relaxed case is a bit larger than
+in the case of one vacuum layer. This is because there was some interaction between
+slabs of different supercells.
+<p>For the 3 vacuum layer case, the self-consistency is slightly
+more difficult than with 2 vacuum layers:
+the Broyden step 0 is not sufficiently converged
+(one might set nstep to a larger value, but the best is to change the
+preconditioner, as described below)...
+<br>However, for the Broyden steps number 2 and beyond, because one
+takes advantage of the previous wavefunctions, a sufficient convergence
+is reached. The total energy, in the relaxed case, is:
+<pre>
+           etotal2    -6.2559103620E+00
+</pre>
+giving the relaxed surface energy <code>0.0190 Ha = 0.515 eV</code> There is a
+rather small 0.018 eV difference with the 2 vacuum layer case.
+<p>For the next run, we will keep the 2 vacuum layer case, and we know that the
+  accuracy of the coming calculation cannot be better than 0.016 eV. One might
+  investigate the 4 vacuum layer case, but this is not worth, in the present tutorial
+  ...
+<br><br><a href=#top>Go to the top</a>
+<hr>
+<br><a name="layers"> </a>
+<a name="7"> </a>
+<h3><b>7. Surface energy: increasing the number of aluminum layers</b></h3>
+ <p><a name="47">&nbsp;</a>
+<p>One should now increase the number of aluminum layers, while keeping 2 vacuum
+  layers. We will consider 4 and 5 aluminum layers. This is rather straightforward
+  to set up, but will also change the preconditioner. One
+  could use an effective dielectric constant of about 3 or 5, with a rather small
+  mixing coefficient, on the order of 0.2. However, there is also another possibility,
+  using an estimation of the dielectric matrix governed by <a href="../../input_variables/generated_files/varset_gstate.html#iprcel">iprcel</a>=45
+  . For comparison with the previous treatment of SCF, one can recompute the result
+  with 3 aluminum layers.
+<p>The input file ~abinit/tests/tutorial/Input/tbase4_7.in is an example,
+  while ~abinit/tests/tutorial/Refs/tbase4_7.out is a reference output
+  file. This run might take about one minute, and is the longer of the four
+basic lessons.
+  You should start it now.
+<p>You can monitor its evolution by editing from time to time
+the tbase4_7_STATUS file that the code updates regularly.
+The status file, that refer to the skeleton of the code,
+is described in the ~abinit/doc/developers/programmer_guide.txt .
+You might take advantage of the time of the run to explore
+the files contained in the  ~abinit/doc/users directory and the
+~abinit/doc/developers directory. The README files
+provided interesting entry points in the documentation of the code.
+
+<p>Coming back to the file tbase4_7.out
+  ... <br>
+  You will notice that the SCF convergence is rather satisfactory, for all the
+cases (3, 4 or 5 metal layers).
+
+<p>For the 3 aluminum layer case, one has the non-relaxed total energy:
+<pre>
+ ETOT  6  -6.2539524363433
+</pre>(this quantity is converged, unlike in test 4.6)
+<br>giving the unrelaxed surface energy 0.0200 Ha = 0.544 eV ;
+and for the relaxed case:
+<pre>
+           etotal1    -6.2547008127E+00
+</pre>
+(by contrast the difference with test 4.6 is less than
+                       1 microHa)
+<br>giving the relaxed surface energy 0.0196 Ha = 0.533 eV .
+
+<p>For the 4 aluminum layer case, one has the non-relaxed total energy:
+<pre>
+ ETOT  6  -8.3546873357119 
+</pre>
+giving the unrelaxed surface energy 0.0186Ha = 0.506 eV ;
+<br>and for the relaxed case:
+<pre>
+           etotal2    -8.3565593186E+00
+</pre>
+giving the relaxed surface energy 0.0183 Ha = 0.498 eV .
+
+<p>For the 5 aluminum layer case, one has the non-relaxed total energy:
+<pre>
+ ETOT  6  -10.453642176439
+</pre>
+giving the unrelaxed surface energy 0.0183Ha = 0.498 eV ;
+<br>and for the relaxed case:
+<pre>
+           etotal3    -1.0454163186E+01
+</pre>
+giving the relaxed surface energy 0.0180 Ha = 0.490 eV .
+
+<p>The relative difference in the surface energy of the 4 and 5 layer cases
+is on the order of 1.5%.
+<p>In the framework of this tutorial, we will
+not pursue this investigation, which is a simple application
+of the concepts already explored.
+
+<p>Just for your information, and as an additional warning, when the work accomplished
+  until now is completed with 6 and 7 layers without relaxation
+  (see ~abinit/tests/tutorial/Input/tbase4_8.in and ~abinit/tests/tutorial/Refs/tbase4_8.out
+  where 5, 6 and 7 layers are treated), this non-relaxed energy surface energy
+  behaves as follows: <br>
+  <br>
+<table cellspacing="2" cellpadding="2" border="1" width="360">
+  <tr>
+    <td>
+      <div align="center">number of<br>
+        aluminum layers </div>
+    </td>
+    <td>
+      <div align="center">surface energy </div>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <div align="center">3 </div>
+    </td>
+    <td>
+      <div align="center">0.544 eV </div>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <div align="center">4 </div>
+    </td>
+    <td>
+      <div align="center">0.506 eV </div>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <div align="center">5 </div>
+    </td>
+    <td>
+      <div align="center">0.498 eV </div>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <div align="center">6 </div>
+    </td>
+    <td>
+      <div align="center">0.449 eV </div>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <div align="center">7 </div>
+    </td>
+    <td>
+      <div align="center">0.463 eV </div>
+    </td>
+  </tr>
+</table>
+
+<p>So, the surface energy convergence is rather difficult to reach.
+<br>
+  Our values, with a <code>4x4x1</code> grid, a smearing of 0.04 Ha, a kinetic
+  energy cut-off of 6 Ha, the 13al.981214.fhi pseudopotential, still oscillate
+  between 0.45 eV and 0.51 eV. Increasing the k point sampling might decrease slightly
+the oscillations, but note that this effect is intrinsic to the computation of properties
+of a metallic surface : the electrons are confined inside the slab potential, with
+subbands in the direction normal to the surface, and the Fermi energy oscillates
+with the width of the slab. This effect might be understood
+based on a comparison with the behaviour of a jellium slab.<br>
+  An error on the order of 0.016 eV is due to the thin vacuum layer.
+Other sources of errors might have to be rechecked, seeing the
+kind of accuracy that is needed.
+
+<p>Experimental data give a surface energy around 0.55 eV (sorry,
+the reference is to be provided).
+<br><br><a href=#top>Go to the top</a>
+<hr>
+<script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
+
+</body>
+</html>
+
