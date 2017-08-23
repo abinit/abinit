@@ -2007,26 +2007,26 @@ subroutine fock_updatecwaveocc(cg,cprj,dtset,fock,fock_energy,indsym,istep,mcg,m
 &               indsym_,dimlmn,iband0,indlmn,&
 &               fock%tab_symkpt(my_jkpt),fock%timerev(my_jkpt),dtset%kptns(:,ikpt),fock%pawang%l_max-1,lmnmax,&
 &               mband0,dtset%natom,nband,nspinor,dtset%nsym,dtset%ntypat,typat_srt,fock%pawang%zarot,atindx=fock%atindx)
-               if(dtset%optforces/=0) then
-                 do iatom=1,dtset%natom
-                   iatm=fock%atindx(iatom)
-                   do ispinor=iband_cprj,iband_cprj+nspinor-1
-                     do ilmn=1,fock%pawtab(dtset%typat(iatom))%lmn_size
-                       !MT aug 2017: has to use BLAS because of increment in array dcp
-                       CALL DGEMV('T',3,3,one,fock%symrec(:,:,fock%tab_symkpt(my_jkpt)),3,&
-&                                 fock%cwaveocc_prj(iatm,ispinor)%dcp(1,1,ilmn),2,zero,dcp,1)
-                       !dcp(:)= MATMUL(TRANSPOSE(fock%symrec(:,:,fock%tab_symkpt(my_jkpt))),&
-&                      !                         fock%cwaveocc_prj(iatm,ispinor)%dcp(1,:,ilmn))
-                       fock%cwaveocc_prj(iatm,ispinor)%dcp(1,:,ilmn)=dcp(:)
-                       CALL DGEMV('T',3,3,one,fock%symrec(:,:,fock%tab_symkpt(my_jkpt)),3,&
-&                                 fock%cwaveocc_prj(iatm,ispinor)%dcp(2,1,ilmn),2,zero,dcp,1)
-                       !dcp(:)= MATMUL(TRANSPOSE(fock%symrec(:,:,fock%tab_symkpt(my_jkpt))),&
-&                      !                         fock%cwaveocc_prj(iatm,ispinor)%dcp(2,:,ilmn))
-                       fock%cwaveocc_prj(iatm,ispinor)%dcp(2,:,ilmn)=dcp(:)
-                     end do
-                   end do
-                 end do
-               end if
+                do iatom=1,dtset%natom
+                  iatm=fock%atindx(iatom)
+                  do ispinor=iband_cprj,iband_cprj+nspinor-1
+                    if(fock%cwaveocc_prj(iatm,ispinor)%ncpgr>0) then
+                      do ilmn=1,fock%pawtab(dtset%typat(iatom))%lmn_size
+                        !MT aug 2017: has to use BLAS because of increment in array dcp
+                        CALL DGEMV('T',3,3,one,fock%symrec(:,:,fock%tab_symkpt(my_jkpt)),3,&
+ &                                 fock%cwaveocc_prj(iatm,ispinor)%dcp(1,1,ilmn),2,zero,dcp,1)
+                        !dcp(:)= MATMUL(TRANSPOSE(fock%symrec(:,:,fock%tab_symkpt(my_jkpt))),&
+ &                      !                         fock%cwaveocc_prj(iatm,ispinor)%dcp(1,:,ilmn))
+                        fock%cwaveocc_prj(iatm,ispinor)%dcp(1,:,ilmn)=dcp(:)
+                        CALL DGEMV('T',3,3,one,fock%symrec(:,:,fock%tab_symkpt(my_jkpt)),3,&
+ &                                 fock%cwaveocc_prj(iatm,ispinor)%dcp(2,1,ilmn),2,zero,dcp,1)
+                        !dcp(:)= MATMUL(TRANSPOSE(fock%symrec(:,:,fock%tab_symkpt(my_jkpt))),&
+ &                      !                         fock%cwaveocc_prj(iatm,ispinor)%dcp(2,:,ilmn))
+                        fock%cwaveocc_prj(iatm,ispinor)%dcp(2,:,ilmn)=dcp(:)
+                      end do
+                    end if
+                  end do
+                end do
              end if
 
            end if ! band occupied
