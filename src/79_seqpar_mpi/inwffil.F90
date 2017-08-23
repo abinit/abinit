@@ -253,8 +253,8 @@ subroutine inwffil(ask_accurate,cg,dtset,ecut,ecut_eff,eigen,exchn2n3d,&
    iomode=dtset%iomode
    if (localrdwf==0) then
      ! This is in case the wff file must be read by only the master proc
-     if (iomode /= IO_MODE_ETSF) iomode=IO_MODE_FORTRAN_MASTER 
-     !iomode=IO_MODE_FORTRAN_MASTER 
+     if (iomode /= IO_MODE_ETSF) iomode=IO_MODE_FORTRAN_MASTER
+     !iomode=IO_MODE_FORTRAN_MASTER
    end if
 
    call WffOpen(iomode,spaceComm,wff1%fname,ierr,wff1,master,me,unwff1,spaceComm_io)
@@ -776,8 +776,8 @@ subroutine inwffil(ask_accurate,cg,dtset,ecut,ecut_eff,eigen,exchn2n3d,&
            if(my_kpt(ikpt0)) then
              nband0_k=nband0(ikpt0);npw0=npwarr0(ikpt0)
              do iband=nband0_k,1,-1
-               icg0=icg0-npw0 
-               if (indx(ii)<icg0) then 
+               icg0=icg0-npw0
+               if (indx(ii)<icg0) then
                  MSG_BUG("Unable to read WF!")
                end if
                cg(:,indx(ii)+1:indx(ii)+npw0)=cg(:,icg0+1:icg0+npw0)
@@ -835,8 +835,8 @@ subroutine inwffil(ask_accurate,cg,dtset,ecut,ecut_eff,eigen,exchn2n3d,&
          if(my_kpt(ikpt0)) then
            nband0_k=nband0(ikpt0);npw0=npwarr0(ikpt0)
            do iband=nband0_k,1,-1
-             icg0=icg0-npw0 
-             if (indx(ii)<icg0) then 
+             icg0=icg0-npw0
+             if (indx(ii)<icg0) then
                MSG_BUG("Unable to read WF!")
              end if
              cg(:,indx(ii)+1:indx(ii)+npw0)=cg(:,icg0+1:icg0+npw0)
@@ -942,7 +942,7 @@ subroutine inwffil(ask_accurate,cg,dtset,ecut,ecut_eff,eigen,exchn2n3d,&
 
  ceksp=0; debug=0; doorth=1; fill=1
  if (dtset%usewvl == 0) then
-   
+
    call newkpt(ceksp,cg,debug,ecut0,ecut,ecut_eff,eigen,exchn2n3d,&
 &   fill,formeig,gmet0,gmet,headform0,indkk_eff,&
 &   ab_out,ireadwf,istwfk0,istwfk,kg,kptns0,kptns,&

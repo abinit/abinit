@@ -268,8 +268,8 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  integer,allocatable :: irrzon(:,:,:),kg(:,:),nattyp(:),symrec(:,:,:)
  integer,allocatable,target :: npwarr(:)
  integer,pointer :: npwarr_(:),pwind(:,:,:)
- real(dp) :: efield_band(3),gmet(3,3),gprimd(3,3)
- real(dp) :: rmet(3,3),rprimd(3,3),rprimd_orig(3,3),tsec(2)
+ real(dp) :: efield_band(3),gmet(3,3),gmet_(3,3),gprimd(3,3),gprimd_orig(3,3)
+ real(dp) :: rmet(3,3),rprimd(3,3),rprimd0(3,3),tsec(2)
  real(dp),allocatable :: amass(:),cg(:,:),doccde(:)
  real(dp),allocatable :: eigen(:),ph1df(:,:),phnons(:,:,:),resid(:),rhowfg(:,:)
  real(dp),allocatable :: rhowfr(:,:),spinat_dum(:,:),start(:,:),work(:)
@@ -372,7 +372,14 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  if (dtset%usewvl == 0 .and. dtset%tfkinfunc /= 2) then
 !  Set up the basis sphere of planewaves
    ABI_ALLOCATE(kg,(3,dtset%mpw*dtset%mkmem))
-   call kpgio(ecut_eff,dtset%exchn2n3d,gmet,dtset%istwfk,kg, &
+   gmet_(:,:)=gmet(:,:)
+   if (dtset%getcell/=0) then
+!    When cell is read from previous dataset, use original cell
+!      to generate the same g-vectors.
+     call matr3inv(args_gs%rprimd_orig,gprimd_orig)
+     gmet_=matmul(transpose(gprimd_orig),gprimd_orig)
+   end if
+   call kpgio(ecut_eff,dtset%exchn2n3d,gmet_,dtset%istwfk,kg, &
 &   dtset%kptns,dtset%mkmem,dtset%nband,dtset%nkpt,'PERS',mpi_enreg,&
 &   dtset%mpw,npwarr,npwtot,dtset%nsppol)
    call bandfft_kpt_init1(bandfft_kpt,dtset%istwfk,kg,dtset%mgfft,dtset%mkmem,mpi_enreg,&
@@ -1140,7 +1147,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 & pwind,pwind_alloc,pwnsfac,rprimd,symrec,xred)
 
  fatvshift=one
- rprimd_orig(:,:)=rprimd
+ rprimd0(:,:)=rprimd
 
  if (dtset%usewvl == 1 .and. wvl_debug) then
 #if defined HAVE_BIGDFT
@@ -1276,7 +1283,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 !the header with change of rprim. Might be due to the planewave basis set definition.
 !Put the original rprimd .
  call hdr_update(hdr,bantot,results_gs%etotal,results_gs%energies%e_fermie,&
-& results_gs%residm,rprimd_orig,occ,pawrhoij,xred,args_gs%amu,&
+& results_gs%residm,rprimd0,occ,pawrhoij,xred,args_gs%amu,&
 & comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
 
  ABI_ALLOCATE(doccde,(dtset%mband*dtset%nkpt*dtset%nsppol))
