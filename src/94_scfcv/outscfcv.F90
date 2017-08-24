@@ -594,8 +594,10 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
    nradint = 1000 ! radial integration grid density
    ABI_ALLOCATE(vpaw,(nfft,nspden))
    vpaw(:,:)=zero
-   if (paw_an(1)%cplex > 1) then
-     MSG_WARNING('cplex = 2 : complex hartree potential in PAW spheres. This is not coded yet. Imag part ignored')
+   if (me == master .and. my_natom > 0) then  
+     if (paw_an(1)%cplex > 1) then
+       MSG_WARNING('cplex = 2 : complex hartree potential in PAW spheres. This is not coded yet. Imag part ignored')
+     end if
    end if
 
    do ispden=1,nspden
