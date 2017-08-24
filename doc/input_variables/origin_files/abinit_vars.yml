@@ -28358,6 +28358,26 @@
     varset: dev
     vartype: real
 - !variable
+    abivarname: thermal_supercell@anaddb
+    characteristics:
+    - '[[DEVELOP]]'
+    commentdefault: do not calculate any thermalized supercells
+    commentdims: null
+    defaultval: (/(/0,0,0/),  (/0,0,0/),  (/0,0,0/)/)
+    dimensions: 3,3
+    excludes: null
+    mnemonics: THERMALized SUPERCELL lattice vectors
+    requires: null
+    text: |-
+        <p>Thermal_supercell defines the real space supercell in which a thermalized atomic configuration should be produced, following the prescription of Zacharias and Giustino (PRB 94 075125 (2016)). The displacements are chosen for each phonon mode according to a temperature, and the displacements are alternated in sign/direction to obtain maximal compensation of the linear electron phonon coupling. In this way in the PRB dielectric properties at finite T can be obtained from a single supercell calculation instead of lots of MD and configuration averaging.</p>
+
+        <p>The supercell vectors are not constrained to be collinear with the normal lattice vectors: this effect is obtained by using a diagonal Thermal_supercell. The lines of the matrix describe the linear combination of the primitive cell lattice vectors yielding the supercell vectors, as for kptrlatt.</p>
+
+        <p>For the moment this feature is under development and it looks like the relative phases of the displacements are not fixed properly yet... (Aug 2017)</p>
+    topics: phonons, thermal properties
+    varset: anaddb
+    vartype: integer
+- !variable
     abivarname: thetamax@aim
     characteristics: null
     commentdefault: null

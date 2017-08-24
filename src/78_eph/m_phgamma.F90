@@ -1747,8 +1747,10 @@ subroutine phgamma_vv_interp_setup(gams,cryst,action)
      do spin=1,gams%nsppol
        do iq_ibz=1,gams%nqibz
          iq_bz = qirredtofull(iq_ibz)
-         gams%vals_in_bz(:,:,:,iq_bz,spin) = reshape(gams%vals_in_qibz(:,:,:,:,iq_ibz,spin), [2,gams%ndir_transp**2,gams%natom3**2])
-         gams%vals_out_bz(:,:,:,iq_bz,spin) = reshape(gams%vals_out_qibz(:,:,:,:,iq_ibz,spin), [2,gams%ndir_transp**2,gams%natom3**2])
+         gams%vals_in_bz(:,:,:,iq_bz,spin) = reshape(gams%vals_in_qibz(:,:,:,:,iq_ibz,spin), &
+&             [2,gams%ndir_transp**2,gams%natom3**2])
+         gams%vals_out_bz(:,:,:,iq_bz,spin) = reshape(gams%vals_out_qibz(:,:,:,:,iq_ibz,spin), &
+&             [2,gams%ndir_transp**2,gams%natom3**2])
        end do
      end do
 
@@ -3506,8 +3508,10 @@ subroutine a2fw_tr_init(a2f_tr,gams,cryst,ifc,intmeth,wstep,wminmax,smear,ngqpt,
          ! Accumulate (Integral of a2F_tr is computed afterwards)
          do idir=1,3
            do jdir=1,3
-             a2f_tr%vals_in(:,idir,jdir,mu,spin)  = a2f_tr%vals_in(:,idir,jdir,mu,spin)  + wdt(:,1) * lambda_in_tetra(iq_ibz,idir,jdir,mu,spin)
-             a2f_tr%vals_out(:,idir,jdir,mu,spin) = a2f_tr%vals_out(:,idir,jdir,mu,spin) + wdt(:,1) * lambda_out_tetra(iq_ibz,idir,jdir,mu,spin)
+             a2f_tr%vals_in(:,idir,jdir,mu,spin)  = a2f_tr%vals_in(:,idir,jdir,mu,spin)  &
+&               + wdt(:,1) * lambda_in_tetra(iq_ibz,idir,jdir,mu,spin)
+             a2f_tr%vals_out(:,idir,jdir,mu,spin) = a2f_tr%vals_out(:,idir,jdir,mu,spin) &
+&               + wdt(:,1) * lambda_out_tetra(iq_ibz,idir,jdir,mu,spin)
              !a2f_tr%lambdaw(:,mu,spin) = a2f_tr%lambdaw(:,mu,spin) + wdt(:,2) * lambda_XX_tetra(iq_ibz, mu, spin)
            end do
          end do
@@ -4451,8 +4455,10 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
          do ipc2 = 1,gams%ndir_transp
            do ib1 = 1,nband_kq
              do ipc1 = 1,gams%ndir_transp
-               vv_kk(ipc1+(ipc2-1)*gams%ndir_transp, ib1,ib2)  = ddk%velocity(ipc1,ib1,ik_bz,spin)  * ddk%velocity(ipc2,ib2,ik_bz,spin) ! vk vk
-               vv_kkq(ipc1+(ipc2-1)*gams%ndir_transp, ib1,ib2) = ddk%velocity(ipc1,ib1,ikq_bz,spin) * ddk%velocity(ipc2,ib2,ik_bz,spin) ! vk vk+q
+               vv_kk(ipc1+(ipc2-1)*gams%ndir_transp, ib1,ib2)  = ddk%velocity(ipc1,ib1,ik_bz,spin) &
+&                 * ddk%velocity(ipc2,ib2,ik_bz,spin) ! vk vk
+               vv_kkq(ipc1+(ipc2-1)*gams%ndir_transp, ib1,ib2) = ddk%velocity(ipc1,ib1,ikq_bz,spin) &
+&                 * ddk%velocity(ipc2,ib2,ik_bz,spin) ! vk vk+q
              end do
            end do
          end do
@@ -4473,9 +4479,12 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
                 resvv_out(2,:) = res(2) * vv_kk(:,ib1,ib2) 
                 ! Loop over smearing values.
                 do isig=1,nsig
-                  tgam(:,ipc1,ipc2,isig) = tgam(:,ipc1,ipc2,isig)         + res(:)     * wt_kq(isig, ib1) * wt_k(isig, ib2)
-                  tgamvv_in(:,:,ipc1,ipc2,isig)  = tgamvv_in(:,:,ipc1,ipc2,isig)  + resvv_in(:,:)  * wt_kq(isig, ib1) * wt_k(isig, ib2)
-                  tgamvv_out(:,:,ipc1,ipc2,isig) = tgamvv_out(:,:,ipc1,ipc2,isig) + resvv_out(:,:) * wt_kq(isig, ib1) * wt_k(isig, ib2)
+                  tgam(:,ipc1,ipc2,isig) = tgam(:,ipc1,ipc2,isig) &
+&                   + res(:)     * wt_kq(isig, ib1) * wt_k(isig, ib2)
+                  tgamvv_in(:,:,ipc1,ipc2,isig)  = tgamvv_in(:,:,ipc1,ipc2,isig)  &
+&                   + resvv_in(:,:)  * wt_kq(isig, ib1) * wt_k(isig, ib2)
+                  tgamvv_out(:,:,ipc1,ipc2,isig) = tgamvv_out(:,:,ipc1,ipc2,isig) &
+&                   + resvv_out(:,:) * wt_kq(isig, ib1) * wt_k(isig, ib2)
                   !write(std_out,*)res, wt_kq(isig, ib,  wt_k(isig, ib2)
                 end do
               end do
