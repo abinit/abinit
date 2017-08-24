@@ -34,16 +34,17 @@ module m_elpa
  private
 
 !Public procedures
+!Had to choose names different from those provided by elpa
 #ifdef HAVE_LINALG_ELPA
- public :: elpa_get_elpa_communicators
- public :: elpa_solve_evp_real_1stage
- public :: elpa_solve_evp_complex_1stage
- public :: elpa_cholesky_real
- public :: elpa_cholesky_complex
- public :: elpa_invert_trm_real
- public :: elpa_invert_trm_complex
- public :: elpa_mult_at_b_real
- public :: elpa_mult_ah_b_complex
+ public :: elpa_func_get_communicators
+ public :: elpa_func_solve_evp_real_1stage
+ public :: elpa_func_solve_evp_complex_1stage
+ public :: elpa_func_cholesky_real
+ public :: elpa_func_cholesky_complex
+ public :: elpa_func_invert_trm_real
+ public :: elpa_func_invert_trm_complex
+ public :: elpa_func_mult_at_b_real
+ public :: elpa_func_mult_ah_b_complex
 #endif
 
 CONTAINS  !==============================================================================
@@ -53,12 +54,12 @@ CONTAINS  !=====================================================================
 
 !----------------------------------------------------------------------
 
-!!****f* m_elpa/elpa_get_elpa_communicators
+!!****f* m_elpa/elpa_func_get_communicators
 !! NAME
-!!  elpa_get_elpa_communicators
+!!  elpa_func_get_communicators
 !!
 !! FUNCTION
-!!  Wrapper to get_elpa_communicators ELPA function
+!!  Wrapper to elpa_get_communicators ELPA function
 !!
 !! INPUTS
 !!  mpi_comm_global=Global communicator for the calculations (in)
@@ -73,17 +74,17 @@ CONTAINS  !=====================================================================
 !!      m_slk
 !!
 !! CHILDREN
-!!      mult_ah_b_complex
 !!
 !! SOURCE
 
-subroutine elpa_get_elpa_communicators(mpi_comm_global,my_prow,my_pcol,mpi_comm_rows,mpi_comm_cols)
+subroutine elpa_func_get_communicators(mpi_comm_global,my_prow,my_pcol,&
+&                                      mpi_comm_rows,mpi_comm_cols)
 
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'elpa_get_elpa_communicators'
+#define ABI_FUNC 'elpa_func_get_communicators'
 !End of the abilint section
 
  implicit none
@@ -98,28 +99,32 @@ subroutine elpa_get_elpa_communicators(mpi_comm_global,my_prow,my_pcol,mpi_comm_
 ! *********************************************************************
 
  mpierr=0
- 
+
 #if (defined HAVE_LINALG_ELPA_2013) || (defined HAVE_LINALG_ELPA_2014)
  call get_elpa_row_col_comms(mpi_comm_global,my_prow,my_pcol,mpi_comm_rows,mpi_comm_cols)
 #elif (defined HAVE_LINALG_ELPA_2015)
  mpierr=get_elpa_row_col_comms(mpi_comm_global,my_prow,my_pcol,mpi_comm_rows,mpi_comm_cols)
+#elif (defined HAVE_LINALG_ELPA_2016)
+ mpierr=elpa_get_communicators(mpi_comm_global,my_prow,my_pcol,mpi_comm_rows,mpi_comm_cols)
 #else
  mpierr=get_elpa_communicators(mpi_comm_global,my_prow,my_pcol,mpi_comm_rows,mpi_comm_cols)
 #endif
 
- ABI_CHECK_MPI(mpierr,"elpa_get_elpa_communicators")
+ if (mpierr/=0) then
+   MSG_ERROR('Problem with ELPA (elpa_get_communicators)!')
+ end if
 
-end subroutine elpa_get_elpa_communicators
+end subroutine elpa_func_get_communicators
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* m_elpa/elpa_solve_evp_real_1stage
+!!****f* m_elpa/elpa_func_solve_evp_real_1stage
 !! NAME
-!!  elpa_solve_evp_real_1stage
+!!  elpa_func_solve_evp_real_1stage
 !!
 !! FUNCTION
-!!  Wrapper to solve_evp_real_1stage ELPA function
+!!  Wrapper to elpa_solve_evp_real_1stage ELPA function
 !!
 !! INPUTS
 !!  na=Order of matrix aa
@@ -148,18 +153,17 @@ end subroutine elpa_get_elpa_communicators
 !!      m_slk
 !!
 !! CHILDREN
-!!      mult_ah_b_complex
 !!
 !! SOURCE
 
-subroutine elpa_solve_evp_real_1stage(na,nev,aa,lda,ev,qq,ldq,nblk,matrixCols, &
-&                                     mpi_comm_rows, mpi_comm_cols)
+subroutine elpa_func_solve_evp_real_1stage(na,nev,aa,lda,ev,qq,ldq,nblk,matrixCols, &
+&                                          mpi_comm_rows, mpi_comm_cols)
 
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'elpa_solve_evp_real_1stage'
+#define ABI_FUNC 'elpa_func_solve_evp_real_1stage'
 !End of the abilint section
 
  implicit none
@@ -182,25 +186,27 @@ subroutine elpa_solve_evp_real_1stage(na,nev,aa,lda,ev,qq,ldq,nblk,matrixCols, &
   call solve_evp_real(na,nev,aa,lda,ev,qq,ldq,nblk,mpi_comm_rows,mpi_comm_cols)
 #elif (defined HAVE_LINALG_ELPA_2014) || (defined HAVE_LINALG_ELPA_2015)
   success=solve_evp_real(na,nev,aa,lda,ev,qq,ldq,nblk,mpi_comm_rows,mpi_comm_cols)
+#elif  (defined HAVE_LINALG_ELPA_2016)
+  success=elpa_solve_evp_real_1stage(na,nev,aa,lda,ev,qq,ldq,nblk,matrixCols,mpi_comm_rows,mpi_comm_cols)
 #else
-  success=solve_evp_real_1stage(na,nev,aa,lda,ev,qq,ldq,nblk,matrixCols,mpi_comm_rows,mpi_comm_cols)
+  success=elpa_solve_evp_real_1stage(na,nev,aa,lda,ev,qq,ldq,nblk,matrixCols,mpi_comm_rows,mpi_comm_cols)
 #endif
 
  if (.not.success) then
-   MSG_ERROR('Problem with ELPA (solve_evp_real)!')
+   MSG_ERROR('Problem with ELPA (elpa_solve_evp_real_1stage)!')
  end if
 
-end subroutine elpa_solve_evp_real_1stage
+end subroutine elpa_func_solve_evp_real_1stage
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* m_elpa/elpa_solve_evp_complex_1stage
+!!****f* m_elpa/elpa_func_solve_evp_complex_1stage
 !! NAME
-!!  elpa_solve_evp_complex_1stage
+!!  elpa_func_solve_evp_complex_1stage
 !!
 !! FUNCTION
-!!  Wrapper to solve_evp_complex_1stage ELPA function
+!!  Wrapper to elpa_solve_evp_complex_1stage ELPA function
 !!
 !! INPUTS
 !!  na=Order of matrix aa
@@ -229,18 +235,17 @@ end subroutine elpa_solve_evp_real_1stage
 !!      m_slk
 !!
 !! CHILDREN
-!!      mult_ah_b_complex
 !!
 !! SOURCE
 
-subroutine elpa_solve_evp_complex_1stage(na,nev,aa,lda,ev,qq,ldq,nblk,matrixCols, &
-&                                     mpi_comm_rows, mpi_comm_cols)
+subroutine elpa_func_solve_evp_complex_1stage(na,nev,aa,lda,ev,qq,ldq,nblk,matrixCols, &
+&                                             mpi_comm_rows, mpi_comm_cols)
 
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'elpa_solve_evp_complex_1stage'
+#define ABI_FUNC 'elpa_func_solve_evp_complex_1stage'
 !End of the abilint section
 
  implicit none
@@ -264,25 +269,27 @@ subroutine elpa_solve_evp_complex_1stage(na,nev,aa,lda,ev,qq,ldq,nblk,matrixCols
   call solve_evp_complex(na,nev,aa,lda,ev,qq,ldq,nblk,mpi_comm_rows,mpi_comm_cols)
 #elif (defined HAVE_LINALG_ELPA_2014) || (defined HAVE_LINALG_ELPA_2015)
   success=solve_evp_complex(na,nev,aa,lda,ev,qq,ldq,nblk,mpi_comm_rows,mpi_comm_cols)
+#elif (defined HAVE_LINALG_ELPA_2016)
+  success=elpa_solve_evp_complex_1stage(na,nev,aa,lda,ev,qq,ldq,matrixCols,nblk,mpi_comm_rows,mpi_comm_cols)
 #else
-  success=solve_evp_complex_1stage(na,nev,aa,lda,ev,qq,ldq,nblk,matrixCols,mpi_comm_rows,mpi_comm_cols)
+  success=elpa_solve_evp_complex_1stage(na,nev,aa,lda,ev,qq,ldq,nblk,matrixCols,mpi_comm_rows,mpi_comm_cols)
 #endif
 
  if (.not.success) then
-   MSG_ERROR('Problem with ELPA (solve_evp_complex)!')
+   MSG_ERROR('Problem with ELPA (elpa_solve_evp_complex_1stage)!')
  end if
 
-end subroutine elpa_solve_evp_complex_1stage
+end subroutine elpa_func_solve_evp_complex_1stage
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* m_elpa/elpa_cholesky_real
+!!****f* m_elpa/elpa_func_cholesky_real
 !! NAME
-!!  elpa_cholesky_real
+!!  elpa_func_cholesky_real
 !!
 !! FUNCTION
-!!  Wrapper to cholesky_real ELPA function
+!!  Wrapper to elpa_cholesky_real ELPA function
 !!
 !! INPUTS
 !!  na=Order of matrix
@@ -303,17 +310,17 @@ end subroutine elpa_solve_evp_complex_1stage
 !!      m_slk
 !!
 !! CHILDREN
-!!      mult_ah_b_complex
 !!
 !! SOURCE
 
-subroutine elpa_cholesky_real(na,aa,lda,nblk,matrixCols,mpi_comm_rows,mpi_comm_cols)
+subroutine elpa_func_cholesky_real(na,aa,lda,nblk,matrixCols,&
+&                                  mpi_comm_rows,mpi_comm_cols)
 
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'elpa_cholesky_real'
+#define ABI_FUNC 'elpa_func_cholesky_real'
 !End of the abilint section
 
  implicit none
@@ -337,24 +344,26 @@ subroutine elpa_cholesky_real(na,aa,lda,nblk,matrixCols,mpi_comm_rows,mpi_comm_c
  call cholesky_real(na,aa,lda,nblk,mpi_comm_rows,mpi_comm_cols,success)
 #elif (defined HAVE_LINALG_ELPA_2015)
  call cholesky_real(na,aa,lda,nblk,mpi_comm_rows,mpi_comm_cols,.false.,success)
+#elif (defined HAVE_LINALG_ELPA_2016)
+ success = elpa_cholesky_real(na,aa,lda,nblk,matrixCols,mpi_comm_rows,mpi_comm_cols,.false.)
 #else
- call cholesky_real(na,aa,lda,nblk,matrixCols,mpi_comm_rows,mpi_comm_cols,.false.,success)
+ success = elpa_cholesky_real(na,aa,lda,nblk,matrixCols,mpi_comm_rows,mpi_comm_cols,.false.)
 #endif
 
  if (.not.success) then
-   MSG_ERROR('Problem with ELPA (cholesky_real)!')
+   MSG_ERROR('Problem with ELPA (elpa_cholesky_real)!')
  end if
 
-end subroutine elpa_cholesky_real
+end subroutine elpa_func_cholesky_real
 !!***
 
 !----------------------------------------------------------------------
-!!****f* m_elpa/elpa_cholesky_complex
+!!****f* m_elpa/elpa_func_cholesky_complex
 !! NAME
-!!  elpa_cholesky_complex
+!!  elpa_func_cholesky_complex
 !!
 !! FUNCTION
-!!  Wrapper to cholesky_complex ELPA function
+!!  Wrapper to elpa_cholesky_complex ELPA function
 !!
 !! INPUTS
 !!  na=Order of matrix
@@ -375,17 +384,17 @@ end subroutine elpa_cholesky_real
 !!      m_slk
 !!
 !! CHILDREN
-!!      mult_ah_b_complex
 !!
 !! SOURCE
 
-subroutine elpa_cholesky_complex(na,aa,lda,nblk,matrixCols,mpi_comm_rows,mpi_comm_cols)
+subroutine elpa_func_cholesky_complex(na,aa,lda,nblk,matrixCols,&
+&                                     mpi_comm_rows,mpi_comm_cols)
 
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'elpa_cholesky_complex'
+#define ABI_FUNC 'elpa_func_cholesky_complex'
 !End of the abilint section
 
  implicit none
@@ -409,25 +418,27 @@ subroutine elpa_cholesky_complex(na,aa,lda,nblk,matrixCols,mpi_comm_rows,mpi_com
  call cholesky_complex(na,aa,lda,nblk,mpi_comm_rows,mpi_comm_cols,success)
 #elif (defined HAVE_LINALG_ELPA_2015)
  call cholesky_complex(na,aa,lda,nblk,mpi_comm_rows,mpi_comm_cols,.false.,success)
+#elif (defined HAVE_LINALG_ELPA_2016)
+ success = elpa_cholesky_complex(na,aa,lda,nblk,matrixCols,mpi_comm_rows,mpi_comm_cols,.false.)
 #else
- call cholesky_complex(na,aa,lda,nblk,matrixCols,mpi_comm_rows,mpi_comm_cols,.false.,success)
+ success = elpa_cholesky_complex(na,aa,lda,nblk,matrixCols,mpi_comm_rows,mpi_comm_cols,.false.)
 #endif
 
  if (.not.success) then
-   MSG_ERROR('Problem with ELPA (cholesky_complex)!')
+   MSG_ERROR('Problem with ELPA (elpa_cholesky_complex)!')
  end if
 
-end subroutine elpa_cholesky_complex
+end subroutine elpa_func_cholesky_complex
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* m_elpa/elpa_invert_trm_real
+!!****f* m_elpa/elpa_func_invert_trm_real
 !! NAME
-!!  elpa_invert_trm_real
+!!  elpa_func_invert_trm_real
 !!
 !! FUNCTION
-!!  Wrapper to invert_trm_real ELPA function
+!!  Wrapper to elpa_invert_trm_real ELPA function
 !!
 !! INPUTS
 !!  na=Order of matrix
@@ -447,17 +458,17 @@ end subroutine elpa_cholesky_complex
 !!      m_slk
 !!
 !! CHILDREN
-!!      mult_ah_b_complex
 !!
 !! SOURCE
 
-subroutine elpa_invert_trm_real(na,aa,lda,nblk,matrixCols,mpi_comm_rows,mpi_comm_cols)
+subroutine elpa_func_invert_trm_real(na,aa,lda,nblk,matrixCols,&
+&                                    mpi_comm_rows,mpi_comm_cols)
 
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'elpa_invert_trm_real'
+#define ABI_FUNC 'elpa_func_invert_trm_real'
 !End of the abilint section
 
  implicit none
@@ -481,25 +492,27 @@ subroutine elpa_invert_trm_real(na,aa,lda,nblk,matrixCols,mpi_comm_rows,mpi_comm
  call invert_trm_real(na,aa,lda,nblk,mpi_comm_rows,mpi_comm_cols,success)
 #elif (defined HAVE_LINALG_ELPA_2015)
  call invert_trm_real(na,aa,lda,nblk,mpi_comm_rows,mpi_comm_cols,.false.,success)
+#elif (defined HAVE_LINALG_ELPA_2016)
+ success = elpa_invert_trm_real(na,aa,lda,nblk,matrixCols,mpi_comm_rows,mpi_comm_cols,.false.)
 #else
- call invert_trm_real(na,aa,lda,nblk,matrixCols,mpi_comm_rows,mpi_comm_cols,.false.,success)
+ success = elpa_invert_trm_real(na,aa,lda,nblk,matrixCols,mpi_comm_rows,mpi_comm_cols,.false.)
 #endif
 
  if (.not.success) then
    MSG_ERROR('Problem with ELPA (invert_trm_real)!')
  end if
 
-end subroutine elpa_invert_trm_real
+end subroutine elpa_func_invert_trm_real
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* m_elpa/elpa_invert_trm_complex
+!!****f* m_elpa/elpa_func_invert_trm_complex
 !! NAME
-!!  elpa_invert_trm_complex
+!!  elpa_func_invert_trm_complex
 !!
 !! FUNCTION
-!!  Wrapper to invert_trm_complex ELPA function
+!!  Wrapper to elpa_invert_trm_complex ELPA function
 !!
 !! INPUTS
 !!  na=Order of matrix
@@ -519,17 +532,17 @@ end subroutine elpa_invert_trm_real
 !!      m_slk
 !!
 !! CHILDREN
-!!      mult_ah_b_complex
 !!
 !! SOURCE
 
-subroutine elpa_invert_trm_complex(na,aa,lda,nblk,matrixCols,mpi_comm_rows,mpi_comm_cols)
+subroutine elpa_func_invert_trm_complex(na,aa,lda,nblk,matrixCols,&
+&                                       mpi_comm_rows,mpi_comm_cols)
 
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'elpa_invert_trm_complex'
+#define ABI_FUNC 'elpa_func_invert_trm_complex'
 !End of the abilint section
 
  implicit none
@@ -553,25 +566,27 @@ subroutine elpa_invert_trm_complex(na,aa,lda,nblk,matrixCols,mpi_comm_rows,mpi_c
  call invert_trm_complex(na,aa,lda,nblk,mpi_comm_rows,mpi_comm_cols,success)
 #elif (defined HAVE_LINALG_ELPA_2015)
  call invert_trm_complex(na,aa,lda,nblk,mpi_comm_rows,mpi_comm_cols,.false.,success)
+#elif (defined HAVE_LINALG_ELPA_2016)
+ success = elpa_invert_trm_complex(na,aa,lda,nblk,matrixCols,mpi_comm_rows,mpi_comm_cols,.false.)
 #else
- call invert_trm_complex(na,aa,lda,nblk,matrixCols,mpi_comm_rows,mpi_comm_cols,.false.,success)
+ success = elpa_invert_trm_complex(na,aa,lda,nblk,matrixCols,mpi_comm_rows,mpi_comm_cols,.false.)
 #endif
 
  if (.not.success) then
-   MSG_ERROR('Problem with ELPA (invert_trm_complex)!')
+   MSG_ERROR('Problem with ELPA (elpa_invert_trm_complex)!')
  end if
 
-end subroutine elpa_invert_trm_complex
+end subroutine elpa_func_invert_trm_complex
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* m_elpa/elpa_mult_at_b_real
+!!****f* m_elpa/elpa_func_mult_at_b_real
 !! NAME
-!!  elpa_mult_at_b_real
+!!  elpa_func_mult_at_b_real
 !!
 !! FUNCTION
-!!  Wrapper to mult_at_b_real ELPA function
+!!  Wrapper to elpa_mult_at_b_real ELPA function
 !!  Performs C := A**T * B
 !!
 !! INPUTS
@@ -606,22 +621,21 @@ end subroutine elpa_invert_trm_complex
 !!      m_slk
 !!
 !! CHILDREN
-!!      mult_ah_b_complex
 !!
 !! SOURCE
 
-subroutine elpa_mult_at_b_real(uplo_a,uplo_c,na,ncb,aa,lda,bb,ldb,nblk,matrixCols, &
-&                              mpi_comm_rows,mpi_comm_cols,cc,ldc)
+subroutine elpa_func_mult_at_b_real(uplo_a,uplo_c,na,ncb,aa,lda,bb,ldb,nblk,matrixCols, &
+&                                   mpi_comm_rows,mpi_comm_cols,cc,ldc)
 
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'elpa_mult_at_b_real'
+#define ABI_FUNC 'elpa_func_mult_at_b_real'
 !End of the abilint section
 
  implicit none
- 
+
 !Arguments ------------------------------------
 !scalars
  integer,intent(in)  :: na,ncb,lda,ldb,ldc,nblk,matrixCols,mpi_comm_rows,mpi_comm_cols
@@ -635,20 +649,28 @@ subroutine elpa_mult_at_b_real(uplo_a,uplo_c,na,ncb,aa,lda,bb,ldb,nblk,matrixCol
 
 ! *********************************************************************
 
+#if (defined HAVE_LINALG_ELPA_2013) || (defined HAVE_LINALG_ELPA_2014) || (defined HAVE_LINALG_ELPA_2015)
  call mult_at_b_real(uplo_a,uplo_c,na,ncb,aa,lda,bb,ldb,nblk, &
 &                    mpi_comm_rows,mpi_comm_cols,cc,ldc)
+#elif (defined HAVE_LINALG_ELPA_2016)
+ success =  elpa_mult_at_b_real(uplo_a,uplo_c,na,ncb,aa,lda,matrixCols,bb,ldb,matrixCols,nblk, &
+&                               mpi_comm_rows,mpi_comm_cols,cc,ldc,matrixCols)
+#else
+ success =  elpa_mult_at_b_real(uplo_a,uplo_c,na,ncb,aa,lda,matrixCols,bb,ldb,matrixCols,nblk, &
+&                               mpi_comm_rows,mpi_comm_cols,cc,ldc,matrixCols)
+#endif
 
-end subroutine elpa_mult_at_b_real
+end subroutine elpa_func_mult_at_b_real
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* m_elpa/elpa_mult_ah_b_complex
+!!****f* m_elpa/elpa_func_mult_ah_b_complex
 !! NAME
-!!  elpa_mult_ah_b_complex
+!!  elpa_func_mult_ah_b_complex
 !!
 !! FUNCTION
-!!  Wrapper to mult_ah_b_complex ELPA function
+!!  Wrapper to elpa_mult_ah_b_complex ELPA function
 !!  Performs C := A**H * B
 !!
 !! INPUTS
@@ -683,18 +705,17 @@ end subroutine elpa_mult_at_b_real
 !!      m_slk
 !!
 !! CHILDREN
-!!      mult_ah_b_complex
 !!
 !! SOURCE
 
-subroutine elpa_mult_ah_b_complex(uplo_a,uplo_c,na,ncb,aa,lda,bb,ldb,nblk,matrixCols, &
-&                              mpi_comm_rows,mpi_comm_cols,cc,ldc)
+subroutine elpa_func_mult_ah_b_complex(uplo_a,uplo_c,na,ncb,aa,lda,bb,ldb,nblk,matrixCols, &
+&                                      mpi_comm_rows,mpi_comm_cols,cc,ldc)
 
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'elpa_mult_ah_b_complex'
+#define ABI_FUNC 'elpa_func_mult_ah_b_complex'
 !End of the abilint section
 
  implicit none
@@ -712,10 +733,17 @@ subroutine elpa_mult_ah_b_complex(uplo_a,uplo_c,na,ncb,aa,lda,bb,ldb,nblk,matrix
 
 ! *********************************************************************
 
+#if (defined HAVE_LINALG_ELPA_2013) || (defined HAVE_LINALG_ELPA_2014) || (defined HAVE_LINALG_ELPA_2015)
  call mult_ah_b_complex(uplo_a,uplo_c,na,ncb,aa,lda,bb,ldb,nblk, &
-&                    mpi_comm_rows,mpi_comm_cols,cc,ldc)
-
-end subroutine elpa_mult_ah_b_complex
+&                       mpi_comm_rows,mpi_comm_cols,cc,ldc)
+#elif (defined HAVE_LINALG_ELPA_2016)
+  success = elpa_mult_ah_b_complex(uplo_a,uplo_c,na,ncb,aa,lda,matrixCols,bb,ldb,matrixCols,nblk, &
+&                                  mpi_comm_rows,mpi_comm_cols,cc,ldc,matrixCols)
+#else
+  success = elpa_mult_ah_b_complex(uplo_a,uplo_c,na,ncb,aa,lda,matrixCols,bb,ldb,matrixCols,nblk, &
+&                                  mpi_comm_rows,mpi_comm_cols,cc,ldc,matrixCols)
+#endif
+end subroutine elpa_func_mult_ah_b_complex
 !!***
 
 !----------------------------------------------------------------------

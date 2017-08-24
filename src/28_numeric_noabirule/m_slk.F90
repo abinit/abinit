@@ -350,7 +350,7 @@ subroutine build_processor_scalapack(processor,grid,myproc,comm)
  processor%coords(2) = MOD((myproc), grid%dims(2))
 
 #ifdef HAVE_LINALG_ELPA
- call elpa_get_elpa_communicators(comm,processor%coords(1),processor%coords(2),&
+ call elpa_func_get_communicators(comm,processor%coords(1),processor%coords(2),&
 &                                 processor%comm_rows_elpa,processor%comm_cols_elpa)
 #endif
 
@@ -2127,12 +2127,12 @@ subroutine compute_eigen_problem(processor,matrix,results,eigen,comm,istwf_k)
   !Local variables ------------------------------
 
   if (istwf_k/=2) then
-    call elpa_solve_evp_complex_1stage(matrix%sizeb_global(1), matrix%sizeb_global(1), &
+    call elpa_func_solve_evp_complex_1stage(matrix%sizeb_global(1), matrix%sizeb_global(1), &
 &         matrix%buffer_cplx, matrix%sizeb_local(1), eigen, results%buffer_cplx, &
 &         results%sizeb_local(1), matrix%sizeb_blocs(1), matrix%sizeb_local(2), &
 &         processor%comm_rows_elpa, processor%comm_cols_elpa)
   else
-    call elpa_solve_evp_real_1stage(matrix%sizeb_global(1), matrix%sizeb_global(1), &
+    call elpa_func_solve_evp_real_1stage(matrix%sizeb_global(1), matrix%sizeb_global(1), &
 &         matrix%buffer_real, matrix%sizeb_local(1), eigen, results%buffer_real, &
 &         results%sizeb_local(1), matrix%sizeb_blocs(1), matrix%sizeb_local(2), &
 &         processor%comm_rows_elpa, processor%comm_cols_elpa)
@@ -2351,18 +2351,18 @@ subroutine solve_gevp_complex(na,nev,na_rows,na_cols,nblk,a,b,ev,z,tmp1,tmp2, &
 
   ! 1. Calculate Cholesky factorization of Matrix B = U**T * U
   !    and invert triangular matrix U
-  call elpa_cholesky_complex(na,b,na_rows,nblk,na_cols,mpi_comm_rows,mpi_comm_cols)
-  call elpa_invert_trm_complex(na,b,na_rows,nblk,na_cols,mpi_comm_rows,mpi_comm_cols)
+  call elpa_func_cholesky_complex(na,b,na_rows,nblk,na_cols,mpi_comm_rows,mpi_comm_cols)
+  call elpa_func_invert_trm_complex(na,b,na_rows,nblk,na_cols,mpi_comm_rows,mpi_comm_cols)
 
   ! 2. Calculate U**-T * A * U**-1
   ! 2a. tmp1 = U**-T * A
-  call elpa_mult_ah_b_complex('U','L',na,na,b,na_rows,a,na_rows,nblk,na_cols,&
-                              mpi_comm_rows,mpi_comm_cols,tmp1,na_rows)
+  call elpa_func_mult_ah_b_complex('U','L',na,na,b,na_rows,a,na_rows,nblk,na_cols,&
+                                   mpi_comm_rows,mpi_comm_cols,tmp1,na_rows)
   ! 2b. tmp2 = tmp1**T
   call pztranc(na,na,CONE,tmp1,1,1,sc_desc,CZERO,tmp2,1,1,sc_desc)
   ! 2c. A =  U**-T * tmp2 ( = U**-T * Aorig * U**-1 )
-  call elpa_mult_ah_b_complex('U','U',na,na,b,na_rows,tmp2,na_rows,nblk,na_cols, &
-&                             mpi_comm_rows, mpi_comm_cols, a, na_rows)
+  call elpa_func_mult_ah_b_complex('U','U',na,na,b,na_rows,tmp2,na_rows,nblk,na_cols, &
+&                                  mpi_comm_rows, mpi_comm_cols, a, na_rows)
   ! A is only set in the upper half, solve_evp_real needs a full matrix
   ! Set lower half from upper half
   call pztranc(na,na,CONE,a,1,1,sc_desc,CZERO,tmp1,1,1,sc_desc)
@@ -2375,13 +2375,13 @@ subroutine solve_gevp_complex(na,nev,na_rows,na_cols,nblk,a,b,ev,z,tmp1,tmp2, &
   enddo
   ! 3. Calculate eigenvalues/eigenvectors of U**-T * A * U**-1
   !    Eigenvectors go to tmp1
-  call elpa_solve_evp_complex_1stage(na,nev,a,na_rows,ev,tmp1,na_rows,nblk,na_cols, &
-&                                    mpi_comm_rows,mpi_comm_cols)
+  call elpa_func_solve_evp_complex_1stage(na,nev,a,na_rows,ev,tmp1,na_rows,nblk,na_cols, &
+&                                         mpi_comm_rows,mpi_comm_cols)
   ! 4. Backtransform eigenvectors: Z = U**-1 * tmp1
   ! mult_ah_b_complex needs the transpose of U**-1, thus tmp2 = (U**-1)**T
    call pztranc(na,na,CONE,b,1,1,sc_desc,CZERO,tmp2,1,1,sc_desc)
-   call elpa_mult_ah_b_complex('L','N',na,nev,tmp2,na_rows,tmp1,na_rows,nblk,na_cols, &
-&                              mpi_comm_rows,mpi_comm_cols,z,na_rows)
+   call elpa_func_mult_ah_b_complex('L','N',na,nev,tmp2,na_rows,tmp1,na_rows,nblk,na_cols, &
+&                                   mpi_comm_rows,mpi_comm_cols,z,na_rows)
 end subroutine solve_gevp_complex
 
 !----------------------------------------------------------------------
@@ -2418,17 +2418,17 @@ subroutine solve_gevp_real(na,nev,na_rows,na_cols,nblk,a,b,ev,z,tmp1,tmp2, &
 
   ! 1. Calculate Cholesky factorization of Matrix B = U**T * U
   !    and invert triangular matrix U
-  call elpa_cholesky_real(na,b,na_rows,nblk,na_cols,mpi_comm_rows,mpi_comm_cols)
-  call elpa_invert_trm_real(na,b,na_rows,nblk,na_cols,mpi_comm_rows,mpi_comm_cols)
+  call elpa_func_cholesky_real(na,b,na_rows,nblk,na_cols,mpi_comm_rows,mpi_comm_cols)
+  call elpa_func_invert_trm_real(na,b,na_rows,nblk,na_cols,mpi_comm_rows,mpi_comm_cols)
   ! 2. Calculate U**-T * A * U**-1
   ! 2a. tmp1 = U**-T * A
-  call elpa_mult_at_b_real('U','L',na,na,b,na_rows,a,na_rows,nblk,na_cols, &
-&                          mpi_comm_rows,mpi_comm_cols,tmp1,na_rows)
+  call elpa_func_mult_at_b_real('U','L',na,na,b,na_rows,a,na_rows,nblk,na_cols, &
+&                               mpi_comm_rows,mpi_comm_cols,tmp1,na_rows)
   ! 2b. tmp2 = tmp1**T
   call pdtran(na,na,1.d0,tmp1,1,1,sc_desc,0.d0,tmp2,1,1,sc_desc)
   ! 2c. A =  U**-T * tmp2 ( = U**-T * Aorig * U**-1 )
-  call elpa_mult_at_b_real('U','U',na,na,b,na_rows,tmp2,na_rows,nblk,na_cols, &
-&                          mpi_comm_rows,mpi_comm_cols,a,na_rows)
+  call elpa_func_mult_at_b_real('U','U',na,na,b,na_rows,tmp2,na_rows,nblk,na_cols, &
+&                               mpi_comm_rows,mpi_comm_cols,a,na_rows)
   ! A is only set in the upper half, solve_evp_real needs a full matrix
   ! Set lower half from upper half
   call pdtran(na,na,1.d0,a,1,1,sc_desc,0.d0,tmp1,1,1,sc_desc)
@@ -2441,13 +2441,13 @@ subroutine solve_gevp_real(na,nev,na_rows,na_cols,nblk,a,b,ev,z,tmp1,tmp2, &
   enddo
   ! 3. Calculate eigenvalues/eigenvectors of U**-T * A * U**-1
   !    Eigenvectors go to tmp1
-  call elpa_solve_evp_real_1stage(na,nev,a,na_rows,ev,tmp1,na_rows,nblk,na_cols, &
-&                                 mpi_comm_rows,mpi_comm_cols)
+  call elpa_func_solve_evp_real_1stage(na,nev,a,na_rows,ev,tmp1,na_rows,nblk,na_cols, &
+&                                      mpi_comm_rows,mpi_comm_cols)
   ! 4. Backtransform eigenvectors: Z = U**-1 * tmp1
   ! mult_at_b_real needs the transpose of U**-1, thus tmp2 = (U**-1)**T
   call pdtran(na,na,1.d0,b,1,1,sc_desc,0.d0,tmp2,1,1,sc_desc)
-  call elpa_mult_at_b_real('L','N',na,nev,tmp2,na_rows,tmp1,na_rows,nblk,na_cols, &
-&                          mpi_comm_rows,mpi_comm_cols,z,na_rows)
+  call elpa_func_mult_at_b_real('L','N',na,nev,tmp2,na_rows,tmp1,na_rows,nblk,na_cols, &
+&                               mpi_comm_rows,mpi_comm_cols,z,na_rows)
 
  end subroutine solve_gevp_real
 #endif

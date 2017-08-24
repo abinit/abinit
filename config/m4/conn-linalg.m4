@@ -85,10 +85,17 @@ AC_DEFUN([_ABI_LINALG_CHECK_LIBS],[
   dnl ELPA?
   AC_MSG_CHECKING([for ELPA support in specified libraries])
   AC_LINK_IFELSE([AC_LANG_PROGRAM([],
-    [use elpa1
-     integer,parameter :: n=1,comm=1 ; integer :: comm1,comm2,success
-     success=get_elpa_communicators(comm,n,n,comm1,comm2)
-    ])], [abi_linalg_has_elpa="yes"], [abi_linalg_has_elpa="no"])
+  [use elpa1
+   integer,parameter :: n=1,comm=1 ; integer :: comm1,comm2,success
+   success=elpa_get_communicators(comm,n,n,comm1,comm2)
+  ])], [abi_linalg_has_elpa="yes"], [abi_linalg_has_elpa="no"])
+  if test "${abi_linalg_has_elpa}" = "no"; then
+    AC_LINK_IFELSE([AC_LANG_PROGRAM([],
+      [use elpa1
+       integer,parameter :: n=1,comm=1 ; integer :: comm1,comm2,success
+       success=get_elpa_communicators(comm,n,n,comm1,comm2)
+      ])], [abi_linalg_has_elpa="yes"], [abi_linalg_has_elpa="no"])
+  fi
   if test "${abi_linalg_has_elpa}" = "no"; then
     AC_LINK_IFELSE([AC_LANG_PROGRAM([],
       [call elpa_transpose_vectors
@@ -308,7 +315,7 @@ AC_DEFUN([_ABI_LINALG_SEARCH_LAPACKE],[
       if test "${abi_linalg_has_lapacke}" = "yes"; then
         abi_linalg_libs="-l${test_lib} $2 ${abi_linalg_libs}"
         break
-      fi  
+      fi
     done
     if test "${abi_linalg_has_lapacke}" = "no"; then
       LIBS="${tmp_saved_LIBS}"
@@ -429,13 +436,13 @@ AC_DEFUN([_ABI_LINALG_FIND_ELPA_VERSION],[
     [
     use elpa1
     logical :: success1,debug
-    integer,parameter :: na=1,lda=1,ldq=1,nev=1,nblk=1,nrow=1
+    integer,parameter :: na=1,lda=1,ldq=1,mcol=1,nev=1,nblk=1,nrow=1
     integer :: comm_g=1,comm_r=1,comm_c=1,success2
     real*8 :: a(lda,nrow),ev(na),q(ldq,nrow)
     complex*16 :: ac(lda,nrow)
-    success1=solve_evp_real_1stage(na,nev,a,lda,ev,q,ldq,nblk,nrow,comm_r,comm_c)
-    success1=cholesky_complex(na,ac,lda,nblk,nrow,comm_r,comm_c,debug)
-    success2=get_elpa_communicators(comm_g,na,na,comm_r,comm_c)
+    success1=elpa_solve_evp_real_1stage(na,nev,a,lda,ev,q,ldq,nblk,mcol,comm_r,comm_c)
+    success1=elpa_cholesky_complex(na,ac,lda,nblk,nrow,comm_r,comm_c,debug)
+    success2=elpa_get_communicators(comm_g,na,na,comm_r,comm_c)
     ])], [abi_linalg_has_elpa_2016="yes"], [abi_linalg_has_elpa_2016="no"])
   if test "${abi_linalg_has_elpa_2016}" = "yes"; then
     abi_linalg_elpa_version="2016"
