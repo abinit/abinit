@@ -416,6 +416,7 @@ subroutine ddk_fs_average_veloc(ddk, ebands, fstab, sigmas, comm)
 
  ddk%nene = fstab(1)%nene
  ABI_MALLOC(ddk%velocity_fsavg, (3,ddk%nene,ddk%nsppol))
+ ddk%velocity_fsavg = zero
 
  nsig = size(sigmas, dim=1)
  mnb = 1
