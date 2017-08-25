@@ -4232,6 +4232,7 @@ subroutine dvdb_interpolate_and_write(dtfil, ngfft, ngfftf, cryst, dvdb, &
  use interfaces_14_hidewrite
  use interfaces_28_numeric_noabirule
  use interfaces_32_util
+ use interfaces_41_geometry
 !End of the abilint section
 
  implicit none
@@ -4257,7 +4258,8 @@ subroutine dvdb_interpolate_and_write(dtfil, ngfft, ngfftf, cryst, dvdb, &
  integer :: my_rank,nproc,iomode,idir,ipert,iat,ipc,ispden
  integer :: cplex,db_iqpt,natom,natom3,npc,trev_q,nspden
  integer :: nqbz, nqibz, iq, ifft, nqbz_coarse
- integer :: nq_read, nq_interp, nperts_read, nperts_interp, nperts
+ integer :: nperts_read, nperts_, nperts
+ integer :: nqpt_read, nqpt_interpolate
  integer :: n1,n2,n3,n4,n5,n6
  integer :: nfft,nfftf,mgfft,mgfftf,nkpg,nkpg1
  integer :: ount, unt, fform
@@ -4367,8 +4369,8 @@ subroutine dvdb_interpolate_and_write(dtfil, ngfft, ngfftf, cryst, dvdb, &
 
  pertsy = zero
 
- nq_read = 0
- nq_interp = 0
+ nqpt_read = 0
+ nqpt_interpolate = 0
  nperts_interp = 0
 
  do iq=1,nqibz
@@ -4381,15 +4383,15 @@ subroutine dvdb_interpolate_and_write(dtfil, ngfft, ngfftf, cryst, dvdb, &
    if (db_iqpt /= -1) then
 
      call wrtout(std_out, sjoin("Q-point: ",ktoa(qpt)," found in DVDB with index ",itoa(db_iqpt)))
-     nq_read = nq_read + 1
-     q_read(:,nq_read) = qpt(:) 
-     iq_read(nq_read) = db_iqpt
+     nqpt_read = nqpt_read + 1
+     q_read(:,nqpt_read) = qpt(:) 
+     iq_read(nqpt_read) = db_iqpt
 
    else
 
      call wrtout(std_out, sjoin("Q-point: ",ktoa(qpt), "not found in DVDB. Will interpolate."))
-     nq_interp = nq_interp + 1
-     q_interp(:,nq_interp) = qpt(:) 
+     nqpt_interpolate = nqpt_interpolate + 1
+     q_interp(:,nqpt_interpolate) = qpt(:) 
 
 
      ! Examine the symmetries of the q wavevector
@@ -4397,12 +4399,12 @@ subroutine dvdb_interpolate_and_write(dtfil, ngfft, ngfftf, cryst, dvdb, &
 
      ! Find the list of irreducible perturbations for this q-point.
      call irreducible_set_pert(cryst%indsym,dvdb%mpert,cryst%natom,cryst%nsym,&
-     &    pertsy(nq_interp,:,:),rfdir,rfpert,symq,cryst%symrec,cryst%symrel)
+     &    pertsy(nqpt_interpolate,:,:),rfdir,rfpert,symq,cryst%symrec,cryst%symrel)
 
      do iat=1,natom
        do idir=1,3
          ipert = (iat-1) * 3 + idir
-         if (pertsy(nq_interp,idir,iat) == 1) then
+         if (pertsy(nqpt_interpolate,idir,iat) == 1) then
            nperts_interp = nperts_interp + 1
          end if
 
@@ -4438,7 +4440,7 @@ subroutine dvdb_interpolate_and_write(dtfil, ngfft, ngfftf, cryst, dvdb, &
  rhog1_g0 = zero
 
  if (my_rank == master) then
-   do iq=1,nq_read
+   do iq=1,nqpt_read
 
      qpt = q_read(:,iq)
      db_iqpt = iq_read(iq)
@@ -4486,7 +4488,7 @@ subroutine dvdb_interpolate_and_write(dtfil, ngfft, ngfftf, cryst, dvdb, &
    do idir=1,3
      ipert = (iat-1) * 3 + idir
 
-     if (sum(pertsy(:,idir,iat)) == -nq_interp) cycle
+     if (sum(pertsy(:,idir,iat)) == -nqpt_interpolate) cycle
 
      call wrtout(std_out, sjoin("Interpolating perturbation iat,idir = ",itoa(iat), itoa(idir)))
 
@@ -4496,7 +4498,7 @@ subroutine dvdb_interpolate_and_write(dtfil, ngfft, ngfftf, cryst, dvdb, &
      &                       dvdb%nrpt, dvdb%nspden, ipert, v1scf_rpt, comm)
 
 
-     do iq=1,nq_interp
+     do iq=1,nqpt_interpolate
 
        if (pertsy(iq,idir,iat) == -1) cycle
 
