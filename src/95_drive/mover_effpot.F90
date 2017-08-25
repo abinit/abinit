@@ -661,12 +661,13 @@ implicit none
         call polynomial_coeff_free(coeffs_bound(ii))
       end do
       if(allocated(coeffs_bound)) ABI_DEALLOCATE(coeffs_bound)
-    end if
+      
+      do ii=1,ncoeff+ncoeff_bound
+        call polynomial_coeff_free(coeffs_all(ii))
+      end do
+      if(allocated(coeffs_all)) ABI_DEALLOCATE(coeffs_all)
 
-    do ii=1,ncoeff+ncoeff_bound
-      call polynomial_coeff_free(coeffs_all(ii))
-    end do
-    if(allocated(coeffs_all)) ABI_DEALLOCATE(coeffs_all)
+    end if
     
   else
 !    just call mover in case of NPT or NVT simulation
