@@ -59,4 +59,5 @@ xred 3*0
 #%%   The remaining is due to finiteness of the basis set.
 #%%   The estimation of the latter errors is presented in the test_cases
 #%%   17 and 18. In all these tests, intxc=0.
+#%% topics = xc
 #%%<END TEST_INFO>

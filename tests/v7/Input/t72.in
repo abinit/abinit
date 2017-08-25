@@ -169,4 +169,5 @@ kptbounds4  0.0 0.0 0.0 #Gamma
 #%% description = 
 #%%    Calculation of Projected Wannier functions and compute 
 #%%    a simplified interpolated band structure 
+#%% topics = Wannier, ElecBandStructure
 #%%<END TEST_INFO>

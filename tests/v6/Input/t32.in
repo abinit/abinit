@@ -1,10 +1,10 @@
 #test silicon crystal
  ndtset 4
 
-#First dataset : SC run with LDA and effmass=1.00
+#First dataset : SC run with LDA and effmass_free=1.00
  ixc1     32
 
-#Second dataset : SC run with mGGA fake1 (alpha=1-1/effmass) effmass=1.01
+#Second dataset : SC run with mGGA fake1 (alpha=1-1/effmass_free) effmass=1.01
  ixc2     33
 
 #Third dataset : (same as dataset 1 but with spin)

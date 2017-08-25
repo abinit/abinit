@@ -48,9 +48,10 @@
 !!      driver
 !!
 !! CHILDREN
-!!      d3sym,ddb_io_out,dfptnl_doutput,dfptnl_loop,ebands_free,fourdp,getcut
+!!      d3sym,dfptnl_doutput,dfptnl_loop,ebands_free,fourdp,getcut
 !!      getkgrid,getshell,hdr_free,hdr_init,hdr_update,initmv,inwffil,kpgio
-!!      mkcore,nlopt,psddb8,pspini,read_rhor,rhohxc,setsym,setup1,status
+!!      mkcore,nlopt,pspini,read_rhor,rhohxc,setsym,setup1,status
+!!      ddb_hdr_init, ddb_hdr_free, ddb_hdr_open_write
 !!      symmetrize_xred,sytens,timab,wffclose,wrtout
 !!
 !! SOURCE
@@ -77,7 +78,8 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,&
  use m_ebands
 
  use m_dynmat,   only : d3sym, sytens
- use m_ddb,      only : psddb8, nlopt, DDB_VERSION
+ use m_ddb,      only : nlopt, DDB_VERSION
+ use m_ddb_hdr,  only : ddb_hdr_type, ddb_hdr_init, ddb_hdr_free, ddb_hdr_open_write
  use m_ioarr,    only : read_rhor
  use m_pawrad,   only : pawrad_type
  use m_pawtab,   only : pawtab_type
@@ -132,6 +134,7 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,&
  character(len=fnlen) :: dscrpt
  type(ebands_t) :: bstruct
  type(hdr_type) :: hdr,hdr_den
+ type(ddb_hdr_type) :: ddb_hdr
  type(wffile_type) :: wffgs,wfftgs
  type(wvl_data) :: wvl
 !arrays
@@ -506,22 +509,13 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,&
    call status(0,dtfil%filstat,iexit,level,'call ioddb8_ou')
 
    dscrpt=' Note : temporary (transfer) database '
-!  tolwfr must be initialized here, but it is a dummy value
-   tolwfr=1.0_dp
-   call ddb_io_out(dscrpt,dtfil%fnameabo_ddb,natom,mband,&
-&   nkpt,nsym,psps%ntypat,dtfil%unddb,DDB_VERSION,&
-&   dtset%acell_orig(1:3,1),dtset%amu_orig(:,1),dtset%dilatmx,dtset%ecut,dtset%ecutsm,&
-&   dtset%intxc,dtset%iscf,dtset%ixc,dtset%kpt,dtset%kptnrm,&
-&   natom,dtset%nband,dtset%ngfft,nkpt,nspden,nspinor,&
-&   nsppol,nsym,psps%ntypat,occ,dtset%occopt,dtset%pawecutdg,&
-&   dtset%rprim_orig(1:3,1:3,1),dtset%dfpt_sciss,dtset%spinat,dtset%symafm,dtset%symrel,&
-&   dtset%tnons,tolwfr,dtset%tphysel,dtset%tsmear,&
-&   dtset%typat,dtset%usepaw,dtset%wtk,xred,psps%ziontypat,dtset%znucl)
 
-   nblok=1 ; fullinit=1 ; choice=2
-   call psddb8 (choice,psps%dimekb,psps%ekb,fullinit,psps%indlmn,&
-&   psps%lmnmax,nblok,psps%ntypat,dtfil%unddb,&
-&   pawtab,psps%pspso,psps%usepaw,psps%useylm,DDB_VERSION)
+   call ddb_hdr_init(ddb_hdr,dtset,psps,pawtab,DDB_VERSION,dscrpt,&
+&                    1,xred=xred,occ=occ)
+
+   call ddb_hdr_open_write(ddb_hdr, dtfil%fnameabo_ddb, dtfil%unddb)
+
+   call ddb_hdr_free(ddb_hdr)
 
 !  Call main output routine
    call dfptnl_doutput(blkflg,d3lo,dtset%mband,mpert,dtset%nkpt,dtset%natom,dtset%ntypat,dtfil%unddb)

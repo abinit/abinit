@@ -73,4 +73,5 @@
 #%%   Both with fixed occupation numbers and metallic occupations.
 #%%   This test has been contributed by L.E. Diaz.
 #%%   Additional test added for kinetic energy density by A. Lherbier
+#%% topics = spinpolarisation
 #%%<END TEST_INFO>

@@ -78,4 +78,5 @@ xred   0.0  0.0  0.0
 #%%   This tests uses psps8 files with model core charges and valence charge densities. 
 #%%   We test the initialization of rhor1, rhog1 from atomic quantities and the 
 #%%   treatment of the non-linear core correction in G-space (nc_xccc_gspace).
+#%% topics = DFPT
 #%%<END TEST_INFO>

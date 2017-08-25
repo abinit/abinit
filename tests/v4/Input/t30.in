@@ -36,4 +36,5 @@
 #%%   Simple cubic lattice of Mg atoms, with low cut-off.
 #%%   Pseudopotentials WITHOUT a non-linear core correction.
 #%%   Prepare the Bader density analysis
+#%% topics = Bader
 #%%<END TEST_INFO>

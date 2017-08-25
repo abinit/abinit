@@ -74,8 +74,8 @@ _ WF disk file :      9.842 Mbytes ; DEN or POT disk file :     45.565 Mbytes.
            diemix      5.00000000E-01
              ecut1     2.50000000E+01 Hartree
              ecut2     2.50000000E+03 Hartree
-          effmass1     1.00000000E+00
-          effmass2     1.00000000E+01
+          effmass_free1     1.00000000E+00
+          effmass_free2     1.00000000E+01
 -          fftalg         312
               ixc          20
            jdtset        1    2
@@ -434,8 +434,8 @@ _setup2: Arith. and geom. avg. npw (full set) are  161214.000  161214.000
            diemix      5.00000000E-01
              ecut1     2.50000000E+01 Hartree
              ecut2     2.50000000E+03 Hartree
-          effmass1     1.00000000E+00
-          effmass2     1.00000000E+01
+          effmass_free1     1.00000000E+00
+          effmass_free2     1.00000000E+01
            etotal1    -4.4898604023E-01
            etotal2    -4.4898604024E+00
             fcart1    -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00

@@ -1,8 +1,8 @@
 
-.Version 8.1.7 of MRGDDB 
-.(MPI version, prepared for a x86_64_darwin15.6.0_gnu6.0 computer) 
+.Version 8.5.2 of MRGDDB 
+.(MPI version, prepared for a x86_64_darwin16.6.0_gnu7.1 computer) 
 
-.Copyright (C) 1998-2016 ABINIT group . 
+.Copyright (C) 1998-2017 ABINIT group . 
  MRGDDB comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see http://www.abinit.org .
 
-.Starting date : Sat 10 Dec 2016.
-- ( at 21h55 )
+.Starting date : Sat  8 Jul 2017.
+- ( at 19h12 )
   
   Give name for output derivative database : 
  t44o_DS20_DDB
@@ -54,10 +54,18 @@
         occ  0.20000000000000D+01  0.20000000000000D+01  0.20000000000000D+01
              0.20000000000000D+01
   read the input derivative database information
+ Opening DDB file: t41o_DS3_DDB
+  inprep8 : nband(1)=           4
+        occ  0.20000000000000D+01  0.20000000000000D+01  0.20000000000000D+01
+             0.20000000000000D+01
  About to open file t41o_DS3_DDB
  read     1 blocks from the input DDB
 
  read the input derivative database number     2
+ Opening DDB file: t41o_DS4_DDB
+  inprep8 : nband(1)=           4
+        occ  0.20000000000000D+01  0.20000000000000D+01  0.20000000000000D+01
+             0.20000000000000D+01
  About to open file t41o_DS4_DDB
  compare the current and input DDB information
  Will try to merge this input DDB with the current one.
@@ -66,6 +74,10 @@
  Now, current number of bloks =    2
 
  read the input derivative database number     3
+ Opening DDB file: t41o_DS5_DDB
+  inprep8 : nband(1)=           4
+        occ  0.20000000000000D+01  0.20000000000000D+01  0.20000000000000D+01
+             0.20000000000000D+01
  About to open file t41o_DS5_DDB
  compare the current and input DDB information
  Will try to merge this input DDB with the current one.
@@ -76,7 +88,6 @@
  check the equality of blocks, and eventually merge
      0 blocks are merged; the new DDB will have      3 blocks.
  open the output database, write the preliminary information
- write the psp information
  write the DDB
  Write bloc number   1
  Write bloc number   2

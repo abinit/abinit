@@ -1,0 +1,75 @@
+#Spin
+nsppol 1
+nspden 2
+nspinor 1
+spinat 0 0 1
+       0 0 -1
+       0 0 0
+       0 0 0
+
+#Parameters
+nstep  50
+ecut 15
+pawecutdg 30
+tolvrs 1.0d-7
+nband  28
+occopt 7 tsmear 0.015
+#tsmear 300 K
+
+#Structural parameters
+natom 4 ntypat 2 typat 1 1 2 2
+znucl 28 8
+xred 0 0 0
+    0.0 0.0 0.5
+    0.5 0.5 0.25
+    0.5 0.5 0.75
+
+acell   3*7.92
+
+rprim 0.0 1/2 1/2
+      1/2 0.0 1/2
+      1.0 1.0 0.0
+
+# Kpoint Grid
+ngkpt 2 2 2
+chksymbreak 0  # The k point grid is not symmetric, but the calculations being for the ground-state, this is not a problem.
+
+# LDA+U
+usepawu   1
+lpawu   2 -1
+upawu  8.0 0.0 eV
+jpawu  0.8 0.0 eV
+
+#Density matrix
+usedmatpu 5
+
+dmatpawu 
+#Occupation matrix for spin  1 and atom 1
+     0.90036    0.00000   -0.00003    0.00000    0.00000
+     0.00000    0.90036   -0.00001    0.00000    0.00002
+    -0.00003   -0.00001    0.91309   -0.00001    0.00000
+     0.00000    0.00000   -0.00001    0.90036   -0.00002
+     0.00000    0.00002    0.00000   -0.00002    0.91309
+#Occupation matrix for spin  1 and atom 2
+     0.89677   -0.00001    0.00011   -0.00001    0.00000
+    -0.00001    0.89677    0.00006    0.00001   -0.00010
+     0.00011    0.00006    0.11580    0.00006    0.00000
+    -0.00001    0.00001    0.00006    0.89677    0.00010
+     0.00000   -0.00010    0.00000    0.00010    0.11580
+
+
+## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   tdftu_3.out, tolnlines=  8, tolabs=  7.001e-02, tolrel=  5.000e-03, fld_options = -easy  
+#%% psp_files = 28ni.paw, 8o.2.paw 
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = Unknown
+#%% keywords = LDAU
+#%% description = third lesson of the LDA+U tutorial
+#%%<END TEST_INFO>
