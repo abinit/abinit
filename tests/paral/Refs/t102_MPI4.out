@@ -153,16 +153,7 @@
 ================================================================================
 
 -Reading the file the HIST file :
--/home/alex/Desktop/dev/abinit/abinit_git_dev/tests/v8/Input/t13_HIST
-
-
- The size of the supercell for the fit is  2  2  2
-
- --- !WARNING
-     The ordering of the atoms in the hist file is different,
-     of the one built by multibinit. The hist file will be map,
-     on the ordering of multibinit.
- ---
+-/home/alex/dev/abinit_git/tests/paral/Input/t101_HIST
 
 
 ================================================================================
@@ -175,27 +166,27 @@
  Mean Standard Deviation values at the begining of the fit process (meV/f.u.):
    Energy          :   3.7052088257134135E+00
  Goal function values at the begining of the fit process (eV^2/A^2):
-   Forces+Stresses :   7.5063892046370942E-03
-   Forces          :   7.3678364726198617E-03
-   Stresses        :   1.3855273201723232E-04
+   Forces+Stresses :   7.8729467327226348E-03
+   Forces          :   7.3678367059221714E-03
+   Stresses        :   5.0511002680046302E-04
 
  N   Selecting          MSEE              MSEFS              MSEF              MSES
     Coefficient      (meV/f.u.)        (eV^2/A^2)        (eV^2/A^2)        (eV^2/A^2)
- 3      3         1.9687718710E+00  4.0002876127E-03  3.8455540654E-03  1.5473354726E-04
- 4      4         2.0033066296E+00  3.7875226129E-03  3.6336181883E-03  1.5390442456E-04
+ 3      3         1.9765125847E+00  4.3922666391E-03  3.8456936182E-03  5.4657302093E-04
+ 4      4         1.9767912499E+00  3.9837066556E-03  3.8415430215E-03  1.4216363416E-04
 
  Fitted coefficients at the end of the fit process:
- 1 =>   1.8766945024E+00 (Ru_x-O1_x)^2(Ru_y-O1_y)^2
- 2 =>   1.2507790346E-01 (Sr_x-Ru_x)^4
- 3 =>  -5.8319599017E-01 (Sr_x-O1_x)^1(Sr_y-O1_y)^1(Ru_x-O1_x)^1(Ru_y-O1_y)^1
- 4 =>   9.0370877256E-02 (Ru_x-O1_x)^1(Ru_y-O1_y)^1(O1_x-O2_x)^1
+ 1 =>   1.9521245996E+00 (Ru_x-O1_x)^2(Ru_y-O1_y)^2
+ 2 =>   1.3342873988E-01 (Sr_x-Ru_x)^4
+ 3 =>  -5.3013657042E-01 (Sr_x-O1_x)^1(Sr_y-O1_y)^1(Ru_x-O1_x)^1(Ru_y-O1_y)^1
+ 4 =>  -9.3589800830E-01 (Ru_x-O1_x)^2(eta_1)^1
 
  Mean Standard Deviation values at the end of the fit process (meV/f.u.):
-   Energy          :   2.0033066296352717E+00
+   Energy          :   1.9767912499334965E+00
  Goal function values at the end of the fit process (eV^2/A^2):
-   Forces+Stresses :   3.7875226128532198E-03
-   Forces          :   3.6336181882901937E-03
-   Stresses        :   1.5390442456302621E-04
+   Forces+Stresses :   3.9837066556193393E-03
+   Forces          :   3.8415430214621951E-03
+   Stresses        :   1.4216363415714458E-04
 
 
 ================================================================================

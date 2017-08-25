@@ -2382,7 +2382,7 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
     need_anharmonic = compute_anharmonic
   end if
 
-!Check some variables  
+! Check some variables  
   if (natom /= eff_pot%supercell%natom_supercell) then
     write(msg,'(a,I7,a,I7,a)')' The number of atoms is not correct :',natom,&
 &   ' in argument istead of ',eff_pot%supercell%natom_supercell, ' in supercell'

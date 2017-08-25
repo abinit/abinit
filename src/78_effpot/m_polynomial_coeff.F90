@@ -560,8 +560,6 @@ subroutine polynomial_coeff_broadcast(coefficients, source, comm)
 
  if (xmpi_comm_size(comm) == 1) return
 
- DBG_ENTER("COLL")
-
 ! Free the output
  if (xmpi_comm_rank(comm) /= source) then
    call polynomial_coeff_free(coefficients)
@@ -604,7 +602,6 @@ subroutine polynomial_coeff_broadcast(coefficients, source, comm)
       call xmpi_bcast(coefficients%terms(ii)%power, source, comm, ierr)
   end do
 
- DBG_EXIT("COLL")
 
 end subroutine polynomial_coeff_broadcast
 !!***
@@ -657,7 +654,6 @@ subroutine polynomial_coeff_MPIsend(coefficients, tag, dest, comm)
 ! *************************************************************************
 
  if (xmpi_comm_size(comm) == 1) return
- DBG_ENTER("COLL")
 
   my_rank = xmpi_comm_rank(comm)
 ! Transmit variables
@@ -678,8 +674,6 @@ subroutine polynomial_coeff_MPIsend(coefficients, tag, dest, comm)
       call xmpi_send(coefficients%terms(ii)%cell, dest, 9*tag+7, comm, ierr)
       call xmpi_send(coefficients%terms(ii)%power, dest, 9*tag+8, comm, ierr)
   end do
-
- DBG_EXIT("COLL")
 
 end subroutine polynomial_coeff_MPIsend
 !!***
@@ -731,7 +725,6 @@ subroutine polynomial_coeff_MPIrecv(coefficients, tag, source, comm)
 
  if (xmpi_comm_size(comm) == 1) return
 
- DBG_ENTER("COLL")
 
 ! Free the output
   call polynomial_coeff_free(coefficients)
@@ -769,8 +762,6 @@ subroutine polynomial_coeff_MPIrecv(coefficients, tag, source, comm)
     call xmpi_recv(coefficients%terms(ii)%cell, source, 9*tag+7, comm, ierr)
     call xmpi_recv(coefficients%terms(ii)%power, source, 9*tag+8, comm, ierr)
   end do
-
- DBG_EXIT("COLL")
 
 end subroutine polynomial_coeff_MPIrecv
 !!***

@@ -194,7 +194,7 @@ void effpot_xml_readSystem(char *filename,int *natom,int *ntypat,int *nrpt,int *
     xmlFreeDoc(doc);
     return;
   }
- 
+
   cur = cur->xmlChildrenNode;
   while (cur != NULL) {
     if ((!xmlStrcmp(cur->name, (const  xmlChar *) "energy"))) {
@@ -758,7 +758,6 @@ void effpot_xml_readCoeff(char *filename,int*ncoeff,int*ndisp,int*nterm,
 
   //Reset counter
   icoeff = 0; iterm = 0; idisp = 0;
-
   cur = cur->xmlChildrenNode;
   while (cur != NULL) {
     if (!xmlStrcmp(cur->name, (const  xmlChar *) "Heff_definition")) {
@@ -872,8 +871,7 @@ void effpot_xml_getDimCoeff(char *filename,int*ncoeff,char *nterm_max,int*ndisp_
   int count1,count2;
   xmlDocPtr doc;
   char * pch;
-  xmlNodePtr cur,cur2,cur3;
-  xmlChar *uri,*uri2;
+  xmlNodePtr cur,cur2,cur3,cur4;
 
   icoeff = 0;
   iterm  = 0;
@@ -891,29 +889,31 @@ void effpot_xml_getDimCoeff(char *filename,int*ncoeff,char *nterm_max,int*ndisp_
   cur = cur->xmlChildrenNode;
   while (cur != NULL) {
     if (!xmlStrcmp(cur->name, (const  xmlChar *) "Heff_definition")) {
-      cur = cur->xmlChildrenNode;
-    }
-    if (!xmlStrcmp(cur->name, (const  xmlChar *) "coefficient")) {
-      icoeff ++;
       cur2 = cur->xmlChildrenNode;
-      count1 = 0;
       while (cur2 != NULL){
-        if (!xmlStrcmp(cur2->name, (const  xmlChar *) "term")) {
-          count1 ++;
-          count2 = 0;
+        if (!xmlStrcmp(cur2->name, (const  xmlChar *) "coefficient")) {
+          icoeff ++;
           cur3 = cur2->xmlChildrenNode;
-          
+          count1 = 0;
           while (cur3 != NULL){
-            if (!xmlStrcmp(cur3->name, (const  xmlChar *) "displacement_diff")) {count2 ++;}
-            if (!xmlStrcmp(cur3->name, (const  xmlChar *) "strain")) {count2 ++;}
+            if (!xmlStrcmp(cur3->name, (const  xmlChar *) "term")) {
+              count1 ++;
+              count2 = 0;
+              cur4 = cur3->xmlChildrenNode;
+              
+              while (cur4 != NULL){
+                if (!xmlStrcmp(cur4->name, (const  xmlChar *) "displacement_diff")) {count2 ++;}
+                if (!xmlStrcmp(cur4->name, (const  xmlChar *) "strain")) {count2 ++;}
+                cur4 = cur4->next;
+              }
+              if(count2 > idisp){idisp = count2;}
+            }
             cur3 = cur3->next;
           }
-          if(count2 > idisp){idisp = count2;}
+          if(count1 > iterm){iterm = count1;}
         }
-        cur2 = cur2->next;
+        cur2 = cur2->next;        
       }
-      if(count1 > iterm){iterm = count1;}
-      xmlFree(uri);
     }
     cur = cur->next;
   }

@@ -608,7 +608,7 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
 &           scfcv_args%results_gs%strten,ab_mover%natom,rprimd,xred=xred,verbose=need_verbose)
 
 !          Check if the simulation does not diverged...
-           if(ABS(scfcv_args%results_gs%etotal - hist%etot(1)) > 1E6)then
+           if(hist%ihist > 1.and.ABS(scfcv_args%results_gs%etotal - hist%etot(1)) > 1E4)then
 !            We set to false the flag corresponding to the bound 
              effective_potential%anharmonics_terms%bounded = .FALSE.
              if(need_verbose.and.me==master)then

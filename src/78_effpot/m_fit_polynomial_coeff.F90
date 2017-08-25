@@ -1230,20 +1230,19 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,powers,nbanco
  need_anharmstr = .FALSE.
  if(present(anharmstr)) need_anharmstr = anharmstr
 
-!Initialisation of constants
- ntime      = hist%mxhist
- natom_sc   = eff_pot%supercell%natom_supercell
 
 !if the cutoff_in == zero,
 !we set to the lenght of the cell parameters
- if(cutoff_in==zero)then
-   cutoff = tol10
+ cutoff = zero
+ if(present(cutoff_in))then
+   cutoff = cutoff_in
+ end if
+ 
+ if(cutoff == zero)then
    do ii=1,3
      cutoff = cutoff + eff_pot%crystal%rprimd(ii,ii)
    end do
    cutoff = cutoff / 3.0
- else
-   cutoff = cutoff_in
  end if
 
  if(need_verbose) then
@@ -1315,7 +1314,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,powers,nbanco
 !wrt to the number of atom in the hist, we set map the hist and set the good 
 !supercell
  if (size(hist%xred,2) /= eff_pot%supercell%natom_supercell) then
-   call fit_polynomial_coeff_mapHistToRef(eff_pot,hist,comm)
+   call fit_polynomial_coeff_mapHistToRef(eff_pot,hist,comm,verbose=need_verbose)
  end if
 
 !Set the MPI, we need to distribute the list of coeffiecients in
@@ -1433,6 +1432,10 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,powers,nbanco
         if(need_verbose) call wrtout(std_out,message,'COLL')
  end if
 
+!Initialisation of constants
+ ntime      = hist%mxhist
+ natom_sc   = eff_pot%supercell%natom_supercell
+
 !Initialisation of arrays:
  ABI_ALLOCATE(displacement,(3,natom_sc,ntime))
  ABI_ALLOCATE(du_delta,(6,3,natom_sc,ntime))
@@ -1527,7 +1530,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,powers,nbanco
 
     ABI_DEALLOCATE(work)
     ABI_DEALLOCATE(work2)
-    
+
 !  Get forces and stresses from harmonic part (fixed part)     
    call effective_potential_evaluate(eff_pot,energy,fcart_fixed(:,:,itime),fred_fixed(:,:,itime),&
 &                                    strten_fixed(:,itime),natom_sc,hist%rprimd(:,:,itime),&
@@ -1535,6 +1538,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,powers,nbanco
 &                                    du_delta=du_delta(:,:,:,itime),strain=strain(:,itime),&
 &                                    compute_anharmonic=.FALSE.,verbose=.FALSE.)
 
+   
 !  Compute \Omega^{2} and ucvol for each time
    call metric(gmet,gprimd,-1,rmet,hist%rprimd(:,:,itime),ucvol(itime))
 !  Formula:
@@ -1545,10 +1549,11 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,powers,nbanco
    ncell      = product(eff_pot%supercell%qphon(:))
 
 !  Compute the difference between History and model (fixed part)
-   fcart_diff(:,:,itime) =  hist%fcart(:,:,itime) - fcart_fixed(:,:,itime) 
-   strten_diff(:,itime)  =  hist%strten(:,itime)  - strten_fixed(:,itime)
+   fcart_diff(:,:,itime) =  hist%fcart(:,:,itime) - fcart_fixed(:,:,itime)
    energy_diff(itime)    =  hist%etot(itime) - energy
-
+   strten_fixed = -1 * strten_fixed
+   strten_diff(:,itime)  =  hist%strten(:,itime) - strten_fixed(:,itime)
+   
  end do
 
 !Check if the initial stresses of the reference is set to the potential
@@ -1597,7 +1602,6 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,powers,nbanco
 
 !Get the decomposition for each coefficients of the forces,stresses and energy for 
 !each atoms and each step  (see equations 11 & 12 of  PRB95,094115(2017)) + allocation
-
  ABI_ALLOCATE(energy_coeffs,(my_ncoeff,ntime))
  ABI_ALLOCATE(fcart_coeffs,(3,natom_sc,my_ncoeff,ntime))
  ABI_ALLOCATE(strten_coeffs,(6,ntime,my_ncoeff))
@@ -2063,10 +2067,6 @@ subroutine fit_polynomial_coeff_getPositive(eff_pot,hist,coeff_values,isPositive
  need_verbose = .TRUE.
  if(present(verbose)) need_verbose = verbose
 
-!Initialisation of constants
- ntime      = hist%mxhist
- natom_sc   = eff_pot%supercell%natom_supercell
-
 !Get the list of coefficients from the eff_pot
  if(eff_pot%anharmonics_terms%ncoeff > zero)then
 !  Copy the initial coefficients array
@@ -2089,9 +2089,12 @@ subroutine fit_polynomial_coeff_getPositive(eff_pot,hist,coeff_values,isPositive
 !wrt to the number of atom in the hist, we set map the hist and set the good 
 !supercell
  if (size(hist%xred,2) /= eff_pot%supercell%natom_supercell) then
-   call fit_polynomial_coeff_mapHistToRef(eff_pot,hist,comm)
+   call fit_polynomial_coeff_mapHistToRef(eff_pot,hist,comm,verbose=need_verbose)
  end if
 
+!Initialisation of constants
+ ntime      = hist%mxhist
+ natom_sc   = eff_pot%supercell%natom_supercell
 
 !Initialisation of arrays:
  ABI_ALLOCATE(displacement,(3,natom_sc,ntime))
@@ -2175,7 +2178,7 @@ subroutine fit_polynomial_coeff_getPositive(eff_pot,hist,coeff_values,isPositive
      du_delta(5,:,ii,itime) = (/work2(3,ii),zero,work2(1,ii)/)
      du_delta(6,:,ii,itime) = (/work2(2,ii),work2(1,ii),zero/)
    end do
-
+   
    ABI_DEALLOCATE(work)
    ABI_DEALLOCATE(work2)
     
@@ -2196,7 +2199,8 @@ subroutine fit_polynomial_coeff_getPositive(eff_pot,hist,coeff_values,isPositive
    ncell      = product(eff_pot%supercell%qphon(:))
 
 !  Compute the difference between History and model (fixed part)
-   fcart_diff(:,:,itime) =  hist%fcart(:,:,itime) - fcart_fixed(:,:,itime) 
+   fcart_diff(:,:,itime) =  hist%fcart(:,:,itime) - fcart_fixed(:,:,itime)
+   strten_fixed = -1*strten_fixed
    strten_diff(:,itime)  =  hist%strten(:,itime)  - strten_fixed(:,itime)
    energy_diff(itime)    =  hist%etot(itime) - energy
 
@@ -2884,7 +2888,8 @@ subroutine fit_polynomial_coeff_getFS(coefficients,du_delta,displacement,energy_
    end do
  end do
 
-!multiply by -1 the forces
+! multiply by -1
+ strten_out(:,:,:)  = -1 * strten_out(:,:,:)
  fcart_out(:,:,:,:) = -1 * fcart_out(:,:,:,:)
 
 end subroutine fit_polynomial_coeff_getFS
@@ -3019,7 +3024,7 @@ end subroutine fit_polynomial_coeff_computeMSE
 !!
 !! SOURCE
 
-subroutine fit_polynomial_coeff_mapHistToRef(eff_pot,hist,comm)
+subroutine fit_polynomial_coeff_mapHistToRef(eff_pot,hist,comm,verbose)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -3035,6 +3040,7 @@ subroutine fit_polynomial_coeff_mapHistToRef(eff_pot,hist,comm)
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: comm
+ logical,optional,intent(in) :: verbose
 !arrays
  type(effective_potential_type),intent(inout) :: eff_pot
  type(abihist),intent(inout) :: hist
@@ -3042,7 +3048,7 @@ subroutine fit_polynomial_coeff_mapHistToRef(eff_pot,hist,comm)
 !scalar
  integer :: factE_hist,ia,ib,ii,jj,natom_hist,ncell,nstep_hist
  real(dp):: factor
- logical :: revelant_factor,need_map
+ logical :: revelant_factor,need_map,need_verbose
 !arrays
  real(dp) :: rprimd_hist(3,3),rprimd_ref(3,3),scale_cell(3)
  integer :: n_cell(3)
@@ -3052,6 +3058,10 @@ subroutine fit_polynomial_coeff_mapHistToRef(eff_pot,hist,comm)
  type(abihist) :: hist_tmp
 ! *************************************************************************
 
+!Set optional values
+ need_verbose = .false.
+ if (present(verbose)) need_verbose = verbose
+ 
  natom_hist = size(hist%xred,2)
  nstep_hist = size(hist%xred,3)
 
@@ -3103,7 +3113,7 @@ subroutine fit_polynomial_coeff_mapHistToRef(eff_pot,hist,comm)
 &          '     However, the multiplicity of the cell is ',ncell,'.',ch10,&
 &          '     Please check the energy of the step ',ii,ch10,&
 &          ' ---',ch10
-     call wrtout(std_out,msg,'COLL') 
+     if(need_verbose) call wrtout(std_out,msg,'COLL') 
    end if
  end do
 
@@ -3123,10 +3133,12 @@ subroutine fit_polynomial_coeff_mapHistToRef(eff_pot,hist,comm)
 
  xred_hist = hist%xred(:,:,1)
 
- write(msg,'(2a,I2,a,I2,a,I2)') ch10,&
+ if(need_verbose) then 
+   write(msg,'(2a,I2,a,I2,a,I2)') ch10,&
 &       ' The size of the supercell for the fit is ',n_cell(1),' ',n_cell(2),' ',n_cell(3)
- call wrtout(std_out,msg,'COLL') 
- call wrtout(ab_out,msg,'COLL') 
+   call wrtout(std_out,msg,'COLL') 
+   call wrtout(ab_out,msg,'COLL')
+ end if
  
 !try to map
  do ia=1,natom_hist
@@ -3166,15 +3178,16 @@ subroutine fit_polynomial_coeff_mapHistToRef(eff_pot,hist,comm)
    if(list(ia) /= ia) need_map = .TRUE.
  end do
  if(need_map)then
-   write(msg, '(11a)' )ch10,&
+   if(need_verbose) then
+     write(msg, '(11a)' )ch10,&
 &      ' --- !WARNING',ch10,&
 &      '     The ordering of the atoms in the hist file is different,',ch10,&
 &      '     of the one built by multibinit. The hist file will be map,',ch10,&
 &      '     on the ordering of multibinit.',ch10,&
 &      ' ---',ch10
-   call wrtout(ab_out,msg,'COLL')
-   call wrtout(std_out,msg,'COLL')
-
+     call wrtout(ab_out,msg,'COLL')
+     call wrtout(std_out,msg,'COLL')
+   end if
 
 ! Allocate hist datatype 
    call abihist_init(hist_tmp,natom_hist,nstep_hist,.false.,.false.)
