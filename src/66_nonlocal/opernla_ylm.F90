@@ -2633,9 +2633,9 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
 
 !      --------------------------------------------------------------------
 !      CHOICE= 8, 81 --  SIGNS= 2
-!      Accumulate dGxdt --- 2nd derivative wrt k --- for direction IDIR (Voigt not.)
+!      Accumulate d2Gxdt --- 2nd derivative wrt k --- for direction IDIR (Voigt not.)
 !      --------------------------------------------------------------------
-       if ((signs==2).and.(choice_==8)) then
+       if ((signs==2).and.(choice_==8.or.choice_==81)) then
          mu0=1
          !idir= (xx=1, xy=2, xz=3, yx=4, yy=5, yz=6, zx=7, zy=8, zz=9)
          mua=idir1(idir);mub=idir2(idir)
