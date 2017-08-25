@@ -4258,7 +4258,7 @@ subroutine dvdb_interpolate_and_write(dtfil, ngfft, ngfftf, cryst, dvdb, &
  integer :: my_rank,nproc,iomode,idir,ipert,iat,ipc,ispden
  integer :: cplex,db_iqpt,natom,natom3,npc,trev_q,nspden
  integer :: nqbz, nqibz, iq, ifft, nqbz_coarse
- integer :: nperts_read, nperts_, nperts
+ integer :: nperts_read, nperts_interpolate, nperts
  integer :: nqpt_read, nqpt_interpolate
  integer :: n1,n2,n3,n4,n5,n6
  integer :: nfft,nfftf,mgfft,mgfftf,nkpg,nkpg1
@@ -4371,7 +4371,7 @@ subroutine dvdb_interpolate_and_write(dtfil, ngfft, ngfftf, cryst, dvdb, &
 
  nqpt_read = 0
  nqpt_interpolate = 0
- nperts_interp = 0
+ nperts_interpolate = 0
 
  do iq=1,nqibz
 
@@ -4405,7 +4405,7 @@ subroutine dvdb_interpolate_and_write(dtfil, ngfft, ngfftf, cryst, dvdb, &
        do idir=1,3
          ipert = (iat-1) * 3 + idir
          if (pertsy(nqpt_interpolate,idir,iat) == 1) then
-           nperts_interp = nperts_interp + 1
+           nperts_interpolate = nperts_interpolate + 1
          end if
 
        end do
@@ -4418,7 +4418,7 @@ subroutine dvdb_interpolate_and_write(dtfil, ngfft, ngfftf, cryst, dvdb, &
  ! ================================================= !
  ! Open the new DVDB file and write preliminary info
  ! ================================================= !
- nperts = nperts_read + nperts_interp
+ nperts = nperts_read + nperts_interpolate
 
  if (my_rank == master) then
    new_ddb_fname = strcat(dtfil%filnam_ds(4), '_DVDB')
