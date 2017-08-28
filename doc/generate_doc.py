@@ -433,8 +433,9 @@ for item in bibtex_items:
 
 reference_dic={}
 for (i,ref) in enumerate(bibtex_dics):
-  # Very strange behaviour of python when I try to use ref["journal"] directly ?! So, use an ugly bypass.
+  # There was a Very strange behaviour of python when I try to use ref["journal"] directly ?! So, use an ugly bypass.
   # Same thing for ref["volume"]. In any case, one should define a class ...
+  # Now everything seems OK ... ?!  ref[key]  works as it should ...
   position=0
   flag_pages=0
   flag_eprint=0
@@ -457,40 +458,56 @@ for (i,ref) in enumerate(bibtex_dics):
   for key in ref.keys():
 
     if key=='ENTRYTYPE':
-      ENTRYTYPE=ref.values()[position].strip()
+      #ENTRYTYPE=ref.values()[position].strip()
+      ENTRYTYPE=ref[key].strip()
     elif key=='ID':
-      ID=ref.values()[position].strip()
+      #ID=ref.values()[position].strip()
+      ID=ref[key].strip()
     elif key=='author':
-      author=ref.values()[position].strip()
+      #author=ref.values()[position].strip()
+      author=ref[key].strip()
     elif key=='title':
-      title=ref.values()[position].strip()
+      #title=ref.values()[position].strip()
+      title=ref[key].strip()
     elif key=='booktitle':
-      booktitle=ref.values()[position].strip()
+      #booktitle=ref.values()[position].strip()
+      booktitle=ref[key].strip()
     elif key=='journal':
-      journal=ref.values()[position].strip()
+      #journal=ref.values()[position].strip()
+      journal=ref[key].strip()
     elif key=='volume':
-      volume=ref.values()[position].strip()
+      #volume=ref.values()[position].strip()
+      volume=ref[key].strip()
       flag_pages+=1
     elif key=='pages':
-      pages=ref.values()[position].strip()
+      #pages=ref.values()[position].strip()
+      pages=ref[key].strip()
       flag_pages+=1
     elif key=='year':
-      year=ref.values()[position].strip()
+      #year=ref.values()[position].strip()
+      year=ref[key].strip()
     elif key=='eprint':
-      eprint=ref.values()[position].strip()
+      #eprint=ref.values()[position].strip()
+      eprint=ref[key].strip()
       flag_eprint=1
     elif key=='editor':
-      editor=ref.values()[position].strip()
+      #editor=ref.values()[position].strip()
+      editor=ref[key].strip()
     elif key=='publisher':
-      publisher=ref.values()[position].strip()
+      #publisher=ref.values()[position].strip()
+      publisher=ref[key].strip()
     elif key=='school':
-      school=ref.values()[position].strip()
+      #school=ref.values()[position].strip()
+      school=ref[key].strip()
     elif key=='address':
-      address=ref.values()[position].strip()
+      #address=ref.values()[position].strip()
+      address=ref[key].strip()
     elif key=='note':
-      note=ref.values()[position].strip()
+      #note=ref.values()[position].strip()
+      note=ref[key].strip()
     elif key=='howpublished':
-      howpublished=ref.values()[position].strip()
+      #howpublished=ref.values()[position].strip()
+      howpublished=ref[key].strip()
     position+=1
 
   # Reformat the list of authors, starting with the initials.
