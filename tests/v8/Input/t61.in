@@ -73,7 +73,7 @@
 #%% [paral_info]
 #%% max_nprocs = 10
 #%% [extra_info]
-#%% authors = Gabriel Antonius
+#%% authors = G. Antonius
 #%% keywords = NC, DFPT, EPH
 #%% description = 
 #%%   Testing of the phonon potential interpolation routines.

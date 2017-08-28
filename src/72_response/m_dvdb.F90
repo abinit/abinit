@@ -4451,7 +4451,7 @@ subroutine dvdb_interpolate_and_write(dtfil, ngfft, ngfftf, cryst, dvdb, &
 
      do ipc=1,npc
        idir = pinfo(1,ipc); iat = pinfo(2,ipc); ipert = pinfo(3, ipc)
-       if (dvdb_read_onev1(dvdb, idir, iat, db_iqpt, cplex, nfftf, ngfftf, v1scf(:,:,:), msg) /= 0) then
+       if (dvdb_read_onev1(dvdb, idir, iat, db_iqpt, cplex, nfftf, ngfftf, v1scf, msg) /= 0) then
          MSG_ERROR(msg)
        end if
 
@@ -4546,10 +4546,13 @@ subroutine dvdb_interpolate_and_write(dtfil, ngfft, ngfftf, cryst, dvdb, &
  ABI_FREE(qibz)
  ABI_FREE(q_interp)
  ABI_FREE(q_read)
+ ABI_FREE(wtq)
  ABI_FREE(iq_read)
  ABI_FREE(pertsy)
  ABI_FREE(rfpert)
  ABI_FREE(pinfo)
+
+ call hdr_free(hdr_ref)
 
  call cwtime(cpu,wall,gflops,"stop")
 

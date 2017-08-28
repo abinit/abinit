@@ -1,6 +1,6 @@
 
 .Version 8.5.3 of ABINIT 
-.(MPI version, prepared for a x86_64_darwin16.7.0_gnu7.1 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu5.3 computer)
 
 .Copyright (C) 1998-2017 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -1042,7 +1042,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     115.484     115.407
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1   210.42346732597     -1.469E+01 8.315E-01 2.181E+05
- ETOT  2   90.728297190021     -1.197E+02 3.399E-01 6.477E+04
+ ETOT  2   90.728295698835     -1.197E+02 3.399E-01 6.477E+04
  ETOT  3   19.324600465439     -7.140E+01 1.072E-01 1.020E+03
  ETOT  4   17.471290197565     -1.853E+00 3.197E-03 9.968E+00
  ETOT  5   17.460765846128     -1.052E-02 7.181E-06 5.754E-02
@@ -1096,7 +1096,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     115.484     115.407
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1   25.579704897362     -1.650E+02 4.646E-01 5.725E+03
- ETOT  2   14.677738426111     -1.090E+01 2.958E-02 1.506E+02
+ ETOT  2   14.677738429464     -1.090E+01 2.958E-02 1.506E+02
  ETOT  3   14.343637187372     -3.341E-01 7.851E-04 3.447E-01
  ETOT  4   14.343254279897     -3.829E-04 1.188E-06 1.070E-01
  ETOT  5   14.343104040364     -1.502E-04 2.460E-07 1.475E-03
@@ -1332,12 +1332,12 @@ _setup2: Arith. and geom. avg. npw (full set) are     115.484     115.407
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1   103.65179902520     -1.094E+02 8.673E-01 7.757E+04
- ETOT  2   39.689364594933     -6.396E+01 4.050E-01 1.676E+04
- ETOT  3   17.629484769690     -2.206E+01 2.149E-02 2.883E+02
+ ETOT  2   39.689364664175     -6.396E+01 4.050E-01 1.676E+04
+ ETOT  3   17.629484759676     -2.206E+01 2.149E-02 2.883E+02
  ETOT  4   17.158297274494     -4.712E-01 1.105E-03 1.310E+00
  ETOT  5   17.156965157791     -1.332E-03 2.193E-06 4.159E-03
  ETOT  6   17.156958087347     -7.070E-06 2.281E-08 6.173E-05
- ETOT  7   17.156958020276     -6.707E-08 1.954E-10 9.053E-06
+ ETOT  7   17.156958020276     -6.707E-08 1.953E-10 9.052E-06
  ETOT  8   17.156958007349     -1.293E-08 2.299E-11 9.806E-08
  ETOT  9   17.156958007213     -1.359E-10 1.595E-13 8.911E-11
 
@@ -1957,4 +1957,4 @@ P          mk1mem5         64
 
  Calculation completed.
 .Delivered  35 WARNINGs and   0 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         40.5  wall=         40.6
++Overall time at end (sec) : cpu=          7.6  wall=         24.1
