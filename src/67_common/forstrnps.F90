@@ -586,12 +586,18 @@ use m_cgtools
        call bandfft_kpt_restoretabs(my_bandfft_kpt,ffnl=ffnl_sav,ph3d=ph3d_sav,kpg=kpg_k_sav)
      end if
 
-!    Incremente indexes
+!    Increment indexes
      bdtot_index=bdtot_index+nband_k
      if (mkmem/=0) then
        ibg=ibg+my_nspinor*nband_cprj_k
        icg=icg+npw_k*my_nspinor*nband_k
        ikg=ikg+npw_k
+     end if
+
+     if (usefock_loc) then
+       if (fock%optstr) then
+         ABI_DEALLOCATE(fock%stress_ikpt)
+       end if
      end if
 
      if (psps%usepaw==1) then
