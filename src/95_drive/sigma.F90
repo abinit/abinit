@@ -140,7 +140,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  use m_paw_an,        only : paw_an_type, paw_an_init, paw_an_free, paw_an_nullify
  use m_paw_ij,        only : paw_ij_type, paw_ij_init, paw_ij_free, paw_ij_nullify, paw_ij_print
  use m_pawfgrtab,     only : pawfgrtab_type, pawfgrtab_init, pawfgrtab_free, pawfgrtab_print
- use m_pawrhoij,      only : pawrhoij_type, pawrhoij_alloc, pawrhoij_copy, pawrhoij_free, symrhoij
+ use m_pawrhoij,      only : pawrhoij_type, pawrhoij_alloc, pawrhoij_copy, pawrhoij_free, pawrhoij_get_nspden, symrhoij
  use m_pawcprj,       only : pawcprj_type, pawcprj_alloc, pawcprj_free, paw_overlap
  use m_pawdij,        only : pawdij, symdij_all
  use m_pawfgr,        only : pawfgr_type, pawfgr_init, pawfgr_destroy
@@ -320,8 +320,8 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
    end if
    if(Dtset%gwcalctyp>=100 .AND. Dtset%gwcalctyp <200) then
      if( Dtset%rcut<tol6 ) then
-       msg='For HSE calculation, the cutoff radius rcut has to be set to 9.090909 bohr!'
-       MSG_ERROR(msg)
+       msg='The cutoff radius rcut is not specified for HSE calculations. Default values will be used!'
+       MSG_WARNING(msg)
      end if
      if( Dtset%icutcoul /=5 .AND. Dtset%icutcoul /=15 ) then
        msg='For HSE calculation, abinit requires short-range only exchange (icutcoul=5)'
@@ -435,7 +435,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
    cplex_dij=Dtset%nspinor; cplex=1; ndij=1
 
    ABI_DT_MALLOC(KS_Pawrhoij,(Cryst%natom))
-   nspden_rhoij=Dtset%nspden; if (Dtset%pawspnorb>0.and.Dtset%nspinor==2) nspden_rhoij=4
+   nspden_rhoij=pawrhoij_get_nspden(Dtset%nspden,Dtset%nspinor,Dtset%pawspnorb)
    call pawrhoij_alloc(KS_Pawrhoij,Dtset%pawcpxocc,nspden_rhoij,Dtset%nspinor,Dtset%nsppol,Cryst%typat,pawtab=Pawtab)
 
    ! Initialize values for several basic arrays
@@ -885,8 +885,8 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
    nkxc1=0
    ABI_DT_MALLOC(KS_paw_an,(Cryst%natom))
    call paw_an_nullify(KS_paw_an)
-   call paw_an_init(KS_paw_an,Cryst%natom,Cryst%ntypat,nkxc1,Dtset%nspden,cplex,Dtset%pawxcdev,&
-&   Cryst%typat,Pawang,Pawtab,has_vxc=1,has_vxcval=1)
+   call paw_an_init(KS_paw_an,Cryst%natom,Cryst%ntypat,nkxc1,Dtset%nspden,&
+&   cplex,Dtset%pawxcdev,Cryst%typat,Pawang,Pawtab,has_vxc=1,has_vxcval=1)
 !
 !  Calculate onsite vxc with and without core charge.
    nzlmopt=-1; option=0; compch_sph=greatest_real

@@ -120,7 +120,7 @@ subroutine ldau_self(cryst_struc,green,paw_dmft,pawtab,self,opt_ldau,prtopt)
    lpawu=paw_dmft%lpawu(iatom)
    if(lpawu.ne.-1) then
      ldim=2*lpawu+1
-     ABI_ALLOCATE(vpawu,(paw_ij(iatom)%cplex_dij,ldim,ldim,nspden))
+     ABI_ALLOCATE(vpawu,(paw_ij(iatom)%cplex_dij,ldim,ldim,paw_ij(iatom)%ndij))
 
      paw_ij(iatom)%nocctot(:)=zero ! contains nmmp in the n m representation
 !    ===============================
@@ -192,8 +192,8 @@ subroutine ldau_self(cryst_struc,green,paw_dmft,pawtab,self,opt_ldau,prtopt)
 !    ===============================
      call pawpupot(paw_ij(iatom)%cplex_dij,paw_ij(iatom)%ndij,&
 &     paw_ij(iatom)%noccmmp,paw_ij(iatom)%nocctot,&
-&     nspden,2,pawtab(itypat),vpawu)
-!    do idijeff=1,nspden
+&     2,pawtab(itypat),vpawu)
+!    do idijeff=1,size(vpawu,4)
 !    write(message,'(2a)') ch10," == The vpawu matrix is"
 !    call wrtout(std_out,message,'COLL')
 !    do im=1,ldim
