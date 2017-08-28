@@ -83,27 +83,41 @@ AC_DEFUN([_ABI_LINALG_CHECK_LIBS],[
   AC_MSG_RESULT([${abi_linalg_has_scalapack}])
 
   dnl ELPA?
-  AC_MSG_CHECKING([for ELPA support in specified libraries])
-  AC_LINK_IFELSE([AC_LANG_PROGRAM([],
-  [use elpa1
-   integer,parameter :: n=1,comm=1 ; integer :: comm1,comm2,success
-   success=elpa_get_communicators(comm,n,n,comm1,comm2)
-  ])], [abi_linalg_has_elpa="yes"], [abi_linalg_has_elpa="no"])
-  if test "${abi_linalg_has_elpa}" = "no"; then
-    AC_LINK_IFELSE([AC_LANG_PROGRAM([],
-      [use elpa1
-       integer,parameter :: n=1,comm=1 ; integer :: comm1,comm2,success
-       success=get_elpa_communicators(comm,n,n,comm1,comm2)
-      ])], [abi_linalg_has_elpa="yes"], [abi_linalg_has_elpa="no"])
-  fi
-  if test "${abi_linalg_has_elpa}" = "no"; then
-    AC_LINK_IFELSE([AC_LANG_PROGRAM([],
-      [call elpa_transpose_vectors
-      ])], [abi_linalg_has_elpa="yes"], [abi_linalg_has_elpa="no"])
-  fi
-  AC_MSG_RESULT([${abi_linalg_has_elpa}])
+  abi_linalg_has_elpa="${abi_linalg_has_scalapack}"
   if test "${abi_linalg_has_elpa}" = "yes"; then
-    _ABI_LINALG_FIND_ELPA_VERSION()
+    AC_MSG_CHECKING([for ELPA support in specified libraries])
+    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([],[use elpa])],
+      [abi_linalg_has_elpa="yes"], [abi_linalg_has_elpa="no"])
+    if test "${abi_linalg_has_elpa}" = "yes"; then
+      AC_LINK_IFELSE([AC_LANG_PROGRAM([],
+      [use elpa
+       integer :: nrows=1,err
+       class(elpa_t),pointer :: e
+       call e%set("local_nrows",nrows,err)
+      ])], [abi_linalg_has_elpa="yes"], [abi_linalg_has_elpa="no"])
+    fi
+    if test "${abi_linalg_has_elpa}" = "no"; then
+      AC_COMPILE_IFELSE([AC_LANG_PROGRAM([],[use elpa1])],
+        [abi_linalg_has_elpa="yes"], [abi_linalg_has_elpa="no"])
+      if test "${abi_linalg_has_elpa}" = "yes"; then
+        if test "${abi_linalg_has_elpa}" = "no"; then
+          AC_LINK_IFELSE([AC_LANG_PROGRAM([],
+            [use elpa1
+             integer :: n=1,comm=1,comm1,comm2,success
+             success=get_elpa_communicators(comm,n,n,comm1,comm2)
+            ])], [abi_linalg_has_elpa="yes"], [abi_linalg_has_elpa="no"])
+        fi
+        if test "${abi_linalg_has_elpa}" = "no"; then
+          AC_LINK_IFELSE([AC_LANG_PROGRAM([],
+            [call elpa_transpose_vectors
+            ])], [abi_linalg_has_elpa="yes"], [abi_linalg_has_elpa="no"])
+        fi
+      fi
+    fi
+    AC_MSG_RESULT([${abi_linalg_has_elpa}])
+    if test "${abi_linalg_has_elpa}" = "yes"; then
+      _ABI_LINALG_FIND_ELPA_VERSION()
+    fi
   fi
 
   dnl PLASMA?
@@ -431,71 +445,87 @@ AC_DEFUN([_ABI_LINALG_FIND_ELPA_VERSION],[
   abi_linalg_elpa_version="none"
   AC_MSG_CHECKING([for ELPA library version])
 
-# Check for ELPA 2016
+# Check for ELPA 2017
   AC_COMPILE_IFELSE([AC_LANG_PROGRAM([],
     [
-    use elpa1
-    logical :: success1,debug
-    integer,parameter :: na=1,lda=1,ldq=1,mcol=1,nev=1,nblk=1,nrow=1
-    integer :: comm_g=1,comm_r=1,comm_c=1,success2
-    real*8 :: a(lda,nrow),ev(na),q(ldq,nrow)
-    complex*16 :: ac(lda,nrow)
-    success1=elpa_solve_evp_real_1stage(na,nev,a,lda,ev,q,ldq,nblk,mcol,comm_r,comm_c)
-    success1=elpa_cholesky_complex(na,ac,lda,nblk,nrow,comm_r,comm_c,debug)
-    success2=elpa_get_communicators(comm_g,na,na,comm_r,comm_c)
-    ])], [abi_linalg_has_elpa_2016="yes"], [abi_linalg_has_elpa_2016="no"])
-  if test "${abi_linalg_has_elpa_2016}" = "yes"; then
-    abi_linalg_elpa_version="2016"
-    AC_DEFINE([HAVE_LINALG_ELPA_2016],1,[Define to 1 if you have ELPA 2016 API support])
+    use elpa
+    class(elpa_t),pointer :: e
+    integer,parameter :: na=1,ncol=1,nrow=1 ; integer :: err
+    real*8 :: a(ncol,nrow),ev(na),q(ncol,nrow)
+    call e%eigenvectors(a,ev,q,err)
+    call e%cholesky(a,err)
+    ])], [abi_linalg_has_elpa_2017="yes"], [abi_linalg_has_elpa_2017="no"])
+  if test "${abi_linalg_has_elpa_2017}" = "yes"; then
+    abi_linalg_elpa_version="2017"
+    AC_DEFINE([HAVE_LINALG_ELPA_2017],1,[Define to 1 if you have ELPA 2017 API support])
   else
 
-# Check for ELPA 2015
+# Check for ELPA 2016
    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([],
      [
      use elpa1
      logical :: success1,debug
-     integer,parameter :: na=1,lda=1,ldq=1,nev=1,nblk=1
+     integer,parameter :: na=1,lda=1,ldq=1,mcol=1,nev=1,nblk=1,nrow=1
      integer :: comm_g=1,comm_r=1,comm_c=1,success2
-     real*8 :: a(lda,na),ev(na),q(ldq,na)
-     complex*16 :: ac(lda,na)
-     success1=solve_evp_real(na,nev,a,lda,ev,q,ldq,nblk,comm_r,comm_c)
-     call cholesky_complex(na,ac,lda,nblk,comm_r,comm_c,debug,success1)
-     success2=get_elpa_row_col_comms(comm_g,na,na,comm_r,comm_c)
-     ])], [abi_linalg_has_elpa_2015="yes"], [abi_linalg_has_elpa_2015="no"])
-   if test "${abi_linalg_has_elpa_2015}" = "yes"; then
-     abi_linalg_elpa_version="2015"
-      AC_DEFINE([HAVE_LINALG_ELPA_2015],1,[Define to 1 if you have ELPA 2015 API support])
+     real*8 :: a(lda,nrow),ev(na),q(ldq,nrow)
+     complex*16 :: ac(lda,nrow)
+     success1=elpa_solve_evp_real_1stage(na,nev,a,lda,ev,q,ldq,nblk,mcol,comm_r,comm_c)
+     success1=elpa_cholesky_complex(na,ac,lda,nblk,nrow,comm_r,comm_c,debug)
+     success2=elpa_get_communicators(comm_g,na,na,comm_r,comm_c)
+     ])], [abi_linalg_has_elpa_2016="yes"], [abi_linalg_has_elpa_2016="no"])
+   if test "${abi_linalg_has_elpa_2016}" = "yes"; then
+     abi_linalg_elpa_version="2016"
+     AC_DEFINE([HAVE_LINALG_ELPA_2016],1,[Define to 1 if you have ELPA 2016 API support])
    else
 
-# Check for ELPA 2014
+# Check for ELPA 2015
     AC_COMPILE_IFELSE([AC_LANG_PROGRAM([],
       [
       use elpa1
-      logical :: success
-      integer,parameter :: na=1,lda=1,ldq=1,nev=1,nblk=1,comm_r=1,comm_c=1
+      logical :: success1,debug
+      integer,parameter :: na=1,lda=1,ldq=1,nev=1,nblk=1
+      integer :: comm_g=1,comm_r=1,comm_c=1,success2
       real*8 :: a(lda,na),ev(na),q(ldq,na)
       complex*16 :: ac(lda,na)
-      success=solve_evp_real(na,nev,a,lda,ev,q,ldq,nblk,comm_r,comm_c)
-      call invert_trm_complex(na,ac,lda,nblk,comm_r,comm_c,success)
-      ])], [abi_linalg_has_elpa_2014="yes"], [abi_linalg_has_elpa_2014="no"])
-    if test "${abi_linalg_has_elpa_2014}" = "yes"; then
-      abi_linalg_elpa_version="2014"
-      AC_DEFINE([HAVE_LINALG_ELPA_2014],1,[Define to 1 if you have ELPA 2014 API support])
+      success1=solve_evp_real(na,nev,a,lda,ev,q,ldq,nblk,comm_r,comm_c)
+      call cholesky_complex(na,ac,lda,nblk,comm_r,comm_c,debug,success1)
+      success2=get_elpa_row_col_comms(comm_g,na,na,comm_r,comm_c)
+      ])], [abi_linalg_has_elpa_2015="yes"], [abi_linalg_has_elpa_2015="no"])
+    if test "${abi_linalg_has_elpa_2015}" = "yes"; then
+      abi_linalg_elpa_version="2015"
+       AC_DEFINE([HAVE_LINALG_ELPA_2015],1,[Define to 1 if you have ELPA 2015 API support])
     else
 
-# Check for ELPA 2013
+# Check for ELPA 2014
      AC_COMPILE_IFELSE([AC_LANG_PROGRAM([],
        [
        use elpa1
+       logical :: success
        integer,parameter :: na=1,lda=1,ldq=1,nev=1,nblk=1,comm_r=1,comm_c=1
        real*8 :: a(lda,na),ev(na),q(ldq,na)
        complex*16 :: ac(lda,na)
-       call solve_evp_real(na,nev,a,lda,ev,q,ldq,nblk,comm_r,comm_c)
-       call invert_trm_complex(na,ac,lda,nblk,comm_r,comm_c)
-       ])], [abi_linalg_has_elpa_2013="yes"], [abi_linalg_has_elpa_2013="no"])
-     if test "${abi_linalg_has_elpa_2013}" = "yes"; then
-       abi_linalg_elpa_version="2011-13"
-       AC_DEFINE([HAVE_LINALG_ELPA_2013],1,[Define to 1 if you have ELPA 2013 API support])
+       success=solve_evp_real(na,nev,a,lda,ev,q,ldq,nblk,comm_r,comm_c)
+       call invert_trm_complex(na,ac,lda,nblk,comm_r,comm_c,success)
+       ])], [abi_linalg_has_elpa_2014="yes"], [abi_linalg_has_elpa_2014="no"])
+     if test "${abi_linalg_has_elpa_2014}" = "yes"; then
+       abi_linalg_elpa_version="2014"
+       AC_DEFINE([HAVE_LINALG_ELPA_2014],1,[Define to 1 if you have ELPA 2014 API support])
+     else
+
+# Check for ELPA 2011-2013
+      AC_COMPILE_IFELSE([AC_LANG_PROGRAM([],
+        [
+        use elpa1
+        integer,parameter :: na=1,lda=1,ldq=1,nev=1,nblk=1,comm_r=1,comm_c=1
+        real*8 :: a(lda,na),ev(na),q(ldq,na)
+        complex*16 :: ac(lda,na)
+        call solve_evp_real(na,nev,a,lda,ev,q,ldq,nblk,comm_r,comm_c)
+        call invert_trm_complex(na,ac,lda,nblk,comm_r,comm_c)
+        ])], [abi_linalg_has_elpa_2013="yes"], [abi_linalg_has_elpa_2013="no"])
+      if test "${abi_linalg_has_elpa_2013}" = "yes"; then
+        abi_linalg_elpa_version="2011-13"
+        AC_DEFINE([HAVE_LINALG_ELPA_2013],1,[Define to 1 if you have ELPA 2013 API support])
+      fi
      fi
     fi
    fi
