@@ -24,6 +24,7 @@ if n_arg < 1 or sys.argv[1] == "--help"  or sys.argv[1] == "-help":
   print >> sys.stderr, '   choice= 2  : d/d_atm (force)'
   print >> sys.stderr, '           3  : d/d_+strain (stress)'
   print >> sys.stderr, '           5  : d/d_k (ddk)'
+  print >> sys.stderr, '           51 : d(right)/d_k, partial dk derivative'
   print >> sys.stderr, '           54k: d2/d_atm.d_k, finite difference on k (effective charge)'
   print >> sys.stderr, '           54a: d2/d_atm.d_k, finite difference on atm (effective charge)'
   print >> sys.stderr, '           55k: d2/d_strain.d_k, finite difference on k (piezo)'
@@ -60,7 +61,8 @@ for ii in range(n_arg+1)[1:]:
     enl=sys.argv[ii+1]
 if signsdfpt==-1:signsdfpt=signs
 
-if test_type!='2'   and test_type!='3' and test_type!='5' and \
+if test_type!='2'   and test_type!='3'   and \
+   test_type!='5'   and test_type!='51'  and \
    test_type!='54k' and test_type!='54a' and \
    test_type!='55k' and test_type!='55s' and \
    test_type!='8'   and test_type!='81':
@@ -96,6 +98,8 @@ if test_type  =='2':       # Force
 elif test_type=='3':       # Stress
   INPUT_DIR=GENERIC_INPUT_DIR+'_STR'
 elif test_type=='5':       # ddk
+  INPUT_DIR=GENERIC_INPUT_DIR+'_K'
+elif test_type=='51':      # d(right)dk
   INPUT_DIR=GENERIC_INPUT_DIR+'_K'
 elif test_type=='54k':     # Effective charge
   INPUT_DIR=GENERIC_INPUT_DIR+'_K'
@@ -151,6 +155,13 @@ if test_type=='5':         # ddk
   dir2_list=[0]
   atom_list=[0]
   df_conv_factor=1.
+if test_type=='51':        # d(right)dk
+  choice='choice1'
+  choicedfpt='choicedfpt51'
+  dir1_list=[1,2,3]
+  dir2_list=[0]
+  atom_list=[0]
+  df_conv_factor=2.
 elif test_type=='54k':     # Effective charge
   choice='choice2'
   choicedfpt='choicedfpt54'
@@ -159,12 +170,12 @@ elif test_type=='54k':     # Effective charge
   atom_list=range(natom+1)[1:]
   df_conv_factor=2.
 elif test_type=='54a':     # Effective charge
-  choice='choice5'
+  choice='choice51'
   choicedfpt='choicedfpt54'
   dir1_list=[1,2,3]
   dir2_list=[1,2,3]
   atom_list=range(natom+1)[1:]
-  df_conv_factor=2.
+  df_conv_factor=1.
 elif test_type=='55k':     # Piezo
   choice='choice3'
   choicedfpt='choicedfpt55'
@@ -232,6 +243,11 @@ for iatom in atom_list:   # Atom (optional)
         idirdfpt   =idir1
         input_index=idir1
         print ("k_dir=%d" %(idir1))
+      elif test_type=='51':      # d(right)dk
+        idir       =0
+        idirdfpt   =idir1
+        input_index=idir1
+        print ("k_dir=%d" %(idir1))
       elif test_type=='54k':     # Effective charge
         idir       =idir1
         idirdfpt   =3*(idir1-1)+idir2
@@ -295,7 +311,7 @@ for iatom in atom_list:   # Atom (optional)
 
 #     Run ABINIT
       os.system('rm -rf ./temp/* ./exec/outputDF.out* ./exec/logdf')
-      os.system(ABINIT_EXE+'< ./exec/filesdf > ./exec/logdf')
+      os.system(ABINIT_EXE+'< ./input_template/filesdf > ./exec/logdf')
       os.system('rm -rf malloc.prc')
 
 #     Extract relevant lines from ABINIT log
