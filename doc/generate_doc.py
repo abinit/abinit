@@ -1080,6 +1080,9 @@ for topic_name in list_of_topics:
       backlinks_str=backlinks["topic_"+topic_name]
       backlinks_formatted=format_backlinks(backlinks_str)
       if len(backlinks_formatted)!=0:
+        for ibacklink in range(len(backlinks_formatted))-1:
+          backlinks_formatted[ibacklink]+="," 
+        backlinks_formatted[len(backlinks_formatted)-1]+="."
         topic_html += " Mentioned in "+backlinks_formatted+"\n <hr>"
       if not "help_features" in backlinks_formatted:
         print(" Topic %s not (yet) mentioned in the file help_feature.yml. Please correct this omission.")
