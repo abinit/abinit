@@ -1273,7 +1273,7 @@ subroutine pawdijxc(cplex,cplex_dij,dijxc,ndij,nspden,nsppol,&
  end if
 
 !Precompute products Ylm*Ylpmp
- lmax=maxval(pawtab%indklmn(4,1:lmn2_size))
+ lmax=1+maxval(pawtab%indklmn(4,1:lmn2_size))
  LIBPAW_ALLOCATE(yylmr,(lmax**2*(lmax**2+1)/2,angl_size))
  do ipts=1,angl_size
    do jlm=1,lmax**2
