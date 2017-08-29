@@ -21,4 +21,5 @@ relaxstr 0
 #%% description = 
 #%%   AlAs, zinc-blende structure.
 #%%   Use ANADDB to compute the polarization of the previous two tests in cartesian coordinates.
+#%% topics = ConstrainedPol
 #%%<END TEST_INFO>

@@ -3,8 +3,19 @@
 <!-- It is useless to modify it. Modify the related .yml  or .bib files instead.         -->
 <!--                                                                                     -->
 <html>
-<head><title>Unfolding bans strutures </title>
-<link rel=stylesheet type="text/css" href="../formabinit.css">
+<head><title>Unfolding band structures </title>
+<link rel=stylesheet type="text/css" href="../../formabinit.css">
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  jax: ["input/TeX","output/HTML-CSS"],
+  tex2jax: {inlineMath: [['$','$']]},
+  displayAlign: "center",
+  TeX: { equationNumbers: { autoNumber: "AMS" } }
+});
+</script>
+<script type="text/javascript" async
+src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
 </head>
 <body bgcolor="#ffffff">
 
@@ -12,7 +23,7 @@
 <a name="top"></a>
 
 <h1>Unfolding supercell band structures</h1>
-<h3>This file gives hints on how to unfold supercell band structures with the ABINIT package.
+<h3>This page gives hints on how to unfold supercell band structures with the ABINIT package.
 <hr>
 
 <h5>Copyright (C) 2016-2017 ABINIT group (OR)
@@ -21,8 +32,10 @@
 
 <script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
 
+ Mentioned in &nbsp; <a href="../../topics/generated_files/topic_ElecBandStructure.html">topic_ElecBandStructure</a>, &nbsp; <a href="../../users/generated_files/help_features.html#8">help_features#8</a>. 
+ <hr>
  <h3><b>Table of content: </b></h3> 
- <ul> <li><a href="topic_Unfolding.html#1">1</a>. Introduction.<li><a href="topic_Unfolding.html#2">2</a>. Related lesson(s) of the tutorial.<li><a href="topic_Unfolding.html#3">3</a>. References.</ul>
+ <ul> <li>1. <a href="topic_Unfolding.html#1">Introduction.</a><li>2. <a href="topic_Unfolding.html#2">Related lesson(s) of the tutorial.</a><li>3. <a href="topic_Unfolding.html#3">References.</a></ul>
 
 &nbsp; 
 <HR ALIGN=left> 
@@ -30,20 +43,28 @@
 <h3><b>1. Introduction.</b></h3>
 
 
-<p>Supercells are often used in ab initio calculations to model compound alloys, surfaces and defects. Band structure plots obtained from supercell calculations are difficult to interpret and compare to the reference band structure of a corresponding primitive crystallographic unit due to the zone folding . The purpose of the executable file fold2Bloch is to assist with interpretation of supercell electronic structure calculations by recovering the Bloch character of electronic eigenstates perturbed by disorder. In general, there is no single wave-vector <b>k</b> associated with a particular eigenvalue E, but rather a distribution of k's. This distribution is also known as a Bloch spectral density or spectral weight. The spectral weight w<sub>n</sub>(<b>k</b>) amounts to a Bloch <b>k</b>-character of the n'th energy eigenstates &epsilon;<sub>n</sub> and fulfills the normalization &sum;<sub><b>k</b></sub>w<sub>n</sub>(<b>k</b>)=1. In the case of a non-local basis set, such as plane waves, the spectral weight can be constructed from the Fourier expansion coefficients by gathering them in groups associated with a particular Bloch wave vector in the primitive cell <a href="../../bibliography/generated_files/bibliography.html#Wang1998">[Wang1998]</a>,<a href="../../bibliography/generated_files/bibliography.html#Popescu2010">[Popescu2010]</a>,<a href="../../bibliography/generated_files/bibliography.html#Popescu2012">[Popescu2012]</a>,<a href="../../bibliography/generated_files/bibliography.html#Allen2013">[Allen2013]</a>,<a href="../../bibliography/generated_files/bibliography.html#Medeiros2014">[Medeiros2014]</a>
+<p>Supercells are often used in ab initio calculations to model compound alloys, surfaces and defects. 
+Band structure plots obtained from supercell calculations are difficult to interpret and compare to the 
+reference band structure of a corresponding primitive crystallographic unit due to the zone folding. 
+The purpose of the executable file <a href="../../users/generated_files/help_fold2bloch.html#">fold2bloch</a> is to assist with interpretation of supercell electronic 
+structure calculations by recovering the Bloch character of electronic eigenstates perturbed by disorder. 
+In general, there is no single wave-vector <b>k</b> associated with a particular eigenvalue E, but rather a distribution of k's. 
+This distribution is also known as a Bloch spectral density or spectral weight. The spectral weight w<sub>n</sub>(<b>k</b>) amounts to a Bloch <b>k</b>-character of the n'th energy eigenstates &epsilon;<sub>n</sub> and fulfills the normalization &sum;<sub><b>k</b></sub>w<sub>n</sub>(<b>k</b>)=1. In the case of a non-local basis set, such as plane waves, the spectral weight can be constructed from the Fourier expansion coefficients by gathering them in groups associated with a particular Bloch wave vector in the primitive cell <a href="../../biblio/generated_files/bib_biblio.html#Wang1998">[Wang1998]</a>,<a href="../../biblio/generated_files/bib_biblio.html#Popescu2010">[Popescu2010]</a>,<a href="../../biblio/generated_files/bib_biblio.html#Popescu2012">[Popescu2012]</a>,<a href="../../biblio/generated_files/bib_biblio.html#Allen2013">[Allen2013]</a>,<a href="../../biblio/generated_files/bib_biblio.html#Medeiros2014">[Medeiros2014]</a>
 
 <p>   w<sub>n</sub>(<b>k</b>)= &sum;<sub><b>G</b></sub> |C<sub>n,<b>K</b></sub>(<b>G</b>)|<sup>2</sup>   
 for all <b>G</b> that fulfill <b>K</b>+<b>G</b>=<b>k</b> +<b>g</b>,
 
-<p>where C<sub>n,<b>K</b></sub>(<b>G</b>) refers to plane wave coefficients for nth eigenstate with the wave vector <b>K</b> within the first Brillouin zone (BZ) of the supercell, <b>G</b> and <b>g</b> are the reciprocal lattice vectors of the supercell and primitive cell, respectively. More technical details on this unfolding procedure are available in <a href="../../bibliography/generated_files/bibliography.html#Rubel2014">[Rubel2014]</a>. It should be noted that the primitive and supercell reciprocal lattices should be commensurate as required by the above equation. This condition implies that a supercell needs to be generated by translation of the primitive cell along its lattice vectors in real space using a desired multiplicity N<sub>x</sub>&times;N<sub>y</sub>&times;N<sub>z</sub> . Care should be taken when working with lattices whose conventional unit cell is different from the primitive cell (e.g., zinc-blende or rock salt structures). 
+<p>where C<sub>n,<b>K</b></sub>(<b>G</b>) refers to plane wave coefficients for nth eigenstate with the wave vector <b>K</b> within the first Brillouin zone (BZ) of the supercell, <b>G</b> and <b>g</b> are the reciprocal lattice vectors of the supercell and primitive cell, respectively. More technical details on this unfolding procedure are available in <a href="../../biblio/generated_files/bib_biblio.html#Rubel2014">[Rubel2014]</a>. It should be noted that the primitive and supercell reciprocal lattices should be commensurate as required by the above equation. This condition implies that a supercell needs to be generated by translation of the primitive cell along its lattice vectors in real space using a desired multiplicity N<sub>x</sub>&times;N<sub>y</sub>&times;N<sub>z</sub> . Care should be taken when working with lattices whose conventional unit cell is different from the primitive cell (e.g., zinc-blende or rock salt structures). 
 
-<p>A prerequisite for unfolding is the presence of wave function files (e.g., abo_WFK) that can be generated in a way similar to standard band structure calculations. The only difference from the conventional band structure calculation is the k-path selection approach. For instance, when aiming for the band structure plot with &Gamma;(0,0,0)-Z(0,0,1/2) path in the primitive Brillouin zone (BZ), the <a href="../../input_variables/generated_files/vargs.html#kptbounds">kptbounds</a> in supercell BZ should include Z<sub>-</sub>(0,0,-1/2)-&Gamma;(0,0,0)-Z(0,0,1/2). At first, the part Z<sub>-</sub>-&Gamma; seems redundant lying outside of the range of interest. However, it is easy to show that those wave vectors contribute to the range &Gamma;-Z after unfolding. For instance, let us consider a k-point (0,0,-K) in the 1&times;1&times;3 supercell. This point ``unfolds" into 3 k-points in the primitive BZ: (0,0,(-K-1)/3), (0,0,-K/3), and (0,0,(-K+1)/3). The first two points are irrelevant for the purpose of the plot as they do not belong to the &Gamma;-Z segment, but the last point falls into the range of interest and needs to be included.
+<p>A prerequisite for unfolding is the presence of wave function files (e.g., abo_WFK) that can be generated in a way similar to standard band structure calculations. The only difference from the conventional band structure calculation is the k-path selection approach. For instance, when aiming for the band structure plot with &Gamma;(0,0,0)-Z(0,0,1/2) path in the primitive Brillouin zone (BZ), the <a href="../../input_variables/generated_files/varset_gstate.html#kptbounds">kptbounds</a> in supercell BZ should include Z<sub>-</sub>(0,0,-1/2)-&Gamma;(0,0,0)-Z(0,0,1/2). At first, the part Z<sub>-</sub>-&Gamma; seems redundant lying outside of the range of interest. However, it is easy to show that those wave vectors contribute to the range &Gamma;-Z after unfolding. For instance, let us consider a k-point (0,0,-K) in the 1&times;1&times;3 supercell. This point ``unfolds" into 3 k-points in the primitive BZ: (0,0,(-K-1)/3), (0,0,-K/3), and (0,0,(-K+1)/3). The first two points are irrelevant for the purpose of the plot as they do not belong to the &Gamma;-Z segment, but the last point falls into the range of interest and needs to be included.
 
 
 <p>Once the wave function file is prepared, the unfolding proceeds by invoking fold2Bloch abo_WFK N<sub>x</sub>:N<sub>y</sub>:N<sub>z</sub> that generates an output file abo_WFK.f2b. The output file contains 5 columns: the list of unfolded wave vectors (k<sub>x</sub>,k<sub>y</sub>,k<sub>z</sub>) in the primitive BZ, the corresponding eigenvalue &epsilon;<sub>n</sub> (Ha) and the Bloch spectral weight w<sub>n</sub>.
 
 
 <p>A MATLAB script <i>ubs_dots.m</i> is designed to assist with plotting the unfolded band structure. The unfolded band structure plot is represented as a scatter plot where the size and colour of the markers  carry information about the Bloch character of energy bands. Users are asked to provide details about the k-path, name of the fold2Bloch output file abo_WFK.f2b, position of the Fermi energy, and reciprocal lattice vectors that can be found in the main output file ab_out.out.
+<br><br><a href=#top>Go to the top</a>
+
 
 
 &nbsp; 
@@ -52,7 +73,9 @@ for all <b>G</b> that fulfill <b>K</b>+<b>G</b>=<b>k</b> +<b>g</b>,
 <h3><b>2. Related lesson(s) of the tutorial.</b></h3>
 
 
-<li><a href="../../tutorial/generated_files/lesson_fold2Bloch.html">The lesson on unfolding supercell band structures</a></li>
+<li><a href="../../tutorial/generated_files/lesson_fold2bloch.html">The lesson on unfolding supercell band structures</a></li>
+<br><br><a href=#top>Go to the top</a>
+
 
 
 
@@ -62,13 +85,15 @@ for all <b>G</b> that fulfill <b>K</b>+<b>G</b>=<b>k</b> +<b>g</b>,
 <h3><b>3. References.</b></h3>
 
 
-<br> <a href="../../bibliography/generated_files/bibliography.html#Allen2013">[Allen2013]</a>  P. B. Allen, T. Berlijn, D. A. Casavant and J. M. Soler, "Recovering hidden Bloch character: Unfolding electrons, phonons, and slabs", Phys. Rev. B 87, 085322 (2013).<br>
-<br> <a href="../../bibliography/generated_files/bibliography.html#Medeiros2014">[Medeiros2014]</a>  Paulo V. C. Medeiros, Sven Stafstr&ouml;m and Jonas Bj&ouml;rk, "Effects of extrinsic and intrinsic perturbations on the electronic structure of graphene: Retaining an effective primitive cell band structure by band unfolding", Phys. Rev. B 89, 041407 (2014).<br>
-<br> <a href="../../bibliography/generated_files/bibliography.html#Popescu2010">[Popescu2010]</a>  V. Popescu and A. Zunger, "Effective Band Structure of Random Alloys", Phys. Rev. Lett. 104, 236403 (2010).<br>
-<br> <a href="../../bibliography/generated_files/bibliography.html#Popescu2012">[Popescu2012]</a>  V. Popescu and A. Zunger, "Extracting E versus k effective band structure from supercell calculations on alloys and impurities", Phys. Rev. B 85, 085201 (2012).<br>
-<br> <a href="../../bibliography/generated_files/bibliography.html#Rubel2014">[Rubel2014]</a>  O. Rubel, A. Bokhanchuk, S. J. Ahmed and E. Assmann, "Unfolding the band structure of disordered solids: from bound states to high-mobility Kane fermions", Phys. Rev. B 90, 115202 (2014).<br>
-<br> <a href="../../bibliography/generated_files/bibliography.html#Wang1998">[Wang1998]</a>  L.-W. Wang, L. Bellaiche, S.-H. Wei and A. Zunger, "Majority Representation of Alloy Electronic States", Phys. Rev. Lett. 80, 4725 (1998).<br>
+<br> <a href="../../biblio/generated_files/bib_biblio.html#Allen2013">[Allen2013]</a>  P. B. Allen, T. Berlijn, D. A. Casavant and J. M. Soler, "Recovering hidden Bloch character: Unfolding electrons, phonons, and slabs", Phys. Rev. B 87, 085322 (2013).<br>
+<br> <a href="../../biblio/generated_files/bib_biblio.html#Medeiros2014">[Medeiros2014]</a>  Paulo V. C. Medeiros, Sven Stafstr&ouml;m and Jonas Bj&ouml;rk, "Effects of extrinsic and intrinsic perturbations on the electronic structure of graphene: Retaining an effective primitive cell band structure by band unfolding", Phys. Rev. B 89, 041407 (2014).<br>
+<br> <a href="../../biblio/generated_files/bib_biblio.html#Popescu2010">[Popescu2010]</a>  V. Popescu and A. Zunger, "Effective Band Structure of Random Alloys", Phys. Rev. Lett. 104, 236403 (2010).<br>
+<br> <a href="../../biblio/generated_files/bib_biblio.html#Popescu2012">[Popescu2012]</a>  V. Popescu and A. Zunger, "Extracting E versus k effective band structure from supercell calculations on alloys and impurities", Phys. Rev. B 85, 085201 (2012).<br>
+<br> <a href="../../biblio/generated_files/bib_biblio.html#Rubel2014">[Rubel2014]</a>  O. Rubel, A. Bokhanchuk, S. J. Ahmed and E. Assmann, "Unfolding the band structure of disordered solids: from bound states to high-mobility Kane fermions", Phys. Rev. B 90, 115202 (2014).<br>
+<br> <a href="../../biblio/generated_files/bib_biblio.html#Wang1998">[Wang1998]</a>  L.-W. Wang, L. Bellaiche, S.-H. Wei and A. Zunger, "Majority Representation of Alloy Electronic States", Phys. Rev. Lett. 80, 4725 (1998).<br>
 <p>
+<br><br><a href=#top>Go to the top</a>
+
 <script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
 
 </body>

@@ -1,44 +1,28 @@
-# This YAML file contains the introduction as well as the body (including the table of content) of the html lesson.
-# In order to modify the other parts, modify the file lessons.html .
-# This is the introduction ...
+## This YAML file contains the introduction as well as the body of the html lesson.
+## In order to modify the other parts, modify the file lessons.html .
+
+## This is the introduction ...
 intro : |
   <p>The purpose of this lesson is to show how to compute several
   observables of interest in Moessbauer, NMR, and NQR spectroscopy,
   namely:
   <ul>
   <li>the electric field gradient,
-  <li>the isomer shift,
-  <li>and the electronic density itself.
+  <li>the isomer shift (not yet available),
+  <li>and the electronic density itself (not yet available).
   </ul>
   
   <p>This lesson should take about 1 hour.
-# This is the body, including the table of content ...
-body : |
-  <ul>
-    <li><a href="#efg">1.</a>
-      Electric field gradient
-  <!--
-    <li><a href="#isomer">2.</a>
-      Moessbauer isomer shift
-    <li><a href="#density">3.</a>
-      Electronic density
-  -->
-  </ul>
-  
-  <p><i>Before beginning, you might consider working in a different
-  subdirectory than the other tutorials, for example "work_nuc".
-  </i>
-  
-  <hr>
-  
-  <a name="efg">&nbsp;</a>
-  <h3><b>
-  1.
-  Computing the electric field gradient at the
-  nuclear positions.
-  </b></h3>
-  
-  <p>
+
+## Now come the different sections, numbered.
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec1:
+ title: "Electric field gradient"
+ tag: efg
+ body: |
   Various spectroscopies, including nuclear magnetic resonance and nuclear quadrupole
   resonance (NMR and NQR), as well as Moessbauer spectroscopy, show spectral features
   arising from the electric field gradient at the nuclear sites. Note that the electric

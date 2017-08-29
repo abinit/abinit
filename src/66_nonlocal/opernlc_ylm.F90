@@ -53,6 +53,7 @@
 !!  nspinor= number of spinorial components of the wavefunctions (on current proc)
 !!  nspinortot=total number of spinorial components of the wavefunctions
 !!  optder=0=only gxfac is computed, 1=both gxfac and dgxdtfac are computed
+!!         2=gxfac, dgxdtfac and d2gxdtfac are computed
 !!  paw_opt= define the nonlocal operator concerned with:
 !!           paw_opt=0 : Norm-conserving Vnl (use of Kleinman-Bylander ener.)
 !!           paw_opt=1 : PAW nonlocal part of H (use of Dij coeffs)

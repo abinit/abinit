@@ -1,6 +1,7 @@
-# This YAML file contains the introduction as well as the body (including the table of content) of the html lesson.
-# In order to modify the other parts, modify the file lessons.html .
-# This is the introduction ...
+## This YAML file contains the introduction as well as the body of the html lesson.
+## In order to modify the other parts, modify the file lessons.html .
+
+## This is the introduction ...
 intro : |
   <p>This lesson aims at showing how to get
   the following physical properties, for a metal, and for a surface:
@@ -14,43 +15,17 @@ intro : |
   and also a bit about preconditioning the SCF cycle.
   
   <p>This lesson should take about 1 hour and 30 minutes.
-# This is the body, including the table of content ...
-body : |
-  <ul>
-    <li><a href="#41">4.1.</a>
-      Computing the total energy and lattice parameters of aluminum
-      for a fixed smearing and number of k points.</li>
-    <li><a href="#42">4.2.</a>
-      The convergence study with respect to k points.</li>
-    <li><a href="#43">4.3.</a>
-      The convergence study with respect to both number of k points AND
-      broadening factor (tsmear).</li>
-    <li><a href="#44">4.4.</a>
-      Determination of the surface energy of aluminum (100):
-      changing the orientation of the unit cell.</li>
-    <li><a href="#45">4.5.</a>
-      Determination of the surface energy:
-      a (3 aluminum layer + 1 vacuum layer) slab calculation.</li>
-    <li><a href="#46">4.6.</a>
-      Determination of the surface energy:
-      increasing the number of vacuum layers.</li>
-    <li><a href="#47">4.7.</a>
-      Determination of the surface energy:
-      increasing the number of aluminum layers.</li>
-  </ul>
-  
-  <hr>
-  
-  
-  
-  
+
+## Now come the different sections, numbered.
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec1:
+ title: "Total energy and lattice parameters at fixed smearing and k-point grid"
+ tag: fixed
+ body: |
   <a name="41">&nbsp;</a>
-  <h3><b>
-  4.1.
-  Computing the total energy and lattice parameters of aluminum
-  for a fixed smearing and number of k points.
-  </b></h3>
-  
   <p><i>Before beginning, you might consider to work in a different
   subdirectory as for lesson 1, 2 or 3 . Why not "Work4" ?
   </i>
@@ -114,15 +89,15 @@ body : |
    Other information on the energy :
       Total energy(eV)= -5.70889598417024E+01 ; Band energy (Ha)=   3.6059822203E-01
   </pre>
-  
-  <hr>
-  
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec2:
+ title: "The convergence study with respect to k points"
+ tag: conv_wrt_kpt
+ body: |
   <a name="42">&nbsp;</a>
-  <h3><b>
-  4.2.
-  The convergence study with respect to k points
-  </b></h3>
-  
   <p>There is of course a convergence study associated to the sampling
   of the Brillouin zone. You should examine different grids,
   of increasing resolution. You might try the following series
@@ -162,19 +137,15 @@ body : |
   the k-point converged values for different values of [[tsmear]].
   <p>In what follows, we will restrict ourselves to the grids with [[nkpt]]=2,
     10 and 28.
-  
-  <p>
-  
-  <hr>
-  
-  
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec3:
+ title: "The convergence study with respect to both number of k points AND broadening factor (tsmear)"
+ tag: conv_tsmear
+ body: |
   <p> <a name="43">&nbsp;</a>
-  <h3><b>
-  4.3.
-  The convergence study with respect to both number of k points AND
-  broadening factor (tsmear).
-  </b></h3>
-  
   <p>The theoretical convergence rate for [[tsmear]]
     ending to 0, in the case of [[occopt]]=4,
     is quartic. This is obtained in the hypothesis of infinitely dense k point grid.
@@ -254,16 +225,15 @@ body : |
              etotal34   -2.0984218116E+00
   </pre>
   <p><b>etotal</b>24 is -2.0979980153E+00 Ha, with an accuracy of 0.0005 Ha .</p>
-  
-  <hr>
-  
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec4:
+ title: "Surface energy of aluminum (100): changing the orientation of the unit cell"
+ tag: surf
+ body: |
   <p> <a name="44">&nbsp;</a> </p>
-  <h3><b>
-  4.4.
-  Determination of the surface energy of aluminum (100):
-  changing the orientation of the unit cell.
-  </b></h3>
-  
   <p>In order to study the Aluminum (100) surface, we will have to set up
   a supercell representing a slab. This supercell should be chosen
   as to be compatible with the primitive surface unit cell.
@@ -310,15 +280,15 @@ body : |
     These grids are always homogeneous primitive 3D grids, so that changing the
     orientation of the lattice will give mutually incompatible lattices. Increasing
     the size of the FFT grid would improve the agreement.</p>
-  
-  <hr>
-  
-  <p> <a name="45">&nbsp;</a> </p>
-  <h3><b>
-  4.5.
-  Determination of the surface energy :
-  a (3 aluminum layer + 1 vacuum layer) slab calculation.
-  </b></h3>
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec5:
+ title: "Surface energy : a (3 aluminum layer + 1 vacuum layer) slab calculation"
+ tag: slab
+ body: |
+  <a name="45">&nbsp;</a>
   
   <p>We will first compute the total energy associated with only three layers of
     aluminum, separated by only one layer of vacuum. This is kind of a minimal slab:
@@ -372,17 +342,15 @@ body : |
   </pre>
   <p>It seems that the relaxation energy is very small, compared to the surface
     energy, but we need to do the convergence studies.</p>
-  <p>
-  
-  <hr>
-  
-  
-  <p> <a name="46">&nbsp;</a> </p>
-  <h3><b>
-  4.6.
-  Determination of the surface energy:
-  increasing the number of vacuum layers.
-  </b></h3>
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec6:
+ title: "Surface energy: increasing the number of vacuum layers"
+ tag: vacuum
+ body: |
+  <a name="46">&nbsp;</a>
   
   <p>One should now increase the number of vacuum layers: 2 and 3 layers
   instead of only 1.
@@ -445,17 +413,15 @@ body : |
     accuracy of the coming calculation cannot be better than 0.016 eV. One might
     investigate the 4 vacuum layer case, but this is not worth, in the present tutorial
     ...
-  
-  <p>
-  <hr>
-  
-  <p> <a name="47">&nbsp;</a>
-  <h3><b>
-  4.7.
-  Determination of the surface energy:
-  increasing the number of aluminum layers.
-  </b></h3>
-  
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec7:
+ title: "Surface energy: increasing the number of aluminum layers"
+ tag: layers
+ body: |
+  <a name="47">&nbsp;</a>
   <p>One should now increase the number of aluminum layers, while keeping 2 vacuum
     layers. We will consider 4 and 5 aluminum layers. This is rather straightforward
     to set up, but will also change the preconditioner. One

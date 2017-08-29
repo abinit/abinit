@@ -4,7 +4,18 @@
 <!--                                                                                     -->
 <html>
 <head><title>the AIM utility</title>
-<link rel=stylesheet type="text/css" href="../formabinit.css">
+<link rel=stylesheet type="text/css" href="../../formabinit.css">
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  jax: ["input/TeX","output/HTML-CSS"],
+  tex2jax: {inlineMath: [['$','$']]},
+  displayAlign: "center",
+  TeX: { equationNumbers: { autoNumber: "AMS" } }
+});
+</script>
+<script type="text/javascript" async
+src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
 </head>
 <body bgcolor="#ffffff">
 
@@ -34,19 +45,16 @@ corresponding nucleus, hence the concept of Atom-In-Molecule.
 <a name="list"></a>
 <h3><b> Content of the help file:</b></h3>
 
-<ul>
-  <li><a href="#1">1. Introduction</a>
-  <li><a href="#2">2. Input and output files</a>
-  <li><a href="#3">3. Typical use of input variables</a>
-  <li><a href="#4">4. List of input variables</a>
-</ul>
+<ul> 
+  <li>1. <a href="#introduction">Introduction</a></li>
+  <li>2. <a href="#None">Input and output files</a></li>
+  <li>3. <a href="#None">List of input variables</a></li>
 
-<hr>
-<h3>&nbsp;</h3>
-<h3><b><a name="1"></a>1. Introduction </b></h3>
-
-<p>
-The Bader technique allows to partition the space in
+ </ul> 
+ <hr><br><a name="introduction"> </a>
+<a name="1"> </a>
+<h3><b>1. Introduction</b></h3>
+ <p>The Bader technique allows to partition the space in
 attraction regions. Each of these regions
 is centered on one atom. The only input for this technique
 is the total charge density : the density
@@ -92,7 +100,7 @@ In case of the search for critical points, one start from the
 middle of the segment with a neighbouring atom (all neighbouring
 atoms are examined in turn), and
 evolves towards a nearby point with zero gradient.
-Then, in case <a href="#crit">crit</a> equals 2,
+Then, in case <a href="../../input_variables/generated_files/varset_aim.html#crit@aim">crit</a> equals 2,
 one checks that the CP that has been found belongs to the
 attraction region of the desired atom. This last step
 is by no means trivial. In the present implementation, the
@@ -152,14 +160,12 @@ Note that the AIM program can also determine the Bader distance
 for one given angular direction, or determine the density
 and laplacian at several, given, points in space, according
 to the user will.
-
-<p>
+<br><br><a href=#top>Go to the top</a>
 <hr>
-<h3>&nbsp;</h3>
-<h3><b><a name="2"></a>2. Input and output files.</b></h3>
-
-<p>
-To run the program one needs to prepare two files:
+<br><a name="None"> </a>
+<a name="2"> </a>
+<h3><b>2. Input and output files</b></h3>
+ <p>To run the program one needs to prepare two files:
 <ul>
  <li>[files-file] file which contains the name of the input file, the
 root for the names of the different output files, and the name of other
@@ -262,14 +268,13 @@ and then the total Bader charge.
 <li> [*.crit] - the file with the critical points (CPs) -
 they are listed in the order Bond CPs (BCPs), Ring CPs (RCPs)
 and Cage CPs (CCPs).
-The line of the output contains these informations (in latex, sorry for this):
-<pre>
-$$ position \quad \frac{eigen\  values}{of\  Hessian} \quad \frac{index\
-of\  the}{bonded\  atom}\footnote{BCPs only} \quad \Delta \rho_c \quad \rho_c, $$
-</pre>
-where position is done with respect to the considered atom.
+The line of the output contains these informations:
+$$ position \quad \frac{eigenvalues}{of\  Hessian} \quad \frac{index\
+of}{bonded\  atom} \quad \Delta \rho_c \quad \rho_c $$
+(note: position is evaluated with respect to the considered atom, 
+while the index of bonded atom is listed only for BCPs).
 <li> [*.surf] - the file with the Bader surface - there is a head
-of the form (again in latex):
+of the form (in latex):
 <pre>
 \begin{tabular}{ccc}
 index of the atom & \multicolumn{2}{c}{position} \\
@@ -278,10 +283,9 @@ nphi & phimin & phimax \\
 \end{tabular}
 </pre>
 and the list of the Bader surface radii:
-<pre>
 $$ \theta \quad \phi \quad r(\theta,\phi) \quad
-W(\theta,\phi)\footnote{the weight for the Gauss quadrature}. $$
-</pre>
+W(\theta,\phi)$$
+(note : $W(\theta,\phi)$ is the weight for the Gauss quadrature).
 The minimal and maximal radii are given at the last line.
 <li> [*.log] - the log file - a lot of informations but it is not
 very nice actually.
@@ -294,677 +298,14 @@ load  'file'
 </pre> (quotes are necessary).
 Note, that this isn't considered as
 the visualization (it is only for working purpose)!
-
-<p>&nbsp;
+<br><br><a href=#top>Go to the top</a>
 <hr>
-
-
-<p><a name="3">&nbsp;</a></p>
-<h3><b>3. Typical use of input variables.</b> </h3>
-
-<p>
-There are two groups of input variables : those
-that define the behaviour of the driver and those
-related to the numerics (all the others).
-Here is the list of the driver variables :
-<ul>
- <li> <a href="#crit">crit</a>&nbsp;&nbsp;
- <li> <a href="#denout">denout</a>&nbsp;&nbsp;
- <li> <a href="#dltyp">dltyp</a>&nbsp;&nbsp;
- <li> <a href="#follow">follow</a>&nbsp;&nbsp;
- <li> <a href="#gpsurf">gpsurf</a>&nbsp;&nbsp;
- <li> <a href="#irho">irho</a>&nbsp;&nbsp;
- <li> <a href="#ivol">ivol</a>&nbsp;&nbsp;
- <li> <a href="#lapout">lapout</a>&nbsp;&nbsp;
- <li> <a href="#rsurf">rsurf</a>&nbsp;&nbsp;
- <li> <a href="#surf">surf</a>&nbsp;&nbsp;
-</ul>
-A standard determination of the electronic charge
-around one atom will use :
-<ul>
- <li><a href="#crit">crit</a>=2
- <li><a href="#surf">surf</a>=1
- <li><a href="#irho">irho</a>=1
-</ul>
-Then, the user will have to specify the atom,
-thanks to <a href="#atom">atom</a>,
-and the angular integration, typically with
- <a href="#phimax">phimax</a>,
- <a href="#thetamax">thetamax</a>,
- <a href="#nphi">nphi</a>,
- <a href="#ntheta">ntheta</a>.
-<br>
-Finally, the following input variables might often need some tuning :
- <a href="#lgrad2">lgrad2</a>,
- <a href="#lstep2">lstep2</a>,
- <a href="#dpclim">dpclim</a>,
- <a href="#maxatd">maxatd</a>,
- <a href="#maxcpd">maxcpd</a>.
-<br>
-In most cases, the other input variables will not have to be
-modified.
-
-<br>
-Atomic units and cartesian coordinates are used for all input
-parameters.
-
-<p>&nbsp;
+<br><a name="None"> </a>
+<a name="3"> </a>
+<h3><b>3. List of input variables</b></h3>
+ <p>The list of input variables for the aim input file is presented in the <a href="../../input_variables/generated_files/varset_aim.html#">aim set of input variables</a>.
+<br><br><a href=#top>Go to the top</a>
 <hr>
-
-<p><a name="4">&nbsp;</a></p>
-<h3><b>4. List of AIM input variables.</b> </h3>
-
-<p>
-<b> Alphabetical list of AIM input variables.</b>
-<br>
- <br>A.
- <a href="#atom">atom</a>&nbsp;&nbsp;
- <a href="#atrad">atrad</a>&nbsp;&nbsp;
- <br>B.
- <br>C.
- <a href="#coff1">coff1</a>&nbsp;&nbsp;
- <a href="#coff2">coff2</a>&nbsp;&nbsp;
- <a href="#crit">crit</a>&nbsp;&nbsp;
- <br>D.
- <a href="#denout">denout</a>&nbsp;&nbsp;
- <a href="#dltyp">dltyp</a>&nbsp;&nbsp;
- <a href="#dpclim">dpclim</a>&nbsp;&nbsp;
- <br>E.
- <br>F.
- <a href="#foldep">foldep</a>&nbsp;&nbsp;
- <a href="#follow">follow</a>&nbsp;&nbsp;
- <a href="#folstp">folstp</a>&nbsp;&nbsp;
- <br>G.
- <a href="#gpsurf">gpsurf</a>&nbsp;&nbsp;
- <br>H.
- <br>I.
- <a href="#inpt">inpt</a>&nbsp;&nbsp;
- <a href="#irho">irho</a>&nbsp;&nbsp;
- <a href="#ivol">ivol</a>&nbsp;&nbsp;
- <br>J.
- <br>K.
- <br>L.
- <a href="#lapout">lapout</a>&nbsp;&nbsp;
- <a href="#lgrad">lgrad</a>&nbsp;&nbsp;
- <a href="#lgrad2">lgrad2</a>&nbsp;&nbsp;
- <a href="#lstep">lstep</a>&nbsp;&nbsp;
- <a href="#lstep2">lstep2</a>&nbsp;&nbsp;
- <br>M.
- <a href="#maxatd">maxatd</a>&nbsp;&nbsp;
- <a href="#maxcpd">maxcpd</a>&nbsp;&nbsp;
- <br>N.
- <a href="#ngrid">ngrid</a>&nbsp;&nbsp;
- <a href="#nphi">nphi</a>&nbsp;&nbsp;
- <a href="#nsa">nsa</a>&nbsp;&nbsp;
- <a href="#nsb">nsb</a>&nbsp;&nbsp;
- <a href="#nsc">nsc</a>&nbsp;&nbsp;
- <a href="#ntheta">ntheta</a>&nbsp;&nbsp;
- <br>O.
- <br>P.
- <a href="#phimax">phimax</a>&nbsp;&nbsp;
- <a href="#phimin">phimin</a>&nbsp;&nbsp;
- <br>Q.
- <br>R.
- <a href="#radstp">radstp</a>&nbsp;&nbsp;
- <a href="#ratmin">ratmin</a>&nbsp;&nbsp;
- <a href="#rsurf">rsurf</a>&nbsp;&nbsp;
- <a href="#rsurdir">rsurdir</a>&nbsp;&nbsp;
- <br>S.
- <a href="#scal">scal</a>&nbsp;&nbsp;
- <a href="#surf">surf</a>&nbsp;&nbsp;
- <br>T.
- <a href="#thetamax">thetamax</a>&nbsp;&nbsp;
- <a href="#thetamin">thetamin</a>&nbsp;&nbsp;
- <br>U.
- <br>V.
- <a href="#vpts">vpts</a>&nbsp;&nbsp;
- <br>W.
- <br>X.
- <br>Y.
- <br>Z.
-
-<br><br><br><br><hr>
-<font id="title"><a name="atom">atom</a></font>
-<br><font id="category">Characteristic: numerics</font>
-<br><font id="vartype">Variable type: integer </font>
-<br><font id="default">Default: 1</font>
-<br><br><font id="text">
-Index of the investigated atom.
-</font>
-
-<br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B> <a href=#4>Go to the AIM input variable list</a><hr>
-<font id="title"><a name="atrad">atrad</a></font>
-<br><font id="category">Characteristic: numerics</font>
-<br><font id="vartype">Variable type: real </font>
-<br><font id="default">Default: 1.0</font>
-<br><br><font id="text">
-A first estimation of the Bader radius (not too
-important - it is used only two times)
-</font>
-
-<br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B> <a href=#4>Go to the AIM input variable list</a><hr>
-<font id="title"><a name="coff1">coff1</a></font>
-<br><font id="category">Characteristic: numerics</font>
-<br><font id="vartype">Variable type: real </font>
-<br><font id="default">Default: 0.98</font>
-<br><br><font id="text">
-See the input variable <a href="#ratmin">ratmin</a>.
-</font>
-
-<br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B> <a href=#4>Go to the AIM input variable list</a><hr>
-<font id="title"><a name="coff2">coff2</a></font>
-<br><font id="category">Characteristic: numerics</font>
-<br><font id="vartype">Variable type: real </font>
-<br><font id="default">Default: 0.95</font>
-<br><br><font id="text">
-See the input variable <a href="#ratmin">ratmin</a>.
-</font>
-
-<br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B> <a href=#4>Go to the AIM input variable list</a><hr>
-<font id="title"><a name="crit">crit</a></font>
-<br><font id="category">Characteristic: driver</font>
-<br><font id="vartype">Variable type: integer </font>
-<br><font id="default">Default: 0 (no computation of critical points)</font>
-<br><br><font id="text">
-Drives the computation of critical points.
-<ul>
- <li> [0] not
- <li> [-1] reading from the file ``root''.crit
- <li> [1] calculated (simplified version)
- <li> [2] calculated (standard version - recommended)
- <li> [3] calculated (the original version)
-</ul>
-  <p> The original version searches all critical points (CPs)
-  starting from the center between
-  two and three atoms (atom - neighbor(s)) by
-  Newton-Raphson algorithm - without tests (not recommended) - don't
-  use together with surface analysis !
- <p> The simplified and standard versions search CP(3,-1) starting
-  from the center of the pairs~atom-neighbor; then CP(3,1) from the
-  center between two CP(3,-1) and finally CP(3,3) from the center
-  between two CP(3,1). The robust Popeliers's algorithm is used.
-  The difference between the two is based in the fact
-  that the standard version makes the test if the CP is really
-  on the Bader surface of the calculated atom for each CP, while
-  the simplified version does this only for CP(3,-1). When CP analysis is
-  rather fast (with respect to surface determination), 2 is recommended.
-  In all cases the number of neighbors considered is limited by
-  distance cutoff (variable  <a href="#maxatd">maxatd</a>)
-</font>
-
-<br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B> <a href=#4>Go to the AIM input variable list</a><hr>
-<font id="title"><a name="denout">denout</a></font>
-<br><font id="category">Characteristic: driver</font>
-<br><font id="vartype">Variable type: integer </font>
-<br><font id="default">Default: 0</font>
-<br><br><font id="text">
-Output of the electronic density.
-The specification of the
-line (plane) in the real space must be given in the input variable
-<a href="#vpts">vpts</a> and grid in
-<a href="#ngrid">ngrid</a>.
-It is also possible to get only the
-valence density or the core density (see <a href="#dltyp">dltyp</a>).
-<ul>
- <li>0, no output
- <li>1, 1D distribution
- <li>2, 2D distribution
-</ul>
-</font>
-
-<br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B> <a href=#4>Go to the AIM input variable list</a><hr>
-<font id="title"><a name="dltyp">dltyp</a></font>
-<br><font id="category">Characteristic: driver</font>
-<br><font id="vartype">Variable type: integer </font>
-<br><font id="default">Default: 0</font>
-<br><br><font id="text">
-Specification of the contribution of the electronic
-density corresponding to the density and/or laplacian output
-(see <a href="#denout">denout</a> and
-     <a href="#lapout">lapout</a>)
-<ul>
- <li>0, total electronic density
- <li>1, only the valence density
- <li>2, only the core density
-</ul>
-</font>
-
-<br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B> <a href=#4>Go to the AIM input variable list</a><hr>
-<font id="title"><a name="dpclim">dpclim</a></font>
-<br><font id="category">Characteristic: numerics</font>
-<br><font id="vartype">Variable type: real </font>
-<br><font id="default">Default: 1.d-2</font>
-<br><br><font id="text">
-If two "numerically different" critical points are separated by
-less than <b>dpclim</b>, they are considered to be the same
-critical point. This often happens because of numerical
-inaccuracies : one CP might be "seen" by
-two different finite elements. The default should be OK when
-the ecut is quite large, on the order of 60 Hartree. For less
-accurate calculations of the density, increase the default value
-to 5.d-2, let's say.
-</font>
-
-
-<br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B> <a href=#4>Go to the AIM input variable list</a><hr>
-<font id="title"><a name="foldep">foldep</a></font>
-<br><font id="category">Characteristic: numerics</font>
-<br><font id="vartype">Variable type: real foldep(3) </font>
-<br><font id="default">Default: 0.0, 0.0, 0.0</font>
-<br><br><font id="text">
-Needed in the case <a href="#follow">follow</a>=1 only.
-Defines the starting point.
-</font>
-
-<br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B> <a href=#4>Go to the AIM input variable list</a><hr>
-<font id="title"><a name="follow">follow</a></font>
-<br><font id="category">Characteristic: driver</font>
-<br><font id="vartype">Variable type: integer </font>
-<br><font id="default">Default: 0</font>
-<br><br><font id="text">
-Follow the gradient path to the corresponding atom
-starting from the position specified in the input variable
-<a href="#foldep">foldep</a>.
-<ul>
- <li>0, not calculated
- <li>1, calculated
-</ul>
-</font>
-
-<br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B> <a href=#4>Go to the AIM input variable list</a><hr>
-<font id="title"><a name="folstp">folstp</a></font>
-<br><font id="category">Characteristic: numerics</font>
-<br><font id="vartype">Variable type: real </font>
-<br><font id="default">Default: 0.5</font>
-<br><br><font id="text">
-The first step for following the gradient path.
-</font>
-
-<br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B> <a href=#4>Go to the AIM input variable list</a><hr>
-<font id="title"><a name="gpsurf">gpsurf</a></font>
-<br><font id="category">Characteristic: driver</font>
-<br><font id="vartype">Variable type: integer </font>
-<br><font id="default">Default: 0</font>
-<br><br><font id="text">
-Drives the graphic output (gnuplot script) of the
-irreducible part of the calculated Bader surface.
-<ul>
- <li>0, not output
- <li>1, output
-</ul>
-</font>
-
-<br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B> <a href=#4>Go to the AIM input variable list</a><hr>
-<font id="title"><a name="inpt">inpt</a></font>
-<br><font id="category">Characteristic: numerics</font>
-<br><font id="vartype">Variable type: integer </font>
-<br><font id="default">Default: 100</font>
-<br><br><font id="text">
-Number of radial points used for integration of the
-Bader charge (not too sensitive).
-</font>
-
-<br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B> <a href=#4>Go to the AIM input variable list</a><hr>
-<font id="title"><a name="irho">irho</a></font>
-<br><font id="category">Characteristic: driver</font>
-<br><font id="vartype">Variable type: integer </font>
-<br><font id="default">Default: 0</font>
-<br><br><font id="text">
-Drives the integration of the charge of the Bader atom.
-<ul>
- <li>0, not calculated
- <li>1, calculated (usual mode)
-</ul>
-</font>
-
-<br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B> <a href=#4>Go to the AIM input variable list</a><hr>
-<font id="title"><a name="ivol">ivol</a></font>
-<br><font id="category">Characteristic: driver</font>
-<br><font id="vartype">Variable type: integer </font>
-<br><font id="default">Default: 0</font>
-<br><br><font id="text">
-Drives the integration of the volume of the Bader atom.
-<ul>
- <li>0, not calculated
- <li>1, calculated
-</ul>
-</font>
-
-<br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B> <a href=#4>Go to the AIM input variable list</a><hr>
-<font id="title"><a name="lapout">lapout</a></font>
-<br><font id="category">Characteristic: driver</font>
-<br><font id="vartype">Variable type: integer </font>
-<br><font id="default">Default: 0</font>
-<br><br><font id="text">
-Output of
-the laplacian of electronic density. The specification of the
-line (plane) in the real space must be given in the input variable
-<a href="#vpts">vpts</a> and grid in
-<a href="#ngrid">ngrid</a>.
-It is also possible to get only the
-valence density or the core density (see <a href="#dltyp">dltyp</a>).
-<ul>
- <li>0, no output
- <li>1, 1D distribution
- <li>2, 2D distribution
-</ul>
-</font>
-
-<br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B> <a href=#4>Go to the AIM input variable list</a><hr>
-<font id="title"><a name="lgrad">lgrad</a></font>
-<br><font id="category">Characteristic: numerics</font>
-<br><font id="vartype">Variable type: real </font>
-<br><font id="default">Default: 1.d-12</font>
-<br><br><font id="text">
-The search for one particular CP is decided to be successful when either
-the norm of the gradient of the electron density is smaller
-than <b>lgrad</b> or when the length of the planned search step
-is smaller than <a href="#lstep">lstep</a>. If
-the number of search step becomes larger than an internal limit
-(presently set to 100), one will allow a weaker criteria for
-satisfaction, based on <a href="#lgrad2">lgrad2</a>
-and <a href="#lstep2">lstep2</a>. If the internal limit
-is reached, and the criteria on <a href="#lgrad2">lgrad2</a>
-and <a href="#lstep2">lstep2</a> are not satisfied, then
-the searching procedure continues with the next seed.
-</font>
-
-<br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B> <a href=#4>Go to the AIM input variable list</a><hr>
-<font id="title"><a name="lgrad2">lgrad2</a></font>
-<br><font id="category">Characteristic: numerics</font>
-<br><font id="vartype">Variable type: real </font>
-<br><font id="default">Default: 1.d-5</font>
-<br><br><font id="text">
-Determines the criterion for deciding that a CP has been found. See
-<a href="#lgrad">lgrad</a> for more details.
-</font>
-
-<br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B> <a href=#4>Go to the AIM input variable list</a><hr>
-<font id="title"><a name="lstep">lstep</a></font>
-<br><font id="category">Characteristic: numerics</font>
-<br><font id="vartype">Variable type: real </font>
-<br><font id="default">Default: 1.d-10</font>
-<br><br><font id="text">
-Determines the criterion for deciding a CP has been found. See
-<a href="#lgrad">lgrad</a> for more details.
-</font>
-
-<br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B> <a href=#4>Go to the AIM input variable list</a><hr>
-<font id="title"><a name="lstep2">lstep2</a></font>
-<br><font id="category">Characteristic: numerics</font>
-<br><font id="vartype">Variable type: real </font>
-<br><font id="default">Default: 1.d-5</font>
-<br><br><font id="text">
-Determines the criterion for deciding that a CP has been found. See
-<a href="#lgrad">lgrad</a> for more details.
-</font>
-
-<br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B> <a href=#4>Go to the AIM input variable list</a><hr>
-<font id="title"><a name="maxatd">maxatd</a></font>
-<br><font id="category">Characteristic: numerics</font>
-<br><font id="vartype">Variable type: real </font>
-<br><font id="default">Default: 10.0</font>
-<br><br><font id="text">
-Atoms within this maximal distance are considered in order
-to start the search of a CP.
-<p>Note that the supercell,
-determined by
-<a href="#nsa">nsa</a>,
-<a href="#nsb">nsb</a>, and
-<a href="#nsc">nsc</a> might
-be too small to actually lead to the consideration of all the
-desired atoms.
-</font>
-
-<br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B> <a href=#4>Go to the AIM input variable list</a><hr>
-<font id="title"><a name="maxcpd">maxcpd</a></font>
-<br><font id="category">Characteristic: numerics</font>
-<br><font id="vartype">Variable type: real </font>
-<br><font id="default">Default: 5.0</font>
-<br><br><font id="text">
-The CPs are searched for within this maximal distance.
-<p>Note that the supercell,
-determined by
-<a href="#nsa">nsa</a>,
-<a href="#nsb">nsb</a>, and
-<a href="#nsc">nsc</a> might
-be too small to actually lead to the consideration of all the
-critical points.
-</font>
-
-<br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B> <a href=#4>Go to the AIM input variable list</a><hr>
-<font id="title"><a name="ngrid">ngrid</a></font>
-<br><font id="category">Characteristic: numerics</font>
-<br><font id="vartype">Variable type: integer ngrid(2) </font>
-<br><font id="default">Default: 30,30</font>
-<br><br><font id="text">
-Defines the grid in real space, for the density
-and laplacian outputs, governed by
-<a href="#denout">denout</a> and
-<a href="#lapout">lapout</a>.
-</font>
-
-<br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B> <a href=#4>Go to the AIM input variable list</a><hr>
-<font id="title"><a name="nphi">nphi</a></font>
-<br><font id="category">Characteristic: numerics</font>
-<br><font id="vartype">Variable type: integer </font>
-<br><font id="default">Default: 48</font>
-<br><br><font id="text">
-With <a href="#ntheta">ntheta</a>, this
-variable defines the angular grid for the integration
-within the Bader volume, in particular, the number
-of phi angles, to be used between
-<a href="#phimin">phimin</a> and
-<a href="#phimax">phimax</a>.
-When the difference between these two variables
-is 2 pi, the recommended value of <b>nphi</b> is 48.
-When it is pi (for symmetry reasons), the recommended
-value is 32. When it is pi/2 (for symmetry reasons),
-the recommended value is 20.
-</font>
-
-<br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B> <a href=#4>Go to the AIM input variable list</a><hr>
-<font id="title"><a name="nsa">nsa</a></font>,
-<font id="title"><a name="nsb">nsb</a></font>,
-<font id="title"><a name="nsc">nsc</a></font>
-<br><font id="category">Characteristic: numerics</font>
-<br><font id="vartype">Variable type: integer </font>
-<br><font id="default">Default: 3 </font>
-<br><br><font id="text">
-These variables define a "supercell", from the primitive
-cell repeated along each primitive direction. This
-supercell is build as follows :
-<pre>
-do isa=-nsa,nsa
- do isb=-nsb,nsb
-  do isc=-nsc,nsc
-    -> here, the cell is translated by the vector
-    -> (isa,isb,isc) in crystallographic coordinates
-    -> and accumulated, to give the supercell
-  enddo
- enddo
-enddo
-</pre>
-</font>
-
-<br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B> <a href=#4>Go to the AIM input variable list</a><hr>
-<font id="title"><a name="ntheta">ntheta</a></font>
-<br><font id="category">Characteristic: numerics</font>
-<br><font id="vartype">Variable type: integer </font>
-<br><font id="default">Default: 32</font>
-<br><br><font id="text">
-With <a href="#nphi">nphi</a>, this
-variable defines the angular grid for the integration
-within the Bader volume, in particular, the number
-of theta angles, to be used between
-<a href="#thetamin">thetamin</a> and
-<a href="#thetamax">thetamax</a>.
-When the difference between these two variables
-is pi, the recommended value of <b>ntheta</b> is 32.
-When it is pi/2 (for symmetry reasons),
-the recommended value is 20.
-</font>
-
-
-<br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B> <a href=#4>Go to the AIM input variable list</a><hr>
-<font id="title"><a name="phimin">phimin</a></font>,
-<font id="title"><a name="phimax">phimax</a></font>
-<br><font id="category">Characteristic: numerics</font>
-<br><font id="vartype">Variable type: real </font>
-<br><font id="default">Default: 0.0 for phimin, 2 pi for phimax</font>
-<br><br><font id="text">
-Angular limits of integration of the Bader volume
-for the phi variables. The number
-of integration points is given by
-<a href="#nphi">nphi</a>.
-The range of integration can be decreased if there are
-symmetry reasons for doing this.
-</font>
-
-<br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B> <a href=#4>Go to the AIM input variable list</a><hr>
-<font id="title"><a name="radstp">radstp</a></font>
-<br><font id="category">Characteristic: numerics</font>
-<br><font id="vartype">Variable type: real </font>
-<br><font id="default">Default: 0.05 </font>
-<br><br><font id="text">
-The length of the first step in the search of the
-exact Bader radius.
-</font>
-
-<br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B> <a href=#4>Go to the AIM input variable list</a><hr>
-<font id="title"><a name="ratmin">ratmin</a></font>
-<br><font id="category">Characteristic: numerics</font>
-<br><font id="vartype">Variable type: real </font>
-<br><font id="default">Default: 1.0 </font>
-<br><br><font id="text">
-The first estimation of the smallest radius of the basin of the
-atom (the distance at which the procedure that follows the gradient path
-announces that the gradient path finishes in the corresponding atom)
-This parameter is very important for the speed of the
-calculation, but this first estimation is not usually used because
-the program
-makes a new one based on the knowledge of CPs. In fact after
-the CP analysis, the new estimation is done by the product of the ad hoc
-parameter  <a href="#coff1">coff1</a> (default 0.98) by the distance of the nearest
-bonding CP.
-If there is a problem later, <a href="#coff2">coff2</a> (default 0.95) is used instead.
-</font>
-
-<br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B> <a href=#4>Go to the AIM input variable list</a><hr>
-<font id="title"><a name="rsurdir">rsurdir</a></font>
-<br><font id="category">Characteristic: numerics</font>
-<br><font id="vartype">Variable type: real rsurdir(2) </font>
-<br><font id="default">Default: 0.0, 0.0</font>
-<br><br><font id="text">
-In the case <a href="#rsurf">rsurf</a>=1,
-gives the direction (angular coordinates theta,phi)
-along which the radius of the Bader
-surface is to be determined.
-</font>
-
-<br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B> <a href=#4>Go to the AIM input variable list</a><hr>
-<font id="title"><a name="rsurf">rsurf</a></font>
-<br><font id="category">Characteristic: driver</font>
-<br><font id="vartype">Variable type: integer </font>
-<br><font id="default">Default: 0</font>
-<br><br><font id="text">
-Drive the computation of the radius of the Bader surface for
-the angles specified in the input variable
-<a href="#rsurdir">rsurdir</a>
-<ul>
- <li>0, not calculated
- <li>1, calculated
-</ul>
-</font>
-
-<br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B> <a href=#4>Go to the AIM input variable list</a><hr>
-<font id="title"><a name="scal">scal</a></font>
-<br><font id="category">Characteristic: numerics</font>
-<br><font id="vartype">Variable type: real scal(3) </font>
-<br><font id="default">Default: 1.0, 1.0, 1.0</font>
-<br><br><font id="text">
-The scaling of the cartesian coordinates for the computation
-of the distances (x'[i]=x[i]/scal[i]). Not really useful.
-</font>
-
-<br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B> <a href=#4>Go to the AIM input variable list</a><hr>
-<font id="title"><a name="surf">surf</a></font>
-<br><font id="category">Characteristic: driver</font>
-<br><font id="vartype">Variable type: integer </font>
-<br><font id="default">Default: 0</font>
-<br><br><font id="text">
-Drive the computation of the full Bader surface.
-<ul>
- <li>0, not calculated
- <li>1, calculated
-</ul>
-</font>
-
-<br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B> <a href=#4>Go to the AIM input variable list</a><hr>
-<font id="title"><a name="thetamin">thetamin</a></font>,
-<font id="title"><a name="thetamax">thetamax</a></font>
-<br><font id="category">Characteristic: numerics</font>
-<br><font id="vartype">Variable type: real </font>
-<br><font id="default">Default: 0.0 for thetamin, pi for thetamax</font>
-<br><br><font id="text">
-Angular limits of integration of the Bader volume
-for the theta variables. The number
-of integration points is given by
-<a href="#ntheta">ntheta</a>.
-The range of integration can be decreased if there are
-symmetry reasons for doing this.
-</font>
-
-<br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B> <a href=#4>Go to the AIM input variable list</a><hr>
-<font id="title"><a name="vpts">vpts</a></font>
-<br><font id="category">Characteristic: numerics</font>
-<br><font id="vartype">Variable type: real vpts(6) or vpts(9) </font>
-<br><font id="default">Default: all zero</font>
-<br><br><font id="text">
-Basic vectors of the line or rectangle in real space,
-defining the points for which the density or
-laplacian will be computed, thanks to
-<a href="#denout">denout</a>
-or
-<a href="#lapout">lapout</a>
-</font>
-
-<br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B> <a href=#4>Go to the AIM input variable list</a>
 <script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
 
 </body>

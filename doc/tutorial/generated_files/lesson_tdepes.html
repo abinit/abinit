@@ -4,7 +4,18 @@
 <!--                                                                                     -->
 <html>
 <head><title>Lesson TDepES</title>
-<link rel=stylesheet type="text/css" href="../formabinit.css">
+<link rel=stylesheet type="text/css" href="../../formabinit.css">
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  jax: ["input/TeX","output/HTML-CSS"],
+  tex2jax: {inlineMath: [['$','$']]},
+  displayAlign: "center",
+  TeX: { equationNumbers: { autoNumber: "AMS" } }
+});
+</script>
+<script type="text/javascript" async
+src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
 </head>
 <body bgcolor="#ffffff">
 
@@ -26,7 +37,7 @@ properties, for periodic solids:
 </p>
 <p>
 For the theory related to the temperature-dependent calculations, you can read the following papers:  
-<a href="../../bibliography/generated_files/bibliography.html#Ponce2015">[Ponce2015]</a>, <a href="../../bibliography/generated_files/bibliography.html#Ponce2014">[Ponce2014]</a> and <a href="../../bibliography/generated_files/bibliography.html#Ponce2014a">[Ponce2014a]</a>.
+<a href="../../biblio/generated_files/bib_biblio.html#Ponce2015">[Ponce2015]</a>, <a href="../../biblio/generated_files/bib_biblio.html#Ponce2014">[Ponce2014]</a> and <a href="../../biblio/generated_files/bib_biblio.html#Ponce2014a">[Ponce2014a]</a>.
 <p>
 There are two ways to compute the temperature dependence with Abinit:
 <ul>
@@ -45,19 +56,18 @@ There are two ways to compute the temperature dependence with Abinit:
 <script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
 
 <a name="list"></a>
-<h3><b> Lesson TDepES, table of content:</b></h3>
+<h3><b> Lesson TDepES. Table of content:</b></h3>
 
-<ul>
-  <li><a href="#1">1</a> Calculation of the ZPR of eigenenergies at q=&Gamma; </li>
-  <li><a href="#2">2</a> Converging the calculation with the q-point grid</li>
-  <li><a href="#3">3</a> Calculation of the eigenenergies correction along high-symmetry lines </li>
-</ul>
-<hr>
+<ul> 
+  <li>1. <a href="#zpr">Calculation of the ZPR of eigenenergies at q=&Gamma;</a></li>
+  <li>2. <a href="#converging">Converging the calculation with the q-point grid</a></li>
+  <li>3. <a href="#high_symmetry">Calculation of the eigenenergies correction along high-symmetry lines</a></li>
 
-<a name="1"></a>
-<h3><b>1. Calculation of the ZPR of eigenenergies at q=&Gamma; </b> </h3>
-<h3>&nbsp;</h3>
-The reference input files for this lesson are located in ~abinit/tests/tutorespfn/Input and 
+ </ul> 
+ <hr><br><a name="zpr"> </a>
+<a name="1"> </a>
+<h3><b>1. Calculation of the ZPR of eigenenergies at q=&Gamma;</b></h3>
+ <p>The reference input files for this lesson are located in ~abinit/tests/tutorespfn/Input and 
 the corresponding reference output files are in ~abinit/tests/tutorespfn/Refs. The prefix is "tdepes".
 
 First, run the calculation using the <a href="../../tests/tutorespfn/Input/tdepes_1.in">&#126;abinit/tests/tutorespfn/Input/tdepes_1.in</a> input file.
@@ -120,7 +130,7 @@ of only the q=&Gamma; from the <b>temperature.txt</b> file.
 <p>
 Here you can see that the HOMO correction goes down with temperature. 
 This is due to the underconvergence of the calculation. 
-If you increase <a href="../../input_variables/generated_files/varbas.html#ecut">ecut</a> from 5 to 10, you get the following plot.
+If you increase <a href="../../input_variables/generated_files/varset_basic.html#ecut">ecut</a> from 5 to 10, you get the following plot.
 <br>
 
 <img style="height: 450px; width: 600px;" src=../documents/lesson_tdepes/plot2.png>
@@ -151,13 +161,12 @@ The run will generate 3 files:
   This file contains the eigenenergy corrections as well as the temperature dependence one. 
   You can check that the results are the same as with the python script approach here above.
 </ul>
-
+<br><br><a href=#top>Go to the top</a>
 <hr>
-<a name="2"></a>
-<h3><b>2. Converging the calculation with the q-point grid</b> </h3>
-<h3>&nbsp;</h3>
-
-From now on we will only describe the approach with Abinit compiled with Netcdf. 
+<br><a name="converging"> </a>
+<a name="2"> </a>
+<h3><b>2. Converging the calculation with the q-point grid</b></h3>
+ <p>From now on we will only describe the approach with Abinit compiled with Netcdf. 
 The approach with Anaddb is similar to what we described above. Note that Anaddb only support homogenous q-point grid integration.
 
 You can integrate over the q-grid using either random q-point integration or homogenous Monkhorst-Pack based integration. 
@@ -197,7 +206,7 @@ python temperature_para.py < tdepes_3.files
 with the file <a href="../../tests/tutorespfn/Input/tdepes_3.files">&#126;abinit/tests/tutorespfn/Input/tdepes_3.files</a>.
 
 The plotting of the same HOMO band at k=&Gamma; for a 4x4x4 q-point grid gives a very different result than previously 
-(this graph has been obtained with <a href="../../input_variables/generated_files/varbas.html#ecut">ecut</a> = 10).
+(this graph has been obtained with <a href="../../input_variables/generated_files/varset_basic.html#ecut">ecut</a> = 10).
 <br>
 
 <img style="height: 450px; width: 600px;" src=../documents/lesson_tdepes/plot3.png>
@@ -205,13 +214,12 @@ The plotting of the same HOMO band at k=&Gamma; for a 4x4x4 q-point grid gives a
 <p>
 As a matter of fact, diamond needs an extremely dense q-point grid (40x40x40) to be converged. 
 On the bright side each q-point calculation is independent and thus the parallel scaling is ideal...
-
+<br><br><a href=#top>Go to the top</a>
 <hr>
-<a name="3"></a>
-<h3><b>3. Calculation of the eigenenergies correction along high-symmetry lines</b> </h3>
-<h3>&nbsp;</h3>
-
-The calculation of the electronic eigenvalue correction 
+<br><a name="high_symmetry"> </a>
+<a name="3"> </a>
+<h3><b>3. Calculation of the eigenenergies correction along high-symmetry lines</b></h3>
+ <p>The calculation of the electronic eigenvalue correction 
 due to electron-phonon coupling along high-symmetry lines requires the use of 6 datasets per q-point. 
 Different datasets are required to compute the following quantites:
 <ol>
@@ -261,7 +269,7 @@ You should of course notice all the spiky jumps in the renormalization.
 This is because we did a completely under-converged calculation. 
 
 <p> It is possible to converge the calculations using 
-<a href="../../input_variables/generated_files/varbas.html#ecut">ecut</a>=30 Ha, a <a href="../../input_variables/generated_files/varbas.html#ngkpt">ngkpt</a> grid of 6x6x6 and an increasing <a href="../../input_variables/generated_files/vargs.html#ngqpt">ngqpt</a> grid to get converged results: 
+<a href="../../input_variables/generated_files/varset_basic.html#ecut">ecut</a>=30 Ha, a <a href="../../input_variables/generated_files/varset_basic.html#ngkpt">ngkpt</a> grid of 6x6x6 and an increasing <a href="../../input_variables/generated_files/varset_gstate.html#ngqpt">ngqpt</a> grid to get converged results: 
 
 <pre>
 | Convergence study ZPR and inverse lifetime(1/&tau;) [meV] at 0K               |
@@ -301,7 +309,9 @@ Since it is not possible here with the script, we reject the contribution of the
 close to &Gamma; if their phonon frequency is lower than 1E-6 Ha. 
 Otherwise you get unphysically large contribution. 
 You can tune this paramter by editing the variable "tol6 = 1E-6" in the beginning 
-of the mrgeignc.py file. For example, for the last 43x43x43 calculation, it was set to 1E-4.
+of the mrgeignc.py file. For example, for the last 43x43x43 calculation, it was set to 1E-4. 
+<br><br><a href=#top>Go to the top</a>
+<hr>
 <script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
 
 </body>

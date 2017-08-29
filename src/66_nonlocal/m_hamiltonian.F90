@@ -541,7 +541,7 @@ module m_hamiltonian
   real(dp) :: ecutsm
    ! Smearing energy for plane wave kinetic energy (Ha)
 
-  real(dp) :: effmass
+  real(dp) :: effmass_free
    ! Effective mass for electrons (usually one).
 
   logical :: do_full_diago
@@ -2214,7 +2214,7 @@ end subroutine pawdij2e1kb
 !! SOURCE
 
 subroutine init_ddiago_ctl(Dctl,jobz,isppol,nspinor,ecut,kpoint,nloalg,gmet,&
-& nband_k,istwf_k,ecutsm,effmass,abstol,range,ilu,vlu,use_scalapack,prtvol)
+& nband_k,istwf_k,ecutsm,effmass_free,abstol,range,ilu,vlu,use_scalapack,prtvol)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -2232,7 +2232,7 @@ subroutine init_ddiago_ctl(Dctl,jobz,isppol,nspinor,ecut,kpoint,nloalg,gmet,&
  integer,intent(in) :: isppol,nspinor
  integer,optional,intent(in) :: istwf_k,prtvol,use_scalapack,nband_k
  real(dp),intent(in) :: ecut
- real(dp),optional,intent(in) :: ecutsm,effmass
+ real(dp),optional,intent(in) :: ecutsm,effmass_free
  real(dp),optional,intent(in) :: abstol
  character(len=*),intent(in) :: jobz
  character(len=*),optional,intent(in) :: range
@@ -2277,7 +2277,7 @@ subroutine init_ddiago_ctl(Dctl,jobz,isppol,nspinor,ecut,kpoint,nloalg,gmet,&
 
  Dctl%ecut = ecut
  Dctl%ecutsm = zero; if (PRESENT(ecutsm)) Dctl%ecutsm = ecutsm
- Dctl%effmass = one; if (PRESENT(effmass)) Dctl%effmass = effmass
+ Dctl%effmass_free = one; if (PRESENT(effmass_free)) Dctl%effmass_free = effmass_free
  Dctl%nloalg  = nloalg
  Dctl%prtvol = 0; if (PRESENT(prtvol)) Dctl%prtvol = prtvol
  Dctl%abstol = -tol8; if (PRESENT(abstol)) Dctl%abstol = abstol

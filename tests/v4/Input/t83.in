@@ -22,5 +22,6 @@ instrflag 1
 #%%   Using the DDB file merged by test2, this test computed the elastic
 #%%   constant (relaxed ion) considering the correction from remaining
 #%%   stresses in the unit cell. Voigt symmetry will be broken.
-#%%   Please refer to: Infos/Theory/elasticity-oganov.pdf.
+#%%   Please refer to: doc/theory/elasticity-oganov.pdf.
+#%% topics = Elastic
 #%%<END TEST_INFO>

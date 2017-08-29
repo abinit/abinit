@@ -68,4 +68,5 @@
 #%% description = 
 #%%   Hydrure of Lithium-Boron, in a face-centered monoclinic cell.
 #%%   Test the recognition of the space group (C2/c (# 15)). Was lacking a case before Dec 2011.
+#%% topics = UnitCell, SmartSymm
 #%%<END TEST_INFO>

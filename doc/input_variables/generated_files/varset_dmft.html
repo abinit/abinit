@@ -1,0 +1,816 @@
+<!--                                                                                     -->
+<!-- This file has been produced by generate_doc.py using different .yml  or .bib files. -->
+<!-- It is useless to modify it. Modify the related .yml  or .bib files instead.         -->
+<!--                                                                                     -->
+<html>
+<head><title>Description of DMFT variables.</title>
+<link rel=stylesheet type="text/css" href="../../formabinit.css">
+<link rel=stylesheet type="text/css" href="../formabinit.css">
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  jax: ["input/TeX","output/HTML-CSS"],
+  tex2jax: {inlineMath: [['$','$']]},
+  displayAlign: "center",
+  TeX: { equationNumbers: { autoNumber: "AMS" } }
+});
+</script>
+<script type="text/javascript" async
+src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+</head>
+<body bgcolor="#ffffff">
+
+<hr>
+<a name="top"></a>
+
+<h1>ABINIT, DMFT input variables:</h1>
+
+<h2>List and description.
+</h2>
+<hr>
+<p>This document lists and provides the description
+of the name (keywords) of the "DMFT" input
+variables to be used in the main input file of the abinit code.
+
+<script type="text/javascript" src="../../js_files/generic_advice.js"> </script>
+<hr>
+
+<h5>Copyright (C) 1998-2017 ABINIT group (DCA,XG,RC,YG,FJ)
+<script type="text/javascript" src="../../js_files/copyright.js"> </script>
+</h5> 
+
+<script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
+
+<script type="text/javascript" src="../../js_files/list_htmlfiles_input_variables.js"> </script>
+
+<a name="list"></a>
+<h3><b> Content of the file : alphabetical list of "DMFT" variables.</b></h3>
+
+<br><a id='A'></a>A.
+ <br><a id='B'></a>B.
+ <br><a id='C'></a>C.
+ <br><a id='D'></a>D.
+ <a href="#dmft_dc">dmft_dc</a>&nbsp;&nbsp;
+ <a href="#dmft_entropy">dmft_entropy</a>&nbsp;&nbsp;
+ <a href="#dmft_iter">dmft_iter</a>&nbsp;&nbsp;
+ <a href="#dmft_mxsf">dmft_mxsf</a>&nbsp;&nbsp;
+ <a href="#dmft_nlambda">dmft_nlambda</a>&nbsp;&nbsp;
+ <a href="#dmft_nwli">dmft_nwli</a>&nbsp;&nbsp;
+ <a href="#dmft_nwlo">dmft_nwlo</a>&nbsp;&nbsp;
+ <a href="#dmft_rslf">dmft_rslf</a>&nbsp;&nbsp;
+ <a href="#dmft_solv">dmft_solv</a>&nbsp;&nbsp;
+ <a href="#dmft_t2g">dmft_t2g</a>&nbsp;&nbsp;
+ <a href="#dmft_tolfreq">dmft_tolfreq</a>&nbsp;&nbsp;
+ <a href="#dmft_tollc">dmft_tollc</a>&nbsp;&nbsp;
+ <a href="#dmftbandf">dmftbandf</a>&nbsp;&nbsp;
+ <a href="#dmftbandi">dmftbandi</a>&nbsp;&nbsp;
+ <a href="#dmftcheck">dmftcheck</a>&nbsp;&nbsp;
+ <a href="#dmftctqmc_check">dmftctqmc_check</a>&nbsp;&nbsp;
+ <a href="#dmftctqmc_correl">dmftctqmc_correl</a>&nbsp;&nbsp;
+ <a href="#dmftctqmc_gmove">dmftctqmc_gmove</a>&nbsp;&nbsp;
+ <a href="#dmftctqmc_grnns">dmftctqmc_grnns</a>&nbsp;&nbsp;
+ <a href="#dmftctqmc_meas">dmftctqmc_meas</a>&nbsp;&nbsp;
+ <a href="#dmftctqmc_mov">dmftctqmc_mov</a>&nbsp;&nbsp;
+ <a href="#dmftctqmc_mrka">dmftctqmc_mrka</a>&nbsp;&nbsp;
+ <a href="#dmftctqmc_order">dmftctqmc_order</a>&nbsp;&nbsp;
+ <a href="#dmftctqmc_triqs_nleg">dmftctqmc_triqs_nleg</a>&nbsp;&nbsp;
+ <a href="#dmftqmc_l">dmftqmc_l</a>&nbsp;&nbsp;
+ <a href="#dmftqmc_n">dmftqmc_n</a>&nbsp;&nbsp;
+ <a href="#dmftqmc_seed">dmftqmc_seed</a>&nbsp;&nbsp;
+ <a href="#dmftqmc_therm">dmftqmc_therm</a>&nbsp;&nbsp;
+<br><br><hr>
+<br><font id="title"><a name="dmft_dc">dmft_dc</a></font>
+<br><font id="mnemonics">Mnemonics: Dynamical Mean Fied Theory: Double Counting</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#DEVELOP">DEVELOP</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_DMFT.html">DMFT</a>, </font>
+<br><font id="smalltext">Moderately used: [10/888] in abinit tests, [1/136] in tuto abinit tests. Tuto test list: {tutoparal:[<a href="../../tests/tutoparal/Input/tdmft_2.in">dmft_2</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 1</font>
+<br><font id="text">
+<p>
+<p>
+ <br />
+ Value of double counting used for DMFT. Only value 1 is activated for the moment and is the FLL double counting.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="dmft_entropy">dmft_entropy</a></font>
+<br><font id="mnemonics">Mnemonics: Dynamical Mean Fied Theory: ENTROPY</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_DMFT.html">DMFT</a>, </font>
+<br><font id="smalltext">Rarely used: [3/888] in abinit tests, [0/136] in tuto abinit tests. Test list: {v7:[<a href="../../tests/v7/Input/t29.in">29</a>,<a href="../../tests/v7/Input/t30.in">30</a>,<a href="../../tests/v7/Input/t31.in">31</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><br><font id="requires">
+Only relevant if <a href="../../input_variables/generated_files/varset_dev.html#usedmft">usedmft</a>==1 and <a href="../../input_variables/generated_files/varset_dmft.html#dmft_solv">dmft_solv</a>==5
+</font>
+<br><font id="text">
+<p>
+If 1, enable the calculation of the entropy  within the DMFT framework and so allows the calculation of the total energy (free energy).
+In the current implementation, this is only possible with <a href="../../input_variables/generated_files/varset_dmft.html#dmft_solv">dmft_solv</a>=5 (Continuous Time Quantum Monte Carlo).
+See also the input variable <a href="../../input_variables/generated_files/varset_dmft.html#dmft_nlambda">dmft_nlambda</a>.
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="dmft_iter">dmft_iter</a></font>
+<br><font id="mnemonics">Mnemonics: Dynamical Mean Fied Theory: number of ITERation</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#DEVELOP">DEVELOP</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_DMFT.html">DMFT</a>, </font>
+<br><font id="smalltext">Moderately used: [20/888] in abinit tests, [1/136] in tuto abinit tests. Tuto test list: {tutoparal:[<a href="../../tests/tutoparal/Input/tdmft_2.in">dmft_2</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p>
+ <br />
+ Number of iterations for the DMFT inner loop.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="dmft_mxsf">dmft_mxsf</a></font>
+<br><font id="mnemonics">Mnemonics: Dynamical Mean Fied Theory: MiXing parameter for the SelF energy</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#DEVELOP">DEVELOP</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_DMFT.html">DMFT</a>, </font>
+<br><font id="smalltext">Moderately used: [15/888] in abinit tests, [1/136] in tuto abinit tests. Tuto test list: {tutoparal:[<a href="../../tests/tutoparal/Input/tdmft_2.in">dmft_2</a>]}.</font>
+<br><font id="vartype">Variable type: real</font>
+<br><font id="default">Default is 0.3</font>
+<br><font id="text">
+<p>
+<p>
+ <br />
+ Mixing parameter for the simple mixing of the self-energy.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="dmft_nlambda">dmft_nlambda</a></font>
+<br><font id="mnemonics">Mnemonics: Dynamical Mean Fied Theory: Number of LAMBDA points</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#DEVELOP">DEVELOP</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_DMFT.html">DMFT</a>, </font>
+<br><font id="smalltext">Rarely used: [3/888] in abinit tests, [0/136] in tuto abinit tests. Test list: {v7:[<a href="../../tests/v7/Input/t29.in">29</a>,<a href="../../tests/v7/Input/t30.in">30</a>,<a href="../../tests/v7/Input/t31.in">31</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 6</font>
+<br><br><font id="requires">
+Only relevant if <a href="../../input_variables/generated_files/varset_dev.html#usedmft">usedmft</a>==1 and <a href="../../input_variables/generated_files/varset_dmft.html#dmft_entropy">dmft_entropy</a>==1
+</font>
+<br><font id="text">
+<p>
+<b>dmft_nlambda</b> gives the number of integration points for the thermodynamical integration in case of free energy calculation within DMFT.
+Its value must be greater or equal to 3.
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="dmft_nwli">dmft_nwli</a></font>
+<br><font id="mnemonics">Mnemonics: Dynamical Mean Fied Theory: Number of frequency omega (W) in the LInear mesh</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#DEVELOP">DEVELOP</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_DMFT.html">DMFT</a>, </font>
+<br><font id="smalltext">Moderately used: [20/888] in abinit tests, [1/136] in tuto abinit tests. Tuto test list: {tutoparal:[<a href="../../tests/tutoparal/Input/tdmft_2.in">dmft_2</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p>
+ <br />
+ Number of Matsubara frequencies (linear  mesh)
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="dmft_nwlo">dmft_nwlo</a></font>
+<br><font id="mnemonics">Mnemonics: Dynamical Mean Fied Theory: Number of frequency omega (W) in the LOg mesh</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#DEVELOP">DEVELOP</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_DMFT.html">DMFT</a>, </font>
+<br><font id="smalltext">Moderately used: [18/888] in abinit tests, [1/136] in tuto abinit tests. Tuto test list: {tutoparal:[<a href="../../tests/tutoparal/Input/tdmft_2.in">dmft_2</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p>
+ <br />
+ Number of frequencies in the log mesh.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="dmft_rslf">dmft_rslf</a></font>
+<br><font id="mnemonics">Mnemonics: Dynamical Mean Fied Theory: Read SeLF energy</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#DEVELOP">DEVELOP</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_DMFT.html">DMFT</a>, </font>
+<br><font id="smalltext">Moderately used: [15/888] in abinit tests, [1/136] in tuto abinit tests. Tuto test list: {tutoparal:[<a href="../../tests/tutoparal/Input/tdmft_2.in">dmft_2</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p>
+ Flag to read/write Self-Energy. If put to one, self-energy is written and read at each DFT iteration.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="dmft_solv">dmft_solv</a></font>
+<br><font id="mnemonics">Mnemonics: Dynamical Mean Fied Theory: choice of SOLVer</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#DEVELOP">DEVELOP</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_DMFT.html">DMFT</a>, </font>
+<br><font id="smalltext">Moderately used: [19/888] in abinit tests, [1/136] in tuto abinit tests. Tuto test list: {tutoparal:[<a href="../../tests/tutoparal/Input/tdmft_2.in">dmft_2</a>]}.</font>
+<br><font id="vartype">Variable type: real</font>
+<br><font id="default">Default is 5</font>
+<br><font id="text">
+<p>
+<p>
+ <br />
+ Choice of solver for the Impurity model.
+ <ul>
+  <li>
+   0=&gt; No solver and U=0, J=0 (see <a href="../../input_variables/generated_files/varset_paw.html#upawu">upawu</a> and <a href="../../input_variables/generated_files/varset_paw.html#jpawu">jpawu</a>).
+  </li>
+  <li>
+   1=&gt; LDA+U self-energy is used (for testing purpose)
+  </li>
+  <li>
+   2=&gt; Hubbard one solver. The Hubbard one solver is an approximation which gives a rough description of correlated Mott insulators. It should not be used for metals.
+  </li>
+  <li>
+   5=&gt; Use the Continuous Time Quantum Monte Carlo (CTQMC) solver CT-Hyb of ABINIT
+    in the density density representation,
+CTQMC calculations are much more time consuming that Hubbard I calculations. Nevertheless, the calculation is fully parallelised.
+  </li>
+  <li>
+   6=&gt; Continuous Time Quantum Monte Carlo (CTQMC) solver CT-Hyb of TRIQS
+    in the density density representation.
+  </li>
+  <li>
+   7=&gt; Continuous Time Quantum Monte Carlo (CTQMC) solver CT-Hyb of TRIQS
+    with the rotationally invariant formulation.
+  </li>
+ </ul>
+ <br />
+ The CT Hyb algorithm is described in
+   <a href="https://journals.aps.org/prl/abstract/10.1103/PhysRevLett.97.076405">
+    Phys. Rev. Lett 97, 076405, (2006) </a>.
+    For a discussion  of density-density approximation with respect
+    with the rotationnally invariant formulation, see e.g.
+   <a href="https://journals.aps.org/prb/abstract/10.1103/PhysRevB.86.155107">
+     Phys. Rev. B 86, 155107 (2012)
+   </a>.
+ <br />
+ The ABINIT/CT Hyb implementation is discussed in
+   <a href="http://dx.doi.org/10.1016/j.cpc.2016.04.003">
+      http://dx.doi.org/10.1016/j.cpc.2016.04.003 </a>.
+ <br />
+ The TRIQS/CT Hyb implementation is described in
+   <a href="http://dx.doi.org/10.1016/j.cpc.2015.10.023">
+    Comp. Phys. Comm. 200, 274 (2016)
+   </a>. Before using it, it has to be installed following
+    instructions at https://triqs.ipht.cnrs.fr/1.3/applications/cthyb/install.html.
+    The current interface is valid for TRIQS 1.3 and TRIQS/CTHYB 1.3.
+ <br />
+ See the useful variables for CT-QMC solver :
+<a href="../../input_variables/generated_files/varset_dev.html#dmftctqmc_basis">dmftctqmc_basis</a>,
+<a href="../../input_variables/generated_files/varset_dmft.html#dmftctqmc_check">dmftctqmc_check</a>,
+<a href="../../input_variables/generated_files/varset_dmft.html#dmftctqmc_correl">dmftctqmc_correl</a>,
+<a href="../../input_variables/generated_files/varset_dmft.html#dmftctqmc_gmove">dmftctqmc_gmove</a>,
+<a href="../../input_variables/generated_files/varset_dmft.html#dmftctqmc_grnns">dmftctqmc_grnns</a>,
+<a href="../../input_variables/generated_files/varset_dmft.html#dmftctqmc_meas">dmftctqmc_meas</a>,
+<a href="../../input_variables/generated_files/varset_dmft.html#dmftctqmc_mrka">dmftctqmc_mrka</a>,
+<a href="../../input_variables/generated_files/varset_dmft.html#dmftctqmc_mov">dmftctqmc_mov</a>,
+<a href="../../input_variables/generated_files/varset_dmft.html#dmftctqmc_order">dmftctqmc_order</a>,
+<a href="../../input_variables/generated_files/varset_dmft.html#dmftctqmc_triqs_nleg">dmftctqmc_triqs_nleg</a>,
+<a href="../../input_variables/generated_files/varset_dmft.html#dmftqmc_l">dmftqmc_l</a>,
+<a href="../../input_variables/generated_files/varset_dmft.html#dmftqmc_n">dmftqmc_n</a>,
+<a href="../../input_variables/generated_files/varset_dmft.html#dmftqmc_seed">dmftqmc_seed</a>,
+<a href="../../input_variables/generated_files/varset_dmft.html#dmftqmc_therm">dmftqmc_therm</a>
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="dmft_t2g">dmft_t2g</a></font>
+<br><font id="mnemonics">Mnemonics: Dynamical Mean Fied Theory: t2g orbitals</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#DEVELOP">DEVELOP</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_DMFT.html">DMFT</a>, </font>
+<br><font id="smalltext">Rarely used: [6/888] in abinit tests, [1/136] in tuto abinit tests. Test list: {paral:[<a href="../../tests/paral/Input/t99.in">99</a>],tutoparal:[<a href="../../tests/tutoparal/Input/tdmft_2.in">dmft_2</a>],v7:[<a href="../../tests/v7/Input/t27.in">27</a>,<a href="../../tests/v7/Input/t30.in">30</a>,<a href="../../tests/v7/Input/t31.in">31</a>],v8:[<a href="../../tests/v8/Input/t01.in">01</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p>
+ <br />
+ Can be set to 1 only if in cubic symmetry. It enables one to carry a DFT+DMFT calculations only on t2g orbitals.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="dmft_tolfreq">dmft_tolfreq</a></font>
+<br><font id="mnemonics">Mnemonics: Dynamical Mean Fied Theory: TOLerance on DFT correlated electron occupation matrix for the definition of the FREQuency grid</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#DEVELOP">DEVELOP</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_DMFT.html">DMFT</a>, </font>
+<br><font id="smalltext">Rarely used: [2/888] in abinit tests, [0/136] in tuto abinit tests. Test list: {paral:[<a href="../../tests/paral/Input/t99.in">99</a>],v8:[<a href="../../tests/v8/Input/t01.in">01</a>]}.</font>
+<br><font id="vartype">Variable type: real</font>
+<br><font id="default">Default is 0.0001</font>
+<br><font id="text">
+<p>
+<p>
+ <br />
+ The LDA occupation matrix for correlated electrons can be computed directly. It can be compared to the calculation of the same quantity using LDA Green's function, a sum over Matsubara frequencies and
+ a projection over correlated orbitals.
+ Because the Matsubara grid is finite, the two quantities differ. If this difference is larger than dmft_tolfreq, then the code stops and an error message is given.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="dmft_tollc">dmft_tollc</a></font>
+<br><font id="mnemonics">Mnemonics: Dynamical Mean Fied Theory: TOLerance on Local Charge for convergence of the DMFT loop</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#DEVELOP">DEVELOP</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_DMFT.html">DMFT</a>, </font>
+<br><font id="smalltext">Rarely used: [1/888] in abinit tests, [0/136] in tuto abinit tests. Test list: {v6:[<a href="../../tests/v6/Input/t45.in">45</a>]}.</font>
+<br><font id="vartype">Variable type: real</font>
+<br><font id="default">Default is 1e-05</font>
+<br><font id="text">
+<p>
+<p>
+ <br />
+ Tolerance for the variation of Local Charge during iterations of the DMFT Loop.
+ <br />
+ The default value is good for fast calculations. However, to obtain good convergence of the DFT Loop,
+the DMFT Loop needs a better convergence criterion.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="dmftbandf">dmftbandf</a></font>
+<br><font id="mnemonics">Mnemonics: Dynamical Mean Field Theory: BAND: Final</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#DEVELOP">DEVELOP</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_DMFT.html">DMFT</a>, </font>
+<br><font id="smalltext">Moderately used: [21/888] in abinit tests, [1/136] in tuto abinit tests. Tuto test list: {tutoparal:[<a href="../../tests/tutoparal/Input/tdmft_2.in">dmft_2</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p>
+ <b>dmftbandf</b> is the last band taken into account in the Projected Local
+Orbitals scheme of DFT+DMFT. With <a href="../../input_variables/generated_files/varset_dmft.html#dmftbandi">dmftbandi</a>, they define the energy window used to define Wannier Functions.
+(see  Amadon, B., Lechermann, F., Georges, A., Jollet, F., Wehling, T. O., and Lichtenstein, A. I. Phys. Rev. B 77(20), (2008).)
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="dmftbandi">dmftbandi</a></font>
+<br><font id="mnemonics">Mnemonics: Dynamical Mean Field Theory: BAND: Initial</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#DEVELOP">DEVELOP</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_DMFT.html">DMFT</a>, </font>
+<br><font id="smalltext">Moderately used: [21/888] in abinit tests, [1/136] in tuto abinit tests. Tuto test list: {tutoparal:[<a href="../../tests/tutoparal/Input/tdmft_2.in">dmft_2</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p>
+ <b>dmftbandi</b> is the first band taken into account in the Projected Local
+Orbitals scheme of LDA+DMFT. With <a href="../../input_variables/generated_files/varset_dmft.html#dmftbandf">dmftbandf</a>, they define the energy window used to define Wannier Functions.
+(see  Amadon, B., Lechermann, F., Georges, A., Jollet, F., Wehling, T. O., and Lichtenstein, A. I. Phys. Rev. B 77(20), (2008).)
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="dmftcheck">dmftcheck</a></font>
+<br><font id="mnemonics">Mnemonics: Dynamical Mean Fied Theory: CHECKs</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#DEVELOP">DEVELOP</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_DMFT.html">DMFT</a>, </font>
+<br><font id="smalltext">Moderately used: [16/888] in abinit tests, [1/136] in tuto abinit tests. Tuto test list: {tutoparal:[<a href="../../tests/tutoparal/Input/tdmft_2.in">dmft_2</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p>
+ <br />
+Only for developer purposes.
+ (Introduced by B. Amadon, v6.1.0)
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="dmftctqmc_check">dmftctqmc_check</a></font>
+<br><font id="mnemonics">Mnemonics: Dynamical Mean Fied Theory: Continuous Time Quantum Monte Carlo CHECK</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#DEVELOP">DEVELOP</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_DMFT.html">DMFT</a>, </font>
+<br><font id="smalltext">Rarely used: [3/888] in abinit tests, [0/136] in tuto abinit tests. Test list: {paral:[<a href="../../tests/paral/Input/t92.in">92</a>],v7:[<a href="../../tests/v7/Input/t28.in">28</a>,<a href="../../tests/v7/Input/t29.in">29</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><br><font id="requires">
+Only relevant if <a href="../../input_variables/generated_files/varset_dmft.html#dmft_solv">dmft_solv</a>==5
+</font>
+<br><font id="text">
+<p>
+<p>
+ <br />
+ Check the fast calculations during the Monte Carlo simulation with very slow but robust methods.
+Should only be used for debugging.
+ <ul>
+  <li>
+   0=&gt;  No check.
+  </li>
+  <li>
+   1=&gt;  Check the overlap calculations (Impurity operator).
+  </li>
+  <li>
+   2=&gt;  Check the update of M matrix calculation (Bath operator).
+  </li>
+  <li>
+   3=&gt;  Check both.
+  </li>
+ </ul>
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="dmftctqmc_correl">dmftctqmc_correl</a></font>
+<br><font id="mnemonics">Mnemonics: Dynamical Mean Fied Theory: Continuous Time Quantum Monte Carlo CORRELations</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#DEVELOP">DEVELOP</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_DMFT.html">DMFT</a>, </font>
+<br><font id="smalltext">Rarely used: [3/888] in abinit tests, [0/136] in tuto abinit tests. Test list: {paral:[<a href="../../tests/paral/Input/t92.in">92</a>],v7:[<a href="../../tests/v7/Input/t28.in">28</a>,<a href="../../tests/v7/Input/t29.in">29</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><br><font id="requires">
+Only relevant if <a href="../../input_variables/generated_files/varset_dmft.html#dmft_solv">dmft_solv</a>==5
+</font>
+<br><font id="text">
+<p>
+<p>
+ <br />
+ Flag to compute statistics about segments and anti-segments during the simulation.
+Slow down the simulation.
+ <ul>
+  <li>
+   0=&gt;  Nothing done
+  </li>
+  <li>
+   1=&gt;  Calculations performed and written in "Correlation.dat" file
+  </li>
+ </ul>
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="dmftctqmc_gmove">dmftctqmc_gmove</a></font>
+<br><font id="mnemonics">Mnemonics: Dynamical Mean Fied Theory: Continuous Time Quantum Monte Carlo Global MOVEs</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#DEVELOP">DEVELOP</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_DMFT.html">DMFT</a>, </font>
+<br><font id="smalltext">Rarely used: [4/888] in abinit tests, [1/136] in tuto abinit tests. Test list: {paral:[<a href="../../tests/paral/Input/t92.in">92</a>],tutoparal:[<a href="../../tests/tutoparal/Input/tdmft_2.in">dmft_2</a>],v7:[<a href="../../tests/v7/Input/t28.in">28</a>,<a href="../../tests/v7/Input/t29.in">29</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><br><font id="requires">
+Only relevant if <a href="../../input_variables/generated_files/varset_dmft.html#dmft_solv">dmft_solv</a>==5
+</font>
+<br><font id="text">
+<p>
+<p>
+ <br />
+ Default is no global moves.
+The value of this variable is the modulo used to try a global move.
+A value of 5000 means that a global move is tried every 5000 Monte Carlo sweep.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="dmftctqmc_grnns">dmftctqmc_grnns</a></font>
+<br><font id="mnemonics">Mnemonics: Dynamical Mean Fied Theory: Continuous Time Quantum Monte Carlo GReeNs NoiSe</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#DEVELOP">DEVELOP</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_DMFT.html">DMFT</a>, </font>
+<br><font id="smalltext">Rarely used: [3/888] in abinit tests, [0/136] in tuto abinit tests. Test list: {paral:[<a href="../../tests/paral/Input/t92.in">92</a>],v7:[<a href="../../tests/v7/Input/t28.in">28</a>,<a href="../../tests/v7/Input/t29.in">29</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><br><font id="requires">
+Only relevant if <a href="../../input_variables/generated_files/varset_dmft.html#dmft_solv">dmft_solv</a>==5
+</font>
+<br><font id="text">
+<p>
+<p>
+ <br />
+ Compute the statistical noise for each time slice of each green function.
+This is a good approximation only if there is enough Monte Carlo sweeps per cpu.
+ <ul>
+  <li>
+   0=&gt;  Nothing
+  </li>
+  <li>
+   1=&gt;  Do it and write the noise in the "Gtau.dat" file.
+  </li>
+ </ul>
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="dmftctqmc_meas">dmftctqmc_meas</a></font>
+<br><font id="mnemonics">Mnemonics: Dynamical Mean Fied Theory: Continuous Time Quantum Monte Carlo MEASurements</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#DEVELOP">DEVELOP</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_DMFT.html">DMFT</a>, </font>
+<br><font id="smalltext">Rarely used: [3/888] in abinit tests, [0/136] in tuto abinit tests. Test list: {paral:[<a href="../../tests/paral/Input/t92.in">92</a>],v7:[<a href="../../tests/v7/Input/t28.in">28</a>,<a href="../../tests/v7/Input/t29.in">29</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 1</font>
+<br><br><font id="requires">
+Only relevant if <a href="../../input_variables/generated_files/varset_dmft.html#dmft_solv">dmft_solv</a>==5
+</font>
+<br><font id="text">
+<p>
+<p>
+ <br />
+ The modulo used to measure the interaction energy and the number of electrons.
+Example : 2 means the measure is perform every two sweeps.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="dmftctqmc_mov">dmftctqmc_mov</a></font>
+<br><font id="mnemonics">Mnemonics: Dynamical Mean Fied Theory: Continuous Time Quantum Monte Carlo MOVie</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#DEVELOP">DEVELOP</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_DMFT.html">DMFT</a>, </font>
+<br><font id="smalltext">Rarely used: [3/888] in abinit tests, [0/136] in tuto abinit tests. Test list: {paral:[<a href="../../tests/paral/Input/t92.in">92</a>],v7:[<a href="../../tests/v7/Input/t28.in">28</a>,<a href="../../tests/v7/Input/t29.in">29</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><br><font id="requires">
+Only relevant if <a href="../../input_variables/generated_files/varset_dmft.html#dmft_solv">dmft_solv</a>==5
+</font>
+<br><font id="text">
+<p>
+<p>
+ <br />
+ Print a latex file per cpu displaying the full simulation.
+This option should only be use with very small number (&lt;1000) of Monte Carlo sweeps since it requires a lot of I/O band width.
+ <ul>
+  <li>
+   0=&gt;  Nothing
+  </li>
+  <li>
+   1=&gt;  Write the "Movie_id.dat" file where id is the MPI rank of each process
+  </li>
+ </ul>
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="dmftctqmc_mrka">dmftctqmc_mrka</a></font>
+<br><font id="mnemonics">Mnemonics: Dynamical Mean Fied Theory: Continuous Time Quantum Monte Carlo MARKov Analysis</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#DEVELOP">DEVELOP</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_DMFT.html">DMFT</a>, </font>
+<br><font id="smalltext">Rarely used: [3/888] in abinit tests, [0/136] in tuto abinit tests. Test list: {paral:[<a href="../../tests/paral/Input/t92.in">92</a>],v7:[<a href="../../tests/v7/Input/t28.in">28</a>,<a href="../../tests/v7/Input/t29.in">29</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><br><font id="requires">
+Only relevant if <a href="../../input_variables/generated_files/varset_dmft.html#dmft_solv">dmft_solv</a>==5
+</font>
+<br><font id="text">
+<p>
+<p>
+ <br />
+ Measure the time evolution of the number of electrons for each orbital and perform a fourier transform.
+The result can be plotted using the "Markov_id.dat" file
+ <ul>
+  <li>
+   0=&gt;  Nothing
+  </li>
+  <li>
+   1=&gt;  Do it and write the noise in the "Markov_id.dat" file where id is the rank of each MPI process.
+  </li>
+ </ul>
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="dmftctqmc_order">dmftctqmc_order</a></font>
+<br><font id="mnemonics">Mnemonics: Dynamical Mean Fied Theory: Continuous Time Quantum Monte Carlo perturbation ORDER</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#DEVELOP">DEVELOP</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_DMFT.html">DMFT</a>, </font>
+<br><font id="smalltext">Rarely used: [4/888] in abinit tests, [1/136] in tuto abinit tests. Test list: {paral:[<a href="../../tests/paral/Input/t92.in">92</a>],tutoparal:[<a href="../../tests/tutoparal/Input/tdmft_2.in">dmft_2</a>],v7:[<a href="../../tests/v7/Input/t28.in">28</a>,<a href="../../tests/v7/Input/t29.in">29</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><br><font id="requires">
+Only relevant if <a href="../../input_variables/generated_files/varset_dmft.html#dmft_solv">dmft_solv</a>==5
+</font>
+<br><font id="text">
+<p>
+<p>
+ <br />
+ Print a file containing the statistic distribution of the number of segments per orbital.
+The maximal order taken into account <b>dmftctqmc_order</b> : 50 means that we have the statistic distribution from 0 to 50 segments.
+The result is written in the "Perturbation.dat" file.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="dmftctqmc_triqs_nleg">dmftctqmc_triqs_nleg</a></font>
+<br><font id="mnemonics">Mnemonics: Dynamical Mean Fied Theory: Continuous Time Quantum Monte Carlo perturbation of TRIQS, Number of LEGendre polynomials</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#DEVELOP">DEVELOP</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_DMFT.html">DMFT</a>, </font>
+<br><font id="smalltext">Rarely used: [2/888] in abinit tests, [0/136] in tuto abinit tests. Test list: {paral:[<a href="../../tests/paral/Input/t99.in">99</a>],v8:[<a href="../../tests/v8/Input/t01.in">01</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 30</font>
+<br><br><font id="requires">
+Only relevant if <a href="../../input_variables/generated_files/varset_dmft.html#dmft_solv">dmft_solv</a>==6 or 7
+</font>
+<br><font id="text">
+<p>
+<p>
+ <br />
+ Specify the number of Legendre polynomials used for the calculation of Green's function in CTQMC code from the library TRIQS.
+ Default is 30. The value of coefficients are given in file whose name ending is "Legendre_coefficient.dat".
+ (see also <a href="https://journals.aps.org/prb/abstract/10.1103/PhysRevB.84.075145"> Phys. Rev. B 84, 075145 (2010))
+ </a>
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="dmftqmc_l">dmftqmc_l</a></font>
+<br><font id="mnemonics">Mnemonics: Dynamical Mean Fied Theory: Quantum Monte Carlo time sLices</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#DEVELOP">DEVELOP</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_DMFT.html">DMFT</a>, </font>
+<br><font id="smalltext">Moderately used: [10/888] in abinit tests, [1/136] in tuto abinit tests. Tuto test list: {tutoparal:[<a href="../../tests/tutoparal/Input/tdmft_2.in">dmft_2</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><br><font id="requires">
+Only relevant if <a href="../../input_variables/generated_files/varset_dmft.html#dmft_solv">dmft_solv</a>>=4
+</font>
+<br><font id="text">
+<p>
+<p>
+ <br />
+ Number of time slices used to represent the time green function.
+This value should be carefully chosen according to Niquist frequency and the <a href="../../input_variables/generated_files/varset_gstate.html#tsmear">tsmear</a> value.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="dmftqmc_n">dmftqmc_n</a></font>
+<br><font id="mnemonics">Mnemonics: Dynamical Mean Fied Theory: Quantum Monte Carlo Number of sweeps</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#DEVELOP">DEVELOP</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_DMFT.html">DMFT</a>, </font>
+<br><font id="smalltext">Moderately used: [10/888] in abinit tests, [1/136] in tuto abinit tests. Tuto test list: {tutoparal:[<a href="../../tests/tutoparal/Input/tdmft_2.in">dmft_2</a>]}.</font>
+<br><font id="vartype">Variable type: real</font>
+<br><font id="default">Default is 0.0</font>
+<br><br><font id="requires">
+Only relevant if <a href="../../input_variables/generated_files/varset_dmft.html#dmft_solv">dmft_solv</a>>=4
+</font>
+<br><font id="text">
+<p>
+<p>
+ <br />
+ Number of Monte Carlo sweeps. Should be at least 10^6.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="dmftqmc_seed">dmftqmc_seed</a></font>
+<br><font id="mnemonics">Mnemonics: Dynamical Mean Fied Theory: Quantum Monte Carlo SEED</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#DEVELOP">DEVELOP</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_DMFT.html">DMFT</a>, </font>
+<br><font id="smalltext">Rarely used: [2/888] in abinit tests, [0/136] in tuto abinit tests. Test list: {v7:[<a href="../../tests/v7/Input/t28.in">28</a>,<a href="../../tests/v7/Input/t29.in">29</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is <a href="../../input_variables/generated_files/varset_basic.html#jdtset">jdtset</a></font>
+<br><br><font id="requires">
+Only relevant if <a href="../../input_variables/generated_files/varset_dmft.html#dmft_solv">dmft_solv</a>>=4
+</font>
+<br><font id="text">
+<p>
+<p>
+ <br />
+ Seed to initilize the random number generator.
+ <br />
+ Should not be relevant except for testing purpose.
+ <br />
+ NOTE : If the CT-QMC (<a href="../../input_variables/generated_files/varset_dmft.html#dmft_solv">dmft_solv</a>=5) is used on many CPUs, each CPU initializes its random number generator with dmftqmc_seed+rank where rank is the rank of the cpu in the MPI communicator.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="dmftqmc_therm">dmftqmc_therm</a></font>
+<br><font id="mnemonics">Mnemonics: Dynamical Mean Fied Theory: Quantum Monte Carlo THERMalization</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#DEVELOP">DEVELOP</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_DMFT.html">DMFT</a>, </font>
+<br><font id="smalltext">Moderately used: [9/888] in abinit tests, [1/136] in tuto abinit tests. Test list: {paral:[<a href="../../tests/paral/Input/t92.in">92</a>,<a href="../../tests/paral/Input/t99.in">99</a>],tutoparal:[<a href="../../tests/tutoparal/Input/tdmft_2.in">dmft_2</a>],v7:[<a href="../../tests/v7/Input/t27.in">27</a>,<a href="../../tests/v7/Input/t28.in">28</a>,<a href="../../tests/v7/Input/t29.in">29</a>,<a href="../../tests/v7/Input/t30.in">30</a>,<a href="../../tests/v7/Input/t31.in">31</a>],v8:[<a href="../../tests/v8/Input/t01.in">01</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 1000</font>
+<br><br><font id="requires">
+Only relevant if <a href="../../input_variables/generated_files/varset_dmft.html#dmft_solv">dmft_solv</a>==5
+</font>
+<br><font id="text">
+<p>
+<p>
+ <br />
+ Number of Monte Carlo sweeps for the thermalization
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+<script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
+
+</body>
+</html>
+

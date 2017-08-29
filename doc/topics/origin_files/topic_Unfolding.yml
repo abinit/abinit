@@ -1,6 +1,6 @@
 - !components 
     name      : Unfolding 
-    keyword   : Unfolding bans strutures 
+    keyword   : Unfolding band structures 
     authors   : OR
     howto     : unfold supercell band structures
     header    : default
@@ -9,7 +9,13 @@
     copyright : default
     links     : default
     introduction : |- 
-        <p>Supercells are often used in ab initio calculations to model compound alloys, surfaces and defects. Band structure plots obtained from supercell calculations are difficult to interpret and compare to the reference band structure of a corresponding primitive crystallographic unit due to the zone folding . The purpose of the executable file fold2Bloch is to assist with interpretation of supercell electronic structure calculations by recovering the Bloch character of electronic eigenstates perturbed by disorder. In general, there is no single wave-vector <b>k</b> associated with a particular eigenvalue E, but rather a distribution of k's. This distribution is also known as a Bloch spectral density or spectral weight. The spectral weight w<sub>n</sub>(<b>k</b>) amounts to a Bloch <b>k</b>-character of the n'th energy eigenstates &epsilon;<sub>n</sub> and fulfills the normalization &sum;<sub><b>k</b></sub>w<sub>n</sub>(<b>k</b>)=1. In the case of a non-local basis set, such as plane waves, the spectral weight can be constructed from the Fourier expansion coefficients by gathering them in groups associated with a particular Bloch wave vector in the primitive cell [[Wang1998]],[[Popescu2010]],[[Popescu2012]],[[Allen2013]],[[Medeiros2014]]
+        <p>Supercells are often used in ab initio calculations to model compound alloys, surfaces and defects. 
+        Band structure plots obtained from supercell calculations are difficult to interpret and compare to the 
+        reference band structure of a corresponding primitive crystallographic unit due to the zone folding. 
+        The purpose of the executable file [[help:fold2bloch]] is to assist with interpretation of supercell electronic 
+        structure calculations by recovering the Bloch character of electronic eigenstates perturbed by disorder. 
+        In general, there is no single wave-vector <b>k</b> associated with a particular eigenvalue E, but rather a distribution of k's. 
+        This distribution is also known as a Bloch spectral density or spectral weight. The spectral weight w<sub>n</sub>(<b>k</b>) amounts to a Bloch <b>k</b>-character of the n'th energy eigenstates &epsilon;<sub>n</sub> and fulfills the normalization &sum;<sub><b>k</b></sub>w<sub>n</sub>(<b>k</b>)=1. In the case of a non-local basis set, such as plane waves, the spectral weight can be constructed from the Fourier expansion coefficients by gathering them in groups associated with a particular Bloch wave vector in the primitive cell [[Wang1998]],[[Popescu2010]],[[Popescu2012]],[[Allen2013]],[[Medeiros2014]]
 
         <p>   w<sub>n</sub>(<b>k</b>)= &sum;<sub><b>G</b></sub> |C<sub>n,<b>K</b></sub>(<b>G</b>)|<sup>2</sup>   
         for all <b>G</b> that fulfill <b>K</b>+<b>G</b>=<b>k</b> +<b>g</b>,
@@ -25,5 +31,5 @@
         <p>A MATLAB script <i>ubs_dots.m</i> is designed to assist with plotting the unfolded band structure. The unfolded band structure plot is represented as a scatter plot where the size and colour of the markers  carry information about the Bloch character of energy bands. Users are asked to provide details about the k-path, name of the fold2Bloch output file abo_WFK.f2b, position of the Fermi energy, and reciprocal lattice vectors that can be found in the main output file ab_out.out. 
 
     tutorials  : |-
-          <li><a href="../../tutorial/generated_files/lesson_fold2Bloch.html">The lesson on unfolding supercell band structures</a></li>
+          <li><a href="../../tutorial/generated_files/lesson_fold2bloch.html">The lesson on unfolding supercell band structures</a></li>
     end : default

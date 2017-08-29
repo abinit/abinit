@@ -12,7 +12,7 @@
        <p>It is well known that long range correlations responsible of van der Waals interactions
        are out of reach for both LDA and GGA approximations to the exchange-correlation energy in DFT. 
        In recent years several methods have been devised to include such interactions, which can be
-       grouped into two strategies, namely <i>ad hoc</i>}  methods and self-consistent approaches.   
+       grouped into two strategies, namely <i>ad hoc</i> methods and self-consistent approaches.   
        Currently ABINIT can perform calculations based on either the DFT-D methods or the 
        vdW-WF methods, as described later, both belonging to the first group. 
 

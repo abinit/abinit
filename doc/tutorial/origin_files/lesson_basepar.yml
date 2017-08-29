@@ -1,6 +1,7 @@
-# This YAML file contains the introduction as well as the body (including the table of content) of the html lesson.
-# In order to modify the other parts, modify the file lessons.html .
-# This is the introduction ...
+## This YAML file contains the introduction as well as the body of the html lesson.
+## In order to modify the other parts, modify the file lessons.html .
+
+## This is the introduction ...
 intro : |
   <p>There are many situations where a sequential code is not enough, often
   because it would take too much time to get a result. There are also cases where
@@ -24,43 +25,17 @@ intro : |
   that rationalizes the fact that, beyond some number of processors, the
   inherently sequential parts will dominate parallel parts, and give a
   limitation to the maximal speed-up that can be achieved.</p>
-# This is the body, including the table of content ...
-body : |
-  <ul>
-  <li><a href="#1">1.</a> Generalities</li>
-  <li><a href="#2">2.</a> Parallel environments
-  
-  <ul>
-  <li>Generalities</li>
-  <li>MPI</li>
-  <li>OpenMP</li>
-  <li>Scalapack</li>
-  <li>Fast/slow communications</li>
-  </ul></li>
-  <li><a href="#3">3.</a> What parts of ABINIT are parallel?</li>
-  <li><a href="#4">4.</a> A simple example of parallelism in ABINIT
-  <ul>
-  <li>Running a job</li>
-  <li>Parallelism over the k-points</li>
-  <li>Parallelism over the spins</li>
-  <li>Number of computing cores to accomplish a task</li>
-  <li>Evidencing overhead</li>
-  </ul></li>
-  
-  <li><a href="#5">5.</a> Details of the implementation
-  
-  <ul>
-  <li>The MPI toolbox in ABINIT</li>
-  <li>How to parallelize a routine: some hints</li>
-  </ul></li>
-  
-  </ul>
-  
-  
-  <hr>
-  
-  <h2><a name="1"></a>1. Generalities</h2>
-  
+
+## Now come the different sections, numbered.
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec1:
+ title: "Generalities"
+ tag: generalities
+ body: |
+  <a name="1"></a>
   <p>With the broad availability of multi-core processors, everybody 
   now has a parallel machine at hand. ABINIT will be able to take advantage of
   the availability of several cores for most of its capabilities, be it
@@ -92,12 +67,15 @@ body : |
   Please remember that, as there is no standard way of setting up a
   parallel environment, we are not able to provide you with support beyond
   ABINIT itself.</p>
-  
-  <hr>
-  
-  <h2><a name="2"></a>2. Characteristics of parallel environments</h2>
-  
-  <h3>Generalities</h3>
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec2:
+ title: "Characteristics of parallel environments"
+ tag: environments
+ body: |
+  <a name="2"></a>
   <p>Different software solutions can be used to benefit from parallelism.
   Most of ABINIT parallelism is based on MPI, but some additional speed-up
   (or a better distribution of data, allowing to run bigger calculations)
@@ -189,10 +167,14 @@ body : |
   announced in the tutorials. You have to perform some tests on your
   actual machine to gain knowledge of it.</p>
   
-  <hr>
-  
-  <h2><a name="3"></a>3. What parts of ABINIT are parallel?</h2>
-  
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec3:
+ title: "What parts of ABINIT are parallel?"
+ tag: parts
+ body: |
+  <a name="3"></a>
   <p>Parallelizing a code is a very delicate and complicated task, thus
   do not expect that things will systematically go faster just because you
   are using a parallel version of ABINIT. Please keep also in mind that in
@@ -204,8 +186,8 @@ body : |
   <li><a href="lesson_paral_gspw.html">ground state with plane waves</a>,</li>
   <li><a href="lesson_paral_gswvl.html">ground state with wavelets</a>,</li>
   <li><a href="lesson_paral_moldyn.html">molecular dynamics</a>,</li>
-  <li><a href="lesson_paral_string.html">parallelism on "images"</a>,</li>
-  <li><a href="lesson_paral_dfpt.html">response functions</a>,</li>
+  <li><a href="lesson_paral_images.html">parallelism on "images"</a>,</li>
+  <li><a href="lesson_paral_dfpt.html">density-functional perturbation theory (DFPT)</a>,</li>
   <li><a href="lesson_paral_mbt.html">Many-Body Perturbation Theory</a>.</li>
   </ul>
   <p>Note that the tutorial on <a href="lesson_paral_gspw.html">ground state
@@ -216,19 +198,21 @@ body : |
   <p>Actually, the two levels based on</p>
   <ul>
   <li>the treatment of k-points in reciprocal space;</li>
-  <li>the treatment of spins, for spin-polarized collinear situations
-      (when <a href="../../input_variables/generated_files/varbas.html#nsppol"
-      target="kwimg">nsppol</a>=2);</li>
+  <li>the treatment of spins, for spin-polarized collinear situations 
+      [[nsppol]]=2);</li>
   </ul>
   <p>are, on the contrary, quite easy to use. An example of such parallelism
   will be given in the next section.</p>
-  
-  <hr>
-  
-  <h2><a name="4"></a>4. A simple example of parallelism in ABINIT</h2>
-  
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec4:
+ title: "A simple example of parallelism in ABINIT"
+ tag: example
+ body: |
+  <a name="4"></a>
   <h3>Running a job</h3>
-  
   <p><i>Before starting, you might consider working in a different
   subdirectory as for the other lessons. Why not "Work_paral" ?</i></p>
   
@@ -416,8 +400,7 @@ body : |
   </p>
   
   <p>If you have more than 2 processors at hand, you might increase the
-  value of <a href="../../input_variables/generated_files/varbas.html#ngkpt"
-  target="kwimg">ngkpt</a>, so that more than one k-point is available,
+  value of [[ngkpt]], so that more than one k-point is available,
   and see that the k-point and spin parallelism indeed work
   concurrently.</p>
   
@@ -442,10 +425,14 @@ body : |
   implementation and linked to the decreasing charge on each processor
   too.</p>
   
-  <hr>
-  
-  <h2><a name="5"></a>5. Details of the implementation</h2>
-  
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec5:
+ title: "Details of the implementation"
+ tag: implementation
+ body: |
+  <a name="5"></a>
   <h3>The MPI toolbox in ABINIT</h3>
   
   <p>The ABINIT-specific MPI routines are located in different

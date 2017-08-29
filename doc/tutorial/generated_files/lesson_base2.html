@@ -4,7 +4,18 @@
 <!--                                                                                     -->
 <html>
 <head><title>Second (basic) lesson</title>
-<link rel=stylesheet type="text/css" href="../formabinit.css">
+<link rel=stylesheet type="text/css" href="../../formabinit.css">
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  jax: ["input/TeX","output/HTML-CSS"],
+  tex2jax: {inlineMath: [['$','$']]},
+  displayAlign: "center",
+  TeX: { equationNumbers: { autoNumber: "AMS" } }
+});
+</script>
+<script type="text/javascript" async
+src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
 </head>
 <body bgcolor="#ffffff">
 
@@ -40,25 +51,25 @@ pseudopotential are not examined.
 <script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
 
 <a name="list"></a>
-<h3><b> Second (basic) lesson, table of content:</b></h3>
+<h3><b> Second (basic) lesson. Table of content:</b></h3>
 
-<ul>
-  <li><a href="#20">2.0</a> Summary of the previous lesson</li>
-  <li><a href="#21">2.1</a> The convergence in <a href="../../input_variables/generated_files/varbas.html#ecut">ecut</a></li>
-  <li><a href="#22">2.2</a> The convergence in <a href="../../input_variables/generated_files/varbas.html#ecut">ecut</a></li>
-  <li><a href="#23">2.3</a> The convergence in <a href="../../input_variables/generated_files/varbas.html#acell">acell</a></li>
-  <li><a href="#24">2.4</a> The final calculation in Local (Spin)
-    Density Approximation.</li>
-  <li><a href="#25">2.5</a> The use of the Generalized Gradient Approximation.</li>
-</ul>
-<hr>
-<h4><a name="20"></a></h4>
-<h3><b>2.0. Summary of the previous lesson.</b></h3>
+<ul> 
+  <li>1. <a href="#summary">Summary of the previous lesson</a></li>
+  <li>2. <a href="#ecut1">The convergence in ecut (I)</a></li>
+  <li>3. <a href="#ecut2">The convergence in ecut (II)</a></li>
+  <li>4. <a href="#acell">The convergence in acell</a></li>
+  <li>5. <a href="#LDA">The final calculation in Local (Spin) Density Approximation</a></li>
+  <li>6. <a href="#GGA">The use of the Generalized Gradient Approximation</a></li>
 
+ </ul> 
+ <hr><br><a name="summary"> </a>
+<a name="1"> </a>
+<h3><b>1. Summary of the previous lesson</b></h3>
+ <p><a name="20"></a>
 <p>We studied the H2 molecule in a big box.
   We used 10 Ha as cut-off energy, a 10x10x10 Bohr^3 supercell, the local-density
   approximation (as well as the local-spin-density approximation) in the Teter
-  parametrization (<a href="../../input_variables/generated_files/varbas.html#ixc">ixc</a>=1, the default),
+  parametrization (<a href="../../input_variables/generated_files/varset_basic.html#ixc">ixc</a>=1, the default),
   and a pseudopotential from the Goedecker-Hutter-Teter table.
 <p>At this stage, we compared our results:
 <ul>
@@ -73,14 +84,12 @@ a much more accurate technique than DFT)
 </ul>
 The bond length is awful (nearly 10% off), and the atomisation energy is a bit
 too low, 5 % off.
-<h3><br>
-
+<br><br><a href=#top>Go to the top</a>
 <hr>
-  <a name="21">&nbsp;</a> <a name="22">&nbsp;</a> </h3>
-
-<p><h3><b>2.1 and 2.2
-The convergence in ecut</b></h3>
-
+<br><a name="ecut1"> </a>
+<a name="2"> </a>
+<h3><b>2. The convergence in ecut (I)</b></h3>
+ <p><a name="21">&nbsp;</a>
 <p><b>2.1.a</b><b>
 Computing the bond length and corresponding atomisation energy
 in one run.</b>
@@ -125,27 +134,33 @@ and
   entirely the abinit_help file now, while the knowledge of the input variables will
   come in the long run. </p>
 <p><b>2.1.b</b> Many convergence parameters have already been identified. We will
-  focus only on <a href="../../input_variables/generated_files/varbas.html#ecut">ecut</a> and <a href="../../input_variables/generated_files/varbas.html#acell">acell</a>.
+  focus only on <a href="../../input_variables/generated_files/varset_basic.html#ecut">ecut</a> and <a href="../../input_variables/generated_files/varset_basic.html#acell">acell</a>.
   This is because
 <ul>
   <li> the convergence of the SCF cycle and geometry determination are well under
-    control thanks to <a href="../../input_variables/generated_files/varbas.html#toldfe">toldfe</a>,
-    <a href="../../input_variables/generated_files/varbas.html#toldff">toldff</a> and <a href="../../input_variables/generated_files/varrlx.html#tolmxf">tolmxf</a>
+    control thanks to <a href="../../input_variables/generated_files/varset_basic.html#toldfe">toldfe</a>,
+    <a href="../../input_variables/generated_files/varset_basic.html#toldff">toldff</a> and <a href="../../input_variables/generated_files/varset_rlx.html#tolmxf">tolmxf</a>
     (this might not be the case for other physical properties)</li>
   <li> there is no k point convergence study to be done for an isolated system
     in a big box: no additional information is gained by adding a k-point beyond one</li>
   <li> the boxcut value is automatically chosen larger than 2 by ABINIT, see the
-    determination of the input variable <a href="../../input_variables/generated_files/vargs.html#ngfft">ngfft</a>
+    determination of the input variable <a href="../../input_variables/generated_files/varset_gstate.html#ngfft">ngfft</a>
     by preprocessing</li>
-  <li> we are using <a href="../../input_variables/generated_files/varrlx.html#ionmov">ionmov</a>=2
+  <li> we are using <a href="../../input_variables/generated_files/varset_rlx.html#ionmov">ionmov</a>=2
     for the determination of the geometry.</li>
 </ul>
+<br><br><a href=#top>Go to the top</a>
+<hr>
+<br><a name="ecut2"> </a>
+<a name="3"> </a>
+<h3><b>3. The convergence in ecut (II)</b></h3>
+ <p><a name="22"></a>
 
-For the check of convergence with respect to <a href="../../input_variables/generated_files/varbas.html#ecut">ecut</a>,
+For the check of convergence with respect to <a href="../../input_variables/generated_files/varset_basic.html#ecut">ecut</a>,
 you have the choice between doing different runs of the tbase2_1.in
-file with different values of <a href="../../input_variables/generated_files/varbas.html#ecut">ecut</a>, or doing
+file with different values of <a href="../../input_variables/generated_files/varset_basic.html#ecut">ecut</a>, or doing
 a double loop of datasets, as proposed in ~abinit/tests/tutorial/Input/tbase2_2.in .
-The values of <a href="../../input_variables/generated_files/varbas.html#ecut">ecut</a> have been
+The values of <a href="../../input_variables/generated_files/varset_basic.html#ecut">ecut</a> have been
 chosen between 10Ha and 35Ha, by step of 5 Ha. If you want to make a double loop,
 you might benefit of reading again the
 <a href="../../users/generated_files/help_abinit.html#loop" target="helpsimg">double-loop section</a>
@@ -207,22 +222,21 @@ of 30 Ha. We will keep in mind this value for the final run.
 
 <p>Well, 30 Ha is a large kinetic energy cut-off! The pseudopotential
 that we are using for Hydrogen is rather "hard" ...
-
-<p>
+<br><br><a href=#top>Go to the top</a>
 <hr>
+<br><a name="acell"> </a>
+<a name="4"> </a>
+<h3><b>4. The convergence in acell</b></h3>
+ <p><a name="23"></a>
 
-
-<h3><p><b><a name="23">2.3</a>
-The convergence in acell</b></h3>
-
-<p>The same technique as for <a href="../../input_variables/generated_files/varbas.html#ecut">ecut</a>
-  should be now used for the convergence in <a href="../../input_variables/generated_files/varbas.html#acell">acell</a>.
-  We will explore <a href="../../input_variables/generated_files/varbas.html#acell">acell</a> starting
+<p>The same technique as for <a href="../../input_variables/generated_files/varset_basic.html#ecut">ecut</a>
+  should be now used for the convergence in <a href="../../input_variables/generated_files/varset_basic.html#acell">acell</a>.
+  We will explore <a href="../../input_variables/generated_files/varset_basic.html#acell">acell</a> starting
   from <code>8 8 8</code> to <code>18 18 18</code>, by step of <code>2 2 2</code>.
-  We keep <a href="../../input_variables/generated_files/varbas.html#ecut">ecut</a> 10 for this study.
+  We keep <a href="../../input_variables/generated_files/varset_basic.html#ecut">ecut</a> 10 for this study.
   Indeed, it is a rather general rule that there is little cross-influence between
-  the convergence of <a href="../../input_variables/generated_files/varbas.html#ecut">ecut</a> and the
-  convergence of <a href="../../input_variables/generated_files/varbas.html#acell">acell</a>. The file
+  the convergence of <a href="../../input_variables/generated_files/varset_basic.html#ecut">ecut</a> and the
+  convergence of <a href="../../input_variables/generated_files/varset_basic.html#acell">acell</a>. The file
   ~abinit/tests/tutorial/Input/tbase2_3.in can be used as an example. 
   The output data (~abinit/tests/tutorial/Refs/tbase2_3.out) are as follows:
 <pre>
@@ -352,27 +366,25 @@ We are treating a lot of vacuum in this supercell!
 So, the H2 study, with this pseudopotential, turns out to be not
 really easy. Of course, the number of states to be treated is
 minimal! This allows to have reasonable CPU time still.
-
-<p>
-
+<br><br><a href=#top>Go to the top</a>
 <hr>
-
-<p><h3><b><a name="24">2.4</a>
-The final calculation in Local (Spin) Density Approximation.</b></h3>
-
-<p>We now use the correct values of both <a href="../../input_variables/generated_files/varbas.html#ecut">ecut</a>
-  and <a href="../../input_variables/generated_files/varbas.html#acell">acell</a>. Well, you should
+<br><a name="LDA"> </a>
+<a name="5"> </a>
+<h3><b>5. The final calculation in Local (Spin) Density Approximation</b></h3>
+ <p><a name="24"></a>
+<p>We now use the correct values of both <a href="../../input_variables/generated_files/varset_basic.html#ecut">ecut</a>
+  and <a href="../../input_variables/generated_files/varset_basic.html#acell">acell</a>. Well, you should
   modify the tbase2_3.in file to make a calculation
   with <code>acell 12 12 12</code>
   and <code>ecut 30</code>.
   You can still use the double loop feature with
-  <code><a href="../../input_variables/generated_files/varbas.html#udtset">udtset</a>
+  <code><a href="../../input_variables/generated_files/varset_basic.html#udtset">udtset</a>
   1 2</code> (which reduces to a single loop), to minimize the modifications to
   the file. The file ~abinit/tests/tutorial/Input/tbase2_4.in can be taken as an example of input
   file, and ~abinit/tests/tutorial/Refs/tbase2_4.out as an example of output file.
 <p>Since we are doing the calculation at a single
-  (<a href="../../input_variables/generated_files/varbas.html#ecut">ecut</a>,
-  <a href="../../input_variables/generated_files/varbas.html#acell">acell</a>) pair, the total CPU time
+  (<a href="../../input_variables/generated_files/varset_basic.html#ecut">ecut</a>,
+  <a href="../../input_variables/generated_files/varset_basic.html#acell">acell</a>) pair, the total CPU time
   is not as much as for the previous determinations of optimal values through
   series calculations. However, the memory needs have still increased a bit.
 <p>The output data are:
@@ -391,22 +403,20 @@ The final calculation in Local (Spin) Density Approximation.</b></h3>
 <li>These are our final data for the local (spin) density approximation.
 </ul>
 
-We have used <code><a href="../../input_variables/generated_files/varbas.html#ixc">ixc</a>=1</code>
-. Other expressions for the local (spin) density approximation <code><a href="../../input_variables/generated_files/varbas.html#ixc">ixc</a>=2,
+We have used <code><a href="../../input_variables/generated_files/varset_basic.html#ixc">ixc</a>=1</code>
+. Other expressions for the local (spin) density approximation <code><a href="../../input_variables/generated_files/varset_basic.html#ixc">ixc</a>=2,
 3 .. 7</code> are possible. The values 1, 2, 3 and 7 should give about the same
 results, since they all start from the XC energy of the homogeneous electron gas,
 as determined by Quantum Monte Carlo calculations. <br>
-Other possibilities <code><a href="../../input_variables/generated_files/varbas.html#ixc">ixc</a>=4,
+Other possibilities <code><a href="../../input_variables/generated_files/varset_basic.html#ixc">ixc</a>=4,
 5, 6</code> are older local density functionals, that could not rely on these
 data.
-
-<p>
-
+<br><br><a href=#top>Go to the top</a>
 <hr>
-
-<p><h3><b><a name="25">2.5</a>
-The use of the Generalized Gradient Approximation.</b></h3>
-
+<br><a name="GGA"> </a>
+<a name="6"> </a>
+<h3><b>6. The use of the Generalized Gradient Approximation</b></h3>
+ <p><a name="25"></a>
 <p>We will use the Perdew-Burke-Ernzerhof functional, proposed in
 <cite>Phys. Rev. Lett. 77, 3865 (1996)</cite>.
 
@@ -416,13 +426,13 @@ with a very small core (including only the 1s orbital), pseudopotentials
 issued from the LDA and from the GGA are very similar.
 
 <p>So, we will not change our pseudopotential. This will save us lot of time,
-  as we should not redo an <a href="../../input_variables/generated_files/varbas.html#ecut">ecut</a>
+  as we should not redo an <a href="../../input_variables/generated_files/varset_basic.html#ecut">ecut</a>
   convergence test (ecut is often characteristic of the pseudopotentials that
   are used in a calculation).
-<p>Independently of the pseudopotential, an <a href="../../input_variables/generated_files/varbas.html#acell">acell</a>
+<p>Independently of the pseudopotential, an <a href="../../input_variables/generated_files/varset_basic.html#acell">acell</a>
   convergence test should not be done again, since the vacuum is treated similarly
   in LDA or GGA.
-<p>So, our final values within GGA will be easily obtained, by setting <a href="../../input_variables/generated_files/varbas.html#ixc">ixc</a>
+<p>So, our final values within GGA will be easily obtained, by setting <a href="../../input_variables/generated_files/varset_basic.html#ixc">ixc</a>
   to 11 in the input file tbase2_4.in. See ~abinit/tests/tutorial/Input/tbase2_5.in
   for an example.
 <pre>
@@ -450,6 +460,8 @@ within 4% of the experimental bond length, and within
 
 <p><i>Do not forget that the typical accuracy of LDA and GGA varies
 with the class of materials studied...</i>
+<br><br><a href=#top>Go to the top</a>
+<hr>
 <script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
 
 </body>

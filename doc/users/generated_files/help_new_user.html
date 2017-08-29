@@ -4,7 +4,18 @@
 <!--                                                                                     -->
 <html>
 <head><title>new user help file</title>
-<link rel=stylesheet type="text/css" href="../formabinit.css">
+<link rel=stylesheet type="text/css" href="../../formabinit.css">
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  jax: ["input/TeX","output/HTML-CSS"],
+  tex2jax: {inlineMath: [['$','$']]},
+  displayAlign: "center",
+  TeX: { equationNumbers: { autoNumber: "AMS" } }
+});
+</script>
+<script type="text/javascript" async
+src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
 </head>
 <body bgcolor="#ffffff">
 
@@ -24,26 +35,22 @@
 <a name="list"></a>
 <h3><b> Content of the help file:</b></h3>
 
-<ul>
-<li><a href="#0">0.</a> Foreword
-<li><a href="#1">1.</a> Introduction
-<li><a href="#2">2.</a> The ABINIT executable : abinit
-<li><a href="#3">3.</a> Other programs in the ABINIT package.
-<li><a href="#4">4.</a> Other resources outside the ABINIT package.
-<li><a href="#5">5.</a> Input variables to abinit.
-<li><a href="#6">6.</a> Output files.
-<li><a href="#7">7.</a> What does the code do?
-<li><a href="#8">8.</a> Versioning logic.
-</ul>
+<ul> 
+  <li>1. <a href="#foreword">Foreword</a></li>
+  <li>2. <a href="#introduction">Introduction</a></li>
+  <li>3. <a href="#abinit">The ABINIT executable : abinit</a></li>
+  <li>4. <a href="#other_programs">Other programs in the ABINIT package</a></li>
+  <li>5. <a href="#other_resources">Other resources outside the ABINIT package</a></li>
+  <li>6. <a href="#input_variables">Input variables to abinit</a></li>
+  <li>7. <a href="#None">Output files</a></li>
+  <li>8. <a href="#do">What does the code do?</a></li>
+  <li>9. <a href="#versioning">Versioning logic</a></li>
 
-<HR ALIGN=left>
-
-<p>
-<a name="0">&nbsp;</a>
-<h3><b>0. Foreword</b></h3>
-
-
-<p>The ABINIT project is a group effort of dozens of people worldwide, whose central
+ </ul> 
+ <hr><br><a name="foreword"> </a>
+<a name="1"> </a>
+<h3><b>1. Foreword</b></h3>
+ <p>The ABINIT project is a group effort of dozens of people worldwide, whose central
 outcome is the main ABINIT application, delivered with many other files in the
 ABINIT package. The ABINIT project includes also resources provided on the 
 <a href="http://www.abinit.org">ABINIT Web site</a>
@@ -68,15 +75,12 @@ Cambridge University Press (2004) ISBN 0 521 78285 6.</cite>
 
 <p>After having gone through the present New User's Guide, you should
 follow the ABINIT tutorial (<a href="../../tutorial/generated_files/lesson_welcome.html#">lesson_welcome</a>).
-
-<p>&nbsp;</p>
-<HR ALIGN=left>
-
-<p><a name="1">&nbsp;</a> </p>
-<h3><b>1. Introduction</b></h3>
-
-
- <p> ABINIT is a package whose main program allows
+<br><br><a href=#top>Go to the top</a>
+<hr>
+<br><a name="introduction"> </a>
+<a name="2"> </a>
+<h3><b>2. Introduction</b></h3>
+ <p>ABINIT is a package whose main program allows
 to find the total energy, charge density and electronic structure
 of systems made of electrons and nuclei (molecules and periodic solids)
 within Density Functional Theory,
@@ -105,17 +109,17 @@ In addition to the main ABINIT code, different utility programs are provided.
   package after download. In practice, a version number is appended to this name, to give for
   example : abinit-8.4.0 . 
   The ABINIT package versioning scheme is explained 
-  <a href="#8">later in this file</a>.
+  <a href="#9">later in this file</a>.
 
 <p>
   ~abinit contains different subdirectories. For example,
   the present file, as well as other descriptive files, should be found in ~abinit/doc/users .
   Other subdirectories will be described later.
-<p>&nbsp;
-<HR ALIGN=left>
-<p> <a name="2">&nbsp;</a>
-<h3><b>2. The ABINIT executable : abinit . </b></h3>
-
+<br><br><a href=#top>Go to the top</a>
+<hr>
+<br><a name="abinit"> </a>
+<a name="3"> </a>
+<h3><b>3. The ABINIT executable : abinit</b></h3>
  <p>After compilation, the main code will be present in the package as
   ~abinit/src/98_main/abinit (or perhaps at another place, depending on your installation).
 
@@ -129,15 +133,15 @@ In addition to the main ABINIT code, different utility programs are provided.
   With these items a job can be run.
 
  <p> The full list of input variables, all of which are provided in the
-single input file, is given in the ABINIT <a href="#">[[FAKE LINK:invars:all|list of all variable]]</a>.
-<br>The detailed description of input variables is given in many "VAR*" files, including:
+single input file, is given in the ABINIT <a href="../../input_variables/generated_files/varset_allvars.html#">list of all variable</a>.
+<br>The detailed description of input variables is given in many "Variable Set" files, including:
 <ul>
-<li> Basic variables, <a href="../../input_variables/generated_files/varbas.html#">varbas</a></li>
-<li> Ground-state calculation variables, <a href="../../input_variables/generated_files/vargs.html#">vargs</a></li>
-<li> GW variables, <a href="../../input_variables/generated_files/vargw.html#">vargw</a></li>
-<li> Files handling variables, <a href="../../input_variables/generated_files/varfil.html#">varfil</a></li>
-<li> Parallelisation variables, <a href="../../input_variables/generated_files/varpar.html#">varpar</a></li>
-<li> Response Function variables, <a href="../../input_variables/generated_files/varrf.html#">varrf</a></li>
+<li> Basic variables, <a href="../../input_variables/generated_files/varset_basic.html#">varset_basic</a></li>
+<li> Ground-state calculation variables, <a href="../../input_variables/generated_files/varset_gstate.html#">varset_gstate</a></li>
+<li> GW variables, <a href="../../input_variables/generated_files/varset_gw.html#">varset_gw</a></li>
+<li> Files handling variables, <a href="../../input_variables/generated_files/varset_files.html#">varset_files</a></li>
+<li> Parallelisation variables, <a href="../../input_variables/generated_files/varset_paral.html#">varset_paral</a></li>
+<li> Density Functional Perturbation Theory variables, <a href="../../input_variables/generated_files/varset_dfpt.html#">varset_dfpt</a></li>
 <li>  ... </li>
 </ul>
 
@@ -159,15 +163,12 @@ in the ~abinit/test subdirectories, e.g. "fast", the "vX" series (v1, v2, ... v6
   Information on pseudopotential
   files can be found in the <a href="help_abinit.html#5">ABINIT help file</a> and
   the ~abinit/doc/psp_infos directory.
-<p>&nbsp;
-<HR ALIGN=left>
-
-
-<p> <a name="3">&nbsp;</a>
-<h3><b>3. Other programs in the ABINIT package.</b></h3>
-
-
-<p> In addition to abinit, there are utility programs provided in the ABINIT package. 
+<br><br><a href=#top>Go to the top</a>
+<hr>
+<br><a name="other_programs"> </a>
+<a name="4"> </a>
+<h3><b>4. Other programs in the ABINIT package</b></h3>
+ <p>In addition to abinit, there are utility programs provided in the ABINIT package. 
 <p>
 <p> Some utility programs are written in F90 (like the main abinit program), and their 
    sources is also in ~abinit/src/98_main . <br> These include :
@@ -195,13 +196,12 @@ in the ~abinit/test subdirectories, e.g. "fast", the "vX" series (v1, v2, ... v6
 <p> Some utility programs are not written in F90, but in Python. They are contained in ~abinit/scripts,
   where post-processing (numerous tools) and pre-processing scripts are distinguished.
   Some allows one to visualize ABINIT outputs, like abinit_eignc_to_bandstructure.py .
-<p>&nbsp;
-<HR ALIGN=left>
-
-<p> <a name="4">&nbsp;</a>
-<h3><b>4. Other resources outside the ABINIT package.</b></h3>
-
-<p> In addition to the ABINIT package, other resources can be obtained from the 
+<br><br><a href=#top>Go to the top</a>
+<hr>
+<br><a name="other_resources"> </a>
+<a name="5"> </a>
+<h3><b>5. Other resources outside the ABINIT package</b></h3>
+ <p>In addition to the ABINIT package, other resources can be obtained from the 
 <a href="https://github.com/abinit">ABINIT GitHub site</a>. The sources
 of the latest version of the ABINIT package are actually mirrored on this site,
 but for other resources (not in the package) this is the only download point. 
@@ -230,66 +230,62 @@ visualize ABINIT outputs or interact with ABINIT.
 We provide a (not very well maintained) list of links in 
 <a href="http://www.abinit.org/community/links">http://www.abinit.org/community/links</a>.
 Of course, you might get more by browsing the Web...
-<p>&nbsp;
-<HR ALIGN=left>
-
-<p> <a name="5">&nbsp;</a>
-<h3><b>5. Input variables to abinit.</b></h3>
-
-
-<p> 
-As an overview, the most important input variables, to be provided in the input file, are listed below:
+<br><br><a href=#top>Go to the top</a>
+<hr>
+<br><a name="input_variables"> </a>
+<a name="6"> </a>
+<h3><b>6. Input variables to abinit</b></h3>
+ <p>As an overview, the most important input variables, to be provided in the input file, are listed below:
 <pre>
 Specification of the geometry of the problem, and types of atoms :
-<a href="../../input_variables/generated_files/varbas.html#natom">natom</a>           total number of atoms in unit cell
-<a href="../../input_variables/generated_files/varbas.html#ntypat">ntypat</a>          number of types of atoms
-<a href="../../input_variables/generated_files/varbas.html#typat">typat</a>(<a href="../../input_variables/generated_files/varbas.html#natom">natom</a>)    sequence of integers, specifying the type of each atom.
-                NOTE: the atomic coordinates (<a href="../../input_variables/generated_files/varbas.html#xangst">xangst</a>, <a href="../../input_variables/generated_files/varbas.html#xcart">xcart</a> or <a href="../../input_variables/generated_files/varbas.html#xred">xred</a>)
+<a href="../../input_variables/generated_files/varset_basic.html#natom">natom</a>           total number of atoms in unit cell
+<a href="../../input_variables/generated_files/varset_basic.html#ntypat">ntypat</a>          number of types of atoms
+<a href="../../input_variables/generated_files/varset_basic.html#typat">typat</a>(<a href="../../input_variables/generated_files/varset_basic.html#natom">natom</a>)    sequence of integers, specifying the type of each atom.
+                NOTE: the atomic coordinates (<a href="../../input_variables/generated_files/varset_basic.html#xangst">xangst</a>, <a href="../../input_variables/generated_files/varset_basic.html#xcart">xcart</a> or <a href="../../input_variables/generated_files/varset_basic.html#xred">xred</a>)
                 must be specified in the same order
-<a href="../../input_variables/generated_files/varbas.html#rprim">rprim</a>(3,3)      unscaled primitive translations of periodic cell;
+<a href="../../input_variables/generated_files/varset_basic.html#rprim">rprim</a>(3,3)      unscaled primitive translations of periodic cell;
                 each COLUMN of this array is one primitive translation
-<a href="../../input_variables/generated_files/varbas.html#xangst">xangst</a>(3,<a href="../../input_variables/generated_files/varbas.html#natom">natom</a>)  cartesian coordinates (Angstrom) of atoms in unit cell
-                NOTE: only used when <a href="../../input_variables/generated_files/varbas.html#xred">xred</a> and <a href="../../input_variables/generated_files/varbas.html#xcart">xcart</a> are absent
-<a href="../../input_variables/generated_files/varbas.html#xcart">xcart</a>(3,<a href="../../input_variables/generated_files/varbas.html#natom">natom</a>)  cartesian coordinates (Bohr) of atoms in unit cell
-                NOTE: only used when <a href="../../input_variables/generated_files/varbas.html#xred">xred</a> and <a href="../../input_variables/generated_files/varbas.html#xangst">xangst</a> are absent
-<a href="../../input_variables/generated_files/varbas.html#xred">xred</a>(3,<a href="../../input_variables/generated_files/varbas.html#natom">natom</a>)   fractional coordinates for atomic locations;
-                NOTE: leave out if <a href="../../input_variables/generated_files/varbas.html#xangst">xangst</a> or <a href="../../input_variables/generated_files/varbas.html#xcart">xcart</a> is used
-<a href="../../input_variables/generated_files/varbas.html#znucl">znucl</a>(<a href="../../input_variables/generated_files/varbas.html#ntypat">ntypat</a>)   Nuclear charge of each type of element; must agree with
+<a href="../../input_variables/generated_files/varset_basic.html#xangst">xangst</a>(3,<a href="../../input_variables/generated_files/varset_basic.html#natom">natom</a>)  cartesian coordinates (Angstrom) of atoms in unit cell
+                NOTE: only used when <a href="../../input_variables/generated_files/varset_basic.html#xred">xred</a> and <a href="../../input_variables/generated_files/varset_basic.html#xcart">xcart</a> are absent
+<a href="../../input_variables/generated_files/varset_basic.html#xcart">xcart</a>(3,<a href="../../input_variables/generated_files/varset_basic.html#natom">natom</a>)  cartesian coordinates (Bohr) of atoms in unit cell
+                NOTE: only used when <a href="../../input_variables/generated_files/varset_basic.html#xred">xred</a> and <a href="../../input_variables/generated_files/varset_basic.html#xangst">xangst</a> are absent
+<a href="../../input_variables/generated_files/varset_basic.html#xred">xred</a>(3,<a href="../../input_variables/generated_files/varset_basic.html#natom">natom</a>)   fractional coordinates for atomic locations;
+                NOTE: leave out if <a href="../../input_variables/generated_files/varset_basic.html#xangst">xangst</a> or <a href="../../input_variables/generated_files/varset_basic.html#xcart">xcart</a> is used
+<a href="../../input_variables/generated_files/varset_basic.html#znucl">znucl</a>(<a href="../../input_variables/generated_files/varset_basic.html#ntypat">ntypat</a>)   Nuclear charge of each type of element; must agree with
                 nuclear charge found in psp file.
 
 Specification of the planewave basis set, Brillouin zone wavevector sampling, and occupation of the bands:
-<a href="../../input_variables/generated_files/varbas.html#ecut">ecut</a>            planewave kinetic energy cutoff in Hartree
-<a href="../../input_variables/generated_files/varbas.html#kptopt">kptopt</a>          option for specifying the k-point grid
-                if <a href="../../input_variables/generated_files/varbas.html#kptopt">kptopt</a>=1, automatic generation, using ngkpt and shiftk.
+<a href="../../input_variables/generated_files/varset_basic.html#ecut">ecut</a>            planewave kinetic energy cutoff in Hartree
+<a href="../../input_variables/generated_files/varset_basic.html#kptopt">kptopt</a>          option for specifying the k-point grid
+                if <a href="../../input_variables/generated_files/varset_basic.html#kptopt">kptopt</a>=1, automatic generation, using ngkpt and shiftk.
                 (for the latter, see the <a href="help_abinit.html">help_abinit</a> file)
-<a href="../../input_variables/generated_files/varbas.html#ngkpt">ngkpt</a>(3)        dimensions of the three-dimensional grid of k-points
-<a href="../../input_variables/generated_files/varbas.html#occopt">occopt</a>          set the occupation of electronic levels :
+<a href="../../input_variables/generated_files/varset_basic.html#ngkpt">ngkpt</a>(3)        dimensions of the three-dimensional grid of k-points
+<a href="../../input_variables/generated_files/varset_basic.html#occopt">occopt</a>          set the occupation of electronic levels :
                  =1 for semiconductors
                  =3 ... 7  for metals
 
 Specification of the type of calculation to be done:
-<a href="../../input_variables/generated_files/varrlx.html#ionmov">ionmov</a>          when <a href="../../input_variables/generated_files/varrlx.html#ionmov">ionmov</a> = 0 : the ions and cell shape are fixed
+<a href="../../input_variables/generated_files/varset_rlx.html#ionmov">ionmov</a>          when <a href="../../input_variables/generated_files/varset_rlx.html#ionmov">ionmov</a> = 0 : the ions and cell shape are fixed
                             = 2 : search for the equilibrium geometry
                             = 6 : molecular dynamics
-<a href="../../input_variables/generated_files/varbas.html#iscf">iscf</a>            either a positive number for defining self-consistent
+<a href="../../input_variables/generated_files/varset_basic.html#iscf">iscf</a>            either a positive number for defining self-consistent
                 algorithm (usual), or -2 for band structure in fixed potential
-<a href="../../input_variables/generated_files/vargs.html#optdriver">optdriver</a>       when == 3 and 4 : will do GW calculations (many-body perturbation theory)
-<a href="../../input_variables/generated_files/varrf.html#rfelfd">rfelfd</a>          when /= 0 : will do response calculation to electric field
-<a href="../../input_variables/generated_files/varrf.html#rfphon">rfphon</a>          when = 1 : will do response calculation to atomic displacements
+<a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>       when == 3 and 4 : will do GW calculations (many-body perturbation theory)
+<a href="../../input_variables/generated_files/varset_dfpt.html#rfelfd">rfelfd</a>          when /= 0 : will do response calculation to electric field
+<a href="../../input_variables/generated_files/varset_dfpt.html#rfphon">rfphon</a>          when = 1 : will do response calculation to atomic displacements
 
 Specification of the numerical convergency of the calculation:
-<a href="../../input_variables/generated_files/varbas.html#nstep">nstep</a>           maximal number of self-consistent cycles (on the order of 20)
-<a href="../../input_variables/generated_files/varbas.html#tolvrs">tolvrs</a>          tolerance on self-consistent convergence
-<a href="../../input_variables/generated_files/varrlx.html#ntime">ntime</a>           number of molecular dynamics or relaxation steps
-<a href="../../input_variables/generated_files/varrlx.html#tolmxf">tolmxf</a>          force tolerance for structural relaxation in Hartree/Bohr
+<a href="../../input_variables/generated_files/varset_basic.html#nstep">nstep</a>           maximal number of self-consistent cycles (on the order of 20)
+<a href="../../input_variables/generated_files/varset_basic.html#tolvrs">tolvrs</a>          tolerance on self-consistent convergence
+<a href="../../input_variables/generated_files/varset_rlx.html#ntime">ntime</a>           number of molecular dynamics or relaxation steps
+<a href="../../input_variables/generated_files/varset_rlx.html#tolmxf">tolmxf</a>          force tolerance for structural relaxation in Hartree/Bohr
 </pre>
-
-<p>&nbsp;
-<HR ALIGN=left>
-<a name="6">&nbsp;</a>
-<h3><b> 6. Output files.</b></h3>
-
- <p> Output from an abinit run shows up in several files and
+<br><br><a href=#top>Go to the top</a>
+<hr>
+<br><a name="None"> </a>
+<a name="7"> </a>
+<h3><b>7. Output files</b></h3>
+ <p><p> Output from an abinit run shows up in several files and
 in the standard output.  Usually one runs the command with
 a pipe of standard output to a log file, which can
 be inspected for warnings or error messages if anything goes wrong or otherwise
@@ -317,14 +313,12 @@ should be provided by the user, from which the code generates
 a full name. Amongst these files, there is a "status" file,
 summarizing the current status of advancement of the code,
 in long jobs. The <a href="help_abinit.html">ABINIT help file</a> contains more details.
-
-<p>&nbsp;
-
-<HR ALIGN=left>
-<a name="7">&nbsp;</a>
-<h3><b> 7. What does the code do?</b></h3>
-
- <p> The simplest sort of job computes an electronic structure for a fixed set
+<br><br><a href=#top>Go to the top</a>
+<hr>
+<br><a name="do"> </a>
+<a name="8"> </a>
+<h3><b>8. What does the code do?</b></h3>
+ <p>The simplest sort of job computes an electronic structure for a fixed set
 of atomic positions within a periodic unit cell.  By electronic structure, we
 mean a set of eigenvalues and wavefunctions which achieve the lowest (DFT)
 energy possible for that basis set (that number of planewaves).  The code
@@ -341,13 +335,12 @@ zero and adjust unit cell parameters to move toward zero stress.
 It can performs molecular dynamics. It can also be used to find responses
 to atomic displacements and homogeneous electric field, so that
 the full phonon band structure can be constructed...
-
-<p>&nbsp;
-<HR ALIGN=left>
-<a name="8">&nbsp;</a>
-<h3><b> 8. Versioning logic.</b></h3>
-
-<p> We finish this "new user guide" with a brief explanation of the logic of ABINIT version releases.
+<br><br><a href=#top>Go to the top</a>
+<hr>
+<br><a name="versioning"> </a>
+<a name="9"> </a>
+<h3><b>9. Versioning logic</b></h3>
+ <p>We finish this "help for new user" with a brief explanation of the logic of ABINIT version releases.
 <p>
 The full name of a version has three digits (for example, 8.4.0). 
 The first digit is the slowly varying one (in average, it is changed after two or three years). 
@@ -373,6 +366,8 @@ version 8.4.1 is more debugged than 8.4.0, but no new features has been added (s
 <p>&nbsp;
 <HR ALIGN=left>
 <p> In order to start using ABINIT, please follow the tutorial (<a href="../../tutorial/generated_files/lesson_welcome.html#">lesson_welcome</a>)</a>
+<br><br><a href=#top>Go to the top</a>
+<hr>
 <script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
 
 </body>

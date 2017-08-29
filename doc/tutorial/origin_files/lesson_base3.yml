@@ -1,6 +1,7 @@
-# This YAML file contains the introduction as well as the body (including the table of content) of the html lesson.
-# In order to modify the other parts, modify the file lessons.html .
-# This is the introduction ...
+## This YAML file contains the introduction as well as the body of the html lesson.
+## In order to modify the other parts, modify the file lessons.html .
+
+## This is the introduction ...
 intro : |
   <p>This lesson aims at showing you how to get
   the following physical properties, for an insulator:
@@ -13,28 +14,17 @@ intro : |
   as the smearing of the plane-wave kinetic energy cut-off.
   
   <p>This lesson should take about 1 hour.
-# This is the body, including the table of content ...
-body : |
-  <ul>
-    <li><a href="#31">3.1</a> Computing the total energy of silicon at
-      fixed number of k points.</li>
-    <li><a href="#32">3.2</a> Starting the convergence study with respect
-      to k points</li>
-    <li><a href="#33">3.3</a> Actually performing the convergence study
-      with respect to k points</li>
-    <li><a href="#34">3.4</a> Determination of the lattice parameters</li>
-    <li><a href="#35">3.5</a> Computing the band structure</li>
-  </ul>
-  
-  <br>
-  <hr>
-  
+
+## Now come the different sections, numbered.
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec1:
+ title: "Computing the total energy of silicon at fixed number of k points"
+ tag: energy
+ body: |
   <a name="31">&nbsp;</a>
-  <h3><b>
-  3.1.
-  Computing the total energy of silicon at fixed number of k points.
-  </b></h3>
-  
   <p><i>Before beginning, you might consider to work in a different subdirectory
     as for lesson_base1 or lesson_base2 . Why not "Work3" ?</i>
   
@@ -71,14 +61,15 @@ body : |
   <pre>
      etotal   -8.8662238960E+00
   </pre>
-  
-  <hr>
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec2:
+ title: "Starting the convergence study with respect to k points"
+ tag: convergence
+ body: |
   <a name="32">&nbsp;</a>
-  <h3><b>
-  3.2.
-  Starting the convergence study with respect to k points
-  </b></h3>
-  
   <p>There is of course a convergence study associated with the sampling
   of the Brillouin zone. You should examine different grids,
   of increasing resolution. You might try the following series
@@ -158,15 +149,15 @@ body : |
   that will fold to 10 k points in the irreducible Brillouin zone, as well as
   one that will fold to 2 k points in the irreducible Brillouin zone.
   The latter is clearly to be preferred !
-  <p>
-  <hr>
-  
-  <p> <a name="33">&nbsp;</a> </p>
-  <h3><b>
-  3.3.
-  Actually performing the convergence study with respect to k points
-  </b></h3>
-  
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec3:
+ title: "Actually performing the convergence study with respect to k points"
+ tag: kpts_conv
+ body: |
+  <a name="33">&nbsp;</a>
   <p>In order to understand k-point grids, you should read the Monkhorst and Pack
     paper, <cite>Phys. Rev. B 13, 5188 (1976)</cite> ... Well, maybe not immediately
     ... In the meantime, you can try the above-mentioned convergence study.
@@ -191,18 +182,15 @@ body : |
     2 gives an accuracy of about 0.0001 Ha <br>
     So, our converged value for the total energy, at fixed [[acell]],
     fixed [[ecut]], is -8.8726 Ha .
-  
-  <p>
-  <hr>
-  
-  
-  
-  <p> <a name="34">&nbsp;</a>
-  <h3><b>
-  3.4.
-  Determination of the lattice parameters.
-  </b></h3>
-  
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec4:
+ title: "Determination of the lattice parameters"
+ tag: lattice
+ body: |
+  <a name="34">&nbsp;</a>
   <p>The input variable [[optcell]]
     governs the automatic optimisation of cell shape and volume. <br>
     For the automatic optimisation of cell volume, use:
@@ -247,12 +235,15 @@ body : |
     Bohr (actually 10.21644...), that is 5.406 Angstrom. The experimental value is <code>5.431 Angstrom
     at 25 degree Celsius</code>, see <cite>R.W.G. Wyckoff, Crystal structures
     Ed. Wiley and sons, New-York (1963).</cite>
-  <p>
-  <hr>
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec5:
+ title: "Computing the band structure"
+ tag: bands
+ body: |
   <a name="35">&nbsp;</a>
-  <h3><b>3.5.
-  Computing the band structure</b></h3>
-  
   <p>We fix the parameters [[acell]]
     to the theoretical value of 3*10.216, and we fix also the grid of k points (the
     4x4x4 FCC grid, equivalent to a 8x8x8 Monkhorst-pack grid) <br>

@@ -1323,8 +1323,8 @@ subroutine gshgg_mkncwrite(istep, dtset, dtfil, psps, hdr, pawtab, pawfgr, paw_i
      ! Set up remaining of the Hamiltonian
      ! Compute (1/2) (2 Pi)**2 (k+G)**2:
      ABI_ALLOCATE(kinpw,(npw_k))
-!     call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass,gmet,kg_k,kinpw,kpoint,npw_k)
-     call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass,gmet,kg_k,kinpw,kpoint,npw_k,0,0)
+!     call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass_free,gmet,kg_k,kinpw,kpoint,npw_k)
+     call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass_free,gmet,kg_k,kinpw,kpoint,npw_k,0,0)
 
      ! Compute (k+G) vectors (only if useylm=1)
      nkpg=3*dtset%nloalg(3)
@@ -1577,7 +1577,7 @@ subroutine kss_calc_vkb(Psps,kpoint,npw_k,kg_k,rprimd,vkbsign,vkb,vkbd)
 !scalars
  integer :: dimffnl,ider,idir,itypat,nkpg,il0,in
  integer :: il,ilmn,ig,is
- real(dp) :: ucvol,effmass,ecutsm,ecut
+ real(dp) :: ucvol,effmass_free,ecutsm,ecut
 !arrays
  real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3)
  real(dp),allocatable :: ffnl(:,:,:,:),kpg_dum(:,:),modkplusg(:)
@@ -1631,9 +1631,9 @@ subroutine kss_calc_vkb(Psps,kpoint,npw_k,kg_k,rprimd,vkbsign,vkb,vkbd)
 
  ABI_MALLOC(modkplusg,(npw_k))
 
- effmass=one; ecutsm=zero; ecut=HUGE(one)
-! call mkkin(ecut,ecutsm,effmass,gmet,kg_k,modkplusg,kpoint,npw_k)
- call mkkin(ecut,ecutsm,effmass,gmet,kg_k,modkplusg,kpoint,npw_k,0,0)
+ effmass_free=one; ecutsm=zero; ecut=HUGE(one)
+! call mkkin(ecut,ecutsm,effmass_free,gmet,kg_k,modkplusg,kpoint,npw_k)
+ call mkkin(ecut,ecutsm,effmass_free,gmet,kg_k,modkplusg,kpoint,npw_k,0,0)
  modkplusg(:)=SQRT(half/pi**2*modkplusg(:))
  modkplusg(:)=MAX(modkplusg(:),tol10)
 

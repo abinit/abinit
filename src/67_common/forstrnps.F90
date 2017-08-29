@@ -19,7 +19,7 @@
 !!  cprj(natom,mcprj*usecprj)=<p_lmn|Cnk> coefficients for each WF |Cnk> and each NL proj |p_lmn>
 !!  ecut=cut-off energy for plane wave basis sphere (Ha)
 !!  ecutsm=smearing energy for plane wave kinetic energy (Ha)
-!!  effmass=effective mass for electrons (1. in common case)
+!!  effmass_free=effective mass for electrons (1. in common case)
 !!  electronpositron <type(electronpositron_type)>=quantities for the electron-positron annihilation (optional argument)
 !!  eigen(mband*nkpt*nsppol)=array for holding eigenvalues (hartree)
 !!  fock <type(fock_type)>= quantities to calculate Fock exact exchange
@@ -75,9 +75,6 @@
 !!   npsstr(6)=nonlocal pseudopotential energy part of stress tensor
 !!    (hartree/bohr^3)
 !!
-!! NOTES
-!!  Please, dont suppress TESTDFPT sections (MT, nov. 2014)
-!!
 !! PARENTS
 !!      forstr
 !!
@@ -95,7 +92,7 @@
 
 #include "abi_common.h"
 
-subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass,eigen,electronpositron,fock,&
+subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,fock,&
 &  grnl,istwfk,kg,kinstr,npsstr,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_enreg,mpsang,&
 &  mpw,my_natom,natom,nband,nfft,ngfft,nkpt,nloalg,npwarr,nspden,nspinor,nsppol,nsym,&
 &  ntypat,nucdipmom,occ,optfor,paw_ij,pawtab,ph1d,psps,rprimd,&
@@ -117,9 +114,6 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass,eigen,electronpositron,fock,&
  use m_paw_ij,           only : paw_ij_type
  use m_pawcprj,          only : pawcprj_type,pawcprj_alloc,pawcprj_free,pawcprj_get,pawcprj_reorder
 use m_cgtools
-!TESTDFPT
-!  use m_cgtools, only : dotprod_g
-!TESTDFPT
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -140,7 +134,7 @@ use m_cgtools
  integer,intent(in) :: mband,mcg,mcprj,mgfft,mkmem,mpsang,mpw,my_natom,natom,nfft,nkpt
  integer,intent(in) :: nspden,nsppol,nspinor,nsym,ntypat,optfor,stress_needed
  integer,intent(in) :: usecprj,usefock,use_gpu_cuda
- real(dp),intent(in) :: ecut,ecutsm,effmass
+ real(dp),intent(in) :: ecut,ecutsm,effmass_free
  type(electronpositron_type),pointer :: electronpositron
  type(MPI_type),intent(inout) :: mpi_enreg
  type(pseudopotential_type),intent(in) :: psps
@@ -186,22 +180,6 @@ use m_cgtools
  type(pawcprj_type),target,allocatable :: cwaveprj(:,:)
  type(pawcprj_type),pointer :: cwaveprj_idat(:,:)
 
-
-!TESTDFPT
-!  integer,parameter :: ndtset_test=4
-!  integer,save :: idtset_test=1
-!  integer :: choice_test,cplex_test,cpopt_test,dimffnl_test,iatom_test,iatom_only_test
-!  integer :: iband_test,ider_ffnl_test,idir_test,idir_ffnl_test,idir_nonlop_test,inlout_test
-!  integer :: nnlout_test,paw_opt_test,signs_test,unkg,unylm
-!  logical :: ex,testdfpt = .true.
-!  character(len=100) :: strg
-!  real(dp) :: argr,argi
-!  real(dp),allocatable :: enl_test(:,:,:),cwavef_test(:,:),scwavef_test(:,:),enlout_test(:)
-!  real(dp),allocatable :: ylm_test(:,:),ylmgr_test(:,:,:),ylm_k_test(:,:),ylmgr_k_test(:,:,:)
-!  real(dp),allocatable,target :: ffnl_test(:,:,:,:)
-!  type(pawcprj_type) :: cprj_test(1,1)
-!TESTDFPT
-
 !*************************************************************************
 
  call timab(920,1,tsec)
@@ -235,7 +213,6 @@ use m_cgtools
  usefock_loc = (usefock==1 .and. associated(fock))
 !Arrays initializations
  grnl(:)=zero
- 
  if (usefock_loc) then
    fock%optfor=.false.
    fock%optstr=.false.
@@ -269,7 +246,6 @@ use m_cgtools
  end if
 
 !Initialize Hamiltonian (k-independent terms)
- 
 
  call init_hamiltonian(gs_hamk,psps,pawtab,nspinor,nsppol,nspden,natom,&
 & typat,xred,nfft,mgfft,ngfft,rprimd,nloalg,usecprj=usecprj_local,&
@@ -285,7 +261,6 @@ use m_cgtools
    call pawcprj_reorder(cprj,gs_hamk%atindx)
  end if
 
-
 !Common data for "nonlop" routine
  signs=1 ; idir=0  ; ishift=0 ; tim_nonlop=4 ; tim_nonlop_prep=12
  choice=2*optfor;if (stress_needed==1) choice=10*choice+3
@@ -298,133 +273,6 @@ use m_cgtools
  end if
 
  call timab(921,2,tsec)
-
-!TESTDFPT
-!  if (testdfpt) then
-!    choice_test=1 ; idir_test=0 ; signs_test=1
-!    if(idtset_test<ndtset_test)then
-!      inquire(file='config/signs1',exist=ex) ; if(ex) signs_test=1
-!      inquire(file='config/signs2',exist=ex) ; if(ex) signs_test=2
-!      do ii=1,100
-!        if (ii< 10) write(unit=strg,fmt='(a13,i1)') "config/choice",ii
-!        if (ii>=10) write(unit=strg,fmt='(a13,i2)') "config/choice",ii
-!        inquire(file=trim(strg),exist=ex)  ; if(ex) choice_test=ii
-!      end do
-!      do ii=1,9
-!        write(unit=strg,fmt='(a11,i1)') "config/idir",ii
-!        inquire(file=trim(strg),exist=ex)  ; if(ex) idir_test=ii
-!      end do
-!    else
-!      inquire(file='config/signsdfpt1',exist=ex)  ; if(ex)signs_test=1
-!      inquire(file='config/signsdfpt2',exist=ex)  ; if(ex)signs_test=2
-!      do ii=1,100
-!        if (ii< 10) write(unit=strg,fmt='(a17,i1)') "config/choicedfpt",ii
-!        if (ii>=10) write(unit=strg,fmt='(a17,i2)') "config/choicedfpt",ii
-!        inquire(file=trim(strg),exist=ex)  ; if(ex) choice_test=ii
-!      end do
-!      do ii=1,36
-!        if (ii< 10) write(unit=strg,fmt='(a15,i1)') "config/idirdfpt",ii
-!        if (ii>=10) write(unit=strg,fmt='(a15,i2)') "config/idirdfpt",ii
-!        inquire(file=trim(strg),exist=ex) ; if(ex) idir_test=ii
-!      end do
-!    end if
-!    iatom_test=1 ; iband_test=-1
-!    do ii=1,50
-!      if (ii< 10) write(unit=strg,fmt='(a12,i1)') "config/iatom",ii
-!      if (ii>=10) write(unit=strg,fmt='(a12,i2)') "config/iatom",ii
-!      inquire(file=trim(strg),exist=ex)  ; if(ex) iatom_test=ii
-!      if (ii< 10) write(unit=strg,fmt='(a12,i1)') "config/iband",ii
-!      if (ii>=10) write(unit=strg,fmt='(a12,i2)') "config/iband",ii
-!      inquire(file=trim(strg),exist=ex)  ; if(ex) iband_test=ii
-!    end do
-!    cpopt_test=-1 ; paw_opt_test=3*psps%usepaw
-!    inquire(file='config/dij',exist=ex);if(ex) paw_opt_test=1*psps%usepaw
-!    if(signs_test==1)then
-!      iatom_only_test=-1 ; idir_ffnl_test=0
-!      idir_nonlop_test=0 ; cplex_test=1
-!      if(choice_test==1)then
-!        ider_ffnl_test=0
-!        nnlout_test=1 ; inlout_test=1
-!      end if
-!      if(choice_test==2)then
-!        ider_ffnl_test=0
-!        nnlout_test=3*natom ; inlout_test=3*(iatom_test-1)+idir_test
-!      end if
-!      if(choice_test==3)then
-!        ider_ffnl_test=1
-!        nnlout_test=6 ; inlout_test=idir_test
-!      end if
-!      if(choice_test==5)then
-!        ider_ffnl_test=1
-!        nnlout_test=3 ; inlout_test=idir_test
-!      end if
-!      if(choice_test==51.or.choice_test==52)then
-!        ider_ffnl_test=1 ; cplex_test=2
-!        nnlout_test=6 ; inlout_test=2*idir_test-1
-!      end if
-!      if(choice_test==54)then
-!        ider_ffnl_test=2 ; cplex_test=2
-!        nnlout_test=18*natom ; inlout_test=2*idir_test-1
-!      end if
-!      if(choice_test==55)then
-!        ider_ffnl_test=2 ; cplex_test=2
-!        nnlout_test=36 ; inlout_test=2*idir_test-1
-!      end if
-!      if(choice_test==8)then
-!        ider_ffnl_test=2
-!        nnlout_test=6 ; inlout_test=idir_test
-!      end if
-!      if(choice_test==81)then
-!        ider_ffnl_test=2 ; cplex_test=2
-!        nnlout_test=18 ; inlout_test=2*idir_test-1
-!      end if
-!    else if(signs_test==2)then
-!      nnlout_test=1 ; inlout_test =1 ; cplex_test=1
-!      idir_nonlop_test=idir_test ; iatom_only_test=-1
-!      if(choice_test==1)then
-!        ider_ffnl_test=0 ; idir_ffnl_test=0
-!      end if
-!      if(choice_test==2)then
-!        iatom_only_test=iatom_test
-!        ider_ffnl_test=0 ; idir_ffnl_test=0
-!      end if
-!      if(choice_test==3)then
-!        ider_ffnl_test=1 ; idir_ffnl_test=-7
-!      end if
-!      if(choice_test==5)then
-!        ider_ffnl_test=1 ; idir_ffnl_test=4
-!      end if
-!      if(choice_test==51.or.choice_test==52)then
-!        ider_ffnl_test=1 ; idir_ffnl_test=4 ; cplex_test=2
-!      end if
-!      if(choice_test==8)then
-!        ider_ffnl_test=2 ; idir_ffnl_test=4
-!      end if
-!      if(choice_test==81)then
-!        ider_ffnl_test=2 ; idir_ffnl_test=4 ; cplex_test=2
-!      end if
-!    end if
-!    dimffnl_test=1+ider_ffnl_test
-!    if (ider_ffnl_test==1.and.(idir_ffnl_test==0.or.idir_ffnl_test==4)) dimffnl_test=2+2*psps%useylm
-!    if (ider_ffnl_test==2.and.(idir_ffnl_test==0.or.idir_ffnl_test==4)) dimffnl_test=3+7*psps%useylm
-!    if (ider_ffnl_test==1.and.idir_ffnl_test==-7) dimffnl_test=2+5*psps%useylm
-!    if (idir_ffnl_test>-7.and.idir_ffnl_test<0) dimffnl_test=2
-!    write(std_out,'(2(a,i2),(a,i1),2(a,i2),(a,i1),(a,i2),(a,i1),2(a,i2))') &
-! &   "TESTDFPT: choice=",choice_test,", idir(mkffnl)=",idir_ffnl_test,&
-! &   ", ider(mkffnl)=",ider_ffnl_test,", dimffnl=",dimffnl_test,&
-! &   ", idir(nonlop)=",idir_nonlop_test,", signs=",signs_test,&
-! &   ", iatom=",iatom_only_test,", paw_opt=",paw_opt_test,&
-! &   ", nnlout=",nnlout_test,", inlout=",inlout_test
-!    ABI_ALLOCATE(ylm_test,(mpw*mkmem,psps%mpsang*psps%mpsang*psps%useylm))
-!    ABI_ALLOCATE(ylmgr_test,(mpw*mkmem,9,psps%mpsang*psps%mpsang*psps%useylm))
-!    if (psps%useylm==1) then
-!      call initylmg(gs_hamk%gprimd,kg,kpt,mkmem,mpi_enreg,psps%mpsang,mpw,nband,nkpt,&
-! &     npwarr,nsppol,2,rprimd,ylm_test,ylmgr_test)
-!    else
-!      ylm_test=zero ; ylmgr_test=zero
-!    end if
-!  end if
-!TESTDFPT
 
 !LOOP OVER SPINS
  bdtot_index=0;ibg=0;icg=0
@@ -468,7 +316,6 @@ use m_cgtools
      if (psps%usepaw==1.and.usecprj_local==1) then
        ABI_DATATYPE_ALLOCATE(cwaveprj,(natom,my_nspinor*bandpp))
        call pawcprj_alloc(cwaveprj,0,gs_hamk%dimcprj)
-!       call pawcprj_alloc(cwaveprj,cprj(1,1)%ncpgr,gs_hamk%dimcprj)
      else
        ABI_DATATYPE_ALLOCATE(cwaveprj,(0,0))
      end if
@@ -566,44 +413,6 @@ use m_cgtools
        call mkkpg(kg_k,kpg_k,kpoint,nkpg,npw_k)
      end if
 
-!TESTDFPT
-!      if (ikpt==1.and.isppol==1.and.testdfpt) then
-!        ABI_ALLOCATE(ylm_k_test,(npw_k,mpsang*mpsang*psps%useylm))
-!        ABI_ALLOCATE(ylmgr_k_test,(npw_k,9,mpsang*mpsang*psps%useylm))
-!        ABI_ALLOCATE(cwavef_test,(2,npw_k))
-!        if (paw_opt_test>=3) then
-!          ABI_ALLOCATE(scwavef_test,(2,npw_k))
-!          ABI_ALLOCATE(enl_test,(0,0,0))
-!        else
-!          ABI_ALLOCATE(scwavef_test,(0,0))
-!          ABI_ALLOCATE(enl_test,(gs_hamk%dimekb1,gs_hamk%dimekb2,gs_hamk%nspinor**2))
-!          enl_test(:,:,:)=one
-!        end if
-!        if (psps%useylm==1) then
-!          do ilm=1,mpsang*mpsang
-!            do ipw=1,npw_k
-!              ylm_k_test(ipw,ilm)=ylm_test(ipw+ikg,ilm)
-!            end do
-!          end do
-!          if (ider_ffnl_test>=1) then
-!            do ilm=1,mpsang*mpsang
-!              do ii=1,3+6*(ider_ffnl_test/2)
-!                do ipw=1,npw_k
-!                  ylmgr_k_test(ipw,ii,ilm)=ylmgr_test(ipw+ikg,ii,ilm)
-!                end do
-!              end do
-!            end do
-!          end if
-!        end if
-!        ABI_ALLOCATE(ffnl_test,(npw_k,dimffnl_test,psps%lmnmax,ntypat))
-!        call mkffnl(psps%dimekb,dimffnl_test,psps%ekb,ffnl_test,psps%ffspl,&
-! &       gs_hamk%gmet,gs_hamk%gprimd,ider_ffnl_test,idir_ffnl_test,psps%indlmn,kg_k,kpg_k,&
-! &       gs_hamk%kpt_k,psps%lmnmax,psps%lnmax,psps%mpsang,psps%mqgrid_ff,nkpg,&
-! &       npw_k,ntypat,psps%pspso,psps%qgrid_ff,rmet,&
-! &       psps%usepaw,psps%useylm,ylm_k_test,ylmgr_k_test)
-!      end if
-!TESTDFPT
-
 !    Compute nonlocal form factors ffnl at all (k+G)
      ider=0;idir=0;dimffnl=1
      if (stress_needed==1) then
@@ -625,7 +434,6 @@ use m_cgtools
 !     - Compute 3D phase factors
 !     - Prepare various tabs in case of band-FFT parallelism
 !     - Load k-dependent quantities in the Hamiltonian
-
      ABI_ALLOCATE(ph3d,(2,npw_k,gs_hamk%matblk))
      call load_k_hamiltonian(gs_hamk,kpt_k=kpoint,istwf_k=istwf_k,npw_k=npw_k,&
 &     kg_k=kg_k,kpg_k=kpg_k,ffnl_k=ffnl,ph3d_k=ph3d,compute_gbound=compute_gbound,compute_ph3d=.true.)
@@ -647,7 +455,6 @@ use m_cgtools
 !    The following is now wrong. In sequential, nblockbd=nband_k/bandpp
 !    blocksize= bandpp (JB 2016/04/16)
 !    Note that in sequential mode iblock=iband, nblockbd=nband_k and blocksize=1
-!   
      ABI_ALLOCATE(lambda,(blocksize))
      ABI_ALLOCATE(occblock,(blocksize))
      ABI_ALLOCATE(weight,(blocksize))
@@ -664,6 +471,7 @@ use m_cgtools
          fock%forces_ikpt=zero
        end if
      end if
+
      do iblock=1,nblockbd
 
        iband=(iblock-1)*blocksize+1;iband_last=min(iband+blocksize-1,nband_k)
@@ -690,45 +498,6 @@ use m_cgtools
 
          lambda(1:blocksize)= eigen(1+(iblock-1)*blocksize+bdtot_index:iblock*blocksize+bdtot_index)
          if (mpi_enreg%paral_kgb/=1) then
-!TESTDFPT
-!            if (ikpt==1.and.isppol==1.and.testdfpt.and.(iband==iband_test.or.iband_test==-1)) then
-!              ABI_ALLOCATE(enlout_test,(nnlout_test*blocksize))
-!              nullify(gs_hamk%ffnl_k,gs_hamk%ffnl_kp)
-!              gs_hamk%ffnl_k => ffnl_test;gs_hamk%ffnl_kp => gs_hamk%ffnl_k
-!              if (paw_opt_test<3) then
-!                call nonlop(choice_test,cpopt_test,cprj_test,enlout_test,gs_hamk,idir_nonlop_test,lambda,&
-! &                mpi_enreg,1,nnlout_test,paw_opt_test,signs_test,scwavef_test,tim_nonlop,cwavef,cwavef_test,&
-! &                iatom_only=iatom_only_test,enl=enl_test)
-!              else
-!                call nonlop(choice_test,cpopt_test,cprj_test,enlout_test,gs_hamk,idir_nonlop_test,lambda,&
-! &                mpi_enreg,1,nnlout_test,paw_opt_test,signs_test,scwavef_test,tim_nonlop,cwavef,cwavef_test,&
-! &                iatom_only=iatom_only_test)
-!              end if
-!              nullify(gs_hamk%ffnl_k,gs_hamk%ffnl_kp)
-!              gs_hamk%ffnl_k => ffnl;gs_hamk%ffnl_kp => gs_hamk%ffnl_k
-!              if (signs_test==2) then
-!                if (paw_opt_test<3) then
-!                  call dotprod_g(argr,argi,istwf_k,npw_k,cplex_test,cwavef,cwavef_test,&
-! &                 mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
-!                else
-!                  call dotprod_g(argr,argi,istwf_k,npw_k,cplex_test,cwavef,scwavef_test,&
-! &                 mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
-!                end if
-!                enlout_test(inlout_test)=argr
-!              end if
-!              if (signs_test==1.and.choice_test==1) then
-!                call dotprod_g(argr,argi,istwf_k,npw_k,1,cwavef,cwavef,&
-! &                 mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
-!                   enlout_test(:)=enlout_test(:)+argr
-!              end if
-!              if (idtset_test<ndtset_test) then
-!                write(std_out,'(a,i3,es24.16)') "TESTDFPT_df:  ",iband,enlout_test(inlout_test)
-!              else
-!                write(std_out,'(a,i3,es24.16)') "TESTDFPT_dfpt:",iband,enlout_test(inlout_test)
-!              end if
-!              ABI_DEALLOCATE(enlout_test)
-!            end if
-!TESTDFPT
            call nonlop(choice,cpopt,cwaveprj,enlout,gs_hamk,idir,lambda,mpi_enreg,blocksize,nnlout,&
 &           paw_opt,signs,nonlop_dum,tim_nonlop,cwavef,cwavef)
          else
@@ -783,6 +552,7 @@ use m_cgtools
            end do
            call timab(924,2,tsec)
          end if
+
 !        Accumulate stress tensor and forces for the Fock part
          if (usefock_loc) then
            if(fock%optstr.or.fock%optfor) then
@@ -812,27 +582,25 @@ use m_cgtools
          end if
        end if
 
-!TESTDFPT
-!       if (ikpt==1.and.iband==nband_k.and.testdfpt) itest=itest+1
-!TESTDFPT
-
      end do ! End of loop on block of bands
-     if (usefock_loc) then
-       if (fock%optstr) then
-         ABI_DEALLOCATE(fock%stress_ikpt)
-       end if
-     end if
+
 !    Restore the bandfft tabs
      if (mpi_enreg%paral_kgb==1) then
        call bandfft_kpt_restoretabs(my_bandfft_kpt,ffnl=ffnl_sav,ph3d=ph3d_sav,kpg=kpg_k_sav)
      end if
 
-!    Incremente indexes
+!    Increment indexes
      bdtot_index=bdtot_index+nband_k
      if (mkmem/=0) then
        ibg=ibg+my_nspinor*nband_cprj_k
        icg=icg+npw_k*my_nspinor*nband_k
        ikg=ikg+npw_k
+     end if
+
+     if (usefock_loc) then
+       if (fock%optstr) then
+         ABI_DEALLOCATE(fock%stress_ikpt)
+       end if
      end if
 
      if (psps%usepaw==1) then
@@ -862,27 +630,9 @@ use m_cgtools
      if ((stress_needed==1).and.(usefock_loc).and.(psps%usepaw==1))then
        ABI_DEALLOCATE(fock%ffnl_str)
      end if
-!TESTDFPT
-!      if (ikpt==1.and.isppol==1.and.testdfpt) then
-!        ABI_DEALLOCATE(ffnl_test)
-!        ABI_DEALLOCATE(enl_test)
-!        ABI_DEALLOCATE(cwavef_test)
-!        ABI_DEALLOCATE(scwavef_test)
-!        ABI_DEALLOCATE(ylm_k_test)
-!        ABI_DEALLOCATE(ylmgr_k_test)
-!      end if
-!TESTDFPT
 
    end do ! End k point loop
  end do ! End loop over spins
-
-!TESTDFPT
-!  if (testdfpt) then
-!    ABI_DEALLOCATE(ylm_test)
-!    ABI_DEALLOCATE(ylmgr_test)
-!    idtset_test=idtset_test+1
-!  end if
-!TESTDFPT
 
 !Stress is equal to dE/d_strain * (1/ucvol)
  npsstr(:)=npsstr(:)/gs_hamk%ucvol
@@ -914,7 +664,7 @@ use m_cgtools
 
 !Do final normalizations and symmetrizations of stress tensor contributions
  if (stress_needed==1) then
-   renorm_factor=-(two_pi**2)/effmass/gs_hamk%ucvol
+   renorm_factor=-(two_pi**2)/effmass_free/gs_hamk%ucvol
    kinstr(:)=kinstr(:)*renorm_factor
    if (nsym>1) then
      call stresssym(gs_hamk%gprimd,nsym,kinstr,symrec)
@@ -924,10 +674,12 @@ use m_cgtools
      end if
    end if
  end if
-!need to reorder cprj=<p_lmn|Cnk> (from atom-sorted to unsorted)
+
+!Need to reorder cprj=<p_lmn|Cnk> (from atom-sorted to unsorted)
  if (psps%usepaw==1.and.usecprj_local==1) then
    call pawcprj_reorder(cprj,gs_hamk%atindx1)
  end if
+
 !Deallocate temporary space
  call destroy_hamiltonian(gs_hamk)
  if (usefock_loc) then

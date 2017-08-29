@@ -1,5 +1,5 @@
 # This file provides the information needed to generate the documentation files that describes the input variables,
-# the "var*.html files, as well as related parameters ("special"), and the list of all input variables. 
+# the "varset_*.html files, as well as related parameters ("special"), and the list of all input variables. 
 # Each paragraph of such documentation file has a mix of formatting html information and real content.
 
 # The present file contains the html information.
@@ -14,6 +14,7 @@
     header : |
       <html>
       <head><title>Description of external parameters.</title>
+      <link rel=stylesheet type="text/css" href="../../formabinit.css">
       <link rel=stylesheet type="text/css" href="../formabinit.css">
       </head>
       <body bgcolor="#ffffff">
@@ -37,6 +38,7 @@
     header : |
       <html>
       <head><title>Input variables</title>
+      <link rel=stylesheet type="text/css" href="../../formabinit.css">
       <link rel=stylesheet type="text/css" href="../formabinit.css">
       <script type="text/javascript" src="__JS_PATH__smart_input_variables.js"></script>
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -46,23 +48,48 @@
       <hr>
       <a name="top"></a>
     title : |
-      <h1>Main ABINIT code, input variables:</h1>
+      <h1>Input variables for ABINIT, AIM, ANADDB and OPTIC:</h1>
     subtitle : |
       Complete list.
     purpose : |
-      This document lists the names of all input variables for ABINIT and the other executables of the ABINIT package.
+      This document lists the names of all input variables for ABINIT and three post-processors of ABINIT.
       <p>
-      The internal variables (see the [[varint]] web page) are prepended with the sign %.
+      The internal variables (see the varset_[[varset:internal]] web page) are prepended with the sign %.
     tofcontent_header : |
       <a name="list"></a>
-      <h3><b> Alphabetical list of all input variables for ABINIT and the other executables of the ABINIT package.</b></h3>
-      See [[varaim]], [[varanaddb]] or [[varoptic]] for the subset of input variables for the executables AIM(Bader), ANADDB and OPTIC. Such input variables are specifically
+      <h3><b> Alphabetical list of all input variables for ABINIT, AIM, ANADDB and OPTICS.</b></h3>
+      See [[varset:aim]], [[varset:anaddb]] or [[varset:optic]] for the subset of input variables for the executables AIM(Bader), ANADDB and OPTIC. Such input variables are specifically
       labelled @aim, @anaddb, or @optic in the input variable database.
       <p>Enter any string to search in the database. Clicking without any request will give all variables.
-      
 
 - !components
-    name : varaim
+    name : stats
+    keyword : statistics
+    header : |
+      <html>
+      <head><title>Statistics of input variables.</title>
+      <link rel=stylesheet type="text/css" href="../../formabinit.css">
+      <link rel=stylesheet type="text/css" href="../formabinit.css">
+      </head>
+      <body bgcolor="#ffffff">
+
+      <hr>
+      <a name="top"></a>
+    title : |
+      <h1>Input variables, statistics :</h1>
+    subtitle : |
+      occurrences in the input files provided with the package 
+    purpose : |
+      This document lists the input variables for ABINIT and three post-processors of ABINIT,
+      in order of number of occurrence in the input files provided with the package.
+    advice : |
+      <hr>
+    tofcontent_header : |
+      <a name="list"></a>
+      <h3><b> List of all input variables for ABINIT, AIM, ANADDB and OPTICS, in order of decreasing occurrence.</b></h3>
+
+- !components
+    name : aim
     keyword : aim
     purpose : |
       <p>This document lists and provides the description
@@ -70,7 +97,7 @@
       variables to be used in the input file for the AIM(Bader) executable of the ABINIT package.
 
 - !components
-    name : varanaddb
+    name : anaddb
     keyword : anaddb
     purpose : |
       <p>This document lists and provides the description
@@ -78,47 +105,47 @@
       variables to be used in the input file for the ANADDB executable of the ABINIT package.
 
 - !components 
-    name : varbas
+    name : basic
     keyword : basic
 
 - !components
-    name : varbse
+    name : bse
     keyword : BSE
 
 - !components
-    name : vardev
+    name : dev
     keyword : developer
 
 - !components
-    name : vardmft
+    name : dmft
     keyword : DMFT
 
 - !components
-    name : vareph
+    name : eph
     keyword : electron-phonon calculation
 
 - !components
-    name : varff
+    name : ffield
     keyword : applied finite field calculation
 
 - !components
-    name : varfil
+    name : files
     keyword : file handling
 
 - !components
-    name : vargeo
+    name : geo
     keyword : geometry builder and symmetry related
 
 - !components
-    name : vargs
+    name : gstate
     keyword : ground state calculations
 
 - !components
-    name : vargw
+    name : gw
     keyword : GW
 
 - !components
-    name : varint
+    name : internal
     keyword : internal
     purpose : |
       <p>This document lists and provides the description
@@ -129,7 +156,7 @@
       In the [[varset:allvars|database]] of all input variables, they are prepended with the sign %.
 
 - !components
-    name : varoptic
+    name : optic
     keyword : optic
     purpose : |
       <p>This document lists and provides the description
@@ -137,27 +164,27 @@
       variables to be used in the input file for the OPTIC executable of the ABINIT package.
 
 - !components
-    name : varpar
+    name : paral
     keyword : parallelisation
 
 - !components
-    name : varpaw
+    name : paw
     keyword : PAW
 
 - !components
-    name : varrf
-    keyword : response function
+    name : dfpt
+    keyword : DFPT
 
 - !components
-    name : varrlx
+    name : rlx
     keyword : structural optimization
 
 - !components
-    name : varvdw
+    name : vdw
     keyword : Van der Waals
 
 - !components
-    name : varw90
+    name : w90
     keyword : Wannier90 interface
 
 - !components
@@ -166,7 +193,19 @@
     header : |
       <html>
       <head><title>Description of __KEYWORD__ variables.</title>
+      <link rel=stylesheet type="text/css" href="../../formabinit.css">
       <link rel=stylesheet type="text/css" href="../formabinit.css">
+      <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        jax: ["input/TeX","output/HTML-CSS"],
+        tex2jax: {inlineMath: [['$','$']]},
+        displayAlign: "center",
+        TeX: { equationNumbers: { autoNumber: "AMS" } }
+      });
+      </script>
+      <script type="text/javascript" async
+      src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML">
+      </script>
       </head>
       <body bgcolor="#ffffff">
 

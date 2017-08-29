@@ -4,7 +4,18 @@
 <!--                                                                                     -->
 <html>
 <head><title>Lesson on optical properties</title>
-<link rel=stylesheet type="text/css" href="../formabinit.css">
+<link rel=stylesheet type="text/css" href="../../formabinit.css">
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  jax: ["input/TeX","output/HTML-CSS"],
+  tex2jax: {inlineMath: [['$','$']]},
+  displayAlign: "center",
+  TeX: { equationNumbers: { autoNumber: "AMS" } }
+});
+</script>
+<script type="text/javascript" async
+src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
 </head>
 <body bgcolor="#ffffff">
 
@@ -31,21 +42,18 @@
 <script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
 
 <a name="list"></a>
-<h3><b> Lesson on optical properties, table of content:</b></h3>
+<h3><b> Lesson on optical properties. Table of content:</b></h3>
 
-<ul>
-  <li><a href="#1">1.</a> Computing the momentum matrix elements.
-  <li><a href="#2">2.</a> Computing the linear and nonlinear optical response.
-  <li><a href="#3">3.</a> Faster computation of the imaginary part of the linear optical response.
-</ul>
-<hr>
+<ul> 
+  <li>1. <a href="#momentum">Computing the momentum matrix elements</a></li>
+  <li>2. <a href="#lin_nonlin">Computing the linear and nonlinear optical response</a></li>
+  <li>3. <a href="#imaginary">Faster computation of the imaginary part of the linear optical response</a></li>
 
-<a name="1">&nbsp;</a>
-<h3><b>
-1. Computing the momentum matrix elements.
-</b></h3>
-
-<p><i>Before beginning, you might consider to work in a different
+ </ul> 
+ <hr><br><a name="momentum"> </a>
+<a name="1"> </a>
+<h3><b>1. Computing the momentum matrix elements</b></h3>
+ <p><i>Before beginning, you might consider to work in a different
 subdirectory as for the other lessons.
 Why not create "Work_optic" in ~abinit/tests/tutorespfn/Input ?
 </i>
@@ -77,8 +85,8 @@ but is included for later CPU time saving).
 <br>The fourth to sixth datasets correspond to the computation of the ddk matrix
 elements. Note that the number of bands is the same as for dataset 2 and 3. Note also
 that these are non-self-consistent calculations, moreover, restricted to
-<a href="../../input_variables/generated_files/varbas.html#nstep">nstep</a>=1 and
-<a href="../../input_variables/generated_files/vargs.html#nline">nline</a>=0 .
+<a href="../../input_variables/generated_files/varset_basic.html#nstep">nstep</a>=1 and
+<a href="../../input_variables/generated_files/varset_gstate.html#nline">nline</a>=0 .
 Indeed, only the matrix elements between explicitly computed states are required.
 Using a larger nstep would lead to a full computation of derivative of the wavefunction
 with respect to the wavevector, while only the matrix elements are needed. Such a larger
@@ -95,16 +103,12 @@ toptic_1o_DS6_1WF9 are the four files requested for the Optic run.
 The three latter ones contain the matrix elements.
 <p> Real preparation runs (with adequate k point sampling and cut-off energy)
 can last several hours (days) on such a PC.
-
+<br><br><a href=#top>Go to the top</a>
 <hr>
-
-<a name="2">&nbsp;</a>
-<h3><b>
-
-2. Computing the linear and nonlinear optical response.
-</b></h3>
-
-Next step is to compute the linear and nonlinear optical response:
+<br><a name="lin_nonlin"> </a>
+<a name="2"> </a>
+<h3><b>2. Computing the linear and nonlinear optical response</b></h3>
+ <p>Next step is to compute the linear and nonlinear optical response:
 once the momentum matrix elements are available you are ready to determine the
 optical response (up to second order in the current implementation) for material under study.
 
@@ -235,15 +239,12 @@ This can be corrected by increasing the cut-off energy, the k point sampling
 and the number of unoccupied states.
 <p>
 Similar considerations apply to the non-linear spectra.
-
-
-
+<br><br><a href=#top>Go to the top</a>
 <hr>
-
-<a name="3">&nbsp;</a>
-<h3><b> 3. Faster computation of the imaginary part of the linear optical response.
-</b></h3>
-In the case of the imaginary part of the linear optical response, there are several
+<br><a name="imaginary"> </a>
+<a name="3"> </a>
+<h3><b>3. Faster computation of the imaginary part of the linear optical response</b></h3>
+ <p>In the case of the imaginary part of the linear optical response, there are several
 points that make the calculation easier :
 <ul>
 <li>The time-reversal symmetry can be used to decrease the number of k points
@@ -347,6 +348,8 @@ You might note how the first peak slowly develop with increasing number
 of k points ... but nevertheless
 stays much smaller than the converged one, and even smaller than the
 experimental one.
+<br><br><a href=#top>Go to the top</a>
+<hr>
 <script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
 
 </body>

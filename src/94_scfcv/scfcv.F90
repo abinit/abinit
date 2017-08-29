@@ -633,8 +633,8 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
    if(any(abs(dtset%nucdipmom)>tol8)) then
      has_dijnd=1; req_cplex_dij=2
    end if
-   call paw_an_init(paw_an,dtset%natom,dtset%ntypat,0,dtset%nspden,cplex,dtset%pawxcdev,&
-&   dtset%typat,pawang,pawtab,has_vxc=1,has_vxc_ex=1,has_vhartree=has_vhartree,&
+   call paw_an_init(paw_an,dtset%natom,dtset%ntypat,0,dtset%nspden,&
+&   cplex,dtset%pawxcdev,dtset%typat,pawang,pawtab,has_vxc=1,has_vxc_ex=1,has_vhartree=has_vhartree,&
 &   comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
    call paw_ij_init(paw_ij,cplex,dtset%nspinor,dtset%nsppol,dtset%nspden,&
 &   dtset%pawspnorb,dtset%natom,dtset%ntypat,dtset%typat,pawtab,&

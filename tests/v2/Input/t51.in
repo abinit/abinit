@@ -50,5 +50,5 @@
 #%% description = 
 #%%   O2 (nsppol=2, non-linear XC core correction, GGA)    
 #%%   Similar to test50, except use iscf=6 .
-#%% topics = GSgeneral
+#%% topics = SCFAlgorithms
 #%%<END TEST_INFO>

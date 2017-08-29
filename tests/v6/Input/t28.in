@@ -87,4 +87,5 @@ kptrlatt -4  4  4      # In cartesian coordinates, this grid is simple cubic, an
 #%%   Test of alchemical calculations with images.
 #%%   Mostly checking the treatment of input variables and their echo.
 #%%   (Tests 30-36 are more slots for testing the ground state)
+#%% topics = AtomTypes
 #%%<END TEST_INFO>

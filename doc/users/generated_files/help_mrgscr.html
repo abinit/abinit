@@ -4,7 +4,18 @@
 <!--                                                                                     -->
 <html>
 <head><title>the Mrgscr utility</title>
-<link rel=stylesheet type="text/css" href="../formabinit.css">
+<link rel=stylesheet type="text/css" href="../../formabinit.css">
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  jax: ["input/TeX","output/HTML-CSS"],
+  tex2jax: {inlineMath: [['$','$']]},
+  displayAlign: "center",
+  TeX: { equationNumbers: { autoNumber: "AMS" } }
+});
+</script>
+<script type="text/javascript" async
+src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
 </head>
 <body bgcolor="#ffffff">
 
@@ -27,94 +38,105 @@ especially the GW part before reading the present file.
 <a name="list"></a>
 <h3><b> Content of the help file:</b></h3>
 
+<ul> 
+  <li>1. <a href="#introduction">Introduction</a></li>
+  <li>2. <a href="#useful">Why such utility can be useful?</a></li>
+  <li>3. <a href="#work">How does the mrgscr code work ?</a></li>
+  <li>4. <a href="#repetition">What if there is a repetition of one or more q points through different input partial screening files?</a></li>
+  <li>5. <a href="#checking">How to check the status of the resulting screening file, or partial files, what is there, what is needed, etc.?</a></li>
+
+ </ul> 
+ <hr><br><a name="introduction"> </a>
+<a name="1"> </a>
+<h3><b>1. Introduction</b></h3>
+ <p><p>The mrgscr is a utility that comes with the ABINIT code.
+It is used to merge partial screening files. These files
+contain the screening calculated on some selected q points
+generated using the input variables 'nqptdm' and 'qptdm'.
+The mrgscr utility merge these files into a single file
+that contain the screening on the full list of q points.
+
+<p>Like other utilities within ABINIT (e.g. mrgddb, mrgkk), the
+input is very simple, and could be given directly at the screen,
+or more conveniently, piped from a file.
+
+<p>The user should give the number of SCRs that will be merged in the
+first line, then the name of the output file in the second line, after
+what he/she shall write the whole set of filenames for the SCRs to be
+merged, one on each line.
+<br><br><a href=#top>Go to the top</a>
+<hr>
+<br><a name="useful"> </a>
+<a name="2"> </a>
+<h3><b>2. Why such utility can be useful?</b></h3>
+ <p><p>The GW part of ABINIT code in its present version (5.x) is not yet
+parallelized. The input variables 'nqptdm' and 'qptdm' are meant to be
+used as a kind of manual parallelization by splitting the whole
+screening calculation into several smaller jobs which can be submitted
+into several machines simultaneously. mrgscr later can be used to 
+merge the several output SCRs into a single file.
+<br><br><a href=#top>Go to the top</a>
+<hr>
+<br><a name="work"> </a>
+<a name="3"> </a>
+<h3><b>3. How does the mrgscr code work ?</b></h3>
+ <p><p>First the code reads the header of the first partial file, then it
+calculates the full list of q points that should exist in the full
+screening file. Then it checks the consistency of the other files and
+the existing q points in each file. Last it merges the files into a
+single file, but it worth to say here that merging WILL NOT be
+successful and no output file will be generated if:
+
+<p>
+1) the files are not consistent, i.e, different PPs, different DM size
+etc.; usually the files MUST be generated under same conditions for
+every single input variable, except of course for 'nqptdm' and =20
+'qptdm'.
+
+<p>
+2) the various input partial screening files can not form a complete
+file via merging. This often happen if the user still have one or =20
+more q
+points on which screening still need to be calculated.
+<br><br><a href=#top>Go to the top</a>
+<hr>
+<br><a name="repetition"> </a>
+<a name="4"> </a>
+<h3><b>4. What if there is a repetition of one or more q points through different input partial screening files?</b></h3>
+ <p><p>No problem, the code will include only one q point from every two
+repeated q points, and will report it in the log file.
+<br><br><a href=#top>Go to the top</a>
+<hr>
+<br><a name="checking"> </a>
+<a name="5"> </a>
+<h3><b>5. How to check the status of the resulting screening file, or partial files, what is there, what is needed, etc.?</b></h3>
+ <p><p>mrgscr can do it, the user only need to use a two-line input file. The
+first line of the input file should be 0, then the second line should
+contain the name of the file to be checked. The result of the checking
+is reported through the log file.
+
+<p>Examples
+
 <pre>
-
- The mrgscr is a utility that comes with the ABINIT code.
- It is used to merge partial screening files. These files
- contain the screening calculated on some selected q points
- generated using the input variables 'nqptdm' and 'qptdm'.
- The mrgscr utility merge these files into a single file
- that contain the screening on the full list of q points.
-
- Like other utilities within ABINIT (e.g. mrgddb, mrgkk), the
- input is very simple, and could be given directly at the screen,
- or more conveniently, piped from a file.
-
- The user should give the number of SCRs that will be merged in the
- first line, then the name of the output file in the second line, after
- what he/she shall write the whole set of filenames for the SCRs to be
- merged, one on each line.
-
- --------------------------------------------------------------------
-
- Why such utility can be useful?
-
- The GW part of ABINIT code in its present version (5.x) is not yet
- parallelized. The input variables 'nqptdm' and 'qptdm' are meant to be
- used as a kind of manual parallelization by splitting the whole
- screening calculation into several smaller jobs which can be submitted
- into several machines simultaneously. mrgscr later can be used to 
- merge the several output SCRs into a single file.
-
- -------------------------------------------------------------------
-
- How does the mrgscr code work ?
+merging case
+3                    <== the number of files to be merged
+out                  <== name of out put file
+1_SCR                <== start:name of the files, to be merged
+2_SCR
+3_SCR
+1                    <== to merge q-points (2 = to merge frequencies) 
 
 
- First the code reads the header of the first partial file, then it
- calculates the full list of q points that should exist in the full
- screening file. Then it checks the consistency of the other files and
- the existing q points in each file. Last it merges the files into a
- single file, but it worth to say here that merging WILL NOT be
- successful and no output file will be generated if:
+checking case
 
- 1) the files are not consistent, i.e, different PPs, different DM size
- etc.; usually the files MUST be generated under same conditions for
- every single input variable, except of course for 'nqptdm' and =20
- 'qptdm'.
-
- 2) the various input partial screening files can not form a complete
- file via merging. This often happen if the user still have one or =20
- more q
- points on which screening still need to be calculated.
-
- ----------------------------------------------------------------------
- What if there is a repetition of one or more q points through =20
- different
- input partial screening files?
-
- No problem, the code will include only one q point from every two
- repeated q points, and will report it in the log file.
-
- ----------------------------------------------------------------------
- How to check the status of the resulting screening file, or partial
- files, what is there, what is needed, etc.?
-
- mrgscr can do it, the user only need to use a two-line input file. The
- first line of the input file should be 0, then the second line should
- contain the name of the file to be checked. The result of the checking
- is reported through the log file.
-
- examples
-
- merging case
- 3                    <== the number of files to be merged
- out                  <== name of out put file
- 1_SCR                <== start:name of the files, to be merged
- 2_SCR
- 3_SCR
- 1                    <== to merge q-points (2 = to merge frequencies) 
-
-
- checking case
-
- 0                    <== just write zero
- 1_SCR                <== the name of the file to be checked
-
+0                    <== just write zero
+1_SCR                <== the name of the file to be checked
+</pre>
 
 In case of problem, contact Riad Shaltaf 
 (see e-mail in ~abinit/doc/developers/contributors)
-</pre>
+<br><br><a href=#top>Go to the top</a>
+<hr>
 <script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
 
 </body>

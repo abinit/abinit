@@ -79,4 +79,5 @@
 #%%   the electronic dielectric tensor, and the (full) dielectric tensor
 #%%   at zero frequency (so including atomic displacements and 
 #%%   related polarization).
+#%% topics = PhononBands, Phonons, Temperature
 #%%<END TEST_INFO>
