@@ -16,7 +16,6 @@ t61o_DS5_POT1
 #%%   t63.stdout, tolnlines = 0, tolabs = 0.0, tolrel = 0.0
 #%% [paral_info]
 #%% max_nprocs = 1
-#%% [shell]
 #%% [extra_info]
 #%% authors = G. Antonius
 #%% keywords = NC, DFPT, EPH
