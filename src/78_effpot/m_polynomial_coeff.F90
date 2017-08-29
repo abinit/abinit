@@ -573,7 +573,7 @@ subroutine polynomial_coeff_broadcast(coefficients, source, comm)
  !Allocate arrays on the other nodes.
   if (xmpi_comm_rank(comm) /= source) then
     ABI_DATATYPE_ALLOCATE(coefficients%terms,(coefficients%nterm))
-    do ii=1,1,coefficients%nterm
+    do ii=1,coefficients%nterm
       call polynomial_term_free(coefficients%terms(ii))
     end do
   end if
@@ -736,7 +736,7 @@ subroutine polynomial_coeff_MPIrecv(coefficients, tag, source, comm)
  
  !Allocate arrays on the other nodes.
   ABI_DATATYPE_ALLOCATE(coefficients%terms,(coefficients%nterm))
-  do ii=1,1,coefficients%nterm
+  do ii=1,coefficients%nterm
     call polynomial_term_free(coefficients%terms(ii))
   end do
 

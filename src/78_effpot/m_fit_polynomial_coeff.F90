@@ -1307,8 +1307,8 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,powers,nbanco
      call fit_polynomial_coeff_getNorder(cutoff,coeffs_in,eff_pot,ncoeff_tot,powers,0,comm,&
 &                                        anharmstr=need_anharmstr,spcoupling=need_spcoupling)
 
-     filename = "terms_set.xml"
-     call polynomial_coeff_writeXML(coeffs_in,ncoeff_tot,filename=filename,newfile=.true.)
+!     filename = "terms_set.xml"
+!     call polynomial_coeff_writeXML(coeffs_in,ncoeff_tot,filename=filename,newfile=.true.)
 
      if(need_verbose)then
        write(message,'(1x,I0,2a)') ncoeff_tot,' coefficients generated ',ch10     
