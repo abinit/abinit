@@ -22,9 +22,9 @@
 #include "abi_common.h"
 
 #if (defined HAVE_LINALG_ELPA) && (defined HAVE_LINALG_ELPA_2017)
-#define ELPA_FORTRAN2008
+#define HAVE_ELPA_FORTRAN2008
 #else
-#undef ELPA_FORTRAN2008
+#undef HAVE_ELPA_FORTRAN2008
 #endif
 
 module m_elpa
@@ -33,7 +33,7 @@ module m_elpa
  use m_errors
 
 #ifdef HAVE_LINALG_ELPA
-#ifdef ELPA_FORTRAN2008
+#ifdef HAVE_ELPA_FORTRAN2008
  use elpa
 #else
  use elpa1
@@ -76,9 +76,9 @@ module m_elpa
    module procedure elpa_func_hermitian_multiply_complex
  end interface elpa_func_hermitian_multiply
 
-#ifdef ELPA_FORTRAN2008
+#ifdef HAVE_ELPA_FORTRAN2008
 !Handle for ELPA type
- class(elpa_t),pointer,private :: elpa_obj
+ class(elpa_t),pointer,private :: elpa_hdl
 #else
 !MPI-Communicator for rows
  integer,private,save :: elpa_comm_rows
@@ -331,21 +331,22 @@ subroutine elpa_func_solve_evp_1stage_real(na,nev,aa,lda,ev,qq,ldq,nblk,matrixCo
 !Local variables-------------------------------
  integer :: error
  logical  :: success
+ character(len=100) :: errmsg
 
 ! *********************************************************************
 
- success=.true. ; error=0
+ success=.true. ; error=0 ; errmsg=""
 
 #if  (defined HAVE_LINALG_ELPA_2017)
- elpa_obj => elpa_allocate()
- success=elpa_func_set_matrix_params(na,nblk,lda,matrixCols,mpi_comm,my_prow,my_pcol,&
+ elpa_hdl => elpa_allocate()
+ success=elpa_func_set_matrix_params(errmsg,na,nblk,lda,matrixCols,mpi_comm,my_prow,my_pcol,&
 &                                    nev=nev,ldq=ldq)
  if (success) then
-   call elpa_obj%set("solver",ELPA_SOLVER_1STAGE,error)
-   if (error==0) call elpa_obj%eigenvectors(aa,ev,qq,error)
+   call elpa_hdl%set("solver",ELPA_SOLVER_1STAGE,error)
+   if (error==0) call elpa_hdl%eigenvectors(aa,ev,qq,error)
    success=(error==0)
  end if
- call elpa_deallocate(elpa_obj)
+ call elpa_deallocate(elpa_hdl)
 #elif  (defined HAVE_LINALG_ELPA_2016)
  success=elpa_solve_evp_real_1stage(na,nev,aa,lda,ev,qq,ldq,nblk,matrixCols,&
 &                                   elpa_comm_rows,elpa_comm_cols)
@@ -360,7 +361,8 @@ subroutine elpa_func_solve_evp_1stage_real(na,nev,aa,lda,ev,qq,ldq,nblk,matrixCo
 #endif
 
  if (.not.success) then
-   MSG_ERROR('Problem with ELPA (solve_evp_1stage_real)!')
+   if (trim(errmsg)=="") errmsg="Problem with ELPA (solve_evp_1stage_real)!"
+   MSG_ERROR(errmsg)
  end if
 
 end subroutine elpa_func_solve_evp_1stage_real
@@ -430,21 +432,22 @@ subroutine elpa_func_solve_evp_1stage_complex(na,nev,aa,lda,ev,qq,ldq,nblk,matri
 !Local variables-------------------------------
  integer :: error
  logical  :: success
+ character(len=100) :: errmsg
 
 ! *********************************************************************
 
- success=.true. ; error=0
+ success=.true. ; error=0 ; errmsg=""
 
 #if  (defined HAVE_LINALG_ELPA_2017)
- elpa_obj => elpa_allocate()
- success=elpa_func_set_matrix_params(na,nblk,lda,matrixCols,mpi_comm,my_prow,my_pcol,&
+ elpa_hdl => elpa_allocate()
+ success=elpa_func_set_matrix_params(errmsg,na,nblk,lda,matrixCols,mpi_comm,my_prow,my_pcol,&
 &                                    nev=nev,ldq=ldq)
  if (success) then
-   call elpa_obj%set("solver",ELPA_SOLVER_1STAGE,error)
-   if (error==0) call elpa_obj%eigenvectors(aa,ev,qq,error)
+   call elpa_hdl%set("solver",ELPA_SOLVER_1STAGE,error)
+   if (error==0) call elpa_hdl%eigenvectors(aa,ev,qq,error)
    success=(error==0)
  end if
- call elpa_deallocate(elpa_obj)
+ call elpa_deallocate(elpa_hdl)
 #elif (defined HAVE_LINALG_ELPA_2016)
  success=elpa_solve_evp_complex_1stage(na,nev,aa,lda,ev,qq,ldq,nblk,matrixCols,&
 &                                      elpa_comm_rows,elpa_comm_cols)
@@ -459,7 +462,8 @@ subroutine elpa_func_solve_evp_1stage_complex(na,nev,aa,lda,ev,qq,ldq,nblk,matri
 #endif
 
  if (.not.success) then
-   MSG_ERROR('Problem with ELPA (solve_evp_1stage_complex)!')
+   if (trim(errmsg)=="") errmsg="Problem with ELPA (solve_evp_1stage_complex)!"
+   MSG_ERROR(errmsg)
  end if
 
 end subroutine elpa_func_solve_evp_1stage_complex
@@ -519,19 +523,20 @@ subroutine elpa_func_cholesky_real(na,aa,lda,nblk,matrixCols,&
 !Local variables-------------------------------
  integer :: error
  logical :: success
+ character(len=100) :: errmsg
 
 ! *********************************************************************
 
- success=.true. ; error=0
+ success=.true. ; error=0 ; errmsg=""
 
 #if  (defined HAVE_LINALG_ELPA_2017)
- elpa_obj => elpa_allocate()
- success=elpa_func_set_matrix_params(na,nblk,lda,matrixCols,mpi_comm,my_prow,my_pcol)
+ elpa_hdl => elpa_allocate()
+ success=elpa_func_set_matrix_params(errmsg,na,nblk,lda,matrixCols,mpi_comm,my_prow,my_pcol)
  if (success) then
-   call elpa_obj%cholesky(aa,error)
+   call elpa_hdl%cholesky(aa,error)
    success=(error==0)
  end if
- call elpa_deallocate(elpa_obj)
+ call elpa_deallocate(elpa_hdl)
 #elif (defined HAVE_LINALG_ELPA_2016)
  success = elpa_cholesky_real(na,aa,lda,nblk,matrixCols,elpa_comm_rows,elpa_comm_cols,.false.)
 #elif (defined HAVE_LINALG_ELPA_2015)
@@ -546,7 +551,8 @@ subroutine elpa_func_cholesky_real(na,aa,lda,nblk,matrixCols,&
 #endif
 
  if (.not.success) then
-   MSG_ERROR('Problem with ELPA (cholesky_real)!')
+   if (trim(errmsg)=="") errmsg="Problem with ELPA (cholesky_real)!"
+   MSG_ERROR(errmsg)
  end if
 
 end subroutine elpa_func_cholesky_real
@@ -605,19 +611,20 @@ subroutine elpa_func_cholesky_complex(na,aa,lda,nblk,matrixCols,&
 !Local variables-------------------------------
  integer :: error
  logical :: success
+ character(len=100) :: errmsg
 
 ! *********************************************************************
 
- success=.true. ; error=0
+ success=.true. ; error=0 ; errmsg=""
 
 #if  (defined HAVE_LINALG_ELPA_2017)
- elpa_obj => elpa_allocate()
- success=elpa_func_set_matrix_params(na,nblk,lda,matrixCols,mpi_comm,my_prow,my_pcol)
+ elpa_hdl => elpa_allocate()
+ success=elpa_func_set_matrix_params(errmsg,na,nblk,lda,matrixCols,mpi_comm,my_prow,my_pcol)
  if (success) then
-   call elpa_obj%cholesky(aa,error)
+   call elpa_hdl%cholesky(aa,error)
    success=(error==0)
  end if
- call elpa_deallocate(elpa_obj)
+ call elpa_deallocate(elpa_hdl)
 #elif (defined HAVE_LINALG_ELPA_2016)
  success = elpa_cholesky_complex(na,aa,lda,nblk,matrixCols,elpa_comm_rows,elpa_comm_cols,.false.)
 #elif (defined HAVE_LINALG_ELPA_2015)
@@ -632,7 +639,8 @@ subroutine elpa_func_cholesky_complex(na,aa,lda,nblk,matrixCols,&
 #endif
 
  if (.not.success) then
-   MSG_ERROR('Problem with ELPA (cholesky_complex)!')
+   if (trim(errmsg)=="") errmsg="Problem with ELPA (cholesky_complex)!"
+   MSG_ERROR(errmsg)
  end if
 
 end subroutine elpa_func_cholesky_complex
@@ -691,19 +699,20 @@ subroutine elpa_func_invert_triangular_real(na,aa,lda,nblk,matrixCols,&
 !Local variables-------------------------------
  integer :: error
  logical :: success
+ character(len=100) :: errmsg
 
 ! *********************************************************************
 
- success=.true. ; error=0
+ success=.true. ; error=0 ; errmsg=""
 
 #if  (defined HAVE_LINALG_ELPA_2017)
- elpa_obj => elpa_allocate()
- success=elpa_func_set_matrix_params(na,nblk,lda,matrixCols,mpi_comm,my_prow,my_pcol)
+ elpa_hdl => elpa_allocate()
+ success=elpa_func_set_matrix_params(errmsg,na,nblk,lda,matrixCols,mpi_comm,my_prow,my_pcol)
  if (success) then
-   call elpa_obj%invert_triangular(aa,error)
+   call elpa_hdl%invert_triangular(aa,error)
    success=(error==0)
  end if
- call elpa_deallocate(elpa_obj)
+ call elpa_deallocate(elpa_hdl)
 #elif (defined HAVE_LINALG_ELPA_2016)
  success = elpa_invert_trm_real(na,aa,lda,nblk,matrixCols,elpa_comm_rows,elpa_comm_cols,.false.)
 #elif (defined HAVE_LINALG_ELPA_2015)
@@ -719,7 +728,8 @@ subroutine elpa_func_invert_triangular_real(na,aa,lda,nblk,matrixCols,&
 #endif
 
  if (.not.success) then
-   MSG_ERROR('Problem with ELPA (invert_triangular_real)!')
+   if (trim(errmsg)=="") errmsg="Problem with ELPA (invert_triangular_real)!"
+   MSG_ERROR(errmsg)
  end if
 
 end subroutine elpa_func_invert_triangular_real
@@ -778,19 +788,20 @@ subroutine elpa_func_invert_triangular_complex(na,aa,lda,nblk,matrixCols,&
 !Local variables-------------------------------
  integer :: error
  logical :: success
+ character(len=100) :: errmsg
 
 ! *********************************************************************
 
- success=.true. ; error=0
+ success=.true. ; error=0 ; errmsg=""
 
 #if  (defined HAVE_LINALG_ELPA_2017)
- elpa_obj => elpa_allocate()
- success=elpa_func_set_matrix_params(na,nblk,lda,matrixCols,mpi_comm,my_prow,my_pcol)
+ elpa_hdl => elpa_allocate()
+ success=elpa_func_set_matrix_params(errmsg,na,nblk,lda,matrixCols,mpi_comm,my_prow,my_pcol)
  if (success) then
-   call elpa_obj%invert_triangular(aa,error)
+   call elpa_hdl%invert_triangular(aa,error)
    success=(error==0)
  end if
- call elpa_deallocate(elpa_obj)
+ call elpa_deallocate(elpa_hdl)
 #elif (defined HAVE_LINALG_ELPA_2016)
  success = elpa_invert_trm_complex(na,aa,lda,nblk,matrixCols,elpa_comm_rows,elpa_comm_cols,.false.)
 #elif (defined HAVE_LINALG_ELPA_2015)
@@ -806,7 +817,8 @@ subroutine elpa_func_invert_triangular_complex(na,aa,lda,nblk,matrixCols,&
 #endif
 
  if (.not.success) then
-   MSG_ERROR('Problem with ELPA (invert_triangular_complex)!')
+   if (trim(errmsg)=="") errmsg="Problem with ELPA (invert_triangular_complex)!"
+   MSG_ERROR(errmsg)
  end if
 
 end subroutine elpa_func_invert_triangular_complex
@@ -882,19 +894,20 @@ subroutine elpa_func_hermitian_multiply_real(uplo_a,uplo_c,na,ncb,aa,lda,bb,ldb,
 !Local variables-------------------------------
  integer :: error
  logical :: success
+ character(len=100) :: errmsg
 
 ! *********************************************************************
 
- success=.true. ; error=0
+ success=.true. ; error=0 ; errmsg=""
 
 #if  (defined HAVE_LINALG_ELPA_2017)
- elpa_obj => elpa_allocate()
- success=elpa_func_set_matrix_params(na,nblk,lda,matrixCols,mpi_comm,my_prow,my_pcol)
+ elpa_hdl => elpa_allocate()
+ success=elpa_func_set_matrix_params(errmsg,na,nblk,lda,matrixCols,mpi_comm,my_prow,my_pcol)
  if (success) then
-   call elpa_obj%hermitian_multiply(uplo_a,uplo_c,ncb,aa,bb,ldb,matrixCols,cc,ldc,matrixCols,error)
+   call elpa_hdl%hermitian_multiply(uplo_a,uplo_c,ncb,aa,bb,ldb,matrixCols,cc,ldc,matrixCols,error)
    success=(error==0)
  end if
- call elpa_deallocate(elpa_obj)
+ call elpa_deallocate(elpa_hdl)
 #elif (defined HAVE_LINALG_ELPA_2016)
  success = elpa_mult_at_b_real(uplo_a,uplo_c,na,ncb,aa,lda,matrixCols,bb,ldb,matrixCols,nblk, &
 &                              elpa_comm_rows,elpa_comm_cols,cc,ldc,matrixCols)
@@ -908,7 +921,8 @@ subroutine elpa_func_hermitian_multiply_real(uplo_a,uplo_c,na,ncb,aa,lda,bb,ldb,
 #endif
 
  if (.not.success) then
-   MSG_ERROR('Problem with ELPA (hermitian_multiply_real)!')
+   if (trim(errmsg)=="") errmsg="Problem with ELPA (hermitian_multiply_real)!"
+   MSG_ERROR(errmsg)
  end if
 
 end subroutine elpa_func_hermitian_multiply_real
@@ -983,19 +997,20 @@ subroutine elpa_func_hermitian_multiply_complex(uplo_a,uplo_c,na,ncb,aa,lda,bb,l
 !Local variables-------------------------------
  integer :: error
  logical :: success
+ character(len=100) :: errmsg
 
 ! *********************************************************************
 
- success=.true. ; error=0
+ success=.true. ; error=0 ; errmsg=""
 
 #if  (defined HAVE_LINALG_ELPA_2017)
- elpa_obj => elpa_allocate()
- success=elpa_func_set_matrix_params(na,nblk,lda,matrixCols,mpi_comm,my_prow,my_pcol)
+ elpa_hdl => elpa_allocate()
+ success=elpa_func_set_matrix_params(errmsg,na,nblk,lda,matrixCols,mpi_comm,my_prow,my_pcol)
  if (success) then
-   call elpa_obj%hermitian_multiply(uplo_a,uplo_c,ncb,aa,bb,ldb,matrixCols,cc,ldc,matrixCols,error)
+   call elpa_hdl%hermitian_multiply(uplo_a,uplo_c,ncb,aa,bb,ldb,matrixCols,cc,ldc,matrixCols,error)
    success=(error==0)
  end if
- call elpa_deallocate(elpa_obj)
+ call elpa_deallocate(elpa_hdl)
 #elif (defined HAVE_LINALG_ELPA_2016)
   success = elpa_mult_ah_b_complex(uplo_a,uplo_c,na,ncb,aa,lda,matrixCols,bb,ldb,matrixCols,nblk, &
 &                                  elpa_comm_rows,elpa_comm_cols,cc,ldc,matrixCols)
@@ -1009,7 +1024,8 @@ subroutine elpa_func_hermitian_multiply_complex(uplo_a,uplo_c,na,ncb,aa,lda,bb,l
 #endif
 
  if (.not.success) then
-   MSG_ERROR('Problem with ELPA (hermitian_multiply_complex)!')
+   if (trim(errmsg)=="") errmsg="Problem with ELPA (hermitian_multiply_complex)!"
+   MSG_ERROR(errmsg)
  end if
 
 end subroutine elpa_func_hermitian_multiply_complex
@@ -1017,7 +1033,7 @@ end subroutine elpa_func_hermitian_multiply_complex
 
 !----------------------------------------------------------------------
 
-#ifdef ELPA_FORTRAN2008
+#ifdef HAVE_ELPA_FORTRAN2008
 
 !!****f* m_elpa/elpa_func_set_matrix_params
 !! NAME
@@ -1030,7 +1046,7 @@ end subroutine elpa_func_hermitian_multiply_complex
 !!  na=Order of matrix A
 !!  nblk=Blocksize of cyclic distribution, must be the same in both directions!
 !!  local_nrows=Leading dimension of A
-!!  local_ncols=Local columns of matrix Q (eigenvectors)
+!!  local_ncols=Local columns of matrixes A and Q (eigenvectors)
 !!  mpi_comm_parent=Global communicator for the calculations
 !!  process_row=Row coordinate of the calling process in the process grid
 !!  process_col=Column coordinate of the calling process in the process grid
@@ -1039,6 +1055,8 @@ end subroutine elpa_func_hermitian_multiply_complex
 !!  [gpu]= -- optional -- Flag (0 or 1): use GPU version
 !!
 !! OUTPUT
+!!  errmsg=error message if any
+!!  success=.TRUE. if successful
 !!
 !! PARENTS
 !!
@@ -1046,7 +1064,7 @@ end subroutine elpa_func_hermitian_multiply_complex
 !!
 !! SOURCE
 
-function elpa_func_set_matrix_params(na,nblk,local_nrows,local_ncols,&
+function elpa_func_set_matrix_params(errmsg,na,nblk,local_nrows,local_ncols,&
 &             mpi_comm_parent,process_row,process_col,nev,ldq,gpu) &
 & result(success)
 
@@ -1065,6 +1083,7 @@ function elpa_func_set_matrix_params(na,nblk,local_nrows,local_ncols,&
  integer,intent(in) :: mpi_comm_parent,process_row,process_col
  integer,intent(in),optional :: nev,ldq,gpu
  logical :: success
+ character(len=*) :: errmsg
 !arrays
 
 !Local variables-------------------------------
@@ -1072,7 +1091,7 @@ function elpa_func_set_matrix_params(na,nblk,local_nrows,local_ncols,&
 
 ! *********************************************************************
 
- success=.true.
+ success=.true. ; errmsg=""
 
  if (present(ldq)) then
    if (local_nrows/=ldq) then
@@ -1080,57 +1099,57 @@ function elpa_func_set_matrix_params(na,nblk,local_nrows,local_ncols,&
    end if
  end if
 
- call elpa_obj%set("na",na,err)
+ call elpa_hdl%set("na",na,err)
  if (err/=0) then
-   MSG_ERROR('Cannot setup ELPA instance (na)!');success=.false.;return
+   errmsg="Cannot setup ELPA instance (na)!";success=.false.;return
  endif
 
- call elpa_obj%set("nblk",nblk,err)
+ call elpa_hdl%set("nblk",nblk,err)
  if (err/=0) then
-   MSG_ERROR('Cannot setup ELPA instance (nblk)!');success=.false.;return
+   errmsg="Cannot setup ELPA instance (nblk)!";success=.false.;return
  endif
 
- call elpa_obj%set("local_nrows",local_nrows,err)
+ call elpa_hdl%set("local_nrows",local_nrows,err)
  if (err/=0) then
-   MSG_ERROR('Cannot setup ELPA instance (local_nrows)!');success=.false.;return
+   errmsg="Cannot setup ELPA instance (local_nrows)!";success=.false.;return
  endif
 
- call elpa_obj%set("local_ncols",local_ncols,err)
+ call elpa_hdl%set("local_ncols",local_ncols,err)
  if (err/=0) then
-   MSG_ERROR('Cannot setup ELPA instance (local_ncols)!');success=.false.;return
+   errmsg="Cannot setup ELPA instance (local_ncols)!";success=.false.;return
  endif
 
- call elpa_obj%set("process_row",process_row,err)
+ call elpa_hdl%set("process_row",process_row,err)
  if (err/=0) then
-   MSG_ERROR('Cannot setup ELPA instance (process_row)!');success=.false.;return
+   errmsg="Cannot setup ELPA instance (process_row)!";success=.false.;return
  endif
 
- call elpa_obj%set("process_col",process_col,err)
+ call elpa_hdl%set("process_col",process_col,err)
  if (err/=0) then
-   MSG_ERROR('Cannot setup ELPA instance (process_col)!');success=.false.;return
+   errmsg="Cannot setup ELPA instance (process_col)!";success=.false.;return
  endif
 
- call elpa_obj%set("mpi_comm_parent",mpi_comm_parent,err)
+ call elpa_hdl%set("mpi_comm_parent",mpi_comm_parent,err)
  if (err/=0) then
-   MSG_ERROR('Cannot setup ELPA instance (mpi_comm_parent)!');success=.false.;return
+   errmsg="Cannot setup ELPA instance (mpi_comm_parent)!";success=.false.;return
  endif
 
  if (present(nev)) then
-   call elpa_obj%set("nev",nev,err)
+   call elpa_hdl%set("nev",nev,err)
    if (err/=0) then
-     MSG_ERROR('Cannot setup ELPA instance (nev)!');success=.false.;return
+     errmsg="Cannot setup ELPA instance (nev)!";success=.false.;return
    endif
  end if
 
  if (present(gpu)) then
-   call elpa_obj%set("gpu",gpu,err)
+   call elpa_hdl%set("gpu",gpu,err)
    if (err/=0) then
-     MSG_ERROR('Cannot setup ELPA instance (gpu)!');success=.false.;return
+     errmsg="Cannot setup ELPA instance (gpu)!";success=.false.;return
    endif
  end if
 
- if (elpa_obj%setup()/=ELPA_OK) then
-   MSG_ERROR('Cannot setup ELPA instance!')
+ if (elpa_hdl%setup()/=ELPA_OK) then
+   errmsg="Cannot setup ELPA instance!"
    success=.false.;return
  endif
 

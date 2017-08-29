@@ -458,6 +458,7 @@ AC_DEFUN([_ABI_LINALG_FIND_ELPA_VERSION],[
   if test "${abi_linalg_has_elpa_2017}" = "yes"; then
     abi_linalg_elpa_version="2017"
     AC_DEFINE([HAVE_LINALG_ELPA_2017],1,[Define to 1 if you have ELPA 2017 API support])
+    AC_DEFINE([HAVE_ELPA_FORTRAN2008],1,[Define to 1 if you have ELPA Fortran 2008 API support])
   else
 
 # Check for ELPA 2016
