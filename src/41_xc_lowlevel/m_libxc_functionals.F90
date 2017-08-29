@@ -560,7 +560,7 @@ contains
      write(msg, '(a,i8,2a,i8,6a)' )&
 &      'Invalid IXC = ',ixc,ch10,&
 &      'The LibXC functional family ',xc_func%family,&
-&      'is currently unsupported by ABINIT',ch10,&
+&      ' is currently unsupported by ABINIT',ch10,&
 &      '(-1 means the family is unknown to the LibXC itself)',ch10,&
 &      'Please consult the LibXC documentation',ch10
      MSG_ERROR(msg)

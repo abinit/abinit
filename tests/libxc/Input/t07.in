@@ -1,9 +1,8 @@
-# Bi atom : reference test (very quick) for all LibXC functionals. nstep=1, nline=1.
+# Bi atom : reference test (very quick) for various LibXC functionals. nstep=1, nline=1.
 # Not accurate, only portability check.
 
-ndtset 20
-# dtset 8 and 9 have been disabled, because they do not pass on IBM6 XLF14 with LibXC 2.0.1
-jdtset 1 2 3 4 5 6 7    10 11 12 13 14 15 16 17 18 19 20 21 22
+ndtset 16
+jdtset 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16
 
 # GGAs : Becke 88 exchange + different correlations
 ixc1 -106138
@@ -19,20 +18,13 @@ ixc6 -163
 ixc7 -164
 ixc8 -165
 ixc9 -166
-ixc10 -167
-ixc11 -168
-ixc12 -169
-ixc13 -172
-ixc14 -173
-ixc15 -174
-ixc16 -175
-ixc17 -176
-ixc18 -177
-ixc19 -178
-ixc20 -179
-ixc21 -180
-ixc22 -181
-
+ixc10 -173
+ixc11 -176
+ixc12 -177
+ixc13 -178
+ixc14 -179
+ixc15 -180
+ixc16 -181
 
 #Common data
 acell 3*10
@@ -83,5 +75,5 @@ prteig 0
 #%%   Test functionals from libXC that have been added in ABINITv6 or were untested in ABINITv5 (LDAs and GGAs).
 #%%   Spin-polarized case.
 #%%   This is to check the portability for different platform.
-#%%   Extremely quick (nstep=1, nline=1). Less than 20 secs to test 22 functionals ...
+#%%   Extremely quick (nstep=1, nline=1). Less than 5 secs to test 16 functionals ...
 #%%<END TEST_INFO>
