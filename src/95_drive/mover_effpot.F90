@@ -395,6 +395,10 @@ implicit none
 !    monte carlo / molecular dynamics
 !*********************************************************
    if(option_fit==1)then
+      write(message, '((80a),4a)' ) ('-',ii=1,80), ch10,&
+&     ' Try to bound the model',ch10,' Check if the model is bounded or not'
+       call wrtout(ab_out,message,'COLL')
+       call wrtout(std_out,message,'COLL')
 
 !    Try the model             
      call mover(scfcv_args,ab_xfh,acell,amass,dtfil,electronpositron,&
@@ -411,11 +415,6 @@ implicit none
        call wrtout(std_out,message,'COLL')
 
 
-       write(message, '((80a),3a)' ) ('-',ii=1,80), ch10,&
-&     '-Try to bound the model',ch10
-       call wrtout(ab_out,message,'COLL')
-       call wrtout(std_out,message,'COLL')
-
 !      Get the list of possible coefficients to bound the model
        cutoff = zero
        do ii=1,3
@@ -424,13 +423,15 @@ implicit none
        cutoff = cutoff / 3.0
        
       call fit_polynomial_coeff_getNorder(cutoff,coeffs_bound,effective_potential,ncoeff_bound,&
-&                                         inp%fit_boundPower,1,comm,anharmstr=.true.)
+&                                         inp%fit_boundPower,1,comm,&
+&                                         anharmstr=inp%fit_anhaStrain==1,&
+&                                         spcoupling=inp%fit_SPCoupling==1)
 
       if(iam_master)then
         filename=trim(filnam(2))//"_boundcoeff.xml"
         call polynomial_coeff_writeXML(coeffs_bound,ncoeff_bound,filename=filename,newfile=.true.)
       end if
-
+      
 !     Store all the initial coefficients
       ncoeff = effective_potential%anharmonics_terms%ncoeff
       ABI_DATATYPE_ALLOCATE(coeffs_all,(ncoeff+ncoeff_bound))
@@ -494,8 +495,7 @@ implicit none
         kk = one
         jj = one
          
-
-!        Generate the list of possible combinaison
+!       Generate the list of possible combinaison
         call genereList(kk,jj,ii,ncoeff_bound,list_tmp,list_bound,nmodels)
         do jj=1,nmodels
           listcoeff_bound(jj,1:ncoeff) = listcoeff(1:ncoeff)
@@ -541,7 +541,7 @@ implicit none
 
                 else
 !                 Set the good coefficient
-                  icoeff_bound = listcoeff_bound(jj,kk) - ncoeff ! need to remove ncoeff value
+                  icoeff_bound = listcoeff_bound(jj,kk)-ncoeff ! need to remove ncoeff value
                   write(message, '(a,I0,a,I0,a,ES19.10)')&
 &                         ' Set the value of the coefficient ',kk,&
 &                         ' (',icoeff_bound,&
@@ -562,22 +562,26 @@ implicit none
               call effective_potential_setCoeffs(coeffs_tmp(1:ncoeff+ii),effective_potential,&
 &                                                 ncoeff+ii)
               call fit_polynomial_coeff_fit(effective_potential,&
-        &                                   (/0/),(/0/),hist,(/0,0/),1,0,&
-        &                                   -1,comm,verbose=.false.,positive=.false.,anharmstr=.false.)
-              
+&                                           (/0/),(/0/),hist,(/0,0/),1,0,&
+&                                          -1,comm,verbose=.false.,positive=.false.) 
               call effective_potential_setSupercell(effective_potential,comm,n_cell=sc_size)
-
+              dtset%rprimd_orig(:,:,1) = effective_potential%supercell%rprimd_supercell
+              acell(1) = dtset%rprimd_orig(1,1,1)
+              acell(2) = dtset%rprimd_orig(2,2,1)
+              acell(3) = dtset%rprimd_orig(3,3,1)
               call xcart2xred(dtset%natom,effective_potential%supercell%rprimd_supercell,&
 &                      effective_potential%supercell%xcart_supercell,xred)
               xred_old = xred
               vel_cell(:,:) = zero
               vel(:,:)      = zero
+              fred(:,:)     = zero
+              fcart(:,:)    = zero
+              
 !             Run mover
               call mover(scfcv_args,ab_xfh,acell,amass,dtfil,electronpositron,&
 &                        rhog,rhor,dtset%rprimd_orig,vel,vel_cell,xred,xred_old,&
 &                        effective_potential=effective_potential,verbose=verbose,writeHIST=.false.)
 
-              
               if(.not.effective_potential%anharmonics_terms%bounded)then
                 write(message, '(2a)' ) ' => The model is not bounded'
               else
@@ -604,10 +608,10 @@ implicit none
           write(message, '(3a)' ) ch10,' => The model is now bounded'
           call wrtout(ab_out,message,'COLL')
           call wrtout(std_out,message,'COLL')
-          do kk=max(ncoeff,1),model_ncoeffbound
-            icoeff_bound = listcoeff_bound(model_ncoeffbound,kk) - ncoeff ! need to remove ncoeff value
+          do kk=ncoeff+1,ncoeff+model_ncoeffbound
+            icoeff_bound = listcoeff_bound(model_bound,kk)-ncoeff! need to remove ncoeff value
             call polynomial_coeff_free(coeffs_tmp(kk))
-            call polynomial_coeff_init(coeff_values(model_ncoeffbound,kk),&
+            call polynomial_coeff_init(coeff_values(model_bound,kk),&
 &                                      coeffs_bound(icoeff_bound)%nterm,&
 &                                      coeffs_tmp(kk),&
 &                                      coeffs_bound(icoeff_bound)%terms,&
@@ -623,7 +627,7 @@ implicit none
       end do
 
       if(.not.effective_potential%anharmonics_terms%bounded)then
-        write(message, '(3a)' ) ch10,' => The model can not be bounded'
+        write(message, '(3a)' ) ch10,' => The model cannot be bounded'
         call wrtout(ab_out,message,'COLL')
         call wrtout(std_out,message,'COLL')
         model_ncoeffbound = zero
@@ -913,3 +917,4 @@ implicit none
 
 end subroutine mover_effpot
 !!***
+

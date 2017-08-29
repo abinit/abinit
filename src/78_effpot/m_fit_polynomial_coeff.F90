@@ -589,7 +589,7 @@ end subroutine fit_polynomial_coeff_getList
 !! SOURCE
 
 subroutine fit_polynomial_coeff_getNorder(cutoff,coefficients,eff_pot,ncoeff,powers,option,comm,&
-&                                         anharmstr)
+&                                         anharmstr,spcoupling)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -605,7 +605,7 @@ subroutine fit_polynomial_coeff_getNorder(cutoff,coefficients,eff_pot,ncoeff,pow
  integer,intent(in) :: option,comm
  integer,intent(out):: ncoeff
  real(dp),intent(in):: cutoff
- logical,optional,intent(in) :: anharmstr
+ logical,optional,intent(in) :: anharmstr,spcoupling
 !arrays
  integer,intent(in) :: powers(2)
  type(effective_potential_type), intent(inout) :: eff_pot
@@ -616,7 +616,8 @@ subroutine fit_polynomial_coeff_getNorder(cutoff,coefficients,eff_pot,ncoeff,pow
  integer :: lim1,lim2,lim3
  integer :: natom,ncoeff_max,ncoeff_sym,ncoeff_tot,nrpt,nsym,nstr_sym
  integer :: r1,r2,r3
- logical :: need_anharmstr
+ logical :: need_anharmstr,need_spcoupling
+ 
 !arrays
  integer :: ncell(3)
  integer,allocatable :: cell(:,:),compatibleCoeffs(:,:)
@@ -647,12 +648,14 @@ subroutine fit_polynomial_coeff_getNorder(cutoff,coefficients,eff_pot,ncoeff,pow
  end if
 
 !Initialisation of variables
+ need_anharmstr = .TRUE.
+ if(present(anharmstr)) need_anharmstr = anharmstr
+ need_spcoupling = .TRUE.
+ if(present(spcoupling)) need_spcoupling = spcoupling
+
  natom  = eff_pot%crystal%natom
  nsym   = eff_pot%crystal%nsym
  rprimd = eff_pot%crystal%rprimd
- need_anharmstr = .false.
- if(present(anharmstr)) need_anharmstr = anharmstr
-
 
  ABI_ALLOCATE(xcart,(3,natom))
  ABI_ALLOCATE(xred,(3,natom))
@@ -740,7 +743,8 @@ subroutine fit_polynomial_coeff_getNorder(cutoff,coefficients,eff_pot,ncoeff,pow
 !    Otherwise cycle (we keep the term)
      if(icoeff>ncoeff_sym.and.icoeff2<=ncoeff_sym)cycle
      if(icoeff2<=ncoeff_sym.and.icoeff2>ncoeff_sym)cycle
-     if(icoeff>ncoeff_sym.and.icoeff2>ncoeff_sym.and..not.need_anharmstr) then
+     if((icoeff>ncoeff_sym.or.icoeff2>ncoeff_sym).and.&
+&       .not.need_anharmstr.and..not.need_spcoupling) then
        compatibleCoeffs(icoeff,icoeff2) = zero
      end if
      if(icoeff2<=ncoeff_sym.and.icoeff2<=ncoeff_sym)then
@@ -781,7 +785,8 @@ subroutine fit_polynomial_coeff_getNorder(cutoff,coefficients,eff_pot,ncoeff,pow
 
  call computeNorder(cell,coeffs_tmp,compatibleCoeffs,list_symcoeff,list_symstr,list_coeff,&
 &                   icoeff,icoeff2,natom,ncoeff_sym,nstr_sym,icoeff,nrpt,nsym,1,powers(1),powers(2),&
-&                   symbols,nbody=option,compute=.false.,anharmstr=need_anharmstr)
+&                   symbols,nbody=option,compute=.false.,&
+&                   anharmstr=need_anharmstr,spcoupling=need_spcoupling)
  ABI_DEALLOCATE(coeffs_tmp)
 
 !Set to the maximum of possible coefficients
@@ -792,8 +797,8 @@ subroutine fit_polynomial_coeff_getNorder(cutoff,coefficients,eff_pot,ncoeff,pow
  icoeff  = 1
  icoeff2 = 0
  call computeNorder(cell,coeffs_tmp,compatibleCoeffs,list_symcoeff,list_symstr,list_coeff,&
-&                 icoeff,icoeff2,natom,ncoeff_sym,nstr_sym,ncoeff_max,nrpt,nsym,1,powers(1),powers(2),&
-&                 symbols,nbody=option,compute=.true.,anharmstr=need_anharmstr)
+&               icoeff,icoeff2,natom,ncoeff_sym,nstr_sym,ncoeff_max,nrpt,nsym,1,powers(1),powers(2),&
+&               symbols,nbody=option,compute=.true.,anharmstr=need_anharmstr,spcoupling=need_spcoupling)
 
  ABI_DEALLOCATE(list_coeff)
 
@@ -897,7 +902,7 @@ end subroutine fit_polynomial_coeff_getNorder
 recursive subroutine computeNorder(cell,coeffs_out,compatibleCoeffs,list_coeff,list_str,&
 &                                  index_coeff_in,icoeff,icoeff_tot,natom,ncoeff,nstr,ncoeff_out,&
 &                                  nrpt,nsym,power,power_min,power_max,symbols,nbody,&
-&                                  compute,anharmstr)
+&                                  compute,anharmstr,spcoupling)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -912,7 +917,7 @@ recursive subroutine computeNorder(cell,coeffs_out,compatibleCoeffs,list_coeff,l
 !scalar 
  integer,intent(in) :: natom,ncoeff,power,power_min,power_max,ncoeff_out,nsym,nrpt,nstr
  integer,intent(inout) :: icoeff,icoeff_tot
- logical,optional,intent(in) :: compute,anharmstr
+ logical,optional,intent(in) :: compute,anharmstr,spcoupling
  integer,optional,intent(in) :: nbody
 !arrays
  integer,intent(in) :: cell(3,nrpt),compatibleCoeffs(ncoeff+nstr,ncoeff+nstr)
@@ -926,7 +931,7 @@ recursive subroutine computeNorder(cell,coeffs_out,compatibleCoeffs,list_coeff,l
  integer :: irpt,isym,idisp,iterm,mu,nbody_in,ncoeff_max,ndisp
  integer :: nterm_max
  real(dp):: pa,pb,coefficient,weight
- logical :: need_compute,compatible,possible,need_anharmstr
+ logical :: need_compute,compatible,possible,need_anharmstr,need_spcoupling
 !arrays
  integer,allocatable :: index_coeff(:)
  integer,allocatable :: atindx(:,:)
@@ -939,11 +944,13 @@ recursive subroutine computeNorder(cell,coeffs_out,compatibleCoeffs,list_coeff,l
 
 !Set the inputs
  need_compute = .TRUE.
- need_anharmstr = .FALSE.
+ need_anharmstr = .TRUE.
+ need_spcoupling = .TRUE.
  nbody_in = 0 !all kind of terms
  if(present(compute)) need_compute = compute
  if(present(nbody)) nbody_in = nbody
  if(present(anharmstr)) need_anharmstr = anharmstr
+ if(present(spcoupling)) need_spcoupling = spcoupling
 
  if(power <= power_max)then   
    
@@ -1017,19 +1024,21 @@ recursive subroutine computeNorder(cell,coeffs_out,compatibleCoeffs,list_coeff,l
 !        -------------
 !        1-Check if the coefficient is full anharmonic strain and if we need to compute it
          if(all(terms(1)%direction(:) < zero))then
-           if(need_anharmstr)then
-             possible = .TRUE.
-             compatible = .TRUE.
-           else
-             possible = .FALSE.
-             compatible = .FALSE.
-           end if
+           possible = (need_anharmstr .or. need_spcoupling)
+           compatible = need_anharmstr
          end if
+!        1-Check if the coefficient is strain-coupling and if we need to compute it         
+         if(any(terms(1)%direction(:) < zero).and.any(terms(1)%direction(:) > zero))then
+           possible   = need_spcoupling
+           compatible = need_spcoupling
+         end if
+         
 !        ------------
 !        2-Check if this terms is compatible with nbody
          if(nbody_in > zero)then
            pa = one ; pb = one
            ia = zero ; ib = zero
+!          Count the number of terms and the power           
            do ii=1,terms(1)%ndisp
              if(terms(1)%direction(ii) < zero) then
                pb = pb*terms(1)%power(ii)
@@ -1081,7 +1090,7 @@ recursive subroutine computeNorder(cell,coeffs_out,compatibleCoeffs,list_coeff,l
        call computeNorder(cell,coeffs_out,compatibleCoeffs,list_coeff,list_str,index_coeff,&
 &                         icoeff1,icoeff_tot,natom,ncoeff,nstr,ncoeff_out,nrpt,nsym,power+1,&
 &                         power_min,power_max,symbols,nbody=nbody_in,compute=need_compute,&
-&                         anharmstr=need_anharmstr)
+&                         anharmstr=need_anharmstr,spcoupling=need_spcoupling)
      end if
    end do
 
@@ -1161,7 +1170,7 @@ end subroutine computeNorder
 !! SOURCE
 
 subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,powers,nbancoeff,ncycle_in,&
-&                                   nfixcoeff,comm,cutoff_in,positive,verbose,anharmstr)
+&                                   nfixcoeff,comm,cutoff_in,positive,verbose,anharmstr,spcoupling)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1184,7 +1193,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,powers,nbanco
  type(effective_potential_type),intent(inout) :: eff_pot
  type(abihist),intent(inout) :: hist
  real(dp),optional,intent(in) :: cutoff_in
- logical,optional,intent(in) :: verbose,positive,anharmstr
+ logical,optional,intent(in) :: verbose,positive,anharmstr,spcoupling
 !Local variables-------------------------------
 !scalar
  integer :: ii,icoeff,icycle,icycle_tmp,ierr,info,index_min,itime
@@ -1193,7 +1202,8 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,powers,nbanco
  integer :: rank_to_send
  real(dp) :: cutoff,energy
  real(dp),parameter :: HaBohr_meVAng = 27.21138386 / 0.529177249
- logical :: iam_master,found,need_verbose,need_positive,need_anharmstr
+ logical :: iam_master,found,need_verbose,need_positive
+ logical :: need_anharmstr,need_spcoupling
 !arrays
  real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3),strain_mat_inv(3,3)
  real(dp) :: mingf(4)
@@ -1229,7 +1239,8 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,powers,nbanco
  if(present(positive)) need_positive = positive
  need_anharmstr = .FALSE.
  if(present(anharmstr)) need_anharmstr = anharmstr
-
+ need_spcoupling = .TRUE.
+ if(present(spcoupling)) need_spcoupling = spcoupling
 
 !if the cutoff_in == zero,
 !we set to the lenght of the cell parameters
@@ -1294,10 +1305,10 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,powers,nbanco
      end if
 
      call fit_polynomial_coeff_getNorder(cutoff,coeffs_in,eff_pot,ncoeff_tot,powers,0,comm,&
-&                                        anharmstr=need_anharmstr)
+&                                        anharmstr=need_anharmstr,spcoupling=need_spcoupling)
 
      filename = "terms_set.xml"
-!     call polynomial_coeff_writeXML(coeffs_in,ncoeff_tot,filename=filename,newfile=.true.)
+     call polynomial_coeff_writeXML(coeffs_in,ncoeff_tot,filename=filename,newfile=.true.)
 
      if(need_verbose)then
        write(message,'(1x,I0,2a)') ncoeff_tot,' coefficients generated ',ch10     

@@ -760,7 +760,8 @@ void effpot_xml_readCoeff(char *filename,int*ncoeff,int*ndisp,int*nterm,
   icoeff = 0; iterm = 0; idisp = 0;
   cur = cur ->xmlChildrenNode;
   while (cur != NULL) {
-    if (!xmlStrcmp(cur->name, (const  xmlChar *) "Heff_definition")) {
+    if (!xmlStrcmp(cur->name, (const  xmlChar *) "Heff_definition") ||
+        !xmlStrcmp(cur->name, (const  xmlChar *) "Terms_definition")) {
       cur2 = cur->xmlChildrenNode;
       while (cur2 != NULL){
         if (!xmlStrcmp(cur2->name, (const  xmlChar *) "coefficient")) {
@@ -858,7 +859,6 @@ void effpot_xml_readCoeff(char *filename,int*ncoeff,int*ndisp,int*nterm,
             }
             cur3 = cur3->next;
           }
-          xmlFree(uri); 
           icoeff ++;
         }
         cur2 = cur2->next;
@@ -891,7 +891,8 @@ void effpot_xml_getDimCoeff(char *filename,int*ncoeff,char *nterm_max,int*ndisp_
   }
   cur = cur ->xmlChildrenNode;
   while (cur != NULL) {
-    if (!xmlStrcmp(cur->name, (const  xmlChar *) "Heff_definition")) {
+    if (!xmlStrcmp(cur->name, (const  xmlChar *) "Heff_definition") ||
+        !xmlStrcmp(cur->name, (const  xmlChar *) "Terms_definition")) {
       cur2 = cur->xmlChildrenNode;
       while (cur2 != NULL){
         if (!xmlStrcmp(cur2->name, (const  xmlChar *) "coefficient")){

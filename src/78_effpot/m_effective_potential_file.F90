@@ -518,7 +518,8 @@ subroutine effective_potential_file_getType(filename,filetype)
        read(ddbun,'(a)',iostat=ios) readline
        call rmtabfromline(readline)
        line=adjustl(readline)
-       if(line(1:16)==char(60)//"Heff_definition")then
+       if(line(1:16)==char(60)//"Heff_definition".or.&
+&         line(1:17)==char(60)//"Terms_definition")then
          filetype = 3
          ios = -1
        end if
@@ -528,7 +529,8 @@ subroutine effective_potential_file_getType(filename,filetype)
            read(ddbun,'(a)',iostat=ios) readline
            call rmtabfromline(readline)
            line=adjustl(readline)
-           if(line(1:16)==char(60)//"Heff_definition")then
+           if(line(1:16)==char(60)//"Heff_definition".or.&
+&             line(1:17)==char(60)//"Terms_definition")then
              filetype = 23
              ios = -1
            end if           

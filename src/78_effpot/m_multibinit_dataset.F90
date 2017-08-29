@@ -73,9 +73,12 @@ module m_multibinit_dataset
   integer :: fit_bound
   integer :: fit_boundTerm
   integer :: fit_boundStep
+  integer :: fit_anhaStrain
+  integer :: fit_SPCoupling
   integer :: fit_coeff
   integer :: fit_option
   integer :: fit_ncycle
+  integer :: fit_nbancoeff
   integer :: fit_nfixcoeff
   integer :: ifcana
   integer :: ifcflag
@@ -135,6 +138,9 @@ module m_multibinit_dataset
   ! atifc(natom)
   integer, allocatable :: fit_fixcoeff(:)
   ! fit_fixcoeffs(fit_nfixcoeff)
+
+  integer, allocatable :: fit_bancoeff(:)
+  ! fit_bancoeffs(fit_nbancoeff)
 
   integer, allocatable :: qmass(:)
   ! qmass(nnos)
@@ -210,6 +216,9 @@ subroutine multibinit_dtset_free(multibinit_dtset)
  end if
  if (allocated(multibinit_dtset%fit_fixcoeff))  then
    ABI_DEALLOCATE(multibinit_dtset%fit_fixcoeff)
+ end if
+  if (allocated(multibinit_dtset%fit_bancoeff))  then
+   ABI_DEALLOCATE(multibinit_dtset%fit_bancoeff)
  end if
  if (allocated(multibinit_dtset%qmass))  then
    ABI_DEALLOCATE(multibinit_dtset%qmass)
@@ -469,6 +478,17 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
 &   'fit_ncycle is',multibinit_dtset%fit_ncycle,', but the only allowed values',ch10,&
 &   'are positives for multibinit.',ch10,&
 &   'Action: correct fit_ncycle in your input file.'
+   MSG_ERROR(message)
+ end if
+
+ multibinit_dtset%fit_nbancoeff=0
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'fit_nbancoeff',tread,'INT')
+ if(tread==1) multibinit_dtset%fit_nbancoeff=intarr(1)
+ if(multibinit_dtset%fit_nbancoeff<0)then
+   write(message, '(a,i8,a,a,a,a,a)' )&
+&   'fit_nbancoeff is',multibinit_dtset%fit_nbancoeff,', but the only allowed values',ch10,&
+&   'are 0 or positive values for multibinit.',ch10,&
+&   'Action: correct fit_nbancoeff in your input file.'
    MSG_ERROR(message)
  end if
 
@@ -964,7 +984,18 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
    MSG_ERROR(message)
  end if
 
-!F
+ !F
+  multibinit_dtset%fit_anhaStrain=1
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'fit_anhaStrain',tread,'INT')
+ if(tread==1) multibinit_dtset%fit_anhaStrain=intarr(1)
+ if(multibinit_dtset%fit_anhaStrain<0.and.multibinit_dtset%fit_anhaStrain>1)then
+   write(message, '(a,i8,a,a,a,a,a)' )&
+&   'fit_anhaStrain is',multibinit_dtset%fit_anhaStrain,', but the only allowed values',ch10,&
+&   'are 0 or 1 for multibinit.',ch10,&
+&   'Action: correct fit_anhaStrain in your input file.'
+   MSG_ERROR(message)
+ end if
+
  multibinit_dtset%fit_bound=0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'fit_bound',tread,'INT')
  if(tread==1) multibinit_dtset%fit_bound=intarr(1)
@@ -973,6 +1004,18 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
 &   'fit_bound is',multibinit_dtset%fit_bound,', but the only allowed values',ch10,&
 &   'are 0 or 1 for multibinit.',ch10,&
 &   'Action: correct fit_bound in your input file.'
+   MSG_ERROR(message)
+ end if
+
+   multibinit_dtset%fit_SPCoupling=1
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'fit_SPCoupling',tread,'INT')
+ if(tread==1) multibinit_dtset%fit_SPCoupling=intarr(1)
+ if(multibinit_dtset%fit_SPCoupling<0.and.multibinit_dtset%fit_SPCoupling>1)then
+   write(message, '(a,i8,a,a,a,a,a)' )&
+     &   'fit_SPCoupling is',multibinit_dtset%fit_SPCoupling,&
+     &   ', but the only allowed values',ch10,&
+&   'are 0 or 1 for multibinit.',ch10,&
+&   'Action: correct fit_SPCoupling in your input file.'
    MSG_ERROR(message)
  end if
 
@@ -1098,6 +1141,24 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
 !M
 
 !N
+
+ ABI_ALLOCATE(multibinit_dtset%fit_bancoeff,(multibinit_dtset%fit_nbancoeff))
+ if (multibinit_dtset%fit_nbancoeff >0)then
+   if(multibinit_dtset%fit_nbancoeff>marr)then
+     marr=multibinit_dtset%fit_nbancoeff
+     ABI_DEALLOCATE(intarr)
+     ABI_ALLOCATE(intarr,(marr))
+   end if
+   multibinit_dtset%fit_bancoeff(:)=zero
+   call intagm(dprarr,intarr,jdtset,marr,multibinit_dtset%fit_nbancoeff,&
+&              string(1:lenstr),'fit_bancoeff',tread,'INT')
+   if(tread==1)then
+     do ii=1,multibinit_dtset%fit_nbancoeff
+       multibinit_dtset%fit_bancoeff(ii)=intarr(ii)
+     end do
+   end if
+ end if
+
  ABI_ALLOCATE(multibinit_dtset%fit_fixcoeff,(multibinit_dtset%fit_nfixcoeff))
  if (multibinit_dtset%fit_nfixcoeff >0)then
    if(multibinit_dtset%fit_nfixcoeff>marr)then
@@ -1300,7 +1361,19 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
  end if
 
 
-!check the fit_fixcoeff
+!check the fit_bancoeff and fit_fixcoeff
+ do ii=1,multibinit_dtset%fit_nbancoeff
+   do jj=ii+1,multibinit_dtset%fit_nbancoeff
+     if (multibinit_dtset%fit_bancoeff(ii) == multibinit_dtset%fit_bancoeff(jj))then     
+       write(message, '(a,I0,a,I0,2a)' )&
+&           ' There is two similar numbers for fit_bancoeff: ',multibinit_dtset%fit_bancoeff(ii),&
+&           ' and ', multibinit_dtset%fit_bancoeff(jj),ch10,&
+&            'Action: change fit_bancoeff'
+       MSG_BUG(message)
+     end if
+   end do
+ end do
+
  do ii=1,multibinit_dtset%fit_nfixcoeff
    do jj=ii+1,multibinit_dtset%fit_nfixcoeff
      if (multibinit_dtset%fit_fixcoeff(ii) == multibinit_dtset%fit_fixcoeff(jj))then     
@@ -1420,6 +1493,11 @@ subroutine outvars_multibinit (multibinit_dtset,nunit)
    write(nunit,'(3x,a14,I10.1)')'    fit_ncycle',multibinit_dtset%fit_ncycle
    write(nunit,'(3x,a14,3i10)') '      fit_grid',multibinit_dtset%fit_grid
    write(nunit,'(3x,a14,2i10)') 'fit_rangePower',multibinit_dtset%fit_rangePower
+   write(nunit,'(3x,a14,I10)')  'fit_anhaStrain',multibinit_dtset%fit_anhaStrain
+   write(nunit,'(3x,a14,I10)')  'fit_SPCoupling',multibinit_dtset%fit_SPCoupling
+   write(nunit,'(3x,a14,I10)')  ' fit_nbancoeff',multibinit_dtset%fit_nbancoeff
+   write(nunit,'(3x,a14)',advance='no')' fit_bancoeff'
+   write(nunit,'(4x,9i6)') (multibinit_dtset%fit_bancoeff(ii),ii=1,multibinit_dtset%fit_nbancoeff)
    write(nunit,'(3x,a14,I10)')  ' fit_nfixcoeff',multibinit_dtset%fit_nfixcoeff
    write(nunit,'(3x,a14)',advance='no')' fit_fixcoeff'
    write(nunit,'(4x,9i6)') (multibinit_dtset%fit_fixcoeff(ii),ii=1,multibinit_dtset%fit_nfixcoeff)
