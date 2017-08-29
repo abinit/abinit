@@ -104,6 +104,7 @@ module m_multibinit_dataset
   integer :: restarxf
   integer :: symdynmat
 
+  integer :: dipdip_range(3)
   integer :: fit_grid(3)
   integer :: fit_rangePower(2)
   integer :: fit_boundPower(2)
@@ -277,6 +278,7 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'invars10'
+ use interfaces_14_hidewrite
  use interfaces_42_parser
 !End of the abilint section
 
@@ -616,7 +618,7 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
  if(tread==1) multibinit_dtset%n_cell(1:3)=intarr(1:3)
  do ii=1,3
    if(multibinit_dtset%n_cell(ii)<0.or.multibinit_dtset%n_cell(ii)>50)then
-     write(message, '(a,i0,a,i0,a,a,a,i0,a)' )&
+     write(message, '(a,i0,a,i0,3a,i0,a)' )&
 &     'n_cell(',ii,') is ',multibinit_dtset%n_cell(ii),', which is lower than 0 of superior than 50.',&
 &     ch10,'Action: correct n_cell(',ii,') in your input file.'
      MSG_ERROR(message)
@@ -971,7 +973,18 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
  end if
 
 !D
-
+ multibinit_dtset%dipdip_range(:)= (/0,0,0/)
+ call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'dipdip_range',tread,'INT')
+ if(tread==1) multibinit_dtset%dipdip_range(1:3)=intarr(1:3)
+ do ii=1,3
+   if(multibinit_dtset%dipdip_range(ii)<0.or.multibinit_dtset%dipdip_range(ii)>50)then
+     write(message, '(a,i0,a,i0,4a,i0,a)' )&
+&     'dipdip_range(',ii,') is ',multibinit_dtset%dipdip_range(ii),', which is lower',&
+&     ' than 0 of superior than 50.',&
+&     ch10,'Action: correct dipdip_range(',ii,') in your input file.'
+     MSG_ERROR(message)
+   end if
+ end do
 !E
  multibinit_dtset%eivec=0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'eivec',tread,'INT')
@@ -1103,7 +1116,7 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
  call intagm(dprarr,intarr,jdtset,marr,2,string(1:lenstr),'fit_boundPower',tread,'INT')
  if(tread==1) multibinit_dtset%fit_boundPower(1:2)=intarr(1:2)
  do ii=1,2
-   if(multibinit_dtset%fit_boundPower(ii)<0.or.multibinit_dtset%fit_boundPower(ii)>20)then
+   if(multibinit_dtset%fit_boundPower(ii)<=0.or.multibinit_dtset%fit_boundPower(ii)>20)then
      write(message, '(a,i0,a,i0,a,a,a,i0,a)' )&
 &     'fit_boundPower(',ii,') is ',multibinit_dtset%fit_boundPower(ii),', which is lower',&
 &     ' than 0 of superior than 20.',&
@@ -1117,7 +1130,7 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
  if(tread==1) multibinit_dtset%fit_boundCell(1:3)=intarr(1:3)
  do ii=1,3
    if(multibinit_dtset%fit_boundCell(ii)<=0.or.multibinit_dtset%fit_boundCell(ii)>20)then
-     write(message, '(a,i0,a,i0,a,a,a,i0,a)' )&
+     write(message, '(a,i0,a,i0,4a,i0,a)' )&
 &     'fit_boundCell(',ii,') is ',multibinit_dtset%fit_boundCell(ii),', which is lower',&
 &     ' than 0 of superior than 20.',&
 &     ch10,'Action: correct fit_boundCell(',ii,') in your input file.'
@@ -1386,6 +1399,21 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
    end do
  end do
 
+ do ii=1,3
+   if(multibinit_dtset%dipdip_range(ii) < multibinit_dtset%n_cell(ii)) then
+     write(message,'(4a,3I3,3a,3I3,6a)') ch10,&
+&                 ' --- !WARNING',ch10,&
+&                 '     The range of dipdip_range (',multibinit_dtset%dipdip_range(:),')',ch10,&
+&                 '     But the range of the cell for the simulation is',&
+&                       multibinit_dtset%n_cell(:),')',ch10,&
+&                 '     dipdip_range is set to n_cell.',ch10,&
+&                 ' ---',ch10
+     multibinit_dtset%dipdip_range(:) =  multibinit_dtset%n_cell(:)
+     call wrtout(std_out,message,'COLL')
+     exit
+   end if
+ end do
+
 end subroutine invars10
 !!***
 
@@ -1531,6 +1559,9 @@ subroutine outvars_multibinit (multibinit_dtset,nunit)
  if(multibinit_dtset%ifcflag/=0)then
    write(nunit,'(a)')' Interatomic Force Constants Inputs :'
    write(nunit,'(3x,a9,3i10)')'   dipdip',multibinit_dtset%dipdip
+   if(multibinit_dtset%dipdip /= 0)then
+     write(nunit,'(3x,a12,3i10)') 'dipdip_range',multibinit_dtset%dipdip_range
+   end if
    if(multibinit_dtset%nsphere/=0)write(nunit,'(3x,a9,3i10)')'  nsphere',multibinit_dtset%nsphere
    if(abs(multibinit_dtset%rifcsph)>tol10)write(nunit,'(3x,a9,E16.6)')'  nsphere',multibinit_dtset%rifcsph
    write(nunit,'(3x,a9,3i10)')'   ifcana',multibinit_dtset%ifcana

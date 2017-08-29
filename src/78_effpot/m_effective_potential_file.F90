@@ -314,8 +314,8 @@ subroutine effective_potential_file_read(filename,eff_pot,inp,comm,hist)
 !     Transfert the ddb to the effective potential
       call system_ddb2effpot(Crystal,ddb, eff_pot,inp,comm)
 
-!   Generate long rage interation for the effective potential for both type and generate suppercell
-      call effective_potential_generateDipDip(eff_pot,inp%n_cell,inp%dipdip,inp%asr,comm)
+!     Generate long rage interation for the effective potential for both type and generate suppercell
+      call effective_potential_generateDipDip(eff_pot,inp%dipdip_range,inp%dipdip,inp%asr,comm)
 
 !     If needed, print the effective potential into the output
       if (inp%prt_model>=3.or.inp%prt_model==-1) then
@@ -354,7 +354,7 @@ subroutine effective_potential_file_read(filename,eff_pot,inp,comm,hist)
       end if
 
 !     Generate long rage interation for the effective potential for both type and generate suppercell
-      call effective_potential_generateDipDip(eff_pot,inp%n_cell,inp%dipdip,inp%asr,comm)
+      call effective_potential_generateDipDip(eff_pot,inp%dipdip_range,inp%dipdip,inp%asr,comm)
 
 !     If needed, print the effective potential
       call effective_potential_print(eff_pot,inp%prt_model)
