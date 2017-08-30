@@ -245,6 +245,9 @@ def make_links(text,cur_key,allowed_link_seeds,backlinks,backlink):
           backlinks[key]+=backlink+";;"
           return '<a href="../../biblio/generated_files/bib_biblio.html#%s">[%s]</a>' %(key,webtext)
 
+    if 1:
+      print(" FAKE LINK detected : '"+dokukey+"'")
+
     return '<a href="#">[[FAKE LINK:'+dokukey+']]</a>'
 
   p=re.compile("\\[\\[([a-zA-Z0-9_ ,\(\)\"\'?=*/<>.|:+#@-]*)\\]\\]")
