@@ -399,13 +399,15 @@ subroutine freeze_displ_supercell (displ,freeze_displ,scell)
 
  ! fix gauge by imposing real displacement for first atom in first direction 
  ! multiply by normalized complex conjugate of first element
- phase = conjg(zdispl(1,1)) / abs(zdispl(1,1))
- 
+ phase = cmplx(one,zero)
+ if (abs(zdispl(1,1)) > tol10) then
+   phase = conjg(zdispl(1,1)) / abs(zdispl(1,1))
+ end if
 
  do iatom = 1, scell%natom
    expqdotr = exp(j*two_pi*(scell%qphon(1)*scell%uc_indexing(1,iatom) &
-&                             +scell%qphon(2)*scell%uc_indexing(2,iatom) &
-&                             +scell%qphon(3)*scell%uc_indexing(3,iatom)))
+&                          +scell%qphon(2)*scell%uc_indexing(2,iatom) &
+&                          +scell%qphon(3)*scell%uc_indexing(3,iatom)))
 
 ! this is offset in zdispl vector due to primitive cell atom position
    ipratom = scell%atom_indexing(iatom)
