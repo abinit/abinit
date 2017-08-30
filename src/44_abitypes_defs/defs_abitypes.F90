@@ -519,6 +519,7 @@ type dataset_type
  integer :: prtxml
  integer :: prt1dm
  integer :: ptgroupma
+ integer :: qptopt
  integer :: random_atpos
  integer :: recgratio
  integer :: recnpath
