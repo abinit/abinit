@@ -784,7 +784,7 @@ for i, var in enumerate(abinit_vars):
               print("\n For input variable %s, name of tribe '%s' is given. However this name of tribe is not in list_tribes.yml ."%(var.abivarname.strip(),name_tribe[1].strip()))
               topic_error+=1
             cur_content += '<a href="../../topics/generated_files/topic_'+name_tribe[0].strip()+'.html">'+name_tribe[0].strip()+'</a>'
-            if i!=len(name_tribe)-1:
+            if i!=len(topics_name_tribe)-1:
               cur_content+=", "
             else:
               cur_content+="."
