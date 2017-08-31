@@ -1,10 +1,10 @@
 !{\src2tex{textfont=tt}}
-!!****f* ABINIT/fock_getghc
+!!****f* ABINIT/fock_ACE_getghc
 !! NAME
-!!  fock_getghc
+!!  fock_ACE_getghc
 !!
 !! FUNCTION
-!!  Compute the matrix elements <G|Vx|psi> of the Fock operator.
+!!  Compute the matrix elements <G|Vx|psi> of the Fock operator in the ACE context.
 !!
 !! COPYRIGHT
 !!  Copyright (C) 2013-2017 ABINIT group (CMartins,FJ,MT)
@@ -45,7 +45,7 @@
 
 #include "abi_common.h"
 
-subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
+subroutine fock_ACE_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
 
  use defs_basis
  use defs_abitypes
@@ -64,7 +64,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'fock_getghc'
+#define ABI_FUNC 'fock_ACE_getghc'
  use interfaces_18_timing
  use interfaces_32_util
  use interfaces_52_fft_mpi_noabirule
@@ -117,7 +117,7 @@ type(pseudopotential_type) :: psps
  type(pawrhoij_type),allocatable  ::  pawrhoij(:)
 
 ! *************************************************************************
-!return
+return
  call timab(1504,1,tsec)
  call timab(1505,1,tsec)
 
@@ -293,10 +293,6 @@ type(pseudopotential_type) :: psps
 ! =================================================
    do jband=1,nband_k
 
-!*   occ = occupancy of jband at this k point
-     occ=fock%occ_bz(jband+bdtot_jindex,my_jsppol)
-     if(occ<tol8) cycle 
-
 ! ==============================================
 ! === Get cwaveocc_r in real space using FFT ===
 ! ==============================================
@@ -310,6 +306,10 @@ type(pseudopotential_type) :: psps
 &       npwj,1,n4f,n5f,n6f,tim_fourwf0,mpi_enreg%paral_kgb,0,weight1,weight1,use_gpu_cuda=gs_ham%use_gpu_cuda)
        cwaveocc_r=cwaveocc_r*invucvol
      end if
+
+!*   occ = occupancy of jband at this k point
+     occ=fock%occ_bz(jband+bdtot_jindex,my_jsppol)
+     if(occ<tol8) cycle 
 
 ! if((jkpt/=fock%ikpt).or.(jband/=fock%ieigen)) cycle
 
@@ -360,12 +360,7 @@ type(pseudopotential_type) :: psps
        call strfock(gs_ham%gprimd,fock%gsqcut,fockstr,fock%hybrid_mixing,fock%hybrid_mixing_sr,&
 &       fock%hybrid_range,mpi_enreg,nfftf,ngfftf,fock%nkpt_bz,rhog_munu,gs_ham%ucvol,qvec_j)
        fock%stress_ikpt(:,fock%ieigen)=fock%stress_ikpt(:,fock%ieigen)+fockstr(:)*occ*wtk
-       if (fock%usepaw==0.and.(.not.need_ghc)) then
-         if (allocated(fock%cgocc)) then
-           ABI_DEALLOCATE(cwaveocc_r)
-         end if
-         cycle
-       end if
+       if (fock%usepaw==0.and.(.not.need_ghc)) cycle
      end if
 
 ! ===================================================
@@ -673,7 +668,7 @@ type(pseudopotential_type) :: psps
    if(gs_ham%istwf_k>=2) eigen=two*eigen
    call xmpi_sum(eigen,mpi_enreg%comm_hf,ier)
    fock%eigen_ikpt(fock%ieigen)= eigen
-   if(fock%use_ACE==0) fock%ieigen = 0
+   fock%ieigen = 0
  end if
 
 ! ===============================
@@ -691,5 +686,5 @@ type(pseudopotential_type) :: psps
 
  call timab(1504,2,tsec)
 
-end subroutine fock_getghc
+end subroutine fock_ACE_getghc
 !!***
