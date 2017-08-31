@@ -28364,7 +28364,9 @@
     commentdefault: do not calculate any thermalized supercells
     commentdims: null
     defaultval: (/(/0,0,0/),  (/0,0,0/),  (/0,0,0/)/)
-    dimensions: 3,3
+    dimensions:
+    - 3
+    - 3
     excludes: null
     mnemonics: THERMALized SUPERCELL lattice vectors
     requires: null
