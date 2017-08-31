@@ -1253,7 +1253,7 @@ for ref in bibtex_dics:
   backlinks_formatted=format_backlinks(backlinks_str)
   line=("@%s{%s,%s") %(entrytype,ID,ref['body'])
   lines_txt+= line
-  bibtex_content+= ('<hr><a id="%s">%s</a> \n <pre>' ) %(ID,ID)
+  bibtex_content+= ('<hr><a href="./bib_biblio.html#%s id="%s">%s</a> \n <pre>' ) %(ID,ID,ID)
   bibtex_content+= line+'</pre> \n'
   while ID[0]>cur_let:
     cur_let = chr(ord(cur_let)+1)
