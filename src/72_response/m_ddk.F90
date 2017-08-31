@@ -447,6 +447,8 @@ subroutine ddk_fs_average_veloc(ddk, ebands, fstab, sigmas, comm)
    ddk%velocity_fsavg(:,:,isppol) = sqrt(ddk%velocity_fsavg(:,:,isppol)) / dble(fs%nkfs)
  end do ! isppol
 
+ ABI_DEALLOCATE(wtk)
+
 end subroutine ddk_fs_average_veloc
 !!***
 

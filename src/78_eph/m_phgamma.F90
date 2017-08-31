@@ -4646,6 +4646,8 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
    call a2fw_tr_init(a2fw_tr,gams,cryst,ifc,dtset%ph_intmeth,dtset%ph_wstep,wminmax,dtset%ph_smear,&
      dtset%ph_ngqpt,dtset%ph_nqshift,dtset%ph_qshift,comm,qptopt=3)
    if (my_rank == master) call a2fw_tr_write(a2fw_tr, strcat(dtfil%filnam_ds(4), "_A2FWTR_QPTOPT3"))
+
+   call a2fw_tr_free(a2fw_tr)
  end if
 
 #ifdef HAVE_NETCDF
