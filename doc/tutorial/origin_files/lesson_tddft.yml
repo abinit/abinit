@@ -36,7 +36,7 @@ sec1:
    <a href="http://dx.doi.org/10.1016/S1380-7323(96)80093-8" >http://dx.doi.org/10.1016/S1380-7323(96)80093-8</a>
   </pre>
   However this reference might be hard to get, that is why we have based the tutorial
-  instead on the following (also early) papers : [[Casida1998]], [[Casida1998a]], and [[Vasiliev1999]].
+  instead on the following (also early) papers : [[Casida1998]], [[Casida1998a]], and [[Vasiliev1998]].
   <p>
   The first of these papers, [[Casida1998]],
   will be used as main reference for our tutorial.
@@ -58,7 +58,7 @@ sec1:
   The exchange-correlation kernel contribution will differ in the
   spin-singlet and in the spin-triplet states, this being the only difference between
   spin-singlet and spin-triplet states.
-  See Eqs.(1.3) and (1.4) of [[Casida1998b]],
+  See Eqs.(1.3) and (1.4) of [[Casida1998a]],
   and Eqs.(1-2) of [[Vasiliev1998]].
   <p>
   The construction of the coupling matrix can be done on the basis of an exchange-correlation

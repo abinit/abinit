@@ -2963,8 +2963,8 @@
     defaultval: 0.0
     dimensions:
     - 3
-    -   -   - nzchempot
-    -   -   - ntype
+    - '[[nzchempot]]'
+    - '[[ntypat]]'
     excludes: null
     mnemonics: spatially varying CHEMical POTential
     requires: '[[nzchempot]]/=0'
@@ -25571,7 +25571,7 @@
     defaultval: !valuewithconditions
         defaultval: 2.0
         usepaw==1:
-        -   - AUTO_FROM_PSP
+        - '[[AUTO_FROM_PSP]]'
     dimensions:
     - '[[ntypat]]'
     excludes: null
