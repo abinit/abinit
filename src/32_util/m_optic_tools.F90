@@ -115,6 +115,10 @@ subroutine sym2cart(gprimd,nsym,rprimd,symrel,symcart)
    call dgemm('N','N',3,3,3,one,tmp,   3,gprimd,3,zero,rsymcart,3)
 !  write(std_out,*) 'rsymcart = ',rsymcart
    symcart(:,:,isym) = rsymcart(:,:)
+! purify symops in cartesian dp coordinates
+   where( abs(symcart(:,:,isym))<tol14)
+     symcart(:,:,isym) = zero
+   end where
  end do
 
 end subroutine sym2cart
