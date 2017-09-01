@@ -25,6 +25,8 @@ sources = [
  "fxphas.F90",
  "getdc1.F90",
  "getghcnd.F90",
+ "fock2ACE.F90",
+ "fock_ACE_getghc.F90",
  "fock_getghc.F90",
  "getghc.F90",
  "getgh1c.F90",

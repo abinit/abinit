@@ -571,6 +571,7 @@ end subroutine effective_potential_file_getType
 subroutine effective_potential_file_getDimSystem(filename,natom,ntypat,nqpt,nrpt,comm)
 
  use m_ddb
+ use m_ddb_hdr
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -594,6 +595,7 @@ subroutine effective_potential_file_getDimSystem(filename,natom,ntypat,nqpt,nrpt
  integer :: dimekb,filetype,lmnmax,mband,mtyp,msym,nblok,nkpt,usepaw
  integer :: ddbun = 666
  character(len=500) :: message
+ type(ddb_hdr_type) :: ddb_hdr
 !arrays
 ! *************************************************************************
 
@@ -614,8 +616,12 @@ subroutine effective_potential_file_getDimSystem(filename,natom,ntypat,nqpt,nrpt
 &    'if you want to predic the number of cell (nrpt)',ch10,' use bigbx9 routines',ch10
    call wrtout(std_out,message,'COLL')
 
-   call ddb_getdims(dimekb,filename,lmnmax,mband,mtyp,msym,natom,nblok,&
-&                  nkpt,ntypat,ddbun,usepaw,DDB_VERSION,comm)
+   call ddb_hdr_open_read(ddb_hdr,filename,ddbun,DDB_VERSION,&
+&                         dimonly=1)
+   natom = ddb_hdr%natom
+   ntypat = ddb_hdr%ntypat
+
+   call ddb_hdr_free(ddb_hdr)
 
 !  Must read some value to initialze  array (nprt for ifc)
 !   call bigbx9(inp%brav,dummy_cell,0,1,inp%ngqpt,inp%nqshft,nrpt,ddb%rprim,dummy_rpt)

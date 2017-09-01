@@ -75,4 +75,5 @@ nshiftk1  4
 #%%   structure is well-converged at the ecut used in the test (20 Ha).
 #%%   A complete description of the input format is avaiable in 
 #%%   doc/psp_infos/psp8_info.txt.
+#%% topics = spinpolarisation
 #%%<END TEST_INFO>

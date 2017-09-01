@@ -1,0 +1,19 @@
+- !components
+    name      : PortabilityNonRegression
+    keyword   : PortabilityNonRegression
+    authors   : XG
+    subtitle : |
+      <h3>This page describes briefly the portability and non-regression tests made in the ABINIT project.
+      <hr>
+    header    : default
+    title     : <h1>Portability and non-regression tests</h1>
+    subtitle  : default
+    copyright : default
+    links     : default
+    introduction : |
+      ABINIT is tested at each merge in the trunk, on a dedicated test farm, see 
+      [[http://dev.abinit.org/environment/buildbot/buildbot-slave-matrix]]
+      and
+      [[http://dev.abinit.org/environment/buildbot/buildbot-builder-matrix]].
+      The numerous tests contained in ~abinit/tests/doc are executed, and compared with reference files.
+    end : default

@@ -1,0 +1,2736 @@
+<!--                                                                                     -->
+<!-- This file has been produced by generate_doc.py using different .yml  or .bib files. -->
+<!-- It is useless to modify it. Modify the related .yml  or .bib files instead.         -->
+<!--                                                                                     -->
+<html>
+<head><title>Description of anaddb variables.</title>
+<link rel=stylesheet type="text/css" href="../../formabinit.css">
+<link rel=stylesheet type="text/css" href="../formabinit.css">
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  jax: ["input/TeX","output/HTML-CSS"],
+  tex2jax: {inlineMath: [['$','$']]},
+  displayAlign: "center",
+  TeX: { equationNumbers: { autoNumber: "AMS" } }
+});
+</script>
+<script type="text/javascript" async
+src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+</head>
+<body bgcolor="#ffffff">
+
+<hr>
+<a name="top"></a>
+
+<h1>ABINIT, anaddb input variables:</h1>
+
+<h2>List and description.
+</h2>
+<hr>
+<p>This document lists and provides the description
+of the name (keywords) of the "anaddb" input
+variables to be used in the input file for the ANADDB executable of the ABINIT package.
+<script type="text/javascript" src="../../js_files/generic_advice.js"> </script>
+<hr>
+
+<h5>Copyright (C) 1998-2017 ABINIT group (DCA,XG,RC,YG,FJ)
+<script type="text/javascript" src="../../js_files/copyright.js"> </script>
+</h5> 
+
+<script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
+
+<script type="text/javascript" src="../../js_files/list_htmlfiles_input_variables.js"> </script>
+
+<a name="list"></a>
+<h3><b> Content of the file : alphabetical list of "anaddb" variables.</b></h3>
+
+<br><a id='A'></a>A.
+ <a href="#a2fsmear@anaddb">a2fsmear</a>&nbsp;&nbsp;
+ <a href="#alphon@anaddb">alphon</a>&nbsp;&nbsp;
+ <a href="#asr@anaddb">asr</a>&nbsp;&nbsp;
+ <a href="#atftol@anaddb">atftol</a>&nbsp;&nbsp;
+ <a href="#atifc@anaddb">atifc</a>&nbsp;&nbsp;
+ <br><a id='B'></a>B.
+ <a href="#band_gap@anaddb">band_gap</a>&nbsp;&nbsp;
+ <a href="#brav@anaddb">brav</a>&nbsp;&nbsp;
+ <br><a id='C'></a>C.
+ <a href="#chneut@anaddb">chneut</a>&nbsp;&nbsp;
+ <br><a id='D'></a>D.
+ <a href="#dieflag@anaddb">dieflag</a>&nbsp;&nbsp;
+ <a href="#dipdip@anaddb">dipdip</a>&nbsp;&nbsp;
+ <a href="#dosdeltae@anaddb">dosdeltae</a>&nbsp;&nbsp;
+ <a href="#dossmear@anaddb">dossmear</a>&nbsp;&nbsp;
+ <a href="#dossum@anaddb">dossum</a>&nbsp;&nbsp;
+ <a href="#dostol@anaddb">dostol</a>&nbsp;&nbsp;
+ <br><a id='E'></a>E.
+ <a href="#eivec@anaddb">eivec</a>&nbsp;&nbsp;
+ <a href="#elaflag@anaddb">elaflag</a>&nbsp;&nbsp;
+ <a href="#elph_fermie@anaddb">elph_fermie</a>&nbsp;&nbsp;
+ <a href="#elphflag@anaddb">elphflag</a>&nbsp;&nbsp;
+ <a href="#elphsmear@anaddb">elphsmear</a>&nbsp;&nbsp;
+ <a href="#enunit@anaddb">enunit</a>&nbsp;&nbsp;
+ <a href="#ep_b_max@anaddb">ep_b_max</a>&nbsp;&nbsp;
+ <a href="#ep_b_min@anaddb">ep_b_min</a>&nbsp;&nbsp;
+ <a href="#ep_extrael@anaddb">ep_extrael</a>&nbsp;&nbsp;
+ <a href="#ep_int_gkk@anaddb">ep_int_gkk</a>&nbsp;&nbsp;
+ <a href="#ep_keepbands@anaddb">ep_keepbands</a>&nbsp;&nbsp;
+ <a href="#ep_nqpt@anaddb">ep_nqpt</a>&nbsp;&nbsp;
+ <a href="#ep_nspline@anaddb">ep_nspline</a>&nbsp;&nbsp;
+ <a href="#ep_prt_yambo@anaddb">ep_prt_yambo</a>&nbsp;&nbsp;
+ <a href="#ep_qptlist@anaddb">ep_qptlist</a>&nbsp;&nbsp;
+ <a href="#ep_scalprod@anaddb">ep_scalprod</a>&nbsp;&nbsp;
+ <br><a id='F'></a>F.
+ <a href="#freeze_displ@anaddb">freeze_displ</a>&nbsp;&nbsp;
+ <a href="#frmax@anaddb">frmax</a>&nbsp;&nbsp;
+ <a href="#frmin@anaddb">frmin</a>&nbsp;&nbsp;
+ <br><a id='G'></a>G.
+ <a href="#gkqwrite@anaddb">gkqwrite</a>&nbsp;&nbsp;
+ <a href="#gruns_ddbs@anaddb">gruns_ddbs</a>&nbsp;&nbsp;
+ <a href="#gruns_nddbs@anaddb">gruns_nddbs</a>&nbsp;&nbsp;
+ <br><a id='H'></a>H.
+ <br><a id='I'></a>I.
+ <a href="#iatfix@anaddb">iatfix</a>&nbsp;&nbsp;
+ <a href="#iatprj_bs@anaddb">iatprj_bs</a>&nbsp;&nbsp;
+ <a href="#ifcana@anaddb">ifcana</a>&nbsp;&nbsp;
+ <a href="#ifcflag@anaddb">ifcflag</a>&nbsp;&nbsp;
+ <a href="#ifcout@anaddb">ifcout</a>&nbsp;&nbsp;
+ <a href="#ifltransport@anaddb">ifltransport</a>&nbsp;&nbsp;
+ <a href="#instrflag@anaddb">instrflag</a>&nbsp;&nbsp;
+ <a href="#istrfix@anaddb">istrfix</a>&nbsp;&nbsp;
+ <br><a id='J'></a>J.
+ <br><a id='K'></a>K.
+ <a href="#kptrlatt@anaddb">kptrlatt</a>&nbsp;&nbsp;
+ <a href="#kptrlatt_fine@anaddb">kptrlatt_fine</a>&nbsp;&nbsp;
+ <br><a id='L'></a>L.
+ <br><a id='M'></a>M.
+ <a href="#mustar@anaddb">mustar</a>&nbsp;&nbsp;
+ <br><a id='N'></a>N.
+ <a href="#natfix@anaddb">natfix</a>&nbsp;&nbsp;
+ <a href="#natifc@anaddb">natifc</a>&nbsp;&nbsp;
+ <a href="#natprj_bs@anaddb">natprj_bs</a>&nbsp;&nbsp;
+ <a href="#nchan@anaddb">nchan</a>&nbsp;&nbsp;
+ <a href="#ndivsm@anaddb">ndivsm</a>&nbsp;&nbsp;
+ <a href="#nfreq@anaddb">nfreq</a>&nbsp;&nbsp;
+ <a href="#ng2qpt@anaddb">ng2qpt</a>&nbsp;&nbsp;
+ <a href="#ngqpt@anaddb">ngqpt</a>&nbsp;&nbsp;
+ <a href="#ngrids@anaddb">ngrids</a>&nbsp;&nbsp;
+ <a href="#nlflag@anaddb">nlflag</a>&nbsp;&nbsp;
+ <a href="#nph1l@anaddb">nph1l</a>&nbsp;&nbsp;
+ <a href="#nph2l@anaddb">nph2l</a>&nbsp;&nbsp;
+ <a href="#nqpath@anaddb">nqpath</a>&nbsp;&nbsp;
+ <a href="#nqshft@anaddb">nqshft</a>&nbsp;&nbsp;
+ <a href="#nsphere@anaddb">nsphere</a>&nbsp;&nbsp;
+ <a href="#nstrfix@anaddb">nstrfix</a>&nbsp;&nbsp;
+ <a href="#ntemper@anaddb">ntemper</a>&nbsp;&nbsp;
+ <a href="#nwchan@anaddb">nwchan</a>&nbsp;&nbsp;
+ <br><a id='O'></a>O.
+ <a href="#outboltztrap@anaddb">outboltztrap</a>&nbsp;&nbsp;
+ <a href="#outscphon@anaddb">outscphon</a>&nbsp;&nbsp;
+ <br><a id='P'></a>P.
+ <a href="#piezoflag@anaddb">piezoflag</a>&nbsp;&nbsp;
+ <a href="#polflag@anaddb">polflag</a>&nbsp;&nbsp;
+ <a href="#prt_ifc@anaddb">prt_ifc</a>&nbsp;&nbsp;
+ <a href="#prtbltztrp@anaddb">prtbltztrp</a>&nbsp;&nbsp;
+ <a href="#prtddb@anaddb">prtddb</a>&nbsp;&nbsp;
+ <a href="#prtdos@anaddb">prtdos</a>&nbsp;&nbsp;
+ <a href="#prtfsurf@anaddb">prtfsurf</a>&nbsp;&nbsp;
+ <a href="#prtmbm@anaddb">prtmbm</a>&nbsp;&nbsp;
+ <a href="#prtnest@anaddb">prtnest</a>&nbsp;&nbsp;
+ <a href="#prtphbands@anaddb">prtphbands</a>&nbsp;&nbsp;
+ <a href="#prtsrlr@anaddb">prtsrlr</a>&nbsp;&nbsp;
+ <a href="#prtvol@anaddb">prtvol</a>&nbsp;&nbsp;
+ <br><a id='Q'></a>Q.
+ <a href="#q1shft@anaddb">q1shft</a>&nbsp;&nbsp;
+ <a href="#q2shft@anaddb">q2shft</a>&nbsp;&nbsp;
+ <a href="#qgrid_type@anaddb">qgrid_type</a>&nbsp;&nbsp;
+ <a href="#qpath@anaddb">qpath</a>&nbsp;&nbsp;
+ <a href="#qph1l@anaddb">qph1l</a>&nbsp;&nbsp;
+ <a href="#qph2l@anaddb">qph2l</a>&nbsp;&nbsp;
+ <a href="#qrefine@anaddb">qrefine</a>&nbsp;&nbsp;
+ <br><a id='R'></a>R.
+ <a href="#ramansr@anaddb">ramansr</a>&nbsp;&nbsp;
+ <a href="#relaxat@anaddb">relaxat</a>&nbsp;&nbsp;
+ <a href="#relaxstr@anaddb">relaxstr</a>&nbsp;&nbsp;
+ <a href="#rfmeth@anaddb">rfmeth</a>&nbsp;&nbsp;
+ <a href="#rifcsph@anaddb">rifcsph</a>&nbsp;&nbsp;
+ <br><a id='S'></a>S.
+ <a href="#selectz@anaddb">selectz</a>&nbsp;&nbsp;
+ <a href="#symdynmat@anaddb">symdynmat</a>&nbsp;&nbsp;
+ <a href="#symgkq@anaddb">symgkq</a>&nbsp;&nbsp;
+ <br><a id='T'></a>T.
+ <a href="#targetpol@anaddb">targetpol</a>&nbsp;&nbsp;
+ <a href="#telphint@anaddb">telphint</a>&nbsp;&nbsp;
+ <a href="#temperinc@anaddb">temperinc</a>&nbsp;&nbsp;
+ <a href="#tempermin@anaddb">tempermin</a>&nbsp;&nbsp;
+ <a href="#thmflag@anaddb">thmflag</a>&nbsp;&nbsp;
+ <a href="#thmtol@anaddb">thmtol</a>&nbsp;&nbsp;
+ <br><a id='U'></a>U.
+ <a href="#use_k_fine@anaddb">use_k_fine</a>&nbsp;&nbsp;
+ <br><a id='V'></a>V.
+ <a href="#vs_qrad_tolkms@anaddb">vs_qrad_tolkms</a>&nbsp;&nbsp;
+<br><br><hr>
+<br><font id="title"><a name="a2fsmear@anaddb">a2fsmear</a></font>
+<br><font id="mnemonics">Mnemonics: Alpha2F SMEARing factor</font>
+<br><font id="mnemonics">Executable: anaddb</font>
+<br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#ENERGY">ENERGY</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_ElPhonTransport.html">ElPhonTransport</a>.</font>
+<br><font id="smalltext">Moderately used: [1/70] in anaddb tests, [0/10] in tuto anaddb tests. Test list: {v5:[<a href="../../tests/v5/Input/t91.in">91</a>]}.</font>
+<br><font id="vartype">Variable type: real</font>
+<br><font id="default">Default is 2e-05</font>
+<br><font id="text">
+<p>
+<p>Smearing width for the Eliashberg alpha^2F function
+(similar to a phonon DOS), which is sampled on a finite q and k grid. The Dirac delta
+functions in energy are replaced by Gaussians of width <b>a2fsmear</b>
+(by default in Hartree).
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="alphon@anaddb">alphon</a></font>
+<br><font id="mnemonics">Mnemonics: ALign PHONon mode eigendisplacements</font>
+<br><font id="mnemonics">Executable: anaddb</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_nonlinear.html">nonlinear</a>.</font>
+<br><font id="smalltext">Moderately used: [3/70] in anaddb tests, [1/10] in tuto anaddb tests. Test list: {tutorespfn:[<a href="../../tests/tutorespfn/Input/tnlo_5.in">nlo_5</a>],v4:[<a href="../../tests/v4/Input/t54.in">54</a>],v8:[<a href="../../tests/v8/Input/t49.in">49</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p>In case <b>alphon</b> is set to 1, ANADDB will compute linear combinations of
+the eigendisplacements of modes that are degenerate (twice or three times),
+in order to align the mode effective charges along the cartesian axes.
+This option is useful in the mode-by-mode decomposition of the electrooptic tensor, and to compute
+the Raman susceptibilities of individual phonon modes.
+In case of uniaxial crystals, the z-axis should be chosen along the optical axis.
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="asr@anaddb">asr</a></font>
+<br><font id="mnemonics">Mnemonics: Acoustic Sum Rule</font>
+<br><font id="mnemonics">Executable: anaddb</font>
+<br><font id="characteristic">Mentioned in topics: <a href="../../topics/generated_files/topic_Phonons.html">Phonons</a>, <a href="../../topics/generated_files/topic_PhononBands.html">PhononBands</a>.</font>
+<br><font id="smalltext">Moderately used: [23/70] in anaddb tests, [3/10] in tuto anaddb tests. Tuto test list: {tutorespfn:[<a href="../../tests/tutorespfn/Input/teph_4.in">eph_4</a>,<a href="../../tests/tutorespfn/Input/teph_5.in">eph_5</a>,<a href="../../tests/tutorespfn/Input/teph_6.in">eph_6</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 1 (Comment: was 0 before v5.3)</font>
+<br><font id="text">
+<p>
+<p>Govern the imposition of the Acoustic Sum Rule (ASR).
+<ul>
+<li>  0 => no ASR for interatomic force constants is imposed.</li>
+<li>  1 or 2 => the ASR for interatomic force constants
+is imposed by modifying the on-site interatomic force constants,
+in a symmetric way (<b>asr</b>=2), or in the more general case, unconstrained way (<b>asr</b>=1).</li>
+</ul>
+<p>
+
+More detailed explanations: the total energy should be
+invariant under translation of the crystal as a whole. This
+would guarantee that the three lowest phonon modes at Gamma
+have zero frequency (Acoustic Sum Rule - ASR).
+Unfortunately, the way the DDB is
+generated (presence of a discrete grid of points for the
+evaluation of the exchange-correlation potential and energy)
+slightly breaks the translational invariance.
+Well, in some pathological cases, the breaking can be rather important.
+
+<p>Two quantities are affected: the interatomic forces
+(or dynamical matrices), and the effective charges.
+The ASR for the effective charges is called the charge
+neutrality sum rule, and will be dealt with by the variable
+<a href="../../input_variables/generated_files/varset_anaddb.html#chneut@anaddb">chneut</a>.
+The ASR for the interatomic forces can be restored,
+by modifying the interatomic force of the atom on itself,
+(called self-IFC), as soon as the dynamical matrix at Gamma is known.
+This quantity should be equal to minus the sum of all interatomic
+forces generated by all others atoms (action-reaction law!),
+which is determined by the dynamical matrix at Gamma.
+<p>
+So, if <b>asr</b> is non-zero, the correction to the self-force
+will be determined, and the self-force will be imposed to be consistent with the ASR.
+This correction will work if IFCs are computed
+(<a href="../../input_variables/generated_files/varset_anaddb.html#ifcflag@anaddb">ifcflag</a>/=0),
+as well as if the IFCs are not computed
+(<a href="../../input_variables/generated_files/varset_anaddb.html#ifcflag@anaddb">ifcflag</a>==0).
+In both cases, the phonon frequencies will not be the same
+as the ones determined by the output of abinit, RF case.
+If you want to check that the DDB is correct, by comparing
+phonon frequencies from abinit and anaddb, you should turn off both <b>asr</b> and
+<a href="../../input_variables/generated_files/varset_anaddb.html#chneut@anaddb">chneut</a>.
+
+<p>Until now, we have not explained the difference between
+<b>asr</b>=1 and <b>asr</b>=2.
+This is rather subtle.
+In some local low-symmetry cases (basically the effective charges should be anisotropic),
+when the dipole-dipole contribution is evaluated and subtracted,
+the ASR cannot be imposed without breaking the
+symmetry of the on-site interatomic forces. That explains why two
+options are given: the second case (<b>asr</b>=2, sym) does not
+entirely impose the ASR, but simply the part that keeps the on-site
+interatomic forces symmetric (which means that the acoustic frequencies
+do not go to zero exactly), the first case (<b>asr</b>=1, asym)
+imposes the ASR, but breaks the symmetry.
+<b>asr</b>=2 is to be preferred for the analysis of the interatomic force
+constant in real space, while <b>asr</b>=1 should be used to get the phonon band structure.
+</p>
+<p>(NOTE: in order to confuse even more the situation,
+it seems that the acoustic phonon frequencies generated by the code
+for both the sym and asym options are exactly the same ...
+likely due to an extra symmetrisation in the diagonalisation routine.
+Of course, when the matrix at Gamma has been generated from IFCs coming from dynamical
+matrices none of which are Gamma, the breaking of the ASR is rather severe.
+In order to clear the situation, one should use a diagonalisation
+routine for non-hermitian matrices. So, at the present status of
+understanding, one should always use the <b>asr</b>=2 option ).
+<br>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="atftol@anaddb">atftol</a></font>
+<br><font id="mnemonics">Mnemonics: ATomic Temperature Factor TOLerance</font>
+<br><font id="mnemonics">Executable: anaddb</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_Temperature.html">Temperature</a>.</font>
+<br><font id="smalltext">Rarely used: [0/70] in anaddb tests, [0/10] in tuto anaddb tests.</font>
+<br><font id="vartype">Variable type: real</font>
+<br><font id="default">Default is 0.05</font>
+<br><font id="text">
+<p>
+<p>The relative tolerance on the atomic temperature factors.
+This number will determine when the series of channel widths
+with which the DOS is calculated can be stopped, i.e.
+the mean of the relative change going from one grid
+to the next bigger is smaller than <b>wtol2</b>.
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="atifc@anaddb">atifc</a></font>
+<br><font id="mnemonics">Mnemonics: AToms for IFC analysis</font>
+<br><font id="mnemonics">Executable: anaddb</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_PhononBands.html">PhononBands</a>.</font>
+<br><font id="smalltext">Very frequently used: [36/70] in anaddb tests, [4/10] in tuto anaddb tests. Tuto test list: {tutorespfn:[<a href="../../tests/tutorespfn/Input/teph_4.in">eph_4</a>,<a href="../../tests/tutorespfn/Input/teph_5.in">eph_5</a>,<a href="../../tests/tutorespfn/Input/teph_6.in">eph_6</a>,<a href="../../tests/tutorespfn/Input/trf2_4.in">rf2_4</a>]}.</font>
+<br><font id="vartype">Variable type: integer(array '<a href="../../input_variables/generated_files/varset_anaddb.html#natifc@anaddb">natifc</a>')</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p>The actual numbers of the atoms for which the interatomic
+force constant have to be written and eventually analysed.
+<br>
+<p>WARNING: there will be an in-place change of meaning of atifc (this is
+confusing, and should be taken away in one future version - sorry for this).
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="band_gap@anaddb">band_gap</a></font>
+<br><font id="mnemonics">Mnemonics: BAND GAP</font>
+<br><font id="mnemonics">Executable: anaddb</font>
+<br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#ENERGY">ENERGY</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_ElPhonTransport.html">ElPhonTransport</a>.</font>
+<br><font id="smalltext">Moderately used: [5/70] in anaddb tests, [0/10] in tuto anaddb tests. Test list: {v6:[<a href="../../tests/v6/Input/t94.in">94</a>,<a href="../../tests/v6/Input/t95.in">95</a>,<a href="../../tests/v6/Input/t96.in">96</a>],v7:[<a href="../../tests/v7/Input/t93.in">93</a>,<a href="../../tests/v7/Input/t94.in">94</a>]}.</font>
+<br><font id="vartype">Variable type: real</font>
+<br><font id="default">Default is 999.0</font>
+<br><font id="text">
+<p>
+<p>Allow setting the target band gap, in eV.
+(<a href="../../input_variables/generated_files/varset_anaddb.html#elphflag@anaddb">elphflag@anaddb</a>=1).
+<p>NOTE XG20170811 : apparently no effective test for this input variable. Also, the descirption is strange ...!
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="brav@anaddb">brav</a></font>
+<br><font id="mnemonics">Mnemonics: BRAVais</font>
+<br><font id="mnemonics">Executable: anaddb</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_PhononBands.html">PhononBands</a>.</font>
+<br><font id="smalltext">Very frequently used: [55/70] in anaddb tests, [7/10] in tuto anaddb tests. Tuto test list: {tutorespfn:[<a href="../../tests/tutorespfn/Input/tdepes_2.in">depes_2</a>,<a href="../../tests/tutorespfn/Input/teph_4.in">eph_4</a>,<a href="../../tests/tutorespfn/Input/teph_5.in">eph_5</a>,<a href="../../tests/tutorespfn/Input/teph_6.in">eph_6</a>,<a href="../../tests/tutorespfn/Input/trf2_4.in">rf2_4</a>,<a href="../../tests/tutorespfn/Input/trf2_5.in">rf2_5</a>,<a href="../../tests/tutorespfn/Input/trf2_7.in">rf2_7</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 1</font>
+<br><font id="text">
+<p>
+<p>Allows to specify the Bravais lattice of the crystal,
+in order to help to generate a grid of special q points.
+<p></p>
+<ul>
+<li> 1 =&gt; all the lattices (including FCC, BCC
+and hexagonal) </li>
+<li> 2 =&gt; specific for Face Centered lattices </li>
+<li> 3 =&gt; specific for Body Centered lattices </li>
+<li> 4 =&gt; specific for the Hexagonal lattice </li>
+</ul>
+<p>
+Note that in the latter case, the rprim of
+the unit cell have to be 1.0 0.0 0.0 -.5 sqrt(3)/2 0.0 0.0 0.0 1.0
+in order for the code to work properly.
+<p> Warning: the generation of q-points in anaddb is rather
+old-fashioned, and should be replaced by routines used by the main abinit code.
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="chneut@anaddb">chneut</a></font>
+<br><font id="mnemonics">Mnemonics: Integer for CHarge NEUTrality treatment</font>
+<br><font id="mnemonics">Executable: anaddb</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_Phonons.html">Phonons</a>.</font>
+<br><font id="smalltext">Very frequently used: [41/70] in anaddb tests, [7/10] in tuto anaddb tests. Tuto test list: {tutorespfn:[<a href="../../tests/tutorespfn/Input/tdepes_2.in">depes_2</a>,<a href="../../tests/tutorespfn/Input/telast_3.in">elast_3</a>,<a href="../../tests/tutorespfn/Input/tffield_3.in">ffield_3</a>,<a href="../../tests/tutorespfn/Input/tnlo_5.in">nlo_5</a>,<a href="../../tests/tutorespfn/Input/trf2_4.in">rf2_4</a>,<a href="../../tests/tutorespfn/Input/trf2_5.in">rf2_5</a>,<a href="../../tests/tutorespfn/Input/trf2_7.in">rf2_7</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p>Set the treatment of the Charge Neutrality requirement for
+the effective charges.
+<p>
+<ul>
+<li> chneut=0 => no ASR for effective charges is imposed</li>
+<li> chneut=1 => the ASR for effective charges is imposed
+       by giving to each atom an equal portion
+       of the missing charge. See Eq.(48) in Phys. Rev. B55, 10355 (1997).</li>
+<li> chneut=2 => the ASR for effective charges is imposed
+       by giving to each atom a portion of the
+       missing charge proportional to the screening charge
+       already present. See Eq.(49) in Phys. Rev. B55, 10355 (1997).</li>
+</ul>
+<p>
+More detailed explanation: the sum of the effective charges
+in the unit cell should be equal to zero. It is not the case
+in the DDB, and this sum rule is sometimes strongly violated.
+In particular, this will make the lowest frequencies at Gamma
+non-zero. There is no "best" way of imposing the ASR on effective charges.
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="dieflag@anaddb">dieflag</a></font>
+<br><font id="mnemonics">Mnemonics: DIElectric FLAG</font>
+<br><font id="mnemonics">Executable: anaddb</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_Phonons.html">Phonons</a>.</font>
+<br><font id="smalltext">Very frequently used: [40/70] in anaddb tests, [4/10] in tuto anaddb tests. Tuto test list: {tutorespfn:[<a href="../../tests/tutorespfn/Input/teph_4.in">eph_4</a>,<a href="../../tests/tutorespfn/Input/teph_5.in">eph_5</a>,<a href="../../tests/tutorespfn/Input/teph_6.in">eph_6</a>,<a href="../../tests/tutorespfn/Input/tnlo_5.in">nlo_5</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p>Integer. Frequency-dependent dielectric tensor flag.
+<br>
+<ul>
+ <li> 0 => No dielectric tensor is calculated.</li>
+ <li> 1 => The frequency-dependent dielectric tensor is calculated.
+      Requirements for preceding response-function DDB generation
+      run:  electric-field and full atomic-displacement responses.
+      Set <a href="../../input_variables/generated_files/varset_dfpt.html#rfstrs">rfstrs</a> = 1, 2, or 3 (preferably 3).
+      Set <a href="../../input_variables/generated_files/varset_dfpt.html#rfatpol">rfatpol</a> and
+      <a href="../../input_variables/generated_files/varset_dfpt.html#rfdir">rfdir</a> to do a full calculation of
+        phonons at Q=0.
+  The frequencies are defined by the
+<a href="../../input_variables/generated_files/varset_anaddb.html#nfreq@anaddb">nfreq</a>,<a href="../../input_variables/generated_files/varset_anaddb.html#frmin@anaddb">frmin</a>,<a href="../../input_variables/generated_files/varset_anaddb.html#frmax@anaddb">frmax</a>
+ variables. Also, the generalized Lyddane-Sachs-Teller
+relation will be used as an independent check of the
+dielectric tensor at zero frequency (this for the
+directions defined in the phonon list 2.
+See <a href="../../input_variables/generated_files/varset_anaddb.html#nph2l@anaddb">nph2l</a>.</li>
+<li> 2 => Only the electronic dielectric tensor is calculated.
+ It corresponds to a zero-frequency homogeneous field,
+with quenched atomic positions. For large band gap materials,
+this quantity is measurable because the highest phonon
+frequency is on the order of a few tenths of eV, and the
+band gap is larger than 5eV. Requirements for preceding response-function
+DDB generation: electric-field response.
+Set <a href="../../input_variables/generated_files/varset_dfpt.html#rfelfd">rfelfd</a> = 1 or 3 (preferably 3).
+Note that the same information on the electronic dielectric tensor will be printed in the
+.out file of the <a href="../../input_variables/generated_files/varset_dfpt.html#rfelfd">rfelfd</a> run.
+</li>
+<li> 3 => Compute and print the relaxed-ion dielectric tensor.
+      Requirements for preceding response-function DDB generation
+      run:  electric-field and full atomic-displacement responses.
+      Set <a href="../../input_variables/generated_files/varset_dfpt.html#rfstrs">rfstrs</a> = 1, 2, or 3 (preferably 3).
+      Set <a href="../../input_variables/generated_files/varset_dfpt.html#rfatpol">rfatpol</a> and
+      <a href="../../input_variables/generated_files/varset_dfpt.html#rfdir">rfdir</a> to do a full calculation of
+        phonons at Q=0 (needed because the inverse of
+        force-constant tensor is required). Furthermore, in the anaddb input file the variable
+        <a href="../../input_variables/generated_files/varset_anaddb.html#nph2l@anaddb">nph2l</a> must be nonzero in order to initiate
+        computation of atomic displacements. If only the dielectric response is needed it
+        is sufficient to set <a href="../../input_variables/generated_files/varset_anaddb.html#nph2l@anaddb">nph2l</a> to 1 and leave
+        <a href="../../input_variables/generated_files/varset_anaddb.html#qph2l@anaddb">qph2l</a> at its default value (the Gamma point).
+   Note that the relaxed-ion dielectric tensor computed here can
+   also be obtained as the zero-frequency limit of the
+   frequency-dependent dielectric tensor using input variables
+   dieflag=1 and frmin=0.0.  (The results obtained using these two
+   approaches should agree to good numerical precision.)  The ability
+   to compute and print the static dielectric tensor here is provided
+   for completeness and consistency with the other tensor
+   quantities that are computed in this section of the code.
+ </li>
+ <li> 4 => Calculate dielectric tensor of both relaxed ion and
+               free stress.
+   We need information of internal strain and elastic tensor (relaxed ion)
+   in this computation. So please set:
+   <a href="../../input_variables/generated_files/varset_anaddb.html#elaflag@anaddb">elaflag</a>=2,3,4 or 5  and
+   <a href="../../input_variables/generated_files/varset_anaddb.html#instrflag@anaddb">instrflag</a>=1
+ </ul>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="dipdip@anaddb">dipdip</a></font>
+<br><font id="mnemonics">Mnemonics: DIPole-DIPole interaction</font>
+<br><font id="mnemonics">Executable: anaddb</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_PhononBands.html">PhononBands</a>.</font>
+<br><font id="smalltext">Very frequently used: [52/70] in anaddb tests, [7/10] in tuto anaddb tests. Tuto test list: {tutorespfn:[<a href="../../tests/tutorespfn/Input/tdepes_2.in">depes_2</a>,<a href="../../tests/tutorespfn/Input/teph_4.in">eph_4</a>,<a href="../../tests/tutorespfn/Input/teph_5.in">eph_5</a>,<a href="../../tests/tutorespfn/Input/teph_6.in">eph_6</a>,<a href="../../tests/tutorespfn/Input/trf2_4.in">rf2_4</a>,<a href="../../tests/tutorespfn/Input/trf2_5.in">rf2_5</a>,<a href="../../tests/tutorespfn/Input/trf2_7.in">rf2_7</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 1</font>
+<br><font id="text">
+<p>
+<ul>
+<li>
+ 0 => the dipole-dipole interaction is not handled separately
+ in the treatment of the interatomic forces.
+ This option is available for testing purposes or if effective charge
+ and/or dielectric tensor is not available in the derivative database.
+ It gives results much less accurate than <b>dipdip</b>=1.</li>
+<li>
+1 => the dipole-dipole interaction is subtracted from the dynamical
+ matrices before Fourier transform, so that only the short-range
+ part is handled in real space. Of course, it is reintroduced
+ analytically when the phonon spectrum is interpolated, or if
+ the interatomic force constants have to be analysed in real space.</li>
+ </ul>
+The abinit input variable <a href="../../input_variables/generated_files/varset_eph.html#dipdip">dipdip</a> has a similar meaning.
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="dosdeltae@anaddb">dosdeltae</a></font>
+<br><font id="mnemonics">Mnemonics: DOS DELTA in Energy</font>
+<br><font id="mnemonics">Executable: anaddb</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_PhononBands.html">PhononBands</a>.</font>
+<br><font id="smalltext">Rarely used: [0/70] in anaddb tests, [0/10] in tuto anaddb tests.</font>
+<br><font id="vartype">Variable type: real</font>
+<br><font id="default">Default is 4.5E-06 Hartree = 1 cm<sup>-1</sup></font>
+<br><font id="text">
+<p>
+<p>The input variable <b>dosdeltae</b> is used to define the step of the frequency grid used to
+calculate the phonon density of states when <a href="../../input_variables/generated_files/varset_anaddb.html#prtdos@anaddb">prtdos</a>=1.
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="dossmear@anaddb">dossmear</a></font>
+<br><font id="mnemonics">Mnemonics: DOS SMEARing value</font>
+<br><font id="mnemonics">Executable: anaddb</font>
+<br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#ENERGY">ENERGY</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_PhononBands.html">PhononBands</a>.</font>
+<br><font id="smalltext">Moderately used: [1/70] in anaddb tests, [0/10] in tuto anaddb tests. Test list: {v5:[<a href="../../tests/v5/Input/t91.in">91</a>]}.</font>
+<br><font id="vartype">Variable type: real</font>
+<br><font id="default">Default is 4.5E-05 Hartree = 10 cm<sup>-1</sup></font>
+<br><font id="text">
+<p>
+<p><b>dossmear</b> defines the gaussian broadening used to calculate the phonon density
+of states when <a href="../../input_variables/generated_files/varset_anaddb.html#prtdos@anaddb">prtdos</a>=1.
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="dossum@anaddb">dossum</a></font>
+<br><font id="mnemonics">Mnemonics: DOS SUM</font>
+<br><font id="mnemonics">Executable: anaddb</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_PhononBands.html">PhononBands</a>.</font>
+<br><font id="smalltext">Moderately used: [1/70] in anaddb tests, [0/10] in tuto anaddb tests. Test list: {v2:[<a href="../../tests/v2/Input/t15.in">15</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p>Set the flag to calculate the two phonon dos density of states. Sum and Difference for
+the Gamma point. The DOS is converged and based on that, the sum and different is
+reported in the output file <b>dossum</b>.
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="dostol@anaddb">dostol</a></font>
+<br><font id="mnemonics">Mnemonics: DOS TOLerance</font>
+<br><font id="mnemonics">Executable: anaddb</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_PhononBands.html">PhononBands</a>.</font>
+<br><font id="smalltext">Moderately used: [3/70] in anaddb tests, [0/10] in tuto anaddb tests. Test list: {v4:[<a href="../../tests/v4/Input/t54.in">54</a>,<a href="../../tests/v4/Input/t71.in">71</a>],v8:[<a href="../../tests/v8/Input/t49.in">49</a>]}.</font>
+<br><font id="vartype">Variable type: real</font>
+<br><font id="default">Default is 0.25</font>
+<br><font id="text">
+<p>
+<p>The relative tolerance on the phonon density of state.
+This number will determine when the series of grids
+with which the DOS is calculated can be stopped, i.e.
+the mean of the relative change going from one grid
+to the next bigger is smaller than <b>dostol</b>.
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="eivec@anaddb">eivec</a></font>
+<br><font id="mnemonics">Mnemonics: EIgenVECtors</font>
+<br><font id="mnemonics">Executable: anaddb</font>
+<br><font id="characteristic">Mentioned in topics: <a href="../../topics/generated_files/topic_Phonons.html">Phonons</a>, <a href="../../topics/generated_files/topic_PhononBands.html">PhononBands</a>.</font>
+<br><font id="smalltext">Very frequently used: [36/70] in anaddb tests, [5/10] in tuto anaddb tests. Tuto test list: {tutorespfn:[<a href="../../tests/tutorespfn/Input/teph_4.in">eph_4</a>,<a href="../../tests/tutorespfn/Input/teph_5.in">eph_5</a>,<a href="../../tests/tutorespfn/Input/teph_6.in">eph_6</a>,<a href="../../tests/tutorespfn/Input/tnlo_5.in">nlo_5</a>,<a href="../../tests/tutorespfn/Input/trf2_5.in">rf2_5</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<ul>
+<li> 0 => do not write the phonon eigenvectors;</li>
+<li> 1 or 2 => write the phonon eigenvectors;</li>
+<li> 4 => generate output files for band2eps (drawing tool for the phonon band structure);</li>
+</ul>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="elaflag@anaddb">elaflag</a></font>
+<br><font id="mnemonics">Mnemonics: ELAstic tensor FLAG</font>
+<br><font id="mnemonics">Executable: anaddb</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_Elastic.html">Elastic</a>.</font>
+<br><font id="smalltext">Moderately used: [6/70] in anaddb tests, [3/10] in tuto anaddb tests. Test list: {tutorespfn:[<a href="../../tests/tutorespfn/Input/telast_3.in">elast_3</a>,<a href="../../tests/tutorespfn/Input/tffield_3.in">ffield_3</a>,<a href="../../tests/tutorespfn/Input/tnlo_5.in">nlo_5</a>],v4:[<a href="../../tests/v4/Input/t68.in">68</a>,<a href="../../tests/v4/Input/t70.in">70</a>,<a href="../../tests/v4/Input/t83.in">83</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p>Flag for calculation of elastic and compliance tensors
+<ul>
+<li>0 => No elastic or compliance tensor will be calculated.</li>
+<li>1 => Only clamped-ion elastic and compliance tensors will be
+    calculated.
+    Requirements for preceding response-function DDB generation
+    run:  Strain perturbation.
+    Set <a href="../../input_variables/generated_files/varset_dfpt.html#rfstrs">rfstrs</a> to 1, 2, or 3.
+    Note that <a href="../../input_variables/generated_files/varset_dfpt.html#rfstrs">rfstrs</a>=3 is recommended so that responses to
+    both uniaxial and shear strains will be computed.
+</li>
+<li>2 => Both relaxed- and clamped-ion elastic and compliance tensor
+    will be calculated, but only the relaxed-ion quantities
+    will be printed.
+   The input variable <a href="../../input_variables/generated_files/varset_anaddb.html#instrflag@anaddb">instrflag</a>
+    should also be set to 1, because
+    the internal-strain tensor is needed to compute the relaxed-ion
+    corrections.  Requirements for preceding response-function DDB
+    generation run:  Strain and atomic-displacement responses at Q=0.
+    Set <a href="../../input_variables/generated_files/varset_dfpt.html#rfstrs">rfstrs</a> = 1, 2, or 3 (preferably 3).
+    Set <a href="../../input_variables/generated_files/varset_dfpt.html#rfatpol">rfatpol</a> and
+    <a href="../../input_variables/generated_files/varset_dfpt.html#rfdir">rfdir</a> to do a full calculation of
+      phonons at Q=0 (needed because the inverse of
+      force-constant tensor is required).
+</li>
+<li>3 =>  Both relaxed and clamped-ion elastic and compliance tensors
+    will be printed out.
+    The input variable <a href="../../input_variables/generated_files/varset_anaddb.html#instrflag@anaddb">instrflag</a>
+     should also be set to 1.
+    Requirements for preceding response-function DDB generation
+    run:  Same as for <b>elaflag</b>=2.
+</li>
+<li>4 => Calculate the elastic and compliance tensors (relaxed ion)
+  at fixed displacement field, the relaxed-ion tensors at fixed
+  electric field will be printed out too, for comparison.
+  When <b>elaflag</b>=4, we need the information of internal strain and
+ relaxed-ion dielectric tensor to build the whole tensor, so
+ we need set <a href="../../input_variables/generated_files/varset_anaddb.html#instrflag@anaddb">instrflag</a>=1 and
+ <a href="../../input_variables/generated_files/varset_anaddb.html#dieflag@anaddb">dieflag</a>=3 or 4 .
+</li>
+<li>5 => Calculate the relaxed ion elastic and compliance tensors, considering
+ the stress left inside cell. At the same time, bare relaxed ion tensors
+ will still be printed out for comparison.
+ In this calculation, stress tensor is needed to compute the correction
+ term, so one supposed to merge the first order derivative data base (DDB file)
+ with the second order derivative data base (DDB file) into a new DDB file, which
+ can contain both information. And the program will also check for the users.
+</li>
+</ul>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="elph_fermie@anaddb">elph_fermie</a></font>
+<br><font id="mnemonics">Mnemonics: ELectron-PHonon FERMI Energy</font>
+<br><font id="mnemonics">Executable: anaddb</font>
+<br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#ENERGY">ENERGY</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_ElPhonTransport.html">ElPhonTransport</a>.</font>
+<br><font id="smalltext">Moderately used: [2/70] in anaddb tests, [0/10] in tuto anaddb tests. Test list: {v5:[<a href="../../tests/v5/Input/t93.in">93</a>],v6:[<a href="../../tests/v6/Input/t93.in">93</a>]}.</font>
+<br><font id="vartype">Variable type: real</font>
+<br><font id="default">Default is 0.0</font>
+<br><font id="text">
+<p>
+<p>If non-zero, will fix artificially the value of the Fermi energy
+(e.g. for semiconductors), in the electron-phonon case. Note that <a href="../../input_variables/generated_files/varset_anaddb.html#elph_fermie@anaddb">elph_fermie</a> and <a href="../../input_variables/generated_files/varset_anaddb.html#ep_extrael@anaddb">ep_extrael</a>
+should not be used at the same time. (<a href="../../input_variables/generated_files/varset_anaddb.html#elphflag@anaddb">elphflag</a>=1).
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="elphflag@anaddb">elphflag</a></font>
+<br><font id="mnemonics">Mnemonics: ELectron-PHonon FLAG</font>
+<br><font id="mnemonics">Executable: anaddb</font>
+<br><font id="characteristic">Mentioned in topics: <a href="../../topics/generated_files/topic_PhononWidth.html">PhononWidth</a>, <a href="../../topics/generated_files/topic_ElPhonTransport.html">ElPhonTransport</a>.</font>
+<br><font id="smalltext">Moderately used: [20/70] in anaddb tests, [3/10] in tuto anaddb tests. Tuto test list: {tutorespfn:[<a href="../../tests/tutorespfn/Input/teph_4.in">eph_4</a>,<a href="../../tests/tutorespfn/Input/teph_5.in">eph_5</a>,<a href="../../tests/tutorespfn/Input/teph_6.in">eph_6</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p>If <b>elphflag</b> is 1, anaddb performs an analysis of the electron-phonon coupling.
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="elphsmear@anaddb">elphsmear</a></font>
+<br><font id="mnemonics">Mnemonics: ELectron-PHonon SMEARing factor</font>
+<br><font id="mnemonics">Executable: anaddb</font>
+<br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#ENERGY">ENERGY</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_ElPhonTransport.html">ElPhonTransport</a>.</font>
+<br><font id="smalltext">Moderately used: [2/70] in anaddb tests, [2/10] in tuto anaddb tests. Test list: {tutorespfn:[<a href="../../tests/tutorespfn/Input/teph_5.in">eph_5</a>,<a href="../../tests/tutorespfn/Input/teph_6.in">eph_6</a>]}.</font>
+<br><font id="vartype">Variable type: real</font>
+<br><font id="default">Default is 0.01 Hartree</font>
+<br><font id="text">
+<p>
+<p>Smearing width for the Fermi surface integration (in Hartree by default).
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="enunit@anaddb">enunit</a></font>
+<br><font id="mnemonics">Mnemonics: ENergy UNITs</font>
+<br><font id="mnemonics">Executable: anaddb</font>
+<br><font id="characteristic">Mentioned in topics: <a href="../../topics/generated_files/topic_Phonons.html">Phonons</a>, <a href="../../topics/generated_files/topic_PhononBands.html">PhononBands</a>.</font>
+<br><font id="smalltext">Moderately used: [11/70] in anaddb tests, [1/10] in tuto anaddb tests. Tuto test list: {tutorespfn:[<a href="../../tests/tutorespfn/Input/tnlo_5.in">nlo_5</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p>Give the energy for the phonon frequency output
+(in the output file, not in the console log file, for
+ which Hartree units are used).
+<br>
+<ul>
+ <li> 0 => Hartree and cm-1;</li>
+ <li> 1 => meV and Thz;</li>
+ <li> 2 => Hartree, cm-1, meV, Thz, and Kelvin.</li>
+</ul>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="ep_b_max@anaddb">ep_b_max</a></font>
+<br><font id="mnemonics">Mnemonics: Electron Phonon integration Band MAXimum</font>
+<br><font id="mnemonics">Executable: anaddb</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_ElPhonTransport.html">ElPhonTransport</a>.</font>
+<br><font id="smalltext">Moderately used: [1/70] in anaddb tests, [0/10] in tuto anaddb tests. Test list: {v5:[<a href="../../tests/v5/Input/t92.in">92</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p>When set, and <a href="../../input_variables/generated_files/varset_anaddb.html#telphint@anaddb">telphint</a> is equal to 2, this variable determines the k-point integration weights which are used in the electron-phonon part of the code. Instead of weighting according to a distance from the Fermi surface, an equal weight is given to all k-points, for all bands between <a href="../../input_variables/generated_files/varset_anaddb.html#ep_b_min@anaddb">ep_b_min</a> and <b>ep_b_max</b>.
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="ep_b_min@anaddb">ep_b_min</a></font>
+<br><font id="mnemonics">Mnemonics: Electron Phonon integration Band MINimum</font>
+<br><font id="mnemonics">Executable: anaddb</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_ElPhonTransport.html">ElPhonTransport</a>.</font>
+<br><font id="smalltext">Moderately used: [1/70] in anaddb tests, [0/10] in tuto anaddb tests. Test list: {v5:[<a href="../../tests/v5/Input/t92.in">92</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p>As for <a href="../../input_variables/generated_files/varset_anaddb.html#ep_b_max@anaddb">ep_b_max</a>, but <b>ep_b_min</b> is the lower bound on the band integration, instead of the upper bound. See also <a href="../../input_variables/generated_files/varset_anaddb.html#telphint@anaddb">telphint</a>.
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="ep_extrael@anaddb">ep_extrael</a></font>
+<br><font id="mnemonics">Mnemonics: Electron-Phonon EXTRA ELectrons</font>
+<br><font id="mnemonics">Executable: anaddb</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_ElPhonTransport.html">ElPhonTransport</a>.</font>
+<br><font id="smalltext">Moderately used: [5/70] in anaddb tests, [0/10] in tuto anaddb tests. Test list: {v6:[<a href="../../tests/v6/Input/t94.in">94</a>,<a href="../../tests/v6/Input/t95.in">95</a>,<a href="../../tests/v6/Input/t96.in">96</a>],v7:[<a href="../../tests/v7/Input/t93.in">93</a>,<a href="../../tests/v7/Input/t94.in">94</a>]}.</font>
+<br><font id="vartype">Variable type: real</font>
+<br><font id="default">Default is 0.0</font>
+<br><font id="text">
+<p>
+<p>If non-zero, will fix artificially the number of extra electrons per unit cell (positive for electron doping), according to a doped case.
+(e.g. for semiconductors), in the electron-phonon case.
+This field can also be filled with doping concentration, in the units of cm-3 (negative for electron doping).
+Note that <b>ep_extrael</b> and <a href="../../input_variables/generated_files/varset_anaddb.html#elph_fermie@anaddb">elph_fermie</a> should not be used at the same time.
+(<a href="../../input_variables/generated_files/varset_anaddb.html#elphflag@anaddb">elphflag</a>=1).
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="ep_int_gkk@anaddb">ep_int_gkk</a></font>
+<br><font id="mnemonics">Mnemonics: Electron-Phonon INTerpolation of GKK</font>
+<br><font id="mnemonics">Executable: anaddb</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_PhononWidth.html">PhononWidth</a>.</font>
+<br><font id="smalltext">Moderately used: [1/70] in anaddb tests, [0/10] in tuto anaddb tests. Test list: {v6:[<a href="../../tests/v6/Input/t77.in">77</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p>This flag determines whether the interpolation of the electron-phonon matrix
+elements over the coarse k-grid is done (<b>ep_int_gkk</b> 1) before summing
+with appropriate Fermi Surface weights. In this way, the two integration weights
+are treated symmetrically.
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="ep_keepbands@anaddb">ep_keepbands</a></font>
+<br><font id="mnemonics">Mnemonics: Electron-Phonon KEEP dependence on electron BANDS</font>
+<br><font id="mnemonics">Executable: anaddb</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_ElPhonTransport.html">ElPhonTransport</a>.</font>
+<br><font id="smalltext">Moderately used: [10/70] in anaddb tests, [1/10] in tuto anaddb tests. Tuto test list: {tutorespfn:[<a href="../../tests/tutorespfn/Input/teph_6.in">eph_6</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p>This flag determines whether the dependency of the electron-phonon matrix
+elements on the electron band index is kept (<b>ep_keepbands</b> 1), or whether
+it is summed over immediately with appropriate Fermi Surface weights. For
+transport calculations <b>ep_keepbands</b> must be set to 1.
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="ep_nqpt@anaddb">ep_nqpt</a></font>
+<br><font id="mnemonics">Mnemonics: Electron Phonon Number of Q PoinTs</font>
+<br><font id="mnemonics">Executable: anaddb</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_ElPhonTransport.html">ElPhonTransport</a>.</font>
+<br><font id="smalltext">Moderately used: [1/70] in anaddb tests, [0/10] in tuto anaddb tests. Test list: {v5:[<a href="../../tests/v5/Input/t94.in">94</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p>In case a non-uniform grid of q-points is being used, for direct calculation
+of the electron-phonon quantities without interpolation, this specifies the
+number of q-points to be found in the GKK file, independently of the normal
+anaddb input (ngqpt)
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="ep_nspline@anaddb">ep_nspline</a></font>
+<br><font id="mnemonics">Mnemonics: Electron Phonon Number for SPLINE interpolation</font>
+<br><font id="mnemonics">Executable: anaddb</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_ElPhonTransport.html">ElPhonTransport</a>.</font>
+<br><font id="smalltext">Moderately used: [1/70] in anaddb tests, [0/10] in tuto anaddb tests. Test list: {v6:[<a href="../../tests/v6/Input/t94.in">94</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 20</font>
+<br><font id="text">
+<p>
+<p>The scale factor for cubic spline interpolation, only used in the relaxation time approximation (<a href="../../input_variables/generated_files/varset_anaddb.html#ifltransport@anaddb">ifltransport</a>=3).
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="ep_prt_yambo@anaddb">ep_prt_yambo</a></font>
+<br><font id="mnemonics">Mnemonics: Electron Phonon PRinTout YAMBO data</font>
+<br><font id="mnemonics">Executable: anaddb</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_ElPhonInt.html">ElPhonInt</a>.</font>
+<br><font id="smalltext">Moderately used: [1/70] in anaddb tests, [0/10] in tuto anaddb tests. Test list: {v5:[<a href="../../tests/v5/Input/t91.in">91</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p>For electron-phonon calculations, print out matrix elements for use by the yambo code.
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="ep_qptlist@anaddb">ep_qptlist</a></font>
+<br><font id="mnemonics">Mnemonics: Electron Phonon Q PoinT LIST</font>
+<br><font id="mnemonics">Executable: anaddb</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_PhononWidth.html">PhononWidth</a>.</font>
+<br><font id="smalltext">Moderately used: [1/70] in anaddb tests, [0/10] in tuto anaddb tests. Test list: {v5:[<a href="../../tests/v5/Input/t94.in">94</a>]}.</font>
+<br><font id="vartype">Variable type: real(3,<a href="../../input_variables/generated_files/varset_anaddb.html#ep_nqpt@anaddb">ep_nqpt</a>)</font>
+<br><font id="default">Default is (3*<a href="../../input_variables/generated_files/varset_anaddb.html#ep_nqpt@anaddb">ep_nqpt</a>)*0</font>
+<br><font id="text">
+<p>
+<p>In case a non-uniform grid of q-points is being used, for direct calculation
+of the electron-phonon quantities without interpolation, this specifies the
+q-points to be found in the GKK file, independently of the normal
+anaddb input (ngqpt), in reduced coordinates of the reciprocal space lattice.
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="ep_scalprod@anaddb">ep_scalprod</a></font>
+<br><font id="mnemonics">Mnemonics: DO SCALar PRODuct for gkk matrix elements</font>
+<br><font id="mnemonics">Executable: anaddb</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_PhononWidth.html">PhononWidth</a>.</font>
+<br><font id="smalltext">Moderately used: [9/70] in anaddb tests, [0/10] in tuto anaddb tests. Test list: {v5:[<a href="../../tests/v5/Input/t89.in">89</a>],v6:[<a href="../../tests/v6/Input/t76.in">76</a>,<a href="../../tests/v6/Input/t77.in">77</a>,<a href="../../tests/v6/Input/t93.in">93</a>,<a href="../../tests/v6/Input/t94.in">94</a>,<a href="../../tests/v6/Input/t95.in">95</a>,<a href="../../tests/v6/Input/t96.in">96</a>],v7:[<a href="../../tests/v7/Input/t93.in">93</a>,<a href="../../tests/v7/Input/t94.in">94</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p>The input variable <b>ep_scalprod</b> is a flag determining whether the scalar
+product of the electron-phonon matrix elements (gkk) with the phonon
+displacement vectors is done before or after interpolation. Doing so before
+(<b>ep_scalprod</b> 1) makes phonon linewidths smoother but introduces an error,
+as the interpolated phonons and gkk are not diagonalized in the same basis.
+Doing so afterwards (<b>ep_scalprod</b> 0) eliminates the diagonalization error,
+but sometimes gives small spikes in the phonon linewidths near band crossings
+or high symmetry points. I do not know why...
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="freeze_displ@anaddb">freeze_displ</a></font>
+<br><font id="mnemonics">Mnemonics: FREEZE DISPLacement of phonons into supercells</font>
+<br><font id="mnemonics">Executable: anaddb</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_PhononBands.html">PhononBands</a>.</font>
+<br><font id="smalltext">Moderately used: [7/70] in anaddb tests, [0/10] in tuto anaddb tests. Test list: {v6:[<a href="../../tests/v6/Input/t76.in">76</a>,<a href="../../tests/v6/Input/t93.in">93</a>,<a href="../../tests/v6/Input/t94.in">94</a>,<a href="../../tests/v6/Input/t95.in">95</a>,<a href="../../tests/v6/Input/t96.in">96</a>],v7:[<a href="../../tests/v7/Input/t93.in">93</a>,<a href="../../tests/v7/Input/t94.in">94</a>]}.</font>
+<br><font id="vartype">Variable type: real</font>
+<br><font id="default">Default is 0.0</font>
+<br><font id="text">
+<p>
+<p>If different from zero, <b>freeze_displ</b> will be used as the amplitude of a phonon displacement.
+For each q-point and mode in the <a href="../../input_variables/generated_files/varset_anaddb.html#qph1l@anaddb">qph1l</a> list,
+a file will be created containing a supercell
+of atoms with the corresponding phonon displacements frozen in.
+This is typically useful to freeze a soft phonon mode, then let it relax in abinit
+afterwards.
+<br>
+<b>freeze_displ</b> is unitless, but has a physical meaning: it is related to the Bose
+distribution n_B and the frequency w_qs of the phonon mode. At a given temperature T,
+<b>freeze_displ</b> will give the mean square displacement of atoms (along with the displacement
+vectors, which are in Bohr). In atomic units <b>freeze_displ</b> = sqrt((0.5 + n_B(w_qs/kT) / w_qs)
+Typical values are 50-200 for a frequency of a few hundred cm-1 and room temperature. If all you want
+is to break the symmetry in the right direction, any reasonable value (10-50) should be ok.
+<br>
+<b>WARNING</b>: this will create a <i>lot</i> of files (3*natom*nph1l), so it should be used with a small number
+<a href="../../input_variables/generated_files/varset_anaddb.html#nph1l@anaddb">nph1l</a> of q-points for interpolation.
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="frmax@anaddb">frmax</a></font>
+<br><font id="mnemonics">Mnemonics: FRequency MAXimum</font>
+<br><font id="mnemonics">Executable: anaddb</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_Phonons.html">Phonons</a>.</font>
+<br><font id="smalltext">Moderately used: [3/70] in anaddb tests, [0/10] in tuto anaddb tests. Test list: {v4:[<a href="../../tests/v4/Input/t54.in">54</a>,<a href="../../tests/v4/Input/t71.in">71</a>],v8:[<a href="../../tests/v8/Input/t49.in">49</a>]}.</font>
+<br><font id="vartype">Variable type: real</font>
+<br><font id="default">Default is 10.0</font>
+<br><font id="text">
+<p>
+<p>Value of the largest frequency for the frequency-dependent dielectric tensor, in Hartree.
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="frmin@anaddb">frmin</a></font>
+<br><font id="mnemonics">Mnemonics: FRequency MINimum</font>
+<br><font id="mnemonics">Executable: anaddb</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_Phonons.html">Phonons</a>.</font>
+<br><font id="smalltext">Moderately used: [3/70] in anaddb tests, [0/10] in tuto anaddb tests. Test list: {v4:[<a href="../../tests/v4/Input/t54.in">54</a>,<a href="../../tests/v4/Input/t71.in">71</a>],v8:[<a href="../../tests/v8/Input/t49.in">49</a>]}.</font>
+<br><font id="vartype">Variable type: real</font>
+<br><font id="default">Default is 0.0</font>
+<br><font id="text">
+<p>
+<p>Value of the lowest frequency for the frequency-dependent dielectric tensor, in Hartree.
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="gkqwrite@anaddb">gkqwrite</a></font>
+<br><font id="mnemonics">Mnemonics: GKk for input Q grid to be WRITtEn to disk</font>
+<br><font id="mnemonics">Executable: anaddb</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_ElPhonInt.html">ElPhonInt</a>.</font>
+<br><font id="smalltext">Moderately used: [1/70] in anaddb tests, [0/10] in tuto anaddb tests. Test list: {v5:[<a href="../../tests/v5/Input/t91.in">91</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p>Flag to write out the reciprocal space matrix elements to a disk file named
+gkqfile. This reduces strongly the memory needed for an electron-phonon run.
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="gruns_ddbs@anaddb">gruns_ddbs</a></font>
+<br><font id="mnemonics">Mnemonics: GRUNeiSen DDBS</font>
+<br><font id="mnemonics">Executable: anaddb</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_Temperature.html">Temperature</a>.</font>
+<br><font id="smalltext">Moderately used: [1/70] in anaddb tests, [0/10] in tuto anaddb tests. Test list: {v8:[<a href="../../tests/v8/Input/t45.in">45</a>]}.</font>
+<br><font id="vartype">Variable type: string(<a href="../../input_variables/generated_files/varset_anaddb.html#gruns_nddbs@anaddb">gruns_nddbs</a>)</font>
+<br><font id="default">Default is Empty</font>
+<br><font id="text">
+<p>
+<p>List of strings with the paths of the DDB files used for the calculation of the Gruneisen parameters.
+Each string must be enclosed by quotation marks. The number of DDB files is defined by
+<a href="../../input_variables/generated_files/varset_anaddb.html#gruns_nddbs@anaddb">gruns_nddbs</a> (possible values are: 3,5,7,9)
+The DDB files correspond to phonon calculations performed at different volumes (usually &plusmn; 1%
+of the equilibrium volume). The DDB files must be ordered according to the volume of the unit cell
+(the DDB with smallest volume comes first) and the volume increment must be constant.
+The code computes the derivative of the dynamical matrix wrt the volume using central finite difference.
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="gruns_nddbs@anaddb">gruns_nddbs</a></font>
+<br><font id="mnemonics">Mnemonics: GRUNeiSen Number of DDB files</font>
+<br><font id="mnemonics">Executable: anaddb</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_Temperature.html">Temperature</a>.</font>
+<br><font id="smalltext">Moderately used: [1/70] in anaddb tests, [0/10] in tuto anaddb tests. Test list: {v8:[<a href="../../tests/v8/Input/t45.in">45</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p>This variable defines the number of DDB files (read from <a href="../../input_variables/generated_files/varset_anaddb.html#gruns_ddbs@anaddb">gruns_ddbs</a>)
+used for the calculation of the Gruneisen parameters.
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="iatfix@anaddb">iatfix</a></font>
+<br><font id="mnemonics">Mnemonics: Indices of the AToms that are FIXed</font>
+<br><font id="mnemonics">Executable: anaddb</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_ConstrainedPol.html">ConstrainedPol</a>.</font>
+<br><font id="smalltext">Rarely used: [0/70] in anaddb tests, [0/10] in tuto anaddb tests.</font>
+<br><font id="vartype">Variable type: integer(<a href="../../input_variables/generated_files/varset_anaddb.html#natfix@anaddb">natfix</a>)</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p>Indices of the atoms that are fixed during a structural relaxation at constrained polarization.
+See <a href="../../input_variables/generated_files/varset_anaddb.html#polflag@anaddb">polflag</a>.
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="iatprj_bs@anaddb">iatprj_bs</a></font>
+<br><font id="mnemonics">Mnemonics: Indices of the AToms for the PRoJection of the phonon Band Structure</font>
+<br><font id="mnemonics">Executable: anaddb</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_PhononBands.html">PhononBands</a>.</font>
+<br><font id="smalltext">Moderately used: [7/70] in anaddb tests, [0/10] in tuto anaddb tests. Test list: {v6:[<a href="../../tests/v6/Input/t76.in">76</a>,<a href="../../tests/v6/Input/t93.in">93</a>,<a href="../../tests/v6/Input/t94.in">94</a>,<a href="../../tests/v6/Input/t95.in">95</a>,<a href="../../tests/v6/Input/t96.in">96</a>],v7:[<a href="../../tests/v7/Input/t93.in">93</a>,<a href="../../tests/v7/Input/t94.in">94</a>]}.</font>
+<br><font id="vartype">Variable type: integer(<a href="../../input_variables/generated_files/varset_anaddb.html#natprj_bs@anaddb">natprj_bs</a>)</font>
+<br><font id="default">Default is 0*'<a href="../../input_variables/generated_files/varset_anaddb.html#natprj_bs@anaddb">natprj_bs</a>'</font>
+<br><font id="text">
+<p>
+<p>Indices of the atoms that are chosen for projection of the phonon eigenvectors, giving a weighted phonon band structure file.
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="ifcana@anaddb">ifcana</a></font>
+<br><font id="mnemonics">Mnemonics: IFC ANAlysis</font>
+<br><font id="mnemonics">Executable: anaddb</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_PhononBands.html">PhononBands</a>.</font>
+<br><font id="smalltext">Very frequently used: [37/70] in anaddb tests, [4/10] in tuto anaddb tests. Tuto test list: {tutorespfn:[<a href="../../tests/tutorespfn/Input/teph_4.in">eph_4</a>,<a href="../../tests/tutorespfn/Input/teph_5.in">eph_5</a>,<a href="../../tests/tutorespfn/Input/teph_6.in">eph_6</a>,<a href="../../tests/tutorespfn/Input/trf2_4.in">rf2_4</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<ul>
+<li> 0 => no analysis of interatomic force constants; </li>
+<li> 1 => analysis of interatomic force constants.
+</ul>
+
+<p> If the analysis is activated, one get the
+trace of the matrices between pairs of atoms,
+if <a href="../../input_variables/generated_files/varset_anaddb.html#dipdip@anaddb">dipdip</a> is 1,
+get also the trace of the short-range
+and electrostatic part, and
+calculate the ratio with the full matrix;
+then define a local coordinate reference (using
+the next-neighbour coordinates), and express
+the interatomic force constant matrix between
+pairs of atoms in that local coordinate reference
+(the first vector is along the bond; the second
+vector is along the perpendicular force exerted
+on the generic atom by a longitudinal displacement
+of the neighbouring atom - in case it does not vanish;
+the third vector is perpendicular to the two other)
+also calculate ratios with respect to the
+longitudinal force constant ( the (1,1) element of
+the matrix in local coordinates).
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="ifcflag@anaddb">ifcflag</a></font>
+<br><font id="mnemonics">Mnemonics: Interatomic Force Constants FLAG</font>
+<br><font id="mnemonics">Executable: anaddb</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_PhononBands.html">PhononBands</a>.</font>
+<br><font id="smalltext">Very frequently used: [57/70] in anaddb tests, [8/10] in tuto anaddb tests. Tuto test list: {tutorespfn:[<a href="../../tests/tutorespfn/Input/tdepes_2.in">depes_2</a>,<a href="../../tests/tutorespfn/Input/teph_4.in">eph_4</a>,<a href="../../tests/tutorespfn/Input/teph_5.in">eph_5</a>,<a href="../../tests/tutorespfn/Input/teph_6.in">eph_6</a>,<a href="../../tests/tutorespfn/Input/tnlo_5.in">nlo_5</a>,<a href="../../tests/tutorespfn/Input/trf2_4.in">rf2_4</a>,<a href="../../tests/tutorespfn/Input/trf2_5.in">rf2_5</a>,<a href="../../tests/tutorespfn/Input/trf2_7.in">rf2_7</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<ul>
+<li> 0 => do all calculations directly from the DDB, without the
+           use of the interatomic force constant.</li>
+<li> 1 => calculate and use the interatomic force constants
+        for interpolating the phonon spectrum and dynamical
+        matrices at every q wavevector, and eventually analyse
+        the interatomic force constants, according to the
+        informations given by
+<a href="../../input_variables/generated_files/varset_anaddb.html#atifc@anaddb">atifc</a>,<a href="../../input_variables/generated_files/varset_anaddb.html#dipdip@anaddb">dipdip</a>,<a href="../../input_variables/generated_files/varset_anaddb.html#ifcana@anaddb">ifcana</a>,<a href="../../input_variables/generated_files/varset_anaddb.html#ifcout@anaddb">ifcout</a>,<a href="../../input_variables/generated_files/varset_anaddb.html#natifc@anaddb">natifc</a>,<a href="../../input_variables/generated_files/varset_anaddb.html#nsphere@anaddb">nsphere</a>,<a href="../../input_variables/generated_files/varset_anaddb.html#rifcsph@anaddb">rifcsph</a></li>
+</ul>
+   More detailed explanations: if the dynamical matrices
+   are known on a regular set of wavevectors, they
+   can be used to get the interatomic forces, which are simply
+   their Fourier transform. When non-analyticities
+   can been removed by the use of effective charge at Gamma
+   (option offered by putting
+   <a href="../../input_variables/generated_files/varset_anaddb.html#dipdip@anaddb">dipdip</a> to 1),
+   the interatomic forces are known to decay rather fast (in real space).
+   The interatomic forces generated from a small set of
+   dynamical matrices
+   could be of sufficient range to allow
+   the remaining interatomic forces to be neglected.
+   This gives a practical way to interpolate the content
+   of a small set of dynamical matrices, because dynamical
+   matrices can everywhere be generated starting from this
+   set of interatomic force constants. It is suggested to
+   always use <b>ifcflag</b>=1. The <b>ifcflag</b>=0 option
+   is available for checking purpose, and if there is not enough information in the DDB.
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="ifcout@anaddb">ifcout</a></font>
+<br><font id="mnemonics">Mnemonics: IFC OUTput</font>
+<br><font id="mnemonics">Executable: anaddb</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_PhononBands.html">PhononBands</a>.</font>
+<br><font id="smalltext">Very frequently used: [47/70] in anaddb tests, [7/10] in tuto anaddb tests. Tuto test list: {tutorespfn:[<a href="../../tests/tutorespfn/Input/tdepes_2.in">depes_2</a>,<a href="../../tests/tutorespfn/Input/teph_4.in">eph_4</a>,<a href="../../tests/tutorespfn/Input/teph_5.in">eph_5</a>,<a href="../../tests/tutorespfn/Input/teph_6.in">eph_6</a>,<a href="../../tests/tutorespfn/Input/trf2_4.in">rf2_4</a>,<a href="../../tests/tutorespfn/Input/trf2_5.in">rf2_5</a>,<a href="../../tests/tutorespfn/Input/trf2_7.in">rf2_7</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p>For each atom in the list <a href="../../input_variables/generated_files/varset_anaddb.html#atifc@anaddb">atifc</a> (generic atoms),
+<b>ifcout</b> give the number
+of neighbouring atoms for which the ifc's will be
+output (written) and eventually analysed. The
+neighbouring atoms are selected by decreasing distance with respect to
+the generic atom.
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="ifltransport@anaddb">ifltransport</a></font>
+<br><font id="mnemonics">Mnemonics: IFLag for TRANSPORT</font>
+<br><font id="mnemonics">Executable: anaddb</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_ElPhonTransport.html">ElPhonTransport</a>.</font>
+<br><font id="smalltext">Moderately used: [10/70] in anaddb tests, [1/10] in tuto anaddb tests. Tuto test list: {tutorespfn:[<a href="../../tests/tutorespfn/Input/teph_6.in">eph_6</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p>if ifltransport=1 (LOVA) or ifltransport=2 (non-LOVA), anaddb calculates the transport
+properties: electrical and thermal resistivities from electron-phonon
+interactions in the variational approach. If ifltransport=3, anaddb calculates the
+k-dependent relaxation time. (needs<a href="../../input_variables/generated_files/varset_anaddb.html#elphflag@anaddb">elphflag</a> = 1)
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="instrflag@anaddb">instrflag</a></font>
+<br><font id="mnemonics">Mnemonics: INternal STRain FLAG</font>
+<br><font id="mnemonics">Executable: anaddb</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_Elastic.html">Elastic</a>.</font>
+<br><font id="smalltext">Moderately used: [6/70] in anaddb tests, [3/10] in tuto anaddb tests. Test list: {tutorespfn:[<a href="../../tests/tutorespfn/Input/telast_3.in">elast_3</a>,<a href="../../tests/tutorespfn/Input/tffield_3.in">ffield_3</a>,<a href="../../tests/tutorespfn/Input/tnlo_5.in">nlo_5</a>],v4:[<a href="../../tests/v4/Input/t68.in">68</a>,<a href="../../tests/v4/Input/t70.in">70</a>,<a href="../../tests/v4/Input/t83.in">83</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p>Internal strain tensor flag.
+<br>
+<ul>
+<li> 0 => No internal-strain calculation.</li>
+ <li> 1 => Print out both force-response and displacement-response
+    internal-strain tensor.
+    Requirements for preceding response-function DDB generation
+    run:  Strain and full atomic-displacement responses.
+    Set <a href="../../input_variables/generated_files/varset_dfpt.html#rfstrs">rfstrs</a> = 1, 2, or 3 (preferably 3).
+    Set <a href="../../input_variables/generated_files/varset_dfpt.html#rfatpol">rfatpol</a> and
+    <a href="../../input_variables/generated_files/varset_dfpt.html#rfdir">rfdir</a> to do a full calculation of
+      phonons at Q=0.
+  </li>
+</ul>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="istrfix@anaddb">istrfix</a></font>
+<br><font id="mnemonics">Mnemonics: Index of STRain FIXed</font>
+<br><font id="mnemonics">Executable: anaddb</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_ConstrainedPol.html">ConstrainedPol</a>.</font>
+<br><font id="smalltext">Moderately used: [1/70] in anaddb tests, [0/10] in tuto anaddb tests. Test list: {v4:[<a href="../../tests/v4/Input/t71.in">71</a>]}.</font>
+<br><font id="vartype">Variable type: integer(<a href="../../input_variables/generated_files/varset_anaddb.html#nstrfix@anaddb">nstrfix</a>)</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p>Indices of the elements of the strain tensor that are fixed during a structural relaxation at constrained polarisation:
+
+<ul>
+<li>0 =&gt; No elastic or compliance tensor will be calculated.</li>
+<li>1 =&gt; Only clamped-ion elastic and compliance tensors will be
+calculated. Requirements for preceding response-function DDB generation
+run: Strain perturbation. Set <a href="../../input_variables/generated_files/varset_dfpt.html#rfstrs">rfstrs</a> to 1, 2, or 3.
+Note that <a href="../../input_variables/generated_files/varset_dfpt.html#rfstrs">rfstrs</a>>=3
+is recommended so that responses to both uniaxial and shear strains
+will be computed. </li>
+  <li>2 =&gt; Both relaxed- and clamped-ion elastic and compliance
+tensor will be calculated, but only the relaxed-ion quantities will be
+printed. The input variable <a href="../../input_variables/generated_files/varset_anaddb.html#instrflag@anaddb">instrflag</a>
+should also be set to 1, because the internal-strain tensor is needed
+to compute the relaxed-ion corrections. Requirements for preceding
+response-function DDB generation run: Strain and atomic-displacement
+responses at Q=0. Set <a href="../../input_variables/generated_files/varset_dfpt.html#rfstrs">rfstrs</a> = 1, 2, or 3 (preferably 3). Set
+ <a href="../../input_variables/generated_files/varset_dfpt.html#rfatpol">rfatpol</a> and <a href="../../input_variables/generated_files/varset_dfpt.html#rfdir">rfdir</a> to do a full
+calculation of phonons at Q=0 (needed because the inverse of
+force-constant tensor is required). </li>
+  <li>3 =&gt; Both relaxed and clamped-ion elastic and compliance
+tensors will be printed out. The input variable <a href="../../input_variables/generated_files/varset_anaddb.html#instrflag@anaddb">instrflag</a> should also be set to
+1. Requirements for preceding response-function DDB generation run:
+Same as for <a href="../../input_variables/generated_files/varset_anaddb.html#elaflag@anaddb">elaflag</a>=2'. </li>
+  <li>4 =&gt; Calculate the elastic and compliance tensors (relaxed
+ion) at fixed displacement field, the relaxed-ion tensors at fixed
+electric field will be printed out too, for comparison. When <a href="../../input_variables/generated_files/varset_anaddb.html#elaflag@anaddb">elaflag</a>=4,
+we need the information of internal strain and relaxed-ion dielectric
+tensor to build the whole tensor, so we need set <a href="../../input_variables/generated_files/varset_anaddb.html#instrflag@anaddb">instrflag</a>=1 and <a href="../../input_variables/generated_files/varset_anaddb.html#dieflag@anaddb">dieflag</a>=3 or 4 . </li>
+  <li>5 =&gt; Calculate the relaxed ion elastic and compliance tensors,
+considering the stress left inside cell. At the same time, bare relaxed
+ion tensors will still be printed out for comparison. In this
+calculation, stress tensor is needed to compute the correction term, so
+one supposed to merge the first order derivative data base (DDB file)
+with the second order derivative data base (DDB file) into a new DDB
+file, which can contain both information. And the program will also
+check for the users. </li>
+</ul>
+See <a href="../../input_variables/generated_files/varset_anaddb.html#polflag@anaddb">polflag</a>.
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="kptrlatt@anaddb">kptrlatt</a></font>
+<br><font id="mnemonics">Mnemonics: K PoinT Reciprocal LATTice</font>
+<br><font id="mnemonics">Executable: anaddb</font>
+<br><font id="characteristic">Mentioned in topics: <a href="../../topics/generated_files/topic_ElPhonTransport.html">ElPhonTransport</a>, <a href="../../topics/generated_files/topic_PhononWidth.html">PhononWidth</a>.</font>
+<br><font id="smalltext">Moderately used: [10/70] in anaddb tests, [2/10] in tuto anaddb tests. Tuto test list: {tutorespfn:[<a href="../../tests/tutorespfn/Input/teph_5.in">eph_5</a>,<a href="../../tests/tutorespfn/Input/teph_6.in">eph_6</a>]}.</font>
+<br><font id="vartype">Variable type: integer(3,3)</font>
+<br><font id="default">Default is 9*0</font>
+<br><font id="text">
+<p>
+<p>Unnormalized lattice vectors for the k-point grid in reciprocal space
+(see <a href="../../input_variables/generated_files/varset_gstate.html#kptrlatt">kptrlatt</a> abinit variable definitionas well).
+Input needed in electron-phonon calculations
+using nesting functions or tetrahedron integration.
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="kptrlatt_fine@anaddb">kptrlatt_fine</a></font>
+<br><font id="mnemonics">Mnemonics: K PoinT Reciprocal LATTice for FINE grid</font>
+<br><font id="mnemonics">Executable: anaddb</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_ElPhonTransport.html">ElPhonTransport</a>.</font>
+<br><font id="smalltext">Moderately used: [1/70] in anaddb tests, [0/10] in tuto anaddb tests. Test list: {v6:[<a href="../../tests/v6/Input/t77.in">77</a>]}.</font>
+<br><font id="vartype">Variable type: integer(3,3)</font>
+<br><font id="default">Default is 9*0</font>
+<br><font id="text">
+<p>
+<p>As kptrlatt above, but for a finer grid of k-points. Under development. Does not work yet, as of June 2010.
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="mustar@anaddb">mustar</a></font>
+<br><font id="mnemonics">Mnemonics: MU STAR</font>
+<br><font id="mnemonics">Executable: anaddb</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_ElPhonTransport.html">ElPhonTransport</a>.</font>
+<br><font id="smalltext">Moderately used: [20/70] in anaddb tests, [3/10] in tuto anaddb tests. Tuto test list: {tutorespfn:[<a href="../../tests/tutorespfn/Input/teph_4.in">eph_4</a>,<a href="../../tests/tutorespfn/Input/teph_5.in">eph_5</a>,<a href="../../tests/tutorespfn/Input/teph_6.in">eph_6</a>]}.</font>
+<br><font id="vartype">Variable type: real</font>
+<br><font id="default">Default is 0.1</font>
+<br><font id="text">
+<p>
+<p>Average electron-electron interaction strength, for the computation of the superconducting Tc using Mc-Millan's formula.
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="natfix@anaddb">natfix</a></font>
+<br><font id="mnemonics">Mnemonics: Number of AToms FIXed</font>
+<br><font id="mnemonics">Executable: anaddb</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_ConstrainedPol.html">ConstrainedPol</a>.</font>
+<br><font id="smalltext">Rarely used: [0/70] in anaddb tests, [0/10] in tuto anaddb tests.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p>Number of atoms that are fixed during a structural optimisation at constrained polarization.
+See <a href="../../input_variables/generated_files/varset_anaddb.html#polflag@anaddb">polflag</a>.
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="natifc@anaddb">natifc</a></font>
+<br><font id="mnemonics">Mnemonics: Number of AToms for IFC analysis</font>
+<br><font id="mnemonics">Executable: anaddb</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_PhononBands.html">PhononBands</a>.</font>
+<br><font id="smalltext">Very frequently used: [36/70] in anaddb tests, [4/10] in tuto anaddb tests. Tuto test list: {tutorespfn:[<a href="../../tests/tutorespfn/Input/teph_4.in">eph_4</a>,<a href="../../tests/tutorespfn/Input/teph_5.in">eph_5</a>,<a href="../../tests/tutorespfn/Input/teph_6.in">eph_6</a>,<a href="../../tests/tutorespfn/Input/trf2_4.in">rf2_4</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p> Give the number of atoms for which IFCs are written and eventually analysed. The list of these atoms is provided
+by <a href="../../input_variables/generated_files/varset_anaddb.html#atifc@anaddb">atifc</a>.
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="natprj_bs@anaddb">natprj_bs</a></font>
+<br><font id="mnemonics">Mnemonics: Number of AToms for PRoJection of the Band Structure</font>
+<br><font id="mnemonics">Executable: anaddb</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_PhononBands.html">PhononBands</a>.</font>
+<br><font id="smalltext">Moderately used: [7/70] in anaddb tests, [0/10] in tuto anaddb tests. Test list: {v6:[<a href="../../tests/v6/Input/t76.in">76</a>,<a href="../../tests/v6/Input/t93.in">93</a>,<a href="../../tests/v6/Input/t94.in">94</a>,<a href="../../tests/v6/Input/t95.in">95</a>,<a href="../../tests/v6/Input/t96.in">96</a>],v7:[<a href="../../tests/v7/Input/t93.in">93</a>,<a href="../../tests/v7/Input/t94.in">94</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p>Give the number of atoms for which atomic-projected phonon
+band structures will be output. The list of these atoms is provided
+by <a href="../../input_variables/generated_files/varset_anaddb.html#iatprj_bs@anaddb">iatprj_bs@anaddb</a>.
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="nchan@anaddb">nchan</a></font>
+<br><font id="mnemonics">Mnemonics: Number of CHANnels</font>
+<br><font id="mnemonics">Executable: anaddb</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_PhononBands.html">PhononBands</a>.</font>
+<br><font id="smalltext">Moderately used: [7/70] in anaddb tests, [1/10] in tuto anaddb tests. Test list: {tutorespfn:[<a href="../../tests/tutorespfn/Input/trf2_7.in">rf2_7</a>],v2:[<a href="../../tests/v2/Input/t15.in">15</a>,<a href="../../tests/v2/Input/t16.in">16</a>],v4:[<a href="../../tests/v4/Input/t54.in">54</a>,<a href="../../tests/v4/Input/t71.in">71</a>],v5:[<a href="../../tests/v5/Input/t22.in">22</a>],v8:[<a href="../../tests/v8/Input/t49.in">49</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 800</font>
+<br><font id="text">
+<p>
+<p>The number of channels of width 1 cm-1 used in calculating the phonon density of states through the histogram method,
+or, equivalently, the largest frequency sampled. The first channel begins at 0.
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="ndivsm@anaddb">ndivsm</a></font>
+<br><font id="mnemonics">Mnemonics: Number of DIVisions for the SMallest segment</font>
+<br><font id="mnemonics">Executable: anaddb</font>
+<br><font id="characteristic">Mentioned in topics: <a href="../../topics/generated_files/topic_PhononBands.html">PhononBands</a>, <a href="../../topics/generated_files/topic_PhononWidth.html">PhononWidth</a>.</font>
+<br><font id="smalltext">Moderately used: [2/70] in anaddb tests, [0/10] in tuto anaddb tests. Test list: {v8:[<a href="../../tests/v8/Input/t45.in">45</a>,<a href="../../tests/v8/Input/t46.in">46</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 20</font>
+<br><font id="text">
+<p>
+<p>This variable defines the number of divisions used to sample the smallest segment of the q-path used
+for the phonon band structure. If ndivsm is specified in the input file, the code will automatically generate the points along the path using the coordinates given in the array <a href="../../input_variables/generated_files/varset_anaddb.html#qpath@anaddb">qpath</a>.
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="nfreq@anaddb">nfreq</a></font>
+<br><font id="mnemonics">Mnemonics: Number of FREQuencies</font>
+<br><font id="mnemonics">Executable: anaddb</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_Phonons.html">Phonons</a>.</font>
+<br><font id="smalltext">Moderately used: [3/70] in anaddb tests, [0/10] in tuto anaddb tests. Test list: {v4:[<a href="../../tests/v4/Input/t54.in">54</a>,<a href="../../tests/v4/Input/t71.in">71</a>],v8:[<a href="../../tests/v8/Input/t49.in">49</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 1</font>
+<br><font id="text">
+<p>
+<p>Number of frequencies wanted for the frequency-dependent dielectric tensor. Should be positive.
+See <a href="../../input_variables/generated_files/varset_anaddb.html#dieflag@anaddb">dieflag</a>.
+
+The code will take <b>nfreq</b> equidistant values from <a href="../../input_variables/generated_files/varset_anaddb.html#frmin@anaddb">frmin</a> to <a href="../../input_variables/generated_files/varset_anaddb.html#frmax@anaddb">frmax</a>.
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="ng2qpt@anaddb">ng2qpt</a></font>
+<br><font id="mnemonics">Mnemonics: Number of Grids points for Q PoinTs (grid 2)</font>
+<br><font id="mnemonics">Executable: anaddb</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_PhononBands.html">PhononBands</a>.</font>
+<br><font id="smalltext">Moderately used: [16/70] in anaddb tests, [1/10] in tuto anaddb tests. Tuto test list: {tutorespfn:[<a href="../../tests/tutorespfn/Input/trf2_7.in">rf2_7</a>]}.</font>
+<br><font id="vartype">Variable type: integer(3)</font>
+<br><font id="default">Default is 3*0 (Comment: (will not work))</font>
+<br><font id="text">
+<p>
+<p>The Monkhorst-Pack grid linear dimensions, for the finer of the
+series of fine grids. Used for the integration
+of thermodynamical functions (Bose-Einstein distribution)
+or for the DOS.
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="ngqpt@anaddb">ngqpt</a></font>
+<br><font id="mnemonics">Mnemonics: Number of Grids points for Q PoinTs</font>
+<br><font id="mnemonics">Executable: anaddb</font>
+<br><font id="characteristic">Mentioned in topics: <a href="../../topics/generated_files/topic_Phonons.html">Phonons</a>, <a href="../../topics/generated_files/topic_PhononBands.html">PhononBands</a>.</font>
+<br><font id="smalltext">Very frequently used: [57/70] in anaddb tests, [7/10] in tuto anaddb tests. Tuto test list: {tutorespfn:[<a href="../../tests/tutorespfn/Input/tdepes_2.in">depes_2</a>,<a href="../../tests/tutorespfn/Input/teph_4.in">eph_4</a>,<a href="../../tests/tutorespfn/Input/teph_5.in">eph_5</a>,<a href="../../tests/tutorespfn/Input/teph_6.in">eph_6</a>,<a href="../../tests/tutorespfn/Input/trf2_4.in">rf2_4</a>,<a href="../../tests/tutorespfn/Input/trf2_5.in">rf2_5</a>,<a href="../../tests/tutorespfn/Input/trf2_7.in">rf2_7</a>]}.</font>
+<br><font id="vartype">Variable type: integer(3)</font>
+<br><font id="default">Default is 3*0 (Comment: (will not work))</font>
+<br><font id="text">
+<p>
+<p>The Monkhorst-Pack grid linear dimensions, for the DDB (coarse grid).
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="ngrids@anaddb">ngrids</a></font>
+<br><font id="mnemonics">Mnemonics: Number of GRIDS</font>
+<br><font id="mnemonics">Executable: anaddb</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_PhononBands.html">PhononBands</a>.</font>
+<br><font id="smalltext">Moderately used: [7/70] in anaddb tests, [1/10] in tuto anaddb tests. Test list: {tutorespfn:[<a href="../../tests/tutorespfn/Input/trf2_7.in">rf2_7</a>],v2:[<a href="../../tests/v2/Input/t15.in">15</a>,<a href="../../tests/v2/Input/t16.in">16</a>],v4:[<a href="../../tests/v4/Input/t54.in">54</a>,<a href="../../tests/v4/Input/t71.in">71</a>],v5:[<a href="../../tests/v5/Input/t22.in">22</a>],v8:[<a href="../../tests/v8/Input/t49.in">49</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 4</font>
+<br><font id="text">
+<p>
+<p>This number define the series of grids that will be used
+for the estimation of the phonon DOS. The coarsest will be
+tried first, then the next, ... then the one described by
+<a href="../../input_variables/generated_files/varset_anaddb.html#ng2qpt@anaddb">ng2qpt</a>.
+The intermediate grids are defined
+for igrid=1... <b>ngrids</b>,
+by the numbers ngqpt_igrid(ii)=(ng2qpt(ii)*igrid)/<b>ngrids</b>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="nlflag@anaddb">nlflag</a></font>
+<br><font id="mnemonics">Mnemonics: Non-Linear FLAG</font>
+<br><font id="mnemonics">Executable: anaddb</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_nonlinear.html">nonlinear</a>.</font>
+<br><font id="smalltext">Moderately used: [5/70] in anaddb tests, [1/10] in tuto anaddb tests. Test list: {tutorespfn:[<a href="../../tests/tutorespfn/Input/tnlo_5.in">nlo_5</a>],v4:[<a href="../../tests/v4/Input/t54.in">54</a>],v8:[<a href="../../tests/v8/Input/t49.in">49</a>,<a href="../../tests/v8/Input/t50.in">50</a>,<a href="../../tests/v8/Input/t64.in">64</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p>Non-linear properties flag.
+<ul>
+  <li>0 => do not compute non-linear properties ;</li>
+  <li>1 => the electrooptic tensor, Raman susceptibilities and non-linear optical
+    susceptibilities are calculated;</li>
+  <li>2 => only the non-linear optical susceptibilities and first-order
+    changes of the dielectric tensor induced by an atomic displacement are calculated;</li>
+  <li>3 => only the non-linear optical susceptibility is calculated.</li>
+</ul>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="nph1l@anaddb">nph1l</a></font>
+<br><font id="mnemonics">Mnemonics: Number of PHonons in List 1</font>
+<br><font id="mnemonics">Executable: anaddb</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_PhononBands.html">PhononBands</a>.</font>
+<br><font id="smalltext">Very frequently used: [60/70] in anaddb tests, [6/10] in tuto anaddb tests. Tuto test list: {tutorespfn:[<a href="../../tests/tutorespfn/Input/tdepes_2.in">depes_2</a>,<a href="../../tests/tutorespfn/Input/teph_4.in">eph_4</a>,<a href="../../tests/tutorespfn/Input/teph_5.in">eph_5</a>,<a href="../../tests/tutorespfn/Input/teph_6.in">eph_6</a>,<a href="../../tests/tutorespfn/Input/tnlo_5.in">nlo_5</a>,<a href="../../tests/tutorespfn/Input/trf2_5.in">rf2_5</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p>The number of wavevectors in phonon list 1, used for interpolation of the phonon frequencies. The
+values of these wavevectors will be specified by <a href="../../input_variables/generated_files/varset_anaddb.html#qph1l@anaddb">qph1l</a>.
+The dynamical matrix for these wavevectors, obtained
+either directly from the DDB - if
+<a href="../../input_variables/generated_files/varset_anaddb.html#ifcflag@anaddb">ifcflag</a>=0 - or through
+the interatomic forces interpolation - if
+<a href="../../input_variables/generated_files/varset_anaddb.html#ifcflag@anaddb">ifcflag</a>=1 -),
+will be diagonalized, and the corresponding eigenfrequencies
+will be printed.
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="nph2l@anaddb">nph2l</a></font>
+<br><font id="mnemonics">Mnemonics: Number of PHonons in List 2</font>
+<br><font id="mnemonics">Executable: anaddb</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_PhononBands.html">PhononBands</a>.</font>
+<br><font id="smalltext">Moderately used: [20/70] in anaddb tests, [2/10] in tuto anaddb tests. Tuto test list: {tutorespfn:[<a href="../../tests/tutorespfn/Input/tnlo_5.in">nlo_5</a>,<a href="../../tests/tutorespfn/Input/trf2_5.in">rf2_5</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p>The number of wavevectors in phonon list 2, defining the directions
+along which the non-analytical splitting of phonon frequencies
+at Gamma will be calculated. The actual
+values of the wavevector directions will be specified
+by <a href="../../input_variables/generated_files/varset_anaddb.html#qph2l@anaddb">qph2l</a>.
+These are actually all wavectors at Gamma, but obtained
+by a limit along a different direction in the Brillouin-zone.
+It is important to note that non-analyticities in the
+dynamical matrices are present at Gamma, due to the
+long-range Coulomb forces. So, going to Gamma along different
+directions can give different results.
+<p>
+The wavevectors in list 2 will be used to:
+<br>
+
+- generate and diagonalize a dynamical matrix, and print the
+     corresponding eigenvalues.
+
+<br>
+
+- calculate the generalized Lyddane-Sachs-Teller relation.
+   Note that if the three first numbers are zero, then
+   the code will do a calculation at Gamma without
+   non-analyticities.
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="nqpath@anaddb">nqpath</a></font>
+<br><font id="mnemonics">Mnemonics: Number of Q wavevectors defining a PATH</font>
+<br><font id="mnemonics">Executable: anaddb</font>
+<br><font id="characteristic">Mentioned in topics: <a href="../../topics/generated_files/topic_PhononBands.html">PhononBands</a>, <a href="../../topics/generated_files/topic_PhononWidth.html">PhononWidth</a>.</font>
+<br><font id="smalltext">Moderately used: [22/70] in anaddb tests, [3/10] in tuto anaddb tests. Tuto test list: {tutorespfn:[<a href="../../tests/tutorespfn/Input/teph_4.in">eph_4</a>,<a href="../../tests/tutorespfn/Input/teph_5.in">eph_5</a>,<a href="../../tests/tutorespfn/Input/teph_6.in">eph_6</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p>Number of q-points in the array <a href="../../input_variables/generated_files/varset_anaddb.html#qpath@anaddb">qpath</a>
+defining the path along which the phonon band structure and phonon linewidths
+are interpolated.
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="nqshft@anaddb">nqshft</a></font>
+<br><font id="mnemonics">Mnemonics: Number of Q SHiFTs</font>
+<br><font id="mnemonics">Executable: anaddb</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_PhononBands.html">PhononBands</a>.</font>
+<br><font id="smalltext">Very frequently used: [55/70] in anaddb tests, [7/10] in tuto anaddb tests. Tuto test list: {tutorespfn:[<a href="../../tests/tutorespfn/Input/tdepes_2.in">depes_2</a>,<a href="../../tests/tutorespfn/Input/teph_4.in">eph_4</a>,<a href="../../tests/tutorespfn/Input/teph_5.in">eph_5</a>,<a href="../../tests/tutorespfn/Input/teph_6.in">eph_6</a>,<a href="../../tests/tutorespfn/Input/trf2_4.in">rf2_4</a>,<a href="../../tests/tutorespfn/Input/trf2_5.in">rf2_5</a>,<a href="../../tests/tutorespfn/Input/trf2_7.in">rf2_7</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 1</font>
+<br><font id="text">
+<p>
+<p>The number of vector shifts of the simple Monkhorst and
+Pack grid, needed to generate the coarse grid of q points
+(for the series of fine grids, the number of shifts it is always taken to be 1).
+Usually, put it to 1.
+Use 2 if BCC sampling (Warning: not BCC lattice, BCC *sampling*),
+and 4 for FCC sampling (Warning: not FCC lattice, FCC *sampling*).
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="nsphere@anaddb">nsphere</a></font>
+<br><font id="mnemonics">Mnemonics: Number of atoms in SPHERe</font>
+<br><font id="mnemonics">Executable: anaddb</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_PhononBands.html">PhononBands</a>.</font>
+<br><font id="smalltext">Moderately used: [5/70] in anaddb tests, [0/10] in tuto anaddb tests. Test list: {v2:[<a href="../../tests/v2/Input/t17.in">17</a>],v4:[<a href="../../tests/v4/Input/t54.in">54</a>,<a href="../../tests/v4/Input/t71.in">71</a>],v8:[<a href="../../tests/v8/Input/t46.in">46</a>,<a href="../../tests/v8/Input/t49.in">49</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p>Number of atoms included in the cut-off sphere for
+interatomic force constant, see also the alternative <a href="../../input_variables/generated_files/varset_anaddb.html#rifcsph@anaddb">rifcsph</a>.
+If <b>nsphere</b>= 0: maximum extent allowed by the grid.
+If <b>nsphere</b>= -1: the code analyzes different values of nsphere and
+find the value that does not lead to unstable frequencies in a small sphere around Gamma.
+The truncated IFCs are then used for further post-processing.
+The results of the test are reported in the main output file.
+This option is useful to obtain a initial guess of nsphere: the value that
+leads to stable frequencies and gives linear dispersion for the acoustic modes around Gamma
+is usually smaller that the one reported by nsphere -1.
+
+<p>This number defines the atoms for which the
+short range part of the interatomic force constants, after
+imposition of the acoustic sum rule, will not be put to zero.
+This option is available for testing purposes
+(evaluate the range of the interatomic force constants), because
+the acoustic sum rule will be violated if some atoms are no more
+included in the inverse Fourier Transform.
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="nstrfix@anaddb">nstrfix</a></font>
+<br><font id="mnemonics">Mnemonics: Number of STRain components FIXed</font>
+<br><font id="mnemonics">Executable: anaddb</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_ConstrainedPol.html">ConstrainedPol</a>.</font>
+<br><font id="smalltext">Moderately used: [1/70] in anaddb tests, [0/10] in tuto anaddb tests. Test list: {v4:[<a href="../../tests/v4/Input/t71.in">71</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p> Number of strain component that are fixed during a
+structural optimisation at constrained polarization.
+See <a href="../../input_variables/generated_files/varset_anaddb.html#polflag@anaddb">polflag</a>.
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="ntemper@anaddb">ntemper</a></font>
+<br><font id="mnemonics">Mnemonics: Number of TEMPERatures</font>
+<br><font id="mnemonics">Executable: anaddb</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_Temperature.html">Temperature</a>.</font>
+<br><font id="smalltext">Moderately used: [3/70] in anaddb tests, [3/10] in tuto anaddb tests. Test list: {tutorespfn:[<a href="../../tests/tutorespfn/Input/tdepes_2.in">depes_2</a>,<a href="../../tests/tutorespfn/Input/teph_6.in">eph_6</a>,<a href="../../tests/tutorespfn/Input/trf2_7.in">rf2_7</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 10</font>
+<br><font id="text">
+<p>
+<p>Number of temperatures at which the thermodynamical
+quantities have to be evaluated. Now also used for the output of transport
+quantities in electron-phonon calculations. The full grid is specified
+with the <a href="../../input_variables/generated_files/varset_anaddb.html#tempermin@anaddb">tempermin</a> and
+<a href="../../input_variables/generated_files/varset_anaddb.html#temperinc@anaddb">temperinc</a> variables.
+The default temperature grid goes from 100K to 1000K by step of 100K. For the largest temperatures, for most solids, anharmonic effects not accounted in the harmonic approximation implemented in anaddb will be important. For weakly bounded systems (e.g. Van der Waals solids), such anharmonic effects might be important already at room temperature.
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="nwchan@anaddb">nwchan</a></font>
+<br><font id="mnemonics">Mnemonics: Number of Widths of CHANnels</font>
+<br><font id="mnemonics">Executable: anaddb</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_PhononBands.html">PhononBands</a>.</font>
+<br><font id="smalltext">Moderately used: [7/70] in anaddb tests, [1/10] in tuto anaddb tests. Test list: {tutorespfn:[<a href="../../tests/tutorespfn/Input/trf2_7.in">rf2_7</a>],v2:[<a href="../../tests/v2/Input/t15.in">15</a>,<a href="../../tests/v2/Input/t16.in">16</a>],v4:[<a href="../../tests/v4/Input/t54.in">54</a>,<a href="../../tests/v4/Input/t71.in">71</a>],v5:[<a href="../../tests/v5/Input/t22.in">22</a>],v8:[<a href="../../tests/v8/Input/t49.in">49</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 10</font>
+<br><font id="text">
+<p>
+<p> Integer. The width of the largest channel
+used to sample the frequencies.
+The code will generate different sets of channels,
+with decreasing widths (by step of 1 cm-1), from
+this channel width to 1, eventually. It considers to
+have converged when the convergence criterion based on <a href="../../input_variables/generated_files/varset_anaddb.html#dostol@anaddb">dostol</a> and <a href="../../input_variables/generated_files/varset_anaddb.html#thmtol@anaddb">thmtol</a> have been fulfilled.
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="outboltztrap@anaddb">outboltztrap</a></font>
+<br><font id="mnemonics">Mnemonics: OUTput files for BOLTZTRAP code</font>
+<br><font id="mnemonics">Executable: anaddb</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_PhononBands.html">PhononBands</a>.</font>
+<br><font id="smalltext">Moderately used: [1/70] in anaddb tests, [0/10] in tuto anaddb tests. Test list: {v6:[<a href="../../tests/v6/Input/t76.in">76</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p> If set to 1, the phonon frequencies on the ngqpt grid are output in a format legible by the BoltzTrap code,
+which does band interpolation and gets group velocities. The output file will be appended _BTRAP
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="outscphon@anaddb">outscphon</a></font>
+<br><font id="mnemonics">Mnemonics: OUTput files for Self Consistent PHONons</font>
+<br><font id="mnemonics">Executable: anaddb</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_PhononBands.html">PhononBands</a>.</font>
+<br><font id="smalltext">Rarely used: [0/70] in anaddb tests, [0/10] in tuto anaddb tests.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p>If set to 1, the phonon frequency and eigenvector files needed for a Self Consistent
+phonon run (as in Souvatzis PRL <b>100</b> 095901) will be output to files appended _PHFRQ and _PHVEC.
+The third file needed is appended _PCINFO for Primitive Cell INFOrmation.
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="piezoflag@anaddb">piezoflag</a></font>
+<br><font id="mnemonics">Mnemonics: PIEZOelectric tensor FLAG</font>
+<br><font id="mnemonics">Executable: anaddb</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_Elastic.html">Elastic</a>.</font>
+<br><font id="smalltext">Moderately used: [5/70] in anaddb tests, [3/10] in tuto anaddb tests. Test list: {tutorespfn:[<a href="../../tests/tutorespfn/Input/telast_3.in">elast_3</a>,<a href="../../tests/tutorespfn/Input/tffield_3.in">ffield_3</a>,<a href="../../tests/tutorespfn/Input/tnlo_5.in">nlo_5</a>],v4:[<a href="../../tests/v4/Input/t68.in">68</a>,<a href="../../tests/v4/Input/t70.in">70</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p>Flag for calculation of piezoelectric tensors
+<ul>
+  <li>0 =&gt; No piezoelectric tensor will be calculated.</li>
+  <li>1 =&gt; Only the clamped-ion piezoelectric tensor is computed and
+printed. Requirements for preceding response-function DDB generation
+run: Strain and electric-field responses. For the electric-field part,
+one needs results from a prior 'ddk perturbation' run. Note that even
+if only a limited number of piezoelectric tensor terms are wanted (as
+determined by rfstrs and rfdir in this calculation) it is necessary to
+set rfdir = 1 1 1 in the d/dk calculation for most structures. The only
+obvious exception to this requirement is cases in which the primitive
+lattice vectors are all aligned with the cartesian axes. The code will
+omit terms in the output piezoelectric tensor for which the available
+d/dk set is incomplete. Thus: Set <a href="../../input_variables/generated_files/varset_dfpt.html#rfstrs">rfstrs</a> to 1, 2, or 3i
+(preferably 3) </li>
+  <li>2 =&gt; Both relaxed- and clamped-ion elastic and compliance
+tensor will be calculated, but only the relaxed-ion quantities will be
+printed. The input variable <a href="../../input_variables/generated_files/varset_anaddb.html#instrflag@anaddb">instrflag</a>
+should also be set to 1, because the internal-strain tensor is needed
+to compute the relaxed-ion corrections. Requirements for preceding
+response-function DDB generation run: Strain, electric-field and full
+atomic-displacement responses at Q=0. Set <a href="../../input_variables/generated_files/varset_dfpt.html#rfstrs">rfstrs</a> = 1, 2, or 3
+(preferably 3). Set <a href="../../input_variables/generated_files/varset_dfpt.html#rfelfd">rfelfd</a> = 3. Set <a href="../../input_variables/generated_files/varset_dfpt.html#rfatpol">rfatpol</a> and <<a href="../../input_variables/generated_files/varset_dfpt.html#rfdir">rfdir</a> to do a
+full calculation of phonons at Q=0 (needed because the inverse of
+force-constant tensor is required). </li>
+  <li>3 =&gt; Both relaxed and clamped-ion piezoelectric tensors will
+be printed out. The input variable <a href="../../input_variables/generated_files/varset_anaddb.html#instrflag@anaddb">instrflag</a>
+should also be set to 1. Requirements for preceding response-function
+DDB generation run: Same as for <b>piezoflag</b>=2. </li>
+  <li>4 =&gt; Calculate the piezoelectric d tensor (relaxed ion). In
+order to calculate the piezoelectric d tensor, we need information of
+internal strain and elastic tensor (relaxed ion). So we should set <a href="../../input_variables/generated_files/varset_anaddb.html#elaflag@anaddb">elaflag</a>= 2,3,4, or 5 and <a href="../../input_variables/generated_files/varset_anaddb.html#instrflag@anaddb">instrflag</a>=1. The subroutine will
+also do a check for you, and print warning message without stopping
+even if flags were not correctly set. </li>
+  <li>5 =&gt; Calculate the piezoelectric g tensor (relaxed ion). In
+this computation, we need information of internal strain, elastic
+tensor (relaxed ion) and dielectric tensor (relaxed ion). So we should
+set: <a href="../../input_variables/generated_files/varset_anaddb.html#instrflag@anaddb">instrflag</a>=1, <a href="../../input_variables/generated_files/varset_anaddb.html#elaflag@anaddb">elaflag</a>=2,3,4 or 5, <a href="../../input_variables/generated_files/varset_anaddb.html#dieflag@anaddb">dieflag</a>=3 or 4. The subroutine
+will also do a check for you, and print warning message without
+stopping even if flags were not correctly set. </li>
+  <li>6 =&gt; Calculate the piezoelectric h tensor (relaxed ion). In
+this calculation, we need information of internal strain and dielectric
+tensor (relaxed ion). So we need set: <a href="../../input_variables/generated_files/varset_anaddb.html#instrflag@anaddb">instrflag</a>=1 and <a href="../../input_variables/generated_files/varset_anaddb.html#dieflag@anaddb">dieflag</a>=3 or 4. The subroutine
+will also do a check for you, and print warning message without
+stopping even if flags were not correctly set. </li>
+  <li>7 =&gt; calculate all the possible piezoelectric tensors,
+including e (clamped and relaxed ion), d, g and h tensors. The flags
+should be set to satisfy the above rules from 1 to 6.</li>
+</ul>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="polflag@anaddb">polflag</a></font>
+<br><font id="mnemonics">Mnemonics: POLarization FLAG</font>
+<br><font id="mnemonics">Executable: anaddb</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_ConstrainedPol.html">ConstrainedPol</a>.</font>
+<br><font id="smalltext">Moderately used: [3/70] in anaddb tests, [0/10] in tuto anaddb tests. Test list: {v4:[<a href="../../tests/v4/Input/t71.in">71</a>,<a href="../../tests/v4/Input/t74.in">74</a>,<a href="../../tests/v4/Input/t77.in">77</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p>If activated, compute polarization in cartesian coordinates,
+and update lattice constants and atomic positions in order to perform a structural
+optimization at constrained polarization.
+<p>
+More detailed explanation: ANADDB can use the formalism described in
+Na Sai et al, PRB 66, 104108 (2002), to perform structural relaxations
+under the constraint that the polarization is equal to a value specified by the
+input variable <a href="../../input_variables/generated_files/varset_anaddb.html#targetpol@anaddb">targetpol</a>.
+The user starts from a given configuration of a crystal and performs
+a ground-state calculation of the Hellman-Feynman forces and stresses
+and the Berry phase polarization as
+well as a linear response calculation of the whole matrix of
+second-order energy derivatives with respect to atomic displacement,
+strains and electric field.
+<br>
+In case <b>polflag</b>=1, ANADDB solves the linear system of equations
+(13)
+of the Na Sai paper, and computes new atomic positions (if <a href="../../input_variables/generated_files/varset_anaddb.html#relaxat@anaddb">relaxat</a>=1) and
+lattice constant (if <a href="../../input_variables/generated_files/varset_anaddb.html#relaxstr@anaddb">relaxstr</a>=1).
+Then, the user uses these parameters to perform a new ground-state
+and linear-response calculation. This must be repeated until convergence is
+reached. The user can also fix some atomic positions, or strains, thanks to the input variables
+<a href="../../input_variables/generated_files/varset_anaddb.html#natfix@anaddb">natfix</a>, <a href="../../input_variables/generated_files/varset_anaddb.html#nstrfix@anaddb">nstrfix</a>,<a href="../../input_variables/generated_files/varset_anaddb.html#iatfix@anaddb">iatfix</a>,<a href="../../input_variables/generated_files/varset_anaddb.html#istrfix@anaddb">istrfix</a>.
+<br>
+In case both <a href="../../input_variables/generated_files/varset_anaddb.html#relaxat@anaddb">relaxat</a>
+and <a href="../../input_variables/generated_files/varset_anaddb.html#relaxstr@anaddb">relaxstr</a> are 0, while
+<b>polflag</b>=1, ANADDB only computes the polarization in cartesian coordinates.
+</p>
+<p><As described in the Na Sai's paper, it is important to use the
+finite difference expression of the ddk (<a href="../../input_variables/generated_files/varset_ffield.html#berryopt">berryopt</a>=2 or -2)
+in the linear response calculation of the effective charges and the piezoelectric tensor.
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="prt_ifc@anaddb">prt_ifc</a></font>
+<br><font id="mnemonics">Mnemonics: PRinT the Interatomic Force Constants</font>
+<br><font id="mnemonics">Executable: anaddb</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_PhononBands.html">PhononBands</a>.</font>
+<br><font id="smalltext">Moderately used: [1/70] in anaddb tests, [0/10] in tuto anaddb tests. Test list: {v2:[<a href="../../tests/v2/Input/t15.in">15</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p>Flag to print out the Interatomic Force Constants in real space to a file. The available
+options are:
+<ul>
+ <li>0 =&gt; do nothing (IFC are printed to the log file);</li>
+ <li>1 =&gt; write out the IFC in file ifcinfo.out (the name is fixed) to be used by AI2PS from John Rehr's group</li>
+</ul>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="prtbltztrp@anaddb">prtbltztrp</a></font>
+<br><font id="mnemonics">Mnemonics: PRinT input files for BoLTZTRaP code.</font>
+<br><font id="mnemonics">Executable: anaddb</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_PhononBands.html">PhononBands</a>.</font>
+<br><font id="smalltext">Rarely used: [0/70] in anaddb tests, [0/10] in tuto anaddb tests.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<ul>
+  <li>0 =&gt; do not write the BoltzTraP input files;</li>
+  <li>1 =&gt; write out the input files for BoLTZTRaP code.</li>
+</ul>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="prtddb@anaddb">prtddb</a></font>
+<br><font id="mnemonics">Mnemonics: PRinT the Derivative DataBase files</font>
+<br><font id="mnemonics">Executable: anaddb</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_PhononBands.html">PhononBands</a>.</font>
+<br><font id="smalltext">Moderately used: [1/70] in anaddb tests, [0/10] in tuto anaddb tests. Test list: {v8:[<a href="../../tests/v8/Input/t64.in">64</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p>
+Flag to print out the DDB file interpolated
+with the Interatomic Force Constants.
+<p>
+The available options are:
+<ul>
+  <li>0 =&gt; no output of DDB (default);</li>
+  <li>1 =&gt; Interpolate the DDB and write out the DDB and DDB.nc files. </li>
+</ul>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="prtdos@anaddb">prtdos</a></font>
+<br><font id="mnemonics">Mnemonics: PRinT the phonon Density Of States</font>
+<br><font id="mnemonics">Executable: anaddb</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_PhononBands.html">PhononBands</a>.</font>
+<br><font id="smalltext">Moderately used: [7/70] in anaddb tests, [0/10] in tuto anaddb tests. Test list: {v5:[<a href="../../tests/v5/Input/t88.in">88</a>,<a href="../../tests/v5/Input/t90.in">90</a>,<a href="../../tests/v5/Input/t91.in">91</a>,<a href="../../tests/v5/Input/t92.in">92</a>,<a href="../../tests/v5/Input/t93.in">93</a>,<a href="../../tests/v5/Input/t94.in">94</a>,<a href="../../tests/v5/Input/t95.in">95</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p>The <b>prtdos</b> variable is used to calculate
+the phonon density of states, PHDOS, by Fourier interpolating the interatomic force
+constants on the (dense) q-mesh defined by <a href="../../input_variables/generated_files/varset_anaddb.html#ng2qpt@anaddb">ng2qpt</a>.
+Note that the variable <a href="../../input_variables/generated_files/varset_anaddb.html#ifcflag@anaddb">ifcflag</a> must be set to 1
+since the interatomic force constants are supposed to be known.
+<p>
+The available options are:
+<ul>
+ <li>0 =&gt; no output of PHDOS (default);</li>
+ <li>1 =&gt; calculate PHDOS using the gaussian method and the broadening defined
+ by <a href="../../input_variables/generated_files/varset_anaddb.html#dossmear@anaddb">dossmear</a>. </li>
+ <!--<li>2 =&gt; use tetrahedron method. </li>-->
+ </ul>
+
+The step of the frequency grid employed to calculate the DOS
+can be defined through the input variable <a href="../../input_variables/generated_files/varset_anaddb.html#dosdeltae@anaddb">dosdeltae</a>.
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="prtfsurf@anaddb">prtfsurf</a></font>
+<br><font id="mnemonics">Mnemonics: PRinT the Fermi SURFace</font>
+<br><font id="mnemonics">Executable: anaddb</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_ElPhonTransport.html">ElPhonTransport</a>.</font>
+<br><font id="smalltext">Rarely used: [0/70] in anaddb tests, [0/10] in tuto anaddb tests.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p>Only for electron-phonon calculations. The available options are:
+
+<ul>
+  <li>0 =&gt; do not write the Fermi Surface;</li>
+  <li>1 =&gt; write out the Fermi Surface in the BXSF format used by
+  <a href="http://www.xcrysden.org">XCrySDen</a>.</li>
+
+</ul>
+<p>Further comments:
+<p> a) Only the eigenvalues for k-points inside the
+Irreducible Brillouin zone are required. As a consequence it is
+possible to use <a href="../../input_variables/generated_files/varset_basic.html#kptopt">kptopt</a>
+=1 during the GS calculation to reduce
+the computational effort.</font></p>
+
+<p> b) Only unshifted k-grids that are orthogonal in
+reduced space are supported by <a href="http://www.xcrysden.org">XCrySDen</a>.
+This implies that <a href="../../input_variables/generated_files/varset_basic.html#shiftk">shiftk</a>
+must be set to (0,0,0) during the GS calculation
+with <a href="../../input_variables/generated_files/varset_basic.html#nshiftk">nshiftk</a>=1. Furthermore if <a href="../../input_variables/generated_files/varset_gstate.html#kptrlatt">kptrlatt</a>
+is used to generate the k-grid, all the off-diagonal elements of this
+array must be zero.</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="prtmbm@anaddb">prtmbm</a></font>
+<br><font id="mnemonics">Mnemonics: PRinT Mode-By-Mode decomposition of the electrooptic tensor</font>
+<br><font id="mnemonics">Executable: anaddb</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_nonlinear.html">nonlinear</a>.</font>
+<br><font id="smalltext">Moderately used: [3/70] in anaddb tests, [1/10] in tuto anaddb tests. Test list: {tutorespfn:[<a href="../../tests/tutorespfn/Input/tnlo_5.in">nlo_5</a>],v4:[<a href="../../tests/v4/Input/t54.in">54</a>],v8:[<a href="../../tests/v8/Input/t49.in">49</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<ul>
+<li>0 =&gt; do not write the mode-by-mode decomposition of the
+electrooptic tensor;</li>
+<li>1 =&gt; write out the contribution of the individual zone-center
+phonon modes to the electrooptic tensor.</li>
+</ul>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="prtnest@anaddb">prtnest</a></font>
+<br><font id="mnemonics">Mnemonics: PRinT the NESTing function</font>
+<br><font id="mnemonics">Executable: anaddb</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_PhononWidth.html">PhononWidth</a>.</font>
+<br><font id="smalltext">Moderately used: [3/70] in anaddb tests, [2/10] in tuto anaddb tests. Test list: {tutorespfn:[<a href="../../tests/tutorespfn/Input/teph_5.in">eph_5</a>,<a href="../../tests/tutorespfn/Input/teph_6.in">eph_6</a>],v6:[<a href="../../tests/v6/Input/t76.in">76</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p>Only for electron-phonon calculations.
+This input variable is used to calculate the nesting function defined as:
+\chi_{nm}(q) = \sum_k \delta(\epsilon_{k,n}-epsilon_F) \delta(\epsilon_{k+q,m}-\epsilon_F).
+The nesting factor is calculated for every point of the k-grid
+employed during the previous GS calculation.
+The values are subsequently interpolated along the trajectory in q space
+defined by <a href="../../input_variables/generated_files/varset_anaddb.html#qpath@anaddb">qpath</a>, and written in the _NEST
+file using the X-Y format (<b>prtnest</b>=1).
+It is also possible to analyze the behavior of the function
+in the reciprocal unit cell saving the values in the NEST_XSF file that can be read
+using <a href="http://www.xcrysden.org">XCrySDen</a> (<b>prtnest</b>=2).
+Note that in the present implementation what is really printed to file is
+the "total nesting" defined as \sum_{nm} \chi_{nm}(q).
+Limitations: the k-grid defined by
+<a href="../../input_variables/generated_files/varset_gstate.html#kptrlatt">kptrlatt</a>
+must be orthogonal in reciprocal space,
+moreover off-diagonal elements are not allowed, i.e
+kptrlatt 4 0 0  0 4 0  0 0 4 is fine while
+kprtlatt = 1 0 0 0 1 1 0 -1 1 will not work.
+
+<p>
+<ul>
+  <li>0 =&gt; do not write the nesting function;</li>
+  <li>1 =&gt; write only the nesting function along the q-path in the X-Y format;</li>
+  <li>2 =&gt; write out the nesting function both in the X-Y and in the XSF format.</li>
+</ul>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="prtphbands@anaddb">prtphbands</a></font>
+<br><font id="mnemonics">Mnemonics: PRinT PHonon BANDS</font>
+<br><font id="mnemonics">Executable: anaddb</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_PhononBands.html">PhononBands</a>.</font>
+<br><font id="smalltext">Moderately used: [1/70] in anaddb tests, [0/10] in tuto anaddb tests. Test list: {v8:[<a href="../../tests/v8/Input/t46.in">46</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 1</font>
+<br><font id="text">
+<p>
+<p>Only if <a href="../../input_variables/generated_files/varset_anaddb.html#ifcflag@anaddb">ifcflag</a>=1.
+
+This option specifies the file format for the phonon band structure.
+Possible values:
+
+<ul>
+<!--
+<li>0 Disable the output of the phonon frequencies.</li>
+-->
+
+<li>1 Write frequencies in xmgrace format.  A file with extension `PHBANDS.agr` is produced.
+Use `xmgrace file_PHBANDS.agr` to visualize the data</li>
+
+<li>2 Write frequencies in gnuplot format.
+The code produces a `PHBANDS.dat` file with the eigenvalues and a `PHBANDS.gnuplot` script.
+Use `gnuplot file_PHBANDS.gnuplot` to visualize the phonon band structure.</li>
+</ul>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="prtsrlr@anaddb">prtsrlr</a></font>
+<br><font id="mnemonics">Mnemonics: PRinT the Short-Range/Long-Range decomposition of phonon FREQuencies</font>
+<br><font id="mnemonics">Executable: anaddb</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_PhononBands.html">PhononBands</a>.</font>
+<br><font id="smalltext">Moderately used: [1/70] in anaddb tests, [0/10] in tuto anaddb tests. Test list: {v6:[<a href="../../tests/v6/Input/t85.in">85</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p>Only if <a href="../../input_variables/generated_files/varset_anaddb.html#ifcflag@anaddb">ifcflag</a>=1.
+The available options are:
+<ul>
+  <li>0 =&gt; do not write the SR/LR decomposition of phonon frequencies;</li>
+  <li>1 =&gt; write out the SR/LR decomposition of the square of phonon frequencies at each q-point specified
+  in <a href="../../input_variables/generated_files/varset_anaddb.html#qph1l@anaddb">qph1l</a>.</li>
+</ul>
+<p> For details see <I>Europhys. Lett., 33 (9), pp. 713-718 (1996)</I>.
+See also <a href="../../input_variables/generated_files/varset_anaddb.html#ifcflag@anaddb">ifcflag</a>, <a href="../../input_variables/generated_files/varset_anaddb.html#ifcflag@anaddb">ifcflag</a> and <a href="../../input_variables/generated_files/varset_anaddb.html#dipdip@anaddb">dipdip</a>.
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="prtvol@anaddb">prtvol</a></font>
+<br><font id="mnemonics">Mnemonics: PRinT VOLume</font>
+<br><font id="mnemonics">Executable: anaddb</font>
+<br><font id="characteristic">Mentioned in topics: <a href="../../topics/generated_files/topic_Phonons.html">Phonons</a>, <a href="../../topics/generated_files/topic_PhononBands.html">PhononBands</a>, <a href="../../topics/generated_files/topic_Temperature.html">Temperature</a>, <a href="../../topics/generated_files/topic_PhononWidth.html">PhononWidth</a>, <a href="../../topics/generated_files/topic_ElPhonTransport.html">ElPhonTransport</a>.</font>
+<br><font id="smalltext">Moderately used: [1/70] in anaddb tests, [0/10] in tuto anaddb tests. Test list: {v8:[<a href="../../tests/v8/Input/t45.in">45</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p>Control the volume of printed output.
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="q1shft@anaddb">q1shft</a></font>
+<br><font id="mnemonics">Mnemonics: Q shifts for the grid number 1</font>
+<br><font id="mnemonics">Executable: anaddb</font>
+<br><font id="characteristic">Mentioned in topics: <a href="../../topics/generated_files/topic_Phonons.html">Phonons</a>, <a href="../../topics/generated_files/topic_PhononBands.html">PhononBands</a>.</font>
+<br><font id="smalltext">Very frequently used: [55/70] in anaddb tests, [7/10] in tuto anaddb tests. Tuto test list: {tutorespfn:[<a href="../../tests/tutorespfn/Input/tdepes_2.in">depes_2</a>,<a href="../../tests/tutorespfn/Input/teph_4.in">eph_4</a>,<a href="../../tests/tutorespfn/Input/teph_5.in">eph_5</a>,<a href="../../tests/tutorespfn/Input/teph_6.in">eph_6</a>,<a href="../../tests/tutorespfn/Input/trf2_4.in">rf2_4</a>,<a href="../../tests/tutorespfn/Input/trf2_5.in">rf2_5</a>,<a href="../../tests/tutorespfn/Input/trf2_7.in">rf2_7</a>]}.</font>
+<br><font id="vartype">Variable type: real(<a href="../../input_variables/generated_files/varset_anaddb.html#nqshft@anaddb">nqshft</a>)</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p>This vector gives the shifts needed to define the coarse q-point grid.
+<p>
+   a) Case nqshft=1
+   In general, 0.5 0.5 0.5 with the ngqpt's even will give
+     very economical grids. On the other hand, is it
+     sometimes better for phonons to have the Gamma point
+     in the grid. In that case, 0.0 0.0 0.0 should be OK.
+   For the hexagonal lattice, the above mentioned
+     quantities become 0.0 0.0 0.5 and 0.0 0.0 0.0 .
+<p>
+   b) Case nqshft=2
+   The two q1shft vectors must form a BCC lattice.
+   For example, use 0.0 0.0 0.0 and 0.5 0.5 0.5
+<p>
+   c) Case nqshft=4
+   The four q1shft vectors must form a FCC lattice.
+   For example, use 0.0 0.0 0.0 , 0.0 0.5 0.5 ,
+                    0.5 0.0 0.5 , 0.5 0.5 0.0
+   or   0.5 0.5 0.5  , 0.0 0.0 0.5 ,
+        0.0 0.5 0.0  , 0.5 0.0 0.0  (the latter is referred to
+                                     as shifted)
+<p>
+   Further comments: by using this technique, it is possible
+   to increase smoothly the number of q-points, at least
+   less abruptly than relying on series of grids like
+   (for the full cubic symmetry): <br>
+   1x1x1 => (0 0 0) <br>
+   2x2x2 (shifted) => (.25 .25 .25) <br>
+   2x2x2 => 1x1x1 + (.5 0 0) (.5 .5 0) (.5 .5 0) <br>
+   4x4x4 => 2x2x2 + (.25 0 0) (.25 .25 0) (.25 .5 0)
+                   (.25 .25 .25) (.25 .25 .5) (.25 .5 .5) <br>
+    ... <br> <br>
+   with respectively 1, 1, 4 and 10 q-points, corresponding
+   to a number of points in the full BZ of 1, 8, 8 and 64.
+   Indeed, the following grids are made available: <br>
+   1x1x1 with nqshft=2  => (0 0 0) (.5 .5 .5) <br>
+   1x1x1 with nqshft=4  => (0 0 0) (.5 .5 0) <br>
+   1x1x1 with nqshft=4 (shifted) => (.5 0 0) (.5 .5 .5) <br>
+   2x2x2 with nqshft=2  => 2x2x2 + (.25 .25 .25) <br>
+   2x2x2 with nqshft=4  => 2x2x2 + (.25 .25 0) (.25 .25 .5) <br>
+   2x2x2 with nqshft=4 (shifted) => (.25 0 0) (.25 .25 .25)
+                                    (.5 .5 .25) (.25 .5 0) <br>
+    ... <br> <br>
+   with respectively 2, 2, 2, 5, 6 and 4 q-points, corresponding
+   to a number of points in the full BZ of 2, 4, 4, 16, 32 and 32.
+<p>
+   For a FCC lattice, it is possible to sample only the Gamma point
+   by using a 1x1x1 BCC sampling (nqshft=2).
+<p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="q2shft@anaddb">q2shft</a></font>
+<br><font id="mnemonics">Mnemonics: Q points SHiFTs for the grids 2</font>
+<br><font id="mnemonics">Executable: anaddb</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_PhononBands.html">PhononBands</a>.</font>
+<br><font id="smalltext">Moderately used: [4/70] in anaddb tests, [1/10] in tuto anaddb tests. Test list: {tutorespfn:[<a href="../../tests/tutorespfn/Input/trf2_7.in">rf2_7</a>],v2:[<a href="../../tests/v2/Input/t15.in">15</a>,<a href="../../tests/v2/Input/t16.in">16</a>],v5:[<a href="../../tests/v5/Input/t22.in">22</a>]}.</font>
+<br><font id="vartype">Variable type: real(3)</font>
+<br><font id="default">Default is 3* 0</font>
+<br><font id="text">
+<p>
+<p>Similar to <a href="../../input_variables/generated_files/varset_anaddb.html#q1shft@anaddb">q1shft</a>,
+but for the series of fine grids.
+<p>Note that <a href="../../input_variables/generated_files/varset_anaddb.html#nqshft@anaddb">nqshft</a>
+for this series of grids corresponds to 1.
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="qgrid_type@anaddb">qgrid_type</a></font>
+<br><font id="mnemonics">Mnemonics: Q GRID TYPE</font>
+<br><font id="mnemonics">Executable: anaddb</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_PhononWidth.html">PhononWidth</a>.</font>
+<br><font id="smalltext">Moderately used: [1/70] in anaddb tests, [0/10] in tuto anaddb tests. Test list: {v5:[<a href="../../tests/v5/Input/t94.in">94</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p>If <b>qgrid_type</b> is set to 1, the electron-phonon part of anaddb will use
+the <a href="../../input_variables/generated_files/varset_anaddb.html#ep_nqpt@anaddb">ep_nqpt</a> and <a href="../../input_variables/generated_files/varset_anaddb.html#ep_qptlist@anaddb">ep_qptlist</a> variables to determine
+which q-points to calculate the electron-phonon coupling for. This is an alternative
+to a regular grid as in the rest of anaddb (using <a href="../../input_variables/generated_files/varset_anaddb.html#ngqpt@anaddb">ngqpt</a>).
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="qpath@anaddb">qpath</a></font>
+<br><font id="mnemonics">Mnemonics: Q wavevectors defining a PATH</font>
+<br><font id="mnemonics">Executable: anaddb</font>
+<br><font id="characteristic">Mentioned in topics: <a href="../../topics/generated_files/topic_PhononBands.html">PhononBands</a>, <a href="../../topics/generated_files/topic_PhononWidth.html">PhononWidth</a>.</font>
+<br><font id="smalltext">Moderately used: [22/70] in anaddb tests, [3/10] in tuto anaddb tests. Tuto test list: {tutorespfn:[<a href="../../tests/tutorespfn/Input/teph_4.in">eph_4</a>,<a href="../../tests/tutorespfn/Input/teph_5.in">eph_5</a>,<a href="../../tests/tutorespfn/Input/teph_6.in">eph_6</a>]}.</font>
+<br><font id="vartype">Variable type: real(3,<a href="../../input_variables/generated_files/varset_anaddb.html#nqpath@anaddb">nqpath</a>)</font>
+<br><font id="default">Default is 0.0</font>
+<br><font id="text">
+<p>
+<p>It is used to generate the path along which the phonon band structure and
+phonon linewidths are interpolated.
+There are <a href="../../input_variables/generated_files/varset_anaddb.html#nqpath@anaddb">nqpath</a>-1 segments to be
+defined, each of which starts from the end point of the previous one.
+The number of divisions in each segment is automatically calculated
+inside the code to respect the proportion between the segments.
+The same circuit is used for the output of the nesting function if
+<a href="../../input_variables/generated_files/varset_anaddb.html#prtnest@anaddb">prtnest</a>=1.
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="qph1l@anaddb">qph1l</a></font>
+<br><font id="mnemonics">Mnemonics: Q for PHonon List 1</font>
+<br><font id="mnemonics">Executable: anaddb</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_PhononBands.html">PhononBands</a>.</font>
+<br><font id="smalltext">Very frequently used: [59/70] in anaddb tests, [6/10] in tuto anaddb tests. Tuto test list: {tutorespfn:[<a href="../../tests/tutorespfn/Input/tdepes_2.in">depes_2</a>,<a href="../../tests/tutorespfn/Input/teph_4.in">eph_4</a>,<a href="../../tests/tutorespfn/Input/teph_5.in">eph_5</a>,<a href="../../tests/tutorespfn/Input/teph_6.in">eph_6</a>,<a href="../../tests/tutorespfn/Input/tnlo_5.in">nlo_5</a>,<a href="../../tests/tutorespfn/Input/trf2_5.in">rf2_5</a>]}.</font>
+<br><font id="vartype">Variable type: real(4,<a href="../../input_variables/generated_files/varset_anaddb.html#nph1l@anaddb">nph1l</a>)</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p>List of <a href="../../input_variables/generated_files/varset_anaddb.html#nph1l@anaddb">nph1l</a>
+wavevectors, at which the phonon frequencies will be interpolated.
+Defined by 4 numbers:
+the wavevector is made by the three first numbers
+divided by the fourth one (a normalisation factor).
+The coordinates are defined with respect to the unit vectors
+that spans the Brillouin zone. Note that this set of axes
+can be non-orthogonal and not normed.
+The normalisation factor makes easier the input of wavevector
+such as (1/3,1/3,1/3), represented by 1.0 1.0 1.0 3.0 .
+<br>
+The internal representation of this array is as follows:
+for each wavevector, the three first numbers are stored
+in the array qph1l(3,nph1l), while the fourth is stored
+in the array qnrml1(nph1l).
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="qph2l@anaddb">qph2l</a></font>
+<br><font id="mnemonics">Mnemonics: PHonon List 2</font>
+<br><font id="mnemonics">Executable: anaddb</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_PhononBands.html">PhononBands</a>.</font>
+<br><font id="smalltext">Moderately used: [20/70] in anaddb tests, [2/10] in tuto anaddb tests. Tuto test list: {tutorespfn:[<a href="../../tests/tutorespfn/Input/tnlo_5.in">nlo_5</a>,<a href="../../tests/tutorespfn/Input/trf2_5.in">rf2_5</a>]}.</font>
+<br><font id="vartype">Variable type: real(4,<a href="../../input_variables/generated_files/varset_anaddb.html#nph2l@anaddb">nph2l</a>)</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p>List of phonon wavevector <i>directions</i> along which the
+non-analytical correction to the Gamma-point phonon frequencies
+will be calculated (for insulators).
+Four numbers, as for <a href="../../input_variables/generated_files/varset_anaddb.html#qph1l@anaddb">qph1l</a>,
+but where the last one, that correspond to the normalisation factor, is 0.0
+For the anaddb code, this has the meaning that the three previous
+values define a direction. The direction is in CARTESIAN
+COORDINATES, unlike the non-Gamma wavevectors defined in the first list of vectors...
+<p>
+Note that if the three first numbers are zero, then
+the code will do a calculation at Gamma without non-analyticities.
+<p>
+Also note that the code automatically set the imaginary
+part of the dynamical matrix to zero. This is useful to compute
+the phonon frequencies when half of the k-points has been
+used, by the virtue of the time-reversal symmetry (which
+may induce parasitic imaginary parts...).
+<br>
+The internal representation of this array is as follows:
+for each wavevector, the three first numbers are stored
+in the array qph2l(3,nph2l), while the fourth is stored
+in the array qnrml2(nph2l).
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="qrefine@anaddb">qrefine</a></font>
+<br><font id="mnemonics">Mnemonics: Q-point REFINEment order (experimental)</font>
+<br><font id="mnemonics">Executable: anaddb</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_PhononBands.html">PhononBands</a>.</font>
+<br><font id="smalltext">Moderately used: [1/70] in anaddb tests, [0/10] in tuto anaddb tests. Test list: {v6:[<a href="../../tests/v6/Input/t81.in">81</a>]}.</font>
+<br><font id="vartype">Variable type: integer(3)</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p>If <b>qrefine</b> is superior to 1, attempts to initialize a first set of dynamical matrices
+from the DDB file, with a q-point grid which is <a href="../../input_variables/generated_files/varset_anaddb.html#ngqpt@anaddb">ngqpt</a>
+divided by <b>qrefine</b> (e.g. ngqpt 4 4 2 qrefine 2 2 1 starts with a 2x2x2 grid).
+The dynamical matrices are interpolated onto the full <a href="../../input_variables/generated_files/varset_anaddb.html#ngqpt@anaddb">ngqpt</a>
+grid and any additional information found in the DDB file is imposed, before proceeding
+to normal band structure and other interpolations. Should implement Gaal-Nagy's algorithm in
+PRB <b>73</b> 014117.
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="ramansr@anaddb">ramansr</a></font>
+<br><font id="mnemonics">Mnemonics: RAMAN Sum-Rule</font>
+<br><font id="mnemonics">Executable: anaddb</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_nonlinear.html">nonlinear</a>.</font>
+<br><font id="smalltext">Moderately used: [3/70] in anaddb tests, [1/10] in tuto anaddb tests. Test list: {tutorespfn:[<a href="../../tests/tutorespfn/Input/tnlo_5.in">nlo_5</a>],v4:[<a href="../../tests/v4/Input/t54.in">54</a>],v8:[<a href="../../tests/v8/Input/t49.in">49</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p>Govern the imposition of the sum-rule on the Raman tensors.
+<br>
+As in the case of the Born effective charges, the first-order derivatives
+of the linear dielectric susceptibility with respect to an atomic displacement
+must vanish when they are summed over all atoms. This sum rule is broken
+in most calculations. By putting <b>ramansr</b> equal to 1 or 2, this sum
+rule is imposed by giving each atom a part of the discrepancy.
+<ul>
+  <li>0 =&gt; no sum rule is imposed;</li>
+  <li>1 =&gt; impose the sum rule on the Raman tensors, giving each
+atom an equal part of the discrepancy;</li>
+  <li>2 =&gt; impose the sum rule on the Raman tensors, giving each
+atom a part of the discrepancy proportional to the magnitude of its
+contribution to the Raman tensor.</li>
+</ul>
+For the time being, <b>ramansr</b>=1 is the preferred choice.
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="relaxat@anaddb">relaxat</a></font>
+<br><font id="mnemonics">Mnemonics: RELAXation of AToms</font>
+<br><font id="mnemonics">Executable: anaddb</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_ConstrainedPol.html">ConstrainedPol</a>.</font>
+<br><font id="smalltext">Moderately used: [3/70] in anaddb tests, [0/10] in tuto anaddb tests. Test list: {v4:[<a href="../../tests/v4/Input/t71.in">71</a>,<a href="../../tests/v4/Input/t74.in">74</a>,<a href="../../tests/v4/Input/t77.in">77</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p>If <b>relaxat</b>=1, relax atomic positions during a
+structural relaxation at constrained polarization.
+See <a href="../../input_variables/generated_files/varset_anaddb.html#polflag@anaddb">polflag</a>.
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="relaxstr@anaddb">relaxstr</a></font>
+<br><font id="mnemonics">Mnemonics: RELAXation of STRain</font>
+<br><font id="mnemonics">Executable: anaddb</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_ConstrainedPol.html">ConstrainedPol</a>.</font>
+<br><font id="smalltext">Moderately used: [3/70] in anaddb tests, [0/10] in tuto anaddb tests. Test list: {v4:[<a href="../../tests/v4/Input/t71.in">71</a>,<a href="../../tests/v4/Input/t74.in">74</a>,<a href="../../tests/v4/Input/t77.in">77</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p>If <b>relaxat</b>=1, relax lattice constants
+(lengths/angles) during a structural relaxation
+ at constrained polarization. See <a href="../../input_variables/generated_files/varset_anaddb.html#polflag@anaddb">polflag</a>.
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="rfmeth@anaddb">rfmeth</a></font>
+<br><font id="mnemonics">Mnemonics: Response-Function METHod</font>
+<br><font id="mnemonics">Executable: anaddb</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_Phonons.html">Phonons</a>.</font>
+<br><font id="smalltext">Moderately used: [8/70] in anaddb tests, [2/10] in tuto anaddb tests. Test list: {tutorespfn:[<a href="../../tests/tutorespfn/Input/tffield_3.in">ffield_3</a>,<a href="../../tests/tutorespfn/Input/tnlo_5.in">nlo_5</a>],v4:[<a href="../../tests/v4/Input/t54.in">54</a>,<a href="../../tests/v4/Input/t71.in">71</a>,<a href="../../tests/v4/Input/t77.in">77</a>],v8:[<a href="../../tests/v8/Input/t49.in">49</a>,<a href="../../tests/v8/Input/t50.in">50</a>,<a href="../../tests/v8/Input/t64.in">64</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 1</font>
+<br><font id="text">
+<p>
+<p>Select a particular set of Data Blocks in the DDB.
+(PRESENTLY, ONLY OPTION 1 IS AVAILABLE)
+<br>
+<ul>
+  <li> 1 =&gt; Blocks obtained by a non-stationary formulation.</li>
+  <li> 2 =&gt; Blocks obtained by a stationary formulation.</li>
+</ul>
+For more detailed explanations, see <a href="../../users/generated_files/help_abinit.html#">abinit help file</a>
+If the information in the DDB is available, always use
+the option 2. If not, you can try option 1, which is less accurate.
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="rifcsph@anaddb">rifcsph</a></font>
+<br><font id="mnemonics">Mnemonics: Radius of the Interatomic Force Constant SPHere</font>
+<br><font id="mnemonics">Executable: anaddb</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_PhononBands.html">PhononBands</a>.</font>
+<br><font id="smalltext">Moderately used: [1/70] in anaddb tests, [0/10] in tuto anaddb tests. Test list: {v5:[<a href="../../tests/v5/Input/t95.in">95</a>]}.</font>
+<br><font id="vartype">Variable type: real</font>
+<br><font id="default">Default is zero</font>
+<br><font id="text">
+<p>
+<p>Cut-off radius for the sphere for
+interatomic force constant, see also the alternative <a href="../../input_variables/generated_files/varset_anaddb.html#nsphere@anaddb">nsphere</a>.
+If <b>rifcsph</b>= 0: maximum extent allowed by the grid .
+
+<p>This number defines the atoms for which the
+short range part of the interatomic force constants, after
+imposition of the acoustic sum rule, will not be put to zero.
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="selectz@anaddb">selectz</a></font>
+<br><font id="mnemonics">Mnemonics: SeLECT Z</font>
+<br><font id="mnemonics">Executable: anaddb</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_Phonons.html">Phonons</a>.</font>
+<br><font id="smalltext">Moderately used: [7/70] in anaddb tests, [1/10] in tuto anaddb tests. Test list: {tutorespfn:[<a href="../../tests/tutorespfn/Input/tnlo_5.in">nlo_5</a>],v4:[<a href="../../tests/v4/Input/t54.in">54</a>,<a href="../../tests/v4/Input/t71.in">71</a>,<a href="../../tests/v4/Input/t77.in">77</a>],v8:[<a href="../../tests/v8/Input/t49.in">49</a>,<a href="../../tests/v8/Input/t50.in">50</a>,<a href="../../tests/v8/Input/t64.in">64</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p>Select some parts of the effective charge tensor.
+(This is done after the application or non-application of the ASR for
+effective charges). The transformed effective charges are then used for
+all the subsequent calculations. <br>
+<ul>
+ <li> 0 => The effective charge tensor is left as it is.</li>
+ <li> 1 => For each atom, the effective charge tensor is made
+        isotropic, by calculating the trace of the matrix,
+        dividing it by 3, and using this number in a
+        diagonal effective charge tensor. </li>
+ <li> 2 => For each atom, the effective charge tensor is made
+        symmetric, by simply averaging on symmetrical elements.<li>
+</ul>
+<p>
+Note: this is for analysis the effect of anisotropy
+in the effective charge. The result with non-zero <b>selectz</b>
+are unphysical.</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="symdynmat@anaddb">symdynmat</a></font>
+<br><font id="mnemonics">Mnemonics: SYMmetrize the DYNamical MATrix</font>
+<br><font id="mnemonics">Executable: anaddb</font>
+<br><font id="characteristic">Mentioned in topics: <a href="../../topics/generated_files/topic_Phonons.html">Phonons</a>, <a href="../../topics/generated_files/topic_PhononBands.html">PhononBands</a>.</font>
+<br><font id="smalltext">Moderately used: [12/70] in anaddb tests, [0/10] in tuto anaddb tests. Tuto test list: {}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 1 (Comment: (was 0 before v5.3))</font>
+<br><font id="text">
+<p>
+<p>If <b>symdynmat</b> is equal to 1, the dynamical matrix
+is symmetrized before the diagonalization.
+<br>
+This is especially useful when the set of primitive vectors of the unit cell
+and their opposite do not reflect the symmetries of the Bravais lattice
+(typical case: body-centered tetragonal lattices ; FCC and BCC lattices
+might be treated with the proper setting of the
+<a href="../../input_variables/generated_files/varset_anaddb.html#brav@anaddb">brav</a> variable), and the interpolation
+procedure based on interatomic force constant is used: there are some
+slight symmetry breaking effects. The latter can be bypassed by this
+additional symmetrization.
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="symgkq@anaddb">symgkq</a></font>
+<br><font id="mnemonics">Mnemonics: SYMmetrize the GKk matrix elements for each Q</font>
+<br><font id="mnemonics">Executable: anaddb</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_ElPhonInt.html">ElPhonInt</a>.</font>
+<br><font id="smalltext">Moderately used: [1/70] in anaddb tests, [0/10] in tuto anaddb tests. Test list: {v5:[<a href="../../tests/v5/Input/t90.in">90</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 1</font>
+<br><font id="text">
+<p>
+<p>If <b>symgkq</b> is equal to 1, the electron-phonon matrix elements are symmetrized
+over the small group of the q-point they correspond to. This should always be used,
+except for debugging or test purposes.
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="targetpol@anaddb">targetpol</a></font>
+<br><font id="mnemonics">Mnemonics: TARGET POLarization</font>
+<br><font id="mnemonics">Executable: anaddb</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_ConstrainedPol.html">ConstrainedPol</a>.</font>
+<br><font id="smalltext">Moderately used: [2/70] in anaddb tests, [0/10] in tuto anaddb tests. Test list: {v4:[<a href="../../tests/v4/Input/t71.in">71</a>,<a href="../../tests/v4/Input/t77.in">77</a>]}.</font>
+<br><font id="vartype">Variable type: real(3)</font>
+<br><font id="default">Default is 0.0</font>
+<br><font id="text">
+<p>
+<p>Target value of the polarization in cartesian
+coordinates and in C/m^2.
+See <a href="../../input_variables/generated_files/varset_anaddb.html#polflag@anaddb">polflag</a>.
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="telphint@anaddb">telphint</a></font>
+<br><font id="mnemonics">Mnemonics: Technique for ELectron-PHonon INTegration</font>
+<br><font id="mnemonics">Executable: anaddb</font>
+<br><font id="characteristic">Mentioned in topics: <a href="../../topics/generated_files/topic_ElPhonTransport.html">ElPhonTransport</a>, <a href="../../topics/generated_files/topic_PhononWidth.html">PhononWidth</a>.</font>
+<br><font id="smalltext">Moderately used: [7/70] in anaddb tests, [3/10] in tuto anaddb tests. Test list: {tutorespfn:[<a href="../../tests/tutorespfn/Input/tdepes_2.in">depes_2</a>,<a href="../../tests/tutorespfn/Input/teph_5.in">eph_5</a>,<a href="../../tests/tutorespfn/Input/teph_6.in">eph_6</a>],v5:[<a href="../../tests/v5/Input/t92.in">92</a>],v6:[<a href="../../tests/v6/Input/t57.in">57</a>,<a href="../../tests/v6/Input/t59.in">59</a>,<a href="../../tests/v6/Input/t69.in">69</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 1</font>
+<br><font id="text">
+<p>
+<p>Flag controlling the Fermi surface integration
+technique used for electron-phonon quantities.
+<ul>
+  <li>0 = tetrahedron method (no adjustable parameter)</li>
+  <li>1 = Gaussian smearing (see <a href="../../input_variables/generated_files/varset_anaddb.html#elphsmear@anaddb">elphsmear</a>)</li>
+  <li>2 = uniformly weighted band window between <a href="../../input_variables/generated_files/varset_anaddb.html#ep_b_min@anaddb">ep_b_min</a> and <a href="../../input_variables/generated_files/varset_anaddb.html#ep_b_max@anaddb">ep_b_max</a>, for all k-points</li>
+</ul>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="temperinc@anaddb">temperinc</a></font>
+<br><font id="mnemonics">Mnemonics: TEMPERature INCrease</font>
+<br><font id="mnemonics">Executable: anaddb</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_Temperature.html">Temperature</a>.</font>
+<br><font id="smalltext">Moderately used: [3/70] in anaddb tests, [3/10] in tuto anaddb tests. Test list: {tutorespfn:[<a href="../../tests/tutorespfn/Input/tdepes_2.in">depes_2</a>,<a href="../../tests/tutorespfn/Input/teph_6.in">eph_6</a>,<a href="../../tests/tutorespfn/Input/trf2_7.in">rf2_7</a>]}.</font>
+<br><font id="vartype">Variable type: real</font>
+<br><font id="default">Default is 100.0</font>
+<br><font id="text">
+<p>
+<p>Increment of the temperature in Kelvin, for thermodynamical and el-phon
+transport properties. See the associated
+<a href="../../input_variables/generated_files/varset_anaddb.html#tempermin@anaddb">tempermin</a> and <a href="../../input_variables/generated_files/varset_anaddb.html#ntemper@anaddb">ntemper</a> variables.
+The default temperature grid goes from 100K to 1000K by step of 100K. For the largest temperatures, for most solids, anharmonic effects not accounted in the harmonic approximation implemented in anaddb will be important. For weakly bounded systems (e.g. Van der Waals solids), such anharmonic effects might be important already at room temperature.
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="tempermin@anaddb">tempermin</a></font>
+<br><font id="mnemonics">Mnemonics: TEMPERature MINimum</font>
+<br><font id="mnemonics">Executable: anaddb</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_Temperature.html">Temperature</a>.</font>
+<br><font id="smalltext">Moderately used: [3/70] in anaddb tests, [3/10] in tuto anaddb tests. Test list: {tutorespfn:[<a href="../../tests/tutorespfn/Input/tdepes_2.in">depes_2</a>,<a href="../../tests/tutorespfn/Input/teph_6.in">eph_6</a>,<a href="../../tests/tutorespfn/Input/trf2_7.in">rf2_7</a>]}.</font>
+<br><font id="vartype">Variable type: real</font>
+<br><font id="default">Default is 100.0</font>
+<br><font id="text">
+<p>
+<p>Lowest temperature (Kelvin) at which the thermodynamical quantities
+have to be evaluated. Cannot be zero when <a href="../../input_variables/generated_files/varset_anaddb.html#thmflag@anaddb">thmflag</a> is 1.
+<p>The highest temperature is defined using
+<a href="../../input_variables/generated_files/varset_anaddb.html#temperinc@anaddb">temperinc</a> and <a href="../../input_variables/generated_files/varset_anaddb.html#ntemper@anaddb">ntemper</a>.
+The default temperature grid goes from 100K to 1000K by step of 100K. For the largest temperatures, for most solids, anharmonic effects not accounted in the harmonic approximation implemented in anaddb will be important. For weakly bounded systems (e.g. Van der Waals solids),
+such anharmonic effects might be important already at room temperature.
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="thmflag@anaddb">thmflag</a></font>
+<br><font id="mnemonics">Mnemonics: THerMal FLAG</font>
+<br><font id="mnemonics">Executable: anaddb</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_Temperature.html">Temperature</a>.</font>
+<br><font id="smalltext">Moderately used: [18/70] in anaddb tests, [3/10] in tuto anaddb tests. Tuto test list: {tutorespfn:[<a href="../../tests/tutorespfn/Input/tdepes_2.in">depes_2</a>,<a href="../../tests/tutorespfn/Input/tnlo_5.in">nlo_5</a>,<a href="../../tests/tutorespfn/Input/trf2_7.in">rf2_7</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p>Flag controlling the calculation of thermal quantities.
+
+<ul>
+<li>When <b>thmflag</b> == 1, the code will compute, using the histogram method:
+<ul>
+<li> the normalized phonon DOS </li>
+<li> the phonon internal energy, free energy,
+       entropy, constant volume heat capacity
+       as a function of the temperature </li>
+<li> the Debye-Waller factors (tensors) for
+       each atom, as a function of the temperature</li>
+<li> the mean-square velocity tensor for each atom, as a function of temperature </li>
+<li> the "average frequency"
+       as a function of the temperature
+</ul> </li>
+<li>When <b>thmflag</b> == 2, all the phonon frequencies for the
+q points in the second grid are printed. </li>
+
+<li>When <b>thmflag</b> == 3, 5 or 7, the thermal corrections to the electronic eigenvalues are calculated.
+If <b>thmflag</b>==3, the list of phonon wavevector from the first list is used (with equal weight for all wavevectors in this list),
+while if <b>thmflag</b>==5 or 7, the first grid of wavevectors is used,
+possibly folded to the irreducible Brillouin Zone if symmetry operations are present,
+or if they are recomputed (this happens for <b>thmflag</b>==7).</li>
+<li>When <b>thmflag</b> == 4 or 6, the temperature broadening (electron lifetime) of the electronic eigenvalues is calculated.
+If <b>thmflag</b>==4, the list of phonon wavevector from the first list is used (with equal weight for all wavevectors in this list),
+while if <b>thmflag</b>==6, the first grid of wavevectors is used, possibly folded to the irreducible Brillouin Zone
+if symmetry operations are present or if they are recomputed (this happens for <b>thmflag</b>==8).</li>
+</ul>
+WARNING: The use of symmetries for the temperature dependence of the eigenenergies is tricky ! It can only be valid
+ for the  k points that respect the symmetries (i.e. the Gamma point), provided one also averages over the
+degenerate states.
+<br>
+
+<p>
+Input variables that may be needed if this flag is activated:
+<a href="../../input_variables/generated_files/varset_anaddb.html#dostol@anaddb">dostol</a>, <a href="../../input_variables/generated_files/varset_anaddb.html#nchan@anaddb">nchan</a>, <a href="../../input_variables/generated_files/varset_anaddb.html#ntemper@anaddb">ntemper</a>, <a href="../../input_variables/generated_files/varset_anaddb.html#temperinc@anaddb">temperinc</a>, <a href="../../input_variables/generated_files/varset_anaddb.html#tempermin@anaddb">tempermin</a>,
+as well as the wavevector grid number 2 definition,  <a href="../../input_variables/generated_files/varset_anaddb.html#ng2qpt@anaddb">ng2qpt</a>, <a href="../../input_variables/generated_files/varset_anaddb.html#ngrids@anaddb">ngrids</a>, <a href="../../input_variables/generated_files/varset_anaddb.html#q2shft@anaddb">q2shft</a>.
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="thmtol@anaddb">thmtol</a></font>
+<br><font id="mnemonics">Mnemonics: THerModynamic TOLerance</font>
+<br><font id="mnemonics">Executable: anaddb</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_Temperature.html">Temperature</a>.</font>
+<br><font id="smalltext">Moderately used: [7/70] in anaddb tests, [1/10] in tuto anaddb tests. Test list: {tutorespfn:[<a href="../../tests/tutorespfn/Input/trf2_7.in">rf2_7</a>],v2:[<a href="../../tests/v2/Input/t15.in">15</a>,<a href="../../tests/v2/Input/t16.in">16</a>],v4:[<a href="../../tests/v4/Input/t54.in">54</a>,<a href="../../tests/v4/Input/t71.in">71</a>],v5:[<a href="../../tests/v5/Input/t22.in">22</a>],v8:[<a href="../../tests/v8/Input/t49.in">49</a>]}.</font>
+<br><font id="vartype">Variable type: real</font>
+<br><font id="default">Default is 0.05</font>
+<br><font id="text">
+<p>
+<p>The relative tolerance on the thermodynamical functions
+This number will determine when the series of channel widths
+with which the DOS is calculated can be stopped, i.e.
+the mean of the relative change going from one grid
+to the next bigger is smaller than <b>thmtol</b>.
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="use_k_fine@anaddb">use_k_fine</a></font>
+<br><font id="mnemonics">Mnemonics: USE K-grid FINEr than the coarse k-grid</font>
+<br><font id="mnemonics">Executable: anaddb</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_PhononWidth.html">PhononWidth</a>.</font>
+<br><font id="smalltext">Moderately used: [1/70] in anaddb tests, [0/10] in tuto anaddb tests. Test list: {v6:[<a href="../../tests/v6/Input/t77.in">77</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p>When set, <a href="../../input_variables/generated_files/varset_anaddb.html#kptrlatt_fine@anaddb">kptrlatt_fine</a> is suggested to be given. For the present version, both eigenvalues (densergridGKK, obtained from mrggkk with only the GS WFK file) and electronic velocities(GKK files from DDK calculation) are needed. Note that the coarse k-grid must be a subset of the fine k-grid.
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="vs_qrad_tolkms@anaddb">vs_qrad_tolkms</a></font>
+<br><font id="mnemonics">Mnemonics: Speed of Sound Q-radius, TOLerance KiloMeter/Second</font>
+<br><font id="mnemonics">Executable: anaddb</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_PhononBands.html">PhononBands</a>.</font>
+<br><font id="smalltext">Moderately used: [1/70] in anaddb tests, [0/10] in tuto anaddb tests. Test list: {v8:[<a href="../../tests/v8/Input/t45.in">45</a>]}.</font>
+<br><font id="vartype">Variable type: real(2)</font>
+<br><font id="default">Default is 2*0.0d0</font>
+<br><font id="text">
+<p>
+<p>This variable activates the calculation of the speed of sound
+(requires <a href="../../input_variables/generated_files/varset_anaddb.html#ifcflag@anaddb">ifcflag</a> = 1).
+The first entry of the array defines the radius of the small sphere around the Gamma point (Bohr-1).
+The second entry gives the absolute tolerance in kilometer/second.
+The speed of sound is evaluated by performing a spherical average on the small sphere using
+Lebedev-Laikov grids (typical values for q-radius: 0.1 Bohr-1)
+The number of radial points is increased until the integration converges twice withing the tolerance
+specified by the user (typical values for tolkms: 0.05 km/s).
+<p>The default values will not work.
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+<script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
+
+</body>
+</html>
+

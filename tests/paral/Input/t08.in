@@ -97,4 +97,5 @@ autoparal 1
 #%%      # With 2  procs, should be: npkpt 2, npimage 1
 #%%      # With 4  procs, should be: npkpt 4, npimage 1
 #%%      # With 10 procs, should be: npkpt 2, npimage 5
+#%% topics = parallelism, TransPath
 #%%<END TEST_INFO>

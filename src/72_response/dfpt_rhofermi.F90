@@ -155,7 +155,7 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
  use m_pawfgrtab,   only : pawfgrtab_type
  use m_pawrhoij,    only : pawrhoij_type, pawrhoij_init_unpacked, pawrhoij_gather, &
 &                          pawrhoij_alloc, pawrhoij_free, pawrhoij_nullify, &
-&                          pawrhoij_free_unpacked, pawrhoij_mpisum_unpacked
+&                          pawrhoij_free_unpacked, pawrhoij_mpisum_unpacked, pawrhoij_get_nspden
  use m_pawcprj,     only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_get
  use m_pawdij,      only : pawdijfr
  use m_pawfgr,      only : pawfgr_type
@@ -330,7 +330,7 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
    if (paral_atom) then
      ABI_DATATYPE_ALLOCATE(pawrhoijfermi_unsym,(natom))
      cplex_rhoij=max(cplex,dtset%pawcpxocc)
-     nspden_rhoij=dtset%nspden;if (dtset%pawspnorb>0.and.dtset%nspinor==2) nspden_rhoij=4
+     nspden_rhoij=pawrhoij_get_nspden(dtset%nspden,dtset%nspinor,dtset%pawspnorb)
      call pawrhoij_alloc(pawrhoijfermi_unsym,cplex_rhoij,nspden_rhoij,dtset%nspinor,&
 &     dtset%nsppol,dtset%typat,pawtab=pawtab,use_rhoijp=0,use_rhoij_=1)
    else
@@ -533,14 +533,14 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
        if (ipert==natom+3) istr=idir
        if (ipert==natom+4) istr=idir+3
        call status(counter,dtfil%filstat,iexit,level,'call kpgstr   ')
-       call kpgstr(dkinpw,dtset%ecut,dtset%ecutsm,dtset%effmass,gmet,gprimd,istr,&
+       call kpgstr(dkinpw,dtset%ecut,dtset%ecutsm,dtset%effmass_free,gmet,gprimd,istr,&
 &       kg_k,kpoint,npw_k)
      end if
 
 !    Compute (1/2) (2 Pi)**2 (k+q+G)**2:
      call status(counter,dtfil%filstat,iexit,level,'call mkkin(1) ')
-!     call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass,gmet,kg1_k,kinpw1,kpq,npw1_k)
-     call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass,gmet,kg1_k,kinpw1,kpq,npw1_k,0,0)
+!     call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass_free,gmet,kg1_k,kinpw1,kpq,npw1_k)
+     call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass_free,gmet,kg1_k,kinpw1,kpq,npw1_k,0,0)
 
 !    ===== Load the k/k+q dependent parts of the Hamiltonian
 

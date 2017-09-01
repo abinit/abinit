@@ -42,4 +42,5 @@
 #%%   MgO FCC crystal, with low cut-off, and 32 k points.
 #%%   Pseudopotentials WITHOUT a non-linear core correction.
 #%%   Prepare the Bader density analysis
+#%% topics = Bader
 #%%<END TEST_INFO>

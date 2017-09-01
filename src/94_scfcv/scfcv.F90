@@ -203,7 +203,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
  use m_paw_ij,           only : paw_ij_type, paw_ij_init, paw_ij_free, paw_ij_nullify,&
 &                               paw_ij_reset_flags
  use m_paw_dmft,         only : paw_dmft_type
- use m_fock,             only : fock_type,fock_init,fock_destroy,fock_update_exc,fock_updatecwaveocc
+ use m_fock,             only : fock_type,fock_init,fock_destroy,fock_ACE_destroy,fock_update_exc,fock_updatecwaveocc
  use gwls_hamiltonian,   only : build_vxc
 #if defined HAVE_BIGDFT
  use BigDFT_API,         only : cprj_clean,cprj_paw_alloc
@@ -229,6 +229,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
  use interfaces_62_poisson
  use interfaces_65_paw
  use interfaces_66_nonlocal
+ use interfaces_66_wfs
  use interfaces_67_common
  use interfaces_68_recursion
  use interfaces_68_rsprc
@@ -632,8 +633,8 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
    if(any(abs(dtset%nucdipmom)>tol8)) then
      has_dijnd=1; req_cplex_dij=2
    end if
-   call paw_an_init(paw_an,dtset%natom,dtset%ntypat,0,dtset%nspden,cplex,dtset%pawxcdev,&
-&   dtset%typat,pawang,pawtab,has_vxc=1,has_vxc_ex=1,has_vhartree=has_vhartree,&
+   call paw_an_init(paw_an,dtset%natom,dtset%ntypat,0,dtset%nspden,&
+&   cplex,dtset%pawxcdev,dtset%typat,pawang,pawtab,has_vxc=1,has_vxc_ex=1,has_vhartree=has_vhartree,&
 &   comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
    call paw_ij_init(paw_ij,cplex,dtset%nspinor,dtset%nsppol,dtset%nspden,&
 &   dtset%pawspnorb,dtset%natom,dtset%ntypat,dtset%typat,pawtab,&
@@ -1085,6 +1086,12 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
      hybrid_mixing=fock%hybrid_mixing ; hybrid_mixing_sr=fock%hybrid_mixing_sr
      ! Update data relative to the occupied states in fock
      call fock_updatecwaveocc(cg,cprj,dtset,fock,energies%e_exactX,indsym,istep,mcg,mcprj,mpi_enreg,nattyp,npwarr,occ,ucvol)
+     if(fock%use_ACE/=0) then
+       call fock2ACE(cg,cprj,fock,kg,dtset%kptns,dtset%mband,mcg,mcprj,dtset%mgfft,dtset%mkmem,mpi_enreg,psps%mpsang,&
+&       dtset%mpw,dtset%natom,dtset%natom,dtset%nband,dtset%nfft,ngfft,dtset%nkpt,dtset%nloalg,npwarr,dtset%nspden,&
+&       dtset%nspinor,dtset%nsppol,dtset%nsym,dtset%ntypat,occ,dtset%optforces,paw_ij,pawtab,ph1d,psps,rprimd,&
+&       dtset%optstress,fock%symrec,dtset%typat,usecprj,dtset%use_gpu_cuda,dtset%wtk,xred,ylm,ylmgr)
+     end if
    end if ! usefock
 
 !  Initialize/update data in the electron-positron case
@@ -2064,8 +2071,12 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
 
 ! Deallocate exact exchange data at the end of the calculation
  if (usefock==1) then
+   if (fock%use_ACE/=0) then     
+     call fock_ACE_destroy(fock%fockACE)
+   end if
    call fock_destroy(fock)
    nullify(fock)
+   
  end if
 
  if (prtxml == 1) then

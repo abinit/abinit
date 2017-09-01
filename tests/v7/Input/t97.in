@@ -64,5 +64,6 @@ prteig 0
 #%%   Both the pair-wise term and the 3-body term are included
 #%%   In this test the following properties are thus tested: contribution
 #%%   to the energy and to the stress of DFT-D3 including the 3-body term
+#%% topics = vdw
 #%%<END TEST_INFO>
 

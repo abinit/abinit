@@ -1,0 +1,21 @@
+- !components 
+    name      : positron 
+    keyword   : Positron 
+    authors   : MT
+    howto     : set parameters for a calculation with a positron in the system.
+    header    : default
+    title     : <h1>Positron calculations</h1>
+    subtitle  : default
+    copyright : default
+    links     : default
+    introduction : |- 
+         <p> The lifetime of positrons and their annihilation rate can be computed,
+         using the self-consistent two-component DFT, including force and stress computation,
+         LDA and GGA, norm-conserving as well as PAW [[Wiktor2015]].
+         Doppler broadening can also be computed.
+         The details of of the way to perform such calculations is given in the description of the [[positron]] input variable, as well as in [[lesson_positron|the lesson on electron-positron annihilation]].
+         <p> Examples can be found in [[Wiktor2013]],[[Wiktor2014]],[[Wiktor2014a]] and [[Wiktor2014b]].
+    tutorials : |
+         <li>[[lesson_positron|The lesson on electron-positron annihilation]]
+    end : default
+ 

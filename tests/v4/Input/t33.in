@@ -75,4 +75,5 @@ phimax   1.57079632679    #
 #%%   shared by Oxygen and Magnesium atoms. By contrast, the
 #%%   middle of the segment connecting the Mg atoms is, as expected,
 #%%   close to a Bond Critical Point.
+#%% topics = Bader
 #%%<END TEST_INFO>

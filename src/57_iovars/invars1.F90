@@ -524,6 +524,10 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'kptopt',tread,'INT')
  if(tread==1) dtset%kptopt=intarr(1)
 
+ dtset%qptopt=1
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'qptopt',tread,'INT')
+ if(tread==1) dtset%qptopt=intarr(1)
+
  iscf=5
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'iscf',tread,'INT')
  if(tread==1) iscf=intarr(1)

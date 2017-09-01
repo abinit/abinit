@@ -2721,7 +2721,8 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
  ! if (psps%usepaw==1.and.iscf_mod>0) then
  !   if (paral_atom) then
  !     ABI_DATATYPE_ALLOCATE(pawrhoij1_unsym,(natom))
- !     cplex_rhoij=max(cplex,dtset%pawcpxocc);nspden_rhoij=nspden
+ !     cplex_rhoij=max(cplex,dtset%pawcpxocc)
+ !     nspden_rhoij=pawrhoij_get_nspden(dtset%nspden,dtset%nspinor,dtset%pawspnorb)
  !     call pawrhoij_alloc(pawrhoij1_unsym,cplex_rhoij,nspden_rhoij,nspinor,&
  !       dtset%nsppol,dtset%typat,pawtab=pawtab,use_rhoijp=0,use_rhoij_=1)
  !   else

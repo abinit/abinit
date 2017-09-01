@@ -49,4 +49,5 @@ qph2l 0.0 0.0 1.0 0.0  ! why here the normalization factor is 0
 #%%   piezoelectric (d, g, h tensors), free-stress dielectric tensor, elastic
 #%%   tensors at fixed displacement filed and elastic tensor with stress correction
 #%%   are the new abilities of anaddb.
+#%% topics = Elastic
 #%%<END TEST_INFO>

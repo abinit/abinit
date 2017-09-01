@@ -68,4 +68,5 @@
 #%% description = 
 #%%   Bi atom in a big supercell.
 #%%   Test the application of a Zeeman field.
+#%% topics = MagField
 #%%<END TEST_INFO>

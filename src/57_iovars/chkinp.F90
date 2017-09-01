@@ -737,7 +737,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 !  eph variables
    if (optdriver==RUNL_EPH) then
      cond_string(1)='optdriver' ; cond_values(1)=RUNL_EPH
-     call chkint_eq(1,1,cond_string,cond_values,ierr,'eph_task',dt%eph_task,5,[0,1,2,3,4],iout)
+     call chkint_eq(1,1,cond_string,cond_values,ierr,'eph_task',dt%eph_task,6,[0,1,2,3,4,5],iout)
 
      if (any(dt%ddb_ngqpt <= 0)) then
        MSG_ERROR_NOSTOP("ddb_ngqpt must be specified when performing EPH calculations.", ierr)
@@ -864,23 +864,18 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
      end if
    end if
 
-!  gwls_sternheimer_kmax
-   call chkint_ge(0,0,cond_string,cond_values,ierr,'gwls_sternheimer_kmax',dt%gwls_sternheimer_kmax,1,iout)
+!  gwls_stern_kmax
+   call chkint_ge(0,0,cond_string,cond_values,ierr,'gwls_stern_kmax',dt%gwls_stern_kmax,1,iout)
 
 !  gwls_npt_gauss_quad
    call chkint_ge(0,0,cond_string,cond_values,ierr,'gwls_npt_gauss_quad',dt%gwls_npt_gauss_quad,1,iout)
 
-! gwls_dielectric_model
-   call chkint_ge(0,0,cond_string,cond_values,ierr,'gwls_dielectric_model',dt%gwls_dielectric_model,1,iout)
-   call chkint_le(0,0,cond_string,cond_values,ierr,'gwls_dielectric_model',dt%gwls_dielectric_model,3,iout)
+! gwls_diel_model
+   call chkint_ge(0,0,cond_string,cond_values,ierr,'gwls_diel_model',dt%gwls_diel_model,1,iout)
+   call chkint_le(0,0,cond_string,cond_values,ierr,'gwls_diel_model',dt%gwls_diel_model,3,iout)
 
 ! gwls_model_parameter
    call chkdpr(0,0,cond_string,cond_values,ierr,'gwls_model_parameter',dt%gwls_model_parameter,1,zero,iout)
-
-! gwls_second_model_parameter
-   call chkdpr(0,0,cond_string,cond_values,ierr,'gwls_second_model_parameter',  &
-   dt%gwls_second_model_parameter,1,-1000.0_dp,iout)
-
 
 ! gwls_print_debug
    call chkint_ge(0,0,cond_string,cond_values,ierr,'gwls_print_debug',dt%gwls_print_debug,0,iout)
