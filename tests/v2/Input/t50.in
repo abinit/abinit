@@ -62,4 +62,5 @@
 #%%   a difference in total energy of 0.123861d-3 Ha,
 #%%   for a difference of volume of 0.07605 Bohr**3 leading
 #%%   to a stress estimation of 1.62867d-3 Ha/Bohr**3
+#%% topics = ForcesStresses
 #%%<END TEST_INFO>

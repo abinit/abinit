@@ -116,9 +116,9 @@ subroutine ddb_io_out (dscrpt,filnam,matom,mband,&
  real(dp),intent(in) :: tsmear
  character(len=fnlen),intent(in) :: dscrpt,filnam
 !arrays
- integer,intent(in) :: nband(mkpt),ngfft(18),symafm(msym),symrel(3,3,msym)
+ integer,intent(in) :: nband(mkpt*nsppol),ngfft(18),symafm(msym),symrel(3,3,msym)
  integer,intent(in) :: typat(matom)
- real(dp),intent(in) :: acell(3),amu(mtypat),kpt(3,mkpt),occ(mband*mkpt)
+ real(dp),intent(in) :: acell(3),amu(mtypat),kpt(3,mkpt),occ(mband*mkpt*nsppol)
  real(dp),intent(in) :: rprim(3,3),spinat(3,matom),tnons(3,msym),wtk(mkpt)
  real(dp),intent(in) :: xred(3,matom),zion(mtypat),znucl(mtypat)
 
@@ -126,7 +126,7 @@ subroutine ddb_io_out (dscrpt,filnam,matom,mband,&
 !Set routine version number here:
 !scalars
  integer,parameter :: vrsio8=100401,vrsio8_old=010929,vrsio8_old_old=990527
- integer :: bantot,ii,ij,ikpt,iline,im
+ integer :: bantot,ii,ij,ikpt,iline,im,ierr
  character(len=500) :: message
 !arrays
  character(len=9) :: name(9)
@@ -134,6 +134,7 @@ subroutine ddb_io_out (dscrpt,filnam,matom,mband,&
 ! *********************************************************************
 
  DBG_ENTER("COLL")
+
 
 !Check ioddb8 version number (vrsio8) against mkddb version number
 !(vrsddb)
@@ -149,7 +150,8 @@ subroutine ddb_io_out (dscrpt,filnam,matom,mband,&
 !(version 2.1. : changed because of a bug in a Perl script
 !should set up a name checking procedure, with change of name
 !like for the output file)
- if (open_file(filnam,message,unit=unddb,status='unknown',form='formatted') /= 0) then
+ ierr = open_file(filnam,message,unit=unddb,status='unknown',form='formatted')
+ if (ierr /= 0) then
    MSG_ERROR(message)
  end if
 

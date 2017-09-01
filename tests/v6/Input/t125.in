@@ -51,4 +51,5 @@
 #%%   Test berryopt=17 (mixed finite electric field and electric displacement 
 #%%   field boundary condition, relaxing cell parameters, e.g. optcell=2)
 #%%   (XG120616 : tranferred to tests/seq)
+#%% topics = Berry
 #%%<END TEST_INFO>

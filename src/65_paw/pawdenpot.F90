@@ -822,7 +822,7 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
      end if
 
      if (option<2) then
-       call pawxpot(nspden,pawprtvol,pawrhoij(iatom),pawtab(itypat),paw_ij(iatom)%vpawx)
+       call pawxpot(ndij,pawprtvol,pawrhoij(iatom),pawtab(itypat),paw_ij(iatom)%vpawx)
        paw_ij(iatom)%has_exexch_pot=2
      end if
      if (option/=1) then

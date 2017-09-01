@@ -62,4 +62,5 @@
 #%%   Test computation of the Berry phase in PAW.
 #%%   Contributed by P. Hermet.
 #%%   WARNING : HAS BEEN TRANSFERRED TO tests/seq
+#%% topics = Berry
 #%%<END TEST_INFO>

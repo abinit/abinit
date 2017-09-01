@@ -62,4 +62,5 @@
 #%%    npband*npfft*npkpt=2*1*2=4 processors.
 #%%    In addition, we also test here various features of bandfft-kpt parallelisation
 #%%    In particular, the bandpp, istwfk=2 and wfoptalg=14 variables.
+#%% topics = parallelism
 #%%<END TEST_INFO>

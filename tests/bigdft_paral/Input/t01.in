@@ -88,4 +88,5 @@ prteig 0
 #%% keywords =  NC, WVL
 #%% description = O2 in a box (NC). ABINIT routines are used (wvl_bigdft_comp=0)
 #%% Test: DIIS, potential/density mixing and parallelism
+#%% topics = Wavelets
 #%%<END TEST_INFO>

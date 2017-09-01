@@ -378,7 +378,7 @@ def _str2filestotest(string):
         for tok in tokens[1:]:
             k, v = [s.strip() for s in tok.split("=")]
             if k in d:
-                err_msg = "Found multiple occurences of keyword %s" % k
+                err_msg = "Found multiple occurrences of keyword %s" % k
                 raise AbinitTestInfoParserError(err_msg)
             d[k] = v
         files_to_test.append(FileToTest(d))
@@ -1152,7 +1152,7 @@ def input_file_has_vars(fname, ivars, comment="#", mode="any"):
         return:
             (bool, d)
             bool is True is the input file contains the specified variables
-            d is a dictionary with the matching lines (empty dict if no occurence).
+            d is a dictionary with the matching lines (empty dict if no occurrence).
     """
     # This algorithm is not very robust as it assumes that the variable and the line
     # are placed on the same line.

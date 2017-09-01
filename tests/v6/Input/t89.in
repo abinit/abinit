@@ -64,4 +64,5 @@
 #%%   is good : one gets 149.9612 Ha.
 #%%   In dataset 5, RF is computed with frozen Fermi energy and the disagreement with
 #%%   finite-differences of datasets 1 and 3 is large: one gets 124.9787 Ha.
+#%% topics = DFPT
 #%%<END TEST_INFO>

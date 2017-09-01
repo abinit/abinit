@@ -1052,6 +1052,7 @@ end subroutine effective_potential_generateDipDip
 
 subroutine effective_potential_setCoeffs(coeffs,eff_pot,ncoeff)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -1133,6 +1134,7 @@ end subroutine effective_potential_setCoeffs
 
 subroutine effective_potential_setElastic3rd(eff_pot,elastics)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -1177,6 +1179,7 @@ end subroutine effective_potential_setElastic3rd
 !! SOURCE
 
 subroutine effective_potential_setElastic4rd(eff_pot,elastics)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1224,6 +1227,7 @@ end subroutine effective_potential_setElastic4rd
 !! SOURCE
 
 subroutine effective_potential_setStrainPhononCoupling(eff_pot,natom,phonon_strain)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

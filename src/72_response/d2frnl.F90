@@ -553,8 +553,8 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
        ABI_ALLOCATE(ddkinpw,(npw_k,3,3))
        do mu=1,3
          do nu=1,3
-!           call d2kpg(ddkinpw(:,mu,nu),dtset%ecut,dtset%ecutsm,dtset%effmass,gmet,mu,nu,kg_k,kpoint,npw_k)
-           call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass,gmet,kg_k,ddkinpw(:,mu,nu),kpoint,npw_k,mu,nu)
+!           call d2kpg(ddkinpw(:,mu,nu),dtset%ecut,dtset%ecutsm,dtset%effmass_free,gmet,mu,nu,kg_k,kpoint,npw_k)
+           call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass_free,gmet,kg_k,ddkinpw(:,mu,nu),kpoint,npw_k,mu,nu)
          end do
        end do
      end if
@@ -756,9 +756,10 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
                call nonlop(choice_efmas,cpopt,cwaveprj,enlout_efmas,gs_ham,idir,(/eig_k/),mpi_enreg,&
                1,nnlout_efmas,paw_opt_efmas,signs,gs2c,tim_nonlop,cwavef,gh2c)
                do ispinor=1,dtset%nspinor
+                 ii = 1+(ispinor-1)*npw_k
                  do icplx=1,2
-                   gh2c(icplx,1+(ispinor-1)*npw_k:ispinor*npw_k) = gh2c(icplx,1+(ispinor-1)*npw_k:ispinor*npw_k) +  &
-&                   ddkinpw(1:npw_k,mu,nu)*cwavef(icplx,1+(ispinor-1)*npw_k:ispinor*npw_k)
+                   gh2c(icplx,ii:ispinor*npw_k) = gh2c(icplx,ii:ispinor*npw_k) +  &
+&                   ddkinpw(1:npw_k,mu,nu)*cwavef(icplx,ii:ispinor*npw_k)
                  end do
                end do
                gh2c = gh2c - eig_k*gs2c

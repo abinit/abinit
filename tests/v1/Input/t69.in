@@ -87,4 +87,5 @@
 #%%   With the values acell 22, ecut 3.5, nband2 22, ABINIT 
 #%%   generates KS diff=3.40eV , TDLDA(1S1P)=4.35eV, TDLDA(1S3P)=2.77eV
 #%%   Vasiliev gets KS diff=3.39eV, TDLDA(1S1P)=4.34eV, TDLDA(1S3P)=2.79eV
+#%% topics = TDDFT
 #%%<END TEST_INFO>

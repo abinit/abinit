@@ -98,8 +98,8 @@ subroutine pawprt(dtset,my_natom,paw_ij,pawrhoij,pawtab,&
 !Local variables-------------------------------
 !scalars
  integer,parameter :: natmax=2
- integer :: group1,group2,iat,iatom,ierr,ii,im1,im2,ipositron,irhoij,ispden
- integer :: i_unitfi,itypat,jrhoij,ll,llp,me_atom,my_comm_atom,natprt,nspden,nsppol
+ integer :: cplex_dij,group1,group2,iat,iatom,ierr,ii,im1,im2,ipositron,irhoij,ispden
+ integer :: i_unitfi,itypat,jrhoij,ll,llp,me_atom,my_comm_atom,natprt,ndij,nspden,nsppol
  integer :: optsym,sz1,sz2,unitfi,unt
  real(dp) :: mnorm,mx,my,mz,ntot,valmx,localm
  logical,parameter :: debug=.false.
@@ -215,25 +215,26 @@ subroutine pawprt(dtset,my_natom,paw_ij,pawrhoij,pawtab,&
        if (((unt==1).and.(dtset%enunit==0.or.dtset%enunit==2)).or.&
 &       ((unt==2).and.(dtset%enunit==1.or.dtset%enunit==2))) then
          do iat=1,natprt
-           iatom=jatom(iat);nspden=paw_ij_all(iatom)%ndij
-           optsym=2;if (paw_ij_all(iatom)%cplex_dij==2.and.dtset%nspinor==1) optsym=1
-           do ispden=1,nspden
+           iatom=jatom(iat);nspden=paw_ij_all(iatom)%nspden;ndij=paw_ij_all(iatom)%ndij
+           cplex_dij=paw_ij_all(iatom)%cplex_dij
+           optsym=2;if (cplex_dij==2.and.dtset%nspinor==1) optsym=1
+           do ispden=1,ndij
              valmx=100._dp;if (ispden==1) valmx=-1._dp
              msg='' ; msg0=''
-             if (dtset%natom>1.or.nspden>1) write(msg0, '(a,i3)' ) ' Atom #',iatom
-             if (nspden==1) write(msg,'(a)')     trim(msg0)
+             if (dtset%natom>1.or.nspden>1.or.ndij==4) write(msg0, '(a,i3)' ) ' Atom #',iatom
+             if (nspden==1.and.ndij/=4) write(msg,'(a)')     trim(msg0)
              if (nspden==2) write(msg,'(2a,i1)') trim(msg0),' - Spin component ',ispden
-             if (nspden==4) write(msg,'(3a)')    trim(msg0),' - Component ',trim(dspin1(ispden+2*(nspden/4)))
-             if (dtset%natom>1.or.nspden>1) then
+             if (ndij==4) write(msg,'(3a)')    trim(msg0),' - Component ',trim(dspin1(ispden+2*(ndij/4)))
+             if (dtset%natom>1.or.nspden>1.or.ndij==4) then
                call wrtout(unitfi,msg,'COLL')
              end if
-             if (nspden/=4.or.ispden<=2) then
+             if (ndij/=4.or.ispden<=2) then
                call pawio_print_ij(unitfi,paw_ij_all(iatom)%dij(:,ispden),paw_ij_all(iatom)%lmn2_size,&
-&               paw_ij_all(iatom)%cplex_dij,paw_ij_all(iatom)%lmn_size,-1,idum,0,dtset%pawprtvol,&
+&               cplex_dij,paw_ij_all(iatom)%lmn_size,-1,idum,0,dtset%pawprtvol,&
 &               idum,valmx,unt,opt_sym=optsym)
              else
                call pawio_print_ij(unitfi,paw_ij_all(iatom)%dij(:,ispden),paw_ij_all(iatom)%lmn2_size,&
-&               paw_ij_all(iatom)%cplex_dij,paw_ij_all(iatom)%lmn_size,-1,idum,0,dtset%pawprtvol,&
+&               cplex_dij,paw_ij_all(iatom)%lmn_size,-1,idum,0,dtset%pawprtvol,&
 &               idum,valmx,unt,asym_ij=paw_ij_all(iatom)%dij(:,7-ispden),opt_sym=optsym)
              end if
            end do
@@ -321,6 +322,7 @@ subroutine pawprt(dtset,my_natom,paw_ij,pawrhoij,pawtab,&
      valmx=-1._dp
      do iatom=1,dtset%natom
        nspden=pawrhoij_all(iatom)%nspden;itypat=dtset%typat(iatom)
+       cplex_dij=paw_ij_all(iatom)%cplex_dij
        ll=-1;llp=-1
        if (pawtab(itypat)%usepawu>0) ll=pawtab(itypat)%lpawu
        if (pawtab(itypat)%useexexch>0) llp=pawtab(itypat)%lexexch
@@ -346,12 +348,12 @@ subroutine pawprt(dtset,my_natom,paw_ij,pawrhoij,pawtab,&
 &           pawrhoij_all(iatom)%rhoijselect(:),valmx,1,opt_sym=optsym)
 
          end do
-         if (debug.and.paw_ij_all(iatom)%ndij==4) then
-           sz1=paw_ij_all(iatom)%lmn2_size*paw_ij_all(iatom)%cplex_dij
+         if (debug.and.nspden==4) then
+           sz1=paw_ij_all(iatom)%lmn2_size*cplex_dij
            sz2=paw_ij_all(iatom)%ndij
            ABI_ALLOCATE(rhoijs,(sz1,sz2))
            do irhoij=1,pawrhoij_all(iatom)%nrhoijsel
-             jrhoij=paw_ij_all(iatom)%cplex_dij*(irhoij-1)+1
+             jrhoij=cplex_dij*(irhoij-1)+1
              rhoijs(jrhoij,1)=pawrhoij_all(iatom)%rhoijp(jrhoij,1)+pawrhoij_all(iatom)%rhoijp(jrhoij,4)
              rhoijs(jrhoij+1,1)=pawrhoij_all(iatom)%rhoijp(jrhoij+1,1)+pawrhoij_all(iatom)%rhoijp(jrhoij+1,4)
              rhoijs(jrhoij,2)=pawrhoij_all(iatom)%rhoijp(jrhoij,1)-pawrhoij_all(iatom)%rhoijp(jrhoij,4)
@@ -391,7 +393,8 @@ subroutine pawprt(dtset,my_natom,paw_ij,pawrhoij,pawtab,&
      call wrtout(unitfi,msg,'COLL')
      do iatom=1,dtset%natom
        itypat=dtset%typat(iatom);ll=pawtab(itypat)%lpawu
-       nspden=paw_ij_all(iatom)%nspden
+       nspden=paw_ij_all(iatom)%nspden;ndij=paw_ij_all(iatom)%ndij
+       cplex_dij=paw_ij_all(iatom)%cplex_dij
        if ((ll>=0).and.(pawtab(itypat)%usepawu>0)) then
          write(msg,fmt='(a,i5,a,i4,a)') " ====== For Atom ", iatom,&
 &         ", occupations for correlated orbitals. lpawu =",ll,ch10
@@ -413,7 +416,7 @@ subroutine pawprt(dtset,my_natom,paw_ij,pawrhoij,pawtab,&
 &           ",  local Mag. for lpawu is  ",localm
            call wrtout(unitfi,msg,'COLL')
          end if
-         if(nspden==4) then
+         if(ndij==4) then
            ntot=paw_ij_all(iatom)%nocctot(1)
            mx=paw_ij_all(iatom)%nocctot(2)
            my=paw_ij_all(iatom)%nocctot(3)
@@ -436,16 +439,16 @@ subroutine pawprt(dtset,my_natom,paw_ij,pawrhoij,pawtab,&
          end if
          write(msg,'(3a)') ch10," == Occupation matrix for correlated orbitals:",ch10
          call wrtout(unitfi,msg,'COLL')
-         do ispden=1,nspden
-           if (nspden==1.and.(paw_ij_all(iatom)%cplex_dij==1)) write(msg,fmt='(a)') " Up component only..."
+         do ispden=1,ndij
+           if (nspden==1.and.ndij/=4.and.(cplex_dij==1)) write(msg,fmt='(a)') " Up component only..."
            if (nspden==2) write(msg,fmt='(a,i3)')" Occupation matrix for spin",ispden
-           if (nspden==4.or.(paw_ij_all(iatom)%cplex_dij==2)) &
-&           write(msg,fmt='(2a)')  " Occupation matrix for component ",trim(dspin1(ispden+2*(nspden/4)))
+           if (ndij==4.or.(cplex_dij==2)) &
+&           write(msg,fmt='(2a)')  " Occupation matrix for component ",trim(dspin1(ispden+2*(ndij/4)))
            call wrtout(unitfi,msg,'COLL')
            do im1=1,ll*2+1
-             if(paw_ij_all(iatom)%cplex_dij==1)&
+             if(cplex_dij==1)&
 &             write(msg,'(12(1x,9(1x,f10.5)))') (paw_ij_all(iatom)%noccmmp(1,im1,im2,ispden),im2=1,ll*2+1)
-             if(paw_ij_all(iatom)%cplex_dij==2)&
+             if(cplex_dij==2)&
 &             write(msg,'(12(1x,9(1x,"(",f9.5,",",f9.5,")")))')&
 &             (paw_ij_all(iatom)%noccmmp(:,im1,im2,ispden),im2=1,ll*2+1)
              call wrtout(unitfi,msg,'COLL')
@@ -505,11 +508,12 @@ subroutine pawprt(dtset,my_natom,paw_ij,pawrhoij,pawtab,&
 !Exact exchange: print out occupations for correlated orbitals
 !-------------------------------------------------------------
  if (useexexch.and.ipositron/=1.and.me_atom==0) then
-   nspden=paw_ij_all(1)%nspden;nsppol=paw_ij_all(1)%nsppol
+   nspden=paw_ij_all(1)%nspden;nsppol=paw_ij_all(1)%nsppol;ndij=paw_ij_all(1)%ndij
    do iatom=1,dtset%natom
      itypat=dtset%typat(iatom);ll=pawtab(itypat)%lexexch
+     cplex_dij=paw_ij_all(iatom)%cplex_dij
      if (ll>=0.and.pawtab(itypat)%useexexch>0) then
-       ABI_ALLOCATE(paw_ij_all(iatom)%noccmmp,(paw_ij_all(iatom)%cplex_dij,2*ll+1,2*ll+1,nspden))
+       ABI_ALLOCATE(paw_ij_all(iatom)%noccmmp,(cplex_dij,2*ll+1,2*ll+1,ndij))
        ABI_ALLOCATE(paw_ij_all(iatom)%nocctot,(nspden))
      end if
    end do
@@ -522,21 +526,22 @@ subroutine pawprt(dtset,my_natom,paw_ij,pawrhoij,pawtab,&
      call wrtout(unitfi,msg,'COLL')
      do iatom=1,dtset%natom
        itypat=dtset%typat(iatom);ll=pawtab(itypat)%lexexch
+       cplex_dij=paw_ij_all(iatom)%cplex_dij
        if ((ll>=0).and.(pawtab(itypat)%useexexch>0)) then
          write(msg,fmt='(a,i5,a,i4,a)') " ====== For Atom",iatom,&
 &         ", occupations for correlated orbitals. l =",ll,ch10
          call wrtout(unitfi,msg,'COLL')
-         do ispden=1,nspden
-           if (nspden==1) write(msg,fmt='(a)')   " Up component only..."
+         do ispden=1,ndij
+           if (nspden==1.and.ndij/=4) write(msg,fmt='(a)')   " Up component only..."
            if (nspden==2) write(msg,fmt='(a,i3)')" Occupation matrix for spin",ispden
-           if (nspden==4) write(msg,fmt='(2a)')  " Occupation matrix for component ",&
-&           trim(dspin2(ispden+2*(nspden/4)))
+           if (ndij==4) write(msg,fmt='(2a)')  " Occupation matrix for component ",&
+&           trim(dspin2(ispden+2*(ndij/4)))
            call wrtout(unitfi,msg,'COLL')
            do im1=1,ll*2+1
-             if(paw_ij_all(iatom)%cplex_dij==1)&
+             if(cplex_dij==1)&
 &             write(msg,'(12(1x,9(1x,f10.5)))')&
 &             (paw_ij_all(iatom)%noccmmp(1,im1,im2,ispden),im2=1,ll*2+1)
-             if(paw_ij_all(iatom)%cplex_dij==2)&
+             if(cplex_dij==2)&
 &             write(msg,'(12(1x,9(1x,"(",f7.3,",",f7.3,")")))') &
 &             (paw_ij_all(iatom)%noccmmp(:,im1,im2,ispden),im2=1,ll*2+1)
              call wrtout(unitfi,msg,'COLL')

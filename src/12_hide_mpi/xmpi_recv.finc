@@ -56,7 +56,7 @@ subroutine xmpi_recv_char(xval,source,tag,spaceComm,ier)
  implicit none
 
 !Arguments-------------------------
- character(len=100), intent(inout) :: xval
+ character(len=*), intent(inout) :: xval
  integer ,intent(in) :: source,tag,spaceComm
  integer ,intent(out) :: ier
 
@@ -71,7 +71,7 @@ subroutine xmpi_recv_char(xval,source,tag,spaceComm,ier)
 #if defined HAVE_MPI
  if (spaceComm /= MPI_COMM_SELF .and. spaceComm /= MPI_COMM_NULL) then
    my_tag = MOD(tag,xmpi_tag_ub)
-   call MPI_RECV(xval,100,MPI_CHARACTER,source,my_tag,spaceComm,MPI_STATUS_IGNORE,ier)
+   call MPI_RECV(xval,len(xval),MPI_CHARACTER,source,my_tag,spaceComm,MPI_STATUS_IGNORE,ier)
  end if
 #endif
 

@@ -58,4 +58,5 @@
 #%%   The parameters were really too low in test 26, so that some 
 #%%   phonon unstabilities are present close to Gamma. These
 #%%   do not appear anymore in test 29.
+#%% topics = PhononBands
 #%%<END TEST_INFO>

@@ -1,0 +1,74 @@
+<!--                                                                                     -->
+<!-- This file has been produced by generate_doc.py using different .yml  or .bib files. -->
+<!-- It is useless to modify it. Modify the related .yml  or .bib files instead.         -->
+<!--                                                                                     -->
+<html>
+<head><title>DeltaSCF </title>
+<link rel=stylesheet type="text/css" href="../../formabinit.css">
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  jax: ["input/TeX","output/HTML-CSS"],
+  tex2jax: {inlineMath: [['$','$']]},
+  displayAlign: "center",
+  TeX: { equationNumbers: { autoNumber: "AMS" } }
+});
+</script>
+<script type="text/javascript" async
+src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+</head>
+<body bgcolor="#ffffff">
+
+<hr>
+<a name="top"></a>
+
+<h1>&Delta;-SCF methodology</h1>
+<h3>This page gives hints on how to to perform a &Delta;-SCF calculation of neutral excitations with the ABINIT package.
+<hr>
+
+<h5>Copyright (C) 2016-2017 ABINIT group (FJ)
+<script type="text/javascript" src="../../js_files/copyright.js"> </script>
+</h5>
+
+<script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
+
+ Mentioned in &nbsp; <a href="../../users/generated_files/help_features.html#7">help_features#7</a>. 
+ <hr>
+ <h3><b>Table of content: </b></h3> 
+ <ul> <li>1. <a href="topic_DeltaSCF.html#1">Introduction.</a><li>2. <a href="topic_DeltaSCF.html#2">References.</a></ul>
+
+&nbsp; 
+<HR ALIGN=left> 
+<a name="1">&nbsp;</a>
+<h3><b>1. Introduction.</b></h3>
+
+
+Although formally not justified, difference in total energy using constrained occupation numbers
+sometimes results in surprisingly good agreement with experimental results, for neutral excitations,
+in molecules or doped solids. See e.g. <a href="../../biblio/generated_files/bib_biblio.html#Jia2017">[Jia2017]</a>.
+<p>The manual specification of the occupation numbers is needed in this case. This is accomplished
+with the input variable <a href="../../input_variables/generated_files/varset_gstate.html#occ">occ</a>, coupled with <a href="../../input_variables/generated_files/varset_basic.html#occopt">occopt</a>=0 for the homogeneous occupation of a band
+throughout the Brillouin Zone, or with <a href="../../input_variables/generated_files/varset_basic.html#occopt">occopt</a>=2 for the specific occupation of a state for a selected k-wavevector.
+For very big cells, both should be equivalent, and <a href="../../input_variables/generated_files/varset_basic.html#occopt">occopt</a>=0 is easier to use.
+<br><br><a href=#top>Go to the top</a>
+
+
+
+
+
+
+&nbsp; 
+<HR ALIGN=left> 
+<a name="2">&nbsp;</a>
+<h3><b>2. References.</b></h3>
+
+
+<br> <a href="../../biblio/generated_files/bib_biblio.html#Jia2017">[Jia2017]</a>  Yongchao Jia, Samuel Ponc&eacute;, Anna Miglio, Masayoshi Mikami and Xavier Gonze, "Assessment of First-Principles and Semiempirical Methodologies for Absorption and Emission Energies of Ce<sup>3+</sup>-Doped Luminescent Materials", Adv. Optical Mater. 5, 1600997 (2017).<br>
+<p>
+<br><br><a href=#top>Go to the top</a>
+
+<script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
+
+</body>
+</html>
+
