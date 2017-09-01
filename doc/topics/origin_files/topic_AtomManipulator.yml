@@ -17,5 +17,5 @@
          Then, atoms can be removed, to form e.g. vacancies. See [[nobj]] as entry point.
          <p>
          The related input variables being used for preprocessing of the input file, they are not echoed
-         in the output file ([[NO_INTERNAL]] characteristics).
+         in the output file ([[INPUT_ONLY]] characteristics).
     end : default 

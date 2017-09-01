@@ -293,6 +293,10 @@ type(pseudopotential_type) :: psps
 ! =================================================
    do jband=1,nband_k
 
+!*   occ = occupancy of jband at this k point
+     occ=fock%occ_bz(jband+bdtot_jindex,my_jsppol)
+     if(occ<tol8) cycle 
+
 ! ==============================================
 ! === Get cwaveocc_r in real space using FFT ===
 ! ==============================================
@@ -306,10 +310,6 @@ type(pseudopotential_type) :: psps
 &       npwj,1,n4f,n5f,n6f,tim_fourwf0,mpi_enreg%paral_kgb,0,weight1,weight1,use_gpu_cuda=gs_ham%use_gpu_cuda)
        cwaveocc_r=cwaveocc_r*invucvol
      end if
-
-!*   occ = occupancy of jband at this k point
-     occ=fock%occ_bz(jband+bdtot_jindex,my_jsppol)
-     if(occ<tol8) cycle 
 
 ! if((jkpt/=fock%ikpt).or.(jband/=fock%ieigen)) cycle
 
@@ -360,7 +360,12 @@ type(pseudopotential_type) :: psps
        call strfock(gs_ham%gprimd,fock%gsqcut,fockstr,fock%hybrid_mixing,fock%hybrid_mixing_sr,&
 &       fock%hybrid_range,mpi_enreg,nfftf,ngfftf,fock%nkpt_bz,rhog_munu,gs_ham%ucvol,qvec_j)
        fock%stress_ikpt(:,fock%ieigen)=fock%stress_ikpt(:,fock%ieigen)+fockstr(:)*occ*wtk
-       if (fock%usepaw==0.and.(.not.need_ghc)) cycle
+       if (fock%usepaw==0.and.(.not.need_ghc)) then
+         if (allocated(fock%cgocc)) then
+           ABI_DEALLOCATE(cwaveocc_r)
+         end if
+         cycle
+       end if
      end if
 
 ! ===================================================
@@ -668,7 +673,7 @@ type(pseudopotential_type) :: psps
    if(gs_ham%istwf_k>=2) eigen=two*eigen
    call xmpi_sum(eigen,mpi_enreg%comm_hf,ier)
    fock%eigen_ikpt(fock%ieigen)= eigen
-   fock%ieigen = 0
+   if(fock%use_ACE==0) fock%ieigen = 0
  end if
 
 ! ===============================

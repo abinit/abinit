@@ -111,8 +111,9 @@ def format_backlinks(backlinks_str):
       backlinks_newlist=[]
   backlinks_formatted=""
   if len(backlinks_newlist)!=0:
-    for link in backlinks_newlist:
-      backlinks_formatted+=link
+    for ilink in range(len(backlinks_newlist)-1):
+      backlinks_formatted+=backlinks_newlist[ilink]+", "
+    backlinks_formatted+=backlinks_newlist[len(backlinks_newlist)-1]+". "
   return backlinks_formatted
 
 ################################################################################
@@ -244,6 +245,9 @@ def make_links(text,cur_key,allowed_link_seeds,backlinks,backlink):
           backlinks[key]+=backlink+";;"
           return '<a href="../../biblio/generated_files/bib_biblio.html#%s">[%s]</a>' %(key,webtext)
 
+    if 1:
+      print(" FAKE LINK detected : '"+dokukey+"'")
+
     return '<a href="#">[[FAKE LINK:'+dokukey+']]</a>'
 
   p=re.compile("\\[\\[([a-zA-Z0-9_ ,\(\)\"\'?=*/<>.|:+#@-]*)\\]\\]")
@@ -334,7 +338,7 @@ def assemble_html(origin_yml_files,suppl_components,dir_name,root_filname,allowe
            full_filname=origin_yml.name
            if root_filname != "":
              full_filname=root_filname+"_"+origin_yml.name
-           backlink=' &nbsp; <a href="../../%s/generated_files/%s.html#%s">%s#%s</a> &nbsp; ' %(dir_name,full_filname,label,full_filname,label)
+           backlink=' &nbsp; <a href="../../%s/generated_files/%s.html#%s">%s#%s</a> ' %(dir_name,full_filname,label,full_filname,label)
            sec_html = make_links(sec_html,None,allowed_link_seeds,backlinks,backlink)
          #Treat one level of subsections
          sublabels=[]
@@ -352,7 +356,7 @@ def assemble_html(origin_yml_files,suppl_components,dir_name,root_filname,allowe
              full_filname=origin_yml.name
              if root_filname != "":
                full_filname=root_filname+"_"+origin_yml.name
-             backlink=' &nbsp; <a href="../../%s/generated_files/%s.html#%s">%s#%s</a> &nbsp; ' %(dir_name,full_filname,sublabel,full_filname,sublabel)
+             backlink=' &nbsp; <a href="../../%s/generated_files/%s.html#%s">%s#%s</a> ' %(dir_name,full_filname,sublabel,full_filname,sublabel)
              sec_html = make_links(sec_html,None,allowed_link_seeds,backlinks,backlink)
          sec_html+="<br><br><a href=#top>Go to the top</a>\n<hr>\n"
          secs_html+=sec_html
@@ -462,7 +466,7 @@ def finalize_html(doc_html,origin_yml,dir_name,root_filname,allowed_link_seeds,b
     full_filname=root_filname+"_"+origin_yml.name
   else:
     full_filname=origin_yml.name
-  backlink=' &nbsp; <a href="../../%s/generated_files/%s.html">%s</a> &nbsp; ' %(dir_name,full_filname,full_filname)
+  backlink=' &nbsp; <a href="../../%s/generated_files/%s.html">%s</a> ' %(dir_name,full_filname,full_filname)
 
   doc_html=doc_html.replace("__JS_PATH__","../../js_files/")
 

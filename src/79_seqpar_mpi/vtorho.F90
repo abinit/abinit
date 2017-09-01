@@ -226,7 +226,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  use m_oper,               only : oper_type,init_oper,destroy_oper
  use m_io_tools,           only : flush_unit
  use m_abi2big,            only : wvl_occ_abi2big,wvl_rho_abi2big,wvl_occopt_abi2big
- use m_fock,               only : fock_type,fock_updateikpt,fock_calc_ene
+ use m_fock,               only : fock_type,fock_ACE_type,fock_updateikpt,fock_calc_ene
  use m_invovl,             only : make_invovl
  use m_gemm_nonlop
 #if defined HAVE_BIGDFT
@@ -324,7 +324,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  integer :: nproc_distrb,npw_k,nspden_rhoij,option,prtvol
  integer :: spaceComm_distrb,usecprj_local,usetimerev
  logical :: berryflag,computesusmat,fixed_occ
- logical :: locc_test,paral_atom,remove_inv,usefock,with_vxctau
+ logical :: locc_test,paral_atom,remove_inv,usefock,usefock_ACE,with_vxctau
  logical :: do_last_ortho,wvlbigdft=.false.
  real(dp) :: dmft_ldaocc
  real(dp) :: edmft,ebandlda,ebanddmft,ebandldatot,ekindmft,ekindmft2,ekinlda
@@ -381,6 +381,10 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
 !Check that fock is present if want to use fock option
  usefock = (dtset%usefock==1 .and. associated(fock))
+ usefock_ACE=.false.
+ if (usefock) then
+   if (fock%use_ACE==2) usefock_ACE=.true.
+ end if
 
 !Init MPI
  spaceComm_distrb=mpi_enreg%comm_cell
@@ -805,10 +809,18 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 !       - Prepare various tabs in case of band-FFT parallelism
 !       - Load k-dependent quantities in the Hamiltonian
        ABI_ALLOCATE(ph3d,(2,npw_k,gs_hamk%matblk))
-       call load_k_hamiltonian(gs_hamk,kpt_k=dtset%kptns(:,ikpt),istwf_k=istwf_k,npw_k=npw_k,&
-&       kinpw_k=kinpw,kg_k=kg_k,kpg_k=kpg_k,ffnl_k=ffnl,ph3d_k=ph3d,&
-&       compute_ph3d=(mpi_enreg%paral_kgb/=1.or.istep<=1),&
-&       compute_gbound=(mpi_enreg%paral_kgb/=1))
+ 
+       if(usefock_ACE) then
+         call load_k_hamiltonian(gs_hamk,kpt_k=dtset%kptns(:,ikpt),istwf_k=istwf_k,npw_k=npw_k,&
+&         kinpw_k=kinpw,kg_k=kg_k,kpg_k=kpg_k,ffnl_k=ffnl,fockACE_k=fock%fockACE,ph3d_k=ph3d,&
+&         compute_ph3d=(mpi_enreg%paral_kgb/=1.or.istep<=1),&
+&         compute_gbound=(mpi_enreg%paral_kgb/=1),usefock_ACE=usefock_ACE,ikpt=ikpt)
+       else
+         call load_k_hamiltonian(gs_hamk,kpt_k=dtset%kptns(:,ikpt),istwf_k=istwf_k,npw_k=npw_k,&
+&         kinpw_k=kinpw,kg_k=kg_k,kpg_k=kpg_k,ffnl_k=ffnl,ph3d_k=ph3d,&
+&         compute_ph3d=(mpi_enreg%paral_kgb/=1.or.istep<=1),&
+&         compute_gbound=(mpi_enreg%paral_kgb/=1))
+       end if
 
 !      Load band-FFT tabs (transposed k-dependent arrays)
        if (mpi_enreg%paral_kgb==1) then
