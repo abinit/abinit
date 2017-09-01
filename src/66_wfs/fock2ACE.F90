@@ -461,7 +461,11 @@ subroutine fock2ACE(cg,cprj,fock,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_enreg,mp
 !write(80,*)"mkl"
 !write(80,*)mkl
      ABI_DEALLOCATE(cwavefk)
-     call zpotrf("L",nband_k,-mkl,nband_k,ierr)
+     mkl=-mkl*ucvol/nfft
+! Cholesky factorisation of -mkl=Lx(trans(L)*. On output mkl=L
+     call zpotrf("L",nband_k,mkl,nband_k,ierr)
+
+! calculate trans(L¯1)
      ABI_ALLOCATE(bb,(2,nband_k,nband_k))
      bb=zero
      do kk=1,nband_k
@@ -471,6 +475,7 @@ subroutine fock2ACE(cg,cprj,fock,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_enreg,mp
      fock%fockACE(ikpt)%xi=zero
 
 !write(80,*)bb
+! Calculate ksi
      do kk=1,nband_k
        do jblock=1,nblockbd
          do jblocksize=1,blocksize
