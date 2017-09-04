@@ -1,0 +1,4 @@
+natom= 2
+nband= 9
+delta= 0.0001
+pseudo= O.LDA_PW-JTH.xml O.LDA_PW-JTH.xml

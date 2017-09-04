@@ -14,7 +14,7 @@ import os,sys
 
 # TO BE CUSTOMIZED BY USER
 ABINIT_EXE='/cea/home/abinit/abinit/REPOSITORY/TORRENT/ABINIT-GIT/misc/build/src/98_main/abinit'
-GENERIC_INPUT_DIR='TEST1'
+GENERIC_INPUT_DIR='TEST_CAO-1'
 
 #Read argument(s)
 n_arg=len(sys.argv)-1
@@ -117,7 +117,7 @@ elif test_type=='81':      # D2dk partial
 #natom,nband, delta:
 #These values should be consistent with the ABINIT input file
 #Eventually read the values from data file
-natom=2 ; nband=8 ; DELTA=0.0001
+natom=2 ; nband=8 ; DELTA=0.0001 ; pseudos=['Ca.LDA_PW-JTH.xml']
 ff=open('./input_template/'+INPUT_DIR+'/data','r')
 fflines=ff.readlines()
 ff.close()
@@ -125,6 +125,8 @@ for lgn in fflines:
  if lgn.find('natom=')!=-1: natom=int(lgn.split()[1])
  if lgn.find('nband=')!=-1: nband=int(lgn.split()[1])
  if lgn.find('delta=')!=-1: DELTA=float(lgn.split()[1])
+ if lgn.find('pseudo=')!=-1: pseudos=(lgn.split()[1:])
+
 if atom>natom:
   print >> sys.stderr, 'Error: iatom>natom!'
   sys.exit()
@@ -204,8 +206,8 @@ elif test_type=='81':      # D2dk partial
   dir2_list=[1,2,3]
   atom_list=[0]
   df_conv_factor=1.
-# choice='choice5'
-# df_conv_factor=2.
+#  choice='choice5'
+#  df_conv_factor=2.
 
 #If requested, overwrite default values for pert. dirs
 if dir1>0: dir1_list=[dir1]
@@ -309,9 +311,20 @@ for iatom in atom_list:   # Atom (optional)
         with open('config/inputDF.in', "a") as ff:
           ff.write('\nuseria 112233  ! Activate nonlop_test routine\n')
 
+#     Create files filesdf
+      ff=open('./exec/filesdf','w')
+      ff.write('config/inputDF.in\n')
+      ff.write('exec/outputDF.out\n')
+      ff.write('temp/nonlop_test_inp\n')
+      ff.write('temp/nonlop_test_out\n')
+      ff.write('temp/nonlop_test_tmp\n')
+      for pseudo in pseudos:
+        ff.write('pseudo/'+pseudo+'\n')
+      ff.close()
+
 #     Run ABINIT
       os.system('rm -rf ./temp/* ./exec/outputDF.out* ./exec/logdf')
-      os.system(ABINIT_EXE+'< ./input_template/filesdf > ./exec/logdf')
+      os.system(ABINIT_EXE+'< ./exec/filesdf > ./exec/logdf')
       os.system('rm -rf malloc.prc')
 
 #     Extract relevant lines from ABINIT log
