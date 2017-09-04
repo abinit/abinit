@@ -14,13 +14,14 @@ import os,sys
 
 # TO BE CUSTOMIZED BY USER
 ABINIT_EXE='/cea/home/abinit/abinit/REPOSITORY/TORRENT/ABINIT-GIT/misc/build/src/98_main/abinit'
-GENERIC_INPUT_DIR='TEST_CAO-1'
 
 #Read argument(s)
 n_arg=len(sys.argv)-1
 if n_arg < 1 or sys.argv[1] == "--help"  or sys.argv[1] == "-help":
-  print >> sys.stderr, 'Syntax: '+ sys.argv[0]+' --choice choice [--idir1 idir1] [--idir2 idir2]'
-  print >> sys.stderr, '         [--iatom iatom] [--signs signs] [--iband iband] --enl [enl]'
+  print >> sys.stderr, 'Syntax: '+ sys.argv[0]+' --choice choice [--test_case test_case]'
+  print >> sys.stderr, '         [--signs signs] [--signsdfpt signsdfpt]'
+  print >> sys.stderr, '         [--idir1 idir1] [--idir2 idir2] [--iatom iatom]'
+  print >> sys.stderr, '         [--iband iband] --enl [enl]'
   print >> sys.stderr, '   choice= 2  : d/d_atm (force)'
   print >> sys.stderr, '           3  : d/d_+strain (stress)'
   print >> sys.stderr, '           5  : d/d_k (ddk)'
@@ -31,20 +32,24 @@ if n_arg < 1 or sys.argv[1] == "--help"  or sys.argv[1] == "-help":
   print >> sys.stderr, '           55s: d2/d_strain.d_k, finite difference on strain (piezo)'
   print >> sys.stderr, '           8  : d2/d_k.d_k, full dk derivative (effective mass)'
   print >> sys.stderr, '           81 : d/d_k[.d(right)_k], partial dk derivative (d_k.d_field)'
+  print >> sys.stderr, '   test_case = which test case to use (see input_template directory), optional (default=TEST_CAO-1) '
+  print >> sys.stderr, '   signs = option for nonlop calculation (1:<Psi|Vnl|Psi> or 2:<g|Vnl|Psi>), optional (default=1) '
+  print >> sys.stderr, '   signsdfpt= option for DFPT nonlop calc. (1:<Psi|Vnl^(1)|Psi> or 2:<g|Vnl^(1)|Psi>), optional (default=signs) '
   print >> sys.stderr, '   idir1 = direction of 1st perturbation, optional (default=1)'
   print >> sys.stderr, '   idir2 = direction of 2nd perturbation, optional (default=1) '
   print >> sys.stderr, '   iatom = index of perturbed atom (direction idir1), optional (default=1) '
-  print >> sys.stderr, '   signs = option for nonlop calculation (1:<Psi|Vnl|Psi> or 2:<g|Vnl|Psi>), optional (default=1) '
-  print >> sys.stderr, '   signsdfpt= option for DFPT nonlop calc. (1:<Psi|Vnl^(1)|Psi> or 2:<g|Vnl^(1)|Psi>), optional (default=signs) '
   print >> sys.stderr, '   iband = compute only band iband, optional (default=all bands)'
   print >> sys.stderr, '   enl   = option for NL operator (sij: use Sij, dij: use Dij), optional (default=sij)'
   sys.exit()
 
-test_type='$';dir1=0;dir2=0;atom=0;band=0;signs=1;signsdfpt=-1;enl='sij'
+test_type='$';test_case='TEST_CAO-1'
+dir1=0;dir2=0;atom=0;band=0;signs=1;signsdfpt=-1;enl='sij'
 for ii in range(n_arg+1)[1:]:
   arg=sys.argv[ii]
   if arg=='-c' or arg=='-choice' or arg=='--choice':
     test_type=sys.argv[ii+1]
+  if arg=='-t' or arg=='-test_case' or arg=='--test_case':
+    test_case=sys.argv[ii+1]
   if arg=='-i1' or arg=='-idir1' or arg=='--idir1':
     dir1=int(sys.argv[ii+1])
   if arg=='-i2' or arg=='-idir2' or arg=='--idir2':
@@ -93,6 +98,7 @@ if (signsdfpt==2 and (test_type=='55k' or test_type=='55s')):
 
 
 #Name of input dir
+GENERIC_INPUT_DIR=test_case
 if test_type  =='2':       # Force
   INPUT_DIR=GENERIC_INPUT_DIR+'_ATM'
 elif test_type=='3':       # Stress
