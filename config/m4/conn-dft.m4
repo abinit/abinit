@@ -206,20 +206,10 @@ AC_DEFUN([_ABI_DFT_CHECK_LIBXC],[
     AC_LANG_PUSH([C])
     AC_RUN_IFELSE([AC_LANG_PROGRAM(
       [[#include "xc.h"]],
-      [[int major = -1, minor = -1, micro = -1;
-        xc_version(&major, &minor, &micro);
-        if ( (major<$1) || (major>$3) || ((major==$1)&&(minor<$2)) || ((major==$3)&&(minor>$4)) ) {
-          return 1; }
+      [[int ver=100*XC_MAJOR_VERSION+XC_MINOR_VERSION;
+        int ver_min=100*$1+$2,ver_max=100*$3+$4;
+        if ( (ver<ver_min) || (ver>ver_max)) {return 1;}
       ]])], [abi_dft_libxc_version="yes"], [abi_dft_libxc_version="no"])
-    if test "${abi_dft_libxc_version}" = "no"; then
-      AC_RUN_IFELSE([AC_LANG_PROGRAM(
-        [[#include "xc.h"]],
-        [[int major = -1, minor = -1;
-          xc_version(&major, &minor);
-          if ( (major<$1) || (major>$3) || ((major==$1)&&(minor<$2)) || ((major==$3)&&(minor>$4)) ) {
-            return 1; }
-        ]])], [abi_dft_libxc_version="yes"], [abi_dft_libxc_version="no"])
-    fi
     AC_LANG_POP([C])
     AC_MSG_RESULT([${abi_dft_libxc_version}])
   fi

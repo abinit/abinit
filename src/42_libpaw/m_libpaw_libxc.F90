@@ -282,10 +282,11 @@ module m_libpaw_libxc_funcs
  end interface
 !
  interface
-   type(C_PTR) function libpaw_xc_get_info_refs(xc_func) &
+   type(C_PTR) function libpaw_xc_get_info_refs(xc_func,iref) &
 &                       bind(C,name="libpaw_xc_get_info_refs")
-     use iso_c_binding, only : C_PTR
+     use iso_c_binding, only : C_INT,C_PTR
      type(C_PTR) :: xc_func
+     integer(C_INT) :: iref
    end function libpaw_xc_get_info_refs
  end interface
 !
@@ -481,7 +482,7 @@ contains
  type(libpaw_libxc_type),pointer :: xc_func
 #if defined LIBPAW_HAVE_LIBXC && defined LIBPAW_ISO_C_BINDING
  integer :: flags
- integer(C_INT) :: func_id_c,nspin_c,success_c
+ integer(C_INT) :: func_id_c,iref_c,nspin_c,success_c
  real(C_DOUBLE) :: alpha_c,beta_c,omega_c
  character(kind=C_CHAR,len=1),pointer :: strg_c
  type(C_PTR) :: func_ptr_c
@@ -584,9 +585,17 @@ contains
    call c_f_pointer(libpaw_xc_get_info_name(xc_func%conf),strg_c)
    call char_c_to_f(strg_c,msg)
    call wrtout(std_out,msg,'COLL')
-   call c_f_pointer(libpaw_xc_get_info_refs(xc_func%conf),strg_c)
-   call char_c_to_f(strg_c,msg)
-   call wrtout(std_out,msg,'COLL')
+   iref_c=0
+   do while (iref_c>=0)
+     call c_f_pointer(libpaw_xc_get_info_refs(xc_func%conf,iref_c),strg_c)
+     if (associated(strg_c)) then
+       call char_c_to_f(strg_c,msg)
+       call wrtout(std_out,msg,'COLL')
+       iref_c=iref_c+1
+     else
+       iref_c=-1
+     end if
+   end do
 
 #endif
 
