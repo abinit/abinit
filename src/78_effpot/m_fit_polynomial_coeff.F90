@@ -928,9 +928,9 @@ recursive subroutine computeNorder(cell,coeffs_out,compatibleCoeffs,list_coeff,l
 !Local variables ---------------------------------------
 !scalar
  integer :: ia,ib,ii,icoeff1,icoeff_tmp,icoeff_str
- integer :: irpt,isym,idisp,iterm,mu,nbody_in,ncoeff_max,ndisp
+ integer :: irpt,isym,idisp,iterm,mu,nbody_in,ncoeff_max,ndisp,pa,pb
  integer :: nterm_max
- real(dp):: pa,pb,coefficient,weight
+ real(dp):: coefficient,weight
  logical :: need_compute,compatible,possible,need_anharmstr,need_spcoupling
 !arrays
  integer,allocatable :: index_coeff(:)
@@ -951,7 +951,6 @@ recursive subroutine computeNorder(cell,coeffs_out,compatibleCoeffs,list_coeff,l
  if(present(nbody)) nbody_in = nbody
  if(present(anharmstr)) need_anharmstr = anharmstr
  if(present(spcoupling)) need_spcoupling = spcoupling
-
  if(power <= power_max)then   
    
 !  Initialisation of variables
@@ -1024,8 +1023,8 @@ recursive subroutine computeNorder(cell,coeffs_out,compatibleCoeffs,list_coeff,l
 !        -------------
 !        1-Check if the coefficient is full anharmonic strain and if we need to compute it
          if(all(terms(1)%direction(:) < zero))then
-           possible = (need_anharmstr .or. need_spcoupling)
-           compatible = need_anharmstr
+           compatible = (need_anharmstr .or. need_spcoupling)
+           possible = need_anharmstr
          end if
 !        1-Check if the coefficient is strain-coupling and if we need to compute it         
          if(any(terms(1)%direction(:) < zero).and.any(terms(1)%direction(:) > zero))then
@@ -1049,11 +1048,11 @@ recursive subroutine computeNorder(cell,coeffs_out,compatibleCoeffs,list_coeff,l
              end if
            end do
            if(ia <= nbody_in)then
-             if(ia==nbody_in.and.mod(pa,2.0)==zero)then
+             if(ia==nbody_in.and.mod(pa,2)==zero)then
                if(ib==zero)then
                  compatible = .FALSE.
                  possible   = .TRUE.
-               else if (ib==nbody_in.and.mod(pb,2.0)==zero) then
+               else if (ib==nbody_in.and.mod(pb,2)==zero) then
                  compatible = .FALSE.
                  possible   = .TRUE.               
                else
@@ -1205,9 +1204,8 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,powers,nbanco
  logical :: iam_master,found,need_verbose,need_positive
  logical :: need_anharmstr,need_spcoupling
 !arrays
- real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3),strain_mat_inv(3,3)
+ real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3)
  real(dp) :: mingf(4)
- integer :: ipiv(3)
  integer,allocatable  :: buffsize(:),buffdisp(:)
  integer,allocatable  :: list_coeffs(:),list_coeffs_tmp(:),my_coeffindexes(:),singular_coeffs(:)
  integer,allocatable  :: my_coefflist(:) 
@@ -1219,12 +1217,12 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,powers,nbanco
  real(dp),allocatable :: fcart_coeffs_tmp(:,:,:,:),strten_coeffs_tmp(:,:,:)
  real(dp),allocatable :: strain(:,:),strten_coeffs(:,:,:)
  real(dp),allocatable :: strten_diff(:,:),strten_fixed(:,:),sqomega(:),ucvol(:)
- real(dp),allocatable :: work(:),work2(:,:)
  type(polynomial_coeff_type),allocatable :: coeffs_tmp(:),coeffs_in(:),my_coeffs(:)
  type(strain_type) :: strain_t
  character(len=500) :: message
  character(len=fnlen) :: filename
- character(len=5)   :: i_char,j_char
+ character(len=3)  :: i_char
+ character(len=7)  :: j_char
 ! *************************************************************************
 
 !MPI variables
@@ -1307,9 +1305,9 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,powers,nbanco
      call fit_polynomial_coeff_getNorder(cutoff,coeffs_in,eff_pot,ncoeff_tot,powers,0,comm,&
 &                                        anharmstr=need_anharmstr,spcoupling=need_spcoupling)
 
-!     filename = "terms_set.xml"
+     filename = "terms_set.xml"
 !     call polynomial_coeff_writeXML(coeffs_in,ncoeff_tot,filename=filename,newfile=.true.)
-
+     
      if(need_verbose)then
        write(message,'(1x,I0,2a)') ncoeff_tot,' coefficients generated ',ch10     
        call wrtout(ab_out,message,'COLL')
@@ -1510,37 +1508,13 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,powers,nbanco
       strain(:,itime) = zero
     end if
 
-!  Get displacement
-   call effective_potential_getDisp(displacement(:,:,itime),natom_sc,hist%rprimd(:,:,itime),&
-&                                   eff_pot%supercell%rprimd_supercell,&
-&                                   xred_hist=hist%xred(:,:,itime),&
-&                                   xcart_ref=eff_pot%supercell%xcart_supercell)
-
-!  Get the variation of the displacmeent wr to strain
-!  See formula A4  in PRB 95,094115
-   strain_mat_inv = strain_t%strain(:,:)
-   do ii=1,3
-     strain_mat_inv(ii,ii) = strain_mat_inv(ii,ii) + one
-     ipiv(ii) = ii
-   end do
-
-   ABI_ALLOCATE(work,(3))
-   ABI_ALLOCATE(work2,(3,natom_sc))
-
-   call DGETRI(3,strain_mat_inv, 3, ipiv, work, 3, ii)
-
-    do ii=1,natom_sc
-      work2(:,ii) = MATMUL(strain_mat_inv,displacement(:,ii,itime))
-      du_delta(1,:,ii,itime) = (/work2(1,ii),zero,zero/)
-      du_delta(2,:,ii,itime) = (/zero,work2(2,ii),zero/)
-      du_delta(3,:,ii,itime) = (/zero,zero,work2(3,ii)/)
-      du_delta(4,:,ii,itime) = (/zero,work2(3,ii),work2(2,ii)/)
-      du_delta(5,:,ii,itime) = (/work2(3,ii),zero,work2(1,ii)/)
-      du_delta(6,:,ii,itime) = (/work2(2,ii),work2(1,ii),zero/)
-    end do
-
-    ABI_DEALLOCATE(work)
-    ABI_DEALLOCATE(work2)
+!   Get displacement and du_delta
+    call effective_potential_getDisp(displacement(:,:,itime),du_delta(:,:,:,itime),natom_sc,&
+&                                    hist%rprimd(:,:,itime),&
+&                                    eff_pot%supercell%rprimd_supercell,comm,&
+&                                    xred_hist=hist%xred(:,:,itime),&
+&                                    xcart_ref=eff_pot%supercell%xcart_supercell,&
+&                                    compute_displacement=.TRUE.,compute_duDelta=.TRUE.)
 
 !  Get forces and stresses from harmonic part (fixed part)     
    call effective_potential_evaluate(eff_pot,energy,fcart_fixed(:,:,itime),fred_fixed(:,:,itime),&
@@ -1798,8 +1772,8 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,powers,nbanco
 &                                         icycle,ncycle_max,ntime,&
 &                                         strten_coeffs_tmp,strten_diff,sqomega,ucvol)
 
-         write (j_char, '(i5)') my_coeffindexes(icoeff)
-         write(message, '(6x,a,3x,4ES18.10)') adjustl(j_char),&
+         write (j_char, '(i7)') my_coeffindexes(icoeff)
+         write(message, '(4x,a,3x,4ES18.10)') adjustl(j_char),&
 &                                   gf_values(4,icoeff)* 1000*Ha_ev / ncell,&
 &                                   gf_values(1,icoeff)*HaBohr_meVAng**2,&
 &                                   gf_values(2,icoeff)*HaBohr_meVAng**2,&
@@ -1887,9 +1861,9 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,powers,nbanco
 &                         mingf(4)* Ha_eV *1000 / ncell
      call wrtout(std_out,message,'COLL')
 
-     write (i_char, '(i5)') icycle
-     write (j_char, '(i5)') list_coeffs(icycle)
-     write(message, '(a,a,2x,a,3x,4ES18.10)') " ",adjustl(i_char),adjustl(j_char),&
+     write (i_char, '(i3)') icycle
+     write (j_char, '(i7)') list_coeffs(icycle)
+     write(message, '(a,a,3x,a,3x,4ES18.10)') " ",adjustl(i_char),adjustl(j_char),&
 &                                    mingf(4)* 1000*Ha_eV / ncell,&
 &                                    mingf(1)*HaBohr_meVAng**2,&
 &                                    mingf(2)*HaBohr_meVAng**2,&
@@ -2054,8 +2028,7 @@ subroutine fit_polynomial_coeff_getPositive(eff_pot,hist,coeff_values,isPositive
  real(dp),parameter :: HaBohr_meVAng = 27.21138386 / 0.529177249
  logical :: iam_master,need_verbose
 !arrays
- real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3),strain_mat_inv(3,3)
- integer :: ipiv(3)
+ real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3)
  integer,allocatable  :: list_coeffs(:),my_modelindexes(:),my_modellist(:)
  real(dp),allocatable :: du_delta(:,:,:,:),displacement(:,:,:),energy_coeffs(:,:)
  real(dp),allocatable :: energy_diff(:),fcart_fixed(:,:,:)
@@ -2063,7 +2036,6 @@ subroutine fit_polynomial_coeff_getPositive(eff_pot,hist,coeff_values,isPositive
  real(dp),allocatable :: fcart_coeffs(:,:,:,:)
  real(dp),allocatable :: strain(:,:),strten_coeffs(:,:,:)
  real(dp),allocatable :: strten_diff(:,:),strten_fixed(:,:),sqomega(:),ucvol(:)
- real(dp),allocatable :: work(:),work2(:,:)
  type(polynomial_coeff_type),allocatable :: coeffs_in(:)
  type(strain_type) :: strain_t
  character(len=500) :: message
@@ -2162,36 +2134,11 @@ subroutine fit_polynomial_coeff_getPositive(eff_pot,hist,coeff_values,isPositive
     end if
 
 !  Get displacement
-   call effective_potential_getDisp(displacement(:,:,itime),natom_sc,hist%rprimd(:,:,itime),&
-&                                   eff_pot%supercell%rprimd_supercell,&
+   call effective_potential_getDisp(displacement(:,:,itime),du_delta(:,:,:,itime),natom_sc,&
+&                                   hist%rprimd(:,:,itime),eff_pot%supercell%rprimd_supercell,comm,&
 &                                   xred_hist=hist%xred(:,:,itime),&
-&                                   xcart_ref=eff_pot%supercell%xcart_supercell)
-
-!  Get the variation of the displacmeent wr to strain
-!  See formula A4  in PRB 95,094115
-   strain_mat_inv = strain_t%strain(:,:)
-   do ii=1,3
-     strain_mat_inv(ii,ii) = strain_mat_inv(ii,ii) + one
-     ipiv(ii) = ii
-   end do
-
-   ABI_ALLOCATE(work,(3))
-   ABI_ALLOCATE(work2,(3,natom_sc))
-
-   call DGETRI(3,strain_mat_inv, 3, ipiv, work, 3, ii)
-
-   do ii=1,natom_sc
-     work2(:,ii) = MATMUL(strain_mat_inv,displacement(:,ii,itime))
-     du_delta(1,:,ii,itime) = (/work2(1,ii),zero,zero/)
-     du_delta(2,:,ii,itime) = (/zero,work2(2,ii),zero/)
-     du_delta(3,:,ii,itime) = (/zero,zero,work2(3,ii)/)
-     du_delta(4,:,ii,itime) = (/zero,work2(3,ii),work2(2,ii)/)
-     du_delta(5,:,ii,itime) = (/work2(3,ii),zero,work2(1,ii)/)
-     du_delta(6,:,ii,itime) = (/work2(2,ii),work2(1,ii),zero/)
-   end do
-   
-   ABI_DEALLOCATE(work)
-   ABI_DEALLOCATE(work2)
+&                                   xcart_ref=eff_pot%supercell%xcart_supercell,&
+&                                   compute_displacement=.true.,compute_duDelta=.true.)
     
 !  Get forces and stresses from harmonic part (fixed part)     
    call effective_potential_evaluate(eff_pot,energy,fcart_fixed(:,:,itime),fred_fixed(:,:,itime),&
@@ -2465,7 +2412,11 @@ subroutine fit_polynomial_coeff_solve(coefficients,fcart_coeffs,fcart_diff,&
 
  call dsgesv(N,NRHS,A,LDA,IPIV,B,LDB,coefficients,LDX,WORK,SWORK,ITER,INFO)
 
-!U is nonsingular
+!other routine
+! call dgesv(N,NRHS,A,LDA,IPIV,B,LDB,INFO)
+! coefficients = B(:,NRHS)
+
+ !U is nonsingular
  if (INFO==N+2) then
    coefficients = zero
  end if
@@ -3157,7 +3108,7 @@ subroutine fit_polynomial_coeff_mapHistToRef(eff_pot,hist,comm,verbose)
      if(blkval(ib)==1)then
        if(abs((xred_ref(1,ia)-xred_hist(1,ib))) < 0.1 .and.&
 &         abs((xred_ref(2,ia)-xred_hist(2,ib))) < 0.1 .and.&
-&         abs((xred_ref(3,ia)-xred_hist(3,ib)))< 0.1) then
+&         abs((xred_ref(3,ia)-xred_hist(3,ib))) < 0.1) then
          blkval(ib) = zero
          list(ib) = ia
        end if

@@ -475,7 +475,7 @@ implicit none
       model_bound = zero
       model_ncoeffbound = zero
       
-      do ii=1,inp%fit_boundTerm
+      do ii=3,inp%fit_boundTerm
 !       Compute the number of possible combination         
         nmodels = factorial(ncoeff_bound) / (factorial(ii)*factorial(ncoeff_bound-ii))
 
@@ -515,7 +515,7 @@ implicit none
         else
 
           do jj=1,nmodels
-            if(isPositive(jj) == one) then
+            if(isPositive(jj) == one.and.all(coeff_values(jj,:) < 10)) then
               write(message, '(2a,I0,a)') ch10,' The model number ',jj,' ['
               do kk=1,ncoeff+ii
                 if(kk<ncoeff+ii)then
@@ -535,17 +535,17 @@ implicit none
                 if(kk<=ncoeff)then
 !                 just set the values of the coefficient
                   call polynomial_coeff_setCoefficient(coeff_values(jj,kk),coeffs_tmp(kk))
-                  write(message, '(a,I0,a,ES19.10)') ' Set the value of the coefficient ',kk,&
-                     &                         ' =>',coeff_values(jj,kk)
+                  write(message, '(a,I0,a,ES19.10,2a)') ' Set the value of the coefficient ',kk,&
+&                        ' =>',coeff_values(jj,kk),'     ',trim(coeffs_tmp(kk)%name)
                   call wrtout(std_out,message,'COLL')
 
                 else
 !                 Set the good coefficient
                   icoeff_bound = listcoeff_bound(jj,kk)-ncoeff ! need to remove ncoeff value
-                  write(message, '(a,I0,a,I0,a,ES19.10)')&
-&                         ' Set the value of the coefficient ',kk,&
-&                         ' (',icoeff_bound,&
-&                         ') =>',coeff_values(jj,kk)
+                  write(message, '(a,I0,a,I0,a,ES19.10,2a)')&
+&                         ' Set the value of the coefficient ',kk,' (',icoeff_bound,&
+&                         ') =>',coeff_values(jj,kk),&
+&                         '     ',trim(coeffs_bound(icoeff_bound)%name)
                   call wrtout(std_out,message,'COLL')
                   call polynomial_coeff_free(coeffs_tmp(kk))
                   call polynomial_coeff_init(coeff_values(jj,kk),&

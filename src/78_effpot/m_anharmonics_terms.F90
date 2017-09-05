@@ -40,7 +40,7 @@ module m_anharmonics_terms
  public :: anharmonics_terms_evaluateIFCStrainCoupling
  public :: anharmonics_terms_setCoeffs
  public :: anharmonics_terms_setElastic3rd
- public :: anharmonics_terms_setElastic4rd
+ public :: anharmonics_terms_setElastic4th
  public :: anharmonics_terms_setElasticDispCoupling
  public :: anharmonics_terms_setStrainPhononCoupling
 
@@ -82,7 +82,7 @@ module m_anharmonics_terms
 !    elastic_constant(6,6,6)
 !    Elastic tensor Hartree
 
-   real(dp) :: elastic4rd(6,6,6,6)
+   real(dp) :: elastic4th(6,6,6,6)
 !    elastic_constant(6,6,6)
 !    Elastic tensor Hartree
 
@@ -128,7 +128,7 @@ CONTAINS  !=====================================================================
 !! SOURCE
 
 subroutine anharmonics_terms_init(anharmonics_terms,natom,ncoeff,&
-&                                 bounded,elastic3rd,elastic4rd,elastic_displacement,&
+&                                 bounded,elastic3rd,elastic4th,elastic_displacement,&
 &                                 phonon_strain,coeffs)
 
 
@@ -145,7 +145,7 @@ subroutine anharmonics_terms_init(anharmonics_terms,natom,ncoeff,&
  integer, intent(in) :: natom,ncoeff
  type(anharmonics_terms_type), intent(out) :: anharmonics_terms
  real(dp),optional,intent(in) :: elastic_displacement(6,6,3,natom)
- real(dp),optional,intent(in) :: elastic3rd(6,6,6),elastic4rd(6,6,6,6)
+ real(dp),optional,intent(in) :: elastic3rd(6,6,6),elastic4th(6,6,6,6)
  type(polynomial_coeff_type),optional :: coeffs(ncoeff)
  type(ifc_type),optional,intent(in) :: phonon_strain(6)
  logical,optional,intent(in) :: bounded
@@ -179,9 +179,9 @@ subroutine anharmonics_terms_init(anharmonics_terms,natom,ncoeff,&
  end if
 
 !Set the 3rd order elastic tensor
- anharmonics_terms%elastic4rd = zero
- if(present(elastic4rd))then
-   call anharmonics_terms_setElastic4rd(anharmonics_terms,elastic4rd)
+ anharmonics_terms%elastic4th = zero
+ if(present(elastic4th))then
+   call anharmonics_terms_setElastic4th(anharmonics_terms,elastic4th)
  end if
 
 !Allocation of 3rd order with respecto to 2 strain and 1 atomic displacement
@@ -468,10 +468,10 @@ subroutine anharmonics_terms_setElastic3rd(anharmonics_terms,elastics)
 end subroutine anharmonics_terms_setElastic3rd
 !!***
 
-!****f* m_anharmonics_terms/anharmonics_terms_setElastic4rd
+!****f* m_anharmonics_terms/anharmonics_terms_setElastic4th
 !!
 !! NAME
-!! anharmonics_terms_setElastic4rd
+!! anharmonics_terms_setElastic4th
 !!
 !! FUNCTION
 !! Set the 4th order derivative of with respect to 4 strain
@@ -490,13 +490,13 @@ end subroutine anharmonics_terms_setElastic3rd
 !!
 !! SOURCE
  
-subroutine anharmonics_terms_setElastic4rd(anharmonics_terms,elastics)
+subroutine anharmonics_terms_setElastic4th(anharmonics_terms,elastics)
 
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'anharmonics_terms_setElastic4rd'
+#define ABI_FUNC 'anharmonics_terms_setElastic4th'
 !End of the abilint section
 
   implicit none
@@ -512,18 +512,18 @@ subroutine anharmonics_terms_setElastic4rd(anharmonics_terms,elastics)
 ! *************************************************************************
 
 ! 1-reinitialise the previous value
-  anharmonics_terms%elastic4rd(:,:,:,:) = zero
+  anharmonics_terms%elastic4th(:,:,:,:) = zero
   anharmonics_terms%has_elastic4th = .FALSE. 
 
 ! 2-Allocation of the new array
-  anharmonics_terms%elastic4rd(:,:,:,:) = elastics(:,:,:,:)
+  anharmonics_terms%elastic4th(:,:,:,:) = elastics(:,:,:,:)
 
 ! 3-Set the flag
-  if(any(abs(anharmonics_terms%elastic4rd)> tol15)) then
+  if(any(abs(anharmonics_terms%elastic4th)> tol15)) then
     anharmonics_terms%has_elastic4th = .TRUE. 
   end if
 
-end subroutine anharmonics_terms_setElastic4rd
+end subroutine anharmonics_terms_setElastic4th
 !!***
 
 
@@ -744,7 +744,7 @@ subroutine anharmonics_terms_evaluateElastic(disp,energy,fcart,natom,natom_uc,nc
 
  !Local variables-------------------------------
 ! scalar
- integer :: ia,ii,mu,alpha,beta,gamma,delta
+ integer :: ia,ii,mu,alpha,beta,gamma,delta,d1,d2
  real(dp):: cijk
  logical :: has_elastic3rd,has_elastic4th,has_elastic_displ
 ! array
@@ -757,14 +757,18 @@ subroutine anharmonics_terms_evaluateElastic(disp,energy,fcart,natom,natom_uc,nc
  has_elastic3rd    = .FALSE.
  has_elastic4th    = .FALSE.
  has_elastic_displ = .FALSE.
-
+ d1=zero;d2=zero
+ 
 !Set the flags
  if(present(elastic3rd)) has_elastic3rd = .TRUE.
- if(present(elastic4th)) has_elastic4th = .TRUE.
+ if(present(elastic4th)) then
+   has_elastic4th = .TRUE.
+   d1=1;d2=6
+ end if
  if(present(elastic_displacement)) has_elastic_displ = .TRUE.
-
+ 
 !1-Treat 3rd order elastic constants
- if (has_elastic3rd) then
+ if (has_elastic3rd.or.has_elastic4th) then
    do alpha=1,6
      do beta=1,6
        do gamma=1,6
@@ -773,24 +777,14 @@ subroutine anharmonics_terms_evaluateElastic(disp,energy,fcart,natom,natom_uc,nc
          energy = energy + sixth*cijk*strain(alpha)*strain(beta)*strain(gamma)
 !        Accumulate stresses contributions
          strten(alpha)=strten(alpha)+ half*cijk*strain(beta)*strain(gamma)
-       end do
-     end do
-   end do
- end if
-
-!4-Treat 4rd order elastic constants
- if (has_elastic4th) then
-   do alpha=1,6
-     do beta=1,6
-       do gamma=1,6
-         do delta=1,6
+         do delta=d1,d2
            cijk = ncell*elastic4th(alpha,beta,gamma,delta)
 !          Accumulate energy
            energy = energy + (1/24.)*cijk*strain(alpha)*strain(beta)*&
-&                                                   strain(gamma)*strain(delta)
+&                                                  strain(gamma)*strain(delta)
 !          Accumulate stresses contributions
            strten(alpha)=strten(alpha)+ sixth*cijk*strain(beta)*strain(gamma)*&
-&                                                            strain(delta)
+&                                                           strain(delta)
          end do
        end do
      end do

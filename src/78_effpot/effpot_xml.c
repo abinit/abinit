@@ -90,13 +90,9 @@ void effpot_xml_getDimSystem(char *filename,int *natom,int *ntypat, int *nqpt, i
   Array typat;
 
   initArray(&typat, 1);
-
+  *natom  = 0;  *nqpt   = iqpt; *loc_nrpt   = irpt1; *tot_nrpt   = irpt2;  *ntypat = itypat;
+  iatom    = 0; irpt1     = 0; irpt2     = 0;  iqpt    = 0;  itypat   = 0;
   present  = 0;
-  iatom    = 0;
-  irpt1     = 0;
-  irpt2     = 0;
-  iqpt    = 0;
-  itypat   = 0;
   typat.array[0] = 0;
 
   doc = xmlParseFile(filename);
@@ -139,7 +135,7 @@ void effpot_xml_getDimSystem(char *filename,int *natom,int *ntypat, int *nqpt, i
       itypat++;
     }
   }
- 
+  xmlFreeDoc(doc);
   freeArray(&typat);
 
   *natom  = iatom;
@@ -170,7 +166,7 @@ void effpot_xml_readSystem(char *filename,int *natom,int *ntypat,int *nrpt,int *
   int i,j;
   xmlNodePtr cur,cur2,cur3;
   xmlChar *key,*uri;
-  
+
   if (*natom <= 0){ 
     printf(" error: The number of atom must be superior to zero\n");
     exit(0);
@@ -424,8 +420,8 @@ void effpot_xml_readSystem(char *filename,int *natom,int *ntypat,int *nrpt,int *
   }
   xmlFreeDoc(doc);
 
-  //Reorder the ATMFRC
-  //Case 1: only local in the xml
+  //  Reorder the ATMFRC
+  //  Case 1: only local in the xml
   if (irpt1>0 && irpt2==0){
     for(i=0;i<irpt1;i++){
       for(j=0;j<3;j++){
@@ -572,6 +568,7 @@ void effpot_xml_getDimStrainCoupling(char *filename, int *nrpt,int *voigt){
     }
     cur = cur->next;
   }
+  xmlFreeDoc(doc);  
 }
 
 void effpot_xml_readStrainCoupling(char *filename,int *natom,int *nrpt,int *voigt,

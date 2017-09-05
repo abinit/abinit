@@ -284,7 +284,7 @@ program multibinit
    call fit_polynomial_coeff_mapHistToRef(reference_effective_potential,hist,comm)
  end if
 
-!Generate the confinement polynome
+!Generate the confinement polynome (not working yet)
  if(inp%confinement/=0)then
    option=inp%confinement
    select case(option)

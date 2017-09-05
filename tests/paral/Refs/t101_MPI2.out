@@ -40,7 +40,7 @@
        fit_ncycle         4
          fit_grid         1         1         1
    fit_rangePower         3         4
-   fit_anhaStrain         1
+   fit_anhaStrain         0
    fit_SPCoupling         1
     fit_nbancoeff         0
      fit_bancoeff
@@ -200,7 +200,7 @@
 --------------------------------------------------------------------------------
 
  The coefficients for the fit must be generate...
- 1815 coefficients generated 
+ 1633 coefficients generated 
 
  Mean Standard Deviation values at the begining of the fit process (meV/f.u.):
    Energy          :   3.7052089149349636E+00

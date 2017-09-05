@@ -998,7 +998,7 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
  end if
 
  !F
-  multibinit_dtset%fit_anhaStrain=1
+  multibinit_dtset%fit_anhaStrain=0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'fit_anhaStrain',tread,'INT')
  if(tread==1) multibinit_dtset%fit_anhaStrain=intarr(1)
  if(multibinit_dtset%fit_anhaStrain<0.and.multibinit_dtset%fit_anhaStrain>1)then

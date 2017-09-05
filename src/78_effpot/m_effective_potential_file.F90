@@ -627,7 +627,8 @@ subroutine effective_potential_file_getDimSystem(filename,natom,ntypat,nqpt,nrpt
 !Local variables-------------------------------
  !scalar
  integer,parameter :: vrsio8=100401,vrsio8_old=010929,vrsio8_old_old=990527
- integer :: dimekb,filetype,lmnmax,mband,mtyp,msym,nblok,nkpt,usepaw
+ integer :: filetype
+! integer :: dimekb,lmnmax,mband,mtyp,msym,nblok,nkpt,usepaw
  integer :: ddbun = 666
  character(len=500) :: message
  type(ddb_hdr_type) :: ddb_hdr
@@ -1488,7 +1489,7 @@ end subroutine system_getDimFromXML
    call wrtout(ab_out,message,'COLL')
    call wrtout(std_out,message,'COLL')
 
-  !Read with libxml librarie
+!Read with libxml library
    call effpot_xml_readSystem(char_f2c(trim(filename)),natom,ntypat,nrpt,nph1l,all_amu,&
 &                       ifcs%atmfrc,ifcs%cell,dynmat,elastic_constants,energy,&
 &                       epsilon_inf,ifcs%ewald_atmfrc,phfrq,rprimd,qph1l,ifcs%short_atmfrc,&
@@ -2897,7 +2898,7 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
 
   if (iblok /=0) then
 
-!    then print the internal stain tensor
+!   then print the internal stain tensor
     call ddb_internalstr(inp%asr,crystal,ddb%val,asrq0,d2asr,iblok,instrain,&
 &                        ab_out,mpert,msize,natom,nblok)
 
@@ -3078,27 +3079,6 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
 !  In the XML the atom index begin to zero
 !  Need to shift for fortran array
    atindx(:,:,:,:) = atindx(:,:,:,:) + 1
-
-!TEST_AM
-   ! do icoeff=1,ncoeff
-   !   do iterm=1,nterm_max
-   !     do ii=1,ndisp_max
-   !       if (atindx(icoeff,iterm,1,ii) == 1) then
-   !         atindx(icoeff,iterm,1,ii) = 2
-   !       else if (atindx(icoeff,iterm,1,ii) == 2) then
-   !         atindx(icoeff,iterm,1,ii) = 1 
-   !       end if
-
-   !       if (atindx(icoeff,iterm,2,ii) == 1) then
-   !         atindx(icoeff,iterm,2,ii) = 2
-   !       else if (atindx(icoeff,iterm,2,ii) == 2) then
-   !         atindx(icoeff,iterm,2,ii) = 1 
-   !       end if
-
-   !     end do
-   !   end do
-   ! end do
-!TEST_AM
 
    do icoeff=1,ncoeff
      do iterm=1,nterm_max

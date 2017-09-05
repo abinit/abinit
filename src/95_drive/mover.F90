@@ -316,10 +316,6 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
 & dtfil%fnameabi_hes,&
 & dtfil%filnam_ds)
 
- if (ab_mover%ionmov==31.and..not.present(effective_potential)) then
-   MSG_BUG("effective_potential is not present.")
- end if
-
  if (ab_mover%ionmov==13)then
    call mttk_ini(mttk_vars,ab_mover%nnos)
  end if
@@ -599,7 +595,7 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
              MSG_WARNING(message)
            end if
 
-         else if(ab_mover%ionmov /= 31) then
+         else
 !          For monte carlo don't need to recompute energy here
 !          (done in pred_montecarlo)
            call effective_potential_evaluate( &
