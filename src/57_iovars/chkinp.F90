@@ -1895,7 +1895,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
      cond_string(1)='mkmem' ; cond_values(1)=dt%mkmem
      call chkint_ne(1,1,cond_string,cond_values,ierr,'optdriver',dt%optdriver,1,(/RUNL_NONLINEAR/),iout)
    end if
-   if(dt%kptopt/=2 .and. dt%kptopt/=3)then
+   if(dt%kptopt/=0 .and. dt%kptopt/=2 .and. dt%kptopt/=3)then
      cond_string(1)='kptopt' ; cond_values(1)=dt%kptopt
      call chkint_ne(1,1,cond_string,cond_values,ierr,'optdriver',dt%optdriver,2,(/RUNL_RESPFN,RUNL_NONLINEAR/),iout)
    end if
