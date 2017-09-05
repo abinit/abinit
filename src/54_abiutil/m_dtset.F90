@@ -804,6 +804,7 @@ subroutine dtset_copy(dtout, dtin)
  dtout%prtxml             = dtin%prtxml
  dtout%prt1dm             = dtin%prt1dm
  dtout%ptgroupma          = dtin%ptgroupma
+ dtout%qptopt             = dtin%qptopt
  dtout%random_atpos       = dtin%random_atpos
  dtout%recgratio          = dtin%recgratio
  dtout%recnpath           = dtin%recnpath

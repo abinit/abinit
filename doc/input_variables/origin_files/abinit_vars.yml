@@ -2963,8 +2963,8 @@
     defaultval: 0.0
     dimensions:
     - 3
-    -   -   - nzchempot
-    -   -   - ntype
+    - '[[nzchempot]]'
+    - '[[ntypat]]'
     excludes: null
     mnemonics: spatially varying CHEMical POTential
     requires: '[[nzchempot]]/=0'
@@ -21146,7 +21146,7 @@
           - [[pawovlp]]&gt;0. and &lt;100. : overlap is allowed only if it is less than [[pawovlp]] %
          </div>
         </p>
-    topics: PAW_expert
+    topics: PAW_useful
     varset: paw
     vartype: real
 - !variable
@@ -21173,7 +21173,7 @@
         The indexing of the bands start with one for the lowest occupied band
         and goes up from there.
         </p>
-    topics: PAW_useful
+    topics: PAW_expert
     varset: dev
     vartype: integer
 - !variable
@@ -21204,7 +21204,7 @@
          </b>
          in the beginning of the run.
         </p>
-    topics: PAW_useful
+    topics: PAW_expert
     varset: dev
     vartype: integer
 - !variable
@@ -21310,7 +21310,7 @@
          When [[pawprtvol]]&lt;0, all components of rho_ij and D_ij matrices for all atoms are printed.
          <br />
         </p>
-    topics: PAW_useful
+    topics: PAW_expert
     varset: paw
     vartype: integer
 - !variable
@@ -21605,7 +21605,7 @@
          <br />
          Be careful: GGA requires [[pawxcdev]] &gt; 0
         </p>
-    topics: PAW_expert
+    topics: PAW_useful
     varset: paw
     vartype: integer
 - !variable
@@ -25571,7 +25571,7 @@
     defaultval: !valuewithconditions
         defaultval: 2.0
         usepaw==1:
-        -   - AUTO_FROM_PSP
+        - '[[AUTO_FROM_PSP]]'
     dimensions:
     - '[[ntypat]]'
     excludes: null
@@ -27675,7 +27675,7 @@
         other values are used for the analysis of the effect of the spin-orbit interaction,
         but are not expected to correspond to any physical situation.
         </p>
-    topics: PAW_useful, spinpolarisation_useful
+    topics: PAW_expert, spinpolarisation_useful
     varset: paw
     vartype: real
 - !variable
@@ -29733,7 +29733,7 @@
          - B. Amadon, F. Jollet and M. Torrent, Phys. Rev. B 77, 155104 (2008).
          <br />
         </p>
-    topics: DFT+U_compulsory, GW_useful, SelfEnergy_useful
+    topics: DFT+U_compulsory, PAW_useful, GW_useful, SelfEnergy_useful
     varset: paw
     vartype: integer
 - !variable

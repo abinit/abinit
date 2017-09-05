@@ -272,24 +272,24 @@ for abivarname in tests_for_abivars.keys():
   tests_for_abivars[abivarname]["ratio_in_tuto"]=ratio_in_tuto
 
   # Constitutes an usage report
-  frequency="Rarely used,"
+  frequency="Rarely used:"
   if ratio_all>0.5:
-    frequency="Very frequently used,"
+    frequency="Very frequently used:"
   elif ratio_all>0.01:
-    frequency="Moderately used,"
+    frequency="Moderately used:"
   usage_report=frequency
-  usage_report+=" in %s tests [%s/%s],"%(executable,ntests_abivarname,ntests_executable)
-  usage_report+=" in tuto %s tests [%s/%s]."%(executable,ntests_abivarname_in_tuto,ntests_executable_in_tuto)
+  usage_report+=" [%s/%s] in %s tests,"%(ntests_abivarname,ntests_executable,executable)
+  usage_report+=" [%s/%s] in tuto %s tests."%(ntests_abivarname_in_tuto,ntests_executable_in_tuto,executable)
   maxtests=10
   if ntests_abivarname>0 :
     if ntests_abivarname<maxtests or ntests_abivarname_in_tuto<maxtests :
       only_tuto=0
       if not ntests_abivarname<maxtests:
         only_tuto=1
-        usage_report+=" Tuto test list {"
+        usage_report+=" Tuto test list: {"
       else:
         only_tuto=0
-        usage_report+=" Test list {"
+        usage_report+=" Test list: {"
       counter=0
       for tests_dir in yml_in["tests_dirs"]:
         if len(dir_ID_for_tests[tests_dir])>0 and (only_tuto==0 or "tuto"==tests_dir[:4]):
@@ -433,8 +433,9 @@ for item in bibtex_items:
 
 reference_dic={}
 for (i,ref) in enumerate(bibtex_dics):
-  # Very strange behaviour of python when I try to use ref["journal"] directly ?! So, use an ugly bypass.
+  # There was a Very strange behaviour of python when I try to use ref["journal"] directly ?! So, use an ugly bypass.
   # Same thing for ref["volume"]. In any case, one should define a class ...
+  # Now everything seems OK ... ?!  ref[key]  works as it should ...
   position=0
   flag_pages=0
   flag_eprint=0
@@ -457,40 +458,56 @@ for (i,ref) in enumerate(bibtex_dics):
   for key in ref.keys():
 
     if key=='ENTRYTYPE':
-      ENTRYTYPE=ref.values()[position].strip()
+      #ENTRYTYPE=ref.values()[position].strip()
+      ENTRYTYPE=ref[key].strip()
     elif key=='ID':
-      ID=ref.values()[position].strip()
+      #ID=ref.values()[position].strip()
+      ID=ref[key].strip()
     elif key=='author':
-      author=ref.values()[position].strip()
+      #author=ref.values()[position].strip()
+      author=ref[key].strip()
     elif key=='title':
-      title=ref.values()[position].strip()
+      #title=ref.values()[position].strip()
+      title=ref[key].strip()
     elif key=='booktitle':
-      booktitle=ref.values()[position].strip()
+      #booktitle=ref.values()[position].strip()
+      booktitle=ref[key].strip()
     elif key=='journal':
-      journal=ref.values()[position].strip()
+      #journal=ref.values()[position].strip()
+      journal=ref[key].strip()
     elif key=='volume':
-      volume=ref.values()[position].strip()
+      #volume=ref.values()[position].strip()
+      volume=ref[key].strip()
       flag_pages+=1
     elif key=='pages':
-      pages=ref.values()[position].strip()
+      #pages=ref.values()[position].strip()
+      pages=ref[key].strip()
       flag_pages+=1
     elif key=='year':
-      year=ref.values()[position].strip()
+      #year=ref.values()[position].strip()
+      year=ref[key].strip()
     elif key=='eprint':
-      eprint=ref.values()[position].strip()
+      #eprint=ref.values()[position].strip()
+      eprint=ref[key].strip()
       flag_eprint=1
     elif key=='editor':
-      editor=ref.values()[position].strip()
+      #editor=ref.values()[position].strip()
+      editor=ref[key].strip()
     elif key=='publisher':
-      publisher=ref.values()[position].strip()
+      #publisher=ref.values()[position].strip()
+      publisher=ref[key].strip()
     elif key=='school':
-      school=ref.values()[position].strip()
+      #school=ref.values()[position].strip()
+      school=ref[key].strip()
     elif key=='address':
-      address=ref.values()[position].strip()
+      #address=ref.values()[position].strip()
+      address=ref[key].strip()
     elif key=='note':
-      note=ref.values()[position].strip()
+      #note=ref.values()[position].strip()
+      note=ref[key].strip()
     elif key=='howpublished':
-      howpublished=ref.values()[position].strip()
+      #howpublished=ref.values()[position].strip()
+      howpublished=ref[key].strip()
     position+=1
 
   # Reformat the list of authors, starting with the initials.
@@ -676,7 +693,7 @@ for i, varset_info in enumerate(varsets):
 # Constitute the body of information for the external parameters, stored for the appropriate varset in all_contents[varset]
 
 for (key, value) in list_externalvars:
-  backlink= ' &nbsp; <a href="../../input_variables/generated_files/varset_external.html#%s">%s</a> &nbsp; ' %(key,key)
+  backlink= ' &nbsp; <a href="../../input_variables/generated_files/varset_external.html#%s">%s</a>' %(key,key)
   cur_content = '<br><font id="title"><a name="%s">%s</a></font>\n'%(key,key)
   cur_content += '<br><font id="text">\n'
   cur_content += '<p>\n'+make_links(value,key,allowed_link_seeds,backlinks,backlink)+'\n'
@@ -718,7 +735,7 @@ for i, var in enumerate(abinit_vars):
   varset = var.varset
   all_vars[varset].append([var.abivarname,var.mnemonics])
   cur_content = ""
-  backlink=' &nbsp; <a href="../../input_variables/generated_files/varset_%s.html#%s">%s</a> &nbsp; ' %(varset,var.abivarname,var.abivarname)
+  backlink=' &nbsp; <a href="../../input_variables/generated_files/varset_%s.html#%s">%s</a> ' %(varset,var.abivarname,var.abivarname)
 
   try:
     # Title
@@ -766,7 +783,11 @@ for i, var in enumerate(abinit_vars):
             if not name_tribe[1].strip() in list_tribenames:
               print("\n For input variable %s, name of tribe '%s' is given. However this name of tribe is not in list_tribes.yml ."%(var.abivarname.strip(),name_tribe[1].strip()))
               topic_error+=1
-            cur_content += '<a href="../../topics/generated_files/topic_'+name_tribe[0].strip()+'.html">'+name_tribe[0].strip()+'</a> '
+            cur_content += '<a href="../../topics/generated_files/topic_'+name_tribe[0].strip()+'.html">'+name_tribe[0].strip()+'</a>'
+            if i!=len(topics_name_tribe)-1:
+              cur_content+=", "
+            else:
+              cur_content+="."
       cur_content += "</font>\n"
     else:
       print(" No topic_tribe for abivarname %s"%(var.abivarname))
@@ -1019,7 +1040,7 @@ for topic_name in list_of_topics:
       m=re.search("\d{4}",ref,flags=0)
       if m!=None:
         reflist.append(ref)
-    backlink=' &nbsp; <a href="../../topics/generated_files/topic_%s.html">topic_%s</a> &nbsp; ' %(topic_name,topic_name)
+    backlink=' &nbsp; <a href="../../topics/generated_files/topic_%s.html">topic_%s</a> ' %(topic_name,topic_name)
     extract_j = make_links(extract_j,None,allowed_link_seeds,backlinks,backlink)
     setattr(topic,j,extract_j)
 
@@ -1206,7 +1227,7 @@ if 0:
 ################################################################################
 # Treat the links within the "introduction" of the acknowledgment component first.
 
-backlink= ' &nbsp; <a href="../../biblio/generated_files/bib_acknow.html">bib_acknow.html</a> &nbsp; ' 
+backlink= ' &nbsp; <a href="../../biblio/generated_files/bib_acknow.html">bib_acknow.html</a> ' 
 for i, bibfile_info in enumerate(yml_in["bibfiles"]):
   if bibfile_info.name.strip()=="acknow":
     bibfile_intro=bibfile_info.introduction
@@ -1232,7 +1253,7 @@ for ref in bibtex_dics:
   backlinks_formatted=format_backlinks(backlinks_str)
   line=("@%s{%s,%s") %(entrytype,ID,ref['body'])
   lines_txt+= line
-  bibtex_content+= ('<hr><a id="%s">%s</a> \n <pre>' ) %(ID,ID)
+  bibtex_content+= ('<hr><a id="%s"></a><a href="./bib_biblio.html#%s">%s</a> \n <pre>' ) %(ID,ID,ID)
   bibtex_content+= line+'</pre> \n'
   while ID[0]>cur_let:
     cur_let = chr(ord(cur_let)+1)

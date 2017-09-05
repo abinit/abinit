@@ -50,7 +50,7 @@ module m_hamiltonian
  use m_paral_atom,        only : get_my_atmtab, free_my_atmtab
  use m_electronpositron,  only : electronpositron_type, electronpositron_calctype
  use m_mpinfo,            only : destroy_mpi_enreg
- use m_fock,              only : fock_type
+ use m_fock,              only : fock_type,fock_ACE_type
 
 #if defined HAVE_FC_ISO_C_BINDING
  use iso_c_binding, only : c_ptr,c_loc,c_f_pointer
@@ -358,14 +358,19 @@ module m_hamiltonian
    ! xred(3,natom)
    ! reduced coordinates of atoms (dimensionless)
 
+ 
 ! ===== Structured datatype pointers
 
   type(fock_type), pointer :: fock => null()
    ! fock
    ! all quantities needed to calculate Fock exact exchange
 
+  type(fock_ACE_type), pointer :: fockACE_k
+   ! fock
+   ! all quantities needed to calculate Fock exact exchange in the ACE context
 
  end type gs_hamiltonian_type
+
 
  public :: init_hamiltonian         ! Initialize the GS Hamiltonian
  public :: destroy_hamiltonian      ! Free the memory in the GS Hamiltonian
@@ -693,7 +698,7 @@ subroutine destroy_hamiltonian(Ham)
 
 ! Structured datatype pointers
  if (associated(Ham%fock)) nullify(Ham%fock)
-
+ if (associated(Ham%fockACE_k)) nullify(Ham%fockACE_k)
 #if defined HAVE_GPU_CUDA
  if(Ham%use_gpu_cuda==1) then
    call gpu_finalize_ham_data()
@@ -875,7 +880,12 @@ subroutine init_hamiltonian(ham,Psps,pawtab,nspinor,nsppol,nspden,natom,typat,&
  ham%xred => xred
 
  if (present(fock)) then
-   ham%fock => fock
+   if(.not.associated(fock)) ham%fock => fock
+   if (associated(fock)) then
+     if (fock%use_ACE/=2) then
+       ham%fock => fock
+     end if
+   end if
  end if
 
  if (present(ph1d)) then
@@ -1014,9 +1024,9 @@ end subroutine init_hamiltonian
 !!
 !! SOURCE
 
-subroutine load_k_hamiltonian(ham,ffnl_k,gbound_k,istwf_k,kinpw_k,&
+subroutine load_k_hamiltonian(ham,ffnl_k,fockACE_k,gbound_k,istwf_k,kinpw_k,&
 &                             kg_k,kpg_k,kpt_k,npw_k,npw_fft_k,ph3d_k,&
-&                             compute_gbound,compute_ph3d)
+&                             compute_gbound,compute_ph3d,usefock_ACE,ikpt)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1031,13 +1041,14 @@ subroutine load_k_hamiltonian(ham,ffnl_k,gbound_k,istwf_k,kinpw_k,&
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in),optional :: npw_k,npw_fft_k,istwf_k
- logical,intent(in),optional :: compute_gbound,compute_ph3d
+ integer,intent(in),optional :: npw_k,npw_fft_k,istwf_k,ikpt
+ logical,intent(in),optional :: compute_gbound,compute_ph3d,usefock_ACE
  type(gs_hamiltonian_type),intent(inout),target :: ham
 !arrays
  integer,intent(in),optional,target :: gbound_k(:,:),kg_k(:,:)
  real(dp),intent(in),optional :: kpt_k(3)
  real(dp),intent(in),optional,target :: ffnl_k(:,:,:,:),kinpw_k(:),kpg_k(:,:),ph3d_k(:,:,:)
+ type(fock_ACE_type),intent(in),optional,target :: fockACE_k(:)
 
 !Local variables-------------------------------
 !scalars
@@ -1094,7 +1105,11 @@ subroutine load_k_hamiltonian(ham,ffnl_k,gbound_k,istwf_k,kinpw_k,&
    ham%ph3d_k  => ph3d_k
    ham%ph3d_kp => ph3d_k
  end if
-
+ if (present(usefock_ACE)) then
+   if (usefock_ACE) then
+     ham%fockACE_k  => fockACE_k(ikpt)
+   end if
+ end if
 !Compute exp(i.k.R) for each atom
  if (present(kpt_k)) then
    if (associated(Ham%phkpxred).and.(.not.associated(Ham%phkpxred,Ham%phkxred))) then
@@ -1474,6 +1489,16 @@ implicit none
 #endif
  else
    nullify(gs_hamk_out%fock)
+ end if
+ if (associated(gs_hamk_in%fockACE_k)) then
+#if defined HAVE_FC_ISO_C_BINDING
+   ham_ptr=c_loc(gs_hamk_in%fockACE_k)
+!   call c_f_pointer(ham_ptr,gs_hamk_out%fockACE_k)
+#else
+   gs_hamk_out%fockACE_k=transfer(gs_hamk_in%fockACE_k,gs_hamk_out%fockACE_k)
+#endif
+ else
+   nullify(gs_hamk_out%fockACE_k)
  end if
 
  DBG_EXIT("COLL")

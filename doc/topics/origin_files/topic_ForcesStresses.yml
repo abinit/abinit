@@ -4,7 +4,7 @@
     authors   : FJ
     howto     : to tune the computation of forces and stresses
     header    : default
-    title     : <h1>General settings</h1>
+    title     : <h1>Forces and stresses</h1>
     subtitle  : default
     copyright : default
     links     : default
