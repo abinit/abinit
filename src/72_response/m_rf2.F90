@@ -742,7 +742,7 @@ subroutine rf2_apply_hamiltonian(cg_jband,cprj_jband,cwave,cwaveprj,h_cwave,s_cw
          enl_ptr => rf_hamk_idir%e1kbfr
        end if
 
-       iatom = ipert - natom - 11
+       iatom = gs_hamkq%atindx(ipert - natom - 11)  ! Atoms are type-sorted in enlout()
 
 !      Compute application of dS/dtau1 to i*d[cwavef]/dk2
 !      sum_{i,j} s_ij < psi^(0) | d(|p_i><p_j|)/dtau(idir1) | i*psi^(k(idir2)) >
