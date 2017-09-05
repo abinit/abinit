@@ -324,7 +324,7 @@
            klmn=j0lmn+ilmn
            klmn_re=cplex_rhoij*(klmn-1)+1
            d1cpi0(1:2,1)=cwaveprj0_pert1(iatm,1)%dcp(1:2,1,ilmn) ! < p_i^(pert1) | Psi^(0) >
-           d2cpi0(1:2,1)=cwaveprj0_pert2(iatm,1)%dcp(1:2,1,ilmn) ! < p_i^(pert1) | Psi^(0) >
+           d2cpi0(1:2,1)=cwaveprj0_pert2(iatm,1)%dcp(1:2,1,ilmn) ! < p_i^(pert2) | Psi^(0) >
            ro11_re=zero
            do iplex=1,cplex
              ro11_re=ro11_re+d1cpi0(iplex,1)*d2cpj0(iplex,1)+d2cpi0(iplex,1)*d1cpj0(iplex,1)
