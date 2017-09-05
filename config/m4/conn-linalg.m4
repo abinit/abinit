@@ -86,34 +86,7 @@ AC_DEFUN([_ABI_LINALG_CHECK_LIBS],[
   abi_linalg_has_elpa="${abi_linalg_has_scalapack}"
   if test "${abi_linalg_has_elpa}" = "yes"; then
     AC_MSG_CHECKING([for ELPA support in specified libraries])
-    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([],[use elpa])],
-      [abi_linalg_has_elpa="yes"], [abi_linalg_has_elpa="no"])
-    if test "${abi_linalg_has_elpa}" = "yes"; then
-      AC_LINK_IFELSE([AC_LANG_PROGRAM([],
-      [use elpa
-       integer :: nrows=1,err
-       class(elpa_t),pointer :: e
-       call e%set("local_nrows",nrows,err)
-      ])], [abi_linalg_has_elpa="yes"], [abi_linalg_has_elpa="no"])
-    fi
-    if test "${abi_linalg_has_elpa}" = "no"; then
-      AC_COMPILE_IFELSE([AC_LANG_PROGRAM([],[use elpa1])],
-        [abi_linalg_has_elpa="yes"], [abi_linalg_has_elpa="no"])
-      if test "${abi_linalg_has_elpa}" = "yes"; then
-        if test "${abi_linalg_has_elpa}" = "no"; then
-          AC_LINK_IFELSE([AC_LANG_PROGRAM([],
-            [use elpa1
-             integer :: n=1,comm=1,comm1,comm2,success
-             success=get_elpa_communicators(comm,n,n,comm1,comm2)
-            ])], [abi_linalg_has_elpa="yes"], [abi_linalg_has_elpa="no"])
-        fi
-        if test "${abi_linalg_has_elpa}" = "no"; then
-          AC_LINK_IFELSE([AC_LANG_PROGRAM([],
-            [call elpa_transpose_vectors
-            ])], [abi_linalg_has_elpa="yes"], [abi_linalg_has_elpa="no"])
-        fi
-      fi
-    fi
+    _ABI_LINALG_TEST_ELPA()
     AC_MSG_RESULT([${abi_linalg_has_elpa}])
     if test "${abi_linalg_has_elpa}" = "yes"; then
       _ABI_LINALG_FIND_ELPA_VERSION()
@@ -394,20 +367,12 @@ AC_DEFUN([_ABI_LINALG_SEARCH_ELPA],[
   dnl Look for libraries and routines
   dnl Has to rewrite AC_SEARCH_LIBS because of mandatory F90 module
   AC_MSG_CHECKING([for ELPA library])
-  AC_LINK_IFELSE([AC_LANG_PROGRAM([],
-    [use elpa1
-     integer,parameter :: n=1,comm=1 ; integer :: comm1,comm2,success
-     success=get_elpa_communicators(comm,n,n,comm1,comm2)
-    ])], [abi_linalg_has_elpa="yes"], [])
+  _ABI_LINALG_TEST_ELPA()
   if test "${abi_linalg_has_elpa}" = "no"; then
     tmp_saved_LIBS="${LIBS}"
     for test_lib in $1; do
       LIBS="-l${test_lib} $2 ${tmp_saved_LIBS}"
-      AC_LINK_IFELSE([AC_LANG_PROGRAM([],
-        [use elpa1
-         integer,parameter :: n=1,comm=1 ; integer :: comm1,comm2,success
-         success=get_elpa_communicators(comm,n,n,comm1,comm2)
-        ])], [abi_linalg_has_elpa="yes"], [])
+      _ABI_LINALG_TEST_ELPA()
       if test "${abi_linalg_has_elpa}" = "yes"; then
         abi_linalg_libs="-l${test_lib} $2 ${abi_linalg_libs}"
         break
@@ -417,18 +382,9 @@ AC_DEFUN([_ABI_LINALG_SEARCH_ELPA],[
       LIBS="${tmp_saved_LIBS}"
     fi
   fi
-  if test "${abi_linalg_has_elpa}" = "no"; then
-    AC_SEARCH_LIBS([elpa_transpose_vectors],$1,
-      [abi_linalg_has_elpa="yes"],[abi_linalg_has_elpa="no"],
-      [$2 ${abi_linalg_libs}])
-    if test "${abi_linalg_has_elpa}" = "yes"; then
-      if test "${ac_cv_search_elpa_transpose_vectors}" != "none required"; then
-        abi_linalg_libs="${ac_cv_search_elpa_transpose_vectors} $2 ${abi_linalg_libs}"
-      fi
-    fi
-  else
-    AC_MSG_RESULT([${abi_linalg_has_elpa}])
-  fi
+
+  AC_MSG_RESULT([${abi_linalg_has_elpa}])
+
   if test "${abi_linalg_has_elpa}" = "yes"; then
     _ABI_LINALG_FIND_ELPA_VERSION()
   fi
@@ -537,6 +493,50 @@ AC_DEFUN([_ABI_LINALG_FIND_ELPA_VERSION],[
     AC_MSG_ERROR([ELPA version was not recognized!])
   fi
 ]) # _ABI_LINALG_FIND_ELPA_VERSION
+
+
+
+# _ABI_LINALG_TEST_ELPA(ELPA,EXTRA_LIBS)
+# ----------------------------------------
+#
+# Test if ELPA can be compiled or not
+#
+AC_DEFUN([_ABI_LINALG_TEST_ELPA],[
+  dnl Init
+  abi_linalg_has_elpa="no"
+
+# Check ELPA v2017+
+  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([],[use elpa])],
+    [abi_linalg_has_elpa="yes"], [abi_linalg_has_elpa="no"])
+  if test "${abi_linalg_has_elpa}" = "yes"; then
+    AC_LINK_IFELSE([AC_LANG_PROGRAM([],
+      [use elpa
+       integer :: nrows=1,err
+       class(elpa_t),pointer :: e
+       call e%set("local_nrows",nrows,err)
+      ])], [abi_linalg_has_elpa="yes"], [abi_linalg_has_elpa="no"])
+  fi
+
+# Check ELPA v2017-
+  if test "${abi_linalg_has_elpa}" = "no"; then
+    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([],[use elpa1])],
+      [abi_linalg_has_elpa="yes"], [abi_linalg_has_elpa="no"])
+    if test "${abi_linalg_has_elpa}" = "yes"; then
+      AC_LINK_IFELSE([AC_LANG_PROGRAM([],
+        [use elpa1
+         integer,parameter :: n=1,comm=1 ; integer :: comm1,comm2,success
+         success=get_elpa_communicators(comm,n,n,comm1,comm2)
+        ])], [abi_linalg_has_elpa="yes"], [abi_linalg_has_elpa="no"])
+    fi
+  fi
+
+# Check ELPA v2013-
+  if test "${abi_linalg_has_elpa}" = "no"; then
+    AC_LINK_IFELSE([AC_LANG_PROGRAM([],
+      [call elpa_transpose_vectors
+      ])], [abi_linalg_has_elpa="yes"], [abi_linalg_has_elpa="no"])
+  fi
+]) # _ABI_LINALG_TEST_ELPA
 
 
 # _ABI_LINALG_CHECK_MAGMA_15(MAGMA,EXTRA_LIBS)
