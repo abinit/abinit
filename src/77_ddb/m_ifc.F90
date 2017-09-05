@@ -726,7 +726,8 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
  if (nsphere == -1) call ifc_autocutoff(ifc, crystal, comm)
 
  call cwtime(cpu, wall, gflops, "stop")
- write(std_out,"(2(a,f6.2))")" ifc_init: cpu: ",cpu,", wall: ",wall
+ write(message,"(2(a,f6.2))")" ifc_init: cpu: ",cpu,", wall: ",wall
+ call wrtout(std_out,message,'COLL')
 
 end subroutine ifc_init
 !!***
@@ -1126,7 +1127,7 @@ subroutine ifc_speedofsound(ifc, crystal, qrad_tolkms, ncid, comm)
  integer :: ii,nu,igrid,my_rank,nprocs,ierr,converged,npts,num_negw,vs_ierr,ncerr
  integer :: iatom,iatref,num_acoustic,isacoustic
  real(dp) :: min_negw,cpu,wall,gflops
- real(dp) :: qrad,tolkms
+ real(dp) :: qrad,tolkms,diff
  character(len=500) :: msg
  type(lebedev_t) :: lgrid
 !arrays
@@ -1236,14 +1237,20 @@ subroutine ifc_speedofsound(ifc, crystal, qrad_tolkms, ncid, comm)
      " Lebedev-Laikov grid: ",igrid,", npts: ", npts, " vs_sphavg(ac_modes): ",quad, " <vs>: ",sum(quad)/3
 
    if (igrid > 1) then
-     if (abs(sum(quad - prev_quad)/3) < tolkms) then
-        converged = converged + 1; if (converged == 2) exit
+     diff = zero
+     do nu=1,3
+       diff = diff + abs(quad(nu) - prev_quad(nu)) / 3
+     end do
+     !if (abs(sum(quad - prev_quad)/3) < tolkms) then
+     if (diff < tolkms) then
+        converged = converged + 1
      else
         converged = 0
      end if
    end if
    prev_quad = quad
    vs(7, :) = quad
+   if (converged == 2) exit
  end do ! igrid
 
  if (my_rank == master) then

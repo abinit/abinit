@@ -1,0 +1,102 @@
+# This file provides the information needed to generate the "help" documentation files.
+# Each paragraph of such documentation file has a mix of formatting html information and real content.
+
+# The present file contains the formatting html information.
+# The "default" html information is presented in the section "default", at the bottom of the file. 
+# For most of the *_help.html files, the default html formatting is hardly changed, so only minimal information
+# is needed to generate them. 
+
+- !components
+    name : abinit
+    keyword : ABINIT, the main code
+    authors : DCA, XG
+    subtitle : This document explains the i/o parameters and format needed for the main code (abinit) in the ABINIT package.
+- !components
+    name : aim
+    keyword : the AIM utility
+    authors : PCasek,FF,XG
+    subtitle : This file explains the use and i/o parameters needed for the Atom-In-Molecule (AIM - Bader analysis) utility of the ABINIT package.
+- !components
+    name : anaddb
+    keyword : the Anaddb utility
+    authors : XG,DCA
+    subtitle : This file explains the use and i/o parameters needed for the "Analysis of Derivative DataBase" code of the ABINIT package.
+- !components
+    name : cut3d
+    keyword : the Cut3D utility
+    authors : XG,RC,GMR,JFB,MCote
+    subtitle : This file explains the use and i/o parameters needed for the "Cut 3-Dimensional files" post-processor of the ABINIT package.
+- !components
+    name : fold2bloch
+    keyword : the Fold2Bloch utility
+    authors : AB, OR
+    subtitle : This file explains the use and i/o parameters needed for the "fold2Bloch" post-processor of the ABINIT package.
+- !components
+    name : mrgddb
+    keyword : the Mrgddb utility
+    authors : XG,DCA
+    subtitle : This file explains the i/o parameters needed for the derivative database (DDB) merging code (MRGDDB).
+- !components
+    name : mrgscr
+    keyword : the Mrgscr utility
+    authors : RShaltaf
+    subtitle : This file explains the i/o parameters needed for the screening files (SCR) merging code (MRGSCR).
+- !components
+    name : new_user
+    keyword : new user help file
+    authors : DCA,XG,RC
+    title : |
+      <h1>ABINIT new user help file.</h1>
+    subtitle : This file gives a beginner's introduction to the ABINIT resources, the ABINIT package, and the main ABINIT application.
+- !components
+    name : optic
+    keyword : the Optic utility
+    authors : SS,XG,YG
+    subtitle : Frequency dependent linear optical dielectric function and second order nonlinear optical susceptibility.
+- !components
+    name : respfn
+    keyword : DFPT
+    authors : XG,DCA
+    title : | 
+      <h1>Auxiliary help file for responses to perturbations.</h1>
+    subtitle : |
+      This file complements the main [[help_abinit]], for matters related to responses to perturbations (computed using DFPT)
+- !components
+    name : features
+    keyword : ABINIT features
+    authors : FJ,XG
+    title : |
+      <h1> ABINIT settings and features.</h1>
+    subtitle : |
+      An overview of ABINIT settings and features, for beginners and more experienced users.
+    tofcontent_header : |
+      <a name="list"></a>
+      <h3><b> Table of contents:</b></h3>
+- !components
+    name : default
+    keyword : Default keyword ... this is an error
+    authors : Default authors ... this is an error
+    header : |
+      <html>
+      <head><title>__KEYWORD__</title>
+      <link rel=stylesheet type="text/css" href="../formabinit.css">
+      </head>
+      <body bgcolor="#ffffff">
+
+      <hr>
+      <a name="top"></a>
+    title : |
+      <h1>Help file for __KEYWORD__ of the ABINIT package.</h1>
+    copyright : |
+      <hr>
+      <h5>Copyright (C) 1998-2017 ABINIT group (__AUTHORS__)
+      <script type="text/javascript" src="__JS_PATH__copyright.js"> </script>
+      </h5> 
+    links : |
+      <script type="text/javascript" src="__JS_PATH__list_internal_links_for_generated_files.js"> </script>
+    tofcontent_header : |
+      <a name="list"></a>
+      <h3><b> Content of the help file:</b></h3>
+    end : |
+      </body>
+      </html>

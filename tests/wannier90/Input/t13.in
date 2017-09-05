@@ -73,4 +73,5 @@ w90iniprj2 1
 #%% description = Argon FCC
 #%%   Test the approach of Silvestrelli to assess van der Waals interactions, combining the QHO model with Wannier functions.   
 #%% references = J. Chem. Phys. 139, 054106 (2013).
+#%% topics = vdw, Wannier
 #%%<END TEST_INFO>

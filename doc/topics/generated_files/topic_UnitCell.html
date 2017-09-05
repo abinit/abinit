@@ -1,0 +1,111 @@
+<!--                                                                                     -->
+<!-- This file has been produced by generate_doc.py using different .yml  or .bib files. -->
+<!-- It is useless to modify it. Modify the related .yml  or .bib files instead.         -->
+<!--                                                                                     -->
+<html>
+<head><title>UnitCell </title>
+<link rel=stylesheet type="text/css" href="../formabinit.css">
+</head>
+<body bgcolor="#ffffff">
+
+<hr>
+<a name="top"></a>
+
+<h1>Specification of the unit cell</h1>
+<h3>This page gives hints on how to specify the unit cell with the ABINIT package.
+<hr>
+
+<h5>Copyright (C) 2016-2017 ABINIT group (FJ)
+<script type="text/javascript" src="../../js_files/copyright.js"> </script>
+</h5>
+
+<script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
+
+ Mentioned in &nbsp; <a href="../../topics/generated_files/topic_SmartSymm.html">topic_SmartSymm</a> &nbsp;&nbsp; <a href="../../topics/generated_files/topic_crystal.html">topic_crystal</a> &nbsp;&nbsp; <a href="../../users/generated_files/help_features.html#2.1">help_features#2.1</a> &nbsp;
+ <hr>
+ <h3><b>Table of content: </b></h3> 
+ <ul> <li>1. <a href="topic_UnitCell.html#1">Introduction.</a><li>2. <a href="topic_UnitCell.html#2">Related lesson(s) of the tutorial.</a><li>3. <a href="topic_UnitCell.html#3">Related input variables.</a><li>4. <a href="topic_UnitCell.html#4">Selected input files.</a></ul>
+
+&nbsp; 
+<HR ALIGN=left> 
+<a name="1">&nbsp;</a>
+<h3><b>1. Introduction.</b></h3>
+
+
+ABINIT needs three dimensioned non-coplanar vectors, forming the unit cell, to set up the real space lattice.
+<p>
+An initial set of three vectors, specified in real space by <a href="../../input_variables/generated_files/varset_basic.html#rprim">rprim</a> or as unit vectors with angles <a href="../../input_variables/generated_files/varset_basic.html#angdeg">angdeg</a>,
+are dimensioned in a second step using scaling factors as specified by <a href="../../input_variables/generated_files/varset_basic.html#acell">acell</a> or by rescaling their cartesian coordinates, 
+as specified by <a href="../../input_variables/generated_files/varset_basic.html#scalecart">scalecart</a>. Internally, only the final result, <a href="../../input_variables/generated_files/varset_basic.html#rprimd">rprimd</a> matters.
+The most detailed explanation can be found by looking at <a href="../../input_variables/generated_files/varset_basic.html#rprim">rprim</a>.
+<p>
+Note that ABINIT expects the mixed product of the three vectors (R1xR2).R3 to be positive. 
+If it is not the case, exchange two of them.
+<p>
+More information about the way the real space lattice, 
+the reciprocal lattice, and symmetries are defined in ABINIT can be found <a href="../documents/geometry.pdf">here</a>.
+<p><b>Smart symmetriser</b><p>
+ABINIT has also a smart symmetriser capability, when <a href="../../input_variables/generated_files/varset_geo.html#spgroup">spgroup</a>!=0 and <a href="../../input_variables/generated_files/varset_geo.html#brvltt">brvltt</a>=-1. 
+In this case, the CONVENTIONAL unit cell must be input through the usual 
+input variables <a href="../../input_variables/generated_files/varset_basic.html#rprim">rprim</a>, <a href="../../input_variables/generated_files/varset_basic.html#angdeg">angdeg</a>, <a href="../../input_variables/generated_files/varset_basic.html#acell">acell</a> and/or <a href="../../input_variables/generated_files/varset_basic.html#scalecart">scalecart</a>. 
+ABINIT will fold the conventional unit to the primitive cell, 
+and also generate all the nuclei positions from the irreducible ones. 
+See <a href="../../topics/generated_files/topic_SmartSymm.html#">SmartSymm</a>.
+<br><br><a href=#top>Go to the top</a>
+
+
+
+&nbsp; 
+<HR ALIGN=left> 
+<a name="2">&nbsp;</a>
+<h3><b>2. Related lesson(s) of the tutorial.</b></h3>
+
+
+<li><a href="../../tutorial/generated_files/lesson_base4.html#44">Fourth basic lesson</a> Determination of the surface energy of aluminum (100): changing the orientation of the unit cell.
+<br><br><a href=#top>Go to the top</a>
+
+
+&nbsp; 
+<hr> 
+<a name="3">&nbsp;</a>
+<h3><b>3. Related input variables.</b></h3>
+
+
+<p>Basic input variables:<p>... <a href="../../input_variables/generated_files/varset_basic.html#acell">acell</a>   [CELL lattice vector scaling]<br>
+... <a href="../../input_variables/generated_files/varset_basic.html#rprim">rprim</a>   [Real space PRIMitive translations]<br>
+<p>Useful input variables:<p>... <a href="../../input_variables/generated_files/varset_basic.html#angdeg">angdeg</a>   [ANGles in DEGrees]<br>
+... <a href="../../input_variables/generated_files/varset_geo.html#brvltt">brvltt</a>   [BRaVais LaTTice type]<br>
+... <a href="../../input_variables/generated_files/varset_gstate.html#chkprim">chkprim</a>   [CHecK whether the cell is PRIMitive]<br>
+... <a href="../../input_variables/generated_files/varset_basic.html#scalecart">scalecart</a>   [SCALE CARTesian coordinates]<br>
+... <a href="../../input_variables/generated_files/varset_geo.html#spgroup">spgroup</a>   [SPace GROUP number]<br>
+<p>Relevant internal variables:<p>... <a href="../../input_variables/generated_files/varset_basic.html#rprimd">%rprimd</a>   [Real space PRIMitive translations, Dimensional]<br>
+
+<br><br><a href=#top>Go to the top</a>
+
+
+&nbsp; 
+<HR ALIGN=left> 
+<a name="4">&nbsp;</a>
+<h3><b>4. Selected input files.</b></h3>
+
+
+<i><b>WARNING</b> : as of ABINITv8.6.x, the list of input files provided in the specific section of the topics Web pages is still to be reviewed/tuned. In some cases, it will be adequate, and in other cases, it might be incomplete, or perhaps even useless.</i>
+<br><br>The user can find some related example input files in the ABINIT package in the directory /tests, or on the Web:
+<p> tests/v1/Input: <a href="../../tests/v1/Input/t96.in">t96.in</a> 
+<p> tests/v2/Input: <a href="../../tests/v2/Input/t59.in">t59.in</a> 
+<a href="../../tests/v2/Input/t60.in">t60.in</a> 
+<p> tests/v3/Input: <a href="../../tests/v3/Input/t23.in">t23.in</a> 
+<p> tests/v5/Input: <a href="../../tests/v5/Input/t77.in">t77.in</a> 
+<p> tests/v6/Input: <a href="../../tests/v6/Input/t16.in">t16.in</a> 
+<a href="../../tests/v6/Input/t30.in">t30.in</a> 
+<p> tests/tutorial/Input: <a href="../../tests/tutorial/Input/tbase4_4.in">tbase4_4.in</a> 
+<br>
+
+<br><br><a href=#top>Go to the top</a>
+
+
+<script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
+
+</body>
+</html>
+

@@ -74,4 +74,5 @@ xred 3*0 3*1/4
 #%%   needed for further computations, while PAWDEN files are useful for visualization, AIM, and other
 #%%   post-processing of the density.
 #%%   PAW AE DEN not compatible with parallelization over atoms.
+#%% topics = PAW
 #%%<END TEST_INFO>

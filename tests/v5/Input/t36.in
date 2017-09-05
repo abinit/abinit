@@ -46,4 +46,5 @@ xred 3*0
 #%% description = 
 #%%   BCC iron, ferromagnetic, computation of Fermi contact term with two spin densities.
 #%%   Coded and contributed by J. Zwanziger.
+#%% topics = EFG
 #%%<END TEST_INFO>

@@ -1,0 +1,6 @@
+This directory, hpc, contains tests which exercise High Performance Computing (HPC)
+features of the ABINIT package.
+
+Please, see the README file in the tests directory (above this one) to get help.
+
+This test suite can only be used on High Performance computers (i.e. on ~100...1000 processes/tasks).

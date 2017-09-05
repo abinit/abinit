@@ -140,4 +140,5 @@ optdriver5    5
 #%%    considered) the 5-th dataset compute 3DTE.
 #%%    localrdwf=1
 #%%    Also check parallelism for Raman calculations.
+#%% topics = nonlinear
 #%%<END TEST_INFO>

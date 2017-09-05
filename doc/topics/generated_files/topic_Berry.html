@@ -1,0 +1,149 @@
+<!--                                                                                     -->
+<!-- This file has been produced by generate_doc.py using different .yml  or .bib files. -->
+<!-- It is useless to modify it. Modify the related .yml  or .bib files instead.         -->
+<!--                                                                                     -->
+<html>
+<head><title>Berry phase </title>
+<link rel=stylesheet type="text/css" href="../formabinit.css">
+</head>
+<body bgcolor="#ffffff">
+
+<hr>
+<a name="top"></a>
+
+<h1>Berry phase computation of electric polarisation and finite electric field</h1>
+<h3>This page gives hints on how to compute the polarisation and take into account a finite homogeneous electric field with the ABINIT package.
+<hr>
+
+<h5>Copyright (C) 2016-2017 ABINIT group (JZ)
+<script type="text/javascript" src="../../js_files/copyright.js"> </script>
+</h5>
+
+<script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
+
+ Mentioned in &nbsp; <a href="../../topics/generated_files/topic_Phonons.html">topic_Phonons</a> &nbsp;&nbsp; <a href="../../users/generated_files/help_features.html#2.5">help_features#2.5</a> &nbsp;
+ <hr>
+ <h3><b>Table of content: </b></h3> 
+ <ul> <li>1. <a href="topic_Berry.html#1">Introduction.</a><li>2. <a href="topic_Berry.html#2">Related lesson(s) of the tutorial.</a><li>3. <a href="topic_Berry.html#3">Related input variables.</a><li>4. <a href="topic_Berry.html#4">Selected input files.</a><li>5. <a href="topic_Berry.html#5">References.</a></ul>
+
+&nbsp; 
+<HR ALIGN=left> 
+<a name="1">&nbsp;</a>
+<h3><b>1. Introduction.</b></h3>
+
+
+<p>The effect of an homogeneous static electric field on an insulator may be treated in ABINIT from two perspectives. 
+One is perturbative, and yields the susceptibility in the form of the 
+second derivative of the total energy with respect to the electric field, at zero field strength (see <a href="../../topics/generated_files/topic_DFPT.html#">DFPT</a>).
+<p> ABINIT can also be used to compute the effect of an electric field of finite amplitude, using techniques from the
+Modern Theory of Polarization <a href="../../biblio/generated_files/bib_biblio.html#Resta1994">[Resta1994]</a>,<a href="../../biblio/generated_files/bib_biblio.html#Nunes2001">[Nunes2001]</a>,<a href="../../biblio/generated_files/bib_biblio.html#Souza2002">[Souza2002]</a>. The latter is based on the notion of "Berry phase". 
+In this approach, the total energy to minimize includes the contribution due 
+to the interaction of the external electric field with the material polarization <b>P</b><sub>Tot</sub>, as follows:
+
+<p>E = E<sub>0</sub> - &Omega;<b>P</b><sub>Tot</sub><b>.E</b>,
+where E<sub>0</sub> is the usual ground state energy obtained from Kohn-Sham DFT in the absence of the external field <b>E</b>, <b>P</b><sub>Tot</sub> is the polarization, made up of an ionic contribution and an electronic contribution, and &Omega; the volume of the unit cell.
+<p>Some details of the implementation of The Modern Theory of Polarization in ABINIT are given in <a href="../../biblio/generated_files/bib_biblio.html#Gonze2016">[the 2016 ABINIT publication]</a>.
+
+<p>In the NCPP case, the electric field has no additional contribution to the Hellmann-Feynman forces, because the electronic
+states do not depend explicitly on ionic position <a href="../../biblio/generated_files/bib_biblio.html#Souza2002">[Souza2002]</a>.  In the PAW case however, as the projectors do depend on ion location, an additional force and additional stresses terms arise <a href="../../biblio/generated_files/bib_biblio.html#Zwanziger2012">[Zwanziger2012]</a>. 
+
+<p>The generalisation to fixed D-field or fixed reduced fields are also available, as described in M. Stengel, N.A. Spaldin and D. Vanderbilt, Nat. Phys. 5,304 (2009).
+
+<p>The polarization and finite electric field calculation in ABINIT is accessed through the variables <a href="../../input_variables/generated_files/varset_ffield.html#berryopt">berryopt</a> and <a href="../../input_variables/generated_files/varset_ffield.html#efield">efield</a>. In addition, 
+displacement fields and mixed boundary conditions (a mix of electric field and displacement field) can be computed as well.
+<br><br><a href=#top>Go to the top</a>
+
+
+
+&nbsp; 
+<HR ALIGN=left> 
+<a name="2">&nbsp;</a>
+<h3><b>2. Related lesson(s) of the tutorial.</b></h3>
+
+
+<li><a href="../../tutorial/generated_files/lesson_ffield.html">The lesson on polarization and finite
+electric field</a> deals with the computation of the polarization of
+an insulator (e.g. ferroelectric, or dielectric material) thanks to
+the Berry phase approach, and also presents the computation of
+materials properties in the presence of a finite electric field (also
+thanks to the Berry phase approach).</li>
+<br><br><a href=#top>Go to the top</a>
+
+
+&nbsp; 
+<hr> 
+<a name="3">&nbsp;</a>
+<h3><b>3. Related input variables.</b></h3>
+
+
+<p>Compulsory input variables:<p>... <a href="../../input_variables/generated_files/varset_ffield.html#berryopt">berryopt</a>   [BERRY phase OPTions]<br>
+<p>Basic input variables:<p>... <a href="../../input_variables/generated_files/varset_ffield.html#bdberry">bdberry</a>   [BanD limits for BERRY phase]<br>
+... <a href="../../input_variables/generated_files/varset_ffield.html#dfield">dfield</a>   [Displacement FIELD]<br>
+... <a href="../../input_variables/generated_files/varset_ffield.html#efield">efield</a>   [Electric FIELD]<br>
+... <a href="../../input_variables/generated_files/varset_ffield.html#jfielddir">jfielddir</a>   [electric/displacement FIELD DIRection]<br>
+... <a href="../../input_variables/generated_files/varset_ffield.html#kberry">kberry</a>   [K wavevectors for BERRY phase computation]<br>
+... <a href="../../input_variables/generated_files/varset_ffield.html#nberry">nberry</a>   [Number of BERRY phase computations]<br>
+<p>Useful input variables:<p>... <a href="../../input_variables/generated_files/varset_ffield.html#berrysav">berrysav</a>   [BERRY SAVe]<br>
+... <a href="../../input_variables/generated_files/varset_ffield.html#ddamp">ddamp</a>   [electric Displacement field DAMPing parameter]<br>
+... <a href="../../input_variables/generated_files/varset_ffield.html#maxestep">maxestep</a>   [MAXimum Electric field STEP]<br>
+... <a href="../../input_variables/generated_files/varset_ffield.html#polcen">polcen</a>   [POLarization for CENtrosymmetric geometry]<br>
+... <a href="../../input_variables/generated_files/varset_ffield.html#red_dfield">red_dfield</a>   [REDuced Displacement FIELD]<br>
+... <a href="../../input_variables/generated_files/varset_ffield.html#red_efield">red_efield</a>   [REDuced Electric FIELD]<br>
+... <a href="../../input_variables/generated_files/varset_ffield.html#red_efieldbar">red_efieldbar</a>   [REDuced Electric FIELD BAR]<br>
+<p>Input variables for experts:<p>... <a href="../../input_variables/generated_files/varset_ffield.html#berrystep">berrystep</a>   [BERRY phase : multiple STEP]<br>
+
+<br><br><a href=#top>Go to the top</a>
+
+
+&nbsp; 
+<HR ALIGN=left> 
+<a name="4">&nbsp;</a>
+<h3><b>4. Selected input files.</b></h3>
+
+
+<i><b>WARNING</b> : as of ABINITv8.6.x, the list of input files provided in the specific section of the topics Web pages is still to be reviewed/tuned. In some cases, it will be adequate, and in other cases, it might be incomplete, or perhaps even useless.</i>
+<br><br>The user can find some related example input files in the ABINIT package in the directory /tests, or on the Web:
+<p> tests/paral/Input: <a href="../../tests/paral/Input/t07.in">t07.in</a> 
+<p> tests/v2/Input: <a href="../../tests/v2/Input/t81.in">t81.in</a> 
+<p> tests/v3/Input: <a href="../../tests/v3/Input/t03.in">t03.in</a> 
+<a href="../../tests/v3/Input/t05.in">t05.in</a> 
+<p> tests/v4/Input: <a href="../../tests/v4/Input/t55.in">t55.in</a> 
+<a href="../../tests/v4/Input/t66.in">t66.in</a> 
+<a href="../../tests/v4/Input/t72.in">t72.in</a> 
+<a href="../../tests/v4/Input/t75.in">t75.in</a> 
+<a href="../../tests/v4/Input/t78.in">t78.in</a> 
+<a href="../../tests/v4/Input/t80.in">t80.in</a> 
+<p> tests/v5/Input: <a href="../../tests/v5/Input/t112.in">t112.in</a> 
+<a href="../../tests/v5/Input/t113.in">t113.in</a> 
+<a href="../../tests/v5/Input/t23.in">t23.in</a> 
+<p> tests/v6/Input: <a href="../../tests/v6/Input/t121.in">t121.in</a> 
+<a href="../../tests/v6/Input/t122.in">t122.in</a> 
+<a href="../../tests/v6/Input/t123.in">t123.in</a> 
+<a href="../../tests/v6/Input/t124.in">t124.in</a> 
+<a href="../../tests/v6/Input/t125.in">t125.in</a> 
+<a href="../../tests/v6/Input/t126.in">t126.in</a> 
+<a href="../../tests/v6/Input/t43.in">t43.in</a> 
+<p> tests/v7/Input: <a href="../../tests/v7/Input/t03.in">t03.in</a> 
+<br>
+
+<br><br><a href=#top>Go to the top</a>
+
+
+&nbsp; 
+<HR ALIGN=left> 
+<a name="5">&nbsp;</a>
+<h3><b>5. References.</b></h3>
+
+
+<br> <a href="../../biblio/generated_files/bib_biblio.html#Nunes2001">[Nunes2001]</a>  R. W. Nunes and X. Gonze, "Berry-phase treatment of the homogeneous electric field perturbation in insulators", Phys. Rev. B 63, 155107 (2001).<br>
+<br> <a href="../../biblio/generated_files/bib_biblio.html#Resta1994">[Resta1994]</a>  R. Resta, "Macroscopic polarization in crystalline dielectrics: the geometric phase approach", Rev. Mod. Phys. 66, 899&ndash;915 (1994).<br>
+<br> <a href="../../biblio/generated_files/bib_biblio.html#Souza2002">[Souza2002]</a>  I. Souza, J. &Iacute;&ntilde;iguez and D. Vanderbilt, "First-Principles Approach to Insulators in Finite Electric Fields", Phys. Rev. Lett. 89, 117602 (2002).<br>
+<br> <a href="../../biblio/generated_files/bib_biblio.html#Zwanziger2012">[Zwanziger2012]</a>  J.W. Zwanziger, J. Galbraith, Y. Kipouros, M. Torrent, M. Giantomassi and X. Gonze, "Finite homogeneous electric fields in the projector augmented wave formalism: Applications to linear and nonlinear response", Comput. Mater. Sci. 58, 113&ndash;118 (2012).<br>
+<p>
+<br><br><a href=#top>Go to the top</a>
+
+<script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
+
+</body>
+</html>
+

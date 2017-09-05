@@ -87,4 +87,5 @@ rfdir       1 1 1      # Do all directions (symmetry will be used)
 #%%   reduction of the number of q points to be computed, thanks to thmflag=7 .
 #%%   Warning : only valid for Gamma, AND the temperature-dependent shifts must be averaged
 #%%   over degenerate states.
+#%% topics = TDepES
 #%%<END TEST_INFO>

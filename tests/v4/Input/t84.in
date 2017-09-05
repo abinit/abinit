@@ -90,4 +90,5 @@
 #%% description = 
 #%%   Si FCC, in primitive cell (2 atoms/cell).
 #%%   Test GW calculation with and without plasmon-pole model.
+#%% topics = GW
 #%%<END TEST_INFO>

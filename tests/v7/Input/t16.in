@@ -95,4 +95,5 @@ toldfe   1.d-7
 #%% authors = A. Shukri, F. Bruneval
 #%% keywords = GW
 #%% description = Random stopping power within RPA and TD-LDA
+#%% topics = RandStopPow
 #%%<END TEST_INFO>

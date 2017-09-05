@@ -1,0 +1,37 @@
+# This file provides the information needed to generate the documentation files that describes the topics files,
+# and the list of all topics. 
+# Each component of such documentation file has a mix of formatting html information and real content.
+
+# The present file contains the default html information, also used for the list of all variables.
+# For each of the topics file, there is a corresponding yml file, that specifies usually the list of paragraphs.
+
+- !components
+    name : all_topics
+    keyword : All_topics
+    authors : FJ,XG
+    howto : default
+    header : |
+      <html>
+      <head><title>__KEYWORD__ </title>
+      <link rel=stylesheet type="text/css" href="../formabinit.css">
+      </head>
+      <body bgcolor="#ffffff">
+
+      <hr>
+      <a name="top"></a>
+    title : |
+      <h1>Main ABINIT code, "How to ?" documentation topics.</h1>
+    subtitle : |
+      <h3>This page gives hints on how to __HOWTO__ with the ABINIT package.
+      <hr>
+    copyright : |
+      <h5>Copyright (C) 2016-2017 ABINIT group (__AUTHORS__)
+      <script type="text/javascript" src="__JS_PATH__copyright.js"> </script>
+      </h5>
+    links : |
+      <script type="text/javascript" src="__JS_PATH__list_internal_links_for_generated_files.js"> </script>
+    tofcontent_header : |
+      <script type="text/javascript" src="__JS_PATH__topics_table_of_content.js"> </script>
+    end : |
+      </body>
+      </html>

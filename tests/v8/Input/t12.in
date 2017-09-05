@@ -47,6 +47,7 @@
 #%% authors = S. PROKHORENKO
 #%% keywords = MD
 #%% description = 
-#%%   Simple test of velocity verlet integrator             
+#%%   Simple test of velocity verlet integrator   
+#%% topics = MolecularDynamics
 #%%<END TEST_INFO>
 

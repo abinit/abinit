@@ -1,0 +1,82 @@
+<!--                                                                                     -->
+<!-- This file has been produced by generate_doc.py using different .yml  or .bib files. -->
+<!-- It is useless to modify it. Modify the related .yml  or .bib files instead.         -->
+<!--                                                                                     -->
+<html>
+<head><title>Artificial modification of the physics </title>
+<link rel=stylesheet type="text/css" href="../formabinit.css">
+</head>
+<body bgcolor="#ffffff">
+
+<hr>
+<a name="top"></a>
+
+<h1>Some artificial modifications of the physics - modify nuclear or electronic masses, chemical potential ...</h1>
+<h3>This page gives hints on how to perform some artificial modifications of the physics with the ABINIT package.
+<hr>
+
+<h5>Copyright (C) 2016-2017 ABINIT group (XG)
+<script type="text/javascript" src="../../js_files/copyright.js"> </script>
+</h5>
+
+<script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
+
+ Mentioned in &nbsp; <a href="../../users/generated_files/help_features.html#2.5">help_features#2.5</a> &nbsp;
+ <hr>
+ <h3><b>Table of content: </b></h3> 
+ <ul> <li>1. <a href="topic_Artificial.html#1">Introduction.</a><li>2. <a href="topic_Artificial.html#2">Related input variables.</a><li>3. <a href="topic_Artificial.html#3">Selected input files.</a></ul>
+
+&nbsp; 
+<HR ALIGN=left> 
+<a name="1">&nbsp;</a>
+<h3><b>1. Introduction.</b></h3>
+
+
+With a computer, one can consider non-physical modifications of the system to help the understanding the physics ...
+<p>The nuclear masses and free electron mass can be modified. A fake space dependent chemical potenial can be added, see <a href="../../input_variables/generated_files/varset_geo.html#chempot">chempot</a>, 
+as well as the electrostatic potential of a slab, <a href="../../input_variables/generated_files/varset_gstate.html#jellslab">jellslab</a>. A simple sine/cosine potential with a wavevector compatible 
+with the (super)call can also be added, see <a href="../../input_variables/generated_files/varset_ffield.html#qprtrb">qprtrb</a>.
+<br><br><a href=#top>Go to the top</a>
+
+
+
+
+&nbsp; 
+<hr> 
+<a name="2">&nbsp;</a>
+<h3><b>2. Related input variables.</b></h3>
+
+
+<p>Basic input variables:<p>... <a href="../../input_variables/generated_files/varset_rlx.html#amu">amu</a>   [Atomic Mass Units]<br>
+<p>Useful input variables:<p>... <a href="../../input_variables/generated_files/varset_ffield.html#qprtrb">qprtrb</a>   [Q-wavevector of the PERTurbation]<br>
+... <a href="../../input_variables/generated_files/varset_ffield.html#vprtrb">vprtrb</a>   [potential -V- for the PeRTuRBation]<br>
+<p>Input variables for experts:<p>... <a href="../../input_variables/generated_files/varset_geo.html#chempot">chempot</a>   [spatially varying CHEMical POTential]<br>
+... <a href="../../input_variables/generated_files/varset_dev.html#effmass_free">effmass_free</a>   [EFFective MASS for the FREE electron]<br>
+... <a href="../../input_variables/generated_files/varset_gstate.html#jellslab">jellslab</a>   [include a JELLium SLAB in the cell]<br>
+... <a href="../../input_variables/generated_files/varset_geo.html#nzchempot">nzchempot</a>   [Number of Z reduced coordinates that define the spatial CHEMical POTential]<br>
+... <a href="../../input_variables/generated_files/varset_gstate.html#slabwsrad">slabwsrad</a>   [jellium SLAB Wigner-Seitz RADius]<br>
+... <a href="../../input_variables/generated_files/varset_gstate.html#slabzbeg">slabzbeg</a>   [jellium SLAB BEGinning edge along the Z direction]<br>
+... <a href="../../input_variables/generated_files/varset_gstate.html#slabzend">slabzend</a>   [jellium SLAB ENDing edge along the Z direction]<br>
+
+<br><br><a href=#top>Go to the top</a>
+
+
+&nbsp; 
+<HR ALIGN=left> 
+<a name="3">&nbsp;</a>
+<h3><b>3. Selected input files.</b></h3>
+
+
+<i><b>WARNING</b> : as of ABINITv8.6.x, the list of input files provided in the specific section of the topics Web pages is still to be reviewed/tuned. In some cases, it will be adequate, and in other cases, it might be incomplete, or perhaps even useless.</i>
+<br><br>The user can find some related example input files in the ABINIT package in the directory /tests, or on the Web:
+<p> tests/v1/Input: <a href="../../tests/v1/Input/t25.in">t25.in</a> 
+<br>
+
+<br><br><a href=#top>Go to the top</a>
+
+
+<script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
+
+</body>
+</html>
+

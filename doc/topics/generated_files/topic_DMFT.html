@@ -1,0 +1,194 @@
+<!--                                                                                     -->
+<!-- This file has been produced by generate_doc.py using different .yml  or .bib files. -->
+<!-- It is useless to modify it. Modify the related .yml  or .bib files instead.         -->
+<!--                                                                                     -->
+<html>
+<head><title>DMFT </title>
+<link rel=stylesheet type="text/css" href="../formabinit.css">
+</head>
+<body bgcolor="#ffffff">
+
+<hr>
+<a name="top"></a>
+
+<h1>The DMFT framework</h1>
+<h3>This page gives hints on how to perform a DMFT calculation with the ABINIT package.
+<hr>
+
+<h5>Copyright (C) 2016-2017 ABINIT group (BAmadon)
+<script type="text/javascript" src="../../js_files/copyright.js"> </script>
+</h5>
+
+<script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
+
+ Mentioned in &nbsp; <a href="../../users/generated_files/help_features.html#5">help_features#5</a> &nbsp;
+ <hr>
+ <h3><b>Table of content: </b></h3> 
+ <ul> <li>1. <a href="topic_DMFT.html#1">Introduction.</a><li>2. <a href="topic_DMFT.html#2">Related lesson(s) of the tutorial.</a><li>3. <a href="topic_DMFT.html#3">Related input variables.</a><li>4. <a href="topic_DMFT.html#4">Selected input files.</a><li>5. <a href="topic_DMFT.html#5">References.</a></ul>
+
+&nbsp; 
+<HR ALIGN=left> 
+<a name="1">&nbsp;</a>
+<h3><b>1. Introduction.</b></h3>
+
+
+<p>DFT fails to describe the ground state and/or the excited states  such as many lanthanides, actinides or transition metals.
+Indeed, exchange correlation functionals are not (yet) able to describe the strong repulsive Coulomb interactions occurring 
+among electrons in partly filled localized d or f orbitals.
+<p>A way to improve the description of 
+strongly correlated systems is to explicitly include the strong repulsive Coulomb
+interactions in the Hamiltonian.  Solving it in the static mean field approximation, gives the 
+DFT+U method (<a href="../../biblio/generated_files/bib_biblio.html#Anisimov1991">[Anisimov1991]</a>,<a href="../../biblio/generated_files/bib_biblio.html#Liechtenstein1995">[Liechtenstein1995]</a>), implemented in ABINIT <a href="../../biblio/generated_files/bib_biblio.html#Amadon2008a">[Amadon2008a]</a>.
+The Dynamical Mean Field Theory <a href="../../biblio/generated_files/bib_biblio.html#Georges1996">[Georges1996]</a> (DMFT), goes beyond, 
+by solving exactly the local correlations for an atom in an effective field (i.e., an Anderson model).
+The effective field reproduces the effect of the surrounding correlated atoms and is thus self-consistently related 
+to the solution of the Anderson model <a href="../../biblio/generated_files/bib_biblio.html#Georges1996">[Georges1996]</a>.
+
+<p>The combination of DFT with DMFT <a href="../../biblio/generated_files/bib_biblio.html#Georges2004">[Georges2004]</a>,<a href="../../biblio/generated_files/bib_biblio.html#Kotliar2006">[Kotliar2006]</a> <a href="../../input_variables/generated_files/varset_dev.html#usedmft">usedmft</a>= 1}) relies on :
+
+ <li> The definition of correlated orbitals. In ABINIT, we use Wannier functions built using projected local orbitals <a href="../../biblio/generated_files/bib_biblio.html#Amadon2008">[Amadon2008]</a>.
+Wannier functions are unitarily related to  a selected set of Kohn Sham (KS) wavefunctions, specified in ABINIT by band indices
+<a href="../../input_variables/generated_files/varset_dmft.html#dmftbandi">dmftbandi</a> and <a href="../../input_variables/generated_files/varset_dmft.html#dmftbandf">dmftbandf</a>. As empty bands are necessary to build Wannier functions, it is required in DMFT calculations
+that the KS Hamiltonian is correctly diagonalized: use high values for <a href="../../input_variables/generated_files/varset_dev.html#nnsclo">nnsclo</a> and <a href="../../input_variables/generated_files/varset_gstate.html#nline">nline</a>.
+
+In order to make a first rough estimation of the orbital character of KS bands and choose 
+the band index, the band structure with highlighted atomic orbital character (so called <i>fatbands</i>) can
+be plotted, using the <a href="../../input_variables/generated_files/varset_paw.html#pawfatbnd">pawfatbnd</a> variable.
+Band structures obtained from projected orbitals Wannier functions can also be 
+plotted using <a href="../../input_variables/generated_files/varset_dev.html#plowan_compute">plowan_compute</a> and related variables. </li>
+ <li> The choice of the screened Coulomb interaction U (<a href="../../input_variables/generated_files/varset_paw.html#upawu">upawu</a>) and J (<a href="../../input_variables/generated_files/varset_paw.html#jpawu">jpawu</a>).
+Note that up to version 7.10.5 (but not in later versions) <a href="../../input_variables/generated_files/varset_paw.html#jpawu">jpawu</a>= 0 is required if the density matrix in the correlated subspace is not diagonal.</li>
+ <li> The choice of the double counting correction <a href="../../biblio/generated_files/bib_biblio.html#Amadon2012">[Amadon2012]</a>. The current default choice
+in ABINIT is <a href="../../input_variables/generated_files/varset_dmft.html#dmft_dc">dmft_dc</a>= 1} which corresponds to the full localized limit.</li>
+<li> The method of resolution of the Anderson model. In ABINIT, it can be the Hubbard I method <a href="../../biblio/generated_files/bib_biblio.html#Amadon2012">[Amadon2012]</a>  (<a href="../../input_variables/generated_files/varset_dmft.html#dmft_solv">dmft_solv</a>= 2),
+the Continuous time Quantum Monte Carlo (CTQMC) method <a href="../../biblio/generated_files/bib_biblio.html#Gull2011">[Gull2011]</a>,<a href="../../biblio/generated_files/bib_biblio.html#Bieder2014">[Bieder2014]</a> (<a href="../../input_variables/generated_files/varset_dmft.html#dmft_solv">dmft_solv</a>= 5)
+or the static mean field method (<a href="../../input_variables/generated_files/varset_dmft.html#dmft_solv">dmft_solv</a>= 1}, equivalent to usual DFT+U <a href="../../biblio/generated_files/bib_biblio.html#Amadon2012">[Amadon2012]</a>).</li>
+
+
+
+<p>The practical solution of the DFT+DMFT scheme is usually  presented as a double loop over, first, the local Green's function, and second the electronic local density <a href="../../biblio/generated_files/bib_biblio.html#Amadon2012">[Amadon2012]</a>. The number of iterations of the two loops are determined by <a href="../../input_variables/generated_files/varset_dmft.html#dmft_iter">dmft_iter</a> and <a href="../../input_variables/generated_files/varset_basic.html#nstep">nstep</a>. 
+However, in the general case, the most efficient way to carry out fully consistent DFT+DMFT calculations
+is to keep only the loop governed by <a href="../../input_variables/generated_files/varset_basic.html#nstep">nstep</a>, while <a href="../../input_variables/generated_files/varset_dmft.html#dmft_iter">dmft_iter</a>=1 <a href="../../biblio/generated_files/bib_biblio.html#Bieder2014">[Bieder2014]</a>, <a href="../../input_variables/generated_files/varset_dmft.html#dmft_rslf">dmft_rslf</a>= 1 (to read the self-energy file at each step of the DFT loop)
+and <a href="../../input_variables/generated_files/varset_files.html#prtden">prtden</a>= -1 (to be able to restart the calculation of each step of the DFT loop from the density file). Lastly, one linear and one logarithmic grid
+are used for Matsubara frequencies <a href="../../biblio/generated_files/bib_biblio.html#Kotliar2006">[Kotliar2006]</a> determined by <a href="../../input_variables/generated_files/varset_dmft.html#dmft_nwli">dmft_nwli</a> and <a href="../../input_variables/generated_files/varset_dmft.html#dmft_nwlo">dmft_nwlo</a> (Typical values
+are 10000 and 100, but convergence should be studied). More information can be obtained in the log file by setting <a href="../../input_variables/generated_files/varset_paw.html#pawprtvol">pawprtvol</a>=3.
+
+<p>The main output of the calculations are the imaginary time Green's function , from which spectral functions can be obtained
+using an external maximum entropy code <a href="../../biblio/generated_files/bib_biblio.html#Bergeron2015">[Bergeron2015]</a>, self-energies, from which quasiparticle renormalization weight can be extracted, the density matrix of correlated orbitals, and the internal energies <a href="../../biblio/generated_files/bib_biblio.html#Amadon2006">[Amadon2006]</a>. The electronic entropic contribution to the free energy 
+can also be obtained using <a href="../../input_variables/generated_files/varset_dmft.html#dmft_entropy">dmft_entropy</a> and <a href="../../input_variables/generated_files/varset_dmft.html#dmft_nlambda">dmft_nlambda</a>.
+
+
+<p>The efficient CTQMC code in ABINIT, which is the most time consuming part of DMFT,
+uses the hybridization expansion <a href="../../biblio/generated_files/bib_biblio.html#Werner2006">[Werner2006]</a>,<a href="../../biblio/generated_files/bib_biblio.html#Gull2011">[Gull2011]</a> with
+a <i>density-density</i>  multiorbital interaction <a href="../../biblio/generated_files/bib_biblio.html#Gull2011">[Gull2011]</a>.
+Moreover, the hybridization function <a href="../../biblio/generated_files/bib_biblio.html#Gull2011">[Gull2011]</a> is assumed to be diagonal in the orbital (or flavor) index. This is exact for cubic symmetry without spin orbit coupling but, in general, one should always check 
+that the off-diagonal terms are much smaller than the diagonal ones.
+The non diagonal hybridization and coupling to the exact rotationally invariant interaction <a href="../../biblio/generated_files/bib_biblio.html#Gull2011">[Gull2011]</a> is not available
+in version 7.10.5.
+<p>As the CTQMC solver uses a Fourier transform, the time grid <a href="../../input_variables/generated_files/varset_dmft.html#dmftqmc_l">dmftqmc_l</a> in imaginary space must be chosen so that the Nyquist frequency, defined by &pi;*<a href="../../input_variables/generated_files/varset_dmft.html#dmftqmc_l">dmftqmc_l</a>*<a href="../../input_variables/generated_files/varset_gstate.html#tsmear">tsmear</a>, is around 2 or 3 Ha.
+A convergence study should be performed on this variable.
+Moreover, the number of imaginary frequencies (<a href="../../input_variables/generated_files/varset_dmft.html#dmft_nwlo">dmft_nwlo</a>) has to be set to at least twice the value of <a href="../../input_variables/generated_files/varset_dmft.html#dmftqmc_l">dmftqmc_l</a>.
+Typical numbers of steps for the thermalization (<a href="../../input_variables/generated_files/varset_dmft.html#dmftqmc_therm">dmftqmc_therm</a>) and for the Monte carlo runs (<a href="../../input_variables/generated_files/varset_dmft.html#dmftqmc_n">dmftqmc_n</a>) are 10<sup>6</sup> and 10<sup>9</sup> respectively.
+The random number generator can be initialized with the variable <a href="../../input_variables/generated_files/varset_dmft.html#dmftqmc_seed">dmftqmc_seed</a>.
+Several other variables are available.
+<a href="../../input_variables/generated_files/varset_dmft.html#dmftctqmc_order">dmftctqmc_order</a> gives a histogram of the perturbation orders during the simulation, <a href="../../input_variables/generated_files/varset_dmft.html#dmftctqmc_gmove">dmftctqmc_gmove</a> customizes the global move tries (mainly useful for systems with high/low spin configurations), and <a href="../../input_variables/generated_files/varset_dmft.html#dmftctqmc_meas">dmftctqmc_meas</a> sets the frequency of measurement of quantities.
+<br><br><a href=#top>Go to the top</a>
+
+
+
+&nbsp; 
+<HR ALIGN=left> 
+<a name="2">&nbsp;</a>
+<h3><b>2. Related lesson(s) of the tutorial.</b></h3>
+
+
+<li><a href="../../tutorial/generated_files/lesson_dmft.html">The lesson on DFT+DMFT</a> shows
+how to perform a DFT+DMFT calculation on SrVO3 using projected Wannier functions. Prerequisite : DFT+U.</li>
+<br><br><a href=#top>Go to the top</a>
+
+
+&nbsp; 
+<hr> 
+<a name="3">&nbsp;</a>
+<h3><b>3. Related input variables.</b></h3>
+
+
+<p>Compulsory input variables:<p>... <a href="../../input_variables/generated_files/varset_dmft.html#dmft_iter">dmft_iter</a>   [Dynamical Mean Fied Theory: number of ITERation]<br>
+... <a href="../../input_variables/generated_files/varset_dmft.html#dmft_nwli">dmft_nwli</a>   [Dynamical Mean Fied Theory: Number of frequency omega (W) in the LInear mesh]<br>
+... <a href="../../input_variables/generated_files/varset_dmft.html#dmft_nwlo">dmft_nwlo</a>   [Dynamical Mean Fied Theory: Number of frequency omega (W) in the LOg mesh]<br>
+... <a href="../../input_variables/generated_files/varset_dmft.html#dmftbandf">dmftbandf</a>   [Dynamical Mean Field Theory: BAND: Final]<br>
+... <a href="../../input_variables/generated_files/varset_dmft.html#dmftbandi">dmftbandi</a>   [Dynamical Mean Field Theory: BAND: Initial]<br>
+... <a href="../../input_variables/generated_files/varset_dmft.html#dmftqmc_l">dmftqmc_l</a>   [Dynamical Mean Fied Theory: Quantum Monte Carlo time sLices]<br>
+... <a href="../../input_variables/generated_files/varset_dmft.html#dmftqmc_n">dmftqmc_n</a>   [Dynamical Mean Fied Theory: Quantum Monte Carlo Number of sweeps]<br>
+... <a href="../../input_variables/generated_files/varset_dmft.html#dmftqmc_therm">dmftqmc_therm</a>   [Dynamical Mean Fied Theory: Quantum Monte Carlo THERMalization]<br>
+... <a href="../../input_variables/generated_files/varset_dev.html#usedmft">usedmft</a>   [USE Dynamical Mean Field Theory]<br>
+<p>Basic input variables:<p>... <a href="../../input_variables/generated_files/varset_dmft.html#dmft_rslf">dmft_rslf</a>   [Dynamical Mean Fied Theory: Read SeLF energy]<br>
+... <a href="../../input_variables/generated_files/varset_dmft.html#dmft_solv">dmft_solv</a>   [Dynamical Mean Fied Theory: choice of SOLVer]<br>
+<p>Useful input variables:<p>... <a href="../../input_variables/generated_files/varset_dmft.html#dmft_dc">dmft_dc</a>   [Dynamical Mean Fied Theory: Double Counting]<br>
+... <a href="../../input_variables/generated_files/varset_dmft.html#dmft_mxsf">dmft_mxsf</a>   [Dynamical Mean Fied Theory: MiXing parameter for the SelF energy]<br>
+... <a href="../../input_variables/generated_files/varset_dmft.html#dmft_tollc">dmft_tollc</a>   [Dynamical Mean Fied Theory: TOLerance on Local Charge for convergence of the DMFT loop]<br>
+... <a href="../../input_variables/generated_files/varset_dmft.html#dmftcheck">dmftcheck</a>   [Dynamical Mean Fied Theory: CHECKs]<br>
+... <a href="../../input_variables/generated_files/varset_dmft.html#dmftctqmc_check">dmftctqmc_check</a>   [Dynamical Mean Fied Theory: Continuous Time Quantum Monte Carlo CHECK]<br>
+... <a href="../../input_variables/generated_files/varset_dmft.html#dmftctqmc_gmove">dmftctqmc_gmove</a>   [Dynamical Mean Fied Theory: Continuous Time Quantum Monte Carlo Global MOVEs]<br>
+... <a href="../../input_variables/generated_files/varset_dmft.html#dmftctqmc_order">dmftctqmc_order</a>   [Dynamical Mean Fied Theory: Continuous Time Quantum Monte Carlo perturbation ORDER]<br>
+... <a href="../../input_variables/generated_files/varset_dmft.html#dmftqmc_seed">dmftqmc_seed</a>   [Dynamical Mean Fied Theory: Quantum Monte Carlo SEED]<br>
+<p>Input variables for experts:<p>... <a href="../../input_variables/generated_files/varset_dmft.html#dmft_entropy">dmft_entropy</a>   [Dynamical Mean Fied Theory: ENTROPY]<br>
+... <a href="../../input_variables/generated_files/varset_dmft.html#dmft_nlambda">dmft_nlambda</a>   [Dynamical Mean Fied Theory: Number of LAMBDA points]<br>
+... <a href="../../input_variables/generated_files/varset_dev.html#dmft_read_occnd">dmft_read_occnd</a>   [Dynamical Mean Fied Theory: READ OCCupations (Non Diagonal)]<br>
+... <a href="../../input_variables/generated_files/varset_dmft.html#dmft_t2g">dmft_t2g</a>   [Dynamical Mean Fied Theory: t2g orbitals]<br>
+... <a href="../../input_variables/generated_files/varset_dmft.html#dmft_tolfreq">dmft_tolfreq</a>   [Dynamical Mean Fied Theory: TOLerance on DFT correlated electron occupation matrix for the definition of the FREQuency grid]<br>
+... <a href="../../input_variables/generated_files/varset_dev.html#dmftctqmc_basis">dmftctqmc_basis</a>   [Dynamical Mean Fied Theory: Continuous Time Quantum Monte Carlo BASIS]<br>
+... <a href="../../input_variables/generated_files/varset_dmft.html#dmftctqmc_correl">dmftctqmc_correl</a>   [Dynamical Mean Fied Theory: Continuous Time Quantum Monte Carlo CORRELations]<br>
+... <a href="../../input_variables/generated_files/varset_dmft.html#dmftctqmc_grnns">dmftctqmc_grnns</a>   [Dynamical Mean Fied Theory: Continuous Time Quantum Monte Carlo GReeNs NoiSe]<br>
+... <a href="../../input_variables/generated_files/varset_dmft.html#dmftctqmc_meas">dmftctqmc_meas</a>   [Dynamical Mean Fied Theory: Continuous Time Quantum Monte Carlo MEASurements]<br>
+... <a href="../../input_variables/generated_files/varset_dmft.html#dmftctqmc_mov">dmftctqmc_mov</a>   [Dynamical Mean Fied Theory: Continuous Time Quantum Monte Carlo MOVie]<br>
+... <a href="../../input_variables/generated_files/varset_dmft.html#dmftctqmc_mrka">dmftctqmc_mrka</a>   [Dynamical Mean Fied Theory: Continuous Time Quantum Monte Carlo MARKov Analysis]<br>
+... <a href="../../input_variables/generated_files/varset_dmft.html#dmftctqmc_triqs_nleg">dmftctqmc_triqs_nleg</a>   [Dynamical Mean Fied Theory: Continuous Time Quantum Monte Carlo perturbation of TRIQS, Number of LEGendre polynomials]<br>
+
+<br><br><a href=#top>Go to the top</a>
+
+
+&nbsp; 
+<HR ALIGN=left> 
+<a name="4">&nbsp;</a>
+<h3><b>4. Selected input files.</b></h3>
+
+
+<i><b>WARNING</b> : as of ABINITv8.6.x, the list of input files provided in the specific section of the topics Web pages is still to be reviewed/tuned. In some cases, it will be adequate, and in other cases, it might be incomplete, or perhaps even useless.</i>
+<br><br>The user can find some related example input files in the ABINIT package in the directory /tests, or on the Web:
+<p> tests/v6/Input: <a href="../../tests/v6/Input/t47.in">t47.in</a> 
+<p> tests/v7/Input: <a href="../../tests/v7/Input/t21.in">t21.in</a> 
+<a href="../../tests/v7/Input/t27.in">t27.in</a> 
+<a href="../../tests/v7/Input/t28.in">t28.in</a> 
+<br>
+
+<br><br><a href=#top>Go to the top</a>
+
+
+&nbsp; 
+<HR ALIGN=left> 
+<a name="5">&nbsp;</a>
+<h3><b>5. References.</b></h3>
+
+
+<br> <a href="../../biblio/generated_files/bib_biblio.html#Amadon2006">[Amadon2006]</a>  B. Amadon, S. Biermann, A. Georges and F. Aryasetiawan, "The &alpha;-&gamma; Transition of Cerium Is Entropy Driven", Phys. Rev. Lett. 96, 066402 (2006). <br> DOI: <a href="https://doi.org/10.1103/PhysRevLett.96.066402">10.1103/PhysRevLett.96.066402</a>.<br>
+<br> <a href="../../biblio/generated_files/bib_biblio.html#Amadon2008">[Amadon2008]</a>  B. Amadon, F. Lechermann, A. Georges, F. Jollet, T. O. Wehling and A. I. Liechtenstein, "Plane-wave based electronic structure calculations for correlated materials using dynamical mean-field theory and projected local orbitals", Phys. Rev. B 77, 205112 (2008). <br> DOI: <a href="https://doi.org/10.1103/PhysRevB.77.205112">10.1103/PhysRevB.77.205112</a>.<br>
+<br> <a href="../../biblio/generated_files/bib_biblio.html#Amadon2008a">[Amadon2008a]</a>  B. Amadon, F. Jollet and M. Torrent, "&gamma; and &beta; cerium: LDA+U calculations of ground-state parameters", Phys. Rev. B 77, 155104 (2008). <br> DOI: <a href="https://doi.org/10.1103/PhysRevB.77.155104">10.1103/PhysRevB.77.155104</a>.<br>
+<br> <a href="../../biblio/generated_files/bib_biblio.html#Amadon2012">[Amadon2012]</a>  B. Amadon, "A self-consistent DFT+DMFT scheme in the projector augmented wave method: applications to cerium, Ce<sub>2</sub>O<sub>3</sub> and Pu<sub>2</sub>O<sub>3</sub> with the Hubbard I solver and comparison to DFT+U", J. Phys.: Cond. Matt. 24, 075604 (2012). <br> URL: <a href="http://iopscience.iop.org/article/10.1088/0953-8984/24/7/075604"> http://iopscience.iop.org/article/10.1088/0953-8984/24/7/075604</a>.<br>
+<br> <a href="../../biblio/generated_files/bib_biblio.html#Anisimov1991">[Anisimov1991]</a>  V. I. Anisimov and O. Gunnarsson, "Density-functional calculation of effective Coulomb interactions in metals", Phys. Rev. B 43, 7570&ndash;7574 (1991). <br> DOI: <a href="https://doi.org/10.1103/PhysRevB.43.7570">10.1103/PhysRevB.43.7570</a>.<br>
+<br> <a href="../../biblio/generated_files/bib_biblio.html#Bergeron2015">[Bergeron2015]</a>  D. Bergeron and A.-M. S. Tremblay, "Algorithms for optimized maximum entropy and diagnostic tools for analytic continuation", arXiv e-prints 1507.01012 (2015). <br> URL: <a href="http://adsabs.harvard.edu/abs/2015arXiv150701012B"> http://adsabs.harvard.edu/abs/2015arXiv150701012B</a>.<br>
+<br> <a href="../../biblio/generated_files/bib_biblio.html#Bieder2014">[Bieder2014]</a>  J. Bieder and B. Amadon, "Thermodynamics of the &alpha;-&gamma; transition in cerium from first principles", Phys. Rev. B 89, 195132 (2014). <br> DOI: <a href="https://doi.org/10.1103/PhysRevB.89.195132">10.1103/PhysRevB.89.195132</a>.<br>
+<br> <a href="../../biblio/generated_files/bib_biblio.html#Georges1996">[Georges1996]</a>  A. Georges, G. Kotliar, W. Krauth and M.J. Rozenberg, "Dynamical mean-field theory of strongly correlated fermion systems and the limit of infinite dimensions", Rev. Mod. Phys. 68, 13&ndash;125 (1996). <br> DOI: <a href="https://doi.org/10.1103/RevModPhys.68.13">10.1103/RevModPhys.68.13</a>.<br>
+<br> <a href="../../biblio/generated_files/bib_biblio.html#Georges2004">[Georges2004]</a>  A. Georges, "Strongly Correlated Electron Materials: Dynamical Mean-Field Theory and Electronic Structure", AIP Conf. Proc. 715, 3&ndash;74 (2004). <br> DOI: <a href="https://doi.org/10.1063/1.1800733">10.1063/1.1800733</a>.<br>
+<br> <a href="../../biblio/generated_files/bib_biblio.html#Gull2011">[Gull2011]</a>  E. Gull, A.J. Millis, A. I. Liechtenstein, A.N. Rubtsov, M. Troyer and P. Werner, "Continuous-time Monte Carlo methods for quantum impurity models", Rev. Mod. Phys. 83, 349&ndash;404 (2011). <br> DOI: <a href="https://doi.org/10.1103/RevModPhys.83.349">10.1103/RevModPhys.83.349</a>.<br>
+<br> <a href="../../biblio/generated_files/bib_biblio.html#Kotliar2006">[Kotliar2006]</a>  G. Kotliar, S. Y. Savrasov, K. Haule, V. S. Oudovenko, O. Parcollet and C. A. Marianetti, "Electronic structure calculations with dynamical mean-field theory", Rev. Mod. Phys. 78, 865&ndash;951 (2006). <br> DOI: <a href="https://doi.org/10.1103/RevModPhys.78.865">10.1103/RevModPhys.78.865</a>.<br>
+<br> <a href="../../biblio/generated_files/bib_biblio.html#Liechtenstein1995">[Liechtenstein1995]</a>  A. I. Liechtenstein, V. I. Anisimov and J. Zaanen, "Density-functional theory and strong interactions: Orbital ordering in Mott-Hubbard insulators", Phys. Rev. B 52, R5467&ndash;R5470 (1995). <br> DOI: <a href="https://doi.org/10.1103/PhysRevB.52.R5467">10.1103/PhysRevB.52.R5467</a>.<br>
+<br> <a href="../../biblio/generated_files/bib_biblio.html#Werner2006">[Werner2006]</a>  P. Werner, A. Comanac, L. de Medici, M. Troyer and A.J. Millis, "Continuous-Time Solver for Quantum Impurity Models", Phys. Rev. Lett. 97, 076405 (2006). <br> DOI: <a href="https://doi.org/10.1103/PhysRevLett.97.076405">10.1103/PhysRevLett.97.076405</a>.<br>
+<p>
+<br><br><a href=#top>Go to the top</a>
+
+<script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
+
+</body>
+</html>
+

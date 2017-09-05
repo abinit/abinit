@@ -276,9 +276,9 @@ type dataset_type
  integer :: gw_sigxcore
 
  ! GWLS
- integer :: gwls_sternheimer_kmax       ! number of Lanczos steps taken by the gw_sternheimer routine
+ integer :: gwls_stern_kmax       ! number of Lanczos steps taken by the gw_sternheimer routine
  integer :: gwls_npt_gauss_quad         ! number of points used in Gaussian quadrature in gw_sternheimer routine
- integer :: gwls_dielectric_model       ! switch to determine which dielectic model should be used in integration
+ integer :: gwls_diel_model       ! switch to determine which dielectic model should be used in integration
  integer :: gwls_print_debug            ! switch to determine what to print out for debugging
  integer :: gwls_nseeds                 ! number of seeds in the Lanczos description of the dielectric matrix
  integer :: gwls_n_proj_freq            ! Number of projection frequencies to be used for the construction of the sternheimer basis
@@ -672,7 +672,7 @@ type dataset_type
  real(dp) :: ecutsigx
  real(dp) :: ecutsm
  real(dp) :: ecutwfn
- real(dp) :: effmass
+ real(dp) :: effmass_free
  real(dp) :: efmas_deg_tol
  real(dp) :: elph2_imagden
  real(dp) :: eshift
@@ -692,7 +692,6 @@ type dataset_type
  real(dp) :: gwencomp
  real(dp) :: gwfockmix
  real(dp) :: gwls_model_parameter         ! Parameter used in modelization of dielectric function
- real(dp) :: gwls_second_model_parameter  ! another Parameter used in modelization of dielectric function
  real(dp) :: gw_toldfeig
  real(dp) :: kptnrm
  real(dp) :: kptrlen
