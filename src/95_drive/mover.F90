@@ -514,7 +514,7 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
        call wrtout(std_out,message,'COLL')
      end if
      if (useprtxfase) then
-       call prtxfase(ab_mover,hist,std_out,mover_BEFORE)
+       call prtxfase(ab_mover,hist,itime,std_out,mover_BEFORE)
      end if
 
      xred_prev(:,:)=xred(:,:)
@@ -725,8 +725,8 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
        call wrtout(std_out,message,'COLL')
      end if
      if (useprtxfase) then
-       call prtxfase(ab_mover,hist,ab_out,mover_AFTER)
-       call prtxfase(ab_mover,hist,std_out,mover_AFTER)
+       call prtxfase(ab_mover,hist,itime,ab_out,mover_AFTER)
+       call prtxfase(ab_mover,hist,itime,std_out,mover_AFTER)
      end if
 
 !    ###########################################################
