@@ -65,13 +65,6 @@ subroutine fock_ACE_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'fock_ACE_getghc'
- use interfaces_18_timing
- use interfaces_32_util
- use interfaces_52_fft_mpi_noabirule
- use interfaces_53_ffts
- use interfaces_56_xc
- use interfaces_65_paw
- use interfaces_66_nonlocal
 !End of the abilint section
 
  implicit none
@@ -87,7 +80,7 @@ subroutine fock_ACE_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
 
 !Local variables-------------------------------
 ! Scalars
- integer :: iband, ipw,npw
+ integer :: iband, ier,ipw,npw
  real(dp) :: doti,dotr,eigen
  type(fock_common_type),pointer :: fockcommon
 ! Arrays
@@ -96,10 +89,8 @@ subroutine fock_ACE_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
 
 ! *************************************************************************
 return
- call timab(1504,1,tsec)
- call timab(1505,1,tsec)
 
- ABI_CHECK(associated(gs_ham%fock),"fock must be associated!")
+ ABI_CHECK(associated(gs_ham%fockcommon),"fock must be associated!")
  fockcommon => gs_ham%fockcommon
 
  ABI_CHECK(gs_ham%nspinor==1,"only allowed for nspinor=1!")
@@ -112,15 +103,15 @@ return
  ABI_ALLOCATE(ghc1,(2,npw))
  ghc1=zero
  ABI_ALLOCATE(xi,(2,npw))
- do iband=1,nband_k
-   xi(1,:)=gs_ham%fockACE_k%xi(1,:,iband)
-   xi(2,:)=-gs_ham%fockACE_k%xi(2,:,iband)
-   call dotprod_g(dotr,doti,gs_ham%istwf_k,npw,2,cwavef,xi,mpi_enreg%me_g0,mpi_enreg%comm_fft)
-   ghc1(1,:)=ghc1(1,:)+(dotr*gs_ham%fockACE_k%xi(1,:,iband)-doti*gs_ham%fockACE_k%xi(2,:,iband))
-   ghc1(2,:)=ghc1(2,:)+(dotr*gs_ham%fockACE_k%xi(2,:,iband)+doti*gs_ham%fockACE_k%xi(1,:,iband))
- end do
+ iband=fockcommon%iband
+ xi(1,:)=gs_ham%fockACE_k%xi(1,:,iband)
+ xi(2,:)=-gs_ham%fockACE_k%xi(2,:,iband)
+ call dotprod_g(dotr,doti,gs_ham%istwf_k,npw,2,cwavef,xi,mpi_enreg%me_g0,mpi_enreg%comm_fft)
+ ghc1(1,:)=ghc1(1,:)+(dotr*gs_ham%fockACE_k%xi(1,:,iband)-doti*gs_ham%fockACE_k%xi(2,:,iband))
+ ghc1(2,:)=ghc1(2,:)+(dotr*gs_ham%fockACE_k%xi(2,:,iband)+doti*gs_ham%fockACE_k%xi(1,:,iband))
+
  ABI_DEALLOCATE(xi)
- ghc1=-ghc1*gs_ham%ucvol/gs_ham%nfftf
+ ghc1=-ghc1*gs_ham%ucvol/gs_ham%nfft
 
 !* If the calculation is parallelized, perform an MPI_allreduce to sum all the contributions in the array ghc
  ghc(:,:)=ghc(:,:)/mpi_enreg%nproc_hf + ghc1(:,:)
@@ -155,8 +146,6 @@ return
 ! ===============================
 
  ABI_DEALLOCATE(ghc1)
-
- call timab(1504,2,tsec)
 
 end subroutine fock_ACE_getghc
 !!***

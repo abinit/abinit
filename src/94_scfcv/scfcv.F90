@@ -2072,7 +2072,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
 
 ! Deallocate exact exchange data at the end of the calculation
  if (usefock==1) then
-   if (fock%use_ACE/=0) then     
+   if (fock%fock_common%use_ACE/=0) then     
      call fock_ACE_destroy(fock%fockACE)
    end if
    call fock_common_destroy(fock%fock_common)

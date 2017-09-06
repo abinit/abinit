@@ -66,9 +66,9 @@ module m_fock
 !! SOURCE
 
  type, public :: fock_type
-  type(fock_common_type), pointer :: fock_common
-  type(fock_BZ_type), pointer :: fock_BZ(:)
-  type(fock_ACE_type), pointer :: fock_ACE(:)
+  type(fock_common_type), pointer :: fock_common=> null()
+  type(fock_BZ_type), pointer :: fock_BZ=> null()
+  type(fock_ACE_type), pointer :: fockACE(:)=> null()
  end type fock_type
 
 
@@ -293,6 +293,8 @@ module m_fock
  public :: fock_updateikpt            ! Update the value of energies%e_xc and energies%e_xcdc with Fock contribution.
  public :: fock_destroy               ! Free memory.
  public :: fock_ACE_destroy           ! Free memory.
+ public :: fock_common_destroy        ! Free memory.
+ public :: fock_bz_destroy            ! Free memory.
  public :: fock_calc_ene              ! Calculate the Fock contribution to the total energy.
  public :: fock_update_exc            ! Update the value of energies%e_xc and energies%e_xcdc with Fock contribution.
  public :: fock_updatecwaveocc        ! Update in the fock datastructure the fields relative to the occupied states.
@@ -339,7 +341,7 @@ contains
 !!
 !! SOURCE
 
-subroutine fock_create(fock,mgfft,mpw,mkpt,mkptband,my_nsppol,natom,n4,n5,n6,nband,userid)
+subroutine fock_create(fock,mgfft,mpw,mkpt,mkptband,my_nsppol,natom,n4,n5,n6,userid)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -352,8 +354,8 @@ subroutine fock_create(fock,mgfft,mpw,mkpt,mkptband,my_nsppol,natom,n4,n5,n6,nba
 
 !Arguments ------------------------------------
 !scalars
- integer, intent(in) :: mgfft,mpw,mkpt,mkptband,my_nsppol,natom,n4,n5,n6,nband,userid
- type(fock_type),pointer :: fock
+ integer, intent(in) :: mgfft,mpw,mkpt,mkptband,my_nsppol,natom,n4,n5,n6,userid
+ type(fock_BZ_type) , intent(inout) :: fock
 
 !Local variables-------------------------------
 !scalars
@@ -414,11 +416,11 @@ subroutine fock_create(fock,mgfft,mpw,mkpt,mkptband,my_nsppol,natom,n4,n5,n6,nba
 !* Create the array %cwaveocc_bz = wavefunctions of each bands at each k point
 
  if (userid==1961) then
-   ABI_ALLOCATE(fock%cwaveocc_bz,(2,n4,n5,n6,mkptband,my_nsppol))
-   fock%cwaveocc_bz=zero
- else
    ABI_ALLOCATE(fock%cgocc,(2,mpw*mkptband,my_nsppol))
    fock%cgocc=zero
+ else
+   ABI_ALLOCATE(fock%cwaveocc_bz,(2,n4,n5,n6,mkptband,my_nsppol))
+   fock%cwaveocc_bz=zero
  end if
 !* Create the array %occ_bz = occupancy of each bands at each k point => will be limited to only the occupied states
  ABI_ALLOCATE(fock%occ_bz,(mkptband,my_nsppol))
@@ -507,7 +509,7 @@ subroutine fock_init(atindx,cplex,dtset,fock,gsqcut,kg,mpi_enreg,nattyp,npwarr,p
 !Local variables-------------------------------
 !scalars
  integer :: iatom,ibg,icg,icp,ier,ik,ikg,ikpt,isppol,isym,itypat,jkpt,jpw,jsym,mband,mgfft,mkpt,mkptband
- integer :: n1,n2,n3,n4,n5,n6,nband,ncpgr,nkpt,nkpt_bz,nproc_hf,npwj,timrev,v1,v2,v3
+ integer :: n1,n2,n3,n4,n5,n6,nband,ncpgr,nkpt,nkpt_bz,nproc_hf,npwj,timrev,userid,v1,v2,v3
  integer :: my_jkpt,jkg_this_proc,my_nsppol,my_nspinor
  real(dp) :: dksqmax,arg
  character(len=500) :: msg
@@ -516,8 +518,8 @@ subroutine fock_init(atindx,cplex,dtset,fock,gsqcut,kg,mpi_enreg,nattyp,npwarr,p
  real(dp) :: gmet(3,3),gprimd(3,3),tau_nons(3),phktnons(2,1),tsec(2),Rtnons(3,dtset%nsym)
  integer,allocatable :: dimcprj(:),indkk(:,:),kg_tmp(:),my_ikgtab(:),my_ibgtab(:,:),my_icgtab(:,:),my_icptab(:,:),invsym(:)
  real(dp),allocatable :: kptns_hf(:,:), phase1d(:,:)
- type(fock_common_type), intent(in),target :: fockcommon
- type(fock_BZ_type), intent(in),target :: fockbz
+ type(fock_common_type),pointer :: fockcommon
+ type(fock_BZ_type),pointer :: fockbz
 ! *************************************************************************
  
  DBG_ENTER("COLL")
@@ -528,25 +530,8 @@ subroutine fock_init(atindx,cplex,dtset,fock,gsqcut,kg,mpi_enreg,nattyp,npwarr,p
    msg='Hartree-Fock option can be used only with option nspinor=1.'
    MSG_ERROR(msg)
  end if 
-! ========================================================
-! === Set all the other state-dependent fields to zero ===
-! ========================================================
- fockcommon=>fock%fock_common
- fockbz=> fock%fock_BZ
- fockcommon%ikpt= 0
-!* Will contain the k-point ikpt of the current state
- fockcommon%isppol= 0
-!* Will contain the spin isppol of the current state
- fockcommon%ieigen=0
-!* Will contain the band index of the current state
-!* if the value is 0, the Fock contribution to the eigenvalue is not calculated.
- ABI_ALLOCATE(fockcommon%eigen_ikpt,(nband))
- fockcommon%eigen_ikpt=0.d0
-!* Will contain the Fock contributions to the eigenvalue of the current state
- if (fockcommon%optfor) then
-   ABI_ALLOCATE(fockcommon%forces_ikpt,(3,natom,nband))
-   ABI_ALLOCATE(fockcommon%forces,(3,natom))
- endif
+
+
 ! =====================================
 ! === Define useful local variables ===
 ! =====================================           
@@ -583,7 +568,7 @@ subroutine fock_init(atindx,cplex,dtset,fock,gsqcut,kg,mpi_enreg,nattyp,npwarr,p
 !* Default value is -1.
    end if
  end do
- 
+
 !* Initialize the array my_ibgtab = shifts in arrays occ(ibg) associated to ikpt
 !* Initialize the array my_icgtab = shifts in arrays cg(icg) associated to ikpt
  ABI_ALLOCATE(my_ibgtab,(dtset%nkpt,dtset%nsppol))
@@ -617,7 +602,27 @@ subroutine fock_init(atindx,cplex,dtset,fock,gsqcut,kg,mpi_enreg,nattyp,npwarr,p
 ! === Create the fock structure ===
 ! =================================
    ABI_DATATYPE_ALLOCATE(fock,)
-
+   ABI_DATATYPE_ALLOCATE(fock%fock_common,)
+   ABI_DATATYPE_ALLOCATE(fock%fock_BZ,)
+! ========================================================
+! === Set all the other state-dependent fields to zero ===
+! ========================================================
+ fockcommon=>fock%fock_common
+ fockbz=> fock%fock_BZ
+ fockcommon%ikpt= 0
+!* Will contain the k-point ikpt of the current state
+ fockcommon%isppol= 0
+!* Will contain the spin isppol of the current state
+ fockcommon%ieigen=0
+!* Will contain the band index of the current state
+!* if the value is 0, the Fock contribution to the eigenvalue is not calculated.
+ ABI_ALLOCATE(fockcommon%eigen_ikpt,(nband))
+ fockcommon%eigen_ikpt=0.d0
+!* Will contain the Fock contributions to the eigenvalue of the current state
+ if (fockcommon%optfor) then
+   ABI_ALLOCATE(fockcommon%forces_ikpt,(3,dtset%natom,nband))
+   ABI_ALLOCATE(fockcommon%forces,(3,dtset%natom))
+ endif
 !* Compute the dimension of arrays in "spin" w.r.t parallelism
    my_nsppol=dtset%nsppol
    if (mpi_enreg%nproc_kpt>1) my_nsppol=1
@@ -652,7 +657,9 @@ subroutine fock_init(atindx,cplex,dtset,fock,gsqcut,kg,mpi_enreg,nattyp,npwarr,p
    fockcommon%optfor=.FALSE.; fockcommon%optstr=.false.
    if(dtset%optforces==1) fockcommon%optfor=.true.
    fockcommon%use_ACE=0!if (dtset%use_ACE==1)
-   call fock_create(fockbz,mgfft,dtset%mpw,mkpt,mkptband,my_nsppol,dtset%natom,n4,n5,n6,nband,dtset%userid)
+   userid=dtset%userid
+   if(fockcommon%use_ACE/=0) userid=1961
+   call fock_create(fockbz,mgfft,dtset%mpw,mkpt,mkptband,my_nsppol,dtset%natom,n4,n5,n6,userid)
 
 
 !* Initialize %mband, %mkpt, %mkptband = size of arrays
@@ -665,6 +672,7 @@ subroutine fock_init(atindx,cplex,dtset,fock,gsqcut,kg,mpi_enreg,nattyp,npwarr,p
      ABI_DATATYPE_ALLOCATE(fock%fockACE,(dtset%nkpt))
      my_nspinor=max(1,dtset%nspinor/mpi_enreg%nproc_spinor)
      do ikpt=1,dtset%nkpt
+       nband=dtset%nband(ikpt)
        ABI_ALLOCATE(fock%fockACE(ikpt)%xi,(2,npwarr(ikpt)*my_nspinor,nband))
      end do
    end if
@@ -1164,11 +1172,8 @@ subroutine fock_init(atindx,cplex,dtset,fock,gsqcut,kg,mpi_enreg,nattyp,npwarr,p
  ABI_DEALLOCATE(my_icptab)
  ABI_DEALLOCATE(my_ikgtab)
  ABI_DEALLOCATE(phase1d)
+ call fock_print(fockcommon,fockbz,unit=std_out)
 
- call fock_print(fock%fock_common,fock%fock_BZ,unit=std_out)
-
- call timab(1500,2,tsec)
- 
 DBG_EXIT("COLL")
 
 end subroutine fock_init
@@ -1313,6 +1318,7 @@ end subroutine fock_set_ieigen
 !! SOURCE
 subroutine fock_destroy(fock)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -1327,7 +1333,7 @@ subroutine fock_destroy(fock)
 ! *************************************************************************
 
  DBG_ENTER("COLL")
- if (fock%use_ACE/=0) then
+ if (fock%fock_common%use_ACE/=0) then
    ABI_DATATYPE_DEALLOCATE(fock%fockACE)
  end if
  ABI_DATATYPE_DEALLOCATE(fock%fock_common)
@@ -1343,7 +1349,7 @@ subroutine fock_common_destroy(fock)
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'fock_destroy'
+#define ABI_FUNC 'fock_common_destroy'
 !End of the abilint section
 
  implicit none
@@ -1408,7 +1414,7 @@ subroutine fock_BZ_destroy(fock)
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'fock_destroy'
+#define ABI_FUNC 'fock_BZ_destroy'
 !End of the abilint section
 
  implicit none
@@ -1767,8 +1773,8 @@ subroutine fock_updatecwaveocc(cg,cprj,dtset,fock,fock_energy,indsym,istep,mcg,m
  real(dp) :: tsec(2),tsec2(2),dcp(3)
  real(dp),allocatable :: cgocc_tmp(:),cgocc(:,:),dummytab2(:,:),dummytab3(:,:,:),phase_jkpt(:,:)
  type(pawcprj_type),allocatable :: cprj_tmp(:,:)
- type(fock_common_type), intent(in),target :: fockcommon
- type(fock_BZ_type), intent(in),target :: fockbz
+ type(fock_common_type),pointer :: fockcommon
+ type(fock_BZ_type),pointer :: fockbz
 ! *************************************************************************
  
 ! DEBUG
@@ -1780,8 +1786,10 @@ subroutine fock_updatecwaveocc(cg,cprj,dtset,fock,fock_energy,indsym,istep,mcg,m
  ABI_CHECK(associated(fock),"fock must be associated")
 
  if (associated(fock)) then
+
  fockcommon=>fock%fock_common
  fockbz=> fock%fock_BZ
+
    if (mod(istep-1,fockcommon%nnsclo_hf)==0) then 
      invucvol=1.d0/sqrt(ucvol)
 ! Local variables = useful dimensions
@@ -2238,7 +2246,7 @@ subroutine fock_print(fockcommon,fockbz,header,unit,mode_paral,prtvol)
 
  ! Important dimensions
  call wrtout(my_unt,sjoin(" my_nsppol ...",itoa(fockcommon%my_nsppol)),my_mode)
- call wrtout(my_unt,sjoin(" nkpt_bz .....",itoa(fockcommon%nkpt_bz)),my_mode)
+ call wrtout(my_unt,sjoin(" nkpt_bz .....",itoa(fockbz%nkpt_bz)),my_mode)
 
  ! Options
  call wrtout(my_unt,sjoin(" cg_typ .........",itoa(fockcommon%cg_typ)),my_mode)
