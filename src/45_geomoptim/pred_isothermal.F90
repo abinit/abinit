@@ -570,8 +570,8 @@ subroutine pred_isothermal(ab_mover,hist,itime,mttk_vars,ntime,zDEBUG,iexit)
 !##########################################################
 !### 06. Update the history with the prediction
 
-!Increase indexes
- hist%ihist=hist%ihist+1
+!Free the last index of the array to the last history step
+ call abihist_shift(hist)
 
 !Fill the history with the variables
 !xred, acell, rprimd, vel

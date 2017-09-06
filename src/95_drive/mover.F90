@@ -191,7 +191,7 @@ type(abimover) :: ab_mover
 type(abimover_specs) :: specs
 type(abiforstr) :: preconforstr ! Preconditioned forces and stress
 type(mttk_type) :: mttk_vars
-integer :: itime,icycle,iexit=0,ifirst,timelimit_exit,ncycle,ncycletot,kk,jj,me
+integer :: itime,icycle,iexit=0,ifirst,timelimit_exit,ncycle,nhisttot,kk,jj,me
 integer :: nloop,ntime,option,comm
 integer :: nerr_dilatmx,my_quit,ierr,quitsum_request
 integer ABI_ASYNC :: quitsum_async
@@ -389,9 +389,12 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
  iexit=0; timelimit_exit=0
  ncycle=specs%ncycle
 
- ncycletot=ncycle*ntime;if (scfcv_args%dtset%nctime>0) ncycletot=ncycletot+1
- call abihist_init(hist,ab_mover%natom,ncycletot,specs%isVused,specs%isARused)
+ nhisttot=ncycle*ntime;if (scfcv_args%dtset%nctime>0) nhisttot=nhisttot+1
 
+!AM_2017 New version of the hist, we just store the needed history step not all of them...
+ if(specs%nhist/=-1) nhisttot = specs%nhist! Need all the history
+ call abihist_init(hist,ab_mover%natom,nhisttot,specs%isVused,specs%isARused)
+ if(specs%nhist/=-1) hist%ihist=specs%nhist !the last index will be permanent
  call abiforstr_ini(preconforstr,ab_mover%natom)
 
 !###########################################################
@@ -554,11 +557,12 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
 
      if(hist_prev%mxhist>0.and.ab_mover%restartxf==-1.and.hist_prev%ihist<=hist_prev%mxhist)then
 
-       call abihist_compare_and_copy(hist_prev,hist,ab_mover%natom,similar,tol8)
+       call abihist_compare_and_copy(hist_prev,hist,ab_mover%natom,similar,tol8,specs%nhist==nhisttot)
        hist_prev%ihist=hist_prev%ihist+1
 
      else
-
+!      we don't need anymore the hist_prev       
+       call abihist_free(hist_prev)
        scfcv_args%ndtpawuj=0
        iapp=itime
        if(icycle>1.and.icycle/=ncycle) iapp=-1
@@ -604,7 +608,7 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
 &           scfcv_args%results_gs%strten,ab_mover%natom,rprimd,xred=xred,verbose=need_verbose)
 
 !          Check if the simulation does not diverged...
-           if(hist%ihist > 1.and.ABS(scfcv_args%results_gs%etotal - hist%etot(1)) > 1E4)then
+           if(itime > 10 .and.ABS(scfcv_args%results_gs%etotal - hist%etot(1)) > 1E4)then
 !            We set to false the flag corresponding to the bound 
              effective_potential%anharmonics_terms%bounded = .FALSE.
              if(need_verbose.and.me==master)then
@@ -668,7 +672,6 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
        hist%time(hist%ihist)     =real(itime,kind=dp)
 
 !      !######################################################################
-
      end if ! if(hist_prev%mxhist>0.and.ab_mover%restartxf==-1.and.hist_prev%ihist<=hist_prev%mxhist)then
 
 !    Store trajectory in xfh file
@@ -708,7 +711,7 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
 #if defined HAVE_NETCDF
      if (need_writeHIST.and.me==master) then
        ifirst=merge(0,1,(itime>1.or.icycle>1))
-       call write_md_hist(hist,filename,ifirst,ab_mover%natom,ab_mover%ntypat,&
+       call write_md_hist(hist,filename,ifirst,itime,ab_mover%natom,ab_mover%ntypat,&
 &       ab_mover%typat,amu,ab_mover%znucl,ab_mover%dtion,scfcv_args%dtset%mdtemp)
      end if
 #endif

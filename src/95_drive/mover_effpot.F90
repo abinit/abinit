@@ -242,7 +242,7 @@ implicit none
      dtset%ionmov = inp%dynamics  ! Number for the dynamic
      dtset%ntime = inp%ntime  ! Number of TIME steps 
      dtset%optcell = inp%optcell    ! OPTimize the CELL shape and dimensions Characteristic
-     dtset%restartxf = inp%restarxf  ! RESTART from (X,F) history
+     dtset%restartxf = inp%restartxf  ! RESTART from (X,F) history
      dtset%mdtemp(1) = inp%temperature   !Molecular Dynamics Temperatures 
      dtset%mdtemp(2) = inp%temperature   !Molecular Dynamics Temperatures
      dtset%strtarget(1:6) = -1 * inp%strtarget(1:6) / 29421.033d0 ! STRess TARGET

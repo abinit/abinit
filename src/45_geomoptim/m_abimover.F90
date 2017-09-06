@@ -213,6 +213,7 @@ end type abimover
 
    !scalars
    integer           :: ncycle
+   integer           :: nhist ! Number of step of history needed in the algorithm
    character(len=8)  :: crit4xml
    character(len=10) :: type4xml
    character(len=60) :: method
@@ -648,6 +649,9 @@ character(len=fnlen), target, intent(in) :: filnam_ds(:)   ! dtfil%filnam_ds(5)
 !specs%ncycle is 1 by default except for ionmov=1,9,14
  specs%ncycle=1
 
+!specs%nhist is -1 by default store all the history except for ionmov=12,13
+ specs%nhist=-1
+
 !This is the initialization for ionmov==1
 !-----------------------------------------
  select case (ab_mover%ionmov)
@@ -769,6 +773,8 @@ character(len=fnlen), target, intent(in) :: filnam_ds(:)   ! dtfil%filnam_ds(5)
    specs%crit4xml='tolmxf'
 !  Name of specs%method
    specs%method = 'Isokinetic ensemble molecular dynamics'
+!  Number of history
+   specs%nhist = 3
 !  This is the initialization for ionmov==13
 !  -------------------------------------------
  case (13)
@@ -781,6 +787,8 @@ character(len=fnlen), target, intent(in) :: filnam_ds(:)   ! dtfil%filnam_ds(5)
    specs%crit4xml='tolmxf'
 !  Name of specs%method
    specs%method = 'Isothermal/isenthalpic ensemble molecular dynamics'
+!  Number of history
+   specs%nhist = 3
 !  This is the initialization for ionmov==14
 !  -------------------------------------------
  case (14)

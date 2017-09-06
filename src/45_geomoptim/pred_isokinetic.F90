@@ -417,8 +417,8 @@ subroutine pred_isokinetic(ab_mover,hist,itime,ntime,zDEBUG,iexit)
  xcart=xcart_next
  xred=xred_next
 
-!Increase indexes
- hist%ihist=hist%ihist+1
+!Let the last index of the array to the last history step
+ call abihist_shift(hist)
 
 !Fill the history with the variables
 !xred, acell, rprimd, vel

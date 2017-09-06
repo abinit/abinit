@@ -263,8 +263,6 @@ subroutine effective_potential_file_read(filename,eff_pot,inp,comm,hist)
   character(500) :: message
 !array
   integer,allocatable :: atifc(:)
-  integer :: dummy_cell(3)
-  real(dp) :: dummy_rpt(3)
 
 ! *************************************************************************
 
@@ -307,9 +305,6 @@ subroutine effective_potential_file_read(filename,eff_pot,inp,comm,hist)
       end if
 
       ABI_DEALLOCATE(atifc)
-
-!     Must read some value to initialze  array (nprt for ifc)
-      call bigbx9(inp%brav,dummy_cell,0,1,inp%ngqpt,inp%nqshft,nrpt,ddb%rprim,dummy_rpt)
 
 !     Transfert the ddb to the effective potential
       call system_ddb2effpot(Crystal,ddb, eff_pot,inp,comm)

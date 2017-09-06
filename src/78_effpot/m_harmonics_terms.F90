@@ -669,7 +669,7 @@ subroutine harmonics_terms_evaluateIFC(atmfrc,disp,energy,fcart,cells,natom_sc,n
             do mu=1,3
               disp1 = disp(mu,kk)
               ifc = atmfrc(mu,ia,nu,ib,irpt)
-              if(abs(ifc) > tol8)then
+              if(abs(ifc) > tol10)then
                 tmp = disp2 * ifc
 !               accumule energy
                 tmp2 = disp1*tmp
