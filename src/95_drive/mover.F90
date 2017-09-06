@@ -191,7 +191,7 @@ type(abimover) :: ab_mover
 type(abimover_specs) :: specs
 type(abiforstr) :: preconforstr ! Preconditioned forces and stress
 type(mttk_type) :: mttk_vars
-integer :: itime,icycle,iexit=0,ifirst,timelimit_exit,ncycle,nhisttot,kk,jj,me
+integer :: itime,icycle,itime_hist,iexit=0,ifirst,timelimit_exit,ncycle,nhisttot,kk,jj,me
 integer :: nloop,ntime,option,comm
 integer :: nerr_dilatmx,my_quit,ierr,quitsum_request
 integer ABI_ASYNC :: quitsum_async
@@ -504,7 +504,8 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
 !  ###########################################################
 !  ### 09. Loop for icycle (From 1 to ncycles)
    do icycle=1,ncycle
-
+     itime_hist = (itime-1)*ncycle + icycle ! Store the time step in of the history
+     
 !    ###########################################################
 !    ### 10. Output for each icycle (and itime)
      if(need_verbose)then
@@ -514,7 +515,7 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
        call wrtout(std_out,message,'COLL')
      end if
      if (useprtxfase) then
-       call prtxfase(ab_mover,hist,itime,std_out,mover_BEFORE)
+       call prtxfase(ab_mover,hist,itime_hist,std_out,mover_BEFORE)
      end if
 
      xred_prev(:,:)=xred(:,:)
@@ -561,8 +562,6 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
        hist_prev%ihist=hist_prev%ihist+1
 
      else
-!      we don't need anymore the hist_prev       
-       call abihist_free(hist_prev)
        scfcv_args%ndtpawuj=0
        iapp=itime
        if(icycle>1.and.icycle/=ncycle) iapp=-1
@@ -711,7 +710,7 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
 #if defined HAVE_NETCDF
      if (need_writeHIST.and.me==master) then
        ifirst=merge(0,1,(itime>1.or.icycle>1))
-       call write_md_hist(hist,filename,ifirst,itime,ab_mover%natom,ab_mover%ntypat,&
+       call write_md_hist(hist,filename,ifirst,itime_hist,ab_mover%natom,ab_mover%ntypat,&
 &       ab_mover%typat,amu,ab_mover%znucl,ab_mover%dtion,scfcv_args%dtset%mdtemp)
      end if
 #endif
@@ -725,8 +724,8 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
        call wrtout(std_out,message,'COLL')
      end if
      if (useprtxfase) then
-       call prtxfase(ab_mover,hist,itime,ab_out,mover_AFTER)
-       call prtxfase(ab_mover,hist,itime,std_out,mover_AFTER)
+       call prtxfase(ab_mover,hist,itime_hist,ab_out,mover_AFTER)
+       call prtxfase(ab_mover,hist,itime_hist,std_out,mover_AFTER)
      end if
 
 !    ###########################################################
@@ -1016,6 +1015,7 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
  ABI_DEALLOCATE(xred_prev)
 
  call abihist_free(hist)
+ call abihist_free(hist_prev)
 
  call abimover_fin(ab_mover)
  call abiforstr_fin(preconforstr)

@@ -2835,6 +2835,7 @@ subroutine effective_potential_getDisp(displacement,du_delta,natom,rprimd_hist,r
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'effective_potential_getDisp'
+ use interfaces_32_util
  use interfaces_41_geometry
 !End of the abilint section
 
@@ -2962,6 +2963,7 @@ subroutine effective_potential_getDisp(displacement,du_delta,natom,rprimd_hist,r
     end do
     strain_mat_inv = strain_mat
     call DGETRI(3,strain_mat_inv, 3, ipiv, work, 3, ii)
+!   call matr3inv(strain_mat,strain_mat_inv)
     do ii=1,my_natom
       ib = my_atoms(ii)
       work2(:,:) = zero
