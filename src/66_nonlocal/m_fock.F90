@@ -1030,6 +1030,7 @@ subroutine fock_init(atindx,cplex,dtset,fock,gsqcut,kg,mpi_enreg,nattyp,npwarr,p
      if (dtset%istwfk(ikpt)/=1) then
        fockbz%istwfk_bz(my_jkpt)=set_istwfk(kptns_hf(:,jkpt))
      end if
+
 !* One can take advantage of the time-reversal symmetry in this case.
 !* Initialize the array %wtk_bz = weight assigned to each k point.
 !     fock%wtk_bz(my_jkpt)=dtset%wtk(jkpt)/ucvol

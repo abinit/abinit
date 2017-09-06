@@ -88,7 +88,7 @@ subroutine fock_ACE_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
 
 
 ! *************************************************************************
-return
+!return
 
  ABI_CHECK(associated(gs_ham%fockcommon),"fock must be associated!")
  fockcommon => gs_ham%fockcommon

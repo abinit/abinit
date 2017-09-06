@@ -888,7 +888,7 @@ subroutine init_hamiltonian(ham,Psps,pawtab,nspinor,nsppol,nspden,natom,typat,&
  if (present(fock)) then
    if (associated(fock)) then
      ham%fockcommon => fock%fock_common
-     if (fock%fock_common%use_ace==0) ham%fockbz=>fock%fock_BZ
+     if (fock%fock_common%use_ACE==0) ham%fockbz=>fock%fock_BZ
    end if
  end if
 

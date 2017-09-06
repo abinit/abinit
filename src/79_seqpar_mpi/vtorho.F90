@@ -322,9 +322,9 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  integer :: mwarning,my_nspinor,n1,n2,n3,n4,n5,n6,nband_eff
  integer :: nband_k,nband_cprj_k,nbuf,neglect_pawhat,nfftot,nkpg,nkpt1,nnn,nnsclo_now
  integer :: nproc_distrb,npw_k,nspden_rhoij,option,prtvol
- integer :: spaceComm_distrb,usecprj_local,usetimerev
+ integer :: spaceComm_distrb,usecprj_local,usefock_ACE,usetimerev
  logical :: berryflag,computesusmat,fixed_occ
- logical :: locc_test,paral_atom,remove_inv,usefock,usefock_ACE,with_vxctau
+ logical :: locc_test,paral_atom,remove_inv,usefock,with_vxctau
  logical :: do_last_ortho,wvlbigdft=.false.
  real(dp) :: dmft_ldaocc
  real(dp) :: edmft,ebandlda,ebanddmft,ebandldatot,ekindmft,ekindmft2,ekinlda
@@ -381,7 +381,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
 !Check that fock is present if want to use fock option
  usefock = (dtset%usefock==1 .and. associated(fock))
- usefock_ACE=.false.
+ usefock_ACE=0
  if (usefock) usefock_ACE=fock%fock_common%use_ACE
  
 
@@ -809,7 +809,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 !       - Load k-dependent quantities in the Hamiltonian
        ABI_ALLOCATE(ph3d,(2,npw_k,gs_hamk%matblk))
  
-       if(usefock_ACE) then
+       if(usefock_ACE/=0) then
          call load_k_hamiltonian(gs_hamk,kpt_k=dtset%kptns(:,ikpt),istwf_k=istwf_k,npw_k=npw_k,&
 &         kinpw_k=kinpw,kg_k=kg_k,kpg_k=kpg_k,ffnl_k=ffnl,fockACE_k=fock%fockACE(ikpt),ph3d_k=ph3d,&
 &         compute_ph3d=(mpi_enreg%paral_kgb/=1.or.istep<=1),&

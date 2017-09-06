@@ -225,7 +225,7 @@ subroutine fock2ACE(cg,cprj,fock,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_enreg,mp
 & paw_ij=paw_ij,ph1d=ph1d,fock=fock,&
 & use_gpu_cuda=use_gpu_cuda)
  rmet = MATMUL(TRANSPOSE(rprimd),rprimd)
-
+ fockcommon%use_ACE=use_ACE_old
  call timab(921,2,tsec)
 
 !need to reorder cprj=<p_lmn|Cnk> (from unsorted to atom-sorted)
@@ -468,7 +468,7 @@ subroutine fock2ACE(cg,cprj,fock,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_enreg,mp
 ! Cholesky factorisation of -mkl=Lx(trans(L)*. On output mkl=L
      call zpotrf("L",nband_k,mkl,nband_k,ierr)
 
-! calculate trans(L¯1)
+! calculate trans(L-1)
      ABI_ALLOCATE(bb,(2,nband_k,nband_k))
      bb=zero
      do kk=1,nband_k
@@ -573,7 +573,7 @@ subroutine fock2ACE(cg,cprj,fock,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_enreg,mp
  end if
 !Deallocate temporary space
  call destroy_hamiltonian(gs_hamk)
- fockcommon%use_ACE=use_ACE_old
+
  call timab(925,2,tsec)
  call timab(920,2,tsec)
 

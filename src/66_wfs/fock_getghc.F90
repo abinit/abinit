@@ -308,8 +308,8 @@ type(pseudopotential_type) :: psps
      else
        ABI_ALLOCATE(cwaveocc_r,(2,n4f,n5f,n6f))
        cwaveocc_r=zero
-       call fourwf(0,rhodum0,fockbz%cgocc(:,1+jcg+npwj*(jband-1):jcg+jband*npwj,my_jsppol),rhodum,cwaveocc_r, &
-&       gbound_kp,gbound_kp,gs_ham%istwf_k,kg_occ,kg_occ,mgfftf,mpi_enreg,ndat1,ngfftf,&
+       call fourwf(1,rhodum0,fockbz%cgocc(:,1+jcg+npwj*(jband-1):jcg+jband*npwj,my_jsppol),rhodum,cwaveocc_r, &
+&       gbound_kp,gbound_kp,jstwfk,kg_occ,kg_occ,mgfftf,mpi_enreg,ndat1,ngfftf,&
 &       npwj,1,n4f,n5f,n6f,tim_fourwf0,mpi_enreg%paral_kgb,0,weight1,weight1,use_gpu_cuda=gs_ham%use_gpu_cuda)
        cwaveocc_r=cwaveocc_r*invucvol
      end if
