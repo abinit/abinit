@@ -512,6 +512,17 @@ subroutine phgamma_init(gams,cryst,ifc,symdynmat,eph_scalprod,eph_transport,ngqp
  ABI_CHECK(ierr==0, "out of memory in %vals_qibz")
  gams%vals_qibz = zero
 
+ ! TODO: if we remove the nsig dependency in the gvvvals_*_qibz we can remove
+ ! the intermediate array and save a lot of memory
+ ABI_STAT_MALLOC(gams%vals_in_qibz, (2,gams%ndir_transp**2,gams%natom3,gams%natom3,gams%nqibz,nsppol), ierr)
+ ABI_CHECK(ierr==0, "out of memory in %vals_in_qibz")
+ gams%vals_in_qibz = zero
+
+ ABI_STAT_MALLOC(gams%vals_out_qibz, (2,gams%ndir_transp**2,gams%natom3,gams%natom3,gams%nqibz,nsppol), ierr)
+ ABI_CHECK(ierr==0, "out of memory in %vals_out_qibz")
+ gams%vals_out_qibz = zero
+
+
  ! Prepare Fourier interpolation.
  gams%gprim = ifc%gprim
  gams%nrpt  = ifc%nrpt
@@ -4191,6 +4202,8 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
  ABI_MALLOC(resvv_out, (2,gams%ndir_transp**2))
  ABI_CALLOC(dummy_vtrial, (nfftf,nspden))
  ABI_CALLOC(gvals_qibz, (2,natom3,natom3,nsig,gams%nqibz,nsppol))
+! TODO: if we remove the nsig dependency we can remove this intermediate array
+! and save a lot of memory
  ABI_CALLOC(gvvvals_in_qibz, (2,gams%ndir_transp**2,natom3,natom3,nsig,gams%nqibz,nsppol))
  ABI_CALLOC(gvvvals_out_qibz, (2,gams%ndir_transp**2,natom3,natom3,nsig,gams%nqibz,nsppol))
 
