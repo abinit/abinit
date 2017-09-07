@@ -134,7 +134,7 @@ module m_abihist
  public :: abihist_copy             ! Copy 2 HIST records
  public :: abihist_compare_and_copy ! Compare 2 HIST records; if similar copy
  public :: hist2var                 ! Get xred, acell and rprimd from the history.
- public :: abihist_shift            ! Shift history indexes
+ public :: abihist_findIndex            ! Shift history indexes
  public :: var2hist                 ! Append xred, acell and rprimd
  public :: vel2hist                 ! Append velocities and Kinetic Energy
  public :: write_md_hist            ! Write the history into a netcdf file
@@ -785,69 +785,62 @@ subroutine var2hist(acell,hist,natom,rprimd,xred,zDEBUG)
 end subroutine var2hist
 !!***
 
-!!****f* m_abihist/abihist_shift
+!!****f* m_abihist/abihist_fi
 !!
 !! NAME
-!! abihist_shift
+!! abihist_findIndex
 !!
 !! FUNCTION
-!! Shit the index values of the history "hist"
-!! in order to free the last index
 !!
 !! INPUTS
+!! hist<type abihist>=Historical record of positions, forces
+!!      |                    acell, stresses, and energies
+!! step = value of the needed step
 !!
 !! OUTPUT
+!! index = index of the step in the hist file
 !!
 !! SIDE EFFECTS
-!! hist<type abihist>=Historical record of positions, forces
-!!      |                    acell, stresses, and energies,
 !!
 !! PARENTS
-!!      gstateimg,m_monte_carlo,m_pred_lotf,mover,pred_bfgs,pred_delocint
-!!      pred_diisrelax,pred_hmc,pred_isokinetic,pred_isothermal,pred_langevin
-!!      pred_lbfgs,pred_moldyn,pred_nose,pred_srkna14,pred_steepdesc
-!!      pred_velverlet,pred_verlet
 !!
 !! CHILDREN
 !!
 !! SOURCE
 
-subroutine abihist_shift(hist)
+function abihist_findIndex(hist,step) result(index)
 
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'abihist_shift'
+#define ABI_FUNC 'abihist_findIndex'
 !End of the abilint section
 
  implicit none
 
 !Arguments ------------------------------------
 !scalars
- type(abihist),intent(inout) :: hist
+ integer,intent(in) :: step
+ integer :: index
 !arrays
+ type(abihist),intent(in) :: hist
 !Local variables-------------------------------
 !scalars
- integer :: ii,kk
+ integer :: ii,ihist,mxhist
 ! *************************************************************
- 
- do ii=1,hist%mxhist-1
-   kk = ii + 1
-   hist%xred(:,:,ii)  =  hist%xred(:,:,kk)
-   hist%rprimd(:,:,ii)=  hist%rprimd(:,:,kk)
-   hist%acell(:,ii)   =  hist%acell(:,kk)
-   hist%time(ii)      =  hist%time(kk)
-   hist%fcart(:,:,ii) =  hist%fcart(:,:,kk)
-   hist%strten(:,ii)  =  hist%strten(:,kk)
-   hist%ekin(ii)      =  hist%ekin(kk)
-   hist%etot(ii)      =  hist%etot(kk)     
-   hist%entropy(ii)   =  hist%entropy(kk)
-   hist%vel(:,:,ii)   =  hist%vel(:,:,kk)
-   hist%vel_cell(:,:,ii) = hist%vel_cell(:,:,kk)
- end do
 
-end subroutine abihist_shift
+ ii = hist%ihist + step
+ mxhist = hist%mxhist
+ do while (ii > mxhist)
+   ii = ii - mxhist
+ end do
+ do while (ii <= 0)
+   ii = ii + mxhist
+ end do
+ index = ii
+ 
+end function abihist_findIndex
 !!***
 
 !----------------------------------------------------------------------
@@ -1199,7 +1192,6 @@ character(len= 500) :: msg
  if (maxdiff>tolerance) similar=0
 
  if (similar==1) then
-   if(.not.store_all) call abihist_shift(hist_out)
    hist_out%acell(:,hist_out%ihist)     =hist_in%acell(:,hist_in%ihist)
    hist_out%rprimd(:,:,hist_out%ihist)  =hist_in%rprimd(:,:,hist_in%ihist)
    hist_out%xred(:,:,hist_out%ihist)    =hist_in%xred(:,:,hist_in%ihist)

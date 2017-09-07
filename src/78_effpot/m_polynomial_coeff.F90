@@ -1071,14 +1071,14 @@ subroutine polynomial_coeff_evaluate(coefficients,disp,energy,fcart,natom_sc,nat
             cell_atoma1 = coefficients(icoeff)%terms(iterm)%cell(:,1,idisp1)
             if(cell_atoma1(1)/=0.or.cell_atoma1(2)/=0.or.cell_atoma1(3)/=0) then
 !             if the cell is not 0 0 0 we apply PBC:
-              cell_atoma1(1) =  (i1-1) + cell_atoma1(1)
-              cell_atoma1(2) =  (i2-1) + cell_atoma1(2)
-              cell_atoma1(3) =  (i3-1) + cell_atoma1(3)
+              cell_atoma1(1) =  i1 + cell_atoma1(1)
+              cell_atoma1(2) =  i2 + cell_atoma1(2)
+              cell_atoma1(3) =  i3 + cell_atoma1(3)
               call getPBCIndexes_supercell(cell_atoma1(1:3),sc_size(1:3))
 !             index of the first atom (position in the supercell if the cell is not 0 0 0)
-              ia1 = cell_atoma1(1)*sc_size(2)*sc_size(3)*natom_uc+&
-&                   cell_atoma1(2)*sc_size(3)*natom_uc+&
-&                   cell_atoma1(3)*natom_uc+&
+              ia1 = (cell_atoma1(1)-1)*sc_size(2)*sc_size(3)*natom_uc+&
+&                   (cell_atoma1(2)-1)*sc_size(3)*natom_uc+&
+&                   (cell_atoma1(3)-1)*natom_uc+&
 &                   coefficients(icoeff)%terms(iterm)%atindx(1,idisp1)
             else
 !             index of the first atom (position in the supercell if the cell is 0 0 0)
@@ -1088,15 +1088,15 @@ subroutine polynomial_coeff_evaluate(coefficients,disp,energy,fcart,natom_sc,nat
 !           indexes of the cell of the atom b  (with PBC) same as ia1
             cell_atomb1 = coefficients(icoeff)%terms(iterm)%cell(:,2,idisp1)
             if(cell_atomb1(1)/=0.or.cell_atomb1(2)/=0.or.cell_atomb1(3)/=0) then
-              cell_atomb1(1) =  (i1-1) + cell_atomb1(1)
-              cell_atomb1(2) =  (i2-1) + cell_atomb1(2)
-              cell_atomb1(3) =  (i3-1) + cell_atomb1(3)
+              cell_atomb1(1) =  i1 + cell_atomb1(1)
+              cell_atomb1(2) =  i2 + cell_atomb1(2)
+              cell_atomb1(3) =  i3 + cell_atomb1(3)
               call getPBCIndexes_supercell(cell_atomb1(1:3),sc_size(1:3))
 
 !            index of the second atom in the (position in the supercell  if the cell is not 0 0 0) 
-              ib1 = cell_atomb1(1)*sc_size(2)*sc_size(3)*natom_uc+&
-&                   cell_atomb1(2)*sc_size(3)*natom_uc+&
-&                   cell_atomb1(3)*natom_uc+&
+              ib1 = (cell_atomb1(1)-1)*sc_size(2)*sc_size(3)*natom_uc+&
+&                   (cell_atomb1(2)-1)*sc_size(3)*natom_uc+&
+&                   (cell_atomb1(3)-1)*natom_uc+&
 &                   coefficients(icoeff)%terms(iterm)%atindx(2,idisp1)
             else
 !             index of the first atom (position in the supercell if the cell is 0 0 0)
@@ -1137,15 +1137,15 @@ subroutine polynomial_coeff_evaluate(coefficients,disp,energy,fcart,natom_sc,nat
               else
                 cell_atoma2=coefficients(icoeff)%terms(iterm)%cell(:,1,idisp2)
                 if(cell_atoma2(1)/=0.or.cell_atoma2(2)/=0.or.cell_atoma2(3)/=0) then
-                  cell_atoma2(1) =  (i1-1) + cell_atoma2(1)
-                  cell_atoma2(2) =  (i2-1) + cell_atoma2(2)
-                  cell_atoma2(3) =  (i3-1) + cell_atoma2(3)
+                  cell_atoma2(1) =  i1 + cell_atoma2(1)
+                  cell_atoma2(2) =  i2 + cell_atoma2(2)
+                  cell_atoma2(3) =  i3 + cell_atoma2(3)
                   call getPBCIndexes_supercell(cell_atoma2(1:3),sc_size(1:3))
 !                 index of the first atom (position in the supercell and direction)
 !                 if the cell of the atom a is not 0 0 0 (may happen)
-                  ia2 = cell_atoma2(1)*sc_size(2)*sc_size(3)*natom_uc+&
-&                       cell_atoma2(2)*sc_size(3)*natom_uc+&
-&                       cell_atoma2(3)*natom_uc+&
+                  ia2 = (cell_atoma2(1)-1)*sc_size(2)*sc_size(3)*natom_uc+&
+&                       (cell_atoma2(2)-1)*sc_size(3)*natom_uc+&
+&                       (cell_atoma2(3)-1)*natom_uc+&
 &                       coefficients(icoeff)%terms(iterm)%atindx(1,idisp2)
                 else
 !                 index of the first atom (position in the supercell and direction)
@@ -1156,15 +1156,15 @@ subroutine polynomial_coeff_evaluate(coefficients,disp,energy,fcart,natom_sc,nat
 
                 if(cell_atomb2(1)/=0.or.cell_atomb2(2)/=0.or.cell_atomb2(3)/=0) then
 !                 indexes of the cell2 (with PBC)
-                  cell_atomb2(1) =  (i1-1) + cell_atomb2(1)
-                  cell_atomb2(2) =  (i2-1) + cell_atomb2(2)
-                  cell_atomb2(3) =  (i3-1) + cell_atomb2(3)
+                  cell_atomb2(1) =  i1 + cell_atomb2(1)
+                  cell_atomb2(2) =  i2 + cell_atomb2(2)
+                  cell_atomb2(3) =  i3 + cell_atomb2(3)
                   call getPBCIndexes_supercell(cell_atomb2(1:3),sc_size(1:3))
 
 !                 index of the second atom in the (position in the supercell) 
-                  ib2 = cell_atomb2(1)*sc_size(2)*sc_size(3)*natom_uc+&
-&                       cell_atomb2(2)*sc_size(3)*natom_uc+&
-&                       cell_atomb2(3)*natom_uc+&
+                  ib2 = (cell_atomb2(1)-1)*sc_size(2)*sc_size(3)*natom_uc+&
+&                       (cell_atomb2(2)-1)*sc_size(3)*natom_uc+&
+&                       (cell_atomb2(3)-1)*natom_uc+&
 &                       coefficients(icoeff)%terms(iterm)%atindx(2,idisp2)
                 else
                   ib2 = ii + coefficients(icoeff)%terms(iterm)%atindx(2,idisp2)

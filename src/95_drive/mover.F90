@@ -392,9 +392,8 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
  nhisttot=ncycle*ntime;if (scfcv_args%dtset%nctime>0) nhisttot=nhisttot+1
 
 !AM_2017 New version of the hist, we just store the needed history step not all of them...
- if(specs%nhist/=-1) nhisttot = specs%nhist! Need all the history
+ if(specs%nhist/=-1) nhisttot = specs%nhist! We don't need to store all the history
  call abihist_init(hist,ab_mover%natom,nhisttot,specs%isVused,specs%isARused)
- if(specs%nhist/=-1) hist%ihist=specs%nhist !the last index will be permanent
  call abiforstr_ini(preconforstr,ab_mover%natom)
 
 !###########################################################
@@ -692,8 +691,7 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
            rprim(ii,1:3)=rprimd(ii,1:3)/acell(1:3)
          end do
 
-!        AM(3/7/17):This function induces memory leak, I don't know why.
-!        Morever, the size of ab_xfh%xfhist is to big for very large supercell.
+!        The size of ab_xfh%xfhist is to big for very large supercell.
 !        Call it only for specific ionmov
          if(any((/2,3,10,11,22/)==ab_mover%ionmov)) then
            call xfh_update(ab_xfh,acell,fred_corrected,ab_mover%natom,rprim,&
@@ -917,9 +915,11 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
      vel_cell(:,:)=zero
      if (ab_mover%ionmov==13) then
        if (hist%ihist>2) then
-         vel_cell(:,:)=(hist%rprimd(:,:,hist%ihist)-hist%rprimd(:,:,hist%ihist-2))/(two*ab_mover%dtion)
+         ii = abihist_findIndex(hist,-2)
+         vel_cell(:,:)=(hist%rprimd(:,:,hist%ihist)- hist%rprimd(:,:,ii)/(two*ab_mover%dtion))
        else if (hist%ihist>1) then
-         vel_cell(:,:)=(hist%rprimd(:,:,hist%ihist)-hist%rprimd(:,:,hist%ihist-1))/(ab_mover%dtion)
+         ii = abihist_findIndex(hist,-1)
+         vel_cell(:,:)=(hist%rprimd(:,:,hist%ihist)-hist%rprimd(:,:,ii))/(ab_mover%dtion)
        end if
      end if
 

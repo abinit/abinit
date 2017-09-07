@@ -2961,9 +2961,8 @@ subroutine effective_potential_getDisp(displacement,du_delta,natom,rprimd_hist,r
       strain_mat(mu,mu) =  strain_mat(mu,mu) + one
       ipiv(mu) = mu
     end do
-    strain_mat_inv = strain_mat
-    call DGETRI(3,strain_mat_inv, 3, ipiv, work, 3, ii)
-!   call matr3inv(strain_mat,strain_mat_inv)
+    call matr3inv(strain_mat,strain_mat_inv)
+    strain_mat_inv=transpose(strain_mat_inv)
     do ii=1,my_natom
       ib = my_atoms(ii)
       work2(:,:) = zero
