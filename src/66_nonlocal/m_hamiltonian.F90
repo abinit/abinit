@@ -1052,7 +1052,7 @@ subroutine load_k_hamiltonian(ham,ffnl_k,fockACE_k,gbound_k,istwf_k,kinpw_k,&
  integer,intent(in),optional,target :: gbound_k(:,:),kg_k(:,:)
  real(dp),intent(in),optional :: kpt_k(3)
  real(dp),intent(in),optional,target :: ffnl_k(:,:,:,:),kinpw_k(:),kpg_k(:,:),ph3d_k(:,:,:)
- type(fock_ACE_type),intent(in),optional,pointer :: fockACE_k
+ type(fock_ACE_type),intent(in),optional,target :: fockACE_k
 
 !Local variables-------------------------------
 !scalars

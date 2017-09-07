@@ -491,10 +491,10 @@ subroutine fock2ACE(cg,cprj,fock,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_enreg,mp
 &                                bb(2,ll,kk)*wi(1,1+(jblocksize-1)*npw_k*my_nspinor:jblocksize*npw_k*my_nspinor,jblock)
          end do
        end do
-!write(80,*) kk
-!write(80,*)fock%fockACE(ikpt)%xi(:,1:80,kk)
+!write(80,*) ikpt,kk
+!write(80,*)fock%fockACE(ikpt)%xi(:,:,kk)
      end do
-
+!stop
 !flush(80)
      ABI_DEALLOCATE(wi)
      ABI_DEALLOCATE(mkl)

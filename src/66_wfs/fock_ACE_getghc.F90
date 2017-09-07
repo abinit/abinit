@@ -106,10 +106,13 @@ subroutine fock_ACE_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
  iband=fockcommon%iband
  xi(1,:)=gs_ham%fockACE_k%xi(1,:,iband)
  xi(2,:)=-gs_ham%fockACE_k%xi(2,:,iband)
+!write(80,*) gs_ham%fockACE_k%xi(:,:,iband)
+!flush(80)
  call dotprod_g(dotr,doti,gs_ham%istwf_k,npw,2,cwavef,xi,mpi_enreg%me_g0,mpi_enreg%comm_fft)
+!write(80,*) dotr,doti
  ghc1(1,:)=ghc1(1,:)+(dotr*gs_ham%fockACE_k%xi(1,:,iband)-doti*gs_ham%fockACE_k%xi(2,:,iband))
  ghc1(2,:)=ghc1(2,:)+(dotr*gs_ham%fockACE_k%xi(2,:,iband)+doti*gs_ham%fockACE_k%xi(1,:,iband))
-
+!stop
  ABI_DEALLOCATE(xi)
  ghc1=-ghc1*gs_ham%ucvol/gs_ham%nfft
 
@@ -146,6 +149,6 @@ subroutine fock_ACE_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
 ! ===============================
 
  ABI_DEALLOCATE(ghc1)
-
+!write(80,*)fockcommon%eigen_ikpt
 end subroutine fock_ACE_getghc
 !!***
