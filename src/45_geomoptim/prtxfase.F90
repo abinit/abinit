@@ -323,9 +323,10 @@ implicit none
 &   hist%etot(hist%ihist)
 
    if (itime>1)then
-     dEabs=hist%etot(hist%ihist)-hist%etot(hist%ihist-1)
+     jj = abihist_findIndex(hist,-1)
+     dEabs=hist%etot(hist%ihist)-hist%etot(jj)
      dErel=2*dEabs/(abs(hist%etot(hist%ihist))+&
-&     abs(hist%etot(hist%ihist-1)))
+&     abs(hist%etot(jj)))
      write(message, '(a,a,a,a)' )&
 &     TRIM(message),ch10,ch10,&
 &     ' Difference of energy with previous step (new-old):'

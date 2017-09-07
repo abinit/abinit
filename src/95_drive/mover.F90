@@ -191,7 +191,7 @@ type(abimover) :: ab_mover
 type(abimover_specs) :: specs
 type(abiforstr) :: preconforstr ! Preconditioned forces and stress
 type(mttk_type) :: mttk_vars
-integer :: itime,icycle,itime_hist,iexit=0,ifirst,timelimit_exit,ncycle,nhisttot,kk,jj,me
+integer :: itime,icycle,itime_hist,iexit=0,ifirst,jhist,timelimit_exit,ncycle,nhisttot,kk,jj,me
 integer :: nloop,ntime,option,comm
 integer :: nerr_dilatmx,my_quit,ierr,quitsum_request
 integer ABI_ASYNC :: quitsum_async
@@ -866,12 +866,13 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
          jj=itime; if(hist_prev%mxhist>0.and.ab_mover%restartxf==-1) jj=jj-hist_prev%mxhist
          if (jj>0) then
            option=3
+           jhist = abihist_findIndex(hist,-1)
            call wrt_moldyn_netcdf(amass,scfcv_args%dtset,jj,option,dtfil%fnameabo_moldyn,&
 &           scfcv_args%mpi_enreg,scfcv_args%results_gs,&
-&           hist%rprimd(:,:,hist%ihist-1),dtfil%unpos,hist%vel(:,:,hist%ihist),&
-&           hist%xred(:,:,hist%ihist-1))
+&           hist%rprimd(:,:,jhist),dtfil%unpos,hist%vel(:,:,hist%ihist),&
+&           hist%xred(:,:,jhist))
          end if
-         if (iexit==1) hist%ihist=hist%ihist-1
+         if (iexit==1) hist%ihist=jhist
        end if
      end if
      if(iexit/=0) exit
@@ -914,12 +915,12 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
 !    Not yet used here but compute it for consistency
      vel_cell(:,:)=zero
      if (ab_mover%ionmov==13) then
-       if (hist%ihist>2) then
-         ii = abihist_findIndex(hist,-2)
-         vel_cell(:,:)=(hist%rprimd(:,:,hist%ihist)- hist%rprimd(:,:,ii)/(two*ab_mover%dtion))
-       else if (hist%ihist>1) then
-         ii = abihist_findIndex(hist,-1)
-         vel_cell(:,:)=(hist%rprimd(:,:,hist%ihist)-hist%rprimd(:,:,ii))/(ab_mover%dtion)
+       if (itime_hist>2) then
+         jhist = abihist_findIndex(hist,-2)
+         vel_cell(:,:)=(hist%rprimd(:,:,hist%ihist)- hist%rprimd(:,:,jhist))/(two*ab_mover%dtion)
+       else if (itime_hist>1) then
+         jhist = abihist_findIndex(hist,-1)
+         vel_cell(:,:)=(hist%rprimd(:,:,hist%ihist)-hist%rprimd(:,:,jhist))/(ab_mover%dtion)
        end if
      end if
 
