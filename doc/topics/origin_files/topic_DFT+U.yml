@@ -33,6 +33,9 @@
 
          <p> Consistency between total energy and forces in DFT+U have been checked.
 
+         <p> The implementation of DFT+U in ABINIT allows also to impose a starting density matrix in order
+         to compare the energy of various electronic configuration (see keywords [[usedmatpu]] and [[dmatpawu]]).
+
          <p>
     tutorials  : |-
           <li><a href="../../tutorial/generated_files/lesson_dftu.html">The lesson on DFT+U</a> shows

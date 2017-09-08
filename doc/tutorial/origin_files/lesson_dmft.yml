@@ -151,14 +151,18 @@ sec2:
   </pre> </font> 
   The band structure is given in eV.
   <br>
+  <p align="center">
   <img style="width: 634px" alt="FatbandV" src="../documents/lesson_dmft/fatbandV.jpg">
+  </p>
   <br>
   <p>and the fatbands for Oxygen and l=1 with </p> <font color="gray"> <pre> 
   xmgrace tdmft_1o_DS2_FATBANDS_at0003_O_is1_l0001.
   </pre> </font> 
   
   <br>
+  <p align="center">
   <img style="width: 634px" alt="FatbandV" src="../documents/lesson_dmft/fatbandO.jpg">
+  </p>
   <br>
   
   In these plots, you recover the band structure of SrVO<SUB>3</SUB> (see for comparison 
@@ -402,7 +406,9 @@ sec3:
   </pre> </font>
   Then using xmgrace, you click on  <i>Data</i>, then  on <i> Transformations </i> and then on <i> Regression </i> and you can do a 4th order fit as:
   <br>
+  <p align="center">
   <img style="width: 634px" alt="self" src="../documents/lesson_dmft/self.jpg">
+  </p>
   <br>
   
   The slope at zero
@@ -421,7 +427,9 @@ sec3:
   xmgrace -nxy Gtau.dat 
   </pre> </font>
   <br>
+  <p align="center">
   <img style="width: 634px" alt="Gtau" src="../documents/lesson_dmft/Gtau.jpg">
+  </p>
   <br>
   
   As the six <i> t<SUB>2g</SUB> </i> orbitals are degenerated, the six Green's function must
@@ -454,7 +462,9 @@ sec3:
   </pre> </font>
   one obtains:
   <br>
+  <p align="center">
   <img style="width: 634px" alt="Gtau2" src="../documents/lesson_dmft/Gtau2.jpg">
+  </p>
   <br>
   
   One naturally sees that the stochastic noise is much larger in this case. This stochastic noise
@@ -506,7 +516,9 @@ sec3:
   </pre> </font>
   Change the unit from Hartree to eV, and then, you have the spectral function:
   <br>
+  <p align="center">
   <img style="width: 634px" alt="spectralfunction" src="../documents/lesson_dmft/spectralfunction.jpg">
+  </p>
   <br>
   
   Even if the calculation is not well converged, you recognize in the spectral functions
@@ -563,10 +575,10 @@ sec4:
   
   <pre>
    Energy window:                              <i>t<SUB>2g</SUB></i>-like bands         <i>t<SUB>2g</SUB></i>-like+<i>O-p</i>-like bands
-   dmftbandi/dmftbandf:                           21/23                      12/23
-   Norm:                                           0.66                       0.78
-   LDA Number of electrons (before &perp;):            0.66(=0.11*6)              1.42(=0.235*6)
-   LDA Number of electrons (after  &perp;):            1.02                       1.81
+   dmftbandi/dmftbandf:                             21/23                      12/23
+   Norm:                                                       0.66                        0.78
+   LDA Number of electrons (before &perp;):     0.66(=0.11*6)        1.42(=0.235*6)
+   LDA Number of electrons (after  &perp;):       1.02                       1.81
   </pre>
   
   For the large window, as we use more Kohn Sham states, both the occupation and the norm are larger,
@@ -593,7 +605,9 @@ sec4:
   we find a spectral function with an hybridation peak at -5 eV, as described
   in  Fig.5 of [[Amadon2008]]</a>.
   <br>
+  <p align="center">
   <img style="width: 634px" alt="spectralfunction" src="../documents/lesson_dmft/spectralfunction2.jpg">
+  </p>
   <br>
   Resolving the lower Hubbard bands would require a more converged calculation.
   
@@ -631,7 +645,9 @@ sec5:
   </pre> 
   You can plot the evolution of the internal energy as a function of the iteration.
   <br>
+  <p align="center">
   <img style="width: 634px" alt="internal" src="../documents/lesson_dmft/internal.jpg">
+  </p>
   <br>
   You notice that the internal energy (in a DFT+DMFT calculations) does
   not converge as a function of iterations, because there is a finite statistical noise. So, as a function of iterations, first, the internal
