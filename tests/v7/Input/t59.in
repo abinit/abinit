@@ -87,6 +87,7 @@
  rfatpol7  1 2          # Treat displacements of all atoms
  rfdir7    1 1 1        # Do all directions 
  tolwfr7   1.0d-16
+ kptopt7   3
 
 # Cell dependant parameters
  acell  3*6.6709983131

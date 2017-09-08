@@ -31,7 +31,7 @@ module m_fit_polynomial_coeff
  use m_atomdata
  use m_xmpi
  use m_sort
- use m_phonon_supercell
+ use m_supercell
  use m_special_funcs,only : factorial
  use m_crystal,only : symbols_crystal
  use m_strain,only : strain_type,strain_get
@@ -1113,6 +1113,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,fixcoeff,hist,powers,ncycle_in,nfixc
  real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3),strain_mat_inv(3,3)
  real(dp) :: mingf(4)
  integer :: ipiv(3)
+ integer :: sc_size(3)
  integer,allocatable  :: buffsize(:),buffdisp(:)
  integer,allocatable  :: list_coeffs(:),list_coeffs_tmp(:),my_coeffindexes(:),singular_coeffs(:)
  integer,allocatable  :: my_coefflist(:) 
@@ -1139,7 +1140,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,fixcoeff,hist,powers,ncycle_in,nfixc
 
 !Initialisation of constants
  ntime      = hist%mxhist
- natom_sc   = eff_pot%supercell%natom_supercell
+ natom_sc   = eff_pot%supercell%natom
 
 !if the cutoff_in == zero,
 !we set to the lenght of the cell parameters
@@ -1214,10 +1215,10 @@ subroutine fit_polynomial_coeff_fit(eff_pot,fixcoeff,hist,powers,ncycle_in,nfixc
 !Reset the output (we free the memory)
  call effective_potential_freeCoeffs(eff_pot)
 
-!if the number of atoms in reference supercell into effpot is not corret,
+!if the number of atoms in reference supercell into effpot is not correct,
 !wrt to the number of atom in the hist, we set map the hist and set the good 
 !supercell
- if (size(hist%xred,2) /= eff_pot%supercell%natom_supercell) then
+ if (size(hist%xred,2) /= eff_pot%supercell%natom) then
    call fit_polynomial_coeff_mapHistToRef(eff_pot,hist,comm)
  end if
 
@@ -1384,7 +1385,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,fixcoeff,hist,powers,ncycle_in,nfixc
 !Compute Shepard and al Factors  \Omega^{2} see J.Chem Phys 136, 074103 (2012).
  do itime=1,ntime
 !  Get strain
-   call strain_get(strain_t,rprim=eff_pot%supercell%rprimd_supercell,&
+   call strain_get(strain_t,rprim=eff_pot%supercell%rprimd,&
 &                  rprim_def=hist%rprimd(:,:,itime),symmetrized=.FALSE.)
     if (strain_t%name /= "reference")  then
       do ii=1,3
@@ -1399,9 +1400,9 @@ subroutine fit_polynomial_coeff_fit(eff_pot,fixcoeff,hist,powers,ncycle_in,nfixc
 
 !  Get displacement
    call effective_potential_getDisp(displacement(:,:,itime),natom_sc,hist%rprimd(:,:,itime),&
-&                                   eff_pot%supercell%rprimd_supercell,&
+&                                   eff_pot%supercell%rprimd,&
 &                                   xred_hist=hist%xred(:,:,itime),&
-&                                   xcart_ref=eff_pot%supercell%xcart_supercell)
+&                                   xcart_ref=eff_pot%supercell%xcart)
 
 !  Get the variation of the displacmeent wr to strain
 !  See formula A4  in PRB 95,094115
@@ -1443,7 +1444,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,fixcoeff,hist,powers,ncycle_in,nfixc
 !  Compact form:
    sqomega(itime) = ((ucvol(itime)**(4.0/3.0)) / ((natom_sc)**(1/3.0)))
 !  Compute also normalisation factors
-   ncell      = product(eff_pot%supercell%qphon(:))
+   ncell      = eff_pot%supercell%ncells
 
 !  Compute the difference between History and model (fixed part)
    fcart_diff(:,:,itime) =  hist%fcart(:,:,itime) - fcart_fixed(:,:,itime) 
@@ -1503,9 +1504,12 @@ subroutine fit_polynomial_coeff_fit(eff_pot,fixcoeff,hist,powers,ncycle_in,nfixc
  ABI_ALLOCATE(fcart_coeffs,(3,natom_sc,my_ncoeff,ntime))
  ABI_ALLOCATE(strten_coeffs,(6,ntime,my_ncoeff))
 
+ do ii = 1, 3
+   sc_size(ii) = eff_pot%supercell%rlatt(ii,ii)
+ end do
  call fit_polynomial_coeff_getFS(my_coeffs,du_delta,displacement,&
 &                                energy_coeffs,fcart_coeffs,natom_sc,eff_pot%crystal%natom,&
-&                                my_ncoeff,ntime,int(eff_pot%supercell%qphon(:)),strain,&
+&                                my_ncoeff,ntime,sc_size,strain,&
 &                                strten_coeffs,ucvol,my_coefflist,my_ncoeff)
 
 !Free space
@@ -2692,8 +2696,8 @@ subroutine fit_polynomial_coeff_mapHistToRef(eff_pot,hist,comm)
  ABI_ALLOCATE(xred_ref,(3,natom_hist))
  blkval = one
  list   = zero
- call xcart2xred(eff_pot%supercell%natom_supercell,eff_pot%supercell%rprimd_supercell,&
-&                eff_pot%supercell%xcart_supercell,xred_ref)
+ call xcart2xred(eff_pot%supercell%natom,eff_pot%supercell%rprimd,&
+&                eff_pot%supercell%xcart,xred_ref)
 
  xred_hist = hist%xred(:,:,1)
 
@@ -2846,13 +2850,13 @@ subroutine fit_polynomial_printSystemFiles(eff_pot,hist)
 
 !Create new supercell corresponding to the MD
  ncell = (/2,2,2/)
- call init_supercell(eff_pot%crystal%natom, 0, real(ncell,dp), eff_pot%crystal%rprimd,&
-&                    eff_pot%crystal%typat,eff_pot%crystal%xcart, supercell)
+ call init_supercell(eff_pot%crystal%natom, (/ncell(1),0,0,  0,ncell(2),0,  0,0,ncell(3)/), eff_pot%crystal%rprimd,&
+&                    eff_pot%crystal%typat,eff_pot%crystal%xcart,eff_pot%crystal%znucl, supercell)
 
 !allocation of array
- ABI_ALLOCATE(xcart,(3,supercell%natom_supercell))
- ABI_ALLOCATE(fcart,(3,supercell%natom_supercell))
- ABI_ALLOCATE(typat_order,(supercell%natom_supercell))
+ ABI_ALLOCATE(xcart,(3,supercell%natom))
+ ABI_ALLOCATE(fcart,(3,supercell%natom))
+ ABI_ALLOCATE(typat_order,(supercell%natom))
  ABI_ALLOCATE(typat_order_uc,(eff_pot%crystal%natom))
 
  A = (/ 2, 3, 1/)
@@ -2868,7 +2872,7 @@ subroutine fit_polynomial_printSystemFiles(eff_pot,hist)
  do ii=1,eff_pot%crystal%ntypat
    jj = A(ii)
    do kk=1,natom_uc
-     if(supercell%typat_supercell(kk)==jj)then
+     if(supercell%typat(kk)==jj)then
        typat_order_uc(ib1) = kk
        ib1 = ib1 + 1 
        do ll=1,nshift
@@ -2920,15 +2924,15 @@ subroutine fit_polynomial_printSystemFiles(eff_pot,hist)
  write(unit_ref,'("Cell vectors")')
  write(unit_ref,'("============")')
  do jj=1,3
-   write(unit_ref,'(3(F22.14))') (supercell%rprimd_supercell(:,jj))
+   write(unit_ref,'(3(F22.14))') (supercell%rprimd(:,jj))
  end do
 
  write(unit_ref,'("")')
  write(unit_ref,'("Atomic positions (Bohr radius)")')
  write(unit_ref,'("==============================")')
 
- do ia=1,supercell%natom_supercell
-   write(unit_ref,'(3(F23.14))') supercell%xcart_supercell(:,typat_order(ia))
+ do ia=1,supercell%natom
+   write(unit_ref,'(3(F23.14))') supercell%xcart(:,typat_order(ia))
  end do
 
 !Harmonic XML file
@@ -2999,12 +3003,12 @@ subroutine fit_polynomial_printSystemFiles(eff_pot,hist)
      write(unit_md,'(3(F22.14))') (hist%rprimd(:,jj,ii))
    end do
 !  Set xcart and fcart for this step
-   call xred2xcart(supercell%natom_supercell,hist%rprimd(:,:,ii),&
+   call xred2xcart(supercell%natom,hist%rprimd(:,:,ii),&
 &                  xcart,hist%xred(:,:,ii))
 
    fcart(:,:) = hist%fcart(:,:,ii)
 
-   do ia=1,supercell%natom_supercell
+   do ia=1,supercell%natom
      write(unit_md,'(3(E22.14),3(E22.14))') xcart(:,typat_order(ia)),fcart(:,typat_order(ia))
    end do
    write(unit_md,'(6(E22.14))') hist%strten(:,ii)
