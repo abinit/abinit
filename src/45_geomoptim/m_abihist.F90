@@ -827,17 +827,28 @@ function abihist_findIndex(hist,step) result(index)
  type(abihist),intent(in) :: hist
 !Local variables-------------------------------
 !scalars
- integer :: ii,ihist,mxhist
+ integer :: ii,mxhist
+!arrays
+ character(len=500) :: msg
 ! *************************************************************
 
- ii = hist%ihist + step
  mxhist = hist%mxhist
+
+ if (abs(step) >=mxhist) then
+   write(msg,'(a,I0)')' The requested step must be lass than ',mxhist,ch10,&
+&                     ' Action: increase the number of history store in the hist' 
+   MSG_BUG(msg)
+ end if
+ 
+ ii = hist%ihist + step
+
  do while (ii > mxhist)
    ii = ii - mxhist
  end do
  do while (ii <= 0)
    ii = ii + mxhist
  end do
+ 
  index = ii
  
 end function abihist_findIndex
@@ -900,7 +911,7 @@ real(dp),intent(out) :: xred(3,natom)
 
 !Local variables-------------------------------
 !scalars
-integer :: jj,kk
+integer :: kk
 
 ! *************************************************************
 
@@ -1550,7 +1561,6 @@ implicit none
  integer :: mdtime_id,vel_id,vel_cell_id,etotal_id
  integer :: acell_id,rprimd_id,strten_id
  logical :: has_nimage
- character(len=500) :: msg
 #endif
 
 ! *************************************************************************

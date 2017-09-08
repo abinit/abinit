@@ -570,7 +570,7 @@ subroutine pred_isothermal(ab_mover,hist,itime,mttk_vars,ntime,zDEBUG,iexit)
 !##########################################################
  !### 06. Update the history with the prediction
 
-!increment the ihist
+!Increase indexes
  hist%ihist = abihist_findIndex(hist,+1)
 
 !Fill the history with the variables

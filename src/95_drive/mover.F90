@@ -191,7 +191,7 @@ type(abimover) :: ab_mover
 type(abimover_specs) :: specs
 type(abiforstr) :: preconforstr ! Preconditioned forces and stress
 type(mttk_type) :: mttk_vars
-integer :: itime,icycle,itime_hist,iexit=0,ifirst,jhist,timelimit_exit,ncycle,nhisttot,kk,jj,me
+integer :: itime,icycle,itime_hist,iexit=0,ifirst,ihist_prev,ihist_prev2,timelimit_exit,ncycle,nhisttot,kk,jj,me
 integer :: nloop,ntime,option,comm
 integer :: nerr_dilatmx,my_quit,ierr,quitsum_request
 integer ABI_ASYNC :: quitsum_async
@@ -751,8 +751,7 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
 &           hist%strten(:,hist%ihist),&
 &           scfcv_args%dtset%tolmxf)
          else
-           call erlxconv(hist%etot(:),iexit,hist%ihist,&
-&           itime,hist%mxhist,ntime,scfcv_args%dtset%tolmxde)
+           call erlxconv(hist,iexit,itime,itime_hist,ntime,scfcv_args%dtset%tolmxde)
          end if
        end if
      end if
@@ -866,13 +865,13 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
          jj=itime; if(hist_prev%mxhist>0.and.ab_mover%restartxf==-1) jj=jj-hist_prev%mxhist
          if (jj>0) then
            option=3
-           jhist = abihist_findIndex(hist,-1)
+           ihist_prev = abihist_findIndex(hist,-1)
            call wrt_moldyn_netcdf(amass,scfcv_args%dtset,jj,option,dtfil%fnameabo_moldyn,&
 &           scfcv_args%mpi_enreg,scfcv_args%results_gs,&
-&           hist%rprimd(:,:,jhist),dtfil%unpos,hist%vel(:,:,hist%ihist),&
-&           hist%xred(:,:,jhist))
+&           hist%rprimd(:,:,ihist_prev),dtfil%unpos,hist%vel(:,:,hist%ihist),&
+&           hist%xred(:,:,ihist_prev))
          end if
-         if (iexit==1) hist%ihist=jhist
+         if (iexit==1) hist%ihist=ihist_prev
        end if
      end if
      if(iexit/=0) exit
@@ -916,11 +915,11 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
      vel_cell(:,:)=zero
      if (ab_mover%ionmov==13) then
        if (itime_hist>2) then
-         jhist = abihist_findIndex(hist,-2)
-         vel_cell(:,:)=(hist%rprimd(:,:,hist%ihist)- hist%rprimd(:,:,jhist))/(two*ab_mover%dtion)
+         ihist_prev2 = abihist_findIndex(hist,-2)
+         vel_cell(:,:)=(hist%rprimd(:,:,hist%ihist)- hist%rprimd(:,:,ihist_prev2))/(two*ab_mover%dtion)
        else if (itime_hist>1) then
-         jhist = abihist_findIndex(hist,-1)
-         vel_cell(:,:)=(hist%rprimd(:,:,hist%ihist)-hist%rprimd(:,:,jhist))/(ab_mover%dtion)
+         ihist_prev = abihist_findIndex(hist,-1)
+         vel_cell(:,:)=(hist%rprimd(:,:,hist%ihist)-hist%rprimd(:,:,ihist_prev))/(ab_mover%dtion)
        end if
      end if
 
@@ -955,9 +954,10 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
  if (timelimit_exit==1 .and. specs%isFconv) then
    iexit = timelimit_exit
    ntime = itime-1
+   ihist_prev = abihist_findIndex(hist,-1)
    if ((ab_mover%ionmov/=4.and.ab_mover%ionmov/=5)) then
      if (scfcv_args%dtset%tolmxf/=0)then
-       call fconv(hist%fcart(:,:,hist%ihist-1),&
+       call fconv(hist%fcart(:,:,ihist_prev),&
 &       scfcv_args%dtset%iatfix, &
 &       iexit, itime,&
 &       ab_mover%natom,&
@@ -965,11 +965,10 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
 &       ab_mover%optcell,&
 &       scfcv_args%dtset%strfact,&
 &       scfcv_args%dtset%strtarget,&
-&       hist%strten(:,hist%ihist-1),&
+&       hist%strten(:,ihist_prev),&
 &       scfcv_args%dtset%tolmxf)
      else
-       call erlxconv(hist%etot(:),iexit,hist%ihist,&
-&       itime,hist%mxhist,ntime,scfcv_args%dtset%tolmxde)
+       call erlxconv(hist,iexit,itime,itime_hist,ntime,scfcv_args%dtset%tolmxde)
      end if
    end if
  end if
