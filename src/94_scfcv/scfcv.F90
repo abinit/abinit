@@ -203,7 +203,8 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
  use m_paw_ij,           only : paw_ij_type, paw_ij_init, paw_ij_free, paw_ij_nullify,&
 &                               paw_ij_reset_flags
  use m_paw_dmft,         only : paw_dmft_type
- use m_fock,             only : fock_type,fock_init,fock_destroy,fock_ACE_destroy,fock_update_exc,fock_updatecwaveocc
+ use m_fock,             only : fock_type,fock_init,fock_destroy,fock_ACE_destroy,fock_common_destroy,&
+&                               fock_BZ_destroy,fock_update_exc,fock_updatecwaveocc
  use gwls_hamiltonian,   only : build_vxc
 #if defined HAVE_BIGDFT
  use BigDFT_API,         only : cprj_clean,cprj_paw_alloc
@@ -1063,13 +1064,13 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
        ! Initialize data_type fock for the calculation
        cplex_hf=cplex
        if (psps%usepaw==1) cplex_hf=dtset%pawcpxocc
-       call fock_init(atindx,cplex_hf,dtset,fock,gsqcut,indsym,kg,mpi_enreg,nattyp,npwarr,pawang,pawfgr,pawtab,rprimd)
-       if (fock%usepaw==1) then
+       call fock_init(atindx,cplex_hf,dtset,fock,gsqcut,kg,mpi_enreg,nattyp,npwarr,pawang,pawfgr,pawtab,rprimd)
+       if (fock%fock_common%usepaw==1) then
          optcut_hf = 0 ! use rpaw to construct local_pawfgrtab
          optgr0_hf = 0; optgr1_hf = 0; optgr2_hf = 0 ! dont need gY terms locally
          optrad_hf = 1 ! do store r-R
          call nhatgrid(atindx1,gmet,dtset%natom,dtset%natom,nattyp,ngfftf,psps%ntypat,&
-&         optcut_hf,optgr0_hf,optgr1_hf,optgr2_hf,optrad_hf,fock%pawfgrtab,pawtab,&
+&         optcut_hf,optgr0_hf,optgr1_hf,optgr2_hf,optrad_hf,fock%fock_common%pawfgrtab,pawtab,&
 &         rprimd,dtset%typat,ucvol,xred,typord=1)
          iatom=-1;idir=0
          call ctocprj(atindx,cg,ctocprj_choice,cprj,gmet,gprimd,iatom,idir,&
@@ -1080,17 +1081,17 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
        end if
      end if
 
-     if (fock%optfor) then
-       fock%forces=zero
+     if (fock%fock_common%optfor) then
+       fock%fock_common%forces=zero
      end if
-     hybrid_mixing=fock%hybrid_mixing ; hybrid_mixing_sr=fock%hybrid_mixing_sr
+     hybrid_mixing=fock%fock_common%hybrid_mixing ; hybrid_mixing_sr=fock%fock_common%hybrid_mixing_sr
      ! Update data relative to the occupied states in fock
      call fock_updatecwaveocc(cg,cprj,dtset,fock,energies%e_exactX,indsym,istep,mcg,mcprj,mpi_enreg,nattyp,npwarr,occ,ucvol)
-     if(fock%use_ACE/=0) then
+     if(fock%fock_common%use_ACE/=0) then
        call fock2ACE(cg,cprj,fock,kg,dtset%kptns,dtset%mband,mcg,mcprj,dtset%mgfft,dtset%mkmem,mpi_enreg,psps%mpsang,&
 &       dtset%mpw,dtset%natom,dtset%natom,dtset%nband,dtset%nfft,ngfft,dtset%nkpt,dtset%nloalg,npwarr,dtset%nspden,&
 &       dtset%nspinor,dtset%nsppol,dtset%nsym,dtset%ntypat,occ,dtset%optforces,paw_ij,pawtab,ph1d,psps,rprimd,&
-&       dtset%optstress,fock%symrec,dtset%typat,usecprj,dtset%use_gpu_cuda,dtset%wtk,xred,ylm,ylmgr)
+&       dtset%optstress,fock%fock_common%symrec,dtset%typat,usecprj,dtset%use_gpu_cuda,dtset%wtk,xred,ylm,ylmgr)
      end if
    end if ! usefock
 
@@ -2072,12 +2073,13 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
 
 ! Deallocate exact exchange data at the end of the calculation
  if (usefock==1) then
-   if (fock%use_ACE/=0) then     
+   if (fock%fock_common%use_ACE/=0) then     
      call fock_ACE_destroy(fock%fockACE)
    end if
+   call fock_common_destroy(fock%fock_common)
+   call fock_BZ_destroy(fock%fock_BZ)
    call fock_destroy(fock)
    nullify(fock)
-   
  end if
 
  if (prtxml == 1) then
