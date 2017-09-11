@@ -4,7 +4,18 @@
 <!--                                                                                     -->
 <html>
 <head><title>Lesson on Bethe-Salpeter calculations</title>
-<link rel=stylesheet type="text/css" href="../formabinit.css">
+<link rel=stylesheet type="text/css" href="../../formabinit.css">
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  jax: ["input/TeX","output/HTML-CSS"],
+  tex2jax: {inlineMath: [['$','$']]},
+  displayAlign: "center",
+  TeX: { equationNumbers: { autoNumber: "AMS" } }
+});
+</script>
+<script type="text/javascript" async
+src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
 </head>
 <body bgcolor="#ffffff">
 
@@ -466,7 +477,7 @@ function of frequency for the different directions:
  
 You can visualize the data using your preferred software. For instance,
 <pre>
-$ gnuplot
+>>> gnuplot
 gnuplot&#62  p "tbs_2o_EXC_MDF" u 1:3 w l
 </pre>
 will plot the imaginary part of the macroscopic dielectric function (the absorption spectrum) for the first q-point.
@@ -488,7 +499,7 @@ the excitonic spectra with the RPA results obtained without local field effects.
 Use the sequence of gnuplot command
 
 <pre>
-$ gnuplot
+>>> gnuplot
 gnuplot&#62  p   "tbs_2o_EXC_MDF"     u 1:3 w l
 gnuplot&#62  rep "tbs_2o_RPA_NLF_MDF" u 1:3 w l
 gnuplot&#62  rep "tbs_2o_GW_NLF_MDF"  u 1:3 w l
@@ -670,7 +681,7 @@ Let us hope that your calculation has been completed, and that we can examine th
 Use the following sequence of gnuplot commands:
 
 <pre>
-$ gnuplot
+>>> gnuplot
 gnuplot&#62 p   "tbs_3o_DS1_EXC_MDF" u 1:3 w l
 gnuplot&#62 rep "tbs_3o_DS2_EXC_MDF" u 1:3 w l
 gnuplot&#62 rep "tbs_3o_DS3_EXC_MDF" u 1:3 w l
@@ -798,7 +809,7 @@ Once the calculation is completed, plot the spectra obtained with different
 <a href="../../input_variables/generated_files/varset_gw.html#ecuteps">ecuteps</a> using
 
 <pre>
-$ gnuplot
+>>> gnuplot
 gnuplot&#62  p "tbs_4o_DS1_EXC_MDF" u 1:3 w l
 gnuplot&#62  p "tbs_4o_DS2_EXC_MDF" u 1:3 w l
 gnuplot&#62  p "tbs_4o_DS3_EXC_MDF" u 1:3 w l

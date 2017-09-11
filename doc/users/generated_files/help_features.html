@@ -4,7 +4,18 @@
 <!--                                                                                     -->
 <html>
 <head><title>ABINIT features</title>
-<link rel=stylesheet type="text/css" href="../formabinit.css">
+<link rel=stylesheet type="text/css" href="../../formabinit.css">
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  jax: ["input/TeX","output/HTML-CSS"],
+  tex2jax: {inlineMath: [['$','$']]},
+  displayAlign: "center",
+  TeX: { equationNumbers: { autoNumber: "AMS" } }
+});
+</script>
+<script type="text/javascript" async
+src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
 </head>
 <body bgcolor="#ffffff">
 
@@ -45,8 +56,9 @@ It might answer the question "How to ... with ABINIT ?", to some extent.
   <li>6. <a href="#dfpt">Adiabatic response properties (phonons, low-frequency dielectric, Raman, elasticity, temperature dependence ...)</a></li>
   <li>7. <a href="#excited">Excited state calculations, and frequency-dependent electronic and optical properties</a></li>
   <li>8. <a href="#other_physics">Electronic properties and analysis tools (DOS, STM, Wannier, band plotting and interpolating...)</a></li>
-  <li>9. <a href="#other_physics">Other properties (e.g. positron) and analysis/postprocessing tools</a></li>
-  <li>10. <a href="#miscellaneous">Miscellaneous topics</a></li>
+  <li>9. <a href="#other_physics">Other physical properties (e.g. positron)</a></li>
+  <li>10. <a href="#postprocess">Analysis/postprocessing tools</a></li>
+  <li>11. <a href="#miscellaneous">Miscellaneous topics</a></li>
 
  </ul> 
  <hr><br><a name="foreword"> </a>
@@ -244,18 +256,25 @@ See the list of "printing" input variables in <a href="../../topics/generated_fi
 <hr>
 <br><a name="other_physics"> </a>
 <a name="9"> </a>
-<h3><b>9. Other properties (e.g. positron) and analysis/postprocessing tools</b></h3>
+<h3><b>9. Other physical properties (e.g. positron)</b></h3>
  <p><ol>
  <li><a href="../../topics/generated_files/topic_positron.html#">Positron calculations</a></li>
- <li><a href="../../topics/generated_files/topic_Abipy.html#">Abipy</a></li>
+</ol>
+<br><br><a href=#top>Go to the top</a>
+<hr>
+<br><a name="postprocess"> </a>
+<a name="10"> </a>
+<h3><b>10. Analysis/postprocessing tools</b></h3>
+ <p><ol>
+ <li><a href="../../topics/generated_files/topic_Abipy.html#">Abipy - ABINIT swiss knife</a></li>
  <li><a href="../../topics/generated_files/topic_APPA.html#">Abinit Post-Processor Application (APPA), for molecular-dynamics trajectory analysis</a></li>
  <li><a href="../../topics/generated_files/topic_Band2eps.html#">Band2eps for phonon dispersion curves</a></li>
 </ol>
 <br><br><a href=#top>Go to the top</a>
 <hr>
 <br><a name="miscellaneous"> </a>
-<a name="10"> </a>
-<h3><b>10. Miscellaneous topics</b></h3>
+<a name="11"> </a>
+<h3><b>11. Miscellaneous topics</b></h3>
  <p><ol>
  <li><a href="../../topics/generated_files/topic_Verification.html#">Verification of the implementation</a></li>
  <li><a href="../../topics/generated_files/topic_PortabilityNonRegression.html#">Portability and non-regression tests</a></li>

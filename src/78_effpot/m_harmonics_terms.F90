@@ -28,7 +28,7 @@ module m_harmonics_terms
  use defs_basis
  use m_errors
  use m_profiling_abi
- use m_phonon_supercell,only: getPBCIndexes_supercell
+ use m_supercell,only: getPBCIndexes_supercell
  use m_xmpi,only : xmpi_sum
  use m_ifc
 

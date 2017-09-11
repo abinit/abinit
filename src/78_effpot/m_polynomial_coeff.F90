@@ -29,7 +29,7 @@ module m_polynomial_coeff
  use m_errors
  use m_profiling_abi
  use m_polynomial_term
- use m_phonon_supercell, only: getPBCIndexes_supercell
+ use m_supercell, only: getPBCIndexes_supercell
  use m_xmpi
 
  implicit none

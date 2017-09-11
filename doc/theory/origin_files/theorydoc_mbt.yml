@@ -18,54 +18,34 @@ intro : |
 ## Each section must have a title, that will form the table of content.
 ## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
 ## Note the small (one space) indentation for the title and body keys.
-sec0:
- title: "To be filled"
- tag: 
- body: |
-  <ul>
-  <li><a href="#green_self_intro">1</a> The Green's function and the self-energy 
-    </li><li><a href="#hedins_equations">2</a> Hedin's equations
-    </li><li><a href="#gw_approximation">3</a> The GW approximation 
-    </li><li><a href="#perturbative">4</a> Perturbative approach 
-    </li><li><a href="#RPA_Fourier_space">5</a> The RPA polarizability in Fourier space
-    </li><li><a href="#oscillator_notes">6</a>  Notes on the calculation of oscillator matrix elements
-    </li><li><a href="#hilbert_transform">7</a>  Hilbert transform method 
-    </li><li><a href="#evaluation_gw_sigma">8</a> Evaluation of the GW self-energy
-    </li><li><a href="#contour_deformation">9</a> The contour deformation technique
-    </li><li><a href="#references">10</a> References
-  
-  </li>
-  </ul>
-  
-  <hr>
-  
-  
-
-
-## Each section must have a title, that will form the table of content.
-## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
-## Note the small (one space) indentation for the title and body keys.
 sec1:
  title: "Green's function and self-energy"
  tag: green_self_intro
  body: |
-  The time-ordered Green's function <i>G</i>(12), also called the propagator, 
+  The time-ordered Green's function $G(12)$, also called the propagator, 
   defines the probability amplitude for the propagation of an added or removed electron in a many-body system. 
   Since the probability amplitude is simply given by the overlap between the final and the initial state, 
-  <i>G</i>(12) can be expressed as 
-  
+  $G(12)$ can be expressed as 
+  $$
+  \begin{equation}
+  G(1,2)=-i\left\langle \Theta_0^N \left| \hat{T}
+  \left[ \hat{\psi}(1)\hat{\psi}^{\dagger}(2) \right]
+  \right| \Theta_0^N \right\rangle,
+  \end{equation}
+  $$
   </p>
+  <!--
   <p align="center">
   
       <img src="../documents/theory_mbt/G_def.png">
       
   </p>
+  -->
   
   
-  where the matrix element is taken in the Heisenberg representation, T is the time-ordering operator 
-  and the creation and annihilation field operators act on the ground state of the <i>N</i>-electron many-body Hamiltonian
-  (the conventions used in the equations are explained in the section on
-  <a href="#notations">notation</a>).
+  where the matrix element is taken in the Heisenberg representation, $\hat{T}$ is the time-ordering operator 
+  and the creation and annihilation field operators act on the ground state of the $N$-electron many-body Hamiltonian
+  (the conventions used in the equations are explained in the section on [[#notations]]).
   The propagator contains only part of the full information carried by 
   the many-body wave function, but it includes the relevant part
   for the study of charged excitations. Also, any single-particle operator
@@ -74,14 +54,25 @@ sec1:
   Useful physical information about the charged excitation energies 
   of the many-body system can be obtained by expressing the propagator in the so-called Lehmann representation [1-2-3].
   To this purpose it is useful to introduce the following notation to denote the 
-  charged excitation energies of the <i>N</i>-electron system[5]:
-  
+  charged excitation energies of the $N$-electron system[5]:
+  $$
+  \begin{equation}
+  \varepsilon_i =
+  \begin{cases}
+  E_i^{(N+1)}-E_0^N  & \text{if $\varepsilon_i$ > $\mu$} \\
+  E_0^N-E_i^{(N-1)}  & \text{if $\varepsilon_i$ < $\mu$} ,
+  \end{cases}
+  \end{equation}
+  $$
   </p>
+
+  <!--
   <p align="center">
   
       <img src="../documents/theory_mbt/charged_exc_ene.png">
       
   </p>
+  -->
   
   
   where <i>E<sub>0</sub><sup>N</sup></i> is the ground state energy of the electron system with <i>N</i>
@@ -330,7 +321,7 @@ sec3:
   <p>
   <!--dressed 
   In practice, the electron propagator $G(12)$ is never explicitly known and has to be
-  approximated with the Green's function, $\Go(12)$, of an appropriate non-interacting system. 
+  approximated with the Green's function, $\G(12)$, of an appropriate non-interacting system. 
   -->
   </p>
   <p>
@@ -455,7 +446,7 @@ sec5:
   
   where only the transitions between valence (<i>v</i>) and conduction states (<i>c</i>) contribute
   (for simplicity we have assumed a semiconductor with time-reversal invariance, 
-  the conventions used for the Fourier transform are discussed in the <a href="#notations">notation</a> section).
+  the conventions used for the Fourier transform are discussed in the [[#notations|notation]] section).
   <p>
   The number of bands used to compute the polarizability is specified by [[nband]],
   while [[zcut]] gives the small complex
@@ -480,7 +471,7 @@ sec5:
   determined by [[ecuteps]].
   The oscillators are ubiquitous in the Many-Body part of ABINIT and their 
   calculation represents one of the most CPU intensive part of the execution.
-  For this reason we devote section <a href="theorydoc_mbt.html#oscillator_notes">6</a> 
+  For this reason we devote [[#6|section 6]] 
   to the discussion of some important technical details concerning their computation.
   </p>
   <p>
@@ -641,7 +632,7 @@ sec7:
   </p>
   <p>
   This linear scaling represents a serious problem, especially when many frequencies are wanted, for
-  example when computing QP corrections within the contour deformation technique described in the <a href="../../tutorial/generated_files/lesson_gw2.html">second lesson</a> of the GW tutorial.
+  example when computing QP corrections within the contour deformation technique described in the [[lesson_gw2|second lesson]] of the GW tutorial.
   
   </p>
   <p>
@@ -947,7 +938,7 @@ sec10:
 ## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
 ## Note the small (one space) indentation for the title and body keys.
 sec11:
- title: "Notation"
+ title: "Notations"
  tag: notations
  body: |
   The following shorthand notations are employed:

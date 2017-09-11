@@ -342,25 +342,19 @@
   pages : 16392
 -
   ENTRYTYPE : article
-  ID : Bergeron2015
-  author : Bergeron, D. and Tremblay, A.-M. S.
-  title : Algorithms for optimized maximum entropy and diagnostic tools for analytic continuation
-  journal : arXiv e-prints
-  year : 2015
-  month : jul
-  adsnote : Provided by the SAO/NASA Astrophysics Data System
-  url : http://adsabs.harvard.edu/abs/2015arXiv150701012B
-  eprint : 1507.01012
-  archiveprefix : arXiv:cond-mat.str-el
--
-  ENTRYTYPE : article
   ID : Bergeron2016
-  author : D. Bergeron and A.-M.S. Tremblay
+  author : Bergeron, Dominic and Tremblay, A.-M. S.
   title : Algorithms for optimized maximum entropy and diagnostic tools for analytic continuation
   journal : Phys. Rev. E
   year : 2016
   volume : 94
   pages : 023303
+  numpages : 25
+  doi : 10.1103/PhysRevE.94.023303
+  url : https://link.aps.org/doi/10.1103/PhysRevE.94.023303
+  publisher : American Physical Society
+  month : Aug
+  issue : 2
 -
   ENTRYTYPE : article
   ID : Bieder2014

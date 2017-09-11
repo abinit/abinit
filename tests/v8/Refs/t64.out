@@ -1,0 +1,173 @@
+
+.Version 8.5.3 of ANADDB 
+.(MPI version, prepared for a x86_64_darwin16.7.0_gnu7.1 computer) 
+
+.Copyright (C) 1998-2017 ABINIT group . 
+ ANADDB comes with ABSOLUTELY NO WARRANTY.
+ It is free software, and you are welcome to redistribute it
+ under certain conditions (GNU General Public License,
+ see ~abinit/COPYING or http://www.gnu.org/copyleft/gpl.txt).
+
+ ABINIT is a project of the Universite Catholique de Louvain,
+ Corning Inc. and other collaborators, see ~abinit/doc/developers/contributors.txt .
+ Please read ~abinit/doc/users/acknowledgments.html for suggested
+ acknowledgments of the ABINIT effort.
+ For more information, see http://www.abinit.org .
+
+.Starting date : Mon 28 Aug 2017.
+- ( at 10h28 )
+  
+
+================================================================================
+
+ -outvars_anaddb: echo values of input variables ----------------------
+
+ Flags :
+     ifcflag         1
+ Miscellaneous information :
+         asr         1
+ Interatomic Force Constants Inputs :
+      dipdip         1
+      ifcana         0
+      ifcout         0
+ Description of grid 1 :
+        brav         1
+       ngqpt         2         2         2
+      nqshft         1
+      q1shft
+                     0.00000000E+00  0.00000000E+00  0.00000000E+00
+ First list of wavevector (reduced coord.) :
+       nph1l         8
+       qph1l
+                     0.00000000E+00  0.00000000E+00  0.00000000E+00    1.000E+00
+                     2.50000000E-01  0.00000000E+00  0.00000000E+00    1.000E+00
+                     5.00000000E-01  0.00000000E+00  0.00000000E+00    1.000E+00
+                     2.50000000E-01  2.50000000E-01  0.00000000E+00    1.000E+00
+                     5.00000000E-01  2.50000000E-01  0.00000000E+00    1.000E+00
+                    -2.50000000E-01  2.50000000E-01  0.00000000E+00    1.000E+00
+                     5.00000000E-01  5.00000000E-01  0.00000000E+00    1.000E+00
+                    -2.50000000E-01  5.00000000E-01  2.50000000E-01    1.000E+00
+
+================================================================================
+
+ read the DDB information and perform some checks
+
+ Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
+ R(1)=  0.0000000  3.3517340  3.3517340  G(1)= -0.1491765  0.1491765  0.1491765
+ R(2)=  3.3517340  0.0000000  3.3517340  G(2)=  0.1491765 -0.1491765  0.1491765
+ R(3)=  3.3517340  3.3517340  0.0000000  G(3)=  0.1491765  0.1491765 -0.1491765
+ Unit cell volume ucvol=  7.5307571E+01 bohr^3
+ Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
+ Now the whole DDB is in central memory
+
+================================================================================
+
+ Calculation of the interatomic forces 
+
+-begin at tcpu      0.017  and twall      0.017 sec
+       Homogeneous q point set in the B.Z.
+ Grid q points  :        8
+  1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
+  2)   5.00000000E-01  0.00000000E+00  0.00000000E+00
+  3)   0.00000000E+00  5.00000000E-01  0.00000000E+00
+  4)   5.00000000E-01  5.00000000E-01  0.00000000E+00
+  5)   0.00000000E+00  0.00000000E+00  5.00000000E-01
+  6)   5.00000000E-01  0.00000000E+00  5.00000000E-01
+  7)   0.00000000E+00  5.00000000E-01  5.00000000E-01
+  8)   5.00000000E-01  5.00000000E-01  5.00000000E-01
+
+ The interatomic forces have been obtained
+
+================================================================================
+
+ Treat the first list of vectors 
+
+
+  Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
+ Phonon energies in Hartree :
+   0.000000E+00  0.000000E+00  0.000000E+00  7.660123E-03  7.660123E-03
+   7.660123E-03
+ Phonon frequencies in cm-1    :
+-  0.000000E+00  0.000000E+00  0.000000E+00  1.681203E+03  1.681203E+03
+-  1.681203E+03
+
+ Analysis of degeneracies and characters (maximum tolerance=1.00E-06 a.u.)
+ Symmetry characters of vibration mode #   1
+       degenerate with vibration modes #   2 to    3
+  3.0 -3.0 -1.0  1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0
+ -0.0  0.0 -0.0  0.0  0.0 -0.0 -0.0  0.0  1.0 -1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0
+ -0.0  0.0 -0.0  0.0  0.0 -0.0  0.0 -0.0  1.0 -1.0  1.0 -1.0 -1.0  1.0 -1.0  1.0
+ Symmetry characters of vibration mode #   4
+       degenerate with vibration modes #   5 to    6
+  3.0  3.0 -1.0 -1.0 -1.0 -1.0 -1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0  1.0 -1.0 -1.0
+ -0.0 -0.0  0.0  0.0 -0.0 -0.0  0.0  0.0  1.0  1.0 -1.0 -1.0 -1.0 -1.0  1.0  1.0
+ -0.0 -0.0 -0.0 -0.0  0.0  0.0  0.0  0.0  1.0  1.0  1.0  1.0 -1.0 -1.0 -1.0 -1.0
+
+  Phonon wavevector (reduced coordinates) :  0.25000  0.00000  0.00000
+ Phonon energies in Hartree :
+   1.537137E-03  1.537137E-03  3.638866E-03  7.400007E-03  7.492179E-03
+   7.492179E-03
+ Phonon frequencies in cm-1    :
+-  3.373627E+02  3.373627E+02  7.986389E+02  1.624114E+03  1.644343E+03
+-  1.644343E+03
+
+  Phonon wavevector (reduced coordinates) :  0.50000  0.00000  0.00000
+ Phonon energies in Hartree :
+   2.230086E-03  2.230086E-03  6.131419E-03  6.303262E-03  7.303446E-03
+   7.303446E-03
+ Phonon frequencies in cm-1    :
+-  4.894473E+02  4.894473E+02  1.345691E+03  1.383406E+03  1.602921E+03
+-  1.602921E+03
+
+  Phonon wavevector (reduced coordinates) :  0.25000  0.25000  0.00000
+ Phonon energies in Hartree :
+   2.409896E-03  2.409896E-03  3.501145E-03  7.436426E-03  7.449835E-03
+   7.449835E-03
+ Phonon frequencies in cm-1    :
+-  5.289110E+02  5.289110E+02  7.684126E+02  1.632107E+03  1.635050E+03
+-  1.635050E+03
+
+  Phonon wavevector (reduced coordinates) :  0.50000  0.25000  0.00000
+ Phonon energies in Hartree :
+   2.730052E-03  3.432607E-03  5.411419E-03  6.614008E-03  7.094314E-03
+   7.263685E-03
+ Phonon frequencies in cm-1    :
+-  5.991772E+02  7.533702E+02  1.187669E+03  1.451607E+03  1.557022E+03
+-  1.594195E+03
+
+  Phonon wavevector (reduced coordinates) : -0.25000  0.25000  0.00000
+ Phonon energies in Hartree :
+   2.292964E-03  3.648892E-03  4.632564E-03  6.600038E-03  7.271955E-03
+   7.327972E-03
+ Phonon frequencies in cm-1    :
+-  5.032473E+02  8.008393E+02  1.016730E+03  1.448541E+03  1.596010E+03
+-  1.608304E+03
+
+  Phonon wavevector (reduced coordinates) :  0.50000  0.50000  0.00000
+ Phonon energies in Hartree :
+   3.215707E-03  3.215707E-03  6.413056E-03  6.413056E-03  6.849130E-03
+   6.849130E-03
+ Phonon frequencies in cm-1    :
+-  7.057661E+02  7.057661E+02  1.407503E+03  1.407503E+03  1.503210E+03
+-  1.503210E+03
+
+  Phonon wavevector (reduced coordinates) : -0.25000  0.50000  0.25000
+ Phonon energies in Hartree :
+   3.795932E-03  3.795932E-03  5.796633E-03  5.796633E-03  7.047511E-03
+   7.047511E-03
+ Phonon frequencies in cm-1    :
+-  8.331107E+02  8.331107E+02  1.272214E+03  1.272214E+03  1.546750E+03
+-  1.546750E+03
+
+================================================================================
+
+ Treat the first list of vectors 
+
+-
+- Proc.   0 individual time (sec): cpu=          0.0  wall=          0.0
+
+================================================================================
+
++Total cpu time      0.038  and wall time      0.039 sec
+
+ anaddb : the run completed succesfully.
