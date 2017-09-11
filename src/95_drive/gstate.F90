@@ -268,8 +268,8 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  integer,allocatable :: irrzon(:,:,:),kg(:,:),nattyp(:),symrec(:,:,:)
  integer,allocatable,target :: npwarr(:)
  integer,pointer :: npwarr_(:),pwind(:,:,:)
- real(dp) :: efield_band(3),gmet(3,3),gmet_(3,3),gprimd(3,3),gprimd_orig(3,3)
- real(dp) :: rmet(3,3),rprimd(3,3),rprimd0(3,3),tsec(2)
+ real(dp) :: efield_band(3),gmet(3,3),gmet_for_kg(3,3),gprimd(3,3),gprimd_for_kg(3,3)
+ real(dp) :: rmet(3,3),rprimd(3,3),rprimd_for_kg(3,3),tsec(2)
  real(dp),allocatable :: amass(:),cg(:,:),doccde(:)
  real(dp),allocatable :: eigen(:),ph1df(:,:),phnons(:,:,:),resid(:),rhowfg(:,:)
  real(dp),allocatable :: rhowfr(:,:),spinat_dum(:,:),start(:,:),work(:)
@@ -368,18 +368,18 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 & dtset%natom,ngfftf,ngfft,dtset%nkpt,dtset%nsppol,&
 & response,rmet,rprim,rprimd,ucvol,psps%usepaw)
 
+!In some cases (e.g. getcell/=0), the plane wave vectors have
+! to be generated from the original simulation cell
+ rprimd_for_kg=rprimd
+ if (dtset%getcell/=0.and.dtset%usewvl==0) rprimd_for_kg=args_gs%rprimd_orig
+ call matr3inv(rprimd_for_kg,gprimd_for_kg)
+ gmet_for_kg=matmul(transpose(gprimd_for_kg),gprimd_for_kg)
+
+!Set up the basis sphere of planewaves
  ABI_ALLOCATE(npwarr,(dtset%nkpt))
  if (dtset%usewvl == 0 .and. dtset%tfkinfunc /= 2) then
-!  Set up the basis sphere of planewaves
    ABI_ALLOCATE(kg,(3,dtset%mpw*dtset%mkmem))
-   gmet_(:,:)=gmet(:,:)
-   if (dtset%getcell/=0) then
-!    When cell is read from previous dataset, use original cell
-!      to generate the same g-vectors.
-     call matr3inv(args_gs%rprimd_orig,gprimd_orig)
-     gmet_=matmul(transpose(gprimd_orig),gprimd_orig)
-   end if
-   call kpgio(ecut_eff,dtset%exchn2n3d,gmet_,dtset%istwfk,kg, &
+   call kpgio(ecut_eff,dtset%exchn2n3d,gmet_for_kg,dtset%istwfk,kg, &
 &   dtset%kptns,dtset%mkmem,dtset%nband,dtset%nkpt,'PERS',mpi_enreg,&
 &   dtset%mpw,npwarr,npwtot,dtset%nsppol)
    call bandfft_kpt_init1(bandfft_kpt,dtset%istwfk,kg,dtset%mgfft,dtset%mkmem,mpi_enreg,&
@@ -701,13 +701,15 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    wff1%unwff=dtfil%unwff1
    optorth=1   !if (psps%usepaw==1) optorth=0
    if(psps%usepaw==1 .and. dtfil%ireadwf==1)optorth=0
+   hdr%rprimd=rprimd_for_kg ! We need the rprimd that was used to generate de G vectors
    call inwffil(ask_accurate,cg,dtset,dtset%ecut,ecut_eff,eigen,&
-&   dtset%exchn2n3d,formeig,gmet,hdr,dtfil%ireadwf,dtset%istwfk,kg,&
+&   dtset%exchn2n3d,formeig,gmet_for_kg,hdr,dtfil%ireadwf,dtset%istwfk,kg,&
 &   dtset%kptns,dtset%localrdwf,dtset%mband,mcg,dtset%mkmem,mpi_enreg,&
 &   dtset%mpw,dtset%nband,ngfft,dtset%nkpt,npwarr,&
-&   dtset%nsppol,dtset%nsym,occ,optorth,rprimd,dtset%symafm,&
+&   dtset%nsppol,dtset%nsym,occ,optorth,rprimd_for_kg,dtset%symafm,&
 &   dtset%symrel,dtset%tnons,dtfil%unkg,wff1,wffnow,dtfil%unwff1,&
 &   dtfil%fnamewffk,wvl)
+   hdr%rprimd=rprimd
  end if
 
  if (psps%usepaw==1.and.dtfil%ireadwf==1)then
@@ -1147,7 +1149,6 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 & pwind,pwind_alloc,pwnsfac,rprimd,symrec,xred)
 
  fatvshift=one
- rprimd0(:,:)=rprimd
 
  if (dtset%usewvl == 1 .and. wvl_debug) then
 #if defined HAVE_BIGDFT
@@ -1279,11 +1280,8 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 !! end if
 
 !Update the header, before using it
-!WARNING : There is a problem now (time of writing, 6.0.4, but was in ABINITv5 and had ever been there) to update
-!the header with change of rprim. Might be due to the planewave basis set definition.
-!Put the original rprimd .
  call hdr_update(hdr,bantot,results_gs%etotal,results_gs%energies%e_fermie,&
-& results_gs%residm,rprimd0,occ,pawrhoij,xred,args_gs%amu,&
+& results_gs%residm,rprimd,occ,pawrhoij,xred,args_gs%amu,&
 & comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
 
  ABI_ALLOCATE(doccde,(dtset%mband*dtset%nkpt*dtset%nsppol))
@@ -1314,18 +1312,22 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    MSG_COMMENT(message)
  end if
 
+!To print out the WFs, need the rprimd that was used to generate the G vectors
+ hdr%rprimd=rprimd_for_kg
+
  if (write_wfk) then
    call outwf(cg,dtset,psps,eigen,filnam,hdr,kg,dtset%kptns,&
 &   dtset%mband,mcg,dtset%mkmem,mpi_enreg,dtset%mpw,dtset%natom,&
 &   dtset%nband,dtset%nkpt,npwarr,dtset%nsppol,&
 &   occ,resid,response,dtfil%unwff2,wvl%wfs,wvl%descr)
-
-  !call printmagvtk(mpi_enreg,dtset%nspden,nfftf,ngfftf,rhor,rprimd,'DEN.vtk') SPr debug
  end if
 
  if (dtset%prtwf==2) then
    call outqmc(cg,dtset,eigen,gprimd,hdr,kg,mcg,mpi_enreg,npwarr,occ,psps,results_gs)
  end if
+
+!Restore the original rprimd in hdr
+ hdr%rprimd=rprimd
 
  ! Generate WFK in full BZ (needed by LOBSTER)
  if (me == master .and. dtset%prtwf == 1 .and. dtset%prtwf_full == 1 .and. dtset%nqpt == 0) then
