@@ -34,7 +34,7 @@ module m_effective_potential
  use m_strain
  use m_ifc
  use m_io_tools, only : open_file,get_unit
- use m_phonon_supercell
+ use m_supercell
  use m_phonons
  use m_ddb
  use m_polynomial_conf
@@ -340,6 +340,8 @@ subroutine effective_potential_init(crystal,eff_pot,energy,ifcs,ncoeff,nqpt,comm
  if(present(supercell))then
    call effective_potential_setSupercell(eff_pot,comm,supercell=supercell)
  else
+!   call init_supercell(eff_pot%crystal%natom, (/1,0,0, 0,1,0,  0,0,1/), eff_pot%crystal%rprimd,&
+!&                      eff_pot%crystal%typat, eff_pot%crystal%xcart, eff_pot%crystal%znucl, eff_pot%supercell)
    call effective_potential_setSupercell(eff_pot,comm,n_cell=(/1,1,1/))
  end if
 
@@ -415,12 +417,23 @@ subroutine effective_potential_initmpi(eff_pot,comm)
 !Local variables-------------------------------
 !scalars
  integer :: ndiv
+ integer :: ncell
 !array
  integer :: cell_number(3)
+ character(len=500) :: msg
 ! ***********************************************************************
 
 !Set the number of cell in the supercell
- cell_number(:) = int(eff_pot%supercell%qphon(:))
+ cell_number(1) = eff_pot%supercell%rlatt(1,1)
+ cell_number(2) = eff_pot%supercell%rlatt(2,2)
+ cell_number(3) = eff_pot%supercell%rlatt(3,3)
+ ncell = product(cell_number(:))
+
+!Do some checks
+ if (any(cell_number <= 0).or.ncell<=0) then
+   write(msg,'(a,a)')' No supercell found for setting'
+   MSG_ERROR(msg)
+ end if
 
 !First mpi_ifc
  ndiv = 1
@@ -630,7 +643,7 @@ end subroutine effective_potential_freempi
 
 subroutine effective_potential_generateDipDip(eff_pot,n_cell,option,asr,comm)
 
- use m_phonon_supercell
+ use m_supercell
  use m_ewald
 
 !This section has been created automatically by the script Abilint (TD).
@@ -691,11 +704,12 @@ subroutine effective_potential_generateDipDip(eff_pot,n_cell,option,asr,comm)
    end if
  end do
 
- call init_supercell(eff_pot%crystal%natom, 0,&
-&  real(n_cell,dp),&
+ call init_supercell(eff_pot%crystal%natom, &
+&   (/n_cell(1),0,0,  0,n_cell(2),0,  0,0,n_cell(3)/),&
 &   eff_pot%crystal%rprimd,&
 &   eff_pot%crystal%typat,&
 &   eff_pot%crystal%xcart,&
+&   eff_pot%crystal%znucl,&
 &   supercell)
 
  ncell = product(n_cell(:))
@@ -786,10 +800,11 @@ subroutine effective_potential_generateDipDip(eff_pot,n_cell,option,asr,comm)
        if (abs(max3) < abs(max3_cell)) max3 = max3_cell
 !      If the cell is smaller, we redifine new cell to take into acount all atoms
        call destroy_supercell(supercell)
-       call init_supercell(natom_uc, 0,real((/(max1-min1+1),&
-&                          (max2-min2+1),(max3-min3+1)/),dp),&
+       call init_supercell(natom_uc, &
+&                          (/(max1-min1+1),0,0,  0,(max2-min2+1),0,  0,0,(max3-min3+1)/),&
 &                          eff_pot%crystal%rprimd,eff_pot%crystal%typat,&
-&                          eff_pot%crystal%xcart,supercell)
+&                          eff_pot%crystal%xcart,eff_pot%crystal%znucl,supercell)
+
 !      Store the information of the supercell of the reference structure into effective potential
        call effective_potential_setSupercell(eff_pot,comm,supercell=supercell)
      else
@@ -826,7 +841,7 @@ subroutine effective_potential_generateDipDip(eff_pot,n_cell,option,asr,comm)
    ABI_ALLOCATE(bufdisp,(nproc))
 
    nrpt_alone = mod(ifc_tmp%nrpt,nproc)
-   my_nrpt = aint(real(ifc_tmp%nrpt,sp)/nproc)
+   my_nrpt = int(real(ifc_tmp%nrpt,sp)/nproc)
    if(my_rank >= (nproc-nrpt_alone)) then
      my_nrpt = my_nrpt  + 1
    end if
@@ -849,7 +864,7 @@ subroutine effective_potential_generateDipDip(eff_pot,n_cell,option,asr,comm)
 !  Allocation of array
    do irpt = 1,my_nrpt
      if(my_rank >= (nproc-nrpt_alone))then
-       my_irpt(irpt)=(aint(real(ifc_tmp%nrpt,sp)/nproc))*(my_rank)+&
+       my_irpt(irpt)=(int(real(ifc_tmp%nrpt,sp)/nproc))*(my_rank)+&
 &                       (my_rank - (nproc-nrpt_alone)) + irpt
      else
        my_irpt(irpt)=(my_nrpt)*(my_rank) + irpt
@@ -875,7 +890,7 @@ subroutine effective_potential_generateDipDip(eff_pot,n_cell,option,asr,comm)
 
 !  Allocate and initialize some array
    ABI_ALLOCATE(xred_tmp,(3,2*natom_uc))
-   ABI_ALLOCATE(xred,(3,supercell%natom_supercell))
+   ABI_ALLOCATE(xred,(3,supercell%natom))
    ABI_ALLOCATE(zeff_tmp,(3,3,2*natom_uc))
    ABI_ALLOCATE(dyew,(2,3,2*natom_uc,3,2*natom_uc))
    ABI_ALLOCATE(dyewq0,(2,3,natom_uc,3,natom_uc))
@@ -888,10 +903,10 @@ subroutine effective_potential_generateDipDip(eff_pot,n_cell,option,asr,comm)
    sumg0           = zero
    acell           = one
 
-   call matr3inv(supercell%rprimd_supercell,gprimd)
-   call xcart2xred(supercell%natom_supercell,supercell%rprimd_supercell,&
-&                  supercell%xcart_supercell,xred)
-   call metric(gmet,gprimd,-1,rmet,supercell%rprimd_supercell,ucvol)
+   call matr3inv(supercell%rprimd,gprimd)
+   call xcart2xred(supercell%natom,supercell%rprimd,&
+&                  supercell%xcart,xred)
+   call metric(gmet,gprimd,-1,rmet,supercell%rprimd,ucvol)
 
 !  Fill the atom position of the first cell (reference cell)
    first_coordinate  = ((irpt_ref-1)*natom_uc) + 1
@@ -908,7 +923,7 @@ subroutine effective_potential_generateDipDip(eff_pot,n_cell,option,asr,comm)
      if (i1==0.and.i2==0.and.i3==0) then
        call ewald9(acell,eff_pot%harmonics_terms%epsilon_inf,dyewq0,&
 &                  gmet,gprimd,natom_uc,real((/0,0,0/),dp),rmet,&
-&                  supercell%rprimd_supercell,sumg0,ucvol,xred_tmp(:,1:natom_uc),&
+&                  supercell%rprimd,sumg0,ucvol,xred_tmp(:,1:natom_uc),&
 &                  eff_pot%harmonics_terms%zeff)
        buff_ewald(:,:,:,:,:,irpt) = dyewq0
      else
@@ -918,7 +933,7 @@ subroutine effective_potential_generateDipDip(eff_pot,n_cell,option,asr,comm)
 &              xred(:,first_coordinate:second_coordinate)
        call ewald9(acell,eff_pot%harmonics_terms%epsilon_inf,dyew,gmet,gprimd,&
 &                  int(2*natom_uc),real((/0,0,0/),dp),&
-&                  rmet,supercell%rprimd_supercell,&
+&                  rmet,supercell%rprimd,&
 &                  sumg0,ucvol,xred_tmp,zeff_tmp)
        buff_ewald(:,:,:,:,:,irpt) = &
 &           dyew(:,:,1:natom_uc,:,natom_uc+1:2*natom_uc)
@@ -936,7 +951,7 @@ subroutine effective_potential_generateDipDip(eff_pot,n_cell,option,asr,comm)
 
 !  Set the bufsize for mpi allgather
    do ii = 1,nproc
-     bufsize(ii) = aint(real(ifc_tmp%nrpt,sp)/nproc)*2*3*natom_uc*3*natom_uc
+     bufsize(ii) = int(real(ifc_tmp%nrpt,sp)/nproc)*2*3*natom_uc*3*natom_uc
      if(ii > (nproc-nrpt_alone)) then
        bufsize(ii) = bufsize(ii) + 2*3*natom_uc*3*natom_uc
      end if
@@ -1440,9 +1455,9 @@ subroutine effective_potential_setSupercell(eff_pot,comm,n_cell,supercell)
  if(present(supercell))then
    call copy_supercell(supercell,eff_pot%supercell)
  else
-   call init_supercell(eff_pot%crystal%natom, 0, real((/n_cell(1),n_cell(2),n_cell(3)/),dp), &
+   call init_supercell(eff_pot%crystal%natom, (/n_cell(1),0,0,  0,n_cell(2),0,  0,0,n_cell(3)/), &
 &                      eff_pot%crystal%rprimd,eff_pot%crystal%typat,eff_pot%crystal%xcart,&
-&                      eff_pot%supercell)
+&                      eff_pot%crystal%znucl, eff_pot%supercell)
  end if
 
 !Initialisation of new mpi over supercell
@@ -1639,21 +1654,21 @@ subroutine effective_potential_printSupercell(eff_pot,supercell)
    supercell_tmp => eff_pot%supercell
  end if
 
- if(supercell_tmp%natom_supercell /= eff_pot%supercell%natom_supercell) then
+ if(supercell_tmp%natom/= eff_pot%supercell%natom) then
    write(msg, '(3a)' )&
 &  ' There is not the same numbers of atoms in the two supercell',ch10,&
 &   'Action: modify the code'
    MSG_BUG(msg)
  end if
 
- ABI_ALLOCATE(xred,(3,supercell_tmp%natom_supercell))
+ ABI_ALLOCATE(xred,(3,supercell_tmp%natom))
 
 !**********************************************************************
 ! Write basics values
 !**********************************************************************
 
  write (msg, '(4a,I8,a)') ' Structure parameters of the supercell :',ch10,ch10,&
-                       '  natom ', supercell_tmp%natom_supercell,ch10
+                       '  natom ', supercell_tmp%natom,ch10
  call wrtout(ab_out,msg,'COLL')
  call wrtout(std_out,msg,'COLL')
 
@@ -1677,9 +1692,9 @@ subroutine effective_potential_printSupercell(eff_pot,supercell)
  call wrtout(std_out,msg,'COLL')
 
  write(msg,*) ''
- do iatom = 1, supercell_tmp%natom_supercell
+ do iatom = 1, supercell_tmp%natom
    write (msg, '(a,I5)') trim(msg),&
-&         supercell_tmp%typat_supercell(supercell_tmp%atom_indexing_supercell(iatom))
+&         supercell_tmp%typat(supercell_tmp%atom_indexing(iatom))
    if (mod(iatom,12) == 0)then
      call wrtout(ab_out,msg,'COLL')
      call wrtout(std_out,msg,'COLL')
@@ -1695,9 +1710,9 @@ subroutine effective_potential_printSupercell(eff_pot,supercell)
  call wrtout(std_out,msg,'COLL')
 
  do ii = 1,3
-   write(msg,'(3E23.14,3E23.14,3E23.14)') supercell_tmp%rprimd_supercell(1,ii),&
-&                                             supercell_tmp%rprimd_supercell(2,ii),&
-&                                             supercell_tmp%rprimd_supercell(3,ii)
+   write(msg,'(3E23.14,3E23.14,3E23.14)') supercell_tmp%rprimd(1,ii),&
+&                                             supercell_tmp%rprimd(2,ii),&
+&                                             supercell_tmp%rprimd(3,ii)
    call wrtout(ab_out,msg,'COLL')
    call wrtout(std_out,msg,'COLL')
  end do
@@ -1705,19 +1720,19 @@ subroutine effective_potential_printSupercell(eff_pot,supercell)
   write (msg, '(2a)') ch10,'  xcart'
   call wrtout(ab_out,msg,'COLL')
   call wrtout(std_out,msg,'COLL')
-  do iatom = 1, supercell_tmp%natom_supercell
-    write (msg, '(3E23.14)') supercell_tmp%xcart_supercell(1,iatom),&
-&                                supercell_tmp%xcart_supercell(2,iatom),&
-&                                supercell_tmp%xcart_supercell(3,iatom)
+  do iatom = 1, supercell_tmp%natom
+    write (msg, '(3E23.14)') supercell_tmp%xcart(1,iatom),&
+&                                supercell_tmp%xcart(2,iatom),&
+&                                supercell_tmp%xcart(3,iatom)
     call wrtout(ab_out,msg,'COLL')
     call wrtout(std_out,msg,'COLL')
   end do
-  call xcart2xred(supercell_tmp%natom_supercell,supercell_tmp%rprimd_supercell,&
- &                supercell_tmp%xcart_supercell,xred)
+  call xcart2xred(supercell_tmp%natom,supercell_tmp%rprimd,&
+ &                supercell_tmp%xcart,xred)
   write (msg, '(2a)') ch10,'  xred'
   call wrtout(ab_out,msg,'COLL')
   call wrtout(std_out,msg,'COLL')
-  do iatom = 1, supercell_tmp%natom_supercell
+  do iatom = 1, supercell_tmp%natom
     write (msg, '(3E23.14)') xred(1,iatom),&
 &                                xred(2,iatom),&
 &                                xred(3,iatom)
@@ -1808,7 +1823,8 @@ subroutine effective_potential_writeXML(eff_pot,option,filename)
  character(len=10) :: natom
  logical :: new_file = .FALSE.
 !arrays
- real :: strain(9,6)
+! MJV 21/5/2017 put to (dp) - Alex: check and remove this comment
+ real(dp) :: strain(9,6)
 
 ! *************************************************************************
 
@@ -2355,6 +2371,7 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
 !array
   type(strain_type) :: strain_t
   integer  :: supercell(3),ipiv(3)
+  integer :: sc_size(3)
   real(dp) :: disp_tmp(3,natom)
   real(dp) :: du_delta_tmp(6,3,natom)
   real(dp) :: fcart_part(3,natom)
@@ -2367,8 +2384,13 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
   iam_master = (eff_pot%mpi_ifc%my_rank == master)
 
 ! Set variables
-  supercell(1:3) = eff_pot%supercell%qphon(1:3)
-  ncell          = product(eff_pot%supercell%qphon)
+  supercell(1) = eff_pot%supercell%rlatt(1,1)
+  supercell(2) = eff_pot%supercell%rlatt(2,2)
+  supercell(3) = eff_pot%supercell%rlatt(3,3)
+  ncell          = eff_pot%supercell%ncells
+  do ii = 1, 3
+    sc_size(ii) = eff_pot%supercell%rlatt(ii,ii)  
+  end do
 
   need_verbose = .TRUE.
   if(present(verbose)) then
@@ -2381,30 +2403,30 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
   end if
 
 !Check some variables  
-  if (natom /= eff_pot%supercell%natom_supercell) then
+  if (natom /= eff_pot%supercell%natom) then
     write(msg,'(a,I7,a,I7,a)')' The number of atoms is not correct :',natom,&
-&   ' in argument istead of ',eff_pot%supercell%natom_supercell, ' in supercell'
+&   ' in argument istead of ',eff_pot%supercell%natom, ' in supercell'
     MSG_ERROR(msg)
   end if
 
   if (present(displacement))then
-    if(size(displacement(1,:)) /= eff_pot%supercell%natom_supercell) then
+    if(size(displacement(1,:)) /= eff_pot%supercell%natom) then
       write(msg,'(a,I7,a,I7,a)')' The number of atoms is not correct :',size(displacement(1,:)),&
-&      ' in displacement array instead of ',eff_pot%supercell%natom_supercell, ' in supercell'
+&      ' in displacement array instead of ',eff_pot%supercell%natom, ' in supercell'
       MSG_ERROR(msg)
     end if
   end if
   if (present(du_delta))then
-    if(size(du_delta,3) /= eff_pot%supercell%natom_supercell) then
+    if(size(du_delta,3) /= eff_pot%supercell%natom) then
       write(msg,'(a,I7,a,I7,a)')' The number of atoms is not correct :',size(du_delta,3),&
-&      ' in du_delta array instead of ',eff_pot%supercell%natom_supercell, ' in supercell'
+&      ' in du_delta array instead of ',eff_pot%supercell%natom, ' in supercell'
       MSG_ERROR(msg)
     end if
   end if
   do ii=1,3
-    if(eff_pot%supercell%qphon(ii)<0.or.eff_pot%supercell%qphon(ii)>50)then
+    if(eff_pot%supercell%rlatt(ii,ii)<0.or.eff_pot%supercell%rlatt(ii,ii)>50)then
       write(msg, '(a,i0,a,i2,a,a,a,i0,a)' )&
-&     'eff_pot%supercell%qphon(',ii,') is ',int(eff_pot%supercell%qphon(ii)),&
+&     'eff_pot%supercell%rlatt(',ii,') is ',int(eff_pot%supercell%rlatt(ii,ii)),&
 &     ', which is lower than 0 of superior than 10.',ch10,'Action: correct n_cell(',ii,').'
       MSG_ERROR(msg)
     end if
@@ -2434,7 +2456,7 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
     has_strain = .TRUE.
   else
 !   Compute the strain
-    call strain_get(strain_t,rprim=eff_pot%supercell%rprimd_supercell,&
+    call strain_get(strain_t,rprim=eff_pot%supercell%rprimd,&
 &                   rprim_def=rprimd,symmetrized=.FALSE.)
     if(need_verbose)then
       write(msg,'(80a)')('-',mu=1,80)
@@ -2460,8 +2482,8 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
   else
     if(present(xred))then
 !   Compute the displacement
-      call effective_potential_getDisp(disp_tmp,natom,rprimd,eff_pot%supercell%rprimd_supercell,&
-&                                      xred_hist=xred,xcart_ref=eff_pot%supercell%xcart_supercell)
+      call effective_potential_getDisp(disp_tmp,natom,rprimd,eff_pot%supercell%rprimd,&
+&                                      xred_hist=xred,xcart_ref =eff_pot%supercell%xcart)
     else
       disp_tmp(:,:) = zero
     end if
@@ -2475,7 +2497,7 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
 !      Compute displacmeent wr to strain 
 !      See formula A4  in PRB 95,094115
        ABI_ALLOCATE(work,(3))
-       ABI_ALLOCATE(work2,(3,eff_pot%supercell%natom_supercell))
+       ABI_ALLOCATE(work2,(3,eff_pot%supercell%natom))
        work2(:,:) = zero
        work(:) = zero
        strain_mat(:,:) = strain_t%strain(:,:)
@@ -2485,7 +2507,7 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
        end do
        strain_mat_inv = strain_mat
        call DGETRI(3,strain_mat_inv, 3, ipiv, work, 3, ii)
-       do ia=1,eff_pot%supercell%natom_supercell
+       do ia=1,eff_pot%supercell%natom
          work2(:,:) = zero
          work2(:,ia) = MATMUL(strain_mat_inv,disp_tmp(:,ia))
          du_delta_tmp(1,:,ia) = (/work2(1,ia),zero,zero/)
@@ -2537,11 +2559,11 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
   fcart_part(:,:)= zero
 
   call harmonics_terms_evaluateIFC(eff_pot%harmonics_terms%ifcs%atmfrc(1,:,:,:,:,:),disp_tmp,energy_part,&
-&                       fcart_part,eff_pot%mpi_ifc%my_cells,eff_pot%supercell%natom_supercell,&
+&                       fcart_part,eff_pot%mpi_ifc%my_cells,eff_pot%supercell%natom,&
 &                       eff_pot%crystal%natom,eff_pot%mpi_ifc%my_ncell,&
 &                       eff_pot%mpi_ifc%my_nrpt,eff_pot%mpi_ifc%my_index_cells,&
 &                       eff_pot%harmonics_terms%ifcs%cell,&
-&                       int(eff_pot%supercell%qphon(:)),&
+&                       sc_size,&
 &                       eff_pot%mpi_ifc%my_rpt,eff_pot%mpi_ifc%comm)
 
   if(need_verbose)then
@@ -2573,7 +2595,7 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
   strten_part(:) = zero
 
   call harmonics_terms_evaluateElastic(eff_pot%harmonics_terms%elastic_constants,disp_tmp,energy_part,&
-&                                fcart_part,eff_pot%supercell%natom_supercell,eff_pot%crystal%natom,&
+&                                fcart_part,eff_pot%supercell%natom,eff_pot%crystal%natom,&
 &                                ncell,eff_pot%harmonics_terms%strain_coupling,strten_part,strain_tmp)
 
 
@@ -2597,7 +2619,7 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
     fcart_part(:,:)= zero
     
     call anharmonics_terms_evaluateElastic(disp_tmp,energy_part,fcart_part,&
-&                                    eff_pot%supercell%natom_supercell,&
+&                                    eff_pot%supercell%natom,&
 &                                    eff_pot%crystal%natom,ncell,strten_part,strain_tmp,&
 &                                    elastic3rd=eff_pot%anharmonics_terms%elastic3rd,&
 &                                    elastic4th=eff_pot%anharmonics_terms%elastic4rd,&
@@ -2620,9 +2642,9 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
 
       call anharmonics_terms_evaluateIFCStrainCoupling(eff_pot%anharmonics_terms%phonon_strain,disp_tmp,&
 &                                                      energy_part,fcart_part,&
-&                                                      eff_pot%supercell%natom_supercell,&
+&                                                      eff_pot%supercell%natom,&
 &                                                      eff_pot%crystal%natom,&
-&                                                      int(eff_pot%supercell%qphon(:)),strain_tmp,&
+&                                                      sc_size,strain_tmp,&
 &                                                      strten_part,eff_pot%mpi_ifc%my_cells,&
 &                                                      eff_pot%mpi_ifc%my_ncell,&
 &                                                      eff_pot%mpi_ifc%my_index_cells,&
@@ -2651,9 +2673,9 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
     strten_part(:) = zero
 
     call polynomial_coeff_evaluate(eff_pot%anharmonics_terms%coefficients,disp_tmp,&
-&                                  energy_part,fcart_part,eff_pot%supercell%natom_supercell,&
+&                                  energy_part,fcart_part,eff_pot%supercell%natom,&
 &                                  eff_pot%crystal%natom,eff_pot%anharmonics_terms%ncoeff,&
-&                                  int(eff_pot%supercell%qphon(:)),strain_tmp,strten_part,&
+&                                  sc_size,strain_tmp,strten_part,&
 &                                  eff_pot%mpi_coeff%my_cells,eff_pot%mpi_coeff%my_ncell,&
 &                                  eff_pot%mpi_coeff%my_index_cells,eff_pot%mpi_coeff%comm)
 
@@ -2681,7 +2703,7 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
 &                                 eff_pot%confinement%cutoff_strain,strten_part,&
 &                                 eff_pot%confinement%power_disp,eff_pot%confinement%power_strain,&
 &                                 eff_pot%mpi_coeff%my_cells,&
-&                                 eff_pot%supercell%natom_supercell,eff_pot%crystal%natom,&
+&                                 eff_pot%supercell%natom,eff_pot%crystal%natom,&
 &                                 eff_pot%mpi_coeff%my_ncell,eff_pot%mpi_coeff%my_index_cells,&
 &                                 eff_pot%mpi_coeff%comm)
 
@@ -2701,7 +2723,7 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
 !-----------------------------------
   if (has_strain) then
     strten_part(:) = zero
-    do ia = 1,eff_pot%supercell%natom_supercell
+    do ia = 1,eff_pot%supercell%natom
       do mu = 1,3
         do alpha=1,6
           strten_part(alpha) = strten_part(alpha) + fcart(mu,ia) * du_delta_tmp(alpha,mu,ia)
@@ -2722,7 +2744,7 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
   fcart = -1 * fcart
 
 ! Redistribute the residuale of the forces
-  call effective_potential_distributeResidualForces(eff_pot,fcart,eff_pot%supercell%natom_supercell)
+  call effective_potential_distributeResidualForces(eff_pot,fcart,eff_pot%supercell%natom)
 
   call fcart2fred(fcart,fred,rprimd,natom)
 
@@ -2916,17 +2938,17 @@ end subroutine effective_potential_getDisp
 !! Distribute the residual forces in a weighted manner
 !!
 !! INPUTS
-!! natom = number of atoms
-!! eff_pot <type(effective_potential_type)> = effective potential datatype
+!! natom   = number of atoms
+!! eff_pot = effective potential structure
 !!
 !! OUTPUT
-!! fcart(3,natom) = forces in cartesian coordinates
+!! fcart   = forces in cartesian coordinates
 !!
 !! PARENTS
 !!      m_effective_potential
 !!
 !! CHILDREN
-!!
+!!      asrq0_free,effective_potential_effpot2ddb,invars9,mkphbs
 !!
 !! SOURCE
 
@@ -2962,11 +2984,11 @@ subroutine effective_potential_distributeResidualForces(eff_pot,fcart,natom)
   sum_mass = zero
 
   do ia=1,natom
-    sum_mass = sum_mass + eff_pot%crystal%amu(eff_pot%supercell%typat_supercell(ia))
+    sum_mass = sum_mass + eff_pot%crystal%amu(eff_pot%supercell%typat(ia))
   end do
 
   do ia=1,natom
-    mass_ia = eff_pot%crystal%amu(eff_pot%supercell%typat_supercell(ia))
+    mass_ia = eff_pot%crystal%amu(eff_pot%supercell%typat(ia))
     fcart(:,ia) = fcart(:,ia) - (mass_ia/sum_mass) * sum_f(:)
   end do
 
@@ -3153,12 +3175,12 @@ subroutine effective_potential_effpot2ddb(ddb,crystal,eff_pot,n_cell,nph1l,optio
    else  if (option==2) then
 !   Compute different matrices in real and reciprocal space, also
 !   checks whether ucvol is positive.
-    call metric(gmet,gprimd,-1,rmet,eff_pot%supercell%rprimd_supercell,ucvol)
+    call metric(gmet,gprimd,-1,rmet,eff_pot%supercell%rprimd,ucvol)
 
 !   Convert to rprim (dimensionless)
     do ii=1,3
       do jj=1,3
-        rprimd(ii,jj)=eff_pot%supercell%rprimd_supercell(ii,jj)
+        rprimd(ii,jj)=eff_pot%supercell%rprimd(ii,jj)
       end do
     end do
 
@@ -3167,7 +3189,7 @@ subroutine effective_potential_effpot2ddb(ddb,crystal,eff_pot,n_cell,nph1l,optio
     call matr3inv(rprimd,gprimd)
 
 !   transfert basic values
-    ddb%natom  = eff_pot%supercell%natom_supercell
+    ddb%natom  = eff_pot%supercell%natom
     ddb%ntypat = eff_pot%crystal%ntypat
     ddb%mpert  = ddb%natom+6
     ddb%msize  = 3*ddb%mpert*3*ddb%mpert;
@@ -3370,18 +3392,18 @@ subroutine effective_potential_computeGradient(delta,fcart_out,eff_pot,natom,n_c
  
  fcart_out = zero
 
- call xcart2xred(eff_pot%supercell%natom_supercell,eff_pot%supercell%rprimd_supercell,&
-&                eff_pot%supercell%xcart_supercell,xred)
+ call xcart2xred(eff_pot%supercell%natom,eff_pot%supercell%rprimd,&
+&                eff_pot%supercell%xcart,xred)
 
- do ia=1,eff_pot%supercell%natom_supercell
+ do ia=1,eff_pot%supercell%natom
    do mu=1,3
      diff = zero
      do ii=1,npt
        delt = (-(npt/2+1)+ii) * delta
        disp = zero
-       disp(mu,ia) = delt * eff_pot%supercell%rprimd_supercell(mu,mu)
+       disp(mu,ia) = delt * eff_pot%supercell%rprimd(mu,mu)
        call effective_potential_evaluate(eff_pot,energy,fcart,fred,&
-&                                        strten,natom,eff_pot%supercell%rprimd_supercell,&
+&                                        strten,natom,eff_pot%supercell%rprimd,&
 &                                        displacement=disp,&
 &                                        compute_anharmonic=.FALSE.,verbose=.false.)
 
@@ -3404,9 +3426,9 @@ subroutine effective_potential_computeGradient(delta,fcart_out,eff_pot,natom,n_c
 !Write the phonon  into ddb format wavevector
 !write(999, '(a,3es16.8,f6.1)' )' qpt',real((/0,0,0/),dp),1.0
 !Write the matrix elements
- do ib=1,eff_pot%supercell%natom_supercell
+ do ib=1,eff_pot%supercell%natom
    do nu=1,3
-     do ia=1,eff_pot%supercell%natom_supercell
+     do ia=1,eff_pot%supercell%natom
        do mu=1,3
 !          write(999,'(4i4,2d22.14)')nu,ib,mu,ia,&
 ! &             dynmat(1,mu,ia,nu,ib),dynmat(2,mu,ia,nu,ib)

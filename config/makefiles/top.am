@@ -160,6 +160,7 @@ infos_html:
           tmp-infos-$(VERSION)/tutorial \
           tmp-infos-$(VERSION)/users \
           tmp-infos-$(VERSION)/js_files \
+          tmp-infos-$(VERSION)/formabinit.css \
           tmp-infos-$(VERSION)/known_problems \
           tmp-infos-$(VERSION)/gallery/Plot1.jpg tmp-infos-$(VERSION)/gallery/pcpm.gif tmp-infos-$(VERSION)/gallery/mode.png  \
           tmp-infos-$(VERSION)/install_notes/install.html \

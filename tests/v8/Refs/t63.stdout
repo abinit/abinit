@@ -1,0 +1,73 @@
+
+.Version 8.5.3 of MRGDV 
+.(MPI version, prepared for a x86_64_darwin16.7.0_gnu7.1 computer) 
+
+.Copyright (C) 1998-2017 ABINIT group . 
+ MRGDV comes with ABSOLUTELY NO WARRANTY.
+ It is free software, and you are welcome to redistribute it
+ under certain conditions (GNU General Public License,
+ see ~abinit/COPYING or http://www.gnu.org/copyleft/gpl.txt).
+
+ ABINIT is a project of the Universite Catholique de Louvain,
+ Corning Inc. and other collaborators, see ~abinit/doc/developers/contributors.txt .
+ Please read ~abinit/doc/users/acknowledgments.html for suggested
+ acknowledgments of the ABINIT effort.
+ For more information, see http://www.abinit.org .
+
+.Starting date : Mon 28 Aug 2017.
+- ( at 10h41 )
+  
+>>> Enter name of output file: 
+>>> Enter total number of DFPT POT files: 
+>>> Enter name of POT file 1 : 
+>>> Enter name of POT file 2 : 
+>>> Enter name of POT file 3 : 
+>>> Enter name of POT file 4 : 
+- Reading header of file [1]: t61o_DS3_POT1
+- Merging file [1]: t61o_DS3_POT1
+- Reading header of file [2]: t61o_DS4_POT1
+- Merging file [2]: t61o_DS4_POT1
+- Reading header of file [3]: t61o_DS4_POT2
+- Merging file [3]: t61o_DS4_POT2
+- Reading header of file [4]: t61o_DS5_POT1
+- Merging file [4]: t61o_DS5_POT1
+Merged successfully 4 files
+ ==== Info on the dvdb% object ====
+DVDB version: 2
+File path: t63o_DVDB
+Number of v1scf potentials: 4
+Number of q-points in DVDB: 3
+Activate symmetrization of v1scf(r): no
+List of q-points:
+[ 1 ] [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+[ 2 ] [ 5.0000E-01,  0.0000E+00,  0.0000E+00]
+[ 3 ] [ 5.0000E-01,  5.0000E-01,  0.0000E+00]
+qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
+ The list of irreducible perturbations for this q vector is:
+    1)  idir= 1, ipert=   1, type=independent, found=Yes
+    2)  idir= 2, ipert=   1, type=symmetric, found=No
+    3)  idir= 3, ipert=   1, type=symmetric, found=No
+    4)  idir= 1, ipert=   2, type=symmetric, found=No
+    5)  idir= 2, ipert=   2, type=symmetric, found=No
+    6)  idir= 3, ipert=   2, type=symmetric, found=No
+
+qpoint: [ 5.0000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
+ The list of irreducible perturbations for this q vector is:
+    1)  idir= 1, ipert=   1, type=independent, found=Yes
+    2)  idir= 2, ipert=   1, type=independent, found=Yes
+    3)  idir= 3, ipert=   1, type=symmetric, found=No
+    4)  idir= 1, ipert=   2, type=symmetric, found=No
+    5)  idir= 2, ipert=   2, type=symmetric, found=No
+    6)  idir= 3, ipert=   2, type=symmetric, found=No
+
+qpoint: [ 5.0000E-01,  5.0000E-01,  0.0000E+00] is present in the DVDB file
+ The list of irreducible perturbations for this q vector is:
+    1)  idir= 1, ipert=   1, type=independent, found=Yes
+    2)  idir= 2, ipert=   1, type=symmetric, found=No
+    3)  idir= 3, ipert=   1, type=symmetric, found=No
+    4)  idir= 1, ipert=   2, type=symmetric, found=No
+    5)  idir= 2, ipert=   2, type=symmetric, found=No
+    6)  idir= 3, ipert=   2, type=symmetric, found=No
+
+All the independent perturbations are available
+ Done
