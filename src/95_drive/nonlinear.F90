@@ -365,11 +365,11 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,&
  eigen(:)=0_dp ; ask_accurate=1
  call status(0,dtfil%filstat,iexit,level,'call inwffil  ')
  call inwffil(ask_accurate,cg,dtset,dtset%ecut,ecut_eff,eigen,dtset%exchn2n3d,&
-& formeig,gmet,hdr,ireadwf,dtset%istwfk,kg,dtset%kptns,&
+& formeig,hdr,ireadwf,dtset%istwfk,kg,dtset%kptns,&
 & dtset%localrdwf,mband,mcg,dtset%mkmem,mpi_enreg,mpw,&
 & dtset%nband,dtset%ngfft,dtset%nkpt,&
 & npwarr,dtset%nsppol,dtset%nsym,&
-& occ,optorth,rprimd,dtset%symafm,dtset%symrel,dtset%tnons,&
+& occ,optorth,dtset%symafm,dtset%symrel,dtset%tnons,&
 & dtfil%unkg,wffgs,wfftgs,dtfil%unwffgs,&
 & dtfil%fnamewffk,wvl)
 

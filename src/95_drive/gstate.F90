@@ -703,10 +703,10 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    if(psps%usepaw==1 .and. dtfil%ireadwf==1)optorth=0
    hdr%rprimd=rprimd_for_kg ! We need the rprimd that was used to generate de G vectors
    call inwffil(ask_accurate,cg,dtset,dtset%ecut,ecut_eff,eigen,&
-&   dtset%exchn2n3d,formeig,gmet_for_kg,hdr,dtfil%ireadwf,dtset%istwfk,kg,&
+&   dtset%exchn2n3d,formeig,hdr,dtfil%ireadwf,dtset%istwfk,kg,&
 &   dtset%kptns,dtset%localrdwf,dtset%mband,mcg,dtset%mkmem,mpi_enreg,&
 &   dtset%mpw,dtset%nband,ngfft,dtset%nkpt,npwarr,&
-&   dtset%nsppol,dtset%nsym,occ,optorth,rprimd_for_kg,dtset%symafm,&
+&   dtset%nsppol,dtset%nsym,occ,optorth,dtset%symafm,&
 &   dtset%symrel,dtset%tnons,dtfil%unkg,wff1,wffnow,dtfil%unwff1,&
 &   dtfil%fnamewffk,wvl)
    hdr%rprimd=rprimd

@@ -1012,10 +1012,10 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
    call timab(144,1,tsec)
    call status(0,dtfil%filstat,iexit,level,'call inwffil-k')
    call inwffil(ask_accurate,cg,dtset,dtset%ecut,ecut_eff,eigen0,dtset%exchn2n3d,&
-&   formeig,gmet,hdr0,ireadwf0,istwfk_rbz,kg,&
+&   formeig,hdr0,ireadwf0,istwfk_rbz,kg,&
 &   kpt_rbz,dtset%localrdwf,dtset%mband,mcg,&
 &   mkmem_rbz,mpi_enreg,mpw,nband_rbz,dtset%ngfft,nkpt_rbz,npwarr,&
-&   dtset%nsppol,nsym,occ_rbz,optorth,rprimd,dtset%symafm,&
+&   dtset%nsppol,nsym,occ_rbz,optorth,dtset%symafm,&
 &   dtset%symrel,dtset%tnons,dtfil%unkg,wffgs,wfftgs,&
 &   dtfil%unwffgs,dtfil%fnamewffk,wvl)
    call timab(144,2,tsec)
@@ -1140,11 +1140,11 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      call timab(144,1,tsec)
      call status(0,dtfil%filstat,iexit,level,'call inwffilkq')
      call inwffil(ask_accurate,cgq,dtset,dtset%ecut,ecut_eff,eigenq,dtset%exchn2n3d,&
-&     formeig,gmet,hdr,&
+&     formeig,hdr,&
 &     ireadwf0,istwfk_rbz,kg1,kpq_rbz,dtset%localrdwf,dtset%mband,mcgq,&
 &     mkqmem_rbz,mpi_enreg,mpw1,nband_rbz,dtset%ngfft,nkpt_rbz,npwar1,&
 &     dtset%nsppol,nsym,occ_rbz,optorth,&
-&     rprimd,dtset%symafm,dtset%symrel,dtset%tnons,&
+&     dtset%symafm,dtset%symrel,dtset%tnons,&
 &     dtfil%unkg1,wffkq,wfftkq,dtfil%unwffkq,dtfil%fnamewffq,wvl)
      call timab(144,2,tsec)
 !    Close dtfil%unwffkq, if it was ever opened (in inwffil)
@@ -1297,10 +1297,10 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
    call timab(144,1,tsec)
    call status(pertcase,dtfil%filstat,iexit,level,'call inwffil  ')
    call inwffil(ask_accurate,cg1,dtset,dtset%ecut,ecut_eff,eigen1,dtset%exchn2n3d,&
-&   formeig,gmet,hdr,&
+&   formeig,hdr,&
 &   dtfil%ireadwf,istwfk_rbz,kg1,kpq_rbz,dtset%localrdwf,&
 &   dtset%mband,mcg1,mk1mem_rbz,mpi_enreg,mpw1,nband_rbz,dtset%ngfft,nkpt_rbz,npwar1,&
-&   dtset%nsppol,nsym1,occ_rbz,optorth,rprimd,&
+&   dtset%nsppol,nsym1,occ_rbz,optorth,&
 &   symaf1,symrl1,tnons1,dtfil%unkg1,wff1,wffnow,dtfil%unwff1,&
 &   fiwf1i,wvl)
    call timab(144,2,tsec)
