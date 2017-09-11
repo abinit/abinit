@@ -28653,10 +28653,7 @@
         geometry characteristics. When all forces vanish by symmetry (e.g. optimization of the lattice parameters
         of a high-symmetry crystal), then place [[toldfe]] to 1.0d-12, or use (better) [[tolvrs]].
          <br />
-         Since [[toldfe]], [[toldff]],
-        [[tolrff]],
-        [[tolvrs]] and [[tolwfr]]
-        are aimed at the same goal (causing the SCF cycle to stop),
+        Since [[toldfe]], [[toldff]], [[tolrff]], [[tolvrs]] and [[tolwfr]] are aimed at the same goal (causing the SCF cycle to stop),
         they are seen as a unique input variable at reading. Hence, it is forbidden that two of these input variables
         have non-zero values for the same dataset, or generically (for all datasets).
         However, a non-zero value for one such variable for one dataset will have precedence on the non-zero value for another
@@ -28695,14 +28692,7 @@
          <br />
          This stopping criterion is not allowed for RF calculations.
          <br />
-         Since
-         <b>
-          toldfe
-         </b>
-         , [[toldff]],
-        [[tolrff]],
-        [[tolvrs]] and [[tolwfr]]
-        are aimed at the same goal (causing the SCF cycle to stop),
+        Since [[toldfe]], [[toldff]], [[tolrff]], [[tolvrs]] and [[tolwfr]] are aimed at the same goal (causing the SCF cycle to stop),
         they are seen as a unique input variable at reading. Hence, it is forbidden that two of these input variables
         have non-zero values for the same dataset, or generically (for all datasets).
         However, a non-zero value for one such variable for one dataset will have precedence on the non-zero value for another
@@ -28875,14 +28865,7 @@
          <br />
          This stopping criterion is not allowed for RF calculations.
          <br />
-         Since
-         <b>
-          toldfe
-         </b>
-         , [[toldff]],
-        [[tolrff]],
-        [[tolvrs]] and [[tolwfr]]
-        are aimed at the same goal (causing the SCF cycle to stop),
+         Since [[toldfe]], [[toldff]], [[tolrff]], [[tolvrs]] and [[tolwfr]] are aimed at the same goal (causing the SCF cycle to stop),
         they are seen as a unique input variable at reading. Hence, it is forbidden that two of these input variables
         have non-zero values for the same dataset, or generically (for all datasets).
         However, a non-zero value for one such variable for one dataset will have precedence on the non-zero value for another
@@ -28950,14 +28933,7 @@
         then summing the square of this function over all FFT grid points. The result should be
         lower than [[tolvrs]].
          <br />
-         Since
-         <b>
-          toldfe
-         </b>
-         , [[toldff]],
-        [[tolrff]],
-        [[tolvrs]] and [[tolwfr]]
-        are aimed at the same goal (causing the SCF cycle to stop),
+        Since [[toldfe]], [[toldff]], [[tolrff]], [[tolvrs]] and [[tolwfr]] are aimed at the same goal (causing the SCF cycle to stop),
         they are seen as a unique input variable at reading. Hence, it is forbidden that two of these input variables
         have non-zero values for the same dataset, or generically (for all datasets).
         However, a non-zero value for one such variable for one dataset will have precedence on the non-zero value for another
@@ -29045,14 +29021,7 @@
          .
         </p>
         <br />
-        Since
-        <b>
-         toldfe
-        </b>
-        , [[toldff]],
-        [[tolrff]],
-        [[tolvrs]] and [[tolwfr]]
-        are aimed at the same goal (causing the SCF cycle to stop),
+        Since [[toldfe]], [[toldff]], [[tolrff]], [[tolvrs]] and [[tolwfr]] are aimed at the same goal (causing the SCF cycle to stop),
         they are seen as a unique input variable at reading. Hence, it is forbidden that two of these input variables
         have non-zero values for the same dataset, or generically (for all datasets).
         However, a non-zero value for one such variable for one dataset will have precedence on the non-zero value for another

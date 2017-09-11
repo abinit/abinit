@@ -95,7 +95,7 @@ module m_fock
    ! Number of atoms, input variable
 
   integer :: nsppol 
-   ! Number of indipendent spin polarizations, input variable
+   ! Number of independent spin polarizations, input variable
    ! Note that this value does not take into account the MPI distribution of the wavefunctions.
 
   integer :: ntypat 
