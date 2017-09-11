@@ -17763,7 +17763,7 @@
         of levels at the Fermi energy may require a larger value of
         [[nline]] (5 or 6 ?)
         Line minimizations will be stopped anyway when improvement
-        gets small. With the input variable [[nnsclo]],
+        gets small (governed by [[tolrde]]). With the input variable [[nnsclo]],
         governs the convergence of the wavefunctions
         for fixed potential.
          <br />
