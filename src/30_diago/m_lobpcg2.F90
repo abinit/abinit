@@ -486,11 +486,7 @@ module m_lobpcg2
         ! P with values such as 1e-29 that make the eigenvectors diverge
         if ( iline == 1 .or. minResidu < 1e-27) then 
           ! Do RR on XW to get the eigen vectors
-          if ( minResidu > 1e-27 ) then
-            call lobpcg_Borthonormalize(lobpcg,VAR_XW,.true.,ierr) ! Do rotate AW
-          else 
-            call lobpcg_Borthonormalize(lobpcg,VAR_W,.true.,ierr) ! Do rotate AW
-          end if
+          call lobpcg_Borthonormalize(lobpcg,VAR_XW,.true.,ierr) ! Do rotate AW
           RR_var = VAR_XW
           call xgBlock_zero(lobpcg%P)
           call xgBlock_zero(lobpcg%AP)
@@ -501,21 +497,13 @@ module m_lobpcg2
           end if
         else
           ! B-orthonormalize P, BP 
-          if ( minResidu > 1e-27 ) then
-            call lobpcg_Borthonormalize(lobpcg,VAR_XWP,.true.,ierr) ! Do rotate AWP
-          else 
-            call lobpcg_Borthonormalize(lobpcg,VAR_WP,.true.,ierr) ! Do rotate AWP
-          end if
+          call lobpcg_Borthonormalize(lobpcg,VAR_XWP,.true.,ierr) ! Do rotate AWP
           ! Do RR on XWP to get the eigen vectors
           if ( ierr == 0 ) then
             RR_var = VAR_XWP
             !RR_eig = eigenvalues3N%self
           else 
-            if ( minResidu > 1e-27 ) then
-              call lobpcg_Borthonormalize(lobpcg,VAR_XW,.true.,ierr) ! Do rotate AW
-            else 
-              call lobpcg_Borthonormalize(lobpcg,VAR_W,.true.,ierr) ! Do rotate AW
-            end if
+            call lobpcg_Borthonormalize(lobpcg,VAR_XW,.true.,ierr) ! Do rotate AW
             RR_var = VAR_XW
             !RR_eig = eigenvalues2N
             call xgBlock_zero(lobpcg%P)
@@ -883,12 +871,10 @@ module m_lobpcg2
 
     call xg_setBlock(subA,subsub,1,blockdim,blockdim)
     call xgBlock_gemm(X%trans,AX%normal,1.0d0,X,AX,0.d0,subsub)
-    !call xgBlock_diagonalOnly(subsub)
 
     if ( var /= VAR_X ) then
       call xg_setBlock(subB,subsub,1,blockdim,blockdim)
       call xgBlock_gemm(X%trans,BX%normal,1.0d0,X,BX,0.d0,subsub)
-      !call xgBlock_one(subsub)
     endif 
 
     if ( var == VAR_XW .or. var == VAR_XWP ) then
@@ -899,8 +885,6 @@ module m_lobpcg2
       ! subB
       call xg_setBlock(subB,subsub,blockdim+1,2*blockdim,blockdim)
       call xgBlock_gemm(lobpcg%XW%trans,lobpcg%BW%normal,1.0d0,lobpcg%XW,lobpcg%BW,0.d0,subsub)
-      !call xg_setBlock(subB,subsub,blockdim+1,blockdim,blockdim)
-      !call xgBlock_gemm(lobpcg%X%trans,lobpcg%BW%normal,1.0d0,lobpcg%X,lobpcg%BW,0.d0,subsub)
     end if
 
     if ( var == VAR_XWP ) then
@@ -911,8 +895,6 @@ module m_lobpcg2
       ! subB
       call xg_setBlock(subB,subsub,2*blockdim+1,3*blockdim,blockdim)
       call xgBlock_gemm(lobpcg%XWP%trans,lobpcg%BP%normal,1.0d0,lobpcg%XWP%self,lobpcg%BP,0.d0,subsub)
-      !call xg_setBlock(subB,subsub,2*blockdim+1,2*blockdim,blockdim)
-      !call xgBlock_gemm(lobpcg%XW%trans,lobpcg%BP%normal,1.0d0,lobpcg%XW,lobpcg%BP,0.d0,subsub)
     end if
 
     if ( EIGPACK(eigenSolver) ) then
@@ -1008,7 +990,7 @@ module m_lobpcg2
       call xgBlock_gemm(lobpcg%BX%normal,Cwp%normal,1.0d0,lobpcg%BX,Cwp,0.d0,subB%self)
       call xgBlock_copy(subB%self,lobpcg%BX) 
   
-      if ( var /= VAR_X .and. ( var == VAR_XW .or. var == VAR_XWP ) ) then
+      if ( var /= VAR_X ) then
         ! Cost to pay to avoid temporary array in xgemm
         call xgBlock_cshift(vec%self,blockdim,1) ! Bottom 2*blockdim lines are now at the top
         call xgBlock_setBlock(vec%self,Cwp,1,subdim-blockdim,blockdim)
