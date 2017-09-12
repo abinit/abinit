@@ -1567,11 +1567,13 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
      call chkint_eq(1,2,cond_string,cond_values,ierr,'npfft',dt%npfft,1,(/1/),iout)
    end if
 #ifdef HAVE_OPENMP
-   if ( xomp_get_num_threads(.true.) > 1 .and. dt%npfft > 1 ) then
-     write(message,'(4a,i4,a,i4,a)') "When compilied with OpenMP, the FFT parallelization is not ",&
-       & "compatible with multiple threads.",ch10,"Please set npfft to 1 (currently npfft=",&
-       & dt%npfft, ") or export OMP_NUM_THREADS=1 (currently ",xomp_get_num_threads(.true.),")"
-     MSG_ERROR(message)
+   if (dt%wfoptalg==114) then
+     if ( xomp_get_num_threads(.true.) > 1 .and. dt%npfft > 1 ) then
+       write(message,'(4a,i4,a,i4,a)') "When compilied with OpenMP, the FFT parallelization is not ",&
+         & "compatible with multiple threads.",ch10,"Please set npfft to 1 (currently npfft=",&
+         & dt%npfft, ") or export OMP_NUM_THREADS=1 (currently ",xomp_get_num_threads(.true.),")"
+       MSG_ERROR_NOSTOP(message, ierr)
+     end if
    end if
 #endif
 
