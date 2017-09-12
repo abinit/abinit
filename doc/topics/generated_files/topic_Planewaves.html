@@ -1,0 +1,96 @@
+<!--                                                                                     -->
+<!-- This file has been produced by generate_doc.py using different .yml  or .bib files. -->
+<!-- It is useless to modify it. Modify the related .yml  or .bib files instead.         -->
+<!--                                                                                     -->
+<html>
+<head><title>Planewaves </title>
+<link rel=stylesheet type="text/css" href="../formabinit.css">
+</head>
+<body bgcolor="#ffffff">
+
+<hr>
+<a name="top"></a>
+
+<h1>Precision with a planewave basis, PAW/pseudopotentials, and the related real space sampling</h1>
+<h3>This page gives hints on how to perform numerically precise calculations with planewaves or projector-augmented waves and pseudopotentials with the ABINIT package.
+<hr>
+
+<h5>Copyright (C) 2016-2017 ABINIT group (FJ)
+<script type="text/javascript" src="../../js_files/copyright.js"> </script>
+</h5>
+
+<script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
+
+ Mentioned in &nbsp; <a href="../../topics/generated_files/topic_TuningSpeed.html">topic_TuningSpeed</a> &nbsp;&nbsp; <a href="../../users/generated_files/help_features.html#2.3">help_features#2.3</a> &nbsp;
+ <hr>
+ <h3><b>Table of content: </b></h3> 
+ <ul> <li>1. <a href="topic_Planewaves.html#1">Introduction.</a><li>2. <a href="topic_Planewaves.html#2">Related lesson(s) of the tutorial.</a><li>3. <a href="topic_Planewaves.html#3">Related input variables.</a></ul>
+
+&nbsp; 
+<HR ALIGN=left> 
+<a name="1">&nbsp;</a>
+<h3><b>1. Introduction.</b></h3>
+
+
+<p> The numerical precision of the calculations depends on many settings, 
+among which the definition of a basis set is likely the most important. With planewaves, there
+is one single parameter, <a href="../../input_variables/generated_files/varset_basic.html#ecut">ecut</a> that governs the completeness of the basis set. 
+<p> The wavefunction, density, potentials are represented in both reciprocal space (plane waves)
+and real space, on a homogeneous grid of points. The transformation from reciprocal space to real space and vice-versa
+is made thanks to the Fast Fourier Transform (FFT) algorithm.
+With norm-conserving pseudopotential, <a href="../../input_variables/generated_files/varset_basic.html#ecut">ecut</a> is also the main parameter to define the real space FFT grid,
+In PAW, the sampling for such quantities is governed by a more independent variable, <a href="../../input_variables/generated_files/varset_paw.html#pawecutdg">pawecutdg</a>.
+More precise tuning might be done by using <a href="../../input_variables/generated_files/varset_gstate.html#boxcutmin">boxcutmin</a> and <a href="../../input_variables/generated_files/varset_gstate.html#ngfft">ngfft</a>.
+<p> Avoiding discontinuity issues with changing the size of the planewave basis set is made possible thanks to <a href="../../input_variables/generated_files/varset_rlx.html#ecutsm">ecutsm</a>.
+<p> The <a href="../../input_variables/generated_files/varset_basic.html#accuracy">accuracy</a> variable enables to tune the accuracy of a calculation by setting automatically up to seventeen variables.
+<p> Many more parameters govern a PAW computation than a norm-conserving pseudopotential calculation. They are described 
+in a specific page <a href="../../topics/generated_files/topic_PAW.html#">topic_PAW</a>. For the settings related to wavelets, see <a href="../../topics/generated_files/topic_Wavelets.html#">Wavelets</a>.
+<br><br><a href=#top>Go to the top</a>
+
+
+
+&nbsp; 
+<HR ALIGN=left> 
+<a name="2">&nbsp;</a>
+<h3><b>2. Related lesson(s) of the tutorial.</b></h3>
+
+
+<li><a href="../../tutorial/generated_files/lesson_base2.html">The lesson 2</a> deals again with the H2
+molecule: convergence studies, LDA versus GGA </li>
+<li><a href="../../tutorial/generated_files/lesson_base3.html">The lesson 3</a> deals with crystalline
+silicon (an insulator): the definition of a k-point grid, the smearing
+of the cut-off energy, the computation of a band structure, and again,
+convergence studies ...</li>
+<li>The first lesson on the <a href="../../tutorial/generated_files/lesson_paw1.html#">the projector-augmented wave</a> technique.
+<br><br><a href=#top>Go to the top</a>
+
+
+&nbsp; 
+<hr> 
+<a name="3">&nbsp;</a>
+<h3><b>3. Related input variables.</b></h3>
+
+
+<p>Compulsory input variables:<p>... <a href="../../input_variables/generated_files/varset_basic.html#ecut">ecut</a>   [Energy CUToff]<br>
+... <a href="../../input_variables/generated_files/varset_paw.html#pawecutdg">pawecutdg</a>   [PAW - Energy CUToff for the Double Grid]<br>
+<p>Basic input variables:<p>... <a href="../../input_variables/generated_files/varset_basic.html#accuracy">accuracy</a>   [ACCURACY]<br>
+... <a href="../../input_variables/generated_files/varset_rlx.html#ecutsm">ecutsm</a>   [Energy CUToff SMearing]<br>
+<p>Useful input variables:<p>... <a href="../../input_variables/generated_files/varset_gstate.html#boxcutmin">boxcutmin</a>   [BOX CUT-off MINimum]<br>
+... <a href="../../input_variables/generated_files/varset_gstate.html#ngfft">ngfft</a>   [Number of Grid points for Fast Fourier Transform]<br>
+<p>Relevant internal variables:<p>... <a href="../../input_variables/generated_files/varset_internal.html#mgfft">%mgfft</a>   [Maximum of nGFFT]<br>
+... <a href="../../input_variables/generated_files/varset_internal.html#mgfftdg">%mgfftdg</a>   [Maximum of nGFFT for the Double Grid]<br>
+... <a href="../../input_variables/generated_files/varset_internal.html#mpw">%mpw</a>   [Maximum number of Plane Waves]<br>
+... <a href="../../input_variables/generated_files/varset_internal.html#nfft">%nfft</a>   [Number of FFT points]<br>
+... <a href="../../input_variables/generated_files/varset_internal.html#nfftdg">%nfftdg</a>   [Number of FFT points for the Double Grid]<br>
+<p>Input variables for experts:<p>... <a href="../../input_variables/generated_files/varset_dev.html#mqgrid">mqgrid</a>   [Maximum number of Q-space GRID points for pseudopotentials]<br>
+... <a href="../../input_variables/generated_files/varset_dev.html#nc_xccc_gspace">nc_xccc_gspace</a>   [Norm-Conserving pseudopotentials - use XC Core-Correction in G-SPACE]<br>
+
+<br><br><a href=#top>Go to the top</a>
+
+
+
+<script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
+
+</body>
+</html>
+

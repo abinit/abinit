@@ -1,0 +1,48 @@
+# General informations
+#**********************
+   rfmeth  1
+   enunit  0
+   eivec   0
+   chneut  0
+   selectz  0
+
+!Wavevector grid number 1 (coarse grid from DDB)
+  brav    1
+  ngqpt   2 2 2
+  nqshft  1
+  q1shft  3*0.0
+
+!Wavevector list number 1 (Reduced coordinates and normalization factor)
+  nph1l 4
+  qph1l
+   0.00000000  0.00000000  0.00000000 1.0
+   0.12500000  0.00000000  0.00000000 1.0
+   0.12500000  0.12500000  0.00000000 1.0
+   0.50000000  0.00000000  0.00000000 1.0
+
+# Flags
+#*******
+   ifcflag  1
+   prtddb   1
+   dieflag  0
+   thmflag  0
+    nlflag  0
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = anaddb
+#%% input_ddb = t51.ddb.in
+#%% [files]
+#%% extra_inputs = t51.ddb.in
+#%% files_to_test =
+#%%   t51.out_DDB, tolnlines = 4, tolabs = 2.000e-08, tolrel = 1.000e-6
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors =  G. Antonius
+#%% keywords = ddb
+#%% description =
+#%%   Diamond structure.
+#%%   Interpolation of the DDB onto arbitrary q-points
+#%%   using the interatomic force constants.
+#%%<END TEST_INFO>

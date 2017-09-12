@@ -70,4 +70,5 @@ ecut 15.0          # Maximal kinetic energy cut-off, in Hartree
 #%% description = 
 #%%   HI 8 molecule per cell, the cell is triclinic.
 #%%   Prepare the density for the next Bader analysis.
+#%% topics = Bader
 #%%<END TEST_INFO>

@@ -1,0 +1,95 @@
+<!--                                                                                     -->
+<!-- This file has been produced by generate_doc.py using different .yml  or .bib files. -->
+<!-- It is useless to modify it. Modify the related .yml  or .bib files instead.         -->
+<!--                                                                                     -->
+<html>
+<head><title>ElecBandStructure </title>
+<link rel=stylesheet type="text/css" href="../formabinit.css">
+</head>
+<body bgcolor="#ffffff">
+
+<hr>
+<a name="top"></a>
+
+<h1>Electronic band structure and related topics</h1>
+<h3>This page gives hints on how to generate the electronic band structure related topics with the ABINIT package.
+<hr>
+
+<h5>Copyright (C) 2016-2017 ABINIT group (XG)
+<script type="text/javascript" src="../../js_files/copyright.js"> </script>
+</h5>
+
+<script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
+
+ Mentioned in &nbsp; <a href="../../topics/generated_files/topic_k-points.html">topic_k-points</a> &nbsp;&nbsp; <a href="../../users/generated_files/help_features.html#8">help_features#8</a> &nbsp;
+ <hr>
+ <h3><b>Table of content: </b></h3> 
+ <ul> <li>1. <a href="topic_ElecBandStructure.html#1">Introduction.</a><li>2. <a href="topic_ElecBandStructure.html#2">Related input variables.</a><li>3. <a href="topic_ElecBandStructure.html#3">Selected input files.</a></ul>
+
+&nbsp; 
+<HR ALIGN=left> 
+<a name="1">&nbsp;</a>
+<h3><b>1. Introduction.</b></h3>
+
+
+The eigenenergies along a set of segments can be computed (non-self-consistent calculations <a href="../../input_variables/generated_files/varset_basic.html#iscf">iscf</a>=-2)
+using a negative value of <a href="../../input_variables/generated_files/varset_basic.html#kptopt">kptopt</a>, 
+with <a href="../../input_variables/generated_files/varset_gstate.html#kptbounds">kptbounds</a> defining the end points of the segments, and <a href="../../input_variables/generated_files/varset_gstate.html#ndivsm">ndivsm</a> (or <a href="../../input_variables/generated_files/varset_gstate.html#ndivk">ndivk</a>) defining the 
+sampling. 
+<p>A band structure can even be represented using weights proportional to the orbital content (so-called "Fat Bands"),
+in case of PAW calculation, see <a href="../../input_variables/generated_files/varset_paw.html#pawfatbnd">pawfatbnd</a>, and related variables.
+<p>Different interpolation schemes for the band energies can be defined thanks to <a href="../../input_variables/generated_files/varset_basic.html#einterp">einterp</a>. 
+The Wannier interpolation is also available through the use of the <a href="../../tutorial/generated_files/lesson_wannier90.html#">wannier90</a> post-processor.
+<p>The band structure from a supercell calculation can be unfolded to the (large) Brillouin zone of the (small) primitive cell 
+thanks to the <a href="../../users/generated_files/help_fold2bloch.html#">fold2bloch</a> post-processor. See the related <a href="../../topics/generated_files/topic_Unfolding.html#">topic_Unfolding</a>.
+<p>Different plotting postprocessors exist to produce graphical representations of electronic band structures from ABINIT. The most 
+powerful is based on <a href="../../topics/generated_files/topic_Abipy.html#">Abipy</a>. Simpler tools also exist, and can be found in ~abinit/scripts/post_processing,
+e.g. AbinitBandStructureMaker.py, plot_bandstructure.py or abinit_eignc_to_bandstructure.py.
+<br><br><a href=#top>Go to the top</a>
+
+
+
+
+&nbsp; 
+<hr> 
+<a name="2">&nbsp;</a>
+<h3><b>2. Related input variables.</b></h3>
+
+
+<p>Basic input variables:<p>... <a href="../../input_variables/generated_files/varset_basic.html#iscf">iscf</a>   [Integer for Self-Consistent-Field cycles]<br>
+... <a href="../../input_variables/generated_files/varset_gstate.html#kptbounds">kptbounds</a>   [K PoinT BOUNDarieS]<br>
+... <a href="../../input_variables/generated_files/varset_basic.html#kptopt">kptopt</a>   [KPoinTs OPTion]<br>
+... <a href="../../input_variables/generated_files/varset_gstate.html#ndivsm">ndivsm</a>   [Number of DIVisions for the SMallest segment]<br>
+<p>Useful input variables:<p>... <a href="../../input_variables/generated_files/varset_basic.html#einterp">einterp</a>   [Electron bands INTERPolation]<br>
+... <a href="../../input_variables/generated_files/varset_gstate.html#iatsph">iatsph</a>   [Index for the ATomic SPHeres of the atom-projected density-of-states]<br>
+... <a href="../../input_variables/generated_files/varset_gstate.html#natsph">natsph</a>   [Number of ATomic SPHeres for the atom-projected density-of-states]<br>
+... <a href="../../input_variables/generated_files/varset_gstate.html#ndivk">ndivk</a>   [Number of DIVisions of K lines]<br>
+... <a href="../../input_variables/generated_files/varset_paw.html#pawfatbnd">pawfatbnd</a>   [PAW: print band structure in the FAT-BaND representation]<br>
+... <a href="../../input_variables/generated_files/varset_gstate.html#ratsph">ratsph</a>   [Radii of the ATomic SPHere(s)]<br>
+
+<br><br><a href=#top>Go to the top</a>
+
+
+&nbsp; 
+<HR ALIGN=left> 
+<a name="3">&nbsp;</a>
+<h3><b>3. Selected input files.</b></h3>
+
+
+<i><b>WARNING</b> : as of ABINITv8.6.x, the list of input files provided in the specific section of the topics Web pages is still to be reviewed/tuned. In some cases, it will be adequate, and in other cases, it might be incomplete, or perhaps even useless.</i>
+<br><br>The user can find some related example input files in the ABINIT package in the directory /tests, or on the Web:
+<p> tests/v8/Input: <a href="../../tests/v8/Input/t04.in">t04.in</a> 
+<p> tests/v5/Input: <a href="../../tests/v5/Input/t20.in">t20.in</a> 
+<p> tests/v6/Input: <a href="../../tests/v6/Input/t14.in">t14.in</a> 
+<p> tests/v7/Input: <a href="../../tests/v7/Input/t71.in">t71.in</a> 
+<a href="../../tests/v7/Input/t72.in">t72.in</a> 
+<br>
+
+<br><br><a href=#top>Go to the top</a>
+
+
+<script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
+
+</body>
+</html>
+

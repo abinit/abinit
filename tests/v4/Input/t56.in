@@ -82,4 +82,5 @@
 #%% description = 
 #%%   GaAs, zinc-blende structure. Generate the data for optic (linear and non-linear coefficients).
 #%%   to be analysed in the test 57.
+#%% topics = Optic
 #%%<END TEST_INFO>

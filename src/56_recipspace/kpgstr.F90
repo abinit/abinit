@@ -16,7 +16,7 @@
 !! INPUTS
 !!  ecut=cut-off energy for plane wave basis sphere (Ha)
 !!  ecutsm=smearing energy for plane wave kinetic energy (Ha)
-!!  effmass=effective mass for electrons (1. in common case)
+!!  effmass_free=effective mass for electrons (1. in common case)
 !!  gmet(3,3) = reciprocal lattice metric tensor (Bohr**-2)
 !!  gprimd(3,3)=reciprocal space dimensional primitive translations
 !!  istr=1,...6 specifies cartesian strain component 11,22,33,32,31,21
@@ -43,7 +43,7 @@
 
 #include "abi_common.h"
 
-subroutine kpgstr(dkinpw,ecut,ecutsm,effmass,gmet,gprimd,istr,kg,kpt,npw)
+subroutine kpgstr(dkinpw,ecut,ecutsm,effmass_free,gmet,gprimd,istr,kg,kpt,npw)
 
  use defs_basis
  use m_profiling_abi
@@ -60,7 +60,7 @@ subroutine kpgstr(dkinpw,ecut,ecutsm,effmass,gmet,gprimd,istr,kg,kpt,npw)
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: istr,npw
- real(dp),intent(in) :: ecut,ecutsm,effmass
+ real(dp),intent(in) :: ecut,ecutsm,effmass_free
 !arrays
  integer,intent(in) :: kg(3,npw)
  real(dp),intent(in) :: gmet(3,3),gprimd(3,3),kpt(3)
@@ -132,7 +132,7 @@ subroutine kpgstr(dkinpw,ecut,ecutsm,effmass,gmet,gprimd,istr,kg,kpt,npw)
        dkinetic=dkpg2*(fsm-ecutsm_inv*kpg2*dfsm)
      end if
    end if
-   dkinpw(ig)=dkinetic/effmass
+   dkinpw(ig)=dkinetic/effmass_free
  end do
 
 end subroutine kpgstr

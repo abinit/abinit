@@ -68,4 +68,5 @@ phimax   1.57079632679    #
 #%%   Nevertheless, in this particular
 #%%   case of the MgO molecule, there is a fundamental limit of this
 #%%   algorithm...
+#%% topics = Bader
 #%%<END TEST_INFO>

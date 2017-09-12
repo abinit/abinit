@@ -127,5 +127,5 @@ jpawu   0.6   0.0  eV
 #%%    The results for the Born effective charge, and for the phonon frequencies do not fulfill the
 #%%    charge neutrality sum rule and the acoustic sum rule.
 #%%    When debugged, the computation of dielectric tensor and Born effective charges might be kept and activated.
-#%% topics = DFT+U
+#%% topics = DFT+U, DFPT
 #%%<END TEST_INFO>

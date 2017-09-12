@@ -1,0 +1,703 @@
+<!--                                                                                     -->
+<!-- This file has been produced by generate_doc.py using different .yml  or .bib files. -->
+<!-- It is useless to modify it. Modify the related .yml  or .bib files instead.         -->
+<!--                                                                                     -->
+<html>
+<head><title>Lesson on DFT+DMFT</title>
+<link rel=stylesheet type="text/css" href="../formabinit.css">
+</head>
+<body bgcolor="#ffffff">
+
+<hr>
+<a name="top"></a>
+
+<h1>ABINIT tutorial. Lesson on DFT+DMFT...</h1>
+
+<h2>A DFT+DMFT calculation for SrVO<sub>3</sub>.</h2>
+<hr>
+<p>This lesson aims at showing how to perform
+a DFT+DMFT calculation using Abinit.</p>
+
+<p>You will not learn here what is DFT+DMFT. But you will learn
+how to do a DFT+DMFT calculation and what are the main input variables
+controlling this type of calculation.</p>
+
+<p>It might be useful that you already know how to
+do PAW calculations using ABINIT but it is not mandatory  (you can follow the two lessons
+on PAW in ABINIT, <a href="../../tutorial/generated_files/lesson_paw1.html#">PAW1</a> and <a href="../../tutorial/generated_files/lesson_paw2.html#">PAW2</a>).
+Also the <a href="../../tutorial/generated_files/lesson_dftu.html#">DFT+U lesson</a> in ABINIT
+might be useful to know some basic variables common to DFT+U and DFT+DMFT.</p>
+
+<p>This lesson should take one hour to
+complete (especially if you have access to several processors).</p>
+<hr>
+<h5>Copyright (C) 2000-2017 ABINIT group (BAmadon)
+<script type="text/javascript" src="../../js_files/copyright.js"> </script>
+</h5> 
+
+<script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
+
+<a name="list"></a>
+<h3><b> Lesson on DFT+DMFT. Table of content:</b></h3>
+
+<ul> 
+  <li>1. <a href="#summary">The DFT+DMFT method: summary and key parameters</a></li>
+  <li>2. <a href="#LDA">Electronic Structure of SrVO<sub>3</sub> in LDA</a></li>
+  <li>3. <a href="#DFT+DMFT">Electronic Structure of SrVO<sub>3</sub>: DFT+DMFT calculation</a></li>
+  <li>4. <a href="#orbitals">Electronic Structure of SrVO<sub>3</sub>: Choice of correlated orbitals</a></li>
+  <li>5. <a href="#energy">Electronic Structure of SrVO<sub>3</sub>: The internal energy</a></li>
+  <li>6. <a href="#volume">Electronic Structure of SrVO<sub>3</sub> in DFT+DMFT: Equilibrium volume</a></li>
+  <li>7. <a href="#conclusion">Electronic Structure of SrVO<sub>3</sub>: Conclusion</a></li>
+
+ </ul> 
+ <hr><br><a name="summary"> </a>
+<a name="1"> </a>
+<h3><b>1. The DFT+DMFT method: summary and key parameters</b></h3>
+ <p><p> The DFT+DMFT method aims at improving the description of
+strongly correlated systems.  Generally, these highly correlated
+materials contain rare-earth metals or transition metals, which have partially
+filled <i>d</i> or <i>f</i> bands and thus localized electrons.
+For further information on this method, please refer to <a href="../../biblio/generated_files/bib_biblio.html#Georges1996">[Georges1996]</a> and <a href="../../biblio/generated_files/bib_biblio.html#Kotliar2006">[Kotliar2006]</a>.
+For an introduction to Many Body Physics (Green's function, Self-energy, imaginary time, and
+Matsubara frequencies), see e.g. <a href="../../biblio/generated_files/bib_biblio.html#Coleman2015">[Coleman2015]</a> and <a href="../../biblio/generated_files/bib_biblio.html#Tremblay2017">[Tremblay2017]</a>.
+
+<p> Several parameters (both physical and technical) needs to be discussed for a DFT+DMFT calculation.
+ </p>
+
+<UL>
+<LI> The definition of correlated orbitals.
+ In the ABINIT DMFT implementation, it is done with the help of Projected Wannier orbitals
+(see <a href="../../biblio/generated_files/bib_biblio.html#Amadon2008">[Amadon2008]</a></a>).
+The first part of the tutorial explains the importance of this choice.
+Wannier functions are unitarily related to  a selected set of Kohn Sham (KS) wavefunctions, specified in ABINIT by band index 
+<a href="../../input_variables/generated_files/varset_dmft.html#dmftbandi">dmftbandi</a>, and <a href="../../input_variables/generated_files/varset_dmft.html#dmftbandf">dmftbandf</a>.
+	Thus, as empty bands are necessary to build Wannier functions, it is required in DMFT calculations
+	that the KS Hamiltonian is correctly diagonalized: use high values for  
+<a href="../../input_variables/generated_files/varset_dev.html#nnsclo">nnsclo</a>, 
+	and 
+<a href="../../input_variables/generated_files/varset_gstate.html#nline">nline</a> for DMFT calculations and preceding DFT calculations.
+Roughly speaking, the larger dmftbandf-dmftbandi is, the more localized is the radial part of the orbital.
+Note that this definition is different from the definition of correlated orbitals in
+the DFT+U implementation in ABINIT
+(see <a href="../../biblio/generated_files/bib_biblio.html#Amadon2008a">[Amadon2008a]</a>).
+The relation between the two expressions is briefly discussed in <a href="../../biblio/generated_files/bib_biblio.html#Amadon2012">[Amadon2012]</a>.
+
+
+<LI> The definition of the Coulomb and exchange interaction U and J are done as in DFT+U through the variables
+<a href="../../input_variables/generated_files/varset_paw.html#upawu">upawu</a> and
+<a href="../../input_variables/generated_files/varset_paw.html#jpawu">jpawu</a>.
+They could be computed with the cRPA method, also available in ABINIT. The value of U and J should
+in principle depend on the definition of correlated orbitals. In this tutorial, U and J will be seen
+as parameters, as in the DFT+U approach. As in DFT+U, two double counting methods are available
+(see the 
+<a href="../../input_variables/generated_files/varset_dmft.html#dmft_dc">dmft_dc</a> input variable).
+Note that in version 7.10.5 (but not in later versions) <a href="../../input_variables/generated_files/varset_paw.html#jpawu">jpawu</a>=0
+is required if the density matrix in the correlated subspace is not diagonal.
+
+<LI> The choice of the double counting correction. The current default choice
+	in ABINIT is 
+(<a href="../../input_variables/generated_files/varset_dmft.html#dmft_dc">dmft_dc</a>=1)
+	which corresponds to the full localized limit.
+
+<LI> The method of resolution of the Anderson model. In ABINIT, it can be the Hubbard I method
+(<a href="../../input_variables/generated_files/varset_dmft.html#dmft_solv">dmft_solv</a>=2)
+	the Continuous time Quantum Monte Carlo (CTQMC) method
+(<a href="../../input_variables/generated_files/varset_dmft.html#dmft_solv">dmft_solv</a>=5)
+	or the static mean field method 
+(<a href="../../input_variables/generated_files/varset_dmft.html#dmft_solv">dmft_solv</a>=1)
+	equivalent to usual DFT+U.
+
+<LI> The solution of the Anderson Hamiltonian and the DMFT solution are strongly dependent over
+temperature. So the temperature
+<a href="../../input_variables/generated_files/varset_gstate.html#tsmear">tsmear</a> is a very important physical parameter
+of the calculation. 
+
+
+<LI> The practical solution of the DFT+DMFT scheme is usually  presented as a double loop over first the local Green's function,
+and second the electronic local density. 
+(cf Fig. 1 in <a href="../../biblio/generated_files/bib_biblio.html#Amadon2012">[Amadon2012]</a>).
+The number of iterations of both loops are respectively given in ABINIT by  keywords
+<a href="../../input_variables/generated_files/varset_dmft.html#dmft_iter">dmft_iter</a> and
+<a href="../../input_variables/generated_files/varset_basic.html#nstep">nstep</a>.
+Other useful variables are 
+<a href="../../input_variables/generated_files/varset_dmft.html#dmft_rslf">dmft_rslf</a>=1
+and 
+<a href="../../input_variables/generated_files/varset_files.html#prtden">prtden</a>=-1
+(to be able to restart the calculation from the density file). Lastly, one linear and one logarithmic grid
+are used for Matsubara Frequencies indicated by 
+<a href="../../input_variables/generated_files/varset_dmft.html#dmft_nwli">dmft_nwli</a>
+and 
+<a href="../../input_variables/generated_files/varset_dmft.html#dmft_nwlo">dmft_nwlo</a>
+
+(Typical values
+are 100000 and 100, but convergence should be studied). A large number of informations are given in the log file using
+<a href="../../input_variables/generated_files/varset_paw.html#pawprtvol">pawprtvol</a>=3.
+</UL>
+<br><br><a href=#top>Go to the top</a>
+<hr>
+<br><a name="LDA"> </a>
+<a name="2"> </a>
+<h3><b>2. Electronic Structure of SrVO<sub>3</sub> in LDA</b></h3>
+ <p><p>You might create a subdirectory of the
+~abinit/tests/tutoparal directory, and use it for the tutorial. In what follows,
+the names of files will be mentioned as if you were in this subdirectory</p>
+
+<p>Copy the files ../Input/tdmft_1.in and
+../Input/tdmft_x.files in your Work directory and run ABINIT (as usual, the actual "abinit" command is something like  ../../../../src/98_main/abinit):</p>
+<font color="gray"> <pre>
+abinit < tdmft_x.files > log_1
+</pre> </font>
+
+<p>This run should take some time. It is recommended that you use at least 10 processors (and 32 should be fast).
+It calculates the LDA ground state of SrVO<sub>3</sub> and compute the band structure in a second step.
+The variable 
+<a href="../../input_variables/generated_files/varset_paw.html#pawfatbnd">pawfatbnd</a>
+allows to create files with "fatbands" (see description of the variable
+in the list of variables): the width of the line along each k-point path and for each band is proportional to the contribution
+of a given atomic orbital on this particular Kohn Sham Wavefunction.
+
+A low cutoff and a small number of k-points are used in order to speed up the
+calculation.
+During this time you can take a look at the input file. There are two datasets. The first one is a ground
+state calculations with 
+<a href="../../input_variables/generated_files/varset_dev.html#nnsclo">nnsclo</a>=3 and
+<a href="../../input_variables/generated_files/varset_gstate.html#nline">nline</a>=3 in order
+to have well diagonalized eigenfunctions even for empty states. In practice, you have however to check
+that the residue of wavefunctions is small at the end of the calculation. In this calculation, we find 1.E-06,
+which is large (1.E-10 would be better, so nnsclo and nline should be increased, but it would take more time).
+
+When the calculation is finished, you can plot the fatbands for Vanadium and l=2. Several possibilities
+are available for that purpose. We will work with the simple XMGRACE package (you need to install it, if not already avaialble on your machine).</p>
+<font color="gray"> <pre>
+xmgrace tdmft_1o_DS2_FATBANDS_at0001_V_is1_l0002
+</pre> </font> 
+The band structure is given in eV.
+<br>
+<img style="width: 634px" alt="FatbandV" src="../documents/lesson_dmft/fatbandV.jpg">
+<br>
+<p>and the fatbands for Oxygen and l=1 with </p> <font color="gray"> <pre> 
+xmgrace tdmft_1o_DS2_FATBANDS_at0003_O_is1_l0001.
+</pre> </font> 
+
+<br>
+<img style="width: 634px" alt="FatbandV" src="../documents/lesson_dmft/fatbandO.jpg">
+<br>
+
+In these plots, you recover the band structure of SrVO<SUB>3</SUB> (see for comparison 
+the band structure of Fig.3 of <a href="../../biblio/generated_files/bib_biblio.html#Amadon2008">[Amadon2008]</a>).
+, and the main character of the bands.
+Bands 21 to 25 are mainly <i>d</i> and bands 12 to 20 are  mainly
+oxygen <i>p</i>. However, we clearly see an important hybridization.
+The Fermi level (at 0 eV) is in the middle of bands 21-23.
+
+<p>
+One can easily check thats bands 21-23 are mainly  <i>d-t<SUB>2g</SUB></i> and bands 24-25 are mainly <i>e<SUB>g</SUB></i>:
+just use pawfatbnd=2 in tdmft_1.in and relaunch the calculations. Then
+the file tdmft_1o_DS2_FATBANDS_at0001_V_is1_l2_m-2, tdmft_1o_DS2_FATBANDS_at0001_V_is1_l2_m-1 and tdmft_1o_DS2_FATBANDS_at0001_V_is1_l2_m1
+give you respectively the xy,yz and xz fatbands (ie  <i>d-t<SUB>2g</SUB></i>) and tdmft_1o_DS2_FATBANDS_at0001_V_is1_l2_m+0 and tdmft_1o_DS2_FATBANDS_at0001_V_is1_l2_m+2
+give the z2 and z2-y2 fatbands (ie <i>e<SUB>g</SUB></i>).
+<p>
+So in conclusion of this study, the Kohn Sham bands which are mainly  <i>t<SUB>2g</SUB></i> are the bands 21,22 and 23.
+<p>
+Of course, it could
+have been anticipated from classical crystal field theory: the vanadium is in the center of an octahedron of oxygen atoms, so
+<i>d</i> orbitals are splitted in  <i>t<SUB>2g</SUB></i> and  <i>e<SUB>g</SUB></i>. As <i>t<SUB>2g</SUB></i> orbitals are not directed toward oxygen atoms, <i>t<SUB>2g</SUB></i>-like bands are lower
+in energy and filled with one electron, whereas  <i>e<SUB>g</SUB></i>-like bands are higher and empty.
+<p>
+In the next section, we will thus use the <i>t<SUB>2g</SUB></i>-like bands to built Wannier functions and do the DFT+DMFT calculation.
+<br><br><a href=#top>Go to the top</a>
+<hr>
+<br><a name="DFT+DMFT"> </a>
+<a name="3"> </a>
+<h3><b>3. Electronic Structure of SrVO<sub>3</sub>: DFT+DMFT calculation</b></h3>
+ <p><h4>3.1. The input file for DMFT calculation: correlated orbitals, screened Coulomb interaction and  frequency mesh </h4>
+
+<p> In ABINIT, correlated orbitals are defined using the projected local orbitals Wannier functions as outlined above.
+The definition requires to define a given energy window from which projected Wannier functions are constructed.
+We would like in this tutorial, to apply the DMFT method on <i>d</i> orbitals and  for simplicity
+on a subset of d orbitals, namely  <i>t<SUB>2g</SUB></i>  orbitals  (<i>e<SUB>g</SUB></i> orbitals play a minor role because they are empty).
+But we need to define  <i>t<SUB>2g</SUB></i>  orbitals. For this, we will use Wannier functions.
+
+<p>
+As we have seen in the orbitally resolved fatbands, the Kohn Sham wave function contains a important weight of <i>t<SUB>2g</SUB></i> atomic orbitals
+mainly in <i>t<SUB>2g</SUB></i>-like  bands but also in oxygen bands.
+
+<p>
+So, we can use only the <i>t<SUB>2g</SUB></i>-like  bands to define Wannier functions
+or also both the <i>t<SUB>2g</SUB></i>-like  and <i>O-p</i>-like  bands.
+
+<p> The first case corresponds to the input file tdmft_2.in. In this case
+<a href="../../input_variables/generated_files/varset_dmft.html#dmftbandi">dmftbandi</a>=21 and <a href="../../input_variables/generated_files/varset_dmft.html#dmftbandf">dmftbandf</a>=23.
+As we only put the electron interaction on  <i>t<SUB>2g</SUB></i> orbitals, we have to use first lpawu=2, but also the keyword 
+<a href="../../input_variables/generated_files/varset_dmft.html#dmft_t2g">dmft_t2g</a>=1
+in order to restrict the application of interaction on <i>t<SUB>2g</SUB></i> orbitals.
+<p>
+
+Notice also that before launching a DMFT calculation, the LDA should be perfectly converged, including
+the empty states (check nline and nnsclo in the input file). The input file tdmft_2.in thus contains two datasets:
+the first one is a well converged LDA calculation, and the second is the DFT+DMFT calculation.
+
+
+<p> Notice the other dmft variables used in the input file and check their meaning in the input variable glossary.
+In particular, we are using dmft_solv=5 for the dmft dataset in order to use the density-density continuous time quantum monte carlo (CTQMC) solver.
+(See <a href="../../biblio/generated_files/bib_biblio.html#Gull2011">[Gull2011]</a>, as well as the ABINIT 2016 paper <a href="../../biblio/generated_files/bib_biblio.html#Gonze2016">[Gonze2016]</a> for details about the CTQMC implementation in ABINIT.)
+<br>
+Note that the number of imaginary frequencies 
+<a href="../../input_variables/generated_files/varset_dmft.html#dmft_nwlo">dmft_nwlo</a>
+has to be set to at least twice the value of
+<a href="../../input_variables/generated_files/varset_dmft.html#dmftqmc_l">dmftqmc_l</a>
+(the discretization in imaginary time). Here, we choose a temperature of 1200 K. For lower temperature, the number
+of Matsubara frequencies should be higher.
+
+<p> Here we use a fast calculation, with a small value of the parameters, especially 
+<a href="../../input_variables/generated_files/varset_dmft.html#dmft_nwlo">dmft_nwlo</a>,
+<a href="../../input_variables/generated_files/varset_dmft.html#dmftqmc_l">dmftqmc_l</a> and
+<a href="../../input_variables/generated_files/varset_dmft.html#dmftqmc_n">dmftqmc_n</a>.
+
+<p> Let's now discuss the value of the effective Coulomb interaction U 
+(<a href="../../input_variables/generated_files/varset_paw.html#upawu">upawu</a>) and
+J (<a href="../../input_variables/generated_files/varset_paw.html#jpawu">jpawu</a>).
+
+The values of U and J used in ABINIT in DMFT use the same
+convention as in DFT+U calculations in ABINIT (cf <a href="../../biblio/generated_files/bib_biblio.html#Amadon2008a">[Amadon2008a]</a>).
+However, calculations in Ref. <a href="../../biblio/generated_files/bib_biblio.html#Amadon2008">[Amadon2008]</a>
+use for U and J the usual convention for <i> t<SUB>2g</SUB> </i> systems as found in <a href="../../biblio/generated_files/bib_biblio.html#Lechermann2006">[Lechermann2006]</a>, Eq. 26 (see also the appendix in <a href="../../biblio/generated_files/bib_biblio.html#Fresard1997">[Fresard1997]</a>).
+It corresponds to the Slater integral F4=0
+and we can show that U_abinit=U-4/3 J and J_abinit=7/6 J .
+So in order to use U=4 eV and J=0.65 eV with these latter conventions 
+(as in <a href="../../biblio/generated_files/bib_biblio.html#Amadon2008">[Amadon2008]</a>), we have to use in ABINIT:
+<a href="../../input_variables/generated_files/varset_paw.html#upawu">upawu</a>=3.13333 eV; 
+<a href="../../input_variables/generated_files/varset_paw.html#jpawu">jpawu</a>=0.75833 eV and
+<a href="../../input_variables/generated_files/varset_paw.html#f4of2_sla">f4of2_sla</a>=0.
+
+<p> Now, you can launch the calculation:
+<p>Copy the files ../Input/tdmft_2.in and
+modify tdmft_x.files in your Work directory and run ABINIT:
+</p>
+<font color="gray"> <pre>
+mpirun -n 32 ../../../tmp/src/98_main/abinit < tdmft_x.files > log_2
+</pre> </font>
+
+<h4>3.2. The DFT+DMFT calculation: the log file </h4>
+
+<p> We are now going to browse quickly the log file (log_2) for this calculation.
+
+<p>
+Starting from </p><font color="gray"> <pre>
+     =====  Start of DMFT calculation
+	 </pre> </font>
+we have first the definition of logarithmic grid for frequency, then, after:
+ <font color="gray"> <pre>
+  == Prepare data for DMFT calculation
+</pre> </font>
+  The projection of Kohn Sham wavefunctions and (truncated) atomic orbitals are computed 
+  (Eq.(2.1) in <a href="../../biblio/generated_files/bib_biblio.html#Amadon2012">[Amadon2012]</a>)
+  and unnormalized orbitals are built
+  (Eq.(2.2) in <a href="../../biblio/generated_files/bib_biblio.html#Amadon2012">[Amadon2012]</a>)
+
+  The occupation matrix in this orbital basis is
+<font color="gray"> <pre>
+  ------ Symetrised Occupation
+</pre> </font>
+<font color="gray"> <pre>
+        0.11142  -0.00000  -0.00000
+       -0.00000   0.11142  -0.00000
+       -0.00000  -0.00000   0.11142
+</pre> </font>
+and the Normalization of this orbital basis is
+<font color="gray"> <pre>
+  ------ Symetrised Norm
+</pre> </font>
+<font color="gray"> <pre>
+        0.65790   0.00000   0.00000
+        0.00000   0.65790   0.00000
+        0.00000   0.00000   0.65790
+</pre> </font>
+Now, let's compare these numbers to other quantities.
+If the preceding LDA calculation is converged, dmatpuopt=1 is used, and 
+<a href="../../input_variables/generated_files/varset_dmft.html#dmftbandi">dmftbandi</a>=1 and
+<a href="../../input_variables/generated_files/varset_dmft.html#dmftbandf">dmftbandf</a>=nband,
+then the above Symetrised Occupation 
+should be exactly equal to the occupation matrix given in the usual DFT+U occupation matrix written in the log file (with dmatpuopt=1)
+(see discussion in <a href="../../biblio/generated_files/bib_biblio.html#Amadon2012">[Amadon2012]</a>).
+In our case, we are not in this case because <a href="../../input_variables/generated_files/varset_dmft.html#dmftbandi">dmftbandi</a>=21 
+so this condition is not fulfilled.
+
+Concerning the norm if these orbitals, two factors play a role:
+<UL>
+<LI> Firstly, the number of Kohn Sham function used should be infinite (cf Eq. B.4 of <a href="../../biblio/generated_files/bib_biblio.html#Amadon2012">[Amadon2012]</a>), which is not the case here, because we take into account only bands 21-23.
+We emphasize that it is not a limitation of our approach, but just a physical choice concerning Wannier functions. This physical
+choice induces that these intermediate wave functions have a very low norm.
+<LI>
+Secondly, the atomic orbitals used to do the projection are cut at the PAW radius. As a consequence, even if we would use a complete set of KS wavefunctions  and thus the closure relation, the norm could not be one. In our case, it could be at most 0.86852, which is the norm of the truncated atomic function of <i>d</i> orbitals of Vanadium used in
+this calculation. This number can be found in the log file by searching for ph0phiint (grep "ph0phiint(icount)= 1" log_2).
+(See also the discussion in Section B.3 of <a href="../../biblio/generated_files/bib_biblio.html#Amadon2012">[Amadon2012]</a>).
+</UL>
+
+
+Next the LDA Green's function is computed.
+<font color="gray"> <pre>
+ =====  LDA Green Function Calculation
+</pre> </font>
+<p>
+Then the Green's function is integrated to compute the occupation matrix.
+Interestingly, the density matrix here must be equal
+to the density matrix computed with the unnormalized correlated orbitals.
+If this is not the case, it means that the frequency grid is not sufficiently large.
+In our case, we find:
+</p>
+<font color="gray"> <pre>
+        0.11143   0.00000   0.00000
+        0.00000   0.11143   0.00000
+        0.00000   0.00000   0.11143
+</pre> </font>
+So the error is very small (1.10E-5). As an exercise, you can decrease the number of frequencies
+and see that the error becomes larger.
+<p>
+Then the true orthonormal Wannier functions  are built and the Green's function is computed in this basis just after:
+</p>
+<font color="gray"> <pre>
+ =====  LDA Green Function Calculation with renormalized psichi
+</pre> </font>
+The occupation matrix is now:
+<font color="gray"> <pre>
+        0.16937   0.00000  -0.00000
+        0.00000   0.16937   0.00000
+       -0.00000   0.00000   0.16937
+</pre> </font>
+We see that because of the orthonormalization of the orbitals necessary to built Wannier functions, the occupation matrix logically increases.
+<p> Then, after:</p>
+<font color="gray"> <pre>
+ =====  Define Interaction and self-energy
+</pre> </font>
+The Interaction kernel is computed from U and J, and the self energy is read from the disk file (if it exists).
+Then, the Green's function is computed
+with the self energy and the Fermi level is computed. 
+Then the DMFT Loop starts.
+
+<font color="gray"> <pre>
+ =====  DMFT Loop starts here   
+</pre> </font>
+The log contains a lot of details about the calculation (especially if 
+<a href="../../input_variables/generated_files/varset_paw.html#pawprtvol">pawprtvol</a>=3).
+In order to have a more synthetic overview of the calculation
+(this  is especially useful to detect possible divergence of the calculation), the following command extracts
+the evolution of the number of electrons (LDA, LDA with Wannier functions, and DMFT number of electrons)
+as a function of iterations (be careful, all numbers of electron are computed differently as explained in the log file):
+<font color="gray"> <pre>
+grep -e Nb -e ITER log_2
+</pre> </font>
+<p>
+Besides, during each DMFT calculation, there are one or more CTQMC calculations:</p>
+<font color="gray"> <pre>
+Starting QMC  (Thermalization)
+</pre> </font>
+
+For the sake of efficiency, the DMFT Loop is in this calculation done only once before doing again the DFT Loop
+(cf Fig. 1 of <a href="../../biblio/generated_files/bib_biblio.html#Amadon2012">[Amadon2012]</a>).
+At the end of the calculation, the occupation matrix is written and is:
+<font color="gray"> <pre>
+          -- polarization spin component  1
+        0.16843   0.00000  -0.00000
+       -0.00000   0.16843  -0.00000
+       -0.00000   0.00000   0.16843
+
+</pre> </font>
+We can see that the total number of electron is very close to one and it does not change much as a function of iterations.
+As an output of the calculation, you can find the self energy in file tdmft_2o_DS2Self-omega_iatom0001_isppol1
+and the Green's function is file Gtau.dat.
+
+
+<h4>3.3.  The self energy </h4>
+<p>
+You can use the self-energy to compute the quasiparticle renormalization weight. 
+We first extract the first six Matsubara frequencies:</p>
+<font color="gray"> <pre>
+head -n 8 tdmft_2o_DS2Self-omega_iatom0001_isppol1 > self.dat
+</pre> </font>
+Then we plot the  imaginary part of the self-energy (in imaginary frequency):
+<font color="gray"> <pre>
+xmgrace -block self.dat -bxy 1:3
+</pre> </font>
+Then using xmgrace, you click on  <i>Data</i>, then  on <i> Transformations </i> and then on <i> Regression </i> and you can do a 4th order fit as:
+<br>
+<img style="width: 634px" alt="self" src="../documents/lesson_dmft/self.jpg">
+<br>
+
+The slope at zero
+frequency obtained is 0.82. From this number, the quasiparticle renormalisation weight can be obtained
+using Z=1/(1+0.82)=0.55.
+
+
+<h4>3.4. The Green's function for correlated orbitals </h4>
+<p>
+The impurity (or local) Green's function for correlated orbitals is written in the file Gtau.dat.
+It is plotted as a function of the imaginary time in the interval [0,&beta;] where
+&beta; is the inverse temperature (in Hartree).
+You can plot this Green's function for the six <i>t<SUB>2g</SUB></i> orbitals using e.g xmgrace
+</p>
+<font color="gray"> <pre>
+xmgrace -nxy Gtau.dat 
+</pre> </font>
+<br>
+<img style="width: 634px" alt="Gtau" src="../documents/lesson_dmft/Gtau.jpg">
+<br>
+
+As the six <i> t<SUB>2g</SUB> </i> orbitals are degenerated, the six Green's function must
+be similar, within the stochastic noise.
+Moreover, this imaginary time Green's function must be negative and the value
+of G(&beta;) for the orbital i is equal to the opposite of the number of electrons
+in the orbital i (-n<SUB>i</SUB>).
+
+Optionnally, you can check how the Green's function can be a rough way to check for the importance
+of stochastic noise. For example, change for simplicity the number of steps
+for the DMFT calculation to 1:
+<font color="gray"> <pre>
+nstep2 1
+</pre> </font>
+and then use a much smaller number 
+of steps for the Monte Carlo Solver such as 
+<font color="gray"> <pre>
+dmftqmc_n 1.d3
+</pre> </font>
+save the previous Gtau.dat file:
+<font color="gray"> <pre>
+cp Gtau.dat Gtau.dat_save
+</pre> </font>
+Then relaunch the calculation.
+After it is completed, compare the new Green's function and the old one with the previous value of 
+<a href="../../input_variables/generated_files/varset_dmft.html#dmftqmc_n">dmftqmc_n</a>.
+Using xmgrace, 
+<font color="gray"> <pre>
+xmgrace -nxy Gtau.dat_save -nxy Gtau.dat
+</pre> </font>
+one obtains:
+<br>
+<img style="width: 634px" alt="Gtau2" src="../documents/lesson_dmft/Gtau2.jpg">
+<br>
+
+One naturally sees that the stochastic noise is much larger in this case. This stochastic noise
+can induces that the variation of physical quantities (number of electrons, electronic density,
+energy) as a function of the number of iteration is noisy.
+Once you have finished this comparison, copy the saved Green's function into  Gtau.dat
+in order to continue the tutorial with a precise Green's function in Gtau.dat:
+<font color="gray"> <pre>
+cp Gtau.dat_save Gtau.dat
+</pre> </font>
+
+
+<h4>3.5. The local spectral function </h4>
+<p>
+You can now use the imaginary time Green's function (contained in file Gtau.dat) to compute the spectral function  in real frequency.
+Such analytical continuation can be done on quantum Monte Carlo data using the Maximum Entropy method.
+
+<p>
+A maximum entropy code has been published recently by D. Bergeron. It can be downloaded 
+<a href="https://www.physique.usherbrooke.ca/MaxEnt/index.php/Main_Page">here</a>.
+Please cite the related paper <a href="../../biblio/generated_files/bib_biblio.html#Bergeron2016">[Bergeron2016]</a> if you use this code in a publication.
+<p>
+The code has a lot of options, and definitely, the method should be understood and the user guide should be read before any real use.
+It is not the goal of this DFT+DMFT tutorial to introduce to the Maximum Entropy Method (see <a href="../../biblio/generated_files/bib_biblio.html#Bergeron2016">[Bergeron2016]</a> and references therein).
+We give here a very quick way to obtain a spectral function.
+First, you have to install this code and the armadillo library by following
+the <a href="https://www.physique.usherbrooke.ca/MaxEnt/index.php/Download">guidelines</a>, and then launch it on the current directory in order to generate the default input file OmegaMaxEnt_input_params.dat.
+</p>
+<font color="gray"> <pre>
+OmegaMaxEnt
+</pre> </font>
+Then edit the file OmegaMaxEnt_input_params.dat, and modify the first seven lines with:
+<font color="gray"> <pre>
+data file: Gtau.dat
+
+OPTIONAL PREPROCESSING TIME PARAMETERS
+
+DATA PARAMETERS
+bosonic data (yes/[no]): no
+imaginary time data (yes/[no]): yes
+</pre> </font>
+Then relaunch the code 
+<font color="gray"> <pre>
+OmegaMaxEnt
+</pre> </font>
+and plot the spectral function:
+<font color="gray"> <pre>
+xmgrace OmegaMaxEnt_final_result/optimal_spectral_function_*.dat
+</pre> </font>
+Change the unit from Hartree to eV, and then, you have the spectral function:
+<br>
+<img style="width: 634px" alt="spectralfunction" src="../documents/lesson_dmft/spectralfunction.jpg">
+<br>
+
+Even if the calculation is not well converged, you recognize in the spectral functions
+the quasiparticle peak as well as Hubbard bands at -2 eV and +2.5 eV
+as in  Fig.4 of <a href="../../biblio/generated_files/bib_biblio.html#Amadon2008">[Amadon2008]</a>.
+<br><br><a href=#top>Go to the top</a>
+<hr>
+<br><a name="orbitals"> </a>
+<a name="4"> </a>
+<h3><b>4. Electronic Structure of SrVO<sub>3</sub>: Choice of correlated orbitals</b></h3>
+ <p>Previously, only the  <i>t<SUB>2g</SUB></i>-like bands were used in the
+definition of Wannier functions. 
+If there were no hybridization between <i>t<SUB>2g</SUB></i> orbitals and oxygen <i>p</i> orbitals, the Wannier functions
+would be pure atomic orbitals and they would not change if the energy window was increased.
+But there is an important hybridization, as a consequence, we will now built Wannier functions
+with a large window, by including oxygen <i>p</i>-like bands in the definition of Wannier functions.
+
+Create a new input file:
+<font color="gray"> <pre>
+cp tdmft_2.in tdmft_3.in
+</pre> </font>
+and use <a href="../../input_variables/generated_files/varset_dmft.html#dmftbandi">dmftbandi</a>= 12 in tdmft_3.in. Now the code will built
+Wannier functions with a larger window, including <i>O-p</i>-like bands, and thus much more localized.
+
+Launch the calculation after having updated tdmft_x.files (if the calculation is too long, you can decide to restart the second dataset directly from a converged LDA calculation
+instead of redoing the LDA calculation for each new DMFT calculation).
+<font color="gray"> <pre>
+abinit < tdmft_x.files > log_3
+</pre> </font>
+In this case, both the occupation and the norm are larger because more states are taken into account:
+  you have the occupation matrix which is
+<font color="gray"> <pre>
+  ------ Symetrised Occupation
+</pre> </font>
+<font color="gray"> <pre>
+        0.23573  -0.00000  -0.00000
+       -0.00000   0.23573  -0.00000
+       -0.00000  -0.00000   0.23573
+</pre> </font>
+and the norm is:
+<font color="gray"> <pre>
+  ------ Symetrised Norm
+</pre> </font>
+<font color="gray"> <pre>
+        0.78223   0.00000  -0.00000
+        0.00000   0.78223  -0.00000
+       -0.00000  -0.00000   0.78223
+</pre> </font>
+
+Let us now compare the total number of electron and the norm with the two energy window:
+
+<pre>
+ Energy window:                              <i>t<SUB>2g</SUB></i>-like bands         <i>t<SUB>2g</SUB></i>-like+<i>O-p</i>-like bands
+ dmftbandi/dmftbandf:                           21/23                      12/23
+ Norm:                                           0.66                       0.78
+ LDA Number of electrons (before &perp;):            0.66(=0.11*6)              1.42(=0.235*6)
+ LDA Number of electrons (after  &perp;):            1.02                       1.81
+</pre>
+
+For the large window, as we use more Kohn Sham states, both the occupation and the norm are larger,
+mainly because of the important weight of <i>d</i> orbitals in the oxygen bands (because of the hybridization). Concerning the norm, 
+remind that in any case, it cannot be larger that 0.86. 
+So as the Norm is 0.78, it means that by selecting bands 12-23 in the calculation, we took
+into account 0.78/0.86*100=90\% of the weight of the truncated atomic orbital among Kohn Sham bands. 
+
+Moreover, after orthonormalization, you can check that the difference between LDA numbers of electrons is still large (1.02 versus 1.81), even if the orthonormalization effect is larger on the small windows case.
+Note that in this particular case, with diagonal matrix, the number of electrons before and after orthonormalization are simply linked by
+ n_before/Norm=n_after, i.e. 1.81&asymp;1.42/0.78 and 1.02&asymp;0.66/0.66
+
+<p>
+At the end of the DFT+DMFT calculation, the occupation matrix is written and is</p>
+<font color="gray"> <pre>
+          -- polarization spin component  1
+        0.29450   0.00000   0.00000
+        0.00000   0.29450   0.00000
+        0.00000   0.00000   0.29450
+</pre> </font>
+
+<p>
+Similarly to the previous calculation, the spectral function can be plotted using the Maximum Entropy code:
+we find a spectral function with an hybridation peak at -5 eV, as described
+in  Fig.5 of <a href="../../biblio/generated_files/bib_biblio.html#Amadon2008">[Amadon2008]</a></a>.
+<br>
+<img style="width: 634px" alt="spectralfunction" src="../documents/lesson_dmft/spectralfunction2.jpg">
+<br>
+Resolving the lower Hubbard bands would require a more converged calculation.
+
+ <p> As above, one can compute the renormalization weight and it gives 0.68. It shows that with the same value of U and J, interactions have a weaker
+ effect for the large window Wannier functions. Indeed, the value of the screened interaction U should be larger because
+ the Wannier functions are more localized
+(see discussion in <a href="../../biblio/generated_files/bib_biblio.html#Amadon2008">[Amadon2008]</a>).
+<br><br><a href=#top>Go to the top</a>
+<hr>
+<br><a name="energy"> </a>
+<a name="5"> </a>
+<h3><b>5. Electronic Structure of SrVO<sub>3</sub>: The internal energy</b></h3>
+ <p><p>  The internal energy can be obtained with </p>
+ 
+<font color="gray"> <pre>
+grep -e ITER -e Internal log_3
+</pre> </font>
+and select the second occurrence for each iteration (the double counting expression) which
+should be accurate with iscf=17 (at convergence both expressions are equals also in DFT+DMFT).
+So after gathering the data:
+<pre>
+  1      -1.51483736718814E+02
+  2      -1.51480860837124E+02
+  3      -1.51479980721122E+02
+  4      -1.51479456233951E+02
+  5      -1.51479511038784E+02
+  6      -1.51479570943715E+02
+  7      -1.51479487485907E+02
+  8      -1.51479539558451E+02
+  9      -1.51479457525225E+02
+ 10      -1.51479582334490E+02
+</pre> 
+You can plot the evolution of the internal energy as a function of the iteration.
+<br>
+<img style="width: 634px" alt="internal" src="../documents/lesson_dmft/internal.jpg">
+<br>
+You notice that the internal energy (in a DFT+DMFT calculations) does
+not converge as a function of iterations, because there is a finite statistical noise. So, as a function of iterations, first, the internal
+energy starts to converge, because the modification of the energy  induced by the self-consistency cycle
+is larger than the statistical noise, but then
+the internal energy fluctuates around a mean value.
+So if the statistical noise is larger than the tolerance, the calculation will never converge. 
+So if a given precision on the total energy is expected, a practical solution is to increase
+the number of Quantum Monte Carlo steps
+(<a href="../../input_variables/generated_files/varset_dmft.html#dmftqmc_n">dmftqmc_n</a>) in order
+to lower the statistical noise. Also another solution is
+to do an average over the last values of the internal energy.
+Note that in version 7.10.5, only the Internal energy has a physical meaning in DFT+DMFT and not Etotal or ETOT.
+<br><br><a href=#top>Go to the top</a>
+<hr>
+<br><a name="volume"> </a>
+<a name="6"> </a>
+<h3><b>6. Electronic Structure of SrVO<sub>3</sub> in DFT+DMFT: Equilibrium volume</b></h3>
+ <p>We focus now on the total energy.
+
+Create a new input file, tdmft_4.in:
+<font color="gray"> <pre>
+cp tdmft_3.in tdmft_4.in
+</pre> </font>
+And use acell=7.1605 instead of 7.2605.
+Relaunch the calculation and note the Internal energy (grep Internal tdmft_4.out).
+<p>
+Redo another calculation with acell=7.00.
+Then extract the LDA Internal energy and the DMFT Internal energy (grep Internal tdmft_5.out).
+<pre>
+acell   Internal energy LDA    Internal energy DMFT
+7.0000   -151.51517               -151.4797
+7.1605   -151.52399               -151.4877
+7.2605   -151.51515               -151.4795
+</pre>
+and then plot DMFT and LDA energies as a function of acell.
+ 
+You will notice that the equilibrium volume is very weakly modified by the  strong correlations is this case.
+<br><br><a href=#top>Go to the top</a>
+<hr>
+<br><a name="conclusion"> </a>
+<a name="7"> </a>
+<h3><b>7. Electronic Structure of SrVO<sub>3</sub>: Conclusion</b></h3>
+ <p>To sum up, the important physical parameters for DFT+DMFT are the definition
+of correlated orbitals, the choice of U and J (and double counting). The important technical parameters are 
+the frequency and time grids as well as the number of steps for Monte Carlo, the DMFT loop and the DFT loop.
+<p>
+We showed in this tutorial how to compute spectral
+functions, quasiparticle renormalization weights and total internal energy.
+<br><br><a href=#top>Go to the top</a>
+<hr>
+<script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
+
+</body>
+</html>
+

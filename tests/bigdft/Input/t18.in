@@ -89,4 +89,5 @@ iomode 3  # ETSF IO access
 #%% description = 
 #%%   CO molecule to test the ETSF restart inside several datasets, also test the
 #%%   reformating of wavelets after wvl_hgrid changed (need compilation with --enable-bigdft).
+#%% topics = Wavelets
 #%%<END TEST_INFO>

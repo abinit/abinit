@@ -79,5 +79,5 @@ nstep 50               # Maximal number of SCF cycles
 #%%   Computation of the total energy and EFG tensors in LDA+U formalism
 #%%   Note: Cu2O is a nonmagnetic insulator. However, LDA+U
 #%%   as implemented requires nspden=2 in all cases.
-#%% topics = DFT+U
+#%% topics = DFT+U, EFG
 #%%<END TEST_INFO>

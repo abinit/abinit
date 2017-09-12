@@ -1,0 +1,156 @@
+<!--                                                                                     -->
+<!-- This file has been produced by generate_doc.py using different .yml  or .bib files. -->
+<!-- It is useless to modify it. Modify the related .yml  or .bib files instead.         -->
+<!--                                                                                     -->
+<html>
+<head><title>PhononBands </title>
+<link rel=stylesheet type="text/css" href="../formabinit.css">
+</head>
+<body bgcolor="#ffffff">
+
+<hr>
+<a name="top"></a>
+
+<h1>Phonon bands and related topics</h1>
+<h3>This page gives hints on how to compute phonon bands, density of states, interatomic force constants, sound velocity ... with the ABINIT package.
+<hr>
+
+<h5>Copyright (C) 2016-2017 ABINIT group (MT)
+<script type="text/javascript" src="../../js_files/copyright.js"> </script>
+</h5>
+
+<script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
+
+ Mentioned in &nbsp; <a href="../../topics/generated_files/topic_Phonons.html">topic_Phonons</a> &nbsp;&nbsp; <a href="../../topics/generated_files/topic_Temperature.html">topic_Temperature</a> &nbsp;&nbsp; <a href="../../topics/generated_files/topic_q-points.html">topic_q-points</a> &nbsp;&nbsp; <a href="../../users/generated_files/help_features.html#6">help_features#6</a> &nbsp;
+ <hr>
+ <h3><b>Table of content: </b></h3> 
+ <ul> <li>1. <a href="topic_PhononBands.html#1">Introduction.</a><li>2. <a href="topic_PhononBands.html#2">Related lesson(s) of the tutorial.</a><li>3. <a href="topic_PhononBands.html#3">Related input variables.</a><li>4. <a href="topic_PhononBands.html#4">Selected input files.</a><li>5. <a href="topic_PhononBands.html#5">References.</a></ul>
+
+&nbsp; 
+<HR ALIGN=left> 
+<a name="1">&nbsp;</a>
+<h3><b>1. Introduction.</b></h3>
+
+
+The Fourier transformation of the phonon dynamical matrices generates interatomic force constants in real space,
+as explained in <a href="../../biblio/generated_files/bib_biblio.html#Gonze1997a">[Gonze1997a]</a>. Backtransforming to reciprocal space gives the Fourier interpolation
+of the initial phonon band structure. After such Fourier interpolation, the DOS can be produced (see <a href="../../biblio/generated_files/bib_biblio.html#Lee1995">[Lee1995]</a>),
+the phonon eigenenergies plotted along lines, the slope of the energy versus cristalline momentum evaluated (to give sound velocity).
+<p>The two-phonon sum and difference spectra can also be obtained, see <a href="../../input_variables/generated_files/varset_anaddb.html#dossum@anaddb">dossum</a>.
+<p>For the related computation of temperature-dependent properties, see <a href="../../topics/generated_files/topic_Temperature.html#">topic_Temperature</a>.
+<br><br><a href=#top>Go to the top</a>
+
+
+
+&nbsp; 
+<HR ALIGN=left> 
+<a name="2">&nbsp;</a>
+<h3><b>2. Related lesson(s) of the tutorial.</b></h3>
+
+
+<li><a href="../../tutorial/generated_files/lesson_rf2.html#">The lesson Response-Function 2 (RF2)</a>
+presents the analysis of the DDBs that have been introduced in the
+<a href="../../tutorial/generated_files/lesson_rf1.html#">lesson_rf1</a>.  The computation of the interatomic forces and
+the computation of thermodynamical properties is an outcome of this
+lesson.</li>
+<br><br><a href=#top>Go to the top</a>
+
+
+&nbsp; 
+<hr> 
+<a name="3">&nbsp;</a>
+<h3><b>3. Related input variables.</b></h3>
+
+
+<p>Compulsory input variables:<p>... <a href="../../input_variables/generated_files/varset_anaddb.html#ifcflag@anaddb">ifcflag@anaddb</a>   [Interatomic Force Constants FLAG]<br>
+<p>Basic input variables:<p>... <a href="../../input_variables/generated_files/varset_anaddb.html#asr@anaddb">asr@anaddb</a>   [Acoustic Sum Rule]<br>
+... <a href="../../input_variables/generated_files/varset_anaddb.html#atifc@anaddb">atifc@anaddb</a>   [AToms for IFC analysis]<br>
+... <a href="../../input_variables/generated_files/varset_anaddb.html#dipdip@anaddb">dipdip@anaddb</a>   [DIPole-DIPole interaction]<br>
+... <a href="../../input_variables/generated_files/varset_anaddb.html#dossum@anaddb">dossum@anaddb</a>   [DOS SUM]<br>
+... <a href="../../input_variables/generated_files/varset_anaddb.html#ndivsm@anaddb">ndivsm@anaddb</a>   [Number of DIVisions for the SMallest segment]<br>
+... <a href="../../input_variables/generated_files/varset_anaddb.html#ngqpt@anaddb">ngqpt@anaddb</a>   [Number of Grids points for Q PoinTs]<br>
+... <a href="../../input_variables/generated_files/varset_anaddb.html#nph1l@anaddb">nph1l@anaddb</a>   [Number of PHonons in List 1]<br>
+... <a href="../../input_variables/generated_files/varset_anaddb.html#nph2l@anaddb">nph2l@anaddb</a>   [Number of PHonons in List 2]<br>
+... <a href="../../input_variables/generated_files/varset_anaddb.html#nqpath@anaddb">nqpath@anaddb</a>   [Number of Q wavevectors defining a PATH]<br>
+... <a href="../../input_variables/generated_files/varset_anaddb.html#prtdos@anaddb">prtdos@anaddb</a>   [PRinT the phonon Density Of States]<br>
+... <a href="../../input_variables/generated_files/varset_anaddb.html#qpath@anaddb">qpath@anaddb</a>   [Q wavevectors defining a PATH]<br>
+... <a href="../../input_variables/generated_files/varset_anaddb.html#qph1l@anaddb">qph1l@anaddb</a>   [Q for PHonon List 1]<br>
+... <a href="../../input_variables/generated_files/varset_anaddb.html#qph2l@anaddb">qph2l@anaddb</a>   [PHonon List 2]<br>
+<p>Useful input variables:<p>... <a href="../../input_variables/generated_files/varset_anaddb.html#brav@anaddb">brav@anaddb</a>   [BRAVais]<br>
+... <a href="../../input_variables/generated_files/varset_anaddb.html#dosdeltae@anaddb">dosdeltae@anaddb</a>   [DOS DELTA in Energy]<br>
+... <a href="../../input_variables/generated_files/varset_anaddb.html#dossmear@anaddb">dossmear@anaddb</a>   [DOS SMEARing value]<br>
+... <a href="../../input_variables/generated_files/varset_anaddb.html#dostol@anaddb">dostol@anaddb</a>   [DOS TOLerance]<br>
+... <a href="../../input_variables/generated_files/varset_anaddb.html#eivec@anaddb">eivec@anaddb</a>   [EIgenVECtors]<br>
+... <a href="../../input_variables/generated_files/varset_anaddb.html#enunit@anaddb">enunit@anaddb</a>   [ENergy UNITs]<br>
+... <a href="../../input_variables/generated_files/varset_anaddb.html#iatprj_bs@anaddb">iatprj_bs@anaddb</a>   [Indices of the AToms for the PRoJection of the phonon Band Structure]<br>
+... <a href="../../input_variables/generated_files/varset_anaddb.html#ifcana@anaddb">ifcana@anaddb</a>   [IFC ANAlysis]<br>
+... <a href="../../input_variables/generated_files/varset_anaddb.html#ifcout@anaddb">ifcout@anaddb</a>   [IFC OUTput]<br>
+... <a href="../../input_variables/generated_files/varset_anaddb.html#natifc@anaddb">natifc@anaddb</a>   [Number of AToms for IFC analysis]<br>
+... <a href="../../input_variables/generated_files/varset_anaddb.html#natprj_bs@anaddb">natprj_bs@anaddb</a>   [Number of AToms for PRoJection of the Band Structure]<br>
+... <a href="../../input_variables/generated_files/varset_anaddb.html#ng2qpt@anaddb">ng2qpt@anaddb</a>   [Number of Grids points for Q PoinTs (grid 2)]<br>
+... <a href="../../input_variables/generated_files/varset_anaddb.html#nqshft@anaddb">nqshft@anaddb</a>   [Number of Q SHiFTs]<br>
+... <a href="../../input_variables/generated_files/varset_anaddb.html#nsphere@anaddb">nsphere@anaddb</a>   [Number of atoms in SPHERe]<br>
+... <a href="../../input_variables/generated_files/varset_anaddb.html#nwchan@anaddb">nwchan@anaddb</a>   [Number of Widths of CHANnels]<br>
+... <a href="../../input_variables/generated_files/varset_anaddb.html#prt_ifc@anaddb">prt_ifc@anaddb</a>   [PRinT the Interatomic Force Constants]<br>
+... <a href="../../input_variables/generated_files/varset_anaddb.html#prtddb@anaddb">prtddb@anaddb</a>   [PRinT the Derivative DataBase files]<br>
+... <a href="../../input_variables/generated_files/varset_anaddb.html#prtphbands@anaddb">prtphbands@anaddb</a>   [PRinT PHonon BANDS]<br>
+... <a href="../../input_variables/generated_files/varset_anaddb.html#prtsrlr@anaddb">prtsrlr@anaddb</a>   [PRinT the Short-Range/Long-Range decomposition of phonon FREQuencies]<br>
+... <a href="../../input_variables/generated_files/varset_anaddb.html#prtvol@anaddb">prtvol@anaddb</a>   [PRinT VOLume]<br>
+... <a href="../../input_variables/generated_files/varset_anaddb.html#q1shft@anaddb">q1shft@anaddb</a>   [Q shifts for the grid number 1]<br>
+... <a href="../../input_variables/generated_files/varset_anaddb.html#q2shft@anaddb">q2shft@anaddb</a>   [Q points SHiFTs for the grids 2]<br>
+... <a href="../../input_variables/generated_files/varset_anaddb.html#rifcsph@anaddb">rifcsph@anaddb</a>   [Radius of the Interatomic Force Constant SPHere]<br>
+... <a href="../../input_variables/generated_files/varset_anaddb.html#symdynmat@anaddb">symdynmat@anaddb</a>   [SYMmetrize the DYNamical MATrix]<br>
+... <a href="../../input_variables/generated_files/varset_anaddb.html#vs_qrad_tolkms@anaddb">vs_qrad_tolkms@anaddb</a>   [Speed of Sound Q-radius, TOLerance KiloMeter/Second]<br>
+<p>Input variables for experts:<p>... <a href="../../input_variables/generated_files/varset_anaddb.html#freeze_displ@anaddb">freeze_displ@anaddb</a>   [FREEZE DISPLacement of phonons into supercells]<br>
+... <a href="../../input_variables/generated_files/varset_anaddb.html#nchan@anaddb">nchan@anaddb</a>   [Number of CHANnels]<br>
+... <a href="../../input_variables/generated_files/varset_anaddb.html#ngrids@anaddb">ngrids@anaddb</a>   [Number of GRIDS]<br>
+... <a href="../../input_variables/generated_files/varset_anaddb.html#outboltztrap@anaddb">outboltztrap@anaddb</a>   [OUTput files for BOLTZTRAP code]<br>
+... <a href="../../input_variables/generated_files/varset_anaddb.html#outscphon@anaddb">outscphon@anaddb</a>   [OUTput files for Self Consistent PHONons]<br>
+... <a href="../../input_variables/generated_files/varset_anaddb.html#prtbltztrp@anaddb">prtbltztrp@anaddb</a>   [PRinT input files for BoLTZTRaP code.]<br>
+... <a href="../../input_variables/generated_files/varset_anaddb.html#qrefine@anaddb">qrefine@anaddb</a>   [Q-point REFINEment order (experimental)]<br>
+
+<br><br><a href=#top>Go to the top</a>
+
+
+&nbsp; 
+<HR ALIGN=left> 
+<a name="4">&nbsp;</a>
+<h3><b>4. Selected input files.</b></h3>
+
+
+<i><b>WARNING</b> : as of ABINITv8.6.x, the list of input files provided in the specific section of the topics Web pages is still to be reviewed/tuned. In some cases, it will be adequate, and in other cases, it might be incomplete, or perhaps even useless.</i>
+<br><br>The user can find some related example input files in the ABINIT package in the directory /tests, or on the Web:
+<p> tests/v2/Input: <a href="../../tests/v2/Input/t15.in">t15.in</a> 
+<a href="../../tests/v2/Input/t16.in">t16.in</a> 
+<a href="../../tests/v2/Input/t17.in">t17.in</a> 
+<a href="../../tests/v2/Input/t19.in">t19.in</a> 
+<a href="../../tests/v2/Input/t20.in">t20.in</a> 
+<a href="../../tests/v2/Input/t22.in">t22.in</a> 
+<a href="../../tests/v2/Input/t25.in">t25.in</a> 
+<a href="../../tests/v2/Input/t28.in">t28.in</a> 
+<a href="../../tests/v2/Input/t29.in">t29.in</a> 
+<a href="../../tests/v2/Input/t32.in">t32.in</a> 
+<a href="../../tests/v2/Input/t39.in">t39.in</a> 
+<p> tests/v5/Input: <a href="../../tests/v5/Input/t95.in">t95.in</a> 
+<p> tests/v6/Input: <a href="../../tests/v6/Input/t76.in">t76.in</a> 
+<br>
+
+<br><br><a href=#top>Go to the top</a>
+
+
+&nbsp; 
+<HR ALIGN=left> 
+<a name="5">&nbsp;</a>
+<h3><b>5. References.</b></h3>
+
+
+<br> <a href="../../biblio/generated_files/bib_biblio.html#Gonze1997a">[Gonze1997a]</a>  X. Gonze and C. Lee, "Dynamical matrices, Born effective charges, dielectric permittivity tensors, and interatomic force constants from density-functional perturbation theory", Phys. Rev. B 55, 10355 (1997).<br>
+<br> <a href="../../biblio/generated_files/bib_biblio.html#Lee1995">[Lee1995]</a>  C. Lee and X. Gonze, "Ab-initio calculation of the thermodynamic properties and atomic temperature factors of SiO<sub>2</sub> &alpha;-quartz and stishovite", Phys. Rev. B 51, 8610 (1995).<br>
+<p>
+<br><br><a href=#top>Go to the top</a>
+
+<script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
+
+</body>
+</html>
+

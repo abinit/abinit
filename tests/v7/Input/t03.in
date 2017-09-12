@@ -83,4 +83,5 @@ xred 3*0 3*1/4
 #%%   test computes the polarization of GaAs in zero and finite electric field, in three
 #%%   cases: nspinor 1, nspinor 2, and nspinor 2 with spin-orbit coupling (so_psp). HGH
 #%%   norm-conserving pseudopotentials are used. 
+#%% topics = Berry
 #%%<END TEST_INFO>

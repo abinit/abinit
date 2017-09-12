@@ -114,7 +114,7 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
  use m_pawrad,  only : pawrad_type, simp_gen
  use m_pawtab,  only : pawtab_type
  use m_pawrhoij,only : pawrhoij_type, pawrhoij_alloc, pawrhoij_free,&
-&                      pawrhoij_nullify, pawrhoij_gather, symrhoij
+&                      pawrhoij_nullify, pawrhoij_gather, pawrhoij_get_nspden, symrhoij
  use m_pawxc,   only : pawxcsum
  use m_paw_sphharm, only : initylmr
  use m_pawpsp,  only : pawpsp_read_corewf
@@ -467,13 +467,13 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
 &             Crystal%gprimd(:,2)*real(ig2+dtset%kpt(2,ikpt))+&
 &             Crystal%gprimd(:,3)*real(ig3+dtset%kpt(3,ikpt))
              pnorm=dsqrt(dot_product(pcart,pcart))
-             pbn(:) = pcart(:)/pnorm ! unit vector
 
              if (pnorm < tol12) then
                pbn(:) = zero
                ylmp(:) = zero
                ylmp(1) = 1.d0/sqrt(four_pi)
              else
+               pbn(:) = pcart(:)/pnorm ! unit vector
                call initylmr(l_size,ylmr_normchoice,ylmr_npts,ylmr_nrm,ylmr_option,pbn(:),ylmp(:),ylmgr)
              end if
 
@@ -649,7 +649,7 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
    ABI_ALLOCATE(rhor_dop_el,(nfft))
    if (dtset%usepaw==1) then
      ABI_DATATYPE_ALLOCATE(pawrhoij_dop_el,(dtset%natom))
-     nspden_rhoij=dtset%nspden;if (dtset%pawspnorb>0.and.dtset%nspinor==2) nspden_rhoij=4
+     nspden_rhoij=pawrhoij_get_nspden(dtset%nspden,dtset%nspinor,dtset%pawspnorb)
      call pawrhoij_alloc(pawrhoij_dop_el,dtset%pawcpxocc,nspden_rhoij,&
      dtset%nspinor,dtset%nsppol,dtset%typat,&
      pawtab=pawtab,use_rhoij_=1,use_rhoijp=1)

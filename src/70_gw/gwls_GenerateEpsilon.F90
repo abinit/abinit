@@ -489,10 +489,11 @@ character(50)  :: debug_filename
 
 
 
-kmax_exact   = dtset%gwls_sternheimer_kmax
+kmax_exact   = dtset%gwls_stern_kmax
 kmax_model   = dtset%gwls_kmax_complement
 
-second_model_parameter  = dtset%gwls_second_model_parameter
+!second_model_parameter  = dtset%gwls_second_model_parameter
+second_model_parameter  = zero
 
 
 ! global stuff

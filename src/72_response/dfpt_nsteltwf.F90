@@ -20,7 +20,7 @@
 !!    wavefunctions at k,q.
 !!  ecut=cut-off energy for plane wave basis sphere (Ha)
 !!  ecutsm=smearing energy for plane wave kinetic energy (Ha)  (NOT NEEDED !)
-!!  effmass=effective mass for electrons (1. in common case)
+!!  effmass_free=effective mass for electrons (1. in common case)
 !!  gs_hamk <type(gs_hamiltonian_type)>=all data for the Hamiltonian at k
 !!  icg=shift to be applied on the location of data in the array cg
 !!  icg1=shift to be applied on the location of data in the array cg1
@@ -70,7 +70,7 @@
 #include "abi_common.h"
 
 
-subroutine dfpt_nsteltwf(cg,cg1,d2nl_k,ecut,ecutsm,effmass,gs_hamk,icg,icg1,ikpt,isppol,&
+subroutine dfpt_nsteltwf(cg,cg1,d2nl_k,ecut,ecutsm,effmass_free,gs_hamk,icg,icg1,ikpt,isppol,&
 &  istwf_k,kg_k,kg1_k,kpoint,mband,mkmem,mk1mem,mpert,mpi_enreg,mpw,mpw1,natom,nband_k,&
 &  npw_k,npw1_k,nspinor,nsppol,ntypat,occ_k,psps,rmet,wtk_k,ylm,ylmgr)
 
@@ -100,7 +100,7 @@ subroutine dfpt_nsteltwf(cg,cg1,d2nl_k,ecut,ecutsm,effmass,gs_hamk,icg,icg1,ikpt
  integer,intent(in) :: icg,icg1,ikpt,isppol,istwf_k,mband,mk1mem,mkmem,mpert,mpw,mpw1,natom
  integer,intent(in) :: nspinor,nsppol,ntypat
  integer,intent(inout) :: nband_k,npw1_k,npw_k
- real(dp),intent(in) :: ecut,ecutsm,effmass,wtk_k
+ real(dp),intent(in) :: ecut,ecutsm,effmass_free,wtk_k
  type(MPI_type),intent(in) :: mpi_enreg
  type(pseudopotential_type),intent(in) :: psps
 !arrays
@@ -165,8 +165,8 @@ subroutine dfpt_nsteltwf(cg,cg1,d2nl_k,ecut,ecutsm,effmass,gs_hamk,icg,icg1,ikpt
  end if
 
 !Compute kinetic contributions (1/2) (2 Pi)**2 (k+G)**2:
-! call mkkin(ecut,ecutsm,effmass,gs_hamk%gmet,kg1_k,kinpw1,kpoint,npw1_k)
- call mkkin(ecut,ecutsm,effmass,gs_hamk%gmet,kg1_k,kinpw1,kpoint,npw1_k,0,0)
+! call mkkin(ecut,ecutsm,effmass_free,gs_hamk%gmet,kg1_k,kinpw1,kpoint,npw1_k)
+ call mkkin(ecut,ecutsm,effmass_free,gs_hamk%gmet,kg1_k,kinpw1,kpoint,npw1_k,0,0)
 
 !Load k/k+q-dependent part in the Hamiltonian datastructure
  ABI_ALLOCATE(ph3d,(2,npw_k,gs_hamk%matblk))
@@ -195,7 +195,7 @@ subroutine dfpt_nsteltwf(cg,cg1,d2nl_k,ecut,ecutsm,effmass,gs_hamk,icg,icg1,ikpt
        if (ipert1==natom+4) istr1=idir1+3
 
 !      Compute the derivative of the kinetic operator vs strain in dkinpw
-       call kpgstr(dkinpw,ecut,ecutsm,effmass,gs_hamk%gmet,gs_hamk%gprimd,istr1,&
+       call kpgstr(dkinpw,ecut,ecutsm,effmass_free,gs_hamk%gmet,gs_hamk%gprimd,istr1,&
 &       kg1_k,kpoint,npw1_k)
 
 !      Get |vnon-locj1|u0> :

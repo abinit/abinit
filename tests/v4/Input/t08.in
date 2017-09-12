@@ -69,4 +69,5 @@ pawecutdg 10.
 #%%   shape function expressed analytically.
 #%%   SecondPAW dataset is Fe with a "Bessel" compensation charge
 #%%   shape function expressed numerically.
+#%% topics = PAW
 #%%<END TEST_INFO>

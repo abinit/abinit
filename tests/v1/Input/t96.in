@@ -144,4 +144,5 @@
 #%%   Dataset 3 : Hexagonal axes; irreducible unit cell and space group
 #%%   Dataset 4 : Hexagonal axes; full unit cell and space group
 #%%   The results are equivalent for Dataset 1 and 2 and Dataset 3 and 4.
+#%% topics = UnitCell
 #%%<END TEST_INFO>

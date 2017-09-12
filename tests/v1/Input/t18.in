@@ -52,4 +52,5 @@ xred 3*0
 #%%  Isolated Helium atom (see above)
 #%%  Treated with the exchange-only part of Perdew-Wang 92 (ixc=8).
 #%%  For speed-up, it begins with the wavefunctions from test 11.
+#%% topics = xc
 #%%<END TEST_INFO>

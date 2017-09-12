@@ -46,4 +46,5 @@ xred # here come the fractional coordinates from the cif file
 #%% authors = J. Zwanziger
 #%% keywords = PAW
 #%% description = 
+#%% topics = SmartSymm
 #%%<END TEST_INFO>

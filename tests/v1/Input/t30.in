@@ -49,4 +49,5 @@ xred 3*0
 #%% description = 
 #%%   Helium atom in a box, with Fermi-Amaldi correction (ixc=20), that for
 #%%   Z=2, is equivalent to OEP or Hartree-Fock. Otherwise, similar to test 11.
+#%% topics = xc
 #%%<END TEST_INFO>

@@ -374,7 +374,7 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
  dtion=one;if (is_pimd) dtion=pimd_param%dtion
 
 !In some cases, need amass variable
- if (use_hist.and.is_pimd) then
+ if (use_hist) then
    ABI_ALLOCATE(amass,(dtset%natom,nimage))
    do iimage=1,nimage
      if (any(amu_img(:,iimage)/=amu_img(:,1))) then
@@ -590,7 +590,7 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
      ifirst=merge(0,1,itimimage>1)
      call write_md_hist_img(hist,hist_filename,ifirst,dtset%natom,dtset%ntypat,&
 &     dtset%typat,amu_img(:,1),dtset%znucl,dtion,&
-&     nimage=dtset%nimage,imgmov=dtset%imgmov,comm_img=mpi_enreg%comm_img,&
+&     nimage=dtset%nimage,imgmov=dtset%imgmov,mdtemp=dtset%mdtemp,comm_img=mpi_enreg%comm_img,&
 &     imgtab=mpi_enreg%my_imgtab)
    end if
 #endif
