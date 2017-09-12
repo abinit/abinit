@@ -141,13 +141,13 @@ end interface
 
 CONTAINS  !===========================================================================================
 
-!!****f* m_phonon_effective_potential/effective_potential_init
+!!****f* m_effective_potential/effective_potential_init
 !!
 !! NAME
 !! effective_potential_init
 !!
 !! FUNCTION
-!! Initialize scell datatype, from unit cell vectors, qpoint chosen, and atoms
+!! Initialize effective_potential datatype
 !!
 !! INPUTS
 !! crytal<type(crystal_t)> = datatype with all the information for the crystal
@@ -358,7 +358,7 @@ end subroutine effective_potential_init
 !!***
 
 
-!!****f* m_phonon_effective_potential/effective_potential_initmpi
+!!****f* m_effective_potential/effective_potential_initmpi
 !! NAME
 !!  effective_potential_initmpi
 !!
@@ -487,7 +487,6 @@ subroutine effective_potential_free(eff_pot)
 !scalars
 !array
   type(effective_potential_type), intent(inout) :: eff_pot
-
 !Local variables-------------------------------
 !scalars
 !array
