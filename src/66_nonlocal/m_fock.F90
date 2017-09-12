@@ -619,10 +619,6 @@ subroutine fock_init(atindx,cplex,dtset,fock,gsqcut,kg,mpi_enreg,nattyp,npwarr,p
  ABI_ALLOCATE(fockcommon%eigen_ikpt,(nband))
  fockcommon%eigen_ikpt=0.d0
 !* Will contain the Fock contributions to the eigenvalue of the current state
- if (fockcommon%optfor) then
-   ABI_ALLOCATE(fockcommon%forces_ikpt,(3,dtset%natom,nband))
-   ABI_ALLOCATE(fockcommon%forces,(3,dtset%natom))
- endif
 !* Compute the dimension of arrays in "spin" w.r.t parallelism
    my_nsppol=dtset%nsppol
    if (mpi_enreg%nproc_kpt>1) my_nsppol=1
@@ -655,7 +651,11 @@ subroutine fock_init(atindx,cplex,dtset,fock,gsqcut,kg,mpi_enreg,nattyp,npwarr,p
      n4=dtset%ngfftdg(4) ; n5=dtset%ngfftdg(5) ; n6=dtset%ngfftdg(6)
    end if
    fockcommon%optfor=.FALSE.; fockcommon%optstr=.false.
-   if(dtset%optforces==1) fockcommon%optfor=.true.
+   if(dtset%optforces==1)then
+     fockcommon%optfor=.true.
+     ABI_ALLOCATE(fockcommon%forces_ikpt,(3,dtset%natom,nband))
+     ABI_ALLOCATE(fockcommon%forces,(3,dtset%natom))
+   endif
    fockcommon%use_ACE=0!if (dtset%use_ACE==1)
    userid=dtset%userid
    if(fockcommon%use_ACE/=0) userid=1961
