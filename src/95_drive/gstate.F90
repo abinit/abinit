@@ -451,6 +451,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    call wvl_setBoxGeometry(dtset%prtvol, psps%gth_params%radii_cf, rprimd, xred, &
 &   wvl%descr, dtset%wvl_crmult, dtset%wvl_frmult)
    call mkradim(acell,rprim,rprimd)
+   rprimd_for_kg=rprimd
    call wvl_denspot_set(wvl%den, psps%gth_params, dtset%ixc, dtset%natom, dtset%nsppol, rprimd, &
 &   wvl%descr, dtset%wvl_crmult, dtset%wvl_frmult, mpi_enreg%comm_wvl, xred)
 !  TODO: to be moved in a routine.
