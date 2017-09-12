@@ -1088,7 +1088,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
      ! Update data relative to the occupied states in fock
      call fock_updatecwaveocc(cg,cprj,dtset,fock,energies%e_exactX,indsym,istep,mcg,mcprj,mpi_enreg,nattyp,npwarr,occ,ucvol)
      if(fock%fock_common%use_ACE/=0) then
-       call fock2ACE(cg,cprj,fock,kg,dtset%kptns,dtset%mband,mcg,mcprj,dtset%mgfft,dtset%mkmem,mpi_enreg,psps%mpsang,&
+       call fock2ACE(cg,cprj,fock,dtset%istwfk,kg,dtset%kptns,dtset%mband,mcg,mcprj,dtset%mgfft,dtset%mkmem,mpi_enreg,psps%mpsang,&
 &       dtset%mpw,dtset%natom,dtset%natom,dtset%nband,dtset%nfft,ngfft,dtset%nkpt,dtset%nloalg,npwarr,dtset%nspden,&
 &       dtset%nspinor,dtset%nsppol,dtset%nsym,dtset%ntypat,occ,dtset%optforces,paw_ij,pawtab,ph1d,psps,rprimd,&
 &       dtset%optstress,fock%fock_common%symrec,dtset%typat,usecprj,dtset%use_gpu_cuda,dtset%wtk,xred,ylm,ylmgr)

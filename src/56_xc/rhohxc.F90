@@ -724,8 +724,10 @@ subroutine rhohxc(dtset,enxc,gsqcut,izero,kxc,mpi_enreg,nfft,ngfft, &
 !      is first needed to compute Kxc using such fallback GGA, 
 !      before calling again drivexc_main using the correct functional for Exc and Vxc
        if(ixc_fallbackkxc_hyb/=dtset%ixc)then
-         call libxc_functionals_end()
-         call libxc_functionals_init(ixc_fallbackkxc_hyb,dtset%nspden)
+         if(dtset%ixc<0) then
+           call libxc_functionals_end()
+           call libxc_functionals_init(ixc_fallbackkxc_hyb,dtset%nspden)
+         end if
          call drivexc_main(exc_b,ixc_fallbackkxc_hyb,mgga,ndvxc,nd2vxc,ngr2,npts,nspden_updn,nvxcgrho,order,&
 &          rho_b_updn,vxcrho_b_updn,dtset%xclevel, &
 &          dvxc=dvxc_b,d2vxc=d2vxc_b,grho2=grho2_b_updn,vxcgrho=vxcgrho_b, &
@@ -740,8 +742,10 @@ subroutine rhohxc(dtset,enxc,gsqcut,izero,kxc,mpi_enreg,nfft,ngfft, &
            kxc(ifft:ifft+npts-1,2)=dvxc_b(1:npts,10)
            kxc(ifft:ifft+npts-1,3)=dvxc_b(1:npts,2)+dvxc_b(1:npts,11)
          end if
-         call libxc_functionals_end()
-         call libxc_functionals_init(dtset%ixc,dtset%nspden)
+         if(dtset%ixc<0) then
+           call libxc_functionals_end()
+           call libxc_functionals_init(dtset%ixc,dtset%nspden)
+         end if
        endif
 
 !      Call to main XC driver
