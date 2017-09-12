@@ -54,7 +54,7 @@
 #%% keywords = 
 #%% description = 
 #%%   CH molecule spin-polarized, in a big box.
-#%%   PAW : first PBE, then PBE0, then HSE06. Interatomic distance optimization.
+#%%   Norm conserving : first PBE, then PBE0, then HSE06. Interatomic distance optimization.
 #%%   Test the geometry convergence in the hybrid functional case
 #%%   The results obtained with underconverged ecut (ecut 15) and box size (4 3 3 Angstrom)
 #%%   compare favourably with those mentioned in Arnardi's report, as well as with those of VASP.
