@@ -1064,7 +1064,6 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
        ! Initialize data_type fock for the calculation
        cplex_hf=cplex
        if (psps%usepaw==1) cplex_hf=dtset%pawcpxocc
-       hybrid_mixing=fock%fock_common%hybrid_mixing ; hybrid_mixing_sr=fock%fock_common%hybrid_mixing_sr
        call fock_init(atindx,cplex_hf,dtset,fock,gsqcut,kg,mpi_enreg,nattyp,npwarr,pawang,pawfgr,pawtab,rprimd)
        if (fock%fock_common%usepaw==1) then
          optcut_hf = 0 ! use rpaw to construct local_pawfgrtab
@@ -1103,6 +1102,10 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
          istep_mix=1
        endif
      endif
+
+     !Used locally
+     hybrid_mixing=fock%fock_common%hybrid_mixing ; hybrid_mixing_sr=fock%fock_common%hybrid_mixing_sr
+
    end if ! usefock
 
 !  Initialize/update data in the electron-positron case
