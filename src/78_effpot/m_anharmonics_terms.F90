@@ -906,14 +906,14 @@ subroutine anharmonics_terms_evaluateIFCStrainCoupling(phonon_strain,disp,energy
     do alpha=1,6
       do irpt = 1,phonon_strain(alpha)%nrpt
 !       get the cell of atom2  (0 0 0, 0 0 1...)
-        cell_atom2(1) =  (i1-1) + phonon_strain(alpha)%cell(1,irpt)
-        cell_atom2(2) =  (i2-1) + phonon_strain(alpha)%cell(2,irpt)
-        cell_atom2(3) =  (i3-1) + phonon_strain(alpha)%cell(3,irpt)
+        cell_atom2(1) =  i1 + phonon_strain(alpha)%cell(1,irpt)
+        cell_atom2(2) =  i2 + phonon_strain(alpha)%cell(2,irpt)
+        cell_atom2(3) =  i3 + phonon_strain(alpha)%cell(3,irpt)
         call getPBCIndexes_supercell(cell_atom2(1:3),sc_size(1:3))
 !       index of the second atom in the displacement array
-        jj = cell_atom2(1)*sc_size(2)*sc_size(3)*natom_uc+&
-&            cell_atom2(2)*sc_size(3)*natom_uc+&
-&            cell_atom2(3)*natom_uc
+        jj = (cell_atom2(1)-1)*sc_size(2)*sc_size(3)*natom_uc+&
+&            (cell_atom2(2)-1)*sc_size(3)*natom_uc+&
+&            (cell_atom2(3)-1)*natom_uc
         do ib = 1, natom_uc
           ll = jj + ib
           do nu=1,3

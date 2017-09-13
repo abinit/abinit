@@ -223,7 +223,7 @@ subroutine compute_anharmonics(eff_pot,filenames,inp,comm)
 
   have_strain = zero
 
-  write(message,'(a)') ' Strains available after reading the files after:'
+  write(message,'(a)') ' Strains available after reading the files:'
   call wrtout(ab_out,message,'COLL')
   call wrtout(std_out,message,'COLL')
   do ii=1,size(eff_pots)

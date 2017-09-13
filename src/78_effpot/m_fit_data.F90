@@ -76,7 +76,8 @@ module m_fit_data
 !    ucvol array, volume of the cell in the training set
 
  end type training_set_type
-
+!!***
+ 
 !routine for training_set
  public :: training_set_init
  public :: training_set_free 
@@ -119,12 +120,13 @@ module m_fit_data
 !    datatype with the informations of the training set
    
  end type fit_data_type
-
+!!***
+ 
 !routine for fit_data
  public :: fit_data_compute
  public :: fit_data_init
  public :: fit_data_free 
- !!***
+!!***
 
 CONTAINS  !===========================================================================================
 
@@ -137,8 +139,20 @@ CONTAINS  !=====================================================================
 !! Initialize fit_data datatype
 !!
 !! INPUTS
+!! energy_diff(3,natom,ntime) = Difference of energy between DFT calculation and 
+!!                             fixed part of the model (more often harmonic part)
+!! fcart_diff(3,natom,ntime) = Difference of cartesian forces between DFT calculation and 
+!!                             fixed part of the model (more often harmonic part)
+!! natom = Number of atoms
+!! ntime = Number of time (number of snapshot, number of md step...)
+!! strten_diff(6,natom) = Difference of stress tensor between DFT calculation and 
+!!                        fixed part of the model (more often harmonic part)
+!! sqomega(ntime) =  Shepard and al Factors \Omega^{2} see J.Chem Phys 136, 074103 (2012)
+!! ucvol(ntime) = Volume of the system for each time
+!! ts<training_set_type> = datatype with the information about the training set
 !!
 !! OUTPUT
+!! fit_data<fit_data_type> = fit_data datatype to be initialized
 !!
 !! PARENTS
 !!
@@ -152,7 +166,6 @@ subroutine fit_data_init(fit_data,energy_diff,fcart_diff,natom,ntime,strten_diff
 
 !Arguments ------------------------------------
 !scalars
-  
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -279,11 +292,16 @@ end subroutine fit_data_free
 !! Compute Shepard and al Factors  \Omega^{2} see J.Chem Phys 136, 074103 (2012).
 !!
 !! INPUTS
-!! training_set<training_set_type> = training_set to be free
+!! eff_pot<type(effective_potential)> = effective potential
+!! hist<type(abihist)> = The history of the MD (or snapshot of DFT
+!! comm = MPI communicator
+!! verbose  = optional, flag for the verbose mode
+!!
 !! OUTPUT
+!! fit_data<fit_data_type> = fit_data is now filled
 !!
 !! PARENTS
-!!
+!! 
 !!
 !! CHILDREN
 !!
@@ -303,6 +321,7 @@ subroutine fit_data_compute(fit_data,eff_pot,hist,comm,verbose)
 #undef ABI_FUNC
 #define ABI_FUNC 'fit_data_compute'
  use interfaces_14_hidewrite
+ use interfaces_41_geometry
 !End of the abilint section
 
  implicit none
@@ -396,8 +415,7 @@ subroutine fit_data_compute(fit_data,eff_pot,hist,comm,verbose)
 &                                    strten_fixed(:,itime),natom,hist%rprimd(:,:,itime),&
 &                                    displacement=displacement(:,:,itime),&
 &                                    du_delta=du_delta(:,:,:,itime),strain=strain(:,itime),&
-&                                    compute_anharmonic=.FALSE.,verbose=.FALSE.)
-
+&                                    compute_anharmonic=.true.,verbose=.FALSE.)
    
 !  Compute \Omega^{2} and ucvol for each time
    call metric(gmet,gprimd,-1,rmet,hist%rprimd(:,:,itime),ucvol(itime))
@@ -438,7 +456,9 @@ subroutine fit_data_compute(fit_data,eff_pot,hist,comm,verbose)
      end if
      exit
    end do
-   if(need_verbose) call wrtout(std_out,message,"COLL")
+   if(need_verbose) then
+     call wrtout(std_out,message,"COLL")
+   end if
    if (found) then
      if( ii < zero .and. ii > ntime)then
        write(message,'(a)') 'ii is not correct'
@@ -491,6 +511,7 @@ end subroutine fit_data_compute
 !! ucvol(ntime) = Volume of the supercell for each time (Bohr^3)
 !!
 !! OUTPUT
+!! ts<training_set_type> = training set to be initialized
 !!
 !! PARENTS
 !!
@@ -568,6 +589,7 @@ end subroutine training_set_init
 !! SOURCE
 
 subroutine training_set_free(ts)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

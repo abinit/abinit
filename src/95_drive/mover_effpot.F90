@@ -62,9 +62,10 @@ subroutine mover_effpot(inp,filnam,effective_potential,option,comm,hist)
  use m_supercell
  use m_multibinit_dataset, only : multibinit_dataset_type
  use m_effective_potential,only : effective_potential_type
- use m_fit_polynomial_coeff, only : fit_polynomial_coeff_getNorder,polynomial_coeff_writeXML
+ use m_fit_polynomial_coeff, only : polynomial_coeff_writeXML
  use m_fit_polynomial_coeff, only : fit_polynomial_coeff_fit,genereList
  use m_fit_polynomial_coeff, only : fit_polynomial_coeff_getPositive
+ use m_polynomial_coeff,only : polynomial_coeff_getNorder
  use m_dtset,  only : dtset_free
  use m_abihist, only : abihist
  use m_ifc
@@ -422,10 +423,10 @@ implicit none
        end do
        cutoff = cutoff / 3.0
        
-      call fit_polynomial_coeff_getNorder(cutoff,coeffs_bound,effective_potential,ncoeff_bound,&
-&                                         inp%fit_boundPower,1,comm,&
-&                                         anharmstr=inp%fit_anhaStrain==1,&
-&                                         spcoupling=inp%fit_SPCoupling==1)
+      call polynomial_coeff_getNorder(coeffs_bound,effective_potential%crystal,cutoff,&
+&                                     ncoeff_bound,inp%fit_boundPower,1,comm,&
+&                                     anharmstr=inp%fit_anhaStrain==1,&
+&                                     spcoupling=inp%fit_SPCoupling==1)
 
       if(iam_master)then
         filename=trim(filnam(2))//"_boundcoeff.xml"

@@ -281,7 +281,7 @@ program multibinit
 !  MPI BROADCAST the history of the MD
    call abihist_bcast(hist,master,comm)
 !  Map the hist in order to be consistent with the supercell into reference_effective_potential
-   call fit_polynomial_coeff_mapHistToRef(reference_effective_potential,hist,comm)
+   call effective_potential_file_mapHistToRef(reference_effective_potential,hist,comm)
  end if
 
 !Generate the confinement polynome (not working yet)

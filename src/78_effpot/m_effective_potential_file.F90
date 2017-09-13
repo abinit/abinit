@@ -49,6 +49,7 @@ module m_effective_potential_file
  public :: effective_potential_file_getDimSystem
  public :: effective_potential_file_getDimStrainCoupling
  public :: effective_potential_file_getType
+ public :: effective_potential_file_mapHistToRef
  public :: effective_potential_file_read
  public :: effective_potential_file_readDisplacement
  public :: effective_potential_file_readMDfile
@@ -1385,8 +1386,7 @@ end subroutine system_getDimFromXML
  !arrays
  integer :: bravais(11)
  integer,allocatable :: typat(:)
- integer,allocatable  :: symrel(:,:,:),symafm(:)
- integer,allocatable ::  ptsymrel(:,:,:)
+ integer,allocatable  :: symrel(:,:,:),symafm(:),ptsymrel(:,:,:)
  real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3),rprimd(3,3)
  real(dp) :: elastic_constants(6,6),elastic3rd(6,6,6),epsilon_inf(3,3)
  real(dp),allocatable :: all_amu(:), cell_local(:,:),cell_total(:,:)
@@ -2317,6 +2317,7 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
 #undef ABI_FUNC
 #define ABI_FUNC 'system_ddb2effpot'
  use interfaces_14_hidewrite
+ use interfaces_41_geometry
  use interfaces_72_response
  use interfaces_77_ddb
 !End of the abilint section
@@ -2341,8 +2342,11 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
  integer :: my_rank,nproc
  logical :: iam_master=.FALSE.
  integer,parameter :: master=0
+ integer :: nptsym,nsym
+ integer :: msym = 192,  use_inversion = 1, space_group
+ real(dp):: tolsym = tol8
 !arrays
- integer :: cell_number(3),cell2(3)
+ integer :: bravais(11),cell_number(3),cell2(3)
  integer :: shift(3),rfelfd(4),rfphon(4),rfstrs(4)
  real(dp):: dielt(3,3),elast_clamped(6,6),fact
  real(dp):: red(3,3),qphnrm(3),qphon(3,3)
@@ -2354,6 +2358,8 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
  type(ifc_type) :: ifc
  real(dp),allocatable :: d2cart(:,:,:,:,:),displ(:)
  real(dp),allocatable :: eigval(:,:),eigvec(:,:,:,:,:),phfrq(:)
+ real(dp),allocatable :: spinat(:,:),tnons(:,:)
+ integer,allocatable  :: symrel(:,:,:),symafm(:),ptsymrel(:,:,:)
 
 ! *************************************************************************
 
@@ -2378,15 +2384,40 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
 !**********************************************************************
 ! Transfert crystal values 
 !**********************************************************************
+! Re-generate symmetry operations from the lattice and atomic coordinates
+  ABI_ALLOCATE(spinat,(3,natom))
+  ABI_ALLOCATE(ptsymrel,(3,3,msym))
+  ABI_ALLOCATE(symafm,(msym))
+  ABI_ALLOCATE(symrel,(3,3,msym))
+  ABI_ALLOCATE(tnons,(3,msym))
+  spinat = zero;  symrel = zero;  symafm = zero;  tnons = zero ; space_group = zero;
+  call symlatt(bravais,msym,nptsym,ptsymrel,crystal%rprimd,tolsym)
+  call symfind(0,(/zero,zero,zero/),crystal%gprimd,0,msym,crystal%natom,0,nptsym,nsym,&
+&              0,ptsymrel,spinat,symafm,symrel,tnons,tolsym,&
+&              crystal%typat,use_inversion,crystal%xred)
+  if(crystal%nsym/=nsym)then
+    write(message,'(4a,I0,3a,I0,3a)') ch10,&
+&          ' --- !WARNING:',ch10,&
+&          '     There is ',nsym,' found for the crystal',ch10,&
+&          '     but ',crystal%nsym,' found in the DDB',ch10,&
+&          ' ---'
+      call wrtout(std_out,message,'COLL')
+  end if
   call crystal_init(ddb%amu,effective_potential%crystal,&
-&                   crystal%space_group,crystal%natom,crystal%npsp,&
-&                   crystal%ntypat,crystal%nsym,crystal%rprimd,&
+&                   space_group,crystal%natom,crystal%npsp,&
+&                   crystal%ntypat,nsym,crystal%rprimd,&
 &                   crystal%typat,crystal%xred,crystal%zion,&
 &                   crystal%znucl,crystal%timrev,crystal%use_antiferro,&
 &                   .FALSE.,crystal%title,&
-&                   symrel=crystal%symrel,tnons=crystal%tnons,&
-&                   symafm=crystal%symafm)
+&                   symrel=symrel,tnons=tnons,&
+&                   symafm=symafm)
 
+  ABI_DEALLOCATE(spinat)
+  ABI_DEALLOCATE(ptsymrel)
+  ABI_DEALLOCATE(symafm)
+  ABI_DEALLOCATE(symrel)
+  ABI_DEALLOCATE(tnons)
+  
 !**********************************************************************
 ! Transfert energy from input file
 !**********************************************************************
@@ -3463,6 +3494,236 @@ subroutine effective_potential_file_readMDfile(filename,hist)
  end if!end if type
  
 end subroutine effective_potential_file_readMDfile
+!!***
+
+!!****f* m_effective_potential_file/effective_potential_file_mapHistToRef
+!!
+!! NAME
+!! effective_potential_file_mapHistToRef
+!!
+!! FUNCTION
+!! Generate the supercell in the effective potential according to the size of the 
+!! supercell in the hist file
+!! Check if the hist file match to reference supercell in the effective potential
+!! If not, the hist file is reordering 
+!!
+!! INPUTS
+!! eff_pot<type(effective_potential)> = effective potential
+!! hist<type(abihist)> = The history of the MD
+!! comm = MPI communicator
+!!
+!! OUTPUT
+!! hist<type(abihist)> = The history of the MD
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine effective_potential_file_mapHistToRef(eff_pot,hist,comm,verbose)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'effective_potential_file_mapHistToRef'
+ use interfaces_14_hidewrite
+ use interfaces_41_geometry
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: comm
+ logical,optional,intent(in) :: verbose
+!arrays
+ type(effective_potential_type),intent(inout) :: eff_pot
+ type(abihist),intent(inout) :: hist
+!Local variables-------------------------------
+!scalar
+ integer :: factE_hist,ia,ib,ii,jj,natom_hist,ncell,nstep_hist
+ real(dp):: factor
+ logical :: revelant_factor,need_map,need_verbose
+!arrays
+ real(dp) :: rprimd_hist(3,3),rprimd_ref(3,3),scale_cell(3)
+ integer :: n_cell(3)
+ integer,allocatable  :: blkval(:),list(:)
+ real(dp),allocatable :: xred_hist(:,:),xred_ref(:,:)
+ character(len=500) :: msg
+ type(abihist) :: hist_tmp
+! *************************************************************************
+
+!Set optional values
+ need_verbose = .false.
+ if (present(verbose)) need_verbose = verbose
+ 
+ natom_hist = size(hist%xred,2)
+ nstep_hist = size(hist%xred,3)
+
+!Try to set the supercell according to the hist file
+ rprimd_ref(:,:)  = eff_pot%crystal%rprimd
+ rprimd_hist(:,:) = hist%rprimd(:,:,1)
+
+ do ia=1,3
+   scale_cell(:) = zero
+   do ii=1,3
+     if(abs(rprimd_ref(ii,ia)) > tol10)then
+       scale_cell(ii) = rprimd_hist(ii,ia) / rprimd_ref(ii,ia)
+     end if
+   end do
+!  Check if the factor for the supercell is revelant
+   revelant_factor = .TRUE.
+   do ii=1,3
+     if(abs(scale_cell(ii)) < tol10) cycle
+     factor = abs(scale_cell(ii))
+     do jj=ii,3
+       if(abs(scale_cell(jj)) < tol10) cycle
+       if(abs(abs(scale_cell(ii))-abs(scale_cell(jj))) > tol10) revelant_factor = .FALSE.
+     end do
+   end do
+   if(.not.revelant_factor)then
+     write(msg, '(3a)' )&
+&         'unable to map the hist file ',ch10,&
+&         'Action: check/change your MD file'
+     MSG_ERROR(msg)
+   else
+     n_cell(ia) = nint(factor)
+   end if
+ end do
+
+ ncell = product(n_cell)
+ 
+!Check if the energy store in the hist is revelant, sometimes some MD files gives
+!the energy of the unit cell... This is not suppose to happen... But just in case...
+ do ii=1,nstep_hist
+   factE_hist = anint(hist%etot(ii) / eff_pot%energy)
+   if(factE_hist == 1) then
+!    In this case we mutiply the energy of the hist by the number of cell
+     hist%etot(ii) = hist%etot(ii)  * ncell
+   end if
+   if(factE_hist /=1 .and. factE_hist /= ncell)then
+     write(msg, '(4a,I0,a,I0,2a,I0,3a,I0,3a)' )ch10,&
+&          ' --- !WARNING',ch10,&
+&          '     The energy of the step ',ii,' seems to be with multiplicity of ',factE_hist,ch10,&
+&          '     However, the multiplicity of the cell is ',ncell,'.',ch10,&
+&          '     Please check the energy of the step ',ii,ch10,&
+&          ' ---',ch10
+     if(need_verbose) call wrtout(std_out,msg,'COLL') 
+   end if
+ end do
+
+ 
+!Set the new supercell datatype into the effective potential reference
+ call effective_potential_setSupercell(eff_pot,comm,n_cell)
+
+!allocation
+ ABI_ALLOCATE(blkval,(natom_hist))
+ ABI_ALLOCATE(list,(natom_hist))
+ ABI_ALLOCATE(xred_hist,(3,natom_hist))
+ ABI_ALLOCATE(xred_ref,(3,natom_hist))
+ blkval = one
+ list   = zero
+ call xcart2xred(eff_pot%supercell%natom,eff_pot%supercell%rprimd,&
+&                eff_pot%supercell%xcart,xred_ref)
+
+ xred_hist = hist%xred(:,:,1)
+
+ if(need_verbose) then 
+   write(msg,'(2a,I2,a,I2,a,I2)') ch10,&
+&       ' The size of the supercell for the fit is ',n_cell(1),' ',n_cell(2),' ',n_cell(3)
+   call wrtout(std_out,msg,'COLL') 
+   call wrtout(ab_out,msg,'COLL')
+ end if
+ 
+!try to map
+ do ia=1,natom_hist
+   do ib=1,natom_hist
+     if(blkval(ib)==1)then
+       if(abs((xred_ref(1,ia)-xred_hist(1,ib))) < 0.1 .and.&
+&         abs((xred_ref(2,ia)-xred_hist(2,ib))) < 0.1 .and.&
+&         abs((xred_ref(3,ia)-xred_hist(3,ib))) < 0.1) then
+         blkval(ib) = zero
+         list(ib) = ia
+       end if
+     end if
+   end do
+ end do
+
+!Check before transfert
+ if(.not.all(blkval==zero))then
+   write(msg, '(5a)' )&
+&         'Unable to map the molecular dynamic file ',ch10,&
+&         'on the reference supercell structure',ch10,&
+&         'Action: change the MD file'
+     MSG_ERROR(msg)
+ end if
+
+ do ia=1,natom_hist
+   if(.not.any(list(:)==ia))then
+     write(msg, '(5a)' )&
+&         'Unable to map the molecular dynamic file  ',ch10,&
+&         'on the reference supercell structure',ch10,&
+&         'Action: change the MD file'
+     MSG_ERROR(msg)
+   end if
+ end do
+
+ need_map = .FALSE.
+ do ia=1,natom_hist
+   if(list(ia) /= ia) need_map = .TRUE.
+ end do
+ if(need_map)then
+   if(need_verbose) then
+     write(msg, '(11a)' )ch10,&
+&      ' --- !WARNING',ch10,&
+&      '     The ordering of the atoms in the hist file is different,',ch10,&
+&      '     of the one built by multibinit. The hist file will be map,',ch10,&
+&      '     on the ordering of multibinit.',ch10,&
+&      ' ---',ch10
+     call wrtout(ab_out,msg,'COLL')
+     call wrtout(std_out,msg,'COLL')
+   end if
+
+! Allocate hist datatype 
+   call abihist_init(hist_tmp,natom_hist,nstep_hist,.false.,.false.)
+! copy all the information
+   do ia=1,nstep_hist
+     hist%ihist = ia
+     hist_tmp%ihist = ia
+     call abihist_copy(hist,hist_tmp)
+   end do
+   hist_tmp%mxhist = nstep_hist
+
+! reoder array
+   do ia=1,natom_hist
+     hist_tmp%xred(:,list(ia),:)=hist%xred(:,ia,:)
+     hist_tmp%fcart(:,list(ia),:)=hist%fcart(:,ia,:)
+     hist_tmp%vel(:,list(ia),:)=hist%vel(:,ia,:)
+   end do
+
+! free the old hist and reinit
+   call abihist_free(hist)
+   call abihist_init(hist,natom_hist,nstep_hist,.false.,.false.)
+! copy the temporary hist into output
+   do ia=1,nstep_hist
+     hist%ihist = ia
+     hist_tmp%ihist = ia
+     call abihist_copy(hist_tmp,hist)
+   end do
+   hist_tmp%mxhist = nstep_hist
+
+   call abihist_free(hist_tmp)
+ end if
+
+!deallocation
+ ABI_DEALLOCATE(blkval)
+ ABI_DEALLOCATE(list)
+ ABI_DEALLOCATE(xred_hist)
+ ABI_DEALLOCATE(xred_ref)
+
+end subroutine effective_potential_file_mapHistToRef
 !!***
 
 
