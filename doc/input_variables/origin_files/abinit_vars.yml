@@ -7201,6 +7201,34 @@
     varset: gw
     vartype: integer
 - !variable
+    abivarname: fockoptmix
+    characteristics: null
+    commentdefault: null
+    commentdims: null
+    defaultval: 0
+    dimensions: scalar
+    excludes: null
+    mnemonics: 'FOCK operator : OPTions for MIXing'
+    requires: '[[usefock]]==1'
+    text: |-
+        Governs the mixing algorithm at the level of the Fock operator, i.e.
+        how to mix it, and how the underlying SCF calculation is to be performed. It is the most relevant when the Fock operator is not updated at each SCF step ([[nnsclohf]]/=0).
+        <p>
+        The last digit of [[fockoptmix]] governs what happens at the level of the SCF algorithm, when the Fock operator is updated.
+        <ol>
+        <li>
+        If [[fockoptmix]]==0 : the SCF algorithm is not restarted (it continues to use the previous potential/density pairs without worrying).</li>
+        <li>
+        If [[fockoptmix]]==1 : the SCF algorithm is restarted (the previous potential/density pairs are discarted).</li>
+        </ol>
+        <p>
+        The second-to-last (dozen) digit governs the possible modification of the XC functional inside the SCF loop to take into account the lack of update of the Fock operator. Irrelevant when the unit digit is 0.
+        <p>
+        The third-to-last (hundreds) digit governs the mixing of the Fock operator itself with its previous occurrences. Irrelevant when the unit digit is 0.
+    topics: Hybrids_basic
+    varset: gstate
+    vartype: integer
+- !variable
     abivarname: foldep@aim
     characteristics: null
     commentdefault: null

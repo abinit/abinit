@@ -767,6 +767,9 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 !  fftgw
    call chkint_eq(0,0,cond_string,cond_values,ierr,'fftgw',dt%fftgw,8, [00,01,10,11,20,21,30,31],iout)
 
+!  fockoptmix
+   call chkint_eq(0,0,cond_string,cond_values,ierr,'fockoptmix',dt%fockoptmix,2,(/0,1/),iout)
+
 !  frzfermi
    call chkint_eq(0,0,cond_string,cond_values,ierr,'frzfermi',dt%frzfermi,2,(/0,1/),iout)
 

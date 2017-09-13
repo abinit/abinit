@@ -511,6 +511,7 @@ subroutine dtset_copy(dtout, dtin)
  dtout%pawfatbnd          = dtin%pawfatbnd
  dtout%fermie_nest        = dtin%fermie_nest
  dtout%fftgw              = dtin%fftgw
+ dtout%fockoptmix         = dtin%fockoptmix
  dtout%freqim_alpha       = dtin%freqim_alpha
  dtout%freqremin          = dtin%freqremin
  dtout%freqremax          = dtin%freqremax

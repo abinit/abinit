@@ -1091,6 +1091,10 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
      if (mod(istep-1,fock%fock_common%nnsclo_hf)==0) then
        ! Update data relative to the occupied states in fock
        call fock_updatecwaveocc(cg,cprj,dtset,fock,indsym,istep,mcg,mcprj,mpi_enreg,nattyp,npwarr,occ,ucvol)
+       !Depending on fockoptmix, possibly restart the mixing procedure for the potential
+       if(mod(dtset%fockoptmix,10)==1)then
+         istep_mix=1
+       endif
      endif
 
      if(fock%fock_common%use_ACE/=0) then

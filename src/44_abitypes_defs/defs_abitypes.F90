@@ -234,6 +234,7 @@ type dataset_type
  integer :: exchn2n3d
  integer :: extrapwf
  integer :: fftgw
+ integer :: fockoptmix
  integer :: frzfermi
  integer :: ga_algor
  integer :: ga_fitness
