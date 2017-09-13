@@ -33,7 +33,7 @@
  nband 4
  nbdbuf 0
 
- nstep 25  
+ nstep 6
  ntypat  2
  typat  1 2
  xcart -0.562   0 0  0.562  0 0 Angstrom   
@@ -47,12 +47,12 @@
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t69.out, tolnlines = 0, tolabs = 0.000e-00, tolrel = 0.000e-00
+#%%   t69.out, tolnlines = 0, tolabs = 0.000e-00, tolrel = 0.000e-00, fld_options = -medium
 #%% psp_files = C.xml, H.xml
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]
-#%% authors = XG
+#%% authors = X. Gonze
 #%% keywords = 
 #%% description = 
 #%%   CH molecule spin-polarized, in a big box.

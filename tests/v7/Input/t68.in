@@ -15,9 +15,9 @@
  getxred3  2
 
 #Common
- acell 6  2*5 Angstrom
+ acell 5  2*4 Angstrom
  diemac 1.0d0   diemix 0.5d0
- ecut 15  
+ ecut 13  
  ionmov 2
  ntime 15 
  tolrff 0.02
@@ -45,12 +45,12 @@
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t68.out, tolnlines = 0, tolabs = 0.000e-00, tolrel = 0.000e-00
+#%%   t68.out, tolnlines = 0, tolabs = 0.000e-00, tolrel = 0.000e-00, fld_options = -medium
 #%% psp_files = C.psp8, H.psp8
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]
-#%% authors = XG
+#%% authors = X. Gonze
 #%% keywords = 
 #%% description = 
 #%%   CH molecule spin-polarized, in a big box.
@@ -59,8 +59,8 @@
 #%%   The results obtained with underconverged ecut (ecut 15) and box size (4 3 3 Angstrom)
 #%%   compare favourably with those mentioned in Arnardi's report, as well as with those of VASP.
 #%%   Values for the distance d, in Angstrom, for PBE, PBE0 and HSE06 respectively :
-#%%   Present calculation  (ecut 15, 6 5 5 box) : 1.147, 1.138, 1.138
-#%%   Better  calculation  (ecut 18, 7 6 6 box) : 1.138, 1.127, 1.128 
+#%%   Present calculation  (ecut 13, 5 4 4 box) : 1.138, 1.130, 1.131
+#%%   Better  calculation  (ecut 18, 7 6 6 box) : 1.135, 1.124, 1.125 
 #%%   ABINIT Arnardi report (ecut acell unknown): 1.136, 1.124, 1.124
 #%%   VASP Arnardi report (ecut acell unknown)  : 1.136, 1.124,  NA
 #%%   Experimental : 1.120 .
