@@ -695,10 +695,10 @@ subroutine getPBCIndexes_supercell(index,n_cell)
 ! *********************************************************************
 
   do ii=1,3
-    do while (index(ii) > n_cell(ii)-1)
+    do while (index(ii) > n_cell(ii))
       index(ii) = index(ii) - n_cell(ii)
     end do
-    do while (index(ii) < 0)
+    do while (index(ii) <= 0)
       index(ii) = index(ii) + n_cell(ii)
     end do
   end do

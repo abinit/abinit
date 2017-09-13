@@ -40,6 +40,10 @@
        fit_ncycle         4
          fit_grid         1         1         1
    fit_rangePower         3         4
+   fit_anhaStrain         0
+   fit_SPCoupling         1
+    fit_nbancoeff         0
+     fit_bancoeff
     fit_nfixcoeff         0
      fit_fixcoeff
  Miscellaneous information :
@@ -83,10 +87,10 @@
 
  Extraction of the stress tensor (unit: GPa) and forces (unit: Ha/bohr)
 
- --- !WARNING
-     Stress Tensor and forces are set to zero (not available in the DDB)
+ --- !WARNING:
+     The stress tensor of the reference structure is not specify
+     The stress tensor will be set to zero
  ---
-
 
 ================================================================================
 
@@ -185,16 +189,8 @@
 
 ================================================================================
 
--Reading the file /home/alex/Desktop/dev/abinit/abinit_git_dev/tests/paral/Input/t101_HIST
- with NetCDF in order to fit the polynomial coefficients
-
- The size of the supercell for the fit is  2  2  2
-
- --- !WARNING
-     The ordering of the atoms in the hist file is different,
-     of the one built by multibinit. The hist file will be map,
-     on the ordering of multibinit.
- ---
+-Reading the file the HIST file :
+-/home/alex/dev/abinit_git/tests/paral/Input/t101_HIST
 
 
 ================================================================================
@@ -204,36 +200,34 @@
 --------------------------------------------------------------------------------
 
  The coefficients for the fit must be generate...
-
- 4 fitted coefficients for the 1st order
- 842 coefficients generated 
+ 1633 coefficients generated 
 
  Mean Standard Deviation values at the begining of the fit process (meV/f.u.):
    Energy          :   3.7052089149349636E+00
  Goal function values at the begining of the fit process (eV^2/A^2):
-   Forces+Stresses :   7.5063892046377629E-03
-   Forces          :   7.3678364726205139E-03
-   Stresses        :   1.3855273201724902E-04
+   Forces+Stresses :   7.8729467327233547E-03
+   Forces          :   7.3678367059228245E-03
+   Stresses        :   5.0511002680052894E-04
 
  N   Selecting          MSEE              MSEFS              MSEF              MSES
     Coefficient      (meV/f.u.)        (eV^2/A^2)        (eV^2/A^2)        (eV^2/A^2)
- 1      718       2.5609676624E+00  5.3488564713E-03  5.2003038308E-03  1.4855264050E-04
- 2      540       1.9431984603E+00  4.4884624863E-03  4.3332758540E-03  1.5518663222E-04
- 3      93        1.9687719602E+00  4.0002876127E-03  3.8455540654E-03  1.5473354726E-04
- 4      752       2.0033067189E+00  3.7875226129E-03  3.6336181883E-03  1.5390442456E-04
+ 1      1229      2.5657782535E+00  5.7335170893E-03  5.2003875504E-03  5.3312953894E-04
+ 2      869       1.9509190592E+00  4.8812097742E-03  4.3334154733E-03  5.4779430084E-04
+ 3      114       1.9765126739E+00  4.3922666391E-03  3.8456936182E-03  5.4657302093E-04
+ 4      1262      1.9767913392E+00  3.9837066556E-03  3.8415430215E-03  1.4216363416E-04
 
  Fitted coefficients at the end of the fit process:
- 718 =>   1.8766945024E+00 (Ru_x-O1_x)^2(Ru_y-O1_y)^2
- 540 =>   1.2507790346E-01 (Sr_x-Ru_x)^4
- 93 =>  -5.8319599017E-01 (Sr_x-O1_x)^1(Sr_y-O1_y)^1(Ru_x-O1_x)^1(Ru_y-O1_y)^1
- 752 =>   9.0370877257E-02 (Ru_x-O1_x)^1(Ru_y-O1_y)^1(O1_x-O2_x)^1
+ 1229 =>   1.9521245996E+00 (Ru_x-O1_x)^2(Ru_y-O1_y)^2
+ 869 =>   1.3342873988E-01 (Sr_x-Ru_x)^4
+ 114 =>  -5.3013657042E-01 (Sr_x-O1_x)^1(Sr_y-O1_y)^1(Ru_x-O1_x)^1(Ru_y-O1_y)^1
+ 1262 =>  -9.3589800830E-01 (Ru_x-O1_x)^2(eta_1)^1
 
  Mean Standard Deviation values at the end of the fit process (meV/f.u.):
-   Energy          :   2.0033067188567482E+00
+   Energy          :   1.9767913391547272E+00
  Goal function values at the end of the fit process (eV^2/A^2):
-   Forces+Stresses :   3.7875226128517088E-03
-   Forces          :   3.6336181882886637E-03
-   Stresses        :   1.5390442456304510E-04
+   Forces+Stresses :   3.9837066556190296E-03
+   Forces          :   3.8415430214618889E-03
+   Stresses        :   1.4216363415714054E-04
 
 
 ================================================================================

@@ -263,7 +263,7 @@ subroutine pred_hmc(ab_mover,hist,itime,icycle,ntime,ncycle,zDEBUG,iexit)
      xred(:,:)=xred_hmc_prev(:,:)
    end if
 
-   hist%ihist=hist%ihist+1
+   hist%ihist=abihist_findIndex(hist,+1)
    call var2hist(acell,hist,ab_mover%natom,rprimd,xred,zDEBUG)
 
  end if

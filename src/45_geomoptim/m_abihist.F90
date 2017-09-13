@@ -134,6 +134,7 @@ module m_abihist
  public :: abihist_copy             ! Copy 2 HIST records
  public :: abihist_compare_and_copy ! Compare 2 HIST records; if similar copy
  public :: hist2var                 ! Get xred, acell and rprimd from the history.
+ public :: abihist_findIndex            ! Shift history indexes
  public :: var2hist                 ! Append xred, acell and rprimd
  public :: vel2hist                 ! Append velocities and Kinetic Energy
  public :: write_md_hist            ! Write the history into a netcdf file
@@ -784,6 +785,76 @@ subroutine var2hist(acell,hist,natom,rprimd,xred,zDEBUG)
 end subroutine var2hist
 !!***
 
+!!****f* m_abihist/abihist_fi
+!!
+!! NAME
+!! abihist_findIndex
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!! hist<type abihist>=Historical record of positions, forces
+!!      |                    acell, stresses, and energies
+!! step = value of the needed step
+!!
+!! OUTPUT
+!! index = index of the step in the hist file
+!!
+!! SIDE EFFECTS
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+function abihist_findIndex(hist,step) result(index)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'abihist_findIndex'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: step
+ integer :: index
+!arrays
+ type(abihist),intent(in) :: hist
+!Local variables-------------------------------
+!scalars
+ integer :: ii,mxhist
+!arrays
+ character(len=500) :: msg
+! *************************************************************
+
+ mxhist = hist%mxhist
+
+ if ((mxhist ==1.and.step/=+1).or.&
+&    (mxhist /=1.and.abs(step) >=mxhist)) then
+   write(msg,'(a,I0,2a)')' The requested step must be lass than ',mxhist,ch10,&
+&                     'Action: increase the number of history store in the hist' 
+   MSG_BUG(msg)
+ end if
+ 
+ ii = hist%ihist + step
+
+ do while (ii > mxhist)
+   ii = ii - mxhist
+ end do
+ do while (ii <= 0)
+   ii = ii + mxhist
+ end do
+ 
+ index = ii
+ 
+end function abihist_findIndex
+!!***
+
 !----------------------------------------------------------------------
 
 !!****f* m_abihist/hist2var
@@ -841,7 +912,7 @@ real(dp),intent(out) :: xred(3,natom)
 
 !Local variables-------------------------------
 !scalars
-integer :: jj,kk
+integer :: kk
 
 ! *************************************************************
 
@@ -1033,6 +1104,8 @@ end subroutine abihist_copy
 !! INPUTS
 !!  hist_in <type(abihist)>
 !!  tolerance
+!!  store_all = flag to known if we need to increment ihist (store all the history)
+!!              or just call shift (store just le last step)
 !!
 !! OUTPUT
 !!  similar= 1 the records are consistent
@@ -1048,7 +1121,7 @@ end subroutine abihist_copy
 !!
 !! SOURCE
 
-subroutine abihist_compare_and_copy(hist_in,hist_out,natom,similar,tolerance)
+subroutine abihist_compare_and_copy(hist_in,hist_out,natom,similar,tolerance,store_all)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1067,7 +1140,7 @@ integer,intent(out) :: similar
 real(dp),intent(in) :: tolerance
 type(abihist),intent(in) :: hist_in
 type(abihist),intent(inout) :: hist_out
-
+logical,intent(in) :: store_all
 !Local variables-------------------------------
 !scalars
 integer :: kk,jj
@@ -1163,6 +1236,7 @@ end subroutine abihist_compare_and_copy
 !!  hist<type abihist>=Historical record of positions, forces, stresses,
 !!                        cell dims and energies,
 !!  ifirst=1 if first access to the file
+!!  itime = index of the step in the hist file
 !!  natom=Number of atoms.
 !!  ntypat=Number of type of atoms.
 !!  typat(natom)=Type of each natom
@@ -1184,7 +1258,7 @@ end subroutine abihist_compare_and_copy
 !!
 !! SOURCE
 
-subroutine write_md_hist(hist,filename,ifirst,natom,ntypat,&
+subroutine write_md_hist(hist,filename,ifirst,itime,natom,ntypat,&
 &                        typat,amu,znucl,dtion,mdtemp)
 
 
@@ -1198,7 +1272,7 @@ subroutine write_md_hist(hist,filename,ifirst,natom,ntypat,&
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: ifirst,natom,ntypat
+ integer,intent(in) :: ifirst,itime,natom,ntypat
  real(dp),intent(in) :: dtion
  character(len=*),intent(in) :: filename
 !arrays
@@ -1257,7 +1331,7 @@ subroutine write_md_hist(hist,filename,ifirst,natom,ntypat,&
  call get_varid_hist(ncid,xcart_id,xred_id,fcart_id,fred_id,vel_id,vel_cell_id,&
 &     rprimd_id,acell_id,strten_id,etotal_id,ekin_id,entropy_id,mdtime_id,has_nimage)
 !Write
- call write_vars_hist(ncid,hist,natom,has_nimage,1,&
+ call write_vars_hist(ncid,hist,natom,has_nimage,1,itime,&
 &     xcart_id,xred_id,fcart_id,fred_id,vel_id,vel_cell_id,&
 &     rprimd_id,acell_id,strten_id,etotal_id,ekin_id,entropy_id,mdtime_id)
 
@@ -1287,6 +1361,7 @@ end subroutine write_md_hist
 !!                         cell dims and energies,
 !!    Size(hist) is equal to a number of images to be written
 !!  ifirst= 1 if first access to the file
+!!  itime = index of the step in the hist file
 !!  natom= Number of atoms.
 !!  ntypat= Number of type of atoms.
 !!  typat(natom)= Type of each natom
@@ -1313,7 +1388,7 @@ end subroutine write_md_hist
 !!
 !! SOURCE
 
-subroutine write_md_hist_img(hist,filename,ifirst,natom,ntypat,&
+subroutine write_md_hist_img(hist,filename,ifirst,itime,natom,ntypat,&
 &                            typat,amu,znucl,dtion,&
 &                            nimage,imgmov,mdtemp,comm_img,imgtab) ! optional arguments
 
@@ -1328,7 +1403,7 @@ subroutine write_md_hist_img(hist,filename,ifirst,natom,ntypat,&
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: ifirst,natom,ntypat
+ integer,intent(in) :: ifirst,itime,natom,ntypat
  integer,intent(in),optional :: nimage,imgmov,comm_img
  real(dp),intent(in) :: dtion
  character(len=*),intent(in) :: filename
@@ -1415,7 +1490,7 @@ subroutine write_md_hist_img(hist,filename,ifirst,natom,ntypat,&
      do iimage=1,my_nimage
        iimg=my_imgtab(iimage)
        hist_ => hist(iimage)
-       call write_vars_hist(ncid,hist_,natom,has_nimage,iimg,&
+       call write_vars_hist(ncid,hist_,natom,has_nimage,iimg,itime,&
 &           xcart_id,xred_id,fcart_id,fred_id,vel_id,vel_cell_id,&
 &           rprimd_id,acell_id,strten_id,etotal_id,ekin_id,entropy_id,mdtime_id)
      end do
@@ -1487,7 +1562,6 @@ implicit none
  integer :: mdtime_id,vel_id,vel_cell_id,etotal_id
  integer :: acell_id,rprimd_id,strten_id
  logical :: has_nimage
- character(len=500) :: msg
 #endif
 
 ! *************************************************************************
@@ -2178,7 +2252,7 @@ end subroutine write_csts_hist
 !!
 !! SOURCE
 
-subroutine write_vars_hist(ncid,hist,natom,has_nimage,iimg,&
+subroutine write_vars_hist(ncid,hist,natom,has_nimage,iimg,itime,&
 &          xcart_id,xred_id,fcart_id,fred_id,vel_id,vel_cell_id,rprimd_id,&
 &          acell_id,strten_id,etotal_id,ekin_id,entropy_id,mdtime_id)
 
@@ -2194,7 +2268,7 @@ implicit none
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: ncid,natom,iimg
+ integer,intent(in) :: ncid,natom,iimg,itime
  integer,intent(in) :: xcart_id,xred_id,fcart_id,fred_id,vel_id
  integer,intent(in) :: vel_cell_id,rprimd_id,acell_id,strten_id
  integer,intent(in) :: etotal_id,ekin_id,entropy_id,mdtime_id
@@ -2225,7 +2299,7 @@ implicit none
 !Variables not depending on images
 
 !mdtime
- start1=(/hist%ihist/)
+ start1=(/itime/)
  ncerr = nf90_put_var(ncid,mdtime_id,hist%time(hist%ihist),start=start1)
  NCF_CHECK_MSG(ncerr," write variable mdtime")
 
@@ -2235,7 +2309,7 @@ implicit none
 
 !xcart,xred,fcart,fred,vel
  if (has_nimage) then
-   start4=(/1,1,iimg,hist%ihist/);count4=(/3,natom,1,1/)
+   start4=(/1,1,iimg,itime/);count4=(/3,natom,1,1/)
    call xred2xcart(natom,rprimd,conv,xred)
    ncerr = nf90_put_var(ncid,xcart_id,conv, start = start4,count = count4)
    NCF_CHECK_MSG(ncerr," write variable xcart")
@@ -2249,7 +2323,7 @@ implicit none
    ncerr = nf90_put_var(ncid,vel_id,vel, start = start4,count = count4)
    NCF_CHECK_MSG(ncerr," write variable vel")
  else
-   start3=(/1,1,hist%ihist/);count3=(/3,natom,1/)
+   start3=(/1,1,itime/);count3=(/3,natom,1/)
    call xred2xcart(natom,rprimd,conv,xred)
    ncerr = nf90_put_var(ncid,xcart_id,conv, start = start3,count = count3)
    NCF_CHECK_MSG(ncerr," write variable xcart")
@@ -2268,7 +2342,7 @@ implicit none
 
 !rprimd,vel_cell
  if (has_nimage) then
-   start4=(/1,1,iimg,hist%ihist/);count4=(/3,3,1,1/)
+   start4=(/1,1,iimg,itime/);count4=(/3,3,1,1/)
    ncerr = nf90_put_var(ncid,rprimd_id,hist%rprimd(:,:,hist%ihist),&
 &                       start = start4,count = count4)
    NCF_CHECK_MSG(ncerr," write variable rprimd")
@@ -2276,7 +2350,7 @@ implicit none
 &                       start = start4,count = count4)
    NCF_CHECK_MSG(ncerr," write variable vel_cell")
  else
-   start3=(/1,1,hist%ihist/);count3=(/3,3,1/)
+   start3=(/1,1,itime/);count3=(/3,3,1/)
    ncerr = nf90_put_var(ncid,rprimd_id,hist%rprimd(:,:,hist%ihist),&
 &                       start = start3,count = count3)
    NCF_CHECK_MSG(ncerr," write variable rprimd")
@@ -2284,12 +2358,12 @@ implicit none
 
 !acell
  if (has_nimage) then
-   start3=(/1,iimg,hist%ihist/);count3=(/3,1,1/)
+   start3=(/1,iimg,itime/);count3=(/3,1,1/)
    ncerr = nf90_put_var(ncid,acell_id,hist%acell(:,hist%ihist),&
 &                       start = start3,count = count3)
    NCF_CHECK_MSG(ncerr," write variable acell")
  else
-   start2=(/1,hist%ihist/);count2=(/3,1/)
+   start2=(/1,itime/);count2=(/3,1/)
    ncerr = nf90_put_var(ncid,acell_id,hist%acell(:,hist%ihist),&
 &                       start = start2,count = count2)
    NCF_CHECK_MSG(ncerr," write variable acell")
@@ -2297,12 +2371,12 @@ implicit none
 
 !strten
  if (has_nimage) then
-   start3=(/1,iimg,hist%ihist/);count3=(/6,1,1/)
+   start3=(/1,iimg,itime/);count3=(/6,1,1/)
    ncerr = nf90_put_var(ncid,strten_id,hist%strten(:,hist%ihist),&
 &                       start = start3,count = count3)
    NCF_CHECK_MSG(ncerr," write variable strten")
  else
-   start2=(/1,hist%ihist/);count2=(/6,1/)
+   start2=(/1,itime/);count2=(/6,1/)
    ncerr = nf90_put_var(ncid,strten_id,hist%strten(:,hist%ihist),&
 &                       start = start2,count = count2)
    NCF_CHECK_MSG(ncerr," write variable strten")
@@ -2310,7 +2384,7 @@ implicit none
 
 !etotal,ekin,entropy
  if (has_nimage) then
-   start2=(/iimg,hist%ihist/)
+   start2=(/iimg,itime/)
    ncerr = nf90_put_var(ncid,etotal_id,hist%etot(hist%ihist),start=start2)
    NCF_CHECK_MSG(ncerr," write variable etotal")
    ncerr = nf90_put_var(ncid,ekin_id,hist%ekin(hist%ihist),start=start2)
@@ -2318,7 +2392,7 @@ implicit none
    ncerr = nf90_put_var(ncid,entropy_id,hist%entropy(hist%ihist),start=start2)
    NCF_CHECK_MSG(ncerr," write variable entropy")
  else
-   start1=(/hist%ihist/)
+   start1=(/itime/)
    ncerr = nf90_put_var(ncid,etotal_id,hist%etot(hist%ihist),start=start1)
    NCF_CHECK_MSG(ncerr," write variable etotal")
    ncerr = nf90_put_var(ncid,ekin_id,hist%ekin(hist%ihist),start=start1)

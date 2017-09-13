@@ -213,6 +213,7 @@ end type abimover
 
    !scalars
    integer           :: ncycle
+   integer           :: nhist ! Number of step of history needed in the algorithm
    character(len=8)  :: crit4xml
    character(len=10) :: type4xml
    character(len=60) :: method
@@ -648,6 +649,9 @@ character(len=fnlen), target, intent(in) :: filnam_ds(:)   ! dtfil%filnam_ds(5)
 !specs%ncycle is 1 by default except for ionmov=1,9,14
  specs%ncycle=1
 
+!specs%nhist is -1 by default store all the history except for ionmov=12,13
+ specs%nhist=-1
+
 !This is the initialization for ionmov==1
 !-----------------------------------------
  select case (ab_mover%ionmov)
@@ -667,6 +671,8 @@ character(len=fnlen), target, intent(in) :: filnam_ds(:)   ! dtfil%filnam_ds(5)
      write(specs%method,'(a,1p,e12.5,a)')&
      'Molecular dynamics with viscosity (vis=',ab_mover%vis,')'
    end if
+!  Number of history
+   specs%nhist = 6
 !  This is the initialization for ionmov==2,3
 !  -------------------------------------------
  case (2,3)
@@ -679,6 +685,8 @@ character(len=fnlen), target, intent(in) :: filnam_ds(:)   ! dtfil%filnam_ds(5)
    else
      specs%method = 'Broyden-Fletcher-Goldfard-Shanno method (forces,Tot energy)'
    end if
+!  Number of history
+   specs%nhist = 3
 !  This is the initialization for ionmov==4,5
 !  -------------------------------------------
  case (4,5)
@@ -691,6 +699,8 @@ character(len=fnlen), target, intent(in) :: filnam_ds(:)   ! dtfil%filnam_ds(5)
    else
      specs%method = 'Simple relaxation of ionic positions'
    end if
+!  Number of history
+   specs%nhist = 3
 !  This is the initialization for ionmov==6
 !  ------------------------------------------
  case (6)
@@ -703,6 +713,8 @@ character(len=fnlen), target, intent(in) :: filnam_ds(:)   ! dtfil%filnam_ds(5)
    specs%crit4xml='tolmxf'
 !  Name of specs%method
    specs%method = 'Verlet algorithm for molecular dynamics'
+!  Number of history
+   specs%nhist = 3
 !  This is the initialization for ionmov==7
 !  ------------------------------------------
  case (7)
@@ -714,6 +726,8 @@ character(len=fnlen), target, intent(in) :: filnam_ds(:)   ! dtfil%filnam_ds(5)
    specs%crit4xml='tolmxf'
 !  Name of specs%method
    specs%method = 'Verlet algorithm blocking every atom where dot(vel,force)<0'
+!  Number of history
+   specs%nhist = 3
 !  This is the initialization for ionmov==8
 !  ------------------------------------------
  case (8)
@@ -725,6 +739,8 @@ character(len=fnlen), target, intent(in) :: filnam_ds(:)   ! dtfil%filnam_ds(5)
    specs%crit4xml='tolmxf'
 !  Name of specs%method
    specs%method = 'Verlet algorithm with a nose-hoover thermostat'
+!  Number of history
+   specs%nhist = 3
 !  This is the initialization for ionmov==9
 !  ------------------------------------------
  case (9)
@@ -737,6 +753,8 @@ character(len=fnlen), target, intent(in) :: filnam_ds(:)   ! dtfil%filnam_ds(5)
    specs%crit4xml='tolmxf'
 !  Name of specs%method
    specs%method = 'Langevin molecular dynamics'
+!  Number of history
+   specs%nhist = 3
 !  This is the initialization for ionmov==10
 !  -------------------------------------------
  case (10)
@@ -747,6 +765,8 @@ character(len=fnlen), target, intent(in) :: filnam_ds(:)   ! dtfil%filnam_ds(5)
    specs%crit4xml='tolmxf'
 !  Name of specs%method
    specs%method = 'BFGS with delocalized internal coordinates'
+!  Number of history
+   specs%nhist = 3
 !  This is the initialization for ionmov==11
 !  -------------------------------------------
  case (11)
@@ -757,6 +777,8 @@ character(len=fnlen), target, intent(in) :: filnam_ds(:)   ! dtfil%filnam_ds(5)
    specs%crit4xml='tolmxf'
 !  Name of specs%method
    specs%method = 'Conjugate gradient algorithm'
+!  Number of history
+   specs%nhist = 3   
 !  This is the initialization for ionmov==12
 !  -------------------------------------------
  case (12)
@@ -769,6 +791,8 @@ character(len=fnlen), target, intent(in) :: filnam_ds(:)   ! dtfil%filnam_ds(5)
    specs%crit4xml='tolmxf'
 !  Name of specs%method
    specs%method = 'Isokinetic ensemble molecular dynamics'
+!  Number of history
+   specs%nhist = 3
 !  This is the initialization for ionmov==13
 !  -------------------------------------------
  case (13)
@@ -781,6 +805,8 @@ character(len=fnlen), target, intent(in) :: filnam_ds(:)   ! dtfil%filnam_ds(5)
    specs%crit4xml='tolmxf'
 !  Name of specs%method
    specs%method = 'Isothermal/isenthalpic ensemble molecular dynamics'
+!  Number of history
+   specs%nhist = 3
 !  This is the initialization for ionmov==14
 !  -------------------------------------------
  case (14)
@@ -794,6 +820,8 @@ character(len=fnlen), target, intent(in) :: filnam_ds(:)   ! dtfil%filnam_ds(5)
    specs%crit4xml='tolmxf'
 !  Name of specs%method
    specs%method = 'Symplectic algorithm Runge-Kutta-Nystrom SRKNa14'
+!  Number of history
+   specs%nhist = 3
 !  This is the initialization for ionmov==20
 !  -------------------------------------------
  case (20)
@@ -804,6 +832,8 @@ character(len=fnlen), target, intent(in) :: filnam_ds(:)   ! dtfil%filnam_ds(5)
    specs%crit4xml='tolmxf'
 !  Name of specs%method
    specs%method = 'Ionic positions relaxation using DIIS'
+!  Number of history
+   specs%nhist = 3
 !  This is the initialization for ionmov==21
 !  -------------------------------------------
  case (21)
@@ -813,6 +843,8 @@ character(len=fnlen), target, intent(in) :: filnam_ds(:)   ! dtfil%filnam_ds(5)
    specs%crit4xml='tolmxf'
 !  Name of specs%method
    specs%method = 'Steepest descend algorithm'
+!  Number of history
+   specs%nhist = 3
 !  This is the initialization for ionmov==22
 !  -------------------------------------------
  case (22)
@@ -821,6 +853,8 @@ character(len=fnlen), target, intent(in) :: filnam_ds(:)   ! dtfil%filnam_ds(5)
    specs%crit4xml='tolmxf'
 !  Name of specs%method
    specs%method = 'Limited-memory Broyden-Fletcher-Goldfard-Shanno method'
+!  Number of history
+   specs%nhist = 3
 !  This is the initialization for ionmov==23
 !  -------------------------------------------
  case (23)
@@ -834,6 +868,8 @@ character(len=fnlen), target, intent(in) :: filnam_ds(:)   ! dtfil%filnam_ds(5)
    specs%crit4xml='tolmxf'
 !  Name of specs%method
    specs%method = 'Using LOTF Molecular dynamics'
+!  Number of history
+   specs%nhist = 3
 !  This is the initialization for ionmov==24
 !  -------------------------------------------
  case (24)
@@ -847,6 +883,8 @@ character(len=fnlen), target, intent(in) :: filnam_ds(:)   ! dtfil%filnam_ds(5)
    specs%crit4xml='none'
 !  Name of specs%method
    specs%method = 'Symplectic velocity verlet Molecular dynamics'
+!  Number of history
+   specs%nhist = 3
 !  This is the initialization for ionmov==25
 !  -------------------------------------------
  case (25)                ! Hybrid Monte Carlo algorithm (fixed lattice vectors)
@@ -860,19 +898,6 @@ character(len=fnlen), target, intent(in) :: filnam_ds(:)   ! dtfil%filnam_ds(5)
    specs%crit4xml='none'
 !  Name of specs%method
    specs%method = 'Hybrid Monte Carlo'
-
-case (31)
-   specs%ncycle=1 ! Number of internal cycles for first itime
-   specs%isFconv=.FALSE.     ! Convergence is not used for MD
-   specs%isVused=.FALSE. ! Velocities are used
-!  TEMPORARLY optcell is not allow
-   specs%isARused=.FALSE.
-!  Values use in XML Output
-   specs%type4xml='none'
-   specs%crit4xml='none'
-!  Name of specs%method
-   write(specs%method,'(a,1p,e12.5,a)')&
-     'Monte carlo'
 
 case default
    write(msg,"(a,i0)")"Wrong value for ionmov: ",ab_mover%ionmov
