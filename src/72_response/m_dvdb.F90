@@ -4352,7 +4352,6 @@ subroutine dvdb_interpolate_and_write(dtfil, ngfft, ngfftf, cryst, dvdb, &
  natom = cryst%natom
  natom3 = 3 * natom
  nspden = dvdb%nspden
- nperts_read = dvdb%numv1
 
  ! ================================================== !
  ! Sort the q-points to read and those to interpolate
@@ -4370,6 +4369,7 @@ subroutine dvdb_interpolate_and_write(dtfil, ngfft, ngfftf, cryst, dvdb, &
  pertsy = zero
 
  nqpt_read = 0
+ nperts_read = 0
  nqpt_interpolate = 0
  nperts_interpolate = 0
 
@@ -4386,6 +4386,13 @@ subroutine dvdb_interpolate_and_write(dtfil, ngfft, ngfftf, cryst, dvdb, &
      nqpt_read = nqpt_read + 1
      q_read(:,nqpt_read) = qpt(:) 
      iq_read(nqpt_read) = db_iqpt
+
+     ! Count the perturbations
+     npc = dvdb_get_pinfo(dvdb, db_iqpt, cplex, pinfo)
+     do ipc=1,npc
+       idir = pinfo(1,ipc); iat = pinfo(2,ipc); ipert = pinfo(3, ipc)
+       if (iat .le. natom) nperts_read = nperts_read + 1
+     end do
 
    else
 

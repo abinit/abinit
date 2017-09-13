@@ -1223,7 +1223,9 @@ logical function iwrite_fftdatar(mpi_enreg) result(ans)
  ans = (xmpi_paral==0 .or. &                                  ! No MPI
   (mpi_enreg%paral_kgb==0 .and. mpi_enreg%me==0) .or. &       ! paral_kgb=0 does not use MPI-FFT and cartesian communicators. 
   (mpi_enreg%paral_kgb==1 .and. mpi_enreg%me_band==0 .and. &  ! select procs in one FFT communicator.
-  mpi_enreg%me_kpt==0 .and. mpi_enreg%me_spinor==0))
+  mpi_enreg%me_kpt==0 .and. mpi_enreg%me_spinor==0) .or.   &
+  (mpi_enreg%paral_pert==1 .and. mpi_enreg%me_cell==0) & ! Group master in perturbation communicator.
+  )
 
 end function iwrite_fftdatar
 !!***
