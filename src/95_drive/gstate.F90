@@ -142,6 +142,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  use m_hdr
  use m_ebands
 
+ use m_ddb_hdr,          only : ddb_hdr_type, ddb_hdr_init, ddb_hdr_free, ddb_hdr_open_write
  use m_fstrings,         only : strcat, sjoin
  use m_kpts,             only : tetra_from_kptrlatt
  use m_pawang,           only : pawang_type
@@ -159,7 +160,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 &                               electronpositron_calctype
  use m_scfcv,            only : scfcv_t,scfcv_init, scfcv_destroy, scfcv_run
  use m_iowf,             only : outwf
- use m_ioarr,            only : read_rhor
+ use m_ioarr,            only : ioarr,read_rhor
  use defs_wvltypes,      only : wvl_data,coulomb_operator,wvl_wf_type
 #if defined HAVE_BIGDFT
  use BigDFT_API,         only : wvl_timing => timing,xc_init,xc_end,XC_MIXED,XC_ABINIT,&
@@ -194,7 +195,6 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  use interfaces_64_psp
  use interfaces_65_paw
  use interfaces_67_common
- use interfaces_72_response
  use interfaces_79_seqpar_mpi
  use interfaces_95_drive, except_this_one => gstate
 !End of the abilint section
@@ -234,7 +234,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 #if defined HAVE_BIGDFT
  integer :: icoulomb
 #endif
- integer :: ask_accurate,bantot,choice,comm_psp,fullinit
+ integer :: accessfil,ask_accurate,bantot,choice,comm_psp,fform,fullinit
  integer :: gnt_option,gscase,iatom,idir,ierr,ii,indx,jj,kk,ios,itypat
  integer :: ixfh,izero,mcg,me,mgfftf,mpert,msize,mu,my_natom,my_nspinor
  integer :: nblok,nfftf,nfftot,npwmin
@@ -242,7 +242,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  integer :: pwind_alloc,rdwrpaw,comm,tim_mkrho,use_sc_dmft
  integer :: cnt,spin,band,ikpt
  real(dp) :: cpus,ecore,ecut_eff,ecutdg_eff,etot,fermie
- real(dp) :: gsqcut_eff,gsqcut_shp,gsqcutc_eff,hyb_range,residm,tolwfr,ucvol
+ real(dp) :: tolwfr,gsqcut_eff,gsqcut_shp,gsqcutc_eff,hyb_range,residm,ucvol
  logical :: read_wf_or_den,has_to_init,call_pawinit,write_wfk
  logical :: wvlbigdft=.false.,wvl_debug=.false.
  character(len=500) :: message
@@ -261,6 +261,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  type(wffile_type) :: wff1,wffnew,wffnow
  type(ab_xfh_type) :: ab_xfh
  type(ddb_type) :: ddb
+ type(ddb_hdr_type) :: ddb_hdr
  type(scfcv_t) :: scfcv_args
 !arrays
  integer :: ngfft(18),ngfftf(18)
@@ -301,10 +302,10 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  if (dtset%usewvl == 1) then
 
 !  If usewvl: wvlbigdft indicates that the BigDFT workflow will be followed
-   if(dtset%wvl_bigdft_comp==1) wvlbigdft=.true.
+   wvlbigdft=(dtset%wvl_bigdft_comp==1)
 
 !  Default value, to be set-up elsewhere.
-   wvl%descr%h(:)                 = dtset%wvl_hgrid
+   wvl%descr%h(:) = dtset%wvl_hgrid
 
 #if defined HAVE_BIGDFT
    wvl%descr%paw%usepaw=psps%usepaw
@@ -347,6 +348,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 
  ecore=zero
  results_gs%pel(1:3)   =zero
+ results_gs%grchempottn(:,:)=zero
  results_gs%grewtn(:,:)=zero
 !MT Feb 2012: I dont know why but grvdw has to be allocated
 !when using BigDFT to ensure success on inca_gcc44_sdebug
@@ -897,7 +899,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    if (psp_gencond==1.or.call_pawinit) then
      call timab(553,1,tsec)
      gsqcut_shp=two*abs(dtset%diecut)*dtset%dilatmx**2/pi**2
-     hyb_range=zero;if (dtset%ixc<0) call libxc_functionals_get_hybridcoef(hyb_range=hyb_range)
+     hyb_range=zero;if (dtset%ixc<0) call libxc_functionals_get_hybridparams(hyb_range=hyb_range)
      call pawinit(gnt_option,gsqcut_shp,hyb_range,dtset%pawlcutd,dtset%pawlmix,&
 &     psps%mpsang,dtset%pawnphi,dtset%nsym,dtset%pawntheta,&
 &     pawang,pawrad,dtset%pawspnorb,pawtab,dtset%pawxcdev,dtset%xclevel,dtset%usepotzero)
@@ -962,9 +964,17 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 
        ! Read density
        rdwrpaw=psps%usepaw; if(dtfil%ireadwf/=0) rdwrpaw=0
-       call read_rhor(dtfil%fildensin, cplex1, dtset%nspden, nfftf, ngfftf, rdwrpaw, &
-       mpi_enreg, rhor, hdr_den, pawrhoij, comm, check_hdr=hdr)
-       results_gs%etotal = hdr_den%etot; call hdr_free(hdr_den)
+       if (dtset%usewvl==0) then
+         call read_rhor(dtfil%fildensin, cplex1, dtset%nspden, nfftf, ngfftf, rdwrpaw, &
+         mpi_enreg, rhor, hdr_den, pawrhoij, comm, check_hdr=hdr)
+         results_gs%etotal = hdr_den%etot; call hdr_free(hdr_den)
+       else
+         fform=52 ; accessfil=0
+         if (dtset%iomode == IO_MODE_MPI ) accessfil=4
+         if (dtset%iomode == IO_MODE_ETSF) accessfil=3
+         call ioarr(accessfil,rhor,dtset,results_gs%etotal,fform,dtfil%fildensin,hdr,&
+&         mpi_enreg,ngfftf,cplex1,nfftf,pawrhoij,1,rdwrpaw,wvl%den)
+       end if
 
        if (rdwrpaw/=0) then
          call hdr_update(hdr,bantot,etot,fermie,residm,&
@@ -1070,7 +1080,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 !    Warning : should check the use of results_gs%residm
 !    One might make them separate variables.
 
-    ! Read densiry and get Fermi level from hdr_den
+    ! Read density and get Fermi level from hdr_den
      call read_rhor(dtfil%fildensin, cplex1, dtset%nspden, nfftf, ngfftf, rdwrpaw, &
      mpi_enreg, rhor, hdr_den, pawrhoij, comm, check_hdr=hdr)
      results_gs%etotal = hdr_den%etot; results_gs%energies%e_fermie = hdr_den%fermie
@@ -1202,7 +1212,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 !    ========================================
 !    New structure for geometry optimization
 !    ========================================
-   else if (dtset%ionmov>50.or.dtset%ionmov<=23) then
+   else if (dtset%ionmov>50.or.dtset%ionmov<=25) then
 
      ! TODO: return conv_retcode
      call mover(scfcv_args,ab_xfh,acell,amass,dtfil,&
@@ -1222,7 +1232,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    else ! Not an allowed option
      write(message, '(a,i0,2a)' )&
 &     'Disallowed value for ionmov=',dtset%ionmov,ch10,&
-&     'Allowed values are: 1,2,3,4,5,6,7,8,9,10,11,12,13,14,20,21 and 30'
+&     'Allowed values are: 1,2,3,4,5,6,7,8,9,10,11,12,13,14,20,21,22,23,24 and 30'
      MSG_BUG(message)
    end if
 
@@ -1303,6 +1313,8 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 &   dtset%mband,mcg,dtset%mkmem,mpi_enreg,dtset%mpw,dtset%natom,&
 &   dtset%nband,dtset%nkpt,npwarr,dtset%nsppol,&
 &   occ,resid,response,dtfil%unwff2,wvl%wfs,wvl%descr)
+
+  !call printmagvtk(mpi_enreg,dtset%nspden,nfftf,ngfftf,rhor,rprimd,'DEN.vtk') SPr debug
  end if
 
  if (dtset%prtwf==2) then
@@ -1386,31 +1398,24 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  if (me==0.and.dtset%nimage==1.and.((dtset%iscf > 0).or.&
 & (dtset%berryopt == -1).or.(dtset%berryopt) == -3)) then
 
-   dscrpt=' Note : temporary (transfer) database '
-   ddbnm=trim(dtfil%filnam_ds(4))//'_DDB'
-!  tolwfr must be initialized here, but it is a dummy value
-   tolwfr=1.0_dp
-   call ddb_io_out (dscrpt,ddbnm,dtset%natom,dtset%mband,&
-&   dtset%nkpt,dtset%nsym,psps%ntypat,dtfil%unddb,DDB_VERSION,&
-&   acell,args_gs%amu,dtset%dilatmx,dtset%ecut,dtset%ecutsm,&
-&   dtset%intxc,dtset%iscf,dtset%ixc,dtset%kpt,dtset%kptnrm,&
-&   dtset%natom,dtset%nband,ngfft,dtset%nkpt,dtset%nspden,dtset%nspinor,&
-&   dtset%nsppol,dtset%nsym,psps%ntypat,occ,dtset%occopt,dtset%pawecutdg,&
-&   rprim,dtset%dfpt_sciss,dtset%spinat,dtset%symafm,dtset%symrel,&
-&   dtset%tnons,tolwfr,dtset%tphysel,dtset%tsmear,&
-&   dtset%typat,dtset%usepaw,dtset%wtk,xred,psps%ziontypat,dtset%znucl)
-
    if (dtset%iscf > 0) then
      nblok = 2          ! 1st blok = energy, 2nd blok = gradients
    else
      nblok = 1
    end if
-   fullinit = 0 ; choice=2
-   call psddb8 (choice,psps%dimekb,psps%ekb,fullinit,psps%indlmn,&
-&   psps%lmnmax,nblok,psps%ntypat,dtfil%unddb,pawtab,&
-&   psps%pspso,psps%usepaw,psps%useylm,DDB_VERSION)
 
-   mpert = dtset%natom + 6   ; msize = 3*mpert
+   dscrpt=' Note : temporary (transfer) database '
+   ddbnm=trim(dtfil%filnam_ds(4))//'_DDB'
+
+   call ddb_hdr_init(ddb_hdr,dtset,psps,pawtab,DDB_VERSION,dscrpt,&
+&                    nblok,xred=xred,occ=occ,ngfft=ngfft)
+
+   call ddb_hdr_open_write(ddb_hdr,ddbnm,dtfil%unddb,fullinit=0)
+
+   call ddb_hdr_free(ddb_hdr)
+
+   choice=2
+   mpert = dtset%natom + 6 ; msize = 3*mpert
 
 !  create a ddb structure with just one blok
    call ddb_malloc(ddb,msize,1,dtset%natom,dtset%ntypat)
@@ -1469,7 +1474,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  end if
 
  if (dtset%nstep>0 .and. dtset%prtstm==0 .and. dtset%positron/=1) then
-   call clnup2(psps%n1xccc,results_gs%fred,results_gs%gresid,&
+   call clnup2(psps%n1xccc,results_gs%fred,results_gs%grchempottn,results_gs%gresid,&
 &   results_gs%grewtn,results_gs%grvdw,results_gs%grxc,dtset%iscf,dtset%natom,&
 &   results_gs%ngrvdw,dtset%optforces,dtset%optstress,dtset%prtvol,start,&
 &   results_gs%strten,results_gs%synlgr,xred)
@@ -1723,10 +1728,6 @@ subroutine setup2(dtset,npwtot,start,wfs,xred)
      call wrtout(std_out, message,'COLL')
 
    end if
-
-!DEBUG
-!write(std_out,*)' setup2 : leave '
-!ENDDEBUG
 
 #if !defined HAVE_BIGDFT
    if (.false.) write(std_out,*) wfs%ks

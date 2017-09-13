@@ -59,4 +59,5 @@ xcart
 #%%   Basic test of geometry optimization for water
 #%%   First computing the ground state of a close configuration
 #%%   Uses 5 different methods to find the relaxed positions
+#%% topics = MolecularDynamics, GeoOpt
 #%%<END TEST_INFO>

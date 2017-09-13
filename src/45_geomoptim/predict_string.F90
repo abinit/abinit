@@ -16,7 +16,8 @@
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
-!! itimimage=number of the current time for image propagation (itimimage+1 is to be predicted here)
+!! itimimage=time index for image propagation (itimimage+1 is to be predicted here)
+!! itimimage_eff=time index in the history
 !! list_dynimage(nimage)=list of dynamical images. The non-dynamical ones will not change.
 !!       Example : in the NEB of string method, one expect the two end images to be fixed.
 !! This is quite useful when ground states of the A and B states is known
@@ -25,29 +26,29 @@
 !! ndynimage=number of dynamical images
 !! nimage=number of images (on current proc)
 !! nimage_tot=total number of images
-!! ntimimage=dimension of several arrays
+!! ntimimage_stored=number of time steps stored in the history
 !!
 !! OUTPUT
 !!
 !! SIDE EFFECTS
 !! mep_param=several parameters for Minimal Energy Path (MEP) search
-!! results_img(ntimimage,nimage)=datastructure that hold all the history of previous computations.
+!! results_img(ntimimage_stored,nimage)=datastructure that holds the history of previous computations.
 !!   results_img(:,:)%acell(3)
-!!    at input, history of the values of acell for all images, up to itimimage
+!!    at input, history of the values of acell for all images
 !!    at output, the predicted values of acell for all images
 !!   results_img(:,:)%results_gs
-!!    at input, history of the values of energies and forces for all images, up to itimimage
+!!    at input, history of the values of energies and forces for all images
 !!   results_img(:,:)%rprim(3,3)
-!!    at input, history of the values of rprim for all images, up to itimimage
+!!    at input, history of the values of rprim for all images
 !!    at output, the predicted values of rprim for all images
 !!   results_img(:,:)%vel(3,natom)
-!!    at input, history of the values of vel for all images, up to itimimage
+!!    at input, history of the values of vel for all images
 !!    at output, the predicted values of vel for all images
 !!   results_img(:,:)%vel_cell(3,3)
-!!    at input, history of the values of vel_cell for all images, up to itimimage
+!!    at input, history of the values of vel_cell for all images
 !!    at output, the predicted values of vel_cell for all images
 !!   results_img(:,:)%xred(3,natom)
-!!    at input, history of the values of xred for all images, up to itimimage
+!!    at input, history of the values of xred for all images
 !!    at output, the predicted values of xred for all images
 !!
 !! PARENTS
@@ -65,8 +66,8 @@
 
 #include "abi_common.h"
 
-subroutine predict_string(itimimage,list_dynimage,mep_param,mpi_enreg,natom,&
-&                         ndynimage,nimage,nimage_tot,ntimimage,results_img)
+subroutine predict_string(itimimage,itimimage_eff,list_dynimage,mep_param,mpi_enreg,natom,&
+&                         ndynimage,nimage,nimage_tot,ntimimage_stored,results_img)
 
 
  use defs_basis
@@ -89,16 +90,17 @@ subroutine predict_string(itimimage,list_dynimage,mep_param,mpi_enreg,natom,&
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: itimimage,natom,ndynimage,nimage,nimage_tot,ntimimage
+ integer,intent(in) :: itimimage,itimimage_eff,natom,ndynimage
+ integer,intent(in) :: nimage,nimage_tot,ntimimage_stored
  type(mep_type),intent(inout) :: mep_param
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in)     :: list_dynimage(ndynimage)
- type(results_img_type) :: results_img(nimage,ntimimage)
+ type(results_img_type) :: results_img(nimage,ntimimage_stored)
 
 !Local variables-------------------------------
 !scalars
- integer :: idynimage,ierr,ii,iimage,iatom
+ integer :: idynimage,ierr,ii,iimage,iatom,next_itimimage
  real(dp) :: emax,emin,step
 !arrays
  real(dp),allocatable :: buffer(:,:),buffer_all(:,:)
@@ -120,7 +122,8 @@ subroutine predict_string(itimimage,list_dynimage,mep_param,mpi_enreg,natom,&
    ABI_ALLOCATE(xcart,(3,natom,nimage))
    ABI_ALLOCATE(fcart,(3,natom,nimage))
    ABI_ALLOCATE(rprimd,(3,3,nimage))
-   call get_geometry_img(etotal,natom,nimage,results_img(:,itimimage),fcart,rprimd,xcart,xred)
+   call get_geometry_img(etotal,natom,nimage,results_img(:,itimimage_eff),&
+&   fcart,rprimd,xcart,xred)
 
 !  EVOLUTION STEP
 !  ===============================================
@@ -269,12 +272,14 @@ subroutine predict_string(itimimage,list_dynimage,mep_param,mpi_enreg,natom,&
 
 !Store acell, rprim, xred and vel for the new iteration
  call xmpi_bcast(xred,0,mpi_enreg%comm_cell,ierr)
+ next_itimimage=itimimage_eff+1
+ if (next_itimimage>ntimimage_stored) next_itimimage=1
  do iimage=1,nimage
-   results_img(iimage,itimimage+1)%xred(:,:)    =xred(:,:,iimage)
-   results_img(iimage,itimimage+1)%acell(:)     =results_img(iimage,itimimage)%acell(:)
-   results_img(iimage,itimimage+1)%rprim(:,:)   =results_img(iimage,itimimage)%rprim(:,:)
-   results_img(iimage,itimimage+1)%vel(:,:)     =results_img(iimage,itimimage)%vel(:,:)
-   results_img(iimage,itimimage+1)%vel_cell(:,:)=results_img(iimage,itimimage)%vel_cell(:,:)
+   results_img(iimage,next_itimimage)%xred(:,:)    =xred(:,:,iimage)
+   results_img(iimage,next_itimimage)%acell(:)     =results_img(iimage,itimimage_eff)%acell(:)
+   results_img(iimage,next_itimimage)%rprim(:,:)   =results_img(iimage,itimimage_eff)%rprim(:,:)
+   results_img(iimage,next_itimimage)%vel(:,:)     =results_img(iimage,itimimage_eff)%vel(:,:)
+   results_img(iimage,next_itimimage)%vel_cell(:,:)=results_img(iimage,itimimage_eff)%vel_cell(:,:)
  end do
  ABI_DEALLOCATE(xred)
 

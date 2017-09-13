@@ -48,9 +48,10 @@
 !!      driver
 !!
 !! CHILDREN
-!!      d3sym,ddb_io_out,dfptnl_doutput,dfptnl_loop,ebands_free,fourdp,getcut
+!!      d3sym,dfptnl_doutput,dfptnl_loop,ebands_free,fourdp,getcut
 !!      getkgrid,getshell,hdr_free,hdr_init,hdr_update,initmv,inwffil,kpgio
-!!      mkcore,nlopt,psddb8,pspini,read_rhor,rhohxc,setsym,setup1,status
+!!      mkcore,nlopt,pspini,read_rhor,rhohxc,setsym,setup1,status
+!!      ddb_hdr_init, ddb_hdr_free, ddb_hdr_open_write
 !!      symmetrize_xred,sytens,timab,wffclose,wrtout
 !!
 !! SOURCE
@@ -76,8 +77,9 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,&
  use m_hdr
  use m_ebands
 
- use m_dynmat,   only : d3sym
- use m_ddb,      only : psddb8, nlopt, DDB_VERSION
+ use m_dynmat,   only : d3sym, sytens
+ use m_ddb,      only : nlopt, DDB_VERSION
+ use m_ddb_hdr,  only : ddb_hdr_type, ddb_hdr_init, ddb_hdr_free, ddb_hdr_open_write
  use m_ioarr,    only : read_rhor
  use m_pawrad,   only : pawrad_type
  use m_pawtab,   only : pawtab_type
@@ -132,6 +134,7 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,&
  character(len=fnlen) :: dscrpt
  type(ebands_t) :: bstruct
  type(hdr_type) :: hdr,hdr_den
+ type(ddb_hdr_type) :: ddb_hdr
  type(wffile_type) :: wffgs,wfftgs
  type(wvl_data) :: wvl
 !arrays
@@ -250,7 +253,7 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,&
 & ch10,' optical susceptibility tensors is:',ch10
  call wrtout(ab_out,message,'COLL')
  call wrtout(std_out,message,'COLL')
- 
+
  write(message,'(12x,a)')&
 & 'i1pert  i1dir   i2pert  i2dir   i3pert  i3dir'
  call wrtout(ab_out,message,'COLL')
@@ -280,6 +283,37 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,&
  write(message,'(a,a)') ch10,ch10
  call wrtout(ab_out,message,'COLL')
  call wrtout(std_out,message,'COLL')
+
+ !if (dtset%paral_rf == -1) then
+ write(std_out,'(a)')"--- !IrredPerts"
+ write(std_out,'(a)')'# List of irreducible perturbations for nonlinear'
+ write(std_out,'(a)')'irred_perts:'
+
+ n1 = 0
+ do i1pert = 1, natom + 2
+   do i1dir = 1, 3
+     do i2pert = 1, natom + 2
+       do i2dir = 1, 3
+         do i3pert = 1, natom + 2
+           do i3dir = 1,3
+             if (rfpert(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)==1) then
+               n1 = n1 + 1
+               write(std_out,'(a,i0)')"   - i1pert: ",i1pert
+               write(std_out,'(a,i0)')"     i1dir: ",i1dir
+               write(std_out,'(a,i0)')"     i2pert: ",i2pert
+               write(std_out,'(a,i0)')"     i2dir: ",i2dir
+               write(std_out,'(a,i0)')"     i3pert: ",i3pert
+               write(std_out,'(a,i0)')"     i3dir: ",i3dir
+             end if
+           end do
+         end do
+       end do
+     end do
+   end do
+ end do
+ write(std_out,'(a)')"..."
+   !MSG_ERROR_NODUMP("aborting now")
+ !end if
 
 !Set up for iterations
  ecut_eff= (dtset%ecut) * (dtset%dilatmx) **2
@@ -388,9 +422,10 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,&
 
 !Comput kxc (second- and third-order exchange-correlation kernel)
  option=3
- nkxc=2*nspden-1
+ nkxc=2*nspden-1 ! LDA
+ if(dtset%xclevel==2.and.nspden==1) nkxc=7  ! non-polarized GGA
+ if(dtset%xclevel==2.and.nspden==2) nkxc=19 ! polarized GGA
  nk3xc=3*nspden-2
- if(dtset%xclevel==2) nkxc=23
  ABI_ALLOCATE(kxc,(nfft,nkxc))
  ABI_ALLOCATE(k3xc,(nfft,nk3xc))
 
@@ -474,22 +509,13 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,&
    call status(0,dtfil%filstat,iexit,level,'call ioddb8_ou')
 
    dscrpt=' Note : temporary (transfer) database '
-!  tolwfr must be initialized here, but it is a dummy value
-   tolwfr=1.0_dp
-   call ddb_io_out(dscrpt,dtfil%fnameabo_ddb,natom,mband,&
-&   nkpt,nsym,psps%ntypat,dtfil%unddb,DDB_VERSION,&
-&   dtset%acell_orig(1:3,1),dtset%amu_orig(:,1),dtset%dilatmx,dtset%ecut,dtset%ecutsm,&
-&   dtset%intxc,dtset%iscf,dtset%ixc,dtset%kpt,dtset%kptnrm,&
-&   natom,dtset%nband,dtset%ngfft,nkpt,nspden,nspinor,&
-&   nsppol,nsym,psps%ntypat,occ,dtset%occopt,dtset%pawecutdg,&
-&   dtset%rprim_orig(1:3,1:3,1),dtset%dfpt_sciss,dtset%spinat,dtset%symafm,dtset%symrel,&
-&   dtset%tnons,tolwfr,dtset%tphysel,dtset%tsmear,&
-&   dtset%typat,dtset%usepaw,dtset%wtk,xred,psps%ziontypat,dtset%znucl)
 
-   nblok=1 ; fullinit=1 ; choice=2
-   call psddb8 (choice,psps%dimekb,psps%ekb,fullinit,psps%indlmn,&
-&   psps%lmnmax,nblok,psps%ntypat,dtfil%unddb,&
-&   pawtab,psps%pspso,psps%usepaw,psps%useylm,DDB_VERSION)
+   call ddb_hdr_init(ddb_hdr,dtset,psps,pawtab,DDB_VERSION,dscrpt,&
+&                    1,xred=xred,occ=occ)
+
+   call ddb_hdr_open_write(ddb_hdr, dtfil%fnameabo_ddb, dtfil%unddb)
+
+   call ddb_hdr_free(ddb_hdr)
 
 !  Call main output routine
    call dfptnl_doutput(blkflg,d3lo,dtset%mband,mpert,dtset%nkpt,dtset%natom,dtset%ntypat,dtfil%unddb)

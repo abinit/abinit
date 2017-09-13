@@ -93,6 +93,7 @@ subroutine smpbz(brav,iout,kptrlatt,mkpt,nkpt,nshiftk,option,shiftk,spkpt)
 
 !Local variables -------------------------
 !scalars
+ integer,parameter :: prtvol=0
  integer :: ii,ikshft,jj,kk,nkpout,nkptlatt,nn
  real(dp) :: shift
  character(len=500) :: message
@@ -153,7 +154,7 @@ subroutine smpbz(brav,iout,kptrlatt,mkpt,nkpt,nshiftk,option,shiftk,spkpt)
 &   -kptrlatt(1,1)*kptrlatt(2,3)*kptrlatt(3,2)
 
 !  Simple Lattice
-   call wrtout(std_out,'       Simple Lattice Grid ','COLL')
+   if (prtvol > 0) call wrtout(std_out,'       Simple Lattice Grid ','COLL')
    if (mkpt<nkptlatt*nshiftk) then
      write(message, '(a,a,a,i8,a,a,a,a,a)' )&
 &     'The value of mkpt is not large enough. It should be',ch10,&
@@ -230,7 +231,7 @@ subroutine smpbz(brav,iout,kptrlatt,mkpt,nkpt,nshiftk,option,shiftk,spkpt)
  else if(brav==2)then
 
 !  Face-Centered Lattice
-   call wrtout(std_out,'       Face-Centered Lattice Grid ','COLL')
+   if (prtvol > 0) call wrtout(std_out,'       Face-Centered Lattice Grid ','COLL')
    if (mkpt<ngkpt(1)*ngkpt(2)*ngkpt(3)*nshiftk/2) then
      write(message, '(a,a,a,i8,a,a,a,a,a)' )&
 &     'The value of mkpt is not large enough. It should be',ch10,&
@@ -307,7 +308,7 @@ subroutine smpbz(brav,iout,kptrlatt,mkpt,nkpt,nshiftk,option,shiftk,spkpt)
  else if(brav==3)then
 
 !  Body-Centered Lattice (not mandatory cubic !)
-   call wrtout(std_out,'       Body-Centered Lattice Grid ','COLL')
+   if (prtvol > 0) call wrtout(std_out,'       Body-Centered Lattice Grid ','COLL')
    if (mkpt<ngkpt(1)*ngkpt(2)*ngkpt(3)*nshiftk/4) then
      write(message, '(a,a,a,i8,a,a,a,a,a)' )&
 &     'The value of mkpt is not large enough. It should be',ch10,&
@@ -386,7 +387,7 @@ subroutine smpbz(brav,iout,kptrlatt,mkpt,nkpt,nshiftk,option,shiftk,spkpt)
  else if(brav==4)then
 
 !  Hexagonal Lattice  (D6h)
-   call wrtout(std_out,'       Hexagonal Lattice Grid ','COLL')
+   if (prtvol > 0) call wrtout(std_out,'       Hexagonal Lattice Grid ','COLL')
    if (mkpt<ngkpt(1)*ngkpt(2)*ngkpt(3)) then
      write(message, '(a,a,a,i8,a,a,a,a,a)' )&
 &     'The value of mkpt is not large enough. It should be',ch10,&
@@ -446,8 +447,7 @@ subroutine smpbz(brav,iout,kptrlatt,mkpt,nkpt,nshiftk,option,shiftk,spkpt)
    MSG_BUG(message)
  end if
 
- if(option/=0)then
-
+ if (option/=0) then
 !  Put the Gamma point first
    if(nkpt>1)then
      do ii=1,nkpt
@@ -470,7 +470,6 @@ subroutine smpbz(brav,iout,kptrlatt,mkpt,nkpt,nshiftk,option,shiftk,spkpt)
      write(message, '(1x,i2,a2,3es16.8)' )ii,') ',spkpt(1,ii),spkpt(2,ii),spkpt(3,ii)
      call wrtout(iout,message,'COLL')
    end do
-
  end if
 
 end subroutine smpbz

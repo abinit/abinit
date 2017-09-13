@@ -48,7 +48,7 @@
 #%%   t25.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
 #%% extra_inputs = t25.ddb.in.gz
 #%% [paral_info]
-#%% max_nprocs = 1
+#%% max_nprocs = 4
 #%% [extra_info]
 #%% keywords = 
 #%% authors = Unknown
@@ -57,4 +57,5 @@
 #%%   BaTiO3 (see tests 18 to 21), but the DDB contains the q-wavevectors
 #%%   on a 2x2x2 FCC grid, finer than those tested for BaTiO3.
 #%%   Output : analysis of IFCs, as well as a few phonon frequencies.
+#%% topics = PhononBands
 #%%<END TEST_INFO>

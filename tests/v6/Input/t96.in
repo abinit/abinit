@@ -95,4 +95,5 @@ iatprj_bs 1 2
 #%% keywords = 
 #%% description = 
 #%%   anaddb test electron phonon coupling electron lifetime calculation, on hcp TiNb
+#%% topic = anaddbEPC
 #%%<END TEST_INFO>

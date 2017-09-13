@@ -378,7 +378,7 @@ def _str2filestotest(string):
         for tok in tokens[1:]:
             k, v = [s.strip() for s in tok.split("=")]
             if k in d:
-                err_msg = "Found multiple occurences of keyword %s" % k
+                err_msg = "Found multiple occurrences of keyword %s" % k
                 raise AbinitTestInfoParserError(err_msg)
             d[k] = v
         files_to_test.append(FileToTest(d))
@@ -410,6 +410,9 @@ TESTCNF_KEYWORDS = {
 "expected_failure": (_str2bool, "no" , "setup", "yes if the subprocess executing executable is expected to fail (retcode != 0) (default: no)"),
 "input_ddb"      : (str       , ""   , "setup", "The input DDB file read by anaddb"),
 "input_gkk"      : (str       , ""   , "setup", "The input GKK file read by anaddb"),
+"system_xml"     : (str       , ""   , "setup","The system.xml file read by multibinit"),
+"coeff_xml"      : (str       , ""   , "setup","The coeff.xml file read by multibinit"),
+"md_hist"        : (str       , ""   , "setup","The hist file file read by multibinit"),
 # [files]
 "files_to_test"  : (_str2filestotest, "", "files", "List with the output files that are be compared with the reference results. Format:\n" +
                                                    "\t file_name, tolnlines = int, tolabs = float, tolrel = float [,fld_options = -medium]\n" +
@@ -1149,7 +1152,7 @@ def input_file_has_vars(fname, ivars, comment="#", mode="any"):
         return:
             (bool, d)
             bool is True is the input file contains the specified variables
-            d is a dictionary with the matching lines (empty dict if no occurence).
+            d is a dictionary with the matching lines (empty dict if no occurrence).
     """
     # This algorithm is not very robust as it assumes that the variable and the line
     # are placed on the same line.
@@ -2644,16 +2647,42 @@ class MultibinitTest(BaseTest):
         t_stdin.write( self.id + ".out" + "\n")       # 2) formatted output file e.g. t13.out
 
         if self.input_ddb:
-            iddb_fname = os.path.join(self.workdir, self.input_ddb)  # Use output DDB of a previous run.
-
+            iddb_fname = os.path.join(self.inp_dir,self.input_ddb)
             if not os.path.isfile(iddb_fname):
                 self.exceptions.append(self.Error("%s no such DDB file: " % iddb_fname))
-
             iddb_fname = self.cygwin_path(iddb_fname)   # cygwin
+            t_stdin.write(iddb_fname + "\n")         # 3) input derivative database e.g. ddb.in
         else:
-            iddb_fname =  "system.xml" # Use xml file of a previous run
+            if self.system_xml:
+                sys_xml_fname =  os.path.join(self.inp_dir,self.system_xml)
+                if not os.path.isfile(sys_xml_fname):
+                    self.exceptions.append(self.Error("%s no such xml file: " % sys_xml_fname))
+                sys_xml_fname = self.cygwin_path(sys_xml_fname)
+                t_stdin.write(sys_xml_fname + "\n") # 3) input for system.xml XML
+            else:
+                self.exceptions.append(self.Error("%s no file avail for the system"))
 
-        t_stdin.write( iddb_fname + "\n")         # 3) input derivative database e.g. ddb.in / XML
+        if self.coeff_xml:
+            coeffxml_fname =  os.path.join(self.inp_dir,self.coeff_xml)
+            if not os.path.isfile(coeffxml_fname):
+                self.exceptions.append(self.Error("%s no such xml file for coeffs: " % coeffxml_fname))
+
+            coeffxml_fname = self.cygwin_path(coeffxml_fname)
+            t_stdin.write(coeffxml_fname + "\n") # 4) input for coefficients
+        else:
+            coeffxml_fname = "no"
+            t_stdin.write(coeffxml_fname + "\n")
+
+        if self.md_hist:
+            md_hist_fname =  os.path.join(self.inp_dir,self.md_hist)
+            if not os.path.isfile(md_hist_fname):
+                self.exceptions.append(self.Error("%s no such xml file for coeffs: " % md_hist_fname))
+
+            md_hist_fname = self.cygwin_path(md_hist_fname)
+            t_stdin.write(md_hist_fname + "\n") # 5) input for coefficients
+        else:
+            md_hist_fname = "no"
+            t_stdin.write(md_hist_fname + "\n")
 
         return t_stdin.getvalue()
 

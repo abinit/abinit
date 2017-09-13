@@ -50,11 +50,11 @@
 !!      predict_pimd
 !!
 !! CHILDREN
-!!      pimd_coord_transform,pimd_energies,pimd_force_transform,pimd_forces
-!!      pimd_initvel,pimd_langevin_forces,pimd_langevin_random
-!!      pimd_langevin_random_init,pimd_langevin_random_qtb,pimd_mass_spring
-!!      pimd_predict_taylor,pimd_predict_verlet,pimd_print,pimd_stresses
-!!      xcart2xred,xred2xcart
+!!      pimd_apply_constraint,pimd_coord_transform,pimd_energies
+!!      pimd_force_transform,pimd_forces,pimd_initvel,pimd_langevin_forces
+!!      pimd_langevin_random,pimd_langevin_random_init,pimd_langevin_random_qtb
+!!      pimd_mass_spring,pimd_predict_taylor,pimd_predict_verlet,pimd_print
+!!      pimd_stresses,xcart2xred,xred2xcart
 !!
 !! SOURCE
 
@@ -106,7 +106,7 @@ subroutine pimd_langevin_nvt(etotal,forces,itimimage,natom,pimd_param,prtvolimg,
  real(dp) :: dtion,eharm,eharm2,epot,friction,initemp,kt,kt_,rescale_temp
  real(dp) :: temperature1,temperature2,temp2_prev,thermtemp,tol
 !arrays
- real(dp) :: spring_prim(natom),stress_pimd(3,3,3),vel_cell(3,3)
+ real(dp) :: constraint_output(2),spring_prim(natom),stress_pimd(3,3,3),vel_cell(3,3)
  real(dp),allocatable :: alea(:,:,:),forces_orig(:,:,:),forces_pimd(:,:,:)
  real(dp),allocatable :: inertmass(:),langev(:,:),mass(:,:),quantummass(:),spring(:,:)
  real(dp),allocatable :: xcart(:,:,:),xcart_next(:,:,:),xcart_prev(:,:,:)
@@ -127,6 +127,7 @@ subroutine pimd_langevin_nvt(etotal,forces,itimimage,natom,pimd_param,prtvolimg,
  zeroforce=1
  if(pitransform==1) zeroforce=0
  if(pitransform==2) zeroforce=0
+ if(pimd_param%constraint==1) zeroforce=0
 
 !Allocation of local arrays
  ABI_ALLOCATE(xcart,(3,natom,trotter))
@@ -187,7 +188,7 @@ subroutine pimd_langevin_nvt(etotal,forces,itimimage,natom,pimd_param,prtvolimg,
 !If this is a calculation from scratch,generate random distribution of velocities
  irestart=1;if (itimimage==1) irestart=pimd_is_restart(mass,vel)
  if (irestart==0) then
-   call pimd_initvel(idum,mass,natom,initemp,trotter,vel)
+   call pimd_initvel(idum,mass,natom,initemp,trotter,vel,pimd_param%constraint,pimd_param%wtatcon)
  end if
 
 !Compute temperature at t
@@ -207,6 +208,8 @@ subroutine pimd_langevin_nvt(etotal,forces,itimimage,natom,pimd_param,prtvolimg,
  call pimd_force_transform(forces,1,natom,pitransform,trotter) !compute staging forces
  call pimd_forces(forces,natom,spring,pitransform,trotter,xcart)
  call pimd_langevin_forces(alea,forces,forces_pimd,friction,langev,mass,natom,trotter,vel)
+ call pimd_apply_constraint(pimd_param%constraint,constraint_output,forces_pimd,&
+& mass,natom,trotter,pimd_param%wtatcon,xcart)
 
 !Compute atomic positions at t+dt
  if (itimimage<=1) then
@@ -239,6 +242,8 @@ subroutine pimd_langevin_nvt(etotal,forces,itimimage,natom,pimd_param,prtvolimg,
 !    Reestimate the force
      call pimd_langevin_forces(alea,forces,forces_pimd,friction,&
 &     langev,mass,natom,trotter,vel)
+     call pimd_apply_constraint(pimd_param%constraint,constraint_output,forces_pimd,&
+&     mass,natom,trotter,pimd_param%wtatcon,xcart)
 !    Compute new positions
      call pimd_predict_verlet(dtion,forces_pimd,mass,natom,trotter,&
 &     xcart,xcart_next,xcart_prev)
@@ -271,7 +276,8 @@ subroutine pimd_langevin_nvt(etotal,forces,itimimage,natom,pimd_param,prtvolimg,
 !Print messages
  vel_cell=zero;prtstress=1;if (prtvolimg>=2) prtstress=0
  kt_=kt;if (use_qtb==1) kt_=temperature2*kb_HaK
- call pimd_print(eharm,eharm2,epot,forces_pimd,inertmass,irestart,&
+ call pimd_print(pimd_param%constraint,constraint_output,&
+& eharm,eharm2,epot,forces_pimd,inertmass,irestart,&
 & itimimage,kt_,natom,pimd_param%optcell,prtstress,prtvolimg,rprimd,&
 & stress_pimd,temperature1,temperature2,&
 & pimd_param%traj_unit,trotter,vel,vel_cell,xcart,xred)

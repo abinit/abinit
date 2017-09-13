@@ -32,11 +32,12 @@ qph1l   0.00000000E+00  0.00000000E+00  0.00000000E+00   1.0
 #%% files_to_test = 
 #%%   t69.out, tolnlines = 0, tolabs = 0.0, tolrel = 0.0
 #%% [paral_info]
-#%% max_nprocs = 1
+#%% max_nprocs = 2
 #%% [extra_info]
 #%% authors = Unknown
 #%% keywords = 
 #%% description = 
 #%%   H2 molecule in a reasonably large box
 #%%   Analysis of the test 68 results, using anaddb.
+#%% topics = TDepES
 #%%<END TEST_INFO>

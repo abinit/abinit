@@ -31,7 +31,6 @@
 !! chkint_le.F90
 !! chkint_ne.F90
 !! chkint_prt.F90
-!! chkneu.F90
 !! chkvars.F90
 !! compute_kgb_indicator.F90
 !! create_nc_file.F90

@@ -54,6 +54,7 @@
 !!  rprimd(3,3)=dimensional primitive translations in real space (bohr)
 !!  symrec(3,3,nsym)=symmetries in reciprocal space, reduced coordinates
 !!  typat(natom)=types of atoms
+!!  ucvol=unit cell volume
 !!  vtrial(nfft,nspden)= total local potential
 !!  vxc(nfft,nspden)=XC potential
 !!  xred(3,natom)=reduced dimensionless atomic coordinates
@@ -92,7 +93,7 @@
 
 subroutine pawgrnl(atindx1,dimnhat,dyfrnl,dyfr_cplex,eltfrnl,grnl,gsqcut,mgfft,my_natom,natom,&
 &          nattyp,nfft,ngfft,nhat,nlstr,nspden,nsym,ntypat,optgr,optgr2,optstr,optstr2,&
-&          pawang,pawfgrtab,pawrhoij,pawtab,ph1d,psps,qphon,rprimd,symrec,typat,vtrial,vxc,xred, &
+&          pawang,pawfgrtab,pawrhoij,pawtab,ph1d,psps,qphon,rprimd,symrec,typat,ucvol,vtrial,vxc,xred,&
 &          mpi_atmtab,comm_atom,comm_fft,mpi_comm_grid,me_g0,paral_kgb,distribfft) ! optional arguments (parallelism)
 
  use defs_basis
@@ -126,7 +127,7 @@ subroutine pawgrnl(atindx1,dimnhat,dyfrnl,dyfr_cplex,eltfrnl,grnl,gsqcut,mgfft,m
  integer,intent(in) :: dimnhat,dyfr_cplex,mgfft,my_natom,natom,nfft,nspden,nsym,ntypat
  integer,intent(in) :: optgr,optgr2,optstr,optstr2
  integer,optional,intent(in) :: me_g0,comm_atom,comm_fft,mpi_comm_grid,paral_kgb
- real(dp),intent(in) :: gsqcut
+ real(dp),intent(in) :: gsqcut,ucvol
  type(distribfft_type),optional,target,intent(in) :: distribfft
  type(pawang_type),intent(in) :: pawang
  type(pseudopotential_type),intent(in) :: psps
@@ -157,7 +158,7 @@ subroutine pawgrnl(atindx1,dimnhat,dyfrnl,dyfr_cplex,eltfrnl,grnl,gsqcut,mgfft,m
  logical,parameter :: save_memory=.true.
  logical :: has_phase,my_atmtab_allocated
  logical :: paral_atom,paral_atom_pawfgrtab,paral_atom_pawrhoij,paral_grid
- real(dp) :: dlt_tmp,fact_ucvol,grhat_x,hatstr_diag,rcut_jatom,ro,ro_d,ucvol
+ real(dp) :: dlt_tmp,fact_ucvol,grhat_x,hatstr_diag,rcut_jatom,ro,ro_d,ucvol_
  character(len=500) :: msg
  type(distribfft_type),pointer :: my_distribfft
  type(pawfgrtab_type),pointer :: pawfgrtab_iatom,pawfgrtab_jatom
@@ -254,8 +255,9 @@ subroutine pawgrnl(atindx1,dimnhat,dyfrnl,dyfr_cplex,eltfrnl,grnl,gsqcut,mgfft,m
 !----------------------------------------------------------------------
 !Initializations
 
-!Compute different geometric tensor, as well as ucvol, from rprimd
- call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
+!Compute different geometric tensors
+!ucvol is not computed here but provided as input arg
+ call metric(gmet,gprimd,-1,rmet,rprimd,ucvol_)
  fact_ucvol=ucvol/dble(nfftot)
 
 !Retrieve local potential according to the use of nhat in XC
@@ -472,6 +474,7 @@ subroutine pawgrnl(atindx1,dimnhat,dyfrnl,dyfr_cplex,eltfrnl,grnl,gsqcut,mgfft,m
          call pawgylm(rdum,pawfgrtab_iatom%gylmgr,rdum2,lm_size,pawfgrtab_iatom%nfgd,&
 &         0,1,0,pawtab(itypat),pawfgrtab_iatom%rfgd)
        end if
+
      end if
      if (optgr2==1.or.optstr2==1) then
        opt1=0;opt2=0;opt3=0
@@ -547,7 +550,6 @@ subroutine pawgrnl(atindx1,dimnhat,dyfrnl,dyfr_cplex,eltfrnl,grnl,gsqcut,mgfft,m
 &       vspl=psps%vlspl,comm_fft=my_comm_fft,me_g0=my_me_g0,&
 &       paral_kgb=my_paral_kgb,distribfft=my_distribfft)
      end if
-
 
 !    ------------------------------------------------------------------
 !    Loop over spin components
@@ -1441,6 +1443,7 @@ subroutine pawgrnl(atindx1,dimnhat,dyfrnl,dyfr_cplex,eltfrnl,grnl,gsqcut,mgfft,m
 
 !===== Convert stresses (add diag and off-diag contributions) =====
  if (optstr==1) then
+
 !  Has to compute int[nhat*vtrial]
    hatstr_diag=zero
    if (nspden==1.or.dimvtrial==1) then
@@ -1464,6 +1467,7 @@ subroutine pawgrnl(atindx1,dimnhat,dyfrnl,dyfr_cplex,eltfrnl,grnl,gsqcut,mgfft,m
    end if
 
 !  Convert hat contribution
+
    hatstr(1:3)=(hatstr(1:3)+hatstr_diag)/ucvol
    hatstr(4:6)= hatstr(4:6)/ucvol
 

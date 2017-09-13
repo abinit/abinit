@@ -155,7 +155,6 @@ _setup2: Arith. and geom. avg. npw (full set) are    6419.000    6419.000
   sigma(2 2)=  1.29129744E-05  sigma(3 1)=  9.01660761E-15
   sigma(3 3)=  1.29129744E-05  sigma(2 1)=  0.00000000E+00
 
- io1dm : about to open file t04o_VCLMB_1DM
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density

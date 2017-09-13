@@ -67,6 +67,8 @@ module m_phonon_supercell
  public :: freeze_displ_supercell
  public :: prt_supercell
  public :: copy_supercell
+ public :: findBound_supercell
+ public :: getPBCIndexes_supercell
  public :: destroy_supercell
 !!***
 
@@ -87,18 +89,21 @@ CONTAINS  !=====================================================================
 !!          1 find smallest supercell which will accomodate phonon qphon = (1/2,1/2,1/2) or ...
 !! rprimd(3,3) = real space lattice vectors (bohr)
 !! xcart(3,natom) = cartesian positions of atoms in primitive cell
+!! ordering = if true,  typat will be 1 1 1 1 1 1 2 2 2 2 2 2 3 3 3 3 ....
+!!            if false, typat will be 1 2 3 4 1 2 3 4 1 2 3 4 1 2 3 4 ....
 !!
 !! OUTPUT
 !! scell = supercell structure to be initialized
 !!
 !! PARENTS
-!!      freeze_displ_allmodes,m_effective_potential,mover_effpot
+!!      freeze_displ_allmodes,m_effective_potential,m_fit_polynomial_coeff
+!!      mover_effpot
 !!
 !! CHILDREN
 !!
 !! SOURCE
 
-subroutine init_supercell(natom, option, qphon, rprimd, typat, xcart, scell)
+subroutine init_supercell(natom, option, qphon, rprimd, typat, xcart, scell,ordering)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -112,6 +117,7 @@ subroutine init_supercell(natom, option, qphon, rprimd, typat, xcart, scell)
 !scalars
  integer, intent(in) :: natom, option
  type(supercell_type), intent(out) :: scell
+ logical,optional,intent(in) :: ordering
 !arrays
  integer , intent(in) :: typat(natom)
  real(dp), intent(in) :: qphon(3)
@@ -123,11 +129,19 @@ subroutine init_supercell(natom, option, qphon, rprimd, typat, xcart, scell)
  integer :: ii, maxsc, i1,i2,i3, iscmult
  integer :: iatom, iatom_supercell
  real(dp) :: qbymult
+ logical :: ordering_tmp
 !arrays
  integer :: r_cell(3)
  integer :: supercell(3) ! number of primitive cells in each direction for the supercell
  character(len=500) :: msg
 ! *************************************************************************
+
+!Set the optional variable ordering
+ if (present(ordering)) then
+   ordering_tmp = ordering
+ else
+   ordering_tmp = .false.
+ end if
 
 ! maximum number of unit cells in a given direction
  maxsc = 10
@@ -170,21 +184,39 @@ subroutine init_supercell(natom, option, qphon, rprimd, typat, xcart, scell)
  ABI_ALLOCATE(scell%atom_indexing_supercell,(scell%natom_supercell))
  ABI_ALLOCATE(scell%uc_indexing_supercell,(3,scell%natom_supercell))
 
- iatom_supercell = 0
- do i1 = 1, supercell(1)
-   do i2 = 1, supercell(2)
-     do i3 = 1, supercell(3)
-       do iatom = 1, natom
-         iatom_supercell = iatom_supercell + 1
-         r_cell = (/i1-1,i2-1,i3-1/)
-         scell%xcart_supercell_ref(:,iatom_supercell) = xcart(:,iatom) + matmul(rprimd,r_cell)
-         scell%atom_indexing_supercell(iatom_supercell) = iatom
-         scell%uc_indexing_supercell(:,iatom_supercell) = r_cell
-         scell%typat_supercell(iatom_supercell) = typat(iatom)
+ if (ordering_tmp) then
+   iatom_supercell = 0
+   do iatom = 1, natom
+     do i1 = 1, supercell(1)
+       do i2 = 1, supercell(2)
+         do i3 = 1, supercell(3)
+           iatom_supercell = iatom_supercell + 1
+           r_cell = (/i1-1,i2-1,i3-1/)
+           scell%xcart_supercell_ref(:,iatom_supercell) = xcart(:,iatom) + matmul(rprimd,r_cell)
+           scell%atom_indexing_supercell(iatom_supercell) = iatom
+           scell%uc_indexing_supercell(:,iatom_supercell) = r_cell
+           scell%typat_supercell(iatom_supercell) = typat(iatom)
+         end do
        end do
      end do
    end do
- end do
+ else
+   iatom_supercell = 0
+   do i1 = 1, supercell(1)
+     do i2 = 1, supercell(2)
+       do i3 = 1, supercell(3)
+         do iatom = 1, natom
+           iatom_supercell = iatom_supercell + 1
+           r_cell = (/i1-1,i2-1,i3-1/)
+           scell%xcart_supercell_ref(:,iatom_supercell) = xcart(:,iatom) + matmul(rprimd,r_cell)
+           scell%atom_indexing_supercell(iatom_supercell) = iatom
+           scell%uc_indexing_supercell(:,iatom_supercell) = r_cell
+           scell%typat_supercell(iatom_supercell) = typat(iatom)
+         end do
+       end do
+     end do
+   end do
+ end if
 
  ABI_CHECK(iatom_supercell == scell%natom_supercell, "iatom_supercell /= scell%natom_supercell")
 
@@ -432,7 +464,99 @@ subroutine copy_supercell (scell_in,scell_copy)
 end subroutine copy_supercell
 !!***
 
+!!****f* m_effective_potential/getPBCIndexes_supercell
+!! NAME
+!!
+!! FUNCTION
+!! Get the index of the cell by using PBC
+!!
+!! INPUTS
+!! index  = index of the cell into the supercell
+!! n_cell = number of total cell
+!!
+!! OUTPUT
+!! index  = index of the cell into the supercell with PBC
+!!
+!! SOURCE
 
+subroutine getPBCIndexes_supercell(index,n_cell)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'getPBCIndexes_supercell'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ---------------------------------------------
+  integer, intent(inout)  :: index(3)
+  integer, intent(in) :: n_cell(3)
+!Local variables ---------------------------------------
+  integer :: ii
+! *********************************************************************
+
+  do ii=1,3
+    do while (index(ii) > n_cell(ii)-1)
+      index(ii) = index(ii) - n_cell(ii)
+    end do
+    do while (index(ii) < 0)
+      index(ii) = index(ii) + n_cell(ii)
+    end do
+  end do
+
+end subroutine getPBCIndexes_supercell
+!!***
+
+!****f* m_phonon_supercell/findBound_supercell
+!! NAME
+!!  findBound_supercell
+!!
+!! FUNCTION
+!!  compute the bound of the supercell by considering the 0 0 0 (reference)
+!!  in the center of the supercell.
+!!  for example: (4 4 4) => min = -1 and max = 2
+!! 
+!! INPUTS
+!! n_cell(3) = size of the supercell (for example 3 3 3)   
+!!
+!! OUTPUT
+!! min = minimun of the range
+!! max = maximum of the range
+!!
+!! PARENTS
+!!      m_effective_potential
+!!
+!! CHILDREN
+!!
+!!
+!! SOURCE
+
+subroutine findBound_supercell(min,max,n_cell)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'findBound_supercell'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ---------------------------------------------
+  integer, intent(inout) :: min,max
+  integer, intent(in) :: n_cell
+!Local variables ---------------------------------------
+  if(abs(max)>abs(min)) then
+    max=(n_cell)/2; min=-max;  if(mod(n_cell,2)==0) max = max -1
+  else
+    min=-(n_cell)/2; max=-min; if(mod(n_cell,2)==0)  min= min +1
+  end if
+
+! *********************************************************************
+end subroutine findBound_supercell
+!!***
 
 !****f* m_phonon_supercell/destroy_supercell
 !!
@@ -448,8 +572,8 @@ end subroutine copy_supercell
 !! scell = supercell structure with data to be output
 !!
 !! PARENTS
-!!      freeze_displ_allmodes,m_effective_potential,m_phonon_supercell
-!!      mover_effpot
+!!      freeze_displ_allmodes,m_effective_potential,m_fit_polynomial_coeff
+!!      m_phonon_supercell,mover_effpot
 !!
 !! CHILDREN
 !!

@@ -88,7 +88,7 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
  use m_fstrings,        only : strcat, sjoin, itoa, ftoa
  use m_fftcore,         only : print_ngfft
  use m_kpts,            only : tetra_from_kptrlatt
- use m_bz_mesh,         only : kpath_t, kpath_init, kpath_free
+ use m_bz_mesh,         only : kpath_t, kpath_new, kpath_free
  use m_mpinfo,          only : destroy_mpi_enreg
  use m_esymm,           only : esymm_t, esymm_free, esymm_failed
  use m_pawang,          only : pawang_type
@@ -97,7 +97,7 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
  use m_paw_an,          only : paw_an_type, paw_an_init, paw_an_free, paw_an_nullify
  use m_paw_ij,          only : paw_ij_type, paw_ij_init, paw_ij_free, paw_ij_nullify
  use m_pawfgrtab,       only : pawfgrtab_type, pawfgrtab_free, pawfgrtab_init, pawfgrtab_print
- use m_pawrhoij,        only : pawrhoij_type, pawrhoij_alloc, pawrhoij_copy, pawrhoij_free, symrhoij
+ use m_pawrhoij,        only : pawrhoij_type, pawrhoij_alloc, pawrhoij_copy, pawrhoij_free, pawrhoij_get_nspden, symrhoij
  use m_pawdij,          only : pawdij, symdij
  use m_pawfgr,          only : pawfgr_type, pawfgr_init, pawfgr_destroy
  !use m_pawpwij,        only : pawpwff_t, pawpwff_init, pawpwff_free
@@ -310,7 +310,7 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
    cplex_dij=dtset%nspinor; cplex=1; ndij=1
 
    ABI_DT_MALLOC(pawrhoij,(cryst%natom))
-   nspden_rhoij=dtset%nspden; if (dtset%pawspnorb>0.and.dtset%nspinor==2) nspden_rhoij=4
+   nspden_rhoij=pawrhoij_get_nspden(dtset%nspden,dtset%nspinor,dtset%pawspnorb)
    call pawrhoij_alloc(pawrhoij,dtset%pawcpxocc,nspden_rhoij,dtset%nspinor,dtset%nsppol,cryst%typat,pawtab=pawtab)
 
    ! Initialize values for several basic arrays
@@ -498,7 +498,7 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
    zero, zero, half,   & !A
    zero, zero, zero], [3,nbounds])
 
-   call kpath_init(kpath,kptbounds,cryst%gprimd,ndivsm)
+   kpath = kpath_new(kptbounds,cryst%gprimd,ndivsm)
    ABI_FREE(kptbounds)
 
    intp_mband=dtset%nband(1); min_bsize=intp_mband; sh_coverage=dtset%userra

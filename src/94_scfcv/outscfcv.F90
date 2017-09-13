@@ -78,7 +78,7 @@
 !!  usecprj=1 if cprj datastructure has been allocated
 !!  vhartr(nfft)=Hartree potential
 !!  vxc(nfft,nspden)=xc potential
-!!  vtrial(nfft,nspden)=the trial potential
+!!  vtrial(nfft,nspden)=the trial potential = vxc + vpsp + vhartr, roughly speaking
 !!  xccc3d(n3xccc)=3D core electron density for XC core correction (bohr^-3)
 !!  xred(3,natom)=reduced dimensionless atomic coordinates
 !!
@@ -107,14 +107,15 @@
 !!      bonds_lgth_angles,bound_deriv,calc_efg,calc_fc,calcdensph
 !!      compute_coeff_plowannier,crystal_free,crystal_init,datafordmft,denfgr
 !!      destroy_dmft,destroy_oper,destroy_plowannier,dos_calcnwrite,ebands_free
-!!      ebands_init,ebands_prtbltztrp,epjdos_free,fatbands_ncwrite
-!!      fftdatar_write,free_my_atmtab,get_my_atmtab,init_dmft,init_oper
-!!      init_plowannier,ioarr,mag_constr_e,mlwfovlp,mlwfovlp_qp,multipoles_out
-!!      optics_paw,optics_paw_core,optics_vloc,out1dm,outkss,outwant
-!!      partial_dos_fractions,partial_dos_fractions_paw,pawmkaewf,pawprt
-!!      pawrhoij_copy,pawrhoij_nullify,posdoppler,poslifetime,print_dmft
-!!      prt_cif,prtfatbands,read_atomden,simpson_int,sort_dp,spline,splint
-!!      timab,wrtout,xmpi_sum,xmpi_sum_master
+!!      ebands_init,ebands_interpolate_kpath,ebands_prtbltztrp,ebands_write
+!!      epjdos_free,fatbands_ncwrite,fftdatar_write,free_my_atmtab
+!!      get_my_atmtab,init_dmft,init_oper,init_plowannier,ioarr,mag_constr_e
+!!      mlwfovlp,mlwfovlp_qp,multipoles_out,optics_paw,optics_paw_core
+!!      optics_vloc,out1dm,outkss,outwant,partial_dos_fractions
+!!      partial_dos_fractions_paw,pawmkaewf,pawprt,pawrhoij_copy
+!!      pawrhoij_nullify,posdoppler,poslifetime,print_dmft,prt_cif,prtfatbands
+!!      read_atomden,simpson_int,sort_dp,spline,splint,timab,wrtout,xmpi_sum
+!!      xmpi_sum_master
 !!
 !! SOURCE
 
@@ -184,7 +185,6 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  use interfaces_18_timing
  use interfaces_28_numeric_noabirule
  use interfaces_41_geometry
- use interfaces_53_spacepar
  use interfaces_54_abiutil
  use interfaces_62_iowfdenpot
  use interfaces_65_paw
@@ -223,7 +223,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  real(dp),intent(in) :: vpsp(nfft)
  real(dp),intent(inout) :: cg(2,mcg)
  real(dp),intent(inout) :: nhat(nfft,nspden*psps%usepaw)
- real(dp),intent(inout) :: rhor(nfft,nspden),vtrial(nfft,nspden)
+ real(dp),intent(inout),target :: rhor(nfft,nspden),vtrial(nfft,nspden)
  real(dp),intent(inout) :: vxc(nfft,nspden),xred(3,natom)
  real(dp),pointer :: elfr(:,:),grhor(:,:,:),lrhor(:,:),taur(:,:)
  type(pawcprj_type),intent(inout) :: cprj(natom,mcprj*usecprj)
@@ -271,6 +271,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  real(dp), allocatable :: vh1_integ(:)
  real(dp), allocatable :: vh1_corrector(:)
  real(dp), allocatable :: radii(:)
+ real(dp), ABI_CONTIGUOUS pointer :: rho_ptr(:,:)
  type(pawrhoij_type) :: pawrhoij_dum(0)
  type(pawrhoij_type),pointer :: pawrhoij_all(:)
  logical :: remove_inv
@@ -281,7 +282,6 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  type(ebands_t) :: ebands
  type(epjdos_t) :: dos
  type(plowannier_type) :: wan
- !type(skw_t) :: skw
 
 ! *************************************************************************
 
@@ -402,14 +402,18 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 
    ! output the density.
    if (dtset%prtden/=0) then
+     if (dtset%positron/=1) rho_ptr => rhor
+     if (dtset%positron==1) rho_ptr => electronpositron%rhor_ep
      call fftdatar_write("density",dtfil%fnameabo_app_den,dtset%iomode,hdr,&
-     crystal,ngfft,cplex1,nfft,nspden,rhor,mpi_enreg,ebands=ebands)
+     crystal,ngfft,cplex1,nfft,nspden,rho_ptr,mpi_enreg,ebands=ebands)
 
      if (dtset%positron/=0) then
+       if (dtset%positron/=1) rho_ptr => electronpositron%rhor_ep
+       if (dtset%positron==1) rho_ptr => rhor
        fname = trim(dtfil%fnameabo_app_den)//'_POSITRON'
        if (dtset%iomode == IO_MODE_ETSF) fname = strcat(fname, ".nc")
-       call fftdatar_write("ep_density",fname,dtset%iomode,hdr,&
-       crystal,ngfft,cplex1,nfft,nspden,electronpositron%rhor_ep,mpi_enreg,ebands=ebands)
+       call fftdatar_write("positron_density",fname,dtset%iomode,hdr,&
+       crystal,ngfft,cplex1,nfft,nspden,rho_ptr,mpi_enreg,ebands=ebands)
      end if
    end if
 
@@ -816,10 +820,12 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
      end if
 
      call fftdatar_write("vhartree_vloc",dtfil%fnameabo_app_vclmb,dtset%iomode,hdr,&
-     crystal,ngfft,cplex1,nfft,nspden,vwork,mpi_enreg,ebands=ebands)
+&     crystal,ngfft,cplex1,nfft,nspden,vwork,mpi_enreg,ebands=ebands)
 
-     call out1dm(dtfil%fnameabo_app_vclmb_1dm,mpi_enreg,natom,nfft,ngfft,nspden,psps%ntypat,&
-&     rhor,rprimd,dtset%typat,ucvol,vwork,xred,dtset%znucl)
+!TODO: find out why this combination of calls with fftdatar_write then out1dm fails on buda with 4 mpi-fft procs (npkpt 1). 
+!      For the moment comment it out. Only DS2 of mpiio test 27 fails
+!     call out1dm(dtfil%fnameabo_app_vclmb_1dm,mpi_enreg,natom,nfft,ngfft,nspden,psps%ntypat,&
+!&         rhor,rprimd,dtset%typat,ucvol,vwork,xred,dtset%znucl)
 
 ! TODO: add TEM phase with CE = (2 pi / lambda) (E+E0)/(E(E+2E0)) from p.49 of RE Dunin Borkowski 2004 encyclopedia of nanoscience volume 3 pp 41-99
 !   where E is energy of electron, E0 rest mass, lambda the relativistic wavelength
@@ -908,7 +914,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 !Output of integrated density inside atomic spheres
  if (dtset%prtdensph==1.and.dtset%usewvl==0)then
    call calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,&
-&   ntypat,ab_out,dtset%ratsph,rhor,rprimd,dtset%typat,ucvol,xred)
+&   ntypat,ab_out,dtset%ratsph,rhor,rprimd,dtset%typat,ucvol,xred,1)
  end if
 
  call timab(960,2,tsec)
@@ -1119,8 +1125,17 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
    call timab(967,2,tsec)
  end if
 
+ ! Output electron bands.
+ if (me == master .and. dtset%tfkinfunc==0) then
+   if (size(dtset%kptbounds, dim=2) > 0) then
+     call ebands_write(ebands, dtset%prtebands, dtfil%filnam_ds(4), kptbounds=dtset%kptbounds)
+   else
+     call ebands_write(ebands, dtset%prtebands, dtfil%filnam_ds(4))
+   end if
+ end if
+
 !Optionally provide Xcrysden output for the Fermi surface (Only master writes)
- if (dtset%prtfsurf==1.and.me==master) then
+ if (me == master .and. dtset%prtfsurf == 1) then
    if (ebands_write_bxsf(ebands,crystal,dtfil%fnameabo_app_bxsf) /= 0) then
      message = "Cannot produce BXSF file with Fermi surface, see log file for more info"
      MSG_WARNING(message)
@@ -1143,14 +1158,18 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  call timab(969,1,tsec)
 
  if (dtset%prtdipole == 1) then
-!  FIXME: need to add ionic part of multipoles
    call multipoles_out(rhor,mpi_enreg,natom,nfft,ngfft,dtset%nspden,dtset%ntypat,rprimd,&
-&   dtset%typat,ucvol,xred,dtset%ziontypat)
- end if ! prtmultipoles
+&   dtset%typat,ucvol,ab_out,xred,dtset%ziontypat)
+ end if
 
  ! BoltzTraP output files in GENEric format
  if (dtset%prtbltztrp == 1 .and. me==master) then
    call ebands_prtbltztrp(ebands, crystal, dtfil%filnam_ds(4))
+ end if
+
+ ! Band structure interpolation from eigenvalues computed on the k-mesh.
+ if (nint(dtset%einterp(1)) /= 0) then
+   call ebands_interpolate_kpath(ebands, dtset, crystal, [0,0], dtfil%filnam_ds(4), spacecomm)
  end if
 
  call crystal_free(crystal)

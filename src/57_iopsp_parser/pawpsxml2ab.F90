@@ -139,6 +139,10 @@ subroutine pawpsxml2ab( psxml, pspheads,option )
      write(std_out,*)"zero_potential grid= ",psxml%zero_potential%grid
      write(std_out,*)psxml%zero_potential%data
    end if
+   if(psxml%LDA_minus_half_potential%tread) then
+     write(std_out,*)"LDA_minus_half_potential grid= ",psxml%LDA_minus_half_potential%grid
+     write(std_out,*)psxml%LDA_minus_half_potential%data
+   end if
    if(psxml%ae_core_kinetic_energy_density%tread) then
      write(std_out,*)"ae_core_kinetic_energy_density grid= ",psxml%ae_core_kinetic_energy_density%grid
      write(std_out,*)psxml%ae_core_kinetic_energy_density%data

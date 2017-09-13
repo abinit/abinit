@@ -61,4 +61,5 @@
 #%%   Bulk Aluminium, FCC, with 2 special points, occopt=5 and tsmear=0.05.
 #%%   Designed to test the treatment of metals, using the "cold smearing"
 #%%   of N. Marzari , with a=-.8165 (monotonic function in the tail).
+#%% topics = BandOcc
 #%%<END TEST_INFO>

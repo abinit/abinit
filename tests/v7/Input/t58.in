@@ -129,4 +129,5 @@
 #%%  Diamond. Test the getddb variable that cancels the divergence in el-ph for small q-points
 #%%  Such divergence is induced by a residual electric field.
 #%%  Note: The Fan terms in DATASET 6 should be different (renormalized) from the one of DATASET 5. 
+#%% topics = TDepES
 #%%<END TEST_INFO>

@@ -46,7 +46,7 @@
 #%% files_to_test = 
 #%%   t20.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
 #%% [paral_info]
-#%% max_nprocs = 1
+#%% max_nprocs = 4
 #%% [extra_info]
 #%% keywords = 
 #%% authors = Unknown
@@ -61,4 +61,5 @@
 #%%   provided in TABLE III-V of the Ghosez et al paper.
 #%%   Note the decomposition between dipole-dipole contribution
 #%%   and short-ranged contribution.
+#%% topics = Phonons, PhononBands
 #%%<END TEST_INFO>

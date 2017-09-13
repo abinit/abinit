@@ -61,4 +61,5 @@ tolwfr2    1.0d-9
 #%%   Note however that the singlet and triplet states cannot be disentagled,
 #%%   so one gets a big list of excitations, the merge of singlet and triplet
 #%%   excitations.
+#%% topics = TDDFT
 #%%<END TEST_INFO>

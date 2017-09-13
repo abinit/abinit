@@ -1,0 +1,118 @@
+<!--                                                                                     -->
+<!-- This file has been produced by generate_doc.py using different .yml  or .bib files. -->
+<!-- It is useless to modify it. Modify the related .yml  or .bib files instead.         -->
+<!--                                                                                     -->
+<html>
+<head><title>Molecular Dynamics </title>
+<link rel=stylesheet type="text/css" href="../formabinit.css">
+</head>
+<body bgcolor="#ffffff">
+
+<hr>
+<a name="top"></a>
+
+<h1>Molecular dynamics calculations</h1>
+<h3>This page gives hints on how to perform a molecular dynamics calculation with the ABINIT package.
+<hr>
+
+<h5>Copyright (C) 2016-2017 ABINIT group (GG)
+<script type="text/javascript" src="../../js_files/copyright.js"> </script>
+</h5>
+
+<script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
+
+ Mentioned in &nbsp; <a href="../../topics/generated_files/topic_GeoConstraints.html">topic_GeoConstraints</a> &nbsp;&nbsp; <a href="../../users/generated_files/help_features.html#4">help_features#4</a> &nbsp;
+ <hr>
+ <h3><b>Table of content: </b></h3> 
+ <ul> <li>1. <a href="topic_MolecularDynamics.html#1">Introduction.</a><li>2. <a href="topic_MolecularDynamics.html#2">Related lesson(s) of the tutorial.</a><li>3. <a href="topic_MolecularDynamics.html#3">Related input variables.</a><li>4. <a href="topic_MolecularDynamics.html#4">Selected input files.</a></ul>
+
+&nbsp; 
+<HR ALIGN=left> 
+<a name="1">&nbsp;</a>
+<h3><b>1. Introduction.</b></h3>
+
+
+<p> Three molecular dynamics algorithm (Numerov, Verlet, Blanes and Moanes)
+allow to perform simulations in real
+(simulated) time, see <a href="../../input_variables/generated_files/varset_rlx.html#ionmov">ionmov</a>. The displacement of atoms may be computed according to
+Newton's law, or by adding a friction force to it.
+Nose-Hoover thermostat is available with Verlet algorithm.
+Langevin dynamics is also available.
+<p> Specified lattice parameters, or angles, or atomic positions,
+can be kept fixed if needed, see <a href="../../topics/generated_files/topic_GeoConstraints.html#">topic_GeoConstraints</a>.
+<p> The trajectories can be analyzed thanks to the <a href="../../topics/generated_files/topic_APPA.html#">APPA postprocessor</a>.
+<br><br><a href=#top>Go to the top</a>
+
+
+
+&nbsp; 
+<HR ALIGN=left> 
+<a name="2">&nbsp;</a>
+<h3><b>2. Related lesson(s) of the tutorial.</b></h3>
+
+
+<li><a href="../../tutorial/generated_files/lesson_paral_moldyn.html">Parallelism for molecular
+dynamics calculations</a></li>
+<br><br><a href=#top>Go to the top</a>
+
+
+&nbsp; 
+<hr> 
+<a name="3">&nbsp;</a>
+<h3><b>3. Related input variables.</b></h3>
+
+
+<p>Compulsory input variables:<p>... <a href="../../input_variables/generated_files/varset_rlx.html#dtion">dtion</a>   [Delta Time for IONs]<br>
+... <a href="../../input_variables/generated_files/varset_rlx.html#ionmov">ionmov</a>   [IONic MOVEs]<br>
+... <a href="../../input_variables/generated_files/varset_rlx.html#mdtemp">mdtemp</a>   [Molecular Dynamics TEMPeratures]<br>
+<p>Basic input variables:<p>... <a href="../../input_variables/generated_files/varset_rlx.html#nnos">nnos</a>   [Number of NOSe masses]<br>
+... <a href="../../input_variables/generated_files/varset_rlx.html#ntime">ntime</a>   [Number of TIME steps]<br>
+... <a href="../../input_variables/generated_files/varset_rlx.html#qmass">qmass</a>   [Q thermostat MASS]<br>
+... <a href="../../input_variables/generated_files/varset_rlx.html#vel">vel</a>   [VELocity]<br>
+... <a href="../../input_variables/generated_files/varset_rlx.html#vis">vis</a>   [VIScosity]<br>
+<p>Useful input variables:<p>... <a href="../../input_variables/generated_files/varset_rlx.html#friction">friction</a>   [internal FRICTION coefficient]<br>
+... <a href="../../input_variables/generated_files/varset_dev.html#nctime">nctime</a>   [NetCdf TIME between output of molecular dynamics informations]<br>
+... <a href="../../input_variables/generated_files/varset_rlx.html#noseinert">noseinert</a>   [NOSE thermostat INERTia factor]<br>
+... <a href="../../input_variables/generated_files/varset_rlx.html#restartxf">restartxf</a>   [RESTART from (X,F) history]<br>
+<p>Input variables for experts:<p>... <a href="../../input_variables/generated_files/varset_rlx.html#bmass">bmass</a>   [Barostat MASS]<br>
+... <a href="../../input_variables/generated_files/varset_rlx.html#delayperm">delayperm</a>   [DELAY between trials to PERMUTE atoms]<br>
+... <a href="../../input_variables/generated_files/varset_dev.html#densfor_pred">densfor_pred</a>   [DENSity and FORces PREDictor]<br>
+... <a href="../../input_variables/generated_files/varset_rlx.html#diismemory">diismemory</a>   [Direct Inversion in the Iterative Subspace MEMORY]<br>
+... <a href="../../input_variables/generated_files/varset_dev.html#extrapwf">extrapwf</a>   [flag - EXTRAPolation of the Wave-Functions]<br>
+... <a href="../../input_variables/generated_files/varset_rlx.html#mdwall">mdwall</a>   [Molecular Dynamics WALL location]<br>
+... <a href="../../input_variables/generated_files/varset_rlx.html#signperm">signperm</a>   [SIGN of PERMutation potential]<br>
+
+<br><br><a href=#top>Go to the top</a>
+
+
+&nbsp; 
+<HR ALIGN=left> 
+<a name="4">&nbsp;</a>
+<h3><b>4. Selected input files.</b></h3>
+
+
+<i><b>WARNING</b> : as of ABINITv8.6.x, the list of input files provided in the specific section of the topics Web pages is still to be reviewed/tuned. In some cases, it will be adequate, and in other cases, it might be incomplete, or perhaps even useless.</i>
+<br><br>The user can find some related example input files in the ABINIT package in the directory /tests, or on the Web:
+<p> tests/mpiio/Input: <a href="../../tests/mpiio/Input/t21.in">t21.in</a> 
+<a href="../../tests/mpiio/Input/t22.in">t22.in</a> 
+<p> tests/fast/Input: <a href="../../tests/fast/Input/t21.in">t21.in</a> 
+<a href="../../tests/fast/Input/t29.in">t29.in</a> 
+<p> tests/paral/Input: <a href="../../tests/paral/Input/t21.in">t21.in</a> 
+<a href="../../tests/paral/Input/t22.in">t22.in</a> 
+<a href="../../tests/paral/Input/t23.in">t23.in</a> 
+<p> tests/v2/Input: <a href="../../tests/v2/Input/t88.in">t88.in</a> 
+<p> tests/v3/Input: <a href="../../tests/v3/Input/t40.in">t40.in</a> 
+<p> tests/v5/Input: <a href="../../tests/v5/Input/t01.in">t01.in</a> 
+<a href="../../tests/v5/Input/t03.in">t03.in</a> 
+<a href="../../tests/v5/Input/t04.in">t04.in</a> 
+<p> tests/v8/Input: <a href="../../tests/v8/Input/t12.in">t12.in</a> 
+<br>
+
+<br><br><a href=#top>Go to the top</a>
+
+
+<script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
+
+</body>
+</html>
+

@@ -98,4 +98,5 @@
 #%%   half-displacement, lead to 3.81832E-03 Ha/Bohr.
 #%%   This is in excellent agreement with
 #%%   fcart6=3.8183150850E-03 Ha/Bohr
+#%% topics = spinpolarisation
 #%%<END TEST_INFO>

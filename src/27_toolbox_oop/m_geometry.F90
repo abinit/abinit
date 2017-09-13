@@ -30,10 +30,10 @@ MODULE m_geometry
 
  private
 
- public :: normv             ! Norm of vector(s) in reduced coordinates either in real or reciprocal space.
- public :: vdotw             ! Scalar product between two reduced vectors either in real or reciprocal space.
- public :: wigner_seitz      ! Find the grid of points falling inside the Wigner-Seitz cell.
- public :: phdispl_cart2red  ! Calculate the displacement vectors for all branches in reduced coordinates.
+ public :: normv              ! Norm of vector(s) in reduced coordinates either in real or reciprocal space.
+ public :: vdotw              ! Scalar product between two reduced vectors either in real or reciprocal space.
+ public :: wigner_seitz       ! Find the grid of points falling inside the Wigner-Seitz cell.
+ public :: phdispl_cart2red   ! Calculate the displacement vectors for all branches in reduced coordinates.
 
  interface normv
   module procedure normv_rdp_vector

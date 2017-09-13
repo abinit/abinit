@@ -38,7 +38,7 @@ MODULE m_nesting
 
  implicit none
 
- private  
+ private
 
  public :: bfactor
  public :: mknesting
@@ -107,7 +107,7 @@ subroutine bfactor(nkptfull,kptfull,nqpt,qpt,kptrank_t,nkpt,weight,nband,nestfac
  integer :: ib1,ib2,ikplusq_irr,ikpt
  integer :: irank_kpt,ikpt_irr,iqpt,symrank_kpt
  real(dp) :: w1,w2
- character(len=500) :: message
+ !character(len=500) :: message
 !arrays
  real(dp) :: kptpq(3)
 
@@ -125,8 +125,7 @@ subroutine bfactor(nkptfull,kptfull,nqpt,qpt,kptrank_t,nkpt,weight,nband,nestfac
 
      ikplusq_irr = kptrank_t%invrank(symrank_kpt)
      if (ikplusq_irr == -1) then
-       message = ' it looks like no kpoint equiv to k+q !!!'
-       MSG_ERROR(message)
+       MSG_ERROR('It looks like no kpoint equiv to k+q!')
      end if
 
      do ib1=1,nband
@@ -291,7 +290,7 @@ subroutine mknesting(nkpt,kpt,kptrlatt,nband,weight,nqpath,&
  do ikpt=1,nqptfull
    ktable(ikpt) = ikpt
  end do
- 
+
  ABI_MALLOC(tmprank, (nqptfull))
  tmprank = kptrank_t%rank
  call sort_int(nqptfull, tmprank, ktable)
@@ -436,7 +435,7 @@ subroutine outnesting(base_name,gmet,gprimd,kptrlatt,nestordered,nkpt,nqpath,prt
 
    write(unit_nest,'(i5,18e16.5)')indx,kval
    indx = indx+1
- end do 
+ end do
 
  close (unit_nest)
  ABI_FREE(finepath)
@@ -453,7 +452,7 @@ subroutine outnesting(base_name,gmet,gprimd,kptrlatt,nestordered,nkpt,nqpath,prt
    natom = 1
    ntypat = 1
    typat = (/1/)
-   xcart = reshape ((/zero, zero, zero/), (/3,1/)) 
+   xcart = reshape ((/zero, zero, zero/), (/3,1/))
    znucl = (/one/)
    call printxsf(nkx,nky,nkz,nestordered,gprimd,origin,natom, ntypat, typat, xcart, znucl, unit_nest,realrecip)
 

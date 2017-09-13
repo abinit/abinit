@@ -110,6 +110,10 @@ _ WF disk file :      0.086 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
             acell      1.0600000000E+01  1.0600000000E+01  1.0600000000E+01 Bohr
               amu      6.97200000E+01  7.49216000E+01
         autoparal           1
+     densfor_pred1          6
+     densfor_pred2          2
+     densfor_pred3          2
+     densfor_pred4          2
            diemac      6.00000000E+00
              ecut      2.00000000E+00 Hartree
 -          fftalg         312
@@ -125,10 +129,6 @@ _ WF disk file :      0.086 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
            getwfk2          1
            getwfk3          2
            getwfk4          2
-     densfor_pred1          6
-     densfor_pred2          2
-     densfor_pred3          2
-     densfor_pred4          2
              iscf1          7
              iscf2         -2
              iscf3         -3
@@ -338,7 +338,7 @@ P          mk1mem4          8
            tolwfr3     1.00000000E-22
            tolwfr4     1.00000000E-16
             typat      1  2
-         wfoptalg1         14
+         wfoptalg1        114
          wfoptalg2          0
          wfoptalg3          0
          wfoptalg4          0
@@ -1196,6 +1196,10 @@ _setup2: Arith. and geom. avg. npw (full set) are      21.000      21.000
             acell      1.0600000000E+01  1.0600000000E+01  1.0600000000E+01 Bohr
               amu      6.97200000E+01  7.49216000E+01
         autoparal           1
+     densfor_pred1          6
+     densfor_pred2          2
+     densfor_pred3          2
+     densfor_pred4          2
            diemac      6.00000000E+00
              ecut      2.00000000E+00 Hartree
            etotal1    -8.3602806603E+00
@@ -1218,10 +1222,6 @@ _setup2: Arith. and geom. avg. npw (full set) are      21.000      21.000
            getwfk2          1
            getwfk3          2
            getwfk4          2
-     densfor_pred1          6
-     densfor_pred2          2
-     densfor_pred3          2
-     densfor_pred4          2
              iscf1          7
              iscf2         -2
              iscf3         -3
@@ -1435,7 +1435,7 @@ P          mk1mem4          8
            tolwfr3     1.00000000E-22
            tolwfr4     1.00000000E-16
             typat      1  2
-         wfoptalg1         14
+         wfoptalg1        114
          wfoptalg2          0
          wfoptalg3          0
          wfoptalg4          0

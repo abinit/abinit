@@ -19,7 +19,6 @@ ABI_SRC_DEP = 2     # The file depends on other files
 sources = [
  "corrmetalwf1.F90",
  "ddb_io_out.F90",
- "ddb_write_blok.F90",
  "dfptff_bec.F90",
  "dfptff_die.F90",
  "dfptff_ebp.F90",
@@ -77,6 +76,7 @@ sources = [
  "inpgkk.F90",
  "kptfine_av.F90",
  "m_ddb.F90",
+ "m_ddb_hdr.F90",
  "m_ddk.F90",
  "m_dvdb.F90",
  "m_efmas.F90",
@@ -93,7 +93,6 @@ sources = [
  "rf2_init.F90",
  "rotate_rho.F90",
  "smeared_delta.F90",
- "sytens.F90",
  "vlocalstr.F90",
  "wrtloctens.F90",
 ]

@@ -193,8 +193,8 @@ subroutine pawpsp_nl(ffspl,indlmn,lmnmax,lnmax,mqgrid,qgrid,radmesh,wfll)
  LIBPAW_ALLOCATE(rrwf,(meshsz))
  LIBPAW_ALLOCATE(rr2wf,(meshsz))
  LIBPAW_ALLOCATE(work,(mqgrid))
- rr(:) =radmesh%rad(:)
- rr2(:)=two_pi*rr(:)*rr(:)
+ rr(1:meshsz) =radmesh%rad(1:meshsz)
+ rr2(1:meshsz)=two_pi*rr(1:meshsz)*rr(1:meshsz)
  argn=two_pi*qgrid(mqgrid)
  mmax=meshsz
 
@@ -1327,8 +1327,8 @@ subroutine pawpsp_read(core_mesh,funit,imainmesh,lmax,&
      LIBPAW_ALLOCATE(work2,(msz))
      LIBPAW_ALLOCATE(work3,(msz))
      LIBPAW_ALLOCATE(work4,(pawtab%mesh_size))
-     work3(:)=shpf_mesh%rad(:)
-     work4(:)=pawrad%rad(:)
+     work3(1:pawtab%mesh_size)=shpf_mesh%rad(1:pawtab%mesh_size)
+     work4(1:pawtab%mesh_size)=pawrad%rad(1:pawtab%mesh_size)
      do il=1,pawtab%l_size
        call bound_deriv(shpf(1:msz,il),shpf_mesh,msz,yp1,ypn)
        call paw_spline(work3,shpf(:,il),msz,yp1,ypn,work1)
@@ -2077,17 +2077,17 @@ subroutine pawpsp_calc(core_mesh,epsatm,ffspl,imainmesh,ixc,lnmax,&
    LIBPAW_ALLOCATE(nwk,(core_mesh%mesh_size))
    LIBPAW_ALLOCATE(vh,(core_mesh%mesh_size))
    if (core_mesh%mesh_type==5) then
-     nwk(:)=tncore(:)*four_pi*core_mesh%rad(:)**2
+     nwk(1:msz)=tncore(1:msz)*four_pi*core_mesh%rad(1:msz)**2
      call simp_gen(qcore,nwk,core_mesh)
      qcore=znucl-zion-qcore
    else
-     nwk(:)=(ncore(:)-tncore(:))*four_pi*core_mesh%rad(:)**2
+     nwk(1:msz)=(ncore(1:msz)-tncore(1:msz))*four_pi*core_mesh%rad(1:msz)**2
      ib=1
-     do ir=core_mesh%mesh_size,2,-1
+     do ir=msz,2,-1
        if(abs(nwk(ir))<tol14)ib=ir
      end do
      call simp_gen(qcore,nwk,core_mesh,r_for_intg=core_mesh%rad(ib))
-     nwk(:)=tncore(:)*four_pi*core_mesh%rad(:)**2
+     nwk(1:msz)=tncore(1:msz)*four_pi*core_mesh%rad(1:msz)**2
    end if
    nwk(1:msz)=nwk(1:msz)+r2k(1:msz)*(qcore-znucl)
    call poisson(nwk,0,core_mesh,vh)
@@ -2312,7 +2312,7 @@ subroutine pawpsp_calc(core_mesh,epsatm,ffspl,imainmesh,ixc,lnmax,&
  if (msz<core_mesh%mesh_size) nwk(msz+1:core_mesh%mesh_size)=zero
 
 ! perform the spherical integration
- nwk(:)=nwk(:)*four_pi*core_mesh%rad(:)**2
+ nwk(1:msz)=nwk(1:msz)*four_pi*core_mesh%rad(1:msz)**2
 
  call simp_gen(pawtab%beta,nwk,core_mesh)
 
@@ -2339,7 +2339,7 @@ subroutine pawpsp_calc(core_mesh,epsatm,ffspl,imainmesh,ixc,lnmax,&
    LIBPAW_ALLOCATE(work1,(msz))
    LIBPAW_ALLOCATE(work2,(msz))
    LIBPAW_ALLOCATE(work3,(msz))
-   work3(:)=vloc_mesh%rad(:)
+   work3(1:msz)=vloc_mesh%rad(1:msz)
    call paw_spline(work3,vlocr,msz,yp1,ypn,work1)
    call paw_splint(msz,work3,vlocr,work1,reduced_mshsz,rvloc_mesh%rad,rvlocr)
    LIBPAW_DEALLOCATE(work1)
@@ -2379,7 +2379,7 @@ subroutine pawpsp_calc(core_mesh,epsatm,ffspl,imainmesh,ixc,lnmax,&
    LIBPAW_ALLOCATE(work1,(msz))
    LIBPAW_ALLOCATE(work2,(msz))
    LIBPAW_ALLOCATE(work3,(msz))
-   work3(:)=core_mesh%rad(:)
+   work3(1:msz)=core_mesh%rad(1:msz)
    call paw_spline(work3,tncore,msz,yp1,ypn,work1)
    call paw_splint(msz,work3,tncore,work1,reduced_mshsz,rcore_mesh%rad,rtncor)
    LIBPAW_DEALLOCATE(work1)
@@ -2403,7 +2403,7 @@ subroutine pawpsp_calc(core_mesh,epsatm,ffspl,imainmesh,ixc,lnmax,&
      LIBPAW_ALLOCATE(work1,(msz))
      LIBPAW_ALLOCATE(work2,(msz))
      LIBPAW_ALLOCATE(work3,(msz))
-     work3(:)=vale_mesh%rad(:)
+     work3(1:msz)=vale_mesh%rad(1:msz)
      call paw_spline(work3,tnvale,msz,yp1,ypn,work1)
      call paw_splint(msz,work3,tnvale,work1,reduced_mshsz,rvale_mesh%rad,rtnval)
      LIBPAW_DEALLOCATE(work1)
@@ -2505,7 +2505,6 @@ subroutine pawpsp_calc(core_mesh,epsatm,ffspl,imainmesh,ixc,lnmax,&
 !==================================================
 !Compute atomic contribution to Dij (Dij0)
 !if not already in memory
-
  if ((.not.has_dij0).and.(pawtab%has_kij==2.or.pawtab%has_kij==-1)) then
    LIBPAW_ALLOCATE(pawtab%dij0,(pawtab%lmn2_size))
    if (reduced_vloc) then
@@ -2517,7 +2516,6 @@ subroutine pawpsp_calc(core_mesh,epsatm,ffspl,imainmesh,ixc,lnmax,&
    end if
    has_dij0=.true.
  end if
-
 !==================================================
 !Compute kinetic operator contribution to Dij
 
@@ -2844,7 +2842,7 @@ subroutine pawpsp_wvl_calc(pawtab,tnvale,usewvl,vale_mesh,vloc_mesh,vlocr)
  LIBPAW_ALLOCATE(pawtab%wvl%rholoc%d,(msz,4))
  LIBPAW_ALLOCATE(pawtab%wvl%rholoc%rad,(msz))
  pawtab%wvl%rholoc%msz=msz
- pawtab%wvl%rholoc%rad(:)=vloc_mesh%rad(:)
+ pawtab%wvl%rholoc%rad(1:msz)=vloc_mesh%rad(1:msz)
 
 !get rho from v:
  call pawpsp_vhar2rho(vloc_mesh,pawtab%wvl%rholoc%d(:,1),vlocr)
@@ -2974,7 +2972,7 @@ subroutine pawpsp_17in(epsatm,ffspl,icoulomb,ipsp,ixc,lmax,&
 
 !Local variables ------------------------------
 !scalars
- integer :: ib,icoremesh,il,ilm,ilmn,ilmn0,iln,imainmesh,imsh,iprojmesh,ipsploc
+ integer :: has_v_minushalf,ib,icoremesh,il,ilm,ilmn,ilmn0,iln,imainmesh,imsh,iprojmesh,ipsploc
  integer :: ir,iread1,ishpfmesh,ivalemesh,ivlocmesh,j0lmn,jlm,pngau
  integer :: jlmn,jln,klmn,msz,nmesh,nval,pspversion,sz10,usexcnhat,vlocopt
  real(dp), parameter :: rmax_vloc=10.0_dp
@@ -2985,7 +2983,7 @@ subroutine pawpsp_17in(epsatm,ffspl,icoulomb,ipsp,ixc,lmax,&
 !arrays
  integer,allocatable :: nprj(:)
  real(dp),allocatable :: kij(:),ncore(:)
- real(dp),allocatable :: shpf(:,:),tncore(:),tnvale(:),tproj(:,:),vhnzc(:),vlocr(:)
+ real(dp),allocatable :: shpf(:,:),tncore(:),tnvale(:),tproj(:,:),vhnzc(:),vlocr(:),v_minushalf(:)
  real(dp),allocatable :: work1(:),work2(:),work3(:),work4(:)
  type(pawrad_type),allocatable :: radmesh(:)
 
@@ -3352,6 +3350,7 @@ subroutine pawpsp_17in(epsatm,ffspl,icoulomb,ipsp,ixc,lmax,&
  call wrtout(ab_out,msg,'COLL')
  call wrtout(std_out,  msg,'COLL')
 
+
 !---------------------------------
 !Read core density (coredens)
  do imsh=1,nmesh
@@ -3485,6 +3484,31 @@ subroutine pawpsp_17in(epsatm,ffspl,icoulomb,ipsp,ixc,lmax,&
  call wrtout(ab_out,msg,'COLL')
  call wrtout(std_out,  msg,'COLL')
 
+!-------------------------------------------------
+!Read LDA-1/2 potential
+ if (paw_setup(ipsploc)%LDA_minus_half_potential%tread) then
+   do imsh=1,nmesh
+     if(trim(paw_setup(ipsploc)%LDA_minus_half_potential%grid)==trim(paw_setup(ipsploc)%radial_grid(imsh)%id)) then
+       iread1=imsh
+       cycle
+     end if
+   end do
+   if(iread1/=ivlocmesh) then
+     write(msg, '(a)' )&
+&     'The LDA-1/2 potential must be given on the same grid as the local potential.'
+     MSG_ERROR(msg)
+   end if
+   has_v_minushalf=1
+   LIBPAW_ALLOCATE(v_minushalf,(vloc_mesh%mesh_size))
+   v_minushalf(1:vloc_mesh%mesh_size)=paw_setup(ipsploc)%LDA_minus_half_potential%data(1:vloc_mesh%mesh_size)/sqrt(fourpi)
+   write(msg,'(a,i1)') &
+&   ' Radial grid used for LDA-1/2 potential is grid ',ivlocmesh
+   call wrtout(ab_out,msg,'COLL')
+   call wrtout(std_out,  msg,'COLL')
+ else
+   has_v_minushalf=0
+!   LIBPAW_ALLOCATE(v_minushalf,(0))
+ end if
 !---------------------------------
 !Eventually read "numeric" shapefunctions (if shape_type=-1)
  if (pawtab%shape_type==-1) then
@@ -3530,8 +3554,8 @@ subroutine pawpsp_17in(epsatm,ffspl,icoulomb,ipsp,ixc,lmax,&
      LIBPAW_ALLOCATE(work2,(msz))
      LIBPAW_ALLOCATE(work3,(msz))
      LIBPAW_ALLOCATE(work4,(pawrad%mesh_size))
-     work3(:)=shpf_mesh%rad(:)
-     work4(:)=pawrad%rad(:)
+     work3(1:msz)=shpf_mesh%rad(1:msz)
+     work4(1:pawrad%mesh_size)=pawrad%rad(1:pawrad%mesh_size)
      do il=1,pawtab%l_size
        call bound_deriv(shpf(1:msz,il),shpf_mesh,msz,yp1,ypn)
        call paw_spline(work3,shpf(:,il),msz,yp1,ypn,work1)
@@ -3604,10 +3628,19 @@ subroutine pawpsp_17in(epsatm,ffspl,icoulomb,ipsp,ixc,lmax,&
 
  if (vlocopt>0) then
    LIBPAW_ALLOCATE(pawtab%dij0,(pawtab%lmn2_size))
+!   if (allocated(v_minushalf)) then
+!   call atompaw_dij0(pawtab%indlmn,kij,pawtab%lmn_size,ncore,0,pawtab,pawrad,core_mesh,&
+!&                    vloc_mesh,vlocr,znucl,v_minushalf)
+!   else
    call atompaw_dij0(pawtab%indlmn,kij,pawtab%lmn_size,ncore,0,pawtab,pawrad,core_mesh,&
 &                    vloc_mesh,vlocr,znucl)
- end if
+!   end if
 
+ end if
+ if (allocated(v_minushalf)) then
+   vlocr(1:vloc_mesh%mesh_size)=vlocr(1:vloc_mesh%mesh_size)+v_minushalf(1:vloc_mesh%mesh_size)/sqrt(fourpi)
+   LIBPAW_DEALLOCATE(v_minushalf)
+ end if
 !Keep eventualy Kij in memory
  if (pawtab%has_kij==1.or.vlocopt==0) then
    LIBPAW_ALLOCATE(pawtab%kij,(pawtab%lmn2_size))

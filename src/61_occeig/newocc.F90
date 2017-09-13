@@ -341,9 +341,7 @@ subroutine newocc(doccde,eigen,entropy,fermie,spinmagntarget,mband,nband,&
 
  end if !  End of logical on fixed moment calculations
 
-!DEBUG
 !write(std_out,*) "kT*Entropy:", entropy*tsmear
-!ENDDEBUG
 
  nkpt_eff=nkpt
  if(prtvol==0)nkpt_eff=min(nkpt_max,nkpt)
@@ -362,7 +360,7 @@ subroutine newocc(doccde,eigen,entropy,fermie,spinmagntarget,mband,nband,&
      end do
    end do
    if(nkpt/=nkpt_eff)then
-     call wrtout(std_out,' newocc: prtvol=0, stop printing more k-point informations','COLL')
+     call wrtout(std_out,' newocc: prtvol=0, stop printing more k-point information','COLL')
    end if
 
 !  DEBUG
@@ -410,7 +408,7 @@ subroutine newocc(doccde,eigen,entropy,fermie,spinmagntarget,mband,nband,&
      end do
    end do
    if(nkpt/=nkpt_eff)then
-     call wrtout(std_out,' newocc: prtvol=0, stop printing more k-point informations','COLL')
+     call wrtout(std_out,' newocc: prtvol=0, stop printing more k-point information','COLL')
    end if
 
  end if !  End choice based on spin

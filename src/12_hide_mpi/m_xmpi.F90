@@ -417,9 +417,12 @@ end interface xmpi_min
 !----------------------------------------------------------------------
 
 interface xmpi_recv
+  module procedure xmpi_recv_char
   module procedure xmpi_recv_intv
   module procedure xmpi_recv_int1d
   module procedure xmpi_recv_int2d
+  module procedure xmpi_recv_int3d
+  module procedure xmpi_recv_dp
   module procedure xmpi_recv_dp1d
   module procedure xmpi_recv_dp2d
   module procedure xmpi_recv_dp3d
@@ -454,9 +457,12 @@ end interface xmpi_isend
 !----------------------------------------------------------------------
 
 interface xmpi_send
+  module procedure xmpi_send_char
   module procedure xmpi_send_intv
   module procedure xmpi_send_int1d
   module procedure xmpi_send_int2d
+  module procedure xmpi_send_int3d
+  module procedure xmpi_send_dp
   module procedure xmpi_send_dp1d
   module procedure xmpi_send_dp2d
   module procedure xmpi_send_dp3d
@@ -710,8 +716,8 @@ end function xmpi_get_unit
 !!  None
 !!
 !! PARENTS
-!!      aim,anaddb,band2eps,bsepostproc,conducti,cut3d,fold2Bloch,lapackprof
-!!      m_sigmaph,macroave,mrggkk,multibinit,optic,ujdet,vdw_kernelgen
+!!      aim,anaddb,band2eps,bsepostproc,conducti,cut3d,eph,fold2Bloch
+!!      lapackprof,macroave,mrggkk,multibinit,optic,ujdet,vdw_kernelgen
 !!
 !! CHILDREN
 !!      mpi_type_commit,mpi_type_size,xmpi_abort,xmpio_type_struct
@@ -1812,10 +1818,10 @@ end subroutine xmpi_comm_translate_ranks
 !! PARENTS
 !!      alloc_hamilt_gpu,atomden,calc_optical_mels,calc_ucrpa,chebfi,cohsex_me
 !!      datafordmft,denfgr,dfpt_nselt,dfpt_nstpaw,dfpt_scfcv,exc_build_block
-!!      fermisolverec,getcgqphase,gstateimg,iofn1,ks_ddiago,m_bse_io
+!!      fermisolverec,getcgqphase,gstateimg,iofn1,ks_ddiago,m_abihist,m_bse_io
 !!      m_exc_diago,m_exc_itdiago,m_exc_spectra,m_green,m_haydock,m_hdr
-!!      m_io_kss,m_io_redirect,m_ioarr,m_iowf,m_plowannier,m_sigmaph,m_slk
-!!      m_wfd,m_wffile,m_wfk,mlwfovlp,mlwfovlp_pw,mover,outkss,pawmkaewf
+!!      m_io_redirect,m_ioarr,m_iowf,m_plowannier,m_sigmaph,m_slk,m_wfd
+!!      m_wffile,m_wfk,mlwfovlp,mlwfovlp_pw,mover,outkss,pawmkaewf
 !!      qmc_prep_ctqmc,rf2_init,sigma,tddft,vtorho,vtorhorec,wfk_analyze
 !!
 !! CHILDREN
@@ -2391,7 +2397,7 @@ end subroutine xmpi_split_work_i4b
 !!    +2 if ntasks>nprocs.
 !!
 !! PARENTS
-!!      exc_build_block,m_screening,setup_screening
+!!      exc_build_block,m_screening,m_skw,setup_screening
 !!
 !! CHILDREN
 !!      mpi_type_commit,mpi_type_size,xmpi_abort,xmpio_type_struct
@@ -2441,11 +2447,11 @@ subroutine xmpi_split_work2_i4b(ntasks,nprocs,istart,istop,warn_msg,ierr)
 
  do irank=0,nprocs-1
    if (irank<res) then
-     istart(irank+1)= irank   *block+1
-     istop (irank+1)=(irank+1)*block
+     istart(irank+1) = irank    *block+1
+     istop (irank+1) = (irank+1)*block
    else
-     istart(irank+1)=res*block+(irank-res  )*block_tmp+1
-     istop (irank+1)=res*block+(irank-res+1)*block_tmp
+     istart(irank+1) = res*block + (irank-res  )*block_tmp+1
+     istop (irank+1) = res*block + (irank-res+1)*block_tmp
    end if
  end do
 

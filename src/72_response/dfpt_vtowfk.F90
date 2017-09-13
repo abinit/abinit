@@ -92,7 +92,7 @@
 !!  enl1_k(nband_k)=first-order non-local contribution to 2nd-order total energy
 !!      from all bands at this k point.
 !!  gh1c_set(2,mpw1*nspinor*mband*mk1mem*nsppol*dim_eig2rf)= set of <G|H^{(1)}|nK>
-!!  gh0c1_set(2,mpw1*nspinor*mband*mk1mem*nsppol*dim_eig2rf)= set of <G|H^{(0)}|\Psi^{(1)}>
+!!  gh0c1_set(2,mpw1*nspinor*mband*mk1mem*nsppol*dim_eig2rf)= set of <G|H^{(0)}k+q-eig^{(0)}nk|\Psi^{(1)}kq>
 !!      The wavefunction is orthogonal to the active space (for metals). It is not coherent with cg1.
 !!  resid_k(nband_k)=residuals for each band over all k points,
 !!  rhoaug1(cplex*n4,n5,n6,nspden)= density in electrons/bohr**3,

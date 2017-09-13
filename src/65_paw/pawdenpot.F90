@@ -312,6 +312,7 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
    lmn2_size=paw_ij(iatom)%lmn2_size
    lm_size=paw_an(iatom)%lm_size
    mesh_size=pawtab(itypat)%mesh_size
+
    usecore=1;usetcore =pawtab(itypat)%usetcore
    if (ipert/=0) usecore=0  ! This is true for phonons and Efield pert.
    if (ipert/=0) usetcore=0 ! This is true for phonons and Efield pert.
@@ -821,7 +822,7 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
      end if
 
      if (option<2) then
-       call pawxpot(nspden,pawprtvol,pawrhoij(iatom),pawtab(itypat),paw_ij(iatom)%vpawx)
+       call pawxpot(ndij,pawprtvol,pawrhoij(iatom),pawtab(itypat),paw_ij(iatom)%vpawx)
        paw_ij(iatom)%has_exexch_pot=2
      end if
      if (option/=1) then
@@ -852,6 +853,7 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
        paw_ij(iatom)%dijfock(:,:)=dijfock_vv(:,:)+dijfock_cv(:,:)
 
 !      Fock contribution to energy
+
        if (option/=1) then
          if ((cplex==1).or.(ipert==0)) then
            do ispden=1,pawrhoij(iatom)%nspden
@@ -878,6 +880,7 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
            end do
          end if
        end if
+
        ABI_DEALLOCATE(dijfock_vv)
        ABI_DEALLOCATE(dijfock_cv)
 

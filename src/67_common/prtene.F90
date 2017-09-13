@@ -79,31 +79,18 @@ subroutine prtene(dtset,energies,iout,usepaw)
  real(dp) :: eent,enevalue,etotal,etotaldc
  character(len=22) :: eneName
  character(len=500) :: message
- !logical :: wvlbigdft=.false.
 !arrays
  character(len=10) :: EPName(1:2)=(/"Positronic","Electronic"/)
 
 ! *************************************************************************
 
-!If usewvl: wvlbigdft indicates that the BigDFT workflow will be followed
- !if(dtset%usewvl==1 .and. dtset%wvl_bigdft_comp==1) wvlbigdft=.true.
-
- optdc=-1;ipositron=0
- if (dtset%positron==0) then
-   !if (abs(energies%e_xcdc)<1.e-15_dp) optdc=0
-   !if (abs(energies%e_localpsp)<1.e-15_dp.and.abs(energies%e_xcdc)>1.e-15_dp) optdc=1
-   !if (abs(energies%e_localpsp)>1.e-15_dp.and.abs(energies%e_xcdc)>1.e-15_dp) optdc=2
-   !if (wvlbigdft .and. dtset%iscf > 0) optdc=1
- else
-   ipositron=2
-   if (abs(energies%e_ewald)<1.e-15_dp.and.abs(energies%e_hartree)<1.e-15_dp) ipositron=1
-   !if (abs(energies%edc_electronpositron)<1.e-15_dp) optdc=0
-   !if (abs(energies%e_electronpositron)<1.e-15_dp.and.abs(energies%edc_electronpositron)>1.e-15_dp) optdc=1
-   !if (abs(energies%e_electronpositron)>1.e-15_dp.and.abs(energies%edc_electronpositron)>1.e-15_dp) optdc=2
- end if
  directE_avail=(usepaw==0.or.dtset%pawspnorb==0.or.dtset%pawcpxocc==2.or.dtset%kptopt==1.or.dtset%kptopt==2)
 
 !============= Evaluate some parts of the energy ===========
+
+ optdc=-1;ipositron=merge(0,2,dtset%positron==0)
+ if (abs(energies%e_ewald)<1.e-15_dp.and.abs(energies%e_hartree)<1.e-15_dp) ipositron=1
+ call energies_eval_eint(energies,dtset,usepaw,optdc,etotal,etotaldc)
 
 !Here, treat the case of metals
 !In re-smeared case the free energy is defined with tphysel
@@ -120,32 +107,8 @@ subroutine prtene(dtset,energies,iout,usepaw)
 ! non interacting entropy
  testdmft=(dtset%dmftcheck>=0.and.dtset%usedmft>=1.and.(sum(dtset%upawu(:,1))>=tol8.or.  &
 & sum(dtset%jpawu(:,1))>tol8).and.dtset%dmft_entropy==0)
- if(testdmft) then
-   eent=zero
- end if
+ if(testdmft) eent=zero
 
-!
-! if (optdc==0.or.optdc==2) then
-!   etotal = energies%e_kinetic + energies%e_hartree + energies%e_xc + &
-!&   energies%e_localpsp + energies%e_corepsp + eent
-!   if (usepaw==0) etotal = etotal + energies%e_nonlocalpsp
-!   if (usepaw==1) etotal = etotal + energies%e_paw
-!   if (dtset%berryopt==4 .or. dtset%berryopt==6 .or. dtset%berryopt==7 .or.  &
-!&   dtset%berryopt==14 .or. dtset%berryopt==16 .or. dtset%berryopt==17) etotal=etotal+energies%e_elecfield    !!HONG
-!   etotal = etotal + energies%e_ewald + energies%e_vdw_dftd
-!   if (ipositron/=0) etotal=etotal+energies%e0_electronpositron+energies%e_electronpositron
-! end if
-! if (optdc>=1) then
-!   etotaldc = energies%e_eigenvalues - energies%e_hartree + energies%e_xc - &
-!&   energies%e_xcdc + energies%e_corepsp - energies%e_corepspdc + eent
-!   if (usepaw==1) etotaldc = etotaldc + energies%e_pawdc
-!   if (dtset%berryopt==4 .or. dtset%berryopt==6 .or. dtset%berryopt==7 .or.  &
-!&   dtset%berryopt==14 .or. dtset%berryopt==16 .or. dtset%berryopt==17) etotaldc = etotaldc + energies%e_elecfield
-!   etotaldc = etotaldc + energies%e_ewald + energies%e_vdw_dftd
-!   if (ipositron/=0) etotaldc=etotaldc-energies%edc_electronpositron &
-!&   +energies%e0_electronpositron+energies%e_electronpositron
-! end if
- call energies_eval_eint(energies,dtset,usepaw,optdc,etotal,etotaldc)
  etotal   = etotal   + eent
  etotaldc = etotaldc + eent
 
@@ -200,6 +163,11 @@ subroutine prtene(dtset,energies,iout,usepaw)
      if ((dtset%vdw_xc>=5.and.dtset%vdw_xc<=7).and.ipositron/=1) then
        write(message, '(a,es21.14)' ) &
 &       '    Vd Waals DFT-D = ',energies%e_vdw_dftd
+       call wrtout(iout,message,'COLL')
+     end if
+     if (dtset%nzchempot>=1) then
+       write(message, '(a,es21.14)' ) &
+&       '    Chem. potential = ',energies%e_chempot
        call wrtout(iout,message,'COLL')
      end if
      if(dtset%occopt>=3.and.dtset%occopt<=8.and.ipositron==0) then
@@ -281,6 +249,11 @@ subroutine prtene(dtset,energies,iout,usepaw)
    if ((dtset%vdw_xc>=5.and.dtset%vdw_xc<=7).and.ipositron/=1) then
      write(message, '(a,es21.14)' ) &
 &     '    Vd Waals DFT-D = ',energies%e_vdw_dftd
+     call wrtout(iout,message,'COLL')
+   end if
+   if (dtset%nzchempot>=1) then
+     write(message, '(a,es21.14)' ) &
+&     '    Chem. potential = ',energies%e_chempot
      call wrtout(iout,message,'COLL')
    end if
    if(dtset%occopt>=3.and.dtset%occopt<=8.and.ipositron==0) then

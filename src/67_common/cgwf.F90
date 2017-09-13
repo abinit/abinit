@@ -397,7 +397,6 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
    do iblock=1,nblock
      ibandmin=1+(iblock-1)*nbdblock
      ibandmax=min(iblock*nbdblock,nband)
-
      do iband=ibandmin,ibandmax
        ibdblock=iband-(iblock-1)*nbdblock
        icg_shift=npw*nspinor*(iband-1)+icg
@@ -422,6 +421,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
 
        call cg_zcopy(npw*nspinor,ghc,ghc_all(1,1+icg_shift-icg))
        call cg_zcopy(npw*nspinor,scwavef,gsc(1,1+igsc_shift))
+
      end do
    end do
  end if
@@ -490,11 +490,13 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
 
      ! Compute (or extract) <g|H|c>
      if (gen_eigenpb.and.(inonsc==1)) then
+
 !$OMP PARALLEL DO PRIVATE(ipw)
        do ipw=1,npw*nspinor
          ghc(1,ipw)=xnorm*ghc_all(1,ipw+icg_shift-icg)
          ghc(2,ipw)=xnorm*ghc_all(2,ipw+icg_shift-icg)
        end do
+
      else
 !      By setting ieigen to iband, Fock contrib. of this iband to the energy will be calculated
        call fock_set_ieigen(gs_hamk%fock,iband)
@@ -502,6 +504,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
        call getghc(cpopt,cwavef,cprj_dum,ghc,gsc_dummy,gs_hamk,gvnlc,&
 &       eval,mpi_enreg,1,prtvol,sij_opt,tim_getghc,0)
      end if
+
 
      ! Minimisation of the residual: compute <G|(H-zshift)^2|C iband,k>
      if(wfopta10==2 .or. wfopta10==3) then
@@ -531,6 +534,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
          ! === COMPUTE THE RESIDUAL ===
 
          ! Compute lambda = <C|H|C> or <C|(H-zshift)**2|C>
+
          call dotprod_g(chc,doti,istwf_k,npw*nspinor,1,cwavef,ghc,me_g0,mpi_enreg%comm_spinorfft)
          lam0=chc
 
@@ -556,6 +560,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
          if (wfopta10<=1) then
            eval=chc
            if (gen_eigenpb) then
+
 !$OMP PARALLEL DO
              do ipw=1,npw*nspinor
                vresid(1,ipw)=ghc(1,ipw)-chc*scwavef(1,ipw)
@@ -798,6 +803,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
          ! MG: TODO: this is an hot spot that could be rewritten with BLAS! provided
          ! that direc --> conjgr
          if(istwf_k==1)then
+
 !$OMP PARALLEL DO
            do ipw=1,npw*nspinor
              direc(1,ipw)=conjgr(1,ipw)-(dotr*cwavef(1,ipw)-doti*cwavef(2,ipw))
@@ -828,8 +834,10 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
          sij_opt=0;if (gen_eigenpb) sij_opt=1
 
          if (fock_cg_typ==1) old_fockflag=fock_set_getghc_call(gs_hamk%fock,0)
+
          call getghc(cpopt,direc,cprj_dum,gh_direc,gs_direc,gs_hamk,gvnl_direc,&
 &         eval,mpi_enreg,1,prtvol,sij_opt,tim_getghc,0)
+
          if (fock_cg_typ==1) ii=fock_set_getghc_call(gs_hamk%fock,old_fockflag)
 
          if(wfopta10==2 .or. wfopta10==3)then
@@ -846,6 +854,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
            if (fock_cg_typ==1) old_fockflag=fock_set_getghc_call(gs_hamk%fock,0)
            call getghc(cpopt,work,cprj_dum,gh_direc,swork,gs_hamk,gvnl_dummy,&
 &           eval,mpi_enreg,1,prtvol,0,tim_getghc,0)
+
            if (fock_cg_typ==1) ii=fock_set_getghc_call(gs_hamk%fock,old_fockflag)
 
            if (gen_eigenpb) then
@@ -1043,6 +1052,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
            cwavef(1,ipw)=cwavef(1,ipw)*costh+direc(1,ipw)*sintn
            cwavef(2,ipw)=cwavef(2,ipw)*costh+direc(2,ipw)*sintn
          end do
+
 !        call cg_zaxpby(npw*nspinor,(/sintn,zero/),direc,(/costh,zero/),cwavef)
          call cg_zcopy(npw*nspinor,cwavef,cg(1,1+icg_shift))
 

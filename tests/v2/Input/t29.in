@@ -52,7 +52,7 @@
 #%%   t29.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
 #%% extra_inputs = t29.ddb.in.gz
 #%% [paral_info]
-#%% max_nprocs = 1
+#%% max_nprocs = 4
 #%% [extra_info]
 #%% keywords = 
 #%% authors = Unknown
@@ -64,4 +64,5 @@
 #%%   though, but the frequencies compare already rather well with those
 #%%   in Quong and Klein, PRB 46, 10734 (1992), except
 #%%   close to Gamma (still, no instability is observed, unlike in test 28).
+#%% topics = PhononBands
 #%%<END TEST_INFO>

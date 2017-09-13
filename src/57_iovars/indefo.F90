@@ -168,6 +168,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%cd_frqim_method=1
    dtsets(idtset)%cd_full_grid=0
    dtsets(idtset)%charge=zero
+   dtsets(idtset)%chempot(:,:,:)=zero
    dtsets(idtset)%chkexit=0
    dtsets(idtset)%chksymbreak=1
    dtsets(idtset)%cineb_start=7
@@ -176,6 +177,12 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
 !  D
    dtsets(idtset)%ddamp=0.1_dp
    dtsets(idtset)%delayperm=0
+   dtsets(idtset)%densfor_pred=2
+   if (dtsets(idtset)%paral_kgb>0.and.idtset>0) dtsets(idtset)%densfor_pred=6 ! Recommended for band-FFT parallelism
+!XG170502 : This section is completely useless, as ionmov is NOT know at present !
+!#ifdef HAVE_LOTF
+!   if (dtsets(idtset)%ionmov==23) dtsets(idtset)%densfor_pred=2 ! Recommended for LOTF
+!#endif
    dtsets(idtset)%dfpt_sciss=zero
    dtsets(idtset)%diecut=2.2_dp
    dtsets(idtset)%dielng=1.0774841_dp
@@ -244,7 +251,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%ecutsigx=zero ! The true default value is ecut . This is defined in invars2.F90
    dtsets(idtset)%ecutsm=zero
    dtsets(idtset)%ecutwfn=zero ! The true default value is ecut . This is defined in invars2.F90
-   dtsets(idtset)%effmass=one
+   dtsets(idtset)%effmass_free=one
    dtsets(idtset)%efmas=0
    dtsets(idtset)%efmas_bands=0 ! The true default is nband. This is defined in invars2.F90
    dtsets(idtset)%efmas_deg=1
@@ -327,11 +334,11 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%gwmem=11
    dtsets(idtset)%gwpara=2
    dtsets(idtset)%gwrpacorr=0
-   dtsets(idtset)%gwls_sternheimer_kmax=1
+   dtsets(idtset)%gwfockmix=0.25_dp
+   dtsets(idtset)%gwls_stern_kmax=1
    dtsets(idtset)%gwls_model_parameter=1.0_dp
-   dtsets(idtset)%gwls_second_model_parameter=0.0_dp
    dtsets(idtset)%gwls_npt_gauss_quad=10
-   dtsets(idtset)%gwls_dielectric_model=2
+   dtsets(idtset)%gwls_diel_model=2
    dtsets(idtset)%gwls_print_debug=0
    if (dtsets(idtset)%gwls_n_proj_freq/=0) dtsets(idtset)%gwls_list_proj_freq(:) = zero
    dtsets(idtset)%gwls_nseeds=1
@@ -362,9 +369,10 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%ionmov=0
    dtsets(idtset)%densfor_pred=2
    if (dtsets(idtset)%paral_kgb>0.and.idtset>0) dtsets(idtset)%densfor_pred=6 ! Recommended for band-FFT parallelism
-#ifdef HAVE_LOTF
-   if (dtsets(idtset)%ionmov==23) dtsets(idtset)%densfor_pred=2 ! Recommended for LOTF
-#endif
+!This section is completely useless, as ionmov is NOT know at present !
+!#ifdef HAVE_LOTF
+!   if (dtsets(idtset)%ionmov==23) dtsets(idtset)%densfor_pred=2 ! Recommended for LOTF
+!#endif
    dtsets(idtset)%iprcel=0
    dtsets(idtset)%iprcfc=0
    dtsets(idtset)%irandom=3
@@ -445,7 +453,11 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%nbdblock=1
    dtsets(idtset)%nbdbuf=0
    dtsets(idtset)%nberry=1
-   dtsets(idtset)%nc_xccc_gspace=0
+   if (dtsets(idtset)%usepaw==0) then
+     dtsets(idtset)%nc_xccc_gspace=0
+   else
+     dtsets(idtset)%nc_xccc_gspace=1
+   end if
    dtsets(idtset)%nbandkss=0
    dtsets(idtset)%nctime=0
    dtsets(idtset)%ndtset = -1
@@ -553,6 +565,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%pawujv=0.1_dp/Ha_eV
    dtsets(idtset)%pawusecp=1
    dtsets(idtset)%pawxcdev=1
+   dtsets(idtset)%pimd_constraint=0
    dtsets(idtset)%pitransform=0
    dtsets(idtset)%ptcharge(:) = zero
    dtsets(idtset)%plowan_bandi=0
@@ -587,6 +600,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%prtdipole=0
    dtsets(idtset)%prtdos=0
    dtsets(idtset)%prtdosm=0
+   dtsets(idtset)%prtebands=1;if (dtsets(idtset)%nimage>1) dtsets(idtset)%prtebands=0
    dtsets(idtset)%prtefg=0
    dtsets(idtset)%prteig=1;if (dtsets(idtset)%nimage>1) dtsets(idtset)%prteig=0
    dtsets(idtset)%prtelf=0
@@ -649,6 +663,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%rfddk=0
    dtsets(idtset)%rfdir(1:3)=0
    dtsets(idtset)%rfelfd=0
+   dtsets(idtset)%rfmagn=0
    dtsets(idtset)%rfmeth=1
    dtsets(idtset)%rfphon=0
    dtsets(idtset)%rfstrs=0

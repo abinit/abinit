@@ -1,5 +1,5 @@
 
-.Version 8.0.5 of ANADDB 
+.Version 8.4.2 of ANADDB 
 .(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
 
 .Copyright (C) 1998-2017 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see http://www.abinit.org .
 
-.Starting date : Thu 12 May 2016.
-- ( at 02h18 )
+.Starting date : Mon  5 Jun 2017.
+- ( at 16h30 )
   
 
 ================================================================================
@@ -61,8 +61,6 @@
 ================================================================================
 
  read the DDB information and perform some checks
-
--begin at tcpu      0.030  and twall      0.029 sec
 
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  7.7857000  0.0000000  0.0000000  G(1)=  0.1284406  0.0000000  0.0000000
@@ -119,7 +117,7 @@
 
  Calculation of the interatomic forces 
 
--begin at tcpu      0.038  and twall      0.038 sec
+-begin at tcpu      0.023  and twall      0.024 sec
        Homogeneous q point set in the B.Z.
  Grid q points  :       32
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -1067,8 +1065,7 @@
 
  Treat the first list of vectors 
 
--begin at tcpu      2.146  and twall      2.152 sec
- 
+
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
  Phonon energies in Hartree :
   -6.693346E-04 -6.693346E-04 -6.693346E-04  0.000000E+00  0.000000E+00
@@ -1105,7 +1102,7 @@
   3.0  0.0  0.0  1.0  1.0  1.0  1.0  0.0 -0.0 -1.0  1.0  1.0  1.0 -0.0  0.0  1.0
   1.0 -1.0  1.0  0.0  0.0  1.0 -1.0  1.0 -3.0 -0.0 -0.0 -1.0 -1.0 -1.0 -1.0 -0.0
   0.0  1.0 -1.0 -1.0 -1.0  0.0 -0.0 -1.0 -1.0  1.0 -1.0 -0.0 -0.0 -1.0  1.0 -1.0
- 
+
   Phonon wavevector (reduced coordinates) :  0.50000  0.00000  0.00000
  Phonon energies in Hartree :
   -3.057066E-04 -3.057066E-04 -1.801675E-04 -1.801675E-04  4.071033E-04
@@ -1115,7 +1112,7 @@
 - -6.709485E+01 -6.709485E+01 -3.954221E+01 -3.954221E+01  8.934884E+01
 -  9.688442E+01  1.374346E+02  1.374346E+02  1.842615E+02  1.842615E+02
 -  2.095623E+02  3.818690E+02  5.902820E+02  5.902820E+02  7.859020E+02
- 
+
   Phonon wavevector (reduced coordinates) :  0.00000  0.50000  0.50000
  Phonon energies in Hartree :
   -9.308306E-04 -4.796805E-04 -4.796805E-04 -1.284993E-04  5.286738E-04
@@ -1125,7 +1122,7 @@
 - -2.042937E+02 -1.052777E+02 -1.052777E+02 -2.820234E+01  1.160305E+02
 -  1.399106E+02  1.399106E+02  1.930462E+02  1.930462E+02  3.181140E+02
 -  3.181140E+02  3.453943E+02  5.858857E+02  6.462180E+02  8.381257E+02
- 
+
   Phonon wavevector (reduced coordinates) :  0.50000  0.50000  0.50000
  Phonon energies in Hartree :
   -9.192399E-04 -9.192399E-04 -9.192399E-04 -2.942422E-04 -2.942422E-04
@@ -1135,7 +1132,7 @@
 - -2.017498E+02 -2.017498E+02 -2.017498E+02 -6.457870E+01 -6.457870E+01
 - -6.457870E+01  2.916694E+02  2.916694E+02  2.916694E+02  3.050146E+02
 -  3.050146E+02  3.050146E+02  6.362089E+02  6.362089E+02  8.681908E+02
- 
+
   Phonon wavevector (reduced coordinates) :  0.12500  0.12500  0.12500
  Phonon energies in Hartree :
   -6.125718E-04 -6.125718E-04 -2.510007E-04  1.599438E-04  1.599438E-04
@@ -1145,31 +1142,28 @@
 - -1.344440E+02 -1.344440E+02 -5.508829E+01  3.510362E+01  3.510362E+01
 -  5.085657E+01  1.213243E+02  1.213243E+02  1.296226E+02  1.891411E+02
 -  1.891411E+02  3.300142E+02  6.046845E+02  6.046845E+02  7.507611E+02
- Found acoustic mode      4 for |q| in red coord < 0.25 ; q =       0.1250      0.1250      0.1250
  Speed of sound for this q and mode:
    in atomic units:     0.9154079440E-03
-   in SI units m/s:           2002.62995
+   in units km/s:              2.00263
  Partial Debye temperature for this q and mode:
    in atomic units:     0.4582832773E-03
    in SI units K  :            144.71424
 
- Found acoustic mode      5 for |q| in red coord < 0.25 ; q =       0.1250      0.1250      0.1250
  Speed of sound for this q and mode:
    in atomic units:     0.9154079440E-03
-   in SI units m/s:           2002.62995
+   in units km/s:              2.00263
  Partial Debye temperature for this q and mode:
    in atomic units:     0.4582832773E-03
    in SI units K  :            144.71424
 
- Found acoustic mode      9 for |q| in red coord < 0.25 ; q =       0.1250      0.1250      0.1250
  Speed of sound for this q and mode:
    in atomic units:     0.3380208185E-02
-   in SI units m/s:           7394.85188
+   in units km/s:              7.39485
  Partial Debye temperature for this q and mode:
    in atomic units:     0.1692243218E-02
    in SI units K  :            534.36751
 
- 
+
   Phonon wavevector (reduced coordinates) :  0.25000  0.25000  0.25000
  Phonon energies in Hartree :
   -5.926883E-04 -5.926883E-04 -5.751221E-04 -1.866964E-04 -1.866964E-04
@@ -1179,7 +1173,7 @@
 - -1.300800E+02 -1.300800E+02 -1.262247E+02 -4.097513E+01 -4.097513E+01
 -  1.863112E+01  2.104613E+02  2.104613E+02  2.175202E+02  2.492049E+02
 -  2.492049E+02  3.350638E+02  6.238214E+02  6.238214E+02  8.141873E+02
- 
+
   Phonon wavevector (reduced coordinates) :  0.37500  0.37500  0.37500
  Phonon energies in Hartree :
   -8.234160E-04 -7.855768E-04 -7.855768E-04 -2.908672E-04 -2.908672E-04
@@ -1194,8 +1188,7 @@
 
  Treat the second list of vectors 
 
--begin at tcpu      2.353  and twall      2.360 sec
- 
+
   Phonon at Gamma, with non-analyticity in the
   direction (cartesian coordinates)  0.00000  0.00000  1.00000
  Phonon energies in Hartree :
@@ -1211,12 +1204,12 @@
       6.97205676     -0.00000000     -0.00000000
      -0.00000000      6.97205676     -0.00000000
      -0.00000000     -0.00000000      6.97205676
- 
+
 -
-- Proc.   0 individual time (sec): cpu=          2.4  wall=          2.4
+- Proc.   0 individual time (sec): cpu=          1.6  wall=          1.6
 
 ================================================================================
 
-+Total cpu time      2.365  and wall time      2.372 sec
++Total cpu time      1.619  and wall time      1.628 sec
 
  anaddb : the run completed succesfully.

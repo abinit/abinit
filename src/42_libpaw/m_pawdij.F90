@@ -643,7 +643,6 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
        end do
      end if   
      LIBPAW_DEALLOCATE(dij0)
-
    end if
 
 !  ------------------------------------------------------------------------
@@ -674,7 +673,6 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
        LIBPAW_DEALLOCATE(dijfock_cv)
      end if
    end if
-
 
 !  ----------- Add Dij_Hartree to Dij
 !  ------------------------------------------------------------------------
@@ -747,7 +745,7 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
        if (dij_need) paw_ij(iatom)%dij(:,:)=paw_ij(iatom)%dij(:,:)+dijxc(:,:)
        LIBPAW_DEALLOCATE(dijxc)
      end if
- 
+
    end if
 
 !  ------------------------------------------------------------------------
@@ -842,16 +840,16 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
 !    ===== Need to compute DijU
        lpawu=pawtab(itypat)%lpawu
        LIBPAW_ALLOCATE(dijpawu,(cplex_dij*lmn2_size,ndij))
-       LIBPAW_POINTER_ALLOCATE(vpawu,(cplex_dij,lpawu*2+1,lpawu*2+1,nspden))
+       LIBPAW_POINTER_ALLOCATE(vpawu,(cplex_dij,lpawu*2+1,lpawu*2+1,ndij))
        if (pawtab(itypat)%usepawu>=10) vpawu=zero ! if dmft, do not apply U in LDA+U
        if (pawtab(itypat)%usepawu< 10) then
          call pawpupot(cplex_dij,ndij,paw_ij(iatom)%noccmmp,paw_ij(iatom)%nocctot,&
-&                      nspden,pawprtvol,pawtab(itypat),vpawu)
+&                      pawprtvol,pawtab(itypat),vpawu)
        end if  
        if (natvshift_==0) then
-         call pawdiju(cplex_dij,dijpawu,ndij,nspden,nsppol,pawtab(itypat),vpawu)
+         call pawdiju(cplex_dij,dijpawu,ndij,nsppol,pawtab(itypat),vpawu)
        else
-         call pawdiju(cplex_dij,dijpawu,ndij,nspden,nsppol,pawtab(itypat),vpawu,&
+         call pawdiju(cplex_dij,dijpawu,ndij,nsppol,pawtab(itypat),vpawu,&
 &                     natvshift=natvshift_,atvshift=atvshift(:,:,iatom_tot),&
 &                     fatvshift=fatvshift)
        end if
@@ -878,8 +876,8 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
        LIBPAW_ALLOCATE(dijexxc,(cplex_dij*lmn2_size,ndij))
        if (pawxcdev/=0) then
          if (paw_ij(iatom)%has_exexch_pot/=2) then
-           LIBPAW_POINTER_ALLOCATE(vpawx,(1,lmn2_size,nspden))
-           call pawxpot(nspden,pawprtvol,pawrhoij(iatom),pawtab(itypat),vpawx)
+           LIBPAW_POINTER_ALLOCATE(vpawx,(1,lmn2_size,ndij))
+           call pawxpot(ndij,pawprtvol,pawrhoij(iatom),pawtab(itypat),vpawx)
          else
            vpawx=>paw_ij(iatom)%vpawx
          end if
@@ -1190,7 +1188,7 @@ end subroutine pawdijhartree
 !! INPUTS
 !!  cplex=(RF calculations only) - 1 if RF 1st-order quantities are REAL, 2 if COMPLEX
 !!  cplex_dij=1 if dij is REAL, 2 if complex (2 for spin-orbit)
-!!  ndij= number of spin components for Dij^hat
+!!  ndij= number of spin components
 !!  nspden=number of spin density components
 !!  nsppol=number of independent spin WF components
 !!  pawang <type(pawang_type)>=paw angular mesh and related data, for current atom
@@ -1497,7 +1495,7 @@ end subroutine pawdijxc
 !!  cplex=(RF calculations only) - 1 if RF 1st-order quantities are REAL, 2 if COMPLEX
 !!  cplex_dij=1 if dij is REAL, 2 if complex (2 for spin-orbit)
 !!  [hyb_mixing, hyb_mixing_sr]= -- optional-- mixing factors for the global (resp. screened) XC hybrid functional
-!!  ndij= number of spin components for Dij^hat
+!!  ndij= number of spin components
 !!  nspden=number of spin density components
 !!  pawrhoij <type(pawrhoij_type)>= paw rhoij occupancies (and related data) for current atom
 !!  pawtab <type(pawtab_type)>=paw tabulated starting data, for current atom
@@ -1800,7 +1798,7 @@ end subroutine pawdijfock
 !!  cplex=(RF calculations only) - 1 if RF 1st-order quantities are REAL, 2 if COMPLEX
 !!  cplex_dij=1 if dij is REAL, 2 if complex (2 for spin-orbit)
 !!  lmselect(lm_size)=select the non-zero LM-moments of on-site potentials
-!!  ndij= number of spin components for Dij^hat
+!!  ndij= number of spin components
 !!  nspden=number of spin density components
 !!  nsppol=number of independent spin WF components
 !!  pawang <type(pawang_type)>=paw angular mesh and related data, for current atom
@@ -2074,7 +2072,7 @@ end subroutine pawdijxcm
 !!  iatom=absolute index of current atom (between 1 and natom)
 !!  ipert=index of perturbation; used only for RF calculation ; set ipert<=0 for GS calculations.
 !!  natom=total number of atoms
-!!  ndij= number of spin components for Dij^hat
+!!  ndij= number of spin components
 !!  ngrid=number of points of the real space grid (FFT, WVL, ...) treated by current proc
 !!  ngridtot=total number of points of the real space grid (FFT, WVL, ...)
 !!           For the FFT grid, thi should be equal to ngfft1*ngfft2*ngfft3
@@ -2756,11 +2754,10 @@ end subroutine pawdijso
 !! 
 !! INPUTS
 !!  cplex_dij=1 if dij is REAL, 2 if complex (2 for spin-orbit)
-!!  ndij= number of spin components for Dij^hat
-!!  nspden=number of spin density components
+!!  ndij= number of spin components
 !!  nsppol=number of independent spin WF components
 !!  pawtab <type(pawtab_type)>=paw tabulated starting data, for current atom
-!!  vpawu(cplex_dij,lpawu*2+1,lpawu*2+1,nspden)=moments of LDA+U potential for current atom
+!!  vpawu(cplex_dij,lpawu*2+1,lpawu*2+1,ndij)=moments of LDA+U potential for current atom
 !!  --- Optional arguments ---
 !!    atvshift(natvshift,nsppol)=potential energy shift for lm channel & spin (current atom)
 !!    fatvshift=factor that multiplies atvshift
@@ -2777,7 +2774,7 @@ end subroutine pawdijso
 !!
 !! SOURCE
 
-subroutine pawdiju(cplex_dij,dijpawu,ndij,nspden,nsppol,pawtab,vpawu,&
+subroutine pawdiju(cplex_dij,dijpawu,ndij,nsppol,pawtab,vpawu,&
 &                  natvshift,atvshift,fatvshift) ! optional arguments
 
 
@@ -2791,7 +2788,7 @@ subroutine pawdiju(cplex_dij,dijpawu,ndij,nspden,nsppol,pawtab,vpawu,&
 
 !Arguments ---------------------------------------------
 !scalars
- integer,intent(in) :: cplex_dij,ndij,nspden,nsppol
+ integer,intent(in) :: cplex_dij,ndij,nsppol
  integer,intent(in),optional :: natvshift
  real(dp),intent(in),optional :: fatvshift
 !arrays
@@ -2821,7 +2818,7 @@ subroutine pawdiju(cplex_dij,dijpawu,ndij,nspden,nsppol,pawtab,vpawu,&
    MSG_BUG(msg)
  end if
  if (size(vpawu,1)/=cplex_dij.or.size(vpawu,2)/=2*lpawu+1.or.&
-&    size(vpawu,3)/=2*lpawu+1.or.size(vpawu,4)/=nspden) then
+&    size(vpawu,3)/=2*lpawu+1.or.size(vpawu,4)/=ndij) then
    msg='invalid sizes for vpawu !'
    MSG_BUG(msg)
  end if
@@ -2900,7 +2897,7 @@ subroutine pawdiju(cplex_dij,dijpawu,ndij,nspden,nsppol,pawtab,vpawu,&
 
    end if ! idij
 
-   if (nspden==4.or.ndij==4.or.cplex_dij==2) then
+   if (ndij==4.or.cplex_dij==2) then
      if (idij<=2)  then
        dijpawu(:,idij)=dijpawu(:,idij)
      else
@@ -2938,13 +2935,12 @@ end subroutine pawdiju
 !!  cplex=(RF calculations only) - 1 if RF 1st-order quantities are REAL, 2 if COMPLEX
 !!  cplex_dij=1 if dij is REAL, 2 if complex (2 for spin-orbit)
 !!  lmselect(lm_size)=select the non-zero LM-moments of on-site potentials
-!!  ndij= number of spin components for Dij^hat
-!!  nspden=number of spin density components
+!!  ndij= number of spin components
 !!  nsppol=number of independent spin WF components
 !!  pawang <type(pawang_type)>=paw angular mesh and related data
 !!  pawrad <type(pawrad_type)>=paw radial mesh and related data, for current atom
 !!  pawtab <type(pawtab_type)>=paw tabulated starting data, for current atom
-!!  vpawx(1,lmn2_size,nspden)=moments of exact exchange potential
+!!  vpawx(1,lmn2_size,ndij)=moments of exact exchange potential
 !!                    for current atom and for correlated electrons
 !!  vxc_ex(mesh_size,lm_size,nspden)=all-electron on-site XC potential for current atom
 !!                    taken into account only valence correlated electrons
@@ -2988,7 +2984,7 @@ subroutine pawdijexxc(cplex,cplex_dij,dijexxc,lmselect,ndij,nspden,nsppol,&
 
 !Local variables ---------------------------------------
 !scalars
- integer :: icount,idij,idijend,ij_size,iln,in1,in2,ir,ir1,isel,ispden
+ integer :: icount,idij,idijend,ij_size,iln,in1,in2,ir,ir1,isel,ispden,ivxc
  integer :: jln,j0ln,klm,klm1,klmn,klmn1,kln,lexexch,ln_min,ln_max,lmax,lmin
  integer :: lm_size,lmn2_size,mesh_size,nsploop
  character(len=500) :: msg
@@ -3021,7 +3017,7 @@ subroutine pawdijexxc(cplex,cplex_dij,dijexxc,lmselect,ndij,nspden,nsppol,&
    MSG_BUG(msg)
  end if
  if (size(vpawx,1)/=1.or.size(vpawx,2)/=lmn2_size.or.&
-&    size(vpawx,3)/=nspden) then
+&    size(vpawx,3)/=ndij) then
    msg='invalid sizes for vpawx !'
    MSG_BUG(msg)
  end if
@@ -3043,12 +3039,17 @@ subroutine pawdijexxc(cplex,cplex_dij,dijexxc,lmselect,ndij,nspden,nsppol,&
  nsploop=nsppol;if (ndij==4) nsploop=4
  do idij=1,nsploop
 
-   if (idij<=nsppol.or.(nspden==4.and.idij<=3).or.cplex==2) then
+   if (idij<=nsppol.or.(ndij==4.and.idij<=3).or.cplex==2) then
 
      idijend=idij+idij/3;if (cplex==2) idijend=idij
      do ispden=idij,idijend
 
        dijexxc_idij=zero
+
+       ivxc=ispden
+       !Take into account nspden=1/nspinor=2 case
+       if (ndij/=nspden.and.ispden==2) ivxc=1
+       if (ndij/=nspden.and.ispden> 2) cycle
 
 !      ----------------------------------------------------------
 !      Summing over (l,m) moments
@@ -3064,7 +3065,7 @@ subroutine pawdijexxc(cplex,cplex_dij,dijexxc,lmselect,ndij,nspden,nsppol,&
                do iln=ln_min,jln
                  kln=j0ln+iln
                  ff(1:mesh_size)= &
-&                  vxc_ex(1:mesh_size,klm,idij)*pawtab%phiphj(1:mesh_size,kln)
+&                  vxc_ex(1:mesh_size,klm,ivxc)*pawtab%phiphj(1:mesh_size,kln)
                  call simp_gen(vxcij1(kln),ff,pawrad)
                end do
              end do
@@ -3076,9 +3077,9 @@ subroutine pawdijexxc(cplex,cplex_dij,dijexxc,lmselect,ndij,nspden,nsppol,&
                  do ir=1,mesh_size
                    ir1=2*ir
                    ff(ir)= &
-&                   vxc_ex(ir1-1,klm,ispden)*pawtab%phiphj(ir,kln)
+&                   vxc_ex(ir1-1,klm,ivxc)*pawtab%phiphj(ir,kln)
                    gg(ir)= &
-&                   vxc_ex(ir1,klm,ispden)*pawtab%phiphj(ir,kln)
+&                   vxc_ex(ir1,klm,ivxc)*pawtab%phiphj(ir,kln)
                  end do
                  call simp_gen(vxcij1(2*kln-1),ff,pawrad)
                  call simp_gen(vxcij1(2*kln  ),gg,pawrad)
@@ -3199,7 +3200,7 @@ subroutine pawdijexxc(cplex,cplex_dij,dijexxc,lmselect,ndij,nspden,nsppol,&
 
      end do !ispden
 
-   else if (nspden==4.and.idij==4) then ! cplex=1 here
+   else if (ndij==4.and.idij==4) then ! cplex=1 here
      dijexxc(:,idij)=dijexxc(:,idij-1)
      klmn1=2
      do klmn=1,lmn2_size
@@ -3855,8 +3856,7 @@ end subroutine pawdijfr
 !!
 !! INPUTS
 !!  cplex_dij=1 if dij is REAL, 2 if complex (2 for spin-orbit)
-!!  ndij=number of spin components for Dij^hat
-!!  nspden=number of spin density components
+!!  ndij=number of spin components for Dij
 !!  pawprtvol=control print volume and debugging output for PAW
 !!  noccmmp(cplex_dij,2*lpawu+1,2*lpawu+1,ndij)=density matrix in the augm. region
 !!  nocctot(ndij)=number of electrons in the correlated subspace
@@ -3865,7 +3865,7 @@ end subroutine pawdijfr
 !!     %vee(2*lpawu+1*4)=screened coulomb matrix
 !!
 !! OUTPUT
-!!  vpawu(cplex_dij,lpawu*2+1,lpawu*2+1,nspden)=lda+u potential
+!!  vpawu(cplex_dij,lpawu*2+1,lpawu*2+1,ndij)=lda+u potential
 !!                                 (see eg PRB 52, 5467 (1995))
 !!
 !! PARENTS
@@ -3876,7 +3876,7 @@ end subroutine pawdijfr
 !!
 !! SOURCE
 
- subroutine pawpupot(cplex_dij,ndij,noccmmp,nocctot,nspden,&
+ subroutine pawpupot(cplex_dij,ndij,noccmmp,nocctot,&
 &                    pawprtvol,pawtab,vpawu)
 
 
@@ -3891,7 +3891,7 @@ end subroutine pawdijfr
 
 !Arguments ---------------------------------------------
 !scalars
- integer,intent(in) :: cplex_dij,ndij,nspden,pawprtvol
+ integer,intent(in) :: cplex_dij,ndij,pawprtvol
  type(pawtab_type),intent(in) :: pawtab
 !arrays
  real(dp),intent(in) :: noccmmp(:,:,:,:),nocctot(:)
@@ -3904,7 +3904,7 @@ end subroutine pawdijfr
 !           2: E_int=-J/2.(Nup.(Nup-1)+Ndn.(Ndn-1)) (Nup and Ndn are ill-defined)
  integer,parameter :: option_interaction=1
 
- integer :: iplex,ispden,jspden,lpawu,m1,m11,m2,m21,m3,m31,m4,m41
+ integer :: iplex,ispden,jspden,lpawu,m1,m11,m2,m21,m3,m31,m4,m41,nspden_eff
  real(dp) :: mnorm,mx,my,mz,n_sig,n_msig,n_tot,VUKStemp,n_sigs,n_msigs
  real(dp),save :: VUKS
  character(len=500) :: msg
@@ -3924,8 +3924,8 @@ end subroutine pawdijfr
    MSG_ERROR(msg)
  end if
  if (size(vpawu,1)/=cplex_dij.or.size(vpawu,2)/=2*lpawu+1.or.&
-&    size(vpawu,3)/=2*lpawu+1.or.size(vpawu,4)/=nspden) then
-   write (msg,'(a,4I5, a,4I5)') ' invalid sizes for vpawu !',cplex_dij,2*lpawu+1,2*lpawu+1,nspden, &
+&    size(vpawu,3)/=2*lpawu+1.or.size(vpawu,4)/=ndij) then
+   write (msg,'(a,4I5, a,4I5)') ' invalid sizes for vpawu !',cplex_dij,2*lpawu+1,2*lpawu+1,ndij, &
 &    ' /= ', size(vpawu,1), size(vpawu,2), size(vpawu,3), size(vpawu,4)
    MSG_BUG(msg)
  end if
@@ -3945,13 +3945,13 @@ end subroutine pawdijfr
 !cf PRB 52 5467 (1995)
 !-----------------------------------------------------
 
- vpawu=zero
- do ispden=1,nspden
+ vpawu=zero ; nspden_eff=ndij
+ do ispden=1,nspden_eff
 
    if (ispden<=2) then   ! cases ndij=4, ispden=1,2 or ndij<4
-     jspden=min(ndij,2)-ispden+1   ! (ispden,ndij)=(1,4)=>jspden=2
+     jspden=min(nspden_eff,2)-ispden+1   ! (ispden,ndij)=(1,4)=>jspden=2
 
-     if (nspden<=2) then
+     if (nspden_eff<=2) then
        n_sig =nocctot(ispden)
        n_msig=nocctot(jspden)
        n_tot =n_sig+n_msig
@@ -4129,7 +4129,7 @@ end subroutine pawdijfr
      VUKS=VUKS+VUKStemp
      write(msg,*) "pawpupot: VUKStemp= ",ispden,VUKStemp
      call wrtout(std_out,  msg,'COLL')
-     if (ispden==nspden) then
+     if (ispden==nspden_eff) then
        write(msg,*) "pawpupot: VUKS= ",ispden,VUKS
        call wrtout(std_out,  msg,'COLL')
      end if
@@ -4150,7 +4150,7 @@ end subroutine pawdijfr
 !! Compute the PAW Local Exact-Exchange on-site potential
 !!
 !! INPUTS
-!!  nspden=number of spin-density components
+!!  ndij=number of spin components for Dij
 !!  pawprtvol=control print volume and debugging output for PAW
 !!  paw_ij <type(paw_ij_type)>=paw arrays given on (i,j) channels
 !!  pawtab <type(pawtab_type)>=paw tabulated starting data:
@@ -4167,7 +4167,7 @@ end subroutine pawdijfr
 !!
 !! SOURCE
 
- subroutine pawxpot(nspden,pawprtvol,pawrhoij,pawtab,vpawx)
+ subroutine pawxpot(ndij,pawprtvol,pawrhoij,pawtab,vpawx)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -4181,7 +4181,7 @@ end subroutine pawdijfr
 
 !Arguments ---------------------------------------------
 !scalars
- integer,intent(in) :: nspden,pawprtvol
+ integer,intent(in) :: ndij,pawprtvol
  type(pawrhoij_type),intent(in) :: pawrhoij
  type(pawtab_type),intent(in) :: pawtab
  real(dp),intent(out) :: vpawx(:,:,:)
@@ -4189,7 +4189,7 @@ end subroutine pawdijfr
 !Local variables ---------------------------------------
 !scalars
  integer :: irhoij,irhoij1,ispden,jrhoij,jrhoij1,klmn,klmn1,lexexch,ll,lmn2_size
- integer :: m11,m21,m31,m41,n1,n2,n3,n4,nk,nn1,nn2
+ integer :: m11,m21,m31,m41,n1,n2,n3,n4,nk,nn1,nn2,nspden_eff
  real(dp) :: tot
  character(len=500) :: msg
 !arrays
@@ -4211,7 +4211,7 @@ end subroutine pawdijfr
 
 !Check data consistency
  if (size(vpawx,1)/=1.or.size(vpawx,2)/=lmn2_size.or.&
-&    size(vpawx,3)/=nspden) then
+&    size(vpawx,3)/=ndij) then
    msg='invalid sizes for vpawx !'
    MSG_BUG(msg)
  end if
@@ -4221,8 +4221,8 @@ end subroutine pawdijfr
 !on the basis of projectors.
 !-----------------------------------------------------
 
- vpawx=zero
- do ispden=1,nspden
+ vpawx=zero ; nspden_eff=ndij
+ do ispden=1,nspden_eff
    jrhoij=1
    do irhoij=1,pawrhoij%nrhoijsel
      klmn=pawrhoij%rhoijselect(irhoij)

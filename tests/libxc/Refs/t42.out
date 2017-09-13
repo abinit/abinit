@@ -95,7 +95,7 @@ _ WF disk file :      0.162 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 --------------------------------------------------------------------------------
 -
 - outvars: echo of selected default values                                      
--   accesswff0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+-   iomode0 =  0 , fftalg0 =112 , wfoptalg0 =  0
 -
 - outvars: echo of global parameters not present in the input file              
 -  max_nthreads =    0
@@ -116,6 +116,14 @@ _ WF disk file :      0.162 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
           ecutwfn2     1.04264636E+01 Hartree
           ecutwfn3     1.04264636E+01 Hartree
           ecutwfn4     1.04264636E+01 Hartree
+          einterp1     0.00000000E+00  0.00000000E+00  0.00000000E+00
+                       0.00000000E+00
+          einterp2     0.00000000E+00  0.00000000E+00  0.00000000E+00
+                       0.00000000E+00
+          einterp3     0.00000000E+00  0.00000000E+00  0.00000000E+00
+                       0.00000000E+00
+          einterp4     1.00000000E+00  5.00000000E+00  0.00000000E+00
+                       0.00000000E+00
            enunit           1
 -          fftalg         312
            getqps          -1
@@ -140,6 +148,10 @@ P           mkmem           6
             natom           2
             nband          14
            ndtset           4
+           ndivsm1          0
+           ndivsm2          0
+           ndivsm3          0
+           ndivsm4         20
             ngfft1         16      16      16
             ngfft2         15      15      15
             ngfft3         15      15      15
@@ -163,6 +175,10 @@ P           mkmem           6
         optdriver2          4
         optdriver3          4
         optdriver4          4
+        prtebands1          1
+        prtebands2          1
+        prtebands3          1
+        prtebands4          2
              rcut      9.09090900E+00 Bohr
             rprim      0.0000000000E+00  5.0000000000E-01  5.0000000000E-01
                        5.0000000000E-01  0.0000000000E+00  5.0000000000E-01
@@ -1169,6 +1185,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     154.531     154.481
    Minimum optical gap =   7.2608 [eV], located at k-point      :   0.0000  0.0000  0.0000
    Fundamental gap     =   6.0690 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
                                         Bottom of conduction at :  -0.2500 -0.2500  0.0000
+- Writing interpolated bands to file: t42o_DS4_INTERP
 
  writing QP data on file : t42o_DS4_QPS
 
@@ -1200,6 +1217,14 @@ _setup2: Arith. and geom. avg. npw (full set) are     154.531     154.481
           ecutwfn2     1.04264636E+01 Hartree
           ecutwfn3     1.04264636E+01 Hartree
           ecutwfn4     1.04264636E+01 Hartree
+          einterp1     0.00000000E+00  0.00000000E+00  0.00000000E+00
+                       0.00000000E+00
+          einterp2     0.00000000E+00  0.00000000E+00  0.00000000E+00
+                       0.00000000E+00
+          einterp3     0.00000000E+00  0.00000000E+00  0.00000000E+00
+                       0.00000000E+00
+          einterp4     1.00000000E+00  5.00000000E+00  0.00000000E+00
+                       0.00000000E+00
            enunit           1
            etotal1    -1.1927650065E+01
            etotal2     0.0000000000E+00
@@ -1236,6 +1261,10 @@ P           mkmem           6
             natom           2
             nband          14
            ndtset           4
+           ndivsm1          0
+           ndivsm2          0
+           ndivsm3          0
+           ndivsm4         20
             ngfft1         16      16      16
             ngfft2         15      15      15
             ngfft3         15      15      15
@@ -1259,6 +1288,10 @@ P           mkmem           6
         optdriver2          4
         optdriver3          4
         optdriver4          4
+        prtebands1          1
+        prtebands2          1
+        prtebands3          1
+        prtebands4          2
              rcut      9.09090900E+00 Bohr
             rprim      0.0000000000E+00  5.0000000000E-01  5.0000000000E-01
                        5.0000000000E-01  0.0000000000E+00  5.0000000000E-01

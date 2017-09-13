@@ -38,7 +38,7 @@
 #%% files_to_test = 
 #%%   t57.out, tolnlines = 0, tolabs = 0.0, tolrel = 0.0
 #%% [paral_info]
-#%% max_nprocs = 1
+#%% max_nprocs = 2
 #%% [extra_info]
 #%% authors = Unknown
 #%% keywords =
@@ -50,4 +50,5 @@
 #%%   For the lowest eigenenergy, with -0.19671 Ha, ZP correction is -1.775406E-03  (kpt 1, bands 1 and 2)
 #%%   For the HOMO,               with  0.09747 Ha, ZP correction is  1.970635E-03  (kpt 4, bands 1 and 2)
 #%%   For the LUMO,               with  0.46242 Ha, ZP correction is -3.291346E-03  (kpt 1, bands 3 to 8)
+#%% topics = TDepES
 #%%<END TEST_INFO>

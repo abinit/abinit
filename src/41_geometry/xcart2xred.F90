@@ -36,7 +36,8 @@
 !!      pimd_langevin_nvt,pimd_nosehoover_npt,pimd_nosehoover_nvt,prcref
 !!      prcref_PMA,pred_delocint,pred_diisrelax,pred_isokinetic,pred_isothermal
 !!      pred_langevin,pred_moldyn,pred_nose,pred_srkna14,pred_steepdesc
-!!      pred_verlet,relaxpol,wrt_moldyn_netcdf,wvl_setboxgeometry
+!!      pred_velverlet,pred_verlet,relaxpol,wrt_moldyn_netcdf
+!!      wvl_setboxgeometry
 !!
 !! CHILDREN
 !!      matr3inv

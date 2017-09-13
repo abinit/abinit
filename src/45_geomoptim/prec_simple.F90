@@ -33,7 +33,7 @@
 !!      mover
 !!
 !! CHILDREN
-!!      bonds_free,dsyev,dsysv,fcart2fred,make_bonds_new
+!!      bonds_free,dsyev,dsysv,fcart2fred,make_bonds_new,xred2xcart
 !!
 !! SOURCE
 
@@ -83,11 +83,11 @@ subroutine prec_simple(ab_mover,forstr,hist,icycle,itime,iexit)
  real(dp) :: fcart(3,ab_mover%natom)
  real(dp) :: B(3*ab_mover%natom)
  real(dp) :: rprimd(3,3)
- real(dp),allocatable,save :: matrix(:,:)
  real(dp) :: matrix_tmp(3*ab_mover%natom,3*ab_mover%natom)
  real(dp) :: w(3*ab_mover%natom)
  real(dp),allocatable :: work(:)
  real(dp) :: badger(6,6)
+ real(dp),allocatable,save :: matrix(:,:)
  character(len=18)   :: fmt
 
 !***************************************************************************
@@ -119,9 +119,9 @@ subroutine prec_simple(ab_mover,forstr,hist,icycle,itime,iexit)
 !##########################################################
 !### 02. Take the coordinates and cell parameters from HIST
 
- xcart(:,:) =hist%histXF(:,:,1,hist%ihist)
- fcart(:,:) =hist%histXF(:,:,3,hist%ihist)
- rprimd(:,:)=hist%histR(:,:,hist%ihist)
+ rprimd(:,:)=hist%rprimd(:,:,hist%ihist)
+ fcart(:,:)=hist%fcart(:,:,hist%ihist)
+ call xred2xcart(ab_mover%natom,rprimd,xcart,hist%xred(:,:,hist%ihist))
 
 !##########################################################
 !### 03. Decide based on kind of precondiotioner if
@@ -297,7 +297,7 @@ subroutine prec_simple(ab_mover,forstr,hist,icycle,itime,iexit)
    lwork=-1
    call DSYEV('V', 'U', 3*ab_mover%natom, matrix_tmp, 3*ab_mover%natom, w , work, lwork, info )
    lwork=work(1)
-   write(std_out,*) '[DSYEV] Recomended lwork=',lwork
+   write(std_out,*) '[DSYEV] Recommended lwork=',lwork
    ABI_DEALLOCATE(work)
    ABI_ALLOCATE(work,(lwork))
    call DSYEV('V', 'U', 3*ab_mover%natom, matrix_tmp, 3*ab_mover%natom, w , work, lwork, info )
@@ -313,8 +313,6 @@ subroutine prec_simple(ab_mover,forstr,hist,icycle,itime,iexit)
    end do
 
    matrix=lambda*matrix
-
-!  write(std_out,*) 'Forces:',fcart(:,:)
 
    write(std_out,*) ch10
    do ii=1,3*ab_mover%natom

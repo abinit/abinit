@@ -28,7 +28,7 @@
 #%% files_to_test = 
 #%%   t21.out, tolnlines = 14, tolabs = 2.510e-10, tolrel = 1.000e-07
 #%% [paral_info]
-#%% max_nprocs = 1
+#%% max_nprocs = 4
 #%% [extra_info]
 #%% keywords = 
 #%% authors = Unknown
@@ -43,4 +43,5 @@
 #%%   multiplied by -60.54 and rounded to the third digit, 
 #%%   gives values that appear in the first line of that TABLE II :
 #%%   ( -0.002 , -0.096 , 0.158 , 0.071 , 0.071 )
+#%% topics = Phonons
 #%%<END TEST_INFO>

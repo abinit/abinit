@@ -47,20 +47,19 @@
 !!  mxnspinor=maximal value of input nspinor for all the datasets
 !!  mxnsppol=maximal value of input nsppol for all the datasets
 !!  mxnsym=maximum number of symmetries
+!!  mxntypat=maximum number of types of atoms
+!!  mxnzchempot=maximal value of input nzchempot for all the datasets
 !!
 !! SIDE EFFECTS
 !!  dtsets(0:ndtset_alloc)=<type datafiles_type>contains all input variables,
 !!   some of which are initialized here (see invars1.f for more details on the
 !!   initialized records)
 !!
-!! TODO
-!!  MG: What about using modules to store the maximum dimensions as global variables?
-!!
 !! PARENTS
 !!      m_ab7_invars_f90
 !!
 !! CHILDREN
-!!      indefo1,invars1,wrtout
+!!      indefo1,invars1
 !!
 !! SOURCE
 
@@ -71,8 +70,10 @@
 #include "abi_common.h"
 
 subroutine invars1m(dmatpuflag,dtsets,iout,lenstr,mband_upper_,&
-& msym,mxga_n_rules,mxgw_nqlwl,mxlpawu,mxmband_upper,mxnatom,mxnatpawu,mxnatsph,mxnatsph_extra,mxnatvshift,mxnconeq,&
-& mxnimage,mxn_efmas_dirs,mxnkpt,mxnkptgw,mxnnos,mxnqptdm,mxnspinor,mxnsppol,mxnsym,mxnimfrqs,mxnfreqsp,&
+& msym,mxga_n_rules,mxgw_nqlwl,mxlpawu,mxmband_upper,mxnatom,&
+& mxnatpawu,mxnatsph,mxnatsph_extra,mxnatvshift,mxnconeq,&
+& mxnimage,mxn_efmas_dirs,mxnkpt,mxnkptgw,mxnnos,mxnqptdm,mxnspinor, &
+& mxnsppol,mxnsym,mxntypat,mxnimfrqs,mxnfreqsp,mxnzchempot,&
 & mxn_projection_frequencies,ndtset,ndtset_alloc,string,npsp,zionpsp)
 
  use defs_basis
@@ -84,7 +85,6 @@ subroutine invars1m(dmatpuflag,dtsets,iout,lenstr,mband_upper_,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'invars1m'
- use interfaces_14_hidewrite
  use interfaces_57_iovars, except_this_one => invars1m
 !End of the abilint section
 
@@ -96,23 +96,22 @@ subroutine invars1m(dmatpuflag,dtsets,iout,lenstr,mband_upper_,&
  integer,intent(out) :: dmatpuflag,mxga_n_rules,mxgw_nqlwl,mxlpawu,mxmband_upper,mxnatpawu
  integer,intent(out) :: mxnatsph, mxnatsph_extra
  integer,intent(out) :: mxnatvshift,mxnconeq,mxn_efmas_dirs,mxnkpt,mxnkptgw,mxnnos
- integer,intent(out) :: mxnqptdm,mxnspinor,mxnsppol,mxnsym,mxnimfrqs,mxnfreqsp,mxn_projection_frequencies
+ integer,intent(out) :: mxnqptdm,mxnspinor,mxnsppol,mxnsym,mxntypat
+ integer,intent(out) :: mxnimfrqs,mxnfreqsp,mxnzchempot,mxn_projection_frequencies
  character(len=*),intent(inout) :: string
 !arrays
  integer,intent(out) :: mband_upper_(0:ndtset_alloc)
  type(dataset_type),intent(inout) :: dtsets(0:ndtset_alloc)
  real(dp),intent(in) :: zionpsp(npsp)
+
 !Local variables-------------------------------
 !scalars
  integer :: idtset,ii,jdtset,lpawu,mband_upper,iatom,nat,nsp
  character(len=500) :: message
 !arrays
-! integer :: bravais(11)
- integer,allocatable :: symafm_(:,:)
- integer,allocatable :: symrel_(:,:,:,:)
- real(dp),allocatable :: tnons_(:,:,:)
+ integer,allocatable :: symafm_(:,:),symrel_(:,:,:,:)
  integer,allocatable :: symafm(:),symrel(:,:,:)
- real(dp),allocatable :: tnons(:,:)
+ real(dp),allocatable :: tnons_(:,:,:),tnons(:,:)
 
 !******************************************************************
 
@@ -151,11 +150,8 @@ subroutine invars1m(dmatpuflag,dtsets,iout,lenstr,mband_upper_,&
 
 !Loop on datasets
  do idtset=1,ndtset_alloc
-
+   !write(std_out,'(2a,i0)') ch10,' invars1m : enter jdtset= ',jdtset
    jdtset=dtsets(idtset)%jdtset ; if(ndtset==0)jdtset=0
-
-   write(message,'(2a,i0)') ch10,' invars1m : enter jdtset= ',jdtset
-   call wrtout(std_out,message,'COLL')
 
 !  Input default values
    dtsets(idtset)%bravais(:)=0
@@ -171,7 +167,6 @@ subroutine invars1m(dmatpuflag,dtsets,iout,lenstr,mband_upper_,&
    symrel_(:,:,:,idtset)=symrel(:,:,:)
    tnons_(:,:,idtset)=tnons(:,:)
  end do
-
 
  mxmband_upper =maxval(mband_upper_ (1:ndtset_alloc))
 
@@ -192,6 +187,8 @@ subroutine invars1m(dmatpuflag,dtsets,iout,lenstr,mband_upper_,&
  mxnqptdm=dtsets(1)%nqptdm
  mxnspinor=dtsets(1)%nspinor
  mxnsppol=dtsets(1)%nsppol
+ mxntypat=dtsets(1)%ntypat
+ mxnzchempot=dtsets(1)%nzchempot
 
 !Get MAX dimension over datasets
  do ii=1,ndtset_alloc
@@ -210,6 +207,8 @@ subroutine invars1m(dmatpuflag,dtsets,iout,lenstr,mband_upper_,&
    mxnqptdm=max(dtsets(ii)%nqptdm,mxnqptdm)
    mxnspinor=max(dtsets(ii)%nspinor,mxnspinor)
    mxnsppol=max(dtsets(ii)%nsppol,mxnsppol)
+   mxntypat=max(dtsets(ii)%ntypat,mxntypat)
+   mxnzchempot=max(dtsets(ii)%nzchempot,mxnzchempot)
    if (dtsets(ii)%usepawu>0) then
      if (dtsets(ii)%usedmatpu/=0) dmatpuflag=1
      lpawu=maxval(dtsets(ii)%lpawu(:))
@@ -218,9 +217,7 @@ subroutine invars1m(dmatpuflag,dtsets,iout,lenstr,mband_upper_,&
      ! Old fashon way that should do fine
      dtsets(ii)%natpawu = 0
      do iatom=1, dtsets(ii)%natom
-       if (dtsets(ii)%lpawu(dtsets(ii)%typat(iatom)) /= -1 ) then
-         dtsets(ii)%natpawu = dtsets(ii)%natpawu + 1
-       end if
+       if (dtsets(ii)%lpawu(dtsets(ii)%typat(iatom)) /= -1 ) dtsets(ii)%natpawu = dtsets(ii)%natpawu + 1
      end do
      mxnatpawu=max(dtsets(ii)%natpawu,mxnatpawu)
      if (dtsets(ii)%macro_uj/=0) dtsets(ii)%natvshift=lpawu*2+1
@@ -239,6 +236,7 @@ subroutine invars1m(dmatpuflag,dtsets,iout,lenstr,mband_upper_,&
    ABI_ALLOCATE(dtsets(idtset)%bs_loband,(mxnsppol))
    ABI_ALLOCATE(dtsets(idtset)%bdgw,(2,mxnkptgw,mxnsppol))
    ABI_ALLOCATE(dtsets(idtset)%cd_imfrqs,(mxnimfrqs))
+   ABI_ALLOCATE(dtsets(idtset)%chempot,(3,mxnzchempot,mxntypat))
    nsp=max(mxnsppol,mxnspinor);nat=mxnatpawu*dmatpuflag
    ABI_ALLOCATE(dtsets(idtset)%dmatpawu,(2*mxlpawu+1,2*mxlpawu+1,nsp,nat,mxnimage))
    ABI_ALLOCATE(dtsets(idtset)%efmas_bands,(2,mxnkpt))
@@ -265,27 +263,13 @@ subroutine invars1m(dmatpuflag,dtsets,iout,lenstr,mband_upper_,&
    dtsets(idtset)%symafm(:)    =symafm_(1:mxnsym,idtset)
    dtsets(idtset)%tnons (:,:)  =tnons_ (:,1:mxnsym,idtset)
  end do
-!DEBUG
-!write(std_out,*)'invars1m dtsets(:)%natvshift',dtsets(:)%natvshift
-!ENDDEBUG
-!end if
+
  ABI_DEALLOCATE(symafm_)
  ABI_DEALLOCATE(symrel_)
  ABI_DEALLOCATE(tnons_)
  ABI_DEALLOCATE(symafm)
  ABI_DEALLOCATE(symrel)
  ABI_DEALLOCATE(tnons)
-
-!DEBUG
-!write(std_out,*)' invars1m : exit'
-!write(std_out,*)' invars1m : dtsets(0)%vel_orig(:,1,1)=',dtsets(0)%vel_orig(:,1,1)
-!write(std_out,*)' mxnatvshift,mxnsppol,mxnatpawu=',mxnatvshift,mxnsppol,mxnatpawu
-!dtsets(0)%atvshift(:,:,:)=zero
-!write(std_out,*)' succeeded to zero atvshift0 '
-!ENDDEBUG
-
-!stop
-!ENDDEBUG
 
 end subroutine invars1m
 !!***

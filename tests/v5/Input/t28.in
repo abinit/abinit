@@ -51,7 +51,7 @@ qph1l  0.00000000E+00  0.00000000E+00  0.00000000E+00    1.0
 #%%   t28.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
 #%% extra_inputs =  t26o.gz
 #%% [paral_info]
-#%% max_nprocs = 1
+#%% max_nprocs = 4
 #%% [extra_info]
 #%% authors = P. Boulanger
 #%% keywords =  
@@ -61,4 +61,5 @@ qph1l  0.00000000E+00  0.00000000E+00  0.00000000E+00    1.0
 #%%   the merged second order eigenvalue file, from test 27.
 #%%   NOTE : the DDB is actually taken from the Input directory, not from the test 26.
 #%%   - I find this a bit misleading, XG -.
+#%% topics = TDepES
 #%%<END TEST_INFO>

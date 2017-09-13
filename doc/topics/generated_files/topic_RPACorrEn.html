@@ -1,0 +1,103 @@
+<!--                                                                                     -->
+<!-- This file has been produced by generate_doc.py using different .yml  or .bib files. -->
+<!-- It is useless to modify it. Modify the related .yml  or .bib files instead.         -->
+<!--                                                                                     -->
+<html>
+<head><title>RPA correlation energy </title>
+<link rel=stylesheet type="text/css" href="../formabinit.css">
+</head>
+<body bgcolor="#ffffff">
+
+<hr>
+<a name="top"></a>
+
+<h1>Correlation energy within RPA</h1>
+<h3>This page gives hints on how to calculate the RPA correlation energy with the ABINIT package.
+<hr>
+
+<h5>Copyright (C) 2016-2017 ABINIT group (FB)
+<script type="text/javascript" src="../../js_files/copyright.js"> </script>
+</h5>
+
+<script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
+
+ Mentioned in &nbsp; <a href="../../users/generated_files/help_features.html#2.2">help_features#2.2</a> &nbsp;
+ <hr>
+ <h3><b>Table of content: </b></h3> 
+ <ul> <li>1. <a href="topic_RPACorrEn.html#1">Introduction.</a><li>2. <a href="topic_RPACorrEn.html#2">Related input variables.</a><li>3. <a href="topic_RPACorrEn.html#3">Selected input files.</a><li>4. <a href="topic_RPACorrEn.html#4">References.</a></ul>
+
+&nbsp; 
+<HR ALIGN=left> 
+<a name="1">&nbsp;</a>
+<h3><b>1. Introduction.</b></h3>
+
+
+<p>In the adiabatic-connection fluctuation-dissipation framework, the correlation energy of an electronic system can
+be related to the density-density correlation function, also known as the reducible polarizability.
+When further neglecting the exchange-correlation contribution to the polarizability,
+one obtains the celebrated random-phase approximation (RPA) correlation energy.
+This expression for the correlation energy can alternatively be derived from many-body perturbation theory.
+In this context, the RPA correlation energy corresponds to the GW total energy.
+
+
+<p>The RPA correlation energy can be expressed as an integral function of the dielectric matrix (see <a href="../../biblio/generated_files/bib_biblio.html#Gonze2016">[Gonze2016]</a>).
+The integral over the frequencies is performed along the imaginary axis, where the integrand function is very smooth.
+Only a few sampling frequencies are then necessary.
+In ABINIT, the RPA correlation energy is triggered by setting the keyword <a href="../../input_variables/generated_files/varset_gw.html#gwrpacorr">gwrpacorr</a> to 1. 
+<p>The RPA correlation energy is a post-processed quantity
+from the GW module of ABINIT, which takes care of evaluating the dielectric matrix for several imaginary frequencies.
+
+<p>The RPA correlation has been shown to capture the weak van der Waals interactions <a href="../../biblio/generated_files/bib_biblio.html#Lebegue2010">[Lebegue2010]</a>
+and to drastically improve defect formation energies <a href="../../biblio/generated_files/bib_biblio.html#Bruneval2012">[Bruneval2012]</a>.
+<p>The convergence versus empty states and energy cutoff is generally very slow.
+<p>It requires a careful convergence study. 
+The situation can be improved with the use of an extrapolation scheme (<a href="../../biblio/generated_files/bib_biblio.html#Bruneval2008">[Bruneval2008]</a>,<a href="../../biblio/generated_files/bib_biblio.html#Harl2010">[Harl2010]</a>).
+<br><br><a href=#top>Go to the top</a>
+
+
+
+
+&nbsp; 
+<hr> 
+<a name="2">&nbsp;</a>
+<h3><b>2. Related input variables.</b></h3>
+
+
+<p>Input variables for experts:<p>... <a href="../../input_variables/generated_files/varset_gw.html#gwrpacorr">gwrpacorr</a>   [GW RPA CORRelation energy]<br>
+
+<br><br><a href=#top>Go to the top</a>
+
+
+&nbsp; 
+<HR ALIGN=left> 
+<a name="3">&nbsp;</a>
+<h3><b>3. Selected input files.</b></h3>
+
+
+<i><b>WARNING</b> : as of ABINITv8.6.x, the list of input files provided in the specific section of the topics Web pages is still to be reviewed/tuned. In some cases, it will be adequate, and in other cases, it might be incomplete, or perhaps even useless.</i>
+<br><br>The user can find some related example input files in the ABINIT package in the directory /tests, or on the Web:
+<p> tests/v67mbpt/Input: <a href="../../tests/v67mbpt/Input/t19.in">t19.in</a> 
+<br>
+
+<br><br><a href=#top>Go to the top</a>
+
+
+&nbsp; 
+<HR ALIGN=left> 
+<a name="4">&nbsp;</a>
+<h3><b>4. References.</b></h3>
+
+
+<br> <a href="../../biblio/generated_files/bib_biblio.html#Bruneval2008">[Bruneval2008]</a>  F. Bruneval and X. Gonze, "Accurate GW self-energies in a plane-wave basis using only a few empty states: Towards large systems", Phys. Rev. B 78, 085125 (2008). <br> DOI: <a href="https://doi.org/10.1103/PhysRevB.78.085125">10.1103/PhysRevB.78.085125</a>.<br>
+<br> <a href="../../biblio/generated_files/bib_biblio.html#Bruneval2012">[Bruneval2012]</a>  F. Bruneval, "Range-Separated Approach to the RPA Correlation Applied to the van der Waals Bond and to Diffusion of Defects", Phys. Rev. Lett. 108, 256403 (2012). <br> DOI: <a href="https://doi.org/10.1103/PhysRevLett.108.256403">10.1103/PhysRevLett.108.256403</a>.<br>
+<br> <a href="../../biblio/generated_files/bib_biblio.html#Gonze2016">[Gonze2016]</a>  X. Gonze, F. Jollet, F. Abreu Araujo, D. Adams, B. Amadon, T. Applencourt, C. Audouze, J.-M. Beuken, J. Bieder, A. Bokhanchuk, E. Bousquet, F. Bruneval, D. Caliste, M. C&ocirc;t&eacute;, F. Dahm, F. Da Pieve, M. Delaveau, M. Di Gennaro, B. Dorado, C. Espejo, G. Geneste, L. Genovese, A. Gerossier, M. Giantomassi, Y. Gillet, D.R. Hamann, L. He, G. Jomard, J. Laflamme Janssen, S. Le Roux, A. Levitt, A. Lherbier, F. Liu, I. Lukacevic, A. Martin, C. Martins, M.J.T. Oliveira, S. Ponc&eacute;, Y. Pouillon, T. Rangel, G.-M. Rignanese, A.H. Romero, B. Rousseau, O. Rubel, A.A. Shukri, M. Stankovski, M. Torrent, M.J. Van Setten, B. Van troeye, M.J. Verstraete, D. Waroquier, J. Wiktor, B. Xue, A. Zhou and J.W. Zwanziger, "Recent developments in the ABINIT software package", Computer Physics Communications 205, 106 (2016). <br> DOI: <a href="https://doi.org/10.1016/j.cpc.2016.04.003">10.1016/j.cpc.2016.04.003</a>.<br>
+<br> <a href="../../biblio/generated_files/bib_biblio.html#Harl2010">[Harl2010]</a>  J. Harl, L. Schimka and G. Kresse, "Assessing the quality of the random phase approximation for lattice constants and atomization energies of solids", Phys. Rev. B 81, 115126 (2010). <br> DOI: <a href="https://doi.org/10.1103/PhysRevB.81.115126">10.1103/PhysRevB.81.115126</a>.<br>
+<br> <a href="../../biblio/generated_files/bib_biblio.html#Lebegue2010">[Lebegue2010]</a>  S. Leb&egrave;gue, J. Harl, T. Gould, J. G. &Aacute;ngy&aacute;n, G. Kresse and J. F. Dobson, "Cohesive Properties and Asymptotics of the Dispersion Interaction in Graphite by the Random Phase Approximation", Phys. Rev. Lett. 105, 196401 (2010).<br>
+<p>
+<br><br><a href=#top>Go to the top</a>
+
+<script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
+
+</body>
+</html>
+

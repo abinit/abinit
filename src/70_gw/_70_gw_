@@ -53,7 +53,6 @@
 !! interfaces_70_gw.F90
 !! m_chi0.F90
 !! m_dyson_solver.F90
-!! m_eet.F90
 !! m_fft_prof.F90
 !! m_model_screening.F90
 !! m_ppmodel.F90

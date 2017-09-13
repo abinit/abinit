@@ -53,4 +53,5 @@ xred 3*0
 #%%  Isolated Helium atom. Treated with LDA, Perdew-Zunger-Ceperley-Alder (ixc=2).
 #%%  The total energy is -2.8278 Ha.
 #%%  For speed-up, it begins with the wavefunctions from test 11.
+#%% topics = xc
 #%%<END TEST_INFO>

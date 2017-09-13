@@ -31,6 +31,7 @@
 !! iofn1.F90
 !! m_argparse.F90
 !! mover.F90
+!! mover_effpot.F90
 !! nonlinear.F90
 !! pawuj_drive.F90
 !! respfn.F90

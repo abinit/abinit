@@ -83,7 +83,7 @@
 !!
 !! CHILDREN
 !!      alloc_hamilt_gpu,atm2fft,check_kxc,chkpawovlp,chkph3,d2frnl,d2sym3
-!!      ddb_io_out,dealloc_hamilt_gpu,dfpt_dyfro,dfpt_dyout,dfpt_dyxc1
+!!      dealloc_hamilt_gpu,dfpt_dyfro,dfpt_dyout,dfpt_dyxc1
 !!      dfpt_eltfrhar,dfpt_eltfrkin,dfpt_eltfrloc,dfpt_eltfrxc,dfpt_ewald
 !!      dfpt_gatherdy,dfpt_looppert,dfpt_phfrq,dfpt_prtph,ebands_free
 !!      efmasdeg_free_array,efmasfr_free_array,eig2tot,eigen_meandege
@@ -94,9 +94,10 @@
 !!      paw_ij_nullify,pawdenpot,pawdij,pawexpiqr,pawfgr_destroy,pawfgr_init
 !!      pawfgrtab_free,pawfgrtab_init,pawinit,pawmknhat,pawpuxinit
 !!      pawrhoij_alloc,pawrhoij_bcast,pawrhoij_copy,pawrhoij_free
-!!      pawrhoij_nullify,pawtab_get_lsize,prteigrs,psddb8,pspini,q0dy3_apply
+!!      pawrhoij_nullify,pawtab_get_lsize,prteigrs,pspini,q0dy3_apply
 !!      q0dy3_calc,read_rhor,rhohxc,setsym,setsymrhoij,setup1,status,symdij
 !!      symmetrize_xred,sytens,timab,transgrid,vdw_dftd2,vdw_dftd3,wffclose
+!!      ddb_hdr_init, ddb_hdr_free, ddb_hdr_open_write
 !!      wings3,wrtloctens,wrtout,xmpi_bcast
 !!
 !! SOURCE
@@ -123,9 +124,12 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  use m_ebands
  use m_results_respfn
  use m_hdr
+ use m_crystal
 
- use m_dynmat,      only : chkph3, d2sym3, q0dy3_apply, q0dy3_calc, wings3, dfpt_phfrq
- use m_ddb,         only : psddb8, DDB_VERSION
+ use m_fstrings,    only : strcat
+ use m_dynmat,      only : chkph3, d2sym3, q0dy3_apply, q0dy3_calc, wings3, dfpt_phfrq, sytens
+ use m_ddb,         only : DDB_VERSION
+ use m_ddb_hdr,     only : ddb_hdr_type, ddb_hdr_init, ddb_hdr_free, ddb_hdr_open_write
  use m_efmas,       only : efmasdeg_free_array, efmasfr_free_array
  use m_wfk,         only : wfk_read_eigenvalues
  use m_ioarr,       only : read_rhor
@@ -136,7 +140,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  use m_paw_ij,      only : paw_ij_type, paw_ij_init, paw_ij_free, paw_ij_nullify
  use m_pawfgrtab,   only : pawfgrtab_type, pawfgrtab_init, pawfgrtab_free
  use m_pawrhoij,    only : pawrhoij_type, pawrhoij_alloc, pawrhoij_free, pawrhoij_copy, &
-&                          pawrhoij_bcast, pawrhoij_nullify
+&                          pawrhoij_bcast, pawrhoij_nullify, pawrhoij_get_nspden
  use m_pawdij,      only : pawdij, symdij
  use m_pawfgr,      only : pawfgr_type, pawfgr_init, pawfgr_destroy
  use m_paw_finegrid,only : pawexpiqr
@@ -190,7 +194,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  integer,parameter :: formeig=0,level=10
  integer,parameter :: response=1,syuse=0,master=0,cplex1=1
  integer :: nk3xc
- integer :: analyt,ask_accurate,band_index,bantot,bdeigrf,choice,cplex
+ integer :: analyt,ask_accurate,band_index,bantot,bdeigrf,choice,coredens_method,cplex
  integer :: dim_eig2nkq,dim_eigbrd,dyfr_cplex,dyfr_nondiag,fullinit,gnt_option
  integer :: gscase,has_dijnd,has_kxc,iatom,iatom_tot,iband,idir,ider,ierr,ifft,ii,ikpt,indx
  integer :: i1dir,i1pert,i2dir,i2pert,i3dir,i3pert
@@ -201,8 +205,9 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  integer :: optcut,option,optgr0,optgr1,optgr2,optorth,optrad
  integer :: optatm,optdyfr,opteltfr,optgr,optn,optn2,optstr,optv
  integer :: outd2,pawbec,pawpiezo,prtbbb,psp_gencond,qzero,rdwr,rdwrpaw
- integer :: req_cplex_dij,rfasr,rfddk,rfelfd,rfphon,rfstrs,rfuser,rf2_dkdk,rf2_dkde
- integer :: spaceworld,sumg0,sz1,sz2,tim_mkrho,timrev,usecprj,usevdw,usexcnhat,use_sym
+ integer :: req_cplex_dij,rfasr,rfddk,rfelfd,rfphon,rfstrs,rfuser,rf2_dkdk,rf2_dkde,rfmagn
+ integer :: spaceworld,sumg0,sz1,sz2,tim_mkrho,timrev,usecprj,usevdw
+ integer :: usexcnhat,use_sym,vloc_method
  logical :: has_full_piezo,has_allddk,paral_atom,qeq0,use_nhat_gga,call_pawinit
  real(dp) :: boxcut,compch_fft,compch_sph,cpus,ecore,ecut_eff,ecutdg_eff,ecutf
  real(dp) :: eei,eew,ehart,eii,ek,enl,entropy,enxc
@@ -210,13 +215,16 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  real(dp) :: tolwfr
  real(dp) :: ucvol,vxcavg
  character(len=fnlen) :: dscrpt
+ character(len=fnlen) :: filename
  character(len=500) :: message
  type(ebands_t) :: bstruct
  type(hdr_type) :: hdr,hdr_fine,hdr0,hdr_den
+ type(ddb_hdr_type) :: ddb_hdr
  type(paw_dmft_type) :: paw_dmft
  type(pawfgr_type) :: pawfgr
  type(wffile_type) :: wffgs,wfftgs
  type(wvl_data) :: wvl
+ type(crystal_t) :: Crystal
  integer :: ddkfil(3),ngfft(18),ngfftf(18),rfdir(3),rf2_dirs_from_rfpert_nl(3,3)
  integer,allocatable :: atindx(:),atindx1(:),blkflg(:,:,:,:),blkflgfrx1(:,:,:,:),blkflg1(:,:,:,:)
  integer,allocatable :: blkflg2(:,:,:,:),carflg(:,:,:,:),clflg(:,:),indsym(:,:,:)
@@ -282,7 +290,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 
 !Respfn input variables
  rfasr=dtset%rfasr   ; rfdir(1:3)=dtset%rfdir(1:3)
- rfddk=dtset%rfddk   ; rfelfd=dtset%rfelfd
+ rfddk=dtset%rfddk   ; rfelfd=dtset%rfelfd ; rfmagn=dtset%rfmagn
  rfphon=dtset%rfphon ; rfstrs=dtset%rfstrs
  rfuser=dtset%rfuser ; rf2_dkdk=dtset%rf2_dkdk ; rf2_dkde=dtset%rf2_dkde
 
@@ -316,7 +324,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 & response,rmet,dtset%rprim_orig(1:3,1:3,1),rprimd,ucvol,psps%usepaw)
 
 !Define the set of admitted perturbations
- mpert=natom+6
+ mpert=natom+7
  if (rf2_dkdk>0.or.rf2_dkde>0) mpert=natom+11
 
 !Initialize the list of perturbations rfpert
@@ -336,8 +344,10 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  if(rfstrs==1.or.rfstrs==3)rfpert(natom+3)=1
  if(rfstrs==2.or.rfstrs==3)rfpert(natom+4)=1
 
- if(rfuser==1.or.rfuser==3)rfpert(natom+5)=1
- if(rfuser==2.or.rfuser==3)rfpert(natom+6)=1
+ if(rfuser==1.or.rfuser==3)rfpert(natom+6)=1
+ if(rfuser==2.or.rfuser==3)rfpert(natom+7)=1
+
+ if(rfmagn==1) rfpert(natom+5)=1
 
  qeq0=(dtset%qptn(1)**2+dtset%qptn(2)**2+dtset%qptn(3)**2<1.d-14)
 
@@ -659,11 +669,12 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
      has_dijnd=1; req_cplex_dij=2
    end if
    if (rfphon/=0.or.rfelfd==1.or.rfelfd==3.or.rfstrs/=0.or.rf2_dkde/=0) then
-     has_kxc=1;nkxc1=2*dtset%nspden-1 ! LDA only
-     if(dtset%xclevel==2.and.dtset%pawxcdev==0) nkxc1=23
+     has_kxc=1;nkxc1=2*dtset%nspden-1                   ! LDA
+     if(dtset%xclevel==2.and.dtset%nspden==1) nkxc1=7   ! GGA non-polarized
+     if(dtset%xclevel==2.and.dtset%nspden==2) nkxc1=19  ! GGA polarized
    end if
-   call paw_an_init(paw_an,dtset%natom,dtset%ntypat,nkxc1,dtset%nspden,cplex,dtset%pawxcdev,&
-&   dtset%typat,pawang,pawtab,has_vxc=1,has_vxc_ex=1,has_kxc=has_kxc,&
+   call paw_an_init(paw_an,dtset%natom,dtset%ntypat,nkxc1,dtset%nspden,&
+&   cplex,dtset%pawxcdev,dtset%typat,pawang,pawtab,has_vxc=1,has_vxc_ex=1,has_kxc=has_kxc,&
 &   mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
    call paw_ij_init(paw_ij,cplex,dtset%nspinor,dtset%nsppol,dtset%nspden,dtset%pawspnorb,&
 &   natom,dtset%ntypat,dtset%typat,pawtab,has_dij=1,has_dijhartree=1,has_dijnd=has_dijnd,&
@@ -692,7 +703,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
    if (rdwrpaw/=0) then
      ABI_DATATYPE_ALLOCATE(pawrhoij_read,(natom))
      call pawrhoij_nullify(pawrhoij_read)
-     nspden_rhoij=dtset%nspden;if (dtset%pawspnorb>0.and.dtset%nspinor==2) nspden_rhoij=4
+     nspden_rhoij=pawrhoij_get_nspden(dtset%nspden,dtset%nspinor,dtset%pawspnorb)
      call pawrhoij_alloc(pawrhoij_read,dtset%pawcpxocc,nspden_rhoij,dtset%nspinor,&
 &     dtset%nsppol,dtset%typat,pawtab=pawtab)
    else
@@ -776,17 +787,32 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  ABI_ALLOCATE(xccc3d,(n3xccc))
  ABI_ALLOCATE(vpsp,(nfftf))
 
- if (psps%usepaw==1 .or. psps%nc_xccc_gspace==1) then
-!  PAW or NC with nc_xccc_gspace: compute Vloc and core charge together in reciprocal space
+!Determine by which method the local ionic potential and/or
+! the pseudo core charge density have to be computed
+!Local ionic potential:
+! Method 1: PAW ; Method 2: Norm-conserving PP
+ vloc_method=1;if (psps%usepaw==0) vloc_method=2
+!Pseudo core charge density:
+! Method 1: PAW, nc_xccc_gspace ; Method 2: Norm-conserving PP
+ coredens_method=1;if (psps%usepaw==0) coredens_method=2
+ if (psps%nc_xccc_gspace==1) coredens_method=1
+ if (psps%nc_xccc_gspace==0) coredens_method=2
+
+!Local ionic potential and/or pseudo core charge by method 1
+ if (vloc_method==1.or.coredens_method==1) then
    call timab(562,1,tsec)
-   optatm=1;optdyfr=0;opteltfr=0;optgr=0;optstr=0;optv=1;optn=n3xccc/nfftf;optn2=1
+   optv=0;if (vloc_method==1) optv=1
+   optn=0;if (coredens_method==1) optn=n3xccc/nfftf
+   optatm=1;optdyfr=0;opteltfr=0;optgr=0;optstr=0;optn2=1
    call atm2fft(atindx1,xccc3d,vpsp,dum_dyfrn,dum_dyfrv,dum_eltfrxc,dum_gauss,gmet,gprimd,&
 &   dum_grn,dum_grv,gsqcut,mgfftf,psps%mqgrid_vl,natom,nattyp,nfftf,ngfftf,&
 &   ntypat,optatm,optdyfr,opteltfr,optgr,optn,optn2,optstr,optv,psps,pawtab,ph1df,psps%qgrid_vl,&
 &   dtset%qprtrb,dum_rhog,strn_dummy6,strv_dummy6,ucvol,psps%usepaw,dum_vg,dum_vg,dum_vg,dtset%vprtrb,psps%vlspl)
    call timab(562,2,tsec)
- else
-!  Norm-cons.: compute Vloc in reciprocal space and core charge in real space
+ end if
+
+!Local ionic potential by method 2
+ if (vloc_method==2) then
    option=1
    ABI_ALLOCATE(dyfrlo_indx,(3,3,natom))
    ABI_ALLOCATE(grtn_indx,(3,natom))
@@ -796,20 +822,23 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 &   dtset%qprtrb,rhog,rhor,rprimd,ucvol,dtset%vprtrb,vpsp,wvl%descr,wvl%den,xred)
    ABI_DEALLOCATE(dyfrlo_indx)
    ABI_DEALLOCATE(grtn_indx)
-   if (psps%n1xccc/=0) then
-     ABI_ALLOCATE(dyfrx2,(3,3,natom))
-     ABI_ALLOCATE(vxc,(0,0)) ! dummy
-     call mkcore(dummy6,dyfrx2,grxc,mpi_enreg,natom,nfftf,dtset%nspden,ntypat,&
-&     ngfftf(1),psps%n1xccc,ngfftf(2),ngfftf(3),option,rprimd,dtset%typat,ucvol,vxc,&
-&     psps%xcccrc,psps%xccc1d,xccc3d,xred)
-     ABI_DEALLOCATE(dyfrx2)
-     ABI_DEALLOCATE(vxc) ! dummy
-   end if
+ end if
+
+!Pseudo core electron density by method 2
+ if (coredens_method==2.and.psps%n1xccc/=0) then
+   option=1
+   ABI_ALLOCATE(dyfrx2,(3,3,natom))
+   ABI_ALLOCATE(vxc,(0,0)) ! dummy
+   call mkcore(dummy6,dyfrx2,grxc,mpi_enreg,natom,nfftf,dtset%nspden,ntypat,&
+&   ngfftf(1),psps%n1xccc,ngfftf(2),ngfftf(3),option,rprimd,dtset%typat,ucvol,vxc,&
+&   psps%xcccrc,psps%xccc1d,xccc3d,xred)
+   ABI_DEALLOCATE(dyfrx2)
+   ABI_DEALLOCATE(vxc) ! dummy
  end if
 
 !Set up hartree and xc potential. Compute kxc here.
  option=2 ; nk3xc=1
- nkxc=2*min(dtset%nspden,2)-1;if(dtset%xclevel==2)nkxc=23
+ nkxc=2*min(dtset%nspden,2)-1;if(dtset%xclevel==2)nkxc=12*min(dtset%nspden,2)-5
  call check_kxc(dtset%ixc,dtset%optdriver)
  ABI_ALLOCATE(kxc,(nfftf,nkxc))
  ABI_ALLOCATE(vhartr,(nfftf))
@@ -980,7 +1009,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
    end if
 
 !  Calculate the kinetic part of the elastic tensor
-   call dfpt_eltfrkin(cg,eltfrkin,dtset%ecut,dtset%ecutsm,dtset%effmass,&
+   call dfpt_eltfrkin(cg,eltfrkin,dtset%ecut,dtset%ecutsm,dtset%effmass_free,&
 &   dtset%istwfk,kg,dtset%kptns,dtset%mband,dtset%mgfft,dtset%mkmem,mpi_enreg,&
 &   dtset%mpw,dtset%nband,dtset%nkpt,ngfft,npwarr,&
 &   dtset%nspinor,dtset%nsppol,occ,rprimd,dtset%wtk)
@@ -1314,7 +1343,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 !rfpert(natom+1)=0
 
 !Were 2DTE computed ?
- if(rfphon==0 .and. (rf2_dkdk/=0 .or. rf2_dkde/=0 .or. rfddk/=0 .or. rfelfd==2) .and. rfstrs==0 .and. rfuser==0)then
+ if(rfphon==0 .and. (rf2_dkdk/=0 .or. rf2_dkde/=0 .or. rfddk/=0 .or. rfelfd==2) .and. rfstrs==0 .and. rfuser==0 .and. rfmagn==0)then
 
    write(message,'(a,a)' )ch10,' respfn : d/dk was computed, but no 2DTE, so no DDB output.'
    call wrtout(std_out,message,'COLL')
@@ -1327,27 +1356,6 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
    write(message,'(a,a)' )ch10,' ==> Compute Derivative Database <== '
    call wrtout(std_out,message,'COLL')
    call wrtout(ab_out,message,'COLL')
-
-!  Open the formatted derivative database file, and write the
-!  preliminary information
-   call status(0,dtfil%filstat,iexit,level,'call ddb_io_out')
-   dscrpt=' Note : temporary (transfer) database '
-!  tolwfr must be initialized here, but it is a dummy value
-   tolwfr=1.0_dp
-   call ddb_io_out (dscrpt,dtfil%fnameabo_ddb,natom,dtset%mband,&
-&   dtset%nkpt,dtset%nsym,ntypat,dtfil%unddb,DDB_VERSION,&
-&   dtset%acell_orig(1:3,1),dtset%amu_orig(:,1),dtset%dilatmx,dtset%ecut,dtset%ecutsm,&
-&   dtset%intxc,iscf,dtset%ixc,dtset%kpt,dtset%kptnrm,&
-&   natom,dtset%nband,ngfft,dtset%nkpt,dtset%nspden,dtset%nspinor,&
-&   dtset%nsppol,dtset%nsym,ntypat,occ,dtset%occopt,dtset%pawecutdg,&
-&   dtset%rprim_orig(1:3,1:3,1),dtset%dfpt_sciss,dtset%spinat,dtset%symafm,dtset%symrel,&
-&   dtset%tnons,tolwfr,dtset%tphysel,dtset%tsmear,&
-&   dtset%typat,dtset%usepaw,dtset%wtk,xred,psps%ziontypat,dtset%znucl)
-
-   nblok=1 ; fullinit=1 ; choice=2
-   call psddb8 (choice,psps%dimekb,psps%ekb,fullinit,psps%indlmn,&
-&   psps%lmnmax,nblok,ntypat,dtfil%unddb,pawtab,&
-&   psps%pspso,psps%usepaw,psps%useylm,DDB_VERSION)
 
 !  In the RESPFN code, dfpt_nstdy and stady3 were called here
    d2nfr(:,:,:,:,:)=d2lo(:,:,:,:,:)+d2nl(:,:,:,:,:)
@@ -1410,8 +1418,20 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 &   eltcore,elteew,eltfrhar,eltfrkin,eltfrloc,eltfrnl,eltfrxc,eltvdw,&
 &   gprimd,dtset%mband,mpert,natom,ntypat,outd2,pawbec,pawpiezo,piezofrnl,dtset%prtbbb,&
 &   rfasr,rfpert,rprimd,dtset%typat,ucvol,usevdw,psps%ziontypat)
-!  Output of the dynamical matrix
-!  (Note : remember, previously, the processor me=0 has been selected)
+
+   dscrpt=' Note : temporary (transfer) database '
+
+!  Initialize the header of the DDB file
+   call ddb_hdr_init(ddb_hdr,dtset,psps,pawtab,DDB_VERSION,dscrpt,&
+&                    1,xred=xred,occ=occ,ngfft=ngfft)
+
+!  Open the formatted derivative database file, and write the header
+   call status(0,dtfil%filstat,iexit,level,'call ddb_hdr_open_write')
+   call ddb_hdr_open_write(ddb_hdr, dtfil%fnameabo_ddb, dtfil%unddb)
+
+   call ddb_hdr_free(ddb_hdr)
+
+!  Output of the dynamical matrix (master only)
    call status(0,dtfil%filstat,iexit,level,'call dfpt_dyout   ')
    call dfpt_dyout(becfrnl,dtset%berryopt,blkflg,carflg,dtfil%unddb,ddkfil,dyew,dyfrlo,&
 &   dyfrnl,dyfrx1,dyfrx2,dyfr_cplex,dyfr_nondiag,dyvdw,d2cart,d2cart_bbb,d2eig0,&
@@ -1425,7 +1445,18 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 
 #ifdef HAVE_NETCDF
    ! Output dynamical matrix in NetCDF format.
-   call outddbnc(dtfil, dtset, hdr, psps, natom, mpert, rprimd, xred, dtset%qptn, d2matr, blkflg)
+   call crystal_init(dtset%amu_orig(:,1), Crystal, &
+   & dtset%spgroup, dtset%natom, dtset%npsp, psps%ntypat, &
+   & dtset%nsym, rprimd, dtset%typat, xred, dtset%ziontypat, dtset%znucl, 1, &
+   & dtset%nspden==2.and.dtset%nsppol==1, .false., hdr%title, &
+   & dtset%symrel, dtset%tnons, dtset%symafm)
+
+   filename = strcat(dtfil%filnam_ds(4),"_DDB.nc")
+
+   call outddbnc(filename, mpert, d2matr, blkflg, dtset%qptn, Crystal)
+
+   call crystal_free(Crystal)
+
 #endif
 
 
@@ -1459,7 +1490,8 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  end if !end me == 0
 
 !Compute the other terms for AHC dynamic and AHC full
- if (.not.(rfphon==0 .and. (rf2_dkdk/=0 .or. rf2_dkde/=0.or. rfddk/=0 .or. rfelfd==2) .and. rfstrs==0 .and. rfuser==0)) then
+ if (.not.(rfphon==0 .and. (rf2_dkdk/=0 .or. rf2_dkde/=0.or. rfddk/=0 .or. rfelfd==2) .and. rfstrs==0 .and. rfuser==0 &
+& .and. rfmagn==0)) then
    if(rfphon==1) then ! AHC can only be computed in case of phonons
 
 !    Stuff for parallelism
@@ -1534,7 +1566,8 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 
 
  if(me==0)then
-   if (.not.(rfphon==0 .and. (rf2_dkdk/=0 .or. rf2_dkde/=0 .or. rfddk/=0 .or. rfelfd==2) .and. rfstrs==0 .and.rfuser==0) )then
+   if (.not.(rfphon==0 .and. (rf2_dkdk/=0 .or. rf2_dkde/=0 .or. rfddk/=0 .or. rfelfd==2) .and. rfstrs==0 .and.rfuser==0 &
+&   .and. rfmagn==0) )then
      if(rfphon==1)then
 !      Compute and print the T=0 Fan, and possibly DDW contributions to the eigenenergies.
        if(dtset%ieig2rf > 0) then

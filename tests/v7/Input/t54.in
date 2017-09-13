@@ -30,9 +30,10 @@
 #%% files_to_test = 
 #%%   t54.out, tolnlines = 11, tolabs = 2.0e-7, tolrel = 5.0e-4, fld_options = -medium
 #%% [paral_info]
-#%% max_nprocs = 1
+#%% max_nprocs = 2
 #%% [extra_info]
 #%% authors = S. Ponc\'e 
 #%% keywords = 
-#%% description = Use anaddb to compute the T-dependent correction.
+#%% description = Use anaddb to compute the T-dependent correction of electronic structure.
+#%% topics = TDepES
 #%%<END TEST_INFO>

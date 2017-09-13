@@ -89,4 +89,5 @@
 #%%   (Mol. Phys., 1996, p 1117).
 #%%   XG20090912 : Why is the result of dataset 1 and dataset 4 equivalent, while
 #%%   the bmass varies by a factor of 2 ?
+#%% topics = MolecularDynamics
 #%%<END TEST_INFO>

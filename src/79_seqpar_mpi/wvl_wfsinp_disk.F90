@@ -113,7 +113,7 @@ subroutine wvl_wfsinp_disk(dtset, hdr0, hdr, mpi_enreg, occ, option, rprimd, wff
  call wrtout(std_out,message,'COLL')
 
 !If usewvl: wvlbigdft indicates that the BigDFT workflow will be followed
- if(dtset%usewvl==1 .and. dtset%wvl_bigdft_comp==1) wvlbigdft=.true.
+ wvlbigdft=(dtset%usewvl==1.and.dtset%wvl_bigdft_comp==1)
 
  comm=mpi_enreg%comm_wvl
  me=xmpi_comm_rank(comm)

@@ -267,6 +267,7 @@ type, public :: paw_setup_t
   type(radialfunc_t)           :: pseudo_core_density
   type(radialfunc_t)           :: pseudo_valence_density
   type(radialfunc_t)           :: zero_potential
+  type(radialfunc_t)           :: LDA_minus_half_potential
   type(radialfunc_t)           :: ae_core_kinetic_energy_density
   type(radialfunc_t)           :: pseudo_core_kinetic_energy_density
   type(radialfunc_t),allocatable :: ae_partial_wave(:)
@@ -782,6 +783,27 @@ select case(name)
          in_data=.true.
          ndata = 0
 
+     case ("LDA_minus_half_potential")
+         paw_setuploc%LDA_minus_half_potential%tread=.true.
+          value = getValue(attributes,"grid")
+         if (value == "" ) value = "unknown"
+         paw_setuploc%LDA_minus_half_potential%grid=trim(value)
+
+         value = getValue(attributes,"state")
+         if (value == "" ) value = "unknown"
+         paw_setuploc%LDA_minus_half_potential%state=trim(value)
+
+         do ii=1,igrid
+           if(trim(paw_setuploc%LDA_minus_half_potential%grid)==trim(grids(ii)%id)) then
+             mesh_size=grids(ii)%iend-grids(ii)%istart+1
+           end if
+         end do
+
+         LIBPAW_ALLOCATE(paw_setuploc%LDA_minus_half_potential%data,(mesh_size))
+         rp=>paw_setuploc%LDA_minus_half_potential
+         in_data=.true.
+         ndata = 0
+
      case ("ae_core_kinetic_energy_density")
          paw_setuploc%ae_core_kinetic_energy_density%tread=.true.
           value = getValue(attributes,"grid")
@@ -999,6 +1021,9 @@ select case(name)
       case ("zero_potential")
         in_data=.false.
 
+      case ("LDA_minus_half_potential")
+        in_data=.false.
+
       case ("ae_core_kinetic_energy_density")
         in_data=.false.
 
@@ -1163,6 +1188,7 @@ subroutine paw_setup_free(paw_setupin)
  paw_setupin%pseudo_core_density%tread=.false.
  paw_setupin%pseudo_valence_density%tread=.false.
  paw_setupin%zero_potential%tread=.false.
+ paw_setupin%LDA_minus_half_potential%tread=.false.
  paw_setupin%ae_core_kinetic_energy_density%tread=.false.
  paw_setupin%pseudo_core_kinetic_energy_density%tread=.false.
  paw_setupin%kresse_joubert_local_ionic_potential%tread=.false.
@@ -1184,6 +1210,9 @@ subroutine paw_setup_free(paw_setupin)
  end if
  if(allocated( paw_setupin%zero_potential%data)) then
    LIBPAW_DEALLOCATE(paw_setupin%zero_potential%data)
+ end if
+ if(allocated( paw_setupin%LDA_minus_half_potential%data)) then
+   LIBPAW_DEALLOCATE(paw_setupin%LDA_minus_half_potential%data)
  end if
  if(allocated( paw_setupin%ae_core_kinetic_energy_density%data)) then
    LIBPAW_DEALLOCATE(paw_setupin%ae_core_kinetic_energy_density%data)
@@ -1323,6 +1352,9 @@ subroutine paw_setup_copy(paw_setupin,paw_setupout)
  paw_setupout%zero_potential%tread=paw_setupin%zero_potential%tread
  paw_setupout%zero_potential%grid=paw_setupin%zero_potential%grid
  paw_setupout%zero_potential%state=paw_setupin%zero_potential%state
+ paw_setupout%LDA_minus_half_potential%tread=paw_setupin%LDA_minus_half_potential%tread
+ paw_setupout%LDA_minus_half_potential%grid=paw_setupin%LDA_minus_half_potential%grid
+ paw_setupout%LDA_minus_half_potential%state=paw_setupin%LDA_minus_half_potential%state
  paw_setupout%ae_core_kinetic_energy_density%tread=&
 &     paw_setupin%ae_core_kinetic_energy_density%tread
  paw_setupout%ae_core_kinetic_energy_density%grid=&
@@ -1377,6 +1409,11 @@ subroutine paw_setup_copy(paw_setupin,paw_setupout)
    sz1=size(paw_setupin%zero_potential%data,1)
    LIBPAW_ALLOCATE(paw_setupout%zero_potential%data,(sz1))
    paw_setupout%zero_potential%data=paw_setupin%zero_potential%data
+ end if
+ if (allocated(paw_setupin%LDA_minus_half_potential%data)) then
+   sz1=size(paw_setupin%LDA_minus_half_potential%data,1)
+   LIBPAW_ALLOCATE(paw_setupout%LDA_minus_half_potential%data,(sz1))
+   paw_setupout%LDA_minus_half_potential%data=paw_setupin%LDA_minus_half_potential%data
  end if
  if (allocated(paw_setupin%ae_core_kinetic_energy_density%data)) then
    sz1=size(paw_setupin%ae_core_kinetic_energy_density%data,1)
@@ -1618,9 +1655,9 @@ end subroutine paw_setup_copy
    end if
 
 !  --Read TITLE, ATOMIC CHARGE AND CORE CHARGE
-   if (line(1:12)=='<atom symbol') then
+   if (line(1:6)=='<atom ') then
      paw_setup%atom%tread=.true.
-     call paw_rdfromline("atom symbol",line,strg,ierr)
+     call paw_rdfromline(" symbol",line,strg,ierr)
      paw_setup%atom%symbol=trim(strg)
      call paw_rdfromline(" Z",line,strg,ierr)
      if (len(trim(strg))<=30) then
@@ -1885,7 +1922,7 @@ end subroutine paw_setup_copy
 
 !  End of reading loop
  end do
- 
+
  if(igrid==0.or.ival==0) then
    write(msg,'(a,a,a)')"the grids and the states must be read before the shapefunction",ch10,&
 &   "Action: Modify your XML PAW data file"
@@ -2042,7 +2079,31 @@ end subroutine paw_setup_copy
      read(funit,*) (paw_setup%zero_potential%data(ir),ir=1,mesh_size)
      cycle
    end if
-
+!  --Read external potential
+   if (line(1:25)=='<LDA_minus_half_potential') then
+     paw_setup%LDA_minus_half_potential%tread=.true.
+     call paw_rdfromline(" grid",line,strg,ierr)
+     if (strg == "" ) strg = "unknown"
+     paw_setup%LDA_minus_half_potential%grid=trim(strg)
+     do ii=1,paw_setup%ngrid
+       if(trim(paw_setup%LDA_minus_half_potential%grid)==trim(paw_setup%radial_grid(ii)%id)) then
+         mesh_size=paw_setup%radial_grid(ii)%iend-paw_setup%radial_grid(ii)%istart+1
+         exit
+       end if
+     end do
+     call paw_rdfromline(" rc",line,strg,ierr)
+     if (strg /= "" ) then
+       if (len(trim(strg))<=30) then
+         strg1=trim(strg)
+         read(unit=strg1,fmt=*) rc(4)
+       else
+         read(unit=strg,fmt=*) rc(4)
+       end if
+     end if
+     LIBPAW_ALLOCATE(paw_setup%LDA_minus_half_potential%data,(mesh_size))
+     read(funit,*) (paw_setup%LDA_minus_half_potential%data(ir),ir=1,mesh_size)
+     cycle
+   end if
 !  --Read Vloc for Abinit potential VLOC_ION
    if (line(1:37)=='<kresse_joubert_local_ionic_potential') then
      paw_setup%kresse_joubert_local_ionic_potential%tread=.true.

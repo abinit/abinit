@@ -78,8 +78,6 @@
 
  read the DDB information and perform some checks
 
--begin at tcpu      0.020  and twall      0.020 sec
-
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  3.7500000  3.7500000  G(1)= -0.1333333  0.1333333  0.1333333
  R(2)=  3.7500000  0.0000000  3.7500000  G(2)=  0.1333333 -0.1333333  0.1333333
@@ -92,7 +90,6 @@
 
  Calculation of the interatomic forces 
 
--begin at tcpu      0.023  and twall      0.022 sec
        Homogeneous q point set in the B.Z.
  Grid q points  :        8
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -180,17 +177,25 @@
 
  Calculation of phonon density of states 
 
-- Average speed of sound:     0.1349778731E-03 (at units) =         295.2899 (m/s)
+ Average speed of sound partial sums:    -0.5947310100E-03 (at units)
+-                                   =       -1301.0878 (m/s)
 
- Debye frequency from DOS:     0.1113537833E-03 (Ha) =     0.7326726973E+00 (THz)
- Debye temperature from DOS:     0.3516270194E+02 (K)
+ Debye frequency from partial sums:    -0.4906400322E-03 (Ha)
+-                                 =    -0.3228256331E+01 (THz)
+-Debye temperature from partial sums:    -0.1549316845E+03 (K)
+
+ Average speed of sound:     0.1349778731E-03 (at units)
+-                      =         295.2899 (m/s)
+
+ Debye frequency from DOS:     0.1113537833E-03 (Ha)
+-                        =     0.7326726973E+00 (THz)
+-Debye temperature from DOS:     0.3516270194E+02 (K)
 
 
 ================================================================================
 
  Treat the first list of vectors 
 
--begin at tcpu     10.440  and twall     10.560 sec
 
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
  Phonon energies in Hartree :

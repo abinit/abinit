@@ -43,6 +43,7 @@ MODULE m_pimd
  public :: pimd_nullify
  public :: pimd_destroy
  public :: pimd_init_qtb
+ public :: pimd_skip_qtb
  public :: pimd_print
  public :: pimd_is_restart
  public :: pimd_temperature
@@ -62,6 +63,7 @@ MODULE m_pimd
  public :: pimd_nosehoover_propagate
  public :: pimd_coord_transform
  public :: pimd_force_transform
+ public :: pimd_apply_constraint
  public :: pimd_mass_spring
 !!***
 
@@ -79,6 +81,7 @@ MODULE m_pimd
  type,public :: pimd_type
 ! Scalars
   integer  :: adpimd
+  integer  :: constraint
   integer  :: irandom
   integer  :: nnos
   integer  :: ntypat
@@ -93,12 +96,13 @@ MODULE m_pimd
   real(dp) :: dtion
   real(dp) :: friction
 ! Arrays
-  integer ,pointer  :: typat(:)    ! This pointer is associated with dtset%typat
-  real(dp),pointer :: amu(:)       ! This pointer is associated with dtset%%amu_orig(:,1)
-  real(dp),pointer :: mdtemp(:)    ! This pointer is associated with dtset%mdtemp
-  real(dp),pointer :: pimass(:)    ! This pointer is associated with dtset%pimass
-  real(dp),pointer :: qmass(:)     ! This pointer is associated with dtset%qmass
-  real(dp),pointer :: strtarget(:) ! This pointer is associated with dtset%dtset%strtarget
+  integer ,pointer  :: typat(:)      ! This pointer is associated with dtset%typat
+  real(dp),pointer :: amu(:)         ! This pointer is associated with dtset%%amu_orig(:,1)
+  real(dp),pointer :: mdtemp(:)      ! This pointer is associated with dtset%mdtemp
+  real(dp),pointer :: pimass(:)      ! This pointer is associated with dtset%pimass
+  real(dp),pointer :: qmass(:)       ! This pointer is associated with dtset%qmass
+  real(dp),pointer :: strtarget(:)   ! This pointer is associated with dtset%strtarget
+  real(dp),pointer :: wtatcon(:,:,:) ! This pointer is associated with dtset%wtatcon
   real(dp),allocatable :: zeta_prev(:,:,:,:)
   real(dp),allocatable :: zeta     (:,:,:,:)
   real(dp),allocatable :: zeta_next(:,:,:,:)
@@ -161,6 +165,7 @@ subroutine pimd_init(dtset,pimd_param,is_master)
 
  if((dtset%imgmov==9).or.(dtset%imgmov==10).or.(dtset%imgmov==13))then
    pimd_param%adpimd      = dtset%adpimd
+   pimd_param%constraint  = dtset%pimd_constraint
    pimd_param%irandom     = dtset%irandom
    pimd_param%nnos        = dtset%nnos
    pimd_param%ntypat      = dtset%ntypat
@@ -177,6 +182,7 @@ subroutine pimd_init(dtset,pimd_param,is_master)
    pimd_param%amu         =>dtset%amu_orig(:,1)
    pimd_param%qmass       =>dtset%qmass
    pimd_param%typat       =>dtset%typat
+   pimd_param%wtatcon     =>dtset%wtatcon
    if(dtset%imgmov==10)then
      pimd_param%use_qtb=1
      if(is_master)then
@@ -246,6 +252,7 @@ subroutine pimd_nullify(pimd_param)
 !************************************************************************
 
  pimd_param%adpimd       =  0
+ pimd_param%constraint   =  0
  pimd_param%irandom      = -1
  pimd_param%nnos         = -1
  pimd_param%ntypat       = -1
@@ -265,6 +272,7 @@ subroutine pimd_nullify(pimd_param)
  nullify(pimd_param%amu)
  nullify(pimd_param%qmass)
  nullify(pimd_param%typat)
+ nullify(pimd_param%wtatcon)
 
 end subroutine pimd_nullify
 !!***
@@ -428,6 +436,64 @@ end subroutine pimd_init_qtb
 
 !----------------------------------------------------------------------
 
+!!****f* m_pimd/pimd_skip_qtb
+!! NAME
+!!  pimd_skip_qtb
+!!
+!! FUNCTION
+!!  Only relevant in case of PI-QTB:
+!!  Skip a line in a QTB random force file
+!!
+!! INPUTS
+!!  pimd_param=datastructure of type pimd_type.
+!!             several parameters for Path-Integral MD.
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!      gstateimg
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine pimd_skip_qtb(pimd_param)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'pimd_skip_qtb'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ type(pimd_type),intent(in) :: pimd_param
+!arrays
+!Local variables-------------------------------
+!scalars
+ character(len=500) :: msg
+!arrays
+
+!************************************************************************
+
+ if (pimd_param%use_qtb==0) return
+
+ if (pimd_param%qtb_file_unit<0) then
+   msg='QTB forces file unit should be positive!'
+   MSG_BUG(msg)
+ end if
+
+!Skip one line QTB random forces file
+ read(pimd_param%qtb_file_unit)
+
+end subroutine pimd_skip_qtb
+!!***
+
+!----------------------------------------------------------------------
+
 !!****f* m_pimd/pimd_is_restart
 !! NAME
 !!  pimd_is_restart
@@ -568,7 +634,8 @@ end function pimd_temperature
 !!  Print out results related to PIMD (for given time step)
 !!
 !! INPUTS
-!!  acell(3)=length scales of primitive translations (bohr)
+!!  constraint=type of constraint eventually applied (on a reaction coordinate)
+!!  constraint_output(2)=several (real) data to be output when a constraint has been applied
 !!  eharm=harmonic energy
 !!  eharm_virial=harmonic energy from virial
 !!  epot=potential energy
@@ -605,9 +672,10 @@ end function pimd_temperature
 !!
 !! SOURCE
 
-subroutine pimd_print(eharm,eharm_virial,epot,forces,inertmass,irestart,&
-&          itimimage,kt,natom,optcell,prtstress,prtvolimg,rprimd,stress,&
-&          temperature1,temperature2,traj_unit,trotter,vel,vel_cell,xcart,xred)
+subroutine pimd_print(constraint,constraint_output,eharm,eharm_virial,epot,&
+&          forces,inertmass,irestart,itimimage,kt,natom,optcell,prtstress,&
+&          prtvolimg,rprimd,stress,temperature1,temperature2,traj_unit,&
+&          trotter,vel,vel_cell,xcart,xred)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -622,9 +690,11 @@ subroutine pimd_print(eharm,eharm_virial,epot,forces,inertmass,irestart,&
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: irestart,itimimage,natom,optcell,prtstress,prtvolimg,traj_unit,trotter
+ integer,intent(in) :: constraint,irestart,itimimage,natom,optcell
+ integer,intent(in) :: prtstress,prtvolimg,traj_unit,trotter
  real(dp),intent(in) :: eharm,eharm_virial,epot,kt,temperature1,temperature2
 !arrays
+ real(dp),intent(in) :: constraint_output(2)
  real(dp),intent(in) :: forces(3,natom,trotter),inertmass(natom)
  real(dp),intent(in) :: rprimd(3,3),stress(3,3,3),vel(3,natom,trotter),vel_cell(3,3)
  real(dp),intent(in) :: xcart(3,natom,trotter),xred(3,natom,trotter)
@@ -680,6 +750,18 @@ subroutine pimd_print(eharm,eharm_virial,epot,forces,inertmass,irestart,&
 &  -third*(stress(1,1,1)+stress(1,2,2)+stress(1,3,3))*HaBohr3_GPa,' GPa'
  call wrtout(ab_out,msg,'COLL')
  call wrtout(std_out,msg,'COLL')
+
+!Data related to constraint eventually applied
+ if (constraint/=0) then
+   if (constraint==1) write(msg,'(2a)') ch10,' Blue Moon Ensemble method is activated:'
+   call wrtout(ab_out,msg,'COLL')
+   call wrtout(std_out,msg,'COLL')
+   write(msg,'(a,f18.10,2a,f18.10)') &
+&     '  - Reaction coordinate =',constraint_output(1),ch10,&
+&     '  - Instantaneous force on the reaction coord. =',constraint_output(2)
+   call wrtout(ab_out,msg,'COLL')
+   call wrtout(std_out,msg,'COLL')
+ end if
 
 !Total force
  if (prtvolimg<=1) then
@@ -844,12 +926,15 @@ end subroutine pimd_print
 !! FUNCTION
 !!  Initialize velocities for PIMD with a gaussian distribution
 !!  fixing the center of mass
+!!  and eventually applying a constraint on atomic positions
 !!
 !! INPUTS
+!!  constraint=type of constraint to be applied
 !!  mass(natom,mass_dim)=masses of atoms (mass_dim=1 or trotter)
 !!  natom=number of atoms
 !!  temperature=temperature used to define velocities
 !!  trotter=Trotter number
+!!  wtatcon(3,natom)=weights for atomic constraints
 !!
 !! OUTPUT
 !!  vel(3,natom,trotter)=velocities of atoms in in each cell
@@ -865,7 +950,7 @@ end subroutine pimd_print
 !!
 !! SOURCE
 
-subroutine pimd_initvel(iseed,mass,natom,temperature,trotter,vel)
+subroutine pimd_initvel(iseed,mass,natom,temperature,trotter,vel,constraint,wtatcon)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -879,11 +964,11 @@ subroutine pimd_initvel(iseed,mass,natom,temperature,trotter,vel)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: natom,trotter
+ integer,intent(in) :: constraint,natom,trotter
  integer,intent(inout) :: iseed
  real(dp),intent(in) :: temperature
 !arrays
- real(dp),intent(in) :: mass(:,:)
+ real(dp),intent(in) :: mass(:,:),wtatcon(3,natom)
  real(dp),intent(out) :: vel(3,natom,trotter)
 !Local variables-------------------------------
 !scalars
@@ -901,9 +986,18 @@ subroutine pimd_initvel(iseed,mass,natom,temperature,trotter,vel)
    MSG_BUG(msg)
  end if
 
- mtot=sum(mass(1:natom,1:nmass))
+!Compute total mass (of non-constrained atoms)
+ if (constraint==0) then
+   mtot=sum(mass(1:natom,1:nmass))
+ else
+   mtot=zero
+   do iatom=1,natom
+     if (all(abs(wtatcon(:,iatom))<tol8)) mtot=mtot+sum(mass(iatom,1:nmass))
+   end do
+ end if
  if (nmass==1) mtot=mtot*dble(trotter)
 
+!Initialize randomly the velocities
  do iimage=1,trotter
    imass=min(nmass,iimage)
    do iatom=1,natom
@@ -913,6 +1007,15 @@ subroutine pimd_initvel(iseed,mass,natom,temperature,trotter,vel)
      end do
    end do
  end do
+
+!Cancel velocities of constrained atoms
+ if (constraint/=0) then
+   do iimage=1,trotter
+     do iatom=1,natom
+       if (any(abs(wtatcon(:,iatom))>=tol8)) vel(:,iatom,iimage)=zero
+     end do
+   end do
+ end if
 
 !Make sure that the (sum of m_i v_i) at step zero is zero
  mvini=zero
@@ -924,14 +1027,21 @@ subroutine pimd_initvel(iseed,mass,natom,temperature,trotter,vel)
      end do
    end do
  end do
- do iimage=1,trotter
-   do iatom=1,natom
-     do ii=1,3
-       vel(ii,iatom,iimage)=vel(ii,iatom,iimage)-(mvini(ii)/mtot)
+ if (constraint==0) then
+   do iimage=1,trotter
+     do iatom=1,natom
+       do ii=1,3
+         vel(ii,iatom,iimage)=vel(ii,iatom,iimage)-(mvini(ii)/mtot)
+       end do
      end do
    end do
- end do
-!at this point (sum of m_i v_i) at step zero is zero
+ else
+   do iimage=1,trotter
+     do iatom=1,natom
+       if (all(abs(wtatcon(:,iatom))<tol8)) vel(:,iatom,iimage)=vel(:,iatom,iimage)-(mvini(:)/mtot)
+     end do
+   end do
+ end if
 
 !Now rescale the velocities to give the exact temperature
  rescale_vel=sqrt(temperature/pimd_temperature(mass,vel))
@@ -2180,7 +2290,7 @@ subroutine pimd_nosehoover_propagate(dtion,dzeta,mass,natom,nnos,qmass,temperatu
  select case(itimimage)
  case(1) !taylor
 
- do inos=1,nnos 
+ do inos=1,nnos
    if(inos==1)then
      zeta_next(:,:,:,1)=zeta(:,:,:,1)+ dzeta(:,:,:,1)*dtion + &
 &       (thermforces(:,:,:,1)-qmass(1)*dzeta(:,:,:,1)*dzeta(:,:,:,2))* &
@@ -2331,7 +2441,7 @@ subroutine pimd_coord_transform(array,ioption,natom,transform,trotter)
 
 !  ---------------- From transformed to primitive coordinates ------------
    else if (ioption==-1) then
-   
+
     ABI_ALLOCATE(array_temp,(3,natom,trotter))  !real part
     ABI_ALLOCATE(nrm,(trotter,trotter))  !real part
 
@@ -2564,6 +2674,142 @@ end subroutine pimd_force_transform
 
 !----------------------------------------------------------------------
 
+!!****f* m_pimd/pimd_apply_constraint
+!! NAME
+!!  pimd_apply_constraint
+!!
+!! FUNCTION
+!!  Modify forces to take into account an holonomic constraint
+!!  according to "pimd_constraint" parameter
+!!  Available constraints:
+!!    0: no constraint
+!!    1: linear combination of coordinates
+!!
+!! INPUTS
+!!  constraint=type of constraint to be applied
+!!  mass(natom)=fictitious masses of atoms
+!!  natom=number of atoms
+!!  trotter=Trotter number
+!!  wtatcon(3,natom)=weights for atomic constraints
+!!  xcart(3,natom,trotter)=cartesian coordinates of atoms
+!!
+!! OUTPUT
+!!  constraint_output(2)=several (real) data to be output
+!!                       when a constraint has been applied
+!!
+!! SIDE EFFECTS
+!!  forces(3,natom,trotter)=array containing forces
+!!
+!! PARENTS
+!!      pimd_langevin_npt,pimd_langevin_nvt,pimd_nosehoover_nvt
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine pimd_apply_constraint(constraint,constraint_output,forces,mass,natom,&
+&                                trotter,wtatcon,xcart)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'pimd_apply_constraint'
+ use interfaces_32_util
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: constraint,natom,trotter
+!arrays
+ real(dp),intent(in) :: mass(natom),wtatcon(3,natom),xcart(3,natom,trotter)
+ real(dp),intent(out) :: constraint_output(2)
+ real(dp),intent(inout) :: forces(3,natom,trotter)
+!Local variables-------------------------------
+!scalars
+ integer :: iatom,ii,iimage
+ real(dp) :: af,lambda_cst,masstot,one_over_trotter,xcart_centroid,zz
+ !character(len=500) :: msg
+!arrays
+ real(dp) :: force_centroid(3),lambda_com(3),mat(3,3),matinv(3,3),vec(3),weightsum(3)
+
+!************************************************************************
+
+
+ select case(constraint)
+
+!=== No constraint =======================================================
+ case(0)
+
+   constraint_output(:)=zero
+   return
+
+!=== Linear combination of centroid coordinates ==========================
+ case(1)
+
+!  Some useful quantities
+   masstot=sum(mass)*dble(trotter)
+   weightsum(:)=sum(wtatcon,dim=2)*dble(trotter)
+   zz=zero;af=zero;force_centroid=zero
+   do iimage=1,trotter
+     do iatom=1,natom
+       do ii=1,3
+         force_centroid(ii)=force_centroid(ii)+forces(ii,iatom,iimage)
+         af=af+wtatcon(ii,iatom)*forces(ii,iatom,iimage)/mass(iatom)
+         zz=zz+wtatcon(ii,iatom)**2/mass(iatom)
+       end do
+     end do
+   end do
+   vec(:)=force_centroid(:)-weightsum(:)*af/zz
+   do ii=1,3
+     mat(:,ii)=-weightsum(:)*weightsum(ii)/zz
+     mat(ii,ii)=mat(ii,ii)+masstot
+   end do
+   call matr3inv(mat,matinv)
+
+   !Calculation of a Lagrange multipliers:
+   ! lambda_cst: to apply the constraint
+   ! lambda_com: to maintain the position of the center of mass
+   lambda_com(:)=matmul(matinv,vec)
+   lambda_cst=(af-dot_product(weightsum,lambda_com))*dble(trotter)/zz
+
+   !Modification of forces
+   one_over_trotter=one/dble(trotter)
+   do iimage=1,trotter
+     do iatom=1,natom
+       do ii=1,3
+         forces(ii,iatom,iimage)=forces(ii,iatom,iimage) &
+&                               -lambda_cst*wtatcon(ii,iatom)*one_over_trotter &
+&                               -lambda_com(ii)*mass(iatom)
+       end do
+     end do
+   end do
+
+   !Computation of relevant outputs
+   constraint_output(:)=zero
+   !1-Reaction coordinate
+   do iatom=1,natom
+     do ii=1,3
+       xcart_centroid=zero
+       do iimage=1,trotter
+         xcart_centroid=xcart_centroid+xcart(ii,iatom,iimage)
+       end do
+       constraint_output(1)=constraint_output(1)+xcart_centroid*wtatcon(ii,iatom)
+     end do
+   end do
+   constraint_output(1)=constraint_output(1)/dble(trotter)
+   !2-Force on reaction coordinate
+   constraint_output(2)=-lambda_cst
+
+ end select
+
+end subroutine pimd_apply_constraint
+!!***
+
+!----------------------------------------------------------------------
+
 !!****f* m_pimd/pimd_mass_spring
 !! NAME
 !!  pimd_mass_spring
@@ -2661,7 +2907,7 @@ subroutine pimd_mass_spring(inertmass,kt,mass,natom,quantummass,spring,transform
 
    !normal mode masses
    do iimage=1,trotter
-     mass(:,iimage)=quantummass(:)*lambda(iimage) 
+     mass(:,iimage)=quantummass(:)*lambda(iimage)
    end do
 
    do iimage=1,trotter
@@ -2669,9 +2915,9 @@ subroutine pimd_mass_spring(inertmass,kt,mass,natom,quantummass,spring,transform
    end do
 
    !fictitious masses
-   mass(:,1)=inertmass(:) 
+   mass(:,1)=inertmass(:)
 
-   !from 2 to P not changed except if adiabatic PIMD 
+   !from 2 to P not changed except if adiabatic PIMD
    !see Hone et al, JCP 124, 154103 (2006)
    gammasquare=one  !adiabaticity parameter
    do iimage=2,trotter

@@ -1,0 +1,11 @@
+include *.rst
+recursive-include ElectronPhononCoupling *.py
+recursive-include ElectronPhononCoupling/scripts *
+recursive-include ElectronPhononCoupling/data *
+prune ElectronPhononCoupling/data/LiF_g2/epc_inputs/output
+graft Examples
+exclude Examples/Calculations/*/odat*
+exclude Examples/Calculations/*/*.out*
+exclude Examples/Calculations/*/*.log*
+exclude Examples/Calculations/*/*fort*
+exclude Examples/Out/*

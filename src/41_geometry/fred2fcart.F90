@@ -17,8 +17,9 @@
 !! INPUTS
 !!  fred(3,natom)=symmetrized grtn = d(etotal)/d(xred)
 !!  natom=Number of atoms in the unitary cell
-!!  jellslab=
-!!  gprimd(3,3)=
+!!  Favgz_null=TRUE if the average cartesian force has to be set to zero
+!!             FALSE if it is set to zero only in x,y directions (not z)
+!!  gprimd(3,3)=dimensional primitive translations for reciprocal space(bohr^-1)
 !!
 !! OUTPUT
 !!  fcart(3,natom)=forces in cartesian coordinates (Ha/Bohr)
@@ -28,10 +29,10 @@
 !! NOTES
 !!    Unlike fred, fcart has been corrected by enforcing
 !!    the translational symmetry, namely that the sum of force
-!!    on all atoms is zero.
+!!    on all atoms is zero (except is a slab is used)
 !!
 !! PARENTS
-!!      forces,m_mep,mover
+!!      forces,m_mep
 !!
 !! CHILDREN
 !!
@@ -44,7 +45,7 @@
 #include "abi_common.h"
 
 
-subroutine fred2fcart(favg,fcart,fred,gprimd,jellslab,natom)
+subroutine fred2fcart(favg,Favgz_null,fcart,fred,gprimd,natom)
 
  use defs_basis
  use m_profiling_abi
@@ -59,7 +60,8 @@ subroutine fred2fcart(favg,fcart,fred,gprimd,jellslab,natom)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: natom,jellslab
+ integer,intent(in) :: natom
+ logical :: Favgz_null
 !arrays
  real(dp),intent(out) :: fcart(3,natom)
  real(dp),intent(in) :: fred(3,natom)
@@ -88,7 +90,7 @@ subroutine fred2fcart(favg,fcart,fred,gprimd,jellslab,natom)
 !Subtract off average force from each force component
 !to avoid spurious drifting of atoms across cell.
  favg(:)=favg(:)/dble(natom)
- if(jellslab/=0) favg(3)=zero
+ if(.not.Favgz_null) favg(3)=zero
  do iatom=1,natom
    fcart(:,iatom)=fcart(:,iatom)-favg(:)
  end do

@@ -246,6 +246,20 @@ AC_DEFUN([_ABI_LINALG_CHECK_BLAS_MKL_EXTS],[
     AC_DEFINE([HAVE_LINALG_MKL_OMATADD],1,[Define to 1 if you have mkl_?omatadd extensions.])
   fi
 
+  dnl mkl_threads support functions
+  AC_MSG_CHECKING([for mkl_set/get_threads in specified libraries])
+  AC_LINK_IFELSE([AC_LANG_PROGRAM([],
+    [
+      integer :: a
+      a = mkl_get_max_threads()
+      call mkl_set_num_threads
+    ])], [abi_linalg_mkl_has_threads="yes"], [abi_linalg_mkl_has_threads="no"])
+  AC_MSG_RESULT([${abi_linalg_mkl_has_threads}])
+
+  if test "${abi_linalg_mkl_has_threads}" = "yes"; then
+    AC_DEFINE([HAVE_LINALG_MKL_THREADS],1,[Define to 1 if you have mkl_*threads extensions.])
+  fi
+
 ]) # _ABI_LINALG_CHECK_BLAS_MKL_EXTS
 
 
@@ -420,7 +434,7 @@ AC_DEFUN([_ABI_LINALG_FIND_ELPA_VERSION],[
     real*8 :: a(lda,nrow),ev(na),q(ldq,nrow)
     complex*16 :: ac(lda,nrow)
     success1=solve_evp_real_1stage(na,nev,a,lda,ev,q,ldq,nblk,nrow,comm_r,comm_c)
-    call cholesky_complex(na,ac,lda,nblk,nrow,comm_r,comm_c,debug,success1)
+    success1=cholesky_complex(na,ac,lda,nblk,nrow,comm_r,comm_c,debug)
     success2=get_elpa_communicators(comm_g,na,na,comm_r,comm_c)
     ])], [abi_linalg_has_elpa_2016="yes"], [abi_linalg_has_elpa_2016="no"])
   if test "${abi_linalg_has_elpa_2016}" = "yes"; then

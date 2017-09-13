@@ -24,8 +24,6 @@
 !! Since these form a group, inverses are also integer
 !! arrays.  Returned array is TRANSPOSE of inverse, as needed.
 !! Note use of integer arithmetic.
-!! Also: has been designed so that mit can be same storage space as m, in
-!! which case m is overwritten by resulting mit.
 !!
 !! PARENTS
 !!      cg_rotate,chkgrp,classify_bands,debug_tools,dfpt_nstdy,get_full_kgrid

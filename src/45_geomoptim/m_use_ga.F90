@@ -16,34 +16,35 @@
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
-!! itimimage=number of the current time for image propagation (itimimage+1 is to be predicted here)
+!! itimimage=time index for image propagation (itimimage+1 is to be predicted here)
+!! itimimage_eff=time index in the history
 !! list_dynimage(nimage)=list of dynamical images.
 !! This is quite useful when ground states of the A and B states is known
 !! natom=dimension of vel_timimage and xred_timimage
 !! ndynimage=number of dynamical images
 !! nimage= population size
-!! ntimimage=dimension of several arrays
+!! ntimimage_stored=number of time steps stored in the history
 !!
 !! OUTPUT
 !!
 !! SIDE EFFECTS
-!! results_img(ntimimage,nimage)=datastructure that hold all the history of previous computations.
+!! results_img(ntimimage_stored,nimage)=datastructure that holds the history of previous computations.
 !!   results_img(:,:)%acell(3)
-!!    at input, history of the values of acell for all images, up to itimimage
+!!    at input, history of the values of acell for all images
 !!    at output, the predicted values of acell for all images
 !!   results_img(:,:)%results_gs
-!!    at input, history of the values of energies and forces for all images, up to itimimage
+!!    at input, history of the values of energies and forces for all images
 !!   results_img(:,:)%rprim(3,3)
-!!    at input, history of the values of rprim for all images, up to itimimage
+!!    at input, history of the values of rprim for all images
 !!    at output, the predicted values of rprim for all images
 !!   results_img(:,:)%vel(3,natom)
-!!    at input, history of the values of vel for all images, up to itimimage
+!!    at input, history of the values of vel for all images
 !!    at output, the predicted values of vel for all images
 !!   results_img(:,:)%vel_cell(3,3)
-!!    at input, history of the values of vel_cell for all images, up to itimimage
+!!    at input, history of the values of vel_cell for all images
 !!    at output, the predicted values of vel_cell for all images
 !!   results_img(:,:)%xred(3,natom)
-!!    at input, history of the values of xred for all images, up to itimimage
+!!    at input, history of the values of xred for all images
 !!    at output, the predicted values of xred for all images
 !!
 !! PARENTS
@@ -81,7 +82,8 @@ MODULE m_use_ga
 
 CONTAINS
 
-subroutine predict_ga(itimimage,idum,ga_param,natom,nimage,ntimimage,results_img)
+subroutine predict_ga(itimimage,itimimage_eff,idum,ga_param,natom,nimage,&
+&                     ntimimage_stored,results_img)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -96,15 +98,16 @@ subroutine predict_ga(itimimage,idum,ga_param,natom,nimage,ntimimage,results_img
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in)     :: itimimage,natom,nimage,ntimimage
+ integer,intent(in)     :: itimimage,itimimage_eff,natom,nimage,ntimimage_stored
  integer,intent(inout)  :: idum
 !arrays
- type(results_img_type) :: results_img(nimage,ntimimage)
+ type(results_img_type) :: results_img(nimage,ntimimage_stored)
  type(ga_type),intent(inout) :: ga_param
 
 !Local variables------------------------------
 !scalars
- integer :: ii,jj,kk,itmp,iimage,indiv,oper,iparent1,iparent2,ndimen,nsurvivor,nspinor
+ integer :: ii,jj,kk,itmp,iimage,indiv,oper,iparent1,iparent2,ndimen
+ integer :: next_itimimage,nsurvivor,nspinor
 !character(len=500)   :: message
 !arrays
  integer,allocatable  :: ieperm(:),ihperm(:),ibgoptperm(:,:),ibgperm(:,:)
@@ -135,7 +138,7 @@ subroutine predict_ga(itimimage,idum,ga_param,natom,nimage,ntimimage,results_img
 ! gen dimension
 
  ndimen=3*natom
- nspinor=results_img(nimage,ntimimage)%nsppol
+ nspinor=results_img(nimage,itimimage_eff)%nsppol
 
  ABI_ALLOCATE(coor,(ndimen,nimage))
  ABI_ALLOCATE(coor_old,(ndimen,nimage))
@@ -176,20 +179,21 @@ subroutine predict_ga(itimimage,idum,ga_param,natom,nimage,ntimimage,results_img
 !from gs_results_image take energies, rprim and acell and build energy and enthalpy vectors reordered from larger to smaller
 
  do iimage=1,nimage
-   etotal_img(iimage)=results_img(iimage,itimimage)%results_gs%etotal
-   call convert_coortogen(results_img(iimage,itimimage)%xred(:,:),coor_old(:,iimage),natom)
-   acell_old(:,iimage)=results_img(iimage,itimimage)%acell(:)
-   rprim_old(:,:,iimage)=results_img(iimage,itimimage)%rprim(:,:)
-   if (results_img(iimage,itimimage)%results_gs%gaps(3,1) > 0.0_dp) then
-       bg_img(:,iimage)=results_img(iimage,itimimage)%results_gs%gaps(1,:)
-       bg_opt_img(:,iimage)=results_img(iimage,itimimage)%results_gs%gaps(2,:)
+   etotal_img(iimage)=results_img(iimage,itimimage_eff)%results_gs%etotal
+   call convert_coortogen(results_img(iimage,itimimage_eff)%xred(:,:),coor_old(:,iimage),natom)
+   acell_old(:,iimage)=results_img(iimage,itimimage_eff)%acell(:)
+   rprim_old(:,:,iimage)=results_img(iimage,itimimage_eff)%rprim(:,:)
+   if (results_img(iimage,itimimage_eff)%results_gs%gaps(3,1) > 0.0_dp) then
+       bg_img(:,iimage)=results_img(iimage,itimimage_eff)%results_gs%gaps(1,:)
+       bg_opt_img(:,iimage)=results_img(iimage,itimimage_eff)%results_gs%gaps(2,:)
    else
        bg_img(:,iimage)=-100.0_dp
        bg_opt_img(:,iimage)=-100.0_dp
    endif
    call mkrdim(acell_old(:,iimage),rprim_old(:,:,iimage),rprimd(:,:,iimage))
    call metric(gmet,gprimd,-1,rmet,rprimd(:,:,iimage),ucvol)
-   enthalpy_img(iimage)=etotal_img(iimage)+sum(results_img(iimage,itimimage)%results_gs%strten(1:3))*ucvol
+   enthalpy_img(iimage)=etotal_img(iimage) &
+&    +sum(results_img(iimage,itimimage_eff)%results_gs%strten(1:3))*ucvol
  enddo
 
 !sort energies
@@ -442,12 +446,15 @@ subroutine predict_ga(itimimage,idum,ga_param,natom,nimage,ntimimage,results_img
     end select
   enddo
 
+ next_itimimage=itimimage_eff+1
+ if (next_itimimage>ntimimage_stored) next_itimimage=1
+
  do iimage=1,nimage
-   results_img(iimage,itimimage+1)%acell   = acell(:,iimage)
-   results_img(iimage,itimimage+1)%rprim    = rprim(:,:,iimage)
-   results_img(iimage,itimimage+1)%vel = results_img(iimage,itimimage)%vel
-   results_img(iimage,itimimage+1)%vel_cell = results_img(iimage,itimimage)%vel_cell
-   call convert_gentocoor(results_img(iimage,itimimage+1)%xred,coor(:,iimage),natom)
+   results_img(iimage,next_itimimage)%acell = acell(:,iimage)
+   results_img(iimage,next_itimimage)%rprim = rprim(:,:,iimage)
+   results_img(iimage,next_itimimage)%vel = results_img(iimage,itimimage_eff)%vel
+   results_img(iimage,next_itimimage)%vel_cell = results_img(iimage,itimimage_eff)%vel_cell
+   call convert_gentocoor(results_img(iimage,next_itimimage)%xred,coor(:,iimage),natom)
  enddo
 
  ABI_DEALLOCATE(coor)
@@ -760,7 +767,7 @@ SUBROUTINE checksymmetrygroup(rprimd,xred,typat,msym,natom,ptgroupma,spgroup)
 
 !Local variables ---------------------------------------
 !scalars
-  integer :: berryopt,jellslab,noncoll,nptsym,use_inversion
+  integer :: berryopt,jellslab=0,noncoll,nptsym,nzchempot=0,use_inversion
   integer :: chkprim,nsym
 ! Arrays
   integer :: bravais(11),ptsymrel(3,3,msym)
@@ -775,7 +782,7 @@ SUBROUTINE checksymmetrygroup(rprimd,xred,typat,msym,natom,ptgroupma,spgroup)
   call symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tol3)
 
   call symfind(berryopt,efield,gprimd,jellslab,msym,natom,noncoll,nptsym,nsym,&
-&           ptsymrel,spinat,symafm,symrel,tnons,tol3,typat,use_inversion,xred)
+&           nzchempot,ptsymrel,spinat,symafm,symrel,tnons,tol3,typat,use_inversion,xred)
 
   call symanal(bravais,chkprim,genafm,msym,nsym,ptgroupma,rprimd,spgroup,symafm,symrel,tnons,tol3)
 

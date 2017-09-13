@@ -81,4 +81,5 @@
 ##%%  Test of irdden and prtdosm input keyword.
 #%%   Density from test 38 is read; then a non self-consistent calculation
 #%%   is done and the m-decomposed LDOS on the first atom is printed out.
+#%% topics = DFT+U
 #%%<END TEST_INFO>

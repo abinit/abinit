@@ -1,7 +1,6 @@
 #CO2 in a box.
 #Tests: 
 #PAW implementation with wvl_bigdft_comp =0
-#Test: potential mixing within the DIIS.
 #
 
 #Variables for Wavelets
@@ -28,11 +27,11 @@ istwfk 1               #This is mandatory for WVLs
 # Self-consistent run to get the density
 
 #Variables to control convergency:
-diemix   0.4
-nstep    10
+nstep    20
+iscf 12
 
 # Self-consistent run to get the density
-tolvrs     1.00d-0     #too low
+tolvrs     1.00d-08
 
 #semiconducting case:
 nband 8             #important give only occupied bands
@@ -56,7 +55,7 @@ znucl     6.00 8.00
 
 #Minimal test: do not print WFK files etc..
 chksymbreak 0
-optforces  0 
+#optforces  0 
 optstress 0
 kptopt 0
 prtden 0
@@ -76,5 +75,6 @@ prteig 0
 #%% authors = T. Rangel
 #%% keywords =  PAW
 #%% description = CO2 in a box (PAW). ABINIT routines are used (wvl_bigdft_comp=0)
-#%% Test: DIIS, potential mixing
+#%% Test: DIIS mixing.
+#%% topics = Wavelets
 #%%<END TEST_INFO>

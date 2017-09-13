@@ -5,7 +5,7 @@
 !! testfi
 !!
 !! FUNCTION
-!! Routine "Final test" for generation of the test report in the status file :
+!! Routine "Final test" for generation of the test report in the status file:
 !! if it appears that the run was a "Build-in Test", then
 !! compare the final values of different quantities to the reference
 !! values, here hard-coded.
@@ -68,7 +68,6 @@ subroutine testfi(builtintest,etotal,filstat,fred,natom,strten,xred)
  real(dp),intent(in) :: fred(3,natom),strten(6),xred(3,natom)
 
 !Local variables-------------------------------
- !character(len=9), parameter :: chara = '123456789'
  character(len=fnlen) :: testname(7)='         '
  character(len=*), parameter :: format01000="(a,d22.14,a,d12.4)"
  character(len=500) :: msg
@@ -81,10 +80,6 @@ subroutine testfi(builtintest,etotal,filstat,fred,natom,strten,xred)
  real(dp) :: fred_ref(3,2),strten_ref(6),xred_ref(3,2)
 
 ! ***********************************************************************
-
-!DEBUG
-!write(std_out,*)' testfi : enter '
-!ENDDEBUG
 
  testname(1)='fast'
  testname(2)='v1'
@@ -131,9 +126,9 @@ subroutine testfi(builtintest,etotal,filstat,fred,natom,strten,xred)
      strten_mxdev=1.0d-5
 
    else if(builtintest==2)then
-     
+
 !    This value of etot is accurate to about 1.0d-12
-     etot_ref=-.70811958266295D+02 
+     etot_ref=-.70811958266295D+02
 !    Initialisation conditions might give fluctuations
      etot_mxdev=3.0d-7
      xred_ref(1:3,1)=(/ 0.0_dp , 0.0_dp , 0.0_dp /)
@@ -311,5 +306,4 @@ subroutine testfi(builtintest,etotal,filstat,fred,natom,strten,xred)
  end if !  End of the choice between produce a report, and produce no report
 
 end subroutine testfi
-
 !!***

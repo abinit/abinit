@@ -1,5 +1,5 @@
 
-.Version 8.0.5 of ANADDB 
+.Version 8.4.2 of ANADDB 
 .(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
 
 .Copyright (C) 1998-2017 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see http://www.abinit.org .
 
-.Starting date : Thu 12 May 2016.
-- ( at 17h42 )
+.Starting date : Mon  5 Jun 2017.
+- ( at 21h08 )
   
 
 ================================================================================
@@ -42,7 +42,7 @@
                      0.00000000E+00  5.00000000E-01  5.00000000E-01
                      5.00000000E-01  0.00000000E+00  5.00000000E-01
                      5.00000000E-01  5.00000000E-01  0.00000000E+00
-     qrefine         2
+     qrefine         2         2         2
  First list of wavevector (reduced coord.) :
        nph1l        17
        qph1l
@@ -68,8 +68,6 @@
 
  read the DDB information and perform some checks
 
--begin at tcpu      0.019  and twall      0.019 sec
-
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  3.8000000  3.8000000  G(1)= -0.1315789  0.1315789  0.1315789
  R(2)=  3.8000000  0.0000000  3.8000000  G(2)=  0.1315789 -0.1315789  0.1315789
@@ -82,7 +80,7 @@
 
  Calculation of the interatomic forces 
 
--begin at tcpu      0.022  and twall      0.022 sec
+-begin at tcpu      0.012  and twall      0.012 sec
        Homogeneous q point set in the B.Z.
  Grid q points  :       16
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -448,8 +446,7 @@
 
  Treat the first list of vectors 
 
--begin at tcpu      0.111  and twall      0.111 sec
- 
+
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
  Phonon energies in Hartree :
    0.000000E+00  0.000000E+00  0.000000E+00
@@ -468,7 +465,7 @@
   3.0 -3.0 -1.0  1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0
   0.0 -0.0  0.0 -0.0  0.0 -0.0 -0.0  0.0  1.0 -1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0
   0.0 -0.0  0.0 -0.0 -0.0  0.0  0.0 -0.0  1.0 -1.0  1.0 -1.0 -1.0  1.0 -1.0  1.0
- 
+
   Phonon wavevector (reduced coordinates) :  0.10000  0.10000  0.00000
  Phonon energies in Hartree :
    1.205590E-04  3.036315E-04  3.036315E-04
@@ -480,31 +477,28 @@
 -  7.932399E-01  1.997800E+00  1.997800E+00
  Phonon energies in Kelvin  :
 -  3.806946E+01  9.587914E+01  9.587914E+01
- Found acoustic mode      1 for |q| in red coord < 0.25 ; q =       0.1000      0.1000      0.0000
  Speed of sound for this q and mode:
    in atomic units:     0.7291270698E-03
-   in SI units m/s:           1595.10491
+   in units km/s:              1.59510
  Partial Debye temperature for this q and mode:
    in atomic units:     0.5935991800E-03
    in SI units K  :            187.44357
 
- Found acoustic mode      2 for |q| in red coord < 0.25 ; q =       0.1000      0.1000      0.0000
  Speed of sound for this q and mode:
    in atomic units:     0.1836329554E-02
-   in SI units m/s:           4017.32210
+   in units km/s:              4.01732
  Partial Debye temperature for this q and mode:
    in atomic units:     0.1494998283E-02
    in SI units K  :            472.08256
 
- Found acoustic mode      3 for |q| in red coord < 0.25 ; q =       0.1000      0.1000      0.0000
  Speed of sound for this q and mode:
    in atomic units:     0.1836329554E-02
-   in SI units m/s:           4017.32210
+   in units km/s:              4.01732
  Partial Debye temperature for this q and mode:
    in atomic units:     0.1494998283E-02
    in SI units K  :            472.08256
 
- 
+
   Phonon wavevector (reduced coordinates) :  0.20000  0.20000  0.00000
  Phonon energies in Hartree :
   -1.932078E-04  3.374067E-04  3.374067E-04
@@ -516,7 +510,7 @@
 - -1.271246E+00  2.220030E+00  2.220030E+00
  Phonon energies in Kelvin  :
 - -6.101013E+01  1.065445E+02  1.065445E+02
- 
+
   Phonon wavevector (reduced coordinates) :  0.30000  0.30000  0.00000
  Phonon energies in Hartree :
    3.847404E-04  3.847404E-04  8.223009E-04
@@ -528,7 +522,7 @@
 -  2.531470E+00  2.531470E+00  5.410480E+00
  Phonon energies in Kelvin  :
 -  1.214913E+02  1.214913E+02  2.596618E+02
- 
+
   Phonon wavevector (reduced coordinates) :  0.40000  0.40000  0.00000
  Phonon energies in Hartree :
    4.414850E-04  4.414850E-04  1.313956E-03
@@ -540,7 +534,7 @@
 -  2.904832E+00  2.904832E+00  8.645416E+00
  Phonon energies in Kelvin  :
 -  1.394098E+02  1.394098E+02  4.149140E+02
- 
+
   Phonon wavevector (reduced coordinates) :  0.50000  0.50000  0.00000
  Phonon energies in Hartree :
    3.702297E-04  3.702297E-04  1.413109E-03
@@ -552,7 +546,7 @@
 -  2.435994E+00  2.435994E+00  9.297808E+00
  Phonon energies in Kelvin  :
 -  1.169091E+02  1.169091E+02  4.462239E+02
- 
+
   Phonon wavevector (reduced coordinates) :  0.42900  0.42900  0.85800
  Phonon energies in Hartree :
    4.238032E-04  4.881808E-04  1.365213E-03
@@ -564,7 +558,7 @@
 -  2.788491E+00  3.212075E+00  8.982667E+00
  Phonon energies in Kelvin  :
 -  1.338263E+02  1.541551E+02  4.310995E+02
- 
+
   Phonon wavevector (reduced coordinates) :  0.35800  0.35800  0.71600
  Phonon energies in Hartree :
    4.867107E-04  5.616880E-04  1.217894E-03
@@ -576,7 +570,7 @@
 -  3.202402E+00  3.695729E+00  8.013358E+00
  Phonon energies in Kelvin  :
 -  1.536909E+02  1.773668E+02  3.845801E+02
- 
+
   Phonon wavevector (reduced coordinates) :  0.28600  0.28600  0.57200
  Phonon energies in Hartree :
    5.312970E-04  6.456200E-04  1.010612E-03
@@ -588,7 +582,7 @@
 -  3.495766E+00  4.247975E+00  6.649510E+00
  Phonon energies in Kelvin  :
 -  1.677701E+02  2.038704E+02  3.191258E+02
- 
+
   Phonon wavevector (reduced coordinates) :  0.21500  0.21500  0.43000
  Phonon energies in Hartree :
    5.081795E-04  6.275570E-04  7.169680E-04
@@ -600,7 +594,7 @@
 -  3.343661E+00  4.129127E+00  4.717423E+00
  Phonon energies in Kelvin  :
 -  1.604702E+02  1.981666E+02  2.264003E+02
- 
+
   Phonon wavevector (reduced coordinates) :  0.14300  0.14300  0.28600
  Phonon energies in Hartree :
    3.933528E-04  4.515691E-04  4.831841E-04
@@ -612,7 +606,7 @@
 -  2.588137E+00  2.971182E+00  3.179199E+00
  Phonon energies in Kelvin  :
 -  1.242108E+02  1.425941E+02  1.525773E+02
- 
+
   Phonon wavevector (reduced coordinates) :  0.07200  0.07200  0.14400
  Phonon energies in Hartree :
    2.326749E-04  3.170878E-04  3.372542E-04
@@ -624,31 +618,28 @@
 -  1.530927E+00  2.086338E+00  2.219026E+00
  Phonon energies in Kelvin  :
 -  7.347282E+01  1.001283E+02  1.064963E+02
- Found acoustic mode      1 for |q| in red coord < 0.25 ; q =       0.0720      0.0720      0.1440
  Speed of sound for this q and mode:
    in atomic units:     0.1381992488E-02
-   in SI units m/s:           3023.37288
+   in units km/s:              3.02337
  Partial Debye temperature for this q and mode:
    in atomic units:     0.1125111989E-02
    in SI units K  :            355.28184
 
- Found acoustic mode      2 for |q| in red coord < 0.25 ; q =       0.0720      0.0720      0.1440
  Speed of sound for this q and mode:
    in atomic units:     0.1883370704E-02
-   in SI units m/s:           4120.23362
+   in units km/s:              4.12023
  Partial Debye temperature for this q and mode:
    in atomic units:     0.1533295570E-02
    in SI units K  :            484.17587
 
- Found acoustic mode      3 for |q| in red coord < 0.25 ; q =       0.0720      0.0720      0.1440
  Speed of sound for this q and mode:
    in atomic units:     0.2003150764E-02
-   in SI units m/s:           4382.27541
+   in units km/s:              4.38228
  Partial Debye temperature for this q and mode:
    in atomic units:     0.1630811281E-02
    in SI units K  :            514.96886
 
- 
+
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
  Phonon energies in Hartree :
    0.000000E+00  0.000000E+00  0.000000E+00
@@ -667,7 +658,7 @@
   3.0 -3.0 -1.0  1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0
   0.0 -0.0  0.0 -0.0  0.0 -0.0 -0.0  0.0  1.0 -1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0
   0.0 -0.0  0.0 -0.0 -0.0  0.0  0.0 -0.0  1.0 -1.0  1.0 -1.0 -1.0  1.0 -1.0  1.0
- 
+
   Phonon wavevector (reduced coordinates) :  0.12500  0.12500  0.12500
  Phonon energies in Hartree :
    3.047695E-04  3.047695E-04  3.606299E-04
@@ -679,31 +670,28 @@
 -  2.005287E+00  2.005287E+00  2.372830E+00
  Phonon energies in Kelvin  :
 -  9.623847E+01  9.623847E+01  1.138778E+02
- Found acoustic mode      1 for |q| in red coord < 0.25 ; q =       0.1250      0.1250      0.1250
  Speed of sound for this q and mode:
    in atomic units:     0.1702685846E-02
-   in SI units m/s:           3724.95093
+   in units km/s:              3.72495
  Partial Debye temperature for this q and mode:
    in atomic units:     0.1386195855E-02
    in SI units K  :            437.72551
 
- Found acoustic mode      2 for |q| in red coord < 0.25 ; q =       0.1250      0.1250      0.1250
  Speed of sound for this q and mode:
    in atomic units:     0.1702685846E-02
-   in SI units m/s:           3724.95093
+   in units km/s:              3.72495
  Partial Debye temperature for this q and mode:
    in atomic units:     0.1386195855E-02
    in SI units K  :            437.72551
 
- Found acoustic mode      3 for |q| in red coord < 0.25 ; q =       0.1250      0.1250      0.1250
  Speed of sound for this q and mode:
    in atomic units:     0.2014766671E-02
-   in SI units m/s:           4407.68742
+   in units km/s:              4.40769
  Partial Debye temperature for this q and mode:
    in atomic units:     0.1640268059E-02
    in SI units K  :            517.95507
 
- 
+
   Phonon wavevector (reduced coordinates) :  0.25000  0.25000  0.25000
  Phonon energies in Hartree :
    4.944388E-04  4.947345E-04  4.947345E-04
@@ -715,7 +703,7 @@
 -  3.253251E+00  3.255196E+00  3.255196E+00
  Phonon energies in Kelvin  :
 -  1.561312E+02  1.562246E+02  1.562246E+02
- 
+
   Phonon wavevector (reduced coordinates) :  0.37500  0.37500  0.37500
  Phonon energies in Hartree :
    4.809031E-04  4.809031E-04  1.006750E-03
@@ -727,7 +715,7 @@
 -  3.164191E+00  3.164191E+00  6.624094E+00
  Phonon energies in Kelvin  :
 -  1.518570E+02  1.518570E+02  3.179060E+02
- 
+
   Phonon wavevector (reduced coordinates) :  0.50000  0.50000  0.50000
  Phonon energies in Hartree :
    3.984722E-04  3.984722E-04  1.340991E-03
@@ -744,6 +732,6 @@
 
 ================================================================================
 
-+Total cpu time      0.114  and wall time      0.146 sec
++Total cpu time      0.095  and wall time      0.095 sec
 
  anaddb : the run completed succesfully.

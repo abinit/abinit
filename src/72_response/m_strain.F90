@@ -200,6 +200,7 @@ end subroutine strain_free
 !!
 !!
 !! INPUTS
+!!  symmetrized = (optional) symmetrize the output
 !!
 !! OUTPUT
 !!  strain = structure with all information of strain
@@ -212,7 +213,7 @@ end subroutine strain_free
 !!
 !! SOURCE
  
-subroutine strain_get(strain,rprim,rprim_def,mat_delta)
+subroutine strain_get(strain,rprim,rprim_def,mat_delta,symmetrized)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -229,9 +230,11 @@ subroutine strain_get(strain,rprim,rprim_def,mat_delta)
 !array
  type(strain_type),intent(inout) :: strain
  real(dp),optional,intent(in) :: rprim(3,3),rprim_def(3,3), mat_delta(3,3)
+ logical,optional,intent(in) :: symmetrized
 !Local variables-------------------------------
 !scalar
  integer :: i,j
+ logical :: symmetrized_in
  character(len=500) :: message
 !arrays
  real(dp) :: mat_delta_tmp(3,3),rprim_inv(3,3)
@@ -239,6 +242,11 @@ subroutine strain_get(strain,rprim,rprim_def,mat_delta)
 ! *************************************************************************
 
 !check inputs 
+ symmetrized_in = .FALSE.
+ if(present(symmetrized)) then
+   symmetrized_in = symmetrized
+ end if
+
  if((present(rprim_def).and..not.present(rprim)).or.&
 &   (present(rprim).and..not.present(rprim_def))) then
     write(message, '(a)' )&
@@ -272,6 +280,17 @@ subroutine strain_get(strain,rprim,rprim_def,mat_delta)
    write(message, '(a)' )&
 &     ' strain_get: should give rprim_def or mat_delta as input of the routines'
    MSG_BUG(message)
+ end if
+
+ if(symmetrized_in)then
+   mat_delta_tmp(2,3) = (mat_delta_tmp(2,3) + mat_delta_tmp(3,2)) / 2
+   mat_delta_tmp(3,1) = (mat_delta_tmp(3,1) + mat_delta_tmp(1,3)) / 2
+   mat_delta_tmp(2,1) = (mat_delta_tmp(2,1) + mat_delta_tmp(1,2)) / 2
+
+   mat_delta_tmp(3,2) = mat_delta_tmp(2,3)
+   mat_delta_tmp(1,3) = mat_delta_tmp(3,1)
+   mat_delta_tmp(1,2) = mat_delta_tmp(2,1)
+
  end if
 
  call strain_def2strain(mat_delta_tmp,strain)
@@ -581,20 +600,20 @@ subroutine strain_print(strain)
    call wrtout(std_out,message,'COLL')
  else
    if(strain%name /= "") then 
-     write(message,'(4a,I2,a,(ES10.2),a)') ch10,&
+     write(message,'(3a,I2,a,(ES10.2),a)') &
 &      ' The strain is ',trim(strain%name),' type in the direction ',&
 &      strain%direction,' with delta of ',strain%delta, ':'
      call wrtout(std_out,message,'COLL')
      call wrtout(ab_out,message,'COLL')
      do ii = 1,3
-       write(message,'(3es12.2)') strain%strain(ii,1),strain%strain(ii,2),strain%strain(ii,3)
+       write(message,'(3es17.8)') strain%strain(ii,1),strain%strain(ii,2),strain%strain(ii,3)
        call wrtout(std_out,message,'COLL')
      end do
    else
-     write(message,'(a,a,a)') ch10,' Strain does not correspond to standard strain:'
+     write(message,'(a)') ' Strain does not correspond to standard strain:'
      call wrtout(std_out,message,'COLL')
      do ii = 1,3
-       write(message,'(3es12.2)') strain%strain(ii,1),strain%strain(ii,2),strain%strain(ii,3)
+       write(message,'(3es17.8)') strain%strain(ii,1),strain%strain(ii,2),strain%strain(ii,3)
        call wrtout(std_out,message,'COLL')
      end do
    end if

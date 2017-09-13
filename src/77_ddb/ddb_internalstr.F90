@@ -59,6 +59,7 @@ subroutine ddb_internalstr(asr,crystal,blkval,asrq0,d2asr,iblok,instrain,iout,mp
  use m_crystal
  use m_ddb
 
+ use m_fstrings,     only : itoa, sjoin
  use m_dynmat,       only : asria_corr
 
 !This section has been created automatically by the script Abilint (TD).
@@ -113,9 +114,7 @@ subroutine ddb_internalstr(asr,crystal,blkval,asrq0,d2asr,iblok,instrain,iout,mp
 !        for the shear modulus
        end if
        instrain(ivarA,ivarB)=(-1.0_dp)*blkval(1,idirA,ipertA,idirB,ipertB,iblok)
-!      DEBUG
 !      write(std_out,'(es16.6)')blkval(1,idirA,ipertA,idirB,ipertB,iblok)
-!      ENDDEBUG
      end do
    end do
  end do
@@ -195,11 +194,6 @@ subroutine ddb_internalstr(asr,crystal,blkval,asrq0,d2asr,iblok,instrain,iout,mp
    call wrtout(iout,message,'COLL')
  end do
 
-!DEBUG
-!write(std_out,'(/,a,/)')'debug the block number'
-!write(std_out,'(i6)')iblok
-!ENDDEBUG
-
 !try to get the displacement response internal strain tensor
 !first need the inverse of force constant matrix
  d2cart = zero
@@ -266,9 +260,11 @@ subroutine ddb_internalstr(asr,crystal,blkval,asrq0,d2asr,iblok,instrain,iout,mp
      ii1=ii1+1
    end do
  end do
+
 !Bpmatr(2,:) is the imaginary part of the force matrix
 !then call the subroutines CHPEV and ZHPEV to get the eigenvectors
  call ZHPEV ('V','U',3*natom,Bpmatr,eigvalp,eigvecp,3*natom,zhpev1p,zhpev2p,ier)
+ ABI_CHECK(ier == 0, sjoin("ZHPEV returned:", itoa(ier)))
 
 !DEBUG
 !the eigenval and eigenvec
@@ -355,6 +351,7 @@ subroutine ddb_internalstr(asr,crystal,blkval,asrq0,d2asr,iblok,instrain,iout,mp
 
 !Call the subroutines CHPEV and ZHPEV to get the eigenvectors and the eigenvalues
  call ZHPEV ('V','U',3*natom-3,Bmatr,eigval,eigvec,3*natom-3,zhpev1,zhpev2,ier)
+ ABI_CHECK(ier == 0, sjoin("ZHPEV returned:", itoa(ier)))
 
 !Check the unstable phonon modes, if the first is negative then print
 !warning message
@@ -430,7 +427,7 @@ subroutine ddb_internalstr(asr,crystal,blkval,asrq0,d2asr,iblok,instrain,iout,mp
    end do
  end do
 
-!Now the inverse in in Cpmatr
+!Now the inverse is in Cpmatr
  kmatrix(:,:)=Cpmatr(:,:)
 !transfer the inverse of k-matrix back to the k matrix
 !so now the inverse of k matrix is in the kmatrix

@@ -187,9 +187,9 @@ subroutine nonlop_pl(choice,dimekb1,dimekb2,dimffnlin,dimffnlout,ekb,enlout,&
  real(dp),intent(in) :: ph1d(2,*) !vz_d
  real(dp),intent(in) :: phkxredin(2,natom),phkxredout(2,natom)
  real(dp),intent(inout) :: ph3din(2,npwin,matblk),ph3dout(2,npwout,matblk)
- real(dp),intent(inout) :: vectin(2,nspinor*npwin)
- real(dp),intent(out) :: enlout(nnlout) !vz_i
- real(dp),intent(inout) :: vectout(2,nspinor*npwout) !vz_i
+ real(dp),intent(inout) :: vectin(:,:)
+ real(dp),intent(out) :: enlout(:) !vz_i
+ real(dp),intent(inout) :: vectout(:,:) !vz_i
 
 !Local variables-------------------------------
 !mlang is the maximum number of different angular momenta
