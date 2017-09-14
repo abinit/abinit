@@ -754,27 +754,27 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
      end if
      if (choice==2) then
        if (dtset%positron<0.and.istep<=nstep) then
-         if (electronpositron%scf_converged) then
-           if (electronpositron%istep==electronpositron%nstep) then
-             quit=1
-           else if ((.not.noquit).and.&
+         if (electronpositron%scf_converged) then 
+           if (electronpositron%istep/=electronpositron%nstep) then
+             if ((.not.noquit).and.&
 &             (diff_e<electronpositron%postoldfe.or.diff_f<electronpositron%postoldff).and.&
 &             (mod(electronpositron%calctype,2)==0.or.(dtset%positron>-20.and.dtset%positron/=-2))) then
-             if (diff_e<electronpositron%postoldfe) then
-               write(message, '(2a,i5,5a,es11.3,a,es11.3)' ) ch10, &
-&               ' At SCF step',istep,', the difference between',ch10,&
-&               ' etotal from electronic calculation and etotal from positronic calculation',ch10,&
-&               ' is converged :  diff(etot_el-etot_pos)=',diff_e,' < postoldfe=',electronpositron%postoldfe
+               if (diff_e<electronpositron%postoldfe) then
+                 write(message, '(2a,i5,5a,es11.3,a,es11.3)' ) ch10, &
+&                 ' At SCF step',istep,', the difference between',ch10,&
+&                 ' etotal from electronic calculation and etotal from positronic calculation',ch10,&
+&                 ' is converged :  diff(etot_el-etot_pos)=',diff_e,' < postoldfe=',electronpositron%postoldfe
+               else
+                 write(message, '(2a,i5,5a,es11.3,a,es11.3)' ) ch10, &
+&                 ' At SCF step',istep,', the difference between',ch10,&
+&                 ' max. force from electronic calculation and max. force from positronic calculation',ch10,&
+&                 ' is converged :  diff(maxfor_el-maxfor_pos)=',diff_f,' < postoldff=',electronpositron%postoldff
+               end if
+               call wrtout(ab_out,message,'COLL')
+               call wrtout(std_out,message,'COLL')
              else
-               write(message, '(2a,i5,5a,es11.3,a,es11.3)' ) ch10, &
-&               ' At SCF step',istep,', the difference between',ch10,&
-&               ' max. force from electronic calculation and max. force from positronic calculation',ch10,&
-&               ' is converged :  diff(maxfor_el-maxfor_pos)=',diff_f,' < postoldff=',electronpositron%postoldff
+               quit=0
              end if
-             call wrtout(ab_out,message,'COLL')
-             call wrtout(std_out,message,'COLL')
-           else
-             quit=0
            end if
          end if
        end if
