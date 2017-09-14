@@ -80,7 +80,7 @@ subroutine fock_ACE_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
 
 !Local variables-------------------------------
 ! Scalars
- integer :: iband, ier,ipw,npw
+ integer :: iband, ier,ikpt,ipw,nband_k,npw
  real(dp) :: doti,dotr,eigen
  type(fock_common_type),pointer :: fockcommon
 ! Arrays
@@ -96,30 +96,32 @@ subroutine fock_ACE_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
  ABI_CHECK(gs_ham%nspinor==1,"only allowed for nspinor=1!")
  ABI_CHECK(gs_ham%npw_k==gs_ham%npw_kp,"only allowed for npw_k=npw_kp (ground state)!")
 
+ ikpt=fockcommon%ikpt
  npw=gs_ham%npw_k
+ nband_k=fockcommon%nband(ikpt)
 
 !*Initialization of the array ghc1
 !*ghc1 will contain the exact exchange contribution to the Hamiltonian
  ABI_ALLOCATE(ghc1,(2,npw))
  ghc1=zero
  ABI_ALLOCATE(xi,(2,npw))
- iband=fockcommon%iband
- xi(1,:)=gs_ham%fockACE_k%xi(1,:,iband)
- xi(2,:)=-gs_ham%fockACE_k%xi(2,:,iband)
-!write(80,*) gs_ham%fockACE_k%xi(:,:,iband)
-!flush(80)
- call dotprod_g(dotr,doti,gs_ham%istwf_k,npw,2,cwavef,xi,mpi_enreg%me_g0,mpi_enreg%comm_fft)
-!write(80,*) dotr,doti
- ghc1(1,:)=ghc1(1,:)+(dotr*gs_ham%fockACE_k%xi(1,:,iband)-doti*gs_ham%fockACE_k%xi(2,:,iband))
- ghc1(2,:)=ghc1(2,:)+(dotr*gs_ham%fockACE_k%xi(2,:,iband)+doti*gs_ham%fockACE_k%xi(1,:,iband))
-!stop
+
+ do iband=1, nband_k
+   xi(1,:)=gs_ham%fockACE_k%xi(1,:,iband)
+   xi(2,:)=gs_ham%fockACE_k%xi(2,:,iband)
+
+   call dotprod_g(dotr,doti,gs_ham%istwf_k,npw,2,xi,cwavef,mpi_enreg%me_g0,mpi_enreg%comm_fft)
+
+   ghc1(1,:)=ghc1(1,:)-(dotr*gs_ham%fockACE_k%xi(1,:,iband)-doti*gs_ham%fockACE_k%xi(2,:,iband))
+   ghc1(2,:)=ghc1(2,:)-(dotr*gs_ham%fockACE_k%xi(2,:,iband)+doti*gs_ham%fockACE_k%xi(1,:,iband))
+ end do
  ABI_DEALLOCATE(xi)
- ghc1=-ghc1*gs_ham%ucvol/gs_ham%nfft
 
 !* If the calculation is parallelized, perform an MPI_allreduce to sum all the contributions in the array ghc
- ghc(:,:)=ghc(:,:)/mpi_enreg%nproc_hf + ghc1(:,:)
+! ghc(:,:)=ghc(:,:)/mpi_enreg%nproc_kpt + ghc1(:,:)
+ ghc(:,:)=ghc(:,:) + ghc1(:,:)
 
- call xmpi_sum(ghc,mpi_enreg%comm_hf,ier)
+! call xmpi_sum(ghc,mpi_enreg%comm_kpt,ier)
 
 ! ============================================
 ! === Calculate the contribution to energy ===
@@ -139,7 +141,7 @@ subroutine fock_ACE_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
      eigen=eigen+cwavef(1,ipw)*ghc1(1,ipw)+cwavef(2,ipw)*ghc1(2,ipw)
    end do
    if(gs_ham%istwf_k>=2) eigen=two*eigen
-   call xmpi_sum(eigen,mpi_enreg%comm_hf,ier)
+!   call xmpi_sum(eigen,mpi_enreg%comm_kpt,ier)
    fockcommon%eigen_ikpt(fockcommon%ieigen)= eigen
    fockcommon%ieigen = 0
  end if
@@ -149,6 +151,6 @@ subroutine fock_ACE_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
 ! ===============================
 
  ABI_DEALLOCATE(ghc1)
-!write(80,*)fockcommon%eigen_ikpt
+
 end subroutine fock_ACE_getghc
 !!***
