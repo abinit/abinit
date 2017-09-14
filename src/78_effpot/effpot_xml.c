@@ -90,13 +90,9 @@ void effpot_xml_getDimSystem(char *filename,int *natom,int *ntypat, int *nqpt, i
   Array typat;
 
   initArray(&typat, 1);
-
+  *natom  = 0;  *nqpt   = iqpt; *loc_nrpt   = irpt1; *tot_nrpt   = irpt2;  *ntypat = itypat;
+  iatom    = 0; irpt1     = 0; irpt2     = 0;  iqpt    = 0;  itypat   = 0;
   present  = 0;
-  iatom    = 0;
-  irpt1     = 0;
-  irpt2     = 0;
-  iqpt    = 0;
-  itypat   = 0;
   typat.array[0] = 0;
 
   doc = xmlParseFile(filename);
@@ -139,7 +135,7 @@ void effpot_xml_getDimSystem(char *filename,int *natom,int *ntypat, int *nqpt, i
       itypat++;
     }
   }
- 
+  xmlFreeDoc(doc);
   freeArray(&typat);
 
   *natom  = iatom;
@@ -170,7 +166,7 @@ void effpot_xml_readSystem(char *filename,int *natom,int *ntypat,int *nrpt,int *
   int i,j;
   xmlNodePtr cur,cur2,cur3;
   xmlChar *key,*uri;
-  
+
   if (*natom <= 0){ 
     printf(" error: The number of atom must be superior to zero\n");
     exit(0);
@@ -194,7 +190,7 @@ void effpot_xml_readSystem(char *filename,int *natom,int *ntypat,int *nrpt,int *
     xmlFreeDoc(doc);
     return;
   }
- 
+
   cur = cur->xmlChildrenNode;
   while (cur != NULL) {
     if ((!xmlStrcmp(cur->name, (const  xmlChar *) "energy"))) {
@@ -424,8 +420,8 @@ void effpot_xml_readSystem(char *filename,int *natom,int *ntypat,int *nrpt,int *
   }
   xmlFreeDoc(doc);
 
-  //Reorder the ATMFRC
-  //Case 1: only local in the xml
+  //  Reorder the ATMFRC
+  //  Case 1: only local in the xml
   if (irpt1>0 && irpt2==0){
     for(i=0;i<irpt1;i++){
       for(j=0;j<3;j++){
@@ -572,6 +568,7 @@ void effpot_xml_getDimStrainCoupling(char *filename, int *nrpt,int *voigt){
     }
     cur = cur->next;
   }
+  xmlFreeDoc(doc);  
 }
 
 void effpot_xml_readStrainCoupling(char *filename,int *natom,int *nrpt,int *voigt,
@@ -758,13 +755,13 @@ void effpot_xml_readCoeff(char *filename,int*ncoeff,int*ndisp,int*nterm,
 
   //Reset counter
   icoeff = 0; iterm = 0; idisp = 0;
-
-  cur = cur->xmlChildrenNode;
+  cur = cur ->xmlChildrenNode;
   while (cur != NULL) {
-    if (!xmlStrcmp(cur->name, (const  xmlChar *) "Heff_definition")) {
+    if (!xmlStrcmp(cur->name, (const  xmlChar *) "Heff_definition") ||
+        !xmlStrcmp(cur->name, (const  xmlChar *) "Terms_definition")){
       cur = cur->xmlChildrenNode;
     }
-    if (!xmlStrcmp(cur->name, (const  xmlChar *) "coefficient")) {
+    if (!xmlStrcmp(cur->name, (const  xmlChar *) "coefficient")){
       //Get the name of the coefficient, need to be debug..
       uri = xmlGetProp(cur, (const  xmlChar *) "text");
       //*name_coeff = &uri;
@@ -774,7 +771,7 @@ void effpot_xml_readCoeff(char *filename,int*ncoeff,int*ndisp,int*nterm,
         coefficient[icoeff] = strtod(uri,NULL);
       }else{
         coefficient[icoeff] = 0.0;
-      }        
+      }
       xmlFree(uri);
       //Get the children of coeff node
       cur2 = cur->xmlChildrenNode;
@@ -798,18 +795,18 @@ void effpot_xml_readCoeff(char *filename,int*ncoeff,int*ndisp,int*nterm,
               uri2 = xmlGetProp(cur3, (const  xmlChar *) "atom_b");
               atindx[idisp][1][iterm][icoeff] = strtod(uri2,NULL);
               xmlFree(uri2);
-
+              
               //Get the direction
               uri2 = xmlGetProp(cur3, (const  xmlChar *) "direction");
               if(strcmp(uri2,"x") == 0){direction[idisp][iterm][icoeff] = 1;}
               if(strcmp(uri2,"y") == 0){direction[idisp][iterm][icoeff] = 2;}
               if(strcmp(uri2,"z") == 0){direction[idisp][iterm][icoeff] = 3;}
               xmlFree(uri2);
-
+              
               //Get the power
               uri2 = xmlGetProp(cur3, (const  xmlChar *) "power");
               power[idisp][iterm][icoeff] = strtod(uri2,NULL);
-                  
+              
               //Get the children of the displacement
               cur4 = cur3->xmlChildrenNode;
               while (cur4 != NULL){
@@ -821,7 +818,7 @@ void effpot_xml_readCoeff(char *filename,int*ncoeff,int*ndisp,int*nterm,
                       cell[idisp][0][i][iterm][icoeff]=strtod(pch,NULL);
                       pch = strtok(NULL,"\t \n");
                     }
-                  }
+                    }
                 }
                 if (!xmlStrcmp(cur4->name, (const  xmlChar *) "cell_b")){
                   key = xmlNodeListGetString(doc, cur4->xmlChildrenNode, 1);
@@ -832,7 +829,7 @@ void effpot_xml_readCoeff(char *filename,int*ncoeff,int*ndisp,int*nterm,
                       pch = strtok(NULL,"\t \n");                      
                     }
                   }
-                }
+                  }
                 cur4 = cur4->next;
               }
               idisp++;
@@ -859,10 +856,9 @@ void effpot_xml_readCoeff(char *filename,int*ncoeff,int*ndisp,int*nterm,
         }
         cur2 = cur2->next;
       }
-      xmlFree(uri); 
       icoeff ++;
-    }
-    cur = cur->next;      
+    }    
+    cur = cur->next;
   }
   xmlFreeDoc(doc);
 }
@@ -873,7 +869,6 @@ void effpot_xml_getDimCoeff(char *filename,int*ncoeff,char *nterm_max,int*ndisp_
   xmlDocPtr doc;
   char * pch;
   xmlNodePtr cur,cur2,cur3;
-  xmlChar *uri,*uri2;
 
   icoeff = 0;
   iterm  = 0;
@@ -888,32 +883,31 @@ void effpot_xml_getDimCoeff(char *filename,int*ncoeff,char *nterm_max,int*ndisp_
     xmlFreeDoc(doc);
     return;
   }
-  cur = cur->xmlChildrenNode;
+  cur = cur ->xmlChildrenNode;
   while (cur != NULL) {
-    if (!xmlStrcmp(cur->name, (const  xmlChar *) "Heff_definition")) {
+    if (!xmlStrcmp(cur->name, (const  xmlChar *) "Heff_definition") ||
+        !xmlStrcmp(cur->name, (const  xmlChar *) "Terms_definition")){
       cur = cur->xmlChildrenNode;
     }
-    if (!xmlStrcmp(cur->name, (const  xmlChar *) "coefficient")) {
+    if (!xmlStrcmp(cur->name, (const  xmlChar *) "coefficient")){
       icoeff ++;
       cur2 = cur->xmlChildrenNode;
       count1 = 0;
-      while (cur2 != NULL){
-        if (!xmlStrcmp(cur2->name, (const  xmlChar *) "term")) {
-          count1 ++;
-          count2 = 0;
-          cur3 = cur2->xmlChildrenNode;
-          
-          while (cur3 != NULL){
-            if (!xmlStrcmp(cur3->name, (const  xmlChar *) "displacement_diff")) {count2 ++;}
-            if (!xmlStrcmp(cur3->name, (const  xmlChar *) "strain")) {count2 ++;}
-            cur3 = cur3->next;
+          while (cur2 != NULL){
+            if (!xmlStrcmp(cur2->name, (const  xmlChar *) "term")){
+              count1 ++;
+              count2 = 0;
+              cur3 = cur2->xmlChildrenNode;             
+              while (cur3 != NULL){
+                if (!xmlStrcmp(cur3->name, (const  xmlChar *) "displacement_diff")) {count2 ++;}
+                if (!xmlStrcmp(cur3->name, (const  xmlChar *) "strain")) {count2 ++;}
+                cur3 = cur3->next;
+              }
+              if(count2 > idisp){idisp = count2;}
+            }
+            cur2 = cur2->next;
           }
-          if(count2 > idisp){idisp = count2;}
-        }
-        cur2 = cur2->next;
-      }
-      if(count1 > iterm){iterm = count1;}
-      xmlFree(uri);
+          if(count1 > iterm){iterm = count1;}
     }
     cur = cur->next;
   }

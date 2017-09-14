@@ -628,7 +628,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
    call paw_an_nullify(paw_an)
    call paw_ij_nullify(paw_ij)
    has_dijhat=0;if (dtset%iscf==22) has_dijhat=1
-   has_vhartree=0; if (dtset%prtvha > 0) has_vhartree=1
+   has_vhartree=0; if (dtset%prtvha > 0 .or. dtset%prtvclmb > 0) has_vhartree=1
    has_dijfock=0; if (usefock==1) has_dijfock=1
    has_dijnd=0; req_cplex_dij=1
    if(any(abs(dtset%nucdipmom)>tol8)) then
@@ -1081,10 +1081,31 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
        end if
      end if
 
+     !Fock energy
+     energies%e_exactX=zero
      if (fock%fock_common%optfor) then
        fock%fock_common%forces=zero
      end if
+
+     if (mod(istep-1,fock%fock_common%nnsclo_hf)==0) then
+       ! Update data relative to the occupied states in fock
+       call fock_updatecwaveocc(cg,cprj,dtset,fock,indsym,istep,mcg,mcprj,mpi_enreg,nattyp,npwarr,occ,ucvol)
+       ! Recompute the ACE operator 
+       if(fock%fock_common%use_ACE/=0) then
+         call fock2ACE(cg,cprj,fock,kg,dtset%kptns,dtset%mband,mcg,mcprj,dtset%mgfft,dtset%mkmem,mpi_enreg,psps%mpsang,&
+&          dtset%mpw,dtset%natom,dtset%natom,dtset%nband,dtset%nfft,ngfft,dtset%nkpt,dtset%nloalg,npwarr,dtset%nspden,&
+&          dtset%nspinor,dtset%nsppol,dtset%nsym,dtset%ntypat,occ,dtset%optforces,paw_ij,pawtab,ph1d,psps,rprimd,&
+&          dtset%optstress,fock%fock_common%symrec,dtset%typat,usecprj,dtset%use_gpu_cuda,dtset%wtk,xred,ylm,ylmgr)
+       end if
+       !Depending on fockoptmix, possibly restart the mixing procedure for the potential
+       if(mod(dtset%fockoptmix,10)==1)then
+         istep_mix=1
+       endif
+     endif
+
+     !Used locally
      hybrid_mixing=fock%fock_common%hybrid_mixing ; hybrid_mixing_sr=fock%fock_common%hybrid_mixing_sr
+
      ! Update data relative to the occupied states in fock
      call fock_updatecwaveocc(cg,cprj,dtset,fock,energies%e_exactX,indsym,istep,mcg,mcprj,mpi_enreg,nattyp,npwarr,occ,ucvol)
      if(fock%fock_common%use_ACE/=0) then
@@ -1093,6 +1114,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
 &       dtset%nspinor,dtset%nsppol,dtset%nsym,dtset%ntypat,occ,dtset%optforces,paw_ij,pawtab,ph1d,psps,rprimd,&
 &       dtset%optstress,fock%fock_common%symrec,dtset%typat,usecprj,dtset%use_gpu_cuda,dtset%wtk,xred,ylm,ylmgr)
      end if
+
    end if ! usefock
 
 !  Initialize/update data in the electron-positron case
@@ -1579,6 +1601,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
 !  Set XC computation flag
    optxc=1
    if (nkxc>0) then
+! MJV 2017 May 25: you should not be able to get here with iscf < 0
      if (dtset%iscf<0) optxc=2
      if (modulo(dtset%iprcel,100)>=61.and.(dtset%iprcel<71.or.dtset%iprcel>79).and. &
 &     dtset%iscf<10.and. &

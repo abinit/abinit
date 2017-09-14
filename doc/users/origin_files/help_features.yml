@@ -256,12 +256,22 @@ sec8:
 ## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
 ## Note the small (one space) indentation for the title and body keys.
 sec9:
- title: "Other properties (e.g. positron) and analysis/postprocessing tools"
+ title: "Other physical properties (e.g. positron)"
  tag: other_physics
  body: |
   <ol>
    <li>[[topic:positron|Positron calculations]]</li>
-   <li>[[topic:Abipy|Abipy]]</li>
+  </ol>
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec10:
+ title: "Analysis/postprocessing tools"
+ tag: postprocess
+ body: |
+  <ol>
+   <li>[[topic:Abipy|Abipy - ABINIT swiss knife]]</li>
    <li>[[topic:APPA|Abinit Post-Processor Application (APPA), for molecular-dynamics trajectory analysis]]</li>
    <li>[[topic:Band2eps|Band2eps for phonon dispersion curves]]</li>
   </ol>
@@ -269,7 +279,7 @@ sec9:
 ## Each section must have a title, that will form the table of content.
 ## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
 ## Note the small (one space) indentation for the title and body keys.
-sec10:
+sec11:
  title: "Miscellaneous topics"
  tag: miscellaneous
  body: |

@@ -14,7 +14,7 @@ intro : |
       are non-zero,
      which activates [[optdriver]]=1.
     You are supposed to be well-familiarized with such calculations before starting the present tutorial.
-    See the input variables described  in the file [[varrf]]
+    See the input variables described  in [[varset:dfpt]]
     and the tutorial <a href="lesson_rf1.html">Response-Function 1</a> and subsequent tutorials.
   <p>
     You will learn about the basic implementation of parallelism for DFPT calculations,

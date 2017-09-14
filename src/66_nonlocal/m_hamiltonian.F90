@@ -1345,7 +1345,7 @@ end subroutine load_kprime_hamiltonian
 !!  structure (gs_hamk_out) and copy the content of the corresponding memory
 !!  space of gs_hamk_in in it. In contrast, the assignment statement would
 !!  only associate the pointers of gs_hamk_out to the same memory space than
-!!  the correcponding ones in gs_hamk_in. This can cause trouble if one data
+!!  the corresponding ones in gs_hamk_in. This can cause trouble if one data
 !!  structure is destroyed before a reading/writing statement for the other
 !!  structure, causing access to unallocated memory space (silently, without
 !!  segmentation fault being generated).

@@ -234,6 +234,7 @@ type dataset_type
  integer :: exchn2n3d
  integer :: extrapwf
  integer :: fftgw
+ integer :: fockoptmix
  integer :: frzfermi
  integer :: ga_algor
  integer :: ga_fitness
@@ -519,6 +520,7 @@ type dataset_type
  integer :: prtxml
  integer :: prt1dm
  integer :: ptgroupma
+ integer :: qptopt
  integer :: random_atpos
  integer :: recgratio
  integer :: recnpath

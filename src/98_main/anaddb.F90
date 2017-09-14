@@ -68,6 +68,7 @@ program anaddb
  use m_crystal,        only : crystal_t, crystal_free
  use m_crystal_io,     only : crystal_ncwrite
  use m_dynmat,         only : gtdyn9, dfpt_phfrq
+ use m_supercell
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -121,6 +122,7 @@ program anaddb
  type(ddb_hdr_type) :: ddb_hdr
  type(asrq0_t) :: asrq0
  type(crystal_t) :: Crystal
+ type(supercell_type), allocatable :: thm_scells(:)
 #ifdef HAVE_NETCDF
  integer :: phdos_ncid, ec_ncid, ncerr
 #endif
@@ -479,6 +481,12 @@ program anaddb
 
 !**********************************************************************
 
+ if (sum(abs(inp%thermal_supercell))>0 .and. inp%ifcflag==1) then
+   ABI_ALLOCATE(thm_scells, (inp%ntemper))
+   call thermal_supercell_make(Crystal, Ifc, inp%ntemper, inp%thermal_supercell, inp%tempermin, inp%temperinc, thm_scells)
+   call thermal_supercell_print(filnam(2), inp%ntemper, inp%tempermin, inp%temperinc, thm_scells)
+ end if
+
 !Phonon density of states calculation, Start if interatomic forces have been calculated
  if (inp%ifcflag==1 .and. any(inp%prtdos==[1, 2])) then
    write(message,'(a,(80a),4a)')ch10,('=',ii=1,80),ch10,ch10,' Calculation of phonon density of states ',ch10
@@ -488,7 +496,7 @@ program anaddb
    call mkphdos(Phdos,Crystal,Ifc, inp%prtdos,inp%dosdeltae,inp%dossmear, inp%ng2qpt, inp%q2shft, comm)
 
    if (iam_master) then
-     call phdos_print_msqd(Phdos, strcat(filnam(2), "_MSQD_T"), inp%ntemper, inp%tempermin, inp%temperinc)
+     call phdos_print_msqd(Phdos, filnam(2), inp%ntemper, inp%tempermin, inp%temperinc)
      call phdos_print(Phdos, strcat(filnam(2), "_PHDOS"))
      call phdos_print_debye(Phdos, Crystal%ucvol)
      call phdos_print_thermo(PHdos, strcat(filnam(2), "_THERMO"), inp%ntemper, inp%tempermin, inp%temperinc)
@@ -860,12 +868,14 @@ program anaddb
  ABI_DEALLOCATE(zeff)
  ABI_DEALLOCATE(instrain)
 
-  50 continue
+ 50 continue
+
  call asrq0_free(asrq0)
  call ifc_free(Ifc)
  call crystal_free(Crystal)
  call ddb_free(ddb)
  call anaddb_dtset_free(inp)
+ call thermal_supercell_free(inp%ntemper, thm_scells)
 
  ! Close files
  if (iam_master) then

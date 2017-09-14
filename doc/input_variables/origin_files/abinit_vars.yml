@@ -2963,8 +2963,8 @@
     defaultval: 0.0
     dimensions:
     - 3
-    -   -   - nzchempot
-    -   -   - ntype
+    - '[[nzchempot]]'
+    - '[[ntypat]]'
     excludes: null
     mnemonics: spatially varying CHEMical POTential
     requires: '[[nzchempot]]/=0'
@@ -4894,6 +4894,7 @@
            </a>. Before using it, it has to be installed following
             instructions at https://triqs.ipht.cnrs.fr/1.3/applications/cthyb/install.html.
             The current interface is valid for TRIQS 1.3 and TRIQS/CTHYB 1.3.
+            An example of a config .ac file to compile ABINIT with TRIQS can be found in ~/doc/build/config-examples/ubu_gnu_4.9_mpich.ac.
          <br />
          See the useful variables for CT-QMC solver :
         [[dmftctqmc_basis]],
@@ -7200,6 +7201,34 @@
     varset: gw
     vartype: integer
 - !variable
+    abivarname: fockoptmix
+    characteristics: null
+    commentdefault: null
+    commentdims: null
+    defaultval: 0
+    dimensions: scalar
+    excludes: null
+    mnemonics: 'FOCK operator : OPTions for MIXing'
+    requires: '[[usefock]]==1'
+    text: |-
+        Governs the mixing algorithm at the level of the Fock operator, i.e.
+        how to mix it, and how the underlying SCF calculation is to be performed. It is the most relevant when the Fock operator is not updated at each SCF step ([[nnsclohf]]/=0).
+        <p>
+        The last digit of [[fockoptmix]] governs what happens at the level of the SCF algorithm, when the Fock operator is updated.
+        <ol>
+        <li>
+        If [[fockoptmix]]==0 : the SCF algorithm is not restarted (it continues to use the previous potential/density pairs without worrying).</li>
+        <li>
+        If [[fockoptmix]]==1 : the SCF algorithm is restarted (the previous potential/density pairs are discarted).</li>
+        </ol>
+        <p>
+        The second-to-last (dozen) digit governs the possible modification of the XC functional inside the SCF loop to take into account the lack of update of the Fock operator. Irrelevant when the unit digit is 0.
+        <p>
+        The third-to-last (hundreds) digit governs the mixing of the Fock operator itself with its previous occurrences. Irrelevant when the unit digit is 0.
+    topics: Hybrids_basic
+    varset: gstate
+    vartype: integer
+- !variable
     abivarname: foldep@aim
     characteristics: null
     commentdefault: null
@@ -7676,7 +7705,7 @@
         <p>
          Different genetic rules have been implemented and the user has the change to choose between any of them.
         The chosen number of rules have been defined in
-        [[ga_n_rules]
+        [[ga_n_rules]]
          <br />
          <br />
          Implemented rules are
@@ -17762,7 +17791,7 @@
         of levels at the Fermi energy may require a larger value of
         [[nline]] (5 or 6 ?)
         Line minimizations will be stopped anyway when improvement
-        gets small. With the input variable [[nnsclo]],
+        gets small (governed by [[tolrde]]). With the input variable [[nnsclo]],
         governs the convergence of the wavefunctions
         for fixed potential.
          <br />
@@ -21146,7 +21175,7 @@
           - [[pawovlp]]&gt;0. and &lt;100. : overlap is allowed only if it is less than [[pawovlp]] %
          </div>
         </p>
-    topics: PAW_expert
+    topics: PAW_useful
     varset: paw
     vartype: real
 - !variable
@@ -21173,7 +21202,7 @@
         The indexing of the bands start with one for the lowest occupied band
         and goes up from there.
         </p>
-    topics: PAW_useful
+    topics: PAW_expert
     varset: dev
     vartype: integer
 - !variable
@@ -21204,7 +21233,7 @@
          </b>
          in the beginning of the run.
         </p>
-    topics: PAW_useful
+    topics: PAW_expert
     varset: dev
     vartype: integer
 - !variable
@@ -21310,7 +21339,7 @@
          When [[pawprtvol]]&lt;0, all components of rho_ij and D_ij matrices for all atoms are printed.
          <br />
         </p>
-    topics: PAW_useful
+    topics: PAW_expert
     varset: paw
     vartype: integer
 - !variable
@@ -21605,7 +21634,7 @@
          <br />
          Be careful: GGA requires [[pawxcdev]] &gt; 0
         </p>
-    topics: PAW_expert
+    topics: PAW_useful
     varset: paw
     vartype: integer
 - !variable
@@ -25571,7 +25600,7 @@
     defaultval: !valuewithconditions
         defaultval: 2.0
         usepaw==1:
-        -   - AUTO_FROM_PSP
+        - '[[AUTO_FROM_PSP]]'
     dimensions:
     - '[[ntypat]]'
     excludes: null
@@ -27675,7 +27704,7 @@
         other values are used for the analysis of the effect of the spin-orbit interaction,
         but are not expected to correspond to any physical situation.
         </p>
-    topics: PAW_useful, spinpolarisation_useful
+    topics: PAW_expert, spinpolarisation_useful
     varset: paw
     vartype: real
 - !variable
@@ -28358,6 +28387,28 @@
     varset: dev
     vartype: real
 - !variable
+    abivarname: thermal_supercell@anaddb
+    characteristics:
+    - '[[DEVELOP]]'
+    commentdefault: do not calculate any thermalized supercells
+    commentdims: null
+    defaultval: (/(/0,0,0/),  (/0,0,0/),  (/0,0,0/)/)
+    dimensions:
+    - 3
+    - 3
+    excludes: null
+    mnemonics: THERMALized SUPERCELL lattice vectors
+    requires: null
+    text: |-
+        <p>Thermal_supercell defines the real space supercell in which a thermalized atomic configuration should be produced, following the prescription of Zacharias and Giustino (PRB 94 075125 (2016)). The displacements are chosen for each phonon mode according to a temperature, and the displacements are alternated in sign/direction to obtain maximal compensation of the linear electron phonon coupling. In this way in the PRB dielectric properties at finite T can be obtained from a single supercell calculation instead of lots of MD and configuration averaging.</p>
+
+        <p>The supercell vectors are not constrained to be collinear with the normal lattice vectors: this effect is obtained by using a diagonal Thermal_supercell. The lines of the matrix describe the linear combination of the primitive cell lattice vectors yielding the supercell vectors, as for kptrlatt.</p>
+
+        <p>For the moment this feature is under development and it looks like the relative phases of the displacements are not fixed properly yet... (Aug 2017)</p>
+    topics: Phonons_expert
+    varset: anaddb
+    vartype: integer
+- !variable
     abivarname: thetamax@aim
     characteristics: null
     commentdefault: null
@@ -28630,10 +28681,7 @@
         geometry characteristics. When all forces vanish by symmetry (e.g. optimization of the lattice parameters
         of a high-symmetry crystal), then place [[toldfe]] to 1.0d-12, or use (better) [[tolvrs]].
          <br />
-         Since [[toldfe]], [[toldff]],
-        [[tolrff]],
-        [[tolvrs]] and [[tolwfr]]
-        are aimed at the same goal (causing the SCF cycle to stop),
+        Since [[toldfe]], [[toldff]], [[tolrff]], [[tolvrs]] and [[tolwfr]] are aimed at the same goal (causing the SCF cycle to stop),
         they are seen as a unique input variable at reading. Hence, it is forbidden that two of these input variables
         have non-zero values for the same dataset, or generically (for all datasets).
         However, a non-zero value for one such variable for one dataset will have precedence on the non-zero value for another
@@ -28672,14 +28720,7 @@
          <br />
          This stopping criterion is not allowed for RF calculations.
          <br />
-         Since
-         <b>
-          toldfe
-         </b>
-         , [[toldff]],
-        [[tolrff]],
-        [[tolvrs]] and [[tolwfr]]
-        are aimed at the same goal (causing the SCF cycle to stop),
+        Since [[toldfe]], [[toldff]], [[tolrff]], [[tolvrs]] and [[tolwfr]] are aimed at the same goal (causing the SCF cycle to stop),
         they are seen as a unique input variable at reading. Hence, it is forbidden that two of these input variables
         have non-zero values for the same dataset, or generically (for all datasets).
         However, a non-zero value for one such variable for one dataset will have precedence on the non-zero value for another
@@ -28852,14 +28893,7 @@
          <br />
          This stopping criterion is not allowed for RF calculations.
          <br />
-         Since
-         <b>
-          toldfe
-         </b>
-         , [[toldff]],
-        [[tolrff]],
-        [[tolvrs]] and [[tolwfr]]
-        are aimed at the same goal (causing the SCF cycle to stop),
+         Since [[toldfe]], [[toldff]], [[tolrff]], [[tolvrs]] and [[tolwfr]] are aimed at the same goal (causing the SCF cycle to stop),
         they are seen as a unique input variable at reading. Hence, it is forbidden that two of these input variables
         have non-zero values for the same dataset, or generically (for all datasets).
         However, a non-zero value for one such variable for one dataset will have precedence on the non-zero value for another
@@ -28927,14 +28961,7 @@
         then summing the square of this function over all FFT grid points. The result should be
         lower than [[tolvrs]].
          <br />
-         Since
-         <b>
-          toldfe
-         </b>
-         , [[toldff]],
-        [[tolrff]],
-        [[tolvrs]] and [[tolwfr]]
-        are aimed at the same goal (causing the SCF cycle to stop),
+        Since [[toldfe]], [[toldff]], [[tolrff]], [[tolvrs]] and [[tolwfr]] are aimed at the same goal (causing the SCF cycle to stop),
         they are seen as a unique input variable at reading. Hence, it is forbidden that two of these input variables
         have non-zero values for the same dataset, or generically (for all datasets).
         However, a non-zero value for one such variable for one dataset will have precedence on the non-zero value for another
@@ -29022,14 +29049,7 @@
          .
         </p>
         <br />
-        Since
-        <b>
-         toldfe
-        </b>
-        , [[toldff]],
-        [[tolrff]],
-        [[tolvrs]] and [[tolwfr]]
-        are aimed at the same goal (causing the SCF cycle to stop),
+        Since [[toldfe]], [[toldff]], [[tolrff]], [[tolvrs]] and [[tolwfr]] are aimed at the same goal (causing the SCF cycle to stop),
         they are seen as a unique input variable at reading. Hence, it is forbidden that two of these input variables
         have non-zero values for the same dataset, or generically (for all datasets).
         However, a non-zero value for one such variable for one dataset will have precedence on the non-zero value for another
@@ -29733,7 +29753,7 @@
          - B. Amadon, F. Jollet and M. Torrent, Phys. Rev. B 77, 155104 (2008).
          <br />
         </p>
-    topics: DFT+U_compulsory, GW_useful, SelfEnergy_useful
+    topics: DFT+U_compulsory, PAW_useful, GW_useful, SelfEnergy_useful
     varset: paw
     vartype: integer
 - !variable

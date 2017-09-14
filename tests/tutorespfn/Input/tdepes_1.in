@@ -33,6 +33,7 @@
  rfatpol3 1 2          # Treat displacements of all atoms
  rfdir3   1 1 1        # Do all directions 
  tolwfr3  1.0d-8       # tolwfr 1.0d-22 should be used for converged results
+ kptopt3  3
 
 # Cell dependant parameters
  acell 3*6.675
