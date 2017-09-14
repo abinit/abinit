@@ -298,7 +298,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
 !integer :: dtset_iprcel
  integer :: iatom,ider,idir,ierr,iexit,ii,ikpt,impose_dmat,denpot
  integer :: initialized0,iorder_cprj,ipert,ipositron,isave_den,isave_kden,iscf10,ispden
- integer :: ispmix,istep,istep_mix,itypat,izero,lmax_diel,lpawumax,mband_cprj,mcprj,me,me_wvl
+ integer :: ispmix,istep,istep_mix,istep_updatedfock,itypat,izero,lmax_diel,lpawumax,mband_cprj,mcprj,me,me_wvl
  integer :: mgfftdiel,mgfftf,moved_atm_inside,moved_rhor,my_nspinor,n1xccc
  integer :: n3xccc,ncpgr,nfftdiel,nfftmix,nfftmix_per_nfft,nfftotf,ngrvdw,nhatgrdim,nk3xc,nkxc
  integer :: npawmix,npwdiel,nstep,nzlmopt,optcut,optcut_hf,optene,optgr0,optgr0_hf
@@ -1087,7 +1087,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
        fock%fock_common%forces=zero
      end if
 
-     if (istep==1.or istep_updatedfock=fock%fock_common%nnsclo_hf) then
+     if (istep==1 .or. istep_updatedfock==fock%fock_common%nnsclo_hf) then
        ! Update data relative to the occupied states in fock
        call fock_updatecwaveocc(cg,cprj,dtset,fock,indsym,istep,mcg,mcprj,mpi_enreg,nattyp,npwarr,occ,ucvol)
        istep_updatedfock=1
