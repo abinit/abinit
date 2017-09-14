@@ -47,6 +47,7 @@
 !!  fcart(3,natom)=cartesian forces (hartree/bohr)
 !!  fermie=fermi energy (Hartree)
 !!  fname_eig=filename for printing of the eigenenergies
+!!  fock <type(fock_type)>=quantities for the fock operator (optional argument)
 !!  character(len=fnlen) :: filnam1=character strings giving input file name
 !!  initGS= 1 if one GS SCF cycle has already be done
 !!  iscf=( <= 0 =>non-SCF), >0 => SCF)
@@ -108,7 +109,7 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
 &  nband,nkpt,nstep,occ,optres,&
 &  prtfor,prtxml,quit,res2,resid,residm,response,tollist,usepaw,&
 &  vxcavg,wtk,xred,conv_retcode,&
-&  electronpositron) ! optional argument)
+&  electronpositron, fock) ! optional arguments)
 
  use defs_basis
  use defs_abitypes
@@ -142,6 +143,7 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
  real(dp),intent(in) :: vxcavg
  character(len=fnlen),intent(in) :: fname_eig,filnam1
  type(electronpositron_type),pointer,optional :: electronpositron
+ type(fock_type),pointer,optional :: fock
  type(MPI_type),intent(in) :: mpi_enreg
  type(dataset_type),intent(in) :: dtset
 !arrays
@@ -734,6 +736,15 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
    write(message, '(a,i0,a)' )' choice = ',choice,' is not an allowed value.'
    MSG_BUG(message)
  end select
+
+!Additional stuff for the Fock+SCF cycle 
+ if (present(fock)) then
+   if (associated(fock)) then
+     fock%fock_common%scf_converged=(quit==1)
+     ! At present, the decision that the Fock loop is converged is not taken here
+     if (.not.fock%fock_common%fock_converged)quit=0
+   endif
+ endif
 
 !Additional stuff for the two-component DFT SCF cycle (electrons+positron)
  if (present(electronpositron)) then

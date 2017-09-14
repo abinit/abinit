@@ -1087,9 +1087,10 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
        fock%fock_common%forces=zero
      end if
 
-     if (mod(istep-1,fock%fock_common%nnsclo_hf)==0) then
+     if (istep==1.or istep_updatedfock=fock%fock_common%nnsclo_hf) then
        ! Update data relative to the occupied states in fock
        call fock_updatecwaveocc(cg,cprj,dtset,fock,indsym,istep,mcg,mcprj,mpi_enreg,nattyp,npwarr,occ,ucvol)
+       istep_updatedfock=1
        ! Recompute the ACE operator 
        if(fock%fock_common%use_ACE/=0) then
          call fock2ACE(cg,cprj,fock,kg,dtset%kptns,dtset%mband,mcg,mcprj,dtset%mgfft,dtset%mkmem,mpi_enreg,psps%mpsang,&
@@ -1097,10 +1098,16 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
 &          dtset%nspinor,dtset%nsppol,dtset%nsym,dtset%ntypat,occ,dtset%optforces,paw_ij,pawtab,ph1d,psps,rprimd,&
 &          dtset%optstress,fock%fock_common%symrec,dtset%typat,usecprj,dtset%use_gpu_cuda,dtset%wtk,xred,ylm,ylmgr)
        end if
+       !Should place a test on whether ther should be the final exit of the istep loop. 
+       !This test should use focktoldfe. 
+       !This should update the info in fock%fock_common%fock_converged. 
+       !For the time being, fock%fock_common%fock_converged=.false. , so the loop end with the maximal value of nstep always.
        !Depending on fockoptmix, possibly restart the mixing procedure for the potential
        if(mod(dtset%fockoptmix,10)==1)then
          istep_mix=1
        endif
+     else
+       istep_updatedfock=istep_updatedfock+1
      endif
 
      !Used locally
@@ -1504,7 +1511,8 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
 &     dtfil%filnam_ds(1),initialized0,dtset%iscf,istep,dtset%kptns,&
 &     maxfor,moved_atm_inside,mpi_enreg,dtset%nband,dtset%nkpt,nstep,&
 &     occ,optres,prtfor,prtxml,quit,res2,resid,residm,response,tollist,&
-&     psps%usepaw,vxcavg,dtset%wtk,xred,conv_retcode,electronpositron=electronpositron)
+&     psps%usepaw,vxcavg,dtset%wtk,xred,conv_retcode,&
+&     electronpositron=electronpositron,fock=fock)
      call timab(52,2,tsec)
 
 !    Check if we need to exit the loop
@@ -1704,7 +1712,8 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
 &     dtfil%filnam_ds(1),initialized0,dtset%iscf,istep,dtset%kptns,&
 &     maxfor,moved_atm_inside,mpi_enreg,dtset%nband,dtset%nkpt,nstep,&
 &     occ,optres,prtfor,prtxml,quit,res2,resid,residm,response,tollist,&
-&     psps%usepaw,vxcavg,dtset%wtk,xred,conv_retcode,electronpositron=electronpositron)
+&     psps%usepaw,vxcavg,dtset%wtk,xred,conv_retcode,&
+&     electronpositron=electronpositron,fock=fock)
      call timab(52,2,tsec)
 
 !    Check if we need to exit the loop
