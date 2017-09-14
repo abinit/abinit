@@ -116,6 +116,7 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
  use m_errors
  use m_profiling_abi
  use m_exit
+ use m_fock
  use m_io_tools
 #if defined DEV_YP_VDWXC
  use m_xc_vdw
