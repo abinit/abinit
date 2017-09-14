@@ -35,7 +35,7 @@
        charges, LO-TO splitting, phonons in the whole Brillouin zone. The
        creation of the "Derivative Data Base" (DDB) is presented.</li>
 
-       <li>[[lesson_rf2||The lesson Response-Function 2 (RF2)]]
+       <li>[[lesson_rf2|The lesson Response-Function 2 (RF2)]]
        presents the analysis of the DDBs that have been introduced in the
        preceeding lesson RF1.  The computation of the interatomic forces and
        the computation of thermodynamical properties is an outcome of this
