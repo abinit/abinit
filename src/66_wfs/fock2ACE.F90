@@ -186,7 +186,7 @@ subroutine fock2ACE(cg,cprj,fock,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_enreg,mp
 !Check that fock is present if want to use fock option
  compute_gbound=.false.
 
-!Arrays initializations
+!Array initializations
  fockcommon => fock%fock_common
  fockcommon%optfor=.false.
  fockcommon%optstr=.false.
@@ -216,8 +216,7 @@ subroutine fock2ACE(cg,cprj,fock,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_enreg,mp
    end if
  end if
 
-!Initialize Hamiltonian (k-independent terms)
-
+!Initialize Hamiltonian (k- and spin-independent terms)
 
  call init_hamiltonian(gs_hamk,psps,pawtab,nspinor,nsppol,nspden,natom,&
 & typat,xred,nfft,mgfft,ngfft,rprimd,nloalg,usecprj=usecprj_local,&
@@ -380,7 +379,7 @@ subroutine fock2ACE(cg,cprj,fock,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_enreg,mp
      wi=zero
      ABI_ALLOCATE(mkl,(2,nband_k,nband_k))
      mkl=zero
-! Calculate all the Wi for the current k-pont
+! Calculate all the Wi for the current k-point
 
      do iblock=1,nblockbd
 
@@ -508,7 +507,7 @@ subroutine fock2ACE(cg,cprj,fock,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_enreg,mp
        call bandfft_kpt_restoretabs(my_bandfft_kpt,ffnl=ffnl_sav,ph3d=ph3d_sav,kpg=kpg_k_sav)
      end if
 
-!    Incremente indexes
+!    Increment indices
      bdtot_index=bdtot_index+nband_k
      if (mkmem/=0) then
        ibg=ibg+my_nspinor*nband_cprj_k

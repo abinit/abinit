@@ -95,7 +95,7 @@ module m_fock
    ! Number of atoms, input variable
 
   integer :: nsppol 
-   ! Number of indipendent spin polarizations, input variable
+   ! Number of independent spin polarizations, input variable
    ! Note that this value does not take into account the MPI distribution of the wavefunctions.
 
   integer :: ntypat 
@@ -619,10 +619,6 @@ subroutine fock_init(atindx,cplex,dtset,fock,gsqcut,kg,mpi_enreg,nattyp,npwarr,p
  ABI_ALLOCATE(fockcommon%eigen_ikpt,(nband))
  fockcommon%eigen_ikpt=0.d0
 !* Will contain the Fock contributions to the eigenvalue of the current state
- if (fockcommon%optfor) then
-   ABI_ALLOCATE(fockcommon%forces_ikpt,(3,dtset%natom,nband))
-   ABI_ALLOCATE(fockcommon%forces,(3,dtset%natom))
- endif
 !* Compute the dimension of arrays in "spin" w.r.t parallelism
    my_nsppol=dtset%nsppol
    if (mpi_enreg%nproc_kpt>1) my_nsppol=1
@@ -655,7 +651,11 @@ subroutine fock_init(atindx,cplex,dtset,fock,gsqcut,kg,mpi_enreg,nattyp,npwarr,p
      n4=dtset%ngfftdg(4) ; n5=dtset%ngfftdg(5) ; n6=dtset%ngfftdg(6)
    end if
    fockcommon%optfor=.FALSE.; fockcommon%optstr=.false.
-   if(dtset%optforces==1) fockcommon%optfor=.true.
+   if(dtset%optforces==1)then
+     fockcommon%optfor=.true.
+     ABI_ALLOCATE(fockcommon%forces_ikpt,(3,dtset%natom,nband))
+     ABI_ALLOCATE(fockcommon%forces,(3,dtset%natom))
+   endif
    fockcommon%use_ACE=0!if (dtset%use_ACE==1)
    userid=dtset%userid
    if(fockcommon%use_ACE/=0) userid=1961
@@ -1708,8 +1708,6 @@ end subroutine fock_update_exc
 !!  ucvol= unit cell volume ($\textrm{bohr}^{3}$)
 !!
 !! OUTPUT
-!! fock_energy=  Fock contribution to the total energy (Hartree)
-!!  fock_energy is set to zero
 !!
 !! SIDE EFFECTS
 !!   The field fock%cgocc_bz contains the table cg at the end.
@@ -1731,7 +1729,7 @@ end subroutine fock_update_exc
 !!
 !! SOURCE
 
-subroutine fock_updatecwaveocc(cg,cprj,dtset,fock,fock_energy,indsym,istep,mcg,mcprj,&
+subroutine fock_updatecwaveocc(cg,cprj,dtset,fock,indsym,istep,mcg,mcprj,&
 &                              mpi_enreg,nattyp,npwarr,occ,ucvol)
 
 
@@ -1749,7 +1747,6 @@ subroutine fock_updatecwaveocc(cg,cprj,dtset,fock,fock_energy,indsym,istep,mcg,m
 !scalars
  integer, intent(in) :: istep,mcg,mcprj
  real(dp), intent(in) :: ucvol
- real(dp), intent(inout) :: fock_energy
  type(dataset_type),intent(in) :: dtset
  type(fock_type),intent(inout),pointer :: fock
  type(MPI_type),intent(in) :: mpi_enreg
@@ -1788,10 +1785,9 @@ subroutine fock_updatecwaveocc(cg,cprj,dtset,fock,fock_energy,indsym,istep,mcg,m
 
  if (associated(fock)) then
 
- fockcommon=>fock%fock_common
- fockbz=> fock%fock_BZ
+   fockcommon=>fock%fock_common
+   fockbz=> fock%fock_BZ
 
-   if (mod(istep-1,fockcommon%nnsclo_hf)==0) then 
      invucvol=1.d0/sqrt(ucvol)
 ! Local variables = useful dimensions
      mband=fockcommon%mband
@@ -2095,11 +2091,6 @@ subroutine fock_updatecwaveocc(cg,cprj,dtset,fock,fock_energy,indsym,istep,mcg,m
 ! If nsppol=1, this is a restricted Hartree-Fock calculation.
 ! If nsppol=2, this is an unrestricted Hartree-Fock calculation.
      end if
-
-   end if ! istep
-
-!* Set the Fock contribution to total energy to zero
-   fock_energy=zero
 
  end if
 

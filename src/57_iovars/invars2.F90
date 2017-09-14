@@ -992,6 +992,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'chksymbreak',tread,'INT')
  if(tread==1) dtset%chksymbreak=intarr(1)
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'fockoptmix',tread,'INT')
+ if(tread==1) dtset%fockoptmix=intarr(1)
+
 !Get array
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'getocc',tread,'INT')
  if(tread==1) dtset%getocc=intarr(1)

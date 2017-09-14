@@ -7201,6 +7201,34 @@
     varset: gw
     vartype: integer
 - !variable
+    abivarname: fockoptmix
+    characteristics: null
+    commentdefault: null
+    commentdims: null
+    defaultval: 0
+    dimensions: scalar
+    excludes: null
+    mnemonics: 'FOCK operator : OPTions for MIXing'
+    requires: '[[usefock]]==1'
+    text: |-
+        Governs the mixing algorithm at the level of the Fock operator, i.e.
+        how to mix it, and how the underlying SCF calculation is to be performed. It is the most relevant when the Fock operator is not updated at each SCF step ([[nnsclohf]]/=0).
+        <p>
+        The last digit of [[fockoptmix]] governs what happens at the level of the SCF algorithm, when the Fock operator is updated.
+        <ol>
+        <li>
+        If [[fockoptmix]]==0 : the SCF algorithm is not restarted (it continues to use the previous potential/density pairs without worrying).</li>
+        <li>
+        If [[fockoptmix]]==1 : the SCF algorithm is restarted (the previous potential/density pairs are discarted).</li>
+        </ol>
+        <p>
+        The second-to-last (dozen) digit governs the possible modification of the XC functional inside the SCF loop to take into account the lack of update of the Fock operator. Irrelevant when the unit digit is 0.
+        <p>
+        The third-to-last (hundreds) digit governs the mixing of the Fock operator itself with its previous occurrences. Irrelevant when the unit digit is 0.
+    topics: Hybrids_basic
+    varset: gstate
+    vartype: integer
+- !variable
     abivarname: foldep@aim
     characteristics: null
     commentdefault: null
@@ -17763,7 +17791,7 @@
         of levels at the Fermi energy may require a larger value of
         [[nline]] (5 or 6 ?)
         Line minimizations will be stopped anyway when improvement
-        gets small. With the input variable [[nnsclo]],
+        gets small (governed by [[tolrde]]). With the input variable [[nnsclo]],
         governs the convergence of the wavefunctions
         for fixed potential.
          <br />
@@ -28653,10 +28681,7 @@
         geometry characteristics. When all forces vanish by symmetry (e.g. optimization of the lattice parameters
         of a high-symmetry crystal), then place [[toldfe]] to 1.0d-12, or use (better) [[tolvrs]].
          <br />
-         Since [[toldfe]], [[toldff]],
-        [[tolrff]],
-        [[tolvrs]] and [[tolwfr]]
-        are aimed at the same goal (causing the SCF cycle to stop),
+        Since [[toldfe]], [[toldff]], [[tolrff]], [[tolvrs]] and [[tolwfr]] are aimed at the same goal (causing the SCF cycle to stop),
         they are seen as a unique input variable at reading. Hence, it is forbidden that two of these input variables
         have non-zero values for the same dataset, or generically (for all datasets).
         However, a non-zero value for one such variable for one dataset will have precedence on the non-zero value for another
@@ -28695,14 +28720,7 @@
          <br />
          This stopping criterion is not allowed for RF calculations.
          <br />
-         Since
-         <b>
-          toldfe
-         </b>
-         , [[toldff]],
-        [[tolrff]],
-        [[tolvrs]] and [[tolwfr]]
-        are aimed at the same goal (causing the SCF cycle to stop),
+        Since [[toldfe]], [[toldff]], [[tolrff]], [[tolvrs]] and [[tolwfr]] are aimed at the same goal (causing the SCF cycle to stop),
         they are seen as a unique input variable at reading. Hence, it is forbidden that two of these input variables
         have non-zero values for the same dataset, or generically (for all datasets).
         However, a non-zero value for one such variable for one dataset will have precedence on the non-zero value for another
@@ -28875,14 +28893,7 @@
          <br />
          This stopping criterion is not allowed for RF calculations.
          <br />
-         Since
-         <b>
-          toldfe
-         </b>
-         , [[toldff]],
-        [[tolrff]],
-        [[tolvrs]] and [[tolwfr]]
-        are aimed at the same goal (causing the SCF cycle to stop),
+         Since [[toldfe]], [[toldff]], [[tolrff]], [[tolvrs]] and [[tolwfr]] are aimed at the same goal (causing the SCF cycle to stop),
         they are seen as a unique input variable at reading. Hence, it is forbidden that two of these input variables
         have non-zero values for the same dataset, or generically (for all datasets).
         However, a non-zero value for one such variable for one dataset will have precedence on the non-zero value for another
@@ -28950,14 +28961,7 @@
         then summing the square of this function over all FFT grid points. The result should be
         lower than [[tolvrs]].
          <br />
-         Since
-         <b>
-          toldfe
-         </b>
-         , [[toldff]],
-        [[tolrff]],
-        [[tolvrs]] and [[tolwfr]]
-        are aimed at the same goal (causing the SCF cycle to stop),
+        Since [[toldfe]], [[toldff]], [[tolrff]], [[tolvrs]] and [[tolwfr]] are aimed at the same goal (causing the SCF cycle to stop),
         they are seen as a unique input variable at reading. Hence, it is forbidden that two of these input variables
         have non-zero values for the same dataset, or generically (for all datasets).
         However, a non-zero value for one such variable for one dataset will have precedence on the non-zero value for another
@@ -29045,14 +29049,7 @@
          .
         </p>
         <br />
-        Since
-        <b>
-         toldfe
-        </b>
-        , [[toldff]],
-        [[tolrff]],
-        [[tolvrs]] and [[tolwfr]]
-        are aimed at the same goal (causing the SCF cycle to stop),
+        Since [[toldfe]], [[toldff]], [[tolrff]], [[tolvrs]] and [[tolwfr]] are aimed at the same goal (causing the SCF cycle to stop),
         they are seen as a unique input variable at reading. Hence, it is forbidden that two of these input variables
         have non-zero values for the same dataset, or generically (for all datasets).
         However, a non-zero value for one such variable for one dataset will have precedence on the non-zero value for another
