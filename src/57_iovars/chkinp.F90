@@ -1061,6 +1061,13 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
    end if
 
 !  istwfk
+   if(dt%usefock==1 .and. maxval( abs(dt%istwfk(1:nkpt)-1) ) >0)then
+     write(message,'(3a)' )&
+&     'When usefock==1, all the components of istwfk must be 1.',ch10,&
+&     'Action: set istwfk to 1 for all k-points'
+     MSG_ERROR_NOSTOP(message,ierr)
+   end if
+
    if(dt%usewvl==1 .and. maxval( abs(dt%istwfk(1:nkpt)-1) ) >0)then
      write(message,'(3a)' )&
 &     'When usewvl==1, all the components of istwfk must be 1.',ch10,&

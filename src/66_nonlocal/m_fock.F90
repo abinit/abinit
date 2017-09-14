@@ -143,6 +143,9 @@ module m_fock
   integer, allocatable :: atindx(:)
     !  atindx(natom)=index table for atoms (see gstate.f)
 
+  integer, allocatable  :: nband(:)
+   ! nband(nkpt)
+   ! Number of bands for each k point
 
   integer, allocatable :: symrec(:,:,:)
 
@@ -607,17 +610,23 @@ subroutine fock_init(atindx,cplex,dtset,fock,gsqcut,kg,mpi_enreg,nattyp,npwarr,p
 ! ========================================================
 ! === Set all the other state-dependent fields to zero ===
 ! ========================================================
- fockcommon=>fock%fock_common
- fockbz=> fock%fock_BZ
- fockcommon%ikpt= 0
+   fockcommon=>fock%fock_common
+   fockbz=> fock%fock_BZ
+   ABI_ALLOCATE(fockcommon%nband,(dtset%nkpt))
+   do ikpt=1,dtset%nkpt
+     fockcommon%nband(ikpt)=dtset%nband(ikpt)
+   end do
+
+
+   fockcommon%ikpt= 0
 !* Will contain the k-point ikpt of the current state
- fockcommon%isppol= 0
+   fockcommon%isppol= 0
 !* Will contain the spin isppol of the current state
- fockcommon%ieigen=0
+   fockcommon%ieigen=0
 !* Will contain the band index of the current state
 !* if the value is 0, the Fock contribution to the eigenvalue is not calculated.
- ABI_ALLOCATE(fockcommon%eigen_ikpt,(nband))
- fockcommon%eigen_ikpt=0.d0
+   ABI_ALLOCATE(fockcommon%eigen_ikpt,(nband))
+   fockcommon%eigen_ikpt=0.d0
 !* Will contain the Fock contributions to the eigenvalue of the current state
 !* Compute the dimension of arrays in "spin" w.r.t parallelism
    my_nsppol=dtset%nsppol
@@ -651,13 +660,14 @@ subroutine fock_init(atindx,cplex,dtset,fock,gsqcut,kg,mpi_enreg,nattyp,npwarr,p
      n4=dtset%ngfftdg(4) ; n5=dtset%ngfftdg(5) ; n6=dtset%ngfftdg(6)
    end if
    fockcommon%optfor=.FALSE.; fockcommon%optstr=.false.
-   if(dtset%optforces==1)then
-     fockcommon%optfor=.true.
+   if(dtset%optforces==1) fockcommon%optfor=.true.
+   if (fockcommon%optfor) then
      ABI_ALLOCATE(fockcommon%forces_ikpt,(3,dtset%natom,nband))
      ABI_ALLOCATE(fockcommon%forces,(3,dtset%natom))
    endif
-   fockcommon%use_ACE=0!if (dtset%use_ACE==1)
+   fockcommon%use_ACE=1!if (dtset%use_ACE==1)
    userid=dtset%userid
+   fockcommon%use_ACE=dtset%userie
    if(fockcommon%use_ACE/=0) userid=1961
    call fock_create(fockbz,mgfft,dtset%mpw,mkpt,mkptband,my_nsppol,dtset%natom,n4,n5,n6,userid)
 
@@ -675,6 +685,7 @@ subroutine fock_init(atindx,cplex,dtset,fock,gsqcut,kg,mpi_enreg,nattyp,npwarr,p
        nband=dtset%nband(ikpt)
        ABI_ALLOCATE(fock%fockACE(ikpt)%xi,(2,npwarr(ikpt)*my_nspinor,nband))
      end do
+
    end if
 !========Initialze PAW data========
    fockcommon%ntypat=dtset%ntypat
@@ -1372,6 +1383,9 @@ subroutine fock_common_destroy(fock)
  if (allocated(fock%forces)) then
    ABI_DEALLOCATE(fock%forces)
  endif
+ if (allocated(fock%nband)) then
+   ABI_DEALLOCATE(fock%nband)
+ endif
  if (allocated(fock%forces_ikpt)) then
    ABI_DEALLOCATE(fock%forces_ikpt)
  endif
@@ -1547,7 +1561,7 @@ subroutine fock_ACE_destroy(fockACE)
 
  do ii=1,dim1
    if (allocated(fockACE(ii)%xi)) then
-    ABI_DEALLOCATE(fockACE(ii)%xi)
+     ABI_DEALLOCATE(fockACE(ii)%xi)
    end if
  end do
  DBG_EXIT("COLL")
