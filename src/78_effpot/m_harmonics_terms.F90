@@ -652,14 +652,14 @@ subroutine harmonics_terms_evaluateIFC(atmfrc,disp,energy,fcart,cells,natom_sc,n
       irpt = rpt(irpt_tmp)
 !     do irpt = 1,eff_pot%harmonics_terms%ifcs%nrpt
 !     get the cell of atom2  (0 0 0, 0 0 1...)
-      cell_atom2(1) = (i1-1) + index_rpt(1,irpt)
-      cell_atom2(2) = (i2-1) + index_rpt(2,irpt)
-      cell_atom2(3) = (i3-1) + index_rpt(3,irpt)
+      cell_atom2(1) = i1 + index_rpt(1,irpt)
+      cell_atom2(2) = i2 + index_rpt(2,irpt)
+      cell_atom2(3) = i3 + index_rpt(3,irpt)
       call getPBCIndexes_supercell(cell_atom2(1:3),sc_size(1:3))
 !     index of the second atom in the displacement array
-      jj = cell_atom2(1)*sc_size(2)*sc_size(3)*natom_uc+&
-&          cell_atom2(2)*sc_size(3)*natom_uc+&
-&          cell_atom2(3)*natom_uc
+      jj = ((cell_atom2(1)-1)*sc_size(2)*sc_size(3))*natom_uc+&
+&          ((cell_atom2(2)-1)*sc_size(3))*natom_uc+&
+&          ((cell_atom2(3)-1))*natom_uc
       do ib = 1, natom_uc
         ll = jj + ib
         do nu=1,3
@@ -669,7 +669,7 @@ subroutine harmonics_terms_evaluateIFC(atmfrc,disp,energy,fcart,cells,natom_sc,n
             do mu=1,3
               disp1 = disp(mu,kk)
               ifc = atmfrc(mu,ia,nu,ib,irpt)
-              if(abs(ifc) > tol8)then
+              if(abs(ifc) > tol10)then
                 tmp = disp2 * ifc
 !               accumule energy
                 tmp2 = disp1*tmp
@@ -761,7 +761,7 @@ subroutine harmonics_terms_evaluateElastic(elastic_constants,disp,energy,fcart,n
    end do
  end do
  
-!2-Part due to the internat strain
+!2-Part due to the internal strain coupling parameters
  ii = 1
  do ia = 1,natom
    do mu = 1,3

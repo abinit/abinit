@@ -671,7 +671,6 @@ type(pseudopotential_type) :: psps
    ABI_DEALLOCATE(gboundf)
  end if
 
-
 ! ============================================
 ! === Calculate the contribution to energy ===
 ! ============================================

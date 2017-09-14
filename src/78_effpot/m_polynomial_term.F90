@@ -346,6 +346,10 @@ pure function terms_compare(t1,t2) result (res)
       do idisp2=1,t2%ndisp
         if(blkval(2,idisp2)==one)cycle!already found
         found = .false.
+        if((t1%direction(idisp1) <= zero .and.t2%direction(idisp2) <= zero).and.&
+&          (t1%direction(idisp1) /= t2%direction(idisp2)))then
+          cycle
+        end if
         if(t1%atindx(1,idisp1)  ==  t2%atindx(1,idisp2).and.&
 &          t1%atindx(2,idisp1)  ==  t2%atindx(2,idisp2).and.&
 &          t1%direction(idisp1) ==  t2%direction(idisp2).and.&
@@ -370,34 +374,6 @@ pure function terms_compare(t1,t2) result (res)
   else
     res = .false.
   end if
-
-!     do idisp1=1,t1%ndisp
-!       do idisp2=1,t2%ndisp
-!         if(t1%atindx(1,idisp1) ==  t2%atindx(1,idisp2).and.&
-! &          t1%atindx(2,idisp1) ==  t2%atindx(2,idisp2).and.&
-! &          t1%direction(idisp1) == t2%direction(idisp2).and.&
-! &          t1%power(idisp1) == t2%power(idisp2))then!.and.&
-! !&          t1%weight == t2%weight)then
-!           found = .true.
-!           do ia=1,2
-!             do mu=1,3
-!               if(t1%cell(mu,ia,idisp1) /= t2%cell(mu,ia,idisp2))then
-!                 found = .false.
-!                 cycle
-!               end if
-!             end do
-!           end do
-!           if (found)then
-!             ndisp = ndisp +1 
-!           end if
-!         end if
-!       end do
-!     end do
-
-!     if(ndisp == t1%ndisp)then
-!       res = .true.
-!     end if
-!  end if
 
 end function terms_compare
 !!***

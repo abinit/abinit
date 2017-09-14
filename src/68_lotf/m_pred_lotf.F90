@@ -358,7 +358,7 @@ CONTAINS !===========================================================
   call wrtout(std_out,message,'PERS')
 
   !Increase indexes
-  hist%ihist = hist%ihist+1
+  hist%ihist = abihist_findIndex(hist,+1)
 
   !Fill the history with the variables
   !xcart, xred, acell, rprimd

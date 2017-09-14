@@ -80,7 +80,7 @@
 
 #include "abi_common.h"
 
-subroutine fock2ACE(cg,cprj,fock,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_enreg,mpsang,&
+subroutine fock2ACE(cg,cprj,fock,istwfk,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_enreg,mpsang,&
 &  mpw,my_natom,natom,nband,nfft,ngfft,nkpt,nloalg,npwarr,nspden,nspinor,nsppol,nsym,&
 &  ntypat,occ,optfor,paw_ij,pawtab,ph1d,psps,rprimd,&
 &  stress_needed,symrec,typat,usecprj,use_gpu_cuda,wtk,xred,ylm,ylmgr)
@@ -122,7 +122,7 @@ subroutine fock2ACE(cg,cprj,fock,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_enreg,mp
  type(MPI_type),intent(inout) :: mpi_enreg
  type(pseudopotential_type),intent(in) :: psps
 !arrays
- integer,intent(in) :: kg(3,mpw*mkmem),nband(nkpt*nsppol)
+ integer,intent(in) :: istwfk(nkpt),kg(3,mpw*mkmem),nband(nkpt*nsppol)
  integer,intent(in) :: ngfft(18),nloalg(3),npwarr(nkpt)
  integer,intent(in) :: symrec(3,3,nsym),typat(natom)
  real(dp),intent(in) :: cg(2,mcg)
@@ -247,7 +247,7 @@ subroutine fock2ACE(cg,cprj,fock,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_enreg,mp
      nband_k=nband(ikpt+(isppol-1)*nkpt)
      npw_k=npwarr(ikpt)
      kpoint(:)=kpt(:,ikpt)
-
+     istwf_k=istwfk(ikpt)
      if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,isppol,me_distrb)) then
        bdtot_index=bdtot_index+nband_k
        cycle
@@ -411,17 +411,14 @@ subroutine fock2ACE(cg,cprj,fock,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_enreg,mp
          end if 
          ndat=mpi_enreg%bandpp
          if (gs_hamk%usepaw==0) cwaveprj_idat => cwaveprj
- 
+
          do iblocksize=1,blocksize
            fockcommon%ieigen=(iblock-1)*blocksize+iblocksize
-
            if (gs_hamk%usepaw==1) then
              cwaveprj_idat => cwaveprj(:,(iblocksize-1)*my_nspinor+1:iblocksize*my_nspinor)
            end if
            call fock_getghc(cwavef(:,1+(iblocksize-1)*npw_k*my_nspinor:iblocksize*npw_k*my_nspinor),cwaveprj_idat,&
 &           wi(:,1+(iblocksize-1)*npw_k*my_nspinor:iblocksize*npw_k*my_nspinor,iblock),gs_hamk,mpi_enreg)
-!write(80,*)"wi"
-!write(80,*) wi(:,1:80,iblock)
            mkl(1,fockcommon%ieigen,fockcommon%ieigen)=fockcommon%eigen_ikpt(fockcommon%ieigen)
            if (fockcommon%optstr) then
              fockcommon%stress(:)=fockcommon%stress(:)+weight(iblocksize)*fockcommon%stress_ikpt(:,fockcommon%ieigen)
@@ -430,40 +427,33 @@ subroutine fock2ACE(cg,cprj,fock,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_enreg,mp
              fockcommon%forces(:,:)=fockcommon%forces(:,:)+weight(iblocksize)*fockcommon%forces_ikpt(:,:,fockcommon%ieigen)
            end if
          end do 
-!       end if
+
 
      end do ! End of loop on block of bands
 
 ! Calculate Mkl for the current k-point
      ABI_ALLOCATE(cwavefk,(2,npw_k*my_nspinor))
-     wi(2,:,:)=-wi(2,:,:)    
      do iblock=1,nblockbd
       cwavef(:,1:npw_k*my_nspinor*blocksize)=&
 &         cg(:,1+(iblock-1)*npw_k*my_nspinor*blocksize+icg:iblock*npw_k*my_nspinor*blocksize+icg)
        do iblocksize=1,blocksize
          kk=(iblock-1)*blocksize+iblocksize
          cwavefk(:,:)=cwavef(:,1+(iblocksize-1)*npw_k*my_nspinor:iblocksize*npw_k*my_nspinor)
-!write(80,*)"cwavefk"
-!write(80,*) cwavefk(:,1:80)
          do jblock=1,iblock
            do jblocksize=1,blocksize
              ll=(jblock-1)*blocksize+jblocksize
-!write(80,*)"wi"
-!write(80,*) wi(:,1:80,jblock)
              if (ll<kk) then
-               call dotprod_g(mkl(1,kk,ll),mkl(2,kk,ll),gs_hamk%istwf_k,npw_k,2,cwavefk,&
-&              wi(:,1+(jblocksize-1)*npw_k*my_nspinor:jblocksize*npw_k*my_nspinor,jblock),mpi_enreg%me_g0,mpi_enreg%comm_fft)
+               call dotprod_g(mkl(1,kk,ll),mkl(2,kk,ll),gs_hamk%istwf_k,npw_k,2,wi(:,1+(jblocksize-1)*npw_k*my_nspinor:&
+&                                           jblocksize*npw_k*my_nspinor,jblock),cwavefk,mpi_enreg%me_g0,mpi_enreg%comm_fft)
              end if
            end do
          end do
        end do
      end do ! End of loop on block of bands
-!write(80,*) ikpt
 
-!write(80,*)"mkl"
-!write(80,*)mkl
      ABI_DEALLOCATE(cwavefk)
-     mkl=-mkl*gs_hamk%ucvol/nfft
+     mkl=-mkl
+
 ! Cholesky factorisation of -mkl=Lx(trans(L)*. On output mkl=L
      call zpotrf("L",nband_k,mkl,nband_k,ierr)
 
@@ -476,7 +466,6 @@ subroutine fock2ACE(cg,cprj,fock,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_enreg,mp
      call ztrtrs("L","T","N",nband_k,nband_k,mkl,nband_k,bb,nband_k,ierr)
      fock%fockACE(ikpt)%xi=zero
 
-!write(80,*)bb
 ! Calculate ksi
      do kk=1,nband_k
        do jblock=1,nblockbd
@@ -490,11 +479,8 @@ subroutine fock2ACE(cg,cprj,fock,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_enreg,mp
 &                                bb(2,ll,kk)*wi(1,1+(jblocksize-1)*npw_k*my_nspinor:jblocksize*npw_k*my_nspinor,jblock)
          end do
        end do
-!write(80,*) ikpt,kk
-!write(80,*)fock%fockACE(ikpt)%xi(:,:,kk)
      end do
-!stop
-!flush(80)
+
      ABI_DEALLOCATE(wi)
      ABI_DEALLOCATE(mkl)
 
