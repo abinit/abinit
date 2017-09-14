@@ -1099,10 +1099,17 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
 &          dtset%nspinor,dtset%nsppol,dtset%nsym,dtset%ntypat,occ,dtset%optforces,paw_ij,pawtab,ph1d,psps,rprimd,&
 &          dtset%optstress,fock%fock_common%symrec,dtset%typat,usecprj,dtset%use_gpu_cuda,dtset%wtk,xred,ylm,ylmgr)
        end if
-       !Should place a test on whether ther should be the final exit of the istep loop. 
+
+       !Should place a test on whether there should be the final exit of the istep loop. 
        !This test should use focktoldfe. 
        !This should update the info in fock%fock_common%fock_converged. 
-       !For the time being, fock%fock_common%fock_converged=.false. , so the loop end with the maximal value of nstep always.
+       !For the time being, fock%fock_common%fock_converged=.false. , so the loop end with the maximal value of nstep always,
+       !except when nnsclo_hf==1 (so the Fock operator is always updated) and the Fock operator is directly applied instead of using its ACE version.
+       !This allows to recover the old behaviour, for checkin purposes.
+       if(fock%fock_common%nnsclo_hf==1 .and. dtset%userie==0)then
+         fock%fock_common%fock_converged=.TRUE.
+       endif
+
        !Depending on fockoptmix, possibly restart the mixing procedure for the potential
        if(mod(dtset%fockoptmix,10)==1)then
          istep_mix=1
