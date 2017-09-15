@@ -731,7 +731,7 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
        if (pawxcdev/=0) then
          LIBPAW_ALLOCATE(lmselect,(lm_size))
          lmselect(:)=paw_an(iatom)%lmselect(:)
-         if (ipositron/=0) lmselect(:)=(lmselect(:).or.electronpositron_lmselect(:,iatom))
+         if (ipositron/=0) lmselect(:)=(lmselect(:).or.electronpositron_lmselect(1:lm_size,iatom))
          call pawdijxcm(cplex,cplex_dij,dijxc,lmselect,ndij,nspden,nsppol,pawang,&
 &                       pawrad(itypat),pawtab(itypat),paw_an(iatom)%vxc1,&
 &                       paw_an(iatom)%vxct1,usexcnhat)
@@ -883,7 +883,7 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
          end if
          LIBPAW_ALLOCATE(lmselect,(lm_size))
          lmselect(:)=paw_an(iatom)%lmselect(:)
-         if (ipositron/=0) lmselect(:)=(lmselect(:).or.electronpositron_lmselect(:,iatom))
+         if (ipositron/=0) lmselect(:)=(lmselect(:).or.electronpositron_lmselect(1:lm_size,iatom))
          call pawdijexxc(cplex,cplex_dij,dijexxc,lmselect,ndij,nspden,nsppol,&
 &             pawang,pawrad(itypat),pawtab(itypat),vpawx,paw_an(iatom)%vxc_ex)
          LIBPAW_DEALLOCATE(lmselect)
@@ -944,7 +944,7 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
      if (pawxcdev/=0) then
        LIBPAW_ALLOCATE(lmselect,(lm_size))
        lmselect(:)=paw_an(iatom)%lmselect(:)
-       if (ipositron/=0) lmselect(:)=(lmselect(:).or.electronpositron_lmselect(:,iatom))
+       if (ipositron/=0) lmselect(:)=(lmselect(:).or.electronpositron_lmselect(1:lm_size,iatom))
        call pawdijxcm(cplex,cplex_dij,dijxcval,lmselect,ndij,nspden,nsppol,&
 &                     pawang,pawrad(itypat),pawtab(itypat),paw_an(iatom)%vxc1_val,&
 &                     paw_an(iatom)%vxct1_val,0)
