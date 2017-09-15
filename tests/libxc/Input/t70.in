@@ -1,6 +1,10 @@
-# CH system, PBE0 and HSE06, interatomic distance optimization
+# CH system, PBE0 and HSE06, interatomic distance optimization. Non spin polarized.
 
- ndtset    3  # Set to 2 or 3 to see the crash 
+#ndtset    3  # Set to 2 or 3 to see the crash 
+ ndtset 2
+ ionmov2 0
+ nstep2 25
+ toldfe2 1.0d-12
 
 #DATASET 1  PBE (the pseudopotentials for C and H are with PBE XC)
 
@@ -14,10 +18,10 @@
  getwfk3   2
  getxred3  2
 
-# userie 1729
+#userie 1729
 
 #Common
- acell 5  2*4 Angstrom
+ acell 5  4  3.5 Angstrom # Note the symmetry breaking
  diemac 1.0d0   diemix 0.5d0
  ecut 13   pawecutdg 35
  ionmov 2
@@ -57,6 +61,7 @@
 #%% authors = X. Gonze
 #%% keywords = 
 #%% description = 
-#%%   CH molecule NON-spin-polarized, in a big box.
+#%%   CH molecule NON-spin-polarized, in a big box, without tetragonal symmetry, in order to avoid
+#%%   spurious degeneracy effects coupled to occupation numbers rapidly changing.
 #%%   PAW : first PBE, then PBE0, then HSE06. Interatomic distance optimization.
 #%%<END TEST_INFO>
