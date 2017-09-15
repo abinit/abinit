@@ -102,7 +102,7 @@ subroutine xchybrid_ncpp_cc(dtset,enxc,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,s
  real(dp) :: enxc_corr,ucvol,vxcavg_corr
  character(len=500) :: msg
  type(dataset_type) :: dtLocal
- logical :: calcgrxc
+ logical :: calcgrxc,nmxc
 !arrays
  integer :: gga_id(2)
  real(dp) :: nhat(1,0),nhatgr(1,1,0),strsxc_corr(6),gmet(3,3),gprimd(3,3),rmet(3,3)
@@ -111,6 +111,9 @@ subroutine xchybrid_ncpp_cc(dtset,enxc,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,s
 ! *************************************************************************
 
  DBG_ENTER("COLL")
+
+
+ nmxc=(dtset%usepawu==4)
 
 !Not relevant for PAW
  if (dtset%usepaw==1) return
@@ -152,7 +155,7 @@ subroutine xchybrid_ncpp_cc(dtset,enxc,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,s
    option=0 ! XC only
    ABI_ALLOCATE(xccc3d_null,(n3xccc_null))
 !  Compute Vxc^Hybrid(rho_val)
-   call rhohxc(dtset,enxc,zero,izero,kxc_dum,mpi_enreg,nfft,ngfft,nhat,ndim,nhatgr,ndim,nkxc,nkxc,&
+   call rhohxc(dtset,enxc,zero,izero,kxc_dum,mpi_enreg,nfft,ngfft,nhat,ndim,nhatgr,ndim,nkxc,nkxc,nmxc,&
 &   dtset%nspden,n3xccc_null,option,rhog_dum,rhor,rprimd,strsxc,usexcnhat,vhartr_dum,vxc,vxcavg,xccc3d_null)
 
 !  Initialize GGA functional
@@ -162,7 +165,7 @@ subroutine xchybrid_ncpp_cc(dtset,enxc,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,s
      call libxc_functionals_init(dtLocal%ixc,dtLocal%nspden)
    end if
 !Add Vxc^GGA(rho_core+rho_val)
-   call rhohxc(dtLocal,enxc_corr,zero,izero,kxc_dum,mpi_enreg,nfft,ngfft,nhat,ndim,nhatgr,ndim,nkxc,nkxc,&
+   call rhohxc(dtLocal,enxc_corr,zero,izero,kxc_dum,mpi_enreg,nfft,ngfft,nhat,ndim,nhatgr,ndim,nkxc,nkxc,nmxc,&
 &   dtLocal%nspden,n3xccc,option,rhog_dum,rhor,rprimd,strsxc_corr,usexcnhat,vhartr_dum,vxc_corr,vxcavg_corr,xccc3d)
    enxc=enxc+enxc_corr
    vxc(:,:)=vxc(:,:)+vxc_corr(:,:)
@@ -170,7 +173,7 @@ subroutine xchybrid_ncpp_cc(dtset,enxc,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,s
    strsxc(:)=strsxc(:)+strsxc_corr(:)
 
 !Substract Vxc^GGA(rho_val)
-   call rhohxc(dtLocal,enxc_corr,zero,izero,kxc_dum,mpi_enreg,nfft,ngfft,nhat,ndim,nhatgr,ndim,nkxc,nkxc,&
+   call rhohxc(dtLocal,enxc_corr,zero,izero,kxc_dum,mpi_enreg,nfft,ngfft,nhat,ndim,nhatgr,ndim,nkxc,nkxc,nmxc,&
 &   dtLocal%nspden,n3xccc_null,option,rhog_dum,rhor,rprimd,strsxc_corr,usexcnhat,vhartr_dum,vxc_corr,vxcavg_corr,xccc3d_null)
    enxc=enxc-enxc_corr
    vxc(:,:)=vxc(:,:)-vxc_corr(:,:)
@@ -197,7 +200,7 @@ subroutine xchybrid_ncpp_cc(dtset,enxc,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,s
    call mkcore(strsxc_corr,dyfrx2_dum,grxc,mpi_enreg,dtset%natom,nfft,dtset%nspden,dtset%ntypat,ngfft(1),n1xccc,ngfft(2),&
 &   ngfft(3),option,rprimd,dtset%typat,ucvol,vxc_corr,xcccrc,xccc1d,xccc3d_null,xred)
 !Add Vxc^GGA(rho_core+rho_val)
-   call rhohxc(dtLocal,enxc_corr,zero,izero,kxc_dum,mpi_enreg,nfft,ngfft,nhat,ndim,nhatgr,ndim,nkxc,nkxc,&
+   call rhohxc(dtLocal,enxc_corr,zero,izero,kxc_dum,mpi_enreg,nfft,ngfft,nhat,ndim,nhatgr,ndim,nkxc,nkxc,nmxc,&
 &   dtLocal%nspden,n3xccc,option,rhog_dum,rhor,rprimd,strsxc_corr,usexcnhat,vhartr_dum,vxc_corr,vxcavg_corr,xccc3d_null)
    option=2
    call mkcore(strsxc_corr,dyfrx2_dum,grxc,mpi_enreg,dtset%natom,nfft,dtset%nspden,dtset%ntypat,ngfft(1),n1xccc,ngfft(2),&
@@ -215,7 +218,7 @@ subroutine xchybrid_ncpp_cc(dtset,enxc,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,s
    end if
 !calculate Vxc^GGA(rho_core+rho_val)
    option=0
-   call rhohxc(dtLocal,enxc_corr,zero,izero,kxc_dum,mpi_enreg,nfft,ngfft,nhat,ndim,nhatgr,ndim,nkxc,nkxc,&
+   call rhohxc(dtLocal,enxc_corr,zero,izero,kxc_dum,mpi_enreg,nfft,ngfft,nhat,ndim,nhatgr,ndim,nkxc,nkxc,nmxc,&
 &   dtLocal%nspden,n3xccc,option,rhog_dum,rhor,rprimd,strsxc_corr,usexcnhat,vhartr_dum,vxc,vxcavg_corr,xccc3d)
  end if 
 

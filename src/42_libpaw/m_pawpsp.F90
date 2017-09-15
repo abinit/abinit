@@ -1795,7 +1795,7 @@ subroutine pawpsp_calc(core_mesh,epsatm,ffspl,imainmesh,ixc,lnmax,&
  integer,parameter :: reduced_mshsz=2501
  integer :: ib,il,ilm,ilmn,iln,ir,isnotzero,itest
  integer :: j0lmn,jlm,jlmn,jln,klmn,msz,msz1,msz_tmp,mst_tmp,nspden
- logical :: has_dij0,reduced_ncor,reduced_nval,reduced_vloc,testval
+ logical :: has_dij0,non_magnetic_xc,reduced_ncor,reduced_nval,reduced_vloc,testval
  real(dp),parameter :: reduced_rstep=0.00025_dp,rm_vloc=20.0_dp
  real(dp) :: d2nvdq0,intg,intvh,lstep_tmp,qcore,qq,rstep_tmp,yp1,ypn
  character(len=500) :: msg
@@ -1813,6 +1813,9 @@ subroutine pawpsp_calc(core_mesh,epsatm,ffspl,imainmesh,ixc,lnmax,&
 
 !==========================================================
 !Perfom tests on meshes
+
+! initialise logical 
+ non_magnetic_xc=.true. 
 
 !Are radial meshes for Phi and Vloc compatibles ?
 ! if (vloc_mesh%rmax<pawrad%rmax) then
@@ -2213,15 +2216,15 @@ subroutine pawpsp_calc(core_mesh,epsatm,ffspl,imainmesh,ixc,lnmax,&
        if (nspden==2) work2(msz+1:2*msz)=half*nwk
        if (nspden==2) work3(msz+1:2*msz)=half*nhatwk
        if (pawxcdev/=0) then
-         call pawxcm(ncorwk,yp1,ypn,0,ixc,work1,1,tmp_lmselect,work3,0,msz,nspden,5,&
+         call pawxcm(ncorwk,yp1,ypn,0,ixc,work1,1,tmp_lmselect,work3,0,non_magnetic_xc,msz,nspden,5,&
 &         pawang_tmp,vloc_mesh,pawxcdev,work2,pawtab%usetcore,0,vxc1,xclevel,xc_denpos)
-         call pawxcm(ncorwk,yp1,ypn,0,ixc,work1,1,tmp_lmselect,work3,0,msz,nspden,5,&
+         call pawxcm(ncorwk,yp1,ypn,0,ixc,work1,1,tmp_lmselect,work3,0,non_magnetic_xc,msz,nspden,5,&
 &         pawang_tmp,vloc_mesh,pawxcdev,work2,pawtab%usetcore,2,vxc2,xclevel,xc_denpos)
          vxc1=vxc1/sqrt(four_pi);vxc2=vxc2/sqrt(four_pi) ! Deduce Vxc from its first moment
        else
-         call pawxc(ncorwk,yp1,ypn,ixc,work1,1,tmp_lmselect,work3,0,msz,nspden,5,&
+         call pawxc(ncorwk,yp1,ypn,ixc,work1,1,tmp_lmselect,work3,0,non_magnetic_xc,msz,nspden,5,&
 &         pawang_tmp,vloc_mesh,work2,pawtab%usetcore,0,vxc1,xclevel,xc_denpos)
-         call pawxc(ncorwk,yp1,ypn,ixc,work1,1,tmp_lmselect,work3,0,msz,nspden,5,&
+         call pawxc(ncorwk,yp1,ypn,ixc,work1,1,tmp_lmselect,work3,0,non_magnetic_xc,msz,nspden,5,&
 &         pawang_tmp,vloc_mesh,work2,pawtab%usetcore,2,vxc2,xclevel,xc_denpos)
        end if
        LIBPAW_DEALLOCATE(nwk)
@@ -2235,15 +2238,15 @@ subroutine pawpsp_calc(core_mesh,epsatm,ffspl,imainmesh,ixc,lnmax,&
        LIBPAW_ALLOCATE(vxc2,(msz))
        LIBPAW_ALLOCATE(work1,(msz))
        if (pawxcdev/=0) then
-         call pawxcm(ncorwk,yp1,ypn,0,ixc,work1,1,tmp_lmselect,nhatwk,0,msz,1,5,&
+         call pawxcm(ncorwk,yp1,ypn,0,ixc,work1,1,tmp_lmselect,nhatwk,0,non_magnetic_xc,msz,1,5,&
 &         pawang_tmp,vloc_mesh,pawxcdev,nwk,pawtab%usetcore,0,vxc1,xclevel,xc_denpos)
-         call pawxcm(ncorwk,yp1,ypn,0,ixc,work1,1,tmp_lmselect,nhatwk,0,msz,1,5,&
+         call pawxcm(ncorwk,yp1,ypn,0,ixc,work1,1,tmp_lmselect,nhatwk,0,non_magnetic_xc,msz,1,5,&
 &         pawang_tmp,vloc_mesh,pawxcdev,nwk,pawtab%usetcore,2,vxc2,xclevel,xc_denpos)
          vxc1=vxc1/sqrt(four_pi);vxc2=vxc2/sqrt(four_pi) ! Deduce Vxc from its first moment
        else
-         call pawxc(ncorwk,yp1,ypn,ixc,work1,1,tmp_lmselect,nhatwk,0,msz,1,5,&
+         call pawxc(ncorwk,yp1,ypn,ixc,work1,1,tmp_lmselect,nhatwk,0,non_magnetic_xc,msz,1,5,&
 &         pawang_tmp,vloc_mesh,nwk,pawtab%usetcore,0,vxc1,xclevel,xc_denpos)
-         call pawxc(ncorwk,yp1,ypn,ixc,work1,1,tmp_lmselect,nhatwk,0,msz,1,5,&
+         call pawxc(ncorwk,yp1,ypn,ixc,work1,1,tmp_lmselect,nhatwk,0,non_magnetic_xc,msz,1,5,&
 &         pawang_tmp,vloc_mesh,nwk,pawtab%usetcore,2,vxc2,xclevel,xc_denpos)
        end if
        LIBPAW_DEALLOCATE(nwk)
@@ -2491,10 +2494,10 @@ subroutine pawpsp_calc(core_mesh,epsatm,ffspl,imainmesh,ixc,lnmax,&
  LIBPAW_ALLOCATE(work4,(core_mesh%mesh_size))
  work1(:)=zero
  if (pawxcdev/=0) then
-   call pawxcm(ncore,pawtab%exccore,yp1,0,ixc,work4,1,tmp_lmselect,work3,0,core_mesh%mesh_size,&
+   call pawxcm(ncore,pawtab%exccore,yp1,0,ixc,work4,1,tmp_lmselect,work3,0,non_magnetic_xc,core_mesh%mesh_size,&
 &   nspden,4,pawang_tmp,core_mesh,pawxcdev,work1,1,0,work2,xclevel,xc_denpos)
  else
-   call pawxc(ncore,pawtab%exccore,yp1,ixc,work4,1,tmp_lmselect,work3,0,core_mesh%mesh_size,&
+   call pawxc(ncore,pawtab%exccore,yp1,ixc,work4,1,tmp_lmselect,work3,0,non_magnetic_xc,core_mesh%mesh_size,&
 &   nspden,4,pawang_tmp,core_mesh,work1,1,0,work2,xclevel,xc_denpos)
  end if
  LIBPAW_DEALLOCATE(work1)

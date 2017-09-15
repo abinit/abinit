@@ -175,7 +175,7 @@ subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
  integer :: nk3xc,ifft,ipositron,ispden,nfftot,offset
  integer :: mpi_comm_sphgrid
  real(dp) :: doti,e_xcdc_vxctau
- logical :: add_tfw_,calc_xcdc,with_vxctau
+ logical :: add_tfw_,calc_xcdc,non_magnetic_xc,with_vxctau
  logical :: is_hybrid_ncpp,wvlbigdft=.false.
 !arrays
  real(dp) :: evxc,tsec(2),vmean(dtset%nspden),vzeeman(dtset%nspden)
@@ -186,6 +186,9 @@ subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
  DBG_ENTER("COLL")
 
  call timab(940,1,tsec)
+
+! Initialise non_magnetic_xc for rhohxc
+ non_magnetic_xc=(dtset%usepawu==4)
 
 !Check that usekden is not 0 if want to use vxctau
  with_vxctau = (present(vxctau).and.present(taur).and.(dtset%usekden/=0))
@@ -226,12 +229,12 @@ subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
      call timab(941,1,tsec)
      if (ipositron==0) then
        call rhohxc(dtset,energies%e_xc,gsqcut,usepaw,kxc,mpi_enreg,nfft,ngfft,&
-&       nhat,usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,dtset%nspden,n3xccc,optxc,rhog,&
+&       nhat,usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,non_magnetic_xc,dtset%nspden,n3xccc,optxc,rhog,&
 &       rhor,rprimd,strsxc,usexcnhat,vhartr,vxc,vxcavg,xccc3d,&
 &       taug=taug,taur=taur,vxctau=vxctau,add_tfw=add_tfw_)
      else
        call rhohxc(dtset,energies%e_xc,gsqcut,usepaw,kxc,mpi_enreg,nfft,ngfft,&
-&       nhat,usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,dtset%nspden,n3xccc,optxc,rhog,&
+&       nhat,usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,non_magnetic_xc,dtset%nspden,n3xccc,optxc,rhog,&
 &       rhor,rprimd,strsxc,usexcnhat,vhartr,vxc,vxcavg,xccc3d,&
 &       taug=taug,taur=taur,vxctau=vxctau,add_tfw=add_tfw_,&
 &       electronpositron=electronpositron)

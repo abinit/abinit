@@ -437,13 +437,13 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
    call chkdpr(0,0,cond_string,cond_values,ierr,'diemac',dt%diemac,1,0.01_dp,iout)
 
 !  dmatpuopt
-   if (dt%usepawu==1.or.dt%usepawu==2.or.dt%usepawu==3.or.dt%usepawu==10) then
+   if (dt%usepawu==1.or.dt%usepawu==2.or.dt%usepawu==3.or.dt%usepawu==4.or.dt%usepawu==10) then
      cond_string(1)='usepawu' ; cond_values(1)=1
      call chkint_eq(0,1,cond_string,cond_values,ierr,'dmatpuopt',dt%dmatpuopt,10,(/1,2,3,4,5,6,7,8,9,10/),iout)
    end if
 
 !  dmatudiag
-   if (dt%usepawu==1.or.dt%usepawu==2.or.dt%usepawu==3.or.dt%usepawu==10) then
+   if (dt%usepawu==1.or.dt%usepawu==2.or.dt%usepawu==3.or.dt%usepawu==4.or.dt%usepawu==10) then
      cond_string(1)='usepawu' ; cond_values(1)=1
      call chkint_eq(0,1,cond_string,cond_values,ierr,'dmatudiag',dt%dmatudiag,3,(/0,1,2/),iout)
    end if
@@ -2839,7 +2839,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 
 !  usepawu and lpawu
 !  PAW+U and restrictions
-   call chkint_eq(0,0,cond_string,cond_values,ierr,'usepawu',dt%usepawu,5,(/0,1,2,3,10/),iout)
+   call chkint_eq(0,0,cond_string,cond_values,ierr,'usepawu',dt%usepawu,6,(/0,1,2,3,4,10/),iout)
    if(dt%usepawu/=0)then
      cond_string(1)='usepawu' ; cond_values(1)=dt%usepawu
      call chkint_eq(1,1,cond_string,cond_values,ierr,'usepaw',usepaw,1,(/1/),iout)

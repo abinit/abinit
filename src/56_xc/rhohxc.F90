@@ -31,6 +31,7 @@
 !!  nhatgrdim= -PAW only- 0 if nhatgr array is not used ; 1 otherwise
 !!  nkxc=second dimension of the kxc array. If /=0,
 !!   the exchange-correlation kernel must be computed.
+!!  non_magnetic_xc= true if usepawu==4
 !!  nspden=number of spin-density components
 !!  n3xccc=dimension of the xccc3d array (0 or nfft or cplx*nfft).
 !!  option=0 for xc only (exc, vxc, strsxc),
@@ -215,7 +216,7 @@
 #include "abi_common.h"
 
 subroutine rhohxc(dtset,enxc,gsqcut,izero,kxc,mpi_enreg,nfft,ngfft, &
-& nhat,nhatdim,nhatgr,nhatgrdim,nkxc,nk3xc,nspden,n3xccc,option, &
+& nhat,nhatdim,nhatgr,nhatgrdim,nkxc,nk3xc,non_magnetic_xc,nspden,n3xccc,option, &
 & rhog,rhor,rprimd,strsxc,usexcnhat,vhartr,vxc,vxcavg,xccc3d, &
 & k3xc,electronpositron,taug,taur,vxctau,exc_vdw_out,add_tfw) ! optional arguments
 
@@ -247,6 +248,7 @@ subroutine rhohxc(dtset,enxc,gsqcut,izero,kxc,mpi_enreg,nfft,ngfft, &
 !scalars
  integer,intent(in) :: izero,nk3xc,n3xccc,nfft,nhatdim,nhatgrdim,nkxc,nspden,option
  integer,intent(in) :: usexcnhat
+ logical,intent(in) :: non_magnetic_xc
  logical,intent(in),optional :: add_tfw
  real(dp),intent(in) :: gsqcut
  real(dp),intent(out) :: enxc,vxcavg
@@ -468,6 +470,17 @@ subroutine rhohxc(dtset,enxc,gsqcut,izero,kxc,mpi_enreg,nfft,ngfft, &
        end do
      end do
    end if
+
+  if(non_magnetic_xc) then
+    if(nspden==2) then
+      rhor_(:,2)=rhor_(:,1)/two
+    endif
+    if(nspden==4) then
+      rhor_(:,2)=zero
+      rhor_(:,3)=zero
+      rhor_(:,4)=zero
+    endif
+  endif
 
 !  Some initializations for the electron-positron correlation
    if (ipositron==2) then

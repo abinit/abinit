@@ -254,6 +254,7 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
  integer :: option_rhoij,paw_opt,signs,spaceComm,tim_mkrho,tim_nonlop
  logical :: add_tfw_,paral_atom,usetimerev,with_vxctau
  logical :: wvlbigdft=.false.
+ logical :: non_magnetic_xc
  real(dp) :: dotr,doti,eeigk,ekk,enlk,evxc,e_xcdc_vxctau,ucvol,ucvol_local,vxcavg
  !character(len=500) :: message
  type(gs_hamiltonian_type) :: gs_hamk
@@ -276,6 +277,9 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
 ! *************************************************************************
 
  DBG_ENTER("COLL")
+
+! Create variable for non_magnetic_xc
+ non_magnetic_xc=(dtset%usepawu==4)
 
 !Check that usekden is not 0 if want to use vxctau
  with_vxctau = (dtset%usekden/=0)
@@ -332,13 +336,13 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
      if (ipositron==0) then
        call rhohxc(dtset,energies%e_xc,gsqcut,psps%usepaw,kxc, &
 &       mpi_enreg,nfftf,ngfftf,nhat,psps%usepaw,nhatgr,nhatgrdim, &
-&       nkxc,nk3xc,dtset%nspden,n3xccc,option,rhog,rhor,rprimd,strsxc, &
+&       nkxc,nk3xc,non_magnetic_xc,dtset%nspden,n3xccc,option,rhog,rhor,rprimd,strsxc, &
 &       usexcnhat,vhartr,vxc,vxcavg,xccc3d,taug=taug,taur=taur, &
 &       vxctau=vxctau,exc_vdw_out=energies%e_xc_vdw,add_tfw=add_tfw_)
      else
        call rhohxc(dtset,energies%e_xc,gsqcut,psps%usepaw,kxc, &
 &       mpi_enreg,nfftf,ngfftf,nhat,psps%usepaw,nhatgr,nhatgrdim, &
-&       nkxc,nk3xc,dtset%nspden,n3xccc,option,rhog,rhor,rprimd,strsxc, &
+&       nkxc,nk3xc,non_magnetic_xc,dtset%nspden,n3xccc,option,rhog,rhor,rprimd,strsxc, &
 &       usexcnhat,vhartr,vxc,vxcavg,xccc3d, &
 &       electronpositron=electronpositron,taug=taug,taur=taur, &
 &       vxctau=vxctau,exc_vdw_out=energies%e_xc_vdw,add_tfw=add_tfw_)

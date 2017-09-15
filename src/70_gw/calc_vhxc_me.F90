@@ -157,7 +157,7 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,gsqcutf_eff,nfftf,ngfftf,&
  integer :: isp1,isp2,iab,nsploop,nkxc,option,n3xccc_,nk3xc,my_nbbp,my_nmels
  real(dp) :: nfftfm1,fact,DijH,enxc_val,enxc_hybrid_val,vxcval_avg,vxcval_hybrid_avg,h0dij,vxc1,vxc1_val,re_p,im_p,dijsigcx
  real(dp) :: omega ! HSE Fock exchange screening parameter
- logical :: ltest
+ logical :: ltest,non_magnetic_xc
  character(len=500) :: msg
  type(MPI_type) :: MPI_enreg_seq
  type(Dataset_type) :: Dtset_dummy
@@ -195,6 +195,8 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,gsqcutf_eff,nfftf,ngfftf,&
  if ( ANY(ngfftf(1:3) /= Wfd%ngfft(1:3)) ) then
    call wfd_change_ngfft(Wfd,Cryst,Psps,ngfftf)
  end if
+
+ non_magnetic_xc=(Dtset%usepawu==4)
 
  comm   = Wfd%comm
  rank   = Wfd%my_rank
@@ -264,7 +266,7 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,gsqcutf_eff,nfftf,ngfftf,&
  ABI_MALLOC(vxc_val,(nfftf,nspden))
 
  call rhohxc(Dtset,enxc_val,gsqcutf_eff,izero,kxc_,MPI_enreg_seq,nfftf,ngfftf,&
-& nhat,Wfd%usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,nspden,n3xccc_,option,rhog,rhor,Cryst%rprimd,&
+& nhat,Wfd%usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,non_magnetic_xc,nspden,n3xccc_,option,rhog,rhor,Cryst%rprimd,&
 & strsxc,usexcnhat,vh_,vxc_val,vxcval_avg,xccc3d_,taug=taug,taur=taur)
 
  !
@@ -313,7 +315,7 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,gsqcutf_eff,nfftf,ngfftf,&
      ABI_MALLOC(vxc_val_hybrid,(nfftf,nspden))
 
      call rhohxc(Dtset_dummy,enxc_hybrid_val,gsqcutf_eff,izero,kxc_,MPI_enreg_seq,nfftf,ngfftf,&
-&     nhat,Wfd%usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,nspden,n3xccc_,option,rhog,rhor,Cryst%rprimd,&
+&     nhat,Wfd%usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,non_magnetic_xc,nspden,n3xccc_,option,rhog,rhor,Cryst%rprimd,&
 &     strsxc,usexcnhat,vh_,vxc_val_hybrid,vxcval_hybrid_avg,xccc3d_)
 
      call dtset_free(Dtset_dummy)

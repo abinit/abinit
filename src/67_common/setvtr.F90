@@ -211,7 +211,7 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
  integer :: iatom,ifft,ipositron,ispden,nfftot
  integer :: optatm,optdyfr,opteltfr,optgr,option,optn,optn2,optstr,optv,vloc_method
  real(dp) :: doti,e_chempot,e_xcdc_vxctau,ebb,ebn,evxc,ucvol_local,rpnrm
- logical :: add_tfw_,is_hybrid_ncpp,with_vxctau,wvlbigdft
+ logical :: add_tfw_,is_hybrid_ncpp,non_magnetic_xc,with_vxctau,wvlbigdft
  real(dp), allocatable :: xcart(:,:)
  character(len=500) :: message
 !arrays
@@ -229,6 +229,9 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
 ! *********************************************************************
 
  call timab(91,1,tsec)
+
+! Initialise non_magnetic_xc for rhohxc
+ non_magnetic_xc=(dtset%usepawu==4)
 
 !Check that usekden is not 0 if want to use vxctau
  with_vxctau = (present(vxctau).and.present(taur).and.(dtset%usekden/=0))
@@ -479,12 +482,12 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
 !xccc3d=zero
        if (ipositron==0) then
          call rhohxc(dtset,energies%e_xc,gsqcut,psps%usepaw,kxc,mpi_enreg,nfft,ngfft,&
-&         nhat,psps%usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,dtset%nspden,n3xccc,&
+&         nhat,psps%usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,non_magnetic_xc,dtset%nspden,n3xccc,&
 &         option,rhog,rhor,rprimd,strsxc,usexcnhat,vhartr,vxc,vxcavg,xccc3d,&
 &         taug=taug,taur=taur,vxctau=vxctau,add_tfw=add_tfw_)
        else if (ipositron==2) then
          call rhohxc(dtset,energies%e_xc,gsqcut,psps%usepaw,kxc,mpi_enreg,nfft,ngfft,&
-&         nhat,psps%usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,dtset%nspden,n3xccc,&
+&         nhat,psps%usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,non_magnetic_xc,dtset%nspden,n3xccc,&
 &         option,rhog,rhor,rprimd,strsxc,usexcnhat,vhartr,vxc,vxcavg,xccc3d,&
 &         taug=taug,taur=taur,vxctau=vxctau,add_tfw=add_tfw_,&
 &         electronpositron=electronpositron)

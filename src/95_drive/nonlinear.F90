@@ -109,6 +109,7 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,&
 !scalars
  integer,intent(in) :: iexit,mband,mgfft,mkmem,mpw,nfft
  integer,intent(in) :: natom,nkpt,nspden,nspinor,nsppol,nsym
+ logical :: non_magnetic_xc
  real(dp),intent(inout) :: etotal
  character(len=6),intent(in) :: codvsn
  type(MPI_type),intent(inout) :: mpi_enreg
@@ -158,6 +159,9 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,&
  call status(0,dtfil%filstat,iexit,level,'enter         ')
 
  comm_cell = mpi_enreg%comm_cell
+
+! Initialise non_magnetic_xc for rhohxc
+ non_magnetic_xc=(dtset%usepawu==4)
 
 !Check if the perturbations asked in the input file can be computed
 
@@ -432,7 +436,7 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,&
  call status(0,dtfil%filstat,iexit,level,'call rhohxc   ')
  ABI_ALLOCATE(work,(0))
  call rhohxc(dtset,enxc,gsqcut,psps%usepaw,kxc,mpi_enreg,nfft,dtset%ngfft,&
-& work,0,work,0,nkxc,nk3xc,nspden,n3xccc,option,rhog,rhor,rprimd,strsxc,1,&
+& work,0,work,0,nkxc,nk3xc,non_magnetic_xc,nspden,n3xccc,option,rhog,rhor,rprimd,strsxc,1,&
 & vhartr,vxc,vxcavg,xccc3d,k3xc)
  ABI_DEALLOCATE(work)
 

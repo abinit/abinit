@@ -754,6 +754,7 @@ end subroutine pawxc_mkdenpos_wrapper
 !!  nhat(nrad,lm_size,nspden)=compensation density
 !!                                        (total in 1st half and spin-up in 2nd half if nspden=2)
 !!  nkxc=second dimension of the kxc array. If /=0, the exchange-correlation kernel must be computed
+!!  non_magnetic_xc= true if usepawu==4
 !!  nrad=size of radial mesh for densities/potentials (might be different from pawrad%mesh_size)
 !!  nspden=number of spin-density components
 !!  option=0  compute both XC energies (direct+double-counting) and potential
@@ -831,7 +832,7 @@ end subroutine pawxc_mkdenpos_wrapper
 !!
 !! SOURCE
 
-subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,lm_size,lmselect,nhat,nkxc,nrad,nspden,option,&
+subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,lm_size,lmselect,nhat,nkxc,non_magnetic_xc,nrad,nspden,option,&
 &                pawang,pawrad,rhor,usecore,usexcnhat,vxc,xclevel,xc_denpos)
 
 
@@ -846,6 +847,7 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,lm_size,lmselect,nhat,nkxc,nrad,nspd
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ixc,lm_size,nkxc,nrad,nspden,option,usecore,usexcnhat,xclevel
+ logical,intent(in) :: non_magnetic_xc
  real(dp),intent(in) :: xc_denpos
  real(dp),intent(out) :: enxc,enxcdc
  type(pawang_type),intent(in) :: pawang
@@ -992,6 +994,19 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,lm_size,lmselect,nhat,nkxc,nrad,nspd
        rhoarr(1:nrad,1)=rhoarr(1:nrad,1)+corexc(1:nrad)
        if (nspden==2) rhoarr(1:nrad,2)=rhoarr(1:nrad,2)+half*corexc(1:nrad)
      end if
+
+!    Optionally suppressed magnetic part.
+     if(non_magnetic_xc) then
+       if(nspden==2) then
+         rhoarr(:,2)=rhoarr(:,1)/two
+       endif
+       if(nspden==4) then 
+         rhoarr(:,2)=zero
+         rhoarr(:,3)=zero
+         rhoarr(:,4)=zero
+       endif
+     endif
+
      rhonow(1:nrad,1:nspden,1)=rhoarr(1:nrad,1:nspden)
 
 !    GGA: compute gradient of density
@@ -3548,6 +3563,7 @@ end subroutine pawxcsphpositron
 !!  nhat(nrad,lm_size,nspden)=compensation density
 !!                                        (total in 1st half and spin-up in 2nd half if nspden=2)
 !!  nkxc=second dimension of the kxc array. If /=0, the exchange-correlation kernel must be computed
+!!  non_magnetic_xc= true if usepawu==4
 !!  nrad=size of radial mesh for densities/potentials (might be different from pawrad%mesh_size)
 !!  nspden=number of spin-density components
 !!  option=0 compute both XC energies (direct+double-counting) and potential (and Kernel)
@@ -3625,7 +3641,7 @@ end subroutine pawxcsphpositron
 !!
 !! SOURCE
 
- subroutine pawxcm(corexc,enxc,enxcdc,exexch,ixc,kxc,lm_size,lmselect,nhat,nkxc,nrad,nspden,option,&
+ subroutine pawxcm(corexc,enxc,enxcdc,exexch,ixc,kxc,lm_size,lmselect,nhat,nkxc,non_magnetic_xc,nrad,nspden,option,&
 &                  pawang,pawrad,pawxcdev,rhor,usecore,usexcnhat,vxc,xclevel,xc_denpos)
 
 
@@ -3641,6 +3657,7 @@ end subroutine pawxcsphpositron
 !scalars
  integer,intent(in) :: exexch,ixc,lm_size,nkxc,nrad,nspden,option,pawxcdev,usecore
  integer,intent(in) :: usexcnhat,xclevel
+ logical,intent(in) :: non_magnetic_xc
  real(dp),intent(in) :: xc_denpos
  real(dp),intent(out) :: enxc,enxcdc
  type(pawang_type),intent(in) :: pawang
@@ -3727,6 +3744,18 @@ end subroutine pawxcsphpositron
      rho_updn(:,1,2)=rho_updn(:,1,2)+sqfpi2*corexc(:)
    end if
  end if
+
+
+ if(non_magnetic_xc) then
+   if(nspden==2) then
+     rho_updn(:,:,2)=rho_updn(:,:,1)/two
+   endif
+   if(nspden==4) then 
+     rho_updn(:,:,2)=zero
+     rho_updn(:,:,3)=zero
+     rho_updn(:,:,4)=zero
+   endif
+ endif
 
 !In case of collinear magnetism, separate up and down contributions
  if (nspden==2) then

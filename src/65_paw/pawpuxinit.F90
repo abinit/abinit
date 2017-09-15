@@ -138,16 +138,18 @@
  end if
 
 !Print title
- if((usepawu>=1.and.usepawu<=3).or.useexexch>0) write(message, '(3a)' ) ch10,ch10," ******************************************"
+ if((usepawu>=1.and.usepawu<=4).or.useexexch>0) write(message, '(3a)' ) ch10,ch10," ******************************************"
  if(usepawu==1) then
    write(message, '(3a)' ) trim(message),ch10," LDA+U Method used: FLL"
  else if(usepawu==2) then
    write(message, '(3a)' ) trim(message),ch10," LDA+U Method used: AMF"
  else if(usepawu==3) then
    write(message, '(3a)' ) trim(message),ch10," LDA+U Method used: AMF (alternative)"
+ else if(usepawu==4) then
+   write(message, '(3a)' ) trim(message),ch10," LDA+U Method used: FLL with no spin polarization in the xc functional"
  end if
  if(useexexch>0) write(message, '(3a)' ) trim(message),ch10," PAW Local Exact exchange: PBE0"
- if((usepawu>=1.and.usepawu<=3).or.useexexch>0) &
+ if((usepawu>=1.and.usepawu<=4).or.useexexch>0) &
  write(message, '(3a)' ) trim(message),ch10," ******************************************"
  if(use_dmft==0) then
    call wrtout(ab_out,message,'COLL')
