@@ -1106,7 +1106,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
        !For the time being, fock%fock_common%fock_converged=.false. , so the loop end with the maximal value of nstep always,
        !except when nnsclo_hf==1 (so the Fock operator is always updated) and the Fock operator is directly applied instead of using its ACE version.
        !This allows to recover the old behaviour, for checkin purposes.
-       if(fock%fock_common%nnsclo_hf==1 .and. dtset%userie==0)then
+       if(fock%fock_common%nnsclo_hf==1 .and. fock%fock_common%use_ACE==0)then
          fock%fock_common%fock_converged=.TRUE.
        endif
 
