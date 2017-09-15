@@ -1,3 +1,33 @@
+!{\src2tex{textfont=tt}}
+!!****f* ABINIT/psp_dump_outputs
+!! NAME
+!! psp_dump_outputs
+!!
+!! FUNCTION
+!! (To be described ...)
+!!
+!! COPYRIGHT
+!! Copyright (C) 2017 ABINIT group (YP)
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt
+!!
+!! INPUTS
+!! (to be filled)
+!!
+!! OUTPUT
+!! (to be filled)
+!!
+!! SIDE EFFECTS
+!! (to be filled)
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
 !      call psp_dump_outputs(psps%lmnmax,psps%mpssoang,psps%lnmax, &
 !&      psps%mqgrid_ff,psps%n1xccc,mmax,epsatm,qchrg,xcccrc,nctab, &
 !&      indlmn,nproj,ekb,ffspl,vlspl,xccc1d)
@@ -37,9 +67,12 @@ subroutine psp_dump_outputs(pfx,pspcod,lmnmax,lnmax,mpssoang, &
  real(dp),intent(in) :: xccc1d(n1xccc,6)
 
 !Local variables ------------------------------
+!scalars
  integer, parameter :: dump = 64
  integer :: ierr, i, j ,k
  character(len=500) :: msg
+
+ ! *********************************************************************
 
  open(unit=dump, file=trim(pfx)//"_psp_info.yaml", status='REPLACE', err=10, iostat=ierr)
 
@@ -173,3 +206,4 @@ subroutine psp_dump_outputs(pfx,pspcod,lmnmax,lnmax,mpssoang, &
  end if
 
 end subroutine psp_dump_outputs
+!!***
