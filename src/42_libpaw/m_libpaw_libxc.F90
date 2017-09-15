@@ -205,7 +205,26 @@ module m_libpaw_libxc_funcs
  end interface
 !
  interface
-   subroutine xc_lda_c_xalpha_set_params(xc_func,alpha) bind(C,name="xc_lda_c_xalpha_set_params")
+   subroutine xc_hyb_gga_xc_pbeh_set_params(xc_func,alpha) &
+&             bind(C,name="xc_hyb_gga_xc_pbeh_set_params")
+     use iso_c_binding, only : C_DOUBLE,C_PTR
+     real(C_DOUBLE),value :: alpha
+     type(C_PTR) :: xc_func
+   end subroutine xc_hyb_gga_xc_pbeh_set_params
+ end interface
+!
+ interface
+   subroutine xc_hyb_gga_xc_hse_set_params(xc_func,alpha,omega) &
+&             bind(C,name="xc_hyb_gga_xc_hse_set_params")
+     use iso_c_binding, only : C_DOUBLE,C_PTR
+     real(C_DOUBLE),value :: alpha, omega
+     type(C_PTR) :: xc_func
+   end subroutine xc_hyb_gga_xc_hse_set_params
+ end interface
+!
+ interface
+   subroutine xc_lda_c_xalpha_set_params(xc_func,alpha) &
+&             bind(C,name="xc_lda_c_xalpha_set_params")
      use iso_c_binding, only : C_DOUBLE,C_PTR
      real(C_DOUBLE),value :: alpha
      type(C_PTR) :: xc_func
@@ -213,7 +232,8 @@ module m_libpaw_libxc_funcs
  end interface
 !
  interface
-   subroutine xc_mgga_x_tb09_set_params(xc_func,c) bind(C,name="xc_mgga_x_tb09_set_params")
+   subroutine xc_mgga_x_tb09_set_params(xc_func,c) &
+&             bind(C,name="xc_mgga_x_tb09_set_params")
      use iso_c_binding, only : C_DOUBLE,C_PTR
      real(C_DOUBLE),value :: c
      type(C_PTR) :: xc_func
@@ -347,7 +367,7 @@ contains
 #if defined LIBPAW_HAVE_LIBXC && defined LIBPAW_ISO_C_BINDING
   call libpaw_xc_get_singleprecision_constant(i1)
   LIBPAW_XC_SINGLE_PRECISION     = int(i1)
-  call xc_get_family_constants(i1,i2,i3,i4,i5,i6,i7,i8)
+  call libpaw_xc_get_family_constants(i1,i2,i3,i4,i5,i6,i7,i8)
   LIBPAW_XC_FAMILY_UNKNOWN       = int(i1)
   LIBPAW_XC_FAMILY_LDA           = int(i2)
   LIBPAW_XC_FAMILY_GGA           = int(i3)
@@ -1584,7 +1604,7 @@ subroutine libpaw_libxc_set_hybridparams(hyb_mixing,hyb_mixing_sr,hyb_range,xc_f
  integer :: ii
  logical :: is_pbe0,is_hse
  character(len=500) :: msg
-#ifdef LIBPAW_ISO_C_BINDING
+#if defined LIBPAW_HAVE_LIBXC && defined LIBPAW_ISO_C_BINDING
  real(C_DOUBLE) :: alpha_c,beta_c,omega_c
 #endif
  type(libpaw_libxc_type),pointer :: xc_func
@@ -1613,7 +1633,7 @@ subroutine libpaw_libxc_set_hybridparams(hyb_mixing,hyb_mixing_sr,hyb_range,xc_f
 &          (xc_func%id==libpaw_libxc_getid('HYB_GGA_XC_HSE06')))
    if ((.not.is_pbe0).and.(.not.is_hse)) cycle
 
-#ifdef LIBPAW_ISO_C_BINDING
+#if defined LIBPAW_HAVE_LIBXC && defined LIBPAW_ISO_C_BINDING
 !  First retrieve current values of parameters
    call xc_hyb_cam_coef(xc_func%conf,omega_c,alpha_c,beta_c)
 

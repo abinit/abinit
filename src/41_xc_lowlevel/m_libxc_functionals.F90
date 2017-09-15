@@ -212,7 +212,7 @@ module libxc_functionals
      type(C_PTR) :: xc_func
    end subroutine xc_mgga
  end interface
-!PBE0
+!
  interface
    subroutine xc_hyb_gga_xc_pbeh_set_params(xc_func, alpha) bind(C)
      use iso_c_binding, only : C_DOUBLE,C_PTR
@@ -220,7 +220,7 @@ module libxc_functionals
      type(C_PTR) :: xc_func
    end subroutine xc_hyb_gga_xc_pbeh_set_params
  end interface
-!HSE
+!
  interface
    subroutine xc_hyb_gga_xc_hse_set_params(xc_func, alpha, omega) bind(C)
      use iso_c_binding, only : C_DOUBLE,C_PTR
