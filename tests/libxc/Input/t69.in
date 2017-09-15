@@ -1,6 +1,6 @@
 # CH system, PBE0 and HSE06, interatomic distance optimization
 
- ndtset    1  # Set to 2 or 3 to see the crash 
+ ndtset    3  # Set to 2 or 3 to see the crash 
 
 #DATASET 1  PBE (the pseudopotentials for C and H are with PBE XC)
 
@@ -15,9 +15,9 @@
  getxred3  2
 
 #Common
- acell 6  2*5 Angstrom
+ acell 5  2*4 Angstrom
  diemac 1.0d0   diemix 0.5d0
- ecut 15   pawecutdg 35
+ ecut 13   pawecutdg 35
  ionmov 2
  ntime 15 
  tolrff 0.02
@@ -47,8 +47,8 @@
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t69.out, tolnlines = 0, tolabs = 0.000e-00, tolrel = 0.000e-00, fld_options = -easy
-#%% psp_files = C.xml, H.xml
+#%%   t69.out, tolnlines = 3, tolabs = 2.000e-05, tolrel = 5.000e-03, fld_options = -easy
+#%% psp_files = C.xml, H4.GGA_X_PBE+GGA_C_PBE-paw.xml
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]
@@ -61,10 +61,11 @@
 #%%   The results obtained with underconverged ecut (ecut 15) and box size (4 3 3 Angstrom)
 #%%   compare favourably with those mentioned in Arnardi's report, as well as with those of VASP.
 #%%   Values for the distance d, in Angstrom, for PBE, PBE0 and HSE06 respectively :
-#%%   Present calculation  (ecut 15, 6 5 5 box) : 1.136, TO BE OBTAINED
-#%%   Better  calculation  (ecut 18, 7 6 6 box) : TO BE OBTAINED
-#%%   ABINIT Arnardi report (ecut acell unknown): 1.136, 1.124, 1.124
-#%%   VASP Arnardi report (ecut acell unknown)  : 1.136, 1.124,  NA
+#%%   Present calculation (ecut 13, 5 4 4 box)     : 1.130, 1.121, 1.122
+#%%   Better calculation (ecut 15, 6 5 5 box)      : 1.136, 1.125, 1.126
+#%%   Even better calculation (ecut 18, 7 6 6 box) : 1.138, 1.126, 1.127
+#%%   ABINIT Arnardi report (ecut acell unknown)   : 1.136, 1.124, 1.124
+#%%   VASP Arnardi report (ecut acell unknown)     : 1.136, 1.124,  NA
 #%%   Experimental : 1.120 .
 #%% topics = Hybrids
 #%%<END TEST_INFO>

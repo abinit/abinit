@@ -124,6 +124,13 @@ module m_fock
   logical :: optstr
     ! option to calculate stresses
 
+  logical :: fock_converged
+    ! .false. if the Fock cycle (with changing Fock/ACE operator) is not converged
+    ! .true. if the Fock cycle (with changing Fock/ACE operator) has converged
+
+  logical :: scf_converged
+    ! .false. if the SCF cycle (with fixed Fock/ACE operator) is not converged
+    ! .true. if the SCF cycle (with fixed Fock/ACE operator) has converged
  
 ! Real(dp) scalars
 
@@ -739,6 +746,8 @@ subroutine fock_init(atindx,cplex,dtset,fock,gsqcut,kg,mpi_enreg,nattyp,npwarr,p
 !* value chosen by the user : 1 or 2.
    end if
   
+   fockcommon%fock_converged=.false.
+   fockcommon%scf_converged=.false.
 !* Number of iterations with fixed occupied states when calculating the exact exchange contribution.
    if (dtset%nnsclohf<0) then
      msg='The parameter nnsclohf must be a non-negative integer.'

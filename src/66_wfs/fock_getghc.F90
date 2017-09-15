@@ -413,7 +413,8 @@ type(pseudopotential_type) :: psps
          ABI_ALLOCATE(dijhat_tmp,(cplex_dij*lmn2_size,ndij))
          dijhat_tmp=zero
          call pawdijhat(cplex_fock,cplex_dij,dijhat_tmp,gs_ham%gprimd,iatom,ipert,&
-&         natom,ndij,nfftf,nfftotf,nspden_fock,my_jsppol,fockbz%pawang,fockcommon%pawfgrtab(iatom),&
+!&         natom,ndij,nfftf,nfftotf,nspden_fock,my_jsppol,fockbz%pawang,fockcommon%pawfgrtab(iatom),&
+&         natom,ndij,nfftf,nfftotf,nspden_fock,nspden_fock,fockbz%pawang,fockcommon%pawfgrtab(iatom),&
 &         fockcommon%pawtab(itypat),vfock,qphon,gs_ham%ucvol,gs_ham%xred)
          dijhat(1:cplex_dij*lmn2_size,iatom,:)=dijhat_tmp(1:cplex_dij*lmn2_size,:)
          ABI_DEALLOCATE(dijhat_tmp)

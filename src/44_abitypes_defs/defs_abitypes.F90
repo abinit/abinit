@@ -655,6 +655,7 @@ type dataset_type
  real(dp) :: charge
  real(dp) :: cpus
  real(dp) :: ddamp
+ real(dp) :: dfpt_sciss
  real(dp) :: diecut
  real(dp) :: diegap
  real(dp) :: dielam
@@ -682,7 +683,7 @@ type dataset_type
  real(dp) :: exchmix
  real(dp) :: fband
  real(dp) :: fermie_nest
- real(dp) :: spinmagntarget
+ real(dp) :: focktoldfe
  real(dp) :: freqim_alpha
  real(dp) :: freqremin
  real(dp) :: freqremax
@@ -699,6 +700,7 @@ type dataset_type
  real(dp) :: kptrlen
  real(dp) :: magcon_lambda
  real(dp) :: maxestep
+ real(dp) :: mbpt_sciss
  real(dp) :: mdf_epsinf
  real(dp) :: mdwall
  real(dp) :: mep_mxstep
@@ -721,12 +723,11 @@ type dataset_type
  real(dp) :: rectolden
  real(dp) :: rhoqpmix
  real(dp) :: rcut
- real(dp) :: dfpt_sciss
  real(dp) :: slabwsrad
  real(dp) :: slabzbeg
  real(dp) :: slabzend
- real(dp) :: mbpt_sciss
  real(dp) :: spbroad
+ real(dp) :: spinmagntarget
  real(dp) :: spnorbscl
  real(dp) :: stmbias
  real(dp) :: strfact
