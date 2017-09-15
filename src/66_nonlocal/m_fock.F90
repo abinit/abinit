@@ -112,7 +112,8 @@ module m_fock
 
   integer :: use_ACE
     ! option to use the ACE method of Lin Lin
-    !==1 in fock2ACE and 2 in vtorho
+    !==0 if the normal Fock operator is to be created and/or used 
+    !==1 if the ACE operator is to be created and/or used
 
   integer ABI_PRIVATE :: getghc_call_ = 1
   ! 1 if fock_getghc should be called in getghc, 0 otherwise
@@ -124,6 +125,13 @@ module m_fock
   logical :: optstr
     ! option to calculate stresses
 
+  logical :: fock_converged
+    ! .false. if the Fock cycle (with changing Fock/ACE operator) is not converged
+    ! .true. if the Fock cycle (with changing Fock/ACE operator) has converged
+
+  logical :: scf_converged
+    ! .false. if the SCF cycle (with fixed Fock/ACE operator) is not converged
+    ! .true. if the SCF cycle (with fixed Fock/ACE operator) has converged
  
 ! Real(dp) scalars
 
@@ -313,9 +321,9 @@ module m_fock
 contains 
 !!***
 
-!!****f* m_fock/fock_create
+!!****f* m_fock/fockbz_create
 !! NAME
-!!  fock_create
+!!  fockbz_create
 !!
 !! FUNCTION
 !!  Create a fock_type structure.
@@ -344,21 +352,21 @@ contains
 !!
 !! SOURCE
 
-subroutine fock_create(fock,mgfft,mpw,mkpt,mkptband,my_nsppol,natom,n4,n5,n6,userid)
+subroutine fockbz_create(fockbz,mgfft,mpw,mkpt,mkptband,my_nsppol,natom,n4,n5,n6,use_ACE)
 
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'fock_create'
+#define ABI_FUNC 'fockbz_create'
 !End of the abilint section
 
  implicit none
 
 !Arguments ------------------------------------
 !scalars
- integer, intent(in) :: mgfft,mpw,mkpt,mkptband,my_nsppol,natom,n4,n5,n6,userid
- type(fock_BZ_type) , intent(inout) :: fock
+ integer, intent(in) :: mgfft,mpw,mkpt,mkptband,my_nsppol,natom,n4,n5,n6,use_ACE
+ type(fock_BZ_type) , intent(inout) :: fockbz
 
 !Local variables-------------------------------
 !scalars
@@ -367,77 +375,77 @@ subroutine fock_create(fock,mgfft,mpw,mkpt,mkptband,my_nsppol,natom,n4,n5,n6,use
  
 ! *************************************************************************
  
- !write (std_out,*) ' fock_create : enter'
+ !write (std_out,*) ' fockbz_create : enter'
 
 !* Create the array %kptns_bz = the k points in full BZ
- ABI_ALLOCATE(fock%kptns_bz,(3,mkpt))
- fock%kptns_bz=zero
+ ABI_ALLOCATE(fockbz%kptns_bz,(3,mkpt))
+ fockbz%kptns_bz=zero
 !* Create the array %jstwfk = how is stored the wavefunction at each k-point
 !* By default, the table is initialized to 1 (do NOT take advantage of the time-reversal symmetry)
- ABI_ALLOCATE(fock%istwfk_bz,(mkpt))
- fock%istwfk_bz=1
+ ABI_ALLOCATE(fockbz%istwfk_bz,(mkpt))
+ fockbz%istwfk_bz=1
 !* Create the array %wtk_bz = weight assigned to each k point.
- ABI_ALLOCATE(fock%wtk_bz,(mkpt))
- fock%wtk_bz=zero
+ ABI_ALLOCATE(fockbz%wtk_bz,(mkpt))
+ fockbz%wtk_bz=zero
 !* Create the array %npwarr_bz = number of planewaves in basis at each k-point
-!    ABI_ALLOCATE(fock%npwarr_bz,(mkpt))
-!    fock%npwarr_bz=0
+!    ABI_ALLOCATE(fockbz%npwarr_bz,(mkpt))
+!    fockbz%npwarr_bz=0
 !* Create the array %kg_bz = reduced planewave coordinates at each k-point
- ABI_ALLOCATE(fock%kg_bz,(3,mpw*mkpt))
- fock%kg_bz=0
+ ABI_ALLOCATE(fockbz%kg_bz,(3,mpw*mkpt))
+ fockbz%kg_bz=0
 !* Create the array %gbound_bz = boundary of the basis sphere of G vectors at each k-point
- ABI_ALLOCATE(fock%gbound_bz,(2*mgfft+8,2,mkpt))
- fock%gbound_bz=0
+ ABI_ALLOCATE(fockbz%gbound_bz,(2*mgfft+8,2,mkpt))
+ fockbz%gbound_bz=0
 
 !* Create the array %tab_ikpt = indices of k-point ikpt in IBZ which corresponds to each k-point jkpt in full BZ
- ABI_ALLOCATE(fock%tab_ikpt,(mkpt))
- fock%tab_ikpt=0
+ ABI_ALLOCATE(fockbz%tab_ikpt,(mkpt))
+ fockbz%tab_ikpt=0
 !* Create the array %tab_symkpt =indices of symmetry operation to apply to get jkpt in full BZ from ikpt in IBZ
- ABI_ALLOCATE(fock%tab_symkpt,(mkpt))
- fock%tab_symkpt=0
+ ABI_ALLOCATE(fockbz%tab_symkpt,(mkpt))
+ fockbz%tab_symkpt=0
 !* Create the array %tab_ibg = indices of occ(ikpt) in the arrays cprj/occ for each k-point jkpt
- ABI_ALLOCATE(fock%tab_ibg,(mkpt,my_nsppol))
- fock%tab_ibg=0
+ ABI_ALLOCATE(fockbz%tab_ibg,(mkpt,my_nsppol))
+ fockbz%tab_ibg=0
 !* Create the array %tab_icp = indices of cprj(ikpt) in the arrays cprj/occ for each k-point jkpt
- ABI_ALLOCATE(fock%tab_icp,(mkpt,my_nsppol))
- fock%tab_icp=0
+ ABI_ALLOCATE(fockbz%tab_icp,(mkpt,my_nsppol))
+ fockbz%tab_icp=0
 !* Create the array %tab_icg = indices of cg(ikpt) in the arrays cg for each k-point jkpt
- ABI_ALLOCATE(fock%tab_icg,(mkpt,my_nsppol))
- fock%tab_icg=0
+ ABI_ALLOCATE(fockbz%tab_icg,(mkpt,my_nsppol))
+ fockbz%tab_icg=0
 
 !* Create the array %calc_phase = 1 if a phase factor must be considered (0 otherwise) at each k point
- ABI_ALLOCATE(fock%calc_phase,(mkpt))
- fock%calc_phase=0
+ ABI_ALLOCATE(fockbz%calc_phase,(mkpt))
+ fockbz%calc_phase=0
 !* Create the array %phase = phase factor the cg array will be multiplied with at each k point
- ABI_ALLOCATE(fock%phase,(2,mpw*mkpt))
- fock%phase=zero
+ ABI_ALLOCATE(fockbz%phase,(2,mpw*mkpt))
+ fockbz%phase=zero
 
 !* Create the array %timerev i= 1 if time reversal symmetry must be used (0 otherwise) at each k point 
- ABI_ALLOCATE(fock%timerev,(mkpt))
- fock%timerev=0
+ ABI_ALLOCATE(fockbz%timerev,(mkpt))
+ fockbz%timerev=0
 
 !* Create the array %cwaveocc_bz = wavefunctions of each bands at each k point
 
- if (userid==1961) then
-   ABI_ALLOCATE(fock%cgocc,(2,mpw*mkptband,my_nsppol))
-   fock%cgocc=zero
+ if (use_ACE==1) then
+   ABI_ALLOCATE(fockbz%cgocc,(2,mpw*mkptband,my_nsppol))
+   fockbz%cgocc=zero
  else
-   ABI_ALLOCATE(fock%cwaveocc_bz,(2,n4,n5,n6,mkptband,my_nsppol))
-   fock%cwaveocc_bz=zero
+   ABI_ALLOCATE(fockbz%cwaveocc_bz,(2,n4,n5,n6,mkptband,my_nsppol))
+   fockbz%cwaveocc_bz=zero
  end if
 !* Create the array %occ_bz = occupancy of each bands at each k point => will be limited to only the occupied states
- ABI_ALLOCATE(fock%occ_bz,(mkptband,my_nsppol))
- fock%occ_bz=zero
+ ABI_ALLOCATE(fockbz%occ_bz,(mkptband,my_nsppol))
+ fockbz%occ_bz=zero
 !* Create the array %nbandocc_bz = nb of bands at each k point
- ABI_ALLOCATE(fock%nbandocc_bz,(mkpt,my_nsppol))
- fock%nbandocc_bz=0
+ ABI_ALLOCATE(fockbz%nbandocc_bz,(mkpt,my_nsppol))
+ fockbz%nbandocc_bz=0
 
- ABI_ALLOCATE(fock%npwarr,(mkpt))
- fock%npwarr=0
+ ABI_ALLOCATE(fockbz%npwarr,(mkpt))
+ fockbz%npwarr=0
 
 
 
-end subroutine fock_create
+end subroutine fockbz_create
 !!***
 
 !!****f* m_fock/fock_init
@@ -512,7 +520,7 @@ subroutine fock_init(atindx,cplex,dtset,fock,gsqcut,kg,mpi_enreg,nattyp,npwarr,p
 !Local variables-------------------------------
 !scalars
  integer :: iatom,ibg,icg,icp,ier,ik,ikg,ikpt,isppol,isym,itypat,jkpt,jpw,jsym,mband,mgfft,mkpt,mkptband
- integer :: n1,n2,n3,n4,n5,n6,nband,ncpgr,nkpt,nkpt_bz,nproc_hf,npwj,timrev,userid,v1,v2,v3
+ integer :: n1,n2,n3,n4,n5,n6,nband,ncpgr,nkpt,nkpt_bz,nproc_hf,npwj,timrev,use_ACE,v1,v2,v3
  integer :: my_jkpt,jkg_this_proc,my_nsppol,my_nspinor
  real(dp) :: dksqmax,arg
  character(len=500) :: msg
@@ -661,6 +669,7 @@ subroutine fock_init(atindx,cplex,dtset,fock,gsqcut,kg,mpi_enreg,nattyp,npwarr,p
      n4=dtset%ngfftdg(4) ; n5=dtset%ngfftdg(5) ; n6=dtset%ngfftdg(6)
    end if
    fockcommon%optfor=.FALSE.; fockcommon%optstr=.false.
+<<<<<<< HEAD
    if(dtset%optforces==1)then
      fockcommon%optfor=.true.
      ABI_ALLOCATE(fockcommon%forces_ikpt,(3,dtset%natom,nband))
@@ -671,7 +680,19 @@ subroutine fock_init(atindx,cplex,dtset,fock,gsqcut,kg,mpi_enreg,nattyp,npwarr,p
    fockcommon%use_ACE=dtset%userie
    if(fockcommon%use_ACE/=0) userid=1961
    call fock_create(fockbz,mgfft,dtset%mpw,mkpt,mkptband,my_nsppol,dtset%natom,n4,n5,n6,userid)
+=======
+   if(dtset%optforces==1) fockcommon%optfor=.true.
+   if (fockcommon%optfor) then
+     ABI_ALLOCATE(fockcommon%forces_ikpt,(3,dtset%natom,nband))
+     ABI_ALLOCATE(fockcommon%forces,(3,dtset%natom))
+   endif
+>>>>>>> trunk/ace_4
 
+   use_ACE=1 ! Default. Normal users do not have access to this variable, although the next line allows experts to make tests.
+   if(dtset%userie==1729)use_ACE=0 ! Hidden possibility to disable ACE
+
+   fockcommon%use_ACE=use_ACE
+   call fockbz_create(fockbz,mgfft,dtset%mpw,mkpt,mkptband,my_nsppol,dtset%natom,n4,n5,n6,use_ACE)
 
 !* Initialize %mband, %mkpt, %mkptband = size of arrays
    fockcommon%mband=mband
@@ -741,6 +762,8 @@ subroutine fock_init(atindx,cplex,dtset,fock,gsqcut,kg,mpi_enreg,nattyp,npwarr,p
 !* value chosen by the user : 1 or 2.
    end if
   
+   fockcommon%fock_converged=.false.
+   fockcommon%scf_converged=.false.
 !* Number of iterations with fixed occupied states when calculating the exact exchange contribution.
    if (dtset%nnsclohf<0) then
      msg='The parameter nnsclohf must be a non-negative integer.'

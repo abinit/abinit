@@ -901,7 +901,7 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 & moved_atm_inside,mpi_enreg,dtset%nband,dtset%nkpt,&
 & dtset%nstep,occ,optres,prtfor,prtxml,quit,&
 & res2,resid,residm,response,tollist,psps%usepaw,vxcavg,dtset%wtk,xred,conv_retcode,&
-& electronpositron=electronpositron)
+& electronpositron=electronpositron, fock=fock)
 
 !output POSCAR and FORCES files, VASP style, for PHON code and friends.
  if (dtset%prtposcar == 1) then

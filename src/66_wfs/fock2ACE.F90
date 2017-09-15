@@ -198,21 +198,20 @@ subroutine fock2ACE(cg,cprj,fock,istwfk,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_e
    fockcommon%stress=zero
  end if
 
+ compute_gbound=.true.
  usecprj_local=usecprj
-
  if (psps%usepaw==1) then
    usecprj_local=1
-   if(optfor==1)then 
-     fockcommon%optfor=.true.
-     if (.not.allocated(fockcommon%forces_ikpt)) then
-       ABI_ALLOCATE(fockcommon%forces_ikpt,(3,natom,mband))
-     end if
-     if (.not.allocated(fockcommon%forces)) then
-       ABI_ALLOCATE(fockcommon%forces,(3,natom))
-     end if
-     fockcommon%forces=zero
-     compute_gbound=.true.
+ endif
+ if(optfor==1)then 
+   fockcommon%optfor=.true.
+   if (.not.allocated(fockcommon%forces_ikpt)) then
+     ABI_ALLOCATE(fockcommon%forces_ikpt,(3,natom,mband))
    end if
+   if (.not.allocated(fockcommon%forces)) then
+     ABI_ALLOCATE(fockcommon%forces,(3,natom))
+   end if
+   fockcommon%forces=zero
  end if
 
 !Initialize Hamiltonian (k- and spin-independent terms)
