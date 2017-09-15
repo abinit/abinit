@@ -45,7 +45,7 @@ subroutine erlxconv(hist,iexit,itime,itime_hist,ntime,tolmxde)
 
  use m_fstrings,  only : indent
  use m_abihist, only : abihist,abihist_findIndex
- 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC

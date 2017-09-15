@@ -192,11 +192,10 @@ subroutine fock2ACE(cg,cprj,fock,istwfk,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_e
  fockcommon%optstr=.false.
  use_ACE_old=fockcommon%use_ACE
  fockcommon%use_ACE=0
-
+ compute_gbound=.true.
  if (stress_needed==1) then
    fockcommon%optstr=.TRUE.
    fockcommon%stress=zero
-   compute_gbound=.true.
  end if
 
  usecprj_local=usecprj
@@ -234,6 +233,7 @@ subroutine fock2ACE(cg,cprj,fock,istwfk,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_e
 
 !LOOP OVER SPINS
  bdtot_index=0;ibg=0;icg=0
+
  do isppol=1,nsppol
 
 !  Continue to initialize the Hamiltonian (PAW DIJ coefficients)
@@ -419,6 +419,9 @@ subroutine fock2ACE(cg,cprj,fock,istwfk,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_e
            end if
            call fock_getghc(cwavef(:,1+(iblocksize-1)*npw_k*my_nspinor:iblocksize*npw_k*my_nspinor),cwaveprj_idat,&
 &           wi(:,1+(iblocksize-1)*npw_k*my_nspinor:iblocksize*npw_k*my_nspinor,iblock),gs_hamk,mpi_enreg)
+!write(80,*) "wi"
+!write(80,*)wi(:,1:10,iblock)
+!write(80,*) "eigen",fockcommon%ieigen,fockcommon%eigen_ikpt(fockcommon%ieigen)
            mkl(1,fockcommon%ieigen,fockcommon%ieigen)=fockcommon%eigen_ikpt(fockcommon%ieigen)
            if (fockcommon%optstr) then
              fockcommon%stress(:)=fockcommon%stress(:)+weight(iblocksize)*fockcommon%stress_ikpt(:,fockcommon%ieigen)
@@ -464,17 +467,17 @@ subroutine fock2ACE(cg,cprj,fock,istwfk,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_e
        bb(1,kk,kk)=one
      end do
      call ztrtrs("L","T","N",nband_k,nband_k,mkl,nband_k,bb,nband_k,ierr)
-     fock%fockACE(ikpt)%xi=zero
+     fock%fockACE(ikpt,isppol)%xi=zero
 
 ! Calculate ksi
      do kk=1,nband_k
        do jblock=1,nblockbd
          do jblocksize=1,blocksize
            ll=(jblock-1)*blocksize+jblocksize
-           fock%fockACE(ikpt)%xi(1,:,kk)=fock%fockACE(ikpt)%xi(1,:,kk)+bb(1,ll,kk)*wi(1,1+(jblocksize-1)*&
+           fock%fockACE(ikpt,isppol)%xi(1,:,kk)=fock%fockACE(ikpt,isppol)%xi(1,:,kk)+bb(1,ll,kk)*wi(1,1+(jblocksize-1)*&
 &                                                                npw_k*my_nspinor:jblocksize*npw_k*my_nspinor,jblock)-&
 &                                bb(2,ll,kk)*wi(2,1+(jblocksize-1)*npw_k*my_nspinor:jblocksize*npw_k*my_nspinor,jblock)
-           fock%fockACE(ikpt)%xi(2,:,kk)=fock%fockACE(ikpt)%xi(2,:,kk)+bb(1,ll,kk)*wi(2,1+(jblocksize-1)*&
+           fock%fockACE(ikpt,isppol)%xi(2,:,kk)=fock%fockACE(ikpt,isppol)%xi(2,:,kk)+bb(1,ll,kk)*wi(2,1+(jblocksize-1)*&
                                                                  npw_k*my_nspinor:jblocksize*npw_k*my_nspinor,jblock)+&
 &                                bb(2,ll,kk)*wi(1,1+(jblocksize-1)*npw_k*my_nspinor:jblocksize*npw_k*my_nspinor,jblock)
          end do

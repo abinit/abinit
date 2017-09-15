@@ -68,7 +68,7 @@ module m_fock
  type, public :: fock_type
   type(fock_common_type), pointer :: fock_common=> null()
   type(fock_BZ_type), pointer :: fock_BZ=> null()
-  type(fock_ACE_type), pointer :: fockACE(:)=> null()
+  type(fock_ACE_type), pointer :: fockACE(:,:)=> null()
  end type fock_type
 
 
@@ -542,7 +542,7 @@ subroutine fock_init(atindx,cplex,dtset,fock,gsqcut,kg,mpi_enreg,nattyp,npwarr,p
  nkpt_bz=dtset%nkpthf
  nproc_hf=mpi_enreg%nproc_hf
  mband=dtset%nbandhf
- nband=dtset%mband
+
  n1=dtset%ngfft(1) ; n2=dtset%ngfft(2) ; n3=dtset%ngfft(3)
  n4=dtset%ngfft(4) ; n5=dtset%ngfft(5) ; n6=dtset%ngfft(6)
 
@@ -580,7 +580,7 @@ subroutine fock_init(atindx,cplex,dtset,fock,gsqcut,kg,mpi_enreg,nattyp,npwarr,p
  ibg=0; icg=0 ;icp=0
  do isppol=1,dtset%nsppol
    do ikpt=1,dtset%nkpt
-     nband=dtset%nband(ikpt)
+     nband=dtset%nband(ikpt+(isppol-1)*dtset%nkpt)
      if (.NOT.(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband,isppol,mpi_enreg%me_kpt))) then
 !* The states with (ikpt,isppol) are stored on this processor.
        my_icgtab(ikpt,isppol)=icg
@@ -612,12 +612,12 @@ subroutine fock_init(atindx,cplex,dtset,fock,gsqcut,kg,mpi_enreg,nattyp,npwarr,p
 ! ========================================================
    fockcommon=>fock%fock_common
    fockbz=> fock%fock_BZ
-   ABI_ALLOCATE(fockcommon%nband,(dtset%nkpt))
-   do ikpt=1,dtset%nkpt
+   ABI_ALLOCATE(fockcommon%nband,(dtset%nkpt*dtset%nsppol))
+   do ikpt=1,dtset%nkpt*dtset%nsppol
      fockcommon%nband(ikpt)=dtset%nband(ikpt)
    end do
 
-
+   nband=dtset%mband
    fockcommon%ikpt= 0
 !* Will contain the k-point ikpt of the current state
    fockcommon%isppol= 0
@@ -680,13 +680,14 @@ subroutine fock_init(atindx,cplex,dtset,fock,gsqcut,kg,mpi_enreg,nattyp,npwarr,p
    fockcommon%my_nsppol = my_nsppol
    fockcommon%nsppol = dtset%nsppol
    if (fockcommon%use_ACE/=0) then
-     ABI_DATATYPE_ALLOCATE(fock%fockACE,(dtset%nkpt))
+     ABI_DATATYPE_ALLOCATE(fock%fockACE,(dtset%nkpt,dtset%nsppol))
      my_nspinor=max(1,dtset%nspinor/mpi_enreg%nproc_spinor)
-     do ikpt=1,dtset%nkpt
-       nband=dtset%nband(ikpt)
-       ABI_ALLOCATE(fock%fockACE(ikpt)%xi,(2,npwarr(ikpt)*my_nspinor,nband))
+     do isppol=1,dtset%nsppol
+       do ikpt=1,dtset%nkpt
+         nband=dtset%nband(ikpt+(isppol-1)*dtset%nkpt)
+         ABI_ALLOCATE(fock%fockACE(ikpt,isppol)%xi,(2,npwarr(ikpt)*my_nspinor,nband))
+       end do
      end do
-
    end if
 !========Initialze PAW data========
    fockcommon%ntypat=dtset%ntypat
@@ -1552,18 +1553,20 @@ subroutine fock_ACE_destroy(fockACE)
  implicit none
 
 !Arguments ------------------------------------
- type(fock_ACE_type),pointer :: fockACE(:)
+ type(fock_ACE_type),pointer :: fockACE(:,:)
 !Local variables-------------------------------
- integer :: dim1,ii
+ integer :: dim1,dim2,ii,jj
 ! *************************************************************************
  DBG_ENTER("COLL")
 
  dim1=size(fockACE,1)
-
- do ii=1,dim1
-   if (allocated(fockACE(ii)%xi)) then
-     ABI_DEALLOCATE(fockACE(ii)%xi)
-   end if
+ dim2=size(fockACE,2)
+ do jj=1,dim2
+   do ii=1,dim1
+     if (allocated(fockACE(ii,jj)%xi)) then
+       ABI_DEALLOCATE(fockACE(ii,jj)%xi)
+     end if
+   end do
  end do
  DBG_EXIT("COLL")
 
