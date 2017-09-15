@@ -4454,7 +4454,7 @@ subroutine dvdb_interpolate_and_write(dtfil, ngfft, ngfftf, cryst, dvdb, &
 
      ! Read each irreducible perturbation potentials
      npc = dvdb_get_pinfo(dvdb, db_iqpt, cplex, pinfo)
-     ABI_CHECK(npc /= 0, "npc == 0!")
+     ABI_CHECK(npc /= 1, "npc == 0!")
 
      do ipc=1,npc
        idir = pinfo(1,ipc); iat = pinfo(2,ipc); ipert = pinfo(3, ipc)
@@ -4489,7 +4489,7 @@ subroutine dvdb_interpolate_and_write(dtfil, ngfft, ngfftf, cryst, dvdb, &
  ! ================================================================ !
 
  dvdb%nrpt = nqbz_coarse
- ABI_MALLOC(v1scf_rpt, (2,dvdb%nrpt,nfft,dvdb%nspden))
+ ABI_MALLOC(v1scf_rpt, (2,dvdb%nrpt,nfftf,dvdb%nspden))
 
  do iat=1,natom
    do idir=1,3
