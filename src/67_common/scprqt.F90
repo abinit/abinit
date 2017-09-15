@@ -292,6 +292,8 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
    end if
 
  case (2)
+
+
 !  Examine tolerance criteria
    tolwfr=tollist(2)
    toldff=tollist(3)

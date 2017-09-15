@@ -476,7 +476,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 !TODO: do we want to pass the temper etc... from anaddb_dtset into the full dtset for abinit?
 ! Otherwise just leave these defaults.
 !MG: Disabled for the time being because of SIGFPE in v8[41]
-     path = strcat(dtfil%filnam_ds(4), "_MSQD_T")
+     path = dtfil%filnam_ds(4)
      !call phdos_print_msqd(phdos, path, 1000, one, one)
      path = strcat(dtfil%filnam_ds(4), "_THERMO")
      call phdos_print_thermo(PHdos, path, 1000, zero, one)

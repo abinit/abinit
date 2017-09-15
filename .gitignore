@@ -38,6 +38,8 @@ tmp_*
 ui_*.py
 abipy.egg-info
 math.so
+positions.so
+topology.so
 *-stamp
 *.abiauty
 *.abirules

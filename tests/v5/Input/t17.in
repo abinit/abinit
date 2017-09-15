@@ -61,6 +61,5 @@ prtden 0  prteig 0  prtwf 0
 #%%   - with zero magnetization      (nspden=1, nspinor=2)
 #%%   - with non-collinear magnetism (nspden=4, nspinor=2)
 #%%   Also tests spnorbscl and pawcpxocc variables reserved to exp. users.
-#%% topics = spinpolarisation
-#%% topics = PAW
+#%% topics = spinpolarisation, PAW
 #%%<END TEST_INFO>

@@ -42,6 +42,7 @@
          asr         2
  Interatomic Force Constants Inputs :
       dipdip         1
+     dipdip_range         2         2         2
       ifcana         0
       ifcout     20000
       natifc         4
@@ -126,10 +127,10 @@
 
  Extraction of the stress tensor (unit: GPa) and forces (unit: Ha/bohr)
 
- --- !WARNING
-     Stress Tensor and forces are set to zero (not available in the DDB)
+ --- !WARNING:
+     The stress tensor of the reference structure is not specify
+     The stress tensor will be set to zero
  ---
-
 
 ================================================================================
 

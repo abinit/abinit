@@ -245,13 +245,14 @@ program multibinit
 
 ! If needed, fit the anharmonic part and compute the confinement potential
 !****************************************************************************************
- if (inp%fit_coeff/=0.or.inp%confinement==2) then
+ if (inp%fit_coeff/=0.or.inp%confinement==2.or.inp%fit_bound/=0) then
 
    if(iam_master) then
 !    Read the MD file
      write(message,'(a,(80a),7a)')ch10,('=',ii=1,80),ch10,ch10,&
-&     '-Reading the file ',trim(filnam(5)),ch10,&
-&     ' with NetCDF in order to fit the polynomial coefficients'
+&     '-Reading the file the HIST file :',ch10,&
+&     '-',trim(filnam(5)),ch10
+
      call wrtout(std_out,message,'COLL') 
      call wrtout(ab_out,message,'COLL') 
      if(filnam(5)/=''.and.filnam(5)/='no')then
@@ -283,7 +284,7 @@ program multibinit
    call fit_polynomial_coeff_mapHistToRef(reference_effective_potential,hist,comm)
  end if
 
-!Generate the confinement polynome
+!Generate the confinement polynome (not working yet)
  if(inp%confinement/=0)then
    option=inp%confinement
    select case(option)
@@ -314,22 +315,26 @@ program multibinit
    if(hist%mxhist >0)then
      select case(option)
      case (-1)
-!    option == -1
-!    Print the file in the specific format for the script of carlos
-!    Born_Charges  
-!    Dielectric_Tensor
-!    harmonic.xml
-!    Reference_structure
-!    Strain_Tensor
-!    symmetry_operations (only cubic)
+!      option == -1
+!      Print the file in the specific format for the script of carlos
+!      Born_Charges  
+!      Dielectric_Tensor
+!      harmonic.xml
+!      Reference_structure
+!      Strain_Tensor
+!      symmetry_operations (only cubic)
        if (iam_master) then
          call fit_polynomial_printSystemFiles(reference_effective_potential,hist)
        end if
      case (1)
-!    option = 1
+!      option = 1
        call fit_polynomial_coeff_fit(reference_effective_potential,&
-&                                    inp%fit_fixcoeff,hist,inp%fit_rangePower,inp%fit_ncycle,&
-&                                    inp%fit_nfixcoeff,comm,cutoff_in=inp%fit_cutoff)
+&                                    inp%fit_bancoeff,inp%fit_fixcoeff,hist,&
+&                                    inp%fit_rangePower,inp%fit_nbancoeff,inp%fit_ncycle,&
+&                                    inp%fit_nfixcoeff,comm,cutoff_in=inp%fit_cutoff,&
+&                                    verbose=.true.,positive=.false.,&
+&                                    anharmstr=inp%fit_anhaStrain==1,&
+&                                    spcoupling=inp%fit_SPCoupling==1)
      end select
    else
      write(message, '(3a)' )&
@@ -338,6 +343,14 @@ program multibinit
      MSG_ERROR(message)
    end if
  end if
+
+!TEST_AM
+!try to bound the model with mover_effpot
+!we need to use the molecular dynamics
+ if(inp%fit_bound==1)then
+   call mover_effpot(inp,filnam,reference_effective_potential,1,comm,hist=hist)
+ end if
+!TEST_AM
 
 !****************************************************************************************
 
@@ -387,7 +400,7 @@ program multibinit
 ! Compute the monte carlo, molecular dynamics of compute specific energy 
 !****************************************************************************************
  if(inp%dynamics>=1) then
-   call mover_effpot(inp,filnam,reference_effective_potential,comm)
+   call mover_effpot(inp,filnam,reference_effective_potential,inp%dynamics,comm)
  end if
 !****************************************************************************************    
 

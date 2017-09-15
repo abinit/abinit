@@ -50,7 +50,7 @@ module m_hamiltonian
  use m_paral_atom,        only : get_my_atmtab, free_my_atmtab
  use m_electronpositron,  only : electronpositron_type, electronpositron_calctype
  use m_mpinfo,            only : destroy_mpi_enreg
- use m_fock,              only : fock_type
+ use m_fock,              only : fock_common_type, fock_BZ_type, fock_ACE_type, fock_type
 
 #if defined HAVE_FC_ISO_C_BINDING
  use iso_c_binding, only : c_ptr,c_loc,c_f_pointer
@@ -358,14 +358,23 @@ module m_hamiltonian
    ! xred(3,natom)
    ! reduced coordinates of atoms (dimensionless)
 
+ 
 ! ===== Structured datatype pointers
 
-  type(fock_type), pointer :: fock => null()
+  type(fock_common_type), pointer :: fockcommon => null()
    ! fock
-   ! all quantities needed to calculate Fock exact exchange
+   ! common quantities needed to calculate Fock exact exchange
 
+  type(fock_BZ_type), pointer :: fockbz => null()
+   ! fock
+   ! total brillouin zone quantities needed to calculate Fock exact exchange
+
+  type(fock_ACE_type), pointer :: fockACE_k => null()
+   ! fock
+   ! ACE quantities needed to calculate Fock exact exchange in the ACE context
 
  end type gs_hamiltonian_type
+
 
  public :: init_hamiltonian         ! Initialize the GS Hamiltonian
  public :: destroy_hamiltonian      ! Free the memory in the GS Hamiltonian
@@ -692,8 +701,9 @@ subroutine destroy_hamiltonian(Ham)
  end if
 
 ! Structured datatype pointers
- if (associated(Ham%fock)) nullify(Ham%fock)
-
+ if (associated(Ham%fockcommon)) nullify(Ham%fockcommon)
+ if (associated(Ham%fockACE_k)) nullify(Ham%fockACE_k)
+ if (associated(Ham%fockbz)) nullify(Ham%fockbz)
 #if defined HAVE_GPU_CUDA
  if(Ham%use_gpu_cuda==1) then
    call gpu_finalize_ham_data()
@@ -717,7 +727,8 @@ end subroutine destroy_hamiltonian
 !!
 !! INPUTS
 !!  [comm_atom]=optional, MPI communicator over atoms
-!!  [fock <type(fock_type)>]= quantities to calculate Fock exact exchange
+!!  [fockcommon <type(fock_common_type)>]= common quantities to calculate Fock exact exchange
+!!  [fockbz <type(fock_BZ_type)>]= quantities to calculate Fock exact exchange in the total BZ
 !!  natom=Number of atoms in the unit cell.
 !!  nfft=Number of FFT grid points (for this processors).
 !!  nspinor=Number of spinorial components
@@ -875,7 +886,10 @@ subroutine init_hamiltonian(ham,Psps,pawtab,nspinor,nsppol,nspden,natom,typat,&
  ham%xred => xred
 
  if (present(fock)) then
-   ham%fock => fock
+   if (associated(fock)) then
+     ham%fockcommon => fock%fock_common
+     if (fock%fock_common%use_ACE==0) ham%fockbz=>fock%fock_BZ
+   end if
  end if
 
  if (present(ph1d)) then
@@ -1014,7 +1028,7 @@ end subroutine init_hamiltonian
 !!
 !! SOURCE
 
-subroutine load_k_hamiltonian(ham,ffnl_k,gbound_k,istwf_k,kinpw_k,&
+subroutine load_k_hamiltonian(ham,ffnl_k,fockACE_k,gbound_k,istwf_k,kinpw_k,&
 &                             kg_k,kpg_k,kpt_k,npw_k,npw_fft_k,ph3d_k,&
 &                             compute_gbound,compute_ph3d)
 
@@ -1038,6 +1052,7 @@ subroutine load_k_hamiltonian(ham,ffnl_k,gbound_k,istwf_k,kinpw_k,&
  integer,intent(in),optional,target :: gbound_k(:,:),kg_k(:,:)
  real(dp),intent(in),optional :: kpt_k(3)
  real(dp),intent(in),optional,target :: ffnl_k(:,:,:,:),kinpw_k(:),kpg_k(:,:),ph3d_k(:,:,:)
+ type(fock_ACE_type),intent(in),optional,target :: fockACE_k
 
 !Local variables-------------------------------
 !scalars
@@ -1094,7 +1109,9 @@ subroutine load_k_hamiltonian(ham,ffnl_k,gbound_k,istwf_k,kinpw_k,&
    ham%ph3d_k  => ph3d_k
    ham%ph3d_kp => ph3d_k
  end if
-
+ if (present(fockACE_k)) then
+   ham%fockACE_k  => fockACE_k
+ end if
 !Compute exp(i.k.R) for each atom
  if (present(kpt_k)) then
    if (associated(Ham%phkpxred).and.(.not.associated(Ham%phkpxred,Ham%phkxred))) then
@@ -1328,7 +1345,7 @@ end subroutine load_kprime_hamiltonian
 !!  structure (gs_hamk_out) and copy the content of the corresponding memory
 !!  space of gs_hamk_in in it. In contrast, the assignment statement would
 !!  only associate the pointers of gs_hamk_out to the same memory space than
-!!  the correcponding ones in gs_hamk_in. This can cause trouble if one data
+!!  the corresponding ones in gs_hamk_in. This can cause trouble if one data
 !!  structure is destroyed before a reading/writing statement for the other
 !!  structure, causing access to unallocated memory space (silently, without
 !!  segmentation fault being generated).
@@ -1465,15 +1482,35 @@ implicit none
 
 !For pointers to structured datatypes, have to copy the address
 !manually because there is no generic addr_copy function for that
- if (associated(gs_hamk_in%fock)) then
+ if (associated(gs_hamk_in%fockcommon)) then
 #if defined HAVE_FC_ISO_C_BINDING
-   ham_ptr=c_loc(gs_hamk_in%fock)
-   call c_f_pointer(ham_ptr,gs_hamk_out%fock)
+   ham_ptr=c_loc(gs_hamk_in%fockcommon)
+   call c_f_pointer(ham_ptr,gs_hamk_out%fockcommon)
 #else
-   gs_hamk_out%fock=transfer(gs_hamk_in%fock,gs_hamk_out%fock)
+   gs_hamk_out%fockcommon=transfer(gs_hamk_in%fockcommon,gs_hamk_out%fockcommon)
 #endif
  else
-   nullify(gs_hamk_out%fock)
+   nullify(gs_hamk_out%fockcommon)
+ end if
+ if (associated(gs_hamk_in%fockbz)) then
+#if defined HAVE_FC_ISO_C_BINDING
+   ham_ptr=c_loc(gs_hamk_in%fockbz)
+   call c_f_pointer(ham_ptr,gs_hamk_out%fockbz)
+#else
+   gs_hamk_out%fockbz=transfer(gs_hamk_in%fockbz,gs_hamk_out%fockbz)
+#endif
+ else
+   nullify(gs_hamk_out%fockbz)
+ end if
+ if (associated(gs_hamk_in%fockACE_k)) then
+#if defined HAVE_FC_ISO_C_BINDING
+   ham_ptr=c_loc(gs_hamk_in%fockACE_k)
+   call c_f_pointer(ham_ptr,gs_hamk_out%fockACE_k)
+#else
+   gs_hamk_out%fockACE_k=transfer(gs_hamk_in%fockACE_k,gs_hamk_out%fockACE_k)
+#endif
+ else
+   nullify(gs_hamk_out%fockACE_k)
  end if
 
  DBG_EXIT("COLL")

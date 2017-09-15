@@ -102,7 +102,7 @@ subroutine pred_delocint(ab_mover,ab_xfh,forstr,hist,ionmov,itime,zDEBUG,iexit)
 !Local variables-------------------------------
 !scalars
  integer  :: ndim,cycl_main
- integer  :: ii,jj,kk
+ integer  :: ihist_prev,ii,jj,kk
  real(dp),save :: ucvol0
  real(dp) :: ucvol
  real(dp) :: etotal,etotal_prev
@@ -529,8 +529,8 @@ subroutine pred_delocint(ab_mover,ab_xfh,forstr,hist,ionmov,itime,zDEBUG,iexit)
 
  else
    if(ionmov==11)then
-
-     etotal_prev=hist%etot(hist%ihist-1)
+     ihist_prev = abihist_findIndex(hist,-1)
+     etotal_prev=hist%etot(ihist_prev)
 !    Here the BFGS algorithm, modified to take into account the
 !    energy
      call brdene(etotal,etotal_prev,hessin,&
@@ -616,7 +616,7 @@ subroutine pred_delocint(ab_mover,ab_xfh,forstr,hist,ionmov,itime,zDEBUG,iexit)
 !### 11. Update the history with the prediction
 
 !Increase indexes
- hist%ihist=hist%ihist+1
+ hist%ihist = abihist_findIndex(hist,+1)
 
  if(ab_mover%optcell/=0)then
    call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
@@ -625,7 +625,8 @@ subroutine pred_delocint(ab_mover,ab_xfh,forstr,hist,ionmov,itime,zDEBUG,iexit)
 !Fill the history with the variables
 !xred, acell, rprimd, vel
  call var2hist(acell,hist,ab_mover%natom,rprimd,xred,zDEBUG)
- hist%vel(:,:,hist%ihist)=hist%vel(:,:,hist%ihist-1)
+ ihist_prev = abihist_findIndex(hist,-1)
+ hist%vel(:,:,hist%ihist)=hist%vel(:,:,ihist_prev)
 
  if(zDEBUG)then
    write (std_out,*) 'residual:'

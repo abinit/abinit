@@ -86,7 +86,7 @@ subroutine pred_srkna14(ab_mover,hist,icycle,zDEBUG,iexit,skipcycle)
 
 !Local variables-------------------------------
 !scalars
- integer  :: ii,jj,kk
+ integer  :: ihist_prev,ii,jj,kk
  real(dp) :: ucvol,ucvol_next
  real(dp),parameter :: v2tol=tol8
  real(dp) :: etotal
@@ -273,13 +273,14 @@ subroutine pred_srkna14(ab_mover,hist,icycle,zDEBUG,iexit,skipcycle)
 !### 07. Update the history with the prediction
 
 !Increase indexes
- hist%ihist=hist%ihist+1
+ hist%ihist = abihist_findIndex(hist,+1)
 
 !Fill the history with the variables
 !xred, acell, rprimd, vel
  call var2hist(acell,hist,ab_mover%natom,rprimd,xred,zDEBUG)
  hist%vel(:,:,hist%ihist)=vel(:,:)
- hist%time(hist%ihist)=hist%time(hist%ihist-1)+ab_mover%dtion
+ ihist_prev = abihist_findIndex(hist,-1)
+ hist%time(hist%ihist)=hist%time(ihist_prev)+ab_mover%dtion
 
 end subroutine pred_srkna14
 !!***

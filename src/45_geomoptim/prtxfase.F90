@@ -30,6 +30,7 @@
 !!          | amass:  Mass of ions
 !! hist<type abihist>=Historical record of positions, forces,
 !!                               stresses, cell and energies,
+!! itime= time step
 !! iout=unit number for printing
 !!
 !! OUTPUT
@@ -49,7 +50,7 @@
 
 #include "abi_common.h"
 
-subroutine prtxfase(ab_mover,hist,iout,pos)
+subroutine prtxfase(ab_mover,hist,itime,iout,pos)
 
  use defs_basis
  use m_profiling_abi
@@ -70,7 +71,7 @@ implicit none
 !scalars
  type(abimover),intent(in) :: ab_mover
  type(abihist),intent(in),target :: hist
- integer,intent(in) :: iout
+ integer,intent(in) :: itime,iout
  integer,intent(in) :: pos
 !arrays
 
@@ -321,10 +322,11 @@ implicit none
 &   ' Total energy (etotal) [Ha]=',&
 &   hist%etot(hist%ihist)
 
-   if (hist%ihist>1)then
-     dEabs=hist%etot(hist%ihist)-hist%etot(hist%ihist-1)
+   if (itime>1)then
+     jj = abihist_findIndex(hist,-1)
+     dEabs=hist%etot(hist%ihist)-hist%etot(jj)
      dErel=2*dEabs/(abs(hist%etot(hist%ihist))+&
-&     abs(hist%etot(hist%ihist-1)))
+&     abs(hist%etot(jj)))
      write(message, '(a,a,a,a)' )&
 &     TRIM(message),ch10,ch10,&
 &     ' Difference of energy with previous step (new-old):'

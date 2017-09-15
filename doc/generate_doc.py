@@ -784,7 +784,7 @@ for i, var in enumerate(abinit_vars):
               print("\n For input variable %s, name of tribe '%s' is given. However this name of tribe is not in list_tribes.yml ."%(var.abivarname.strip(),name_tribe[1].strip()))
               topic_error+=1
             cur_content += '<a href="../../topics/generated_files/topic_'+name_tribe[0].strip()+'.html">'+name_tribe[0].strip()+'</a>'
-            if i!=len(name_tribe)-1:
+            if i!=len(topics_name_tribe)-1:
               cur_content+=", "
             else:
               cur_content+="."
@@ -845,7 +845,7 @@ for i, varset_info in enumerate(varsets):
     continue
 
   scriptTab = "\n\
-<input type=\"text\" id=\"InputSearch\" onkeyup=\"searchInput()\" onClick=\"searchInput()\" onblur=\"defaultClick()\" placeholder=\"Search\">\n\
+<input type=\"text\" id=\"InputSearch\" onkeyup=\"searchInput()\" onClick=\"searchInput()\" placeholder=\"Search\">\n\
 "
   alphalinks='\n \n <div class="TabsLetter">'
   for i in string.ascii_uppercase:
@@ -1253,7 +1253,7 @@ for ref in bibtex_dics:
   backlinks_formatted=format_backlinks(backlinks_str)
   line=("@%s{%s,%s") %(entrytype,ID,ref['body'])
   lines_txt+= line
-  bibtex_content+= ('<hr><a id="%s">%s</a> \n <pre>' ) %(ID,ID)
+  bibtex_content+= ('<hr><a id="%s"></a><a href="./bib_biblio.html#%s">%s</a> \n <pre>' ) %(ID,ID,ID)
   bibtex_content+= line+'</pre> \n'
   while ID[0]>cur_let:
     cur_let = chr(ord(cur_let)+1)

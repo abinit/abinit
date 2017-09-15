@@ -476,7 +476,7 @@ subroutine pred_nose(ab_mover,hist,itime,ntime,zDEBUG,iexit)
 !### 06. Update the history with the prediction
 
 !Increase indexes
- hist%ihist=hist%ihist+1
+ hist%ihist=abihist_findIndex(hist,+1)
 
  call var2hist(acell,hist,ab_mover%natom,rprimd,xred,zDEBUG)
  hist%vel(:,:,hist%ihist)=vel(:,:)
