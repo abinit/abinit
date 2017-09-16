@@ -359,7 +359,7 @@ subroutine psp9in(filpsp,ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
 ! end do
 !! ENDDEBUG
 !---
- write(ab_out,*)' psp9in : mmax, amesh, rad(mmax) = ', mmax, amesh, rad(mmax)
+ write(ab_out, '(a,i5,es16.6,es16.6)')' psp9in : mmax, amesh, rad(mmax) = ', mmax, amesh, rad(mmax)
  
 !Check that rad grid is linear starting at zero
  amesh=rad(2)-rad(1)
