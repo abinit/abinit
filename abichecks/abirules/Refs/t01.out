@@ -264,6 +264,8 @@ Work done
  ============================================================= 
  ABINIT Input variables: Check in documentation                
  ============================================================= 
+FAIL:  focktoldfe  does not appear in any var*html files
+FAIL:  focktoldfe  does not appear in the central varset_allvars.html file
 FAIL:  getdelfd  does not appear in any var*html files 
 FAIL:  getdelfd  does not appear in the central varset_allvars.html file 
 FAIL:  getdkdk  does not appear in any var*html files 
@@ -311,6 +313,8 @@ FAIL:  bs_eh_cutoff  does not appear in automatic test suite
 FAIL:  cpum  does not appear in automatic test suite 
 FAIL:  cpuh  does not appear in automatic test suite 
 FAIL:  diismemory  does not appear in automatic test suite 
+FAIL:  fockoptmix  does not appear in automatic test suite
+FAIL:  focktoldfe  does not appear in automatic test suite
 FAIL:  ga_algor  does not appear in automatic test suite 
 FAIL:  getbscoup  does not appear in automatic test suite 
 FAIL:  getdelfd  does not appear in automatic test suite 
