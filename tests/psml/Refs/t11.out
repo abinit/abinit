@@ -1,6 +1,6 @@
 
 .Version 8.5.3 of ABINIT 
-.(sequential version, prepared for a x86_64_linux_gnu5.3 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
 
 .Copyright (C) 1998-2017 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,15 +14,15 @@
  acknowledgments of the ABINIT effort.
  For more information, see http://www.abinit.org .
 
-.Starting date : Fri 15 Sep 2017.
-- ( at 09h45 )
+.Starting date : Sun 17 Sep 2017.
+- ( at 06h07 )
   
 - input  file    -> t11.in
 - output file    -> t11.out
 - root for input  files -> t11i
 - root for output files -> t11o
 
-- inpspheads : Reading pseudopotential header in XML form from /home/buildbot/bb/ABINIT/abiref_gnu_5.3_serial/pouillon_psml-new/tests/Psps_for_tests/13_Al_atom.psml
+- inpspheads : Reading pseudopotential header in XML form from /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/pouillon_psml-new/tests/Psps_for_tests/13_Al_atom.psml
 - psxml2ab: ps_Number_of_Projectors not relativistic     4
 - psxml2ab: ps_Number_of_Projectors scalar relativistic     0
 - psxml2ab: ps_Projector_L     0
@@ -374,16 +374,15 @@ P           mkmem         110
          ecut(hartree)=      8.470   => boxcut(ratio)=   2.02466
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_serial/pouillon_psml-new/tests/Psps_for_tests/13_Al_atom.psml
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_serial/pouillon_psml-new/tests/Psps_for_tests/13_Al_atom.psml
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/pouillon_psml-new/tests/Psps_for_tests/13_Al_atom.psml
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/pouillon_psml-new/tests/Psps_for_tests/13_Al_atom.psml
 - Al    psop-1.1
 - 13.00000   3.00000    170731                znucl, zion, pspdat
     9   -1009    3   -1        -1   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
     0.00000000000000    0.00000000000000    0.00000000000000   rchrg,fchrg,qchrg
      nproj     1     1     1     1
-  psp9in : irelt =            0
-  psp9in : mmax, amesh, rad(mmax) =          600   1.0000000000000000E-002   5.9900000000000002     
- pspatm: epsatm=   10.72055779
+  psp9in : mmax, amesh, rad(mmax) =   600    1.000000E-02    5.990000E+00
+  pspatm : epsatm=   10.72055779
          --- l  ekb(1:nproj) -->
              0    1.556933
              1    0.439408
@@ -498,16 +497,15 @@ _setup2: Arith. and geom. avg. npw (full set) are     124.454     124.404
          ecut(hartree)=      9.680   => boxcut(ratio)=   2.15349
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_serial/pouillon_psml-new/tests/Psps_for_tests/13_Al_atom.psml
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_serial/pouillon_psml-new/tests/Psps_for_tests/13_Al_atom.psml
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/pouillon_psml-new/tests/Psps_for_tests/13_Al_atom.psml
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/pouillon_psml-new/tests/Psps_for_tests/13_Al_atom.psml
 - Al    psop-1.1
 - 13.00000   3.00000    170731                znucl, zion, pspdat
     9   -1009    3   -1        -1   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
     0.00000000000000    0.00000000000000    0.00000000000000   rchrg,fchrg,qchrg
      nproj     1     1     1     1
-  psp9in : irelt =            0
-  psp9in : mmax, amesh, rad(mmax) =          600   1.0000000000000000E-002   5.9900000000000002     
- pspatm: epsatm=   10.72055779
+  psp9in : mmax, amesh, rad(mmax) =   600    1.000000E-02    5.990000E+00
+  pspatm : epsatm=   10.72055779
          --- l  ekb(1:nproj) -->
              0    1.556933
              1    0.439408
@@ -621,16 +619,15 @@ _setup2: Arith. and geom. avg. npw (full set) are     151.746     151.731
          ecut(hartree)=     10.890   => boxcut(ratio)=   2.03033
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_serial/pouillon_psml-new/tests/Psps_for_tests/13_Al_atom.psml
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_serial/pouillon_psml-new/tests/Psps_for_tests/13_Al_atom.psml
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/pouillon_psml-new/tests/Psps_for_tests/13_Al_atom.psml
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/pouillon_psml-new/tests/Psps_for_tests/13_Al_atom.psml
 - Al    psop-1.1
 - 13.00000   3.00000    170731                znucl, zion, pspdat
     9   -1009    3   -1        -1   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
     0.00000000000000    0.00000000000000    0.00000000000000   rchrg,fchrg,qchrg
      nproj     1     1     1     1
-  psp9in : irelt =            0
-  psp9in : mmax, amesh, rad(mmax) =          600   1.0000000000000000E-002   5.9900000000000002     
- pspatm: epsatm=   10.72055779
+  psp9in : mmax, amesh, rad(mmax) =   600    1.000000E-02    5.990000E+00
+  pspatm : epsatm=   10.72055779
          --- l  ekb(1:nproj) -->
              0    1.556933
              1    0.439408
@@ -744,16 +741,15 @@ _setup2: Arith. and geom. avg. npw (full set) are     181.378     181.338
          ecut(hartree)=     12.100   => boxcut(ratio)=   2.17358
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_serial/pouillon_psml-new/tests/Psps_for_tests/13_Al_atom.psml
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_serial/pouillon_psml-new/tests/Psps_for_tests/13_Al_atom.psml
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/pouillon_psml-new/tests/Psps_for_tests/13_Al_atom.psml
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/pouillon_psml-new/tests/Psps_for_tests/13_Al_atom.psml
 - Al    psop-1.1
 - 13.00000   3.00000    170731                znucl, zion, pspdat
     9   -1009    3   -1        -1   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
     0.00000000000000    0.00000000000000    0.00000000000000   rchrg,fchrg,qchrg
      nproj     1     1     1     1
-  psp9in : irelt =            0
-  psp9in : mmax, amesh, rad(mmax) =          600   1.0000000000000000E-002   5.9900000000000002     
- pspatm: epsatm=   10.72055779
+  psp9in : mmax, amesh, rad(mmax) =   600    1.000000E-02    5.990000E+00
+  pspatm : epsatm=   10.72055779
          --- l  ekb(1:nproj) -->
              0    1.556933
              1    0.439408
@@ -1402,51 +1398,10 @@ P           mkmem         110
 
 ================================================================================
 
-- Total cpu        time (s,m,h):         48.8        0.81      0.014
-- Total wall clock time (s,m,h):         62.5        1.04      0.017
--
-- For major independent code sections, cpu and wall times (sec),
--  as well as % of the time and number of calls for node 0-
--<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = 0>
-- cpu_time =           48.8, wall_time =           62.5
--
-- routine                        cpu     %       wall     %      number of calls  Gflops    Speedup Efficacity
--                                                                  (-1=no count)
-- fourwf%(pot)                  24.471  50.1     24.160  38.6         188939      -1.00        1.01       1.01
-- nonlop(apply)                  7.801  16.0      7.533  12.0         188939      -1.00        1.04       1.04
-- projbd                         3.596   7.4      3.056   4.9         289878      -1.00        1.18       1.18
-- invars2                        1.970   4.0      1.973   3.2              4      -1.00        1.00       1.00
-- abinit(2)                      1.903   3.9      1.904   3.0              1      -1.00        1.00       1.00
-- vtowfk(ssdiag)                 1.630   3.3      1.515   2.4             -1      -1.00        1.08       1.08
-- pspini                         1.517   3.1      1.519   2.4              4      -1.00        1.00       1.00
-- getghc-other                   0.904   1.9      1.844   2.9             -1      -1.00        0.49       0.49
-- fourwf%(den)                   0.674   1.4      0.661   1.1           8864      -1.00        1.02       1.02
-- others (104)                   0.788   1.6      0.798   1.3             -1      -1.00        0.99       0.99
--<END_TIMER>
--
-- subtotal                      45.254  92.7     44.963  71.9                                  1.01       1.01
 
-- For major independent code sections, cpu and wall times (sec),
-- as well as % of the total time and number of calls 
+- Timing analysis has been suppressed with timopt=0
 
--<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = world>
-- cpu_time =          48.8, wall_time =          62.5
--
-- routine                         cpu     %       wall     %      number of calls Gflops    Speedup Efficacity
--                                                                  (-1=no count)
-- fourwf%(pot)                  24.471  50.1     24.160  38.6         188939      -1.00        1.01       1.01
-- nonlop(apply)                  7.801  16.0      7.533  12.0         188939      -1.00        1.04       1.04
-- projbd                         3.596   7.4      3.056   4.9         289878      -1.00        1.18       1.18
-- invars2                        1.970   4.0      1.973   3.2              4      -1.00        1.00       1.00
-- abinit(2)                      1.903   3.9      1.904   3.0              1      -1.00        1.00       1.00
-- vtowfk(ssdiag)                 1.630   3.3      1.515   2.4             -1      -1.00        1.08       1.08
-- pspini                         1.517   3.1      1.519   2.4              4      -1.00        1.00       1.00
-- getghc-other                   0.904   1.9      1.844   2.9             -1      -1.00        0.49       0.49
-- fourwf%(den)                   0.674   1.4      0.661   1.1           8864      -1.00        1.02       1.02
-- others (104)                   0.788   1.6      0.798   1.3             -1      -1.00        0.99       0.99
--<END_TIMER>
 
-- subtotal                      45.254  92.7     44.963  71.9                                  1.01       1.01
 
 ================================================================================
 
@@ -1517,10 +1472,10 @@ P           mkmem         110
 - Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7
 - Comment : the original paper describing the ABINIT project.
 -
-- Proc.   0 individual time (sec): cpu=         48.8  wall=         62.5
+- Proc.   0 individual time (sec): cpu=         43.2  wall=         43.7
 
 ================================================================================
 
  Calculation completed.
 .Delivered   4 WARNINGs and   4 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         48.8  wall=         62.5
++Overall time at end (sec) : cpu=         43.2  wall=         43.7

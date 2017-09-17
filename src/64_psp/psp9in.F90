@@ -153,8 +153,8 @@ subroutine psp9in(filpsp,ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
 !Don Hamann's code
  oncvpsp = (trim(creator(1:7)) .eq. trim(oncvpsp_name))
 !DEBUG
- write(std_out,*)' psp9in : creator : ', creator
- write(std_out,*)' psp9in : oncvpsp : ', oncvpsp
+!write(std_out,*)' psp9in : creator : ', creator
+!write(std_out,*)' psp9in : oncvpsp : ', oncvpsp
 !ENDDEBUG
 
 ! SIESTA's ATOM uses spherical harmonics, while ONCVPSP uses Legendre
@@ -246,17 +246,17 @@ subroutine psp9in(filpsp,ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
  end do
 
 !DEBUG
- write(std_out,*)' psp9in : atomic number'
- write(std_out,*)' psp9in :   z = ', z
- write(std_out,*)' psp9in : valence charge of the reference configuration'
- write(std_out,*)' psp9in :   chgvps = ', chgvps
- write(std_out,*)' psp9in : nominal valence charge'
- write(std_out,*)' psp9in :   zval = ', zval
- write(std_out,*)' psp9in :   mqgrid_vl = ', mqgrid_vl
- write(std_out,*)' psp9in : parameters to define the points of the grid'
- write(std_out,*)' psp9in :   amesh = ', amesh
- write(std_out,*)' psp9in :   rmax = ', rmax
- write(std_out,*)' psp9in :   mmax = ', mmax
+!write(std_out,*)' psp9in : atomic number'
+!write(std_out,*)' psp9in :   z = ', z
+!write(std_out,*)' psp9in : valence charge of the reference configuration'
+!write(std_out,*)' psp9in :   chgvps = ', chgvps
+!write(std_out,*)' psp9in : nominal valence charge'
+!write(std_out,*)' psp9in :   zval = ', zval
+!write(std_out,*)' psp9in :   mqgrid_vl = ', mqgrid_vl
+!write(std_out,*)' psp9in : parameters to define the points of the grid'
+!write(std_out,*)' psp9in :   amesh = ', amesh
+!write(std_out,*)' psp9in :   rmax = ', rmax
+!write(std_out,*)' psp9in :   mmax = ', mmax
 !ENDDEBUG
 
 ! TODO: should be simple to average these and get difference for SREL+SOC,
@@ -338,10 +338,10 @@ subroutine psp9in(filpsp,ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
 ! is relativistic or not
 
 !DEBUG
- write(std_out,*)' psp9in : pseudopotential generation relativity ', ps_Relativity(psxml) 
- write(std_out,*)' psp9in : SOC pseudopotential? (1=yes, 0 =no) '
- write(std_out,*)' psp9in : irelt = ', irelt
- write(ab_out,*)' psp9in : irelt = ', irelt
+!write(std_out,*)' psp9in : pseudopotential generation relativity ', ps_Relativity(psxml) 
+!write(std_out,*)' psp9in : SOC pseudopotential? (1=yes, 0 =no) '
+!write(std_out,*)' psp9in : irelt = ', irelt
+!write(ab_out,*)' psp9in : irelt = ', irelt
 !ENDDEBUG
 
 !Can now allocate grids, potentials and projectors
@@ -359,7 +359,7 @@ subroutine psp9in(filpsp,ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
 ! end do
 !! ENDDEBUG
 !---
- write(ab_out, '(a,i5,es16.6,es16.6)')' psp9in : mmax, amesh, rad(mmax) = ', mmax, amesh, rad(mmax)
+ write(ab_out, '(a,i5,es16.6,es16.6)')'  psp9in : mmax, amesh, rad(mmax) = ', mmax, amesh, rad(mmax)
  
 !Check that rad grid is linear starting at zero
  amesh=rad(2)-rad(1)

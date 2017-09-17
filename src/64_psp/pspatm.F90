@@ -576,7 +576,7 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
    end if
 
    if (pspcod/=7.and.pspcod/=17) then
-     write(message, '(a,f14.8,a,a)' ) ' pspatm: epsatm=',epsatm,ch10,&
+     write(message, '(a,f14.8,a,a)' ) '  pspatm : epsatm=',epsatm,ch10,&
 &     '         --- l  ekb(1:nproj) -->'
      call wrtout(ab_out,message,'COLL')
      call wrtout(std_out,  message,'COLL')

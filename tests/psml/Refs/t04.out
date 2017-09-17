@@ -1,6 +1,6 @@
 
-.Version 8.5.2 of ABINIT 
-.(sequential version, prepared for a x86_64_linux_gnu5.4 computer) 
+.Version 8.5.3 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
 
 .Copyright (C) 1998-2017 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see http://www.abinit.org .
 
-.Starting date : Mon  7 Aug 2017.
-- ( at 12h10 )
+.Starting date : Sun 17 Sep 2017.
+- ( at 06h04 )
   
 - input  file    -> t04.in
 - output file    -> t04.out
@@ -95,7 +95,7 @@ _ WF disk file :      3.376 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
 --------------------------------------------------------------------------------
 -
 - outvars: echo of selected default values                                      
--   iomode0 =  0 , fftalg0 =112 , wfoptalg0 =  0
+-   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
 -
 - outvars: echo of global parameters not present in the input file              
 -  max_nthreads =    0
@@ -109,7 +109,7 @@ _ WF disk file :      3.376 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
           dilatmx      1.10000000E+00
              ecut      8.97000000E+00 Hartree
            ecutsm      5.00000000E-01 Hartree
--          fftalg         112
+-          fftalg         312
            iatfix        1
              iscf           5
               ixc     -101130
@@ -355,15 +355,15 @@ P           mkmem         110
          ecut(hartree)=     10.854   => boxcut(ratio)=   2.07555
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/pouillon/abinit/pouillon/tests/Psps_for_tests/13_Al_psml.psp8
-- pspatm: opening atomic psp file    /home/pouillon/abinit/pouillon/tests/Psps_for_tests/13_Al_psml.psp8
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/pouillon_psml-new/tests/Psps_for_tests/13_Al_psml.psp8
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/pouillon_psml-new/tests/Psps_for_tests/13_Al_psml.psp8
 - Al    ONCVPSP-3.3.0  r_core=   1.76802   1.76802   1.70587
 - 13.00000   3.00000    170801                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
     5.99000000000000    5.00000000000000    0.00000000000000   rchrg,fchrg,qchrg
      nproj     2     2     2
      extension_switch     1
- pspatm: epsatm=    4.08140610
+  pspatm : epsatm=    4.08140610
          --- l  ekb(1:nproj) -->
              0    5.126667    0.728291
              1    7.287548    0.832437
@@ -435,7 +435,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     169.478     169.451
  Components of total free energy (in Hartree) :
 
     Kinetic energy  =  9.15874577756196E-01
-    Hartree energy  =  4.73220206204228E-03
+    Hartree energy  =  4.73220206204227E-03
     XC energy       = -1.11398377724334E+00
     Ewald energy    = -2.80666331971047E+00
     PspCore energy  =  1.23295050957513E-01
@@ -536,12 +536,12 @@ _setup2: Arith. and geom. avg. npw (full set) are     177.640     177.609
 --------------------------------------------------------------------------------
  Components of total free energy (in Hartree) :
 
-    Kinetic energy  =  8.88845666367968E-01
+    Kinetic energy  =  8.88845666367967E-01
     Hartree energy  =  4.25485543932582E-03
     XC energy       = -1.10119835220533E+00
     Ewald energy    = -2.76403045915788E+00
     PspCore energy  =  1.17761454617771E-01
-    Loc. psp. energy=  1.56011244415211E-01
+    Loc. psp. energy=  1.56011244415213E-01
     NL   psp  energy=  3.85771801045861E-01
     >>>>> Internal E= -2.31258378947708E+00
 
@@ -638,20 +638,20 @@ _setup2: Arith. and geom. avg. npw (full set) are     185.890     185.849
 --------------------------------------------------------------------------------
  Components of total free energy (in Hartree) :
 
-    Kinetic energy  =  8.63511571502204E-01
-    Hartree energy  =  3.88649749412677E-03
+    Kinetic energy  =  8.63511571502208E-01
+    Hartree energy  =  3.88649749412682E-03
     XC energy       = -1.08896026310799E+00
     Ewald energy    = -2.72267339493109E+00
     PspCore energy  =  1.12554102829310E-01
     Loc. psp. energy=  1.37979798876858E-01
-    NL   psp  energy=  3.80453299845110E-01
+    NL   psp  energy=  3.80453299845111E-01
     >>>>> Internal E= -2.31324838749147E+00
 
-    -kT*entropy     = -3.45901483058436E-03
+    -kT*entropy     = -3.45901483058437E-03
     >>>>>>>>> Etotal= -2.31670740232205E+00
 
  Other information on the energy :
-    Total energy(eV)= -6.30408144158889E+01 ; Band energy (Ha)=   2.9738800618E-01
+    Total energy(eV)= -6.30408144158888E+01 ; Band energy (Ha)=   2.9738800618E-01
 --------------------------------------------------------------------------------
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -748,14 +748,14 @@ _setup2: Arith. and geom. avg. npw (full set) are     194.196     194.153
 --------------------------------------------------------------------------------
  Components of total free energy (in Hartree) :
 
-    Kinetic energy  =  8.39788341921332E-01
-    Hartree energy  =  3.63758118723994E-03
+    Kinetic energy  =  8.39788341921330E-01
+    Hartree energy  =  3.63758118723984E-03
     XC energy       = -1.07725296695752E+00
     Ewald energy    = -2.68253570360532E+00
     PspCore energy  =  1.07649302630729E-01
     Loc. psp. energy=  1.19340672754531E-01
-    NL   psp  energy=  3.76081775867812E-01
-    >>>>> Internal E= -2.31329099620119E+00
+    NL   psp  energy=  3.76081775867811E-01
+    >>>>> Internal E= -2.31329099620120E+00
 
     -kT*entropy     = -3.58525859202901E-03
     >>>>>>>>> Etotal= -2.31687625479322E+00
@@ -794,7 +794,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     194.196     194.153
             fcart2    -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
             fcart3    -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
             fcart4    -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
--          fftalg         112
+-          fftalg         312
            iatfix        1
              iscf           5
               ixc     -101130
@@ -1328,43 +1328,10 @@ P           mkmem         110
 
 ================================================================================
 
-- Total cpu        time (s,m,h):       1339.6       22.33      0.372
-- Total wall clock time (s,m,h):        720.1       12.00      0.200
--
-- For major independent code sections, cpu and wall times (sec),
--  as well as % of the time and number of calls for node 0-
--<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = 0>
-- cpu_time =         1339.6, wall_time =          720.1
--
-- routine                        cpu     %       wall     %      number of calls  Gflops    Speedup Efficacity
--                                                                  (-1=no count)
-- fourwf%(pot)                 858.456  64.1    448.287  62.3         175918      -1.00        1.91       1.91
-- vtowfk(ssdiag)               222.268  16.6    116.403  16.2             -1      -1.00        1.91       1.91
-- nonlop(apply)                129.463   9.7     69.392   9.6         175918      -1.00        1.87       1.87
-- getghc-other                  39.921   3.0     21.417   3.0             -1      -1.00        1.86       1.86
-- projbd                        23.046   1.7     11.842   1.6         279236      -1.00        1.95       1.95
-- others (108)                  16.785   1.3     28.078   3.9             -1      -1.00        0.60       0.60
--<END_TIMER>
--
-- subtotal                    1289.939  96.3    695.419  96.6                                  1.85       1.85
 
-- For major independent code sections, cpu and wall times (sec),
-- as well as % of the total time and number of calls 
+- Timing analysis has been suppressed with timopt=0
 
--<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = world>
-- cpu_time =        1339.6, wall_time =         720.1
--
-- routine                         cpu     %       wall     %      number of calls Gflops    Speedup Efficacity
--                                                                  (-1=no count)
-- fourwf%(pot)                 858.456  64.1    448.287  62.3         175918      -1.00        1.91       1.91
-- vtowfk(ssdiag)               222.268  16.6    116.403  16.2             -1      -1.00        1.91       1.91
-- nonlop(apply)                129.463   9.7     69.392   9.6         175918      -1.00        1.87       1.87
-- getghc-other                  39.921   3.0     21.417   3.0             -1      -1.00        1.86       1.86
-- projbd                        23.046   1.7     11.842   1.6         279236      -1.00        1.95       1.95
-- others (108)                  16.785   1.3     28.078   3.9             -1      -1.00        0.60       0.60
--<END_TIMER>
 
-- subtotal                    1289.939  96.3    695.419  96.6                                  1.85       1.85
 
 ================================================================================
 
@@ -1431,10 +1398,10 @@ P           mkmem         110
 - Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
 - the licence allows the authors to put it on the Web).
 -
-- Proc.   0 individual time (sec): cpu=       1339.6  wall=        720.1
+- Proc.   0 individual time (sec): cpu=         40.9  wall=         44.8
 
 ================================================================================
 
  Calculation completed.
 .Delivered   1 WARNINGs and   5 COMMENTs to log file.
-+Overall time at end (sec) : cpu=       1339.6  wall=        720.1
++Overall time at end (sec) : cpu=         40.9  wall=         44.8

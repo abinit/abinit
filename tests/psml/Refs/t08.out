@@ -1,6 +1,6 @@
 
-.Version 8.5.2 of ABINIT 
-.(sequential version, prepared for a x86_64_linux_gnu5.4 computer) 
+.Version 8.5.3 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
 
 .Copyright (C) 1998-2017 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,15 +14,15 @@
  acknowledgments of the ABINIT effort.
  For more information, see http://www.abinit.org .
 
-.Starting date : Mon  7 Aug 2017.
-- ( at 12h10 )
+.Starting date : Sun 17 Sep 2017.
+- ( at 06h06 )
   
 - input  file    -> t08.in
 - output file    -> t08.out
 - root for input  files -> t08i
 - root for output files -> t08o
 
-- inpspheads : Reading pseudopotential header in XML form from /home/pouillon/abinit/pouillon/tests/Psps_for_tests/13_Al_oncv.psml
+- inpspheads : Reading pseudopotential header in XML form from /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/pouillon_psml-new/tests/Psps_for_tests/13_Al_oncv.psml
 - psxml2ab: ps_Number_of_Projectors not relativistic     0
 - psxml2ab: ps_Number_of_Projectors scalar relativistic     6
 - psxml2ab: ps_Projector_L     0
@@ -118,7 +118,7 @@ _ WF disk file :      3.376 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
 --------------------------------------------------------------------------------
 -
 - outvars: echo of selected default values                                      
--   iomode0 =  0 , fftalg0 =112 , wfoptalg0 =  0
+-   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
 -
 - outvars: echo of global parameters not present in the input file              
 -  max_nthreads =    0
@@ -132,7 +132,7 @@ _ WF disk file :      3.376 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
           dilatmx      1.10000000E+00
              ecut      8.97000000E+00 Hartree
            ecutsm      5.00000000E-01 Hartree
--          fftalg         112
+-          fftalg         312
            iatfix        1
              iscf           5
               ixc     -101130
@@ -378,16 +378,15 @@ P           mkmem         110
          ecut(hartree)=     10.854   => boxcut(ratio)=   2.07555
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/pouillon/abinit/pouillon/tests/Psps_for_tests/13_Al_oncv.psml
-- pspatm: opening atomic psp file    /home/pouillon/abinit/pouillon/tests/Psps_for_tests/13_Al_oncv.psml
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/pouillon_psml-new/tests/Psps_for_tests/13_Al_oncv.psml
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/pouillon_psml-new/tests/Psps_for_tests/13_Al_oncv.psml
 - Al    ONCVPSP-3.3.0+psml-3.3.0-72 (s
 - 13.00000   3.00000    170801                znucl, zion, pspdat
     9 -101130    2   -1        -1   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
     5.98000000000000    1.00000000000000    0.00000000000000   rchrg,fchrg,qchrg
      nproj     2     2     2
-  psp9in : irelt =            0
-  psp9in : mmax, amesh, rad(mmax) =          600   1.0000000000000000E-002   5.9900000000000002     
- pspatm: epsatm=    4.08140610
+  psp9in : mmax, amesh, rad(mmax) =   600    1.000000E-02    5.990000E+00
+  pspatm : epsatm=    4.08140610
          --- l  ekb(1:nproj) -->
              0    5.126667    0.728291
              1    7.287548    0.832437
@@ -458,20 +457,20 @@ _setup2: Arith. and geom. avg. npw (full set) are     169.478     169.451
 --------------------------------------------------------------------------------
  Components of total free energy (in Hartree) :
 
-    Kinetic energy  =  9.15874661247795E-01
-    Hartree energy  =  4.73218493949696E-03
+    Kinetic energy  =  9.15874661247792E-01
+    Hartree energy  =  4.73218493949693E-03
     XC energy       = -1.11398380420622E+00
     Ewald energy    = -2.80666331971047E+00
     PspCore energy  =  1.23295050983528E-01
-    Loc. psp. energy=  1.73424918534028E-01
-    NL   psp  energy=  3.92126980609578E-01
+    Loc. psp. energy=  1.73424918534031E-01
+    NL   psp  energy=  3.92126980609575E-01
     >>>>> Internal E= -2.31119332760226E+00
 
-    -kT*entropy     = -3.19593568830586E-03
+    -kT*entropy     = -3.19593568830584E-03
     >>>>>>>>> Etotal= -2.31438926329056E+00
 
  Other information on the energy :
-    Total energy(eV)= -6.29777346448621E+01 ; Band energy (Ha)=   3.6700459542E-01
+    Total energy(eV)= -6.29777346448622E+01 ; Band energy (Ha)=   3.6700459542E-01
 --------------------------------------------------------------------------------
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -560,13 +559,13 @@ _setup2: Arith. and geom. avg. npw (full set) are     177.640     177.609
 --------------------------------------------------------------------------------
  Components of total free energy (in Hartree) :
 
-    Kinetic energy  =  8.88845729847004E-01
-    Hartree energy  =  4.25484025969985E-03
+    Kinetic energy  =  8.88845729847005E-01
+    Hartree energy  =  4.25484025969976E-03
     XC energy       = -1.10119837855008E+00
     Ewald energy    = -2.76403045915788E+00
     PspCore energy  =  1.17761454642618E-01
-    Loc. psp. energy=  1.56010868564145E-01
-    NL   psp  energy=  3.85772334164956E-01
+    Loc. psp. energy=  1.56010868564143E-01
+    NL   psp  energy=  3.85772334164958E-01
     >>>>> Internal E= -2.31258361022954E+00
 
     -kT*entropy     = -3.32912204298481E-03
@@ -662,16 +661,16 @@ _setup2: Arith. and geom. avg. npw (full set) are     185.890     185.849
 --------------------------------------------------------------------------------
  Components of total free energy (in Hartree) :
 
-    Kinetic energy  =  8.63511615880021E-01
-    Hartree energy  =  3.88648396402285E-03
-    XC energy       = -1.08896028873874E+00
+    Kinetic energy  =  8.63511615880019E-01
+    Hartree energy  =  3.88648396402288E-03
+    XC energy       = -1.08896028873873E+00
     Ewald energy    = -2.72267339493109E+00
-    PspCore energy  =  1.12554102853058E-01
+    PspCore energy  =  1.12554102853059E-01
     Loc. psp. energy=  1.37979442966370E-01
-    NL   psp  energy=  3.80453830308273E-01
+    NL   psp  energy=  3.80453830308270E-01
     >>>>> Internal E= -2.31324820769808E+00
 
-    -kT*entropy     = -3.45901718367616E-03
+    -kT*entropy     = -3.45901718367615E-03
     >>>>>>>>> Etotal= -2.31670722488176E+00
 
  Other information on the energy :
@@ -772,12 +771,12 @@ _setup2: Arith. and geom. avg. npw (full set) are     194.196     194.153
 --------------------------------------------------------------------------------
  Components of total free energy (in Hartree) :
 
-    Kinetic energy  =  8.39788368234166E-01
+    Kinetic energy  =  8.39788368234168E-01
     Hartree energy  =  3.63756902732410E-03
-    XC energy       = -1.07725299171696E+00
+    XC energy       = -1.07725299171697E+00
     Ewald energy    = -2.68253570360532E+00
     PspCore energy  =  1.07649302653443E-01
-    Loc. psp. energy=  1.19340335492759E-01
+    Loc. psp. energy=  1.19340335492758E-01
     NL   psp  energy=  3.76082303529557E-01
     >>>>> Internal E= -2.31329081638504E+00
 
@@ -818,7 +817,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     194.196     194.153
             fcart2    -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
             fcart3    -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
             fcart4    -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
--          fftalg         112
+-          fftalg         312
            iatfix        1
              iscf           5
               ixc     -101130
@@ -1352,43 +1351,10 @@ P           mkmem         110
 
 ================================================================================
 
-- Total cpu        time (s,m,h):       1325.8       22.10      0.368
-- Total wall clock time (s,m,h):        718.1       11.97      0.199
--
-- For major independent code sections, cpu and wall times (sec),
--  as well as % of the time and number of calls for node 0-
--<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = 0>
-- cpu_time =         1325.8, wall_time =          718.1
--
-- routine                        cpu     %       wall     %      number of calls  Gflops    Speedup Efficacity
--                                                                  (-1=no count)
-- fourwf%(pot)                 844.156  63.7    442.758  61.7         175918      -1.00        1.91       1.91
-- vtowfk(ssdiag)               219.743  16.6    116.482  16.2             -1      -1.00        1.89       1.89
-- nonlop(apply)                134.304  10.1     72.831  10.1         175918      -1.00        1.84       1.84
-- getghc-other                  38.578   2.9     20.657   2.9             -1      -1.00        1.87       1.87
-- projbd                        21.719   1.6     11.572   1.6         279236      -1.00        1.88       1.88
-- others (108)                  16.304   1.2     28.449   4.0             -1      -1.00        0.57       0.57
--<END_TIMER>
--
-- subtotal                    1274.804  96.2    692.749  96.5                                  1.84       1.84
 
-- For major independent code sections, cpu and wall times (sec),
-- as well as % of the total time and number of calls 
+- Timing analysis has been suppressed with timopt=0
 
--<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = world>
-- cpu_time =        1325.8, wall_time =         718.1
--
-- routine                         cpu     %       wall     %      number of calls Gflops    Speedup Efficacity
--                                                                  (-1=no count)
-- fourwf%(pot)                 844.156  63.7    442.758  61.7         175918      -1.00        1.91       1.91
-- vtowfk(ssdiag)               219.743  16.6    116.482  16.2             -1      -1.00        1.89       1.89
-- nonlop(apply)                134.304  10.1     72.831  10.1         175918      -1.00        1.84       1.84
-- getghc-other                  38.578   2.9     20.657   2.9             -1      -1.00        1.87       1.87
-- projbd                        21.719   1.6     11.572   1.6         279236      -1.00        1.88       1.88
-- others (108)                  16.304   1.2     28.449   4.0             -1      -1.00        0.57       0.57
--<END_TIMER>
 
-- subtotal                    1274.804  96.2    692.749  96.5                                  1.84       1.84
 
 ================================================================================
 
@@ -1459,10 +1425,10 @@ P           mkmem         110
 - Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7
 - Comment : the original paper describing the ABINIT project.
 -
-- Proc.   0 individual time (sec): cpu=       1325.8  wall=        718.1
+- Proc.   0 individual time (sec): cpu=         40.4  wall=         40.9
 
 ================================================================================
 
  Calculation completed.
 .Delivered   0 WARNINGs and   5 COMMENTs to log file.
-+Overall time at end (sec) : cpu=       1325.8  wall=        718.1
++Overall time at end (sec) : cpu=         40.4  wall=         40.9
