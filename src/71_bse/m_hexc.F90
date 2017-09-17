@@ -50,7 +50,7 @@ MODULE m_hexc
  use m_bse_io,            only : exc_read_rcblock, exc_write_optme, exc_ham_ncwrite
  use m_pawtab,            only : pawtab_type
  use m_vcoul,             only : vcoul_t
- use m_interp,            only : interpolator_t, interpolator_init, interpolator_normalize, &
+ use m_bseinterp,            only : interpolator_t, interpolator_init, interpolator_normalize, &
 &                    interpolator_free, int_alloc_work, int_free_work
 
  implicit none

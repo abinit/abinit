@@ -1,8 +1,8 @@
 
-.Version 8.3.0 of ABINIT 
+.Version 8.5.3 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
 
-.Copyright (C) 1998-2016 ABINIT group . 
+.Copyright (C) 1998-2017 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see http://www.abinit.org .
 
-.Starting date : Sat 21 Jan 2017.
-- ( at 15h12 )
+.Starting date : Tue 12 Sep 2017.
+- ( at 17h52 )
   
 - input  file    -> t04.in
 - output file    -> t04.out
@@ -401,14 +401,14 @@ P           mkmem3         29
          ecut(hartree)=      8.000   => boxcut(ratio)=   2.08390
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit_eph/tests/Psps_for_tests/Al-psval.psp8
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit_eph/tests/Psps_for_tests/Al-psval.psp8
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/pouillon_psml-new/tests/Psps_for_tests/Al-psval.psp8
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/pouillon_psml-new/tests/Psps_for_tests/Al-psval.psp8
 - Al    ONCVPSP  r_core=  1.77  1.77  1.71
 - 13.00000   3.00000    150709                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
     5.99000000000000    0.65000000000000    0.00000000000000   rchrg,fchrg,qchrg
      nproj     2     2     2
-extension_switch     1
+     extension_switch     1
  pspatm: epsatm=    5.28546056
          --- l  ekb(1:nproj) -->
              0    5.190663    0.741808
@@ -442,7 +442,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     114.029     113.987
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
     1        2.00000          0.89763209
-- Writing interpolate bands to file: t04o_DS1_INTERP
+- Writing interpolated bands to file: t04o_DS1_INTERP
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -3344,7 +3344,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     114.029     113.987
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
     1        2.00000          0.89763209
-- Writing interpolate bands to file: t04o_DS3_INTERP
+- Writing interpolated bands to file: t04o_DS3_INTERP
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -3736,10 +3736,10 @@ P           mkmem3         29
 - Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7
 - Comment : the original paper describing the ABINIT project.
 -
-- Proc.   0 individual time (sec): cpu=          8.8  wall=          9.0
+- Proc.   0 individual time (sec): cpu=          9.7  wall=          9.9
 
 ================================================================================
 
  Calculation completed.
 .Delivered  16 WARNINGs and   0 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          8.8  wall=          9.0
++Overall time at end (sec) : cpu=          9.7  wall=          9.9
