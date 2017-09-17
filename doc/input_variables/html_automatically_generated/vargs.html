@@ -694,8 +694,8 @@ for small (but non-zero) values of the wavevector.
 <br><font id="definition">Mnemonics: model DIElectric MIXing factor</font>
 <br><font id="characteristic">Characteristic: </font>
 <br><font id="vartype">Variable type: real</font>
-<br><font id="default">Default is 1.0 if <a href="varint.html#usepaw">usepaw</a>==0 or <a href="vargs.html#iprcel">iprcel</a> !=0,
-0.7 if <a href="varint.html#usepaw">usepaw</a>==1 or <a href="vargs.html#iprcel">iprcel</a>==0,
+<br><font id="default">Default is 0.7 if <a href="varint.html#usepaw">usepaw</a>==1 or <a href="vargs.html#iprcel">iprcel</a>==0,
+1.0 if <a href="varint.html#usepaw">usepaw</a>==0 or <a href="vargs.html#iprcel">iprcel</a> !=0,
 None otherwise.
 </font>
 <br><br><font id="requires">
@@ -737,8 +737,8 @@ for self-consistency.
 <br><font id="definition">Mnemonics: model DIElectric MIXing factor for the MAGgnetization</font>
 <br><font id="characteristic">Characteristic: </font>
 <br><font id="vartype">Variable type: real</font>
-<br><font id="default">Default is <a href="vargs.html#diemix">diemix</a> if 70 < <a href="vargs.html#iprcel">iprcel</a> and <a href="vargs.html#iprcel">iprcel</a> < 80,
-<a href="vargs.html#diemix">diemix</a> if <a href="vargs.html#iprcel">iprcel</a>==0,
+<br><font id="default">Default is <a href="vargs.html#diemix">diemix</a> if <a href="vargs.html#iprcel">iprcel</a>==0,
+<a href="vargs.html#diemix">diemix</a> if 70 < <a href="vargs.html#iprcel">iprcel</a> and <a href="vargs.html#iprcel">iprcel</a> < 80,
 <a href="vargs.html#diemix">diemix</a> if <a href="varbas.html#iscf">iscf</a><10,
 -<a href="vargs.html#diemix">diemix</a> otherwise.
 </font>
@@ -838,9 +838,9 @@ output of eigenvalues (and eventual phonon frequencies)
 <br><font id="definition">Mnemonics: Factor for the number of BANDs</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#input_only">INPUT_ONLY</a></font>
 <br><font id="vartype">Variable type: real</font>
-<br><font id="default">Default is 0.5 if <a href="varbas.html#occopt">occopt</a>>2,
-0.0 if <a href="varbas.html#usewvl">usewvl</a>==1,
+<br><font id="default">Default is 0.0 if <a href="varbas.html#usewvl">usewvl</a>==1,
 0.125 if <a href="varbas.html#occopt">occopt</a>==1,
+0.5 if <a href="varbas.html#occopt">occopt</a>>2,
 0.0 otherwise.
 </font>
 <br><font id="text">
@@ -1773,8 +1773,8 @@ built.
 <br><font id="definition">Mnemonics: Number of BanDs for the BUFfer</font>
 <br><font id="characteristic">Characteristic: </font>
 <br><font id="vartype">Variable type: integer</font>
-<br><font id="default">Default is 2*<a href="vargs.html#nspinor">nspinor</a> if <a href="vargs.html#optdriver">optdriver</a>==0 and <a href="varbas.html#iscf">iscf</a><0,
-2*<a href="vargs.html#nspinor">nspinor</a> if <a href="vargs.html#optdriver">optdriver</a>==1 and 3<=<a href="varbas.html#occopt">occopt</a> and <a href="varbas.html#occopt">occopt</a><= 8,
+<br><font id="default">Default is 2*<a href="vargs.html#nspinor">nspinor</a> if <a href="vargs.html#optdriver">optdriver</a>==1 and 3<=<a href="varbas.html#occopt">occopt</a> and <a href="varbas.html#occopt">occopt</a><= 8,
+2*<a href="vargs.html#nspinor">nspinor</a> if <a href="vargs.html#optdriver">optdriver</a>==0 and <a href="varbas.html#iscf">iscf</a><0,
 0 otherwise.
 </font>
 <br><font id="text">
