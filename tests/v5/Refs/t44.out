@@ -187,7 +187,7 @@ P           mkmem           1
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm: epsatm=   34.79471556
+ pspatm : epsatm=   34.79471556
          --- l  ekb(1:nproj) -->
              0   -0.901401   -0.217891    1.555038
              1   -0.989901    1.571994
@@ -215,7 +215,7 @@ P           mkmem           1
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm: epsatm=   34.79471556
+ pspatm : epsatm=   34.79471556
          --- l  ekb(1:nproj) -->
              0   -0.901401   -0.217891    1.555038
              1   -0.989901    1.571994
@@ -243,7 +243,7 @@ P           mkmem           1
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm: epsatm=   34.79471556
+ pspatm : epsatm=   34.79471556
          --- l  ekb(1:nproj) -->
              0   -0.901401   -0.217891    1.555038
              1   -0.989901    1.571994
@@ -377,7 +377,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    1045.000    1045.000
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm: epsatm=   34.79471556
+ pspatm : epsatm=   34.79471556
          --- l  ekb(1:nproj) -->
              0   -0.901401   -0.217891    1.555038
              1   -0.989901    1.571994
@@ -405,7 +405,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    1045.000    1045.000
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm: epsatm=   34.79471556
+ pspatm : epsatm=   34.79471556
          --- l  ekb(1:nproj) -->
              0   -0.901401   -0.217891    1.555038
              1   -0.989901    1.571994
@@ -433,7 +433,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    1045.000    1045.000
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm: epsatm=   34.79471556
+ pspatm : epsatm=   34.79471556
          --- l  ekb(1:nproj) -->
              0   -0.901401   -0.217891    1.555038
              1   -0.989901    1.571994
@@ -566,7 +566,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    1045.000    1045.000
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm: epsatm=   34.79471556
+ pspatm : epsatm=   34.79471556
          --- l  ekb(1:nproj) -->
              0   -0.901401   -0.217891    1.555038
              1   -0.989901    1.571994
@@ -594,7 +594,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    1045.000    1045.000
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm: epsatm=   34.79471556
+ pspatm : epsatm=   34.79471556
          --- l  ekb(1:nproj) -->
              0   -0.901401   -0.217891    1.555038
              1   -0.989901    1.571994
@@ -622,7 +622,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    1045.000    1045.000
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm: epsatm=   34.79471556
+ pspatm : epsatm=   34.79471556
          --- l  ekb(1:nproj) -->
              0   -0.901401   -0.217891    1.555038
              1   -0.989901    1.571994
@@ -756,7 +756,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    1045.000    1045.000
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm: epsatm=   34.79471556
+ pspatm : epsatm=   34.79471556
          --- l  ekb(1:nproj) -->
              0   -0.901401   -0.217891    1.555038
              1   -0.989901    1.571994
@@ -784,7 +784,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    1045.000    1045.000
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm: epsatm=   34.79471556
+ pspatm : epsatm=   34.79471556
          --- l  ekb(1:nproj) -->
              0   -0.901401   -0.217891    1.555038
              1   -0.989901    1.571994
@@ -812,7 +812,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    1045.000    1045.000
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm: epsatm=   34.79471556
+ pspatm : epsatm=   34.79471556
          --- l  ekb(1:nproj) -->
              0   -0.901401   -0.217891    1.555038
              1   -0.989901    1.571994

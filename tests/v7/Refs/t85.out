@@ -1595,7 +1595,7 @@ P          mk1mem10       512
     5.99000000000000    0.65000000000000    0.00000000000000   rchrg,fchrg,qchrg
      nproj     2     2     2
      extension_switch     1
- pspatm: epsatm=    5.28546056
+ pspatm : epsatm=    5.28546056
          --- l  ekb(1:nproj) -->
              0    5.190663    0.741808
              1    7.659439    0.819933
@@ -1922,7 +1922,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.244      74.168
     5.99000000000000    0.65000000000000    0.00000000000000   rchrg,fchrg,qchrg
      nproj     2     2     2
      extension_switch     1
- pspatm: epsatm=    5.28546056
+ pspatm : epsatm=    5.28546056
          --- l  ekb(1:nproj) -->
              0    5.190663    0.741808
              1    7.659439    0.819933
@@ -2130,7 +2130,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.244      74.168
     5.99000000000000    0.65000000000000    0.00000000000000   rchrg,fchrg,qchrg
      nproj     2     2     2
      extension_switch     1
- pspatm: epsatm=    5.28546056
+ pspatm : epsatm=    5.28546056
          --- l  ekb(1:nproj) -->
              0    5.190663    0.741808
              1    7.659439    0.819933
@@ -2336,7 +2336,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.244      74.168
     5.99000000000000    0.65000000000000    0.00000000000000   rchrg,fchrg,qchrg
      nproj     2     2     2
      extension_switch     1
- pspatm: epsatm=    5.28546056
+ pspatm : epsatm=    5.28546056
          --- l  ekb(1:nproj) -->
              0    5.190663    0.741808
              1    7.659439    0.819933
@@ -2495,7 +2495,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.244      74.168
     5.99000000000000    0.65000000000000    0.00000000000000   rchrg,fchrg,qchrg
      nproj     2     2     2
      extension_switch     1
- pspatm: epsatm=    5.28546056
+ pspatm : epsatm=    5.28546056
          --- l  ekb(1:nproj) -->
              0    5.190663    0.741808
              1    7.659439    0.819933
@@ -2748,7 +2748,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.244      74.168
     5.99000000000000    0.65000000000000    0.00000000000000   rchrg,fchrg,qchrg
      nproj     2     2     2
      extension_switch     1
- pspatm: epsatm=    5.28546056
+ pspatm : epsatm=    5.28546056
          --- l  ekb(1:nproj) -->
              0    5.190663    0.741808
              1    7.659439    0.819933
@@ -2955,7 +2955,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.244      74.168
     5.99000000000000    0.65000000000000    0.00000000000000   rchrg,fchrg,qchrg
      nproj     2     2     2
      extension_switch     1
- pspatm: epsatm=    5.28546056
+ pspatm : epsatm=    5.28546056
          --- l  ekb(1:nproj) -->
              0    5.190663    0.741808
              1    7.659439    0.819933
@@ -3114,7 +3114,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.244      74.168
     5.99000000000000    0.65000000000000    0.00000000000000   rchrg,fchrg,qchrg
      nproj     2     2     2
      extension_switch     1
- pspatm: epsatm=    5.28546056
+ pspatm : epsatm=    5.28546056
          --- l  ekb(1:nproj) -->
              0    5.190663    0.741808
              1    7.659439    0.819933
@@ -3321,7 +3321,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.244      74.168
     5.99000000000000    0.65000000000000    0.00000000000000   rchrg,fchrg,qchrg
      nproj     2     2     2
      extension_switch     1
- pspatm: epsatm=    5.28546056
+ pspatm : epsatm=    5.28546056
          --- l  ekb(1:nproj) -->
              0    5.190663    0.741808
              1    7.659439    0.819933

@@ -175,7 +175,7 @@ P           mkmem           1
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm: epsatm=    0.00001257
+ pspatm : epsatm=    0.00001257
          --- l  ekb(1:nproj) -->
  pspatm: atomic psp has been read  and splines computed
 
@@ -292,7 +292,7 @@ P newkpt: treating      1 bands with npw=    2118 for ikpt=   1 by node    0
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm: epsatm=    0.00001257
+ pspatm : epsatm=    0.00001257
          --- l  ekb(1:nproj) -->
  pspatm: atomic psp has been read  and splines computed
 
@@ -408,7 +408,7 @@ P newkpt: treating      1 bands with npw=    2118 for ikpt=   1 by node    0
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm: epsatm=    0.00001257
+ pspatm : epsatm=    0.00001257
          --- l  ekb(1:nproj) -->
  pspatm: atomic psp has been read  and splines computed
 

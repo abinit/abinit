@@ -295,7 +295,7 @@ P           mkmem          28
     5.99000000000000    3.00000000000000    0.00000000000000   rchrg,fchrg,qchrg
      nproj     2     2     2
      extension_switch     1
- pspatm: epsatm=   19.11146659
+ pspatm : epsatm=   19.11146659
          --- l  ekb(1:nproj) -->
              0    7.403882   -0.301314
              1   -3.559907   -2.326034

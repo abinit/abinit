@@ -553,7 +553,7 @@ P           mkmem           4
     6   11    1    1      1122   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
     0.00000000000000    0.00000000000000    0.00000000000000   rchrg,fchrg,qchrg
   1.013085          amesh (Hamman grid)
- pspatm: epsatm=    0.96697109
+ pspatm : epsatm=    0.96697109
          --- l  ekb(1:nproj) -->
              0    4.575523
  pspatm: atomic psp has been read  and splines computed
@@ -743,7 +743,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     511.222     511.190
     6   11    1    1      1122   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
     0.00000000000000    0.00000000000000    0.00000000000000   rchrg,fchrg,qchrg
   1.013085          amesh (Hamman grid)
- pspatm: epsatm=    0.96697109
+ pspatm : epsatm=    0.96697109
          --- l  ekb(1:nproj) -->
              0    4.575523
  pspatm: atomic psp has been read  and splines computed

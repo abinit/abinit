@@ -332,7 +332,7 @@ P           mkmem          10
      nproj     2     4     4
      spin-orbit psp, extension_switch     3
         nprojso     4     4
- pspatm: epsatm=   26.50896575
+ pspatm : epsatm=   26.50896575
          --- l  ekb(1:nproj) -->
              0    2.331189   31.398658
              1    7.045402    1.078520    0.020238    0.000035
@@ -471,7 +471,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     434.219     434.205
      nproj     2     4     4
      spin-orbit psp, extension_switch     3
         nprojso     4     4
- pspatm: epsatm=   26.50896575
+ pspatm : epsatm=   26.50896575
          --- l  ekb(1:nproj) -->
              0    2.331189   31.398658
              1    7.045402    1.078520    0.020238    0.000035

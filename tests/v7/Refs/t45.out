@@ -243,7 +243,7 @@ P          mk1mem2        128
     5.99000000000000    0.65000000000000    0.00000000000000   rchrg,fchrg,qchrg
      nproj     2     2     2
      extension_switch     1
- pspatm: epsatm=    5.28546056
+ pspatm : epsatm=    5.28546056
          --- l  ekb(1:nproj) -->
              0    5.190663    0.741808
              1    7.659439    0.819933
@@ -258,7 +258,7 @@ P          mk1mem2        128
     5.99000000000000    0.40000000000000    0.00000000000000   rchrg,fchrg,qchrg
      nproj     2     2     2
      extension_switch     1
- pspatm: epsatm=    8.09145236
+ pspatm : epsatm=    8.09145236
          --- l  ekb(1:nproj) -->
              0    7.782393    0.804462
              1    4.802139    0.752102

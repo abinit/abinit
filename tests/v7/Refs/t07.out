@@ -245,7 +245,7 @@ P           mkmem2          3
      nproj     2     4     3     3
      spin-orbit psp, extension_switch     2
         nprojso     4     4     3
- pspatm: epsatm=   63.08639983
+ pspatm : epsatm=   63.08639983
          --- l  ekb(1:nproj) -->
              0   -2.956756   -0.861178
              1   -2.848884   -0.711231   -0.000430   -0.000101
