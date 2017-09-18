@@ -290,13 +290,8 @@ timed sections of the code, only "inwffil" and "vtorho3:synchro" will not benefi
 parallelism.
 <br>
 "inwffil" is a subroutine whose job is to read the ground-state wavefunctions
-<<<<<<< HEAD:doc/tutorial/generated_files/lesson_paral_dfpt.html
 (you can find the source of the "inwffil" routine in <a href="http://www.abinit.org/robodoc">the latest ABINIT sources</a>).
 As mentioned in the section 1, the reading of the ground-state wavefunctions is not done in parallel in the case of the DFPT
-=======
-(you can find the source of the "inwffil" routine in <a href="https://www.abinit.org/sites/default/files/robodoc-html/masterindex.html">the latest ABINIT sources</a>).
-As mentioned in the section 1, the reading of the ground-state wavefunctions is not done in parallel in the case of the linear-response
->>>>>>> hotfix-8.4:doc/tutorial/lesson_paral_dfpt.html
 computations (note that the reading is actually parallelized for e.g. ground-state calculations).
 In the output file provided as a reference (with four computing cores), the "inwffil" wall clock time 
 is 7.387 seconds, on a total of 48.211 secs. By increasing the number of computing cores, it will be
