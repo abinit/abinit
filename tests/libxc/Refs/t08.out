@@ -136,7 +136,7 @@ P           mkmem           1
     6    0    1    1       400   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
     0.00000000000000    0.00000000000000    0.00000000000000   rchrg,fchrg,qchrg
   1.038086          amesh (Hamman grid)
- pspatm: epsatm=    0.13429536
+ pspatm : epsatm=    0.13429536
          --- l  ekb(1:nproj) -->
              0    5.611174
  pspatm: atomic psp has been read  and splines computed

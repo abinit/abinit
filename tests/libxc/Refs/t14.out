@@ -715,7 +715,7 @@ P           mkmem           3
     6    0    2    2      2400   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
     0.00000000000000    0.00000000000000    0.00000000000000   rchrg,fchrg,qchrg
   1.007785          amesh (Hamman grid)
- pspatm: epsatm=   -3.47502210
+ pspatm : epsatm=   -3.47502210
          --- l  ekb(1:nproj) -->
              0    4.763149
              1    2.580046
@@ -1004,7 +1004,7 @@ Result for kinetic energy density :
     6    0    2    2      2400   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
     0.00000000000000    0.00000000000000    0.00000000000000   rchrg,fchrg,qchrg
   1.007785          amesh (Hamman grid)
- pspatm: epsatm=   -3.47502210
+ pspatm : epsatm=   -3.47502210
          --- l  ekb(1:nproj) -->
              0    4.763149
              1    2.580046

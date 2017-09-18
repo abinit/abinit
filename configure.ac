@@ -1022,6 +1022,8 @@ else
   fi
   lib_trio_flavor="${lib_trio_flavor} (libs: ignored)"
 fi
+abi_psml_wanted=`echo "${with_trio_flavor}" | grep "psml"`
+AM_CONDITIONAL([DO_BUILD_PSML], [test "${abi_psml_wanted}" != "" ])
 
 # External timing library support
 if test "${enable_connectors}" = "yes"; then

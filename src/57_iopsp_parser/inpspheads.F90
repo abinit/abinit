@@ -100,6 +100,10 @@
  real(dp) :: psppar(0:4,0:6)
  logical :: exists
 #endif
+#if defined HAVE_PSML
+ character(len=3) :: atmsymb
+ character(len=30) :: creator
+#endif
 
 !*************************************************************************
 
@@ -199,7 +203,7 @@
      call wrtout(std_out,  message,'COLL')
 
 ! could pass pspheads(ipsp) directly and fill all of it in psxml2ab
-     call psxml2abheader( filnam(ipsp), pspheads(ipsp), 1)
+     call psxml2abheader( filnam(ipsp), pspheads(ipsp), atmsymb, creator, 1)
 
 ! save some stuff locally for this ipsp
      pspcod = pspheads(ipsp)%pspcod

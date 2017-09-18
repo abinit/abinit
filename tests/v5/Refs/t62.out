@@ -516,7 +516,7 @@ P           mkmem           1
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     0.00000000000000    0.00000000000000    0.00000000000000   rchrg,fchrg,qchrg
  Note: local psp for atom with Z=  1.0
- pspatm: epsatm=    0.04198703
+ pspatm : epsatm=    0.04198703
          --- l  ekb(1:nproj) -->
  pspatm: atomic psp has been read  and splines computed
 
@@ -530,7 +530,7 @@ P           mkmem           1
     1   5.594   8.391    0   2.2840139        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     1.53889850660196    0.09444755629339    0.30037766970282   rchrg,fchrg,qchrg
- pspatm: epsatm=    0.54556417
+ pspatm : epsatm=    0.54556417
          --- l  ekb(1:nproj) -->
              0    1.873785
  pspatm: atomic psp has been read  and splines computed

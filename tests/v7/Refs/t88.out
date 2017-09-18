@@ -1,5 +1,5 @@
 
-.Version 8.1.1 of ABINIT 
+.Version 8.5.3 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
 
 .Copyright (C) 1998-2017 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see http://www.abinit.org .
 
-.Starting date : Fri  1 Jul 2016.
-- ( at 11h02 )
+.Starting date : Tue 12 Sep 2017.
+- ( at 17h53 )
   
 - input  file    -> t88.in
 - output file    -> t88.out
@@ -352,7 +352,7 @@ Values initialized with zeros
 
  The interatomic forces have been obtained
  Average speed of sound partial sums:     0.1164368178E-02 (at units)
--                                   =        2547.2781 (m/s)
+-                                   =           2.5473 [km/s]
 
  Debye frequency from partial sums:     0.9605781958E-03 (Ha)
 -                                 =     0.6320300909E+01 (THz)
@@ -413,15 +413,15 @@ qpoint: [-2.5000E-01,  5.0000E-01,  2.5000E-01] is present in the DVDB file
 All the independent perturbations are available
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/mverstra_8.1.1-private/tests/Psps_for_tests/Al-psval.psp8
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/mverstra_8.1.1-private/tests/Psps_for_tests/Al-psval.psp8
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/pouillon_psml-new/tests/Psps_for_tests/Al-psval.psp8
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/pouillon_psml-new/tests/Psps_for_tests/Al-psval.psp8
 - Al    ONCVPSP  r_core=  1.77  1.77  1.71
 - 13.00000   3.00000    150709                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
     5.99000000000000    0.65000000000000    0.00000000000000   rchrg,fchrg,qchrg
      nproj     2     2     2
-extension_switch     1
- pspatm: epsatm=    5.28546056
+     extension_switch     1
+ pspatm : epsatm=    5.28546056
          --- l  ekb(1:nproj) -->
              0    5.190663    0.741808
              1    7.659439    0.819933
@@ -584,13 +584,13 @@ Values initialized with zeros
 
  The interatomic forces have been obtained
  Average speed of sound partial sums:     0.1164368178E-02 (at units)
--                                   =        2547.2781 (m/s)
+-                                   =           2.5473 [km/s]
 
  Debye frequency from partial sums:     0.9605781958E-03 (Ha)
 -                                 =     0.6320300909E+01 (THz)
 -Debye temperature from partial sums:     0.3033262436E+03 (K)
 
-- Writing phonon dos to file: t88o_DS2_PHDOS
+- Writing phonon DOS to file: t88o_DS2_PHDOS
 qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:
     1)  idir= 1, ipert=   1, type=independent, found=Yes
@@ -795,13 +795,13 @@ Values initialized with zeros
 
  The interatomic forces have been obtained
  Average speed of sound partial sums:     0.1164368178E-02 (at units)
--                                   =        2547.2781 (m/s)
+-                                   =           2.5473 [km/s]
 
  Debye frequency from partial sums:     0.9605781958E-03 (Ha)
 -                                 =     0.6320300909E+01 (THz)
 -Debye temperature from partial sums:     0.3033262436E+03 (K)
 
-- Writing phonon dos to file: t88o_DS3_PHDOS
+- Writing phonon DOS to file: t88o_DS3_PHDOS
 qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:
     1)  idir= 1, ipert=   1, type=independent, found=Yes
@@ -1224,7 +1224,8 @@ P           mkmem          29
  of the ABINIT implementation.
  For information on why they are suggested, see also http://www.abinit.org/about/?text=acknowledgments.
 -
-- [1] Recent developments in the ABINIT software package
+- [1] Recent developments in the ABINIT software package.
+- Computer Phys. Comm. 205, 106 (2016).
 - X.Gonze, F.Jollet, F.Abreu Araujo, D.Adams, B.Amadon, T.Applencourt,
 - C.Audouze, J.-M.Beuken, J.Bieder, A.Bokhanchuk, E.Bousquet, F.Bruneval
 - D.Caliste, M.Cote, F.Dahm, F.Da Pieve, M.Delaveau, M.Di Gennaro,
@@ -1233,6 +1234,8 @@ P           mkmem          29
 - A.Levitt, A.Lherbier, F.Liu, I.Lukacevic, A.Martin, C.Martins,
 - M.J.T.Oliveira, S.Ponce, Y.Pouillon, T.Rangel, G.-M.Rignanese,
 - A.H.Romero, B.Rousseau, O.Rubel, A.A.Shukri, M.Stankovski, M.Torrent,
+- M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
+- B.Xue, A.Zhou, J.W.Zwanziger.
 - Comment : the fourth generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at http://www.abinit.org/about/ABINIT16.pdf .
@@ -1243,22 +1246,22 @@ P           mkmem          29
 - Comment: Some pseudopotential generated using the ONCVPSP code were used.
 -
 - [3] ABINIT : First-principles approach of materials and nanosystem properties.
+- Computer Phys. Comm. 180, 2582-2615 (2009).
 - X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
 - D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
 - S. Goedecker, D.R. Hamann, P. Hermet, F. Jollet, G. Jomard, S. Leroux, M. Mancini, S. Mazevet,
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
-- Computer Phys. Comm. 180, 2582-2615 (2009).
 - Comment : the third generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at http://www.abinit.org/about/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 -
 - [4] A brief introduction to the ABINIT software package.
+- Z. Kristallogr. 220, 558-562 (2005).
 - X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
 - M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
 - L. Reining, R. Godby, G. Onida, D.R. Hamann, and D.C. Allan.
-- Z. Kristallogr. 220, 558-562 (2005).
 - Comment : the second generic paper describing the ABINIT project. Note that this paper
 - should be cited especially if you are using the GW part of ABINIT, as several authors
 - of this part are not in the list of authors of the first or third paper.
@@ -1274,10 +1277,10 @@ P           mkmem          29
 - Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7
 - Comment : the original paper describing the ABINIT project.
 -
-- Proc.   0 individual time (sec): cpu=         56.3  wall=         56.3
+- Proc.   0 individual time (sec): cpu=         16.0  wall=         16.1
 
 ================================================================================
 
  Calculation completed.
 .Delivered   0 WARNINGs and   6 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         56.3  wall=         56.3
++Overall time at end (sec) : cpu=         16.0  wall=         16.1

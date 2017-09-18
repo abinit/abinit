@@ -131,7 +131,7 @@ fine grid =   12 12 12
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm: epsatm=   -0.00346443
+ pspatm : epsatm=   -0.00346443
          --- l  ekb(1:nproj) -->
  pspatm: atomic psp has been read  and splines computed
 
