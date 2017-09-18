@@ -669,25 +669,11 @@ subroutine fock_init(atindx,cplex,dtset,fock,gsqcut,kg,mpi_enreg,nattyp,npwarr,p
      n4=dtset%ngfftdg(4) ; n5=dtset%ngfftdg(5) ; n6=dtset%ngfftdg(6)
    end if
    fockcommon%optfor=.FALSE.; fockcommon%optstr=.false.
-<<<<<<< HEAD
-   if(dtset%optforces==1)then
-     fockcommon%optfor=.true.
-     ABI_ALLOCATE(fockcommon%forces_ikpt,(3,dtset%natom,nband))
-     ABI_ALLOCATE(fockcommon%forces,(3,dtset%natom))
-   endif
-   fockcommon%use_ACE=0!if (dtset%use_ACE==1)
-   userid=dtset%userid
-   fockcommon%use_ACE=dtset%userie
-   if(fockcommon%use_ACE/=0) userid=1961
-   call fock_create(fockbz,mgfft,dtset%mpw,mkpt,mkptband,my_nsppol,dtset%natom,n4,n5,n6,userid)
-=======
    if(dtset%optforces==1) fockcommon%optfor=.true.
    if (fockcommon%optfor) then
      ABI_ALLOCATE(fockcommon%forces_ikpt,(3,dtset%natom,nband))
      ABI_ALLOCATE(fockcommon%forces,(3,dtset%natom))
    endif
->>>>>>> trunk/ace_4
-
    use_ACE=1 ! Default. Normal users do not have access to this variable, although the next line allows experts to make tests.
    if(dtset%userie==1729)use_ACE=0 ! Hidden possibility to disable ACE
 
@@ -1275,7 +1261,7 @@ subroutine fock_updateikpt(fock,ikpt,isppol)
 !* Set all the Fock contributions to the eigenvalues to 0.d0.
    fock%eigen_ikpt=zero
 !* Set all the Fock contributions to the forces to 0.d0.
-   if (fock%optfor) then
+   if ((fock%optfor).and.(fock%use_ACE==0)) then
      fock%forces_ikpt=zero
    endif
 

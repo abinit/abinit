@@ -2821,9 +2821,11 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
 !  Note that this number might be smaller than the one computed
 !  by a slightly different formula in invars1
      dtset%nbandhf=dtset%nspinor*((ceiling(zelect-1.0d-10)+1)/2)
-     if (occopt>2) dtset%nbandhf=dtset%nbandhf+dtset%nspinor*(ceiling(fband*natom-1.0d-10))
+
+     if (occopt>2) dtset%nbandhf=dtset%nbandhf+dtset%nspinor*(ceiling(dtset%fband*natom-1.0d-10))
 !  More precisely, nbandhf = default value for nband = the number of occupied bands
 !                                                    + extra bands according to fband
+
    end if
 
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nnsclohf',tread,'INT')

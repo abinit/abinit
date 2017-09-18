@@ -428,6 +428,7 @@ type(pseudopotential_type) :: psps
        end if
 
 ! Forces calculation
+
        if (fockcommon%optfor.and.(fockcommon%ieigen/=0)) then
          call matr3inv(gs_ham%gprimd,rprimd)
          choice=2; dotr=zero;doti=zero;cpopt=4

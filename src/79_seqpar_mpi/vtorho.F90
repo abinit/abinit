@@ -865,7 +865,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
          call fock_updateikpt(fock%fock_common,ikpt,isppol)
        end if
        if ((psps%usepaw==1).and.(usefock)) then
-         if (fock%fock_common%optfor) then
+         if ((fock%fock_common%optfor).and.(usefock_ACE==0)) then
            fock%fock_common%forces_ikpt=zero
          end if
        end if
@@ -879,6 +879,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 &       mpi_enreg,dtset%mpw,natom,nband_k,dtset%nkpt,nnsclo_now,npw_k,npwarr,&
 &       occ_k,optforces,prtvol,pwind,pwind_alloc,pwnsfac,pwnsfacq,resid_k,&
 &       rhoaug,paw_dmft,dtset%wtk(ikpt),zshift)
+
 
        call timab(985,1,tsec)
 
