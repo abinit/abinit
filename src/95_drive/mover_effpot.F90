@@ -564,7 +564,7 @@ implicit none
 &                                                 ncoeff+ii)
               call fit_polynomial_coeff_fit(effective_potential,&
 &                                           (/0/),(/0/),hist,(/0,0/),1,0,&
-&                                          -1,1,comm,verbose=.false.,positive=.false.) 
+&                                          -1,comm,verbose=.false.,positive=.false.) 
               call effective_potential_setSupercell(effective_potential,comm,n_cell=sc_size)
               dtset%rprimd_orig(:,:,1) = effective_potential%supercell%rprimd
               acell(1) = dtset%rprimd_orig(1,1,1)
@@ -641,7 +641,7 @@ implicit none
 
       call fit_polynomial_coeff_fit(effective_potential,&
 &                                   (/0/),(/0/),hist,(/0,0/),1,0,&
-&                                   -1,1,comm,verbose=.false.,positive=.false.,anharmstr=.false.)
+&                                   -1,comm,verbose=.false.,positive=.false.,anharmstr=.false.)
         
       write(message, '(3a)') ch10,' Fitted coefficients at the end of the fit bound process: '
       call wrtout(ab_out,message,'COLL')
