@@ -135,11 +135,13 @@ end subroutine
   write(InVar%stdout,*) '#############################################################################'
 
 ! Define inverse of the multiplicity tab
-  allocate(IPIV(3),WORK(3)) ; IPIV(:)=0 ; WORK(:)=0.d0
+  ABI_MALLOC(IPIV,(3))
+  ABI_MALLOC(WORK,(3)) ; IPIV(:)=0 ; WORK(:)=0.d0
   multiplicitym1(:,:)=InVar%multiplicity(:,:)
   call DGETRF(3,3,multiplicitym1,3,IPIV,INFO)
   call DGETRI(3,multiplicitym1,3,IPIV,WORK,3,INFO)
-  deallocate(IPIV,WORK)
+  ABI_FREE(IPIV)
+  ABI_FREE(WORK)
 
   do ii=1,3
     do jj=1,3
@@ -243,11 +245,13 @@ end subroutine
       rprimt(ii,jj)=rprim(jj,ii)
     end do
   end do
-  allocate(IPIV(3),WORK(3)) ; IPIV(:)=0 ; WORK(:)=0.d0
+  ABI_MALLOC(IPIV,(3))
+  ABI_MALLOC(WORK,(3)) ; IPIV(:)=0 ; WORK(:)=0.d0
   rprimm1(:,:)=rprim(:,:)
   call DGETRF(3,3,rprimm1,3,IPIV,INFO)
   call DGETRI(3,rprimm1,3,IPIV,WORK,3,INFO)
-  deallocate(IPIV,WORK)
+  ABI_FREE(IPIV)
+  ABI_FREE(WORK)
 
 ! Compute the acell_unitcell according to the definition of
 ! the unitcell and multiplicity
@@ -331,17 +335,21 @@ end subroutine
     end do
   end do  
   call metric(Lattice%gmet,Lattice%gprimd,iout,Lattice%rmet,rprimdt,Lattice%ucvol)
-  allocate(IPIV(3),WORK(3)) ; IPIV(:)=0 ; WORK(:)=0.d0
+  ABI_MALLOC(IPIV,(3))
+  ABI_MALLOC(WORK,(3)) ; IPIV(:)=0 ; WORK(:)=0.d0
   rprimdtm1(:,:)=rprimdt(:,:)
   call DGETRF(3,3,rprimdtm1,3,IPIV,INFO)
   call DGETRI(3,rprimdtm1,3,IPIV,WORK,3,INFO)
-  deallocate(IPIV,WORK)
+  ABI_FREE(IPIV)
+  ABI_FREE(WORK)
 
-  allocate(IPIV(3),WORK(3)) ; IPIV(:)=0 ; WORK(:)=0.d0
+  ABI_MALLOC(IPIV,(3))
+  ABI_MALLOC(WORK,(3)) ; IPIV(:)=0 ; WORK(:)=0.d0
   rprimdm1(:,:)=rprimd(:,:)
   call DGETRF(3,3,rprimdm1,3,IPIV,INFO)
   call DGETRI(3,rprimdm1,3,IPIV,WORK,3,INFO)
-  deallocate(IPIV,WORK)
+  ABI_FREE(IPIV)
+  ABI_FREE(WORK)
 
 ! Store all these values in the 'Lattice' datatype
   Lattice%acell_unitcell(:)  =acell_unitcell(:)

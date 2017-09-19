@@ -215,10 +215,10 @@ subroutine calc_phij_nbcoeff(distance,iatcell,InVar,ishell,jatom,ncoeff,nshell,p
       end do  
     end do  
     LWORK=4*3
-    allocate(WORK(LWORK)); WORK(:)=zero
+    ABI_MALLOC(WORK,(LWORK)); WORK(:)=zero
 !   La matrice de transformation eigvec est reelle et peut etre non-symetrique
     call dgeev( 'N', 'V', 3, eigvec, 3, WR, WI, VL, 3, VR, 3, WORK, LWORK, INFO)
-    deallocate(WORK)
+    ABI_FREE(WORK)
 
 !   On reconstruit les parties reelles et complexes des vecteurs/valeurs propres
     jj=0
@@ -328,7 +328,7 @@ subroutine calc_phij_nbcoeff(distance,iatcell,InVar,ishell,jatom,ncoeff,nshell,p
   write(16,*) ' '
   write(16,*) 'There is a total of ',ncount,' non-independant constraints for this shell'
   ii=0
-  allocate(tab_vec(9,ncount)); tab_vec(:,:)=czero
+  ABI_MALLOC(tab_vec,(9,ncount)); tab_vec(:,:)=czero
   do isym=1,Sym%nsym
     if (unchanged(isym)) then
       do jj=1,iconst(isym)
@@ -365,7 +365,7 @@ subroutine calc_phij_nbcoeff(distance,iatcell,InVar,ishell,jatom,ncoeff,nshell,p
   end do
 
 ! On stocke les vecteurs non-nuls
-  allocate(temp(9,ncount)); temp(:,:)=czero
+  ABI_MALLOC(temp,(9,ncount)); temp(:,:)=czero
   ii=0
   do kk=1,ncount
     prod_scal=sum( real(tab_vec(:,kk))* real(tab_vec(:,kk))+aimag(tab_vec(:,kk))*aimag(tab_vec(:,kk)))
@@ -375,7 +375,7 @@ subroutine calc_phij_nbcoeff(distance,iatcell,InVar,ishell,jatom,ncoeff,nshell,p
     end if  
   end do  
   ncount=ii
-  deallocate(tab_vec)
+  ABI_FREE(tab_vec)
 
 ! On ecrit les vecteurs non-nuls
   write(16,*) ' '
@@ -392,7 +392,7 @@ subroutine calc_phij_nbcoeff(distance,iatcell,InVar,ishell,jatom,ncoeff,nshell,p
 
 ! On cherche les (9-ncount) vecteurs orthogonaux aux vecteurs non-nuls
 ! --> Orthogonalisation de Gram-Schmidt
-  allocate(tab_vec(9,9)); tab_vec(:,:)=czero
+  ABI_MALLOC(tab_vec,(9,9)); tab_vec(:,:)=czero
   do kk=1,9
     if (kk.le.ncount) then
       tab_vec(:,kk)=temp(:,kk)
@@ -415,7 +415,7 @@ subroutine calc_phij_nbcoeff(distance,iatcell,InVar,ishell,jatom,ncoeff,nshell,p
       end do
     end if
   end do
-  deallocate(temp)
+  ABI_FREE(temp)
 
 ! On ecrit les vecteurs non-nuls
   write(16,*) ' '
@@ -437,7 +437,7 @@ subroutine calc_phij_nbcoeff(distance,iatcell,InVar,ishell,jatom,ncoeff,nshell,p
   do icoeff=1,ncoeff
     proj(:,icoeff,ishell)=tab_vec(:,ncount+icoeff)
   end do
-  deallocate(tab_vec)
+  ABI_FREE(tab_vec)
 
 end subroutine calc_phij_nbcoeff
 
@@ -476,13 +476,13 @@ subroutine build_phij(distance,InVar,bond_ref,nshell,ntotcoeff,proj,Phij_coeff,P
   write(InVar%stdout,*) '#### For each shell, list of coefficients (IFC), number of neighbours... ####'
   write(InVar%stdout,*) '#############################################################################'
 
-  allocate(atoms_in_shell(nshell)) ; atoms_in_shell(:)=0
-  allocate(tab_shell(nshell)); tab_shell(:)=0
+  ABI_MALLOC(atoms_in_shell,(nshell)) ; atoms_in_shell(:)=0
+  ABI_MALLOC(tab_shell,(nshell)); tab_shell(:)=0
 !==========================================================================================
 !======== 1/ Build the Phij_NN ============================================================
 !==========================================================================================
-  allocate(Phij_33(3,3)) ; Phij_33(:,:)=0.d0
-  allocate(Phij_tmp(3,3)) ; Phij_tmp(:,:)=0.d0
+  ABI_MALLOC(Phij_33,(3,3)) ; Phij_33(:,:)=0.d0
+  ABI_MALLOC(Phij_tmp,(3,3)) ; Phij_tmp(:,:)=0.d0
   do katom=1,InVar%natom
     do latom=katom+1,InVar%natom
       if ((bond_ref(katom,latom,1).ne.0).and.(bond_ref(katom,latom,2).ne.0)) then 
@@ -540,7 +540,8 @@ subroutine build_phij(distance,InVar,bond_ref,nshell,ntotcoeff,proj,Phij_coeff,P
       enddo
     enddo
   end do !katom
-  deallocate(Phij_33,Phij_tmp)
+  ABI_FREE(Phij_33)
+  ABI_FREE(Phij_tmp)
 
 !==========================================================================================
 !======== 2/ Symetrize the IFC for low symetry systems (if required) ======================
@@ -548,9 +549,9 @@ subroutine build_phij(distance,InVar,bond_ref,nshell,ntotcoeff,proj,Phij_coeff,P
 ! Detect the IFC terms which are non-symetric
 ! Modify the correspondingly non-symetric terms if the input variable Impose_symetry=2 or 3
   if (((InVar%Impose_symetry.eq.2).or.(InVar%Impose_symetry.eq.3))) then 
-    allocate(correction(InVar%natom,3,3)); correction(:,:,:)=zero
-    allocate(counter(InVar%natom,3,3));    counter(:,:,:)   =zero
-    allocate(Phij_shell(3,3,nshell)); Phij_shell(:,:,:)=zero
+    ABI_MALLOC(correction,(InVar%natom,3,3)); correction(:,:,:)=zero
+    ABI_MALLOC(counter,(InVar%natom,3,3));    counter(:,:,:)   =zero
+    ABI_MALLOC(Phij_shell,(3,3,nshell)); Phij_shell(:,:,:)=zero
 !   Compute the non-symetric contribution for each shell     
     do katom=1,InVar%natom
       Phij_shell(:,:,:)=0.d0
@@ -624,13 +625,15 @@ subroutine build_phij(distance,InVar,bond_ref,nshell,ntotcoeff,proj,Phij_coeff,P
         end do !latom
       end do !kk
     end do !katom 
-    deallocate(correction,counter,Phij_shell)
+    ABI_FREE(correction)
+    ABI_FREE(counter)
+    ABI_FREE(Phij_shell)
   end if !Impose_symetry 
 
 !==========================================================================================
 !======== 3/ Write the Phij_NN in output ==================================================
 !==========================================================================================
-  allocate(nb_atoms(InVar%natom_unitcell)); nb_atoms(:)=zero
+  ABI_MALLOC(nb_atoms,(InVar%natom_unitcell)); nb_atoms(:)=zero
 ! Remove the rounding errors before writing (for non regression testing purposes)
   do ii=1,3*InVar%natom
     do jj=1,3*InVar%natom
@@ -696,7 +699,9 @@ subroutine build_phij(distance,InVar,bond_ref,nshell,ntotcoeff,proj,Phij_coeff,P
     end do !ishell 
   end do !iatcell  
 
-  deallocate(atoms_in_shell,tab_shell,nb_atoms)
+  ABI_FREE(atoms_in_shell)
+  ABI_FREE(tab_shell)
+  ABI_FREE(nb_atoms)
 
 ! Write the Phij_unitcell.dat and Phij_NN.dat files
   if (InVar%debug) then
@@ -748,7 +753,7 @@ subroutine calc_dij(InVar,Lattice,Phij_NN,Qpt,Rlatt_cart)
   write(InVar%stdout,*) '#############################################################################'
   write(InVar%stdout,'(a)') ' See the dij.dat file'
 ! Calcul du Dij
-  allocate(dij(3*InVar%natom_unitcell,3*InVar%natom_unitcell,Qpt%nqpt)) ; dij(:,:,:)=zero
+  ABI_MALLOC(dij,(3*InVar%natom_unitcell,3*InVar%natom_unitcell,Qpt%nqpt)) ; dij(:,:,:)=zero
   do iqpt=1,Qpt%nqpt 
     do iatcell=1,InVar%natom_unitcell
 !     Calcul de la phase et de la matrice dynamique      
@@ -781,8 +786,9 @@ subroutine calc_dij(InVar,Lattice,Phij_NN,Qpt,Rlatt_cart)
 
 ! Diagonalization of dynamical matrix
   LWORK=2*3*InVar%natom_unitcell-1
-  allocate(omega(3*InVar%natom_unitcell,Qpt%nqpt)); omega(:,:)=zero
-  allocate(WORKC(LWORK),RWORK(3*3*InVar%natom_unitcell-2)); WORKC(:)=czero; RWORK(:)=zero
+  ABI_MALLOC(omega,(3*InVar%natom_unitcell,Qpt%nqpt)); omega(:,:)=zero
+  ABI_MALLOC(WORKC,(LWORK))
+  ABI_MALLOC(RWORK,(3*3*InVar%natom_unitcell-2)); WORKC(:)=czero; RWORK(:)=zero
   open(unit=53,file='omega.dat')
   open(unit=52,file='dij.dat')
   open(unit=51,file='eigenvectors.dat')
@@ -844,7 +850,7 @@ subroutine calc_dij(InVar,Lattice,Phij_NN,Qpt,Rlatt_cart)
     write(52,*)' '
 
 !   Diagonalisation of Dij
-    allocate(mass_mat(3*InVar%natom_unitcell,3*InVar%natom_unitcell)); mass_mat(:,:)=dcmplx(0.d0,0.d0)
+    ABI_MALLOC(mass_mat,(3*InVar%natom_unitcell,3*InVar%natom_unitcell)); mass_mat(:,:)=dcmplx(0.d0,0.d0)
     do iatom=1,InVar%natom_unitcell
       itypat=InVar%typat_unitcell(iatom)
       do ii=1,3
@@ -852,7 +858,7 @@ subroutine calc_dij(InVar,Lattice,Phij_NN,Qpt,Rlatt_cart)
       end do
     end do  
     call ZHEGV(1,'V','U',3*InVar%natom_unitcell,dij(:,:,iqpt),3*InVar%natom_unitcell,mass_mat(:,:),3*InVar%natom_unitcell,omega(:,iqpt),WORKC,LWORK,RWORK,INFO)
-    deallocate(mass_mat)
+    ABI_FREE(mass_mat)
     do ii=1,InVar%natom_unitcell
       do jj=1,3
         if (omega((ii-1)*3+jj,iqpt).lt.0.d0) then
@@ -881,8 +887,10 @@ subroutine calc_dij(InVar,Lattice,Phij_NN,Qpt,Rlatt_cart)
   close(53)
   close(52)
   close(51)
-  deallocate(WORKC,RWORK)
-  deallocate(dij,omega)
+  ABI_FREE(WORKC)
+  ABI_FREE(RWORK)
+  ABI_FREE(dij)
+  ABI_FREE(omega)
 end subroutine calc_dij
 
 !=====================================================================================================

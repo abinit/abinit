@@ -52,8 +52,8 @@ contains
 ! Define quantities
   maxdist(:)=10
   datagrid3d(:)=50
-  allocate(proba_3d(datagrid3d(1),datagrid3d(2),datagrid3d(3))); proba_3d(:,:,:)=0
-  allocate(proba_1d(int(2*InVar%Rcut*datagrid3d(1)))); proba_1d(:)=0
+  ABI_MALLOC(proba_3d,(datagrid3d(1),datagrid3d(2),datagrid3d(3))); proba_3d(:,:,:)=0
+  ABI_MALLOC(proba_1d,(int(2*InVar%Rcut*datagrid3d(1)))); proba_1d(:)=0
 
   write(InVar%stdout,*) ' '
   write(InVar%stdout,*) '#############################################################################'
@@ -226,7 +226,8 @@ contains
     write(17,'(f15.10,i8)') dfloat(ii)/dfloat(datagrid3d(1)),proba_1d(ii)
   end do
   close(17)
-  deallocate(proba_3d,proba_1d)
+  ABI_FREE(proba_3d)
+  ABI_FREE(proba_1d)
 
   write(InVar%stdout,'(a,f15.10)') ' The ideal   distance is=',dist_ideal 
   write(InVar%stdout,'(a,f15.10)') ' The mean    distance is=',dist_mean/dfloat(total_point) 
@@ -266,16 +267,18 @@ contains
   write(InVar%stdout,*) '########################## Compute the pseudo-inverse #######################'
   write(InVar%stdout,*) '#############################################################################'
 
-  allocate(pseudo_inverse(ntotcoeff,3*InVar%natom*InVar%nstep_remain)) ; pseudo_inverse(:,:)=0.d0
-  allocate(sigma(ntotcoeff)) ; sigma(:)=0.d0 
-  allocate(matU(3*InVar%natom*InVar%nstep_remain,ntotcoeff)) ; matU(:,:)=0.d0
-  allocate(transmatV(ntotcoeff,ntotcoeff)) ; transmatV(:,:)=0.d0
+  ABI_MALLOC(pseudo_inverse,(ntotcoeff,3*InVar%natom*InVar%nstep_remain)) ; pseudo_inverse(:,:)=0.d0
+  ABI_MALLOC(sigma,(ntotcoeff)) ; sigma(:)=0.d0 
+  ABI_MALLOC(matU,(3*InVar%natom*InVar%nstep_remain,ntotcoeff)) ; matU(:,:)=0.d0
+  ABI_MALLOC(transmatV,(ntotcoeff,ntotcoeff)) ; transmatV(:,:)=0.d0
   LWORK=3*(ntotcoeff)**2+max(3*InVar%natom*InVar%nstep_remain,4*(ntotcoeff)**2+4*(ntotcoeff))
-  allocate(WORK(LWORK),IWORK(8*(ntotcoeff))) ; WORK(:)=0.d0
+  ABI_MALLOC(WORK,(LWORK))
+  ABI_MALLOC(IWORK,(8*(ntotcoeff))) ; WORK(:)=0.d0
   call DGESDD('S',3*InVar%natom*InVar%nstep_remain,ntotcoeff,fcoeff,3*InVar%natom*InVar%nstep_remain,sigma,matU,3*InVar%natom*InVar%nstep_remain,transmatV,ntotcoeff,WORK,LWORK,IWORK,INFO) 
-  deallocate(WORK,IWORK)
+  ABI_FREE(WORK)
+  ABI_FREE(IWORK)
 
-  allocate(pseudo_sigma(ntotcoeff,ntotcoeff)) ; pseudo_sigma(:,:)=0.d0
+  ABI_MALLOC(pseudo_sigma,(ntotcoeff,ntotcoeff)) ; pseudo_sigma(:,:)=0.d0
   sigma(:)=1.d0/sigma(:)
   write(InVar%stdout,*) 'The eigenvalues are:'
   do ii=1,ntotcoeff
@@ -285,19 +288,21 @@ contains
     write(InVar%stdout,'(x,i4,x,f15.10)') ii,sigma(ii)
   end do
   write(InVar%stdout,'(a,x,f15.10)')'  condition number=',maxval(sigma(:))/minval(sigma(:))
-  deallocate(sigma)
+  ABI_FREE(sigma)
   
-  allocate(tmp1(ntotcoeff,3*InVar%natom*InVar%nstep_remain)) ; tmp1(:,:)=0.d0
+  ABI_MALLOC(tmp1,(ntotcoeff,3*InVar%natom*InVar%nstep_remain)) ; tmp1(:,:)=0.d0
   call DGEMM('N','T',ntotcoeff,3*InVar%natom*InVar%nstep_remain,ntotcoeff,1.d0,pseudo_sigma,ntotcoeff,matU,3*InVar%natom*InVar%nstep_remain,1.d0,tmp1,ntotcoeff)
   call DGEMM('T','N',ntotcoeff,3*InVar%natom*InVar%nstep_remain,ntotcoeff,1.d0,transmatV,ntotcoeff,tmp1,ntotcoeff,1.d0,pseudo_inverse,ntotcoeff)
-  deallocate(tmp1)
-  deallocate(matU,transmatV,pseudo_sigma)
-  allocate(fcartij_tmp(3*InVar%natom*InVar%nstep_remain,1)); fcartij_tmp(:,:)=zero  
+  ABI_FREE(tmp1)
+  ABI_FREE(matU)
+  ABI_FREE(transmatV)
+  ABI_FREE(pseudo_sigma)
+  ABI_MALLOC(fcartij_tmp,(3*InVar%natom*InVar%nstep_remain,1)); fcartij_tmp(:,:)=zero  
   fcartij_tmp(:,1)=fcartij(:)
 ! NOTE, we have to solve F_ij = -\sum_j \Phi_ij u_j, so we add a minus sign to the pseudo_inverse  
   call DGEMM('N','N',ntotcoeff,1,3*InVar%natom*InVar%nstep_remain,1.d0,-pseudo_inverse,ntotcoeff,fcartij_tmp,3*InVar%natom*InVar%nstep_remain,1.d0,Phij_coeff,ntotcoeff)
-  deallocate(fcartij_tmp)
-  deallocate(pseudo_inverse)
+  ABI_FREE(fcartij_tmp)
+  ABI_FREE(pseudo_inverse)
 
 
  end subroutine calc_MoorePenrose
@@ -357,8 +362,8 @@ contains
   end do
 
 ! Define the bigbox with ideal positions
-  allocate(Rlatt_red (3,InVar%natom_unitcell,InVar%natom)); Rlatt_red (:,:,:)=0.d0
-  allocate(xred_ideal(3,InVar%natom))                     ; xred_ideal(:,:)=0.d0
+  ABI_MALLOC(Rlatt_red ,(3,InVar%natom_unitcell,InVar%natom)); Rlatt_red (:,:,:)=0.d0
+  ABI_MALLOC(xred_ideal,(3,InVar%natom))                     ; xred_ideal(:,:)=0.d0
   max_ijk=40
   iatom=1
   do ii=-max_ijk,max_ijk
@@ -418,7 +423,7 @@ contains
   end do  
 
 ! Compute the distances between ideal positions in the UNITcell
-  allocate(dist_unitcell(InVar%natom_unitcell,InVar%natom_unitcell,3)); dist_unitcell(:,:,:)=zero
+  ABI_MALLOC(dist_unitcell,(InVar%natom_unitcell,InVar%natom_unitcell,3)); dist_unitcell(:,:,:)=zero
   do iatcell=1,InVar%natom_unitcell
     do jatcell=1,InVar%natom_unitcell
       tmp(:)=xred_ideal(:,jatcell)-xred_ideal(:,iatcell)
@@ -433,8 +438,8 @@ contains
 !======== NOTE: - xred_center is used to find the matching with the ideal positions ======= 
 !========       - xred_average is used to compute the displacements (from MD trajectories) 
 !==========================================================================================
-  allocate(xred_average(3,InVar%natom))             ; xred_average(:,:)=0.d0
-  allocate(xred_center(3,InVar%natom))              ; xred_center(:,:)=0.d0
+  ABI_MALLOC(xred_average,(3,InVar%natom))             ; xred_average(:,:)=0.d0
+  ABI_MALLOC(xred_center,(3,InVar%natom))              ; xred_center(:,:)=0.d0
 ! Average positions from MD (on nstep_remain steps)
   do istep=1,InVar%nstep_remain
     do iatom=1,InVar%natom
@@ -488,7 +493,7 @@ contains
     write(InVar%stdout,*) 'Perhaps, you can adjust the tolerance (tolmotif)'
     stop
   end if  
-  deallocate(dist_unitcell)
+  ABI_FREE(dist_unitcell)
 
 ! Modification of xred and Rlatt tabs
 ! For averaged quantities --> kk=1: xred_center, xred_average et xred 
@@ -559,7 +564,7 @@ contains
 
 ! Matching between Ideal and Average positions: xred_ideal and xred_center
 ! Then, write them in the xred_average.xyz file.
-  allocate(FromIdeal2Average(InVar%natom))             ; FromIdeal2Average(:)=0
+  ABI_MALLOC(FromIdeal2Average,(InVar%natom))             ; FromIdeal2Average(:)=0
   open(unit=31,file='xred_average.xyz')
   write(31,'(i4)') InVar%natom*2
   write(31,'(i4)') 1
@@ -627,7 +632,7 @@ contains
   close(31)
 
 ! Average distances between atoms --> distance_average
-  allocate(distance_average(InVar%natom,InVar%natom,4))      ; distance_average(:,:,:)=0.d0
+  ABI_MALLOC(distance_average,(InVar%natom,InVar%natom,4))      ; distance_average(:,:,:)=0.d0
   do katom=1,InVar%natom
     do latom=1,InVar%natom
       tmp(:)=xred_center(:,FromIdeal2Average(latom))-xred_center(:,FromIdeal2Average(katom))
@@ -641,7 +646,7 @@ contains
       distance_average(katom,latom,1)=distance_average(katom,latom,1)**0.5
     end do  
   end do  
-  deallocate(xred_center)
+  ABI_FREE(xred_center)
 
 !====================================================================================
 !====================== END OF REDUCED COORDINATES ==================================
@@ -651,10 +656,10 @@ contains
 ! c/ The atoms are sorted according the IDEAL arrangement
 !    The correspondance function is contained in: FromIdeal2Average
 !    WARNING : Consequently the arrangement of the xcart* tabs is not modified. 
-  allocate(xcart        (3,InVar%natom,InVar%nstep))       ; xcart(:,:,:)=0.d0
-  allocate(xcart_ideal  (3,InVar%natom))                   ; xcart_ideal(:,:)=0.d0
-  allocate(xcart_average(3,InVar%natom))                   ; xcart_average(:,:)=0.d0
-  allocate(ucart_tmp    (3,InVar%natom,InVar%nstep_remain)); ucart_tmp(:,:,:)=0.d0
+  ABI_MALLOC(xcart        ,(3,InVar%natom,InVar%nstep))       ; xcart(:,:,:)=0.d0
+  ABI_MALLOC(xcart_ideal  ,(3,InVar%natom))                   ; xcart_ideal(:,:)=0.d0
+  ABI_MALLOC(xcart_average,(3,InVar%natom))                   ; xcart_average(:,:)=0.d0
+  ABI_MALLOC(ucart_tmp    ,(3,InVar%natom,InVar%nstep_remain)); ucart_tmp(:,:,:)=0.d0
   do iatom=1,InVar%natom
     call DGEMV('T',3,3,1.d0,Lattice%rprimd_MD(:,:),3,xred_ideal  (:,iatom),1,0.d0,xcart_ideal  (:,iatom),1)
     call DGEMV('T',3,3,1.d0,Lattice%rprimd_MD(:,:),3,xred_average(:,iatom),1,0.d0,xcart_average(:,iatom),1)
@@ -672,10 +677,10 @@ contains
       end if  
     end do
   end do
-  deallocate(xred_average)
+  ABI_FREE(xred_average)
 
 ! Rearrangement of the fcart tabs in column --> fcartij
-  allocate(fcart_tmp(3,InVar%natom,InVar%nstep)); fcart_tmp(:,:,:)=0.d0
+  ABI_MALLOC(fcart_tmp,(3,InVar%natom,InVar%nstep)); fcart_tmp(:,:,:)=0.d0
   do istep=1,InVar%nstep
     do iatom=1,InVar%natom
       fcart_tmp(:,iatom,istep)=InVar%fcart(:,FromIdeal2Average(iatom),istep)
@@ -691,9 +696,9 @@ contains
       enddo  
     enddo
   enddo  
-  deallocate(ucart_tmp)
-  deallocate(xcart_average)
-  deallocate(fcart_tmp)
+  ABI_FREE(ucart_tmp)
+  ABI_FREE(xcart_average)
+  ABI_FREE(fcart_tmp)
 
 ! Define Rlatt4dos, fulfilling the definition of mkphdos (ABINIT routine)
   do ii=1,3
@@ -704,15 +709,15 @@ contains
       call DGEMV('T',3,3,1.d0,rprimd_MD_tmp(:,:),3,Rlatt_red(:,iatcell,iatom),1,0.d0,Rlatt4dos(:,iatcell,iatom),1)
     end do  
   end do
-  deallocate(Rlatt_red)
-  deallocate(InVar%fcart)
+  ABI_FREE(Rlatt_red)
+  ABI_FREE(InVar%fcart)
 
 !==========================================================================================
 !======== 3/ Find the symetry operation between the reference and image bonds =============
 !==========================================================================================
   call SearchMatR_1at(InVar,Lattice,Sym,xred_ideal)
 
-  allocate(Sym%matR(InVar%natom,InVar%natom)) ; Sym%matR(:,:)=zero
+  ABI_MALLOC(Sym%matR,(InVar%natom,InVar%natom)) ; Sym%matR(:,:)=zero
   ishell=0
   do iatcell=1,InVar%natom_unitcell
     do jatom=1,InVar%natom
@@ -737,7 +742,7 @@ contains
     end do !jatom 
   end do !iatcell 
   nshell=ishell
-  deallocate(xred_ideal)
+  ABI_FREE(xred_ideal)
 
 !==========================================================================================
 !======== 4/ Write output quantities needed to visualize the neighbouring distances =======
@@ -746,11 +751,11 @@ contains
   if (InVar%d1NN.gt.0) then
     call write_d1NN(distance_average,FromIdeal2Average,InVar,bond_ref,Sym,xcart,xcart_ideal)
   end if
-  deallocate(InVar%xred)
-  deallocate(distance_average)
-  deallocate(FromIdeal2Average)
-  deallocate(xcart)
-  deallocate(xcart_ideal)
+  ABI_FREE(InVar%xred)
+  ABI_FREE(distance_average)
+  ABI_FREE(FromIdeal2Average)
+  ABI_FREE(xcart)
+  ABI_FREE(xcart_ideal)
 
 
  end subroutine MatchIdeal2Average
@@ -781,14 +786,14 @@ contains
   write(InVar%stdout,*) '#############################################################################'
   write(InVar%stdout,*) '######################### Energies, errors,...  #############################'
   write(InVar%stdout,*) '#############################################################################'
-  allocate(U_MD(InVar%nstep_remain)); U_MD(:)=0.d0
+  ABI_MALLOC(U_MD,(InVar%nstep_remain)); U_MD(:)=0.d0
   do istep=1,InVar%nstep_remain
     U_MD(istep)=InVar%etot(InVar%nstep1+istep-1)
   end do  
   
 ! Compute Forces of the model TDEP
-  allocate(PhijUiUj(InVar%nstep_remain)); PhijUiUj(:)=0.d0 
-  allocate(Forces_TDEP(3*InVar%natom*InVar%nstep_remain)); Forces_TDEP(:)=0.d0 
+  ABI_MALLOC(PhijUiUj,(InVar%nstep_remain)); PhijUiUj(:)=0.d0 
+  ABI_MALLOC(Forces_TDEP,(3*InVar%natom*InVar%nstep_remain)); Forces_TDEP(:)=0.d0 
   do istep=1,InVar%nstep_remain
     do iatom=1,InVar%natom
       do ii=1,3
@@ -805,7 +810,7 @@ contains
   end do
 
 ! Compute U0, U_TDEP, DeltaFree_AH and write them in the data.out file
-  allocate(U_TDEP(InVar%nstep_remain)); U_TDEP(:)=0.d0
+  ABI_MALLOC(U_TDEP,(InVar%nstep_remain)); U_TDEP(:)=0.d0
   write(InVar%stdout,'(a)') ' Average quantities highlighting the convergence (in a.u./atom) :'
   write(InVar%stdout,'(a)') ' Istep                 U_0           DeltaFree_AH          DeltaFree_AH2        (F_MD-F_TDEP)**2'
   tmp0=zero
@@ -845,7 +850,7 @@ contains
     MinDeltaForces=tmp3/dfloat(istepmax*InVar%natom*3)
     write(InVar%stdout,'(i5,4(10x,e12.5))') istepmax,U0,DeltaFree_AH,DeltaFree_AH2,MinDeltaForces
   end do  
-  deallocate(PhijUiUj)
+  ABI_FREE(PhijUiUj)
 
 ! Write (U_TDEP vs U_MD) and (Forces_TDEP vs Forces_MD) 
   write(InVar%stdout,'(a)') ' '
@@ -865,8 +870,9 @@ contains
   end do  
   close(32)
   close(33)
-  deallocate(U_MD,U_TDEP)
-  deallocate(Forces_TDEP)
+  ABI_FREE(U_MD)
+  ABI_FREE(U_TDEP)
+  ABI_FREE(Forces_TDEP)
 
  end subroutine model
 !====================================================================================================

@@ -58,15 +58,15 @@ contains
 ! Compute all the symetries coming from the bravais lattice
 ! The routine used is symlatt (from Abinit code)
   Sym%msym=1000 !msym needs to be very large due to non-primitive cell calculations
-  allocate(Sym%ptsymrel(3,3,Sym%msym)) ; Sym%ptsymrel(:,:,:)=0
+  ABI_MALLOC(Sym%ptsymrel,(3,3,Sym%msym)) ; Sym%ptsymrel(:,:,:)=0
   call symlatt(InVar%bravais,Sym%msym,Sym%nptsym,Sym%ptsymrel,Lattice%rprimdt,tol8)
   write(Invar%stdout,'(a,x,11(i4,x))')' bravais=',InVar%bravais(:)
   Sym%nsym=Sym%nptsym
 
 ! Transform matR_ref in cartesian coordinates
-  allocate(Sym%matR_ref(3,3,Sym%nsym,2)) ; Sym%matR_ref(:,:,:,1)=dfloat(Sym%ptsymrel(:,:,1:Sym%nsym))
-  allocate(Sym%matR_inv(3,3,Sym%nsym,2)) ; Sym%matR_inv(:,:,:,1)=zero
-  allocate(tmp1(3,3)); tmp1(:,:)=0.d0
+  ABI_MALLOC(Sym%matR_ref,(3,3,Sym%nsym,2)) ; Sym%matR_ref(:,:,:,1)=dfloat(Sym%ptsymrel(:,:,1:Sym%nsym))
+  ABI_MALLOC(Sym%matR_inv,(3,3,Sym%nsym,2)) ; Sym%matR_inv(:,:,:,1)=zero
+  ABI_MALLOC(tmp1,(3,3)); tmp1(:,:)=0.d0
   open(unit=75,file='sym.dat')
   do isym=1,Sym%nsym
     write(75,*) ' '
@@ -112,7 +112,7 @@ contains
     end do
   end do  
 
-  deallocate(tmp1)
+  ABI_FREE(tmp1)
 
 
 
@@ -152,8 +152,8 @@ contains
 ! TODO: Initialize the local variables at 0
 
 ! Initialize the all the symetries using the first atom at (0.0;0.0;0.0)
-  allocate(    xred_temp(3,InVar%natom_unitcell))        ;     xred_temp(:,:)=0.d0
-  allocate(Sym%xred_zero(3,InVar%natom_unitcell))        ; Sym%xred_zero(:,:)=0.d0
+  ABI_MALLOC(    xred_temp,(3,InVar%natom_unitcell))        ;     xred_temp(:,:)=0.d0
+  ABI_MALLOC(Sym%xred_zero,(3,InVar%natom_unitcell))        ; Sym%xred_zero(:,:)=0.d0
   if (InVar%natom_unitcell.gt.1) then
     do iatom_unitcell=2,InVar%natom_unitcell
       temp3(:,1)=xred_ideal(:,iatom_unitcell)-xred_ideal(:,1)
@@ -170,13 +170,13 @@ contains
   jellslab=0
   noncoll=0
   nzchempot=0
-  allocate(spinat(3,InVar%natom_unitcell)); spinat(:,:)=0.d0
+  ABI_MALLOC(spinat,(3,InVar%natom_unitcell)); spinat(:,:)=0.d0
   use_inversion=1
-  allocate(symrel    (3,3,Sym%msym)) ; symrel    (:,:,:)=0
-  allocate(symrel_tmp(3,3,Sym%msym)) ; symrel_tmp(:,:,:)=0
-  allocate(Sym%tnons   (3,Sym%msym)) ; Sym%tnons   (:,:)=0.d0
-  allocate(Sym%symafm    (Sym%msym)) ; Sym%symafm(:)    =1
-  allocate(tnons_tmp   (3,Sym%msym)) ; tnons_tmp   (:,:)=0.d0
+  ABI_MALLOC(symrel    ,(3,3,Sym%msym)) ; symrel    (:,:,:)=0
+  ABI_MALLOC(symrel_tmp,(3,3,Sym%msym)) ; symrel_tmp(:,:,:)=0
+  ABI_MALLOC(Sym%tnons   ,(3,Sym%msym)) ; Sym%tnons   (:,:)=0.d0
+  ABI_MALLOC(Sym%symafm    ,(Sym%msym)) ; Sym%symafm(:)    =1
+  ABI_MALLOC(tnons_tmp   ,(3,Sym%msym)) ; tnons_tmp   (:,:)=0.d0
   call symfind(berryopt,efield,Lattice%gprimd,jellslab,Sym%msym,InVar%natom_unitcell,noncoll,Sym%nptsym,nsym,&
 &      nzchempot,Sym%ptsymrel,spinat,Sym%symafm,symrel_tmp,tnons_tmp,tol8,InVar%typat_unitcell,use_inversion,xred_temp)
   
@@ -199,7 +199,8 @@ contains
       stop
     end if  
   end if
-  deallocate(symrel_tmp,tnons_tmp)
+  ABI_FREE(symrel_tmp)
+  ABI_FREE(tnons_tmp)
   do isym=1,Sym%nptsym
     counter=0
     do ii=1,3
@@ -231,7 +232,7 @@ contains
   write(InVar%stdout,'(a)') 'Before symanal'
 
 !Calcul des symrec  
-  allocate(Sym%symrec(3,3,Sym%nptsym)); Sym%symrec(:,:,:)=0
+  ABI_MALLOC(Sym%symrec,(3,3,Sym%nptsym)); Sym%symrec(:,:,:)=0
   do isym=1,Sym%nptsym
     call mati3inv(symrel(:,:,isym),Sym%symrec(:,:,isym))
   end do
@@ -249,9 +250,9 @@ contains
 ! $ R^{-1} (xred(:,iat)-\tau) = xred(:,iat_sym) + R_0 $ 
 ! * indsym(4,  isym,iat) gives iat_sym in the original unit cell.
 ! * indsym(1:3,isym,iat) gives the lattice vector $R_0$.
-  allocate(Sym%indsym(4,Sym%nptsym,InVar%natom)); Sym%indsym(:,:,:)=zero
+  ABI_MALLOC(Sym%indsym,(4,Sym%nptsym,InVar%natom)); Sym%indsym(:,:,:)=zero
   call symatm(Sym%indsym(:,:,1:InVar%natom_unitcell),InVar%natom_unitcell,Sym%nptsym,Sym%symrec,Sym%tnons,tol8,InVar%typat_unitcell,xred_temp)
-  deallocate(xred_temp)
+  ABI_FREE(xred_temp)
 
 ! Store the positions of the atoms in the motif
   do iatom=1,InVar%natom_unitcell
@@ -298,8 +299,8 @@ contains
   if (InVar%debug) close(40)
 
 
-  deallocate(symrel)
-  deallocate(spinat)
+  ABI_FREE(symrel)
+  ABI_FREE(spinat)
 
  end subroutine  
 

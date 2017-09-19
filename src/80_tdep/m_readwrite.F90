@@ -268,11 +268,11 @@ contains
   if ( InVar%netcdf) then
     call get_dims_hist(ncid,InVar%natom,InVar%ntypat,nimage,mdtime,&
 &       natom_id,ntypat_id,nimage_id,time_id,xyz_id,six_id,has_nimage)
-    allocate(InVar%amu(InVar%ntypat)); InVar%amu(:)=zero
-    allocate(InVar%typat(InVar%natom)); InVar%typat(:)=zero
-    allocate(znucl(InVar%ntypat))
+    ABI_MALLOC(InVar%amu,(InVar%ntypat)); InVar%amu(:)=zero
+    ABI_MALLOC(InVar%typat,(InVar%natom)); InVar%typat(:)=zero
+    ABI_MALLOC(znucl,(InVar%ntypat))
     call read_csts_hist(ncid,dtion,InVar%typat,znucl,InVar%amu)
-    deallocate(znucl)
+    ABI_FREE(znucl)
 
     ! Need to close NetCDF file because it is going to be reopened by read_md_hist
     ncerr = nf90_close(ncid)
@@ -304,13 +304,13 @@ contains
   end if
   read(40,*) string,InVar%natom_unitcell
   write(InVar%stdout,'(x,a20,x,i4)') string,InVar%natom_unitcell
-  allocate(InVar%xred_unitcell(3,InVar%natom_unitcell)); InVar%xred_unitcell(:,:)=zero
+  ABI_MALLOC(InVar%xred_unitcell,(3,InVar%natom_unitcell)); InVar%xred_unitcell(:,:)=zero
   read(40,*) string,InVar%xred_unitcell(:,:)
   write(InVar%stdout,'(x,a20)') string
   do ii=1,InVar%natom_unitcell
     write(InVar%stdout,'(22x,3(f15.10,x))') (InVar%xred_unitcell(jj,ii), jj=1,3)
   end do  
-  allocate(InVar%typat_unitcell(InVar%natom_unitcell)); InVar%typat_unitcell(:)=0 
+  ABI_MALLOC(InVar%typat_unitcell,(InVar%natom_unitcell)); InVar%typat_unitcell(:)=0 
   read(40,*) string,InVar%typat_unitcell(:)
   write(InVar%stdout,'(x,a20,20(x,i4))') string,(InVar%typat_unitcell(jj),jj=1,InVar%natom_unitcell)
   if (InVar%netcdf) then
@@ -322,7 +322,7 @@ contains
   if (InVar%netcdf) then
     string='amu'
   else  
-    allocate(InVar%amu(InVar%ntypat)); InVar%amu(:)=zero
+    ABI_MALLOC(InVar%amu,(InVar%ntypat)); InVar%amu(:)=zero
     read(40,*) string,InVar%amu(:)
   end if  
   write(InVar%stdout,'(x,a20,20(x,f15.10))') string,(InVar%amu(jj),jj=1,InVar%ntypat)
@@ -353,7 +353,7 @@ contains
   if (InVar%netcdf) then
     string='typat'
   else
-    allocate(InVar%typat(InVar%natom)); InVar%typat(:)=0 
+    ABI_MALLOC(InVar%typat,(InVar%natom)); InVar%typat(:)=0 
     read(40,*) string,InVar%typat(:)
   end if  
   write(InVar%stdout,'(x,a20)') string
@@ -392,7 +392,7 @@ contains
       read(40,*) string,InVar%Use_ideal_positions
       write(InVar%stdout,'(x,a20,x,i4)') string,InVar%Use_ideal_positions
     else if (string.eq.Born_charge) then  
-      allocate(InVar%born_charge(InVar%ntypat)); InVar%born_charge(:)=0.d0
+      ABI_MALLOC(InVar%born_charge,(InVar%ntypat)); InVar%born_charge(:)=0.d0
       InVar%loto=.true.
       read(40,*) string,InVar%born_charge(:)
       write(InVar%stdout,'(x,a20,20(x,f15.10))') string,(InVar%born_charge(jj),jj=1,InVar%ntypat)
@@ -403,14 +403,14 @@ contains
       read(40,*) string,InVar%BZpath
       write(InVar%stdout,'(x,a20,x,i4)') string,InVar%BZpath
       if (InVar%BZpath.lt.0) then
-        allocate(InVar%qpt(3,abs(InVar%BZpath))); InVar%qpt(:,:)=zero
+        ABI_MALLOC(InVar%qpt,(3,abs(InVar%BZpath))); InVar%qpt(:,:)=zero
         write(InVar%stdout,'(a)') ' Q points as given in the input file:'
         do jj=1,abs(InVar%BZpath)
           read(40,*) InVar%qpt(:,jj)
           write(InVar%stdout,'(22x,3(f15.10,x))') InVar%qpt(:,jj)
         end do  
       else if (InVar%BZpath.gt.0) then
-        allocate(InVar%special_qpt(InVar%BZpath))
+        ABI_MALLOC(InVar%special_qpt,(InVar%BZpath))
         backspace(40)
         read(40,*) string,tmp,(InVar%special_qpt(jj),jj=1,InVar%BZpath)
         write(InVar%stdout,'(a,x,10(a2,"-"))') ' Special q-points: ',InVar%special_qpt(:)
@@ -470,9 +470,9 @@ contains
 
 ! Read xred.dat, fcart.dat and etot.dat ASCII files or extract them from the HIST.nc netcdf file.
   write(InVar%stdout,'(a)') ' '
-  allocate(InVar%xred(3,InVar%natom,InVar%nstep))  ; InVar%xred(:,:,:)=0.d0
-  allocate(InVar%fcart(3,InVar%natom,InVar%nstep)) ; InVar%fcart(:,:,:)=0.d0
-  allocate(InVar%etot(InVar%nstep))                ; InVar%etot(:)=0.d0
+  ABI_MALLOC(InVar%xred,(3,InVar%natom,InVar%nstep))  ; InVar%xred(:,:,:)=0.d0
+  ABI_MALLOC(InVar%fcart,(3,InVar%natom,InVar%nstep)) ; InVar%fcart(:,:,:)=0.d0
+  ABI_MALLOC(InVar%etot,(InVar%nstep))                ; InVar%etot(:)=0.d0
   if (InVar%netcdf) then
     InVar%xred(:,:,:) =Hist%xred(:,:,:)
     InVar%fcart(:,:,:)=Hist%fcart(:,:,:)

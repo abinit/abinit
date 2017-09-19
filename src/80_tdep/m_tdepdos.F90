@@ -21,12 +21,8 @@ module m_tdepdos
   use m_readwrite,   only : Input_Variables_type
   use m_latt,        only : Lattice_Variables_type
   use m_sym,         only : make_sym, SearchMatR_1at, SearchMatR_2at, Symetries_Variables_type
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
   use netcdf
-#endif
-#ifdef HAVE_TRIO_ETSF_IO
-  use etsf_io_low_level
-  use etsf_io
 #endif
 
   implicit none
@@ -195,11 +191,11 @@ subroutine make_phdos(Phij_NN,Ifc,InVar,Lattice,natom,natom_unitcell,PHdos,Qpt,R
 ! Link the atmfrc to the Phij_NN  
 ! ==============================
 !FB
-!FB  allocate(atmfrc_loto(2,3,natom_unitcell,3,natom_unitcell,Ifc%nrpt)); atmfrc_loto(:,:,:,:,:,:)=zero 
+!FB  ABI_MALLOC(atmfrc_loto,(2,3,natom_unitcell,3,natom_unitcell,Ifc%nrpt)); atmfrc_loto(:,:,:,:,:,:)=zero 
 !FB  atmfrc_loto(:,:,:,:,:,:)=Ifc%atmfrc(:,:,:,:,:,:)
 !FB  Ifc%atmfrc(:,:,:,:,:,:)=zero
 !FB! From atmfrc to dynmat  
-!FB  allocate(dynmat(2,3,natom_unitcell,3,natom_unitcell,nqbz)); dynmat(:,:,:,:,:,:)=zero
+!FB  ABI_MALLOC(dynmat,(2,3,natom_unitcell,3,natom_unitcell,nqbz)); dynmat(:,:,:,:,:,:)=zero
 !FB  call ftifc_r2q(Ifc%atmfrc,dynmat,Lattice%gprim,natom_unitcell,nqbz,Ifc%nrpt,Ifc%rpt,spqpt,Ifc%wghatm)
 !FB  do iqpt=1,nqbz
 !FB    write(InVar%stdout,*) ddb%qpt(1:3,iqpt)
@@ -255,13 +251,13 @@ subroutine make_phdos(Phij_NN,Ifc,InVar,Lattice,natom,natom_unitcell,PHdos,Qpt,R
   ifcout=          min(Ifc%nrpt,200)
   prt_ifc=           1
   open(unit=7,file='ifc.tdep')
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
   write(InVar%stdout,'(a)') 'Write the IFC of TDEP in ifc.tdep and anaddb.nc' 
   NCF_CHECK_MSG(nctk_open_create(ncid, "anaddb.nc", xmpi_comm_self), "Creating anaddb.nc")
   NCF_CHECK(nctk_def_basedims(ncid))
   NCF_CHECK(nctk_defnwrite_ivars(ncid, ["anaddb_version"], [1]))
   NCF_CHECK(crystal_ncwrite(crystal,ncid))
-  call ifc_print(Ifc,Ifc%dielt,Ifc%zeff,ifcana,atifc,ifcout,prt_ifc,ncid)
+  call ifc_write(Ifc,ifcana,atifc,ifcout,prt_ifc,ncid)
   write(InVar%stdout,'(a)') '------- achieved'
 #else  
   write(InVar%stdout,'(a)') 'Write the IFC of TDEP in ifc.tdep' 
@@ -339,13 +335,13 @@ subroutine make_phdos(Phij_NN,Ifc,InVar,Lattice,natom,natom_unitcell,PHdos,Qpt,R
 ! Write IFC in ifc.out (for check)
 ! ================================
     open(unit=7,file='ifc.out')
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
     write(InVar%stdout,'(a)') 'Write the IFC of ANADDB in ifc.out and anaddb.nc' 
     NCF_CHECK_MSG(nctk_open_create(ncid, "anaddb.nc", xmpi_comm_self), "Creating anaddb.nc")
     NCF_CHECK(nctk_def_basedims(ncid))
     NCF_CHECK(nctk_defnwrite_ivars(ncid, ["anaddb_version"], [1]))
     NCF_CHECK(crystal_ncwrite(crystal,ncid))
-    call ifc_print(Ifc,Ifc%dielt,Ifc%zeff,ifcana,atifc,ifcout,prt_ifc,ncid)
+    call ifc_write(Ifc,ifcana,atifc,ifcout,prt_ifc,ncid)
     write(InVar%stdout,'(a)') '------- achieved'
 #else  
     write(InVar%stdout,'(a)') 'Write the IFC of ANADDB in ifc.out' 
@@ -540,8 +536,8 @@ subroutine elastic(Phij_NN,distance,InVar,Lattice)
 !==========================================================================================
 ! New calculation of elastic constants using the formula (12.28 and 12.29 of
 ! Wallace, Statistical physics of crystals and liquids, Worl Scientific)  
-  allocate(aijkl(3,3,3,3)); aijkl(:,:,:,:)=0.d0
-  allocate(cijkl(3,3,3,3)); cijkl(:,:,:,:)=0.d0
+  ABI_MALLOC(aijkl,(3,3,3,3)); aijkl(:,:,:,:)=0.d0
+  ABI_MALLOC(cijkl,(3,3,3,3)); cijkl(:,:,:,:)=0.d0
   do ii=1,3
     do jj=1,3
       do kk=1,3
@@ -565,11 +561,11 @@ subroutine elastic(Phij_NN,distance,InVar,Lattice)
       enddo
     enddo
   enddo
-  deallocate(aijkl)
+  ABI_FREE(aijkl)
   
   cijkl(:,:,:,:)=cijkl(:,:,:,:)*29421.033d0
 
-  allocate(Cij(6,6)) ; Cij(:,:)=0.d0
+  ABI_MALLOC(Cij,(6,6)) ; Cij(:,:)=0.d0
   Cij(1,1)=cijkl(1,1,1,1) ; Cij(1,2)=cijkl(1,1,2,2) ; Cij(1,3)=cijkl(1,1,3,3) ; Cij(1,4)=cijkl(1,1,2,3) ; Cij(1,5)=cijkl(1,1,1,3) ; Cij(1,6)=cijkl(1,1,1,2)
   Cij(2,1)=cijkl(2,2,1,1) ; Cij(2,2)=cijkl(2,2,2,2) ; Cij(2,3)=cijkl(2,2,3,3) ; Cij(2,4)=cijkl(2,2,2,3) ; Cij(2,5)=cijkl(2,2,1,3) ; Cij(2,6)=cijkl(2,2,1,2)
   Cij(3,1)=cijkl(3,3,1,1) ; Cij(3,2)=cijkl(3,3,2,2) ; Cij(3,3)=cijkl(3,3,3,3) ; Cij(3,4)=cijkl(3,3,2,3) ; Cij(3,5)=cijkl(3,3,1,3) ; Cij(3,6)=cijkl(3,3,1,2)
@@ -617,7 +613,7 @@ subroutine elastic(Phij_NN,distance,InVar,Lattice)
   write(InVar%stdout,'(a,3(f8.3,x))') 'Shear modulus G23, G13 and G12=',G23,G13,G12
   
 ! Compliance matrix  
-  allocate(Sij(6,6)) ; Sij(:,:)=0.d0
+  ABI_MALLOC(Sij,(6,6)) ; Sij(:,:)=0.d0
   Sij(1,1)= 1.d0/E1 ; Sij(1,2)=-Nu21/E2 ; Sij(1,3)=-Nu31/E3 ; Sij(1,4)=0.d0     ; Sij(1,5)=0.d0     ; Sij(1,6)=0.d0 
   Sij(2,1)=-Nu12/E1 ; Sij(2,2)= 1.d0/E2 ; Sij(2,3)=-Nu32/E3 ; Sij(2,4)=0.d0     ; Sij(2,5)=0.d0     ; Sij(2,6)=0.d0 
   Sij(3,1)=-Nu13/E1 ; Sij(3,2)=-Nu23/E2 ; Sij(3,3)= 1.d0/E3 ; Sij(3,4)=0.d0     ; Sij(3,5)=0.d0     ; Sij(3,6)=0.d0 
@@ -688,7 +684,9 @@ subroutine elastic(Phij_NN,distance,InVar,Lattice)
   Vphi=dsqrt(1.d9*BH/rho)
   write(InVar%stdout,'(3(a,f9.3,x))')'Velocities: compressional Vp=',Vp,' shear Vs=',Vs,' and bulk Vphi=',Vphi
 
-  deallocate(cijkl,Cij,Sij)
+  ABI_FREE(cijkl)
+  ABI_FREE(Cij)
+  ABI_FREE(Sij)
 end subroutine  
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 

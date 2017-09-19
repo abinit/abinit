@@ -52,12 +52,8 @@ program tdep
   use m_readwrite,   only : Aknowledgments, ReadEcho, Input_Variables_type
   use m_utils,       only : calc_MoorePenrose, MatchIdeal2Average, model
   use m_qpt,         only : make_qptpath, Qpoints_type
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
   use netcdf
-#endif
-#ifdef HAVE_TRIO_ETSF_IO
-  use etsf_io_low_level
-  use etsf_io
 #endif
 
 !This section has been created automatically by the script Abilint (TD).
