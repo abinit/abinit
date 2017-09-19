@@ -1878,7 +1878,7 @@ subroutine fit_polynomial_printSystemFiles(eff_pot,hist)
  write(unit_harmonic,'("<name>")')
 
  do irpt=1,eff_pot%harmonics_terms%ifcs%nrpt
-   if(any(abs(eff_pot%harmonics_terms%ifcs%short_atmfrc(1,:,:,:,:,irpt))>tol9)) then
+   if(any(abs(eff_pot%harmonics_terms%ifcs%short_atmfrc(:,:,:,:,irpt))>tol9)) then
      write(unit_harmonic,'("  <local_force_constant units=""hartree/bohrradius**2"">")')
      write(unit_harmonic,'("    <data>")')
      do ia=1,eff_pot%crystal%natom
@@ -1886,7 +1886,7 @@ subroutine fit_polynomial_printSystemFiles(eff_pot,hist)
          do ib=1,eff_pot%crystal%natom
            do  nu=1,3
              write(unit_harmonic,'(F22.14)', advance="no")&
-&                 (eff_pot%harmonics_terms%ifcs%short_atmfrc(1,mu,typat_order_uc(ia),&
+&                 (eff_pot%harmonics_terms%ifcs%short_atmfrc(mu,typat_order_uc(ia),&
 &                                                              nu,typat_order_uc(ib),irpt))
            end do
          end do
