@@ -880,7 +880,6 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 &       occ_k,optforces,prtvol,pwind,pwind_alloc,pwnsfac,pwnsfacq,resid_k,&
 &       rhoaug,paw_dmft,dtset%wtk(ikpt),zshift)
 
-
        call timab(985,1,tsec)
 
 #if defined HAVE_GPU_CUDA
@@ -939,7 +938,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
 !        Calculate Fock contribution to the total energy if required
          if ((psps%usepaw==1).and.(usefock)) then
-           if (fock%fock_common%optfor) then
+           if ((fock%fock_common%optfor).and.(usefock_ACE==0)) then
              call fock_calc_ene(dtset,fock%fock_common,energies%e_exactX,ikpt,nband_k,occ_k)
            end if
          end if

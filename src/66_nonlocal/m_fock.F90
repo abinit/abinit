@@ -1637,10 +1637,10 @@ subroutine fock_calc_ene(dtset,fock,fock_energy,ikpt,nband,occ)
  integer :: iband
  
 ! *************************************************************************
- 
- do iband=1,nband
-   ! Select only the occupied states (such that fock%occ_bz > 10^-8)
 
+ do iband=1,nband
+
+   ! Select only the occupied states (such that fock%occ_bz > 10^-8)
    if (abs(occ(iband))>tol8) then
 !     fock_energy=fock_energy + half*fock%eigen_ikpt(iband)*occ(iband)*dtset%wtk(ikpt)
      !* Sum the contribution of each occupied states at point k_i

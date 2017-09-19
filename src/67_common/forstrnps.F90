@@ -284,11 +284,12 @@ use m_cgtools
 
 !  Continue to initialize the Hamiltonian (PAW DIJ coefficients)
    call load_spin_hamiltonian(gs_hamk,isppol,with_nonlocal=.true.)
+   if (usefock_loc) fockcommon%isppol=isppol
 
 !  Loop over k points
    ikg=0
    do ikpt=1,nkpt
-
+     if (usefock_loc) fockcommon%ikpt=ikpt
      nband_k=nband(ikpt+(isppol-1)*nkpt)
      istwf_k=istwfk(ikpt)
      npw_k=npwarr(ikpt)

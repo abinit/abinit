@@ -234,7 +234,7 @@ subroutine fock2ACE(cg,cprj,fock,istwfk,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_e
  bdtot_index=0;ibg=0;icg=0
 
  do isppol=1,nsppol
-
+   fockcommon%isppol=isppol
 !  Continue to initialize the Hamiltonian (PAW DIJ coefficients)
    call load_spin_hamiltonian(gs_hamk,isppol,with_nonlocal=.true.)
 
@@ -242,7 +242,6 @@ subroutine fock2ACE(cg,cprj,fock,istwfk,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_e
    ikg=0
    do ikpt=1,nkpt
      fockcommon%ikpt=ikpt
-     fockcommon%isppol=isppol
      nband_k=nband(ikpt+(isppol-1)*nkpt)
      npw_k=npwarr(ikpt)
      kpoint(:)=kpt(:,ikpt)
@@ -419,9 +418,9 @@ subroutine fock2ACE(cg,cprj,fock,istwfk,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_e
            call fock_getghc(cwavef(:,1+(iblocksize-1)*npw_k*my_nspinor:iblocksize*npw_k*my_nspinor),cwaveprj_idat,&
 &           wi(:,1+(iblocksize-1)*npw_k*my_nspinor:iblocksize*npw_k*my_nspinor,iblock),gs_hamk,mpi_enreg)
            mkl(1,fockcommon%ieigen,fockcommon%ieigen)=fockcommon%eigen_ikpt(fockcommon%ieigen)
-           if (fockcommon%optstr) then
-             fockcommon%stress(:)=fockcommon%stress(:)+weight(iblocksize)*fockcommon%stress_ikpt(:,fockcommon%ieigen)
-           end if
+!           if (fockcommon%optstr) then
+!             fockcommon%stress(:)=fockcommon%stress(:)+weight(iblocksize)*fockcommon%stress_ikpt(:,fockcommon%ieigen)
+!           end if
            if (fockcommon%optfor) then
              fockcommon%forces(:,:)=fockcommon%forces(:,:)+weight(iblocksize)*fockcommon%forces_ikpt(:,:,fockcommon%ieigen)
            end if
