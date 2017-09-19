@@ -313,8 +313,7 @@ program multibinit
  if (inp%fit_coeff/=0)then
    option=inp%fit_coeff
    if(hist%mxhist >0)then
-     select case(option)
-     case (-1)
+     if (option==-1)then
 !      option == -1
 !      Print the file in the specific format for the script of carlos
 !      Born_Charges  
@@ -326,16 +325,16 @@ program multibinit
        if (iam_master) then
          call fit_polynomial_printSystemFiles(reference_effective_potential,hist)
        end if
-     case (1)
+       else if (option==1.or.option==2)then
 !      option = 1
        call fit_polynomial_coeff_fit(reference_effective_potential,&
 &                                    inp%fit_bancoeff,inp%fit_fixcoeff,hist,&
 &                                    inp%fit_rangePower,inp%fit_nbancoeff,inp%fit_ncycle,&
-&                                    inp%fit_nfixcoeff,comm,cutoff_in=inp%fit_cutoff,&
+&                                    inp%fit_nfixcoeff,option,comm,cutoff_in=inp%fit_cutoff,&
 &                                    verbose=.true.,positive=.false.,&
 &                                    anharmstr=inp%fit_anhaStrain==1,&
 &                                    spcoupling=inp%fit_SPCoupling==1)
-     end select
+     end if
    else
      write(message, '(3a)' )&
 &         'There is no step in the MD file ',ch10,&

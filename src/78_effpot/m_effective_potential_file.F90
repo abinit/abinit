@@ -88,9 +88,9 @@ module m_effective_potential_file
      real(C_DOUBLE) :: energy
      real(C_DOUBLE) :: dynmat(2,3,natom,3,natom,nqpt)
      real(C_DOUBLE) :: phfrq(3*natom,nqpt),qph1l(3,nqpt)
-     real(C_DOUBLE) :: atmfrc(2,3,natom,3,natom,nrpt)
-     real(C_DOUBLE) :: short_atmfrc(2,3,natom,3,natom,nrpt)
-     real(C_DOUBLE) :: ewald_atmfrc(2,3,natom,3,natom,nrpt)
+     real(C_DOUBLE) :: atmfrc(3,natom,3,natom,nrpt)
+     real(C_DOUBLE) :: short_atmfrc(3,natom,3,natom,nrpt)
+     real(C_DOUBLE) :: ewald_atmfrc(3,natom,3,natom,nrpt)
      real(C_DOUBLE) :: amu(ntypat),rprimd(3,3),epsilon_inf(3,3)
      real(C_DOUBLE) :: zeff(3,3,natom)
      real(C_DOUBLE) :: elastic_constants(6,6),xcart(3,natom)
@@ -1391,7 +1391,7 @@ end subroutine system_getDimFromXML
  real(dp) :: elastic_constants(6,6),elastic3rd(6,6,6),epsilon_inf(3,3)
  real(dp),allocatable :: all_amu(:), cell_local(:,:),cell_total(:,:)
  real(dp),allocatable :: elastic_displacement(:,:,:,:),dynmat(:,:,:,:,:,:)
- real(dp),allocatable :: local_atmfrc(:,:,:,:,:,:),total_atmfrc(:,:,:,:,:,:)
+ real(dp),allocatable :: local_atmfrc(:,:,:,:,:),total_atmfrc(:,:,:,:,:)
  real(dp),allocatable :: spinat(:,:),strain_coupling(:,:,:),phfrq(:,:),qph1l(:,:),tnons(:,:)
  real(dp),allocatable :: xcart(:,:),xred(:,:),zeff(:,:,:),znucl(:),zion(:)
  character(len=132),allocatable :: title(:)
@@ -1427,13 +1427,13 @@ end subroutine system_getDimFromXML
  ABI_ALLOCATE(cell_local,(3,nrpt))
  ABI_ALLOCATE(cell_total,(3,nrpt))
  ABI_ALLOCATE(elastic_displacement,(6,6,3,natom))
- ABI_ALLOCATE(ifcs%atmfrc,(2,3,natom,3,natom,nrpt))
+ ABI_ALLOCATE(ifcs%atmfrc,(3,natom,3,natom,nrpt))
  ABI_ALLOCATE(ifcs%cell,(3,nrpt))
- ABI_ALLOCATE(ifcs%short_atmfrc,(2,3,natom,3,natom,nrpt))
- ABI_ALLOCATE(ifcs%ewald_atmfrc,(2,3,natom,3,natom,nrpt))
+ ABI_ALLOCATE(ifcs%short_atmfrc,(3,natom,3,natom,nrpt))
+ ABI_ALLOCATE(ifcs%ewald_atmfrc,(3,natom,3,natom,nrpt))
  ABI_ALLOCATE(strain_coupling,(6,3,natom))
- ABI_ALLOCATE(total_atmfrc,(2,3,natom,3,natom,nrpt))
- ABI_ALLOCATE(local_atmfrc,(2,3,natom,3,natom,nrpt))
+ ABI_ALLOCATE(total_atmfrc,(3,natom,3,natom,nrpt))
+ ABI_ALLOCATE(local_atmfrc,(3,natom,3,natom,nrpt))
  ABI_ALLOCATE(dynmat,(2,3,natom,3,natom,nph1l))
  ABI_ALLOCATE(typat,(natom))
  ABI_ALLOCATE(phfrq,(3*natom,nph1l))
@@ -1449,7 +1449,7 @@ end subroutine system_getDimFromXML
  do ii = 1,6
 !  Get The size of the strainPhonon-coupling
    call effective_potential_file_getDimStrainCoupling(filename,nrpt_scoupling,ii-1)
-   ABI_ALLOCATE(phonon_strain(ii)%atmfrc,(2,3,natom,3,natom,nrpt_scoupling))
+   ABI_ALLOCATE(phonon_strain(ii)%atmfrc,(3,natom,3,natom,nrpt_scoupling))
    ABI_ALLOCATE(phonon_strain(ii)%cell,(3,nrpt_scoupling))
    phonon_strain(ii)%nrpt   = nrpt_scoupling
    phonon_strain(ii)%atmfrc = zero
@@ -1463,10 +1463,10 @@ end subroutine system_getDimFromXML
  elastic3rd(:,:,:) = zero
  elastic_displacement(:,:,:,:) = zero
  ifcs%nrpt = nrpt
- ifcs%atmfrc(:,:,:,:,:,:)  = zero
+ ifcs%atmfrc(:,:,:,:,:)  = zero
  ifcs%cell(:,:)  = zero
- ifcs%ewald_atmfrc(:,:,:,:,:,:) = zero
- ifcs%short_atmfrc(:,:,:,:,:,:) = zero
+ ifcs%ewald_atmfrc(:,:,:,:,:) = zero
+ ifcs%short_atmfrc(:,:,:,:,:) = zero
  strain_coupling(:,:,:) = zero
  phfrq = zero
  qph1l = zero
@@ -1484,11 +1484,11 @@ end subroutine system_getDimFromXML
    call wrtout(ab_out,message,'COLL')
    call wrtout(std_out,message,'COLL')
 
-!Read with libxml library
+!  Read with libxml library
    call effpot_xml_readSystem(char_f2c(trim(filename)),natom,ntypat,nrpt,nph1l,all_amu,&
 &                       ifcs%atmfrc,ifcs%cell,dynmat,elastic_constants,energy,&
-&                       epsilon_inf,ifcs%ewald_atmfrc,phfrq,rprimd,qph1l,ifcs%short_atmfrc,&
-&                       typat,xcart,zeff)
+&                       epsilon_inf,ifcs%ewald_atmfrc,phfrq,rprimd,qph1l,&
+&                       ifcs%short_atmfrc,typat,xcart,zeff)
 
 !  convert atomic mass unit to znucl
    do itypat=1,ntypat
@@ -1516,7 +1516,7 @@ end subroutine system_getDimFromXML
 
 !      Check if the 3rd order strain_coupling is present
        if(any(elastic3rd>tol10).or.any(elastic_displacement>tol10)) has_anharmonics = .TRUE.
-       phonon_strain(voigt)%atmfrc(1,:,:,:,:,:) = phonon_strain_atmfrc(:,:,:,:,:)
+       phonon_strain(voigt)%atmfrc(:,:,:,:,:) = phonon_strain_atmfrc(:,:,:,:,:)
        phonon_strain(voigt)%cell(:,:)   = phonon_strain_cell(:,:)
        if(any(phonon_strain(voigt)%atmfrc > tol10)) has_anharmonics = .TRUE.
 
@@ -1753,14 +1753,14 @@ end subroutine system_getDimFromXML
                    strg1=trim(line)
                  end if
                  read(strg1,*) (work2(3*natom,nu),nu=1,3*natom)
-                 local_atmfrc(1,:,:,:,:,irpt1) = reshape(work2,(/3,natom,3,natom/))
+                 local_atmfrc(:,:,:,:,irpt1) = reshape(work2,(/3,natom,3,natom/))
                  ABI_DEALLOCATE(work2)
                else
                  ABI_ALLOCATE(work2,(3*natom,3*natom))
                  do mu=1,3*natom
                    read(funit,*)(work2(mu,nu),nu=1,3*natom)
                  end do
-                 local_atmfrc(1,:,:,:,:,irpt1) =  reshape(work2,(/3,natom,3,natom/))
+                 local_atmfrc(:,:,:,:,irpt1) =  reshape(work2,(/3,natom,3,natom/))
                  ABI_DEALLOCATE(work2)
                end if
              end if
@@ -1804,14 +1804,14 @@ end subroutine system_getDimFromXML
                    strg1=trim(line)
                  end if
                  read(strg1,*) (work2(3*natom,nu),nu=1,3*natom)
-                 total_atmfrc(1,:,:,:,:,irpt2) = reshape(work2,(/3,natom,3,natom/))
+                 total_atmfrc(:,:,:,:,irpt2) = reshape(work2,(/3,natom,3,natom/))
                  ABI_DEALLOCATE(work2)
                else
                  ABI_ALLOCATE(work2,(3*natom,3*natom))
                  do mu=1,3*natom
                    read(funit,*)(work2(mu,nu),nu=1,3*natom)
                  end do
-                 total_atmfrc(1,:,:,:,:,irpt2) = reshape(work2,(/3,natom,3,natom/))
+                 total_atmfrc(:,:,:,:,irpt2) = reshape(work2,(/3,natom,3,natom/))
                  ABI_DEALLOCATE(work2)
                end if
              end if
@@ -2033,7 +2033,7 @@ end subroutine system_getDimFromXML
                    strg1=trim(line)
                    read(strg1,*) (work2(3*natom,nu),nu=1,3*natom)
                  end if
-                 phonon_strain(voigt)%atmfrc(1,:,:,:,:,irpt) = &
+                 phonon_strain(voigt)%atmfrc(:,:,:,:,irpt) = &
 &                           reshape(work2,(/3,natom,3,natom/))
                  ABI_DEALLOCATE(work2)
                else
@@ -2041,7 +2041,7 @@ end subroutine system_getDimFromXML
                  do mu=1,3*natom
                    read(funit,*)(work2(mu,nu),nu=1,3*natom)
                  end do
-                 phonon_strain(voigt)%atmfrc(1,:,:,:,:,irpt) =&
+                 phonon_strain(voigt)%atmfrc(:,:,:,:,irpt) =&
 &              reshape(work2,(/3,natom,3,natom/))
                  ABI_DEALLOCATE(work2)
                end if
@@ -2076,16 +2076,16 @@ end subroutine system_getDimFromXML
 ! Case 1: only local in the xml
    if (irpt1>0 .and. irpt2==0) then
      ifcs%cell(:,:) = cell_local(:,:)
-     ifcs%atmfrc(:,:,:,:,:,:)  = local_atmfrc(:,:,:,:,:,:)
-     ifcs%short_atmfrc(:,:,:,:,:,:) = local_atmfrc(:,:,:,:,:,:)
-     ifcs%ewald_atmfrc(:,:,:,:,:,:) = zero
+     ifcs%atmfrc(:,:,:,:,:)  = local_atmfrc(:,:,:,:,:)
+     ifcs%short_atmfrc(:,:,:,:,:) = local_atmfrc(:,:,:,:,:)
+     ifcs%ewald_atmfrc(:,:,:,:,:) = zero
 
 ! Case 2: only total in the xml
    else if(irpt1==0 .and. irpt2>0)then
      ifcs%cell(:,:) = cell_total(:,:)
-     ifcs%atmfrc(:,:,:,:,:,:)  = total_atmfrc(:,:,:,:,:,:)
-     ifcs%short_atmfrc(:,:,:,:,:,:) = zero
-     ifcs%ewald_atmfrc(:,:,:,:,:,:) = total_atmfrc(:,:,:,:,:,:)
+     ifcs%atmfrc(:,:,:,:,:)  = total_atmfrc(:,:,:,:,:)
+     ifcs%short_atmfrc(:,:,:,:,:) = zero
+     ifcs%ewald_atmfrc(:,:,:,:,:) = total_atmfrc(:,:,:,:,:)
 
 ! Case 3: local + total in the xml
    else if (irpt1>0 .and. irpt2>0)then
@@ -2093,10 +2093,10 @@ end subroutine system_getDimFromXML
        irpt3 = 0
        do ii=1,irpt2
          ifcs%cell(:,ii) = cell_total(:,ii)
-         ifcs%atmfrc(:,:,:,:,:,ii)  = total_atmfrc(:,:,:,:,:,ii)
+         ifcs%atmfrc(:,:,:,:,ii)  = total_atmfrc(:,:,:,:,ii)
          do jj=1,irpt1
            if (all(cell_local(:,jj)== ifcs%cell(:,ii))) then
-             ifcs%short_atmfrc(:,:,:,:,:,ii) = local_atmfrc(:,:,:,:,:,jj)
+             ifcs%short_atmfrc(:,:,:,:,ii) = local_atmfrc(:,:,:,:,jj)
              irpt3 = irpt3 + 1
            end if
          end do
@@ -2352,7 +2352,7 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
  real(dp):: red(3,3),qphnrm(3),qphon(3,3)
  real(dp),allocatable :: blkval(:,:,:,:,:,:),d2asr(:,:,:,:,:)
  real(dp),allocatable :: instrain(:,:),zeff(:,:,:)
- real(dp),pointer :: atmfrc_red(:,:,:,:,:,:),cell_red(:,:),wghatm_red(:,:,:)
+ real(dp),pointer :: atmfrc_red(:,:,:,:,:),cell_red(:,:),wghatm_red(:,:,:)
  character(len=500) :: message
  type(asrq0_t) :: asrq0
  type(ifc_type) :: ifc
@@ -2759,7 +2759,7 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
   nrpt_new = product(cell_number(:))
 
 ! Allocate temporary array
-  ABI_ALLOCATE(atmfrc_red,(2,3,natom,3,natom,nrpt_new))
+  ABI_ALLOCATE(atmfrc_red,(3,natom,3,natom,nrpt_new))
   ABI_ALLOCATE(wghatm_red,(natom,natom,nrpt_new))
   ABI_ALLOCATE(cell_red,(3,nrpt_new))
 
@@ -2817,7 +2817,7 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
                      i2  ==  cell2(2)  .and.&
                      i3  ==  cell2(3)) then
                    wghatm_red(ia,ib,irpt2) =  ifc%wghatm(ia,ib,irpt)
-                   atmfrc_red(:,:,ia,:,ib,irpt2) = ifc%atmfrc(:,:,ia,:,ib,irpt)
+                   atmfrc_red(:,ia,:,ib,irpt2) = ifc%atmfrc(:,ia,:,ib,irpt)
                    cell_red(1,irpt2) = i1
                    cell_red(2,irpt2) = i2
                    cell_red(3,irpt2) = i3
@@ -2854,9 +2854,9 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
   effective_potential%harmonics_terms%ifcs%nrpt = nrpt_new2
 
 ! Allocation of the final arrays
-  ABI_ALLOCATE(effective_potential%harmonics_terms%ifcs%atmfrc,(2,3,natom,3,natom,nrpt_new2))
-  ABI_ALLOCATE(effective_potential%harmonics_terms%ifcs%short_atmfrc,(2,3,natom,3,natom,nrpt_new2))
-  ABI_ALLOCATE(effective_potential%harmonics_terms%ifcs%ewald_atmfrc,(2,3,natom,3,natom,nrpt_new2))
+  ABI_ALLOCATE(effective_potential%harmonics_terms%ifcs%atmfrc,(3,natom,3,natom,nrpt_new2))
+  ABI_ALLOCATE(effective_potential%harmonics_terms%ifcs%short_atmfrc,(3,natom,3,natom,nrpt_new2))
+  ABI_ALLOCATE(effective_potential%harmonics_terms%ifcs%ewald_atmfrc,(3,natom,3,natom,nrpt_new2))
   ABI_ALLOCATE(effective_potential%harmonics_terms%ifcs%cell,(3,nrpt_new2))
   ABI_ALLOCATE(effective_potential%harmonics_terms%ifcs%wghatm,(natom,natom,nrpt_new2))
 
@@ -2867,19 +2867,19 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
 !     Apply weight on each R point
       do ia=1,effective_potential%crystal%natom
         do ib=1,effective_potential%crystal%natom
-          atmfrc_red(:,:,ia,:,ib,irpt) = atmfrc_red(:,:,ia,:,ib,irpt)*wghatm_red(ia,ib,irpt)
+          atmfrc_red(:,ia,:,ib,irpt) = atmfrc_red(:,ia,:,ib,irpt)*wghatm_red(ia,ib,irpt)
         end do
       end do
       effective_potential%harmonics_terms%ifcs%cell(:,irpt2) = cell_red(:,irpt)
-      effective_potential%harmonics_terms%ifcs%atmfrc(:,:,:,:,:,irpt2) = atmfrc_red(:,:,:,:,:,irpt)
+      effective_potential%harmonics_terms%ifcs%atmfrc(:,:,:,:,irpt2) = atmfrc_red(:,:,:,:,irpt)
       if (inp%dipdip == 1) then
-        effective_potential%harmonics_terms%ifcs%short_atmfrc(:,:,:,:,:,irpt2)=&
-&                                                                     atmfrc_red(:,:,:,:,:,irpt)
+        effective_potential%harmonics_terms%ifcs%short_atmfrc(:,:,:,:,irpt2)=&
+&                                                                     atmfrc_red(:,:,:,:,irpt)
       else
-        effective_potential%harmonics_terms%ifcs%short_atmfrc(:,:,:,:,:,irpt2) = zero
+        effective_potential%harmonics_terms%ifcs%short_atmfrc(:,:,:,:,irpt2) = zero
       end if
-      effective_potential%harmonics_terms%ifcs%short_atmfrc(:,:,:,:,:,irpt2)=atmfrc_red(:,:,:,:,:,irpt)
-      effective_potential%harmonics_terms%ifcs%ewald_atmfrc(:,:,:,:,:,irpt2) = zero
+      effective_potential%harmonics_terms%ifcs%short_atmfrc(:,:,:,:,irpt2)=atmfrc_red(:,:,:,:,irpt)
+      effective_potential%harmonics_terms%ifcs%ewald_atmfrc(:,:,:,:,irpt2) = zero
       effective_potential%harmonics_terms%ifcs%wghatm(:,:,irpt2) =  wghatm_red(:,:,irpt)
     end if
   end do

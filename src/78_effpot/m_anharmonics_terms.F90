@@ -596,10 +596,10 @@ subroutine anharmonics_terms_setStrainPhononCoupling(anharmonics_terms,natom,pho
  ABI_DATATYPE_ALLOCATE(anharmonics_terms%phonon_strain,(6))
  do ii = 1,6
    nrpt = phonon_strain(ii)%nrpt
-   ABI_ALLOCATE(anharmonics_terms%phonon_strain(ii)%atmfrc,(2,3,natom,3,natom,nrpt))
+   ABI_ALLOCATE(anharmonics_terms%phonon_strain(ii)%atmfrc,(3,natom,3,natom,nrpt))
    ABI_ALLOCATE(anharmonics_terms%phonon_strain(ii)%cell,(3,nrpt))
    anharmonics_terms%phonon_strain(ii)%nrpt   = phonon_strain(ii)%nrpt
-   anharmonics_terms%phonon_strain(ii)%atmfrc(:,:,:,:,:,:) = phonon_strain(ii)%atmfrc(:,:,:,:,:,:)
+   anharmonics_terms%phonon_strain(ii)%atmfrc(:,:,:,:,:) = phonon_strain(ii)%atmfrc(:,:,:,:,:)
    anharmonics_terms%phonon_strain(ii)%cell(:,:)   = phonon_strain(ii)%cell(:,:)
 
 !3-Set the flag
@@ -920,7 +920,7 @@ subroutine anharmonics_terms_evaluateIFCStrainCoupling(phonon_strain,disp,energy
             do ia = 1, natom_uc
               kk = ii + ia
               do mu=1,3
-                ifc = phonon_strain(alpha)%atmfrc(1,mu,ia,nu,ib,irpt)
+                ifc = phonon_strain(alpha)%atmfrc(mu,ia,nu,ib,irpt)
 !               accumule energy
                 energy =  energy + sixth*strain(alpha)*disp(mu,kk)*disp(nu,ll)*ifc
 !               accumule forces

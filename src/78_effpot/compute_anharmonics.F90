@@ -448,15 +448,15 @@ subroutine compute_anharmonics(eff_pot,filenames,inp,comm)
           end if
 !         Compute strain phonon-coupling
           phonon_strain(ii)%nrpt =  nrpt
-          ABI_ALLOCATE(phonon_strain(ii)%atmfrc,(2,3,natom,3,natom,nrpt))
+          ABI_ALLOCATE(phonon_strain(ii)%atmfrc,(3,natom,3,natom,nrpt))
           ABI_ALLOCATE(phonon_strain(ii)%cell,(3,nrpt))
           phonon_strain(ii)%atmfrc = zero
           phonon_strain(ii)%cell =  eff_pots(int(delta1))%harmonics_terms%ifcs%cell
 
           do irpt=1,phonon_strain(ii)%nrpt
-            phonon_strain(ii)%atmfrc(:,:,:,:,:,irpt) =&
-&           (eff_pots(int(delta1))%harmonics_terms%ifcs%atmfrc(:,:,:,:,:,irpt)&
-&          - eff_pots(int(delta2))%harmonics_terms%ifcs%atmfrc(:,:,:,:,:,irpt)) / &
+            phonon_strain(ii)%atmfrc(:,:,:,:,irpt) =&
+&           (eff_pots(int(delta1))%harmonics_terms%ifcs%atmfrc(:,:,:,:,irpt)&
+&          - eff_pots(int(delta2))%harmonics_terms%ifcs%atmfrc(:,:,:,:,irpt)) / &
 &            (2 * abs(effpot_strain(int(delta1))%delta))
           end do
 

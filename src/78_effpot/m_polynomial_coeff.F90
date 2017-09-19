@@ -1744,7 +1744,7 @@ end subroutine polynomial_coeff_getList
 !! SOURCE
 
 subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,powers,option,comm,&
-&                                         anharmstr,spcoupling)
+&                                     anharmstr,spcoupling)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1921,16 +1921,6 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,powers,
      end if
    end do
  end do
-
-! call  polynomial_coeff_getOrder1(cell,coeffs_tmp,cutoff,list_symcoeff,list_symstr,&
-!&                                         natom,ncoeff,ncoeff_sym,nrpt,nsym,&
-!&                                         rprimd,symbols,xcart)
-! do icoeff=1,ncoeff
-!   call polynomial_coeff_free(coeffs_tmp(icoeff))
-! end do
-! if(allocated(coeffs_tmp)) then
-!   ABI_DEALLOCATE(coeffs_tmp)
-! end if
 
 !first call to this routine in order to count the number of maximum coefficients
  ABI_ALLOCATE(list_coeff,(0))

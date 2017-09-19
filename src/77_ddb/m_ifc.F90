@@ -125,20 +125,20 @@ MODULE m_ifc
      ! amu(ntypat)
      ! mass of the atoms (atomic mass unit)
 
-   real(dp),allocatable :: atmfrc(:,:,:,:,:,:)
-     ! atmfrc(2,3,natom,3,natom,nrpt)
+   real(dp),allocatable :: atmfrc(:,:,:,:,:)
+     ! atmfrc(3,natom,3,natom,nrpt)
      ! Inter atomic forces in real space
 
    integer,allocatable :: cell(:,:)
      ! cell(nrpt,3)
      ! Give the index of the the cell and irpt
 
-   real(dp),allocatable :: ewald_atmfrc(:,:,:,:,:,:)
-     ! Ewald_atmfrc(2,3,natom,3,natom,nrpt)
+   real(dp),allocatable :: ewald_atmfrc(:,:,:,:,:)
+     ! Ewald_atmfrc(3,natom,3,natom,nrpt)
      ! Ewald Inter atomic forces in real space
 
-   real(dp),allocatable :: short_atmfrc(:,:,:,:,:,:)
-     ! short_atmfrc(2,3,natom,3,natom,nrpt)
+   real(dp),allocatable :: short_atmfrc(:,:,:,:,:)
+     ! short_atmfrc(3,natom,3,natom,nrpt)
      ! Short range part of Inter atomic forces in real space
 
    real(dp),allocatable :: qshft(:,:)
@@ -618,7 +618,7 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
 &     ifc_tmp%rpt,rprimd,r_inscribed_sphere,new_wght,ifc_tmp%wghatm)
 
 ! Fourier transformation of the dynamical matrices (q-->R)
- ABI_MALLOC(ifc_tmp%atmfrc,(2,3,natom,3,natom,ifc_tmp%nrpt))
+ ABI_MALLOC(ifc_tmp%atmfrc,(3,natom,3,natom,ifc_tmp%nrpt))
  call ftifc_q2r(ifc_tmp%atmfrc,Ifc%dynmat,gprim,natom,nqbz,ifc_tmp%nrpt,ifc_tmp%rpt,qbz)
 
 ! Eventually impose Acoustic Sum Rule to the interatomic forces
@@ -649,17 +649,17 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
    if (sum(ifc_tmp%wghatm(:,:,irpt)) /= 0) Ifc%nrpt = Ifc%nrpt+1
  end do
 
- ABI_CALLOC(Ifc%atmfrc,(2,3,natom,3,natom,Ifc%nrpt))
+ ABI_CALLOC(Ifc%atmfrc,(3,natom,3,natom,Ifc%nrpt))
  ABI_CALLOC(Ifc%rpt,(3,Ifc%nrpt))
  ABI_CALLOC(Ifc%cell,(3,Ifc%nrpt))
  ABI_CALLOC(Ifc%wghatm,(natom,natom,Ifc%nrpt))
- ABI_CALLOC(Ifc%short_atmfrc,(2,3,natom,3,natom,Ifc%nrpt))
- ABI_CALLOC(Ifc%ewald_atmfrc,(2,3,natom,3,natom,Ifc%nrpt))
+ ABI_CALLOC(Ifc%short_atmfrc,(3,natom,3,natom,Ifc%nrpt))
+ ABI_CALLOC(Ifc%ewald_atmfrc,(3,natom,3,natom,Ifc%nrpt))
 
  irpt_new = 1
  do irpt = 1, ifc_tmp%nrpt
    if (sum(ifc_tmp%wghatm(:,:,irpt)) /= 0) then
-     Ifc%atmfrc(:,:,:,:,:,irpt_new) = ifc_tmp%atmfrc(:,:,:,:,:,irpt)
+     Ifc%atmfrc(:,:,:,:,irpt_new) = ifc_tmp%atmfrc(:,:,:,:,irpt)
      Ifc%rpt(:,irpt_new) = ifc_tmp%rpt(:,irpt)
      Ifc%wghatm(:,:,irpt_new) = ifc_tmp%wghatm(:,:,irpt)
      Ifc%cell(:,irpt_new) = ifc_tmp%cell(:,irpt)
@@ -1363,7 +1363,7 @@ subroutine ifc_autocutoff(ifc, crystal, comm)
  real(dp) :: displ_cart(2*3*ifc%natom*3*ifc%natom)
  real(dp) :: qred(3),qred_vers(3),phfrqs(3*ifc%natom) !,dwdq(3,3*ifc%natom)
  real(dp),allocatable :: ref_phfrq(:,:),cut_phfrq(:,:)
- real(dp),allocatable :: save_wghatm(:,:,:),save_atmfrc(:,:,:,:,:,:)
+ real(dp),allocatable :: save_wghatm(:,:,:),save_atmfrc(:,:,:,:,:)
 
 ! *********************************************************************
 
@@ -1379,7 +1379,7 @@ subroutine ifc_autocutoff(ifc, crystal, comm)
  call xmpi_sum(ref_phfrq, comm, ierr)
 
  ABI_MALLOC(save_wghatm, (natom,natom,nrpt))
- ABI_MALLOC(save_atmfrc, (2,3,natom,3,natom,ifc%nrpt))
+ ABI_MALLOC(save_atmfrc, (3,natom,3,natom,ifc%nrpt))
  save_wghatm = ifc%wghatm; save_atmfrc = ifc%atmfrc
 
  ABI_MALLOC(cut_phfrq, (3*natom, ifc%nqibz))
@@ -1861,7 +1861,7 @@ subroutine ifc_write(Ifc,ifcana,atifc,ifcout,prt_ifc,ncid)
            ! And the actual short ranged forceconstant: TODO: check if
            ! a transpose is needed or a swap between the nu and the mu
            !write(unit_tdep,'(3f28.16)') (sriaf(nu,mu,ii)*Ha_eV/amu_emass, mu=1, 3)
-           write(unit_tdep,'(3f28.16)') (Ifc%short_atmfrc(1,mu,ia,nu,ib,irpt)*Ha_eV/Bohr_Ang**2, mu=1, 3)
+           write(unit_tdep,'(3f28.16)') (Ifc%short_atmfrc(mu,ia,nu,ib,irpt)*Ha_eV/Bohr_Ang**2, mu=1, 3)
            
            !AI2PS
            write(unit_ifc,'(3f28.16)')(rsiaf(nu,mu,ii),mu=1,3)
@@ -2114,7 +2114,7 @@ implicit none
      ! without taking into account the dipole-dipole interaction
      do mu=1,3
        do nu=1,3
-         rsiaf(mu,nu,ii)=Ifc%atmfrc(1,mu,ia,nu,ib,irpt) * Ifc%wghatm(ia,ib,irpt)
+         rsiaf(mu,nu,ii)=Ifc%atmfrc(mu,ia,nu,ib,irpt) * Ifc%wghatm(ia,ib,irpt)
        end do
      end do
      ! Output of the ifcs in cartesian coordinates
@@ -2123,8 +2123,7 @@ implicit none
          write(iout, '(1x,3f9.5)' )(rsiaf(mu,nu,ii)+tol10,mu=1,3)
 !       transfer short range and long range
          do mu=1,3
-           Ifc%short_atmfrc(1,mu,ia,nu,ib,irpt) = rsiaf(mu,nu,ii) + tol10
-           Ifc%ewald_atmfrc(1,mu,ia,nu,ib,irpt) = zero
+           Ifc%short_atmfrc(mu,ia,nu,ib,irpt) = rsiaf(mu,nu,ii) + tol10
          end do
 
        end do
@@ -2215,7 +2214,7 @@ implicit none
      ! "total" force constants (=real space FC)
      do mu=1,3
        do nu=1,3
-         sriaf(mu,nu,ii)=Ifc%atmfrc(1,mu,ia,nu,ib,irpt)* Ifc%wghatm(ia,ib,irpt)
+         sriaf(mu,nu,ii)=Ifc%atmfrc(mu,ia,nu,ib,irpt)* Ifc%wghatm(ia,ib,irpt)
          rsiaf(mu,nu,ii)=ewiaf1(mu,nu)+sriaf(mu,nu,ii)
        end do
      end do
@@ -2230,8 +2229,8 @@ implicit none
 
 !       transfer short range and long range
          do mu=1,3
-           Ifc%short_atmfrc(1,mu,ia,nu,ib,irpt) = sriaf(mu,nu,ii) + tol10
-           Ifc%ewald_atmfrc(1,mu,ia,nu,ib,irpt) = ewiaf1(mu,nu) + tol10
+           Ifc%short_atmfrc(mu,ia,nu,ib,irpt) = sriaf(mu,nu,ii) + tol10
+           Ifc%ewald_atmfrc(mu,ia,nu,ib,irpt) = ewiaf1(mu,nu) + tol10
          end do
        end do
      end if

@@ -462,14 +462,13 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
  multibinit_dtset%fit_option=0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'fit_option',tread,'INT')
  if(tread==1) multibinit_dtset%fit_option=intarr(1)
-! No test for now
-! if(multibinit_dtset%fit_option=0.or.multibinit_dtset%fit_option/=1)then
-!   write(message, '(a,i8,a,a,a,a,a)' )&
-!&   'fit_option is',multibinit_dtset%fit_option,', but the only allowed values',ch10,&
-!&   'are 0 or 1 for multibinit.',ch10,&
-!&   'Action: correct fit_option in your input file.'
-!   MSG_ERROR(message)
-! end if
+ if(multibinit_dtset%fit_option<0.or.multibinit_dtset%fit_option>2)then
+   write(message, '(a,i8,a,a,a,a,a)' )&
+&   'fit_option is',multibinit_dtset%fit_option,', but the only allowed values',ch10,&
+&   'are 0, 1 or 2 for multibinit.',ch10,&
+&   'Action: correct fit_option in your input file.'
+   MSG_ERROR(message)
+ end if
 
 
  multibinit_dtset%fit_ncycle=0
