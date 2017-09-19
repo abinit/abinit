@@ -368,11 +368,10 @@ subroutine fock2ACE(cg,cprj,fock,istwfk,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_e
        fockcommon%stress_ikpt=zero
      end if
  
-     if (psps%usepaw==1) then
-       if (fockcommon%optfor) then
-         fockcommon%forces_ikpt=zero
-       end if
+     if (fockcommon%optfor) then
+       fockcommon%forces_ikpt=zero
      end if
+
      ABI_ALLOCATE(wi,(2,npw_k*my_nspinor*blocksize,nblockbd))
      wi=zero
      ABI_ALLOCATE(mkl,(2,nband_k,nband_k))
