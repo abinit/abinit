@@ -279,8 +279,9 @@ contains
     NCF_CHECK_MSG(ncerr," close netcdf history file")
     ! .false. -> Velocities note used
     ! .true. -> acell and rprimd may change (2017_04 only NVT/isoK used but maybe
+    ! .false. -> read all times
     ! NPT one day ?)
-    call read_md_hist(filename,Hist,.false.,.true.)
+    call read_md_hist(filename,Hist,.false.,.true.,.false.)
   end if
 #endif
 
