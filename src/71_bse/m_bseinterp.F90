@@ -1,7 +1,7 @@
 !{\src2tex{textfont=tt}}
-!!****m* ABINIT/m_interp
+!!****m* ABINIT/m_bseinterp
 !! NAME
-!! m_interp
+!! m_bseinterp
 !!
 !! FUNCTION
 !!
@@ -23,7 +23,7 @@
 
 #include "abi_common.h"
 
-MODULE m_interp
+MODULE m_bseinterp
 
  use defs_basis
  use m_profiling_abi
@@ -114,7 +114,7 @@ MODULE m_interp
 CONTAINS  !=======================================================================
 !!***
 
-!!****f* m_interp/interpolator_init
+!!****f* m_bseinterp/interpolator_init
 !! NAME
 !! interpolator_init
 !!
@@ -223,7 +223,7 @@ end subroutine interpolator_init
 
 !-------------------------------------------------------------------
 
-!!****f* m_interp/int_alloc_work
+!!****f* m_bseinterp/int_alloc_work
 !! NAME
 !! int_alloc_work
 !!
@@ -273,7 +273,7 @@ end subroutine int_alloc_work
 
 !-------------------------------------------------------------------
 
-!!****f* m_interp/int_free_work
+!!****f* m_bseinterp/int_free_work
 !! NAME
 !! int_free_work
 !!
@@ -326,7 +326,7 @@ end subroutine int_free_work
 
 !-------------------------------------------------------------------
 
-!!****f* m_interp/int_compute_overlaps
+!!****f* m_bseinterp/int_compute_overlaps
 !! NAME
 !! int_compute_overlaps
 !!
@@ -340,7 +340,7 @@ end subroutine int_free_work
 !!
 !!
 !! PARENTS
-!!      m_interp
+!!      m_bseinterp
 !!
 !! CHILDREN
 !!
@@ -518,7 +518,7 @@ end subroutine int_compute_overlaps
 
 !----------------------------------------------------------------------
 
-!!****f* m_interp/int_preprocess_tables
+!!****f* m_bseinterp/int_preprocess_tables
 !! NAME
 !! int_preprocess_tables
 !!
@@ -530,7 +530,7 @@ end subroutine int_compute_overlaps
 !! OUTPUT
 !!
 !! PARENTS
-!!      m_interp
+!!      m_bseinterp
 !!
 !! CHILDREN
 !!
@@ -631,7 +631,7 @@ end subroutine int_preprocess_tables
 !!  Some operations are faster if we allocate with shape (8,nreh(spin))
 !!
 !! PARENTS
-!!      m_interp
+!!      m_bseinterp
 !!
 !! CHILDREN
 !!
@@ -718,7 +718,7 @@ end subroutine int_compute_corresp
 
 !----------------------------------------------------------------------
 
-!!****f* m_interp/interpolator_normalize
+!!****f* m_bseinterp/interpolator_normalize
 !! NAME
 !! interpolator_normalize
 !!
@@ -787,7 +787,7 @@ end subroutine interpolator_normalize
 
 !-------------------------------------------------------------------
 
-!!****f* m_interp/interpolator_free
+!!****f* m_bseinterp/interpolator_free
 !! NAME
 !! interpolator_free
 !!
@@ -846,5 +846,5 @@ end subroutine interpolator_free
 
 !-------------------------------------------------------------------
 
-end module m_interp
+end module 
 !!***

@@ -1218,7 +1218,7 @@ P          mk1mem37        16
     6    7    3    2       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
     3.04000000000000    1.00000000000000    0.00000000000000   rchrg,fchrg,qchrg
   1.025211          amesh (Hamman grid)
- pspatm: epsatm=    9.10637364
+ pspatm : epsatm=    9.10637364
          --- l  ekb(1:nproj) -->
              0    1.487262
              1    0.696903
@@ -1341,7 +1341,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
     6    7    3    2       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
     3.04000000000000    1.00000000000000    0.00000000000000   rchrg,fchrg,qchrg
   1.025211          amesh (Hamman grid)
- pspatm: epsatm=    9.10637364
+ pspatm : epsatm=    9.10637364
          --- l  ekb(1:nproj) -->
              0    1.487262
              1    0.696903
@@ -1468,7 +1468,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
     6    7    3    2       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
     3.04000000000000    1.00000000000000    0.00000000000000   rchrg,fchrg,qchrg
   1.025211          amesh (Hamman grid)
- pspatm: epsatm=    9.10637364
+ pspatm : epsatm=    9.10637364
          --- l  ekb(1:nproj) -->
              0    1.487262
              1    0.696903
@@ -1590,7 +1590,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
     6    7    3    2       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
     3.04000000000000    1.00000000000000    0.00000000000000   rchrg,fchrg,qchrg
   1.025211          amesh (Hamman grid)
- pspatm: epsatm=    9.10637364
+ pspatm : epsatm=    9.10637364
          --- l  ekb(1:nproj) -->
              0    1.487262
              1    0.696903
@@ -1717,7 +1717,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
     6    7    3    2       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
     3.04000000000000    1.00000000000000    0.00000000000000   rchrg,fchrg,qchrg
   1.025211          amesh (Hamman grid)
- pspatm: epsatm=    9.10637364
+ pspatm : epsatm=    9.10637364
          --- l  ekb(1:nproj) -->
              0    1.487262
              1    0.696903
@@ -1839,7 +1839,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
     6    7    3    2       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
     3.04000000000000    1.00000000000000    0.00000000000000   rchrg,fchrg,qchrg
   1.025211          amesh (Hamman grid)
- pspatm: epsatm=    9.10637364
+ pspatm : epsatm=    9.10637364
          --- l  ekb(1:nproj) -->
              0    1.487262
              1    0.696903
@@ -1961,7 +1961,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
     6    7    3    2       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
     3.04000000000000    1.00000000000000    0.00000000000000   rchrg,fchrg,qchrg
   1.025211          amesh (Hamman grid)
- pspatm: epsatm=    9.10637364
+ pspatm : epsatm=    9.10637364
          --- l  ekb(1:nproj) -->
              0    1.487262
              1    0.696903
@@ -2091,7 +2091,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
     6    7    3    2       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
     3.04000000000000    1.00000000000000    0.00000000000000   rchrg,fchrg,qchrg
   1.025211          amesh (Hamman grid)
- pspatm: epsatm=    9.10637364
+ pspatm : epsatm=    9.10637364
          --- l  ekb(1:nproj) -->
              0    1.487262
              1    0.696903
@@ -2215,7 +2215,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
     6    7    3    2       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
     3.04000000000000    1.00000000000000    0.00000000000000   rchrg,fchrg,qchrg
   1.025211          amesh (Hamman grid)
- pspatm: epsatm=    9.10637364
+ pspatm : epsatm=    9.10637364
          --- l  ekb(1:nproj) -->
              0    1.487262
              1    0.696903
@@ -2344,7 +2344,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
     6    7    3    2       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
     3.04000000000000    1.00000000000000    0.00000000000000   rchrg,fchrg,qchrg
   1.025211          amesh (Hamman grid)
- pspatm: epsatm=    9.10637364
+ pspatm : epsatm=    9.10637364
          --- l  ekb(1:nproj) -->
              0    1.487262
              1    0.696903
@@ -2468,7 +2468,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
     6    7    3    2       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
     3.04000000000000    1.00000000000000    0.00000000000000   rchrg,fchrg,qchrg
   1.025211          amesh (Hamman grid)
- pspatm: epsatm=    9.10637364
+ pspatm : epsatm=    9.10637364
          --- l  ekb(1:nproj) -->
              0    1.487262
              1    0.696903
@@ -2597,7 +2597,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
     6    7    3    2       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
     3.04000000000000    1.00000000000000    0.00000000000000   rchrg,fchrg,qchrg
   1.025211          amesh (Hamman grid)
- pspatm: epsatm=    9.10637364
+ pspatm : epsatm=    9.10637364
          --- l  ekb(1:nproj) -->
              0    1.487262
              1    0.696903
@@ -2721,7 +2721,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
     6    7    3    2       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
     3.04000000000000    1.00000000000000    0.00000000000000   rchrg,fchrg,qchrg
   1.025211          amesh (Hamman grid)
- pspatm: epsatm=    9.10637364
+ pspatm : epsatm=    9.10637364
          --- l  ekb(1:nproj) -->
              0    1.487262
              1    0.696903
@@ -2845,7 +2845,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
     6    7    3    2       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
     3.04000000000000    1.00000000000000    0.00000000000000   rchrg,fchrg,qchrg
   1.025211          amesh (Hamman grid)
- pspatm: epsatm=    9.10637364
+ pspatm : epsatm=    9.10637364
          --- l  ekb(1:nproj) -->
              0    1.487262
              1    0.696903
@@ -2976,7 +2976,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
     6    7    3    2       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
     3.04000000000000    1.00000000000000    0.00000000000000   rchrg,fchrg,qchrg
   1.025211          amesh (Hamman grid)
- pspatm: epsatm=    9.10637364
+ pspatm : epsatm=    9.10637364
          --- l  ekb(1:nproj) -->
              0    1.487262
              1    0.696903
@@ -3263,7 +3263,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
     6    7    3    2       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
     3.04000000000000    1.00000000000000    0.00000000000000   rchrg,fchrg,qchrg
   1.025211          amesh (Hamman grid)
- pspatm: epsatm=    9.10637364
+ pspatm : epsatm=    9.10637364
          --- l  ekb(1:nproj) -->
              0    1.487262
              1    0.696903
@@ -3555,7 +3555,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
     6    7    3    2       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
     3.04000000000000    1.00000000000000    0.00000000000000   rchrg,fchrg,qchrg
   1.025211          amesh (Hamman grid)
- pspatm: epsatm=    9.10637364
+ pspatm : epsatm=    9.10637364
          --- l  ekb(1:nproj) -->
              0    1.487262
              1    0.696903
@@ -3842,7 +3842,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
     6    7    3    2       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
     3.04000000000000    1.00000000000000    0.00000000000000   rchrg,fchrg,qchrg
   1.025211          amesh (Hamman grid)
- pspatm: epsatm=    9.10637364
+ pspatm : epsatm=    9.10637364
          --- l  ekb(1:nproj) -->
              0    1.487262
              1    0.696903
@@ -4134,7 +4134,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
     6    7    3    2       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
     3.04000000000000    1.00000000000000    0.00000000000000   rchrg,fchrg,qchrg
   1.025211          amesh (Hamman grid)
- pspatm: epsatm=    9.10637364
+ pspatm : epsatm=    9.10637364
          --- l  ekb(1:nproj) -->
              0    1.487262
              1    0.696903
@@ -4421,7 +4421,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
     6    7    3    2       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
     3.04000000000000    1.00000000000000    0.00000000000000   rchrg,fchrg,qchrg
   1.025211          amesh (Hamman grid)
- pspatm: epsatm=    9.10637364
+ pspatm : epsatm=    9.10637364
          --- l  ekb(1:nproj) -->
              0    1.487262
              1    0.696903
@@ -4708,7 +4708,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
     6    7    3    2       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
     3.04000000000000    1.00000000000000    0.00000000000000   rchrg,fchrg,qchrg
   1.025211          amesh (Hamman grid)
- pspatm: epsatm=    9.10637364
+ pspatm : epsatm=    9.10637364
          --- l  ekb(1:nproj) -->
              0    1.487262
              1    0.696903

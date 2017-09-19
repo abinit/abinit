@@ -1058,7 +1058,7 @@ P          mk1mem12        16
     2  20.947  27.069    1   1.9326638        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     2.82741504495369    0.09256629068341    1.82586447305099   rchrg,fchrg,qchrg
- pspatm: epsatm=   66.67453488
+ pspatm : epsatm=   66.67453488
          --- l  ekb(1:nproj) -->
              1    0.915537
              2   -8.015692
@@ -1071,7 +1071,7 @@ P          mk1mem12        16
     6    7    2    0       539   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
   No XC core correction.
   1.024700          amesh (Hamman grid)
- pspatm: epsatm=   80.47945735
+ pspatm : epsatm=   80.47945735
          --- l  ekb(1:nproj) -->
              1    0.532418
              2   -3.945072
@@ -1704,7 +1704,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      32.938      32.896
     2  20.947  27.069    1   1.9326638        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     2.82741504495369    0.09256629068341    1.82586447305099   rchrg,fchrg,qchrg
- pspatm: epsatm=   66.67453488
+ pspatm : epsatm=   66.67453488
          --- l  ekb(1:nproj) -->
              1    0.915537
              2   -8.015692
@@ -1717,7 +1717,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      32.938      32.896
     6    7    2    0       539   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
   No XC core correction.
   1.024700          amesh (Hamman grid)
- pspatm: epsatm=   80.47945735
+ pspatm : epsatm=   80.47945735
          --- l  ekb(1:nproj) -->
              1    0.532418
              2   -3.945072
@@ -2219,7 +2219,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      32.938      32.896
     2  20.947  27.069    1   1.9326638        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     2.82741504495369    0.09256629068341    1.82586447305099   rchrg,fchrg,qchrg
- pspatm: epsatm=   66.67453488
+ pspatm : epsatm=   66.67453488
          --- l  ekb(1:nproj) -->
              1    0.915537
              2   -8.015692
@@ -2232,7 +2232,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      32.938      32.896
     6    7    2    0       539   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
   No XC core correction.
   1.024700          amesh (Hamman grid)
- pspatm: epsatm=   80.47945735
+ pspatm : epsatm=   80.47945735
          --- l  ekb(1:nproj) -->
              1    0.532418
              2   -3.945072
@@ -2714,7 +2714,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      32.938      32.896
     2  20.947  27.069    1   1.9326638        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     2.82741504495369    0.09256629068341    1.82586447305099   rchrg,fchrg,qchrg
- pspatm: epsatm=   66.67453488
+ pspatm : epsatm=   66.67453488
          --- l  ekb(1:nproj) -->
              1    0.915537
              2   -8.015692
@@ -2727,7 +2727,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      32.938      32.896
     6    7    2    0       539   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
   No XC core correction.
   1.024700          amesh (Hamman grid)
- pspatm: epsatm=   80.47945735
+ pspatm : epsatm=   80.47945735
          --- l  ekb(1:nproj) -->
              1    0.532418
              2   -3.945072
@@ -3219,7 +3219,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      32.938      32.896
     2  20.947  27.069    1   1.9326638        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     2.82741504495369    0.09256629068341    1.82586447305099   rchrg,fchrg,qchrg
- pspatm: epsatm=   66.67453488
+ pspatm : epsatm=   66.67453488
          --- l  ekb(1:nproj) -->
              1    0.915537
              2   -8.015692
@@ -3232,7 +3232,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      32.938      32.896
     6    7    2    0       539   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
   No XC core correction.
   1.024700          amesh (Hamman grid)
- pspatm: epsatm=   80.47945735
+ pspatm : epsatm=   80.47945735
          --- l  ekb(1:nproj) -->
              1    0.532418
              2   -3.945072
@@ -3997,7 +3997,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      32.938      32.896
     2  20.947  27.069    1   1.9326638        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     2.82741504495369    0.09256629068341    1.82586447305099   rchrg,fchrg,qchrg
- pspatm: epsatm=   66.67453488
+ pspatm : epsatm=   66.67453488
          --- l  ekb(1:nproj) -->
              1    0.915537
              2   -8.015692
@@ -4010,7 +4010,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      32.938      32.896
     6    7    2    0       539   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
   No XC core correction.
   1.024700          amesh (Hamman grid)
- pspatm: epsatm=   80.47945735
+ pspatm : epsatm=   80.47945735
          --- l  ekb(1:nproj) -->
              1    0.532418
              2   -3.945072
@@ -4460,7 +4460,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      32.938      32.896
     2  20.947  27.069    1   1.9326638        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     2.82741504495369    0.09256629068341    1.82586447305099   rchrg,fchrg,qchrg
- pspatm: epsatm=   66.67453488
+ pspatm : epsatm=   66.67453488
          --- l  ekb(1:nproj) -->
              1    0.915537
              2   -8.015692
@@ -4473,7 +4473,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      32.938      32.896
     6    7    2    0       539   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
   No XC core correction.
   1.024700          amesh (Hamman grid)
- pspatm: epsatm=   80.47945735
+ pspatm : epsatm=   80.47945735
          --- l  ekb(1:nproj) -->
              1    0.532418
              2   -3.945072
@@ -4923,7 +4923,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      32.938      32.896
     2  20.947  27.069    1   1.9326638        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     2.82741504495369    0.09256629068341    1.82586447305099   rchrg,fchrg,qchrg
- pspatm: epsatm=   66.67453488
+ pspatm : epsatm=   66.67453488
          --- l  ekb(1:nproj) -->
              1    0.915537
              2   -8.015692
@@ -4936,7 +4936,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      32.938      32.896
     6    7    2    0       539   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
   No XC core correction.
   1.024700          amesh (Hamman grid)
- pspatm: epsatm=   80.47945735
+ pspatm : epsatm=   80.47945735
          --- l  ekb(1:nproj) -->
              1    0.532418
              2   -3.945072
@@ -5386,7 +5386,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      32.938      32.896
     2  20.947  27.069    1   1.9326638        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     2.82741504495369    0.09256629068341    1.82586447305099   rchrg,fchrg,qchrg
- pspatm: epsatm=   66.67453488
+ pspatm : epsatm=   66.67453488
          --- l  ekb(1:nproj) -->
              1    0.915537
              2   -8.015692
@@ -5399,7 +5399,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      32.938      32.896
     6    7    2    0       539   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
   No XC core correction.
   1.024700          amesh (Hamman grid)
- pspatm: epsatm=   80.47945735
+ pspatm : epsatm=   80.47945735
          --- l  ekb(1:nproj) -->
              1    0.532418
              2   -3.945072

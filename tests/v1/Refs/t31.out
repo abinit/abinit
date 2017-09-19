@@ -133,7 +133,7 @@ P           mkmem           1
     1   4.144   6.564    1   2.2829199        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     2.91076681154270    0.15277074073946    3.28783043513341   rchrg,fchrg,qchrg
- pspatm: epsatm=   43.89996568
+ pspatm : epsatm=   43.89996568
          --- l  ekb(1:nproj) -->
              1    0.493086
  pspatm: atomic psp has been read  and splines computed

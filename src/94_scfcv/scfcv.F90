@@ -298,7 +298,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
 !integer :: dtset_iprcel
  integer :: iatom,ider,idir,ierr,iexit,ii,ikpt,impose_dmat,denpot
  integer :: initialized0,iorder_cprj,ipert,ipositron,isave_den,isave_kden,iscf10,ispden
- integer :: ispmix,istep,istep_mix,itypat,izero,lmax_diel,lpawumax,mband_cprj,mcprj,me,me_wvl
+ integer :: ispmix,istep,istep_mix,istep_updatedfock,itypat,izero,lmax_diel,lpawumax,mband_cprj,mcprj,me,me_wvl
  integer :: mgfftdiel,mgfftf,moved_atm_inside,moved_rhor,my_nspinor,n1xccc
  integer :: n3xccc,ncpgr,nfftdiel,nfftmix,nfftmix_per_nfft,nfftotf,ngrvdw,nhatgrdim,nk3xc,nkxc
  integer :: npawmix,npwdiel,nstep,nzlmopt,optcut,optcut_hf,optene,optgr0,optgr0_hf
@@ -1087,9 +1087,10 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
        fock%fock_common%forces=zero
      end if
 
-     if (mod(istep-1,fock%fock_common%nnsclo_hf)==0) then
+     if (istep==1 .or. istep_updatedfock==fock%fock_common%nnsclo_hf) then
        ! Update data relative to the occupied states in fock
        call fock_updatecwaveocc(cg,cprj,dtset,fock,indsym,istep,mcg,mcprj,mpi_enreg,nattyp,npwarr,occ,ucvol)
+       istep_updatedfock=1
        ! Possibly (re)compute the ACE operator 
        if(fock%fock_common%use_ACE/=0) then
          call fock2ACE(cg,cprj,fock,dtset%istwfk,kg,dtset%kptns,dtset%mband,mcg,mcprj,dtset%mgfft,&
@@ -1098,10 +1099,23 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
 &          dtset%nspinor,dtset%nsppol,dtset%nsym,dtset%ntypat,occ,dtset%optforces,paw_ij,pawtab,ph1d,psps,rprimd,&
 &          dtset%optstress,fock%fock_common%symrec,dtset%typat,usecprj,dtset%use_gpu_cuda,dtset%wtk,xred,ylm,ylmgr)
        end if
+
+       !Should place a test on whether there should be the final exit of the istep loop. 
+       !This test should use focktoldfe. 
+       !This should update the info in fock%fock_common%fock_converged. 
+       !For the time being, fock%fock_common%fock_converged=.false. , so the loop end with the maximal value of nstep always,
+       !except when nnsclo_hf==1 (so the Fock operator is always updated) and the Fock operator is directly applied instead of using its ACE version.
+       !This allows to recover the old behaviour, for checkin purposes.
+       if(fock%fock_common%nnsclo_hf==1 .and. dtset%userie==0)then
+         fock%fock_common%fock_converged=.TRUE.
+       endif
+
        !Depending on fockoptmix, possibly restart the mixing procedure for the potential
        if(mod(dtset%fockoptmix,10)==1)then
          istep_mix=1
        endif
+     else
+       istep_updatedfock=istep_updatedfock+1
      endif
 
      !Used locally
@@ -1504,7 +1518,8 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
 &     dtfil%filnam_ds(1),initialized0,dtset%iscf,istep,dtset%kptns,&
 &     maxfor,moved_atm_inside,mpi_enreg,dtset%nband,dtset%nkpt,nstep,&
 &     occ,optres,prtfor,prtxml,quit,res2,resid,residm,response,tollist,&
-&     psps%usepaw,vxcavg,dtset%wtk,xred,conv_retcode,electronpositron=electronpositron)
+&     psps%usepaw,vxcavg,dtset%wtk,xred,conv_retcode,&
+&     electronpositron=electronpositron,fock=fock)
      call timab(52,2,tsec)
 
 !    Check if we need to exit the loop
@@ -1704,7 +1719,8 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
 &     dtfil%filnam_ds(1),initialized0,dtset%iscf,istep,dtset%kptns,&
 &     maxfor,moved_atm_inside,mpi_enreg,dtset%nband,dtset%nkpt,nstep,&
 &     occ,optres,prtfor,prtxml,quit,res2,resid,residm,response,tollist,&
-&     psps%usepaw,vxcavg,dtset%wtk,xred,conv_retcode,electronpositron=electronpositron)
+&     psps%usepaw,vxcavg,dtset%wtk,xred,conv_retcode,&
+&     electronpositron=electronpositron,fock=fock)
      call timab(52,2,tsec)
 
 !    Check if we need to exit the loop
@@ -1778,15 +1794,14 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
 
      if(dtset%prtden<0.or.dtset%prtkden<0) then
 !      Update the content of the header (evolving variables)
+!      Don't use parallelism over atoms because only me=0 accesses here
        bantot=hdr%bantot
        if (dtset%positron==0) then
          call hdr_update(hdr,bantot,etotal,energies%e_fermie,residm,&
-&         rprimd,occ,pawrhoij,xred,dtset%amu_orig(:,1),&
-&         comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
+&         rprimd,occ,pawrhoij,xred,dtset%amu_orig(:,1))
        else
          call hdr_update(hdr,bantot,electronpositron%e0,energies%e_fermie,residm,&
-&         rprimd,occ,pawrhoij,xred,dtset%amu_orig(:,1),&
-&         comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
+&         rprimd,occ,pawrhoij,xred,dtset%amu_orig(:,1))
        end if
      end if
 

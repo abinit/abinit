@@ -955,11 +955,11 @@ subroutine dtset_copy(dtout, dtin)
  dtout%esmear             = dtin%esmear
  dtout%exchmix            = dtin%exchmix
  dtout%fband              = dtin%fband
- dtout%gwls_model_parameter = dtin%gwls_model_parameter
- dtout%spinmagntarget     = dtin%spinmagntarget
+ dtout%focktoldfe         = dtin%focktoldfe
  dtout%friction           = dtin%friction
  dtout%fxcartfactor       = dtin%fxcartfactor
  dtout%ga_opt_percent     = dtin%ga_opt_percent
+ dtout%gwls_model_parameter = dtin%gwls_model_parameter
  dtout%kptnrm             = dtin%kptnrm
  dtout%kptrlen            = dtin%kptrlen
  dtout%maxestep           = dtin%maxestep
@@ -985,6 +985,7 @@ subroutine dtset_copy(dtout, dtin)
  dtout%rectolden          = dtin%rectolden
  dtout%dfpt_sciss         = dtin%dfpt_sciss
  dtout%mbpt_sciss         = dtin%mbpt_sciss
+ dtout%spinmagntarget     = dtin%spinmagntarget
  dtout%spbroad            = dtin%spbroad
  dtout%spnorbscl          = dtin%spnorbscl
  dtout%stmbias            = dtin%stmbias
