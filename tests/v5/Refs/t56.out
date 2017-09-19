@@ -238,7 +238,7 @@ P           mkmem          40
 -  0.00000   0.00000     31407                znucl, zion, pspdat
     4    1   -1    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
     0.00000000000000    0.00000000000000    0.00000000000000   rchrg,fchrg,qchrg
- pspatm: epsatm=    0.00000000
+ pspatm : epsatm=    0.00000000
          --- l  ekb(1:nproj) -->
  pspatm: atomic psp has been read  and splines computed
 

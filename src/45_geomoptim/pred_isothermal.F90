@@ -568,10 +568,10 @@ subroutine pred_isothermal(ab_mover,hist,itime,mttk_vars,ntime,zDEBUG,iexit)
 
 !write(std_out,*) 'isothermal 06'
 !##########################################################
-!### 06. Update the history with the prediction
+ !### 06. Update the history with the prediction
 
 !Increase indexes
- hist%ihist=hist%ihist+1
+ hist%ihist = abihist_findIndex(hist,+1)
 
 !Fill the history with the variables
 !xred, acell, rprimd, vel

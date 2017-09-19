@@ -22,7 +22,7 @@
         The effective field reproduces the effect of the surrounding correlated atoms and is thus self-consistently related 
         to the solution of the Anderson model [[Georges1996]].
 
-        <p>The combination of DFT with DMFT [[Georges2004]],[[Kotliar2006]] [[usedmft]]= 1}) relies on :
+        <p>The combination of DFT with DMFT [[Georges2004]],[[Kotliar2006]] ([[usedmft]]= 1) relies on :
 
          <li> The definition of correlated orbitals. In ABINIT, we use Wannier functions built using projected local orbitals [[Amadon2008]].
         Wannier functions are unitarily related to  a selected set of Kohn Sham (KS) wavefunctions, specified in ABINIT by band indices
@@ -37,10 +37,10 @@
          <li> The choice of the screened Coulomb interaction U ([[upawu]]) and J ([[jpawu]]).
         Note that up to version 7.10.5 (but not in later versions) [[jpawu]]= 0 is required if the density matrix in the correlated subspace is not diagonal.</li>
          <li> The choice of the double counting correction [[Amadon2012]]. The current default choice
-        in ABINIT is [[dmft_dc]]= 1} which corresponds to the full localized limit.</li>
+        in ABINIT is [[dmft_dc]]= 1 which corresponds to the full localized limit.</li>
         <li> The method of resolution of the Anderson model. In ABINIT, it can be the Hubbard I method [[Amadon2012]]  ([[dmft_solv]]= 2),
         the Continuous time Quantum Monte Carlo (CTQMC) method [[Gull2011]],[[Bieder2014]] ([[dmft_solv]]= 5)
-        or the static mean field method ([[dmft_solv]]= 1}, equivalent to usual DFT+U [[Amadon2012]]).</li>
+        or the static mean field method ([[dmft_solv]]= 1), equivalent to usual DFT+U [[Amadon2012]]).</li>
 
 
 
@@ -52,7 +52,7 @@
         are 10000 and 100, but convergence should be studied). More information can be obtained in the log file by setting [[pawprtvol]]=3.
 
         <p>The main output of the calculations are the imaginary time Green's function , from which spectral functions can be obtained
-        using an external maximum entropy code [[Bergeron2015]], self-energies, from which quasiparticle renormalization weight can be extracted, the density matrix of correlated orbitals, and the internal energies [[Amadon2006]]. The electronic entropic contribution to the free energy 
+        using an external maximum entropy code [[Bergeron2016]], self-energies, from which quasiparticle renormalization weight can be extracted, the density matrix of correlated orbitals, and the internal energies [[Amadon2006]]. The electronic entropic contribution to the free energy 
         can also be obtained using [[dmft_entropy]] and [[dmft_nlambda]].
 
 
@@ -61,8 +61,7 @@
         a <i>density-density</i>  multiorbital interaction [[Gull2011]].
         Moreover, the hybridization function [[Gull2011]] is assumed to be diagonal in the orbital (or flavor) index. This is exact for cubic symmetry without spin orbit coupling but, in general, one should always check 
         that the off-diagonal terms are much smaller than the diagonal ones.
-        The non diagonal hybridization and coupling to the exact rotationally invariant interaction [[Gull2011]] is not available
-        in version 7.10.5.
+        A link to the exact rotationally invariant interaction CTQMC code of the TRIQS library is also available using [[dmft_solv]]=7.
         <p>As the CTQMC solver uses a Fourier transform, the time grid [[dmftqmc_l]] in imaginary space must be chosen so that the Nyquist frequency, defined by &pi;*[[dmftqmc_l]]*[[tsmear]], is around 2 or 3 Ha.
         A convergence study should be performed on this variable.
         Moreover, the number of imaginary frequencies ([[dmft_nwlo]]) has to be set to at least twice the value of [[dmftqmc_l]].

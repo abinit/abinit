@@ -39,7 +39,7 @@
  ixc 3
 
 #K-points and symmetries
- kptopt 1  ngkpt 5 5 5
+ kptopt 3  ngkpt 5 5 5
  nsym 0  chksymbreak 0
 
 #Convergence of SCF

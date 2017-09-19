@@ -833,7 +833,10 @@ if ctrl.filetype == 'out':
         datasetkey.append(['natom:'])
         for i in range(len(starter)):
             if starter[i].split()[0] == 'natom%s' %n or starter[i].split()[0] == 'natom':
-                datasetkey[-1].append(float(starter[i].split()[1]))
+                if starter[i].split()[1] == '=':
+                   datasetkey[-1].append(float(starter[i].split()[2]))
+                else:
+                   datasetkey[-1].append(float(starter[i].split()[1]))
         if len(datasetkey[-1]) == 1:
             datasetkey[-1].append(float(1)) #default
 

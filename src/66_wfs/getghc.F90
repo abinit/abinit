@@ -95,7 +95,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlc,lambda,mpi_enreg,nd
  use m_pawcprj,     only : pawcprj_type,pawcprj_alloc,pawcprj_free,pawcprj_getdim
  use m_bandfft_kpt, only : bandfft_kpt,bandfft_kpt_get_ikpt
  use m_hamiltonian, only : gs_hamiltonian_type,KPRIME_H_K,K_H_KPRIME,K_H_K,KPRIME_H_KPRIME
- use m_fock,        only : fock_type,fock_get_getghc_call
+ use m_fock,        only : fock_common_type,fock_get_getghc_call
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -149,7 +149,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlc,lambda,mpi_enreg,nd
  real(dp),allocatable :: vlocal_tmp(:,:,:),work(:,:,:,:)
  real(dp), pointer :: kinpw_k1(:),kinpw_k2(:),kpt_k1(:),kpt_k2(:)
  real(dp), ABI_CONTIGUOUS pointer :: gsc_ptr(:,:)
- type(fock_type),pointer :: fock
+ type(fock_common_type),pointer :: fock
  type(pawcprj_type),pointer :: cwaveprj_fock(:,:),cwaveprj_idat(:,:),cwaveprj_nonlop(:,:)
 
 ! *********************************************************************
@@ -239,8 +239,8 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlc,lambda,mpi_enreg,nd
  end if
 
 !Do we add Fock exchange term ?
- has_fock=(associated(gs_ham%fock))
- if (has_fock) fock => gs_ham%fock
+ has_fock=(associated(gs_ham%fockcommon))
+ if (has_fock) fock => gs_ham%fockcommon
 
 !Parallelization over spinors management
  nspinortot=gs_ham%nspinor

@@ -473,8 +473,8 @@
 !In cartesian coordinates (symmetric storage) 
 
  strten(:)=kinstr(:)+ewestr(:)+corstr(:)+strsxc(:)+harstr(:)+lpsstr(:)+nlstr(:)
- if (usefock==1 .and. associated(fock).and.fock%optstr) then
-   strten(:)=strten(:)+fock%stress(:)
+ if (usefock==1 .and. associated(fock).and.fock%fock_common%optstr) then
+   strten(:)=strten(:)+fock%fock_common%stress(:)
  end if
 
 !Add contributions for constant E or D calculation.

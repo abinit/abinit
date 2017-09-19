@@ -207,8 +207,8 @@ _ WF disk file :      0.172 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
            kptopt2          2
            kptopt3          2
            kptopt4          1
-           kptopt5          1
-           kptopt6          1
+           kptopt5          3
+           kptopt6          3
          kptrlatt        2    0    0      0    2    0      0    0    2
           kptrlen      9.43421629E+00
 P           mkmem           8
@@ -327,7 +327,7 @@ P          mk1mem           8
     1  15.431  21.987    0   1.4850707        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     0.83985002509544    0.99012430797080    0.51184907750884   rchrg,fchrg,qchrg
- pspatm: epsatm=    0.92590353
+ pspatm : epsatm=    0.92590353
          --- l  ekb(1:nproj) -->
              0    4.921466
  pspatm: atomic psp has been read  and splines computed
@@ -3117,8 +3117,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     111.625     111.563
            kptopt2          2
            kptopt3          2
            kptopt4          1
-           kptopt5          1
-           kptopt6          1
+           kptopt5          3
+           kptopt6          3
          kptrlatt        2    0    0      0    2    0      0    0    2
           kptrlen      9.43421629E+00
 P           mkmem           8

@@ -27,7 +27,7 @@
          <p>ABINIT also has a default table of the atomic masses, but this can be superceded by specifying [[amu]].
          <p><b>Alchemical potentials</b></p> 
          For norm-conserving pseudopotentials, ABINIT can mix the pseudopotentials, as described in 
-         [[https:wiki.abinit.org/doku.php?id=developers:pseudos|the ABINIT wiki]],
+         [[https://wiki.abinit.org/doku.php?id=developers:pseudos|the ABINIT wiki]],
          to create so-called "alchemical potentials", see [[mixalch]].
          <br>In this case, the number of pseudopotentials to be given, [[npsp]], will usually be larger than the 
          number of types of atoms, [[ntypat]]. Using alchemical potentials makes sense to treat alloys in which

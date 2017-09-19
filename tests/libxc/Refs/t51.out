@@ -1,5 +1,5 @@
 
-.Version 8.3.3 of ABINIT 
+.Version 8.5.3 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
 
 .Copyright (C) 1998-2017 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see http://www.abinit.org .
 
-.Starting date : Mon  1 May 2017.
-- ( at 14h08 )
+.Starting date : Tue 12 Sep 2017.
+- ( at 12h49 )
   
 - input  file    -> t51.in
 - output file    -> t51.out
@@ -90,7 +90,9 @@ _ WF disk file :      0.061 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
              ecut      6.00000000E+00 Hartree
 -          fftalg         312
            getwfk          -1
-           istwfk        2    0    0    0
+           istwfk1       2    0    0    0
+           istwfk2       1    0    0    0
+           istwfk3       1    0    0    0
               ixc1          1
               ixc2       -406
               ixc3         41
@@ -213,8 +215,8 @@ P           mkmem           4
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.00850
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/trunk_trunk_gonze/tests/Psps_for_tests/14si.pspgth
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/trunk_trunk_gonze/tests/Psps_for_tests/14si.pspgth
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/jollet_develop/tests/Psps_for_tests/14si.pspgth
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/jollet_develop/tests/Psps_for_tests/14si.pspgth
 - Goedecker-Teter-Hutter  Fri May 31 17:22:04 EDT 1996
 - 14.00000   4.00000    960531                znucl, zion, pspdat
     2    1    1    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -229,7 +231,7 @@ P           mkmem           4
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm: epsatm=   -4.40972757
+ pspatm : epsatm=   -4.40972757
          --- l  ekb(1:nproj) -->
              0    0.868920    0.186986
              1    0.169080
@@ -345,8 +347,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     186.259     186.184
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.00850
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/trunk_trunk_gonze/tests/Psps_for_tests/14si.pspgth
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/trunk_trunk_gonze/tests/Psps_for_tests/14si.pspgth
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/jollet_develop/tests/Psps_for_tests/14si.pspgth
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/jollet_develop/tests/Psps_for_tests/14si.pspgth
 - Goedecker-Teter-Hutter  Fri May 31 17:22:04 EDT 1996
 - 14.00000   4.00000    960531                znucl, zion, pspdat
     2    1    1    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -361,7 +363,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     186.259     186.184
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm: epsatm=   -4.40972757
+ pspatm : epsatm=   -4.40972757
          --- l  ekb(1:nproj) -->
              0    0.868920    0.186986
              1    0.169080
@@ -406,23 +408,23 @@ _setup2: Arith. and geom. avg. npw (full set) are     186.259     186.184
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.250000000000      0.250000000000      0.250000000000
- rms dE/dt=  2.7482E-29; max dE/dt=  3.3658E-29; dE/dt below (all hartree)
-    1       0.000000000000      0.000000000000      0.000000000000
-    2       0.000000000000      0.000000000000     -0.000000000000
+ rms dE/dt=  1.1578E-28; max dE/dt=  1.3463E-28; dE/dt below (all hartree)
+    1      -0.000000000000      0.000000000000      0.000000000000
+    2      -0.000000000000      0.000000000000     -0.000000000000
 
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
     2      1.35165088504101     1.35165088504101     1.35165088504101
 
  cartesian forces (hartree/bohr) at end:
-    1      0.00000000000000    -0.00000000000000     0.00000000000000
+    1     -0.00000000000000    -0.00000000000000     0.00000000000000
     2      0.00000000000000     0.00000000000000    -0.00000000000000
- frms,max,avg= 2.6898008E-30 3.2943198E-30   0.000E+00  0.000E+00  0.000E+00 h/b
+ frms,max,avg= 1.0546969E-29 1.1530119E-29   0.000E+00  0.000E+00  0.000E+00 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1      0.00000000000000    -0.00000000000000     0.00000000000000
+    1     -0.00000000000000    -0.00000000000000     0.00000000000000
     2      0.00000000000000     0.00000000000000    -0.00000000000000
- frms,max,avg= 1.3831511E-28 1.6940072E-28   0.000E+00  0.000E+00  0.000E+00 e/A
+ frms,max,avg= 5.4234693E-28 5.9290252E-28   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales= 10.217000000000 10.217000000000 10.217000000000 bohr
               =  5.406603540164  5.406603540164  5.406603540164 angstroms
  prteigrs : about to open file t51o_DS2_EIG
@@ -438,7 +440,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     186.259     186.184
 
     Kinetic energy  =  3.13524962421023E+00
     Hartree energy  =  5.77834981155289E-01
-    XC energy       = -2.43932926044962E+00
+    XC energy       = -2.43932926044963E+00
     Ewald energy    = -8.43581958561899E+00
     PspCore energy  = -2.64619322653027E-01
     Loc. psp. energy= -2.27782503130713E+00
@@ -446,10 +448,10 @@ _setup2: Arith. and geom. avg. npw (full set) are     186.259     186.184
     >>>>>>>>> Etotal= -7.89056364956462E+00
 
  "Double-counting" decomposition of free energy:
-    Band energy     =  2.80385929377626E-01
+    Band energy     =  2.80385929377625E-01
     Ewald energy    = -8.43581958561899E+00
     PspCore energy  = -2.64619322653027E-01
-    Dble-C XC-energy=  5.29489397628033E-01
+    Dble-C XC-energy=  5.29489397628032E-01
     >>>> Etotal (DC)= -7.89056358126636E+00
 --------------------------------------------------------------------------------
 
@@ -483,8 +485,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     186.259     186.184
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.00850
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/trunk_trunk_gonze/tests/Psps_for_tests/14si.pspgth
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/trunk_trunk_gonze/tests/Psps_for_tests/14si.pspgth
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/jollet_develop/tests/Psps_for_tests/14si.pspgth
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/jollet_develop/tests/Psps_for_tests/14si.pspgth
 - Goedecker-Teter-Hutter  Fri May 31 17:22:04 EDT 1996
 - 14.00000   4.00000    960531                znucl, zion, pspdat
     2    1    1    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -499,7 +501,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     186.259     186.184
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm: epsatm=   -4.40972757
+ pspatm : epsatm=   -4.40972757
          --- l  ekb(1:nproj) -->
              0    0.868920    0.186986
              1    0.169080
@@ -538,23 +540,23 @@ _setup2: Arith. and geom. avg. npw (full set) are     186.259     186.184
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.250000000000      0.250000000000      0.250000000000
- rms dE/dt=  1.1649E-29; max dE/dt=  2.5244E-29; dE/dt below (all hartree)
-    1      -0.000000000000      0.000000000000      0.000000000000
-    2      -0.000000000000     -0.000000000000      0.000000000000
+ rms dE/dt=  1.0998E-29; max dE/dt=  2.5244E-29; dE/dt below (all hartree)
+    1       0.000000000000      0.000000000000      0.000000000000
+    2      -0.000000000000      0.000000000000      0.000000000000
 
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
     2      1.35165088504101     1.35165088504101     1.35165088504101
 
  cartesian forces (hartree/bohr) at end:
-    1     -0.00000000000000     0.00000000000000    -0.00000000000000
-    2      0.00000000000000    -0.00000000000000     0.00000000000000
- frms,max,avg= 1.5590117E-30 2.0589499E-30   0.000E+00  0.000E+00  0.000E+00 h/b
+    1      0.00000000000000    -0.00000000000000    -0.00000000000000
+    2     -0.00000000000000     0.00000000000000     0.00000000000000
+ frms,max,avg= 1.5904194E-30 1.8530549E-30   0.000E+00  0.000E+00  0.000E+00 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1     -0.00000000000000     0.00000000000000    -0.00000000000000
-    2      0.00000000000000    -0.00000000000000     0.00000000000000
- frms,max,avg= 8.0167597E-29 1.0587545E-28   0.000E+00  0.000E+00  0.000E+00 e/A
+    1      0.00000000000000    -0.00000000000000    -0.00000000000000
+    2     -0.00000000000000     0.00000000000000     0.00000000000000
+ frms,max,avg= 8.1782646E-29 9.5287905E-29   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales= 10.217000000000 10.217000000000 10.217000000000 bohr
               =  5.406603540164  5.406603540164  5.406603540164 angstroms
  prteigrs : about to open file t51o_DS3_EIG
@@ -568,7 +570,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     186.259     186.184
 --------------------------------------------------------------------------------
  Components of total free energy (in Hartree) :
 
-    Kinetic energy  =  3.13524949537443E+00
+    Kinetic energy  =  3.13524949537442E+00
     Hartree energy  =  5.77834906281503E-01
     XC energy       = -2.43932965216047E+00
     Ewald energy    = -8.43581958561899E+00
@@ -578,10 +580,10 @@ _setup2: Arith. and geom. avg. npw (full set) are     186.259     186.184
     >>>>>>>>> Etotal= -7.89056407956574E+00
 
  "Double-counting" decomposition of free energy:
-    Band energy     =  2.80385033085970E-01
+    Band energy     =  2.80385033085971E-01
     Ewald energy    = -8.43581958561899E+00
     PspCore energy  = -2.64619322653027E-01
-    Dble-C XC-energy=  5.29489791194498E-01
+    Dble-C XC-energy=  5.29489791194497E-01
     >>>> Etotal (DC)= -7.89056408399155E+00
 --------------------------------------------------------------------------------
 
@@ -608,13 +610,15 @@ _setup2: Arith. and geom. avg. npw (full set) are     186.259     186.184
            etotal3    -7.8905640796E+00
             fcart1    -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
                       -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
-            fcart2     0.0000000000E+00 -3.2943197895E-30  3.2943197895E-30
-                       0.0000000000E+00  3.2943197895E-30 -3.2943197895E-30
-            fcart3    -2.0589498684E-30  1.2353699211E-30 -1.2353699211E-30
-                       2.0589498684E-30 -1.2353699211E-30  1.2353699211E-30
+            fcart2    -8.2357994738E-30 -1.1530119263E-29  1.1530119263E-29
+                       8.2357994738E-30  1.1530119263E-29 -1.1530119263E-29
+            fcart3     1.4412649079E-30 -1.8530548816E-30 -1.4412649079E-30
+                      -1.4412649079E-30  1.8530548816E-30  1.4412649079E-30
 -          fftalg         312
            getwfk          -1
-           istwfk        2    0    0    0
+           istwfk1       2    0    0    0
+           istwfk2       1    0    0    0
+           istwfk3       1    0    0    0
               ixc1          1
               ixc2       -406
               ixc3         41
@@ -791,10 +795,10 @@ P           mkmem           4
 - Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7
 - Comment : the original paper describing the ABINIT project.
 -
-- Proc.   0 individual time (sec): cpu=         30.4  wall=         30.5
+- Proc.   0 individual time (sec): cpu=         34.4  wall=         35.2
 
 ================================================================================
 
  Calculation completed.
-.Delivered   4 WARNINGs and   3 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         30.4  wall=         30.5
+.Delivered   6 WARNINGs and   3 COMMENTs to log file.
++Overall time at end (sec) : cpu=         34.4  wall=         35.2

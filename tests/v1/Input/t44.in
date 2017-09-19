@@ -58,6 +58,6 @@
 #%%   Test the option ionmov=4. 8-atom Si cube, non spin-polarized.
 #%%   Same test as number 22a of fast, except for the change
 #%%   of ionmov, no reading of wavefunctions, iscf to 2, and different
-#%% topics = GeoOpt
 #%%   tolerance criteria.
+#%% topics = GeoOpt
 #%%<END TEST_INFO>

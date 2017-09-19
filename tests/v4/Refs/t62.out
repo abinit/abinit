@@ -189,7 +189,7 @@ P          mk1mem           4
     6    2    3    1      1295   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
     5.00000000000000    1.00000000000000    0.00000000000000   rchrg,fchrg,qchrg
   1.012000          amesh (Hamman grid)
- pspatm: epsatm=  138.07249370
+ pspatm : epsatm=  138.07249370
          --- l  ekb(1:nproj) -->
              0   -0.249207
              2   -1.677910
@@ -203,7 +203,7 @@ P          mk1mem           4
     6    2    2    2      1249   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
     4.00000000000000    1.00000000000000    0.00000000000000   rchrg,fchrg,qchrg
   1.012000          amesh (Hamman grid)
- pspatm: epsatm=   26.49435566
+ pspatm : epsatm=   26.49435566
          --- l  ekb(1:nproj) -->
              0    2.605584
              1    1.737897
