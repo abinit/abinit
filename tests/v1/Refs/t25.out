@@ -74,8 +74,8 @@ _ WF disk file :      9.842 Mbytes ; DEN or POT disk file :     45.565 Mbytes.
            diemix      5.00000000E-01
              ecut1     2.50000000E+01 Hartree
              ecut2     2.50000000E+03 Hartree
-          effmass1     1.00000000E+00
-          effmass2     1.00000000E+01
+          effmass_free1     1.00000000E+00
+          effmass_free2     1.00000000E+01
 -          fftalg         312
               ixc          20
            jdtset        1    2
@@ -167,7 +167,7 @@ P           mkmem           1
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm: epsatm=    0.00015708
+ pspatm : epsatm=    0.00015708
          --- l  ekb(1:nproj) -->
  pspatm: atomic psp has been read  and splines computed
 
@@ -187,7 +187,7 @@ P           mkmem           1
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm: epsatm=    0.00000157
+ pspatm : epsatm=    0.00000157
          --- l  ekb(1:nproj) -->
  pspatm: atomic psp has been read  and splines computed
 
@@ -312,7 +312,7 @@ _setup2: Arith. and geom. avg. npw (full set) are  161214.000  161214.000
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm: epsatm=    0.00015708
+ pspatm : epsatm=    0.00015708
          --- l  ekb(1:nproj) -->
  pspatm: atomic psp has been read  and splines computed
 
@@ -332,7 +332,7 @@ _setup2: Arith. and geom. avg. npw (full set) are  161214.000  161214.000
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm: epsatm=    0.00000157
+ pspatm : epsatm=    0.00000157
          --- l  ekb(1:nproj) -->
  pspatm: atomic psp has been read  and splines computed
 
@@ -434,8 +434,8 @@ _setup2: Arith. and geom. avg. npw (full set) are  161214.000  161214.000
            diemix      5.00000000E-01
              ecut1     2.50000000E+01 Hartree
              ecut2     2.50000000E+03 Hartree
-          effmass1     1.00000000E+00
-          effmass2     1.00000000E+01
+          effmass_free1     1.00000000E+00
+          effmass_free2     1.00000000E+01
            etotal1    -4.4898604023E-01
            etotal2    -4.4898604024E+00
             fcart1    -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00

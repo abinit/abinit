@@ -216,7 +216,7 @@ P           mkmem           1
     0.00000000000000    0.00000000000000    0.00000000000000   rchrg,fchrg,qchrg
   1.013085          amesh (Hamman grid)
  Note: local psp for atom with Z=  1.0
- pspatm: epsatm=   -0.01219614
+ pspatm : epsatm=   -0.01219614
          --- l  ekb(1:nproj) -->
  pspatm: atomic psp has been read  and splines computed
 

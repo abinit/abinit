@@ -118,7 +118,6 @@ optdriver5    5
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% exclude_hosts = ibm@ibm6
 #%% [files]
 #%% psp_files = 31ga.SGS_mod, 33as.SGS_mod
 #%% [paral_info]
@@ -141,4 +140,5 @@ optdriver5    5
 #%%    considered) the 5-th dataset compute 3DTE.
 #%%    localrdwf=1
 #%%    Also check parallelism for Raman calculations.
+#%% topics = nonlinear
 #%%<END TEST_INFO>

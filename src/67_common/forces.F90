@@ -107,7 +107,7 @@
 !!
 !! CHILDREN
 !!      atm2fft,constrf,dgemv,fourdp,fred2fcart,fresid,fresidrsp,metric,mkcore
-!!      mklocl,sygrad,timab,zerosym
+!!      mkcore_alt,mkcore_wvl,mklocl,sygrad,timab,xchybrid_ncpp_cc,zerosym
 !!
 !! SOURCE
 
@@ -320,12 +320,12 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,&
      else
        if (psps%usewvl==0.and.psps%usepaw==0.and.dtset%icoulomb==0) then
          call mkcore(dummy6,dyfrx2_dum,grxc,mpi_enreg,dtset%natom,nfft,dtset%nspden,ntypat,&
-&             ngfft(1),n1xccc, ngfft(2),ngfft(3),option,rprimd,dtset%typat,ucvol,vxc,&
-&             psps%xcccrc,psps%xccc1d,xccc3d_dum,xred)
+&         ngfft(1),n1xccc, ngfft(2),ngfft(3),option,rprimd,dtset%typat,ucvol,vxc,&
+&         psps%xcccrc,psps%xccc1d,xccc3d_dum,xred)
        else if (psps%usewvl==0.and.(psps%usepaw==1.or.dtset%icoulomb==1)) then
          call mkcore_alt(atindx1,dummy6,dyfrx2_dum,grxc,dtset%icoulomb,mpi_enreg,dtset%natom,nfft,&
-&             dtset%nspden,nattyp,ntypat,ngfft(1),n1xccc,ngfft(2),ngfft(3),option,rprimd,&
-&             ucvol,vxc,psps%xcccrc,psps%xccc1d,xccc3d_dum,xred,pawrad,pawtab,psps%usepaw)
+&         dtset%nspden,nattyp,ntypat,ngfft(1),n1xccc,ngfft(2),ngfft(3),option,rprimd,&
+&         ucvol,vxc,psps%xcccrc,psps%xccc1d,xccc3d_dum,xred,pawrad,pawtab,psps%usepaw)
        else if (psps%usewvl==1.and.psps%usepaw==1) then
          ucvol_local=ucvol
 #if defined HAVE_BIGDFT
@@ -336,8 +336,8 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,&
 ! &           n3xccc,option,pawrad,pawtab,psps%gth_params%psppar,rprimd,ucvol_local,vxc,xccc3d_dum,xred,&
 ! &           mpi_comm_wvl=mpi_enreg%comm_wvl)
          call mkcore_wvl(atindx1,dummy6,grxc,dtset%natom,nattyp,nfft,dtset%nspden,ntypat,&
-&                      n1xccc,n3xccc,option,pawrad,pawtab,rprimd,vxc,psps%xccc1d,xccc3d_dum,&
-&                      psps%xcccrc,xred,wvl_den,wvl,mpi_comm_wvl=mpi_enreg%comm_wvl)
+&         n1xccc,n3xccc,option,pawrad,pawtab,rprimd,vxc,psps%xccc1d,xccc3d_dum,&
+&         psps%xcccrc,xred,wvl_den,wvl,mpi_comm_wvl=mpi_enreg%comm_wvl)
 #endif
        end if
      end if
@@ -457,8 +457,8 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,&
  grtn(:,:)=grl(:,:)+grchempottn(:,:)+grewtn(:,:)+synlgr(:,:)+grxc(:,:)
 ! grtn(:,:)=grl(:,:)+grewtn(:,:)+synlgr(:,:)+grxc(:,:)
 
- if (usefock==1 .and. associated(fock).and.fock%optfor) then
-   grtn(:,:)=grtn(:,:)+fock%forces(:,:)
+ if (usefock==1 .and. associated(fock).and.fock%fock_common%optfor) then
+   grtn(:,:)=grtn(:,:)+fock%fock_common%forces(:,:)
  end if
  if (ngrvdw==dtset%natom) grtn(:,:)=grtn(:,:)+grvdw(:,:)
 ! note that fionred is subtracted, because it really is a force and we need to
@@ -496,7 +496,7 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,&
    grl(:,:)=-grl(:,:);grxc(:,:)=zero;gresid(:,:)=zero
    if (ngrvdw==dtset%natom) grtn(:,:)=grtn(:,:)-grvdw(:,:)
    if ( dtset%berryopt== 4 .or. dtset%berryopt== 6 .or. dtset%berryopt== 7 .or. &
-&       dtset%berryopt==14 .or. dtset%berryopt==16 .or. dtset%berryopt==17)  then
+&   dtset%berryopt==14 .or. dtset%berryopt==16 .or. dtset%berryopt==17)  then
      grtn(:,:)=grtn(:,:)+fionred(:,:)
      fionred(:,:)=zero
    end if

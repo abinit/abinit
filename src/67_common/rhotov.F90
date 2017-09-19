@@ -31,7 +31,7 @@
 !!  nhat(nfft,nspden*usepaw)= -PAW only- compensation density
 !!  nhatgr(nfft,nspden,3*nhatgrdim)= -PAW only- cartesian gradients of compensation density
 !!  nhatgrdim= -PAW only- 0 if nhatgr array is not used ; 1 otherwise
-!!  nkxc=second dimension of the array kxc, see rhohxc.f for a description
+!!  nkxc=second dimension of the array kxc, see rhohxc.F90 for a description
 !!  n3xccc=dimension of the xccc3d array (0 or nfft).
 !!  optene=option for the computation of additional energies
 !!  optres=0: the trial potential residual is computed ; the input potential value is kept
@@ -39,6 +39,13 @@
 !!  optxc=option to be used for the call to rhohxc
 !!  rhog(2,nfft)=array for Fourier transform of electron density
 !!  rhor(nfft,nspden)=array for electron density in electrons/bohr**3.
+!!   | definition for spin components:
+!!   | case of nspden = 2
+!!   |      rhor(:,1) => rho_up + rho_dwn
+!!   |      rhor(:,2) => rho_up
+!!   | case of nspden = 4
+!!   |      rhor(:,1)   => rho_upup + rho_dwndwn
+!!   |      rhor(:,2:4) => {m_x,m_y,m_z}
 !!  rprimd(3,3)=dimensional primitive translations in real space (bohr)
 !!  [taug(2,nfftf*dtset%usekden)]=array for Fourier transform of kinetic energy density
 !!  [taur(nfftf,nspden*dtset%usekden)]=array for kinetic energy density
@@ -253,6 +260,7 @@ subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
 !  For PAW we recalculate this since nhat was not taken into account
 !  in psolver_rhohxc: E_H= int v_H (n+nhat) dr
    if(.not. wvlbigdft .and. (dtset%icoulomb==0 .or. dtset%usepaw==1 ) ) then
+
      call timab(942,1,tsec)
      call dotprod_vn(1,rhor,energies%e_hartree,doti,nfft,nfftot,1,1,vhartr,ucvol,mpi_comm_sphgrid=mpi_comm_sphgrid)
      energies%e_hartree=half*energies%e_hartree
@@ -320,17 +328,26 @@ subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
 !EB vzeeman(:) = factor*( Hz, Hx+iHy; Hx-iHy, -Hz)
 !EB factor = -g/2 * mu_B * mu_0 = -1/2*B in a.u.
 !EB <-- vzeeman might have to be allocated correctly --> to be checked
+! vzeeman = 1/2 ( -B_z, -B_x + iB_y ; -B_x - iB_y , B_z)
  vzeeman(:) = zero
  if (any(abs(dtset%zeemanfield(:))>tol8)) then
    if(dtset%nspden==2)then
 !    EB The collinear case has to be checked :
 !    EB Is it vzeeman(1) or (2) that has to be added here? to be checked in setvtr and energy as well
-     vzeeman(1) =-half*dtset%zeemanfield(3)  ! For collinear ispden=2 is rho_up only
+!    SPr: the density components are: rhor(1) => n_upup + n_dwndwn
+!                                     rhor(2) => n_upup
+!         the convention for the potential spin components is a bit different:
+!                                     v(1)    => v_dwndwn
+!                                     v(2)    => v_upup
+!         verified by comparing collinear and non-collinear calculations
+     
+     vzeeman(1) = -half*dtset%zeemanfield(3)  ! v_dwndwn
+     vzeeman(2) =  half*dtset%zeemanfield(3)  ! v_upup
    else if(dtset%nspden==4)then
-     vzeeman(1)=-half*dtset%zeemanfield(3)
-     vzeeman(2)= half*dtset%zeemanfield(3)
-     vzeeman(3)=-half*dtset%zeemanfield(1)
-     vzeeman(4)= half*dtset%zeemanfield(2)
+     vzeeman(1)=-half*dtset%zeemanfield(3)    ! v_dwndwn
+     vzeeman(2)= half*dtset%zeemanfield(3)    ! v_upup
+     vzeeman(3)=-half*dtset%zeemanfield(1)    ! Re(v_dwnup) = Re(v_updwn)
+     vzeeman(4)= half*dtset%zeemanfield(2)    ! Im(v_dwnup) =-Im(v_updwn)
    end if
  end if
 
@@ -354,6 +371,7 @@ subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
 
  if (optres==0) then
 
+
 !  ------ Compute potential residual -------------
 
    if (.not. wvlbigdft) then
@@ -373,6 +391,7 @@ subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
          end do
        end do
      end if
+
      offset   = 0
 
      if (dtset%iscf==0) vtrial=vnew

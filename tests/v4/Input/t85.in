@@ -91,4 +91,5 @@
 #%% description = 
 #%%   Al FCC, in primitive cell (1 atom/cell).
 #%%   Test GW calculation with and without plasmon-pole model for a metal.
+#%% topics = GW
 #%%<END TEST_INFO>

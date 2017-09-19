@@ -52,12 +52,12 @@ _ WF disk file :      0.021 Mbytes ; DEN or POT disk file :      0.208 Mbytes.
  -outvars: echo values of preprocessed input variables --------
             acell      3.3844700000E+00  3.3844700000E+00  3.3844700000E+00 Bohr
               amu      1.08113000E+01
+     densfor_pred           0
            diemix      5.00000000E-01
             dtion      6.93000000E+00
              ecut      7.50000000E+01 Hartree
 -          fftalg         312
            ionmov          12
-     densfor_pred           0
            istwfk        1
               ixc          50
            kptopt           0
@@ -220,7 +220,7 @@ P           mkmem           1
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     0.00000000000000    0.00000000000000    0.00000000000000   rchrg,fchrg,qchrg
  Note: local psp for atom with Z=  5.0
- pspatm: epsatm=   -0.27723898
+ pspatm : epsatm=   -0.27723898
          --- l  ekb(1:nproj) -->
  pspatm: atomic psp has been read  and splines computed
 
@@ -959,6 +959,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    1213.000    1213.000
  -outvars: echo values of variables after computation  --------
             acell      3.3844700000E+00  3.3844700000E+00  3.3844700000E+00 Bohr
               amu      1.08113000E+01
+     densfor_pred           0
            diemix      5.00000000E-01
             dtion      6.93000000E+00
              ecut      7.50000000E+01 Hartree
@@ -997,7 +998,6 @@ _setup2: Arith. and geom. avg. npw (full set) are    1213.000    1213.000
                        4.4058692949E-02  3.2240071043E-02 -1.0838557963E-01
 -          fftalg         312
            ionmov          12
-     densfor_pred           0
            istwfk        1
               ixc          50
            kptopt           0

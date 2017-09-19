@@ -51,4 +51,5 @@
 #%%   Test berryopt=16 (finite reduced electric displacement field calculation,
 #%%   relaxing cell parameters, e.g. optcell=2)
 #%%   (XG120616 : tranferred to tests/seq)
+#%% topics = Berry
 #%%<END TEST_INFO>

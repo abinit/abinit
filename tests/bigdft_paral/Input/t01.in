@@ -80,7 +80,7 @@ prteig 0
 #%% max_nprocs = 10
 #%% nprocs_to_test = 4, 10
 #%%[NCPU_4]
-#%% files_to_test = t01_MPI4.out, tolnlines = 15, tolabs = 1.100e-7, tolrel = 5.0e-7
+#%% files_to_test = t01_MPI4.out, tolnlines = 15, tolabs = 2.0e-6, tolrel = 2.0e-4
 #%%[NCPU_10]
 #%% files_to_test = t01_MPI10.out, tolnlines = 15, tolabs = 1.100e-7, tolrel = 5.0e-7
 #%% [extra_info]
@@ -88,4 +88,5 @@ prteig 0
 #%% keywords =  NC, WVL
 #%% description = O2 in a box (NC). ABINIT routines are used (wvl_bigdft_comp=0)
 #%% Test: DIIS, potential/density mixing and parallelism
+#%% topics = Wavelets
 #%%<END TEST_INFO>

@@ -105,6 +105,10 @@ P This job should need less than                       0.874 Mbytes of memory.
         accesswff4          0
             acell      1.0600000000E+01  1.0600000000E+01  1.0600000000E+01 Bohr
               amu      6.97200000E+01  7.49216000E+01
+     densfor_pred1          6
+     densfor_pred2          2
+     densfor_pred3          2
+     densfor_pred4          2
            diemac      6.00000000E+00
              ecut      2.00000000E+00 Hartree
            fftalg1        401
@@ -123,10 +127,6 @@ P This job should need less than                       0.874 Mbytes of memory.
            getwfk2          1
            getwfk3          2
            getwfk4          2
-           densfor_pred1          6
-           densfor_pred2          2
-           densfor_pred3          2
-           densfor_pred4          2
              iscf1          3
              iscf2         -2
              iscf3         -3
@@ -408,7 +408,7 @@ P          mk1mem4          4
     2   0.000   0.000    0   1.4889000        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     0.00000000000000    0.00000000000000    0.00000000000000   rchrg,fchrg,qchrg
- pspatm: epsatm=   19.73612150
+ pspatm : epsatm=   19.73612150
          --- l  ekb(1:nproj) -->
              0    9.397339
              1   -0.525725
@@ -427,7 +427,7 @@ P          mk1mem4          4
     2   0.000   0.000    0   1.0000000        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     0.00000000000000    0.00000000000000    0.00000000000000   rchrg,fchrg,qchrg
- pspatm: epsatm=   26.05495600
+ pspatm : epsatm=   26.05495600
          --- l  ekb(1:nproj) -->
              0    9.019459
              1   -0.908274
@@ -1952,6 +1952,10 @@ P newkpt: treating      4 bands with npw=      43 for ikpt=  32 by node    4
         accesswff4          0
             acell      1.0600000000E+01  1.0600000000E+01  1.0600000000E+01 Bohr
               amu      6.97200000E+01  7.49216000E+01
+     densfor_pred1          6
+     densfor_pred2          2
+     densfor_pred3          2
+     densfor_pred4          2
            diemac      6.00000000E+00
              ecut      2.00000000E+00 Hartree
            etotal1    -8.3602806603E+00
@@ -1977,10 +1981,6 @@ P newkpt: treating      4 bands with npw=      43 for ikpt=  32 by node    4
            getwfk2          1
            getwfk3          2
            getwfk4          2
-           densfor_pred1          6
-           densfor_pred2          2
-           densfor_pred3          2
-           densfor_pred4          2
              iscf1          3
              iscf2         -2
              iscf3         -3

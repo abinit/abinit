@@ -1,8 +1,8 @@
 
-.Version 8.3.0 of ANADDB 
+.Version 8.5.2 of ANADDB 
 .(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
 
-.Copyright (C) 1998-2016 ABINIT group . 
+.Copyright (C) 1998-2017 ABINIT group . 
  ANADDB comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see http://www.abinit.org .
 
-.Starting date : Sun  8 Jan 2017.
-- ( at 13h13 )
+.Starting date : Tue 18 Jul 2017.
+- ( at 16h36 )
   
 
 ================================================================================
@@ -37,7 +37,7 @@
       nqshft         1
       q1shft
                      0.00000000E+00  0.00000000E+00  0.00000000E+00
-vs_qrad_tolms  1.00000000E-03  3.00000000E+02
+vs_qrad_tolkms  1.00000000E-03  2.00000000E-01
 Will compute Gruneisen parameters with finite difference method. DDB files:
     t45_Mg2Si_k666_q888_-0.01_DDB
     t45_Mg2Si_k666_q888_DDB
@@ -84,15 +84,15 @@ Computation of Gruneisen parameter with central finite difference:
  imposition of the charge neutrality,
  and eventual restriction to some part :
    atom    displacement
-         1         1    1.825965E+00    6.443406E-18    6.440990E-18
-         1         2    6.443406E-18    1.825965E+00   -6.445822E-18
-         1         3   -6.443406E-18   -6.443406E-18    1.825965E+00
-         2         1    1.825965E+00    6.443406E-18    6.440990E-18
-         2         2    6.443406E-18    1.825965E+00   -6.445822E-18
-         2         3   -6.443406E-18   -6.443406E-18    1.825965E+00
-         3         1   -3.672457E+00   -6.467873E-17   -6.494492E-17
-         3         2   -6.467873E-17   -3.672457E+00    6.441254E-17
-         3         3    6.467873E-17    6.467873E-17   -3.672457E+00
+         1         1    1.825965E+00    0.000000E+00   -2.416039E-21
+         1         2    0.000000E+00    1.825965E+00   -2.416039E-21
+         1         3    0.000000E+00    0.000000E+00    1.825965E+00
+         2         1    1.825965E+00    0.000000E+00   -2.416039E-21
+         2         2    0.000000E+00    1.825965E+00   -2.416039E-21
+         2         3    0.000000E+00    0.000000E+00    1.825965E+00
+         3         1   -3.672457E+00    0.000000E+00   -2.661926E-19
+         3         2    0.000000E+00   -3.672457E+00   -2.661926E-19
+         3         3    0.000000E+00    0.000000E+00   -3.672457E+00
  Now, the imaginary part of the dynamical matrix is zeroed
 - Found dielectric tensor and Born effective charges in DDB file: t45_Mg2Si_k666_q888_-0.01_DDB
        Homogeneous q point set in the B.Z.
@@ -149,15 +149,15 @@ Computation of Gruneisen parameter with central finite difference:
  imposition of the charge neutrality,
  and eventual restriction to some part :
    atom    displacement
-         1         1    1.838808E+00   -2.263711E-18   -2.269921E-18
-         1         2   -2.263711E-18    1.838808E+00    2.257502E-18
-         1         3    2.263711E-18    2.263711E-18    1.838808E+00
-         2         1    1.838808E+00   -2.263711E-18   -2.269921E-18
-         2         2   -2.263711E-18    1.838808E+00    2.257502E-18
-         2         3    2.263711E-18    2.263711E-18    1.838808E+00
-         3         1   -3.698728E+00    1.143384E-16    1.147346E-16
-         3         2    1.143384E-16   -3.698728E+00   -1.139421E-16
-         3         3   -1.143384E-16   -1.143384E-16   -3.698728E+00
+         1         1    1.838808E+00    0.000000E+00   -6.209662E-21
+         1         2    0.000000E+00    1.838808E+00   -6.209662E-21
+         1         3    0.000000E+00    0.000000E+00    1.838808E+00
+         2         1    1.838808E+00    0.000000E+00   -6.209662E-21
+         2         2    0.000000E+00    1.838808E+00   -6.209662E-21
+         2         3    0.000000E+00    0.000000E+00    1.838808E+00
+         3         1   -3.698728E+00    0.000000E+00    3.962556E-19
+         3         2    0.000000E+00   -3.698728E+00    3.962556E-19
+         3         3    0.000000E+00    0.000000E+00   -3.698728E+00
  Now, the imaginary part of the dynamical matrix is zeroed
 - Found dielectric tensor and Born effective charges in DDB file: t45_Mg2Si_k666_q888_DDB
        Homogeneous q point set in the B.Z.
@@ -214,15 +214,15 @@ Computation of Gruneisen parameter with central finite difference:
  imposition of the charge neutrality,
  and eventual restriction to some part :
    atom    displacement
-         1         1    1.851728E+00   -3.493521E-18   -3.494502E-18
-         1         2   -3.493521E-18    1.851728E+00    3.492540E-18
-         1         3    3.493521E-18    3.493521E-18    1.851728E+00
-         2         1    1.851728E+00   -3.493521E-18   -3.494502E-18
-         2         2   -3.493521E-18    1.851728E+00    3.492540E-18
-         2         3    3.493521E-18    3.493521E-18    1.851728E+00
-         3         1   -3.725297E+00    1.388654E-16    1.388377E-16
-         3         2    1.388654E-16   -3.725297E+00   -1.388931E-16
-         3         3   -1.388654E-16   -1.388654E-16   -3.725297E+00
+         1         1    1.851728E+00    0.000000E+00   -9.813475E-22
+         1         2    0.000000E+00    1.851728E+00   -9.813475E-22
+         1         3    0.000000E+00    0.000000E+00    1.851728E+00
+         2         1    1.851728E+00    0.000000E+00   -9.813475E-22
+         2         2    0.000000E+00    1.851728E+00   -9.813475E-22
+         2         3    0.000000E+00    0.000000E+00    1.851728E+00
+         3         1   -3.725297E+00    0.000000E+00   -2.768088E-20
+         3         2    0.000000E+00   -3.725297E+00   -2.768088E-20
+         3         3    0.000000E+00    0.000000E+00   -3.725297E+00
  Now, the imaginary part of the dynamical matrix is zeroed
 - Found dielectric tensor and Born effective charges in DDB file: t45_Mg2Si_k666_q888_0.01_DDB
        Homogeneous q point set in the B.Z.
@@ -251,16 +251,16 @@ Computation of Gruneisen parameter with central finite difference:
 
  The interatomic forces have been obtained
  Average Gruneisen parameter: 1.38600
- Speed of sound:  1.7626E+03  1.7628E+03  9.9437E+03 [m/s] along reduced direction: 1
- Speed of sound:  1.7628E+03  1.7626E+03  9.9437E+03 [m/s] along reduced direction: 2
- Speed of sound:  1.7629E+03  1.7625E+03  9.9437E+03 [m/s] along reduced direction: 3
- Lebedev-Laikov integration with qradius:   1.0000E-03 tolms:   3.0000E+02 [m/s], npts: 38
- Spherical average:  5.5118E+03  4.8207E+03  8.9716E+03 [m/s],   6.4347E+03
+ Speed of sound:  1.7626E+00  1.7628E+00  9.9437E+00 [km/s] along reduced direction: 1
+ Speed of sound:  1.7628E+00  1.7626E+00  9.9437E+00 [km/s] along reduced direction: 2
+ Speed of sound:  1.7629E+00  1.7625E+00  9.9437E+00 [km/s] along reduced direction: 3
+ Lebedev-Laikov integration with qradius:   1.0000E-03 tolkms:   2.0000E-01 [km/s], npts: 434
+ Spherical average:  4.5722E+00  6.3565E+00  9.1616E+00 [km/s],   6.6968E+00
 -
-- Proc.   0 individual time (sec): cpu=        125.2  wall=        125.1
+- Proc.   0 individual time (sec): cpu=        289.2  wall=        301.4
 
 ================================================================================
 
-+Total cpu time    125.154  and wall time    125.094 sec
++Total cpu time    399.973  and wall time    399.975 sec
 
  anaddb : the run completed succesfully.

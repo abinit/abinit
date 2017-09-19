@@ -2,7 +2,7 @@
 #Test for multibinit, just read xml and generate the effective potential into XML file
 # without regeneration of dipole-dipole just reading xml
 ##############################################################################
-prt_effpot = -1
+prt_model = 2
 
 #---------------------------------------------------------------
 #Generation of the IFC

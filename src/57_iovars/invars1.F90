@@ -113,7 +113,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  integer :: index_typsymb,index_upper,ipsp,iscf,intimage,itypat,leave,marr
  integer :: natom,nkpt,npsp,npspalch
  integer :: nqpt,nspinor,nsppol,ntypat,ntypalch,ntyppure,occopt,response
- integer :: rfddk,rfelfd,rfphon,rfstrs,rfuser,rf2_dkdk,rf2_dkde
+ integer :: rfddk,rfelfd,rfphon,rfstrs,rfuser,rf2_dkdk,rf2_dkde,rfmagn
  integer :: tfband,tnband,tread,tread_alt
  real(dp) :: charge,fband,kptnrm,kptrlen,zelect,zval
  character(len=2) :: string2,symbol
@@ -145,11 +145,13 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
 
 !---------------------------------------------------------------------------
 
- rfddk=0; rfelfd=0 ; rfphon=0 ; rfstrs=0 ; rfuser=0 ; rf2_dkdk=0 ; rf2_dkde=0
+ rfddk=0; rfelfd=0; rfphon=0; rfmagn=0; rfstrs=0; rfuser=0; rf2_dkdk=0; rf2_dkde=0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rfddk',tread,'INT')
  if(tread==1) rfddk=intarr(1)
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rfelfd',tread,'INT')
  if(tread==1) rfelfd=intarr(1)
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rfmagn',tread,'INT')
+ if(tread==1) rfmagn=intarr(1)
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rfphon',tread,'INT')
  if(tread==1) rfphon=intarr(1)
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rfstrs',tread,'INT')
@@ -162,7 +164,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  if(tread==1) rf2_dkde=intarr(1)
 
  response=0
- if(rfddk/=0.or.rf2_dkdk/=0.or.rf2_dkde/=0.or.rfelfd/=0.or.rfphon/=0.or.rfstrs/=0.or.rfuser/=0)response=1
+ if(rfddk/=0.or.rf2_dkdk/=0.or.rf2_dkde/=0.or.rfelfd/=0.or.rfphon/=0.or.rfstrs/=0.or.rfuser/=0.or.rfmagn/=0)response=1
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'optdriver',tread,'INT')
  if (tread==1) then
@@ -521,6 +523,10 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  if(dtset%nspden==4)dtset%kptopt=4
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'kptopt',tread,'INT')
  if(tread==1) dtset%kptopt=intarr(1)
+
+ dtset%qptopt=1
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'qptopt',tread,'INT')
+ if(tread==1) dtset%qptopt=intarr(1)
 
  iscf=5
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'iscf',tread,'INT')

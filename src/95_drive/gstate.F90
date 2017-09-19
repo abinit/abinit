@@ -142,6 +142,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  use m_hdr
  use m_ebands
 
+ use m_ddb_hdr,          only : ddb_hdr_type, ddb_hdr_init, ddb_hdr_free, ddb_hdr_open_write
  use m_fstrings,         only : strcat, sjoin
  use m_kpts,             only : tetra_from_kptrlatt
  use m_pawang,           only : pawang_type
@@ -194,7 +195,6 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  use interfaces_64_psp
  use interfaces_65_paw
  use interfaces_67_common
- use interfaces_72_response
  use interfaces_79_seqpar_mpi
  use interfaces_95_drive, except_this_one => gstate
 !End of the abilint section
@@ -242,7 +242,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  integer :: pwind_alloc,rdwrpaw,comm,tim_mkrho,use_sc_dmft
  integer :: cnt,spin,band,ikpt
  real(dp) :: cpus,ecore,ecut_eff,ecutdg_eff,etot,fermie
- real(dp) :: gsqcut_eff,gsqcut_shp,gsqcutc_eff,hyb_range,residm,tolwfr,ucvol
+ real(dp) :: tolwfr,gsqcut_eff,gsqcut_shp,gsqcutc_eff,hyb_range,residm,ucvol
  logical :: read_wf_or_den,has_to_init,call_pawinit,write_wfk
  logical :: wvlbigdft=.false.,wvl_debug=.false.
  character(len=500) :: message
@@ -261,6 +261,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  type(wffile_type) :: wff1,wffnew,wffnow
  type(ab_xfh_type) :: ab_xfh
  type(ddb_type) :: ddb
+ type(ddb_hdr_type) :: ddb_hdr
  type(scfcv_t) :: scfcv_args
 !arrays
  integer :: ngfft(18),ngfftf(18)
@@ -268,8 +269,8 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  integer,allocatable :: irrzon(:,:,:),kg(:,:),nattyp(:),symrec(:,:,:)
  integer,allocatable,target :: npwarr(:)
  integer,pointer :: npwarr_(:),pwind(:,:,:)
- real(dp) :: efield_band(3),gmet(3,3),gprimd(3,3)
- real(dp) :: rmet(3,3),rprimd(3,3),rprimd_orig(3,3),tsec(2)
+ real(dp) :: efield_band(3),gmet(3,3),gmet_for_kg(3,3),gprimd(3,3),gprimd_for_kg(3,3)
+ real(dp) :: rmet(3,3),rprimd(3,3),rprimd_for_kg(3,3),tsec(2)
  real(dp),allocatable :: amass(:),cg(:,:),doccde(:)
  real(dp),allocatable :: eigen(:),ph1df(:,:),phnons(:,:,:),resid(:),rhowfg(:,:)
  real(dp),allocatable :: rhowfr(:,:),spinat_dum(:,:),start(:,:),work(:)
@@ -368,11 +369,18 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 & dtset%natom,ngfftf,ngfft,dtset%nkpt,dtset%nsppol,&
 & response,rmet,rprim,rprimd,ucvol,psps%usepaw)
 
+!In some cases (e.g. getcell/=0), the plane wave vectors have
+! to be generated from the original simulation cell
+ rprimd_for_kg=rprimd
+ if (dtset%getcell/=0.and.dtset%usewvl==0) rprimd_for_kg=args_gs%rprimd_orig
+ call matr3inv(rprimd_for_kg,gprimd_for_kg)
+ gmet_for_kg=matmul(transpose(gprimd_for_kg),gprimd_for_kg)
+
+!Set up the basis sphere of planewaves
  ABI_ALLOCATE(npwarr,(dtset%nkpt))
  if (dtset%usewvl == 0 .and. dtset%tfkinfunc /= 2) then
-!  Set up the basis sphere of planewaves
    ABI_ALLOCATE(kg,(3,dtset%mpw*dtset%mkmem))
-   call kpgio(ecut_eff,dtset%exchn2n3d,gmet,dtset%istwfk,kg, &
+   call kpgio(ecut_eff,dtset%exchn2n3d,gmet_for_kg,dtset%istwfk,kg, &
 &   dtset%kptns,dtset%mkmem,dtset%nband,dtset%nkpt,'PERS',mpi_enreg,&
 &   dtset%mpw,npwarr,npwtot,dtset%nsppol)
    call bandfft_kpt_init1(bandfft_kpt,dtset%istwfk,kg,dtset%mgfft,dtset%mkmem,mpi_enreg,&
@@ -444,6 +452,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    call wvl_setBoxGeometry(dtset%prtvol, psps%gth_params%radii_cf, rprimd, xred, &
 &   wvl%descr, dtset%wvl_crmult, dtset%wvl_frmult)
    call mkradim(acell,rprim,rprimd)
+   rprimd_for_kg=rprimd
    call wvl_denspot_set(wvl%den, psps%gth_params, dtset%ixc, dtset%natom, dtset%nsppol, rprimd, &
 &   wvl%descr, dtset%wvl_crmult, dtset%wvl_frmult, mpi_enreg%comm_wvl, xred)
 !  TODO: to be moved in a routine.
@@ -694,13 +703,15 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    wff1%unwff=dtfil%unwff1
    optorth=1   !if (psps%usepaw==1) optorth=0
    if(psps%usepaw==1 .and. dtfil%ireadwf==1)optorth=0
+   hdr%rprimd=rprimd_for_kg ! We need the rprimd that was used to generate de G vectors
    call inwffil(ask_accurate,cg,dtset,dtset%ecut,ecut_eff,eigen,&
-&   dtset%exchn2n3d,formeig,gmet,hdr,dtfil%ireadwf,dtset%istwfk,kg,&
+&   dtset%exchn2n3d,formeig,hdr,dtfil%ireadwf,dtset%istwfk,kg,&
 &   dtset%kptns,dtset%localrdwf,dtset%mband,mcg,dtset%mkmem,mpi_enreg,&
 &   dtset%mpw,dtset%nband,ngfft,dtset%nkpt,npwarr,&
-&   dtset%nsppol,dtset%nsym,occ,optorth,rprimd,dtset%symafm,&
+&   dtset%nsppol,dtset%nsym,occ,optorth,dtset%symafm,&
 &   dtset%symrel,dtset%tnons,dtfil%unkg,wff1,wffnow,dtfil%unwff1,&
 &   dtfil%fnamewffk,wvl)
+   hdr%rprimd=rprimd
  end if
 
  if (psps%usepaw==1.and.dtfil%ireadwf==1)then
@@ -1079,7 +1090,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 !    Warning : should check the use of results_gs%residm
 !    One might make them separate variables.
 
-    ! Read densiry and get Fermi level from hdr_den
+    ! Read density and get Fermi level from hdr_den
      call read_rhor(dtfil%fildensin, cplex1, dtset%nspden, nfftf, ngfftf, rdwrpaw, &
      mpi_enreg, rhor, hdr_den, pawrhoij, comm, check_hdr=hdr)
      results_gs%etotal = hdr_den%etot; results_gs%energies%e_fermie = hdr_den%fermie
@@ -1140,7 +1151,6 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 & pwind,pwind_alloc,pwnsfac,rprimd,symrec,xred)
 
  fatvshift=one
- rprimd_orig(:,:)=rprimd
 
  if (dtset%usewvl == 1 .and. wvl_debug) then
 #if defined HAVE_BIGDFT
@@ -1272,11 +1282,8 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 !! end if
 
 !Update the header, before using it
-!WARNING : There is a problem now (time of writing, 6.0.4, but was in ABINITv5 and had ever been there) to update
-!the header with change of rprim. Might be due to the planewave basis set definition.
-!Put the original rprimd .
  call hdr_update(hdr,bantot,results_gs%etotal,results_gs%energies%e_fermie,&
-& results_gs%residm,rprimd_orig,occ,pawrhoij,xred,args_gs%amu,&
+& results_gs%residm,rprimd,occ,pawrhoij,xred,args_gs%amu,&
 & comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
 
  ABI_ALLOCATE(doccde,(dtset%mband*dtset%nkpt*dtset%nsppol))
@@ -1307,6 +1314,9 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    MSG_COMMENT(message)
  end if
 
+!To print out the WFs, need the rprimd that was used to generate the G vectors
+ hdr%rprimd=rprimd_for_kg
+
  if (write_wfk) then
    call outwf(cg,dtset,psps,eigen,filnam,hdr,kg,dtset%kptns,&
 &   dtset%mband,mcg,dtset%mkmem,mpi_enreg,dtset%mpw,dtset%natom,&
@@ -1317,6 +1327,9 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  if (dtset%prtwf==2) then
    call outqmc(cg,dtset,eigen,gprimd,hdr,kg,mcg,mpi_enreg,npwarr,occ,psps,results_gs)
  end if
+
+!Restore the original rprimd in hdr
+ hdr%rprimd=rprimd
 
  ! Generate WFK in full BZ (needed by LOBSTER)
  if (me == master .and. dtset%prtwf == 1 .and. dtset%prtwf_full == 1 .and. dtset%nqpt == 0) then
@@ -1395,31 +1408,24 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  if (me==0.and.dtset%nimage==1.and.((dtset%iscf > 0).or.&
 & (dtset%berryopt == -1).or.(dtset%berryopt) == -3)) then
 
-   dscrpt=' Note : temporary (transfer) database '
-   ddbnm=trim(dtfil%filnam_ds(4))//'_DDB'
-!  tolwfr must be initialized here, but it is a dummy value
-   tolwfr=1.0_dp
-   call ddb_io_out (dscrpt,ddbnm,dtset%natom,dtset%mband,&
-&   dtset%nkpt,dtset%nsym,psps%ntypat,dtfil%unddb,DDB_VERSION,&
-&   acell,args_gs%amu,dtset%dilatmx,dtset%ecut,dtset%ecutsm,&
-&   dtset%intxc,dtset%iscf,dtset%ixc,dtset%kpt,dtset%kptnrm,&
-&   dtset%natom,dtset%nband,ngfft,dtset%nkpt,dtset%nspden,dtset%nspinor,&
-&   dtset%nsppol,dtset%nsym,psps%ntypat,occ,dtset%occopt,dtset%pawecutdg,&
-&   rprim,dtset%dfpt_sciss,dtset%spinat,dtset%symafm,dtset%symrel,&
-&   dtset%tnons,tolwfr,dtset%tphysel,dtset%tsmear,&
-&   dtset%typat,dtset%usepaw,dtset%wtk,xred,psps%ziontypat,dtset%znucl)
-
    if (dtset%iscf > 0) then
      nblok = 2          ! 1st blok = energy, 2nd blok = gradients
    else
      nblok = 1
    end if
-   fullinit = 0 ; choice=2
-   call psddb8 (choice,psps%dimekb,psps%ekb,fullinit,psps%indlmn,&
-&   psps%lmnmax,nblok,psps%ntypat,dtfil%unddb,pawtab,&
-&   psps%pspso,psps%usepaw,psps%useylm,DDB_VERSION)
 
-   mpert = dtset%natom + 6   ; msize = 3*mpert
+   dscrpt=' Note : temporary (transfer) database '
+   ddbnm=trim(dtfil%filnam_ds(4))//'_DDB'
+
+   call ddb_hdr_init(ddb_hdr,dtset,psps,pawtab,DDB_VERSION,dscrpt,&
+&                    nblok,xred=xred,occ=occ,ngfft=ngfft)
+
+   call ddb_hdr_open_write(ddb_hdr,ddbnm,dtfil%unddb,fullinit=0)
+
+   call ddb_hdr_free(ddb_hdr)
+
+   choice=2
+   mpert = dtset%natom + 6 ; msize = 3*mpert
 
 !  create a ddb structure with just one blok
    call ddb_malloc(ddb,msize,1,dtset%natom,dtset%ntypat)

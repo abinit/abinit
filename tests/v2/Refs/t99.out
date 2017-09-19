@@ -313,7 +313,7 @@ P          mk1mem2        128
     6    7    2    0       539   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
   No XC core correction.
   1.024700          amesh (Hamman grid)
- pspatm: epsatm=   80.47945735
+ pspatm : epsatm=   80.47945735
          --- l  ekb(1:nproj) -->
              1    0.532418
              2   -3.945072

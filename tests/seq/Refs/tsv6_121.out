@@ -140,7 +140,7 @@ P           mkmem           1
     3   0.000   0.000    0   1.2991516        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     0.00000000000000    0.00000000000000    0.00000000000000   rchrg,fchrg,qchrg
- pspatm: epsatm=   26.97912547
+ pspatm : epsatm=   26.97912547
          --- l  ekb(1:nproj) -->
              0    4.600411    3.774203
              1    3.392405    3.894354
@@ -159,7 +159,7 @@ P           mkmem           1
     2   0.000   0.000    0   1.6491622        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     0.00000000000000    0.00000000000000    0.00000000000000   rchrg,fchrg,qchrg
- pspatm: epsatm=    4.67708954
+ pspatm : epsatm=    4.67708954
          --- l  ekb(1:nproj) -->
              0    9.517316   -2.344682
              1    5.011406   -0.741179
@@ -175,7 +175,7 @@ P           mkmem           1
     1   0.000   0.000    0   1.6491622        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     1.00000000000000    0.95000909444395    0.44408665956870   rchrg,fchrg,qchrg
- pspatm: epsatm=    1.15255884
+ pspatm : epsatm=    1.15255884
          --- l  ekb(1:nproj) -->
              0    7.721978   -1.904542
  pspatm: atomic psp has been read  and splines computed

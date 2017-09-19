@@ -32,6 +32,7 @@ MODULE m_optic_tools
  use m_profiling_abi
  use m_linalg_interfaces
 
+ use defs_datatypes, only : ebands_t
  use m_numeric_tools,   only : wrap2_pmhalf
  use m_io_tools,        only : open_file
 
@@ -114,6 +115,10 @@ subroutine sym2cart(gprimd,nsym,rprimd,symrel,symcart)
    call dgemm('N','N',3,3,3,one,tmp,   3,gprimd,3,zero,rsymcart,3)
 !  write(std_out,*) 'rsymcart = ',rsymcart
    symcart(:,:,isym) = rsymcart(:,:)
+! purify symops in cartesian dp coordinates
+   where( abs(symcart(:,:,isym))<tol14)
+     symcart(:,:,isym) = zero
+   end where
  end do
 
 end subroutine sym2cart
@@ -444,7 +449,7 @@ end subroutine pmat_renorm
 
 #include "abi_common.h"
 
-subroutine linopt(nspin,omega,nkpt,wkpt,nsymcrys,symcrys,nstval,occv,evalv,efermi,pmat, &
+subroutine linopt(nspin,omega,nkpt,wkpt,nsymcrys,symcrys,nstval,KSBSt,EPBSt,efermi,pmat, &
   v1,v2,nmesh,de,sc,brod,fnam,comm)
 
  use m_profiling_abi
@@ -469,8 +474,7 @@ real(dp), intent(in) :: wkpt(nkpt)
 integer, intent(in) :: nsymcrys
 real(dp), intent(in) :: symcrys(3,3,nsymcrys)
 integer, intent(in) :: nstval
-real(dp), intent(in) :: occv(nstval,nkpt,nspin)
-real(dp), intent(in) :: evalv(nstval,nkpt,nspin)
+type(ebands_t),intent(in) :: KSBSt,EPBSt
 real(dp), intent(in) :: efermi
 complex(dpc), intent(in) :: pmat(nstval,nstval,nkpt,3,nspin)
 integer, intent(in) :: v1
@@ -493,8 +497,12 @@ integer,parameter :: master=0
 integer :: my_k1, my_k2
 integer :: ierr
 integer :: fout1
-real(dp) :: e1,e2,e12,deltav1v2
+logical :: do_lifetime
+complex(dpc) :: e1,e2,e12
+complex(dpc) :: e1_ep,e2_ep,e12_ep
+real(dp) :: deltav1v2
 real(dp) :: ha2ev
+real(dp) :: tmpabs
 real(dp) :: renorm_factor,emin,emax
 real(dp) :: ene
 complex(dpc) :: b11,b12
@@ -572,6 +580,17 @@ complex(dpc), allocatable :: eps(:)
    end if
 !fool proof end
  end if
+
+ ABI_CHECK(KSBSt%mband==nstval, "The number of bands in the BSt should be equal to nstval !")
+
+ do_lifetime = allocated(EPBSt%lifetime)
+! TODO: activate this, and remove do_lifetime - always add it in even if 0.
+! if (.not. allocated(EPBSt%lifetime)) then
+!   ABI_ALLOCATE(EPBSt%lifetime, (nstval, my_k2-my_k1+1, nspin))
+!   EPBSt%lifetime = zero
+! end if
+
+
 !
 !allocate local arrays
  ABI_ALLOCATE(chi,(nmesh))
@@ -591,14 +610,15 @@ complex(dpc), allocatable :: eps(:)
      end do
    end do
  end do
+
 !calculate the energy window
  emin=0._dp
  emax=0._dp
  do ik=1,nkpt
    do isp=1,nspin
      do ist1=1,nstval
-       emin=min(emin,evalv(ist1,ik,isp))
-       emax=max(emax,evalv(ist1,ik,isp))
+       emin=min(emin,EPBSt%eig(ist1,ik,isp))
+       emax=max(emax,EPBSt%eig(ist1,ik,isp))
      end do
    end do
  end do
@@ -608,23 +628,39 @@ complex(dpc), allocatable :: eps(:)
 
 !start calculating linear optical response
  chi(:)=0._dp
- !do ik=1,nkpt
- do ik=my_k1,my_k2
-   write(std_out,*) "P-",my_rank,": ",ik,'of',nkpt
-   do isp=1,nspin
+! TODO: this loop should be outside the ik one, for speed and cache.
+ do isp=1,nspin
+   !do ik=1,nkpt
+   do ik=my_k1,my_k2
+     write(std_out,*) "P-",my_rank,": ",ik,'of',nkpt
      do ist1=1,nstval
-       e1=evalv(ist1,ik,isp)
+       e1=KSBSt%eig(ist1,ik,isp)
+       e1_ep=EPBSt%eig(ist1,ik,isp)
+! TODO: unless memory is a real issue, should set lifetimes to 0 and do this sum systematically
+! instead of putting an if statement in a loop! See above
+       if(do_lifetime) then
+         e1_ep = e1_ep + EPBSt%lifetime(ist1,ik,isp)*(0.0_dp,1.0_dp)
+       end if
 !      if (e1.lt.efermi) then
 !      do ist2=ist1,nstval
        do ist2=1,nstval
-         e2=evalv(ist2,ik,isp)
+         e2=KSBSt%eig(ist2,ik,isp)
+         e2_ep=EPBSt%eig(ist2,ik,isp)
+         if(do_lifetime) then
+           e2_ep = e2_ep - EPBSt%lifetime(ist2,ik,isp)*(0.0_dp,1.0_dp)
+         end if
 !        if (e2.gt.efermi) then
          if (ist1.ne.ist2) then
 !          scissors correction of momentum matrix
-           if(e1 > e2) then
+           if(REAL(e1) > REAL(e2)) then
              e12 = e1-e2+sc
            else
              e12 = e1-e2-sc
+           end if
+           if(REAL(e1_ep) > REAL(e2_ep)) then
+             e12_ep = e1_ep-e2_ep+sc
+           else
+             e12_ep = e1_ep-e2_ep-sc
            end if
 !          e12=e1-e2-sc
            b11=0._dp
@@ -639,8 +675,8 @@ complex(dpc), allocatable :: eps(:)
 !          calculate on the desired energy grid
            do iw=2,nmesh
              w=(iw-1)*de+ieta
-             chi(iw)=chi(iw)+(wkpt(ik)*(occv(ist1,ik,isp)-occv(ist2,ik,isp))* &
-             (b12/(-e12-w)))
+             chi(iw)=chi(iw)+(wkpt(ik)*(KSBSt%occ(ist1,ik,isp)-KSBSt%occ(ist2,ik,isp))* &
+             (b12/(-e12_ep-w)))
            end do
 !          end loops over states
          end if
@@ -655,12 +691,21 @@ complex(dpc), allocatable :: eps(:)
  call xmpi_sum(chi,comm,ierr)
 
  if(my_rank == master) then
+! calculate epsilon
+   eps(:)=0._dp
+   deltav1v2=zero
+   if(v1==v2)deltav1v2=one
+   do iw=2,nmesh
+     ene=(iw-1)*de
+     ene=ene*ha2ev
+     eps(iw)=deltav1v2+4._dp*pi*chi(iw)
+   end do
+
 !  open the output files
    if (open_file(fnam1,msg,newunit=fout1,action='WRITE',form='FORMATTED') /= 0) then
      MSG_ERROR(msg)
    end if
 !  write the output
-   write(fout1, '(a)' ) ' # Energy(eV)         Im(eps(w))'
    write(fout1, '(a,2i3,a)' )' #calculated the component:',v1,v2,'  of dielectric function'
    write(std_out,*) 'calculated the component:',v1,v2,'  of dielectric function'
    write(fout1, '(a,2es16.6)' ) ' #broadening:', real(ieta),aimag(ieta)
@@ -669,13 +714,11 @@ complex(dpc), allocatable :: eps(:)
    write(std_out,*) 'and scissors shift:',sc
    write(fout1, '(a,es16.6,a,es16.6,a)' ) ' #energy window:',(emax-emin)*ha2ev,'eV',(emax-emin),'Ha'
    write(std_out,*) 'energy window:',(emax-emin)*ha2ev,'eV',(emax-emin),'Ha'
-   eps(:)=0._dp
-   deltav1v2=zero
-   if(v1==v2)deltav1v2=one
+   write(fout1,*)
+   write(fout1, '(a)' ) ' # Energy(eV)         Im(eps(w))'
    do iw=2,nmesh
      ene=(iw-1)*de
      ene=ene*ha2ev
-     eps(iw)=deltav1v2+4._dp*pi*chi(iw)
      write(fout1, '(2es16.6)' ) ene,aimag(eps(iw))
    end do
    write(fout1,*)
@@ -693,6 +736,41 @@ complex(dpc), allocatable :: eps(:)
      ene=(iw-1)*de
      ene=ene*ha2ev
      write(fout1, '(2es16.6)' ) ene,abs(eps(iw))
+   end do
+   write(fout1,*)
+   write(fout1,*)
+   write(fout1, '(a)' )' # Energy(eV)         Im(refractive index(w)) aka kappa'
+   do iw=2,nmesh
+     ene=(iw-1)*de
+     ene=ene*ha2ev
+     write(fout1, '(2es16.6)' ) ene,sqrt(half*(abs(eps(iw)) - dble(eps(iw)) ))
+   end do
+   write(fout1,*)
+   write(fout1,*)
+   write(fout1, '(a)' )' # Energy(eV)         Re(refractive index(w)) aka n'
+   do iw=2,nmesh
+     ene=(iw-1)*de
+     ene=ene*ha2ev
+     write(fout1, '(2es16.6)' ) ene,sqrt(half*(abs(eps(iw)) + dble(eps(iw)) ))
+   end do
+   write(fout1,*)
+   write(fout1,*)
+   write(fout1, '(a)' )' # Energy(eV)         Reflectivity(w) from vacuum, at normal incidence'
+   do iw=2,nmesh
+     ene=(iw-1)*de
+     ene=ene*ha2ev
+     write(fout1, '(2es16.6)' ) ene, sqrt(half*(abs(eps(iw)) + dble(eps(iw)) ))
+   end do
+   write(fout1,*)
+   write(fout1,*)
+   write(fout1, '(a)' )' # Energy(eV)         absorption coeff (in m-1) = omega Im(eps) / c n(eps)'
+   do iw=2,nmesh
+     ene=(iw-1)*de
+     tmpabs=zero
+     if (abs(eps(iw)) + dble(eps(iw)) > zero) then
+       tmpabs = aimag(eps(iw))*ene / sqrt(half*( abs(eps(iw)) + dble(eps(iw)) )) / Sp_Lt / Bohr_meter 
+     end if
+     write(fout1, '(2es16.6)' ) ha2ev*ene, tmpabs
    end do
 
 !  close output file
@@ -810,7 +888,7 @@ character(256), intent(in) :: fnam
 !no_abirules
 ! present calculation related (user specific)
 integer :: iw
-integer :: i1,i2,i3,i,j,k,lx,ly,lz
+integer :: i,j,k,lx,ly,lz
 integer :: isp,isym,ik
 integer :: ist1,ist2,istl,istn,istm
 ! Parallelism
@@ -819,6 +897,7 @@ integer :: my_rank, nproc
 integer :: my_k1, my_k2
 integer :: ierr
 integer :: fout1,fout2,fout3,fout4,fout5,fout6,fout7
+real(dp) :: f1,f2,f3
 real(dp) :: ha2ev
 real(dp) :: t1,t2,t3,tst
 real(dp) :: ene,totre,totabs,totim
@@ -1008,12 +1087,12 @@ complex(dpc), allocatable :: intra1wS(:)
              do lx=1,3
                do ly=1,3
                  do lz=1,3
-                   i1=sym(lx,ly,lz)+sym(lx,lz,ly)
-                   i2=sym(ly,lx,lz)+sym(ly,lz,lx)
-                   i3=sym(lz,lx,ly)+sym(lz,ly,lx)
-                   px(ist1,ist2,lx,ly,lz)=i1*pmat(ist1,ist2,ik,lx,isp)
-                   py(ist2,ist1,lx,ly,lz)=i2*pmat(ist2,ist1,ik,lx,isp)   
-                   pz(ist2,ist1,lx,ly,lz)=i3*pmat(ist2,ist1,ik,lx,isp)
+                   f1=sym(lx,ly,lz)+sym(lx,lz,ly)
+                   f2=sym(ly,lx,lz)+sym(ly,lz,lx)
+                   f3=sym(lz,lx,ly)+sym(lz,ly,lx)
+                   px(ist1,ist2,lx,ly,lz)=f1*pmat(ist1,ist2,ik,lx,isp)
+                   py(ist2,ist1,lx,ly,lz)=f2*pmat(ist2,ist1,ik,lx,isp)   
+                   pz(ist2,ist1,lx,ly,lz)=f3*pmat(ist2,ist1,ik,lx,isp)
                  end do
                end do
              end do

@@ -84,4 +84,5 @@ bfield 3*0.0
 #%%   PAW Berrys Phase calculation of Born effective charge in AlAs by
 #%%   finite electric fields (contributed by J. Zwanziger, adapted from efield tutorial.)
 #%%   Cannot be executed with more than 1 MPI node.
+#%% topics = Berry
 #%%<END TEST_INFO>

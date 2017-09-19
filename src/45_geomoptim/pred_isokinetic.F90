@@ -45,7 +45,7 @@
 !!      mover
 !!
 !! CHILDREN
-!!      hist2var,metric,var2hist,wrtout,xcart2xred,xred2xcart
+!!      hist2var,var2hist,wrtout,xcart2xred,xred2xcart
 !!
 !! SOURCE
 
@@ -417,9 +417,9 @@ subroutine pred_isokinetic(ab_mover,hist,itime,ntime,zDEBUG,iexit)
  xcart=xcart_next
  xred=xred_next
 
-!Increase indexes
- hist%ihist=hist%ihist+1
-
+!increment the ihist
+ hist%ihist = abihist_findIndex(hist,+1)
+ 
 !Fill the history with the variables
 !xred, acell, rprimd, vel
  call var2hist(acell,hist,ab_mover%natom,rprimd,xred,zDEBUG)

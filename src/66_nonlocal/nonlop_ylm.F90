@@ -387,7 +387,7 @@
 !signs=2, less choices
  if (signs==2) then
    check=(choice==0.or.choice==1.or.choice==2.or.choice==3 .or.&
-&   choice==5.or.choice==51.or.choice==52.or.choice==53.or.&
+&   choice==5.or.choice==51.or.choice==52.or.choice==53.or.choice==54.or.&
 &   choice==7.or.choice==8.or.choice==81)
    ABI_CHECK(check,'BUG: choice not compatible (for signs=2)')
  end if
@@ -396,7 +396,7 @@
    check=(idir>=1.and.idir<=6)
    ABI_CHECK(check,'BUG: choice=3 and signs=2 requires 1<=idir<=6')
 !1<=idir<=9 is required when choice==8/81 and signs=2
- else if ((choice==8.or.choice==81).and.signs==2) then
+ else if ((choice==8.or.choice==81.or.choice==54).and.signs==2) then
    check=(idir>=1.and.idir<=9)
    ABI_CHECK(check,'BUG: choice=8/81 and signs=2 requires 1<=idir<=9')
  else
@@ -491,6 +491,10 @@
    if(signs==1) ndgxdt=6
    if(signs==1) ndgxdtfac=6
    if(signs==1) nd2gxdt=9
+   if(signs==2) ndgxdt=1
+   if(signs==2) nd2gxdt=1
+   if(signs==2) ndgxdtfac=1
+   if(signs==2) nd2gxdtfac=1
  end if
  if (choice==55) then
    if(signs==1) ndgxdt=9
@@ -561,11 +565,11 @@
 
 !Eventually re-compute (k+G) vectors (and related data)
  nkpgin_=0
- if (choice==2) nkpgin_=3
+ if (choice==2.or.choice==54) nkpgin_=3
  if (signs==1) then
    if (choice==4.or.choice==24) nkpgin_=9
    if (choice==3.or.choice==23.or.choice==6) nkpgin_=3
-   if (choice==54.or.choice==55) nkpgin_=3
+   if (choice==55) nkpgin_=3
  end if
  if (nkpgin<nkpgin_) then
    ABI_ALLOCATE(kpgin_,(npwin,nkpgin_))
@@ -575,7 +579,7 @@
    kpgin_  => kpgin
  end if
  nkpgout_=0
- if (choice==2.and.signs==2) nkpgout_=3
+ if ((choice==2.or.choice==54).and.signs==2) nkpgout_=3
  if (nkpgout<nkpgout_) then
    ABI_ALLOCATE(kpgout_,(npwout,nkpgout_))
    call mkkpg(kgout,kpgout_,kptout,nkpgout_,npwout)
@@ -645,9 +649,7 @@
 
 !      Prepare the phase factors if they were not already computed
        if (nloalg(2)<=0) then
-!write(87,*) "coucou0",ia3,ia4
          call ph1d3d(ia3,ia4,kgin,matblk,natom,npwin,n1,n2,n3,phkxredin,ph1d,ph3din)
-!write(87,*) "ph3din",ph3din(1,487,:)
        end if
 
 !      Allocate memory for projected scalars
@@ -685,10 +687,11 @@
          if (choice==5.or.choice==51.or.choice==52.or.choice==53.or. &
 &         choice==8.or.choice==81) cplex_dgxdt(:) = 2
          if (choice==54.and.signs==1) cplex_dgxdt(4:6) = 2
+         if (choice==54.and.signs==2) cplex_dgxdt(:)   = 2
          if (choice==55.and.signs==1) cplex_dgxdt(7:9) = 2
        end if
        if(nd2gxdt > 0) then
-         if (choice==54.and.signs==1) cplex_d2gxdt(1:9) = 2
+         if (choice==54) cplex_d2gxdt(:) = 2
          if (choice==55.and.signs==1) cplex_d2gxdt(1:18)= 2
        end if
 
@@ -707,12 +710,12 @@
        if (cpopt==4.and.ndgxdt>0) then
          ndgxdt_stored = cprjin(1,1)%ncpgr
          ishift=0
-         if ((choice==2).and.(ndgxdt_stored>ndgxdt).and.(signs==2)) ishift=idir-ndgxdt
+         if (((choice==2).or.(choice==3)).and.(ndgxdt_stored>ndgxdt).and.(signs==2)) ishift=idir-ndgxdt
          if (choice==2.and.(ndgxdt_stored>ndgxdt).and.(signs==1)) ishift=ndgxdt_stored-ndgxdt
          if(cplex == 2) then
            do ispinor=1,nspinor
              do ia=1,nincat
-               if (ndgxdt_stored==ndgxdt.or.(ndgxdt_stored>ndgxdt.and.choice==2)) then
+               if (ndgxdt_stored==ndgxdt.or.(ndgxdt_stored>ndgxdt.and.((choice==2).or.(choice==3)))) then
                  dgxdt(1:2,1:ndgxdt,1:nlmn,ia,ispinor)=cprjin(iatm+ia,ispinor)%dcp(1:2,1+ishift:ndgxdt+ishift,1:nlmn)
                else if (signs==2.and.ndgxdt_stored==3) then
                  if (choice==5.or.choice==51.or.choice==52) then ! ndgxdt=1
@@ -732,7 +735,7 @@
            do ispinor=1,nspinor
              do ia=1,nincat
                do ilmn=1,nlmn
-                 if (ndgxdt_stored==ndgxdt.or.(ndgxdt_stored>ndgxdt.and.choice==2)) then
+                 if (ndgxdt_stored==ndgxdt.or.(ndgxdt_stored>ndgxdt.and.((choice==2).or.(choice==3)))) then
                    do ii=1,ndgxdt
                      ic = cplex_dgxdt(ii)
                      dgxdt(1,ii,ilmn,ia,ispinor)=cprjin(iatm+ia,ispinor)%dcp(ic,ii+ishift,ilmn)
@@ -845,7 +848,6 @@
 &             nincat,nlmn,nnlout,nspinor,paw_opt,strnlk)
              ABI_DEALLOCATE(gx_left)
            end if
-
          end if
 
 !        Operate with the non-local potential on the projected scalars,

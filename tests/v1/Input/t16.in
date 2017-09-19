@@ -52,4 +52,5 @@ xred 3*0
 #%% description = 
 #%%   Isolated Helium atom (see above). Treated with LDA, "X-alpha" functional (ixc=6).
 #%%   The total energy is -2.7172 Ha. For speed-up, it begins with the wavefunctions from test 11.
+#%% topics = xc
 #%%<END TEST_INFO>

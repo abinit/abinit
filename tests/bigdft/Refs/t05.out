@@ -140,7 +140,7 @@
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm: epsatm=    5.91122074
+ pspatm : epsatm=    5.91122074
          --- l  ekb(1:nproj) -->
              0   -0.636687   -0.017197    1.920868
              1   -0.676457    0.963544
@@ -165,7 +165,7 @@
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm: epsatm=   -0.52475100
+ pspatm : epsatm=   -0.52475100
          --- l  ekb(1:nproj) -->
              0    1.154608
  pspatm: atomic psp has been read  and splines computed
@@ -186,7 +186,7 @@
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm: epsatm=   -0.00129784
+ pspatm : epsatm=   -0.00129784
          --- l  ekb(1:nproj) -->
  pspatm: atomic psp has been read  and splines computed
 

@@ -55,9 +55,9 @@ _ WF disk file :     10.293 Mbytes ; DEN or POT disk file :      1.320 Mbytes.
 -          iomode           1
             acell      7.5589045315E+00  7.5589045315E+00  5.2912331721E+01 Bohr
               amu      1.37327000E+02  4.78800000E+01  1.59994000E+01
+     densfor_pred           6
              ecut      1.50000000E+01 Hartree
 -          fftalg         401
-     densfor_pred           6
            iprcel          45
               ixc           3
               kpt      1.25000000E-01  1.25000000E-01  5.00000000E-01
@@ -273,7 +273,7 @@ P           mkmem           1
     2   0.000   0.000    0   1.6965489        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     0.00000000000000    0.00000000000000    0.00000000000000   rchrg,fchrg,qchrg
- pspatm: epsatm=   43.25917021
+ pspatm : epsatm=   43.25917021
          --- l  ekb(1:nproj) -->
              0   -9.646692   27.266828
              1   -6.938476   21.148499
@@ -291,7 +291,7 @@ P           mkmem           1
     2   0.000   0.000    0   1.6491622        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     0.00000000000000    0.00000000000000    0.00000000000000   rchrg,fchrg,qchrg
- pspatm: epsatm=    4.67708954
+ pspatm : epsatm=    4.67708954
          --- l  ekb(1:nproj) -->
              0    9.517316   -2.344682
              1    5.011406   -0.741179
@@ -307,7 +307,7 @@ P           mkmem           1
     1   0.000   0.000    0   1.6491622        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     1.00000000000000    0.95000909444395    0.44408665956870   rchrg,fchrg,qchrg
- pspatm: epsatm=    1.15255884
+ pspatm : epsatm=    1.15255884
          --- l  ekb(1:nproj) -->
              0    7.721978   -1.904542
  pspatm: atomic psp has been read  and splines computed
@@ -630,6 +630,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    1399.000    1398.994
 -          iomode           1
             acell      7.5589045315E+00  7.5589045315E+00  5.2912331721E+01 Bohr
               amu      1.37327000E+02  4.78800000E+01  1.59994000E+01
+     densfor_pred           6
              ecut      1.50000000E+01 Hartree
            etotal     -7.9153671196E+02
             fcart      7.1973657205E-33 -0.0000000000E+00  2.0101018032E-03
@@ -662,7 +663,6 @@ _setup2: Arith. and geom. avg. npw (full set) are    1399.000    1398.994
                        7.1973657205E-33 -0.0000000000E+00  4.9496790772E-02
                        7.1973657205E-33 -0.0000000000E+00  5.1363824236E-02
 -          fftalg         401
-     densfor_pred           6
            iprcel          45
               ixc           3
               kpt      1.25000000E-01  1.25000000E-01  5.00000000E-01

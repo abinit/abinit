@@ -85,8 +85,8 @@ contains
 !!  krank = object containing ranking and inverse ranking
 !!
 !! PARENTS
-!!      get_full_kgrid,m_ddk,m_ebands,m_fstab,m_nesting,m_phgamma,m_tetrahedron
-!!      mkfskgrid,mkqptequiv,order_fs_kpts,outelph,printbxsf,read_el_veloc
+!!      get_full_kgrid,m_ddk,m_ebands,m_fstab,m_nesting,m_phgamma,m_pptools
+!!      m_tetrahedron,mkfskgrid,mkqptequiv,order_fs_kpts,outelph,read_el_veloc
 !!
 !! CHILDREN
 !!
@@ -220,8 +220,8 @@ end subroutine mkkptrank
 !!
 !! PARENTS
 !!      elphon,get_full_kgrid,integrate_gamma,integrate_gamma_alt,k_neighbors
-!!      m_ddk,m_fstab,m_kptrank,m_nesting,m_phgamma,m_tetrahedron,mkfskgrid
-!!      mkqptequiv,printbxsf,read_el_veloc,read_gkk
+!!      m_ddk,m_kptrank,m_nesting,m_pptools,m_tetrahedron,mkfskgrid,mkqptequiv
+!!      read_el_veloc,read_gkk
 !!
 !! CHILDREN
 !!
@@ -414,7 +414,7 @@ end subroutine copy_kptrank
 !!
 !! PARENTS
 !!      defs_elphon,get_full_kgrid,m_ddk,m_ebands,m_fstab,m_nesting,m_phgamma
-!!      m_tetrahedron,mkfskgrid,mkqptequiv,order_fs_kpts,outelph,printbxsf
+!!      m_pptools,m_tetrahedron,mkfskgrid,mkqptequiv,order_fs_kpts,outelph
 !!      read_el_veloc
 !!
 !! CHILDREN

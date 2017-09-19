@@ -1,6 +1,6 @@
 GENE                      # Format of input: generic format, with Symmetries
 0 0 0 0.0                 # iskip (not presently used) idebug setgap shiftgap
-    0.56659E+00 0.0005 0.4      3.0000  # Fermilevel (Ry), energy grid spacing, energy span around Fermilevel, number of electrons for this spin
+    0.56659E+00 0.0005     0.9022    3.0000  # Fermilevel (Ry), energy grid spacing, energy span around Fermilevel, number of electrons for this spin
 CALC                      # CALC (calculate expansion coeff), NOCALC read from file
 3                         # lpfac, number of latt-points per k-point
 BOLTZ                     # run mode (only BOLTZ is supported)

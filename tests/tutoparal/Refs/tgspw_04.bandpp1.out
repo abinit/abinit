@@ -52,8 +52,8 @@ P This job should need less than                     103.595 Mbytes of memory.
         accesswff           1
             acell      2.3010000000E+01  2.3010000000E+01  2.3010000000E+01 Bohr
               amu      1.96966540E+02
+     densfor_pred           6
              ecut      1.50000000E+01 Hartree
-           densfor_pred           6
            istwfk        2
           kptrlen      2.30100000E+01
          kptrlatt      1  0  0   0  1  0   0  0  1
@@ -579,7 +579,7 @@ P           mkmem           1
     2  13.861  18.519    1   1.9261744        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     1.84225747565994    1.72828030557005    9.43000986633162   rchrg,fchrg,qchrg
- pspatm: epsatm=   90.81237674
+ pspatm : epsatm=   90.81237674
          --- l  ekb(1:nproj) -->
              1    0.637337
              2   -5.866564
@@ -1451,6 +1451,7 @@ P newkpt: treating    648 bands with npw=     155 for ikpt=   1 by node    0
         accesswff           1
             acell      2.3010000000E+01  2.3010000000E+01  2.3010000000E+01 Bohr
               amu      1.96966540E+02
+     densfor_pred           6
              ecut      1.50000000E+01 Hartree
            etotal     -4.2976546804E+03
             fcart      1.3425868024E-20  3.4189541210E-04  3.4189541210E-04
@@ -1560,7 +1561,6 @@ P newkpt: treating    648 bands with npw=     155 for ikpt=   1 by node    0
                        1.0303291987E-03  2.3065619198E-05  1.0303291987E-03
                        1.0303291987E-03  1.0303291987E-03  2.3065619198E-05
                        1.5832084541E-04  1.5832084541E-04  1.5832084541E-04
-           densfor_pred           6
            istwfk        2
           kptrlen      2.30100000E+01
          kptrlatt      1  0  0   0  1  0   0  0  1

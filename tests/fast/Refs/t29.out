@@ -52,6 +52,7 @@ _ WF disk file :      0.268 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
  -outvars: echo values of preprocessed input variables --------
             acell      1.0263110000E+01  1.0263110000E+01  1.0263110000E+01 Bohr
               amu      2.80000000E+01
+     densfor_pred           1
            diemac      1.20000000E+01
             dtion      3.50000000E+02
              ecut      2.99000000E+00 Hartree
@@ -60,7 +61,6 @@ _ WF disk file :      0.268 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
            iatfix        2    3    4    5    6    7    8
             intxc           1
            ionmov           1
-     densfor_pred           1
            irdwfk           1
               kpt      1.00000000E+00  1.00000000E+00  1.00000000E+00
                       -1.00000000E+00  1.00000000E+00  1.00000000E+00
@@ -152,7 +152,7 @@ P           mkmem           4
     2   0.000   0.000    0   2.0872718        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     1.80626423934776    0.22824404341771    1.17378968127746   rchrg,fchrg,qchrg
- pspatm: epsatm=    1.43386982
+ pspatm : epsatm=    1.43386982
          --- l  ekb(1:nproj) -->
              0    3.287949
              1    1.849886
@@ -1261,6 +1261,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     272.000     272.000
  -outvars: echo values of variables after computation  --------
             acell      1.0263110000E+01  1.0263110000E+01  1.0263110000E+01 Bohr
               amu      2.80000000E+01
+     densfor_pred           1
            diemac      1.20000000E+01
             dtion      3.50000000E+02
              ecut      2.99000000E+00 Hartree
@@ -1278,7 +1279,6 @@ _setup2: Arith. and geom. avg. npw (full set) are     272.000     272.000
            iatfix        2    3    4    5    6    7    8
             intxc           1
            ionmov           1
-     densfor_pred           1
            irdwfk           1
               kpt      1.00000000E+00  1.00000000E+00  1.00000000E+00
                       -1.00000000E+00  1.00000000E+00  1.00000000E+00

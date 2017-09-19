@@ -108,10 +108,10 @@ _ WF disk file :      0.397 Mbytes ; DEN or POT disk file :      0.714 Mbytes.
         bs_loband3          0       0
         bs_loband4          0       0
              ecut      2.50000000E+01 Hartree
-          effmass1     1.00000000E+00
-          effmass2     1.01000000E+00
-          effmass3     1.00000000E+00
-          effmass4     1.01000000E+00
+          effmass_free1     1.00000000E+00
+          effmass_free2     1.01000000E+00
+          effmass_free3     1.00000000E+00
+          effmass_free4     1.01000000E+00
 -          fftalg         312
               ixc1          7
               ixc2         31
@@ -277,7 +277,7 @@ P           mkmem           2
     2   0.000   0.000    1   1.2715070        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     0.00000000000000    0.00000000000000    0.00000000000000   rchrg,fchrg,qchrg
- pspatm: epsatm=   28.17357484
+ pspatm : epsatm=   28.17357484
          --- l  ekb(1:nproj) -->
              1   -2.083263
              2   -1.959803
@@ -418,7 +418,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    1617.250    1617.250
     2   0.000   0.000    1   1.2715070        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     0.00000000000000    0.00000000000000    0.00000000000000   rchrg,fchrg,qchrg
- pspatm: epsatm=   28.17357484
+ pspatm : epsatm=   28.17357484
          --- l  ekb(1:nproj) -->
              1   -2.083263
              2   -1.959803
@@ -560,7 +560,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    1617.250    1617.250
     2   0.000   0.000    1   1.2715070        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     0.00000000000000    0.00000000000000    0.00000000000000   rchrg,fchrg,qchrg
- pspatm: epsatm=   28.17357484
+ pspatm : epsatm=   28.17357484
          --- l  ekb(1:nproj) -->
              1   -2.083263
              2   -1.959803
@@ -710,7 +710,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    1617.250    1617.250
     2   0.000   0.000    1   1.2715070        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     0.00000000000000    0.00000000000000    0.00000000000000   rchrg,fchrg,qchrg
- pspatm: epsatm=   28.17357484
+ pspatm : epsatm=   28.17357484
          --- l  ekb(1:nproj) -->
              1   -2.083263
              2   -1.959803
@@ -833,10 +833,10 @@ _setup2: Arith. and geom. avg. npw (full set) are    1617.250    1617.250
         bs_loband3          0       0
         bs_loband4          0       0
              ecut      2.50000000E+01 Hartree
-          effmass1     1.00000000E+00
-          effmass2     1.01000000E+00
-          effmass3     1.00000000E+00
-          effmass4     1.01000000E+00
+          effmass_free1     1.00000000E+00
+          effmass_free2     1.01000000E+00
+          effmass_free3     1.00000000E+00
+          effmass_free4     1.01000000E+00
            etotal1    -7.9333340831E+00
            etotal2    -7.9333340831E+00
            etotal3    -7.9333340831E+00

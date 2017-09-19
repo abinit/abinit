@@ -60,9 +60,14 @@ program cut3d
 #endif
  use m_hdr
  use m_cut3d
+ use m_crystal
+ use m_crystal_io
 
  use m_fstrings,        only : endswith, sjoin, itoa
  use m_mpinfo,          only : destroy_mpi_enreg
+ use m_fftcore,         only : ngfft_seq
+ use m_distribfft,      only : init_distribfft_seq
+ use m_ioarr,           only : fftdatar_write
  use m_io_tools,        only : flush_unit, file_exists, open_file, is_open, get_unit, read_string
 
 !This section has been created automatically by the script Abilint (TD).
@@ -82,9 +87,9 @@ program cut3d
 !scalars
  integer,parameter :: paral_kgb0=0,mfiles=10,exchn2n3d0=0
  integer :: fform0,gridshift1,gridshift2,gridshift3,i1,i2,i3
- integer :: iatom,ifiles,ii,ii1,ii2,ii3,index,iprompt,ir1,ir2,ir3,ispden
+ integer :: iatom,ifiles,ii,ii1,ii2,ii3,index,iprompt,ir1,ir2,ir3,ispden,cplex
  integer :: itask,jfiles,natom,nfiles,nr1,nr2,unt,comm,iomode,nprocs,my_rank
- integer :: nr3,nr1_stored,nr2_stored,nr3_stored,nrws,nspden,nspden_stored,ntypat
+ integer :: nr3,nr1_stored,nr2_stored,nr3_stored,nrws,nspden,nspden_stored,ntypat,timrev,nfft
  real(dp) :: dotdenpot,maxmz,normz,sumdenpot,ucvol,xm,xnow,xp,ym,ynow,yp,zm,znow,zp,tcpui,twalli
  character(len=24) :: codename
  character(len=fnlen) :: filnam,filrho,filrho_tmp
@@ -92,8 +97,10 @@ program cut3d
  type(hdr_type) :: hdr
  type(abifile_t) :: abifile
  type(MPI_type) :: mpi_enreg
+ type(crystal_t) :: cryst
 !arrays
  integer, allocatable :: isdenpot(:)
+ integer :: ngfft(18)
  real(dp) :: rprimd(3,3),shift_tau(3),tsec(2)
  real(dp) :: xcart2(3),gmet(3,3),gprimd(3,3),rmet(3,3)
  real(dp),allocatable :: grid(:,:,:),grid_full(:,:,:,:),grid_full_stored(:,:,:,:,:),gridtt(:,:,:)
@@ -109,7 +116,7 @@ program cut3d
 !Initialize MPI
  call xmpi_init()
  comm = xmpi_world
- nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm) 
+ nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
  ABI_CHECK(nprocs == 1, "cut3d not programmed for parallel execution")
 
 !Initialize memory profiling if it is activated
@@ -168,7 +175,7 @@ program cut3d
    write(std_out,*)
    call hdr_read_from_fname(hdr, filrho, fform0, comm)
    ABI_CHECK(fform0 /= 0, "hdr_read returned fform = 0")
-   abifile = abifile_from_fform(fform0) 
+   abifile = abifile_from_fform(fform0)
    ABI_CHECK(abifile%fform /= 0, "Cannot detect abifile from fform")
 
 !  Echo part of the header
@@ -185,7 +192,7 @@ program cut3d
    ABI_MALLOC(xred,(3,natom))
    xred(:,:)=hdr%xred(:,:)
    call xred2xcart(natom,rprimd,xcart,xred)
-   
+
    ispden=0
    if (abifile%class == "density" .or. abifile%class == "potential") then
      if(nspden/=1)then
@@ -270,17 +277,16 @@ program cut3d
      ABI_MALLOC(gridmy,(nr1,nr2,nr3))
      ABI_MALLOC(gridmz,(nr1,nr2,nr3))
 
-     varname = "dummy"
+     varname = varname_from_fname(filrho)
      if (iomode == IO_MODE_ETSF) then
-       varname = varname_from_fname(filrho)
-       call wrtout(std_out, sjoin("- Reading netcdf variable: ", varname), "COLL")
+       call wrtout(std_out, sjoin("- Reading netcdf variable: ", varname))
      end if
 
      call cut3d_rrho(filrho,varname,iomode,grid_full,nr1,nr2,nr3,nspden)
 
 !    Do not forget that the first sub-array of a density file is the total density,
 !    while the first sub-array of a potential file is the spin-up potential
-     if (abifile%class == "density") then 
+     if (abifile%class == "density") then
 
 !      gridtt= grid --> Total density or potential.
 !      gridmx= grid --> spin-Up density, or magnetization density in X direction.
@@ -364,10 +370,11 @@ program cut3d
          write(std_out,*) '  9 => output .xsf file for XCrysDen'
          write(std_out,*) ' 11 => compute atomic charge using the Hirshfeld method'
          write(std_out,*) ' 14 => Gaussian/cube wavefunction module'
+         write(std_out,*) ' 15 => Write data to netcdf file'
          read(std_in,*) itask
          write(std_out,'(a,a,i2,a)' ) ch10,' Your choice is ',itask,ch10
 
-         if( 5<=itask .and. itask<=9 .or. itask==14 )then
+         if ((5 <= itask .and. itask <= 9) .or. any(itask == [14, 15]) )then
            write(std_out,*) ch10,'  Enter the name of an output file:'
            if (read_string(filnam, unit=std_in) /= 0) then
              MSG_ERROR("Fatal error!")
@@ -528,9 +535,9 @@ program cut3d
              read(std_in,*) gridshift1, gridshift2, gridshift3
              shift_tau(:) = gridshift1*rprimd(:,1)/(nr1+1) + gridshift2*rprimd(:,2)/(nr2+1) + gridshift3*rprimd(:,3)/(nr3+1)
            end if
-!            
+!
 !            Generate translated coordinates to match density shift
-!            
+!
            ABI_MALLOC(tau2,(3,natom))
            do iatom = 1,natom
              tau2(:,iatom) = xcart(:,iatom) - shift_tau(:)
@@ -601,7 +608,7 @@ program cut3d
              end do
            else
 !              ################################################################### (LD)
-!              
+!
 !              normal case: output density or potential (scalar field)
              write(unt,'(1X,A)')  'DIM-GROUP'
              write(unt,*) '3  1'
@@ -755,6 +762,20 @@ program cut3d
            close(unt)
            exit
 
+        case (15)
+            ! Write netcdf file.
+            timrev = 2; if (any(hdr%kptopt == [3, 4])) timrev = 1
+            call crystal_from_hdr(cryst, hdr, timrev)
+            call ngfft_seq(ngfft, [nr1, nr2, nr3])
+            ngfft(4:6) = ngfft(1:3)
+            nfft = product(ngfft(1:3))
+            cplex = 1
+            call init_distribfft_seq(mpi_enreg%distribfft, 'c', ngfft(2), ngfft(3), 'all')
+            call init_distribfft_seq(mpi_enreg%distribfft, 'f', ngfft(2), ngfft(3), 'all')
+
+            call fftdatar_write(varname,filnam,IO_MODE_ETSF,hdr,cryst,ngfft,cplex,nfft,nspden,grid_full,mpi_enreg)
+            call crystal_free(cryst)
+
          case(0)
            write(std_out,*)' Exit requested by user'
            exit
@@ -780,7 +801,7 @@ program cut3d
      MSG_ERROR(sjoin("Don't know how to handle file class ", abifile%class))
    end if ! WF file or DEN/POT file
 
-!  A maximum number of files had been previously specified, but set the actual number of files 
+!  A maximum number of files had been previously specified, but set the actual number of files
 !  to 1 if one does not read at least one other.
    if(ifiles==1)then
      nfiles=1

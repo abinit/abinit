@@ -77,7 +77,6 @@ module m_anaddb_dataset
   integer :: gkk_rptwrite
   integer :: gkqwrite
   integer :: gruns_nddbs
-  integer :: iavfrq
   integer :: ifcana
   integer :: ifcflag
   integer :: ifcout
@@ -105,13 +104,13 @@ module m_anaddb_dataset
   integer :: polflag
   integer :: prtdos
   integer :: prt_ifc
+  integer :: prtddb
   integer :: prtmbm
   integer :: prtfsurf
   integer :: prtnest
   integer :: prtphbands
   integer :: prtsrlr  ! print the short-range/long-range decomposition of phonon freq.
   integer :: prtvol = 0
-  integer :: qrefine
   integer :: ramansr
   integer :: relaxat
   integer :: relaxstr
@@ -135,8 +134,10 @@ module m_anaddb_dataset
   integer :: ngqpt(9)             ! ngqpt(9) instead of ngqpt(3) is needed in wght9.f
   integer :: istrfix(6)
   integer :: ng2qpt(3)
+  integer :: qrefine(3)
   integer :: kptrlatt(3,3)
   integer :: kptrlatt_fine(3,3)
+  integer :: thermal_supercell(3,3)
 
 ! Real(dp)
   real(dp) :: a2fsmear
@@ -159,7 +160,7 @@ module m_anaddb_dataset
   real(dp) :: q1shft(3,4)
   real(dp) :: q2shft(3)
   real(dp) :: targetpol(3)
-  real(dp) :: vs_qrad_tolms(2) = 0
+  real(dp) :: vs_qrad_tolkms(2) = 0
 
 ! Integer arrays
   integer, allocatable :: atifc(:)
@@ -214,6 +215,7 @@ contains
 !!      anaddb
 !!
 !! CHILDREN
+!!      chkvars_in_string,inupper
 !!
 !! NOTES
 !!
@@ -301,6 +303,7 @@ end subroutine anaddb_dtset_free
 !!      anaddb,m_effective_potential
 !!
 !! CHILDREN
+!!      chkvars_in_string,inupper
 !!
 !! SOURCE
 
@@ -312,6 +315,7 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
 #undef ABI_FUNC
 #define ABI_FUNC 'invars9'
  use interfaces_14_hidewrite
+ use interfaces_32_util
  use interfaces_42_parser
 !End of the abilint section
 
@@ -328,6 +332,7 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
  integer,parameter :: vrsddb=100401 !Set routine version number here:
  integer,parameter :: jdtset=1
  integer :: ii,iph1,iph2,marr,tread,start
+ integer :: idet
  character(len=500) :: message
  character(len=fnlen) :: path
 !arrays
@@ -723,16 +728,6 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
 
 !I
 
- anaddb_dtset%iavfrq=0
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'iavfrq',tread,'INT')
- if(tread==1) anaddb_dtset%iavfrq=intarr(1)
- if(anaddb_dtset%iavfrq<0.or.anaddb_dtset%iavfrq>1)then
-   write(message, '(a,i0,5a)' )&
-&   'iavfrq is ',anaddb_dtset%iavfrq,', but the only allowed values',ch10,&
-&   'are 0 or 1 .',ch10,'Action: correct iavfrq in your input file.'
-   MSG_ERROR(message)
- end if
-
  anaddb_dtset%ifcana=0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ifcana',tread,'INT')
  if(tread==1) anaddb_dtset%ifcana=intarr(1)
@@ -1104,6 +1099,26 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
 &   'Action: correct prt_ifc in your input file.'
    MSG_ERROR(message)
  end if
+! check that ifcout is set
+ if (anaddb_dtset%prt_ifc /= 0 .and. anaddb_dtset%ifcout == 0) then
+   anaddb_dtset%ifcout = -1 ! this forces output of all IFC
+ end if
+
+!Default is no output of the DDB to file
+ anaddb_dtset%prtddb = 0
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prtddb',tread,'INT')
+ if(tread==1) anaddb_dtset%prtddb = intarr(1)
+ if(anaddb_dtset%prtddb < 0 .or. anaddb_dtset%prtddb > 1) then
+   write(message, '(a,i0,5a)' )&
+&   'prtf_ddb is ',anaddb_dtset%prtddb,'. The only allowed values',ch10,&
+&   'are 0 (no output) or 1 (print DDB and DDB.nc files)',ch10,  &
+&   'Action: correct prtddb in your input file.'
+   MSG_ERROR(message)
+ end if
+! check that ifcflag is set
+ if (anaddb_dtset%prtddb /= 0 .and. anaddb_dtset%ifcflag == 0) then
+   anaddb_dtset%ifcflag = 1 ! this forces the use of IFC
+ end if
 
  anaddb_dtset%prtmbm=0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prtmbm',tread,'INT')
@@ -1164,15 +1179,17 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
  end if
 
  anaddb_dtset%qrefine=1 ! default is no refinement
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'qrefine',tread,'INT')
- if(tread==1) anaddb_dtset%qrefine = intarr(1)
- if(anaddb_dtset%qrefine < 1) then
-   write(message, '(a,i0,5a)' )&
-&   'qrefine is ',anaddb_dtset%qrefine,' The only allowed values',ch10,&
-&   'are integers >= 1 giving the refinement of the ngqpt grid',ch10,&
-&   'Action: correct qrefine in your input file.'
-   MSG_ERROR(message)
- end if
+ call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'qrefine',tread,'INT')
+ if(tread==1) anaddb_dtset%qrefine = intarr(1:3)
+ do ii=1,3
+   if(anaddb_dtset%qrefine(ii) < 1) then
+     write(message, '(a,3i0,a,a,a,a,a)' )&
+&     'qrefine is',anaddb_dtset%qrefine,' The only allowed values',ch10,&
+&     'are integers >= 1 giving the refinement of the ngqpt grid',ch10,&
+&     'Action: correct qrefine in your input file.'
+     MSG_ERROR(message)
+   end if
+ end do
 
 !R
 
@@ -1286,6 +1303,22 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
    MSG_ERROR(message)
  end if
 
+ anaddb_dtset%thermal_supercell(:,:)=0
+ marr = 9
+ ABI_DEALLOCATE(intarr)
+ ABI_DEALLOCATE(dprarr)
+ ABI_ALLOCATE(intarr,(marr))
+ ABI_ALLOCATE(dprarr,(marr))
+ call intagm(dprarr,intarr,jdtset,marr,9,string(1:lenstr),'thermal_supercell',tread,'INT')
+ if(tread==1) anaddb_dtset%thermal_supercell(1:3,1:3)=reshape(intarr(1:9),(/3,3/))
+ call mati3det(anaddb_dtset%thermal_supercell, idet)
+ if(sum(abs(anaddb_dtset%thermal_supercell))>0 .and. idet == 0) then
+   write(message, '(a,9I6,5a)' )&
+&   'thermal_supercell is ',anaddb_dtset%thermal_supercell,', but the matrix must be non singular',ch10,&
+&   'with a non zero determinant.',ch10,'Action: correct thermal_supercell in your input file.'
+   MSG_ERROR(message)
+ end if
+
  anaddb_dtset%thmflag=0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'thmflag',tread,'INT')
  if(tread==1) anaddb_dtset%thmflag=intarr(1)
@@ -1349,12 +1382,12 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
 
 
 !V
- anaddb_dtset%vs_qrad_tolms(:) = zero
- call intagm(dprarr,intarr,jdtset,marr,2,string(1:lenstr),'vs_qrad_tolms',tread,'DPR')
+ anaddb_dtset%vs_qrad_tolkms(:) = zero
+ call intagm(dprarr,intarr,jdtset,marr,2,string(1:lenstr),'vs_qrad_tolkms',tread,'DPR')
  if (tread==1) then
-    anaddb_dtset%vs_qrad_tolms(:) = dprarr(1:2)
+    anaddb_dtset%vs_qrad_tolkms(:) = dprarr(1:2)
     ABI_CHECK(dprarr(1) >= zero, "vs_qrad must be >= 0")
-    ABI_CHECK(dprarr(2) > zero, "vs_tolms must be > zero")
+    ABI_CHECK(dprarr(2) > zero, "vs_tolkms must be > zero")
  end if
 !W
 
@@ -1651,7 +1684,7 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
    MSG_ERROR("ifcflag must be 1 for Grunesein calculation")
  end if
 
- if (anaddb_dtset%vs_qrad_tolms(1) /= zero .and. anaddb_dtset%ifcflag /=1) then
+ if (anaddb_dtset%vs_qrad_tolkms(1) /= zero .and. anaddb_dtset%ifcflag /=1) then
    MSG_ERROR("ifcflag must be 1 to calculate speed of sound")
  end if
 
@@ -1686,10 +1719,11 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
  end if
 
 !check that q-grid refinement is a divisor of ngqpt in each direction
- if(anaddb_dtset%qrefine > 1 .and. sum(abs(dmod(anaddb_dtset%ngqpt/dble(anaddb_dtset%qrefine),one))) > tol10) then
-   write(message, '(a,i0,3a,3i8,2a)' )&
-&   'qrefine is',anaddb_dtset%qrefine,' The only allowed values',ch10,&
-&   'are integers which are divisors of the ngqpt grid', anaddb_dtset%ngqpt,ch10,&
+ if(any(anaddb_dtset%qrefine(1:3) > 1) .and. &
+&   any(abs(dmod(dble(anaddb_dtset%ngqpt(1:3))/dble(anaddb_dtset%qrefine(1:3)),one)) > tol10) ) then
+   write(message, '(a,3i10,a,a,a,3i8,a,a)' )&
+&   'qrefine is',anaddb_dtset%qrefine(1:3),' The only allowed values',ch10,&
+&   'are integers which are divisors of the ngqpt grid', anaddb_dtset%ngqpt(1:3),ch10,&
 &   'Action: correct qrefine in your input file.'
    MSG_ERROR(message)
  end if
@@ -1734,6 +1768,7 @@ end subroutine invars9
 !!      anaddb
 !!
 !! CHILDREN
+!!      chkvars_in_string,inupper
 !!
 !! SOURCE
 
@@ -1832,12 +1867,12 @@ subroutine outvars_anaddb (anaddb_dtset,nunit)
        write(nunit,'(19x,4es16.8)') (anaddb_dtset%q1shft(ii,iqshft),ii=1,3)
      end do
    end if
-   if (anaddb_dtset%qrefine > 1) then
-     write(nunit,'(3x,a9,i10)')'  qrefine', anaddb_dtset%qrefine
+   if (any(anaddb_dtset%qrefine(:) > 1)) then
+     write(nunit,'(3x,a9,3i10)')'  qrefine', anaddb_dtset%qrefine
    end if
    ! Speed of sound
-   if (anaddb_dtset%vs_qrad_tolms(1) > zero) then
-      write(nunit,'(a,2es16.8)')"vs_qrad_tolms", (anaddb_dtset%vs_qrad_tolms(:))
+   if (anaddb_dtset%vs_qrad_tolkms(1) > zero) then
+      write(nunit,'(a,2es16.8)')"vs_qrad_tolkms", (anaddb_dtset%vs_qrad_tolkms(:))
    end if
  end if
 
@@ -1862,7 +1897,6 @@ subroutine outvars_anaddb (anaddb_dtset,nunit)
    write(nunit,'(3x,a9,3i10)')'  ntemper',anaddb_dtset%ntemper
    write(nunit,'(3x,a9,7x,3es16.8)')'temperinc',anaddb_dtset%temperinc
    write(nunit,'(3x,a9,7x,3es16.8)')'tempermin',anaddb_dtset%tempermin
-   if (anaddb_dtset%iavfrq/=0) write(nunit,'(3x,a9,3i10)')'    iavfrq',anaddb_dtset%iavfrq
    write(nunit,'(a)')' Description of grid 2 :'
    write(nunit,'(3x,a9,3i10)')'   ng2qpt',anaddb_dtset%ng2qpt(1:3)
    write(nunit,'(3x,a9,3i10)')'   ngrids',anaddb_dtset%ngrids
@@ -1955,7 +1989,7 @@ subroutine outvars_anaddb (anaddb_dtset,nunit)
    end if
 
    if (anaddb_dtset%prt_ifc == 1) then
-     write(nunit, '(a)') ' Will output real space IFC in AI2PS format'
+     write(nunit, '(a)') ' Will output real space IFC in AI2PS and TDEP format'
    end if
 
    if (anaddb_dtset%prtnest == 1) then
@@ -2064,6 +2098,7 @@ end subroutine outvars_anaddb
 !!      anaddb
 !!
 !! CHILDREN
+!!      chkvars_in_string,inupper
 !!
 !! SOURCE
 
@@ -2124,8 +2159,10 @@ end subroutine anaddb_init
 !! OUTPUT
 !!
 !! PARENTS
+!!      m_anaddb_dataset
 !!
 !! CHILDREN
+!!      chkvars_in_string,inupper
 !!
 !! SOURCE
 
@@ -2175,7 +2212,7 @@ subroutine anaddb_chkvars(string)
  list_vars=trim(list_vars)//' gkk2write gkk_rptwrite gkqwrite gruns_nddbs'
 !H
 !I
- list_vars=trim(list_vars)//' iavfrq ifcana ifcflag ifcout ifltransport instrflag istrfix iatfix iatprj_bs'
+ list_vars=trim(list_vars)//' ifcana ifcflag ifcout ifltransport instrflag istrfix iatfix iatprj_bs'
 !J
 !K
  list_vars=trim(list_vars)//' kptrlatt kptrlatt_fine'
@@ -2188,8 +2225,8 @@ subroutine anaddb_chkvars(string)
 !O
  list_vars=trim(list_vars)//' outboltztrap'
 !P
- list_vars=trim(list_vars)//' piezoflag polflag prtdos prt_ifc prtmbm prtfsurf prtnest prtphbands'
- list_vars=trim(list_vars)//' prtsrlr prtvol prtbltztrp'
+ list_vars=trim(list_vars)//' piezoflag polflag prtddb prtdos prt_ifc prtmbm prtfsurf'
+ list_vars=trim(list_vars)//' prtnest prtphbands prtsrlr prtvol prtbltztrp'
 !Q
  list_vars=trim(list_vars)//' qrefine qgrid_type q1shft q2shft qnrml1 qnrml2 qpath qph1l qph2l'
 !R
@@ -2197,11 +2234,11 @@ subroutine anaddb_chkvars(string)
 !S
  list_vars=trim(list_vars)//' selectz symdynmat symgkq'
 !T
- list_vars=trim(list_vars)//' targetpol telphint thmflag temperinc tempermin thmtol'
+ list_vars=trim(list_vars)//' targetpol telphint thmflag temperinc tempermin thermal_supercell thmtol'
 !U
  list_vars=trim(list_vars)//' use_k_fine'
 !V
- list_vars=trim(list_vars)//' vs_qrad_tolms'
+ list_vars=trim(list_vars)//' vs_qrad_tolkms'
 !W
 !X
 !Y

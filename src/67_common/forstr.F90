@@ -26,7 +26,7 @@
 !!   |  Pulay correction to stress tensor (hartree).  Should be <=0.
 !!   | ecut=cut-off energy for plane wave basis sphere (Ha)
 !!   | ecutsm=smearing energy for plane wave kinetic energy (Ha)
-!!   | effmass=effective mass for electrons (1. in common case)
+!!   | effmass_free=effective mass for electrons (1. in common case)
 !!   | efield = cartesian coordinates of the electric field in atomic units
 !!   | ionmov=governs the movement of atoms (see help file)
 !!   | densfor_pred=governs the mixed electronic-atomic part of the preconditioner
@@ -159,7 +159,8 @@
 !!      afterscfloop,setup_positron
 !!
 !! CHILDREN
-!!      fock_updatecwaveocc,forces,forstrnps,nres2vres,pawgrnl,stress,timab
+!!      ctocprj,forces,forstrnps,metric,nres2vres,pawgrnl,stress,timab
+!!      wvl_nl_gradient,xchybrid_ncpp_cc,xred2xcart
 !!
 !! SOURCE
 
@@ -197,7 +198,8 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
  use m_pawrhoij,         only : pawrhoij_type
  use m_pawfgr,           only : pawfgr_type
  use m_pawcprj,          only : pawcprj_type
- use m_fock,             only : fock_type,fock_updatecwaveocc
+ use m_fock,             only : fock_type
+ use libxc_functionals,  only : libxc_functionals_is_hybrid
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -205,8 +207,10 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
 #define ABI_FUNC 'forstr'
  use interfaces_18_timing
  use interfaces_41_geometry
+ use interfaces_56_xc
  use interfaces_62_wvl_wfs
  use interfaces_65_paw
+ use interfaces_66_nonlocal
  use interfaces_67_common, except_this_one => forstr
 !End of the abilint section
 
@@ -259,15 +263,17 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
 
 !Local variables-------------------------------
 !scalars
- integer :: comm_grid,ifft,ispden,occopt_,optgr,optgr2,option,optnc,optstr,optstr2
- real(dp) :: dum,ucvol_
+
+ integer :: comm_grid,ifft,ispden,occopt_,optgr,optgr2,option,optnc,optstr,optstr2,iorder_cprj,ctocprj_choice,idir,iatom,unpaw
+ real(dp) ::dum,dum1,ucvol_
  logical :: apply_residual
 !arrays
  real(dp),parameter :: k0(3)=(/zero,zero,zero/)
- real(dp) :: kinstr(6),nlstr(6),tsec(2)
+ real(dp) :: kinstr(6),nlstr(6),tsec(2),strdum(6),gmet(3,3),gprimd(3,3),rmet(3,3)
  real(dp) :: dummy(0)
- real(dp),allocatable :: grnl(:),vlocal(:,:),xcart(:,:)
+ real(dp),allocatable :: grnl(:),vlocal(:,:),vxc_hf(:,:),xcart(:,:)
  real(dp), ABI_CONTIGUOUS pointer :: resid(:,:)
+
 
 ! *************************************************************************
 
@@ -303,12 +309,19 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
  else if (dtset%usewvl==0) then
    occopt_=0 ! This means that occ are now fixed
    if(dtset%usefock==1 .and. associated(fock)) then
-     if((dtset%optforces/=0).or.(dtset%optstress/=0)) then
-       call fock_updatecwaveocc(cg,cprj,dtset,fock,dum,indsym,fock%nnsclo_hf+1,mcg,mcprj,&
-&       mpi_enreg,nattyp,npwarr,occ,ucvol)
+     if((dtset%optstress/=0).and.(psps%usepaw==1)) then
+       iatom=-1;idir=0;ctocprj_choice=3;iorder_cprj=0;unpaw=26
+       call metric(gmet,gprimd,-1,rmet,rprimd,dum)
+       call ctocprj(fock%fock_common%atindx,fock%fock_BZ%cgocc,ctocprj_choice,fock%fock_BZ%cwaveocc_prj,gmet,gprimd,iatom,idir,&
+&       iorder_cprj,fock%fock_BZ%istwfk_bz,fock%fock_BZ%kg_bz,fock%fock_BZ%kptns_bz,fock%fock_common%mband,mcg,&
+&       fock%fock_BZ%mcprj,dtset%mgfft,fock%fock_BZ%mkpt,mpi_enreg,psps%mpsang,&
+&       dtset%mpw,dtset%natom,nattyp,fock%fock_BZ%nbandocc_bz,dtset%natom,dtset%ngfft,fock%fock_BZ%nkpt_bz,&
+&       dtset%nloalg,fock%fock_BZ%npwarr,dtset%nspinor,&
+&       dtset%nsppol,dtset%ntypat,dtset%paral_kgb,ph1d,psps,rmet,dtset%typat,ucvol,unpaw,&
+&       xred,ylm,ylmgr)
      end if
    end if
-   call forstrnps(cg,cprj,dtset%ecut,dtset%ecutsm,dtset%effmass,eigen,electronpositron,fock,grnl,&
+   call forstrnps(cg,cprj,dtset%ecut,dtset%ecutsm,dtset%effmass_free,eigen,electronpositron,fock,grnl,&
 &   dtset%istwfk,kg,kinstr,nlstr,dtset%kptns,dtset%mband,mcg,mcprj,dtset%mgfft,dtset%mkmem,&
 &   mpi_enreg,psps%mpsang,dtset%mpw,my_natom,dtset%natom,dtset%nband,dtset%nfft,dtset%ngfft,&
 &   dtset%nkpt,dtset%nloalg,npwarr,dtset%nspden,dtset%nspinor,dtset%nsppol,dtset%nsym,ntypat,&
@@ -343,9 +356,9 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
      end do
    end if
    ucvol_=ucvol
-#  if defined HAVE_BIGDFT
+#if defined HAVE_BIGDFT
    if (dtset%usewvl==1) ucvol_=product(wvl%den%denspot%dpbox%hgrids)*real(product(wvl%den%denspot%dpbox%ndims),dp)
-#  endif
+#endif
    optgr=optfor;optgr2=0;optstr=stress_needed;optstr2=0
    comm_grid=mpi_enreg%comm_fft;if(dtset%usewvl==1) comm_grid=mpi_enreg%comm_wvl
    call pawgrnl(atindx1,dtset%nspden,dummy,1,dummy,grnl,gsqcut,mgfftf,my_natom,dtset%natom,&
@@ -362,7 +375,7 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
 !==========================================================================
  if (optfor==1) then
    apply_residual=(optres==1 .and. dtset%usewvl==0.and.abs(dtset%densfor_pred)>=1 .and. &
-&                  abs(dtset%densfor_pred)<=6.and.abs(dtset%densfor_pred)/=5)
+&   abs(dtset%densfor_pred)<=6.and.abs(dtset%densfor_pred)/=5)
 
 !  If residual is a density residual (and forces from residual asked),
 !  has to convert it into a potential residual before calling forces routine
@@ -378,11 +391,11 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
    end if
 
    call forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,forold,fred,grchempottn,gresid,grewtn,&
-&     grhf,grnl,grvdw,grxc,gsqcut,indsym,maxfor,mgfftf,&
-&     mpi_enreg,psps%n1xccc,n3xccc,nattyp,&
-&     nfftf,ngfftf,ngrvdw,ntypat,pawrad,pawtab,ph1df,psps,rhog,&
-&     rhor,rprimd,symrec,synlgr,dtset%usefock,resid,vxc,wvl%descr,wvl%den,xred,&
-&     electronpositron=electronpositron)
+&   grhf,grnl,grvdw,grxc,gsqcut,indsym,maxfor,mgfftf,&
+&   mpi_enreg,psps%n1xccc,n3xccc,nattyp,&
+&   nfftf,ngfftf,ngrvdw,ntypat,pawrad,pawtab,ph1df,psps,rhog,&
+&   rhor,rprimd,symrec,synlgr,dtset%usefock,resid,vxc,wvl%descr,wvl%den,xred,&
+&   electronpositron=electronpositron)
 
    if (apply_residual) then
      ABI_DEALLOCATE(resid)
@@ -395,24 +408,34 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
 !==========================================================================
 !Here compute stress tensor (if required)
 !==========================================================================
+
  if (stress_needed==1.and.dtset%usewvl==0) then
-   if (dtset%usefock==1 .and. associated(fock).and.fock%optstr) then
-!write(80,*)fock%stress
-     fock%stress(1:3)=fock%stress(1:3)-energies%e_fock/ucvol
-!write(80,*) "forstr",-energies%e_fock/ucvol, energies%e_fock
+   if (dtset%usefock==1 .and. associated(fock).and.fock%fock_common%optstr.and.psps%usepaw==0) then
+     fock%fock_common%stress(1:3)=fock%fock_common%stress(1:3)-energies%e_fock/ucvol
+     if (n3xccc>0.and.psps%usepaw==0 .and. &
+&     (dtset%ixc==41.or.dtset%ixc==42.or.libxc_functionals_is_hybrid())) then
+       ABI_ALLOCATE(vxc_hf,(nfftf,dtset%nspden))
+!compute Vxc^GGA(rho_val)
+       call xchybrid_ncpp_cc(dtset,dum,mpi_enreg,nfftf,ngfftf,n3xccc,rhor,rprimd,strdum,dum1,xccc3d,vxc=vxc_hf,optstr=1)
+     end if
    end if
    call stress(atindx1,dtset%berryopt,dtefield,energies%e_localpsp,dtset%efield,&
 &   energies%e_hartree,energies%e_corepsp,fock,gsqcut,dtset%ixc,kinstr,mgfftf,&
 &   mpi_enreg,psps%mqgrid_vl,psps%n1xccc,n3xccc,dtset%natom,nattyp,&
 &   nfftf,ngfftf,nlstr,dtset%nspden,dtset%nsym,ntypat,dtset%paral_kgb,psps,pawrad,pawtab,ph1df,&
 &   dtset%prtvol,psps%qgrid_vl,dtset%red_efieldbar,rhog,rprimd,strten,strsxc,symrec,&
-&   dtset%typat,dtset%usefock,psps%usepaw,dtset%vdw_tol,dtset%vdw_tol_3bt,dtset%vdw_xc,psps%vlspl,&
-&   vxc,psps%xccc1d,xccc3d,psps%xcccrc,xred,psps%ziontypat,psps%znucltypat,qvpotzero,&
+&   dtset%typat,dtset%usefock,psps%usepaw,&
+&   dtset%vdw_tol,dtset%vdw_tol_3bt,dtset%vdw_xc,psps%vlspl,vxc,vxc_hf,psps%xccc1d,xccc3d,psps%xcccrc,xred,&
+&   psps%ziontypat,psps%znucltypat,qvpotzero,&
 &   electronpositron=electronpositron)
  end if
 
 !Memory deallocation
  ABI_DEALLOCATE(grnl)
+ if (allocated(vxc_hf)) then
+   ABI_DEALLOCATE(vxc_hf)
+ end if
+ 
 
  call timab(914,2,tsec)
  call timab(910,2,tsec)

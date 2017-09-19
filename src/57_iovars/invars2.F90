@@ -274,20 +274,17 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
  if(tread==1) dtset%gw_toldfeig=dprarr(1)
 
 
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gwls_sternheimer_kmax',tread,'INT')
- if(tread==1) dtset%gwls_sternheimer_kmax=intarr(1)
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gwls_stern_kmax',tread,'INT')
+ if(tread==1) dtset%gwls_stern_kmax=intarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gwls_npt_gauss_quad',tread,'INT')
  if(tread==1) dtset%gwls_npt_gauss_quad=intarr(1)
 
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gwls_dielectric_model',tread,'INT')
- if(tread==1) dtset%gwls_dielectric_model=intarr(1)
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gwls_diel_model',tread,'INT')
+ if(tread==1) dtset%gwls_diel_model=intarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gwls_model_parameter',tread,'ENE')
  if(tread==1) dtset%gwls_model_parameter=dprarr(1)
-
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gwls_second_model_parameter',tread,'ENE')
- if(tread==1) dtset%gwls_second_model_parameter=dprarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gwls_recycle',tread,'INT')
  if(tread==1) dtset%gwls_recycle=intarr(1)
@@ -440,7 +437,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
 
 !RESPFN integer input variables (needed here to get the value of response
 !Presently, rfmeth is not used.
-!Warning : rfddk,rfelfd,rfphon,rfstrs,rfuser,rf2_dkdk and rf2_dkde are also read in invars1
+!Warning : rfddk,rfelfd,rfmagn,rfphon,rfstrs,rfuser,rf2_dkdk and rf2_dkde are also read in invars1
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rfasr',tread,'INT')
  if(tread==1) dtset%rfasr=intarr(1)
 
@@ -455,6 +452,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rfelfd',tread,'INT')
  if(tread==1) dtset%rfelfd=intarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rfmagn',tread,'INT')
+ if(tread==1) dtset%rfmagn=intarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rfmeth',tread,'INT')
  if(tread==1) dtset%rfmeth=intarr(1)
@@ -643,8 +643,8 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'strfact',tread,'DPR')
  if(tread==1) dtset%strfact=dprarr(1)
 
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'effmass',tread,'DPR')
- if(tread==1) dtset%effmass=dprarr(1)
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'effmass_free',tread,'DPR')
+ if(tread==1) dtset%effmass_free=dprarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,2,string(1:lenstr),'mdtemp',tread,'DPR')
  if(tread==1) dtset%mdtemp(1:2)=dprarr(1:2)
@@ -992,6 +992,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'chksymbreak',tread,'INT')
  if(tread==1) dtset%chksymbreak=intarr(1)
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'fockoptmix',tread,'INT')
+ if(tread==1) dtset%fockoptmix=intarr(1)
+
 !Get array
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'getocc',tread,'INT')
  if(tread==1) dtset%getocc=intarr(1)
@@ -1310,7 +1313,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
  if( 20<=dtset%ixc .and. dtset%ixc<=22 )dtset%xclevel=3 ! ixc for TDDFT kernel tests
  if( dtset%ixc>=40 .and. dtset%ixc<=42 )dtset%usefock=1 ! Hartree-Fock or internal hybrid functionals
  if( dtset%ixc>=41 .and. dtset%ixc<=42) dtset%xclevel=2 ! ixc for internal hybrids using GGA
- if (dtset%ixc<0) then                                  ! libXC: metaGGA and hybrifd functionals
+ if (dtset%ixc<0) then                                  ! libXC: metaGGA and hybrid functionals
    dtset%xclevel=1
    do isiz=1,2
      if (isiz==1) ii=-dtset%ixc/1000
@@ -1703,12 +1706,12 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
    if(tread==1) dtset%dmftbandf=intarr(1)
    if((dtset%dmftbandf-dtset%dmftbandi+1)<2*maxval(dtset%lpawu(:))+1.and.(dtset%dmft_t2g==0)) then
      write(message, '(4a,i2,2a)' )&
-      '   dmftbandf-dmftbandi+1)<2*max(lpawu(:))+1)',ch10, &
+     '   dmftbandf-dmftbandi+1)<2*max(lpawu(:))+1)',ch10, &
 &     '   Number of bands to construct Wannier functions is not', &
 &     ' sufficient to build Wannier functions for l=',maxval(dtset%lpawu(:)),ch10, &
 &     '   Action: select a correct number of KS bands with dmftbandi and dmftbandf.'
      MSG_ERROR(message)
-   endif
+   end if
 
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmftcheck',tread,'INT')
    if(tread==1) dtset%dmftcheck=intarr(1)
@@ -2237,21 +2240,21 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
    call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'vdw_supercell',tread,'INT')
    if(tread==1)then
      dtset%vdw_supercell(1:3)=intarr(1:3)
-     if (dtset%supercell(1)<zero.and.dtset%supercell(2)<zero) then
+     if (dtset%vdw_supercell(1)<zero.and.dtset%vdw_supercell(2)<zero) then
        write(message, '(7a)' )&
 &       ' only one component of vdw_supercell could be < 0, however, it was ',ch10,&
 &       dtset%vdw_supercell(1),dtset%vdw_supercell(2),dtset%vdw_supercell(3),ch10,&
 &       'Action: check the components of vdw_supercell.'
        MSG_ERROR(message)
      end if
-     if (dtset%supercell(2)<zero.and.dtset%supercell(3)<zero) then
+     if (dtset%vdw_supercell(2)<zero.and.dtset%vdw_supercell(3)<zero) then
        write(message, '(7a)' )&
 &       'only one component of vdw_supercell could be < 0, however, it was ',ch10,&
 &       dtset%vdw_supercell(1),dtset%vdw_supercell(2),dtset%vdw_supercell(3),ch10,&
 &       'Action: check the components of vdw_supercell.'
        MSG_ERROR(message)
      end if
-     if (dtset%supercell(1)<zero.and.dtset%supercell(3)<zero) then
+     if (dtset%vdw_supercell(1)<zero.and.dtset%vdw_supercell(3)<zero) then
        write(message, '(7a)' )&
 &       'only one component of vdw_supercell could be < 0, however, it was ',ch10,&
 &       dtset%vdw_supercell(1),dtset%vdw_supercell(2),dtset%vdw_supercell(3),ch10,&
@@ -2346,7 +2349,10 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
    dtset%tolmxf=tolmxf_
  end if
 
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'tolrde',tread,'DPR')
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'focktoldfe',tread,'DPR')
+ if(tread==1) dtset%toldfe=dprarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'focktoldfe',tread,'DPR')
  if(tread==1) dtset%tolrde=dprarr(1)
 
 !find which tolXXX are defined generically and for this jdtset
@@ -2594,7 +2600,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
 
  nsym=dtset%nsym
  ii=0;if (mod(dtset%wfoptalg,10)==4) ii=2
- if (dtset%ngfft(7)==314) ii=1
+ if ((dtset%ngfft(7)==314).or.(dtset%usefock==1)) ii=1
 
  call inkpts(bravais,dtset%chksymbreak,iout,iscf,dtset%istwfk(1:nkpt),jdtset,&
 & dtset%kpt(:,1:nkpt),kptopt,dtset%kptnrm,dtset%kptrlatt_orig,dtset%kptrlatt,kptrlen,lenstr,nsym,&

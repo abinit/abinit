@@ -54,7 +54,7 @@
 !!      mover
 !!
 !! CHILDREN
-!!      hist2var,var2hist,xcart2xred
+!!      hist2var,var2hist,xcart2xred,xred2xcart
 !!
 !! SOURCE
 
@@ -94,7 +94,8 @@ logical,intent(in)    :: zDEBUG
 
 !Local variables-------------------------------
 !scalars
-integer  :: kk,jj
+integer  :: kk,jj,ihist,ihist_next,ihist_prev,ihist_prev2
+integer  :: ihist_prev4,ihist_prev5
 real(dp) :: aa,alfa,bb,cc,x0,xm,em,vis,dx,dv
 real(dp) :: fcart,fprev,fprev2
 real(dp) :: xc
@@ -161,14 +162,21 @@ real(dp),pointer :: fcart_cur(:,:),fcart_prev(:,:),fcart_prev2(:,:)
    call xred2xcart(ab_mover%natom,rprimd,xcart_prev,hist%xred(:,:,1))
  end if
 
- fcart_cur => hist%fcart(:,:,hist%ihist)
- if (itime==2.and.icycle<2) fcart_prev  => hist%fcart(:,:,1)
- if (itime==3.and.icycle<3) fcart_prev2 => hist%fcart(:,:,1)
- if (itime >2.or. icycle>=2)fcart_prev  => hist%fcart(:,:,hist%ihist-1)
- if (itime >3.or. icycle>=3)fcart_prev2 => hist%fcart(:,:,hist%ihist-2)
+ ihist = abihist_findIndex(hist, 0)
+ ihist_prev  = abihist_findIndex(hist,-1)
+ ihist_prev2 = abihist_findIndex(hist,-2)
+ ihist_prev4 = abihist_findIndex(hist,-4)
+ ihist_prev5 = abihist_findIndex(hist,-5)
+ ihist_next  = abihist_findIndex(hist,+1)
+ 
+ fcart_cur => hist%fcart(:,:,ihist)
+ if (itime==2) fcart_prev  => hist%fcart(:,:,ihist_prev4)
+ if (itime==3) fcart_prev2 => hist%fcart(:,:,ihist_prev5)
+ if (itime >2.or. icycle>=2)fcart_prev  => hist%fcart(:,:,ihist_prev)
+ if (itime >3.or. icycle>=3)fcart_prev2 => hist%fcart(:,:,ihist_prev2)
 
- vel_cur  => hist%vel(:,:,hist%ihist)
- vel_next => hist%vel(:,:,hist%ihist+1)
+ vel_cur  => hist%vel(:,:,ihist)
+ vel_next => hist%vel(:,:,ihist_next)
 
 !write(std_out,*) '01'
 !##########################################################
@@ -364,7 +372,7 @@ real(dp),pointer :: fcart_cur(:,:),fcart_prev(:,:),fcart_prev2(:,:)
 !##########################################################
 !### 10. Filling history with the new values
 
- hist%ihist=hist%ihist+1
+ hist%ihist = abihist_findIndex(hist,+1)
 
  call xcart2xred(ab_mover%natom,rprimd,xcart,xred)
  call var2hist(acell,hist,ab_mover%natom,rprimd,xred,zDEBUG)

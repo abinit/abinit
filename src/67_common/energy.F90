@@ -177,7 +177,7 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
  use m_paw_ij,           only : paw_ij_type
  use m_pawfgrtab,        only : pawfgrtab_type
  use m_pawrhoij,         only : pawrhoij_type,pawrhoij_alloc,pawrhoij_free,pawrhoij_init_unpacked,&
-&                               pawrhoij_mpisum_unpacked,pawrhoij_free_unpacked,symrhoij
+&                               pawrhoij_mpisum_unpacked,pawrhoij_free_unpacked,pawrhoij_get_nspden,symrhoij
  use m_pawcprj,          only : pawcprj_type,pawcprj_alloc,pawcprj_free,pawcprj_gather_spin
  use m_pawfgr,           only : pawfgr_type
  use m_paw_dmft,         only : paw_dmft_type
@@ -497,7 +497,7 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
    end if
    if (paral_atom) then
      ABI_DATATYPE_ALLOCATE(pawrhoij_unsym,(dtset%natom))
-     nspden_rhoij=dtset%nspden;if (dtset%pawspnorb>0.and.dtset%nspinor==2) nspden_rhoij=4
+     nspden_rhoij=pawrhoij_get_nspden(dtset%nspden,dtset%nspinor,dtset%pawspnorb)
      call pawrhoij_alloc(pawrhoij_unsym,dtset%pawcpxocc,nspden_rhoij,dtset%nspinor,&
 &     dtset%nsppol,dtset%typat,pawtab=pawtab,use_rhoijp=0,use_rhoij_=1)
    else
@@ -605,8 +605,8 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
 
 !    Compute kinetic energy
      ABI_ALLOCATE(kinpw,(npw_k))
-!     call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass,gmet,kg_k,kinpw,kpoint,npw_k)
-     call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass,gmet,kg_k,kinpw,kpoint,npw_k,0,0)
+!     call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass_free,gmet,kg_k,kinpw,kpoint,npw_k)
+     call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass_free,gmet,kg_k,kinpw,kpoint,npw_k,0,0)
 
 !    Compute kinetic energy of each band
      do iblock=1,nblockbd
@@ -655,8 +655,8 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
      if (gemm_nonlop_use_gemm) then
        gemm_nonlop_ikpt_this_proc_being_treated = my_ikpt
        call make_gemm_nonlop(my_ikpt,gs_hamk%npw_fft_k,gs_hamk%lmnmax, &
-&          gs_hamk%ntypat, gs_hamk%indlmn, gs_hamk%nattyp, gs_hamk%istwf_k, gs_hamk%ucvol, gs_hamk%ffnl_k,&
-&          gs_hamk%ph3d_k)
+&       gs_hamk%ntypat, gs_hamk%indlmn, gs_hamk%nattyp, gs_hamk%istwf_k, gs_hamk%ucvol, gs_hamk%ffnl_k,&
+&       gs_hamk%ph3d_k)
      end if
 
 #if defined HAVE_GPU_CUDA
@@ -778,12 +778,12 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
 !Compute total (free) energy
  if (optene==0.or.optene==2) then
    etotal = energies%e_kinetic + energies%e_hartree + energies%e_xc + &
-&           energies%e_localpsp + energies%e_corepsp
+&   energies%e_localpsp + energies%e_corepsp
    if (psps%usepaw==0) etotal=etotal + energies%e_nonlocalpsp
    if (psps%usepaw==1) etotal=etotal + energies%e_paw
  else if (optene==1.or.optene==3) then
    etotal = energies%e_eigenvalues - energies%e_hartree + energies%e_xc - &
-&           energies%e_xcdc + energies%e_corepsp - energies%e_corepspdc
+&   energies%e_xcdc + energies%e_corepsp - energies%e_corepspdc
    if (psps%usepaw==1) etotal=etotal + energies%e_pawdc
  end if
  etotal = etotal + energies%e_ewald + energies%e_chempot + energies%e_vdw_dftd

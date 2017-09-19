@@ -69,6 +69,7 @@ _ WF disk file :      0.024 Mbytes ; DEN or POT disk file :      0.049 Mbytes.
  -outvars: echo values of preprocessed input variables --------
             acell      7.0000000000E+00  5.0000000000E+00  5.0000000000E+00 Bohr
               amu      1.00794000E+00
+     densfor_pred           1
            diemac      1.00000000E+00
            diemix      5.00000000E-01
              ecut      1.20000000E+01 Hartree
@@ -76,7 +77,6 @@ _ WF disk file :      0.024 Mbytes ; DEN or POT disk file :      0.049 Mbytes.
            getwfk          -1
          getxcart          -1
            ionmov           2
-     densfor_pred           1
            jdtset        1    2
               kpt1     1.00000000E+00  1.00000000E+00  1.00000000E+00
               kpt2     1.00000000E+00  1.00000000E+00  1.00000000E+00
@@ -156,7 +156,7 @@ P           mkmem2          4
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     0.00000000000000    0.00000000000000    0.00000000000000   rchrg,fchrg,qchrg
  Note: local psp for atom with Z=  1.0
- pspatm: epsatm=    0.04198703
+ pspatm : epsatm=    0.04198703
          --- l  ekb(1:nproj) -->
  pspatm: atomic psp has been read  and splines computed
 
@@ -751,6 +751,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     351.000     350.990
  -outvars: echo values of variables after computation  --------
             acell      7.0000000000E+00  5.0000000000E+00  5.0000000000E+00 Bohr
               amu      1.00794000E+00
+     densfor_pred           1
            diemac      1.00000000E+00
            diemix      5.00000000E-01
              ecut      1.20000000E+01 Hartree
@@ -764,7 +765,6 @@ _setup2: Arith. and geom. avg. npw (full set) are     351.000     350.990
            getwfk          -1
          getxcart          -1
            ionmov           2
-     densfor_pred           1
            jdtset        1    2
               kpt1     1.00000000E+00  1.00000000E+00  1.00000000E+00
               kpt2     1.00000000E+00  1.00000000E+00  1.00000000E+00

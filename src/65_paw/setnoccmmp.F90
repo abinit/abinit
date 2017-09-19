@@ -48,7 +48,7 @@
 !!  usepawu=1 if PAW+U is activated
 !!
 !! OUTPUT
-!!   paw_ij(natom)%noccmmp(paw_ij(iatom)%cplex_dij,2*pawtab(itypat)%lpawu+1,2*pawtab(itypat)%lpawu+1,nspden)=density matrix
+!!   paw_ij(natom)%noccmmp(cplex_dij,2*lpawu+1,2*lpawu+1,nsppol or ndij)=density matrix
 !!
 !! NOTES
 !! For non-collinear magnetism,
@@ -219,7 +219,7 @@ subroutine setnoccmmp(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,indsym
          tmp_noccmmp(iatom_tot)%value(1,1:2*lpawu+1,1:2*lpawu+1,1:nsppol)=&
 &         dmatpawu(1:2*lpawu+1,1:2*lpawu+1,1:nsppol,iatpawu)
        else
-         ABI_ALLOCATE(tmp_noccmmp(iatom_tot)%value,(cplex_dij,2*lpawu+1,2*lpawu+1,nspden))
+         ABI_ALLOCATE(tmp_noccmmp(iatom_tot)%value,(cplex_dij,2*lpawu+1,2*lpawu+1,ndij))
          tmp_noccmmp(iatom_tot)%value=zero
          if(limp==0) then ! default reading
            snorm=sqrt(spinat(1,iatom_tot)**2+spinat(1,iatom_tot)**2+spinat(3,iatom_tot)**2)
@@ -426,7 +426,7 @@ subroutine setnoccmmp(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,indsym
            write(message,'(2a)') ch10,"== Calculated occupation matrix for correlated orbitals in the n, m basis :"
            call wrtout(std_out,message,wrt_mode)
            do ispden=1,ndij
-             write(message,'(3a)') ch10,"Calculated occupation matrix for component ",trim(dspinm(ispden+2*(nspden/4)))
+             write(message,'(3a)') ch10,"Calculated occupation matrix for component ",trim(dspinm(ispden+2*(ndij/4)))
              call wrtout(std_out,message,wrt_mode)
              do im1=1,lcur*2+1  ! ( order of indices in noccmmp is exchanged in order to have the same convention as rhoij: transposition is done after )
                if(cplex_dij==1)&
@@ -528,7 +528,7 @@ subroutine setnoccmmp(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,indsym
          write(message,'(2a)') ch10,"== Calculated occupation matrix for correlated orbitals:"
          call wrtout(std_out,message,wrt_mode)
          do ispden=1,ndij
-           write(message,'(3a)') ch10,"Calculated occupation matrix for component ",trim(dspinc(ispden+2*(nspden/4)))
+           write(message,'(3a)') ch10,"Calculated occupation matrix for component ",trim(dspinc(ispden+2*(ndij/4)))
            call wrtout(std_out,message,wrt_mode)
            do im1=1,lcur*2+1
              if(cplex_dij==1)&
@@ -702,8 +702,6 @@ subroutine setnoccmmp(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,indsym
 &           ' == Rotated back diagonalized matrix'
            if (ndij==1) write(message,fmt='(2a)')     trim(message)," for spin up =="
            if (ndij==2) write(message,fmt='(2a,i3,a)')trim(message)," for spin ",ispden," =="
-!          if (nspden==4) write(message,fmt='(4a)')     trim(message)," for component ", &
-!          &      trim(dspin(ispden+2*(nspden/4)))," =="
            if (ndij==4.and.cplex_dij==2) write(message,fmt='(4a)')     trim(message)," for all component "
            call wrtout(std_out,message,wrt_mode)
            do ilm=1,ldim*cplex_dij

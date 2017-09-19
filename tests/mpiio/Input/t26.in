@@ -49,6 +49,7 @@ npband3 4 npkpt3 1 npfft3 1
 getwfk4 0
 getden4 -1
 npband4 2 npkpt4 1 npfft4 2
+nstep4 5  #   Improves the portability of the test
 
 # Dataset 5
 # Read previous WFK file with the simple band-by-band CG solver.
@@ -86,6 +87,7 @@ natom 2
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
+#%% exclude_builders = ubu_intel_13.1_openmpi
 #%% [files]
 #%% psp_files = 6c_lda.paw
 #%% [paral_info]
@@ -95,9 +97,7 @@ natom 2
 #%%   files_to_test=t26_MPI4.out, tolnlines=11, tolabs=2.0e-7, tolrel=1.0;
 #%%    t26_MPI4o_DS1_DOS_AT0002, tolnlines=50, tolabs=0.05, tolrel=0.01, fld_options = -ridiculous;
 #%%    t26_MPI4o_DS2_DOS_AT0002, tolnlines=50, tolabs=0.05, tolrel=0.01, fld_options = -ridiculous;
-#%%    t26_MPI4o_DS2_VCLMB_1DM,  tolnlines=0,  tolabs=0.  , tolrel=0.01, fld_options = -ridiculous;
 #%%    t26_MPI4o_DS5_DOS_AT0002, tolnlines=50, tolabs=0.05, tolrel=0.01, fld_options = -ridiculous;
-#%%    t26_MPI4o_DS5_VCLMB_1DM,  tolnlines=0,  tolabs=0.  , tolrel=0.01, fld_options = -ridiculous;
 #%% [extra_info]
 #%% keywords = PAW
 #%% authors = M. Giantomassi

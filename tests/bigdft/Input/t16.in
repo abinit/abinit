@@ -79,5 +79,6 @@ iomode 3  # ETSF IO access
 #%% [extra_info]
 #%% authors = D. Caliste
 #%% description = 
-#%%  CO molecule to test the ETSF writing of wavefunctions (need compilation with --enable-bigdft). 
+#%%  CO molecule to test the ETSF writing of wavefunctions (need compilation with --enable-bigdft).
+#%% topics = Wavelets
 #%%<END TEST_INFO>

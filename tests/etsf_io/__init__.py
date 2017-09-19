@@ -2,12 +2,12 @@
 
 #: List of CPP variables that should be defined in config.h in order to enable this suite.
 need_cpp_vars = [
-"HAVE_ETSF_IO",
+"HAVE_NETCDF",
 ]
 
-#: List of keywords that are automatically added to all the tests of this suite. 
+#: List of keywords that are automatically added to all the tests of this suite.
 keywords = [
-"ETSF_IO"
+"netcdf"
 ]
 
 #: List of input files

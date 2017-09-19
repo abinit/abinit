@@ -78,8 +78,8 @@ CONTAINS !===========================================================
 !!
  !! CHILDREN
 !!      extrapolation_loop,fitclus,hist2var,init_lotf,intparms
-!!      lotf_interpolation,metric,var2hist,vel_rescale,vel_to_gauss,wrtout
-!!      xcart2xred,xred2xcart
+!!      lotf_interpolation,var2hist,vel_rescale,vel_to_gauss,wrtout,xcart2xred
+!!      xred2xcart
 !!
  !! SOURCE
  subroutine pred_lotf(ab_mover,hist,itime,icycle,zDEBUG,iexit)
@@ -358,7 +358,7 @@ CONTAINS !===========================================================
   call wrtout(std_out,message,'PERS')
 
   !Increase indexes
-  hist%ihist = hist%ihist+1
+  hist%ihist = abihist_findIndex(hist,+1)
 
   !Fill the history with the variables
   !xcart, xred, acell, rprimd

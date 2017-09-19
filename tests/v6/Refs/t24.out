@@ -54,6 +54,7 @@ _ WF disk file :      0.026 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
             acell      3.0000000000E+00  3.0000000000E+00  3.0000000000E+00 Bohr
               amu      1.00794000E+00  1.00794000E+00
       chksymbreak           0
+     densfor_pred           1
          dynimage        0    1    1    1    1    0
              ecut      1.50000000E+01 Hartree
            ecutsm      5.00000000E-01 Hartree
@@ -61,7 +62,6 @@ _ WF disk file :      0.026 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
      fxcartfactor      1.00000000E+01
            iatfix        1
            imgmov           2
-     densfor_pred           1
          istatimg           0
               kpt      1.25000000E-01  1.25000000E-01  1.25000000E-01
                        3.75000000E-01  1.25000000E-01  1.25000000E-01
@@ -200,7 +200,7 @@ P           mkmem          20
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     0.00000000000000    0.00000000000000    0.00000000000000   rchrg,fchrg,qchrg
  Note: local psp for atom with Z=  1.0
- pspatm: epsatm=    0.04198703
+ pspatm : epsatm=    0.04198703
          --- l  ekb(1:nproj) -->
  pspatm: atomic psp has been read  and splines computed
 
@@ -213,7 +213,7 @@ P           mkmem          20
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     0.00000000000000    0.00000000000000    0.00000000000000   rchrg,fchrg,qchrg
  Note: local psp for atom with Z=  1.0
- pspatm: epsatm=    0.04198703
+ pspatm : epsatm=    0.04198703
          --- l  ekb(1:nproj) -->
  pspatm: atomic psp has been read  and splines computed
 
@@ -6823,6 +6823,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.625      74.598
             acell      3.0000000000E+00  3.0000000000E+00  3.0000000000E+00 Bohr
               amu      1.00794000E+00  1.00794000E+00
       chksymbreak           0
+     densfor_pred           1
          dynimage        0    1    1    1    1    0
              ecut      1.50000000E+01 Hartree
            ecutsm      5.00000000E-01 Hartree
@@ -6842,7 +6843,6 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.625      74.598
      fxcartfactor      1.00000000E+01
            iatfix        1
            imgmov           2
-     densfor_pred           1
          istatimg           0
               kpt      1.25000000E-01  1.25000000E-01  1.25000000E-01
                        3.75000000E-01  1.25000000E-01  1.25000000E-01

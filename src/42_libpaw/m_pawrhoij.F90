@@ -55,6 +55,7 @@ MODULE m_pawrhoij
  public :: pawrhoij_unpack
  public :: pawrhoij_init_unpacked
  public :: pawrhoij_free_unpacked
+ public :: pawrhoij_get_nspden
  public :: symrhoij
 
  public :: pawrhoij_mpisum_unpacked
@@ -557,7 +558,7 @@ subroutine pawrhoij_copy(pawrhoij_in,pawrhoij_cpy, &
 
 !Local variables-------------------------------
 !scalars
- integer :: cplex_in,cplex_out,dplex_in,dplex_out,i_in,i_out,ilmn
+ integer :: cplex_in,cplex_out,dplex,dplex_in,dplex_out,i_in,i_out,ilmn
  integer :: irhoij,ispden,jrhoij,lmn2_size_out,lmnmix,my_comm_atom,my_nrhoij
  integer :: ngrhoij,nrhoij_in,nrhoij_max,nrhoij_out,nselect,nselect_out
  integer :: nspden_in,nspden_out,paral_case,use_rhoij_,use_rhoijp,use_rhoijres
@@ -648,6 +649,7 @@ subroutine pawrhoij_copy(pawrhoij_in,pawrhoij_cpy, &
 &     pawrhoij_out(irhoij)%nspden/=nspden_out.or. &
 &     nselect/=nselect_out)
      dplex_in=cplex_in-1;dplex_out=cplex_out-1
+     dplex=min(dplex_in,dplex_out)
 
 !    Scalars
      pawrhoij_out(irhoij)%cplex=cplex_out+0
@@ -697,54 +699,56 @@ subroutine pawrhoij_copy(pawrhoij_in,pawrhoij_cpy, &
            if (nspden_in==2) then
              do ilmn=1,nselect
                i_in=cplex_in*ilmn-dplex_in;i_out=cplex_out*ilmn-dplex_out
-               pawrhoij_out(irhoij)%rhoijp(i_out,1)=pawrhoij_in(jrhoij)%rhoijp(i_in,1) &
-&               +pawrhoij_in(jrhoij)%rhoijp(i_in,2)+zero
+               pawrhoij_out(irhoij)%rhoijp(i_out:i_out+dplex,1)=pawrhoij_in(jrhoij)%rhoijp(i_in:i_in+dplex,1) &
+&                                                              +pawrhoij_in(jrhoij)%rhoijp(i_in:i_in+dplex,2)+zero
              end do
            else ! nspden_in==1 or nspden_in=4
              do ilmn=1,nselect
                i_in=cplex_in*ilmn-dplex_in;i_out=cplex_out*ilmn-dplex_out
-               pawrhoij_out(irhoij)%rhoijp(i_out,1)=pawrhoij_in(jrhoij)%rhoijp(i_in,1)+zero
+               pawrhoij_out(irhoij)%rhoijp(i_out:i_out+dplex,1)=pawrhoij_in(jrhoij)%rhoijp(i_in:i_in+dplex,1)+zero
              end do
            end if
          else if (nspden_out==2) then
            if (nspden_in==1) then
              do ilmn=1,nselect
                i_in=cplex_in*ilmn-dplex_in;i_out=cplex_out*ilmn-dplex_out
-               pawrhoij_out(irhoij)%rhoijp(i_out,1)=half*pawrhoij_in(jrhoij)%rhoijp(i_in,1)+zero
-               pawrhoij_out(irhoij)%rhoijp(i_out,2)=pawrhoij_in(jrhoij)%rhoijp(i_out,1)
+               pawrhoij_out(irhoij)%rhoijp(i_out:i_out+dplex,1)=half*pawrhoij_in(jrhoij)%rhoijp(i_in:i_in+dplex,1)+zero
+               pawrhoij_out(irhoij)%rhoijp(i_out:i_out+dplex,2)=half*pawrhoij_in(jrhoij)%rhoijp(i_in:i_in+dplex,1)+zero
              end do
            else if (nspden_in==2) then
              do ilmn=1,nselect
                i_in=cplex_in*ilmn-dplex_in;i_out=cplex_out*ilmn-dplex_out
-               pawrhoij_out(irhoij)%rhoijp(i_out,1:2)=pawrhoij_in(jrhoij)%rhoijp(i_in,1:2)+zero
+               pawrhoij_out(irhoij)%rhoijp(i_out:i_out+dplex,1:2)=pawrhoij_in(jrhoij)%rhoijp(i_in:i_in+dplex,1:2)+zero
              end do
            else ! nspden_in==4
              do ilmn=1,nselect
                i_in=cplex_in*ilmn-dplex_in;i_out=cplex_out*ilmn-dplex_out
-               pawrhoij_out(irhoij)%rhoijp(i_out,1)=half*(pawrhoij_in(jrhoij)%rhoijp(i_in,1) &
-&               +pawrhoij_in(jrhoij)%rhoijp(i_in,4))+zero
-               pawrhoij_out(irhoij)%rhoijp(i_out,2)=half*(pawrhoij_in(jrhoij)%rhoijp(i_in,1) &
-&               -pawrhoij_in(jrhoij)%rhoijp(i_in,4))+zero
+               pawrhoij_out(irhoij)%rhoijp(i_out:i_out+dplex,1)=half*(pawrhoij_in(jrhoij)%rhoijp(i_in:i_in+dplex,1) &
+&                                                                    +pawrhoij_in(jrhoij)%rhoijp(i_in:i_in+dplex,4))+zero
+               pawrhoij_out(irhoij)%rhoijp(i_out:i_out+dplex,2)=half*(pawrhoij_in(jrhoij)%rhoijp(i_in:i_in+dplex,1) &
+&                                                                    -pawrhoij_in(jrhoij)%rhoijp(i_in:i_in+dplex,4))+zero
              end do
            end if
          else if (nspden_out==4) then
            if (nspden_in==1) then
              do ilmn=1,nselect
                i_in=cplex_in*ilmn-dplex_in;i_out=cplex_out*ilmn-dplex_out
-               pawrhoij_out(irhoij)%rhoijp(i_out,1)=pawrhoij_in(jrhoij)%rhoijp(i_in,1)+zero
+               pawrhoij_out(irhoij)%rhoijp(i_out:i_out+dplex,1)=pawrhoij_in(jrhoij)%rhoijp(i_in:i_in+dplex,1)+zero
+               pawrhoij_out(irhoij)%rhoijp(i_out:i_out+dplex,2:4)=zero
              end do
            else if (nspden_in==2) then
              do ilmn=1,nselect
                i_in=cplex_in*ilmn-dplex_in;i_out=cplex_out*ilmn-dplex_out
-               pawrhoij_out(irhoij)%rhoijp(i_out,1)=pawrhoij_in(jrhoij)%rhoijp(i_in,1) &
-&               +pawrhoij_in(jrhoij)%rhoijp(i_in,2)+zero
-               pawrhoij_out(irhoij)%rhoijp(i_out,4)=pawrhoij_in(jrhoij)%rhoijp(i_in,1) &
-&               -pawrhoij_in(jrhoij)%rhoijp(i_in,2)+zero
+               pawrhoij_out(irhoij)%rhoijp(i_out:i_out+dplex,1)=pawrhoij_in(jrhoij)%rhoijp(i_in:i_in+dplex,1) &
+&                                                              +pawrhoij_in(jrhoij)%rhoijp(i_in:i_in+dplex,2)+zero
+               pawrhoij_out(irhoij)%rhoijp(i_out:i_out+dplex,4)=pawrhoij_in(jrhoij)%rhoijp(i_in:i_in+dplex,1) &
+&                                                              -pawrhoij_in(jrhoij)%rhoijp(i_in:i_in+dplex,2)+zero
+               pawrhoij_out(irhoij)%rhoijp(i_out:i_out+dplex,2:3)=zero
              end do
            else ! nspden_in==4
              do ilmn=1,nselect
                i_in=cplex_in*ilmn-dplex_in;i_out=cplex_out*ilmn-dplex_out
-               pawrhoij_out(irhoij)%rhoijp(i_out,1:4)=pawrhoij_in(jrhoij)%rhoijp(i_in,1:4)+zero
+               pawrhoij_out(irhoij)%rhoijp(i_out:i_out+dplex,1:4)=pawrhoij_in(jrhoij)%rhoijp(i_in:i_in+dplex,1:4)+zero
              end do
            end if
          end if
@@ -798,7 +802,8 @@ subroutine pawrhoij_copy(pawrhoij_in,pawrhoij_cpy, &
        if (cplex_out==cplex_in.and.nspden_out==nspden_in) then
          do ispden=1,nspden_out
            do ilmn=1,cplex_out*lmn2_size_out
-             pawrhoij_out(irhoij)%grhoij(1:ngrhoij,ilmn,ispden)=pawrhoij_in(jrhoij)%grhoij(1:ngrhoij,ilmn,ispden)
+             pawrhoij_out(irhoij)%grhoij(1:ngrhoij,ilmn,ispden)= &
+&               pawrhoij_in(jrhoij)%grhoij(1:ngrhoij,ilmn,ispden)+zero
            end do
          end do
        else
@@ -807,45 +812,67 @@ subroutine pawrhoij_copy(pawrhoij_in,pawrhoij_cpy, &
            if (nspden_in==2) then
              do ilmn=1,lmn2_size_out
                i_in=cplex_in*ilmn-dplex_in;i_out=cplex_out*ilmn-dplex_out
-               pawrhoij_out(irhoij)%grhoij(1:ngrhoij,i_out,1)=pawrhoij_in(jrhoij)%grhoij(1:ngrhoij,i_in,1) &
-&               +pawrhoij_in(jrhoij)%grhoij(1:ngrhoij,i_in,2)
+               pawrhoij_out(irhoij)%grhoij(1:ngrhoij,i_out:i_out+dplex,1)= &
+&                 pawrhoij_in(jrhoij)%grhoij(1:ngrhoij,i_in:i_in+dplex,1) &
+&                +pawrhoij_in(jrhoij)%grhoij(1:ngrhoij,i_in:i_in+dplex,2)+zero
              end do
            else ! nspden_in==4
              do ilmn=1,lmn2_size_out
                i_in=cplex_in*ilmn-dplex_in;i_out=cplex_out*ilmn-dplex_out
-               pawrhoij_out(irhoij)%grhoij(1:ngrhoij,i_out,1)=pawrhoij_in(jrhoij)%grhoij(1:ngrhoij,i_in,1)
+               pawrhoij_out(irhoij)%grhoij(1:ngrhoij,i_out:i_out+dplex,1)= &
+&                 pawrhoij_in(jrhoij)%grhoij(1:ngrhoij,i_in:i_in+dplex,1)+zero
              end do
            end if
          else if (nspden_out==2) then
            if (nspden_in==1) then
              do ilmn=1,lmn2_size_out
                i_in=cplex_in*ilmn-dplex_in;i_out=cplex_out*ilmn-dplex_out
-               pawrhoij_out(irhoij)%grhoij(1:ngrhoij,i_out,1)=half*(pawrhoij_in(jrhoij)%grhoij(1:ngrhoij,i_in,1) &
-&               +pawrhoij_in(jrhoij)%grhoij(1:ngrhoij,i_in,2))
-               pawrhoij_out(irhoij)%grhoij(1:ngrhoij,i_out,2)=pawrhoij_out(irhoij)%grhoij(1:ngrhoij,i_out,1)
+               pawrhoij_out(irhoij)%grhoij(1:ngrhoij,i_out:i_out+dplex,1)= &
+&                 half*pawrhoij_in(jrhoij)%grhoij(1:ngrhoij,i_in:i_in+dplex,1)+zero
+               pawrhoij_out(irhoij)%grhoij(1:ngrhoij,i_out:i_out+dplex,2)= &
+&                 half*pawrhoij_in(jrhoij)%grhoij(1:ngrhoij,i_in:i_in+dplex,1)+zero
+             end do
+           else if (nspden_in==2) then
+             do ilmn=1,lmn2_size_out
+               i_in=cplex_in*ilmn-dplex_in;i_out=cplex_out*ilmn-dplex_out
+               pawrhoij_out(irhoij)%grhoij(1:ngrhoij,i_out:i_out+dplex,1:2)= &
+&                 pawrhoij_in(jrhoij)%grhoij(1:ngrhoij,i_in:i_in+dplex,1:2)+zero
              end do
            else ! nspden_in==4
              do ilmn=1,lmn2_size_out
                i_in=cplex_in*ilmn-dplex_in;i_out=cplex_out*ilmn-dplex_out
-               pawrhoij_out(irhoij)%grhoij(1:ngrhoij,i_out,1)=half*(pawrhoij_in(jrhoij)%grhoij(1:ngrhoij,i_in,1) &
-&               +pawrhoij_in(jrhoij)%grhoij(1:ngrhoij,i_in,4))
-               pawrhoij_out(irhoij)%grhoij(1:ngrhoij,i_out,2)=half*(pawrhoij_in(jrhoij)%grhoij(1:ngrhoij,i_in,1) &
-&               -pawrhoij_in(jrhoij)%grhoij(1:ngrhoij,i_in,4))
+               pawrhoij_out(irhoij)%grhoij(1:ngrhoij,i_out:i_out+dplex,1)= &
+&                 half*(pawrhoij_in(jrhoij)%grhoij(1:ngrhoij,i_in:i_in+dplex,1) &
+&                      +pawrhoij_in(jrhoij)%grhoij(1:ngrhoij,i_in:i_in+dplex,4))+zero
+               pawrhoij_out(irhoij)%grhoij(1:ngrhoij,i_out:i_out+dplex,2)= &
+&                 half*(pawrhoij_in(jrhoij)%grhoij(1:ngrhoij,i_in:i_in+dplex,1) &
+&                      -pawrhoij_in(jrhoij)%grhoij(1:ngrhoij,i_in:i_in+dplex,4))+zero
              end do
            end if
          else if (nspden_out==4) then
            if (nspden_in==1) then
              do ilmn=1,lmn2_size_out
                i_in=cplex_in*ilmn-dplex_in;i_out=cplex_out*ilmn-dplex_out
-               pawrhoij_out(irhoij)%grhoij(1:ngrhoij,i_out,1)=pawrhoij_in(jrhoij)%grhoij(1:ngrhoij,i_in,1)
+               pawrhoij_out(irhoij)%grhoij(1:ngrhoij,i_out:i_out+dplex,1)= &
+&                 pawrhoij_in(jrhoij)%grhoij(1:ngrhoij,i_in:i_in+dplex,1)+zero
+               pawrhoij_out(irhoij)%grhoij(1:ngrhoij,i_out:i_out+dplex,2:4)=zero
              end do
-           else ! nspden_in==2
+           else if (nspden_in==2) then
              do ilmn=1,lmn2_size_out
                i_in=cplex_in*ilmn-dplex_in;i_out=cplex_out*ilmn-dplex_out
-               pawrhoij_out(irhoij)%grhoij(1:ngrhoij,i_out,1)=half*(pawrhoij_in(jrhoij)%grhoij(1:ngrhoij,i_in,1) &
-&               +pawrhoij_in(jrhoij)%grhoij(1:ngrhoij,i_in,2))
-               pawrhoij_out(irhoij)%grhoij(1:ngrhoij,i_out,4)=half*(pawrhoij_in(jrhoij)%grhoij(1:ngrhoij,i_in,1) &
-&               -pawrhoij_in(jrhoij)%grhoij(1:ngrhoij,i_in,2))
+               pawrhoij_out(irhoij)%grhoij(1:ngrhoij,i_out:i_out+dplex,1)= &
+&                 pawrhoij_in(jrhoij)%grhoij(1:ngrhoij,i_in:i_in+dplex,1) &
+&                +pawrhoij_in(jrhoij)%grhoij(1:ngrhoij,i_in:i_in+dplex,2)+zero
+               pawrhoij_out(irhoij)%grhoij(1:ngrhoij,i_out:i_out+dplex,4)= &
+&                 pawrhoij_in(jrhoij)%grhoij(1:ngrhoij,i_in:i_in+dplex,1) &
+&                -pawrhoij_in(jrhoij)%grhoij(1:ngrhoij,i_in:i_in+dplex,2)+zero
+               pawrhoij_out(irhoij)%grhoij(1:ngrhoij,i_out:i_out+dplex,2:3)=zero
+             end do
+           else ! nspden_in==4
+             do ilmn=1,lmn2_size_out
+               i_in=cplex_in*ilmn-dplex_in;i_out=cplex_out*ilmn-dplex_out
+               pawrhoij_out(irhoij)%grhoij(1:ngrhoij,i_out:i_out+dplex,1:4)= &
+&                 pawrhoij_in(jrhoij)%grhoij(1:ngrhoij,i_in:i_in+dplex,1:4)+zero
              end do
            end if
          end if
@@ -871,7 +898,7 @@ subroutine pawrhoij_copy(pawrhoij_in,pawrhoij_cpy, &
        if (cplex_out==cplex_in.and.nspden_out==nspden_in) then
          do ispden=1,nspden_out
            do ilmn=1,cplex_out*lmn2_size_out
-             pawrhoij_out(irhoij)%rhoijres(ilmn,ispden)=pawrhoij_in(jrhoij)%rhoijres(ilmn,ispden)
+             pawrhoij_out(irhoij)%rhoijres(ilmn,ispden)=pawrhoij_in(jrhoij)%rhoijres(ilmn,ispden)+zero
            end do
          end do
        else
@@ -880,45 +907,56 @@ subroutine pawrhoij_copy(pawrhoij_in,pawrhoij_cpy, &
            if (nspden_in==2) then
              do ilmn=1,lmn2_size_out
                i_in=cplex_in*ilmn-dplex_in;i_out=cplex_out*ilmn-dplex_out
-               pawrhoij_out(irhoij)%rhoijres(i_out,1)=pawrhoij_in(jrhoij)%rhoijres(i_in,1) &
-&               +pawrhoij_in(jrhoij)%rhoijres(i_in,2)
+               pawrhoij_out(irhoij)%rhoijres(i_out:i_out+dplex,1)=pawrhoij_in(jrhoij)%rhoijres(i_in:i_in+dplex,1) &
+&                                                                +pawrhoij_in(jrhoij)%rhoijres(i_in:i_in+dplex,2)+zero
              end do
            else ! nspden_in==4
              do ilmn=1,lmn2_size_out
                i_in=cplex_in*ilmn-dplex_in;i_out=cplex_out*ilmn-dplex_out
-               pawrhoij_out(irhoij)%rhoijres(i_out,1)=pawrhoij_in(jrhoij)%rhoijres(i_in,1)
+               pawrhoij_out(irhoij)%rhoijres(i_out:i_out+dplex,1)=pawrhoij_in(jrhoij)%rhoijres(i_in:i_in+dplex,1)+zero
              end do
            end if
          else if (nspden_out==2) then
            if (nspden_in==1) then
              do ilmn=1,lmn2_size_out
                i_in=cplex_in*ilmn-dplex_in;i_out=cplex_out*ilmn-dplex_out
-               pawrhoij_out(irhoij)%rhoijres(i_out,1)=half*(pawrhoij_in(jrhoij)%rhoijres(i_in,1) &
-&               +pawrhoij_in(jrhoij)%rhoijres(i_in,2))
-               pawrhoij_out(irhoij)%rhoijres(i_out,2)=pawrhoij_out(irhoij)%rhoijres(i_out,1)
+               pawrhoij_out(irhoij)%rhoijres(i_out:i_out+dplex,1)=half*pawrhoij_in(jrhoij)%rhoijres(i_in:i_in+dplex,1)+zero
+               pawrhoij_out(irhoij)%rhoijres(i_out:i_out+dplex,2)=half*pawrhoij_in(jrhoij)%rhoijres(i_in:i_in+dplex,1)+zero
+             end do
+           else if (nspden_in==2) then
+             do ilmn=1,lmn2_size_out
+               i_in=cplex_in*ilmn-dplex_in;i_out=cplex_out*ilmn-dplex_out
+               pawrhoij_out(irhoij)%rhoijres(i_out:i_out+dplex,1:2)=pawrhoij_in(jrhoij)%rhoijres(i_in:i_in+dplex,1:2)+zero
              end do
            else ! nspden_in==4
              do ilmn=1,lmn2_size_out
                i_in=cplex_in*ilmn-dplex_in;i_out=cplex_out*ilmn-dplex_out
-               pawrhoij_out(irhoij)%rhoijres(i_out,1)=half*(pawrhoij_in(jrhoij)%rhoijres(i_in,1) &
-&               +pawrhoij_in(jrhoij)%rhoijres(i_in,4))
-               pawrhoij_out(irhoij)%rhoijres(i_out,2)=half*(pawrhoij_in(jrhoij)%rhoijres(i_in,1) &
-&               -pawrhoij_in(jrhoij)%rhoijres(i_in,4))
+               pawrhoij_out(irhoij)%rhoijres(i_out:i_out+dplex,1)=half*(pawrhoij_in(jrhoij)%rhoijres(i_in:i_in+dplex,1) &
+&                                                                      +pawrhoij_in(jrhoij)%rhoijres(i_in:i_in+dplex,4))+zero
+               pawrhoij_out(irhoij)%rhoijres(i_out:i_out+dplex,2)=half*(pawrhoij_in(jrhoij)%rhoijres(i_in:i_in+dplex,1) &
+&                                                                      -pawrhoij_in(jrhoij)%rhoijres(i_in:i_in+dplex,4))+zero
              end do
            end if
          else if (nspden_out==4) then
            if (nspden_in==1) then
              do ilmn=1,lmn2_size_out
                i_in=cplex_in*ilmn-dplex_in;i_out=cplex_out*ilmn-dplex_out
-               pawrhoij_out(irhoij)%rhoijres(i_out,1)=pawrhoij_in(jrhoij)%rhoijres(i_in,1)
+               pawrhoij_out(irhoij)%rhoijres(i_out:i_out+dplex,1)=pawrhoij_in(jrhoij)%rhoijres(i_in:i_in+dplex,1)+zero
+               pawrhoij_out(irhoij)%rhoijres(i_out:i_out+dplex,2:4)=zero
              end do
-           else ! nspden_in==2
+           else if (nspden_in==2) then
              do ilmn=1,lmn2_size_out
                i_in=cplex_in*ilmn-dplex_in;i_out=cplex_out*ilmn-dplex_out
-               pawrhoij_out(irhoij)%rhoijres(i_out,1)=half*(pawrhoij_in(jrhoij)%rhoijres(i_in,1) &
-&               +pawrhoij_in(jrhoij)%rhoijres(i_in,2))
-               pawrhoij_out(irhoij)%rhoijres(i_out,4)=half*(pawrhoij_in(jrhoij)%rhoijres(i_in,1) &
-&               -pawrhoij_in(jrhoij)%rhoijres(i_in,2))
+               pawrhoij_out(irhoij)%rhoijres(i_out:i_out+dplex,1)=pawrhoij_in(jrhoij)%rhoijres(i_in:i_in+dplex,1) &
+&                                                                +pawrhoij_in(jrhoij)%rhoijres(i_in:i_in+dplex,2)+zero
+               pawrhoij_out(irhoij)%rhoijres(i_out:i_out+dplex,4)=pawrhoij_in(jrhoij)%rhoijres(i_in:i_in+dplex,1) &
+&                                                                -pawrhoij_in(jrhoij)%rhoijres(i_in:i_in+dplex,2)+zero
+               pawrhoij_out(irhoij)%rhoijres(i_out:i_out+dplex,2:3)=zero
+             end do
+           else ! nspden_in==4
+             do ilmn=1,lmn2_size_out
+               i_in=cplex_in*ilmn-dplex_in;i_out=cplex_out*ilmn-dplex_out
+               pawrhoij_out(irhoij)%rhoijres(i_out:i_out+dplex,1:4)=pawrhoij_in(jrhoij)%rhoijres(i_in:i_in+dplex,1:4)+zero
              end do
            end if
          end if
@@ -946,8 +984,7 @@ subroutine pawrhoij_copy(pawrhoij_in,pawrhoij_cpy, &
        if (cplex_out==cplex_in.and.nspden_out==nspden_in) then
          do ispden=1,nspden_out
            do ilmn=1,cplex_out*lmn2_size_out
-
-             pawrhoij_out(irhoij)%rhoij_(ilmn,ispden)=pawrhoij_in(jrhoij)%rhoij_(ilmn,ispden)
+             pawrhoij_out(irhoij)%rhoij_(ilmn,ispden)=pawrhoij_in(jrhoij)%rhoij_(ilmn,ispden)+zero
            end do
          end do
        else
@@ -956,45 +993,56 @@ subroutine pawrhoij_copy(pawrhoij_in,pawrhoij_cpy, &
            if (nspden_in==2) then
              do ilmn=1,lmn2_size_out
                i_in=cplex_in*ilmn-dplex_in;i_out=cplex_out*ilmn-dplex_out
-               pawrhoij_out(irhoij)%rhoij_(i_out,1)=pawrhoij_in(jrhoij)%rhoij_(i_in,1) &
-&               +pawrhoij_in(jrhoij)%rhoij_(i_in,2)
+               pawrhoij_out(irhoij)%rhoij_(i_out:i_out+dplex,1)=pawrhoij_in(jrhoij)%rhoij_(i_in:i_in+dplex,1) &
+&                                                              +pawrhoij_in(jrhoij)%rhoij_(i_in:i_in+dplex,2)+zero
              end do
-           else ! nspden_in==4
+           else ! nspden_in==1 or nspden_in==4
              do ilmn=1,lmn2_size_out
                i_in=cplex_in*ilmn-dplex_in;i_out=cplex_out*ilmn-dplex_out
-               pawrhoij_out(irhoij)%rhoij_(i_out,1)=pawrhoij_in(jrhoij)%rhoij_(i_in,1)
+               pawrhoij_out(irhoij)%rhoij_(i_out:i_out+dplex,1)=pawrhoij_in(jrhoij)%rhoij_(i_in:i_in+dplex,1)+zero
              end do
            end if
          else if (nspden_out==2) then
            if (nspden_in==1) then
              do ilmn=1,lmn2_size_out
                i_in=cplex_in*ilmn-dplex_in;i_out=cplex_out*ilmn-dplex_out
-               pawrhoij_out(irhoij)%rhoij_(i_out,1)=half*(pawrhoij_in(jrhoij)%rhoij_(i_in,1) &
-&               +pawrhoij_in(jrhoij)%rhoij_(i_in,2))
-               pawrhoij_out(irhoij)%rhoij_(i_out,2)=pawrhoij_out(irhoij)%rhoij_(i_out,1)
+               pawrhoij_out(irhoij)%rhoij_(i_out:i_out+dplex,1)=half*pawrhoij_in(jrhoij)%rhoij_(i_in:i_in+dplex,1)+zero
+               pawrhoij_out(irhoij)%rhoij_(i_out:i_out+dplex,2)=half*pawrhoij_in(irhoij)%rhoij_(i_in:i_in+dplex,1)+zero
+             end do
+           else if (nspden_in==2) then
+             do ilmn=1,lmn2_size_out
+               i_in=cplex_in*ilmn-dplex_in;i_out=cplex_out*ilmn-dplex_out
+               pawrhoij_out(irhoij)%rhoij_(i_out:i_out+dplex,1:2)=pawrhoij_in(jrhoij)%rhoij_(i_in:i_in+dplex,1:2)+zero
              end do
            else ! nspden_in==4
              do ilmn=1,lmn2_size_out
                i_in=cplex_in*ilmn-dplex_in;i_out=cplex_out*ilmn-dplex_out
-               pawrhoij_out(irhoij)%rhoij_(i_out,1)=half*(pawrhoij_in(jrhoij)%rhoij_(i_in,1) &
-&               +pawrhoij_in(jrhoij)%rhoij_(i_in,4))
-               pawrhoij_out(irhoij)%rhoij_(i_out,2)=half*(pawrhoij_in(jrhoij)%rhoij_(i_in,1) &
-&               -pawrhoij_in(jrhoij)%rhoij_(i_in,4))
+               pawrhoij_out(irhoij)%rhoij_(i_out:i_out+dplex,1)=half*(pawrhoij_in(jrhoij)%rhoij_(i_in:i_in+dplex,1) &
+&                                                                    +pawrhoij_in(jrhoij)%rhoij_(i_in:i_in+dplex,4))+zero
+               pawrhoij_out(irhoij)%rhoij_(i_out:i_out+dplex,2)=half*(pawrhoij_in(jrhoij)%rhoij_(i_in:i_in+dplex,1) &
+&                                                                    -pawrhoij_in(jrhoij)%rhoij_(i_in:i_in+dplex,4))+zero
              end do
            end if
          else if (nspden_out==4) then
            if (nspden_in==1) then
              do ilmn=1,lmn2_size_out
                i_in=cplex_in*ilmn-dplex_in;i_out=cplex_out*ilmn-dplex_out
-               pawrhoij_out(irhoij)%rhoij_(i_out,1)=pawrhoij_in(jrhoij)%rhoij_(i_in,1)
+               pawrhoij_out(irhoij)%rhoij_(i_out:i_out+dplex,1)=pawrhoij_in(jrhoij)%rhoij_(i_in:i_in+dplex,1)+zero
+               pawrhoij_out(irhoij)%rhoij_(i_out:i_out+dplex,2:4)=zero
              end do
-           else ! nspden_in==2
+           else if (nspden_in==2) then
              do ilmn=1,lmn2_size_out
                i_in=cplex_in*ilmn-dplex_in;i_out=cplex_out*ilmn-dplex_out
-               pawrhoij_out(irhoij)%rhoij_(i_out,1)=half*(pawrhoij_in(jrhoij)%rhoij_(i_in,1) &
-&               +pawrhoij_in(jrhoij)%rhoij_(i_in,2))
-               pawrhoij_out(irhoij)%rhoij_(i_out,4)=half*(pawrhoij_in(jrhoij)%rhoij_(i_in,1) &
-&               -pawrhoij_in(jrhoij)%rhoij_(i_in,2))
+               pawrhoij_out(irhoij)%rhoij_(i_out:i_out+dplex,1)=pawrhoij_in(jrhoij)%rhoij_(i_in:i_in+dplex,1) &
+&                                                              +pawrhoij_in(jrhoij)%rhoij_(i_in:i_in+dplex,2)+zero
+               pawrhoij_out(irhoij)%rhoij_(i_out:i_out+dplex,4)=pawrhoij_in(jrhoij)%rhoij_(i_in:i_in+dplex,1) &
+&                                                              -pawrhoij_in(jrhoij)%rhoij_(i_in:i_in+dplex,2)+zero
+               pawrhoij_out(irhoij)%rhoij_(i_out:i_out+dplex,2:3)=zero
+             end do
+           else ! nspden_in==4
+             do ilmn=1,lmn2_size_out
+               i_in=cplex_in*ilmn-dplex_in;i_out=cplex_out*ilmn-dplex_out
+               pawrhoij_out(irhoij)%rhoij_(i_out:i_out+dplex,1:4)=pawrhoij_in(jrhoij)%rhoij_(i_in:i_in+dplex,1:4)+zero
              end do
            end if
          end if
@@ -2190,6 +2238,7 @@ subroutine pawrhoij_io(pawrhoij,unitfi,nsppol_in,nspinor_in,nspden_in,nlmn_type,
 ! *************************************************************************
 
  my_natom=SIZE(pawrhoij);if (my_natom==0) return
+ my_nspden=nspden_in
  natom=size(typat)
  paral_atom=(my_natom/=natom)
  if (present(mpi_atmtab)) then
@@ -2277,7 +2326,6 @@ subroutine pawrhoij_io(pawrhoij,unitfi,nsppol_in,nspinor_in,nspden_in,nlmn_type,
           NCF_CHECK(nf90_get_var(ncid, nsel56_id, nsel56))
 #endif
          end if
-         my_nspden=nspden_in
        else
          if (iomode == fort_binary) then
            read(unitfi  ) (nsel56(iatom),iatom=1,natom),my_cplex,my_nspden
@@ -2300,7 +2348,7 @@ subroutine pawrhoij_io(pawrhoij,unitfi,nsppol_in,nspinor_in,nspden_in,nlmn_type,
        end do
        bsize=sum(nsel56)
        LIBPAW_ALLOCATE(ibuffer,(bsize))
-       LIBPAW_ALLOCATE(buffer,(bsize*nspden_in*my_cplex))
+       LIBPAW_ALLOCATE(buffer,(bsize*my_nspden*my_cplex))
        if (iomode == fort_binary) then
          read(unitfi  ) ibuffer(:),buffer(:)
        else if (iomode == fort_formatted) then
@@ -2320,7 +2368,7 @@ subroutine pawrhoij_io(pawrhoij,unitfi,nsppol_in,nspinor_in,nspden_in,nlmn_type,
          nselect=nsel56(iatom)
          pawrhoij(iatom)%rhoijselect(1:nselect)=ibuffer(ii+1:ii+nselect)
          ii=ii+nselect
-         do ispden=1,nspden_in
+         do ispden=1,my_nspden
            pawrhoij(iatom)%rhoijp(1:my_cplex*nselect,ispden)=buffer(jj+1:jj+my_cplex*nselect)
            jj=jj+my_cplex*nselect
          end do
@@ -2876,6 +2924,58 @@ subroutine pawrhoij_mpisum_unpacked_2D(pawrhoij,comm1,comm2)
  LIBPAW_DEALLOCATE(dimlmn)
 
 end subroutine pawrhoij_mpisum_unpacked_2D
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_pawrhoij/pawrhoij_get_nspden
+!! NAME
+!! pawrhoij_get_nspden
+!!
+!! FUNCTION
+!! Compute the value of nspden (number of spin component) for a pawrhoij datastructure.
+!! This one depends on the number of spinorial components, the number of components
+!! of the density and use of the spin-orbit coupling.
+!!
+!! INPUTS
+!!  nspden= number of spin-density components
+!!  nspinor= number of spinorial components
+!!  spnorb= flag: 1 if spin-orbit coupling is activated
+!!
+!! OUTPUT
+!!  pawrhoij_get_nspden= value of nspden associated to pawrhoij
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+function pawrhoij_get_nspden(nspden,nspinor,spnorb)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'pawrhoij_get_nspden'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ---------------------------------------------
+!scalars
+ integer,intent(in) :: nspden,nspinor,spnorb
+ integer :: pawrhoij_get_nspden
+!arrays
+
+!Local variables ---------------------------------------
+
+!************************************************************************
+
+ pawrhoij_get_nspden=nspden
+ if (nspinor==2.and.spnorb>0) pawrhoij_get_nspden=4
+
+end function pawrhoij_get_nspden
 !!***
 
 !----------------------------------------------------------------------

@@ -100,4 +100,5 @@ berryopt3  -2
 #%%   gives the proper piezoelectric tensor.  Only the electron response, and
 #%%   not the strain-induced movement of the rigid ions contributes to the
 #%%   proper tensor.
+#%% topics = Berry, DFPT
 #%%<END TEST_INFO>

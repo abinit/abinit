@@ -5,6 +5,8 @@
 !! m_polynomial_term
 !!
 !! FUNCTION
+!! Module with the datatype polynomial terms
+!!
 !! COPYRIGHT
 !! Copyright (C) 2010-2017 ABINIT group (AM)
 !! This file is distributed under the terms of the
@@ -31,7 +33,6 @@ module m_polynomial_term
 
  public :: polynomial_term_init
  public :: polynomial_term_free
- public :: polynomial_term_dot
 !!***
 
 !!****t* m_polynomial_term/polynomial_term_type
@@ -39,7 +40,8 @@ module m_polynomial_term
 !! polynomial_term_type
 !!
 !! FUNCTION
-!! structure for specific displacements of term
+!! Datatype for a terms  (displacements or strain)
+!! related to a polynomial coefficient
 !!
 !! SOURCE
 
@@ -85,20 +87,27 @@ CONTAINS  !=====================================================================
 !! polynomial_term_init
 !!
 !! FUNCTION
-!! Initialize polynomial_term_init for given set of displacements
+!! Initialize a polynomial_term_init for given set of displacements/strain
 !!
 !! INPUTS
 !! atindx(2) = Indexes of the atoms a and b in the unit cell
 !! cell(3,2) = Indexes of the cell of the atom a and b
-!! ndisp     = Number of displacement for this terms
-!! power     = Power of the displacement 2 (X_z-O_z)^2 or 1 for (X_y-O_y)^1
+!! direction = direction of the perturbation => 1,2,3 for atomic displacement
+!!                                             -1 -2 -3 -4 -5 -6 for strain
+!! ndisp     = Number of displacement/strain for this terms
+!! power     = Power of the displacement/strain 2 (X_z-O_z)^2 or 1 for (X_y-O_y)^1
 !! weight    = Weight of the term
-!!
+!! check     = optional,logical => if TRUE, the term will be check, same displacement/strain
+!!                                          are gathered in the same displacement but with an higher
+!!                                          power. For example:
+!!                                          ((Sr_y-O1_y)^1(Sr_y-O1_y)^1 => (Sr_y-O1_y)^2)
+!!                                 if FALSE, default, do nothing
+!!                                         
 !! OUTPUT
-!! polynomial_term = polynomial_term structure to be initialized
+!! polynomial_term<type(polynomial_term)> = polynomial_term datatype is now initialized
 !!
 !! PARENTS
-!!      m_effective_potential_file,m_polynomial_coeff
+!!      m_effective_potential_file,m_fit_polynomial_coeff,m_polynomial_coeff
 !!
 !! CHILDREN
 !!
@@ -128,7 +137,7 @@ subroutine polynomial_term_init(atindx,cell,direction,ndisp,polynomial_term,powe
 !Local variables-------------------------------
 !scalar
  integer :: idisp1,idisp2,ndisp_tmp
- logical :: check_in = .false.
+ logical :: check_in
 !arrays
  integer :: power_tmp(ndisp)
  character(500) :: msg
@@ -156,8 +165,9 @@ subroutine polynomial_term_init(atindx,cell,direction,ndisp,polynomial_term,powe
    MSG_ERROR(msg)
  end if
 
-!First free structure before init
+!First free datatype before init
  call polynomial_term_free(polynomial_term)
+ check_in = .false.
 
 !Copy the powers before check
  power_tmp(:) = power(:)
@@ -207,10 +217,11 @@ subroutine polynomial_term_init(atindx,cell,direction,ndisp,polynomial_term,powe
  do idisp1=1,ndisp
    if(power_tmp(idisp1) > zero)then
      idisp2 =  idisp2 + 1
-     polynomial_term%atindx(:,idisp2) = atindx(:,idisp1) 
      polynomial_term%direction(idisp2) = direction(idisp1)
+     polynomial_term%power(idisp2) = power_tmp(idisp1)
+     polynomial_term%atindx(:,idisp2) = atindx(:,idisp1) 
      polynomial_term%cell(:,:,idisp2) = cell(:,:,idisp1)
-     polynomial_term%power(idisp2) = power_tmp(idisp2)
+     polynomial_term%power(idisp2) = power_tmp(idisp1)
    end if
  end do
 
@@ -227,12 +238,14 @@ end subroutine polynomial_term_init
 !! Free polynomial_term
 !!
 !! INPUTS
+!! polynomial_term<type(polynomial_term)> =  datatype to free
 !!
 !! OUTPUT
-!! polynomial_term = polynomial_term structure to be free
+!! polynomial_term<type(polynomial_term)> =  datatype to free
 !!
 !! PARENTS
-!!      m_effective_potential_file,m_polynomial_coeff,m_polynomial_term
+!!      m_effective_potential_file,m_fit_polynomial_coeff,m_polynomial_coeff
+!!      m_polynomial_term
 !!
 !! CHILDREN
 !!
@@ -286,85 +299,20 @@ subroutine polynomial_term_free(polynomial_term)
 end subroutine polynomial_term_free
 !!***
 
-!!****f* m_polynomial_term/polynomial_term_dot
-!!
-!! NAME
-!! polynomial_term_dot
-!!
-!! FUNCTION
-!! Return the multiplication of two terms
-!!
-!! INPUTS
-!! term1_in = Firts term
-!! term2_in = Second term
-!!
-!! OUTPUT
-!! term_out = multiplication of the two input terms
-!!
-!! PARENTS
-!!
-!!
-!! CHILDREN
-!!
-!! SOURCE
-
-subroutine polynomial_term_dot(term_out,term1_in,term2_in)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'polynomial_term_dot'
-!End of the abilint section
-
- implicit none
-
-!Arguments ------------------------------------
-!scalars
-!arrays
- type(polynomial_term_type), intent(in) :: term1_in
- type(polynomial_term_type), intent(in) :: term2_in
- type(polynomial_term_type), intent(out):: term_out
-!Local variables-------------------------------
-!scalar
- integer :: idisp1,idisp2,ndisp,new_ndisp
-!arrays
-
-! *************************************************************************
-
-!Get the number of displacement for this new term
- new_ndisp = term1_in%ndisp + term2_in%ndisp
-
- ndisp = 0
-
-! do while (ndisp < new_ndisp)
-   do idisp1=1,term1_in%ndisp
-     do idisp2=1,term2_in%ndisp
-       if (term1_in%atindx(1,idisp1)/=&
-&          term2_in%atindx(1,idisp2).or.&
-&          term1_in%atindx(2,idisp1)/=&
-&          term2_in%atindx(2,idisp2).or.&
-&          term1_in%direction(idisp1)/=&
-&          term2_in%direction(idisp2))  then
-         ndisp = ndisp + 1
-       end if
-     end do
-   end do
-! end do
-
-end subroutine polynomial_term_dot
-!!***
-
 !!****f* m_polynomial_term/terms_compare
 !! NAME
 !!  equal
 !!
 !! FUNCTION
+!!  Compare two polynomial_term_dot
 !!
 !! INPUTS
+!! t1<type(polynomial_term)> =  datatype of the first term
+!! t2<type(polynomial_term)> =  datatype of the second term
 !!
 !! OUTPUT
-!!
+!! res = logical 
+!!  
 !! SOURCE
 
 pure function terms_compare(t1,t2) result (res)
@@ -398,6 +346,10 @@ pure function terms_compare(t1,t2) result (res)
       do idisp2=1,t2%ndisp
         if(blkval(2,idisp2)==one)cycle!already found
         found = .false.
+        if((t1%direction(idisp1) <= zero .and.t2%direction(idisp2) <= zero).and.&
+&          (t1%direction(idisp1) /= t2%direction(idisp2)))then
+          cycle
+        end if
         if(t1%atindx(1,idisp1)  ==  t2%atindx(1,idisp2).and.&
 &          t1%atindx(2,idisp1)  ==  t2%atindx(2,idisp2).and.&
 &          t1%direction(idisp1) ==  t2%direction(idisp2).and.&
@@ -422,34 +374,6 @@ pure function terms_compare(t1,t2) result (res)
   else
     res = .false.
   end if
-
-!     do idisp1=1,t1%ndisp
-!       do idisp2=1,t2%ndisp
-!         if(t1%atindx(1,idisp1) ==  t2%atindx(1,idisp2).and.&
-! &          t1%atindx(2,idisp1) ==  t2%atindx(2,idisp2).and.&
-! &          t1%direction(idisp1) == t2%direction(idisp2).and.&
-! &          t1%power(idisp1) == t2%power(idisp2))then!.and.&
-! !&          t1%weight == t2%weight)then
-!           found = .true.
-!           do ia=1,2
-!             do mu=1,3
-!               if(t1%cell(mu,ia,idisp1) /= t2%cell(mu,ia,idisp2))then
-!                 found = .false.
-!                 cycle
-!               end if
-!             end do
-!           end do
-!           if (found)then
-!             ndisp = ndisp +1 
-!           end if
-!         end if
-!       end do
-!     end do
-
-!     if(ndisp == t1%ndisp)then
-!       res = .true.
-!     end if
-!  end if
 
 end function terms_compare
 !!***

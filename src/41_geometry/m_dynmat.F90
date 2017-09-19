@@ -54,6 +54,8 @@ module m_dynmat
  public :: cart39               ! Transform a vector from reduced coordinates to cartesian coordinates,
                                 !   taking into account the perturbation from which it was derived,
                                 !   and also check the existence of the new values.
+ public :: d2cart_to_red        ! Transform a second-derivative matrix
+                                ! from cartesian to reduced coordinate.
  public :: chkph3               ! Check the completeness of the dynamical matrix
  public :: chneu9               ! Imposition of the Acoustic sum rule on the Effective charges
  public :: d2sym3               ! Build (nearly) all the other matrix elements that can be build using symmetries.
@@ -975,6 +977,167 @@ end subroutine cart39
 
 !----------------------------------------------------------------------
 
+!!****f* m_dynmat/d2cart_to_red
+!! NAME
+!! d2cart_to_red
+!!
+!!
+!! FUNCTION
+!! Transform a second-derivative matrix from cartesian
+!! coordinates to reduced coordinate. Also,
+!! 1) remove the ionic part of the effective charges,
+!! 2) remove the vacuum polarisation from the dielectric tensor
+!!    and scale it with the unit cell volume
+!! In short, does the inverse operation of cart29.
+!!
+!! INPUTS
+!!  d2cart(2,3,mpert,3,mpert)=
+!!    second-derivative matrix in cartesian coordinates
+!!  gprimd(3,3)=basis vector in the reciprocal space
+!!  rprimd(3,3)=basis vector in the real space
+!!  mpert =maximum number of ipert
+!!  natom=number of atom
+!!
+!! OUTPUT
+!!  d2red(2,3,mpert,3,mpert)=
+!!    second-derivative matrix in reduced coordinates
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine d2cart_to_red(d2cart, d2red, gprimd, rprimd, mpert, natom, &
+&                        ntypat,typat,ucvol,zion)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'd2cart_to_red'
+!End of the abilint section
+
+ implicit none
+
+!Arguments -------------------------------
+!scalars
+ integer,intent(in) :: mpert,natom,ntypat
+ real(dp),intent(in) :: ucvol
+!arrays
+ integer,intent(in) :: typat(natom)
+ real(dp),intent(in) :: d2cart(2,3,mpert,3,mpert)
+ real(dp),intent(out) :: d2red(2,3,mpert,3,mpert)
+ real(dp),intent(in) :: gprimd(3,3),rprimd(3,3)
+ real(dp),intent(in) :: zion(ntypat)
+
+!Local variables -------------------------
+!scalars
+ integer :: idir1,idir2,ii,ipert1,ipert2
+ real(dp) :: fac
+!arrays
+ integer :: flg1(3),flg2(3)
+ real(dp) :: vec1(3),vec2(3)
+
+! *********************************************************************
+
+ flg1 = one
+ flg2 = one
+
+ d2red = d2cart
+
+!Remove the ionic charges to z to get the change in effective charges
+ do ipert1=1,natom
+   do idir1=1,3
+     d2red(1,idir1,ipert1,idir1,natom+2)=&
+&     d2red(1,idir1,ipert1,idir1,natom+2) - zion(typat(ipert1))
+   end do
+ end do
+ do ipert2=1,natom
+   do idir2=1,3
+     d2red(1,idir2,natom+2,idir2,ipert2)=&
+&     d2red(1,idir2,natom+2,idir2,ipert2) - zion(typat(ipert2))
+   end do
+ end do
+
+ ! Remove the vacuum polarizability from the dielectric tensor
+ do idir1=1,3
+   d2red(1,idir1,natom+2,idir1,natom+2)=&
+&   d2red(1,idir1,natom+2,idir1,natom+2) - 1.0_dp
+ end do
+
+! Scale the dielectric tensor with the volue of the unit cell
+ do idir1=1,3
+   do idir2=1,3
+     do ii=1,2
+       d2red(ii,idir1,natom+2,idir2,natom+2)=&
+&       - (ucvol / four_pi) * d2red(ii,idir1,natom+2,idir2,natom+2)
+     end do
+   end do
+ end do
+
+!For the piezoelectric tensor, takes into account the volume of the unit cell
+ do ipert2=natom+3,natom+4
+   do idir1=1,3
+     do idir2=1,3
+       do ii=1,2
+         d2red(ii,idir1,natom+2,idir2,ipert2)=&
+&         (ucvol)*d2red(ii,idir1,natom+2,idir2,ipert2)
+         d2red(ii,idir2,ipert2,idir1,natom+2)=&
+&         (ucvol)*d2red(ii,idir2,ipert2,idir1,natom+2)
+       end do
+     end do
+   end do
+ end do
+
+! Reduced coordinates transformation (in two steps)
+! Note that rprimd and gprimd are swapped, compared to what cart39 expects
+! A factor of (2pi) ** 2 is added to transform the electric field perturbations
+
+!First step
+ do ipert1=1,mpert
+   do ipert2=1,mpert
+     fac = one; if (ipert2==natom+2) fac = two_pi ** 2
+
+     do ii=1,2
+       do idir1=1,3
+         do idir2=1,3
+           vec1(idir2)=d2red(ii,idir1,ipert1,idir2,ipert2)
+         end do
+         call cart39(flg1,flg2,rprimd,ipert2,natom,gprimd,vec1,vec2)
+         do idir2=1,3
+           d2red(ii,idir1,ipert1,idir2,ipert2)=vec2(idir2) * fac
+         end do
+       end do
+     end do
+   end do
+ end do
+
+!Second step
+ do ipert1=1,mpert
+   fac = one; if (ipert1==natom+2) fac = two_pi ** 2
+
+   do ipert2=1,mpert
+     do ii=1,2
+       do idir2=1,3
+         do idir1=1,3
+           vec1(idir1)=d2red(ii,idir1,ipert1,idir2,ipert2)
+         end do
+         call cart39(flg1,flg2,rprimd,ipert1,natom,gprimd,vec1,vec2)
+         do idir1=1,3
+           d2red(ii,idir1,ipert1,idir2,ipert2)=vec2(idir1) * fac
+         end do
+       end do
+     end do
+   end do
+ end do
+
+
+end subroutine d2cart_to_red
+!!***
+
+!----------------------------------------------------------------------
+
 !!****f* m_dynmat/chkph3
 !! NAME
 !! chkph3
@@ -1128,7 +1291,7 @@ subroutine chneu9(chneut,d2cart,mpert,natom,ntypat,selectz,typat,zion)
  integer :: idir1,idir2,ii,ipert1,ipert2
  character(len=500) :: message
 !arrays
- real(dp) :: sum(2)
+ real(dp) :: sumwght(2)
  real(dp),allocatable :: wghtat(:)
 
 ! *********************************************************************
@@ -1146,7 +1309,7 @@ subroutine chneu9(chneut,d2cart,mpert,natom,ntypat,selectz,typat,zion)
  else if (chneut==2) then
 
 !  The weight is proportional to the diagonal electronic screening charge of the atom
-   sum(1)=zero
+   sumwght(1)=zero
    do ipert1=1,natom
      wghtat(ipert1)=zero
      do idir1=1,3
@@ -1154,12 +1317,12 @@ subroutine chneu9(chneut,d2cart,mpert,natom,ntypat,selectz,typat,zion)
 &       d2cart(1,idir1,ipert1,idir1,natom+2)+&
 &       d2cart(1,idir1,natom+2,idir1,ipert1)-2*zion(typat(ipert1))
      end do
-     sum(1)=sum(1)+wghtat(ipert1)
+     sumwght(1)=sumwght(1)+wghtat(ipert1)
    end do
 
 !  Normalize the weights to unity
    do ipert1=1,natom
-     wghtat(ipert1)=wghtat(ipert1)/sum(1)
+     wghtat(ipert1)=wghtat(ipert1)/sumwght(1)
    end do
  end if
 
@@ -1175,16 +1338,16 @@ subroutine chneu9(chneut,d2cart,mpert,natom,ntypat,selectz,typat,zion)
    do idir1=1,3
      do idir2=1,3
        do ii=1,2
-         sum(ii)=zero
+         sumwght(ii)=zero
          do ipert1=1,natom
-           sum(ii)=sum(ii)+d2cart(ii,idir1,ipert1,idir2,natom+2)
+           sumwght(ii)=sumwght(ii)+d2cart(ii,idir1,ipert1,idir2,natom+2)
          end do
          do ipert1=1,natom
            d2cart(ii,idir1,ipert1,idir2,natom+2)=&
-&           d2cart(ii,idir1,ipert1,idir2,natom+2)-sum(ii)*wghtat(ipert1)
+&           d2cart(ii,idir1,ipert1,idir2,natom+2)-sumwght(ii)*wghtat(ipert1)
          end do
        end do
-       write(message, '(i8,i16,2f16.6)' ) idir1,idir2,sum(1),sum(2)
+       write(message, '(i8,i16,2f16.6)' ) idir1,idir2,sumwght(1),sumwght(2)
        call wrtout(ab_out,message,'COLL')
      end do
    end do
@@ -1195,13 +1358,13 @@ subroutine chneu9(chneut,d2cart,mpert,natom,ntypat,selectz,typat,zion)
    do idir1=1,3
      do idir2=1,3
        do ii=1,2
-         sum(ii)=zero
+         sumwght(ii)=zero
          do ipert2=1,natom
-           sum(ii)=sum(ii)+d2cart(ii,idir1,natom+2,idir2,ipert2)
+           sumwght(ii)=sumwght(ii)+d2cart(ii,idir1,natom+2,idir2,ipert2)
          end do
          do ipert2=1,natom
            d2cart(ii,idir1,natom+2,idir2,ipert2)=&
-&           d2cart(ii,idir1,natom+2,idir2,ipert2)-sum(ii)*wghtat(ipert2)
+&           d2cart(ii,idir1,natom+2,idir2,ipert2)-sumwght(ii)*wghtat(ipert2)
          end do
        end do
      end do
@@ -1212,9 +1375,9 @@ subroutine chneu9(chneut,d2cart,mpert,natom,ntypat,selectz,typat,zion)
  if(selectz==1)then
    do ipert1=1,natom
      do ii=1,2
-       sum(ii)=zero
+       sumwght(ii)=zero
        do idir1=1,3
-         sum(ii)=sum(ii)+d2cart(ii,idir1,ipert1,idir1,natom+2)
+         sumwght(ii)=sumwght(ii)+d2cart(ii,idir1,ipert1,idir1,natom+2)
        end do
        do idir1=1,3
          do idir2=1,3
@@ -1222,16 +1385,16 @@ subroutine chneu9(chneut,d2cart,mpert,natom,ntypat,selectz,typat,zion)
          end do
        end do
        do idir1=1,3
-         d2cart(ii,idir1,ipert1,idir1,natom+2)=sum(ii)/3.0_dp
+         d2cart(ii,idir1,ipert1,idir1,natom+2)=sumwght(ii)/3.0_dp
        end do
      end do
    end do
 !  Do the same for the symmetrical part of d2cart
    do ipert2=1,natom
      do ii=1,2
-       sum(ii)=zero
+       sumwght(ii)=zero
        do idir1=1,3
-         sum(ii)=sum(ii)+d2cart(ii,idir1,natom+2,idir1,ipert2)
+         sumwght(ii)=sumwght(ii)+d2cart(ii,idir1,natom+2,idir1,ipert2)
        end do
        do idir1=1,3
          do idir2=1,3
@@ -1239,7 +1402,7 @@ subroutine chneu9(chneut,d2cart,mpert,natom,ntypat,selectz,typat,zion)
          end do
        end do
        do idir1=1,3
-         d2cart(ii,idir1,natom+2,idir1,ipert2)=sum(ii)/3.0_dp
+         d2cart(ii,idir1,natom+2,idir1,ipert2)=sumwght(ii)/3.0_dp
        end do
      end do
    end do
@@ -1251,10 +1414,10 @@ subroutine chneu9(chneut,d2cart,mpert,natom,ntypat,selectz,typat,zion)
      do ii=1,2
        do idir1=1,3
          do idir2=1,3
-           sum(ii)=(d2cart(ii,idir1,ipert1,idir2,natom+2)&
+           sumwght(ii)=(d2cart(ii,idir1,ipert1,idir2,natom+2)&
 &           +d2cart(ii,idir2,ipert1,idir1,natom+2))/2.0_dp
-           d2cart(ii,idir1,ipert1,idir2,natom+2)=sum(ii)
-           d2cart(ii,idir2,ipert1,idir1,natom+2)=sum(ii)
+           d2cart(ii,idir1,ipert1,idir2,natom+2)=sumwght(ii)
+           d2cart(ii,idir2,ipert1,idir1,natom+2)=sumwght(ii)
          end do
        end do
      end do
@@ -1264,10 +1427,10 @@ subroutine chneu9(chneut,d2cart,mpert,natom,ntypat,selectz,typat,zion)
      do ii=1,2
        do idir1=1,3
          do idir2=1,3
-           sum(ii)=(d2cart(ii,idir1,ipert1,idir2,natom+2)&
+           sumwght(ii)=(d2cart(ii,idir1,ipert1,idir2,natom+2)&
 &           +d2cart(ii,idir2,ipert1,idir1,natom+2))/2.0_dp
-           d2cart(ii,idir1,ipert1,idir2,natom+2)=sum(ii)
-           d2cart(ii,idir2,ipert1,idir1,natom+2)=sum(ii)
+           d2cart(ii,idir1,ipert1,idir2,natom+2)=sumwght(ii)
+           d2cart(ii,idir2,ipert1,idir1,natom+2)=sumwght(ii)
          end do
        end do
      end do
@@ -2314,7 +2477,7 @@ subroutine asrif9(asr,atmfrc,natom,nrpt,rpt,wghatm)
 !Local variables -------------------------
 !scalars
  integer :: found,ia,ib,irpt,izero,mu,nu
- real(dp) :: sum
+ real(dp) :: sumifc
 
 ! *********************************************************************
 
@@ -2340,18 +2503,18 @@ subroutine asrif9(asr,atmfrc,natom,nrpt,rpt,wghatm)
    do mu=1,3
      do nu=1,3
        do ia=1,natom
-         sum=zero
+         sumifc=zero
          do ib=1,natom
 
-!          Get the sum of interatomic forces acting on the atom ia,
+!          Get the sumifc of interatomic forces acting on the atom ia,
 !          either in a symmetrical manner, or an unsymmetrical one.
            if(asr==1)then
              do irpt=1,nrpt
-               sum=sum+wghatm(ia,ib,irpt)*atmfrc(1,mu,ia,nu,ib,irpt)
+               sumifc=sumifc+wghatm(ia,ib,irpt)*atmfrc(1,mu,ia,nu,ib,irpt)
              end do
            else if(asr==2)then
              do irpt=1,nrpt
-               sum=sum+&
+               sumifc=sumifc+&
 &               (wghatm(ia,ib,irpt)*atmfrc(1,mu,ia,nu,ib,irpt)+&
 &               wghatm(ia,ib,irpt)*atmfrc(1,nu,ia,mu,ib,irpt))/2
              end do
@@ -2359,7 +2522,7 @@ subroutine asrif9(asr,atmfrc,natom,nrpt,rpt,wghatm)
          end do
 
 !        Correct the self-interaction in order to fulfill the ASR
-         atmfrc(1,mu,ia,nu,ia,izero)=atmfrc(1,mu,ia,nu,ia,izero)-sum
+         atmfrc(1,mu,ia,nu,ia,izero)=atmfrc(1,mu,ia,nu,ia,izero)-sumifc
          if(asr==2)then
            atmfrc(1,nu,ia,mu,ia,izero)=atmfrc(1,mu,ia,nu,ia,izero)
          end if
@@ -3293,7 +3456,7 @@ subroutine ftifc_q2r(atmfrc,dynmat,gprim,natom,nqpt,nrpt,rpt,spqpt)
    end do
  end do
 
-!The sum has to be weighted by a normalization factor of 1/nqpt
+!The sumifc has to be weighted by a normalization factor of 1/nqpt
  atmfrc = atmfrc/nqpt
 
  DBG_EXIT("COLL")
@@ -3437,7 +3600,7 @@ end subroutine ftifc_r2q
 !!  These coordinates are normalized (=> * acell(3)!!)
 !!
 !! PARENTS
-!!      m_dynmat
+!!      m_ifc
 !!
 !! CHILDREN
 !!
@@ -3629,7 +3792,7 @@ end subroutine ifclo9
 !!
 !! SOURCE
 
-subroutine wght9(brav,gprim,natom,ngqpt,nqpt,nqshft,nrpt,qshft,rcan,rpt,rprimd,new_wght,wghatm)
+subroutine wght9(brav,gprim,natom,ngqpt,nqpt,nqshft,nrpt,qshft,rcan,rpt,rprimd,r_inscribed_sphere,new_wght,wghatm)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -3643,6 +3806,7 @@ subroutine wght9(brav,gprim,natom,ngqpt,nqpt,nqshft,nrpt,qshft,rcan,rpt,rprimd,n
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: brav,natom,nqpt,nqshft,nrpt,new_wght
+ real(dp),intent(out) :: r_inscribed_sphere
 !arrays
  integer,intent(inout) :: ngqpt(9)
  real(dp),intent(in) :: gprim(3,3),qshft(3,4),rcan(3,natom),rpt(3,nrpt),rprimd(3,3)
@@ -3651,7 +3815,8 @@ subroutine wght9(brav,gprim,natom,ngqpt,nqpt,nqshft,nrpt,qshft,rcan,rpt,rprimd,n
 !Local variables -------------------------
 !scalars
  integer :: ia,ib,ii,jj,kk,iqshft,irpt,jqshft,nbordh,tok,nptws,nreq
- real(dp) :: factor,sum,normsq,proj
+ integer :: idir
+ real(dp) :: factor,sumwght,normsq,proj
  character(len=500) :: message
 !arrays
  integer :: nbord(9)
@@ -3731,12 +3896,13 @@ subroutine wght9(brav,gprim,natom,ngqpt,nqpt,nqshft,nrpt,qshft,rcan,rpt,rprimd,n
 
    ! Find the points of the lattice given by ngqpt*acell. These are used to define
    ! a Wigner-Seitz cell around the origin. The origin is excluded from the list.
+   ! TODO : in principle this should be only -1 to +1 for ii jj kk!
    nptws=0
    do ii=-4,4
      do jj=-4,4
        do kk=-4,4
-         do ia=1,3
-           pp(ia)=ii*ngqpt(1)*rprimd(ia,1)+ jj*ngqpt(2)*rprimd(ia,2)+ kk*ngqpt(3)*rprimd(ia,3)
+         do idir=1,3
+           pp(idir)=ii*ngqpt(1)*rprimd(idir,1)+ jj*ngqpt(2)*rprimd(idir,2)+ kk*ngqpt(3)*rprimd(idir,3)
          end do
          normsq = pp(1)*pp(1)+pp(2)*pp(2)+pp(3)*pp(3)
          if (normsq > tol6) then
@@ -3747,11 +3913,26 @@ subroutine wght9(brav,gprim,natom,ngqpt,nqpt,nqshft,nrpt,qshft,rcan,rpt,rprimd,n
        end do
      end do
    end do
- end if
+ end if ! end new_wght
 
 !DEBUG
 !write(std_out,*)'factor,ngqpt',factor,ngqpt(1:3)
 !ENDDEBUG
+ 
+ r_inscribed_sphere = sum((matmul(rprimd(:,:),ngqpt(1:3)))**2)
+ do ii=-1,1
+   do jj=-1,1
+     do kk=-1,1
+       if (ii==0 .and. jj==0 .and. kk==0) cycle
+       do idir=1,3
+         pp(idir)=ii*ngqpt(1)*rprimd(idir,1)+ jj*ngqpt(2)*rprimd(idir,2)+ kk*ngqpt(3)*rprimd(idir,3)
+       end do
+       normsq = pp(1)*pp(1)+pp(2)*pp(2)+pp(3)*pp(3)
+       r_inscribed_sphere = min(r_inscribed_sphere, normsq)
+     end do
+   end do
+ end do
+ r_inscribed_sphere = sqrt(r_inscribed_sphere)
 
 
 !Begin the big loop on ia and ib
@@ -3983,19 +4164,19 @@ subroutine wght9(brav,gprim,natom,ngqpt,nqpt,nqshft,nrpt,qshft,rcan,rpt,rprimd,n
 ! Check the results
  do ia=1,natom
    do ib=1,natom
-     sum=zero
+     sumwght=zero
      do irpt=1,nrpt
 !      Check if the sum of the weights is equal to the number of q points
-       sum=sum+wghatm(ia,ib,irpt)
+       sumwght=sumwght+wghatm(ia,ib,irpt)
 !      write(std_out,'(a,3i5)' )' atom1, atom2, irpt ; rpt ; wghatm ',ia,ib,irpt
 !      write(std_out,'(3es16.6,es18.6)' )&
 !      &    rpt(1,irpt),rpt(2,irpt),rpt(3,irpt),wghatm(ia,ib,irpt)
      end do
-     if (abs(sum-nqpt)>1.0d-10) then
+     if (abs(sumwght-nqpt)>1.0d-10) then
        write(message, '(a,a,a,2i4,a,a,es14.4,a,a,i4,a,a,a,a,a,a)' )&
 &       'The sum of the weight is not equal to nqpt.',ch10,&
 &       'atoms :',ia,ib,ch10,&
-&       'The sum of the weights is : ',sum,ch10,&
+&       'The sum of the weights is : ',sumwght,ch10,&
 &       'The number of q points is : ',nqpt,ch10,&
 &       'You might increase "buffer" in bigbx9.f, and recompile.',ch10,&
 &       'Actually, this can also happen when ngqpt is 0 0 0,',ch10,&
@@ -4258,7 +4439,7 @@ end subroutine d3sym
 !!      -2   ->   element is zero by symmetry
 !!
 !! PARENTS
-!!      nonlinear,respfn
+!!      m_ddb,nonlinear,respfn
 !!
 !! CHILDREN
 !!

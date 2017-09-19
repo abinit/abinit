@@ -67,8 +67,8 @@
 !!      pawrad_free,pawtab_free,pawtab_nullify,psps_free,psps_init_from_dtset
 !!      psps_init_global,respfn,screening,sigma,status,timab,wfk_analyze,wrtout
 !!      xc_vdw_done,xc_vdw_init,xc_vdw_libxc_init,xc_vdw_memcheck,xc_vdw_read
-!!      xc_vdw_show,xc_vdw_trigger,xc_vdw_write,xcart2xred,xmpi_bcast
-!!      xred2xcart
+!!      xc_vdw_show,xc_vdw_trigger,xc_vdw_write,xcart2xred,xg_finalize
+!!      xmpi_bcast,xred2xcart
 !!
 !! SOURCE
 
@@ -370,6 +370,7 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
 &                 miximage(ii,iimage_get)*results_out_all(iget_cell)%rprim(kk,jj,iimage_get)
                end do
              end do
+             dtset%rprimd_orig(:,:,iimage)=dtsets(iget_cell)%rprimd_orig(:,:,iimage)
 !            Check that the new acell and rprim are consistent with the input dilatmx
              call mkrdim(acell_img(:,iimage),rprim_img(:,:,iimage),rprimd)
              call chkdilatmx(dtset%dilatmx,rprimd,dtset%rprimd_orig(1:3,1:3,iimage), dilatmx_errmsg)

@@ -205,6 +205,7 @@ _ WF disk file :      0.025 Mbytes ; DEN or POT disk file :      0.202 Mbytes.
  -outvars: echo values of preprocessed input variables --------
             acell      7.0000000000E+00  5.0000000000E+00  5.0000000000E+00 Bohr
               amu      1.00794000E+00
+     densfor_pred           1
            diemac      1.00000000E+00
            diemix      5.00000000E-01
              ecut1     6.00000000E+00 Hartree
@@ -220,7 +221,6 @@ _ WF disk file :      0.025 Mbytes ; DEN or POT disk file :      0.202 Mbytes.
 -          fftalg         312
           getxred          -1
            ionmov           2
-     densfor_pred           1
            jdtset        1    2    3    4    5    6    7    8    9   10
               kpt      2.50000000E-01  2.50000000E-01  2.50000000E-01
            kptopt           0
@@ -313,7 +313,7 @@ P           mkmem           1
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     0.00000000000000    0.00000000000000    0.00000000000000   rchrg,fchrg,qchrg
  Note: local psp for atom with Z=  1.0
- pspatm: epsatm=    0.04198703
+ pspatm : epsatm=    0.04198703
          --- l  ekb(1:nproj) -->
  pspatm: atomic psp has been read  and splines computed
 
@@ -603,7 +603,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     122.000     122.000
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     0.00000000000000    0.00000000000000    0.00000000000000   rchrg,fchrg,qchrg
  Note: local psp for atom with Z=  1.0
- pspatm: epsatm=    0.04198703
+ pspatm : epsatm=    0.04198703
          --- l  ekb(1:nproj) -->
  pspatm: atomic psp has been read  and splines computed
 
@@ -892,7 +892,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     186.000     186.000
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     0.00000000000000    0.00000000000000    0.00000000000000   rchrg,fchrg,qchrg
  Note: local psp for atom with Z=  1.0
- pspatm: epsatm=    0.04198703
+ pspatm : epsatm=    0.04198703
          --- l  ekb(1:nproj) -->
  pspatm: atomic psp has been read  and splines computed
 
@@ -1140,7 +1140,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     264.000     264.000
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     0.00000000000000    0.00000000000000    0.00000000000000   rchrg,fchrg,qchrg
  Note: local psp for atom with Z=  1.0
- pspatm: epsatm=    0.04198703
+ pspatm : epsatm=    0.04198703
          --- l  ekb(1:nproj) -->
  pspatm: atomic psp has been read  and splines computed
 
@@ -1383,7 +1383,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     349.000     349.000
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     0.00000000000000    0.00000000000000    0.00000000000000   rchrg,fchrg,qchrg
  Note: local psp for atom with Z=  1.0
- pspatm: epsatm=    0.04198703
+ pspatm : epsatm=    0.04198703
          --- l  ekb(1:nproj) -->
  pspatm: atomic psp has been read  and splines computed
 
@@ -1630,7 +1630,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     437.000     437.000
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     0.00000000000000    0.00000000000000    0.00000000000000   rchrg,fchrg,qchrg
  Note: local psp for atom with Z=  1.0
- pspatm: epsatm=    0.04198703
+ pspatm : epsatm=    0.04198703
          --- l  ekb(1:nproj) -->
  pspatm: atomic psp has been read  and splines computed
 
@@ -1877,7 +1877,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     539.000     539.000
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     0.00000000000000    0.00000000000000    0.00000000000000   rchrg,fchrg,qchrg
  Note: local psp for atom with Z=  1.0
- pspatm: epsatm=    0.04198703
+ pspatm : epsatm=    0.04198703
          --- l  ekb(1:nproj) -->
  pspatm: atomic psp has been read  and splines computed
 
@@ -2120,7 +2120,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     753.000     753.000
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     0.00000000000000    0.00000000000000    0.00000000000000   rchrg,fchrg,qchrg
  Note: local psp for atom with Z=  1.0
- pspatm: epsatm=    0.04198703
+ pspatm : epsatm=    0.04198703
          --- l  ekb(1:nproj) -->
  pspatm: atomic psp has been read  and splines computed
 
@@ -2368,7 +2368,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     984.000     984.000
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     0.00000000000000    0.00000000000000    0.00000000000000   rchrg,fchrg,qchrg
  Note: local psp for atom with Z=  1.0
- pspatm: epsatm=    0.04198703
+ pspatm : epsatm=    0.04198703
          --- l  ekb(1:nproj) -->
  pspatm: atomic psp has been read  and splines computed
 
@@ -2611,7 +2611,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    1242.000    1242.000
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     0.00000000000000    0.00000000000000    0.00000000000000   rchrg,fchrg,qchrg
  Note: local psp for atom with Z=  1.0
- pspatm: epsatm=    0.04198703
+ pspatm : epsatm=    0.04198703
          --- l  ekb(1:nproj) -->
  pspatm: atomic psp has been read  and splines computed
 
@@ -2783,6 +2783,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    1510.000    1510.000
  -outvars: echo values of variables after computation  --------
             acell      7.0000000000E+00  5.0000000000E+00  5.0000000000E+00 Bohr
               amu      1.00794000E+00
+     densfor_pred           1
            diemac      1.00000000E+00
            diemix      5.00000000E-01
              ecut1     6.00000000E+00 Hartree
@@ -2828,7 +2829,6 @@ _setup2: Arith. and geom. avg. npw (full set) are    1510.000    1510.000
 -          fftalg         312
           getxred          -1
            ionmov           2
-     densfor_pred           1
            jdtset        1    2    3    4    5    6    7    8    9   10
               kpt      2.50000000E-01  2.50000000E-01  2.50000000E-01
            kptopt           0

@@ -50,7 +50,7 @@ MODULE m_hexc
  use m_bse_io,            only : exc_read_rcblock, exc_write_optme, exc_ham_ncwrite
  use m_pawtab,            only : pawtab_type
  use m_vcoul,             only : vcoul_t
- use m_interp,            only : interpolator_t, interpolator_init, interpolator_normalize, &
+ use m_bseinterp,            only : interpolator_t, interpolator_init, interpolator_normalize, &
 &                    interpolator_free, int_alloc_work, int_free_work
 
  implicit none
@@ -89,6 +89,10 @@ MODULE m_hexc
 
     integer :: my_t2
     ! Upper limit of MPI paral
+
+    integer :: my_nt
+    ! Number of transitions treat by node
+    ! = my_t2 - my_t1 + 1
 
     integer :: nbnd_coarse
     ! Product of number of bands conduction X valence
@@ -205,6 +209,7 @@ MODULE m_hexc
  public :: hexc_build_hinterp  ! Interpolate the Hamiltonian and store it in memory
  public :: hexc_matmul_tda     ! Matrix-vector multiplication (TDA)
  public :: hexc_matmul_full    ! Matrix-vector multiplication (TDA + Coupling)
+ public :: hexc_matmul_elphon  ! Matrix-vector multiplication (TDA + elphon)
 
 !----------------------------------------------------------------------
 
@@ -302,7 +307,8 @@ subroutine hexc_init(hexc, BSp, BS_files, Cryst, Kmesh_coarse, Wfd_coarse, KS_BS
    MSG_WARNING(msg)
  end if
 
- ABI_CHECK(hexc%my_t2-hexc%my_t1+1>0,"found processor with 0 rows")
+ hexc%my_nt = hexc%my_t2 - hexc%my_t1 + 1
+ ABI_CHECK(hexc%my_nt>0,"found processor with 0 rows")
 
  ABI_STAT_MALLOC(hexc%hreso,(hsize,hexc%my_t1:hexc%my_t2), ierr)
  ABI_CHECK(ierr==0, "out of memory in hreso")
@@ -1744,16 +1750,12 @@ subroutine hexc_matmul_tda(hexc, hexc_i, phi, hphi)
  complex(dpc),intent(out) :: hphi(hexc%hsize)
 
 !Local variables ---------------------
- integer :: my_nt
  integer :: ierr
  real(dp) :: tsec(2)
 
 !*****************************************************************************
  
  call timab(697,1,tsec)
-
- my_nt = hexc%my_t2 - hexc%my_t1+1
- ABI_CHECK(my_nt>0,"One of the processors has zero columns")
 
  if(hexc%BSp%use_interp) then
    hphi = hexc_i%diag_dense * phi
@@ -1771,13 +1773,89 @@ subroutine hexc_matmul_tda(hexc, hexc_i, phi, hphi)
 &     hexc_i%interpolator%double_grid,hexc%nbnd_coarse, hexc_i%interpolator, hexc_i%div2kdense, hexc_i%kdense2div)
 
  else ! No interpolation
-   call xgemv('N',hexc%hsize,my_nt,cone,hexc%hreso,hexc%hsize,phi,1,czero,hphi,1)
+   call xgemv('N',hexc%hsize,hexc%my_nt,cone,hexc%hreso,hexc%hsize,phi,1,czero,hphi,1)
    call xmpi_sum(hphi,hexc%comm,ierr)
  end if
  
  call timab(697,2,tsec)
 
 end subroutine hexc_matmul_tda
+!!***
+
+!-------------------------------------------------------------------
+
+!!****f* m_hexc/hexc_matmul_elphon
+!! NAME
+!! hexc_matmul_elphon
+!!
+!! FUNCTION
+!! Compute H | \psi > + E_{elphon} | \psi >
+!!
+!! INPUTS
+!! hexc<hexc_t> = Excitonic hamiltonian
+!! hexc_i<hexc_interp_t> = Interpolated excitonic hamiltonian
+!! phi = Input ket
+!! ep_renorm = vector with electron-phonon renorms
+!! op = 'N' for H | psi >, 'C' for H^\dagger | psi >
+!!
+!! OUTPUT
+!! hphi = hreso * phi + ep_renorm * phi
+!!
+!! PARENTS
+!!      m_haydock
+!!
+!! CHILDREN
+!!      timab
+!!
+!! SOURCE
+
+subroutine hexc_matmul_elphon(hexc, hexc_i, phi, hphi, op, ep_renorm)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'hexc_matmul_elphon'
+ use interfaces_18_timing
+!End of the abilint section
+
+ implicit none
+
+!Arguments ---------------------------
+ type(hexc_t),intent(in) :: hexc
+ type(hexc_interp_t),intent(in) :: hexc_i
+ character,intent(in) :: op
+ complex(dpc),intent(in) :: phi(hexc%my_nt)
+ complex(dpc),intent(out) :: hphi(hexc%hsize)
+ complex(dpc),intent(in) :: ep_renorm(hexc%hsize)
+
+!Local variables ---------------------
+ integer :: my_nt
+ integer :: ierr
+ real(dp) :: tsec(2)
+
+!*****************************************************************************
+ 
+ call timab(697,1,tsec)
+
+ if(hexc%BSp%use_interp) then
+   MSG_ERROR('Not yet implemented with interpolation !')
+ else ! No interpolation
+   ! As our matrix is hermitian (hreso), we should always use 'N' here (it is stored column-wise !)
+   call xgemv('N',hexc%hsize,hexc%my_nt,cone,hexc%hreso,hexc%hsize,phi,1,czero,hphi,1)
+
+   !!! ep_renorm is stored on each cpu
+   if (op == 'N') then
+     hphi(hexc%my_t1:hexc%my_t2) = hphi(hexc%my_t1:hexc%my_t2) + ep_renorm(hexc%my_t1:hexc%my_t2) * phi
+   else if(op == 'C') then
+     hphi(hexc%my_t1:hexc%my_t2) = hphi(hexc%my_t1:hexc%my_t2) + CONJG(ep_renorm(hexc%my_t1:hexc%my_t2)) * phi
+   end if
+   call xmpi_sum(hphi,hexc%comm,ierr)
+ end if
+ 
+ call timab(697,2,tsec)
+
+end subroutine hexc_matmul_elphon
 !!***
 
 !-------------------------------------------------------------------
@@ -1826,15 +1904,11 @@ subroutine hexc_matmul_full(hexc, hexc_i, phi, hphi, parity)
  complex(dpc),intent(out) :: hphi(hexc%hsize)
 
 !Local variables ---------------------
- integer :: my_nt
  real(dp) :: tsec(2)
 
 !*****************************************************************************
 
  call timab(697,1,tsec)
-
- my_nt = hexc%my_t2 - hexc%my_t1+1
- ABI_CHECK(my_nt>0,"One of the processors has zero columns")
 
  ABI_UNUSED(hexc_i%hsize_dense)
 

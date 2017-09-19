@@ -21,11 +21,18 @@
 !!  gsqcut=cutoff value on G**2 for sphere inside fft box.
 !!  ixc= choice of exchange-correlation scheme
 !!  kxc(nfft,nkxc)=first-order derivative of the xc potential
-!!   if(nkxc=1): kxc(:,1)=dvxc/d$\rho$
-!!   if(nkxc=3): kxc(:,1)=dvxc($\uparrow$)/d$\rho(\uparrow)$,
-!!               kxc(:,2)=dvxc($\uparrow$)/d$\rho(\downarrow)$,
-!!               kxc(:,3)=dvxc($\downarrow$)/d$\rho(\downarrow)$
-!!   if(nkxc=23): GGA case, see rhohxc_coll.f
+!!    if (nkxc=1) LDA kxc(:,1)= d2Exc/drho2
+!!    if (nkxc=2) LDA kxc(:,1)=d2Exc/drho_up drho_up
+!!                    kxc(:,2)=d2Exc/drho_up drho_dn
+!!                    kxc(:,3)=d2Exc/drho_dn drho_dn
+!!    if (nkxc=7) GGA kxc(:,1)= d2Exc/drho2
+!!                    kxc(:,2)= 1/|grad(rho)| dExc/d|grad(rho)|
+!!                    kxc(:,3)= 1/|grad(rho)| d2Exc/d|grad(rho)| drho
+!!                    kxc(:,4)= 1/|grad(rho)| * d/d|grad(rho)| ( 1/|grad(rho)| dExc/d|grad(rho)| )
+!!                    kxc(:,5)= gradx(rho)
+!!                    kxc(:,6)= grady(rho)
+!!                    kxc(:,7)= gradz(rho)
+!!    if (nkxc=19) spin-polarized GGA case (same as nkxc=7 with up and down components)
 !!  mgfft=maximum size of 1D FFTs
 !!  mpert=maximum number of ipert
 !!  mpi_enreg=information about MPI parallelization
@@ -178,8 +185,7 @@ subroutine dfpt_dyxc1(atindx,blkflgfrx1,dyfrx1,gmet,gsqcut,ixc,kxc,mgfft,mpert,m
      rhor1=zero
 !FR EB Non-collinear magnetism
      if (nspden==4.and.present(rhor)) then
-       optnc=1
-       optxc=1
+       optnc=1 ; optxc=1
        call dfpt_mkvxc_noncoll(1,ixc,kxc,mpi_enreg,nfft,ngfft,dum_nhat,0,dum_nhat,0,nkxc,&
 &       nkxc,nspden,n3xccc,optnc,option,optxc,paral_kgb,qphon,rhor,rhor1,rprimd,0,vxc10,xcccwk1) 
      else

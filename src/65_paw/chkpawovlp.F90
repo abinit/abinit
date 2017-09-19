@@ -166,7 +166,7 @@ subroutine chkpawovlp(natom,ntypat,pawovlp,pawtab,rmet,typat,xred)
 &     '   Compensation radius around atom ',iamax(2),' is: ',pawtab(typat(iamax(2)))%rshp,ch10,&
 &     '   Compensation radius around atom ',ibmax(2),' is: ',pawtab(typat(ibmax(2)))%rshp,ch10,&
 &     '   This leads to a (voluminal) overlap ratio of ',ratio_percent_max(2),' %',ch10,&
-&     '  THIS IS DANGEROUS !, as PAW formalism assume non-overlapping compensation densities.'
+&     '  THIS IS DANGEROUS !, as PAW formalism assumes non-overlapping compensation densities.'
      call wrtout(std_out,message,'COLL')
    end if
 

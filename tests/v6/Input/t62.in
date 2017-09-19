@@ -125,4 +125,5 @@ pawecutdg   9.
 #%%   Note: Charge neutrality is not achieved with the present dataset,
 #%%   but can be easily reached by increasing some parameters; for instance:
 #%%     (ngkpt 8 8 8, ecut 15., pawecutdg 30.) gives Z(Al)=2.1184310, Z(As)=-2.1184804
+#%% topics = DFPT
 #%%<END TEST_INFO>

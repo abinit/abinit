@@ -71,11 +71,11 @@ _ WF disk file :      0.817 Mbytes ; DEN or POT disk file :      0.022 Mbytes.
             acell      4.6200000000E+00  4.6200000000E+00  7.5200000000E+00 Bohr
               amu      5.58470000E+01
       chksymbreak           0
+     densfor_pred           6
              ecut      6.00000000E+00 Hartree
 -          fftalg         112
            getwfk1          0
            getwfk2         -1
-     densfor_pred           6
            jdtset        1    2
               kpt      8.33333333E-02  8.33333333E-02  8.33333333E-02
                        2.50000000E-01  8.33333333E-02  8.33333333E-02
@@ -327,7 +327,7 @@ P           mkmem          36
     2  18.664  23.972    1   2.2918558        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     1.56404770202776    2.06158206779471    6.88331421535388   rchrg,fchrg,qchrg
- pspatm: epsatm=   62.03296659
+ pspatm : epsatm=   62.03296659
          --- l  ekb(1:nproj) -->
              1    1.561134
              2   -8.115829
@@ -460,7 +460,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      97.574      97.533
     2  18.664  23.972    1   2.2918558        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     1.56404770202776    2.06158206779471    6.88331421535388   rchrg,fchrg,qchrg
- pspatm: epsatm=   62.03296659
+ pspatm : epsatm=   62.03296659
          --- l  ekb(1:nproj) -->
              1    1.561134
              2   -8.115829
@@ -563,6 +563,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      97.574      97.533
             acell      4.6200000000E+00  4.6200000000E+00  7.5200000000E+00 Bohr
               amu      5.58470000E+01
       chksymbreak           0
+     densfor_pred           6
              ecut      6.00000000E+00 Hartree
            etotal1    -3.9179774444E+01
            etotal2    -3.9179774444E+01
@@ -573,7 +574,6 @@ _setup2: Arith. and geom. avg. npw (full set) are      97.574      97.533
 -          fftalg         112
            getwfk1          0
            getwfk2         -1
-     densfor_pred           6
            jdtset        1    2
               kpt      8.33333333E-02  8.33333333E-02  8.33333333E-02
                        2.50000000E-01  8.33333333E-02  8.33333333E-02

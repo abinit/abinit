@@ -70,6 +70,7 @@
 !!  vdw_xc= Van der Waals correction flag
 !!  vlspl(mqgrid,2,ntypat)=local psp spline
 !!  vxc(nfft,nspden)=exchange-correlation potential (hartree) in real space
+!!  vxc_hf(nfft,nspden)=exchange-correlation potential (hartree) in real space for Hartree-Fock corrections
 !!  xccc1d(n1xccc*(1-usepaw),6,ntypat)=1D core charge function and five derivatives,
 !!                          for each type of atom, from psp (used in Norm-conserving only)
 !!  xccc3d(n3xccc)=3D core electron density for XC core correction, bohr^-3
@@ -111,8 +112,8 @@
 !!      forstr
 !!
 !! CHILDREN
-!!      atm2fft,ewald2,fourdp,metric,mkcore,mklocl_recipspace,stresssym,strhar
-!!      timab,vdw_dftd2,vdw_dftd3,wrtout,zerosym
+!!      atm2fft,ewald2,fourdp,metric,mkcore,mkcore_alt,mklocl_recipspace
+!!      stresssym,strhar,timab,vdw_dftd2,vdw_dftd3,wrtout,zerosym
 !!
 !! SOURCE
 
@@ -127,7 +128,7 @@
 &                  nfft,ngfft,nlstr,nspden,nsym,ntypat,paral_kgb,psps,pawrad,pawtab,ph1d,&
 &                  prtvol,qgrid,red_efieldbar,rhog,rprimd,strten,strsxc,symrec,&
 &                  typat,usefock,usepaw,vdw_tol,vdw_tol_3bt,vdw_xc,&
-&                  vlspl,vxc,xccc1d,xccc3d,xcccrc,xred,zion,znucl,qvpotzero,&
+&                  vlspl,vxc,vxc_hf,xccc1d,xccc3d,xcccrc,xred,zion,znucl,qvpotzero,&
 &                  electronpositron) ! optional argument
 
  use defs_basis
@@ -175,6 +176,7 @@
  real(dp),intent(in) :: ph1d(2,3*(2*mgfft+1)*natom),qgrid(mqgrid)
  real(dp),intent(in) :: red_efieldbar(3),rhog(2,nfft),rprimd(3,3),strsxc(6)
  real(dp),intent(in) :: vlspl(mqgrid,2,ntypat),vxc(nfft,nspden)
+ real(dp),allocatable,intent(in) :: vxc_hf(:,:)
  real(dp),intent(in) :: xccc1d(n1xccc*(1-usepaw),6,ntypat),xcccrc(ntypat)
  real(dp),intent(in) :: xred(3,natom),zion(ntypat),znucl(ntypat)
  real(dp),intent(inout) :: xccc3d(n3xccc)
@@ -184,8 +186,8 @@
 
 !Local variables-------------------------------
 !scalars
- integer :: coredens_method,iatom,icoulomb,idir,ii,ipositron,mu,optatm,optdyfr
- integer :: opteltfr,optgr,option,optn,optn2,optstr,optv,sdir,vloc_method
+ integer :: coredens_method,iatom,icoulomb,idir,ii,ipositron,mu,optatm,optdyfr,opteltfr,opt_hybr,optgr,option
+ integer :: optn,optn2,optstr,optv,sdir,vloc_method
  real(dp),parameter :: tol=1.0d-15
  real(dp) :: e_dum,strsii,ucvol,vol_element
  character(len=500) :: message
@@ -199,7 +201,7 @@
  real(dp) :: vdwstr(6),vprtrb_dum(2)
  real(dp) :: dummy_in(0)
  real(dp) :: dummy_out1(0),dummy_out2(0),dummy_out3(0),dummy_out4(0),dummy_out5(0),dummy_out6(0),dummy_out7(0) 
- real(dp),allocatable :: dummy(:),dyfr_dum(:,:,:),gr_dum(:,:),rhog_ep(:,:),v_dum(:)
+ real(dp),allocatable :: dummy(:),dyfr_dum(:,:,:),gr_dum(:,:),rhog_ep(:,:),v_dum(:),vxc_loc(:,:)
  real(dp),allocatable :: vxctotg(:,:)
  character(len=10) :: EPName(1:2)=(/"Electronic","Positronic"/)
 
@@ -209,7 +211,8 @@
 
 !Compute different geometric tensor, as well as ucvol, from rprimd
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
-
+ opt_hybr=0
+ if (allocated(vxc_hf)) opt_hybr=1
 !=======================================================================
 !========= Local pseudopotential and core charge contributions =========
 !=======================================================================
@@ -281,13 +284,19 @@
      ABI_ALLOCATE(v_dum,(nfft))
      icoulomb=0 ! not yet compatible with icoulomb
      if (psps%usewvl==0.and.usepaw==0.and.icoulomb==0) then
-       call mkcore(corstr,dyfr_dum,gr_dum,mpi_enreg,natom,nfft,nspden,ntypat,ngfft(1),&
-&       n1xccc,ngfft(2),ngfft(3),option,rprimd,typat,ucvol,vxc,&
-&       xcccrc,xccc1d,xccc3d,xred)
+       if(opt_hybr==0) then
+         call mkcore(corstr,dyfr_dum,gr_dum,mpi_enreg,natom,nfft,nspden,ntypat,ngfft(1),&
+&         n1xccc,ngfft(2),ngfft(3),option,rprimd,typat,ucvol,vxc,&
+&         xcccrc,xccc1d,xccc3d,xred)
+       else
+         call mkcore(corstr,dyfr_dum,gr_dum,mpi_enreg,natom,nfft,nspden,ntypat,ngfft(1),&
+&         n1xccc,ngfft(2),ngfft(3),option,rprimd,typat,ucvol,vxc_hf,&
+&         xcccrc,xccc1d,xccc3d,xred)
+       end if
      else if (psps%usewvl==0.and.(usepaw==1.or.icoulomb==1)) then
        call mkcore_alt(atindx1,corstr,dyfr_dum,gr_dum,icoulomb,mpi_enreg,natom,nfft,&
-&           nspden,nattyp,ntypat,ngfft(1),n1xccc,ngfft(2),ngfft(3),option,rprimd,&
-&           ucvol,vxc,xcccrc,xccc1d,xccc3d,xred,pawrad,pawtab,usepaw)
+&       nspden,nattyp,ntypat,ngfft(1),n1xccc,ngfft(2),ngfft(3),option,rprimd,&
+&       ucvol,vxc,xcccrc,xccc1d,xccc3d,xred,pawrad,pawtab,usepaw)
      end if
      ABI_DEALLOCATE(dyfr_dum)
      ABI_DEALLOCATE(gr_dum)
@@ -464,8 +473,8 @@
 !In cartesian coordinates (symmetric storage) 
 
  strten(:)=kinstr(:)+ewestr(:)+corstr(:)+strsxc(:)+harstr(:)+lpsstr(:)+nlstr(:)
- if (usefock==1 .and. associated(fock).and.fock%optstr) then
-   strten(:)=strten(:)+fock%stress(:)
+ if (usefock==1 .and. associated(fock).and.fock%fock_common%optstr) then
+   strten(:)=strten(:)+fock%fock_common%stress(:)
  end if
 
 !Add contributions for constant E or D calculation.
