@@ -76,7 +76,6 @@ module m_fit_data
 !    ucvol array, volume of the cell in the training set
 
  end type training_set_type
-!!***
  
 !routine for training_set
  public :: training_set_init
@@ -120,7 +119,6 @@ module m_fit_data
 !    datatype with the informations of the training set
    
  end type fit_data_type
-!!***
  
 !routine for fit_data
  public :: fit_data_compute
