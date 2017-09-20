@@ -1796,15 +1796,14 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
 
      if(dtset%prtden<0.or.dtset%prtkden<0) then
 !      Update the content of the header (evolving variables)
+!      Don't use parallelism over atoms because only me=0 accesses here
        bantot=hdr%bantot
        if (dtset%positron==0) then
          call hdr_update(hdr,bantot,etotal,energies%e_fermie,residm,&
-&         rprimd,occ,pawrhoij,xred,dtset%amu_orig(:,1),&
-&         comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
+&         rprimd,occ,pawrhoij,xred,dtset%amu_orig(:,1))
        else
          call hdr_update(hdr,bantot,electronpositron%e0,energies%e_fermie,residm,&
-&         rprimd,occ,pawrhoij,xred,dtset%amu_orig(:,1),&
-&         comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
+&         rprimd,occ,pawrhoij,xred,dtset%amu_orig(:,1))
        end if
      end if
 

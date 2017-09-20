@@ -264,7 +264,7 @@ Work done
  ============================================================= 
  ABINIT Input variables: Check in documentation                
  ============================================================= 
-FAIL:  focktoldfe  does not appear in any var*html files 
+FAIL:  focktoldfe  does not appear in any var*html files
 FAIL:  focktoldfe  does not appear in the central varset_allvars.html file
 FAIL:  getdelfd  does not appear in any var*html files 
 FAIL:  getdelfd  does not appear in the central varset_allvars.html file 

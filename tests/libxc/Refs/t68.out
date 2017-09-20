@@ -176,8 +176,8 @@ P           mkmem           1
     8   11    1    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
     5.99000000000000    4.00000000000000    0.00000000000000   rchrg,fchrg,qchrg
      nproj     2     2
-extension_switch     1
- pspatm: epsatm=    6.54852399
+     extension_switch     1
+  pspatm : epsatm=    6.54852399
          --- l  ekb(1:nproj) -->
              0    5.385069    0.619074
              1   -3.489168   -1.040664
@@ -190,8 +190,8 @@ extension_switch     1
     8   11    1    4       300   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
     2.99000000000000    0.00000000000000    0.00000000000000   rchrg,fchrg,qchrg
      nproj     2     1
-extension_switch     1
- pspatm: epsatm=    0.36200384
+     extension_switch     1
+  pspatm : epsatm=    0.36200384
          --- l  ekb(1:nproj) -->
              0   -7.905942   -0.865230
              1   -6.853045
@@ -511,8 +511,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    1207.000    1207.000
     8   11    1    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
     5.99000000000000    4.00000000000000    0.00000000000000   rchrg,fchrg,qchrg
      nproj     2     2
-extension_switch     1
- pspatm: epsatm=    6.54852399
+     extension_switch     1
+  pspatm : epsatm=    6.54852399
          --- l  ekb(1:nproj) -->
              0    5.385069    0.619074
              1   -3.489168   -1.040664
@@ -525,8 +525,8 @@ extension_switch     1
     8   11    1    4       300   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
     2.99000000000000    0.00000000000000    0.00000000000000   rchrg,fchrg,qchrg
      nproj     2     1
-extension_switch     1
- pspatm: epsatm=    0.36200384
+     extension_switch     1
+  pspatm : epsatm=    0.36200384
          --- l  ekb(1:nproj) -->
              0   -7.905942   -0.865230
              1   -6.853045
@@ -800,8 +800,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    1207.000    1207.000
     8   11    1    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
     5.99000000000000    4.00000000000000    0.00000000000000   rchrg,fchrg,qchrg
      nproj     2     2
-extension_switch     1
- pspatm: epsatm=    6.54852399
+     extension_switch     1
+  pspatm : epsatm=    6.54852399
          --- l  ekb(1:nproj) -->
              0    5.385069    0.619074
              1   -3.489168   -1.040664
@@ -814,8 +814,8 @@ extension_switch     1
     8   11    1    4       300   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
     2.99000000000000    0.00000000000000    0.00000000000000   rchrg,fchrg,qchrg
      nproj     2     1
-extension_switch     1
- pspatm: epsatm=    0.36200384
+     extension_switch     1
+  pspatm : epsatm=    0.36200384
          --- l  ekb(1:nproj) -->
              0   -7.905942   -0.865230
              1   -6.853045

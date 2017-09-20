@@ -1722,7 +1722,7 @@ P          mk1mem10        64
     1   3.283   5.836    0   2.4315963        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     2.44451305764117    0.01373030920382    0.17502673260160   rchrg,fchrg,qchrg
- pspatm: epsatm=   -1.77437869
+ pspatm : epsatm=   -1.77437869
          --- l  ekb(1:nproj) -->
              0    1.242797
  pspatm: atomic psp has been read  and splines computed
@@ -2409,7 +2409,7 @@ P newkpt: treating      8 bands with npw=      38 for ikpt=  13 by node    0
     1   3.283   5.836    0   2.4315963        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     2.44451305764117    0.01373030920382    0.17502673260160   rchrg,fchrg,qchrg
- pspatm: epsatm=   -1.77437869
+ pspatm : epsatm=   -1.77437869
          --- l  ekb(1:nproj) -->
              0    1.242797
  pspatm: atomic psp has been read  and splines computed
@@ -3438,7 +3438,7 @@ P newkpt: treating      8 bands with npw=      49 for ikpt=  50 by node    0
     1   3.283   5.836    0   2.4315963        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     2.44451305764117    0.01373030920382    0.17502673260160   rchrg,fchrg,qchrg
- pspatm: epsatm=   -1.77437869
+ pspatm : epsatm=   -1.77437869
          --- l  ekb(1:nproj) -->
              0    1.242797
  pspatm: atomic psp has been read  and splines computed
@@ -4354,7 +4354,7 @@ P newkpt: treating      8 bands with npw=      44 for ikpt=  40 by node    0
     1   3.283   5.836    0   2.4315963        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     2.44451305764117    0.01373030920382    0.17502673260160   rchrg,fchrg,qchrg
- pspatm: epsatm=   -1.77437869
+ pspatm : epsatm=   -1.77437869
          --- l  ekb(1:nproj) -->
              0    1.242797
  pspatm: atomic psp has been read  and splines computed
@@ -6980,7 +6980,7 @@ P newkpt: treating      8 bands with npw=      38 for ikpt=  36 by node    0
     1   3.283   5.836    0   2.4315963        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     2.44451305764117    0.01373030920382    0.17502673260160   rchrg,fchrg,qchrg
- pspatm: epsatm=   -1.77437869
+ pspatm : epsatm=   -1.77437869
          --- l  ekb(1:nproj) -->
              0    1.242797
  pspatm: atomic psp has been read  and splines computed
@@ -8047,7 +8047,7 @@ P newkpt: treating      8 bands with npw=      49 for ikpt=  50 by node    0
     1   3.283   5.836    0   2.4315963        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     2.44451305764117    0.01373030920382    0.17502673260160   rchrg,fchrg,qchrg
- pspatm: epsatm=   -1.77437869
+ pspatm : epsatm=   -1.77437869
          --- l  ekb(1:nproj) -->
              0    1.242797
  pspatm: atomic psp has been read  and splines computed
@@ -9114,7 +9114,7 @@ P newkpt: treating      8 bands with npw=      46 for ikpt=  50 by node    0
     1   3.283   5.836    0   2.4315963        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     2.44451305764117    0.01373030920382    0.17502673260160   rchrg,fchrg,qchrg
- pspatm: epsatm=   -1.77437869
+ pspatm : epsatm=   -1.77437869
          --- l  ekb(1:nproj) -->
              0    1.242797
  pspatm: atomic psp has been read  and splines computed

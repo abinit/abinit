@@ -4465,7 +4465,7 @@
          The occupation matrix is in the basis of real spherical harmonics Slm (note that this differs from the choice made when
          [[prtdosm]]=1
          , that is in the basis of complex spherical harmonics).
-        Their are ordered by increasing m, and are defined e.g. in [[Blancoa1997]]
+        They are ordered by increasing m, and are defined e.g. in [[Blancoa1997]]
          </a>
          .
         For the case l=2 (d states), the five columns corresponds respectively to (the normalisation factor has been dropped)
@@ -20640,7 +20640,7 @@
         <p>
          For additional information,
         download F. Bottin presentation at the
-         <a href="http://www.abinit.org/community/events/program3rd">
+         <a href="https://www.abinit.org/sites/default/files/oldsites/workshop_07/program.html">
           ABINIT workshop 2007
          </a>
         </p>

@@ -143,7 +143,7 @@
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm: epsatm=   16.60045163
+ pspatm : epsatm=   16.60045163
          --- l  ekb(1:nproj) -->
              0   -0.861114    0.561626
              1   -0.100584    0.010589
@@ -168,7 +168,7 @@
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm: epsatm=   -8.62113488
+ pspatm : epsatm=   -8.62113488
          --- l  ekb(1:nproj) -->
              0    0.556226    1.932007
              1    1.545198

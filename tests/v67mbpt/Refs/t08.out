@@ -272,7 +272,7 @@ P           mkmem           4
     2   0.000   0.000    0   2.0872718        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     1.80626423934776    0.22824404341771    1.17378968127746   rchrg,fchrg,qchrg
- pspatm: epsatm=    1.43386982
+ pspatm : epsatm=    1.43386982
          --- l  ekb(1:nproj) -->
              0    3.287949
              1    1.849886
@@ -285,7 +285,7 @@ P           mkmem           4
     6    7    2    2       473   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
     1.20000000000000    0.00000000000000    0.00000000000000   rchrg,fchrg,qchrg
   1.024700          amesh (Hamman grid)
- pspatm: epsatm=    2.60350195
+ pspatm : epsatm=    2.60350195
          --- l  ekb(1:nproj) -->
              0    4.939348
              1   -3.218107
@@ -466,7 +466,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     539.889     539.876
     2   0.000   0.000    0   2.0872718        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     1.80626423934776    0.22824404341771    1.17378968127746   rchrg,fchrg,qchrg
- pspatm: epsatm=    1.43386982
+ pspatm : epsatm=    1.43386982
          --- l  ekb(1:nproj) -->
              0    3.287949
              1    1.849886
@@ -479,7 +479,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     539.889     539.876
     6    7    2    2       473   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
     1.20000000000000    0.00000000000000    0.00000000000000   rchrg,fchrg,qchrg
   1.024700          amesh (Hamman grid)
- pspatm: epsatm=    2.60350195
+ pspatm : epsatm=    2.60350195
          --- l  ekb(1:nproj) -->
              0    4.939348
              1   -3.218107
