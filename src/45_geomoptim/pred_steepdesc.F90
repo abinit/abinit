@@ -87,7 +87,7 @@ logical,intent(in)    :: zDEBUG
 
 !Local variables-------------------------------
 !scalars
-integer  :: kk,jj
+integer  :: kk,jj,ihist_prev
 real(dp) :: em
 real(dp) :: f_cart
 real(dp) :: xc,str
@@ -221,13 +221,14 @@ real(dp), ABI_CONTIGUOUS pointer :: fcart(:,:),vel(:,:)
 !### 10. Filling history with the new values
 
 !Increase indices
- hist%ihist=hist%ihist+1
+ hist%ihist = abihist_findIndex(hist,+1)
 
 !Compute xred from xcart, and rprimd
  call xcart2xred(ab_mover%natom,rprimd,xcart,xred)
 
  call var2hist(acell,hist,ab_mover%natom,rprimd,xred,zDEBUG)
- hist%vel(:,:,hist%ihist)=hist%vel(:,:,hist%ihist-1)
+ ihist_prev = abihist_findIndex(hist,-1)
+ hist%vel(:,:,hist%ihist)=hist%vel(:,:,ihist_prev)
 
 end subroutine pred_steepdesc
 !!***

@@ -4,8 +4,9 @@
 !! mkkpg
 !!
 !! FUNCTION
-!! Compute all (k+G) vectors (in reduced coordinates) for given k point.
-!! Eventually compute related data
+!! Compute all (k+G) vectors (dp, in reduced coordinates) for given k point,
+!! from integer coordinates of G vectors.
+!! Eventually compute related data.
 !!
 !! COPYRIGHT
 !! Copyright (C) 1998-2017 ABINIT group (MT)

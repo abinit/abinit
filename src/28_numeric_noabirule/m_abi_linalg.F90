@@ -30,13 +30,16 @@ module m_abi_linalg
   use m_xomp
   use m_slk
   use iso_c_binding
+#ifdef HAVE_LINALG_ELPA
+ use m_elpa
+#endif
 #ifdef HAVE_LINALG_PLASMA
  use plasma, except_dp => dp, except_sp => sp
 #endif
 
  implicit none
 
- private 
+ private
 !!***
 
  ! Working arrays for eigen problem
@@ -77,11 +80,11 @@ module m_abi_linalg
 !!****t* m_abi_linalg/laparams_t
 !! NAME
 !! laparams_t
-!! 
+!!
 !! FUNCTION
-!!  Gather the parameters and the options to be passed to the 
+!!  Gather the parameters and the options to be passed to the
 !!  linear algebra routines.
-!! 
+!!
 !! SOURCE
 
  integer,public,parameter :: LIB_LINALG=1
@@ -216,9 +219,9 @@ module m_abi_linalg
 
  logical,external :: LSAME
 
- ! Timab slots, used if we want to profile BLAS calls 
+ ! Timab slots, used if we want to profile BLAS calls
  ! Fine-grained profiling, must be enabled with the CPP option DEV_LINALG_TIMING
- ! For the time being, I use the same slots employed in lobpcgwf although 
+ ! For the time being, I use the same slots employed in lobpcgwf although
  ! one should define specialized entries.If the index of the slot 0, no profiling is done.
 
  integer,parameter,private :: TIMAB_XCOPY=584
@@ -323,17 +326,20 @@ CONTAINS  !===========================================================
    call MPI_CART_SUB(commcart, keepdim, abi_communicator,abi_info1)
    keepdim = (/.false., .true./)
    call MPI_CART_SUB(commcart, keepdim, abi_complement_communicator,abi_info1)
-   
+
    call init_scalapack(abi_processor,abi_communicator)
  else
    abi_communicator=xmpi_comm_null
    abi_complement_communicator = xmpi_comm_null
  end if
 #endif
-
  if (present(only_scalapack)) then
    if (only_scalapack) return
  end if
+
+#ifdef HAVE_LINALG_ELPA
+ call elpa_func_init()
+#endif
 
 #ifdef HAVE_LINALG_PLASMA
 !Plasma Initialization
@@ -518,6 +524,10 @@ CONTAINS  !===========================================================
    if (only_scalapack) return
  end if
 
+#ifdef HAVE_LINALG_ELPA
+ call elpa_func_uninit()
+#endif
+
 #ifdef HAVE_LINALG_PLASMA
  call PLASMA_Finalize(info)
 #endif
@@ -570,7 +580,7 @@ CONTAINS  !===========================================================
 !! NAME
 !!
 !! FUNCTION
-!!  Programmatic interface to enable the use of [Z,C]GEMM3M calls 
+!!  Programmatic interface to enable the use of [Z,C]GEMM3M calls
 !!
 !! SOURCE
 
@@ -603,7 +613,7 @@ end subroutine linalg_allow_gemm3m
 !!  use_zgemm3m
 !!
 !! FUNCTION
-!!  Enable the use of ZGEMM3M 
+!!  Enable the use of ZGEMM3M
 !!
 !! PARENTS
 !!
@@ -624,7 +634,7 @@ end subroutine linalg_allow_gemm3m
 !!
 !! SOURCE
 
-pure logical function use_zgemm3m(m,n,k) 
+pure logical function use_zgemm3m(m,n,k)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -643,7 +653,7 @@ pure logical function use_zgemm3m(m,n,k)
 
  use_zgemm3m = .False.
  if (XGEMM3M_ISON) use_zgemm3m = ((m * n * k) > ZGEMM3M_LIMIT)
- 
+
 #ifndef HAVE_LINALG_GEMM3M
  use_zgemm3m = .False.
 #endif
@@ -658,7 +668,7 @@ end function use_zgemm3m
 !!  use_cgemm3m
 !!
 !! FUNCTION
-!!  Enable the use of CGEMM3M 
+!!  Enable the use of CGEMM3M
 !!
 !! PARENTS
 !!
@@ -667,7 +677,7 @@ end function use_zgemm3m
 !!
 !! SOURCE
 
-pure logical function use_cgemm3m(m,n,k) 
+pure logical function use_cgemm3m(m,n,k)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -699,12 +709,12 @@ end function use_cgemm3m
 !! NAME
 !!
 !! FUNCTION
-!!  Programmatic interface to enable the use of PLASMA 
+!!  Programmatic interface to enable the use of PLASMA
 !!  False to disable PLASMA version.
 !!
 !! SOURCE
 
-subroutine linalg_allow_plasma(bool) 
+subroutine linalg_allow_plasma(bool)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -742,7 +752,7 @@ end subroutine linalg_allow_plasma
 !!
 !! SOURCE
 
-integer function uplo_plasma(uplo) 
+integer function uplo_plasma(uplo)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -780,7 +790,7 @@ end function uplo_plasma
 !!
 !! SOURCE
 
-integer function trans_plasma(trans) 
+integer function trans_plasma(trans)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -820,7 +830,7 @@ end function trans_plasma
 !!
 !! SOURCE
 
-integer function side_plasma(side) 
+integer function side_plasma(side)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -858,7 +868,7 @@ end function side_plasma
 !!
 !! SOURCE
 
-integer function diag_plasma(diag) 
+integer function diag_plasma(diag)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -896,7 +906,7 @@ end function diag_plasma
 !!
 !! SOURCE
 
-integer function jobz_plasma(jobz) 
+integer function jobz_plasma(jobz)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -915,7 +925,7 @@ integer function jobz_plasma(jobz)
 
  if (LSAME(jobz,'N')) then
    jobz_plasma = PlasmaNoVec
- else 
+ else
    jobz_plasma = PlasmaVec
  end if
 
@@ -970,7 +980,7 @@ end function jobz_plasma
 ! ************  ABINIT Orthonormalization interface *******************!
 ! *********************************************************************!
 #include "abi_xorthonormalize.f90"
- 
+
 ! *********************************************************************!
 ! ******************    GPU LINALG interface  *************************!
 ! *********************************************************************!

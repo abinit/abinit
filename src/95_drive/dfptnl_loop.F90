@@ -251,13 +251,11 @@ subroutine dfptnl_loop(blkflg,cg,cgindex,dtfil,dtset,d3lo,&
 
        mcg=mpw*nspinor*mband*mkmem*nsppol
        call inwffil(ask_accurate,cg1,dtset,dtset%ecut,ecut_eff,eigen1,dtset%exchn2n3d,&
-&       formeig,gmet,hdr,&
-&       ireadwf,dtset%istwfk,kg,dtset%kptns,dtset%localrdwf,&
+&       formeig,hdr,ireadwf,dtset%istwfk,kg,dtset%kptns,dtset%localrdwf,&
 &       dtset%mband,mcg,dtset%mk1mem,mpi_enreg,mpw,&
 &       dtset%nband,dtset%ngfft,dtset%nkpt,npwarr,&
 &       dtset%nsppol,dtset%nsym,&
-&       occ,optorth,rprimd,&
-&       dtset%symafm,dtset%symrel,dtset%tnons,&
+&       occ,optorth,dtset%symafm,dtset%symrel,dtset%tnons,&
 &       dtfil%unkg1,wff1,wfft1,dtfil%unwff1,fiwf1i,wvl)
 
        if (ireadwf==1) then
@@ -295,13 +293,11 @@ subroutine dfptnl_loop(blkflg,cg,cgindex,dtfil,dtset,d3lo,&
              call status(counter,dtfil%filstat,iexit,level,'call inwffil  ')
              mcg=mpw*nspinor*mband*mkmem*nsppol
              call inwffil(ask_accurate,cg3,dtset,dtset%ecut,ecut_eff,eigen1,dtset%exchn2n3d,&
-&             formeig,gmet,hdr,&
-&             ireadwf,dtset%istwfk,kg,dtset%kptns,dtset%localrdwf,&
+&             formeig,hdr,ireadwf,dtset%istwfk,kg,dtset%kptns,dtset%localrdwf,&
 &             dtset%mband,mcg,dtset%mk1mem,mpi_enreg,mpw,&
 &             dtset%nband,dtset%ngfft,dtset%nkpt,npwarr,&
 &             dtset%nsppol,dtset%nsym,&
-&             occ,optorth,rprimd,&
-&             dtset%symafm,dtset%symrel,dtset%tnons,&
+&             occ,optorth,dtset%symafm,dtset%symrel,dtset%tnons,&
 &             dtfil%unkg1,wff2,wfft2,dtfil%unwff2,&
 &             fiwf3i,wvl)
              if (ireadwf==1) then

@@ -240,7 +240,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
  optekin=0;if (wfoptalg>=10) optekin=1
  natom=gs_hamk%natom
  cpopt=-1
- fock_cg_typ=-1;if (associated(gs_hamk%fock)) fock_cg_typ=gs_hamk%fock%cg_typ
+ fock_cg_typ=-1;if (associated(gs_hamk%fockcommon)) fock_cg_typ=gs_hamk%fockcommon%cg_typ
  kinpw => gs_hamk%kinpw_k
 
  ABI_ALLOCATE(pcon,(npw))
@@ -406,7 +406,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
 
 !      Compute <g|H|c>
 !      By setting ieigen to iband, Fock contrib. of this iband to the energy will be calculated
-       call fock_set_ieigen(gs_hamk%fock,iband)
+       call fock_set_ieigen(gs_hamk%fockcommon,iband)
        sij_opt=1
        if (finite_field .and. gs_hamk%usepaw == 1) then
          call getghc(0,cwavef,cprj_band_srt,ghc,scwavef,gs_hamk,gvnlc,&
@@ -499,7 +499,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
 
      else
 !      By setting ieigen to iband, Fock contrib. of this iband to the energy will be calculated
-       call fock_set_ieigen(gs_hamk%fock,iband)
+       call fock_set_ieigen(gs_hamk%fockcommon,iband)
        sij_opt=0
        call getghc(cpopt,cwavef,cprj_dum,ghc,gsc_dummy,gs_hamk,gvnlc,&
 &       eval,mpi_enreg,1,prtvol,sij_opt,tim_getghc,0)
@@ -833,12 +833,12 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
          ! Compute gh_direc = <G|H|D> and eventually gs_direc = <G|S|D>
          sij_opt=0;if (gen_eigenpb) sij_opt=1
 
-         if (fock_cg_typ==1) old_fockflag=fock_set_getghc_call(gs_hamk%fock,0)
+         if (fock_cg_typ==1) old_fockflag=fock_set_getghc_call(gs_hamk%fockcommon,0)
 
          call getghc(cpopt,direc,cprj_dum,gh_direc,gs_direc,gs_hamk,gvnl_direc,&
 &         eval,mpi_enreg,1,prtvol,sij_opt,tim_getghc,0)
 
-         if (fock_cg_typ==1) ii=fock_set_getghc_call(gs_hamk%fock,old_fockflag)
+         if (fock_cg_typ==1) ii=fock_set_getghc_call(gs_hamk%fockcommon,old_fockflag)
 
          if(wfopta10==2 .or. wfopta10==3)then
            ! Minimisation of the residual, so compute <G|(H-zshift)^2|D>
@@ -851,11 +851,11 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
              work(:,:)=gh_direc(:,:)-zshift(iband)*direc(:,:)
            end if
 
-           if (fock_cg_typ==1) old_fockflag=fock_set_getghc_call(gs_hamk%fock,0)
+           if (fock_cg_typ==1) old_fockflag=fock_set_getghc_call(gs_hamk%fockcommon,0)
            call getghc(cpopt,work,cprj_dum,gh_direc,swork,gs_hamk,gvnl_dummy,&
 &           eval,mpi_enreg,1,prtvol,0,tim_getghc,0)
 
-           if (fock_cg_typ==1) ii=fock_set_getghc_call(gs_hamk%fock,old_fockflag)
+           if (fock_cg_typ==1) ii=fock_set_getghc_call(gs_hamk%fockcommon,old_fockflag)
 
            if (gen_eigenpb) then
              gh_direc(:,:)=gh_direc(:,:)-zshift(iband)*swork(:,:)

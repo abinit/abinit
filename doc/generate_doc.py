@@ -845,7 +845,7 @@ for i, varset_info in enumerate(varsets):
     continue
 
   scriptTab = "\n\
-<input type=\"text\" id=\"InputSearch\" onkeyup=\"searchInput()\" onClick=\"searchInput()\" onblur=\"defaultClick()\" placeholder=\"Search\">\n\
+<input type=\"text\" id=\"InputSearch\" onkeyup=\"searchInput()\" onClick=\"searchInput()\" placeholder=\"Search\">\n\
 "
   alphalinks='\n \n <div class="TabsLetter">'
   for i in string.ascii_uppercase:

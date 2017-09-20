@@ -80,7 +80,7 @@
 
 #include "abi_common.h"
 
-subroutine fock2ACE(cg,cprj,fock,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_enreg,mpsang,&
+subroutine fock2ACE(cg,cprj,fock,istwfk,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_enreg,mpsang,&
 &  mpw,my_natom,natom,nband,nfft,ngfft,nkpt,nloalg,npwarr,nspden,nspinor,nsppol,nsym,&
 &  ntypat,occ,optfor,paw_ij,pawtab,ph1d,psps,rprimd,&
 &  stress_needed,symrec,typat,usecprj,use_gpu_cuda,wtk,xred,ylm,ylmgr)
@@ -122,7 +122,7 @@ subroutine fock2ACE(cg,cprj,fock,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_enreg,mp
  type(MPI_type),intent(inout) :: mpi_enreg
  type(pseudopotential_type),intent(in) :: psps
 !arrays
- integer,intent(in) :: kg(3,mpw*mkmem),nband(nkpt*nsppol)
+ integer,intent(in) :: istwfk(nkpt),kg(3,mpw*mkmem),nband(nkpt*nsppol)
  integer,intent(in) :: ngfft(18),nloalg(3),npwarr(nkpt)
  integer,intent(in) :: symrec(3,3,nsym),typat(natom)
  real(dp),intent(in) :: cg(2,mcg)
@@ -141,11 +141,12 @@ subroutine fock2ACE(cg,cprj,fock,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_enreg,mp
  integer :: idir,idir_str,ierr,ii,ikg,ikpt,ilm,ipw,isppol,istwf_k,kk,ll
  integer :: mband_cprj,me_distrb,my_ikpt,my_nspinor,nband_k,nband_cprj_k,ndat,nkpg
  integer :: npw_k,spaceComm
- integer :: usecprj_local
+ integer :: usecprj_local,use_ACE_old
  integer :: blocksize,iblock,jblock,iblocksize,jblocksize,ibs,nblockbd
  type(gs_hamiltonian_type) :: gs_hamk
  logical :: compute_gbound
  character(len=500) :: msg
+ type(fock_common_type),pointer :: fockcommon
 !arrays
  integer,allocatable :: kg_k(:,:)
  real(dp) :: kpoint(3),rmet(3,3),tsec(2)
@@ -163,7 +164,6 @@ subroutine fock2ACE(cg,cprj,fock,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_enreg,mp
  call timab(920,1,tsec)
  call timab(921,1,tsec)
 
- fock%use_ACE=1
 !Init mpicomm and me
  if(mpi_enreg%paral_kgb==1)then
    spaceComm=mpi_enreg%comm_kpt
@@ -186,13 +186,16 @@ subroutine fock2ACE(cg,cprj,fock,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_enreg,mp
 !Check that fock is present if want to use fock option
  compute_gbound=.false.
 
-!Arrays initializations
- fock%optfor=.false.
- fock%optstr=.false.
+!Array initializations
+ fockcommon => fock%fock_common
+ fockcommon%optfor=.false.
+ fockcommon%optstr=.false.
+ use_ACE_old=fockcommon%use_ACE
+ fockcommon%use_ACE=0
 
  if (stress_needed==1) then
-   fock%optstr=.TRUE.
-   fock%stress=zero
+   fockcommon%optstr=.TRUE.
+   fockcommon%stress=zero
    compute_gbound=.true.
  end if
 
@@ -201,20 +204,19 @@ subroutine fock2ACE(cg,cprj,fock,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_enreg,mp
  if (psps%usepaw==1) then
    usecprj_local=1
    if(optfor==1)then 
-     fock%optfor=.true.
-     if (.not.allocated(fock%forces_ikpt)) then
-       ABI_ALLOCATE(fock%forces_ikpt,(3,natom,mband))
+     fockcommon%optfor=.true.
+     if (.not.allocated(fockcommon%forces_ikpt)) then
+       ABI_ALLOCATE(fockcommon%forces_ikpt,(3,natom,mband))
      end if
-     if (.not.allocated(fock%forces)) then
-       ABI_ALLOCATE(fock%forces,(3,natom))
+     if (.not.allocated(fockcommon%forces)) then
+       ABI_ALLOCATE(fockcommon%forces,(3,natom))
      end if
-     fock%forces=zero
+     fockcommon%forces=zero
      compute_gbound=.true.
    end if
  end if
 
-!Initialize Hamiltonian (k-independent terms)
-
+!Initialize Hamiltonian (k- and spin-independent terms)
 
  call init_hamiltonian(gs_hamk,psps,pawtab,nspinor,nsppol,nspden,natom,&
 & typat,xred,nfft,mgfft,ngfft,rprimd,nloalg,usecprj=usecprj_local,&
@@ -222,7 +224,7 @@ subroutine fock2ACE(cg,cprj,fock,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_enreg,mp
 & paw_ij=paw_ij,ph1d=ph1d,fock=fock,&
 & use_gpu_cuda=use_gpu_cuda)
  rmet = MATMUL(TRANSPOSE(rprimd),rprimd)
-
+ fockcommon%use_ACE=use_ACE_old
  call timab(921,2,tsec)
 
 !need to reorder cprj=<p_lmn|Cnk> (from unsorted to atom-sorted)
@@ -240,12 +242,12 @@ subroutine fock2ACE(cg,cprj,fock,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_enreg,mp
 !  Loop over k points
    ikg=0
    do ikpt=1,nkpt
-     fock%ikpt=ikpt
-     fock%isppol=isppol
+     fockcommon%ikpt=ikpt
+     fockcommon%isppol=isppol
      nband_k=nband(ikpt+(isppol-1)*nkpt)
      npw_k=npwarr(ikpt)
      kpoint(:)=kpt(:,ikpt)
-
+     istwf_k=istwfk(ikpt)
      if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,isppol,me_distrb)) then
        bdtot_index=bdtot_index+nband_k
        cycle
@@ -327,8 +329,8 @@ subroutine fock2ACE(cg,cprj,fock,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_enreg,mp
 &     nkpg,npw_k,ntypat,psps%pspso,psps%qgrid_ff,rmet,psps%usepaw,psps%useylm,ylm_k,ylmgr_k)
      if ((stress_needed==1).and.(psps%usepaw==1))then
        ider_str=1; dimffnl_str=7;idir_str=-7
-       ABI_ALLOCATE(fock%ffnl_str,(npw_k,dimffnl_str,psps%lmnmax,ntypat))
-       call mkffnl(psps%dimekb,dimffnl_str,psps%ekb,fock%ffnl_str,psps%ffspl,gs_hamk%gmet,gs_hamk%gprimd,&
+       ABI_ALLOCATE(fockcommon%ffnl_str,(npw_k,dimffnl_str,psps%lmnmax,ntypat))
+       call mkffnl(psps%dimekb,dimffnl_str,psps%ekb,fockcommon%ffnl_str,psps%ffspl,gs_hamk%gmet,gs_hamk%gprimd,&
 &       ider_str,idir_str,psps%indlmn,kg_k,kpg_k,kpoint,psps%lmnmax,psps%lnmax,psps%mpsang,psps%mqgrid_ff,&
 &       nkpg,npw_k,ntypat,psps%pspso,psps%qgrid_ff,rmet,psps%usepaw,psps%useylm,ylm_k,ylmgr_k)
      end if
@@ -363,21 +365,21 @@ subroutine fock2ACE(cg,cprj,fock,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_enreg,mp
      ABI_ALLOCATE(occblock,(blocksize))
      ABI_ALLOCATE(weight,(blocksize))
      occblock=zero;weight=zero
-     if (fock%optstr) then
-       ABI_ALLOCATE(fock%stress_ikpt,(6,nband_k))
-       fock%stress_ikpt=zero
+     if (fockcommon%optstr) then
+       ABI_ALLOCATE(fockcommon%stress_ikpt,(6,nband_k))
+       fockcommon%stress_ikpt=zero
      end if
  
      if (psps%usepaw==1) then
-       if (fock%optfor) then
-         fock%forces_ikpt=zero
+       if (fockcommon%optfor) then
+         fockcommon%forces_ikpt=zero
        end if
      end if
      ABI_ALLOCATE(wi,(2,npw_k*my_nspinor*blocksize,nblockbd))
      wi=zero
      ABI_ALLOCATE(mkl,(2,nband_k,nband_k))
      mkl=zero
-! Calculate all the Wi for the current k-pont
+! Calculate all the Wi for the current k-point
 
      do iblock=1,nblockbd
 
@@ -409,59 +411,53 @@ subroutine fock2ACE(cg,cprj,fock,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_enreg,mp
          end if 
          ndat=mpi_enreg%bandpp
          if (gs_hamk%usepaw==0) cwaveprj_idat => cwaveprj
- 
-         do iblocksize=1,blocksize
-           fock%ieigen=(iblock-1)*blocksize+iblocksize
 
+         do iblocksize=1,blocksize
+           fockcommon%ieigen=(iblock-1)*blocksize+iblocksize
            if (gs_hamk%usepaw==1) then
              cwaveprj_idat => cwaveprj(:,(iblocksize-1)*my_nspinor+1:iblocksize*my_nspinor)
            end if
            call fock_getghc(cwavef(:,1+(iblocksize-1)*npw_k*my_nspinor:iblocksize*npw_k*my_nspinor),cwaveprj_idat,&
 &           wi(:,1+(iblocksize-1)*npw_k*my_nspinor:iblocksize*npw_k*my_nspinor,iblock),gs_hamk,mpi_enreg)
-!write(80,*)"wi"
-!write(80,*) wi(:,1:80,iblock)
-           mkl(1,fock%ieigen,fock%ieigen)=fock%eigen_ikpt(fock%ieigen)
-           if (fock%optstr) then
-             fock%stress(:)=fock%stress(:)+weight(iblocksize)*fock%stress_ikpt(:,fock%ieigen)
+           mkl(1,fockcommon%ieigen,fockcommon%ieigen)=fockcommon%eigen_ikpt(fockcommon%ieigen)
+           if (fockcommon%optstr) then
+             fockcommon%stress(:)=fockcommon%stress(:)+weight(iblocksize)*fockcommon%stress_ikpt(:,fockcommon%ieigen)
            end if
-           if (fock%optfor) then
-             fock%forces(:,:)=fock%forces(:,:)+weight(iblocksize)*fock%forces_ikpt(:,:,fock%ieigen)
+           if (fockcommon%optfor) then
+             fockcommon%forces(:,:)=fockcommon%forces(:,:)+weight(iblocksize)*fockcommon%forces_ikpt(:,:,fockcommon%ieigen)
            end if
          end do 
-!       end if
+
 
      end do ! End of loop on block of bands
 
 ! Calculate Mkl for the current k-point
      ABI_ALLOCATE(cwavefk,(2,npw_k*my_nspinor))
-     wi(2,:,:)=-wi(2,:,:)    
      do iblock=1,nblockbd
       cwavef(:,1:npw_k*my_nspinor*blocksize)=&
 &         cg(:,1+(iblock-1)*npw_k*my_nspinor*blocksize+icg:iblock*npw_k*my_nspinor*blocksize+icg)
        do iblocksize=1,blocksize
          kk=(iblock-1)*blocksize+iblocksize
          cwavefk(:,:)=cwavef(:,1+(iblocksize-1)*npw_k*my_nspinor:iblocksize*npw_k*my_nspinor)
-!write(80,*)"cwavefk"
-!write(80,*) cwavefk(:,1:80)
          do jblock=1,iblock
            do jblocksize=1,blocksize
              ll=(jblock-1)*blocksize+jblocksize
-!write(80,*)"wi"
-!write(80,*) wi(:,1:80,jblock)
              if (ll<kk) then
-               call dotprod_g(mkl(1,kk,ll),mkl(2,kk,ll),gs_hamk%istwf_k,npw_k,2,cwavefk,&
-&              wi(:,1+(jblocksize-1)*npw_k*my_nspinor:jblocksize*npw_k*my_nspinor,jblock),mpi_enreg%me_g0,mpi_enreg%comm_fft)
+               call dotprod_g(mkl(1,kk,ll),mkl(2,kk,ll),gs_hamk%istwf_k,npw_k,2,wi(:,1+(jblocksize-1)*npw_k*my_nspinor:&
+&                                           jblocksize*npw_k*my_nspinor,jblock),cwavefk,mpi_enreg%me_g0,mpi_enreg%comm_fft)
              end if
            end do
          end do
        end do
      end do ! End of loop on block of bands
-!write(80,*) ikpt
 
-!write(80,*)"mkl"
-!write(80,*)mkl
      ABI_DEALLOCATE(cwavefk)
-     call zpotrf("L",nband_k,-mkl,nband_k,ierr)
+     mkl=-mkl
+
+! Cholesky factorisation of -mkl=Lx(trans(L)*. On output mkl=L
+     call zpotrf("L",nband_k,mkl,nband_k,ierr)
+
+! calculate trans(L-1)
      ABI_ALLOCATE(bb,(2,nband_k,nband_k))
      bb=zero
      do kk=1,nband_k
@@ -470,7 +466,7 @@ subroutine fock2ACE(cg,cprj,fock,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_enreg,mp
      call ztrtrs("L","T","N",nband_k,nband_k,mkl,nband_k,bb,nband_k,ierr)
      fock%fockACE(ikpt)%xi=zero
 
-!write(80,*)bb
+! Calculate ksi
      do kk=1,nband_k
        do jblock=1,nblockbd
          do jblocksize=1,blocksize
@@ -483,16 +479,13 @@ subroutine fock2ACE(cg,cprj,fock,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_enreg,mp
 &                                bb(2,ll,kk)*wi(1,1+(jblocksize-1)*npw_k*my_nspinor:jblocksize*npw_k*my_nspinor,jblock)
          end do
        end do
-!write(80,*) kk
-!write(80,*)fock%fockACE(ikpt)%xi(:,1:80,kk)
      end do
 
-!flush(80)
      ABI_DEALLOCATE(wi)
      ABI_DEALLOCATE(mkl)
 
-     if (fock%optstr) then
-       ABI_DEALLOCATE(fock%stress_ikpt)
+     if (fockcommon%optstr) then
+       ABI_DEALLOCATE(fockcommon%stress_ikpt)
      end if
  
 !    Restore the bandfft tabs
@@ -500,7 +493,7 @@ subroutine fock2ACE(cg,cprj,fock,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_enreg,mp
        call bandfft_kpt_restoretabs(my_bandfft_kpt,ffnl=ffnl_sav,ph3d=ph3d_sav,kpg=kpg_k_sav)
      end if
 
-!    Incremente indexes
+!    Increment indices
      bdtot_index=bdtot_index+nband_k
      if (mkmem/=0) then
        ibg=ibg+my_nspinor*nband_cprj_k
@@ -524,13 +517,11 @@ subroutine fock2ACE(cg,cprj,fock,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_enreg,mp
      ABI_DEALLOCATE(ph3d)
 
      if ((stress_needed==1).and.(psps%usepaw==1))then
-       ABI_DEALLOCATE(fock%ffnl_str)
+       ABI_DEALLOCATE(fockcommon%ffnl_str)
      end if
 
    end do ! End k point loop
  end do ! End loop over spins
-
- fock%use_ACE=2
 
 !Parallel case: accumulate (n,k) contributions
  if (xmpi_paral==1) then
@@ -538,14 +529,14 @@ subroutine fock2ACE(cg,cprj,fock,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_enreg,mp
    if (optfor==1) then
      call timab(65,2,tsec)
      if (psps%usepaw==1) then
-       call xmpi_sum(fock%forces,spaceComm,ierr)
+       call xmpi_sum(fockcommon%forces,spaceComm,ierr)
      end if
    end if
 !  Stresses
    if (stress_needed==1) then
      call timab(65,1,tsec)
-     if (fock%optstr) then
-       call xmpi_sum(fock%stress,spaceComm,ierr)
+     if (fockcommon%optstr) then
+       call xmpi_sum(fockcommon%stress,spaceComm,ierr)
      end if
      call timab(65,2,tsec)
    end if
@@ -556,8 +547,8 @@ subroutine fock2ACE(cg,cprj,fock,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_enreg,mp
 !Do final normalizations and symmetrizations of stress tensor contributions
  if (stress_needed==1) then
    if (nsym>1) then
-     if (fock%optstr) then
-       call stresssym(gs_hamk%gprimd,nsym,fock%stress,symrec)
+     if (fockcommon%optstr) then
+       call stresssym(gs_hamk%gprimd,nsym,fockcommon%stress,symrec)
      end if
    end if
  end if

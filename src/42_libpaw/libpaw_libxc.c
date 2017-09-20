@@ -106,15 +106,32 @@ void libpaw_xc_func_type_free(XC(func_type) **xc_func)
 
 /* ===============================================================
  * Get properties from a xc_func_info_type pointer
+ *     These accessors where not provided before libXC v3
  * ===============================================================
  */
-char *libpaw_xc_get_info_name(XC(func_type) *xc_func)
+#if defined XC_MICRO_VERSION
+ /* libXC v3.0 and later */
+char const *libpaw_xc_get_info_name(XC(func_type) *xc_func)
+ {return xc_func_info_get_name(xc_func->info);}
+int libpaw_xc_get_info_flags(XC(func_type) *xc_func)
+ {return xc_func_info_get_flags(xc_func->info);}
+int libpaw_xc_get_info_kind(XC(func_type) *xc_func)
+ {return xc_func_info_get_kind(xc_func->info);}
+char const *libpaw_xc_get_info_refs(XC(func_type) *xc_func, const int *number)
+ {if (*number>=0&&*number<=4)
+   {if (xc_func_info_get_ref(xc_func->info,*number) != NULL)
+    {return xc_func_info_get_ref(xc_func->info,*number);}}
+  else {return NULL;}}
+#else
+ /* libXC before v3.0 */
+char const *libpaw_xc_get_info_name(XC(func_type) *xc_func)
  {return xc_func->info->name;}
-char *libpaw_xc_get_info_refs(XC(func_type) *xc_func)
- {return xc_func->info->refs;}
 int libpaw_xc_get_info_flags(XC(func_type) *xc_func)
  {return xc_func->info->flags;}
 int libpaw_xc_get_info_kind(XC(func_type) *xc_func)
  {return xc_func->info->kind;}
+char const *libpaw_xc_get_info_refs(XC(func_type) *xc_func, const int *number)
+ {if (*number==0) {return xc_func->info->refs;} else {return NULL;}}
+#endif
 
 #endif

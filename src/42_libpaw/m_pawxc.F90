@@ -138,7 +138,7 @@ subroutine pawxc_xcpositron_wrapper(fnxc,grhoe2,ixcpositron,ngr,npt,posdensity0_
  real(dp),intent(out),optional :: dvxce(npt),dvxcp(npt)
 
 !Local variables-------------------------------
- 
+
 ! *************************************************************************
 
 #if defined HAVE_LIBPAW_ABINIT
@@ -2047,7 +2047,7 @@ subroutine pawxc3(corexc1,cplex_den,cplex_vxc,d2enxc,ixc,kxc,lm_size,lmselect,nh
                  ylm_ii=pawang%ylmr(ilm,ipts)*pawang%anginit(ii,ipts)
                  dylmdr_ii=dylmdr(ii,ipts,ilm)
                  do ir=2,nrad
-                   jr=2*ir 
+                   jr=2*ir
                    grho1arr(jr-1,ispden,ii)=grho1arr(jr-1,ispden,ii) &
 &                   +drho1(ir,1)*ylm_ii+ff(ir)*dylmdr_ii
                    grho1arr(jr  ,ispden,ii)=grho1arr(jr  ,ispden,ii) &
@@ -3014,7 +3014,7 @@ subroutine pawxcsph3(cplex_den,cplex_vxc,ixc,nrad,nspden,pawrad,rho_updn,rho1_up
 !      end if
 !      if (grho2(ir,1)<tol24) gxc1r(ir,:)=zero ! ???
 !    end do
-! 
+!
 ! !  Apply divergence
 !    fact=one;if (nspden==1) fact=two  ! Is it true  ? we force nspden=2 for gxc...
 !    if (cplex_vxc==1) then
@@ -3047,7 +3047,7 @@ subroutine pawxcsph3(cplex_den,cplex_vxc,ixc,nrad,nspden,pawrad,rho_updn,rho1_up
 !      LIBPAW_DEALLOCATE(ff)
 !      LIBPAW_DEALLOCATE(gg)
 !    end if
-! 
+!
 !    LIBPAW_DEALLOCATE(vxc1r)
 !    LIBPAW_DEALLOCATE(vxc1i)
 !    LIBPAW_DEALLOCATE(gxc1r)
@@ -3987,7 +3987,7 @@ end subroutine pawxcsphpositron
    end if
    if (pawxcdev>=2)  then
      LIBPAW_ALLOCATE(v2sum,(nrad,lm_size,nsums))
-   else 
+   else
      LIBPAW_ALLOCATE(v2sum,(0,0,0))
    end if
    if (nspden/=4) then
@@ -5228,7 +5228,7 @@ end subroutine pawxcmpositron
 !! NOTES
 !! PENDING. Need to manage properly optional arguments:
 !! Check that these are present before calling drivexc
-!! Probably use better interfaces of fortran 2003 to avoid 
+!! Probably use better interfaces of fortran 2003 to avoid
 !! numerous if/then sentences.
 !!
 !! PARENTS

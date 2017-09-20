@@ -1348,7 +1348,6 @@ function fermi_dirac(energy, mu, temperature)
 !Local variables-------------------------------
 !scalars
  real(dp) :: arg
- character(len=500) :: message
 
 ! *************************************************************************
 
@@ -1557,7 +1556,6 @@ type(jlspline_t) function jlspline_new(nx, delta, mlang) result(new)
 !Local variables -------------------------
 !scalars
  integer :: ix,ll
- character(len=500) :: msg
  real(dp) :: yp1,ypn
 !arrays
  real(dp),allocatable :: cosbessx(:),sinbessx(:)

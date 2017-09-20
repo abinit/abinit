@@ -1,4 +1,4 @@
-++ EXPERIMENTAL ++ self-intraction-corrected psp for calcium (D. R. Hamann)
+++ EXPERIMENTAL ++ self-interaction-corrected psp for calcium (D. R. Hamann)
      20.0000      2.0000    040701    zatom,zion,pspd
      8     2     2     4   313     0    pspcod,pspxc,lmax,lloc,mmax,r2well
   6.18295050  1.00000000  0.00000000    rchrg fchrg qchrg

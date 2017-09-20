@@ -2354,7 +2354,7 @@ subroutine pawpsp_calc(core_mesh,epsatm,ffspl,imainmesh,ixc,lnmax,&
 &   .and.(rvloc_mesh%rstep==pawrad%rstep).and.(rvloc_mesh%lstep==pawrad%lstep)) then
      pawtab%vhtnzc(1:pawtab%mesh_size)=rvlocr(1:pawtab%mesh_size)
      pawtab%has_vhtnzc=2
-   else if ((.not.(reduced_vloc)).and.(vloc_mesh%mesh_type==pawrad%mesh_type)&
+   else if ((vloc_mesh%mesh_type==pawrad%mesh_type)&
 &     .and.(vloc_mesh%rstep==pawrad%rstep).and.(vloc_mesh%lstep==pawrad%lstep)) then
      pawtab%vhtnzc(1:pawtab%mesh_size)=vlocr(1:pawtab%mesh_size)
      pawtab%has_vhtnzc=2

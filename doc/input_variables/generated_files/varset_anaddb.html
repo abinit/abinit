@@ -163,6 +163,7 @@ variables to be used in the input file for the ANADDB executable of the ABINIT p
  <a href="#telphint@anaddb">telphint</a>&nbsp;&nbsp;
  <a href="#temperinc@anaddb">temperinc</a>&nbsp;&nbsp;
  <a href="#tempermin@anaddb">tempermin</a>&nbsp;&nbsp;
+ <a href="#thermal_supercell@anaddb">thermal_supercell</a>&nbsp;&nbsp;
  <a href="#thmflag@anaddb">thmflag</a>&nbsp;&nbsp;
  <a href="#thmtol@anaddb">thmtol</a>&nbsp;&nbsp;
  <br><a id='U'></a>U.
@@ -2613,6 +2614,27 @@ have to be evaluated. Cannot be zero when <a href="../../input_variables/generat
 <a href="../../input_variables/generated_files/varset_anaddb.html#temperinc@anaddb">temperinc</a> and <a href="../../input_variables/generated_files/varset_anaddb.html#ntemper@anaddb">ntemper</a>.
 The default temperature grid goes from 100K to 1000K by step of 100K. For the largest temperatures, for most solids, anharmonic effects not accounted in the harmonic approximation implemented in anaddb will be important. For weakly bounded systems (e.g. Van der Waals solids),
 such anharmonic effects might be important already at room temperature.
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="thermal_supercell@anaddb">thermal_supercell</a></font>
+<br><font id="mnemonics">Mnemonics: THERMALized SUPERCELL lattice vectors</font>
+<br><font id="mnemonics">Executable: anaddb</font>
+<br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#DEVELOP">DEVELOP</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_Phonons.html">Phonons</a>.</font>
+<br><font id="smalltext">Moderately used: [1/70] in anaddb tests, [0/10] in tuto anaddb tests. Test list: {v8:[<a href="../../tests/v8/Input/t46.in">46</a>]}.</font>
+<br><font id="vartype">Variable type: integer(3,3)</font>
+<br><font id="default">Default is (/(/0,0,0/),  (/0,0,0/),  (/0,0,0/)/) (Comment: do not calculate any thermalized supercells)</font>
+<br><font id="text">
+<p>
+<p>Thermal_supercell defines the real space supercell in which a thermalized atomic configuration should be produced, following the prescription of Zacharias and Giustino (PRB 94 075125 (2016)). The displacements are chosen for each phonon mode according to a temperature, and the displacements are alternated in sign/direction to obtain maximal compensation of the linear electron phonon coupling. In this way in the PRB dielectric properties at finite T can be obtained from a single supercell calculation instead of lots of MD and configuration averaging.</p>
+
+<p>The supercell vectors are not constrained to be collinear with the normal lattice vectors: this effect is obtained by using a diagonal Thermal_supercell. The lines of the matrix describe the linear combination of the primitive cell lattice vectors yielding the supercell vectors, as for kptrlatt.</p>
+
+<p>For the moment this feature is under development and it looks like the relative phases of the displacements are not fixed properly yet... (Aug 2017)</p>
 </font>
 
 <br><br><a href=#top>Go to the top</a>

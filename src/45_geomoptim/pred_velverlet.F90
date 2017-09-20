@@ -267,7 +267,7 @@ subroutine pred_velverlet(ab_mover,hist,itime,ntime,zDEBUG,iexit,hmcflag,icycle,
  !Update the history with the new coordinates, velocities, etc.
 
  !Increase indexes
- hist%ihist=hist%ihist+1
+ hist%ihist=abihist_findIndex(hist,+1)
 
  call xcart2xred(ab_mover%natom,rprimd,xcart,xred)
  call var2hist(acell,hist,ab_mover%natom,rprimd,xred,zDEBUG)
