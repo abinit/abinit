@@ -330,7 +330,7 @@ program multibinit
        call fit_polynomial_coeff_fit(reference_effective_potential,&
 &                                    inp%fit_bancoeff,inp%fit_fixcoeff,hist,&
 &                                    inp%fit_rangePower,inp%fit_nbancoeff,inp%fit_ncycle,&
-&                                    inp%fit_nfixcoeff,comm,cutoff_in=inp%fit_cutoff,&
+&                                    inp%fit_nfixcoeff,option,comm,cutoff_in=inp%fit_cutoff,&
 &                                    verbose=.true.,positive=.false.,&
 &                                    anharmstr=inp%fit_anhaStrain==1,&
 &                                    spcoupling=inp%fit_SPCoupling==1)

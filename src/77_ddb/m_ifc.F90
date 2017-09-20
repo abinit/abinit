@@ -3235,7 +3235,7 @@ subroutine ifc_test_phinterp(ifc, cryst, ngqpt, nshiftq, shiftq, ords, comm, tes
 !local variables-------------------------------
 !scalars
  integer,parameter :: master=0
- integer :: iq,nq,natom3,my_rank,nprocs,ierr,nu,ii
+ integer :: iq,nq,natom3,my_rank,nprocs,ierr,nu
  real(dp) :: mare_bspl,mae_bspl,mare_skw,mae_skw,dq
  real(dp) :: cpu,wall,gflops,cpu_fourq,wall_fourq,gflops_fourq
  real(dp) :: cpu_bspl,wall_bspl,gflops_bspl,cpu_skw,wall_skw,gflops_skw
@@ -3244,7 +3244,7 @@ subroutine ifc_test_phinterp(ifc, cryst, ngqpt, nshiftq, shiftq, ords, comm, tes
  type(skw_t) :: skw
  type(kpath_t) :: qpath
 !arrays
- integer :: imax(1)
+! integer :: imax(1)
  real(dp) :: phfrq(3*cryst%natom),ofreqs(3*cryst%natom),qpt(3),wnext(3*cryst%natom)
  real(dp) :: adiff_mev(3*cryst%natom),rel_err(3*cryst%natom)
  real(dp) :: displ_cart(2,3,cryst%natom,3*cryst%natom),qvers_cart(3),qvers_red(3),qstep(3)
