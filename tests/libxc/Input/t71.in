@@ -18,8 +18,6 @@
  getwfk3   2
  getxred3  2
 
-#userie 1729
-
 #Common
  acell 5  4  3.5 Angstrom # Note the symmetry breaking
  diemac 1.0d0   diemix 0.5d0
