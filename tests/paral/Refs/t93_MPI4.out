@@ -90,7 +90,7 @@ P           mkmem2          2
             natom           2
             nband           5
           nbandhf1          0
-          nbandhf2          4
+          nbandhf2          5
            ndtset           2
             ngfft          15      15      15
              nkpt           4
@@ -473,7 +473,7 @@ P           mkmem2          2
             natom           2
             nband           5
           nbandhf1          0
-          nbandhf2          4
+          nbandhf2          5
            ndtset           2
             ngfft          15      15      15
              nkpt           4
