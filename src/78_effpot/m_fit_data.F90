@@ -29,6 +29,7 @@ module m_fit_data
  use m_profiling_abi
  
  implicit none
+!!***
 
 !!****t* defs_abitypes/training_set_type
 !! NAME
