@@ -670,6 +670,7 @@ subroutine dtset_copy(dtout, dtin)
  dtout%nkpt               = dtin%nkpt
  dtout%nkpthf             = dtin%nkpthf
  dtout%nkptgw             = dtin%nkptgw
+ dtout%nonlinear_info     = dtin%nonlinear_info
  dtout%nline              = dtin%nline
  dtout%nnsclo             = dtin%nnsclo
  dtout%nnsclohf           = dtin%nnsclohf

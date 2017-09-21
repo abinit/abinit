@@ -118,7 +118,7 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,ffnl1,ffnl1_test,gs_ha
  integer,parameter :: berryopt=0,iorder_cprj=0,level=19,tim_getghc=1,tim_getgh1c=1,tim_getgh2c=1
  integer :: choice_cprj,cpopt_cprj,iband,icpgr_loc,idir1,idir2,idir_cprj,ierr
  integer :: igs,indb,ipert1,ipert2,iproc,ipw,ispinor,jband,kdir1
- integer :: me,my_nband,natom,ncpgr_loc,nproc_band,print_info
+ integer :: me,my_nband,natom,ncpgr_loc,nproc_band,debug_mode
  integer :: size_cprj,size_wf,shift_band1,shift_band2,shift_cprj_band1,shift_cprj_dir1,shift_proc
  integer :: shift_dir1_lambda,shift_dir2_lambda,shift_dir1,shift_dir1_loc,shift_dir2,shift_jband_lambda
  logical :: has_cprj_jband,has_dudkprj
@@ -146,8 +146,8 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,ffnl1,ffnl1_test,gs_ha
  size_wf=gs_hamkq%npw_k*gs_hamkq%nspinor
  size_cprj=gs_hamkq%nspinor
  natom = gs_hamkq%natom
- print_info = 0
- if (dtset%prtvol == -level.or.dtset%prtvol == -20.or.dtset%prtvol == -21) print_info = 1 ! also active a lot of tests
+ debug_mode = 0
+ if (dtset%nonlinear_info>2) debug_mode = 1 ! also active a lot of tests
 
 !Define some attributes of the rf2 object
  rf2%nband_k = nband_k
@@ -204,7 +204,7 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,ffnl1,ffnl1_test,gs_ha
    ABI_DATATYPE_ALLOCATE(dudkprj,(natom,0))
  end if
 
- if (print_info/=0) then
+ if (debug_mode/=0) then
    write(msg,'(4(a,i2))') 'RF2_INIT : ipert-natom = ',ipert-natom,' , idir = ',idir,&
    ' , ikpt = ',ikpt,' , isppol = ',isppol
    call wrtout(std_out,msg,'COLL')
@@ -262,7 +262,7 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,ffnl1,ffnl1_test,gs_ha
      shift_band1=(iband-1)*size_wf
      dudkdk(:,1+shift_band1:size_wf+shift_band1)=ddk_read(:,:)
 !    Check that < u^(0) | u^(2) > = - Re[< u^(1) | u^(1) >]
-     if (print_info/=0 .and. gs_hamkq%usepaw==0) then
+     if (debug_mode/=0 .and. gs_hamkq%usepaw==0) then
 !      Compute < u^(0) | u^(2) >
        do jband=1,nband_k
          cwave_j => cg(:,1+shift_band1+icg:size_wf+shift_band1+icg)
@@ -283,7 +283,7 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,ffnl1,ffnl1_test,gs_ha
            end if
          end if ! idir<=3
        end do ! jband
-     end if ! print_info
+     end if ! debug_mode
 !    Read ddk for idir2
      if (idir>3) then
        call wfk_read_bks(ddk_f(4),iband,ikpt,isppol,xmpio_single,cg_bks=ddk_read,eig1_bks=eig1_read)
@@ -318,9 +318,9 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,ffnl1,ffnl1_test,gs_ha
  ABI_ALLOCATE(rf2%lambda_mn,(2,nband_k**2))
  rf2%lambda_mn(:,:)=zero
 
-!Allocate work spaces when print_info is activated
+!Allocate work spaces when debug_mode is activated
  has_cprj_jband=.false.
- if (print_info/=0) then ! Only for test purposes
+ if (debug_mode/=0) then ! Only for test purposes
    ABI_ALLOCATE(cg_jband,(2,size_wf*nband_k,2))
    cg_jband(:,:,1) = cg(:,1+icg:size_wf*nband_k+icg)
    if (ipert==natom+11) then ! Note the multiplication by "i"
@@ -403,10 +403,10 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,ffnl1,ffnl1_test,gs_ha
 !      Compute H^(0) | du/dpert1 > (in h_cwave) and S^(0) | du/dpert1 > (in s_cwave)
        call rf2_apply_hamiltonian(cg_jband,cprj_jband,cwave_dudk,cprj_dudk,h_cwave,s_cwave,&
 &       eig0_k,eig1_k_jband,jband,gs_hamkq,gvnl1,0,0,ikpt,isppol,mkmem,&
-&       mpi_enreg,nband_k,nsppol,print_info,dtset%prtvol,rf_hamk_idir,size_cprj,size_wf)
+&       mpi_enreg,nband_k,nsppol,debug_mode,dtset%prtvol,rf_hamk_idir,size_cprj,size_wf)
 !       call rf2_apply_hamiltonian(rf2,cg_jband,cprj_jband,cwave_dudk,cprj_dudk,h_cwave,s_cwave,dtfil,&
 !&       eig0_k,eig1_k_jband,jband,gs_hamkq,gvnl1,0,0,ikpt,isppol,dtset%mband,mkmem,&
-!&       mpi_enreg,nsppol,print_info,dtset%prtvol,rf_hamk_idir)
+!&       mpi_enreg,nsppol,debug_mode,dtset%prtvol,rf_hamk_idir)
 
        if (gs_hamkq%usepaw==0) s_cwave(:,:)=cwave_dudk(:,:) ! Store | du/dpert1 > in s_cwave
 
@@ -414,7 +414,7 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,ffnl1,ffnl1_test,gs_ha
        dsusdu(:,1+shift_band1+shift_dir1:size_wf+shift_band1+shift_dir1)=s_cwave(:,:)&
        +dsusdu(:,1+shift_band1+shift_dir1:size_wf+shift_band1+shift_dir1)
 
-       if (print_info/=0) then
+       if (debug_mode/=0) then
          write(msg,'(2(a,i2))') 'RF2 TEST before accumulate_bands choice = 1 kdir1 = ',kdir1,' jband = ',jband
          call wrtout(std_out,msg)
        end if
@@ -427,7 +427,7 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,ffnl1,ffnl1_test,gs_ha
            shift_band2=(iband-1)*size_wf
            cwave_dudk => dudk(:,1+shift_band2+shift_dir2:size_wf+shift_band2+shift_dir2)
            call rf2_accumulate_bands(rf2,1,gs_hamkq,mpi_enreg,iband,idir1,idir2,ipert1,ipert2,&
-           jband,print_info,cwave_dudk,h_cwave,s_cwave)
+           jband,debug_mode,cwave_dudk,h_cwave,s_cwave)
          end if
        end do
 
@@ -449,10 +449,10 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,ffnl1,ffnl1_test,gs_ha
 !      Compute dH/dpert1 | u^(0) > (in h_cwave) and dS/dpert1 | u^(0) > (in s_cwave)
        call rf2_apply_hamiltonian(cg_jband,cprj_jband,cwave_j,cprj_j,h_cwave,s_cwave,&
 &       eig0_k,eig1_k_jband,jband,gs_hamkq,gvnl1,idir1,ipert1,ikpt,isppol,&
-&       mkmem,mpi_enreg,nband_k,nsppol,print_info,dtset%prtvol,rf_hamk_idir,size_cprj,size_wf)
+&       mkmem,mpi_enreg,nband_k,nsppol,debug_mode,dtset%prtvol,rf_hamk_idir,size_cprj,size_wf)
 !       call rf2_apply_hamiltonian(rf2,cg_jband,cprj_jband,cwave_j,cprj_j,h_cwave,s_cwave,dtfil,&
 !&       eig0_k,eig1_k_jband,jband,gs_hamkq,gvnl1,idir1,ipert1,ikpt,isppol,&
-!&       dtset%mband,mkmem,mpi_enreg,nsppol,print_info,dtset%prtvol,rf_hamk_idir)
+!&       dtset%mband,mkmem,mpi_enreg,nsppol,debug_mode,dtset%prtvol,rf_hamk_idir)
 
 !      Copy infos in dsusdu
        if (gs_hamkq%usepaw==1) then
@@ -460,7 +460,7 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,ffnl1,ffnl1_test,gs_ha
          +dsusdu(:,1+shift_band1+shift_dir1:size_wf+shift_band1+shift_dir1)
        end if
 
-       if (print_info/=0) then
+       if (debug_mode/=0) then
          write(msg,'(2(a,i2))') 'RF2 TEST before accumulate_bands choice = 2 kdir1 = ',kdir1,' jband = ',jband
          call wrtout(std_out,msg)
        end if
@@ -473,7 +473,7 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,ffnl1,ffnl1_test,gs_ha
            shift_band2=(iband-1)*size_wf
            cwave_dudk => dudk(:,1+shift_band2+shift_dir2:size_wf+shift_band2+shift_dir2)
            call rf2_accumulate_bands(rf2,2,gs_hamkq,mpi_enreg,iband,idir1,idir2,ipert1,ipert2,&
-           jband,print_info,cwave_dudk,h_cwave,s_cwave)
+           jband,debug_mode,cwave_dudk,h_cwave,s_cwave)
          end if
        end do
 
@@ -589,13 +589,13 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,ffnl1,ffnl1_test,gs_ha
 !      and      : d^2S/(dpert1 dpert2)|u^(0)>  (in s_cwave)
        call rf2_apply_hamiltonian(cg_jband,cprj_jband,cwave_j,cprj_j,h_cwave,s_cwave,&
 &       eig0_k,eig1_k_jband,jband,gs_hamkq,gvnl1,idir,ipert,ikpt,isppol,&
-&       mkmem,mpi_enreg,nband_k,nsppol,print_info,dtset%prtvol,rf_hamk_idir,size_cprj,size_wf,&
+&       mkmem,mpi_enreg,nband_k,nsppol,debug_mode,dtset%prtvol,rf_hamk_idir,size_cprj,size_wf,&
 &       ffnl1=ffnl1,ffnl1_test=ffnl1_test)
 !       call rf2_apply_hamiltonian(rf2,cg_jband,cprj_jband,cwave_j,cprj_j,h_cwave,s_cwave,dtfil,&
 !&       eig0_k,eig1_k_jband,jband,gs_hamkq,gvnl1,idir,ipert,ikpt,isppol,dtset%mband,&
-!&       mkmem,mpi_enreg,nsppol,print_info,dtset%prtvol,rf_hamk_idir)
+!&       mkmem,mpi_enreg,nsppol,debug_mode,dtset%prtvol,rf_hamk_idir)
 
-       if (print_info/=0) then
+       if (debug_mode/=0) then
          write(msg,'(a,i2)') 'RF2 TEST before accumulate_bands choice = 3 jband = ',jband
          call wrtout(std_out,msg)
        end if
@@ -616,7 +616,7 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,ffnl1,ffnl1_test,gs_ha
            end if
            call rf2_getidirs(idir,idir1,idir2)
            call rf2_accumulate_bands(rf2,3,gs_hamkq,mpi_enreg,iband,idir1,idir2,ipert1,ipert2,&
-           jband,print_info,cwave_i,h_cwave,s_cwave)
+           jband,debug_mode,cwave_i,h_cwave,s_cwave)
          end if
        end do
 
@@ -693,12 +693,12 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,ffnl1,ffnl1_test,gs_ha
 !      Compute dH/dpert2 | du/dpert1 > (in h_cwave) and dS/dpert2 | du/dpert1 > (in s_cwave)
        call rf2_apply_hamiltonian(cg_jband,cprj_jband,cwave_dudk,cprj_dudk,h_cwave,s_cwave,&
 &       eig0_k,eig1_k_jband,jband,gs_hamkq,gvnl1,idir2,ipert2,ikpt,isppol,&
-&       mkmem,mpi_enreg,nband_k,nsppol,print_info,dtset%prtvol,rf_hamk_idir,size_cprj,size_wf)
+&       mkmem,mpi_enreg,nband_k,nsppol,debug_mode,dtset%prtvol,rf_hamk_idir,size_cprj,size_wf)
 !       call rf2_apply_hamiltonian(rf2,cg_jband,cprj_jband,cwave_dudk,cprj_dudk,h_cwave,s_cwave,dtfil,&
 !&       eig0_k,eig1_k_jband,jband,gs_hamkq,gvnl1,idir2,ipert2,ikpt,isppol,&
-!&       dtset%mband,mkmem,mpi_enreg,nsppol,print_info,dtset%prtvol,rf_hamk_idir)
+!&       dtset%mband,mkmem,mpi_enreg,nsppol,debug_mode,dtset%prtvol,rf_hamk_idir)
 
-       if (print_info/=0) then
+       if (debug_mode/=0) then
          write(msg,'(2(a,i2))') 'RF2 TEST before accumulate_bands choice = 4 kdir1 = ',kdir1,' jband = ',jband
          call wrtout(std_out,msg)
        end if
@@ -711,7 +711,7 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,ffnl1,ffnl1_test,gs_ha
            shift_band2=(iband-1)*size_wf
            cwave_i => cg(:,1+shift_band2+icg:size_wf+shift_band2+icg)
            call rf2_accumulate_bands(rf2,4,gs_hamkq,mpi_enreg,iband,idir1,idir2,ipert1,ipert2,&
-           jband,print_info,cwave_i,h_cwave,s_cwave)
+           jband,debug_mode,cwave_i,h_cwave,s_cwave)
          end if
        end do
 
@@ -770,7 +770,7 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,ffnl1,ffnl1_test,gs_ha
      rhs_j => rf2%RHS_Stern(:,1+shift_band1:size_wf+shift_band1)
      do iband=1,nband_k
        if (iband /= jband) then
-         if (print_info/=0) then
+         if (debug_mode/=0) then
            if (abs(occ_k(iband) - occ_k(jband)) > tol12 .and. occ_k(iband) > tol8) then
              write(msg,'(a,i2,a,i2)') 'RF2 TEST ACTIVE SPACE : jband = ',jband,' iband = ',iband
              call wrtout(std_out,msg)
@@ -853,7 +853,7 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,ffnl1,ffnl1_test,gs_ha
 ! **************************************************************************************************
 
  tol_final = tol6
- if (print_info/=0) then
+ if (debug_mode/=0) then
    do jband=1,nband_k
 
 !    Skip bands not treated by current proc
@@ -892,7 +892,7 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,ffnl1,ffnl1_test,gs_ha
 ! **************************************************************************************************
 
 ! Deallocations of arrays
- if (print_info==0) ABI_DEALLOCATE(rf2%amn)
+ if (debug_mode==0) ABI_DEALLOCATE(rf2%amn)
 
 ! call timab(566,2,tsec)
 

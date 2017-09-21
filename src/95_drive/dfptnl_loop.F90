@@ -96,7 +96,8 @@ subroutine dfptnl_loop(atindx,atindx1,blkflg,cg,cgindex,dtfil,dtset,d3etot,eigen
 & npwarr,occ,paw_an0,paw_ij0,&
 & pawang,pawang1,pawfgr,pawfgrtab,pawrad,pawrhoij,pawtab,&
 & ph1d,ph1df,psps,pwind,rfpert,rhog,rhor,rprimd,ucvol,usecprj,vtrial,vxc,xred,&
-& nsym1,indsy1,symaf1,symrc1)
+& nsym1,indsy1,symaf1,symrc1,&
+& d3etot_1,d3etot_2,d3etot_3,d3etot_4,d3etot_5,d3etot_6,d3etot_7,d3etot_8,d3etot_9)
 
  use defs_basis
  use defs_datatypes
@@ -171,6 +172,15 @@ subroutine dfptnl_loop(atindx,atindx1,blkflg,cg,cgindex,dtfil,dtset,d3etot,eigen
  real(dp),intent(in) :: vxc(nfftf,dtset%nspden)
  real(dp),intent(inout) :: occ(mband*nkpt*nsppol)
  real(dp),intent(inout) :: d3etot(2,3,mpert,3,mpert,3,mpert) !vz_i
+ real(dp),intent(inout) :: d3etot_1(2,3,mpert,3,mpert,3,mpert)
+ real(dp),intent(inout) :: d3etot_2(2,3,mpert,3,mpert,3,mpert)
+ real(dp),intent(inout) :: d3etot_3(2,3,mpert,3,mpert,3,mpert)
+ real(dp),intent(inout) :: d3etot_4(2,3,mpert,3,mpert,3,mpert)
+ real(dp),intent(inout) :: d3etot_5(2,3,mpert,3,mpert,3,mpert)
+ real(dp),intent(inout) :: d3etot_6(2,3,mpert,3,mpert,3,mpert)
+ real(dp),intent(inout) :: d3etot_7(2,3,mpert,3,mpert,3,mpert)
+ real(dp),intent(inout) :: d3etot_8(2,3,mpert,3,mpert,3,mpert)
+ real(dp),intent(inout) :: d3etot_9(2,3,mpert,3,mpert,3,mpert)
  type(pawfgrtab_type),intent(inout) :: pawfgrtab(natom*psps%usepaw)
  type(pawrhoij_type),intent(in) :: pawrhoij(natom*psps%usepaw)
  type(pawrad_type),intent(inout) :: pawrad(psps%ntypat*psps%usepaw)
@@ -705,43 +715,11 @@ subroutine dfptnl_loop(atindx,atindx1,blkflg,cg,cgindex,dtfil,dtset,d3etot,eigen
 &                   pawang,pawang1,pawfgrtab,pawrad,pawtab,pawrhoij,pawrhoij1_i1pert,pawrhoij1_i2pert,pawrhoij1_i3pert,&
 &                   paw_an0,paw_an1_i2pert,paw_ij0,paw_ij1_i2pert,pawfgr,ph1d,psps,rho1r1,rho2r1,rho3r1,&
 &                   rprimd,symaf1,symrc1,ucvol,vtrial,vhartr1_i2pert,vtrial1_i2pert,vxc1_i2pert,&
-&                   ddk_f,xccc3d1,xccc3d2,xccc3d3,xred)
+&                   ddk_f,xccc3d1,xccc3d2,xccc3d3,xred,&
+&                   d3etot_1,d3etot_2,d3etot_3,d3etot_4,d3etot_5,d3etot_6,d3etot_7,d3etot_8,d3etot_9)
 !                   call timab(512,2,tsec)
 
                    call status(counter,dtfil%filstat,iexit,level,'after dfptnl_resp')
-
-!!                  Describe the perturbation and write out the result
-!                   if (mpi_enreg%me == 0) then
-!                     if (i2pert < natom + 1) then
-!                       write(message,'(a,i3,a,i3)') &
-!&                       ' j2 : displacement of atom ',i2pert,&
-!&                       ' along direction ', i2dir
-!                     end if
-!                     if (i2pert == dtset%natom + 2) then
-!                       write(message,'(a,i4)') &
-!&                       ' j2 : homogeneous electric field along direction ',&
-!&                       i2dir
-!                     end if
-!                     call wrtout(std_out,message,'COLL')
-!                     call wrtout(ab_out,message,'COLL')
-!                     write(ab_out,'(20x,a,13x,a)')'real part','imaginary part'
-!                     write(ab_out,'(5x,a2,1x,f22.10,3x,f22.10)')'xc',exc3*sixth,zero
-!                     write(ab_out,'(5x,a3,f22.10,3x,f22.10)')'dft',&
-!&                     d3etot(1,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert),&
-!&                     d3etot(2,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)
-!                     write(ab_out,*)
-!                     write(std_out,'(18x,a,11x,a)')'real part','imaginary part'
-!                     write(std_out,'(5x,a2,1x,f20.10,3x,f20.10)')'xc',exc3*sixth,zero
-!                     write(std_out,'(5x,a3,f22.10,3x,f22.10)')'dft',&
-!&                     d3etot(1,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert),&
-!&                     d3etot(2,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)
-!                     write(std_out,*)
-!                   end if  ! mpi_enreg%me == 0
-
-!                   d3etot(1,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) = &
-!&                   d3etot(1,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) + exc3*sixth
-!                   d3etot(:,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) = &
-!&                   d3etot(:,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)
 
 !                  Eventually close the dot file
                    do ii=1,nwffile

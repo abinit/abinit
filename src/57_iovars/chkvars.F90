@@ -159,7 +159,7 @@ subroutine chkvars (string)
  list_vars=trim(list_vars)//' nfreqim nfreqre nfreqsp ngfft ngfftdg'
  list_vars=trim(list_vars)//' ngkpt ngqpt nimage nkpath nkpt nkptgw nkpthf'
  list_vars=trim(list_vars)//' nline nloc_alg nloc_mem nnos nnsclo nnsclohf'
- list_vars=trim(list_vars)//' nobj nomegasf nomegasi nomegasrd noseinert npband'
+ list_vars=trim(list_vars)//' nobj nomegasf nomegasi nomegasrd nonlinear_info noseinert npband'
  list_vars=trim(list_vars)//' npfft nphf npimage npkpt nppert npsp npspinor'
  list_vars=trim(list_vars)//' npulayit npvel npwkss'
  list_vars=trim(list_vars)//' np_slk nqpt nqptdm nscforder nshiftk nshiftq'

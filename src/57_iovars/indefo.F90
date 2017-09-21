@@ -501,6 +501,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%nomegasf=100
    dtsets(idtset)%nomegasrd=9
    dtsets(idtset)%nomegasi=12
+   dtsets(idtset)%nonlinear_info=0
    dtsets(idtset)%noseinert=1.0d5
    dtsets(idtset)%npvel=0
    dtsets(idtset)%npweps=0

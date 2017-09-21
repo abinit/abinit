@@ -174,8 +174,10 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
  type(wffile_type) :: wffgs,wfftgs
  type(wvl_data) :: wvl
 !arrays
- integer :: dum_kptrlatt(3,3),dum_vacuum(3),ngfft(18),ngfftf(18),perm(6),ii
+ integer :: dum_kptrlatt(3,3),dum_vacuum(3),ngfft(18),ngfftf(18),perm(6),ii,theunit
  integer,allocatable :: atindx(:),atindx1(:),blkflg(:,:,:,:,:,:),carflg(:,:,:,:,:,:),cgindex(:,:)
+ integer,allocatable :: blkflg_tmp(:,:,:,:,:,:),blkflg_sav(:,:,:,:,:,:)
+ integer,allocatable :: carflg_tmp(:,:,:,:,:,:),carflg_sav(:,:,:,:,:,:)
  integer,allocatable :: d3e_pert1(:),d3e_pert2(:),d3e_pert3(:)
  integer,allocatable :: indsym(:,:,:),indsy1(:,:,:),irrzon(:,:,:),irrzon1(:,:,:)
  integer,allocatable :: kg(:,:),kneigh(:,:),kg_neigh(:,:,:)
@@ -188,6 +190,16 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
  real(dp) :: qphon(3),rmet(3,3),rprimd(3,3),strsxc(6),tsec(2)
  real(dp),allocatable :: amass(:),cg(:,:),d3cart(:,:,:,:,:,:,:)
  real(dp),allocatable :: d3etot(:,:,:,:,:,:,:),dum_kptns(:,:)
+! We need all these arrays instead of one because in Fortran the maximum number of dimensions is 7...
+ real(dp),allocatable :: d3e_1(:,:,:,:,:,:,:),d3cart_1(:,:,:,:,:,:,:)
+ real(dp),allocatable :: d3e_2(:,:,:,:,:,:,:),d3cart_2(:,:,:,:,:,:,:)
+ real(dp),allocatable :: d3e_3(:,:,:,:,:,:,:),d3cart_3(:,:,:,:,:,:,:)
+ real(dp),allocatable :: d3e_4(:,:,:,:,:,:,:),d3cart_4(:,:,:,:,:,:,:)
+ real(dp),allocatable :: d3e_5(:,:,:,:,:,:,:),d3cart_5(:,:,:,:,:,:,:)
+ real(dp),allocatable :: d3e_6(:,:,:,:,:,:,:),d3cart_6(:,:,:,:,:,:,:)
+ real(dp),allocatable :: d3e_7(:,:,:,:,:,:,:),d3cart_7(:,:,:,:,:,:,:)
+ real(dp),allocatable :: d3e_8(:,:,:,:,:,:,:),d3cart_8(:,:,:,:,:,:,:)
+ real(dp),allocatable :: d3e_9(:,:,:,:,:,:,:),d3cart_9(:,:,:,:,:,:,:)
  real(dp),allocatable :: dum_wtk(:),dyfrlo(:,:,:),dyfrlo_indx(:,:,:),dyfrx2(:,:,:),eigen0(:) 
  real(dp),allocatable :: grtn_indx(:,:),grxc(:,:),k3xc(:,:),kpt3(:,:),kxc(:,:)
  real(dp),allocatable :: mvwtk(:,:),nhat(:,:),nhatgr(:,:,:),ph1d(:,:),ph1df(:,:),phnons(:,:,:),phnons1(:,:,:)
@@ -199,7 +211,7 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
  type(paw_an_type),allocatable :: paw_an(:)
  type(paw_ij_type),allocatable :: paw_ij(:)
  type(paw_dmft_type) :: paw_dmft
- 
+
 ! ***********************************************************************
 
  DBG_ENTER("COLL")
@@ -418,6 +430,37 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
  ABI_ALLOCATE(d3e_pert3,(mpert))
  ABI_ALLOCATE(d3etot,(2,3,mpert,3,mpert,3,mpert))
  ABI_ALLOCATE(d3cart,(2,3,mpert,3,mpert,3,mpert))
+ ABI_ALLOCATE(blkflg_tmp,(3,mpert,3,mpert,3,mpert))
+ ABI_ALLOCATE(blkflg_sav,(3,mpert,3,mpert,3,mpert))
+ ABI_ALLOCATE(carflg_tmp,(3,mpert,3,mpert,3,mpert))
+ ABI_ALLOCATE(carflg_sav,(3,mpert,3,mpert,3,mpert))
+ ABI_ALLOCATE(d3e_1,(2,3,mpert,3,mpert,3,mpert))
+ ABI_ALLOCATE(d3e_2,(2,3,mpert,3,mpert,3,mpert))
+ ABI_ALLOCATE(d3e_3,(2,3,mpert,3,mpert,3,mpert))
+ ABI_ALLOCATE(d3e_4,(2,3,mpert,3,mpert,3,mpert))
+ ABI_ALLOCATE(d3e_5,(2,3,mpert,3,mpert,3,mpert))
+ ABI_ALLOCATE(d3e_6,(2,3,mpert,3,mpert,3,mpert))
+ ABI_ALLOCATE(d3e_7,(2,3,mpert,3,mpert,3,mpert))
+ ABI_ALLOCATE(d3e_8,(2,3,mpert,3,mpert,3,mpert))
+ ABI_ALLOCATE(d3e_9,(2,3,mpert,3,mpert,3,mpert))
+ d3e_1(:,:,:,:,:,:,:) = 0_dp
+ d3e_2(:,:,:,:,:,:,:) = 0_dp
+ d3e_3(:,:,:,:,:,:,:) = 0_dp
+ d3e_4(:,:,:,:,:,:,:) = 0_dp
+ d3e_5(:,:,:,:,:,:,:) = 0_dp
+ d3e_6(:,:,:,:,:,:,:) = 0_dp
+ d3e_7(:,:,:,:,:,:,:) = 0_dp
+ d3e_8(:,:,:,:,:,:,:) = 0_dp
+ d3e_9(:,:,:,:,:,:,:) = 0_dp
+ ABI_ALLOCATE(d3cart_1,(2,3,mpert,3,mpert,3,mpert))
+ ABI_ALLOCATE(d3cart_2,(2,3,mpert,3,mpert,3,mpert))
+ ABI_ALLOCATE(d3cart_3,(2,3,mpert,3,mpert,3,mpert))
+ ABI_ALLOCATE(d3cart_4,(2,3,mpert,3,mpert,3,mpert))
+ ABI_ALLOCATE(d3cart_5,(2,3,mpert,3,mpert,3,mpert))
+ ABI_ALLOCATE(d3cart_6,(2,3,mpert,3,mpert,3,mpert))
+ ABI_ALLOCATE(d3cart_7,(2,3,mpert,3,mpert,3,mpert))
+ ABI_ALLOCATE(d3cart_8,(2,3,mpert,3,mpert,3,mpert))
+ ABI_ALLOCATE(d3cart_9,(2,3,mpert,3,mpert,3,mpert))
  blkflg(:,:,:,:,:,:) = 0
  d3etot(:,:,:,:,:,:,:) = 0_dp
  rfpert(:,:,:,:,:,:) = 0
@@ -490,26 +533,27 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
            do i2dir = 1,3
              if (rfpert(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)==1) then
                n1 = n1 + 1
-!               write(message,'(2x,i4,a,6(5x,i3))') n1,')', &
                write(message,'(a,i4,a,6(5x,i3))') ' pert number :',n1,')', &
 &               i1pert,i1dir,i2pert,i2dir,i3pert,i3dir
                call wrtout(ab_out,message,'COLL')
                call wrtout(std_out,message,'COLL')
              else if (rfpert(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)==-2) then
-               n1 = n1 + 1
-!               write(message,'(2x,i4,a,6(5x,i3),a)') n1,')', &
-               write(message,'(a,i4,a,6(5x,i3),a)') ' pert number :',n1,')', &
-&               i1pert,i1dir,i2pert,i2dir,i3pert,i3dir,' => must be zero, not computed'
-               call wrtout(ab_out,message,'COLL')
-               call wrtout(std_out,message,'COLL')
                blkflg(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) = 1
+               if (dtset%nonlinear_info>0) then
+!                 n1 = n1 + 1
+                 write(message,'(a,i4,a,6(5x,i3),a)') ' pert number :',n1,')', &
+  &               i1pert,i1dir,i2pert,i2dir,i3pert,i3dir,' => must be zero, not computed'
+                 call wrtout(ab_out,message,'COLL')
+                 call wrtout(std_out,message,'COLL')
+               end if
              else if (rfpert(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)==-1) then
-               n1 = n1 + 1
-!               write(message,'(2x,i4,a,6(5x,i3),a)') n1,')', &
-               write(message,'(a,i4,a,6(5x,i3),a)') ' pert number :',n1,')', &
-&               i1pert,i1dir,i2pert,i2dir,i3pert,i3dir,' => symmetric of an other element, not computed'
-               call wrtout(ab_out,message,'COLL')
-               call wrtout(std_out,message,'COLL')
+               if (dtset%nonlinear_info>0) then
+!                 n1 = n1 + 1
+                 write(message,'(a,i4,a,6(5x,i3),a)') ' pert number :',n1,')', &
+  &               i1pert,i1dir,i2pert,i2dir,i3pert,i3dir,' => symmetric of an other element, not computed'
+                 call wrtout(ab_out,message,'COLL')
+                 call wrtout(std_out,message,'COLL')
+               end if
              end if
            end do
          end do
@@ -973,7 +1017,8 @@ end if
 &   dtset%nkpt,nkpt3,nkxc,nk3xc,nneigh,dtset%nspinor,dtset%nsppol,npwarr,occ,&
 &   paw_an,paw_ij,pawang,pawang1,pawfgr,pawfgrtab,pawrad,pawrhoij,pawtab,&
 &   ph1d,ph1df,psps,pwind,rfpert,rhog,rhor,rprimd,ucvol,usecprj,vtrial,vxc,xred,&
-&   nsym1,indsy1,symaf1,symrc1)
+&   nsym1,indsy1,symaf1,symrc1,&
+&   d3e_1,d3e_2,d3e_3,d3e_4,d3e_5,d3e_6,d3e_7,d3e_8,d3e_9)
 
  end if ! end pead/=0
 
@@ -982,9 +1027,28 @@ end if
  call wrtout(ab_out,message,'COLL')
 
 !Complete missing elements using symmetry operations
+ blkflg_sav = blkflg
  call status(0,dtfil%filstat,iexit,level,'call d3sym    ')
- call d3sym(blkflg,d3etot,indsym,mpert,natom,dtset%nsym,&
-& symrec,dtset%symrel)
+ call d3sym(blkflg,d3etot,indsym,mpert,natom,dtset%nsym,symrec,dtset%symrel)
+
+ blkflg_tmp = blkflg_sav
+ call d3sym(blkflg_tmp,d3e_1,indsym,mpert,natom,dtset%nsym,symrec,dtset%symrel)
+ blkflg_tmp = blkflg_sav
+ call d3sym(blkflg_tmp,d3e_2,indsym,mpert,natom,dtset%nsym,symrec,dtset%symrel)
+ blkflg_tmp = blkflg_sav
+ call d3sym(blkflg_tmp,d3e_3,indsym,mpert,natom,dtset%nsym,symrec,dtset%symrel)
+ blkflg_tmp = blkflg_sav
+ call d3sym(blkflg_tmp,d3e_4,indsym,mpert,natom,dtset%nsym,symrec,dtset%symrel)
+ blkflg_tmp = blkflg_sav
+ call d3sym(blkflg_tmp,d3e_5,indsym,mpert,natom,dtset%nsym,symrec,dtset%symrel)
+ blkflg_tmp = blkflg_sav
+ call d3sym(blkflg_tmp,d3e_6,indsym,mpert,natom,dtset%nsym,symrec,dtset%symrel)
+ blkflg_tmp = blkflg_sav
+ call d3sym(blkflg_tmp,d3e_7,indsym,mpert,natom,dtset%nsym,symrec,dtset%symrel)
+ blkflg_tmp = blkflg_sav
+ call d3sym(blkflg_tmp,d3e_8,indsym,mpert,natom,dtset%nsym,symrec,dtset%symrel)
+ blkflg_tmp = blkflg_sav
+ call d3sym(blkflg_tmp,d3e_9,indsym,mpert,natom,dtset%nsym,symrec,dtset%symrel)
 
 !Open the formatted derivative database file, and write the
 !preliminary information
@@ -1019,6 +1083,16 @@ end if
 
 !  Compute tensors related to third-order derivatives
    call nlopt(blkflg,carflg,d3etot,d3cart,gprimd,mpert,natom,rprimd,ucvol)
+!  Note that the imaginary part is not transformed into cartesian coordinates
+   call nlopt(blkflg,carflg_tmp,d3e_1,d3cart_1,gprimd,mpert,natom,rprimd,ucvol)
+   call nlopt(blkflg,carflg_tmp,d3e_2,d3cart_2,gprimd,mpert,natom,rprimd,ucvol)
+   call nlopt(blkflg,carflg_tmp,d3e_3,d3cart_3,gprimd,mpert,natom,rprimd,ucvol)
+   call nlopt(blkflg,carflg_tmp,d3e_4,d3cart_4,gprimd,mpert,natom,rprimd,ucvol)
+   call nlopt(blkflg,carflg_tmp,d3e_5,d3cart_5,gprimd,mpert,natom,rprimd,ucvol)
+   call nlopt(blkflg,carflg_tmp,d3e_6,d3cart_6,gprimd,mpert,natom,rprimd,ucvol)
+   call nlopt(blkflg,carflg_tmp,d3e_7,d3cart_7,gprimd,mpert,natom,rprimd,ucvol)
+   call nlopt(blkflg,carflg_tmp,d3e_8,d3cart_8,gprimd,mpert,natom,rprimd,ucvol)
+   call nlopt(blkflg,carflg_tmp,d3e_9,d3cart_9,gprimd,mpert,natom,rprimd,ucvol)
 
    if ((d3e_pert1(natom+2)==1).and.(d3e_pert2(natom+2)==1).and. &
 &   (d3e_pert3(natom+2)==1)) then
@@ -1044,6 +1118,70 @@ end if
          end do
        end do
      end do
+
+     if (pead==0.and.(dtset%nonlinear_info>0)) then
+
+       d3cart_1(:,:,i1pert,:,i1pert,:,i1pert) = &
+&       d3cart_1(:,:,i1pert,:,i1pert,:,i1pert)*16*(pi**2)*(Bohr_Ang**2)*1.0d-8*eps0/e_Cb
+       d3cart_2(:,:,i1pert,:,i1pert,:,i1pert) = &
+&       d3cart_2(:,:,i1pert,:,i1pert,:,i1pert)*16*(pi**2)*(Bohr_Ang**2)*1.0d-8*eps0/e_Cb
+       d3cart_3(:,:,i1pert,:,i1pert,:,i1pert) = &
+&       d3cart_3(:,:,i1pert,:,i1pert,:,i1pert)*16*(pi**2)*(Bohr_Ang**2)*1.0d-8*eps0/e_Cb
+       d3cart_4(:,:,i1pert,:,i1pert,:,i1pert) = &
+&       d3cart_4(:,:,i1pert,:,i1pert,:,i1pert)*16*(pi**2)*(Bohr_Ang**2)*1.0d-8*eps0/e_Cb
+       d3cart_5(:,:,i1pert,:,i1pert,:,i1pert) = &
+&       d3cart_5(:,:,i1pert,:,i1pert,:,i1pert)*16*(pi**2)*(Bohr_Ang**2)*1.0d-8*eps0/e_Cb
+       d3cart_6(:,:,i1pert,:,i1pert,:,i1pert) = &
+&       d3cart_6(:,:,i1pert,:,i1pert,:,i1pert)*16*(pi**2)*(Bohr_Ang**2)*1.0d-8*eps0/e_Cb
+       d3cart_7(:,:,i1pert,:,i1pert,:,i1pert) = &
+&       d3cart_7(:,:,i1pert,:,i1pert,:,i1pert)*16*(pi**2)*(Bohr_Ang**2)*1.0d-8*eps0/e_Cb
+       d3cart_8(:,:,i1pert,:,i1pert,:,i1pert) = &
+&       d3cart_8(:,:,i1pert,:,i1pert,:,i1pert)*16*(pi**2)*(Bohr_Ang**2)*1.0d-8*eps0/e_Cb
+       d3cart_9(:,:,i1pert,:,i1pert,:,i1pert) = &
+&       d3cart_9(:,:,i1pert,:,i1pert,:,i1pert)*16*(pi**2)*(Bohr_Ang**2)*1.0d-8*eps0/e_Cb
+
+       theunit = ab_out
+       write(theunit,'(2a)') ch10,' ** sum_psi1H1psi1 :'
+       do i1dir = 1, 3
+         do i2dir = 1, 3
+           do i3dir = 1, 3
+             write(theunit,'(3(5x,i2),5x,f16.9)') i1dir,i2dir,i3dir,&
+  &           d3cart_1(1,i1dir,i1pert,i2dir,i1pert,i3dir,i1pert)
+           end do
+         end do
+       end do
+
+       write(theunit,'(2a)') ch10,' ** sum_lambda1psi1psi1 :'
+       do i1dir = 1, 3
+         do i2dir = 1, 3
+           do i3dir = 1, 3
+             write(theunit,'(3(5x,i2),5x,f16.9)') i1dir,i2dir,i3dir,&
+  &           d3cart_2(1,i1dir,i1pert,i2dir,i1pert,i3dir,i1pert)
+            end do
+         end do
+       end do
+
+       write(theunit,'(2a)') ch10,' ** exc3 :'
+       do i1dir = 1, 3
+         do i2dir = 1, 3
+           do i3dir = 1, 3
+             write(theunit,'(3(5x,i2),5x,f16.9)') i1dir,i2dir,i3dir,&
+  &           d3cart_8(1,i1dir,i1pert,i2dir,i1pert,i3dir,i1pert)
+           end do
+         end do
+       end do
+
+       write(theunit,'(2a)') ch10,' ** exc3_paw :'
+       do i1dir = 1, 3
+         do i2dir = 1, 3
+           do i3dir = 1, 3
+             write(theunit,'(3(5x,i2),5x,f16.9)') i1dir,i2dir,i3dir,&
+  &           d3cart_9(1,i1dir,i1pert,i2dir,i1pert,i3dir,i1pert)
+           end do
+         end do
+       end do
+
+     end if ! nonlinear_info > 0
 
      if (flag == 0) then
        write(message,'(a,a,a,a,a,a)')ch10,&
@@ -1107,6 +1245,110 @@ end if
        call wrtout(std_out,message,'COLL')
      end if
 
+     if (pead==0.and.(dtset%nonlinear_info>0)) then
+       theunit = ab_out
+       write(theunit,'(a)') ' ** sum_psi1H1psi1 :'
+       do i1pert = 1,natom
+         do i1dir = 1,3
+           write(theunit,'(1x,i4,9x,i2,3(3x,f16.9),3(3x,f16.9))')i1pert,i1dir,&
+  &         d3cart_1(1,i1dir,i1pert,1,natom+2,:,natom+2),d3cart_1(2,i1dir,i1pert,1,natom+2,:,natom+2)
+           write(theunit,'(16x,3(3x,f16.9),3(3x,f16.9))')&
+  &         d3cart_1(1,i1dir,i1pert,2,natom+2,:,natom+2),d3cart_1(2,i1dir,i1pert,2,natom+2,:,natom+2)
+           write(theunit,'(16x,3(3x,f16.9),3(3x,f16.9))')&
+  &         d3cart_1(1,i1dir,i1pert,3,natom+2,:,natom+2),d3cart_1(2,i1dir,i1pert,3,natom+2,:,natom+2)
+         end do
+       end do
+       write(theunit,'(a)') ' ** sum_lambda1psi1psi1 :'
+       do i1pert = 1,natom
+         do i1dir = 1,3
+           write(theunit,'(1x,i4,9x,i2,3(3x,f16.9),3(3x,f16.9))')i1pert,i1dir,&
+  &         d3cart_2(1,i1dir,i1pert,1,natom+2,:,natom+2),d3cart_2(2,i1dir,i1pert,1,natom+2,:,natom+2)
+           write(theunit,'(16x,3(3x,f16.9),3(3x,f16.9))')&
+  &         d3cart_2(1,i1dir,i1pert,2,natom+2,:,natom+2),d3cart_2(2,i1dir,i1pert,2,natom+2,:,natom+2)
+           write(theunit,'(16x,3(3x,f16.9),3(3x,f16.9))')&
+  &         d3cart_2(1,i1dir,i1pert,3,natom+2,:,natom+2),d3cart_2(2,i1dir,i1pert,3,natom+2,:,natom+2)
+         end do
+       end do
+       write(theunit,'(a)') ' ** sum_lambda1psi0S1psi1 :'
+       do i1pert = 1,natom
+         do i1dir = 1,3
+           write(theunit,'(1x,i4,9x,i2,3(3x,f16.9),3(3x,f16.9))')i1pert,i1dir,&
+  &         d3cart_3(1,i1dir,i1pert,1,natom+2,:,natom+2),d3cart_3(2,i1dir,i1pert,1,natom+2,:,natom+2)
+           write(theunit,'(16x,3(3x,f16.9),3(3x,f16.9))')&
+  &         d3cart_3(1,i1dir,i1pert,2,natom+2,:,natom+2),d3cart_3(2,i1dir,i1pert,2,natom+2,:,natom+2)
+           write(theunit,'(16x,3(3x,f16.9),3(3x,f16.9))')&
+  &         d3cart_3(1,i1dir,i1pert,3,natom+2,:,natom+2),d3cart_3(2,i1dir,i1pert,3,natom+2,:,natom+2)
+         end do
+       end do
+       write(theunit,'(a)') ' ** sum_psi0H2psi1a :'
+       do i1pert = 1,natom
+         do i1dir = 1,3
+           write(theunit,'(1x,i4,9x,i2,3(3x,f16.9),3(3x,f16.9))')i1pert,i1dir,&
+  &         d3cart_4(1,i1dir,i1pert,1,natom+2,:,natom+2),d3cart_4(2,i1dir,i1pert,1,natom+2,:,natom+2)
+           write(theunit,'(16x,3(3x,f16.9),3(3x,f16.9))')&
+  &         d3cart_4(1,i1dir,i1pert,2,natom+2,:,natom+2),d3cart_4(2,i1dir,i1pert,2,natom+2,:,natom+2)
+           write(theunit,'(16x,3(3x,f16.9),3(3x,f16.9))')&
+  &         d3cart_4(1,i1dir,i1pert,3,natom+2,:,natom+2),d3cart_4(2,i1dir,i1pert,3,natom+2,:,natom+2)
+         end do
+       end do
+       write(theunit,'(a)') ' ** sum_psi0H2psi1b :'
+       do i1pert = 1,natom
+         do i1dir = 1,3
+           write(theunit,'(1x,i4,9x,i2,3(3x,f16.9),3(3x,f16.9))')i1pert,i1dir,&
+  &         d3cart_5(1,i1dir,i1pert,1,natom+2,:,natom+2),d3cart_5(2,i1dir,i1pert,1,natom+2,:,natom+2)
+           write(theunit,'(16x,3(3x,f16.9),3(3x,f16.9))')&
+  &         d3cart_5(1,i1dir,i1pert,2,natom+2,:,natom+2),d3cart_5(2,i1dir,i1pert,2,natom+2,:,natom+2)
+           write(theunit,'(16x,3(3x,f16.9),3(3x,f16.9))')&
+  &         d3cart_5(1,i1dir,i1pert,3,natom+2,:,natom+2),d3cart_5(2,i1dir,i1pert,3,natom+2,:,natom+2)
+         end do
+       end do
+       write(theunit,'(a)') ' ** eHxc21_paw :'
+       do i1pert = 1,natom
+         do i1dir = 1,3
+           write(theunit,'(1x,i4,9x,i2,3(3x,f16.9),3(3x,f16.9))')i1pert,i1dir,&
+  &         d3cart_6(1,i1dir,i1pert,1,natom+2,:,natom+2),d3cart_6(2,i1dir,i1pert,1,natom+2,:,natom+2)
+           write(theunit,'(16x,3(3x,f16.9),3(3x,f16.9))')&
+  &         d3cart_6(1,i1dir,i1pert,2,natom+2,:,natom+2),d3cart_6(2,i1dir,i1pert,2,natom+2,:,natom+2)
+           write(theunit,'(16x,3(3x,f16.9),3(3x,f16.9))')&
+  &         d3cart_6(1,i1dir,i1pert,3,natom+2,:,natom+2),d3cart_6(2,i1dir,i1pert,3,natom+2,:,natom+2)
+         end do
+       end do
+       write(theunit,'(a)') ' ** eHxc21_nhat :'
+       do i1pert = 1,natom
+         do i1dir = 1,3
+           write(theunit,'(1x,i4,9x,i2,3(3x,f16.9),3(3x,f16.9))')i1pert,i1dir,&
+  &         d3cart_7(1,i1dir,i1pert,1,natom+2,:,natom+2),d3cart_7(2,i1dir,i1pert,1,natom+2,:,natom+2)
+           write(theunit,'(16x,3(3x,f16.9),3(3x,f16.9))')&
+  &         d3cart_7(1,i1dir,i1pert,2,natom+2,:,natom+2),d3cart_7(2,i1dir,i1pert,2,natom+2,:,natom+2)
+           write(theunit,'(16x,3(3x,f16.9),3(3x,f16.9))')&
+  &         d3cart_7(1,i1dir,i1pert,3,natom+2,:,natom+2),d3cart_7(2,i1dir,i1pert,3,natom+2,:,natom+2)
+         end do
+       end do
+       write(theunit,'(a)') ' ** exc3 :'
+       do i1pert = 1,natom
+         do i1dir = 1,3
+           write(theunit,'(1x,i4,9x,i2,3(3x,f16.9),3(3x,f16.9))')i1pert,i1dir,&
+  &         d3cart_8(1,i1dir,i1pert,1,natom+2,:,natom+2),d3cart_8(2,i1dir,i1pert,1,natom+2,:,natom+2)
+           write(theunit,'(16x,3(3x,f16.9),3(3x,f16.9))')&
+  &         d3cart_8(1,i1dir,i1pert,2,natom+2,:,natom+2),d3cart_8(2,i1dir,i1pert,2,natom+2,:,natom+2)
+           write(theunit,'(16x,3(3x,f16.9),3(3x,f16.9))')&
+  &         d3cart_8(1,i1dir,i1pert,3,natom+2,:,natom+2),d3cart_8(2,i1dir,i1pert,3,natom+2,:,natom+2)
+         end do
+       end do
+       write(theunit,'(a)') ' ** exc3_paw :'
+       do i1pert = 1,natom
+         do i1dir = 1,3
+           write(theunit,'(1x,i4,9x,i2,3(3x,f16.9),3(3x,f16.9))')i1pert,i1dir,&
+  &         d3cart_9(1,i1dir,i1pert,1,natom+2,:,natom+2),d3cart_9(2,i1dir,i1pert,1,natom+2,:,natom+2)
+           write(theunit,'(16x,3(3x,f16.9),3(3x,f16.9))')&
+  &         d3cart_9(1,i1dir,i1pert,2,natom+2,:,natom+2),d3cart_9(2,i1dir,i1pert,2,natom+2,:,natom+2)
+           write(theunit,'(16x,3(3x,f16.9),3(3x,f16.9))')&
+  &         d3cart_9(1,i1dir,i1pert,3,natom+2,:,natom+2),d3cart_9(2,i1dir,i1pert,3,natom+2,:,natom+2)
+         end do
+       end do
+
+     end if ! nonlinear_info > 0
+
    end if  ! d3e_pert1,d3e_pert2,d3e_pert3
  end if   ! mpi_enreg%me
 
@@ -1130,6 +1372,24 @@ end if
  ABI_DEALLOCATE(cg)
  ABI_DEALLOCATE(d3cart)
  ABI_DEALLOCATE(d3etot)
+ ABI_DEALLOCATE(d3cart_1)
+ ABI_DEALLOCATE(d3cart_2)
+ ABI_DEALLOCATE(d3cart_3)
+ ABI_DEALLOCATE(d3cart_4)
+ ABI_DEALLOCATE(d3cart_5)
+ ABI_DEALLOCATE(d3cart_6)
+ ABI_DEALLOCATE(d3cart_7)
+ ABI_DEALLOCATE(d3cart_8)
+ ABI_DEALLOCATE(d3cart_9)
+ ABI_DEALLOCATE(d3e_1)
+ ABI_DEALLOCATE(d3e_2)
+ ABI_DEALLOCATE(d3e_3)
+ ABI_DEALLOCATE(d3e_4)
+ ABI_DEALLOCATE(d3e_5)
+ ABI_DEALLOCATE(d3e_6)
+ ABI_DEALLOCATE(d3e_7)
+ ABI_DEALLOCATE(d3e_8)
+ ABI_DEALLOCATE(d3e_9)
  ABI_DEALLOCATE(d3e_pert1)
  ABI_DEALLOCATE(d3e_pert2)
  ABI_DEALLOCATE(d3e_pert3)

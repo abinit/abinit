@@ -496,6 +496,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
    end if
  end if
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nonlinear_info',tread,'INT')
+ if(tread==1) dtset%nonlinear_info=intarr(1)
+
 !NONLINEAR integer input variables (same definition as for rfarr)
 !Presently, rf?asr, rf?meth,rf?strs and rf?thrd are not used
 !--Keep the old input variables for backward compatibility

@@ -265,12 +265,12 @@ end subroutine rf2_getidirs
 !!  gs_hamkq <type(gs_hamiltonian_type)>=all data for the Hamiltonian at k+q
 !!  mpi_enreg=information about MPI parallelization
 !!  iband : band index for vi
-!!  idir1  (used only if print_info/=0)  : direction of the 1st perturbation
-!!  idir2  (used only if print_info/=0)  : direction of the 2nd perturbation
-!!  ipert1 (used only if print_info/=0)  : 1st perturbation
-!!  ipert2 (used only if print_info/=0)  : 2nd perturbation
+!!  idir1  (used only if debug_mode/=0)  : direction of the 1st perturbation
+!!  idir2  (used only if debug_mode/=0)  : direction of the 2nd perturbation
+!!  ipert1 (used only if debug_mode/=0)  : 1st perturbation
+!!  ipert2 (used only if debug_mode/=0)  : 2nd perturbation
 !!  jband : band index for v1j and v2j
-!!  print_info : if /=0 : all < vi | v1j > and < vi | v2j > are printed in std_out
+!!  debug_mode : if /=0 : all < vi | v1j > and < vi | v2j > are printed in std_out
 !!  vi,v1j,v2j : input vectors
 !!
 !! OUTPUT
@@ -284,7 +284,7 @@ end subroutine rf2_getidirs
 !! SOURCE
 
 subroutine rf2_accumulate_bands(rf2,choice,gs_hamkq,mpi_enreg,iband,idir1,idir2,ipert1,ipert2,&
-                                 jband,print_info,vi,v1j,v2j)
+                                 jband,debug_mode,vi,v1j,v2j)
 
  use defs_basis
  use defs_abitypes
@@ -302,7 +302,7 @@ subroutine rf2_accumulate_bands(rf2,choice,gs_hamkq,mpi_enreg,iband,idir1,idir2,
 
 !Arguments ---------------------------------------------
 !scalars
- integer,intent(in) :: choice,iband,idir1,idir2,ipert1,ipert2,jband,print_info
+ integer,intent(in) :: choice,iband,idir1,idir2,ipert1,ipert2,jband,debug_mode
  type(rf2_t),intent(inout) :: rf2
  type(gs_hamiltonian_type),intent(in) :: gs_hamkq
  type(MPI_type),intent(in) :: mpi_enreg
@@ -329,7 +329,7 @@ subroutine rf2_accumulate_bands(rf2,choice,gs_hamkq,mpi_enreg,iband,idir1,idir2,
 
  call dotprod_g(dotr,doti,gs_hamkq%istwf_k,size_wf,2,vi,v1j,mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
 
- if(print_info/=0) then
+ if(debug_mode/=0) then
    if (ipert1 == gs_hamkq%natom+1) then
      pert1 = "dk"
    else
@@ -373,7 +373,7 @@ subroutine rf2_accumulate_bands(rf2,choice,gs_hamkq,mpi_enreg,iband,idir1,idir2,
  if (choice == 1 .or. gs_hamkq%usepaw==1) then
    call dotprod_g(dotr,doti,gs_hamkq%istwf_k,size_wf,2,vi,v2j,mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
 
-   if(print_info/=0) then
+   if(debug_mode/=0) then
      dot2r = dotr ; if (abs(dot2r)<tol9) dot2r = zero ! in order to hide the numerical noise 
      dot2i = doti ; if (abs(dot2i)<tol9) dot2i = zero ! in order to hide the numerical noise
      write(msg,'(3a,2(a,es17.8E3))') bra_i,op2,ket_j,' = ',dot2r,',',dot2i
@@ -401,7 +401,7 @@ end subroutine rf2_accumulate_bands
 !!
 !! INPUTS
 !!  rf2 : rf2_t object containing all rf2 data
-!!  cg_jband (used only if print_info/=0) : array containing |u^(0)(jband)> for all bands
+!!  cg_jband (used only if debug_mode/=0) : array containing |u^(0)(jband)> for all bands
 !!  cprj_jband(natom,nspinor*usecprj)= u^(0) wave functions for all bands
 !!              projected with non-local projectors: cprj_jband=<p_i|u^(0)(jband)>
 !!  cwave(2,size_wf) : input wave function |u>
@@ -423,7 +423,7 @@ end subroutine rf2_accumulate_bands
 !!  mkmem =number of k points trated by this node (GS data).
 !!  mpi_enreg=information about MPI parallelization
 !!  nsppol=1 for unpolarized, 2 for spin-polarized
-!!  print_info : if /=0 : some tests are done (see NOTES below). Wrong results are printed in std_out
+!!  debug_mode : if /=0 : some tests are done (see NOTES below). Wrong results are printed in std_out
 !!  prtvol=control print volume and debugging output (for getghc)
 !!  rf_hamk_idir <type(rf_hamiltonian_type)>=all data for the 1st-order Hamiltonian at k,q (here q=0)
 !!
@@ -432,7 +432,7 @@ end subroutine rf2_accumulate_bands
 !!  s_cwave(2,size_wf) : array containing S^(ipert)|cwave>
 !!
 !! NOTES
-!!  * Tests are done if print_info/=0. In that case : cg_jband(:,jband,1) = |u^(0)(jband)>
+!!  * Tests are done if debug_mode/=0. In that case : cg_jband(:,jband,1) = |u^(0)(jband)>
 !!    For ipert==natom+2 (electric field) : cg_jband(:,jband,2) = i * |du/dk_idir(jband)>
 !!    According to ipert, we check that :
 !!    -- ipert = 0 :
@@ -456,7 +456,7 @@ end subroutine rf2_accumulate_bands
 
 subroutine rf2_apply_hamiltonian(cg_jband,cprj_jband,cwave,cwaveprj,h_cwave,s_cwave,eig0,eig1_k_jband,&
 &                                jband,gs_hamkq,gvnl1,idir,ipert,ikpt,isppol,mkmem,mpi_enreg,nband_k,nsppol,&
-&                                print_info,prtvol,rf_hamk_idir,size_cprj,size_wf,&
+&                                debug_mode,prtvol,rf_hamk_idir,size_cprj,size_wf,&
 &                                conj,enl,ffnl1,ffnl1_test) ! optional
 
  use defs_basis
@@ -481,14 +481,14 @@ subroutine rf2_apply_hamiltonian(cg_jband,cprj_jband,cwave,cwaveprj,h_cwave,s_cw
 !Arguments ---------------------------------------------
 !scalars
  logical,intent(in),optional :: conj
- integer,intent(in) :: idir,ipert,ikpt,isppol,jband,mkmem,nband_k,nsppol,print_info,prtvol,size_wf,size_cprj
+ integer,intent(in) :: idir,ipert,ikpt,isppol,jband,mkmem,nband_k,nsppol,debug_mode,prtvol,size_wf,size_cprj
  type(gs_hamiltonian_type),intent(inout) :: gs_hamkq
 ! type(rf2_t),intent(in) :: rf2
  type(rf_hamiltonian_type),intent(inout),target :: rf_hamk_idir
  type(MPI_type),intent(in) :: mpi_enreg
 
 !arrays
- real(dp),intent(in),target :: cg_jband(2,size_wf*print_info*nband_k,2)
+ real(dp),intent(in),target :: cg_jband(2,size_wf*debug_mode*nband_k,2)
  real(dp),intent(in),optional,target :: enl(gs_hamkq%dimekb1,gs_hamkq%dimekb2,gs_hamkq%nspinor**2)
  real(dp),intent(in),optional :: ffnl1(:,:,:,:),ffnl1_test(:,:,:,:)
  real(dp),intent(in) :: eig0(nband_k),eig1_k_jband(2*nband_k)
@@ -566,7 +566,7 @@ subroutine rf2_apply_hamiltonian(cg_jband,cprj_jband,cwave,cwaveprj,h_cwave,s_cw
  has_cwaveprj=(gs_hamkq%usepaw==1.and.gs_hamkq%usecprj==1.and.size(cwaveprj)/=0)
  cprj_j => cprj_empty
 
- if (print_info/=0) then
+ if (debug_mode/=0) then
    if (ipert/=0) then
      write(msg,'(4(a,i4))') 'RF2 TEST rf2_apply_hamiltonian ipert = ',ipert,' idir =',idir,&
      & ' ikpt = ',ikpt,' jband = ',jband
@@ -585,7 +585,7 @@ subroutine rf2_apply_hamiltonian(cg_jband,cprj_jband,cwave,cwaveprj,h_cwave,s_cw
    gvnlc(:,:) = zero
 
 !  Test if < u^(0) | H^(0) | u^(0) > = eig0(jband)
-   if(print_info/=0) then
+   if(debug_mode/=0) then
      cwave_j => cg_jband(:,1+(jband-1)*size_wf:jband*size_wf,1)
      if (has_cprj_jband) cprj_j => cprj_jband(:,1+(jband-1)*size_cprj:jband*size_cprj)
      cpopt = -1+3*gs_hamkq%usecprj*gs_hamkq%usepaw
@@ -612,7 +612,7 @@ subroutine rf2_apply_hamiltonian(cg_jband,cprj_jband,cwave,cwaveprj,h_cwave,s_cw
  else if (ipert<=natom+2) then
 
 !  Test if < u^(0) | ( H^(1) - eps^(0) S^(1) ) | u^(0) > = eig^(1)
-   if(print_info/=0) then
+   if(debug_mode/=0) then
      ABI_ALLOCATE(iddk,(2,size_wf))
      cwave_j => cg_jband(:,1+(jband-1)*size_wf:jband*size_wf,1)
      if (has_cprj_jband) cprj_j => cprj_jband(:,1+(jband-1)*size_cprj:jband*size_cprj)
@@ -649,7 +649,7 @@ subroutine rf2_apply_hamiltonian(cg_jband,cprj_jband,cwave,cwaveprj,h_cwave,s_cw
 
 ! *******************************************************************************************
 !  Test if < u^(0) | H^(2) | u^(0) > from getgh2c is equal to nonlop with signs=1
-   if(print_info/=0.and.present(ffnl1).and.present(ffnl1_test)) then
+   if(debug_mode/=0.and.present(ffnl1).and.present(ffnl1_test)) then
 
      cwave_j => cg_jband(:,1+(jband-1)*size_wf:jband*size_wf,1)
 

@@ -391,6 +391,7 @@ type dataset_type
  integer :: nomegasf
  integer :: nomegasi
  integer :: nomegasrd
+ integer :: nonlinear_info
  integer :: npband
  integer :: npfft
  integer :: nphf
