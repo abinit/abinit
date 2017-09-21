@@ -1141,12 +1141,22 @@ end if
 &       d3cart_9(:,:,i1pert,:,i1pert,:,i1pert)*16*(pi**2)*(Bohr_Ang**2)*1.0d-8*eps0/e_Cb
 
        theunit = ab_out
+       write(theunit,'(2a)') ch10,' ** Total :'
+       do i1dir = 1, 3
+         do i2dir = 1, 3
+           do i3dir = 1, 3
+             write(theunit,'(3(5x,i2),5x,f16.9,2x,f16.9)') i1dir,i2dir,i3dir,&
+  &           d3cart(1,i1dir,i1pert,i2dir,i1pert,i3dir,i1pert),d3cart(2,i1dir,i1pert,i2dir,i1pert,i3dir,i1pert)
+           end do
+         end do
+       end do
+
        write(theunit,'(2a)') ch10,' ** sum_psi1H1psi1 :'
        do i1dir = 1, 3
          do i2dir = 1, 3
            do i3dir = 1, 3
-             write(theunit,'(3(5x,i2),5x,f16.9)') i1dir,i2dir,i3dir,&
-  &           d3cart_1(1,i1dir,i1pert,i2dir,i1pert,i3dir,i1pert)
+             write(theunit,'(3(5x,i2),5x,f16.9,2x,f16.9)') i1dir,i2dir,i3dir,&
+  &           d3cart_1(1,i1dir,i1pert,i2dir,i1pert,i3dir,i1pert),d3cart_1(2,i1dir,i1pert,i2dir,i1pert,i3dir,i1pert)
            end do
          end do
        end do
@@ -1155,8 +1165,8 @@ end if
        do i1dir = 1, 3
          do i2dir = 1, 3
            do i3dir = 1, 3
-             write(theunit,'(3(5x,i2),5x,f16.9)') i1dir,i2dir,i3dir,&
-  &           d3cart_2(1,i1dir,i1pert,i2dir,i1pert,i3dir,i1pert)
+             write(theunit,'(3(5x,i2),5x,f16.9,2x,f16.9)') i1dir,i2dir,i3dir,&
+  &           d3cart_2(1,i1dir,i1pert,i2dir,i1pert,i3dir,i1pert),d3cart_2(2,i1dir,i1pert,i2dir,i1pert,i3dir,i1pert)
             end do
          end do
        end do
@@ -1165,8 +1175,8 @@ end if
        do i1dir = 1, 3
          do i2dir = 1, 3
            do i3dir = 1, 3
-             write(theunit,'(3(5x,i2),5x,f16.9)') i1dir,i2dir,i3dir,&
-  &           d3cart_8(1,i1dir,i1pert,i2dir,i1pert,i3dir,i1pert)
+             write(theunit,'(3(5x,i2),5x,f16.9,2x,f16.9)') i1dir,i2dir,i3dir,&
+  &           d3cart_8(1,i1dir,i1pert,i2dir,i1pert,i3dir,i1pert),d3cart_8(2,i1dir,i1pert,i2dir,i1pert,i3dir,i1pert)
            end do
          end do
        end do
@@ -1175,8 +1185,8 @@ end if
        do i1dir = 1, 3
          do i2dir = 1, 3
            do i3dir = 1, 3
-             write(theunit,'(3(5x,i2),5x,f16.9)') i1dir,i2dir,i3dir,&
-  &           d3cart_9(1,i1dir,i1pert,i2dir,i1pert,i3dir,i1pert)
+             write(theunit,'(3(5x,i2),5x,f16.9,2x,f16.9)') i1dir,i2dir,i3dir,&
+  &           d3cart_9(1,i1dir,i1pert,i2dir,i1pert,i3dir,i1pert),d3cart_9(2,i1dir,i1pert,i2dir,i1pert,i3dir,i1pert)
            end do
          end do
        end do
@@ -1247,6 +1257,17 @@ end if
 
      if (pead==0.and.(dtset%nonlinear_info>0)) then
        theunit = ab_out
+       write(theunit,'(a)') ' ** Total :'
+       do i1pert = 1,natom
+         do i1dir = 1,3
+           write(theunit,'(1x,i4,9x,i2,3(3x,f16.9),3(3x,f16.9))')i1pert,i1dir,&
+  &         d3cart(1,i1dir,i1pert,1,natom+2,:,natom+2),d3cart(2,i1dir,i1pert,1,natom+2,:,natom+2)
+           write(theunit,'(16x,3(3x,f16.9),3(3x,f16.9))')&
+  &         d3cart(1,i1dir,i1pert,2,natom+2,:,natom+2),d3cart(2,i1dir,i1pert,2,natom+2,:,natom+2)
+           write(theunit,'(16x,3(3x,f16.9),3(3x,f16.9))')&
+  &         d3cart(1,i1dir,i1pert,3,natom+2,:,natom+2),d3cart(2,i1dir,i1pert,3,natom+2,:,natom+2)
+         end do
+       end do
        write(theunit,'(a)') ' ** sum_psi1H1psi1 :'
        do i1pert = 1,natom
          do i1dir = 1,3
