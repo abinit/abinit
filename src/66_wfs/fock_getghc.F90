@@ -82,7 +82,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
  type(gs_hamiltonian_type),target,intent(inout) :: gs_ham
 ! Arrays
  type(pawcprj_type),intent(inout) :: cwaveprj(:,:)
- real(dp),intent(inout) :: cwavef(2,gs_ham%npw_k)!,ghc(2,gs_ham%npw_k)
+ real(dp),intent(inout) :: cwavef(:,:)!,ghc(2,gs_ham%npw_k)
  real(dp),intent(inout) :: ghc(:,:)
 
 !Local variables-------------------------------
@@ -217,7 +217,6 @@ type(pseudopotential_type) :: psps
 ! === Get cwavef in real space using FFT ===
 ! ==========================================
  cwavef_r=zero
-
  call fourwf(0,rhodum0,cwavef,rhodum,cwavef_r,gboundf,gboundf,gs_ham%istwf_k,gs_ham%kg_k,gs_ham%kg_k,&
 & mgfftf,mpi_enreg,ndat1,ngfftf,npw,1,n4f,n5f,n6f,0,mpi_enreg%paral_kgb,tim_fourwf0,weight1,weight1,&
 & use_gpu_cuda=gs_ham%use_gpu_cuda)
@@ -429,6 +428,7 @@ type(pseudopotential_type) :: psps
        end if
 
 ! Forces calculation
+
        if (fockcommon%optfor.and.(fockcommon%ieigen/=0)) then
          call matr3inv(gs_ham%gprimd,rprimd)
          choice=2; dotr=zero;doti=zero;cpopt=4

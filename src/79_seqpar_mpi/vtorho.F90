@@ -811,7 +811,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  
        if(usefock_ACE/=0) then
          call load_k_hamiltonian(gs_hamk,kpt_k=dtset%kptns(:,ikpt),istwf_k=istwf_k,npw_k=npw_k,&
-&         kinpw_k=kinpw,kg_k=kg_k,kpg_k=kpg_k,ffnl_k=ffnl,fockACE_k=fock%fockACE(ikpt),ph3d_k=ph3d,&
+&         kinpw_k=kinpw,kg_k=kg_k,kpg_k=kpg_k,ffnl_k=ffnl,fockACE_k=fock%fockACE(ikpt,isppol),ph3d_k=ph3d,&
 &         compute_ph3d=(mpi_enreg%paral_kgb/=1.or.istep<=1),&
 &         compute_gbound=(mpi_enreg%paral_kgb/=1))
        else
@@ -865,7 +865,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
          call fock_updateikpt(fock%fock_common,ikpt,isppol)
        end if
        if ((psps%usepaw==1).and.(usefock)) then
-         if (fock%fock_common%optfor) then
+         if ((fock%fock_common%optfor).and.(usefock_ACE==0)) then
            fock%fock_common%forces_ikpt=zero
          end if
        end if
@@ -938,7 +938,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
 !        Calculate Fock contribution to the total energy if required
          if ((psps%usepaw==1).and.(usefock)) then
-           if (fock%fock_common%optfor) then
+           if ((fock%fock_common%optfor).and.(usefock_ACE==0)) then
              call fock_calc_ene(dtset,fock%fock_common,energies%e_exactX,ikpt,nband_k,occ_k)
            end if
          end if
