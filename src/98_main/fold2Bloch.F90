@@ -160,14 +160,14 @@ real(dp), allocatable :: cg(:,:), eig(:),kpts(:,:), weights(:),coefc(:,:), nkval
  NCF_CHECK(ebands_ncwrite(ebands, ncid))
 
  ncerr = nctk_def_dims(ncid, [ &
-    nctkdim_t("nk_unfolded", nkpt * nfold), &
-    nctkdim_t("nsppol_times_nspinor", wfk%hdr%nsppol * wfk%hdr%nspinor)], defmode=.True.)
+ nctkdim_t("nk_unfolded", nkpt * nfold), &
+ nctkdim_t("nsppol_times_nspinor", wfk%hdr%nsppol * wfk%hdr%nspinor)], defmode=.True.)
  NCF_CHECK(ncerr)
  ncerr = nctk_def_arrays(ncid, [ &
-    nctkarr_t("fold_matrix", "int", "number_of_reduced_dimensions, number_of_reduced_dimensions"), &
-    nctkarr_t("reduced_coordinates_of_unfolded_kpoints", "dp", "number_of_reduced_dimensions, nk_unfolded"), &
-    nctkarr_t("unfolded_eigenvalues", "dp", "max_number_of_states, nk_unfolded, number_of_spins"), &
-    nctkarr_t("spectral_weights", "dp", "max_number_of_states, nk_unfolded, nsppol_times_nspinor") &
+ nctkarr_t("fold_matrix", "int", "number_of_reduced_dimensions, number_of_reduced_dimensions"), &
+ nctkarr_t("reduced_coordinates_of_unfolded_kpoints", "dp", "number_of_reduced_dimensions, nk_unfolded"), &
+ nctkarr_t("unfolded_eigenvalues", "dp", "max_number_of_states, nk_unfolded, number_of_spins"), &
+ nctkarr_t("spectral_weights", "dp", "max_number_of_states, nk_unfolded, nsppol_times_nspinor") &
  ])
  NCF_CHECK(ncerr)
  NCF_CHECK(nf90_inq_varid(ncid, "reduced_coordinates_of_unfolded_kpoints", kunf_varid))
@@ -251,12 +251,12 @@ real(dp), allocatable :: cg(:,:), eig(:),kpts(:,:), weights(:),coefc(:,:), nkval
 #ifdef HAVE_NETCDF
          iss = csppol; if (nspinor == 2) iss = cspinor
          ncerr = nf90_put_var(ncid, weights_varid, weights, start=[iband, 1 + (ikpt-1) * nfold, iss], &
-           stride=[mband, 1, 1], count=[1, nfold, 1])
+         stride=[mband, 1, 1], count=[1, nfold, 1])
          NCF_CHECK(ncerr)
          if (cspinor == 1) then
            weights = eig(iband) ! Use weights as workspace array.
            ncerr = nf90_put_var(ncid, eigunf_varid, weights, start=[iband, 1 + (ikpt-1) * nfold, csppol], &
-             stride=[mband, 1, 1], count=[1, nfold, 1])
+           stride=[mband, 1, 1], count=[1, nfold, 1])
              !count=[1, nfold, 1])
            NCF_CHECK(ncerr)
          end if

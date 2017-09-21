@@ -222,15 +222,15 @@ program multibinit
    end if
  else
    if(inp%ncoeff/=zero) then
-         write(message, '(5a)' )&
-&         'ncoeff is specified in the input but,',ch10,&
-&         'there is no file for the coefficients ',ch10,&
-&         'Action: add coefficients.xml file'
-         MSG_ERROR(message)
+     write(message, '(5a)' )&
+&     'ncoeff is specified in the input but,',ch10,&
+&     'there is no file for the coefficients ',ch10,&
+&     'Action: add coefficients.xml file'
+     MSG_ERROR(message)
      
    else
      write(message,'(a,(80a),3a)') ch10,('=',ii=1,80),ch10,ch10,&
-&                        ' There is no file for the coefficients from polynomial fitting'
+&     ' There is no file for the coefficients from polynomial fitting'
      call wrtout(ab_out,message,'COLL')
      call wrtout(std_out,message,'COLL')
    end if
@@ -267,8 +267,8 @@ program multibinit
      else
        if (inp%fit_coeff/=0) then
          write(message, '(3a)' )&
-&       'There is no MD file to fit the coefficients ',ch10,&
-&       'Action: add MD file'
+&         'There is no MD file to fit the coefficients ',ch10,&
+&         'Action: add MD file'
          MSG_ERROR(message)
        else if(inp%confinement==2) then
          write(message, '(3a)' )&
@@ -291,19 +291,19 @@ program multibinit
    select case(option)
    case(1)
      call effective_potential_setConfinement(inp%conf_cutoff_disp,inp%conf_cutoff_strain,&
-&                                            reference_effective_potential,inp%conf_power_fact_disp,&
-&                                            inp%conf_power_fact_strain,inp%conf_power_disp,&
-&                                            inp%conf_power_disp,inp%conf_power_strain,&
-&                                            need_confinement=.TRUE.)
+&     reference_effective_potential,inp%conf_power_fact_disp,&
+&     inp%conf_power_fact_strain,inp%conf_power_disp,&
+&     inp%conf_power_disp,inp%conf_power_strain,&
+&     need_confinement=.TRUE.)
 
      write(message,'(a,(80a),3a)') ch10,('=',ii=1,80),ch10,ch10,&
-&                       ' The confinement potential is active.'
+&     ' The confinement potential is active.'
      call wrtout(ab_out,message,'COLL')
      call wrtout(std_out,message,'COLL')
 
    case(2)
      write(message,'(a,(80a),3a)') ch10,('=',ii=1,80),ch10,ch10,&
-&                       ' The confinement potential is computed from the MD file and actived.'
+&     ' The confinement potential is computed from the MD file and actived.'
      call wrtout(ab_out,message,'COLL')
      call wrtout(std_out,message,'COLL')
 
@@ -330,17 +330,17 @@ program multibinit
      case (1)
 !      option = 1
        call fit_polynomial_coeff_fit(reference_effective_potential,&
-&                                    inp%fit_bancoeff,inp%fit_fixcoeff,hist,&
-&                                    inp%fit_rangePower,inp%fit_nbancoeff,inp%fit_ncycle,&
-&                                    inp%fit_nfixcoeff,comm,cutoff_in=inp%fit_cutoff,&
-&                                    verbose=.true.,positive=.false.,&
-&                                    anharmstr=inp%fit_anhaStrain==1,&
-&                                    spcoupling=inp%fit_SPCoupling==1)
+&       inp%fit_bancoeff,inp%fit_fixcoeff,hist,&
+&       inp%fit_rangePower,inp%fit_nbancoeff,inp%fit_ncycle,&
+&       inp%fit_nfixcoeff,comm,cutoff_in=inp%fit_cutoff,&
+&       verbose=.true.,positive=.false.,&
+&       anharmstr=inp%fit_anhaStrain==1,&
+&       spcoupling=inp%fit_SPCoupling==1)
      end select
    else
      write(message, '(3a)' )&
-&         'There is no step in the MD file ',ch10,&
-&         'Action: add correct MD file'
+&     'There is no step in the MD file ',ch10,&
+&     'Action: add correct MD file'
      MSG_ERROR(message)
    end if
  end if
@@ -360,7 +360,7 @@ program multibinit
  if(iam_master) then
    if (inp%prt_model >= 1) then
      write(message, '(a,(80a),a)' ) ch10,&
-&    ('=',ii=1,80)
+&     ('=',ii=1,80)
      call wrtout(ab_out,message,'COLL')
      call wrtout(std_out,message,'COLL')
      name = replace(trim(filnam(2)),".out","")
@@ -391,7 +391,7 @@ program multibinit
 !      call effective_potential_effpot2dynmat(dynmat,inp%delta_df,reference_effective_potential,&
 ! &                                           reference_effective_potential%supercell%natom_supercell,&
 ! &                                           int(reference_effective_potential%supercell%qphon),3)
-     
+ 
 !      ABI_DEALLOCATE(dynmat)
 !    end if
 ! end if
@@ -466,7 +466,7 @@ program multibinit
 
  if (iam_master) close(ab_out)
 
-100 call xmpi_end()
+  100 call xmpi_end()
  
-end program multibinit
+  end program multibinit
 !!***

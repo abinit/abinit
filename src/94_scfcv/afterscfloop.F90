@@ -1009,9 +1009,9 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 !test of the nonlop routine (DFPT vs Finite Differences)
  if (dtset%useria==112233) then
    call nonlop_test(cg,eigen,dtset%istwfk,kg,dtset%kptns,dtset%mband,mcg,dtset%mgfft,dtset%mkmem,&
-&       mpi_enreg,dtset%mpw,my_natom,dtset%natom,dtset%nband,dtset%nfft,dtset%ngfft,dtset%nkpt,&
-&       dtset%nloalg,npwarr,dtset%nspden,dtset%nspinor,dtset%nsppol,dtset%ntypat,paw_ij,pawtab,&
-&       ph1d,psps,rprimd,dtset%typat,xred)
+&   mpi_enreg,dtset%mpw,my_natom,dtset%natom,dtset%nband,dtset%nfft,dtset%ngfft,dtset%nkpt,&
+&   dtset%nloalg,npwarr,dtset%nspden,dtset%nspinor,dtset%nsppol,dtset%ntypat,paw_ij,pawtab,&
+&   ph1d,psps,rprimd,dtset%typat,xred)
  end if
 
  call timab(257,2,tsec)

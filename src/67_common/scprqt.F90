@@ -744,8 +744,8 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
      fock%fock_common%scf_converged=(quit==1)
      ! At present, the decision that the Fock loop is converged is not taken here
      if (.not.fock%fock_common%fock_converged)quit=0
-   endif
- endif
+   end if
+ end if
 
 !Additional stuff for the two-component DFT SCF cycle (electrons+positron)
  if (present(electronpositron)) then

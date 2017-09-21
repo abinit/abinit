@@ -1432,7 +1432,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 
 !  Initialize the header of the DDB file
    call ddb_hdr_init(ddb_hdr,dtset,psps,pawtab,DDB_VERSION,dscrpt,&
-&                    1,xred=xred,occ=occ,ngfft=ngfft)
+&   1,xred=xred,occ=occ,ngfft=ngfft)
 
 !  Open the formatted derivative database file, and write the header
    call status(0,dtfil%filstat,iexit,level,'call ddb_hdr_open_write')
@@ -1455,10 +1455,10 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 #ifdef HAVE_NETCDF
    ! Output dynamical matrix in NetCDF format.
    call crystal_init(dtset%amu_orig(:,1), Crystal, &
-   & dtset%spgroup, dtset%natom, dtset%npsp, psps%ntypat, &
-   & dtset%nsym, rprimd, dtset%typat, xred, dtset%ziontypat, dtset%znucl, 1, &
-   & dtset%nspden==2.and.dtset%nsppol==1, .false., hdr%title, &
-   & dtset%symrel, dtset%tnons, dtset%symafm)
+&   dtset%spgroup, dtset%natom, dtset%npsp, psps%ntypat, &
+&   dtset%nsym, rprimd, dtset%typat, xred, dtset%ziontypat, dtset%znucl, 1, &
+&   dtset%nspden==2.and.dtset%nsppol==1, .false., hdr%title, &
+&   dtset%symrel, dtset%tnons, dtset%symafm)
 
    filename = strcat(dtfil%filnam_ds(4),"_DDB.nc")
 

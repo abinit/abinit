@@ -203,7 +203,7 @@ subroutine fock2ACE(cg,cprj,fock,istwfk,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_e
  usecprj_local=usecprj
  if (psps%usepaw==1) then
    usecprj_local=1
- endif
+ end if
  if(optfor==1)then 
    fockcommon%optfor=.true.
    if (.not.allocated(fockcommon%forces_ikpt)) then
@@ -368,7 +368,7 @@ subroutine fock2ACE(cg,cprj,fock,istwfk,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_e
        ABI_ALLOCATE(fockcommon%stress_ikpt,(6,nband_k))
        fockcommon%stress_ikpt=zero
      end if
- 
+     
      if (fockcommon%optfor) then
        fockcommon%forces_ikpt=zero
      end if
@@ -388,43 +388,43 @@ subroutine fock2ACE(cg,cprj,fock,istwfk,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_e
 !      Select occupied bandsddk
        occblock(:)=occ(1+(iblock-1)*blocksize+bdtot_index:iblock*blocksize+bdtot_index)
 !       if( abs(maxval(occblock))>=tol8 ) then
-         call timab(923,1,tsec)
-         weight(:)=wtk(ikpt)*occblock(:)
+       call timab(923,1,tsec)
+       weight(:)=wtk(ikpt)*occblock(:)
 
 !        Load contribution from n,k
-         cwavef(:,1:npw_k*my_nspinor*blocksize)=&
-&         cg(:,1+(iblock-1)*npw_k*my_nspinor*blocksize+icg:iblock*npw_k*my_nspinor*blocksize+icg)
-         if (psps%usepaw==1.and.usecprj_local==1) then
-           call pawcprj_get(gs_hamk%atindx1,cwaveprj,cprj,natom,iband_cprj,ibg,ikpt,0,isppol,&
-&           mband_cprj,mkmem,natom,bandpp,nband_cprj_k,my_nspinor,nsppol,0,&
-&           mpicomm=mpi_enreg%comm_kpt,proc_distrb=mpi_enreg%proc_distrb)
-         end if
+       cwavef(:,1:npw_k*my_nspinor*blocksize)=&
+&       cg(:,1+(iblock-1)*npw_k*my_nspinor*blocksize+icg:iblock*npw_k*my_nspinor*blocksize+icg)
+       if (psps%usepaw==1.and.usecprj_local==1) then
+         call pawcprj_get(gs_hamk%atindx1,cwaveprj,cprj,natom,iband_cprj,ibg,ikpt,0,isppol,&
+&         mband_cprj,mkmem,natom,bandpp,nband_cprj_k,my_nspinor,nsppol,0,&
+&         mpicomm=mpi_enreg%comm_kpt,proc_distrb=mpi_enreg%proc_distrb)
+       end if
 
-         call timab(926,2,tsec)
+       call timab(926,2,tsec)
 
 !        Accumulate stress tensor and forces for the Fock part
-         if (mpi_enreg%paral_kgb==1) then
-           msg='fock2ACE: Paral_kgb is not yet implemented for fock stresses'
-           MSG_BUG(msg)
-         end if 
-         ndat=mpi_enreg%bandpp
-         if (gs_hamk%usepaw==0) cwaveprj_idat => cwaveprj
+       if (mpi_enreg%paral_kgb==1) then
+         msg='fock2ACE: Paral_kgb is not yet implemented for fock stresses'
+         MSG_BUG(msg)
+       end if 
+       ndat=mpi_enreg%bandpp
+       if (gs_hamk%usepaw==0) cwaveprj_idat => cwaveprj
 
-         do iblocksize=1,blocksize
-           fockcommon%ieigen=(iblock-1)*blocksize+iblocksize
-           if (gs_hamk%usepaw==1) then
-             cwaveprj_idat => cwaveprj(:,(iblocksize-1)*my_nspinor+1:iblocksize*my_nspinor)
-           end if
-           call fock_getghc(cwavef(:,1+(iblocksize-1)*npw_k*my_nspinor:iblocksize*npw_k*my_nspinor),cwaveprj_idat,&
-&           wi(:,1+(iblocksize-1)*npw_k*my_nspinor:iblocksize*npw_k*my_nspinor,iblock),gs_hamk,mpi_enreg)
-           mkl(1,fockcommon%ieigen,fockcommon%ieigen)=fockcommon%eigen_ikpt(fockcommon%ieigen)
+       do iblocksize=1,blocksize
+         fockcommon%ieigen=(iblock-1)*blocksize+iblocksize
+         if (gs_hamk%usepaw==1) then
+           cwaveprj_idat => cwaveprj(:,(iblocksize-1)*my_nspinor+1:iblocksize*my_nspinor)
+         end if
+         call fock_getghc(cwavef(:,1+(iblocksize-1)*npw_k*my_nspinor:iblocksize*npw_k*my_nspinor),cwaveprj_idat,&
+&         wi(:,1+(iblocksize-1)*npw_k*my_nspinor:iblocksize*npw_k*my_nspinor,iblock),gs_hamk,mpi_enreg)
+         mkl(1,fockcommon%ieigen,fockcommon%ieigen)=fockcommon%eigen_ikpt(fockcommon%ieigen)
 !           if (fockcommon%optstr) then
 !             fockcommon%stress(:)=fockcommon%stress(:)+weight(iblocksize)*fockcommon%stress_ikpt(:,fockcommon%ieigen)
 !           end if
-           if (fockcommon%optfor) then
-             fockcommon%forces(:,:)=fockcommon%forces(:,:)+weight(iblocksize)*fockcommon%forces_ikpt(:,:,fockcommon%ieigen)
-           end if
-         end do 
+         if (fockcommon%optfor) then
+           fockcommon%forces(:,:)=fockcommon%forces(:,:)+weight(iblocksize)*fockcommon%forces_ikpt(:,:,fockcommon%ieigen)
+         end if
+       end do 
 
 
      end do ! End of loop on block of bands
@@ -432,8 +432,8 @@ subroutine fock2ACE(cg,cprj,fock,istwfk,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_e
 ! Calculate Mkl for the current k-point
      ABI_ALLOCATE(cwavefk,(2,npw_k*my_nspinor))
      do iblock=1,nblockbd
-      cwavef(:,1:npw_k*my_nspinor*blocksize)=&
-&         cg(:,1+(iblock-1)*npw_k*my_nspinor*blocksize+icg:iblock*npw_k*my_nspinor*blocksize+icg)
+       cwavef(:,1:npw_k*my_nspinor*blocksize)=&
+&       cg(:,1+(iblock-1)*npw_k*my_nspinor*blocksize+icg:iblock*npw_k*my_nspinor*blocksize+icg)
        do iblocksize=1,blocksize
          kk=(iblock-1)*blocksize+iblocksize
          cwavefk(:,:)=cwavef(:,1+(iblocksize-1)*npw_k*my_nspinor:iblocksize*npw_k*my_nspinor)
@@ -442,7 +442,7 @@ subroutine fock2ACE(cg,cprj,fock,istwfk,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_e
              ll=(jblock-1)*blocksize+jblocksize
              if (ll<kk) then
                call dotprod_g(mkl(1,kk,ll),mkl(2,kk,ll),gs_hamk%istwf_k,npw_k,2,wi(:,1+(jblocksize-1)*npw_k*my_nspinor:&
-&                                           jblocksize*npw_k*my_nspinor,jblock),cwavefk,mpi_enreg%me_g0,mpi_enreg%comm_fft)
+&               jblocksize*npw_k*my_nspinor,jblock),cwavefk,mpi_enreg%me_g0,mpi_enreg%comm_fft)
              end if
            end do
          end do
@@ -470,11 +470,11 @@ subroutine fock2ACE(cg,cprj,fock,istwfk,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_e
          do jblocksize=1,blocksize
            ll=(jblock-1)*blocksize+jblocksize
            fock%fockACE(ikpt,isppol)%xi(1,:,kk)=fock%fockACE(ikpt,isppol)%xi(1,:,kk)+bb(1,ll,kk)*wi(1,1+(jblocksize-1)*&
-&                                                                npw_k*my_nspinor:jblocksize*npw_k*my_nspinor,jblock)-&
-&                                bb(2,ll,kk)*wi(2,1+(jblocksize-1)*npw_k*my_nspinor:jblocksize*npw_k*my_nspinor,jblock)
+&           npw_k*my_nspinor:jblocksize*npw_k*my_nspinor,jblock)-&
+&           bb(2,ll,kk)*wi(2,1+(jblocksize-1)*npw_k*my_nspinor:jblocksize*npw_k*my_nspinor,jblock)
            fock%fockACE(ikpt,isppol)%xi(2,:,kk)=fock%fockACE(ikpt,isppol)%xi(2,:,kk)+bb(1,ll,kk)*wi(2,1+(jblocksize-1)*&
-                                                                 npw_k*my_nspinor:jblocksize*npw_k*my_nspinor,jblock)+&
-&                                bb(2,ll,kk)*wi(1,1+(jblocksize-1)*npw_k*my_nspinor:jblocksize*npw_k*my_nspinor,jblock)
+           npw_k*my_nspinor:jblocksize*npw_k*my_nspinor,jblock)+&
+&           bb(2,ll,kk)*wi(1,1+(jblocksize-1)*npw_k*my_nspinor:jblocksize*npw_k*my_nspinor,jblock)
          end do
        end do
      end do
@@ -485,7 +485,7 @@ subroutine fock2ACE(cg,cprj,fock,istwfk,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_e
      if (fockcommon%optstr) then
        ABI_DEALLOCATE(fockcommon%stress_ikpt)
      end if
- 
+     
 !    Restore the bandfft tabs
      if (mpi_enreg%paral_kgb==1) then
        call bandfft_kpt_restoretabs(my_bandfft_kpt,ffnl=ffnl_sav,ph3d=ph3d_sav,kpg=kpg_k_sav)

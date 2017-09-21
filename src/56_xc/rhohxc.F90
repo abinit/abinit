@@ -430,9 +430,9 @@ subroutine rhohxc(dtset,enxc,gsqcut,izero,kxc,mpi_enreg,nfft,ngfft, &
      if(dtset%ixc==-406 .or. dtset%ixc==-427 .or. dtset%ixc==-428 .or. dtset%ixc==-456)then
        if (libxc_functionals_gga_from_hybrid(gga_id=gga_id)) then
          ixc_fallbackkxc_hyb=-gga_id(1)*1000-gga_id(2)
-       endif
-     endif
-   endif
+       end if
+     end if
+   end if
 
 !  The different components of depsxc will be
 !  for nspden=1,   depsxc(:,1)=d(rho.exc)/d(rho) == (depsxcdrho) == (vxcrho)
@@ -728,13 +728,13 @@ subroutine rhohxc(dtset,enxc,gsqcut,izero,kxc,mpi_enreg,nfft,ngfft, &
          if (dtset%ixc<0) then
            call libxc_functionals_end()
            call libxc_functionals_init(ixc_fallbackkxc_hyb,dtset%nspden)
-         endif
+         end if
          call drivexc_main(exc_b,ixc_fallbackkxc_hyb,mgga,ndvxc,nd2vxc,ngr2,npts,nspden_updn,nvxcgrho,order,&
-&          rho_b_updn,vxcrho_b_updn,dtset%xclevel, &
-&          dvxc=dvxc_b,d2vxc=d2vxc_b,grho2=grho2_b_updn,vxcgrho=vxcgrho_b, &
-&          lrho=lrho_b_updn,tau=tau_b_updn,vxclrho=vxclrho_b_updn,vxctau=vxctau_b_updn, &
-&          fxcT=fxc_b,el_temp=dtset%tsmear, &
-&          xc_tb09_c=dtset%xc_tb09_c)
+&         rho_b_updn,vxcrho_b_updn,dtset%xclevel, &
+&         dvxc=dvxc_b,d2vxc=d2vxc_b,grho2=grho2_b_updn,vxcgrho=vxcgrho_b, &
+&         lrho=lrho_b_updn,tau=tau_b_updn,vxclrho=vxclrho_b_updn,vxctau=vxctau_b_updn, &
+&         fxcT=fxc_b,el_temp=dtset%tsmear, &
+&         xc_tb09_c=dtset%xc_tb09_c)
 !        Transfer the xc kernel
          if (nkxc_eff==1.and.ndvxc==15) then
            kxc(ifft:ifft+npts-1,1)=half*(dvxc_b(1:npts,1)+dvxc_b(1:npts,9)+dvxc_b(1:npts,10))
@@ -746,8 +746,8 @@ subroutine rhohxc(dtset,enxc,gsqcut,izero,kxc,mpi_enreg,nfft,ngfft, &
          if (dtset%ixc<0) then
            call libxc_functionals_end()
            call libxc_functionals_init(dtset%ixc,dtset%nspden)
-         endif
-       endif
+         end if
+       end if
 
 !      Call to main XC driver
        call drivexc_main(exc_b,dtset%ixc,mgga,ndvxc,nd2vxc,ngr2,npts,nspden_updn,nvxcgrho,order,&

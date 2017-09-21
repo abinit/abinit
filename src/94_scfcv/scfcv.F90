@@ -1095,10 +1095,10 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
        ! Possibly (re)compute the ACE operator 
        if(fock%fock_common%use_ACE/=0) then
          call fock2ACE(cg,cprj,fock,dtset%istwfk,kg,dtset%kptns,dtset%mband,mcg,mcprj,dtset%mgfft,&
-&          dtset%mkmem,mpi_enreg,psps%mpsang,&
-&          dtset%mpw,dtset%natom,dtset%natom,dtset%nband,dtset%nfft,ngfft,dtset%nkpt,dtset%nloalg,npwarr,dtset%nspden,&
-&          dtset%nspinor,dtset%nsppol,dtset%nsym,dtset%ntypat,occ,dtset%optforces,paw_ij,pawtab,ph1d,psps,rprimd,&
-&          dtset%optstress,fock%fock_common%symrec,dtset%typat,usecprj,dtset%use_gpu_cuda,dtset%wtk,xred,ylm,ylmgr)
+&         dtset%mkmem,mpi_enreg,psps%mpsang,&
+&         dtset%mpw,dtset%natom,dtset%natom,dtset%nband,dtset%nfft,ngfft,dtset%nkpt,dtset%nloalg,npwarr,dtset%nspden,&
+&         dtset%nspinor,dtset%nsppol,dtset%nsym,dtset%ntypat,occ,dtset%optforces,paw_ij,pawtab,ph1d,psps,rprimd,&
+&         dtset%optstress,fock%fock_common%symrec,dtset%typat,usecprj,dtset%use_gpu_cuda,dtset%wtk,xred,ylm,ylmgr)
        end if
 
        !Should place a test on whether there should be the final exit of the istep loop. 
@@ -1110,15 +1110,15 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
        !if(fock%fock_common%nnsclo_hf==1 .and. fock%fock_common%use_ACE==0)then
        if(fock%fock_common%nnsclo_hf==1)then
          fock%fock_common%fock_converged=.TRUE.
-       endif
+       end if
 
        !Depending on fockoptmix, possibly restart the mixing procedure for the potential
        if(mod(dtset%fockoptmix,10)==1)then
          istep_mix=1
-       endif
+       end if
      else
        istep_updatedfock=istep_updatedfock+1
-     endif
+     end if
 
      !Used locally
      hybrid_mixing=fock%fock_common%hybrid_mixing ; hybrid_mixing_sr=fock%fock_common%hybrid_mixing_sr

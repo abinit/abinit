@@ -764,19 +764,19 @@ program cut3d
            close(unt)
            exit
 
-        case (15)
+         case (15)
             ! Write netcdf file.
-            timrev = 2; if (any(hdr%kptopt == [3, 4])) timrev = 1
-            call crystal_from_hdr(cryst, hdr, timrev)
-            call ngfft_seq(ngfft, [nr1, nr2, nr3])
-            ngfft(4:6) = ngfft(1:3)
-            nfft = product(ngfft(1:3))
-            cplex = 1
-            call init_distribfft_seq(mpi_enreg%distribfft, 'c', ngfft(2), ngfft(3), 'all')
-            call init_distribfft_seq(mpi_enreg%distribfft, 'f', ngfft(2), ngfft(3), 'all')
+           timrev = 2; if (any(hdr%kptopt == [3, 4])) timrev = 1
+           call crystal_from_hdr(cryst, hdr, timrev)
+           call ngfft_seq(ngfft, [nr1, nr2, nr3])
+           ngfft(4:6) = ngfft(1:3)
+           nfft = product(ngfft(1:3))
+           cplex = 1
+           call init_distribfft_seq(mpi_enreg%distribfft, 'c', ngfft(2), ngfft(3), 'all')
+           call init_distribfft_seq(mpi_enreg%distribfft, 'f', ngfft(2), ngfft(3), 'all')
 
-            call fftdatar_write(varname,filnam,IO_MODE_ETSF,hdr,cryst,ngfft,cplex,nfft,nspden,grid_full,mpi_enreg)
-            call crystal_free(cryst)
+           call fftdatar_write(varname,filnam,IO_MODE_ETSF,hdr,cryst,ngfft,cplex,nfft,nspden,grid_full,mpi_enreg)
+           call crystal_free(cryst)
 
          case(0)
            write(std_out,*)' Exit requested by user'

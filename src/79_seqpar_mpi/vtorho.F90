@@ -808,7 +808,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 !       - Prepare various tabs in case of band-FFT parallelism
 !       - Load k-dependent quantities in the Hamiltonian
        ABI_ALLOCATE(ph3d,(2,npw_k,gs_hamk%matblk))
- 
+       
        if(usefock_ACE/=0) then
          call load_k_hamiltonian(gs_hamk,kpt_k=dtset%kptns(:,ikpt),istwf_k=istwf_k,npw_k=npw_k,&
 &         kinpw_k=kinpw,kg_k=kg_k,kpg_k=kpg_k,ffnl_k=ffnl,fockACE_k=fock%fockACE(ikpt,isppol),ph3d_k=ph3d,&
@@ -1325,7 +1325,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
              if (usefock) then
                energies%e_fock=energies%e_fock + half*focknk(bdtot_index)*occ(bdtot_index)*dtset%wtk(ikpt)
                if (optforces>0) fock%fock_common%forces(:,:)=fock%fock_common%forces(:,:)+&
-&                                               dtset%wtk(ikpt)*occ(bdtot_index)*fockfornk(:,:,bdtot_index)
+&               dtset%wtk(ikpt)*occ(bdtot_index)*fockfornk(:,:,bdtot_index)
              end if
              if (optforces>0) grnl(:)=grnl(:)+dtset%wtk(ikpt)*occ(bdtot_index)*grnlnk(:,bdtot_index)
            end if

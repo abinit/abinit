@@ -177,7 +177,7 @@ program anaddb
  ! Must read natom from the DDB before being able to allocate some arrays needed for invars9
 
  call ddb_hdr_open_read(ddb_hdr,filnam(3),ddbun,DDB_VERSION,comm=comm, &
-&                       dimonly=1)
+& dimonly=1)
 
  natom = ddb_hdr%natom
  ntypat = ddb_hdr%ntypat
@@ -570,7 +570,7 @@ program anaddb
     ! DEBUG
     !call ddb_hdr_open_read(ddb_hdr,filnam(5),ddbun,DDB_VERSION,&
     ! &                     dimonly=1)
- 
+   
     !mband = ddb_hdr%mband
     !msym = ddb_hdr%msym
     !natom = ddb_hdr%natom
@@ -578,7 +578,7 @@ program anaddb
     !nkpt = ddb_hdr%nkpt
     !ntypat = ddb_hdr%ntypat
     !usepaw = ddb_hdr%usepaw
- 
+   
     !call ddb_hdr_free(ddb_hdr)
     ! END DEBUG
 
@@ -586,7 +586,7 @@ program anaddb
    elph_base_name=trim(filnam(2))//"_ep"
 
    call thmeig(inp,ddb,Crystal,elph_base_name,filnam(5),&
-&  ddbun,ab_out,natom,mpert,msize,asrq0%d2asr,comm)
+&   ddbun,ab_out,natom,mpert,msize,asrq0%d2asr,comm)
 
  end if
 

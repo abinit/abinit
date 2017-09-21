@@ -2012,7 +2012,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
          vrsddb=100401
 
          call ddb_hdr_init(ddb_hdr,dtset,psps,pawtab,DDB_VERSION,dscrpt,&
-&                          1,xred=xred,occ=occ_pert)
+&         1,xred=xred,occ=occ_pert)
 
          call ddb_hdr_open_write(ddb_hdr, dtfil%fnameabo_eigr2d, dtfil%unddb)
 

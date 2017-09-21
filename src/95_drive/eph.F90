@@ -583,8 +583,8 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  case (5)
    ! Interpolate the phonon potential
    call dvdb_interpolate_and_write(dtfil,ngfftc,ngfftf,cryst,dvdb,&
-   &    ifc%ngqpt,ifc%nqshft,ifc%qshft, &
-   &    dtset%eph_ngqpt_fine,dtset%qptopt,mpi_enreg,comm)
+&   ifc%ngqpt,ifc%nqshft,ifc%qshft, &
+&   dtset%eph_ngqpt_fine,dtset%qptopt,mpi_enreg,comm)
 
  case default
    MSG_ERROR(sjoin("Unsupported value of eph_task:", itoa(dtset%eph_task)))

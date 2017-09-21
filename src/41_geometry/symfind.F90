@@ -422,7 +422,7 @@
  call wrtout(std_out,message,'COLL')
  do isym=1,nsym
    write(message,'(i4,4x,3i4,2x,3i4,2x,3i4,4x,i4,4x,3f8.4)' ) isym,symrel(:,:,isym),&
-&                                                               symafm(isym),tnons(:,isym)
+&   symafm(isym),tnons(:,isym)
    call wrtout(std_out,message,'COLL')
  end do
 
