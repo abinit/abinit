@@ -57,6 +57,8 @@
 !!      afterscfloop
 !!
 !! CHILDREN
+!!      destroy_hamiltonian,dotprod_g,init_hamiltonian,initylmg
+!!      load_k_hamiltonian,load_spin_hamiltonian,mkffnl,mkkpg,nonlop
 !!
 !! SOURCE
 

@@ -1543,7 +1543,7 @@ end subroutine fock_BZ_destroy
 !!  fockACE <type(fock_ACE_type)>= all the quantities to calculate Fock exact exchange in the ACE context
 !!
 !! PARENTS
-!!      fock_destroy
+!!      scfcv
 !!
 !! CHILDREN
 !!      ptabs_fourdp,timab,xmpi_sum

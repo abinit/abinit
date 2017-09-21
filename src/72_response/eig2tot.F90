@@ -70,11 +70,10 @@
 !!      respfn
 !!
 !! CHILDREN
-!!      crystal_free,crystal_init,distrb2,ebands_free,ebands_init
-!!      eigr2d_free,eigr2d_init,eigr2d_ncwrite,fan_free,fan_init,fan_ncwrite
-!!      gkk_free,gkk_init,gkk_ncwrite,kptfine_av,outbsd,smeared_delta
-!!      ddb_hdr_init, ddb_hdr_free, ddb_hdr_open_write
-!!      timab,xmpi_sum
+!!      crystal_free,crystal_init,ddb_hdr_free,ddb_hdr_init,ddb_hdr_open_write
+!!      distrb2,ebands_free,ebands_init,eigr2d_free,eigr2d_init,eigr2d_ncwrite
+!!      fan_free,fan_init,fan_ncwrite,gkk_free,gkk_init,gkk_ncwrite,kptfine_av
+!!      outbsd,smeared_delta,timab,xmpi_sum
 !!
 !! SOURCE
 

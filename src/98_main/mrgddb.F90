@@ -38,8 +38,9 @@
 !! PARENTS
 !!
 !! CHILDREN
-!!      abi_io_redirect,abimem_init,abinit_doctor
-!!      get_command_argument,herald,mblktyp1,mblktyp5,timein,wrtout,xmpi_init
+!!      abi_io_redirect,abimem_init,abinit_doctor,ddb_hdr_free
+!!      ddb_hdr_open_read,get_command_argument,herald,mblktyp1,mblktyp5,timein
+!!      wrtout,xmpi_init
 !!
 !! SOURCE
 

@@ -133,7 +133,8 @@
 !!      ab7_mixing_deallocate,ab7_mixing_new,ab7_mixing_use_disk_cache
 !!      afterscfloop,build_vxc,check_kxc,chkpawovlp,cprj_clean,cprj_paw_alloc
 !!      ctocprj,destroy_distribfft,destroy_mpi_enreg,energies_init,energy
-!!      etotfor,extraprho,fftdatar_write_from_hdr,first_rec,fock_destroy
+!!      etotfor,extraprho,fftdatar_write_from_hdr,first_rec,fock2ace
+!!      fock_ace_destroy,fock_bz_destroy,fock_common_destroy,fock_destroy
 !!      fock_init,fock_updatecwaveocc,fourdp,fresid,getcut,getmpw,getng,getph
 !!      gshgg_mkncwrite,hdr_update,init_distribfft,init_distribfft_seq
 !!      init_metricrec,initmpi_seq,initylmg,int2char4,kpgio,metric,newrho

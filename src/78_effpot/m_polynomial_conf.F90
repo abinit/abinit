@@ -103,8 +103,10 @@ CONTAINS  !=====================================================================
 !!                                           polynomial 
 !!
 !! PARENTS
+!!      m_effective_potential
 !!
 !! CHILDREN
+!!      xmpi_sum
 !!
 !! SOURCE
 !!
@@ -177,9 +179,10 @@ end subroutine polynomial_conf_init
 !! polynomial_conf <type(polynomial_conf)> = polynomial_conf datatype to be free
 !!
 !! PARENTS
-!!      m_effective_potential_file,m_polynomial_coeff,m_polynomial_conf
+!!      m_effective_potential,m_polynomial_conf
 !!
 !! CHILDREN
+!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -252,10 +255,10 @@ end subroutine polynomial_conf_free
 !! CHILDREN
 !!
 !! PARENTS
-!!      m_polynomial_conf
+!!      m_effective_potential
 !!
 !! CHILDREN
-!!      asrq0_free,effective_potential_effpot2ddb,invars9,mkphbs
+!!      xmpi_sum
 !!
 !! SOURCE
 

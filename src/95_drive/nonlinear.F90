@@ -48,11 +48,11 @@
 !!      driver
 !!
 !! CHILDREN
-!!      d3sym,dfptnl_doutput,dfptnl_loop,ebands_free,fourdp,getcut
-!!      getkgrid,getshell,hdr_free,hdr_init,hdr_update,initmv,inwffil,kpgio
-!!      mkcore,nlopt,pspini,read_rhor,rhohxc,setsym,setup1,status
-!!      ddb_hdr_init, ddb_hdr_free, ddb_hdr_open_write
-!!      symmetrize_xred,sytens,timab,wffclose,wrtout
+!!      d3sym,ddb_hdr_free,ddb_hdr_init,ddb_hdr_open_write,dfptnl_doutput
+!!      dfptnl_loop,ebands_free,fourdp,getcut,getkgrid,getshell,hdr_free
+!!      hdr_init,hdr_update,initmv,inwffil,kpgio,mkcore,nlopt,pspini,read_rhor
+!!      rhohxc,setsym,setup1,status,symmetrize_xred,sytens,timab,wffclose
+!!      wrtout
 !!
 !! SOURCE
 

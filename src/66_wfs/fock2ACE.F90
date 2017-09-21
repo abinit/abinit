@@ -64,13 +64,14 @@
 !!  Please, dont suppress TESTDFPT sections (MT, nov. 2014)
 !!
 !! PARENTS
-!!      forstr
+!!      scfcv
 !!
 !! CHILDREN
 !!      bandfft_kpt_restoretabs,bandfft_kpt_savetabs,destroy_hamiltonian
-!!      fock_getghc,init_hamiltonian,load_k_hamiltonian,load_spin_hamiltonian
-!!      meanvalue_g,mkffnl,mkkpg,pawcprj_alloc,pawcprj_free,pawcprj_get
-!!      pawcprj_reorder,prep_bandfft_tabs,stresssym,timab,xmpi_sum
+!!      dotprod_g,fock_getghc,init_hamiltonian,load_k_hamiltonian
+!!      load_spin_hamiltonian,mkffnl,mkkpg,pawcprj_alloc,pawcprj_free
+!!      pawcprj_get,pawcprj_reorder,prep_bandfft_tabs,stresssym,timab,xmpi_sum
+!!      zpotrf,ztrtrs
 !!
 !! SOURCE
 

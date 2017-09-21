@@ -25,8 +25,9 @@
 !! PARENTS
 !!
 !! CHILDREN
-!!      abi_io_redirect,abimem_init,abinit_doctor,getargs,newk,progress,prompt
-!!      sortc,wfk_close,wfk_open_read,wfk_read_band_block,xmpi_end,xmpi_init
+!!      abi_io_redirect,abimem_init,abinit_doctor,crystal_free,crystal_from_hdr
+!!      ebands_free,getargs,newk,progress,prompt,sortc,wfk_close,wfk_open_read
+!!      wfk_read_band_block,xmpi_end,xmpi_init
 !!
 !! SOURCE
 

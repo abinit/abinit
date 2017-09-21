@@ -41,8 +41,8 @@
 !!      mrgddb
 !!
 !! CHILDREN
-!!      ddb_free,ddb_malloc,ddb_write_blok
-!!      read_blok8,wrtout
+!!      ddb_free,ddb_hdr_compare,ddb_hdr_free,ddb_hdr_open_read
+!!      ddb_hdr_open_write,ddb_malloc,ddb_write_blok,read_blok8,wrtout
 !!
 !! SOURCE
 

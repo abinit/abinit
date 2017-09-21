@@ -66,7 +66,8 @@
 !!      pspatm
 !!
 !! CHILDREN
-!!      cc_derivatives,ps_destroy,psml_reader,psp8lo,psp8nl,spline,wrtout
+!!      nctab_eval_tvalespl,pawrad_free,pawrad_init,ps_destroy
+!!      ps_get_projector_indexes,psml_reader,psp8lo,psp8nl,psp9cc,spline,wrtout
 !!
 !! SOURCE
 

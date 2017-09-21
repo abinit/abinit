@@ -27,9 +27,10 @@
 !!  This routine will be built only if PSML support is enabled.
 !!
 !! PARENTS
-!!      psp8in
+!!      psp9in
 !!
 !! CHILDREN
+!!      dgesv
 !!
 !! SOURCE
 

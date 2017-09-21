@@ -49,9 +49,10 @@
 !!  be 0 0 0 each for a symmorphic space group)
 !!
 !! PARENTS
-!!      ingeo,inqpt,m_ab7_symmetry,m_use_ga,thmeig
+!!      ingeo,inqpt,m_ab7_symmetry,m_effective_potential_file,m_use_ga,thmeig
 !!
 !! CHILDREN
+!!      wrtout
 !!
 !! SOURCE
 

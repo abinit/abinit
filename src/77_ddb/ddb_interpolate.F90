@@ -25,6 +25,8 @@
 !!      anaddb
 !!
 !! CHILDREN
+!!      d2cart_to_red,ddb_free,ddb_hdr_open_write,ddb_malloc,ddb_write_blok
+!!      gtblk9,gtdyn9,outddbnc,wrtout
 !!
 !! SOURCE
 

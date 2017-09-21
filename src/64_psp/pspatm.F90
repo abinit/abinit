@@ -108,8 +108,9 @@
 !! CHILDREN
 !!      nctab_eval_tcorespl,pawpsp_17in,pawpsp_7in,pawpsp_bcast
 !!      pawpsp_read_header_xml,pawpsp_read_pawheader,pawpsp_wvl,psp10in,psp1in
-!!      psp2in,psp3in,psp5in,psp6in,psp8in,psp9in,psxml2abheader
-!!      test_xml_xmlpaw_upf,timab,upf2abinit,wrtout,wvl_descr_psp_fill
+!!      psp2in,psp3in,psp5in,psp6in,psp8in,psp9in,psp_dump_outputs
+!!      psxml2abheader,test_xml_xmlpaw_upf,timab,upf2abinit,wrtout
+!!      wvl_descr_psp_fill
 !!
 !! SOURCE
 

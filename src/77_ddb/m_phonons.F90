@@ -1192,8 +1192,11 @@ end subroutine mkphdos
 !! NOTES
 !!
 !! PARENTS
+!!      anaddb
 !!
 !! CHILDREN
+!!      ifc_fourq,kpath_free,phonons_ncwrite,phonons_write_gnuplot
+!!      phonons_write_phfrq,phonons_write_xmgrace,xmpi_sum_master
 !!
 !! SOURCE
 
@@ -1362,8 +1365,11 @@ end subroutine thermal_supercell_make
 !! NOTES
 !!
 !! PARENTS
+!!      anaddb
 !!
 !! CHILDREN
+!!      ifc_fourq,kpath_free,phonons_ncwrite,phonons_write_gnuplot
+!!      phonons_write_phfrq,phonons_write_xmgrace,xmpi_sum_master
 !!
 !! SOURCE
 
@@ -1411,8 +1417,11 @@ end subroutine thermal_supercell_free
 !! NOTES
 !!
 !! PARENTS
+!!      anaddb
 !!
 !! CHILDREN
+!!      ifc_fourq,kpath_free,phonons_ncwrite,phonons_write_gnuplot
+!!      phonons_write_phfrq,phonons_write_xmgrace,xmpi_sum_master
 !!
 !! SOURCE
 
@@ -1583,7 +1592,7 @@ end subroutine phdos_ncwrite
 !!  Only writing.
 !!
 !! PARENTS
-!!      anaddb,m_effective_potential
+!!      anaddb
 !!
 !! CHILDREN
 !!      ifc_fourq,kpath_free,phonons_ncwrite,phonons_write_gnuplot

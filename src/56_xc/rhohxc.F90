@@ -203,8 +203,9 @@
 !!      prcref_PMA,respfn,rhotov,scfcv,setvtr,xchybrid_ncpp_cc
 !!
 !! CHILDREN
-!!      dotprod_vn,drivexc_main,hartre,mean_fftr,metric,mkdenpos,size_dvxc
-!!      timab,xc_vdw_aggregate,xcden,xcmult,xcpositron,xcpot,xctfw,xmpi_sum
+!!      dotprod_vn,drivexc_main,hartre,libxc_functionals_end
+!!      libxc_functionals_init,mean_fftr,metric,mkdenpos,size_dvxc,timab
+!!      xc_vdw_aggregate,xcden,xcmult,xcpositron,xcpot,xctfw,xmpi_sum
 !!
 !! SOURCE
 
