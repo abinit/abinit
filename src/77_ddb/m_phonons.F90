@@ -724,6 +724,7 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,&
  integer :: nmesh,nqbz,nqshft,ierr,natom,nomega
  integer :: jdir, isym
  integer :: nprocs, my_rank
+ integer :: ncid
  real(dp) :: nsmallq
  real(dp) :: dum,gaussfactor,gaussprefactor,gaussval,low_bound,max_occ,pnorm
  real(dp) :: upr_bound,xx,gaussmaxarg
@@ -733,6 +734,7 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,&
  logical :: out_of_bounds
  character(len=500) :: msg
  character(len=80) :: errstr
+ character(len=80) ::  prefix = "freq_displ"
  type(t_tetrahedron) :: tetraq
 !arrays
  integer :: qptrlatt(3,3)
@@ -846,6 +848,12 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,&
    qptrlatt=0
    qptrlatt(1,1)=ngqpt(1,imesh); qptrlatt(2,2)=ngqpt(2,imesh); qptrlatt(3,3)=ngqpt(3,imesh)
 
+   if(allocated(wtqibz)) then
+     ABI_FREE(wtqibz)
+   end if
+   if(allocated(qibz)) then
+     ABI_FREE(qibz)
+   end if
    ! This call will set %nqibz, IBZ and BZ arrays
    call kpts_ibz_from_kptrlatt(crystal, qptrlatt, qptopt1, nqshft, qshft, &
      phdos%nqibz, qibz, wtqibz, nqbz, qbz) ! new_kptrlatt, new_shiftk)  ! Optional
@@ -1041,9 +1049,7 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,&
      call wrtout (std_out,msg,"COLL")
    end if
 
-   ABI_FREE(qibz)
    ABI_FREE(qbz)
-   ABI_FREE(wtqibz)
  end do !imesh
  ABI_FREE(ngqpt)
 
@@ -1108,13 +1114,39 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,&
        end do ! iq
      end do  ! io
    end do ! imode
+
+! make eigvec into displacements
+   do iat = 1, natom
+     full_eigvec(:,:,iat,:,:) = full_eigvec(:,:,iat,:,:)/sqrt(PHdos%atom_mass(iat))
+   end do
+#ifdef HAVE_NETCDF
+   NCF_CHECK_MSG(nctk_open_create(ncid, strcat(prefix, "_PHIBZ.nc"), xmpi_comm_self), "Creating PHIBZ")
+   NCF_CHECK(crystal_ncwrite(Crystal, ncid))
+   call phonons_ncwrite(ncid,natom,PHdos%nqibz, qibz, wtqibz, full_phfrq, full_eigvec)
+   NCF_CHECK(nf90_close(ncid))
+#endif
+
+! immediately free this - it contains displ and not eigvec at this stage
+   ABI_FREE(full_eigvec)
+
+   ABI_FREE(full_phfrq)
    ABI_FREE(tmp_phfrq)
    ABI_FREE(tweight)
    ABI_FREE(dtweightde)
+   call destroy_tetra(tetraq)
+ else
+#ifdef HAVE_NETCDF
+   write (msg, '(a)') 'The netcdf PHIBZ file is only output for tetrahedron integration and DOS calculations'
+   MSG_WARNING (msg)
+#endif
+
  end if ! prtdos 2 = tetrahedra
 
 ! normalize by nsym : symmetrization is used in all prtdos cases
  PHdos%msqd_dos_atom = PHdos%msqd_dos_atom / Crystal%nsym
+
+ ABI_FREE(qibz)
+ ABI_FREE(wtqibz)
 
 ! normalize by mass and factor of 2 ! now added in the printout to agree with harmonic_thermo
 ! do iat=1, natom
@@ -1158,12 +1190,6 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,&
    do itype=1,Crystal%ntypat
      call simpson_int(PHdos%nomega,PHdos%omega_step,PHdos%pjdos_type(:,itype),PHdos%pjdos_type_int(:,itype))
    end do
- end if
-
- if (prtdos==2) then
-   ABI_FREE(full_phfrq)
-   ABI_FREE(full_eigvec)
-   call destroy_tetra(tetraq)
  end if
 
  call cwtime(cpu,wall,gflops,"stop")
