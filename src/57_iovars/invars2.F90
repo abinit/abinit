@@ -2809,22 +2809,24 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
    if(tread==1) then
      dtset%nbandhf=intarr(1)
    else
-!  First compute the total valence charge
-     zval=0.0_dp
-     do iatom=1,natom
-       zval=zval+dtset%ziontypat(dtset%typat(iatom))
-     end do
-!  Only take into account negative charge, to compute maximum number of bands
-     if(charge > 0.0_dp)charge=0.0_dp
-     zelect=zval-charge
+!!  First compute the total valence charge
+!     zval=0.0_dp
+!     do iatom=1,natom
+!       zval=zval+dtset%ziontypat(dtset%typat(iatom))
+!     end do
+!!  Only take into account negative charge, to compute maximum number of bands
+!     if(charge > 0.0_dp)charge=0.0_dp
+!     zelect=zval-charge
 
-!  Then select the minimum number of bands, and add the required number
-!  Note that this number might be smaller than the one computed
-!  by a slightly different formula in invars1
-     dtset%nbandhf=dtset%nspinor*((ceiling(zelect-1.0d-10)+1)/2)
-     if (occopt>2) dtset%nbandhf=dtset%nbandhf+dtset%nspinor*(ceiling(fband*natom-1.0d-10))
-!  More precisely, nbandhf = default value for nband = the number of occupied bands
-!                                                    + extra bands according to fband
+!!  Then select the minimum number of bands, and add the required number
+!!  Note that this number might be smaller than the one computed
+!!  by a slightly different formula in invars1
+!     dtset%nbandhf=dtset%nspinor*((ceiling(zelect-1.0d-10)+1)/2)
+!
+!     if (occopt>2) dtset%nbandhf=dtset%nbandhf+dtset%nspinor*(ceiling(dtset%fband*natom-1.0d-10))
+!!  More precisely, nbandhf = default value for nband = the number of occupied bands
+!!                                                    + extra bands according to fband
+     dtset%nbandhf=dtset%nband(1)
    end if
 
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nnsclohf',tread,'INT')

@@ -979,10 +979,9 @@ end subroutine effective_potential_file_getDimStrainCoupling
 !! nstep = number of MD steps
 !!
 !! PARENTS
-!!      multibinit
+!!      m_effective_potential_file
 !!
 !! CHILDREN
-!!      destroy_supercell,init_supercell,xred2xcart
 !!
 !! SOURCE
 
@@ -3375,10 +3374,9 @@ end subroutine coeffs_xml2effpot
 !! hist<type(abihist)> = datatype with the  history of the MD
 !!
 !! PARENTS
-!!      multibinit
+!!      m_effective_potential_file,multibinit
 !!
 !! CHILDREN
-!!      destroy_supercell,init_supercell,xred2xcart
 !!
 !! SOURCE
 

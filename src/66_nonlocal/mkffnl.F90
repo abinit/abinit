@@ -135,8 +135,8 @@
 !!
 !! PARENTS
 !!      ctocprj,d2frnl,dfpt_nsteltwf,dfpt_nstpaw,dfpt_nstwf,dfpt_rhofermi
-!!      dfptnl_resp,energy,forstrnps,getgh1c,ks_ddiago,m_io_kss,m_shirley
-!!      m_vkbr,m_wfd,vtorho
+!!      dfptnl_resp,energy,fock2ACE,forstrnps,getgh1c,ks_ddiago,m_io_kss
+!!      m_shirley,m_vkbr,m_wfd,nonlop_test,vtorho
 !!
 !! CHILDREN
 !!      mkkin,splfit,timab

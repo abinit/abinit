@@ -85,7 +85,7 @@ CONTAINS  !=====================================================================
 !!  strain = structure with all information of strain
 !!
 !! PARENTS
-!!      compute_anharmonics,m_effective_potential,mover_effpot
+!!      compute_anharmonics,m_effective_potential
 !!
 !! CHILDREN
 !!      wrtout
@@ -152,7 +152,7 @@ end subroutine strain_init
 !! OUTPUT
 !!
 !! PARENTS
-!!      compute_anharmonics,m_effective_potential
+!!      compute_anharmonics
 !!
 !! CHILDREN
 !!      wrtout
@@ -206,7 +206,7 @@ end subroutine strain_free
 !!  strain = structure with all information of strain
 !!
 !! PARENTS
-!!      compute_anharmonics,m_effective_potential,mover_effpot
+!!      compute_anharmonics,m_effective_potential,m_fit_polynomial_coeff
 !!
 !! CHILDREN
 !!      wrtout
@@ -564,7 +564,7 @@ end subroutine strain_strain2def
 !! eff_pot = supercell structure with data to be output
 !!
 !! PARENTS
-!!      m_effective_potential,mover_effpot
+!!      m_effective_potential
 !!
 !! CHILDREN
 !!      wrtout

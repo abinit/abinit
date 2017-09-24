@@ -29,10 +29,9 @@
 !!  Only writing
 !!
 !! PARENTS
-!!      respfn
+!!      ddb_interpolate,respfn
 !!
 !! CHILDREN
-!!      crystal_free,crystal_init
 !!
 !! SOURCE
 

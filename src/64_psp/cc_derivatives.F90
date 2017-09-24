@@ -29,7 +29,7 @@
 !!  xccc1d(n1xccc,6)= 1D core charge function and its five first derivatives
 !!
 !! PARENTS
-!!      psp6cc_drh,psp9in,upf2abinit
+!!      psp6cc_drh,upf2abinit
 !!
 !! CHILDREN
 !!      spline,splint

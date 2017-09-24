@@ -221,6 +221,7 @@ use m_cgtools
    fockcommon%optstr=.false.
    use_ACE_old=fockcommon%use_ACE
    fockcommon%use_ACE=0
+   if (fockcommon%optfor) compute_gbound=.true.
  end if
  if (stress_needed==1) then
    kinstr(:)=zero;npsstr(:)=zero
@@ -230,7 +231,7 @@ use m_cgtools
      compute_gbound=.true.
    end if
  end if
-
+ 
  usecprj_local=usecprj
 
  if ((usefock_loc).and.(psps%usepaw==1)) then
@@ -283,11 +284,12 @@ use m_cgtools
 
 !  Continue to initialize the Hamiltonian (PAW DIJ coefficients)
    call load_spin_hamiltonian(gs_hamk,isppol,with_nonlocal=.true.)
+   if (usefock_loc) fockcommon%isppol=isppol
 
 !  Loop over k points
    ikg=0
    do ikpt=1,nkpt
-
+     if (usefock_loc) fockcommon%ikpt=ikpt
      nband_k=nband(ikpt+(isppol-1)*nkpt)
      istwf_k=istwfk(ikpt)
      npw_k=npwarr(ikpt)

@@ -24,14 +24,16 @@
 !! CHILDREN
 !!      abi_io_redirect,abimem_init,abinit_doctor,anaddb_dtset_free,anaddb_init
 !!      asrq0_apply,asrq0_free,crystal_free,ddb_diel,ddb_elast,ddb_free
-!!      ddb_from_file,ddb_internalstr,ddb_piezo,dfpt_phfrq
-!!      dfpt_prtph,dfpt_symph,elast_ncwrite,electrooptic,elphon,flush_unit
-!!      gruns_anaddb,gtblk9,gtdyn9,harmonic_thermo,herald,ifc_free,ifc_init
-!!      ifc_outphbtrap,ifc_print,ifc_speedofsound,ifc_write,instrng,int2char4
-!!      inupper,invars9,isfile,mkphbs,mkphdos,nctk_defwrite_nonana_terms
-!!      outvars_anaddb,phdos_free,phdos_ncwrite,phdos_print,phdos_print_debye
-!!      phdos_print_msqd,phdos_print_thermo,ramansus,relaxpol,thmeig,timein
-!!      wrtout,xmpi_bcast,xmpi_end,xmpi_init,xmpi_sum
+!!      ddb_from_file,ddb_hdr_free,ddb_hdr_open_read,ddb_internalstr
+!!      ddb_interpolate,ddb_piezo,dfpt_phfrq,dfpt_prtph,dfpt_symph
+!!      elast_ncwrite,electrooptic,elphon,flush_unit,gruns_anaddb,gtblk9,gtdyn9
+!!      harmonic_thermo,herald,ifc_free,ifc_init,ifc_outphbtrap,ifc_print
+!!      ifc_speedofsound,ifc_write,instrng,int2char4,inupper,invars9,isfile
+!!      mkphbs,mkphdos,nctk_defwrite_nonana_terms,outvars_anaddb,phdos_free
+!!      phdos_ncwrite,phdos_print,phdos_print_debye,phdos_print_msqd
+!!      phdos_print_thermo,ramansus,relaxpol,thermal_supercell_free
+!!      thermal_supercell_make,thermal_supercell_print,thmeig,timein,wrtout
+!!      xmpi_bcast,xmpi_end,xmpi_init,xmpi_sum
 !!
 !! SOURCE
 
@@ -175,7 +177,7 @@ program anaddb
  ! Must read natom from the DDB before being able to allocate some arrays needed for invars9
 
  call ddb_hdr_open_read(ddb_hdr,filnam(3),ddbun,DDB_VERSION,comm=comm, &
-&                       dimonly=1)
+& dimonly=1)
 
  natom = ddb_hdr%natom
  ntypat = ddb_hdr%ntypat
@@ -568,7 +570,7 @@ program anaddb
     ! DEBUG
     !call ddb_hdr_open_read(ddb_hdr,filnam(5),ddbun,DDB_VERSION,&
     ! &                     dimonly=1)
- 
+   
     !mband = ddb_hdr%mband
     !msym = ddb_hdr%msym
     !natom = ddb_hdr%natom
@@ -576,7 +578,7 @@ program anaddb
     !nkpt = ddb_hdr%nkpt
     !ntypat = ddb_hdr%ntypat
     !usepaw = ddb_hdr%usepaw
- 
+   
     !call ddb_hdr_free(ddb_hdr)
     ! END DEBUG
 
@@ -584,7 +586,7 @@ program anaddb
    elph_base_name=trim(filnam(2))//"_ep"
 
    call thmeig(inp,ddb,Crystal,elph_base_name,filnam(5),&
-&  ddbun,ab_out,natom,mpert,msize,asrq0%d2asr,comm)
+&   ddbun,ab_out,natom,mpert,msize,asrq0%d2asr,comm)
 
  end if
 
