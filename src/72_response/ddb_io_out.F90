@@ -71,7 +71,7 @@
 !!  Only writing
 !!
 !! PARENTS
-!!      dfpt_looppert,eig2tot,gstate,mblktyp1,mblktyp5,nonlinear,respfn
+!!      m_ddb_hdr
 !!
 !! CHILDREN
 !!      wrtout

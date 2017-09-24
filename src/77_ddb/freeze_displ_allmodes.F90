@@ -40,7 +40,8 @@
 !!      m_phonons
 !!
 !! CHILDREN
-!!      destroy_supercell,freeze_displ_supercell,init_supercell,prt_supercell
+!!      destroy_supercell,freeze_displ_supercell,init_supercell_for_qpt
+!!      prt_supercell_for_qpt
 !!
 !! SOURCE
 !!

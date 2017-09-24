@@ -602,8 +602,8 @@ CONTAINS  !===========================================================
 !!
 !! PARENTS
 !!      d2frnl,dfpt_nselt,dfpt_nstdy,dfpt_nstpaw,dfpt_rhofermi,dfpt_vtorho
-!!      dfptnl_resp,energy,forstrnps,gwls_hamiltonian,ks_ddiago,m_gkk,m_io_kss
-!!      m_phgamma,m_phpi,m_shirley,m_sigmaph,vtorho
+!!      dfptnl_resp,energy,fock2ACE,forstrnps,gwls_hamiltonian,ks_ddiago,m_gkk
+!!      m_io_kss,m_phgamma,m_phpi,m_shirley,m_sigmaph,nonlop_test,vtorho
 !!
 !! CHILDREN
 !!      destroy_mpi_enreg,initmpi_seq,kpgsph,wrtout
@@ -762,8 +762,8 @@ end subroutine destroy_hamiltonian
 !!
 !! PARENTS
 !!      d2frnl,dfpt_nselt,dfpt_nstdy,dfpt_nstpaw,dfpt_rhofermi,dfpt_vtorho
-!!      dfptnl_resp,energy,forstrnps,ks_ddiago,m_gkk,m_io_kss,m_phgamma,m_phpi
-!!      m_shirley,m_sigmaph,vtorho
+!!      dfptnl_resp,energy,fock2ACE,forstrnps,ks_ddiago,m_gkk,m_io_kss
+!!      m_phgamma,m_phpi,m_shirley,m_sigmaph,nonlop_test,vtorho
 !!
 !! CHILDREN
 !!      destroy_mpi_enreg,initmpi_seq,kpgsph,wrtout
@@ -1020,8 +1020,8 @@ end subroutine init_hamiltonian
 !!
 !! PARENTS
 !!      d2frnl,dfpt_nsteltwf,dfpt_nstpaw,dfpt_nstwf,dfpt_rhofermi,dfptnl_resp
-!!      energy,fock_getghc,forstrnps,getgh1c,gwls_hamiltonian,ks_ddiago
-!!      m_io_kss,m_shirley,vtorho,wfd_vnlpsi
+!!      energy,fock2ACE,fock_getghc,forstrnps,getgh1c,gwls_hamiltonian
+!!      ks_ddiago,m_io_kss,m_shirley,nonlop_test,vtorho,wfd_vnlpsi
 !!
 !! CHILDREN
 !!      destroy_mpi_enreg,initmpi_seq,kpgsph,wrtout
@@ -1539,9 +1539,9 @@ end subroutine copy_hamiltonian
 !!   * Quantities that depend spin are initialized.
 !!
 !! PARENTS
-!!      d2frnl,dfpt_nstdy,dfpt_nstpaw,dfpt_rhofermi,dfpt_vtorho,energy
+!!      d2frnl,dfpt_nstdy,dfpt_nstpaw,dfpt_rhofermi,dfpt_vtorho,energy,fock2ACE
 !!      forstrnps,ks_ddiago,m_gkk,m_io_kss,m_phgamma,m_phpi,m_shirley,m_sigmaph
-!!      vtorho
+!!      nonlop_test,vtorho
 !!
 !! CHILDREN
 !!      destroy_mpi_enreg,initmpi_seq,kpgsph,wrtout

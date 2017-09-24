@@ -108,8 +108,9 @@
 !! CHILDREN
 !!      nctab_eval_tcorespl,pawpsp_17in,pawpsp_7in,pawpsp_bcast
 !!      pawpsp_read_header_xml,pawpsp_read_pawheader,pawpsp_wvl,psp10in,psp1in
-!!      psp2in,psp3in,psp5in,psp6in,psp8in,psp9in,psxml2abheader
-!!      test_xml_xmlpaw_upf,timab,upf2abinit,wrtout,wvl_descr_psp_fill
+!!      psp2in,psp3in,psp5in,psp6in,psp8in,psp9in,psp_dump_outputs
+!!      psxml2abheader,test_xml_xmlpaw_upf,timab,upf2abinit,wrtout
+!!      wvl_descr_psp_fill
 !!
 !! SOURCE
 
@@ -288,7 +289,7 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
      lloc = -1
      mmax = -1
      r2well = 0
- 
+     
      write(message,'(a,1x,a3,3x,a)') "-",atmsymb,trim(creator)
      call wrtout(ab_out,message,'COLL')
      call wrtout(std_out,message,'COLL')
@@ -506,8 +507,8 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
 
 #if defined DEV_YP_DEBUG_PSP
      call psp_dump_outputs("DBG",pspcod,psps%lmnmax,psps%lnmax,psps%mpssoang, &
-&      psps%mqgrid_ff,psps%n1xccc,mmax,maxrad,epsatm,qchrg,xcccrc,nctab, &
-&      indlmn,nproj,ekb,ffspl,vlspl,xccc1d)
+&     psps%mqgrid_ff,psps%n1xccc,mmax,maxrad,epsatm,qchrg,xcccrc,nctab, &
+&     indlmn,nproj,ekb,ffspl,vlspl,xccc1d)
 #endif
 
    else if (pspcod==9)then
@@ -520,8 +521,8 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
 
 #if defined DEV_YP_DEBUG_PSP
      call psp_dump_outputs("DBG",pspcod,psps%lmnmax,psps%lnmax,psps%mpssoang, &
-&      psps%mqgrid_ff,psps%n1xccc,mmax,maxrad,epsatm,qchrg,xcccrc,nctab, &
-&      indlmn,nproj,ekb,ffspl,vlspl,xccc1d)
+&     psps%mqgrid_ff,psps%n1xccc,mmax,maxrad,epsatm,qchrg,xcccrc,nctab, &
+&     indlmn,nproj,ekb,ffspl,vlspl,xccc1d)
 #endif
 #else
      write(message,'(2a)')  &

@@ -172,6 +172,7 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsph
          dify=dble(i2)/dble(n2)-xred(2,iatom)
          do i1=n1a,n1b
            ix=mod(i1+ishift*n1,n1)
+
            difx=dble(i1)/dble(n1)-xred(1,iatom)
            rx=difx*rprimd(1,1)+dify*rprimd(1,2)+difz*rprimd(1,3)
            ry=difx*rprimd(2,1)+dify*rprimd(2,2)+difz*rprimd(2,3)

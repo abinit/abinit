@@ -21,7 +21,7 @@
 !! NOTES
 !!
 !! PARENTS
-!!      get_kpt_fullbz,getspinrot,m_ab7_symmetry,symdet
+!!      get_kpt_fullbz,getspinrot,m_ab7_symmetry,m_anaddb_dataset,symdet
 !!
 !! CHILDREN
 !!

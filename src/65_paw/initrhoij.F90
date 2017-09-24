@@ -166,7 +166,7 @@ subroutine initrhoij(cplex,lexexch,lpawu,my_natom,natom,&
      if (nspden_rhoij==2) then
        ratio=half
        if ((spinat(3,iatom)>zero.and.ispden==1).or.&
-&          (spinat(3,iatom)<zero.and.ispden==2)) then
+&       (spinat(3,iatom)<zero.and.ispden==2)) then
          if(abs(zz)>tol12)then
            zratio=two*abs(spinat(3,iatom))/zz
          else

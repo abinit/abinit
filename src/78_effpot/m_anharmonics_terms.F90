@@ -124,6 +124,7 @@ CONTAINS  !=====================================================================
 !!      m_effective_potential
 !!
 !! CHILDREN
+!!      getpbcindexes_supercell,xmpi_sum
 !!
 !! SOURCE
 
@@ -229,6 +230,7 @@ end subroutine anharmonics_terms_init
 !!      m_anharmonics_terms,m_effective_potential
 !!
 !! CHILDREN
+!!      getpbcindexes_supercell,xmpi_sum
 !!
 !! SOURCE
  
@@ -300,6 +302,7 @@ end subroutine anharmonics_terms_free
 !!      m_anharmonics_terms,m_effective_potential
 !!
 !! CHILDREN
+!!      getpbcindexes_supercell,xmpi_sum
 !!
 !! SOURCE
  
@@ -357,6 +360,7 @@ end subroutine anharmonics_terms_freeCoeffs
 !!      m_anharmonics_terms,m_effective_potential
 !!
 !! CHILDREN
+!!      getpbcindexes_supercell,xmpi_sum
 !!
 !! SOURCE
  
@@ -429,6 +433,7 @@ end subroutine anharmonics_terms_setCoeffs
 !!      m_anharmonics_terms,m_effective_potential
 !!
 !! CHILDREN
+!!      getpbcindexes_supercell,xmpi_sum
 !!
 !! SOURCE
  
@@ -487,6 +492,7 @@ end subroutine anharmonics_terms_setElastic3rd
 !!      m_anharmonics_terms,m_effective_potential
 !!
 !! CHILDREN
+!!      getpbcindexes_supercell,xmpi_sum
 !!
 !! SOURCE
  
@@ -546,6 +552,7 @@ end subroutine anharmonics_terms_setElastic4th
 !!      m_anharmonics_terms,m_effective_potential
 !!
 !! CHILDREN
+!!      getpbcindexes_supercell,xmpi_sum
 !!
 !! SOURCE
  
@@ -637,6 +644,7 @@ end subroutine anharmonics_terms_setStrainPhononCoupling
 !!      m_anharmonics_terms,m_effective_potential
 !!
 !! CHILDREN
+!!      getpbcindexes_supercell,xmpi_sum
 !!
 !! SOURCE
  
@@ -718,7 +726,7 @@ end subroutine anharmonics_terms_setElasticDispCoupling
 !!      m_effective_potential
 !!
 !! CHILDREN
-!!      asrq0_free,effective_potential_effpot2ddb,invars9,mkphbs
+!!      getpbcindexes_supercell,xmpi_sum
 !!
 !! SOURCE
 !!
@@ -847,7 +855,7 @@ end subroutine anharmonics_terms_evaluateElastic
 !!      m_effective_potential
 !!
 !! CHILDREN
-!!      asrq0_free,effective_potential_effpot2ddb,invars9,mkphbs
+!!      getpbcindexes_supercell,xmpi_sum
 !!
 !! SOURCE
 
