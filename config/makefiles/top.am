@@ -147,8 +147,7 @@ infos_html:
 	cp -fr tests/v7/Input tmp-infos-$(VERSION)/tests/v7/Input
 	cp -fr tests/v8/Input tmp-infos-$(VERSION)/tests/v8/Input
 	cp -fr tests/vdwxc/Input tmp-infos-$(VERSION)/tests/vdwxc/Input
-	-rm -f tmp-infos-$(VERSION)/features/features.html tmp-infos-$(VERSION)/release_notes/release_notes.html tmp-infos-$(VERSION)/installation_notes/install.html
-	cp -fr tmp-infos-$(VERSION)/features/features_v$(ABINIT_VERSION_MAJOR).$(ABINIT_VERSION_MINOR).html tmp-infos-$(VERSION)/features/features.html
+	-rm -f tmp-infos-$(VERSION)/release_notes/release_notes.html tmp-infos-$(VERSION)/installation_notes/install.html
 	cp -fr tmp-infos-$(VERSION)/release_notes/rel*_v$(ABINIT_VERSION_MAJOR).$(ABINIT_VERSION_MINOR).html tmp-infos-$(VERSION)/release_notes/release_notes.html
 	cp -fr tmp-infos-$(VERSION)/inst*_notes/inst*_v$(ABINIT_VERSION_MAJOR).$(ABINIT_VERSION_MINOR).html tmp-infos-$(VERSION)/install_notes/install.html
 	tar -cvf infos_html-$(VERSION).tar                \
