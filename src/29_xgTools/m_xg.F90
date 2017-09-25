@@ -210,6 +210,10 @@ module m_xg
   public :: xgBlock_zero
   public :: xgBlock_one
   public :: xgBlock_diagonal
+  public :: xgBlock_diagonalOnly
+
+  public :: xgBlock_average
+  public :: xgBlock_deviation
 
   public :: xgBlock_reshape
   public :: xgBlock_print
@@ -2561,6 +2565,124 @@ module m_xg
     end select
 
   end subroutine xgBlock_diagonal
+!!***
+
+!!****f* m_xg/xgBlock_diagonalOnly
+!!
+!! NAME
+!! xgBlock_diagonalOnly
+
+  subroutine xgBlock_diagonalOnly(xgBlock)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'xgBlock_diagonalOnly'
+!End of the abilint section
+
+    type(xgBlock_t) , intent(inout) :: xgBlock
+    type(xg_t) :: diag
+    integer :: i
+
+    if ( xgBlock%rows /= xgBlock%cols) then
+      MSG_ERROR("Bad xgBlock shape")
+    end if
+
+    call xg_init(diag,space(xgBlock),xgBlock%rows,1,xgBlock%spacedim_comm)
+    select case(xgBlock%space)
+    case (SPACE_R,SPACE_CR)
+      !$omp parallel do
+      do i = 1, xgBlock%cols
+        diag%vecR(i,1) = xgBlock%vecR(i,i)
+      end do
+    case (SPACE_C)
+      !$omp parallel do
+      do i = 1, xgBlock%cols
+        diag%vecC(i,1) = xgBlock%vecC(i,i)
+      end do
+    end select
+    call xgBlock_zero(xgBlock)
+    call xgBlock_diagonal(xgBlock,diag%self)
+    call xg_free(diag)
+  end subroutine xgBlock_diagonalOnly
+!!***
+
+!!****f* m_xg/xgBlock_average
+!!
+!! NAME
+!! xgBlock_average
+
+  subroutine xgBlock_average(xgBlock,average)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'xgBlock_average'
+!End of the abilint section
+
+    type(XgBlock_t) , intent(in)  :: xgBlock
+    double precision, intent(out) :: average
+    complex(kind=8) :: averageC
+    integer :: i
+    
+    select case(xgBlock%space)
+    case (SPACE_R,SPACE_CR)
+      average = 0.d0
+      do i = 1, xgBlock%cols
+        average = average + sum(xgBlock%vecR(1:xgBlock%rows,i))
+      end do
+      average = average / dble(xgBlock%cols*xgBlock%rows)
+    case (SPACE_C)
+      averageC = cmplx(0.d0,0.d0)
+      do i = 1, xgBlock%cols
+        averageC = averageC + sum(xgBlock%vecC(1:xgBlock%rows,i))
+      end do
+      averageC = averageC / dble(xgBlock%cols*xgBlock%rows)
+      average = dble(averageC)
+    end select
+
+  end subroutine xgBlock_average
+!!***
+
+!!****f* m_xg/xgBlock_deviation
+!!
+!! NAME
+!! xgBlock_deviation
+
+  subroutine xgBlock_deviation(xgBlock,deviation)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'xgBlock_deviation'
+!End of the abilint section
+
+    type(XgBlock_t) , intent(in)  :: xgBlock
+    double precision, intent(out) :: deviation
+    complex(kind=8) :: deviationC
+    double precision :: average
+    integer :: i 
+
+    call xgBlock_average(xgBlock,average)
+    select case(xgBlock%space)
+    case (SPACE_R,SPACE_CR)
+      deviation = 0.d0
+      do i = 1, xgBlock%cols
+        deviation = deviation + sum((xgBlock%vecR(1:xgBlock%rows,i)-average)*(xgBlock%vecR(1:xgBlock%rows,i)-average))
+      end do
+      deviation = sqrt( deviation / dble(xgBlock%cols*xgBlock%rows) )
+    case (SPACE_C)
+      deviationC = cmplx(0.d0,0.d0)
+      do i = 1, xgBlock%cols
+        deviationC = deviationC + sum((xgBlock%vecC(1:xgBlock%rows,i)-average)*(xgBlock%vecC(1:xgBlock%rows,i)-average))
+      end do
+      deviationC = deviationC / dble(xgBlock%cols*xgBlock%rows)
+      deviation = abs(deviationC)
+    end select
+  end subroutine xgBlock_deviation
 !!***
 
 !!****f* m_xg/xgBlock_print

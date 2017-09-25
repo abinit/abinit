@@ -345,7 +345,7 @@ module m_lobpcg2
     type(xgBlock_t) :: eigenBlock   ! 
     type(xgBlock_t) :: residuBlock
     type(xgBlock_t):: RR_eig ! Will be eigenvaluesXN
-    double precision :: maxResidu, minResidu
+    double precision :: maxResidu, minResidu, average, deviation
     double precision :: prevMaxResidu
     double precision :: dlamch
     integer :: eigResiduMax, eigResiduMin
@@ -454,6 +454,9 @@ module m_lobpcg2
           write(std_out,'(2x,a1,es10.3,a1,es10.3,a,i4,a,i4,a)') &
             "(",minResidu,",",maxResidu, ") for eigen vectors (", &
             eigResiduMin,",",eigResiduMax,")"
+          call xgBlock_average(residuBlock,average)
+          call xgBlock_deviation(residuBlock,deviation)
+          write(std_out,'(a,es21.14,a,es21.14)') "Average : ", average, " +/-", deviation
           if ( maxResidu < lobpcg%tolerance ) then
             write(std_out,*) "Block ", iblock, "converged at iline =", iline
             exit
@@ -475,12 +478,13 @@ module m_lobpcg2
         call timab(tim_ax_bx,2,tsec)
 
         ! B-orthonormalize W, BW
-        !call lobpcg_Borthonormalize(lobpcg,VAR_W,.true.) ! Do rotate AW
+        !call lobpcg_Borthonormalize(lobpcg,VAR_XW,.true.,ierr) ! Do rotate AW
+        !call lobpcg_Borthonormalize(lobpcg,VAR_W,.true.,ierr) ! Do rotate AW
 
         ! DO RR in the correct subspace
         ! if residu starts to be too small, there is an accumulation error in
         ! P with values such as 1e-29 that make the eigenvectors diverge
-        if ( iline == 1 .or. minResidu <= 1e-28) then 
+        if ( iline == 1 .or. minResidu < 1e-27) then 
           ! Do RR on XW to get the eigen vectors
           call lobpcg_Borthonormalize(lobpcg,VAR_XW,.true.,ierr) ! Do rotate AW
           RR_var = VAR_XW
@@ -844,7 +848,12 @@ module m_lobpcg2
     abstol = 0d0 ; if ( present(tolerance) ) abstol = tolerance
 
     call xg_init(subA,space(X),subdim,subdim,lobpcg%spacecom)
-    if ( var /= VAR_X ) call xg_init(subB,space(X),subdim,subdim,lobpcg%spacecom)
+    !call xgBlock_zero(subA%self)
+    if ( var /= VAR_X ) then
+      call xg_init(subB,space(X),subdim,subdim,lobpcg%spacecom)
+      !call xgBlock_zero(subB%self)
+      !call xgBlock_one(subB%self)
+    end if
 
     if ( eigenSolver == EIGENVX .or. eigenSolver == EIGENPVX ) then
       call xg_init(vec,space(x),subdim,blockdim)
@@ -895,13 +904,11 @@ module m_lobpcg2
       end if
     end if
 
-!    ! Compute X*AX subspace matrix
-!    call xgBlock_gemm(X%trans,AX%normal,1.0d0,X,AX,0.d0,subA%self)
-!    ! Sum all MPI contribution
-!
-!    ! Compute X*BX subspace matrix
-!    call xgBlock_gemm(X%trans,BX%normal,1.0d0,X,BX,0.d0,subB%self)
-!    ! Sum all MPI contribution
+    ! Compute X*AX subspace matrix
+    !call xgBlock_gemm(X%trans,AX%normal,1.0d0,X,AX,0.d0,subA%self)
+
+    ! Compute X*BX subspace matrix
+    !call xgBlock_gemm(X%trans,BX%normal,1.0d0,X,BX,0.d0,subB%self)
     !---end 
 
     call timab(tim_hegv,1,tsec)
@@ -983,7 +990,7 @@ module m_lobpcg2
       call xgBlock_gemm(lobpcg%BX%normal,Cwp%normal,1.0d0,lobpcg%BX,Cwp,0.d0,subB%self)
       call xgBlock_copy(subB%self,lobpcg%BX) 
   
-      if ( var /= VAR_X .and. ( var == VAR_XW .or. var == VAR_XWP ) ) then
+      if ( var /= VAR_X ) then
         ! Cost to pay to avoid temporary array in xgemm
         call xgBlock_cshift(vec%self,blockdim,1) ! Bottom 2*blockdim lines are now at the top
         call xgBlock_setBlock(vec%self,Cwp,1,subdim-blockdim,blockdim)

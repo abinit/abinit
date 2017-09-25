@@ -106,13 +106,13 @@
 !!      abihist_free,abihist_init,abimover_fin,abimover_ini,abimover_nullify
 !!      chkdilatmx,crystal_free,crystal_init,dtfil_init_time
 !!      effective_potential_evaluate,erlxconv,fcart2fred,fconv,hist2var
-!!      initylmg,matr3inv,monte_carlo_step,mttk_fin,mttk_ini,prec_simple
-!!      pred_bfgs,pred_delocint,pred_diisrelax,pred_hmc,pred_isokinetic
-!!      pred_isothermal,pred_langevin,pred_lbfgs,pred_lotf,pred_moldyn
-!!      pred_nose,pred_simple,pred_srkna14,pred_steepdesc,pred_velverlet
-!!      pred_verlet,prtxfase,read_md_hist,scfcv_run,status,symmetrize_xred
-!!      var2hist,vel2hist,write_md_hist,wrt_moldyn_netcdf,wrtout,wvl_mkrho
-!!      wvl_wfsinp_reformat,xfh_update,xmpi_barrier,xmpi_isum,xmpi_wait
+!!      initylmg,matr3inv,mttk_fin,mttk_ini,prec_simple,pred_bfgs,pred_delocint
+!!      pred_diisrelax,pred_hmc,pred_isokinetic,pred_isothermal,pred_langevin
+!!      pred_lbfgs,pred_lotf,pred_moldyn,pred_nose,pred_simple,pred_srkna14
+!!      pred_steepdesc,pred_velverlet,pred_verlet,prtxfase,read_md_hist
+!!      scfcv_run,status,symmetrize_xred,var2hist,vel2hist,write_md_hist
+!!      wrt_moldyn_netcdf,wrtout,wvl_mkrho,wvl_wfsinp_reformat,xfh_update
+!!      xmpi_barrier,xmpi_isum,xmpi_wait
 !!
 !! SOURCE
 
@@ -392,7 +392,7 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
  nhisttot=ncycle*ntime;if (scfcv_args%dtset%nctime>0) nhisttot=nhisttot+1
 
 !AM_2017 New version of the hist, we just store the needed history step not all of them...
- if(specs%nhist/=-1) nhisttot = specs%nhist! We don't need to store all the history
+ if(specs%nhist/=-1) nhisttot = specs%nhist ! We don't need to store all the history
  call abihist_init(hist,ab_mover%natom,nhisttot,specs%isVused,specs%isARused)
  call abiforstr_ini(preconforstr,ab_mover%natom)
 
@@ -405,8 +405,8 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
    need_scfcv_cycle = .FALSE.
    if(need_verbose)then
      write(message,'(2a,i2,5a,80a)')&
-&   ch10,'=== [ionmov=',ab_mover%ionmov,'] ',trim(specs%method),' with effective potential',&
-&   ch10,('=',kk=1,80)
+&     ch10,'=== [ionmov=',ab_mover%ionmov,'] ',trim(specs%method),' with effective potential',&
+&     ch10,('=',kk=1,80)
      call wrtout(ab_out,message,'COLL')
      call wrtout(std_out,message,'COLL')
    end if
@@ -509,7 +509,7 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
 !    ### 10. Output for each icycle (and itime)
      if(need_verbose)then
        write(message,fmt)&
-&     ch10,'--- Iteration: (',itime,'/',ntime,') Internal Cycle: (',icycle,'/',ncycle,')',ch10,('-',kk=1,80)
+&       ch10,'--- Iteration: (',itime,'/',ntime,') Internal Cycle: (',icycle,'/',ncycle,')',ch10,('-',kk=1,80)
        call wrtout(ab_out,message,'COLL')
        call wrtout(std_out,message,'COLL')
      end if
@@ -544,12 +544,12 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
      if (need_verbose) then
        if (need_scfcv_cycle) then
          write(message,'(a,3a,33a,44a)')&
-&       ch10,('-',kk=1,3),&
-&       'SELF-CONSISTENT-FIELD CONVERGENCE',('-',kk=1,44)
+&         ch10,('-',kk=1,3),&
+&         'SELF-CONSISTENT-FIELD CONVERGENCE',('-',kk=1,44)
        else
          write(message,'(a,3a,33a,44a)')&
-&       ch10,('-',kk=1,3),&
-&       'EFFECTIVE POTENTIAL CALCULATION',('-',kk=1,44)
+&         ch10,('-',kk=1,3),&
+&         'EFFECTIVE POTENTIAL CALCULATION',('-',kk=1,44)
        end if
        call wrtout(ab_out,message,'COLL')
        call wrtout(std_out,message,'COLL')
@@ -948,7 +948,7 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
 !  ###########################################################
 !  ### 20. End loop itime
 
-  end do ! do itime=1,ntime
+ end do ! do itime=1,ntime
 
  ! Call fconv here if we exited due to wall time limit.
  if (timelimit_exit==1 .and. specs%isFconv) then

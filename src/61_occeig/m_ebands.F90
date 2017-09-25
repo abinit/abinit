@@ -838,9 +838,10 @@ end function ebands_from_dtset
 !!  (only deallocate)
 !!
 !! PARENTS
-!!      bethe_salpeter,dfpt_looppert,eig2tot,elphon,eph,gstate,m_ebands
-!!      m_exc_spectra,m_haydock,m_ioarr,m_iowf,m_shirley,m_sigmaph,m_wfk
-!!      mlwfovlp_qp,nonlinear,optic,outscfcv,respfn,screening,sigma,wfk_analyze
+!!      bethe_salpeter,dfpt_looppert,eig2tot,elphon,eph,fold2Bloch,gstate
+!!      m_ebands,m_exc_spectra,m_haydock,m_ioarr,m_iowf,m_shirley,m_sigmaph
+!!      m_wfk,mlwfovlp_qp,nonlinear,optic,outscfcv,respfn,screening,sigma
+!!      wfk_analyze
 !!
 !! CHILDREN
 !!      alloc_copy,ebands_free,ebands_write,kpath_free,kpath_print,wrtout

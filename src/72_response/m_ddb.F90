@@ -217,7 +217,7 @@ CONTAINS  !===========================================================
 !!  Clean and deallocate types for the ddb_type structure
 !!
 !! PARENTS
-!!      anaddb,dfpt_looppert,dfptnl_doutput,eph,gstate
+!!      anaddb,ddb_interpolate,dfpt_looppert,dfptnl_doutput,eph,gstate
 !!      m_effective_potential_file,m_gruneisen,mblktyp1,mblktyp5,thmeig
 !!
 !! CHILDREN
@@ -335,7 +335,7 @@ end subroutine ddb_copy
 !! OUTPUT
 !!
 !! PARENTS
-!!      dfptnl_doutput,gstate,m_ddb,mblktyp1,mblktyp5,thmeig
+!!      ddb_interpolate,dfptnl_doutput,gstate,m_ddb,mblktyp1,mblktyp5,thmeig
 !!
 !! CHILDREN
 !!
@@ -504,7 +504,8 @@ end subroutine ddb_bcast
 !! iblok= number of the block that corresponds to the specifications
 !!
 !! PARENTS
-!!      anaddb,m_ddb,m_effective_potential_file,m_phonons,thmeig
+!!      anaddb,ddb_interpolate,m_ddb,m_effective_potential_file,m_phonons
+!!      thmeig
 !!
 !! CHILDREN
 !!
@@ -3013,7 +3014,7 @@ end subroutine asrq0_apply
 !!   Free dynamic memory
 !!
 !! PARENTS
-!!      anaddb,m_effective_potential,m_effective_potential_file
+!!      anaddb,m_effective_potential_file
 !!
 !! CHILDREN
 !!
@@ -3101,7 +3102,7 @@ end subroutine asrq0_free
 !! only executed by one processor.
 !!
 !! PARENTS
-!!      dfptnl_doutput,gstate,mblktyp1,mblktyp5
+!!      ddb_interpolate,dfptnl_doutput,gstate,mblktyp1,mblktyp5
 !!
 !! CHILDREN
 !!

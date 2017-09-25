@@ -70,11 +70,10 @@
 !!      respfn
 !!
 !! CHILDREN
-!!      crystal_free,crystal_init,distrb2,ebands_free,ebands_init
-!!      eigr2d_free,eigr2d_init,eigr2d_ncwrite,fan_free,fan_init,fan_ncwrite
-!!      gkk_free,gkk_init,gkk_ncwrite,kptfine_av,outbsd,smeared_delta
-!!      ddb_hdr_init, ddb_hdr_free, ddb_hdr_open_write
-!!      timab,xmpi_sum
+!!      crystal_free,crystal_init,ddb_hdr_free,ddb_hdr_init,ddb_hdr_open_write
+!!      distrb2,ebands_free,ebands_init,eigr2d_free,eigr2d_init,eigr2d_ncwrite
+!!      fan_free,fan_init,fan_ncwrite,gkk_free,gkk_init,gkk_ncwrite,kptfine_av
+!!      outbsd,smeared_delta,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -525,7 +524,7 @@ subroutine eig2tot(dtfil,xred,psps,pawtab,natom,bdeigrf,clflg,dim_eig2nkq,eigen0
      unitout = dtfil%unddb
 
      call ddb_hdr_init(ddb_hdr,dtset,psps,pawtab,DDB_VERSION,dscrpt,&
-&                      1,xred=xred,occ=occ_rbz)
+&     1,xred=xred,occ=occ_rbz)
 
      call ddb_hdr_open_write(ddb_hdr, dtfil%fnameabo_eigr2d, unitout)
 
@@ -617,7 +616,7 @@ subroutine eig2tot(dtfil,xred,psps,pawtab,natom,bdeigrf,clflg,dim_eig2nkq,eigen0
        dscrpt=' Note : temporary (transfer) database '
 
        call ddb_hdr_init(ddb_hdr,dtset,psps,pawtab,DDB_VERSION,dscrpt,&
-&                        1,xred=xred,occ=occ_rbz)
+&       1,xred=xred,occ=occ_rbz)
 
        call ddb_hdr_open_write(ddb_hdr, dtfil%fnameabo_eigi2d, unitout)
 

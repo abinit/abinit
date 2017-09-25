@@ -407,8 +407,6 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    ! At least for ucrpa, the Arnaud Alouani is always a better choice but needs a larger cutoff
    if(dtset%ucrpa>0) rhoxsp_method=1 
 
-   !if (Dtset%userie==1) rhoxsp_method=1 ! Arnaud-Alouani
-   !if (Dtset%userie==2) rhoxsp_method=2 ! Shiskin-Kresse
    if (Dtset%pawoptosc /= 0) rhoxsp_method = Dtset%pawoptosc
 
    ABI_MALLOC(gw_gfft,(3,nfftgw_tot))

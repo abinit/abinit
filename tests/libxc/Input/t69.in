@@ -1,6 +1,6 @@
 # CH system, PBE0 and HSE06, interatomic distance optimization
 
- ndtset    3  # Set to 2 or 3 to see the crash 
+ ndtset    3  
 
 #DATASET 1  PBE (the pseudopotentials for C and H are with PBE XC)
 

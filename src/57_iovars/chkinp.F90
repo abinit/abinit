@@ -649,7 +649,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 
      if (maxval(abs(dt%istwfk(1:nkpt))) > 1 .and. mod(dt%gwcalctyp, 100) >= 20) then
        write(msg, "(3a)")"Self-consistent GW with istwfk > 1 not supported.",ch10, &
-         "Please regenerate your WFK file with istwfk *1"
+       "Please regenerate your WFK file with istwfk *1"
        MSG_ERROR_NOSTOP(msg, ierr)
      end if
 !
@@ -1137,8 +1137,8 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
    end if
    if(dt%usepaw>0.and.dt%ixc<0) then
      if (libxc_functionals_is_hybrid()) then
-     message='Meta-GGA functionals are not compatible with PAW!'
-     MSG_ERROR_NOSTOP(message,ierr)
+       message='Meta-GGA functionals are not compatible with PAW!'
+       MSG_ERROR_NOSTOP(message,ierr)
      end if
    end if
    if (dt%usepaw>0.and.(dt%ixc==-427.or.dt%ixc==-428)) then
@@ -1572,8 +1572,8 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
    if (dt%wfoptalg==114) then
      if ( xomp_get_num_threads(.true.) > 1 .and. dt%npfft > 1 ) then
        write(message,'(4a,i4,a,i4,a)') "When compilied with OpenMP, the FFT parallelization is not ",&
-         & "compatible with multiple threads.",ch10,"Please set npfft to 1 (currently npfft=",&
-         & dt%npfft, ") or export OMP_NUM_THREADS=1 (currently ",xomp_get_num_threads(.true.),")"
+&       "compatible with multiple threads.",ch10,"Please set npfft to 1 (currently npfft=",&
+&       dt%npfft, ") or export OMP_NUM_THREADS=1 (currently ",xomp_get_num_threads(.true.),")"
        MSG_ERROR_NOSTOP(message, ierr)
      end if
    end if
@@ -3016,8 +3016,8 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
    call chkint_eq(0,1,cond_string,cond_values,ierr,'vdw_xc',dt%vdw_xc,9,(/0,1,2,5,6,7,10,11,14/),iout)
    if (dt%usepaw==1.and.(.not.(dt%vdw_xc==0.or.dt%vdw_xc==5.or.dt%vdw_xc==6.or.dt%vdw_xc==7))) then
      write(message,'(a,i2,a)')&
-&       'vdw_xc=',dt%vdw_xc,' is not yet available with Projector Augmented-Wave (PAW) formalism!'
-       MSG_ERROR_NOSTOP(message, ierr)
+&     'vdw_xc=',dt%vdw_xc,' is not yet available with Projector Augmented-Wave (PAW) formalism!'
+     MSG_ERROR_NOSTOP(message, ierr)
    end if
 !  vdw DFT-D2
    if (dt%vdw_xc==5.or.dt%vdw_xc==6.or.dt%vdw_xc==7) then

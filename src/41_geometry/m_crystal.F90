@@ -233,8 +233,8 @@ CONTAINS  !=====================================================================
 !!
 !! PARENTS
 !!      dfpt_looppert,eig2tot,gwls_hamiltonian,m_crystal_io,m_ddb
-!!      m_effective_potential,m_effective_potential_file,mover,optic,outddbnc
-!!      outscfcv,vtorho
+!!      m_effective_potential,m_effective_potential_file,mover,optic,outscfcv
+!!      respfn,vtorho
 !!
 !! CHILDREN
 !!      mati3inv,sg_multable
@@ -417,10 +417,11 @@ end subroutine crystal_init
 !!  Destroy the dynamic arrays in a crystal_t data type.
 !!
 !! PARENTS
-!!      anaddb,bethe_salpeter,dfpt_looppert,eig2tot,eph,gstate,gwls_hamiltonian
-!!      m_ddk,m_dvdb,m_effective_potential,m_effective_potential_file
-!!      m_gruneisen,m_ioarr,m_iowf,m_wfd,m_wfk,mlwfovlp_qp,mover,mrgscr,optic
-!!      outddbnc,outscfcv,screening,sigma,vtorho,wfk_analyze
+!!      anaddb,bethe_salpeter,cut3d,dfpt_looppert,eig2tot,eph,fold2Bloch,gstate
+!!      gwls_hamiltonian,m_ddk,m_dvdb,m_effective_potential
+!!      m_effective_potential_file,m_gruneisen,m_ioarr,m_iowf,m_wfd,m_wfk
+!!      mlwfovlp_qp,mover,mrgscr,optic,outscfcv,respfn,screening,sigma,vtorho
+!!      wfk_analyze
 !!
 !! CHILDREN
 !!      mati3inv,sg_multable
@@ -526,8 +527,8 @@ end subroutine crystal_free
 !!  Only printing
 !!
 !! PARENTS
-!!      eph,gwls_hamiltonian,m_dvdb,m_effective_potential,m_gruneisen,setup_bse
-!!      setup_screening,setup_sigma,wfk_analyze
+!!      eph,gwls_hamiltonian,m_dvdb,m_gruneisen,setup_bse,setup_screening
+!!      setup_sigma,wfk_analyze
 !!
 !! CHILDREN
 !!      mati3inv,sg_multable
@@ -698,10 +699,10 @@ end subroutine print_symmetries
 !! symbols = array with the symbol of each atoms
 !!
 !! PARENTS
-!!      m_effective_potential_file
+!!      m_effective_potential_file,m_fit_polynomial_coeff
 !!
 !! CHILDREN
-!!      isfile,wrtout
+!!      mati3inv,sg_multable
 !!
 !! SOURCE
 
