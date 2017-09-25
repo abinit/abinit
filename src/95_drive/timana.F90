@@ -1379,7 +1379,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
 
    write(ount,'(a,t35,a,t43,a,t51,a,t60,a,t66,a,t82,a,3x,a7,1x,a10)')&
 &   '- routine        ','cpu','%','wall','%', ' number of calls ',' Gflops ', &
-    'Speedup', 'Efficacity'
+   'Speedup', 'Efficacity'
    write(ount,'(a,t35,a,t43,a,t51,a,t60,a,t66,a,t78,a)')&
 &   '-                ','   ',' ','    ',' ','  (-1=no count)'
 

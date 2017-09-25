@@ -337,7 +337,8 @@ contains  !=====================================================
 !!      m_phgamma
 !!
 !! CHILDREN
-!!      a2fw_free,a2fw_init,a2fw_write,cg_rotate,cwtime,ddk_read_fsvelocities
+!!      a2fw_free,a2fw_init,a2fw_tr_free,a2fw_tr_init,a2fw_tr_write,a2fw_write
+!!      cg_rotate,cwtime,ddk_fs_average_veloc,ddk_read_fsvelocities
 !!      destroy_hamiltonian,destroy_rf_hamiltonian,dotprod_g,dvdb_ftinterp_qpt
 !!      dvdb_ftinterp_setup,dvdb_open_read,dvdb_readsym_allv1,fstab_free
 !!      fstab_init,fstab_print,fstab_weights_ibz,gam_mult_displ,get_kg,getgh1c
@@ -445,7 +446,8 @@ end subroutine phgamma_free
 !!      m_phgamma
 !!
 !! CHILDREN
-!!      a2fw_free,a2fw_init,a2fw_write,cg_rotate,cwtime,ddk_read_fsvelocities
+!!      a2fw_free,a2fw_init,a2fw_tr_free,a2fw_tr_init,a2fw_tr_write,a2fw_write
+!!      cg_rotate,cwtime,ddk_fs_average_veloc,ddk_read_fsvelocities
 !!      destroy_hamiltonian,destroy_rf_hamiltonian,dotprod_g,dvdb_ftinterp_qpt
 !!      dvdb_ftinterp_setup,dvdb_open_read,dvdb_readsym_allv1,fstab_free
 !!      fstab_init,fstab_print,fstab_weights_ibz,gam_mult_displ,get_kg,getgh1c
@@ -555,7 +557,8 @@ end subroutine phgamma_init
 !!      m_phgamma
 !!
 !! CHILDREN
-!!      a2fw_free,a2fw_init,a2fw_write,cg_rotate,cwtime,ddk_read_fsvelocities
+!!      a2fw_free,a2fw_init,a2fw_tr_free,a2fw_tr_init,a2fw_tr_write,a2fw_write
+!!      cg_rotate,cwtime,ddk_fs_average_veloc,ddk_read_fsvelocities
 !!      destroy_hamiltonian,destroy_rf_hamiltonian,dotprod_g,dvdb_ftinterp_qpt
 !!      dvdb_ftinterp_setup,dvdb_open_read,dvdb_readsym_allv1,fstab_free
 !!      fstab_init,fstab_print,fstab_weights_ibz,gam_mult_displ,get_kg,getgh1c
@@ -664,7 +667,8 @@ end subroutine phgamma_finalize
 !!      m_phgamma
 !!
 !! CHILDREN
-!!      a2fw_free,a2fw_init,a2fw_write,cg_rotate,cwtime,ddk_read_fsvelocities
+!!      a2fw_free,a2fw_init,a2fw_tr_free,a2fw_tr_init,a2fw_tr_write,a2fw_write
+!!      cg_rotate,cwtime,ddk_fs_average_veloc,ddk_read_fsvelocities
 !!      destroy_hamiltonian,destroy_rf_hamiltonian,dotprod_g,dvdb_ftinterp_qpt
 !!      dvdb_ftinterp_setup,dvdb_open_read,dvdb_readsym_allv1,fstab_free
 !!      fstab_init,fstab_print,fstab_weights_ibz,gam_mult_displ,get_kg,getgh1c
@@ -761,7 +765,8 @@ end subroutine tgamma_symm
 !!      m_phgamma
 !!
 !! CHILDREN
-!!      a2fw_free,a2fw_init,a2fw_write,cg_rotate,cwtime,ddk_read_fsvelocities
+!!      a2fw_free,a2fw_init,a2fw_tr_free,a2fw_tr_init,a2fw_tr_write,a2fw_write
+!!      cg_rotate,cwtime,ddk_fs_average_veloc,ddk_read_fsvelocities
 !!      destroy_hamiltonian,destroy_rf_hamiltonian,dotprod_g,dvdb_ftinterp_qpt
 !!      dvdb_ftinterp_setup,dvdb_open_read,dvdb_readsym_allv1,fstab_free
 !!      fstab_init,fstab_print,fstab_weights_ibz,gam_mult_displ,get_kg,getgh1c
@@ -902,7 +907,8 @@ end subroutine phgamma_eval_qibz
 !!      m_phgamma
 !!
 !! CHILDREN
-!!      a2fw_free,a2fw_init,a2fw_write,cg_rotate,cwtime,ddk_read_fsvelocities
+!!      a2fw_free,a2fw_init,a2fw_tr_free,a2fw_tr_init,a2fw_tr_write,a2fw_write
+!!      cg_rotate,cwtime,ddk_fs_average_veloc,ddk_read_fsvelocities
 !!      destroy_hamiltonian,destroy_rf_hamiltonian,dotprod_g,dvdb_ftinterp_qpt
 !!      dvdb_ftinterp_setup,dvdb_open_read,dvdb_readsym_allv1,fstab_free
 !!      fstab_init,fstab_print,fstab_weights_ibz,gam_mult_displ,get_kg,getgh1c
@@ -1058,7 +1064,8 @@ end subroutine phgamma_interp
 !!      m_phgamma
 !!
 !! CHILDREN
-!!      a2fw_free,a2fw_init,a2fw_write,cg_rotate,cwtime,ddk_read_fsvelocities
+!!      a2fw_free,a2fw_init,a2fw_tr_free,a2fw_tr_init,a2fw_tr_write,a2fw_write
+!!      cg_rotate,cwtime,ddk_fs_average_veloc,ddk_read_fsvelocities
 !!      destroy_hamiltonian,destroy_rf_hamiltonian,dotprod_g,dvdb_ftinterp_qpt
 !!      dvdb_ftinterp_setup,dvdb_open_read,dvdb_readsym_allv1,fstab_free
 !!      fstab_init,fstab_print,fstab_weights_ibz,gam_mult_displ,get_kg,getgh1c
@@ -1243,7 +1250,8 @@ end subroutine phgamma_interp_setup
 !!      m_phgamma
 !!
 !! CHILDREN
-!!      a2fw_free,a2fw_init,a2fw_write,cg_rotate,cwtime,ddk_read_fsvelocities
+!!      a2fw_free,a2fw_init,a2fw_tr_free,a2fw_tr_init,a2fw_tr_write,a2fw_write
+!!      cg_rotate,cwtime,ddk_fs_average_veloc,ddk_read_fsvelocities
 !!      destroy_hamiltonian,destroy_rf_hamiltonian,dotprod_g,dvdb_ftinterp_qpt
 !!      dvdb_ftinterp_setup,dvdb_open_read,dvdb_readsym_allv1,fstab_free
 !!      fstab_init,fstab_print,fstab_weights_ibz,gam_mult_displ,get_kg,getgh1c
@@ -1658,7 +1666,8 @@ end subroutine phgamma_vv_interp
 !!      m_phgamma
 !!
 !! CHILDREN
-!!      a2fw_free,a2fw_init,a2fw_write,cg_rotate,cwtime,ddk_read_fsvelocities
+!!      a2fw_free,a2fw_init,a2fw_tr_free,a2fw_tr_init,a2fw_tr_write,a2fw_write
+!!      cg_rotate,cwtime,ddk_fs_average_veloc,ddk_read_fsvelocities
 !!      destroy_hamiltonian,destroy_rf_hamiltonian,dotprod_g,dvdb_ftinterp_qpt
 !!      dvdb_ftinterp_setup,dvdb_open_read,dvdb_readsym_allv1,fstab_free
 !!      fstab_init,fstab_print,fstab_weights_ibz,gam_mult_displ,get_kg,getgh1c
@@ -1874,7 +1883,8 @@ end subroutine phgamma_vv_interp_setup
 !!      m_phgamma
 !!
 !! CHILDREN
-!!      a2fw_free,a2fw_init,a2fw_write,cg_rotate,cwtime,ddk_read_fsvelocities
+!!      a2fw_free,a2fw_init,a2fw_tr_free,a2fw_tr_init,a2fw_tr_write,a2fw_write
+!!      cg_rotate,cwtime,ddk_fs_average_veloc,ddk_read_fsvelocities
 !!      destroy_hamiltonian,destroy_rf_hamiltonian,dotprod_g,dvdb_ftinterp_qpt
 !!      dvdb_ftinterp_setup,dvdb_open_read,dvdb_readsym_allv1,fstab_free
 !!      fstab_init,fstab_print,fstab_weights_ibz,gam_mult_displ,get_kg,getgh1c
@@ -2090,7 +2100,8 @@ end subroutine phgamma_linwid
 !!      m_phgamma
 !!
 !! CHILDREN
-!!      a2fw_free,a2fw_init,a2fw_write,cg_rotate,cwtime,ddk_read_fsvelocities
+!!      a2fw_free,a2fw_init,a2fw_tr_free,a2fw_tr_init,a2fw_tr_write,a2fw_write
+!!      cg_rotate,cwtime,ddk_fs_average_veloc,ddk_read_fsvelocities
 !!      destroy_hamiltonian,destroy_rf_hamiltonian,dotprod_g,dvdb_ftinterp_qpt
 !!      dvdb_ftinterp_setup,dvdb_open_read,dvdb_readsym_allv1,fstab_free
 !!      fstab_init,fstab_print,fstab_weights_ibz,gam_mult_displ,get_kg,getgh1c
@@ -2176,7 +2187,8 @@ end subroutine a2fw_free
 !!      m_phgamma
 !!
 !! CHILDREN
-!!      a2fw_free,a2fw_init,a2fw_write,cg_rotate,cwtime,ddk_read_fsvelocities
+!!      a2fw_free,a2fw_init,a2fw_tr_free,a2fw_tr_init,a2fw_tr_write,a2fw_write
+!!      cg_rotate,cwtime,ddk_fs_average_veloc,ddk_read_fsvelocities
 !!      destroy_hamiltonian,destroy_rf_hamiltonian,dotprod_g,dvdb_ftinterp_qpt
 !!      dvdb_ftinterp_setup,dvdb_open_read,dvdb_readsym_allv1,fstab_free
 !!      fstab_init,fstab_print,fstab_weights_ibz,gam_mult_displ,get_kg,getgh1c
@@ -2805,7 +2817,8 @@ end function a2fw_lambda_wij
 !!      m_phgamma
 !!
 !! CHILDREN
-!!      a2fw_free,a2fw_init,a2fw_write,cg_rotate,cwtime,ddk_read_fsvelocities
+!!      a2fw_free,a2fw_init,a2fw_tr_free,a2fw_tr_init,a2fw_tr_write,a2fw_write
+!!      cg_rotate,cwtime,ddk_fs_average_veloc,ddk_read_fsvelocities
 !!      destroy_hamiltonian,destroy_rf_hamiltonian,dotprod_g,dvdb_ftinterp_qpt
 !!      dvdb_ftinterp_setup,dvdb_open_read,dvdb_readsym_allv1,fstab_free
 !!      fstab_init,fstab_print,fstab_weights_ibz,gam_mult_displ,get_kg,getgh1c
@@ -2953,7 +2966,8 @@ end subroutine a2fw_write
 !! PARENTS
 !!
 !! CHILDREN
-!!      a2fw_free,a2fw_init,a2fw_write,cg_rotate,cwtime,ddk_read_fsvelocities
+!!      a2fw_free,a2fw_init,a2fw_tr_free,a2fw_tr_init,a2fw_tr_write,a2fw_write
+!!      cg_rotate,cwtime,ddk_fs_average_veloc,ddk_read_fsvelocities
 !!      destroy_hamiltonian,destroy_rf_hamiltonian,dotprod_g,dvdb_ftinterp_qpt
 !!      dvdb_ftinterp_setup,dvdb_open_read,dvdb_readsym_allv1,fstab_free
 !!      fstab_init,fstab_print,fstab_weights_ibz,gam_mult_displ,get_kg,getgh1c
@@ -3202,7 +3216,8 @@ end subroutine a2fw_solve_gap
 !!      m_phgamma
 !!
 !! CHILDREN
-!!      a2fw_tr_free,a2fw_init,a2fw_write,cg_rotate,cwtime,ddk_read_fsvelocities
+!!      a2fw_free,a2fw_init,a2fw_tr_free,a2fw_tr_init,a2fw_tr_write,a2fw_write
+!!      cg_rotate,cwtime,ddk_fs_average_veloc,ddk_read_fsvelocities
 !!      destroy_hamiltonian,destroy_rf_hamiltonian,dotprod_g,dvdb_ftinterp_qpt
 !!      dvdb_ftinterp_setup,dvdb_open_read,dvdb_readsym_allv1,fstab_free
 !!      fstab_init,fstab_print,fstab_weights_ibz,gam_mult_displ,get_kg,getgh1c
@@ -3294,7 +3309,8 @@ end subroutine a2fw_tr_free
 !!      m_phgamma
 !!
 !! CHILDREN
-!!      a2fw_free,a2fw_init,a2fw_write,cg_rotate,cwtime,ddk_read_fsvelocities
+!!      a2fw_free,a2fw_init,a2fw_tr_free,a2fw_tr_init,a2fw_tr_write,a2fw_write
+!!      cg_rotate,cwtime,ddk_fs_average_veloc,ddk_read_fsvelocities
 !!      destroy_hamiltonian,destroy_rf_hamiltonian,dotprod_g,dvdb_ftinterp_qpt
 !!      dvdb_ftinterp_setup,dvdb_open_read,dvdb_readsym_allv1,fstab_free
 !!      fstab_init,fstab_print,fstab_weights_ibz,gam_mult_displ,get_kg,getgh1c
@@ -3669,7 +3685,8 @@ end subroutine a2fw_tr_init
 !!      m_phgamma
 !!
 !! CHILDREN
-!!      a2fw_free,a2fw_init,a2fw_write,cg_rotate,cwtime,ddk_read_fsvelocities
+!!      a2fw_free,a2fw_init,a2fw_tr_free,a2fw_tr_init,a2fw_tr_write,a2fw_write
+!!      cg_rotate,cwtime,ddk_fs_average_veloc,ddk_read_fsvelocities
 !!      destroy_hamiltonian,destroy_rf_hamiltonian,dotprod_g,dvdb_ftinterp_qpt
 !!      dvdb_ftinterp_setup,dvdb_open_read,dvdb_readsym_allv1,fstab_free
 !!      fstab_init,fstab_print,fstab_weights_ibz,gam_mult_displ,get_kg,getgh1c
@@ -3847,7 +3864,8 @@ end subroutine a2fw_tr_write
 !!      eph
 !!
 !! CHILDREN
-!!      a2fw_free,a2fw_init,a2fw_write,cg_rotate,cwtime,ddk_read_fsvelocities
+!!      a2fw_free,a2fw_init,a2fw_tr_free,a2fw_tr_init,a2fw_tr_write,a2fw_write
+!!      cg_rotate,cwtime,ddk_fs_average_veloc,ddk_read_fsvelocities
 !!      destroy_hamiltonian,destroy_rf_hamiltonian,dotprod_g,dvdb_ftinterp_qpt
 !!      dvdb_ftinterp_setup,dvdb_open_read,dvdb_readsym_allv1,fstab_free
 !!      fstab_init,fstab_print,fstab_weights_ibz,gam_mult_displ,get_kg,getgh1c

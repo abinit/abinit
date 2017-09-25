@@ -66,7 +66,8 @@
 !!      pspatm
 !!
 !! CHILDREN
-!!      cc_derivatives,ps_destroy,psml_reader,psp8lo,psp8nl,spline,wrtout
+!!      nctab_eval_tvalespl,pawrad_free,pawrad_init,ps_destroy
+!!      ps_get_projector_indexes,psml_reader,psp8lo,psp8nl,psp9cc,spline,wrtout
 !!
 !! SOURCE
 
@@ -240,9 +241,9 @@ subroutine psp9in(filpsp,ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
 !  Sum the corresponding occupation of each shell
    chgvps = chgvps + ps_ValenceShellOccupation(psxml, il)
    write(std_out,*)' psp9in : n, l, occupation = ',   &
- &      ps_ValenceShellN(psxml, il),                  &
- &      ps_ValenceShellL(psxml, il),                  &
- &      ps_ValenceShellOccupation(psxml, il)
+&   ps_ValenceShellN(psxml, il),                  &
+&   ps_ValenceShellL(psxml, il),                  &
+&   ps_ValenceShellOccupation(psxml, il)
  end do
 
 !DEBUG
@@ -395,28 +396,28 @@ subroutine psp9in(filpsp,ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
    rmatch = ps_CoreCharge_MatchingRadius(psxml)
    nders  = ps_CoreCharge_NumberOfKeptDerivatives(psxml)
    write (message,'(1X,A,A,5X,A,1X,F8.3,A,5X,A,I8,A)') &
-&    "Reading pseudocore charge",ch10, &
-&    "- matching radius:",rmatch,ch10, &
-&    "- number of continuous derivatives",nders,ch10
+&   "Reading pseudocore charge",ch10, &
+&   "- matching radius:",rmatch,ch10, &
+&   "- number of continuous derivatives",nders,ch10
    call wrtout(std_out,message,'COLL')
 
 !Get core charge function and derivatives, if needed
- if(fchrg>1.0d-15)then
-   call psp9cc(psxml,mmax,n1xccc,rad,rchrg,xccc1d)
+   if(fchrg>1.0d-15)then
+     call psp9cc(psxml,mmax,n1xccc,rad,rchrg,xccc1d)
 !  The core charge function for pspcod=9
 !  becomes zero beyond rchrg. Thus xcccrc must be set
 !  equal to rchrg.
-   xcccrc=rchrg
- else
-   xccc1d(:,:) = zero
-   xcccrc = zero
-   fchrg = zero
-   qchrg = zero
- end if
+     xcccrc=rchrg
+   else
+     xccc1d(:,:) = zero
+     xcccrc = zero
+     fchrg = zero
+     qchrg = zero
+   end if
 
- maxrad = rad(mmax)
+   maxrad = rad(mmax)
 
- endif ! ps_HasCoreCorrections(psxml)
+ end if ! ps_HasCoreCorrections(psxml)
 
 !!   DEBUG
 !    write(std_out,*)' xcccrc = ', xcccrc, rchrg

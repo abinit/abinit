@@ -110,6 +110,8 @@ CONTAINS  !=====================================================================
 !!      m_abi_linalg
 !!
 !! CHILDREN
+!!      elpa_deallocate,elpa_hdl%hermitian_multiply,elpa_hdl%set
+!!      mult_ah_b_complex
 !!
 !! SOURCE
 
@@ -170,6 +172,8 @@ end subroutine elpa_func_init
 !!      m_abi_linalg
 !!
 !! CHILDREN
+!!      elpa_deallocate,elpa_hdl%hermitian_multiply,elpa_hdl%set
+!!      mult_ah_b_complex
 !!
 !! SOURCE
 
@@ -224,6 +228,8 @@ end subroutine elpa_func_uninit
 !!      m_slk
 !!
 !! CHILDREN
+!!      elpa_deallocate,elpa_hdl%hermitian_multiply,elpa_hdl%set
+!!      mult_ah_b_complex
 !!
 !! SOURCE
 
@@ -302,9 +308,10 @@ end subroutine elpa_func_get_communicators
 !!                    Destroyed on exit (upper and lower half).
 !!
 !! PARENTS
-!!      m_slk
 !!
 !! CHILDREN
+!!      elpa_deallocate,elpa_hdl%hermitian_multiply,elpa_hdl%set
+!!      mult_ah_b_complex
 !!
 !! SOURCE
 
@@ -402,9 +409,10 @@ end subroutine elpa_func_solve_evp_1stage_real
 !!                    Destroyed on exit (upper and lower half).
 !!
 !! PARENTS
-!!      m_slk
 !!
 !! CHILDREN
+!!      elpa_deallocate,elpa_hdl%hermitian_multiply,elpa_hdl%set
+!!      mult_ah_b_complex
 !!
 !! SOURCE
 
@@ -495,9 +503,10 @@ end subroutine elpa_func_solve_evp_1stage_complex
 !!                     and the lower triangle is set to 0.
 !!
 !! PARENTS
-!!      m_slk
 !!
 !! CHILDREN
+!!      elpa_deallocate,elpa_hdl%hermitian_multiply,elpa_hdl%set
+!!      mult_ah_b_complex
 !!
 !! SOURCE
 
@@ -583,9 +592,10 @@ end subroutine elpa_func_cholesky_real
 !!                     and the lower triangle is set to 0.
 !!
 !! PARENTS
-!!      m_slk
 !!
 !! CHILDREN
+!!      elpa_deallocate,elpa_hdl%hermitian_multiply,elpa_hdl%set
+!!      mult_ah_b_complex
 !!
 !! SOURCE
 
@@ -671,9 +681,10 @@ end subroutine elpa_func_cholesky_complex
 !!                     The lower triangle is not referenced.
 !!
 !! PARENTS
-!!      m_slk
 !!
 !! CHILDREN
+!!      elpa_deallocate,elpa_hdl%hermitian_multiply,elpa_hdl%set
+!!      mult_ah_b_complex
 !!
 !! SOURCE
 
@@ -760,9 +771,10 @@ end subroutine elpa_func_invert_triangular_real
 !!                     The lower triangle is not referenced.
 !!
 !! PARENTS
-!!      m_slk
 !!
 !! CHILDREN
+!!      elpa_deallocate,elpa_hdl%hermitian_multiply,elpa_hdl%set
+!!      mult_ah_b_complex
 !!
 !! SOURCE
 
@@ -864,9 +876,10 @@ end subroutine elpa_func_invert_triangular_complex
 !!  cc=Matrix C
 !!
 !! PARENTS
-!!      m_slk
 !!
 !! CHILDREN
+!!      elpa_deallocate,elpa_hdl%hermitian_multiply,elpa_hdl%set
+!!      mult_ah_b_complex
 !!
 !! SOURCE
 
@@ -967,9 +980,10 @@ end subroutine elpa_func_hermitian_multiply_real
 !!  cc=Matrix C
 !!
 !! PARENTS
-!!      m_slk
 !!
 !! CHILDREN
+!!      elpa_deallocate,elpa_hdl%hermitian_multiply,elpa_hdl%set
+!!      mult_ah_b_complex
 !!
 !! SOURCE
 

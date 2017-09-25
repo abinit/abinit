@@ -27,9 +27,10 @@
 !!  This routine will be built only if PSML support is enabled.
 !!
 !! PARENTS
-!!      psp8in
+!!      psp9in
 !!
 !! CHILDREN
+!!      dgesv
 !!
 !! SOURCE
 
@@ -109,13 +110,13 @@ subroutine psp9cc(psxml,mmax,n1xccc,rad,rchrg,xccc1d)
 !Calculate 4 first derivatives with 5-point stencil, except borders
  do irad=3,mmax-2
    ff(irad,2) = (-ff(irad+2,1) + 8.0d0*ff(irad+1,1) - &
-&    8.0d0*ff(irad-1,1) + ff(irad-2,1)) * twelvth * dri
+&   8.0d0*ff(irad-1,1) + ff(irad-2,1)) * twelvth * dri
    ff(irad,3) = (-ff(irad+2,1) + 16.0d0*ff(irad+1,1) - 30.0d0*ff(irad,1) + &
-&    16.0d0*ff(irad-1,1) - ff(irad-2,1)) * twelvth * dri * dri
+&   16.0d0*ff(irad-1,1) - ff(irad-2,1)) * twelvth * dri * dri
    ff(irad,4) = (ff(irad+2,1) - 2.0d0*ff(irad+1,1) + &
-&    2.0d0*ff(irad-1,1) - ff(irad-2,1)) * half * dri * dri * dri
+&   2.0d0*ff(irad-1,1) - ff(irad-2,1)) * half * dri * dri * dri
    ff(irad,5) = (ff(irad+2,1) - 4.0d0*ff(irad+1,1) + 6.0d0*ff(irad,1) - &
-&    4.0d0*ff(irad-1,1) + ff(irad-2,1)) * dri * dri * dri * dri
+&   4.0d0*ff(irad-1,1) + ff(irad-2,1)) * dri * dri * dri * dri
  end do
 
 !Add border near zero using polynomial fit
@@ -133,21 +134,21 @@ subroutine psp9cc(psxml,mmax,n1xccc,rad,rchrg,xccc1d)
 
  do irad=1,2
    ff(irad,2) = &
-&    vpoly(2) + 2.0d0*vpoly(3)*rad(irad) + &
-&    3.0d0*vpoly(4)*rad(irad)*rad(irad) + &
-&    4.0d0*vpoly(5)*rad(irad)*rad(irad)*rad(irad) + &
-&    5.0d0*vpoly(6)*rad(irad)*rad(irad)*rad(irad)*rad(irad)
+&   vpoly(2) + 2.0d0*vpoly(3)*rad(irad) + &
+&   3.0d0*vpoly(4)*rad(irad)*rad(irad) + &
+&   4.0d0*vpoly(5)*rad(irad)*rad(irad)*rad(irad) + &
+&   5.0d0*vpoly(6)*rad(irad)*rad(irad)*rad(irad)*rad(irad)
    ff(irad,3) = &
-&    2.0d0*vpoly(3)*rad(irad) + &
-&    6.0d0*vpoly(4)*rad(irad) + &
-&    12.0d0*vpoly(5)*rad(irad)*rad(irad) + &
-&    20.0d0*vpoly(6)*rad(irad)*rad(irad)*rad(irad)
+&   2.0d0*vpoly(3)*rad(irad) + &
+&   6.0d0*vpoly(4)*rad(irad) + &
+&   12.0d0*vpoly(5)*rad(irad)*rad(irad) + &
+&   20.0d0*vpoly(6)*rad(irad)*rad(irad)*rad(irad)
    ff(irad,4) = &
-&    6.0d0*vpoly(4) + &
-&    24.0d0*vpoly(5)*rad(irad) + &
-&    60.0d0*vpoly(6)*rad(irad)*rad(irad)
+&   6.0d0*vpoly(4) + &
+&   24.0d0*vpoly(5)*rad(irad) + &
+&   60.0d0*vpoly(6)*rad(irad)*rad(irad)
    ff(irad,5) = 24.0d0*vpoly(5) + &
-&    120.0d0*vpoly(6)*rad(irad)
+&   120.0d0*vpoly(6)*rad(irad)
  end do
 
 !Make linear approximation for the tail near mmax

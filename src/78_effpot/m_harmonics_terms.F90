@@ -123,6 +123,7 @@ CONTAINS  !=====================================================================
 !!      m_effective_potential
 !!
 !! CHILDREN
+!!      wrtout
 !!
 !! SOURCE
 
@@ -272,6 +273,7 @@ end subroutine harmonics_terms_init
 !!      m_effective_potential,m_harmonics_terms
 !!
 !! CHILDREN
+!!      wrtout
 !!
 !! SOURCE
  
@@ -349,6 +351,7 @@ end subroutine harmonics_terms_free
 !!      m_effective_potential,m_harmonics_terms
 !!
 !! CHILDREN
+!!      wrtout
 !!
 !! SOURCE
  
@@ -415,6 +418,7 @@ end subroutine harmonics_terms_setInternalStrain
 !!      m_effective_potential,m_harmonics_terms
 !!
 !! CHILDREN
+!!      wrtout
 !!
 !! SOURCE
  
@@ -483,6 +487,7 @@ end subroutine harmonics_terms_setEffectiveCharges
 !!      m_effective_potential,m_harmonics_terms
 !!
 !! CHILDREN
+!!      wrtout
 !!
 !! SOURCE
  
@@ -595,10 +600,10 @@ end subroutine harmonics_terms_setDynmat
 !! CHILDREN
 !!
 !! PARENTS
-!!      m_harmonics_terms
+!!      m_effective_potential
 !!
 !! CHILDREN
-!!      asrq0_free,effective_potential_effpot2ddb,invars9,mkphbs
+!!      wrtout
 !!
 !! SOURCE
 
@@ -715,10 +720,10 @@ end subroutine harmonics_terms_evaluateIFC
 !!   strten(6) = contribution to the stress tensor
 !!
 !! PARENTS
-!!      m_harmonics_terms
+!!      m_effective_potential
 !!
 !! CHILDREN
-!!      asrq0_free,effective_potential_effpot2ddb,invars9,mkphbs
+!!      wrtout
 !!
 !! SOURCE
 !!
@@ -801,10 +806,10 @@ end subroutine  harmonics_terms_evaluateElastic
 !! ifc<type(ifc_type)> = interatomic forces constants
 !!
 !! PARENTS
-!!      compute_anharmonics,m_harmonics_terms
+!!      compute_anharmonics,m_effective_potential
 !!
 !! CHILDREN
-!!      asrq0_free,effective_potential_effpot2ddb,invars9,mkphbs
+!!      wrtout
 !!
 !! SOURCE
 

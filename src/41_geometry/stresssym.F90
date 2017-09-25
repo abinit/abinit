@@ -29,7 +29,8 @@
 !! SIDE EFFECTS
 !!
 !! PARENTS
-!!      dfpt_nselt,dfpt_nstpaw,forstrnps,littlegroup_pert,pawgrnl,stress
+!!      dfpt_nselt,dfpt_nstpaw,fock2ACE,forstrnps,littlegroup_pert,pawgrnl
+!!      stress
 !!
 !! CHILDREN
 !!      matr3inv,strconv

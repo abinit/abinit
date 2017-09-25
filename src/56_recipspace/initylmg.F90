@@ -59,8 +59,8 @@
 !!
 !! PARENTS
 !!      debug_tools,dfpt_looppert,dfpt_nstpaw,dfptnl_loop,gstate,ks_ddiago
-!!      m_cut3d,m_pawpwij,m_shirley,m_wfd,mover,partial_dos_fractions,respfn
-!!      scfcv
+!!      m_cut3d,m_pawpwij,m_shirley,m_wfd,mover,nonlop_test
+!!      partial_dos_fractions,respfn,scfcv
 !!
 !! CHILDREN
 !!      plm_coeff

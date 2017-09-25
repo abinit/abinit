@@ -82,23 +82,23 @@
 !!      driver
 !!
 !! CHILDREN
-!!      alloc_hamilt_gpu,atm2fft,check_kxc,chkpawovlp,chkph3,d2frnl,d2sym3
-!!      dealloc_hamilt_gpu,dfpt_dyfro,dfpt_dyout,dfpt_dyxc1
-!!      dfpt_eltfrhar,dfpt_eltfrkin,dfpt_eltfrloc,dfpt_eltfrxc,dfpt_ewald
-!!      dfpt_gatherdy,dfpt_looppert,dfpt_phfrq,dfpt_prtph,ebands_free
-!!      efmasdeg_free_array,efmasfr_free_array,eig2tot,eigen_meandege
-!!      elph2_fanddw,elt_ewald,exit_check,fourdp,getcut,getph,hdr_free,hdr_init
-!!      hdr_update,initrhoij,initylmg,inwffil,irreducible_set_pert,kpgio
-!!      littlegroup_q,mkcore,mklocl,mkrho,newocc,nhatgrid,outddbnc,paw_an_free
-!!      paw_an_init,paw_an_nullify,paw_gencond,paw_ij_free,paw_ij_init
-!!      paw_ij_nullify,pawdenpot,pawdij,pawexpiqr,pawfgr_destroy,pawfgr_init
-!!      pawfgrtab_free,pawfgrtab_init,pawinit,pawmknhat,pawpuxinit
-!!      pawrhoij_alloc,pawrhoij_bcast,pawrhoij_copy,pawrhoij_free
-!!      pawrhoij_nullify,pawtab_get_lsize,prteigrs,pspini,q0dy3_apply
-!!      q0dy3_calc,read_rhor,rhohxc,setsym,setsymrhoij,setup1,status,symdij
-!!      symmetrize_xred,sytens,timab,transgrid,vdw_dftd2,vdw_dftd3,wffclose
-!!      ddb_hdr_init, ddb_hdr_free, ddb_hdr_open_write
-!!      wings3,wrtloctens,wrtout,xmpi_bcast
+!!      alloc_hamilt_gpu,atm2fft,check_kxc,chkpawovlp,chkph3,crystal_free
+!!      crystal_init,d2frnl,d2sym3,ddb_hdr_free,ddb_hdr_init,ddb_hdr_open_write
+!!      dealloc_hamilt_gpu,dfpt_dyfro,dfpt_dyout,dfpt_dyxc1,dfpt_eltfrhar
+!!      dfpt_eltfrkin,dfpt_eltfrloc,dfpt_eltfrxc,dfpt_ewald,dfpt_gatherdy
+!!      dfpt_looppert,dfpt_phfrq,dfpt_prtph,ebands_free,efmasdeg_free_array
+!!      efmasfr_free_array,eig2tot,eigen_meandege,elph2_fanddw,elt_ewald
+!!      exit_check,fourdp,getcut,getph,hdr_free,hdr_init,hdr_update,initrhoij
+!!      initylmg,inwffil,irreducible_set_pert,kpgio,littlegroup_q,matr3inv
+!!      mkcore,mklocl,mkrho,newocc,nhatgrid,outddbnc,paw_an_free,paw_an_init
+!!      paw_an_nullify,paw_gencond,paw_ij_free,paw_ij_init,paw_ij_nullify
+!!      pawdenpot,pawdij,pawexpiqr,pawfgr_destroy,pawfgr_init,pawfgrtab_free
+!!      pawfgrtab_init,pawinit,pawmknhat,pawpuxinit,pawrhoij_alloc
+!!      pawrhoij_bcast,pawrhoij_copy,pawrhoij_free,pawrhoij_nullify
+!!      pawtab_get_lsize,prteigrs,pspini,q0dy3_apply,q0dy3_calc,read_rhor
+!!      rhohxc,setsym,setsymrhoij,setup1,status,symdij,symmetrize_xred,sytens
+!!      timab,transgrid,vdw_dftd2,vdw_dftd3,wffclose,wings3,wrtloctens,wrtout
+!!      xmpi_bcast
 !!
 !! SOURCE
 
@@ -1432,7 +1432,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 
 !  Initialize the header of the DDB file
    call ddb_hdr_init(ddb_hdr,dtset,psps,pawtab,DDB_VERSION,dscrpt,&
-&                    1,xred=xred,occ=occ,ngfft=ngfft)
+&   1,xred=xred,occ=occ,ngfft=ngfft)
 
 !  Open the formatted derivative database file, and write the header
    call status(0,dtfil%filstat,iexit,level,'call ddb_hdr_open_write')
@@ -1455,10 +1455,10 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 #ifdef HAVE_NETCDF
    ! Output dynamical matrix in NetCDF format.
    call crystal_init(dtset%amu_orig(:,1), Crystal, &
-   & dtset%spgroup, dtset%natom, dtset%npsp, psps%ntypat, &
-   & dtset%nsym, rprimd, dtset%typat, xred, dtset%ziontypat, dtset%znucl, 1, &
-   & dtset%nspden==2.and.dtset%nsppol==1, .false., hdr%title, &
-   & dtset%symrel, dtset%tnons, dtset%symafm)
+&   dtset%spgroup, dtset%natom, dtset%npsp, psps%ntypat, &
+&   dtset%nsym, rprimd, dtset%typat, xred, dtset%ziontypat, dtset%znucl, 1, &
+&   dtset%nspden==2.and.dtset%nsppol==1, .false., hdr%title, &
+&   dtset%symrel, dtset%tnons, dtset%symafm)
 
    filename = strcat(dtfil%filnam_ds(4),"_DDB.nc")
 

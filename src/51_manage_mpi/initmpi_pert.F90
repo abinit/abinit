@@ -82,8 +82,11 @@ subroutine initmpi_pert(dtset,mpi_enreg)
      call xmpi_comm_free(mpi_enreg%comm_cell)
    end if
    mpi_enreg%comm_cell=mpi_enreg%comm_world
+
+   ! These values will be properly set in set_pert_comm
    mpi_enreg%me_cell=mpi_enreg%me
    mpi_enreg%nproc_cell=mpi_enreg%nproc
+
    if (mpi_enreg%me>=0) then
      nproc_per_cell=mpi_enreg%nproc/dtset%nppert
      ABI_ALLOCATE(ranks,(dtset%nppert))
@@ -104,6 +107,8 @@ subroutine initmpi_pert(dtset,mpi_enreg)
        mpi_enreg%distrb_pert(irank)=mod(nrank,dtset%nppert)-1
        if (mpi_enreg%distrb_pert(irank)==-1) mpi_enreg%distrb_pert(irank)=dtset%nppert-1
      end do
+     ! Make sure that subrank 0 is working on the last perturbation
+     ! Swap the ranks if necessary
      numproc=mpi_enreg%distrb_pert(npert)
      if(numproc/=0) then
        do irank=1,npert

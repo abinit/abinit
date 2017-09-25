@@ -133,7 +133,8 @@
 !!      ab7_mixing_deallocate,ab7_mixing_new,ab7_mixing_use_disk_cache
 !!      afterscfloop,build_vxc,check_kxc,chkpawovlp,cprj_clean,cprj_paw_alloc
 !!      ctocprj,destroy_distribfft,destroy_mpi_enreg,energies_init,energy
-!!      etotfor,extraprho,fftdatar_write_from_hdr,first_rec,fock_destroy
+!!      etotfor,extraprho,fftdatar_write_from_hdr,first_rec,fock2ace
+!!      fock_ace_destroy,fock_bz_destroy,fock_common_destroy,fock_destroy
 !!      fock_init,fock_updatecwaveocc,fourdp,fresid,getcut,getmpw,getng,getph
 !!      gshgg_mkncwrite,hdr_update,init_distribfft,init_distribfft_seq
 !!      init_metricrec,initmpi_seq,initylmg,int2char4,kpgio,metric,newrho
@@ -1094,32 +1095,34 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
        ! Possibly (re)compute the ACE operator 
        if(fock%fock_common%use_ACE/=0) then
          call fock2ACE(cg,cprj,fock,dtset%istwfk,kg,dtset%kptns,dtset%mband,mcg,mcprj,dtset%mgfft,&
-&          dtset%mkmem,mpi_enreg,psps%mpsang,&
-&          dtset%mpw,dtset%natom,dtset%natom,dtset%nband,dtset%nfft,ngfft,dtset%nkpt,dtset%nloalg,npwarr,dtset%nspden,&
-&          dtset%nspinor,dtset%nsppol,dtset%nsym,dtset%ntypat,occ,dtset%optforces,paw_ij,pawtab,ph1d,psps,rprimd,&
-&          dtset%optstress,fock%fock_common%symrec,dtset%typat,usecprj,dtset%use_gpu_cuda,dtset%wtk,xred,ylm,ylmgr)
+&         dtset%mkmem,mpi_enreg,psps%mpsang,&
+&         dtset%mpw,dtset%natom,dtset%natom,dtset%nband,dtset%nfft,ngfft,dtset%nkpt,dtset%nloalg,npwarr,dtset%nspden,&
+&         dtset%nspinor,dtset%nsppol,dtset%nsym,dtset%ntypat,occ,dtset%optforces,paw_ij,pawtab,ph1d,psps,rprimd,&
+&         dtset%optstress,fock%fock_common%symrec,dtset%typat,usecprj,dtset%use_gpu_cuda,dtset%wtk,xred,ylm,ylmgr)
        end if
 
        !Should place a test on whether there should be the final exit of the istep loop. 
        !This test should use focktoldfe. 
        !This should update the info in fock%fock_common%fock_converged. 
        !For the time being, fock%fock_common%fock_converged=.false. , so the loop end with the maximal value of nstep always,
-       !except when nnsclo_hf==1 (so the Fock operator is always updated) and the Fock operator is directly applied instead of using its ACE version.
-       !This allows to recover the old behaviour, for checkin purposes.
-       if(fock%fock_common%nnsclo_hf==1 .and. dtset%userie==0)then
+       !except when nnsclo_hf==1 (so the Fock operator is always updated), in which case, the usual exit tests (toldfe, tolvrs, etc) 
+       !work fine.
+       !if(fock%fock_common%nnsclo_hf==1 .and. fock%fock_common%use_ACE==0)then
+       if(fock%fock_common%nnsclo_hf==1)then
          fock%fock_common%fock_converged=.TRUE.
-       endif
+       end if
 
        !Depending on fockoptmix, possibly restart the mixing procedure for the potential
        if(mod(dtset%fockoptmix,10)==1)then
          istep_mix=1
-       endif
+       end if
      else
        istep_updatedfock=istep_updatedfock+1
-     endif
+     end if
 
      !Used locally
      hybrid_mixing=fock%fock_common%hybrid_mixing ; hybrid_mixing_sr=fock%fock_common%hybrid_mixing_sr
+
    end if ! usefock
 
 !  Initialize/update data in the electron-positron case

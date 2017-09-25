@@ -588,7 +588,7 @@ end function fstab_findkg0
 !!   wtk(fs%nsig,fs%maxnb)=Weights for FS integration.
 !!
 !! PARENTS
-!!      m_phgamma
+!!      m_ddk,m_phgamma
 !!
 !! CHILDREN
 !!      wrtout
