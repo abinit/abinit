@@ -199,7 +199,7 @@
 !!   for more details about notations please see pdf in /doc/theory/MGGA/
 !!
 !! PARENTS
-!!      calc_vhxc_me,energy,hybrid_corr,m_kxc,nonlinear,nres2vres,odamix,prcref
+!!      calc_vhxc_me,energy,m_kxc,nonlinear,nres2vres,odamix,prcref
 !!      prcref_PMA,respfn,rhotov,scfcv,setvtr,xchybrid_ncpp_cc
 !!
 !! CHILDREN

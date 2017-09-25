@@ -479,7 +479,7 @@ contains
 !!                     XC functionals to initialize
 !!
 !! PARENTS
-!!      calc_vhxc_me,driver,hybrid_corr,m_kxc,m_xc_vdw,rhohxc,xchybrid_ncpp_cc
+!!      calc_vhxc_me,driver,m_kxc,m_xc_vdw,rhohxc,xchybrid_ncpp_cc
 !!
 !! CHILDREN
 !!
@@ -651,7 +651,7 @@ end subroutine libxc_functionals_init
 !!                     XC functionals to initialize
 !!
 !! PARENTS
-!!      calc_vhxc_me,driver,hybrid_corr,m_kxc,m_xc_vdw,rhohxc,xchybrid_ncpp_cc
+!!      calc_vhxc_me,driver,m_kxc,m_xc_vdw,rhohxc,xchybrid_ncpp_cc
 !!
 !! CHILDREN
 !!
