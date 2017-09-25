@@ -1,5 +1,5 @@
 
-.Version 8.5.3 of ABINIT 
+.Version 8.6.0 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
 
 .Copyright (C) 1998-2017 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see http://www.abinit.org .
 
-.Starting date : Fri 22 Sep 2017.
-- ( at 08h53 )
+.Starting date : Sun 24 Sep 2017.
+- ( at 18h37 )
   
 - input  file    -> t52.in
 - output file    -> t52.out
@@ -284,7 +284,7 @@ P          mk1mem6          8
              nqpt6          1
             nstep1        500
             nstep2          9
-            nstep3        500
+            nstep3          9
             nstep4          1
             nstep5          1
             nstep6          1
@@ -438,8 +438,8 @@ P          mk1mem6          8
          ecut(hartree)=      8.000   => boxcut(ratio)=   2.17426
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_develop/tests/Psps_for_tests/14si.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_develop/tests/Psps_for_tests/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_release-8.6.0/tests/Psps_for_tests/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_release-8.6.0/tests/Psps_for_tests/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1149,7 +1149,7 @@ P          mk1mem6          8
              nqpt6          1
             nstep1        500
             nstep2          9
-            nstep3        500
+            nstep3          9
             nstep4          1
             nstep5          1
             nstep6          1
@@ -1343,10 +1343,10 @@ P          mk1mem6          8
 - Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
 - the licence allows the authors to put it on the Web).
 -
-- Proc.   0 individual time (sec): cpu=          2.4  wall=          2.7
+- Proc.   0 individual time (sec): cpu=          2.4  wall=          2.6
 
 ================================================================================
 
  Calculation completed.
 .Delivered  70 WARNINGs and   0 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          2.4  wall=          2.7
++Overall time at end (sec) : cpu=          2.4  wall=          2.6
