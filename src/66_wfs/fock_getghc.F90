@@ -30,7 +30,7 @@
 !!   * all the data for the occupied states (cgocc_bz) are the same as those for the current states (cg)
 !!
 !! PARENTS
-!!      forstrnps,getghc
+!!      fock2ACE,forstrnps,getghc
 !!
 !! CHILDREN
 !!      bare_vqg,dotprod_g,fftpac,fourdp,fourwf,hartre,load_k_hamiltonian
@@ -82,7 +82,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
  type(gs_hamiltonian_type),target,intent(inout) :: gs_ham
 ! Arrays
  type(pawcprj_type),intent(inout) :: cwaveprj(:,:)
- real(dp),intent(inout) :: cwavef(2,gs_ham%npw_k)!,ghc(2,gs_ham%npw_k)
+ real(dp),intent(inout) :: cwavef(:,:)!,ghc(2,gs_ham%npw_k)
  real(dp),intent(inout) :: ghc(:,:)
 
 !Local variables-------------------------------
@@ -217,7 +217,6 @@ type(pseudopotential_type) :: psps
 ! === Get cwavef in real space using FFT ===
 ! ==========================================
  cwavef_r=zero
-
  call fourwf(0,rhodum0,cwavef,rhodum,cwavef_r,gboundf,gboundf,gs_ham%istwf_k,gs_ham%kg_k,gs_ham%kg_k,&
 & mgfftf,mpi_enreg,ndat1,ngfftf,npw,1,n4f,n5f,n6f,0,mpi_enreg%paral_kgb,tim_fourwf0,weight1,weight1,&
 & use_gpu_cuda=gs_ham%use_gpu_cuda)
@@ -413,7 +412,8 @@ type(pseudopotential_type) :: psps
          ABI_ALLOCATE(dijhat_tmp,(cplex_dij*lmn2_size,ndij))
          dijhat_tmp=zero
          call pawdijhat(cplex_fock,cplex_dij,dijhat_tmp,gs_ham%gprimd,iatom,ipert,&
-&         natom,ndij,nfftf,nfftotf,nspden_fock,my_jsppol,fockbz%pawang,fockcommon%pawfgrtab(iatom),&
+!&         natom,ndij,nfftf,nfftotf,nspden_fock,my_jsppol,fockbz%pawang,fockcommon%pawfgrtab(iatom),&
+&         natom,ndij,nfftf,nfftotf,nspden_fock,nspden_fock,fockbz%pawang,fockcommon%pawfgrtab(iatom),&
 &         fockcommon%pawtab(itypat),vfock,qphon,gs_ham%ucvol,gs_ham%xred)
          dijhat(1:cplex_dij*lmn2_size,iatom,:)=dijhat_tmp(1:cplex_dij*lmn2_size,:)
          ABI_DEALLOCATE(dijhat_tmp)
@@ -428,6 +428,7 @@ type(pseudopotential_type) :: psps
        end if
 
 ! Forces calculation
+
        if (fockcommon%optfor.and.(fockcommon%ieigen/=0)) then
          call matr3inv(gs_ham%gprimd,rprimd)
          choice=2; dotr=zero;doti=zero;cpopt=4
@@ -481,7 +482,7 @@ type(pseudopotential_type) :: psps
 &           strout,enl=dijhat,select_k=K_H_KPRIME)
            call dotprod_g(dotr(idir),doti,gs_ham%istwf_k,npw,2,cwavef,strout,mpi_enreg%me_g0,mpi_enreg%comm_fft)
            fockcommon%stress_ikpt(idir,fockcommon%ieigen)=fockcommon%stress_ikpt(idir,fockcommon%ieigen)-&
-&                                                         dotr(idir)*occ*wtk/gs_ham%ucvol
+&           dotr(idir)*occ*wtk/gs_ham%ucvol
          end do
 
        ! second contribution 
@@ -506,7 +507,7 @@ type(pseudopotential_type) :: psps
          fockstr(6)=(str(1,2)+str(2,1))*half
          do idir=1,6
            fockcommon%stress_ikpt(idir,fockcommon%ieigen)=fockcommon%stress_ikpt(idir,fockcommon%ieigen)+&
-&                                                         fockstr(idir)/nfftf*occ*wtk
+&           fockstr(idir)/nfftf*occ*wtk
          end do
 
        ! third contribution
@@ -670,7 +671,6 @@ type(pseudopotential_type) :: psps
  if(fockcommon%usepaw==1.or.fockcommon%optstr) then
    ABI_DEALLOCATE(gboundf)
  end if
-
 
 ! ============================================
 ! === Calculate the contribution to energy ===

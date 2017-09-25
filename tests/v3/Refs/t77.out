@@ -331,7 +331,7 @@ P          mk1mem4         16
     2   0.000   0.000    0   1.6965489        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     0.00000000000000    0.00000000000000    0.00000000000000   rchrg,fchrg,qchrg
- pspatm: epsatm=   43.25917021
+ pspatm : epsatm=   43.25917021
          --- l  ekb(1:nproj) -->
              0   -9.646692   27.266828
              1   -6.938476   21.148499
@@ -347,7 +347,7 @@ P          mk1mem4         16
     1   0.000   0.000    0   1.6491622        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     1.00000000000000    0.95000909444395    0.44408665956870   rchrg,fchrg,qchrg
- pspatm: epsatm=    1.15255884
+ pspatm : epsatm=    1.15255884
          --- l  ekb(1:nproj) -->
              0    7.721978   -1.904542
  pspatm: atomic psp has been read  and splines computed

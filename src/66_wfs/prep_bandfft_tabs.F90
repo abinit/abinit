@@ -22,7 +22,7 @@
 !!  bandfft_kpt tabs (defined in m_bandfft_kpt module)
 !!
 !! PARENTS
-!!      energy,forstrnps,vtorho
+!!      energy,fock2ACE,forstrnps,vtorho
 !!
 !! CHILDREN
 !!      bandfft_kpt_init2,bandfft_kpt_set_ikpt,mkkpg,timab,xmpi_allgatherv

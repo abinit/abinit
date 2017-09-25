@@ -992,6 +992,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'chksymbreak',tread,'INT')
  if(tread==1) dtset%chksymbreak=intarr(1)
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'fockoptmix',tread,'INT')
+ if(tread==1) dtset%fockoptmix=intarr(1)
+
 !Get array
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'getocc',tread,'INT')
  if(tread==1) dtset%getocc=intarr(1)
@@ -2346,7 +2349,10 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
    dtset%tolmxf=tolmxf_
  end if
 
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'tolrde',tread,'DPR')
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'focktoldfe',tread,'DPR')
+ if(tread==1) dtset%toldfe=dprarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'focktoldfe',tread,'DPR')
  if(tread==1) dtset%tolrde=dprarr(1)
 
 !find which tolXXX are defined generically and for this jdtset
@@ -2594,7 +2600,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
 
  nsym=dtset%nsym
  ii=0;if (mod(dtset%wfoptalg,10)==4) ii=2
- if (dtset%ngfft(7)==314) ii=1
+ if ((dtset%ngfft(7)==314).or.(dtset%usefock==1)) ii=1
 
  call inkpts(bravais,dtset%chksymbreak,iout,iscf,dtset%istwfk(1:nkpt),jdtset,&
 & dtset%kpt(:,1:nkpt),kptopt,dtset%kptnrm,dtset%kptrlatt_orig,dtset%kptrlatt,kptrlen,lenstr,nsym,&
@@ -2802,22 +2808,24 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
    if(tread==1) then
      dtset%nbandhf=intarr(1)
    else
-!  First compute the total valence charge
-     zval=0.0_dp
-     do iatom=1,natom
-       zval=zval+dtset%ziontypat(dtset%typat(iatom))
-     end do
-!  Only take into account negative charge, to compute maximum number of bands
-     if(charge > 0.0_dp)charge=0.0_dp
-     zelect=zval-charge
+!!  First compute the total valence charge
+!     zval=0.0_dp
+!     do iatom=1,natom
+!       zval=zval+dtset%ziontypat(dtset%typat(iatom))
+!     end do
+!!  Only take into account negative charge, to compute maximum number of bands
+!     if(charge > 0.0_dp)charge=0.0_dp
+!     zelect=zval-charge
 
-!  Then select the minimum number of bands, and add the required number
-!  Note that this number might be smaller than the one computed
-!  by a slightly different formula in invars1
-     dtset%nbandhf=dtset%nspinor*((ceiling(zelect-1.0d-10)+1)/2)
-     if (occopt>2) dtset%nbandhf=dtset%nbandhf+dtset%nspinor*(ceiling(fband*natom-1.0d-10))
-!  More precisely, nbandhf = default value for nband = the number of occupied bands
-!                                                    + extra bands according to fband
+!!  Then select the minimum number of bands, and add the required number
+!!  Note that this number might be smaller than the one computed
+!!  by a slightly different formula in invars1
+!     dtset%nbandhf=dtset%nspinor*((ceiling(zelect-1.0d-10)+1)/2)
+!
+!     if (occopt>2) dtset%nbandhf=dtset%nbandhf+dtset%nspinor*(ceiling(dtset%fband*natom-1.0d-10))
+!!  More precisely, nbandhf = default value for nband = the number of occupied bands
+!!                                                    + extra bands according to fband
+     dtset%nbandhf=dtset%nband(1)
    end if
 
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nnsclohf',tread,'INT')

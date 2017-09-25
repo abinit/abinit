@@ -104,11 +104,10 @@ CONTAINS  !=====================================================================
 !!
 !! PARENTS
 !!      m_anharmonics_terms,m_effective_potential_file,m_fit_polynomial_coeff
-!!      m_polynomial_coeff
+!!      mover_effpot
 !!
 !! CHILDREN
-!!      polynomial_coeff_getname,polynomial_coeff_init,polynomial_term_free
-!!      polynomial_term_init
+!!      getpbcindexes_supercell,xmpi_sum
 !!
 !! SOURCE
 
@@ -223,11 +222,10 @@ end subroutine polynomial_coeff_init
 !!
 !! PARENTS
 !!      m_anharmonics_terms,m_effective_potential_file,m_fit_polynomial_coeff
-!!      m_polynomial_coeff
+!!      m_polynomial_coeff,mover_effpot
 !!
 !! CHILDREN
-!!      polynomial_coeff_getname,polynomial_coeff_init,polynomial_term_free
-!!      polynomial_term_init
+!!      getpbcindexes_supercell,xmpi_sum
 !!
 !! SOURCE
 
@@ -281,11 +279,10 @@ end subroutine polynomial_coeff_free
 !! polynomial_coeff<type(polynomial_coeff)> = polynomial_coeff datatype
 !!
 !! PARENTS
-!!      m_effective_potential_file
+!!      m_effective_potential_file,mover_effpot
 !!
 !! CHILDREN
-!!      polynomial_coeff_getname,polynomial_coeff_init,polynomial_term_free
-!!      polynomial_term_init
+!!      getpbcindexes_supercell,xmpi_sum
 !!
 !! SOURCE
 
@@ -330,8 +327,10 @@ end subroutine polynomial_coeff_setCoefficient
 !! polynomial_coeff<type(polynomial_coeff)> = polynomial_coeff datatype
 !!
 !! PARENTS
+!!      m_effective_potential_file
 !!
 !! CHILDREN
+!!      getpbcindexes_supercell,xmpi_sum
 !!
 !! SOURCE
 
@@ -381,11 +380,10 @@ end subroutine polynomial_coeff_setName
 !! name = name xof the coefficients
 !!
 !! PARENTS
-!!      m_fit_polynomial_coeff,m_polynomial_coeff
+!!      m_effective_potential_file,m_fit_polynomial_coeff
 !!
 !! CHILDREN
-!!      polynomial_coeff_getname,polynomial_coeff_init,polynomial_term_free
-!!      polynomial_term_init
+!!      getpbcindexes_supercell,xmpi_sum
 !!
 !! SOURCE
 
@@ -416,7 +414,8 @@ subroutine polynomial_coeff_getName(name,natom,polynomial_coeff,symbols,recomput
 !arrays
  integer :: cell_atm1(3),cell_atm2(3)
  character(len=1) :: mutodir(9) = (/"x","y","z","1","2","3","4","5","6"/)
- character(len=1) :: dir,power,powerchar
+ character(len=1) :: dir
+ character(len=2) :: power,powerchar
  character(len=5) :: atm1,atm2
  character(len=100):: atm1_tmp,atm2_tmp
  character(len=200):: text
@@ -526,11 +525,10 @@ end subroutine polynomial_coeff_getName
 !!                              other nodes returns with a completely initialized instance.
 !!
 !! PARENTS
-!!      m_effective_potential_file
+!!      m_effective_potential_file,m_fit_polynomial_coeff
 !!
 !! CHILDREN
-!!      polynomial_coeff_getname,polynomial_coeff_init,polynomial_term_free
-!!      polynomial_term_init
+!!      getpbcindexes_supercell,xmpi_sum
 !!
 !! SOURCE
 
@@ -559,8 +557,6 @@ subroutine polynomial_coeff_broadcast(coefficients, source, comm)
 
  if (xmpi_comm_size(comm) == 1) return
 
- DBG_ENTER("COLL")
-
 ! Free the output
  if (xmpi_comm_rank(comm) /= source) then
    call polynomial_coeff_free(coefficients)
@@ -574,7 +570,7 @@ subroutine polynomial_coeff_broadcast(coefficients, source, comm)
  !Allocate arrays on the other nodes.
   if (xmpi_comm_rank(comm) /= source) then
     ABI_DATATYPE_ALLOCATE(coefficients%terms,(coefficients%nterm))
-    do ii=1,1,coefficients%nterm
+    do ii=1,coefficients%nterm
       call polynomial_term_free(coefficients%terms(ii))
     end do
   end if
@@ -603,7 +599,6 @@ subroutine polynomial_coeff_broadcast(coefficients, source, comm)
       call xmpi_bcast(coefficients%terms(ii)%power, source, comm, ierr)
   end do
 
- DBG_EXIT("COLL")
 
 end subroutine polynomial_coeff_broadcast
 !!***
@@ -624,10 +619,10 @@ end subroutine polynomial_coeff_broadcast
 !!   polynomial_coeff<type(polynomial_coeff)> = polynomial_coeff datatype
 !!
 !! PARENTS
-!!      m_effective_potential_file
+!!      m_fit_polynomial_coeff
 !!
 !! CHILDREN
-!!
+!!      getpbcindexes_supercell,xmpi_sum
 !!
 !! SOURCE
 
@@ -656,7 +651,6 @@ subroutine polynomial_coeff_MPIsend(coefficients, tag, dest, comm)
 ! *************************************************************************
 
  if (xmpi_comm_size(comm) == 1) return
- DBG_ENTER("COLL")
 
   my_rank = xmpi_comm_rank(comm)
 ! Transmit variables
@@ -678,8 +672,6 @@ subroutine polynomial_coeff_MPIsend(coefficients, tag, dest, comm)
       call xmpi_send(coefficients%terms(ii)%power, dest, 9*tag+8, comm, ierr)
   end do
 
- DBG_EXIT("COLL")
-
 end subroutine polynomial_coeff_MPIsend
 !!***
 
@@ -699,9 +691,10 @@ end subroutine polynomial_coeff_MPIsend
 !!   coefficients<type(polynomial_coefficent_type)>=  polynomial_coeff datatype
 !!
 !! PARENTS
-!!      m_effective_potential_file
+!!      m_fit_polynomial_coeff
 !!
 !! CHILDREN
+!!      getpbcindexes_supercell,xmpi_sum
 !!
 !! SOURCE
 
@@ -730,7 +723,6 @@ subroutine polynomial_coeff_MPIrecv(coefficients, tag, source, comm)
 
  if (xmpi_comm_size(comm) == 1) return
 
- DBG_ENTER("COLL")
 
 ! Free the output
   call polynomial_coeff_free(coefficients)
@@ -742,7 +734,7 @@ subroutine polynomial_coeff_MPIrecv(coefficients, tag, source, comm)
  
  !Allocate arrays on the other nodes.
   ABI_DATATYPE_ALLOCATE(coefficients%terms,(coefficients%nterm))
-  do ii=1,1,coefficients%nterm
+  do ii=1,coefficients%nterm
     call polynomial_term_free(coefficients%terms(ii))
   end do
 
@@ -768,8 +760,6 @@ subroutine polynomial_coeff_MPIrecv(coefficients, tag, source, comm)
     call xmpi_recv(coefficients%terms(ii)%cell, source, 9*tag+7, comm, ierr)
     call xmpi_recv(coefficients%terms(ii)%power, source, 9*tag+8, comm, ierr)
   end do
-
- DBG_EXIT("COLL")
 
 end subroutine polynomial_coeff_MPIrecv
 !!***
@@ -800,11 +790,10 @@ end subroutine polynomial_coeff_MPIrecv
 !! OUTPUT
 !!
 !! PARENTS
-!!      m_effective_potential,m_fit_polynomial_coeff
+!!      m_effective_potential,mover_effpot
 !!
 !! CHILDREN
-!!      polynomial_coeff_getname,polynomial_coeff_init,polynomial_term_free
-!!      polynomial_term_init
+!!      getpbcindexes_supercell,xmpi_sum
 !!
 !! SOURCE
 
@@ -980,10 +969,10 @@ end subroutine polynomial_coeff_writeXML
 !!  strten(6) = contribution to the stress tensor
 !!
 !! PARENTS
-!!      m_polynomial_coeff
+!!      m_effective_potential
 !!
 !! CHILDREN
-!!      asrq0_free,effective_potential_effpot2ddb,invars9,mkphbs
+!!      getpbcindexes_supercell,xmpi_sum
 !!
 !! SOURCE
 !!
@@ -1079,14 +1068,14 @@ subroutine polynomial_coeff_evaluate(coefficients,disp,energy,fcart,natom_sc,nat
             cell_atoma1 = coefficients(icoeff)%terms(iterm)%cell(:,1,idisp1)
             if(cell_atoma1(1)/=0.or.cell_atoma1(2)/=0.or.cell_atoma1(3)/=0) then
 !             if the cell is not 0 0 0 we apply PBC:
-              cell_atoma1(1) =  (i1-1) + cell_atoma1(1)
-              cell_atoma1(2) =  (i2-1) + cell_atoma1(2)
-              cell_atoma1(3) =  (i3-1) + cell_atoma1(3)
+              cell_atoma1(1) =  i1 + cell_atoma1(1)
+              cell_atoma1(2) =  i2 + cell_atoma1(2)
+              cell_atoma1(3) =  i3 + cell_atoma1(3)
               call getPBCIndexes_supercell(cell_atoma1(1:3),sc_size(1:3))
 !             index of the first atom (position in the supercell if the cell is not 0 0 0)
-              ia1 = cell_atoma1(1)*sc_size(2)*sc_size(3)*natom_uc+&
-&                   cell_atoma1(2)*sc_size(3)*natom_uc+&
-&                   cell_atoma1(3)*natom_uc+&
+              ia1 = (cell_atoma1(1)-1)*sc_size(2)*sc_size(3)*natom_uc+&
+&                   (cell_atoma1(2)-1)*sc_size(3)*natom_uc+&
+&                   (cell_atoma1(3)-1)*natom_uc+&
 &                   coefficients(icoeff)%terms(iterm)%atindx(1,idisp1)
             else
 !             index of the first atom (position in the supercell if the cell is 0 0 0)
@@ -1096,15 +1085,15 @@ subroutine polynomial_coeff_evaluate(coefficients,disp,energy,fcart,natom_sc,nat
 !           indexes of the cell of the atom b  (with PBC) same as ia1
             cell_atomb1 = coefficients(icoeff)%terms(iterm)%cell(:,2,idisp1)
             if(cell_atomb1(1)/=0.or.cell_atomb1(2)/=0.or.cell_atomb1(3)/=0) then
-              cell_atomb1(1) =  (i1-1) + cell_atomb1(1)
-              cell_atomb1(2) =  (i2-1) + cell_atomb1(2)
-              cell_atomb1(3) =  (i3-1) + cell_atomb1(3)
+              cell_atomb1(1) =  i1 + cell_atomb1(1)
+              cell_atomb1(2) =  i2 + cell_atomb1(2)
+              cell_atomb1(3) =  i3 + cell_atomb1(3)
               call getPBCIndexes_supercell(cell_atomb1(1:3),sc_size(1:3))
 
 !            index of the second atom in the (position in the supercell  if the cell is not 0 0 0) 
-              ib1 = cell_atomb1(1)*sc_size(2)*sc_size(3)*natom_uc+&
-&                   cell_atomb1(2)*sc_size(3)*natom_uc+&
-&                   cell_atomb1(3)*natom_uc+&
+              ib1 = (cell_atomb1(1)-1)*sc_size(2)*sc_size(3)*natom_uc+&
+&                   (cell_atomb1(2)-1)*sc_size(3)*natom_uc+&
+&                   (cell_atomb1(3)-1)*natom_uc+&
 &                   coefficients(icoeff)%terms(iterm)%atindx(2,idisp1)
             else
 !             index of the first atom (position in the supercell if the cell is 0 0 0)
@@ -1145,15 +1134,15 @@ subroutine polynomial_coeff_evaluate(coefficients,disp,energy,fcart,natom_sc,nat
               else
                 cell_atoma2=coefficients(icoeff)%terms(iterm)%cell(:,1,idisp2)
                 if(cell_atoma2(1)/=0.or.cell_atoma2(2)/=0.or.cell_atoma2(3)/=0) then
-                  cell_atoma2(1) =  (i1-1) + cell_atoma2(1)
-                  cell_atoma2(2) =  (i2-1) + cell_atoma2(2)
-                  cell_atoma2(3) =  (i3-1) + cell_atoma2(3)
+                  cell_atoma2(1) =  i1 + cell_atoma2(1)
+                  cell_atoma2(2) =  i2 + cell_atoma2(2)
+                  cell_atoma2(3) =  i3 + cell_atoma2(3)
                   call getPBCIndexes_supercell(cell_atoma2(1:3),sc_size(1:3))
 !                 index of the first atom (position in the supercell and direction)
 !                 if the cell of the atom a is not 0 0 0 (may happen)
-                  ia2 = cell_atoma2(1)*sc_size(2)*sc_size(3)*natom_uc+&
-&                       cell_atoma2(2)*sc_size(3)*natom_uc+&
-&                       cell_atoma2(3)*natom_uc+&
+                  ia2 = (cell_atoma2(1)-1)*sc_size(2)*sc_size(3)*natom_uc+&
+&                       (cell_atoma2(2)-1)*sc_size(3)*natom_uc+&
+&                       (cell_atoma2(3)-1)*natom_uc+&
 &                       coefficients(icoeff)%terms(iterm)%atindx(1,idisp2)
                 else
 !                 index of the first atom (position in the supercell and direction)
@@ -1164,15 +1153,15 @@ subroutine polynomial_coeff_evaluate(coefficients,disp,energy,fcart,natom_sc,nat
 
                 if(cell_atomb2(1)/=0.or.cell_atomb2(2)/=0.or.cell_atomb2(3)/=0) then
 !                 indexes of the cell2 (with PBC)
-                  cell_atomb2(1) =  (i1-1) + cell_atomb2(1)
-                  cell_atomb2(2) =  (i2-1) + cell_atomb2(2)
-                  cell_atomb2(3) =  (i3-1) + cell_atomb2(3)
+                  cell_atomb2(1) =  i1 + cell_atomb2(1)
+                  cell_atomb2(2) =  i2 + cell_atomb2(2)
+                  cell_atomb2(3) =  i3 + cell_atomb2(3)
                   call getPBCIndexes_supercell(cell_atomb2(1:3),sc_size(1:3))
 
 !                 index of the second atom in the (position in the supercell) 
-                  ib2 = cell_atomb2(1)*sc_size(2)*sc_size(3)*natom_uc+&
-&                       cell_atomb2(2)*sc_size(3)*natom_uc+&
-&                       cell_atomb2(3)*natom_uc+&
+                  ib2 = (cell_atomb2(1)-1)*sc_size(2)*sc_size(3)*natom_uc+&
+&                       (cell_atomb2(2)-1)*sc_size(3)*natom_uc+&
+&                       (cell_atomb2(3)-1)*natom_uc+&
 &                       coefficients(icoeff)%terms(iterm)%atindx(2,idisp2)
                 else
                   ib2 = ii + coefficients(icoeff)%terms(iterm)%atindx(2,idisp2)

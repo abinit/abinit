@@ -211,7 +211,7 @@ P           mkmem3          4
   No XC core correction.
   1.024700          amesh (Hamman grid)
  Note: local psp for atom with Z=  2.0
- pspatm: epsatm=   11.14564823
+ pspatm : epsatm=   11.14564823
          --- l  ekb(1:nproj) -->
  pspatm: atomic psp has been read  and splines computed
 

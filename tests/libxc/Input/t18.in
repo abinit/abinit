@@ -1,9 +1,9 @@
 # Bi atom : reference test (very quick) for all LibXC functionals. nstep=1, nline=1.
 # Not accurate, only portability check.
 
-ndtset 18
-jdtset 1  2  3  4  5  6  7  8  9 
-   10 11 12 13 14 15 16    18 19
+ndtset 17
+jdtset 1  2  3  4  5  6  7  8  9
+   10 11 12 13 14 15 16    18
 
 # (S)LDAs X + different correlations
 ixc1  -1022
@@ -30,7 +30,6 @@ ixc16 -106186
 # GGAs : combined XC functionals
 #ixc17  -146  # disabled : was giving NaN on ibm6
 ixc18  -170
-ixc19  -171
 
 
 #Common data
@@ -82,5 +81,5 @@ prteig 0
 #%%   Test functionals from libXC that were untested before ABINIT v6.12 (libxc 1.0.0.1 was used).
 #%%   Spin-polarized case.
 #%%   This is to check the portability for different platform.
-#%%   Extremely quick (nstep=1, nline=1). Less than 20 secs to test 19 functionals ...
+#%%   Extremely quick (nstep=1, nline=1). Less than 5 secs to test 18 functionals ...
 #%%<END TEST_INFO>

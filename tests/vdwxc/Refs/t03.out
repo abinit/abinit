@@ -375,7 +375,7 @@ JP Perdew, K Burke, and M Ernzerhof, Phys. Rev. Lett. 78, 1396(E) (1997)
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm: epsatm=   -0.00883941
+ pspatm : epsatm=   -0.00883941
          --- l  ekb(1:nproj) -->
  pspatm: atomic psp has been read  and splines computed
 

@@ -202,7 +202,7 @@ P           mkmem           1
     6   23    2    1      1113   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
     0.00000000000000    0.00000000000000    0.00000000000000   rchrg,fchrg,qchrg
   1.013085          amesh (Hamman grid)
- pspatm: epsatm=   20.81273898
+ pspatm : epsatm=   20.81273898
          --- l  ekb(1:nproj) -->
              0    3.724826
              2   -2.269272

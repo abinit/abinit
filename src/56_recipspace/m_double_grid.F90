@@ -380,7 +380,7 @@ end subroutine create_indices_coarse
 !!  g0(3) = g-vector obtained
 !!
 !! PARENTS
-!!      m_double_grid,m_interp
+!!      m_bseinterp,m_double_grid
 !!
 !! CHILDREN
 !!
