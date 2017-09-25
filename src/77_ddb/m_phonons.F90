@@ -750,6 +750,7 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,&
  real(dp),allocatable :: dtweightde(:,:),full_eigvec(:,:,:,:,:),full_phfrq(:,:)
  real(dp),allocatable :: kpt_fullbz(:,:),qbz(:,:),qibz(:,:),qshft(:,:),tmp_phfrq(:),tweight(:,:)
  real(dp),allocatable :: wtqibz(:)
+ real(dp), allocatable :: pjdos_tmp(:,:,:)
 
 ! *********************************************************************
 
@@ -802,6 +803,7 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,&
  ABI_MALLOC(PHdos%pjdos_type_int, (nomega,crystal%ntypat))
  ABI_MALLOC(PHdos%pjdos_rc_type, (nomega,3,crystal%ntypat))
  ABI_MALLOC(PHdos%msqd_dos_atom, (nomega,3,3,natom))
+ ABI_CALLOC(pjdos_tmp,(2,3,natom))
 
  ! === Parameters defining the gaussian approximant ===
  if (prtdos==1) then
@@ -970,8 +972,11 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,&
                do iat=1,natom
                  msqd_atom_tmp = zero
                  do idir=1,3
-                   pnorm=eigvec(1,idir,iat,imode)**2+eigvec(2,idir,iat,imode)**2
-                   PHdos%pjdos(io,idir,iat)=PHdos%pjdos(io,idir,iat)+ pnorm*wtqibz(iq_ibz)*gaussval
+                   !pnorm=eigvec(1,idir,iat,imode)**2+eigvec(2,idir,iat,imode)**2
+
+                   pjdos_tmp(:,idir,iat) = eigvec(:,idir,iat,imode)*wtqibz(iq_ibz)*gaussval ! * pnorm
+
+                   !PHdos%pjdos(io,idir,iat)=PHdos%pjdos(io,idir,iat)+ pnorm*wtqibz(iq_ibz)*gaussval
 
                    ! accumulate outer product of displacement vectors
                    do jdir=1,3
@@ -995,6 +1000,9 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,&
                    jat = Crystal%indsym(4,isym,iat)
                    PHdos%msqd_dos_atom(io,:,:,jat) = PHdos%msqd_dos_atom(io,:,:,jat) &
 &                    + matmul( (symcart(:,:,isym)), matmul(msqd_atom_tmp, transpose(symcart(:,:,isym))) )
+
+                   PHdos%pjdos(io,:,jat)=PHdos%pjdos(io,:,jat)+ (matmul(symcart(:,:,isym), pjdos_tmp(1,:,iat)))**2 +&
+&                                                               (matmul(symcart(:,:,isym), pjdos_tmp(2,:,iat)))**2
                  end do
                end do ! iat
              end do ! io
@@ -1052,6 +1060,7 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,&
    ABI_FREE(qbz)
  end do !imesh
  ABI_FREE(ngqpt)
+ ABI_FREE(pjdos_tmp)
 
  if (allocated(PHdos%phdos_int)) then
    ABI_FREE(PHdos%phdos_int)
@@ -1144,6 +1153,7 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,&
 
 ! normalize by nsym : symmetrization is used in all prtdos cases
  PHdos%msqd_dos_atom = PHdos%msqd_dos_atom / Crystal%nsym
+ PHdos%pjdos = PHdos%pjdos / Crystal%nsym
 
  ABI_FREE(qibz)
  ABI_FREE(wtqibz)
