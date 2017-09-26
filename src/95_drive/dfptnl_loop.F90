@@ -424,7 +424,7 @@ subroutine dfptnl_loop(blkflg,cg,cgindex,dtfil,dtset,d3lo,&
                    end if  ! i2pert <= natom
 
                    call status(counter,dtfil%filstat,iexit,level,'call hartre   ')
-                   call hartre(cplex,gmet,gsqcut,0,mpi_enreg,nfft,dtset%ngfft,dtset%paral_kgb,dtset%qptn,rho2g1,vhartr1)
+                   call hartre(cplex,gsqcut,0,mpi_enreg,nfft,dtset%ngfft,dtset%paral_kgb,dtset%qptn,rho2g1,rprimd,vhartr1)
                    option=1
                    call status(counter,dtfil%filstat,iexit,level,'call dfpt_mkvxc   ')
                    call dfpt_mkvxc(cplex,dtset%ixc,kxc,mpi_enreg,nfft,dtset%ngfft,&

@@ -362,7 +362,7 @@ subroutine rhohxc(enxc,gsqcut,izero,kxc,mpi_enreg,nfft,ngfft, &
  add_tfw_=.false.;if (present(add_tfw)) add_tfw_=add_tfw
 
  if(option/=0.and.option/=10)then
-   call hartre(cplex,gmet,gsqcut,izero,mpi_enreg,nfft,ngfft,paral_kgb,qphon,rhog,vhartr)
+   call hartre(cplex,gsqcut,izero,mpi_enreg,nfft,ngfft,paral_kgb,qphon,rhog,rprimd,vhartr)
  end if
 
 !Note : hartre is excluded from the timing

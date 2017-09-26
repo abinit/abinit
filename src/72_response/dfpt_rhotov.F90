@@ -217,7 +217,7 @@
 
 !------ Compute 1st-order Hartree potential (and energy) ----------------------
 
- call hartre(cplex,gmet,gsqcut,0,mpi_enreg,nfft,ngfft,paral_kgb,qphon,rhog1,vhartr1_)
+ call hartre(cplex,gsqcut,0,mpi_enreg,nfft,ngfft,paral_kgb,qphon,rhog1,rprimd,vhartr1_)
 
  if (optene>0) then
    call dotprod_vn(cplex,rhor1,ehart1,doti,nfft,nfftot,1,1,vhartr1_,ucvol)

@@ -25,7 +25,6 @@
 !!
 !! INPUTS
 !!  cplex= if 1, vhartr is REAL, if 2, vhartr is COMPLEX
-!!  gmet(3,3)=metrix tensor in G space in Bohr**-2.
 !!  gsqcut=cutoff value on G**2 for sphere inside fft box.
 !!         (gsqcut=(boxcut**2)*ecut/(2.d0*(Pi**2))
 !!  izero=if 1, unbalanced components of Vhartree(g) are set to zero
@@ -34,6 +33,7 @@
 !!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
 !!  qphon(3)=reduced coordinates for the phonon wavelength (needed if cplex==2).
 !!  rhog(2,nfft)=electron density in G space
+!!  rprimd(3,3)=dimensional primitive translations in real space (bohr)
 !!  divgq0= [optional argument] value of the integration of the Coulomb singularity 4pi\int_BZ 1/q^2 dq
 !!
 !! OUTPUT
@@ -54,7 +54,7 @@
 
 #include "abi_common.h"
 
-subroutine hartre(cplex,gmet,gsqcut,izero,mpi_enreg,nfft,ngfft,paral_kgb,qphon,rhog,vhartr,&
+subroutine hartre(cplex,gsqcut,izero,mpi_enreg,nfft,ngfft,paral_kgb,qphon,rhog,rprimd,vhartr,&
 &  divgq0) ! Optional argument
 
  use defs_basis
@@ -81,7 +81,7 @@ subroutine hartre(cplex,gmet,gsqcut,izero,mpi_enreg,nfft,ngfft,paral_kgb,qphon,r
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: ngfft(18)
- real(dp),intent(in) :: gmet(3,3),qphon(3),rhog(2,nfft)
+ real(dp),intent(in) :: qphon(3),rprimd(3,3),rhog(2,nfft)
  real(dp),intent(in),optional :: divgq0
  real(dp),intent(out) :: vhartr(cplex*nfft)
 
@@ -92,13 +92,13 @@ subroutine hartre(cplex,gmet,gsqcut,izero,mpi_enreg,nfft,ngfft,paral_kgb,qphon,r
  integer :: ig,ig1min,ig1,ig1max,ig2,ig2min,ig2max,ig3,ig3min,ig3max
  integer :: ii,ii1,ing,n1,n2,n3,qeq0,qeq05,me_fft,nproc_fft
  real(dp),parameter :: tolfix=1.000000001e0_dp
- real(dp) :: cutoff,den,gqg2p3,gqgm12,gqgm13,gqgm23,gs,gs2,gs3
+ real(dp) :: cutoff,den,gqg2p3,gqgm12,gqgm13,gqgm23,gs,gs2,gs3,ucvol
  character(len=500) :: message
 !arrays
  integer :: id(3)
  integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:)
  integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
- real(dp) :: tsec(2)
+ real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3),tsec(2)
  real(dp),allocatable :: gq(:,:),work1(:,:)
 
 ! *************************************************************************
@@ -113,6 +113,8 @@ subroutine hartre(cplex,gmet,gsqcut,izero,mpi_enreg,nfft,ngfft,paral_kgb,qphon,r
 &   'but the only value allowed are 1 and 2.'
    MSG_BUG(message)
  end if
+
+ call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
 
  n1=ngfft(1); n2=ngfft(2); n3=ngfft(3)
  nproc_fft = mpi_enreg%nproc_fft; me_fft = mpi_enreg%me_fft

@@ -136,6 +136,7 @@ type(pseudopotential_type) :: psps
 
 !Some constants
  invucvol=1.d0/sqrt(gs_ham%ucvol)
+ call matr3inv(gs_ham%gprimd,rprimd)
  cplex_fock=2;nspden_fock=1
  natom=fockcommon%natom
  nspinor=gs_ham%nspinor
@@ -381,8 +382,8 @@ type(pseudopotential_type) :: psps
 #if 0
 !    rhog_munu=rhog_munu*fockbz%wtk_bz(jkpt)
 
-     call hartre(cplex_fock,gs_ham%gmet,fockcommon%gsqcut,fockcommon%usepaw,mpi_enreg,nfftf,ngfftf,&
-&     mpi_enreg%paral_kgb,qvec_j,rhog_munu,vfock,divgq0=fock%divgq0)
+     call hartre(cplex_fock,fockcommon%gsqcut,fockcommon%usepaw,mpi_enreg,nfftf,ngfftf,&
+&     mpi_enreg%paral_kgb,qvec_j,rhog_munu,rprimd,vfock,divgq0=fock%divgq0)
 
 #else
      do ifft=1,nfftf
@@ -430,7 +431,6 @@ type(pseudopotential_type) :: psps
 ! Forces calculation
 
        if (fockcommon%optfor.and.(fockcommon%ieigen/=0)) then
-         call matr3inv(gs_ham%gprimd,rprimd)
          choice=2; dotr=zero;doti=zero;cpopt=4
          do iatom=1,natom
            do idir=1,3

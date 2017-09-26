@@ -199,7 +199,7 @@ subroutine nres2vres(dtset,gsqcut,izero,kxc,mpi_enreg,my_natom,nfft,ngfft,nhat,&
 
 !  Compute VH(n^res)(r)
    if (dtset%icoulomb == 0) then
-     call hartre(1,gmet,gsqcut,izero,mpi_enreg,nfft,ngfft,dtset%paral_kgb,qq,nresg,vhres)
+     call hartre(1,gsqcut,izero,mpi_enreg,nfft,ngfft,dtset%paral_kgb,qq,nresg,rprimd,vhres)
    else
      comm=mpi_enreg%comm_cell
      nproc=xmpi_comm_size(comm)

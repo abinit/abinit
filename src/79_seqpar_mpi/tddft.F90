@@ -1068,7 +1068,7 @@
 !      &            '   vhartr(1) :,',vhartr(1)
 !      ENDDEBUG
 
-       call hartre(cplex,gmet,gsqcut,0,mpi_enreg,nfftdiel,ngfftdiel,dtset%paral_kgb,qphon,rhog,vhartr)
+       call hartre(cplex,gsqcut,0,mpi_enreg,nfftdiel,ngfftdiel,dtset%paral_kgb,qphon,rhog,rprimd,vhartr)
 
 !      DEBUG
 !      write(message,'(a,i3)')'After Hartree, on proc ',me_loc
