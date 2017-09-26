@@ -226,7 +226,7 @@
  if (optene>0) ehart01=zero
  if(ipert==natom+3 .or. ipert==natom+4) then
    ABI_ALLOCATE(vhartr01,(cplex*nfft))
-   call hartrestr(gmet,gprimd,gsqcut,idir,ipert,mpi_enreg,natom,nfft,ngfft,paral_kgb,rhog,vhartr01)
+   call hartrestr(gsqcut,idir,ipert,mpi_enreg,natom,nfft,ngfft,paral_kgb,rhog,rprimd,vhartr01)
    if (optene>0) then
      call dotprod_vn(cplex,rhor1,ehart01,doti,nfft,nfftot,1,1,vhartr01,ucvol)
      ehart01=two*ehart01
