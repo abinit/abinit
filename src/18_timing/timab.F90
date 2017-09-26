@@ -54,7 +54,7 @@
 !!      green_kernel,gstate,gstateimg,gwls_ComputeCorrelationEnergy
 !!      gwls_DielectricArray,gwls_QR_factorization,gwls_lineqsolver
 !!      gwls_model_polarisability,gwls_polarisability,gwls_sternheimer,hartre
-!!      hartre1,impurity_solve,initberry,initwf,inkpts,invars2,inwffil,listkk
+!!      impurity_solve,initberry,initwf,inkpts,invars2,inwffil,listkk
 !!      lobpcgwf,m_ab7_invars_f90,m_ab7_mixing,m_cgtools,m_dyson_solver
 !!      m_fftcore,m_fftw3,m_fock,m_green,m_haydock,m_hexc,m_invovl,m_iowf
 !!      m_lobpcg,m_lobpcg2,m_lobpcgwf,m_paral_pert,m_sg2002,m_wfutils,m_xg
