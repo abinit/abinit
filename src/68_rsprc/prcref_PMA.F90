@@ -149,6 +149,7 @@
  use m_profiling_abi
  use m_xmpi
  use m_cgtools
+ use m_xcdata
 
  use m_pawtab,   only : pawtab_type
  use m_pawrhoij, only : pawrhoij_type
@@ -208,6 +209,7 @@
  real(dp) :: mixfac_eff,mixfacmag,ucvol,vxcavg
  logical :: computediel
  character(len=500) :: message
+ type(xcdata_type) :: xcdata
 !arrays
  integer :: qprtrb(3)
  integer,allocatable :: indpw_prc(:)
@@ -590,11 +592,13 @@
    option=1
 
 !  to be adjusted for the call to rhohxc
+   call xcdata_init(dtset%intxc,dtset%ixc,&
+&    dtset%nelect,dtset%tphysel,dtset%usekden,dtset%vdw_xc,dtset%xc_tb09_c,dtset%xc_denpos,xcdata)
    nk3xc=1
    ABI_ALLOCATE(work,(0))
-   call rhohxc(dtset,enxc,gsqcut,psps%usepaw,kxc,mpi_enreg,nfft,ngfft,&
-&   work,0,work,0,nkxc,nk3xc,dtset%nspden,n3xccc,option,rhog_wk,rhor_wk,rprimd,strsxc,1,&
-&   vhartr_wk,vxc_wk,vxcavg,xccc3d)
+   call rhohxc(enxc,gsqcut,psps%usepaw,kxc,mpi_enreg,nfft,ngfft,&
+&   work,0,work,0,nkxc,nk3xc,dtset%nspden,n3xccc,option,dtset%paral_kgb,rhog_wk,rhor_wk,rprimd,strsxc,1,&
+&   vhartr_wk,vxc_wk,vxcavg,xccc3d,xcdata)
    ABI_DEALLOCATE(work)
    ABI_DEALLOCATE(xccc3d)
 
