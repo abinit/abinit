@@ -43,16 +43,23 @@ program tdep
 
   use defs_basis
   use m_phonons
-  use m_tdepdos
-  use m_ifc
-  use m_phij,        only : calc_phij_fcoeff, calc_phij_nbcoeff, build_phij, calc_dij
-  use m_xmpi,        only : xmpi_init, xmpi_end
-  use m_latt,        only : make_latt, Lattice_Variables_type
-  use m_sym,         only : make_sym, Symetries_Variables_type
-  use m_readwrite,   only : Aknowledgments, ReadEcho, Input_Variables_type
-  use m_utils,       only : calc_MoorePenrose, MatchIdeal2Average, model
-  use m_qpt,         only : make_qptpath, Qpoints_type
-#ifdef HAVE_NETCDF
+  use m_xmpi,             only : xmpi_init, xmpi_end
+  use m_ifc,              only : ifc_type
+  use m_crystal,          only : crystal_t
+  use m_ddb,              only : ddb_type
+  use m_dynmat,           only : ftifc_r2q, ftifc_q2r, asrif9
+  use m_tdep_abitypes,    only : tdep_init_crystal, tdep_init_ifc, tdep_init_ddb, tdep_write_ifc
+  use m_tdep_psij,        only : tdep_calc_psijfcoeff, tdep_build_psijNNN, tdep_calc_alpha_gamma, tdep_write_gruneisen
+  use m_tdep_phij,        only : tdep_calc_phijfcoeff, tdep_build_phijNN, tdep_calc_dij, tdep_write_dij, &
+&                                Eigen_Variables_type, tdep_init_eigen2nd, tdep_destroy_eigen2nd, tdep_write_yaml
+  use m_tdep_latt,        only : tdep_make_latt, Lattice_Variables_type
+  use m_tdep_sym,         only : tdep_make_sym, Symetries_Variables_type
+  use m_tdep_readwrite,   only : tdep_print_Aknowledgments, tdep_ReadEcho, Input_Variables_type
+  use m_tdep_utils,       only : Coeff_Moore_type, tdep_calc_MoorePenrose, tdep_MatchIdeal2Average, tdep_calc_model
+  use m_tdep_qpt,         only : tdep_make_qptpath, Qpoints_type
+  use m_tdep_phdos,       only : tdep_calc_phdos,tdep_calc_elastic,tdep_calc_thermo
+  use m_tdep_shell,       only : Shell_Variables_type, tdep_init_shell2at, tdep_init_shell3at, tdep_destroy_shell
+#ifdef HAVE_TRIO_NETCDF
   use netcdf
 #endif
 
@@ -64,18 +71,30 @@ program tdep
 
   implicit none
 
-  integer :: natom,jatom,natom_unitcell,nshell,ntotcoeff,ncoeff,iatcell,ishell,stdout
-  integer, allocatable :: bond_ref(:,:,:),shell(:,:)
+  integer :: natom,jatom,natom_unitcell,ntotcoeff,ncoeff,iatcell,nshell_max
+  integer :: order,ishell,stdout,norder,katom,iqpt
   double precision :: U0,DeltaFree_AH2
-  double precision, allocatable :: ucart(:,:,:),proj(:,:,:)
-  double precision, allocatable :: fcoeff(:,:),Phij_coeff(:,:),fcartij(:),Phij_NN(:,:)
-  double precision, allocatable :: distance(:,:,:),Rlatt_cart(:,:,:),Rlatt4dos(:,:,:)
+  double precision, allocatable :: ucart(:,:,:),proj(:,:,:),proj_tmp(:,:,:),Forces_TDEP(:),Fresid(:)
+!FB  double precision, allocatable :: fcoeff(:,:),Phij_coeff(:,:),Forces_MD(:),Phij_NN(:,:)
+  double precision, allocatable :: Phij_coeff(:,:),Forces_MD(:),Phij_NN(:,:)
+  double precision, allocatable :: Psij_coeff(:,:),Psij_NN(:,:,:)
+  double precision, allocatable :: distance(:,:,:),Rlatt_cart(:,:,:),Rlatt4Abi(:,:,:)
+  double precision, allocatable :: omega (:)
+  double precision, allocatable :: dynmat(:,:,:,:,:,:)
+  double precision :: qpt_cart(3)
+  double complex  , allocatable :: dij(:,:),eigenV(:,:)
+  double complex  , allocatable :: Gruneisen(:)
   type(phonon_dos_type) :: PHdos
   type(Input_Variables_type) :: InVar
   type(Lattice_Variables_type) :: Lattice
   type(Symetries_Variables_type) :: Sym
   type(Qpoints_type) :: Qpt
   type(ifc_type) :: Ifc
+  type(ddb_type) :: DDB
+  type(crystal_t) :: Crystal
+  type(Shell_Variables_type) :: Shell2at,Shell3at
+  type(Coeff_Moore_type) :: CoeffMoore
+  type(Eigen_Variables_type) :: Eigen2nd
 
 !==========================================================================================
 !===================== Initialization & Reading  ==========================================
@@ -83,132 +102,211 @@ program tdep
   call xmpi_init()
 
 ! Read input values from the input.in input file
-  call ReadEcho(InVar)
+  call tdep_ReadEcho(InVar)
 
 ! Initialize basic quantities  
   natom         =InVar%natom
   natom_unitcell=InVar%natom_unitcell
   stdout        =InVar%stdout  
+  nshell_max    =500
 
 !==========================================================================================
-!============== Define the ideal lattice and its symetries ================================
+!============== Define the ideal lattice, symmetries and Brillouin zone ===================
 !==========================================================================================
 ! Define all the quantities needed to buid the lattice (rprim*, acell*, brav*...)
-  call make_latt(InVar,Lattice)
+  call tdep_make_latt(InVar,Lattice)
 
-! Compute all the symetries coming from the bravais lattice
-  call make_sym(Invar,Lattice,Sym)
+! Compute all the symmetries coming from the bravais lattice
+  call tdep_make_sym(Invar,Lattice,Sym)
+
+! Initialize the Brillouin zone and compute the q-points path 
+  call tdep_make_qptpath(InVar,Lattice,Qpt)
 
 !==========================================================================================
 !======== 1/ Determine ideal positions and distances ======================================
 !======== 2/ Find the matching between the ideal and average ==============================
 !========   (from the MD simulations) positions. ==========================================
-!======== 3/ Find the symetry operation between the reference and image bonds =============
+!======== 3/ Find the symmetry operation between the reference and image bonds =============
 !======== 4/ Write output quantities needed to visualize the neighbouring distances =======
 !==========================================================================================
-  allocate(Rlatt4dos (3,natom_unitcell,natom))   ; Rlatt4dos (:,:,:)=0.d0
-  allocate(distance(natom,natom,4))              ; distance(:,:,:)=0.d0
-  allocate(Rlatt_cart(3,natom_unitcell,natom))   ; Rlatt_cart(:,:,:)=0.d0
-  allocate(ucart(3,natom,InVar%nstep_remain))    ; ucart(:,:,:)=0.d0
-  allocate(fcartij(3*natom*InVar%nstep_remain))  ; fcartij(:)=0.d0
-  allocate(bond_ref(natom,natom,3))              ; bond_ref(:,:,:)=0
-  call MatchIdeal2Average(bond_ref,distance,fcartij,InVar,Lattice,nshell,Rlatt_cart,Rlatt4dos,Sym,ucart)
+  ABI_MALLOC(Rlatt4Abi ,(3,natom_unitcell,natom))   ; Rlatt4Abi (:,:,:)=0.d0
+  ABI_MALLOC(distance,(natom,natom,4))              ; distance(:,:,:)=0.d0
+  ABI_MALLOC(Rlatt_cart,(3,natom_unitcell,natom))   ; Rlatt_cart(:,:,:)=0.d0
+  ABI_MALLOC(ucart,(3,natom,InVar%nstep))    ; ucart(:,:,:)=0.d0
+  ABI_MALLOC(Forces_MD,(3*natom*InVar%nstep)); Forces_MD(:)=0.d0
+
+  call tdep_MatchIdeal2Average(distance,Forces_MD,InVar,Lattice,Rlatt_cart,Rlatt4Abi,Sym,ucart)
 
 !==========================================================================================
-!========  Find the number of coefficients of the (3x3) Phij for a given shell ============
+!============== Initialize Crystal and DDB ABINIT Datatypes ===============================
 !==========================================================================================
-  write(stdout,*) ' '
-  write(stdout,*) '#############################################################################'
-  write(stdout,*) '################# The symetry operations (connecting the ####################'
-  write(stdout,*) '################# interactions together) have been found. ###################'
-  write(stdout,*) '################ Now, find the number of coefficients for ###################'
-  write(stdout,*) '########################## a reference interaction ##########################'
-  write(stdout,*) '#############################################################################'
-  allocate(shell(nshell,4)); shell(:,:)=0
-  allocate(proj(9,9,nshell)) ; proj(:,:,:)=0.d0
-  write(stdout,*) 'Number of shells=',nshell
-  ntotcoeff=0
-  ishell=0
-  open(unit=16,file='nbcoeff.dat')
-  do iatcell=1,natom_unitcell
-    write(stdout,*) '>>>>>>>>>>>>>>>>>>>>>>>>>  For iatcell=',iatcell
-    ncoeff=0
-    do jatom=1,natom
-      if ((bond_ref(iatcell,jatom,1).ne.iatcell).or.(bond_ref(iatcell,jatom,2).ne.jatom)) cycle
-      ishell=ishell+1
-      write(stdout,*) 'Shell number:',ishell 
-      write(stdout,'(a,i5,a,i5,a,f16.10)') '  Between atom',iatcell,' and ',jatom,' the distance is=',distance(iatcell,jatom,1)
-      call calc_phij_nbcoeff(distance,iatcell,InVar,ishell,jatom,ncoeff,nshell,proj,Sym)
-      shell(ishell,1)=ncoeff
-      shell(ishell,2)=ntotcoeff
-      shell(ishell,3)=iatcell
-      shell(ishell,4)=jatom
-      ntotcoeff=ntotcoeff+ncoeff
-      write(stdout,*)'  ntotcoeff=',ntotcoeff
-      write(stdout,*) '============================================================================'
-    end do !jatom
-  end do !iatcell
-  close(16)
+  call tdep_init_crystal(Crystal,InVar,Lattice,Sym)
+  call tdep_init_ddb(Crystal,DDB,InVar,Lattice)
+
+!#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=
+!#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=
+!#=#=#=#=#=#=#=#=#=#=#=#=#=#=# CALCULATION OF THE 2nd ORDER =#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=
+!#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=
+!#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=
+  order=2
+  norder=3**order
+  write(InVar%stdout,*) ' '
+  write(InVar%stdout,*) '#############################################################################'
+  write(InVar%stdout,*) '############################## SECOND ORDER  ################################'
+  write(InVar%stdout,*) '################ Now, find the number of coefficients for ###################'
+  write(InVar%stdout,*) '########################## a reference interaction ##########################'
+  write(InVar%stdout,*) '#############################################################################'
     
+!==========================================================================================
+!============== Initialize the Shell2at datatype ==========================================
+!==========================================================================================
+  ABI_MALLOC(proj_tmp,(norder,norder,nshell_max)) ; proj_tmp(:,:,:)=0.d0
+  call tdep_init_shell2at(distance,InVar,norder,nshell_max,ntotcoeff,order,proj_tmp,Shell2at,Sym)
+  ABI_MALLOC(proj    ,(norder,norder,Shell2at%nshell)) ; proj(:,:,:)=0.d0
+  proj = reshape (proj_tmp, (/ norder,norder,Shell2at%nshell /)) 
+  ABI_FREE(proj_tmp)
+
+!==========================================================================================
+!============== Initialize the IFC Abinit datatype ========================================
+!==========================================================================================
+  ABI_MALLOC(Phij_NN,(3*natom,3*natom)) ; Phij_NN(:,:)=0.d0
+  call tdep_init_ifc(Crystal,DDB,Ifc,InVar,Lattice,Phij_NN,Rlatt4Abi,Shell2at,Sym)
+
 !==========================================================================================
 !============= Build fcoeff, needed for the Moore-Penrose method just below ===============
 !==========================================================================================
-  allocate(fcoeff(3*natom*InVar%nstep_remain,ntotcoeff)); fcoeff(:,:)=0.d0 
-  call calc_phij_fcoeff(InVar,bond_ref,nshell,ntotcoeff,proj,shell,Sym,ucart,fcoeff)
+  ABI_MALLOC(CoeffMoore%fcoeff,(3*natom*InVar%nstep,ntotcoeff)); CoeffMoore%fcoeff(:,:)=0.d0 
+  if (InVar%ReadIFC.ne.1) call tdep_calc_phijfcoeff(InVar,ntotcoeff,proj,Shell2at,Sym,ucart,CoeffMoore%fcoeff)
 
 !==========================================================================================
 !============= Compute the pseudo inverse using the Moore-Penrose method ==================
 !==========================================================================================
-  allocate(Phij_coeff(ntotcoeff,1)); Phij_coeff(:,:)=0.d0
-  call calc_MoorePenrose(fcartij,fcoeff,InVar,ntotcoeff,Phij_coeff)
-  deallocate(fcoeff)
+  ABI_MALLOC(Phij_coeff,(ntotcoeff,1)); Phij_coeff(:,:)=0.d0
+  if (InVar%ReadIFC.ne.1) call tdep_calc_MoorePenrose(Forces_MD,CoeffMoore,InVar,ntotcoeff,Phij_coeff)
 
 !==========================================================================================
 !============= Reorganize the IFC coefficients into the whole Phij_NN matrix ==============
 !==========================================================================================
-  allocate(Phij_NN(3*natom,         3*natom)) ; Phij_NN(:,:)=0.d0
-  call build_phij(distance,InVar,bond_ref,nshell,ntotcoeff,proj,Phij_coeff,Phij_NN,shell,Sym)
-  deallocate(Phij_coeff)
-  deallocate(bond_ref)
-  deallocate(shell)
-
-!==========================================================================================
-!=========== Compute U_0, the "free energy" and the forces (from the model) ===============
-!==========================================================================================
-  call model(DeltaFree_AH2,fcartij,InVar,Phij_NN,ucart,U0)
-  deallocate(fcartij)
-  deallocate(ucart)
-
-!==========================================================================================
-!===== 1/ Initialize the Brillouin zone and compute the q-points path  Compute  ===========
-!===== 2/ Compute the dynamical matrix ====================================================
-!==========================================================================================
-  call make_qptpath(InVar,Lattice,Qpt)
-  call calc_dij(InVar,Lattice,Phij_NN,Qpt,Rlatt_cart)
-  deallocate(Rlatt_cart)
-
-!==========================================================================================
-!===================== Compute the elastic constants ======================================
-!==========================================================================================
-  call elastic(Phij_NN,distance,InVar,Lattice)
-  deallocate(distance)
+  if (InVar%ReadIFC.ne.1) call tdep_build_phijNN(distance,InVar,ntotcoeff,proj,Phij_coeff,Phij_NN,Shell2at,Sym)
+  ABI_FREE(Phij_coeff)
+  ABI_FREE(proj)
 
 !==========================================================================================
 !===================== Compute the phonons density of states ==============================
 !==========================================================================================
-  call make_phdos(Phij_NN(1:3*natom_unitcell,1:3*natom),Ifc,InVar,Lattice,natom,natom_unitcell,PHdos,Qpt,Rlatt4dos,Sym)
-  deallocate(Rlatt4dos)
-  deallocate(Phij_NN)
+  call tdep_calc_phdos(Crystal,ddb,Ifc,InVar,Lattice,natom,natom_unitcell,Phij_NN,PHdos,Qpt,Rlatt4Abi,Shell2at,Sym)
+  ABI_FREE(Rlatt4Abi)
+  call tdep_destroy_shell(natom,order,Shell2at)
+
+!==========================================================================================
+!============= Compute the dynamical matrix and phonon spectrum ===========================
+!================ then print Dij, omega, eigenvectors =====================================
+!==========================================================================================
+  write(stdout,*)' '
+  write(stdout,*) '#############################################################################'
+  write(stdout,*) '######################## Dynamical matrix ###################################'
+  write(stdout,*) '#############################################################################'
+  open(unit=53,file='omega.dat')
+  open(unit=52,file='dij.dat')
+  open(unit=51,file='eigenvectors.dat')
+  ABI_MALLOC(dij   ,(3*InVar%natom_unitcell,3*InVar%natom_unitcell)) 
+  ABI_MALLOC(eigenV,(3*InVar%natom_unitcell,3*InVar%natom_unitcell)) 
+  ABI_MALLOC(omega,(3*InVar%natom_unitcell))
+  call tdep_init_eigen2nd(Eigen2nd,InVar%natom_unitcell,Qpt%nqpt)
+  do iqpt=1,Qpt%nqpt
+    dij(:,:)=zero ; eigenV(:,:)=zero ; omega(:)=zero
+    qpt_cart(:)=Qpt%qpt_cart(:,iqpt)
+    call tdep_calc_dij (dij,eigenV,iqpt,InVar,Lattice,omega,Phij_NN,qpt_cart,Rlatt_cart)
+    call tdep_write_dij(dij,eigenV,iqpt,InVar,Lattice,omega,qpt_cart)
+    Eigen2nd%eigenval(:,iqpt)=  omega(:)
+    Eigen2nd%eigenvec(:,:,iqpt)=eigenV(:,:)
+  end do  
+  ABI_FREE(dij)
+  ABI_FREE(eigenV)
+  ABI_FREE(omega)
+  close(53)
+  close(52)
+  close(51)
+  call tdep_write_yaml(Eigen2nd,Lattice,Qpt)
+  write(InVar%stdout,'(a)') ' See the dij.dat, omega.dat and eigenvectors files'
+!==========================================================================================
+!===================== Compute the elastic constants ======================================
+!==========================================================================================
+  call tdep_calc_elastic(Phij_NN,distance,InVar,Lattice)
+
+!==========================================================================================
+!=========== Compute U_0, the "free energy" and the forces (from the model) ===============
+!==========================================================================================
+  ABI_MALLOC(Forces_TDEP,(3*InVar%natom*InVar%nstep)); Forces_TDEP(:)=0.d0 
+  call tdep_calc_model(DeltaFree_AH2,distance,Forces_MD,Forces_TDEP,InVar,Phij_NN,ucart,U0) 
 
 !==========================================================================================
 !===================== Compute the thermodynamical quantities =============================
 !==========================================================================================
-  call thermo(DeltaFree_AH2,InVar,PHdos,U0)
+  call tdep_calc_thermo(DeltaFree_AH2,InVar,PHdos,U0)
 
+  if (InVar%Order==2) then
+    call tdep_print_Aknowledgments(InVar)
+    call xmpi_end()
+    stop
+  end if  
+    
+!#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=
+!#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=
+!#=#=#=#=#=#=#=#=#=#=#=#=#=#=# CALCULATION OF THE 3rd ORDER =#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=
+!#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=
+!#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=
+  order=3
+  norder=3**order
+
+!==========================================================================================
+!======== Initialize the Shell3at datatype ================================================
+!==========================================================================================
+  ABI_MALLOC(proj_tmp,(norder,norder,nshell_max)) ; proj_tmp(:,:,:)=0.d0
+  call tdep_init_shell3at(distance,InVar,norder,nshell_max,ntotcoeff,order,proj_tmp,Shell3at,Sym)
+  ABI_MALLOC(proj    ,(norder,norder,Shell3at%nshell)) ; proj(:,:,:)=0.d0
+  proj = reshape (proj_tmp, (/ norder,norder,Shell3at%nshell /)) 
+  ABI_FREE(proj_tmp)
+
+!==========================================================================================
+!============= Build fcoeff, needed for the Moore-Penrose method just below ===============
+!==========================================================================================
+  ABI_MALLOC(CoeffMoore%fcoeff,(3*natom*InVar%nstep,ntotcoeff)); CoeffMoore%fcoeff(:,:)=0.d0 
+  call tdep_calc_psijfcoeff(InVar,ntotcoeff,proj,Shell3at,Sym,ucart,CoeffMoore%fcoeff)
+
+!==========================================================================================
+!============= Compute the pseudo inverse using the Moore-Penrose method ==================
+!==========================================================================================
+  ABI_MALLOC(Psij_coeff,(ntotcoeff,1)); Psij_coeff(:,:)=0.d0
+  ABI_MALLOC(Fresid,(3*InVar%natom*InVar%nstep)); Fresid(:)=0.d0 
+  Fresid(:)=2*(Forces_MD(:)-Forces_TDEP(:))
+  call tdep_calc_MoorePenrose(Fresid,CoeffMoore,InVar,ntotcoeff,Psij_coeff)
+  ABI_FREE(Fresid)
+
+!==========================================================================================
+!============= Reorganize the IFC coefficients into the whole Psij_NN matrix ==============
+!==========================================================================================
+  ABI_MALLOC(Psij_NN,(3*natom,3*natom,3*natom)) ; Psij_NN(:,:,:)=0.d0
+  call tdep_build_psijNNN(distance,InVar,ntotcoeff,proj,Psij_coeff,Psij_NN,Shell3at,Sym)
+  ABI_FREE(Psij_coeff)
+  ABI_FREE(proj)
+  call tdep_write_gruneisen(distance,Eigen2nd,InVar,Lattice,Psij_NN,Qpt,Rlatt_cart,Shell3at)
+  call tdep_calc_alpha_gamma(Crystal,distance,DDB,Ifc,InVar,Lattice,Psij_NN,Rlatt_cart,Shell3at,Sym)
+  stop
+  ABI_FREE(Rlatt_cart)
+  call tdep_destroy_eigen2nd(Eigen2nd)
+  call tdep_destroy_shell(natom,order,Shell3at)
+  call tdep_calc_model(DeltaFree_AH2,distance,Forces_MD,Forces_TDEP,InVar,Phij_NN,ucart,U0,Psij_NN) 
+  ABI_FREE(distance)
+  ABI_FREE(Forces_MD)
+  ABI_FREE(Forces_TDEP)
+  ABI_FREE(Phij_NN)
+  ABI_FREE(Psij_NN)
+  ABI_FREE(ucart)
 !==========================================================================================
 !================= Write the last informations (aknowledgments...)  =======================
 !==========================================================================================
-  call Aknowledgments(InVar)
+  call tdep_print_Aknowledgments(InVar)
   call xmpi_end()
 
 end program tdep

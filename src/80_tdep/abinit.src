@@ -18,13 +18,16 @@ ABI_SRC_DEP = 2     # The file depends on other files
 
 # Source files
 sources = [
- "m_readwrite.F90",
- "m_latt.F90",
- "m_qpt.F90",
- "m_sym.F90",
- "m_tdepdos.F90",
- "m_phij.F90",
- "m_utils.F90",
+ "m_tdep_abitypes.F90",
+ "m_tdep_latt.F90",
+ "m_tdep_phdos.F90",
+ "m_tdep_phij.F90",
+ "m_tdep_psij.F90",
+ "m_tdep_qpt.F90",
+ "m_tdep_readwrite.F90",
+ "m_tdep_shell.F90",
+ "m_tdep_sym.F90",
+ "m_tdep_utils.F90",
 ]
 # IMPORTANT : please use the alphabetic order in the previous list. Do NOT add the new routine names at the end of the list.
 # This is important to avoid numerous conflicts at merge time. Thank you very much. Xavier.
