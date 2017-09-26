@@ -274,7 +274,7 @@ subroutine rhohxc(enxc,gsqcut,izero,kxc,mpi_enreg,nfft,ngfft, &
  integer :: nproc_fft,comm_fft
  logical :: add_tfw_
  real(dp),parameter :: mot=-one/3.0_dp
- real(dp) :: coeff,divshft,doti,dstrsxc,dvdn,dvdz,epsxc,exc_str,factor,m_norm_min,nelect,s1,s2,s3
+ real(dp) :: coeff,divshft,doti,dstrsxc,dvdn,dvdz,epsxc,exc_str,factor,m_norm_min,s1,s2,s3
  real(dp) :: strdiag,strsxc1_tot,strsxc2_tot,strsxc3_tot,strsxc4_tot
  real(dp) :: strsxc5_tot,strsxc6_tot,ucvol
  logical :: allow3,test_nhat,with_vxctau
@@ -1158,8 +1158,8 @@ subroutine rhohxc(enxc,gsqcut,izero,kxc,mpi_enreg,nfft,ngfft, &
 !  Fermi-Amaldi correction : minus Hartree divided by the
 !  number of electrons per unit cell. This is not size consistent, but
 !  interesting for isolated systems with a few electrons.
-   nelect=ucvol*rhog(1,1)
-   factor=-one/nelect
+!  nelect=ucvol*rhog(1,1)
+   factor=-one/xcdata%nelect
    vxc(:,1)=factor*vhartr(:)
    if(nspden>=2) vxc(:,2)=factor*vhartr(:)
 
