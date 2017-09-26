@@ -446,7 +446,7 @@ subroutine kxc_alda(dtset,ixc,kxcg,mpi_enreg,nfft,ngfft,nspden,option,rhor,rhocu
  type(xcdata_type) :: xcdata
 !arrays
  real(dp) :: strsxc(6)
- real(dp) :: dum(0)
+ real(dp) :: dum(0),qphon(3)
  real(dp),allocatable :: kxcr(:,:),rhog(:,:),rhorcut(:,:),vhartree(:)
  real(dp),allocatable :: vxc(:,:),xccc3d(:)
 
@@ -529,6 +529,8 @@ subroutine kxc_alda(dtset,ixc,kxcg,mpi_enreg,nfft,ngfft,nspden,option,rhor,rhocu
 
    optionrhoxc = 2 !See rhohxc.f
 
+   qphon(:)=zero
+   call hartre(1,gsqcut,0,mpi_enreg,nfft,ngfft,dtset%paral_kgb,qphon,rhog,rprimd,vhartree)
    call rhohxc(enxc,gsqcut,0,kxcr,mpi_enreg,nfft,ngfft,dum,0,dum,0,nkxc,nk3xc,nspden,n3xccc,&
 &   optionrhoxc,dtset%paral_kgb,rhog,rhorcut,rprimd,strsxc,1,vhartree,vxc,vxcavg,xccc3d,xcdata)
 
@@ -583,6 +585,8 @@ subroutine kxc_alda(dtset,ixc,kxcg,mpi_enreg,nfft,ngfft,nspden,option,rhor,rhocu
 
    optionrhoxc = -2 !See rhohxc.f
 
+   qphon(:)=zero
+   call hartre(1,gsqcut,0,mpi_enreg,nfft,ngfft,dtset%paral_kgb,qphon,rhog,rprimd,vhartree)
    call rhohxc(enxc,gsqcut,0,kxcr,mpi_enreg,nfft,ngfft,dum,0,dum,0,nkxc,nk3xc,nspden,n3xccc,&
 &   optionrhoxc,dtset%paral_kgb,rhog,rhorcut,rprimd,strsxc,1,vhartree,vxc,vxcavg,xccc3d,xcdata)
 
@@ -1168,6 +1172,8 @@ subroutine kxc_driver(Dtset,Cryst,ixc,ngfft,nfft_tot,nspden,rhor,npw,dim_kxcg,kx
    call libxc_functionals_init(ixc,Dtset%nspden)
  end if
 
+ call hartre(1,gsqcut,izero,mpi_enreg,nfft_tot,ngfft,dtset%paral_kgb,qphon,rhog,Cryst%rprimd,vhartr)
+
 !Compute the kernel.
  call rhohxc(enxc,gsqcut,izero,kxcr,MPI_enreg_seq,nfft_tot,ngfft,&
 & dum,0,dum,0,nkxc,nk3xc,nspden,n3xccc,option,Dtset%paral_kgb,rhog,rhor,Cryst%rprimd,&
@@ -1440,7 +1446,7 @@ subroutine kxc_ADA(Dtset,Cryst,ixc,ngfft,nfft,nspden,rhor,&
  ABI_MALLOC(vxclda,(nfft,nspden))
 
  option=2 ! 2 for Hxc and kxcr (no paramagnetic part if nspden=1)
- qphon(:)=0.0
+ qphon(:)=zero
 
 !to be adjusted for the call to rhohxc
  nk3xc=1
@@ -1495,6 +1501,7 @@ subroutine kxc_ADA(Dtset,Cryst,ixc,ngfft,nfft,nspden,rhor,&
    call libxc_functionals_init(ixc,Dtset%nspden)
  end if
 
+ call hartre(1,gsqcut,izero,mpi_enreg,nfft,ngfft,dtset%paral_kgb,qphon,rhog,Cryst%rprimd,vhartr)
  call rhohxc(enxc,gsqcut,izero,kxcr,MPI_enreg_seq,nfft,ngfft,&
 & dum,0,dum,0,nkxc,nk3xc,nspden,n3xccc,option,dtset%paral_kgb,rhog,my_rhor,Cryst%rprimd,&
 & strsxc,1,vhartr,vxclda,vxcavg,xccc3d,xcdata)

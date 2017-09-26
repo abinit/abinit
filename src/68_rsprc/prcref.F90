@@ -596,7 +596,10 @@ subroutine prcref(atindx,dielar,dielinv,&
      ABI_ALLOCATE(vhartr_wk,(nfft))
      option=1
 
-!    to be adjusted for the call to rhohxc
+     qphon(:)=zero
+     call hartre(1,gsqcut,psps%usepaw,mpi_enreg,nfft,ngfft,dtset%paral_kgb,qphon,rhog_wk,rprimd,vhartr_wk)
+
+!    Prepare the call to rhohxc
      call xcdata_init(dtset%intxc,dtset%ixc,&
 &      dtset%nelect,dtset%tphysel,dtset%usekden,dtset%vdw_xc,dtset%xc_tb09_c,dtset%xc_denpos,xcdata)
      nk3xc=1

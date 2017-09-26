@@ -262,7 +262,7 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
 !arrays
  integer,allocatable :: kg_k(:,:)
  real(dp) :: gmet(3,3),gprimd(3,3),kpg_dum(0,0),kpoint(3),nonlop_out(1,1)
- real(dp) :: qpt(3),rhodum(1),rmet(3,3),tsec(2),ylmgr_dum(1,1,1)
+ real(dp) :: qphon(3),qpt(3),rhodum(1),rmet(3,3),tsec(2),ylmgr_dum(1,1,1)
  real(dp) :: vzeeman(4)
  real(dp),allocatable :: buffer(:),cgrvtrial(:,:)
  real(dp),allocatable :: cwavef(:,:),eig_k(:),enlout(:),ffnl(:,:,:,:),ffnl_sav(:,:,:,:)
@@ -328,6 +328,8 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
 
    if (dtset%icoulomb == 0) then
 !    Use the periodic solver to compute Hxc.
+     qphon(:)=zero
+     call hartre(1,gsqcut,psps%usepaw,mpi_enreg,nfftf,ngfftf,paral_kgb,qphon,rhog,rprimd,vhartr)
      call xcdata_init(dtset%intxc,dtset%ixc,&
 &      dtset%nelect,dtset%tphysel,dtset%usekden,dtset%vdw_xc,dtset%xc_tb09_c,dtset%xc_denpos,xcdata)
      ABI_ALLOCATE(kxc,(1,nkxc))

@@ -47,6 +47,7 @@
 !!   (total in first comp. and magnetization in comp. 2 to 4 if nspden=4)
 !!  rprimd(3,3)=dimensional primitive translations in real space (bohr)
 !!  usexcnhat= -PAW only- 1 if nhat density has to be taken into account in Vxc
+!!  vhartr(nfft)=Hartree potential (only needed for Fermi-Amaldi functional)
 !!  xcdata <type(xcdata_type)>=storage for different input variables and derived parameters needed to compute the XC functional
 !!  xccc3d(n3xccc)=3D core electron density for XC core correction (bohr^-3)
 !!
@@ -65,7 +66,6 @@
 !!               - depsxc_drho(up,i)*rhor(up,i)-depsxc_drho(dn,i)*rhor(dn,i)]
 !!     - gradrho(up,mu)*gradrho(up,nu) * depsxc_dgradrho(up,i) / gradrho(up,i)
 !!     - gradrho(dn,mu)*gradrho(dn,nu) * depsxc_dgradrho(dn,i) / gradrho(dn,i) )
-!!  vhartr(nfft)=Hartree potential (returned if option/=0 and option/=10)
 !!  vxc(nfft,nspden)=xc potential
 !!    (spin up in first half and spin down in second half if nspden=2)
 !!    (v^11, v^22, Re[V^12], Im[V^12] if nspden=4)
@@ -261,8 +261,8 @@ subroutine rhohxc(enxc,gsqcut,izero,kxc,mpi_enreg,nfft,ngfft, &
  real(dp),intent(in) :: nhat(nfft,nspden*nhatdim)
  real(dp),intent(in) :: nhatgr(nfft,nspden,3*nhatgrdim),rhog(2,nfft)
  real(dp),intent(in),target :: rhor(nfft,nspden)
- real(dp),intent(in) :: rprimd(3,3),xccc3d(n3xccc)
- real(dp),intent(out) :: kxc(nfft,nkxc),strsxc(6),vhartr(nfft),vxc(nfft,nspden)
+ real(dp),intent(in) :: rprimd(3,3),vhartr(nfft),xccc3d(n3xccc)
+ real(dp),intent(out) :: kxc(nfft,nkxc),strsxc(6),vxc(nfft,nspden)
  real(dp),intent(in),optional :: taug(:,:),taur(:,:)
  real(dp),intent(out),optional :: k3xc(1:nfft,1:nk3xc),vxctau(:,:,:)
 
@@ -361,9 +361,9 @@ subroutine rhohxc(enxc,gsqcut,izero,kxc,mpi_enreg,nfft,ngfft, &
  usefxc=0;if (ixc==50) usefxc=1
  add_tfw_=.false.;if (present(add_tfw)) add_tfw_=add_tfw
 
- if(option/=0.and.option/=10)then
-   call hartre(cplex,gsqcut,izero,mpi_enreg,nfft,ngfft,paral_kgb,qphon,rhog,rprimd,vhartr)
- end if
+! if(option/=0.and.option/=10)then
+!   call hartre(cplex,gsqcut,izero,mpi_enreg,nfft,ngfft,paral_kgb,qphon,rhog,rprimd,vhartr)
+! end if
 
 !Note : hartre is excluded from the timing
  call timab(81,1,tsec)
