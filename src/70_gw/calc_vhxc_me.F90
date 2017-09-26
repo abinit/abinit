@@ -161,7 +161,6 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,gsqcutf_eff,nfftf,ngfftf,&
  character(len=500) :: msg
  type(MPI_type) :: MPI_enreg_seq
  type(xcdata_type) :: xcdata,xcdata_hybrid
- type(Dataset_type) :: Dtset_dummy
 !arrays
  integer,parameter :: spinor_idxs(2,4)=RESHAPE((/1,1,2,2,1,2,2,1/),(/2,4/))
  integer :: got(Wfd%nproc)
@@ -278,12 +277,7 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,gsqcutf_eff,nfftf,ngfftf,&
 
      write(msg,'(a)') ' Hybrid functional xc potential is being set'
      call wrtout(std_out,msg,'COLL')
-     !
-     ! copy the Dtset into the temporary Dtset_dummy
-     call dtset_copy(Dtset_dummy,Dtset)
-     !
-     ! then override the variables: xclevel, ixc
-     Dtset_dummy%xclevel=2
+     !Define ixc_hybrid
      if(Dtset%gwcalctyp<200) then
        ixc_hybrid=-428         ! HSE06
      else if(Dtset%gwcalctyp<300) then
@@ -320,8 +314,6 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,gsqcutf_eff,nfftf,ngfftf,&
 &     nhat,Wfd%usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,nspden,n3xccc_,option,dtset%paral_kgb,rhog,rhor,Cryst%rprimd,&
 &     strsxc,usexcnhat,vh_,vxc_val_hybrid,vxcval_hybrid_avg,xccc3d_,xcdata_hybrid)
 
-     call dtset_free(Dtset_dummy)
-     !
      ! Fix the libxc module with the original settings
      call libxc_functionals_end()
      if(Dtset%ixc<0) then
