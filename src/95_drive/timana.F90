@@ -769,9 +769,9 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(938)='outkss(write)                   '
 
  names(940)='rhotov                          '
- names(941)='rhotov(rhotoxc)                  '
+ names(941)='rhotov(rhotoxc)                 '
  names(942)='rhotov(dotprod_vn)              '
- names(943)='rhotov(PSolver_rhotoxc)          '
+ names(943)='rhotov(PSolver_rhohxc)          '
  names(944)='rhotov(rhohxcpositron)          '
  names(945)='rhotov(other)                   '
 
