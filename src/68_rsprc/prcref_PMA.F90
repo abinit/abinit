@@ -599,9 +599,9 @@
 &    dtset%nelect,dtset%tphysel,dtset%usekden,dtset%vdw_xc,dtset%xc_tb09_c,dtset%xc_denpos,xcdata)
    nk3xc=1
    ABI_ALLOCATE(work,(0))
-   call rhohxc(enxc,gsqcut,psps%usepaw,kxc,mpi_enreg,nfft,ngfft,&
-&   work,0,work,0,nkxc,nk3xc,dtset%nspden,n3xccc,option,dtset%paral_kgb,rhog_wk,rhor_wk,rprimd,strsxc,1,&
-&   vhartr_wk,vxc_wk,vxcavg,xccc3d,xcdata)
+   call rhohxc(enxc,kxc,mpi_enreg,nfft,ngfft,&
+&   work,0,work,0,nkxc,nk3xc,dtset%nspden,n3xccc,option,dtset%paral_kgb,rhor_wk,rprimd,strsxc,1,&
+&   vxc_wk,vxcavg,xccc3d,xcdata,vhartr=vhartr_wk)
    ABI_DEALLOCATE(work)
    ABI_DEALLOCATE(xccc3d)
 

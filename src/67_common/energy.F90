@@ -336,17 +336,17 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
 !    to be adjusted for the call to rhohxc
      nk3xc=1
      if (ipositron==0) then
-       call rhohxc(energies%e_xc,gsqcut,psps%usepaw,kxc, &
+       call rhohxc(energies%e_xc,kxc, &
 &       mpi_enreg,nfftf,ngfftf,nhat,psps%usepaw,nhatgr,nhatgrdim, &
-&       nkxc,nk3xc,dtset%nspden,n3xccc,option,dtset%paral_kgb,rhog,rhor,rprimd,strsxc, &
-&       usexcnhat,vhartr,vxc,vxcavg,xccc3d,xcdata,taug=taug,taur=taur, &
+&       nkxc,nk3xc,dtset%nspden,n3xccc,option,dtset%paral_kgb,rhor,rprimd,strsxc, &
+&       usexcnhat,vxc,vxcavg,xccc3d,xcdata,taug=taug,taur=taur,vhartr=vhartr, &
 &       vxctau=vxctau,exc_vdw_out=energies%e_xc_vdw,add_tfw=add_tfw_)
      else
-       call rhohxc(energies%e_xc,gsqcut,psps%usepaw,kxc, &
+       call rhohxc(energies%e_xc,kxc, &
 &       mpi_enreg,nfftf,ngfftf,nhat,psps%usepaw,nhatgr,nhatgrdim, &
-&       nkxc,nk3xc,dtset%nspden,n3xccc,option,dtset%paral_kgb,rhog,rhor,rprimd,strsxc, &
-&       usexcnhat,vhartr,vxc,vxcavg,xccc3d,xcdata, &
-&       electronpositron=electronpositron,taug=taug,taur=taur, &
+&       nkxc,nk3xc,dtset%nspden,n3xccc,option,dtset%paral_kgb,rhor,rprimd,strsxc, &
+&       usexcnhat,vxc,vxcavg,xccc3d,xcdata, &
+&       electronpositron=electronpositron,taug=taug,taur=taur,vhartr=vhartr, &
 &       vxctau=vxctau,exc_vdw_out=energies%e_xc_vdw,add_tfw=add_tfw_)
      end if
      ABI_DEALLOCATE(kxc)

@@ -232,15 +232,15 @@ subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
 !xccc3d=zero
      call timab(941,1,tsec)
      if (ipositron==0) then
-       call rhohxc(energies%e_xc,gsqcut,usepaw,kxc,mpi_enreg,nfft,ngfft,&
-&       nhat,usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,dtset%nspden,n3xccc,optxc,dtset%paral_kgb,rhog,&
-&       rhor,rprimd,strsxc,usexcnhat,vhartr,vxc,vxcavg,xccc3d,xcdata,&
-&       taug=taug,taur=taur,vxctau=vxctau,add_tfw=add_tfw_)
+       call rhohxc(energies%e_xc,kxc,mpi_enreg,nfft,ngfft,&
+&       nhat,usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,dtset%nspden,n3xccc,optxc,dtset%paral_kgb,&
+&       rhor,rprimd,strsxc,usexcnhat,vxc,vxcavg,xccc3d,xcdata,&
+&       taug=taug,taur=taur,vhartr=vhartr,vxctau=vxctau,add_tfw=add_tfw_)
      else
-       call rhohxc(energies%e_xc,gsqcut,usepaw,kxc,mpi_enreg,nfft,ngfft,&
-&       nhat,usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,dtset%nspden,n3xccc,optxc,dtset%paral_kgb,rhog,&
-&       rhor,rprimd,strsxc,usexcnhat,vhartr,vxc,vxcavg,xccc3d,xcdata,&
-&       taug=taug,taur=taur,vxctau=vxctau,add_tfw=add_tfw_,&
+       call rhohxc(energies%e_xc,kxc,mpi_enreg,nfft,ngfft,&
+&       nhat,usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,dtset%nspden,n3xccc,optxc,dtset%paral_kgb,&
+&       rhor,rprimd,strsxc,usexcnhat,vxc,vxcavg,xccc3d,xcdata,&
+&       taug=taug,taur=taur,vhartr=vhartr,vxctau=vxctau,add_tfw=add_tfw_,&
 &       electronpositron=electronpositron)
      end if
 !write(80,*) vxc

@@ -17,7 +17,6 @@
 !!
 !! INPUTS
 !!  Mflags
-!!  gsqcutf_eff=Fourier cutoff on G^2 for "large sphere" of radius double
 !!   that of the basis sphere--appropriate for charge density rho(G),Hartree potential, and pseudopotentials
 !!  Dtset <type(dataset_type)>=all input variables in this dataset
 !!  ngfftf(18)contain all needed information about 3D fine FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
@@ -82,7 +81,7 @@
 
 #include "abi_common.h"
 
-subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,gsqcutf_eff,nfftf,ngfftf,&
+subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,nfftf,ngfftf,&
 &  vtrial,vhartr,vxc,Psps,Pawtab,Paw_an,Pawang,Pawfgrtab,Paw_ij,dijexc_core,&
 &  rhor,rhog,usexcnhat,nhat,nhatgr,nhatgrdim,kstab,&
 &  taug,taur) ! optional arguments
@@ -124,7 +123,6 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,gsqcutf_eff,nfftf,ngfftf,&
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nhatgrdim,usexcnhat,nfftf
- real(dp),intent(in) :: gsqcutf_eff
  type(Dataset_type),intent(in) :: Dtset
  type(Pseudopotential_type),intent(in) :: Psps
  type(wfd_t),target,intent(inout) :: Wfd
@@ -151,7 +149,7 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,gsqcutf_eff,nfftf,ngfftf,&
 !scalars
  integer :: iat,ikc,ik_ibz,ib,jb,is,b_start,b_stop
  integer :: itypat,lmn_size,j0lmn,jlmn,ilmn,klmn,klmn1,lmn2_size_max
- integer :: isppol,izero,cplex_dij,npw_k
+ integer :: isppol,cplex_dij,npw_k
  integer :: nspinor,nsppol,nspden,nk_calc
  integer :: rank,comm,master,nprocs
  integer :: iab,isp1,isp2,ixc_hybrid,nsploop,nkxc,option,n3xccc_,nk3xc,my_nbbp,my_nmels
@@ -172,7 +170,7 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,gsqcutf_eff,nfftf,ngfftf,&
  real(dp) :: tmp_H(2,Wfd%nspinor**2),tmp_U(2,Wfd%nspinor**2)
  real(dp) :: tmp_h0ij(2,Wfd%nspinor**2),tmp_sigcx(2,Wfd%nspinor**2)
  real(dp) :: dijU(2),strsxc(6),kpt(3),vxc1ab(2),vxc1ab_val(2)
- real(dp),allocatable :: kxc_(:,:),vh_(:),xccc3d_(:),vxc_val(:,:),vxc_val_hybrid(:,:)
+ real(dp),allocatable :: kxc_(:,:),xccc3d_(:),vxc_val(:,:),vxc_val_hybrid(:,:)
  real(dp),allocatable :: kinpw(:),veffh0(:,:)
  complex(dpc) :: tmp(3)
  complex(gwpc),ABI_CONTIGUOUS pointer :: ur1_up(:),ur1_dwn(:)
@@ -256,18 +254,17 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,gsqcutf_eff,nfftf,ngfftf,&
  nkxc   = 0 ! No computation of XC kernel
  n3xccc_= 0 ! No core
  nk3xc  = 0 ! k3xc not needed
- izero  = Wfd%usepaw
 
  ABI_MALLOC(xccc3d_,(n3xccc_))
- ABI_MALLOC(vh_,(nfftf))
  ABI_MALLOC(kxc_,(nfftf,nkxc))
  ABI_MALLOC(vxc_val,(nfftf,nspden))
 
  call xcdata_init(dtset%intxc,dtset%ixc,&
 &  dtset%nelect,dtset%tphysel,dtset%usekden,dtset%vdw_xc,dtset%xc_tb09_c,dtset%xc_denpos,xcdata)
- call rhohxc(enxc_val,gsqcutf_eff,izero,kxc_,MPI_enreg_seq,nfftf,ngfftf,&
-& nhat,Wfd%usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,nspden,n3xccc_,option,dtset%paral_kgb,rhog,rhor,Cryst%rprimd,&
-& strsxc,usexcnhat,vh_,vxc_val,vxcval_avg,xccc3d_,xcdata,taug=taug,taur=taur)
+
+ call rhohxc(enxc_val,kxc_,MPI_enreg_seq,nfftf,ngfftf,&
+& nhat,Wfd%usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,nspden,n3xccc_,option,dtset%paral_kgb,rhor,Cryst%rprimd,&
+& strsxc,usexcnhat,vxc_val,vxcval_avg,xccc3d_,xcdata,taug=taug,taur=taur)
 
  !
  ! FABIEN's development
@@ -285,9 +282,10 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,gsqcutf_eff,nfftf,ngfftf,&
      else ! Dtset%gwcalctyp > 300
        ixc_hybrid=-402         ! B3LYP
      end if
+
      call xcdata_init(dtset%intxc,ixc_hybrid,&
 &      dtset%nelect,dtset%tphysel,dtset%usekden,dtset%vdw_xc,dtset%xc_tb09_c,dtset%xc_denpos,xcdata_hybrid)
-     !
+
      ! reinitialize the libxc module with the overriden values
      if(Dtset%ixc<0) then
        call libxc_functionals_end()
@@ -310,9 +308,9 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,gsqcutf_eff,nfftf,ngfftf,&
 
      ABI_MALLOC(vxc_val_hybrid,(nfftf,nspden))
 
-     call rhohxc(enxc_hybrid_val,gsqcutf_eff,izero,kxc_,MPI_enreg_seq,nfftf,ngfftf,&
-&     nhat,Wfd%usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,nspden,n3xccc_,option,dtset%paral_kgb,rhog,rhor,Cryst%rprimd,&
-&     strsxc,usexcnhat,vh_,vxc_val_hybrid,vxcval_hybrid_avg,xccc3d_,xcdata_hybrid)
+     call rhohxc(enxc_hybrid_val,kxc_,MPI_enreg_seq,nfftf,ngfftf,&
+&     nhat,Wfd%usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,nspden,n3xccc_,option,dtset%paral_kgb,rhor,Cryst%rprimd,&
+&     strsxc,usexcnhat,vxc_val_hybrid,vxcval_hybrid_avg,xccc3d_,xcdata_hybrid)
 
      ! Fix the libxc module with the original settings
      call libxc_functionals_end()
@@ -327,7 +325,6 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,gsqcutf_eff,nfftf,ngfftf,&
  endif
 
  ABI_FREE(xccc3d_)
- ABI_FREE(vh_)
  ABI_FREE(kxc_)
 
  write(msg,'(a,f8.4,2a,f8.4,a)')&
