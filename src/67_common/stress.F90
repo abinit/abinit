@@ -311,7 +311,7 @@
 !======================= Hartree energy contribution ===================
 !=======================================================================
 
- call strhar(ehart,gprimd,gsqcut,harstr,mpi_enreg,nfft,ngfft,rhog,ucvol)
+ call strhar(ehart,gsqcut,harstr,mpi_enreg,nfft,ngfft,rhog,rprimd)
 
 !=======================================================================
 !======================= Ewald contribution ============================
@@ -504,7 +504,7 @@
    ABI_ALLOCATE(dummy,(6))
    call fourdp(1,rhog_ep,electronpositron%rhor_ep,-1,mpi_enreg,nfft,ngfft,paral_kgb,0)
    rhog_ep=-rhog_ep
-   call strhar(electronpositron%e_hartree,gprimd,gsqcut,dummy,mpi_enreg,nfft,ngfft,rhog_ep,ucvol)
+   call strhar(electronpositron%e_hartree,gsqcut,dummy,mpi_enreg,nfft,ngfft,rhog_ep,rprimd)
    strten(:)=strten(:)+dummy(:);harstr(:)=harstr(:)+dummy(:)
    ABI_DEALLOCATE(rhog_ep)
    ABI_DEALLOCATE(dummy)
