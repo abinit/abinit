@@ -727,7 +727,7 @@ subroutine rhohxc(dtset,enxc,gsqcut,izero,kxc,mpi_enreg,nfft,ngfft, &
        if(ixc_fallbackkxc_hyb/=dtset%ixc)then
          if (dtset%ixc<0) then
            call libxc_functionals_end()
-           call libxc_functionals_init(ixc_fallbackkxc_hyb,dtset%nspden)
+           call libxc_functionals_init(ixc_fallbackkxc_hyb,nspden)
          end if
          call drivexc_main(exc_b,ixc_fallbackkxc_hyb,mgga,ndvxc,nd2vxc,ngr2,npts,nspden_updn,nvxcgrho,order,&
 &         rho_b_updn,vxcrho_b_updn,dtset%xclevel, &
@@ -745,7 +745,7 @@ subroutine rhohxc(dtset,enxc,gsqcut,izero,kxc,mpi_enreg,nfft,ngfft, &
          end if
          if (dtset%ixc<0) then
            call libxc_functionals_end()
-           call libxc_functionals_init(dtset%ixc,dtset%nspden)
+           call libxc_functionals_init(dtset%ixc,nspden)
          end if
        end if
 
