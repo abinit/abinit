@@ -264,7 +264,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(78)='nonlop(dyfrnl)                  '
  names(79)='nonlop(ddk)                     '
  names(80)='etotfor/=forces                 '
- names(81)='xc:pot                          ' ! rhohxc_coll, except the call to hartre.f
+ names(81)='xc:pot                          ' ! rhotoxc_coll, except the call to hartre.f
  names(82)='xc:fourdp                       '
  names(83)='newvtr/rho(3):io                '; basic(83)=1
  names(84)='suscep                          '
@@ -769,9 +769,9 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(938)='outkss(write)                   '
 
  names(940)='rhotov                          '
- names(941)='rhotov(rhohxc)                  '
+ names(941)='rhotov(rhotoxc)                  '
  names(942)='rhotov(dotprod_vn)              '
- names(943)='rhotov(PSolver_rhohxc)          '
+ names(943)='rhotov(PSolver_rhotoxc)          '
  names(944)='rhotov(rhohxcpositron)          '
  names(945)='rhotov(other)                   '
 
@@ -1218,7 +1218,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
 !For the following sections, the number of counts is non standard, and thus these sections have not been placed
 !in the previous doloop.
 
-!Compute xc part of rhohxc and dfpt_mkvxc, minus the calls to fourdp inside that part
+!Compute xc part of rhotoxc and dfpt_mkvxc, minus the calls to fourdp inside that part
  ncount(11)=ncount(81)+ncount(181)
  times(1:2,11)=times(1:2,81)+times(1:2,181)-times(1:2,82)
  ftimes(1:2,11)=ftimes(1:2,81)+ftimes(1:2,181)-ftimes(1:2,82)

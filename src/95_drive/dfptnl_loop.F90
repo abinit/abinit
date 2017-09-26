@@ -47,7 +47,7 @@
 !!  nfft  = (effective) number of FFT grid points (for this processor)
 !!  nkpt  = number of k points
 !!  nkpt3 = number of k-points in the full BZ
-!!  nkxc=second dimension of the array kxc, see rhohxc.f for a description
+!!  nkxc=second dimension of the array kxc, see rhotoxc.f for a description
 !!  nneigh  = total number of neighbours required to evaluate the finite
 !!          difference formula
 !!  nspinor = number of spinorial components of the wavefunctions

@@ -402,7 +402,7 @@ end subroutine kxc_local
 !!
 !! CHILDREN
 !!      destroy_mpi_enreg,dtset_copy,dtset_free,fourdp,fourdp_6d,initmpi_seq
-!!      libxc_functionals_end,libxc_functionals_init,printxsf,rhohxc,wrtout
+!!      libxc_functionals_end,libxc_functionals_init,printxsf,rhotoxc,wrtout
 !!
 !! SOURCE
 
@@ -483,7 +483,7 @@ subroutine kxc_alda(dtset,ixc,kxcg,mpi_enreg,nfft,ngfft,nspden,option,rhor,rhocu
    call libxc_functionals_init(ixc,dtset%nspden)
  end if
 
-!to be adjusted for the call to rhohxc
+!to be adjusted for the call to rhotoxc
  nk3xc=1
 
 !Cut-off the density.
@@ -527,11 +527,11 @@ subroutine kxc_alda(dtset,ixc,kxcg,mpi_enreg,nfft,ngfft,nspden,option,rhor,rhocu
    ABI_MALLOC(kxcr,(nfft,nkxc))
    ABI_MALLOC(xccc3d,(n3xccc))
 
-   optionrhoxc = 2 !See rhohxc.f
+   optionrhoxc = 2 !See rhotoxc.f
 
    qphon(:)=zero
    call hartre(1,gsqcut,0,mpi_enreg,nfft,ngfft,dtset%paral_kgb,qphon,rhog,rprimd,vhartree)
-   call rhohxc(enxc,kxcr,mpi_enreg,nfft,ngfft,dum,0,dum,0,nkxc,nk3xc,nspden,n3xccc,&
+   call rhotoxc(enxc,kxcr,mpi_enreg,nfft,ngfft,dum,0,dum,0,nkxc,nk3xc,nspden,n3xccc,&
 &   optionrhoxc,dtset%paral_kgb,rhorcut,rprimd,strsxc,1,vxc,vxcavg,xccc3d,xcdata,vhartr=vhartree)
 
 !  DEBUG
@@ -583,11 +583,11 @@ subroutine kxc_alda(dtset,ixc,kxcg,mpi_enreg,nfft,ngfft,nspden,option,rhor,rhocu
    ABI_MALLOC(kxcr,(nfft,nkxc))
    ABI_MALLOC(xccc3d,(n3xccc))
 
-   optionrhoxc = -2 !See rhohxc.f
+   optionrhoxc = -2 !See rhotoxc.f
 
    qphon(:)=zero
    call hartre(1,gsqcut,0,mpi_enreg,nfft,ngfft,dtset%paral_kgb,qphon,rhog,rprimd,vhartree)
-   call rhohxc(enxc,kxcr,mpi_enreg,nfft,ngfft,dum,0,dum,0,nkxc,nk3xc,nspden,n3xccc,&
+   call rhotoxc(enxc,kxcr,mpi_enreg,nfft,ngfft,dum,0,dum,0,nkxc,nk3xc,nspden,n3xccc,&
 &   optionrhoxc,dtset%paral_kgb,rhorcut,rprimd,strsxc,1,vxc,vxcavg,xccc3d,xcdata,vhartr=vhartree)
 
    kxcr(:,2) = 0.5_dp*kxcr(:,2)
@@ -1060,7 +1060,7 @@ end subroutine kxc_eok
 !!
 !! CHILDREN
 !!      destroy_mpi_enreg,dtset_copy,dtset_free,fourdp,fourdp_6d,initmpi_seq
-!!      libxc_functionals_end,libxc_functionals_init,printxsf,rhohxc,wrtout
+!!      libxc_functionals_end,libxc_functionals_init,printxsf,rhotoxc,wrtout
 !!
 !! SOURCE
 
@@ -1145,7 +1145,7 @@ subroutine kxc_driver(Dtset,Cryst,ixc,ngfft,nfft_tot,nspden,rhor,npw,dim_kxcg,kx
 
  ABI_MALLOC(kxcr,(nfft_tot,nkxc))
 
-!gsqcut and rhog are zeroed because they are not used by rhohxc if 1<=ixc<=16 and option=0
+!gsqcut and rhog are zeroed because they are not used by rhotoxc if 1<=ixc<=16 and option=0
  gsqcut=zero
 
  ABI_MALLOC(rhog,(2,nfft_tot))
@@ -1160,7 +1160,7 @@ subroutine kxc_driver(Dtset,Cryst,ixc,ngfft,nfft_tot,nspden,rhor,npw,dim_kxcg,kx
  option=2 ! 2 for Hxc and kxcr (no paramagnetic part if nspden=1)
  qphon =zero
 
-!to be adjusted for the call to rhohxc
+!to be adjusted for the call to rhotoxc
  nk3xc=1
  izero=0
 
@@ -1175,7 +1175,7 @@ subroutine kxc_driver(Dtset,Cryst,ixc,ngfft,nfft_tot,nspden,rhor,npw,dim_kxcg,kx
  call hartre(1,gsqcut,izero,mpi_enreg,nfft_tot,ngfft,dtset%paral_kgb,qphon,rhog,Cryst%rprimd,vhartr)
 
 !Compute the kernel.
- call rhohxc(enxc,kxcr,MPI_enreg_seq,nfft_tot,ngfft,&
+ call rhotoxc(enxc,kxcr,MPI_enreg_seq,nfft_tot,ngfft,&
 & dum,0,dum,0,nkxc,nk3xc,nspden,n3xccc,option,Dtset%paral_kgb,rhor,Cryst%rprimd,&
 & strsxc,1,vxclda,vxcavg,xccc3d,xcdata,vhartr=vhartr)
 
@@ -1324,7 +1324,7 @@ end subroutine kxc_driver
 !!
 !! CHILDREN
 !!      destroy_mpi_enreg,dtset_copy,dtset_free,fourdp,fourdp_6d,initmpi_seq
-!!      libxc_functionals_end,libxc_functionals_init,printxsf,rhohxc,wrtout
+!!      libxc_functionals_end,libxc_functionals_init,printxsf,rhotoxc,wrtout
 !!
 !! SOURCE
 
@@ -1433,7 +1433,7 @@ subroutine kxc_ADA(Dtset,Cryst,ixc,ngfft,nfft,nspden,rhor,&
  
  ABI_MALLOC(kxcr,(nfft,nkxc))
 
-!gsqcut and rhog are zeroed because they are not used by rhohxc if 1<=ixc<=16 and option=0
+!gsqcut and rhog are zeroed because they are not used by rhotoxc if 1<=ixc<=16 and option=0
  gsqcut=zero
 
  ABI_MALLOC(rhog,(2,nfft))
@@ -1448,7 +1448,7 @@ subroutine kxc_ADA(Dtset,Cryst,ixc,ngfft,nfft,nspden,rhor,&
  option=2 ! 2 for Hxc and kxcr (no paramagnetic part if nspden=1)
  qphon(:)=zero
 
-!to be adjusted for the call to rhohxc
+!to be adjusted for the call to rhotoxc
  nk3xc=1
 
 !Compute the kernel.
@@ -1502,7 +1502,7 @@ subroutine kxc_ADA(Dtset,Cryst,ixc,ngfft,nfft,nspden,rhor,&
  end if
 
  call hartre(1,gsqcut,izero,mpi_enreg,nfft,ngfft,dtset%paral_kgb,qphon,rhog,Cryst%rprimd,vhartr)
- call rhohxc(enxc,kxcr,MPI_enreg_seq,nfft,ngfft,&
+ call rhotoxc(enxc,kxcr,MPI_enreg_seq,nfft,ngfft,&
 & dum,0,dum,0,nkxc,nk3xc,nspden,n3xccc,option,dtset%paral_kgb,my_rhor,Cryst%rprimd,&
 & strsxc,1,vxclda,vxcavg,xccc3d,xcdata,vhartr=vhartr)
 

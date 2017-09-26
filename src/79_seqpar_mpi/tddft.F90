@@ -37,7 +37,7 @@
 !!                see ~abinit/doc/input_variables/vargs.htm#ngfft
 
 !!  nkpt=number of k points
-!!  nkxc=second dimension of the array kxc (see rhohxc for a description)
+!!  nkxc=second dimension of the array kxc (see rhotoxc for a description)
 !!  npwarr(nkpt)=number of planewaves at each k point
 !!  nspinor=number of spinorial components of the wavefunctions
 !!  nsppol=1 for unpolarized, 2 for spin-polarized

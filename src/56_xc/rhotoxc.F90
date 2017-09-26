@@ -1,7 +1,7 @@
 !{\src2tex{textfont=tt}}
-!!****f* ABINIT/rhohxc
+!!****f* ABINIT/rhotoxc
 !! NAME
-!! rhohxc
+!! rhotoxc
 !!
 !! FUNCTION
 !! Start from the density or spin-density, and
@@ -210,7 +210,7 @@
 
 #include "abi_common.h"
 
-subroutine rhohxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
+subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
 & nhat,nhatdim,nhatgr,nhatgrdim,nkxc,nk3xc,nspden,n3xccc,option,paral_kgb, &
 & rhor,rprimd,strsxc,usexcnhat,vxc,vxcavg,xccc3d,xcdata, &
 & k3xc,electronpositron,taug,taur,vhartr,vxctau,exc_vdw_out,add_tfw) ! optional arguments
@@ -230,12 +230,12 @@ subroutine rhohxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'rhohxc'
+#define ABI_FUNC 'rhotoxc'
  use interfaces_18_timing
  use interfaces_41_geometry
  use interfaces_41_xc_lowlevel
  use interfaces_53_spacepar
- use interfaces_56_xc, except_this_one => rhohxc
+ use interfaces_56_xc, except_this_one => rhotoxc
 !End of the abilint section
 
  implicit none
@@ -1173,7 +1173,7 @@ subroutine rhohxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
  
    else
 
-     MSG_BUG('When ixc=20,21 or 22, vhartr needs to be present in the call to rhohxc !')
+     MSG_BUG('When ixc=20,21 or 22, vhartr needs to be present in the call to rhotoxc !')
 
    end if
 
@@ -1200,5 +1200,5 @@ subroutine rhohxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
 
  DBG_EXIT("COLL")
 
-end subroutine rhohxc
+end subroutine rhotoxc
 !!***

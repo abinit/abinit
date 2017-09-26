@@ -139,7 +139,7 @@
 !!      pawaccrhoij,pawcprj_alloc,pawcprj_free,pawcprj_gather_spin,pawmknhat
 !!      pawrhoij_alloc,pawrhoij_free,pawrhoij_free_unpacked
 !!      pawrhoij_init_unpacked,pawrhoij_mpisum_unpacked,prep_bandfft_tabs
-!!      prep_nonlop,psolver_rhohxc,rhohxc,rhohxcpositron,symrhoij,timab
+!!      prep_nonlop,psolver_rhohxc,rhotoxc,rhohxcpositron,symrhoij,timab
 !!      transgrid,xmpi_sum
 !!
 !! SOURCE
@@ -333,16 +333,16 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
      call xcdata_init(dtset%intxc,dtset%ixc,&
 &      dtset%nelect,dtset%tphysel,dtset%usekden,dtset%vdw_xc,dtset%xc_tb09_c,dtset%xc_denpos,xcdata)
      ABI_ALLOCATE(kxc,(1,nkxc))
-!    to be adjusted for the call to rhohxc
+!    to be adjusted for the call to rhotoxc
      nk3xc=1
      if (ipositron==0) then
-       call rhohxc(energies%e_xc,kxc, &
+       call rhotoxc(energies%e_xc,kxc, &
 &       mpi_enreg,nfftf,ngfftf,nhat,psps%usepaw,nhatgr,nhatgrdim, &
 &       nkxc,nk3xc,dtset%nspden,n3xccc,option,dtset%paral_kgb,rhor,rprimd,strsxc, &
 &       usexcnhat,vxc,vxcavg,xccc3d,xcdata,taug=taug,taur=taur,vhartr=vhartr, &
 &       vxctau=vxctau,exc_vdw_out=energies%e_xc_vdw,add_tfw=add_tfw_)
      else
-       call rhohxc(energies%e_xc,kxc, &
+       call rhotoxc(energies%e_xc,kxc, &
 &       mpi_enreg,nfftf,ngfftf,nhat,psps%usepaw,nhatgr,nhatgrdim, &
 &       nkxc,nk3xc,dtset%nspden,n3xccc,option,dtset%paral_kgb,rhor,rprimd,strsxc, &
 &       usexcnhat,vxc,vxcavg,xccc3d,xcdata, &

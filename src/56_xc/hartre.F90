@@ -40,7 +40,7 @@
 !!  vhartr(cplex*nfft)=Hartree potential in real space, either REAL or COMPLEX
 !!
 !! PARENTS
-!!      dfpt_rhotov,dfptnl_loop,fock_getghc,nres2vres,rhohxc,setup_positron
+!!      dfpt_rhotov,dfptnl_loop,fock_getghc,nres2vres,rhotoxc,setup_positron
 !!      tddft
 !!
 !! CHILDREN

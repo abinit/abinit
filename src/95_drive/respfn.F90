@@ -96,7 +96,7 @@
 !!      pawfgrtab_init,pawinit,pawmknhat,pawpuxinit,pawrhoij_alloc
 !!      pawrhoij_bcast,pawrhoij_copy,pawrhoij_free,pawrhoij_nullify
 !!      pawtab_get_lsize,prteigrs,pspini,q0dy3_apply,q0dy3_calc,read_rhor
-!!      rhohxc,setsym,setsymrhoij,setup1,status,symdij,symmetrize_xred,sytens
+!!      rhotoxc,setsym,setsymrhoij,setup1,status,symdij,symmetrize_xred,sytens
 !!      timab,transgrid,vdw_dftd2,vdw_dftd3,wffclose,wings3,wrtloctens,wrtout
 !!      xmpi_bcast
 !!
@@ -859,11 +859,11 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  ABI_ALLOCATE(vhartr,(nfftf))
  ABI_ALLOCATE(vxc,(nfftf,dtset%nspden))
 
- _IBM6("Before rhohxc")
+ _IBM6("Before rhotoxc")
 
  call xcdata_init(dtset%intxc,dtset%ixc,&
 &    dtset%nelect,dtset%tphysel,dtset%usekden,dtset%vdw_xc,dtset%xc_tb09_c,dtset%xc_denpos,xcdata)
- call rhohxc(enxc,kxc,mpi_enreg,nfftf,ngfftf,&
+ call rhotoxc(enxc,kxc,mpi_enreg,nfftf,ngfftf,&
 & nhat,nhatdim,nhatgr,nhatgrdim,nkxc,nk3xc,dtset%nspden,n3xccc,option,dtset%paral_kgb,rhor,&
 & rprimd,strsxc,usexcnhat,vxc,vxcavg,xccc3d,xcdata,vhartr=vhartr)
 

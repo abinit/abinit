@@ -51,7 +51,7 @@
 !!  ngfft(18)=contain all needed information about 3D FFT
 !!  ngrvdw=size of grvdw(:,:); can be 0 or natom according to dtset%vdw_xc
 !!  nhat(nfftf,nspden*usepaw)= -PAW only- compensation density
-!!  nkxc=second dimension of the array kxc, see rhohxc.f for a description
+!!  nkxc=second dimension of the array kxc, see rhotoxc.f for a description
 !!  npwarr(nkpt)=number of planewaves in basis and on boundary for each k
 !!  nvresid(nfftf,nspden)=array for the residual of the density/potential
 !!  optres=0 if the potential residual has to be used for forces corrections

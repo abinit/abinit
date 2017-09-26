@@ -87,7 +87,7 @@
 !!  grewtn(3,natom)=grads of Ewald energy (hartree)
 !!  grvdw(3,ngrvdw)=gradients of energy due to Van der Waals DFT-D2 dispersion (hartree)
 !!  kxc(nfft,nkxc)=exchange-correlation kernel, will be computed if nkxc/=0 .
-!!                 see routine rhohxc for a more complete description
+!!                 see routine rhotoxc for a more complete description
 !!  strsxc(6)=xc contribution to stress tensor (hartree/bohr^3)
 !!  vxcavg=mean of the vxc potential
 !!
@@ -117,7 +117,7 @@
 !! CHILDREN
 !!      atm2fft,denspot_set_history,dotprod_vn,ewald,ionion_realspace
 !!      ionion_surface,jellium,mag_constr,mkcore,mkcore_alt,mkcore_wvl,mklocl
-!!      psolver_rhohxc,rhohxc,rhohxcpositron,spatialchempot,timab,vdw_dftd2
+!!      psolver_rhohxc,rhotoxc,rhohxcpositron,spatialchempot,timab,vdw_dftd2
 !!      vdw_dftd3,wvl_psitohpsi,wvl_vtrial_abi2big,xchybrid_ncpp_cc,xred2xcart
 !!
 !! SOURCE
@@ -486,12 +486,12 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
 !write(80,*)"setvtr"
 !xccc3d=zero
        if (ipositron==0) then
-         call rhohxc(energies%e_xc,kxc,mpi_enreg,nfft,ngfft,&
+         call rhotoxc(energies%e_xc,kxc,mpi_enreg,nfft,ngfft,&
 &         nhat,psps%usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,dtset%nspden,n3xccc,&
 &         option,dtset%paral_kgb,rhor,rprimd,strsxc,usexcnhat,vxc,vxcavg,xccc3d,xcdata,&
 &         taug=taug,taur=taur,vhartr=vhartr,vxctau=vxctau,add_tfw=add_tfw_)
        else if (ipositron==2) then
-         call rhohxc(energies%e_xc,kxc,mpi_enreg,nfft,ngfft,&
+         call rhotoxc(energies%e_xc,kxc,mpi_enreg,nfft,ngfft,&
 &         nhat,psps%usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,dtset%nspden,n3xccc,&
 &         option,dtset%paral_kgb,rhor,rprimd,strsxc,usexcnhat,vxc,vxcavg,xccc3d,xcdata,&
 &         taug=taug,taur=taur,vhartr=vhartr,vxctau=vxctau,add_tfw=add_tfw_,&

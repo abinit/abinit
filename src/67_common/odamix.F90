@@ -46,7 +46,7 @@
 !!  my_natom=number of atoms treated by current processor
 !!  nfft=(effective) number of FFT grid points (for this processor)
 !!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
-!!  nkxc=second dimension of the array kxc, see rhohxc.f for a description
+!!  nkxc=second dimension of the array kxc, see rhotoxc.f for a description
 !!  ntypat=number of types of atoms in unit cell.
 !!  nvresid(nfft,nspden)=potential or density residual
 !!  n3xccc=dimension of the xccc3d array (0 or nfft).
@@ -121,7 +121,7 @@
 !!      scfcv
 !!
 !! CHILDREN
-!!      dotprod_vn,fourdp,metric,pawdenpot,pawmknhat,rhohxc,timab,xmpi_sum
+!!      dotprod_vn,fourdp,metric,pawdenpot,pawmknhat,rhotoxc,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -227,7 +227,7 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
 !Check that usekden is not 0 if want to use vxctau
  with_vxctau = (present(vxctau).and.present(taur).and.(dtset%usekden/=0))
 
-!To be adjusted for the call to rhohxc
+!To be adjusted for the call to rhotoxc
  add_tfw_=.false.;if (present(add_tfw)) add_tfw_=add_tfw
  nk3xc=1
 
@@ -339,7 +339,7 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
 
 !Compute xc potential (separate up and down if spin-polarized)
  optxc=1
- call rhohxc(energies%e_xc,kxc,mpi_enreg,nfft,ngfft,&
+ call rhotoxc(energies%e_xc,kxc,mpi_enreg,nfft,ngfft,&
 & nhat,usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,dtset%nspden,n3xccc,optxc,dtset%paral_kgb,rhor,rprimd,strsxc,&
 & usexcnhat,vxc,vxcavg,xccc3d,xcdata,taug=taug,taur=taur,vhartr=vhartr,vxctau=vxctau,add_tfw=add_tfw_)
 
@@ -603,7 +603,7 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
 
 !Compute xc potential (separate up and down if spin-polarized)
  optxc=1;if (nkxc>0) optxc=2
- call rhohxc(energies%e_xc,kxc,mpi_enreg,nfft,ngfft,&
+ call rhotoxc(energies%e_xc,kxc,mpi_enreg,nfft,ngfft,&
 & nhat,usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,dtset%nspden,n3xccc,optxc,dtset%paral_kgb,rhor,rprimd,strsxc,&
 & usexcnhat,vxc,vxcavg,xccc3d,xcdata,taug=taug,taur=taur,vhartr=vhartr,vxctau=vxctau,add_tfw=add_tfw_)
 

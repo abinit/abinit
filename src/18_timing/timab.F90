@@ -65,7 +65,7 @@
 !!      partial_dos_fractions_paw,pawdenpot,pawdfptenergy,pawinit,pawmknhat
 !!      pawmknhat_psipsi,pawmkrho,pawpolev,prep_bandfft_tabs,prep_calc_ucrpa
 !!      prep_fourwf,prep_getghc,prep_nonlop,pspatm,pspheads_comm,pspini
-!!      pw_orthon,rayleigh_ritz,recursion,recursion_nl,redgr,respfn,rhohxc
+!!      pw_orthon,rayleigh_ritz,recursion,recursion_nl,redgr,respfn,rhotoxc
 !!      rhotov,rwwf,scfcv,screening,setsym,setvtr,sigma,sqnormm_v,status,stress
 !!      strhar,suscep_stat,susk,suskmm,symrhg,symsgcube,tddft,timana,vn_nl_rec
 !!      vtorho,vtorhorec,vtorhotf,vtowfk,wfconv,wfk_analyze,wfsinp,wvl_nhatgrid

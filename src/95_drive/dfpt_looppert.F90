@@ -42,7 +42,7 @@
 !!  fermie=fermi energy (Hartree)
 !!  iexit=index of "exit" on first line of file (0 if not found)
 !!  indsym(4,nsym,natom)=indirect indexing array for atom labels
-!!  kxc(nfftf,nkxc)=exchange and correlation kernel (see rhohxc.f)
+!!  kxc(nfftf,nkxc)=exchange and correlation kernel (see rhotoxc.f)
 !!  mkmem =Number of k points treated by this node (GS data)
 !!  mkqmem=Number of k+q points treated by this node (GS data)
 !!  mk1mem=Number of k points treated by this node (RF data)
