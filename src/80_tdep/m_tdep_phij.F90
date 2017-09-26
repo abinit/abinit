@@ -260,7 +260,7 @@ subroutine tdep_build_phijNN(distance,InVar,ntotcoeff,proj,Phij_coeff,Phij_NN,Sh
           do ll=1,3
             if (counter(iatom,kk,ll).ne.counter(iatom,ll,kk)) then
               write(InVar%stdout,*) ' BUG: The correction cannot be applied'
-              stop
+              stop -1
             end if
           end do !ll
         end do !kk 
@@ -440,7 +440,7 @@ subroutine tdep_calc_dij(dij,eigenV,iqpt,InVar,Lattice,omega,Phij_NN,qpt_cart,Rl
             write(InVar%stdout,'(100(f12.8,x))') imag(dij(2+(iatcell-1)*3,:))
             write(InVar%stdout,'(100(f12.8,x))') imag(dij(3+(iatcell-1)*3,:))
           end do  
-          stop
+          stop -1
         else if ((InVar%Impose_symetry.eq.1).or.(InVar%Impose_symetry.eq.3)) then
           ctemp=(dij(ii,jj)+conjg(dij(jj,ii)))/2.d0
           dij(ii,jj)=ctemp
@@ -598,7 +598,7 @@ subroutine tdep_build_phij33(eatom,fatom,isym,InVar,Phij_ref,Phij_33,Sym,trans)
 
   if ((trans.lt.1).or.(trans.gt.2)) then
     write(InVar%stdout,'(a)') '  BUG: this value of the symmetry index is not permitted'
-    stop
+    stop -1
   end if
 ! Transpose the 3x3 matrix if required
   if (trans.eq.2) then

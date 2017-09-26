@@ -329,9 +329,9 @@ subroutine tdep_build_psijNNN(distance,InVar,ntotcoeff,proj,Psij_coeff,Psij_NN,S
               norm=norm+Psij_NN(3*(eatom-1)+ii,3*(fatom-1)+jj,3*(gatom-1)+kk)
             end do !gatom
             if (abs(norm).gt.tol8) then
-              write(6,*) ' BUG : the acoustic sum rule is not fulfilled'
-              write(6,'(5(i3,x),1(e17.10,x))') ii,jj,kk,eatom,fatom,norm
-              stop
+              write(std_err,*) ' BUG : the acoustic sum rule is not fulfilled'
+              write(std_err,'(5(i3,x),1(e17.10,x))') ii,jj,kk,eatom,fatom,norm
+              stop -1
             end if
           end do !kk
         end do !jj

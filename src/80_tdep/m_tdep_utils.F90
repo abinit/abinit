@@ -150,7 +150,7 @@ contains
 !FB        write(InVar%stdout,*) 'xred_unitcell='
 !FB        write(InVar%stdout,*)  InVar%xred_unitcell(:,1:InVar%natom_unitcell)
 !FB        write(InVar%stdout,*) 'Please put the atoms in the ]-0.5;0.5] range'
-!FB        stop
+!FB        stop -1
       endif
     end do
   end do
@@ -186,7 +186,7 @@ contains
           end if
           if (iatom.gt.(InVar%natom+1)) then
             write(InVar%stdout,*) 'The number of atoms found in the bigbox exceeds natom' 
-            stop
+            stop -1
           end if  
           xred_ideal(:,iatom)=xred_tmp(:)
           call DGEMV('T',3,3,1.d0,Lattice%multiplicitym1(:,:),3,Rlatt(:),1,0.d0,Rlatt_red(:,1,iatom),1)
@@ -198,7 +198,7 @@ contains
 
   if (iatom.lt.InVar%natom) then
     write(InVar%stdout,*) 'STOP : The number of atoms found in the bigbox is lower than natom' 
-    stop
+    stop -1
   end if  
 
 ! Compute the distances between ideal positions in the SUPERcell
@@ -275,7 +275,7 @@ contains
       exit
     else if (foo2.gt.InVar%natom_unitcell) then
       write(InVar%stdout,*) ' Something wrong: WTF'
-      stop
+      stop -1
     endif
   end do  
   if (ok) then
@@ -287,7 +287,7 @@ contains
     close(31)
     write(InVar%stdout,*) 'The basis of atoms written in input.in file does not appear in the MD trajectory'
     write(InVar%stdout,*) 'Perhaps, you can adjust the tolerance (tolmotif)'
-    stop
+    stop -1
   end if  
   ABI_FREE(dist_unitcell)
 
@@ -392,29 +392,29 @@ contains
 !FB        write(InVar%stdout,*) '  xred_ideal(:,',jatom,')='
 !FB        write(InVar%stdout,*) xred_ideal(:,jatom)
 !FB        write(InVar%stdout,*) 'Perhaps, you can adjust the tolerance (tolinbox)'
-!FB        stop
+!FB        stop -1
         do ii=1,3
           if (abs(xred_center(ii,iatom)-xred_ideal(ii,jatom)-1.d0).le.InVar%tolmatch.and.(InVar%typat(iatom).eq.InVar%typat_unitcell(mod(jatom-1,InVar%natom_unitcell)+1))) then
-            write(*,*) iatom,jatom
-            write(*,*) xred_center(:,iatom)
-            write(*,*) xred_ideal(:,jatom)
+!JB            write(*,*) iatom,jatom
+!JB            write(*,*) xred_center(:,iatom)
+!JB            write(*,*) xred_ideal(:,jatom)
             xred_center(ii,iatom)=xred_center(ii,iatom)-1d0
             do istep=1,InVar%nstep
               InVar%xred(:,iatom,istep)=InVar%xred(:,iatom,istep)-1d0
             end do
-            write(*,*) xred_center(:,iatom)
-            write(*,*) xred_ideal(:,jatom)
+!JB            write(*,*) xred_center(:,iatom)
+!JB            write(*,*) xred_ideal(:,jatom)
             FromIdeal2Average(jatom)=iatom
           else if (abs(xred_center(ii,iatom)-xred_ideal(ii,jatom)+1.d0).le.InVar%tolmatch.and.(InVar%typat(iatom).eq.InVar%typat_unitcell(mod(jatom-1,InVar%natom_unitcell)+1))) then
-            write(*,*) iatom,jatom
-            write(*,*) xred_center(:,iatom)
-            write(*,*) xred_ideal(:,jatom)
+!jB            write(*,*) iatom,jatom
+!jB            write(*,*) xred_center(:,iatom)
+!jB            write(*,*) xred_ideal(:,jatom)
             xred_center(ii,iatom)=xred_center(ii,iatom)+1d0
             do istep=1,InVar%nstep
               InVar%xred(:,iatom,istep)=InVar%xred(:,iatom,istep)+1d0
             end do
-            write(*,*) xred_center(:,iatom)
-            write(*,*) xred_ideal(:,jatom)
+!JB            write(*,*) xred_center(:,iatom)
+!JB            write(*,*) xred_ideal(:,jatom)
             FromIdeal2Average(jatom)=iatom
           end if
         end do
@@ -434,7 +434,7 @@ contains
         write(31,'(a,x,3(f10.6,x))') 'I',xred_ideal (:,eatom)
         write(31,'(a,x,3(f10.6,x))') 'C',xred_center(:,eatom)
       end do
-      stop
+      stop -1
     end if  
   end do
 
@@ -807,10 +807,10 @@ contains
 &                           Phij_NN(3*(iatcell-1)+alpha,3*(jatom-1)+gama)*Levi_Civita(gama,beta,nu)
               end do !gama
               if (abs(norm1).gt.tol8) then
-                write(6,*) ' BUG : invariance under arbitrary rotation is not fulfilled (order 3)'
-                write (6,'(5(i3,x),1(e17.10,x))') iatcell,jatom,alpha,nu,beta,norm1
+                write(std_err,*) ' BUG : invariance under arbitrary rotation is not fulfilled (order 3)'
+                write (std_err,'(5(i3,x),1(e17.10,x))') iatcell,jatom,alpha,nu,beta,norm1
                 write(6,*) 'iatcell,jatom,alpha,nu,beta,norm1'
-                if (InVar%RotationalInv.eq.0) stop
+                if (InVar%RotationalInv.eq.0) stop -1
               end if  
             end do !beta
           end do !nu
@@ -831,10 +831,10 @@ contains
             end do !gama
           end do !beta
           if (abs(norm1).gt.tol8) then
-            write(6,*) ' BUG : invariance under arbitrary rotation is not fulfilled (order 2)'
-            write(6,*) 'iatcell,alpha,nu,norm1'
+            write(std_err,*) ' BUG : invariance under arbitrary rotation is not fulfilled (order 2)'
+            write(std_err,*) 'iatcell,alpha,nu,norm1'
             write (6,'(3(i3,x),1(e17.10,x))') iatcell,alpha,nu,norm1
-            if (InVar%RotationalInv.eq.0) stop
+            if (InVar%RotationalInv.eq.0) stop -1
           end if 
         end do !nu
       end do !alpha
@@ -1064,7 +1064,7 @@ subroutine tdep_calc_nbcoeff(distance,iatcell,InVar,ishell,jatom,katom,ncoeff,no
                 alphaij(isyminv,(mu-1)*3+nu,iconst(isyminv))=lambda*pp(mu,nu)-pp(nu,mu)
               else
                 write(16,*)'  BUG: This symetry is neither Keptinvariant nor Reversed'
-                stop
+                stop -1
               end if
             end do  
           end do  
@@ -1113,7 +1113,7 @@ subroutine tdep_calc_nbcoeff(distance,iatcell,InVar,ishell,jatom,katom,ncoeff,no
                     alphaij(isyminv,(mu-1)*9+(nu-1)*3+xi,iconst(isyminv))=lambda*ppp(mu,nu,xi)-ppp(xi,nu,mu)
                   else
                     write(16,*)'  BUG: This symetry is neither Keptinvariant nor Reversed'
-                    stop
+                    stop -1
                   end if
                 end do !xi  
               end do !nu 
@@ -1126,17 +1126,17 @@ subroutine tdep_calc_nbcoeff(distance,iatcell,InVar,ishell,jatom,katom,ncoeff,no
       end do !ii
     else
       write(16,*)'  BUG: Only the second and third order is allowed'
-      stop
+      stop -1
     end if  
 
 !   WARNING: There are some minimum and maximum of constraints
     if (order==2.and.(iconst(isyminv).gt.8)) then
       write(16,*)'  BUG : There are more than 8 constraints'
-      stop
+      stop -1
     end if
     if (order==3.and.(iconst(isyminv).gt.26)) then
       write(16,*)'  BUG : There are more than 26 constraints'
-      stop
+      stop -1
     end if
   end do !isyminv
 ! ================================================================================================
@@ -1170,7 +1170,7 @@ subroutine tdep_calc_nbcoeff(distance,iatcell,InVar,ishell,jatom,katom,ncoeff,no
   end do
   if (ii.ne.ncount) then
     write(16,*) ii,' non equal to ',ncount
-    stop
+    stop -1
   end if  
   do ii=1,norder
     do jj=1,ncount
@@ -1218,11 +1218,11 @@ subroutine tdep_calc_nbcoeff(distance,iatcell,InVar,ishell,jatom,katom,ncoeff,no
   write(16,*) '  =======Au total, il y a ',ncount,' vecteurs independants'
   if (ncount.gt.8.and.order==2) then
     write(16,*) '  ERROR : There are too many independant vectors'
-    stop
+    stop -1
   end if
   if (ncount.gt.26.and.order==3) then
     write(16,*) '  ERROR : There are too many independant vectors'
-    stop
+    stop -1
   end if
 
 ! On cherche les (norder-ncount) vecteurs orthogonaux aux vecteurs non-nuls
@@ -1262,7 +1262,7 @@ subroutine tdep_calc_nbcoeff(distance,iatcell,InVar,ishell,jatom,katom,ncoeff,no
 &       (abs(aimag(tab_vec(1,kk))).gt.1.d-6).or.&
 &       (abs(aimag(tab_vec(1,kk))).gt.1.d-6)) then
       write(16,*) ' ERROR : the constraint has an imaginary part'
-      stop
+      stop -1
     end if
   end do  
   ncoeff=norder-ncount

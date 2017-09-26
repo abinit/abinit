@@ -111,7 +111,7 @@ contains
     write(InVar%stdout,*) '  STOP : The maximum number of shells allowed by the code is:',nshell_max
     write(InVar%stdout,*) '         In the present calculation, the number of shells is:',Shell2at%nshell
     write(InVar%stdout,*) '         Action: increase nshell_max'
-    stop
+    stop -1
   end if  
 
 
@@ -277,7 +277,7 @@ contains
     write(InVar%stdout,*) '  STOP : The maximum number of shells allowed by the code is:',nshell_max
     write(InVar%stdout,*) '         In the present calculation, the number of shells is:',Shell3at%nshell
     write(InVar%stdout,*) '         Action: increase nshell_max'
-    stop
+    stop -1
   end if  
 
 

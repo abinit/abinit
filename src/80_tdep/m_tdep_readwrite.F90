@@ -278,7 +278,7 @@ contains
     write(InVar%stdout,'(a,f6.1,a)') '.Version ', version_value,' of PHONONS (Debug)'
   else
     write(InVar%stdout,*) '.Please use recent format for the input file'
-    stop
+    stop -1
   end if  
   write(InVar%stdout,'(a)') '.Copyright (C) 1998-2016 ABINIT group (FB,JB).'
   write(InVar%stdout,'(a)') ' ABINIT comes with ABSOLUTELY NO WARRANTY.'
@@ -433,10 +433,10 @@ contains
       write(InVar%stdout,'(x,a20,x,i4)') string,InVar%Slice
       nstep_float=float(InVar%nstep_max-InVar%nstep_min+1)/float(InVar%Slice)
       nstep_int  =float(int(nstep_float))
-      write(6,*) nstep_int,nstep_float
+      write(InVar%stdout,*) nstep_int,nstep_float
       if (abs(nstep_float-nstep_int).gt.tol8) then
-        write(InVar%stdout,*) 'ERROR: Change nstep_min. (nstep_max-nstep_min+1)/Slice has to be an integer.'
-        stop
+        write(std_err,*) 'ERROR: Change nstep_min. (nstep_max-nstep_min+1)/Slice has to be an integer.'
+        stop -1
       end if  
     else if (string.eq.Enunit) then  
       read(40,*) string,InVar%Enunit
@@ -473,7 +473,7 @@ contains
       exit
     else 
       write(InVar%stdout,'(a,a,a)') ' THE KEYWORD ',string,' IS NOT ALLOWED' 
-      stop
+      stop -1
     end if  
   end do
 ! Output very important informations 

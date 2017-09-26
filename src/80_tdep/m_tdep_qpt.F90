@@ -372,7 +372,7 @@ contains
       if (.not.IsThisAllowed) then
         write(InVar%stdout,*) 'The ',Qpt%special_qpt(jj),' Qpt bound (letter) is not allowed.'
         write(InVar%stdout,*) 'The code stop.'
-        stop
+        stop -1
       end if
     end do  
 !   Compute the cartesian coordinates of the special Q points in the reciprocical lattice     
@@ -448,7 +448,7 @@ contains
     ABI_MALLOC(Qpt%qpt_cart,(3,nqpt)); Qpt%qpt_cart(:,:)=zero
     Qpt%qpt_red(:,:)=InVar%qpt(:,:)
     write(InVar%stdout,*) ' STOP : the indices in the loop below are not consistent'
-    stop
+    stop -1
     do ii=1,nqpt
       do jj=1,3
         do kk=1,3

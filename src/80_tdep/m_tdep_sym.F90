@@ -108,7 +108,7 @@ contains
         if ((ii/=jj.and.abs(tmp1(ii,jj)).gt.tol8).or.(ii==jj.and.abs(tmp1(ii,jj)-1.d0).gt.tol8)) then
           write(InVar%stdout,'(a)') ' STOP : the matrix is not orthogonal : '
           write(InVar%stdout,'(a,x,i3,x,i3,x,f15.10)') ' ii, jj, sym(ii,jj)=',ii,jj,tmp1(ii,jj)
-          stop
+          stop -1
         end if
       end do
     end do
@@ -205,7 +205,7 @@ contains
       end do        
     else
       write(InVar%stdout,'(a)') 'There is no relationship between nsym and nptsym'
-      stop
+      stop -1
     end if  
   end if
   ABI_FREE(symrel_tmp)
@@ -235,7 +235,7 @@ contains
       write(InVar%stdout,*) Sym%ptsymrel(3,:,isym)
     end do  
     write(InVar%stdout,'(a)') ' ERROR: the symrel and ptsymrel tabs do not correspond' 
-    stop
+    stop -1
   end if  
 
 !Calcul des symrec  
