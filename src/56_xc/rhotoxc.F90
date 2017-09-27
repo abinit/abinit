@@ -262,7 +262,7 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
 
 !Local variables-------------------------------
 !scalars
- integer :: cplex,ierr,ifft,ii,intxc,ixc,ixc_fallbackkxc_hyb,indx,ipositron,ipts,ishift,ispden,iwarn,iwarnp
+ integer :: cplex,ierr,ifft,ii,ixc,ixc_fallbackkxc_hyb,indx,ipositron,ipts,ishift,ispden,iwarn,iwarnp
  integer :: jj,mpts,ndvxc,nd2vxc,nfftot,ngr,ngr2,ngrad,ngrad_apn,nkxc_eff,npts
  integer :: nspden_apn,nspden_eff,nspden_updn,nspgrad,nvxcgrho,order,mgga,usefxc
  integer :: nproc_fft,comm_fft
