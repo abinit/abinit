@@ -1285,8 +1285,7 @@ subroutine write_md_hist(hist,filename,ifirst,itime,natom,ntypat,&
  integer :: ncerr,ncid,npsp
  integer :: xcart_id,xred_id,fcart_id,fred_id
  integer :: vel_id,vel_cell_id,etotal_id,acell_id,rprimd_id,strten_id
- integer :: ntypat_id,npsp_id,typat_id,znucl_id
- integer :: ekin_id,entropy_id,mdtime_id,amu_id,dtion_id
+ integer :: ekin_id,entropy_id,mdtime_id
  logical :: has_nimage=.false.
  integer, parameter :: imgmov=0
 !arrays
@@ -1420,8 +1419,7 @@ subroutine write_md_hist_img(hist,filename,ifirst,itime,natom,ntypat,&
  integer :: xcart_id,xred_id,fcart_id,fred_id
  integer :: vel_id,vel_cell_id,etotal_id
  integer :: acell_id,rprimd_id,strten_id
- integer :: ntypat_id,npsp_id,typat_id,znucl_id
- integer :: ekin_id,entropy_id,mdtime_id,amu_id,dtion_id
+ integer :: ekin_id,entropy_id,mdtime_id
  logical :: has_nimage, has_imgmov
  character(len=500) :: msg
  type(abihist),pointer :: hist_
@@ -2279,7 +2277,7 @@ implicit none
 !scalars
  integer :: ncerr
 !arrays
- integer :: count1(1),count2(2),count3(3),count4(4)
+ integer :: count2(2),count3(3),count4(4)
  integer :: start1(1),start2(2),start3(3),start4(4)
  real(dp),allocatable :: conv(:,:)
  real(dp),pointer :: xred(:,:),fcart(:,:),rprimd(:,:),vel(:,:),vel_cell(:,:)

@@ -159,8 +159,8 @@
  integer,allocatable :: kg_k(:,:)
  integer,allocatable :: excit_coords(:,:)
  integer :: count_to_do, count, displ, countmax, displmax
- integer :: ijexcit, ijexcit2, sendcount, f_sing_trip(2/nsppol)
- real(dp) :: sendbuf(5-nsppol)
+ integer :: ijexcit, ijexcit2, sendcount
+ real(dp) :: f_sing_trip(2/nsppol),sendbuf(5-nsppol)
  real(dp) :: cauchy(7),poscart(3),rprimd(3,3),tsec(2),dummy(2,1)
  integer :: iomode,action,me,nmaster,sender,source,sread,sskip
  integer :: formeig,icg,ikg,nband_k_
@@ -963,10 +963,10 @@
 #if defined HAVE_MPI
 !Need to dispatch the elements to compute to the different processes
  ABI_ALLOCATE(tmpbuf,(nexcit_win**2))
- tmpbuf=zero
+ tmpbuf=0
  call MPI_Scatterv(excit_coords(1,1),counts,displs,MPI_INTEGER,tmpbuf,count,MPI_INTEGER,0,spaceComm,ierr)
  excit_coords(:,1)=tmpbuf(:)
- tmpbuf=zero
+ tmpbuf=0
  call MPI_Scatterv(excit_coords(1,2),counts,displs,MPI_INTEGER,tmpbuf,count,MPI_INTEGER,0,spaceComm,ierr)
  excit_coords(:,2)=tmpbuf(:)
  ABI_DEALLOCATE(tmpbuf)
@@ -1085,7 +1085,7 @@
 
      if(pole_approx==0 .or. (iunocc1==iunocc2 .and. iocc1==iocc2 .and. isppol1==isppol2))then
        sum_kernel(:)=zero
-       f_sing_trip(1)=two/nsppol
+       f_sing_trip(1)=two/dble(nsppol)
        if(nsppol==1) f_sing_trip(2)=zero
 !      For Fermi-Amaldi kxc, the xc contribution is -1/2 the Hartree contribution
 !      to the triplet state. The following factors combines both contributions.
@@ -1475,10 +1475,10 @@
        write(std_out,*)' tddft : iexcit=',iexcit
 !      Select largest and next contributions
        flargest=zero ; fnext=zero
-       nlargest=zero ; nnext=zero
+       nlargest=0 ; nnext=0
        if(nsppol==2)then
          fnext1=zero  ;  fnext2=zero
-         nnext1=zero  ;  nnext2=zero
+         nnext1=0  ;  nnext2=0
        end if
        do jexcit=1,nexcit_win
          ff=vec(1,jexcit,iexcit)**2+vec(2,jexcit,iexcit)**2

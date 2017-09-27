@@ -67,7 +67,7 @@
 
 !Local variables ------------------------------
 ! scalars
- integer :: iatom,iband,ikpt,im1,im2,isppol,ispinor,ispinor2
+ integer :: iatom,iband,ikpt,im1,isppol,ispinor
  integer :: lpawu,mbandc,natom,nspinor,nsppol,nkpt
  character(len=500) :: message
 ! arrays

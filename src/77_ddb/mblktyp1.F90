@@ -87,7 +87,6 @@ subroutine mblktyp1(chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
  integer :: mband,mblktyp,mblok,mkpt,mpert,msize,mtypat
  integer :: nblok,nblokt,nq
  integer :: tmerge,usepaw
- integer :: ngfft(18),ngfft8(18)
  integer,allocatable :: mgblok(:)!,lloc(:)
  real(dp),parameter :: qtol=2.0d-8
  real(dp) :: diff

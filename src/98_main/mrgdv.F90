@@ -65,13 +65,13 @@ program mrgdv
 
 !Local variables-------------------------------
 !scalars
- integer :: ii,nargs,nfiles,comm,prtvol,nfft,my_rank,ierr
+ integer :: ii,nargs,nfiles,comm,prtvol,my_rank,ierr
  character(len=24) :: codename
  character(len=500) :: command,arg, msg
  character(len=fnlen) :: db_path,dump_file
  type(dvdb_t) :: db
 !arrays
- integer :: ngfft(18),ngqpt(3)
+ integer :: ngqpt(3)
  character(len=fnlen),allocatable :: v1files(:)
 
 ! *************************************************************************

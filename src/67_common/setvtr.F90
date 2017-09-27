@@ -211,7 +211,7 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
  integer :: coredens_method,mpi_comm_sphgrid,nk3xc
  integer :: iatom,ifft,ipositron,ispden,nfftot
  integer :: optatm,optdyfr,opteltfr,optgr,option,optn,optn2,optstr,optv,vloc_method
- real(dp) :: doti,e_chempot,e_xcdc_vxctau,ebb,ebn,evxc,ucvol_local,rpnrm
+ real(dp) :: doti,e_xcdc_vxctau,ebb,ebn,evxc,ucvol_local,rpnrm
  logical :: add_tfw_,is_hybrid_ncpp,with_vxctau,wvlbigdft
  real(dp), allocatable :: xcart(:,:)
  character(len=500) :: message

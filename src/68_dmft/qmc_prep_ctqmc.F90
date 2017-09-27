@@ -110,12 +110,11 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
  character(len=2) :: gtau_iter,iatomnb
  integer :: iatom,ierr,if1,if2,iflavor,iflavor1,iflavor2,iflavor3,ifreq,im,im1,ispinor,ispinor1,isppol,itau,itypat,im2,ispinor2
  integer :: lpawu,master,mbandc,natom,nflavor,nkpt,nspinor,nsppol,nsppol_imp,tndim,ispa,ispb,ima,imb
- integer :: nproc,spacecomm,opt_diag,opt_nondiag,testcode,testrot,dmft_nwlo,opt_fk,useylm,nomega,opt_rot
+ integer :: nproc,opt_diag,opt_nondiag,testcode,testrot,dmft_nwlo,opt_fk,useylm,nomega,opt_rot
  integer :: ier,rot_type_vee
- complex(dpc) :: omega_current,integral(2,2),xsum
- real(dp) :: Doccsum,Noise,omega
+ complex(dpc) :: omega_current,integral(2,2)
+ real(dp) :: omega
  real(dp) :: facd,facnd
- real(dp) :: tsec(2)
  logical :: nondiaglevels
 ! arrays
  real(dp), allocatable :: docc(:,:)
@@ -124,7 +123,6 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
  complex(dpc), allocatable :: hybri_limit(:,:)
  real(dp), allocatable, target :: gtmp_nd(:,:,:)
  real(dp) :: umod(2,2)
- character(len=4) :: tag_proc
  character(len=30) :: tmpfil
  complex(dpc), allocatable :: fw1(:,:),gw_tmp(:,:)
  complex(dpc), allocatable, target :: gw_tmp_nd(:,:,:) !modif
@@ -153,24 +151,18 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
  
  logical(kind=1) :: rot_inv = .false.
  logical(kind=1) :: leg_measure = .true.
- logical(kind=1) :: hist = .false.
- logical(kind=1) :: wrt_files = .true.
- logical(kind=1) :: tot_not = .true.
  
  integer :: nfreq,unt,unt2
  integer :: ntau ! >= 2*nfreq + 1
  integer :: nleg 
  integer :: ileg
  integer :: verbosity_solver ! min 0 -> max 3
- integer :: seed
- integer :: comm 
 
  real(dp) :: beta,besp,bespp,xx
  complex(dpc) :: u_nl
 
  complex(dpc), allocatable, target ::fw1_nd_tmp(:,:,:)
  complex(dpc), allocatable, target :: g_iw(:,:,:)
- real(dp), allocatable, target :: levels_ctqmc_(:)
  real(dp), allocatable, target :: u_mat_ij(:,:)
  real(dp), allocatable, target :: u_mat_ijkl(:,:,:,:)
  real(dp), allocatable, target :: u_mat_ijkl_tmp(:,:,:,:)
