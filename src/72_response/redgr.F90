@@ -37,7 +37,7 @@
 !!      dfpt_eltfrxc
 !!
 !! CHILDREN
-!!      fourdp,timab
+!!      fourdp
 !!
 !! SOURCE
 
@@ -107,9 +107,7 @@ subroutine redgr (frin,frredgr,mpi_enreg,nfft,ngfft,paral_kgb)
 !Obtain rho(G) in wkcmpx from input rho(r)
  work(:)=frin(:)
 
- call timab(82,1,tsec)
  call fourdp(cplex_tmp,wkcmpx,work,-1,mpi_enreg,nfft,ngfft,paral_kgb,0)
- call timab(82,2,tsec)
 
 !Gradient calculation for three reduced components in turn.
 !Code duplicated to remove logic from loops.
@@ -155,9 +153,7 @@ subroutine redgr (frin,frredgr,mpi_enreg,nfft,ngfft,paral_kgb)
      end do
    end if !idir
 
-   call timab(82,1,tsec)
    call fourdp(cplex_tmp,workgr,work,1,mpi_enreg,nfft,ngfft,paral_kgb,0)
-   call timab(82,2,tsec)
 
 !$OMP PARALLEL DO 
    do ifft=1,nfft
