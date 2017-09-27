@@ -124,12 +124,12 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,&
 !Local variables-------------------------------
 !scalars
  integer,parameter :: level=50,response=1,cplex1=1
- integer :: ask_accurate,bantot,choice,dum_nshiftk,flag
- integer :: formeig,fullinit,gencond,gscase,i1dir,i1pert,i2dir,i2pert,i3dir
- integer :: i3pert,ierr,ireadwf,mcg,mkmem_max,mpert,n1,n2,n3,n3xccc,nblok
+ integer :: ask_accurate,bantot,dum_nshiftk,flag
+ integer :: formeig,gencond,gscase,i1dir,i1pert,i2dir,i2pert,i3dir
+ integer :: i3pert,ierr,ireadwf,mcg,mkmem_max,mpert,n1,n2,n3,n3xccc
  integer :: nkpt3,nkxc,nk3xc,nneigh,option,optorth,rdwrpaw,comm_cell
  real(dp) :: boxcut,ecore,ecut_eff,enxc,fermie,gsqcut,gsqcut_eff,gsqcut_eff2,gsqcutdg_eff
- real(dp) :: rdum,residm,tolwfr,ucvol,vxcavg
+ real(dp) :: rdum,residm,ucvol,vxcavg
  character(len=500) :: message
  character(len=fnlen) :: dscrpt
  type(ebands_t) :: bstruct

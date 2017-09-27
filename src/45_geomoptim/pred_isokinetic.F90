@@ -84,7 +84,7 @@ subroutine pred_isokinetic(ab_mover,hist,itime,ntime,zDEBUG,iexit)
 
 !Local variables-------------------------------
 !scalars
- integer  :: ii,kk,iatom,idim,idum=5,nfirst,ifirst
+ integer  :: kk,iatom,idim,idum=5,nfirst,ifirst
  real(dp) :: a,as,b,sqb,s,s1,s2,scdot,sigma2,vtest,v2gauss
  real(dp),parameter :: v2tol=tol8
  real(dp) :: etotal,rescale_vel

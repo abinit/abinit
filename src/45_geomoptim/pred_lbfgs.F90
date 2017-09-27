@@ -93,20 +93,17 @@ logical,intent(in) :: zDEBUG
 integer :: info,ihist_prev
 integer  :: ndim,cycl_main
 integer, parameter :: npul=0
-integer  :: ierr,ii,jj,kk,nitpul
+integer  :: ii,jj,kk
 real(dp),save :: ucvol0
-real(dp) :: ucvol,det
+real(dp) :: ucvol
 real(dp) :: etotal
-real(dp) :: favg,alpha0
+real(dp) :: favg
 
 !arrays
-integer,allocatable :: ipiv(:)
 real(dp),allocatable :: diag(:)
 real(dp),allocatable,save :: hessin(:,:),vin(:),vin_prev(:)
 real(dp),allocatable,save :: vout(:),vout_prev(:)
 real(dp),allocatable,save ::vinres(:,:),vin1(:,:)
-real(dp),allocatable ::  amat(:,:),amatinv(:,:),alpha(:,:)
-real(dp),allocatable :: rwork(:)
 real(dp),save :: acell0(3) ! Initial acell
 real(dp),save :: rprimd0(3,3) ! Initial rprimd
 real(dp) :: acell(3)

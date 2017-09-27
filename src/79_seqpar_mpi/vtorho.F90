@@ -1946,7 +1946,7 @@ subroutine wvl_nscf_loop_bigdft()
  integer,parameter :: iscf_=-1       !do not do a SCF cycle
  logical,parameter :: do_scf=.false. !do not do a SCF cycle
  logical,parameter :: wvlbigdft=.true.
- real(dp) :: dum,eexctx,eh,ekin,eloc,enl,esicdc,evxc,exc
+ real(dp) :: eexctx,eh,ekin,eloc,enl,esicdc,evxc,exc
 
 ! *************************************************************************
 

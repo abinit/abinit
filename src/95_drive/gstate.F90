@@ -234,7 +234,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 #if defined HAVE_BIGDFT
  integer :: icoulomb
 #endif
- integer :: accessfil,ask_accurate,bantot,choice,comm_psp,fform,fullinit
+ integer :: accessfil,ask_accurate,bantot,choice,comm_psp,fform
  integer :: gnt_option,gscase,iatom,idir,ierr,ii,indx,jj,kk,ios,itypat
  integer :: ixfh,izero,mcg,me,mgfftf,mpert,msize,mu,my_natom,my_nspinor
  integer :: nblok,nfftf,nfftot,npwmin
@@ -242,7 +242,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  integer :: pwind_alloc,rdwrpaw,comm,tim_mkrho,use_sc_dmft
  integer :: cnt,spin,band,ikpt
  real(dp) :: cpus,ecore,ecut_eff,ecutdg_eff,etot,fermie
- real(dp) :: tolwfr,gsqcut_eff,gsqcut_shp,gsqcutc_eff,hyb_range,residm,ucvol
+ real(dp) :: gsqcut_eff,gsqcut_shp,gsqcutc_eff,hyb_range,residm,ucvol
  logical :: read_wf_or_den,has_to_init,call_pawinit,write_wfk
  logical :: wvlbigdft=.false.,wvl_debug=.false.
  character(len=500) :: message
