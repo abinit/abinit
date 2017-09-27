@@ -148,9 +148,13 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
  type(green_type) :: greenlda
  type(matlu_type), allocatable  :: hybri_coeff(:)
 ! Var added to the code for TRIQS_CTQMC test and default value -----------------------------------------------------------
- 
  logical(kind=1) :: rot_inv = .false.
  logical(kind=1) :: leg_measure = .true.
+#if defined HAVE_TRIQS
+ logical(kind=1) :: hist = .false.
+ logical(kind=1) :: wrt_files = .true.
+ logical(kind=1) :: tot_not = .true.
+#endif
  
  integer :: nfreq,unt,unt2
  integer :: ntau ! >= 2*nfreq + 1
