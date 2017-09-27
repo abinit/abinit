@@ -167,6 +167,7 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
  use m_errors
  use m_xmpi
  use m_gemm_nonlop
+ use m_xcdata
 
  use m_energies,         only : energies_type
  use m_electronpositron, only : electronpositron_type,electronpositron_calctype
@@ -257,6 +258,7 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
  real(dp) :: dotr,doti,eeigk,ekk,enlk,evxc,e_xcdc_vxctau,ucvol,ucvol_local,vxcavg
  !character(len=500) :: message
  type(gs_hamiltonian_type) :: gs_hamk
+ type(xcdata_type) :: xcdata
 !arrays
  integer,allocatable :: kg_k(:,:)
  real(dp) :: gmet(3,3),gprimd(3,3),kpg_dum(0,0),kpoint(3),nonlop_out(1,1)
@@ -326,20 +328,22 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
 
    if (dtset%icoulomb == 0) then
 !    Use the periodic solver to compute Hxc.
+     call xcdata_init(dtset%intxc,dtset%ixc,&
+&      dtset%nelect,dtset%tphysel,dtset%usekden,dtset%vdw_xc,dtset%xc_tb09_c,dtset%xc_denpos,xcdata)
      ABI_ALLOCATE(kxc,(1,nkxc))
 !    to be adjusted for the call to rhohxc
      nk3xc=1
      if (ipositron==0) then
-       call rhohxc(dtset,energies%e_xc,gsqcut,psps%usepaw,kxc, &
+       call rhohxc(energies%e_xc,gsqcut,psps%usepaw,kxc, &
 &       mpi_enreg,nfftf,ngfftf,nhat,psps%usepaw,nhatgr,nhatgrdim, &
-&       nkxc,nk3xc,dtset%nspden,n3xccc,option,rhog,rhor,rprimd,strsxc, &
-&       usexcnhat,vhartr,vxc,vxcavg,xccc3d,taug=taug,taur=taur, &
+&       nkxc,nk3xc,dtset%nspden,n3xccc,option,dtset%paral_kgb,rhog,rhor,rprimd,strsxc, &
+&       usexcnhat,vhartr,vxc,vxcavg,xccc3d,xcdata,taug=taug,taur=taur, &
 &       vxctau=vxctau,exc_vdw_out=energies%e_xc_vdw,add_tfw=add_tfw_)
      else
-       call rhohxc(dtset,energies%e_xc,gsqcut,psps%usepaw,kxc, &
+       call rhohxc(energies%e_xc,gsqcut,psps%usepaw,kxc, &
 &       mpi_enreg,nfftf,ngfftf,nhat,psps%usepaw,nhatgr,nhatgrdim, &
-&       nkxc,nk3xc,dtset%nspden,n3xccc,option,rhog,rhor,rprimd,strsxc, &
-&       usexcnhat,vhartr,vxc,vxcavg,xccc3d, &
+&       nkxc,nk3xc,dtset%nspden,n3xccc,option,dtset%paral_kgb,rhog,rhor,rprimd,strsxc, &
+&       usexcnhat,vhartr,vxc,vxcavg,xccc3d,xcdata, &
 &       electronpositron=electronpositron,taug=taug,taur=taur, &
 &       vxctau=vxctau,exc_vdw_out=energies%e_xc_vdw,add_tfw=add_tfw_)
      end if
