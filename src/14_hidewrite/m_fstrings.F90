@@ -2167,7 +2167,7 @@ integer function next_token(string, start, ostr) result(ierr)
  integer,intent(inout) :: start
 
 !Local variables-------------------------------
- integer :: ii,beg,stp
+ integer :: ii,beg
 
 ! *************************************************************************
 

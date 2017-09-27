@@ -600,10 +600,13 @@ subroutine xmpi_init()
 
 !Local variables-------------------
  integer :: mpierr,ierr,unt
- logical :: exists,isopen
+ logical :: exists
 #ifdef HAVE_MPI
- integer :: attribute_val,required,provided
+ integer :: attribute_val
  logical :: lflag
+#ifdef HAVE_OPENMP
+ integer :: required,provided
+#endif
 #endif
 
 ! *************************************************************************
@@ -2865,7 +2868,7 @@ subroutine xmpio_get_info_frm(bsize_frm,mpi_type_frm,comm)
 !scalars
  integer,parameter :: master=0
  integer :: spt,ept,ii
- integer :: f90_unt,ierr,iimax,mpio_fh,bsize_int,mpierr
+ integer :: f90_unt,iimax,mpio_fh,bsize_int,mpierr
  integer(XMPI_OFFSET_KIND) :: offset,rml
  character(len=fnlen) :: fname
  character(len=500) :: errmsg
@@ -4206,7 +4209,8 @@ subroutine xmpio_write_frmarkers(fh,offset,sc_mode,nfrec,bsize_frecord,ierr)
 !Local variables-------------------------------
 !scalars
  integer :: nb,irec,frmarkers_type,jj,bsize_frm,mpi_type_frm,mpierr,myfh
- integer(XMPI_OFFSET_KIND) :: displ,my_offset
+ integer(XMPI_OFFSET_KIND) :: displ
+!integer(XMPI_OFFSET_KIND) :: my_offset
 !character(len=500) :: msg
 !arrays
  integer(kind=int16),allocatable :: bufdelim2(:)

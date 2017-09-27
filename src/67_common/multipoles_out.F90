@@ -70,7 +70,7 @@ subroutine multipoles_out(rhor,mpi_enreg,natom,nfft,ngfft,nspden,&
  real(dp),intent(in) :: rhor(nfft,nspden),rprimd(3,3),xred(3,natom),ziontypat(ntypat)
 !Local variables ------------------------------
 !scalars
- integer :: iatom,ispden,nspden_updn
+ integer :: iatom,nspden_updn
  real(dp) :: ziontotal
  character(len=500) :: message
 !arrays
