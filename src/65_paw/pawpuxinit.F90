@@ -111,7 +111,7 @@
  integer :: lmexexch,lmkyc,lmn_size,lmn2_size,lmpawu,lpawu
  integer :: m1,m11,m2,m21,m3,m31,m4,m41
  integer :: mesh_size,int_meshsz,mkyc,sz1
- real(dp) :: ak,f4of2,f6of2,int1,intg
+ real(dp) :: ak,f4of2,f6of2,int1,intg,testj,testu,testumj
  character(len=500) :: message
 !arrays
  integer,ABI_CONTIGUOUS pointer :: indlmn(:,:)
@@ -488,7 +488,44 @@
          end do
        end do
        ABI_DEALLOCATE(fk)
-
+       testu=0
+       write(6,*) " Matrix of interaction vee(m1,m2,m1,m2)"
+       do m1=1,2*lpawu+1
+         write(6,'(2x,14(f12.6,2x))') (pawtab(itypat)%vee(m1,m2,m1,m2),m2=1,2*lpawu+1)
+         do m2=1,2*lpawu+1
+           testu=testu+ pawtab(itypat)%vee(m1,m2,m1,m2)
+        enddo
+       enddo
+       testu=testu/((two*lpawu+one)**2)
+       write(6,*) "------------------------"
+       write(6,'(a,f12.6)') " U=", testu
+       write(6,*) "------------------------"
+      ! testj=0
+      ! write(6,*) " vee(m1,m2,m2,m1)"
+      ! do m1=1,2*lpawu+1
+      !   write(6,'(2x,14(f12.6,2x))') (pawtab(itypat)%vee(m1,m2,m2,m1),m2=1,2*lpawu+1)
+      !   do m2=1,2*lpawu+1
+      !   if(m1/=m2) testj=testj+ pawtab(itypat)%vee(m1,m2,m2,m1)
+      !  enddo
+      ! enddo
+      ! testj=testj/((two*lpawu)*(two*lpawu+one))
+      ! write(6,*) "------------------------"
+      ! write(6,'(a,f12.6)') "J=", testj
+      ! write(6,*) "------------------------"
+       write(6,*) " Matrix of interaction vee(m1,m2,m1,m2)-vee(m1,m2,m2,m1)"
+       do m1=1,2*lpawu+1
+         write(6,'(2x,14(f12.6,2x))') ((pawtab(itypat)%vee(m1,m2,m1,m2)-pawtab(itypat)%vee(m1,m2,m2,m1)),m2=1,2*lpawu+1)
+         do m2=1,2*lpawu+1
+         if(m1/=m2) testumj=testumj+ pawtab(itypat)%vee(m1,m2,m1,m2)-pawtab(itypat)%vee(m1,m2,m2,m1)
+        enddo
+       enddo
+       testumj=testumj/((two*lpawu)*(two*lpawu+one))
+       write(6,*) "------------------------"
+       write(6,'(a,f12.6)') " U-J=", testumj
+       write(6,*) "------------------------"
+       write(6,*) "------------------------"
+       write(6,'(a,f12.6)')  " J=", testu-testumj
+       write(6,*) "------------------------"
      end if ! usepawu
 
 !    ======================================================================

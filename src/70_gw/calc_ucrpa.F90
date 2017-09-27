@@ -1078,7 +1078,7 @@
   implicit none
   integer, intent(in) :: m_inf,m_sup,option,ifreq
   complex(dpc), intent(in) :: Interaction(m_inf:m_sup,m_inf:m_sup,m_inf:m_sup,m_inf:m_sup)
-  complex(dpc),intent(out) :: UU,JJ
+  complex(dpc),intent(out) :: UU,JJ,UUmJJ
   character(len=*), intent(in) :: utype
   complex(dpc) :: UU1
   integer :: m1,m2
@@ -1159,13 +1159,22 @@
    end do
  endif
 
- JJ=czero
+ UUmJJ=czero
  do m1=m_inf,m_sup
    do m2=m_inf,m_sup
-     if(m1/=m2) JJ=JJ+Interaction(m1,m2,m2,m1)
+     if(m1/=m2) UUmJJ=UUmJJ+Interaction(m1,m2,m1,m2)-Interaction(m1,m2,m2,m1)
    enddo
  enddo
- JJ=JJ/float((m_sup-m_inf+1)*(m_sup-m_inf))
+ UUmJJ=UUmJJ/float((m_sup-m_inf+1)*(m_sup-m_inf))
+ JJ=UU-UUmJJ
+
+! JJ=czero
+! do m1=m_inf,m_sup
+!   do m2=m_inf,m_sup
+!     if(m1/=m2) JJ=JJ+Interaction(m1,m2,m2,m1)
+!   enddo
+! enddo
+! JJ=JJ/float((m_sup-m_inf+1)*(m_sup-m_inf))
  write(message,'(a,3x,2a,2f10.4,a)')ch10,utype,' value of J=1/((2l+1)(2l)) \sum_{m1/=m2} U(m1,m2,m2,m1)=',JJ,ch10
  call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
  

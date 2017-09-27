@@ -251,7 +251,7 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
  usefock=0;if (abs(hyb_mixing_)>tol8.or.abs(hyb_mixing_sr_)>tol8) usefock=1
  usexcnhat=maxval(pawtab(1:ntypat)%usexcnhat)
  usepawu=maxval(pawtab(1:ntypat)%usepawu)
- non_magnetic_xc=(usepawu==4) 
+ non_magnetic_xc=(usepawu==4).or.(usepawu==14)
  compch_sph=-1.d5
  opt_compch=0;if (option/=1.and.ipert<=0) opt_compch=1
  if (opt_compch==1) compch_sph=zero

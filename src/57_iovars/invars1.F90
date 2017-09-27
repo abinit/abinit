@@ -924,11 +924,15 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    write(message, '(7a)' )&
 &   'usedmft and usepawu are both activated ',ch10,&
 &   'This is not an usual calculation:',ch10,&
-&   'usepawu will be put to 10:',ch10,&
+&   'usepawu will be put to a value >= 10:',ch10,&
 &   'LDA+U potential and energy will be put to zero'
    MSG_WARNING(message)
  end if
- if ( dtset%usedmft > 0 .and. dtset%usepawu >= 0 ) dtset%usepawu = 1
+ if ( dtset%usedmft > 0 .and. dtset%usepawu == 4 ) then
+   dtset%usepawu = 14
+ else if ( dtset%usedmft > 0 .and. dtset%usepawu >= 0 ) then
+   dtset%usepawu = 10
+ endif
 
  dtset%usedmatpu=0
  dtset%lpawu(1:dtset%ntypat)=-1

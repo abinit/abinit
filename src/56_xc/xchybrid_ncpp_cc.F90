@@ -113,7 +113,7 @@ subroutine xchybrid_ncpp_cc(dtset,enxc,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,s
  DBG_ENTER("COLL")
 
 
- nmxc=(dtset%usepawu==4)
+ nmxc=(dtset%usepawu==4).or.(dtset%usepawu==14)
 
 !Not relevant for PAW
  if (dtset%usepaw==1) return

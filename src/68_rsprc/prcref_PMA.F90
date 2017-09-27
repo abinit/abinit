@@ -234,7 +234,7 @@
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
 
 ! Initialise non_magnetic_xc for rhohxc
- non_magnetic_xc=(dtset%usepawu==4)
+ non_magnetic_xc=(dtset%usepawu==4).or.(dtset%usepawu==14)
 
 !1) Eventually take care of the forces
 

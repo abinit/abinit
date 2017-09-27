@@ -224,7 +224,7 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
  call timab(80,1,tsec)
 
 ! Initialise non_magnetic_xc for rhohxc
- non_magnetic_xc=(dtset%usepawu==4)
+ non_magnetic_xc=(dtset%usepawu==4).or.(dtset%usepawu==14)
 
 !Check that usekden is not 0 if want to use vxctau
  with_vxctau = (present(vxctau).and.present(taur).and.(dtset%usekden/=0))

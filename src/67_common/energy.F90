@@ -279,7 +279,7 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
  DBG_ENTER("COLL")
 
 ! Create variable for non_magnetic_xc
- non_magnetic_xc=(dtset%usepawu==4)
+ non_magnetic_xc=(dtset%usepawu==4).or.(dtset%usepawu==14)
 
 !Check that usekden is not 0 if want to use vxctau
  with_vxctau = (dtset%usekden/=0)

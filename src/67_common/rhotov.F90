@@ -188,7 +188,7 @@ subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
  call timab(940,1,tsec)
 
 ! Initialise non_magnetic_xc for rhohxc
- non_magnetic_xc=(dtset%usepawu==4)
+ non_magnetic_xc=(dtset%usepawu==4).or.(dtset%usepawu==14)
 
 !Check that usekden is not 0 if want to use vxctau
  with_vxctau = (present(vxctau).and.present(taur).and.(dtset%usekden/=0))

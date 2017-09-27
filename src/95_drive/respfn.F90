@@ -272,7 +272,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  call status(0,dtfil%filstat,iexit,level,'init          ')
 
 ! Initialise non_magnetic_xc for rhohxc
- non_magnetic_xc=(dtset%usepawu==4)
+ non_magnetic_xc=(dtset%usepawu==4).or.(dtset%usepawu==14)
 
 !Some data for parallelism
  nkpt_max=50;if(xmpi_paral==1)nkpt_max=-1

@@ -196,7 +196,7 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,gsqcutf_eff,nfftf,ngfftf,&
    call wfd_change_ngfft(Wfd,Cryst,Psps,ngfftf)
  end if
 
- non_magnetic_xc=(Dtset%usepawu==4)
+ non_magnetic_xc=(Dtset%usepawu==4).or.(Dtset%usepawu==14)
 
  comm   = Wfd%comm
  rank   = Wfd%my_rank

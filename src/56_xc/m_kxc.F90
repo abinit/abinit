@@ -531,7 +531,7 @@ subroutine kxc_alda(dtset,ixc,kxcg,mpi_enreg,nfft,ngfft,nspden,option,rhor,rhocu
    optionrhoxc = 2 !See rhohxc.f
 
    call rhohxc(dtLocal,enxc,gsqcut,0,kxcr,mpi_enreg,nfft,ngfft,dum,0,dum,0,nkxc,nk3xc,&
-&   dtset%usepawu==4,nspden,n3xccc,&
+&   dtset%usepawu==4.or.dtset%usepawu==14,nspden,n3xccc,&
 &   optionrhoxc,rhog,rhorcut,rprimd,strsxc,1,vhartree,vxc,vxcavg,xccc3d)
 
 !  DEBUG
@@ -586,7 +586,7 @@ subroutine kxc_alda(dtset,ixc,kxcg,mpi_enreg,nfft,ngfft,nspden,option,rhor,rhocu
    optionrhoxc = -2 !See rhohxc.f
 
    call rhohxc(dtLocal,enxc,gsqcut,0,kxcr,mpi_enreg,nfft,ngfft,dum,0,dum,0,nkxc,nk3xc,&
-&   dtset%usepawu==4,nspden,n3xccc,&
+&   dtset%usepawu==4.or.dtset%usepawu==14,nspden,n3xccc,&
 &   optionrhoxc,rhog,rhorcut,rprimd,strsxc,1,vhartree,vxc,vxcavg,xccc3d)
 
    kxcr(:,2) = 0.5_dp*kxcr(:,2)
@@ -1179,7 +1179,8 @@ subroutine kxc_driver(Dtset,Cryst,ixc,ngfft,nfft_tot,nspden,rhor,npw,dim_kxcg,kx
 
 !Compute the kernel.
  call rhohxc(DtGW,enxc,gsqcut,izero,kxcr,MPI_enreg_seq,nfft_tot,ngfft,&
-& dum,0,dum,0,nkxc,nk3xc,dtset%usepawu==4,nspden,n3xccc,option,rhog,rhor,Cryst%rprimd,&
+& dum,0,dum,0,nkxc,nk3xc,dtset%usepawu==4.or.dtset%usepawu==14,&
+& nspden,n3xccc,option,rhog,rhor,Cryst%rprimd,&
 & strsxc,1,vhartr,vxclda,vxcavg,xccc3d)
 
  ABI_FREE(rhog)
@@ -1511,7 +1512,8 @@ subroutine kxc_ADA(Dtset,Cryst,ixc,ngfft,nfft,nspden,rhor,&
  end if
 
  call rhohxc(DtGW,enxc,gsqcut,izero,kxcr,MPI_enreg_seq,nfft,ngfft,&
-& dum,0,dum,0,nkxc,nk3xc,dtset%usepawu==4,nspden,n3xccc,option,rhog,my_rhor,Cryst%rprimd,&
+& dum,0,dum,0,nkxc,nk3xc,dtset%usepawu==4.or.dtset%usepawu==14,&
+& nspden,n3xccc,option,rhog,my_rhor,Cryst%rprimd,&
 & strsxc,1,vhartr,vxclda,vxcavg,xccc3d)
 
 !Check for extreme (NaN) values

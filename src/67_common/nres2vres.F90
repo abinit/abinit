@@ -132,7 +132,7 @@ subroutine nres2vres(dtset,gsqcut,izero,kxc,mpi_enreg,my_natom,nfft,ngfft,nhat,&
  has_nkxc_gga=(nkxc==7.or.nkxc==19)
 
 ! Initialise non_magnetic_xc for rhohxc
- non_magnetic_xc=(dtset%usepawu==4)
+ non_magnetic_xc=(dtset%usepawu==4).or.(dtset%usepawu==14)
 
  if(optxc<-1.or.optxc>1)then
    write(message,'(a,i0)')' Wrong value for optxc ',optxc

@@ -94,7 +94,7 @@
 
  if(present(dmft_dc))  then
    dmftdc=dmft_dc
-   if(pawtab%usepawu/=10) then
+   if(pawtab%usepawu<10) then
      write(message,'(4x,2a,i5)') "Error, usepawu should be equal to 10 if", &
 &     " dmft_dc is an argument of pawuenergy",pawtab%usepawu
      call wrtout(std_out,message,'COLL')

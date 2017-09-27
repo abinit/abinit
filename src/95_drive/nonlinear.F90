@@ -161,7 +161,7 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,&
  comm_cell = mpi_enreg%comm_cell
 
 ! Initialise non_magnetic_xc for rhohxc
- non_magnetic_xc=(dtset%usepawu==4)
+ non_magnetic_xc=(dtset%usepawu==4).or.(dtset%usepawu==14)
 
 !Check if the perturbations asked in the input file can be computed
 
