@@ -73,6 +73,7 @@ subroutine hartrestr(gsqcut,idir,ipert,mpi_enreg,natom,nfft,ngfft,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'hartrestr'
+ use interfaces_41_geometry
  use interfaces_53_ffts
 !End of the abilint section
 
