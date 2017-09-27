@@ -846,6 +846,8 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
    ABI_DEALLOCATE(vxc) ! dummy
  end if
 
+ ABI_ALLOCATE(vhartr,(nfftf))
+
 !Set up hartree and xc potential. Compute kxc here.
  qphon(:)=zero
  call hartre(1,gsqcut,psps%usepaw,mpi_enreg,nfftf,ngfftf,dtset%paral_kgb,qphon,rhog,rprimd,vhartr)
@@ -854,7 +856,6 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  nkxc=2*min(dtset%nspden,2)-1;if(dtset%xclevel==2)nkxc=12*min(dtset%nspden,2)-5
  call check_kxc(dtset%ixc,dtset%optdriver)
  ABI_ALLOCATE(kxc,(nfftf,nkxc))
- ABI_ALLOCATE(vhartr,(nfftf))
  ABI_ALLOCATE(vxc,(nfftf,dtset%nspden))
 
  _IBM6("Before rhotoxc")
