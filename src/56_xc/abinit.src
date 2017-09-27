@@ -28,6 +28,7 @@ sources = [
 "interfaces_56_xc.F90",
 "m_electronpositron.F90",
 "m_kxc.F90",
+"m_xcdata.F90",
 "m_xc_vdw.F90",
 "mkcore.F90",
 "phase.F90",

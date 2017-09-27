@@ -92,6 +92,7 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,gsqcutf_eff,nfftf,ngfftf,&
  use defs_abitypes
  use m_profiling_abi
  use m_errors
+ use m_xcdata
 
  use m_pawang,      only : pawang_type
  use m_pawtab,      only : pawtab_type
@@ -152,13 +153,14 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,gsqcutf_eff,nfftf,ngfftf,&
  integer :: itypat,lmn_size,j0lmn,jlmn,ilmn,klmn,klmn1,lmn2_size_max
  integer :: isppol,izero,cplex_dij,npw_k
  integer :: nspinor,nsppol,nspden,nk_calc,rank
- integer :: isp1,isp2,iab,nsploop,nkxc,option,n3xccc_,nk3xc,my_nbbp,my_nmels
+ integer :: isp1,isp2,iab,nsploop,nkxc,option,n3xccc_,nk3xc,my_nbbp,my_nmels,ixc_hybrid
  real(dp) :: nfftfm1,fact,DijH,enxc_val,enxc_hybrid_val,vxcval_avg,vxcval_hybrid_avg,h0dij,vxc1,vxc1_val,re_p,im_p,dijsigcx
  real(dp) :: omega ! HSE Fock exchange screening parameter
  complex(dpc) :: cdot
  logical :: ltest
  character(len=500) :: msg
  type(MPI_type) :: MPI_enreg_seq
+ type(xcdata_type) :: xcdata,xcdata_hybrid
  type(Dataset_type) :: Dtset_dummy
 !arrays
  integer,parameter :: spinor_idxs(2,4)=RESHAPE([1,1,2,2,1,2,2,1], [2,4])
@@ -245,9 +247,11 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,gsqcutf_eff,nfftf,ngfftf,&
  ABI_MALLOC(kxc_,(nfftf,nkxc))
  ABI_MALLOC(vxc_val,(nfftf,nspden))
 
- call rhohxc(Dtset,enxc_val,gsqcutf_eff,izero,kxc_,MPI_enreg_seq,nfftf,ngfftf,&
-& nhat,Wfd%usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,nspden,n3xccc_,option,rhog,rhor,Cryst%rprimd,&
-& strsxc,usexcnhat,vh_,vxc_val,vxcval_avg,xccc3d_,taug=taug,taur=taur)
+ call xcdata_init(dtset%intxc,dtset%ixc,&
+&  dtset%nelect,dtset%tphysel,dtset%usekden,dtset%vdw_xc,dtset%xc_tb09_c,dtset%xc_denpos,xcdata)
+ call rhohxc(enxc_val,gsqcutf_eff,izero,kxc_,MPI_enreg_seq,nfftf,ngfftf,&
+& nhat,Wfd%usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,nspden,n3xccc_,option,dtset%paral_kgb,rhog,rhor,Cryst%rprimd,&
+& strsxc,usexcnhat,vh_,vxc_val,vxcval_avg,xccc3d_,xcdata,taug=taug,taur=taur)
 
  ! FABIEN's development
  ! Hybrid functional treatment
@@ -261,39 +265,40 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,gsqcutf_eff,nfftf,ngfftf,&
      ! then override the variables: xclevel, ixc
      Dtset_dummy%xclevel=2
      if(Dtset%gwcalctyp<200) then
-       Dtset_dummy%ixc=-428         ! HSE06
+       ixc_hybrid=-428         ! HSE06
      else if(Dtset%gwcalctyp<300) then
-       Dtset_dummy%ixc=-406         ! PBE0
+       ixc_hybrid=-406         ! PBE0
      else ! Dtset%gwcalctyp > 300
-       Dtset_dummy%ixc=-402         ! B3LYP
+       ixc_hybrid=-402         ! B3LYP
      end if
-
+     call xcdata_init(dtset%intxc,ixc_hybrid,&
+&      dtset%nelect,dtset%tphysel,dtset%usekden,dtset%vdw_xc,dtset%xc_tb09_c,dtset%xc_denpos,xcdata_hybrid)
+     !
      ! reinitialize the libxc module with the overriden values
      if(Dtset%ixc<0) then
        call libxc_functionals_end()
      end if
-     call libxc_functionals_init(Dtset_dummy%ixc,Dtset_dummy%nspden)
-     if (Dtset_dummy%ixc==-406) then !PBE0
-       call libxc_functionals_set_hybridparams(hyb_mixing=Dtset_dummy%gwfockmix)
-     else if (Dtset_dummy%ixc==-428) then !HSE06
-       if (Dtset_dummy%rcut>tol6) then
-         omega = one/Dtset_dummy%rcut
+     call libxc_functionals_init(ixc_hybrid,Dtset%nspden)
+     if (ixc_hybrid==-406) then !PBE0
+       call libxc_functionals_set_hybridparams(hyb_mixing=Dtset%gwfockmix)
+     else if (ixc_hybrid==-428) then !HSE06
+       if (Dtset%rcut>tol6) then
+         omega = one/Dtset%rcut
        else
          omega = 0.11_dp
-         !call libxc_functionals_get_hybridparams(hyb_range=omega)
        end if
-       call libxc_functionals_set_hybridparams(hyb_range=omega,hyb_mixing_sr=Dtset_dummy%gwfockmix)
+       call libxc_functionals_set_hybridparams(hyb_range=omega,hyb_mixing_sr=Dtset%gwfockmix)
      end if
-     write(msg, '(a, f4.2)') ' Fock fraction = ', Dtset_dummy%gwfockmix
+     write(msg, '(a, f4.2)') ' Fock fraction = ', Dtset%gwfockmix
      call wrtout(std_out,msg,'COLL')
      write(msg, '(a, f5.2, a)') ' Fock inverse screening length = ', omega, ' (bohr^-1)'
      call wrtout(std_out,msg,'COLL')
 
      ABI_MALLOC(vxc_val_hybrid,(nfftf,nspden))
 
-     call rhohxc(Dtset_dummy,enxc_hybrid_val,gsqcutf_eff,izero,kxc_,MPI_enreg_seq,nfftf,ngfftf,&
-&     nhat,Wfd%usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,nspden,n3xccc_,option,rhog,rhor,Cryst%rprimd,&
-&     strsxc,usexcnhat,vh_,vxc_val_hybrid,vxcval_hybrid_avg,xccc3d_)
+     call rhohxc(enxc_hybrid_val,gsqcutf_eff,izero,kxc_,MPI_enreg_seq,nfftf,ngfftf,&
+&     nhat,Wfd%usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,nspden,n3xccc_,option,dtset%paral_kgb,rhog,rhor,Cryst%rprimd,&
+&     strsxc,usexcnhat,vh_,vxc_val_hybrid,vxcval_hybrid_avg,xccc3d_,xcdata_hybrid)
 
      call dtset_free(Dtset_dummy)
 

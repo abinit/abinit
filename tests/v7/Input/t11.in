@@ -17,7 +17,7 @@
  ecut 75
 
 #Brillouin zone sampling (not relevant for TF)
- tsmear      0.1469972355
+ tphysel     0.1469972355
  kptopt      0
  nkpt        1
  occopt      0

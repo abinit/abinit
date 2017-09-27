@@ -124,6 +124,7 @@ subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
  use m_abi2big
  use m_xmpi
  use m_cgtools
+ use m_xcdata
 
  use m_energies,         only : energies_type
  use m_electronpositron, only : electronpositron_type,electronpositron_calctype
@@ -177,6 +178,7 @@ subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
  real(dp) :: doti,e_xcdc_vxctau
  logical :: add_tfw_,calc_xcdc,with_vxctau
  logical :: is_hybrid_ncpp,wvlbigdft=.false.
+ type(xcdata_type) :: xcdata
 !arrays
  real(dp) :: evxc,tsec(2),vmean(dtset%nspden),vzeeman(dtset%nspden)
  real(dp),allocatable :: rhowk(:,:),Vmagconstr(:,:),vnew(:,:),xcart(:,:)
@@ -219,20 +221,23 @@ subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
  if (ipositron/=1) then
 !  Compute xc potential (separate up and down if spin-polarized)
    if (dtset%icoulomb == 0 .and. dtset%usewvl == 0) then
+     call xcdata_init(dtset%intxc,dtset%ixc,&
+&     dtset%nelect,dtset%tphysel,dtset%usekden,dtset%vdw_xc,dtset%xc_tb09_c,dtset%xc_denpos,xcdata)
+
 !    Use the periodic solver to compute Hxc.
      nk3xc=1
 !write(80,*) "rhotov"
 !xccc3d=zero
      call timab(941,1,tsec)
      if (ipositron==0) then
-       call rhohxc(dtset,energies%e_xc,gsqcut,usepaw,kxc,mpi_enreg,nfft,ngfft,&
-&       nhat,usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,dtset%nspden,n3xccc,optxc,rhog,&
-&       rhor,rprimd,strsxc,usexcnhat,vhartr,vxc,vxcavg,xccc3d,&
+       call rhohxc(energies%e_xc,gsqcut,usepaw,kxc,mpi_enreg,nfft,ngfft,&
+&       nhat,usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,dtset%nspden,n3xccc,optxc,dtset%paral_kgb,rhog,&
+&       rhor,rprimd,strsxc,usexcnhat,vhartr,vxc,vxcavg,xccc3d,xcdata,&
 &       taug=taug,taur=taur,vxctau=vxctau,add_tfw=add_tfw_)
      else
-       call rhohxc(dtset,energies%e_xc,gsqcut,usepaw,kxc,mpi_enreg,nfft,ngfft,&
-&       nhat,usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,dtset%nspden,n3xccc,optxc,rhog,&
-&       rhor,rprimd,strsxc,usexcnhat,vhartr,vxc,vxcavg,xccc3d,&
+       call rhohxc(energies%e_xc,gsqcut,usepaw,kxc,mpi_enreg,nfft,ngfft,&
+&       nhat,usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,dtset%nspden,n3xccc,optxc,dtset%paral_kgb,rhog,&
+&       rhor,rprimd,strsxc,usexcnhat,vhartr,vxc,vxcavg,xccc3d,xcdata,&
 &       taug=taug,taur=taur,vxctau=vxctau,add_tfw=add_tfw_,&
 &       electronpositron=electronpositron)
      end if

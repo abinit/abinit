@@ -180,6 +180,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
  use mod_prc_memory
  use m_nctk
  use m_hdr
+ use m_xcdata
 
  use m_fstrings,         only : int2char4, sjoin
  use m_time,             only : abi_wtime, sec2str
@@ -319,6 +320,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
  !character(len=500) :: dilatmx_errmsg
  character(len=fnlen) :: fildata
  type(MPI_type) :: mpi_enreg_diel
+ type(xcdata_type) :: xcdata
  type(energies_type) :: energies
  type(ab7_mixing_object) :: mix
  logical,parameter :: VERBOSE=.FALSE.
@@ -1552,12 +1554,14 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
      if (nkxc>0.and.modulo(dtset%iprcel,100)>=61.and.(dtset%iprcel<71.or.dtset%iprcel>79) &
 &     .and.((istep==1.or.istep==dielstrt).or.(dtset%iprcel>=100))) then
        optxc=10
+       call xcdata_init(dtset%intxc,dtset%ixc,&
+&        dtset%nelect,dtset%tphysel,dtset%usekden,dtset%vdw_xc,dtset%xc_tb09_c,dtset%xc_denpos,xcdata)
 !      to be adjusted for the call to rhohxc
        nk3xc=1
        if(dtset%icoulomb==0 .and. dtset%usewvl==0) then
-         call rhohxc(dtset,edum,gsqcut,psps%usepaw,kxc,mpi_enreg,nfftf,&
+         call rhohxc(edum,gsqcut,psps%usepaw,kxc,mpi_enreg,nfftf,&
 &         ngfftf,nhat,psps%usepaw,nhatgr,0,nkxc,nk3xc,dtset%nspden,n3xccc,&
-&         optxc,rhog,rhor,rprimd,dummy2,0,vhartr,vxc,vxcavg_dum,xccc3d,&
+&         optxc,dtset%paral_kgb,rhog,rhor,rprimd,dummy2,0,vhartr,vxc,vxcavg_dum,xccc3d,xcdata,&
 &         add_tfw=tfw_activated,taug=taug,taur=taur,vxctau=vxctau)
        else if(.not. wvlbigdft) then
 !        WVL case:
