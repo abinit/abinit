@@ -146,7 +146,7 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,&
  integer,allocatable :: indsym(:,:,:),irrzon(:,:,:),kg(:,:),kneigh(:,:),kg_neigh(:,:,:)
  integer,allocatable :: kptindex(:,:),npwarr(:),pwind(:,:,:),rfpert(:,:,:,:,:,:),symrec(:,:,:)
  real(dp) :: dum_shiftk(3,210),dummy2(6),gmet(3,3),gprimd(3,3),k0(3)
- real(dp) :: qphon(3),rmet(3,3),rprimd(3,3),strsxc(6),tsec(2)
+ real(dp) :: rmet(3,3),rprimd(3,3),strsxc(6),tsec(2)
  real(dp),allocatable :: amass(:),cg(:,:),d3cart(:,:,:,:,:,:,:)
  real(dp),allocatable :: d3lo(:,:,:,:,:,:,:),dum_kptns(:,:)
  real(dp),allocatable :: dum_wtk(:),dyfrx2(:,:,:),eigen(:),grxc(:,:),k3xc(:,:)
@@ -422,8 +422,7 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,&
    ABI_DEALLOCATE(dyfrx2)
  end if
 
- qphon(:)=zero
- call hartre(1,gsqcut,psps%usepaw,mpi_enreg,nfft,dtset%ngfft,dtset%paral_kgb,qphon,rhog,rprimd,vhartr)
+ call hartre(1,gsqcut,psps%usepaw,mpi_enreg,nfft,dtset%ngfft,dtset%paral_kgb,rhog,rprimd,vhartr)
 
 !Compute kxc (second- and third-order exchange-correlation kernel)
  option=3

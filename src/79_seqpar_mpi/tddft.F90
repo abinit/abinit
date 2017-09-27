@@ -161,7 +161,7 @@
  integer :: count_to_do, count, displ, countmax, displmax
  integer :: ijexcit, ijexcit2, sendcount, f_sing_trip(2/nsppol)
  real(dp) :: sendbuf(5-nsppol)
- real(dp) :: cauchy(7),poscart(3),qphon(3),rprimd(3,3),tsec(2),dummy(2,1)
+ real(dp) :: cauchy(7),poscart(3),rprimd(3,3),tsec(2),dummy(2,1)
  integer :: iomode,action,me,nmaster,sender,source,sread,sskip
  integer :: formeig,icg,ikg,nband_k_
  logical :: mydata, tmaster, swrite
@@ -1047,7 +1047,7 @@
 
 !      For the singlet correction, must compute the hartre potential created
 !      by the product of wavefunctions
-       cplex=1 ; qphon(:)=zero
+       cplex=1 
 
 !      DEBUG
 !      write(message,'(a,i3)')'Before Fourdp, on proc ',me_loc
@@ -1063,12 +1063,11 @@
 !      &            '   cplex : ',cplex,ch10,&
 !      &            '   gmet(3,3)  : ',gmet(3,3),ch10,&
 !      &            '   gsqcut : ',gsqcut,ch10,&
-!      &            '   qphon(1) : ',qphon(1),ch10,&
 !      &            '   rhog(1,1) :,',rhog(1,1),ch10,&
 !      &            '   vhartr(1) :,',vhartr(1)
 !      ENDDEBUG
 
-       call hartre(cplex,gsqcut,0,mpi_enreg,nfftdiel,ngfftdiel,dtset%paral_kgb,qphon,rhog,rprimd,vhartr)
+       call hartre(cplex,gsqcut,0,mpi_enreg,nfftdiel,ngfftdiel,dtset%paral_kgb,rhog,rprimd,vhartr)
 
 !      DEBUG
 !      write(message,'(a,i3)')'After Hartree, on proc ',me_loc

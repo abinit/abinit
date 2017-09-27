@@ -383,7 +383,7 @@ type(pseudopotential_type) :: psps
 !    rhog_munu=rhog_munu*fockbz%wtk_bz(jkpt)
 
      call hartre(cplex_fock,fockcommon%gsqcut,fockcommon%usepaw,mpi_enreg,nfftf,ngfftf,&
-&     mpi_enreg%paral_kgb,qvec_j,rhog_munu,rprimd,vfock,divgq0=fock%divgq0)
+&     mpi_enreg%paral_kgb,rhog_munu,rprimd,vfock,divgq0=fock%divgq0,qpt=qvec_j)
 
 #else
      do ifft=1,nfftf

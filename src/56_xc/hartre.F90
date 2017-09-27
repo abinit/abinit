@@ -31,7 +31,7 @@
 !!  mpi_enreg=information about MPI parallelization
 !!  nfft=(effective) number of FFT grid points (for this processor)
 !!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
-!!  qphon(3)=reduced coordinates for the phonon wavelength (needed if cplex==2).
+!!  [qpt(3)=reduced coordinates for a wavevector to be combined with the G vectors (needed if cplex==2).]
 !!  rhog(2,nfft)=electron density in G space
 !!  rprimd(3,3)=dimensional primitive translations in real space (bohr)
 !!  divgq0= [optional argument] value of the integration of the Coulomb singularity 4pi\int_BZ 1/q^2 dq
@@ -54,8 +54,8 @@
 
 #include "abi_common.h"
 
-subroutine hartre(cplex,gsqcut,izero,mpi_enreg,nfft,ngfft,paral_kgb,qphon,rhog,rprimd,vhartr,&
-&  divgq0) ! Optional argument
+subroutine hartre(cplex,gsqcut,izero,mpi_enreg,nfft,ngfft,paral_kgb,rhog,rprimd,vhartr,&
+&  divgq0,qpt) ! Optional argument
 
  use defs_basis
  use defs_abitypes
@@ -82,8 +82,9 @@ subroutine hartre(cplex,gsqcut,izero,mpi_enreg,nfft,ngfft,paral_kgb,qphon,rhog,r
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: ngfft(18)
- real(dp),intent(in) :: qphon(3),rprimd(3,3),rhog(2,nfft)
+ real(dp),intent(in) :: rprimd(3,3),rhog(2,nfft)
  real(dp),intent(in),optional :: divgq0
+ real(dp),intent(in),optional :: qpt(3)
  real(dp),intent(out) :: vhartr(cplex*nfft)
 
 !Local variables-------------------------------
@@ -99,7 +100,7 @@ subroutine hartre(cplex,gsqcut,izero,mpi_enreg,nfft,ngfft,paral_kgb,qphon,rhog,r
  integer :: id(3)
  integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:)
  integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
- real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3),tsec(2)
+ real(dp) :: gmet(3,3),gprimd(3,3),qpt_(3),rmet(3,3),tsec(2)
  real(dp),allocatable :: gq(:,:),work1(:,:)
 
 ! *************************************************************************
@@ -125,26 +126,31 @@ subroutine hartre(cplex,gsqcut,izero,mpi_enreg,nfft,ngfft,paral_kgb,qphon,rhog,r
 
  ! Initialize a few quantities
  cutoff=gsqcut*tolfix
- qeq0=0; if(qphon(1)**2+qphon(2)**2+qphon(3)**2<1.d-15) qeq0=1
+ if(present(qpt))then
+   qpt_=qpt
+ else 
+   qpt_=zero
+ qeq0=0 
+ if(qpt_(1)**2+qpt_(2)**2+qpt_(3)**2<1.d-15) qeq0=1
  qeq05=0
  if (qeq0==0) then
-   if (abs(abs(qphon(1))-half)<tol12.or.abs(abs(qphon(2))-half)<tol12.or. &
-&   abs(abs(qphon(3))-half)<tol12) qeq05=1
+   if (abs(abs(qpt_(1))-half)<tol12.or.abs(abs(qpt_(2))-half)<tol12.or. &
+&   abs(abs(qpt_(3))-half)<tol12) qeq05=1
  end if
 
- ! If cplex=1 then qphon should be 0 0 0
+ ! If cplex=1 then qpt_ should be 0 0 0
  if (cplex==1.and. qeq0/=1) then
    write(message,'(a,3e12.4,a,a)')&
-&   'cplex=1 but qphon=',qphon,ch10,&
-&   'qphon should be 0 0 0.'
+&   'cplex=1 but qpt=',qpt_,ch10,&
+&   'qpt should be 0 0 0.'
    MSG_BUG(message)
  end if
 
- ! If FFT parallelism then qphon should not be 1/2
+ ! If FFT parallelism then qpt should not be 1/2
  if (nproc_fft>1.and.qeq05==1) then
    write(message, '(a,3e12.4,a,a)' )&
-&   'FFT parallelism selected but qphon=',qphon,ch10,&
-&   'qphon(i) should not be 1/2...'
+&   'FFT parallelism selected but qpt',qpt_,ch10,&
+&   'qpt(i) should not be 1/2...'
    MSG_ERROR(message)
  end if
 
@@ -155,7 +161,7 @@ subroutine hartre(cplex,gsqcut,izero,mpi_enreg,nfft,ngfft,paral_kgb,qphon,rhog,r
    id(ii)=ngfft(ii)/2+2
    do ing=1,ngfft(ii)
      ig=ing-(ing/id(ii))*ngfft(ii)-1
-     gq(ii,ing)=ig+qphon(ii)
+     gq(ii,ing)=ig+qpt_(ii)
    end do
  end do
  ig1max=-1;ig2max=-1;ig3max=-1
@@ -236,15 +242,15 @@ subroutine hartre(cplex,gsqcut,izero,mpi_enreg,nfft,ngfft,paral_kgb,qphon,rhog,r
      ig1=-1;if (mod(n1,2)==0) ig1=1+n1/2
      ig2=-1;if (mod(n2,2)==0) ig2=1+n2/2
      ig3=-1;if (mod(n3,2)==0) ig3=1+n3/2
-     if (abs(abs(qphon(1))-half)<tol12) then
+     if (abs(abs(qpt_(1))-half)<tol12) then
        if (abs(ig1min)<abs(ig1max)) ig1=abs(ig1max)
        if (abs(ig1min)>abs(ig1max)) ig1=n1-abs(ig1min)
      end if
-     if (abs(abs(qphon(2))-half)<tol12) then
+     if (abs(abs(qpt_(2))-half)<tol12) then
        if (abs(ig2min)<abs(ig2max)) ig2=abs(ig2max)
        if (abs(ig2min)>abs(ig2max)) ig2=n2-abs(ig2min)
      end if
-     if (abs(abs(qphon(3))-half)<tol12) then
+     if (abs(abs(qpt_(3))-half)<tol12) then
        if (abs(ig3min)<abs(ig3max)) ig3=abs(ig3max)
        if (abs(ig3min)>abs(ig3max)) ig3=n3-abs(ig3min)
      end if

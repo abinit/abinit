@@ -529,8 +529,7 @@ subroutine kxc_alda(dtset,ixc,kxcg,mpi_enreg,nfft,ngfft,nspden,option,rhor,rhocu
 
    optionrhoxc = 2 !See rhotoxc.f
 
-   qphon(:)=zero
-   call hartre(1,gsqcut,0,mpi_enreg,nfft,ngfft,dtset%paral_kgb,qphon,rhog,rprimd,vhartree)
+   call hartre(1,gsqcut,0,mpi_enreg,nfft,ngfft,dtset%paral_kgb,rhog,rprimd,vhartree)
    call rhotoxc(enxc,kxcr,mpi_enreg,nfft,ngfft,dum,0,dum,0,nkxc,nk3xc,nspden,n3xccc,&
 &   optionrhoxc,dtset%paral_kgb,rhorcut,rprimd,strsxc,1,vxc,vxcavg,xccc3d,xcdata,vhartr=vhartree)
 
@@ -585,8 +584,7 @@ subroutine kxc_alda(dtset,ixc,kxcg,mpi_enreg,nfft,ngfft,nspden,option,rhor,rhocu
 
    optionrhoxc = -2 !See rhotoxc.f
 
-   qphon(:)=zero
-   call hartre(1,gsqcut,0,mpi_enreg,nfft,ngfft,dtset%paral_kgb,qphon,rhog,rprimd,vhartree)
+   call hartre(1,gsqcut,0,mpi_enreg,nfft,ngfft,dtset%paral_kgb,rhog,rprimd,vhartree)
    call rhotoxc(enxc,kxcr,mpi_enreg,nfft,ngfft,dum,0,dum,0,nkxc,nk3xc,nspden,n3xccc,&
 &   optionrhoxc,dtset%paral_kgb,rhorcut,rprimd,strsxc,1,vxc,vxcavg,xccc3d,xcdata,vhartr=vhartree)
 
@@ -1172,7 +1170,7 @@ subroutine kxc_driver(Dtset,Cryst,ixc,ngfft,nfft_tot,nspden,rhor,npw,dim_kxcg,kx
    call libxc_functionals_init(ixc,Dtset%nspden)
  end if
 
- call hartre(1,gsqcut,izero,MPI_enreg_seq,nfft_tot,ngfft,dtset%paral_kgb,qphon,rhog,Cryst%rprimd,vhartr)
+ call hartre(1,gsqcut,izero,MPI_enreg_seq,nfft_tot,ngfft,dtset%paral_kgb,rhog,Cryst%rprimd,vhartr)
 
 !Compute the kernel.
  call rhotoxc(enxc,kxcr,MPI_enreg_seq,nfft_tot,ngfft,&
@@ -1501,7 +1499,7 @@ subroutine kxc_ADA(Dtset,Cryst,ixc,ngfft,nfft,nspden,rhor,&
    call libxc_functionals_init(ixc,Dtset%nspden)
  end if
 
- call hartre(1,gsqcut,izero,MPI_enreg_seq,nfft,ngfft,dtset%paral_kgb,qphon,rhog,Cryst%rprimd,vhartr)
+ call hartre(1,gsqcut,izero,MPI_enreg_seq,nfft,ngfft,dtset%paral_kgb,rhog,Cryst%rprimd,vhartr)
  call rhotoxc(enxc,kxcr,MPI_enreg_seq,nfft,ngfft,&
 & dum,0,dum,0,nkxc,nk3xc,nspden,n3xccc,option,dtset%paral_kgb,my_rhor,Cryst%rprimd,&
 & strsxc,1,vxclda,vxcavg,xccc3d,xcdata,vhartr=vhartr)
