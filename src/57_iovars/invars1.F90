@@ -120,9 +120,9 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  character(len=500) :: message
  type(atomdata_t) :: atom
 !arrays
- integer :: cond_values(4),useri(5),vacuum(3)
+ integer :: cond_values(4),vacuum(3)
  integer,allocatable :: iatfix(:,:),intarr(:),istwfk(:),nband(:),typat(:)
- real(dp) :: acell(3),userr(5),rprim(3,3)
+ real(dp) :: acell(3),rprim(3,3)
 !real(dp) :: field(3)
  real(dp),allocatable :: amu(:),dprarr(:),kpt(:,:),mixalch(:,:),nucdipmom(:,:)
  real(dp),allocatable :: ratsph(:),reaalloc(:),spinat(:,:)
@@ -290,17 +290,6 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
 !and the list of fixed atoms (iatfix,iatfixx,iatfixy,iatfixz).
 !Arrays have already been
 !dimensioned thanks to the knowledge of msym and mxnatom
-
- useri(1)=dtset%useria
- useri(2)=dtset%userib
- useri(3)=dtset%useric
- useri(4)=dtset%userid
- useri(5)=dtset%userie
- userr(1)=dtset%userra
- userr(2)=dtset%userrb
- userr(3)=dtset%userrc
- userr(4)=dtset%userrd
- userr(5)=dtset%userre
 
 !ji: We need to read the electric field before calling ingeo
 !****** Temporary ******

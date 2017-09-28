@@ -458,7 +458,7 @@ subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
 !  Compute square norm vres2 of potential residual vresid
    call sqnorm_v(1,nfft,vres2,dtset%nspden,optres,vresidnew(1+offset, 1),mpi_comm_sphgrid=mpi_comm_sphgrid)
 
- else ! optres
+ else ! optres/=0
 
 !  ------Produce new value of trial potential-------------
 

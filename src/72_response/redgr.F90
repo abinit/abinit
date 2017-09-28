@@ -58,7 +58,6 @@ subroutine redgr (frin,frredgr,mpi_enreg,nfft,ngfft,paral_kgb)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'redgr'
- use interfaces_18_timing
  use interfaces_53_ffts
 !End of the abilint section
 
