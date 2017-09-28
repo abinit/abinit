@@ -227,7 +227,7 @@ subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
      call hartre(1,gsqcut,usepaw,mpi_enreg,nfft,ngfft,dtset%paral_kgb,rhog,rprimd,vhartr)
      !Use the proper exchange_correlation energy : either the origin one, or the auxiliary one
      ixc_current=dtset%ixc
-     if(mod(dtset%fockoptmix,100)==11)dtset%useric
+     if(mod(dtset%fockoptmix,100)==11)ixc_current=dtset%useric
      call xcdata_init(dtset%intxc,ixc_current,&
 &     dtset%nelect,dtset%tphysel,dtset%usekden,dtset%vdw_xc,dtset%xc_tb09_c,dtset%xc_denpos,xcdata)
 

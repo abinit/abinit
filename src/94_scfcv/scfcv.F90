@@ -360,7 +360,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
  real(dp),allocatable :: phnonsdiel(:,:,:),shiftvector(:)
  real(dp),allocatable :: susmat(:,:,:,:,:),synlgr(:,:)
  real(dp),allocatable :: vhartr(:),vpsp(:),vtrial(:,:)
- real(dp),allocatable :: vxc(:,:),vxchyb_compensate(:,:),vxctau(:,:,:),workr(:,:),xccc3d(:),ylmdiel(:,:)
+ real(dp),allocatable :: vxc(:,:),vxc_hybcomp(:,:),vxctau(:,:,:),workr(:,:),xccc3d(:),ylmdiel(:,:)
  real(dp),pointer :: elfr(:,:),grhor(:,:,:),lrhor(:,:)
  type(pawcprj_type),allocatable :: cprj(:,:)
  type(paw_an_type),allocatable :: paw_an(:)
@@ -1146,7 +1146,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
 
    if ((moved_atm_inside==1 .or. istep==1).or.&
 &      (dtset%positron<0.and.istep_mix==1).or.&
-&      (mod(dtset%fockoptmix,100)==11 .and. istep_updatedfock==1) then
+&      (mod(dtset%fockoptmix,100)==11 .and. istep_updatedfock==1)) then
 !    PAW only: we sometimes have to compute compensation density
 !    and eventually add it to density from WFs
      nhatgrdim=0

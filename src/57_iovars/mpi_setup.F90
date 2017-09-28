@@ -95,6 +95,9 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
  integer :: nfft,nfftdg,nkpt,nkpt_me,npert,nproc,nproc_fft,nqpt
  integer :: nspink,nsppol,nsym,paral_fft,response,tnband,tread0,usepaw,vectsize
  integer :: fftalg,fftalga,fftalgc
+#ifdef HAVE_LINALG_ELPA
+ integer :: icol,irow,np
+#endif
  logical :: fftalg_read,ortalg_read,wfoptalg_read,do_check
  real(dp) :: dilatmx,ecut,ecut_eff,ecutdg_eff,ucvol
  character(len=500) :: message
