@@ -102,8 +102,7 @@ CONTAINS  !=====================================================================
 !! scell = supercell structure to be initialized
 !!
 !! PARENTS
-!!      freeze_displ_allmodes,m_effective_potential,m_fit_polynomial_coeff
-!!      mover_effpot
+!!      freeze_displ_allmodes
 !!
 !! CHILDREN
 !!
@@ -201,6 +200,7 @@ end subroutine init_supercell_for_qpt
 !! scell = supercell structure to be initialized
 !!
 !! PARENTS
+!!      m_effective_potential,m_fit_polynomial_coeff,m_phonons,m_supercell
 !!
 !! CHILDREN
 !!
@@ -298,6 +298,7 @@ end subroutine init_supercell
 !! scell = supercell structure: typat, xcart and so on will be updated 
 !!
 !! PARENTS
+!!      m_supercell
 !!
 !! CHILDREN
 !!
@@ -362,7 +363,7 @@ end subroutine order_supercell_typat
 !! scell = supercell structure: xcart will be updated with phonon displacement
 !!
 !! PARENTS
-!!      freeze_displ_allmodes
+!!      freeze_displ_allmodes,m_phonons
 !!
 !! CHILDREN
 !!
@@ -512,6 +513,7 @@ end subroutine prt_supercell_for_qpt
 !! printing to file
 !!
 !! PARENTS
+!!      m_phonons,m_supercell
 !!
 !! CHILDREN
 !!
@@ -619,7 +621,7 @@ end subroutine prt_supercell
 !! scell = supercell structure with data to be output
 !!
 !! PARENTS
-!!      m_effective_potential,mover_effpot
+!!      m_effective_potential,m_supercell
 !!
 !! CHILDREN
 !!
@@ -727,7 +729,6 @@ end subroutine getPBCIndexes_supercell
 !!
 !! CHILDREN
 !!
-!!
 !! SOURCE
 
 subroutine findBound_supercell(min,max,n_cell)
@@ -770,7 +771,7 @@ end subroutine findBound_supercell
 !!
 !! PARENTS
 !!      freeze_displ_allmodes,m_effective_potential,m_fit_polynomial_coeff
-!!      m_supercell,mover_effpot
+!!      m_phonons,m_supercell
 !!
 !! CHILDREN
 !!

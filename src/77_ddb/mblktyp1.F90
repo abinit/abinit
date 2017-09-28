@@ -41,8 +41,8 @@
 !!      mrgddb
 !!
 !! CHILDREN
-!!      ddb_free,ddb_malloc,ddb_write_blok
-!!      read_blok8,wrtout
+!!      ddb_free,ddb_hdr_compare,ddb_hdr_free,ddb_hdr_open_read
+!!      ddb_hdr_open_write,ddb_malloc,ddb_write_blok,read_blok8,wrtout
 !!
 !! SOURCE
 
@@ -119,7 +119,7 @@ subroutine mblktyp1(chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
  do iddb=1,nddb
 
    call ddb_hdr_open_read(ddb_hdr, filnam(iddb+1), ddbun, vrsddb,&
-&                         dimonly=1)
+&   dimonly=1)
 
    mblok=mblok+ddb_hdr%nblok
    mblktyp=max(mblktyp,ddb_hdr%mblktyp)
@@ -151,13 +151,13 @@ subroutine mblktyp1(chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
 
  write(std_out,*)' read the input derivative database information'
  call ddb_hdr_open_read(ddb_hdr, filnam(2), ddbun, vrsddb, &
-&            matom=matom,mtypat=mtypat,mband=mband,mkpt=mkpt,&
-&            msym=msym,dimekb=dimekb,lmnmax=lmnmax,usepaw=usepaw)
+& matom=matom,mtypat=mtypat,mband=mband,mkpt=mkpt,&
+& msym=msym,dimekb=dimekb,lmnmax=lmnmax,usepaw=usepaw)
 
  if(ddb_hdr%nblok>=1)then
 !  Read the blocks from the input database.
    write(message, '(a,i5,a)' ) ' read ',ddb_hdr%nblok, &
-&                              ' blocks from the input DDB '
+&   ' blocks from the input DDB '
    call wrtout(std_out,message,'COLL')
    do iblok=1,ddb_hdr%nblok
      call read_blok8(ddb,iblok,ddb_hdr%nband(1),mpert,msize,ddb_hdr%nkpt,ddbun)
@@ -180,12 +180,12 @@ subroutine mblktyp1(chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
 !  Open the corresponding input DDB,
 !  and read the database file informations
    write(message, '(a,a,i6)' )ch10,&
-&       ' read the input derivative database number',iddb
+&   ' read the input derivative database number',iddb
    call wrtout(std_out,message,'COLL')
 
    call ddb_hdr_open_read(ddb_hdr8, filnam(iddb+1), ddbun, vrsddb, &
-&            matom=matom,mtypat=mtypat,mband=mband,mkpt=mkpt,&
-&            msym=msym,dimekb=dimekb,lmnmax=lmnmax,usepaw=usepaw)
+&   matom=matom,mtypat=mtypat,mband=mband,mkpt=mkpt,&
+&   msym=msym,dimekb=dimekb,lmnmax=lmnmax,usepaw=usepaw)
 
    if (chkopt==1)then
 !    Compare the current DDB and input DDB information.

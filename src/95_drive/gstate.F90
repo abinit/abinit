@@ -1418,7 +1418,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    ddbnm=trim(dtfil%filnam_ds(4))//'_DDB'
 
    call ddb_hdr_init(ddb_hdr,dtset,psps,pawtab,DDB_VERSION,dscrpt,&
-&                    nblok,xred=xred,occ=occ,ngfft=ngfft)
+&   nblok,xred=xred,occ=occ,ngfft=ngfft)
 
    call ddb_hdr_open_write(ddb_hdr,ddbnm,dtfil%unddb,fullinit=0)
 

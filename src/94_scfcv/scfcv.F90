@@ -133,7 +133,8 @@
 !!      ab7_mixing_deallocate,ab7_mixing_new,ab7_mixing_use_disk_cache
 !!      afterscfloop,build_vxc,check_kxc,chkpawovlp,cprj_clean,cprj_paw_alloc
 !!      ctocprj,destroy_distribfft,destroy_mpi_enreg,energies_init,energy
-!!      etotfor,extraprho,fftdatar_write_from_hdr,first_rec,fock_destroy
+!!      etotfor,extraprho,fftdatar_write_from_hdr,first_rec,fock2ace
+!!      fock_ace_destroy,fock_bz_destroy,fock_common_destroy,fock_destroy
 !!      fock_init,fock_updatecwaveocc,fourdp,fresid,getcut,getmpw,getng,getph
 !!      gshgg_mkncwrite,hdr_update,init_distribfft,init_distribfft_seq
 !!      init_metricrec,initmpi_seq,initylmg,int2char4,kpgio,metric,newrho
@@ -179,6 +180,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
  use mod_prc_memory
  use m_nctk
  use m_hdr
+ use m_xcdata
 
  use m_fstrings,         only : int2char4, sjoin
  use m_time,             only : abi_wtime, sec2str
@@ -318,6 +320,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
  !character(len=500) :: dilatmx_errmsg
  character(len=fnlen) :: fildata
  type(MPI_type) :: mpi_enreg_diel
+ type(xcdata_type) :: xcdata
  type(energies_type) :: energies
  type(ab7_mixing_object) :: mix
  logical,parameter :: VERBOSE=.FALSE.
@@ -1094,10 +1097,10 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
        ! Possibly (re)compute the ACE operator 
        if(fock%fock_common%use_ACE/=0) then
          call fock2ACE(cg,cprj,fock,dtset%istwfk,kg,dtset%kptns,dtset%mband,mcg,mcprj,dtset%mgfft,&
-&          dtset%mkmem,mpi_enreg,psps%mpsang,&
-&          dtset%mpw,dtset%natom,dtset%natom,dtset%nband,dtset%nfft,ngfft,dtset%nkpt,dtset%nloalg,npwarr,dtset%nspden,&
-&          dtset%nspinor,dtset%nsppol,dtset%nsym,dtset%ntypat,occ,dtset%optforces,paw_ij,pawtab,ph1d,psps,rprimd,&
-&          dtset%optstress,fock%fock_common%symrec,dtset%typat,usecprj,dtset%use_gpu_cuda,dtset%wtk,xred,ylm,ylmgr)
+&         dtset%mkmem,mpi_enreg,psps%mpsang,&
+&         dtset%mpw,dtset%natom,dtset%natom,dtset%nband,dtset%nfft,ngfft,dtset%nkpt,dtset%nloalg,npwarr,dtset%nspden,&
+&         dtset%nspinor,dtset%nsppol,dtset%nsym,dtset%ntypat,occ,dtset%optforces,paw_ij,pawtab,ph1d,psps,rprimd,&
+&         dtset%optstress,fock%fock_common%symrec,dtset%typat,usecprj,dtset%use_gpu_cuda,dtset%wtk,xred,ylm,ylmgr)
        end if
 
        !Should place a test on whether there should be the final exit of the istep loop. 
@@ -1109,15 +1112,15 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
        !if(fock%fock_common%nnsclo_hf==1 .and. fock%fock_common%use_ACE==0)then
        if(fock%fock_common%nnsclo_hf==1)then
          fock%fock_common%fock_converged=.TRUE.
-       endif
+       end if
 
        !Depending on fockoptmix, possibly restart the mixing procedure for the potential
        if(mod(dtset%fockoptmix,10)==1)then
          istep_mix=1
-       endif
+       end if
      else
        istep_updatedfock=istep_updatedfock+1
-     endif
+     end if
 
      !Used locally
      hybrid_mixing=fock%fock_common%hybrid_mixing ; hybrid_mixing_sr=fock%fock_common%hybrid_mixing_sr
@@ -1551,12 +1554,14 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
      if (nkxc>0.and.modulo(dtset%iprcel,100)>=61.and.(dtset%iprcel<71.or.dtset%iprcel>79) &
 &     .and.((istep==1.or.istep==dielstrt).or.(dtset%iprcel>=100))) then
        optxc=10
+       call xcdata_init(dtset%intxc,dtset%ixc,&
+&        dtset%nelect,dtset%tphysel,dtset%usekden,dtset%vdw_xc,dtset%xc_tb09_c,dtset%xc_denpos,xcdata)
 !      to be adjusted for the call to rhohxc
        nk3xc=1
        if(dtset%icoulomb==0 .and. dtset%usewvl==0) then
-         call rhohxc(dtset,edum,gsqcut,psps%usepaw,kxc,mpi_enreg,nfftf,&
+         call rhohxc(edum,gsqcut,psps%usepaw,kxc,mpi_enreg,nfftf,&
 &         ngfftf,nhat,psps%usepaw,nhatgr,0,nkxc,nk3xc,dtset%nspden,n3xccc,&
-&         optxc,rhog,rhor,rprimd,dummy2,0,vhartr,vxc,vxcavg_dum,xccc3d,&
+&         optxc,dtset%paral_kgb,rhog,rhor,rprimd,dummy2,0,vhartr,vxc,vxcavg_dum,xccc3d,xcdata,&
 &         add_tfw=tfw_activated,taug=taug,taur=taur,vxctau=vxctau)
        else if(.not. wvlbigdft) then
 !        WVL case:

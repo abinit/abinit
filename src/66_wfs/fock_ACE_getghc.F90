@@ -29,12 +29,10 @@
 !!   * all the data for the occupied states (cgocc_bz) are the same as those for the current states (cg)
 !!
 !! PARENTS
-!!      forstrnps,getghc
+!!      getghc
 !!
 !! CHILDREN
-!!      bare_vqg,dotprod_g,fftpac,fourdp,fourwf,hartre,load_k_hamiltonian
-!!      load_kprime_hamiltonian,matr3inv,nonlop,pawdijhat,pawmknhat_psipsi
-!!      sphereboundary,strfock,timab,xmpi_sum
+!!      dotprod_g
 !!
 !! SOURCE
 

@@ -263,8 +263,8 @@
 !!
 !! PARENTS
 !!      d2frnl,dfpt_nsteltwf,dfptnl_resp,energy,fock_getghc,forstrnps,getgh1c
-!!      getgh2c,getghc,getgsc,m_invovl,m_lobpcgwf,make_grad_berry,prep_nonlop
-!!      vtowfk,wfd_vnlpsi
+!!      getgh2c,getghc,getgsc,m_invovl,m_lobpcgwf,make_grad_berry,nonlop_test
+!!      prep_nonlop,vtowfk,wfd_vnlpsi
 !!
 !! CHILDREN
 !!      gemm_nonlop,nonlop_gpu,nonlop_pl,nonlop_ylm,pawcprj_alloc,pawcprj_copy

@@ -99,6 +99,7 @@ CONTAINS  !=====================================================================
 !! OUTPUT
 !! effpot_mpi<type(effpot_mpi_type)()> = effpot_mpi datatype
 !! PARENTS
+!!      m_effective_potential
 !!
 !! CHILDREN
 !!
@@ -255,6 +256,7 @@ end subroutine effpot_mpi_init
 !! OUTPUT
 !!
 !! PARENTS
+!!      m_effective_potential,m_effpot_mpi
 !!
 !! CHILDREN
 !!

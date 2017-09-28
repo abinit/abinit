@@ -30,7 +30,7 @@
 !!   * all the data for the occupied states (cgocc_bz) are the same as those for the current states (cg)
 !!
 !! PARENTS
-!!      forstrnps,getghc
+!!      fock2ACE,forstrnps,getghc
 !!
 !! CHILDREN
 !!      bare_vqg,dotprod_g,fftpac,fourdp,fourwf,hartre,load_k_hamiltonian
@@ -483,7 +483,7 @@ type(pseudopotential_type) :: psps
 &           strout,enl=dijhat,select_k=K_H_KPRIME)
            call dotprod_g(dotr(idir),doti,gs_ham%istwf_k,npw,2,cwavef,strout,mpi_enreg%me_g0,mpi_enreg%comm_fft)
            fockcommon%stress_ikpt(idir,fockcommon%ieigen)=fockcommon%stress_ikpt(idir,fockcommon%ieigen)-&
-&                                                         dotr(idir)*occ*wtk/gs_ham%ucvol
+&           dotr(idir)*occ*wtk/gs_ham%ucvol
          end do
 
        ! second contribution 
@@ -508,7 +508,7 @@ type(pseudopotential_type) :: psps
          fockstr(6)=(str(1,2)+str(2,1))*half
          do idir=1,6
            fockcommon%stress_ikpt(idir,fockcommon%ieigen)=fockcommon%stress_ikpt(idir,fockcommon%ieigen)+&
-&                                                         fockstr(idir)/nfftf*occ*wtk
+&           fockstr(idir)/nfftf*occ*wtk
          end do
 
        ! third contribution
