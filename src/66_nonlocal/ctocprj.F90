@@ -243,7 +243,7 @@
    if (choice==3) idir0=-idir
    if (choice==5) idir0=idir
  else
-   if (choice==23) idir0=-7
+!   if (choice==23) idir0=-7
    if (choice==3) idir0=-7
    if (choice==5) idir0=4
  end if
@@ -541,7 +541,6 @@
 &           npw_nk,my_nspinor,ntypat0,phkxred,ph1d_atm,ph3d,ucvol,psps%useylm)
          end do
        end do
-
 !      Export cwaveprj to big array cprj
        call pawcprj_put(atindx_atm,cwaveprj,cprj,ncprj,iband_start,ibgb,ikpt,iorder_cprj,isppol,&
 &       mband_cprj,mkmem,natom,cprj_bandpp,nband_cprj_k,dimlmn,my_nspinor,nsppol,uncp,&

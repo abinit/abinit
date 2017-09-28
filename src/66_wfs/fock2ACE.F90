@@ -193,10 +193,10 @@ subroutine fock2ACE(cg,cprj,fock,istwfk,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_e
  use_ACE_old=fockcommon%use_ACE
  fockcommon%use_ACE=0
  compute_gbound=.true.
- if (stress_needed==1) then
-   fockcommon%optstr=.TRUE.
+! if (stress_needed==1) then
+!   fockcommon%optstr=.TRUE.
    fockcommon%stress=zero
- end if
+! end if
 
  compute_gbound=.true.
  usecprj_local=usecprj

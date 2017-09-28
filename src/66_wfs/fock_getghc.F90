@@ -67,6 +67,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
 #define ABI_FUNC 'fock_getghc'
  use interfaces_18_timing
  use interfaces_32_util
+ use interfaces_41_geometry
  use interfaces_52_fft_mpi_noabirule
  use interfaces_53_ffts
  use interfaces_56_xc
@@ -469,12 +470,12 @@ type(pseudopotential_type) :: psps
 !            end do
 !          end do
 
-
          signs=2;choice=3;cpopt=4
+
        ! first contribution 
 !         call load_kprime_hamiltonian(gs_ham,ffnl_kp=fockcommon%ffnl_str)
          call load_k_hamiltonian(gs_ham,ffnl_k=fockcommon%ffnl_str)
-         strout=zero
+!         strout=zero
          dotr=zero
          do idir=1,6
            call nonlop(choice,cpopt,cwaveocc_prj,enlout_dum,gs_ham,idir,(/zero/),mpi_enreg,&

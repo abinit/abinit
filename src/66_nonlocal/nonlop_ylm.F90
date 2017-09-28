@@ -711,6 +711,7 @@
          ndgxdt_stored = cprjin(1,1)%ncpgr
          ishift=0
          if (((choice==2).or.(choice==3)).and.(ndgxdt_stored>ndgxdt).and.(signs==2)) ishift=idir-ndgxdt
+         if ((choice==2).and.(ndgxdt_stored==9).and.(signs==2)) ishift=ishift+6
          if (choice==2.and.(ndgxdt_stored>ndgxdt).and.(signs==1)) ishift=ndgxdt_stored-ndgxdt
          if(cplex == 2) then
            do ispinor=1,nspinor

@@ -712,8 +712,9 @@ subroutine fock_init(atindx,cplex,dtset,fock,gsqcut,kg,mpi_enreg,nattyp,npwarr,p
      ABI_ALLOCATE(dimcprj,(dtset%natom))
      call pawcprj_getdim(dimcprj,dtset%natom,nattyp,dtset%ntypat,dtset%typat,pawtab,'O')
      ncpgr = 0
-     if (dtset%optforces/= 0) ncpgr = 3 
-     if (dtset%optstress /= 0) ncpgr = 6 
+     if (dtset%optforces== 1) ncpgr = 3 
+!     if (dtset%optstress /= 0) ncpgr = 6 
+!     ncpgr=3*dtset%optforces+6*dtset%optstress
      call pawcprj_alloc(fockbz%cwaveocc_prj,ncpgr,dimcprj)
      ABI_DEALLOCATE(dimcprj)
      ABI_ALLOCATE(fockcommon%atindx,(dtset%natom))
@@ -1839,8 +1840,8 @@ subroutine fock_updatecwaveocc(cg,cprj,dtset,fock,indsym,istep,mcg,mcprj,&
        ABI_ALLOCATE(dimlmn,(dtset%natom))
        call pawcprj_getdim(dimlmn,dtset%natom,nattyp,dtset%ntypat,dtset%typat,fockcommon%pawtab,"O")
        ncpgr = 0
-       if (dtset%optforces/= 0) ncpgr = 3
-       if (dtset%optstress /= 0) ncpgr = 6
+       if (dtset%optforces== 1) ncpgr = 3
+!       if (dtset%optstress /= 0) ncpgr = 6
        call pawcprj_alloc(cprj_tmp,ncpgr,dimlmn)
 
        lmnmax=maxval(fockcommon%pawtab(:)%lmn_size)
@@ -2056,7 +2057,8 @@ subroutine fock_updatecwaveocc(cg,cprj,dtset,fock,indsym,istep,mcg,mcprj,&
 &               indsym_,dimlmn,iband0,indlmn,&
 &               fockbz%tab_symkpt(my_jkpt),fockbz%timerev(my_jkpt),dtset%kptns(:,ikpt),fockbz%pawang%l_max-1,lmnmax,&
 &               mband0,dtset%natom,nband,nspinor,dtset%nsym,dtset%ntypat,typat_srt,fockbz%pawang%zarot,atindx=fockcommon%atindx)
-               if(dtset%optforces/=0) then
+
+               if(dtset%optforces==1) then
                  do iatom=1,dtset%natom
                    iatm=fockcommon%atindx(iatom)
                    do ispinor=iband_cprj,iband_cprj+nspinor-1
