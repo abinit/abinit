@@ -167,7 +167,7 @@ subroutine eph_phpi(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,e
  type(rf_hamiltonian_type) :: rf_hamkq
  character(len=500) :: msg
 !arrays
- integer :: g0_k(3),symq(4,2,cryst%nsym),dummy_gvec(3,dummy_npw)
+ integer :: g0_k(3),dummy_gvec(3,dummy_npw)
  integer,allocatable :: kg_k(:,:),kg_kq(:,:),gtmp(:,:),nband(:,:),nband_kq(:,:),blkflg(:,:)
  real(dp) :: kk(3),kq(3),qpt(3),phfrq(3*cryst%natom)
  real(dp) :: displ_cart(2,3,cryst%natom,3*cryst%natom),displ_red(2,3,cryst%natom,3*cryst%natom)
@@ -667,7 +667,6 @@ subroutine out_phpi(iout, Pi_ph, phfrq, qpt, natom3)
 !Local variables ------------------------------
 !scalars
  integer :: imode
- character(len=500) :: msg
 
  write(iout,'(a)')' '
  !write(iout,'(a)')' ----------------------------------------'
@@ -735,7 +734,6 @@ subroutine out_phpi_nc(dtfil, cryst, Pi_ph, phfrq, qpt, natom3)
 !scalars
  integer :: natom,one_dim,cplex,cart_dir
  integer :: ncid, ncerr
- character(len=500) :: msg
  character(len=fnlen) :: fname
 
 #ifdef HAVE_NETCDF

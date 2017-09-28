@@ -90,7 +90,7 @@ subroutine hubbard_one(cryst_struc,green,hu,paw_dmft,pawang,pawprtvol,hdc,weiss)
  end type level1_type
 ! scalars
  character(len=500) :: message
- integer :: iatom,iband,ifreq,ikpt,im,im1,isppol,ispinor,ispinor1
+ integer :: iatom,ifreq,im,im1,isppol,ispinor,ispinor1
  integer :: lpawu,mbandc,natom,nkpt,nspinor,nsppol,nsppol_imp,tndim
 ! complex(dpc) :: g,g0,w
 ! arrays

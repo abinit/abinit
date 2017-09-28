@@ -84,17 +84,16 @@ subroutine pred_hmc(ab_mover,hist,itime,icycle,ntime,ncycle,zDEBUG,iexit)
  real(dp)      :: etotal,epot,ekin,de                                          ! total, potential (electronic), kinetic (ionic) energies and energy difference between initial and proposed states  
  real(dp)      :: mv2tot,factor                                                ! dummies used for rescaling of velocities
  real(dp)      :: rnd     
- real(dp)      :: xcart(3,ab_mover%natom)                                      ! Cartesian coordinates of all ions
  real(dp)      :: xred(3,ab_mover%natom)                                       ! reduced coordinates of all ions
  real(dp)      :: vel(3,ab_mover%natom)                                        ! ionic velocities in Cartesian coordinates
  real(dp)      :: mvtot(3)                                                     ! total momentum of the cell used to rescale velocities
  real(dp)      :: mtot,kbtemp                                                  ! total ionic mass and target temperature in energy units
  real(dp)      :: acell(3)                                                     ! lattice parameters
- real(dp)      :: rprimd(3,3),rprim(3,3)                                       ! lattice vectors
+ real(dp)      :: rprimd(3,3)                                                  ! lattice vectors
  
  real(dp),save :: etotal_hmc_prev                                              ! total energy of the initial state
  real(dp),save :: acell_hmc_prev(3)                                            !
- real(dp),save :: rprimd_hmc_prev(3,3),rprim_hmc_prev(3,3)                     !
+ real(dp),save :: rprimd_hmc_prev(3,3)                                         !
  real(dp),allocatable,save :: xcart_hmc_prev(:,:)                              ! Cart. coordinates of the ions corresponding to the initial state
  real(dp),allocatable,save :: xred_hmc_prev(:,:)                               ! reduced coordinates of the ions corresponding to the initial state
 

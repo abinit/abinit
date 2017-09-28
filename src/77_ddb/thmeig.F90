@@ -88,20 +88,19 @@ subroutine thmeig(inp, ddb, crystal, &
  integer :: usepaw,natifc
  integer :: nsym,occopt,nblok2
  integer :: ntemper,telphint,thmflag
- integer :: brav,chksymbreak,found,gqpt,iatom1,iatom2,iband,iblok,iblok2,idir1,idir2,ii,jj,ikpt,ilatt,imod,index
+ integer :: brav,chksymbreak,found,gqpt,iatom1,iatom2,iband,iblok,iblok2,idir1,idir2,ii,ikpt,ilatt,imod,index
  integer :: iomega,iqpt,iqpt1,iqpt2,iqpt2_previous,iqpt3,iscf_fake,itemper
  integer :: mpert_eig2,msize2,nene,ng2f,nqshft,nsym_new,unit_g2f,nqpt,nqpt_computed,qptopt,rftyp
 !integer :: mqpt,nqpt2,option
  integer :: unit_phdos,unitout
- integer :: intxc,iscf,isym,ixc,natom_,nkpt_,ntypat_
- integer :: nspden,nspinor,nsppol,nptsym,use_inversion,useylm
+ integer :: isym
+ integer :: nptsym,use_inversion
  integer :: ierr
  real(dp) :: ucvol
  real(dp) :: g2fsmear,temperinc,tempermin
  real(dp) :: bosein,deltaene,det,domega,enemax,enemin,fact2i,fact2r,factr
  real(dp) :: gaussfactor,gaussprefactor,gaussval,invdet,omega,omega_max,omega_min,qnrm,qptrlen
  real(dp) :: rcvol,tmp,tol,vec1i,vec1r,vec2i,vec2r,veci,vecr,xx
- real(dp) :: tphysel,tolwfr,dfpt_sciss,tsmear,pawecutdg,kptnrm,ecut,ecutsm,dilatmx !new
  real(dp) :: tolsym,tolsym8  !new
  character(len=500) :: message
  character(len=fnlen) :: outfile
@@ -143,8 +142,6 @@ subroutine thmeig(inp, ddb, crystal, &
  real(dp),allocatable :: qpt_full(:,:),qptnrm(:)
  real(dp),allocatable :: spqpt(:,:),tnons_new(:,:),spinat(:,:)
  real(dp),allocatable :: wghtq(:)
-
- integer :: ngfft(18) !new
 
  type(t_tetrahedron) :: tetrahedra
  character(len=80) :: errstr

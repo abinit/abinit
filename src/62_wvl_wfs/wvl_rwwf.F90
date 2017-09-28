@@ -88,18 +88,20 @@ subroutine wvl_read(dtset, hdr0, hdr, mpi_enreg, option, rprimd, wff, wfs, wvl, 
 !Local variables-------------------------------
 #if defined HAVE_BIGDFT
   character(len = 500)  :: message
-  logical               :: reformat
-  integer               :: i, iBand, iCoeff, iCoarse, iFine, bandSize
+  integer               :: iBand, bandSize
   integer               :: comm,me
-  real(dp), allocatable, target :: wvl_band(:)
-  integer               :: coord(3), n_old(3)
-  real(dp), allocatable :: xcart(:,:), psifscf(:,:,:), psigold(:,:,:,:,:,:)
+  real(dp), allocatable :: xcart(:,:), psifscf(:,:,:)
   real(dp), allocatable :: xcart_old(:,:)
-  real(dp)              :: hgrid_old(3), displ
 #if defined HAVE_ETSF_IO
+  integer               :: i, iCoeff, iCoarse, iFine
+  integer               :: n_old(3)
+  real(dp)              :: hgrid_old(3)
+  real(dp), allocatable :: psigold(:,:,:,:,:,:)
+  real(dp), allocatable, target :: wvl_band(:)
   type(etsf_basisdata) :: basis_folder
   type(etsf_main)      :: main_folder
   type(etsf_electrons) :: electrons_folder
+  logical               :: reformat
   logical              :: lstat
   type(etsf_io_low_error) :: error
 #endif
@@ -363,15 +365,16 @@ subroutine wvl_write(dtset, eigen, mpi_enreg, option, rprimd, wff, wfs, wvl, xre
 #if defined HAVE_BIGDFT
   character(len = 500)  :: message
   integer               :: comm,me
-  integer               :: iGrid, iCoeff, iCoarse, iFine
-  integer               :: iorb, jj, j0, j1, i, ii, i0, i1, i2, i3
+  integer               :: iorb
   integer               :: iseg, nseg, ipsi, npsi
-  integer               :: iband
-  real(dp), allocatable, target :: wvl_band(:)
   real(dp), allocatable :: xcart(:,:)
 #if defined HAVE_ETSF_IO
+  integer               :: i, i0, i1, i2, i3, jj, j0, j1, ii
+  integer               :: iGrid, iCoeff, iCoarse, iFine
+  integer               :: iband
   integer, allocatable  :: coeff_map(:,:,:)
   integer, allocatable, target :: wvl_coord(:,:), wvl_ncoeff(:)
+  real(dp), allocatable, target :: wvl_band(:)
   type(etsf_basisdata) :: basis_folder
   type(etsf_main)      :: main_folder
   type(etsf_electrons) :: electrons_folder

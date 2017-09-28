@@ -600,10 +600,13 @@ subroutine xmpi_init()
 
 !Local variables-------------------
  integer :: mpierr,ierr,unt
- logical :: exists,isopen
+ logical :: exists
 #ifdef HAVE_MPI
- integer :: attribute_val,required,provided
+ integer :: attribute_val
  logical :: lflag
+#ifdef HAVE_OPENMP
+ integer :: required,provided
+#endif
 #endif
 
 ! *************************************************************************

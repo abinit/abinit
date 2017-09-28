@@ -221,7 +221,7 @@ subroutine compute_anharmonics(eff_pot,filenames,inp,comm)
     MSG_BUG(message)
   end if  
 
-  have_strain = zero
+  have_strain = 0
 
   write(message,'(a)') ' Strains available after reading the files after:'
   call wrtout(ab_out,message,'COLL')
@@ -253,7 +253,7 @@ subroutine compute_anharmonics(eff_pot,filenames,inp,comm)
 
  !First check the strain  
   do ii =1,6
-    jj = zero
+    jj = 0
     jj = count(effpot_strain%direction==ii)
     if(jj>2) then
       write(message, '(a,I1,a)' )&
