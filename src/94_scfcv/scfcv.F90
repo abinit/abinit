@@ -307,7 +307,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
  integer :: optgr1,optgr2,optgr1_hf,optgr2_hf,option,optrad,optrad_hf,optres,optxc,prtfor,prtxml,quit
  integer :: quit_sum,req_cplex_dij,rdwrpaw,shft,spaceComm,spaceComm_fft,spaceComm_wvl,spaceComm_grid
  integer :: stress_needed,sz1,sz2,unit_out
- integer :: usecprj,usexcnhat
+ integer :: usecprj,usexcnhat,use_hybcomp
  integer :: my_quit,quitsum_request,timelimit_exit
  integer ABI_ASYNC :: quitsum_async
  real(dp) :: boxcut,compch_fft,compch_sph,deltae,diecut,diffor,ecut
@@ -360,7 +360,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
  real(dp),allocatable :: phnonsdiel(:,:,:),shiftvector(:)
  real(dp),allocatable :: susmat(:,:,:,:,:),synlgr(:,:)
  real(dp),allocatable :: vhartr(:),vpsp(:),vtrial(:,:)
- real(dp),allocatable :: vxc(:,:),vxctau(:,:,:),workr(:,:),xccc3d(:),ylmdiel(:,:)
+ real(dp),allocatable :: vxc(:,:),vxchyb_compensate(:,:),vxctau(:,:,:),workr(:,:),xccc3d(:),ylmdiel(:,:)
  real(dp),pointer :: elfr(:,:),grhor(:,:,:),lrhor(:,:)
  type(pawcprj_type),allocatable :: cprj(:,:)
  type(paw_an_type),allocatable :: paw_an(:)
@@ -588,6 +588,9 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
  ABI_ALLOCATE(vpsp,(nfftf))
  ABI_ALLOCATE(vxc,(nfftf,dtset%nspden))
  ABI_ALLOCATE(vxctau,(nfftf,dtset%nspden,4*dtset%usekden))
+ use_hybcomp=0 
+ if(mod(dtset%fockoptmix,100)==11)use_hybcomp=1
+ ABI_ALLOCATE(vxc_hybcomp,(nfftf,dtset%nspden*use_hybcomp))
  ngrvdw=0;if (dtset%vdw_xc>=5.and.dtset%vdw_xc<=7) ngrvdw=dtset%natom
  ABI_ALLOCATE(grvdw,(3,ngrvdw))
  grchempottn(:,:)=zero
@@ -944,6 +947,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
 !Pass through the first routines even when nstep==0
 
  quitsum_request = xmpi_request_null; timelimit_exit = 0
+ istep_updatedfock=0
 
 ! start SCF loop
  do istep=1,max(1,nstep)
@@ -1140,11 +1144,14 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
      ipositron=electronpositron_calctype(electronpositron)
    end if
 
-   if ((moved_atm_inside==1 .or. istep==1).or. (dtset%positron<0.and.istep_mix==1)) then
+   if ((moved_atm_inside==1 .or. istep==1).or.&
+&      (dtset%positron<0.and.istep_mix==1).or.&
+&      (mod(dtset%fockoptmix,100)==11 .and. istep_updatedfock==1) then
 !    PAW only: we sometimes have to compute compensation density
 !    and eventually add it to density from WFs
      nhatgrdim=0
      dummy_nhatgr = .False.
+!    This is executed only in the positron case.
      if (psps%usepaw==1.and.(dtset%positron>=0.or.ipositron/=1) &
 &     .and.((usexcnhat==0) &
 &     .or.(dtset%xclevel==2.and.(dtfil%ireadwf/=0.or.dtfil%ireadden/=0.or.initialized/=0)) &
@@ -1195,7 +1202,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
 &     n1xccc,n3xccc,optene,pawrad,pawtab,ph1df,psps,rhog,rhor,rmet,rprimd,&
 &     strsxc,ucvol,usexcnhat,vhartr,vpsp,vtrial,vxc,vxcavg,wvl,&
 &     xccc3d,xred,electronpositron=electronpositron,&
-&     taug=taug,taur=taur,vxctau=vxctau,add_tfw=tfw_activated)
+&     taug=taug,taur=taur,vxc_hybcomp=vxc_hybcomp,vxctau=vxctau,add_tfw=tfw_activated)
 
      ! set the zero of the potentials here
      if(dtset%usepotzero==2) then
@@ -1662,7 +1669,8 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
 &     nhat,nhatgr,nhatgrdim,nkxc,nvresid,n3xccc,optene,optres,optxc,&
 &     rhog,rhor,rprimd,strsxc,ucvol_local,psps%usepaw,usexcnhat,&
 &     vhartr,vnew_mean,vpsp,vres_mean,res2,vtrial,vxcavg,vxc,wvl,xccc3d,xred,&
-&     electronpositron=electronpositron,taug=taug,taur=taur,vxctau=vxctau,add_tfw=tfw_activated)
+&     electronpositron=electronpositron,taug=taug,taur=taur,vxctau=vxctau,&
+&     vxc_hybcomp=vxc_hybcomp,add_tfw=tfw_activated)
 
    end if
 
@@ -2051,6 +2059,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
  ABI_DEALLOCATE(vtrial)
  ABI_DEALLOCATE(vpsp)
  ABI_DEALLOCATE(vxc)
+ ABI_DEALLOCATE(vxc_hybcomp)
  ABI_DEALLOCATE(vxctau)
  ABI_DEALLOCATE(xccc3d)
  ABI_DEALLOCATE(kxc)

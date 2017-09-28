@@ -98,6 +98,8 @@
 !!  vpsp(nfft)=local psp (Hartree)
 !!  vtrial(nfft,nspden)= trial potential (Hartree)
 !!  vxc(nfft,nspden)= xc potential (Hartree)
+!!  [vxc_hybcomp(nfft,nspden)= compensation xc potential (Hartree) in case of hybrids] Optional output
+||       i.e. difference between the hybrid Vxc at fixed density and the auxiliary Vxc at fixed density
 !!  [vxctau(nfftf,dtset%nspden,4*dtset%usekden)]=derivative of XC energy density with respect to
 !!    kinetic energy density (metaGGA cases) (optional output)
 !!  xccc3d(n3xccc)=3D core electron density for XC core correction, bohr^-3
@@ -133,7 +135,7 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
 &  nattyp,nfft,ngfft,ngrvdw,nhat,nhatgr,nhatgrdim,nkxc,ntypat,n1xccc,n3xccc,&
 &  optene,pawrad,pawtab,ph1d,psps,rhog,rhor,rmet,rprimd,strsxc,&
 &  ucvol,usexcnhat,vhartr,vpsp,vtrial,vxc,vxcavg,wvl,xccc3d,xred,&
-&  electronpositron,taug,taur,vxctau,add_tfw) ! optionals arguments
+&  electronpositron,taug,taur,vxc_hybcomp,vxctau,add_tfw) ! optionals arguments
 
  use defs_basis
  use defs_datatypes
@@ -199,6 +201,7 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
  real(dp),intent(inout),optional :: taur(nfft,dtset%nspden*dtset%usekden)
  real(dp),intent(inout) :: vtrial(nfft,dtset%nspden),vxc(nfft,dtset%nspden)
  real(dp),intent(out),optional :: vxctau(nfft,dtset%nspden,4*dtset%usekden)
+ real(dp),intent(out),optional :: vxc_hybcomp(:,:) ! (nfft,nspden)
  real(dp),intent(inout) :: xccc3d(n3xccc)
  real(dp),intent(in) :: xred(3,dtset%natom)
  real(dp),intent(out) :: grchempottn(3,dtset%natom)
@@ -215,7 +218,7 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
  logical :: add_tfw_,is_hybrid_ncpp,with_vxctau,wvlbigdft
  real(dp), allocatable :: xcart(:,:)
  character(len=500) :: message
- type(xcdata_type) :: xcdata
+ type(xcdata_type) :: xcdata,xcdatahyb
 !arrays
  real(dp),parameter :: identity(1:4)=(/1._dp,1._dp,0._dp,0._dp/)
  real(dp) :: dummy6(6),tsec(2)
@@ -480,6 +483,11 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
        endif
        call xcdata_init(dtset%intxc,dtset%ixc,&
 &        dtset%nelect,dtset%tphysel,dtset%usekden,dtset%vdw_xc,dtset%xc_tb09_c,dtset%xc_denpos,xcdata)
+       if(mod(dtset%fockoptmix,100)==11)then
+         xcdatahyb=xcdata
+         call xcdata_init(dtset%intxc,dtset%useric,&
+&          dtset%nelect,dtset%tphysel,dtset%usekden,dtset%vdw_xc,dtset%xc_tb09_c,dtset%xc_denpos,xcdata)
+       endif
 !      Use the periodic solver to compute Hxc
        nk3xc=1
 !write(80,*)"setvtr"
@@ -489,6 +497,14 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
 &         nhat,psps%usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,dtset%nspden,n3xccc,&
 &         option,dtset%paral_kgb,rhor,rprimd,strsxc,usexcnhat,vxc,vxcavg,xccc3d,xcdata,&
 &         taug=taug,taur=taur,vhartr=vhartr,vxctau=vxctau,add_tfw=add_tfw_)
+         if(mod(dtset%fockoptmix,100)==11)then
+!          Note that at present, this latest call to rhotoxc delivers the used energies%e_xc and strsxc
+           call rhotoxc(energies%e_xc,kxc,mpi_enreg,nfft,ngfft,&
+&            nhat,psps%usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,dtset%nspden,n3xccc,&
+&            option,dtset%paral_kgb,rhor,rprimd,strsxc,usexcnhat,vxc_hybcomp,vxcavg,xccc3d,xcdatahyb,&
+&            taug=taug,taur=taur,vhartr=vhartr,vxctau=vxctau,add_tfw=add_tfw_)
+           vxc_hybcomp(:,:)=vxc_hybcomp(:,:)-vxc(:,:)
+         endif
        else if (ipositron==2) then
          call rhotoxc(energies%e_xc,kxc,mpi_enreg,nfft,ngfft,&
 &         nhat,psps%usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,dtset%nspden,n3xccc,&
@@ -562,6 +578,11 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
        end do
      end do
    end if
+
+!  Adds the compensating vxc for hybrids
+   if(mod(dtset%fockoptmix,100)==11)then
+     vtrial(:,:)=vtrial(:,:)+vxc_hybcomp(:,:)
+   endif
 
    if(dtset%usewvl==1) then
      call wvl_vtrial_abi2big(1,vtrial,wvl%den)
