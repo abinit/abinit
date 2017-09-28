@@ -54,7 +54,7 @@
 !!  usexcnhat= -PAW only- flag controling use of compensation density in Vxc
 !!  vpsp(nfft)=array for holding local psp
 !!  [vxc_hybcomp(nfft,nspden)= compensation xc potential (Hartree) in case of hybrids] Optional output
-||       i.e. difference between the hybrid Vxc at fixed density and the auxiliary Vxc at fixed density
+!!       i.e. difference between the hybrid Vxc at fixed density and the auxiliary Vxc at fixed density
 !!  xccc3d(n3xccc)=3D core electron density for XC core correction (bohr^-3)
 !!  ==== if optres==0
 !!    vtrial(nfft,nspden)= old value of trial potential

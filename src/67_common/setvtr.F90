@@ -99,7 +99,7 @@
 !!  vtrial(nfft,nspden)= trial potential (Hartree)
 !!  vxc(nfft,nspden)= xc potential (Hartree)
 !!  [vxc_hybcomp(nfft,nspden)= compensation xc potential (Hartree) in case of hybrids] Optional output
-||       i.e. difference between the hybrid Vxc at fixed density and the auxiliary Vxc at fixed density
+!!       i.e. difference between the hybrid Vxc at fixed density and the auxiliary Vxc at fixed density
 !!  [vxctau(nfftf,dtset%nspden,4*dtset%usekden)]=derivative of XC energy density with respect to
 !!    kinetic energy density (metaGGA cases) (optional output)
 !!  xccc3d(n3xccc)=3D core electron density for XC core correction, bohr^-3
