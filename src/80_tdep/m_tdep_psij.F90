@@ -733,7 +733,7 @@ subroutine tdep_write_gruneisen(distance,Eigen2nd,InVar,Lattice,Psij_NN,Qpt,Rlat
 !   Write the Gruneisen
     if (sum(abs(qpt_cart(:))).gt.tol8) then 
       if (sum(abs(imag(Gruneisen(:)))).gt.tol8) then
-        write(6,*) 'BUG : the imaginary part of the Gruneisen is not equal to zero'
+        write(std_err,*) 'BUG : the imaginary part of the Gruneisen is not equal to zero'
         write(53,'(i5,x,100(e15.6,x))') iqpt,(real(Gruneisen(ii)),ii=1,nmode),(imag(Gruneisen(ii)),ii=1,nmode)
       else 
 !FB        write(53,'(i5,x,500(e15.6,x))') iqpt,(real(Gruneisen(ii)),ii=1,nmode),((real(Grun_shell(ii,jj)),ii=1,nmode),jj=1,Shell3at%nshell)

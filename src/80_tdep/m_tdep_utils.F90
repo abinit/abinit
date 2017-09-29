@@ -809,7 +809,7 @@ contains
               if (abs(norm1).gt.tol8) then
                 write(std_err,*) ' BUG : invariance under arbitrary rotation is not fulfilled (order 3)'
                 write (std_err,'(5(i3,x),1(e17.10,x))') iatcell,jatom,alpha,nu,beta,norm1
-                write(6,*) 'iatcell,jatom,alpha,nu,beta,norm1'
+                write(std_err,*) 'iatcell,jatom,alpha,nu,beta,norm1'
                 if (InVar%RotationalInv.eq.0) stop -1
               end if  
             end do !beta
@@ -833,7 +833,7 @@ contains
           if (abs(norm1).gt.tol8) then
             write(std_err,*) ' BUG : invariance under arbitrary rotation is not fulfilled (order 2)'
             write(std_err,*) 'iatcell,alpha,nu,norm1'
-            write (6,'(3(i3,x),1(e17.10,x))') iatcell,alpha,nu,norm1
+            write(std_err,'(3(i3,x),1(e17.10,x))') iatcell,alpha,nu,norm1
             if (InVar%RotationalInv.eq.0) stop -1
           end if 
         end do !nu
