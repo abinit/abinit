@@ -67,7 +67,6 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
 #define ABI_FUNC 'fock_getghc'
  use interfaces_18_timing
  use interfaces_32_util
- use interfaces_41_geometry
  use interfaces_52_fft_mpi_noabirule
  use interfaces_53_ffts
  use interfaces_56_xc

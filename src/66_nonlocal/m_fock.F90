@@ -35,6 +35,7 @@ module m_fock
  use defs_abitypes
  use m_profiling_abi
  use m_errors
+ use m_mpinfo
  use m_xmpi
  use libxc_functionals
  use m_pawang
@@ -283,6 +284,7 @@ module m_fock
     ! phase(2,mpw*mkpt))
     ! phase factor the cg array will be multiplied with at each k point
 
+  type(MPI_type) :: mpi_enreg
   type(pawang_type),pointer :: pawang
   type(pawcprj_type), allocatable :: cwaveocc_prj(:,:)
  end type fock_BZ_type
@@ -494,6 +496,7 @@ subroutine fock_init(atindx,cplex,dtset,fock,gsqcut,kg,mpi_enreg,nattyp,npwarr,p
  use interfaces_14_hidewrite
  use interfaces_18_timing
  use interfaces_32_util
+ use interfaces_51_manage_mpi
  use interfaces_52_fft_mpi_noabirule
  use interfaces_56_recipspace
 !End of the abilint section
@@ -621,6 +624,19 @@ subroutine fock_init(atindx,cplex,dtset,fock,gsqcut,kg,mpi_enreg,nattyp,npwarr,p
    do ikpt=1,dtset%nkpt*dtset%nsppol
      fockcommon%nband(ikpt)=dtset%nband(ikpt)
    end do
+
+! mpi_enreg settings
+  
+   call initmpi_seq(fockbz%mpi_enreg)
+   fockbz%mpi_enreg%comm_fft=mpi_enreg%comm_fft
+   fockbz%mpi_enreg%comm_band=mpi_enreg%comm_band
+   fockbz%mpi_enreg%comm_cell=mpi_enreg%comm_cell
+   fockbz%mpi_enreg%nproc_spinor=mpi_enreg%nproc_spinor
+   fockbz%mpi_enreg%nproc_fft=mpi_enreg%nproc_fft
+   fockbz%mpi_enreg%me_g0=mpi_enreg%me_g0
+   fockbz%mpi_enreg%me_kpt=mpi_enreg%me_hf
+   ABI_ALLOCATE(fockbz%mpi_enreg%proc_distrb,(nkpt_bz,mband,1))
+   fockbz%mpi_enreg%proc_distrb=mpi_enreg%distrb_hf
 
    nband=dtset%mband
    fockcommon%ikpt= 0
@@ -1527,7 +1543,7 @@ subroutine fock_BZ_destroy(fock)
 !* Put the integer to 0
  fock%mkpt=0
  fock%mkptband=0
-
+ call destroy_mpi_enreg(fock%mpi_enreg)
 
  DBG_EXIT("COLL")
 

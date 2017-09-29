@@ -207,6 +207,7 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
 #define ABI_FUNC 'forstr'
  use interfaces_18_timing
  use interfaces_41_geometry
+ use interfaces_56_recipspace
  use interfaces_56_xc
  use interfaces_62_wvl_wfs
  use interfaces_65_paw
@@ -265,7 +266,7 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
 !scalars
 
  integer :: comm_grid,ifft,ispden,ncpgr,occopt_,optgr,optgr2,option,optnc,optstr,optstr2,iorder_cprj,ctocprj_choice
- integer :: idir,iatom,unpaw,ii,nlmn,kk
+ integer :: idir,iatom,unpaw,ii,nlmn,kk,mcgbz
  integer,allocatable :: dimcprj(:)
  real(dp) ::dum,dum1,ucvol_
  logical :: apply_residual
@@ -273,7 +274,7 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
  real(dp),parameter :: k0(3)=(/zero,zero,zero/)
  real(dp) :: kinstr(6),nlstr(6),tsec(2),strdum(6),gmet(3,3),gprimd(3,3),rmet(3,3),work(6)
  real(dp) :: dummy(0)
- real(dp),allocatable :: grnl(:),vlocal(:,:),vxc_hf(:,:),xcart(:,:)
+ real(dp),allocatable :: grnl(:),vlocal(:,:),vxc_hf(:,:),xcart(:,:),ylmbz(:,:),ylmgrbz(:,:,:)
  real(dp), ABI_CONTIGUOUS pointer :: resid(:,:)
 
 
@@ -332,13 +333,31 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
        end if
        iatom=-1;idir=0;iorder_cprj=0;unpaw=26
        call metric(gmet,gprimd,-1,rmet,rprimd,dum)
-       call ctocprj(fock%fock_common%atindx,fock%fock_BZ%cgocc,ctocprj_choice,fock%fock_BZ%cwaveocc_prj,gmet,gprimd,iatom,idir,&
-&       iorder_cprj,fock%fock_BZ%istwfk_bz,fock%fock_BZ%kg_bz,fock%fock_BZ%kptns_bz,fock%fock_common%mband,mcg,&
-&       fock%fock_BZ%mcprj,dtset%mgfft,fock%fock_BZ%mkpt,mpi_enreg,psps%mpsang,&
-&       dtset%mpw,dtset%natom,nattyp,fock%fock_BZ%nbandocc_bz,dtset%natom,dtset%ngfft,fock%fock_BZ%nkpt_bz,&
-&       dtset%nloalg,fock%fock_BZ%npwarr,dtset%nspinor,&
-&       dtset%nsppol,dtset%ntypat,dtset%paral_kgb,ph1d,psps,rmet,dtset%typat,ucvol,unpaw,&
-&       xred,ylm,ylmgr)
+       if (fock%fock_BZ%mkpt/=dtset%mkmem) then
+         ABI_ALLOCATE(ylmbz,(dtset%mpw*fock%fock_BZ%mkpt,psps%mpsang*psps%mpsang*psps%useylm))
+         ABI_ALLOCATE(ylmgrbz,(dtset%mpw*fock%fock_BZ%mkpt,3,psps%mpsang*psps%mpsang*psps%useylm))
+         option=1; mcgbz=dtset%mpw*fock%fock_BZ%mkptband*fock%fock_common%my_nsppol
+         call initylmg(gprimd,fock%fock_BZ%kg_bz,fock%fock_BZ%kptns_bz,fock%fock_BZ%mkpt,fock%fock_BZ%mpi_enreg,&
+&         psps%mpsang,dtset%mpw,fock%fock_BZ%nbandocc_bz,fock%fock_BZ%mkpt,&
+&         fock%fock_BZ%npwarr,dtset%nsppol,option,rprimd,ylmbz,ylmgrbz)
+         call ctocprj(fock%fock_common%atindx,fock%fock_BZ%cgocc,ctocprj_choice,fock%fock_BZ%cwaveocc_prj,gmet,gprimd,iatom,idir,&
+&         iorder_cprj,fock%fock_BZ%istwfk_bz,fock%fock_BZ%kg_bz,fock%fock_BZ%kptns_bz,fock%fock_common%mband,mcgbz,&
+&         fock%fock_BZ%mcprj,dtset%mgfft,fock%fock_BZ%mkpt,fock%fock_BZ%mpi_enreg,psps%mpsang,&
+&         dtset%mpw,dtset%natom,nattyp,fock%fock_BZ%nbandocc_bz,dtset%natom,dtset%ngfft,fock%fock_BZ%nkpt_bz,&
+&         dtset%nloalg,fock%fock_BZ%npwarr,dtset%nspinor,&
+&         dtset%nsppol,dtset%ntypat,dtset%paral_kgb,ph1d,psps,rmet,dtset%typat,ucvol,unpaw,&
+&         xred,ylmbz,ylmgrbz)
+         ABI_DEALLOCATE(ylmbz)
+         ABI_DEALLOCATE(ylmgrbz)
+       else
+         call ctocprj(fock%fock_common%atindx,fock%fock_BZ%cgocc,ctocprj_choice,fock%fock_BZ%cwaveocc_prj,gmet,gprimd,iatom,idir,&
+&         iorder_cprj,fock%fock_BZ%istwfk_bz,fock%fock_BZ%kg_bz,fock%fock_BZ%kptns_bz,fock%fock_common%mband,mcg,&
+&         fock%fock_BZ%mcprj,dtset%mgfft,fock%fock_BZ%mkpt,mpi_enreg,psps%mpsang,&
+&         dtset%mpw,dtset%natom,nattyp,fock%fock_BZ%nbandocc_bz,dtset%natom,dtset%ngfft,fock%fock_BZ%nkpt_bz,&
+&         dtset%nloalg,fock%fock_BZ%npwarr,dtset%nspinor,&
+&         dtset%nsppol,dtset%ntypat,dtset%paral_kgb,ph1d,psps,rmet,dtset%typat,ucvol,unpaw,&
+&         xred,ylm,ylmgr)
+       end if
        if (fock%fock_BZ%cwaveocc_prj(1,1)%ncpgr==9) then
          do iatom=1,dtset%natom
            do ii=1,fock%fock_BZ%mcprj
