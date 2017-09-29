@@ -73,6 +73,9 @@
 !! OUTPUT
 !!  energies <type(energies_type)>=all part of total energy.
 !!   | e_xc=exchange-correlation energy (hartree)
+!!   | In case of hybrid compensation algorithm:
+!!   | e_hybcomp1=first compensation term for the exchange-correlation energy (hartree)
+!!   | e_hybcomp2=second compensation term for the exchange-correlation energy (hartree)
 !!  ==== if optene==2 or 4
 !!   | e_localpsp=local psp energy (hartree)
 !!  ==== if dtset%icoulomb == 0
@@ -469,10 +472,10 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
 !write(std_out,*)' setvtr : istep,n1xccc,moved_rhor=',istep,n1xccc,moved_rhor
 !ENDDEBUG
 
- if(istep==1 .or. n1xccc/=0 .or. moved_rhor==1 .or. dtset%positron<0) then
+ if(istep==1 .or. n1xccc/=0 .or. moved_rhor==1 .or. dtset%positron<0 .or. mod(dtset%fockoptmix,100)==11) then
 
    option=0
-   if(istep==1 .or. moved_rhor==1 .or. dtset%positron<0) option=1
+   if(istep==1 .or. moved_rhor==1 .or. dtset%positron<0 .or. mod(dtset%fockoptmix,100)==11) option=1
    if (nkxc>0) option=2
    if (dtset%xclevel==2.and.(nkxc==3-2*mod(dtset%nspden,2))) option=12
    if(dtset%iscf==-1) option=-2
@@ -499,11 +502,12 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
 &         taug=taug,taur=taur,vhartr=vhartr,vxctau=vxctau,add_tfw=add_tfw_)
          if(mod(dtset%fockoptmix,100)==11)then
 !          Note that at present, this latest call to rhotoxc delivers the used energies%e_xc and strsxc
-           call rhotoxc(energies%e_xc,kxc,mpi_enreg,nfft,ngfft,&
+           call rhotoxc(energies%e_hybcomp1,kxc,mpi_enreg,nfft,ngfft,&
 &            nhat,psps%usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,dtset%nspden,n3xccc,&
 &            option,dtset%paral_kgb,rhor,rprimd,strsxc,usexcnhat,vxc_hybcomp,vxcavg,xccc3d,xcdatahyb,&
 &            taug=taug,taur=taur,vhartr=vhartr,vxctau=vxctau,add_tfw=add_tfw_)
-           vxc_hybcomp(:,:)=vxc_hybcomp(:,:)-vxc(:,:)
+           energies%e_hybcomp1=(energies%e_hybcomp1-energies%e_xc)*dtset%userre
+           vxc_hybcomp(:,:)=(vxc_hybcomp(:,:)-vxc(:,:))*dtset%userre
          endif
        else if (ipositron==2) then
          call rhotoxc(energies%e_xc,kxc,mpi_enreg,nfft,ngfft,&
@@ -677,6 +681,15 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
      energies%e_hartree=zero
    end if
  end if
+
+ if(mod(dtset%fockoptmix,100)==11)then
+   if (optene>=1 .and. .not. wvlbigdft) then
+     call dotprod_vn(1,rhor,energies%e_hybcomp2,doti,nfft,nfftot,1,1,vxc_hybcomp,ucvol_local,&
+&      mpi_comm_sphgrid=mpi_comm_sphgrid)
+     energies%e_hybcomp2=energies%e_hybcomp2*dtset%userre
+     energies%e_hybcomp1=energies%e_hybcomp1-energies%e_hybcomp2
+   endif 
+ endif 
 
  if (optene==2.or.optene==4 .and. .not. wvlbigdft) then
 !  Compute local psp energy eei

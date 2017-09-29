@@ -63,6 +63,8 @@
 !!  energies <type(energies_type)>=all part of total energy.
 !!   | e_hartree=Hartree part of total energy (hartree units)
 !!   | e_xc=exchange-correlation energy (hartree)
+!!   | In case of hybrid compensation algorithm:
+!!   | e_hybcomp2=second compensation term for the exchange-correlation energy (hartree)
 !!  ==== if optene==0.or.2
 !!   | e_localpsp=local psp energy (hartree)
 !!  ==== if optene==1.or.2
@@ -299,6 +301,14 @@ subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
 !  Compute local psp energy energies%e_localpsp
    call dotprod_vn(1,rhor,energies%e_localpsp,doti,nfft,nfftot,1,1,vpsp,ucvol,&
 &   mpi_comm_sphgrid=mpi_comm_sphgrid)
+ end if
+
+ if(mod(dtset%fockoptmix,100)==11)then
+   if ( optene>1 .and. .not. wvlbigdft) then
+!    Compute second compensation energy for hybrid functionals
+     call dotprod_vn(1,rhor,energies%e_hybcomp2,doti,nfft,nfftot,1,1,vxc_hybcomp,ucvol,&
+&     mpi_comm_sphgrid=mpi_comm_sphgrid)
+   endif
  end if
 
  calc_xcdc=.false.

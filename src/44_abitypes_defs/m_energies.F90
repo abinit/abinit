@@ -116,6 +116,12 @@ MODULE m_energies
   real(dp) :: e_hartree=zero
    ! Hartree part of total energy (hartree units)
 
+  real(dp) :: e_hybcomp1=zero
+   ! First compensation energy in the case of hybrid functionals, due to the use of two different XC functionals
+
+  real(dp) :: e_hybcomp2=zero
+   ! Second compensation energy in the case of hybrid functionals, due to the use of two different XC potentials
+
   real(dp) :: e_kinetic=zero
    ! Kinetic energy part of total energy.
    ! (valid for direct scheme, dtset%optene == 0)
