@@ -507,9 +507,9 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
        occ(:)       =occ_img(:,iimage)
 
        call args_gs_init(args_gs, &
-&       res_img(iimage)%amu(:),&
-&       res_img(iimage)%mixalch(:,:),&
-&       dtset%dmatpawu(:,:,:,:,ii),dtset%upawu(:,ii),dtset%jpawu(:,ii))
+&       res_img(iimage)%amu(:),res_img(iimage)%mixalch(:,:),&
+&       dtset%dmatpawu(:,:,:,:,ii),dtset%upawu(:,ii),dtset%jpawu(:,ii),&
+&       dtset%rprimd_orig(:,:,ii))
 
        call timab(705,2,tsec)
 
@@ -638,7 +638,7 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
    end if
 
 !Temporary statement
-    110 continue
+   110 continue
 
 !  Dont call the predictor at last time step
    if (itimimage>=ntimimage_max) call_predictor=(call_predictor.and.is_pimd)

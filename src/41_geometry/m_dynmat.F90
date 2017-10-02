@@ -1003,6 +1003,7 @@ end subroutine cart39
 !!    second-derivative matrix in reduced coordinates
 !!
 !! PARENTS
+!!      ddb_interpolate
 !!
 !! CHILDREN
 !!
@@ -2649,7 +2650,7 @@ end subroutine make_bigbox
 !!  (output only if choice=1)
 !!
 !! PARENTS
-!!      m_dynmat,m_effective_potential_file
+!!      m_dynmat
 !!
 !! CHILDREN
 !!
@@ -5329,7 +5330,7 @@ end subroutine nanal9
 !! d2cart(2,3,mpert,3,mpert)=dynamical matrix obtained for the wavevector qpt (normalized using qphnrm)
 !!
 !! PARENTS
-!!      anaddb,m_effective_potential_file,m_ifc,m_phonons
+!!      anaddb,ddb_interpolate,m_effective_potential_file,m_ifc,m_phonons
 !!
 !! CHILDREN
 !!

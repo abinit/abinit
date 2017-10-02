@@ -357,10 +357,10 @@ subroutine ddb_internalstr(asr,crystal,blkval,asrq0,d2asr,iblok,instrain,iout,mp
 !warning message
  if(eigval(1)<-1.0*tol8)then
    write(message,'(9a)') ch10,&
-&      ' --- !WARNING',ch10,&
-&      '     Unstable eigenvalue detected in force constant matrix at Gamma point',ch10,&
-&      '     The system under calculation is physically unstable.',ch10,&
-&      ' ---',ch10
+&   ' --- !WARNING',ch10,&
+&   '     Unstable eigenvalue detected in force constant matrix at Gamma point',ch10,&
+&   '     The system under calculation is physically unstable.',ch10,&
+&   ' ---',ch10
    call wrtout(std_out,message,'COLL')
  end if
 

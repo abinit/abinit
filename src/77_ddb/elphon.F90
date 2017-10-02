@@ -1213,7 +1213,7 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
 &       tmp_veloc_sq1,tmp_veloc_sq2,elph_tr_ds)
 
        call complete_gamma_tr(cryst,elph_ds%ep_scalprod,elph_ds%nbranch,elph_ds%nqptirred,&
-&        elph_ds%nqpt_full,elph_ds%nsppol,elph_tr_ds%gamma_qpt_tr,elph_ds%qirredtofull,qpttoqpt)
+&       elph_ds%nqpt_full,elph_ds%nsppol,elph_tr_ds%gamma_qpt_tr,elph_ds%qirredtofull,qpttoqpt)
 
 !      Now FT to real space too
        qtor = 1 ! q --> r

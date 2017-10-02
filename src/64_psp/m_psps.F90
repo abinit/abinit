@@ -534,7 +534,7 @@ end subroutine psps_init_from_dtset
 !! psps=<type pseudopotential_type>the pseudopotentials description
 !!
 !! PARENTS
-!!      driver
+!!      driver,m_ddb_hdr
 !!
 !! CHILDREN
 !!      nctab_free,nctab_init
@@ -657,8 +657,10 @@ end subroutine psps_free
 !! SIDE EFFECTS
 !!
 !! PARENTS
+!!      m_ddb_hdr
 !!
 !! CHILDREN
+!!      nctab_free,nctab_init
 !!
 !! SOURCE
 
@@ -1248,8 +1250,10 @@ end subroutine psp2params_init
 !! OUTPUT
 !!
 !! PARENTS
+!!      m_psps
 !!
 !! CHILDREN
+!!      nctab_free,nctab_init
 !!
 !! SOURCE
 
@@ -1467,8 +1471,10 @@ end subroutine nctab_free
 !! FUNCTION
 !!
 !! PARENTS
+!!      m_psps
 !!
 !! CHILDREN
+!!      nctab_free,nctab_init
 !!
 !! SOURCE
 
@@ -1526,7 +1532,7 @@ end subroutine nctab_copy
 !!  nctab%d2ncdq0
 !!
 !! PARENTS
-!!      psp8in
+!!      psp8in,psp9in
 !!
 !! CHILDREN
 !!      nctab_free,nctab_init

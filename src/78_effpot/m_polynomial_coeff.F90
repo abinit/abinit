@@ -110,11 +110,10 @@ CONTAINS  !=====================================================================
 !!
 !! PARENTS
 !!      m_anharmonics_terms,m_effective_potential_file,m_polynomial_coeff
-!!      m_polynomial_coeff
+!!      mover_effpot
 !!
 !! CHILDREN
-!!      polynomial_coeff_getname,polynomial_coeff_init,polynomial_term_free
-!!      polynomial_term_init
+!!      getpbcindexes_supercell,xmpi_sum
 !!
 !! SOURCE
 
@@ -229,11 +228,10 @@ end subroutine polynomial_coeff_init
 !!
 !! PARENTS
 !!      m_anharmonics_terms,m_effective_potential_file,m_polynomial_coeff
-!!      m_polynomial_coeff
+!!      m_polynomial_coeff,mover_effpot
 !!
 !! CHILDREN
-!!      polynomial_coeff_getname,polynomial_coeff_init,polynomial_term_free
-!!      polynomial_term_init
+!!      getpbcindexes_supercell,xmpi_sum
 !!
 !! SOURCE
 
@@ -287,11 +285,10 @@ end subroutine polynomial_coeff_free
 !! polynomial_coeff<type(polynomial_coeff)> = polynomial_coeff datatype
 !!
 !! PARENTS
-!!      m_effective_potential_file
+!!      m_effective_potential_file,mover_effpot
 !!
 !! CHILDREN
-!!      polynomial_coeff_getname,polynomial_coeff_init,polynomial_term_free
-!!      polynomial_term_init
+!!      getpbcindexes_supercell,xmpi_sum
 !!
 !! SOURCE
 
@@ -336,8 +333,10 @@ end subroutine polynomial_coeff_setCoefficient
 !! polynomial_coeff<type(polynomial_coeff)> = polynomial_coeff datatype
 !!
 !! PARENTS
+!!      m_effective_potential_file
 !!
 !! CHILDREN
+!!      getpbcindexes_supercell,xmpi_sum
 !!
 !! SOURCE
 
@@ -390,8 +389,7 @@ end subroutine polynomial_coeff_setName
 !!      m_polynomial_coeff,m_polynomial_coeff
 !!
 !! CHILDREN
-!!      polynomial_coeff_getname,polynomial_coeff_init,polynomial_term_free
-!!      polynomial_term_init
+!!      getpbcindexes_supercell,xmpi_sum
 !!
 !! SOURCE
 
@@ -533,11 +531,10 @@ end subroutine polynomial_coeff_getName
 !!                              other nodes returns with a completely initialized instance.
 !!
 !! PARENTS
-!!      m_effective_potential_file
+!!      m_effective_potential_file,m_fit_polynomial_coeff
 !!
 !! CHILDREN
-!!      polynomial_coeff_getname,polynomial_coeff_init,polynomial_term_free
-!!      polynomial_term_init
+!!      getpbcindexes_supercell,xmpi_sum
 !!
 !! SOURCE
 
@@ -628,10 +625,10 @@ end subroutine polynomial_coeff_broadcast
 !!   polynomial_coeff<type(polynomial_coeff)> = polynomial_coeff datatype
 !!
 !! PARENTS
-!!      m_effective_potential_file
+!!      m_fit_polynomial_coeff
 !!
 !! CHILDREN
-!!
+!!      getpbcindexes_supercell,xmpi_sum
 !!
 !! SOURCE
 
@@ -700,9 +697,10 @@ end subroutine polynomial_coeff_MPIsend
 !!   coefficients<type(polynomial_coefficent_type)>=  polynomial_coeff datatype
 !!
 !! PARENTS
-!!      m_effective_potential_file
+!!      m_fit_polynomial_coeff
 !!
 !! CHILDREN
+!!      getpbcindexes_supercell,xmpi_sum
 !!
 !! SOURCE
 
@@ -801,8 +799,7 @@ end subroutine polynomial_coeff_MPIrecv
 !!      m_effective_potential,m_polynomial_coeff
 !!
 !! CHILDREN
-!!      polynomial_coeff_getname,polynomial_coeff_init,polynomial_term_free
-!!      polynomial_term_init
+!!      getpbcindexes_supercell,xmpi_sum
 !!
 !! SOURCE
 
@@ -978,10 +975,10 @@ end subroutine polynomial_coeff_writeXML
 !!  strten(6) = contribution to the stress tensor
 !!
 !! PARENTS
-!!      m_polynomial_coeff
+!!      m_effective_potential
 !!
 !! CHILDREN
-!!      asrq0_free,effective_potential_effpot2ddb,invars9,mkphbs
+!!      getpbcindexes_supercell,xmpi_sum
 !!
 !! SOURCE
 !!

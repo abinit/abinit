@@ -557,7 +557,7 @@ subroutine calcdVloc_wvl(yy,xx,rloc,Z)
    call derf_ab(tt,arg)
    yy=(Z/(xx**2))* ( tt - 2._dp/sqrt(pi)*arg*exp(-arg**2) )
 
-  end subroutine calcdVloc_wvl
+ end subroutine calcdVloc_wvl
 !!***
 
 !----------------------------------------------------------------------
@@ -639,7 +639,7 @@ function dvloc_zero_wvl(charge,rloc,msz,rad,vloc,d2vloc)
 
    dvloc_zero_wvl=yy(1)*ll(1)+yy(2)*ll(2)+yy(3)*ll(3)
 
-  end function dvloc_zero_wvl
+ end function dvloc_zero_wvl
 !!***
 
 end subroutine local_forces_wvl

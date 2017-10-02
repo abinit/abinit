@@ -169,6 +169,7 @@ CONTAINS  !===========================================================
 !! OUTPUT
 !!
 !! PARENTS
+!!      dfpt_looppert,eig2tot,gstate,nonlinear,respfn
 !!
 !! CHILDREN
 !!
@@ -316,6 +317,7 @@ end subroutine ddb_hdr_init
 !! OUTPUT
 !!
 !! PARENTS
+!!      m_ddb_hdr
 !!
 !! CHILDREN
 !!
@@ -374,6 +376,8 @@ end subroutine ddb_hdr_malloc
 !! OUTPUT
 !!
 !! PARENTS
+!!      anaddb,dfpt_looppert,eig2tot,gstate,m_ddb,m_effective_potential_file
+!!      m_gruneisen,mblktyp1,mblktyp5,mrgddb,nonlinear,respfn,thmeig
 !!
 !! CHILDREN
 !!
@@ -463,6 +467,8 @@ end subroutine ddb_hdr_free
 !! OUTPUT
 !!
 !! PARENTS
+!!      ddb_interpolate,dfpt_looppert,eig2tot,gstate,mblktyp1,mblktyp5
+!!      nonlinear,respfn
 !!
 !! CHILDREN
 !!
@@ -529,6 +535,8 @@ end subroutine ddb_hdr_open_write
 !! OUTPUT
 !!
 !! PARENTS
+!!      anaddb,m_ddb,m_effective_potential_file,m_gruneisen,mblktyp1,mblktyp5
+!!      mrgddb,thmeig
 !!
 !! CHILDREN
 !!
@@ -674,6 +682,7 @@ end subroutine ddb_hdr_open_read
 !! OUTPUT
 !!
 !! PARENTS
+!!      mblktyp1,mblktyp5
 !!
 !! CHILDREN
 !!
@@ -786,8 +795,7 @@ end subroutine ddb_hdr_compare
 !! Only executed by one processor
 !!
 !! PARENTS
-!!      dfpt_looppert,eig2tot,gstate,mblktyp1,mblktyp5,nonlinear,respfn
-!!      thmeig
+!!      m_ddb_hdr
 !!
 !! CHILDREN
 !!
@@ -1252,7 +1260,7 @@ end subroutine psddb8
 !! znucl(mtypat)=atomic number of atom type
 !!
 !! PARENTS
-!!      mblktyp1,mblktyp5,thmeig
+!!      m_ddb_hdr
 !!
 !! CHILDREN
 !!
@@ -1852,8 +1860,7 @@ end subroutine ioddb8_in
 !! comm=MPI communicator.
 !!
 !! PARENTS
-!!      anaddb,m_effective_potential_file,m_gruneisen,mblktyp1,mblktyp5
-!!      mrgddb
+!!      m_ddb_hdr
 !!
 !! CHILDREN
 !!
@@ -1940,6 +1947,7 @@ end subroutine ddb_getdims
 !! usepaw= 0 for non paw calculation; =1 for paw calculation
 !!
 !! PARENTS
+!!      m_ddb_hdr
 !!
 !! CHILDREN
 !!
@@ -2443,6 +2451,7 @@ end subroutine inprep8
 !! Describe the inputs
 !!
 !! PARENTS
+!!      m_ddb_hdr
 !!
 !! CHILDREN
 !!
@@ -2558,6 +2567,7 @@ end subroutine ddb_chkname
 !!  rprim, dfpt_sciss, symrel, tnons, tolwfr, typat, usepaw, wtk, xred, zion
 !!
 !! PARENTS
+!!      m_ddb_hdr
 !!
 !! CHILDREN
 !!
@@ -2906,7 +2916,7 @@ end subroutine compare_ddb_variables
 !!  (only checking)
 !!
 !! PARENTS
-!!      ddb_compare
+!!      m_ddb_hdr
 !!
 !! CHILDREN
 !!
@@ -2968,7 +2978,7 @@ subroutine chkr8(reali,realt,name,tol)
 !!  (only checking)
 !!
 !! PARENTS
-!!      ddb_compare
+!!      m_ddb_hdr
 !!
 !! CHILDREN
 !!

@@ -2963,8 +2963,8 @@
     defaultval: 0.0
     dimensions:
     - 3
-    - '[[nzchempot]]'
-    - '[[ntypat]]'
+    - "[[nzchempot]]"
+    - "[[ntypat]]"
     excludes: null
     mnemonics: spatially varying CHEMical POTential
     requires: '[[nzchempot]]/=0'
@@ -4465,7 +4465,7 @@
          The occupation matrix is in the basis of real spherical harmonics Slm (note that this differs from the choice made when
          [[prtdosm]]=1
          , that is in the basis of complex spherical harmonics).
-        Their are ordered by increasing m, and are defined e.g. in [[Blancoa1997]]
+        They are ordered by increasing m, and are defined e.g. in [[Blancoa1997]]
          </a>
          .
         For the case l=2 (d states), the five columns corresponds respectively to (the normalisation factor has been dropped)
@@ -6597,7 +6597,8 @@
     excludes: null
     mnemonics: 'Electron-PHonon: EXTRA ELectrons'
     requires: null
-    text: null
+    text: |-
+        Number of electrons per unit cell to be added to the initial value computed from the pseudopotentials and unit cell.
     topics: ElPhonInt_expert
     varset: eph
     vartype: real
@@ -7201,6 +7202,34 @@
     varset: gw
     vartype: integer
 - !variable
+    abivarname: fockoptmix
+    characteristics: null
+    commentdefault: null
+    commentdims: null
+    defaultval: 0
+    dimensions: scalar
+    excludes: null
+    mnemonics: 'FOCK operator : OPTions for MIXing'
+    requires: '[[usefock]]==1'
+    text: |-
+        Governs the mixing algorithm at the level of the Fock operator, i.e.
+        how to mix it, and how the underlying SCF calculation is to be performed. It is the most relevant when the Fock operator is not updated at each SCF step ([[nnsclohf]]/=0).
+        <p>
+        The last digit of [[fockoptmix]] governs what happens at the level of the SCF algorithm, when the Fock operator is updated.
+        <ol>
+        <li>
+        If [[fockoptmix]]==0 : the SCF algorithm is not restarted (it continues to use the previous potential/density pairs without worrying).</li>
+        <li>
+        If [[fockoptmix]]==1 : the SCF algorithm is restarted (the previous potential/density pairs are discarted).</li>
+        </ol>
+        <p>
+        The second-to-last (dozen) digit governs the possible modification of the XC functional inside the SCF loop to take into account the lack of update of the Fock operator. Irrelevant when the unit digit is 0.
+        <p>
+        The third-to-last (hundreds) digit governs the mixing of the Fock operator itself with its previous occurrences. Irrelevant when the unit digit is 0.
+    topics: Hybrids_basic
+    varset: gstate
+    vartype: integer
+- !variable
     abivarname: foldep@aim
     characteristics: null
     commentdefault: null
@@ -7677,7 +7706,7 @@
         <p>
          Different genetic rules have been implemented and the user has the change to choose between any of them.
         The chosen number of rules have been defined in
-        [[ga_n_rules]
+        [[ga_n_rules]]
          <br />
          <br />
          Implemented rules are
@@ -9934,7 +9963,7 @@
         That is, the states associated to band index [[gwls_first_seed]] to [[gwls_first_seed]]+[[gwls_nseeds]]-1 are used to generate the seed vectors.
         </p>
         <p>
-        The default [[gwls_first_seed]]==[[gwls_band_index]] and [[gwls_nseeds]]==1 has been touroughly tested and seems to be the most performant.
+        The default [[gwls_first_seed]]==[[gwls_band_index]] and [[gwls_nseeds]]==1 has been thoroughly tested and seems to be the most performant.
         Users should therefore keep the default value.
         </p>
     topics: GWls_expert
@@ -14403,7 +14432,7 @@
         remapping is easily done by adding or subtracting 1 from
         each component until it is in the range [-1,1].  That is,
         given the k point normalization [[kptnrm]] described below,
-        each component must lie in [-[[kptnrm]],[[kptnrm]]].
+        each component must lie in [ -[[kptnrm]], [[kptnrm]] ].
          <br />
          Note: a global shift can be provided by [[qptn]]
          <br />
@@ -17763,7 +17792,7 @@
         of levels at the Fermi energy may require a larger value of
         [[nline]] (5 or 6 ?)
         Line minimizations will be stopped anyway when improvement
-        gets small. With the input variable [[nnsclo]],
+        gets small (governed by [[tolrde]]). With the input variable [[nnsclo]],
         governs the convergence of the wavefunctions
         for fixed potential.
          <br />
@@ -20227,7 +20256,7 @@
     text: |-
         <p>
          The maximum distance from the KS energy where to evaluate Sigma. Sigma is evaluated at
-        [KS_energy - [[omegasrdmax]], KS_energy + [[omegasrdmax]]] sampled [[nomegasrd]] times.
+        [ KS_energy - [[omegasrdmax]], KS_energy + [[omegasrdmax]] ] sampled [[nomegasrd]] times.
         </p>
     topics: SelfEnergy_basic
     varset: gw
@@ -20611,7 +20640,7 @@
         <p>
          For additional information,
         download F. Bottin presentation at the
-         <a href="http://www.abinit.org/community/events/program3rd">
+         <a href="https://www.abinit.org/sites/default/files/oldsites/workshop_07/program.html">
           ABINIT workshop 2007
          </a>
         </p>
@@ -26753,7 +26782,8 @@
     excludes: null
     mnemonics: SCALing of the cartesian coordinates
     requires: null
-    text: null
+    text: |-
+        SCALing of the cartesian coordinates.
     topics: Bader_expert
     varset: aim
     vartype: real
@@ -28653,10 +28683,7 @@
         geometry characteristics. When all forces vanish by symmetry (e.g. optimization of the lattice parameters
         of a high-symmetry crystal), then place [[toldfe]] to 1.0d-12, or use (better) [[tolvrs]].
          <br />
-         Since [[toldfe]], [[toldff]],
-        [[tolrff]],
-        [[tolvrs]] and [[tolwfr]]
-        are aimed at the same goal (causing the SCF cycle to stop),
+        Since [[toldfe]], [[toldff]], [[tolrff]], [[tolvrs]] and [[tolwfr]] are aimed at the same goal (causing the SCF cycle to stop),
         they are seen as a unique input variable at reading. Hence, it is forbidden that two of these input variables
         have non-zero values for the same dataset, or generically (for all datasets).
         However, a non-zero value for one such variable for one dataset will have precedence on the non-zero value for another
@@ -28695,14 +28722,7 @@
          <br />
          This stopping criterion is not allowed for RF calculations.
          <br />
-         Since
-         <b>
-          toldfe
-         </b>
-         , [[toldff]],
-        [[tolrff]],
-        [[tolvrs]] and [[tolwfr]]
-        are aimed at the same goal (causing the SCF cycle to stop),
+        Since [[toldfe]], [[toldff]], [[tolrff]], [[tolvrs]] and [[tolwfr]] are aimed at the same goal (causing the SCF cycle to stop),
         they are seen as a unique input variable at reading. Hence, it is forbidden that two of these input variables
         have non-zero values for the same dataset, or generically (for all datasets).
         However, a non-zero value for one such variable for one dataset will have precedence on the non-zero value for another
@@ -28875,14 +28895,7 @@
          <br />
          This stopping criterion is not allowed for RF calculations.
          <br />
-         Since
-         <b>
-          toldfe
-         </b>
-         , [[toldff]],
-        [[tolrff]],
-        [[tolvrs]] and [[tolwfr]]
-        are aimed at the same goal (causing the SCF cycle to stop),
+         Since [[toldfe]], [[toldff]], [[tolrff]], [[tolvrs]] and [[tolwfr]] are aimed at the same goal (causing the SCF cycle to stop),
         they are seen as a unique input variable at reading. Hence, it is forbidden that two of these input variables
         have non-zero values for the same dataset, or generically (for all datasets).
         However, a non-zero value for one such variable for one dataset will have precedence on the non-zero value for another
@@ -28950,14 +28963,7 @@
         then summing the square of this function over all FFT grid points. The result should be
         lower than [[tolvrs]].
          <br />
-         Since
-         <b>
-          toldfe
-         </b>
-         , [[toldff]],
-        [[tolrff]],
-        [[tolvrs]] and [[tolwfr]]
-        are aimed at the same goal (causing the SCF cycle to stop),
+        Since [[toldfe]], [[toldff]], [[tolrff]], [[tolvrs]] and [[tolwfr]] are aimed at the same goal (causing the SCF cycle to stop),
         they are seen as a unique input variable at reading. Hence, it is forbidden that two of these input variables
         have non-zero values for the same dataset, or generically (for all datasets).
         However, a non-zero value for one such variable for one dataset will have precedence on the non-zero value for another
@@ -29045,14 +29051,7 @@
          .
         </p>
         <br />
-        Since
-        <b>
-         toldfe
-        </b>
-        , [[toldff]],
-        [[tolrff]],
-        [[tolvrs]] and [[tolwfr]]
-        are aimed at the same goal (causing the SCF cycle to stop),
+        Since [[toldfe]], [[toldff]], [[tolrff]], [[tolvrs]] and [[tolwfr]] are aimed at the same goal (causing the SCF cycle to stop),
         they are seen as a unique input variable at reading. Hence, it is forbidden that two of these input variables
         have non-zero values for the same dataset, or generically (for all datasets).
         However, a non-zero value for one such variable for one dataset will have precedence on the non-zero value for another

@@ -24,7 +24,7 @@
 !!  mmax=maximum number of points in real space grid in the psp file
 !!   angular momentum of nonlocal pseudopotential
 !!  mpsang= 1+maximum angular momentum for nonlocal pseudopotentials
-!!  mpssoang= 2*maximum angular momentum for nonlocal pseudopotentials-1
+!!  mpssoang= 2*maximum angular momentum for nonlocal pseudopotentials - 1
 !!  mqgrid=dimension of q (or G) grid for arrays.
 !!  mqgrid_vl=dimension of q (or G) grid for valence charge (array qgrid_vl)
 !!  n1xccc=dimension of xccc1d ; 0 if no XC core correction is used
@@ -73,7 +73,7 @@
 
 subroutine psp8in(ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
 &                  mmax,mpsang,mpssoang,mqgrid,mqgrid_vl,nproj,n1xccc,pspso,qchrg,qgrid,qgrid_vl,&
-&                  useylm,vlspl,xcccrc,xccc1d,zion,znucl,nctab)
+&                  useylm,vlspl,xcccrc,xccc1d,zion,znucl,nctab,maxrad)
 
  use defs_basis
  use m_splines
@@ -97,9 +97,9 @@ subroutine psp8in(ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: lloc,lmax,lmnmax,lnmax,mmax,mpsang,mpssoang,mqgrid,mqgrid_vl
- integer,intent(in)  :: pspso,n1xccc,useylm
+ integer,intent(in) :: pspso,n1xccc,useylm
  real(dp),intent(in) :: zion,znucl
- real(dp),intent(out) :: epsatm,qchrg,xcccrc
+ real(dp),intent(out) :: epsatm,qchrg,xcccrc,maxrad
  type(nctab_t),intent(inout) :: nctab
 !arrays
  integer,intent(out) :: indlmn(6,lmnmax),nproj(mpssoang)
@@ -109,15 +109,15 @@ subroutine psp8in(ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
 
 !Local variables-------------------------------
 !scalars
- integer :: extension_switch,iln,iln0,index,ipsang,irad,jj,kk,ll,ll_err,llin
- integer :: mm,nn,nso
+ integer :: extension_switch,iln,iln0,pspindex,ipsang,irad,jj,kk,ll,ll_err,llin
+ integer :: mm,nn,nso,ii,ir,il
  real(dp) :: amesh,damesh,fchrg,rchrg,yp1,ypn,dnvdq0,d2nvdq0,fact
  logical :: has_tvale
  character(len=500) :: message,errmsg
  type(pawrad_type) :: mesh
 !arrays
  integer, allocatable :: nproj_tmp(:)
- real(dp),allocatable :: rad(:),vloc(:),vpspll(:,:),work_space(:),work_spl(:)
+ real(dp),allocatable :: rad(:),vloc(:),vpspll(:,:),work_spl(:)
 
 ! ***************************************************************************
 
@@ -136,6 +136,7 @@ subroutine psp8in(ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
 !(3) pspcod,pspxc,lmax,lloc,mmax,r2well  (r2well not used)
 !(4) rchrg,fchrg,qchrg  (fchrg /=0 if core charge, qchrg not used)
 !(5) nproj(0:lmax)  (several projectors allowed for each l)
+!(6) extension_switch(2) (spin-orbit parameters)
 !Then, for ll=0,lmax :
 !if(nproj(ll)>0)
 !1/<u1|vbkb1>, 1/<u2|vbkb2>, ...
@@ -170,7 +171,7 @@ subroutine psp8in(ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
  read (tmp_unit,*, err=10, iomsg=errmsg) nproj_tmp(1:lmax+1)
  write(message, '(a,5i6)' ) '     nproj',nproj_tmp(1:lmax+1)
  call wrtout(ab_out,message,'COLL')
- call wrtout(std_out,  message,'COLL')
+ call wrtout(std_out,message,'COLL')
 
 !place holder for future implementation of additional optional header
 !lines without invalidating existing psp files
@@ -184,15 +185,15 @@ subroutine psp8in(ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
  read (tmp_unit,*, err=10, iomsg=errmsg) extension_switch
  if (any(extension_switch==[2, 3])) then
    read (tmp_unit,*, err=10, iomsg=errmsg) nproj_tmp(lmax+2:2*lmax+1)
-   write(message, '(a,i6)' ) 'spin-orbit psp, extension_switch',extension_switch
+   write(message, '(5x,a,i6)' ) 'spin-orbit psp, extension_switch',extension_switch
    call wrtout(ab_out,message,'COLL')
    call wrtout(std_out,  message,'COLL')
-   write(message, '(a,5i6)' ) '   nprojso',nproj_tmp(lmax+2:2*lmax+1)
+   write(message, '(5x,a,5i6)' ) '   nprojso',nproj_tmp(lmax+2:2*lmax+1)
    call wrtout(ab_out,message,'COLL')
    call wrtout(std_out,  message,'COLL')
    has_tvale =  (extension_switch == 3)
  else if (any(extension_switch==[0,1])) then
-   write(message, '(a,i6)' ) 'extension_switch',extension_switch
+   write(message, '(5x,a,i6)' ) 'extension_switch',extension_switch
    call wrtout(ab_out,message,'COLL')
    call wrtout(std_out,  message,'COLL')
    has_tvale =  (extension_switch == 1)
@@ -215,7 +216,7 @@ subroutine psp8in(ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
 
 !--------------------------------------------------------------------
 
-!Initialize array indlmn array giving l,m,n,lm,ln,s for i=lmn
+!Initialize array indlmn giving l,m,n,lm,ln,s for i=lmn
 ! if(pspso==2) then
  if (any(extension_switch == [0,1])) then
    nso=1
@@ -232,7 +233,7 @@ subroutine psp8in(ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
    MSG_ERROR(message)
  end if
 
- index=0;iln=0;indlmn(:,:)=0
+ pspindex=0;iln=0;indlmn(:,:)=0
  do nn=1,nso
    do ipsang=1+(nn-1)*(lmax+1),nn*lmax+1
      ll=ipsang-(nn-1)*lmax-1
@@ -240,13 +241,13 @@ subroutine psp8in(ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
        do kk=1,nproj_tmp(ipsang)
          iln=iln+1
          do mm=1,2*ll*useylm+1
-           index=index+1
-           indlmn(1,index)=ll
-           indlmn(2,index)=mm-ll*useylm-1
-           indlmn(3,index)=kk
-           indlmn(4,index)=ll*ll+(1-useylm)*ll+mm
-           indlmn(5,index)=iln
-           indlmn(6,index)=nn
+           pspindex=pspindex+1
+           indlmn(1,pspindex)=ll
+           indlmn(2,pspindex)=mm-ll*useylm-1
+           indlmn(3,pspindex)=kk
+           indlmn(4,pspindex)=ll*ll+(1-useylm)*ll+mm
+           indlmn(5,pspindex)=iln
+           indlmn(6,pspindex)=nn
          end do
        end do
      end if
@@ -260,6 +261,7 @@ subroutine psp8in(ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
    nproj(mpsang+1:mpsang+lmax)=nproj_tmp(lmax+2:2*lmax+1)
  end if
 
+!Can now allocate grids, potentials and projectors
  ABI_ALLOCATE(rad,(mmax))
  ABI_ALLOCATE(vloc,(mmax))
  ABI_ALLOCATE(vpspll,(mmax,lnmax))
@@ -341,12 +343,29 @@ subroutine psp8in(ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
    call psp8cc(mmax,n1xccc,rchrg,xccc1d)
 !  The core charge function for pspcod=8
 !  becomes zero beyond rchrg. Thus xcccrc must be set
-!  equal to rchrg .
+!  equal to rchrg.
    xcccrc=rchrg
  else
-   xccc1d(:,:)=0.0d0
-   xcccrc=0.0d0
+   xccc1d(:,:) = zero
+   xcccrc = zero
+   fchrg = zero
+   qchrg = zero
  end if
+
+ maxrad = rad(mmax)
+
+!!   DEBUG
+!    write(std_out,*)' xcccrc = ', xcccrc, rchrg
+!    write(std_out,*)
+!    write(std_out,*) '# psp8in NLCC data ', n1xccc, xcccrc
+!    do ii = 1, n1xccc
+!    write(std_out,'(7e20.8)')xcccrc*(ii-1.d0)/(n1xccc-1.d0),xccc1d(ii,1),&
+! &         xccc1d(ii,2),xccc1d(ii,3),xccc1d(ii,4),xccc1d(ii,5),xccc1d(ii,6)
+!    enddo
+!    write(std_out,*)
+!    stop
+!!   ENDDEBUG
+
 
 !--------------------------------------------------------------------
 !Carry out calculations for local (lloc) pseudopotential.
@@ -357,12 +376,34 @@ subroutine psp8in(ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
 & vlspl(:,1),rad,vloc,yp1,ypn,zion)
 
 !Fit spline to q^2 V(q) (Numerical Recipes subroutine)
- ABI_ALLOCATE(work_space,(mqgrid))
  ABI_ALLOCATE(work_spl,(mqgrid))
  call spline (qgrid,vlspl(:,1),mqgrid,yp1,ypn,work_spl)
  vlspl(:,2)=work_spl(:)
- ABI_DEALLOCATE(work_space)
  ABI_DEALLOCATE(work_spl)
+
+!!  DEBUG         
+! write(std_out,*)'# Vlocal = '
+! write(std_out,*)' amesh  = ', amesh
+! write(std_out,*)' epsatm = ', epsatm
+! write(std_out,*)' mmax   = ', mmax  
+! write(std_out,*)' mqgrid = ', mqgrid
+! do ir = 1, mqgrid
+!   write(std_out,*)'   qgrid = ', ir, qgrid(ir)
+! enddo
+! do ir = 1, mqgrid
+!   write(std_out,'(a,i5,2f20.12)')'   iq, vlspl = ', ir, vlspl(ir,1), vlspl(ir,2)
+! enddo
+! write(std_out,*)
+! do ir = 1, mmax
+!   write(std_out,*)'   rad   = ', rad(ir), vloc(ir)
+! enddo
+! write(std_out,*)
+! write(std_out,*)' yp1    = ', yp1
+! write(std_out,*)' ypn    = ', ypn
+! write(std_out,*)' zion   = ', zion
+! stop
+!!  ENDDEBUG      
+
 
 !--------------------------------------------------------------------
 !Take care of non-local part
@@ -382,13 +423,51 @@ subroutine psp8in(ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
 
  end if
 
- ! Read pseudo valence charge in real space on the linear mesh
- ! and transform it to reciprocal space on a regular grid. Use vloc as workspace.
+!!  DEBUG         
+! write(std_out,*)'# KB Projectors = '
+! write(std_out,*)' amesh  = ', amesh
+! do ir = 1, mqgrid
+!   do il = 1, lnmax
+!     write(std_out,*)' iq, il, ffspl = ', ir, il, ffspl(ir,1,il), ffspl(ir,2,il)
+!   enddo
+! enddo
+! do il = 1, lmnmax
+!   write(std_out,*)' indlmn = ', il, indlmn(:,il)
+! enddo
+! write(std_out,*)' lmax   = ', lmax
+! write(std_out,*)' lmnmax = ', lmnmax
+! write(std_out,*)' lnmax  = ', lnmax
+! write(std_out,*)' mmax   = ', mmax
+! write(std_out,*)' mqgrid = ', mqgrid
+! do ir = 1, mqgrid
+!   write(std_out,*)'   qgrid = ', ir, qgrid(ir)
+! enddo
+! do il = 1, lnmax
+!   write(std_out,*)
+!   write(std_out,*)'# il = ', il
+!   do ir = 1, mmax
+!     write(std_out,*)'   rad   = ', rad(ir), vpspll(ir,il)
+!   enddo
+! enddo
+! stop
+!!  ENDDEBUG      
+
+! Read pseudo valence charge in real space on the linear mesh
+! and transform it to reciprocal space on a regular grid. Use vloc as workspace.
+ vloc(:) = zero
  if (has_tvale) then
    do irad=1,mmax
      read(tmp_unit,*, err=10, iomsg=errmsg)jj,rad(irad),vloc(irad)
      vloc(irad) = vloc(irad) / four_pi
    end do
+
+!! DEBUG
+!  do irad = 1, mmax
+!    write(std_out,*)' Valence Charge  = ', rad(irad), vloc(irad)
+!  enddo
+!  stop
+!! ENDDEBUG
+
 
    ! Check that rad grid is linear starting at zero
    amesh=rad(2)-rad(1)
@@ -404,16 +483,16 @@ subroutine psp8in(ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
      MSG_ERROR(message)
    end if
 
-   !  Evalute spline-fit of the atomic pseudo valence charge in reciprocal space.
+   !  Evaluate spline-fit of the atomic pseudo valence charge in reciprocal space.
    call pawrad_init(mesh,mesh_size=mmax,mesh_type=1,rstep=amesh)
    call nctab_eval_tvalespl(nctab, zion, mesh, vloc, mqgrid_vl, qgrid_vl)
    call pawrad_free(mesh)
  end if
 
- ABI_DEALLOCATE(nproj_tmp)
  ABI_DEALLOCATE(vpspll)
  ABI_DEALLOCATE(vloc)
  ABI_DEALLOCATE(rad)
+ ABI_DEALLOCATE(nproj_tmp)
 
  return
 
