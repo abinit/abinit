@@ -56,6 +56,7 @@ module m_fit_polynomial_coeff
 CONTAINS  !===========================================================================================
 
 
+!!      polynomial_coeff_init,polynomial_term_free,polynomial_term_init,wrtout
 !!****f* m_fit_polynomial_coeff/fit_polynomial_coeff_fit
 !!
 !! NAME
@@ -91,9 +92,11 @@ CONTAINS  !=====================================================================
 !! eff_pot<type(effective_potential)> = effective potential datatype with new fitted coefficients
 !!
 !! PARENTS
-!!      m_fit_polynomial_coeff
+!!      mover_effpot,multibinit
 !!
 !! CHILDREN
+!!      generelist,polynomial_coeff_free,polynomial_coeff_getname
+!!      polynomial_coeff_init,polynomial_term_free,polynomial_term_init,wrtout
 !!
 !! SOURCE
 
@@ -831,9 +834,11 @@ end subroutine fit_polynomial_coeff_fit
 !! eff_pot = effective potential datatype with new fitted coefficients
 !!
 !! PARENTS
-!!      m_fit_polynomial_coeff
+!!      mover_effpot
 !!
 !! CHILDREN
+!!      generelist,polynomial_coeff_free,polynomial_coeff_getname
+!!      polynomial_coeff_init,polynomial_term_free,polynomial_term_init,wrtout
 !!
 !! SOURCE
 
@@ -1058,6 +1063,8 @@ end subroutine fit_polynomial_coeff_getPositive
 !!      m_fit_polynomial_coeff
 !!
 !! CHILDREN
+!!      generelist,polynomial_coeff_free,polynomial_coeff_getname
+!!      polynomial_coeff_init,polynomial_term_free,polynomial_term_init,wrtout
 !!
 !! SOURCE
 
@@ -1245,6 +1252,8 @@ end subroutine fit_polynomial_coeff_solve
 !!      m_fit_polynomial_coeff
 !!
 !! CHILDREN
+!!      generelist,polynomial_coeff_free,polynomial_coeff_getname
+!!      polynomial_coeff_init,polynomial_term_free,polynomial_term_init,wrtout
 !!
 !! SOURCE
 
@@ -1369,6 +1378,8 @@ end subroutine fit_polynomial_coeff_computeGF
 !!      m_fit_polynomial_coeff
 !!
 !! CHILDREN
+!!      generelist,polynomial_coeff_free,polynomial_coeff_getname
+!!      polynomial_coeff_init,polynomial_term_free,polynomial_term_init,wrtout
 !!
 !! SOURCE
 
@@ -1647,6 +1658,8 @@ end subroutine fit_polynomial_coeff_getFS
 !! PARENTS
 !!
 !! CHILDREN
+!!      generelist,polynomial_coeff_free,polynomial_coeff_getname
+!!      polynomial_coeff_init,polynomial_term_free,polynomial_term_init,wrtout
 !!
 !! SOURCE
 
@@ -1725,6 +1738,9 @@ subroutine fit_polynomial_coeff_computeMSE(eff_pot,hist,mse,msef,mses,natom,ntim
 end subroutine fit_polynomial_coeff_computeMSE
 !!***
 
+!!      m_fit_polynomial_coeff,multibinit
+!!      generelist,polynomial_coeff_free,polynomial_coeff_getname
+!!      polynomial_coeff_init,polynomial_term_free,polynomial_term_init,wrtout
 
 !!****f* m_fit_polynomial_coeff/fit_polynomial_printSystemFiles
 !!
@@ -1744,7 +1760,8 @@ end subroutine fit_polynomial_coeff_computeMSE
 !!      multibinit
 !!
 !! CHILDREN
-!!      destroy_supercell,init_supercell,xred2xcart
+!!      generelist,polynomial_coeff_free,polynomial_coeff_getname
+!!      polynomial_coeff_init,polynomial_term_free,polynomial_term_init,wrtout
 !!
 !! SOURCE
 

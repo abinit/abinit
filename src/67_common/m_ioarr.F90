@@ -129,7 +129,6 @@ CONTAINS  !=====================================================================
 !!      gstate,outscfcv
 !!
 !! CHILDREN
-!!      hdr_check,hdr_fort_read,hdr_free
 !!
 !! SOURCE
 
@@ -697,10 +696,9 @@ end subroutine ioarr
 !!   fform i.e. the integer specification for data type is automatically initialized from varname.
 !!
 !! PARENTS
-!!      m_ioarr,outscfcv,sigma
+!!      cut3d,m_ioarr,outscfcv,sigma
 !!
 !! CHILDREN
-!!      hdr_check,hdr_fort_read,hdr_free
 !!
 !! SOURCE
 
@@ -919,7 +917,6 @@ end subroutine fftdatar_write
 !!      dfpt_scfcv,scfcv
 !!
 !! CHILDREN
-!!      hdr_check,hdr_fort_read,hdr_free
 !!
 !! SOURCE
 
@@ -1026,7 +1023,6 @@ end subroutine fftdatar_write_from_hdr
 !!      sigma
 !!
 !! CHILDREN
-!!      hdr_check,hdr_fort_read,hdr_free
 !!
 !! SOURCE
 
@@ -1449,6 +1445,7 @@ end function fort_denpot_skip
 !!       into denpot_out(istart_out+1:istart_out+nelem,:)
 !!
 !! PARENTS
+!!      m_ioarr
 !!
 !! CHILDREN
 !!

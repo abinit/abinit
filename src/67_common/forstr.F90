@@ -198,7 +198,7 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
  use m_pawrhoij,         only : pawrhoij_type
  use m_pawfgr,           only : pawfgr_type
  use m_pawcprj,          only : pawcprj_type
- use m_fock,             only : fock_type,fock_updatecwaveocc
+ use m_fock,             only : fock_type
  use libxc_functionals,  only : libxc_functionals_is_hybrid
 
 !This section has been created automatically by the script Abilint (TD).

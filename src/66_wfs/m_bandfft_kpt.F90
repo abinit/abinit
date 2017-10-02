@@ -1868,7 +1868,7 @@ end subroutine bandfft_kpt_mpi_recv
 !!  kinpw(:)=kinetic energy for each plane wave (Hartree)
 !!
 !! PARENTS
-!!      energy,forstrnps
+!!      energy,fock2ACE,forstrnps
 !!
 !! CHILDREN
 !!
@@ -1965,7 +1965,7 @@ end subroutine bandfft_kpt_savetabs
 !!  bandfft_kpt_out=<type(bandfft_kpt)>=bandfft_kpt datastructure
 !!
 !! PARENTS
-!!      energy,forstrnps
+!!      energy,fock2ACE,forstrnps
 !!
 !! CHILDREN
 !!

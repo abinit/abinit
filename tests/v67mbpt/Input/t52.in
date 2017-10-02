@@ -27,6 +27,7 @@
     iscf2 -2  
   kptopt2  1
    getden2 1   ! Usual file handling data
+    nstep2 9   ! Only for test portability. Do not keep in production runs.
 
 #Third dataset : NSC run with large number of bands, and points in the the full BZ
     iscf3 -2  

@@ -581,7 +581,7 @@ P          mk1mem6         32
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm: epsatm=   -7.15372539
+ pspatm : epsatm=   -7.15372539
          --- l  ekb(1:nproj) -->
              0    0.721843    1.905447
              1    1.063023
@@ -604,7 +604,7 @@ P          mk1mem6         32
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm: epsatm=    0.06537478
+ pspatm : epsatm=    0.06537478
          --- l  ekb(1:nproj) -->
              0    0.706436
  pspatm: atomic psp has been read  and splines computed

@@ -25,6 +25,8 @@
 !!      anaddb
 !!
 !! CHILDREN
+!!      d2cart_to_red,ddb_free,ddb_hdr_open_write,ddb_malloc,ddb_write_blok
+!!      gtblk9,gtdyn9,outddbnc,wrtout
 !!
 !! SOURCE
 
@@ -179,17 +181,17 @@ subroutine ddb_interpolate(ifc, crystal, inp, ddb, ddb_hdr, asrq0, &
 
      !d2cart(:,1:msize) = ddb%val(:,:,iblok)
      d2cart(1,:,:,:,:) = reshape(ddb%val(1,:,iblok), &
-                         &       shape = (/3,mpert,3,mpert/))                                                                          
+&     shape = (/3,mpert,3,mpert/))                                                                          
      d2cart(2,:,:,:,:) = reshape(ddb%val(2,:,iblok), &
-                         &       shape = (/3,mpert,3,mpert/))                                                                          
+&     shape = (/3,mpert,3,mpert/))                                                                          
    else
 
      ! Get d2cart using the interatomic forces and the
      ! long-range coulomb interaction through Ewald summation
      call gtdyn9(ddb%acell,Ifc%atmfrc,Ifc%dielt,Ifc%dipdip,Ifc%dyewq0,d2cart, &
-     &           crystal%gmet,ddb%gprim,ddb%mpert,natom,Ifc%nrpt,qptnrm(1), &
-     &           qpt, crystal%rmet,ddb%rprim,Ifc%rpt,Ifc%trans,crystal%ucvol, &
-     &           Ifc%wghatm,crystal%xred,ifc%zeff)
+&     crystal%gmet,ddb%gprim,ddb%mpert,natom,Ifc%nrpt,qptnrm(1), &
+&     qpt, crystal%rmet,ddb%rprim,Ifc%rpt,Ifc%trans,crystal%ucvol, &
+&     Ifc%wghatm,crystal%xred,ifc%zeff)
 
    end if
 
@@ -199,15 +201,15 @@ subroutine ddb_interpolate(ifc, crystal, inp, ddb, ddb_hdr, asrq0, &
 
    ! Transform d2cart into reduced coordinates.
    call d2cart_to_red(d2cart,d2red,crystal%gprimd,crystal%rprimd,mpert, &
-   &                  natom,ntypat,crystal%typat,crystal%ucvol,crystal%zion)
+&   natom,ntypat,crystal%typat,crystal%ucvol,crystal%zion)
 
 
    ! Store the dynamical matrix into a block of the new ddb
    jblok = iqpt
    ddb_new%val(1,1:nsize,jblok) = reshape(d2red(1,:,:,:,:), &
-                                  &       shape = (/3*mpert*3*mpert/))                                                                          
+&   shape = (/3*mpert*3*mpert/))                                                                          
    ddb_new%val(2,1:nsize,jblok) = reshape(d2red(2,:,:,:,:), &
-                                  &       shape = (/3*mpert*3*mpert/)) 
+&   shape = (/3*mpert*3*mpert/)) 
 
    ! Store the q-point
    ddb_new%qpt(1:3,jblok) = qpt
@@ -269,7 +271,7 @@ subroutine ddb_interpolate(ifc, crystal, inp, ddb, ddb_hdr, asrq0, &
    choice=2
    do iblok=1,nblok
      call ddb_write_blok(ddb_new,iblok,choice,ddb_hdr%mband,mpert,msize,&
-     &                   ddb_hdr%nkpt,unddb)
+&     ddb_hdr%nkpt,unddb)
    end do
 
    ! Also write summary of bloks at the end
@@ -277,7 +279,7 @@ subroutine ddb_interpolate(ifc, crystal, inp, ddb, ddb_hdr, asrq0, &
    choice=3
    do iblok=1,nblok
      call ddb_write_blok(ddb_new,iblok,choice,ddb_hdr%mband,mpert,msize,&
-     &                   ddb_hdr%nkpt,unddb)
+&     ddb_hdr%nkpt,unddb)
    end do
 
    close (unddb)
@@ -286,20 +288,20 @@ subroutine ddb_interpolate(ifc, crystal, inp, ddb, ddb_hdr, asrq0, &
    ! Write the DDB.nc files (one for each q-point)
    do jblok=1,nblok
 
-    write(ddb_out_nc_filename,'(2a,i5.5,a)') trim(prefix),'_qpt_',jblok,'_DDB.nc'
+     write(ddb_out_nc_filename,'(2a,i5.5,a)') trim(prefix),'_qpt_',jblok,'_DDB.nc'
 
-    d2red(1,:,:,:,:) = reshape(ddb_new%val(1,1:nsize,jblok), &
-                       &       shape = (/3,mpert,3,mpert/))                                                                          
-    d2red(2,:,:,:,:) = reshape(ddb_new%val(2,1:nsize,jblok), &
-                       &       shape = (/3,mpert,3,mpert/))                                                                          
-    blkflg(:,:,:,:)  = reshape(ddb_new%flg(1:nsize,jblok), &
-                       &       shape = (/3,mpert,3,mpert/))                                                                          
+     d2red(1,:,:,:,:) = reshape(ddb_new%val(1,1:nsize,jblok), &
+&     shape = (/3,mpert,3,mpert/))                                                                          
+     d2red(2,:,:,:,:) = reshape(ddb_new%val(2,1:nsize,jblok), &
+&     shape = (/3,mpert,3,mpert/))                                                                          
+     blkflg(:,:,:,:)  = reshape(ddb_new%flg(1:nsize,jblok), &
+&     shape = (/3,mpert,3,mpert/))                                                                          
 
-    do ii=1,3
-      qred(ii) = ddb_new%qpt(ii,jblok) / ddb_new%nrm(1,jblok)
-    end do
+     do ii=1,3
+       qred(ii) = ddb_new%qpt(ii,jblok) / ddb_new%nrm(1,jblok)
+     end do
 
-    call outddbnc(ddb_out_nc_filename,mpert,d2red,blkflg,qred,crystal)
+     call outddbnc(ddb_out_nc_filename,mpert,d2red,blkflg,qred,crystal)
 
    end do
 #endif

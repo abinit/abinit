@@ -377,7 +377,7 @@ P           mkmem          28
     1  15.431  21.987    0   1.4850707        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     0.83985002509544    0.99012430797080    0.51184907750884   rchrg,fchrg,qchrg
- pspatm: epsatm=    0.92590353
+ pspatm : epsatm=    0.92590353
          --- l  ekb(1:nproj) -->
              0    4.921466
  pspatm: atomic psp has been read  and splines computed
@@ -501,7 +501,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      83.056      83.010
     1  15.431  21.987    0   1.4850707        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     0.83985002509544    0.99012430797080    0.51184907750884   rchrg,fchrg,qchrg
- pspatm: epsatm=    0.92590353
+ pspatm : epsatm=    0.92590353
          --- l  ekb(1:nproj) -->
              0    4.921466
  pspatm: atomic psp has been read  and splines computed
@@ -624,7 +624,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     115.546     115.518
     1  15.431  21.987    0   1.4850707        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     0.83985002509544    0.99012430797080    0.51184907750884   rchrg,fchrg,qchrg
- pspatm: epsatm=    0.92590353
+ pspatm : epsatm=    0.92590353
          --- l  ekb(1:nproj) -->
              0    4.921466
  pspatm: atomic psp has been read  and splines computed
@@ -754,7 +754,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     151.667     151.650
     1  15.431  21.987    0   1.4850707        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     0.83985002509544    0.99012430797080    0.51184907750884   rchrg,fchrg,qchrg
- pspatm: epsatm=    0.92590353
+ pspatm : epsatm=    0.92590353
          --- l  ekb(1:nproj) -->
              0    4.921466
  pspatm: atomic psp has been read  and splines computed
@@ -877,7 +877,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     191.713     191.671
     1  15.431  21.987    0   1.4850707        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     0.83985002509544    0.99012430797080    0.51184907750884   rchrg,fchrg,qchrg
- pspatm: epsatm=    0.92590353
+ pspatm : epsatm=    0.92590353
          --- l  ekb(1:nproj) -->
              0    4.921466
  pspatm: atomic psp has been read  and splines computed
@@ -1000,7 +1000,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     234.139     234.120
     1  15.431  21.987    0   1.4850707        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     0.83985002509544    0.99012430797080    0.51184907750884   rchrg,fchrg,qchrg
- pspatm: epsatm=    0.92590353
+ pspatm : epsatm=    0.92590353
          --- l  ekb(1:nproj) -->
              0    4.921466
  pspatm: atomic psp has been read  and splines computed
@@ -1123,7 +1123,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     279.481     279.445
     1  15.431  21.987    0   1.4850707        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     0.83985002509544    0.99012430797080    0.51184907750884   rchrg,fchrg,qchrg
- pspatm: epsatm=    0.92590353
+ pspatm : epsatm=    0.92590353
          --- l  ekb(1:nproj) -->
              0    4.921466
  pspatm: atomic psp has been read  and splines computed
@@ -1253,7 +1253,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     327.250     327.242
     1  15.431  21.987    0   1.4850707        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     0.83985002509544    0.99012430797080    0.51184907750884   rchrg,fchrg,qchrg
- pspatm: epsatm=    0.92590353
+ pspatm : epsatm=    0.92590353
          --- l  ekb(1:nproj) -->
              0    4.921466
  pspatm: atomic psp has been read  and splines computed
@@ -1383,7 +1383,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     377.398     377.368
     1  15.431  21.987    0   1.4850707        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     0.83985002509544    0.99012430797080    0.51184907750884   rchrg,fchrg,qchrg
- pspatm: epsatm=    0.92590353
+ pspatm : epsatm=    0.92590353
          --- l  ekb(1:nproj) -->
              0    4.921466
  pspatm: atomic psp has been read  and splines computed

@@ -82,23 +82,23 @@
 !!      driver
 !!
 !! CHILDREN
-!!      alloc_hamilt_gpu,atm2fft,check_kxc,chkpawovlp,chkph3,d2frnl,d2sym3
-!!      dealloc_hamilt_gpu,dfpt_dyfro,dfpt_dyout,dfpt_dyxc1
-!!      dfpt_eltfrhar,dfpt_eltfrkin,dfpt_eltfrloc,dfpt_eltfrxc,dfpt_ewald
-!!      dfpt_gatherdy,dfpt_looppert,dfpt_phfrq,dfpt_prtph,ebands_free
-!!      efmasdeg_free_array,efmasfr_free_array,eig2tot,eigen_meandege
-!!      elph2_fanddw,elt_ewald,exit_check,fourdp,getcut,getph,hdr_free,hdr_init
-!!      hdr_update,initrhoij,initylmg,inwffil,irreducible_set_pert,kpgio
-!!      littlegroup_q,mkcore,mklocl,mkrho,newocc,nhatgrid,outddbnc,paw_an_free
-!!      paw_an_init,paw_an_nullify,paw_gencond,paw_ij_free,paw_ij_init
-!!      paw_ij_nullify,pawdenpot,pawdij,pawexpiqr,pawfgr_destroy,pawfgr_init
-!!      pawfgrtab_free,pawfgrtab_init,pawinit,pawmknhat,pawpuxinit
-!!      pawrhoij_alloc,pawrhoij_bcast,pawrhoij_copy,pawrhoij_free
-!!      pawrhoij_nullify,pawtab_get_lsize,prteigrs,pspini,q0dy3_apply
-!!      q0dy3_calc,read_rhor,rhohxc,setsym,setsymrhoij,setup1,status,symdij
-!!      symmetrize_xred,sytens,timab,transgrid,vdw_dftd2,vdw_dftd3,wffclose
-!!      ddb_hdr_init, ddb_hdr_free, ddb_hdr_open_write
-!!      wings3,wrtloctens,wrtout,xmpi_bcast
+!!      alloc_hamilt_gpu,atm2fft,check_kxc,chkpawovlp,chkph3,crystal_free
+!!      crystal_init,d2frnl,d2sym3,ddb_hdr_free,ddb_hdr_init,ddb_hdr_open_write
+!!      dealloc_hamilt_gpu,dfpt_dyfro,dfpt_dyout,dfpt_dyxc1,dfpt_eltfrhar
+!!      dfpt_eltfrkin,dfpt_eltfrloc,dfpt_eltfrxc,dfpt_ewald,dfpt_gatherdy
+!!      dfpt_looppert,dfpt_phfrq,dfpt_prtph,ebands_free,efmasdeg_free_array
+!!      efmasfr_free_array,eig2tot,eigen_meandege,elph2_fanddw,elt_ewald
+!!      exit_check,fourdp,getcut,getph,hdr_free,hdr_init,hdr_update,initrhoij
+!!      initylmg,inwffil,irreducible_set_pert,kpgio,littlegroup_q,matr3inv
+!!      mkcore,mklocl,mkrho,newocc,nhatgrid,outddbnc,paw_an_free,paw_an_init
+!!      paw_an_nullify,paw_gencond,paw_ij_free,paw_ij_init,paw_ij_nullify
+!!      pawdenpot,pawdij,pawexpiqr,pawfgr_destroy,pawfgr_init,pawfgrtab_free
+!!      pawfgrtab_init,pawinit,pawmknhat,pawpuxinit,pawrhoij_alloc
+!!      pawrhoij_bcast,pawrhoij_copy,pawrhoij_free,pawrhoij_nullify
+!!      pawtab_get_lsize,prteigrs,pspini,q0dy3_apply,q0dy3_calc,read_rhor
+!!      rhohxc,setsym,setsymrhoij,setup1,status,symdij,symmetrize_xred,sytens
+!!      timab,transgrid,vdw_dftd2,vdw_dftd3,wffclose,wings3,wrtloctens,wrtout
+!!      xmpi_bcast
 !!
 !! SOURCE
 
@@ -232,8 +232,8 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  integer,allocatable :: pertsy(:,:),rfpert(:),rfpert_nl(:,:,:,:,:,:),symq(:,:,:),symrec(:,:,:)
  real(dp) :: dum_gauss(0),dum_dyfrn(0),dum_dyfrv(0),dum_eltfrxc(0)
  real(dp) :: dum_grn(0),dum_grv(0),dum_rhog(0),dum_vg(0)
- real(dp) :: dummy6(6),gmet(3,3),gprimd(3,3),qphon(3)
- real(dp) :: rmet(3,3),rprimd(3,3),strn_dummy6(6),strv_dummy6(6),strsxc(6),tsec(2)
+ real(dp) :: dummy6(6),gmet(3,3),gmet_for_kg(3,3),gprimd(3,3),gprimd_for_kg(3,3),qphon(3)
+ real(dp) :: rmet(3,3),rprimd(3,3),rprimd_for_kg(3,3),strn_dummy6(6),strv_dummy6(6),strsxc(6),tsec(2)
  real(dp),parameter :: k0(3)=(/zero,zero,zero/)
  real(dp),allocatable :: amass(:),becfrnl(:,:,:),cg(:,:),d2bbb(:,:,:,:,:,:),d2cart(:,:,:,:,:)
  real(dp),allocatable :: d2cart_bbb(:,:,:,:,:,:),d2eig0(:,:,:,:,:)
@@ -323,6 +323,13 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 & natom,ngfftf,ngfft,dtset%nkpt,dtset%nsppol,&
 & response,rmet,dtset%rprim_orig(1:3,1:3,1),rprimd,ucvol,psps%usepaw)
 
+!In some cases (e.g. getcell/=0), the plane wave vectors have
+! to be generated from the original simulation cell
+ rprimd_for_kg=rprimd
+ if (dtset%getcell/=0.and.dtset%usewvl==0) rprimd_for_kg=dtset%rprimd_orig(:,:,1)
+ call matr3inv(rprimd_for_kg,gprimd_for_kg)
+ gmet_for_kg=matmul(transpose(gprimd_for_kg),gprimd_for_kg)
+
 !Define the set of admitted perturbations
  mpert=natom+7
  if (rf2_dkdk>0.or.rf2_dkde>0) mpert=natom+11
@@ -359,7 +366,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  ABI_ALLOCATE(kg,(3,dtset%mpw*dtset%mkmem))
  ABI_ALLOCATE(npwarr,(dtset%nkpt))
  call status(0,dtfil%filstat,iexit,level,'call kpgio(1) ')
- call kpgio(ecut_eff,dtset%exchn2n3d,gmet,dtset%istwfk,kg,&
+ call kpgio(ecut_eff,dtset%exchn2n3d,gmet_for_kg,dtset%istwfk,kg,&
 & dtset%kptns,dtset%mkmem,dtset%nband,dtset%nkpt,'PERS',mpi_enreg,dtset%mpw,npwarr,npwtot,&
 & dtset%nsppol)
 
@@ -433,12 +440,14 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  eigen0(:)=zero ; ask_accurate=1
  optorth=0
 
+ hdr%rprimd=rprimd_for_kg ! We need the rprimd that was used to generate de G vectors
  call inwffil(ask_accurate,cg,dtset,dtset%ecut,ecut_eff,eigen0,dtset%exchn2n3d,&
-& formeig,gmet,hdr,ireadwf0,dtset%istwfk,kg,dtset%kptns,&
+& formeig,hdr,ireadwf0,dtset%istwfk,kg,dtset%kptns,&
 & dtset%localrdwf,dtset%mband,mcg,dtset%mkmem,mpi_enreg,dtset%mpw,&
 & dtset%nband,ngfft,dtset%nkpt,npwarr,dtset%nsppol,dtset%nsym,&
-& occ,optorth,rprimd,dtset%symafm,dtset%symrel,dtset%tnons,&
+& occ,optorth,dtset%symafm,dtset%symrel,dtset%tnons,&
 & dtfil%unkg,wffgs,wfftgs,dtfil%unwffgs,dtfil%fnamewffk,wvl)
+ hdr%rprimd=rprimd
 
 !Close wffgs, if it was ever opened (in inwffil)
  if (ireadwf0==1) then
@@ -1423,7 +1432,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 
 !  Initialize the header of the DDB file
    call ddb_hdr_init(ddb_hdr,dtset,psps,pawtab,DDB_VERSION,dscrpt,&
-&                    1,xred=xred,occ=occ,ngfft=ngfft)
+&   1,xred=xred,occ=occ,ngfft=ngfft)
 
 !  Open the formatted derivative database file, and write the header
    call status(0,dtfil%filstat,iexit,level,'call ddb_hdr_open_write')
@@ -1446,10 +1455,10 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 #ifdef HAVE_NETCDF
    ! Output dynamical matrix in NetCDF format.
    call crystal_init(dtset%amu_orig(:,1), Crystal, &
-   & dtset%spgroup, dtset%natom, dtset%npsp, psps%ntypat, &
-   & dtset%nsym, rprimd, dtset%typat, xred, dtset%ziontypat, dtset%znucl, 1, &
-   & dtset%nspden==2.and.dtset%nsppol==1, .false., hdr%title, &
-   & dtset%symrel, dtset%tnons, dtset%symafm)
+&   dtset%spgroup, dtset%natom, dtset%npsp, psps%ntypat, &
+&   dtset%nsym, rprimd, dtset%typat, xred, dtset%ziontypat, dtset%znucl, 1, &
+&   dtset%nspden==2.and.dtset%nsppol==1, .false., hdr%title, &
+&   dtset%symrel, dtset%tnons, dtset%symafm)
 
    filename = strcat(dtfil%filnam_ds(4),"_DDB.nc")
 

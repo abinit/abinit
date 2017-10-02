@@ -162,12 +162,12 @@ sec3:
       The list of input variables present in the latter file links them to their definitions,
       contained in different "variable set" files, some of which are listed here:
    <ul>
-    <li> Basic variables, [[varset_basic]]</li>
-    <li> Files handling variables, [[varset_files]]</li>
-    <li> Ground-state calculation variables, [[varset_gstate]]</li>
-    <li> GW variables, [[varset_gw]]</li>
-    <li> Parallelisation variables, [[varset_paral]]</li>
-    <li> Density Functional Perturbation Theory variables, [[varset_dfpt]]</li>
+    <li> Basic variables, [[varset:basic]]</li>
+    <li> Files handling variables, [[varset:files]]</li>
+    <li> Ground-state calculation variables, [[varset:gstate]]</li>
+    <li> GW variables, [[varset:gw]]</li>
+    <li> Parallelisation variables, [[varset:paral]]</li>
+    <li> Density Functional Perturbation Theory variables, [[varset:dfpt]]</li>
    </ul>
       In the actual input file, these parameters may be given in any desired order,
       and more than one may be given per line. Spaces are used to separate values
@@ -299,8 +299,8 @@ sec3:
     </pre>
       The use of the atomic units is mandatory for other dimensioned input variables, like
       the tolerance on forces ([[toldff]]),
-      parameters that define an 'object' ([[objaax|objaax, objbax]], 
-      [[objatr|objatr, objbtr]]),
+      parameters that define an 'object' ([[objaax]], [[objaax]], [[objbax]], 
+      [[objatr]], [[objbtr]]),
       and the initial velocity of atoms ([[vel]]
       - if needed). </p>
     <p>The initial atomic positions can be input in Bohr or Angstrom through '[[xcart]]',

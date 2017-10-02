@@ -114,6 +114,7 @@ for lib in abinit_corelibs:
   # Reset variables
   makefile = makefile_header(my_name,now)
   sources = list()
+  optional_sources = list()
   modules = list()
   headers = list()
   cudas   = list()
@@ -144,13 +145,15 @@ for lib in abinit_corelibs:
     sources.append("interfaces_%s.F90" % (lib))
 
   # Initialize internal variables
-  dd_srcs  = "lib%s_srcs =" % (lib)
-  nd_srcs  = "lib%s_srcs_built =" % (lib)
+  dd_srcs = "lib%s_srcs =" % (lib)
+  nd_srcs = "lib%s_srcs_built =" % (lib)
+  ob_srcs = ""
 
   cleans = ""
   distcleans = ""
 
   nds_print = False
+  obs_print = False
 
   # Initialize build flags
   makefile += "AM_CFLAGS = @ABI_CPPFLAGS@\n"
@@ -206,10 +209,22 @@ for lib in abinit_corelibs:
     if ( re_src["cu"].search(src) ):
       cudas.append(src)
 
+  # Optional source files
+  try:
+    for cnd in optional_sources:
+      ob_srcs += "if DO_BUILD_%s\n  lib%s_srcs += \\\n    %s\nendif" % \
+        (cnd,lib," \\\n    ".join(optional_sources[cnd]))
+    obs_print = True
+  except NameError:
+    pass
+
   dd_srcs += "\n\n"
   nd_srcs += "\n\n"
+  ob_srcs += "\n\n"
 
   makefile += "# Regular source files\n"+dd_srcs
+  if ( obs_print ):
+    makefile += "# Source files depending on conditionals\n"+ob_srcs
   if ( nds_print ):
     makefile += "# Source files built by scripts\n"+nd_srcs
 
@@ -284,6 +299,18 @@ for lib in abinit_corelibs:
     for src in cudas:
       makefile += "\n%s.$(OBJEXT): %s\n" % (re.sub("\.cu","",src),src)
 
+  # Write optional source files
+  # Note: useless because Automake already takes care of it
+  #try:
+  #  ob_xtra = "\nEXTRA_DIST +="
+  #  for cnd in optional_sources:
+  #    ob_xtra += " \\\n  " + " \\\n  ".join(optional_sources[cnd])
+  #  ob_xtra += "\n"
+  #  makefile += ob_xtra
+  #except NameError:
+  #  pass
+
+  dd_srcs += "\n\n"
   # Write additional hand-made information
   add = "src/%s/abinit.amf" % (lib)
   if ( os.path.exists(add) ):

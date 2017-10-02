@@ -183,11 +183,12 @@
 !! CHILDREN
 !!      applyprojectorsonthefly,denspot_free_history,eigensystem_info,elpolariz
 !!      energies_copy,exchange_electronpositron,forstr,getph,hdr_update
-!!      kswfn_free_scf_data,last_orthon,metric,mkrho,nhatgrid,pawcprj_getdim
-!!      pawmkrho,pawmkrhoij,prtposcar,prtrhomxmn,scprqt,setnoccmmp,spin_current
-!!      timab,total_energies,write_energies,wrtout,wvl_eigen_abi2big,wvl_mkrho
-!!      wvl_nhatgrid,wvl_occ_abi2big,wvl_psitohpsi,wvl_rho_abi2big
-!!      wvl_tail_corrections,wvl_vtrial_abi2big,xcden,xmpi_sum,xred2xcart
+!!      kswfn_free_scf_data,last_orthon,metric,mkrho,nhatgrid,nonlop_test
+!!      pawcprj_getdim,pawmkrho,pawmkrhoij,prtposcar,prtrhomxmn,scprqt
+!!      setnoccmmp,spin_current,timab,total_energies,write_energies,wrtout
+!!      wvl_eigen_abi2big,wvl_mkrho,wvl_nhatgrid,wvl_occ_abi2big,wvl_psitohpsi
+!!      wvl_rho_abi2big,wvl_tail_corrections,wvl_vtrial_abi2big,xcden,xmpi_sum
+!!      xred2xcart
 !!
 !! SOURCE
 
@@ -901,7 +902,7 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 & moved_atm_inside,mpi_enreg,dtset%nband,dtset%nkpt,&
 & dtset%nstep,occ,optres,prtfor,prtxml,quit,&
 & res2,resid,residm,response,tollist,psps%usepaw,vxcavg,dtset%wtk,xred,conv_retcode,&
-& electronpositron=electronpositron)
+& electronpositron=electronpositron, fock=fock)
 
 !output POSCAR and FORCES files, VASP style, for PHON code and friends.
  if (dtset%prtposcar == 1) then
@@ -1008,9 +1009,9 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 !test of the nonlop routine (DFPT vs Finite Differences)
  if (dtset%useria==112233) then
    call nonlop_test(cg,eigen,dtset%istwfk,kg,dtset%kptns,dtset%mband,mcg,dtset%mgfft,dtset%mkmem,&
-&       mpi_enreg,dtset%mpw,my_natom,dtset%natom,dtset%nband,dtset%nfft,dtset%ngfft,dtset%nkpt,&
-&       dtset%nloalg,npwarr,dtset%nspden,dtset%nspinor,dtset%nsppol,dtset%ntypat,paw_ij,pawtab,&
-&       ph1d,psps,rprimd,dtset%typat,xred)
+&   mpi_enreg,dtset%mpw,my_natom,dtset%natom,dtset%nband,dtset%nfft,dtset%ngfft,dtset%nkpt,&
+&   dtset%nloalg,npwarr,dtset%nspden,dtset%nspinor,dtset%nsppol,dtset%ntypat,paw_ij,pawtab,&
+&   ph1d,psps,rprimd,dtset%typat,xred)
  end if
 
  call timab(257,2,tsec)

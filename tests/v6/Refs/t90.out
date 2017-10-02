@@ -2042,7 +2042,7 @@ P          mk1mem12        64
     2  20.947  27.069    1   1.9326638        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     2.82741504495369    0.09256629068341    1.82586447305099   rchrg,fchrg,qchrg
- pspatm: epsatm=   66.67453488
+ pspatm : epsatm=   66.67453488
          --- l  ekb(1:nproj) -->
              1    0.915537
              2   -8.015692
@@ -3732,7 +3732,7 @@ P newkpt: treating     10 bands with npw=      90 for ikpt=  13 by node    0
     2  20.947  27.069    1   1.9326638        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     2.82741504495369    0.09256629068341    1.82586447305099   rchrg,fchrg,qchrg
- pspatm: epsatm=   66.67453488
+ pspatm : epsatm=   66.67453488
          --- l  ekb(1:nproj) -->
              1    0.915537
              2   -8.015692
@@ -5925,7 +5925,7 @@ P newkpt: treating     10 bands with npw=      91 for ikpt=  40 by node    0
     2  20.947  27.069    1   1.9326638        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     2.82741504495369    0.09256629068341    1.82586447305099   rchrg,fchrg,qchrg
- pspatm: epsatm=   66.67453488
+ pspatm : epsatm=   66.67453488
          --- l  ekb(1:nproj) -->
              1    0.915537
              2   -8.015692
@@ -7943,7 +7943,7 @@ P newkpt: treating     10 bands with npw=      91 for ikpt=  20 by node    0
     2  20.947  27.069    1   1.9326638        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     2.82741504495369    0.09256629068341    1.82586447305099   rchrg,fchrg,qchrg
- pspatm: epsatm=   66.67453488
+ pspatm : epsatm=   66.67453488
          --- l  ekb(1:nproj) -->
              1    0.915537
              2   -8.015692
@@ -10204,7 +10204,7 @@ P newkpt: treating     10 bands with npw=      91 for ikpt=  40 by node    0
     2  20.947  27.069    1   1.9326638        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     2.82741504495369    0.09256629068341    1.82586447305099   rchrg,fchrg,qchrg
- pspatm: epsatm=   66.67453488
+ pspatm : epsatm=   66.67453488
          --- l  ekb(1:nproj) -->
              1    0.915537
              2   -8.015692
@@ -14258,7 +14258,7 @@ P newkpt: treating     10 bands with npw=      84 for ikpt=  36 by node    0
     2  20.947  27.069    1   1.9326638        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     2.82741504495369    0.09256629068341    1.82586447305099   rchrg,fchrg,qchrg
- pspatm: epsatm=   66.67453488
+ pspatm : epsatm=   66.67453488
          --- l  ekb(1:nproj) -->
              1    0.915537
              2   -8.015692
@@ -16608,7 +16608,7 @@ P newkpt: treating     10 bands with npw=      95 for ikpt=  50 by node    0
     2  20.947  27.069    1   1.9326638        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     2.82741504495369    0.09256629068341    1.82586447305099   rchrg,fchrg,qchrg
- pspatm: epsatm=   66.67453488
+ pspatm : epsatm=   66.67453488
          --- l  ekb(1:nproj) -->
              1    0.915537
              2   -8.015692
@@ -18958,7 +18958,7 @@ P newkpt: treating     10 bands with npw=      95 for ikpt=  50 by node    0
     2  20.947  27.069    1   1.9326638        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     2.82741504495369    0.09256629068341    1.82586447305099   rchrg,fchrg,qchrg
- pspatm: epsatm=   66.67453488
+ pspatm : epsatm=   66.67453488
          --- l  ekb(1:nproj) -->
              1    0.915537
              2   -8.015692
@@ -21308,7 +21308,7 @@ P newkpt: treating     10 bands with npw=      95 for ikpt=  50 by node    0
     2  20.947  27.069    1   1.9326638        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     2.82741504495369    0.09256629068341    1.82586447305099   rchrg,fchrg,qchrg
- pspatm: epsatm=   66.67453488
+ pspatm : epsatm=   66.67453488
          --- l  ekb(1:nproj) -->
              1    0.915537
              2   -8.015692

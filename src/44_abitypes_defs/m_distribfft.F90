@@ -262,10 +262,10 @@ end subroutine init_distribfft
 !!  Update of "fft distrib" tabs accordingly to the fft parallelisation
 !!
 !! PARENTS
-!!      atm2fft,bethe_salpeter,calc_vhxc_me,dfpt_atm2fft,dieltcel,eph,ks_ddiago
-!!      m_cut3d,m_dvdb,m_fft_prof,m_gsphere,m_ioarr,m_kxc,m_ppmodel,m_screening
-!!      m_wfk,multipoles_fftr,pawgrnl,pawmknhat,pawmknhat_psipsi,pawsushat
-!!      scfcv,screening,sigma,suscep_stat,susk,suskmm,wfk_analyze
+!!      atm2fft,bethe_salpeter,calc_vhxc_me,cut3d,dfpt_atm2fft,dieltcel,eph
+!!      ks_ddiago,m_cut3d,m_dvdb,m_fft_prof,m_gsphere,m_ioarr,m_kxc,m_ppmodel
+!!      m_screening,m_wfk,multipoles_fftr,pawgrnl,pawmknhat,pawmknhat_psipsi
+!!      pawsushat,scfcv,screening,sigma,suscep_stat,susk,suskmm,wfk_analyze
 !!
 !! CHILDREN
 !!

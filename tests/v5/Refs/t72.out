@@ -308,7 +308,7 @@ P           mkmem           3
     2  13.861  18.519    1   1.9261744        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     1.84225747565994    1.72828030557005    9.43000986633162   rchrg,fchrg,qchrg
- pspatm: epsatm=   90.81237674
+ pspatm : epsatm=   90.81237674
          --- l  ekb(1:nproj) -->
              1    0.637337
              2   -5.866564
@@ -499,7 +499,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      66.375      66.256
     2  13.861  18.519    1   1.9261744        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     1.84225747565994    1.72828030557005    9.43000986633162   rchrg,fchrg,qchrg
- pspatm: epsatm=   90.81237674
+ pspatm : epsatm=   90.81237674
          --- l  ekb(1:nproj) -->
              1    0.637337
              2   -5.866564

@@ -170,7 +170,7 @@ P           mkmem           4
     2   0.000   0.000    1   1.2715070        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     0.00000000000000    0.00000000000000    0.00000000000000   rchrg,fchrg,qchrg
- pspatm: epsatm=   28.17357484
+ pspatm : epsatm=   28.17357484
          --- l  ekb(1:nproj) -->
              1   -2.083263
              2   -1.959803
@@ -186,7 +186,7 @@ P           mkmem           4
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     0.00000000000000    0.00000000000000    0.00000000000000   rchrg,fchrg,qchrg
  Note: local psp for atom with Z= 32.0
- pspatm: epsatm=   27.96404307
+ pspatm : epsatm=   27.96404307
          --- l  ekb(1:nproj) -->
  pspatm: atomic psp has been read  and splines computed
 
@@ -322,7 +322,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      67.000      66.970
     2   0.000   0.000    1   1.2715070        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     0.00000000000000    0.00000000000000    0.00000000000000   rchrg,fchrg,qchrg
- pspatm: epsatm=   28.17357484
+ pspatm : epsatm=   28.17357484
          --- l  ekb(1:nproj) -->
              1   -2.083263
              2   -1.959803
@@ -338,7 +338,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      67.000      66.970
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     0.00000000000000    0.00000000000000    0.00000000000000   rchrg,fchrg,qchrg
  Note: local psp for atom with Z= 32.0
- pspatm: epsatm=   27.96404307
+ pspatm : epsatm=   27.96404307
          --- l  ekb(1:nproj) -->
  pspatm: atomic psp has been read  and splines computed
 
@@ -474,7 +474,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      67.000      66.970
     2   0.000   0.000    1   1.2715070        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     0.00000000000000    0.00000000000000    0.00000000000000   rchrg,fchrg,qchrg
- pspatm: epsatm=   28.17357484
+ pspatm : epsatm=   28.17357484
          --- l  ekb(1:nproj) -->
              1   -2.083263
              2   -1.959803
@@ -490,7 +490,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      67.000      66.970
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     0.00000000000000    0.00000000000000    0.00000000000000   rchrg,fchrg,qchrg
  Note: local psp for atom with Z= 32.0
- pspatm: epsatm=   27.96404307
+ pspatm : epsatm=   27.96404307
          --- l  ekb(1:nproj) -->
  pspatm: atomic psp has been read  and splines computed
 
