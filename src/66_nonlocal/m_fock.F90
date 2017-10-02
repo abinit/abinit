@@ -627,14 +627,11 @@ subroutine fock_init(atindx,cplex,dtset,fock,gsqcut,kg,mpi_enreg,nattyp,npwarr,p
 
 ! mpi_enreg settings
   
-   call initmpi_seq(fockbz%mpi_enreg)
-   fockbz%mpi_enreg%comm_fft=mpi_enreg%comm_fft
-   fockbz%mpi_enreg%comm_band=mpi_enreg%comm_band
-   fockbz%mpi_enreg%comm_cell=mpi_enreg%comm_cell
-   fockbz%mpi_enreg%nproc_spinor=mpi_enreg%nproc_spinor
-   fockbz%mpi_enreg%nproc_fft=mpi_enreg%nproc_fft
-   fockbz%mpi_enreg%me_g0=mpi_enreg%me_g0
+   call copy_mpi_enreg(mpi_enreg,fockbz%mpi_enreg)
    fockbz%mpi_enreg%me_kpt=mpi_enreg%me_hf
+   if (allocated(fockbz%mpi_enreg%proc_distrb)) then
+     ABI_DEALLOCATE(fockbz%mpi_enreg%proc_distrb)
+   end if
    ABI_ALLOCATE(fockbz%mpi_enreg%proc_distrb,(nkpt_bz,mband,1))
    fockbz%mpi_enreg%proc_distrb=mpi_enreg%distrb_hf
 
@@ -2293,8 +2290,8 @@ subroutine fock_print(fockcommon,fockbz,header,unit,mode_paral,prtvol)
  call wrtout(my_unt,sjoin(" hybrid SR mixing",ftoa(fockcommon%hybrid_mixing_sr)),my_mode)
  call wrtout(my_unt,sjoin(" hybrid range....",ftoa(fockcommon%hybrid_range)),my_mode)
 
- write(msg,"(a,f12.1,a)")" Memory required for HF u(r) states: ",product(shape(fockbz%cwaveocc_bz)) * dp * b2Mb, " [Mb]"
- call wrtout(my_unt,msg,my_mode)
+! write(msg,"(a,f12.1,a)")" Memory required for HF u(r) states: ",product(shape(fockbz%cwaveocc_bz)) * dp * b2Mb, " [Mb]"
+! call wrtout(my_unt,msg,my_mode)
 
  ! Extra info.
  if (my_prtvol > 0) then

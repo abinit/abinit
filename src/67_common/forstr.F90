@@ -358,21 +358,21 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
 &         dtset%nsppol,dtset%ntypat,dtset%paral_kgb,ph1d,psps,rmet,dtset%typat,ucvol,unpaw,&
 &         xred,ylm,ylmgr)
        end if
-       if (fock%fock_BZ%cwaveocc_prj(1,1)%ncpgr==9) then
-         do iatom=1,dtset%natom
-           do ii=1,fock%fock_BZ%mcprj
-             nlmn=fock%fock_BZ%cwaveocc_prj(iatom,ii)%nlmn
-             do kk=1,nlmn
-               work(1:6)=fock%fock_BZ%cwaveocc_prj(iatom,ii)%dcp(1,1:6,kk)
-               call strconv(work,gprimd,work)
-               fock%fock_BZ%cwaveocc_prj(iatom,ii)%dcp(1,1:6,kk)=work(1:6)
-               work(1:6)=fock%fock_BZ%cwaveocc_prj(iatom,ii)%dcp(2,1:6,kk)
-               call strconv(work,gprimd,work)
-               fock%fock_BZ%cwaveocc_prj(iatom,ii)%dcp(2,1:6,kk)=work(1:6)
-             end do
-           end do
-         end do
-       end if
+!       if (fock%fock_BZ%cwaveocc_prj(1,1)%ncpgr==9) then
+!         do iatom=1,dtset%natom
+!           do ii=1,fock%fock_BZ%mcprj
+!             nlmn=fock%fock_BZ%cwaveocc_prj(iatom,ii)%nlmn
+!             do kk=1,nlmn
+!               work(1:6)=fock%fock_BZ%cwaveocc_prj(iatom,ii)%dcp(1,1:6,kk)
+!               call strconv(work,gprimd,work)
+!               fock%fock_BZ%cwaveocc_prj(iatom,ii)%dcp(1,1:6,kk)=work(1:6)
+!               work(1:6)=fock%fock_BZ%cwaveocc_prj(iatom,ii)%dcp(2,1:6,kk)
+!               call strconv(work,gprimd,work)
+!               fock%fock_BZ%cwaveocc_prj(iatom,ii)%dcp(2,1:6,kk)=work(1:6)
+!             end do
+!           end do
+!         end do
+!       end if
      end if
    end if
    call forstrnps(cg,cprj,dtset%ecut,dtset%ecutsm,dtset%effmass_free,eigen,electronpositron,fock,grnl,&

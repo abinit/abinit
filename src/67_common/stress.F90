@@ -480,7 +480,7 @@
 !Add contributions for constant E or D calculation.
  if ( efield_flag ) then
    strten(:)=strten(:)+Maxstr(:)
-   if ( calc_epaw3_stress ) strten(:) = strten(:) + epaws3red(:) 
+   if ( calc_epaw3_stress ) strten(:) = strten(:) + epaws3red(:)
  end if
  if (vdw_xc>=5.and.vdw_xc<=7) strten(:)=strten(:)+vdwstr(:)
 

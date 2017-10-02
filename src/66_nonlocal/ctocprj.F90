@@ -113,6 +113,7 @@
 #undef ABI_FUNC
 #define ABI_FUNC 'ctocprj'
  use interfaces_32_util
+ use interfaces_41_geometry
  use interfaces_56_recipspace
  use interfaces_66_nonlocal, except_this_one => ctocprj
 !End of the abilint section
@@ -141,7 +142,7 @@
  integer :: blocksz,cg_bandpp,counter,cpopt,cprj_bandpp,dimffnl,ia,iatm,iatom1,iatom2
  integer :: iband_max,iband_min,iband_start,ibg,ibgb,iblockbd,ibp,icg,icgb,icp1,icp2
  integer :: ider,idir0,iend,ierr,ig,ii,ikg,ikpt,ilm,ipw,isize,isppol,istart,istwf_k,itypat,iwf1,iwf2,jdir
- integer :: matblk,mband_cprj,me_distrb,my_nspinor,n1,n1_2p1,n2,n2_2p1,n3,n3_2p1
+ integer :: matblk,mband_cprj,me_distrb,my_nspinor,n1,n1_2p1,n2,n2_2p1,n3,n3_2p1,kk,nlmn
  integer :: nband_k,nband_cprj_k,nblockbd,ncpgr,nkpg,npband_bandfft,npws,npw_k,npw_nk,ntypat0
  integer :: shift1,shift1b,shift2,shift2b,shift3,shift3b
  integer :: spaceComm,spaceComm_band,spaceComm_fft,useylmgr
@@ -153,7 +154,7 @@
  integer,allocatable :: dimlmn(:),kg_k(:,:),kg_k_loc(:,:)
  integer,allocatable :: npw_block(:),npw_disp(:)
  integer,pointer :: atindx_atm(:),indlmn_atm(:,:,:),nattyp_atm(:),pspso_atm(:)
- real(dp) :: kpoint(3)
+ real(dp) :: kpoint(3),work(6)
  real(dp),allocatable :: cwavef(:,:),cwavef_tmp(:,:)
  real(dp),allocatable :: ffnl(:,:,:,:),ffnl_npw(:,:,:,:),ffnl_tmp(:,:,:,:),ffnl_tmp_npw(:,:,:,:)
  real(dp),allocatable :: kpg_k(:,:)
@@ -571,6 +572,22 @@
    end do
 !  End loop over spins
  end do
+
+ if ((iatom<=0).and.(choice==23)) then
+   do iatom1=1,ncprj
+     do ii=1,mcprj
+       nlmn=cprj(iatom1,ii)%nlmn
+       do kk=1,nlmn
+         work(1:6)=cprj(iatom1,ii)%dcp(1,1:6,kk)
+         call strconv(work,gprimd,work)
+         cprj(iatom1,ii)%dcp(1,1:6,kk)=work(1:6)
+         work(1:6)=cprj(iatom1,ii)%dcp(2,1:6,kk)
+         call strconv(work,gprimd,work)
+         cprj(iatom1,ii)%dcp(2,1:6,kk)=work(1:6)
+       end do
+     end do
+   end do
+ end if
 
 !If needed, gather computed scalars
  if (.not.cg_band_distributed) then
