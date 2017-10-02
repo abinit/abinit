@@ -77,6 +77,7 @@ subroutine nres2vres(dtset,gsqcut,izero,kxc,mpi_enreg,my_natom,nfft,ngfft,nhat,&
  use defs_abitypes
  use m_errors
  use m_xmpi
+ use m_xcdata
 
  use m_pawang,   only : pawang_type
  use m_pawtab,   only : pawtab_type
@@ -119,6 +120,7 @@ subroutine nres2vres(dtset,gsqcut,izero,kxc,mpi_enreg,my_natom,nfft,ngfft,nhat,&
  logical :: has_nkxc_gga
  real(dp) :: dum,energy,m_norm_min,ucvol,vxcavg
  character(len=500) :: message
+ type(xcdata_type) :: xcdata
 !arrays
  integer :: nk3xc
  real(dp) :: dummy6(6),gmet(3,3),gprimd(3,3),qq(3),rmet(3,3)
@@ -242,11 +244,14 @@ subroutine nres2vres(dtset,gsqcut,izero,kxc,mpi_enreg,my_natom,nfft,ngfft,nhat,&
    ABI_ALLOCATE(kxc_cur,(nfft,nkxc_cur))
    option=2;if (dtset%xclevel==2.and.optxc==0) option=12
 
-!  to be adjusted for the call rhohxc
+   call xcdata_init(dtset%intxc,dtset%ixc,&
+&    dtset%nelect,dtset%tphysel,dtset%usekden,dtset%vdw_xc,dtset%xc_tb09_c,dtset%xc_denpos,xcdata)
+
+!  To be adjusted for the call to rhohxc
    nk3xc=1
-   call rhohxc(dtset,energy,gsqcut,izero,kxc_cur,mpi_enreg,nfft,ngfft,&
-&   nhat,usepaw,nhatgr,nhatgrdim,nkxc_cur,nk3xc,dtset%nspden,n3xccc,option,nresg,&
-&   rhor0,rprimd,dummy6,usexcnhat,vhres,vresid,vxcavg,xccc3d)  !vresid=work space
+   call rhohxc(energy,gsqcut,izero,kxc_cur,mpi_enreg,nfft,ngfft,&
+&   nhat,usepaw,nhatgr,nhatgrdim,nkxc_cur,nk3xc,dtset%nspden,n3xccc,option,dtset%paral_kgb,nresg,&
+&   rhor0,rprimd,dummy6,usexcnhat,vhres,vresid,vxcavg,xccc3d,xcdata)  !vresid=work space
    if (dtset%nspden/=4)  then
      ABI_DEALLOCATE(rhor0)
    end if
