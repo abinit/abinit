@@ -7,6 +7,7 @@
 module m_tdep_readwrite
   
   use defs_basis
+  use m_errors
   use m_xmpi
   use m_abihist
   use m_abimover, only : abimover
@@ -277,8 +278,7 @@ contains
     InVar%debug=.true.
     write(InVar%stdout,'(a,f6.1,a)') '.Version ', version_value,' of PHONONS (Debug)'
   else
-    write(InVar%stdout,*) '.Please use recent format for the input file'
-    stop -1
+    MSG_ERROR('Please use recent format for the input file')
   end if  
   write(InVar%stdout,'(a)') '.Copyright (C) 1998-2016 ABINIT group (FB,JB).'
   write(InVar%stdout,'(a)') ' ABINIT comes with ABSOLUTELY NO WARRANTY.'
@@ -435,8 +435,7 @@ contains
       nstep_int  =float(int(nstep_float))
       write(InVar%stdout,*) nstep_int,nstep_float
       if (abs(nstep_float-nstep_int).gt.tol8) then
-        write(std_err,*) 'ERROR: Change nstep_min. (nstep_max-nstep_min+1)/Slice has to be an integer.'
-        stop -1
+        MSG_ERROR('Change nstep_min. (nstep_max-nstep_min+1)/Slice has to be an integer.')
       end if  
     else if (string.eq.Enunit) then  
       read(40,*) string,InVar%Enunit
@@ -472,8 +471,7 @@ contains
     else if (string.eq.TheEnd) then
       exit
     else 
-      write(InVar%stdout,'(a,a,a)') ' THE KEYWORD ',string,' IS NOT ALLOWED' 
-      stop -1
+      MSG_ERROR('ONE KEYWORD IS NOT ALLOWED')
     end if  
   end do
 ! Output very important informations 

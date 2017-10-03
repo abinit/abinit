@@ -7,6 +7,7 @@
 module m_tdep_psij
 
   use defs_basis
+  use m_errors
   use m_crystal,          only : crystal_t
   use m_ddb,              only : ddb_type
   use m_ifc,              only : ifc_type,ifc_fourq
@@ -331,7 +332,7 @@ subroutine tdep_build_psijNNN(distance,InVar,ntotcoeff,proj,Psij_coeff,Psij_NN,S
             if (abs(norm).gt.tol8) then
               write(std_err,*) ' BUG : the acoustic sum rule is not fulfilled'
               write(std_err,'(5(i3,x),1(e17.10,x))') ii,jj,kk,eatom,fatom,norm
-              stop -1
+              MSG_BUG('the acoustic sum rule is not fulfilled')
             end if
           end do !kk
         end do !jj

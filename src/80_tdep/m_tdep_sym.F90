@@ -7,6 +7,7 @@
 module m_tdep_sym
   
  use defs_basis
+ use m_errors
  use m_tdep_latt,        only : Lattice_Variables_type, tdep_make_inbox
  use m_tdep_readwrite,   only : Input_Variables_type
 
@@ -108,7 +109,7 @@ contains
         if ((ii/=jj.and.abs(tmp1(ii,jj)).gt.tol8).or.(ii==jj.and.abs(tmp1(ii,jj)-1.d0).gt.tol8)) then
           write(InVar%stdout,'(a)') ' STOP : the matrix is not orthogonal : '
           write(InVar%stdout,'(a,x,i3,x,i3,x,f15.10)') ' ii, jj, sym(ii,jj)=',ii,jj,tmp1(ii,jj)
-          stop -1
+          MSG_ERROR('The matrix is not orthogonal')
         end if
       end do
     end do
@@ -204,8 +205,7 @@ contains
         Sym%tnons(:,isym)=tnons_tmp(:,(isym-1)*InVar%natom_unitcell+1)
       end do        
     else
-      write(InVar%stdout,'(a)') 'There is no relationship between nsym and nptsym'
-      stop -1
+      MSG_ERROR('There is no relationship between nsym and nptsym')
     end if  
   end if
   ABI_FREE(symrel_tmp)
@@ -234,8 +234,7 @@ contains
       write(InVar%stdout,*) Sym%ptsymrel(2,:,isym)
       write(InVar%stdout,*) Sym%ptsymrel(3,:,isym)
     end do  
-    write(InVar%stdout,'(a)') ' ERROR: the symrel and ptsymrel tabs do not correspond' 
-    stop -1
+    MSG_ERROR('The symrel and ptsymrel tabs do not correspond')
   end if  
 
 !Calcul des symrec  

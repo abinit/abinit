@@ -7,6 +7,7 @@
 module m_tdep_utils
   
   use defs_basis
+  use m_errors
   use m_tdep_latt,        only : Lattice_Variables_type, tdep_make_inbox
   use m_tdep_readwrite,   only : Input_Variables_type
   use m_tdep_sym,         only : Symetries_Variables_type, tdep_SearchS_1at
@@ -128,6 +129,9 @@ contains
   double precision, allocatable  :: xcart(:,:,:)
   double precision, allocatable  :: xcart_ideal(:,:)
   logical :: ok,ok1
+  integer :: ierr
+
+  ierr = 0;
 
   write(InVar%stdout,*)' '
   write(InVar%stdout,*) '#############################################################################'
@@ -185,8 +189,7 @@ contains
             if (.not.ok) cycle
           end if
           if (iatom.gt.(InVar%natom+1)) then
-            write(InVar%stdout,*) 'The number of atoms found in the bigbox exceeds natom' 
-            stop -1
+            MSG_ERROR('The number of atoms found in the bigbox exceeds natom' )
           end if  
           xred_ideal(:,iatom)=xred_tmp(:)
           call DGEMV('T',3,3,1.d0,Lattice%multiplicitym1(:,:),3,Rlatt(:),1,0.d0,Rlatt_red(:,1,iatom),1)
@@ -197,8 +200,7 @@ contains
   end do
 
   if (iatom.lt.InVar%natom) then
-    write(InVar%stdout,*) 'STOP : The number of atoms found in the bigbox is lower than natom' 
-    stop -1
+    MSG_ERROR('The number of atoms found in the bigbox is lower than natom')
   end if  
 
 ! Compute the distances between ideal positions in the SUPERcell
@@ -274,8 +276,7 @@ contains
       ok=.false.
       exit
     else if (foo2.gt.InVar%natom_unitcell) then
-      write(InVar%stdout,*) ' Something wrong: WTF'
-      stop -1
+      MSG_BUG(' Something wrong: WTF')
     endif
   end do  
   if (ok) then
@@ -285,9 +286,8 @@ contains
       write(31,'(a,x,3(f10.6,x))') 'I',xred_ideal (:,iatom)
     end do
     close(31)
-    write(InVar%stdout,*) 'The basis of atoms written in input.in file does not appear in the MD trajectory'
-    write(InVar%stdout,*) 'Perhaps, you can adjust the tolerance (tolmotif)'
-    stop -1
+    MSG_ERROR_NOSTOP('The basis of atoms written in input.in file does not appear in the MD trajectory',ierr)
+    MSG_ERROR('Perhaps, you can adjust the tolerance (tolmotif)')
   end if  
   ABI_FREE(dist_unitcell)
 
@@ -434,7 +434,7 @@ contains
         write(31,'(a,x,3(f10.6,x))') 'I',xred_ideal (:,eatom)
         write(31,'(a,x,3(f10.6,x))') 'C',xred_center(:,eatom)
       end do
-      stop -1
+      MSG_ERROR('Problem to find the average position')
     end if  
   end do
 
@@ -810,7 +810,9 @@ contains
                 write(std_err,*) ' BUG : invariance under arbitrary rotation is not fulfilled (order 3)'
                 write (std_err,'(5(i3,x),1(e17.10,x))') iatcell,jatom,alpha,nu,beta,norm1
                 write(std_err,*) 'iatcell,jatom,alpha,nu,beta,norm1'
-                if (InVar%RotationalInv.eq.0) stop -1
+                if (InVar%RotationalInv.eq.0)  then
+                  MSG_BUG('invariance under arbitrary rotation is not fulfilled (order 3)')
+                end if
               end if  
             end do !beta
           end do !nu
@@ -834,7 +836,9 @@ contains
             write(std_err,*) ' BUG : invariance under arbitrary rotation is not fulfilled (order 2)'
             write(std_err,*) 'iatcell,alpha,nu,norm1'
             write(std_err,'(3(i3,x),1(e17.10,x))') iatcell,alpha,nu,norm1
-            if (InVar%RotationalInv.eq.0) stop -1
+            if (InVar%RotationalInv.eq.0) then
+              MSG_BUG('invariance under arbitrary rotation is not fulfilled (order 2)')
+            end if
           end if 
         end do !nu
       end do !alpha
@@ -1063,8 +1067,7 @@ subroutine tdep_calc_nbcoeff(distance,iatcell,InVar,ishell,jatom,katom,ncoeff,no
               else if (inv==2) then
                 alphaij(isyminv,(mu-1)*3+nu,iconst(isyminv))=lambda*pp(mu,nu)-pp(nu,mu)
               else
-                write(16,*)'  BUG: This symetry is neither Keptinvariant nor Reversed'
-                stop -1
+                MSG_BUG('This symetry is neither Keptinvariant nor Reversed')
               end if
             end do  
           end do  
@@ -1112,8 +1115,7 @@ subroutine tdep_calc_nbcoeff(distance,iatcell,InVar,ishell,jatom,katom,ncoeff,no
                   else if (inv==6) then
                     alphaij(isyminv,(mu-1)*9+(nu-1)*3+xi,iconst(isyminv))=lambda*ppp(mu,nu,xi)-ppp(xi,nu,mu)
                   else
-                    write(16,*)'  BUG: This symetry is neither Keptinvariant nor Reversed'
-                    stop -1
+                    MSG_BUG('This symetry is neither Keptinvariant nor Reversed')
                   end if
                 end do !xi  
               end do !nu 
@@ -1125,18 +1127,15 @@ subroutine tdep_calc_nbcoeff(distance,iatcell,InVar,ishell,jatom,katom,ncoeff,no
         end do !jj
       end do !ii
     else
-      write(16,*)'  BUG: Only the second and third order is allowed'
-      stop -1
+      MSG_BUG('Only the second and third order is allowed')
     end if  
 
 !   WARNING: There are some minimum and maximum of constraints
     if (order==2.and.(iconst(isyminv).gt.8)) then
-      write(16,*)'  BUG : There are more than 8 constraints'
-      stop -1
+      MSG_BUG('There are more than 8 constraints')
     end if
     if (order==3.and.(iconst(isyminv).gt.26)) then
-      write(16,*)'  BUG : There are more than 26 constraints'
-      stop -1
+      MSG_BUG('There are more than 26 constraints')
     end if
   end do !isyminv
 ! ================================================================================================
@@ -1169,8 +1168,8 @@ subroutine tdep_calc_nbcoeff(distance,iatcell,InVar,ishell,jatom,katom,ncoeff,no
     end if  
   end do
   if (ii.ne.ncount) then
-    write(16,*) ii,' non equal to ',ncount
-    stop -1
+!JB    write(16,*) ii,' non equal to ',ncount
+    MSG_BUG("Count error")
   end if  
   do ii=1,norder
     do jj=1,ncount
@@ -1217,12 +1216,10 @@ subroutine tdep_calc_nbcoeff(distance,iatcell,InVar,ishell,jatom,katom,ncoeff,no
   end do  
   write(16,*) '  =======Au total, il y a ',ncount,' vecteurs independants'
   if (ncount.gt.8.and.order==2) then
-    write(16,*) '  ERROR : There are too many independant vectors'
-    stop -1
+    MSG_ERROR('There are too many independant vectors')
   end if
   if (ncount.gt.26.and.order==3) then
-    write(16,*) '  ERROR : There are too many independant vectors'
-    stop -1
+    MSG_ERROR('There are too many independant vectors')
   end if
 
 ! On cherche les (norder-ncount) vecteurs orthogonaux aux vecteurs non-nuls
@@ -1261,8 +1258,7 @@ subroutine tdep_calc_nbcoeff(distance,iatcell,InVar,ishell,jatom,katom,ncoeff,no
     if ((abs(aimag(tab_vec(1,kk))).gt.1.d-6).or.&
 &       (abs(aimag(tab_vec(1,kk))).gt.1.d-6).or.&
 &       (abs(aimag(tab_vec(1,kk))).gt.1.d-6)) then
-      write(16,*) ' ERROR : the constraint has an imaginary part'
-      stop -1
+      MSG_ERROR('the constraint has an imaginary part')
     end if
   end do  
   ncoeff=norder-ncount

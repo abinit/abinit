@@ -7,6 +7,7 @@
 module m_tdep_shell
 
   use defs_basis
+  use m_errors
   use m_tdep_readwrite,   only : Input_Variables_type
   use m_tdep_latt,        only : Lattice_Variables_type
   use m_tdep_sym,         only : Symetries_Variables_type, tdep_SearchS_2at, tdep_SearchS_3at
@@ -111,7 +112,7 @@ contains
     write(InVar%stdout,*) '  STOP : The maximum number of shells allowed by the code is:',nshell_max
     write(InVar%stdout,*) '         In the present calculation, the number of shells is:',Shell2at%nshell
     write(InVar%stdout,*) '         Action: increase nshell_max'
-    stop -1
+    MSG_ERROR('The maximum number of shells allowed by the code is reached')
   end if  
 
 
@@ -277,7 +278,7 @@ contains
     write(InVar%stdout,*) '  STOP : The maximum number of shells allowed by the code is:',nshell_max
     write(InVar%stdout,*) '         In the present calculation, the number of shells is:',Shell3at%nshell
     write(InVar%stdout,*) '         Action: increase nshell_max'
-    stop -1
+    MSG_ERROR('The maximum number of shells allowed by the code is reached')
   end if  
 
 

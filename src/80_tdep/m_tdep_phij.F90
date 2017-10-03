@@ -7,6 +7,7 @@
 module m_tdep_phij
 
   use defs_basis
+  use m_errors
   use m_tdep_readwrite,   only : Input_Variables_type
   use m_tdep_latt,        only : Lattice_Variables_type
   use m_tdep_shell,       only : Shell_Variables_type
@@ -259,8 +260,7 @@ subroutine tdep_build_phijNN(distance,InVar,ntotcoeff,proj,Phij_coeff,Phij_NN,Sh
         do kk=1,3
           do ll=1,3
             if (counter(iatom,kk,ll).ne.counter(iatom,ll,kk)) then
-              write(InVar%stdout,*) ' BUG: The correction cannot be applied'
-              stop -1
+              MSG_BUG('The correction cannot be applied')
             end if
           end do !ll
         end do !kk 
@@ -440,7 +440,7 @@ subroutine tdep_calc_dij(dij,eigenV,iqpt,InVar,Lattice,omega,Phij_NN,qpt_cart,Rl
             write(InVar%stdout,'(100(f12.8,x))') imag(dij(2+(iatcell-1)*3,:))
             write(InVar%stdout,'(100(f12.8,x))') imag(dij(3+(iatcell-1)*3,:))
           end do  
-          stop -1
+          MSG_ERROR('The Dij matrix is not hermitian')
         else if ((InVar%Impose_symetry.eq.1).or.(InVar%Impose_symetry.eq.3)) then
           ctemp=(dij(ii,jj)+conjg(dij(jj,ii)))/2.d0
           dij(ii,jj)=ctemp
@@ -597,8 +597,7 @@ subroutine tdep_build_phij33(eatom,fatom,isym,InVar,Phij_ref,Phij_33,Sym,trans)
   call DGEMM('N','N',3,3,3,1.d0,Phij_tmp,3,Sym%S_inv(:,:,isym,1),3,0.d0,Phij_33,3)
 
   if ((trans.lt.1).or.(trans.gt.2)) then
-    write(InVar%stdout,'(a)') '  BUG: this value of the symmetry index is not permitted'
-    stop -1
+    MSG_BUG('This value of the symmetry index is not permitted')
   end if
 ! Transpose the 3x3 matrix if required
   if (trans.eq.2) then

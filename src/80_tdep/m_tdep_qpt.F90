@@ -7,6 +7,7 @@
 module m_tdep_qpt
 
  use defs_basis
+ use m_errors
  use m_tdep_readwrite,   only : Input_Variables_type
  use m_tdep_latt,        only : Lattice_Variables_type
 
@@ -370,9 +371,7 @@ contains
         end if
       end do  
       if (.not.IsThisAllowed) then
-        write(InVar%stdout,*) 'The ',Qpt%special_qpt(jj),' Qpt bound (letter) is not allowed.'
-        write(InVar%stdout,*) 'The code stop.'
-        stop -1
+        MSG_ERROR('One of the Qpt bound (letter) is not allowed.')
       end if
     end do  
 !   Compute the cartesian coordinates of the special Q points in the reciprocical lattice     
@@ -447,8 +446,7 @@ contains
     ABI_MALLOC(Qpt%qpt_red ,(3,nqpt)); Qpt%qpt_red (:,:)=zero
     ABI_MALLOC(Qpt%qpt_cart,(3,nqpt)); Qpt%qpt_cart(:,:)=zero
     Qpt%qpt_red(:,:)=InVar%qpt(:,:)
-    write(InVar%stdout,*) ' STOP : the indices in the loop below are not consistent'
-    stop -1
+    MSG_ERROR('The indices in the loop below are not consistent')
     do ii=1,nqpt
       do jj=1,3
         do kk=1,3
