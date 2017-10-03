@@ -466,7 +466,7 @@ program multibinit
 
  if (iam_master) close(ab_out)
 
-  100 call xmpi_end()
+ 100 call xmpi_end()
  
-  end program multibinit
+ end program multibinit
 !!***
