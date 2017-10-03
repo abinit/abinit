@@ -82,6 +82,7 @@ subroutine chkdilatmx(chkdilatmx_,dilatmx,rprimd,rprimd_orig,dilatmx_errmsg)
 !arrays
  real(dp) :: eigval(3),gprimd_orig(3,3),met(3,3),old_to_new(3,3)
  real(dp) :: eigval_orig(3), alpha
+ character(len=500) :: message
 
 ! *************************************************************************
 
