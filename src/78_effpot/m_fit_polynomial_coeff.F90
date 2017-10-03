@@ -203,7 +203,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,powers,nbanco
 ! or
 ! regenerate the list
  if(iam_master)then
-   if(eff_pot%anharmonics_terms%ncoeff > zero)then
+   if(eff_pot%anharmonics_terms%ncoeff > 0)then
      if(need_verbose)then
        write(message, '(4a)' )ch10,' The coefficients present in the effective',&
 &      ' potential will be used for the fit'
@@ -291,7 +291,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,powers,nbanco
    ii = 1
    do icoeff = 1, ncoeff_tot
 !  Need to send the rank with the chosen coefficient
-     rank_to_send = zero
+     rank_to_send = 0
      if (any(my_coeffindexes(:)==icoeff)) rank_to_send = my_rank
      call xmpi_sum(rank_to_send, comm, ierr)
      
@@ -352,12 +352,12 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,powers,nbanco
 !Use fixcoeff
 !ncycle_tot store the curent number of coefficient in the model
 !Do not reset this variable...
- ncycle_tot = zero
+ ncycle_tot = 0
  if (nfixcoeff == -1)then
    write(message, '(2a)')' nfixcoeff is set to -1, so all the coefficients are imposed.',ch10
      ncycle_tot = ncycle_tot + ncoeff_tot
  else
-   if (nfixcoeff > zero)then
+   if (nfixcoeff > 0)then
      if(maxval(fixcoeff(:)) > ncoeff_tot) then
        write(message, '(4a,I0,6a)' )ch10,&
 &        ' --- !WARNING',ch10,&
@@ -408,10 +408,10 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,powers,nbanco
  ABI_ALLOCATE(list_coeffs,(ncycle_max))
  ABI_ALLOCATE(fcart_coeffs_tmp,(3,natom_sc,ncycle_max,ntime))
  ABI_ALLOCATE(strten_coeffs_tmp,(6,ntime,ncycle_max))
- list_coeffs  = zero
+ list_coeffs  = 0
 
 !if ncycle_tot > 0 fill list_coeffs with the fixed coefficients
- if(ncycle_tot > zero)then
+ if(ncycle_tot > 0)then
    do ii = 1,ncycle_tot
      if(nfixcoeff == -1)then
        list_coeffs(ii) = ii
@@ -460,8 +460,8 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,powers,nbanco
  ABI_ALLOCATE(list_coeffs_tmp2,(ncycle_max))
  ABI_ALLOCATE(stat_coeff,(ncoeff_tot))
  coeff_values = zero
- singular_coeffs = zero
- stat_coeff = zero
+ singular_coeffs = 0
+ stat_coeff = 0
 !Set mpi buffer
 !Set the bufsize for mpi allgather
  ABI_ALLOCATE(buffsize,(nproc))
@@ -483,7 +483,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,powers,nbanco
  if(ncycle_tot>=1)then
    do icycle = 1,ncycle_tot
      list_coeffs_tmp(icycle) = icycle
-     rank_to_send = zero
+     rank_to_send = 0
      do icoeff=1,my_ncoeff
        if((my_coeffindexes(icoeff)==list_coeffs(icycle)))then
          energy_coeffs_tmp(icycle,:)    = energy_coeffs(icoeff,:)
@@ -548,7 +548,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,powers,nbanco
 
  case(1)
    !Option 1, we select the coefficients one by one
-   if(need_verbose.and.ncycle > zero)then
+   if(need_verbose.and.ncycle > 0)then
      write(message,'(a,3x,a,10x,a,14x,a,14x,a,14x,a)') " N","Selecting","MSEE","MSEFS","MSEF","MSES"
      call wrtout(ab_out,message,'COLL') 
      write(message,'(4x,a,6x,a,8x,a,8x,a,8x,a)') "Coefficient","(meV/f.u.)","(eV^2/A^2)","(eV^2/A^2)",&
@@ -646,7 +646,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,powers,nbanco
 
 !    find the best coeff on each CPU
      mingf(:)  = 9D99
-     index_min = zero
+     index_min = 0
      do icoeff=1,my_ncoeff
        if(gf_values(1,icoeff) < zero) cycle
        if(gf_values(1,icoeff) == zero) cycle
@@ -664,7 +664,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,powers,nbanco
        call xmpi_allgatherv(buffGF,5,gf_mpi,buffsize,buffdisp, comm, ierr)
 !      find the best coeff
        mingf(:)    = 9D99
-       index_min= zero
+       index_min= 0
        do icoeff=1,nproc
          if(gf_mpi(2,icoeff) < zero) cycle
          if(gf_mpi(2,icoeff) == zero) cycle
@@ -676,7 +676,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,powers,nbanco
      end if
 
 !    Check if there is still coefficient
-     if(index_min==zero) then
+     if(index_min==0) then
        exit
      else
        list_coeffs(icycle) = index_min
@@ -684,7 +684,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,powers,nbanco
 
 !    Check if this coeff is treat by this cpu and fill the  
 !    temporary array before broadcast
-     rank_to_send = zero
+     rank_to_send = 0
      do icoeff=1,my_ncoeff
        if((my_coeffindexes(icoeff)==list_coeffs(icycle)))then
          energy_coeffs_tmp(icycle,:)    = energy_coeffs(icoeff,:)
@@ -738,7 +738,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,powers,nbanco
 !  Monte Carlo selection
    nsweep = 10000
 !  If no coefficient imposed in the inputs we reset the goal function   
-   if (ncycle_tot == zero) then
+   if (ncycle_tot == 0) then
      gf_values(:,:) = zero
      mingf(:) = 9D99
    else
@@ -824,8 +824,8 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,powers,nbanco
        buffGF(2:5,1) =  mingf(:)       
        call xmpi_allgatherv(buffGF,5,gf_mpi,buffsize,buffdisp, comm, ierr)
 !      find the best coeff
-       mingf(:)    = 9D99
-       index_min= zero
+       mingf(:) = 9D99
+       index_min= 0
        do iproc=1,nproc
          if(gf_mpi(2,iproc) < zero) cycle
          if(gf_mpi(2,iproc) == zero) cycle
@@ -869,7 +869,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,powers,nbanco
  end select
 
 !This routine solves the linear system proposed by C.Escorihuela-Sayalero see PRB95,094115(2017)
- if(ncycle_tot > zero)then
+ if(ncycle_tot > 0)then
 
    call fit_polynomial_coeff_solve(coeff_values(1:ncycle_tot),fcart_coeffs_tmp,fit_data%fcart_diff,&
 &                                  info,list_coeffs_tmp(1:ncycle_tot),natom_sc,ncycle_tot,&
@@ -1051,7 +1051,7 @@ subroutine fit_polynomial_coeff_getPositive(eff_pot,hist,coeff_values,isPositive
  if(present(verbose)) need_verbose = verbose
 
 !Get the list of coefficients from the eff_pot
- if(eff_pot%anharmonics_terms%ncoeff > zero)then
+ if(eff_pot%anharmonics_terms%ncoeff > 0)then
 !  Copy the initial coefficients array
    ncoeff_tot = eff_pot%anharmonics_terms%ncoeff
    ABI_DATATYPE_ALLOCATE(coeffs_in,(ncoeff_tot))
@@ -1085,7 +1085,7 @@ subroutine fit_polynomial_coeff_getPositive(eff_pot,hist,coeff_values,isPositive
  
 !Initialisation of arrays:
  ABI_ALLOCATE(list_coeffs,(ncoeff_tot))
- list_coeffs  = zero
+ list_coeffs  = 0
  do ii = 1,ncoeff_tot
    list_coeffs(ii) = ii
  end do
@@ -1143,7 +1143,7 @@ subroutine fit_polynomial_coeff_getPositive(eff_pot,hist,coeff_values,isPositive
 
 
 !Start fit process
- isPositive   = zero
+ isPositive   = 0
  coeff_values = zero
  do ii=1,my_nmodel
    imodel = my_modelindexes(ii)
@@ -1155,7 +1155,7 @@ subroutine fit_polynomial_coeff_getPositive(eff_pot,hist,coeff_values,isPositive
    if(info==0)then
      if (any(coeff_values(imodel,nfixcoeff+1:ncoeff) < zero))then
        coeff_values(imodel,:) = zero
-       isPositive(imodel) = zero
+       isPositive(imodel) = 0
      else
        isPositive(imodel) = one
      end if
@@ -1268,7 +1268,7 @@ subroutine fit_polynomial_coeff_solve(coefficients,fcart_coeffs,fcart_diff,&
 
 !0-Set variables for the 
  N    = ncoeff_fit; NRHS = 1; LDA  = ncoeff_fit; LDB  = ncoeff_fit; LDX  = ncoeff_fit
- LDAF = ncoeff_fit;  RCOND = zero; INFO  = zero; TRANS='N'; EQUED='N'; FACT='N'
+ LDAF = ncoeff_fit;  RCOND = zero; INFO  = 0; TRANS='N'; EQUED='N'; FACT='N'
 
 !Set the factors
  ffact = one/(3*natom*ntime)
@@ -1290,7 +1290,7 @@ subroutine fit_polynomial_coeff_solve(coefficients,fcart_coeffs,fcart_diff,&
  AF = zero; IPIV = one; 
  R = one; C = one; 
  FERR = zero; BERR = zero
- IWORK = zero; WORK = zero
+ IWORK = 0; WORK = 0
 
 !1-Get forces and stresses from the model and fill A
 !  Fill alsor B with the forces and stresses from 
@@ -1617,7 +1617,7 @@ subroutine fit_polynomial_coeff_getFS(coefficients,du_delta,displacement,energy_
                idir1 = coefficients(icoeff)%terms(iterm)%direction(idisp1)
 
 !              Strain case idir => -6, -5, -4, -3, -2 or -1
-               if (idir1 < zero)then
+               if (idir1 < 0)then
                  if(abs(strain(abs(idir1),itime)) > tol10)then
 !                  Accumulate energy fo each displacement (\sum ((A_x-O_x)^Y(A_y-O_c)^Z))
                    tmp1 = tmp1 * (strain(abs(idir1),itime))**power
@@ -1697,7 +1697,7 @@ subroutine fit_polynomial_coeff_getFS(coefficients,du_delta,displacement,energy_
                    idir2 = coefficients(icoeff)%terms(iterm)%direction(idisp2)
 
 !                  Strain case
-                   if (idir2 < zero)then
+                   if (idir2 < 0)then
 !                    Accumulate energy forces
                      tmp2 = tmp2 * (strain(abs(idir2),itime))**power
 !                    Accumulate stress for each strain (\sum (Y(eta_2)^Y-1(eta_2)^Z+...))
@@ -1749,7 +1749,7 @@ subroutine fit_polynomial_coeff_getFS(coefficients,du_delta,displacement,energy_
                  end if
                end do
                
-               if(idir1<zero)then
+               if(idir1<0)then
 !                Accumule stress tensor
                  strten_out(abs(idir1),itime,icoeff_tmp) = strten_out(abs(idir1),itime,icoeff_tmp) + &
 &                                                      weight * tmp3 / ucvol(itime)
