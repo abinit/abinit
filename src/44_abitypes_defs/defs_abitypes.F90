@@ -182,6 +182,7 @@ type dataset_type
  integer :: cd_full_grid
  integer :: cd_frqim_method
  integer :: cd_customnimfrqs
+ integer :: chkdilatmx
  integer :: chkexit
  integer :: chkprim
  integer :: chksymbreak

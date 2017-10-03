@@ -48,7 +48,7 @@
 #include "abi_common.h"
 
 
-subroutine chkdilatmx(dilatmx,rprimd,rprimd_orig,dilatmx_errmsg)
+subroutine chkdilatmx(chkdilatmx_,dilatmx,rprimd,rprimd_orig,dilatmx_errmsg)
 
  use defs_basis
  use m_errors
@@ -126,18 +126,28 @@ subroutine chkdilatmx(dilatmx,rprimd,rprimd_orig,dilatmx_errmsg)
    end do
    call matr3eigval(eigval_orig,met)
    dilatmx_new=sqrt(maxval(eigval_orig(:)))
-   alpha = (dilatmx**2 - maxval(eigval)) / (maxval(eigval_orig) - maxval(eigval))
-!  for safety, only 90 percent of max jump
-   alpha = 0.9_dp * alpha
 
-   rprimd = alpha * rprimd + (one - alpha) * rprimd_orig
+   if(chkdilatmx_/=0)then
+     alpha = (dilatmx**2 - maxval(eigval)) / (maxval(eigval_orig) - maxval(eigval))
+!    for safety, only 90 percent of max jump
+     alpha = 0.9_dp * alpha
 
-   write(dilatmx_errmsg,'(3a,f5.2,4a,f6.2,a)')&
-&   'The new primitive vectors rprimd (an evolving quantity)',ch10,&
-&   'are too large with respect to the old rprimd and the accompanying dilatmx:',dilatmx,ch10,&
-&   'This large change of unit cell parameters is not allowed by the present value of dilatmx.',ch10,&
-&   'Calculation continues with limited jump of ', 100._dp * alpha,' percent of the projected move.'
+     rprimd = alpha * rprimd + (one - alpha) * rprimd_orig
+
+     write(dilatmx_errmsg,'(3a,f5.2,4a,f6.2,a)')&
+&     'The new primitive vectors rprimd (an evolving quantity)',ch10,&
+&     'are too large with respect to the old rprimd and the accompanying dilatmx:',dilatmx,ch10,&
+&     'This large change of unit cell parameters is not allowed by the present value of dilatmx.',ch10,&
+&     'Calculation continues with limited jump of ', 100._dp * alpha,' percent of the projected move.'
+   else
+     write(message, '(3a,es16.6,2a,es16.6,2a)' )&
+&     'The new primitive vectors rprimd (an evolving quantity)',ch10,&
+&     'are too large, given the initial rprimd and the accompanying dilatmx:',dilatmx,ch10,&
+&     'An adequate value would have been dilatmx_new=',dilatmx_new,ch10,&
+&     'As chkdilatmx=1, assume experienced user. Execution will continue.'
+     MSG_WARNING(message)
+
  end if
 
 end subroutine chkdilatmx
-!!***
+!!**
