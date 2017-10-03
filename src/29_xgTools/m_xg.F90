@@ -2750,6 +2750,7 @@ module m_xg
     lrwork = 0
     lcwork = 0
   end subroutine xg_finalize
+!!***
 
 end module m_xg
 !!***

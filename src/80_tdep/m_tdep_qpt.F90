@@ -426,8 +426,10 @@ contains
       do ii=1,qpt_tot-1
         do jj=1,Qpt%lgth_segments(ii)
           iqpt=iqpt+1
-          Qpt%qpt_red (:,iqpt)=((jj-1)*Qpt%special_red (ii+1,:)+(Qpt%lgth_segments(ii)-jj+1)*Qpt%special_red (ii,:))/Qpt%lgth_segments(ii)
-          Qpt%qpt_cart(:,iqpt)=((jj-1)*Qpt%special_cart(ii+1,:)+(Qpt%lgth_segments(ii)-jj+1)*Qpt%special_cart(ii,:))/Qpt%lgth_segments(ii)
+          Qpt%qpt_red (:,iqpt)=((jj-1)*Qpt%special_red (ii+1,:)+(Qpt%lgth_segments(ii)-jj+1)*Qpt%special_red (ii,:))&
+&           /Qpt%lgth_segments(ii)
+          Qpt%qpt_cart(:,iqpt)=((jj-1)*Qpt%special_cart(ii+1,:)+(Qpt%lgth_segments(ii)-jj+1)*Qpt%special_cart(ii,:))&
+&           /Qpt%lgth_segments(ii)
         end do
       end do
       Qpt%qpt_red (:,nqpt)=Qpt%special_red (qpt_tot,:)
@@ -465,7 +467,8 @@ contains
   write(40,*) ' '
   write(40,*) '  Q-points path (in reduced coordinates) and (in cartesian coordinates)='
   do  iqpt=1,nqpt
-    write(40,'(i4,x,6(f10.5,x))') iqpt,Qpt%qpt_red(1,iqpt),Qpt%qpt_red(2,iqpt),Qpt%qpt_red(3,iqpt),Qpt%qpt_cart(1,iqpt),Qpt%qpt_cart(2,iqpt),Qpt%qpt_cart(3,iqpt)
+    write(40,'(i4,x,6(f10.5,x))') iqpt,Qpt%qpt_red(1,iqpt),Qpt%qpt_red(2,iqpt),Qpt%qpt_red(3,iqpt),&
+&     Qpt%qpt_cart(1,iqpt),Qpt%qpt_cart(2,iqpt),Qpt%qpt_cart(3,iqpt)
   end do
   close(40)
 

@@ -58,7 +58,8 @@ contains
   LWORK=3*(ntotcoeff)**2+max(3*InVar%natom*InVar%nstep,4*(ntotcoeff)**2+4*(ntotcoeff))
   ABI_MALLOC(WORK,(LWORK))
   ABI_MALLOC(IWORK,(8*(ntotcoeff))) ; WORK(:)=0.d0
-  call DGESDD('S',3*InVar%natom*InVar%nstep,ntotcoeff,CoeffMoore%fcoeff,3*InVar%natom*InVar%nstep,sigma,matU,3*InVar%natom*InVar%nstep,transmatV,ntotcoeff,WORK,LWORK,IWORK,INFO) 
+  call DGESDD('S',3*InVar%natom*InVar%nstep,ntotcoeff,CoeffMoore%fcoeff,3*InVar%natom*InVar%nstep,&
+&   sigma,matU,3*InVar%natom*InVar%nstep,transmatV,ntotcoeff,WORK,LWORK,IWORK,INFO) 
   ABI_FREE(CoeffMoore%fcoeff)
   ABI_FREE(WORK)
   ABI_FREE(IWORK)
@@ -77,17 +78,20 @@ contains
   
   write(InVar%stdout,*) ' Calculation of the pseudo-inverse...'
   ABI_MALLOC(tmp1,(ntotcoeff,3*InVar%natom*InVar%nstep)) ; tmp1(:,:)=0.d0
-  call DGEMM('N','T',ntotcoeff,3*InVar%natom*InVar%nstep,ntotcoeff,1.d0,pseudo_sigma,ntotcoeff,matU,3*InVar%natom*InVar%nstep,1.d0,tmp1,ntotcoeff)
+  call DGEMM('N','T',ntotcoeff,3*InVar%natom*InVar%nstep,ntotcoeff,1.d0,pseudo_sigma,ntotcoeff,matU,&
+&   3*InVar%natom*InVar%nstep,1.d0,tmp1,ntotcoeff)
   ABI_FREE(matU)
   ABI_FREE(pseudo_sigma)
   ABI_MALLOC(pseudo_inverse,(ntotcoeff,3*InVar%natom*InVar%nstep)) ; pseudo_inverse(:,:)=0.d0
-  call DGEMM('T','N',ntotcoeff,3*InVar%natom*InVar%nstep,ntotcoeff,1.d0,transmatV,ntotcoeff,tmp1,ntotcoeff,1.d0,pseudo_inverse,ntotcoeff)
+  call DGEMM('T','N',ntotcoeff,3*InVar%natom*InVar%nstep,ntotcoeff,1.d0,transmatV,ntotcoeff,&
+&   tmp1,ntotcoeff,1.d0,pseudo_inverse,ntotcoeff)
   ABI_FREE(tmp1)
   ABI_FREE(transmatV)
   ABI_MALLOC(fcart_tmp,(3*InVar%natom*InVar%nstep,1)); fcart_tmp(:,:)=zero  
   fcart_tmp(:,1)=Forces_MD(:)
 ! NOTE, we have to solve F_ij = -\sum_j \Phi_ij u_j, so we add a minus sign to the pseudo_inverse  
-  call DGEMM('N','N',ntotcoeff,1,3*InVar%natom*InVar%nstep,1.d0,-pseudo_inverse,ntotcoeff,fcart_tmp,3*InVar%natom*InVar%nstep,1.d0,Phij_coeff,ntotcoeff)
+  call DGEMM('N','N',ntotcoeff,1,3*InVar%natom*InVar%nstep,1.d0,-pseudo_inverse,ntotcoeff,fcart_tmp,&
+&   3*InVar%natom*InVar%nstep,1.d0,Phij_coeff,ntotcoeff)
   ABI_FREE(fcart_tmp)
   ABI_FREE(pseudo_inverse)
 
@@ -372,10 +376,13 @@ contains
       ok1=.true.
       foo=0
       do ii=1,3
-        if ((abs(xred_center(ii,iatom)-xred_ideal(ii,jatom)     ).le.InVar%tolmatch.and.(InVar%typat(iatom).eq.InVar%typat_unitcell(mod(jatom-1,InVar%natom_unitcell)+1)))) then
+        if ((abs(xred_center(ii,iatom)-xred_ideal(ii,jatom)     ).le.InVar%tolmatch.and.&
+&         (InVar%typat(iatom).eq.InVar%typat_unitcell(mod(jatom-1,InVar%natom_unitcell)+1)))) then
           foo=foo+1
-        else if ((abs(xred_center(ii,iatom)-xred_ideal(ii,jatom)-1.d0).le.InVar%tolmatch.and.(InVar%typat(iatom).eq.InVar%typat_unitcell(mod(jatom-1,InVar%natom_unitcell)+1))).or.&
-&           (abs(xred_center(ii,iatom)-xred_ideal(ii,jatom)+1.d0).le.InVar%tolmatch.and.(InVar%typat(iatom).eq.InVar%typat_unitcell(mod(jatom-1,InVar%natom_unitcell)+1)))) then
+        else if ((abs(xred_center(ii,iatom)-xred_ideal(ii,jatom)-1.d0).le.InVar%tolmatch.and.&
+&         (InVar%typat(iatom).eq.InVar%typat_unitcell(mod(jatom-1,InVar%natom_unitcell)+1))).or.&
+&           (abs(xred_center(ii,iatom)-xred_ideal(ii,jatom)+1.d0).le.InVar%tolmatch.and.&
+&           (InVar%typat(iatom).eq.InVar%typat_unitcell(mod(jatom-1,InVar%natom_unitcell)+1)))) then
           foo=foo+1
           ok1=.false.
         endif
@@ -394,7 +401,8 @@ contains
 !FB        write(InVar%stdout,*) 'Perhaps, you can adjust the tolerance (tolinbox)'
 !FB        stop -1
         do ii=1,3
-          if (abs(xred_center(ii,iatom)-xred_ideal(ii,jatom)-1.d0).le.InVar%tolmatch.and.(InVar%typat(iatom).eq.InVar%typat_unitcell(mod(jatom-1,InVar%natom_unitcell)+1))) then
+          if (abs(xred_center(ii,iatom)-xred_ideal(ii,jatom)-1.d0).le.InVar%tolmatch.and.&
+&           (InVar%typat(iatom).eq.InVar%typat_unitcell(mod(jatom-1,InVar%natom_unitcell)+1))) then
 !JB            write(*,*) iatom,jatom
 !JB            write(*,*) xred_center(:,iatom)
 !JB            write(*,*) xred_ideal(:,jatom)
@@ -405,7 +413,8 @@ contains
 !JB            write(*,*) xred_center(:,iatom)
 !JB            write(*,*) xred_ideal(:,jatom)
             FromIdeal2Average(jatom)=iatom
-          else if (abs(xred_center(ii,iatom)-xred_ideal(ii,jatom)+1.d0).le.InVar%tolmatch.and.(InVar%typat(iatom).eq.InVar%typat_unitcell(mod(jatom-1,InVar%natom_unitcell)+1))) then
+          else if (abs(xred_center(ii,iatom)-xred_ideal(ii,jatom)+1.d0).le.InVar%tolmatch.and.&
+&           (InVar%typat(iatom).eq.InVar%typat_unitcell(mod(jatom-1,InVar%natom_unitcell)+1))) then
 !jB            write(*,*) iatom,jatom
 !jB            write(*,*) xred_center(:,iatom)
 !jB            write(*,*) xred_ideal(:,jatom)
@@ -497,7 +506,8 @@ contains
   end do
   do istep=1,InVar%nstep
     do iatom=1,InVar%natom
-      call DGEMV('T',3,3,1.d0,Lattice%rprimd_MD(:,:),3,InVar%xred(:,FromIdeal2Average(iatom),istep),1,0.d0,xcart(:,FromIdeal2Average(iatom),istep),1)
+      call DGEMV('T',3,3,1.d0,Lattice%rprimd_MD(:,:),3,InVar%xred(:,FromIdeal2Average(iatom),istep),&
+&       1,0.d0,xcart(:,FromIdeal2Average(iatom),istep),1)
       if (InVar%Use_ideal_positions.eq.0) then
         ucart_tmp(:,iatom,istep)=xcart(:,FromIdeal2Average(iatom),istep)-xcart_average(:,FromIdeal2Average(iatom))
       else
@@ -609,8 +619,11 @@ contains
             do jj=1,3
               do katom=1,InVar%natom
                 do kk=1,3
-                  force_i=force_i-Psij_NN(3*(iatom-1)+ii,3*(jatom-1)+jj,3*(katom-1)+kk)*ucart(jj,jatom,istep)*ucart(kk,katom,istep)/2.d0
-                  PsijUiUjUk(istep)=PsijUiUjUk(istep)+Psij_NN(3*(iatom-1)+ii,3*(jatom-1)+jj,3*(katom-1)+kk)*ucart(ii,iatom,istep)*ucart(jj,jatom,istep)*ucart(kk,katom,istep)/6.d0
+                  force_i=force_i-&
+&                   Psij_NN(3*(iatom-1)+ii,3*(jatom-1)+jj,3*(katom-1)+kk)*ucart(jj,jatom,istep)*ucart(kk,katom,istep)/2.d0
+                  PsijUiUjUk(istep)=PsijUiUjUk(istep)+&
+&                   Psij_NN(3*(iatom-1)+ii,3*(jatom-1)+jj,3*(katom-1)+kk)*&
+&                   ucart(ii,iatom,istep)*ucart(jj,jatom,istep)*ucart(kk,katom,istep)/6.d0
                 end do !kk
               end do !katom 
             end do !jj 
@@ -626,10 +639,12 @@ contains
   write(InVar%stdout,'(a)') ' Average quantities highlighting the convergence (in eV/atom for energies) :'
   if (present(Psij_NN)) then
     write(InVar%stdout,'(a)') ' <U_TDEP> = U_0 + <Uharm> + <Uanh>'
-    write(InVar%stdout,'(a)') ' Istep         <U_MD>            U_0            <Uharm>          <Uanh>        <U_MD-U_TDEP>   <(U_MD-UTDEP)^2> <(F_MD-F_TDEP)^2>     Sigma'
+    write(InVar%stdout,'(2a)') ' Istep         <U_MD>            U_0            <Uharm>',&
+&     '          <Uanh>        <U_MD-U_TDEP>   <(U_MD-UTDEP)^2> <(F_MD-F_TDEP)^2>     Sigma'
   else  
     write(InVar%stdout,'(a)') ' <U_TDEP> = U_0 + <Uharm>'
-    write(InVar%stdout,'(a)') ' Istep         <U_MD>            U_0            <Uharm>       <U_MD-U_TDEP>   <(U_MD-UTDEP)^2> <(F_MD-F_TDEP)^2>     Sigma'
+    write(InVar%stdout,'(2a)') ' Istep         <U_MD>            U_0            <Uharm>',&
+&     '       <U_MD-U_TDEP>   <(U_MD-UTDEP)^2> <(F_MD-F_TDEP)^2>     Sigma'
   end if  
   tmp0=zero
   tmp3=zero
@@ -694,9 +709,11 @@ contains
     MinDeltaForces=tmp3/dfloat(istepmax*InVar%natom*3)
     sigma         =dsqrt(tmp3/tmp4)
     if (present(Psij_NN)) then
-      write(InVar%stdout,'(i5,8(5x,f12.5))') istepmax,UMD*Ha_eV,U0*Ha_eV,Uharm*Ha_eV,Uanh*Ha_eV,DeltaFree_AH*Ha_eV,DeltaFree_AH2*Ha_eV,MinDeltaForces,sigma
+      write(InVar%stdout,'(i5,8(5x,f12.5))') istepmax,UMD*Ha_eV,U0*Ha_eV,Uharm*Ha_eV,Uanh*Ha_eV,&
+&       DeltaFree_AH*Ha_eV,DeltaFree_AH2*Ha_eV,MinDeltaForces,sigma
     else
-      write(InVar%stdout,'(i5,7(5x,f12.5))') istepmax,UMD*Ha_eV,U0*Ha_eV,Uharm*Ha_eV,DeltaFree_AH*Ha_eV,DeltaFree_AH2*Ha_eV,MinDeltaForces,sigma
+      write(InVar%stdout,'(i5,7(5x,f12.5))') istepmax,UMD*Ha_eV,U0*Ha_eV,Uharm*Ha_eV,&
+&       DeltaFree_AH*Ha_eV,DeltaFree_AH2*Ha_eV,MinDeltaForces,sigma
     endif 
   end do  
 

@@ -258,13 +258,17 @@ contains
                     Isym3at(watom,xatom,yatom,1)=Isym3at(eatom,fatom,gatom,1)
                     Isym3at(watom,xatom,yatom,2)=ii
                     if (InVar%debug.and.ii==1) write(InVar%stdout,'(a,x,6(i4,x),a,i4)') &
-&                      'For:',iatcell,jatom,katom,watom,xatom,yatom,' direct transformation with isym=',Isym3at(watom,xatom,yatom,1)
+&                      'For:',iatcell,jatom,katom,watom,xatom,yatom,' direct transformation with isym=', &
+&                       Isym3at(watom,xatom,yatom,1)
                     if (InVar%debug.and.ii.gt.1) write(InVar%stdout,'(a,x,6(i4,x),a,i4)') &
-&                      'For:',iatcell,jatom,katom,watom,xatom,yatom,' transformation+permutation with isym=',Isym3at(watom,xatom,yatom,1)
+&                      'For:',iatcell,jatom,katom,watom,xatom,yatom,' transformation+permutation with isym=',&
+&                       Isym3at(watom,xatom,yatom,1)
                   end do !ii 
                 else  
-                  if (InVar%debug) write(InVar%stdout,'(a,4(x,i4))') &
-&                    'NO SYMETRY OPERATION BETWEEN (iatom,jatom,katom) and (eatom,fatom,gatom)=',iatcell,jatom,katom,eatom,fatom,gatom
+                  if (InVar%debug) write(InVar%stdout,'(a,4(x,i4))') then
+&                    'NO SYMETRY OPERATION BETWEEN (iatom,jatom,katom) and (eatom,fatom,gatom)=',&
+&                    iatcell,jatom,katom,eatom,fatom,gatom
+                  end if
                 end if  
               end if
             end do !gatom

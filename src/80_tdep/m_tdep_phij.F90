@@ -110,7 +110,8 @@ subroutine tdep_calc_phijfcoeff(InVar,ntotcoeff,proj,Shell2at,Sym,ucart,fcoeff)
           do mu=1,3
             do icoeff=1,ncoeff
               terme=sum(SSu(mu,:)*proj(:,icoeff,ishell))
-              fcoeff(mu+3*(iatom-1)+3*InVar%natom*(istep-1),icoeff+ncoeff_prev)=fcoeff(mu+3*(iatom-1)+3*InVar%natom*(istep-1),icoeff+ncoeff_prev)+terme
+              fcoeff(mu+3*(iatom-1)+3*InVar%natom*(istep-1),icoeff+ncoeff_prev)= &
+&             fcoeff(mu+3*(iatom-1)+3*InVar%natom*(istep-1),icoeff+ncoeff_prev)+terme
             end do    
           end do  
         
@@ -233,7 +234,8 @@ subroutine tdep_build_phijNN(distance,InVar,ntotcoeff,proj,Phij_coeff,Phij_NN,Sh
           if (abs(Phij_shell(kk,ll,ishell)-Phij_shell(ll,kk,ishell)).gt.tol8) then
             write(InVar%stdout,'(a,i4,a,i4,x,i4)') '  WARNING: For shell',ishell ,' and directions (kk,ll)=',kk,ll
             write(InVar%stdout,*) '          the shell gives a non symetric contribution to Dij:'
-            write(InVar%stdout,'(a,x,f9.6,x,f9.6)') '           the Dij(qpt=0) and Dji(qpt=0)=',Phij_shell(kk,ll,ishell),Phij_shell(ll,kk,ishell)
+            write(InVar%stdout,'(a,x,f9.6,x,f9.6)') '           the Dij(qpt=0) and Dji(qpt=0)=',&
+&             Phij_shell(kk,ll,ishell),Phij_shell(ll,kk,ishell)
             write(InVar%stdout,*) '          This could lead to a non-hermitian Dij matrix.'
             write(InVar%stdout,*) ' '
           end if  
@@ -338,10 +340,12 @@ subroutine tdep_build_phijNN(distance,InVar,ntotcoeff,proj,Phij_coeff,Phij_NN,Sh
           jatom=Shell2at%neighbours(iatcell,this_shell)%atomj_in_shell(iatshell)
           write(InVar%stdout,'(a,i4,a,i4)') '  For jatom=',jatom,' ,with type=',mod(jatom-1,InVar%natom_unitcell)+1
           do ii=1,3
-            write(InVar%stdout,'(2x,3(f9.6,x))') Phij_NN((iatcell-1)*3+ii,(jatom-1)*3+1),Phij_NN((iatcell-1)*3+ii,(jatom-1)*3+2),Phij_NN((iatcell-1)*3+ii,(jatom-1)*3+3)
+            write(InVar%stdout,'(2x,3(f9.6,x))') Phij_NN((iatcell-1)*3+ii,(jatom-1)*3+1),Phij_NN((iatcell-1)*3+ii,(jatom-1)*3+2),&
+&             Phij_NN((iatcell-1)*3+ii,(jatom-1)*3+3)
           end do
           write(InVar%stdout,'(a,3(x,f11.6))') '  The components of the vector are:', distance(iatcell,jatom,2:4)
-          write(InVar%stdout,'(a,(x,f9.6))') '  Trace=',Phij_NN((iatcell-1)*3+1,(jatom-1)*3+1)+Phij_NN((iatcell-1)*3+2,(jatom-1)*3+2)+Phij_NN((iatcell-1)*3+3,(jatom-1)*3+3)
+          write(InVar%stdout,'(a,(x,f9.6))') '  Trace=',Phij_NN((iatcell-1)*3+1,(jatom-1)*3+1)+Phij_NN((iatcell-1)*3+2,&
+&           (jatom-1)*3+2)+Phij_NN((iatcell-1)*3+3,(jatom-1)*3+3)
           write(InVar%stdout,*) ' '
         end do
       end if
@@ -490,7 +494,8 @@ subroutine tdep_calc_dij(dij,eigenV,iqpt,InVar,Lattice,omega,Phij_NN,qpt_cart,Rl
         norm=norm+eigenV(3*(iatom-1)+ii,imode)*conjg(eigenV(3*(iatom-1)+ii,imode))
         do jatom=1,InVar%natom_unitcell
           do jj=1,3
-            omega2(imode)=omega2(imode)+conjg(eigenV(3*(iatom-1)+ii,imode))*dij(3*(iatom-1)+ii,3*(jatom-1)+jj)*eigenV(3*(jatom-1)+jj,imode)
+            omega2(imode)=omega2(imode)+&
+&             conjg(eigenV(3*(iatom-1)+ii,imode))*dij(3*(iatom-1)+ii,3*(jatom-1)+jj)*eigenV(3*(jatom-1)+jj,imode)
           end do
         end do  
       end do

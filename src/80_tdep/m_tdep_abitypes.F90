@@ -65,7 +65,8 @@ contains
   ABI_MALLOC(zion,(InVar%ntypat)) ; zion(:)=zero
   ABI_MALLOC(znucl,(npsp)) ; znucl(:)=zero
   ABI_MALLOC(title,(InVar%ntypat))
-  call crystal_init(InVar%amu,Crystal,Sym%spgroup,InVar%natom_unitcell,npsp,InVar%ntypat,Sym%nsym,Lattice%rprimdt,InVar%typat_unitcell,Sym%xred_zero,&
+  call crystal_init(InVar%amu,Crystal,Sym%spgroup,InVar%natom_unitcell,npsp,&
+&   InVar%ntypat,Sym%nsym,Lattice%rprimdt,InVar%typat_unitcell,Sym%xred_zero,&
 &  zion,znucl,timrev,use_antiferro,remove_inv,title,&
 &  Sym%ptsymrel(:,:,1:Sym%nsym),Sym%tnons(:,1:Sym%nsym),Sym%symafm(1:Sym%nsym)) ! Optional
   ABI_FREE(title)

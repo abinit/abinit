@@ -259,7 +259,8 @@ contains
 ! * indsym(1:3,isym,iat) gives the lattice vector $R_0$.
   write(InVar%stdout,'(a)') ' Search the matrix transformation going from (k) to (i)...'
   ABI_MALLOC(Sym%indsym,(4,Sym%nptsym,InVar%natom)); Sym%indsym(:,:,:)=zero
-  call symatm(Sym%indsym(:,:,1:InVar%natom_unitcell),InVar%natom_unitcell,Sym%nptsym,Sym%symrec,Sym%tnons,tol8,InVar%typat_unitcell,xred_temp)
+  call symatm(Sym%indsym(:,:,1:InVar%natom_unitcell),InVar%natom_unitcell,Sym%nptsym,&
+&   Sym%symrec,Sym%tnons,tol8,InVar%typat_unitcell,xred_temp)
 
 ! Store the positions of the atoms in the motif
   do iatom=1,InVar%natom_unitcell
@@ -331,7 +332,8 @@ contains
         end do
         indsym2(5:8,isym,iatom,jatom)=Sym%indsym(1:4,isym,jatom_unitcell)+vectsym(1:4,isym)
         if (InVar%debug) then
-          write(40,'(a,i2,a,i4,a,i4,a,3(i4,x),a,i2,a,3(i4,x),a,i2,a)') '  indsym2(isym=',isym,',',iatom,',',jatom,')=',indsym2(1:3,isym,iatom,jatom),&
+          write(40,'(a,i2,a,i4,a,i4,a,3(i4,x),a,i2,a,3(i4,x),a,i2,a)') '  indsym2(isym=',isym,',',iatom,',',jatom,')=',&
+&           indsym2(1:3,isym,iatom,jatom),&
 &           '|iat=',indsym2(4,isym,iatom,jatom),'|',indsym2(5:7,isym,iatom,jatom),'|iat=',indsym2(8,isym,iatom,jatom),'|'
         end if 
       end do

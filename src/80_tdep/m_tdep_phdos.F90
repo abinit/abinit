@@ -299,7 +299,8 @@ subroutine tdep_calc_elastic(Phij_NN,distance,InVar,Lattice)
         do ll=1,3
           do iatom=1,InVar%natom
             do iatcell=1,InVar%natom_unitcell
-              aijkl(ii,jj,kk,ll)=aijkl(ii,jj,kk,ll)-Phij_NN(ii+(iatcell-1)*3,3*(iatom-1)+jj)*distance(iatcell,iatom,kk+1)*distance(iatcell,iatom,ll+1)/2.d0/Lattice%ucvol
+              aijkl(ii,jj,kk,ll)=aijkl(ii,jj,kk,ll)-Phij_NN(ii+(iatcell-1)*3,3*(iatom-1)+jj)&
+&               *distance(iatcell,iatom,kk+1)*distance(iatcell,iatom,ll+1)/2.d0/Lattice%ucvol
             end do  
           end do
         enddo
@@ -322,12 +323,18 @@ subroutine tdep_calc_elastic(Phij_NN,distance,InVar,Lattice)
   cijkl(:,:,:,:)=cijkl(:,:,:,:)*29421.033d0
 
   ABI_MALLOC(Cij,(6,6)) ; Cij(:,:)=0.d0
-  Cij(1,1)=cijkl(1,1,1,1) ; Cij(1,2)=cijkl(1,1,2,2) ; Cij(1,3)=cijkl(1,1,3,3) ; Cij(1,4)=cijkl(1,1,2,3) ; Cij(1,5)=cijkl(1,1,1,3) ; Cij(1,6)=cijkl(1,1,1,2)
-  Cij(2,1)=cijkl(2,2,1,1) ; Cij(2,2)=cijkl(2,2,2,2) ; Cij(2,3)=cijkl(2,2,3,3) ; Cij(2,4)=cijkl(2,2,2,3) ; Cij(2,5)=cijkl(2,2,1,3) ; Cij(2,6)=cijkl(2,2,1,2)
-  Cij(3,1)=cijkl(3,3,1,1) ; Cij(3,2)=cijkl(3,3,2,2) ; Cij(3,3)=cijkl(3,3,3,3) ; Cij(3,4)=cijkl(3,3,2,3) ; Cij(3,5)=cijkl(3,3,1,3) ; Cij(3,6)=cijkl(3,3,1,2)
-  Cij(4,1)=cijkl(2,3,1,1) ; Cij(4,2)=cijkl(2,3,2,2) ; Cij(4,3)=cijkl(2,3,3,3) ; Cij(4,4)=cijkl(2,3,2,3) ; Cij(4,5)=cijkl(2,3,1,3) ; Cij(4,6)=cijkl(2,3,1,2)
-  Cij(5,1)=cijkl(1,3,1,1) ; Cij(5,2)=cijkl(1,3,2,2) ; Cij(5,3)=cijkl(1,3,3,3) ; Cij(5,4)=cijkl(1,3,2,3) ; Cij(5,5)=cijkl(1,3,1,3) ; Cij(5,6)=cijkl(1,3,1,2)
-  Cij(6,1)=cijkl(1,2,1,1) ; Cij(6,2)=cijkl(1,2,2,2) ; Cij(6,3)=cijkl(1,2,3,3) ; Cij(6,4)=cijkl(1,2,2,3) ; Cij(6,5)=cijkl(1,2,1,3) ; Cij(6,6)=cijkl(1,2,1,2)
+  Cij(1,1)=cijkl(1,1,1,1) ; Cij(1,2)=cijkl(1,1,2,2) ; Cij(1,3)=cijkl(1,1,3,3)  
+  Cij(1,4)=cijkl(1,1,2,3) ; Cij(1,5)=cijkl(1,1,1,3) ; Cij(1,6)=cijkl(1,1,1,2)
+  Cij(2,1)=cijkl(2,2,1,1) ; Cij(2,2)=cijkl(2,2,2,2) ; Cij(2,3)=cijkl(2,2,3,3) 
+  Cij(2,4)=cijkl(2,2,2,3) ; Cij(2,5)=cijkl(2,2,1,3) ; Cij(2,6)=cijkl(2,2,1,2)
+  Cij(3,1)=cijkl(3,3,1,1) ; Cij(3,2)=cijkl(3,3,2,2) ; Cij(3,3)=cijkl(3,3,3,3) 
+  Cij(3,4)=cijkl(3,3,2,3) ; Cij(3,5)=cijkl(3,3,1,3) ; Cij(3,6)=cijkl(3,3,1,2)
+  Cij(4,1)=cijkl(2,3,1,1) ; Cij(4,2)=cijkl(2,3,2,2) ; Cij(4,3)=cijkl(2,3,3,3) 
+  Cij(4,4)=cijkl(2,3,2,3) ; Cij(4,5)=cijkl(2,3,1,3) ; Cij(4,6)=cijkl(2,3,1,2)
+  Cij(5,1)=cijkl(1,3,1,1) ; Cij(5,2)=cijkl(1,3,2,2) ; Cij(5,3)=cijkl(1,3,3,3) 
+  Cij(5,4)=cijkl(1,3,2,3) ; Cij(5,5)=cijkl(1,3,1,3) ; Cij(5,6)=cijkl(1,3,1,2)
+  Cij(6,1)=cijkl(1,2,1,1) ; Cij(6,2)=cijkl(1,2,2,2) ; Cij(6,3)=cijkl(1,2,3,3) 
+  Cij(6,4)=cijkl(1,2,2,3) ; Cij(6,5)=cijkl(1,2,1,3) ; Cij(6,6)=cijkl(1,2,1,2)
 ! Remove the rounding errors before writing (for non regression testing purposes)
   do ii=1,6
     do jj=1,6
@@ -350,9 +357,12 @@ subroutine tdep_calc_elastic(Phij_NN,distance,InVar,Lattice)
   Cij(2,3)=(Cij(2,3)+Cij(3,2))/2.d0 ; Cij(3,2)=Cij(2,3)
   
 ! Young's modulus
-  E1=(Cij(1,1)*Cij(2,2)*Cij(3,3)+2.d0*Cij(2,3)*Cij(1,2)*Cij(1,3)-Cij(1,1)*Cij(2,3)**2-Cij(2,2)*Cij(1,3)**2-Cij(3,3)*Cij(1,2)**2)/(Cij(2,2)*Cij(3,3)-Cij(2,3)**2)
-  E2=(Cij(1,1)*Cij(2,2)*Cij(3,3)+2.d0*Cij(2,3)*Cij(1,2)*Cij(1,3)-Cij(1,1)*Cij(2,3)**2-Cij(2,2)*Cij(1,3)**2-Cij(3,3)*Cij(1,2)**2)/(Cij(1,1)*Cij(3,3)-Cij(1,3)**2)
-  E3=(Cij(1,1)*Cij(2,2)*Cij(3,3)+2.d0*Cij(2,3)*Cij(1,2)*Cij(1,3)-Cij(1,1)*Cij(2,3)**2-Cij(2,2)*Cij(1,3)**2-Cij(3,3)*Cij(1,2)**2)/(Cij(1,1)*Cij(2,2)-Cij(1,2)**2)
+  E1=(Cij(1,1)*Cij(2,2)*Cij(3,3)+2.d0*Cij(2,3)*Cij(1,2)*Cij(1,3)-Cij(1,1)*Cij(2,3)**2-Cij(2,2)*Cij(1,3)**2-Cij(3,3)*Cij(1,2)**2)&
+&   /(Cij(2,2)*Cij(3,3)-Cij(2,3)**2)
+  E2=(Cij(1,1)*Cij(2,2)*Cij(3,3)+2.d0*Cij(2,3)*Cij(1,2)*Cij(1,3)-Cij(1,1)*Cij(2,3)**2-Cij(2,2)*Cij(1,3)**2-Cij(3,3)*Cij(1,2)**2)&
+&   /(Cij(1,1)*Cij(3,3)-Cij(1,3)**2)
+  E3=(Cij(1,1)*Cij(2,2)*Cij(3,3)+2.d0*Cij(2,3)*Cij(1,2)*Cij(1,3)-Cij(1,1)*Cij(2,3)**2-Cij(2,2)*Cij(1,3)**2-Cij(3,3)*Cij(1,2)**2)&
+&   /(Cij(1,1)*Cij(2,2)-Cij(1,2)**2)
   write(InVar%stdout,'(a,3(f8.3,x))') 'Young modulus E1, E2 and E3=',E1,E2,E3
 
 ! Poisson Ratio
@@ -404,7 +414,8 @@ subroutine tdep_calc_elastic(Phij_NN,distance,InVar,Lattice)
   Eaverage=9.d0*BV*GV/(3*BV+GV)
   Nuaverage=0.5*(1.d0-(3.d0*GV)/(3.d0*BV+GV) )
   Laverage=(3.d0*BV-2.d0*GV)/3.d0
-  write(InVar%stdout,'(3(a,f9.3))')'Average of Young modulus E=',Eaverage,' Lame modulus Lambda=',Laverage,' and Poisson ratio Nu=',Nuaverage
+  write(InVar%stdout,'(3(a,f9.3))')'Average of Young modulus E=',Eaverage,' Lame modulus Lambda=',Laverage,&
+&   ' and Poisson ratio Nu=',Nuaverage
   Vp=dsqrt(1.d9*(BV+4.d0*GV/3.d0)/rho)
   Vs=dsqrt(1.d9*GV/rho)
   Vphi=dsqrt(1.d9*BV/rho)
@@ -419,7 +430,8 @@ subroutine tdep_calc_elastic(Phij_NN,distance,InVar,Lattice)
   Eaverage=9.d0*BR*GR/(3*BR+GR)
   Nuaverage=0.5*(1.d0-(3.d0*GR)/(3.d0*BR+GR) )
   Laverage=(3.d0*BR-2.d0*GR)/3.d0
-  write(InVar%stdout,'(3(a,f9.3))')'Average of Young modulus E=',Eaverage,' Lame modulus Lambda=',Laverage,' and Poisson ratio Nu=',Nuaverage
+  write(InVar%stdout,'(3(a,f9.3))')'Average of Young modulus E=',Eaverage,' Lame modulus Lambda=',Laverage,&
+&   ' and Poisson ratio Nu=',Nuaverage
   Vp=dsqrt(1.d9*(BR+4.d0*GR/3.d0)/rho)
   Vs=dsqrt(1.d9*GR/rho)
   Vphi=dsqrt(1.d9*BR/rho)
@@ -434,7 +446,8 @@ subroutine tdep_calc_elastic(Phij_NN,distance,InVar,Lattice)
   Eaverage=9.d0*BH*GH/(3*BH+GH)
   Nuaverage=0.5*(1.d0-(3.d0*GH)/(3.d0*BH+GH) )
   Laverage=(3.d0*BH-2.d0*GH)/3.d0
-  write(InVar%stdout,'(3(a,f9.3))')'Average of Young modulus E=',Eaverage,' Lame modulus Lambda=',Laverage,' and Poisson ratio Nu=',Nuaverage
+  write(InVar%stdout,'(3(a,f9.3))')'Average of Young modulus E=',Eaverage,' Lame modulus Lambda=',Laverage,&
+&   ' and Poisson ratio Nu=',Nuaverage
   Vp=dsqrt(1.d9*(BH+4.d0*GH/3.d0)/rho)
   Vs=dsqrt(1.d9*GH/rho)
   Vphi=dsqrt(1.d9*BH/rho)
