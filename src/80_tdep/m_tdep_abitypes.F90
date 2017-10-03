@@ -394,7 +394,7 @@ subroutine tdep_write_ifc(Crystal,Ifc,InVar,natom_unitcell,unitfile)
   else  
     write(InVar%stdout,'(a)') ' Write in ifc.out the IFC read previously'
   end if  
-  call ifc_print(Ifc,7,prt_ifc)
+  call ifc_print(Ifc,"TDEP",7,prt_ifc)
 #endif
   close(7)
 
