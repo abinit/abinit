@@ -330,8 +330,8 @@ subroutine tdep_build_psijNNN(distance,InVar,ntotcoeff,proj,Psij_coeff,Psij_NN,S
               norm=norm+Psij_NN(3*(eatom-1)+ii,3*(fatom-1)+jj,3*(gatom-1)+kk)
             end do !gatom
             if (abs(norm).gt.tol8) then
-              write(std_err,*) ' BUG : the acoustic sum rule is not fulfilled'
-              write(std_err,'(5(i3,x),1(e17.10,x))') ii,jj,kk,eatom,fatom,norm
+              write(std_out,*) ' BUG : the acoustic sum rule is not fulfilled'
+              write(std_out,'(5(i3,x),1(e17.10,x))') ii,jj,kk,eatom,fatom,norm
               MSG_BUG('the acoustic sum rule is not fulfilled')
             end if
           end do !kk
@@ -734,7 +734,7 @@ subroutine tdep_write_gruneisen(distance,Eigen2nd,InVar,Lattice,Psij_NN,Qpt,Rlat
 !   Write the Gruneisen
     if (sum(abs(qpt_cart(:))).gt.tol8) then 
       if (sum(abs(imag(Gruneisen(:)))).gt.tol8) then
-        write(std_err,*) 'BUG : the imaginary part of the Gruneisen is not equal to zero'
+        write(std_out,*) 'BUG : the imaginary part of the Gruneisen is not equal to zero'
         write(53,'(i5,x,100(e15.6,x))') iqpt,(real(Gruneisen(ii)),ii=1,nmode),(imag(Gruneisen(ii)),ii=1,nmode)
       else 
 !FB        write(53,'(i5,x,500(e15.6,x))') iqpt,(real(Gruneisen(ii)),ii=1,nmode),((real(Grun_shell(ii,jj)),ii=1,nmode),jj=1,Shell3at%nshell)

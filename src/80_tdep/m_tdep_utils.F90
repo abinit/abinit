@@ -807,9 +807,9 @@ contains
 &                           Phij_NN(3*(iatcell-1)+alpha,3*(jatom-1)+gama)*Levi_Civita(gama,beta,nu)
               end do !gama
               if (abs(norm1).gt.tol8) then
-                write(std_err,*) ' BUG : invariance under arbitrary rotation is not fulfilled (order 3)'
-                write (std_err,'(5(i3,x),1(e17.10,x))') iatcell,jatom,alpha,nu,beta,norm1
-                write(std_err,*) 'iatcell,jatom,alpha,nu,beta,norm1'
+                write(std_out,*) ' BUG : invariance under arbitrary rotation is not fulfilled (order 3)'
+                write(std_out,'(5(i3,x),1(e17.10,x))') iatcell,jatom,alpha,nu,beta,norm1
+                write(std_out,*) 'iatcell,jatom,alpha,nu,beta,norm1'
                 if (InVar%RotationalInv.eq.0)  then
                   MSG_BUG('invariance under arbitrary rotation is not fulfilled (order 3)')
                 end if
@@ -833,9 +833,9 @@ contains
             end do !gama
           end do !beta
           if (abs(norm1).gt.tol8) then
-            write(std_err,*) ' BUG : invariance under arbitrary rotation is not fulfilled (order 2)'
-            write(std_err,*) 'iatcell,alpha,nu,norm1'
-            write(std_err,'(3(i3,x),1(e17.10,x))') iatcell,alpha,nu,norm1
+            write(std_out,*) ' BUG : invariance under arbitrary rotation is not fulfilled (order 2)'
+            write(std_out,*) 'iatcell,alpha,nu,norm1'
+            write(std_out,'(3(i3,x),1(e17.10,x))') iatcell,alpha,nu,norm1
             if (InVar%RotationalInv.eq.0) then
               MSG_BUG('invariance under arbitrary rotation is not fulfilled (order 2)')
             end if
