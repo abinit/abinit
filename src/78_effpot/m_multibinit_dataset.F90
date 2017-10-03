@@ -96,6 +96,7 @@ module m_multibinit_dataset
   integer :: nsphere
   integer :: optcell
   integer :: prt_model
+  integer :: dipdip_prt
   integer :: prt_phfrq
   integer :: prt_ifc
   integer :: strcpling  ! Print the 3rd order in xml file
@@ -417,6 +418,17 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
 &   'dipdip is',multibinit_dtset%dipdip,', but the only allowed values',ch10,&
 &   'is 1.',ch10,&
 &   'Action: correct dipdip in your input file.'
+   MSG_ERROR(message)
+ end if
+
+ multibinit_dtset%dipdip_prt=0
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dipdip_prt',tread,'INT')
+ if(tread==1) multibinit_dtset%dipdip_prt=intarr(1)
+ if(multibinit_dtset%dipdip_prt<0.or.multibinit_dtset%dipdip_prt>1)then
+   write(message, '(a,i8,a,a,a,a,a)' )&
+&   'dipdip_prt is',multibinit_dtset%prtsrlr,', but the only allowed values',ch10,&
+    'are 0 or 1.',ch10,&
+&   'Action: correct dipdip_prt in your input file.'
    MSG_ERROR(message)
  end if
 
@@ -1559,7 +1571,10 @@ subroutine outvars_multibinit (multibinit_dtset,nunit)
    write(nunit,'(a)')' Interatomic Force Constants Inputs :'
    write(nunit,'(3x,a9,3i10)')'   dipdip',multibinit_dtset%dipdip
    if(multibinit_dtset%dipdip /= 0)then
-     write(nunit,'(3x,a12,3i10)') 'dipdip_range',multibinit_dtset%dipdip_range
+     write(nunit,'(a12,3i10)') 'dipdip_range',multibinit_dtset%dipdip_range
+   end if
+   if(multibinit_dtset%dipdip_prt/=0)then
+     write(nunit,'(a12,3i10)') 'dipdip_prt',multibinit_dtset%dipdip_prt
    end if
    if(multibinit_dtset%nsphere/=0)write(nunit,'(3x,a9,3i10)')'  nsphere',multibinit_dtset%nsphere
    if(abs(multibinit_dtset%rifcsph)>tol10)write(nunit,'(3x,a9,E16.6)')'  nsphere',multibinit_dtset%rifcsph

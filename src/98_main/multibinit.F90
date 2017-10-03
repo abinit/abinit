@@ -363,7 +363,8 @@ program multibinit
      call wrtout(ab_out,message,'COLL')
      call wrtout(std_out,message,'COLL')
      name = replace(trim(filnam(2)),".out","")
-     call effective_potential_writeXML(reference_effective_potential,inp%prt_model,filename=name)
+     call effective_potential_writeXML(reference_effective_potential,inp%prt_model,filename=name,&
+&                                      prt_dipdip=inp%dipdip_prt==1)
    else if (inp%prt_model == -2)then
 !    NetCDF case, in progress
      name = trim(filnam(2))//"_sys.nc"
