@@ -123,7 +123,8 @@ subroutine tdep_calc_psijfcoeff(InVar,ntotcoeff,proj,Shell3at,Sym,ucart,fcoeff)
           do mu=1,3
             do icoeff=1,ncoeff
               terme=sum(SSSu(mu,:)*proj(:,icoeff,ishell))
-              fcoeff(mu+3*(iatom-1)+3*InVar%natom*(istep-1),icoeff+ncoeff_prev)=fcoeff(mu+3*(iatom-1)+3*InVar%natom*(istep-1),icoeff+ncoeff_prev)+terme
+              fcoeff(mu+3*(iatom-1)+3*InVar%natom*(istep-1),icoeff+ncoeff_prev)=&
+&               fcoeff(mu+3*(iatom-1)+3*InVar%natom*(istep-1),icoeff+ncoeff_prev)+terme
             end do    
           end do  
         
@@ -471,7 +472,8 @@ subroutine tdep_calc_gruneisen(distance,Eigen2nd,Gruneisen,iqpt,InVar,Lattice,Ps
           do jj=1,3
             do kk=1,3
               do imode=1,nmode
-                Grun_shell(imode,ishell)=Grun_shell(imode,ishell)-dcmplx(Psij_NN(3*(iatcell-1)+ii,3*(jatom-1)+jj,3*(katom-1)+kk),0.d0)*&
+                Grun_shell(imode,ishell)=Grun_shell(imode,ishell)-&
+&                 dcmplx(Psij_NN(3*(iatcell-1)+ii,3*(jatom-1)+jj,3*(katom-1)+kk),0.d0)*&
 &                                eigen_prod(ii,jj,iatcell,jat_mod,imode)*&
 &                                exp(dcmplx(0.d0,phase))*dcmplx(distance(iatcell,katom,kk+1),0.d0)/&
 &                                dcmplx(dsqrt(InVar%amu(itypat)*InVar%amu(jtypat))*amu_emass,0.d0)/&
