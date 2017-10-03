@@ -16,6 +16,9 @@
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! INPUTS
+!!  chkdilatmx_ = if 1, will prevent to have any vector outside the Fermi sphere, possibly
+!!       by rescaling (three times at most), and then stopping the execution
+!!                if 0, simply send a warning, but continues execution
 !!  dilatmx     = maximal dilatation factor (usually the input variable)
 !!  rprimd      = new primitive vectors
 !!  rprimd_orig = original primitive vectors (usually the input variable)
@@ -65,6 +68,7 @@ subroutine chkdilatmx(chkdilatmx_,dilatmx,rprimd,rprimd_orig,dilatmx_errmsg)
 
 !Arguments ------------------------------------
 !scalars
+ integer,intent(in) :: chkdilatmx_
  real(dp),intent(in) :: dilatmx
  character(len=500),intent(out) :: dilatmx_errmsg
 !arrays
