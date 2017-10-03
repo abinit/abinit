@@ -265,8 +265,9 @@ contains
 &                       Isym3at(watom,xatom,yatom,1)
                   end do !ii 
                 else  
-                  if (InVar%debug) write(InVar%stdout,'(a,4(x,i4))') then
-&                    'NO SYMETRY OPERATION BETWEEN (iatom,jatom,katom) and (eatom,fatom,gatom)=',&
+                  if (InVar%debug) then
+                    write(InVar%stdout,'(a,4(x,i4))') &
+&                     'NO SYMETRY OPERATION BETWEEN (iatom,jatom,katom) and (eatom,fatom,gatom)=',&
 &                    iatcell,jatom,katom,eatom,fatom,gatom
                   end if
                 end if  
