@@ -50,7 +50,6 @@ program tdep
   use m_ddb,              only : ddb_type
   use m_dynmat,           only : ftifc_r2q, ftifc_q2r, asrif9
   use m_tdep_abitypes,    only : tdep_init_crystal, tdep_init_ifc, tdep_init_ddb, tdep_write_ifc
-  use m_tdep_psij,        only : tdep_calc_psijfcoeff, tdep_build_psijNNN, tdep_calc_alpha_gamma, tdep_write_gruneisen
   use m_tdep_phij,        only : tdep_calc_phijfcoeff, tdep_build_phijNN, tdep_calc_dij, tdep_write_dij, &
 &                                Eigen_Variables_type, tdep_init_eigen2nd, tdep_destroy_eigen2nd, tdep_write_yaml
   use m_tdep_latt,        only : tdep_make_latt, Lattice_Variables_type
@@ -254,63 +253,17 @@ program tdep
 !==========================================================================================
  call tdep_calc_thermo(DeltaFree_AH2,InVar,PHdos,U0)
 
- if (InVar%Order==2) then
-   call tdep_print_Aknowledgments(InVar)
-   call xmpi_end()
-   stop
- end if  
- 
-!#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=
-!#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=
-!#=#=#=#=#=#=#=#=#=#=#=#=#=#=# CALCULATION OF THE 3rd ORDER =#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=
-!#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=
-!#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=
- order=3
- norder=3**order
+ !if (InVar%Order==2) then
+ !  call tdep_print_Aknowledgments(InVar)
+ !  call xmpi_end()
+ !  stop
+ !end if  
 
-!==========================================================================================
-!======== Initialize the Shell3at datatype ================================================
-!==========================================================================================
- ABI_MALLOC(proj_tmp,(norder,norder,nshell_max)) ; proj_tmp(:,:,:)=0.d0
- call tdep_init_shell3at(distance,InVar,norder,nshell_max,ntotcoeff,order,proj_tmp,Shell3at,Sym)
- ABI_MALLOC(proj    ,(norder,norder,Shell3at%nshell)) ; proj(:,:,:)=0.d0
- proj = reshape (proj_tmp, (/ norder,norder,Shell3at%nshell /)) 
- ABI_FREE(proj_tmp)
-
-!==========================================================================================
-!============= Build fcoeff, needed for the Moore-Penrose method just below ===============
-!==========================================================================================
- ABI_MALLOC(CoeffMoore%fcoeff,(3*natom*InVar%nstep,ntotcoeff)); CoeffMoore%fcoeff(:,:)=0.d0 
- call tdep_calc_psijfcoeff(InVar,ntotcoeff,proj,Shell3at,Sym,ucart,CoeffMoore%fcoeff)
-
-!==========================================================================================
-!============= Compute the pseudo inverse using the Moore-Penrose method ==================
-!==========================================================================================
- ABI_MALLOC(Psij_coeff,(ntotcoeff,1)); Psij_coeff(:,:)=0.d0
- ABI_MALLOC(Fresid,(3*InVar%natom*InVar%nstep)); Fresid(:)=0.d0 
- Fresid(:)=2*(Forces_MD(:)-Forces_TDEP(:))
- call tdep_calc_MoorePenrose(Fresid,CoeffMoore,InVar,ntotcoeff,Psij_coeff)
- ABI_FREE(Fresid)
-
-!==========================================================================================
-!============= Reorganize the IFC coefficients into the whole Psij_NN matrix ==============
-!==========================================================================================
- ABI_MALLOC(Psij_NN,(3*natom,3*natom,3*natom)) ; Psij_NN(:,:,:)=0.d0
- call tdep_build_psijNNN(distance,InVar,ntotcoeff,proj,Psij_coeff,Psij_NN,Shell3at,Sym)
- ABI_FREE(Psij_coeff)
- ABI_FREE(proj)
- call tdep_write_gruneisen(distance,Eigen2nd,InVar,Lattice,Psij_NN,Qpt,Rlatt_cart,Shell3at)
- call tdep_calc_alpha_gamma(Crystal,distance,DDB,Ifc,InVar,Lattice,Psij_NN,Rlatt_cart,Shell3at,Sym)
- stop
  ABI_FREE(Rlatt_cart)
- call tdep_destroy_eigen2nd(Eigen2nd)
- call tdep_destroy_shell(natom,order,Shell3at)
- call tdep_calc_model(DeltaFree_AH2,distance,Forces_MD,Forces_TDEP,InVar,Phij_NN,ucart,U0,Psij_NN) 
  ABI_FREE(distance)
  ABI_FREE(Forces_MD)
  ABI_FREE(Forces_TDEP)
  ABI_FREE(Phij_NN)
- ABI_FREE(Psij_NN)
  ABI_FREE(ucart)
 !==========================================================================================
 !================= Write the last informations (aknowledgments...)  =======================
