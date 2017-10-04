@@ -266,13 +266,13 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
 !scalars
 
  integer :: comm_grid,ifft,ispden,ncpgr,occopt_,optgr,optgr2,option,optnc,optstr,optstr2,iorder_cprj,ctocprj_choice
- integer :: idir,iatom,unpaw,ii,nlmn,kk,mcgbz
+ integer :: idir,iatom,unpaw,mcgbz
  integer,allocatable :: dimcprj(:)
  real(dp) ::dum,dum1,ucvol_
  logical :: apply_residual
 !arrays
  real(dp),parameter :: k0(3)=(/zero,zero,zero/)
- real(dp) :: kinstr(6),nlstr(6),tsec(2),strdum(6),gmet(3,3),gprimd(3,3),rmet(3,3),work(6)
+ real(dp) :: kinstr(6),nlstr(6),tsec(2),strdum(6),gmet(3,3),gprimd(3,3),rmet(3,3)
  real(dp) :: dummy(0)
  real(dp),allocatable :: grnl(:),vlocal(:,:),vxc_hf(:,:),xcart(:,:),ylmbz(:,:),ylmgrbz(:,:,:)
  real(dp), ABI_CONTIGUOUS pointer :: resid(:,:)
@@ -358,21 +358,6 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
 &         dtset%nsppol,dtset%ntypat,dtset%paral_kgb,ph1d,psps,rmet,dtset%typat,ucvol,unpaw,&
 &         xred,ylm,ylmgr)
        end if
-!       if (fock%fock_BZ%cwaveocc_prj(1,1)%ncpgr==9) then
-!         do iatom=1,dtset%natom
-!           do ii=1,fock%fock_BZ%mcprj
-!             nlmn=fock%fock_BZ%cwaveocc_prj(iatom,ii)%nlmn
-!             do kk=1,nlmn
-!               work(1:6)=fock%fock_BZ%cwaveocc_prj(iatom,ii)%dcp(1,1:6,kk)
-!               call strconv(work,gprimd,work)
-!               fock%fock_BZ%cwaveocc_prj(iatom,ii)%dcp(1,1:6,kk)=work(1:6)
-!               work(1:6)=fock%fock_BZ%cwaveocc_prj(iatom,ii)%dcp(2,1:6,kk)
-!               call strconv(work,gprimd,work)
-!               fock%fock_BZ%cwaveocc_prj(iatom,ii)%dcp(2,1:6,kk)=work(1:6)
-!             end do
-!           end do
-!         end do
-!       end if
      end if
    end if
    call forstrnps(cg,cprj,dtset%ecut,dtset%ecutsm,dtset%effmass_free,eigen,electronpositron,fock,grnl,&
