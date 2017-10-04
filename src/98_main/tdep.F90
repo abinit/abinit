@@ -43,6 +43,7 @@
 program tdep
 
   use defs_basis
+  use m_profiling_abi
   use m_phonons
   use m_xmpi,             only : xmpi_init, xmpi_end
   use m_ifc,              only : ifc_type

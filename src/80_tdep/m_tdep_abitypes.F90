@@ -7,6 +7,7 @@
 module m_tdep_abitypes
 
   use defs_basis
+  use m_profiling_abi
   use m_nctk
   use m_xmpi
   use m_errors

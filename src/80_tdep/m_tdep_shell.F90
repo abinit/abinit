@@ -8,6 +8,7 @@ module m_tdep_shell
 
   use defs_basis
   use m_errors
+  use m_profiling_abi
   use m_tdep_readwrite,   only : Input_Variables_type
   use m_tdep_latt,        only : Lattice_Variables_type
   use m_tdep_sym,         only : Symetries_Variables_type, tdep_SearchS_2at, tdep_SearchS_3at

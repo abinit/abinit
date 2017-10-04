@@ -10,6 +10,7 @@ module m_tdep_phdos
 !FB  use m_nctk
 !FB  use m_xmpi
   use m_errors
+  use m_profiling_abi
   use m_phonons
   use m_ifc,              only : ifc_type,ifc_fourq
   use m_crystal,          only : crystal_t

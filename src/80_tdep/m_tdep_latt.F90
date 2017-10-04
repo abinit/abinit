@@ -7,6 +7,7 @@
 module m_tdep_latt
 
  use defs_basis
+ use m_profiling_abi
  use m_tdep_readwrite,   only : Input_Variables_type
  use m_errors
 

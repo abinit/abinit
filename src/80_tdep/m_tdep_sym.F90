@@ -7,6 +7,7 @@
 module m_tdep_sym
   
  use defs_basis
+ use m_profiling_abi
  use m_errors
  use m_tdep_latt,        only : Lattice_Variables_type, tdep_make_inbox
  use m_tdep_readwrite,   only : Input_Variables_type
