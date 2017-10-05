@@ -351,12 +351,12 @@ contains
   end if  
   write(InVar%stdout,'(1x,a20)') string
   do ii=1,3
-    write(InVar%stdout,'(22x,3(f15.10,x))') (InVar%rprimd_MD(ii,jj),jj=1,3)
+    write(InVar%stdout,'(22x,3(f15.10,1x))') (InVar%rprimd_MD(ii,jj),jj=1,3)
   end do  
   read(40,*) string,InVar%multiplicity(1,:),InVar%multiplicity(2,:),InVar%multiplicity(3,:)
   write(InVar%stdout,'(1x,a20)') string
   do ii=1,3
-    write(InVar%stdout,'(22x,3(f15.10,x))') (InVar%multiplicity(ii,jj),jj=1,3)
+    write(InVar%stdout,'(22x,3(f15.10,1x))') (InVar%multiplicity(ii,jj),jj=1,3)
   end do  
   if (InVar%netcdf) then
     string='natom'
@@ -373,9 +373,9 @@ contains
   write(InVar%stdout,'(1x,a20)') string
   do ii=1,InVar%natom,10
     if (ii+9.lt.InVar%natom) then
-      write(InVar%stdout,'(22x,10(i4,x))') (InVar%typat(ii+jj-1),jj=1,10)
+      write(InVar%stdout,'(22x,10(i4,1x))') (InVar%typat(ii+jj-1),jj=1,10)
     else
-      write(InVar%stdout,'(22x,10(i4,x))') (InVar%typat(jj),jj=ii,InVar%natom)
+      write(InVar%stdout,'(22x,10(i4,1x))') (InVar%typat(jj),jj=ii,InVar%natom)
     end if  
   end do  
   read(40,*) string,InVar%temperature
@@ -420,7 +420,7 @@ contains
         write(InVar%stdout,'(a)') ' Q points as given in the input file:'
         do jj=1,abs(InVar%BZpath)
           read(40,*) InVar%qpt(:,jj)
-          write(InVar%stdout,'(22x,3(f15.10,x))') InVar%qpt(:,jj)
+          write(InVar%stdout,'(22x,3(f15.10,1x))') InVar%qpt(:,jj)
         end do  
       else if (InVar%BZpath.gt.0) then
         ABI_MALLOC(InVar%special_qpt,(InVar%BZpath))
@@ -462,7 +462,7 @@ contains
       write(InVar%stdout,'(1x,a20,1x,i4)') string,InVar%firstqptseg
     else if (string.eq.Ngqpt1) then  
       read(40,*) string,InVar%ngqpt1(:)
-      write(InVar%stdout,'(1x,a20,1x,3(i4,x))') string,InVar%ngqpt1(:)
+      write(InVar%stdout,'(1x,a20,1x,3(i4,1x))') string,InVar%ngqpt1(:)
     else if (string.eq.Ngqpt2) then  
       read(40,*) string,InVar%ngqpt2(:)
       write(InVar%stdout,'(1x,a20,1x,i4)') string,InVar%ngqpt2(:)
