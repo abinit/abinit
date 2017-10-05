@@ -63,11 +63,11 @@ contains
   Sym%msym=1000 !msym needs to be very large due to non-primitive cell calculations
   ABI_MALLOC(Sym%ptsymrel,(3,3,Sym%msym)) ; Sym%ptsymrel(:,:,:)=0
   call symlatt(InVar%bravais,Sym%msym,Sym%nptsym,Sym%ptsymrel,Lattice%rprimdt,tol8)
-  write(Invar%stdout,'(a,x,11(i4,x))')' bravais=',InVar%bravais(:)
+  write(Invar%stdout,'(a,1x,11(i4,1x))')' bravais=',InVar%bravais(:)
   Sym%nsym=Sym%nptsym
 
 ! Transform S_ref in cartesian coordinates
-  ABI_MALLOC(Sym%S_ref,(3,3,Sym%nsym,2)) ; Sym%S_ref(:,:,:,1)=dfloat(Sym%ptsymrel(:,:,1:Sym%nsym))
+  ABI_MALLOC(Sym%S_ref,(3,3,Sym%nsym,2)) ; Sym%S_ref(:,:,:,1)=real(Sym%ptsymrel(:,:,1:Sym%nsym))
   ABI_MALLOC(Sym%S_inv,(3,3,Sym%nsym,2)) ; Sym%S_inv(:,:,:,1)=zero
   ABI_MALLOC(tmp1,(3,3)); tmp1(:,:)=0.d0
   open(unit=75,file='sym.dat')
@@ -75,15 +75,15 @@ contains
     write(75,*) ' '
     write(75,*) 'For isym=',isym
     write(75,*) 'In reduced coordinates:'
-    write(75,'(3(f5.2,x))') Sym%S_ref(1,1,isym,1),Sym%S_ref(1,2,isym,1),Sym%S_ref(1,3,isym,1)
-    write(75,'(3(f5.2,x))') Sym%S_ref(2,1,isym,1),Sym%S_ref(2,2,isym,1),Sym%S_ref(2,3,isym,1)
-    write(75,'(3(f5.2,x))') Sym%S_ref(3,1,isym,1),Sym%S_ref(3,2,isym,1),Sym%S_ref(3,3,isym,1)
+    write(75,'(3(f5.2,1x))') Sym%S_ref(1,1,isym,1),Sym%S_ref(1,2,isym,1),Sym%S_ref(1,3,isym,1)
+    write(75,'(3(f5.2,1x))') Sym%S_ref(2,1,isym,1),Sym%S_ref(2,2,isym,1),Sym%S_ref(2,3,isym,1)
+    write(75,'(3(f5.2,1x))') Sym%S_ref(3,1,isym,1),Sym%S_ref(3,2,isym,1),Sym%S_ref(3,3,isym,1)
     call DGEMM('N','N',3,3,3,1.d0,Lattice%rprimdt,3,Sym%S_ref(:,:,isym,1),3,0.d0,tmp1,3)
     call DGEMM('N','N',3,3,3,1.d0,tmp1,3,Lattice%rprimdtm1,3,0.d0,Sym%S_ref(:,:,isym,1),3)
     write(75,*) 'In cartesian coordinates:'
-    write(75,'(3(f5.2,x))') Sym%S_ref(1,1,isym,1),Sym%S_ref(1,2,isym,1),Sym%S_ref(1,3,isym,1)
-    write(75,'(3(f5.2,x))') Sym%S_ref(2,1,isym,1),Sym%S_ref(2,2,isym,1),Sym%S_ref(2,3,isym,1)
-    write(75,'(3(f5.2,x))') Sym%S_ref(3,1,isym,1),Sym%S_ref(3,2,isym,1),Sym%S_ref(3,3,isym,1)
+    write(75,'(3(f5.2,1x))') Sym%S_ref(1,1,isym,1),Sym%S_ref(1,2,isym,1),Sym%S_ref(1,3,isym,1)
+    write(75,'(3(f5.2,1x))') Sym%S_ref(2,1,isym,1),Sym%S_ref(2,2,isym,1),Sym%S_ref(2,3,isym,1)
+    write(75,'(3(f5.2,1x))') Sym%S_ref(3,1,isym,1),Sym%S_ref(3,2,isym,1),Sym%S_ref(3,3,isym,1)
 
     do ii=1,3
       do jj=1,3
@@ -109,7 +109,7 @@ contains
       do jj=1,3
         if ((ii/=jj.and.abs(tmp1(ii,jj)).gt.tol8).or.(ii==jj.and.abs(tmp1(ii,jj)-1.d0).gt.tol8)) then
           write(InVar%stdout,'(a)') ' STOP : the matrix is not orthogonal : '
-          write(InVar%stdout,'(a,x,i3,x,i3,x,f15.10)') ' ii, jj, sym(ii,jj)=',ii,jj,tmp1(ii,jj)
+          write(InVar%stdout,'(a,1x,i3,1x,i3,1x,f15.10)') ' ii, jj, sym(ii,jj)=',ii,jj,tmp1(ii,jj)
           MSG_ERROR('The matrix is not orthogonal')
         end if
       end do
@@ -272,9 +272,9 @@ contains
     open(unit=40,file='Indsym-unitcell.dat')
     do iatom=1,InVar%natom_unitcell
       write(40,*) '=========================================='
-      write(40,'(a,i4,a,3(f10.5,x))') 'For iatom=',iatom,' with xred=',xred_ideal(:,iatom)
+      write(40,'(a,i4,a,3(f10.5,1x))') 'For iatom=',iatom,' with xred=',xred_ideal(:,iatom)
       do isym=1,Sym%nptsym
-        write(40,'(a,i2,a,i4,a,3(i4,x),a,i2,a,3(f10.5,x))') '  indsym(isym=',isym,',',iatom,')=',&
+        write(40,'(a,i2,a,i4,a,3(i4,1x),a,i2,a,3(f10.5,1x))') '  indsym(isym=',isym,',',iatom,')=',&
 &         Sym%indsym(1:3,isym,iatom),'|iat=',Sym%indsym(4,isym,iatom),'| with tnons=',Sym%tnons(:,isym)
       end do
     end do
@@ -289,7 +289,7 @@ contains
   if (InVar%debug) open(unit=40,file='Indsym-supercell.dat')
   do iatom=1,InVar%natom
     if (InVar%debug) write(40,*) '=========================================='
-    if (InVar%debug) write(40,'(a,i4,a,3(f10.5,x))') 'For iatom=',iatom,' with xred=',xred_ideal(:,iatom)
+    if (InVar%debug) write(40,'(a,i4,a,3(f10.5,1x))') 'For iatom=',iatom,' with xred=',xred_ideal(:,iatom)
 !   For a single iatom 
     call DGEMV('T',3,3,1.d0,InVar%multiplicity(:,:),3,xred_ideal(:,iatom),1,0.d0,tmpi(:,iatom),1)
     iatom_unitcell=mod(iatom-1,InVar%natom_unitcell)+1
@@ -301,7 +301,7 @@ contains
       end do
       Sym%indsym(1:4,isym,iatom)=Sym%indsym(1:4,isym,iatom_unitcell)+vectsym(1:4,isym)
       if (InVar%debug) then
-        write(40,'(a,i2,a,i4,a,3(i4,x),a,i2,a,3(f10.5,x))') '  indsym(isym=',isym,',',iatom,')=',&
+        write(40,'(a,i2,a,i4,a,3(i4,1x),a,i2,a,3(f10.5,1x))') '  indsym(isym=',isym,',',iatom,')=',&
 &         Sym%indsym(1:3,isym,iatom),'|iat=',Sym%indsym(4,isym,iatom),'| with tnons=',Sym%tnons(:,isym)
       end if
       do jatom=1,InVar%natom
@@ -316,10 +316,10 @@ contains
   if (InVar%debug) open(unit=40,file='Indsym-2atoms.dat')
   do iatom=1,InVar%natom
     if (InVar%debug) write(40,*) '=========================================='
-    if (InVar%debug) write(40,'(a,i4,a,3(f10.5,x))') 'For iatom=',iatom,' with xred=',xred_ideal(:,iatom)
+    if (InVar%debug) write(40,'(a,i4,a,3(f10.5,1x))') 'For iatom=',iatom,' with xred=',xred_ideal(:,iatom)
     do jatom=1,InVar%natom
       if (InVar%debug) write(40,*) '  =========================================='
-      if (InVar%debug) write(40,'(a,i4,a,3(f10.5,x))') '  For jatom=',jatom,' with xred=',xred_ideal(:,jatom)
+      if (InVar%debug) write(40,'(a,i4,a,3(f10.5,1x))') '  For jatom=',jatom,' with xred=',xred_ideal(:,jatom)
       temp3(:,1)=xred_ideal(:,jatom)-xred_ideal(:,iatom)
       call tdep_make_inbox(temp3(:,1),1,1d-3,temp3(:,1))
       temp3(:,1)=xred_ideal(:,iatom)+temp3(:,1)
@@ -333,7 +333,7 @@ contains
         end do
         indsym2(5:8,isym,iatom,jatom)=Sym%indsym(1:4,isym,jatom_unitcell)+vectsym(1:4,isym)
         if (InVar%debug) then
-          write(40,'(a,i2,a,i4,a,i4,a,3(i4,x),a,i2,a,3(i4,x),a,i2,a)') '  indsym2(isym=',isym,',',iatom,',',jatom,')=',&
+          write(40,'(a,i2,a,i4,a,i4,a,3(i4,1x),a,i2,a,3(i4,1x),a,i2,a)') '  indsym2(isym=',isym,',',iatom,',',jatom,')=',&
 &           indsym2(1:3,isym,iatom,jatom),&
 &           '|iat=',indsym2(4,isym,iatom,jatom),'|',indsym2(5:7,isym,iatom,jatom),'|iat=',indsym2(8,isym,iatom,jatom),'|'
         end if 

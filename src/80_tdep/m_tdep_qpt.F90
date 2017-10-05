@@ -367,7 +367,7 @@ contains
             Qpt%special_red(jj,1)=QptBound(ii)%x
             Qpt%special_red(jj,2)=QptBound(ii)%y
             Qpt%special_red(jj,3)=QptBound(ii)%z
-            write(40,'(a,x,3(f10.5,x))') Qpt%special_qpt(jj),Qpt%special_red(jj,1),Qpt%special_red(jj,2),Qpt%special_red(jj,3)
+            write(40,'(a,1x,3(f10.5,1x))') Qpt%special_qpt(jj),Qpt%special_red(jj,1),Qpt%special_red(jj,2),Qpt%special_red(jj,3)
           end if  
         end if
       end do  
@@ -388,13 +388,13 @@ contains
           end if
         end do 
       end do
-      write(40,'(a,x,3(f10.5,x))') Qpt%special_qpt(ii),Qpt%special_cart(ii,1),Qpt%special_cart(ii,2),Qpt%special_cart(ii,3)
+      write(40,'(a,1x,3(f10.5,1x))') Qpt%special_qpt(ii),Qpt%special_cart(ii,1),Qpt%special_cart(ii,2),Qpt%special_cart(ii,3)
     end do  
     write(40,*) ' '
     write(40,*) '  Using gprimt='
-    write(40,'(3(f10.5,x))') Lattice%gprimt(1,1),Lattice%gprimt(1,2),Lattice%gprimt(1,3)
-    write(40,'(3(f10.5,x))') Lattice%gprimt(2,1),Lattice%gprimt(2,2),Lattice%gprimt(2,3)
-    write(40,'(3(f10.5,x))') Lattice%gprimt(3,1),Lattice%gprimt(3,2),Lattice%gprimt(3,3)
+    write(40,'(3(f10.5,1x))') Lattice%gprimt(1,1),Lattice%gprimt(1,2),Lattice%gprimt(1,3)
+    write(40,'(3(f10.5,1x))') Lattice%gprimt(2,1),Lattice%gprimt(2,2),Lattice%gprimt(2,3)
+    write(40,'(3(f10.5,1x))') Lattice%gprimt(3,1),Lattice%gprimt(3,2),Lattice%gprimt(3,3)
 
     if (qpt_tot.gt.1) then
       write(40,*) ' '
@@ -409,11 +409,11 @@ contains
       tmp_int=Qpt%lgth_segments(1)
       do ii=1,qpt_tot-1
         if (InVar%firstqptseg.gt.0) then
-          Qpt%lgth_segments(ii)=int(dfloat(Qpt%lgth_segments(ii))/dfloat(tmp_int)*InVar%firstqptseg)
+          Qpt%lgth_segments(ii)=int(real(Qpt%lgth_segments(ii))/real(tmp_int)*InVar%firstqptseg)
         else 
           Qpt%lgth_segments(ii)=100
         end if
-        write(40,'(a2,a,a2,x,i4)') Qpt%special_qpt(ii),'-',Qpt%special_qpt(ii+1),Qpt%lgth_segments(ii)
+        write(40,'(a2,a,a2,1x,i4)') Qpt%special_qpt(ii),'-',Qpt%special_qpt(ii+1),Qpt%lgth_segments(ii)
       end do        
 
 !     Allocate and define the qpt points along the segments
@@ -468,7 +468,7 @@ contains
   write(40,*) ' '
   write(40,*) '  Q-points path (in reduced coordinates) and (in cartesian coordinates)='
   do  iqpt=1,nqpt
-    write(40,'(i4,x,6(f10.5,x))') iqpt,Qpt%qpt_red(1,iqpt),Qpt%qpt_red(2,iqpt),Qpt%qpt_red(3,iqpt),&
+    write(40,'(i4,1x,6(f10.5,1x))') iqpt,Qpt%qpt_red(1,iqpt),Qpt%qpt_red(2,iqpt),Qpt%qpt_red(3,iqpt),&
 &     Qpt%qpt_cart(1,iqpt),Qpt%qpt_cart(2,iqpt),Qpt%qpt_cart(3,iqpt)
   end do
   close(40)

@@ -168,7 +168,7 @@ contains
       write(InVar%stdout,'(a)') ' See the Phij_NN.dat file corresponding to the ifc.in file'
       open(unit=55,file='Phij_NN.dat')
       do iatom=1,3*InVar%natom
-        write(55,'(10000(f10.6,x))') Phij_NN(iatom,:)
+        write(55,'(10000(f10.6,1x))') Phij_NN(iatom,:)
       end do  
       close(55)
     end if  

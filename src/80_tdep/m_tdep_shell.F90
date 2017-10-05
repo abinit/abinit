@@ -86,13 +86,13 @@ contains
 &         (abs(distance(iatcell,jatom,1)-distance(eatom,fatom,1)).lt.1.d-3)) then
             call tdep_SearchS_2at(InVar,iatcell,jatom,eatom,fatom,Isym2at,Sym,InVar%xred_ideal)
             if (Isym2at(eatom,fatom,2)==1) then
-              if (InVar%debug) write(InVar%stdout,'(a,x,4(i4,x),a,i4)') &
+              if (InVar%debug) write(InVar%stdout,'(a,1x,4(i4,1x),a,i4)') &
 &                'For:',iatcell,jatom,eatom,fatom,' direct transformation with isym=',Isym2at(eatom,fatom,1)
               ref2at(eatom,fatom,1)=iatcell
               ref2at(eatom,fatom,2)=jatom
               ref2at(eatom,fatom,3)=ishell
 !             The Phij_NN has to be symetric (transposition symetries)              
-              if (InVar%debug) write(InVar%stdout,'(a,x,4(i4,x),a,i4)') &
+              if (InVar%debug) write(InVar%stdout,'(a,1x,4(i4,1x),a,i4)') &
 &                'For:',iatcell,jatom,eatom,fatom,' transformation+permutation with isym=',Isym2at(eatom,fatom,1)
               ref2at(fatom,eatom,1)=iatcell
               ref2at(fatom,eatom,2)=jatom
@@ -100,7 +100,7 @@ contains
               Isym2at(fatom,eatom,1)=Isym2at(eatom,fatom,1)
               Isym2at(fatom,eatom,2)=2
             else  
-              if (InVar%debug) write(InVar%stdout,'(a,4(x,i4))') &
+              if (InVar%debug) write(InVar%stdout,'(a,4(1x,i4))') &
 &                'NO SYMETRY OPERATION BETWEEN (iatom,jatom) and (eatom,fatom)=',iatcell,jatom,eatom,fatom
             end if  
           end if !already treated
@@ -258,16 +258,16 @@ contains
                     ref3at(watom,xatom,yatom,4)=ishell
                     Isym3at(watom,xatom,yatom,1)=Isym3at(eatom,fatom,gatom,1)
                     Isym3at(watom,xatom,yatom,2)=ii
-                    if (InVar%debug.and.ii==1) write(InVar%stdout,'(a,x,6(i4,x),a,i4)') &
+                    if (InVar%debug.and.ii==1) write(InVar%stdout,'(a,1x,6(i4,1x),a,i4)') &
 &                      'For:',iatcell,jatom,katom,watom,xatom,yatom,' direct transformation with isym=', &
 &                       Isym3at(watom,xatom,yatom,1)
-                    if (InVar%debug.and.ii.gt.1) write(InVar%stdout,'(a,x,6(i4,x),a,i4)') &
+                    if (InVar%debug.and.ii.gt.1) write(InVar%stdout,'(a,1x,6(i4,1x),a,i4)') &
 &                      'For:',iatcell,jatom,katom,watom,xatom,yatom,' transformation+permutation with isym=',&
 &                       Isym3at(watom,xatom,yatom,1)
                   end do !ii 
                 else  
                   if (InVar%debug) then
-                    write(InVar%stdout,'(a,4(x,i4))') &
+                    write(InVar%stdout,'(a,4(1x,i4))') &
 &                     'NO SYMETRY OPERATION BETWEEN (iatom,jatom,katom) and (eatom,fatom,gatom)=',&
 &                    iatcell,jatom,katom,eatom,fatom,gatom
                   end if
