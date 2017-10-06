@@ -34,7 +34,7 @@
 !!  vxci(npts,nspden)=exchange-correlation potential
 !!
 !! PARENTS
-!!      rhohxc
+!!      rhotoxc
 !!
 !! CHILDREN
 !!      invcb

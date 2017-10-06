@@ -51,7 +51,7 @@
 !!      d3sym,ddb_hdr_free,ddb_hdr_init,ddb_hdr_open_write,dfptnl_doutput
 !!      dfptnl_loop,ebands_free,fourdp,getcut,getkgrid,getshell,hdr_free
 !!      hdr_init,hdr_update,initmv,inwffil,kpgio,mkcore,nlopt,pspini,read_rhor
-!!      rhohxc,setsym,setup1,status,symmetrize_xred,sytens,timab,wffclose
+!!      rhotoxc,setsym,setup1,status,symmetrize_xred,sytens,timab,wffclose
 !!      wrtout
 !!
 !! SOURCE
@@ -125,12 +125,12 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,&
 !Local variables-------------------------------
 !scalars
  integer,parameter :: level=50,response=1,cplex1=1
- integer :: ask_accurate,bantot,choice,dum_nshiftk,flag
- integer :: formeig,fullinit,gencond,gscase,i1dir,i1pert,i2dir,i2pert,i3dir
- integer :: i3pert,ierr,ireadwf,mcg,mkmem_max,mpert,n1,n2,n3,n3xccc,nblok
+ integer :: ask_accurate,bantot,dum_nshiftk,flag
+ integer :: formeig,gencond,gscase,i1dir,i1pert,i2dir,i2pert,i3dir
+ integer :: i3pert,ierr,ireadwf,mcg,mkmem_max,mpert,n1,n2,n3,n3xccc
  integer :: nkpt3,nkxc,nk3xc,nneigh,option,optorth,rdwrpaw,comm_cell
  real(dp) :: boxcut,ecore,ecut_eff,enxc,fermie,gsqcut,gsqcut_eff,gsqcut_eff2,gsqcutdg_eff
- real(dp) :: rdum,residm,tolwfr,ucvol,vxcavg
+ real(dp) :: rdum,residm,ucvol,vxcavg
  character(len=500) :: message
  character(len=fnlen) :: dscrpt
  type(ebands_t) :: bstruct
@@ -146,7 +146,7 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,&
  integer,allocatable :: indsym(:,:,:),irrzon(:,:,:),kg(:,:),kneigh(:,:),kg_neigh(:,:,:)
  integer,allocatable :: kptindex(:,:),npwarr(:),pwind(:,:,:),rfpert(:,:,:,:,:,:),symrec(:,:,:)
  real(dp) :: dum_shiftk(3,210),dummy2(6),gmet(3,3),gprimd(3,3),k0(3)
- real(dp) :: rmet(3,3),rprimd(3,3),strsxc(6),tsec(2)
+ real(dp) :: qphon(3),rmet(3,3),rprimd(3,3),strsxc(6),tsec(2)
  real(dp),allocatable :: amass(:),cg(:,:),d3cart(:,:,:,:,:,:,:)
  real(dp),allocatable :: d3lo(:,:,:,:,:,:,:),dum_kptns(:,:)
  real(dp),allocatable :: dum_wtk(:),dyfrx2(:,:,:),eigen(:),grxc(:,:),k3xc(:,:)
@@ -422,7 +422,10 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,&
    ABI_DEALLOCATE(dyfrx2)
  end if
 
-!Comput kxc (second- and third-order exchange-correlation kernel)
+ qphon(:)=zero
+ call hartre(1,gsqcut,psps%usepaw,mpi_enreg,nfft,dtset%ngfft,dtset%paral_kgb,qphon,rhog,rprimd,vhartr)
+
+!Compute kxc (second- and third-order exchange-correlation kernel)
  option=3
  nkxc=2*nspden-1 ! LDA
  if(dtset%xclevel==2.and.nspden==1) nkxc=7  ! non-polarized GGA
@@ -431,13 +434,13 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,&
  ABI_ALLOCATE(kxc,(nfft,nkxc))
  ABI_ALLOCATE(k3xc,(nfft,nk3xc))
 
- call status(0,dtfil%filstat,iexit,level,'call rhohxc   ')
+ call status(0,dtfil%filstat,iexit,level,'call rhotoxc   ')
  ABI_ALLOCATE(work,(0))
  call xcdata_init(dtset%intxc,dtset%ixc,&
 &    dtset%nelect,dtset%tphysel,dtset%usekden,dtset%vdw_xc,dtset%xc_tb09_c,dtset%xc_denpos,xcdata)
- call rhohxc(enxc,gsqcut,psps%usepaw,kxc,mpi_enreg,nfft,dtset%ngfft,&
-& work,0,work,0,nkxc,nk3xc,nspden,n3xccc,option,dtset%paral_kgb,rhog,rhor,rprimd,strsxc,1,&
-& vhartr,vxc,vxcavg,xccc3d,xcdata,k3xc=k3xc)
+ call rhotoxc(enxc,kxc,mpi_enreg,nfft,dtset%ngfft,&
+& work,0,work,0,nkxc,nk3xc,nspden,n3xccc,option,dtset%paral_kgb,rhor,rprimd,strsxc,1,&
+& vxc,vxcavg,xccc3d,xcdata,k3xc=k3xc,vhartr=vhartr)
  ABI_DEALLOCATE(work)
 
  ABI_DEALLOCATE(vhartr)

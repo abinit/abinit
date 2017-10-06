@@ -49,7 +49,7 @@
 !!
 !! PARENTS
 !!      bethe_salpeter,m_pawxc,mkcore_wvl,posdoppler,poslifetime,posratecore
-!!      psolver_rhohxc,rhohxc,rhohxcpositron,wvl_initro
+!!      psolver_rhohxc,rhotoxc,rhohxcpositron,wvl_initro
 !!
 !! CHILDREN
 !!

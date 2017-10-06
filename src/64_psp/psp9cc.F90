@@ -68,7 +68,7 @@ subroutine psp9cc(psxml,mmax,n1xccc,rad,rchrg,xccc1d)
 !scalars
  integer :: i1xccc,idum,irad,jj
  real(dp) :: amesh,c1,c2,c3,c4,damesh,dri,pi4i,tff,xp,xpm1,xpm2,xpp1,xx,twelvth
- character(len=500) :: message,errmsg
+ character(len=500) :: message
 !arrays
  integer :: iwork(8)
  real(dp) :: rscale(5),dpoly(6,6),vpoly(6)

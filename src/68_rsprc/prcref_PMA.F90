@@ -75,7 +75,7 @@
 !!  nfftprc=size of FFT grid on which the potential residual will be preconditionned
 !!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
 !!  ngfftprc(18)=contain all needed information about 3D FFT for the grid corresponding to nfftprc
-!!  nkxc=second dimension of the array kxc, see rhohxc.f for a description
+!!  nkxc=second dimension of the array kxc, see rhotoxc.f for a description
 !!  npawmix=-PAW only- number of spherical part elements to be mixed
 !!  npwdiel=number of planewaves for dielectric matrix
 !!  ntypat=number of types of atoms in cell.
@@ -122,7 +122,7 @@
 !! CHILDREN
 !!      atm2fft,dielmt,dieltcel,fourdp,fresid,getph,indirect_parallel_fourier
 !!      kgindex,mean_fftr,metric,mkcore,mklocl,moddiel,prcrskerker1
-!!      prcrskerker2,rhohxc,testsusmat,xcart2xred,xmpi_sum,zerosym
+!!      prcrskerker2,rhotoxc,testsusmat,xcart2xred,xmpi_sum,zerosym
 !!
 !! SOURCE
 
@@ -591,14 +591,17 @@
    ABI_ALLOCATE(vhartr_wk,(nfft))
    option=1
 
-!  to be adjusted for the call to rhohxc
+   qphon(:)=zero
+   call hartre(1,gsqcut,psps%usepaw,mpi_enreg,nfft,ngfft,dtset%paral_kgb,qphon,rhog_wk,rprimd,vhartr_wk)
+
+!  Prepare the call to rhotoxc
    call xcdata_init(dtset%intxc,dtset%ixc,&
 &    dtset%nelect,dtset%tphysel,dtset%usekden,dtset%vdw_xc,dtset%xc_tb09_c,dtset%xc_denpos,xcdata)
    nk3xc=1
    ABI_ALLOCATE(work,(0))
-   call rhohxc(enxc,gsqcut,psps%usepaw,kxc,mpi_enreg,nfft,ngfft,&
-&   work,0,work,0,nkxc,nk3xc,dtset%nspden,n3xccc,option,dtset%paral_kgb,rhog_wk,rhor_wk,rprimd,strsxc,1,&
-&   vhartr_wk,vxc_wk,vxcavg,xccc3d,xcdata)
+   call rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft,&
+&   work,0,work,0,nkxc,nk3xc,dtset%nspden,n3xccc,option,dtset%paral_kgb,rhor_wk,rprimd,strsxc,1,&
+&   vxc_wk,vxcavg,xccc3d,xcdata,vhartr=vhartr_wk)
    ABI_DEALLOCATE(work)
    ABI_DEALLOCATE(xccc3d)
 

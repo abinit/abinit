@@ -188,7 +188,7 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,&
  integer :: optatm,optdyfr,opteltfr,optgr,option,optn,optn2,optstr,optv,vloc_method
  real(dp) :: eei_dum,ucvol,ucvol_local,vol_element
  logical :: calc_epaw3_forces, efield_flag
- logical :: is_hybrid_ncpp,wvlbigdft=.false.
+ logical :: is_hybrid_ncpp
 !arrays
  integer :: qprtrb_dum(3)
  real(dp) :: dummy6(6),ep3(3),fioncart(3),gmet(3,3),gprimd(3,3) 

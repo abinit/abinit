@@ -240,9 +240,8 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  integer :: bantot,fform,collect,timrev
  integer :: accessfil,coordn
  integer :: ii,ierr,ifft,ikpt,ispden,isppol,itypat
- integer :: jfft
  integer :: me_fft,n1,n2,n3
- integer :: ifgd, iatom, iatom_, iatom_tot,nradint
+ integer :: ifgd, iatom, iatom_tot,nradint
  integer :: me,my_natom_tmp
  integer :: occopt
  integer :: prtnabla
