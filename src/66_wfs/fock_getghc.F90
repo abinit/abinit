@@ -89,7 +89,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
 ! Scalars
  integer,parameter :: tim_fourwf0=0,tim_fourdp0=0,ndat1=1
  integer :: bdtot_jindex,choice,cplex_fock,cplex_dij,cpopt,i1,i2,i3,ia,iatom
- integer :: iband_cprj,ider,idir,idir1,ier,ilmn,ind,ipert,ipw,ifft,ispinor,itypat,izero,jband,jbg,jcg,jkg
+ integer :: iband_cprj,ider,idir,idir1,ier,ind,ipert,ipw,ifft,itypat,izero,jband,jbg,jcg,jkg
  integer :: jkpt,my_jsppol,jstwfk,lmn2_size,mgfftf,mpw,n1,n2,n3,n4,n5,n6
  integer :: n1f,n2f,n3f,n4f,n5f,n6f,natom,nband_k,ndij,nfft,nfftf,nfftotf,nhat12_grdim,nnlout
  integer :: npw,npwj,nspden_fock,nspinor,paw_opt,signs,tim_nonlop
@@ -103,7 +103,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
  integer,pointer :: gboundf(:,:),kg_occ(:,:),gbound_kp(:,:)
  real(dp) :: enlout_dum(1),dotr(6),fockstr(6),for1(3),qphon(3),qvec_j(3),tsec(2),gsc_dum(2,0),rhodum(2,1)
  real(dp) :: rhodum0(0,1,1),str(3,3)
- real(dp), allocatable :: dummytab(:,:),dijhat(:,:,:),dijhat_tmp(:,:),dijhat_tmp1(:,:,:),ffnl_kp_dum(:,:,:,:)
+ real(dp), allocatable :: dummytab(:,:),dijhat(:,:,:),dijhat_tmp(:,:),ffnl_kp_dum(:,:,:,:)
  real(dp), allocatable :: gvnlc(:,:),ghc1(:,:),ghc2(:,:),grnhat12(:,:,:,:),grnhat_12(:,:,:,:,:),forikpt(:,:)
  real(dp), allocatable :: rho12(:,:,:),rhog_munu(:,:),rhor_munu(:,:),vlocpsi_r(:)
  real(dp), allocatable :: vfock(:),psilocal(:,:,:),vectin_dum(:,:),vqg(:),forout(:,:),strout(:,:)
@@ -111,11 +111,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
  real(dp), ABI_CONTIGUOUS  pointer :: cwaveocc_r(:,:,:,:)
  type(pawcprj_type),pointer :: cwaveocc_prj(:,:)
 
-integer :: optgr, optgr2,optstr,optstr2,dumint(0)
-real(dp) :: dummy(0),nhat_dum(0,0),rprimd(3,3),for11(3),for12(3),eigen1,nlstr(6),ener,ener1,ener2
- real(dp), allocatable ::grnl(:),vxc(:,:), vtrial(:,:)
-type(pseudopotential_type) :: psps
- type(pawrhoij_type),allocatable  ::  pawrhoij(:)
+ real(dp) :: dummy(0),rprimd(3,3),for12(3)
 
 ! *************************************************************************
 !return

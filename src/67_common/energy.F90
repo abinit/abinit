@@ -329,7 +329,7 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
    if (dtset%icoulomb == 0) then
 !    Use the periodic solver to compute Hxc.
      qphon(:)=zero
-     call hartre(1,gsqcut,psps%usepaw,mpi_enreg,nfftf,ngfftf,paral_kgb,qphon,rhog,rprimd,vhartr)
+     call hartre(1,gsqcut,psps%usepaw,mpi_enreg,nfftf,ngfftf,dtset%paral_kgb,qphon,rhog,rprimd,vhartr)
      call xcdata_init(dtset%intxc,dtset%ixc,&
 &      dtset%nelect,dtset%tphysel,dtset%usekden,dtset%vdw_xc,dtset%xc_tb09_c,dtset%xc_denpos,xcdata)
      ABI_ALLOCATE(kxc,(1,nkxc))

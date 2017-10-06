@@ -195,13 +195,13 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  integer,parameter :: formeig=0,level=10
  integer,parameter :: response=1,syuse=0,master=0,cplex1=1
  integer :: nk3xc
- integer :: analyt,ask_accurate,band_index,bantot,bdeigrf,choice,coredens_method,cplex
- integer :: dim_eig2nkq,dim_eigbrd,dyfr_cplex,dyfr_nondiag,fullinit,gnt_option
+ integer :: analyt,ask_accurate,band_index,bantot,bdeigrf,coredens_method,cplex
+ integer :: dim_eig2nkq,dim_eigbrd,dyfr_cplex,dyfr_nondiag,gnt_option
  integer :: gscase,has_dijnd,has_kxc,iatom,iatom_tot,iband,idir,ider,ierr,ifft,ii,ikpt,indx
  integer :: i1dir,i1pert,i2dir,i2pert,i3dir,i3pert
  integer :: initialized,ipert,ipert2,ireadwf0,iscf,iscf_eff,ispden,isppol
  integer :: itypat,izero,mcg,me,mgfftf,mk1mem,mkqmem,mpert,mu
- integer :: my_natom,n1,natom,n3xccc,nband_k,nblok,nfftf,nfftot,nfftotf,nhatdim,nhatgrdim
+ integer :: my_natom,n1,natom,n3xccc,nband_k,nfftf,nfftot,nfftotf,nhatdim,nhatgrdim
  integer :: nkpt_eff,nkpt_max,nkpt_rbz,nkxc,nkxc1,nspden_rhoij,ntypat,nzlmopt,openexit
  integer :: optcut,option,optgr0,optgr1,optgr2,optorth,optrad
  integer :: optatm,optdyfr,opteltfr,optgr,optn,optn2,optstr,optv
@@ -213,7 +213,6 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  real(dp) :: boxcut,compch_fft,compch_sph,cpus,ecore,ecut_eff,ecutdg_eff,ecutf
  real(dp) :: eei,eew,ehart,eii,ek,enl,entropy,enxc
  real(dp) :: epaw,epawdc,etot,evdw,fermie,gsqcut,gsqcut_eff,gsqcutc_eff,qphnrm,residm
- real(dp) :: tolwfr
  real(dp) :: ucvol,vxcavg
  character(len=fnlen) :: dscrpt
  character(len=fnlen) :: filename
@@ -847,8 +846,9 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
    ABI_DEALLOCATE(vxc) ! dummy
  end if
 
-!Set up hartree and xc potential. Compute kxc here.
+ ABI_ALLOCATE(vhartr,(nfftf))
 
+!Set up hartree and xc potential. Compute kxc here.
  qphon(:)=zero
  call hartre(1,gsqcut,psps%usepaw,mpi_enreg,nfftf,ngfftf,dtset%paral_kgb,qphon,rhog,rprimd,vhartr)
 
@@ -856,7 +856,6 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  nkxc=2*min(dtset%nspden,2)-1;if(dtset%xclevel==2)nkxc=12*min(dtset%nspden,2)-5
  call check_kxc(dtset%ixc,dtset%optdriver)
  ABI_ALLOCATE(kxc,(nfftf,nkxc))
- ABI_ALLOCATE(vhartr,(nfftf))
  ABI_ALLOCATE(vxc,(nfftf,dtset%nspden))
 
  _IBM6("Before rhotoxc")

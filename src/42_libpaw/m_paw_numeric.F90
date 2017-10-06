@@ -173,7 +173,7 @@ implicit none
 
  do i=1,n-1
    if (t(i)>=t(i+1)) then
-   write(msg,'(6a,i8,a,es18.12,2a,i8,a,es18.12)') ch10, &
+   write(msg,'(6a,i8,a,es19.12,2a,i8,a,es19.12)') ch10, &
 &   'SPLINE_CUBIC_SET - Fatal error!',ch10, &
 &   '  The knots must be strictly increasing, but',ch10, &
 &   '  T(',  i,') = ', t(i), ch10, &

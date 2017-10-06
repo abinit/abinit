@@ -69,6 +69,7 @@ subroutine hartre(cplex,gsqcut,izero,mpi_enreg,nfft,ngfft,paral_kgb,qphon,rhog,r
 #undef ABI_FUNC
 #define ABI_FUNC 'hartre'
  use interfaces_18_timing
+ use interfaces_41_geometry
  use interfaces_53_ffts
 !End of the abilint section
 

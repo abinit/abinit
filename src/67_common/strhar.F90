@@ -62,6 +62,7 @@ subroutine strhar(ehart,gsqcut,harstr,mpi_enreg,nfft,ngfft,rhog,rprimd,&
 #undef ABI_FUNC
 #define ABI_FUNC 'strhar'
  use interfaces_18_timing
+ use interfaces_41_geometry
 !End of the abilint section
 
  implicit none
@@ -83,7 +84,7 @@ subroutine strhar(ehart,gsqcut,harstr,mpi_enreg,nfft,ngfft,rhog,rprimd,&
  integer :: i1,i2,i3,id1,id2,id3,ierr,ig1,ig2,ig3,ii,irho2,me_fft,n1,n2,n3,nproc_fft
  real(dp) :: cutoff,gsquar,rhogsq,tolfix=1.000000001_dp,ucvol
 !arrays
- real(dp) :: gcart(3),gmet(3,3),gprimd(3,3)rmet(3,3),tsec(2)
+ real(dp) :: gcart(3),gmet(3,3),gprimd(3,3),rmet(3,3),tsec(2)
  integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:)
  integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
 

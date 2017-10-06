@@ -84,14 +84,12 @@ subroutine mblktyp5 (chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
  integer :: mband,mblktyp,mblok,mkpt,mpert,msize,mtypat
  integer :: nblok,nblokt
  integer :: temp,tmerge,usepaw
- integer :: ngfft(18),ngfft8(18)
- integer,allocatable :: lloc(:),mgblok(:)
+ integer,allocatable :: mgblok(:)
  real(dp),parameter :: qtol=2.0d-8
  real(dp) :: diff
  type(ddb_type) :: ddb
  type(ddb_hdr_type) :: ddb_hdr, ddb_hdr8
 !arrays
- real(dp) :: acell(3),acell8(3),rprim(3,3),rprim8(3,3)
  real(dp),allocatable :: blkval2(:,:,:,:),kpnt(:,:,:)
  character(len=500) :: message
 
