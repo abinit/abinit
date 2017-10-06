@@ -284,7 +284,6 @@ subroutine exc_diago_resonant(Bsp,BS_files,Hdr_bse,prtvol,comm,Epren,Kmesh,Cryst
  type(processor_scalapack) :: Slk_processor
 #endif
 
- logical :: found_kpt
  integer :: ik, ic, iv, isppol, ireh, ep_ik, itemp
  complex(dpc) :: en
 

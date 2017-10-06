@@ -309,7 +309,7 @@ subroutine effective_potential_file_read(filename,eff_pot,inp,comm,hist)
 !     Transfert the ddb to the effective potential
       call system_ddb2effpot(Crystal,ddb, eff_pot,inp,comm)
 
-!     Generate long rage interation for the effective potential for both type and generate suppercell
+!     Generate long rage interation for the effective potential for both type and generate supercell
       call effective_potential_generateDipDip(eff_pot,inp%dipdip_range,inp%dipdip,inp%asr,comm)
 
 !     If needed, print the effective potential into the output
@@ -323,6 +323,7 @@ subroutine effective_potential_file_read(filename,eff_pot,inp,comm,hist)
       call effective_potential_free(eff_pot)
       
       call system_xml2effpot(eff_pot,filename,comm,strcpling=inp%strcpling)
+
 
 !     Assign the energy of the reference from input
       if(inp%energy_reference/=zero)then
@@ -340,7 +341,7 @@ subroutine effective_potential_file_read(filename,eff_pot,inp,comm,hist)
       if(any(inp%strten_reference==zero))then
         write(message,'(9a)') ch10,&
 &      ' --- !WARNING',ch10,&
-&      '     The stress tensor of the reference structure is no specify in ',ch10,&
+&      '     The stress tensor of the reference structure is not specify in ',ch10,&
 &      '     the input file. The stress tensor is set to zero',ch10,&
 &      ' ---',ch10
         call wrtout(std_out,message,'COLL')
@@ -348,7 +349,7 @@ subroutine effective_potential_file_read(filename,eff_pot,inp,comm,hist)
         eff_pot%strten = inp%strten_reference
       end if
 
-!     Generate long rage interation for the effective potential for both type and generate suppercell
+!     Generate long rage interation for the effective potential for both type and generate supercell
       call effective_potential_generateDipDip(eff_pot,inp%dipdip_range,inp%dipdip,inp%asr,comm)
 
 !     If needed, print the effective potential
@@ -361,7 +362,7 @@ subroutine effective_potential_file_read(filename,eff_pot,inp,comm,hist)
       call wrtout(std_out,message,'COLL')
       call wrtout(ab_out,message,'COLL')
 
-      if(eff_pot%anharmonics_terms%ncoeff/=zero)then
+      if(eff_pot%anharmonics_terms%ncoeff/=0)then
         write(message,'(9a)') ch10,&
 &      ' --- !WARNING',ch10,&
 &      '     There is already fitted polynome set in the model',ch10,&
@@ -373,7 +374,7 @@ subroutine effective_potential_file_read(filename,eff_pot,inp,comm,hist)
       call coeffs_xml2effpot(eff_pot,filename,comm)
 
 !     Assign the coeff number from input
-      if(inp%ncoeff==zero)then
+      if(inp%ncoeff==0)then
         write(message,'(12a)') ch10,&
 &      ' --- !WARNING',ch10,&
 &      '     The values of the coefficients are set to 0',&
@@ -389,7 +390,7 @@ subroutine effective_potential_file_read(filename,eff_pot,inp,comm,hist)
 &          ' --- !WARNING',ch10,&
 &          '     The input for the fit process is set to 0 or -1',&
 &          ' in the input file.',ch10,&
-&          '     Howerver, the values of the coefficients in the XMF files are zero,',ch10,&
+&          '     However, the values of the coefficients in the XMF files are zero,',ch10,&
 &          '     So the coefficients can not be used',ch10,&
 &          ' ---',ch10
           call wrtout(std_out,message,'COLL')
@@ -565,7 +566,7 @@ subroutine effective_potential_file_getType(filename,filetype)
 
 !Try to get the dim of MD ASCII file
  call effective_potential_file_getDimMD(filename,natom,nstep)
- if(natom /= zero .and. nstep/=0) filetype = 41
+ if(natom /= 0 .and. nstep/=0) filetype = 41
 
 end subroutine effective_potential_file_getType
 !!***
@@ -766,9 +767,9 @@ subroutine effective_potential_file_getDimCoeff(filename,ncoeff,ndisp_max,nterm_
 &                         trim(filename)
    call wrtout(std_out,message,'COLL')
 
-   ncoeff = zero
-   nterm_max = zero
-   ndisp_max = zero
+   ncoeff = 0
+   nterm_max = 0
+   ndisp_max = 0
 
 #if defined HAVE_LIBXML
 !  Read with libxml the number of coefficient
@@ -777,7 +778,7 @@ subroutine effective_potential_file_getDimCoeff(filename,ncoeff,ndisp_max,nterm_
 !  Read by hand
 !  Start a reading loop
    found=.false.
-   ncoeff = zero
+   ncoeff = 0
 
    if (open_file(filename,message,unit=funit,form="formatted",status="old",&
 &                action="read") /= 0) then
@@ -795,7 +796,7 @@ subroutine effective_potential_file_getDimCoeff(filename,ncoeff,ndisp_max,nterm_
 !      from old script includes tarbulation at the begining of each line
        if (line(1:12)==char(60)//'coefficient') then
          ncoeff=ncoeff+1
-         count = zero
+         count = 0
          found = .false.
          do while(.not.found)
            read(funit,'(a)',iostat=ios) readline
@@ -804,7 +805,7 @@ subroutine effective_potential_file_getDimCoeff(filename,ncoeff,ndisp_max,nterm_
            if (line(1:5)==char(60)//'term') then
              count = count +1
              found2 = .false.
-             count2 = zero
+             count2 = 0
              do while(.not.found2)
                read(funit,'(a)',iostat=ios) readline
                call rmtabfromline(readline)
@@ -907,7 +908,7 @@ subroutine effective_potential_file_getDimStrainCoupling(filename,nrpt,voigt)
 
 ! *************************************************************************
 
-   nrpt = zero
+   nrpt = 0
 
 #if defined HAVE_LIBXML
 !  Read with libxml the number of coefficient
@@ -1053,15 +1054,15 @@ subroutine effective_potential_file_getDimMD(filename,natom,nstep)
 
 !  Start a reading loop in fortran to get the dimension of the file
    rewind(unit=unit_md)
-   ios = zero
-   nstep   = zero
-   nenergy = zero
+   ios = 0
+   nstep   = 0
+   nenergy = 0
    compatible = .TRUE.
 
    do while ((ios==0))
 !    special treatment of the first step
      if(nstep==0)then
-       ios2 = zero
+       ios2 = 0
        do while ((ios2==0))
          read(unit_md,'(a)',iostat=ios) readline
          line=adjustl(readline)
@@ -1078,13 +1079,13 @@ subroutine effective_potential_file_getDimMD(filename,natom,nstep)
        call elementfromline(line,ia)
        if (ia==1)then
          nenergy = nenergy + 1
-         nrprimd = zero
+         nrprimd = 0
        else if(ia==3)then
          nrprimd = nrprimd + 1
        end if
        if(nrprimd == 3)then
-         ios3 = zero
-         natm_new = zero
+         ios3 = 0
+         natm_new = 0
          do while ((ios3==0))        
            read(unit_md,'(a)',iostat=ios3) readline
            if(ios3==0)then
@@ -1111,12 +1112,12 @@ subroutine effective_potential_file_getDimMD(filename,natom,nstep)
    
    natom = natm_new - 1
    if(nstep /= nenergy) compatible = .FALSE.
-   if(natom <= zero) compatible = .FALSE.
-   if(nstep <= zero) compatible = .FALSE.
+   if(natom <= 0) compatible = .FALSE.
+   if(nstep <= 0) compatible = .FALSE.
 
    if(.not.compatible)then
-     natom = zero
-     nstep = zero
+     natom = 0
+     nstep = 0
    end if
  end if! end if not netcdf
 
@@ -1190,13 +1191,13 @@ subroutine system_getDimFromXML(filename,natom,ntypat,nph1l,nrpt)
 
  call wrtout(std_out,message,'COLL')
 
- natom = zero
- ntypat= zero
- nph1l = zero
- nrpt  = zero
- nrpt1 = zero
- nrpt2 = zero
- itypat= zero
+ natom = 0
+ ntypat= 0
+ nph1l = 0
+ nrpt  = 0
+ nrpt1 = 0
+ nrpt2 = 0
+ itypat= 0
 
 !Open the atomicdata XML file for reading
 
@@ -1247,7 +1248,7 @@ subroutine system_getDimFromXML(filename,natom,ntypat,nph1l,nrpt)
 
 !second parse to get the number of typat
  ABI_ALLOCATE(typat,(natom))
- typat = zero
+ typat = 0
  iatom = 0
 
  rewind(funit)
@@ -1285,9 +1286,9 @@ subroutine system_getDimFromXML(filename,natom,ntypat,nph1l,nrpt)
 
 !Check the RPT
  if (nrpt2/=nrpt1) then
-   if(nrpt1> zero .and. nrpt2== zero) then
+   if(nrpt1> 0 .and. nrpt2==0 ) then
      continue;
-   else if (nrpt1==zero.and.nrpt2>=0) then
+   else if (nrpt1==0.and.nrpt2>=0) then
      write(message, '(5a)' )ch10,&
 &   ' WARNING: the number of local IFC is set to 0  ',ch10,&
 &   '          Dipdip must be set to zero',ch10
@@ -1421,7 +1422,7 @@ end subroutine system_getDimFromXML
 !Get Dimention of system and allocation/initialisation of array
  call effective_potential_file_getDimSystem(filename,natom,ntypat,nph1l,nrpt,0)
  gmet= zero; gprimd = zero; rmet = zero; rprimd = zero
- elastic_constants = zero; epsilon_inf = zero; ncoeff = zero
+ elastic_constants = zero; epsilon_inf = zero; ncoeff = 0
  ABI_ALLOCATE(all_amu,(ntypat))
  ABI_ALLOCATE(cell_local,(3,nrpt))
  ABI_ALLOCATE(cell_total,(3,nrpt))
@@ -1444,7 +1445,7 @@ end subroutine system_getDimFromXML
  ABI_ALLOCATE(znucl,(ntypat))
 
  ABI_DATATYPE_ALLOCATE(phonon_strain,(6))
- nrpt_scoupling = zero
+ nrpt_scoupling = 0
  do ii = 1,6
 !  Get The size of the strainPhonon-coupling
    call effective_potential_file_getDimStrainCoupling(filename,nrpt_scoupling,ii-1)
@@ -1452,7 +1453,7 @@ end subroutine system_getDimFromXML
    ABI_ALLOCATE(phonon_strain(ii)%cell,(3,nrpt_scoupling))
    phonon_strain(ii)%nrpt   = nrpt_scoupling
    phonon_strain(ii)%atmfrc = zero
-   phonon_strain(ii)%cell   = zero
+   phonon_strain(ii)%cell   = 0
  end do
 
  all_amu(:) = zero
@@ -1463,7 +1464,7 @@ end subroutine system_getDimFromXML
  elastic_displacement(:,:,:,:) = zero
  ifcs%nrpt = nrpt
  ifcs%atmfrc(:,:,:,:,:,:)  = zero
- ifcs%cell(:,:)  = zero
+ ifcs%cell(:,:)  = 0
  ifcs%ewald_atmfrc(:,:,:,:,:,:) = zero
  ifcs%short_atmfrc(:,:,:,:,:,:) = zero
  strain_coupling(:,:,:) = zero
@@ -1544,8 +1545,8 @@ end subroutine system_getDimFromXML
    iamu   = 1
    itypat = 1
    irpt   = 1
-   irpt1  = zero
-   irpt2  = zero
+   irpt1  = 0
+   irpt2  = 0
    iph1l  = 1
    amu    = zero
    short_range  = .false.
@@ -2115,7 +2116,7 @@ end subroutine system_getDimFromXML
    end if
   
 !  Do some checks
-   if (any(typat==zero)) then
+   if (any(typat==0)) then
      write(message, '(a,a,a)' )&
 &      ' Unable to read the type of atoms ',trim(filename),ch10
      MSG_ERROR(message)
@@ -2181,10 +2182,10 @@ end subroutine system_getDimFromXML
  ABI_ALLOCATE(tnons,(3,msym))
  use_inversion=1
  spinat = zero;
- symrel = zero;
- symafm = zero;
+ symrel = 0;
+ symafm = 0;
  tnons = zero ; 
- space_group = zero;
+ space_group = 0;
  call symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tolsym)
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
  call symfind(0,(/zero,zero,zero/),gprimd,0,msym,natom,0,nptsym,nsym,&
@@ -2251,7 +2252,7 @@ end subroutine system_getDimFromXML
  do ii = 1,6
    phonon_strain(ii)%nrpt   = nrpt
    phonon_strain(ii)%atmfrc = zero
-   phonon_strain(ii)%cell   = zero
+   phonon_strain(ii)%cell   = 0
    ABI_DEALLOCATE(phonon_strain(ii)%atmfrc)
    ABI_DEALLOCATE(phonon_strain(ii)%cell)
  end do
@@ -3015,20 +3016,20 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
  iam_master = (my_rank == master)
 
 !Get Dimention of system and allocation/initialisation of array
- ncoeff = zero
- nterm  = zero
- ndisp  = zero
+ ncoeff = 0
+ nterm  = 0
+ ndisp  = 0
 
  call effective_potential_file_getDimCoeff(filename,ncoeff,ndisp_max,nterm_max)
 
 !  Do some checks
- if (nterm_max<=zero) then
+ if (nterm_max<=0) then
    write(message, '(a,a,a)' )&
 &     ' Unable to read the number of terms in ',trim(filename),ch10
    MSG_ERROR(message)
  end if
 
-  if (ndisp_max<=zero) then
+  if (ndisp_max<=0) then
     write(message, '(a,a,a)' )&
 &    ' Unable to read the number of displacement in ',trim(filename),ch10
     MSG_ERROR(message)
@@ -3089,7 +3090,7 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
 !    Try to find the index of the term corresponding to the interation in the 
 !    reference cell (000) in order to compute the name correctly...
 !    If this coeff is not in the ref cell, take by default the first term
-     if(coeffs(icoeff)%nterm > zero)then
+     if(coeffs(icoeff)%nterm > 0)then
        call polynomial_coeff_getName(name,eff_pot%crystal%natom,coeffs(icoeff),&
 &                                    symbols,recompute=.true.)
        call polynomial_coeff_setName(name,coeffs(icoeff))
@@ -3118,11 +3119,11 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
 
 !    Start a reading loop in fortran
      rewind(unit=funit)
-     ios  = zero
+     ios  = 0
      found=.false.
 
 !    Initialisation of counter
-     icoeff  = zero
+     icoeff  = 0
 
 !    Parser
      do while (ios==0)
@@ -3146,13 +3147,13 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
 !          End read headers of coefficient
 !          Reset counter
            found  = .false.
-           atindx = zero
-           cell   = zero
-           direction = zero
-           power  = zero           
-           iterm  = zero
-           idisp  = zero  
-           nterm  = zero
+           atindx = 0
+           cell   = 0
+           direction = 0
+           power  = 0
+           iterm  = 0
+           idisp  = 0
+           nterm  = 0
            do while (.not.found)
              read(funit,'(a)',iostat=ios) readline
              call rmtabfromline(readline)
@@ -3163,8 +3164,8 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
              end if
              if ((line(1:5)==char(60)//'term')) then
                nterm = nterm + 1
-               ndisp = zero
-               idisp = zero
+               ndisp = 0
+               idisp = 0
                displacement = .true.
                call rdfromline('weight',line,strg)
                if (strg/="") then
@@ -3578,7 +3579,7 @@ subroutine elementfromline(line,nelement)
 ! *********************************************************************
 
 !Set the output
- nelement = zero
+ nelement = 0
  n = len_trim(line)
  element = .false.
  do ii=1,n

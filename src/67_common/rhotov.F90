@@ -31,12 +31,12 @@
 !!  nhat(nfft,nspden*usepaw)= -PAW only- compensation density
 !!  nhatgr(nfft,nspden,3*nhatgrdim)= -PAW only- cartesian gradients of compensation density
 !!  nhatgrdim= -PAW only- 0 if nhatgr array is not used ; 1 otherwise
-!!  nkxc=second dimension of the array kxc, see rhohxc.F90 for a description
+!!  nkxc=second dimension of the array kxc, see rhotoxc.F90 for a description
 !!  n3xccc=dimension of the xccc3d array (0 or nfft).
 !!  optene=option for the computation of additional energies
 !!  optres=0: the trial potential residual is computed ; the input potential value is kept
 !!         1: the new value of the trial potential is computed in place of the input value
-!!  optxc=option to be used for the call to rhohxc
+!!  optxc=option to be used for the call to rhotoxc
 !!  rhog(2,nfft)=array for Fourier transform of electron density
 !!  rhor(nfft,nspden)=array for electron density in electrons/bohr**3.
 !!   | definition for spin components:
@@ -97,7 +97,7 @@
 !!      scfcv
 !!
 !! CHILDREN
-!!      dotprod_vn,mag_constr,mean_fftr,psolver_rhohxc,rhohxc,rhohxcpositron
+!!      dotprod_vn,mag_constr,mean_fftr,psolver_rhohxc,rhotoxc,rhohxcpositron
 !!      sqnorm_v,timab,wvl_psitohpsi,wvl_vtrial_abi2big,xchybrid_ncpp_cc
 !!      xred2xcart
 !!
@@ -180,7 +180,7 @@ subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
  logical :: is_hybrid_ncpp,wvlbigdft=.false.
  type(xcdata_type) :: xcdata
 !arrays
- real(dp) :: evxc,tsec(2),vmean(dtset%nspden),vzeeman(dtset%nspden)
+ real(dp) :: evxc,qphon(3),tsec(2),vmean(dtset%nspden),vzeeman(dtset%nspden)
  real(dp),allocatable :: rhowk(:,:),Vmagconstr(:,:),vnew(:,:),xcart(:,:)
 
 ! *********************************************************************
@@ -221,6 +221,8 @@ subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
  if (ipositron/=1) then
 !  Compute xc potential (separate up and down if spin-polarized)
    if (dtset%icoulomb == 0 .and. dtset%usewvl == 0) then
+     qphon(:)=zero
+     call hartre(1,gsqcut,usepaw,mpi_enreg,nfft,ngfft,dtset%paral_kgb,qphon,rhog,rprimd,vhartr)
      call xcdata_init(dtset%intxc,dtset%ixc,&
 &     dtset%nelect,dtset%tphysel,dtset%usekden,dtset%vdw_xc,dtset%xc_tb09_c,dtset%xc_denpos,xcdata)
 
@@ -230,15 +232,15 @@ subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
 !xccc3d=zero
      call timab(941,1,tsec)
      if (ipositron==0) then
-       call rhohxc(energies%e_xc,gsqcut,usepaw,kxc,mpi_enreg,nfft,ngfft,&
-&       nhat,usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,dtset%nspden,n3xccc,optxc,dtset%paral_kgb,rhog,&
-&       rhor,rprimd,strsxc,usexcnhat,vhartr,vxc,vxcavg,xccc3d,xcdata,&
-&       taug=taug,taur=taur,vxctau=vxctau,add_tfw=add_tfw_)
+       call rhotoxc(energies%e_xc,kxc,mpi_enreg,nfft,ngfft,&
+&       nhat,usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,dtset%nspden,n3xccc,optxc,dtset%paral_kgb,&
+&       rhor,rprimd,strsxc,usexcnhat,vxc,vxcavg,xccc3d,xcdata,&
+&       taug=taug,taur=taur,vhartr=vhartr,vxctau=vxctau,add_tfw=add_tfw_)
      else
-       call rhohxc(energies%e_xc,gsqcut,usepaw,kxc,mpi_enreg,nfft,ngfft,&
-&       nhat,usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,dtset%nspden,n3xccc,optxc,dtset%paral_kgb,rhog,&
-&       rhor,rprimd,strsxc,usexcnhat,vhartr,vxc,vxcavg,xccc3d,xcdata,&
-&       taug=taug,taur=taur,vxctau=vxctau,add_tfw=add_tfw_,&
+       call rhotoxc(energies%e_xc,kxc,mpi_enreg,nfft,ngfft,&
+&       nhat,usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,dtset%nspden,n3xccc,optxc,dtset%paral_kgb,&
+&       rhor,rprimd,strsxc,usexcnhat,vxc,vxcavg,xccc3d,xcdata,&
+&       taug=taug,taur=taur,vhartr=vhartr,vxctau=vxctau,add_tfw=add_tfw_,&
 &       electronpositron=electronpositron)
      end if
 !write(80,*) vxc

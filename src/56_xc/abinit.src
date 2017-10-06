@@ -32,8 +32,8 @@ sources = [
 "m_xc_vdw.F90",
 "mkcore.F90",
 "phase.F90",
-"rhohxc.F90",
 "rhohxcpositron.F90",
+"rhotoxc.F90",
 "xcpot.F90",
 "xcden.F90",
 "xchybrid_ncpp_cc.F90"

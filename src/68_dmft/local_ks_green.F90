@@ -72,7 +72,7 @@ subroutine local_ks_green(green,paw_dmft,prtopt)
  character(len=1) :: tag_is
  character(len=fnlen) :: tmpfil
  integer,allocatable :: unitgreenlocks_arr(:)
- real(dp) :: beta,tsec(2)
+ real(dp) :: beta
  real(dp), allocatable :: tau(:)
  complex(dpc), allocatable :: loc_ks(:,:,:)
  complex(dpc), allocatable :: loc_ks_tau(:,:,:),fw(:),ft(:)

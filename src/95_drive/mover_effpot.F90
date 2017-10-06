@@ -99,10 +99,10 @@ implicit none
 !Local variables-------------------------------
 !scalar
  integer :: icoeff_bound,ii,jj,kk,nproc,ncoeff,nmodels,ncoeff_bound,ncoeff_max
- integer :: model_bound,model_ncoeffbound,my_rank,option_fit = zero
+ integer :: model_bound,model_ncoeffbound,my_rank,option_fit=0
  real(dp):: cutoff,freq_q,freq_b,qmass,bmass
  logical :: iam_master
- integer, parameter:: master = 0
+ integer, parameter:: master=0
  logical :: verbose,writeHIST
 !TEST_AM
 ! integer :: ia,mu,rand_seed = 5
@@ -232,10 +232,10 @@ implicit none
 
 !array
    ABI_ALLOCATE(dtset%iatfix,(3,dtset%natom)) ! Indices of AToms that are FIXed
-   dtset%iatfix = zero
+   dtset%iatfix = 0
    dtset%goprecprm(:) = zero !Geometry Optimization PREconditioner PaRaMeters equations
    ABI_ALLOCATE(dtset%prtatlist,(dtset%natom)) !PRinT by ATom LIST of ATom
-   dtset%prtatlist(:) = zero
+   dtset%prtatlist(:) = 0
 
    if(option_fit==0)then
      verbose = .TRUE.
@@ -314,7 +314,7 @@ implicit none
    end if
    
    ABI_ALLOCATE(symrel,(3,3,dtset%nsym))
-   symrel = one
+   symrel = 1
    call alloc_copy(symrel,dtset%symrel)
    ABI_ALLOCATE(tnons,(3,dtset%nsym))
    tnons = zero
@@ -332,7 +332,7 @@ implicit none
    zero_integer = 0
    scfcv_args%dtset     => dtset
    ABI_ALLOCATE(indsym,(4,dtset%nsym,dtset%natom))
-   indsym = zero
+   indsym = 0
    scfcv_args%indsym => indsym
    scfcv_args%mpi_enreg => mpi_enreg
    scfcv_args%ndtpawuj  => zero_integer
@@ -469,13 +469,13 @@ implicit none
        
        ncoeff_max = ncoeff+ncoeff_bound              
        ABI_ALLOCATE(listcoeff,(ncoeff_max))
-       listcoeff = zero
+       listcoeff = 0
        do jj=1,ncoeff
          listcoeff(jj) = jj
        end do
 
-       model_bound = zero
-       model_ncoeffbound = zero
+       model_bound = 0
+       model_ncoeffbound = 0
        
        do ii=3,inp%fit_boundTerm
 !       Compute the number of possible combination         
@@ -490,12 +490,12 @@ implicit none
          ABI_ALLOCATE(list_bound,(nmodels,ii))
          ABI_ALLOCATE(list_tmp,(ii))
          ABI_ALLOCATE(isPositive,(nmodels))
-         list_bound = zero
-         listcoeff_bound = zero
-         list_tmp = zero
-         isPositive = zero
-         kk = one
-         jj = one
+         list_bound = 0
+         listcoeff_bound = 0
+         list_tmp = 0
+         isPositive = 0
+         kk = 1
+         jj = 1
          
 !       Generate the list of possible combinaison
          call genereList(kk,jj,ii,ncoeff_bound,list_tmp,list_bound,nmodels)
@@ -510,7 +510,7 @@ implicit none
          call fit_polynomial_coeff_getPositive(effective_potential,hist,coeff_values,&
 &         isPositive,listcoeff_bound,ncoeff+ii,&
 &         ncoeff,nmodels,comm,verbose=.false.)
-         if(all(isPositive == zero)) then
+         if(all(isPositive == 0)) then
            write(message, '(5a,I0,a)')ch10,'--',ch10,' No possible model ',&
 &           'with ', ii,' additional terms found'
            call wrtout(std_out,message,'COLL')
@@ -632,8 +632,8 @@ implicit none
          write(message, '(3a)' ) ch10,' => The model cannot be bounded'
          call wrtout(ab_out,message,'COLL')
          call wrtout(std_out,message,'COLL')
-         model_ncoeffbound = zero
-         model_bound = zero
+         model_ncoeffbound = 0
+         model_bound = 0
        end if
        
 !     Fit the final model

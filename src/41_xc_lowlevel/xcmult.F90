@@ -51,7 +51,7 @@
 !!    described above.
 !!
 !! PARENTS
-!!      m_pawxc,rhohxc
+!!      m_pawxc,rhotoxc
 !!
 !! CHILDREN
 !!

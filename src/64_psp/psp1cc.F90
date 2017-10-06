@@ -85,7 +85,7 @@ subroutine psp1cc(fchrg,n1xccc,xccc1d)
 !scalars
  integer :: i1xccc,ider
  real(dp) :: der1,dern,factor,gg1cc_xx,gp1cc_xx,gpp1cc_xx,xx
- character(len=500) :: message,errmsg
+ character(len=500) :: message
 !arrays
  real(dp),allocatable :: ff(:),ff2(:),work(:),yy(:)
 
