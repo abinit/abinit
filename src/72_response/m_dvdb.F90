@@ -1181,7 +1181,7 @@ pcase_loop: &
    tsign = 3-2*itirev_eq
 
    ! Phase due to L0 + R^{-1}tau
-   l0 = cryst%indsym(1:3,isym_eq,ipert_eq)
+   l0 = cryst%indsym(1:3,isym_eq,ipert)
    call mati3inv(symrel_eq, symm); symm = transpose(symm)
 
    tnon = l0 + matmul(transpose(symrec_eq), cryst%tnons(:,isym_eq))
