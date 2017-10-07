@@ -492,7 +492,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  ABI_ALLOCATE(vhartr1,(cplex*nfftf))
  ABI_ALLOCATE(vtrial1,(cplex*nfftf,nspden))
 ! TODO: for non collinear case this should always be nspden, in NCPP case as well!!!
- ABI_ALLOCATE(vxc1,(cplex*nfftf,nspden*(1-usexcnhat)*psps%usepaw)) ! Not always needed
+ ABI_ALLOCATE(vxc1,(cplex*nfftf,nspden*(1-usexcnhat))) ! Not always needed
  vtrial1_tmp => vtrial1   ! this is to avoid errors when vtrial1_tmp is unused
 
 !Several parameters and arrays for the SCF mixing:
