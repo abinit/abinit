@@ -677,12 +677,12 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
      ncpgr=0
      if (usefock==1) then
        ctocprj_choice = 1
-       if (dtset%optforces /= 0) then
+       if (dtset%optforces == 1) then
          ncpgr = 3 ; ctocprj_choice = 2
        end if
-       if (dtset%optstress /= 0) then
-         ncpgr = 6 ; ctocprj_choice = 3
-       end if
+!       if (dtset%optstress /= 0) then
+!         ncpgr = 6 ; ctocprj_choice = 3
+!       end if
      end if
      call pawcprj_alloc(cprj,ncpgr,dimcprj_srt)
 #if defined HAVE_BIGDFT

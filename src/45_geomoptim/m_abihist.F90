@@ -141,6 +141,8 @@ module m_abihist
  public :: write_md_hist_img        ! Write the history into a netcdf file (with images)
  public :: read_md_hist             ! Read the history from a netcdf file
  public :: read_md_hist_img         ! Read the history from a netcdf file (with images)
+ public :: get_dims_hist
+ public :: read_csts_hist
 
  interface abihist_init
    module procedure abihist_init_0D
@@ -1553,8 +1555,8 @@ implicit none
 !Local variables-------------------------------
 #if defined HAVE_NETCDF
 !scalars
- integer :: ncerr,ncid,nimage,natom,time,start_time
- integer :: nimage_id,natom_id,xyz_id,time_id,six_id
+ integer :: ncerr,ncid,nimage,natom,time,start_time, ntypat
+ integer :: nimage_id,natom_id,xyz_id,time_id,six_id, ntypat_id
  integer :: xcart_id,xred_id,fcart_id,fred_id,ekin_id,entropy_id
  integer :: mdtime_id,vel_id,vel_cell_id,etotal_id
  integer :: acell_id,rprimd_id,strten_id
@@ -1578,8 +1580,8 @@ implicit none
  end if
 
 !Inquire dimensions IDs and lengths
- call get_dims_hist(ncid,natom,nimage,time,&
-&     natom_id,nimage_id,time_id,xyz_id,six_id,has_nimage)
+ call get_dims_hist(ncid,natom,ntypat,nimage,time,&
+&     natom_id,ntypat_id,nimage_id,time_id,xyz_id,six_id,has_nimage)
 
 !If only the last step is needing (restarxf==-3 for example)
  if(readOnlyLast)then
@@ -1663,7 +1665,7 @@ implicit none
 #if defined HAVE_NETCDF
 !scalars
  integer :: iimage,iimg,my_nimage,ncerr,ncid,nimage,natom,time
- integer :: nimage_id,natom_id,xyz_id,time_id,six_id
+ integer :: nimage_id,natom_id,xyz_id,time_id,six_id, ntypat, ntypat_id
  integer :: xcart_id,xred_id,fcart_id,fred_id,ekin_id,entropy_id
  integer :: mdtime_id,vel_id,vel_cell_id,etotal_id
  integer :: acell_id,rprimd_id,strten_id
@@ -1704,8 +1706,8 @@ implicit none
  end if
 
 !Inquire dimensions IDs and lengths
- call get_dims_hist(ncid,natom,nimage,time,&
-&     natom_id,nimage_id,time_id,xyz_id,six_id,has_nimage)
+ call get_dims_hist(ncid,natom,ntypat,nimage,time,&
+&     natom_id,ntypat_id,nimage_id,time_id,xyz_id,six_id,has_nimage)
 
  if (nimage<maxval(my_imgtab)) then
    msg='Not enough images in the HIST file!'
@@ -1975,8 +1977,8 @@ end subroutine def_file_hist
 !!
 !! SOURCE
 
-subroutine get_dims_hist(ncid,natom,nimage,time,&
-&          natom_id,nimage_id,time_id,xyz_id,six_id,has_nimage)
+subroutine get_dims_hist(ncid,natom,ntypat,nimage,time,&
+&          natom_id,ntypat_id,nimage_id,time_id,xyz_id,six_id,has_nimage)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1990,8 +1992,8 @@ implicit none
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ncid
- integer,intent(out) :: natom,nimage,time
- integer,intent(out) :: natom_id,nimage_id,time_id,xyz_id,six_id
+ integer,intent(out) :: natom,nimage,time,ntypat
+ integer,intent(out) :: natom_id,nimage_id,time_id,xyz_id,six_id, ntypat_id
  logical,intent(out) :: has_nimage
 
 !Local variables-------------------------------
@@ -2008,6 +2010,9 @@ implicit none
 
  ncerr = nf90_inq_dimid(ncid,"natom",natom_id)
  NCF_CHECK_MSG(ncerr," inquire dimension ID for natom")
+
+ ncerr = nf90_inq_dimid(ncid,"npsp",ntypat_id)
+ NCF_CHECK_MSG(ncerr," inquire dimension ID for npsp")
 
  ncerr = nf90_inq_dimid(ncid,"xyz",xyz_id)
  NCF_CHECK_MSG(ncerr," inquire dimension ID for xyz")
@@ -2030,10 +2035,13 @@ implicit none
  if (.not.has_nimage) nimage=1
 
  ncerr = nf90_inquire_dimension(ncid,natom_id,char_tmp,natom)
- NCF_CHECK_MSG(ncerr," inquire dimension ID for natom")
+ NCF_CHECK_MSG(ncerr," inquire dimension natom")
+
+ ncerr = nf90_inquire_dimension(ncid,ntypat_id,char_tmp,ntypat)
+ NCF_CHECK_MSG(ncerr," inquire dimension ntypat")
 
  ncerr = nf90_inquire_dimension(ncid,time_id,char_tmp,time)
- NCF_CHECK_MSG(ncerr," inquire dimension ID for time")
+ NCF_CHECK_MSG(ncerr," inquire dimension time")
 
 #endif
 
@@ -2133,6 +2141,86 @@ implicit none
 #endif
 
 end subroutine get_varid_hist
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_abihist/read_csts_hist
+!!
+!! NAME
+!! read_csts_hist
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine read_csts_hist(ncid,dtion,typat,znucl,amu)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'read_csts_hist'
+!End of the abilint section
+
+implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: ncid
+ real(dp),intent(out) :: dtion
+!arrays
+ integer,intent(out) :: typat(:)
+ real(dp),intent(out) :: amu(:),znucl(:)
+
+!Local variables-------------------------------
+#if defined HAVE_NETCDF
+!scalars
+ integer :: ncerr
+ integer :: typat_id,znucl_id,amu_id,dtion_id
+#endif
+
+! *************************************************************************
+
+#if defined HAVE_NETCDF
+
+!1.Get the IDs
+ ncerr = nf90_inq_varid(ncid, "typat", typat_id)
+ NCF_CHECK_MSG(ncerr," get the id for typat")
+
+ ncerr = nf90_inq_varid(ncid, "znucl", znucl_id)
+ NCF_CHECK_MSG(ncerr," get the id for znucl")
+
+ ncerr = nf90_inq_varid(ncid, "amu", amu_id)
+ NCF_CHECK_MSG(ncerr," get the id for amu")
+
+ ncerr = nf90_inq_varid(ncid, "dtion", dtion_id)
+ NCF_CHECK_MSG(ncerr," get the id for dtion")
+
+!2.Write the constants
+ ncerr = nf90_get_var(ncid, typat_id, typat)
+ NCF_CHECK_MSG(ncerr," get variable typat")
+
+ ncerr = nf90_get_var(ncid, znucl_id, znucl)
+ NCF_CHECK_MSG(ncerr," get variable znucl")
+
+ ncerr = nf90_get_var(ncid, amu_id, amu)
+ NCF_CHECK_MSG(ncerr," get variable amu")
+
+ ncerr = nf90_get_var(ncid, dtion_id, dtion)
+ NCF_CHECK_MSG(ncerr," get variable dtion")
+
+#endif
+
+end subroutine read_csts_hist
 !!***
 
 !----------------------------------------------------------------------

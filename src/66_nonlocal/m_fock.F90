@@ -35,6 +35,7 @@ module m_fock
  use defs_abitypes
  use m_profiling_abi
  use m_errors
+ use m_mpinfo
  use m_xmpi
  use libxc_functionals
  use m_pawang
@@ -283,6 +284,7 @@ module m_fock
     ! phase(2,mpw*mkpt))
     ! phase factor the cg array will be multiplied with at each k point
 
+  type(MPI_type) :: mpi_enreg
   type(pawang_type),pointer :: pawang
   type(pawcprj_type), allocatable :: cwaveocc_prj(:,:)
  end type fock_BZ_type
@@ -622,6 +624,16 @@ subroutine fock_init(atindx,cplex,dtset,fock,gsqcut,kg,mpi_enreg,nattyp,npwarr,p
      fockcommon%nband(ikpt)=dtset%nband(ikpt)
    end do
 
+! mpi_enreg settings
+  
+   call copy_mpi_enreg(mpi_enreg,fockbz%mpi_enreg)
+   fockbz%mpi_enreg%me_kpt=mpi_enreg%me_hf
+   if (allocated(fockbz%mpi_enreg%proc_distrb)) then
+     ABI_DEALLOCATE(fockbz%mpi_enreg%proc_distrb)
+   end if
+   ABI_ALLOCATE(fockbz%mpi_enreg%proc_distrb,(nkpt_bz,mband,1))
+   fockbz%mpi_enreg%proc_distrb=mpi_enreg%distrb_hf
+
    nband=dtset%mband
    fockcommon%ikpt= 0
 !* Will contain the k-point ikpt of the current state
@@ -712,8 +724,9 @@ subroutine fock_init(atindx,cplex,dtset,fock,gsqcut,kg,mpi_enreg,nattyp,npwarr,p
      ABI_ALLOCATE(dimcprj,(dtset%natom))
      call pawcprj_getdim(dimcprj,dtset%natom,nattyp,dtset%ntypat,dtset%typat,pawtab,'O')
      ncpgr = 0
-     if (dtset%optforces/= 0) ncpgr = 3 
-     if (dtset%optstress /= 0) ncpgr = 6 
+     if (dtset%optforces== 1) ncpgr = 3 
+!     if (dtset%optstress /= 0) ncpgr = 6 
+!     ncpgr=3*dtset%optforces+6*dtset%optstress
      call pawcprj_alloc(fockbz%cwaveocc_prj,ncpgr,dimcprj)
      ABI_DEALLOCATE(dimcprj)
      ABI_ALLOCATE(fockcommon%atindx,(dtset%natom))
@@ -1526,7 +1539,7 @@ subroutine fock_BZ_destroy(fock)
 !* Put the integer to 0
  fock%mkpt=0
  fock%mkptband=0
-
+ call destroy_mpi_enreg(fock%mpi_enreg)
 
  DBG_EXIT("COLL")
 
@@ -1839,8 +1852,8 @@ subroutine fock_updatecwaveocc(cg,cprj,dtset,fock,indsym,istep,mcg,mcprj,&
        ABI_ALLOCATE(dimlmn,(dtset%natom))
        call pawcprj_getdim(dimlmn,dtset%natom,nattyp,dtset%ntypat,dtset%typat,fockcommon%pawtab,"O")
        ncpgr = 0
-       if (dtset%optforces/= 0) ncpgr = 3
-       if (dtset%optstress /= 0) ncpgr = 6
+       if (dtset%optforces== 1) ncpgr = 3
+!       if (dtset%optstress /= 0) ncpgr = 6
        call pawcprj_alloc(cprj_tmp,ncpgr,dimlmn)
 
        lmnmax=maxval(fockcommon%pawtab(:)%lmn_size)
@@ -2056,7 +2069,8 @@ subroutine fock_updatecwaveocc(cg,cprj,dtset,fock,indsym,istep,mcg,mcprj,&
 &               indsym_,dimlmn,iband0,indlmn,&
 &               fockbz%tab_symkpt(my_jkpt),fockbz%timerev(my_jkpt),dtset%kptns(:,ikpt),fockbz%pawang%l_max-1,lmnmax,&
 &               mband0,dtset%natom,nband,nspinor,dtset%nsym,dtset%ntypat,typat_srt,fockbz%pawang%zarot,atindx=fockcommon%atindx)
-               if(dtset%optforces/=0) then
+
+               if(dtset%optforces==1) then
                  do iatom=1,dtset%natom
                    iatm=fockcommon%atindx(iatom)
                    do ispinor=iband_cprj,iband_cprj+nspinor-1
@@ -2275,8 +2289,8 @@ subroutine fock_print(fockcommon,fockbz,header,unit,mode_paral,prtvol)
  call wrtout(my_unt,sjoin(" hybrid SR mixing",ftoa(fockcommon%hybrid_mixing_sr)),my_mode)
  call wrtout(my_unt,sjoin(" hybrid range....",ftoa(fockcommon%hybrid_range)),my_mode)
 
- write(msg,"(a,f12.1,a)")" Memory required for HF u(r) states: ",product(shape(fockbz%cwaveocc_bz)) * dp * b2Mb, " [Mb]"
- call wrtout(my_unt,msg,my_mode)
+! write(msg,"(a,f12.1,a)")" Memory required for HF u(r) states: ",product(shape(fockbz%cwaveocc_bz)) * dp * b2Mb, " [Mb]"
+! call wrtout(my_unt,msg,my_mode)
 
  ! Extra info.
  if (my_prtvol > 0) then
