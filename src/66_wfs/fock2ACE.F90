@@ -4,11 +4,12 @@
 !! fock2ACE
 !!
 !! FUNCTION
-!! Compute nonlocal pseudopotential energy contribution to forces and/or stress tensor
-!! as well as kinetic energy contribution to stress tensor.
+!! Compute nonlocal contribution to the Fock part of the hamiltonian in the ACE formalism.
+!! optionally contribution to Fock forces 
+!! 
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR, AF, AR, MB, MT)
+!! Copyright (C) 1998-2017 ABINIT group (FJ,XG,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -18,6 +19,7 @@
 !!  cg(2,mcg)=wavefunctions (may be read from disk file)
 !!  cprj(natom,mcprj*usecprj)=<p_lmn|Cnk> coefficients for each WF |Cnk> and each NL proj |p_lmn>
 !!  fock <type(fock_type)>= quantities to calculate Fock exact exchange
+!!  istwfk(nkpt)=input option parameter that describes the storage of wfs
 !!  kg(3,mpw*mkmem)=reduced coordinates (integers) of G vecs in basis
 !!  kpt(3,nkpt)=k points in reduced coordinates
 !!  mband=maximum number of bands
@@ -48,7 +50,6 @@
 !!  ph1d(2,3*(2*mgfft+1)*natom)=one-dimensional structure factor information
 !!  psps <type(pseudopotential_type)>=variables related to pseudopotentials
 !!  rprimd(3,3)=dimensional primitive translations in real space (bohr)
-!!  stress_needed=1 if computation of stress tensor is required
 !!  symrec(3,3,nsym)=symmetries in reciprocal space (dimensionless)
 !!  typat(natom)=type of each atom
 !!  usecprj=1 if cprj datastructure has been allocated
@@ -56,12 +57,12 @@
 !!  wtk(nkpt)=weight associated with each k point
 !!  xred(3,natom)=reduced dimensionless atomic coordinates
 !!  ylm(mpw*mkmem,mpsang*mpsang*useylm)= real spherical harmonics for each G and k point
-!!  ylmgr(mpw*mkmem,3,mpsang*mpsang*useylm)= gradients of real spherical harmonics
 !!
 !! OUTPUT
 !!
+!! fock%fockACE(ikpt,isppol)%xi
+!! if optfor=1, fock%fock_common%forces
 !! NOTES
-!!  Please, dont suppress TESTDFPT sections (MT, nov. 2014)
 !!
 !! PARENTS
 !!      scfcv
@@ -70,7 +71,7 @@
 !!      bandfft_kpt_restoretabs,bandfft_kpt_savetabs,destroy_hamiltonian
 !!      dotprod_g,fock_getghc,init_hamiltonian,load_k_hamiltonian
 !!      load_spin_hamiltonian,mkffnl,mkkpg,pawcprj_alloc,pawcprj_free
-!!      pawcprj_get,pawcprj_reorder,prep_bandfft_tabs,stresssym,timab,xmpi_sum
+!!      pawcprj_get,pawcprj_reorder,prep_bandfft_tabs,timab,xmpi_sum
 !!      zpotrf,ztrtrs
 !!
 !! SOURCE
@@ -83,8 +84,7 @@
 
 subroutine fock2ACE(cg,cprj,fock,istwfk,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_enreg,mpsang,&
 &  mpw,my_natom,natom,nband,nfft,ngfft,nkpt,nloalg,npwarr,nspden,nspinor,nsppol,nsym,&
-&  ntypat,occ,optfor,paw_ij,pawtab,ph1d,psps,rprimd,&
-&  stress_needed,symrec,typat,usecprj,use_gpu_cuda,wtk,xred,ylm,ylmgr)
+&  ntypat,occ,optfor,paw_ij,pawtab,ph1d,psps,rprimd,symrec,typat,usecprj,use_gpu_cuda,wtk,xred,ylm)
 
  use defs_basis
  use defs_datatypes
@@ -108,7 +108,6 @@ subroutine fock2ACE(cg,cprj,fock,istwfk,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_e
 #define ABI_FUNC 'fock2ACE'
  use interfaces_18_timing
  use interfaces_32_util
- use interfaces_41_geometry
  use interfaces_66_nonlocal
  use interfaces_66_wfs, except_this_one => fock2ACE
 !End of the abilint section
@@ -118,7 +117,7 @@ subroutine fock2ACE(cg,cprj,fock,istwfk,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_e
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: mband,mcg,mcprj,mgfft,mkmem,mpsang,mpw,my_natom,natom,nfft,nkpt
- integer,intent(in) :: nspden,nsppol,nspinor,nsym,ntypat,optfor,stress_needed
+ integer,intent(in) :: nspden,nsppol,nspinor,nsym,ntypat,optfor
  integer,intent(in) :: usecprj,use_gpu_cuda
  type(MPI_type),intent(inout) :: mpi_enreg
  type(pseudopotential_type),intent(in) :: psps
@@ -131,7 +130,6 @@ subroutine fock2ACE(cg,cprj,fock,istwfk,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_e
  real(dp),intent(in) :: occ(mband*nkpt*nsppol),ph1d(2,3*(2*mgfft+1)*natom)
  real(dp),intent(in) :: rprimd(3,3),wtk(nkpt),xred(3,natom)
  real(dp),intent(in) :: ylm(mpw*mkmem,mpsang*mpsang*psps%useylm)
- real(dp),intent(in) :: ylmgr(mpw*mkmem,3,mpsang*mpsang*psps%useylm)
  type(pawcprj_type),intent(inout) :: cprj(natom,mcprj*usecprj)
  type(paw_ij_type),intent(in) :: paw_ij(my_natom*psps%usepaw)
  type(pawtab_type),intent(in) :: pawtab(ntypat*psps%usepaw)
@@ -142,7 +140,7 @@ subroutine fock2ACE(cg,cprj,fock,istwfk,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_e
  integer :: idir,idir_str,ierr,ii,ikg,ikpt,ilm,ipw,isppol,istwf_k,kk,ll
  integer :: mband_cprj,me_distrb,my_ikpt,my_nspinor,nband_k,nband_cprj_k,ndat,nkpg
  integer :: npw_k,spaceComm
- integer :: usecprj_local,use_ACE_old
+ integer :: use_ACE_old
  integer :: blocksize,iblock,jblock,iblocksize,jblocksize,ibs,nblockbd
  type(gs_hamiltonian_type) :: gs_hamk
  logical :: compute_gbound
@@ -180,45 +178,17 @@ subroutine fock2ACE(cg,cprj,fock,istwfk,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_e
    end if
  end if
 
-!Some constants
-
+!Some initializations
  my_nspinor=max(1,nspinor/mpi_enreg%nproc_spinor)
-
-!Check that fock is present if want to use fock option
- compute_gbound=.false.
-
-!Array initializations
+ compute_gbound=.true.
  fockcommon => fock%fock_common
- fockcommon%optfor=.false.
- fockcommon%optstr=.false.
  use_ACE_old=fockcommon%use_ACE
  fockcommon%use_ACE=0
- compute_gbound=.true.
-! if (stress_needed==1) then
-!   fockcommon%optstr=.TRUE.
-   fockcommon%stress=zero
-! end if
-
- compute_gbound=.true.
- usecprj_local=usecprj
- if (psps%usepaw==1) then
-   usecprj_local=1
- end if
- if(optfor==1)then 
-   fockcommon%optfor=.true.
-   if (.not.allocated(fockcommon%forces_ikpt)) then
-     ABI_ALLOCATE(fockcommon%forces_ikpt,(3,natom,mband))
-   end if
-   if (.not.allocated(fockcommon%forces)) then
-     ABI_ALLOCATE(fockcommon%forces,(3,natom))
-   end if
-   fockcommon%forces=zero
- end if
 
 !Initialize Hamiltonian (k- and spin-independent terms)
 
  call init_hamiltonian(gs_hamk,psps,pawtab,nspinor,nsppol,nspden,natom,&
-& typat,xred,nfft,mgfft,ngfft,rprimd,nloalg,usecprj=usecprj_local,&
+& typat,xred,nfft,mgfft,ngfft,rprimd,nloalg,usecprj=usecprj,&
 & comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab,&
 & paw_ij=paw_ij,ph1d=ph1d,fock=fock,&
 & use_gpu_cuda=use_gpu_cuda)
@@ -227,7 +197,7 @@ subroutine fock2ACE(cg,cprj,fock,istwfk,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_e
  call timab(921,2,tsec)
 
 !need to reorder cprj=<p_lmn|Cnk> (from unsorted to atom-sorted)
- if (psps%usepaw==1.and.usecprj_local==1) then
+ if (psps%usepaw==1) then
    call pawcprj_reorder(cprj,gs_hamk%atindx)
  end if
 
@@ -270,10 +240,9 @@ subroutine fock2ACE(cg,cprj,fock,istwfk,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_e
      nband_cprj_k=nband_k/mpi_enreg%nproc_band
 
      ABI_ALLOCATE(cwavef,(2,npw_k*my_nspinor*blocksize))
-     if (psps%usepaw==1.and.usecprj_local==1) then
+     if (psps%usepaw==1) then
        ABI_DATATYPE_ALLOCATE(cwaveprj,(natom,my_nspinor*bandpp))
        call pawcprj_alloc(cwaveprj,0,gs_hamk%dimcprj)
-!       call pawcprj_alloc(cwaveprj,cprj(1,1)%ncpgr,gs_hamk%dimcprj)
      else
        ABI_DATATYPE_ALLOCATE(cwaveprj,(0,0))
      end if
@@ -285,11 +254,7 @@ subroutine fock2ACE(cg,cprj,fock,istwfk,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_e
      end do
 
      ABI_ALLOCATE(ylm_k,(npw_k,mpsang*mpsang*psps%useylm))
-     if (stress_needed==1) then
-       ABI_ALLOCATE(ylmgr_k,(npw_k,3,mpsang*mpsang*psps%useylm))
-     else
-       ABI_ALLOCATE(ylmgr_k,(0,0,0))
-     end if
+     ABI_ALLOCATE(ylmgr_k,(0,0,0))
      if (psps%useylm==1) then
 !$OMP PARALLEL DO COLLAPSE(2)
        do ilm=1,mpsang*mpsang
@@ -297,16 +262,6 @@ subroutine fock2ACE(cg,cprj,fock,istwfk,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_e
            ylm_k(ipw,ilm)=ylm(ipw+ikg,ilm)
          end do
        end do
-       if (stress_needed==1) then
-!$OMP PARALLEL DO COLLAPSE(2)
-         do ilm=1,mpsang*mpsang
-           do ii=1,3
-             do ipw=1,npw_k
-               ylmgr_k(ipw,ii,ilm)=ylmgr(ipw+ikg,ii,ilm)
-             end do
-           end do
-         end do
-       end if
      end if
 
 !    Compute (k+G) vectors
@@ -319,20 +274,10 @@ subroutine fock2ACE(cg,cprj,fock,istwfk,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_e
 
 !    Compute nonlocal form factors ffnl at all (k+G)
      ider=0;idir=0;dimffnl=1
-     if (stress_needed==1) then
-       ider=1;dimffnl=2+2*psps%useylm
-     end if
      ABI_ALLOCATE(ffnl,(npw_k,dimffnl,psps%lmnmax,ntypat))
      call mkffnl(psps%dimekb,dimffnl,psps%ekb,ffnl,psps%ffspl,gs_hamk%gmet,gs_hamk%gprimd,&
 &     ider,idir,psps%indlmn,kg_k,kpg_k,kpoint,psps%lmnmax,psps%lnmax,psps%mpsang,psps%mqgrid_ff,&
 &     nkpg,npw_k,ntypat,psps%pspso,psps%qgrid_ff,rmet,psps%usepaw,psps%useylm,ylm_k,ylmgr_k)
-     if ((stress_needed==1).and.(psps%usepaw==1))then
-       ider_str=1; dimffnl_str=7;idir_str=-7
-       ABI_ALLOCATE(fockcommon%ffnl_str,(npw_k,dimffnl_str,psps%lmnmax,ntypat))
-       call mkffnl(psps%dimekb,dimffnl_str,psps%ekb,fockcommon%ffnl_str,psps%ffspl,gs_hamk%gmet,gs_hamk%gprimd,&
-&       ider_str,idir_str,psps%indlmn,kg_k,kpg_k,kpoint,psps%lmnmax,psps%lnmax,psps%mpsang,psps%mqgrid_ff,&
-&       nkpg,npw_k,ntypat,psps%pspso,psps%qgrid_ff,rmet,psps%usepaw,psps%useylm,ylm_k,ylmgr_k)
-     end if
 
 !    Load k-dependent part in the Hamiltonian datastructure
 !     - Compute 3D phase factors
@@ -356,7 +301,6 @@ subroutine fock2ACE(cg,cprj,fock,istwfk,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_e
 
      call timab(922,2,tsec)
 
-!    Loop over (blocks of) bands; accumulate forces and/or stresses
 !    The following is now wrong. In sequential, nblockbd=nband_k/bandpp
 !    blocksize= bandpp (JB 2016/04/16)
 !    Note that in sequential mode iblock=iband, nblockbd=nband_k and blocksize=1
@@ -364,10 +308,6 @@ subroutine fock2ACE(cg,cprj,fock,istwfk,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_e
      ABI_ALLOCATE(occblock,(blocksize))
      ABI_ALLOCATE(weight,(blocksize))
      occblock=zero;weight=zero
-     if (fockcommon%optstr) then
-       ABI_ALLOCATE(fockcommon%stress_ikpt,(6,nband_k))
-       fockcommon%stress_ikpt=zero
-     end if
      
      if (fockcommon%optfor) then
        fockcommon%forces_ikpt=zero
@@ -387,14 +327,13 @@ subroutine fock2ACE(cg,cprj,fock,istwfk,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_e
 
 !      Select occupied bandsddk
        occblock(:)=occ(1+(iblock-1)*blocksize+bdtot_index:iblock*blocksize+bdtot_index)
-!       if( abs(maxval(occblock))>=tol8 ) then
        call timab(923,1,tsec)
        weight(:)=wtk(ikpt)*occblock(:)
 
 !        Load contribution from n,k
        cwavef(:,1:npw_k*my_nspinor*blocksize)=&
 &       cg(:,1+(iblock-1)*npw_k*my_nspinor*blocksize+icg:iblock*npw_k*my_nspinor*blocksize+icg)
-       if (psps%usepaw==1.and.usecprj_local==1) then
+       if (psps%usepaw==1) then
          call pawcprj_get(gs_hamk%atindx1,cwaveprj,cprj,natom,iband_cprj,ibg,ikpt,0,isppol,&
 &         mband_cprj,mkmem,natom,bandpp,nband_cprj_k,my_nspinor,nsppol,0,&
 &         mpicomm=mpi_enreg%comm_kpt,proc_distrb=mpi_enreg%proc_distrb)
@@ -402,9 +341,8 @@ subroutine fock2ACE(cg,cprj,fock,istwfk,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_e
 
        call timab(926,2,tsec)
 
-!        Accumulate stress tensor and forces for the Fock part
        if (mpi_enreg%paral_kgb==1) then
-         msg='fock2ACE: Paral_kgb is not yet implemented for fock stresses'
+         msg='fock2ACE: Paral_kgb is not yet implemented for fock calculations'
          MSG_BUG(msg)
        end if 
        ndat=mpi_enreg%bandpp
@@ -412,15 +350,13 @@ subroutine fock2ACE(cg,cprj,fock,istwfk,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_e
 
        do iblocksize=1,blocksize
          fockcommon%ieigen=(iblock-1)*blocksize+iblocksize
+         fockcommon%iband=(iblock-1)*blocksize+iblocksize
          if (gs_hamk%usepaw==1) then
            cwaveprj_idat => cwaveprj(:,(iblocksize-1)*my_nspinor+1:iblocksize*my_nspinor)
          end if
          call fock_getghc(cwavef(:,1+(iblocksize-1)*npw_k*my_nspinor:iblocksize*npw_k*my_nspinor),cwaveprj_idat,&
 &         wi(:,1+(iblocksize-1)*npw_k*my_nspinor:iblocksize*npw_k*my_nspinor,iblock),gs_hamk,mpi_enreg)
          mkl(1,fockcommon%ieigen,fockcommon%ieigen)=fockcommon%eigen_ikpt(fockcommon%ieigen)
-!           if (fockcommon%optstr) then
-!             fockcommon%stress(:)=fockcommon%stress(:)+weight(iblocksize)*fockcommon%stress_ikpt(:,fockcommon%ieigen)
-!           end if
          if (fockcommon%optfor) then
            fockcommon%forces(:,:)=fockcommon%forces(:,:)+weight(iblocksize)*fockcommon%forces_ikpt(:,:,fockcommon%ieigen)
          end if
@@ -481,10 +417,6 @@ subroutine fock2ACE(cg,cprj,fock,istwfk,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_e
 
      ABI_DEALLOCATE(wi)
      ABI_DEALLOCATE(mkl)
-
-     if (fockcommon%optstr) then
-       ABI_DEALLOCATE(fockcommon%stress_ikpt)
-     end if
      
 !    Restore the bandfft tabs
      if (mpi_enreg%paral_kgb==1) then
@@ -513,11 +445,6 @@ subroutine fock2ACE(cg,cprj,fock,istwfk,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_e
      ABI_DEALLOCATE(ylm_k)
      ABI_DEALLOCATE(ylmgr_k)
      ABI_DEALLOCATE(ph3d)
-
-     if ((stress_needed==1).and.(psps%usepaw==1))then
-       ABI_DEALLOCATE(fockcommon%ffnl_str)
-     end if
-
    end do ! End k point loop
  end do ! End loop over spins
 
@@ -530,28 +457,12 @@ subroutine fock2ACE(cg,cprj,fock,istwfk,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_e
        call xmpi_sum(fockcommon%forces,spaceComm,ierr)
      end if
    end if
-!  Stresses
-   if (stress_needed==1) then
-     call timab(65,1,tsec)
-     if (fockcommon%optstr) then
-       call xmpi_sum(fockcommon%stress,spaceComm,ierr)
-     end if
-     call timab(65,2,tsec)
-   end if
  end if
 
  call timab(925,1,tsec)
 
-!Do final normalizations and symmetrizations of stress tensor contributions
- if (stress_needed==1) then
-   if (nsym>1) then
-     if (fockcommon%optstr) then
-       call stresssym(gs_hamk%gprimd,nsym,fockcommon%stress,symrec)
-     end if
-   end if
- end if
 !need to reorder cprj=<p_lmn|Cnk> (from atom-sorted to unsorted)
- if (psps%usepaw==1.and.usecprj_local==1) then
+ if (psps%usepaw==1) then
    call pawcprj_reorder(cprj,gs_hamk%atindx1)
  end if
 !Deallocate temporary space
@@ -560,6 +471,5 @@ subroutine fock2ACE(cg,cprj,fock,istwfk,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_e
  call timab(925,2,tsec)
  call timab(920,2,tsec)
 
-!stop
 end subroutine fock2ACE
 !!***
