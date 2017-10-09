@@ -155,11 +155,10 @@ subroutine dfpt_atm2fft(atindx,cplex,gmet,gprimd,gsqcut,idir,ipert,&
  integer :: optn,optv,optn2,shift1,shift2,shift3,type1,type2
  logical :: have_g0,qeq0,qeq05
  real(dp),parameter :: tolfix=1.0000001_dp
- real(dp) :: aa,alf2pi2,bb,cc,cutoff,dd,diff,dq,dq2div6,dqdiv6,dqm1,ee,ff,g1,g2,g3
+ real(dp) :: aa,alf2pi2,bb,cc,cutoff,dd,diff,dq,dq2div6,dqdiv6,dqm1,ee,ff
  real(dp) :: gauss1,gauss2,gmag,gq1,gq2,gq3,gsquar,n_at,dn_at,ph12i,ph12r,ph1i
  real(dp) :: ph1r,ph2i,ph2r,ph3i,ph3r,phqim,phqre,qxred2pi
  real(dp) :: sfi,sfqi,sfqr,sfr,term_n,term_v,v_at,dv_at,xnorm
- character(len=500) :: msg
  type(distribfft_type),pointer :: my_distribfft
  type(mpi_type) :: mpi_enreg_fft
 !arrays

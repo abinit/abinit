@@ -1830,7 +1830,6 @@ subroutine hexc_matmul_elphon(hexc, hexc_i, phi, hphi, op, ep_renorm)
  complex(dpc),intent(in) :: ep_renorm(hexc%hsize)
 
 !Local variables ---------------------
- integer :: my_nt
  integer :: ierr
  real(dp) :: tsec(2)
 

@@ -57,7 +57,7 @@
 !!  kg(3,mpw*mkmem)=reduced planewave coordinates at k
 !!  kg1(3,mpw1*mk1mem)=reduced planewave coordinates at k+q, with RF k points
 !!  kpt_rbz(3,nkpt_rbz)=reduced coordinates of k points.
-!!  kxc(nfftf,nkxc)=exchange and correlation kernel (see rhohxc.f)
+!!  kxc(nfftf,nkxc)=exchange and correlation kernel (see rhotoxc.f)
 !!  mgfftf=maximum size of 1D FFTs for the "fine" grid (see NOTES in respfn.F90)
 !!  mkmem =number of k points treated by this node (GS data)
 !!  mkqmem =number of k+q points which can fit in memory (GS data); 0 if use disk
@@ -346,7 +346,6 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  integer :: my_quit,quitsum_request,timelimit_exit,varid,ncerr,ncid
  integer ABI_ASYNC :: quitsum_async
  integer :: rdwrpaw,spaceComm,sz1,sz2,usexcnhat,Z_kappa
- integer :: mpi_comm_sphgrid
  logical :: need_fermie1,paral_atom,use_nhat_gga
  real(dp) :: wtime_step,now,prev
  real(dp) :: born,born_bar,boxcut,deltae,diffor,diel_q,dum,ecut,ecutf,elast
@@ -354,7 +353,6 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  real(dp) :: ucvol,vxcavg,elmag1
  character(len=500) :: msg
  character(len=fnlen) :: fi1o
- character(len=fnlen) :: fi1o_vtk
  type(ab7_mixing_object) :: mix
  type(efield_type) :: dtefield
 !arrays
@@ -494,7 +492,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  ABI_ALLOCATE(vhartr1,(cplex*nfftf))
  ABI_ALLOCATE(vtrial1,(cplex*nfftf,nspden))
 ! TODO: for non collinear case this should always be nspden, in NCPP case as well!!!
- ABI_ALLOCATE(vxc1,(cplex*nfftf,nspden*(1-usexcnhat)*psps%usepaw)) ! Not always needed
+ ABI_ALLOCATE(vxc1,(cplex*nfftf,nspden*(1-usexcnhat))) ! Not always needed
  vtrial1_tmp => vtrial1   ! this is to avoid errors when vtrial1_tmp is unused
 
 !Several parameters and arrays for the SCF mixing:

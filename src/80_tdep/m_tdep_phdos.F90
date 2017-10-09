@@ -10,6 +10,7 @@ module m_tdep_phdos
 !FB  use m_nctk
 !FB  use m_xmpi
   use m_errors
+  use m_profiling_abi
   use m_phonons
   use m_ifc,              only : ifc_type,ifc_fourq
   use m_crystal,          only : crystal_t
@@ -96,7 +97,7 @@ subroutine tdep_calc_phdos(Crystal,ddb,Ifc,InVar,Lattice,natom,natom_unitcell,Ph
       write(InVar%stdout,'(a)') ' See the Phij_NN-new.dat file corresponding to the ifc.tdep/Phij_NN file'
       open(unit=55,file='Phij_NN-new.dat')
       do iatom=1,3*natom
-        write(55,'(10000(f10.6,x))') Phij_NN(iatom,:)
+        write(55,'(10000(f10.6,1x))') Phij_NN(iatom,:)
       end do  
       close(55)
     end if  
@@ -123,9 +124,9 @@ subroutine tdep_calc_phdos(Crystal,ddb,Ifc,InVar,Lattice,natom,natom_unitcell,Ph
   do iqpt=1,Qpt%nqpt 
     call ifc_fourq(Ifc,Crystal,Qpt%qpt_red(:,iqpt),omega(:,iqpt),displ(:,iqpt))
     if (iqpt.le.Qpt%nqpt) then 
-      if (InVar%Enunit.eq.0) write(53,'(i5,x,100(f15.6,x))') iqpt,(omega(ii,iqpt)*Ha_eV*1000,ii=1,3*natom_unitcell)
-      if (InVar%Enunit.eq.1) write(53,'(i5,x,100(f15.6,x))') iqpt,(omega(ii,iqpt)*Ha_cmm1   ,ii=1,3*natom_unitcell)
-      if (InVar%Enunit.eq.2) write(53,'(i5,x,100(f15.6,x))') iqpt,(omega(ii,iqpt)           ,ii=1,3*natom_unitcell)
+      if (InVar%Enunit.eq.0) write(53,'(i5,1x,100(f15.6,1x))') iqpt,(omega(ii,iqpt)*Ha_eV*1000,ii=1,3*natom_unitcell)
+      if (InVar%Enunit.eq.1) write(53,'(i5,1x,100(f15.6,1x))') iqpt,(omega(ii,iqpt)*Ha_cmm1   ,ii=1,3*natom_unitcell)
+      if (InVar%Enunit.eq.2) write(53,'(i5,1x,100(f15.6,1x))') iqpt,(omega(ii,iqpt)           ,ii=1,3*natom_unitcell)
     end if
   end do  
   close(53)
@@ -142,9 +143,9 @@ subroutine tdep_calc_phdos(Crystal,ddb,Ifc,InVar,Lattice,natom,natom_unitcell,Ph
   PHdos%phdos(:)=PHdos%phdos(:)/integ
   open(unit=56,file='vdos.dat')
   do iomega=1,PHdos%nomega
-    if (InVar%Enunit.eq.0) write(56,'(2(f18.6,x))') PHdos%omega(iomega)*Ha_eV*1000,PHdos%phdos(iomega)
-    if (InVar%Enunit.eq.1) write(56,'(2(f18.6,x))') PHdos%omega(iomega)*Ha_cmm1   ,PHdos%phdos(iomega)
-    if (InVar%Enunit.eq.2) write(56,'(2(f18.6,x))') PHdos%omega(iomega)           ,PHdos%phdos(iomega)
+    if (InVar%Enunit.eq.0) write(56,'(2(f18.6,1x))') PHdos%omega(iomega)*Ha_eV*1000,PHdos%phdos(iomega)
+    if (InVar%Enunit.eq.1) write(56,'(2(f18.6,1x))') PHdos%omega(iomega)*Ha_cmm1   ,PHdos%phdos(iomega)
+    if (InVar%Enunit.eq.2) write(56,'(2(f18.6,1x))') PHdos%omega(iomega)           ,PHdos%phdos(iomega)
   end do
   close(56)
 
@@ -199,30 +200,30 @@ subroutine tdep_calc_thermo(DeltaFree_AH2,InVar,PHdos,U0)
   internalE=internalE*3*k_B*InVar%temperature
   freeE=freeE*3*k_B*InVar%temperature
   write(20,'(a)')'============= Direct results (without any inter/extrapolation) =================='
-  write(20,'(x,a,f10.5)')'For present temperature (in Kelvin): T= ',InVar%temperature
-  write(20,'(x,a,f12.5)')'  The cold contribution (in eV/atom): U_0 =',U0*Ha_eV
-  write(20,'(x,a,f10.5)')'  The specific heat (in k_b/atom): C_v=',heatcapa
-  write(20,'(x,a,f10.5)')'  The vibrational entropy (in k_b/atom): S_vib =',entropy
-  write(20,'(x,a,f10.5)')'  The internal energy (in eV/atom): U_vib =',internalE
-  write(20,'(x,a,f10.5)')'  The vibrational contribution (in eV/atom): F_vib = U_vib -T.S_vib =',freeE
-  write(20,'(x,a,f10.5)')'  The anharmonic contribution (in eV/atom): DeltaF_AH =',DeltaFree_AH2*Ha_eV
+  write(20,'(1x,a,f10.5)')'For present temperature (in Kelvin): T= ',InVar%temperature
+  write(20,'(1x,a,f12.5)')'  The cold contribution (in eV/atom): U_0 =',U0*Ha_eV
+  write(20,'(1x,a,f10.5)')'  The specific heat (in k_b/atom): C_v=',heatcapa
+  write(20,'(1x,a,f10.5)')'  The vibrational entropy (in k_b/atom): S_vib =',entropy
+  write(20,'(1x,a,f10.5)')'  The internal energy (in eV/atom): U_vib =',internalE
+  write(20,'(1x,a,f10.5)')'  The vibrational contribution (in eV/atom): F_vib = U_vib -T.S_vib =',freeE
+  write(20,'(1x,a,f10.5)')'  The anharmonic contribution (in eV/atom): DeltaF_AH =',DeltaFree_AH2*Ha_eV
   Ftot=U0*Ha_eV+freeE+DeltaFree_AH2*Ha_eV
-  write(20,'(x,a)')'  So the free energy (in eV/atom) is equal to:'
-  write(20,'(x,a,f12.5)')'     Harmonic only -->  F_tot^HA = U_0 + F_vib =',U0*Ha_eV+freeE
-  write(20,'(x,a,f12.5)')'     With anharmonic contribution -->  F_tot^AH = U_0 + F_vib + DeltaF_AH =',Ftot
+  write(20,'(1x,a)')'  So the free energy (in eV/atom) is equal to:'
+  write(20,'(1x,a,f12.5)')'     Harmonic only -->  F_tot^HA = U_0 + F_vib =',U0*Ha_eV+freeE
+  write(20,'(1x,a,f12.5)')'     With anharmonic contribution -->  F_tot^AH = U_0 + F_vib + DeltaF_AH =',Ftot
   write(20,'(a)')' '
 
 ! The free energy (extrapolation)
 ! ===============================
   write(20,'(a)')'============= Quasi-Harmonic Approximation (QHA) =================='
-  write(20,'(x,a)')'  Note that the following results come from an EXTRAPOLATION:'
-  write(20,'(x,a,i5,a)')'    1/ F_vib^QHA(T) is computed for each T using vDOS(T=',int(InVar%temperature),')'
-  write(20,'(x,a)')'    2/ F_tot^QHA(T) = F_vib^QHA(T) + U_0'
-  write(20,'(x,a)')'    3/ We assume that DeltaF_AH^QHA(T)=a(V)*T**2'
-  write(20,'(x,a)')'    4/ F_tot^QHA+AH(T) = U_0 + F_vib^QHA(T) + DeltaF_AH^QHA(T)'
+  write(20,'(1x,a)')'  Note that the following results come from an EXTRAPOLATION:'
+  write(20,'(1x,a,i5,a)')'    1/ F_vib^QHA(T) is computed for each T using vDOS(T=',int(InVar%temperature),')'
+  write(20,'(1x,a)')'    2/ F_tot^QHA(T) = F_vib^QHA(T) + U_0'
+  write(20,'(1x,a)')'    3/ We assume that DeltaF_AH^QHA(T)=a(V)*T**2'
+  write(20,'(1x,a)')'    4/ F_tot^QHA+AH(T) = U_0 + F_vib^QHA(T) + DeltaF_AH^QHA(T)'
   write(20,'(a)')'   T      F_vib^QHA(T)   F_tot^QHA(T)    DeltaF_AH^QHA(T)   F_tot^QHA+AH(T)'   
   do itemp=1,100
-    wovert=1.d0/(2*dfloat(itemp)*100*k_B)
+    wovert=1.d0/(2*real(itemp)*100*k_B)
     freeE=0.d0
     do iomega=1,PHdos%nomega
       xx=PHdos%omega(iomega)*Ha_eV
@@ -231,7 +232,7 @@ subroutine tdep_calc_thermo(DeltaFree_AH2,InVar,PHdos,U0)
     end do
     freeE=freeE*3*k_B
     Ftot=U0*Ha_eV+freeE*itemp*100+DeltaFree_AH2*Ha_eV*(itemp*100)**2/(InVar%temperature*100)**2
-    write(20,'(x,i5,4(x,f15.5))') itemp*100,freeE*itemp*100,U0*Ha_eV+freeE*itemp*100,&
+    write(20,'(1x,i5,4(1x,f15.5))') itemp*100,freeE*itemp*100,U0*Ha_eV+freeE*itemp*100,&
 &                          DeltaFree_AH2*Ha_eV*(itemp*100)**2/(InVar%temperature)**2,Ftot
   end do  
   close(20)
@@ -273,7 +274,7 @@ subroutine tdep_calc_elastic(Phij_NN,distance,InVar,Lattice)
     itypat=InVar%typat_unitcell(iatom) 
     mass_amu=mass_amu+InVar%amu(itypat)
   end do  
-  mass_amu=mass_amu/dfloat(InVar%natom_unitcell)
+  mass_amu=mass_amu/real(InVar%natom_unitcell)
 
   rho=(mass_amu/1e3)*InVar%natom_unitcell/Lattice%ucvol/bohr**3/6.022e23
 
@@ -286,8 +287,8 @@ subroutine tdep_calc_elastic(Phij_NN,distance,InVar,Lattice)
 !FB    sigma_11=sigma_11+InVar%sigma(1,istep)
 !FB    sigma_21=sigma_21+InVar%sigma(2,istep)
 !FB  end do  
-!FB  sigma_11=sigma_11/dfloat(InVar%nstep)
-!FB  sigma_21=sigma_21/dfloat(InVar%nstep)
+!FB  sigma_11=sigma_11/real(InVar%nstep)
+!FB  sigma_21=sigma_21/real(InVar%nstep)
   
 ! New calculation of elastic constants using the formula (12.28 and 12.29 of
 ! Wallace, Statistical physics of crystals and liquids, Worl Scientific)  
@@ -344,12 +345,12 @@ subroutine tdep_calc_elastic(Phij_NN,distance,InVar,Lattice)
   write(InVar%stdout,'(a)') ' '
   write(InVar%stdout,'(a)') '========== Using the formulation proposed by Wallace (using the IFC) ========='
   write(InVar%stdout,'(a)') 'Cijkl='
-  write(InVar%stdout,'(a,6(f8.3,x))') '| C11 C12 C13 C14 C15 C16 |   ',Cij(1,1),Cij(1,2),Cij(1,3),Cij(1,4),Cij(1,5),Cij(1,6)
-  write(InVar%stdout,'(a,6(f8.3,x))') '| C21 C22 C23 C24 C25 C26 |   ',Cij(2,1),Cij(2,2),Cij(2,3),Cij(2,4),Cij(2,5),Cij(2,6)
-  write(InVar%stdout,'(a,6(f8.3,x))') '| C31 C32 C33 C34 C35 C36 |   ',Cij(3,1),Cij(3,2),Cij(3,3),Cij(3,4),Cij(3,5),Cij(3,6)
-  write(InVar%stdout,'(a,6(f8.3,x))') '| C41 C42 C43 C44 C45 C46 | = ',Cij(4,1),Cij(4,2),Cij(4,3),Cij(4,4),Cij(4,5),Cij(4,6)
-  write(InVar%stdout,'(a,6(f8.3,x))') '| C51 C52 C53 C54 C55 C56 |   ',Cij(5,1),Cij(5,2),Cij(5,3),Cij(5,4),Cij(5,5),Cij(5,6)
-  write(InVar%stdout,'(a,6(f8.3,x))') '| C61 C62 C63 C64 C65 C66 |   ',Cij(6,1),Cij(6,2),Cij(6,3),Cij(6,4),Cij(6,5),Cij(6,6)
+  write(InVar%stdout,'(a,6(f8.3,1x))') '| C11 C12 C13 C14 C15 C16 |   ',Cij(1,1),Cij(1,2),Cij(1,3),Cij(1,4),Cij(1,5),Cij(1,6)
+  write(InVar%stdout,'(a,6(f8.3,1x))') '| C21 C22 C23 C24 C25 C26 |   ',Cij(2,1),Cij(2,2),Cij(2,3),Cij(2,4),Cij(2,5),Cij(2,6)
+  write(InVar%stdout,'(a,6(f8.3,1x))') '| C31 C32 C33 C34 C35 C36 |   ',Cij(3,1),Cij(3,2),Cij(3,3),Cij(3,4),Cij(3,5),Cij(3,6)
+  write(InVar%stdout,'(a,6(f8.3,1x))') '| C41 C42 C43 C44 C45 C46 | = ',Cij(4,1),Cij(4,2),Cij(4,3),Cij(4,4),Cij(4,5),Cij(4,6)
+  write(InVar%stdout,'(a,6(f8.3,1x))') '| C51 C52 C53 C54 C55 C56 |   ',Cij(5,1),Cij(5,2),Cij(5,3),Cij(5,4),Cij(5,5),Cij(5,6)
+  write(InVar%stdout,'(a,6(f8.3,1x))') '| C61 C62 C63 C64 C65 C66 |   ',Cij(6,1),Cij(6,2),Cij(6,3),Cij(6,4),Cij(6,5),Cij(6,6)
 
 ! Mean value of the off-diagonal elements
   Cij(1,2)=(Cij(1,2)+Cij(2,1))/2.d0 ; Cij(2,1)=Cij(1,2)
@@ -363,7 +364,7 @@ subroutine tdep_calc_elastic(Phij_NN,distance,InVar,Lattice)
 &   /(Cij(1,1)*Cij(3,3)-Cij(1,3)**2)
   E3=(Cij(1,1)*Cij(2,2)*Cij(3,3)+2.d0*Cij(2,3)*Cij(1,2)*Cij(1,3)-Cij(1,1)*Cij(2,3)**2-Cij(2,2)*Cij(1,3)**2-Cij(3,3)*Cij(1,2)**2)&
 &   /(Cij(1,1)*Cij(2,2)-Cij(1,2)**2)
-  write(InVar%stdout,'(a,3(f8.3,x))') 'Young modulus E1, E2 and E3=',E1,E2,E3
+  write(InVar%stdout,'(a,3(f8.3,1x))') 'Young modulus E1, E2 and E3=',E1,E2,E3
 
 ! Poisson Ratio
   Nu21=(Cij(1,2)*Cij(3,3)-Cij(1,3)*Cij(2,3))/(Cij(1,1)*Cij(3,3)-Cij(1,3)**2)
@@ -372,11 +373,11 @@ subroutine tdep_calc_elastic(Phij_NN,distance,InVar,Lattice)
   Nu12=(Cij(1,2)*Cij(3,3)-Cij(1,3)*Cij(2,3))/(Cij(2,2)*Cij(3,3)-Cij(2,3)**2)
   Nu13=(Cij(2,2)*Cij(1,3)-Cij(1,2)*Cij(2,3))/(Cij(2,2)*Cij(3,3)-Cij(2,3)**2)
   Nu32=(Cij(1,1)*Cij(2,3)-Cij(1,2)*Cij(1,3))/(Cij(1,1)*Cij(2,2)-Cij(1,2)**2)
-  write(InVar%stdout,'(a,6(f8.3,x))') 'Poisson ratio Nu21, Nu31, Nu23, Nu12, Nu13 and Nu32=',Nu21,Nu31,Nu23,Nu12,Nu13,Nu32
+  write(InVar%stdout,'(a,6(f8.3,1x))') 'Poisson ratio Nu21, Nu31, Nu23, Nu12, Nu13 and Nu32=',Nu21,Nu31,Nu23,Nu12,Nu13,Nu32
   
 ! Shear modulus  
   G23=Cij(4,4) ; G13=Cij(5,5) ; G12=Cij(6,6)
-  write(InVar%stdout,'(a,3(f8.3,x))') 'Shear modulus G23, G13 and G12=',G23,G13,G12
+  write(InVar%stdout,'(a,3(f8.3,1x))') 'Shear modulus G23, G13 and G12=',G23,G13,G12
   
 ! Compliance matrix  
   ABI_MALLOC(Sij,(6,6)) ; Sij(:,:)=0.d0
@@ -394,12 +395,12 @@ subroutine tdep_calc_elastic(Phij_NN,distance,InVar,Lattice)
   end do  
   write(InVar%stdout,'(a)') ' '
   write(InVar%stdout,'(a)') 'Sijkl='
-  write(InVar%stdout,'(a,6(f8.3,x))') '| S11 S12 S13 S14 S15 S16 |   ',Sij(1,1),Sij(1,2),Sij(1,3),Sij(1,4),Sij(1,5),Sij(1,6)
-  write(InVar%stdout,'(a,6(f8.3,x))') '| S21 S22 S23 S24 S25 S26 |   ',Sij(2,2),Sij(2,2),Sij(2,3),Sij(2,4),Sij(2,5),Sij(2,6)
-  write(InVar%stdout,'(a,6(f8.3,x))') '| S31 S32 S33 S34 S35 S36 |   ',Sij(3,1),Sij(3,2),Sij(3,3),Sij(3,4),Sij(3,5),Sij(3,6)
-  write(InVar%stdout,'(a,6(f8.3,x))') '| S41 S42 S43 S44 S45 S46 | = ',Sij(4,1),Sij(4,2),Sij(4,3),Sij(4,4),Sij(4,5),Sij(4,6)
-  write(InVar%stdout,'(a,6(f8.3,x))') '| S51 S52 S53 S54 S55 S56 |   ',Sij(5,1),Sij(5,2),Sij(5,3),Sij(5,4),Sij(5,5),Sij(5,6)
-  write(InVar%stdout,'(a,6(f8.3,x))') '| S61 S62 S63 S64 S65 S66 |   ',Sij(6,1),Sij(6,2),Sij(6,3),Sij(6,4),Sij(6,5),Sij(6,6)
+  write(InVar%stdout,'(a,6(f8.3,1x))') '| S11 S12 S13 S14 S15 S16 |   ',Sij(1,1),Sij(1,2),Sij(1,3),Sij(1,4),Sij(1,5),Sij(1,6)
+  write(InVar%stdout,'(a,6(f8.3,1x))') '| S21 S22 S23 S24 S25 S26 |   ',Sij(2,2),Sij(2,2),Sij(2,3),Sij(2,4),Sij(2,5),Sij(2,6)
+  write(InVar%stdout,'(a,6(f8.3,1x))') '| S31 S32 S33 S34 S35 S36 |   ',Sij(3,1),Sij(3,2),Sij(3,3),Sij(3,4),Sij(3,5),Sij(3,6)
+  write(InVar%stdout,'(a,6(f8.3,1x))') '| S41 S42 S43 S44 S45 S46 | = ',Sij(4,1),Sij(4,2),Sij(4,3),Sij(4,4),Sij(4,5),Sij(4,6)
+  write(InVar%stdout,'(a,6(f8.3,1x))') '| S51 S52 S53 S54 S55 S56 |   ',Sij(5,1),Sij(5,2),Sij(5,3),Sij(5,4),Sij(5,5),Sij(5,6)
+  write(InVar%stdout,'(a,6(f8.3,1x))') '| S61 S62 S63 S64 S65 S66 |   ',Sij(6,1),Sij(6,2),Sij(6,3),Sij(6,4),Sij(6,5),Sij(6,6)
 
 !==========================================================================================
 !===================== Bulk and Shear modulus--Sound velocities ===========================
@@ -419,7 +420,7 @@ subroutine tdep_calc_elastic(Phij_NN,distance,InVar,Lattice)
   Vp=dsqrt(1.d9*(BV+4.d0*GV/3.d0)/rho)
   Vs=dsqrt(1.d9*GV/rho)
   Vphi=dsqrt(1.d9*BV/rho)
-  write(InVar%stdout,'(3(a,f9.3,x))')'Velocities: compressional Vp=',Vp,' shear Vs=',Vs,' and bulk Vphi=',Vphi
+  write(InVar%stdout,'(3(a,f9.3,1x))')'Velocities: compressional Vp=',Vp,' shear Vs=',Vs,' and bulk Vphi=',Vphi
 
 ! Reuss notation  
   write(InVar%stdout,*)' '
@@ -435,7 +436,7 @@ subroutine tdep_calc_elastic(Phij_NN,distance,InVar,Lattice)
   Vp=dsqrt(1.d9*(BR+4.d0*GR/3.d0)/rho)
   Vs=dsqrt(1.d9*GR/rho)
   Vphi=dsqrt(1.d9*BR/rho)
-  write(InVar%stdout,'(3(a,f9.3,x))')'Velocities: compressional Vp=',Vp,' shear Vs=',Vs,' and bulk Vphi=',Vphi
+  write(InVar%stdout,'(3(a,f9.3,1x))')'Velocities: compressional Vp=',Vp,' shear Vs=',Vs,' and bulk Vphi=',Vphi
 
 ! Voigt-Reuss-Hill notation
   write(InVar%stdout,*)' '
@@ -451,7 +452,7 @@ subroutine tdep_calc_elastic(Phij_NN,distance,InVar,Lattice)
   Vp=dsqrt(1.d9*(BH+4.d0*GH/3.d0)/rho)
   Vs=dsqrt(1.d9*GH/rho)
   Vphi=dsqrt(1.d9*BH/rho)
-  write(InVar%stdout,'(3(a,f9.3,x))')'Velocities: compressional Vp=',Vp,' shear Vs=',Vs,' and bulk Vphi=',Vphi
+  write(InVar%stdout,'(3(a,f9.3,1x))')'Velocities: compressional Vp=',Vp,' shear Vs=',Vs,' and bulk Vphi=',Vphi
 ! Store the RVH value of the bulk modulus (will be useful for the Gruneisen)
   Lattice%BulkModulus=BH
 

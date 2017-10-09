@@ -8,6 +8,7 @@ module m_tdep_phij
 
   use defs_basis
   use m_errors
+  use m_profiling_abi
   use m_tdep_readwrite,   only : Input_Variables_type
   use m_tdep_latt,        only : Lattice_Variables_type
   use m_tdep_shell,       only : Shell_Variables_type
@@ -232,9 +233,9 @@ subroutine tdep_build_phijNN(distance,InVar,ntotcoeff,proj,Phij_coeff,Phij_NN,Sh
       do kk=1,3
         do ll=1,3
           if (abs(Phij_shell(kk,ll,ishell)-Phij_shell(ll,kk,ishell)).gt.tol8) then
-            write(InVar%stdout,'(a,i4,a,i4,x,i4)') '  WARNING: For shell',ishell ,' and directions (kk,ll)=',kk,ll
+            write(InVar%stdout,'(a,i4,a,i4,1x,i4)') '  WARNING: For shell',ishell ,' and directions (kk,ll)=',kk,ll
             write(InVar%stdout,*) '          the shell gives a non symetric contribution to Dij:'
-            write(InVar%stdout,'(a,x,f9.6,x,f9.6)') '           the Dij(qpt=0) and Dji(qpt=0)=',&
+            write(InVar%stdout,'(a,1x,f9.6,1x,f9.6)') '           the Dij(qpt=0) and Dji(qpt=0)=',&
 &             Phij_shell(kk,ll,ishell),Phij_shell(ll,kk,ishell)
             write(InVar%stdout,*) '          This could lead to a non-hermitian Dij matrix.'
             write(InVar%stdout,*) ' '
@@ -279,7 +280,7 @@ subroutine tdep_build_phijNN(distance,InVar,ntotcoeff,proj,Phij_coeff,Phij_NN,Sh
               if (abs(Phij_shell(kk,ll,ishell)-Phij_shell(ll,kk,ishell)).gt.tol8) then
                 delta=(correction(iatom,kk,ll)-correction(iatom,ll,kk))/2.d0/counter(iatom,kk,ll)
                 if (InVar%debug.and.iatom.le.InVar%natom_unitcell) then
-                  write(InVar%stdout,'(a,f9.6,a,3(i4,x))') 'Correction=',delta,' for iatom,jatom,shell=',iatom,jatom,ishell
+                  write(InVar%stdout,'(a,f9.6,a,3(i4,1x))') 'Correction=',delta,' for iatom,jatom,shell=',iatom,jatom,ishell
                 end if  
                 Phij_NN((iatom-1)*3+kk,(iatom-1)*3+ll)=Phij_NN((iatom-1)*3+kk,(iatom-1)*3+ll)+delta
                 Phij_NN((iatom-1)*3+kk,(jatom-1)*3+ll)=Phij_NN((iatom-1)*3+kk,(jatom-1)*3+ll)-delta
@@ -340,11 +341,11 @@ subroutine tdep_build_phijNN(distance,InVar,ntotcoeff,proj,Phij_coeff,Phij_NN,Sh
           jatom=Shell2at%neighbours(iatcell,this_shell)%atomj_in_shell(iatshell)
           write(InVar%stdout,'(a,i4,a,i4)') '  For jatom=',jatom,' ,with type=',mod(jatom-1,InVar%natom_unitcell)+1
           do ii=1,3
-            write(InVar%stdout,'(2x,3(f9.6,x))') Phij_NN((iatcell-1)*3+ii,(jatom-1)*3+1),Phij_NN((iatcell-1)*3+ii,(jatom-1)*3+2),&
+            write(InVar%stdout,'(2x,3(f9.6,1x))') Phij_NN((iatcell-1)*3+ii,(jatom-1)*3+1),Phij_NN((iatcell-1)*3+ii,(jatom-1)*3+2),&
 &             Phij_NN((iatcell-1)*3+ii,(jatom-1)*3+3)
           end do
-          write(InVar%stdout,'(a,3(x,f11.6))') '  The components of the vector are:', distance(iatcell,jatom,2:4)
-          write(InVar%stdout,'(a,(x,f9.6))') '  Trace=',Phij_NN((iatcell-1)*3+1,(jatom-1)*3+1)+Phij_NN((iatcell-1)*3+2,&
+          write(InVar%stdout,'(a,3(1x,f11.6))') '  The components of the vector are:', distance(iatcell,jatom,2:4)
+          write(InVar%stdout,'(a,(1x,f9.6))') '  Trace=',Phij_NN((iatcell-1)*3+1,(jatom-1)*3+1)+Phij_NN((iatcell-1)*3+2,&
 &           (jatom-1)*3+2)+Phij_NN((iatcell-1)*3+3,(jatom-1)*3+3)
           write(InVar%stdout,*) ' '
         end do
@@ -360,9 +361,9 @@ subroutine tdep_build_phijNN(distance,InVar,ntotcoeff,proj,Phij_coeff,Phij_NN,Sh
     open(unit=55,file='Phij_NN.dat')
     do jatom=1,3*InVar%natom
       if (jatom.le.3*InVar%natom_unitcell) then
-        write(52,'(10000(f10.6,x))') Phij_NN(jatom,:)
+        write(52,'(10000(f10.6,1x))') Phij_NN(jatom,:)
       end if  
-      write(55,'(10000(f10.6,x))') Phij_NN(jatom,:)
+      write(55,'(10000(f10.6,1x))') Phij_NN(jatom,:)
     end do  
     close(52)
     close(55)
@@ -422,27 +423,27 @@ subroutine tdep_calc_dij(dij,eigenV,iqpt,InVar,Lattice,omega,Phij_NN,qpt_cart,Rl
   itemp=0
   do ii=1,3*InVar%natom_unitcell
     do jj=ii,3*InVar%natom_unitcell
-      if ((abs(real(dij(ii,jj))-real(dij(jj,ii))).gt.tol10).or.(abs(imag(dij(ii,jj))+imag(dij(jj,ii))).gt.tol10)) then
+      if ((abs(real(dij(ii,jj))-real(dij(jj,ii))).gt.tol10).or.(abs(aimag(dij(ii,jj))+aimag(dij(jj,ii))).gt.tol10)) then
         if (InVar%debug) then
-          write (InVar%stdout,'(a,x,2(i4,x))') 'for ii,jj=',ii,jj
-          write (InVar%stdout,'(a,x,1(f12.8,x))') 'abs(realij-realji)=',abs(real(dij(ii,jj))-real(dij(jj,ii)))
-          write (InVar%stdout,'(a,x,1(f12.8,x))') 'abs(imagij+imagji)=',abs(imag(dij(ii,jj))+imag(dij(jj,ii)))
+          write (InVar%stdout,'(a,1x,2(i4,1x))') 'for ii,jj=',ii,jj
+          write (InVar%stdout,'(a,1x,1(f12.8,1x))') 'abs(realij-realji)=',abs(real(dij(ii,jj))-real(dij(jj,ii)))
+          write (InVar%stdout,'(a,1x,1(f12.8,1x))') 'abs(imagij+imagji)=',abs(aimag(dij(ii,jj))+aimag(dij(jj,ii)))
         end if  
         itemp=itemp+1
         if ((InVar%Impose_symetry.eq.0).or.(InVar%Impose_symetry.eq.2)) then
           write(InVar%stdout,*) 'STOP: The Dij matrix is not hermitian'
-          write(InVar%stdout,'(a,x,3(f10.6,x))') 'For qpt=',qpt_cart(:)*Lattice%acell_unitcell(:)
+          write(InVar%stdout,'(a,1x,3(f10.6,1x))') 'For qpt=',qpt_cart(:)*Lattice%acell_unitcell(:)
           write(InVar%stdout,'(a,i4,a)') '  Dij(',iqpt,'real)='
           do iatcell=1,InVar%natom_unitcell
-            write(InVar%stdout,'(100(f12.8,x))') real(dij(1+(iatcell-1)*3,:))
-            write(InVar%stdout,'(100(f12.8,x))') real(dij(2+(iatcell-1)*3,:))
-            write(InVar%stdout,'(100(f12.8,x))') real(dij(3+(iatcell-1)*3,:))
+            write(InVar%stdout,'(100(f12.8,1x))') real(dij(1+(iatcell-1)*3,:))
+            write(InVar%stdout,'(100(f12.8,1x))') real(dij(2+(iatcell-1)*3,:))
+            write(InVar%stdout,'(100(f12.8,1x))') real(dij(3+(iatcell-1)*3,:))
           end do  
           write(InVar%stdout,'(a,i4,a)') '  Dij(',iqpt,'imag)='
           do iatcell=1,InVar%natom_unitcell
-            write(InVar%stdout,'(100(f12.8,x))') imag(dij(1+(iatcell-1)*3,:))
-            write(InVar%stdout,'(100(f12.8,x))') imag(dij(2+(iatcell-1)*3,:))
-            write(InVar%stdout,'(100(f12.8,x))') imag(dij(3+(iatcell-1)*3,:))
+            write(InVar%stdout,'(100(f12.8,1x))') aimag(dij(1+(iatcell-1)*3,:))
+            write(InVar%stdout,'(100(f12.8,1x))') aimag(dij(2+(iatcell-1)*3,:))
+            write(InVar%stdout,'(100(f12.8,1x))') aimag(dij(3+(iatcell-1)*3,:))
           end do  
           MSG_ERROR('The Dij matrix is not hermitian')
         else if ((InVar%Impose_symetry.eq.1).or.(InVar%Impose_symetry.eq.3)) then
@@ -543,25 +544,25 @@ subroutine tdep_write_dij(dij,eigenV,iqpt,InVar,Lattice,omega,qpt_cart)
   integer :: ii,iatcell
 
 ! Print the dynamical matrix (Dij)
-  write(52,'(a,x,3(f10.6,x))') 'For qpt=',qpt_cart(:)*Lattice%acell_unitcell(:)
+  write(52,'(a,1x,3(f10.6,1x))') 'For qpt=',qpt_cart(:)*Lattice%acell_unitcell(:)
   write(52,'(a,i4,a)') '  Dij(',iqpt,'real)*1.d6='
   do iatcell=1,InVar%natom_unitcell
-    write(52,'(100(f10.6,x))') real(dij(1+(iatcell-1)*3,:))*1.d6
-    write(52,'(100(f10.6,x))') real(dij(2+(iatcell-1)*3,:))*1.d6
-    write(52,'(100(f10.6,x))') real(dij(3+(iatcell-1)*3,:))*1.d6
+    write(52,'(100(f10.6,1x))') real(dij(1+(iatcell-1)*3,:))*1.d6
+    write(52,'(100(f10.6,1x))') real(dij(2+(iatcell-1)*3,:))*1.d6
+    write(52,'(100(f10.6,1x))') real(dij(3+(iatcell-1)*3,:))*1.d6
   end do  
   write(52,'(a,i4,a)') '  Dij(',iqpt,'imag)*1.d6='
   do iatcell=1,InVar%natom_unitcell
-    write(52,'(100(f10.6,x))') imag(dij(1+(iatcell-1)*3,:))*1.d6
-    write(52,'(100(f10.6,x))') imag(dij(2+(iatcell-1)*3,:))*1.d6
-    write(52,'(100(f10.6,x))') imag(dij(3+(iatcell-1)*3,:))*1.d6
+    write(52,'(100(f10.6,1x))') aimag(dij(1+(iatcell-1)*3,:))*1.d6
+    write(52,'(100(f10.6,1x))') aimag(dij(2+(iatcell-1)*3,:))*1.d6
+    write(52,'(100(f10.6,1x))') aimag(dij(3+(iatcell-1)*3,:))*1.d6
   end do  
   write(52,*)' '
 
 ! Print the frequencies (omega)
-  if (InVar%Enunit.eq.0) write(53,'(i5,x,100(f15.6,x))') iqpt,(omega(ii)*Ha_eV*1000,ii=1,3*InVar%natom_unitcell)
-  if (InVar%Enunit.eq.1) write(53,'(i5,x,100(f15.6,x))') iqpt,(omega(ii)*Ha_cmm1   ,ii=1,3*InVar%natom_unitcell)
-  if (InVar%Enunit.eq.2) write(53,'(i5,x,100(f15.6,x))') iqpt,(omega(ii)           ,ii=1,3*InVar%natom_unitcell)
+  if (InVar%Enunit.eq.0) write(53,'(i5,1x,100(f15.6,1x))') iqpt,(omega(ii)*Ha_eV*1000,ii=1,3*InVar%natom_unitcell)
+  if (InVar%Enunit.eq.1) write(53,'(i5,1x,100(f15.6,1x))') iqpt,(omega(ii)*Ha_cmm1   ,ii=1,3*InVar%natom_unitcell)
+  if (InVar%Enunit.eq.2) write(53,'(i5,1x,100(f15.6,1x))') iqpt,(omega(ii)           ,ii=1,3*InVar%natom_unitcell)
 
 ! Print the eigenvectors (eigenV) 
   write(51,*) 'For iqpt=',iqpt
@@ -570,7 +571,7 @@ subroutine tdep_write_dij(dij,eigenV,iqpt,InVar,Lattice,omega,qpt_cart)
     write(51,*) '  Real:'
     write(51,*) real(eigenV(:,ii))
     write(51,*) '  Imag:'
-    write(51,*) imag(eigenV(:,ii))
+    write(51,*) aimag(eigenV(:,ii))
   end do  
   write(51,*) ' '
 
@@ -687,7 +688,7 @@ subroutine tdep_write_yaml(Eigen2nd,Lattice,Qpt)
   write(52,'(a)')    'phonon:'
   distance=0.d0
   do iqpt=1,Qpt%nqpt
-    write(52,'(a,3(f15.6,x,a))') '- q-position: [',Qpt%qpt_red(1,iqpt),',',Qpt%qpt_red(2,iqpt),',',Qpt%qpt_red(3,iqpt),']'
+    write(52,'(a,3(f15.6,1x,a))') '- q-position: [',Qpt%qpt_red(1,iqpt),',',Qpt%qpt_red(2,iqpt),',',Qpt%qpt_red(3,iqpt),']'
     if (iqpt.gt.1) distance=distance+sqrt(sum((Qpt%qpt_cart(:,iqpt)-Qpt%qpt_cart(:,iqpt-1))**2))
     write(52,'(a,f15.6)') '  distance:',distance
     do ii=1,Qpt%qpt_tot

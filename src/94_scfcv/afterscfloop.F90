@@ -340,10 +340,9 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  character(len=500) :: message
  type(paw_dmft_type) :: paw_dmft
 #if defined HAVE_BIGDFT
- integer :: iwarn=0,mband_cprj
+ integer :: mband_cprj
  logical :: do_last_ortho
- real(dp) :: doti,dum,exchat
- character(len=1) :: datacode
+ real(dp) :: dum
 #endif
 !arrays
  real(dp) :: gmet(3,3),gprimd(3,3),pelev(3),rmet(3,3),tsec(2)
@@ -351,8 +350,7 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  real(dp),allocatable :: mpibuf(:,:),qphon(:),rhonow(:,:,:),sqnormgrhor(:,:),xcart(:,:)
 #if defined HAVE_BIGDFT
  integer,allocatable :: dimcprj_srt(:)
- real(dp),allocatable :: hpsi_tmp(:),rhowk(:,:),vxc_tmp(:,:)
- real(dp),pointer :: rhocore(:,:,:,:) => null()
+ real(dp),allocatable :: hpsi_tmp(:)
 #endif
 
 ! *************************************************************************

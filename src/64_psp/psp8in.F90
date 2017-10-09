@@ -110,8 +110,8 @@ subroutine psp8in(ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
 !Local variables-------------------------------
 !scalars
  integer :: extension_switch,iln,iln0,pspindex,ipsang,irad,jj,kk,ll,ll_err,llin
- integer :: mm,nn,nso,ii,ir,il
- real(dp) :: amesh,damesh,fchrg,rchrg,yp1,ypn,dnvdq0,d2nvdq0,fact
+ integer :: mm,nn,nso
+ real(dp) :: amesh,damesh,fchrg,rchrg,yp1,ypn
  logical :: has_tvale
  character(len=500) :: message,errmsg
  type(pawrad_type) :: mesh

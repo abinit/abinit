@@ -8,6 +8,7 @@ module m_tdep_readwrite
   
   use defs_basis
   use m_errors
+  use m_profiling_abi
   use m_xmpi
   use m_abihist
   use m_abimover, only : abimover
@@ -308,37 +309,37 @@ contains
   read(40,*) string
   write(InVar%stdout,'(a)') ' ======================= Define the unitcell =================================' 
   read(40,*) string,InVar%bravais(1),InVar%bravais(2)
-  write(InVar%stdout,'(x,a20,x,i4,x,i4)') string,InVar%bravais(1),InVar%bravais(2)
+  write(InVar%stdout,'(1x,a20,1x,i4,1x,i4)') string,InVar%bravais(1),InVar%bravais(2)
   if (InVar%bravais(1).eq.2) then
     read(40,*) string,InVar%angle_alpha
-    write(InVar%stdout,'(x,a20,x,f15.10)') string,InVar%angle_alpha
+    write(InVar%stdout,'(1x,a20,1x,f15.10)') string,InVar%angle_alpha
   else
     InVar%angle_alpha=90.d0
   end if
   read(40,*) string,InVar%natom_unitcell
-  write(InVar%stdout,'(x,a20,x,i4)') string,InVar%natom_unitcell
+  write(InVar%stdout,'(1x,a20,1x,i4)') string,InVar%natom_unitcell
   ABI_MALLOC(InVar%xred_unitcell,(3,InVar%natom_unitcell)); InVar%xred_unitcell(:,:)=zero
   read(40,*) string,InVar%xred_unitcell(:,:)
-  write(InVar%stdout,'(x,a20)') string
+  write(InVar%stdout,'(1x,a20)') string
   do ii=1,InVar%natom_unitcell
-    write(InVar%stdout,'(22x,3(f15.10,x))') (InVar%xred_unitcell(jj,ii), jj=1,3)
+    write(InVar%stdout,'(22x,3(f15.10,1x))') (InVar%xred_unitcell(jj,ii), jj=1,3)
   end do  
   ABI_MALLOC(InVar%typat_unitcell,(InVar%natom_unitcell)); InVar%typat_unitcell(:)=0 
   read(40,*) string,InVar%typat_unitcell(:)
-  write(InVar%stdout,'(x,a20,20(x,i4))') string,(InVar%typat_unitcell(jj),jj=1,InVar%natom_unitcell)
+  write(InVar%stdout,'(1x,a20,20(1x,i4))') string,(InVar%typat_unitcell(jj),jj=1,InVar%natom_unitcell)
   if (InVar%netcdf) then
     string='ntypat'
   else
     read(40,*) string,InVar%ntypat
   end if  
-  write(InVar%stdout,'(x,a20,x,i4)') string,InVar%ntypat
+  write(InVar%stdout,'(1x,a20,1x,i4)') string,InVar%ntypat
   if (InVar%netcdf) then
     string='amu'
   else  
     ABI_MALLOC(InVar%amu,(InVar%ntypat)); InVar%amu(:)=zero
     read(40,*) string,InVar%amu(:)
   end if  
-  write(InVar%stdout,'(x,a20,20(x,f15.10))') string,(InVar%amu(jj),jj=1,InVar%ntypat)
+  write(InVar%stdout,'(1x,a20,20(1x,f15.10))') string,(InVar%amu(jj),jj=1,InVar%ntypat)
 ! Define supercell (as a function of the unitcell defined above)
   read(40,*) string
   write(InVar%stdout,'(a)') ' ======================= Define the supercell ================================' 
@@ -348,46 +349,46 @@ contains
   else
     read(40,*) string,InVar%rprimd_MD(1,:),InVar%rprimd_MD(2,:),InVar%rprimd_MD(3,:)
   end if  
-  write(InVar%stdout,'(x,a20)') string
+  write(InVar%stdout,'(1x,a20)') string
   do ii=1,3
-    write(InVar%stdout,'(22x,3(f15.10,x))') (InVar%rprimd_MD(ii,jj),jj=1,3)
+    write(InVar%stdout,'(22x,3(f15.10,1x))') (InVar%rprimd_MD(ii,jj),jj=1,3)
   end do  
   read(40,*) string,InVar%multiplicity(1,:),InVar%multiplicity(2,:),InVar%multiplicity(3,:)
-  write(InVar%stdout,'(x,a20)') string
+  write(InVar%stdout,'(1x,a20)') string
   do ii=1,3
-    write(InVar%stdout,'(22x,3(f15.10,x))') (InVar%multiplicity(ii,jj),jj=1,3)
+    write(InVar%stdout,'(22x,3(f15.10,1x))') (InVar%multiplicity(ii,jj),jj=1,3)
   end do  
   if (InVar%netcdf) then
     string='natom'
   else
     read(40,*) string,InVar%natom
   end if
-  write(InVar%stdout,'(x,a20,x,i4)') string,InVar%natom
+  write(InVar%stdout,'(1x,a20,1x,i4)') string,InVar%natom
   if (InVar%netcdf) then
     string='typat'
   else
     ABI_MALLOC(InVar%typat,(InVar%natom)); InVar%typat(:)=0 
     read(40,*) string,InVar%typat(:)
   end if  
-  write(InVar%stdout,'(x,a20)') string
+  write(InVar%stdout,'(1x,a20)') string
   do ii=1,InVar%natom,10
     if (ii+9.lt.InVar%natom) then
-      write(InVar%stdout,'(22x,10(i4,x))') (InVar%typat(ii+jj-1),jj=1,10)
+      write(InVar%stdout,'(22x,10(i4,1x))') (InVar%typat(ii+jj-1),jj=1,10)
     else
-      write(InVar%stdout,'(22x,10(i4,x))') (InVar%typat(jj),jj=ii,InVar%natom)
+      write(InVar%stdout,'(22x,10(i4,1x))') (InVar%typat(jj),jj=ii,InVar%natom)
     end if  
   end do  
   read(40,*) string,InVar%temperature
-  write(InVar%stdout,'(x,a20,x,f15.10)') string,InVar%temperature
+  write(InVar%stdout,'(1x,a20,1x,f15.10)') string,InVar%temperature
 ! Define phonons computational details
   read(40,*) string
   write(InVar%stdout,'(a)') ' ======================= Define computational details ========================' 
   read(40,*) string,InVar%nstep_max
-  write(InVar%stdout,'(x,a20,x,i5)') string,InVar%nstep_max
+  write(InVar%stdout,'(1x,a20,1x,i5)') string,InVar%nstep_max
   read(40,*) string,InVar%nstep_min
-  write(InVar%stdout,'(x,a20,x,i5)') string,InVar%nstep_min
+  write(InVar%stdout,'(1x,a20,1x,i5)') string,InVar%nstep_min
   read(40,*) string,InVar%Rcut
-  write(InVar%stdout,'(x,a20,x,f15.10)') string,InVar%Rcut
+  write(InVar%stdout,'(1x,a20,1x,f15.10)') string,InVar%Rcut
 ! Optional input variables  
   read(40,*) string
   write(InVar%stdout,'(a)') ' ======================= Optional input variables ============================' 
@@ -396,43 +397,43 @@ contains
     backspace(40)
     if (string.eq.DosDeltae) then
       read(40,*) string,InVar%dosdeltae
-      write(InVar%stdout,'(x,a20,x,f15.10)') string,InVar%dosdeltae
+      write(InVar%stdout,'(1x,a20,1x,f15.10)') string,InVar%dosdeltae
     else if (string.eq.Impose_Symetry) then
       read(40,*) string,InVar%Impose_Symetry
-      write(InVar%stdout,'(x,a20,x,i4)') string,InVar%Impose_Symetry
+      write(InVar%stdout,'(1x,a20,1x,i4)') string,InVar%Impose_Symetry
     else if (string.eq.Use_ideal_positions) then  
       read(40,*) string,InVar%Use_ideal_positions
-      write(InVar%stdout,'(x,a20,x,i4)') string,InVar%Use_ideal_positions
+      write(InVar%stdout,'(1x,a20,1x,i4)') string,InVar%Use_ideal_positions
     else if (string.eq.Born_charge) then  
       ABI_MALLOC(InVar%born_charge,(InVar%ntypat)); InVar%born_charge(:)=0.d0
       InVar%loto=.true.
       read(40,*) string,InVar%born_charge(:)
-      write(InVar%stdout,'(x,a20,20(x,f15.10))') string,(InVar%born_charge(jj),jj=1,InVar%ntypat)
+      write(InVar%stdout,'(1x,a20,20(1x,f15.10))') string,(InVar%born_charge(jj),jj=1,InVar%ntypat)
     else if (string.eq.Dielec_constant) then  
       read(40,*) string,InVar%dielec_constant
-      write(InVar%stdout,'(x,a20,x,f15.10)') string,InVar%dielec_constant
+      write(InVar%stdout,'(1x,a20,1x,f15.10)') string,InVar%dielec_constant
     else if (string.eq.BZpath) then  
       read(40,*) string,InVar%BZpath
-      write(InVar%stdout,'(x,a20,x,i4)') string,InVar%BZpath
+      write(InVar%stdout,'(1x,a20,1x,i4)') string,InVar%BZpath
       if (InVar%BZpath.lt.0) then
         ABI_MALLOC(InVar%qpt,(3,abs(InVar%BZpath))); InVar%qpt(:,:)=zero
         write(InVar%stdout,'(a)') ' Q points as given in the input file:'
         do jj=1,abs(InVar%BZpath)
           read(40,*) InVar%qpt(:,jj)
-          write(InVar%stdout,'(22x,3(f15.10,x))') InVar%qpt(:,jj)
+          write(InVar%stdout,'(22x,3(f15.10,1x))') InVar%qpt(:,jj)
         end do  
       else if (InVar%BZpath.gt.0) then
         ABI_MALLOC(InVar%special_qpt,(InVar%BZpath))
         backspace(40)
         read(40,*) string,tmp,(InVar%special_qpt(jj),jj=1,InVar%BZpath)
-        write(InVar%stdout,'(a,x,10(a2,"-"))') ' Special q-points: ',InVar%special_qpt(:)
+        write(InVar%stdout,'(a,1x,10(a2,"-"))') ' Special q-points: ',InVar%special_qpt(:)
       end if
     else if (string.eq.Order) then  
       read(40,*) string,InVar%Order,InVar%Rcut3
-      write(InVar%stdout,'(x,a20,x,i4,x,f15.10)') string,InVar%Order,InVar%Rcut3
+      write(InVar%stdout,'(1x,a20,1x,i4,1x,f15.10)') string,InVar%Order,InVar%Rcut3
     else if (string.eq.Slice) then  
       read(40,*) string,InVar%Slice
-      write(InVar%stdout,'(x,a20,x,i4)') string,InVar%Slice
+      write(InVar%stdout,'(1x,a20,1x,i4)') string,InVar%Slice
       nstep_float=float(InVar%nstep_max-InVar%nstep_min+1)/float(InVar%Slice)
       nstep_int  =float(int(nstep_float))
       write(InVar%stdout,*) nstep_int,nstep_float
@@ -441,35 +442,35 @@ contains
       end if  
     else if (string.eq.Enunit) then  
       read(40,*) string,InVar%Enunit
-      if (InVar%Enunit.eq.0) write(InVar%stdout,'(x,a20,x,i4,x,a)') string,InVar%Enunit,'(energy in meV)'
-      if (InVar%Enunit.eq.1) write(InVar%stdout,'(x,a20,x,i4,x,a)') string,InVar%Enunit,'(energy in cm-1)'
-      if (InVar%Enunit.eq.2) write(InVar%stdout,'(x,a20,x,i4,x,a)') string,InVar%Enunit,'(energy in Ha)'
+      if (InVar%Enunit.eq.0) write(InVar%stdout,'(1x,a20,1x,i4,1x,a)') string,InVar%Enunit,'(energy in meV)'
+      if (InVar%Enunit.eq.1) write(InVar%stdout,'(1x,a20,1x,i4,1x,a)') string,InVar%Enunit,'(energy in cm-1)'
+      if (InVar%Enunit.eq.2) write(InVar%stdout,'(1x,a20,1x,i4,1x,a)') string,InVar%Enunit,'(energy in Ha)'
     else if (string.eq.ReadIFC) then  
       read(40,*) string,InVar%ReadIFC
       if (InVar%ReadIFC.eq.1) then
         backspace(40)
         read(40,*) string,InVar%ReadIFC,InVar%tolread
-        write(InVar%stdout,'(x,a20,x,i4,x,f15.10)') string,InVar%ReadIFC,InVar%tolread
+        write(InVar%stdout,'(1x,a20,1x,i4,1x,f15.10)') string,InVar%ReadIFC,InVar%tolread
       else  
-        write(InVar%stdout,'(x,a20,x,i4)') string,InVar%ReadIFC
+        write(InVar%stdout,'(1x,a20,1x,i4)') string,InVar%ReadIFC
       end if  
     else if (string.eq.RotationalInv) then  
       read(40,*) string,InVar%RotationalInv
-      write(InVar%stdout,'(x,a20,x,i4)') string,InVar%RotationalInv
+      write(InVar%stdout,'(1x,a20,1x,i4)') string,InVar%RotationalInv
     else if (string.eq.Firstqptseg) then  
       read(40,*) string,InVar%firstqptseg
-      write(InVar%stdout,'(x,a20,x,i4)') string,InVar%firstqptseg
+      write(InVar%stdout,'(1x,a20,1x,i4)') string,InVar%firstqptseg
     else if (string.eq.Ngqpt1) then  
       read(40,*) string,InVar%ngqpt1(:)
-      write(InVar%stdout,'(x,a20,x,3(i4,x))') string,InVar%ngqpt1(:)
+      write(InVar%stdout,'(1x,a20,1x,3(i4,1x))') string,InVar%ngqpt1(:)
     else if (string.eq.Ngqpt2) then  
       read(40,*) string,InVar%ngqpt2(:)
-      write(InVar%stdout,'(x,a20,x,i4)') string,InVar%ngqpt2(:)
+      write(InVar%stdout,'(1x,a20,1x,i4)') string,InVar%ngqpt2(:)
     else if (string.eq.tolmotifinboxmatch) then  
       read(40,*) string,InVar%tolmotif,InVar%tolinbox,InVar%tolmatch
-      write(InVar%stdout,'(x,a20,f10.5)') 'tolmotif            ',InVar%tolmotif
-      write(InVar%stdout,'(x,a20,f10.5)') 'tolinbox            ',InVar%tolinbox
-      write(InVar%stdout,'(x,a20,f10.5)') 'tolmatch            ',InVar%tolmatch
+      write(InVar%stdout,'(1x,a20,f10.5)') 'tolmotif            ',InVar%tolmotif
+      write(InVar%stdout,'(1x,a20,f10.5)') 'tolinbox            ',InVar%tolinbox
+      write(InVar%stdout,'(1x,a20,f10.5)') 'tolmatch            ',InVar%tolmatch
     else if (string.eq.TheEnd) then
       exit
     else 
@@ -500,12 +501,12 @@ contains
   InVar%nstep=(InVar%nstep_max-InVar%nstep_min+1)/InVar%Slice
   write(InVar%stdout,'(a)') ' '
   write(InVar%stdout,'(a)') ' WARNING: ALL the quantities are now computed :'
-  write(InVar%stdout,'(a,x,i4)') '                                      from nstep_min=',InVar%nstep_min
-  write(InVar%stdout,'(a,x,i4)') '                                        to nstep_max=',InVar%nstep_max
+  write(InVar%stdout,'(a,1x,i4)') '                                      from nstep_min=',InVar%nstep_min
+  write(InVar%stdout,'(a,1x,i4)') '                                        to nstep_max=',InVar%nstep_max
   if (InVar%Slice.ne.1) then
-    write(InVar%stdout,'(a,x,i4)') '                                    by using a slice=',InVar%Slice
+    write(InVar%stdout,'(a,1x,i4)') '                                    by using a slice=',InVar%Slice
   end if  
-  write(InVar%stdout,'(a,x,i4)') '          So, the real number of time steps is nstep=',InVar%nstep
+  write(InVar%stdout,'(a,1x,i4)') '          So, the real number of time steps is nstep=',InVar%nstep
 ! End of read and echo  
   close(40)
 

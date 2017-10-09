@@ -20,7 +20,7 @@
 !!     if 2, COMPLEX
 !!  idir=direction of the current perturbation
 !!  ipert=type of the perturbation
-!!  kxc(nfft,nkxc)=exchange and correlation kernel (see rhohxc.f)
+!!  kxc(nfft,nkxc)=exchange and correlation kernel (see rhotoxc.f)
 !!  mpi_enreg=information about MPI parallelization
 !!  natom=number of atoms in cell.
 !!  nfft=(effective) number of FFT grid points (for this processor)

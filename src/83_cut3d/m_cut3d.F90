@@ -1836,13 +1836,13 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
  integer,parameter :: tim_fourwf0=0,tim_rwwf0=0,ndat1=1,formeig0=0
  integer :: cband,cgshift,ckpt,cplex,cspinor,csppol,gridshift1
  integer :: gridshift2,gridshift3,ia,iatom,iband,ichoice,ifile,iomode
- integer :: ii1,ii2,ii3,ikpt,ilang,ioffkg,iout,iprompt,ipw,itypat
+ integer :: ii1,ii2,ii3,ikpt,ilang,ioffkg,iout,iprompt,ipw
  integer :: ir1,ir2,ir3,ivect,ixint,mband,mbess,mcg,mgfft
  integer :: mkmem,mlang,mpw,n4,n5,n6,nfit,npw_k
  integer :: nradintmax,oldcband,oldckpt,oldcspinor,oldcsppol
  integer :: prtsphere,select_exit,unout,iunt,rc_ylm
  integer :: ikpt_qps,nkpt_qps,nband_qps,iscf_qps
- real(dp) :: arg,bessargmax,bessint_delta,kpgmax,ratsph,tmpi,tmpr,ucvol,weight,eig_k_qps,intg
+ real(dp) :: arg,bessargmax,bessint_delta,kpgmax,ratsph,tmpi,tmpr,ucvol,weight,eig_k_qps
  character(len=*), parameter :: INPUTfile='cut.in'
  character(len=1) :: outputchar
  character(len=10) :: string

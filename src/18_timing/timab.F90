@@ -54,7 +54,7 @@
 !!      green_kernel,gstate,gstateimg,gwls_ComputeCorrelationEnergy
 !!      gwls_DielectricArray,gwls_QR_factorization,gwls_lineqsolver
 !!      gwls_model_polarisability,gwls_polarisability,gwls_sternheimer,hartre
-!!      hartre1,impurity_solve,initberry,initwf,inkpts,invars2,inwffil,listkk
+!!      impurity_solve,initberry,initwf,inkpts,invars2,inwffil,listkk
 !!      lobpcgwf,m_ab7_invars_f90,m_ab7_mixing,m_cgtools,m_dyson_solver
 !!      m_fftcore,m_fftw3,m_fock,m_green,m_haydock,m_hexc,m_invovl,m_iowf
 !!      m_lobpcg,m_lobpcg2,m_lobpcgwf,m_paral_pert,m_sg2002,m_wfutils,m_xg
@@ -65,7 +65,7 @@
 !!      partial_dos_fractions_paw,pawdenpot,pawdfptenergy,pawinit,pawmknhat
 !!      pawmknhat_psipsi,pawmkrho,pawpolev,prep_bandfft_tabs,prep_calc_ucrpa
 !!      prep_fourwf,prep_getghc,prep_nonlop,pspatm,pspheads_comm,pspini
-!!      pw_orthon,rayleigh_ritz,recursion,recursion_nl,redgr,respfn,rhohxc
+!!      pw_orthon,rayleigh_ritz,recursion,recursion_nl,redgr,respfn,rhotoxc
 !!      rhotov,rwwf,scfcv,screening,setsym,setvtr,sigma,sqnormm_v,status,stress
 !!      strhar,suscep_stat,susk,suskmm,symrhg,symsgcube,tddft,timana,vn_nl_rec
 !!      vtorho,vtorhorec,vtorhotf,vtowfk,wfconv,wfk_analyze,wfsinp,wvl_nhatgrid

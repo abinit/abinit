@@ -8,6 +8,7 @@ module m_tdep_utils
   
   use defs_basis
   use m_errors
+  use m_profiling_abi
   use m_tdep_latt,        only : Lattice_Variables_type, tdep_make_inbox
   use m_tdep_readwrite,   only : Input_Variables_type
   use m_tdep_sym,         only : Symetries_Variables_type, tdep_SearchS_1at
@@ -71,9 +72,9 @@ contains
     if (sigma(ii).lt.1.d8) then
       pseudo_sigma(ii,ii)=sigma(ii)
     end if  
-    write(InVar%stdout,'(x,i4,x,f15.10)') ii,sigma(ii)
+    write(InVar%stdout,'(1x,i4,1x,f15.10)') ii,sigma(ii)
   end do
-  write(InVar%stdout,'(a,x,f15.10)')'  condition number=',maxval(sigma(:))/minval(sigma(:))
+  write(InVar%stdout,'(a,1x,f15.10)')'  condition number=',maxval(sigma(:))/minval(sigma(:))
   ABI_FREE(sigma)
   
   write(InVar%stdout,*) ' Calculation of the pseudo-inverse...'
@@ -173,9 +174,9 @@ contains
       do kk=-max_ijk,max_ijk
         do iatcell=1,InVar%natom_unitcell
           if (iatcell==1) ok=.false.
-          Rlatt(1)=dfloat(ii-1)
-          Rlatt(2)=dfloat(jj-1)
-          Rlatt(3)=dfloat(kk-1)
+          Rlatt(1)=real(ii-1)
+          Rlatt(2)=real(jj-1)
+          Rlatt(3)=real(kk-1)
 !         Then compute the reduced positions
           tmp(:)=Rlatt(:)+InVar%xred_unitcell(:,iatcell)
           call DGEMV('T',3,3,1.d0,Lattice%multiplicitym1(:,:),3,tmp(:),1,0.d0,xred_tmp(:),1)
@@ -247,7 +248,7 @@ contains
       xred_average(:,iatom)=xred_average(:,iatom)+InVar%xred(:,iatom,istep)
     end do
   end do
-  xred_average(:,:)=xred_average(:,:)/dfloat(InVar%nstep)
+  xred_average(:,:)=xred_average(:,:)/real(InVar%nstep)
 
   write(InVar%stdout,*)' Search the unitcell basis of atoms in the MD trajectory...'
 ! Search the basis of atoms in the supercell
@@ -286,8 +287,8 @@ contains
   if (ok) then
     open(unit=31,file='xred_average.xyz')
     do iatom=1,InVar%natom
-      write(31,'(a,x,3(f10.6,x))') 'C',xred_center(:,iatom)
-      write(31,'(a,x,3(f10.6,x))') 'I',xred_ideal (:,iatom)
+      write(31,'(a,1x,3(f10.6,1x))') 'C',xred_center(:,iatom)
+      write(31,'(a,1x,3(f10.6,1x))') 'I',xred_ideal (:,iatom)
     end do
     close(31)
     MSG_ERROR_NOSTOP('The basis of atoms written in input.in file does not appear in the MD trajectory',ierr)
@@ -358,7 +359,7 @@ contains
     do iatcell=1,InVar%natom_unitcell
       write(InVar%stdout,*) 'For iatcell=',iatcell
       do jatom=1,InVar%natom
-        write(InVar%stdout,'(a,i4,a,3(f16.10,x))') 'For jatom=',jatom,', Rlatt=',Rlatt_red(1:3,iatcell,jatom)
+        write(InVar%stdout,'(a,i4,a,3(f16.10,1x))') 'For jatom=',jatom,', Rlatt=',Rlatt_red(1:3,iatcell,jatom)
       end do  
     end do  
   end if
@@ -440,8 +441,8 @@ contains
       write(InVar%stdout,*) '  xred_center=',(xred_center(ii,iatom),ii=1,3)
       close(31)
       do eatom=1,InVar%natom
-        write(31,'(a,x,3(f10.6,x))') 'I',xred_ideal (:,eatom)
-        write(31,'(a,x,3(f10.6,x))') 'C',xred_center(:,eatom)
+        write(31,'(a,1x,3(f10.6,1x))') 'I',xred_ideal (:,eatom)
+        write(31,'(a,1x,3(f10.6,1x))') 'C',xred_center(:,eatom)
       end do
       MSG_ERROR('Problem to find the average position')
     end if  
@@ -451,17 +452,17 @@ contains
 ! according to ideal positions xred_ideal. 
 ! --> In reduced coordinates
   do iatom=1,InVar%natom
-    write(31,'(a,x,3(f10.6,x))') 'Ired',xred_ideal (:,iatom)
-    write(31,'(a,x,3(f10.6,x))') 'Cred',xred_center(:,FromIdeal2Average(iatom))
+    write(31,'(a,1x,3(f10.6,1x))') 'Ired',xred_ideal (:,iatom)
+    write(31,'(a,1x,3(f10.6,1x))') 'Cred',xred_center(:,FromIdeal2Average(iatom))
   end do  
 ! --> In cartesian coordinates  
   do iatom=1,InVar%natom
     tmp(:)=zero
     call DGEMV('T',3,3,1.d0,Lattice%rprimd_MD(:,:),3,xred_ideal (:,iatom),1,0.d0,tmp(:),1)
-    write(31,'(a,x,3(f10.6,x))') 'Icart',tmp(:)
+    write(31,'(a,1x,3(f10.6,1x))') 'Icart',tmp(:)
     tmp(:)=zero
     call DGEMV('T',3,3,1.d0,Lattice%rprimd_MD(:,:),3,xred_center(:,FromIdeal2Average(iatom)),1,0.d0,tmp(:),1)
-    write(31,'(a,x,3(f10.6,x))') 'Ccart',tmp(:)
+    write(31,'(a,1x,3(f10.6,1x))') 'Ccart',tmp(:)
   end do  
   close(31)
   ABI_FREE(xred_center)
@@ -678,7 +679,7 @@ contains
     end if  
 !   Compute U_TDEP = U0 + PhijUiUj  (2nd order)
 !                  = U0 + PhijUiUj + PsijUiUjUk  
-    U_TDEP(:)=tmp0/dfloat(istepmax)+PhijUiUj(:)
+    U_TDEP(:)=tmp0/real(istepmax)+PhijUiUj(:)
     if (present(Psij_NN)) U_TDEP(:) = U_TDEP(:)+PsijUiUjUk(:)
 !   Compute DeltaFree_AH = < U_MD - U_TDEP >
     tmp1=zero
@@ -688,7 +689,7 @@ contains
 !   Compute DeltaFree_AH2 = - <( (U_MD-U_TDEP) - <U_MD-U_TDEP> )**2> / (2.k_B.T)
     tmp2=zero
     do istep=1,istepmax
-      tmp2=tmp2-( (U_MD(istep)-U_TDEP(istep)) - tmp1/dfloat(istepmax))**2
+      tmp2=tmp2-( (U_MD(istep)-U_TDEP(istep)) - tmp1/real(istepmax))**2
     end do
 !   Compute eucledian distance for forces    
     do istep=istepmin,istepmax
@@ -700,13 +701,13 @@ contains
         end do
       end do  
     end do
-    U0            =tmp0/dfloat(istepmax*InVar%natom)
-    UMD           =tmp6/dfloat(istepmax*InVar%natom)
-    Uharm         =tmp5/dfloat(istepmax*InVar%natom)
-    Uanh          =tmp7/dfloat(istepmax*InVar%natom)
-    DeltaFree_AH  =tmp1/dfloat(istepmax*InVar%natom)
-    DeltaFree_AH2 =tmp2/dfloat(istepmax*InVar%natom)/(2.d0*kb_HaK*InVar%temperature)
-    MinDeltaForces=tmp3/dfloat(istepmax*InVar%natom*3)
+    U0            =tmp0/real(istepmax*InVar%natom)
+    UMD           =tmp6/real(istepmax*InVar%natom)
+    Uharm         =tmp5/real(istepmax*InVar%natom)
+    Uanh          =tmp7/real(istepmax*InVar%natom)
+    DeltaFree_AH  =tmp1/real(istepmax*InVar%natom)
+    DeltaFree_AH2 =tmp2/real(istepmax*InVar%natom)/(2.d0*kb_HaK*InVar%temperature)
+    MinDeltaForces=tmp3/real(istepmax*InVar%natom*3)
     sigma         =dsqrt(tmp3/tmp4)
     if (present(Psij_NN)) then
       write(InVar%stdout,'(i5,8(5x,f12.5))') istepmax,UMD*Ha_eV,U0*Ha_eV,Uharm*Ha_eV,Uanh*Ha_eV,&
@@ -731,15 +732,15 @@ contains
   end if  
   do istep=1,InVar%nstep
     if (present(Psij_NN)) then
-      write(32,'(i6,x,4(f17.6,x))') istep,U_MD(istep),U_TDEP(istep),PhijUiUj(istep),PsijUiUjUk(istep)
+      write(32,'(i6,1x,4(f17.6,1x))') istep,U_MD(istep),U_TDEP(istep),PhijUiUj(istep),PsijUiUjUk(istep)
     else  
-      write(32,'(i6,x,3(f17.6,x))') istep,U_MD(istep),U_TDEP(istep),PhijUiUj(istep)
+      write(32,'(i6,1x,3(f17.6,1x))') istep,U_MD(istep),U_TDEP(istep),PhijUiUj(istep)
     end if
 
     if (InVar%debug) then
       do iatom=1,InVar%natom
         do ii=1,3
-          write(33,'(2(f17.10,x))') Forces_MD  (ii+3*(iatom-1)+3*InVar%natom*(istep-1)),&
+          write(33,'(2(f17.10,1x))') Forces_MD  (ii+3*(iatom-1)+3*InVar%natom*(istep-1)),&
 &                                   Forces_TDEP(ii+3*(iatom-1)+3*InVar%natom*(istep-1))
         end do
       end do  
@@ -769,10 +770,10 @@ contains
         end do
       end do
     end do
-    Fmean    (:)=Fmean    (:)/dfloat(InVar%nstep)
-    residualF(:)=residualF(:)/dfloat(InVar%nstep)
+    Fmean    (:)=Fmean    (:)/real(InVar%nstep)
+    residualF(:)=residualF(:)/real(InVar%nstep)
     do iatom=1,InVar%natom
-      write(33,'(i6,x,6(f17.10,x))') iatom,(residualF(ii+3*(iatom-1)),ii=1,3),(Fmean(jj+3*(iatom-1)),jj=1,3)
+      write(33,'(i6,1x,6(f17.10,1x))') iatom,(residualF(ii+3*(iatom-1)),ii=1,3),(Fmean(jj+3*(iatom-1)),jj=1,3)
     end do  
     close(33)
     open(unit=34,file='residualF2.dat')
@@ -789,9 +790,9 @@ contains
       end do  
     end do  
   end do  
-  residualF(:)=residualF(:)/dfloat(InVar%nstep)
+  residualF(:)=residualF(:)/real(InVar%nstep)
   do iatom=1,InVar%natom
-    write(34,'(i6,x,3(f17.10,x))') iatom,(residualF(ii+3*(iatom-1)),ii=1,3)
+    write(34,'(i6,1x,3(f17.10,1x))') iatom,(residualF(ii+3*(iatom-1)),ii=1,3)
   end do  
   close(34)
   ABI_FREE(residualF)
@@ -825,7 +826,7 @@ contains
               end do !gama
               if (abs(norm1).gt.tol8) then
                 write(std_out,*) ' BUG : invariance under arbitrary rotation is not fulfilled (order 3)'
-                write(std_out,'(5(i3,x),1(e17.10,x))') iatcell,jatom,alpha,nu,beta,norm1
+                write(std_out,'(5(i3,1x),1(e17.10,1x))') iatcell,jatom,alpha,nu,beta,norm1
                 write(std_out,*) 'iatcell,jatom,alpha,nu,beta,norm1'
                 if (InVar%RotationalInv.eq.0)  then
                   MSG_BUG('invariance under arbitrary rotation is not fulfilled (order 3)')
@@ -852,7 +853,7 @@ contains
           if (abs(norm1).gt.tol8) then
             write(std_out,*) ' BUG : invariance under arbitrary rotation is not fulfilled (order 2)'
             write(std_out,*) 'iatcell,alpha,nu,norm1'
-            write(std_out,'(3(i3,x),1(e17.10,x))') iatcell,alpha,nu,norm1
+            write(std_out,'(3(i3,1x),1(e17.10,1x))') iatcell,alpha,nu,norm1
             if (InVar%RotationalInv.eq.0) then
               MSG_BUG('invariance under arbitrary rotation is not fulfilled (order 2)')
             end if
@@ -993,9 +994,9 @@ subroutine tdep_calc_nbcoeff(distance,iatcell,InVar,ishell,jatom,katom,ncoeff,no
     end if  
 
 !   Write the S_ref matrix
-    write(16,'(3(f16.12,x))') Sym%S_ref(1,1,isym,1),Sym%S_ref(1,2,isym,1),Sym%S_ref(1,3,isym,1)
-    write(16,'(3(f16.12,x))') Sym%S_ref(2,1,isym,1),Sym%S_ref(2,2,isym,1),Sym%S_ref(2,3,isym,1)
-    write(16,'(3(f16.12,x))') Sym%S_ref(3,1,isym,1),Sym%S_ref(3,2,isym,1),Sym%S_ref(3,3,isym,1)
+    write(16,'(3(f16.12,1x))') Sym%S_ref(1,1,isym,1),Sym%S_ref(1,2,isym,1),Sym%S_ref(1,3,isym,1)
+    write(16,'(3(f16.12,1x))') Sym%S_ref(2,1,isym,1),Sym%S_ref(2,2,isym,1),Sym%S_ref(2,3,isym,1)
+    write(16,'(3(f16.12,1x))') Sym%S_ref(3,1,isym,1),Sym%S_ref(3,2,isym,1),Sym%S_ref(3,3,isym,1)
 
 !   Diagonalize the S_ref matrix
     do ii=1,3
@@ -1036,9 +1037,9 @@ subroutine tdep_calc_nbcoeff(distance,iatcell,InVar,ishell,jatom,katom,ncoeff,no
       write(16,*)'  For eigenvalue number',ii
       write(16,*)'     The eigenvalue is:',eigenvalues(ii)
       write(16,*)'     The eigenvector is:'
-      write(16,'(2(f16.12,x))') eigenvectors(1,ii)
-      write(16,'(2(f16.12,x))') eigenvectors(2,ii)
-      write(16,'(2(f16.12,x))') eigenvectors(3,ii)
+      write(16,'(2(f16.12,1x))') eigenvectors(1,ii)
+      write(16,'(2(f16.12,1x))') eigenvectors(2,ii)
+      write(16,'(2(f16.12,1x))') eigenvectors(3,ii)
       if ((aimag(eigenvalues(1)).ne.0).or.(aimag(eigenvalues(2)).ne.0).or.(aimag(eigenvalues(3)).ne.0)) then
         write(16,*) '  WARNING: THERE IS COMPLEX EIGENVALUES:'
       end if  
@@ -1089,8 +1090,8 @@ subroutine tdep_calc_nbcoeff(distance,iatcell,InVar,ishell,jatom,katom,ncoeff,no
             end do  
           end do  
           write(16,*)'  Real & imaginary parts of the eigenvectors product:'
-          write(16,'(9(f16.12,x))')  real(alphaij(isyminv,:,iconst(isyminv)))
-          write(16,'(9(f16.12,x))') aimag(alphaij(isyminv,:,iconst(isyminv)))
+          write(16,'(9(f16.12,1x))')  real(alphaij(isyminv,:,iconst(isyminv)))
+          write(16,'(9(f16.12,1x))') aimag(alphaij(isyminv,:,iconst(isyminv)))
         end do !jj
       end do !ii
     else if (order==3) then  
@@ -1138,8 +1139,8 @@ subroutine tdep_calc_nbcoeff(distance,iatcell,InVar,ishell,jatom,katom,ncoeff,no
               end do !nu 
             end do !mu
             write(16,*)'  Real & imaginary parts of the eigenvectors product:'
-            write(16,'(9(f16.12,x))')  real(alphaij(isyminv,:,iconst(isyminv)))
-            write(16,'(9(f16.12,x))') aimag(alphaij(isyminv,:,iconst(isyminv)))
+            write(16,'(9(f16.12,1x))')  real(alphaij(isyminv,:,iconst(isyminv)))
+            write(16,'(9(f16.12,1x))') aimag(alphaij(isyminv,:,iconst(isyminv)))
           end do !kk
         end do !jj
       end do !ii
@@ -1228,8 +1229,8 @@ subroutine tdep_calc_nbcoeff(distance,iatcell,InVar,ishell,jatom,katom,ncoeff,no
   write(16,*) ' '
   write(16,*) '  ========The final set of vectors is:'
   do kk=1,ncount
-    write(16,'(9(f16.12,x))')  real(temp(:,kk))
-    write(16,'(9(f16.12,x))') aimag(temp(:,kk))
+    write(16,'(9(f16.12,1x))')  real(temp(:,kk))
+    write(16,'(9(f16.12,1x))') aimag(temp(:,kk))
   end do  
   write(16,*) '  =======Au total, il y a ',ncount,' vecteurs independants'
   if (ncount.gt.8.and.order==2) then
@@ -1270,8 +1271,8 @@ subroutine tdep_calc_nbcoeff(distance,iatcell,InVar,ishell,jatom,katom,ncoeff,no
   write(16,*) ' '
   write(16,*) '  ========The orthogonal set of vectors is:'
   do kk=ncount+1,norder
-    write(16,'(9(f16.12,x))')  real(tab_vec(:,kk))
-    write(16,'(9(f16.12,x))') aimag(tab_vec(:,kk))
+    write(16,'(9(f16.12,1x))')  real(tab_vec(:,kk))
+    write(16,'(9(f16.12,1x))') aimag(tab_vec(:,kk))
     if ((abs(aimag(tab_vec(1,kk))).gt.1.d-6).or.&
 &       (abs(aimag(tab_vec(1,kk))).gt.1.d-6).or.&
 &       (abs(aimag(tab_vec(1,kk))).gt.1.d-6)) then

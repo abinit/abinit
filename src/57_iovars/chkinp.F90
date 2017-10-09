@@ -1810,7 +1810,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
        do iz=2,dt%nzchempot
          dz=dt%chempot(1,iz,itypat)-dt%chempot(1,iz-1,itypat)
          if(dz<-tol12)then
-           write(message, '(a,2i6,a,a,d16.10,a,a, a,d16.10,a,a, a,a,a)' )&
+           write(message, '(a,2i6,a,a,d17.10,a,a, a,d17.10,a,a, a,a,a)' )&
 &           ' For izchempot,itypat=',iz,itypat,ch10,&
 &           ' chempot(1,izchempot-1,itypat) = ',dt%chempot(1,iz-1,itypat),' and', ch10,&
 &           ' chempot(1,izchempot  ,itypat) = ',dt%chempot(1,iz  ,itypat),',',ch10,&
@@ -1821,7 +1821,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
        end do
        dz=dt%chempot(1,dt%nzchempot,itypat)-dt%chempot(1,1,itypat)
        if(dz>one)then
-         write(message, '(a,2i6,a,a,d16.10,a,a, a,d16.10,a,a, a,a,a)' )&
+         write(message, '(a,2i6,a,a,d17.10,a,a, a,d17.10,a,a, a,a,a)' )&
 &         ' For nzchempot,itypat=',dt%nzchempot,itypat,ch10,&
 &         ' chempot(1,1,itypat) = ',dt%chempot(1,1,itypat),' and', ch10,&
 &         ' chempot(1,nzchempot  ,itypat) = ',dt%chempot(1,dt%nzchempot,itypat),'.',ch10,&

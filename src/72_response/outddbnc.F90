@@ -79,7 +79,7 @@ subroutine outddbnc (filename, mpert, d2matr, blkflg, qpt, Crystal)
  integer :: natom
  integer :: ncid, ncerr
  integer :: cplex, cart_dir, one_dim
- integer :: ipert1, ipert2, idir1, idir2, ii
+ integer :: ipert1, ipert2, idir1, idir2
  integer,allocatable :: dynmat_mask(:,:,:,:)
  integer,allocatable :: born_effective_charge_tensor_mask(:,:,:)
  real(dp),allocatable :: dynmat(:,:,:,:,:)

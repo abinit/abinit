@@ -59,10 +59,10 @@
 #%%   The results obtained with underconverged ecut (ecut 15) and box size (4 3 3 Angstrom)
 #%%   compare favourably with those mentioned in Arnardi's report, as well as with those of VASP.
 #%%   Values for the distance d, in Angstrom, for PBE, PBE0 and HSE06 respectively :
-#%%   Present calculation  (ecut 13, 5 4 4 box) : 1.138, 1.130, 1.131
-#%%   Better  calculation  (ecut 18, 7 6 6 box) : 1.135, 1.124, 1.125 
-#%%   ABINIT Arnardi report (ecut acell unknown): 1.136, 1.124, 1.124
-#%%   VASP Arnardi report (ecut acell unknown)  : 1.136, 1.124,  NA
-#%%   Experimental : 1.120 .
+#%%   Present calculation  (ecut 13, 5 4 4 box) : 1.138, 1.130, 1.131 Angstrom
+#%%   Better  calculation  (ecut 18, 7 6 6 box) : 1.135, 1.124, 1.125 Angstrom
+#%%   ABINIT Arnardi report (ecut acell unknown): 1.136, 1.124, 1.124 Angstrom
+#%%   VASP Arnardi report (ecut acell unknown)  : 1.136, 1.124,  NA   Angstrom
+#%%   Experimental : 1.120 Angstrom.
 #%% topics = Hybrids
 #%%<END TEST_INFO>

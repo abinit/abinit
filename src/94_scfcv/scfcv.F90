@@ -143,7 +143,7 @@
 !!      paw_ij_free,paw_ij_init,paw_ij_nullify,paw_ij_reset_flags,pawcprj_alloc
 !!      pawcprj_free,pawcprj_getdim,pawcprj_reorder,pawdenpot,pawdij
 !!      pawfgrtab_free,pawfgrtab_init,pawmknhat,pawtab_get_lsize,pawuj_red
-!!      prc_mem_free,prtene,psolver_rhohxc,rhohxc,rhotov,scprqt,setnoccmmp
+!!      prc_mem_free,prtene,psolver_rhohxc,rhotoxc,rhotov,scprqt,setnoccmmp
 !!      setrhoijpbe0,setsym,setup_positron,setvtr,sphereboundary,status,symdij
 !!      symmetrize_xred,timab,update_e_field_vars,vtorho,vtorhorec,vtorhotf
 !!      wrtout,wvl_cprjreorder,wvl_nhatgrid,xmpi_isum,xmpi_sum,xmpi_wait
@@ -180,6 +180,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
  use mod_prc_memory
  use m_nctk
  use m_hdr
+ use m_xcdata
 
  use m_fstrings,         only : int2char4, sjoin
  use m_time,             only : abi_wtime, sec2str
@@ -319,6 +320,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
  !character(len=500) :: dilatmx_errmsg
  character(len=fnlen) :: fildata
  type(MPI_type) :: mpi_enreg_diel
+ type(xcdata_type) :: xcdata
  type(energies_type) :: energies
  type(ab7_mixing_object) :: mix
  logical,parameter :: VERBOSE=.FALSE.
@@ -675,12 +677,12 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
      ncpgr=0
      if (usefock==1) then
        ctocprj_choice = 1
-       if (dtset%optforces /= 0) then
+       if (dtset%optforces == 1) then
          ncpgr = 3 ; ctocprj_choice = 2
        end if
-       if (dtset%optstress /= 0) then
-         ncpgr = 6 ; ctocprj_choice = 3
-       end if
+!       if (dtset%optstress /= 0) then
+!         ncpgr = 6 ; ctocprj_choice = 3
+!       end if
      end if
      call pawcprj_alloc(cprj,ncpgr,dimcprj_srt)
 #if defined HAVE_BIGDFT
@@ -1552,13 +1554,15 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
      if (nkxc>0.and.modulo(dtset%iprcel,100)>=61.and.(dtset%iprcel<71.or.dtset%iprcel>79) &
 &     .and.((istep==1.or.istep==dielstrt).or.(dtset%iprcel>=100))) then
        optxc=10
-!      to be adjusted for the call to rhohxc
+       call xcdata_init(dtset%intxc,dtset%ixc,&
+&        dtset%nelect,dtset%tphysel,dtset%usekden,dtset%vdw_xc,dtset%xc_tb09_c,dtset%xc_denpos,xcdata)
+!      to be adjusted for the call to rhotoxc
        nk3xc=1
        if(dtset%icoulomb==0 .and. dtset%usewvl==0) then
-         call rhohxc(dtset,edum,gsqcut,psps%usepaw,kxc,mpi_enreg,nfftf,&
+         call rhotoxc(edum,kxc,mpi_enreg,nfftf,&
 &         ngfftf,nhat,psps%usepaw,nhatgr,0,nkxc,nk3xc,dtset%nspden,n3xccc,&
-&         optxc,rhog,rhor,rprimd,dummy2,0,vhartr,vxc,vxcavg_dum,xccc3d,&
-&         add_tfw=tfw_activated,taug=taug,taur=taur,vxctau=vxctau)
+&         optxc,dtset%paral_kgb,rhor,rprimd,dummy2,0,vxc,vxcavg_dum,xccc3d,xcdata,&
+&         add_tfw=tfw_activated,taug=taug,taur=taur,vhartr=vhartr,vxctau=vxctau)
        else if(.not. wvlbigdft) then
 !        WVL case:
          call psolver_rhohxc(energies%e_hartree, energies%e_xc, evxc, &

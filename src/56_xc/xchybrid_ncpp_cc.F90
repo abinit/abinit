@@ -51,7 +51,7 @@
 !!
 !! CHILDREN
 !!      dtset_copy,dtset_free,libxc_functionals_end,libxc_functionals_init
-!!      metric,mkcore,rhohxc
+!!      metric,mkcore,rhotoxc
 !!
 !! SOURCE
 
@@ -67,6 +67,7 @@ subroutine xchybrid_ncpp_cc(dtset,enxc,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,s
  use defs_basis
  use m_profiling_abi
  use m_errors
+ use m_xcdata
  use libxc_functionals
 
  use defs_abitypes, only : MPI_type, dataset_type
@@ -98,15 +99,15 @@ subroutine xchybrid_ncpp_cc(dtset,enxc,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,s
 
 !Local variables -------------------------------------------------------
 !scalars
- integer :: ixc_gga,izero,ndim,nkxc,n3xccc_null,option,optstr_loc,usexcnhat
+ integer :: ixc_gga,ndim,nkxc,n3xccc_null,option,optstr_loc,usexcnhat
  real(dp) :: enxc_corr,ucvol,vxcavg_corr
  character(len=500) :: msg
- type(dataset_type) :: dtLocal
+ type(xcdata_type) :: xcdata_gga,xcdata_hybrid 
  logical :: calcgrxc
 !arrays
  integer :: gga_id(2)
  real(dp) :: nhat(1,0),nhatgr(1,1,0),strsxc_corr(6),gmet(3,3),gprimd(3,3),rmet(3,3)
- real(dp),allocatable :: kxc_dum(:,:),rhog_dum(:,:),vhartr_dum(:),vxc_corr(:,:),xccc3d_null(:),dyfrx2_dum(:,:,:)
+ real(dp),allocatable :: kxc_dum(:,:),vxc_corr(:,:),xccc3d_null(:),dyfrx2_dum(:,:,:)
 
 ! *************************************************************************
 
@@ -138,40 +139,44 @@ subroutine xchybrid_ncpp_cc(dtset,enxc,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,s
    return
  end if
 
-!Dirty trick: as rhohxc needs dtset, create a temporary copy if it
- call dtset_copy(dtLocal,dtset)
+!Define xcdata_hybrid as well as xcdata_gga
+ call xcdata_init(dtset%intxc,dtset%ixc,&
+&    dtset%nelect,dtset%tphysel,dtset%usekden,dtset%vdw_xc,dtset%xc_tb09_c,dtset%xc_denpos,xcdata_hybrid)
+ call xcdata_init(dtset%intxc,ixc_gga,&
+&    dtset%nelect,dtset%tphysel,dtset%usekden,dtset%vdw_xc,dtset%xc_tb09_c,dtset%xc_denpos,xcdata_gga)
 
- nkxc=0;ndim=0;izero=0;usexcnhat=0;n3xccc_null=0
- ABI_ALLOCATE(rhog_dum,(2,nfft))
+ nkxc=0;ndim=0;usexcnhat=0;n3xccc_null=0
  ABI_ALLOCATE(kxc_dum,(nfft,nkxc))
- ABI_ALLOCATE(vhartr_dum,(nfft))
  ABI_ALLOCATE(vxc_corr,(nfft,dtset%nspden))
 
  if (present(vxc).and.optstr_loc==0) then
-!Initialize args for rhohxc
+!Initialize args for rhotoxc
    option=0 ! XC only
    ABI_ALLOCATE(xccc3d_null,(n3xccc_null))
 !  Compute Vxc^Hybrid(rho_val)
-   call rhohxc(dtset,enxc,zero,izero,kxc_dum,mpi_enreg,nfft,ngfft,nhat,ndim,nhatgr,ndim,nkxc,nkxc,&
-&   dtset%nspden,n3xccc_null,option,rhog_dum,rhor,rprimd,strsxc,usexcnhat,vhartr_dum,vxc,vxcavg,xccc3d_null)
+   call rhotoxc(enxc,kxc_dum,mpi_enreg,nfft,ngfft,nhat,ndim,nhatgr,ndim,nkxc,nkxc,&
+&   dtset%nspden,n3xccc_null,option,dtset%paral_kgb,rhor,rprimd,&
+&   strsxc,usexcnhat,vxc,vxcavg,xccc3d_null,xcdata_hybrid)
 
 !  Initialize GGA functional
-   dtLocal%ixc=ixc_gga
-   if (dtLocal%ixc<0) then
+   if (ixc_gga<0) then
      call libxc_functionals_end()
-     call libxc_functionals_init(dtLocal%ixc,dtLocal%nspden)
+     call libxc_functionals_init(ixc_gga,dtset%nspden)
    end if
+
 !Add Vxc^GGA(rho_core+rho_val)
-   call rhohxc(dtLocal,enxc_corr,zero,izero,kxc_dum,mpi_enreg,nfft,ngfft,nhat,ndim,nhatgr,ndim,nkxc,nkxc,&
-&   dtLocal%nspden,n3xccc,option,rhog_dum,rhor,rprimd,strsxc_corr,usexcnhat,vhartr_dum,vxc_corr,vxcavg_corr,xccc3d)
+   call rhotoxc(enxc_corr,kxc_dum,mpi_enreg,nfft,ngfft,nhat,ndim,nhatgr,ndim,nkxc,nkxc,&
+&   dtset%nspden,n3xccc,option,dtset%paral_kgb,rhor,rprimd,&
+&   strsxc_corr,usexcnhat,vxc_corr,vxcavg_corr,xccc3d,xcdata_gga)
    enxc=enxc+enxc_corr
    vxc(:,:)=vxc(:,:)+vxc_corr(:,:)
    vxcavg=vxcavg+vxcavg_corr
    strsxc(:)=strsxc(:)+strsxc_corr(:)
 
 !Substract Vxc^GGA(rho_val)
-   call rhohxc(dtLocal,enxc_corr,zero,izero,kxc_dum,mpi_enreg,nfft,ngfft,nhat,ndim,nhatgr,ndim,nkxc,nkxc,&
-&   dtLocal%nspden,n3xccc_null,option,rhog_dum,rhor,rprimd,strsxc_corr,usexcnhat,vhartr_dum,vxc_corr,vxcavg_corr,xccc3d_null)
+   call rhotoxc(enxc_corr,kxc_dum,mpi_enreg,nfft,ngfft,nhat,ndim,nhatgr,ndim,nkxc,nkxc,&
+&   dtset%nspden,n3xccc_null,option,dtset%paral_kgb,rhor,rprimd,strsxc_corr,usexcnhat,&
+&   vxc_corr,vxcavg_corr,xccc3d_null,xcdata_gga)
    enxc=enxc-enxc_corr
    vxc(:,:)=vxc(:,:)-vxc_corr(:,:)
    vxcavg=vxcavg-vxcavg_corr
@@ -185,10 +190,9 @@ subroutine xchybrid_ncpp_cc(dtset,enxc,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,s
 
    call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
 !  Initialize GGA functional
-   dtLocal%ixc=ixc_gga
-   if (dtLocal%ixc<0) then
+   if (ixc_gga<0) then
      call libxc_functionals_end()
-     call libxc_functionals_init(dtLocal%ixc,dtLocal%nspden)
+     call libxc_functionals_init(ixc_gga,dtset%nspden)
    end if
    ABI_ALLOCATE(dyfrx2_dum,(3,3,dtset%natom))
    ABI_ALLOCATE(xccc3d_null,(n3xccc))
@@ -197,8 +201,9 @@ subroutine xchybrid_ncpp_cc(dtset,enxc,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,s
    call mkcore(strsxc_corr,dyfrx2_dum,grxc,mpi_enreg,dtset%natom,nfft,dtset%nspden,dtset%ntypat,ngfft(1),n1xccc,ngfft(2),&
 &   ngfft(3),option,rprimd,dtset%typat,ucvol,vxc_corr,xcccrc,xccc1d,xccc3d_null,xred)
 !Add Vxc^GGA(rho_core+rho_val)
-   call rhohxc(dtLocal,enxc_corr,zero,izero,kxc_dum,mpi_enreg,nfft,ngfft,nhat,ndim,nhatgr,ndim,nkxc,nkxc,&
-&   dtLocal%nspden,n3xccc,option,rhog_dum,rhor,rprimd,strsxc_corr,usexcnhat,vhartr_dum,vxc_corr,vxcavg_corr,xccc3d_null)
+   call rhotoxc(enxc_corr,kxc_dum,mpi_enreg,nfft,ngfft,nhat,ndim,nhatgr,ndim,nkxc,nkxc,&
+&   dtset%nspden,n3xccc,option,dtset%paral_kgb,&
+&   rhor,rprimd,strsxc_corr,usexcnhat,vxc_corr,vxcavg_corr,xccc3d_null,xcdata_gga)
    option=2
    call mkcore(strsxc_corr,dyfrx2_dum,grxc,mpi_enreg,dtset%natom,nfft,dtset%nspden,dtset%ntypat,ngfft(1),n1xccc,ngfft(2),&
 &   ngfft(3),option,rprimd,dtset%typat,ucvol,vxc_corr,xcccrc,xccc1d,xccc3d_null,xred)
@@ -208,28 +213,24 @@ subroutine xchybrid_ncpp_cc(dtset,enxc,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,s
 
  if(optstr_loc==1) then
 !  Initialize GGA functional
-   dtLocal%ixc=ixc_gga
-   if (dtLocal%ixc<0) then
+   if (ixc_gga<0) then
      call libxc_functionals_end()
-     call libxc_functionals_init(dtLocal%ixc,dtLocal%nspden)
+     call libxc_functionals_init(ixc_gga,dtset%nspden)
    end if
 !calculate Vxc^GGA(rho_core+rho_val)
    option=0
-   call rhohxc(dtLocal,enxc_corr,zero,izero,kxc_dum,mpi_enreg,nfft,ngfft,nhat,ndim,nhatgr,ndim,nkxc,nkxc,&
-&   dtLocal%nspden,n3xccc,option,rhog_dum,rhor,rprimd,strsxc_corr,usexcnhat,vhartr_dum,vxc,vxcavg_corr,xccc3d)
+   call rhotoxc(enxc_corr,kxc_dum,mpi_enreg,nfft,ngfft,nhat,ndim,nhatgr,ndim,nkxc,nkxc,&
+&   dtset%nspden,n3xccc,option,dtset%paral_kgb,rhor,rprimd,&
+&   strsxc_corr,usexcnhat,vxc,vxcavg_corr,xccc3d,xcdata_gga)
  end if 
 
 ! Revert libxc to original settings
- if (dtLocal%ixc<0) then
+ if (ixc_gga<0) then
    call libxc_functionals_end()
    call libxc_functionals_init(dtset%ixc,dtset%nspden)
  end if
  ABI_DEALLOCATE(vxc_corr)
- ABI_DEALLOCATE(rhog_dum)
  ABI_DEALLOCATE(kxc_dum)
- ABI_DEALLOCATE(vhartr_dum)
-
- call dtset_free(dtLocal)
 
  DBG_EXIT("COLL")
 

@@ -206,7 +206,6 @@
  cplex=2;if (istwf_k>1) cplex=1
  choice_=choice;if (cpopt==1) choice_=-choice
  signs=1;if (idir>0) signs=2
-
 !Eventually allocate temporary array for ph3d
  if (nloalg(2)<=0) then
    matblk=mincat

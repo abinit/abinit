@@ -7,6 +7,7 @@
 module m_tdep_latt
 
  use defs_basis
+ use m_profiling_abi
  use m_tdep_readwrite,   only : Input_Variables_type
  use m_errors
 
@@ -71,9 +72,9 @@ subroutine tdep_make_inbox(tab,natom,tol,&
         jj=int(tab(ii,iatom)+0.5+tol)
       end if  
       if (present(temp)) then
-        temp(ii,iatom)=temp(ii,iatom)-dfloat(jj)
+        temp(ii,iatom)=temp(ii,iatom)-real(jj)
       else
-        tab(ii,iatom)=tab(ii,iatom)-dfloat(jj)
+        tab(ii,iatom)=tab(ii,iatom)-real(jj)
       end if        
     end do  
   end do  
@@ -294,7 +295,7 @@ end subroutine
     acell_unitcell(2)=acell_unitcell(1)
     acell_unitcell(3)=acell_unitcell(1)
   end if
-  write(InVar%stdout,'(a,x,3(f16.10,x))') ' acell_unitcell=',acell_unitcell(:)
+  write(InVar%stdout,'(a,1x,3(f16.10,1x))') ' acell_unitcell=',acell_unitcell(:)
 ! TODO: Check also the off-diagonal elements  
 
 ! Redefine rprimd_MD (in order to have a precision higher than 1.d-8)
@@ -306,7 +307,7 @@ end subroutine
         rprimd_MD(ii,jj)=rprimd_MD(ii,jj)+acell_unitcell(ii)*Invar%multiplicity(ii,kk)*rprim_tmp(kk,jj)
       end do  
     end do
-    write(InVar%stdout,'(a,x,3(f16.10,x))') ' rprimd_MD=',(rprimd_MD(ii,jj),jj=1,3)
+    write(InVar%stdout,'(a,1x,3(f16.10,1x))') ' rprimd_MD=',(rprimd_MD(ii,jj),jj=1,3)
   end do
 
 ! Define the rprimd with respect to the acell_unitcell, according to the value of "line"

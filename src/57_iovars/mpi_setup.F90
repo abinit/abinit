@@ -89,10 +89,10 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
 
 !Local variables -------------------------------
 !scalars
- integer :: blocksize,exchn2n3d,iband,idtset,iexit,icol,ii,iikpt,iikpt_modulo
- integer :: irow,isppol,jdtset,marr,mband_lower,mband_upper
+ integer :: blocksize,exchn2n3d,iband,idtset,iexit,ii,iikpt,iikpt_modulo
+ integer :: isppol,jdtset,marr,mband_lower,mband_upper
  integer :: me_fft,mgfft,mgfftdg,mkmem,mpw,mpw_k,optdriver
- integer :: nfft,nfftdg,nkpt,nkpt_me,npert,np,nproc,nproc_fft,nqpt
+ integer :: nfft,nfftdg,nkpt,nkpt_me,npert,nproc,nproc_fft,nqpt
  integer :: nspink,nsppol,nsym,paral_fft,response,tnband,tread0,usepaw,vectsize
  integer :: fftalg,fftalga,fftalgc
  logical :: fftalg_read,ortalg_read,wfoptalg_read,do_check
