@@ -243,6 +243,11 @@ subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
 &       nhat,usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,dtset%nspden,n3xccc,optxc,dtset%paral_kgb,&
 &       rhor,rprimd,strsxc,usexcnhat,vxc,vxcavg,xccc3d,xcdata,&
 &       taug=taug,taur=taur,vhartr=vhartr,vxctau=vxctau,add_tfw=add_tfw_)
+       if(mod(dtset%fockoptmix,100)==11)then
+!        For hybrid compensation, to be cleaned
+         energies%e_xc=energies%e_xc*dtset%userre
+         vxc(:,:)=vxc(:,:)*dtset%userre
+       endif
      else
        call rhotoxc(energies%e_xc,kxc,mpi_enreg,nfft,ngfft,&
 &       nhat,usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,dtset%nspden,n3xccc,optxc,dtset%paral_kgb,&

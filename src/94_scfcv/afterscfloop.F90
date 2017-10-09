@@ -157,6 +157,8 @@
 !!   | e_vdw_dftd(IN)=VdW DFT-D energy
 !!   | e_hartree(IN)=Hartree part of total energy (hartree units)
 !!   | e_corepsp(IN)=psp core-core energy
+!!   | e_hybcomp1(IN)=first compensation energy for the hybrid functionals
+!!   | e_hybcomp2(IN)=second compensation energy for the hybrid functionals
 !!   | e_kinetic(IN)=kinetic energy part of total energy.
 !!   | e_nonlocalpsp(IN)=nonlocal pseudopotential part of total energy.
 !!   | e_xc(IN)=exchange-correlation energy (hartree)

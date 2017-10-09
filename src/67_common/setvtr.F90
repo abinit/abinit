@@ -506,8 +506,10 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
 &            nhat,psps%usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,dtset%nspden,n3xccc,&
 &            option,dtset%paral_kgb,rhor,rprimd,strsxc,usexcnhat,vxc_hybcomp,vxcavg,xccc3d,xcdatahyb,&
 &            taug=taug,taur=taur,vhartr=vhartr,vxctau=vxctau,add_tfw=add_tfw_)
-           energies%e_hybcomp1=(energies%e_hybcomp1-energies%e_xc)*dtset%userre
-           vxc_hybcomp(:,:)=(vxc_hybcomp(:,:)-vxc(:,:))*dtset%userre
+           energies%e_xc=energies%e_xc*dtset%userre
+           energies%e_hybcomp1=energies%e_hybcomp1-energies%e_xc
+           vxc(:,:)=vxc(:,:)*dtset%userre
+           vxc_hybcomp(:,:)=vxc_hybcomp(:,:)-vxc(:,:)
          endif
        else if (ipositron==2) then
          call rhotoxc(energies%e_xc,kxc,mpi_enreg,nfft,ngfft,&
@@ -686,7 +688,6 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
    if (optene>=1 .and. .not. wvlbigdft) then
      call dotprod_vn(1,rhor,energies%e_hybcomp2,doti,nfft,nfftot,1,1,vxc_hybcomp,ucvol_local,&
 &      mpi_comm_sphgrid=mpi_comm_sphgrid)
-     energies%e_hybcomp2=energies%e_hybcomp2*dtset%userre
      energies%e_hybcomp1=energies%e_hybcomp1-energies%e_hybcomp2
    endif 
  endif 
