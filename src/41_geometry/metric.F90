@@ -42,7 +42,7 @@
 !!      mkcore_wvl,mlwfovlp_qp,moddiel,mpi_setup,mrgscr,newrho,newvtr,nres2vres
 !!      odamix,optic,pawgrnl,prcref,prcref_PMA,pred_bfgs,pred_delocint
 !!      pred_isothermal,pred_langevin,pred_lbfgs,pred_nose,pred_srkna14
-!!      pred_verlet,prt_cif,prtefield,prtimg,psolver_rhohxc,rhohxc,scfcv
+!!      pred_verlet,prt_cif,prtefield,prtimg,psolver_rhohxc,rhotoxc,scfcv
 !!      screening,setup1,setup_bse,setup_screening,setup_sigma,sigma,smallprim
 !!      stress,symmetrize_rprimd,testkgrid,thmeig,vdw_dftd2,vdw_dftd3
 !!      wrt_moldyn_netcdf,wvl_initro,xchybrid_ncpp_cc,xfpack_vin2x,xfpack_x2vin

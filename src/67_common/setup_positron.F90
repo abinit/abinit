@@ -51,7 +51,7 @@
 !!  ngfft(18)=contain all needed information about 3D FFT
 !!  ngrvdw=size of grvdw(:,:); can be 0 or natom according to dtset%vdw_xc
 !!  nhat(nfftf,nspden*usepaw)= -PAW only- compensation density
-!!  nkxc=second dimension of the array kxc, see rhohxc.f for a description
+!!  nkxc=second dimension of the array kxc, see rhotoxc.f for a description
 !!  npwarr(nkpt)=number of planewaves in basis and on boundary for each k
 !!  nvresid(nfftf,nspden)=array for the residual of the density/potential
 !!  optres=0 if the potential residual has to be used for forces corrections
@@ -554,7 +554,7 @@ type(fock_type),pointer, intent(inout) :: fock
      call fourdp(1,rhog_ep,electronpositron%rhor_ep,-1,mpi_enreg,nfft,ngfft,dtset%paral_kgb,0)
    end if
    if (history_level/=-1) then
-     call hartre(1,gmet,gsqcut,dtset%usepaw,mpi_enreg,nfft,ngfft,dtset%paral_kgb,qphon,rhog_ep,&
+     call hartre(1,gsqcut,dtset%usepaw,mpi_enreg,nfft,ngfft,dtset%paral_kgb,qphon,rhog_ep,rprimd,&
 &     electronpositron%vha_ep)
      electronpositron%vha_ep=-electronpositron%vha_ep
    else

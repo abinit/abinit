@@ -1055,7 +1055,6 @@ subroutine psps_ncwrite(psps, path)
 !Local variables-------------------------------
 !scalars
  integer :: ipsp,itypat,ncid,ncerr
- character(len=500) :: msg
 
 ! *************************************************************************
 
@@ -1566,7 +1565,7 @@ subroutine nctab_eval_tvalespl(nctab, zion, mesh, valr, mqgrid_vl, qgrid_vl)
 
 !Local variables-------------------------------
 !scalars
- real(dp) :: amesh,fact,yp1,ypn,d2nvdq0
+ real(dp) :: fact,yp1,ypn,d2nvdq0
 
 ! *************************************************************************
 
@@ -1645,8 +1644,7 @@ subroutine nctab_eval_tcorespl(nctab, n1xccc, xcccrc, xccc1d, mqgrid_vl, qgrid_v
 
 !Local variables-------------------------------
 !scalars
- integer :: iq
- real(dp) :: amesh,yp1,ypn
+ real(dp) :: amesh,yp1,ypn 
  type(pawrad_type) :: core_mesh
 
 ! *************************************************************************

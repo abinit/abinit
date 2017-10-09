@@ -2534,7 +2534,7 @@ end subroutine pawxc3
 
 !Local variables-------------------------------
 !scalars
- integer :: ii,ir,ispden,mgga,ndvxc,nd2vxc,ngr2,nspgrad,nvxcdgr,order
+ integer :: ir,ispden,mgga,ndvxc,nd2vxc,ngr2,nspgrad,nvxcdgr,order
  real(dp),parameter :: tol24=tol12*tol12
  real(dp) :: coeff,grho_tot,grho_up,fact
  character(len=500) :: msg
@@ -2813,14 +2813,15 @@ subroutine pawxcsph3(cplex_den,cplex_vxc,ixc,nrad,nspden,pawrad,rho_updn,rho1_up
 !scalars
  integer :: ii,ir,ispden,ivxc,jr,kr,mgga,ndvxc,nd2vxc,ngr2,ngrad,nkxc,nvxcdgr,order
  real(dp),parameter :: tol24=tol12*tol12
- real(dp) :: coeff_grho_corr,coeff_grho_dn,coeff_grho_up,fact
- real(dp) :: grho_grho1,grho_grho1_dn,grho_grho1_up
+!real(dp) :: coeff_grho_corr,coeff_grho_dn,coeff_grho_up,fact
+!real(dp) :: grho_grho1,grho_grho1_dn,grho_grho1_up
  character(len=500) :: msg
 !arrays
  integer,parameter :: ikxc(4)=(/1,2,2,3/),irho(4)=(/1,2,1,2/)
  real(dp),allocatable :: dff(:),dgg(:),dvxcdgr(:,:),dvxc(:,:),exc(:),ff(:),gg(:)
  real(dp),allocatable :: grho_updn(:,:),grho1_updn(:,:),grho2(:,:)
- real(dp),allocatable :: gxc1i(:,:),gxc1r(:,:),kxc(:,:),vxc(:,:),vxc1i(:,:),vxc1r(:,:)
+ real(dp),allocatable :: kxc(:,:),vxc(:,:)
+!real(dp),allocatable :: gxc1i(:,:),gxc1r(:,:),vxc1i(:,:),vxc1r(:,:)
 
 ! *************************************************************************
 

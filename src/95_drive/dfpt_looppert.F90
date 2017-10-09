@@ -42,7 +42,7 @@
 !!  fermie=fermi energy (Hartree)
 !!  iexit=index of "exit" on first line of file (0 if not found)
 !!  indsym(4,nsym,natom)=indirect indexing array for atom labels
-!!  kxc(nfftf,nkxc)=exchange and correlation kernel (see rhohxc.f)
+!!  kxc(nfftf,nkxc)=exchange and correlation kernel (see rhotoxc.f)
 !!  mkmem =Number of k points treated by this node (GS data)
 !!  mkqmem=Number of k+q points treated by this node (GS data)
 !!  mk1mem=Number of k points treated by this node (RF data)
@@ -259,11 +259,11 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  integer,parameter :: level=11,response=1,formeig1=1,master=0,fake_unit=-666
  integer :: ask_accurate,band_index,bantot,bantot_rbz,bdeigrf,bdtot1_index,nsppol,nspinor,band2tot_index
  integer :: bdtot_index,choice,cplex,cplex_rhoij,dim_eig2rf,formeig
- integer :: fullinit,gscase,iband,iblok,icase,icase_eq,idir,idir0,idir1,idir2,idir_eq,idir_dkdk,ierr
+ integer :: gscase,iband,iblok,icase,icase_eq,idir,idir0,idir1,idir2,idir_eq,idir_dkdk,ierr
  integer :: ii,ikpt,ikpt1,jband,initialized,iorder_cprj,ipert,ipert_cnt,ipert_eq,ipert_me,ireadwf0
  integer :: iscf_mod,iscf_mod_save,isppol,istr,isym,mcg,mcgq,mcg1,mcprj,mcprjq,mband
  integer :: maxidir,me,mgfftf,mkmem_rbz,mk1mem_rbz,mkqmem_rbz,mpw,mpw1,my_nkpt_rbz
- integer :: n3xccc,nband_k,nblok,ncpgr,ndir,nkpt_eff,nkpt_max,nline_save,nmatel,npert_io,npert_me,nspden_rhoij
+ integer :: n3xccc,nband_k,ncpgr,ndir,nkpt_eff,nkpt_max,nline_save,nmatel,npert_io,npert_me,nspden_rhoij
  integer :: nstep_save,nsym1,ntypat,nwffile,nylmgr,nylmgr1,old_comm_atom,openexit,option,optorth,optthm,pertcase
  integer :: rdwr,ncid,rdwrpaw,spaceComm,smdelta,timrev_pert,to_compute_this_pert
  integer :: unitout,useylmgr,useylmgr1,vrsddb,dfpt_scfcv_retcode,optn2

@@ -87,7 +87,7 @@
 !!  grewtn(3,natom)=grads of Ewald energy (hartree)
 !!  grvdw(3,ngrvdw)=gradients of energy due to Van der Waals DFT-D2 dispersion (hartree)
 !!  kxc(nfft,nkxc)=exchange-correlation kernel, will be computed if nkxc/=0 .
-!!                 see routine rhohxc for a more complete description
+!!                 see routine rhotoxc for a more complete description
 !!  strsxc(6)=xc contribution to stress tensor (hartree/bohr^3)
 !!  vxcavg=mean of the vxc potential
 !!
@@ -117,7 +117,7 @@
 !! CHILDREN
 !!      atm2fft,denspot_set_history,dotprod_vn,ewald,ionion_realspace
 !!      ionion_surface,jellium,mag_constr,mkcore,mkcore_alt,mkcore_wvl,mklocl
-!!      psolver_rhohxc,rhohxc,rhohxcpositron,spatialchempot,timab,vdw_dftd2
+!!      psolver_rhohxc,rhotoxc,rhohxcpositron,spatialchempot,timab,vdw_dftd2
 !!      vdw_dftd3,wvl_psitohpsi,wvl_vtrial_abi2big,xchybrid_ncpp_cc,xred2xcart
 !!
 !! SOURCE
@@ -211,7 +211,7 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
  integer :: coredens_method,mpi_comm_sphgrid,nk3xc
  integer :: iatom,ifft,ipositron,ispden,nfftot
  integer :: optatm,optdyfr,opteltfr,optgr,option,optn,optn2,optstr,optv,vloc_method
- real(dp) :: doti,e_chempot,e_xcdc_vxctau,ebb,ebn,evxc,ucvol_local,rpnrm
+ real(dp) :: doti,e_xcdc_vxctau,ebb,ebn,evxc,ucvol_local,rpnrm
  logical :: add_tfw_,is_hybrid_ncpp,with_vxctau,wvlbigdft
  real(dp), allocatable :: xcart(:,:)
  character(len=500) :: message
@@ -222,7 +222,7 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
  real(dp) :: grewtn_fake(3,1)
  real(dp) :: dummy_in(0)
  real(dp) :: dummy_out1(0),dummy_out2(0),dummy_out3(0),dummy_out4(0),dummy_out5(0)
- real(dp) :: strn_dummy6(6), strv_dummy6(6)
+ real(dp) :: qphon(3),strn_dummy6(6), strv_dummy6(6)
  real(dp) :: vzeeman(4)
  real(dp),allocatable :: grtn(:,:),dyfr_dum(:,:,:),gr_dum(:,:)
  real(dp),allocatable :: rhojellg(:,:),rhojellr(:),rhowk(:,:),vjell(:)
@@ -475,6 +475,10 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
    if(dtset%iscf==-1) option=-2
    if (ipositron/=1) then
      if (dtset%icoulomb == 0 .and. dtset%usewvl == 0) then
+       if(option/=0 .and. option/=10)then
+         qphon(:)=zero
+         call hartre(1,gsqcut,psps%usepaw,mpi_enreg,nfft,ngfft,dtset%paral_kgb,qphon,rhog,rprimd,vhartr)
+       endif
        call xcdata_init(dtset%intxc,dtset%ixc,&
 &        dtset%nelect,dtset%tphysel,dtset%usekden,dtset%vdw_xc,dtset%xc_tb09_c,dtset%xc_denpos,xcdata)
 !      Use the periodic solver to compute Hxc
@@ -482,15 +486,15 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
 !write(80,*)"setvtr"
 !xccc3d=zero
        if (ipositron==0) then
-         call rhohxc(energies%e_xc,gsqcut,psps%usepaw,kxc,mpi_enreg,nfft,ngfft,&
+         call rhotoxc(energies%e_xc,kxc,mpi_enreg,nfft,ngfft,&
 &         nhat,psps%usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,dtset%nspden,n3xccc,&
-&         option,dtset%paral_kgb,rhog,rhor,rprimd,strsxc,usexcnhat,vhartr,vxc,vxcavg,xccc3d,xcdata,&
-&         taug=taug,taur=taur,vxctau=vxctau,add_tfw=add_tfw_)
+&         option,dtset%paral_kgb,rhor,rprimd,strsxc,usexcnhat,vxc,vxcavg,xccc3d,xcdata,&
+&         taug=taug,taur=taur,vhartr=vhartr,vxctau=vxctau,add_tfw=add_tfw_)
        else if (ipositron==2) then
-         call rhohxc(energies%e_xc,gsqcut,psps%usepaw,kxc,mpi_enreg,nfft,ngfft,&
+         call rhotoxc(energies%e_xc,kxc,mpi_enreg,nfft,ngfft,&
 &         nhat,psps%usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,dtset%nspden,n3xccc,&
-&         option,dtset%paral_kgb,rhog,rhor,rprimd,strsxc,usexcnhat,vhartr,vxc,vxcavg,xccc3d,xcdata,&
-&         taug=taug,taur=taur,vxctau=vxctau,add_tfw=add_tfw_,&
+&         option,dtset%paral_kgb,rhor,rprimd,strsxc,usexcnhat,vxc,vxcavg,xccc3d,xcdata,&
+&         taug=taug,taur=taur,vhartr=vhartr,vxctau=vxctau,add_tfw=add_tfw_,&
 &         electronpositron=electronpositron)
        end if
        if (is_hybrid_ncpp) then

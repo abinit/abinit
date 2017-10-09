@@ -357,8 +357,8 @@ subroutine add_vnlr_commutator(vkbr,cryst,psps,npw,nspinor,ug1,ug2,rhotwx)
 
 !Local variables ------------------------------
 !scalars
- integer :: ig1,ig2,iat,ig,ilm,itypat,nlmn,ilmn,iln0,iln,il,in,im
- complex(gwpc) :: cta1,cta4,ct
+ integer :: iat,ig,ilm,itypat,nlmn,ilmn,iln0,iln,il,in,im
+ complex(gwpc) :: cta1,cta4
 !arrays
  complex(gwpc) :: dum(3),cta2(3),cta3(3),gamma_term(3)
 

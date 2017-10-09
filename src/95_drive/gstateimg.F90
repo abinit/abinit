@@ -215,7 +215,7 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
  integer,parameter :: formeig=0,level=100,ndtpawuj=0,response=0
  integer :: history_size,idelta,idynimage,ierr,ifirst
  integer :: ii,iimage,ih,itimimage,itimimage_eff,itimimage_prev,ndynimage,nocc
- integer :: ntimimage,ntimimage_stored,ntimimage_max,similar
+ integer :: ntimimage,ntimimage_stored,ntimimage_max
  logical :: check_conv,compute_all_images,compute_static_images
  logical :: isVused,isARused,is_master,is_mep,is_pimd
  logical :: call_predictor,use_hist,use_hist_prev

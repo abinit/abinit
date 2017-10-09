@@ -143,7 +143,7 @@ subroutine fock2ACE(cg,cprj,fock,istwfk,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_e
  integer :: mband_cprj,me_distrb,my_ikpt,my_nspinor,nband_k,nband_cprj_k,ndat,nkpg
  integer :: npw_k,spaceComm
  integer :: usecprj_local,use_ACE_old
- integer :: blocksize,iblock,jblock,iblocksize,jblocksize,ibs,nblockbd
+ integer :: blocksize,iblock,jblock,iblocksize,jblocksize,nblockbd
  type(gs_hamiltonian_type) :: gs_hamk
  logical :: compute_gbound
  character(len=500) :: msg
@@ -194,10 +194,10 @@ subroutine fock2ACE(cg,cprj,fock,istwfk,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_e
  use_ACE_old=fockcommon%use_ACE
  fockcommon%use_ACE=0
  compute_gbound=.true.
- if (stress_needed==1) then
-   fockcommon%optstr=.TRUE.
+! if (stress_needed==1) then
+!   fockcommon%optstr=.TRUE.
    fockcommon%stress=zero
- end if
+! end if
 
  compute_gbound=.true.
  usecprj_local=usecprj

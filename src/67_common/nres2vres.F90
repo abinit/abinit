@@ -31,7 +31,7 @@
 !! nfft=(effective) number of FFT grid points (for this processor)
 !! ngfft(18)=contain all needed information about 3D FFT
 !! nhat(nfft,nspden*usepaw)= -PAW only- compensation density
-!! nkxc=second dimension of the array kxc, see rhohxc.F90 for a description
+!! nkxc=second dimension of the array kxc, see rhotoxc.F90 for a description
 !! nresid(nfft,nspden)= the input density residual
 !! n3xccc=dimension of the xccc3d array (0 or nfft).
 !! optnc=option for non-collinear magnetism (nspden=4):
@@ -59,7 +59,7 @@
 !!
 !! CHILDREN
 !!      dfpt_mkvxc,dfpt_mkvxc_noncoll,fourdp,hartre,metric,pawmknhat
-!!      psolver_hartree,rhohxc
+!!      psolver_hartree,rhotoxc
 !!
 !! SOURCE
 
@@ -199,7 +199,7 @@ subroutine nres2vres(dtset,gsqcut,izero,kxc,mpi_enreg,my_natom,nfft,ngfft,nhat,&
 
 !  Compute VH(n^res)(r)
    if (dtset%icoulomb == 0) then
-     call hartre(1,gmet,gsqcut,izero,mpi_enreg,nfft,ngfft,dtset%paral_kgb,qq,nresg,vhres)
+     call hartre(1,gsqcut,izero,mpi_enreg,nfft,ngfft,dtset%paral_kgb,qq,nresg,rprimd,vhres)
    else
      comm=mpi_enreg%comm_cell
      nproc=xmpi_comm_size(comm)
@@ -244,14 +244,15 @@ subroutine nres2vres(dtset,gsqcut,izero,kxc,mpi_enreg,my_natom,nfft,ngfft,nhat,&
    ABI_ALLOCATE(kxc_cur,(nfft,nkxc_cur))
    option=2;if (dtset%xclevel==2.and.optxc==0) option=12
 
+   call hartre(1,gsqcut,izero,mpi_enreg,nfft,ngfft,dtset%paral_kgb,qq,nresg,rprimd,vhres)
    call xcdata_init(dtset%intxc,dtset%ixc,&
 &    dtset%nelect,dtset%tphysel,dtset%usekden,dtset%vdw_xc,dtset%xc_tb09_c,dtset%xc_denpos,xcdata)
 
-!  To be adjusted for the call to rhohxc
+!  To be adjusted for the call to rhotoxc
    nk3xc=1
-   call rhohxc(energy,gsqcut,izero,kxc_cur,mpi_enreg,nfft,ngfft,&
-&   nhat,usepaw,nhatgr,nhatgrdim,nkxc_cur,nk3xc,dtset%nspden,n3xccc,option,dtset%paral_kgb,nresg,&
-&   rhor0,rprimd,dummy6,usexcnhat,vhres,vresid,vxcavg,xccc3d,xcdata)  !vresid=work space
+   call rhotoxc(energy,kxc_cur,mpi_enreg,nfft,ngfft,&
+&   nhat,usepaw,nhatgr,nhatgrdim,nkxc_cur,nk3xc,dtset%nspden,n3xccc,option,dtset%paral_kgb,&
+&   rhor0,rprimd,dummy6,usexcnhat,vresid,vxcavg,xccc3d,xcdata,vhartr=vhres)  !vresid=work space
    if (dtset%nspden/=4)  then
      ABI_DEALLOCATE(rhor0)
    end if

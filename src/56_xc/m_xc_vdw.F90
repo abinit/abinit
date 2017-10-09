@@ -282,7 +282,7 @@ contains
 !!  exc_vdw includes deltae_vdw.
 !!
 !! PARENTS
-!!      rhohxc
+!!      rhotoxc
 !!
 !! CHILDREN
 !!      wrtout
@@ -2872,7 +2872,7 @@ subroutine vdw_df_ldaxc(npts_rho,nspden,ngrad,rho_grho, &
   !     but again the use of rho_grho lets us build these quantities
   !     directly.
   !
-  ! See ~abinit/src/56_xc/rhohxc.F90 for details.
+  ! See ~abinit/src/56_xc/rhotoxc.F90 for details.
   if (nspden==1) then
     do ii=1,npts_rho
       rho_tmp(ii,1)=half*rho_grho(ii,1,1)
