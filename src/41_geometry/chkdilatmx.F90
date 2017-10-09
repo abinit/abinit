@@ -156,4 +156,4 @@ subroutine chkdilatmx(chkdilatmx_,dilatmx,rprimd,rprimd_orig,dilatmx_errmsg)
  end if
 
 end subroutine chkdilatmx
-!!**
+!!***

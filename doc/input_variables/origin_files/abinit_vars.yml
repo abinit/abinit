@@ -2988,17 +2988,17 @@
     characteristics: null
     commentdefault: null
     commentdims: null
-    defaultval: null
+    defaultval: 1
     dimensions: scalar
     excludes: null
     mnemonics: CHecK DILATMX
     requires: null
     text: |-
-        If 0, will not stop the execution if the [[dilatmx]] threshold is exceeded, but simply issue a warning.
-        If 1, stop the execution.
+        If 0, will not stop the execution if the [[dilatmx]] threshold is exceeded, but simply issue a warning. There will be no rescaling.
+        If 1, after tentative rescalings as described in [[dilatmx]], will stop the execution.
     topics: GeoOpt_expert
-    varset: null
-    vartype: null
+    varset: rlx
+    vartype: integer
 - !variable
     abivarname: chkexit
     characteristics: null
