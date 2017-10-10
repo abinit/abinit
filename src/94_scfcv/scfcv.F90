@@ -680,12 +680,12 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
      ncpgr=0
      if (usefock==1) then
        ctocprj_choice = 1
-       if (dtset%optforces /= 0) then
+       if (dtset%optforces == 1) then
          ncpgr = 3 ; ctocprj_choice = 2
        end if
-       if (dtset%optstress /= 0) then
-         ncpgr = 6 ; ctocprj_choice = 3
-       end if
+!       if (dtset%optstress /= 0) then
+!         ncpgr = 6 ; ctocprj_choice = 3
+!       end if
      end if
      call pawcprj_alloc(cprj,ncpgr,dimcprj_srt)
 #if defined HAVE_BIGDFT
@@ -1104,7 +1104,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
 &         dtset%mkmem,mpi_enreg,psps%mpsang,&
 &         dtset%mpw,dtset%natom,dtset%natom,dtset%nband,dtset%nfft,ngfft,dtset%nkpt,dtset%nloalg,npwarr,dtset%nspden,&
 &         dtset%nspinor,dtset%nsppol,dtset%nsym,dtset%ntypat,occ,dtset%optforces,paw_ij,pawtab,ph1d,psps,rprimd,&
-&         dtset%optstress,fock%fock_common%symrec,dtset%typat,usecprj,dtset%use_gpu_cuda,dtset%wtk,xred,ylm,ylmgr)
+&         fock%fock_common%symrec,dtset%typat,usecprj,dtset%use_gpu_cuda,dtset%wtk,xred,ylm)
        end if
 
        !Should place a test on whether there should be the final exit of the istep loop. 
