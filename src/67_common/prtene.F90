@@ -136,7 +136,8 @@ subroutine prtene(dtset,energies,iout,usepaw)
      if (ipositron/=1) then
        write(message, '(3(a,es21.14,a),a,es21.14)' ) &
 &       '    Hartree energy  = ',energies%e_hartree,ch10,&
-&       '    XC energy       = ',energies%e_xc+energies%e_fock+energies%e_hybcomp1+energies%e_hybcomp2,ch10,&
+&       '    XC energy       = ',energies%e_xc+energies%e_fock+&
+&       energies%e_hybcomp_E0-energies%e_hybcomp_v0+energies%e_hybcomp_v,ch10,&
 &       eneName            ,enevalue,ch10,&
 &       '    PspCore energy  = ',energies%e_corepsp
        call wrtout(iout,message,'COLL')
@@ -233,7 +234,8 @@ subroutine prtene(dtset,energies,iout,usepaw)
 &     eneName            ,enevalue,ch10,&
 &     '    PspCore energy  = ',energies%e_corepsp-energies%e_corepspdc,ch10,&
 &     '    Dble-C XC-energy= ',-energies%e_hartree+energies%e_xc-energies%e_xcdc+&
-&                               energies%e_fock-energies%e_fockdc+energies%e_hybcomp1
+&                               energies%e_fock-energies%e_fockdc+&
+&                               energies%e_hybcomp_E0-energies%e_hybcomp_v0  
      call wrtout(iout,message,'COLL')
    end if
    if ((dtset%berryopt==4 .or.  dtset%berryopt==6 .or. dtset%berryopt==7 .or.  &

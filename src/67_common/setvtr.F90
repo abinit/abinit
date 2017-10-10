@@ -74,8 +74,9 @@
 !!  energies <type(energies_type)>=all part of total energy.
 !!   | e_xc=exchange-correlation energy (hartree)
 !!   | In case of hybrid compensation algorithm:
-!!   | e_hybcomp1=first compensation term for the exchange-correlation energy (hartree)
-!!   | e_hybcomp2=second compensation term for the exchange-correlation energy (hartree)
+!!   | e_hybcomp_E0=energy compensation term for hybrid exchange-correlation energy (hartree) at fixed density
+!!   | e_hybcomp_v0=potential compensation term for hybrid exchange-correlation energy (hartree) at fixed density
+!!   | e_hybcomp_v=potential compensation term for hybrid exchange-correlation energy (hartree) at self-consistent density
 !!  ==== if optene==2 or 4
 !!   | e_localpsp=local psp energy (hartree)
 !!  ==== if dtset%icoulomb == 0
@@ -502,12 +503,12 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
 &         taug=taug,taur=taur,vhartr=vhartr,vxctau=vxctau,add_tfw=add_tfw_)
          if(mod(dtset%fockoptmix,100)==11)then
 !          Note that at present, this latest call to rhotoxc delivers the used energies%e_xc and strsxc
-           call rhotoxc(energies%e_hybcomp1,kxc,mpi_enreg,nfft,ngfft,&
+           call rhotoxc(energies%e_hybcomp_E0,kxc,mpi_enreg,nfft,ngfft,&
 &            nhat,psps%usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,dtset%nspden,n3xccc,&
 &            option,dtset%paral_kgb,rhor,rprimd,strsxc,usexcnhat,vxc_hybcomp,vxcavg,xccc3d,xcdatahyb,&
 &            taug=taug,taur=taur,vhartr=vhartr,vxctau=vxctau,add_tfw=add_tfw_)
            energies%e_xc=energies%e_xc*dtset%userre
-           energies%e_hybcomp1=energies%e_hybcomp1-energies%e_xc
+           energies%e_hybcomp_E0=energies%e_hybcomp_E0-energies%e_xc
            vxc(:,:)=vxc(:,:)*dtset%userre
            vxc_hybcomp(:,:)=vxc_hybcomp(:,:)-vxc(:,:)
          endif
@@ -685,10 +686,10 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
  end if
 
  if(mod(dtset%fockoptmix,100)==11)then
-   if (optene>=1 .and. .not. wvlbigdft) then
-     call dotprod_vn(1,rhor,energies%e_hybcomp2,doti,nfft,nfftot,1,1,vxc_hybcomp,ucvol_local,&
+   if (.not. wvlbigdft) then
+     call dotprod_vn(1,rhor,energies%e_hybcomp_v0,doti,nfft,nfftot,1,1,vxc_hybcomp,ucvol_local,&
 &      mpi_comm_sphgrid=mpi_comm_sphgrid)
-     energies%e_hybcomp1=energies%e_hybcomp1-energies%e_hybcomp2
+     energies%e_hybcomp_v=energies%e_hybcomp_v0
    endif 
  endif 
 
