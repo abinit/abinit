@@ -792,8 +792,14 @@ for i, var in enumerate(abinit_vars):
     else:
       print(" No topic_tribe for abivarname %s"%(var.abivarname))
       topic_error+=1
-    # Occurence
-    cur_content += '<br><font id="smalltext">'+tests_for_abivars[var.abivarname]["usage_report"]+"</font>\n"
+    # Occurrence in input files, except when internal_only
+    internal_only=0
+    if var.characteristics is not None:
+      for chs in var.characteristics:
+        if "INTERNAL_ONLY" in chs:
+          internal_only=1 
+    if internal_only==0 :
+      cur_content += '<br><font id="smalltext">'+tests_for_abivars[var.abivarname]["usage_report"]+"</font>\n"
     # Variable type, including dimensions
     cur_content += '<br><font id="vartype">Variable type: '+var.vartype
     if var.dimensions is not None:
@@ -845,7 +851,7 @@ for i, varset_info in enumerate(varsets):
     continue
 
   scriptTab = "\n\
-<input type=\"text\" id=\"InputSearch\" onkeyup=\"searchInput()\" onClick=\"searchInput()\" onblur=\"defaultClick()\" placeholder=\"Search\">\n\
+<input type=\"text\" id=\"InputSearch\" onkeyup=\"searchInput()\" onClick=\"searchInput()\" placeholder=\"Search\">\n\
 "
   alphalinks='\n \n <div class="TabsLetter">'
   for i in string.ascii_uppercase:

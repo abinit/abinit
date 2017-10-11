@@ -55,7 +55,7 @@ by solving exactly the local correlations for an atom in an effective field (i.e
 The effective field reproduces the effect of the surrounding correlated atoms and is thus self-consistently related 
 to the solution of the Anderson model <a href="../../biblio/generated_files/bib_biblio.html#Georges1996">[Georges1996]</a>.
 
-<p>The combination of DFT with DMFT <a href="../../biblio/generated_files/bib_biblio.html#Georges2004">[Georges2004]</a>,<a href="../../biblio/generated_files/bib_biblio.html#Kotliar2006">[Kotliar2006]</a> <a href="../../input_variables/generated_files/varset_dev.html#usedmft">usedmft</a>= 1}) relies on :
+<p>The combination of DFT with DMFT <a href="../../biblio/generated_files/bib_biblio.html#Georges2004">[Georges2004]</a>,<a href="../../biblio/generated_files/bib_biblio.html#Kotliar2006">[Kotliar2006]</a> (<a href="../../input_variables/generated_files/varset_dev.html#usedmft">usedmft</a>= 1) relies on :
 
  <li> The definition of correlated orbitals. In ABINIT, we use Wannier functions built using projected local orbitals <a href="../../biblio/generated_files/bib_biblio.html#Amadon2008">[Amadon2008]</a>.
 Wannier functions are unitarily related to  a selected set of Kohn Sham (KS) wavefunctions, specified in ABINIT by band indices
@@ -70,10 +70,10 @@ plotted using <a href="../../input_variables/generated_files/varset_dev.html#plo
  <li> The choice of the screened Coulomb interaction U (<a href="../../input_variables/generated_files/varset_paw.html#upawu">upawu</a>) and J (<a href="../../input_variables/generated_files/varset_paw.html#jpawu">jpawu</a>).
 Note that up to version 7.10.5 (but not in later versions) <a href="../../input_variables/generated_files/varset_paw.html#jpawu">jpawu</a>= 0 is required if the density matrix in the correlated subspace is not diagonal.</li>
  <li> The choice of the double counting correction <a href="../../biblio/generated_files/bib_biblio.html#Amadon2012">[Amadon2012]</a>. The current default choice
-in ABINIT is <a href="../../input_variables/generated_files/varset_dmft.html#dmft_dc">dmft_dc</a>= 1} which corresponds to the full localized limit.</li>
+in ABINIT is <a href="../../input_variables/generated_files/varset_dmft.html#dmft_dc">dmft_dc</a>= 1 which corresponds to the full localized limit.</li>
 <li> The method of resolution of the Anderson model. In ABINIT, it can be the Hubbard I method <a href="../../biblio/generated_files/bib_biblio.html#Amadon2012">[Amadon2012]</a>  (<a href="../../input_variables/generated_files/varset_dmft.html#dmft_solv">dmft_solv</a>= 2),
 the Continuous time Quantum Monte Carlo (CTQMC) method <a href="../../biblio/generated_files/bib_biblio.html#Gull2011">[Gull2011]</a>,<a href="../../biblio/generated_files/bib_biblio.html#Bieder2014">[Bieder2014]</a> (<a href="../../input_variables/generated_files/varset_dmft.html#dmft_solv">dmft_solv</a>= 5)
-or the static mean field method (<a href="../../input_variables/generated_files/varset_dmft.html#dmft_solv">dmft_solv</a>= 1}, equivalent to usual DFT+U <a href="../../biblio/generated_files/bib_biblio.html#Amadon2012">[Amadon2012]</a>).</li>
+or the static mean field method (<a href="../../input_variables/generated_files/varset_dmft.html#dmft_solv">dmft_solv</a>= 1), equivalent to usual DFT+U <a href="../../biblio/generated_files/bib_biblio.html#Amadon2012">[Amadon2012]</a>).</li>
 
 
 
@@ -85,7 +85,7 @@ are used for Matsubara frequencies <a href="../../biblio/generated_files/bib_bib
 are 10000 and 100, but convergence should be studied). More information can be obtained in the log file by setting <a href="../../input_variables/generated_files/varset_paw.html#pawprtvol">pawprtvol</a>=3.
 
 <p>The main output of the calculations are the imaginary time Green's function , from which spectral functions can be obtained
-using an external maximum entropy code <a href="../../biblio/generated_files/bib_biblio.html#Bergeron2015">[Bergeron2015]</a>, self-energies, from which quasiparticle renormalization weight can be extracted, the density matrix of correlated orbitals, and the internal energies <a href="../../biblio/generated_files/bib_biblio.html#Amadon2006">[Amadon2006]</a>. The electronic entropic contribution to the free energy 
+using an external maximum entropy code <a href="../../biblio/generated_files/bib_biblio.html#Bergeron2016">[Bergeron2016]</a>, self-energies, from which quasiparticle renormalization weight can be extracted, the density matrix of correlated orbitals, and the internal energies <a href="../../biblio/generated_files/bib_biblio.html#Amadon2006">[Amadon2006]</a>. The electronic entropic contribution to the free energy 
 can also be obtained using <a href="../../input_variables/generated_files/varset_dmft.html#dmft_entropy">dmft_entropy</a> and <a href="../../input_variables/generated_files/varset_dmft.html#dmft_nlambda">dmft_nlambda</a>.
 
 
@@ -94,8 +94,7 @@ uses the hybridization expansion <a href="../../biblio/generated_files/bib_bibli
 a <i>density-density</i>  multiorbital interaction <a href="../../biblio/generated_files/bib_biblio.html#Gull2011">[Gull2011]</a>.
 Moreover, the hybridization function <a href="../../biblio/generated_files/bib_biblio.html#Gull2011">[Gull2011]</a> is assumed to be diagonal in the orbital (or flavor) index. This is exact for cubic symmetry without spin orbit coupling but, in general, one should always check 
 that the off-diagonal terms are much smaller than the diagonal ones.
-The non diagonal hybridization and coupling to the exact rotationally invariant interaction <a href="../../biblio/generated_files/bib_biblio.html#Gull2011">[Gull2011]</a> is not available
-in version 7.10.5.
+A link to the exact rotationally invariant interaction CTQMC code of the TRIQS library is also available using <a href="../../input_variables/generated_files/varset_dmft.html#dmft_solv">dmft_solv</a>=7.
 <p>As the CTQMC solver uses a Fourier transform, the time grid <a href="../../input_variables/generated_files/varset_dmft.html#dmftqmc_l">dmftqmc_l</a> in imaginary space must be chosen so that the Nyquist frequency, defined by &pi;*<a href="../../input_variables/generated_files/varset_dmft.html#dmftqmc_l">dmftqmc_l</a>*<a href="../../input_variables/generated_files/varset_gstate.html#tsmear">tsmear</a>, is around 2 or 3 Ha.
 A convergence study should be performed on this variable.
 Moreover, the number of imaginary frequencies (<a href="../../input_variables/generated_files/varset_dmft.html#dmft_nwlo">dmft_nwlo</a>) has to be set to at least twice the value of <a href="../../input_variables/generated_files/varset_dmft.html#dmftqmc_l">dmftqmc_l</a>.
@@ -167,10 +166,10 @@ how to perform a DFT+DMFT calculation on SrVO3 using projected Wannier functions
 
 <i><b>WARNING</b> : as of ABINITv8.6.x, the list of input files provided in the specific section of the topics Web pages is still to be reviewed/tuned. In some cases, it will be adequate, and in other cases, it might be incomplete, or perhaps even useless.</i>
 <br><br>The user can find some related example input files in the ABINIT package in the directory /tests, or on the Web:
-<p> tests/v6/Input: <a href="../../tests/v6/Input/t47.in">t47.in</a> 
 <p> tests/v7/Input: <a href="../../tests/v7/Input/t21.in">t21.in</a> 
 <a href="../../tests/v7/Input/t27.in">t27.in</a> 
 <a href="../../tests/v7/Input/t28.in">t28.in</a> 
+<p> tests/v6/Input: <a href="../../tests/v6/Input/t47.in">t47.in</a> 
 <br>
 
 <br><br><a href=#top>Go to the top</a>
@@ -187,7 +186,7 @@ how to perform a DFT+DMFT calculation on SrVO3 using projected Wannier functions
 <br> <a href="../../biblio/generated_files/bib_biblio.html#Amadon2008a">[Amadon2008a]</a>  B. Amadon, F. Jollet and M. Torrent, "&gamma; and &beta; cerium: LDA+U calculations of ground-state parameters", Phys. Rev. B 77, 155104 (2008). <br> DOI: <a href="https://doi.org/10.1103/PhysRevB.77.155104">10.1103/PhysRevB.77.155104</a>.<br>
 <br> <a href="../../biblio/generated_files/bib_biblio.html#Amadon2012">[Amadon2012]</a>  B. Amadon, "A self-consistent DFT+DMFT scheme in the projector augmented wave method: applications to cerium, Ce<sub>2</sub>O<sub>3</sub> and Pu<sub>2</sub>O<sub>3</sub> with the Hubbard I solver and comparison to DFT+U", J. Phys.: Cond. Matt. 24, 075604 (2012). <br> URL: <a href="http://iopscience.iop.org/article/10.1088/0953-8984/24/7/075604"> http://iopscience.iop.org/article/10.1088/0953-8984/24/7/075604</a>.<br>
 <br> <a href="../../biblio/generated_files/bib_biblio.html#Anisimov1991">[Anisimov1991]</a>  V. I. Anisimov and O. Gunnarsson, "Density-functional calculation of effective Coulomb interactions in metals", Phys. Rev. B 43, 7570&ndash;7574 (1991). <br> DOI: <a href="https://doi.org/10.1103/PhysRevB.43.7570">10.1103/PhysRevB.43.7570</a>.<br>
-<br> <a href="../../biblio/generated_files/bib_biblio.html#Bergeron2015">[Bergeron2015]</a>  D. Bergeron and A.-M. S. Tremblay, "Algorithms for optimized maximum entropy and diagnostic tools for analytic continuation", arXiv e-prints 1507.01012 (2015). <br> URL: <a href="http://adsabs.harvard.edu/abs/2015arXiv150701012B"> http://adsabs.harvard.edu/abs/2015arXiv150701012B</a>.<br>
+<br> <a href="../../biblio/generated_files/bib_biblio.html#Bergeron2016">[Bergeron2016]</a>  Dominic Bergeron and A.-M. S. Tremblay, "Algorithms for optimized maximum entropy and diagnostic tools for analytic continuation", Phys. Rev. E 94, 023303 (2016). <br> DOI: <a href="https://doi.org/10.1103/PhysRevE.94.023303">10.1103/PhysRevE.94.023303</a>.<br>
 <br> <a href="../../biblio/generated_files/bib_biblio.html#Bieder2014">[Bieder2014]</a>  J. Bieder and B. Amadon, "Thermodynamics of the &alpha;-&gamma; transition in cerium from first principles", Phys. Rev. B 89, 195132 (2014). <br> DOI: <a href="https://doi.org/10.1103/PhysRevB.89.195132">10.1103/PhysRevB.89.195132</a>.<br>
 <br> <a href="../../biblio/generated_files/bib_biblio.html#Georges1996">[Georges1996]</a>  A. Georges, G. Kotliar, W. Krauth and M.J. Rozenberg, "Dynamical mean-field theory of strongly correlated fermion systems and the limit of infinite dimensions", Rev. Mod. Phys. 68, 13&ndash;125 (1996). <br> DOI: <a href="https://doi.org/10.1103/RevModPhys.68.13">10.1103/RevModPhys.68.13</a>.<br>
 <br> <a href="../../biblio/generated_files/bib_biblio.html#Georges2004">[Georges2004]</a>  A. Georges, "Strongly Correlated Electron Materials: Dynamical Mean-Field Theory and Electronic Structure", AIP Conf. Proc. 715, 3&ndash;74 (2004). <br> DOI: <a href="https://doi.org/10.1063/1.1800733">10.1063/1.1800733</a>.<br>

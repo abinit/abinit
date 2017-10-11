@@ -158,7 +158,7 @@ P           mkmem           2
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm: epsatm=  -27.87322470
+ pspatm : epsatm=  -27.87322470
          --- l  ekb(1:nproj) -->
              0   -3.250798   -0.293559    4.312162
              1   -8.257718   -2.028032    7.058275

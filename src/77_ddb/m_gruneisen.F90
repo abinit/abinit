@@ -287,7 +287,7 @@ subroutine gruns_fourq(gruns, qpt, wvols, gvals, dwdq, phdispl_cart)
 
 !Local variables-------------------------------
 !scalars
- integer :: ivol,ii,natom3,nu
+ integer :: ivol,natom3,nu
  real(dp) :: fact
 !arrays
  real(dp) :: dot(2)

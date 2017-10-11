@@ -1731,7 +1731,7 @@ P          mk1mem10        64
     6    7    2    2       493   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
   No XC core correction.
   1.024700          amesh (Hamman grid)
- pspatm: epsatm=    1.36305739
+ pspatm : epsatm=    1.36305739
          --- l  ekb(1:nproj) -->
              0    1.768744
              1    0.900554
@@ -2108,7 +2108,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.203      41.144
     6    7    2    2       493   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
   No XC core correction.
   1.024700          amesh (Hamman grid)
- pspatm: epsatm=    1.36305739
+ pspatm : epsatm=    1.36305739
          --- l  ekb(1:nproj) -->
              0    1.768744
              1    0.900554
@@ -2361,7 +2361,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.203      41.144
     6    7    2    2       493   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
   No XC core correction.
   1.024700          amesh (Hamman grid)
- pspatm: epsatm=    1.36305739
+ pspatm : epsatm=    1.36305739
          --- l  ekb(1:nproj) -->
              0    1.768744
              1    0.900554
@@ -2616,7 +2616,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.203      41.144
     6    7    2    2       493   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
   No XC core correction.
   1.024700          amesh (Hamman grid)
- pspatm: epsatm=    1.36305739
+ pspatm : epsatm=    1.36305739
          --- l  ekb(1:nproj) -->
              0    1.768744
              1    0.900554
@@ -3169,7 +3169,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.203      41.144
     6    7    2    2       493   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
   No XC core correction.
   1.024700          amesh (Hamman grid)
- pspatm: epsatm=    1.36305739
+ pspatm : epsatm=    1.36305739
          --- l  ekb(1:nproj) -->
              0    1.768744
              1    0.900554
@@ -3408,7 +3408,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.203      41.144
     6    7    2    2       493   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
   No XC core correction.
   1.024700          amesh (Hamman grid)
- pspatm: epsatm=    1.36305739
+ pspatm : epsatm=    1.36305739
          --- l  ekb(1:nproj) -->
              0    1.768744
              1    0.900554
@@ -3647,7 +3647,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.203      41.144
     6    7    2    2       493   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
   No XC core correction.
   1.024700          amesh (Hamman grid)
- pspatm: epsatm=    1.36305739
+ pspatm : epsatm=    1.36305739
          --- l  ekb(1:nproj) -->
              0    1.768744
              1    0.900554

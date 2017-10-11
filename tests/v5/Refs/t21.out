@@ -451,7 +451,7 @@ P          mk1mem           1
     1  24.372  32.350    0   1.3876018        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     0.49406148701180    6.36128955091623    0.66947621353748   rchrg,fchrg,qchrg
- pspatm: epsatm=    1.80528525
+ pspatm : epsatm=    1.80528525
          --- l  ekb(1:nproj) -->
              0    6.310228
  pspatm: atomic psp has been read  and splines computed
@@ -468,7 +468,7 @@ P          mk1mem           1
     2   0.000   0.000    0   1.6350894        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     1.23315314129373    1.11669953786602    1.82740311420084   rchrg,fchrg,qchrg
- pspatm: epsatm=    2.73037554
+ pspatm : epsatm=    2.73037554
          --- l  ekb(1:nproj) -->
              0    6.290146
              1    3.746067
@@ -493,7 +493,7 @@ P          mk1mem           1
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm: epsatm=   12.37618897
+ pspatm : epsatm=   12.37618897
          --- l  ekb(1:nproj) -->
              0   -1.367110    0.141978    2.479722
              1   -1.780211    2.777773

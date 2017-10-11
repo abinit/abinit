@@ -183,7 +183,7 @@ type(skw_t) function skw_new(cryst, params, cplex, nband, nkpt, nsppol, kpts, ei
 !scalars
  integer,parameter :: master=0,prtvol=1
  integer :: my_rank,nprocs,cnt,bstop,bstart,bcount,lwork
- integer :: ir,ik,ib,ii,jj,nr,band,spin,isym,ierr,i1,i2,i3,lpratio,nrwant
+ integer :: ir,ik,ib,ii,jj,nr,band,spin,ierr,lpratio,nrwant
  real(dp),parameter :: c1=0.25_dp,c2=0.25_dp
  real(dp) :: r2,r2min,mare,mae_meV,adiff_meV,rel_err,rcut,rsigma
  real(dp) :: cpu_tot,wall_tot,gflops_tot,cpu,wall,gflops,rval
@@ -796,7 +796,6 @@ subroutine mkstar(skw, kpt, srk)
 !Local variables-------------------------------
 !scalars
  integer :: ir,isym
- logical :: found
 !arrays
  real(dp) :: sk(3)
 

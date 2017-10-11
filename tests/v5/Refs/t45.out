@@ -230,7 +230,7 @@ P           mkmem          10
     6    7    3    2       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
     3.04000000000000    1.00000000000000    0.00000000000000   rchrg,fchrg,qchrg
   1.025211          amesh (Hamman grid)
- pspatm: epsatm=    9.10637364
+ pspatm : epsatm=    9.10637364
          --- l  ekb(1:nproj) -->
              0    1.487262
              1    0.696903
@@ -239,7 +239,7 @@ P           mkmem          10
 
 - pspini: atom type   2  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/14-Si.nlcc.UPF
 - pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/14-Si.nlcc.UPF
- pspatm: epsatm=    9.10637364
+ pspatm : epsatm=    9.10637364
          --- l  ekb(1:nproj) -->
              0    0.371816
              1    0.174226

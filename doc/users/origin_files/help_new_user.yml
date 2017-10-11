@@ -105,12 +105,12 @@ sec3:
   single input file, is given in the ABINIT [[varset:allvars|list of all variable]].
   <br>The detailed description of input variables is given in many "Variable Set" files, including:
   <ul>
-  <li> Basic variables, [[varset_basic]]</li>
-  <li> Ground-state calculation variables, [[varset_gstate]]</li>
-  <li> GW variables, [[varset_gw]]</li>
-  <li> Files handling variables, [[varset_files]]</li>
-  <li> Parallelisation variables, [[varset_paral]]</li>
-  <li> Density Functional Perturbation Theory variables, [[varset_dfpt]]</li>
+  <li> Basic variables, [[varset:basic]]</li>
+  <li> Ground-state calculation variables, [[varset:gstate]]</li>
+  <li> GW variables, [[varset:gw]]</li>
+  <li> Files handling variables, [[varset:files]]</li>
+  <li> Parallelisation variables, [[varset:paral]]</li>
+  <li> Density Functional Perturbation Theory variables, [[varset:dfpt]]</li>
   <li>  ... </li>
   </ul>
   

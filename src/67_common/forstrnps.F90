@@ -167,6 +167,7 @@ use m_cgtools
  type(gs_hamiltonian_type) :: gs_hamk
  logical :: compute_gbound,usefock_loc
  character(len=500) :: msg
+ type(fock_common_type),pointer :: fockcommon
 !arrays
  integer,allocatable :: kg_k(:,:)
  real(dp) :: kpoint(3),nonlop_dum(1,1),rmet(3,3),tsec(2)
@@ -179,6 +180,7 @@ use m_cgtools
  type(bandfft_kpt_type),pointer :: my_bandfft_kpt => null()
  type(pawcprj_type),target,allocatable :: cwaveprj(:,:)
  type(pawcprj_type),pointer :: cwaveprj_idat(:,:)
+
 
 !*************************************************************************
 
@@ -214,33 +216,35 @@ use m_cgtools
 !Arrays initializations
  grnl(:)=zero
  if (usefock_loc) then
-   fock%optfor=.false.
-   fock%optstr=.false.
-   use_ACE_old=fock%use_ACE
-   fock%use_ACE=0
+   fockcommon =>fock%fock_common
+   fockcommon%optfor=.false.
+   fockcommon%optstr=.false.
+   use_ACE_old=fockcommon%use_ACE
+   fockcommon%use_ACE=0
+   if (fockcommon%optfor) compute_gbound=.true.
  end if
  if (stress_needed==1) then
    kinstr(:)=zero;npsstr(:)=zero
    if (usefock_loc) then
-     fock%optstr=.TRUE.
-     fock%stress=zero
+     fockcommon%optstr=.TRUE.
+     fockcommon%stress=zero
      compute_gbound=.true.
    end if
  end if
-
+ 
  usecprj_local=usecprj
 
  if ((usefock_loc).and.(psps%usepaw==1)) then
    usecprj_local=1
    if(optfor==1)then 
-     fock%optfor=.true.
-     if (.not.allocated(fock%forces_ikpt)) then
-       ABI_ALLOCATE(fock%forces_ikpt,(3,natom,mband))
+     fockcommon%optfor=.true.
+     if (.not.allocated(fockcommon%forces_ikpt)) then
+       ABI_ALLOCATE(fockcommon%forces_ikpt,(3,natom,mband))
      end if
-     if (.not.allocated(fock%forces)) then
-       ABI_ALLOCATE(fock%forces,(3,natom))
+     if (.not.allocated(fockcommon%forces)) then
+       ABI_ALLOCATE(fockcommon%forces,(3,natom))
      end if
-     fock%forces=zero
+     fockcommon%forces=zero
      compute_gbound=.true.
    end if
  end if
@@ -280,11 +284,12 @@ use m_cgtools
 
 !  Continue to initialize the Hamiltonian (PAW DIJ coefficients)
    call load_spin_hamiltonian(gs_hamk,isppol,with_nonlocal=.true.)
+   if (usefock_loc) fockcommon%isppol=isppol
 
 !  Loop over k points
    ikg=0
    do ikpt=1,nkpt
-
+     if (usefock_loc) fockcommon%ikpt=ikpt
      nband_k=nband(ikpt+(isppol-1)*nkpt)
      istwf_k=istwfk(ikpt)
      npw_k=npwarr(ikpt)
@@ -424,8 +429,8 @@ use m_cgtools
 &     nkpg,npw_k,ntypat,psps%pspso,psps%qgrid_ff,rmet,psps%usepaw,psps%useylm,ylm_k,ylmgr_k)
      if ((stress_needed==1).and.(usefock_loc).and.(psps%usepaw==1))then
        ider_str=1; dimffnl_str=7;idir_str=-7
-       ABI_ALLOCATE(fock%ffnl_str,(npw_k,dimffnl_str,psps%lmnmax,ntypat))
-       call mkffnl(psps%dimekb,dimffnl_str,psps%ekb,fock%ffnl_str,psps%ffspl,gs_hamk%gmet,gs_hamk%gprimd,&
+       ABI_ALLOCATE(fockcommon%ffnl_str,(npw_k,dimffnl_str,psps%lmnmax,ntypat))
+       call mkffnl(psps%dimekb,dimffnl_str,psps%ekb,fockcommon%ffnl_str,psps%ffspl,gs_hamk%gmet,gs_hamk%gprimd,&
 &       ider_str,idir_str,psps%indlmn,kg_k,kpg_k,kpoint,psps%lmnmax,psps%lnmax,psps%mpsang,psps%mqgrid_ff,&
 &       nkpg,npw_k,ntypat,psps%pspso,psps%qgrid_ff,rmet,psps%usepaw,psps%useylm,ylm_k,ylmgr_k)
      end if
@@ -461,14 +466,14 @@ use m_cgtools
      ABI_ALLOCATE(enlout,(nnlout*blocksize))
      occblock=zero;weight=zero;enlout(:)=zero
      if (usefock_loc) then
-       if (fock%optstr) then
-         ABI_ALLOCATE(fock%stress_ikpt,(6,nband_k))
-         fock%stress_ikpt=zero
+       if (fockcommon%optstr) then
+         ABI_ALLOCATE(fockcommon%stress_ikpt,(6,nband_k))
+         fockcommon%stress_ikpt=zero
        end if
      end if
      if ((usefock_loc).and.(psps%usepaw==1)) then
-       if (fock%optfor) then
-         fock%forces_ikpt=zero
+       if (fockcommon%optfor) then
+         fockcommon%forces_ikpt=zero
        end if
      end if
 
@@ -555,7 +560,7 @@ use m_cgtools
 
 !        Accumulate stress tensor and forces for the Fock part
          if (usefock_loc) then
-           if(fock%optstr.or.fock%optfor) then
+           if(fockcommon%optstr.or.fockcommon%optfor) then
              if (mpi_enreg%paral_kgb==1) then
                msg='forsrtnps: Paral_kgb is not yet implemented for fock stresses'
                MSG_BUG(msg)
@@ -564,17 +569,17 @@ use m_cgtools
              if (gs_hamk%usepaw==0) cwaveprj_idat => cwaveprj
              ABI_ALLOCATE(ghc_dum,(0,0))
              do iblocksize=1,blocksize
-               fock%ieigen=(iblock-1)*blocksize+iblocksize
+               fockcommon%ieigen=(iblock-1)*blocksize+iblocksize
                if (gs_hamk%usepaw==1) then
                  cwaveprj_idat => cwaveprj(:,(iblocksize-1)*my_nspinor+1:iblocksize*my_nspinor)
                end if
                call fock_getghc(cwavef(:,1+(iblocksize-1)*npw_k*my_nspinor:iblocksize*npw_k*my_nspinor),cwaveprj_idat,&
 &               ghc_dum,gs_hamk,mpi_enreg)
-               if (fock%optstr) then
-                 fock%stress(:)=fock%stress(:)+weight(iblocksize)*fock%stress_ikpt(:,fock%ieigen)
+               if (fockcommon%optstr) then
+                 fockcommon%stress(:)=fockcommon%stress(:)+weight(iblocksize)*fockcommon%stress_ikpt(:,fockcommon%ieigen)
                end if
-               if (fock%optfor) then
-                 fock%forces(:,:)=fock%forces(:,:)+weight(iblocksize)*fock%forces_ikpt(:,:,fock%ieigen)
+               if (fockcommon%optfor) then
+                 fockcommon%forces(:,:)=fockcommon%forces(:,:)+weight(iblocksize)*fockcommon%forces_ikpt(:,:,fockcommon%ieigen)
                end if
              end do 
              ABI_DEALLOCATE(ghc_dum)
@@ -598,8 +603,8 @@ use m_cgtools
      end if
 
      if (usefock_loc) then
-       if (fock%optstr) then
-         ABI_DEALLOCATE(fock%stress_ikpt)
+       if (fockcommon%optstr) then
+         ABI_DEALLOCATE(fockcommon%stress_ikpt)
        end if
      end if
 
@@ -628,7 +633,7 @@ use m_cgtools
        ABI_DEALLOCATE(kstr6)
      end if
      if ((stress_needed==1).and.(usefock_loc).and.(psps%usepaw==1))then
-       ABI_DEALLOCATE(fock%ffnl_str)
+       ABI_DEALLOCATE(fockcommon%ffnl_str)
      end if
 
    end do ! End k point loop
@@ -645,7 +650,7 @@ use m_cgtools
      call xmpi_sum(grnl,spaceComm,ierr)
      call timab(65,2,tsec)
      if ((usefock_loc).and.(psps%usepaw==1)) then
-       call xmpi_sum(fock%forces,spaceComm,ierr)
+       call xmpi_sum(fockcommon%forces,spaceComm,ierr)
      end if
    end if
 !  Stresses
@@ -653,8 +658,8 @@ use m_cgtools
      call timab(65,1,tsec)
      call xmpi_sum(kinstr,spaceComm,ierr)
      call xmpi_sum(npsstr,spaceComm,ierr)
-     if ((usefock_loc).and.(fock%optstr)) then
-       call xmpi_sum(fock%stress,spaceComm,ierr)
+     if ((usefock_loc).and.(fockcommon%optstr)) then
+       call xmpi_sum(fockcommon%stress,spaceComm,ierr)
      end if
      call timab(65,2,tsec)
    end if
@@ -669,8 +674,8 @@ use m_cgtools
    if (nsym>1) then
      call stresssym(gs_hamk%gprimd,nsym,kinstr,symrec)
      call stresssym(gs_hamk%gprimd,nsym,npsstr,symrec)
-     if ((usefock_loc).and.(fock%optstr)) then
-       call stresssym(gs_hamk%gprimd,nsym,fock%stress,symrec)
+     if ((usefock_loc).and.(fockcommon%optstr)) then
+       call stresssym(gs_hamk%gprimd,nsym,fockcommon%stress,symrec)
      end if
    end if
  end if
@@ -683,7 +688,7 @@ use m_cgtools
 !Deallocate temporary space
  call destroy_hamiltonian(gs_hamk)
  if (usefock_loc) then
-   fock%use_ACE=use_ACE_old
+   fockcommon%use_ACE=use_ACE_old
  end if
  call timab(925,2,tsec)
  call timab(920,2,tsec)

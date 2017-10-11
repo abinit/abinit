@@ -7,7 +7,7 @@
 !! Loop over the perturbations j1, j2 and j3
 !!
 !! COPYRIGHT
-!! Copyright (C) 2016-2016 ABINIT group (LB)
+!! Copyright (C) 2002-2017 ABINIT group (LB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -47,7 +47,7 @@
 !!  nfftf  = (effective) number of FFT grid points (for this processor)
 !!  nkpt  = number of k points
 !!  nkpt3 = number of k-points in the full BZ
-!!  nkxc=second dimension of the array kxc, see rhohxc.f for a description
+!!  nkxc=second dimension of the array kxc, see rhotoxc.f for a description
 !!  nneigh  = total number of neighbours required to evaluate the finite
 !!          difference formula
 !!  nspinor = number of spinorial components of the wavefunctions

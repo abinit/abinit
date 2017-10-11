@@ -534,7 +534,7 @@ end subroutine psps_init_from_dtset
 !! psps=<type pseudopotential_type>the pseudopotentials description
 !!
 !! PARENTS
-!!      driver
+!!      driver,m_ddb_hdr
 !!
 !! CHILDREN
 !!      nctab_free,nctab_init
@@ -657,8 +657,10 @@ end subroutine psps_free
 !! SIDE EFFECTS
 !!
 !! PARENTS
+!!      m_ddb_hdr
 !!
 !! CHILDREN
+!!      nctab_free,nctab_init
 !!
 !! SOURCE
 
@@ -1048,7 +1050,6 @@ subroutine psps_ncwrite(psps, path)
 !Local variables-------------------------------
 !scalars
  integer :: ipsp,itypat,ncid,ncerr
- character(len=500) :: msg
 
 ! *************************************************************************
 
@@ -1248,8 +1249,10 @@ end subroutine psp2params_init
 !! OUTPUT
 !!
 !! PARENTS
+!!      m_psps
 !!
 !! CHILDREN
+!!      nctab_free,nctab_init
 !!
 !! SOURCE
 
@@ -1467,8 +1470,10 @@ end subroutine nctab_free
 !! FUNCTION
 !!
 !! PARENTS
+!!      m_psps
 !!
 !! CHILDREN
+!!      nctab_free,nctab_init
 !!
 !! SOURCE
 
@@ -1526,7 +1531,7 @@ end subroutine nctab_copy
 !!  nctab%d2ncdq0
 !!
 !! PARENTS
-!!      psp8in
+!!      psp8in,psp9in
 !!
 !! CHILDREN
 !!      nctab_free,nctab_init
@@ -1555,7 +1560,7 @@ subroutine nctab_eval_tvalespl(nctab, zion, mesh, valr, mqgrid_vl, qgrid_vl)
 
 !Local variables-------------------------------
 !scalars
- real(dp) :: amesh,fact,yp1,ypn,d2nvdq0
+ real(dp) :: fact,yp1,ypn,d2nvdq0
 
 ! *************************************************************************
 
@@ -1634,7 +1639,6 @@ subroutine nctab_eval_tcorespl(nctab, n1xccc, xcccrc, xccc1d, mqgrid_vl, qgrid_v
 
 !Local variables-------------------------------
 !scalars
- integer :: iq
  real(dp) :: amesh,yp1,ypn 
  type(pawrad_type) :: core_mesh
 

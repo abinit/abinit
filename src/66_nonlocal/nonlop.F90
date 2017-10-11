@@ -263,8 +263,8 @@
 !!
 !! PARENTS
 !!      d2frnl,dfpt_nsteltwf,dfptnl_resp,energy,fock_getghc,forstrnps,getgh1c
-!!      getgh2c,getghc,getgsc,m_invovl,m_lobpcgwf,make_grad_berry,prep_nonlop
-!!      vtowfk,wfd_vnlpsi
+!!      getgh2c,getghc,getgsc,m_invovl,m_lobpcgwf,make_grad_berry,nonlop_test
+!!      prep_nonlop,vtowfk,wfd_vnlpsi
 !!
 !! CHILDREN
 !!      gemm_nonlop,nonlop_gpu,nonlop_pl,nonlop_ylm,pawcprj_alloc,pawcprj_copy
@@ -335,7 +335,6 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
  real(dp),pointer :: phkxredin(:,:),phkxredin_(:,:),phkxredout(:,:),phkxredout_(:,:)
  real(dp), ABI_CONTIGUOUS pointer :: enl_(:,:,:),ph1d_(:,:),sij_(:,:)
  type(pawcprj_type),pointer :: cprjin_(:,:)
-  integer :: useylm
   integer :: b0,b1,b2,b3,b4,e0,e1,e2,e3,e4
 
 ! **********************************************************************
@@ -639,7 +638,7 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
 
  else
    !$omp parallel do default(shared), &
-   !$omp& firstprivate(ndat,npwin,my_nspinor,choice,signs,paw_opt,npwout,cpopt,useylm,nnlout), &
+   !$omp& firstprivate(ndat,npwin,my_nspinor,choice,signs,paw_opt,npwout,cpopt,nnlout), &
    !$omp& private(b0,b1,b2,b3,b4,e0,e1,e2,e3,e4)
    !!$omp& schedule(static), if(hamk%use_gpu_cuda==0)
    do idat=1, ndat

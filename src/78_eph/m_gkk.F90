@@ -84,13 +84,7 @@ contains  !=====================================================================
 !! NOTES
 !!
 !! CHILDREN
-!!      appdig,cwtime,destroy_hamiltonian,destroy_rf_hamiltonian,dotprod_g
-!!      dvdb_ftinterp_qpt,dvdb_ftinterp_setup,dvdb_open_read,dvdb_readsym_allv1
-!!      findqg0,get_kg,getgh1c,getgh1c_setup,getph,gkk_free,gkk_init
-!!      gkk_ncwrite,init_hamiltonian,init_rf_hamiltonian,littlegroup_q
-!!      load_spin_hamiltonian,load_spin_rf_hamiltonian,pawcprj_free
-!!      rf_transgrid_and_pack,wfd_copy_cg,wfd_free,wfd_init,wfd_print
-!!      wfd_read_wfk,wfd_test_ortho,wrtout,xmpi_split_work,xmpi_sum_master
+!!      get_kg
 !!
 !! SOURCE
 
@@ -171,7 +165,7 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
  integer :: ib1,ib2,band
  integer :: ik,ikq,timerev_q
  integer :: spin,istwf_k,istwf_kq,npw_k,npw_kq
- integer :: mpw,mpw_k,mpw_kq,ierr,my_kstart,my_kstop,cnt,ncid
+ integer :: mpw,mpw_k,mpw_kq,ierr,my_kstart,my_kstop,ncid
  integer :: n1,n2,n3,n4,n5,n6,nspden
  integer :: sij_opt,usecprj,usevnl,optlocal,optnl,opt_gvnl1
  integer :: nfft,nfftf,mgfft,mgfftf,nkpg,nkpg1
@@ -185,7 +179,7 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
  character(len=fnlen) :: fname, gkkfilnam
 !arrays
  integer :: g0_k(3),symq(4,2,cryst%nsym),dummy_gvec(3,dummy_npw)
- integer,allocatable :: kg_k(:,:),kg_kq(:,:),gtmp(:,:),nband(:,:),nband_kq(:,:),blkflg(:,:)
+ integer,allocatable :: kg_k(:,:),kg_kq(:,:),nband(:,:),nband_kq(:,:),blkflg(:,:)
  real(dp) :: kk(3),kq(3),qpt(3)
  real(dp),allocatable :: grad_berry(:,:),kinpw1(:),kpg1_k(:,:),kpg_k(:,:),dkinpw(:)
  real(dp),allocatable :: ffnlk(:,:,:,:),ffnl1(:,:,:,:),ph3d(:,:,:),ph3d1(:,:,:)
@@ -584,6 +578,7 @@ end subroutine eph_gkk
 !! NOTES
 !!
 !! CHILDREN
+!!      get_kg
 !!
 !! SOURCE
 

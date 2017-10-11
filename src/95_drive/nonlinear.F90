@@ -87,6 +87,7 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
  use m_xmpi
  use m_hdr
  use m_ebands
+ use m_xcdata
 
  use m_dynmat,      only : d3sym, sytens
  use m_ddb,         only : nlopt, DDB_VERSION
@@ -173,6 +174,7 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
  type(ddb_hdr_type) :: ddb_hdr
  type(wffile_type) :: wffgs,wfftgs
  type(wvl_data) :: wvl
+ type(xcdata_type) :: xcdata
 !arrays
  integer :: dum_kptrlatt(3,3),dum_vacuum(3),ngfft(18),ngfftf(18),perm(6),ii,theunit
  integer,allocatable :: atindx(:),atindx1(:),blkflg(:,:,:,:,:,:),carflg(:,:,:,:,:,:),cgindex(:,:)

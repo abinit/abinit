@@ -57,6 +57,8 @@
 !!      afterscfloop
 !!
 !! CHILDREN
+!!      destroy_hamiltonian,dotprod_g,init_hamiltonian,initylmg
+!!      load_k_hamiltonian,load_spin_hamiltonian,mkffnl,mkkpg,nonlop
 !!
 !! SOURCE
 
@@ -114,7 +116,6 @@ subroutine nonlop_test(cg,eigen,istwfk,kg,kpt,mband,mcg,mgfft,mkmem,mpi_enreg,mp
  integer :: nkpg,nnlout,npw_k,paw_opt,signs,spaceComm
  logical :: ex
  character(len=100) :: strg
- character(len=500) :: msg
  real(dp) :: argr,argi
  type(gs_hamiltonian_type) :: gs_hamk
 !arrays
@@ -264,18 +265,18 @@ subroutine nonlop_test(cg,eigen,istwfk,kg,kpt,mband,mcg,mgfft,mkmem,mpi_enreg,mp
 
 !Write recognizable statement in log file
  write(std_out,'(2(a,i2),(a,i1),2(a,i2),(a,i1),(a,i2),(a,i1),2(a,i2))') &
-&   "TESTDFPT: choice=",choice,", idir(mkffnl)=",idir_ffnl,&
-&   ", ider(mkffnl)=",ider_ffnl,", dimffnl=",dimffnl,&
-&   ", idir(nonlop)=",idir_nonlop,", signs=",signs,&
-&   ", iatom=",iatom_only,", paw_opt=",paw_opt,&
-&   ", nnlout=",nnlout,", inlout=",inlout
+& "TESTDFPT: choice=",choice,", idir(mkffnl)=",idir_ffnl,&
+& ", ider(mkffnl)=",ider_ffnl,", dimffnl=",dimffnl,&
+& ", idir(nonlop)=",idir_nonlop,", signs=",signs,&
+& ", iatom=",iatom_only,", paw_opt=",paw_opt,&
+& ", nnlout=",nnlout,", inlout=",inlout
 
 !Compute all spherical harmonics and gradients
  ABI_ALLOCATE(ylm,(mpw*mkmem,psps%mpsang*psps%mpsang*psps%useylm))
  ABI_ALLOCATE(ylmgr,(mpw*mkmem,9,psps%mpsang*psps%mpsang*psps%useylm))
  if (psps%useylm==1) then
    call initylmg(gs_hamk%gprimd,kg,kpt,mkmem,mpi_enreg,psps%mpsang,mpw,nband,nkpt,&
-&     npwarr,nsppol,2,rprimd,ylm,ylmgr)
+&   npwarr,nsppol,2,rprimd,ylm,ylmgr)
  else
    ylm=zero ; ylmgr=zero
  end if
@@ -342,15 +343,15 @@ subroutine nonlop_test(cg,eigen,istwfk,kg,kpt,mband,mcg,mgfft,mkmem,mpi_enreg,mp
 !  Compute non-local form factors
    ABI_ALLOCATE(ffnl,(npw_k,dimffnl,psps%lmnmax,ntypat))
    call mkffnl(psps%dimekb,dimffnl,psps%ekb,ffnl,psps%ffspl,&
-&     gs_hamk%gmet,gs_hamk%gprimd,ider_ffnl,idir_ffnl,psps%indlmn,kg_k,kpg_k,&
-&     gs_hamk%kpt_k,psps%lmnmax,psps%lnmax,psps%mpsang,psps%mqgrid_ff,nkpg,&
-&     npw_k,ntypat,psps%pspso,psps%qgrid_ff,rmet,&
-&     psps%usepaw,psps%useylm,ylm_k,ylmgr_k)
+&   gs_hamk%gmet,gs_hamk%gprimd,ider_ffnl,idir_ffnl,psps%indlmn,kg_k,kpg_k,&
+&   gs_hamk%kpt_k,psps%lmnmax,psps%lnmax,psps%mpsang,psps%mqgrid_ff,nkpg,&
+&   npw_k,ntypat,psps%pspso,psps%qgrid_ff,rmet,&
+&   psps%usepaw,psps%useylm,ylm_k,ylmgr_k)
 
 !  Load k-dependent part in the Hamiltonian datastructure
    ABI_ALLOCATE(ph3d,(2,npw_k,gs_hamk%matblk))
    call load_k_hamiltonian(gs_hamk,kpt_k=kpoint,istwf_k=istwf_k,npw_k=npw_k,&
-&       kg_k=kg_k,kpg_k=kpg_k,ffnl_k=ffnl,ph3d_k=ph3d,compute_ph3d=.true.)
+&   kg_k=kg_k,kpg_k=kpg_k,ffnl_k=ffnl,ph3d_k=ph3d,compute_ph3d=.true.)
 
    do iblock=1,nblockbd
 
@@ -362,34 +363,34 @@ subroutine nonlop_test(cg,eigen,istwfk,kg,kpt,mband,mcg,mgfft,mkmem,mpi_enreg,mp
 
 !      Load contribution from block(n,k)
        cwavef(:,1:npw_k*my_nspinor*blocksize)=&
-&         cg(:,1+(iblock-1)*npw_k*my_nspinor*blocksize+icg:iblock*npw_k*my_nspinor*blocksize+icg)
+&       cg(:,1+(iblock-1)*npw_k*my_nspinor*blocksize+icg:iblock*npw_k*my_nspinor*blocksize+icg)
        lambda(1:blocksize)= eigen(1+(iblock-1)*blocksize+bdtot_index:iblock*blocksize+bdtot_index)
 
 !      Call NONLOP
        if (paw_opt<3) then
          call nonlop(choice,cpopt,cwaveprj,enlout,gs_hamk,idir_nonlop,lambda,&
-&              mpi_enreg,1,nnlout,paw_opt,signs,scwavef_out,tim_nonlop,cwavef,cwavef_out,&
-&              iatom_only=iatom_only,enl=enl)
+&         mpi_enreg,1,nnlout,paw_opt,signs,scwavef_out,tim_nonlop,cwavef,cwavef_out,&
+&         iatom_only=iatom_only,enl=enl)
        else
          call nonlop(choice,cpopt,cwaveprj,enlout,gs_hamk,idir_nonlop,lambda,&
-&              mpi_enreg,1,nnlout,paw_opt,signs,scwavef_out,tim_nonlop,cwavef,cwavef_out,&
-&              iatom_only=iatom_only)
+&         mpi_enreg,1,nnlout,paw_opt,signs,scwavef_out,tim_nonlop,cwavef,cwavef_out,&
+&         iatom_only=iatom_only)
        end if
 
 !      Post-processing if nonlop is called with specific options
        if (signs==2) then
          if (paw_opt<3) then
            call dotprod_g(argr,argi,istwf_k,npw_k,cplex,cwavef,cwavef_out,&
-&                         mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
+&           mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
          else
            call dotprod_g(argr,argi,istwf_k,npw_k,cplex,cwavef,scwavef_out,&
-&                         mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
+&           mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
          end if
          enlout(inlout)=argr
        end if
        if (signs==1.and.choice==1) then
          call dotprod_g(argr,argi,istwf_k,npw_k,1,cwavef,cwavef,&
-&                       mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
+&         mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
          enlout(:)=enlout(:)+argr
        end if
 

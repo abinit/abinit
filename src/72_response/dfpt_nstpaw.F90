@@ -649,8 +649,8 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
 
 !      Get first-order Hartree potential (metric tensor contribution only)
        if (nvh1>0) then
-         call hartrestr(gmet,gprimd,gsqcut,idir1,ipert1,mpi_enreg,dtset%natom,&
-&         nfftf,ngfftf,dtset%paral_kgb,rhog,vhartr01)
+         call hartrestr(gsqcut,idir1,ipert1,mpi_enreg,dtset%natom,&
+&         nfftf,ngfftf,dtset%paral_kgb,rhog,rprimd,vhartr01)
        end if
 
 !      Get Hartree + xc + local contributions to dynamical matrix or elastic tensor

@@ -76,8 +76,7 @@ subroutine psp4cc(fchrg,n1xccc,xccc1d)
  real(dp),parameter :: a18=-0.1200356429115204d5,a20=+0.2405099057118771d4
  real(dp),parameter :: a2=-0.8480751097855989d1,a4=+0.9684600878284791d2
  real(dp),parameter :: a6=-0.7490894651588015d3,a8=+0.3670890998130434d4
- real(dp) :: der1,dern,factor,gpp_1,gpp_2,gpp_3
- real(dp) :: gg,gp,gpp,gpp1,gpp2,gpp3
+ real(dp) :: der1,dern,factor
  character(len=500) :: message
 !arrays
  real(dp),allocatable :: ff(:),ff2(:),work(:),xx(:)

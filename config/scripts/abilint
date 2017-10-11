@@ -2682,9 +2682,9 @@ class Declaration(Code):
     #Detect declarations
     re_declaration = re.compile('^[ \t]*' \
         + '(allocatable|character|common|complex|data|dimension|double|end[ ]+type|equivalence|external|'\
-        + 'integer|intrinsic|logical|parameter|private|public|real|save|type)', re.IGNORECASE)
+        + 'integer|intrinsic|logical|parameter|private|public|real|save|type|class)', re.IGNORECASE)
     #Detect "type " or "type," or "type::"
-    re_def_type = re.compile('^[ \t]*type[ ]*(?![(])',re.IGNORECASE)
+    re_def_type = re.compile('^[ \t]*(type|class)[ ]*(?![(])',re.IGNORECASE)
     #Detect digits only (1.2d0 or 1.3e-4 etc.)
     re_digits = re.compile("^\d+[.]?\d*[de]?[+-]?[\d]*$")
     #Detect digits at the beginning for 0.0_dp
@@ -2704,7 +2704,7 @@ class Declaration(Code):
     re_noamp = re.compile("[ ]*[&]+[ ]*")
     #Detect only declarations without include, data, external and save
     re_only_declaration = re.compile('^[ \t]*' \
-        + '(character|complex|dimension|double|end[ ]+type|integer|interface|logical|parameter|private|public|real|type)',\
+        + '(character|complex|dimension|double|end[ ]+type|integer|interface|logical|parameter|private|public|real|type|class)',\
         re.IGNORECASE)
     #For character(len=xxx)
     re_character = re.compile('character[(](len[ =]+)?(?P<len>[^)]+)[)]',re.IGNORECASE)
@@ -3272,12 +3272,12 @@ class Execution(Code):
 class Fortran_Type(Declaration):
     "Class to handle the Fortran type of datastructure"
     #Name of the type ("type xxxx", "type :: xxxx" or "type, yyy :: xxxx"
-    re_name_type = re.compile('^[ \t]*type[ ]*(|.*::)[ ]*(?P<name>\w+)',re.IGNORECASE)
+    re_name_type = re.compile('^[ \t]*(type|class)[ ]*(|.*::)[ ]*(?P<name>\w+)',re.IGNORECASE)
     #Detect "end type"
     re_end_type = re.compile('^[ \t]*end[ ]+type',re.IGNORECASE)
     #Detect only declarations without include, data, external and save
     re_type_declaration = re.compile('^[ \t]*' \
-        + '(character|complex|dimension|double|integer|logical|parameter|private|public|real|type)', re.IGNORECASE)
+        + '(character|complex|dimension|double|integer|logical|parameter|private|public|real|type|class)', re.IGNORECASE)
     #
     def __init__(self,parent,name=None):
         "Special initialisation: we do not add as child to the parent"
@@ -3681,7 +3681,7 @@ abinit_include = { "mpif.h": mpif_file,
 
 
 #Exclude files
-abinit_exclude = [ "m_build_info.F90", "quarantine" ]
+abinit_exclude = [ "m_build_info.F90", "psp9cc.F90", "quarantine" ]
 
 
 #Files to generate generic routines

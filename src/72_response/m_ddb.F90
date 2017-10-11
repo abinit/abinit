@@ -217,7 +217,7 @@ CONTAINS  !===========================================================
 !!  Clean and deallocate types for the ddb_type structure
 !!
 !! PARENTS
-!!      anaddb,dfpt_looppert,dfptnl_doutput,eph,gstate
+!!      anaddb,ddb_interpolate,dfpt_looppert,dfptnl_doutput,eph,gstate
 !!      m_effective_potential_file,m_gruneisen,mblktyp1,mblktyp5,thmeig
 !!
 !! CHILDREN
@@ -335,7 +335,7 @@ end subroutine ddb_copy
 !! OUTPUT
 !!
 !! PARENTS
-!!      dfptnl_doutput,gstate,m_ddb,mblktyp1,mblktyp5,thmeig
+!!      ddb_interpolate,dfptnl_doutput,gstate,m_ddb,mblktyp1,mblktyp5,thmeig
 !!
 !! CHILDREN
 !!
@@ -504,7 +504,8 @@ end subroutine ddb_bcast
 !! iblok= number of the block that corresponds to the specifications
 !!
 !! PARENTS
-!!      anaddb,m_ddb,m_effective_potential_file,m_phonons,thmeig
+!!      anaddb,ddb_interpolate,m_ddb,m_effective_potential_file,m_phonons
+!!      thmeig
 !!
 !! CHILDREN
 !!
@@ -1163,24 +1164,19 @@ subroutine rdddb9(acell,atifc,amu,ddb,&
 !mtyplo=maximum number of type, locally
 !scalars
  integer,parameter :: msppol=2,mtyplo=6
- integer :: ii,jj
- integer :: mtypat,mkpt,matom
- integer :: choice,fullinit,iblok,intxc,iscf,isym,ixc
- integer :: nsize,nspden,nspinor,nsppol,nunit,timrev,useylm,vrsddb
+ integer :: iblok,isym
+ integer :: nsize,timrev
  integer :: i1dir,i1pert,i2dir,i2pert,i3dir,i3pert
  real(dp),parameter :: tolsym8=tol8
- real(dp) :: dilatmx,ecut,ecutsm,kptnrm,pawecutdg,dfpt_sciss,tolwfr
- real(dp) :: tphysel,tsmear
  character(len=500) :: message
  type(ddb_hdr_type) :: ddb_hdr
 !arrays
- integer :: ngfft(18),symq(4,2,msym)
- integer,allocatable :: car3flg(:,:,:,:,:,:),carflg(:,:,:,:),indlmn(:,:,:)
- integer,allocatable :: nband(:),pspso(:),tmpflg(:,:,:,:,:,:),rfpert(:,:,:,:,:,:)
+ integer :: symq(4,2,msym)
+ integer,allocatable :: car3flg(:,:,:,:,:,:),carflg(:,:,:,:)
+ integer,allocatable :: tmpflg(:,:,:,:,:,:),rfpert(:,:,:,:,:,:)
  real(dp) :: gprimd(3,3),qpt(3),rprimd(3,3)
- real(dp),allocatable :: d2cart(:,:,:,:,:),d3cart(:,:,:,:,:,:,:),ekb(:,:)
- real(dp),allocatable :: kpt(:,:),occ(:),spinat(:,:),tmpval(:,:,:,:,:,:,:)
- real(dp),allocatable :: wtk(:)
+ real(dp),allocatable :: d2cart(:,:,:,:,:),d3cart(:,:,:,:,:,:,:)
+ real(dp),allocatable :: tmpval(:,:,:,:,:,:,:)
 
 ! *********************************************************************
 
@@ -1654,15 +1650,13 @@ subroutine ddb_from_file(ddb,filename,brav,natom,natifc,atifc,crystal,comm,prtvo
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master=0
- integer :: ierr,ii,msym,dimekb,lmnmax,mband,nkpt,ntypat,nsym,usepaw,jj,isym
+ integer :: ierr,ii,msym,dimekb,lmnmax,mband,nkpt,ntypat,nsym,usepaw
  integer :: mtyp,mpert,msize,ddb_natom,nblok,occopt,timrev,space_group,npsp,ddbun
  real(dp) :: factor,ucvol
  logical :: use_antiferro
  type(ddb_hdr_type) :: ddb_hdr
 !arrays
  integer,allocatable :: symrec(:,:,:),symrel(:,:,:),symafm(:),indsym(:,:,:),typat(:)
- integer,allocatable :: symrel_red(:,:,:),symafm_red(:)
- real(dp),allocatable :: tnons_red(:,:)
  real(dp) :: acell(3),gmet(3,3),gprim(3,3),rmet(3,3),rprim(3,3),rprimd(3,3)
  real(dp),allocatable :: amu(:),xcart(:),xred(:,:),zion(:),znucl(:),tnons(:,:)
  character(len=132),allocatable :: title(:)
@@ -2571,7 +2565,7 @@ integer function ddb_get_dielt(ddb,rftyp,dielt) result(iblok)
 
 !Local variables -------------------------
 !scalars
- integer :: ii,mpert
+ integer :: mpert
  character(len=1000) :: message
 !arrays
  integer :: rfelfd(4),rfphon(4),rfstrs(4)
@@ -3013,7 +3007,7 @@ end subroutine asrq0_apply
 !!   Free dynamic memory
 !!
 !! PARENTS
-!!      anaddb,m_effective_potential,m_effective_potential_file
+!!      anaddb,m_effective_potential_file
 !!
 !! CHILDREN
 !!
@@ -3101,7 +3095,7 @@ end subroutine asrq0_free
 !! only executed by one processor.
 !!
 !! PARENTS
-!!      dfptnl_doutput,gstate,mblktyp1,mblktyp5
+!!      ddb_interpolate,dfptnl_doutput,gstate,mblktyp1,mblktyp5
 !!
 !! CHILDREN
 !!

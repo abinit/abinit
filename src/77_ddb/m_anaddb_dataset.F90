@@ -137,6 +137,7 @@ module m_anaddb_dataset
   integer :: qrefine(3)
   integer :: kptrlatt(3,3)
   integer :: kptrlatt_fine(3,3)
+  integer :: thermal_supercell(3,3)
 
 ! Real(dp)
   real(dp) :: a2fsmear
@@ -299,7 +300,7 @@ end subroutine anaddb_dtset_free
 !!    FIXME: move checks to chkin9?
 !!
 !! PARENTS
-!!      anaddb,m_effective_potential
+!!      anaddb
 !!
 !! CHILDREN
 !!      chkvars_in_string,inupper
@@ -314,6 +315,7 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
 #undef ABI_FUNC
 #define ABI_FUNC 'invars9'
  use interfaces_14_hidewrite
+ use interfaces_32_util
  use interfaces_42_parser
 !End of the abilint section
 
@@ -330,6 +332,7 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
  integer,parameter :: vrsddb=100401 !Set routine version number here:
  integer,parameter :: jdtset=1
  integer :: ii,iph1,iph2,marr,tread,start
+ integer :: idet
  character(len=500) :: message
  character(len=fnlen) :: path
 !arrays
@@ -1300,6 +1303,22 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
    MSG_ERROR(message)
  end if
 
+ anaddb_dtset%thermal_supercell(:,:)=0
+ marr = 9
+ ABI_DEALLOCATE(intarr)
+ ABI_DEALLOCATE(dprarr)
+ ABI_ALLOCATE(intarr,(marr))
+ ABI_ALLOCATE(dprarr,(marr))
+ call intagm(dprarr,intarr,jdtset,marr,9,string(1:lenstr),'thermal_supercell',tread,'INT')
+ if(tread==1) anaddb_dtset%thermal_supercell(1:3,1:3)=reshape(intarr(1:9),(/3,3/))
+ call mati3det(anaddb_dtset%thermal_supercell, idet)
+ if(sum(abs(anaddb_dtset%thermal_supercell))>0 .and. idet == 0) then
+   write(message, '(a,9I6,5a)' )&
+&   'thermal_supercell is ',anaddb_dtset%thermal_supercell,', but the matrix must be non singular',ch10,&
+&   'with a non zero determinant.',ch10,'Action: correct thermal_supercell in your input file.'
+   MSG_ERROR(message)
+ end if
+
  anaddb_dtset%thmflag=0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'thmflag',tread,'INT')
  if(tread==1) anaddb_dtset%thmflag=intarr(1)
@@ -2215,7 +2234,7 @@ subroutine anaddb_chkvars(string)
 !S
  list_vars=trim(list_vars)//' selectz symdynmat symgkq'
 !T
- list_vars=trim(list_vars)//' targetpol telphint thmflag temperinc tempermin thmtol'
+ list_vars=trim(list_vars)//' targetpol telphint thmflag temperinc tempermin thermal_supercell thmtol'
 !U
  list_vars=trim(list_vars)//' use_k_fine'
 !V

@@ -785,7 +785,7 @@ subroutine cut3d_planeint(gridtt,gridux,griddy,gridmz,natom,nr1,nr2,nr3,nspden,r
    write(std_out,*)
    write(std_out,*) '  Enter plane resolution in width:'
    read(std_in,*) nresolw
-   write(std_out,*) '  Enter plane resolution in lenth:'
+   write(std_out,*) '  Enter plane resolution in length:'
    read(std_in,*) nresoll
    write(std_out,*) ch10,'  Enter the name of an output file:'
    if (read_string(filnam, unit=std_in) /= 0) then
@@ -1434,7 +1434,7 @@ subroutine cut3d_volumeint(gridtt,gridux,griddy,gridmz,natom,nr1,nr2,nr3,nspden,
        x2(2)=0
        x2(3)=0
      end if
-     call vdot(x2,x1,x3)
+     call vdot(x1,x2,x3)
      call normalize(x3)
      exit
 
@@ -1447,17 +1447,17 @@ subroutine cut3d_volumeint(gridtt,gridux,griddy,gridmz,natom,nr1,nr2,nr3,nspden,
        x1(mu)=rprimd(mu,1)*r1(1)+rprimd(mu,2)*r1(2)+rprimd(mu,3)*r1(3)
      end do
      call normalize(x1)
-     if((x1(1).ne.0).or.(x1(2).ne.0)) then
+     if(abs(x1(1))<tol10 .or. abs(x1(2)) < tol10) then
        x2(1)=-x1(2)
-       x2(2)=x1(1)
-       x2(3)=0
+       x2(2)= x1(1)
+       x2(3)= 0
        call normalize(x2)
      else
        x2(1)=1
        x2(2)=0
        x2(3)=0
      end if
-     call vdot(x2,x1,x3)
+     call vdot(x1,x2,x3)
      call normalize(x3)
      exit
 
@@ -1584,9 +1584,10 @@ subroutine cut3d_volumeint(gridtt,gridux,griddy,gridmz,natom,nr1,nr2,nr3,nspden,
    do
      write(std_out,*) '  Enter the format of the output file:'
      write(std_out,*) '   Type 1=> ASCII formatted'
-     write(std_out,*) '   Type 2=> Molekel formatted'
+     write(std_out,*) '   Type 2=> 3D index + data, ASCII formatted'
+     write(std_out,*) '   Type 3=> Molekel formatted'
      read(std_in,*) fileformattype
-     if (fileformattype==1 .or. fileformattype==2) then
+     if (fileformattype>=1 .and. fileformattype<=3) then
        exit
      else
        cycle
@@ -1598,9 +1599,11 @@ subroutine cut3d_volumeint(gridtt,gridux,griddy,gridmz,natom,nr1,nr2,nr3,nspden,
    write(std_out,*) ' With a resolution of ;'
    write(std_out,*) nresoll,' x ',nresolw,' x ',nresolh
    write(std_out,*) ' The result will be redirected to the file:  ',trim(filnam)
-   if (fileformattype==1) then
+   if      (fileformattype==1) then
      write(std_out,*) ' ASCII formatted'
-   else
+   else if (fileformattype==2) then
+     write(std_out,*) ' 3d index + data, ASCII formatted'
+   else if (fileformattype==3) then
      write(std_out,*) ' Molekel formatted'
    end if
    write(std_out,*) ' These parameters may still be changed.'
@@ -1615,11 +1618,11 @@ subroutine cut3d_volumeint(gridtt,gridux,griddy,gridmz,natom,nr1,nr2,nr3,nspden,
 
 !Write the header of the Molekel input file
 
- if (fileformattype==1) then
+ if (fileformattype==1 .or. fileformattype==2) then
    if (open_file(filnam,msg,newunit=unt,status='unknown') /= 0) then
      MSG_ERROR(msg)
    end if
- else
+ else if (fileformattype==3) then
    if (open_file(filnam,msg,newunit=unt,form='unformatted') /= 0) then
      MSG_ERROR(msg)
    end if
@@ -1712,7 +1715,14 @@ subroutine cut3d_volumeint(gridtt,gridux,griddy,gridmz,natom,nr1,nr2,nr3,nspden,
            write(unt, '(4(es22.12))' ) denvaltt,denvalux,denvaldy,denvalmz
          end if
 
-       else
+       else if (fileformattype==2) then
+         if(nspden==1)then
+           write(unt, '(4es22.12)' ) rcart, denvaltt
+         else if(nspden==2 .or. nspden==4)then
+           write(unt, '(3(e22.12), 4(es22.12))' ) rcart, denvaltt,denvalux,denvaldy,denvalmz
+         end if
+
+       else if (fileformattype==3) then
          rhomacutt(k2+1,k3+1)=denvaltt
          if(nspden==2 .or. nspden==4)then
            rhomacuux(k2+1,k3+1)=denvalux
@@ -1721,10 +1731,11 @@ subroutine cut3d_volumeint(gridtt,gridux,griddy,gridmz,natom,nr1,nr2,nr3,nspden,
          end if
        end if
 
-     end do
-   end do
+     end do ! resoll
+     write(unt, * ) 
+   end do ! resolw
 
-   if (fileformattype==2) then
+   if (fileformattype==3) then
      write(unt) rhomacutt(:,:)
      if(nspden==2 .or. nspden==4)then
        write(unt) rhomacuux(:,:)
@@ -1825,13 +1836,13 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
  integer,parameter :: tim_fourwf0=0,tim_rwwf0=0,ndat1=1,formeig0=0
  integer :: cband,cgshift,ckpt,cplex,cspinor,csppol,gridshift1
  integer :: gridshift2,gridshift3,ia,iatom,iband,ichoice,ifile,iomode
- integer :: ii1,ii2,ii3,ikpt,ilang,ioffkg,iout,iprompt,ipw,itypat
+ integer :: ii1,ii2,ii3,ikpt,ilang,ioffkg,iout,iprompt,ipw
  integer :: ir1,ir2,ir3,ivect,ixint,mband,mbess,mcg,mgfft
  integer :: mkmem,mlang,mpw,n4,n5,n6,nfit,npw_k
  integer :: nradintmax,oldcband,oldckpt,oldcspinor,oldcsppol
  integer :: prtsphere,select_exit,unout,iunt,rc_ylm
  integer :: ikpt_qps,nkpt_qps,nband_qps,iscf_qps
- real(dp) :: arg,bessargmax,bessint_delta,kpgmax,ratsph,tmpi,tmpr,ucvol,weight,eig_k_qps,intg
+ real(dp) :: arg,bessargmax,bessint_delta,kpgmax,ratsph,tmpi,tmpr,ucvol,weight,eig_k_qps
  character(len=*), parameter :: INPUTfile='cut.in'
  character(len=1) :: outputchar
  character(len=10) :: string

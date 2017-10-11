@@ -188,7 +188,7 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,&
  integer :: optatm,optdyfr,opteltfr,optgr,option,optn,optn2,optstr,optv,vloc_method
  real(dp) :: eei_dum,ucvol,ucvol_local,vol_element
  logical :: calc_epaw3_forces, efield_flag
- logical :: is_hybrid_ncpp,wvlbigdft=.false.
+ logical :: is_hybrid_ncpp
 !arrays
  integer :: qprtrb_dum(3)
  real(dp) :: dummy6(6),ep3(3),fioncart(3),gmet(3,3),gprimd(3,3) 
@@ -457,8 +457,8 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,&
  grtn(:,:)=grl(:,:)+grchempottn(:,:)+grewtn(:,:)+synlgr(:,:)+grxc(:,:)
 ! grtn(:,:)=grl(:,:)+grewtn(:,:)+synlgr(:,:)+grxc(:,:)
 
- if (usefock==1 .and. associated(fock).and.fock%optfor) then
-   grtn(:,:)=grtn(:,:)+fock%forces(:,:)
+ if (usefock==1 .and. associated(fock).and.fock%fock_common%optfor) then
+   grtn(:,:)=grtn(:,:)+fock%fock_common%forces(:,:)
  end if
  if (ngrvdw==dtset%natom) grtn(:,:)=grtn(:,:)+grvdw(:,:)
 ! note that fionred is subtracted, because it really is a force and we need to

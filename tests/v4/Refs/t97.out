@@ -79,7 +79,7 @@ P           mkmem           1
         tfkinfunc           1
            timopt          -1
            toldfe      1.00000000E-06 Hartree
-           tsmear      2.57245160E-02 Hartree
+          tphysel      2.57245160E-02 Hartree
             typat      1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1
                        1  1  1  1  1  1  1  1  1  1  1  1
               vel     -2.5298357213E-03  3.6818676446E-03 -1.7257200666E-04
@@ -243,7 +243,7 @@ P           mkmem           1
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     0.00000000000000    0.00000000000000    0.00000000000000   rchrg,fchrg,qchrg
  Note: local psp for atom with Z=  5.0
- pspatm: epsatm=   -0.27723898
+ pspatm : epsatm=   -0.27723898
          --- l  ekb(1:nproj) -->
  pspatm: atomic psp has been read  and splines computed
 
@@ -1641,7 +1641,7 @@ P           mkmem           1
         tfkinfunc           1
            timopt          -1
            toldfe      1.00000000E-06 Hartree
-           tsmear      2.57245160E-02 Hartree
+          tphysel      2.57245160E-02 Hartree
             typat      1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1
                        1  1  1  1  1  1  1  1  1  1  1  1
               vel     -2.4199793928E-03  3.8900889861E-03 -5.1269450141E-04
