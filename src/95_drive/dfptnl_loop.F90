@@ -226,7 +226,7 @@ subroutine dfptnl_loop(atindx,atindx1,blkflg,cg,cgindex,dtfil,dtset,d3etot,eigen
 
  DBG_ENTER("COLL")
 
- call timab(502,1,tsec)
+ call timab(503,1,tsec)
  call status(0,dtfil%filstat,iexit,level,'enter         ')
 
  comm_cell = mpi_enreg%comm_cell
@@ -700,9 +700,10 @@ subroutine dfptnl_loop(atindx,atindx1,blkflg,cg,cgindex,dtfil,dtset,d3etot,eigen
                    end do
 
 !                  Perform DFPT part of the 3dte calculation
-!                   call timab(512,1,tsec)
+                   call timab(513,1,tsec)
                    call status(counter,dtfil%filstat,iexit,level,'call dfptnl_resp ')
 !                  NOTE : eigen2 equals zero here
+
                    call dfptnl_pert(atindx,atindx1,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_hamkq,k3xc,indsy1,i1dir,&
 &                   i2dir,i3dir,i1pert,i2pert,i3pert,kg,mband,mgfft,mkmem,mk1mem,mpert,mpi_enreg,&
 &                   mpsang,mpw,natom,nattyp,nfftf,nfftotf,ngfftf,nkpt,nk3xc,nspden,nspinor,nsppol,nsym1,npwarr,occ,&
@@ -711,7 +712,7 @@ subroutine dfptnl_loop(atindx,atindx1,blkflg,cg,cgindex,dtfil,dtset,d3etot,eigen
 &                   rprimd,symaf1,symrc1,ucvol,vtrial,vhartr1_i2pert,vtrial1_i2pert,vxc1_i2pert,&
 &                   ddk_f,xccc3d1,xccc3d2,xccc3d3,xred,&
 &                   d3etot_1,d3etot_2,d3etot_3,d3etot_4,d3etot_5,d3etot_6,d3etot_7,d3etot_8,d3etot_9)
-!                   call timab(512,2,tsec)
+                   call timab(513,2,tsec)
 
                    call status(counter,dtfil%filstat,iexit,level,'after dfptnl_resp')
 
@@ -774,7 +775,7 @@ subroutine dfptnl_loop(atindx,atindx1,blkflg,cg,cgindex,dtfil,dtset,d3etot,eigen
  ABI_DATATYPE_DEALLOCATE(pawrhoij1_i2pert)
  ABI_DATATYPE_DEALLOCATE(pawrhoij1_i3pert)
 
- call timab(502,2,tsec)
+ call timab(503,2,tsec)
 
  DBG_EXIT("COLL")
 

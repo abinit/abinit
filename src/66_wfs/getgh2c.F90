@@ -108,8 +108,9 @@ subroutine getgh2c(cwavef,cwaveprj,gh2c,gs2c,gs_hamkq,gvnl2,idir,ipert,lambda,&
 
 !Local variables-------------------------------
 !scalars
+ integer,parameter :: tim_nonlop=0
  integer :: choice,cpopt,iatm,idir1,idir2,idirc,ipw,ipws,ispinor,my_nspinor
- integer :: natom,ncpgr,nnlout=1,npw,npw1,paw_opt,signs,tim_nonlop,usecprj
+ integer :: natom,ncpgr,nnlout=1,npw,npw1,paw_opt,signs,usecprj
  logical :: compute_conjugate,has_kin,has_vnl,pert_phon_elfd
  real(dp) :: enlout_dum(1)
  character(len=500) :: msg
@@ -220,12 +221,12 @@ subroutine getgh2c(cwavef,cwaveprj,gh2c,gs2c,gs_hamkq,gvnl2,idir,ipert,lambda,&
    end if
  end if
 
- tim_nonlop=8
- if (tim_getgh2c==1.and.ipert<=natom) tim_nonlop=7
- if (tim_getgh2c==2.and.ipert<=natom) tim_nonlop=5
- if (tim_getgh2c==1.and.ipert> natom) tim_nonlop=8
- if (tim_getgh2c==2.and.ipert> natom) tim_nonlop=5
- if (tim_getgh2c==3                 ) tim_nonlop=0
+! tim_nonlop=8
+! if (tim_getgh2c==1.and.ipert<=natom) tim_nonlop=7
+! if (tim_getgh2c==2.and.ipert<=natom) tim_nonlop=5
+! if (tim_getgh2c==1.and.ipert> natom) tim_nonlop=8
+! if (tim_getgh2c==2.and.ipert> natom) tim_nonlop=5
+! if (tim_getgh2c==3                 ) tim_nonlop=0
 
  idir1=alpha(idir);idir2=beta(idir)
 

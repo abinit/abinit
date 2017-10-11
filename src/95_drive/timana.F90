@@ -480,9 +480,12 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(491)='cohsex_me                       '
 
  names(501)='nonlinear                       '
- names(502)='dfptnl_loop                     '
+ names(502)='pead_nl_loop                    '
+ names(503)='dfptnl_loop                     '
  names(511)='dfptnl_mv                       '; basic(511)=1
- names(512)='dfptnl_resp                     '; basic(512)=1
+ names(512)='pead_nl_resp                    '; basic(512)=1
+ names(513)='dfptnl_pert                     '
+ names(514)='rf2_init                        '
 
  names(520)='lobpcgwf(init)                  '; if(abs(timopt)==4)basic(520)=1
  names(521)='lobpcgwf(bef.getghc 1           '; if(abs(timopt)==4)basic(521)=1

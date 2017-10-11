@@ -170,13 +170,13 @@ subroutine dfptnl_pert(atindx,atindx1,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,ei
 !Local variables-------------------------------
 !scalars
  logical :: has_cprj_jband,compute_conjugate,compute_rho21,usetimerev
- integer,parameter :: level=52
+ integer,parameter :: level=52,tim_nonlop=0
  integer :: bandtot,choice,counter,cplex_cprj,cplex_loc,cplex_rhoij,cpopt,dimffnl1,dimffnlk,iband,icg0,ider,ierr,iexit
  integer :: ic,jc,kc,idir0,idir_getgh2c,idir_phon,idir_elfd,ipert_phon,idir_54,ipert_elfd,ispden
  integer :: ia,iatm,ibg,ii,igs,ikg,ikg1,ikpt,ifft,ilm,ipw,isppol,ispinor,istwf_k,jband,jj
  integer :: me,n1,n2,n3,n4,n5,n6,nband_k,ncpgr,nkpg,nkpg1,nnlout,nsp,nspden_rhoij,npert_phon,npw_k,npw1_k,nzlmopt
  integer :: offset_cgi,offset_cgj,offset_eigen,offset_eig0,option,paw_opt,debug_mode,esigns
- integer :: signs,size_wf,size_cprj,spaceComm,tim_fourwf,tim_nonlop,tim_getgh2c,usepaw,useylmgr1
+ integer :: signs,size_wf,size_cprj,spaceComm,usepaw,useylmgr1
  integer :: sij_opt,usevnl,opt_gvnl2,optnl,optlocal
  real(dp) :: arg,dot1i,dot1r,dot2i,dot2r,doti,dotr,e3tot,lagi,lagi_paw,lagr,lagr_paw
  real(dp) :: rho2r_re,rho2r_im,rho3r_re,rho3r_im

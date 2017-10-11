@@ -115,7 +115,7 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,ffnl1,ffnl1_test,gs_ha
 !
 !Local variables-------------------------------
 !scalars
- integer,parameter :: berryopt=0,iorder_cprj=0,level=19,tim_getghc=1,tim_getgh1c=1,tim_getgh2c=1
+ integer,parameter :: berryopt=0,iorder_cprj=0,level=19
  integer :: choice_cprj,cpopt_cprj,iband,icpgr_loc,idir1,idir2,idir_cprj,ierr
  integer :: igs,indb,ipert1,ipert2,iproc,jband,kdir1
  integer :: me,my_nband,natom,ncpgr_loc,nproc_band,debug_mode
@@ -126,7 +126,7 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,ffnl1,ffnl1_test,gs_ha
  character(len=500) :: msg
 !arrays
  integer :: file_index(2)
- real(dp) :: lambda_ij(2)
+ real(dp) :: lambda_ij(2),tsec(2)
  real(dp),allocatable :: cg_jband(:,:,:),ddk_read(:,:),dudkdk(:,:),dudk_dir2(:,:)
  real(dp),allocatable :: eig1_read(:),gvnl1(:,:),h_cwave(:,:),s_cwave(:,:),dsusdu_loc(:,:),dsusdu_gather(:,:)
  real(dp),allocatable,target :: dsusdu(:,:),dudk(:,:),eig1_k_stored(:)
@@ -140,6 +140,8 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,ffnl1,ffnl1_test,gs_ha
 ! *********************************************************************
 
  DBG_ENTER("COLL")
+
+ call timab(514,1,tsec)
 
 !my mpi rank :
  me=mpi_enreg%me_kpt
@@ -883,7 +885,7 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,ffnl1,ffnl1_test,gs_ha
 ! Deallocations of arrays
  if (debug_mode==0) ABI_DEALLOCATE(rf2%amn)
 
-! call timab(566,2,tsec)
+ call timab(514,2,tsec)
 
  DBG_EXIT("COLL")
 

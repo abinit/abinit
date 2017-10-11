@@ -683,7 +683,7 @@ subroutine rf2_apply_hamiltonian(cg_jband,cprj_jband,cwave,cwaveprj,h_cwave,s_cw
        cpopt=-1; choice=8; paw_opt=1; if (gs_hamkq%usepaw==0) paw_opt=0 ; nnlout = 6
 
        call nonlop(choice,cpopt,cprj_empty,enlout,gs_hamkq,idirc,(/zero/),mpi_enreg,1,nnlout,&
-&       paw_opt,signs,svectout_dum,tim_getgh2c,cwave_j,svectout_dum)
+&       paw_opt,signs,svectout_dum,tim_nonlop,cwave_j,svectout_dum)
        dotr2 = enlout(idir)
 
      end if ! IPERT == NATOM+10

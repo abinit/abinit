@@ -264,8 +264,8 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
 & dtset%kptns,dtset%mkmem,dtset%nband,dtset%nkpt,'PERS',mpi_enreg,dtset%mpw,npwarr,npwtot,&
 & dtset%nsppol)
 
- call timab(133,2,tsec)
- call timab(134,1,tsec)
+! call timab(133,2,tsec)
+! call timab(134,1,tsec)
 
 !Open and read pseudopotential files
  ecore = 0_dp
@@ -273,8 +273,8 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
  call pspini(dtset,dtfil,ecore,psp_gencond,gsqcutc_eff,gsqcut_eff,level,pawrad,pawtab,&
 & psps,rprimd,comm_mpi=mpi_enreg%comm_cell)
 
- call timab(134,2,tsec)
- call timab(135,1,tsec)
+! call timab(134,2,tsec)
+! call timab(135,1,tsec)
 
 !Initialize band structure datatype
  bstruct = ebands_from_dtset(dtset, npwarr)
@@ -338,8 +338,8 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
 &   mpi_atmtab=mpi_enreg%my_atmtab)
  end if
 
- call timab(135,2,tsec)
- call timab(136,1,tsec)
+! call timab(135,2,tsec)
+! call timab(136,1,tsec)
 
 !Report on eigen0 values   ! Should use prteigrs.F90
  write(message, '(a,a)' )
