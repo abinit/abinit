@@ -107,6 +107,9 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
  real(dp),allocatable :: dprarr(:),kpt_with_shift(:,:)
  real(dp),pointer :: nband_rbz(:,:)
  character(len=6) :: nm_mkmem(3)
+#ifdef HAVE_LINALG_ELPA
+ integer :: icol,irow,np
+#endif
 
 !*************************************************************************
 

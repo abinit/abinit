@@ -115,41 +115,27 @@ subroutine chkdilatmx(chkdilatmx_,dilatmx,rprimd,rprimd_orig,dilatmx_errmsg)
  if(dilatmx_new>dilatmx+tol6)then
 
 ! MJV 2014 07 22: correct rprim to maximum jump allowed by dilatmx
-! eigenvalues of old metric tensor is needed
-   do mu=1,3
-     old_to_new(mu,:)=rprimd_orig(mu,1)*gprimd_orig(:,1)+&
-&     rprimd_orig(mu,2)*gprimd_orig(:,2)+&
-&     rprimd_orig(mu,3)*gprimd_orig(:,3)
-   end do
-
-   do ii=1,3
-     do jj=1,3
-       met(ii,jj)=old_to_new(1,ii)*old_to_new(1,jj)+&
-&       old_to_new(2,ii)*old_to_new(2,jj)+&
-&       old_to_new(3,ii)*old_to_new(3,jj)
-     end do
-   end do
-   call matr3eigval(eigval_orig,met)
-   dilatmx_new=sqrt(maxval(eigval_orig(:)))
+! XG 20171011 : eigenvalues of "old_to_old" tensor are of course the unity !
 
    if(chkdilatmx_/=0)then
-     alpha = (dilatmx**2 - maxval(eigval)) / (maxval(eigval_orig) - maxval(eigval))
+     alpha = (dilatmx - one) / (dilatmx_new - one)
 !    for safety, only 90 percent of max jump
      alpha = 0.9_dp * alpha
 
      rprimd = alpha * rprimd + (one - alpha) * rprimd_orig
 
-     write(dilatmx_errmsg,'(3a,f5.2,4a,f6.2,a)')&
+     write(dilatmx_errmsg,'(3a,es16.6,4a,es16.6,2a,es16.6,a)')&
 &     'The new primitive vectors rprimd (an evolving quantity)',ch10,&
 &     'are too large with respect to the old rprimd and the accompanying dilatmx:',dilatmx,ch10,&
 &     'This large change of unit cell parameters is not allowed by the present value of dilatmx.',ch10,&
-&     'Calculation continues with limited jump of ', 100._dp * alpha,' percent of the projected move.'
+&     'An adequate value would have been dilatmx_new=',dilatmx_new,ch10,&
+&     'Calculation continues with limited jump, by rescaling the projected move by the factor',alpha,'.'
    else
      write(message, '(3a,es16.6,2a,es16.6,2a)' )&
 &     'The new primitive vectors rprimd (an evolving quantity)',ch10,&
 &     'are too large, given the initial rprimd and the accompanying dilatmx:',dilatmx,ch10,&
 &     'An adequate value would have been dilatmx_new=',dilatmx_new,ch10,&
-&     'As chkdilatmx=1, assume experienced user. Execution will continue.'
+&     'As chkdilatmx=0, assume experienced user. Execution will continue.'
      MSG_WARNING(message)
    endif
 
