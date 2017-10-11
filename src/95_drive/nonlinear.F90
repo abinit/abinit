@@ -62,7 +62,7 @@
 !! CHILDREN
 !!      d3sym,dfptnl_doutput,dfptnl_loop,ebands_free,fourdp,getcut
 !!      getkgrid,getshell,hdr_free,hdr_init,hdr_update,initmv,inwffil,kpgio
-!!      mkcore,nlopt,pspini,read_rhor,rhohxc,setsym,setup1,status
+!!      mkcore,nlopt,pspini,read_rhor,rhotoxc,setsym,setup1,status
 !!      ddb_hdr_init, ddb_hdr_free, ddb_hdr_open_write
 !!      symmetrize_xred,sytens,timab,wffclose,wrtout
 !!
@@ -321,10 +321,10 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
  optorth=0
 
  call inwffil(ask_accurate,cg,dtset,dtset%ecut,ecut_eff,eigen0,dtset%exchn2n3d,&
-& formeig,gmet,hdr,ireadwf0,dtset%istwfk,kg,dtset%kptns,&
+& formeig,hdr,ireadwf0,dtset%istwfk,kg,dtset%kptns,&
 & dtset%localrdwf,dtset%mband,mcg,dtset%mkmem,mpi_enreg,dtset%mpw,&
 & dtset%nband,ngfft,dtset%nkpt,npwarr,dtset%nsppol,dtset%nsym,&
-& occ,optorth,rprimd,dtset%symafm,dtset%symrel,dtset%tnons,&
+& occ,optorth,dtset%symafm,dtset%symrel,dtset%tnons,&
 & dtfil%unkg,wffgs,wfftgs,dtfil%unwffgs,dtfil%fnamewffk,wvl)
 
 !Close wffgs, if it was ever opened (in inwffil)
@@ -863,6 +863,10 @@ end if
  end if
 
 !Set up hartree and xc potential. Compute kxc here.
+ ABI_ALLOCATE(vhartr,(nfftf))
+ qphon(:)=zero
+ call hartre(1,gsqcut,psps%usepaw,mpi_enreg,nfftf,ngfftf,dtset%paral_kgb,qphon,rhog,rprimd,vhartr)
+
  option=3
  nkxc=2*dtset%nspden-1 ! LDA
  if(dtset%xclevel==2.and.dtset%nspden==1) nkxc=7  ! non-polarized GGA
@@ -870,14 +874,16 @@ end if
  nk3xc=3*dtset%nspden-2
  ABI_ALLOCATE(kxc,(nfftf,nkxc))
  ABI_ALLOCATE(k3xc,(nfftf,nk3xc))
- ABI_ALLOCATE(vhartr,(nfftf))
  ABI_ALLOCATE(vxc,(nfftf,dtset%nspden))
 
- _IBM6("Before rhohxc")
+ _IBM6("Before rhotoxc")
 
- call rhohxc(dtset,enxc,gsqcut,psps%usepaw,kxc,mpi_enreg,nfftf,ngfftf,&
-& nhat,nhatdim,nhatgr,nhatgrdim,nkxc,nk3xc,dtset%nspden,n3xccc,option,rhog,rhor,&
-& rprimd,strsxc,usexcnhat,vhartr,vxc,vxcavg,xccc3d,k3xc)
+ call status(0,dtfil%filstat,iexit,level,'call rhotoxc   ')
+ call xcdata_init(dtset%intxc,dtset%ixc,&
+&    dtset%nelect,dtset%tphysel,dtset%usekden,dtset%vdw_xc,dtset%xc_tb09_c,dtset%xc_denpos,xcdata)
+ call rhotoxc(enxc,kxc,mpi_enreg,nfftf,dtset%ngfft,&
+& nhat,nhatdim,nhatgr,nhatgrdim,nkxc,nk3xc,dtset%nspden,n3xccc,option,dtset%paral_kgb,rhor,rprimd,strsxc,usexcnhat,&
+& vxc,vxcavg,xccc3d,xcdata,k3xc=k3xc,vhartr=vhartr)
 
 !Compute local + Hxc potential, and subtract mean potential.
  ABI_ALLOCATE(vtrial,(nfftf,dtset%nspden))

@@ -364,13 +364,11 @@ subroutine dfptnl_loop(atindx,atindx1,blkflg,cg,cgindex,dtfil,dtset,d3etot,eigen
        call status(counter,dtfil%filstat,iexit,level,'call inwffil  ')
 
        call inwffil(ask_accurate,cg1,dtset,dtset%ecut,ecut_eff,eigen1,dtset%exchn2n3d,&
-&       formeig,gmet,hdr,&
-&       ireadwf,dtset%istwfk,kg,dtset%kptns,dtset%localrdwf,&
+&       formeig,hdr,ireadwf,dtset%istwfk,kg,dtset%kptns,dtset%localrdwf,&
 &       dtset%mband,mcg,dtset%mk1mem,mpi_enreg,mpw,&
 &       dtset%nband,dtset%ngfft,dtset%nkpt,npwarr,&
 &       dtset%nsppol,dtset%nsym,&
-&       occ,optorth,rprimd,&
-&       dtset%symafm,dtset%symrel,dtset%tnons,&
+&       occ,optorth,dtset%symafm,dtset%symrel,dtset%tnons,&
 &       dtfil%unkg1,wff1,wfft1,dtfil%unwff1,fiwf1i,wvl)
 
        if (ireadwf==1) then
@@ -416,13 +414,11 @@ subroutine dfptnl_loop(atindx,atindx1,blkflg,cg,cgindex,dtfil,dtset,d3etot,eigen
 
              call status(counter,dtfil%filstat,iexit,level,'call inwffil  ')
              call inwffil(ask_accurate,cg3,dtset,dtset%ecut,ecut_eff,eigen3,dtset%exchn2n3d,&
-&             formeig,gmet,hdr,&
-&             ireadwf,dtset%istwfk,kg,dtset%kptns,dtset%localrdwf,&
+&             formeig,hdr,ireadwf,dtset%istwfk,kg,dtset%kptns,dtset%localrdwf,&
 &             dtset%mband,mcg,dtset%mk1mem,mpi_enreg,mpw,&
 &             dtset%nband,dtset%ngfft,dtset%nkpt,npwarr,&
 &             dtset%nsppol,dtset%nsym,&
-&             occ,optorth,rprimd,&
-&             dtset%symafm,dtset%symrel,dtset%tnons,&
+&             occ,optorth,dtset%symafm,dtset%symrel,dtset%tnons,&
 &             dtfil%unkg1,wff3,wfft3,dtfil%unwff3,&
 &             fiwf3i,wvl)
              if (ireadwf==1) then
@@ -479,13 +475,11 @@ subroutine dfptnl_loop(atindx,atindx1,blkflg,cg,cgindex,dtfil,dtset,d3etot,eigen
 
                    call status(counter,dtfil%filstat,iexit,level,'call inwffil  ')
                    call inwffil(ask_accurate,cg2,dtset,dtset%ecut,ecut_eff,eigen2,dtset%exchn2n3d,&
-&                   formeig,gmet,hdr,&
-&                   ireadwf,dtset%istwfk,kg,dtset%kptns,dtset%localrdwf,&
+&                   formeig,hdr,ireadwf,dtset%istwfk,kg,dtset%kptns,dtset%localrdwf,&
 &                   dtset%mband,mcg,dtset%mk1mem,mpi_enreg,mpw,&
 &                   dtset%nband,dtset%ngfft,dtset%nkpt,npwarr,&
 &                   dtset%nsppol,dtset%nsym,&
-&                   occ,optorth,rprimd,&
-&                   dtset%symafm,dtset%symrel,dtset%tnons,&
+&                   occ,optorth,dtset%symafm,dtset%symrel,dtset%tnons,&
 &                   dtfil%unkg1,wff2,wfft2,dtfil%unwff2,&
 &                   fiwf2i,wvl)
                    if (ireadwf==1) then
