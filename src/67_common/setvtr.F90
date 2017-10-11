@@ -489,7 +489,7 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
 &        dtset%nelect,dtset%tphysel,dtset%usekden,dtset%vdw_xc,dtset%xc_tb09_c,dtset%xc_denpos,xcdata)
        if(mod(dtset%fockoptmix,100)==11)then
          xcdatahyb=xcdata
-         call xcdata_init(dtset%intxc,dtset%useric,&
+         call xcdata_init(dtset%intxc,dtset%fockaux_ixc,&
 &          dtset%nelect,dtset%tphysel,dtset%usekden,dtset%vdw_xc,dtset%xc_tb09_c,dtset%xc_denpos,xcdata)
        endif
 !      Use the periodic solver to compute Hxc
@@ -507,9 +507,9 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
 &            nhat,psps%usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,dtset%nspden,n3xccc,&
 &            option,dtset%paral_kgb,rhor,rprimd,strsxc,usexcnhat,vxc_hybcomp,vxcavg,xccc3d,xcdatahyb,&
 &            taug=taug,taur=taur,vhartr=vhartr,vxctau=vxctau,add_tfw=add_tfw_)
-           energies%e_xc=energies%e_xc*dtset%userre
+           energies%e_xc=energies%e_xc*dtset%fockaux_scal
            energies%e_hybcomp_E0=energies%e_hybcomp_E0-energies%e_xc
-           vxc(:,:)=vxc(:,:)*dtset%userre
+           vxc(:,:)=vxc(:,:)*dtset%fockaux_scal
            vxc_hybcomp(:,:)=vxc_hybcomp(:,:)-vxc(:,:)
          endif
        else if (ipositron==2) then

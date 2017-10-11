@@ -2,9 +2,9 @@
 #with an auxiliary XC functional for the SCF cycle, and some over relaxation.
 # Norm-conserving
 
- useric 11   # Auxiliary XC functional
- userre 1.50
- nstep 57           # Maximal number of SCF cycles
+ fockaux_ixc  11   # Auxiliary XC functional
+ fockaux_scal 1.50 #
+ nstep 57          # Maximal number of SCF cycles
  fockoptmix 11
  nnsclohf2 2       # This is a low number, but the test dos not seem to depend on this value.
  ixc2 40           # Calculation with Hartree-Fock functional
