@@ -1,7 +1,7 @@
 !{\src2tex{textfont=tt}}
-!!****f* ABINIT/Psolver_rhotoxc
+!!****f* ABINIT/Psolver_rhohxc
 !! NAME
-!! Psolver_rhotoxc
+!! Psolver_rhohxc
 !!
 !! FUNCTION
 !! Given rho(r), compute Hartree potential considering the system as
