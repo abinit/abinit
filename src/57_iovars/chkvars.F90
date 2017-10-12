@@ -77,7 +77,7 @@ subroutine chkvars (string)
 !C
  list_vars=trim(list_vars)//' cd_customnimfrqs cd_frqim_method cd_full_grid cd_imfrqs'
  list_vars=trim(list_vars)//' cd_halfway_freq cd_max_freq cd_subset_freq'
- list_vars=trim(list_vars)//' charge chempot chkexit chkprim chksymbreak chneut cineb_start cpus cpum cpuh cgtyphf'
+ list_vars=trim(list_vars)//' charge chempot chkdilatmx chkexit chkprim chksymbreak chneut cineb_start cpus cpum cpuh cgtyphf'
 !D
  list_vars=trim(list_vars)//' ddamp ddb_ngqpt ddb_shiftq delayperm densfor_pred densty dfield'
  list_vars=trim(list_vars)//' dfpt_sciss diecut diegap dielam dielng diemac'
@@ -398,7 +398,7 @@ subroutine chkvars_in_string(protocol, list_vars, list_logicals, list_strings, s
        else
          write(message, '(7a)' )&
 &         'Found the token ',string(index_current:index_endword),' in the input file.',ch10,&
-&         'This name is not one of the registered input variable names (see http://www.abinit.org/doc).',ch10,&
+&         'This name is not one of the registered input variable names (see https://www.abinit.org/doc).',ch10,&
 &         'Action: check your input file. You likely mistyped the input variable.'
          MSG_ERROR(message)
        end if

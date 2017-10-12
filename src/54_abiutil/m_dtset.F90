@@ -423,6 +423,7 @@ subroutine dtset_copy(dtout, dtin)
  dtout%cd_customnimfrqs   = dtin%cd_customnimfrqs
  dtout%cd_frqim_method    = dtin%cd_frqim_method
  dtout%cd_full_grid       = dtin%cd_full_grid
+ dtout%chkdilatmx         = dtin%chkdilatmx
  dtout%chkexit            = dtin%chkexit
  dtout%chkprim            = dtin%chkprim
  dtout%chksymbreak        = dtin%chksymbreak
