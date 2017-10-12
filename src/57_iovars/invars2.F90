@@ -986,9 +986,6 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
 
 !All checking should be done in chkinp.f
 
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'auxc_ixc',tread,'INT')
- if(tread==1) dtset%auxc_ixc=intarr(1)
-
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'auxc_scal',tread,'DPR')
  if(tread==1) dtset%auxc_scal=dprarr(1)
 
@@ -1313,31 +1310,15 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
      tread=1
    end if
  end if
- dtset%xclevel=0
- if( ( 1<=dtset%ixc .and. dtset%ixc<=10).or.(30<=dtset%ixc .and. dtset%ixc<=39).or.(dtset%ixc==50) )dtset%xclevel=1 ! LDA
- if( (11<=dtset%ixc .and. dtset%ixc<=19).or.(23<=dtset%ixc .and. dtset%ixc<=29) )dtset%xclevel=2 ! GGA
- if( 20<=dtset%ixc .and. dtset%ixc<=22 )dtset%xclevel=3 ! ixc for TDDFT kernel tests
- if( dtset%ixc>=40 .and. dtset%ixc<=42 )dtset%usefock=1 ! Hartree-Fock or internal hybrid functionals
- if( dtset%ixc>=41 .and. dtset%ixc<=42) dtset%xclevel=2 ! ixc for internal hybrids using GGA
- if (dtset%ixc<0) then                                  ! libXC: metaGGA and hybrid functionals
-   dtset%xclevel=1
-   do isiz=1,2
-     if (isiz==1) ii=-dtset%ixc/1000
-     if (isiz==2) ii=-dtset%ixc-ii*1000
-     jj=libxc_functionals_family_from_id(ii)
-     if (jj==XC_FAMILY_GGA    .or.jj==XC_FAMILY_MGGA) dtset%xclevel=2
-     if (jj==XC_FAMILY_HYB_GGA.or.jj==XC_FAMILY_HYB_MGGA) then
-       dtset%xclevel=2 ; dtset%usefock=1
-       if (.not.libxc_functionals_gga_from_hybrid(hybrid_id=ii)) then
-         write(message, '(a,i8,i5)' )&
-&         'ixc=',dtset%ixc,' (libXC hybrid functional) is presently not allowed with',ch10,&
-&         'Norm-Conserving PseudoPotentials.',ch10,&
-&         'Action: try another hybrid functional or use PAW.'
-         MSG_ERROR(message)
-       end if
-     end if
-   end do
- end if
+!Initialize xclevel and usefock
+ call get_xclevel(dtset%ixc,dtset%xclevel,dtset%usefock)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'auxc_ixc',tread,'INT')
+ if(tread==1) dtset%auxc_ixc=intarr(1)
+!If the default value had been given, possibly switch on the auxc_ixc corresponding to ixc, if the latter is an hybrid
+ if(dtset%auxc_ixc==0)then
+   call get_auxc_ixc(auxc_ixc,ixc)
+ endif
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'vdw_df_acutmin',tread,'DPR')
  if(tread==1) dtset%vdw_df_acutmin=dprarr(1)

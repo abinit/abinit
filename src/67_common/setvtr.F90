@@ -485,12 +485,12 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
        if(option/=0 .and. option/=10)then
          call hartre(1,gsqcut,psps%usepaw,mpi_enreg,nfft,ngfft,dtset%paral_kgb,rhog,rprimd,vhartr)
        endif
-       call xcdata_init(dtset%intxc,dtset%ixc,&
+       call xcdata_init(dtset%auxc_ixc,dtset%intxc,dtset%ixc,&
 &        dtset%nelect,dtset%tphysel,dtset%usekden,dtset%vdw_xc,dtset%xc_tb09_c,dtset%xc_denpos,xcdata)
        if(mod(dtset%fockoptmix,100)==11)then
          xcdatahyb=xcdata
 !        Setup the auxiliary xc functional information 
-         call xcdata_init(dtset%intxc,dtset%auxc_ixc,&
+         call xcdata_init(0,dtset%intxc,dtset%auxc_ixc,&
 &          dtset%nelect,dtset%tphysel,dtset%usekden,dtset%vdw_xc,dtset%xc_tb09_c,dtset%xc_denpos,xcdata)
        endif
 !      Use the periodic solver to compute Hxc

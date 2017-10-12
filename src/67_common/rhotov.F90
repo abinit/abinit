@@ -230,7 +230,7 @@ subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
      !Use the proper exchange_correlation energy : either the origin one, or the auxiliary one
      ixc_current=dtset%ixc
      if(mod(dtset%fockoptmix,100)==11)ixc_current=dtset%auxc_ixc
-     call xcdata_init(dtset%intxc,ixc_current,&
+     call xcdata_init(dtset%auxc_ixc,dtset%intxc,ixc_current,&
 &     dtset%nelect,dtset%tphysel,dtset%usekden,dtset%vdw_xc,dtset%xc_tb09_c,dtset%xc_denpos,xcdata)
 
 !    Use the periodic solver to compute Hxc.
