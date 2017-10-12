@@ -178,7 +178,9 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
  type(pawrad_type),allocatable :: pawrad(:)
  type(pawtab_type),allocatable :: pawtab(:)
  type(results_out_type),pointer :: results_out_all(:)
-
+!LTEST
+ real(dp) :: cpu,wall,tim_dataset(2)
+!LTEST
 !******************************************************************
 
  DBG_ENTER("COLL")
@@ -225,6 +227,13 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
  do idtset=1,ndtset_alloc
 
    if(mpi_enregs(idtset)%me<0) cycle
+
+!LTEST
+   if (mpi_enregs(idtset)%me==0) then
+     call timein(cpu,wall)
+     tim_dataset(1) = cpu ; tim_dataset(2) = wall 
+   end if
+!LTEST
 
    call timab(642,1,tsec)
    call abi_io_redirect(new_io_comm=mpi_enregs(idtset)%comm_world)
@@ -812,6 +821,22 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
    ! If found then beat a hasty exit from time steps
    openexit=1; if(dtset%chkexit==0) openexit=0
    call exit_check(zero,dtfil%filnam_ds(1),iexit,ab_out,mpi_enregs(idtset)%comm_cell,openexit)
+
+!LTEST
+   if (mpi_enregs(idtset)%me==0) then
+     call timein(cpu,wall)
+     tim_dataset(1) = cpu - tim_dataset(1) ; tim_dataset(2) = wall - tim_dataset(2)
+     write(message, '(a,a)' ) ch10,' ------------------------------------------------------------------------------------------'
+     call wrtout(std_out,message,'COLL')
+     call wrtout(ab_out,message,'COLL')
+     write(message, '(a,f13.1,a,f13.1)' )' Overall time for this dataset (sec) : cpu=',tim_dataset(1),'  wall=',tim_dataset(2)
+     call wrtout(std_out,message,'COLL')
+     call wrtout(ab_out,message,'COLL')
+     write(message, '(a)' ) ' ------------------------------------------------------------------------------------------'
+     call wrtout(std_out,message,'COLL')
+     call wrtout(ab_out,message,'COLL')
+   end if
+!LTEST
 
    call timab(643,2,tsec)
 
