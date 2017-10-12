@@ -88,7 +88,7 @@
  subroutine dfpt_rhotov(cplex,ehart01,ehart1,elpsp1,exc1,elmag1,gmet,gprimd,gsqcut,idir,ipert,&
 &           ixc,kxc,bxc,mpi_enreg,natom,nfft,ngfft,nhat,nhat1,nhat1gr,nhat1grdim,nkxc,nspden,n3xccc,&
 &           optene,optres,paral_kgb,qphon,rhog,rhog1,rhor,rhor1,rprimd,ucvol,&
-&           usepaw,usexcnhat,vhartr1,vpsp1,vresid1,vres2,vtrial1,vxc1,xccc3d1)
+&           usepaw,usexcnhat,vhartr1,vpsp1,vresid1,vres2,vtrial1,vxc,vxc1,xccc3d1)
 
  use defs_basis
  use defs_abitypes
@@ -117,7 +117,8 @@
  real(dp),intent(out) :: vres2
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
- real(dp),intent(in) :: gmet(3,3),gprimd(3,3),kxc(nfft,nkxc),bxc(nfft)
+ real(dp),intent(in) :: gmet(3,3),gprimd(3,3),kxc(nfft,nkxc)
+ real(dp),intent(in) :: vxc(cplex*nfft,nspden),bxc(nfft)
  real(dp),intent(in) :: nhat(nfft,nspden)
  real(dp),intent(in) :: nhat1(cplex*nfft,nspden)  !vz_d
  real(dp),intent(in) :: nhat1gr(cplex*nfft,nspden,3*nhat1grdim)
@@ -254,8 +255,9 @@
      optnc=1
      optxc=1
      nkxc_cur=nkxc ! TODO: remove nkxc_cur?
+
      call dfpt_mkvxc_noncoll(1,ixc,kxc,bxc,mpi_enreg,nfft,ngfft,nhat1,usepaw,nhat1gr,nhat1grdim,nkxc,&
-&     nkxc_cur,nspden,n3xccc,optnc,option,optxc,paral_kgb,qphon,rhor,rhor1,rprimd,usexcnhat,vxc1_,xccc3d1)
+&     nkxc_cur,nspden,n3xccc,optnc,option,optxc,paral_kgb,qphon,rhor,rhor1,rprimd,usexcnhat,vxc,vxc1_,xccc3d1)
       !if(ipert==natom+5)then SPr deb (to remove)
       !  vxc1_(:,:) = vxc1_(:,:) + v1zeeman(:,:)
       !endif
@@ -298,7 +300,7 @@
      optxc=1
      nkxc_cur=nkxc
      call dfpt_mkvxc_noncoll(1,ixc,kxc,bxc,mpi_enreg,nfft,ngfft,nhat1,usepaw,nhat1gr,nhat1grdim,nkxc,&
-&     nkxc_cur,nspden,n3xccc,optnc,option,optxc,paral_kgb,qphon,rhor,rhor1,rprimd,usexcnhat,vxc1val,xccc3d1)
+&     nkxc_cur,nspden,n3xccc,optnc,option,optxc,paral_kgb,qphon,rhor,rhor1,rprimd,usexcnhat,vxc,vxc1val,xccc3d1)
    else
      call dfpt_mkvxc(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat1,usepaw,nhat1gr,nhat1grdim,nkxc,&
 &     nspden,n3xccc,option,paral_kgb,qphon,rhor1,rprimd,usexcnhat,vxc1val,xccc3d1)

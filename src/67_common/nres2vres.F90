@@ -51,6 +51,9 @@
 !! xccc3d(n3xccc)=3D core electron density for XC core correction (bohr^-3)
 !! xred(3,natom)=reduced dimensionless atomic coordinates
 !!
+!! === optional inputs ===
+!! vxc(cplex*nfft,nspden)=XC GS potential 
+!!
 !! OUTPUT
 !! vresid(nfft,nspden)= the output potential residual
 !!
@@ -71,7 +74,7 @@
 
 subroutine nres2vres(dtset,gsqcut,izero,kxc,mpi_enreg,my_natom,nfft,ngfft,nhat,&
 &                 nkxc,nresid,n3xccc,optnc,optxc,pawang,pawfgrtab,pawrhoij,pawtab,&
-&                 rhor,rprimd,usepaw,vresid,xccc3d,xred)
+&                 rhor,rprimd,usepaw,vresid,xccc3d,xred,vxc)
 
  use defs_basis
  use defs_abitypes
@@ -112,6 +115,7 @@ subroutine nres2vres(dtset,gsqcut,izero,kxc,mpi_enreg,my_natom,nfft,ngfft,nhat,&
  type(pawfgrtab_type),intent(inout) :: pawfgrtab(my_natom*usepaw)
  type(pawrhoij_type),intent(in) :: pawrhoij(my_natom*usepaw)
  type(pawtab_type),intent(in) :: pawtab(dtset%ntypat*usepaw)
+ real(dp),intent(in) :: vxc(nfft,dtset%nspden) !FR TODO:cplex?
 
 !Local variables-------------------------------
 !scalars
@@ -217,11 +221,11 @@ subroutine nres2vres(dtset,gsqcut,izero,kxc,mpi_enreg,my_natom,nfft,ngfft,nhat,&
        call dfpt_mkvxc(1,dtset%ixc,kxc,mpi_enreg,nfft,ngfft,nhat,usepaw,nhatgr,nhatgrdim,&
 &       nkxc,dtset%nspden,0,2,dtset%paral_kgb,qq,nresid,rprimd,1,vresid,dummy)
      else
-!FR      call routine for Non-collinear magnetism
+!FR    call routine for Non-collinear magnetism
        ABI_ALLOCATE(rhor0,(nfft,dtset%nspden))
        rhor0(:,:)=rhor(:,:)-nresid(:,:)
        call dfpt_mkvxc_noncoll(1,dtset%ixc,kxc,bxc,mpi_enreg,nfft,ngfft,nhat,usepaw,nhatgr,nhatgrdim,&
-&       nkxc,nkxc_cur,dtset%nspden,0,2,2,optxc,dtset%paral_kgb,qq,rhor0,nresid,rprimd,1,vresid,xccc3d)
+&       nkxc,nkxc_cur,dtset%nspden,0,2,2,optxc,dtset%paral_kgb,qq,rhor0,nresid,rprimd,1,vxc,vresid,xccc3d)
        ABI_DEALLOCATE(rhor0)  
      end if
 
@@ -266,7 +270,7 @@ subroutine nres2vres(dtset,gsqcut,izero,kxc,mpi_enreg,my_natom,nfft,ngfft,nhat,&
      ABI_ALLOCATE(rhor0,(nfft,dtset%nspden))
      rhor0(:,:)=rhor(:,:)-nresid(:,:)
      call dfpt_mkvxc_noncoll(1,dtset%ixc,kxc_cur,bxc_cur,mpi_enreg,nfft,ngfft,nhat,usepaw,nhatgr,nhatgrdim,&
-&     nkxc,nkxc_cur,dtset%nspden,0,2,2,optxc,dtset%paral_kgb,qq,rhor0,nresid,rprimd,1,vresid,xccc3d)
+&     nkxc,nkxc_cur,dtset%nspden,0,2,2,optxc,dtset%paral_kgb,qq,rhor0,nresid,rprimd,1,vxc,vresid,xccc3d)
      ABI_DEALLOCATE(rhor0)
    end if
 

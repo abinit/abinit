@@ -70,7 +70,7 @@
 #include "abi_common.h"
 
 subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,bxc,mpi_enreg,nfft,ngfft,nhat1,nhat1dim,nhat1gr,nhat1grdim,&
-&          nkxc,nkxc_cur,nspden,n3xccc,optnc,option,optxc,paral_kgb,qphon,rhor,rhor1,rprimd,usexcnhat,vxc1,xccc3d1)
+&          nkxc,nkxc_cur,nspden,n3xccc,optnc,option,optxc,paral_kgb,qphon,rhor,rhor1,rprimd,usexcnhat,vxc,vxc1,xccc3d1)
 
  use defs_basis
  use defs_abitypes
@@ -96,7 +96,7 @@ subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,bxc,mpi_enreg,nfft,ngfft,nhat1,nhat1
  integer,intent(in) :: ngfft(18)
  real(dp),intent(in) :: nhat1gr(cplex*nfft,nspden,3*nhat1grdim)
  real(dp),intent(in) :: kxc(nfft,nkxc),rhor(cplex*nfft,nspden)
- real(dp),intent(in) :: bxc(nfft)
+ real(dp),intent(in) :: bxc(nfft),vxc(cplex*nfft,nspden)
  real(dp),intent(in),target :: rhor1(cplex*nfft,nspden),qphon(3)
  real(dp),intent(in) :: rprimd(3,3),xccc3d1(cplex*n3xccc)
  real(dp),intent(out) :: vxc1(cplex*nfft,nspden)
@@ -104,7 +104,9 @@ subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,bxc,mpi_enreg,nfft,ngfft,nhat1,nhat1
 
 !Local variables-------------------------------
 !scalars
- integer :: ifft, ir
+ integer :: ifft, ir, rotation
+! EB-FB option = 1 --> U matrix version
+!       option = 2 --> Bxc version
  real(dp),parameter :: m_norm_min=1.d-8
  real(dp) :: dum,dvdn,dvdz,fact,m_dot_m1
  real(dp) :: mx1,my1,mz1,mdirx,mdiry,mdirz
@@ -112,19 +114,24 @@ subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,bxc,mpi_enreg,nfft,ngfft,nhat1,nhat1
  real(dp) :: tsec(2)
  real(dp),allocatable :: m_norm(:)
  real(dp),allocatable :: rhor1_diag(:,:)
- real(dp),allocatable :: vxc1_diag(:,:)
-
+ real(dp),allocatable :: vxc1_diag(:,:),vxc_diag(:,:)
+ complex(dpc) :: d1,d2,d3,d4,rho_updn
+ complex(dpc),allocatable :: rhor1_offdiag(:,:),vxc1_(:,:)
+ complex(dpc),dimension(2,2) :: u0,u0_1
+ complex(dpc),dimension(2,2) :: u0v1,v1tmp,vxc1tmp,u0_1r1,r1tmp,rhor1_
 ! *************************************************************************
 
  DBG_ENTER("COLL")
 
  call timab(181,1,tsec)
- 
+
+ rotation=1
+
  if(nspden/=4) then
    MSG_BUG('only for nspden=4!')
  end if
 
- if(nkxc==23.or.nkxc==0) then
+ if(nkxc/=2*min(nspden,2)-1) then
    MSG_BUG('nspden=4 works only with LDA.')
  end if
 
@@ -133,7 +140,7 @@ subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,bxc,mpi_enreg,nfft,ngfft,nhat1,nhat1
  end if
 
 !Treat first LDA
- if(nkxc/=23)then
+ if(nkxc==1.or.nkxc==3)then
 
 !FR EB If option=0 (i.e., for XC core-correction only) we apply the correction only on
 ! the diagonal elements of the potential which are vxc1(:,1:2) since XC core correction
@@ -141,27 +148,7 @@ subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,bxc,mpi_enreg,nfft,ngfft,nhat1,nhat1
 ! Then, the corrections on vxc1(:,3:4) are ZERO.
 
    dvdn=zero; dvdz=zero; dum=zero; fact=zero; vxc1(:,:)=zero
-   if (option==0) then
-     if (n3xccc==0) then
-       vxc1(:,:)=zero
-     else !n3xccc/=0
-       if(cplex==1)then
-         do ir=1,nfft
-           vxc1(ir,1)=(kxc(ir,1)+kxc(ir,2))*xccc3d1(ir)*half
-           vxc1(ir,2)=(kxc(ir,2)+kxc(ir,3))*xccc3d1(ir)*half
-         end do
-       else
-         do ir=1,nfft
-           vxc1(2*ir-1,1)=(kxc(ir,1)+kxc(ir,2))*xccc3d1(2*ir-1)*half
-           vxc1(2*ir  ,1)=(kxc(ir,1)+kxc(ir,2))*xccc3d1(2*ir  )*half
-           vxc1(2*ir-1,2)=(kxc(ir,2)+kxc(ir,3))*xccc3d1(2*ir-1)*half
-           vxc1(2*ir  ,2)=(kxc(ir,2)+kxc(ir,3))*xccc3d1(2*ir  )*half
-         end do
-       end if ! cplex==1
-       vxc1(:,3:4)=zero
-     end if
 
-   else ! (option=1 or 2)
 !  Non-collinear magnetism
 !  Has to locally "rotate" rho(r)^(1) (according to magnetization),
 !  compute Vxc(r)^(1) and rotate it back
@@ -177,25 +164,28 @@ subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,bxc,mpi_enreg,nfft,ngfft,nhat1,nhat1
 !    end if
 
      ABI_ALLOCATE(rhor1_diag,(nfft,2))
-     ABI_ALLOCATE(vxc1_diag,(nfft,2))
+     ABI_ALLOCATE(rhor1_offdiag,(nfft,2))
+     ABI_ALLOCATE(vxc_diag,(cplex*nfft,2))
+     ABI_ALLOCATE(vxc1_diag,(cplex*nfft,2))
+     ABI_ALLOCATE(vxc1_,(cplex*nfft,nspden))
      ABI_ALLOCATE(m_norm,(nfft))
 
 !      -- Rotate rho(r)^(1)
-     do ifft=1,nfft
-       rhor1_diag(ifft,1)=rhor1(ifft,1) !FR it is already the tr[rhor1] see symrhg.F90
-       m_norm(ifft)=sqrt(rhor(ifft,2)**2+rhor(ifft,3)**2+rhor(ifft,4)**2)
-       m_dot_m1=rhor(ifft,2)*rhor1(ifft,2)+rhor(ifft,3)*rhor1(ifft,3) &
-&       +rhor(ifft,4)*rhor1(ifft,4)
-       if (optxc /= -1) then 
-         if(m_norm(ifft)>m_norm_min)then
-           rhor1_diag(ifft,2)=half*(rhor1_diag(ifft,1)+m_dot_m1/m_norm(ifft)) !rhor1_upup
-         else
-           rhor1_diag(ifft,2)=half*rhor1_diag(ifft,1)
+       do ifft=1,nfft
+         rhor1_diag(ifft,1)=rhor1(ifft,1) !FR it is the tr[rhor1] see symrhg.F90
+         m_norm(ifft)=sqrt(rhor(ifft,2)**2+rhor(ifft,3)**2+rhor(ifft,4)**2)
+         m_dot_m1=rhor(ifft,2)*rhor1(ifft,2)+rhor(ifft,3)*rhor1(ifft,3) &
+&         +rhor(ifft,4)*rhor1(ifft,4)
+         if (optxc /= -1) then 
+           if(m_norm(ifft)>m_norm_min)then
+             rhor1_diag(ifft,2)=half*(rhor1_diag(ifft,1)+m_dot_m1/m_norm(ifft)) !rhor1_upup
+           else
+             rhor1_diag(ifft,2)=half*rhor1_diag(ifft,1)
+           end if
+         else if (nkxc/=nkxc_cur.and.optxc/=-1) then
+           rhor1_diag(ifft,2)=half*(rhor1_diag(ifft,1)+m_dot_m1/m_norm(ifft))
          end if
-       else if (nkxc/=nkxc_cur.and.optxc/=-1) then
-         rhor1_diag(ifft,2)=half*(rhor1_diag(ifft,1)+m_dot_m1/m_norm(ifft))
-       end if
-     end do
+       end do
 
 !      -- Compute Kxc(r).n^res(r)_rotated
      call dfpt_mkvxc(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat1,nhat1dim,nhat1gr,nhat1grdim,&
@@ -213,24 +203,80 @@ subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,bxc,mpi_enreg,nfft,ngfft,nhat1,nhat1
        do ifft=1,nfft
          dvdn=(vxc1_diag(ifft,1)+vxc1_diag(ifft,2))*half
          dvdz=(vxc1_diag(ifft,1)-vxc1_diag(ifft,2))*half
-         if(m_norm(ifft)>m_norm_min*1000)then
-           fact=dvdz/m_norm(ifft)    ! this part describes the change of the magnitude of the xc magnetic field
-           dum=rhor(ifft,4)*fact     ! and the change of the scalar part of the xc electrostatic potential
-           vxc1(ifft,1)=dvdn+dum
-           vxc1(ifft,2)=dvdn-dum
-           vxc1(ifft,3)= rhor(ifft,2)*fact
-           vxc1(ifft,4)=-rhor(ifft,3)*fact
-           !add remaining contributions comming from the change of magnetization direction
-           m_dot_m1=(rhor(ifft,2)*rhor1(ifft,2)+rhor(ifft,3)*rhor1(ifft,3) &
-&                  +rhor(ifft,4)*rhor1(ifft,4))/m_norm(ifft)
-           mx1=rhor1(ifft,2); mdirx=rhor(ifft,2)/m_norm(ifft);
-           my1=rhor1(ifft,3); mdiry=rhor(ifft,3)/m_norm(ifft);
-           mz1=rhor1(ifft,4); mdirz=rhor(ifft,4)/m_norm(ifft);
+
+         select case (rotation)
+         case (1)  ! U matrix version
+            ! define the U^(0) transformation matrix 
+            rho_updn=(rhor(ifft,2)+(0.,1.)*rhor(ifft,3))
+            ! define the U^(0) transformation matrix 
+            rho_updn=(rhor(ifft,2)+(0.,1.)*rhor(ifft,3))
+            d1=sqrt(( m_norm(ifft)+rhor(ifft,4))**2+rho_updn**2)
+            d2=sqrt((-m_norm(ifft)+rhor(ifft,4))**2+rho_updn**2)
+            d3=sqrt((m_norm(ifft)-rhor(ifft,4))**2+rho_updn**2)
+            d4=sqrt((m_norm(ifft)+rhor(ifft,4))**2-rho_updn**2)
+            u0(1,1)=(m_norm(ifft)+rhor(ifft,4))/d1 !  ( m+mz)/d1
+            u0(2,2)=rho_updn/d2 !(mx+imy)/d2
+            u0(1,2)=(-m_norm(ifft)+rhor(ifft,4))/d2 ! (-m+mz)/d2
+            u0(2,1)=rho_updn/d1 !(mx+imy)/d1
+            ! define the inverse of U^(0): U^(0)^-1
+            u0_1(1,1)= half*d1/m_norm(ifft)
+            u0_1(2,2)= half*d2*(m_norm(ifft)+rhor(ifft,4))/(m_norm(ifft)*rho_updn)
+            u0_1(1,2)= half*d1*(m_norm(ifft)-rhor(ifft,4))/(m_norm(ifft)*rho_updn)
+            u0_1(2,1)=-half*d2/m_norm(ifft)
+            ! Diagonalize the GS Vxc^(0): U^(0)^-1Vxc^(0)U^(0) and remember the abinit notation for vxc!
+            vxc_diag(ifft,1)=half*(vxc(ifft,1)+vxc(ifft,2)-&
+&                      sqrt((vxc(ifft,1)-vxc(ifft,2))**2+four*(vxc(ifft,3)**2+vxc(ifft,4)**2)))
+            vxc_diag(ifft,2)=half*(vxc(ifft,1)+vxc(ifft,2)+&
+&                      sqrt((vxc(ifft,1)-vxc(ifft,2))**2+four*(vxc(ifft,3)**2+vxc(ifft,4)**2)))
+            vxc1_(ifft,1)=cmplx(real(vxc1_diag(ifft,1)),0.)
+            vxc1_(ifft,2)=cmplx(real(vxc1_diag(ifft,2)),0.)
+            if(m_norm(ifft)>m_norm_min) then
+               ! Tranforming the rhor1 with U0
+               rhor1_(1,1)=rhor1(ifft,1)+rhor1(ifft,4)
+               rhor1_(2,2)=rhor1(ifft,1)-rhor1(ifft,4)
+               rhor1_(1,2)=rhor1(ifft,2)-(0.,1.)*rhor1(ifft,3)
+               rhor1_(2,1)=rhor1(ifft,2)+(0.,1.)*rhor1(ifft,3)
+               u0_1r1=matmul(u0_1,rhor1_)
+               r1tmp=matmul(u0_1r1,u0)
+               rhor1_offdiag(ifft,1)=r1tmp(1,2)
+               rhor1_offdiag(ifft,2)=r1tmp(2,1)
+               vxc1_(ifft,3)=-(rhor1_offdiag(ifft,1)/m_norm(ifft))*(vxc_diag(ifft,1)-vxc_diag(ifft,2))
+               vxc1_(ifft,4)= (rhor1_offdiag(ifft,2)/m_norm(ifft))*(vxc_diag(ifft,2)-vxc_diag(ifft,1))
+               !rotate back the "diagonal" xc computing the term U^(0)Vxc1_^(1)U^(0)^-1
+               v1tmp(1,1)=vxc1_(ifft,1)
+               v1tmp(2,2)=vxc1_(ifft,2)
+               v1tmp(1,2)=vxc1_(ifft,3)
+               v1tmp(2,1)=vxc1_(ifft,4)
+               u0v1=matmul(u0,v1tmp)
+               vxc1tmp=matmul(u0v1,u0_1)
+               vxc1(ifft,1)=real(vxc1tmp(1,1))
+               vxc1(ifft,2)=real(vxc1tmp(2,2))
+               vxc1(ifft,3)=real(real(vxc1tmp(1,2)))
+               vxc1(ifft,4)=real(aimag(vxc1tmp(1,2)))
+            else
+               vxc1(ifft,1:2)=dvdn
+               vxc1(ifft,3:4)=zero
+            end if
+         case (2)                        ! More directly method of calculating the rotated xc functional (derivatives of the analitic experssion)   
+           if(m_norm(ifft)>m_norm_min)then
+
+             fact=dvdz/m_norm(ifft)    ! this part describes the change of the magnitude of the xc magnetic field
+             dum=rhor(ifft,4)*fact     ! and the change of the scalar part of the xc electrostatic potential
+             vxc1(ifft,1)=dvdn+dum
+             vxc1(ifft,2)=dvdn-dum
+             vxc1(ifft,3)= rhor(ifft,2)*fact
+             vxc1(ifft,4)=-rhor(ifft,3)*fact
+             !add remaining contributions comming from the change of magnetization direction
+             m_dot_m1=(rhor(ifft,2)*rhor1(ifft,2)+rhor(ifft,3)*rhor1(ifft,3) &
+&                     +rhor(ifft,4)*rhor1(ifft,4))/m_norm(ifft)
+             mx1=rhor1(ifft,2); mdirx=rhor(ifft,2)/m_norm(ifft);
+             my1=rhor1(ifft,3); mdiry=rhor(ifft,3)/m_norm(ifft);
+             mz1=rhor1(ifft,4); mdirz=rhor(ifft,4)/m_norm(ifft);
          
-           vxc1(ifft,1) = vxc1(ifft,1)+ bxc(ifft)*( mz1 - mdirz*m_dot_m1 )
-           vxc1(ifft,2) = vxc1(ifft,2)+ bxc(ifft)*(-mz1 + mdirz*m_dot_m1 )
-           vxc1(ifft,3) = vxc1(ifft,3)+ bxc(ifft)*( mx1 - mdirx*m_dot_m1 )
-           vxc1(ifft,4) = vxc1(ifft,4)+ bxc(ifft)*(-my1 + mdiry*m_dot_m1 )
+             vxc1(ifft,1) = vxc1(ifft,1)+ bxc(ifft)*( mz1 - mdirz*m_dot_m1 )
+             vxc1(ifft,2) = vxc1(ifft,2)+ bxc(ifft)*(-mz1 + mdirz*m_dot_m1 )
+             vxc1(ifft,3) = vxc1(ifft,3)+ bxc(ifft)*( mx1 - mdirx*m_dot_m1 )
+             vxc1(ifft,4) = vxc1(ifft,4)+ bxc(ifft)*(-my1 + mdiry*m_dot_m1 )
 !          write(*,*) m_dot_m1/m_norm(ifft)
 !          write(*,*)   ( mx1 - mdirx*m_dot_m1 )*rhor(ifft,2) + &
 !&                       ( my1 - mdiry*m_dot_m1 )*rhor(ifft,3) + &
@@ -239,10 +285,12 @@ subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,bxc,mpi_enreg,nfft,ngfft,nhat1,nhat1
 !           write(239,*)  vxc1(ifft,2),bxc(ifft)*(-mz1 + mdirz*m_dot_m1 )
 !           write(240,*)  vxc1(ifft,3),bxc(ifft)*( mx1 - mdirx*m_dot_m1 )
 !           write(241,*)  vxc1(ifft,4),bxc(ifft)*(-my1 + mdiry*m_dot_m1 )
-         else
-           vxc1(ifft,1:2)=dvdn
-           vxc1(ifft,3:4)=zero
-         end if
+           else
+             vxc1(ifft,1:2)=dvdn
+             vxc1(ifft,3:4)=zero
+           end if
+        end select
+
       end do
      else
        do ifft=1,nfft
@@ -268,8 +316,7 @@ subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,bxc,mpi_enreg,nfft,ngfft,nhat1,nhat1
 !      ABI_DEALLOCATE(rhor1_)
 !    end if
 
-   end if ! option==1 or 2
- end if ! nkxc=23
+ end if ! nkxc=1 or nkxc=3
 
  call timab(181,2,tsec)
 
