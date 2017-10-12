@@ -95,10 +95,10 @@ subroutine mklocl_wavelets(efield, grtn, mpi_enreg, natom, nfft, &
 #if defined HAVE_BIGDFT
 !scalars
  integer :: i,i1,i2,i3,ia,ierr,igeo,me,nproc,shift,comm
- real(dp) :: charge,energ
+ real(dp) :: energ
  character(len=500) :: message
 !arrays
- real(dp) :: epot(3),locstrten(6,4)
+ real(dp) :: epot(3)
  real(dp) :: elecfield(3)=(/zero,zero,zero/) ! Not used here
  real(dp),allocatable :: gxyz(:,:),vhartr(:),rhov(:,:)
 #endif

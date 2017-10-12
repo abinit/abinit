@@ -89,7 +89,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
 ! Scalars
  integer,parameter :: tim_fourwf0=0,tim_fourdp0=0,ndat1=1
  integer :: bdtot_jindex,choice,cplex_fock,cplex_dij,cpopt,i1,i2,i3,ia,iatom
- integer :: iband_cprj,ider,idir,idir1,ier,ilmn,ind,ipert,ipw,ifft,ispinor,itypat,izero,jband,jbg,jcg,jkg
+ integer :: iband_cprj,ider,idir,idir1,ier,ind,ipert,ipw,ifft,itypat,izero,jband,jbg,jcg,jkg
  integer :: jkpt,my_jsppol,jstwfk,lmn2_size,mgfftf,mpw,n1,n2,n3,n4,n5,n6
  integer :: n1f,n2f,n3f,n4f,n5f,n6f,natom,nband_k,ndij,nfft,nfftf,nfftotf,nhat12_grdim,nnlout
  integer :: npw,npwj,nspden_fock,nspinor,paw_opt,signs,tim_nonlop
@@ -103,7 +103,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
  integer,pointer :: gboundf(:,:),kg_occ(:,:),gbound_kp(:,:)
  real(dp) :: enlout_dum(1),dotr(6),fockstr(6),for1(3),qphon(3),qvec_j(3),tsec(2),gsc_dum(2,0),rhodum(2,1)
  real(dp) :: rhodum0(0,1,1),str(3,3)
- real(dp), allocatable :: dummytab(:,:),dijhat(:,:,:),dijhat_tmp(:,:),dijhat_tmp1(:,:,:),ffnl_kp_dum(:,:,:,:)
+ real(dp), allocatable :: dummytab(:,:),dijhat(:,:,:),dijhat_tmp(:,:),ffnl_kp_dum(:,:,:,:)
  real(dp), allocatable :: gvnlc(:,:),ghc1(:,:),ghc2(:,:),grnhat12(:,:,:,:),grnhat_12(:,:,:,:,:),forikpt(:,:)
  real(dp), allocatable :: rho12(:,:,:),rhog_munu(:,:),rhor_munu(:,:),vlocpsi_r(:)
  real(dp), allocatable :: vfock(:),psilocal(:,:,:),vectin_dum(:,:),vqg(:),forout(:,:),strout(:,:)
@@ -111,11 +111,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
  real(dp), ABI_CONTIGUOUS  pointer :: cwaveocc_r(:,:,:,:)
  type(pawcprj_type),pointer :: cwaveocc_prj(:,:)
 
-integer :: optgr, optgr2,optstr,optstr2,dumint(0)
-real(dp) :: dummy(0),nhat_dum(0,0),rprimd(3,3),for11(3),for12(3),eigen1,nlstr(6),ener,ener1,ener2
- real(dp), allocatable ::grnl(:),vxc(:,:), vtrial(:,:)
-type(pseudopotential_type) :: psps
- type(pawrhoij_type),allocatable  ::  pawrhoij(:)
+ real(dp) :: dummy(0),rprimd(3,3),for12(3)
 
 ! *************************************************************************
 !return
@@ -136,6 +132,7 @@ type(pseudopotential_type) :: psps
 
 !Some constants
  invucvol=1.d0/sqrt(gs_ham%ucvol)
+ call matr3inv(gs_ham%gprimd,rprimd)
  cplex_fock=2;nspden_fock=1
  natom=fockcommon%natom
  nspinor=gs_ham%nspinor
@@ -298,7 +295,7 @@ type(pseudopotential_type) :: psps
 !*   occ = occupancy of jband at this k point
      occ=fockbz%occ_bz(jband+bdtot_jindex,my_jsppol)
      if(occ<tol8) cycle 
-
+!if(jband/=fockcommon%ieigen.or.(fockcommon%ieigen/=1)) cycle
 ! ==============================================
 ! === Get cwaveocc_r in real space using FFT ===
 ! ==============================================
@@ -342,8 +339,10 @@ type(pseudopotential_type) :: psps
 ! =======================================================
      call timab(1509,1,tsec)
      if (fockcommon%usepaw==1) then
-       ABI_ALLOCATE(rho12,(2,nfftf,nspinor**2))
        iband_cprj=(my_jsppol-1)*fockbz%mkptband+jbg+jband
+
+       ABI_ALLOCATE(rho12,(2,nfftf,nspinor**2))
+
        cwaveocc_prj=>fockbz%cwaveocc_prj(:,iband_cprj:iband_cprj+nspinor-1)
 
        call pawmknhat_psipsi(cwaveprj,cwaveocc_prj,ider,izero,natom,natom,nfftf,ngfftf,&
@@ -381,8 +380,8 @@ type(pseudopotential_type) :: psps
 #if 0
 !    rhog_munu=rhog_munu*fockbz%wtk_bz(jkpt)
 
-     call hartre(cplex_fock,gs_ham%gmet,fockcommon%gsqcut,fockcommon%usepaw,mpi_enreg,nfftf,ngfftf,&
-&     mpi_enreg%paral_kgb,qvec_j,rhog_munu,vfock,divgq0=fock%divgq0)
+     call hartre(cplex_fock,fockcommon%gsqcut,fockcommon%usepaw,mpi_enreg,nfftf,ngfftf,&
+&     mpi_enreg%paral_kgb,rhog_munu,rprimd,vfock,divgq0=fock%divgq0,qpt=qvec_j)
 
 #else
      do ifft=1,nfftf
@@ -430,7 +429,6 @@ type(pseudopotential_type) :: psps
 ! Forces calculation
 
        if (fockcommon%optfor.and.(fockcommon%ieigen/=0)) then
-         call matr3inv(gs_ham%gprimd,rprimd)
          choice=2; dotr=zero;doti=zero;cpopt=4
          do iatom=1,natom
            do idir=1,3
@@ -457,24 +455,12 @@ type(pseudopotential_type) :: psps
 ! Stresses calculation
        if (fockcommon%optstr.and.(fockcommon%ieigen/=0)) then
 
-!         do iatom=1,natom
-!            ia=fockcommon%atindx(iatom)
-!            do ispinor=iband_cprj,iband_cprj+nspinor-1
-!              do ilmn=1,fockcommon%pawtab(gs_ham%typat(iatom))%lmn_size
-!                call stresssym(gs_ham%gprimd,1,fockbz%cwaveocc_prj(ia,ispinor)%dcp(1,:,ilmn),&
-!&                                     fockcommon%symrec(:,:,fockbz%tab_symkpt(jkpt)))
-!                call stresssym(gs_ham%gprimd,1,fockbz%cwaveocc_prj(ia,ispinor)%dcp(2,:,ilmn),&
-!&                                     fockcommon%symrec(:,:,fockbz%tab_symkpt(jkpt)))
-!              end do
-!            end do
-!          end do
-
-
          signs=2;choice=3;cpopt=4
+
        ! first contribution 
 !         call load_kprime_hamiltonian(gs_ham,ffnl_kp=fockcommon%ffnl_str)
          call load_k_hamiltonian(gs_ham,ffnl_k=fockcommon%ffnl_str)
-         strout=zero
+!         strout=zero
          dotr=zero
          do idir=1,6
            call nonlop(choice,cpopt,cwaveocc_prj,enlout_dum,gs_ham,idir,(/zero/),mpi_enreg,&
@@ -484,7 +470,6 @@ type(pseudopotential_type) :: psps
            fockcommon%stress_ikpt(idir,fockcommon%ieigen)=fockcommon%stress_ikpt(idir,fockcommon%ieigen)-&
 &           dotr(idir)*occ*wtk/gs_ham%ucvol
          end do
-
        ! second contribution 
          str=zero
          do iatom=1,natom
@@ -509,7 +494,6 @@ type(pseudopotential_type) :: psps
            fockcommon%stress_ikpt(idir,fockcommon%ieigen)=fockcommon%stress_ikpt(idir,fockcommon%ieigen)+&
 &           fockstr(idir)/nfftf*occ*wtk
          end do
-
        ! third contribution
          doti=zero
          do ifft=1,nfftf
@@ -530,6 +514,7 @@ type(pseudopotential_type) :: psps
 ! =============================================================
 ! === Apply the local potential vfockloc_munu to cwaveocc_r ===
 ! =============================================================
+
      call timab(1507,1,tsec)
      ind=0
      do i3=1,ngfftf(3)

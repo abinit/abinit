@@ -345,7 +345,7 @@ module m_lobpcg2
     type(xgBlock_t) :: eigenBlock   ! 
     type(xgBlock_t) :: residuBlock
     type(xgBlock_t):: RR_eig ! Will be eigenvaluesXN
-    double precision :: maxResidu, minResidu
+    double precision :: maxResidu, minResidu, average, deviation
     double precision :: prevMaxResidu
     double precision :: dlamch
     integer :: eigResiduMax, eigResiduMin
@@ -454,6 +454,9 @@ module m_lobpcg2
           write(std_out,'(2x,a1,es10.3,a1,es10.3,a,i4,a,i4,a)') &
             "(",minResidu,",",maxResidu, ") for eigen vectors (", &
             eigResiduMin,",",eigResiduMax,")"
+          call xgBlock_average(residuBlock,average)
+          call xgBlock_deviation(residuBlock,deviation)
+          write(std_out,'(a,es21.14,a,es21.14)') "Average : ", average, " +/-", deviation
           if ( maxResidu < lobpcg%tolerance ) then
             write(std_out,*) "Block ", iblock, "converged at iline =", iline
             exit

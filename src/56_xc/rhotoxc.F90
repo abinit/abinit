@@ -1,12 +1,13 @@
 !{\src2tex{textfont=tt}}
-!!****f* ABINIT/rhohxc
+!!****f* ABINIT/rhotoxc
 !! NAME
-!! rhohxc
+!! rhotoxc
 !!
 !! FUNCTION
 !! Start from the density or spin-density, and
-!! compute Hartree (if option>=1) and xc correlation potential and energies.
+!! compute xc correlation potential and energies.
 !! Eventually compute xc kernel (if option=-2, 2, 3, 10 or 12).
+!! Cannot be used with wavelets.
 !!
 !! COPYRIGHT
 !! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR, MF, GZ, DRH, MT)
@@ -16,12 +17,6 @@
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
-!!  dtset <type(dataset_type)>=all input variables in this dataset
-!!   | intxc=0 for old quadrature; 1 for new improved quadrature
-!!   | ixc= choice of exchange-correlation scheme (see above, and below)
-!!  gsqcut=cutoff value on G**2 for sphere inside fft box.
-!! (gsqcut=(boxcut**2)*ecut/(2.d0*(Pi**2))
-!!  izero=if 1, unbalanced components of Vhartree(g) have to be set to zero
 !!  mpi_enreg=information about MPI parallelization
 !!  nfft=(effective) number of FFT grid points (for this processor)
 !!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
@@ -33,27 +28,28 @@
 !!   the exchange-correlation kernel must be computed.
 !!  nspden=number of spin-density components
 !!  n3xccc=dimension of the xccc3d array (0 or nfft or cplx*nfft).
-!!  option=0 for xc only (exc, vxc, strsxc),
-!!         1 for Hxc (idem + vhartr) ,
-!!         2 for Hxc and kxc (no paramagnetic part if nspden=1)
+!!  option=0 or 1 for xc only (exc, vxc, strsxc),
+!!         2 for xc and kxc (no paramagnetic part if nspden=1)
 !!        10 for xc  and kxc with only partial derivatives wrt density part (d2Exc/drho^2)
-!!        12 for Hxc and kxc with only partial derivatives wrt density part (d2Exc/drho^2)
+!!        12 for xc and kxc with only partial derivatives wrt density part (d2Exc/drho^2)
 !!              and, in the case of hybrid functionals, substitution of the hybrid functional
 !!              by the related fallback GGA functional for the computation of the xc kernel (not for other quantities)
-!!         3 for Hxc, kxc and k3xc
-!!        -2 for Hxc and kxc (with paramagnetic part if nspden=1)
-!!  rhog(2,nfft)=electron density in G space
+!!         3 for xc, kxc and k3xc
+!!        -2 for xc and kxc (with paramagnetic part if nspden=1)
+!!  paral_kgb=Flag related to the kpoint-band-fft parallelism
 !!  rhor(nfft,nspden)=electron density in real space in electrons/bohr**3
 !!   (total in first half and spin-up in second half if nspden=2)
 !!   (total in first comp. and magnetization in comp. 2 to 4 if nspden=4)
 !!  rprimd(3,3)=dimensional primitive translations in real space (bohr)
 !!  usexcnhat= -PAW only- 1 if nhat density has to be taken into account in Vxc
+!!  [vhartr(nfft)=Hartree potential (only needed for Fermi-Amaldi functional)]
+!!  xcdata <type(xcdata_type)>=storage for different input variables and derived parameters needed to compute the XC functional
 !!  xccc3d(n3xccc)=3D core electron density for XC core correction (bohr^-3)
 !!
 !!  === optional inputs ===
 !!  [add_tfw]=flag controling the addition of Weiszacker gradient correction to Thomas-Fermi kin energy
-!!  [taur(nfftf,nspden*usekden)]=array for kinetic energy density
-!!  [taug(2,nfftf*dtset%usekden)]=array for Fourier transform of kinetic energy density
+!!  [taur(nfftf,nspden*xcdata%usekden)]=array for kinetic energy density
+!!  [taug(2,nfftf*xcdata%usekden)]=array for Fourier transform of kinetic energy density
 !!
 !! OUTPUT
 !!  enxc=returned exchange and correlation energy (hartree).
@@ -65,7 +61,6 @@
 !!               - depsxc_drho(up,i)*rhor(up,i)-depsxc_drho(dn,i)*rhor(dn,i)]
 !!     - gradrho(up,mu)*gradrho(up,nu) * depsxc_dgradrho(up,i) / gradrho(up,i)
 !!     - gradrho(dn,mu)*gradrho(dn,nu) * depsxc_dgradrho(dn,i) / gradrho(dn,i) )
-!!  vhartr(nfft)=Hartree potential (returned if option/=0 and option/=10)
 !!  vxc(nfft,nspden)=xc potential
 !!    (spin up in first half and spin down in second half if nspden=2)
 !!    (v^11, v^22, Re[V^12], Im[V^12] if nspden=4)
@@ -124,7 +119,7 @@
 
 !! === Additional optional output ===
 !!  [exc_vdw_out]= vdW-DF contribution to enxc (hartree)
-!!  [vxctau(nfft,nspden,4*dtset%usekden)]=(only for meta-GGA)=
+!!  [vxctau(nfft,nspden,4*xcdata%usekden)]=(only for meta-GGA)=
 !!    vxctau(:,:,1): derivative of XC energy density with respect to kinetic energy density (depsxcdtau).
 !!    vxctau(:,:,2:4): gradient of vxctau (gvxctau)
 !!
@@ -199,7 +194,7 @@
 !!   for more details about notations please see pdf in /doc/theory/MGGA/
 !!
 !! PARENTS
-!!      calc_vhxc_me,energy,hybrid_corr,m_kxc,nonlinear,nres2vres,odamix,prcref
+!!      calc_vhxc_me,energy,m_kxc,nonlinear,nres2vres,odamix,prcref
 !!      prcref_PMA,respfn,rhotov,scfcv,setvtr,xchybrid_ncpp_cc
 !!
 !! CHILDREN
@@ -215,10 +210,10 @@
 
 #include "abi_common.h"
 
-subroutine rhohxc(dtset,enxc,gsqcut,izero,kxc,mpi_enreg,nfft,ngfft, &
-& nhat,nhatdim,nhatgr,nhatgrdim,nkxc,nk3xc,nspden,n3xccc,option, &
-& rhog,rhor,rprimd,strsxc,usexcnhat,vhartr,vxc,vxcavg,xccc3d, &
-& k3xc,electronpositron,taug,taur,vxctau,exc_vdw_out,add_tfw) ! optional arguments
+subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
+& nhat,nhatdim,nhatgr,nhatgrdim,nkxc,nk3xc,nspden,n3xccc,option,paral_kgb, &
+& rhor,rprimd,strsxc,usexcnhat,vxc,vxcavg,xccc3d,xcdata, &
+& k3xc,electronpositron,taug,taur,vhartr,vxctau,exc_vdw_out,add_tfw) ! optional arguments
 
  use defs_basis
  use defs_abitypes
@@ -226,6 +221,7 @@ subroutine rhohxc(dtset,enxc,gsqcut,izero,kxc,mpi_enreg,nfft,ngfft, &
  use m_profiling_abi
  use m_errors
  use m_cgtools
+ use m_xcdata
  use m_xc_vdw
  use libxc_functionals
 
@@ -234,46 +230,45 @@ subroutine rhohxc(dtset,enxc,gsqcut,izero,kxc,mpi_enreg,nfft,ngfft, &
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'rhohxc'
+#define ABI_FUNC 'rhotoxc'
  use interfaces_18_timing
  use interfaces_41_geometry
  use interfaces_41_xc_lowlevel
  use interfaces_53_spacepar
- use interfaces_56_xc, except_this_one => rhohxc
+ use interfaces_56_xc, except_this_one => rhotoxc
 !End of the abilint section
 
  implicit none
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: izero,nk3xc,n3xccc,nfft,nhatdim,nhatgrdim,nkxc,nspden,option
+ integer,intent(in) :: nk3xc,n3xccc,nfft,nhatdim,nhatgrdim,nkxc,nspden,option,paral_kgb
  integer,intent(in) :: usexcnhat
  logical,intent(in),optional :: add_tfw
- real(dp),intent(in) :: gsqcut
  real(dp),intent(out) :: enxc,vxcavg
  real(dp),intent(out),optional :: exc_vdw_out
  type(MPI_type),intent(in) :: mpi_enreg
- type(dataset_type),intent(in) :: dtset
  type(electronpositron_type),pointer,optional :: electronpositron
+ type(xcdata_type), intent(in) :: xcdata
 !arrays
  integer,intent(in) :: ngfft(18)
  real(dp),intent(in) :: nhat(nfft,nspden*nhatdim)
- real(dp),intent(in) :: nhatgr(nfft,nspden,3*nhatgrdim),rhog(2,nfft)
+ real(dp),intent(in) :: nhatgr(nfft,nspden,3*nhatgrdim)
  real(dp),intent(in),target :: rhor(nfft,nspden)
  real(dp),intent(in) :: rprimd(3,3),xccc3d(n3xccc)
- real(dp),intent(out) :: kxc(nfft,nkxc),strsxc(6),vhartr(nfft),vxc(nfft,nspden)
- real(dp),intent(in),optional :: taug(:,:),taur(:,:)
+ real(dp),intent(out) :: kxc(nfft,nkxc),strsxc(6),vxc(nfft,nspden)
+ real(dp),intent(in),optional :: taug(:,:),taur(:,:),vhartr(nfft)
  real(dp),intent(out),optional :: k3xc(1:nfft,1:nk3xc),vxctau(:,:,:)
 
 !Local variables-------------------------------
 !scalars
- integer :: cplex,ierr,ifft,ii,ixc_fallbackkxc_hyb,indx,ipositron,ipts,ishift,ispden,iwarn,iwarnp
+ integer :: cplex,ierr,ifft,ii,ixc,ixc_fallbackkxc_hyb,indx,ipositron,ipts,ishift,ispden,iwarn,iwarnp
  integer :: jj,mpts,ndvxc,nd2vxc,nfftot,ngr,ngr2,ngrad,ngrad_apn,nkxc_eff,npts
  integer :: nspden_apn,nspden_eff,nspden_updn,nspgrad,nvxcgrho,order,mgga,usefxc
  integer :: nproc_fft,comm_fft
  logical :: add_tfw_
  real(dp),parameter :: mot=-one/3.0_dp
- real(dp) :: coeff,divshft,doti,dstrsxc,dvdn,dvdz,epsxc,exc_str,factor,m_norm_min,nelect,s1,s2,s3
+ real(dp) :: coeff,divshft,doti,dstrsxc,dvdn,dvdz,epsxc,exc_str,factor,m_norm_min,s1,s2,s3
  real(dp) :: strdiag,strsxc1_tot,strsxc2_tot,strsxc3_tot,strsxc4_tot
  real(dp) :: strsxc5_tot,strsxc6_tot,ucvol
  logical :: allow3,test_nhat,with_vxctau
@@ -305,39 +300,36 @@ subroutine rhohxc(dtset,enxc,gsqcut,izero,kxc,mpi_enreg,nfft,ngfft, &
 !      - usewvl/=0
 !      - test_nhat and usexcnhat==1 and nspden==4
 
+ call timab(81,1,tsec)
+
 !Check options
+ ixc=xcdata%ixc
  if(option==3)then
-   allow3=(dtset%ixc > 0).and.(dtset%ixc /= 3).and.(dtset%ixc /= 7).and.(dtset%ixc /= 8)
+   allow3=(ixc > 0).and.(ixc /= 3).and.(ixc /= 7).and.(ixc /= 8)
    if(.not.allow3)then
-     allow3=(dtset%ixc < 0).and. &
+     allow3=(ixc < 0).and. &
 &     (libxc_functionals_isgga().or.libxc_functionals_ismgga())
    end if
    if(allow3)then
      write(message, '(3a,i0)' )&
 &     'Third-order xc kernel can only be computed for ixc = 0, 3, 7 or 8,',ch10,&
-&     'while it is found to be',dtset%ixc
+&     'while it is found to be',ixc
      MSG_ERROR(message)
    end if
  end if
- if(dtset%icoulomb /= 0)then
-   write(message, '(a,a,a,i0)' )&
-&   'To use non-periodic computation (icoulomb /= 0), ',ch10,&
-&   'use PSolver_rhohxc() instead, while the argument icoulomb=',dtset%icoulomb
-   MSG_BUG(message)
- end if
- if(nspden==4.and.dtset%xclevel==2.and.(abs(option)==2))then
+ if(nspden==4.and.xcdata%xclevel==2.and.(abs(option)==2))then
    MSG_BUG('When nspden==4 and GGA, the absolute value of option cannot be 2 !')
  end if
 
 !Is the functional a MGGA?
- mgga=0;if(dtset%ixc>=31 .and. dtset%ixc<=34) mgga=1
- if (dtset%ixc<0.and.libxc_functionals_ismgga()) mgga=1
+ mgga=0;if(ixc>=31 .and. ixc<=34) mgga=1
+ if (ixc<0.and.libxc_functionals_ismgga()) mgga=1
  if (mgga==1) then
    if (.not.present(taur)) then
      message='taur arg must be present for metaGGA!'
      MSG_BUG(message)
    end if
-   if (size(taur)/=nfft*nspden*dtset%usekden) then
+   if (size(taur)/=nfft*nspden*xcdata%usekden) then
      message='invalid size for taur!'
      MSG_BUG(message)
    end if
@@ -345,7 +337,7 @@ subroutine rhohxc(dtset,enxc,gsqcut,izero,kxc,mpi_enreg,nfft,ngfft, &
  with_vxctau=(present(vxctau).and.present(taur))
  if (with_vxctau) with_vxctau=(size(vxctau)>0)
  if (with_vxctau) then
-   if (size(vxctau)/=nfft*nspden*dtset%usekden*4) then
+   if (size(vxctau)/=nfft*nspden*xcdata%usekden*4) then
      message='invalid size for vxctau!'
      MSG_BUG(message)
    end if
@@ -362,15 +354,8 @@ subroutine rhohxc(dtset,enxc,gsqcut,izero,kxc,mpi_enreg,nfft,ngfft, &
  qphon(:)=zero
  iwarn=0
  nfftot=ngfft(1)*ngfft(2)*ngfft(3)
- usefxc=0;if (dtset%ixc==50) usefxc=1
+ usefxc=0;if (ixc==50) usefxc=1
  add_tfw_=.false.;if (present(add_tfw)) add_tfw_=add_tfw
-
- if(option/=0.and.option/=10)then
-   call hartre(cplex,gmet,gsqcut,izero,mpi_enreg,nfft,ngfft,dtset%paral_kgb,qphon,rhog,vhartr)
- end if
-
-!Note : hartre is excluded from the timing
- call timab(81,1,tsec)
 
 !Initializations
  enxc=zero
@@ -398,16 +383,16 @@ subroutine rhohxc(dtset,enxc,gsqcut,izero,kxc,mpi_enreg,nfft,ngfft, &
  strsxc_vdw(:,:) = zero
 
 
- if ((dtset%xclevel==0.or.dtset%ixc==0).and.(.not.add_tfw_)) then
+ if ((xcdata%xclevel==0.or.ixc==0).and.(.not.add_tfw_)) then
 !  No xc at all is applied (usually for testing)
    MSG_WARNING('Note that no xc is applied (ixc=0).')
 
- else if (dtset%ixc/=20) then
+ else if (ixc/=20) then
 
 !  ngrad=1 is for LDAs or LSDs, ngrad=2 is for GGAs
-   ngrad=1;if(dtset%xclevel==2)ngrad=2
+   ngrad=1;if(xcdata%xclevel==2)ngrad=2
 !  ixc 31 to 34 are for mgga test purpose only (fake functionals based on LDA but need the gradients too)
-   if(dtset%ixc>=31 .and. dtset%ixc<=34)ngrad=2
+   if(ixc>=31 .and. ixc<=34)ngrad=2
 !  Thomas-Fermi-Weiszacker is a gradient correction
    if(add_tfw_) ngrad=2
 !  Test: has a compensation density to be added/substracted (PAW) ?
@@ -424,10 +409,10 @@ subroutine rhohxc(dtset,enxc,gsqcut,izero,kxc,mpi_enreg,nfft,ngfft, &
    nkxc_eff=nkxc;if (option==10.or.option==12) nkxc_eff=min(nkxc,3)
 
 !  Define the fallback GGA xc kernel in case of hybrid functionals
-   ixc_fallbackkxc_hyb=dtset%ixc
+   ixc_fallbackkxc_hyb=ixc
    if (option==12) then
-     if(dtset%ixc==41 .or. dtset%ixc==42)ixc_fallbackkxc_hyb=11
-     if(dtset%ixc==-406 .or. dtset%ixc==-427 .or. dtset%ixc==-428 .or. dtset%ixc==-456)then
+     if(ixc==41 .or. ixc==42)ixc_fallbackkxc_hyb=11
+     if(ixc==-406 .or. ixc==-427 .or. ixc==-428 .or. ixc==-456)then
        if (libxc_functionals_gga_from_hybrid(gga_id=gga_id)) then
          ixc_fallbackkxc_hyb=-gga_id(1)*1000-gga_id(2)
        end if
@@ -474,7 +459,7 @@ subroutine rhohxc(dtset,enxc,gsqcut,izero,kxc,mpi_enreg,nfft,ngfft, &
    if (ipositron==2) then
      nspden_apn=1;ngrad_apn=1;iwarnp=1
      if (electronpositron%ixcpositron==3.or.electronpositron%ixcpositron==31) ngrad_apn=2
-     if (ngrad_apn==2.and.dtset%xclevel<2) then
+     if (ngrad_apn==2.and.xcdata%xclevel<2) then
        message = 'GGA for the positron can only be performed with GGA pseudopotentials for the electron !'
        MSG_ERROR(message)
      end if
@@ -547,7 +532,7 @@ subroutine rhohxc(dtset,enxc,gsqcut,izero,kxc,mpi_enreg,nfft,ngfft, &
 
 !  ====================================================================
 !  Loop on unshifted or shifted grids
-   do ishift=0,dtset%intxc
+   do ishift=0,xcdata%intxc
 
 !    Set up density on unshifted or shifted grid (will be in rhonow(:,:,1)),
 !    as well as the gradient of the density, also on the unshifted
@@ -555,23 +540,23 @@ subroutine rhohxc(dtset,enxc,gsqcut,izero,kxc,mpi_enreg,nfft,ngfft, &
      if ((n3xccc==0).and.(.not.test_nhat).and.(nspden_eff==nspden)) then
        if (mgga==1) then
          call xcden(cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden_eff,&
-&         dtset%paral_kgb,qphon,rhor_,rhonow,lrhonow=lrhonow)
+&         paral_kgb,qphon,rhor_,rhonow,lrhonow=lrhonow)
        else
-         call xcden(cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden_eff,dtset%paral_kgb,qphon,rhor_,rhonow)
+         call xcden(cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden_eff,paral_kgb,qphon,rhor_,rhonow)
        end if
      else if ((ishift>0).and.(test_nhat)) then
        if (mgga==1) then
          call xcden(cplex,gprimd,0,mpi_enreg,nfft,ngfft,ngrad,nspden_eff,&
-&         dtset%paral_kgb,qphon,rhocorval,rhonow,lrhonow=lrhonow)
+&         paral_kgb,qphon,rhocorval,rhonow,lrhonow=lrhonow)
        else
-         call xcden(cplex,gprimd,0,mpi_enreg,nfft,ngfft,ngrad,nspden_eff,dtset%paral_kgb,qphon,rhocorval,rhonow)
+         call xcden(cplex,gprimd,0,mpi_enreg,nfft,ngfft,ngrad,nspden_eff,paral_kgb,qphon,rhocorval,rhonow)
        end if
      else
        if (mgga==1) then
          call xcden(cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden_eff,&
-&         dtset%paral_kgb,qphon,rhocorval,rhonow,lrhonow=lrhonow)
+&         paral_kgb,qphon,rhocorval,rhonow,lrhonow=lrhonow)
        else
-         call xcden(cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden_eff,dtset%paral_kgb,qphon,rhocorval,rhonow)
+         call xcden(cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden_eff,paral_kgb,qphon,rhocorval,rhonow)
        end if
      end if
 
@@ -591,7 +576,7 @@ subroutine rhohxc(dtset,enxc,gsqcut,izero,kxc,mpi_enreg,nfft,ngfft, &
            rhocorval(:,1)=rhocorval(:,1)+nhat(:,1)
            rhocorval(:,2)=rhocorval(:,2)+nhat_up(:)
          end if
-         call xcden(cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,1,nspden_eff,dtset%paral_kgb,qphon,rhocorval,rhonow)
+         call xcden(cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,1,nspden_eff,paral_kgb,qphon,rhocorval,rhonow)
        end if
        if (ngrad==2.and.nhatgrdim==1.and.nspden==nspden_eff) then
          do ii=1,3
@@ -606,7 +591,7 @@ subroutine rhohxc(dtset,enxc,gsqcut,izero,kxc,mpi_enreg,nfft,ngfft, &
      end if
 
 !    Deallocate temporary arrays
-     if (ishift==dtset%intxc) then
+     if (ishift==xcdata%intxc) then
        if (n3xccc>0.or.test_nhat.or.nspden_eff/=nspden)  then
          ABI_DEALLOCATE(rhocorval)
        end if
@@ -638,7 +623,7 @@ subroutine rhohxc(dtset,enxc,gsqcut,izero,kxc,mpi_enreg,nfft,ngfft, &
      end if
 
 !    Make the density positive everywhere (but do not care about gradients)
-     call mkdenpos(iwarn,nfft,nspden_updn,1,rhonow(:,1:nspden_updn,1),dtset%xc_denpos)
+     call mkdenpos(iwarn,nfft,nspden_updn,1,rhonow(:,1:nspden_updn,1),xcdata%xc_denpos)
 
 !    write(std_out,*) 'rhonow',rhonow
 
@@ -672,7 +657,7 @@ subroutine rhohxc(dtset,enxc,gsqcut,izero,kxc,mpi_enreg,nfft,ngfft, &
        ABI_ALLOCATE(vxcrho_b_updn,(npts,nspden_updn))
        vxcrho_b_updn(:,:)=zero
 !      Allocation of optional arguments
-       call size_dvxc(dtset%ixc,ndvxc,ngr2,nd2vxc,nspden_updn,nvxcgrho,order,add_tfw_)
+       call size_dvxc(ixc,ndvxc,ngr2,nd2vxc,nspden_updn,nvxcgrho,order,add_tfw_)
 
 !      Allocation of optional arguments
        ABI_ALLOCATE(dvxc_b,(npts,ndvxc))
@@ -724,17 +709,17 @@ subroutine rhohxc(dtset,enxc,gsqcut,izero,kxc,mpi_enreg,nfft,ngfft, &
 !      In case of a hybrid functional, if one needs to compute the fallback GGA Kxc, a separate call to drivexc_main
 !      is first needed to compute Kxc using such fallback GGA, 
 !      before calling again drivexc_main using the correct functional for Exc and Vxc
-       if(ixc_fallbackkxc_hyb/=dtset%ixc)then
-         if (dtset%ixc<0) then
+       if(ixc_fallbackkxc_hyb/=ixc)then
+         if (ixc<0) then
            call libxc_functionals_end()
-           call libxc_functionals_init(ixc_fallbackkxc_hyb,dtset%nspden)
+           call libxc_functionals_init(ixc_fallbackkxc_hyb,nspden)
          end if
          call drivexc_main(exc_b,ixc_fallbackkxc_hyb,mgga,ndvxc,nd2vxc,ngr2,npts,nspden_updn,nvxcgrho,order,&
-&         rho_b_updn,vxcrho_b_updn,dtset%xclevel, &
+&         rho_b_updn,vxcrho_b_updn,xcdata%xclevel, &
 &         dvxc=dvxc_b,d2vxc=d2vxc_b,grho2=grho2_b_updn,vxcgrho=vxcgrho_b, &
 &         lrho=lrho_b_updn,tau=tau_b_updn,vxclrho=vxclrho_b_updn,vxctau=vxctau_b_updn, &
-&         fxcT=fxc_b,el_temp=dtset%tsmear, &
-&         xc_tb09_c=dtset%xc_tb09_c)
+&         fxcT=fxc_b,el_temp=xcdata%tphysel, &
+&         xc_tb09_c=xcdata%xc_tb09_c)
 !        Transfer the xc kernel
          if (nkxc_eff==1.and.ndvxc==15) then
            kxc(ifft:ifft+npts-1,1)=half*(dvxc_b(1:npts,1)+dvxc_b(1:npts,9)+dvxc_b(1:npts,10))
@@ -743,24 +728,24 @@ subroutine rhohxc(dtset,enxc,gsqcut,izero,kxc,mpi_enreg,nfft,ngfft, &
            kxc(ifft:ifft+npts-1,2)=dvxc_b(1:npts,10)
            kxc(ifft:ifft+npts-1,3)=dvxc_b(1:npts,2)+dvxc_b(1:npts,11)
          end if
-         if (dtset%ixc<0) then
+         if (ixc<0) then
            call libxc_functionals_end()
-           call libxc_functionals_init(dtset%ixc,dtset%nspden)
+           call libxc_functionals_init(ixc,nspden)
          end if
        end if
 
 !      Call to main XC driver
-       call drivexc_main(exc_b,dtset%ixc,mgga,ndvxc,nd2vxc,ngr2,npts,nspden_updn,nvxcgrho,order,&
-&       rho_b_updn,vxcrho_b_updn,dtset%xclevel, &
+       call drivexc_main(exc_b,ixc,mgga,ndvxc,nd2vxc,ngr2,npts,nspden_updn,nvxcgrho,order,&
+&       rho_b_updn,vxcrho_b_updn,xcdata%xclevel, &
 &       dvxc=dvxc_b,d2vxc=d2vxc_b,grho2=grho2_b_updn,vxcgrho=vxcgrho_b, &
 &       lrho=lrho_b_updn,tau=tau_b_updn,vxclrho=vxclrho_b_updn,vxctau=vxctau_b_updn, &
-&       fxcT=fxc_b,el_temp=dtset%tsmear, &
-&       xc_tb09_c=dtset%xc_tb09_c)
+&       fxcT=fxc_b,el_temp=xcdata%tphysel, &
+&       xc_tb09_c=xcdata%xc_tb09_c)
 
 !      Gradient Weiszacker correction to a Thomas-Fermi functional
        if (add_tfw_) then
          vxcgrho_b(:,:)=zero
-         call xctfw(dtset%tsmear,exc_b,fxc_b,usefxc,rho_b_updn,vxcrho_b_updn,npts,nspden_updn, &
+         call xctfw(xcdata%tphysel,exc_b,fxc_b,usefxc,rho_b_updn,vxcrho_b_updn,npts,nspden_updn, &
 &         vxcgrho_b,nvxcgrho,grho2_b_updn,ngr2)
        end if
 
@@ -784,7 +769,7 @@ subroutine rhohxc(dtset,enxc,gsqcut,izero,kxc,mpi_enreg,nfft,ngfft, &
 
 !        For GGAs, additional terms appear
 !        (the LB functional does not lead to additional terms)
-         if(ngrad==2 .and. dtset%ixc/=13)then
+         if(ngrad==2 .and. ixc/=13)then
 
 !          Treat explicitely spin up, spin down and total spin for spin-polarized
 !          Will exit when ispden=1 is finished if non-spin-polarized
@@ -834,7 +819,7 @@ subroutine rhohxc(dtset,enxc,gsqcut,izero,kxc,mpi_enreg,nfft,ngfft, &
 
 !            In case of ixc 31 (mGGA functional fake 1),
 !            skip the stress tensor to follow a LDA scheme (see doc/theory/MGGA/report_MGGA.pdf)
-             if(dtset%ixc==31) cycle
+             if(ixc==31) cycle
 
 !            Compute the contribution to the stress tensor
              s1=-grho(1)*grho(1)*coeff
@@ -883,7 +868,7 @@ subroutine rhohxc(dtset,enxc,gsqcut,izero,kxc,mpi_enreg,nfft,ngfft, &
          rhonow_apn(1:npts,1,1)=electronpositron%rhor_ep(ifft:ifft+npts-1,1)
          if (usexcnhat==0) rhonow_apn(1:npts,1,1)=rhonow_apn(1:npts,1,1)-electronpositron%nhat_ep(ifft:ifft+npts-1,1)
          if (.not.electronpositron%posdensity0_limit) then
-           call mkdenpos(iwarnp,npts,nspden_apn,1,rhonow_apn(:,1,1),dtset%xc_denpos)
+           call mkdenpos(iwarnp,npts,nspden_apn,1,rhonow_apn(:,1,1),xcdata%xc_denpos)
          end if
          if (ngrad_apn==2.and.ngr2==1) grho2_apn(:)=four*grho2_b_updn(:,1)
          if (ngrad_apn==2.and.ngr2==3) grho2_apn(:)=grho2_b_updn(:,3)
@@ -947,7 +932,7 @@ subroutine rhohxc(dtset,enxc,gsqcut,izero,kxc,mpi_enreg,nfft,ngfft, &
        end if
 
 !      Transfer the xc kernel (if this must be done, and has not yet been done)
-       if (nkxc_eff>0.and.ndvxc>0 .and. ixc_fallbackkxc_hyb==dtset%ixc) then
+       if (nkxc_eff>0.and.ndvxc>0 .and. ixc_fallbackkxc_hyb==ixc) then
          if (nkxc_eff==1.and.ndvxc==15) then
            kxc(ifft:ifft+npts-1,1)=half*(dvxc_b(1:npts,1)+dvxc_b(1:npts,9)+dvxc_b(1:npts,10))
          else if (nkxc_eff==3.and.ndvxc==15) then
@@ -1038,7 +1023,7 @@ subroutine rhohxc(dtset,enxc,gsqcut,izero,kxc,mpi_enreg,nfft,ngfft, &
      else
        rhonow_ptr => rhonow
      end if
-     if(ngrad==2 .and. dtset%ixc/=13)then
+     if(ngrad==2 .and. ixc/=13)then
        call xcmult(depsxc,nfft,ngrad,nspden_eff,nspgrad,rhonow_ptr)
      end if
 
@@ -1046,10 +1031,10 @@ subroutine rhohxc(dtset,enxc,gsqcut,izero,kxc,mpi_enreg,nfft,ngfft, &
      if (nspden/=4) then
        if(with_vxctau)then
          call xcpot(cplex,depsxc,gprimd,ishift,mgga,mpi_enreg,nfft,ngfft,ngrad,nspden_eff,nspgrad,&
-&         dtset%paral_kgb,qphon,rhonow_ptr,vxc,vxctau=vxctau)
+&         paral_kgb,qphon,rhonow_ptr,vxc,vxctau=vxctau)
        else
          call xcpot(cplex,depsxc,gprimd,ishift,mgga,mpi_enreg,nfft,ngfft,ngrad,nspden_eff,nspgrad,&
-&         dtset%paral_kgb,qphon,rhonow_ptr,vxc)
+&         paral_kgb,qphon,rhonow_ptr,vxc)
        end if
 
      else
@@ -1058,7 +1043,7 @@ subroutine rhohxc(dtset,enxc,gsqcut,izero,kxc,mpi_enreg,nfft,ngfft, &
        ABI_ALLOCATE(vxcrho_b_updn,(nfft,4))
        vxcrho_b_updn=zero
        call xcpot(cplex,depsxc,gprimd,ishift,mgga,mpi_enreg,nfft,ngfft,ngrad,nspden_eff,nspgrad,&
-&       dtset%paral_kgb,qphon,rhonow_ptr,vxcrho_b_updn)
+&       paral_kgb,qphon,rhonow_ptr,vxcrho_b_updn)
        do ifft=1,nfft
          dvdn=half*(vxcrho_b_updn(ifft,1)+vxcrho_b_updn(ifft,2))
          if(m_norm(ifft)>m_norm_min) then
@@ -1090,7 +1075,7 @@ subroutine rhohxc(dtset,enxc,gsqcut,izero,kxc,mpi_enreg,nfft,ngfft, &
        ABI_ALLOCATE(vxc_apn,(nfft,nspden_apn))
        vxc_apn=zero
        call xcpot(cplex,depsxc_apn,gprimd,ishift,mgga,mpi_enreg,nfft,ngfft,ngrad_apn,&
-&       nspden_apn,ngrad_apn,dtset%paral_kgb,qphon,rhonow_apn,vxc_apn)
+&       nspden_apn,ngrad_apn,paral_kgb,qphon,rhonow_apn,vxc_apn)
        vxc(:,1)=vxc(:,1)+vxc_apn(:,1)
        if (nspden_updn==2) vxc(:,2)=vxc(:,2)+vxc_apn(:,1)
        s1=zero
@@ -1108,7 +1093,7 @@ subroutine rhohxc(dtset,enxc,gsqcut,izero,kxc,mpi_enreg,nfft,ngfft, &
 
 !  Calculate van der Waals correction when requested
 #if defined DEV_YP_VDWXC
-   if ( (dtset%vdw_xc > 0) .and. (dtset%vdw_xc < 10) .and. (xc_vdw_status()) ) then
+   if ( (xcdata%vdw_xc > 0) .and. (xcdata%vdw_xc < 10) .and. (xc_vdw_status()) ) then
      call xc_vdw_aggregate(ucvol,gprimd,nfft,nspden_updn,ngrad*ngrad, &
 &     ngfft(1),ngfft(2),ngfft(3),rhonow, &
 &     deltae_vdw,exc_vdw,decdrho_vdw,decdgrho_vdw,strsxc_vdw)
@@ -1116,13 +1101,9 @@ subroutine rhohxc(dtset,enxc,gsqcut,izero,kxc,mpi_enreg,nfft,ngfft, &
 #endif
 
 !  Normalize enxc, strsxc and vxc
-   divshft=one/dble(dtset%intxc+1)
+   divshft=one/dble(xcdata%intxc+1)
    strsxc(:)=strsxc(:)/dble(nfftot)*divshft
-   if (dtset%usewvl == 0) then
-     enxc=epsxc*ucvol/dble(nfftot)*divshft
-   else
-     enxc = epsxc * (dtset%wvl_hgrid / two ) ** 3 * divshft
-   end if
+   enxc=epsxc*ucvol/dble(nfftot)*divshft
    vxc=vxc*divshft
    if (with_vxctau) vxctau=vxctau*divshft
 
@@ -1161,34 +1142,41 @@ subroutine rhohxc(dtset,enxc,gsqcut,izero,kxc,mpi_enreg,nfft,ngfft, &
  end if
 
 !Treat separately the Fermi-Amaldi correction.
- if (dtset%ixc==20 .or. dtset%ixc==21 .or. dtset%ixc==22) then
+ if (ixc==20 .or. ixc==21 .or. ixc==22) then
+   if(present(vhartr))then
 
-!  Fermi-Amaldi correction : minus Hartree divided by the
-!  number of electrons per unit cell. This is not size consistent, but
-!  interesting for isolated systems with a few electrons.
-   nelect=ucvol*rhog(1,1)
-   factor=-one/nelect
-   vxc(:,1)=factor*vhartr(:)
-   if(nspden>=2) vxc(:,2)=factor*vhartr(:)
+!    Fermi-Amaldi correction : minus Hartree divided by the
+!    number of electrons per unit cell. This is not size consistent, but
+!    interesting for isolated systems with a few electrons.
+!    nelect=ucvol*rhog(1,1)
+     factor=-one/xcdata%nelect
+     vxc(:,1)=factor*vhartr(:)
+     if(nspden>=2) vxc(:,2)=factor*vhartr(:)
 
-!  Compute corresponding xc energy and stress as well as vxcavg
-   call dotprod_vn(1,rhor,enxc,doti,nfft,nfftot,1,1,vxc,ucvol,mpi_comm_sphgrid=comm_fft)
-   enxc=half*enxc
-   strsxc(1:3)=-enxc/ucvol
+!    Compute corresponding xc energy and stress as well as vxcavg
+     call dotprod_vn(1,rhor,enxc,doti,nfft,nfftot,1,1,vxc,ucvol,mpi_comm_sphgrid=comm_fft)
+     enxc=half*enxc
+     strsxc(1:3)=-enxc/ucvol
 
-!  Compute average of vxc (one component only).
-   call mean_fftr(vxc,vxcmean,nfft,nfftot,1,mpi_comm_sphgrid=comm_fft)
-   vxcavg = vxcmean(1)
-!  For ixc=20, the local exchange-correlation kernel is zero, but the Hartree
-!  kernel will be modified in tddft. No other use of kxc should be made with ixc==20
-   if(nkxc/=0 .and. dtset%ixc==20) kxc(:,:)=zero
-!  For ixc=21 or 22, the LDA (ixc=1) kernel has been computed previously.
+!    Compute average of vxc (one component only).
+     call mean_fftr(vxc,vxcmean,nfft,nfftot,1,mpi_comm_sphgrid=comm_fft)
+     vxcavg = vxcmean(1)
+!    For ixc=20, the local exchange-correlation kernel is zero, but the Hartree
+!    kernel will be modified in tddft. No other use of kxc should be made with ixc==20
+     if(nkxc/=0 .and. ixc==20) kxc(:,:)=zero
+!    For ixc=21 or 22, the LDA (ixc=1) kernel has been computed previously.
+ 
+   else
+
+     MSG_BUG('When ixc=20,21 or 22, vhartr needs to be present in the call to rhotoxc !')
+
+   end if
 
  end if
 
 !Add van der Waals terms
 #if defined DEV_YP_VDWXC
- if ( (dtset%vdw_xc > 0) .and. (dtset%vdw_xc < 10) .and. (xc_vdw_status()) ) then
+ if ( (xcdata%vdw_xc > 0) .and. (xcdata%vdw_xc < 10) .and. (xc_vdw_status()) ) then
    enxc = enxc + exc_vdw
    do ispden=1,nspden
      vxc(:,ispden) = vxc(:,ispden) + decdrho_vdw(ispden)
@@ -1207,5 +1195,5 @@ subroutine rhohxc(dtset,enxc,gsqcut,izero,kxc,mpi_enreg,nfft,ngfft, &
 
  DBG_EXIT("COLL")
 
-end subroutine rhohxc
+end subroutine rhotoxc
 !!***

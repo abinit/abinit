@@ -33,7 +33,6 @@ module m_kptrank
 
  private
 
- integer :: stdout = 6
  double precision :: zero = 0.0d0, half = 0.5d0, one = 1.0d0, tol8 = 1.d-8,  tol10 = 1.d-10, tol12 = 1.d-12
 !!***
 

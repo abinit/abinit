@@ -206,7 +206,7 @@ subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
 !Local variables ------------------------------
 !scalars
  integer,parameter :: im=2,re=1
- integer :: i1,i2,i3,ia,ia1,ia2,id1,id2,id3,ierr,ig1,ig1_,ig2,ig2_,ig3,ig3_,ii,is,is1,is2
+ integer :: i1,i2,i3,ia,ia1,ia2,id1,id2,id3,ierr,ig1,ig1_,ig2,ig2_,ig3,ig3_,ii,is1,is2
  integer :: itypat,jj,js,ka,kb,kd,kg,me_fft,my_comm_fft,ndir,n1,n2,n3,nproc_fft,paral_kgb_fft
  integer :: shift1,shift2,shift3
  logical :: have_g0

@@ -116,7 +116,6 @@ subroutine nonlop_test(cg,eigen,istwfk,kg,kpt,mband,mcg,mgfft,mkmem,mpi_enreg,mp
  integer :: nkpg,nnlout,npw_k,paw_opt,signs,spaceComm
  logical :: ex
  character(len=100) :: strg
- character(len=500) :: msg
  real(dp) :: argr,argi
  type(gs_hamiltonian_type) :: gs_hamk
 !arrays

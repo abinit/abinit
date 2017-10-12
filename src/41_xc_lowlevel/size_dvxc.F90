@@ -12,7 +12,7 @@
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
-!! This routine has been written from rhohxc (DCA, XG, GMR, MF, GZ)
+!! This routine has been written from rhotoxc (DCA, XG, GMR, MF, GZ)
 !!
 !! INPUTS
 !!  [add_tfw]= optional flag controling the addition of Weiszacker gradient correction to Thomas-Fermi XC energy
@@ -30,7 +30,7 @@
 !!  nvxcdgr size of the array dvxcdgr(npts,nvxcdgr) for allocation
 !!
 !! PARENTS
-!!      m_pawxc,rhohxc
+!!      m_pawxc,rhotoxc
 !!
 !! CHILDREN
 !!

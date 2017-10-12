@@ -90,7 +90,7 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsph
  integer,parameter :: ishift=5
  integer :: i1,i2,i3,iatom,ierr,ifft_local,ix,iy,iz,izloc,n1,n1a,n1b,n2,ifft
  integer :: n2a,n2b,n3,n3a,n3b,nd3,nfftot
- integer :: ii,is,npts(natom) 
+ integer :: ii
  real(dp),parameter :: delta=0.99_dp
  real(dp) :: difx,dify,difz,r2,r2atsph,rr1,rr2,rr3,rx,ry,rz
  real(dp) :: fsm, ratsm, ratsm2 

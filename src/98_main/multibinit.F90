@@ -126,7 +126,7 @@ program multibinit
  call timein(tcpui,twalli)
 
  if (iam_master) then
-   codename='MULTIBINIT'//repeat(' ',17)
+   codename='MULTIBINIT'//repeat(' ',14)
    call herald(codename,abinit_version,std_out)
  end if
 
@@ -466,7 +466,7 @@ program multibinit
 
  if (iam_master) close(ab_out)
 
-  100 call xmpi_end()
+ 100 call xmpi_end()
  
-  end program multibinit
+ end program multibinit
 !!***

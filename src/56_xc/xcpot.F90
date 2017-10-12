@@ -71,7 +71,7 @@
 !!   the gradient of vxctau (gvxctau) which will be computed here in vxctau(:,:,2:4).
 !!
 !! PARENTS
-!!      dfpt_mkvxcgga,dfpt_mkvxcstrgga,rhohxc
+!!      dfpt_mkvxcgga,dfpt_mkvxcstrgga,rhotoxc
 !!
 !! CHILDREN
 !!      fourdp,phase,ptabs_fourdp,timab

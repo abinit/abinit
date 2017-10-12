@@ -108,7 +108,7 @@ subroutine herald(code_name,code_version,iout)
 & ' Corning Inc. and other collaborators, see ~abinit/doc/developers/contributors.txt .',&
 & ' Please read ~abinit/doc/users/acknowledgments.html for suggested',&
 & ' acknowledgments of the ABINIT effort.',&
-& ' For more information, see http://www.abinit.org .'
+& ' For more information, see https://www.abinit.org .'
 
 !Get year, month and day
  call date_and_time(strdat,strtime,strzone,values)
