@@ -1193,6 +1193,38 @@
     varset: paral
     vartype: integer
 - !variable
+    abivarname: auxc_ixc
+    characteristics: null
+    commentdefault: null
+    commentdims: null
+    defaultval: 1
+    dimensions: scalar
+    excludes: null
+    mnemonics: AUXiliary XC functional, IXC number
+    requires: null
+    text: |-
+        Specification of an auxiliary exchange-correlation functional,  thanks to its [[ixc]] value, to possibly replace the heavy evaluation of an hybrid functional at specific occasions, e.g. when the Fock operator is frozen during the self-consistent cycle, thanks to [[fockoptmix]]==11, or when evaluating the correction to forces due to the density residual. This auxiliary exchange-correlation functional might be rescaled, thanks to [[fockaux_scal]] when [[fockoptmix]]==11.
+    topics: Hybrids_useful
+    varset: gstate
+    vartype: integer
+- !variable
+    abivarname: auxc_scal
+    characteristics: null
+    commentdefault: null
+    commentdims: null
+    defaultval: 1.0
+    dimensions: scalar
+    excludes: null
+    mnemonics: FOCK AUXiliary xc functional - SCALing factor
+    requires: null
+    text: |-
+        Possible scaling factor for the auxiliary exchange-correlation functional defined by [[auxc_ixc]] that has the goal to replace the Fock operator or hybrid functional when [[fogkoptmix]]==11.
+        <p>
+        The default value 1.0 corresponds to the unmodified xc functional. When the auxiliary functional is used to replace the hybrid functional in SCF loops, a value of 1.5 has been observed to speed up somehow the convergence.
+    topics: Hybrids_useful
+    varset: gstate
+    vartype: real
+- !variable
     abivarname: awtr
     characteristics: null
     commentdefault: null
@@ -7201,38 +7233,6 @@
     topics: GW_expert, Susceptibility_expert, SelfEnergy_expert
     varset: gw
     vartype: integer
-- !variable
-    abivarname: fockaux_ixc
-    characteristics: null
-    commentdefault: null
-    commentdims: null
-    defaultval: null
-    dimensions: scalar
-    excludes: null
-    mnemonics: FOCK AUXiliary xc functional, IXC number
-    requires: null
-    text: |-
-        Specification of an auxiliary exchange-correlation functional,  thanks to its [[ixc]] value, to possibly replace the heavy evaluation of an hybrid functional at specific occasions, e.g. when the Fock operator is frozen during the self-consistent cycle, thanks to [[fockoptmix]]==11, or when evaluating the correction to forces due to the density residual. This auxiliary exchange-correlation functional might be rescaled, thanks to [[fockaux_scal]].
-    topics: Hybrids_useful
-    varset: gstate
-    vartype: integer
-- !variable
-    abivarname: fockaux_scal
-    characteristics: null
-    commentdefault: null
-    commentdims: null
-    defaultval: 1.0
-    dimensions: scalar
-    excludes: null
-    mnemonics: FOCK AUXiliary xc functional - SCALing factor
-    requires: null
-    text: |-
-        Possible scaling factor for the auxiliary exchange-correlation functional defined by [[fockaux_ixc]] that has the goal to replace the Fock operator or hybrid functional in selected occasions.
-        <p>
-        The default value 1.0 corresponds to the unmodified xc functional. When the auxiliary functional is used to replace the hybrid functional in SCF loops, a value of 1.5 has been observed to speed up somehow the convergence.
-    topics: Hybrids_useful
-    varset: gstate
-    vartype: real
 - !variable
     abivarname: fockoptmix
     characteristics: null

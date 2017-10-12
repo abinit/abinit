@@ -229,7 +229,7 @@ subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
      call hartre(1,gsqcut,usepaw,mpi_enreg,nfft,ngfft,dtset%paral_kgb,rhog,rprimd,vhartr)
      !Use the proper exchange_correlation energy : either the origin one, or the auxiliary one
      ixc_current=dtset%ixc
-     if(mod(dtset%fockoptmix,100)==11)ixc_current=dtset%fockaux_ixc
+     if(mod(dtset%fockoptmix,100)==11)ixc_current=dtset%auxc_ixc
      call xcdata_init(dtset%intxc,ixc_current,&
 &     dtset%nelect,dtset%tphysel,dtset%usekden,dtset%vdw_xc,dtset%xc_tb09_c,dtset%xc_denpos,xcdata)
 
@@ -250,8 +250,8 @@ subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
 &          rhor,rprimd,strsxc,usexcnhat,vxc,vxcavg,xccc3d,xcdata,&
 &          taug=taug,taur=taur,vhartr=vhartr,vxctau=vxctau,add_tfw=add_tfw_)
          if(mod(dtset%fockoptmix,100)==11)then
-           energies%e_xc=energies%e_xc*dtset%fockaux_scal
-           vxc(:,:)=vxc(:,:)*dtset%fockaux_scal
+           energies%e_xc=energies%e_xc*dtset%auxc_scal
+           vxc(:,:)=vxc(:,:)*dtset%auxc_scal
          endif
        else
          call xchybrid_ncpp_cc(dtset,energies%e_xc,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,&

@@ -243,6 +243,12 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
  intarr(1,:)=dtsets(:)%autoparal
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'autoparal','INT',0)
 
+ intarr(1,:)=dtsets(:)%auxc_ixc
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'auxc_ixc','INT',0)
+
+ dprarr(1,:)=dtsets(:)%auxc_scal
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'auxc_scal','DPR',0)
+
  intarr(1,:)=dtsets(:)%awtr
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'awtr','INT',0)
 
@@ -867,12 +873,6 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
 
  intarr(1,:)=dtsets(:)%fftgw
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'fftgw','INT',0)
-
- intarr(1,:)=dtsets(:)%fockaux_ixc
- call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'fockaux_ixc','INT',0)
-
- dprarr(1,:)=dtsets(:)%fockaux_scal
- call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'fockaux_scal','DPR',0)
 
  intarr(1,:)=dtsets(:)%fockoptmix
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'fockoptmix','INT',0)

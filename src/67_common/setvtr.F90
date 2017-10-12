@@ -490,7 +490,7 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
        if(mod(dtset%fockoptmix,100)==11)then
          xcdatahyb=xcdata
 !        Setup the auxiliary xc functional information 
-         call xcdata_init(dtset%intxc,dtset%fockaux_ixc,&
+         call xcdata_init(dtset%intxc,dtset%auxc_ixc,&
 &          dtset%nelect,dtset%tphysel,dtset%usekden,dtset%vdw_xc,dtset%xc_tb09_c,dtset%xc_denpos,xcdata)
        endif
 !      Use the periodic solver to compute Hxc
@@ -530,9 +530,9 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
            endif
 
 !          Combine hybrid and auxiliary quantities
-           energies%e_xc=energies%e_xc*dtset%fockaux_scal
+           energies%e_xc=energies%e_xc*dtset%auxc_scal
            energies%e_hybcomp_E0=energies%e_hybcomp_E0-energies%e_xc
-           vxc(:,:)=vxc(:,:)*dtset%fockaux_scal
+           vxc(:,:)=vxc(:,:)*dtset%auxc_scal
            vxc_hybcomp(:,:)=vxc_hybcomp(:,:)-vxc(:,:)
 
          endif

@@ -145,6 +145,8 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%adpimd_gamma=one
    dtsets(idtset)%accuracy=0
    dtsets(idtset)%atvshift(:,:,:)=zero
+   dtsets(idtset)%auxc_ixc=0
+   dtsets(idtset)%auxc_scal=one
    dtsets(idtset)%awtr=1
 !  B
    dtsets(idtset)%bdberry(1:4)=0
@@ -269,8 +271,6 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
 !  F
    dtsets(idtset)%fermie_nest=zero
    dtsets(idtset)%fftgw=21
-   dtsets(idtset)%fockaux_ixc=0
-   dtsets(idtset)%fockaux_scal=one
    dtsets(idtset)%focktoldfe=zero
    dtsets(idtset)%fockoptmix=0
    dtsets(idtset)%freqim_alpha=five

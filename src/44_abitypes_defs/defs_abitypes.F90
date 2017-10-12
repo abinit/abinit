@@ -169,6 +169,7 @@ type dataset_type
  integer :: accuracy
  integer :: adpimd
  integer :: autoparal
+ integer :: auxc_ixc
  integer :: awtr
  integer :: bandpp
  integer :: bdeigrf
@@ -234,7 +235,6 @@ type dataset_type
  integer :: exchn2n3d
  integer :: extrapwf
  integer :: fftgw
- integer :: fockaux_ixc
  integer :: fockoptmix
  integer :: frzfermi
  integer :: ga_algor
@@ -648,6 +648,7 @@ type dataset_type
 
 !Real
  real(dp) :: adpimd_gamma
+ real(dp) :: auxc_scal
  real(dp) :: bmass
  real(dp) :: boxcutmin
  real(dp) :: bxctmindg
@@ -684,7 +685,6 @@ type dataset_type
  real(dp) :: exchmix
  real(dp) :: fband
  real(dp) :: fermie_nest
- real(dp) :: fockaux_scal
  real(dp) :: focktoldfe
  real(dp) :: freqim_alpha
  real(dp) :: freqremin

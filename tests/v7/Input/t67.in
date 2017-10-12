@@ -2,8 +2,8 @@
 #with an auxiliary XC functional for the SCF cycle, and some over relaxation.
 # Norm-conserving
 
- fockaux_ixc  11   # Auxiliary XC functional
- fockaux_scal 1.50 #
+ auxc_ixc  11   # Auxiliary XC functional
+ auxc_scal 1.50 # Auxiliary XC functional scaling
  nstep 57          # Maximal number of SCF cycles
  fockoptmix 11
  nnsclohf2 2       # This is a low number, but the test dos not seem to depend on this value.
