@@ -197,8 +197,8 @@ subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
 !Check that usekden is not 0 if want to use vxctau
  with_vxctau = (present(vxctau).and.present(taur).and.(dtset%usekden/=0))
 
-!Check if we're in hybrid norm conserving pseudopotential
- is_hybrid_ncpp=(usepaw==0 .and. &
+!Check if we're in hybrid norm conserving pseudopotential with a core correction
+ is_hybrid_ncpp=(usepaw==0 .and. n3xccc/=0 .and. &
 & (dtset%ixc==41.or.dtset%ixc==42.or.libxc_functionals_is_hybrid()))
 
 !If usewvl: wvlbigdft indicates that the BigDFT workflow will be followed
@@ -237,16 +237,25 @@ subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
      nk3xc=1
 !write(80,*) "rhotov"
 !xccc3d=zero
+!DEBUG
+     write(std_out,*)' rhotov : is_hybrid_ncpp=',is_hybrid_ncpp
+     write(std_out,*)' rhotov : n3xccc=',n3xccc
+!ENDDEBUG
+
      call timab(941,1,tsec)
      if (ipositron==0) then
-       call rhotoxc(energies%e_xc,kxc,mpi_enreg,nfft,ngfft,&
-&       nhat,usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,dtset%nspden,n3xccc,optxc,dtset%paral_kgb,&
-&       rhor,rprimd,strsxc,usexcnhat,vxc,vxcavg,xccc3d,xcdata,&
-&       taug=taug,taur=taur,vhartr=vhartr,vxctau=vxctau,add_tfw=add_tfw_)
-       if(mod(dtset%fockoptmix,100)==11)then
-!        For hybrid compensation, to be cleaned
-         energies%e_xc=energies%e_xc*dtset%fockaux_scal
-         vxc(:,:)=vxc(:,:)*dtset%fockaux_scal
+       if(.not.is_hybrid_ncpp .or. mod(dtset%fockoptmix,100)==11)then
+         call rhotoxc(energies%e_xc,kxc,mpi_enreg,nfft,ngfft,&
+&          nhat,usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,dtset%nspden,n3xccc,optxc,dtset%paral_kgb,&
+&          rhor,rprimd,strsxc,usexcnhat,vxc,vxcavg,xccc3d,xcdata,&
+&          taug=taug,taur=taur,vhartr=vhartr,vxctau=vxctau,add_tfw=add_tfw_)
+         if(mod(dtset%fockoptmix,100)==11)then
+           energies%e_xc=energies%e_xc*dtset%fockaux_scal
+           vxc(:,:)=vxc(:,:)*dtset%fockaux_scal
+         endif
+       else
+         call xchybrid_ncpp_cc(dtset,energies%e_xc,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,&
+&          strsxc,vxcavg,xccc3d,vxc=vxc)
        endif
      else
        call rhotoxc(energies%e_xc,kxc,mpi_enreg,nfft,ngfft,&
@@ -254,11 +263,6 @@ subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
 &       rhor,rprimd,strsxc,usexcnhat,vxc,vxcavg,xccc3d,xcdata,&
 &       taug=taug,taur=taur,vhartr=vhartr,vxctau=vxctau,add_tfw=add_tfw_,&
 &       electronpositron=electronpositron)
-     end if
-!write(80,*) vxc
-     if (is_hybrid_ncpp) then
-       call xchybrid_ncpp_cc(dtset,energies%e_xc,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,&
-&       strsxc,vxcavg,xccc3d,vxc=vxc)
      end if
      call timab(941,2,tsec)
 
