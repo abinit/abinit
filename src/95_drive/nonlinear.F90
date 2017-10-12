@@ -588,9 +588,9 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
  end do
 
  !if (dtset%paral_rf == -1) then
- write(std_out,'(a)')"--- !IrredPerts"
- write(std_out,'(a)')'# List of irreducible perturbations for nonlinear'
- write(std_out,'(a)')'irred_perts:'
+! write(std_out,'(a)')"--- !IrredPerts"
+! write(std_out,'(a)')'# List of irreducible perturbations for nonlinear'
+! write(std_out,'(a)')'irred_perts:'
 
  n1 = 0
  do i1pert = 1, natom + 2
@@ -601,12 +601,12 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
            do i3dir = 1,3
              if (rfpert(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)==1) then
                n1 = n1 + 1
-               write(std_out,'(a,i0)')"   - i1pert: ",i1pert
-               write(std_out,'(a,i0)')"     i1dir: ",i1dir
-               write(std_out,'(a,i0)')"     i2pert: ",i2pert
-               write(std_out,'(a,i0)')"     i2dir: ",i2dir
-               write(std_out,'(a,i0)')"     i3pert: ",i3pert
-               write(std_out,'(a,i0)')"     i3dir: ",i3dir
+!               write(std_out,'(a,i0)')"   - i1pert: ",i1pert
+!               write(std_out,'(a,i0)')"     i1dir: ",i1dir
+!               write(std_out,'(a,i0)')"     i2pert: ",i2pert
+!               write(std_out,'(a,i0)')"     i2dir: ",i2dir
+!               write(std_out,'(a,i0)')"     i3pert: ",i3pert
+!               write(std_out,'(a,i0)')"     i3dir: ",i3dir
              end if
            end do
          end do
@@ -614,7 +614,7 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
      end do
    end do
  end do
- write(std_out,'(a)')"..."
+! write(std_out,'(a)')"..."
    !MSG_ERROR_NODUMP("aborting now")
  !end if
 
@@ -984,7 +984,7 @@ end if
    ABI_DEALLOCATE(dum_kptns)
    ABI_DEALLOCATE(dum_wtk)
 
-   write(std_out,*) 'nonlinear : nkpt, nkpt3 = ',dtset%nkpt,nkpt3
+!   write(std_out,*) 'nonlinear : nkpt, nkpt3 = ',dtset%nkpt,nkpt3
 !call flush(6)
 !jmb : malloc() problem with gcc461_openmpi under max2 : change order of allocations works ?!?
 !allocate(kneigh(30,nkpt),kg_neigh(30,nkpt,3),mvwtk(30,nkpt))

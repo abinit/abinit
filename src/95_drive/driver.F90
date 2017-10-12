@@ -826,13 +826,13 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
    if (mpi_enregs(idtset)%me==0) then
      call timein(cpu,wall)
      tim_dataset(1) = cpu - tim_dataset(1) ; tim_dataset(2) = wall - tim_dataset(2)
-     write(message, '(a,a)' ) ch10,' ------------------------------------------------------------------------------------------'
+     write(message, '(a,a)' ) ch10,'--------------------------------------------------------------------------------'
      call wrtout(std_out,message,'COLL')
      call wrtout(ab_out,message,'COLL')
-     write(message, '(a,f13.1,a,f13.1)' )' Overall time for this dataset (sec) : cpu=',tim_dataset(1),'  wall=',tim_dataset(2)
+     write(message, '(a,f13.1,a,f13.1)' )'  Overall time for this dataset (sec) : cpu=',tim_dataset(1),'  wall=',tim_dataset(2)
      call wrtout(std_out,message,'COLL')
      call wrtout(ab_out,message,'COLL')
-     write(message, '(a)' ) ' ------------------------------------------------------------------------------------------'
+     write(message, '(a)' ) '--------------------------------------------------------------------------------'
      call wrtout(std_out,message,'COLL')
      call wrtout(ab_out,message,'COLL')
    end if
