@@ -2963,8 +2963,8 @@
     defaultval: 0.0
     dimensions:
     - 3
-    - "[[nzchempot]]"
-    - "[[ntypat]]"
+    - '[[nzchempot]]'
+    - '[[ntypat]]'
     excludes: null
     mnemonics: spatially varying CHEMical POTential
     requires: '[[nzchempot]]/=0'
@@ -2983,6 +2983,22 @@
     topics: Artificial_expert
     varset: geo
     vartype: real
+- !variable
+    abivarname: chkdilatmx
+    characteristics: null
+    commentdefault: null
+    commentdims: null
+    defaultval: 1
+    dimensions: scalar
+    excludes: null
+    mnemonics: CHecK DILATMX
+    requires: null
+    text: |-
+        If 0, will not stop the execution if the [[dilatmx]] threshold is exceeded, but simply issue a warning. There will be no rescaling.
+        If 1, after tentative rescalings as described in [[dilatmx]], will stop the execution.
+    topics: GeoOpt_expert
+    varset: rlx
+    vartype: integer
 - !variable
     abivarname: chkexit
     characteristics: null
@@ -4326,13 +4342,14 @@
     requires: null
     text: |-
         <p>
-         Gives the maximal permitted scaling of
+        Gives the maximal permitted scaling of
         the lattice parameters when the cell shape and
-        dimension is varied (see variable [[optcell]]).
-        It is used to define the sphere of plane waves
+        dimension is varied (see variable [[optcell]]). Accordingly defines the plane wave basis set for this purpose. The [[dilatmx]] threshold might be exceeded if [[chkdilatmx]]=0, otherwise ABINIT exits after three tentative rescalings, as described below.
+        <p>
+        [[dilatmx]] is used to define the sphere of plane waves
         and FFT box coherent with the possible modifications
         of the cell ([[ionmov]]==2 and
-        [[optcell] /=0).
+        [[optcell]] /=0).
         For these definitions, it is equivalent
         to changing [[ecut]] by multiplying it by [[dilatmx]]
          <sup>
@@ -4364,6 +4381,8 @@
         [[optcell]] =0, but
         a value larger than 1.0 will be a waste.
         </p>
+        <p>
+        When the [[dilatmx]] threshold is exceeded, ABINIT will rescale uniformly the tentative new primitive vectors to a value that leads at most to 90% of the maximal allowed [[dilatmx]] deviation from 1. It will do this three times (to forbid the geometry optimization algorithms to have take a too large trial step), but afterwards will exit. Setting [[chkdilatmx]]==0 allows the definition of an appropriate planewave basis, but will not lead to an exit when the threshold is exceeded.
     topics: GeoOpt_basic
     varset: rlx
     vartype: real

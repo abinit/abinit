@@ -169,6 +169,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%cd_full_grid=0
    dtsets(idtset)%charge=zero
    dtsets(idtset)%chempot(:,:,:)=zero
+   dtsets(idtset)%chkdilatmx=1
    dtsets(idtset)%chkexit=0
    dtsets(idtset)%chksymbreak=1
    dtsets(idtset)%cineb_start=7
