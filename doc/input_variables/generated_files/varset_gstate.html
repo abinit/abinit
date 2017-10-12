@@ -48,6 +48,8 @@ variables to be used in the main input file of the abinit code.
 
 <br><a id='A'></a>A.
  <a href="#algalch">algalch</a>&nbsp;&nbsp;
+ <a href="#auxc_ixc">auxc_ixc</a>&nbsp;&nbsp;
+ <a href="#auxc_scal">auxc_scal</a>&nbsp;&nbsp;
  <br><a id='B'></a>B.
  <a href="#boxcenter">boxcenter</a>&nbsp;&nbsp;
  <a href="#boxcutmin">boxcutmin</a>&nbsp;&nbsp;
@@ -72,8 +74,6 @@ variables to be used in the main input file of the abinit code.
  <a href="#enunit">enunit</a>&nbsp;&nbsp;
  <br><a id='F'></a>F.
  <a href="#fband">fband</a>&nbsp;&nbsp;
- <a href="#fockaux_ixc">fockaux_ixc</a>&nbsp;&nbsp;
- <a href="#fockaux_scal">fockaux_scal</a>&nbsp;&nbsp;
  <a href="#fockoptmix">fockoptmix</a>&nbsp;&nbsp;
  <br><a id='G'></a>G.
  <br><a id='H'></a>H.
@@ -217,6 +217,40 @@ mixing coefficients
 <p>
  Note that alchemical mixing cannot be used with PAW.
 </p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="auxc_ixc">auxc_ixc</a></font>
+<br><font id="mnemonics">Mnemonics: AUXiliary XC functional, IXC number</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_Hybrids.html">Hybrids</a>.</font>
+<br><font id="smalltext">Rarely used: [1/908] in abinit tests, [0/136] in tuto abinit tests. Test list: {v7:[<a href="../../tests/v7/Input/t67.in">67</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 1</font>
+<br><font id="text">
+<p>
+Specification of an auxiliary exchange-correlation functional,  thanks to its <a href="../../input_variables/generated_files/varset_basic.html#ixc">ixc</a> value, to possibly replace the heavy evaluation of an hybrid functional at specific occasions, e.g. when the Fock operator is frozen during the self-consistent cycle, thanks to <a href="../../input_variables/generated_files/varset_gstate.html#fockoptmix">fockoptmix</a>==11, or when evaluating the correction to forces due to the density residual. This auxiliary exchange-correlation functional might be rescaled, thanks to <a href="../../input_variables/generated_files/varset_gstate.html#auxc_scal">auxc_scal</a> when <a href="../../input_variables/generated_files/varset_gstate.html#fockoptmix">fockoptmix</a>==11.
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="auxc_scal">auxc_scal</a></font>
+<br><font id="mnemonics">Mnemonics: FOCK AUXiliary xc functional - SCALing factor</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_Hybrids.html">Hybrids</a>.</font>
+<br><font id="smalltext">Rarely used: [1/908] in abinit tests, [0/136] in tuto abinit tests. Test list: {v7:[<a href="../../tests/v7/Input/t67.in">67</a>]}.</font>
+<br><font id="vartype">Variable type: real</font>
+<br><font id="default">Default is 1.0</font>
+<br><font id="text">
+<p>
+Possible scaling factor for the auxiliary exchange-correlation functional defined by <a href="../../input_variables/generated_files/varset_gstate.html#auxc_ixc">auxc_ixc</a> that has the goal to replace the Fock operator or hybrid functional when <a href="#"><a href="#">[[FAKE LINK:FAKE LINK:fogkoptmix]]</a></a>==11.
+<p>
+The default value 1.0 corresponds to the unmodified xc functional. When the auxiliary functional is used to replace the hybrid functional in SCF loops, a value of 1.5 has been observed to speed up somehow the convergence.
 </font>
 
 <br><br><a href=#top>Go to the top</a>
@@ -951,40 +985,6 @@ this, so a fixed default value has been chosen.
 <B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
 
 
-<br><font id="title"><a name="fockaux_ixc">fockaux_ixc</a></font>
-<br><font id="mnemonics">Mnemonics: FOCK AUXiliary xc functional, IXC number</font>
-<br><font id="mnemonics">Executable: abinit</font>
-<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_Hybrids.html">Hybrids</a>.</font>
-<br><font id="smalltext">Rarely used: [1/908] in abinit tests, [0/136] in tuto abinit tests. Test list: {v7:[<a href="../../tests/v7/Input/t67.in">67</a>]}.</font>
-<br><font id="vartype">Variable type: integer</font>
-<br><font id="default">No default</font>
-<br><font id="text">
-<p>
-Specification of an auxiliary exchange-correlation functional,  thanks to its <a href="../../input_variables/generated_files/varset_basic.html#ixc">ixc</a> value, to possibly replace the heavy evaluation of an hybrid functional at specific occasions, e.g. when the Fock operator is frozen during the self-consistent cycle, thanks to <a href="../../input_variables/generated_files/varset_gstate.html#fockoptmix">fockoptmix</a>==11, or when evaluating the correction to forces due to the density residual. This auxiliary exchange-correlation functional might be rescaled, thanks to <a href="../../input_variables/generated_files/varset_gstate.html#fockaux_scal">fockaux_scal</a>.
-</font>
-
-<br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
-
-
-<br><font id="title"><a name="fockaux_scal">fockaux_scal</a></font>
-<br><font id="mnemonics">Mnemonics: FOCK AUXiliary xc functional - SCALing factor</font>
-<br><font id="mnemonics">Executable: abinit</font>
-<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_Hybrids.html">Hybrids</a>.</font>
-<br><font id="smalltext">Rarely used: [1/908] in abinit tests, [0/136] in tuto abinit tests. Test list: {v7:[<a href="../../tests/v7/Input/t67.in">67</a>]}.</font>
-<br><font id="vartype">Variable type: real</font>
-<br><font id="default">Default is 1.0</font>
-<br><font id="text">
-<p>
-Possible scaling factor for the auxiliary exchange-correlation functional defined by <a href="../../input_variables/generated_files/varset_gstate.html#fockaux_ixc">fockaux_ixc</a> that has the goal to replace the Fock operator or hybrid functional in selected occasions.
-<p>
-The default value 1.0 corresponds to the unmodified xc functional. When the auxiliary functional is used to replace the hybrid functional in SCF loops, a value of 1.5 has been observed to speed up somehow the convergence.
-</font>
-
-<br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
-
-
 <br><font id="title"><a name="fockoptmix">fockoptmix</a></font>
 <br><font id="mnemonics">Mnemonics: FOCK operator : OPTions for MIXing</font>
 <br><font id="mnemonics">Executable: abinit</font>
@@ -1008,7 +1008,7 @@ If <b>fockoptmix</b>==0 : the SCF algorithm is not restarted (it continues to us
 If <b>fockoptmix</b>==1 : the SCF algorithm is restarted (the previous potential/density pairs are discarted).</li>
 </ol>
 <p>
-The second-to-last (dozen) digit governs the possible modification of the XC functional inside the SCF loop to take into account the lack of update of the Fock operator. Irrelevant when the unit digit is 0. If the value 1 is used (so, e.g. <b>fockoptmix</b>==11), an auxiliary xc functional is used inside the SCF loop, for a frozen ACE Fock operator. This auxiliary functional is specified thanks to <a href="../../input_variables/generated_files/varset_gstate.html#fockaux_ixc">fockaux_ixc</a> and <a href="../../input_variables/generated_files/varset_gstate.html#fockaux_scal">fockaux_scal</a>.
+The second-to-last (dozen) digit governs the possible modification of the XC functional inside the SCF loop to take into account the lack of update of the Fock operator. Irrelevant when the unit digit is 0. If the value 1 is used (so, e.g. <b>fockoptmix</b>==11), an auxiliary xc functional is used inside the SCF loop, for a frozen ACE Fock operator. This auxiliary functional is specified thanks to <a href="../../input_variables/generated_files/varset_gstate.html#auxc_ixc">auxc_ixc</a> and <a href="../../input_variables/generated_files/varset_gstate.html#auxc_scal">auxc_scal</a>.
 <p>
 The third-to-last (hundreds) digit governs the mixing of the Fock operator itself with its previous occurrences. Irrelevant when the unit digit is 0.
 </font>
