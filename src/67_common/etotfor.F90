@@ -107,6 +107,9 @@
 !!   | e_vdw_dftd(IN)=VdW DFT-D energy
 !!   | e_hartree(IN)=Hartree part of total energy (hartree units)
 !!   | e_corepsp(IN)=psp core-core energy
+!!   | e_hybcomp_E0(IN)=energy compensation energy for the hybrid functionals at frozen density
+!!   | e_hybcomp_v0(IN)=potential compensation energy for the hybrid functionals at frozen density
+!!   | e_hybcomp_v (IN)=potential compensation energy for the hybrid functionals at self-consistent density
 !!   | e_kinetic(IN)=kinetic energy part of total energy.
 !!   | e_nonlocalpsp(IN)=nonlocal pseudopotential part of total energy.
 !!   | e_xc(IN)=exchange-correlation energy (hartree)
@@ -328,7 +331,8 @@ subroutine etotfor(atindx1,deltae,diffor,dtefield,dtset,&
    if (optene==0) then
      etotal = energies%e_kinetic + energies%e_hartree + energies%e_xc + &
 &     energies%e_localpsp + energies%e_corepsp + energies%e_fock+&
-&     energies%e_entropy + energies%e_elecfield + energies%e_magfield
+&     energies%e_entropy + energies%e_elecfield + energies%e_magfield+&
+&     energies%e_hybcomp_E0 - energies%e_hybcomp_v0 + energies%e_hybcomp_v
      etotal = etotal + energies%e_ewald + energies%e_chempot + energies%e_vdw_dftd
      if (usepaw==0) etotal = etotal + energies%e_nonlocalpsp
      if (usepaw/=0) etotal = etotal + energies%e_paw
@@ -338,7 +342,8 @@ subroutine etotfor(atindx1,deltae,diffor,dtefield,dtset,&
    if (optene==1) then
      etotal = energies%e_eigenvalues - energies%e_hartree + energies%e_xc &
 &     - energies%e_xcdc + energies%e_corepsp - energies%e_corepspdc+ energies%e_fock- energies%e_fockdc &
-&     + energies%e_entropy + energies%e_elecfield + energies%e_magfield
+&     + energies%e_entropy + energies%e_elecfield + energies%e_magfield &
+&     + energies%e_hybcomp_E0 - energies%e_hybcomp_v0
      etotal = etotal + energies%e_ewald + energies%e_chempot + energies%e_vdw_dftd
      if (usepaw/=0) etotal = etotal + energies%e_pawdc
    end if

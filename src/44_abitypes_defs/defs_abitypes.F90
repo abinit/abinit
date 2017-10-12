@@ -234,6 +234,7 @@ type dataset_type
  integer :: exchn2n3d
  integer :: extrapwf
  integer :: fftgw
+ integer :: fockaux_ixc
  integer :: fockoptmix
  integer :: frzfermi
  integer :: ga_algor
@@ -683,6 +684,7 @@ type dataset_type
  real(dp) :: exchmix
  real(dp) :: fband
  real(dp) :: fermie_nest
+ real(dp) :: fockaux_scal
  real(dp) :: focktoldfe
  real(dp) :: freqim_alpha
  real(dp) :: freqremin

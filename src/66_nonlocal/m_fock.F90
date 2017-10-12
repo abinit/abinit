@@ -677,11 +677,12 @@ subroutine fock_init(atindx,cplex,dtset,fock,gsqcut,kg,mpi_enreg,nattyp,npwarr,p
      mgfft=dtset%mgfftdg
      n4=dtset%ngfftdg(4) ; n5=dtset%ngfftdg(5) ; n6=dtset%ngfftdg(6)
    end if
-   fockcommon%optfor=.FALSE.; fockcommon%optstr=.false.
+   fockcommon%optfor=.false.; fockcommon%optstr=.false.
    if(dtset%optforces==1) fockcommon%optfor=.true.
    if (fockcommon%optfor) then
      ABI_ALLOCATE(fockcommon%forces_ikpt,(3,dtset%natom,nband))
      ABI_ALLOCATE(fockcommon%forces,(3,dtset%natom))
+     fockcommon%forces=zero
    endif
    use_ACE=1 ! Default. Normal users do not have access to this variable, although the next line allows experts to make tests.
    if(dtset%userie==1729)use_ACE=0 ! Hidden possibility to disable ACE
