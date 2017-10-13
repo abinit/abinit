@@ -262,7 +262,7 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
 
 !Local variables-------------------------------
 !scalars
- integer :: cplex,ierr,ifft,ii,ixc,indx,ipositron,ipts,ishift,ispden,iwarn,iwarnp
+ integer :: auxc_ixc,cplex,ierr,ifft,ii,ixc,indx,ipositron,ipts,ishift,ispden,iwarn,iwarnp
  integer :: jj,mpts,ndvxc,nd2vxc,nfftot,ngr,ngr2,ngrad,ngrad_apn,nkxc_eff,npts
  integer :: nspden_apn,nspden_eff,nspden_updn,nspgrad,nvxcgrho,order,mgga,usefxc
  integer :: nproc_fft,comm_fft
@@ -699,9 +699,11 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
 !      In case of a hybrid functional, if one needs to compute the auxiliary GGA Kxc, a separate call to drivexc_main
 !      is first needed to compute Kxc using such auxiliary GGA, 
 !      before calling again drivexc_main using the correct functional for Exc and Vxc
-       if(auxc_ixc/=0)then
-         if (ixc<0) then
-           call libxc_functionals_end()
+       if(xcdata%usefock==1 .and. auxc_ixc/=0)then
+         if (auxc_ixc<0) then
+           if(ixc<0)then
+             call libxc_functionals_end()
+           endif
            call libxc_functionals_init(auxc_ixc,nspden)
          end if
          call drivexc_main(exc_b,auxc_ixc,mgga,ndvxc,nd2vxc,ngr2,npts,nspden_updn,nvxcgrho,order,&
@@ -718,9 +720,11 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
            kxc(ifft:ifft+npts-1,2)=dvxc_b(1:npts,10)
            kxc(ifft:ifft+npts-1,3)=dvxc_b(1:npts,2)+dvxc_b(1:npts,11)
          end if
-         if (ixc<0) then
+         if (auxc_ixc<0) then
            call libxc_functionals_end()
-           call libxc_functionals_init(ixc,nspden)
+           if(ixc<0)then
+             call libxc_functionals_init(ixc,nspden)
+           endif
          end if
        end if
 
@@ -922,7 +926,7 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
        end if
 
 !      Transfer the xc kernel (if this must be done, and has not yet been done)
-       if (nkxc_eff>0.and.ndvxc>0 .and. auxc_ixc==0) then
+       if (nkxc_eff>0.and.ndvxc>0 .and. (xcdata%usefock==0 .or. auxc_ixc==0)) then
          if (nkxc_eff==1.and.ndvxc==15) then
            kxc(ifft:ifft+npts-1,1)=half*(dvxc_b(1:npts,1)+dvxc_b(1:npts,9)+dvxc_b(1:npts,10))
          else if (nkxc_eff==3.and.ndvxc==15) then

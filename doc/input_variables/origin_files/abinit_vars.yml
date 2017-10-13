@@ -1218,7 +1218,7 @@
     mnemonics: FOCK AUXiliary xc functional - SCALing factor
     requires: null
     text: |-
-        Possible scaling factor for the auxiliary exchange-correlation functional defined by [[auxc_ixc]] that has the goal to replace the Fock operator or hybrid functional when [[fogkoptmix]]==11.
+        Possible scaling factor for the auxiliary exchange-correlation functional defined by [[auxc_ixc]] that has the goal to replace the Fock operator or hybrid functional when [[fockoptmix]]==11.
         <p>
         The default value 1.0 corresponds to the unmodified xc functional. When the auxiliary functional is used to replace the hybrid functional in SCF loops, a value of 1.5 has been observed to speed up somehow the convergence.
     topics: Hybrids_useful

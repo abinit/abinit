@@ -147,7 +147,7 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,nfftf,ngfftf,&
 
 !Local variables-------------------------------
 !scalars
- integer :: iat,ikc,ik_ibz,ib,jb,is,b_start,b_stop
+ integer :: auxc_ixc,iat,ikc,ik_ibz,ib,jb,is,b_start,b_stop
  integer :: itypat,lmn_size,j0lmn,jlmn,ilmn,klmn,klmn1,lmn2_size_max
  integer :: isppol,cplex_dij,npw_k
  integer :: nspinor,nsppol,nspden,nk_calc

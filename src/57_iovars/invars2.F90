@@ -82,6 +82,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
  use m_fstrings,  only : sjoin, itoa, tolower, rmquotes
  use m_ingeo_img, only : ingeo_img
  use m_dtset,     only : dtset_chkneu
+ use m_xcdata,    only : get_auxc_ixc, get_xclevel
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1317,7 +1318,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
  if(tread==1) dtset%auxc_ixc=intarr(1)
 !If the default value had been given, possibly switch on the auxc_ixc corresponding to ixc, if the latter is an hybrid
  if(dtset%auxc_ixc==0)then
-   call get_auxc_ixc(auxc_ixc,ixc)
+   call get_auxc_ixc(dtset%auxc_ixc,dtset%ixc)
  endif
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'vdw_df_acutmin',tread,'DPR')

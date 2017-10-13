@@ -69,7 +69,6 @@ _ WF disk file :      0.061 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
  -outvars: echo values of preprocessed input variables --------
             acell      1.0217000000E+01  1.0217000000E+01  1.0217000000E+01 Bohr
               amu      2.80855000E+01
-         auxc_ixc          11
         auxc_scal      1.50000000E+00
           cgtyphf1          0
           cgtyphf2          2
@@ -508,7 +507,6 @@ _setup2: Arith. and geom. avg. npw (full set) are     186.259     186.184
  -outvars: echo values of variables after computation  --------
             acell      1.0217000000E+01  1.0217000000E+01  1.0217000000E+01 Bohr
               amu      2.80855000E+01
-         auxc_ixc          11
         auxc_scal      1.50000000E+00
           cgtyphf1          0
           cgtyphf2          2

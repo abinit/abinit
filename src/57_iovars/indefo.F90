@@ -145,7 +145,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%adpimd_gamma=one
    dtsets(idtset)%accuracy=0
    dtsets(idtset)%atvshift(:,:,:)=zero
-   dtsets(idtset)%auxc_ixc=0
+   dtsets(idtset)%auxc_ixc=11
    dtsets(idtset)%auxc_scal=one
    dtsets(idtset)%awtr=1
 !  B
