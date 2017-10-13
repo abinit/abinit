@@ -86,6 +86,7 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,ffnl1,ffnl1_test,gs_ha
 #undef ABI_FUNC
 #define ABI_FUNC 'rf2_init'
  use interfaces_14_hidewrite
+ use interfaces_18_timing
  use interfaces_66_nonlocal
 !End of the abilint section
 
