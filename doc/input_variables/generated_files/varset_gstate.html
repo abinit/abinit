@@ -797,9 +797,9 @@ for self-consistency.
 <br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_spinpolarisation.html">spinpolarisation</a>.</font>
 <br><font id="smalltext">Rarely used: [4/907] in abinit tests, [0/136] in tuto abinit tests. Test list: {gpu:[<a href="../../tests/gpu/Input/t03.in">03</a>],v1:[<a href="../../tests/v1/Input/t53.in">53</a>,<a href="../../tests/v1/Input/t54.in">54</a>],v5:[<a href="../../tests/v5/Input/t16.in">16</a>]}.</font>
 <br><font id="vartype">Variable type: real</font>
-<br><font id="default">Default is <a href="../../input_variables/generated_files/varset_gstate.html#diemix">diemix</a> if <a href="../../input_variables/generated_files/varset_basic.html#iscf">iscf</a><10,
-<a href="../../input_variables/generated_files/varset_gstate.html#diemix">diemix</a> if 70 < <a href="../../input_variables/generated_files/varset_gstate.html#iprcel">iprcel</a> and <a href="../../input_variables/generated_files/varset_gstate.html#iprcel">iprcel</a> < 80,
+<br><font id="default">Default is <a href="../../input_variables/generated_files/varset_gstate.html#diemix">diemix</a> if 70 < <a href="../../input_variables/generated_files/varset_gstate.html#iprcel">iprcel</a> and <a href="../../input_variables/generated_files/varset_gstate.html#iprcel">iprcel</a> < 80,
 <a href="../../input_variables/generated_files/varset_gstate.html#diemix">diemix</a> if <a href="../../input_variables/generated_files/varset_gstate.html#iprcel">iprcel</a>==0,
+<a href="../../input_variables/generated_files/varset_gstate.html#diemix">diemix</a> if <a href="../../input_variables/generated_files/varset_basic.html#iscf">iscf</a><10,
 -<a href="../../input_variables/generated_files/varset_gstate.html#diemix">diemix</a> otherwise.
 </font>
 <br><font id="text">
@@ -1906,8 +1906,8 @@ built.
 <br><font id="characteristic">Mentioned in topics: <a href="../../topics/generated_files/topic_SCFControl.html">SCFControl</a>, <a href="../../topics/generated_files/topic_BandOcc.html">BandOcc</a>.</font>
 <br><font id="smalltext">Moderately used: [160/907] in abinit tests, [24/136] in tuto abinit tests. Too many tests to report (>10).</font>
 <br><font id="vartype">Variable type: integer</font>
-<br><font id="default">Default is 2*<a href="../../input_variables/generated_files/varset_gstate.html#nspinor">nspinor</a> if <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>==1 and 3<=<a href="../../input_variables/generated_files/varset_basic.html#occopt">occopt</a> and <a href="../../input_variables/generated_files/varset_basic.html#occopt">occopt</a><= 8,
-2*<a href="../../input_variables/generated_files/varset_gstate.html#nspinor">nspinor</a> if <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>==0 and <a href="../../input_variables/generated_files/varset_basic.html#iscf">iscf</a><0,
+<br><font id="default">Default is 2*<a href="../../input_variables/generated_files/varset_gstate.html#nspinor">nspinor</a> if <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>==0 and <a href="../../input_variables/generated_files/varset_basic.html#iscf">iscf</a><0,
+2*<a href="../../input_variables/generated_files/varset_gstate.html#nspinor">nspinor</a> if <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>==1 and 3<=<a href="../../input_variables/generated_files/varset_basic.html#occopt">occopt</a> and <a href="../../input_variables/generated_files/varset_basic.html#occopt">occopt</a><= 8,
 0 otherwise.
 </font>
 <br><font id="text">
