@@ -752,8 +752,8 @@ for small (but non-zero) values of the wavevector.
 <br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_SCFAlgorithms.html">SCFAlgorithms</a>.</font>
 <br><font id="smalltext">Moderately used: [195/907] in abinit tests, [1/136] in tuto abinit tests. Tuto test list: {tutorial:[<a href="../../tests/tutorial/Input/ttddft_1.in">tddft_1</a>]}.</font>
 <br><font id="vartype">Variable type: real</font>
-<br><font id="default">Default is 1.0 if <a href="../../input_variables/generated_files/varset_internal.html#usepaw">usepaw</a>==0 or <a href="../../input_variables/generated_files/varset_gstate.html#iprcel">iprcel</a> !=0,
-0.7 if <a href="../../input_variables/generated_files/varset_internal.html#usepaw">usepaw</a>==1 or <a href="../../input_variables/generated_files/varset_gstate.html#iprcel">iprcel</a>==0,
+<br><font id="default">Default is 0.7 if <a href="../../input_variables/generated_files/varset_internal.html#usepaw">usepaw</a>==1 or <a href="../../input_variables/generated_files/varset_gstate.html#iprcel">iprcel</a>==0,
+1.0 if <a href="../../input_variables/generated_files/varset_internal.html#usepaw">usepaw</a>==0 or <a href="../../input_variables/generated_files/varset_gstate.html#iprcel">iprcel</a> !=0,
 None otherwise.
 </font>
 <br><br><font id="requires">
@@ -797,9 +797,9 @@ for self-consistency.
 <br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_spinpolarisation.html">spinpolarisation</a>.</font>
 <br><font id="smalltext">Rarely used: [4/907] in abinit tests, [0/136] in tuto abinit tests. Test list: {gpu:[<a href="../../tests/gpu/Input/t03.in">03</a>],v1:[<a href="../../tests/v1/Input/t53.in">53</a>,<a href="../../tests/v1/Input/t54.in">54</a>],v5:[<a href="../../tests/v5/Input/t16.in">16</a>]}.</font>
 <br><font id="vartype">Variable type: real</font>
-<br><font id="default">Default is <a href="../../input_variables/generated_files/varset_gstate.html#diemix">diemix</a> if <a href="../../input_variables/generated_files/varset_basic.html#iscf">iscf</a><10,
+<br><font id="default">Default is <a href="../../input_variables/generated_files/varset_gstate.html#diemix">diemix</a> if <a href="../../input_variables/generated_files/varset_gstate.html#iprcel">iprcel</a>==0,
 <a href="../../input_variables/generated_files/varset_gstate.html#diemix">diemix</a> if 70 < <a href="../../input_variables/generated_files/varset_gstate.html#iprcel">iprcel</a> and <a href="../../input_variables/generated_files/varset_gstate.html#iprcel">iprcel</a> < 80,
-<a href="../../input_variables/generated_files/varset_gstate.html#diemix">diemix</a> if <a href="../../input_variables/generated_files/varset_gstate.html#iprcel">iprcel</a>==0,
+<a href="../../input_variables/generated_files/varset_gstate.html#diemix">diemix</a> if <a href="../../input_variables/generated_files/varset_basic.html#iscf">iscf</a><10,
 -<a href="../../input_variables/generated_files/varset_gstate.html#diemix">diemix</a> otherwise.
 </font>
 <br><font id="text">
@@ -907,8 +907,8 @@ output of eigenvalues (and eventual phonon frequencies)
 <br><font id="smalltext">Rarely used: [2/907] in abinit tests, [0/136] in tuto abinit tests. Test list: {v1:[<a href="../../tests/v1/Input/t03.in">03</a>,<a href="../../tests/v1/Input/t43.in">43</a>]}.</font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 0.5 if <a href="../../input_variables/generated_files/varset_basic.html#occopt">occopt</a>>2,
-0.0 if <a href="../../input_variables/generated_files/varset_basic.html#usewvl">usewvl</a>==1,
 0.125 if <a href="../../input_variables/generated_files/varset_basic.html#occopt">occopt</a>==1,
+0.0 if <a href="../../input_variables/generated_files/varset_basic.html#usewvl">usewvl</a>==1,
 0.0 otherwise.
 </font>
 <br><font id="text">
