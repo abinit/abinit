@@ -48,7 +48,6 @@ sec1:
   charged excitation energies of the $N$-electron system[5]:
   </p>
 
-  $$
   \begin{equation}
   \varepsilon_i =
   \begin{cases}
@@ -56,7 +55,6 @@ sec1:
   E_0^N-E_i^{(N-1)}  & \text{if $\varepsilon_i$ < $\mu$} ,
   \end{cases}
   \end{equation}
-  $$
 
   where <i>E<sub>0</sub><sup>N</sup></i> is the ground state energy of the electron system with <i>N</i>
   electrons, and <i>i</i> is the set of quantum numbers labeling the excited states with <i>N&plusmn;</i>1 electrons. 
@@ -64,9 +62,6 @@ sec1:
   Other important quantities that will be used in the following are
   the so-called Lehmann amplitudes defined, in the Schr&ouml;dinger representation, by
   
-  <p align="center"><img src="../documents/theory_mbt/lehmann_ampl.png"></p>
-
-  $$
   \begin{equation}
   \label{eq:Lehmann_amplitudes}
   \Psi_i (\rr) \equiv
@@ -77,20 +72,15 @@ sec1:
   \langle\Theta_i^{N-1}| \hat\psi(\rr) |\Theta_0^N\rangle  \quad\qquad \ee_i < \mu    
   \end{cases}
   \end{equation}
-  $$
   
   The Lehmann representation of the Green's function
   
-  <p align="center"><img src="../documents/theory_mbt/Lehmann.png"></p>
-
-  $$
   \begin{equation}
   \label{eq:Lehmann_representation}
   G (\rr_1,\rr_2;\ww) = 
   \sum_i \frac{\Psi_i(\rr_1)\Psi_i^\*(\rr_2)}
   {\ww-\ee_i +i\eta\,\sign(\ee_i-\mu)} \qquad\eta \rightarrow 0^+,
   \end{equation}
-  $$
   
   makes it clear that, in the frequency domain, the time-ordered Green's function 
   contains the complete excitation spectrum corresponding to excitations of an (<i>N</i>-1)-particle and an (<i>N</i>+1)-particle
@@ -101,7 +91,7 @@ sec1:
   schematic representation of the location of the poles of the
   time-ordered Green's function.
 
-  <p align="center"><img src="../documents/theory_mbt/poles_G.png"></p>
+  <p align="center"><img src="../documents/theory_mbt/poles_G.svg"></p>
 
   <p>
   Where the ionisation potential is the energy required to remove an electron from 
@@ -114,14 +104,10 @@ sec1:
   The Dyson equation 
   </p>
 
-  <p align="center"><img src="../documents/theory_mbt/G_Dyson.png"></p>
-
-  $$
   \begin{equation}
   \label{eq:G_eq_G0SG}
   G(12) = \Go(12) + \int \Go(13)\,\Sigma(34)\,G(42)\dd34.
   \end{equation}
-  $$
   
   establishes a connection between the fully interacting <i>G</i> and the propagator, <i>G<sub>0</sub></i>, 
   of an approximate non-interacting system
@@ -136,15 +122,11 @@ sec1:
   by solving the quasiparticle (QP) equation[5]:
   </p>
 
-  <p align="center"><img src="../documents/theory_mbt/qp_equation.png"></p>
-  
-  $$
   \begin{equation}
   \label{eq:QP_equation}
   \Bigl[ {\hat h}_0(\rr_1) + v_H(\rr_1) \Bigr] \Psi(\rr_1) + \int\,\Sigma(\rr_1,\rr_2;\ee^\QP)\Psi(\rr_2)\dd\rr_2,
   = \ee^\QP \Psi(\rr_1)
   \end{equation}
-  $$
 
   <!--
   Although the above equation looks similar to a mean-field approach,
@@ -180,43 +162,31 @@ sec2:
   The fundamental building blocks employed in the formalism are the irreducible polarizability:
   </p>
 
-  <p align="center"><img src="../documents/theory_mbt/tchi_def.png"></p>
-
-  $$
   \begin{equation}\label{eq:chi_tilde_def}
   \tchi(12) \equiv \dfrac{\delta n (1) }{\delta \Ueff (2)} = -i\frac{\delta G(11^+)}{\delta \Ueff(2)},
   \end{equation}
-  $$
   
   which describes the linear response of the density to changes in the total effective potential
   (the superposition of the external potential plus the internal classical Hartree potential)
   and the dynamically screened interaction, <i>W</i>, that is related to the bare Coulomb interaction, <i>v</i>, and
   to the inverse dielectric function through:
   
-  <p align="center"><img src="../documents/theory_mbt/W_def.png"></p>
-
-  $$
   \begin{equation}
   \label{W_def}
   W(12) \equiv \int \ee^{-1}(13)\,v(32)\dd3.
   \end{equation}
-  $$
   
-  The dielectric matrix &#1108;(12) is related to the  irreducible polarizability <i>&#967;</i>(12) by the following relation:
+  The dielectric matrix &#1108;(12) is related to the irreducible polarizability <i>&#967;</i>(12) by the following relation:
   
-  <p align="center"><img src="../documents/theory_mbt/e_from_tchi.png"></p>
-
-  $$
   \begin{equation}
-  \ee(1, 2) = \delta(1, 2) - \int v(1, 3)\tchi(3, 2)\dd(3)
+  \ee(1, 2) = \delta(1, 2) - \int v(1, 3)\tchi(3, 2)\dd 3
   \end{equation}
-  $$
   
   <p>
   The pentagon sketched in the figure below shows how the various physical quantities are interrelated: 
   </p>
 
-  <p align="center"><img src="../documents/theory_mbt/hedin_pentagon.png"></p>
+  <p align="center"><img src="../documents/theory_mbt/hedin_pentagon.svg"></p>
   
   The polarization function renormalises the bare interaction resulting in the screened interaction <i>W</i>(12). 
   The screened interaction, <i>W</i>(12), the many-body propagator <i>G</i>(12), and the vertex function, &#915;(12;3), 
@@ -245,30 +215,22 @@ sec3:
   <i>GW</i> approximation[6], which consists in approximating the vertex function with a local and instantaneous function:
   </p>
 
-  <p align="center"><img src="../documents/theory_mbt/gamma_GW.png"></p>
-
-  $$
   \begin{equation}
-   \Gamma(12;3) \approx \delta(1,2)\delta(1,3) \equiv \Gamma^{GW}(12;3).
+  \Gamma(12;3) \approx \delta(1,2)\delta(1,3) \equiv \Gamma^{GW}(12;3).
   \end{equation}
-  $$
   
   This approximated vertex, once inserted in the full set of Hedin's equations, leads to a considerable
   simplification in the set of equations:
   
-  <p align="center"><img src="../documents/theory_mbt/gw_pentagon.png"></p>
+  <p align="center"><img src="../documents/theory_mbt/gw_pentagon.svg"></p>
   
   <p>
   Thanks to the neglect of vertex corrections, the irreducible polarizability <i>&#967;</i>(12) is now given by
   </p>
 
-  <p align="center"><img src="../documents/theory_mbt/RPA_chi.png"></p>
-
-  $$
   \begin{equation}\label{eq:RPA_with_G}
   \tchi = -i\,G(12)G(21^+).
   \end{equation}
-  $$
   
   which, once rewritten in terms of orbitals and energies, reduces to the RPA expression proposed by Adler [7] and Wiser [8].
   <p>
@@ -276,24 +238,16 @@ sec3:
   propagator, <i>G</i>(12), and the dynamically screened interaction, <i>W</i>(12):
   </p>
 
-  <p align="center"><img src="../documents/theory_mbt/gwsigma_rt_domain.png"></p>
-
-  $$
   \begin{equation}
   \Sigma(12) = i G(12)\,W(1^+2).
   \end{equation}
-  $$
   
   The self-energy, a simple product in the space-time domain, becomes a convolution when expressed in frequency-space:
   
-  <p align="center"><img src="../documents/theory_mbt/self_def.png"></p>
-
-  $$
   \begin{equation}
    \Sigma(\rr_1,\rr_2;\ww) = 
    \frac{i}{2\pi} \int G(\rr_1,\rr_2;\ww+\ww') W(\rr_1,\rr_2;\ww')e^{i\ww'\delta^+}\dd\ww'.
   \end{equation}
-  $$
   
   <p>
   <!--dressed 
@@ -333,24 +287,16 @@ sec3:
   In this case the self-energy is simply given by:
   </p>
 
-  <p align="center"><img src="../documents/theory_mbt/G0W0.png"></p>
-
-  $$
   \begin{equation}
   \Sigma(12) = i\Go^\KS(12)\Wo(1^+2)
   \end{equation}
-  $$
   
   where <i>G<sub>0</sub><sup>KS</sup></i>(12) is the independent-particle propagator of the Kohn-Sham (KS) Hamiltonian,
   and the screened interaction is approximated with the RPA calculated with KS energies and wave functions:
   
-  <p align="center"><img src="../documents/theory_mbt/G0G0.png"></p>
-
-  $$
   \begin{equation}
   \chi^0(12) = -i \Go^\KS(12)\Go^\KS(12).
   \end{equation}
-  $$
 
 ## Each section must have a title, that will form the table of content.
 ## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
@@ -383,30 +329,22 @@ sec4:
   
   </p>
 
-  <p align="center"><img src="../documents/theory_mbt/qpene_perturbative.png"></p>
-
-  $$
   \begin{equation}
   \label{eq:implicit_QP_energy}
-   \ee^\QP = \ee^\KS + \langle\Psi^\KS|\Sigma(\ee^\QP)-\vxc|\Psi^\KS\rangle.
+   \ee^\QP = \ee^\KS + Z \langle\Psi^\KS|\Sigma(\ee^\KS)-\vxc|\Psi^\KS\rangle.
   \end{equation}
-  $$
   
   where 
   
-  <p align="center"><img src="../documents/theory_mbt/Z_def.png"></p>
-
-  $$
   \begin{equation}
   \label{eq:Z_factor}
    Z \equiv \left[ 1- \langle \Psi^\KS| \PDER{\Sigma(\ee)}{\ee^\KS}|\Psi^\KS\rangle \right]^{-1}
   \end{equation}
-  $$
 
   is the so-called renormalization factor. This corresponds to making a
   Taylor expansion of the self-energy matrix element around the KS energy, as depicted below.
   
-  <p align="center"><img src="../documents/theory_mbt/self_energy_taylor.png"></p>
+  <p align="center"><img src="../documents/theory_mbt/self_energy_taylor.svg"></p>
 
 ## Each section must have a title, that will form the table of content.
 ## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
@@ -419,7 +357,7 @@ sec5:
   the real space coordinates and time variables), the independent-particle 
   polarizability assumes the form:
   
-  <p align="center"><img src="../documents/theory_mbt/chi0_sc_tr.png"></p>
+  <p align="center"><img src="../documents/theory_mbt/chi0_sc_tr.svg"></p>
   
   where only the transitions between valence (<i>v</i>) and conduction states (<i>c</i>) contribute
   (for simplicity we have assumed a semiconductor with time-reversal invariance, 
@@ -428,19 +366,14 @@ sec5:
   The number of bands used to compute the polarizability is specified by [[nband]],
   while [[zcut]] gives the small complex shift used to avoid the divergences in the denominators.
   The frequency mesh is defined by the set of variables
-  
-  [[nfreqre]],
-  [[nfreqim]],
-  [[freqremax]], and
-  [[freqremin]]
+  [[nfreqre]], [[nfreqim]], [[freqremax]], and [[freqremin]]
   (a number of more exotic grid choices are available through input variables beginning with gw_... or cd_...,
   e.g. [[gw_frqim_inzgrid]]).
   </p>
   <p>
   <i>M</i> is a shorthand notation to denote the matrix element of a plane wave sandwiched 
   between two wavefunctions (i.e. oscillator matrix elements).
-  The number of planewaves (PW) used to describe the wavefunctions is determined by 
-  [[ecutwfn]]
+  The number of planewaves (PW) used to describe the wavefunctions is determined by [[ecutwfn]]
   
   while the number of <i>G</i>-vectors used to describe the polarizability 
   (i.e. the number of <i>G</i> vectors in the oscillator matrix elements) is 
@@ -458,46 +391,33 @@ sec5:
   the action of any symmetry operation of the crystalline space group:
   </p>
 
-  <p align="center"><img src="../documents/theory_mbt/chi0_symmetry.png"><br></p>
-
-  $$
   \begin{equation}
   \chi^0(\rr_1,\rr_2) = \chi^0 \bigl(\Ri(\rr_1-\tt),\Ri(\rr_2-\tt)\bigr) 
   \end{equation}
-  $$
   
   so that only the <b>q</b>-points in the irreducible Brillouin zone (IBZ) have to be calculated explicitly. 
   <!--
   The use of symmetries is switched on/off with 
-  [[awtr]] (time-reversal), and 
-  [[symchi]] (crystal symmetries).
+  [[awtr]] (time-reversal), and [[symchi]] (crystal symmetries).
   -->
   <p>
   In frequency and reciprocal space, the microscopic dielectric function is related to the
   irreducible polarizability by the following relation
   </p>
 
-  <p align="center"><img src="../documents/theory_mbt/epsilon_vs_tchi.png"></p>
-
-  $$
   \begin{equation}
   \ee_{\GG_1\GG_2}(\qq;\ww) = \delta_{\GG_1,\GG_2} - v(\qq, \GG_1) \tchi_{\GG_1\GG_2}(\qq;\ww)
   \end{equation}
-  $$
   
   from which the inverse dielectric function is obtained via matrix inversion.
   
   Following Adler [7,8], the macroscopic dielectric function, &#1108;<sub>M</sub><sup>LF</sup>(&#969;), can be directly related to 
   the inverse of the microscopic dielectric matrix by means of:
   
-  <p align="center"><img src="../documents/theory_mbt/emacro_lfe.png"></p>
-
-  $$
   \begin{equation}
   \label{eq:abs_LFE}
   \ee_M^{\text{LF}}(\ww) = \lim_{\qq \rightarrow 0} \dfrac{1}{\ee^{-1}_{0 0}(\qq,\ww)}
   \end{equation}
-  $$
   
   The optical absorption spectrum -- the quantity one can compare with experiments --
   is given by the imaginary part: Im[&#1108;<sub>M</sub><sup>LF</sup>(&#969;)].
@@ -505,14 +425,10 @@ sec5:
   Note that the equation above differs from 
   </p>
 
-  <p align="center"><img src="../documents/theory_mbt/emacro_nlfe.png"></p>
-
-  $$
   \begin{equation}
   \label{eq:abs_NLFE}
   \ee_M^{\text{NLF}}(\ww) = \lim_{\qq \rightarrow 0} {\ee_{0 0}(\qq,\ww)}
   \end{equation}
-  $$
   
   due to the so called local-field effects introduced by the presence of the crystalline environment. 
   These spectra, if calculated, are typically output as ...<b>_LF</b> and ...<b>_NLF</b> 
@@ -527,7 +443,7 @@ sec6:
  body: |
   Many body calculations require the evaluation of integrals involving the oscillator matrix elements
   
-  <p align="center"><img src="../documents/theory_mbt/oscillator_longv.png"></p>
+  <p align="center"><img src="../documents/theory_mbt/oscillator_longv.svg"></p>
   
   where the <b>k</b>-point belongs to the full Brillouin zone.
   <p>
@@ -615,7 +531,7 @@ sec7:
   algorithm proposed in [13] and subsequently revisited in [14], in which only the spectral function 
   </p>
 
-  <p align="center"><img src="../documents/theory_mbt/sf_chi0.png"></p>
+  <p align="center"><img src="../documents/theory_mbt/sf_chi0.svg"></p>
   
   has to be evaluated in terms of electronic transitions between valence and conduction states.
   The Dirac delta function can be approximated either by means of a triangular function centered 
@@ -635,25 +551,19 @@ sec7:
   The full polarizability is then efficiently retrieved by means of a less expensive frequency integration (a Hilbert transform):
   </p>
 
-  <p align="center"><img src="../documents/theory_mbt/hilbert_transform.png"></p>
-
-  $$
   \begin{equation}
   \label{eq:chi0_Hilbert_transform}
    {\chi^0}_{\GG_1\GG_2} (\qq,\ww) = 
    \int_0^{+\infty} \tchi^\mcS_{\GG_1\GG_2} (\qq,\ww') 
    \times \biggl(\frac{1}{\ww-\ww'+i\delta}-\frac{1}{\ww+\ww'-i\delta}\biggr)\dd\ww'
   \end{equation}
-  $$
   
   <p>
   The price to be paid, however, is that a large table for the spectral function 
   has to be stored in memory and a Hilbert transform has to be performed for each pair 
   (<b>G</b><sub>1</sub>, <b>G</b><sub>2</sub>).
   Since the computing time required for the transform scales quadratically with the number of 
-  vectors in the polarizability (governed by 
-  
-  [[ecuteps]]),
+  vectors in the polarizability (governed by [[ecuteps]]),
   the CPU time spent in this part will overcome the computing time of the standard Adler-Wiser 
   formalism for large [[ecuteps]].
   A theoretical estimate of the crossover point is hard to give because it depends on many 
@@ -670,15 +580,11 @@ sec8:
  body: |
   Following the standard approach, we separate the screened interaction into the static bare Coulomb term 
   and a frequency-dependent contribution according to:
-  
   </p>
-  <p align="center"><img src="../documents/theory_mbt/W_partition_simple.png"></p>
 
-  $$
   \begin{equation}
   W = v + (\ee^{-1} - 1) v
   \end{equation}
-  $$
   
   where matrix notation is used.
   <p>
@@ -686,27 +592,19 @@ sec8:
   leads to the split of the self-energy into two different contributions (exchange and correlation):
   </p>
 
-  <p align="center"><img src="../documents/theory_mbt/self_energy.png"></p>
-
-  $$
   \begin{equation}
   \Sigma(\rr_1,\rr_2;\ww) \equiv \Sigma_x(\rr_1,\rr_2) + \Sigma_c(\rr_1,\rr_2;\ww),
   \end{equation}
-  $$
   
   <p>
   The exchange part is static and turns out to have the same mathematical structure as the Fock operator in Hartree-Fock theory, 
   albeit constructed with quasiparticle amplitudes
   </p>
 
-  <p align="center"><img src="../documents/theory_mbt/self_x.png"></p>
-
-  $$
   \begin{equation}\label{eq:Sigma_x}
   \Sigma_x(\rr_1,\rr_2)=  
-  -\sum_\kk^\BZ \sum_\nu^\text{occ} \Psi_{n\kk}(\rr_1){\Psi^\*_{n\kk}}(\rr_2)\,v(\rr_1,\rr_2).
+  -\sum_\kk^\BZ \sum_\nu^\text{occ} \Psi_{n\kk}(\rr_1){\Psi^\*_{n\kk}}(\rr_2)\,v(\rr_1,\rr_2)
   \end{equation}
-  $$
   
   while the dynamic part &#931;<sub>c</sub>(&#969;) accounts for correlation effects beyond &#931;<sub>x</sub>.
   
@@ -719,7 +617,7 @@ sec8:
   When expressed in reciprocal space, the diagonal matrix elements of the exchange part are given by:
   </p>
 
-  <p align="center"><img src="../documents/theory_mbt/self_x_mel.png"></p>
+  <p align="center"><img src="../documents/theory_mbt/self_x_mel.svg"></p>
   
   The evaluation of these terms represents a minor fraction of the overall CPU time since only 
   occupied states are involved. However we should always keep in mind that, due to the long 
@@ -743,7 +641,7 @@ sec8:
   The expression for the matrix elements of the correlation part is instead given by:
   </p>
 
-  <p align="center"><img src="../documents/theory_mbt/self_c_mel.png"></p>
+  <p align="center"><img src="../documents/theory_mbt/self_c_mel.svg"></p>
   
   <!-- Safari does not recognize the code &#x1D4A5 for capital J -->
   where all dynamical effects are now contained in the frequency convolution integral <i>J</i>.
@@ -800,11 +698,6 @@ sec9:
   the frequency dependence of the inverse dielectric function is modeled according to
   </p>
 
-  <p align="center"><img src="../documents/theory_mbt/ppmodel_imag.png"></p>
-  
-  <p align="center"><img src="../documents/theory_mbt/ppmodel_real.png"></p>
-
-  $$
   \begin{equation}
   \label{eq:ppmodel_imag}
   \text{Im}\,\ee^{-1}_{\GG_1\GG_2}(\qq,\ww) = 
@@ -812,17 +705,14 @@ sec9:
   \bigl[
   \delta(\ww-\ww_{\GG_1\GG_2}(\qq)) - 
   \delta(\ww+\ww_{\GG_1\GG_2}(\qq))
-  \bigr].
+  \bigr]
   \end{equation}
-  $$
 
-  $$
   \begin{equation}
   \label{eq:ppmodel_real}
   \text{Re}\,\ee^{-1}_{\GG_1 \GG_2} (\qq,\ww) = 
-  \delta_{\GG_1 \GG_2} + \dfrac{\Omega_{\GG_1\GG_2}^2(\qq)}{\ww^2-\tww^2_{\GG_1\GG_2}(\qq)}.
+  \delta_{\GG_1 \GG_2} + \dfrac{\Omega_{\GG_1\GG_2}^2(\qq)}{\ww^2-\tww^2_{\GG_1\GG_2}(\qq)}
   \end{equation}
-  $$
   
   The two models differ in the approach used to compute the parameters. 
   [[ppmodel]]=1 derives the parameters such that the inverse dielectric matrix is correctly reproduced at 
@@ -852,11 +742,8 @@ sec10:
   along the imaginary axis plus contributions coming from the poles of the integrand lying inside 
   the contour:
   
-  <p align="center"><img src="../documents/theory_mbt/contour.png"></p>
+  <p align="center"><img src="../documents/theory_mbt/contour.svg"></p>
   
-  <p align="center"><img src="../documents/theory_mbt/GW_CD.png"></p>
-
-  $$
   \begin{equation}
   \label{eq:GW_CD}
   \Sigma_c(\ww) = \dfrac{i}{2\pi} \Bigl\{ 
@@ -864,7 +751,6 @@ sec10:
    -\int_\minf^\pinf G(\ww+i\ww')\,{W}^{\text{c}}(i\ww') \dd(i\ww')
    \Bigr\}.
   \end{equation}
-  $$
   
   In the above equation, the first sum is restricted to the poles lying inside the path 
   <i>C</i><!-- Safari does not render it correctly.
@@ -874,15 +760,11 @@ sec10:
   <i>W</i><sub>c</sub>(<i>z</i>) represents the frequency dependent part of the screened interaction, 
   whose expression in reciprocal space is given by:
   
-  <p align="center"><img src="../documents/theory_mbt/Wc.png"></p>
-
-  $$
   \begin{equation}
   W^{\text{c}}(\qq,\ww)_{\GG_1\GG_2} \equiv
   \bigl(\tee^{-1}_{\GG_1\GG_2}(\qq,\ww) -\delta_{\GG_1,\GG_2}\bigr)
   \,{\tilde v}_{\GG_1\GG_2}(\qq)
   \end{equation}
-  $$
   
   The integration along the imaginary axis is expected to converge quickly with respect to the 
   number of  sampled frequencies since the integrand is typically very smooth.
@@ -898,11 +780,7 @@ sec11:
  body: |
   The following shorthand notations are employed:
   
-  <p align="center"><img src="../documents/theory_mbt/notation_1.png"></p>
-
   $$ (1) \equiv (\rr_1,t_1) $$ 
-
-  $$ v(\rr_1,\rr_2) $$ 
 
   $$ \delta(12) = \delta(\rr_1-\rr_2)\,\delta(t_1-t_2) $$
 
@@ -917,21 +795,15 @@ sec11:
   
   <p>The Fourier transforms for periodic lattice quantities are defined as</p>
 
-  <p align="center"><img src="../documents/theory_mbt/notation_2.png"></p>
-
-  $$
   \begin{alignat}{2}\label{eq:FT_1point_convention}
    u(\rr)= \sum_\GG u(\GG)e^{i\GG\cdot\rr}, &\quad
    u(\GG) = \frac{1}{\Omega} \int_\Omega u(\rr)e^{-i\GG\cdot\rr}\dd\rr
   \end{alignat}
-  $$
 
-  $$
   \begin{equation}\label{eq:IFT_2points_convention}
    f(\rr_1,\rr_2)= \frac{1}{V} \sum_{\substack{\qq \\ \GG_1 \GG_2}}  
    e^{i (\qq +\GG_1) \cdot \rr_1}\,f_{\GG_1 \GG_2}(\qq)\,e^{-i (\qq+\GG_2) \cdot \rr_2} 
   \end{equation}
-  $$
 
   \begin{equation}\label{eq:FT_2points_convention}
    f_{\GG_1\GG_2}(\qq) = \frac{1}{V} \iint_V 
