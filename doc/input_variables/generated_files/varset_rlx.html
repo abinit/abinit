@@ -53,6 +53,7 @@ variables to be used in the main input file of the abinit code.
  <br><a id='B'></a>B.
  <a href="#bmass">bmass</a>&nbsp;&nbsp;
  <br><a id='C'></a>C.
+ <a href="#chkdilatmx">chkdilatmx</a>&nbsp;&nbsp;
  <a href="#cineb_start">cineb_start</a>&nbsp;&nbsp;
  <br><a id='D'></a>D.
  <a href="#delayperm">delayperm</a>&nbsp;&nbsp;
@@ -282,6 +283,23 @@ and can be made to evolve, e.g. with a genetic algorithm (not coded in v7.0.0 th
 <B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
 
 
+<br><font id="title"><a name="chkdilatmx">chkdilatmx</a></font>
+<br><font id="mnemonics">Mnemonics: CHecK DILATMX</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_GeoOpt.html">GeoOpt</a>.</font>
+<br><font id="smalltext">Rarely used: [1/907] in abinit tests, [0/136] in tuto abinit tests. Test list: {v3:[<a href="../../tests/v3/Input/t42.in">42</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 1</font>
+<br><font id="text">
+<p>
+If 0, will not stop the execution if the <a href="../../input_variables/generated_files/varset_rlx.html#dilatmx">dilatmx</a> threshold is exceeded, but simply issue a warning. There will be no rescaling.
+If 1, after tentative rescalings as described in <a href="../../input_variables/generated_files/varset_rlx.html#dilatmx">dilatmx</a>, will stop the execution.
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
 <br><font id="title"><a name="cineb_start">cineb_start</a></font>
 <br><font id="mnemonics">Mnemonics: Climbing-Image Nudged Elastic Band: STARTing iteration</font>
 <br><font id="mnemonics">Executable: abinit</font>
@@ -365,13 +383,14 @@ to find zero-force and stress configurations.
 <br><font id="text">
 <p>
 <p>
- Gives the maximal permitted scaling of
+Gives the maximal permitted scaling of
 the lattice parameters when the cell shape and
-dimension is varied (see variable <a href="../../input_variables/generated_files/varset_rlx.html#optcell">optcell</a>).
-It is used to define the sphere of plane waves
+dimension is varied (see variable <a href="../../input_variables/generated_files/varset_rlx.html#optcell">optcell</a>). Accordingly defines the plane wave basis set for this purpose. The <b>dilatmx</b> threshold might be exceeded if <a href="../../input_variables/generated_files/varset_rlx.html#chkdilatmx">chkdilatmx</a>=0, otherwise ABINIT exits after three tentative rescalings, as described below.
+<p>
+<b>dilatmx</b> is used to define the sphere of plane waves
 and FFT box coherent with the possible modifications
 of the cell (<a href="../../input_variables/generated_files/varset_rlx.html#ionmov">ionmov</a>==2 and
-[[optcell] /=0).
+<a href="../../input_variables/generated_files/varset_rlx.html#optcell">optcell</a> /=0).
 For these definitions, it is equivalent
 to changing <a href="../../input_variables/generated_files/varset_basic.html#ecut">ecut</a> by multiplying it by <b>dilatmx</b>
  <sup>
@@ -403,6 +422,8 @@ and memory.
 <a href="../../input_variables/generated_files/varset_rlx.html#optcell">optcell</a> =0, but
 a value larger than 1.0 will be a waste.
 </p>
+<p>
+When the <b>dilatmx</b> threshold is exceeded, ABINIT will rescale uniformly the tentative new primitive vectors to a value that leads at most to 90% of the maximal allowed <b>dilatmx</b> deviation from 1. It will do this three times (to forbid the geometry optimization algorithms to have take a too large trial step), but afterwards will exit. Setting <a href="../../input_variables/generated_files/varset_rlx.html#chkdilatmx">chkdilatmx</a>==0 allows the definition of an appropriate planewave basis, but will not lead to an exit when the threshold is exceeded.
 </font>
 
 <br><br><a href=#top>Go to the top</a>
