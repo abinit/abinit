@@ -53,6 +53,8 @@
 !!  usepaw= 0 for non paw calculation; =1 for paw calculation
 !!  usexcnhat= -PAW only- flag controling use of compensation density in Vxc
 !!  vpsp(nfft)=array for holding local psp
+!!  [vxc_hybcomp(nfft,nspden)= compensation xc potential (Hartree) in case of hybrids] Optional output
+!!       i.e. difference between the hybrid Vxc at fixed density and the auxiliary Vxc at fixed density
 !!  xccc3d(n3xccc)=3D core electron density for XC core correction (bohr^-3)
 !!  ==== if optres==0
 !!    vtrial(nfft,nspden)= old value of trial potential
@@ -61,6 +63,8 @@
 !!  energies <type(energies_type)>=all part of total energy.
 !!   | e_hartree=Hartree part of total energy (hartree units)
 !!   | e_xc=exchange-correlation energy (hartree)
+!!   | In case of hybrid compensation algorithm:
+!!   | e_hybcomp_v=self-consistent potential compensation term for the exchange-correlation energy (hartree)
 !!  ==== if optene==0.or.2
 !!   | e_localpsp=local psp energy (hartree)
 !!  ==== if optene==1.or.2
@@ -113,7 +117,7 @@ subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
 &  nhat,nhatgr,nhatgrdim,nkxc,vresidnew,n3xccc,optene,optres,optxc,&
 &  rhog,rhor,rprimd,strsxc,ucvol,usepaw,usexcnhat,&
 &  vhartr,vnew_mean,vpsp,vres_mean,vres2,vtrial,vxcavg,vxc,wvl,xccc3d,xred,&
-&  electronpositron,taug,taur,vxctau,add_tfw) ! optional arguments
+&  electronpositron,taug,taur,vxc_hybcomp,vxctau,add_tfw) ! optional arguments
 
  use defs_basis
  use defs_abitypes
@@ -170,17 +174,18 @@ subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
  real(dp),intent(in),optional :: taug(2,nfft*dtset%usekden)
  real(dp),intent(in),optional :: taur(nfft,dtset%nspden*dtset%usekden)
  real(dp),intent(out),optional :: vxctau(nfft,dtset%nspden,4*dtset%usekden)
+ real(dp),intent(out),optional :: vxc_hybcomp(:,:) ! (nfft,nspden)
 
 !Local variables-------------------------------
 !scalars
  integer :: nk3xc,ifft,ipositron,ispden,nfftot,offset
- integer :: mpi_comm_sphgrid
+ integer :: mpi_comm_sphgrid,ixc_current
  real(dp) :: doti,e_xcdc_vxctau
  logical :: add_tfw_,calc_xcdc,with_vxctau
  logical :: is_hybrid_ncpp,wvlbigdft=.false.
  type(xcdata_type) :: xcdata
 !arrays
- real(dp) :: evxc,qphon(3),tsec(2),vmean(dtset%nspden),vzeeman(dtset%nspden)
+ real(dp) :: evxc,tsec(2),vmean(dtset%nspden),vzeeman(dtset%nspden)
  real(dp),allocatable :: rhowk(:,:),Vmagconstr(:,:),vnew(:,:),xcart(:,:)
 
 ! *********************************************************************
@@ -221,9 +226,11 @@ subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
  if (ipositron/=1) then
 !  Compute xc potential (separate up and down if spin-polarized)
    if (dtset%icoulomb == 0 .and. dtset%usewvl == 0) then
-     qphon(:)=zero
-     call hartre(1,gsqcut,usepaw,mpi_enreg,nfft,ngfft,dtset%paral_kgb,qphon,rhog,rprimd,vhartr)
-     call xcdata_init(dtset%intxc,dtset%ixc,&
+     call hartre(1,gsqcut,usepaw,mpi_enreg,nfft,ngfft,dtset%paral_kgb,rhog,rprimd,vhartr)
+     !Use the proper exchange_correlation energy : either the origin one, or the auxiliary one
+     ixc_current=dtset%ixc
+     if(mod(dtset%fockoptmix,100)==11)ixc_current=dtset%fockaux_ixc
+     call xcdata_init(dtset%intxc,ixc_current,&
 &     dtset%nelect,dtset%tphysel,dtset%usekden,dtset%vdw_xc,dtset%xc_tb09_c,dtset%xc_denpos,xcdata)
 
 !    Use the periodic solver to compute Hxc.
@@ -236,6 +243,11 @@ subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
 &       nhat,usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,dtset%nspden,n3xccc,optxc,dtset%paral_kgb,&
 &       rhor,rprimd,strsxc,usexcnhat,vxc,vxcavg,xccc3d,xcdata,&
 &       taug=taug,taur=taur,vhartr=vhartr,vxctau=vxctau,add_tfw=add_tfw_)
+       if(mod(dtset%fockoptmix,100)==11)then
+!        For hybrid compensation, to be cleaned
+         energies%e_xc=energies%e_xc*dtset%fockaux_scal
+         vxc(:,:)=vxc(:,:)*dtset%fockaux_scal
+       endif
      else
        call rhotoxc(energies%e_xc,kxc,mpi_enreg,nfft,ngfft,&
 &       nhat,usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,dtset%nspden,n3xccc,optxc,dtset%paral_kgb,&
@@ -294,6 +306,14 @@ subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
 !  Compute local psp energy energies%e_localpsp
    call dotprod_vn(1,rhor,energies%e_localpsp,doti,nfft,nfftot,1,1,vpsp,ucvol,&
 &   mpi_comm_sphgrid=mpi_comm_sphgrid)
+ end if
+
+ if(mod(dtset%fockoptmix,100)==11)then
+   if (.not. wvlbigdft) then
+!    Compute second compensation energy for hybrid functionals
+     call dotprod_vn(1,rhor,energies%e_hybcomp_v,doti,nfft,nfftot,1,1,vxc_hybcomp,ucvol,&
+&     mpi_comm_sphgrid=mpi_comm_sphgrid)
+   endif
  end if
 
  calc_xcdc=.false.
@@ -386,6 +406,7 @@ subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
      do ispden=1,min(dtset%nspden,2)
        do ifft=1,nfft
          vnew(ifft,ispden)=vhartr(ifft)+vpsp(ifft)+vxc(ifft,ispden)+vzeeman(ispden)+Vmagconstr(ifft,ispden)
+         if(mod(dtset%fockoptmix,100)==11)vnew(ifft,ispden)=vnew(ifft,ispden)+vxc_hybcomp(ifft,ispden)
          vresidnew(ifft,ispden)=vnew(ifft,ispden)-vtrial(ifft,ispden)
        end do
      end do
@@ -394,6 +415,7 @@ subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
        do ispden=3,4
          do ifft=1,nfft
            vnew(ifft,ispden)=vxc(ifft,ispden)+vzeeman(ispden)+Vmagconstr(ifft,ispden)
+           if(mod(dtset%fockoptmix,100)==11)vnew(ifft,ispden)=vnew(ifft,ispden)+vxc_hybcomp(ifft,ispden)
            vresidnew(ifft,ispden)=vnew(ifft,ispden)-vtrial(ifft,ispden)
          end do
        end do
@@ -459,7 +481,7 @@ subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
 !  Compute square norm vres2 of potential residual vresid
    call sqnorm_v(1,nfft,vres2,dtset%nspden,optres,vresidnew(1+offset, 1),mpi_comm_sphgrid=mpi_comm_sphgrid)
 
- else ! optres
+ else ! optres/=0
 
 !  ------Produce new value of trial potential-------------
 
@@ -468,12 +490,14 @@ subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
      do ispden=1,min(dtset%nspden,2)
        do ifft=1,nfft
          vtrial(ifft,ispden)=vhartr(ifft)+vpsp(ifft)+vxc(ifft,ispden)+vzeeman(ispden)+Vmagconstr(ifft,ispden)
+         if(mod(dtset%fockoptmix,100)==11)vtrial(ifft,ispden)=vtrial(ifft,ispden)+vxc_hybcomp(ifft,ispden)
        end do
      end do
      if(dtset%nspden==4) then
 !$OMP PARALLEL DO
        do ifft=1,nfft
          vtrial(ifft,3:4)=vxc(ifft,3:4)+vzeeman(3:4)+Vmagconstr(ifft,3:4)
+         if(mod(dtset%fockoptmix,100)==11)vtrial(ifft,3:4)=vtrial(ifft,3:4)+vxc_hybcomp(ifft,3:4)
        end do
      end if
 !    Pass vtrial to BigDFT object

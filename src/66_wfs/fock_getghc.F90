@@ -295,7 +295,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
 !*   occ = occupancy of jband at this k point
      occ=fockbz%occ_bz(jband+bdtot_jindex,my_jsppol)
      if(occ<tol8) cycle 
-
+!if(jband/=fockcommon%ieigen.or.(fockcommon%ieigen/=1)) cycle
 ! ==============================================
 ! === Get cwaveocc_r in real space using FFT ===
 ! ==============================================
@@ -339,8 +339,10 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
 ! =======================================================
      call timab(1509,1,tsec)
      if (fockcommon%usepaw==1) then
-       ABI_ALLOCATE(rho12,(2,nfftf,nspinor**2))
        iband_cprj=(my_jsppol-1)*fockbz%mkptband+jbg+jband
+
+       ABI_ALLOCATE(rho12,(2,nfftf,nspinor**2))
+
        cwaveocc_prj=>fockbz%cwaveocc_prj(:,iband_cprj:iband_cprj+nspinor-1)
 
        call pawmknhat_psipsi(cwaveprj,cwaveocc_prj,ider,izero,natom,natom,nfftf,ngfftf,&
@@ -379,7 +381,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
 !    rhog_munu=rhog_munu*fockbz%wtk_bz(jkpt)
 
      call hartre(cplex_fock,fockcommon%gsqcut,fockcommon%usepaw,mpi_enreg,nfftf,ngfftf,&
-&     mpi_enreg%paral_kgb,qvec_j,rhog_munu,rprimd,vfock,divgq0=fock%divgq0)
+&     mpi_enreg%paral_kgb,rhog_munu,rprimd,vfock,divgq0=fock%divgq0,qpt=qvec_j)
 
 #else
      do ifft=1,nfftf
@@ -453,18 +455,6 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
 ! Stresses calculation
        if (fockcommon%optstr.and.(fockcommon%ieigen/=0)) then
 
-!         do iatom=1,natom
-!            ia=fockcommon%atindx(iatom)
-!            do ispinor=iband_cprj,iband_cprj+nspinor-1
-!              do ilmn=1,fockcommon%pawtab(gs_ham%typat(iatom))%lmn_size
-!                call stresssym(gs_ham%gprimd,1,fockbz%cwaveocc_prj(ia,ispinor)%dcp(1,:,ilmn),&
-!&                                     fockcommon%symrec(:,:,fockbz%tab_symkpt(jkpt)))
-!                call stresssym(gs_ham%gprimd,1,fockbz%cwaveocc_prj(ia,ispinor)%dcp(2,:,ilmn),&
-!&                                     fockcommon%symrec(:,:,fockbz%tab_symkpt(jkpt)))
-!              end do
-!            end do
-!          end do
-
          signs=2;choice=3;cpopt=4
 
        ! first contribution 
@@ -480,7 +470,6 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
            fockcommon%stress_ikpt(idir,fockcommon%ieigen)=fockcommon%stress_ikpt(idir,fockcommon%ieigen)-&
 &           dotr(idir)*occ*wtk/gs_ham%ucvol
          end do
-
        ! second contribution 
          str=zero
          do iatom=1,natom
@@ -505,7 +494,6 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
            fockcommon%stress_ikpt(idir,fockcommon%ieigen)=fockcommon%stress_ikpt(idir,fockcommon%ieigen)+&
 &           fockstr(idir)/nfftf*occ*wtk
          end do
-
        ! third contribution
          doti=zero
          do ifft=1,nfftf
@@ -526,6 +514,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
 ! =============================================================
 ! === Apply the local potential vfockloc_munu to cwaveocc_r ===
 ! =============================================================
+
      call timab(1507,1,tsec)
      ind=0
      do i3=1,ngfftf(3)
