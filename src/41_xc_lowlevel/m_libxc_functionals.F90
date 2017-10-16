@@ -48,7 +48,9 @@
 #endif
 
 #include "abi_common.h"
+#if defined HAVE_LIBXC 
 #include "xc_version.h"
+#endif
 
 module libxc_functionals
 
