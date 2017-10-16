@@ -12,7 +12,7 @@ intro : |
   <p>
   The conventions used in the equations are explained in the Many-body theory notes ([[theorydoc_mbt]]).
   A much more consistent discussion of the theoretical aspects of the Bethe-Salpeter 
-  equation can be found in [1].
+  equation can be found in [[Onida2002]] and references therein.
 
 ## Now come the different sections, numbered.
 
@@ -198,7 +198,7 @@ sec2:
   \end{equation}
   
   <p>
-  As discussed in [1], local field effects (LF) are included in the formalism through 
+  As discussed in [[Onida2002]], local field effects (LF) are included in the formalism through 
   the exchange term while the Coulomb term describes the screened electron-hole 
   interaction that is responsible for the creation of the excitons. All interaction 
   is in principle already contained in <i>W</i>, and the rewriting of the kernel 
@@ -247,7 +247,7 @@ sec2:
   
   thus leading to a considerable simplification in the mathematical formalism.
   <p>
-  After some algebra (see [1] for a more complete derivation) one finds that,
+  After some algebra (see [[Onida2002]] for a more complete derivation) one finds that,
   in a system with an energy gap, the Dyson-like equation for <i>L</i> can be expressed 
   in terms of an effective two-particle Hamiltonian, <i>H</i>, according to
   </p>
@@ -509,9 +509,9 @@ sec3:
   Another distinct advantage is that the Haydock method is less memory demanding than the direct diagonalization 
   since only three temporary vectors are required instead of the full set of eigenvectors.
   
-  <p>Note that the original formulation of the method presented in [3]
+  <p>Note that the original formulation of the method presented in [[Haydock1980]
   assumes an Hermitian operator thus it can be used only for TDA calculations.
-  We refer the reader to [4] for a generalization of the method to the
+  We refer the reader to [[Gruning2009]] for a generalization of the method to the
   case in which the coupling term cannot be neglected.
   The main drawback of the method is that it does not give direct access to the excitonic spectrum
   hence it cannot be used to calculate binding energies or to plot the excitonic wavefunctions.
@@ -607,7 +607,7 @@ sec5:
   Unfortunately, the above expression cannot be directly used
   because the matrix elements of the position operator are ill-defined when 
   wavefunctions obey Born-von Karman periodic boundary conditions. 
-  For this reason, the first order contribution has to be evaluated using the equivalent expression [5]
+  For this reason, the first order contribution has to be evaluated using the equivalent expression [[Baroni1986]]
   </p>
   
   \begin{equation}
@@ -644,16 +644,16 @@ sec5:
 ## Each section must have a title, that will form the table of content.
 ## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
 ## Note the small (one space) indentation for the title and body keys.
-sec6:
- title: "References"
- tag: references
- body: |
-  <ol>
-  <li><a name="onida_rmp">G. Onida, L. Reining, and A. Rubio, Rev. Mod. Phys. <b>48</b>, 601 (2002)
-  and references therein</a> </li><li><a name="albrecth">S. Albrecht, Ph.D. thesis, Ecole Polytechnique, Palaiseau (Paris), 1999</a> </li><li><a name="haydock2">R. Haydock, Comput. Phys. Comm. <b>20</b>, 11 (1980)</a> </li><li><a name="gruning">M. Gruning, A. Marini and X. Gonze, Nano Letters <b>9</b>, 2820 (2009) </a></li><li><a name="baroni1986">S. Baroni and R. Resta, Phys. Rev. B <b>33</b>, 7017 (1986) </a></li><!--
-  <li><a name="benedict">L. X. Benedict and E. L. Shirley, Phys. Rev. B <b>59</b>, 5441 (1999)</a> </li>
-  <li><a name="adler">S. L. Adler, Phys. Rev. <b>126</b>, 413 (1962)</a> </li>
-  <li><a name="wiser">N. Wiser, Phys. Rev. <b>129</b>, 72 (1963)</a> </li>
-  -->
-  </ol>
-  
+#sec6:
+# title: "References"
+# tag: references
+# body: |
+#  <ol>
+#  <li><a name="onida_rmp">G. Onida, L. Reining, and A. Rubio, Rev. Mod. Phys. <b>48</b>, 601 (2002)
+#  and references therein</a> </li><li><a name="albrecth">S. Albrecht, Ph.D. thesis, Ecole Polytechnique, Palaiseau (Paris), 1999</a> </li><li><a name="haydock2">R. Haydock, Comput. Phys. Comm. <b>20</b>, 11 (1980)</a> </li><li><a name="gruning">M. Gruning, A. Marini and X. Gonze, Nano Letters <b>9</b>, 2820 (2009) </a></li><li><a name="baroni1986">S. Baroni and R. Resta, Phys. Rev. B <b>33</b>, 7017 (1986) </a></li><!--
+#  <li><a name="benedict">L. X. Benedict and E. L. Shirley, Phys. Rev. B <b>59</b>, 5441 (1999)</a> </li>
+#  <li><a name="adler">S. L. Adler, Phys. Rev. <b>126</b>, 413 (1962)</a> </li>
+#  <li><a name="wiser">N. Wiser, Phys. Rev. <b>129</b>, 72 (1963)</a> </li>
+#  -->
+#  </ol>
+#  

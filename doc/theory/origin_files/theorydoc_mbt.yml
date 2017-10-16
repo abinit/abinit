@@ -10,7 +10,8 @@ intro : |
   We mainly focus on the aspects of the theory that are important for understanding the 
   different steps of the calculation and the role played by the input variables used to control the run.
   A much more consistent and rigorous introduction to the physical concept of 
-  Green's function and self-energy can be found in any standard textbook on Many-Body theory, see for example [1,2,3].
+  Green's function and self-energy can be found in any standard textbook on Many-Body theory, see for example 
+  [[Abrikosov1975]], [[Fetter1971]], [[Mattuck1976]].
   </p>
 
 ## Now come the different sections, numbered.
@@ -43,9 +44,10 @@ sec1:
   acting on the system can be evaluated once the Green's function is known.
   <p>
   Useful physical information about the charged excitation energies 
-  of the many-body system can be obtained by expressing the propagator in the so-called Lehmann representation [1-2-3].
+  of the many-body system can be obtained by expressing the propagator in the so-called Lehmann representation.
+  [[Abrikosov1975]], [[Fetter1971]], [[Mattuck1976]].
   To this purpose it is useful to introduce the following notation to denote the 
-  charged excitation energies of the $N$-electron system[5]:
+  charged excitation energies of the $N$-electron system [[Onida2002]]:
   </p>
 
   \begin{equation}
@@ -119,7 +121,7 @@ sec1:
   The self-energy is not a mere mathematical device used in a roundabout way to obtain <i>G</i> but is has a direct physical meaning.
   The knowledge of the self-energy operator, allows one to 
   describe the quantum-mechanical state of a renormalized electron in the many-body system
-  by solving the quasiparticle (QP) equation[5]:
+  by solving the quasiparticle (QP) equation [[Onida2002]]:
   </p>
 
   \begin{equation}
@@ -149,7 +151,7 @@ sec2:
  title: "Hedin's equations"
  tag: hedins_equations
  body: |
-  In 1965 Hedin[6] showed how to derive a set of coupled integro-differential equations
+  In 1965 Hedin [[Hedin1965]] showed how to derive a set of coupled integro-differential equations
   whose self-consistent solution, in principle, gives the exact self-energy of the system and
   therefore the exact <i>G</i>.
   <!--
@@ -190,7 +192,7 @@ sec2:
   
   The polarization function renormalises the bare interaction resulting in the screened interaction <i>W</i>(12). 
   The screened interaction, <i>W</i>(12), the many-body propagator <i>G</i>(12), and the vertex function, &#915;(12;3), 
-  which describe the interactions between virtual hole and electron excitations [5],
+  which describe the interactions between virtual hole and electron excitations [[Onida2002]],
   are the essential ingredients for the determination of &#931;(12). 
   <p>
   The iteration starts by setting <i>G</i> = <i>G<sub>0</sub></i>. Then the set of equations should 
@@ -212,7 +214,7 @@ sec3:
   </p>
   <p>
   A widely used approach to the approximate solution of Hedin's equations is the so-called 
-  <i>GW</i> approximation[6], which consists in approximating the vertex function with a local and instantaneous function:
+  <i>GW</i> approximation [[Hedin1965]], which consists in approximating the vertex function with a local and instantaneous function:
   </p>
 
   \begin{equation}
@@ -232,7 +234,8 @@ sec3:
   \tchi = -i\,G(12)G(21^+).
   \end{equation}
   
-  which, once rewritten in terms of orbitals and energies, reduces to the RPA expression proposed by Adler [7] and Wiser [8].
+  which, once rewritten in terms of orbitals and energies, reduces to the RPA expression proposed 
+  by Adler [[Adler1962]] and Wiser [[Wiser1963]].
   <p>
   In real space, the self-energy reduces to a simple direct product of the dressed electron
   propagator, <i>G</i>(12), and the dynamically screened interaction, <i>W</i>(12):
@@ -314,7 +317,7 @@ sec4:
   This observation suggests that a simple, albeit accurate, solution for the QP energies can be obtained using 
   first-order perturbation theory, treating the exchange and correlation potential, <i>V<sub>xc</sub></i>, 
   as a zeroth-order approximation to the non-local and energy dependent 
-  self-energy [11,12]
+  self-energy [[Hybertsen1985]], [[Hybertsen1986]]
   
   <!--
   <p>
@@ -411,7 +414,7 @@ sec5:
   
   from which the inverse dielectric function is obtained via matrix inversion.
   
-  Following Adler [7,8], the macroscopic dielectric function, &#1108;<sub>M</sub><sup>LF</sup>(&#969;), can be directly related to 
+  Following Adler [[Adler1962]], the macroscopic dielectric function, &#1108;<sub>M</sub><sup>LF</sup>(&#969;), can be directly related to 
   the inverse of the microscopic dielectric matrix by means of:
   
   \begin{equation}
@@ -528,15 +531,15 @@ sec7:
 
   <p>
   This computational bottleneck can be removed, under certain circumstances, by employing an efficient
-  algorithm proposed in [13] and subsequently revisited in [14], in which only the spectral function 
+  algorithm proposed in [[Miyake2000]] and subsequently revisited in [[Shishkin2006]], in which only the spectral function 
   </p>
 
   <p align="center"><img src="../documents/theory_mbt/sf_chi0.svg"></p>
   
   has to be evaluated in terms of electronic transitions between valence and conduction states.
   The Dirac delta function can be approximated either by means of a triangular function centered 
-  at the energy transition following [14] or a gaussian approximant 
-  following [13] (see the related input variables  [[spmeth]], and [[spbroad]]).
+  at the energy transition following [[Shishkin2006]] or a gaussian approximant 
+  following [[Miyake2000]] (see the related input variables  [[spmeth]], and [[spbroad]]).
   The spectral function is evaluated on a linear frequency mesh which covers the entire set
   of transition energies included in the calculation. 
   The number of points in the mesh is given by [[nomegasf]].
@@ -650,7 +653,7 @@ sec8:
   The explicit expression for <i>J</i> depends on the method used to treat the screened interaction. 
   The code implements four different plasmon-pole techniques to model the frequency dependence of
   <b>W</b> in an efficient but approximate way, alternatively, it is possible to use the more sophisticated 
-  frequency integration of the contour deformation method [15]
+  frequency integration of the contour deformation method [[Lebegue2003]
   for accurate QP calculations (see the related variables [[ppmodel]] and [[gwcalctyp]]).
   </p>
   <p>
@@ -722,7 +725,7 @@ sec9:
   The plasmon-pole parameters of  [[ppmodel]]=2
   are calculated so as to reproduce the static limit exactly and to 
   fulfill a generalized frequency sum rule relating the imaginary part of the many-body inverse 
-  dielectric matrix to the plasma frequency and the charge density [12]
+  dielectric matrix to the plasma frequency and the charge density [[Hybertsen1986]]
   
   <p>
   For a discussion of the models corresponding to [[ppmodel]]=3,4 we refer the reader to the 
@@ -736,7 +739,7 @@ sec10:
  tag: contour_deformation
  body: |
   The contour deformation method was proposed in order to avoid having to deal with quantities close
-  to the real axis as much as possible [15].
+  to the real axis as much as possible [[Lebegue2003]].
   The integral over the real frequency axis can be transformed into an integral over the contour 
   depicted in red in the figure below. The integral over real frequency is traded with an integration 
   along the imaginary axis plus contributions coming from the poles of the integrand lying inside 
@@ -817,80 +820,80 @@ sec11:
 ## Each section must have a title, that will form the table of content.
 ## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
 ## Note the small (one space) indentation for the title and body keys.
-sec12:
- title: "References"
- tag: references
- body: |
-  <ol>
-  <li><a name="Abrikosov1975">
-    Abrikosov, Gorkov, and Dzyaloshinskii.
-    Methods of quantum field theory in statistical physics,
-    Dover, New York,
-    (1975)
-  </a> </li><li><a name="Fetter1971">
-    Fetter, and Walecka. 
-    Quantum Theory of Many-Particle Systems,
-    McGraw-Hill, New York,
-    (1971)
-  </a> </li><li><a name="Mattuck1992">
-    R.D Mattuck.
-    A guide to Feynman diagrams in the many-body problem,
-    Dover, New York,
-    (1992)
-  </a> </li><li><a name="Aulbur2000">
-    W. G. Aulbur, 
-    L. J&ouml;nsson 
-    and J. W. Wilkins, 
-    Solid State Physics <b>54</b>, 1 (2000)
-  </a></li><li><a name="Onida1995">
-    G. Onida et al.
-    Phys. Rev. Lett.
-    <b>75</b>, 818
-    (1995)
-  </a> </li><li><a name="Hedin1965">
-  L. Hedin
-  Phys. Rev.
-  <b>139</b>, 
-  A796, (1965)
-  </a> </li><li><a name="adler">S. L. Adler, Phys. Rev. <b>126</b>, 413 (1962)</a> </li><li><a name="wiser">N. Wiser, Phys. Rev. <b>129</b>, 72 (1963)</a> </li><li><a name="2009">
-    A. Kutepov, S. Y. Savrasov and G. Kotliar
-    Phys. Rev. B
-    <b>80</b>, 041103(R)
-    (2009)
-  </a> </li><li><a name="Kutepov2009">
-    A. Kutepov, S. Y. Savrasov and G. Kotliar
-    Phys. Rev. B
-    <b>80</b>, 041103(R)
-    (2009)
-  </a> </li><li><a name="Hybertsen1985">
-  M.S. Hybertsen, and S.G Louie.
-  Phys. Rev. Lett.
-  <b>55</b>,
-  1418
-  (1985)
-  </a></li><li><a name="Hybertsen1986">
-  M.S. Hybertsen, and S.G Louie.
-  Phys. Rev. B
-  <b>34</b>,
-  5390
-  (1986)
-  </a></li><li><a name="Miyake2000">
-  T. Miyake, and F. Aryasetiawan.
-  Phys. Rev. B,
-  <b>61</b>,
-  7172
-  (2000)
-  </a></li><li><a name="Shishkin2006">
-  M. Shishkin, and G. Kresse.
-  Phys. Rev. B,
-  <b>74</b>,
-  035101
-  (2006)
-  </a></li><li><a name="Lebegue2003">
-  S. Lebegue, B. Arnaud, M. Alouani, and P.E. Bloechl.
-  Phys. Rev. B,
-  <b>67</b>,
-  155208
-  (2003)
-  </a></li>
-  </ol>
+#sec12:
+# title: "References"
+# tag: references
+# body: |
+#  <ol>
+#  <li><a name="Abrikosov1975">
+#    Abrikosov, Gorkov, and Dzyaloshinskii.
+#    Methods of quantum field theory in statistical physics,
+#    Dover, New York,
+#    (1975)
+#  </a> </li><li><a name="Fetter1971">
+#    Fetter, and Walecka. 
+#    Quantum Theory of Many-Particle Systems,
+#    McGraw-Hill, New York,
+#    (1971)
+#  </a> </li><li><a name="Mattuck1992">
+#    R.D Mattuck.
+#    A guide to Feynman diagrams in the many-body problem,
+#    Dover, New York,
+#    (1992)
+#  </a> </li><li><a name="Aulbur2000">
+#    W. G. Aulbur, 
+#    L. J&ouml;nsson 
+#    and J. W. Wilkins, 
+#    Solid State Physics <b>54</b>, 1 (2000)
+#  </a></li><li><a name="Onida1995">
+#    G. Onida et al.
+#    Phys. Rev. Lett.
+#    <b>75</b>, 818
+#    (1995)
+#  </a> </li><li><a name="Hedin1965">
+#  L. Hedin
+#  Phys. Rev.
+#  <b>139</b>, 
+#  A796, (1965)
+#  </a> </li><li><a name="adler">S. L. Adler, Phys. Rev. <b>126</b>, 413 (1962)</a> </li><li><a name="wiser">N. Wiser, Phys. Rev. <b>129</b>, 72 (1963)</a> </li><li><a name="2009">
+#    A. Kutepov, S. Y. Savrasov and G. Kotliar
+#    Phys. Rev. B
+#    <b>80</b>, 041103(R)
+#    (2009)
+#  </a> </li><li><a name="Kutepov2009">
+#    A. Kutepov, S. Y. Savrasov and G. Kotliar
+#    Phys. Rev. B
+#    <b>80</b>, 041103(R)
+#    (2009)
+#  </a> </li><li><a name="Hybertsen1985">
+#  M.S. Hybertsen, and S.G Louie.
+#  Phys. Rev. Lett.
+#  <b>55</b>,
+#  1418
+#  (1985)
+#  </a></li><li><a name="Hybertsen1986">
+#  M.S. Hybertsen, and S.G Louie.
+#  Phys. Rev. B
+#  <b>34</b>,
+#  5390
+#  (1986)
+#  </a></li><li><a name="Miyake2000">
+#  T. Miyake, and F. Aryasetiawan.
+#  Phys. Rev. B,
+#  <b>61</b>,
+#  7172
+#  (2000)
+#  </a></li><li><a name="Shishkin2006">
+#  M. Shishkin, and G. Kresse.
+#  Phys. Rev. B,
+#  <b>74</b>,
+#  035101
+#  (2006)
+#  </a></li><li><a name="Lebegue2003">
+#  S. Lebegue, B. Arnaud, M. Alouani, and P.E. Bloechl.
+#  Phys. Rev. B,
+#  <b>67</b>,
+#  155208
+#  (2003)
+#  </a></li>
+#  </ol>
