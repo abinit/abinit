@@ -47,7 +47,7 @@ $RobodocLast = '!!***';		# last source line
 # Upper case keywords that should trigger a warning and exceptions ...
 @UpCaseKeyWds = ('CASE','DO','ELSE','END','IF','SELECT','THEN');
 # ... excluding if present in the following expressions ...
-@UpCaseExcl =('DOS','DOWN','DOUBLE','DOCTYPE','MPI_SEND','ENDDEF','DOT_PRODUCT');
+@UpCaseExcl =('DOS','DOWN','DOUBLE','DOCTYPE','MPI_SEND','ENDDEF','DOT_PRODUCT','IFC');
 # ENDDEBUG and TODO are normally commented
 #
 # Indentation constants (that may be changed with caution):

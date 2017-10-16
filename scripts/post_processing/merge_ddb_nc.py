@@ -13,7 +13,7 @@
 #    Please read ~abinit/doc/users/acknowledgments.html for suggested
 #    acknowledgments of the ABINIT effort.
 #
-#    For more information, see http://www.abinit.org .
+#    For more information, see https://www.abinit.org .
 
 """
 This script can be run interactively,

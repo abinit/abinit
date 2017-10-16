@@ -904,7 +904,6 @@ integer function dvdb_read_onev1(db, idir, ipert, iqpt, cplex, nfft, ngfft, v1sc
  type(MPI_type) :: MPI_enreg_seq
 !arrays
  integer :: ngfft_in(18),ngfft_out(18)
- integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:),fftn3_distrib(:),ffti3_local(:)
  real(dp),allocatable :: v1r_file(:,:),v1g_in(:,:),v1g_out(:,:)
 
 ! *************************************************************************
@@ -1047,7 +1046,6 @@ subroutine dvdb_readsym_allv1(db, iqpt, cplex, nfft, ngfft, v1scf, comm)
  integer :: ipc,npc,idir,ipert,pcase,my_rank,nproc,ierr,mu
  character(len=500) :: msg
 !arrays
- integer :: symq(4,2,db%cryst%nsym)
  integer :: pinfo(3,3*db%mpert),pflag(3, db%natom)
 
 ! *************************************************************************
@@ -1220,7 +1218,7 @@ pcase_loop: &
    tsign = 3-2*itirev_eq
 
    ! Phase due to L0 + R^{-1}tau
-   l0 = cryst%indsym(1:3,isym_eq,ipert_eq)
+   l0 = cryst%indsym(1:3,isym_eq,ipert)
    call mati3inv(symrel_eq, symm); symm = transpose(symm)
 
    tnon = l0 + matmul(transpose(symrec_eq), cryst%tnons(:,isym_eq))
@@ -2378,14 +2376,13 @@ subroutine dvdb_get_v1scf_rpt(db, cryst, ngqpt, nqshift, qshift, nfft, ngfft, &
 !scalars
  integer,parameter :: sppoldbl1=1,timrev1=1,tim_fourdp0=0
  integer :: my_qptopt,iq_ibz,nqibz,iq_bz,nqbz
- integer :: ii,iq_dvdb,cplex_qibz,ispden,mu,irpt,idir,iat
+ integer :: ii,iq_dvdb,cplex_qibz,ispden,irpt,idir,iat
  integer :: iqst,nqst,itimrev,tsign,isym,ix,iy,iz,nq1,nq2,nq3,r1,r2,r3
  integer :: nproc,my_rank,ifft,cnt,ierr
  real(dp) :: dksqmax,phre,phim
  logical :: isirr_q, found
- type(mpi_type) :: mpi_enreg_seq
 !arrays
- integer :: qptrlatt(3,3),g0q(3),ngfft_qspace(18)
+ integer :: qptrlatt(3,3),g0q(3)
  integer,allocatable :: indqq(:,:),iperm(:),bz2ibz_sort(:),nqsts(:),iqs_dvdb(:)
  real(dp) :: qpt_bz(3),shift(3) !,qpt_ibz(3)
  real(dp),allocatable :: qibz(:,:),qbz(:,:),wtq(:),emiqr(:,:)
@@ -2738,7 +2735,7 @@ subroutine dvdb_get_v1scf_qpt(db, cryst, qpt, nfft, ngfft, nrpt, nspden, &
 !Local variables-------------------------------
 !scalars
  integer,parameter :: cplex2=2
- integer :: ir,ispden,ifft,mu,idir,iat,timerev_q,nproc,my_rank,cnt,ierr
+ integer :: ir,ispden,ifft,idir,iat,timerev_q,nproc,my_rank,cnt,ierr
  real(dp) :: wr,wi
 !arrays
  integer :: symq(4,2,db%cryst%nsym)
@@ -3001,7 +2998,7 @@ subroutine dvdb_seek(db, idir, ipert, iqpt)
  type(dvdb_t),intent(inout) :: db
 
 !Local variables-------------------------------
- integer :: pos_wanted,ii,ispden,ierr
+ integer :: pos_wanted,ii,ispden
  real(dp),parameter :: fake_qpt(3)=zero
  character(len=500) :: msg
 
@@ -4034,7 +4031,7 @@ subroutine dvdb_test_ftinterp(db_path, ngqpt, comm)
 
 !Local variables-------------------------------
 !scalars
- integer :: nfft,iq,cplex,mu,ispden,ifft
+ integer :: nfft,iq,cplex,mu,ispden
  type(dvdb_t) :: db
 !arrays
  integer :: ngfft(18)
@@ -4321,18 +4318,17 @@ subroutine dvdb_interpolate_and_write(dtfil, ngfft, ngfftf, cryst, dvdb, &
  integer,parameter :: master=0
  integer :: fform_pot=111
  integer :: ierr
- integer :: my_rank,nproc,iomode,idir,ipert,iat,ipc,ispden
+ integer :: my_rank,nproc,idir,ipert,iat,ipc,ispden
  integer :: cplex,db_iqpt,natom,natom3,npc,trev_q,nspden
  integer :: nqbz, nqibz, iq, ifft, nqbz_coarse
  integer :: nperts_read, nperts_interpolate, nperts
  integer :: nqpt_read, nqpt_interpolate
- integer :: n1,n2,n3,n4,n5,n6
- integer :: nfft,nfftf,mgfft,mgfftf,nkpg,nkpg1
+ integer :: nfft,nfftf,mgfftf
  integer :: ount, unt, fform
  real(dp) :: cpu,wall,gflops
  logical :: i_am_master
  character(len=500) :: msg
- character(len=fnlen) :: fname, new_ddb_fname
+ character(len=fnlen) :: new_ddb_fname
 !arrays
  integer :: qptrlatt(3,3)
  integer :: symq(4,2,cryst%nsym)

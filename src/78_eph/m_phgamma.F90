@@ -3357,7 +3357,7 @@ subroutine a2fw_tr_init(a2f_tr,gams,cryst,ifc,intmeth,wstep,wminmax,smear,ngqpt,
  integer :: mu,iw,natom3,nsppol,spin,ierr,nomega,nqbz
  integer :: idir, jdir
  real(dp) :: cpu,wall,gflops
- real(dp) :: omega,xx,omega_min,omega_max,ww,mustar,tc_macmill
+ real(dp) :: omega,xx,omega_min,omega_max,ww
  logical :: do_qintp
  character(len=500) :: msg
  type(t_tetrahedron) :: tetra

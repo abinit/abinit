@@ -461,7 +461,6 @@ subroutine mcsrch(N,X,F,G,S,STP,FTOL,MAXFEV,INFO,NFEV,WA, &
  real(dp),parameter :: P5     = 0.50_dp
  real(dp),parameter :: P66    = 0.66_dp
  real(dp),parameter :: XTRAPF = 4.00_dp
- integer :: J
  real(dp) :: DG,DGM,DGTEST,DGXM,DGYM, &
         FTEST1,FM,FXM,FYM,WIDTH,WIDTH1
 !***************************************************************************

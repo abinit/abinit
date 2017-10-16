@@ -114,7 +114,7 @@ AC_DEFUN([_ABI_MATH_CHECK_MLIB],[
     dnl FIXME: implement something
     dnl _ABI_MATH_CHECK_USER
     dnl abi_math_mlib_serial="${abi_math_user_serial}"
-    dnl abi_math_mlib_mpi="${abi_math_user_mpi}"µ
+    dnl abi_math_mlib_mpi="${abi_math_user_mpi}"
     AC_MSG_WARN([library check not implemented])
     abi_math_mlib_serial="yes"
     if test "${enable_mpi}" = "yes"; then

@@ -435,8 +435,8 @@ subroutine dfpt_nselt(blkflg,cg,cg1,cplex,&
 &     ucvol,psps%vlspl,vpsp1)
 
 !    Get first-order hartree potential.
-     call hartrestr(gmet,gprimd,gsqcut,idir1,ipert1,mpi_enreg,natom,nfft,ngfft,&
-&     paral_kgb,rhog,vhartr01)
+     call hartrestr(gsqcut,idir1,ipert1,mpi_enreg,natom,nfft,ngfft,&
+&     paral_kgb,rhog,rprimd,vhartr01)
 
 !    Get first-order exchange-correlation potential
      if(psps%n1xccc/=0)then

@@ -122,7 +122,7 @@ subroutine psp9in(filpsp,ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
 !Local variables-------------------------------
 !no_abirules
 !scalars
- integer :: iln,pspindex,ipsang,irad,jj,kk,ll
+ integer :: iln,pspindex,ipsang,irad,kk,ll
  integer :: mm,nn,nso,ii,ir,il
  real(dp) :: amesh,damesh,fchrg,rchrg,yp1,ypn,zval
  logical :: has_tvale,oncvpsp
@@ -130,11 +130,9 @@ subroutine psp9in(filpsp,ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
  type(pawrad_type) :: mesh
  character(len=30)  :: creator
  character(len=7), parameter  :: oncvpsp_name = "ONCVPSP"
- integer :: i1xccc,iproj,irelt,nders
+ integer :: iproj,irelt,nders
  real(dp) :: rmax,rmatch,z,chgvps
- real(dp) :: c1,c2,c3,c4,dri,pi4i,tff,xp,xpm1,xpm2,xpp1,xx
 !arrays
- real(dp) :: rscale(5)
  integer, allocatable :: idx_so(:),idx_sr(:)
  real(dp),allocatable :: rad(:),vloc(:),vpspll(:,:),work_spl(:)
 #if defined HAVE_PSML

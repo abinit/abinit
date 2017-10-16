@@ -568,9 +568,6 @@ subroutine entropyDMFT_init(e_t,dt,pawtab,spacecomm,ifilename,ofilename)
 
     type(entropyDMFT_t), intent(inout) :: e_t
 !Local variables-------------------------------
-    character(len=200) :: msg
-    character(len=21 ) :: hdr
-    integer            :: iostate
     integer            :: ilambda
     integer            :: ictypat
     integer            :: ndim
@@ -579,7 +576,6 @@ subroutine entropyDMFT_init(e_t,dt,pawtab,spacecomm,ifilename,ofilename)
     integer            :: iflavor2
     integer            :: icatom
     integer            :: iatom
-    real(dp)           :: lambda
 
     if ( e_t%rank /= 0 ) return
 

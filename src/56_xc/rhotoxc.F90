@@ -1,11 +1,11 @@
 !{\src2tex{textfont=tt}}
-!!****f* ABINIT/rhohxc
+!!****f* ABINIT/rhotoxc
 !! NAME
-!! rhohxc
+!! rhotoxc
 !!
 !! FUNCTION
 !! Start from the density or spin-density, and
-!! compute Hartree (if option>=1) and xc correlation potential and energies.
+!! compute xc correlation potential and energies.
 !! Eventually compute xc kernel (if option=-2, 2, 3, 10 or 12).
 !! Cannot be used with wavelets.
 !!
@@ -17,9 +17,6 @@
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
-!!  gsqcut=cutoff value on G**2 for sphere inside fft box.
-!! (gsqcut=(boxcut**2)*ecut/(2.d0*(Pi**2))
-!!  izero=if 1, unbalanced components of Vhartree(g) have to be set to zero
 !!  mpi_enreg=information about MPI parallelization
 !!  nfft=(effective) number of FFT grid points (for this processor)
 !!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
@@ -31,22 +28,21 @@
 !!   the exchange-correlation kernel must be computed.
 !!  nspden=number of spin-density components
 !!  n3xccc=dimension of the xccc3d array (0 or nfft or cplx*nfft).
-!!  option=0 for xc only (exc, vxc, strsxc),
-!!         1 for Hxc (idem + vhartr) ,
-!!         2 for Hxc and kxc (no paramagnetic part if nspden=1)
+!!  option=0 or 1 for xc only (exc, vxc, strsxc),
+!!         2 for xc and kxc (no paramagnetic part if nspden=1)
 !!        10 for xc  and kxc with only partial derivatives wrt density part (d2Exc/drho^2)
-!!        12 for Hxc and kxc with only partial derivatives wrt density part (d2Exc/drho^2)
+!!        12 for xc and kxc with only partial derivatives wrt density part (d2Exc/drho^2)
 !!              and, in the case of hybrid functionals, substitution of the hybrid functional
 !!              by the related fallback GGA functional for the computation of the xc kernel (not for other quantities)
-!!         3 for Hxc, kxc and k3xc
-!!        -2 for Hxc and kxc (with paramagnetic part if nspden=1)
+!!         3 for xc, kxc and k3xc
+!!        -2 for xc and kxc (with paramagnetic part if nspden=1)
 !!  paral_kgb=Flag related to the kpoint-band-fft parallelism
-!!  rhog(2,nfft)=electron density in G space
 !!  rhor(nfft,nspden)=electron density in real space in electrons/bohr**3
 !!   (total in first half and spin-up in second half if nspden=2)
 !!   (total in first comp. and magnetization in comp. 2 to 4 if nspden=4)
 !!  rprimd(3,3)=dimensional primitive translations in real space (bohr)
 !!  usexcnhat= -PAW only- 1 if nhat density has to be taken into account in Vxc
+!!  [vhartr(nfft)=Hartree potential (only needed for Fermi-Amaldi functional)]
 !!  xcdata <type(xcdata_type)>=storage for different input variables and derived parameters needed to compute the XC functional
 !!  xccc3d(n3xccc)=3D core electron density for XC core correction (bohr^-3)
 !!
@@ -65,7 +61,6 @@
 !!               - depsxc_drho(up,i)*rhor(up,i)-depsxc_drho(dn,i)*rhor(dn,i)]
 !!     - gradrho(up,mu)*gradrho(up,nu) * depsxc_dgradrho(up,i) / gradrho(up,i)
 !!     - gradrho(dn,mu)*gradrho(dn,nu) * depsxc_dgradrho(dn,i) / gradrho(dn,i) )
-!!  vhartr(nfft)=Hartree potential (returned if option/=0 and option/=10)
 !!  vxc(nfft,nspden)=xc potential
 !!    (spin up in first half and spin down in second half if nspden=2)
 !!    (v^11, v^22, Re[V^12], Im[V^12] if nspden=4)
@@ -215,10 +210,10 @@
 
 #include "abi_common.h"
 
-subroutine rhohxc(enxc,gsqcut,izero,kxc,mpi_enreg,nfft,ngfft, &
+subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
 & nhat,nhatdim,nhatgr,nhatgrdim,nkxc,nk3xc,nspden,n3xccc,option,paral_kgb, &
-& rhog,rhor,rprimd,strsxc,usexcnhat,vhartr,vxc,vxcavg,xccc3d,xcdata, &
-& k3xc,electronpositron,taug,taur,vxctau,exc_vdw_out,add_tfw) ! optional arguments
+& rhor,rprimd,strsxc,usexcnhat,vxc,vxcavg,xccc3d,xcdata, &
+& k3xc,electronpositron,taug,taur,vhartr,vxctau,exc_vdw_out,add_tfw) ! optional arguments
 
  use defs_basis
  use defs_abitypes
@@ -235,22 +230,21 @@ subroutine rhohxc(enxc,gsqcut,izero,kxc,mpi_enreg,nfft,ngfft, &
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'rhohxc'
+#define ABI_FUNC 'rhotoxc'
  use interfaces_18_timing
  use interfaces_41_geometry
  use interfaces_41_xc_lowlevel
  use interfaces_53_spacepar
- use interfaces_56_xc, except_this_one => rhohxc
+ use interfaces_56_xc, except_this_one => rhotoxc
 !End of the abilint section
 
  implicit none
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: izero,nk3xc,n3xccc,nfft,nhatdim,nhatgrdim,nkxc,nspden,option,paral_kgb
+ integer,intent(in) :: nk3xc,n3xccc,nfft,nhatdim,nhatgrdim,nkxc,nspden,option,paral_kgb
  integer,intent(in) :: usexcnhat
  logical,intent(in),optional :: add_tfw
- real(dp),intent(in) :: gsqcut
  real(dp),intent(out) :: enxc,vxcavg
  real(dp),intent(out),optional :: exc_vdw_out
  type(MPI_type),intent(in) :: mpi_enreg
@@ -259,22 +253,22 @@ subroutine rhohxc(enxc,gsqcut,izero,kxc,mpi_enreg,nfft,ngfft, &
 !arrays
  integer,intent(in) :: ngfft(18)
  real(dp),intent(in) :: nhat(nfft,nspden*nhatdim)
- real(dp),intent(in) :: nhatgr(nfft,nspden,3*nhatgrdim),rhog(2,nfft)
+ real(dp),intent(in) :: nhatgr(nfft,nspden,3*nhatgrdim)
  real(dp),intent(in),target :: rhor(nfft,nspden)
  real(dp),intent(in) :: rprimd(3,3),xccc3d(n3xccc)
- real(dp),intent(out) :: kxc(nfft,nkxc),strsxc(6),vhartr(nfft),vxc(nfft,nspden)
- real(dp),intent(in),optional :: taug(:,:),taur(:,:)
+ real(dp),intent(out) :: kxc(nfft,nkxc),strsxc(6),vxc(nfft,nspden)
+ real(dp),intent(in),optional :: taug(:,:),taur(:,:),vhartr(nfft)
  real(dp),intent(out),optional :: k3xc(1:nfft,1:nk3xc),vxctau(:,:,:)
 
 !Local variables-------------------------------
 !scalars
- integer :: cplex,ierr,ifft,ii,intxc,ixc,ixc_fallbackkxc_hyb,indx,ipositron,ipts,ishift,ispden,iwarn,iwarnp
+ integer :: cplex,ierr,ifft,ii,ixc,ixc_fallbackkxc_hyb,indx,ipositron,ipts,ishift,ispden,iwarn,iwarnp
  integer :: jj,mpts,ndvxc,nd2vxc,nfftot,ngr,ngr2,ngrad,ngrad_apn,nkxc_eff,npts
  integer :: nspden_apn,nspden_eff,nspden_updn,nspgrad,nvxcgrho,order,mgga,usefxc
  integer :: nproc_fft,comm_fft
  logical :: add_tfw_
  real(dp),parameter :: mot=-one/3.0_dp
- real(dp) :: coeff,divshft,doti,dstrsxc,dvdn,dvdz,epsxc,exc_str,factor,m_norm_min,nelect,s1,s2,s3
+ real(dp) :: coeff,divshft,doti,dstrsxc,dvdn,dvdz,epsxc,exc_str,factor,m_norm_min,s1,s2,s3
  real(dp) :: strdiag,strsxc1_tot,strsxc2_tot,strsxc3_tot,strsxc4_tot
  real(dp) :: strsxc5_tot,strsxc6_tot,ucvol
  logical :: allow3,test_nhat,with_vxctau
@@ -305,6 +299,8 @@ subroutine rhohxc(enxc,gsqcut,izero,kxc,mpi_enreg,nfft,ngfft, &
 !      - ipositron==2 and ngrad_apn==2
 !      - usewvl/=0
 !      - test_nhat and usexcnhat==1 and nspden==4
+
+ call timab(81,1,tsec)
 
 !Check options
  ixc=xcdata%ixc
@@ -360,13 +356,6 @@ subroutine rhohxc(enxc,gsqcut,izero,kxc,mpi_enreg,nfft,ngfft, &
  nfftot=ngfft(1)*ngfft(2)*ngfft(3)
  usefxc=0;if (ixc==50) usefxc=1
  add_tfw_=.false.;if (present(add_tfw)) add_tfw_=add_tfw
-
- if(option/=0.and.option/=10)then
-   call hartre(cplex,gmet,gsqcut,izero,mpi_enreg,nfft,ngfft,paral_kgb,qphon,rhog,vhartr)
- end if
-
-!Note : hartre is excluded from the timing
- call timab(81,1,tsec)
 
 !Initializations
  enxc=zero
@@ -1154,27 +1143,34 @@ subroutine rhohxc(enxc,gsqcut,izero,kxc,mpi_enreg,nfft,ngfft, &
 
 !Treat separately the Fermi-Amaldi correction.
  if (ixc==20 .or. ixc==21 .or. ixc==22) then
+   if(present(vhartr))then
 
-!  Fermi-Amaldi correction : minus Hartree divided by the
-!  number of electrons per unit cell. This is not size consistent, but
-!  interesting for isolated systems with a few electrons.
-   nelect=ucvol*rhog(1,1)
-   factor=-one/nelect
-   vxc(:,1)=factor*vhartr(:)
-   if(nspden>=2) vxc(:,2)=factor*vhartr(:)
+!    Fermi-Amaldi correction : minus Hartree divided by the
+!    number of electrons per unit cell. This is not size consistent, but
+!    interesting for isolated systems with a few electrons.
+!    nelect=ucvol*rhog(1,1)
+     factor=-one/xcdata%nelect
+     vxc(:,1)=factor*vhartr(:)
+     if(nspden>=2) vxc(:,2)=factor*vhartr(:)
 
-!  Compute corresponding xc energy and stress as well as vxcavg
-   call dotprod_vn(1,rhor,enxc,doti,nfft,nfftot,1,1,vxc,ucvol,mpi_comm_sphgrid=comm_fft)
-   enxc=half*enxc
-   strsxc(1:3)=-enxc/ucvol
+!    Compute corresponding xc energy and stress as well as vxcavg
+     call dotprod_vn(1,rhor,enxc,doti,nfft,nfftot,1,1,vxc,ucvol,mpi_comm_sphgrid=comm_fft)
+     enxc=half*enxc
+     strsxc(1:3)=-enxc/ucvol
 
-!  Compute average of vxc (one component only).
-   call mean_fftr(vxc,vxcmean,nfft,nfftot,1,mpi_comm_sphgrid=comm_fft)
-   vxcavg = vxcmean(1)
-!  For ixc=20, the local exchange-correlation kernel is zero, but the Hartree
-!  kernel will be modified in tddft. No other use of kxc should be made with ixc==20
-   if(nkxc/=0 .and. ixc==20) kxc(:,:)=zero
-!  For ixc=21 or 22, the LDA (ixc=1) kernel has been computed previously.
+!    Compute average of vxc (one component only).
+     call mean_fftr(vxc,vxcmean,nfft,nfftot,1,mpi_comm_sphgrid=comm_fft)
+     vxcavg = vxcmean(1)
+!    For ixc=20, the local exchange-correlation kernel is zero, but the Hartree
+!    kernel will be modified in tddft. No other use of kxc should be made with ixc==20
+     if(nkxc/=0 .and. ixc==20) kxc(:,:)=zero
+!    For ixc=21 or 22, the LDA (ixc=1) kernel has been computed previously.
+ 
+   else
+
+     MSG_BUG('When ixc=20,21 or 22, vhartr needs to be present in the call to rhotoxc !')
+
+   end if
 
  end if
 
@@ -1199,5 +1195,5 @@ subroutine rhohxc(enxc,gsqcut,izero,kxc,mpi_enreg,nfft,ngfft, &
 
  DBG_EXIT("COLL")
 
-end subroutine rhohxc
+end subroutine rhotoxc
 !!***

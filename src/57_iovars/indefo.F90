@@ -169,6 +169,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%cd_full_grid=0
    dtsets(idtset)%charge=zero
    dtsets(idtset)%chempot(:,:,:)=zero
+   dtsets(idtset)%chkdilatmx=1
    dtsets(idtset)%chkexit=0
    dtsets(idtset)%chksymbreak=1
    dtsets(idtset)%cineb_start=7
@@ -269,6 +270,8 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
 !  F
    dtsets(idtset)%fermie_nest=zero
    dtsets(idtset)%fftgw=21
+   dtsets(idtset)%fockaux_ixc=0
+   dtsets(idtset)%fockaux_scal=one
    dtsets(idtset)%focktoldfe=zero
    dtsets(idtset)%fockoptmix=0
    dtsets(idtset)%freqim_alpha=five

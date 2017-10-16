@@ -198,7 +198,7 @@ subroutine psp_dump_outputs(pfx,pspcod,lmnmax,lnmax,mpssoang, &
 
  return
 
-  10 continue
+ 10 continue
 
  if ( ierr /= 0 ) then
    write(msg,'(a,a,a,i8)') "Error writing pseudopotential information", &
