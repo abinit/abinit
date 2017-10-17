@@ -19,10 +19,9 @@ are relative to modifications/improvements of ABINITv8.6 with respect to v8.4.
 
 <TO BE UPDATED>
 The list of contributors includes :
-F. Altvater, G. Antonius, L. Baguet, J.-M. Beuken, J. Bieder, E. Bousquet, 
-W. Chen, G. Geneste, M. Giantomassi, Y. Gillet, X. Gonze, F. Jollet, A. Martin, 
-F. Naccarato, G. Petretto, S. Prokhorenko, F. Ricci, M. Torrent , M. Verstraete, J. Zwanziger
-<END OF TO BE UPDATED>
+B. Amadon, G. Antonius, L. Baguet, J.-M. Beuken, J. Bieder, F. Bottin, Y. Bouchet,
+M. Giantomassi, O. Gingras, Ph. Ghosez, M. Giantomassi, X. Gonze, F. Jollet, J. Junquera, A. Martin, 
+F. Naccarato, G. Petretto, N. Pike, Y. Pouillon, S. Prokhorenko, M. Torrent , M. Verstraete, J. Wiktor, J. Zwanziger
 
 It is worth to read carefully all the modifications that are mentioned in the present file,
 and examine the links to help files or test cases ...
@@ -36,12 +35,10 @@ Version 8.6, released on October 18, 2017.
 
 Changes with respect to version 8.4 :
 
-<TO BE UPDATED>
 A. Warnings and important remarks 
 B. Most noticeable achievements (for users)
 C. Changes in the package, for developers
 D. Other changes (or on-going developments, not finalized)
-<END OF TO BE UPDATED>
 
 __________________________________________________________________
 
@@ -55,26 +52,17 @@ A.1 Some changes of names :
      - lesson tlda has become tdftu;
     Also suppressed gwls_second_model_parameter
 
-<TO BE UPDATED>
-A.1 The Github ABINIT Web page, at https://github.com/abinit, allows one to
-    access the mirror of the repository of ABINIT, as well as some other projects
-    related to ABINIT, like AbiPy or the pseudo-dojo.
-
-A.2 The content of the ABINIT Web portal, specifically for the pages related to the presentation of 
-    ABINIT (https://www.abinit.org/about/what-is-abinit), has been upgraded.  
-<END OF TO BE UPDATED>
-
 __________________________________________________________________
 
 B.  Most noticeable achievements
 
-B.1 The documentation has been significantly upgraded by the introduction of "Topics", replacing the
+B.1 The whole ABINIT documentation has been significantly upgraded by the introduction of "Topics", replacing the
     previous "lists of ABINIT features". All the capabilities of ABINIT are now presented in about 70 short topic Web pages.
     Those topic web pages usually have :
     - a brief introduction;
     - the list of related tutorial lessons -if any-; 
-    - the list of related input variables (ordered according to their importance for the topics -compulsory, basic, useful or expert-),
-    - possibly example input files
+    - the list of related input variables (ordered according to their importance for the topics -compulsory, basic, useful or expert-);
+    - possibly example input files;
     - list of references. 
     Entry point : see the new header of any ABINIT documentation file (e.g. the new user's guide)
     By F. Jollet and X. Gonze (also tests/fixes by B. Amadon, M. Torrent). 
@@ -94,25 +82,25 @@ B.4 The frequency of usage of each input variable (in the set of automatic tests
     The input files for the automatic tests can now be directly accessed on the Web, as well as the reference files for the lessons of the tutorial.
     By. X. Gonze and F. Jollet
 
-B.5 Implemented the Frolich interpolation procedure, as explained in PRL 115, 176401 (2015). 
+B.5 Several important developments related to electron-phonon matrix element computation have been made. 
+    The Frolich interpolation procedure for electron-phonon matrix elements, as explained in PRL 115, 176401 (2015), has been implemented. 
     The long-range part of the phonon coupling potential is modeled with the Born effective charges and the dielectric tensor. 
     This long-range part is substracted from the potential before the Fourier interpolation then added after the interpolation. 
     The resulting potential is in much better agreement with the full calculation, as can be verified from the el-ph matrix elements.
-    Added a functionality in the eph driver (eph_task=5) to only interpolate the phonon potential onto a fine q-point grid.
+    A functionality has been added in the eph driver (eph_task=5) to only interpolate the phonon potential onto a fine q-point grid.
     The interpolation is performed one perturbation at a time, and is thus more memory efficient than the previous procedures.
-    Testing of the new "driver" optdrive=7 specifically dealing with electron-phonon
+    There is additional testing of the new "driver" optdrive=7 specifically dealing with electron-phonon
     related computations (including zero-point renormalisation), especially the interpolation.
-    Memory-efficient phonon potential interpolation.
-    Fixed the symmetries.
+    The symmetries have been fixed.
     See new tests v8#61-65.
     By  G. Antonius and M. Giantomassi.
 
-B.6 ABINIT can read pseudopotentials in the PSML format. This XML-based format is
+B.6 ABINIT can now read pseudopotentials in the PSML format. This XML-based format is
     produced by ONCVPSP as well as ATOM (also read by SIESTA).
     See the new directory ~abinit/tests/psml, tests #1 to 14.
     By Y. Pouillon, M. Verstraete and J. Junquera
 
-B.7 ABINIT is interfaced with Libxc 3.0, the interface with Libxc 4.0 is in preparation.
+B.7 ABINIT is now interfaced with Libxc 3.0. The interface with Libxc 4.0 is in preparation.
     Tests libxc#06,07,17,18,20, 21 have been modified, because some functionals of libxc v2.0 have changed category in v3.0.
     By M. Torrent
 
@@ -130,62 +118,6 @@ B.10 Implementation of the LDA-1/2 methodology.
      (Input variable ? Test ?)
      By F. Jollet
     
-    
-
-
-<TO BE UPDATED>
-B.1 Implementation of algorithms to interpolate the electronic band structure,
-    based either on "star functions" of on "B-splines" (as alternatives to Wannier function interpolation).
-    See the input variables einterp, nkpath, and prtebands, and tests Tlibxc#42, Tv8#04.
-    Work by M. Giantomassi
-
-B.2 The Fock mixing factor for the HSE hybrid functional can be tuned thanks to the input variable gwfockmix  .
-    (Warning : this is for the GW-type approach to electronic structure only, not for total energies)
-    See test Tlibxc#43 .
-    Work by W. Chen.
-
-B.3 Implementation of spatially-varying chemical potential, for each atomic species.
-    See the input variables chempot and nzchempot, and tests Tv8#30 and 31.
-    Work by X. Gonze
-
-B.4 Linear geometrical constraints can now be imposed on PIMD runs.
-    This allows ABINIT to use the blue moon sampling technique.
-    See the input variable pimd_contraint, and test Tv8#05
-    The use of history (HIST) files is now possible with images.
-    Work by G. Geneste and M. Torrent.
-
-B.5 Computation of linear reponse (optics executable as well as BSE part of ABINIT)
-    in the case of temperature-dependent electronic structure.
-    See tests Tv67mbpt#50-53.
-    WARNING : This capability of ABINIT has not been fully tested. However, the
-    basic tests for non-spin-polarized simple semiconductors are OK.
-    As usual, use at your own risk.
-    Work by Y. Gillet and M. Giantomassi.
-
-B.6 Computation of Gruneisen parameters by finite differences, within ANADDB.
-    See test v8#45
-    Work by M. Giantomassi
-
-B.7 New LOBPCG implementation wfoptalg=114.
-    This is the default when paral_kgb=1.
-    Performances are equivalent in standard use (MPI alone) and much better with openmp+multithreaded linalg. 
-    It also allows to have only one block for large system and to reduce memory copies.
-    This version has been developed keeping in mind the next generation of HPC.
-    Work by J. Bieder
-
-B.8 New algorithms for the displacement of nuclei (ionmov) :
-    - Hybrid Monte Carlo (HMC) predictor (ionmov=25)
-    - Velocity Verlet (VV) NVE molecular dynamics predictor (ionmov=24)
-    See Tv8#12 for ionmov=24. 
-    Work by S. Prokhorenko
-
-B.9 Refactoring of ANADDB for the production of DOS and other thermodynamic quantities,
-    also the mean square displacement and mean square velocity.
-    The DOS is obtained using usual DOS methods, instead of the histogram method,
-    and converges much faster with ng2qpt. Activated with prtdos 1 or 2 in anaddb.
-    Work by M. Verstraete.
-<END OF TO BE UPDATED>
-
 __________________________________________________________________
 
 C. Changes for the developers (also compilers)
@@ -194,15 +126,8 @@ C.1 Large changes of the procedure to document ABINIT, for most of the documenta
     The HTML files are now produced from YAML files, under the control of the script ~abinit/doc/generate_doc.py .
     The documentation on this procedure is available on the ABINIT wiki, at https://wiki.abinit.org/doku.php?id=developers:generate_doc . 
     This is directly linked to the modifications in the doc, presented in B1-B4.
-    In particular, use of the Dokuwiki syntax for the hyperlinks.
-
-<TO BE UPDATED> 
-C.1 Management of the test farm : the new bot ubu_intel_17_openmpi 
-    has been activated, so that Intel 17 is now supported.
-    Also, replacement of shiva_gnu_6.3_py3k by inca_gnu_6.3_py3k,
-    update of graphene (MacPorts) to gcc6.3 + scalapack.
-    By J.M. Beuken.
-<END OF TO BE UPDATED>
+    In particular, the Dokuwiki syntax is used for the hyperlinks.
+    By F. Jollet and X. Gonze
 
 __________________________________________________________________
 
@@ -238,7 +163,7 @@ D.6 On-going work on hybrid functionals : speed-up of the SCF loop, computation 
     By X. Gonze and F. Jollet
 
 D.7 On-going work on the implementation of the TDEP algorithm (temperature dependent sampling).
-    By J. Bieder
+    By J. Bieder, F. Bottin and Y. Bouchet
     
 D.8 Replacements of http:// by https:// in many files.
     By J.M. Beuken
@@ -264,16 +189,10 @@ D.13 Write dielectric tensor to anaddb.nc when only perturbations w.r.t. electri
      See test v8#47-50
      By F. Naccarato.
 
-D.14 Testing of the new "driver" optdrive=7 specifically dealing with electron-phonon
-     related computations (including zero-point renormalisation), especially the interpolation.
-     Fixed the symmetries.
-     See new tests v8#61-65.
-     By  G. Antonius and M. Giantomassi.
-
-D.15 Ongoing work : Raman intensities, in the PAW case, using DFPT.
+D.14 Ongoing work : Raman intensities, in the PAW case, using DFPT.
      By L. Baguet and M. Torrent
 
-D.16 Ongoing work on the multibinit project.
+D.15 Ongoing work on the multibinit project.
      New hist storage.
      New tests paral#101-102, to test the anharmonic part.
      Rationalization of supercell treatment with multibinit
