@@ -32,7 +32,7 @@ Xavier
 
 __________________________________________________________________
 
-Version 8.6, released on October XX, 2017.
+Version 8.6, released on October 18, 2017.
 
 Changes with respect to version 8.4 :
 
@@ -41,22 +41,71 @@ A. Warnings and important remarks
 B. Most noticeable achievements (for users)
 C. Changes in the package, for developers
 D. Other changes (or on-going developments, not finalized)
+<END OF TO BE UPDATED>
 
 __________________________________________________________________
 
 A.  Warnings and important remarks
 
+A.1 There has been some changes of names : 
+     - input variable gwls_sternheimer_kmax has become gwls_stern_kmax;
+     - input variable prt_effpot has become prt_model (multibinit);
+     - input variable effmass has become erffmass_free;            
+     - lesson tlda has become tdftu;
+
+<TO BE UPDATED>
 A.1 The Github ABINIT Web page, at https://github.com/abinit, allows one to
     access the mirror of the repository of ABINIT, as well as some other projects
     related to ABINIT, like AbiPy or the pseudo-dojo.
 
 A.2 The content of the ABINIT Web portal, specifically for the pages related to the presentation of 
     ABINIT (https://www.abinit.org/about/what-is-abinit), has been upgraded.  
+<END OF TO BE UPDATED>
 
 __________________________________________________________________
 
 B.  Most noticeable achievements
 
+B.1 The documentation has been significantly upgraded by the introduction of "Topics", replacing the
+    previous "lists of ABINIT features". All the capabilities of ABINIT are now presented in about 70 short topic Web pages.
+    Each topic web page has a brief introduction, including references,
+    then the web page lists the related tutorial lesson(s) -if any-, the related input variables (moreover, ordered
+    according to their importance for the topics -compulsory, basic, useful or expert-),
+    then possibly lists example input files, and ends with the bibliography list.
+    By F. Jollet and X. Gonze
+
+B.2 A central bibliography database abiref.bib has been created, and linked to the
+    above-mentioned topics (B.1) but also to other parts of the ABINIT documentation (e.g. input variable list,
+    the lessons of the tutorial, the theory documents, the acknowledgments ...).
+    By X. Gonze
+ 
+B.3 The list of input variables has been restructured, and is now searchable.
+    The input variables for anaddb, aim and optic have been included in the database.
+    By J. Bieder and X. Gonze
+
+B.4 The frequency of usage of each input variable (in the set of automatic tests) is now automatically 
+    computed, and mentioned in the documentation for this input variable. Examples input files are also mentioned in the documentation.
+    The input files for the automatic tests can now be directly accessed on the Web, as well as the reference files for the lessons of the tutorial.
+    By. X. Gonze
+
+B.5 ABINIT is interfaced with Libxc 3.0, and the interface with Libxc 4.0 is in preparation.
+    Tests libxc#06,07,17,18,20, 21 have been modified, because not all functionals ofr libxc v2.0 have been preserved in v3.0 (bug fixes).
+    By M. Verstraete (to be checked)
+
+B.6 A new lesson of the tutorial, called "Electron-positron annihilation" has been created.
+    By J. Wiktor and M. Torrent.
+
+B.7 The new input variable chkdilatmx has been introduced, to allow expert users to make
+    ABINIT bypass the stopping criterion related to dilatmx. In practice, if the condition related 
+    to dilatmx is not met, ABINIT continues, and delivers an (approximate) optimized geometry and energy,
+    that might be used by external drivers like e.g. USPEX to continue the search for global optimized structures.
+    See input variable chkdilatmx, and test v3#42 .
+    By X. Gonze
+    
+    
+
+
+<TO BE UPDATED>
 B.1 Implementation of algorithms to interpolate the electronic band structure,
     based either on "star functions" of on "B-splines" (as alternatives to Wannier function interpolation).
     See the input variables einterp, nkpath, and prtebands, and tests Tlibxc#42, Tv8#04.
@@ -107,22 +156,50 @@ B.9 Refactoring of ANADDB for the production of DOS and other thermodynamic quan
     The DOS is obtained using usual DOS methods, instead of the histogram method,
     and converges much faster with ng2qpt. Activated with prtdos 1 or 2 in anaddb.
     Work by M. Verstraete.
+<END OF TO BE UPDATED>
 
 __________________________________________________________________
 
 C. Changes for the developers (also compilers)
 
+<TO BE UPDATED> 
 C.1 Management of the test farm : the new bot ubu_intel_17_openmpi 
     has been activated, so that Intel 17 is now supported.
     Also, replacement of shiva_gnu_6.3_py3k by inca_gnu_6.3_py3k,
     update of graphene (MacPorts) to gcc6.3 + scalapack.
     By J.M. Beuken.
+<END OF TO BE UPDATED>
 
 __________________________________________________________________
 
 D.  Other changes
 (or on-going developments, not yet finalized).
 
+D.1 The "Adaptively Compressed Operator" approach for the fast application of the Fock operator has been implemented,
+    and replaces the traditional way to apply the Fock operator in hybrid functionals (e.g. HSE06, PBE0, ...).
+    These are not yet to be considered in production, though. Likely for ABINITv8.8.  
+    See tests libxc 51, 52, 53, 67, 68, 69, 70, 71.
+    By F. Jollet and X. Gonze
+
+D.2 A set of 6 input files and accompanying references (from 32 to 2048 procs), for benchmarking high-performance computing
+    is available in the new directory ~abinit/tests/hpc .
+    Not yet tested automatically, but this future capability is prepared.
+    By M. Torrent.
+
+D.3 The tutorial on the temperature-dependent electronic structure has been imported from the ABINIT wiki to the
+    usual location ~abinit/doc/tutorial . However, it is not yet operational.
+    Work is also going on on tutorial fold2bloch.
+    By X. Gonze
+
+
+D.10 Change of names : 
+     - input variable gwls_sternheimer_kmax has become gwls_stern_kmax;
+     - input variable prt_effpot has become prt_model (multibinit); 
+     - input variable effmass has become erffmass_free; 
+     - lesson tlda has become tdftu;
+     
+
+<TO BE UPDATED>
 D.1 The printing of potentials (e.g. prtvxc ...) works now for DFPT.
     By M. Verstraete.
 
