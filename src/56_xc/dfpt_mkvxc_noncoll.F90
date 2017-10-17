@@ -111,6 +111,11 @@ subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,bxc,mpi_enreg,nfft,ngfft,nhat1,nhat1
  real(dp) :: dum,dvdn,dvdz,fact,m_dot_m1
  real(dp) :: mx1,my1,mz1,mdirx,mdiry,mdirz
 !arrays
+ real(dp),allocatable    :: vxc1rot1(:,:)
+ real(dp),allocatable    :: vxc1rot2(:,:)
+ real(dp),allocatable    :: vxc1rot3(:,:)
+ real(dp)                :: U0_re(2,2),U0_im(2,2),theta0,nx,ny,nz,bxc0
+ real(dp)                :: U1_re(2,2),U1_im(2,2),theta1,nx1,ny1,nz1,vxc0
  real(dp) :: tsec(2)
  real(dp),allocatable :: m_norm(:)
  real(dp),allocatable :: rhor1_diag(:,:)
@@ -125,7 +130,7 @@ subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,bxc,mpi_enreg,nfft,ngfft,nhat1,nhat1
 
  call timab(181,1,tsec)
 
- rotation=1
+ rotation=2
 
  if(nspden/=4) then
    MSG_BUG('only for nspden=4!')
@@ -170,6 +175,11 @@ subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,bxc,mpi_enreg,nfft,ngfft,nhat1,nhat1
      ABI_ALLOCATE(vxc1_,(cplex*nfft,nspden))
      ABI_ALLOCATE(m_norm,(nfft))
 
+     ABI_ALLOCATE(vxc1rot1,(nfft,nspden))
+     ABI_ALLOCATE(vxc1rot2,(nfft,nspden))
+     ABI_ALLOCATE(vxc1rot3,(nfft,nspden))
+     vxc1rot1=0.0d0
+
 !      -- Rotate rho(r)^(1)
        do ifft=1,nfft
          rhor1_diag(ifft,1)=rhor1(ifft,1) !FR it is the tr[rhor1] see symrhg.F90
@@ -206,8 +216,7 @@ subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,bxc,mpi_enreg,nfft,ngfft,nhat1,nhat1
 
          select case (rotation)
          case (1)  ! U matrix version
-            ! define the U^(0) transformation matrix 
-            rho_updn=(rhor(ifft,2)+(0.,1.)*rhor(ifft,3))
+
             ! define the U^(0) transformation matrix 
             rho_updn=(rhor(ifft,2)+(0.,1.)*rhor(ifft,3))
             d1=sqrt(( m_norm(ifft)+rhor(ifft,4))**2+rho_updn**2)
@@ -257,39 +266,124 @@ subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,bxc,mpi_enreg,nfft,ngfft,nhat1,nhat1
                vxc1(ifft,1:2)=dvdn
                vxc1(ifft,3:4)=zero
             end if
-         case (2)                        ! More directly method of calculating the rotated xc functional (derivatives of the analitic experssion)   
+
+            vxc1rot1(ifft,1) = vxc1(ifft,1)
+            vxc1rot1(ifft,2) = vxc1(ifft,2)
+            vxc1rot1(ifft,3) = vxc1(ifft,3)
+            vxc1rot1(ifft,4) = vxc1(ifft,4)
+
+            !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            ! case 2
+
+          case (2)                        ! Explicit calculation of the rotated xc functional (derivatives of the analitic experssion)
+
+
            if(m_norm(ifft)>m_norm_min)then
 
-             fact=dvdz/m_norm(ifft)    ! this part describes the change of the magnitude of the xc magnetic field
-             dum=rhor(ifft,4)*fact     ! and the change of the scalar part of the xc electrostatic potential
+             ! this part describes the change of the magnitude of the xc magnetic field
+             ! and the change of the scalar part of the xc electrostatic potential
+             fact=dvdz/m_norm(ifft)    ! dvdz is deltaBxc (magnetization magnitude part)
+             dum=rhor(ifft,4)*fact     ! dvdn is deltaVxc (density only part)
              vxc1(ifft,1)=dvdn+dum
              vxc1(ifft,2)=dvdn-dum
-             vxc1(ifft,3)= rhor(ifft,2)*fact
-             vxc1(ifft,4)=-rhor(ifft,3)*fact
+             vxc1(ifft,3)= rhor(ifft,2)*fact ! Real part
+             vxc1(ifft,4)=-rhor(ifft,3)*fact ! Imaginary part
              !add remaining contributions comming from the change of magnetization direction
              m_dot_m1=(rhor(ifft,2)*rhor1(ifft,2)+rhor(ifft,3)*rhor1(ifft,3) &
 &                     +rhor(ifft,4)*rhor1(ifft,4))/m_norm(ifft)
              mx1=rhor1(ifft,2); mdirx=rhor(ifft,2)/m_norm(ifft);
              my1=rhor1(ifft,3); mdiry=rhor(ifft,3)/m_norm(ifft);
              mz1=rhor1(ifft,4); mdirz=rhor(ifft,4)/m_norm(ifft);
-         
-             vxc1(ifft,1) = vxc1(ifft,1)+ bxc(ifft)*( mz1 - mdirz*m_dot_m1 )
-             vxc1(ifft,2) = vxc1(ifft,2)+ bxc(ifft)*(-mz1 + mdirz*m_dot_m1 )
+ 
+             vxc1(ifft,1) = vxc1(ifft,1)+ bxc(ifft)*( mz1 - mdirz*m_dot_m1 ) ! bxc is Bxc^(0)/|m|
+             vxc1(ifft,2) = vxc1(ifft,2)+ bxc(ifft)*(-mz1 + mdirz*m_dot_m1 ) 
              vxc1(ifft,3) = vxc1(ifft,3)+ bxc(ifft)*( mx1 - mdirx*m_dot_m1 )
              vxc1(ifft,4) = vxc1(ifft,4)+ bxc(ifft)*(-my1 + mdiry*m_dot_m1 )
-!          write(*,*) m_dot_m1/m_norm(ifft)
-!          write(*,*)   ( mx1 - mdirx*m_dot_m1 )*rhor(ifft,2) + &
+!            write(*,*) m_dot_m1/m_norm(ifft)
+!            write(*,*)   ( mx1 - mdirx*m_dot_m1 )*rhor(ifft,2) + &
 !&                       ( my1 - mdiry*m_dot_m1 )*rhor(ifft,3) + &
 !&                       ( mz1 - mdirz*m_dot_m1 )*rhor(ifft,4)
-!           write(238,*)  vxc1(ifft,1),bxc(ifft)*( mz1 - mdirz*m_dot_m1 )
-!           write(239,*)  vxc1(ifft,2),bxc(ifft)*(-mz1 + mdirz*m_dot_m1 )
-!           write(240,*)  vxc1(ifft,3),bxc(ifft)*( mx1 - mdirx*m_dot_m1 )
-!           write(241,*)  vxc1(ifft,4),bxc(ifft)*(-my1 + mdiry*m_dot_m1 )
+!            write(239,*)  vxc1(ifft,2),bxc(ifft)*(-mz1 + mdirz*m_dot_m1 )
+!            write(240,*)  vxc1(ifft,3),bxc(ifft)*( mx1 - mdirx*m_dot_m1 )
+!            write(241,*)  vxc1(ifft,4),bxc(ifft)*(-my1 + mdiry*m_dot_m1 )
            else
              vxc1(ifft,1:2)=dvdn
              vxc1(ifft,3:4)=zero
            end if
+
+            vxc1rot2(ifft,1)=vxc1(ifft,1)
+            vxc1rot2(ifft,2)=vxc1(ifft,2)
+            vxc1rot2(ifft,3)=vxc1(ifft,3)
+            vxc1rot2(ifft,4)=vxc1(ifft,4)
+
+
+          case (3)                        ! Alternative method (explicitely calculated roation matrices)
+
+
+           if(m_norm(ifft)>m_norm_min)then
+
+
+            theta0 =-acos(rhor(ifft,4)/m_norm(ifft)) 
+            nx     =-rhor(ifft,3)/sqrt(rhor(ifft,2)**2+rhor(ifft,3)**2)            
+            ny     = rhor(ifft,2)/sqrt(rhor(ifft,2)**2+rhor(ifft,3)**2)      
+            nz     = 0.0 
+
+            theta1 = -rhor(ifft,4)*(rhor(ifft,2)*rhor1(ifft,2)+rhor(ifft,3)*rhor1(ifft,3))
+            theta1 =  theta1 + rhor1(ifft,4)*(rhor(ifft,2)**2+rhor(ifft,3)**2)
+            theta1 =  theta1/m_norm(ifft)**2/sqrt(rhor(ifft,2)**2+rhor(ifft,3)**2)
+ 
+            nx1    = rhor(ifft,2)*(rhor(ifft,3)*rhor1(ifft,2)-rhor(ifft,2)*rhor1(ifft,3)) 
+            nx1    = nx1/sqrt(rhor(ifft,2)**2+rhor(ifft,3)**2)/(rhor(ifft,2)**2+rhor(ifft,3)**2)
+            ny1    = rhor(ifft,3)*(rhor(ifft,3)*rhor1(ifft,2)-rhor(ifft,2)*rhor1(ifft,3)) 
+            ny1    = ny1/sqrt(rhor(ifft,2)**2+rhor(ifft,3)**2)/(rhor(ifft,2)**2+rhor(ifft,3)**2)
+           
+            write(117,*) theta0,nx,ny,rhor(ifft,2),rhor(ifft,3)
+            write(118,*) theta1,nx1,ny1
+ 
+            ! U^(0)*.vxc1.U^(0) part
+
+            fact=dvdz/m_norm(ifft)    ! dvdz is deltaBxc (magnetization magnitude part)
+            dum=rhor(ifft,4)*fact     ! dvdn is deltaVxc (density only part)
+            vxc1(ifft,1)=dvdn+dum
+            vxc1(ifft,2)=dvdn-dum
+            vxc1(ifft,3)= rhor(ifft,2)*fact ! Real part
+            vxc1(ifft,4)=-rhor(ifft,3)*fact ! Imaginary part
+
+            vxc0=(vxc(ifft,1)+vxc(ifft,2))/2.0
+            bxc0=(vxc(ifft,1)-vxc(ifft,2))*m_norm(ifft)/rhor(ifft,4)/2.0
+
+            ! U^(1)*.vxc0.U^(0) + U^(0)*.vxc0.U^(1)
+            vxc1(ifft,1) = vxc1(ifft,1) -   sin(theta0/2)*cos(theta0/2)*theta1*((bxc0-vxc0)*(nx**2+ny**2)+(bxc0+vxc0));
+            vxc1(ifft,1) = vxc1(ifft,1) - 2*sin(theta0/2)**2*(bxc0-vxc0)*(nx1*nx+ny1*ny);
+
+            vxc1(ifft,2) = vxc1(ifft,2) +   sin(theta0/2)*cos(theta0/2)*theta1*((bxc0+vxc0)*(nx**2+ny**2)+(bxc0-vxc0));
+            vxc1(ifft,2) = vxc1(ifft,2) + 2*sin(theta0/2)**2*(bxc0+vxc0)*(nx1*nx+ny1*ny);
+        
+            vxc1(ifft,3) = vxc1(ifft,3) - bxc0*(ny*theta1*cos(theta0) + ny1*sin(theta0))
+            vxc1(ifft,4) = vxc1(ifft,4) - bxc0*(nx*theta1*cos(theta0) + nx1*sin(theta0))
+
+           else
+             vxc1(ifft,1:2)=dvdn
+             vxc1(ifft,3:4)=zero
+           end if
+
+           vxc1rot3(ifft,1)=vxc1(ifft,1)
+           vxc1rot3(ifft,2)=vxc1(ifft,2)
+           vxc1rot3(ifft,3)=vxc1(ifft,3)
+           vxc1rot3(ifft,4)=vxc1(ifft,4)
+
+
+
         end select
+
+!        write(237,*)  ifft,vxc1rot1(ifft,1),vxc1rot1(ifft,2),&
+!&                          vxc1rot1(ifft,3),vxc1rot1(ifft,4)
+!
+!        write(238,*)  ifft,vxc1rot2(ifft,1),vxc1rot2(ifft,2),&
+!&                          vxc1rot2(ifft,3),vxc1rot2(ifft,4)
+!
+!        write(239,*)  ifft,vxc1rot3(ifft,1),vxc1rot3(ifft,2),&
+!&                          vxc1rot3(ifft,3),vxc1rot3(ifft,4)
 
       end do
      else
@@ -310,6 +404,11 @@ subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,bxc,mpi_enreg,nfft,ngfft,nhat1,nhat1
      ABI_DEALLOCATE(rhor1_diag)
      ABI_DEALLOCATE(vxc1_diag)
      ABI_DEALLOCATE(m_norm)
+
+
+     ABI_DEALLOCATE(vxc1rot1)
+     ABI_DEALLOCATE(vxc1rot2)
+     ABI_DEALLOCATE(vxc1rot3)
 
 !    PAW
 !   if (option==0.or.(usexcnhat==0.and.nhat1dim==1)) then
