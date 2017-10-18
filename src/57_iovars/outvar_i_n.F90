@@ -569,12 +569,12 @@ subroutine outvar_i_n (dtsets,iout,&
      narrm(idtset)=3*dtsets(idtset)%nkpthf
      if (narrm(idtset)>0)&
 &     dprarr(1:narrm(idtset),idtset)=&
-&     reshape(dtsets(idtset)%kpthf(1:3,1:dtsets(idtset)%nkpthf), [narrm(idtset)])
+&     reshape(dtsets(idtset)%kptns_hf(1:3,1:dtsets(idtset)%nkpthf), [narrm(idtset)])
    else
      narrm(idtset)=mxvals%nkpthf
      if (narrm(idtset)>0)&
 &     dprarr(1:narrm(idtset),idtset)=&
-&     reshape(dtsets(idtset)%kpthf(1:3,1:mxvals%nkpthf), [narrm(idtset)] )
+&     reshape(dtsets(idtset)%kptns_hf(1:3,1:mxvals%nkpthf), [narrm(idtset)] )
    end if
  end do
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,narr,narrm,ncid,ndtset_alloc,'kpthf','DPR',multivals%nkpthf)

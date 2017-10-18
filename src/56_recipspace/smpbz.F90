@@ -178,7 +178,7 @@ subroutine smpbz(brav,iout,kptrlatt,mkpt,nkpt,nshiftk,option,shiftk,spkpt,downsa
 &   -kptrlatt(1,1)*kptrlatt(2,3)*kptrlatt(3,2)
 
    if(present(downsampling))then
-     if(.not.(downsampling(1)==1 .and. downsampling(2)==1 .and. downsampling(3)==1)then
+     if(.not.(downsampling(1)==1 .and. downsampling(2)==1 .and. downsampling(3)==1))then
        if(nshiftk>1)then
          write(message, '(a,3i4,2a,i4,4a)' )&
 &          'Real downsampling is activated, with downsampling(1:3)=',downsampling(1:3),ch10,&
@@ -305,7 +305,7 @@ subroutine smpbz(brav,iout,kptrlatt,mkpt,nkpt,nshiftk,option,shiftk,spkpt,downsa
 
 !          Only the first shiftk is taken into account if downsampling
            if(present(downsampling))then
-             if(.not.(downsampling(1)==1 .and. downsampling(2)==1 .and. downsampling(3)==1)then
+             if(.not.(downsampling(1)==1 .and. downsampling(2)==1 .and. downsampling(3)==1))then
                if(ikshft>1)cycle
              endif
            endif

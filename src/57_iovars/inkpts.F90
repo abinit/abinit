@@ -138,6 +138,7 @@ subroutine inkpts(bravais,chksymbreak,iout,iscf,istwfk,jdtset,&
  real(dp) :: fraction,norm,ucvol,wtksum
  character(len=500) :: message
 !arrays
+ integer :: fock_downsampling(3)
  integer,allocatable :: ndivk(:),intarr(:)
  real(dp) :: gmet(3,3),gprimd(3,3),kpoint(3),rmet(3,3),tsec(2)
  real(dp),allocatable :: kptbounds(:,:),dprarr(:)
