@@ -1278,11 +1278,16 @@ subroutine sigma_bksmask(Dtset,Sigp,Kmesh,my_rank,nprocs,my_spins,bks_mask,keep_
  case (1)
    ! Parallelization over transitions **without** memory distributions (Except for the spin).
    my_minb=1; my_maxb=Sigp%nbnds
-   do isp=1,my_nspins
-     spin = my_spins(isp)
-     bks_mask(my_minb:my_maxb,:,spin)=.TRUE.
-     if (store_ur) keep_ur(my_minb:my_maxb,:,spin)=.TRUE.
-   end do
+   if (dtset%ucrpa>0) then
+     bks_mask(my_minb:my_maxb,:,:)=.TRUE.
+     if (store_ur) keep_ur(my_minb:my_maxb,:,:)=.TRUE.
+   else
+     do isp=1,my_nspins
+       spin = my_spins(isp)
+       bks_mask(my_minb:my_maxb,:,spin)=.TRUE.
+       if (store_ur) keep_ur(my_minb:my_maxb,:,spin)=.TRUE.
+     end do
+   end if
 
  case (2)
    ! Distribute bands and spin (alternating planes of bands)
