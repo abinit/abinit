@@ -78,7 +78,7 @@ subroutine chkvars (string)
 !C
  list_vars=trim(list_vars)//' cd_customnimfrqs cd_frqim_method cd_full_grid cd_imfrqs'
  list_vars=trim(list_vars)//' cd_halfway_freq cd_max_freq cd_subset_freq'
- list_vars=trim(list_vars)//' charge chempot chkexit chkprim chksymbreak chneut cineb_start cpus cpum cpuh cgtyphf'
+ list_vars=trim(list_vars)//' charge chempot chkexit chkprim chksymbreak chneut cineb_start cpus cpum cpuh'
 !D
  list_vars=trim(list_vars)//' ddamp ddb_ngqpt ddb_shiftq delayperm densfor_pred densty dfield'
  list_vars=trim(list_vars)//' dfpt_sciss diecut diegap dielam dielng diemac'
@@ -104,7 +104,7 @@ subroutine chkvars (string)
 !F
  list_vars=trim(list_vars)//' fband fermie_nest'
  list_vars=trim(list_vars)//' fftalg fftcache fftgw'
- list_vars=trim(list_vars)//' fockoptmix focktoldfe'
+ list_vars=trim(list_vars)//' fockoptmix focktoldfe fock_downsampling'
  list_vars=trim(list_vars)//' freqim_alpha freqremax freqremin freqspmax'
  list_vars=trim(list_vars)//' freqspmin'
  list_vars=trim(list_vars)//' friction frzfermi fxcartfactor '

@@ -175,7 +175,6 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%chksymbreak=1
    dtsets(idtset)%cineb_start=7
    dtsets(idtset)%corecs(:) = zero
-   dtsets(idtset)%cgtyphf = 0
 !  D
    dtsets(idtset)%ddamp=0.1_dp
    dtsets(idtset)%delayperm=0
@@ -273,6 +272,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%fftgw=21
    dtsets(idtset)%focktoldfe=zero
    dtsets(idtset)%fockoptmix=0
+   dtsets(idtset)%fock_downsampling(:)=0
    dtsets(idtset)%freqim_alpha=five
    dtsets(idtset)%freqremin=zero
    dtsets(idtset)%freqremax=zero
@@ -421,6 +421,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%kpt(:,:)=zero
    dtsets(idtset)%kptgw(:,:)=zero
    dtsets(idtset)%kptnrm=one
+   dtsets(idtset)%kptns_hf(:,:)=zero
    dtsets(idtset)%kptopt=1
    if(dtsets(idtset)%nspden==4)dtsets(idtset)%kptopt=4
    dtsets(idtset)%kptrlen=30.0_dp

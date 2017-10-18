@@ -429,7 +429,6 @@ subroutine dtset_copy(dtout, dtin)
  dtout%chkprim            = dtin%chkprim
  dtout%chksymbreak        = dtin%chksymbreak
  dtout%cineb_start        = dtin%cineb_start
- dtout%cgtyphf            = dtin%cgtyphf
  dtout%delayperm          = dtin%delayperm
  dtout%diismemory         = dtin%diismemory
  dtout%dmatpuopt          = dtin%dmatpuopt
@@ -513,6 +512,7 @@ subroutine dtset_copy(dtout, dtin)
  dtout%pawfatbnd          = dtin%pawfatbnd
  dtout%fermie_nest        = dtin%fermie_nest
  dtout%fftgw              = dtin%fftgw
+ dtout%fock_downsampling  = dtin%fock_downsampling
  dtout%fockoptmix         = dtin%fockoptmix
  dtout%freqim_alpha       = dtin%freqim_alpha
  dtout%freqremin          = dtin%freqremin
@@ -1134,6 +1134,8 @@ subroutine dtset_copy(dtout, dtin)
 
  call alloc_copy( dtin%kptns, dtout%kptns)
 
+ call alloc_copy( dtin%kptns_hf, dtout%kptns_hf)
+
  call alloc_copy( dtin%mixalch_orig, dtout%mixalch_orig)
 
  call alloc_copy( dtin%nucdipmom, dtout%nucdipmom)
@@ -1362,6 +1364,9 @@ subroutine dtset_free(dtset)
  end if
  if (allocated(dtset%kptns))       then
    ABI_DEALLOCATE(dtset%kptns)
+ end if
+ if (allocated(dtset%kptns_hf))       then
+   ABI_DEALLOCATE(dtset%kptns_hf)
  end if
  if (allocated(dtset%mixalch_orig))     then
    ABI_DEALLOCATE(dtset%mixalch_orig)

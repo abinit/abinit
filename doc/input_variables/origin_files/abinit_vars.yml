@@ -2922,31 +2922,6 @@
     varset: gw
     vartype: integer
 - !variable
-    abivarname: cgtyphf
-    characteristics:
-    - '[[DEVELOP]]'
-    commentdefault: null
-    commentdims: null
-    defaultval: !valuewithconditions
-        '[[usefock]] == 1': 2
-        defaultval: 0
-    dimensions: scalar
-    excludes: null
-    mnemonics: Conjugate Gradient TYPe used for Hartree Fock exact exchange
-    requires: null
-    text: |-
-        <p>
-         Gives how is calculated Fock exact exchange contribution in the conjugate gradient,
-        in the SCF case.
-         <br />
-        The value 2 corresponds to calculate the Fock
-        exact exchange contribution each time in the conjugate gradient. The value 1 corresponds to calculate the Fock
-        exact exchange contribution only for the initial guess (not for the gradient direction) in the conjugate gradient
-        </p>
-    topics: Hybrids_expert
-    varset: dev
-    vartype: integer
-- !variable
     abivarname: charge
     characteristics: null
     commentdefault: null

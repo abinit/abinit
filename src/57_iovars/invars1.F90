@@ -34,7 +34,7 @@
 !!   initialized, while some others will still be initialized later.
 !!   The list of records of dtset initialized in the present routine is:
 !!   acell_orig,densty,iatfix,kptopt,kptrlatt,
-!!   mkmem,mkqmem,mk1mem,natsph,natvshift,nconeq,nkptgw,nkpt,
+!!   mkmem,mkqmem,mk1mem,natsph,natvshift,nconeq,nkpt,nkptgw,nkpthf,
 !!   nqptdm,nshiftk,nucdipmom,nzchempot,optdriver,
 !!   rprim_orig,rprimd_orig,shiftk,
 !!   spgroup,spinat,typat,vel_orig,vel_cell_orig,xred_orig
@@ -111,7 +111,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
 !scalars
  integer :: chksymbreak,found,ierr,iatom,ii,ikpt,iimage,index_blank,index_lower
  integer :: index_typsymb,index_upper,ipsp,iscf,intimage,itypat,leave,marr
- integer :: natom,nkpt,npsp,npspalch
+ integer :: natom,nkpt,nkpthf,npsp,npspalch
  integer :: nqpt,nspinor,nsppol,ntypat,ntypalch,ntyppure,occopt,response
  integer :: rfddk,rfelfd,rfphon,rfstrs,rfuser,rf2_dkdk,rf2_dkde,rfmagn
  integer :: tfband,tnband,tread,tread_alt
@@ -124,7 +124,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  integer,allocatable :: iatfix(:,:),intarr(:),istwfk(:),nband(:),typat(:)
  real(dp) :: acell(3),rprim(3,3)
 !real(dp) :: field(3)
- real(dp),allocatable :: amu(:),dprarr(:),kpt(:,:),mixalch(:,:),nucdipmom(:,:)
+ real(dp),allocatable :: amu(:),dprarr(:),kpt(:,:),kpthf(:,:),mixalch(:,:),nucdipmom(:,:)
  real(dp),allocatable :: ratsph(:),reaalloc(:),spinat(:,:)
  real(dp),allocatable :: vel(:,:),vel_cell(:,:),wtk(:),xred(:,:),znucl(:)
  character(len=32) :: cond_string(4)
@@ -571,6 +571,9 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    call chkint_ge(1,1,cond_string,cond_values,ierr,'nkpt',nkpt,1,iout)
  end if
 
+ nkpthf=0
+ dtset%nkpthf=nkpthf
+
 !Will compute the actual value of nkpt, if needed. Otherwise,
 !test that the value of nkpt is OK, if kptopt/=0
 !Set up dummy arrays istwfk, kpt, wtk
@@ -578,6 +581,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  if(nkpt/=0 .or. dtset%kptopt/=0)then
    ABI_ALLOCATE(istwfk,(nkpt))
    ABI_ALLOCATE(kpt,(3,nkpt))
+   ABI_ALLOCATE(kpthf,(3,nkpthf))
    ABI_ALLOCATE(wtk,(nkpt))
 !  Here, occopt is also a dummy argument
    occopt=1 ; dtset%nshiftk=1 ; dtset%kptrlatt(:,:)=0
@@ -607,16 +611,18 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
 
 !  Find the k point grid
    call inkpts(bravais,chksymbreak,iout,iscf,istwfk,jdtset,&
-&   kpt,dtset%kptopt,kptnrm,dtset%kptrlatt_orig,dtset%kptrlatt,kptrlen,lenstr,msym,&
-&   nkpt,nqpt,dtset%ngkpt,dtset%nshiftk,dtset%nshiftk_orig,dtset%shiftk_orig,dtset%nsym,&
+&   kpt,kpthf,dtset%kptopt,kptnrm,dtset%kptrlatt_orig,dtset%kptrlatt,kptrlen,lenstr,msym,&
+&   nkpt,nkpthf,nqpt,dtset%ngkpt,dtset%nshiftk,dtset%nshiftk_orig,dtset%shiftk_orig,dtset%nsym,&
 &   occopt,dtset%qptn,response,dtset%rprimd_orig(1:3,1:3,intimage),dtset%shiftk,&
 &   string,symafm,symrel,vacuum,wtk)
 
    ABI_DEALLOCATE(istwfk)
    ABI_DEALLOCATE(kpt)
+   ABI_DEALLOCATE(kpthf)
    ABI_DEALLOCATE(wtk)
 !  nkpt has been computed, as well as the k point grid, if needed
    dtset%nkpt=nkpt
+   dtset%nkpthf=nkpthf
  end if
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nqptdm',tread,'INT')

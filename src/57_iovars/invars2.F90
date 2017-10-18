@@ -111,7 +111,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
 !scalars
  integer :: bantot,berryopt,dmatsize,ndim,getocc,iat,iatom,ii,iimage,ikpt,ionmov,intimage
  integer :: densfor_pred,ipsp,iscf,isiz,itypat,jj,kptopt,lpawu,marr,natom,nband1,nberry,mkpt
- integer :: niatcon,nimage,nkpt,npspalch,nqpt,nsp,nspinor,nsppol,nsym,ntypalch,ntypat,ntyppure,nkpt_hf
+ integer :: niatcon,nimage,nkpt,nkpthf,npspalch,nqpt,nsp,nspinor,nsppol,nsym,ntypalch,ntypat,ntyppure
  integer :: occopt,occopt_tmp,response,sumnbl,tfband,tnband,tread,tread_alt,tread_key
  integer :: itol, itol_gen, ds_input, ifreq,ncerr !nkpt_fullbz,
  real(dp) :: areaxy,charge,fband,kptrlen,nelectjell
@@ -128,7 +128,6 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
  real(dp),allocatable :: dmatpawu_tmp(:)
  real(dp),allocatable :: dprarr(:) !Dummy arguments for subroutine 'intagm' to parse input file
  !real(dp),allocatable :: kpt_fullbz(:,:)
- real(dp),allocatable :: kptns_hf(:,:) !Dummy arguments for subroutine 'smpbz' to calculate the value of nkpthf
 
 ! *************************************************************************
 
@@ -138,6 +137,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
  natom=dtset%natom
  nimage=dtset%nimage
  nkpt=dtset%nkpt
+ nkpthf=dtset%nkpthf
  npspalch=dtset%npspalch
  nspinor=dtset%nspinor
  nsppol=dtset%nsppol
@@ -2591,7 +2591,8 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
  if ((dtset%ngfft(7)==314).or.(dtset%usefock==1)) ii=1
 
  call inkpts(bravais,dtset%chksymbreak,iout,iscf,dtset%istwfk(1:nkpt),jdtset,&
-& dtset%kpt(:,1:nkpt),kptopt,dtset%kptnrm,dtset%kptrlatt_orig,dtset%kptrlatt,kptrlen,lenstr,nsym,&
+& dtset%kpt(:,1:nkpt),dtset%kptns_hf(:,1:nkpthf),kptopt,dtset%kptnrm,&
+& dtset%kptrlatt_orig,dtset%kptrlatt,kptrlen,lenstr,nsym,&
 & nkpt,nqpt,dtset%ngkpt,dtset%nshiftk,dtset%nshiftk_orig,dtset%shiftk_orig,nsym,&
 & occopt,dtset%qptn,response,dtset%rprimd_orig(1:3,1:3,intimage),dtset%shiftk,string,&
 & dtset%symafm(1:nsym),dtset%symrel(:,:,1:nsym),vacuum,dtset%wtk(1:nkpt),&
@@ -2605,6 +2606,8 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
    dtset%kptns(2,1:nkpt)=dtset%kptns(2,1:nkpt)+dtset%qptn(2)
    dtset%kptns(3,1:nkpt)=dtset%kptns(3,1:nkpt)+dtset%qptn(3)
  end if
+
+ dtset%kptns_hf(:,1:nkpt)=dtset%kptns_hf(:,1:nkpt)/dtset%kptnrm
 
  ! Read variables defining the k-path
  ! If kptopt < 0  --> Band structure and kptbounds size is given by abs(kptopt)
@@ -2693,7 +2696,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
  end if
 
  if(dtset%nkptgw>0) then
-   ! Read nkptgw and bdgw.
+   ! Read bdgw.
    call intagm(dprarr,intarr,jdtset,marr,2*dtset%nkptgw*dtset%nsppol,string(1:lenstr),'bdgw',tread,'INT')
    if(tread==1) then
      dtset%bdgw(1:2,1:dtset%nkptgw,1:dtset%nsppol) =  &
@@ -2789,9 +2792,6 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
  if (dtset%usefock==1) then
 
 ! integer scalars (used to dimension specific arrays)
-   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'cgtyphf',tread,'INT')
-   if(tread==1) dtset%cgtyphf=intarr(1)
-
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nbandhf',tread,'INT')
    if(tread==1) then
      dtset%nbandhf=intarr(1)
@@ -2819,39 +2819,6 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nnsclohf',tread,'INT')
    if(tread==1) dtset%nnsclohf=intarr(1)
 
-   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nkpthf',tread,'INT')
-   if (dtset%kptopt==0.or.dtset%kptopt==3) then
-     dtset%nkpthf=dtset%nkpt
-   else
-!* Default value for nkpthf is the total number of k-points in BZ.
-
-!* Compute the maximum number of k-points mkpt in the reciprocal space unit cell
-!* (same formula as used in getkgrid)
-     mkpt=dtset%nshiftk*(dtset%kptrlatt(1,1)*dtset%kptrlatt(2,2)*dtset%kptrlatt(3,3) &
-&     +dtset%kptrlatt(1,2)*dtset%kptrlatt(2,3)*dtset%kptrlatt(3,1) &
-&     +dtset%kptrlatt(1,3)*dtset%kptrlatt(2,1)*dtset%kptrlatt(3,2) &
-&     -dtset%kptrlatt(1,2)*dtset%kptrlatt(2,1)*dtset%kptrlatt(3,3) &
-&     -dtset%kptrlatt(1,3)*dtset%kptrlatt(2,2)*dtset%kptrlatt(3,1) &
-&     -dtset%kptrlatt(1,1)*dtset%kptrlatt(2,3)*dtset%kptrlatt(3,2))
-
-     ABI_ALLOCATE(kptns_hf,(3,mkpt))
-     kptns_hf=0.0_dp
-!* Generate all the k-points in BZ (Monkhorst-Pack grid)
-
-!* brav=1 to treat all Bravais lattices ; iout=0 since we do not want any output ; option=0 since we consider k-points
-     call smpbz(1,0,dtset%kptrlatt,mkpt,nkpt_hf,dtset%nshiftk,0,dtset%shiftk,kptns_hf)
-!* kptns_hf contains the special k points obtained by the Monkhorst & Pack method, in reduced coordinates. (output)
-     ABI_DEALLOCATE(kptns_hf)
-
-     if((tread==1).AND.(nkpt_hf/=intarr(1))) then
-       write(message, '(3a)' )&
-&       'This option is not yet fully implemented.',&
-&       'The default value should be equal to the total number of k-point in BZ.'
-       MSG_ERROR(message)
-     end if
-     dtset%nkpthf=nkpt_hf
-
-   end if
  end if ! usefock
 
 !LOTF variables

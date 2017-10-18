@@ -741,24 +741,6 @@ subroutine fock_init(atindx,cplex,dtset,fock,gsqcut,kg,mpi_enreg,nattyp,npwarr,p
    write(msg,'(2a)') ch10,'Fock_init: initialization of Fock operator parameters:'
    call wrtout(std_out,msg,'COLL')
 
-!* Type of conjugate gradient algorithm used for exact exchange calculation
-   if ((dtset%cgtyphf<0).or.(dtset%cgtyphf>2)) then
-     msg=' - The parameter cgtyp must have an integer value between 0 and 2.'
-     call wrtout(std_out,msg,'COLL')
-   end if
-   if (dtset%cgtyphf==0) then 
-     fockcommon%cg_typ=2
-     msg=' - The parameter cgtyphf is set to its default value 2.'
-     call wrtout(std_out,msg,'COLL')
-!* Default value is set to 2 (calculation of exact exchange each time the function getghc is called in cgwf)
-!* May be useful to put default to 1 (calculation of exact exchange only for the first call to getghc in cgwf)
-   else 
-     fockcommon%cg_typ=dtset%cgtyphf
-     write(msg,'(a,i3)') ' - The parameter cgtyphf is set to the value:', dtset%cgtyphf
-     call wrtout(std_out,msg,'COLL')
-!* value chosen by the user : 1 or 2.
-   end if
-  
    fockcommon%fock_converged=.false.
    fockcommon%scf_converged=.false.
 
@@ -840,14 +822,9 @@ subroutine fock_init(atindx,cplex,dtset,fock,gsqcut,kg,mpi_enreg,nattyp,npwarr,p
 ! ============================================
 ! === Initialize the set of k-points in BZ ===
 ! ============================================
-!* Generate all the k-points in BZ (Monkhorst-Pack grid)
-!* brav=1 to treat all Bravais lattices ; iout=0 since we do not want any output ; option=0 since we consider k-points
-       call smpbz(1,0,dtset%kptrlatt,nkpt_bz,nkpt,dtset%nshiftk,0,dtset%shiftk,kptns_hf)
+       ABI_ALLOCATE(kptns_hf,(3,nkpthf))
+       kptns_hf(:,1:nkpthf)=dtset%kptns_hf(:,1:nkpthf)
 !* kptns_hf contains the special k points obtained by the Monkhorst & Pack method, in reduced coordinates. (output)
-       if (nkpt_bz/=nkpt) then
-          msg='The value of nkpt_bz and the result of smpbz should be equal!'
-          MSG_ERROR(msg)
-       end if
 
 ! =======================================================
 ! === Compute the transformation to go from IBZ to BZ ===
@@ -879,16 +856,13 @@ subroutine fock_init(atindx,cplex,dtset,fock,gsqcut,kg,mpi_enreg,nattyp,npwarr,p
 !*      indkk(:,6)   = 1 if time-reversal was used to generate the k point of BZ, 0 otherwise
 !* No use of symafm to generate spin down wfs from spin up wfs for the moment
 
-     else ! In this case, dtset%kptopt=3, one deals with BZ directly.
+     else ! In this case, dtset%kptopt=3, one deals with BZ directly. However, the downsampling makes a difference
+          ! between the k point grid used for Fock, and the k point grid used for the wavefunctions
 ! ============================================
 ! === Initialize the set of k-points in BZ ===
 ! ============================================
-       if (nkpt_bz/=dtset%nkpt) then
-         msg='In this version, the value of nkpt_bz and nkpt should be equal!'
-         MSG_ERROR(msg)
-       end if
 
-       kptns_hf=dtset%kptns
+       kptns_hf=dtset%kptns_hf
 
 ! ==========================================================
 ! === Initialize the transformation to go from IBZ to BZ ===

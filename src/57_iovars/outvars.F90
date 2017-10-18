@@ -31,6 +31,7 @@
 !!         nimfrqs    =maximal value of input cd_customnimfrqs for all the datasets
 !!         nkpt       =maximal value of input nkpt for all the datasets
 !!         nkptgw     =maximal value of input nkptgw for all the datasets
+!!         nkpthf     =maximal value of input nkpthf for all the datasets
 !!         nnos       =maximal value of input nnos for all the datasets
 !!         nqptdm     =maximal value of input nqptdm for all the datasets
 !!         nspinor    =maximal value of input nspinor for all the datasets
@@ -298,6 +299,7 @@ subroutine outvars(choice,dmatpuflag,dtsets,filnam4,iout,&
 & 3*mxvals%nberry,&
 & mxvals%nimage,&
 & 3*mxvals%nkptgw,&
+& 3*mxvals%nkpthf,&
 & mxvals%nkpt*mxvals%nsppol*mxvals%mband,&
 & 3*mxvals%nkpt,npsp,&
 & 3*mxvals%nqptdm,&

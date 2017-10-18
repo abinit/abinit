@@ -602,6 +602,7 @@ type dataset_type
  integer :: d3e_pert2_dir(3)
  integer :: d3e_pert3_atpol(2)
  integer :: d3e_pert3_dir(3)
+ integer :: fock_downsampling(3)
  integer :: jfielddir(3)
  integer :: kptrlatt(3,3)
  integer :: kptrlatt_orig(3,3)=0
@@ -826,6 +827,7 @@ type dataset_type
  real(dp), allocatable :: kptgw(:,:)        !SET2NULL  ! kptgw(3,nkptgw)
  real(dp), allocatable :: kptns(:,:)        !SET2NULL  ! kptns(3,nkpt) k-points renormalized and shifted.
                                         !  The ones that should be used inside the code.
+ real(dp), allocatable :: kptns_hf(:,:)     !SET2NULL  ! kpthf(3,nkptns_hf)
 
  real(dp), allocatable :: mixalch_orig(:,:,:) !SET2NULL  ! mixalch_orig(npspalch,ntypalch,nimage)
  real(dp), allocatable :: nucdipmom(:,:)      !SET2NULL  ! nucdipmom(3,natom)

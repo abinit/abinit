@@ -32,6 +32,7 @@
 !!         nconeq     =maximal value of input nconeq for all the datasets
 !!         nimage     =maximal value of input nimage for all the datasets
 !!         nkptgw     =maximal value of input nkptgw for all the datasets
+!!         nkpthf     =maximal value of input nkpthf for all the datasets
 !!         nkpt       =maximal value of input nkpt for all the datasets
 !!         nnos       =maximal value of input nnos for all the datasets
 !!         nqptdm     =maximal value of input nqptdm for all the datasets
@@ -559,6 +560,25 @@ subroutine outvar_i_n (dtsets,iout,&
    end if
  end do
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,narr,narrm,ncid,ndtset_alloc,'kptgw','DPR',multivals%nkptgw)
+
+
+!kpthf 
+ narr=3*dtsets(1)%nkpthf ! default size for all datasets
+ do idtset=0,ndtset_alloc       ! especific size for each dataset
+   if(idtset/=0)then
+     narrm(idtset)=3*dtsets(idtset)%nkpthf
+     if (narrm(idtset)>0)&
+&     dprarr(1:narrm(idtset),idtset)=&
+&     reshape(dtsets(idtset)%kpthf(1:3,1:dtsets(idtset)%nkpthf), [narrm(idtset)])
+   else
+     narrm(idtset)=mxvals%nkpthf
+     if (narrm(idtset)>0)&
+&     dprarr(1:narrm(idtset),idtset)=&
+&     reshape(dtsets(idtset)%kpthf(1:3,1:mxvals%nkpthf), [narrm(idtset)] )
+   end if
+ end do
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,narr,narrm,ncid,ndtset_alloc,'kpthf','DPR',multivals%nkpthf)
+
 
  dprarr(1,:)=dtsets(:)%kptnrm
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'kptnrm','DPR',0)

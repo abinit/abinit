@@ -32,8 +32,8 @@
 !!         natvshift  =maximal value of input natvshift for all the datasets
 !!         nconeq     =maximal value of input nconeq for all the datasets
 !!         nimage     =maximal value of input nimage for all the datasets
-!!         nkptgw     =maximal value of input nkptgw for all the datasets
 !!         nkpt       =maximal value of input nkpt for all the datasets
+!!         nkptgw     =maximal value of input nkptgw for all the datasets
 !!         nnos       =maximal value of input nnos for all the datasets
 !!         nqptdm     =maximal value of input nqptdm for all the datasets
 !!         nspinor    =maximal value of input nspinor for all the datasets
@@ -431,9 +431,6 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
    intarr(2,:)=dtsets(:)%cd_subset_freq(2)
    call prttagm(dprarr,intarr,iout,jdtset_,2,marr,2,narrm,ncid,ndtset_alloc,'cd_subset_freq','INT',0)
  end if
-
- intarr(1,:)=dtsets(:)%cgtyphf
- call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'cgtyphf','INT',0)
 
  dprarr(1,:)=dtsets(:)%charge
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'charge','DPR',0)
@@ -879,6 +876,11 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
 
  dprarr(1,:)=dtsets(:)%focktoldfe
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'focktoldfe','DPR',0)
+
+ intarr(1,:)=dtsets(:)%fock_downsampling(1)
+ intarr(2,:)=dtsets(:)%fock_downsampling(2)
+ intarr(3,:)=dtsets(:)%fock_downsampling(3)
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,3,narrm,ncid,ndtset_alloc,'fock_downsampling','INT',0)
 
  dprarr(1,:)=dtsets(:)%freqim_alpha
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'freqim_alpha','DPR',0)

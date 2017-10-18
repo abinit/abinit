@@ -41,9 +41,10 @@
 !!  mxnatvshift=maximal value of input natvshift for all the datasets
 !!  mxnconeq=maximal value of input nconeq for all the datasets
 !!  mxnkptgw=maximal value of input nkptgw for all the datasets
+!!  mxnkpthf=maximal value of input nkpthf for all the datasets
+!!  mxnkpt=maximal value of input nkpt for all the datasets
 !!  mxnnos=maximal value of input nnos for all the datasets
 !!  mxnqptdm=maximal value of input nqptdm for all the datasets
-!!  mxnkpt=maximal value of input nkpt for all the datasets
 !!  mxnspinor=maximal value of input nspinor for all the datasets
 !!  mxnsppol=maximal value of input nsppol for all the datasets
 !!  mxnsym=maximum number of symmetries
@@ -72,7 +73,7 @@
 subroutine invars1m(dmatpuflag,dtsets,iout,lenstr,mband_upper_,&
 & msym,mxga_n_rules,mxgw_nqlwl,mxlpawu,mxmband_upper,mxnatom,&
 & mxnatpawu,mxnatsph,mxnatsph_extra,mxnatvshift,mxnconeq,&
-& mxnimage,mxn_efmas_dirs,mxnkpt,mxnkptgw,mxnnos,mxnqptdm,mxnspinor, &
+& mxnimage,mxn_efmas_dirs,mxnkpt,mxnkptgw,mxnkpthf,mxnnos,mxnqptdm,mxnspinor, &
 & mxnsppol,mxnsym,mxntypat,mxnimfrqs,mxnfreqsp,mxnzchempot,&
 & mxn_projection_frequencies,ndtset,ndtset_alloc,string,npsp,zionpsp)
 
@@ -95,7 +96,7 @@ subroutine invars1m(dmatpuflag,dtsets,iout,lenstr,mband_upper_,&
  integer,intent(in) :: iout,lenstr,msym,mxnatom,mxnimage,ndtset,ndtset_alloc,npsp
  integer,intent(out) :: dmatpuflag,mxga_n_rules,mxgw_nqlwl,mxlpawu,mxmband_upper,mxnatpawu
  integer,intent(out) :: mxnatsph, mxnatsph_extra
- integer,intent(out) :: mxnatvshift,mxnconeq,mxn_efmas_dirs,mxnkpt,mxnkptgw,mxnnos
+ integer,intent(out) :: mxnatvshift,mxnconeq,mxn_efmas_dirs,mxnkpt,mxnkptgw,mxnkpthf,mxnnos
  integer,intent(out) :: mxnqptdm,mxnspinor,mxnsppol,mxnsym,mxntypat
  integer,intent(out) :: mxnimfrqs,mxnfreqsp,mxnzchempot,mxn_projection_frequencies
  character(len=*),intent(inout) :: string
@@ -180,8 +181,9 @@ subroutine invars1m(dmatpuflag,dtsets,iout,lenstr,mband_upper_,&
  mxnimfrqs = 0
  mxnfreqsp = 0
  mxn_projection_frequencies=0
- mxnkptgw=dtsets(1)%nkptgw
  mxnkpt  =dtsets(1)%nkpt
+ mxnkptgw=dtsets(1)%nkptgw
+ mxnkpthf=dtsets(1)%nkpthf
  mxnnos  =dtsets(1)%nnos
  mxnqptdm=dtsets(1)%nqptdm
  mxnspinor=dtsets(1)%nspinor
@@ -200,8 +202,9 @@ subroutine invars1m(dmatpuflag,dtsets,iout,lenstr,mband_upper_,&
    mxnimfrqs = max(dtsets(ii)%cd_customnimfrqs,mxnimfrqs)
    mxnfreqsp = max(dtsets(ii)%gw_customnfreqsp,mxnfreqsp)
    mxn_projection_frequencies = max(dtsets(ii)%gwls_n_proj_freq,mxn_projection_frequencies)
-   mxnkptgw=max(dtsets(ii)%nkptgw,mxnkptgw)
    mxnkpt  =max(dtsets(ii)%nkpt,mxnkpt)
+   mxnkptgw=max(dtsets(ii)%nkptgw,mxnkptgw)
+   mxnkpthf=max(dtsets(ii)%nkpthf,mxnkpthf)
    mxnnos  =max(dtsets(ii)%nnos,mxnnos)
    mxnqptdm=max(dtsets(ii)%nqptdm,mxnqptdm)
    mxnspinor=max(dtsets(ii)%nspinor,mxnspinor)
@@ -245,6 +248,7 @@ subroutine invars1m(dmatpuflag,dtsets,iout,lenstr,mband_upper_,&
    ABI_ALLOCATE(dtsets(idtset)%gw_qlwl,(3,mxgw_nqlwl))
    ABI_ALLOCATE(dtsets(idtset)%kpt,(3,mxnkpt))
    ABI_ALLOCATE(dtsets(idtset)%kptgw,(3,mxnkptgw))
+   ABI_ALLOCATE(dtsets(idtset)%kpthf,(3,mxnkpthf))
    ABI_ALLOCATE(dtsets(idtset)%kptns,(3,mxnkpt))
    ABI_ALLOCATE(dtsets(idtset)%iatsph,(mxnatsph))
    ABI_ALLOCATE(dtsets(idtset)%istwfk,(mxnkpt))

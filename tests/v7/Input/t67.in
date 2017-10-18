@@ -60,7 +60,6 @@ toldfe2 1.0d-12   # Will stop when, twice in a row, the difference
 getwfk2 -1        # Start from previous LDA wavefunctions to ease convergence
 
 #Additional (and facultative) variables for Hartree-Fock
-cgtyphf2 2         # always 2 for exact exchange
 #nnsclohf2 1        # always 1 for exact exchange
 nkpthf2 27          # number of k-point in the full-BZ 
 nbandhf2 4         # number of occupied states
