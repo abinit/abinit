@@ -479,7 +479,7 @@ contains
 !!                     XC functionals to initialize
 !!
 !! PARENTS
-!!      calc_vhxc_me,driver,hybrid_corr,m_kxc,m_xc_vdw,rhohxc,xchybrid_ncpp_cc
+!!      calc_vhxc_me,driver,m_kxc,m_xc_vdw,rhotoxc,xchybrid_ncpp_cc
 !!
 !! CHILDREN
 !!
@@ -510,7 +510,6 @@ contains
  integer(C_INT) :: func_id_c,iref_c,nspin_c,success_c
  real(C_DOUBLE) :: alpha_c,beta_c,omega_c
  character(kind=C_CHAR,len=1),pointer :: strg_c
- character(kind=C_CHAR,len=1) :: msg_c(500)
  type(C_PTR) :: func_ptr_c
 #endif
 
@@ -651,7 +650,7 @@ end subroutine libxc_functionals_init
 !!                     XC functionals to initialize
 !!
 !! PARENTS
-!!      calc_vhxc_me,driver,hybrid_corr,m_kxc,m_xc_vdw,rhohxc,xchybrid_ncpp_cc
+!!      calc_vhxc_me,driver,m_kxc,m_xc_vdw,rhotoxc,xchybrid_ncpp_cc
 !!
 !! CHILDREN
 !!

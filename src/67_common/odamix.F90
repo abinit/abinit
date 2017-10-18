@@ -46,7 +46,7 @@
 !!  my_natom=number of atoms treated by current processor
 !!  nfft=(effective) number of FFT grid points (for this processor)
 !!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
-!!  nkxc=second dimension of the array kxc, see rhohxc.f for a description
+!!  nkxc=second dimension of the array kxc, see rhotoxc.f for a description
 !!  ntypat=number of types of atoms in unit cell.
 !!  nvresid(nfft,nspden)=potential or density residual
 !!  n3xccc=dimension of the xccc3d array (0 or nfft).
@@ -121,7 +121,7 @@
 !!      scfcv
 !!
 !! CHILDREN
-!!      dotprod_vn,fourdp,metric,pawdenpot,pawmknhat,rhohxc,timab,xmpi_sum
+!!      dotprod_vn,fourdp,metric,pawdenpot,pawmknhat,rhotoxc,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -153,6 +153,7 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
  use m_pawrhoij, only : pawrhoij_type
  use m_energies, only : energies_type
  use m_xmpi, only : xmpi_sum
+ use m_xcdata
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -209,6 +210,7 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
  real(dp) :: alphaopt,compch_fft,compch_sph,doti,e1t10,e_ksnm1,e_xcdc_vxctau
  real(dp) :: eenth,fp0,gammp1,ro_dlt,ucvol_local
  character(len=500) :: message
+ type(xcdata_type) :: xcdata
 !arrays
  real(dp) :: A(3,3),A1(3,3),A_new(3,3),efield_new(3)
  real(dp) :: gmet(3,3),gprimdlc(3,3),qpt(3),rmet(3,3),tsec(2)
@@ -225,7 +227,7 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
 !Check that usekden is not 0 if want to use vxctau
  with_vxctau = (present(vxctau).and.present(taur).and.(dtset%usekden/=0))
 
-!To be adjusted for the call to rhohxc
+!To be adjusted for the call to rhotoxc
  add_tfw_=.false.;if (present(add_tfw)) add_tfw_=add_tfw
  nk3xc=1
 
@@ -328,11 +330,17 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
 
 !------Compute Hartree and xc potentials----------------------------------
  nfftot=PRODUCT(ngfft(1:3))
+
+ call hartre(1,gsqcut,usepaw,mpi_enreg,nfft,ngfft,dtset%paral_kgb,rhog,rprimd,vhartr)
+
+ call xcdata_init(dtset%intxc,dtset%ixc,&
+&  dtset%nelect,dtset%tphysel,dtset%usekden,dtset%vdw_xc,dtset%xc_tb09_c,dtset%xc_denpos,xcdata)
+
 !Compute xc potential (separate up and down if spin-polarized)
  optxc=1
- call rhohxc(dtset,energies%e_xc,gsqcut,usepaw,kxc,mpi_enreg,nfft,ngfft,&
-& nhat,usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,dtset%nspden,n3xccc,optxc,rhog,rhor,rprimd,strsxc,&
-& usexcnhat,vhartr,vxc,vxcavg,xccc3d,taug=taug,taur=taur,vxctau=vxctau,add_tfw=add_tfw_)
+ call rhotoxc(energies%e_xc,kxc,mpi_enreg,nfft,ngfft,&
+& nhat,usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,dtset%nspden,n3xccc,optxc,dtset%paral_kgb,rhor,rprimd,strsxc,&
+& usexcnhat,vxc,vxcavg,xccc3d,xcdata,taug=taug,taur=taur,vhartr=vhartr,vxctau=vxctau,add_tfw=add_tfw_)
 
 !------Compute parts of total energy depending on potentials--------
 
@@ -589,11 +597,13 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
 
 !------Compute Hartree and xc potentials----------------------------------
 
+ call hartre(1,gsqcut,usepaw,mpi_enreg,nfft,ngfft,dtset%paral_kgb,rhog,rprimd,vhartr)
+
 !Compute xc potential (separate up and down if spin-polarized)
  optxc=1;if (nkxc>0) optxc=2
- call rhohxc(dtset,energies%e_xc,gsqcut,usepaw,kxc,mpi_enreg,nfft,ngfft,&
-& nhat,usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,dtset%nspden,n3xccc,optxc,rhog,rhor,rprimd,strsxc,&
-& usexcnhat,vhartr,vxc,vxcavg,xccc3d,taug=taug,taur=taur,vxctau=vxctau,add_tfw=add_tfw_)
+ call rhotoxc(energies%e_xc,kxc,mpi_enreg,nfft,ngfft,&
+& nhat,usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,dtset%nspden,n3xccc,optxc,dtset%paral_kgb,rhor,rprimd,strsxc,&
+& usexcnhat,vxc,vxcavg,xccc3d,xcdata,taug=taug,taur=taur,vhartr=vhartr,vxctau=vxctau,add_tfw=add_tfw_)
 
  if (nhatgrdim>0)  then
    ABI_DEALLOCATE(nhatgr)

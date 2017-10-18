@@ -115,7 +115,7 @@
 !!                  and  (d($\rho$*exc)/d($\tau_down$))  (hartree)
 !!
 !! PARENTS
-!!      m_pawxc,rhohxc
+!!      m_pawxc,rhotoxc
 !!
 !! CHILDREN
 !!      drivexc

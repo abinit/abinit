@@ -154,6 +154,7 @@ subroutine initylmg(gprimd,kg,kptns,mkmem,mpi_enreg,mpsang,mpw,&
 
    if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband(ikpt),-1,me_distrb)) cycle 
 
+
 !  Get k+G-vectors, for this k-point:
    npw_k=npwarr(ikpt)
    ABI_ALLOCATE(kg_k,(3,npw_k))

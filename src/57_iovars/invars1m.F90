@@ -107,7 +107,6 @@ subroutine invars1m(dmatpuflag,dtsets,iout,lenstr,mband_upper_,&
 !Local variables-------------------------------
 !scalars
  integer :: idtset,ii,jdtset,lpawu,mband_upper,iatom,nat,nsp
- character(len=500) :: message
 !arrays
  integer,allocatable :: symafm_(:,:),symrel_(:,:,:,:)
  integer,allocatable :: symafm(:),symrel(:,:,:)

@@ -51,7 +51,7 @@
 !!
 !! PARENTS
 !!      dfpt_dyxc1,dfpt_eltfrxc,dfpt_nselt,dfpt_nstdy,dfpt_nstpaw,dfpt_rhotov
-!!      dfptnl_loop,energy,newfermie1,odamix,prcrskerker2,rhohxc,rhotov,setvtr
+!!      dfptnl_loop,energy,newfermie1,odamix,prcrskerker2,rhotoxc,rhotov,setvtr
 !!
 !! CHILDREN
 !!      xmpi_sum

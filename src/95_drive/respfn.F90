@@ -96,7 +96,7 @@
 !!      pawfgrtab_init,pawinit,pawmknhat,pawpuxinit,pawrhoij_alloc
 !!      pawrhoij_bcast,pawrhoij_copy,pawrhoij_free,pawrhoij_nullify
 !!      pawtab_get_lsize,prteigrs,pspini,q0dy3_apply,q0dy3_calc,read_rhor
-!!      rhohxc,setsym,setsymrhoij,setup1,status,symdij,symmetrize_xred,sytens
+!!      rhotoxc,setsym,setsymrhoij,setup1,status,symdij,symmetrize_xred,sytens
 !!      timab,transgrid,vdw_dftd2,vdw_dftd3,wffclose,wings3,wrtloctens,wrtout
 !!      xmpi_bcast
 !!
@@ -125,6 +125,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  use m_results_respfn
  use m_hdr
  use m_crystal
+ use m_xcdata
 
  use m_fstrings,    only : strcat
  use m_dynmat,      only : chkph3, d2sym3, q0dy3_apply, q0dy3_calc, wings3, dfpt_phfrq, sytens
@@ -194,13 +195,13 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  integer,parameter :: formeig=0,level=10
  integer,parameter :: response=1,syuse=0,master=0,cplex1=1
  integer :: nk3xc
- integer :: analyt,ask_accurate,band_index,bantot,bdeigrf,choice,coredens_method,cplex
- integer :: dim_eig2nkq,dim_eigbrd,dyfr_cplex,dyfr_nondiag,fullinit,gnt_option
+ integer :: analyt,ask_accurate,band_index,bantot,bdeigrf,coredens_method,cplex
+ integer :: dim_eig2nkq,dim_eigbrd,dyfr_cplex,dyfr_nondiag,gnt_option
  integer :: gscase,has_dijnd,has_kxc,iatom,iatom_tot,iband,idir,ider,ierr,ifft,ii,ikpt,indx
  integer :: i1dir,i1pert,i2dir,i2pert,i3dir,i3pert
  integer :: initialized,ipert,ipert2,ireadwf0,iscf,iscf_eff,ispden,isppol
  integer :: itypat,izero,mcg,me,mgfftf,mk1mem,mkqmem,mpert,mu
- integer :: my_natom,n1,natom,n3xccc,nband_k,nblok,nfftf,nfftot,nfftotf,nhatdim,nhatgrdim
+ integer :: my_natom,n1,natom,n3xccc,nband_k,nfftf,nfftot,nfftotf,nhatdim,nhatgrdim
  integer :: nkpt_eff,nkpt_max,nkpt_rbz,nkxc,nkxc1,nspden_rhoij,ntypat,nzlmopt,openexit
  integer :: optcut,option,optgr0,optgr1,optgr2,optorth,optrad
  integer :: optatm,optdyfr,opteltfr,optgr,optn,optn2,optstr,optv
@@ -212,7 +213,6 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  real(dp) :: boxcut,compch_fft,compch_sph,cpus,ecore,ecut_eff,ecutdg_eff,ecutf
  real(dp) :: eei,eew,ehart,eii,ek,enl,entropy,enxc
  real(dp) :: epaw,epawdc,etot,evdw,fermie,gsqcut,gsqcut_eff,gsqcutc_eff,qphnrm,residm
- real(dp) :: tolwfr
  real(dp) :: ucvol,vxcavg
  character(len=fnlen) :: dscrpt
  character(len=fnlen) :: filename
@@ -225,6 +225,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  type(wffile_type) :: wffgs,wfftgs
  type(wvl_data) :: wvl
  type(crystal_t) :: Crystal
+ type(xcdata_type) :: xcdata
  integer :: ddkfil(3),ngfft(18),ngfftf(18),rfdir(3),rf2_dirs_from_rfpert_nl(3,3)
  integer,allocatable :: atindx(:),atindx1(:),blkflg(:,:,:,:),blkflgfrx1(:,:,:,:),blkflg1(:,:,:,:)
  integer,allocatable :: blkflg2(:,:,:,:),carflg(:,:,:,:),clflg(:,:),indsym(:,:,:)
@@ -846,18 +847,23 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  end if
 
 !Set up hartree and xc potential. Compute kxc here.
+ ABI_ALLOCATE(vhartr,(nfftf))
+
+ call hartre(1,gsqcut,psps%usepaw,mpi_enreg,nfftf,ngfftf,dtset%paral_kgb,rhog,rprimd,vhartr)
+
  option=2 ; nk3xc=1
  nkxc=2*min(dtset%nspden,2)-1;if(dtset%xclevel==2)nkxc=12*min(dtset%nspden,2)-5
  call check_kxc(dtset%ixc,dtset%optdriver)
  ABI_ALLOCATE(kxc,(nfftf,nkxc))
- ABI_ALLOCATE(vhartr,(nfftf))
  ABI_ALLOCATE(vxc,(nfftf,dtset%nspden))
 
- _IBM6("Before rhohxc")
+ _IBM6("Before rhotoxc")
 
- call rhohxc(dtset,enxc,gsqcut,psps%usepaw,kxc,mpi_enreg,nfftf,ngfftf,&
-& nhat,nhatdim,nhatgr,nhatgrdim,nkxc,nk3xc,dtset%nspden,n3xccc,option,rhog,rhor,&
-& rprimd,strsxc,usexcnhat,vhartr,vxc,vxcavg,xccc3d)
+ call xcdata_init(dtset%intxc,dtset%ixc,&
+&    dtset%nelect,dtset%tphysel,dtset%usekden,dtset%vdw_xc,dtset%xc_tb09_c,dtset%xc_denpos,xcdata)
+ call rhotoxc(enxc,kxc,mpi_enreg,nfftf,ngfftf,&
+& nhat,nhatdim,nhatgr,nhatgrdim,nkxc,nk3xc,dtset%nspden,n3xccc,option,dtset%paral_kgb,rhor,&
+& rprimd,strsxc,usexcnhat,vxc,vxcavg,xccc3d,xcdata,vhartr=vhartr)
 
 !Compute local + Hxc potential, and subtract mean potential.
  ABI_ALLOCATE(vtrial,(nfftf,dtset%nspden))

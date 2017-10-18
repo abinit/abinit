@@ -989,8 +989,17 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'builtintest',tread,'INT')
  if(tread==1) dtset%builtintest=intarr(1)
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'chkdilatmx',tread,'INT')
+ if(tread==1) dtset%chkdilatmx=intarr(1)
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'chksymbreak',tread,'INT')
  if(tread==1) dtset%chksymbreak=intarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'fockaux_ixc',tread,'INT')
+ if(tread==1) dtset%fockaux_ixc=intarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'fockaux_scal',tread,'DPR')
+ if(tread==1) dtset%fockaux_scal=dprarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'fockoptmix',tread,'INT')
  if(tread==1) dtset%fockoptmix=intarr(1)

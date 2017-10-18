@@ -119,13 +119,13 @@ subroutine mkcore_wvl(atindx1,corstr,grxc,natom,nattyp,nfft,nspden,ntypat,n1xccc
 #if defined HAVE_BIGDFT
 !scalars
  integer :: iat,iatm,iatom,iex,iey,iez,ind,ioffset,ipts,isx,isy,isz,itypat
- integer :: iwarn=0,i1,i2,i3,i3s,j1,j2,j3,jj,jpts,me_wvl,mu,nproc_wvl
+ integer :: iwarn=0,i1,i2,i3,i3s,j1,j2,j3,jj,jpts,me_wvl,nproc_wvl
  integer :: nbl1,nbr1,nbl2,nbr2,nbl3,nbr3,npts,npts12
- integer :: ntot,nu,n1,n1i,n2,n2i,n3,n3i,n3pi
+ integer :: ntot,n1,n1i,n2,n2i,n3,n3i,n3pi
  logical :: perx,pery,perz,gox,goy,goz,USE_PAW
  real(dp) :: aa,arg,bb,cc,cutoff,dd,delta=0,deltam1=0,delta2div6=0,diff
  real(dp) :: hxh,hyh,hzh,range,range2,rangem1,rr,rx,ry,rz,r2,strdia
- real(dp) :: term,term1,term2,ucvol,xx,yy,zz
+ real(dp) :: term,ucvol,xx,yy,zz
  character(len=500) :: msg
  type(pawrad_type) :: core_mesh
 !arrays

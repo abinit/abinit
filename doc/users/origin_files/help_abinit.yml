@@ -783,7 +783,7 @@ sec5:
  body: |
   Actually, no real understanding of these files
       is needed to run the code. The recommended 
-      pseudopotentials can be downloaded from the ABINIT Web site at [[http://www.abinit.org/downloads/atomic-data-files]].
+      pseudopotentials can be downloaded from the ABINIT Web site at [[https://www.abinit.org/downloads/atomic-data-files]].
       Documentation is provided there as well as in the dedicated [[topic_PseudosPAW]].
       Note that it is not possible to mix norm-conserving pseudopotentials and PAW atomic data sets in the same run.
       Also, every such file has been generated for a particular choice of the exchange-correlation functional [[ixc]].
