@@ -42,7 +42,7 @@ D.9 Contact the relevant people
 D.10 (Obsolete - should be replaced by automatic generation on another machine)
 Run the green_intel12 slave on the trunk PUBLIC branch => static binary for the group.
 
-Also update install notes, features, doc/maintainers/statistics.txt
+Also update install notes and doc/maintainers/statistics.txt
 Look at presentation, theory (doc/make presentation theory)
 
 E. For the second and other merges of a production version
