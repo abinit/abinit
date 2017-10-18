@@ -183,7 +183,7 @@ subroutine smpbz(brav,iout,kptrlatt,mkpt,nkpt,nshiftk,option,shiftk,spkpt,downsa
          write(message, '(a,3i4,2a,i4,4a)' )&
 &          'Real downsampling is activated, with downsampling(1:3)=',downsampling(1:3),ch10,&
 &          'However, nshiftk must be 1 in this case, while the input nshiftk=',nshiftk,ch10,&
-&          'Action: either choose not to downsample the k point grid (e.g. fock_downsampling=1),',ch10,&
+&          'Action: either choose not to downsample the k point grid (e.g. fockdownsampling=1),',ch10,&
 &          'or set nshiftk=1.'
          MSG_ERROR(message)
        endif
@@ -203,7 +203,7 @@ subroutine smpbz(brav,iout,kptrlatt,mkpt,nkpt,nshiftk,option,shiftk,spkpt,downsa
 &          'is not compatible with kptrlatt=',ch10,&
 &          kptrlatt(:,:),ch10,& 
 &          'that gives nkptlatt=',nkptlatt,ch10,&
-&          'Action: either choose not to downsample the k point grid (e.g. fock_downsampling=1),',ch10,&
+&          'Action: either choose not to downsample the k point grid (e.g. fockdownsampling=1),',ch10,&
 &          'or modify your k-point grid and/or your downsampling in order for them to be compatible.'
          MSG_ERROR(message)
        endif

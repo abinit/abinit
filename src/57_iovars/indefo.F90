@@ -272,7 +272,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%fftgw=21
    dtsets(idtset)%focktoldfe=zero
    dtsets(idtset)%fockoptmix=0
-   dtsets(idtset)%fock_downsampling(:)=0
+   dtsets(idtset)%fockdownsampling(:)=0
    dtsets(idtset)%freqim_alpha=five
    dtsets(idtset)%freqremin=zero
    dtsets(idtset)%freqremax=zero

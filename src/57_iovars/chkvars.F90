@@ -104,7 +104,7 @@ subroutine chkvars (string)
 !F
  list_vars=trim(list_vars)//' fband fermie_nest'
  list_vars=trim(list_vars)//' fftalg fftcache fftgw'
- list_vars=trim(list_vars)//' fockoptmix focktoldfe fock_downsampling'
+ list_vars=trim(list_vars)//' fockoptmix focktoldfe fockdownsampling'
  list_vars=trim(list_vars)//' freqim_alpha freqremax freqremin freqspmax'
  list_vars=trim(list_vars)//' freqspmin'
  list_vars=trim(list_vars)//' friction frzfermi fxcartfactor '

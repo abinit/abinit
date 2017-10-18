@@ -877,10 +877,10 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
  dprarr(1,:)=dtsets(:)%focktoldfe
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'focktoldfe','DPR',0)
 
- intarr(1,:)=dtsets(:)%fock_downsampling(1)
- intarr(2,:)=dtsets(:)%fock_downsampling(2)
- intarr(3,:)=dtsets(:)%fock_downsampling(3)
- call prttagm(dprarr,intarr,iout,jdtset_,2,marr,3,narrm,ncid,ndtset_alloc,'fock_downsampling','INT',0)
+ intarr(1,:)=dtsets(:)%fockdownsampling(1)
+ intarr(2,:)=dtsets(:)%fockdownsampling(2)
+ intarr(3,:)=dtsets(:)%fockdownsampling(3)
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,3,narrm,ncid,ndtset_alloc,'fockdownsampling','INT',0)
 
  dprarr(1,:)=dtsets(:)%freqim_alpha
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'freqim_alpha','DPR',0)

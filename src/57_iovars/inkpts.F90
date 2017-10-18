@@ -138,7 +138,7 @@ subroutine inkpts(bravais,chksymbreak,iout,iscf,istwfk,jdtset,&
  real(dp) :: fraction,norm,ucvol,wtksum
  character(len=500) :: message
 !arrays
- integer :: fock_downsampling(3)
+ integer :: fockdownsampling(3)
  integer,allocatable :: ndivk(:),intarr(:)
  real(dp) :: gmet(3,3),gprimd(3,3),kpoint(3),rmet(3,3),tsec(2)
  real(dp),allocatable :: kptbounds(:,:),dprarr(:)
@@ -410,13 +410,13 @@ subroutine inkpts(bravais,chksymbreak,iout,iscf,istwfk,jdtset,&
 
    end if
 
-   fock_downsampling(:)=1
-   call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'fock_downsampling',tread,'INT')
-   if(tread==1)fock_downsampling=intarr(1:3)
+   fockdownsampling(:)=1
+   call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'fockdownsampling',tread,'INT')
+   if(tread==1)fockdownsampling=intarr(1:3)
 
    call getkgrid(chksymbreak,0,iscf,kpt,kptopt,kptrlatt,kptrlen,&
 &   msym,nkpt,nkpt_computed,nshiftk,nsym,rprimd,&
-&   shiftk,symafm,symrel,vacuum,wtk,nkpthf=nkpthf,kpthf=kpthf,downsampling=fock_downsampling)
+&   shiftk,symafm,symrel,vacuum,wtk,nkpthf=nkpthf,kpthf=kpthf,downsampling=fockdownsampling)
 
    kptnrm=one
 

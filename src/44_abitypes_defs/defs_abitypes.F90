@@ -187,7 +187,6 @@ type dataset_type
  integer :: chkprim
  integer :: chksymbreak
  integer :: cineb_start
- integer :: cgtyphf
  integer :: delayperm
  integer :: diismemory
  integer :: dmatpuopt
@@ -602,7 +601,7 @@ type dataset_type
  integer :: d3e_pert2_dir(3)
  integer :: d3e_pert3_atpol(2)
  integer :: d3e_pert3_dir(3)
- integer :: fock_downsampling(3)
+ integer :: fockdownsampling(3)
  integer :: jfielddir(3)
  integer :: kptrlatt(3,3)
  integer :: kptrlatt_orig(3,3)=0
