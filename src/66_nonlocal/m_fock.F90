@@ -818,7 +818,6 @@ subroutine fock_init(atindx,cplex,dtset,fock,gsqcut,kg,mpi_enreg,nattyp,npwarr,p
 ! ============================================
 ! === Initialize the set of k-points in BZ ===
 ! ============================================
-     ABI_ALLOCATE(kptns_hf,(3,nkpt_bz))
      kptns_hf(:,1:nkpt_bz)=dtset%kptns_hf(:,1:nkpt_bz)
 !* kptns_hf contains the special k points obtained by the Monkhorst & Pack method, in reduced coordinates. (output)
 

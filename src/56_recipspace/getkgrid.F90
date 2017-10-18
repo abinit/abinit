@@ -422,6 +422,7 @@ subroutine getkgrid(chksymbreak,iout,iscf,kpt,kptopt,kptrlatt,kptrlen,&
    if (PRESENT(kpthf)) then ! Returns list of k-points in the Full BZ, possibly downsampled for Fock
      kpthf = spkpt(:,1:nkpthf)
    end if
+
  endif
 
  call smpbz(brav,iout,kptrlatt2,mkpt,nkpt_fullbz,nshiftk2,option,shiftk2,spkpt)

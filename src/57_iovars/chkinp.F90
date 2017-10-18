@@ -918,8 +918,6 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
    call chkint_ge(0,0,cond_string,cond_values,ierr,'gwls_recycle',dt%gwls_recycle,0,iout)
    call chkint_le(0,0,cond_string,cond_values,ierr,'gwls_recycle',dt%gwls_recycle,2,iout)
 
-
-
 !  iatsph between 1 and natom
    maxiatsph=maxval(dt%iatsph(1:dt%natsph))
    miniatsph=minval(dt%iatsph(1:dt%natsph))

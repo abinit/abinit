@@ -2607,7 +2607,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
    dtset%kptns(3,1:nkpt)=dtset%kptns(3,1:nkpt)+dtset%qptn(3)
  end if
 
- dtset%kptns_hf(:,1:nkpt)=dtset%kptns_hf(:,1:nkpt)/dtset%kptnrm
+ if(nkpthf/=0)then
+   dtset%kptns_hf(:,1:nkpthf)=dtset%kptns_hf(:,1:nkpthf)/dtset%kptnrm
+ endif
 
  ! Read variables defining the k-path
  ! If kptopt < 0  --> Band structure and kptbounds size is given by abs(kptopt)
@@ -2959,6 +2961,6 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
  ABI_DEALLOCATE(dprarr)
 
  call timab(191,2,tsec)
-
+ 
 end subroutine invars2
 !!***
