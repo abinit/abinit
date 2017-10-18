@@ -300,6 +300,8 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
 !      - usewvl/=0
 !      - test_nhat and usexcnhat==1 and nspden==4
 
+ call timab(81,1,tsec)
+
 !Check options
  ixc=xcdata%ixc
  if(option==3)then
@@ -354,13 +356,6 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
  nfftot=ngfft(1)*ngfft(2)*ngfft(3)
  usefxc=0;if (ixc==50) usefxc=1
  add_tfw_=.false.;if (present(add_tfw)) add_tfw_=add_tfw
-
-! if(option/=0.and.option/=10)then
-!   call hartre(cplex,gsqcut,izero,mpi_enreg,nfft,ngfft,paral_kgb,qphon,rhog,rprimd,vhartr)
-! end if
-
-!Note : hartre is excluded from the timing
- call timab(81,1,tsec)
 
 !Initializations
  enxc=zero

@@ -570,6 +570,7 @@ use m_cgtools
              ABI_ALLOCATE(ghc_dum,(0,0))
              do iblocksize=1,blocksize
                fockcommon%ieigen=(iblock-1)*blocksize+iblocksize
+               fockcommon%iband=(iblock-1)*blocksize+iblocksize
                if (gs_hamk%usepaw==1) then
                  cwaveprj_idat => cwaveprj(:,(iblocksize-1)*my_nspinor+1:iblocksize*my_nspinor)
                end if

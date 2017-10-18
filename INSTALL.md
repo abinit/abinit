@@ -30,7 +30,7 @@ Optionally, install the package inside the `prefix` directory with:
 For troubleshooting, more elaborate installation instructions are contained
 in the [doc/install\_notes](doc/install_notes) directory of this package
 (take the html file that corresponds to the version that you are using), or
-can also be found on-line at <http://www.abinit.org/installation> for the latest production version.
+can also be found on-line at <https://www.abinit.org/installation> for the latest production version.
 
 # GNU AUTOTOOLS SUPPORT
 
