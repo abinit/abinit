@@ -44,19 +44,22 @@ __________________________________________________________________
 
 A.  Warnings and important remarks
 
-A.1 Some changes of names : 
+A.1 The interface between ABINIT and TRIQS has been changed, such that TRIQS 1.4 is used now instead of TRIQS 1.3.
+    No backward compatibility with TRIQS 1.3 has been coded, sorry. See D.4.
+    
+A.2 Some changes of names : 
      - input variable gwls_sternheimer_kmax has become gwls_stern_kmax;
      - input variable gwls_dielectric_model has become gwls_diel_model;
-     - input variable prt_effpot has become prt_model (multibinit);
+     - input variable prt_effpot has become prt_model (multibinit input variable);
      - input variable effmass has become erffmass_free;            
      - lesson tlda has become tdftu;
-    Also suppressed gwls_second_model_parameter
+    Also, the input variable gwls_second_model_parameter, not used, has been suppressed.
 
 __________________________________________________________________
 
 B.  Most noticeable achievements
 
-B.1 The whole ABINIT documentation has been significantly upgraded by the introduction of "Topics", replacing the
+B.1 The whole ABINIT documentation has been significantly improveed by the introduction of "Topics", replacing the
     previous "lists of ABINIT features". All the capabilities of ABINIT are now presented in about 70 short topic Web pages.
     Those topic web pages usually have :
     - a brief introduction;
@@ -70,7 +73,8 @@ B.1 The whole ABINIT documentation has been significantly upgraded by the introd
 B.2 A central bibliography database abiref.bib has been created, and linked to the
     above-mentioned topics (B.1) but also to other parts of the ABINIT documentation (e.g. input variable list,
     the lessons of the tutorial, the theory documents, the acknowledgments ...).
-    More than 200 bibliographical references are present. 
+    More than 200 bibliographical references are present.  Not all bibliographical references of the doc have been entered in this
+    central bibliographic database, though.
     By X. Gonze and F. Jollet
  
 B.3 The list of input variables has been restructured, and is now searchable.
@@ -78,16 +82,16 @@ B.3 The list of input variables has been restructured, and is now searchable.
     By J. Bieder, X. Gonze and F. Jollet
 
 B.4 The frequency of usage of each input variable (in the set of automatic tests) is now automatically 
-    computed, and mentioned in the documentation for this input variable. Examples input files are also mentioned in the documentation.
+    computed, and mentioned in the documentation for this input variable. Examples input files are also now mentioned in the documentation.
     The input files for the automatic tests can now be directly accessed on the Web, as well as the reference files for the lessons of the tutorial.
     By. X. Gonze and F. Jollet
 
 B.5 Several important developments related to electron-phonon matrix element computation have been made. 
-    The Frolich interpolation procedure for electron-phonon matrix elements, as explained in PRL 115, 176401 (2015), has been implemented. 
+    The Frohlich interpolation procedure for electron-phonon matrix elements, as explained in PRL 115, 176401 (2015), has been implemented. 
     The long-range part of the phonon coupling potential is modeled with the Born effective charges and the dielectric tensor. 
     This long-range part is substracted from the potential before the Fourier interpolation then added after the interpolation. 
     The resulting potential is in much better agreement with the full calculation, as can be verified from the el-ph matrix elements.
-    A functionality has been added in the eph driver (eph_task=5) to only interpolate the phonon potential onto a fine q-point grid.
+    Also, a functionality has been added in the eph driver (eph_task=5) to only interpolate the phonon potential onto a fine q-point grid.
     The interpolation is performed one perturbation at a time, and is thus more memory efficient than the previous procedures.
     There is additional testing of the new "driver" optdrive=7 specifically dealing with electron-phonon
     related computations (including zero-point renormalisation), especially the interpolation.
@@ -122,10 +126,10 @@ __________________________________________________________________
 
 C. Changes for the developers (also compilers)
 
-C.1 Large changes of the procedure to document ABINIT, for most of the documentation files.
+C.1 There are large changes of the procedure to document ABINIT, for most of the documentation files.
     The HTML files are now produced from YAML files, under the control of the script ~abinit/doc/generate_doc.py .
-    The documentation on this procedure is available on the ABINIT wiki, at https://wiki.abinit.org/doku.php?id=developers:generate_doc . 
-    This is directly linked to the modifications in the doc, presented in B1-B4.
+    The documentation that describes this procedure is available on the ABINIT wiki, at https://wiki.abinit.org/doku.php?id=developers:generate_doc . 
+    This is directly linked to the modifications in the doc presented in B1-B4.
     In particular, the Dokuwiki syntax is used for the hyperlinks.
     By F. Jollet and X. Gonze
 
@@ -136,7 +140,7 @@ D.  Other changes
 
 D.1 The "Adaptively Compressed Operator" approach for the fast application of the Fock operator has been implemented,
     and replaces the traditional way to apply the Fock operator in hybrid functionals (e.g. HSE06, PBE0, ...).
-    These are not yet to be considered in production, though (see D.4). Likely for ABINITv8.8.  
+    Hybrid functionals are not yet to be considered in production, though (see D.6), but likely for ABINITv8.8.  
     See tests libxc 51, 52, 53, 67, 68, 69, 70, 71, and also v7#65, 66, 70.
     By F. Jollet and X. Gonze
 
@@ -146,7 +150,7 @@ D.2 A set of 6 input files and accompanying references (from 32 to 2048 procs), 
     By M. Torrent.
 
 D.3 The tutorial on the temperature-dependent electronic structure has been imported from the ABINIT wiki to the
-    usual location ~abinit/doc/tutorial . However, it is not yet operational.
+    usual location ~abinit/doc/tutorial and suppressed from the Wiki. However, it is not yet operational.
     Work is also going on on tutorial fold2bloch.
     By X. Gonze
 
@@ -176,7 +180,7 @@ D.10 Tests of the computation of U in cRPA for SrVO3
      See the new test v7#78,79
      By B. Amadon
 
-D.11 Test of the Velocity Verlet algorithm ionmov=24)
+D.11 Test of the Velocity Verlet algorithm ionmov=24 
     See the new test v8#13
     By S. Prokhorenko
 
@@ -196,7 +200,7 @@ D.15 Ongoing work on the multibinit project.
      New hist storage.
      New tests paral#101-102, to test the anharmonic part.
      Rationalization of supercell treatment with multibinit
-     By A. Martin, M. Verstraete  and Ph. Ghosez
+     By A. Martin, M. Verstraete and Ph. Ghosez
 
 D.17 Begin transport epc calculations within the eph part of the code.
      By M. Verstraete
