@@ -128,11 +128,6 @@ subroutine getkgrid(chksymbreak,iout,iscf,kpt,kptopt,kptrlatt,kptrlen,&
 
 ! *************************************************************************
 
-!DEBUG
-   write(std_out,*)' getkgrid, enter '
-   write(std_out,*)' getkgrid : nkpt,nkpthf=',nkpt,nkpthf
-!ENDDEBUG
-
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
 
  if (kptopt==1.or.kptopt==4) then
@@ -432,11 +427,6 @@ subroutine getkgrid(chksymbreak,iout,iscf,kpt,kptopt,kptrlatt,kptrlen,&
  endif
 
  call smpbz(brav,iout,kptrlatt2,mkpt,nkpt_fullbz,nshiftk2,option,shiftk2,spkpt)
-
-!DEBUG
-   write(std_out,*)' getkgrid : after smpbz, mkpt,nkpthf_computed,nkpt_fullbz=',mkpt,nkpthf_computed,nkpt_fullbz
-!ENDDEBUG
-
 
  if (PRESENT(fullbz)) then ! Returns list of k-points in the Full BZ.
    ABI_ALLOCATE(fullbz,(3,nkpt_fullbz))

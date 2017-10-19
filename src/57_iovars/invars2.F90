@@ -1945,6 +1945,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nnsclo',tread,'INT')
  if(tread==1) dtset%nnsclo=intarr(1)
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nnsclohf',tread,'INT')
+ if(tread==1) dtset%nnsclohf=intarr(1)
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nstep',tread,'INT')
  if(tread==1) dtset%nstep=intarr(1)
 
@@ -2817,9 +2820,6 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
 !!                                                    + extra bands according to fband
      dtset%nbandhf=dtset%nband(1)
    end if
-
-   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nnsclohf',tread,'INT')
-   if(tread==1) dtset%nnsclohf=intarr(1)
 
  end if ! usefock
 

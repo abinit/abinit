@@ -609,10 +609,6 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
 &     vacuum,dtset%xred_orig(1:3,1:natom,intimage),dtset%qptrlatt)
    end if
 
-!DEBUG
-   write(std_out,*)' invar1 : before inkpts, nkpthf=',nkpthf
-!ENDDEBUG
-
 !  Find the k point grid
    call inkpts(bravais,chksymbreak,iout,iscf,istwfk,jdtset,&
 &   kpt,kpthf,dtset%kptopt,kptnrm,dtset%kptrlatt_orig,dtset%kptrlatt,kptrlen,lenstr,msym,&
