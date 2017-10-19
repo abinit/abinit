@@ -2314,7 +2314,7 @@ end subroutine compute_eigen_problem
 #ifdef HAVE_LINALG_ELPA
 
 subroutine solve_gevp_complex(na,nev,na_rows,na_cols,nblk,a,b,ev,z,tmp1,tmp2, &
-                              my_prow,my_pcol,np_rows,np_cols,sc_desc,mpi_comm)
+                              my_prow,my_pcol,np_rows,np_cols,sc_desc,comm)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -2333,7 +2333,7 @@ subroutine solve_gevp_complex(na,nev,na_rows,na_cols,nblk,a,b,ev,z,tmp1,tmp2, &
   integer,intent(in) :: my_pcol,my_prow
   integer,intent(in) :: np_cols,np_rows
   integer,intent(in) :: sc_desc(9)
-  integer,intent(in) :: mpi_comm
+  integer,intent(in) :: comm
   real*8 :: ev(na)
   complex*16 :: a(na_rows,na_cols),b(na_rows,na_cols),z(na_rows,na_cols)
   complex*16 :: tmp1(na_rows,na_cols),tmp2(na_rows,na_cols)
@@ -2346,18 +2346,18 @@ subroutine solve_gevp_complex(na,nev,na_rows,na_cols,nblk,a,b,ev,z,tmp1,tmp2, &
 
   ! 1. Calculate Cholesky factorization of Matrix B = U**T * U
   !    and invert triangular matrix U
-  call elpa_func_cholesky(na,b,na_rows,nblk,na_cols,mpi_comm,my_prow,my_pcol)
-  call elpa_func_invert_triangular(na,b,na_rows,nblk,na_cols,mpi_comm,my_prow,my_pcol)
+  call elpa_func_cholesky(na,b,na_rows,nblk,na_cols,comm,my_prow,my_pcol)
+  call elpa_func_invert_triangular(na,b,na_rows,nblk,na_cols,comm,my_prow,my_pcol)
 
   ! 2. Calculate U**-T * A * U**-1
   ! 2a. tmp1 = U**-T * A
   call elpa_func_hermitian_multiply('U','L',na,na,b,na_rows,a,na_rows,tmp1,na_rows,&
-&                                   nblk,na_cols,mpi_comm,my_prow,my_pcol)
+&                                   nblk,na_cols,comm,my_prow,my_pcol)
   ! 2b. tmp2 = tmp1**T
   call pztranc(na,na,CONE,tmp1,1,1,sc_desc,CZERO,tmp2,1,1,sc_desc)
   ! 2c. A =  U**-T * tmp2 ( = U**-T * Aorig * U**-1 )
   call elpa_func_hermitian_multiply('U','U',na,na,b,na_rows,tmp2,na_rows,a,na_rows, &
-&                                   nblk,na_cols,mpi_comm,my_prow,my_pcol)
+&                                   nblk,na_cols,comm,my_prow,my_pcol)
   ! A is only set in the upper half, solve_evp_real needs a full matrix
   ! Set lower half from upper half
   call pztranc(na,na,CONE,a,1,1,sc_desc,CZERO,tmp1,1,1,sc_desc)
@@ -2371,19 +2371,19 @@ subroutine solve_gevp_complex(na,nev,na_rows,na_cols,nblk,a,b,ev,z,tmp1,tmp2, &
   ! 3. Calculate eigenvalues/eigenvectors of U**-T * A * U**-1
   !    Eigenvectors go to tmp1
   call elpa_func_solve_evp_1stage(na,nev,a,na_rows,ev,tmp1,na_rows,nblk,na_cols, &
-&                                 mpi_comm,my_prow,my_pcol)
+&                                 comm,my_prow,my_pcol)
   ! 4. Backtransform eigenvectors: Z = U**-1 * tmp1
   ! hermitian_multiply needs the transpose of U**-1, thus tmp2 = (U**-1)**T
    call pztranc(na,na,CONE,b,1,1,sc_desc,CZERO,tmp2,1,1,sc_desc)
    call elpa_func_hermitian_multiply('L','N',na,nev,tmp2,na_rows,tmp1,na_rows,z,na_rows, &
-&                                    nblk,na_cols,mpi_comm,my_prow,my_pcol)
+&                                    nblk,na_cols,comm,my_prow,my_pcol)
 
 end subroutine solve_gevp_complex
 
 !----------------------------------------------------------------------
 
 subroutine solve_gevp_real(na,nev,na_rows,na_cols,nblk,a,b,ev,z,tmp1,tmp2, &
-                           my_prow,my_pcol,np_rows,np_cols,sc_desc,mpi_comm)
+                           my_prow,my_pcol,np_rows,np_cols,sc_desc,comm)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -2402,7 +2402,7 @@ subroutine solve_gevp_real(na,nev,na_rows,na_cols,nblk,a,b,ev,z,tmp1,tmp2, &
   integer,intent(in) :: my_pcol,my_prow
   integer,intent(in) :: np_cols,np_rows
   integer,intent(in) :: sc_desc(9)
-  integer,intent(in) :: mpi_comm
+  integer,intent(in) :: comm
   real*8 :: ev(na)
   real*8 :: a(na_rows,na_cols),b(na_rows,na_cols),z(na_rows,na_cols)
   real*8::tmp1(na_rows,na_cols),tmp2(na_rows,na_cols)
@@ -2414,17 +2414,17 @@ subroutine solve_gevp_real(na,nev,na_rows,na_cols,nblk,a,b,ev,z,tmp1,tmp2, &
 
   ! 1. Calculate Cholesky factorization of Matrix B = U**T * U
   !    and invert triangular matrix U
-  call elpa_func_cholesky(na,b,na_rows,nblk,na_cols,mpi_comm,my_prow,my_pcol)
-  call elpa_func_invert_triangular(na,b,na_rows,nblk,na_cols,mpi_comm,my_prow,my_pcol)
+  call elpa_func_cholesky(na,b,na_rows,nblk,na_cols,comm,my_prow,my_pcol)
+  call elpa_func_invert_triangular(na,b,na_rows,nblk,na_cols,comm,my_prow,my_pcol)
   ! 2. Calculate U**-T * A * U**-1
   ! 2a. tmp1 = U**-T * A
   call elpa_func_hermitian_multiply('U','L',na,na,b,na_rows,a,na_rows,tmp1,na_rows, &
-&                                   nblk,na_cols,mpi_comm,my_prow,my_pcol)
+&                                   nblk,na_cols,comm,my_prow,my_pcol)
   ! 2b. tmp2 = tmp1**T
   call pdtran(na,na,1.d0,tmp1,1,1,sc_desc,0.d0,tmp2,1,1,sc_desc)
   ! 2c. A =  U**-T * tmp2 ( = U**-T * Aorig * U**-1 )
   call elpa_func_hermitian_multiply('U','U',na,na,b,na_rows,tmp2,na_rows,a,na_rows, &
-&                                   nblk,na_cols,mpi_comm,my_prow,my_pcol)
+&                                   nblk,na_cols,comm,my_prow,my_pcol)
   ! A is only set in the upper half, solve_evp_real needs a full matrix
   ! Set lower half from upper half
   call pdtran(na,na,1.d0,a,1,1,sc_desc,0.d0,tmp1,1,1,sc_desc)
@@ -2438,12 +2438,12 @@ subroutine solve_gevp_real(na,nev,na_rows,na_cols,nblk,a,b,ev,z,tmp1,tmp2, &
   ! 3. Calculate eigenvalues/eigenvectors of U**-T * A * U**-1
   !    Eigenvectors go to tmp1
   call elpa_func_solve_evp_1stage(na,nev,a,na_rows,ev,tmp1,na_rows,nblk,na_cols, &
-&                                 mpi_comm,my_prow,my_pcol)
+&                                 comm,my_prow,my_pcol)
   ! 4. Backtransform eigenvectors: Z = U**-1 * tmp1
   !    hermitian_multiply needs the transpose of U**-1, thus tmp2 = (U**-1)**T
   call pdtran(na,na,1.d0,b,1,1,sc_desc,0.d0,tmp2,1,1,sc_desc)
   call elpa_func_hermitian_multiply('L','N',na,nev,tmp2,na_rows,tmp1,na_rows,z,na_rows, &
-&                                   nblk,na_cols,mpi_comm,my_prow,my_pcol)
+&                                   nblk,na_cols,comm,my_prow,my_pcol)
 
  end subroutine solve_gevp_real
 #endif

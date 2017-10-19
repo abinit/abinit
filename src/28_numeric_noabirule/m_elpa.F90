@@ -213,7 +213,7 @@ end subroutine elpa_func_uninit
 !!  Wrapper to elpa_get_communicators ELPA function
 !!
 !! INPUTS
-!!  mpi_comm=Global communicator for the calculations (in)
+!!  mpi_comm_elpa=Global communicator for the calculations (in)
 !!  my_prow=Row coordinate of the calling process in the process grid (in)
 !!  my_pcol=Column coordinate of the calling process in the process grid (in)
 !!
@@ -227,7 +227,7 @@ end subroutine elpa_func_uninit
 !!
 !! SOURCE
 
-subroutine elpa_func_get_communicators(mpi_comm,my_prow,my_pcol)
+subroutine elpa_func_get_communicators(mpi_comm_elpa,my_prow,my_pcol)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -239,7 +239,7 @@ subroutine elpa_func_get_communicators(mpi_comm,my_prow,my_pcol)
  implicit none
 
 !Arguments ------------------------------------
- integer,intent(in)  :: mpi_comm,my_prow,my_pcol
+ integer,intent(in)  :: mpi_comm_elpa,my_prow,my_pcol
 
 !Local variables-------------------------------
  integer  :: mpierr
@@ -251,14 +251,14 @@ subroutine elpa_func_get_communicators(mpi_comm,my_prow,my_pcol)
 #if (defined HAVE_LINALG_ELPA_2017)
 !This function doesnt exist anymore in the F2008 interface
 #elif (defined HAVE_LINALG_ELPA_2016)
- mpierr=elpa_get_communicators(mpi_comm,my_prow,my_pcol,elpa_comm_rows,elpa_comm_cols)
+ mpierr=elpa_get_communicators(mpi_comm_elpa,my_prow,my_pcol,elpa_comm_rows,elpa_comm_cols)
 #elif (defined HAVE_LINALG_ELPA_2015)
- mpierr=get_elpa_row_col_comms(mpi_comm,my_prow,my_pcol,elpa_comm_rows,elpa_comm_cols)
+ mpierr=get_elpa_row_col_comms(mpi_comm_elpa,my_prow,my_pcol,elpa_comm_rows,elpa_comm_cols)
 #elif (defined HAVE_LINALG_ELPA_2014) || (defined HAVE_LINALG_ELPA_2013)
- call get_elpa_row_col_comms(mpi_comm,my_prow,my_pcol,elpa_comm_rows,elpa_comm_cols)
+ call get_elpa_row_col_comms(mpi_comm_elpa,my_prow,my_pcol,elpa_comm_rows,elpa_comm_cols)
 #else
 !ELPA-LEGACY-2017
- mpierr=get_elpa_communicators(mpi_comm,my_prow,my_pcol,elpa_comm_rows,elpa_comm_cols)
+ mpierr=get_elpa_communicators(mpi_comm_elpa,my_prow,my_pcol,elpa_comm_rows,elpa_comm_cols)
 #endif
 
  if (mpierr/=0) then
@@ -284,7 +284,7 @@ end subroutine elpa_func_get_communicators
 !!  ldq=Leading dimension of qq
 !!  nblk=Blocksize of cyclic distribution, must be the same in both directions!
 !!  matrixCols=Distributed number of matrix columns
-!!  mpi_comm=Global communicator for the calculations
+!!  mpi_comm_elpa=Global communicator for the calculations
 !!  my_prow=Row coordinate of the calling process in the process grid (in)
 !!  my_pcol=Column coordinate of the calling process in the process grid (in)
 !!
@@ -309,7 +309,7 @@ end subroutine elpa_func_get_communicators
 !! SOURCE
 
 subroutine elpa_func_solve_evp_1stage_real(na,nev,aa,lda,ev,qq,ldq,nblk,matrixCols,&
-&                                          mpi_comm,my_prow,my_pcol)
+&                                          mpi_comm_elpa,my_prow,my_pcol)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -323,7 +323,7 @@ subroutine elpa_func_solve_evp_1stage_real(na,nev,aa,lda,ev,qq,ldq,nblk,matrixCo
 !Arguments ------------------------------------
 !scalars
  integer,intent(in)  :: na,nev,lda,ldq,nblk,matrixCols
- integer,intent(in)  :: mpi_comm,my_prow,my_pcol
+ integer,intent(in)  :: mpi_comm_elpa,my_prow,my_pcol
 !arrays
  real(dp),intent(inout) :: aa(lda,matrixCols)
  real(dp),intent(out) :: ev(na),qq(ldq,matrixCols)
@@ -339,7 +339,7 @@ subroutine elpa_func_solve_evp_1stage_real(na,nev,aa,lda,ev,qq,ldq,nblk,matrixCo
 
 #if  (defined HAVE_LINALG_ELPA_2017)
  elpa_hdl => elpa_allocate()
- success=elpa_func_set_matrix_params(errmsg,na,nblk,lda,matrixCols,mpi_comm,my_prow,my_pcol,&
+ success=elpa_func_set_matrix_params(errmsg,na,nblk,lda,matrixCols,mpi_comm_elpa,my_prow,my_pcol,&
 &                                    nev=nev,ldq=ldq)
  if (success) then
    call elpa_hdl%set("solver",ELPA_SOLVER_1STAGE,error)
@@ -357,7 +357,7 @@ subroutine elpa_func_solve_evp_1stage_real(na,nev,aa,lda,ev,qq,ldq,nblk,matrixCo
 #else
 !ELPA-LEGACY-2017
  success=elpa_solve_evp_real_1stage_double(na,nev,aa,lda,ev,qq,ldq,nblk,matrixCols,&
-&                                          elpa_comm_rows,elpa_comm_cols,mpi_comm,.false.)
+&                                          elpa_comm_rows,elpa_comm_cols,mpi_comm_elpa,.false.)
 #endif
 
  if (.not.success) then
@@ -384,7 +384,7 @@ end subroutine elpa_func_solve_evp_1stage_real
 !!  ldq=Leading dimension of qq
 !!  nblk=Blocksize of cyclic distribution, must be the same in both directions!
 !!  matrixCols=Distributed number of matrix columns
-!!  mpi_comm=Global communicator for the calculations
+!!  mpi_comm_elpa=Global communicator for the calculations
 !!  my_prow=Row coordinate of the calling process in the process grid (in)
 !!  my_pcol=Column coordinate of the calling process in the process grid (in)
 !!
@@ -409,7 +409,7 @@ end subroutine elpa_func_solve_evp_1stage_real
 !! SOURCE
 
 subroutine elpa_func_solve_evp_1stage_complex(na,nev,aa,lda,ev,qq,ldq,nblk,matrixCols,&
-&                                             mpi_comm,my_prow,my_pcol)
+&                                             mpi_comm_elpa,my_prow,my_pcol)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -423,7 +423,7 @@ subroutine elpa_func_solve_evp_1stage_complex(na,nev,aa,lda,ev,qq,ldq,nblk,matri
 !Arguments ------------------------------------
 !scalars
  integer,intent(in)  :: na,nev,lda,ldq,nblk,matrixCols
- integer,intent(in)  :: mpi_comm,my_prow,my_pcol
+ integer,intent(in)  :: mpi_comm_elpa,my_prow,my_pcol
 !arrays
  complex(dpc),intent(inout) :: aa(lda,matrixCols)
  real(dp),intent(out) :: ev(na)
@@ -440,7 +440,7 @@ subroutine elpa_func_solve_evp_1stage_complex(na,nev,aa,lda,ev,qq,ldq,nblk,matri
 
 #if  (defined HAVE_LINALG_ELPA_2017)
  elpa_hdl => elpa_allocate()
- success=elpa_func_set_matrix_params(errmsg,na,nblk,lda,matrixCols,mpi_comm,my_prow,my_pcol,&
+ success=elpa_func_set_matrix_params(errmsg,na,nblk,lda,matrixCols,mpi_comm_elpa,my_prow,my_pcol,&
 &                                    nev=nev,ldq=ldq)
  if (success) then
    call elpa_hdl%set("solver",ELPA_SOLVER_1STAGE,error)
@@ -458,7 +458,7 @@ subroutine elpa_func_solve_evp_1stage_complex(na,nev,aa,lda,ev,qq,ldq,nblk,matri
 #else
 !ELPA-LEGACY-2017
  success=elpa_solve_evp_complex_1stage_double(na,nev,aa,lda,ev,qq,ldq,nblk,matrixCols,&
-&                                             elpa_comm_rows,elpa_comm_cols,mpi_comm,.false.)
+&                                             elpa_comm_rows,elpa_comm_cols,mpi_comm_elpa,.false.)
 #endif
 
  if (.not.success) then
@@ -483,7 +483,7 @@ end subroutine elpa_func_solve_evp_1stage_complex
 !!  lda=Leading dimension of aa
 !!  matrixCols=local columns of matrix a
 !!  nblk=Blocksize of cyclic distribution, must be the same in both directions!
-!!  mpi_comm=Global communicator for the calculations
+!!  mpi_comm_elpa=Global communicator for the calculations
 !!  my_prow=Row coordinate of the calling process in the process grid (in)
 !!  my_pcol=Column coordinate of the calling process in the process grid (in)
 !!
@@ -502,7 +502,7 @@ end subroutine elpa_func_solve_evp_1stage_complex
 !! SOURCE
 
 subroutine elpa_func_cholesky_real(na,aa,lda,nblk,matrixCols,&
-&                                  mpi_comm,my_prow,my_pcol)
+&                                  mpi_comm_elpa,my_prow,my_pcol)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -516,7 +516,7 @@ subroutine elpa_func_cholesky_real(na,aa,lda,nblk,matrixCols,&
 !Arguments ------------------------------------
 !scalars
  integer,intent(in)  :: na,lda,nblk,matrixCols
- integer,intent(in)  :: mpi_comm,my_prow,my_pcol
+ integer,intent(in)  :: mpi_comm_elpa,my_prow,my_pcol
 !arrays
  real(dp),intent(inout) :: aa(lda,matrixCols)
 
@@ -531,7 +531,7 @@ subroutine elpa_func_cholesky_real(na,aa,lda,nblk,matrixCols,&
 
 #if  (defined HAVE_LINALG_ELPA_2017)
  elpa_hdl => elpa_allocate()
- success=elpa_func_set_matrix_params(errmsg,na,nblk,lda,matrixCols,mpi_comm,my_prow,my_pcol)
+ success=elpa_func_set_matrix_params(errmsg,na,nblk,lda,matrixCols,mpi_comm_elpa,my_prow,my_pcol)
  if (success) then
    call elpa_hdl%cholesky(aa,error)
    success=(error==0)
@@ -571,7 +571,7 @@ end subroutine elpa_func_cholesky_real
 !!  lda=Leading dimension of aa
 !!  matrixCols=local columns of matrix a
 !!  nblk=Blocksize of cyclic distribution, must be the same in both directions!
-!!  mpi_comm=Global communicator for the calculations
+!!  mpi_comm_elpa=Global communicator for the calculations
 !!  my_prow=Row coordinate of the calling process in the process grid (in)
 !!  my_pcol=Column coordinate of the calling process in the process grid (in)
 !!
@@ -590,7 +590,7 @@ end subroutine elpa_func_cholesky_real
 !! SOURCE
 
 subroutine elpa_func_cholesky_complex(na,aa,lda,nblk,matrixCols,&
-&                                     mpi_comm,my_prow,my_pcol)
+&                                     mpi_comm_elpa,my_prow,my_pcol)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -604,7 +604,7 @@ subroutine elpa_func_cholesky_complex(na,aa,lda,nblk,matrixCols,&
 !Arguments ------------------------------------
 !scalars
  integer,intent(in)  :: na,lda,nblk,matrixCols
- integer,intent(in)  :: mpi_comm,my_prow,my_pcol
+ integer,intent(in)  :: mpi_comm_elpa,my_prow,my_pcol
 !arrays
  complex(dpc),intent(inout) :: aa(lda,matrixCols)
 
@@ -619,7 +619,7 @@ subroutine elpa_func_cholesky_complex(na,aa,lda,nblk,matrixCols,&
 
 #if  (defined HAVE_LINALG_ELPA_2017)
  elpa_hdl => elpa_allocate()
- success=elpa_func_set_matrix_params(errmsg,na,nblk,lda,matrixCols,mpi_comm,my_prow,my_pcol)
+ success=elpa_func_set_matrix_params(errmsg,na,nblk,lda,matrixCols,mpi_comm_elpa,my_prow,my_pcol)
  if (success) then
    call elpa_hdl%cholesky(aa,error)
    success=(error==0)
@@ -660,7 +660,7 @@ end subroutine elpa_func_cholesky_complex
 !!  lda=Leading dimension of aa
 !!  matrixCols=local columns of matrix a
 !!  nblk=Blocksize of cyclic distribution, must be the same in both directions!
-!!  mpi_comm=Global communicator for the calculations
+!!  mpi_comm_elpa=Global communicator for the calculations
 !!  my_prow=Row coordinate of the calling process in the process grid (in)
 !!  my_pcol=Column coordinate of the calling process in the process grid (in)
 !!
@@ -678,7 +678,7 @@ end subroutine elpa_func_cholesky_complex
 !! SOURCE
 
 subroutine elpa_func_invert_triangular_real(na,aa,lda,nblk,matrixCols,&
-&                                           mpi_comm,my_prow,my_pcol)
+&                                           mpi_comm_elpa,my_prow,my_pcol)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -692,7 +692,7 @@ subroutine elpa_func_invert_triangular_real(na,aa,lda,nblk,matrixCols,&
 !Arguments ------------------------------------
 !scalars
  integer,intent(in)  :: na,lda,nblk,matrixCols
- integer,intent(in)  :: mpi_comm,my_prow,my_pcol
+ integer,intent(in)  :: mpi_comm_elpa,my_prow,my_pcol
 !arrays
  real(dp),intent(inout) :: aa(lda,matrixCols)
 
@@ -707,7 +707,7 @@ subroutine elpa_func_invert_triangular_real(na,aa,lda,nblk,matrixCols,&
 
 #if  (defined HAVE_LINALG_ELPA_2017)
  elpa_hdl => elpa_allocate()
- success=elpa_func_set_matrix_params(errmsg,na,nblk,lda,matrixCols,mpi_comm,my_prow,my_pcol)
+ success=elpa_func_set_matrix_params(errmsg,na,nblk,lda,matrixCols,mpi_comm_elpa,my_prow,my_pcol)
  if (success) then
    call elpa_hdl%invert_triangular(aa,error)
    success=(error==0)
@@ -749,7 +749,7 @@ end subroutine elpa_func_invert_triangular_real
 !!  lda=Leading dimension of aa
 !!  matrixCols=local columns of matrix a
 !!  nblk=Blocksize of cyclic distribution, must be the same in both directions!
-!!  mpi_comm=Global communicator for the calculations
+!!  mpi_comm_elpa=Global communicator for the calculations
 !!  my_prow=Row coordinate of the calling process in the process grid (in)
 !!  my_pcol=Column coordinate of the calling process in the process grid (in)
 !!
@@ -767,7 +767,7 @@ end subroutine elpa_func_invert_triangular_real
 !! SOURCE
 
 subroutine elpa_func_invert_triangular_complex(na,aa,lda,nblk,matrixCols,&
-&                                              mpi_comm,my_prow,my_pcol)
+&                                              mpi_comm_elpa,my_prow,my_pcol)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -781,7 +781,7 @@ subroutine elpa_func_invert_triangular_complex(na,aa,lda,nblk,matrixCols,&
 !Arguments ------------------------------------
 !scalars
  integer,intent(in)  :: na,lda,nblk,matrixCols
- integer,intent(in)  :: mpi_comm,my_prow,my_pcol
+ integer,intent(in)  :: mpi_comm_elpa,my_prow,my_pcol
 !arrays
  complex(dpc),intent(inout) :: aa(lda,matrixCols)
 
@@ -796,7 +796,7 @@ subroutine elpa_func_invert_triangular_complex(na,aa,lda,nblk,matrixCols,&
 
 #if  (defined HAVE_LINALG_ELPA_2017)
  elpa_hdl => elpa_allocate()
- success=elpa_func_set_matrix_params(errmsg,na,nblk,lda,matrixCols,mpi_comm,my_prow,my_pcol)
+ success=elpa_func_set_matrix_params(errmsg,na,nblk,lda,matrixCols,mpi_comm_elpa,my_prow,my_pcol)
  if (success) then
    call elpa_hdl%invert_triangular(aa,error)
    success=(error==0)
@@ -856,7 +856,7 @@ end subroutine elpa_func_invert_triangular_complex
 !!  ncb=Number of columns  of B and C
 !!  nblk=Blocksize of cyclic distribution, must be the same in both directions!
 !!  matrixCols=local columns of matrix a
-!!  mpi_comm=Global communicator for the calculations
+!!  mpi_comm_elpa=Global communicator for the calculations
 !!  my_prow=Row coordinate of the calling process in the process grid (in)
 !!  my_pcol=Column coordinate of the calling process in the process grid (in)
 !!
@@ -871,7 +871,7 @@ end subroutine elpa_func_invert_triangular_complex
 !! SOURCE
 
 subroutine elpa_func_hermitian_multiply_real(uplo_a,uplo_c,na,ncb,aa,lda,bb,ldb,cc,ldc,&
-&                                            nblk,matrixCols,mpi_comm,my_prow,my_pcol)
+&                                            nblk,matrixCols,mpi_comm_elpa,my_prow,my_pcol)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -885,7 +885,7 @@ subroutine elpa_func_hermitian_multiply_real(uplo_a,uplo_c,na,ncb,aa,lda,bb,ldb,
 !Arguments ------------------------------------
 !scalars
  integer,intent(in)  :: na,ncb,lda,ldb,ldc,nblk,matrixCols
- integer,intent(in)  :: mpi_comm,my_prow,my_pcol
+ integer,intent(in)  :: mpi_comm_elpa,my_prow,my_pcol
  character*1 :: uplo_a, uplo_c
 !arrays
  real(dp),intent(in) :: aa(lda,matrixCols),bb(ldb,matrixCols)
@@ -902,7 +902,7 @@ subroutine elpa_func_hermitian_multiply_real(uplo_a,uplo_c,na,ncb,aa,lda,bb,ldb,
 
 #if  (defined HAVE_LINALG_ELPA_2017)
  elpa_hdl => elpa_allocate()
- success=elpa_func_set_matrix_params(errmsg,na,nblk,lda,matrixCols,mpi_comm,my_prow,my_pcol)
+ success=elpa_func_set_matrix_params(errmsg,na,nblk,lda,matrixCols,mpi_comm_elpa,my_prow,my_pcol)
  if (success) then
    call elpa_hdl%hermitian_multiply(uplo_a,uplo_c,ncb,aa,bb,ldb,matrixCols,cc,ldc,matrixCols,error)
    success=(error==0)
@@ -974,7 +974,7 @@ end subroutine elpa_func_hermitian_multiply_real
 !! SOURCE
 
 subroutine elpa_func_hermitian_multiply_complex(uplo_a,uplo_c,na,ncb,aa,lda,bb,ldb,cc,ldc, &
-&                                               nblk,matrixCols,mpi_comm,my_prow,my_pcol)
+&                                               nblk,matrixCols,mpi_comm_elpa,my_prow,my_pcol)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -988,7 +988,7 @@ subroutine elpa_func_hermitian_multiply_complex(uplo_a,uplo_c,na,ncb,aa,lda,bb,l
 !Arguments ------------------------------------
 !scalars
  integer,intent(in)  :: na,ncb,lda,ldb,ldc,nblk,matrixCols
- integer,intent(in)  :: mpi_comm,my_prow,my_pcol
+ integer,intent(in)  :: mpi_comm_elpa,my_prow,my_pcol
  character*1 :: uplo_a, uplo_c
 !arrays
  complex(dpc),intent(in) :: aa(lda,matrixCols),bb(ldb,matrixCols)
@@ -1005,7 +1005,7 @@ subroutine elpa_func_hermitian_multiply_complex(uplo_a,uplo_c,na,ncb,aa,lda,bb,l
 
 #if  (defined HAVE_LINALG_ELPA_2017)
  elpa_hdl => elpa_allocate()
- success=elpa_func_set_matrix_params(errmsg,na,nblk,lda,matrixCols,mpi_comm,my_prow,my_pcol)
+ success=elpa_func_set_matrix_params(errmsg,na,nblk,lda,matrixCols,mpi_comm_elpa,my_prow,my_pcol)
  if (success) then
    call elpa_hdl%hermitian_multiply(uplo_a,uplo_c,ncb,aa,bb,ldb,matrixCols,cc,ldc,matrixCols,error)
    success=(error==0)
