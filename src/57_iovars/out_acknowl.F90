@@ -105,7 +105,7 @@ subroutine out_acknowl(dtsets,iout,ndtset_alloc,npsp,pspheads)
 & ' B.Xue, A.Zhou, J.W.Zwanziger.'
  comment(1)=' Comment : the fourth generic paper describing the ABINIT project.'//ch10//&
 & ' Note that a version of this paper, that is not formatted for Computer Phys. Comm. '//ch10//&
-& ' is available at http://www.abinit.org/about/ABINIT16.pdf .'//ch10//&
+& ' is available at https://www.abinit.org/about/ABINIT16.pdf .'//ch10//&
 & ' The licence allows the authors to put it on the Web.'
  priority(1)=3
 
@@ -118,7 +118,7 @@ subroutine out_acknowl(dtsets,iout,ndtset_alloc,npsp,pspheads)
 & ' M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger'
  comment(2)=' Comment : the third generic paper describing the ABINIT project.'//ch10//&
 & ' Note that a version of this paper, that is not formatted for Computer Phys. Comm. '//ch10//&
-& ' is available at http://www.abinit.org/about/ABINIT_CPC_v10.pdf .'//ch10//&
+& ' is available at https://www.abinit.org/about/ABINIT_CPC_v10.pdf .'//ch10//&
 & ' The licence allows the authors to put it on the Web.'
  priority(2)=2
 
@@ -130,7 +130,7 @@ subroutine out_acknowl(dtsets,iout,ndtset_alloc,npsp,pspheads)
  comment(3)=' Comment : the second generic paper describing the ABINIT project. Note that this paper'//ch10//&
 & ' should be cited especially if you are using the GW part of ABINIT, as several authors'//ch10//& 
 & ' of this part are not in the list of authors of the first or third paper.'//ch10//&
-& ' The .pdf of the latter paper is available at http://www.abinit.org/about/zfk_0505-06_558-562.pdf.'//ch10//&
+& ' The .pdf of the latter paper is available at https://www.abinit.org/about/zfk_0505-06_558-562.pdf.'//ch10//&
 & ' Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,'//ch10//&
 & ' the licence allows the authors to put it on the Web).'
  priority(3)=1
@@ -481,7 +481,7 @@ subroutine out_acknowl(dtsets,iout,ndtset_alloc,npsp,pspheads)
 & ' Note also that it will be of great value to readers of publications presenting these results,',ch10,&
 & ' to read papers enabling them to understand the theoretical formalism and details',ch10,&
 & ' of the ABINIT implementation.',ch10,&
-& ' For information on why they are suggested, see also http://www.abinit.org/about/?text=acknowledgments.'
+& ' For information on why they are suggested, see also https://www.abinit.org/about/?text=acknowledgments.'
 
  ncited=0 
  print_optional=1

@@ -6,7 +6,7 @@ Build-Depends: debhelper (>= 7), autotools-dev, quilt (>= 0.46-4),
  gfortran (>= 4:4.2), liblapack-dev (>= 3.0.20000531a-1.1),
  libetsf-io-dev (>= 1.0.3), libnetcdf-dev (>= 4.1.1)
 Standards-Version: 3.8.4
-Homepage: http://www.abinit.org/
+Homepage: https://www.abinit.org/
 
 Package: abinit
 Architecture: any

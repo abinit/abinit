@@ -554,7 +554,7 @@ type(fock_type),pointer, intent(inout) :: fock
      call fourdp(1,rhog_ep,electronpositron%rhor_ep,-1,mpi_enreg,nfft,ngfft,dtset%paral_kgb,0)
    end if
    if (history_level/=-1) then
-     call hartre(1,gsqcut,dtset%usepaw,mpi_enreg,nfft,ngfft,dtset%paral_kgb,qphon,rhog_ep,rprimd,&
+     call hartre(1,gsqcut,dtset%usepaw,mpi_enreg,nfft,ngfft,dtset%paral_kgb,rhog_ep,rprimd,&
 &     electronpositron%vha_ep)
      electronpositron%vha_ep=-electronpositron%vha_ep
    else

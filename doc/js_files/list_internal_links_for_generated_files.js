@@ -1,7 +1,7 @@
 var docpath="../../"
 document.write(' <HR ALIGN=left> ');
 document.write(' Goto :          ');
-document.write(' <A href="http://www.abinit.org"><B>ABINIT home page</B></A>          ');
+document.write(' <A href="https://www.abinit.org"><B>ABINIT home page</B></A>          ');
 document.write(' <B> | </B> ');
 document.write(' <A href="'+docpath+'input_variables/generated_files/varset_allvars.html"><B>List of input variables</B></A> ');
 document.write(' <B> | </B> ');

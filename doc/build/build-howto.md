@@ -102,10 +102,10 @@ Get the source
 --------------
 
 The source package of ABINIT is usually available through the ABINIT website,
-http://www.abinit.org/. Developers are strongly advised to use Bazaar
+https://www.abinit.org/. Developers are strongly advised to use Bazaar
 instead, as it will accelerate a lot the integration of their contributions.
 For more details on Bazaar, please consult the ABINIT website
-(http://www.abinit.org/bzr/) and Bazaar's website (http://bazaar-vcs.org/).
+(https://www.abinit.org/bzr/) and Bazaar's website (http://bazaar-vcs.org/).
 
 
 

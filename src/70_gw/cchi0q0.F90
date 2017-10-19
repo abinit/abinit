@@ -514,7 +514,7 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
    if (memreq > two) then
      MSG_WARNING(' Memory required for sf_chi0q0 is larger than 2.0 Gb!')
    end if
-   if ((Dtset%userre > zero) .and. (memreq > Dtset%userre)) then
+   if ((Dtset%userie==512).and.(Dtset%userre > zero).and.(memreq > Dtset%userre)) then
      write(msg,'(a,f8.3,a)')' Memory required by sf_chi0 is larger than userre:',Dtset%userre,'[Gb]'
      MSG_ERROR(msg)
    end if
