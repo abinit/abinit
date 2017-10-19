@@ -94,11 +94,14 @@ program optic
  use m_ebands
  use m_eprenorms
  use m_crystal
+#ifdef HAVE_NETCDF
+ use netcdf
+#endif
 
  use m_time ,     only : asctime
- use m_io_tools,  only : flush_unit, open_file, file_exists, num_opened_units, show_units
- use m_specialmsg,only : specialmsg_getcount
- use m_fstrings,  only : int2char4, itoa, sjoin, strcat
+ use m_io_tools,  only : flush_unit, open_file, file_exists
+ use m_fstrings,  only : int2char4, itoa, sjoin, strcat, endswith
+ !use m_specialmsg,only : specialmsg_getcount
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -117,13 +120,16 @@ program optic
 
 !Local variables-------------------------------
  integer,parameter :: formeig0=0,formeig1=1,tim_rwwf=0,master=0
- integer :: bantot,bdtot0_index,bdtot_index!,dosdeltae
+ integer :: bantot,bdtot0_index,bdtot_index
  integer :: headform,ierr,ii,ikpt,isym
  integer :: isppol,mband,nomega,natom,nband1
  integer :: nsym
  integer :: nkpt,nspinor,nsppol,ntypat
  integer :: occopt,nks_per_proc,work_size,lin1,lin2,nlin1,nlin2,nlin3
  integer :: linel1,linel2,linel3,nonlin1,nonlin2,nonlin3
+#ifdef HAVE_NETCDF
+ integer :: ncid, varid
+#endif
  integer :: num_lin_comp=1,num_nonlin_comp=0,num_linel_comp=0,num_nonlin2_comp=0
  integer :: autoparal=0,max_ncpus=0
  integer :: nonlin_comp(27) = 0
@@ -134,7 +140,7 @@ program optic
  integer,allocatable :: symrel(:,:,:)
  integer,allocatable :: symrec(:,:,:)
  real(dp),allocatable :: symcart(:,:,:)
- real(dp) :: domega,ecut,fermie!,maxocc,entropy
+ real(dp) :: domega,ecut,fermie
  real(dp):: eff
  logical :: do_antiresonant, do_temperature
  integer,allocatable :: istwfk(:), npwarr(:)
@@ -146,9 +152,11 @@ program optic
  real(dp),allocatable :: kpt(:,:)
  real(dp),allocatable :: cond_kg(:),cond_nd(:),doccde(:)
  real(dp),allocatable :: eig0tmp(:), eigen0(:)
- real(dp),allocatable :: eigen11(:),eigen12(:),eigtmp(:)
- real(dp),allocatable :: eigen13(:),occ(:),wtk(:)
+ real(dp),target,allocatable :: eigen11(:),eigen12(:),eigen13(:)
+ real(dp),pointer :: outeig(:)
+ real(dp),allocatable :: occ(:),wtk(:),eigtmp(:)
  complex(dpc),allocatable :: pmat(:,:,:,:,:)
+ logical :: use_ncddk(3)
  character(len=fnlen) :: filnam,wfkfile,ddkfile_1,ddkfile_2,ddkfile_3,filnam_out, epfile
 !  for the moment this is imposed by the format in linopt.f and nlinopt.f
  character(len=256) :: fn_radix,tmp_radix
@@ -165,10 +173,10 @@ program optic
  namelist /COMPUTATIONS/ num_lin_comp, lin_comp, num_nonlin_comp, nonlin_comp, &
 &        num_linel_comp, linel_comp, num_nonlin2_comp, nonlin2_comp
  namelist /TEMPERATURE/ epfile
- !character(len=fnlen) :: test
  integer :: iomode
  integer :: comm,nproc,my_rank
  type(wfk_t) :: wfk0,wfk1,wfk2,wfk3
+ character(len=fnlen) :: ddk_files(3)
 
  !_EP_NC reading !
  type(eprenorms_t) :: Epren
@@ -178,7 +186,7 @@ program optic
  integer :: itemp
  character(len=10) :: stemp
  type(crystal_t) :: Cryst
- logical :: remove_inv
+ logical,parameter :: remove_inv = .False.
 
 ! *********************************************************************************
 
@@ -186,7 +194,6 @@ program optic
  call abi_io_redirect(new_io_comm=xmpi_world)
 
  call xmpi_init()
-
  comm = xmpi_world
  nproc = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
 
@@ -198,7 +205,6 @@ program optic
 #endif
 
  call timein(tcpui,twall)
-
  call timein(tcpui,twalli)
  start_datetime = asctime()
 
@@ -217,7 +223,7 @@ program optic
    read(5, '(a)')fn_radix
    write(std_out,'(a)')' The root name of the output files is :',trim(fn_radix)
 
-   !Read data file
+   ! Read data file
    if (open_file(filnam,msg,newunit=finunt,form='formatted') /= 0) then
      MSG_ERROR(msg)
    end if
@@ -239,36 +245,25 @@ program optic
    read(finunt,nml=FILES)
    read(finunt,nml=PARAMETERS)
    read(finunt,nml=COMPUTATIONS)
-
-   if(do_temperature) then
-     read(finunt, nml=TEMPERATURE)
-   end if
-
+   if (do_temperature) read(finunt, nml=TEMPERATURE)
    close(finunt)
+   ddk_files = [ddkfile_1, ddkfile_2, ddkfile_3]
 
    ! Validate input
-   if (num_nonlin_comp > 0) then
-     if (all(nonlin_comp(1:num_nonlin_comp) == 0)) then
-       MSG_ERROR("nonlin_comp must be specified when num_nonlin_comp > 0")
-     end if
+   if (num_nonlin_comp > 0 .and. all(nonlin_comp(1:num_nonlin_comp) == 0)) then
+     MSG_ERROR("nonlin_comp must be specified when num_nonlin_comp > 0")
    end if
-
-   if (num_linel_comp > 0) then
-     if (all(linel_comp(1:num_linel_comp) == 0)) then
-       MSG_ERROR("linel_comp must be specified when num_linel_comp > 0")
-     end if
+   if (num_linel_comp > 0 .and. all(linel_comp(1:num_linel_comp) == 0)) then
+     MSG_ERROR("linel_comp must be specified when num_linel_comp > 0")
    end if
-
-   if (num_nonlin2_comp > 0) then
-     if (all(nonlin2_comp(1:num_nonlin2_comp) == 0)) then
-       MSG_ERROR("nonlin2_comp must be specified when num_nonlin2_comp > 0")
-     end if
+   if (num_nonlin2_comp > 0 .and. all(nonlin2_comp(1:num_nonlin2_comp) == 0)) then
+     MSG_ERROR("nonlin2_comp must be specified when num_nonlin2_comp > 0")
    end if
 
    ! Open the Wavefunction files
    ! Note: Cannot use MPI-IO here because of prtwf=3.
-   ! If prtwf==3, the DDK file does not contain the wavefunctions but 
-   ! this info is not reported in the header and the offsets in wfk_compute_offsets 
+   ! If prtwf==3, the DDK file does not contain the wavefunctions but
+   ! this info is not reported in the header and the offsets in wfk_compute_offsets
    ! are always computed assuming the presence of the cg
 
    ! TODO: one should perform basic consistency tests for the GS WFK and the DDK files, e.g.
@@ -278,46 +273,55 @@ program optic
    if (len_trim(msg) /= 0) MSG_ERROR(msg)
    if (iomode == IO_MODE_MPI) iomode = IO_MODE_FORTRAN
    call wfk_open_read(wfk0,wfkfile,formeig0,iomode,10,xmpi_comm_self)
-
-   call nctk_fort_or_ncfile(ddkfile_1, iomode, msg)
-   if (len_trim(msg) /= 0) MSG_ERROR(msg)
-   if (iomode == IO_MODE_MPI) iomode = IO_MODE_FORTRAN
-   call wfk_open_read(wfk1,ddkfile_1,formeig1,iomode,11,xmpi_comm_self)
-
-   call nctk_fort_or_ncfile(ddkfile_2, iomode, msg)
-   if (len_trim(msg) /= 0) MSG_ERROR(msg)
-   if (iomode == IO_MODE_MPI) iomode = IO_MODE_FORTRAN
-   call wfk_open_read(wfk2,ddkfile_2,formeig1,iomode,12,xmpi_comm_self)
-
-   call nctk_fort_or_ncfile(ddkfile_3, iomode, msg)
-   if (len_trim(msg) /= 0) MSG_ERROR(msg)
-   if (iomode == IO_MODE_MPI) iomode = IO_MODE_FORTRAN
-   call wfk_open_read(wfk3,ddkfile_3,formeig1,iomode,13,xmpi_comm_self)
-
-   if (wfk_compare(wfk1, wfk2) /= 0) then
-     MSG_ERROR("ddfile_1 and ddkfile_2 are not consistent. see above messages")
-   end if
-   if (wfk_compare(wfk1, wfk3) /= 0) then
-     MSG_ERROR("ddfile_1 and ddkfile_3 are not consistent. see above messages")
-   end if
-
-   !  Read the header from the gs file
+   ! Get header from the gs file
    call hdr_copy(wfk0%hdr, hdr)
 
-   ep_nc_fname = 'test_EP.nc'
-   if(do_temperature) then
-     ep_nc_fname = epfile
-   end if
-   do_ep_renorm = file_exists(ep_nc_fname)
-   if(do_ep_renorm) then
-     call eprenorms_from_epnc(Epren,ep_nc_fname)
-     ep_ntemp = Epren%ntemp
-   else if(do_temperature) then
-     MSG_ERROR("You have asked for temperature but the epfile is not present !")
-   else
-     ep_ntemp = 1
+   use_ncddk = .False.
+   use_ncddk(1) = endswith(ddkfile_1, "_DDK.nc")
+   if (.not. use_ncddk(1)) then
+     call nctk_fort_or_ncfile(ddkfile_1, iomode, msg)
+     if (len_trim(msg) /= 0) MSG_ERROR(msg)
+     if (iomode == IO_MODE_MPI) iomode = IO_MODE_FORTRAN
+     call wfk_open_read(wfk1,ddkfile_1,formeig1,iomode,11,xmpi_comm_self)
    end if
 
+   use_ncddk(2) = endswith(ddkfile_2, "_DDK.nc")
+   if (.not. use_ncddk(2)) then
+     call nctk_fort_or_ncfile(ddkfile_2, iomode, msg)
+     if (len_trim(msg) /= 0) MSG_ERROR(msg)
+     if (iomode == IO_MODE_MPI) iomode = IO_MODE_FORTRAN
+     call wfk_open_read(wfk2,ddkfile_2,formeig1,iomode,12,xmpi_comm_self)
+   end if
+
+   use_ncddk(3) = endswith(ddkfile_3, "_DDK.nc")
+   if (.not. use_ncddk(3)) then
+     call nctk_fort_or_ncfile(ddkfile_3, iomode, msg)
+     if (len_trim(msg) /= 0) MSG_ERROR(msg)
+     if (iomode == IO_MODE_MPI) iomode = IO_MODE_FORTRAN
+     call wfk_open_read(wfk3,ddkfile_3,formeig1,iomode,13,xmpi_comm_self)
+   end if
+
+   if (.not. use_ncddk(1) .and. .not. use_ncddk(2)) then
+     if (wfk_compare(wfk1, wfk2) /= 0) then
+       MSG_ERROR("ddfile_1 and ddkfile_2 are not consistent. see above messages")
+     end if
+   end if
+   if (.not. use_ncddk(1) .and. .not. use_ncddk(3)) then
+     if (wfk_compare(wfk1, wfk3) /= 0) then
+       MSG_ERROR("ddfile_1 and ddkfile_3 are not consistent. see above messages")
+     end if
+   end if
+
+   ep_nc_fname = 'test_EP.nc'
+   if (do_temperature) ep_nc_fname = epfile
+   do_ep_renorm = file_exists(ep_nc_fname)
+   ep_ntemp = 1
+   if (do_ep_renorm) then
+     call eprenorms_from_epnc(Epren,ep_nc_fname)
+     ep_ntemp = Epren%ntemp
+   else if (do_temperature) then
+     MSG_ERROR("You have asked for temperature but the epfile is not present !")
+   end if
 
    ! autoparal section
    if (autoparal /= 0 .and. max_ncpus /= 0) then
@@ -345,13 +349,12 @@ program optic
        write(std_out,"(a,i0)")"      mpi_ncpus: ",ii
        write(std_out,"(a,i0)")"      omp_ncpus: ",1
        write(std_out,"(a,f12.9)")"      efficiency: ",eff
-       !write(,"(a,f12.2)")"      mem_per_cpu: ",mempercpu_mb 
+       !write(,"(a,f12.2)")"      mem_per_cpu: ",mempercpu_mb
      end do
 
      write(std_out,'(a)')"..."
      MSG_ERROR_NODUMP("aborting now")
-     !call xmpi_abort(msg="Aborting now")
-   end if 
+   end if
 
  end if
 
@@ -371,13 +374,9 @@ program optic
  call xmpi_bcast(num_nonlin2_comp,master,comm,ierr)
  call xmpi_bcast(nonlin2_comp,master,comm,ierr)
  call xmpi_bcast(do_antiresonant,master,comm,ierr)
-
  call xmpi_bcast(do_ep_renorm,master,comm,ierr)
  call xmpi_bcast(ep_ntemp,master,comm,ierr)
-
- if(do_ep_renorm) then
-   call eprenorms_bcast(Epren, master, comm)
- end if
+ if (do_ep_renorm) call eprenorms_bcast(Epren, master, comm)
 
 !Extract info from the header
  headform=hdr%headform
@@ -417,15 +416,12 @@ program optic
  end do
 
  ! Initializes crystal
- remove_inv = .false.
- if(hdr%nspden == 4) remove_inv = .true.
- !space_group = 0
  call crystal_init(hdr%amu, Cryst, 0, hdr%natom, hdr%npsp, hdr%ntypat, &
 & hdr%nsym, rprimd, hdr%typat, hdr%xred, hdr%zionpsp, hdr%znuclpsp, 1, &
 & (hdr%nspden==2 .and. hdr%nsppol==1),remove_inv, hdr%title,&
 & symrel, hdr%tnons, hdr%symafm)
 
- if(my_rank == master) then
+ if (my_rank == master) then
    write(std_out,*)
    write(std_out,'(a,3f10.5,a)' )' rprimd(bohr)      =',rprimd(1:3,1)
    write(std_out,'(a,3f10.5,a)' )'                    ',rprimd(1:3,2)
@@ -435,31 +431,56 @@ program optic
    write(std_out,'(a, f10.5,a)' ) ' ecut              =',ecut,' Ha'
  end if
 
-!Read the eigenvalues of ground-state and ddk files
+ ! Read the eigenvalues of ground-state and ddk files
  ABI_ALLOCATE(eigen0,(mband*nkpt*nsppol))
+ ! MG: Do not understand why not [...,3]
  ABI_ALLOCATE(eigen11,(2*mband*mband*nkpt*nsppol))
  ABI_ALLOCATE(eigen12,(2*mband*mband*nkpt*nsppol))
  ABI_ALLOCATE(eigen13,(2*mband*mband*nkpt*nsppol))
 
- if(my_rank == master) then
-
+ if (my_rank == master) then
    ABI_ALLOCATE(eigtmp,(2*mband*mband))
    ABI_ALLOCATE(eig0tmp,(mband))
+
+   do ii=1,3
+     if (.not. use_ncddk(ii)) cycle
+#ifdef HAVE_NETCDF
+     NCF_CHECK(nctk_open_read(ncid, ddk_files(ii), xmpi_comm_self))
+     varid = nctk_idname(ncid, "h1_matrix_elements")
+     outeig => eigen11
+     if (ii == 2) outeig => eigen12
+     if (ii == 3) outeig => eigen13
+     NCF_CHECK(nf90_get_var(ncid, varid, outeig, count=[2, mband, mband, nkpt, nsppol]))
+     NCF_CHECK(nf90_close(ncid))
+#else
+     MSG_ERROR("Netcdf not available!")
+#endif
+   end do
+
    bdtot0_index=0 ; bdtot_index=0
    do isppol=1,nsppol
      do ikpt=1,nkpt
        nband1=nband(ikpt+(isppol-1)*nkpt)
        eigtmp = zero
        eig0tmp = zero
-       
+
        call wfk_read_eigk(wfk0,ikpt,isppol,xmpio_single,eig0tmp)
        eigen0(1+bdtot0_index:nband1+bdtot0_index)=eig0tmp(1:nband1)
-       call wfk_read_eigk(wfk1,ikpt,isppol,xmpio_single,eigtmp)
-       eigen11(1+bdtot_index:2*nband1**2+bdtot_index)=eigtmp(1:2*nband1**2)
-       call wfk_read_eigk(wfk2,ikpt,isppol,xmpio_single,eigtmp)
-       eigen12(1+bdtot_index:2*nband1**2+bdtot_index)=eigtmp(1:2*nband1**2)
-       call wfk_read_eigk(wfk3,ikpt,isppol,xmpio_single,eigtmp)
-       eigen13(1+bdtot_index:2*nband1**2+bdtot_index)=eigtmp(1:2*nband1**2)
+
+       if (.not. use_ncddk(1)) then
+         call wfk_read_eigk(wfk1,ikpt,isppol,xmpio_single,eigtmp)
+         eigen11(1+bdtot_index:2*nband1**2+bdtot_index)=eigtmp(1:2*nband1**2)
+       end if
+
+       if (.not. use_ncddk(2)) then
+         call wfk_read_eigk(wfk2,ikpt,isppol,xmpio_single,eigtmp)
+         eigen12(1+bdtot_index:2*nband1**2+bdtot_index)=eigtmp(1:2*nband1**2)
+       end if
+
+       if (.not. use_ncddk(3)) then
+         call wfk_read_eigk(wfk3,ikpt,isppol,xmpio_single,eigtmp)
+         eigen13(1+bdtot_index:2*nband1**2+bdtot_index)=eigtmp(1:2*nband1**2)
+       end if
 
        !ABI_CHECK(wfk1%nband(ikpt,isppol) == nband1, "ddk1 nband1")
        !ABI_CHECK(wfk2%nband(ikpt,isppol) == nband1, "ddk2 nband1")
@@ -474,25 +495,22 @@ program optic
        !do ii=1,2*nband1**2
        !  write(std_out,*)ii,eigtmp(ii)
        !end do
-
      end do
    end do
 
    call wfk_close(wfk0)
-   call wfk_close(wfk1)
-   call wfk_close(wfk2)
-   call wfk_close(wfk3)
-   
+   if (.not. use_ncddk(1)) call wfk_close(wfk1)
+   if (.not. use_ncddk(2)) call wfk_close(wfk2)
+   if (.not. use_ncddk(3)) call wfk_close(wfk3)
+
    ABI_DEALLOCATE(eigtmp)
    ABI_DEALLOCATE(eig0tmp)
-
- end if
+ end if ! master
 
  call xmpi_bcast(eigen0,master,comm,ierr)
  call xmpi_bcast(eigen11,master,comm,ierr)
  call xmpi_bcast(eigen12,master,comm,ierr)
  call xmpi_bcast(eigen13,master,comm,ierr)
-
 
 !---------------------------------------------------------------------------------
 !gmet inversion
@@ -533,12 +551,12 @@ program optic
  ABI_ALLOCATE(cond_nd,(nomega))
  ABI_ALLOCATE(cond_kg,(nomega))
 
- if(my_rank == master) then
+ if (my_rank == master) then
    write(std_out,'(a,f10.5,a,f10.5,a)' )' fermie            =',fermie,' Ha',fermie*Ha_eV,' eV'
    write(std_out,'(a,f10.5,a)')' Scissor shift     =', scissor, ' Ha'
    write(std_out,'(a,f10.5,a)')' Tolerance on closeness to singularities     =', tolerance, ' Ha'
    write(std_out,'(a,f10.5,a)')' Smearing factor      =', broadening, ' Ha'
-   if(do_antiresonant) then
+   if (do_antiresonant) then
      write(std_out,'(a)') ' Will use the antiresonant approximation '
    else
      write(std_out,'(a)') ' Will not use the antiresonant approximation (only available for nonlin2 and linel components!) '
@@ -552,7 +570,7 @@ program optic
    write(std_out,'(a)') ' non-linear coeffs (V2) to be calculated :'
    write(std_out,'(27i4)') nonlin2_comp(1:num_nonlin2_comp)
  end if
- 
+
  ABI_ALLOCATE(symcart,(3,3,nsym))
  !YG : we need to transpose gprimd since matrinv give the transpose of the inverse !
  gprimd_trans = transpose(gprimd)
@@ -578,7 +596,7 @@ program optic
 
  do itemp=1,ep_ntemp
    call ebands_copy(BSt, EPBst)
-   if(do_ep_renorm) then
+   if (do_ep_renorm) then
      call renorm_bst(Epren, EPBst, Cryst, itemp, do_lifetime=.True.,do_check=.True.)
    end if
    do ii=1,num_lin_comp
@@ -602,13 +620,13 @@ program optic
    end do
    call ebands_free(EPBst)
  end do
- 
- if(do_ep_renorm) then
+
+ if (do_ep_renorm) then
    call eprenorms_free(Epren)
  end if
- 
+
  call wrtout(std_out," optic : Call nlinopt","COLL")
- 
+
  do ii=1,num_nonlin_comp
    nlin1 = int( nonlin_comp(ii)/100.0_dp)
    nlin2 = int((nonlin_comp(ii)-nlin1*100.0_dp)/10.0_dp)
@@ -643,7 +661,7 @@ program optic
  end do
 
  call wrtout(std_out," optic : Call nonlinopt","COLL")
- 
+
  do ii=1,num_nonlin2_comp
    nonlin1 = int( nonlin2_comp(ii)/100.0_dp)
    nonlin2 = int((nonlin2_comp(ii)-nonlin1*100.0_dp)/10.0_dp)
@@ -668,7 +686,6 @@ program optic
  ABI_DEALLOCATE(wtk)
  ABI_DEALLOCATE(cond_nd)
  ABI_DEALLOCATE(cond_kg)
-
  ABI_DEALLOCATE(kpt)
  ABI_DEALLOCATE(symrel)
  ABI_DEALLOCATE(symrec)
@@ -693,7 +710,7 @@ program optic
 
  call xmpi_sum(tsec,comm,ierr)
 
- if(my_rank == master) then
+ if (my_rank == master) then
    ! Write YAML document with the final summary.
    ! we use this doc to test whether the calculation is completed.
    write(std_out,"(a)")"--- !FinalSummary"

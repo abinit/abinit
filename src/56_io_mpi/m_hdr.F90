@@ -171,7 +171,7 @@ MODULE m_hdr
  !    Moreover the files produced by the DFPT code do not have a well-defined extension and, as a consequence,
  !    they require a special treatment. In python I would use regexp but Fortran is not python!
 
- type(abifile_t),private,parameter :: all_abifiles(45) = [ &
+ type(abifile_t),private,parameter :: all_abifiles(46) = [ &
 
     ! Files with wavefunctions:
     abifile_t(varname="coefficients_of_wavefunctions", fform=2, ext="WFK", class="wf_planewave"), &
@@ -229,6 +229,9 @@ MODULE m_hdr
 
    ! Data used in elphon
     abifile_t(varname="gkk_elements", fform=42, ext="GKK", class="data"), &
+
+   ! DKK matrix elements in netcdf format (optic, eph)
+    abifile_t(varname="h1_matrix_elements", fform=43, ext="DKK", class="data"), &
 
    ! GW files: old 1002, 1102
    !character(len=nctk_slen),public,parameter :: e_ncname="dielectric_function"
