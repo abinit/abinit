@@ -596,8 +596,7 @@ subroutine prcref(atindx,dielar,dielinv,&
      ABI_ALLOCATE(vhartr_wk,(nfft))
      option=1
 
-     qphon(:)=zero
-     call hartre(1,gsqcut,psps%usepaw,mpi_enreg,nfft,ngfft,dtset%paral_kgb,qphon,rhog_wk,rprimd,vhartr_wk)
+     call hartre(1,gsqcut,psps%usepaw,mpi_enreg,nfft,ngfft,dtset%paral_kgb,rhog_wk,rprimd,vhartr_wk)
 
 !    Prepare the call to rhotoxc
      call xcdata_init(dtset%intxc,dtset%ixc,&

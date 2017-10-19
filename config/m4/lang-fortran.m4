@@ -1083,7 +1083,7 @@ AC_DEFUN([_ABI_CHECK_FC_LONG_LINES],[
   AC_MSG_RESULT(${fc_has_long_lines})
 
   dnl Official macro added in autoconf ??
-  dnl AC_FC_LINE_LENGTH ([length], [action-if-success], [action-if-failure = ‘AC_MSG_FAILURE’])
+  dnl AC_FC_LINE_LENGTH ([length], [action-if-success], [action-if-failure = AC_MSG_FAILURE])
 
 ]) # _ABI_CHECK_FC_LONG_LINES
 

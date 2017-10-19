@@ -13,7 +13,7 @@
 #    Please read ~abinit/doc/users/acknowledgments.html for suggested
 #    acknowledgments of the ABINIT effort.
 #
-#    For more information, see http://www.abinit.org .
+#    For more information, see https://www.abinit.org .
 #
 #  This module makes a file into a list of tokens, conserving
 #   or eliminating comments of the type "#  bla bla   \n"
