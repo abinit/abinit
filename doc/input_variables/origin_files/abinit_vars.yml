@@ -20264,7 +20264,7 @@
         a small variation of input parameters might lead to
         a jump of total energy, because there might be two or even
         three possible values of the Fermi energy, and the
-        bissection algorithm find one or the other.
+        bissection algorithm finds one or the other.
         </p>
     topics: BandOcc_basic, STM_compulsory
     varset: basic

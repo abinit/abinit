@@ -811,8 +811,10 @@ subroutine outvar_i_n (dtsets,iout,&
  intarr(1,0:ndtset_alloc)=dtsets(0:ndtset_alloc)%natvshift
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'natvshift','INT',0)
 
- intarr(1,0:ndtset_alloc)=dtsets(0:ndtset_alloc)%nbandhf
- call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'nbandhf','INT',0)
+ if(sum(dtsets(1:ndtset_alloc)%usefock)/=0)then
+   intarr(1,0:ndtset_alloc)=dtsets(0:ndtset_alloc)%nbandhf
+   call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'nbandhf','INT',0)
+ endif
 
  intarr(1,0:ndtset_alloc)=dtsets(0:ndtset_alloc)%nbandkss
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'nbandkss','INT',0)
@@ -886,8 +888,10 @@ subroutine outvar_i_n (dtsets,iout,&
  intarr(1,:)=dtsets(:)%nkptgw
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'nkptgw','INT',0)
 
- intarr(1,:)=dtsets(:)%nkpthf
- call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'nkpthf','INT',0)
+ if(sum(dtsets(1:ndtset_alloc)%usefock)/=0)then
+   intarr(1,:)=dtsets(:)%nkpthf
+   call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'nkpthf','INT',0)
+ endif
 
  intarr(1,:)=dtsets(:)%nline
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'nline','INT',0)

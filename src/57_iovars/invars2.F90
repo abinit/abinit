@@ -109,7 +109,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
 
 !Local variables-------------------------------
 !scalars
- integer :: bantot,berryopt,dmatsize,ndim,getocc,iat,iatom,ii,iimage,ikpt,ionmov,intimage
+ integer :: bantot,berryopt,dmatsize,ndim,getocc,iat,iatom,iband,ii,iimage,ikpt,intimage,ionmov,isppol
  integer :: densfor_pred,ipsp,iscf,isiz,itypat,jj,kptopt,lpawu,marr,natom,nband1,nberry,mkpt
  integer :: niatcon,nimage,nkpt,nkpthf,npspalch,nqpt,nsp,nspinor,nsppol,nsym,ntypalch,ntypat,ntyppure
  integer :: occopt,occopt_tmp,response,sumnbl,tfband,tnband,tread,tread_alt,tread_key
@@ -2772,6 +2772,35 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
  if(getocc/=0)occopt_tmp=1
  call dtset_chkneu(charge,dtset,occopt_tmp)
 
+!Now that the occupation numbers have been initialized, can meaningfully define nbandhf.
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nbandhf',tread,'INT')
+ if(tread==1) then
+   dtset%nbandhf=intarr(1)
+ else
+!  If the occupation numbers might change, must keep the maximum number of bands
+   if(occopt>=3 .and. occopt<=8)then
+     dtset%nbandhf=maxval(dtset%nband(1:nkpt*nsppol))
+   else if(occopt==0 .or. occopt==1 .or. occopt==2) then ! Eliminate all the bands that are never occupied
+     nband1=0
+     do isppol=1,dtset%nsppol
+       do ikpt=1,dtset%nkpt
+         do iband=1,dtset%nband(ikpt+(isppol-1)*dtset%nkpt)
+           bantot=bantot+1
+           if(abs(dtset%occ_orig(bantot))>tol8)then
+             if(iband>nband1)nband1=iband
+           endif
+         end do
+       end do
+     end do
+     dtset%nbandhf=nband1
+   else
+     write(message, '(a,i0,3a)' )&
+&     'occopt=',occopt,' not allowed.',ch10,&
+&     'Action: correct your input file.'
+     MSG_ERROR(message)
+   end if
+ end if
+
 !Initialize Berry phase vectors
 !Should check that nberry is smaller than 20
  if(berryopt>0 .and. nberry>0)then
@@ -2792,36 +2821,6 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
  if(tread==1)then
    dtset%so_psp(1:npsp)=intarr(1:npsp)
  end if
-
-!@ HF or hybrid functionals
- if (dtset%usefock==1) then
-
-! integer scalars (used to dimension specific arrays)
-   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nbandhf',tread,'INT')
-   if(tread==1) then
-     dtset%nbandhf=intarr(1)
-   else
-!!  First compute the total valence charge
-!     zval=0.0_dp
-!     do iatom=1,natom
-!       zval=zval+dtset%ziontypat(dtset%typat(iatom))
-!     end do
-!!  Only take into account negative charge, to compute maximum number of bands
-!     if(charge > 0.0_dp)charge=0.0_dp
-!     zelect=zval-charge
-
-!!  Then select the minimum number of bands, and add the required number
-!!  Note that this number might be smaller than the one computed
-!!  by a slightly different formula in invars1
-!     dtset%nbandhf=dtset%nspinor*((ceiling(zelect-1.0d-10)+1)/2)
-!
-!     if (occopt>2) dtset%nbandhf=dtset%nbandhf+dtset%nspinor*(ceiling(dtset%fband*natom-1.0d-10))
-!!  More precisely, nbandhf = default value for nband = the number of occupied bands
-!!                                                    + extra bands according to fband
-     dtset%nbandhf=dtset%nband(1)
-   end if
-
- end if ! usefock
 
 !LOTF variables
 #if defined HAVE_LOTF
