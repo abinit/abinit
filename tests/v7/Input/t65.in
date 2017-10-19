@@ -1,5 +1,6 @@
 # Crystalline silicon : computation of the total energy using PBE0 functional
 # Norm-conserving
+# Test the possibility to have non-trivial nbandhf
 
 ndtset 2         # Two datasets : 1) LDA 2) PBE0
 
@@ -52,7 +53,9 @@ getwfk2 -1        # Start from previous LDA wavefunctions to ease convergence
 #Additional (and facultative) variables for Hartree-Fock
 nnsclohf2 1        # always 1 for exact exchange
 nkpthf2 27          # number of k-point in the full-BZ 
-nbandhf2 4         # number of occupied states
+#nbandhf2 4         # number of occupied states
+nband 8
+nbandhf 6
 
 # MG These variables are needed to run the test in parallel (bug or feature?)
 #npkpt2 2          # Number of processors for k-point parallelization
