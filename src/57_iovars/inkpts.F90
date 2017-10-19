@@ -414,9 +414,17 @@ subroutine inkpts(bravais,chksymbreak,iout,iscf,istwfk,jdtset,&
    call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'fockdownsampling',tread,'INT')
    if(tread==1)fockdownsampling=intarr(1:3)
 
+!DEBUG
+   write(std_out,*)' inkpts : before getkgrid, nkpt,nkpthf=',nkpt,nkpthf
+!ENDDEBUG
+
    call getkgrid(chksymbreak,0,iscf,kpt,kptopt,kptrlatt,kptrlen,&
 &   msym,nkpt,nkpt_computed,nshiftk,nsym,rprimd,&
 &   shiftk,symafm,symrel,vacuum,wtk,nkpthf=nkpthf,kpthf=kpthf,downsampling=fockdownsampling)
+
+!DEBUG
+   write(std_out,*)' inkpts : after getkgrid, nkpt,nkpt_computed,nkpthf=',nkpt,nkpt_computed,nkpthf
+!ENDDEBUG
 
    kptnrm=one
 

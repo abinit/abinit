@@ -571,8 +571,8 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    call chkint_ge(1,1,cond_string,cond_values,ierr,'nkpt',nkpt,1,iout)
  end if
 
- nkpthf=0
- dtset%nkpthf=nkpthf
+ nkpthf=nkpt
+ dtset%nkpthf=nkpt
 
 !Will compute the actual value of nkpt, if needed. Otherwise,
 !test that the value of nkpt is OK, if kptopt/=0
@@ -609,6 +609,10 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
 &     vacuum,dtset%xred_orig(1:3,1:natom,intimage),dtset%qptrlatt)
    end if
 
+!DEBUG
+   write(std_out,*)' invar1 : before inkpts, nkpthf=',nkpthf
+!ENDDEBUG
+
 !  Find the k point grid
    call inkpts(bravais,chksymbreak,iout,iscf,istwfk,jdtset,&
 &   kpt,kpthf,dtset%kptopt,kptnrm,dtset%kptrlatt_orig,dtset%kptrlatt,kptrlen,lenstr,msym,&
@@ -620,7 +624,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    ABI_DEALLOCATE(kpt)
    ABI_DEALLOCATE(kpthf)
    ABI_DEALLOCATE(wtk)
-!  nkpt has been computed, as well as the k point grid, if needed
+!  nkpt and nkpthf have been computed, as well as the k point grid, if needed
    dtset%nkpt=nkpt
    dtset%nkpthf=nkpthf
  end if

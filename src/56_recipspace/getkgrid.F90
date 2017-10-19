@@ -106,7 +106,7 @@ subroutine getkgrid(chksymbreak,iout,iscf,kpt,kptopt,kptrlatt,kptrlen,&
 !scalars
  integer, parameter :: max_number_of_prime=47,mshiftk=210
  integer :: brav,decreased,found,ii,ikpt,iprime,ishiftk,isym,jshiftk,kshiftk,mkpt,mult
- integer :: nkpt_fullbz,nkptlatt,nshiftk2,nsym_used,option
+ integer :: nkpthf_computed,nkpt_fullbz,nkptlatt,nshiftk2,nsym_used,option
  integer :: test_prime,timrev
  real(dp) :: length2,ucvol,ucvol_super
  character(len=500) :: message
@@ -127,6 +127,11 @@ subroutine getkgrid(chksymbreak,iout,iscf,kpt,kptopt,kptrlatt,kptrlen,&
  real(dp),allocatable :: deltak(:,:),kpt_fullbz(:,:),shiftk2(:,:),shiftk3(:,:),spkpt(:,:),wtk_folded(:),wtk_fullbz(:)
 
 ! *************************************************************************
+
+!DEBUG
+   write(std_out,*)' getkgrid, enter '
+   write(std_out,*)' getkgrid : nkpt,nkpthf=',nkpt,nkpthf
+!ENDDEBUG
 
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
 
@@ -418,14 +423,20 @@ subroutine getkgrid(chksymbreak,iout,iscf,kpt,kptopt,kptrlatt,kptrlen,&
  if(iout/=0)option=1
 
  if (PRESENT(downsampling))then
-   call smpbz(brav,iout,kptrlatt2,mkpt,nkpthf,nshiftk2,option,shiftk2,spkpt,downsampling=downsampling)
-   if (PRESENT(kpthf)) then ! Returns list of k-points in the Full BZ, possibly downsampled for Fock
+   call smpbz(brav,iout,kptrlatt2,mkpt,nkpthf_computed,nshiftk2,option,shiftk2,spkpt,downsampling=downsampling)
+   if (PRESENT(kpthf) .and. nkpthf/=0) then ! Returns list of k-points in the Full BZ, possibly downsampled for Fock
      kpthf = spkpt(:,1:nkpthf)
    end if
+   nkpthf=nkpthf_computed
 
  endif
 
  call smpbz(brav,iout,kptrlatt2,mkpt,nkpt_fullbz,nshiftk2,option,shiftk2,spkpt)
+
+!DEBUG
+   write(std_out,*)' getkgrid : after smpbz, mkpt,nkpthf_computed,nkpt_fullbz=',mkpt,nkpthf_computed,nkpt_fullbz
+!ENDDEBUG
+
 
  if (PRESENT(fullbz)) then ! Returns list of k-points in the Full BZ.
    ABI_ALLOCATE(fullbz,(3,nkpt_fullbz))
