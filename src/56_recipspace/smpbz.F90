@@ -21,6 +21,16 @@
 !! INPUTS
 !!  brav = 1 -> simple lattice; 2 -> face-centered cubic;
 !!   3 -> body-centered lattice; 4 -> hexagonal lattice (D6h)
+!!  downsampling(3) [optional, for brav=1 only]
+!!    Three integer numbers, describing the downsampling of the k grid
+!!    If present, in any case, only the first shiftk is taken into account
+!!    The absolute value of one number gives, for the corresponding k-coordinate, the factor of decrease of the sampling
+!!    If zero, only one point is used to sample along this direction
+!!    The sign has also a meaning : 
+!!    - if three numbers are negative, perform a face-centered sampling
+!!    - if two numbers are negative, perform a body-centered sampling
+!!    - if one number is negative, perform a face-centered sampling for the two-dimensional lattice of the other directions
+!!    - if one number is zero and at least one number is negative, perform face-centered sampling for the non-zero directions.
 !!  iout = unit number for output
 !!  kptrlatt(3,3)=integer coordinates of the primitive vectors of the
 !!   lattice reciprocal to the k point lattice to be generated here
@@ -64,7 +74,7 @@
 
 #include "abi_common.h"
 
-subroutine smpbz(brav,iout,kptrlatt,mkpt,nkpt,nshiftk,option,shiftk,spkpt)
+subroutine smpbz(brav,iout,kptrlatt,mkpt,nkpt,nshiftk,option,shiftk,spkpt,downsampling)
 
  use defs_basis
  use m_errors
@@ -88,23 +98,25 @@ subroutine smpbz(brav,iout,kptrlatt,mkpt,nkpt,nshiftk,option,shiftk,spkpt)
  integer,intent(out) :: nkpt
 !arrays
  integer,intent(in) :: kptrlatt(3,3)
+ integer,optional,intent(in) :: downsampling(3)
  real(dp),intent(in) :: shiftk(3,nshiftk)
  real(dp),intent(out) :: spkpt(3,mkpt)
 
 !Local variables -------------------------
 !scalars
  integer,parameter :: prtvol=0
- integer :: ii,ikshft,jj,kk,nkpout,nkptlatt,nn
+ integer :: dividedown,ii,ikshft,jj,kk,nkpout,nkptlatt,nn,proddown
  real(dp) :: shift
  character(len=500) :: message
 !arrays
- integer :: boundmax(3),boundmin(3),ngkpt(3)
+ integer :: ads(3),boundmax(3),boundmin(3),cds(3),coord(3),ngkpt(3)
+ integer, allocatable :: found1(:,:),found2(:,:),found3(:,:)
  real(dp) :: k1(3),k2(3),kcar(3),klatt(3,3),ktest(3),rlatt(3,3)
 
 ! *********************************************************************
 
 !DEBUG
-!write(std_out,*)' smpbz : kptrlatt(:)=',kptrlatt(1,1),kptrlatt(2,2)
+!write(std_out,*)' smpbz : kptrlatt(:,:)=',kptrlatt(1,1),kptrlatt(2,2)
 !ENDDEBUG
 
  if(option/=0)then
@@ -140,18 +152,63 @@ subroutine smpbz(brav,iout,kptrlatt,mkpt,nkpt,nshiftk,option,shiftk,spkpt)
    end if
  end if
 
+!Just in case the user wants the Gamma point, checks that it is present, and possibly exits
+ if(present(downsampling))then
+   if(sum(abs(downsampling(:)))==0)then
+     do ikshft=1,nshiftk
+       if(sum(abs(shiftk(:,ikshft)))>tol12)cycle
+       nkpt=1
+       spkpt(:,1)=zero
+       return
+     enddo
+   endif
+ endif
+
 !*********************************************************************
 
  if(brav==1)then
 
 !  Compute the number of k points in the G-space unit cell
-!  (will be multiplied by nshiftk later.
+!  (will be multiplied by nshiftk later).
    nkptlatt=kptrlatt(1,1)*kptrlatt(2,2)*kptrlatt(3,3) &
 &   +kptrlatt(1,2)*kptrlatt(2,3)*kptrlatt(3,1) &
 &   +kptrlatt(1,3)*kptrlatt(2,1)*kptrlatt(3,2) &
 &   -kptrlatt(1,2)*kptrlatt(2,1)*kptrlatt(3,3) &
 &   -kptrlatt(1,3)*kptrlatt(2,2)*kptrlatt(3,1) &
 &   -kptrlatt(1,1)*kptrlatt(2,3)*kptrlatt(3,2)
+
+   if(present(downsampling))then
+     if(.not.(downsampling(1)==1 .and. downsampling(2)==1 .and. downsampling(3)==1))then
+       if(nshiftk>1)then
+         write(message, '(a,3i4,2a,i4,4a)' )&
+&          'Real downsampling is activated, with downsampling(1:3)=',downsampling(1:3),ch10,&
+&          'However, nshiftk must be 1 in this case, while the input nshiftk=',nshiftk,ch10,&
+&          'Action: either choose not to downsample the k point grid (e.g. fockdownsampling=1),',ch10,&
+&          'or set nshiftk=1.'
+         MSG_ERROR(message)
+       endif
+       proddown=downsampling(1)*downsampling(2)*downsampling(3)
+       if(proddown/=0)then
+         dividedown=abs(proddown)
+         if(minval(downsampling(:))<0)then   ! If there is at least one negative number
+           dividedown=dividedown*2
+           if(proddown>0)dividedown=dividedown*2 ! If there are two negative numbers
+         endif
+       endif
+       if(mod(nkptlatt,dividedown)==0)then
+         nkptlatt=nkptlatt/dividedown
+       else
+         write(message, '(a,3i4,2a,i4,4a)' )&
+&          'The requested downsampling, with downsampling(1:3)=',downsampling(1:3),ch10,&
+&          'is not compatible with kptrlatt=',ch10,&
+&          kptrlatt(:,:),ch10,& 
+&          'that gives nkptlatt=',nkptlatt,ch10,&
+&          'Action: either choose not to downsample the k point grid (e.g. fockdownsampling=1),',ch10,&
+&          'or modify your k-point grid and/or your downsampling in order for them to be compatible.'
+         MSG_ERROR(message)
+       endif
+     endif
+   endif
 
 !  Simple Lattice
    if (prtvol > 0) call wrtout(std_out,'       Simple Lattice Grid ','COLL')
@@ -194,11 +251,65 @@ subroutine smpbz(brav,iout,kptrlatt,mkpt,nkpt,nshiftk,option,shiftk,spkpt)
      end do
    end do
 
+   if(present(downsampling))then
+     ABI_ALLOCATE(found1,(boundmin(2):boundmax(2),boundmin(3):boundmax(3)))
+     ABI_ALLOCATE(found2,(boundmin(1):boundmax(1),boundmin(3):boundmax(3)))
+     ABI_ALLOCATE(found3,(boundmin(1):boundmax(1),boundmin(2):boundmax(2)))
+     found1=0 ; found2=0 ; found3=0
+   endif
+
    nn=1
-   do kk=boundmin(3),boundmax(3)
+   do ii=boundmin(3),boundmax(3)
+     coord(3)=ii
      do jj=boundmin(2),boundmax(2)
-       do ii=boundmin(1),boundmax(1)
+       coord(2)=jj
+       do kk=boundmin(1),boundmax(1)
+         coord(1)=kk
+
+!        Here, apply the downsampling : skip some of the trials
+         if(present(downsampling))then
+
+           if(downsampling(1)==0 .and. found1(coord(2),coord(3))==1)cycle
+           if(downsampling(2)==0 .and. found2(coord(1),coord(3))==1)cycle
+           if(downsampling(3)==0 .and. found3(coord(1),coord(2))==1)cycle
+
+           ads(:)=abs(downsampling(:))
+           if(ads(1)>0 .and. mod(coord(1),ads(1))/=0)cycle
+           if(ads(2)>0 .and. mod(coord(2),ads(2))/=0)cycle
+           if(ads(3)>0 .and. mod(coord(3),ads(2))/=0)cycle
+           cds(:)=coord(:)/ads(:)
+           if(minval(downsampling(:))<0)then   ! If there is at least one negative number
+
+             if(downsampling(1)*downsampling(2)*downsampling(3)/=0)then  ! If there is no zero number
+!              Face-centered case
+               if(downsampling(1)<0 .and. downsampling(2)<0 .and. downsampling(3)<0)then ! All three are negative
+                 if(mod(sum(cds(:)),2)/=0)cycle
+!              One-face-centered case
+               else if(downsampling(1)*downsampling(2)*downsampling(3)<0)then  ! Only one is negative
+                 if(downsampling(1)<0 .and. mod(cds(2)+cds(3),2)/=0)cycle
+                 if(downsampling(2)<0 .and. mod(cds(1)+cds(3),2)/=0)cycle
+                 if(downsampling(3)<0 .and. mod(cds(1)+cds(2),2)/=0)cycle
+!              Body-centered case ! What is left : two are negative
+               else   
+                 if(sum(cds(:))==1 .or. sum(cds(:))==2)cycle ! Either all are zero, or all are one, so skip when sum is 1 or 2.
+               endif
+             else
+               if(downsampling(1)==0 .and. mod(cds(2)+cds(3),2)/=0)cycle
+               if(downsampling(2)==0 .and. mod(cds(1)+cds(3),2)/=0)cycle
+               if(downsampling(3)==0 .and. mod(cds(1)+cds(2),2)/=0)cycle
+             endif
+           endif  
+         endif
+
          do ikshft=1,nshiftk
+
+!          Only the first shiftk is taken into account if downsampling
+           if(present(downsampling))then
+             if(.not.(downsampling(1)==1 .and. downsampling(2)==1 .and. downsampling(3)==1))then
+               if(ikshft>1)cycle
+             endif
+           endif
+
 !          Coordinates of the trial k point with respect to the k primitive lattice
            k1(1)=ii+shiftk(1,ikshft)
            k1(2)=jj+shiftk(2,ikshft)
@@ -215,6 +326,13 @@ subroutine smpbz(brav,iout,kptrlatt,mkpt,nkpt,nshiftk,option,shiftk,spkpt)
            call wrap2_pmhalf(k2(3),k1(3),shift)
            spkpt(:,nn)=k1(:)
            nn=nn+1
+
+           if(present(downsampling))then
+             found1(coord(2),coord(3))=1
+             found2(coord(1),coord(3))=1
+             found3(coord(1),coord(2))=1
+           endif
+
          end do
        end do
      end do
