@@ -846,11 +846,10 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
    ABI_DEALLOCATE(vxc) ! dummy
  end if
 
+!Set up hartree and xc potential. Compute kxc here.
  ABI_ALLOCATE(vhartr,(nfftf))
 
-!Set up hartree and xc potential. Compute kxc here.
- qphon(:)=zero
- call hartre(1,gsqcut,psps%usepaw,mpi_enreg,nfftf,ngfftf,dtset%paral_kgb,qphon,rhog,rprimd,vhartr)
+ call hartre(1,gsqcut,psps%usepaw,mpi_enreg,nfftf,ngfftf,dtset%paral_kgb,rhog,rprimd,vhartr)
 
  option=2 ; nk3xc=1
  nkxc=2*min(dtset%nspden,2)-1;if(dtset%xclevel==2)nkxc=12*min(dtset%nspden,2)-5
