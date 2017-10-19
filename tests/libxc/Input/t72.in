@@ -11,13 +11,18 @@
 
 #DATASET 1  PBE (the pseudopotential for Al is with PBE XC)
 
-#DATASET 2 PBE0
+#DATASET 2  HSE06
  ixc2  -428
  getwfk2   1
 
+#DATASET 3  PBE0
+ ixc3  41
+ getwfk3   2
+
+
 #Definition of occupation numbers
-occopt 4
-tsmear 0.05
+occopt 7
+tsmear 0.02
 
 #Definition of the unit cell
 acell 3*7.60           # This is equivalent to   7.60 7.60 7.60
@@ -49,10 +54,10 @@ nshiftk 4         # of the reciprocal space. For a FCC real space lattice,
                   # like the present one, it actually corresponds to the
                   # so-called 4x4x4 Monkhorst-Pack grid, if the following shifts
                   # are used :
-shiftk 0.5 0.5 0.5
-       0.5 0.0 0.0
-       0.0 0.5 0.0
-       0.0 0.0 0.5
+shiftk 0.0 0.0 0.0
+       0.0 0.5 0.5
+       0.5 0.0 0.5
+       0.5 0.5 0.0
 
 ## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
