@@ -536,8 +536,7 @@ subroutine outvar_i_n (dtsets,iout,&
    end if
 
  end do
- call prttagm(dprarr,intarr,iout,jdtset_,1,marr,narr,&
-& narrm,ncid,ndtset_alloc,'kpt','DPR',multivals%nkpt)
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,narr, narrm,ncid,ndtset_alloc,'kpt','DPR',multivals%nkpt)
 
  if(tnkpt==1) write(iout,'(23x,a,i3,a)' ) 'outvar_i_n : Printing only first ',nkpt_max,' k-points.'
 
@@ -546,7 +545,7 @@ subroutine outvar_i_n (dtsets,iout,&
 
 !kptgw
  narr=3*dtsets(1)%nkptgw ! default size for all datasets
- do idtset=0,ndtset_alloc       ! especific size for each dataset
+ do idtset=0,ndtset_alloc       ! specific size for each dataset
    if(idtset/=0)then
      narrm(idtset)=3*dtsets(idtset)%nkptgw
      if (narrm(idtset)>0)&
@@ -563,22 +562,23 @@ subroutine outvar_i_n (dtsets,iout,&
 
 
 !kpthf 
- narr=3*dtsets(1)%nkpthf ! default size for all datasets
- do idtset=0,ndtset_alloc       ! especific size for each dataset
-   if(idtset/=0)then
-     narrm(idtset)=3*dtsets(idtset)%nkpthf
-     if (narrm(idtset)>0)&
-&     dprarr(1:narrm(idtset),idtset)=&
-&     reshape(dtsets(idtset)%kptns_hf(1:3,1:dtsets(idtset)%nkpthf), [narrm(idtset)])
-   else
-     narrm(idtset)=mxvals%nkpthf
-     if (narrm(idtset)>0)&
-&     dprarr(1:narrm(idtset),idtset)=&
-&     reshape(dtsets(idtset)%kptns_hf(1:3,1:mxvals%nkpthf), [narrm(idtset)] )
-   end if
- end do
- call prttagm(dprarr,intarr,iout,jdtset_,1,marr,narr,narrm,ncid,ndtset_alloc,'kpthf','DPR',multivals%nkpthf)
-
+ if(sum(dtsets(1:ndtset_alloc)%usefock)/=0)then
+   narr=3*dtsets(1)%nkpthf ! default size for all datasets
+   do idtset=0,ndtset_alloc       ! specific size for each dataset
+     if(idtset/=0)then
+       narrm(idtset)=3*dtsets(idtset)%nkpthf
+       if (narrm(idtset)>0)&
+&       dprarr(1:narrm(idtset),idtset)=&
+&       reshape(dtsets(idtset)%kptns_hf(1:3,1:dtsets(idtset)%nkpthf), [narrm(idtset)])
+     else
+       narrm(idtset)=mxvals%nkpthf
+       if (narrm(idtset)>0)&
+&       dprarr(1:narrm(idtset),idtset)=&
+&       reshape(dtsets(idtset)%kptns_hf(1:3,1:mxvals%nkpthf), [narrm(idtset)] )
+     end if
+   end do
+   call prttagm(dprarr,intarr,iout,jdtset_,1,marr,narr,narrm,ncid,ndtset_alloc,'kpthf','DPR',multivals%nkpthf)
+ endif
 
  dprarr(1,:)=dtsets(:)%kptnrm
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'kptnrm','DPR',0)
