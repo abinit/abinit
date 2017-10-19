@@ -14,7 +14,7 @@
          Two choices of double counting are provided: the Full Localized limit
          and the Around Mean Field approximation.
          Our implementation is described in [[Amadon2008a]].
-         It follows the main lines of [[Bengone2000]]. See als [[Czyzyk1994]].
+         It follows the main lines of [[Bengone2000]]. See also [[Czyzyk1994]].
          Forces and stress are implemented.
          For details on keywords 
          ([[lpawu]],[[upawu]],[[jpawu]],[[usedmatpu]],[[dmatpuopt]],[[dmatudiag]]) 
@@ -26,7 +26,7 @@
            counting term, and sum of the two) in the log file.
          <p>- The orbital density matrix (n_{m,m'}^{\sigma}), also called occupation
           matrix (corresponding to Eq.(9) of [[Bengone2000]] and Eq.(1) of [[Liechtenstein1995]], see also
-           [5] and variable [[dmatpuopt]]) is also
+           [[Amadon2008a]] and variable [[dmatpuopt]]) is also
            given for each atom in the basis of real spherical harmonics.
            It is given at each SCF step in the log file: one can thus check the
            convergency of the calculation.

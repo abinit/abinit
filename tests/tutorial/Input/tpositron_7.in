@@ -70,7 +70,7 @@
 #%% executable = abinit
 #%% [files]
 #%% files_to_test =
-#%%   tpositron_7.out, tolnlines= 7, tolabs= 1.8, tolrel= 0.85, fld_options= -easy
+#%%   tpositron_7.out, tolnlines= 7, tolabs= 1.8, tolrel= 0.9, fld_options= -easy
 #%% psp_files = Si.12el.LDA-PW-paw.abinit
 #%% [paral_info]
 #%% max_nprocs = 10
