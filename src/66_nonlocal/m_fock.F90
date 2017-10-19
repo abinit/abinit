@@ -624,16 +624,6 @@ subroutine fock_init(atindx,cplex,dtset,fock,gsqcut,kg,mpi_enreg,nattyp,npwarr,p
      fockcommon%nband(ikpt)=dtset%nband(ikpt)
    end do
 
-! mpi_enreg settings
-  
-   call copy_mpi_enreg(mpi_enreg,fockbz%mpi_enreg)
-   fockbz%mpi_enreg%me_kpt=mpi_enreg%me_hf
-   if (allocated(fockbz%mpi_enreg%proc_distrb)) then
-     ABI_DEALLOCATE(fockbz%mpi_enreg%proc_distrb)
-   end if
-   ABI_ALLOCATE(fockbz%mpi_enreg%proc_distrb,(nkpt_bz,mband,1))
-   fockbz%mpi_enreg%proc_distrb=mpi_enreg%distrb_hf
-
    nband=dtset%mband
    fockcommon%ikpt= 0
 !* Will contain the k-point ikpt of the current state
@@ -671,6 +661,20 @@ subroutine fock_init(atindx,cplex,dtset,fock,gsqcut,kg,mpi_enreg,nattyp,npwarr,p
        mkpt=1
      end if
    end if
+
+! mpi_enreg settings
+   call copy_mpi_enreg(mpi_enreg,fockbz%mpi_enreg)
+   fockbz%mpi_enreg%me_kpt=mpi_enreg%me_hf
+   fockbz%mpi_enreg%comm_kpt=mpi_enreg%comm_hf
+   fockbz%mpi_enreg%nproc_kpt=mpi_enreg%nproc_hf
+   if (allocated(fockbz%mpi_enreg%proc_distrb)) then
+     ABI_DEALLOCATE(fockbz%mpi_enreg%proc_distrb)
+   end if
+   ABI_ALLOCATE(fockbz%mpi_enreg%proc_distrb,(nkpt_bz,mband,1))
+   do jkpt=1,nkpt_bz
+     fockbz%mpi_enreg%proc_distrb(jkpt,:,1)=fockbz%mpi_enreg%me_kpt
+   end do
+ 
    mgfft=dtset%mgfft
    fockcommon%usepaw=dtset%usepaw
    if (fockcommon%usepaw==1)then

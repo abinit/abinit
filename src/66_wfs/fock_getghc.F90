@@ -287,8 +287,7 @@ type(pseudopotential_type) :: psps
    call bare_vqg(qvec_j,fockcommon%gsqcut,gs_ham%gmet,fockcommon%usepaw,fockcommon%hybrid_mixing,&
 &   fockcommon%hybrid_mixing_sr,fockcommon%hybrid_range,nfftf,fockbz%nkpt_bz,ngfftf,gs_ham%ucvol,vqg)
 
-   
-
+ 
 
 ! =================================================
 ! === Loop on the band indices jband of cgocc_k ===
@@ -298,7 +297,7 @@ type(pseudopotential_type) :: psps
 !*   occ = occupancy of jband at this k point
      occ=fockbz%occ_bz(jband+bdtot_jindex,my_jsppol)
      if(occ<tol8) cycle 
-!if(jband/=fockcommon%ieigen.or.(fockcommon%ieigen/=1)) cycle
+
 ! ==============================================
 ! === Get cwaveocc_r in real space using FFT ===
 ! ==============================================
@@ -313,14 +312,13 @@ type(pseudopotential_type) :: psps
        cwaveocc_r=cwaveocc_r*invucvol
      end if
 
-! if((jkpt/=fockcommon%ikpt).or.(jband/=fockcommon%ieigen)) cycle
-
-! ================================================hatstr
+! ================================================
 ! === Get the overlap density matrix rhor_munu ===
 ! ================================================
 !* Calculate the overlap density matrix in real space = conj(cwaveocc_r)*cwavef_r
 !* rhor_munu will contain the overlap density matrix.
 ! vfock=-int{conj(cwaveocc_r)*cwavef_r*dr'/|r-r'|}
+
      call timab(1508,1,tsec)
      ind=0
      do i3=1,n3f
@@ -381,8 +379,6 @@ type(pseudopotential_type) :: psps
 !* vfock = FFT( rhog_munu/|g+qvec|^2 )
      call timab(1510,1,tsec)
 #if 0
-!    rhog_munu=rhog_munu*fockbz%wtk_bz(jkpt)
-
      call hartre(cplex_fock,gs_ham%gmet,fockcommon%gsqcut,fockcommon%usepaw,mpi_enreg,nfftf,ngfftf,&
 &     mpi_enreg%paral_kgb,qvec_j,rhog_munu,vfock,divgq0=fock%divgq0)
 
@@ -458,13 +454,10 @@ type(pseudopotential_type) :: psps
 
 ! Stresses calculation
        if (fockcommon%optstr.and.(fockcommon%ieigen/=0)) then
-
          signs=2;choice=3;cpopt=4
 
        ! first contribution 
-!         call load_kprime_hamiltonian(gs_ham,ffnl_kp=fockcommon%ffnl_str)
          call load_k_hamiltonian(gs_ham,ffnl_k=fockcommon%ffnl_str)
-!         strout=zero
          dotr=zero
          do idir=1,6
            call nonlop(choice,cpopt,cwaveocc_prj,enlout_dum,gs_ham,idir,(/zero/),mpi_enreg,&
@@ -498,17 +491,18 @@ type(pseudopotential_type) :: psps
            fockcommon%stress_ikpt(idir,fockcommon%ieigen)=fockcommon%stress_ikpt(idir,fockcommon%ieigen)+&
 &           fockstr(idir)/nfftf*occ*wtk
          end do
+
        ! third contribution
          doti=zero
          do ifft=1,nfftf
            doti=doti+vfock(2*ifft-1)*rho12(1,ifft,nspinor)-vfock(2*ifft)*rho12(2,ifft,nspinor)
          end do
          fockcommon%stress_ikpt(1:3,fockcommon%ieigen)=fockcommon%stress_ikpt(1:3,fockcommon%ieigen)-doti/nfftf*occ*wtk
-         doti=zero
-         do ifft=1,nfftf
-           doti=doti+vfock(2*ifft-1)*rhor_munu(1,ifft)-vfock(2*ifft)*rhor_munu(2,ifft)
-         end do
-         fockcommon%stress_ikpt(1:3,fockcommon%ieigen)=fockcommon%stress_ikpt(1:3,fockcommon%ieigen)+doti/nfftf*occ*wtk*half
+!         doti=zero
+!         do ifft=1,nfftf
+!           doti=doti+vfock(2*ifft-1)*rhor_munu(1,ifft)-vfock(2*ifft)*rhor_munu(2,ifft)
+!         end do
+!         fockcommon%stress_ikpt(1:3,fockcommon%ieigen)=fockcommon%stress_ikpt(1:3,fockcommon%ieigen)+doti/nfftf*occ*wtk*half
        end if ! end stresses
 
        ABI_DEALLOCATE(dijhat)
@@ -518,7 +512,6 @@ type(pseudopotential_type) :: psps
 ! =============================================================
 ! === Apply the local potential vfockloc_munu to cwaveocc_r ===
 ! =============================================================
-
      call timab(1507,1,tsec)
      ind=0
      do i3=1,ngfftf(3)
@@ -537,6 +530,7 @@ type(pseudopotential_type) :: psps
      if (allocated(fockbz%cgocc)) then
        ABI_DEALLOCATE(cwaveocc_r)
      end if
+
    end do ! jband
 
 ! ================================================
@@ -565,7 +559,7 @@ type(pseudopotential_type) :: psps
      end do
    end if
  end if
- if(fockcommon%optstr) then
+ if(fockcommon%optstr.and.(fockcommon%ieigen/=0)) then
    call xmpi_sum(fockcommon%stress_ikpt,mpi_enreg%comm_hf,ier)
  end if
 

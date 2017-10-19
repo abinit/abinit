@@ -79,8 +79,7 @@ subroutine fock_ACE_getghc(cwavef,ghc,gs_ham,mpi_enreg)
 
 
 ! *************************************************************************
-!return
-!write(81,*) "fock ACE"
+
  ABI_CHECK(associated(gs_ham%fockcommon),"fock must be associated!")
  fockcommon => gs_ham%fockcommon
 
@@ -134,9 +133,6 @@ subroutine fock_ACE_getghc(cwavef,ghc,gs_ham,mpi_enreg)
    if(gs_ham%istwf_k>=2) eigen=two*eigen
 !   call xmpi_sum(eigen,mpi_enreg%comm_kpt,ier)
    fockcommon%eigen_ikpt(fockcommon%ieigen)= eigen
-
-!write(81,*) ghc1(:,1:10)
-!write(81,*)fockcommon%ieigen,fockcommon%eigen_ikpt(fockcommon%ieigen)
    fockcommon%ieigen = 0
  end if
 

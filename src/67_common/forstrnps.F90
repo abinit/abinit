@@ -257,7 +257,6 @@ use m_cgtools
 & paw_ij=paw_ij,ph1d=ph1d,electronpositron=electronpositron,fock=fock,&
 & nucdipmom=nucdipmom,use_gpu_cuda=use_gpu_cuda)
  rmet = MATMUL(TRANSPOSE(rprimd),rprimd)
-
  call timab(921,2,tsec)
 
 !need to reorder cprj=<p_lmn|Cnk> (from unsorted to atom-sorted)
@@ -488,7 +487,10 @@ use m_cgtools
        if( abs(maxval(occblock))>=tol8 ) then
          call timab(923,1,tsec)
          weight(:)=wtk(ikpt)*occblock(:)
-
+!        gs_hamk%ffnl_k is changed in fock_getghc, so that it is necessary to restore it when stresses are to be calculated.
+         if ((stress_needed==1).and.(usefock_loc).and.(psps%usepaw==1))then
+           call load_k_hamiltonian(gs_hamk,ffnl_k=ffnl)
+         end if
 !        Load contribution from n,k
          cwavef(:,1:npw_k*my_nspinor*blocksize)=&
 &         cg(:,1+(iblock-1)*npw_k*my_nspinor*blocksize+icg:iblock*npw_k*my_nspinor*blocksize+icg)
