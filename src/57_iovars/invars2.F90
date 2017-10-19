@@ -2781,7 +2781,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
    if(occopt>=3 .and. occopt<=8)then
      dtset%nbandhf=maxval(dtset%nband(1:nkpt*nsppol))
    else if(occopt==0 .or. occopt==1 .or. occopt==2) then ! Eliminate all the bands that are never occupied
-     nband1=0
+     nband1=0 ; bantot=0
      do isppol=1,dtset%nsppol
        do ikpt=1,dtset%nkpt
          do iband=1,dtset%nband(ikpt+(isppol-1)*dtset%nkpt)
