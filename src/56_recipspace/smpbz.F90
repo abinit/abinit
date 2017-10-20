@@ -272,12 +272,12 @@ subroutine smpbz(brav,iout,kptrlatt,mkpt,nkpt,nshiftk,option,shiftk,spkpt,downsa
    endif
 
    nn=1
-   do ii=boundmin(3),boundmax(3)
-     coord(3)=ii
+   do kk=boundmin(3),boundmax(3)
+     coord(3)=kk
      do jj=boundmin(2),boundmax(2)
        coord(2)=jj
-       do kk=boundmin(1),boundmax(1)
-         coord(1)=kk
+       do ii=boundmin(1),boundmax(1)
+         coord(1)=ii
 
 !DEBUG
          write(std_out,*)' Try with coord(1:3)=',coord(1:3)
@@ -365,6 +365,13 @@ subroutine smpbz(brav,iout,kptrlatt,mkpt,nkpt,nshiftk,option,shiftk,spkpt,downsa
      end do
    end do
    nkpt=nn-1
+
+   if(present(downsampling))then
+     ABI_DEALLOCATE(found1)
+     ABI_DEALLOCATE(found2)
+     ABI_DEALLOCATE(found3)
+   endif
+
 
    if(nkpt/=nkptlatt*nshiftk)then
      write(message, '(a,i8,a,a,a,i8,a)' )&
