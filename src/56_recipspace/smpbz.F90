@@ -342,6 +342,13 @@ subroutine smpbz(brav,iout,kptrlatt,mkpt,nkpt,nshiftk,option,shiftk,spkpt,downsa
    end do
    nkpt=nn-1
 
+   if(present(downsampling))then
+     ABI_DEALLOCATE(found1)
+     ABI_DEALLOCATE(found2)
+     ABI_DEALLOCATE(found3)
+   endif
+
+
    if(nkpt/=nkptlatt*nshiftk)then
      write(message, '(a,i8,a,a,a,i8,a)' )&
 &     'The number of k points ',nkpt,'  is not equal to',ch10,&
