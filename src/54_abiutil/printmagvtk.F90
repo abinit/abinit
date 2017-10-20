@@ -83,8 +83,7 @@ subroutine printmagvtk(mpi_enreg,nspden,nfft,ngfft,rhor,rprimd,fname)
  integer :: ii,jj,kk,ind
  integer :: mpi_comm,mpi_head,mpi_rank,ierr
  real    :: rx,ry,rz
- integer :: me_fft,nproc_fft,i1,i2,i3,ir
- real(dp):: den,magn(3)
+ integer :: nproc_fft,ir
  character(len=500) :: msg
 !arrays
  real(dp),allocatable :: rhorfull(:,:)

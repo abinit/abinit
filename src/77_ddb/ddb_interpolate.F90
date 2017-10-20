@@ -89,15 +89,14 @@ subroutine ddb_interpolate(ifc, crystal, inp, ddb, ddb_hdr, asrq0, &
  integer :: msize,nsize,mpert,nblok,mtyp
  integer :: rftyp,choice
  integer :: ii,iblok,jblok,iqpt,ipert1,ipert2,idir1,idir2
- integer :: nprocs,my_rank,ncerr
- real(dp) :: nrm
+ integer :: nprocs,my_rank
  character(len=500) :: msg
  character(len=fnlen) :: ddb_out_filename, ddb_out_nc_filename
  type(ddb_type) :: ddb_new
 !arrays
  integer :: rfphon(4),rfelfd(4),rfstrs(4)
  integer,allocatable :: blkflg(:,:,:,:)
- real(dp) :: qpt(3), qptnrm(3), qpt_padded(3,3), qred(3), qcart(3)
+ real(dp) :: qpt(3), qptnrm(3), qpt_padded(3,3), qred(3)
  real(dp),allocatable :: d2cart(:,:,:,:,:),d2red(:,:,:,:,:)
  real(dp),pointer :: qpt_fine(:,:)
 

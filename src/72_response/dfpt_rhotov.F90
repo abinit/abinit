@@ -33,7 +33,7 @@
 !!  nhat1(cplex*nfft,2nspden*usepaw)= -PAW only- 1st-order compensation density
 !!  nhat1gr(cplex*nfft,nspden,3*nhat1grdim)= -PAW only- gradients of 1st-order compensation density
 !!  nhat1grdim= -PAW only- 1 if nhat1gr array is used ; 0 otherwise
-!!  nkxc=second dimension of the array kxc, see rhohxc.f for a description
+!!  nkxc=second dimension of the array kxc, see rhotoxc.f for a description
 !!  nspden=number of spin-density components
 !!  n3xccc=dimension of xccc3d1 ; 0 if no XC core correction is used
 !!  optene=0: the contributions to the 2nd order energy are not computed
@@ -217,7 +217,7 @@
 
 !------ Compute 1st-order Hartree potential (and energy) ----------------------
 
- call hartre(cplex,gmet,gsqcut,0,mpi_enreg,nfft,ngfft,paral_kgb,qphon,rhog1,vhartr1_)
+ call hartre(cplex,gsqcut,0,mpi_enreg,nfft,ngfft,paral_kgb,rhog1,rprimd,vhartr1_,qpt=qphon)
 
  if (optene>0) then
    call dotprod_vn(cplex,rhor1,ehart1,doti,nfft,nfftot,1,1,vhartr1_,ucvol)
@@ -226,7 +226,7 @@
  if (optene>0) ehart01=zero
  if(ipert==natom+3 .or. ipert==natom+4) then
    ABI_ALLOCATE(vhartr01,(cplex*nfft))
-   call hartrestr(gmet,gprimd,gsqcut,idir,ipert,mpi_enreg,natom,nfft,ngfft,paral_kgb,rhog,vhartr01)
+   call hartrestr(gsqcut,idir,ipert,mpi_enreg,natom,nfft,ngfft,paral_kgb,rhog,rprimd,vhartr01)
    if (optene>0) then
      call dotprod_vn(cplex,rhor1,ehart01,doti,nfft,nfftot,1,1,vhartr01,ucvol)
      ehart01=two*ehart01

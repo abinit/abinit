@@ -82,7 +82,7 @@
 !!              (ngfftf=ngfft for norm-conserving potential runs)
 !!  ngrvdw=size of grvdw(:,:); can be 0 or natom according to dtset%vdw_xc
 !!  nhat(nfftf,nspden*psps%usepaw)= -PAW only- compensation density
-!!  nkxc=second dimension of the array kxc, see rhohxc.f for a description
+!!  nkxc=second dimension of the array kxc, see rhotoxc.f for a description
 !!  npwarr(nkpt)=number of planewaves in basis and on boundary for each k
 !!  ntypat=number of types of atoms
 !!  nvresid(nfftf,nspden)=array for the residual of the density/potential

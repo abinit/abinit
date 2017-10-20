@@ -331,7 +331,7 @@ subroutine copy_matlu(nmat1,nmat2,natom,opt_diag,opt_non_diag,opt_re)
  integer, optional, intent(in) :: opt_diag,opt_non_diag,opt_re
 
 !Local variables-------------------------------
- integer :: iatom, lpawu,isppol,im1,im2,ispinor,ispinor1,tndim
+ integer :: iatom,isppol,im1,im2,ispinor,ispinor1,tndim
 ! *********************************************************************
 
  do isppol=1,nmat1(1)%nsppol
@@ -1476,10 +1476,9 @@ end subroutine add_matlu
  integer,optional,intent(in) :: optreal
 !Local variables-------------------------------
 !scalars
- integer :: iatom,im,im1,im2,im3,imc,imc1,info,ispinor,ispinor1,isppol,lwork,tndim,lworkr
+ integer :: iatom,im1,im2,im3,imc,imc1,info,ispinor,ispinor1,isppol,lwork,tndim,lworkr
  integer :: nsppol,nsppolimp,nspinor
  logical :: checkstop_in
- complex(dpc) :: xcheck
  character(len=500) :: message
 !arrays
  type(coeff2c_type),allocatable :: gathermatlu(:)
@@ -1878,7 +1877,6 @@ end subroutine add_matlu
 ! type(coeff2c_type),allocatable :: rot_mat_orig(:,:)
  type(coeff2c_type),allocatable :: rot_mat_orig(:)
  complex(dpc),allocatable :: temp_mat(:,:)
- character(len=500) :: message
 !************************************************************************
  if(prtopt==1) then
  endif
@@ -2288,7 +2286,6 @@ end subroutine add_matlu
 !scalars
  integer :: iatom,im,im1,ispinor,ispinor1,isppol
  integer :: lpawu
- character(len=500) :: message
 !arrays
 !************************************************************************
  nondiag=.false.

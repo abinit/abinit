@@ -1806,7 +1806,7 @@ subroutine ebands_get_erange(ebands, nkpts, kpoints, band_block, emin, emax)
 
 !Local variables-------------------------------
 !scalars
- integer :: spin,band,ik,ikpt,cnt
+ integer :: spin,ik,ikpt,cnt
  type(kptrank_type) :: krank
 
 ! *************************************************************************
@@ -2388,7 +2388,6 @@ subroutine ebands_set_scheme(ebands,occopt,tsmear,spinmagntarget,prtvol)
 !scalars
  real(dp),parameter :: stmbias0=zero
  integer :: my_prtvol
- character(len=500) :: msg
 
 ! *************************************************************************
 
@@ -3027,7 +3026,7 @@ type(edos_t) function ebands_get_edos(ebands,cryst,intmeth,step,broad,comm) resu
 
 !Local variables-------------------------------
 !scalars
- integer :: iw,nw,spin,band,ikpt,ief,nproc,my_rank,mpierr,cnt,ierr,bcorr
+ integer :: nw,spin,band,ikpt,ief,nproc,my_rank,mpierr,cnt,ierr,bcorr
  real(dp) :: max_ene,min_ene,wtk,max_occ
  character(len=500) :: msg
  type(stats_t) :: ediffs
@@ -4368,7 +4367,6 @@ subroutine ebands_get_jdos(ebands, cryst, intmeth, step, broad, comm, ierr)
  type(stats_t) :: ediffs
  type(t_tetrahedron) :: tetra
  character(len=500) :: msg
- character(len=80) :: errstr
  character(len=fnlen) :: path
 !arrays
  integer :: val_idx(ebands%nkpt,ebands%nsppol)
@@ -5195,7 +5193,7 @@ subroutine ebands_write_gnuplot(ebands, prefix, kptbounds)
 
 !Local variables-------------------------------
 !scalars
- integer :: unt,gpl_unt,ik,spin,band,ii,start,nkbounds
+ integer :: unt,gpl_unt,ik,spin,ii,start,nkbounds
  character(len=500) :: msg,fmt
  character(len=fnlen) :: datafile,basefile
 !arrays

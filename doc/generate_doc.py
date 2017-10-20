@@ -1,4 +1,4 @@
-#! /usr/bin/env python 
+#! /usr/bin/env python
 """
    This script generates most of the ABINIT documentation for the ABINIT Web site, in HTML.
 
@@ -6,10 +6,10 @@
    (No options are allowed at present, except the help ones)
 
    This script :
-   (1) reads information from (i) a set of YAML files, (ii) a bibtex file, 
-        (iii) input files contained in tests/*/Input 
+   (1) reads information from (i) a set of YAML files, (ii) a bibtex file,
+        (iii) input files contained in tests/*/Input
        (files (i) and (ii) are contained in subdirectories */origin_files);
-   (2) performs some checks; 
+   (2) performs some checks;
    (3) establishes intermediate dictionaries and databases;
    (4) expands special strings, of the form "[[tag]]", to create HTML links;
    (5) creates the needed HMTL files (all contained in subdirectories */generated_files).
@@ -23,7 +23,7 @@
 # XG 20170814 : sorry, awfully written ... I should have used classes, etc. It developed from Yannick script,
 # having in mind a small generalisation to give input variables for topics, then was further enlarged to bibliography, etc, etc,
 # without any global view at any time, except at the very end.
-# So : TODO 
+# So : TODO
 # Define an enlarged class for abivars, that includes attributes for tests, abivarID, etc ...
 # What are the other classes ? Likely "bibitem" ... But also "executable", "test" ...
 # Define for each class the corresponding functions.
@@ -70,7 +70,7 @@ if cmdline_params != [] :
 ################################################################################
 ################################################################################
 
-# Parsing section, also preliminary treatment of list of topics in tests and bibliography 
+# Parsing section, also preliminary treatment of list of topics in tests and bibliography
 
 ################################################################################
 
@@ -99,7 +99,7 @@ msgs={"bibfiles"       :"as database input file for the list of generated files 
       "tests_dirs"     :"as database input file for the list of directories in which automatic test input files are present ...",
       "lessons"        :"as database input file for the list of lessons ...",
       "helps"          :"as database input file for the list of help files in the users directory ..."}
-      
+
 path_file='biblio/origin_files/abiref.bib'
 with open(path_file) as f:
   print("Read "+path_file+" as database input file for the bibliography references ...")
@@ -126,7 +126,7 @@ list_of_topics=yml_in["list_of_topics"]
 # - the input variables that are exemplified.
 
 inptests_dic={}
-path_itemfile="topics/generated_files/item_in_tests.txt" 
+path_itemfile="topics/generated_files/item_in_tests.txt"
 try :
   rm_cmd = "rm "+path_itemfile
   retcode = os.system(rm_cmd)
@@ -138,12 +138,12 @@ for item in ["executable","topics"]:
   for tests_dir in yml_in["tests_dirs"] :
     grep_cmd = "grep %s tests/%s/Input/*.in | grep '#%%' >> %s"%(item,tests_dir,path_itemfile)
     retcode = os.system(grep_cmd)
-  with open(path_itemfile, 'r') as f: 
+  with open(path_itemfile, 'r') as f:
     item_in_tests=f.read()
     lines=item_in_tests.splitlines()
   for line in lines:
     line_split = line.split(':')
-    inptests_name=line_split[0].strip()    
+    inptests_name=line_split[0].strip()
     line_split2=line_split[1].split('=')
     item_values=line_split2[1].split(',')
     item_values_stripped=[]
@@ -227,7 +227,7 @@ for executable in tests_for_executables.keys():
   for inptest in tests_for_executables[executable]["inptests"]:
     inptest_split=inptest.split("/")
     dirname=inptest_split[1]
-    if "tuto"==dirname[:4]: 
+    if "tuto"==dirname[:4]:
       ntests_in_tuto+=1
   tests_for_executables[executable]["ntests_in_tuto"]=ntests_in_tuto
 
@@ -238,7 +238,7 @@ for abivarname in tests_for_abivars.keys():
     dir_ID_for_tests[tests_dir]=[]
   ntests_abivarname=len(tests_for_abivars[abivarname]["inptests"])
   tests_for_abivars[abivarname]["ntests"]=ntests_abivarname
-  for inptest in tests_for_abivars[abivarname]["inptests"]: 
+  for inptest in tests_for_abivars[abivarname]["inptests"]:
     inptest_split=inptest.split("/")
     dirname=inptest_split[1]
     testname=inptest_split[3]
@@ -293,9 +293,9 @@ for abivarname in tests_for_abivars.keys():
       counter=0
       for tests_dir in yml_in["tests_dirs"]:
         if len(dir_ID_for_tests[tests_dir])>0 and (only_tuto==0 or "tuto"==tests_dir[:4]):
-          if counter>0: 
+          if counter>0:
             usage_report+=","
-          counter+=1 
+          counter+=1
           usage_report+="%s:["%(tests_dir)
           for (i,test) in enumerate(dir_ID_for_tests[tests_dir]):
             usage_report+='<a href="../../tests/%s/Input/t%s.in">%s</a>'%(tests_dir,test,test)
@@ -340,18 +340,16 @@ listIDs=[]
 for item in bibtex_items:
 
   if 'doi.org' in item:
-    print(" Error : please remove the prefix http://dx.doi.org (or similar), from the doi field.")
-    print(" It should start directly with the DOI information, e.g. 10.1016 ...")
-    print(" This error happended while treating item :")
-    print(item)
-    raise
+    raise ValueError("""
+Please remove the prefix http://dx.doi.org (or similar), from the doi field.
+It should start directly with the DOI information, e.g. 10.1016 ...
+This error happended while treating item:\n%s""" % str(item))
 
   item_dic={}
   item=item.split('{',1)
   entrytype=item[0].strip().lower()
   if not entrytype in ["article","book","incollection","phdthesis","mastersthesis","misc","unpublished"]:
-    print(" Not able to treat the following entrytype:",entrytype)
-    raise
+    raise ValueError(" Not able to treat the following entrytype:\n%s", str(entrytype))
 
   #Find the ENTRYTYPE
   item_dic={'ENTRYTYPE':entrytype}
@@ -363,8 +361,7 @@ for item in bibtex_items:
   # Check that there is a four-digit date in the ID
   result=get_year(id_upper_lower)
   if result== -9999 :
-    print("The entry %s does not have the proper format, i.e. the year should be a four-digit number starting with 1 or 2" % id_upper_lower)
-    raise
+    raise ValueError("The entry %s does not have the proper format, i.e. the year should be a four-digit number starting with 1 or 2" % id_upper_lower)
   item_dic['ID']=id_upper_lower
   listIDs.append(id_upper_lower)
 
@@ -394,7 +391,7 @@ for item in bibtex_items:
     else:
       newline=prev+" "+line.strip()
     flag_parenthesis=0
-   
+
     len_new=len(newline)
 
     # Takes care of lines that might be split with a carriage return. They are identified because they do not end with '},',
@@ -792,20 +789,26 @@ for i, var in enumerate(abinit_vars):
     else:
       print(" No topic_tribe for abivarname %s"%(var.abivarname))
       topic_error+=1
-    # Occurence
-    cur_content += '<br><font id="smalltext">'+tests_for_abivars[var.abivarname]["usage_report"]+"</font>\n"
+    # Occurrence in input files, except when internal_only
+    internal_only=0
+    if var.characteristics is not None:
+      for chs in var.characteristics:
+        if "INTERNAL_ONLY" in chs:
+          internal_only=1
+    if internal_only==0 :
+      cur_content += '<br><font id="smalltext">'+tests_for_abivars[var.abivarname]["usage_report"]+"</font>\n"
     # Variable type, including dimensions
     cur_content += '<br><font id="vartype">Variable type: '+var.vartype
     if var.dimensions is not None:
       cur_content += make_links(format_dimensions(var.dimensions),var.abivarname,allowed_link_seeds,backlinks,backlink)
     if var.commentdims is not None and var.commentdims != "":
       cur_content += " (Comment: "+make_links(var.commentdims,var.abivarname,allowed_link_seeds,backlinks,backlink)+")"
-    cur_content += '</font>\n' 
+    cur_content += '</font>\n'
     # Default
     cur_content += '<br><font id="default">'+make_links(format_default(var.defaultval),var.abivarname,allowed_link_seeds,backlinks,backlink)
     if var.commentdefault is not None and var.commentdefault != "":
       cur_content += ' (Comment: '+make_links(var.commentdefault,var.abivarname,allowed_link_seeds,backlinks,backlink)+")"
-    cur_content += '</font>\n' 
+    cur_content += '</font>\n'
     # Requires
     if var.requires is not None and var.requires != "":
       cur_content += '<br><br><font id="requires">\nOnly relevant if '+make_links(var.requires,var.abivarname,allowed_link_seeds,backlinks,backlink)+"\n</font>\n"
@@ -852,7 +855,7 @@ for i, varset_info in enumerate(varsets):
     alphalinks+=('<a class="TabLetterLink" href="#%s" onClick="openLetter(event,\'%s\')" id="click%s">%s</a> ')%(i,i,i,i)
   alphalinks+='</div>\n \n'
 
-  #Generate the body of the table of content 
+  #Generate the body of the table of content
   cur_let = 'A'
   toc_body=""
   if varset=="allvars":
@@ -928,7 +931,7 @@ for list_infos in list_infos_dir:
 # Generate the different "topic" files
 
 ################################################################################
-# Constitute the component "Related input variables" for all topic files. 
+# Constitute the component "Related input variables" for all topic files.
 # This component in input variables is stored, for each topic_name, in topic_abivars[topic_name]
 
 topic_abivars = dict()
@@ -963,7 +966,7 @@ for (tribekey, tribeval) in yml_in["list_tribes"]:
             topic_abivars[topic_name] += "["+var.mnemonics+"]<br>\n"
     except:
       if debug==1 :
-       print(" No topics for abivarname "+var.abivarname) 
+       print(" No topics for abivarname "+var.abivarname)
 
 ################################################################################
 # Constitute the component "Selected input files" for all topic files.
@@ -973,9 +976,9 @@ topic_infiles = dict()
 
 for topic_name in list_of_topics:
   topic_infiles[topic_name] = ""
- 
+
 # Create a dictionary to contain the list of tests for each topic
-inputs_for_topic = {} 
+inputs_for_topic = {}
 topic_error=0
 for inptests_name in inptests_dic.keys() :
   if "topics" in inptests_dic[inptests_name].keys():
@@ -1002,8 +1005,8 @@ for i, topic_name in enumerate(inputs_for_topic):
     dir = dict()
     for test in tests:
       file_split=test.split('/')
-      dirname=file_split[1] 
-      testname=file_split[3] 
+      dirname=file_split[1]
+      testname=file_split[3]
       if dirname not in dir.keys():
         dir[dirname] = []
       dir[dirname].append(testname)
@@ -1016,8 +1019,8 @@ for i, topic_name in enumerate(inputs_for_topic):
     topic_infiles[topic_name] += "<br>\n"
 
 ################################################################################
-# Assemble the "topic" files 
-# Also collect the keywords and howto 
+# Assemble the "topic" files
+# Also collect the keywords and howto
 
 all_topics={}
 all_topic_refs={}
@@ -1027,7 +1030,7 @@ for topic_name in list_of_topics:
   print("Read "+path_ymlfile+" to initiate the topic '"+topic_name+"' ... ")
   topic_yml=read_yaml(path_ymlfile)
   topic=topic_yml[0]
-  #Construct the backlinks and reference list 
+  #Construct the backlinks and reference list
   reflist=[]
   for j in ["introduction","examples"] :
     try :
@@ -1075,7 +1078,7 @@ for topic_name in list_of_topics:
   #Generate the table of content
   item_toc=0
   item_list=[]
-  title={ "introduction":"Introduction." , "examples":"Example(s)", "tutorials":"Related lesson(s) of the tutorial." , 
+  title={ "introduction":"Introduction." , "examples":"Example(s)", "tutorials":"Related lesson(s) of the tutorial." ,
           "input_variables":"Related input variables." , "input_files":"Selected input files." , "references":"References."}
   sec_number={}
   toc=" <h3><b>Table of content: </b></h3> \n <ul> "
@@ -1103,8 +1106,7 @@ for topic_name in list_of_topics:
       if len(backlinks_formatted)!=0:
         topic_html += " Mentioned in "+backlinks_formatted+"\n <hr>"
       if not "help_features" in backlinks_formatted:
-        print(" Topic %s not (yet) mentioned in the file help_feature.yml. Please correct this omission.")
-        raise
+        raise ValueError(" Topic %s not (yet) mentioned in the file help_feature.yml. Please correct this omission.")
     elif j == "toc":
       topic_html += toc
     elif j == "input_variables":
@@ -1227,7 +1229,7 @@ if 0:
 ################################################################################
 # Treat the links within the "introduction" of the acknowledgment component first.
 
-backlink= ' &nbsp; <a href="../../biblio/generated_files/bib_acknow.html">bib_acknow.html</a> ' 
+backlink= ' &nbsp; <a href="../../biblio/generated_files/bib_acknow.html">bib_acknow.html</a> '
 for i, bibfile_info in enumerate(yml_in["bibfiles"]):
   if bibfile_info.name.strip()=="acknow":
     bibfile_intro=bibfile_info.introduction
@@ -1262,7 +1264,7 @@ for ref in bibtex_dics:
       bibliography_content+=alphalinks+('<hr><hr><h2>%s</h2> \n \n')%(cur_let)
   bibliography_content+= ('<hr><a id="%s">[%s]</a> (<a href="./bib_bibtex.html#%s">bibtex</a>)\n <br> %s\n') %(ID,ID,ID,reference_dic[ID])
   if len(backlinks_formatted)!=0:
-    bibliography_content+= "<br> Referred to in "+backlinks_formatted 
+    bibliography_content+= "<br> Referred to in "+backlinks_formatted
 
 # Open, write and close the txt file
 file_txt = 'biblio/generated_files/ordered_abiref.bib'
@@ -1273,8 +1275,8 @@ print("File %s written ..." %file_txt)
 
 ################################################################################
 #Global operation on the bib_biblio html file : conversion from bibtex notation to html notation.
-#This should cover most of the cases. 
- 
+#This should cover most of the cases.
+
 bibliography_content=bibtex2html(bibliography_content)
 
 ################################################################################

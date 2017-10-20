@@ -71,7 +71,7 @@ subroutine fock_ACE_getghc(cwavef,ghc,gs_ham,mpi_enreg)
 
 !Local variables-------------------------------
 ! Scalars
- integer :: iband, ier,ikpt,ipw,my_nspinor,nband_k,npw
+ integer :: iband,ikpt,ipw,my_nspinor,nband_k,npw
  real(dp) :: doti,dotr,eigen
  type(fock_common_type),pointer :: fockcommon
 ! Arrays

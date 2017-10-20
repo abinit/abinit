@@ -8,9 +8,11 @@
 #include <iostream>
 #include <complex>
 #include <triqs/operators/many_body_operator.hpp>
+#include <triqs/utility/real_or_complex.hpp>  //ADDED for compatibility with TRIQS 1.4
 
 using namespace std;
-using triqs::utility::many_body_operator;
+//using triqs::utility::many_body_operator; //COMMENTED: Not relevant with TRIQS 1.4
+using triqs::operators::many_body_operator_generic; //ADDED Instead
 
 extern "C"{
   
@@ -19,11 +21,15 @@ extern "C"{
                           double beta_,
                           double *epsi, double *umat_ij, double *umat_ijkl, std::complex<double> *delta_iw_ptr, std::complex<double> *g_iw_ptr, double *g_tau, double *gl, MPI_Fint *MPI_world_ptr );
 
-    many_body_operator<double> init_Hamiltonian( double *eps, int nflavor, double *U );
+//COMMENTED: Class name changed in TRIQS 1.4
+//    many_body_operator<double> init_Hamiltonian( double *eps, int nflavor, double *U );
+//    many_body_operator<double> init_fullHamiltonian( double *eps, int nflavor, double *U );
+//    many_body_operator<double> init_fullHamiltonianUpDown( double *eps, int nflavor, double *U );
 
-    many_body_operator<double> init_fullHamiltonian( double *eps, int nflavor, double *U );
-
-    many_body_operator<double> init_fullHamiltonianUpDown( double *eps, int nflavor, double *U );
+//ADDED Instead
+    many_body_operator_generic<double> init_Hamiltonian( double *eps, int nflavor, double *U );
+    many_body_operator_generic<double> init_fullHamiltonian( double *eps, int nflavor, double *U );
+    many_body_operator_generic<double> init_fullHamiltonianUpDown( double *eps, int nflavor, double *U );
 }
 
 #endif

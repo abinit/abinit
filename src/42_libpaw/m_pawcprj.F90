@@ -805,7 +805,6 @@ end subroutine pawcprj_zaxpby
  integer :: iatm,iatom, ibct, ibnd, ibsp, ibst, icpgr, iin, il, il0, im
  integer :: ilmn, iln, iln0, ilpm, indexi, ispinor, itypat, jatm,jatom, mm, nlmn
  real(dp) :: kdotL, phr, phi
- logical :: order
 !arrays
  real(dp) :: rl(3), t1(2), t2(2)
 

@@ -80,7 +80,7 @@ program mrgddb
 !scalars
  integer,parameter :: mddb=5000,ddbun=2 ! mddb=maximum number of databases (cannot be made dynamic)
  integer :: chkopt
- integer :: iddb,ii,mblktyp,mblktyptmp,nddb,nfiles_cli,nargs,msym,comm,my_rank,fcnt
+ integer :: iddb,ii,mblktyp,mblktyptmp,nddb,nfiles_cli,nargs,msym,comm,my_rank
  real(dp) :: tcpu,tcpui,twall,twalli
  logical :: cannot_overwrite=.True.
  character(len=24) :: codename
