@@ -259,12 +259,12 @@ subroutine smpbz(brav,iout,kptrlatt,mkpt,nkpt,nshiftk,option,shiftk,spkpt,downsa
    endif
 
    nn=1
-   do ii=boundmin(3),boundmax(3)
-     coord(3)=ii
+   do kk=boundmin(3),boundmax(3)
+     coord(3)=kk
      do jj=boundmin(2),boundmax(2)
        coord(2)=jj
-       do kk=boundmin(1),boundmax(1)
-         coord(1)=kk
+       do ii=boundmin(1),boundmax(1)
+         coord(1)=ii
 
 !        Here, apply the downsampling : skip some of the trials
          if(present(downsampling))then
