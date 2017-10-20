@@ -278,7 +278,7 @@ subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,bxc,mpi_enreg,nfft,ngfft,nhat1,nhat1
           case (2)                        ! Explicit calculation of the rotated xc functional (derivatives of the analitic experssion)
 
 
-           if(m_norm(ifft)>m_norm_min)then
+           !if(m_norm(ifft)>m_norm_min)then
 
              ! this part describes the change of the magnitude of the xc magnetic field
              ! and the change of the scalar part of the xc electrostatic potential
@@ -295,10 +295,20 @@ subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,bxc,mpi_enreg,nfft,ngfft,nhat1,nhat1
              my1=rhor1(ifft,3); mdiry=rhor(ifft,3)/m_norm(ifft);
              mz1=rhor1(ifft,4); mdirz=rhor(ifft,4)/m_norm(ifft);
  
-             vxc1(ifft,1) = vxc1(ifft,1)+ bxc(ifft)*( mz1 - mdirz*m_dot_m1 ) ! bxc is Bxc^(0)/|m|
-             vxc1(ifft,2) = vxc1(ifft,2)+ bxc(ifft)*(-mz1 + mdirz*m_dot_m1 ) 
-             vxc1(ifft,3) = vxc1(ifft,3)+ bxc(ifft)*( mx1 - mdirx*m_dot_m1 )
-             vxc1(ifft,4) = vxc1(ifft,4)+ bxc(ifft)*(-my1 + mdiry*m_dot_m1 )
+             !vxc1(ifft,1) = vxc1(ifft,1)- bxc(ifft)/2*( mz1 - mdirz*m_dot_m1 ) ! bxc is Bxc^(0)/|m|
+             !vxc1(ifft,2) = vxc1(ifft,2)- bxc(ifft)/2*(-mz1 + mdirz*m_dot_m1 ) 
+             !vxc1(ifft,3) = vxc1(ifft,3)- bxc(ifft)/2*( mx1 - mdirx*m_dot_m1 )
+             !vxc1(ifft,4) = vxc1(ifft,4)- bxc(ifft)/2*(-my1 + mdiry*m_dot_m1 )
+
+             bxc0=(vxc(ifft,1)-vxc(ifft,2))/rhor(ifft,4)/2.0
+
+             vxc1(ifft,1) = vxc1(ifft,1) + bxc0*( mz1 - mdirz*m_dot_m1 ) ! bxc is Bxc^(0)/|m|
+             vxc1(ifft,2) = vxc1(ifft,2) + bxc0*(-mz1 + mdirz*m_dot_m1 ) 
+             vxc1(ifft,3) = vxc1(ifft,3) + bxc0*( mx1 - mdirx*m_dot_m1 )
+             vxc1(ifft,4) = vxc1(ifft,4) + bxc0*(-my1 + mdiry*m_dot_m1 )
+
+             !write(239,*) bxc0,bxc(ifft)
+
 !            write(*,*) m_dot_m1/m_norm(ifft)
 !            write(*,*)   ( mx1 - mdirx*m_dot_m1 )*rhor(ifft,2) + &
 !&                       ( my1 - mdiry*m_dot_m1 )*rhor(ifft,3) + &
@@ -306,10 +316,10 @@ subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,bxc,mpi_enreg,nfft,ngfft,nhat1,nhat1
 !            write(239,*)  vxc1(ifft,2),bxc(ifft)*(-mz1 + mdirz*m_dot_m1 )
 !            write(240,*)  vxc1(ifft,3),bxc(ifft)*( mx1 - mdirx*m_dot_m1 )
 !            write(241,*)  vxc1(ifft,4),bxc(ifft)*(-my1 + mdiry*m_dot_m1 )
-           else
-             vxc1(ifft,1:2)=dvdn
-             vxc1(ifft,3:4)=zero
-           end if
+           !else
+           !  vxc1(ifft,1:2)=dvdn
+           !  vxc1(ifft,3:4)=zero
+           !end if
 
             vxc1rot2(ifft,1)=vxc1(ifft,1)
             vxc1rot2(ifft,2)=vxc1(ifft,2)

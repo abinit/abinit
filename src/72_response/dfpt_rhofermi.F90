@@ -226,7 +226,7 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
 !scalars
  integer,parameter :: level=17
  integer :: bd2tot_index,bdtot_index,buffer_size,counter,cplex_rhoij
- integer :: dimffnl1,dimffnlk,iatom,iband,ibg,ibgq
+ integer :: dimffnl1,dimffnlk,iatom,iband,ibg,ibgq,ipw
  integer :: icg,icgq,ider,idir0,ierr,iexit,ii,ikg,ikg1,ikpt,ilm,ilmn,indx
  integer :: ispden,isppol,istr,istwf_k
  integer :: mbd2kpsp,mcgq,mcgq_disk,mcprjq,mcprjq_disk
@@ -251,8 +251,8 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
  real(dp),allocatable :: rocceig(:,:),ylm1_k(:,:),ylm_k(:,:),ylmgr1_k(:,:,:)
  type(paw_ij_type),allocatable :: paw_ij1fr(:)
  type(pawrhoij_type),pointer :: pawrhoijfermi_unsym(:)
-! real(dp),allocatable :: vlocal1(:,:,:,:),vlocal_tmp(:,:,:,:)
-! real(dp),allocatable :: v1zeeman(:,:),vtrial_tmp(:,:)
+ real(dp),allocatable :: vlocal1(:,:,:,:),vlocal_tmp(:,:,:,:)
+ real(dp),allocatable :: v1zeeman(:,:),vtrial_tmp(:,:)
 
 
 ! *********************************************************************
@@ -266,6 +266,7 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
  if (cplex/=1) then
    MSG_BUG('wrong cplex/=1 argument !')
  end if
+
 
 !Keep track of total time spent in this routine
  call timab(121,1,tsec)
@@ -347,47 +348,47 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
 & mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom,mpi_spintab=mpi_enreg%my_isppoltab)
 
 
-! if (ipert==natom+5) then !SPr deb, not "cplex safe" (only cplex=1 is ok for now)
-!
-!    ABI_ALLOCATE(vlocal1,(cplex*n4,n5,n6,rf_hamkq%nvloc))
-!    ABI_ALLOCATE(vlocal_tmp,(cplex*n4,n5,n6,rf_hamkq%nvloc))
-!    ABI_ALLOCATE(v1zeeman,(cplex*nfftf,nspden))
-!    ABI_ALLOCATE(vtrial_tmp,(cplex*nfftf,nspden))
+ if (ipert==natom+5) then !SPr deb, not "cplex safe" (only cplex=1 is ok for now)
 
-!    do ispden=1,nspden
-!      vtrial_tmp(:,ispden)= 0.0d0
-!    enddo
+    ABI_ALLOCATE(vlocal1,(cplex*n4,n5,n6,rf_hamkq%nvloc))
+    ABI_ALLOCATE(vlocal_tmp,(cplex*n4,n5,n6,rf_hamkq%nvloc))
+    ABI_ALLOCATE(v1zeeman,(cplex*nfftf,nspden))
+    ABI_ALLOCATE(vtrial_tmp,(cplex*nfftf,nspden))
 
-!    if (nspden==2) then
-!      v1zeeman(:,1)=-0.5d0
-!      v1zeeman(:,2)=+0.5d0
-!    else if(nspden==4) then
-!      v1zeeman(:,1)=-0.5d0
-!      v1zeeman(:,2)=+0.5d0
-!      v1zeeman(:,3)= 0.0d0
-!      v1zeeman(:,4)= 0.0d0
-!    else
-!      v1zeeman(:,1)= 0.0d0
-!    endif
-!
-! endif
+    do ispden=1,nspden
+      vtrial_tmp(:,ispden)= 0.0d0
+    enddo
+
+    if (nspden==2) then
+      v1zeeman(:,1)=-0.5d0
+      v1zeeman(:,2)=+0.5d0
+    else if(nspden==4) then
+      v1zeeman(:,1)=-0.0d0
+      v1zeeman(:,2)=+0.0d0
+      v1zeeman(:,3)=-0.5d0
+      v1zeeman(:,4)= 0.0d0
+    else
+      v1zeeman(:,1)= 0.0d0
+    endif
+
+ endif
 
 !LOOP OVER SPINS
  do isppol=1,nsppol
    ikg=0;ikg1=0
 !  Continue to initialize the Hamiltonian at k+q
    call load_spin_hamiltonian(gs_hamkq,isppol,with_nonlocal=.true.)
-   call load_spin_rf_hamiltonian(rf_hamkq,gs_hamkq,isppol,with_nonlocal=.true.)
+!  call load_spin_rf_hamiltonian(rf_hamkq,gs_hamkq,isppol,with_nonlocal=.true.)
 
-!   if (ipert/=natom+5) then 
-!     call load_spin_rf_hamiltonian(rf_hamkq,gs_hamkq,isppol,with_nonlocal=.true.)
-!   else
+   if (ipert/=natom+5) then 
+     call load_spin_rf_hamiltonian(rf_hamkq,gs_hamkq,isppol,with_nonlocal=.true.)
+   else
      !add the local part (zeeman perturbation), not the best way to do (for now debugging purposes only)
-!     call rf_transgrid_and_pack(isppol,nspden,psps%usepaw,cplex,nfftf,dtset%nfft,dtset%ngfft,&
-!&    gs_hamkq%nvloc,pawfgr,mpi_enreg,vtrial_tmp,v1zeeman,vlocal_tmp,vlocal1)
-!     call load_spin_rf_hamiltonian(rf_hamkq,gs_hamkq,isppol,vlocal1=vlocal1)
-!     call load_spin_rf_hamiltonian(rf_hamkq,gs_hamkq,isppol,with_nonlocal=.true.)
-!   endif
+     call rf_transgrid_and_pack(isppol,nspden,psps%usepaw,cplex,nfftf,dtset%nfft,dtset%ngfft,&
+&    gs_hamkq%nvloc,pawfgr,mpi_enreg,vtrial_tmp,v1zeeman,vlocal_tmp,vlocal1)
+     call load_spin_rf_hamiltonian(rf_hamkq,gs_hamkq,isppol,vlocal1=vlocal1)
+!    call load_spin_rf_hamiltonian(rf_hamkq,gs_hamkq,isppol,with_nonlocal=.true.)
+   endif
 
 
 !  Nullify contribution to density at EFermi from this k-point
@@ -660,15 +661,19 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
        call fftpac(3,mpi_enreg,nspden,cplex*n1,n2,n3,cplex*n4,n5,n6,dtset%ngfft,rhorfermi,rhoaug4(:,:,:,3),1)
        call fftpac(4,mpi_enreg,nspden,cplex*n1,n2,n3,cplex*n4,n5,n6,dtset%ngfft,rhorfermi,rhoaug4(:,:,:,4),1)
      endif
+     write(*,*) 'SPR deb: writing out debug info on rhorfermi:'
+     do ii=1,nfftf
+        write(239,*) rhorfermi(ii,:)
+     enddo
    endif
  end do ! End loop over spins
  
-! if (ipert==natom+5) then
-!   ABI_DEALLOCATE(v1zeeman)
-!   ABI_DEALLOCATE(vlocal1)
-!   ABI_DEALLOCATE(vlocal_tmp)
-!   ABI_DEALLOCATE(vtrial_tmp)
-! endif
+ if (ipert==natom+5) then
+   ABI_DEALLOCATE(v1zeeman)
+   ABI_DEALLOCATE(vlocal1)
+   ABI_DEALLOCATE(vlocal_tmp)
+   ABI_DEALLOCATE(vtrial_tmp)
+ endif
 
 
  !if(xmpi_paral==1)then

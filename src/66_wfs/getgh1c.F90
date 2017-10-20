@@ -276,6 +276,7 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
        ABI_DEALLOCATE(gh1c_sp)
      end if
    else ! Non-Collinear magnetism for nvloc=4
+
      if (gs_hamkq%nspinor==2) then
        ABI_ALLOCATE(gh1c1,(2,npw1))
        ABI_ALLOCATE(gh1c2,(2,npw1))

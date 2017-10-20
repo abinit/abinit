@@ -816,9 +816,9 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
      end if
    end if
 
-!  call calcdensph(gmet,mpi_enreg,dtset%natom,nfftf,ngfftf,nspden,&
-!&   dtset%ntypat,ab_out,dtset%ratsph,rhor1,rprimd,dtset%typat,ucvol,xred,&
-!&   idir+1,cplex,intgden=intgden,dentot=dentot) !SPr remove
+  call calcdensph(gmet,mpi_enreg,dtset%natom,nfftf,ngfftf,nspden,&
+&   dtset%ntypat,ab_out,dtset%ratsph,rhor1,rprimd,dtset%typat,ucvol,xred,&
+&   idir+1,cplex,intgden=intgden,dentot=dentot) !SPr remove
 !     write(*,*) 'SPr: n (Cr 1,2)',intgden(1,1),' ',intgden(1,2)
 !     write(*,*) 'SPr: mx(Cr 1,2)',intgden(2,1),' ',intgden(2,2)
 !     write(*,*) 'SPr: my(Cr 1,2)',intgden(3,1),' ',intgden(3,2)
