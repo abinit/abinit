@@ -116,7 +116,11 @@ subroutine smpbz(brav,iout,kptrlatt,mkpt,nkpt,nshiftk,option,shiftk,spkpt,downsa
 ! *********************************************************************
 
 !DEBUG
-!write(std_out,*)' smpbz : kptrlatt(:,:)=',kptrlatt(1,1),kptrlatt(2,2)
+ write(std_out,*)' smpbz : brav,iout,mkpt,nkpt,option=',brav,iout,mkpt,nkpt,option
+ write(std_out,*)' smpbz : kptrlatt(:,:)=',kptrlatt(:,:)
+ write(std_out,*)' smpbz : nshiftk=',nshiftk
+ write(std_out,*)' smpbz : shiftk(:,:)=',shiftk(:,:)
+ write(std_out,*)' smpbz : downsampling(:)=',downsampling(:)
 !ENDDEBUG
 
  if(option/=0)then
@@ -152,7 +156,7 @@ subroutine smpbz(brav,iout,kptrlatt,mkpt,nkpt,nshiftk,option,shiftk,spkpt,downsa
    end if
  end if
 
-!Just in case the user wants the Gamma point, checks that it is present, and possibly exits
+!Just in case the user wants the grid downsampled to the Gamma point, checks that it is present, and possibly exits
  if(present(downsampling))then
    if(sum(abs(downsampling(:)))==0)then
      do ikshft=1,nshiftk
@@ -225,30 +229,39 @@ subroutine smpbz(brav,iout,kptrlatt,mkpt,nkpt,nshiftk,option,shiftk,spkpt,downsa
    rlatt(:,:)=kptrlatt(:,:)
    call matr3inv(rlatt,klatt)
 
+!DEBUG
+         write(std_out,*)' First primitive vector of the k lattice :',klatt(:,1)
+         write(std_out,*)' Second primitive vector of the k lattice :',klatt(:,2)
+         write(std_out,*)' Third primitive vector of the k lattice :',klatt(:,3)
+!ENDDEBUG
+
 !  Now, klatt contains the three primitive vectors of the k lattice,
 !  in reduced coordinates. One builds all k vectors that
 !  are contained in the first Brillouin zone, with coordinates
 !  in the interval [0,1[ . First generate boundaries of a big box.
 
    do jj=1,3
-!    To accomodate the shifts, boundmin and boundmax don't start from 0
 
-     if ( maxval(shiftk(jj,:)) .eq. zero ) then
-       boundmin(jj)=-1
-     else
-       boundmin(jj)=-ceiling(max(maxval(shiftk(jj,:)),tol14)) !-1
-     end if
-
-     if ( minval(shiftk(jj,:)) .eq. zero ) then
-       boundmax(jj)=0
-     else
-       boundmax(jj)=-floor(min(minval(shiftk(jj,:)),tol14)) !0
-     end if
-
+!    Mathematically, one has to find the coordinates of the corners of a
+!    rectangular paralleliped with integer coordinates, that multiplies the klatt primitive cell and allows
+!    it to incorporate completely the [0,1]^3 box. Then take the minimum and maximum
+!    of these coordinates, and round them negatively and positively to the next integer.
+!    This can be done easily using kptrlatt, considering each coordinate in turn
+!    and boils down to enlarging the boundaries for jj by the value of kptrlatt(:,jj), 
+!    acting on boundmin or boundmax depending on the sign ot kptrlatt(:,jj). 
+!    XG171020 The coding before 171020 was correct, despite being very simple.
+     boundmin(jj)=0 ; boundmax(jj)=0
      do ii=1,3
        if(kptrlatt(ii,jj)<0)boundmin(jj)=boundmin(jj)+kptrlatt(ii,jj)
        if(kptrlatt(ii,jj)>0)boundmax(jj)=boundmax(jj)+kptrlatt(ii,jj)
      end do
+
+!    To accomodate the shifts, boundmin and boundmax don't start from 0, but are enlarged by one
+!    positively and/or negatively. 
+!    XG171020 Coding in v8.6.0 and before was not correct. This one is even simpler actually.
+     boundmin(jj)=boundmin(jj)-ceiling(maxval(shiftk(jj,:))+tol14)
+     boundmax(jj)=boundmax(jj)-floor(minval(shiftk(jj,:))-tol14)
+
    end do
 
    if(present(downsampling))then
@@ -266,7 +279,12 @@ subroutine smpbz(brav,iout,kptrlatt,mkpt,nkpt,nshiftk,option,shiftk,spkpt,downsa
        do kk=boundmin(1),boundmax(1)
          coord(1)=kk
 
+!DEBUG
+         write(std_out,*)' Try with coord(1:3)=',coord(1:3)
+!ENDDEBUG
+
 !        Here, apply the downsampling : skip some of the trials
+!        if(.false.)then
          if(present(downsampling))then
 
            if(downsampling(1)==0 .and. found1(coord(2),coord(3))==1)cycle
@@ -301,9 +319,14 @@ subroutine smpbz(brav,iout,kptrlatt,mkpt,nkpt,nshiftk,option,shiftk,spkpt,downsa
            endif  
          endif
 
+!DEBUG
+         write(std_out,*)' Passed the downsampling test '
+!ENDDEBUG
+
          do ikshft=1,nshiftk
 
 !          Only the first shiftk is taken into account if downsampling
+!          if(.false.)then
            if(present(downsampling))then
              if(.not.(downsampling(1)==1 .and. downsampling(2)==1 .and. downsampling(3)==1))then
                if(ikshft>1)cycle
@@ -326,6 +349,10 @@ subroutine smpbz(brav,iout,kptrlatt,mkpt,nkpt,nshiftk,option,shiftk,spkpt,downsa
            call wrap2_pmhalf(k2(3),k1(3),shift)
            spkpt(:,nn)=k1(:)
            nn=nn+1
+
+!DEBUG
+         write(std_out,*)' Found new k point, k1(1:3)=',k1(1:3)
+!ENDDEBUG
 
            if(present(downsampling))then
              found1(coord(2),coord(3))=1
