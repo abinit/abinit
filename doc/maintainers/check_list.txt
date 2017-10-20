@@ -28,7 +28,8 @@ C.5 Ask the "local farmers" (YP, JZ, MT, MC) to test the buildsys on local machi
 D. For the first merge of a production version (possibly for the first release also)
 ------------------------------------------------------------------------------------
 Prepare release notes ...
-D.1 Find the starting revision of the corresponding development version
+D.1 To ease comparison, checkout starting revision of corresponding development version
+    e.g. in a separate develop, issue git checkout start-8.x.0
 D.2 Identify new tests : git status to find the list of NEW input files and refs files, 
     and identify corresponding capability
 D.3 Identify new input variables : git diff  of the src/57_iovars/chkvars.F90 file
@@ -41,7 +42,7 @@ D.9 Contact the relevant people
 D.10 (Obsolete - should be replaced by automatic generation on another machine)
 Run the green_intel12 slave on the trunk PUBLIC branch => static binary for the group.
 
-Also update install notes, features, doc/maintainers/statistics.txt
+Also update install notes and doc/maintainers/statistics.txt
 Look at presentation, theory (doc/make presentation theory)
 
 E. For the second and other merges of a production version

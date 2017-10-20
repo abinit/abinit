@@ -993,6 +993,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'builtintest',tread,'INT')
  if(tread==1) dtset%builtintest=intarr(1)
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'chkdilatmx',tread,'INT')
+ if(tread==1) dtset%chkdilatmx=intarr(1)
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'chksymbreak',tread,'INT')
  if(tread==1) dtset%chksymbreak=intarr(1)
 

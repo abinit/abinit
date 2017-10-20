@@ -2376,7 +2376,7 @@ symmetriser, see the input variable <a href="../../input_variables/generated_fil
 <br><font id="mnemonics">Mnemonics: Number of BANDs</font>
 <br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_BandOcc.html">BandOcc</a>.</font>
-<br><font id="smalltext">Very frequently used: [774/910] in abinit tests, [114/136] in tuto abinit tests. Too many tests to report (>10).</font>
+<br><font id="smalltext">Very frequently used: [775/910] in abinit tests, [114/136] in tuto abinit tests. Too many tests to report (>10).</font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">No default (Comment:  the estimated number of occupied bands +1 (TODO provide the mathematical formulation))</font>
 <br><font id="text">
@@ -2620,11 +2620,13 @@ the total number of k points of the circuit will be
 <br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_Hybrids.html">Hybrids</a>.</font>
 <br><font id="smalltext">Rarely used: [5/910] in abinit tests, [0/136] in tuto abinit tests. Test list: {libxc:[<a href="../../tests/libxc/Input/t51.in">51</a>,<a href="../../tests/libxc/Input/t52.in">52</a>],v7:[<a href="../../tests/v7/Input/t65.in">65</a>,<a href="../../tests/v7/Input/t66.in">66</a>,<a href="../../tests/v7/Input/t67.in">67</a>]}.</font>
 <br><font id="vartype">Variable type: integer</font>
-<br><font id="default">No default (Comment:  the total number of k-point in the full Brillouin zone (TODO : provide the mathematical formulation))</font>
+<br><font id="default">No default</font>
 <br><font id="text">
 <p>
 <p>
  <b>nkpthf</b> gives the number of k points used to sample the full Brillouin zone for the Fock exact exchange contribution.
+ It is obtained from the specification of the wavefunction k point grid (see <a href="../../input_variables/generated_files/varset_basic.html#kptopt">kptopt</a>),
+ possibly downfolded as specified by <a href="#"><a href="#">[[FAKE LINK:FAKE LINK:fockdownfolding]]</a></a>.
 </p>
 </font>
 
@@ -2996,7 +2998,7 @@ but be cautious ! As an indication of this problem,
 a small variation of input parameters might lead to
 a jump of total energy, because there might be two or even
 three possible values of the Fermi energy, and the
-bissection algorithm find one or the other.
+bissection algorithm finds one or the other.
 </p>
 </font>
 
