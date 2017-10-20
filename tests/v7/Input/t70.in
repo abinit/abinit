@@ -53,6 +53,9 @@ getwfk2 -1        # Start from previous LDA wavefunctions to ease convergence
 #npkpt2 2           # Number of processors for k-point parallelization
 #nphf2  2           # Number of processors for occupied states parallelization
                    # The calculation thus requires npkpt*nphf processors.
+
+fockdownsampling 1 1 1 # Keep the same grid as the kpt one
+
 nstep2 1
 pawecutdg 12.0
 paral_atom 0

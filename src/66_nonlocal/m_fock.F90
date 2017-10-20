@@ -102,9 +102,6 @@ module m_fock
   integer :: ntypat
    ! Number of type of atoms
 
-  integer :: cg_typ
-    ! Option to control the application of Vx in cgwf.F90
-
   integer :: nnsclo_hf
     ! Number of iterations with fixed occupied states when calculating the exact exchange contribution.
 
@@ -741,24 +738,6 @@ subroutine fock_init(atindx,cplex,dtset,fock,gsqcut,kg,mpi_enreg,nattyp,npwarr,p
    write(msg,'(2a)') ch10,'Fock_init: initialization of Fock operator parameters:'
    call wrtout(std_out,msg,'COLL')
 
-!* Type of conjugate gradient algorithm used for exact exchange calculation
-   if ((dtset%cgtyphf<0).or.(dtset%cgtyphf>2)) then
-     msg=' - The parameter cgtyp must have an integer value between 0 and 2.'
-     call wrtout(std_out,msg,'COLL')
-   end if
-   if (dtset%cgtyphf==0) then 
-     fockcommon%cg_typ=2
-     msg=' - The parameter cgtyphf is set to its default value 2.'
-     call wrtout(std_out,msg,'COLL')
-!* Default value is set to 2 (calculation of exact exchange each time the function getghc is called in cgwf)
-!* May be useful to put default to 1 (calculation of exact exchange only for the first call to getghc in cgwf)
-   else 
-     fockcommon%cg_typ=dtset%cgtyphf
-     write(msg,'(a,i3)') ' - The parameter cgtyphf is set to the value:', dtset%cgtyphf
-     call wrtout(std_out,msg,'COLL')
-!* value chosen by the user : 1 or 2.
-   end if
-  
    fockcommon%fock_converged=.false.
    fockcommon%scf_converged=.false.
 
@@ -836,73 +815,41 @@ subroutine fock_init(atindx,cplex,dtset,fock,gsqcut,kg,mpi_enreg,nattyp,npwarr,p
 
 
    if (dtset%kptopt>=1 .and. dtset%kptopt<=4) then
-     if (dtset%kptopt/=3) then
 ! ============================================
 ! === Initialize the set of k-points in BZ ===
 ! ============================================
-!* Generate all the k-points in BZ (Monkhorst-Pack grid)
-!* brav=1 to treat all Bravais lattices ; iout=0 since we do not want any output ; option=0 since we consider k-points
-       call smpbz(1,0,dtset%kptrlatt,nkpt_bz,nkpt,dtset%nshiftk,0,dtset%shiftk,kptns_hf)
+     kptns_hf(:,1:nkpt_bz)=dtset%kptns_hf(:,1:nkpt_bz)
 !* kptns_hf contains the special k points obtained by the Monkhorst & Pack method, in reduced coordinates. (output)
-       if (nkpt_bz/=nkpt) then
-          msg='The value of nkpt_bz and the result of smpbz should be equal!'
-          MSG_ERROR(msg)
-       end if
 
 ! =======================================================
 ! === Compute the transformation to go from IBZ to BZ ===
 ! =======================================================
 !* Compute the reciprocal space metric.
-       call matr3inv(rprimd,gprimd)
-       gmet = MATMUL(TRANSPOSE(gprimd),gprimd)
+     call matr3inv(rprimd,gprimd)
+     gmet = MATMUL(TRANSPOSE(gprimd),gprimd)
 
 !* Calculate the array indkk which describes how to get IBZ from BZ
 !* dksqmax=maximal value of the norm**2 of the difference between a kpt2 vector and the closest k-point found from the kptns1 set, using symmetries. (output)
 !* sppoldbl=1, no spin-polarisation doubling is required.
-       timrev=1 ; if (dtset%kptopt==4) timrev=0
+     timrev=1 ; if (dtset%kptopt==3 .or. dtset%kptopt==4) timrev=0
 !* timrev=1 if the use of time-reversal is allowed ; 0 otherwise
-       if (dtset%kptopt==2) then
-!* Only time reversal symmetry is used.
-         symm=0 ; symm(1,1)=1 ; symm(2,2)=1 ; symm(3,3)=1
-         call listkk(dksqmax,gmet,indkk(1:nkpt_bz,:),dtset%kptns,kptns_hf,dtset%nkpt, &
-&            nkpt_bz,1,1,indx,symm,timrev)
-       else
+     if (dtset%kptopt==2 .or. dtset%kptopt==3) then
+!* No space symmetry is used, if kptopt==2 time reversal symmetry is used.
+       symm=0 ; symm(1,1)=1 ; symm(2,2)=1 ; symm(3,3)=1
+       call listkk(dksqmax,gmet,indkk(1:nkpt_bz,:),dtset%kptns,kptns_hf,dtset%nkpt, &
+&          nkpt_bz,1,1,indx,symm,timrev)
+     else
 !* As in getkgrid, no use of antiferromagnetic symmetries thans to the option sppoldbl=1
-         call listkk(dksqmax,gmet,indkk(1:nkpt_bz,:),dtset%kptns,kptns_hf,dtset%nkpt, &
-&            nkpt_bz,dtset%nsym,1,dtset%symafm,dtset%symrel,timrev)
-       end if
-!* indkk(nkpt_bz,6) describes the k point of IBZ that generates each k point of BZ
-!*      indkk(:,1)   = k point of IBZ, kpt_ibz
-!*      indkk(:,2)   = symmetry operation to apply to kpt_ibz to give the k point of BZ
-!*                     (if 0, means no symmetry operation, equivalent to identity )
-!*      indkk(:,3:5) = Umklapp vectors to apply to remain in BZ
-!*      indkk(:,6)   = 1 if time-reversal was used to generate the k point of BZ, 0 otherwise
-!* No use of symafm to generate spin down wfs from spin up wfs for the moment
-
-     else ! In this case, dtset%kptopt=3, one deals with BZ directly.
-! ============================================
-! === Initialize the set of k-points in BZ ===
-! ============================================
-       if (nkpt_bz/=dtset%nkpt) then
-         msg='In this version, the value of nkpt_bz and nkpt should be equal!'
-         MSG_ERROR(msg)
-       end if
-
-       kptns_hf=dtset%kptns
-
-! ==========================================================
-! === Initialize the transformation to go from IBZ to BZ ===
-! ==========================================================
-!* indkk(nkpt_bz,6) describes the k point of IBZ that generates each k point of BZ
-       do ikpt=1,nkpt_bz
-         indkk(ikpt,1)=ikpt
-         indkk(ikpt,2)=1
-       end do
-!* indkk(:,1)   = k point of BZ and kpt=kpt_hf
-!* all the other field are zero because the Identity is the only symmetry operation.
-
-!* In the most general case, use of listkk is certainly possible.
+       call listkk(dksqmax,gmet,indkk(1:nkpt_bz,:),dtset%kptns,kptns_hf,dtset%nkpt, &
+&          nkpt_bz,dtset%nsym,1,dtset%symafm,dtset%symrel,timrev)
      end if
+!* indkk(nkpt_bz,6) describes the k point of IBZ that generates each k point of BZ
+!*    indkk(:,1)   = k point of IBZ, kpt_ibz
+!*    indkk(:,2)   = symmetry operation to apply to kpt_ibz to give the k point of BZ
+!*                   (if 0, means no symmetry operation, equivalent to identity )
+!*    indkk(:,3:5) = Umklapp vectors to apply to remain in BZ
+!*    indkk(:,6)   = 1 if time-reversal was used to generate the k point of BZ, 0 otherwise
+!* No use of symafm to generate spin down wfs from spin up wfs for the moment
 
    else
      if (dtset%kptopt==0) then
@@ -2281,7 +2228,6 @@ subroutine fock_print(fockcommon,fockbz,header,unit,mode_paral,prtvol)
  call wrtout(my_unt,sjoin(" nkpt_bz .....",itoa(fockbz%nkpt_bz)),my_mode)
 
  ! Options
- call wrtout(my_unt,sjoin(" cg_typ .........",itoa(fockcommon%cg_typ)),my_mode)
  call wrtout(my_unt,sjoin(" nnsclo_hf ......",itoa(fockcommon%nnsclo_hf)),my_mode)
  call wrtout(my_unt,sjoin(" ixc ............",itoa(fockcommon%ixc)),my_mode)
  call wrtout(my_unt,sjoin(" hybrid mixing...",ftoa(fockcommon%hybrid_mixing)),my_mode)

@@ -169,6 +169,7 @@ type dataset_type
  integer :: accuracy
  integer :: adpimd
  integer :: autoparal
+ integer :: auxc_ixc
  integer :: awtr
  integer :: bandpp
  integer :: bdeigrf
@@ -187,7 +188,6 @@ type dataset_type
  integer :: chkprim
  integer :: chksymbreak
  integer :: cineb_start
- integer :: cgtyphf
  integer :: delayperm
  integer :: diismemory
  integer :: dmatpuopt
@@ -235,7 +235,6 @@ type dataset_type
  integer :: exchn2n3d
  integer :: extrapwf
  integer :: fftgw
- integer :: fockaux_ixc
  integer :: fockoptmix
  integer :: frzfermi
  integer :: ga_algor
@@ -603,6 +602,7 @@ type dataset_type
  integer :: d3e_pert2_dir(3)
  integer :: d3e_pert3_atpol(2)
  integer :: d3e_pert3_dir(3)
+ integer :: fockdownsampling(3)
  integer :: jfielddir(3)
  integer :: kptrlatt(3,3)
  integer :: kptrlatt_orig(3,3)=0
@@ -649,6 +649,7 @@ type dataset_type
 
 !Real
  real(dp) :: adpimd_gamma
+ real(dp) :: auxc_scal
  real(dp) :: bmass
  real(dp) :: boxcutmin
  real(dp) :: bxctmindg
@@ -685,7 +686,6 @@ type dataset_type
  real(dp) :: exchmix
  real(dp) :: fband
  real(dp) :: fermie_nest
- real(dp) :: fockaux_scal
  real(dp) :: focktoldfe
  real(dp) :: freqim_alpha
  real(dp) :: freqremin
@@ -827,6 +827,7 @@ type dataset_type
  real(dp), allocatable :: kptgw(:,:)        !SET2NULL  ! kptgw(3,nkptgw)
  real(dp), allocatable :: kptns(:,:)        !SET2NULL  ! kptns(3,nkpt) k-points renormalized and shifted.
                                         !  The ones that should be used inside the code.
+ real(dp), allocatable :: kptns_hf(:,:)     !SET2NULL  ! kpthf(3,nkptns_hf)
 
  real(dp), allocatable :: mixalch_orig(:,:,:) !SET2NULL  ! mixalch_orig(npspalch,ntypalch,nimage)
  real(dp), allocatable :: nucdipmom(:,:)      !SET2NULL  ! nucdipmom(3,natom)
