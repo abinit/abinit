@@ -171,7 +171,7 @@ use m_cgtools
 !arrays
  integer,allocatable :: kg_k(:,:)
  real(dp) :: kpoint(3),nonlop_dum(1,1),rmet(3,3),tsec(2)
- real(dp),allocatable :: cwavef(:,:),enlout(:),ffnl_sav(:,:,:,:)
+ real(dp),allocatable :: cwavef(:,:),enlout(:),ffnl_sav(:,:,:,:),ffnl_str(:,:,:,:)
  real(dp),allocatable :: ghc_dum(:,:),gprimd(:,:),kpg_k(:,:),kpg_k_sav(:,:)
  real(dp),allocatable :: kstr1(:),kstr2(:),kstr3(:),kstr4(:),kstr5(:),kstr6(:)
  real(dp),allocatable :: lambda(:),occblock(:),ph3d(:,:,:),ph3d_sav(:,:,:)
@@ -428,8 +428,8 @@ use m_cgtools
 &     nkpg,npw_k,ntypat,psps%pspso,psps%qgrid_ff,rmet,psps%usepaw,psps%useylm,ylm_k,ylmgr_k)
      if ((stress_needed==1).and.(usefock_loc).and.(psps%usepaw==1))then
        ider_str=1; dimffnl_str=7;idir_str=-7
-       ABI_ALLOCATE(fockcommon%ffnl_str,(npw_k,dimffnl_str,psps%lmnmax,ntypat))
-       call mkffnl(psps%dimekb,dimffnl_str,psps%ekb,fockcommon%ffnl_str,psps%ffspl,gs_hamk%gmet,gs_hamk%gprimd,&
+       ABI_ALLOCATE(ffnl_str,(npw_k,dimffnl_str,psps%lmnmax,ntypat))
+       call mkffnl(psps%dimekb,dimffnl_str,psps%ekb,ffnl_str,psps%ffspl,gs_hamk%gmet,gs_hamk%gprimd,&
 &       ider_str,idir_str,psps%indlmn,kg_k,kpg_k,kpoint,psps%lmnmax,psps%lnmax,psps%mpsang,psps%mqgrid_ff,&
 &       nkpg,npw_k,ntypat,psps%pspso,psps%qgrid_ff,rmet,psps%usepaw,psps%useylm,ylm_k,ylmgr_k)
      end if
@@ -511,7 +511,9 @@ use m_cgtools
            call prep_nonlop(choice,cpopt,cwaveprj,enlout,gs_hamk,idir,lambda,blocksize,&
 &           mpi_enreg,nnlout,paw_opt,signs,nonlop_dum,tim_nonlop_prep,cwavef,cwavef)
          end if
-
+         if ((stress_needed==1).and.(usefock_loc).and.(psps%usepaw==1))then
+           call load_k_hamiltonian(gs_hamk,ffnl_k=ffnl_str)
+         end if
          call timab(926,2,tsec)
 
 !        Accumulate non-local contributions from n,k
@@ -636,7 +638,7 @@ use m_cgtools
        ABI_DEALLOCATE(kstr6)
      end if
      if ((stress_needed==1).and.(usefock_loc).and.(psps%usepaw==1))then
-       ABI_DEALLOCATE(fockcommon%ffnl_str)
+       ABI_DEALLOCATE(ffnl_str)
      end if
 
    end do ! End k point loop

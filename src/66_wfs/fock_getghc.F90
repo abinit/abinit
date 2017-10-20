@@ -33,7 +33,7 @@
 !!      fock2ACE,forstrnps,getghc
 !!
 !! CHILDREN
-!!      bare_vqg,dotprod_g,fftpac,fourdp,fourwf,hartre,load_k_hamiltonian
+!!      bare_vqg,dotprod_g,fftpac,fourdp,fourwf,hartre,
 !!      load_kprime_hamiltonian,matr3inv,nonlop,pawdijhat,pawmknhat_psipsi
 !!      sphereboundary,strfock,timab,xmpi_sum
 !!
@@ -427,6 +427,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
 
        if (fockcommon%optfor.and.(fockcommon%ieigen/=0)) then
          choice=2; dotr=zero;doti=zero;cpopt=4
+
          do iatom=1,natom
            do idir=1,3
              call nonlop(choice,cpopt,cwaveocc_prj,enlout_dum,gs_ham,idir,(/zero/),mpi_enreg,&
@@ -441,7 +442,6 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
 &               vfock(2*ind)*grnhat_12(2,ind,1,idir,iatom)
              end do
            end do
-
            do idir=1,3
              for12(idir)=rprimd(1,idir)*for1(1)+rprimd(2,idir)*for1(2)+rprimd(3,idir)*for1(3)
              forikpt(idir,iatom)=forikpt(idir,iatom)-(for12(idir)*gs_ham%ucvol/nfftf+dotr(idir))*occ*wtk
@@ -454,7 +454,6 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
          signs=2;choice=3;cpopt=4
 
        ! first contribution 
-         call load_k_hamiltonian(gs_ham,ffnl_k=fockcommon%ffnl_str)
          dotr=zero
          do idir=1,6
            call nonlop(choice,cpopt,cwaveocc_prj,enlout_dum,gs_ham,idir,(/zero/),mpi_enreg,&

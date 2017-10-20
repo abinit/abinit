@@ -179,10 +179,6 @@ module m_fock
     ! forces(3,natom))
     ! contribution of the fock term to forces
 
-  real(dp), allocatable  :: ffnl_str(:,:,:,:)
-    ! ffnl_str(npw,dimffnl,lmnmax,ntypat)
-    ! nonlocal form factors for stresses calculation
-
   real(dp), allocatable :: eigen_ikpt(:)
     ! eigen_ikpt,(nband))
     !  Will contain the band index of the current state
@@ -1429,9 +1425,7 @@ subroutine fock_common_destroy(fock)
     call pawfgrtab_free(fock%pawfgrtab)
     ABI_DATATYPE_DEALLOCATE(fock%pawfgrtab)
  endif
- if (allocated(fock%ffnl_str)) then
-    ABI_DEALLOCATE(fock%ffnl_str)
- endif
+ 
  ! Put the integer to 0
  fock%ieigen=0
  fock%ikpt=0
