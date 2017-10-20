@@ -1,5 +1,5 @@
 
-.Version 8.5.3 of ABINIT 
+.Version 8.7.0 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
 
 .Copyright (C) 1998-2017 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed 20 Sep 2017.
-- ( at 10h25 )
+.Starting date : Fri 20 Oct 2017.
+- ( at 08h24 )
   
 - input  file    -> t65.in
 - output file    -> t65.out
@@ -31,12 +31,12 @@
      natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
     nsppol =       1      nsym =      48    n1xccc =       0    ntypat =       1
     occopt =       1   xclevel =       1
--    mband =           5        mffmem =           1         mkmem =           4
+-    mband =           8        mffmem =           1         mkmem =           4
        mpw =         194          nfft =        4096          nkpt =           4
 ================================================================================
-P This job should need less than                       1.692 Mbytes of memory.
+P This job should need less than                       1.731 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.061 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
+_ WF disk file :      0.097 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
 
 
@@ -48,12 +48,12 @@ _ WF disk file :      0.061 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
      natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
     nsppol =       1      nsym =      48    n1xccc =       0    ntypat =       1
     occopt =       1   xclevel =       2
--    mband =           5        mffmem =           1         mkmem =           4
+-    mband =           8        mffmem =           1         mkmem =           4
        mpw =         194          nfft =        4096          nkpt =           4
 ================================================================================
-P This job should need less than                       1.797 Mbytes of memory.
+P This job should need less than                       1.833 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.061 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
+_ WF disk file :      0.097 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
 
 --------------------------------------------------------------------------------
@@ -69,8 +69,6 @@ _ WF disk file :      0.061 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
  -outvars: echo values of preprocessed input variables --------
             acell      1.0217000000E+01  1.0217000000E+01  1.0217000000E+01 Bohr
               amu      2.80855000E+01
-          cgtyphf1          0
-          cgtyphf2          2
            diemac      1.20000000E+01
              ecut      6.00000000E+00 Hartree
 -          fftalg         312
@@ -85,24 +83,50 @@ _ WF disk file :      0.061 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
                        3.33333333E-01  0.00000000E+00  0.00000000E+00
                        3.33333333E-01  3.33333333E-01  0.00000000E+00
                       -3.33333333E-01  3.33333333E-01  0.00000000E+00
+            kpthf      0.00000000E+00  0.00000000E+00  0.00000000E+00
+                       3.33333333E-01  0.00000000E+00  0.00000000E+00
+                      -3.33333333E-01  0.00000000E+00  0.00000000E+00
+                       0.00000000E+00  3.33333333E-01  0.00000000E+00
+                       3.33333333E-01  3.33333333E-01  0.00000000E+00
+                      -3.33333333E-01  3.33333333E-01  0.00000000E+00
+                       0.00000000E+00 -3.33333333E-01  0.00000000E+00
+                       3.33333333E-01 -3.33333333E-01  0.00000000E+00
+                      -3.33333333E-01 -3.33333333E-01  0.00000000E+00
+                       0.00000000E+00  0.00000000E+00  3.33333333E-01
+                       3.33333333E-01  0.00000000E+00  3.33333333E-01
+                      -3.33333333E-01  0.00000000E+00  3.33333333E-01
+                       0.00000000E+00  3.33333333E-01  3.33333333E-01
+                       3.33333333E-01  3.33333333E-01  3.33333333E-01
+                      -3.33333333E-01  3.33333333E-01  3.33333333E-01
+                       0.00000000E+00 -3.33333333E-01  3.33333333E-01
+                       3.33333333E-01 -3.33333333E-01  3.33333333E-01
+                      -3.33333333E-01 -3.33333333E-01  3.33333333E-01
+                       0.00000000E+00  0.00000000E+00 -3.33333333E-01
+                       3.33333333E-01  0.00000000E+00 -3.33333333E-01
+                      -3.33333333E-01  0.00000000E+00 -3.33333333E-01
+                       0.00000000E+00  3.33333333E-01 -3.33333333E-01
+                       3.33333333E-01  3.33333333E-01 -3.33333333E-01
+                      -3.33333333E-01  3.33333333E-01 -3.33333333E-01
+                       0.00000000E+00 -3.33333333E-01 -3.33333333E-01
+                       3.33333333E-01 -3.33333333E-01 -3.33333333E-01
+                      -3.33333333E-01 -3.33333333E-01 -3.33333333E-01
          kptrlatt        3    0    0      0    3    0      0    0    3
           kptrlen      2.16735300E+01
 P           mkmem           4
             natom           2
-            nband           5
-          nbandhf1          0
-          nbandhf2          4
+            nband           8
+          nbandhf           6
            ndtset           2
             ngfft          16      16      16
              nkpt           4
-           nkpthf1          0
-           nkpthf2         27
+           nkpthf          27
          nnsclohf1          0
          nnsclohf2          1
             nstep          14
              nsym          48
            ntypat           1
-              occ      2.000000  2.000000  2.000000  2.000000  0.000000
+              occ      2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000
             rprim      0.0000000000E+00  5.0000000000E-01  5.0000000000E-01
                        5.0000000000E-01  0.0000000000E+00  5.0000000000E-01
                        5.0000000000E-01  5.0000000000E-01  0.0000000000E+00
@@ -160,6 +184,8 @@ P           mkmem           4
            tolwfr1     1.00000000E-18
            tolwfr2     0.00000000E+00
             typat      1  1
+          usefock1          0
+          usefock2          1
               wtk        0.03704    0.29630    0.22222    0.44444
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        1.3516508850E+00  1.3516508850E+00  1.3516508850E+00
@@ -195,8 +221,8 @@ P           mkmem           4
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.00850
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/jollet_develop/tests/Psps_for_tests/14si.pspgth
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/jollet_develop/tests/Psps_for_tests/14si.pspgth
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_ace_6/tests/Psps_for_tests/14si.pspgth
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_ace_6/tests/Psps_for_tests/14si.pspgth
 - Goedecker-Teter-Hutter  Fri May 31 17:22:04 EDT 1996
 - 14.00000   4.00000    960531                znucl, zion, pspdat
     2    1    1    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -211,7 +237,7 @@ P           mkmem           4
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm : epsatm=   -4.40972757
+  pspatm : epsatm=   -4.40972757
          --- l  ekb(1:nproj) -->
              0    0.868920    0.186986
              1    0.169080
@@ -225,24 +251,30 @@ _setup2: Arith. and geom. avg. npw (full set) are     186.259     186.184
 ================================================================================
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -7.8618190211833    -7.862E+00 1.677E-03 3.726E+00
- ETOT  2  -7.8672083247803    -5.389E-03 2.858E-06 1.284E-01
- ETOT  3  -7.8673316881059    -1.234E-04 2.751E-06 1.628E-03
- ETOT  4  -7.8673326446060    -9.565E-07 2.388E-08 1.606E-06
- ETOT  5  -7.8673326453023    -6.964E-10 1.741E-10 6.581E-09
- ETOT  6  -7.8673326453076    -5.298E-12 9.381E-12 3.268E-11
- ETOT  7  -7.8673326453077    -2.309E-14 1.997E-13 1.571E-13
- ETOT  8  -7.8673326453076     2.398E-14 1.039E-14 7.499E-16
- ETOT  9  -7.8673326453077    -5.951E-14 2.443E-16 2.436E-17
- ETOT 10  -7.8673326453077     3.642E-14 1.350E-17 6.257E-19
- ETOT 11  -7.8673326453076     1.865E-14 9.969E-19 9.633E-23
-
- At SCF step   11   max residual=  9.97E-19 < tolwfr=  1.00E-18 =>converged.
+ ETOT  1  -7.8610426846242    -7.861E+00 9.142E-03 3.692E+00
+ ETOT  2  -7.8672007390476    -6.158E-03 2.728E-04 1.334E-01
+ ETOT  3  -7.8673318055330    -1.311E-04 6.057E-05 1.469E-03
+ ETOT  4  -7.8673326436329    -8.381E-07 1.464E-05 2.535E-06
+ ETOT  5  -7.8673326452921    -1.659E-09 1.002E-06 1.583E-08
+ ETOT  6  -7.8673326453076    -1.554E-11 6.077E-07 5.139E-11
+ ETOT  7  -7.8673326453076    -4.530E-14 8.416E-08 1.653E-13
+ ETOT  8  -7.8673326453076     1.155E-14 5.283E-08 6.460E-16
+ ETOT  9  -7.8673326453077    -5.418E-14 7.330E-09 1.771E-17
+ ETOT 10  -7.8673326453077     1.155E-14 4.686E-09 3.327E-19
+ ETOT 11  -7.8673326453076     3.020E-14 6.560E-10 1.962E-21
+ ETOT 12  -7.8673326453077    -4.086E-14 4.238E-10 3.944E-24
+ ETOT 13  -7.8673326453077     3.730E-14 5.976E-11 1.963E-26
+ ETOT 14  -7.8673326453077     1.776E-15 3.886E-11 2.667E-28
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  1.12690203E-04  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  1.12690203E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  1.12690203E-04  sigma(2 1)=  0.00000000E+00
+
+
+ scprqt:  WARNING -
+  nstep=   14 was not enough SCF cycles to converge;
+  maximum residual=  3.886E-11 exceeds tolwfr=  1.000E-18
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -253,7 +285,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     186.259     186.184
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   3.9804E-19; max=  9.9688E-19
+ Mean square residual over all n,k,spin=   1.2148E-12; max=  3.8865E-11
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.250000000000      0.250000000000      0.250000000000
@@ -279,25 +311,25 @@ _setup2: Arith. and geom. avg. npw (full set) are     186.259     186.184
  prteigrs : about to open file t65o_DS1_EIG
  Fermi (or HOMO) energy (hartree) =   0.26684   Average Vxc (hartree)=  -0.33626
  Eigenvalues (hartree) for nkpt=   4  k points:
- kpt#   1, nband=  5, wtk=  0.03704, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-  -0.17163    0.26684    0.26684    0.26684    0.35950
+ kpt#   1, nband=  8, wtk=  0.03704, kpt=  0.0000  0.0000  0.0000 (reduced coord)
+  -0.17163    0.26684    0.26684    0.26684    0.35950    0.35950    0.35950    0.39663
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
 
 --------------------------------------------------------------------------------
  Components of total free energy (in Hartree) :
 
-    Kinetic energy  =  3.10948160241113E+00
-    Hartree energy  =  5.58262528385388E-01
-    XC energy       = -2.40661988693643E+00
+    Kinetic energy  =  3.10948160228771E+00
+    Hartree energy  =  5.58262528242376E-01
+    XC energy       = -2.40661988687343E+00
     Ewald energy    = -8.43581958561899E+00
     PspCore energy  = -2.64619322653027E-01
-    Loc. psp. energy= -2.25612450754048E+00
-    NL   psp  energy=  1.82810652664477E+00
+    Loc. psp. energy= -2.25612450743665E+00
+    NL   psp  energy=  1.82810652674436E+00
     >>>>>>>>> Etotal= -7.86733264530765E+00
 
  Other information on the energy :
-    Total energy(eV)= -2.14081008565776E+02 ; Band energy (Ha)=   6.5917941338E-01
+    Total energy(eV)= -2.14081008565776E+02 ; Band energy (Ha)=   6.5917941326E-01
 --------------------------------------------------------------------------------
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -330,8 +362,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     186.259     186.184
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.00850
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/jollet_develop/tests/Psps_for_tests/14si.pspgth
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/jollet_develop/tests/Psps_for_tests/14si.pspgth
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_ace_6/tests/Psps_for_tests/14si.pspgth
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_ace_6/tests/Psps_for_tests/14si.pspgth
 - Goedecker-Teter-Hutter  Fri May 31 17:22:04 EDT 1996
 - 14.00000   4.00000    960531                znucl, zion, pspdat
     2    1    1    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -346,7 +378,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     186.259     186.184
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm : epsatm=   -4.40972757
+  pspatm : epsatm=   -4.40972757
          --- l  ekb(1:nproj) -->
              0    0.868920    0.186986
              1    0.169080
@@ -360,24 +392,25 @@ _setup2: Arith. and geom. avg. npw (full set) are     186.259     186.184
 ================================================================================
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -7.8885755805550    -7.889E+00 3.430E-11 1.297E-02
- ETOT  2  -7.8903051238134    -1.730E-03 1.146E-12 2.024E-03
- ETOT  3  -7.8906729047499    -3.678E-04 6.460E-08 1.339E-04
- ETOT  4  -7.8905204051342     1.525E-04 9.072E-10 5.675E-06
- ETOT  5  -7.8905663556176    -4.595E-05 6.941E-11 1.689E-07
- ETOT  6  -7.8905618716063     4.484E-06 2.659E-12 3.709E-08
- ETOT  7  -7.8905645970969    -2.725E-06 1.105E-12 1.867E-09
- ETOT  8  -7.8905639743138     6.228E-07 2.958E-15 4.596E-12
- ETOT  9  -7.8905640502241    -7.591E-08 6.259E-16 3.576E-12
- ETOT 10  -7.8905640807285    -3.050E-08 4.207E-17 1.058E-14
+ ETOT  1  -7.8885147661418    -7.889E+00 5.034E-10 1.430E-02
+ ETOT  2  -7.8903713234627    -1.857E-03 6.574E-11 1.802E-03
+ ETOT  3  -7.8907044031933    -3.331E-04 6.306E-08 9.501E-05
+ ETOT  4  -7.8905395516908     1.649E-04 2.015E-09 1.807E-06
+ ETOT  5  -7.8905672194521    -2.767E-05 4.787E-11 2.646E-07
+ ETOT  6  -7.8905620467163     5.173E-06 1.383E-11 8.233E-09
+ ETOT  7  -7.8905640050519    -1.958E-06 2.245E-13 7.016E-10
+ ETOT  8  -7.8905642096954    -2.046E-07 1.266E-13 8.617E-11
+ ETOT  9  -7.8905640713057     1.384E-07 7.748E-15 2.433E-12
+ ETOT 10  -7.8905640709683     3.374E-10 2.893E-15 2.016E-13
+ ETOT 11  -7.8905640800242    -9.056E-09 1.430E-15 1.913E-14
 
- At SCF step   10, etot is converged : 
-  for the second time, diff in etot=  3.050E-08 < toldfe=  1.000E-07
+ At SCF step   11, etot is converged : 
+  for the second time, diff in etot=  9.056E-09 < toldfe=  1.000E-07
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  1.50071259E-04  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  1.50071259E-04  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)=  1.50071259E-04  sigma(2 1)=  0.00000000E+00
+  sigma(1 1)=  1.50071266E-04  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)=  1.50071266E-04  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  1.50071266E-04  sigma(2 1)=  0.00000000E+00
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -388,66 +421,66 @@ _setup2: Arith. and geom. avg. npw (full set) are     186.259     186.184
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   1.3028E-17; max=  4.2065E-17
+ Mean square residual over all n,k,spin=   4.5476E-17; max=  1.4301E-15
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.250000000000      0.250000000000      0.250000000000
- rms dE/dt=  6.8704E-30; max dE/dt=  8.4145E-30; dE/dt below (all hartree)
+ rms dE/dt=  3.8253E-29; max dE/dt=  2.5244E-29; dE/dt below (all hartree)
     1       0.000000000000      0.000000000000     -0.000000000000
-    2      -0.000000000000      0.000000000000      0.000000000000
+    2       0.000000000000     -0.000000000000      0.000000000000
 
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
     2      1.35165088504101     1.35165088504101     1.35165088504101
 
  cartesian forces (hartree/bohr) at end:
-    1      0.00000000000000     0.00000000000000    -0.00000000000000
-    2     -0.00000000000000    -0.00000000000000     0.00000000000000
- frms,max,avg= 1.3449004E-30 1.6471599E-30   0.000E+00  0.000E+00  0.000E+00 h/b
+    1     -0.00000000000000     0.00000000000000    -0.00000000000000
+    2      0.00000000000000    -0.00000000000000     0.00000000000000
+ frms,max,avg= 5.6059928E-30 7.4122195E-30   0.000E+00  0.000E+00  0.000E+00 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1      0.00000000000000     0.00000000000000    -0.00000000000000
-    2     -0.00000000000000    -0.00000000000000     0.00000000000000
- frms,max,avg= 6.9157555E-29 8.4700360E-29   0.000E+00  0.000E+00  0.000E+00 e/A
+    1     -0.00000000000000     0.00000000000000    -0.00000000000000
+    2      0.00000000000000    -0.00000000000000     0.00000000000000
+ frms,max,avg= 2.8827172E-28 3.8115162E-28   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales= 10.217000000000 10.217000000000 10.217000000000 bohr
               =  5.406603540164  5.406603540164  5.406603540164 angstroms
  prteigrs : about to open file t65o_DS2_EIG
  Fermi (or HOMO) energy (hartree) =   0.23501   Average Vxc (hartree)=  -0.26086
  Eigenvalues (hartree) for nkpt=   4  k points:
- kpt#   1, nband=  5, wtk=  0.03704, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-  -0.24614    0.23501    0.23501    0.23501    0.38912
+ kpt#   1, nband=  8, wtk=  0.03704, kpt=  0.0000  0.0000  0.0000 (reduced coord)
+  -0.24614    0.23501    0.23501    0.23501    0.38912    0.38912    0.38912    0.43655
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
 
 --------------------------------------------------------------------------------
  Components of total free energy (in Hartree) :
 
-    Kinetic energy  =  3.13524949963640E+00
-    Hartree energy  =  5.77834910776351E-01
-    XC energy       = -2.43932965453101E+00
+    Kinetic energy  =  3.13524950207672E+00
+    Hartree energy  =  5.77834911831075E-01
+    XC energy       = -2.43932965483538E+00
     Ewald energy    = -8.43581958561899E+00
     PspCore energy  = -2.64619322653027E-01
-    Loc. psp. energy= -2.27782504626532E+00
-    NL   psp  energy=  1.81394511792709E+00
-    >>>>>>>>> Etotal= -7.89056408072852E+00
+    Loc. psp. energy= -2.27782504355045E+00
+    NL   psp  energy=  1.81394511272583E+00
+    >>>>>>>>> Etotal= -7.89056408002422E+00
 
  "Double-counting" decomposition of free energy:
-    Band energy     =  2.80385040409178E-01
+    Band energy     =  2.80385028881999E-01
     Ewald energy    = -8.43581958561899E+00
     PspCore energy  = -2.64619322653027E-01
-    Dble-C XC-energy=  5.29489788168648E-01
-    >>>> Etotal (DC)= -7.89056407969419E+00
+    Dble-C XC-energy=  5.29489787176845E-01
+    >>>> Etotal (DC)= -7.89056409221318E+00
 --------------------------------------------------------------------------------
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  1.50071259E-04  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  1.50071259E-04  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)=  1.50071259E-04  sigma(2 1)=  0.00000000E+00
+  sigma(1 1)=  1.50071266E-04  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)=  1.50071266E-04  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  1.50071266E-04  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -4.4152E+00 GPa]
-- sigma(1 1)=  4.41524814E+00  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  4.41524814E+00  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  4.41524814E+00  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)=  4.41524835E+00  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  4.41524835E+00  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  4.41524835E+00  sigma(2 1)=  0.00000000E+00
 
 == END DATASET(S) ==============================================================
 ================================================================================
@@ -455,16 +488,14 @@ _setup2: Arith. and geom. avg. npw (full set) are     186.259     186.184
  -outvars: echo values of variables after computation  --------
             acell      1.0217000000E+01  1.0217000000E+01  1.0217000000E+01 Bohr
               amu      2.80855000E+01
-          cgtyphf1          0
-          cgtyphf2          2
            diemac      1.20000000E+01
              ecut      6.00000000E+00 Hartree
            etotal1    -7.8673326453E+00
-           etotal2    -7.8905640807E+00
+           etotal2    -7.8905640800E+00
             fcart1    -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
                       -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
-            fcart2     1.6471598948E-30  1.2669565004E-47 -1.6471598948E-30
-                      -1.6471598948E-30 -1.2669565004E-47  1.6471598948E-30
+            fcart2    -2.4707398421E-30  5.7650596316E-30 -7.4122195264E-30
+                       2.4707398421E-30 -5.7650596316E-30  7.4122195264E-30
 -          fftalg         312
            getwfk1          0
            getwfk2         -1
@@ -477,31 +508,57 @@ _setup2: Arith. and geom. avg. npw (full set) are     186.259     186.184
                        3.33333333E-01  0.00000000E+00  0.00000000E+00
                        3.33333333E-01  3.33333333E-01  0.00000000E+00
                       -3.33333333E-01  3.33333333E-01  0.00000000E+00
+            kpthf      0.00000000E+00  0.00000000E+00  0.00000000E+00
+                       3.33333333E-01  0.00000000E+00  0.00000000E+00
+                      -3.33333333E-01  0.00000000E+00  0.00000000E+00
+                       0.00000000E+00  3.33333333E-01  0.00000000E+00
+                       3.33333333E-01  3.33333333E-01  0.00000000E+00
+                      -3.33333333E-01  3.33333333E-01  0.00000000E+00
+                       0.00000000E+00 -3.33333333E-01  0.00000000E+00
+                       3.33333333E-01 -3.33333333E-01  0.00000000E+00
+                      -3.33333333E-01 -3.33333333E-01  0.00000000E+00
+                       0.00000000E+00  0.00000000E+00  3.33333333E-01
+                       3.33333333E-01  0.00000000E+00  3.33333333E-01
+                      -3.33333333E-01  0.00000000E+00  3.33333333E-01
+                       0.00000000E+00  3.33333333E-01  3.33333333E-01
+                       3.33333333E-01  3.33333333E-01  3.33333333E-01
+                      -3.33333333E-01  3.33333333E-01  3.33333333E-01
+                       0.00000000E+00 -3.33333333E-01  3.33333333E-01
+                       3.33333333E-01 -3.33333333E-01  3.33333333E-01
+                      -3.33333333E-01 -3.33333333E-01  3.33333333E-01
+                       0.00000000E+00  0.00000000E+00 -3.33333333E-01
+                       3.33333333E-01  0.00000000E+00 -3.33333333E-01
+                      -3.33333333E-01  0.00000000E+00 -3.33333333E-01
+                       0.00000000E+00  3.33333333E-01 -3.33333333E-01
+                       3.33333333E-01  3.33333333E-01 -3.33333333E-01
+                      -3.33333333E-01  3.33333333E-01 -3.33333333E-01
+                       0.00000000E+00 -3.33333333E-01 -3.33333333E-01
+                       3.33333333E-01 -3.33333333E-01 -3.33333333E-01
+                      -3.33333333E-01 -3.33333333E-01 -3.33333333E-01
          kptrlatt        3    0    0      0    3    0      0    0    3
           kptrlen      2.16735300E+01
 P           mkmem           4
             natom           2
-            nband           5
-          nbandhf1          0
-          nbandhf2          4
+            nband           8
+          nbandhf           6
            ndtset           2
             ngfft          16      16      16
              nkpt           4
-           nkpthf1          0
-           nkpthf2         27
+           nkpthf          27
          nnsclohf1          0
          nnsclohf2          1
             nstep          14
              nsym          48
            ntypat           1
-              occ      2.000000  2.000000  2.000000  2.000000  0.000000
+              occ      2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000
             rprim      0.0000000000E+00  5.0000000000E-01  5.0000000000E-01
                        5.0000000000E-01  0.0000000000E+00  5.0000000000E-01
                        5.0000000000E-01  5.0000000000E-01  0.0000000000E+00
           spgroup         227
-           strten1     1.1269020303E-04  1.1269020303E-04  1.1269020303E-04
+           strten1     1.1269020313E-04  1.1269020313E-04  1.1269020313E-04
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-           strten2     1.5007125923E-04  1.5007125923E-04  1.5007125923E-04
+           strten2     1.5007126631E-04  1.5007126631E-04  1.5007126631E-04
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            symrel      1  0  0   0  1  0   0  0  1      -1  0  0   0 -1  0   0  0 -1
                        0 -1  1   0 -1  0   1 -1  0       0  1 -1   0  1  0  -1  1  0
@@ -556,6 +613,8 @@ P           mkmem           4
            tolwfr1     1.00000000E-18
            tolwfr2     0.00000000E+00
             typat      1  1
+          usefock1          0
+          usefock2          1
               wtk        0.03704    0.29630    0.22222    0.44444
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        1.3516508850E+00  1.3516508850E+00  1.3516508850E+00
@@ -636,10 +695,10 @@ P           mkmem           4
 - Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7
 - Comment : the original paper describing the ABINIT project.
 -
-- Proc.   0 individual time (sec): cpu=         20.0  wall=         38.5
+- Proc.   0 individual time (sec): cpu=         11.8  wall=         12.2
 
 ================================================================================
 
  Calculation completed.
-.Delivered   4 WARNINGs and   2 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         20.0  wall=         38.5
+.Delivered   5 WARNINGs and   2 COMMENTs to log file.
++Overall time at end (sec) : cpu=         11.8  wall=         12.2

@@ -472,7 +472,7 @@ subroutine kxc_alda(dtset,ixc,kxcg,mpi_enreg,nfft,ngfft,nspden,option,rhor,rhocu
  ABI_MALLOC(vxc,(nfft,nspden))
 
  intxc=0
- call xcdata_init(intxc,ixc,&
+ call xcdata_init(dtset%auxc_ixc,intxc,ixc,&
 &  dtset%nelect,dtset%tphysel,dtset%usekden,dtset%vdw_xc,dtset%xc_tb09_c,dtset%xc_denpos,xcdata)
 
  ! Reinitialize the libxc module with the overriden values
@@ -1121,7 +1121,7 @@ subroutine kxc_driver(Dtset,Cryst,ixc,ngfft,nfft_tot,nspden,rhor,npw,dim_kxcg,kx
  call wrtout(std_out,msg,'COLL')
 
  intxc=0
- call xcdata_init(intxc,ixc,&
+ call xcdata_init(Dtset%auxc_ixc,intxc,ixc,&
 &  Dtset%nelect,Dtset%tphysel,Dtset%usekden,Dtset%vdw_xc,Dtset%xc_tb09_c,Dtset%xc_denpos,xcdata)
 
  if (ALL(xcdata%xclevel/=(/1,2/))) then
@@ -1409,7 +1409,7 @@ subroutine kxc_ADA(Dtset,Cryst,ixc,ngfft,nfft,nspden,rhor,&
  inv_kappa_sq = one/(kappa*kappa)
 
  intxc=0
- call xcdata_init(intxc,ixc,&
+ call xcdata_init(dtset%auxc_ixc,intxc,ixc,&
 &  dtset%nelect,dtset%tphysel,dtset%usekden,dtset%vdw_xc,dtset%xc_tb09_c,dtset%xc_denpos,xcdata)
 
  if (ALL(xcdata%xclevel/=(/1,2/))) then

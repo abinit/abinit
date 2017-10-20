@@ -1,5 +1,5 @@
 
-.Version 8.5.3 of ABINIT 
+.Version 8.7.0 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
 
 .Copyright (C) 1998-2017 ABINIT group . 
@@ -14,15 +14,15 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed 20 Sep 2017.
-- ( at 10h09 )
+.Starting date : Fri 20 Oct 2017.
+- ( at 08h11 )
   
 - input  file    -> t53.in
 - output file    -> t53.out
 - root for input  files -> t53i
 - root for output files -> t53o
 
-- inpspheads : Reading pseudopotential header in XML form from /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/jollet_develop/tests/Psps_for_tests/C.GGA_X_PBE+GGA_C_PBE-paw.xml
+- inpspheads : Reading pseudopotential header in XML form from /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_ace_6/tests/Psps_for_tests/C.GGA_X_PBE+GGA_C_PBE-paw.xml
 
  DATASET    1 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -165,21 +165,44 @@ _ WF disk file :      0.038 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
                        3.33333333E-01  0.00000000E+00  0.00000000E+00
                        3.33333333E-01  3.33333333E-01  0.00000000E+00
                       -3.33333333E-01  3.33333333E-01  0.00000000E+00
+            kpthf      0.00000000E+00  0.00000000E+00  0.00000000E+00
+                       3.33333333E-01  0.00000000E+00  0.00000000E+00
+                      -3.33333333E-01  0.00000000E+00  0.00000000E+00
+                       0.00000000E+00  3.33333333E-01  0.00000000E+00
+                       3.33333333E-01  3.33333333E-01  0.00000000E+00
+                      -3.33333333E-01  3.33333333E-01  0.00000000E+00
+                       0.00000000E+00 -3.33333333E-01  0.00000000E+00
+                       3.33333333E-01 -3.33333333E-01  0.00000000E+00
+                      -3.33333333E-01 -3.33333333E-01  0.00000000E+00
+                       0.00000000E+00  0.00000000E+00  3.33333333E-01
+                       3.33333333E-01  0.00000000E+00  3.33333333E-01
+                      -3.33333333E-01  0.00000000E+00  3.33333333E-01
+                       0.00000000E+00  3.33333333E-01  3.33333333E-01
+                       3.33333333E-01  3.33333333E-01  3.33333333E-01
+                      -3.33333333E-01  3.33333333E-01  3.33333333E-01
+                       0.00000000E+00 -3.33333333E-01  3.33333333E-01
+                       3.33333333E-01 -3.33333333E-01  3.33333333E-01
+                      -3.33333333E-01 -3.33333333E-01  3.33333333E-01
+                       0.00000000E+00  0.00000000E+00 -3.33333333E-01
+                       3.33333333E-01  0.00000000E+00 -3.33333333E-01
+                      -3.33333333E-01  0.00000000E+00 -3.33333333E-01
+                       0.00000000E+00  3.33333333E-01 -3.33333333E-01
+                       3.33333333E-01  3.33333333E-01 -3.33333333E-01
+                      -3.33333333E-01  3.33333333E-01 -3.33333333E-01
+                       0.00000000E+00 -3.33333333E-01 -3.33333333E-01
+                       3.33333333E-01 -3.33333333E-01 -3.33333333E-01
+                      -3.33333333E-01 -3.33333333E-01 -3.33333333E-01
          kptrlatt        3    0    0      0    3    0      0    0    3
           kptrlen      1.42990835E+01
 P           mkmem           4
             natom           2
             nband           5
-          nbandhf1          0
-          nbandhf2          5
-          nbandhf3          5
+          nbandhf           4
            ndtset           3
             ngfft          15      15      15
           ngfftdg          16      16      16
              nkpt           4
-           nkpthf1          0
-           nkpthf2         27
-           nkpthf3         27
+           nkpthf          27
             nstep1         10
             nstep2          1
             nstep3          1
@@ -245,6 +268,9 @@ P           mkmem           4
            toldfe2     1.00000000E-07 Hartree
            toldfe3     1.00000000E-07 Hartree
             typat      1  1
+          usefock1          0
+          usefock2          1
+          usefock3          1
            useylm           1
               wtk        0.03704    0.29630    0.22222    0.44444
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -290,9 +316,9 @@ P           mkmem           4
          ecut(hartree)=     12.000   => boxcut(ratio)=   2.15267
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/jollet_develop/tests/Psps_for_tests/C.GGA_X_PBE+GGA_C_PBE-paw.xml
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/jollet_develop/tests/Psps_for_tests/C.GGA_X_PBE+GGA_C_PBE-paw.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/jollet_develop/tests/Psps_for_tests/C.GGA_X_PBE+GGA_C_PBE-paw.xml
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_ace_6/tests/Psps_for_tests/C.GGA_X_PBE+GGA_C_PBE-paw.xml
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_ace_6/tests/Psps_for_tests/C.GGA_X_PBE+GGA_C_PBE-paw.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_ace_6/tests/Psps_for_tests/C.GGA_X_PBE+GGA_C_PBE-paw.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.51316612
@@ -641,9 +667,9 @@ _setup2: Arith. and geom. avg. npw (full set) are     115.519     115.508
          ecut(hartree)=     12.000   => boxcut(ratio)=   2.15267
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/jollet_develop/tests/Psps_for_tests/C.GGA_X_PBE+GGA_C_PBE-paw.xml
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/jollet_develop/tests/Psps_for_tests/C.GGA_X_PBE+GGA_C_PBE-paw.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/jollet_develop/tests/Psps_for_tests/C.GGA_X_PBE+GGA_C_PBE-paw.xml
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_ace_6/tests/Psps_for_tests/C.GGA_X_PBE+GGA_C_PBE-paw.xml
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_ace_6/tests/Psps_for_tests/C.GGA_X_PBE+GGA_C_PBE-paw.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_ace_6/tests/Psps_for_tests/C.GGA_X_PBE+GGA_C_PBE-paw.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.51316612
@@ -764,23 +790,23 @@ _setup2: Arith. and geom. avg. npw (full set) are     115.519     115.508
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.250000000000      0.250000000000      0.250000000000
- rms dE/dt=  7.1838E-20; max dE/dt=  1.6715E-19; dE/dt below (all hartree)
-    1       0.000000000000     -0.000000000000     -0.000000000000
-    2       0.000000000000      0.000000000000      0.000000000000
+ rms dE/dt=  5.6166E-20; max dE/dt=  1.0490E-19; dE/dt below (all hartree)
+    1      -0.000000000000      0.000000000000     -0.000000000000
+    2       0.000000000000     -0.000000000000      0.000000000000
 
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
     2      0.89174993186803     0.89174993186803     0.89174993186803
 
  cartesian forces (hartree/bohr) at end:
-    1      0.00000000000000    -0.00000000000000     0.00000000000000
-    2     -0.00000000000000     0.00000000000000    -0.00000000000000
- frms,max,avg= 1.5361435E-20 2.0105660E-20   0.000E+00  0.000E+00  0.000E+00 h/b
+    1     -0.00000000000000     0.00000000000000    -0.00000000000000
+    2      0.00000000000000    -0.00000000000000     0.00000000000000
+ frms,max,avg= 1.6050680E-20 2.0165873E-20   0.000E+00  0.000E+00  0.000E+00 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1      0.00000000000000    -0.00000000000000     0.00000000000000
-    2     -0.00000000000000     0.00000000000000    -0.00000000000000
- frms,max,avg= 7.8991668E-19 1.0338745E-18   0.000E+00  0.000E+00  0.000E+00 e/A
+    1     -0.00000000000000     0.00000000000000    -0.00000000000000
+    2      0.00000000000000    -0.00000000000000     0.00000000000000
+ frms,max,avg= 8.2535909E-19 1.0369708E-18   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  6.740652601000  6.740652601000  6.740652601000 bohr
               =  3.566999727472  3.566999727472  3.566999727472 angstroms
  prteigrs : about to open file t53o_DS2_EIG
@@ -967,23 +993,23 @@ _setup2: Arith. and geom. avg. npw (full set) are     115.519     115.508
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.250000000000      0.250000000000      0.250000000000
- rms dE/dt=  1.1332E-19; max dE/dt=  2.6540E-19; dE/dt below (all hartree)
+ rms dE/dt=  1.9776E-19; max dE/dt=  3.5788E-19; dE/dt below (all hartree)
     1       0.000000000000      0.000000000000     -0.000000000000
-    2      -0.000000000000     -0.000000000000      0.000000000000
+    2       0.000000000000      0.000000000000      0.000000000000
 
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
     2      0.89174993186803     0.89174993186803     0.89174993186803
 
  cartesian forces (hartree/bohr) at end:
-    1     -0.00000000000000     0.00000000000000    -0.00000000000000
-    2      0.00000000000000    -0.00000000000000     0.00000000000000
- frms,max,avg= 2.2568962E-20 3.2001509E-20   0.000E+00  0.000E+00  0.000E+00 h/b
+    1      0.00000000000000     0.00000000000000    -0.00000000000000
+    2     -0.00000000000000    -0.00000000000000     0.00000000000000
+ frms,max,avg= 3.5923829E-20 5.0874127E-20   0.000E+00  0.000E+00  0.000E+00 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1     -0.00000000000000     0.00000000000000    -0.00000000000000
-    2      0.00000000000000    -0.00000000000000     0.00000000000000
- frms,max,avg= 1.1605426E-18 1.6455836E-18   0.000E+00  0.000E+00  0.000E+00 e/A
+    1      0.00000000000000     0.00000000000000    -0.00000000000000
+    2     -0.00000000000000    -0.00000000000000     0.00000000000000
+ frms,max,avg= 1.8472774E-18 2.6160526E-18   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  6.740652601000  6.740652601000  6.740652601000 bohr
               =  3.566999727472  3.566999727472  3.566999727472 angstroms
  prteigrs : about to open file t53o_DS3_EIG
@@ -1043,7 +1069,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     115.519     115.508
     2       0.000000000000      0.000000000000      0.000000000000
  residual contribution to red. grads
     1      -0.000000000000     -0.000000000000     -0.000000000000
-    2      -0.000000000000      0.000000000000      0.000000000000
+    2      -0.000000000000     -0.000000000000     -0.000000000000
 
 == END DATASET(S) ==============================================================
 ================================================================================
@@ -1061,10 +1087,10 @@ _setup2: Arith. and geom. avg. npw (full set) are     115.519     115.508
            etotal3    -1.1458850193E+01
             fcart1     1.5978543221E-28 -1.5978543221E-28  1.5978543221E-28
                       -1.5978543221E-28  1.5978543221E-28 -1.5978543221E-28
-            fcart2     2.0105660324E-20 -1.4576603735E-20  9.5501886541E-21
-                      -2.0105660324E-20  1.4576603735E-20 -9.5501886541E-21
-            fcart3    -1.2063396195E-20  1.8932830139E-20 -3.2001509350E-20
-                       1.2063396195E-20 -1.8932830139E-20  3.2001509350E-20
+            fcart2    -8.0422641298E-21  2.0165872588E-20 -1.7364693351E-20
+                       8.0422641298E-21 -2.0165872588E-20  1.7364693351E-20
+            fcart3     8.0422641298E-21  3.4910023493E-20 -5.0874127225E-20
+                      -8.0422641298E-21 -3.4910023493E-20  5.0874127225E-20
 -          fftalg         312
            getwfk1          0
            getwfk2          1
@@ -1078,21 +1104,44 @@ _setup2: Arith. and geom. avg. npw (full set) are     115.519     115.508
                        3.33333333E-01  0.00000000E+00  0.00000000E+00
                        3.33333333E-01  3.33333333E-01  0.00000000E+00
                       -3.33333333E-01  3.33333333E-01  0.00000000E+00
+            kpthf      0.00000000E+00  0.00000000E+00  0.00000000E+00
+                       3.33333333E-01  0.00000000E+00  0.00000000E+00
+                      -3.33333333E-01  0.00000000E+00  0.00000000E+00
+                       0.00000000E+00  3.33333333E-01  0.00000000E+00
+                       3.33333333E-01  3.33333333E-01  0.00000000E+00
+                      -3.33333333E-01  3.33333333E-01  0.00000000E+00
+                       0.00000000E+00 -3.33333333E-01  0.00000000E+00
+                       3.33333333E-01 -3.33333333E-01  0.00000000E+00
+                      -3.33333333E-01 -3.33333333E-01  0.00000000E+00
+                       0.00000000E+00  0.00000000E+00  3.33333333E-01
+                       3.33333333E-01  0.00000000E+00  3.33333333E-01
+                      -3.33333333E-01  0.00000000E+00  3.33333333E-01
+                       0.00000000E+00  3.33333333E-01  3.33333333E-01
+                       3.33333333E-01  3.33333333E-01  3.33333333E-01
+                      -3.33333333E-01  3.33333333E-01  3.33333333E-01
+                       0.00000000E+00 -3.33333333E-01  3.33333333E-01
+                       3.33333333E-01 -3.33333333E-01  3.33333333E-01
+                      -3.33333333E-01 -3.33333333E-01  3.33333333E-01
+                       0.00000000E+00  0.00000000E+00 -3.33333333E-01
+                       3.33333333E-01  0.00000000E+00 -3.33333333E-01
+                      -3.33333333E-01  0.00000000E+00 -3.33333333E-01
+                       0.00000000E+00  3.33333333E-01 -3.33333333E-01
+                       3.33333333E-01  3.33333333E-01 -3.33333333E-01
+                      -3.33333333E-01  3.33333333E-01 -3.33333333E-01
+                       0.00000000E+00 -3.33333333E-01 -3.33333333E-01
+                       3.33333333E-01 -3.33333333E-01 -3.33333333E-01
+                      -3.33333333E-01 -3.33333333E-01 -3.33333333E-01
          kptrlatt        3    0    0      0    3    0      0    0    3
           kptrlen      1.42990835E+01
 P           mkmem           4
             natom           2
             nband           5
-          nbandhf1          0
-          nbandhf2          5
-          nbandhf3          5
+          nbandhf           4
            ndtset           3
             ngfft          15      15      15
           ngfftdg          16      16      16
              nkpt           4
-           nkpthf1          0
-           nkpthf2         27
-           nkpthf3         27
+           nkpthf          27
             nstep1         10
             nstep2          1
             nstep3          1
@@ -1164,6 +1213,9 @@ P           mkmem           4
            toldfe2     1.00000000E-07 Hartree
            toldfe3     1.00000000E-07 Hartree
             typat      1  1
+          usefock1          0
+          usefock2          1
+          usefock3          1
            useylm           1
               wtk        0.03704    0.29630    0.22222    0.44444
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -1246,10 +1298,10 @@ P           mkmem           4
 - Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
 - the licence allows the authors to put it on the Web).
 -
-- Proc.   0 individual time (sec): cpu=         34.5  wall=         35.3
+- Proc.   0 individual time (sec): cpu=         34.6  wall=         34.9
 
 ================================================================================
 
  Calculation completed.
-.Delivered  10 WARNINGs and   0 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         34.5  wall=         35.3
+.Delivered  12 WARNINGs and   0 COMMENTs to log file.
++Overall time at end (sec) : cpu=         34.6  wall=         34.9

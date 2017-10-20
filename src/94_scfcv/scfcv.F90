@@ -1561,7 +1561,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
      if (nkxc>0.and.modulo(dtset%iprcel,100)>=61.and.(dtset%iprcel<71.or.dtset%iprcel>79) &
 &     .and.((istep==1.or.istep==dielstrt).or.(dtset%iprcel>=100))) then
        optxc=10
-       call xcdata_init(dtset%intxc,dtset%ixc,&
+       call xcdata_init(dtset%auxc_ixc,dtset%intxc,dtset%ixc,&
 &        dtset%nelect,dtset%tphysel,dtset%usekden,dtset%vdw_xc,dtset%xc_tb09_c,dtset%xc_denpos,xcdata)
 !      to be adjusted for the call to rhotoxc
        nk3xc=1
