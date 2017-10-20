@@ -1,0 +1,70 @@
+# Crystalline aluminum : computation of the total energy
+#
+# Determination of the surface energy of aluminum :
+# convergence with respect to the number of vacuum layers.
+
+ndtset 2
+
+#DATASET 1  PBE (the pseudopotential for Al is with PBE XC)
+
+#DATASET 2 PBE0
+ ixc2  -428
+ getwfk2   1
+
+#Definition of the unit cell
+acell  3*7.50559090E+00  # Lattice parameters of bulk aluminum
+rprim  0.5 -0.5  0.0    
+       0.5  0.5  0.0    
+       0.0  0.0  3.0    
+
+#Definition of occupation numbers
+occopt 4
+tsmear 0.04
+
+#Definition of the k-point grid 
+ngkpt  4 4 1  
+nshiftk 2
+shiftk  0.5 0.0 0.0
+        0.0 0.5 0.0
+
+#Definition of the atom types
+ntypat 1          # There is only one type of atom
+znucl 13          # The keyword "znucl" refers to the atomic number of the 
+                  # possible type(s) of atom. The pseudopotential(s) 
+                  # mentioned in the "files" file must correspond
+                  # to the type(s) of atom. Here, the only type is Aluminum
+
+#Definition of the atoms
+natom 4           # Four  atoms per cell: four aluminum layers and some vacuum
+typat 4*1         # These atoms are of type 1, that is, Aluminum
+xcart
+   3*0.0          # Triplet giving the CARTESIAN coordinates of atom 1.
+   0.0  2*3.75279545 # Triplet giving the CARTESIAN coordinates of atom 2.
+   2*0.0  7.5055909  # Triplet giving the CARTESIAN coordinates of atom 3.
+   0.0  3.75279545  11.25838635 # Triplet giving the CARTESIAN coordinates of atom 4.
+
+#Definition of the planewave basis set
+ecut  6.0         # Maximal kinetic energy cut-off, in Hartree
+pawecutdg 12.0         # Maximal kinetic energy cut-off, in Hartree
+
+#Definition of the SCF procedure
+nstep 10           # Maximal number of SCF cycles
+toldfe 1.0d-8     
+
+
+## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t73.out, tolnlines=  0, tolabs=  0.0e-00, tolrel=  0.0e-00
+#%% psp_files = Al.GGA_PBE-JTH-paw.xml
+#%% [paral_info]
+#%% max_nprocs = 4
+#%% [extra_info]
+#%% authors = X. Gonze
+#%% keywords = 
+#%% description = 
+#%%   Crystalline aluminum : computation of the total energy in HSE06
+#%%<END TEST_INFO>

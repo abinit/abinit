@@ -64,7 +64,8 @@ subroutine chkvars (string)
 !<ABINIT_VARS>
 !A
  list_vars=                 ' accuracy acell adpimd adpimd_gamma'
- list_vars=trim(list_vars)//' algalch amu angdeg asr atvshift autoparal awtr'
+ list_vars=trim(list_vars)//' algalch amu angdeg asr atvshift autoparal'
+ list_vars=trim(list_vars)//' auxc_ixc auxc_scal awtr'
 !B
  list_vars=trim(list_vars)//' bandpp bdberry bdeigrf bdgw berryopt berrysav berrystep bfield bmass'
  list_vars=trim(list_vars)//' boxcenter boxcutmin brvltt builtintest'
@@ -77,7 +78,7 @@ subroutine chkvars (string)
 !C
  list_vars=trim(list_vars)//' cd_customnimfrqs cd_frqim_method cd_full_grid cd_imfrqs'
  list_vars=trim(list_vars)//' cd_halfway_freq cd_max_freq cd_subset_freq'
- list_vars=trim(list_vars)//' charge chempot chkdilatmx chkexit chkprim chksymbreak chneut cineb_start cpus cpum cpuh cgtyphf'
+ list_vars=trim(list_vars)//' charge chempot chkdilatmx chkexit chkprim chksymbreak chneut cineb_start cpus cpum cpuh'
 !D
  list_vars=trim(list_vars)//' ddamp ddb_ngqpt ddb_shiftq delayperm densfor_pred densty dfield'
  list_vars=trim(list_vars)//' dfpt_sciss diecut diegap dielam dielng diemac'
@@ -103,7 +104,7 @@ subroutine chkvars (string)
 !F
  list_vars=trim(list_vars)//' fband fermie_nest'
  list_vars=trim(list_vars)//' fftalg fftcache fftgw'
- list_vars=trim(list_vars)//' fockaux_ixc fockaux_scal fockoptmix focktoldfe'
+ list_vars=trim(list_vars)//' fockoptmix focktoldfe fockdownsampling'
  list_vars=trim(list_vars)//' freqim_alpha freqremax freqremin freqspmax'
  list_vars=trim(list_vars)//' freqspmin'
  list_vars=trim(list_vars)//' friction frzfermi fxcartfactor '

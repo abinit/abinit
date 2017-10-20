@@ -5,7 +5,8 @@
 !!
 !! FUNCTION
 !! Compute the grid of k points in the irreducible Brillouin zone.
-!! Note that nkpt can be computed by calling this routine with nkpt=0, provided that kptopt/=0.
+!! Note that nkpt (and nkpthf) can be computed by calling this routine with nkpt=0, provided that kptopt/=0.
+!! If downsampling is present, also compute a downsampled k grid.
 !!
 !! COPYRIGHT
 !! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR, MM)
@@ -19,14 +20,14 @@
 !! iout=unit number for echoed output . 0 if no output is wished.
 !! iscf= ( <= 0 =>non-SCF), >0 => SCF)  MG: FIXME I don't understand why we have to pass the value iscf.
 !! kptopt=option for the generation of k points
-!!   (defines whether spatical symmetries and/or time-reversal can be used)
+!!   (defines whether spatial symmetries and/or time-reversal can be used)
 !! msym=default maximal number of symmetries
-!! nkpt=number of k points (might be zero, see output description)
 !! nsym=number of symmetries
 !! rprimd(3,3)=dimensional real space primitive translations (bohr)
 !! symafm(nsym)=(anti)ferromagnetic part of symmetry operations
 !! symrel(3,3,nsym)=symmetry operations in real space in terms of primitive translations
 !! vacuum(3)=for each direction, 0 if no vacuum, 1 if vacuum
+!! [downsampling(3) = input variable that governs the downsampling]
 !!
 !! OUTPUT
 !! kptrlen=length of the smallest real space supercell vector associated with the lattice of k points.
@@ -36,15 +37,18 @@
 !!   wtk(nkpt)=weight assigned to each k point.
 !! [fullbz(3,nkpt_fullbz)]=k-points generated in the full Brillouin zone.
 !!   In output: allocated array with the list of k-points in the BZ.
+!! [kpthf(3,nkpthf)]=k-points generated in the full Brillouin zone, possibly downsampled (for Fock).
 !!
 !! NOTES
 !!  msym not needed since nsym is the last index.
 !!
 !! SIDE EFFECTS
 !! Input/Output
+!! nkpt=number of k points (might be zero, see output description)
 !! kptrlatt(3,3)=k-point lattice specification
 !! nshiftk=actual number of k-point shifts in shiftk
 !! shiftk(3,210)=shift vectors for k point generation
+!! [nkpthf = number of k points in the full BZ, for the Fock operator]
 !!
 !! PARENTS
 !!      ep_setupqpt,getshell,inkpts,inqpt,m_ab7_kpoints,m_bz_mesh,m_kpts
@@ -63,7 +67,7 @@
 
 subroutine getkgrid(chksymbreak,iout,iscf,kpt,kptopt,kptrlatt,kptrlen,&
 & msym,nkpt,nkpt_computed,nshiftk,nsym,rprimd,shiftk,symafm,symrel,vacuum,wtk,&
-& fullbz) ! optional
+& fullbz,nkpthf,kpthf,downsampling) ! optional
 
  use defs_basis
  use m_profiling_abi
@@ -83,23 +87,26 @@ subroutine getkgrid(chksymbreak,iout,iscf,kpt,kptopt,kptrlatt,kptrlen,&
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: chksymbreak,iout,iscf,kptopt,msym,nkpt,nsym
+ integer,intent(inout),optional :: nkpthf
  integer,intent(inout) :: nshiftk
  integer,intent(inout) :: nkpt_computed !vz_i
  real(dp),intent(out) :: kptrlen
 !arrays
  integer,intent(in) :: symafm(msym),symrel(3,3,msym),vacuum(3)
+ integer,optional,intent(in) :: downsampling(3)
  integer,intent(inout) :: kptrlatt(3,3)
  real(dp),intent(in) :: rprimd(3,3)
  real(dp),intent(inout) :: shiftk(3,210)
  real(dp),intent(inout) :: kpt(3,nkpt) !vz_i
  real(dp),intent(inout) :: wtk(nkpt)
  real(dp),optional,allocatable,intent(out) :: fullbz(:,:)
+ real(dp),optional,intent(out) :: kpthf(:,:)
 
 !Local variables-------------------------------
 !scalars
  integer, parameter :: max_number_of_prime=47,mshiftk=210
  integer :: brav,decreased,found,ii,ikpt,iprime,ishiftk,isym,jshiftk,kshiftk,mkpt,mult
- integer :: nkpt_fullbz,nkptlatt,nshiftk2,nsym_used,option
+ integer :: nkpthf_computed,nkpt_fullbz,nkptlatt,nshiftk2,nsym_used,option
  integer :: test_prime,timrev
  real(dp) :: length2,ucvol,ucvol_super
  character(len=500) :: message
@@ -409,6 +416,15 @@ subroutine getkgrid(chksymbreak,iout,iscf,kpt,kptopt,kptrlatt,kptrlen,&
  ABI_ALLOCATE(spkpt,(3,mkpt))
  option=0
  if(iout/=0)option=1
+
+ if (PRESENT(downsampling))then
+   call smpbz(brav,iout,kptrlatt2,mkpt,nkpthf_computed,nshiftk2,option,shiftk2,spkpt,downsampling=downsampling)
+   if (PRESENT(kpthf) .and. nkpthf/=0) then ! Returns list of k-points in the Full BZ, possibly downsampled for Fock
+     kpthf = spkpt(:,1:nkpthf)
+   end if
+   nkpthf=nkpthf_computed
+
+ endif
 
  call smpbz(brav,iout,kptrlatt2,mkpt,nkpt_fullbz,nshiftk2,option,shiftk2,spkpt)
 

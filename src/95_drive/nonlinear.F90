@@ -435,7 +435,7 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,&
 
  call status(0,dtfil%filstat,iexit,level,'call rhotoxc   ')
  ABI_ALLOCATE(work,(0))
- call xcdata_init(dtset%intxc,dtset%ixc,&
+ call xcdata_init(dtset%auxc_ixc,dtset%intxc,dtset%ixc,&
 &    dtset%nelect,dtset%tphysel,dtset%usekden,dtset%vdw_xc,dtset%xc_tb09_c,dtset%xc_denpos,xcdata)
  call rhotoxc(enxc,kxc,mpi_enreg,nfft,dtset%ngfft,&
 & work,0,work,0,nkxc,nk3xc,nspden,n3xccc,option,dtset%paral_kgb,rhor,rprimd,strsxc,1,&

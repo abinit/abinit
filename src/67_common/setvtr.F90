@@ -242,8 +242,8 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
 !Check that usekden is not 0 if want to use vxctau
  with_vxctau = (present(vxctau).and.present(taur).and.(dtset%usekden/=0))
 
-!Check if we're in hybrid and norm conserving pseudopotential
- is_hybrid_ncpp=(psps%usepaw==0 .and. &
+!Check if we're in hybrid norm conserving pseudopotential with a core correction
+ is_hybrid_ncpp=(dtset%usepaw==0 .and. n3xccc/=0 .and. &
 & (dtset%ixc==41.or.dtset%ixc==42.or.libxc_functionals_is_hybrid()))
 
 !If usewvl: wvlbigdft indicates that the BigDFT workflow will be followed
@@ -485,11 +485,12 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
        if(option/=0 .and. option/=10)then
          call hartre(1,gsqcut,psps%usepaw,mpi_enreg,nfft,ngfft,dtset%paral_kgb,rhog,rprimd,vhartr)
        endif
-       call xcdata_init(dtset%intxc,dtset%ixc,&
+       call xcdata_init(dtset%auxc_ixc,dtset%intxc,dtset%ixc,&
 &        dtset%nelect,dtset%tphysel,dtset%usekden,dtset%vdw_xc,dtset%xc_tb09_c,dtset%xc_denpos,xcdata)
        if(mod(dtset%fockoptmix,100)==11)then
          xcdatahyb=xcdata
-         call xcdata_init(dtset%intxc,dtset%fockaux_ixc,&
+!        Setup the auxiliary xc functional information 
+         call xcdata_init(0,dtset%intxc,dtset%auxc_ixc,&
 &          dtset%nelect,dtset%tphysel,dtset%usekden,dtset%vdw_xc,dtset%xc_tb09_c,dtset%xc_denpos,xcdata)
        endif
 !      Use the periodic solver to compute Hxc
@@ -497,21 +498,45 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
 !write(80,*)"setvtr"
 !xccc3d=zero
        if (ipositron==0) then
-         call rhotoxc(energies%e_xc,kxc,mpi_enreg,nfft,ngfft,&
-&         nhat,psps%usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,dtset%nspden,n3xccc,&
-&         option,dtset%paral_kgb,rhor,rprimd,strsxc,usexcnhat,vxc,vxcavg,xccc3d,xcdata,&
-&         taug=taug,taur=taur,vhartr=vhartr,vxctau=vxctau,add_tfw=add_tfw_)
-         if(mod(dtset%fockoptmix,100)==11)then
-!          Note that at present, this latest call to rhotoxc delivers the used energies%e_xc and strsxc
-           call rhotoxc(energies%e_hybcomp_E0,kxc,mpi_enreg,nfft,ngfft,&
+
+!DEBUG
+         write(std_out,*)' setvtr : is_hybrid_ncpp=',is_hybrid_ncpp
+         write(std_out,*)' setvtr : n3xccc=',n3xccc
+!ENDDEBUG
+
+!        Compute energies%e_xc and associated quantities
+         if(.not.is_hybrid_ncpp .or. mod(dtset%fockoptmix,100)==11)then 
+           call rhotoxc(energies%e_xc,kxc,mpi_enreg,nfft,ngfft,&
 &            nhat,psps%usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,dtset%nspden,n3xccc,&
-&            option,dtset%paral_kgb,rhor,rprimd,strsxc,usexcnhat,vxc_hybcomp,vxcavg,xccc3d,xcdatahyb,&
+&            option,dtset%paral_kgb,rhor,rprimd,strsxc,usexcnhat,vxc,vxcavg,xccc3d,xcdata,&
 &            taug=taug,taur=taur,vhartr=vhartr,vxctau=vxctau,add_tfw=add_tfw_)
-           energies%e_xc=energies%e_xc*dtset%fockaux_scal
-           energies%e_hybcomp_E0=energies%e_hybcomp_E0-energies%e_xc
-           vxc(:,:)=vxc(:,:)*dtset%fockaux_scal
-           vxc_hybcomp(:,:)=vxc_hybcomp(:,:)-vxc(:,:)
+         else
+!          Only when is_hybrid_ncpp, and moreover, the xc functional is not the auxiliary xc functional, then call xchybrid_ncpp_cc
+           call xchybrid_ncpp_cc(dtset,energies%e_xc,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,&
+&            strsxc,vxcavg,xccc3d,vxc=vxc)
          endif
+
+!        Possibly compute energies%e_hybcomp_E0
+         if(mod(dtset%fockoptmix,100)==11)then
+!          This call to rhotoxc uses the hybrid xc functional 
+           if(.not.is_hybrid_ncpp)then
+             call rhotoxc(energies%e_hybcomp_E0,kxc,mpi_enreg,nfft,ngfft,&
+&              nhat,psps%usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,dtset%nspden,n3xccc,&
+&              option,dtset%paral_kgb,rhor,rprimd,strsxc,usexcnhat,vxc_hybcomp,vxcavg,xccc3d,xcdatahyb,&
+&              taug=taug,taur=taur,vhartr=vhartr,vxctau=vxctau,add_tfw=add_tfw_)
+           else
+             call xchybrid_ncpp_cc(dtset,energies%e_hybcomp_E0,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,&
+&              strsxc,vxcavg,xccc3d,vxc=vxc_hybcomp)
+           endif
+
+!          Combine hybrid and auxiliary quantities
+           energies%e_xc=energies%e_xc*dtset%auxc_scal
+           energies%e_hybcomp_E0=energies%e_hybcomp_E0-energies%e_xc
+           vxc(:,:)=vxc(:,:)*dtset%auxc_scal
+           vxc_hybcomp(:,:)=vxc_hybcomp(:,:)-vxc(:,:)
+
+         endif
+
        else if (ipositron==2) then
          call rhotoxc(energies%e_xc,kxc,mpi_enreg,nfft,ngfft,&
 &         nhat,psps%usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,dtset%nspden,n3xccc,&
@@ -519,10 +544,7 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
 &         taug=taug,taur=taur,vhartr=vhartr,vxctau=vxctau,add_tfw=add_tfw_,&
 &         electronpositron=electronpositron)
        end if
-       if (is_hybrid_ncpp) then
-         call xchybrid_ncpp_cc(dtset,energies%e_xc,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,&
-&         strsxc,vxcavg,xccc3d,vxc=vxc)
-       end if
+
      elseif(.not. wvlbigdft) then
 !      Use the free boundary solver
        call psolver_rhohxc(energies%e_hartree, energies%e_xc, evxc, &
