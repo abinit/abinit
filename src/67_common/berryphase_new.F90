@@ -1615,7 +1615,7 @@ subroutine berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,&
  ABI_DEALLOCATE(pwnsfac_k)
  ABI_DEALLOCATE(sflag_k)
  ABI_DEALLOCATE(cg1_k)
- if (ddkflag > 1)  then
+ if (ddkflag == 1)  then
    ABI_DEALLOCATE(cg1)
    ABI_DEALLOCATE(eig_dum)
    ABI_DEALLOCATE(occ_dum)
