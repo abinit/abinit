@@ -116,11 +116,11 @@ subroutine smpbz(brav,iout,kptrlatt,mkpt,nkpt,nshiftk,option,shiftk,spkpt,downsa
 ! *********************************************************************
 
 !DEBUG
- write(std_out,*)' smpbz : brav,iout,mkpt,nkpt,option=',brav,iout,mkpt,nkpt,option
- write(std_out,*)' smpbz : kptrlatt(:,:)=',kptrlatt(:,:)
- write(std_out,*)' smpbz : nshiftk=',nshiftk
- write(std_out,*)' smpbz : shiftk(:,:)=',shiftk(:,:)
- write(std_out,*)' smpbz : downsampling(:)=',downsampling(:)
+!write(std_out,*)' smpbz : brav,iout,mkpt,nkpt,option=',brav,iout,mkpt,nkpt,option
+!write(std_out,*)' smpbz : kptrlatt(:,:)=',kptrlatt(:,:)
+!write(std_out,*)' smpbz : nshiftk=',nshiftk
+!write(std_out,*)' smpbz : shiftk(:,:)=',shiftk(:,:)
+!write(std_out,*)' smpbz : downsampling(:)=',downsampling(:)
 !ENDDEBUG
 
  if(option/=0)then
@@ -230,9 +230,9 @@ subroutine smpbz(brav,iout,kptrlatt,mkpt,nkpt,nshiftk,option,shiftk,spkpt,downsa
    call matr3inv(rlatt,klatt)
 
 !DEBUG
-         write(std_out,*)' First primitive vector of the k lattice :',klatt(:,1)
-         write(std_out,*)' Second primitive vector of the k lattice :',klatt(:,2)
-         write(std_out,*)' Third primitive vector of the k lattice :',klatt(:,3)
+!        write(std_out,*)' First primitive vector of the k lattice :',klatt(:,1)
+!        write(std_out,*)' Second primitive vector of the k lattice :',klatt(:,2)
+!        write(std_out,*)' Third primitive vector of the k lattice :',klatt(:,3)
 !ENDDEBUG
 
 !  Now, klatt contains the three primitive vectors of the k lattice,
@@ -279,12 +279,7 @@ subroutine smpbz(brav,iout,kptrlatt,mkpt,nkpt,nshiftk,option,shiftk,spkpt,downsa
        do ii=boundmin(1),boundmax(1)
          coord(1)=ii
 
-!DEBUG
-         write(std_out,*)' Try with coord(1:3)=',coord(1:3)
-!ENDDEBUG
-
 !        Here, apply the downsampling : skip some of the trials
-!        if(.false.)then
          if(present(downsampling))then
 
            if(downsampling(1)==0 .and. found1(coord(2),coord(3))==1)cycle
@@ -319,10 +314,6 @@ subroutine smpbz(brav,iout,kptrlatt,mkpt,nkpt,nshiftk,option,shiftk,spkpt,downsa
            endif  
          endif
 
-!DEBUG
-         write(std_out,*)' Passed the downsampling test '
-!ENDDEBUG
-
          do ikshft=1,nshiftk
 
 !          Only the first shiftk is taken into account if downsampling
@@ -349,10 +340,6 @@ subroutine smpbz(brav,iout,kptrlatt,mkpt,nkpt,nshiftk,option,shiftk,spkpt,downsa
            call wrap2_pmhalf(k2(3),k1(3),shift)
            spkpt(:,nn)=k1(:)
            nn=nn+1
-
-!DEBUG
-         write(std_out,*)' Found new k point, k1(1:3)=',k1(1:3)
-!ENDDEBUG
 
            if(present(downsampling))then
              found1(coord(2),coord(3))=1
