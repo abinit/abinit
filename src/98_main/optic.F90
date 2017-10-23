@@ -129,9 +129,9 @@ program optic
  integer :: nkpt,nspinor,nsppol,ntypat
  integer :: occopt,nks_per_proc,work_size,lin1,lin2,nlin1,nlin2,nlin3
  integer :: linel1,linel2,linel3,nonlin1,nonlin2,nonlin3
- integer :: iomode,comm,nproc,my_rank
+ integer :: iomode,comm,nproc,my_rank, optic_ncid
 #ifdef HAVE_NETCDF
- integer :: ncid, varid, optic_ncid, ncerr
+ integer :: ncid, varid, ncerr
 #endif
  integer :: num_lin_comp=1,num_nonlin_comp=0,num_linel_comp=0,num_nonlin2_comp=0
  integer :: autoparal=0,max_ncpus=0
