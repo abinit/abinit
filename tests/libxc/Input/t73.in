@@ -54,7 +54,6 @@ xred              # This keyword indicate that the location of the atoms
 
 #Definition of the planewave basis set
 ecut  6.0         # Maximal kinetic energy cut-off, in Hartree
-pawecutdg 12.0    
 
 ## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
@@ -62,8 +61,8 @@ pawecutdg 12.0
 #%% executable = abinit
 #%% [files]
 #%% files_to_test =
-#%%   t72.out, tolnlines=  0, tolabs=  0.0e-00, tolrel=  0.0e-00
-#%% psp_files = Al.GGA_PBE-JTH-paw.xml
+#%%   t73.out, tolnlines=  0, tolabs=  0.0e-00, tolrel=  0.0e-00
+#%% psp_files = 13al.pspgth
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]
