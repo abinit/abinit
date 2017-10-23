@@ -523,7 +523,7 @@ subroutine outvar_i_n (dtsets,iout,&
    tnkpt=1
  end if
 
- do idtset=1,ndtset_alloc       ! especific size for each dataset
+ do idtset=1,ndtset_alloc       ! specific size for each dataset
    narrm(idtset)=3*dtsets(idtset)%nkpt
    if (narrm(idtset)>0) then
      dprarr(1:narrm(idtset),idtset)=reshape(&
@@ -563,21 +563,26 @@ subroutine outvar_i_n (dtsets,iout,&
 
 !kpthf 
  if(sum(dtsets(1:ndtset_alloc)%usefock)/=0)then
-   narr=3*dtsets(1)%nkpthf ! default size for all datasets
-   do idtset=0,ndtset_alloc       ! specific size for each dataset
-     if(idtset/=0)then
-       narrm(idtset)=3*dtsets(idtset)%nkpthf
-       if (narrm(idtset)>0)&
-&       dprarr(1:narrm(idtset),idtset)=&
-&       reshape(dtsets(idtset)%kptns_hf(1:3,1:dtsets(idtset)%nkpthf), [narrm(idtset)])
-     else
-       narrm(idtset)=mxvals%nkpthf
-       if (narrm(idtset)>0)&
-&       dprarr(1:narrm(idtset),idtset)=&
-&       reshape(dtsets(idtset)%kptns_hf(1:3,1:mxvals%nkpthf), [narrm(idtset)] )
+   tnkpt=0
+   dprarr(:,0)=0
+   narr=3*dtsets(1)%nkpthf            ! default size for all datasets
+   if(prtvol_glob==0 .and. narr>3*nkpt_max)then
+     narr=3*nkpt_max
+     tnkpt=1
+   end if
+   do idtset=1,ndtset_alloc       ! specific size for each dataset
+     narrm(idtset)=3*dtsets(idtset)%nkpthf
+     if (narrm(idtset)>0) then
+       dprarr(1:narrm(idtset),idtset)=reshape(&
+&       dtsets(idtset)%kptns_hf(1:3,1:dtsets(idtset)%nkpthf), [narrm(idtset)] )
+     end if
+     if(prtvol_glob==0 .and. narrm(idtset)>3*nkpt_max)then
+       narrm(idtset)=3*nkpt_max
+       tnkpt=1
      end if
    end do
-   call prttagm(dprarr,intarr,iout,jdtset_,1,marr,narr,narrm,ncid,ndtset_alloc,'kpthf','DPR',multivals%nkpthf)
+   call prttagm(dprarr,intarr,iout,jdtset_,1,marr,narr,narrm,ncid,ndtset_alloc,'kptns_hf','DPR',multivals%nkpthf)
+   if(tnkpt==1) write(iout,'(23x,a,i3,a)' ) 'outvar_i_n : Printing only first ',nkpt_max,' k-points.'
  endif
 
  dprarr(1,:)=dtsets(:)%kptnrm
