@@ -13098,6 +13098,8 @@ P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   31
 
  Reconstruct in full BZ
  Reconstruct in full BZ
+ Reconstruct in full BZ
+ Reconstruct in full BZ
  
 ==== Calculation of the screened interaction ====
 
@@ -13136,7 +13138,7 @@ P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   31
    4  0.478  0.478  0.400 16.041  0.482
    5  0.249  0.478  0.555  0.482 16.567
 
-   bare interaction value of J=1/((2l+1)(2l)) \sum_{m1/=m2} U(m1,m2,m2,m1)=    0.4486    0.0000
+   bare interaction value of J=U-1/((2l+1)(2l)) \sum_{m1/=m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=    0.6667    0.0000
 
   Hund coupling J2=U(m1,m2,m2,m1) for the bare interaction
  -      1      2      3      4      5
@@ -13182,7 +13184,7 @@ P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   31
    4  0.435  0.436  0.378  3.434  0.446
    5  0.247  0.442  0.444  0.446  3.641
 
-   cRPA interaction value of J=1/((2l+1)(2l)) \sum_{m1/=m2} U(m1,m2,m2,m1)=    0.4092    0.0000
+   cRPA interaction value of J=U-1/((2l+1)(2l)) \sum_{m1/=m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=    0.5997    0.0000
 
   Hund coupling J2=U(m1,m2,m2,m1) for the cRPA interaction
  -      1      2      3      4      5
@@ -13196,7 +13198,7 @@ P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   31
             Average U and J as a function of frequency
    -------------------------------------------------------------
          omega           U(omega)            J(omega)
-        0.000      2.7546   -0.0000      0.4092    0.0000
+        0.000      2.7546   -0.0000      0.5997    0.0000
    -------------------------------------------------------------
 
 == END DATASET(S) ==============================================================

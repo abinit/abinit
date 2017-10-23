@@ -597,7 +597,7 @@ sec4:
        ecutsigx (Ha)            U_bare (eV)    J_bare (eV)      U (eV)       J (eV)
            30                    15.38          0.67            3.22         0.63
            50                    15.38          0.68            3.22         0.65
-           70                    15.38          0.47            3.22         0.66
+           70                    15.38          0.69            3.22         0.66
   </pre>
   For [[ecuteps]]=3, [[nband]]=30 and a 4 4 4 k-point grid, effective interactions are converged
   with a precision of 0.02 eV for [[ecutsigx]]=30 Ha.
@@ -634,12 +634,12 @@ sec5:
   the value of bare and effective interactions.
   
   <pre><span style="color: #000000">
-        model      ucrpa dmftbandi/dmftbandf ucrpa_bands |  U<SUB>bare</SUB>    U<SUB>bare diag</SUB>   J<SUB>bare</SUB> |   U      U<SUB>diag</SUB>     J 
+        model      ucrpa dmftbandi/dmftbandf ucrpa_bands |  <i>U</i><SUB>bare</SUB>    <i>U</i><SUB>bare diag</SUB>   <i>J</i><SUB>bare</SUB> |   <i>U</i>      <i>U</i><SUB>diag</SUB>     <i>J</i>
    <i>     d - d     </i>   1        21/25            21 25     |  15.4      16.3      0.66  |  2.8     3.5     0.60
    <i>    t2g-t2g    </i>   1        21/25            21 25     |  15.3      16.0      0.54  |  2.8     3.4     0.47
-   <i>     dp-dp     </i>   1        12/25            12 25     |  19.4      20.6      0.67 ??  | 10.1    11.2     0.64
-   <i>     d -dp (a) </i>   1        12/25            21 25     |  19.4      20.6      0.67  |  3.4     4.4     0.62
-   <i>     d -dp (b) </i>   2        12/25            12 25     |  19.4      20.6      0.67  |  1.6     2.6     0.60
+   <i>     dp-dp     </i>   1        12/25            12 25     |  19.4      20.6      0.96  | 10.8    12.0     0.91
+   <i>     d -dp (a) </i>   1        12/25            21 25     |  19.4      20.6      0.96  |  3.4     4.4     0.87
+   <i>     d -dp (b) </i>   2        12/25            12 25     |  19.4      20.6      0.96  |  1.6     2.6     0.86
   </pre></span>
   <!--   <i>     d -dp (a) </i>  convergency over ecutsigx                                         0.69                 4.5        0.63 -->
   <!--   <i>     d -dp (a) </i>  convergency over ecutsigx                                         0.70                            0.64 -->
@@ -652,9 +652,11 @@ sec5:
   in this table.
   <p>
   To obtain the results with only the <i>t<SUB>2g</SUB></i>  orbitals, one must use a specific input file, which is tucrpa_4.in, which
-  uses specific keywords, peculiar to this case (compare it with tucrpa_2.in). In this case, the value of J is extracted from the interaction matrices using the
-  usual Slater Kanamori parametrization (see e.g. [[Lechermann2006]]) and not using the value of <i>J</i> computed in the code.)
+  uses specific keywords, peculiar to this case (compare it with tucrpa_2.in). In this peculiar case, the most common definition of J has to be deduced by direct
+  calculation from the interaction matrices using the Slater Kanamori expression (see e.g. [[Lechermann2006]] or [[Vaugier2012]]) and not 
+  using the value of <i>J</i> computed in the code).
   
+  <p>
   We now briefly comment the physics of the results.
   <ul> 
   <li> Bare interactions. When the number of bands used is larger, the Wannier orbitals extension is smaller. 
@@ -674,7 +676,7 @@ sec5:
   </ul>
   </ul>
   Finally, fully screened interactions (not discussed here) could also be computed for each definition
-  correlated orbitals by using the default values of [[ucrpa_bands]] .
+  of correlated orbitals by using the default values of [[ucrpa_bands]] .
   
 ## Each section must have a title, that will form the table of content.
 ## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
@@ -723,6 +725,6 @@ sec7:
  title: "Conclusion"
  tag: conclusion
  body: |
-  This simple tutorial showed how to compute effective interactions for SrVO<sub>3</sub>.
+  This tutorial showed how to compute effective interactions for SrVO<sub>3</sub>.
   It emphasized the importance of the definition of correlated
   orbitals and the definition of constrained polarizability.

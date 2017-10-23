@@ -1162,7 +1162,7 @@
  UUmJJ=czero
  do m1=m_inf,m_sup
    do m2=m_inf,m_sup
-     if(m1/=m2) UUmJJ=UUmJJ+Interaction(m1,m2,m1,m2)-Interaction(m1,m2,m2,m1)
+      UUmJJ=UUmJJ+Interaction(m1,m2,m1,m2)-Interaction(m1,m2,m2,m1)
    enddo
  enddo
  UUmJJ=UUmJJ/float((m_sup-m_inf+1)*(m_sup-m_inf))
@@ -1176,25 +1176,25 @@
 ! enddo
 ! JJ=JJ/float((m_sup-m_inf+1)*(m_sup-m_inf))
  write(message,'(a,3x,2a,2f10.4,a)')ch10,utype,&
-& ' value of J=U-1/((2l+1)(2l)) \sum_{m1/=m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=',JJ1,ch10
+& ' value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=',JJ1,ch10
  call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
 
  UUmJJ=czero
  do m1=m_inf,m_sup
    do m2=m_inf,m_sup
-     if(m1/=m2) UUmJJ=UUmJJ+Interaction(m1,m2,m1,m2)-Interaction(m1,m1,m2,m2)
+      UUmJJ=UUmJJ+Interaction(m1,m2,m1,m2)-Interaction(m1,m1,m2,m2)
    enddo
  enddo
  UUmJJ=UUmJJ/float((m_sup-m_inf+1)*(m_sup-m_inf))
  JJ2=UU-UUmJJ
 
- write(message,'(a,3x,2a,2f10.4,a)')ch10,utype,&
-& ' value of J=U-1/((2l+1)(2l)) \sum_{m1/=m2} (U(m1,m2,m1,m2)-U(m1,m1,m2,m2))=',JJ2,ch10
- call wrtout(std_out,message,'COLL')
 
  if(abs(JJ1-JJ2)<0.0001) then
    JJ=JJ1
  else
+   write(message,'(a,3x,2a,2f10.4,a)')ch10,utype,&
+&   ' value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m1,m2,m2))=',JJ2,ch10
+   call wrtout(std_out,message,'COLL')
    stop
  endif
  
