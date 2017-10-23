@@ -565,19 +565,20 @@ subroutine outvar_i_n (dtsets,iout,&
  if(sum(dtsets(1:ndtset_alloc)%usefock)/=0)then
    tnkpt=0
    dprarr(:,0)=0
-   narr=3*dtsets(1)%nkpthf            ! default size for all datasets
-   if(prtvol_glob==0 .and. narr>3*nkpt_max)then
-     narr=3*nkpt_max
-     tnkpt=1
-   end if
    do idtset=1,ndtset_alloc       ! specific size for each dataset
-     narrm(idtset)=3*dtsets(idtset)%nkpthf
-     if (narrm(idtset)>0) then
-       dprarr(1:narrm(idtset),idtset)=reshape(&
-&       dtsets(idtset)%kptns_hf(1:3,1:dtsets(idtset)%nkpthf), [narrm(idtset)] )
+     if(dtsets(idtset)%usefock/=0)then
+       narrm(idtset)=3*dtsets(idtset)%nkpthf
+       narr=narrm(idtset)
+       if (narrm(idtset)>0) then
+         dprarr(1:narrm(idtset),idtset)=reshape(&
+&         dtsets(idtset)%kptns_hf(1:3,1:dtsets(idtset)%nkpthf), [narrm(idtset)] )
+       endif
+     else
+       narrm(idtset)=0
      end if
      if(prtvol_glob==0 .and. narrm(idtset)>3*nkpt_max)then
        narrm(idtset)=3*nkpt_max
+       narr=narrm(idtset)
        tnkpt=1
      end if
    end do
@@ -894,7 +895,13 @@ subroutine outvar_i_n (dtsets,iout,&
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'nkptgw','INT',0)
 
  if(sum(dtsets(1:ndtset_alloc)%usefock)/=0)then
-   intarr(1,:)=dtsets(:)%nkpthf
+   do idtset=1,ndtset_alloc       ! specific size for each dataset
+     if(dtsets(idtset)%usefock/=0)then
+       intarr(1,idtset)=dtsets(idtset)%nkpthf
+     else
+       intarr(1,idtset)=0
+     endif
+   enddo
    call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'nkpthf','INT',0)
  endif
 

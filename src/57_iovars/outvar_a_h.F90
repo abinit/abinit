@@ -887,6 +887,14 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
  intarr(2,:)=dtsets(:)%fockdownsampling(2)
  intarr(3,:)=dtsets(:)%fockdownsampling(3)
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,3,narrm,ncid,ndtset_alloc,'fockdownsampling','INT',0)
+!DEBUG
+! write(std_out,*)' outvar_a_h : echo fockdownsampling ...'
+! write(std_out,*)' dtsets(0)%fockdownsampling(1:3)=',dtsets(0)%fockdownsampling(1:3)
+! write(std_out,*)' dtsets(1)%fockdownsampling(1:3)=',dtsets(1)%fockdownsampling(1:3)
+! write(std_out,*)' dtsets(2)%fockdownsampling(1:3)=',dtsets(2)%fockdownsampling(1:3)
+! write(std_out,*)' dtsets(3)%fockdownsampling(1:3)=',dtsets(3)%fockdownsampling(1:3)
+! call prttagm(dprarr,intarr,std_out,jdtset_,2,marr,3,narrm,ncid,ndtset_alloc,'fockdownsampling','INT',0)
+!ENDDEBUG
 
  dprarr(1,:)=dtsets(:)%freqim_alpha
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'freqim_alpha','DPR',0)

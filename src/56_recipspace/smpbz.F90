@@ -309,7 +309,7 @@ subroutine smpbz(brav,iout,kptrlatt,mkpt,nkpt,nshiftk,option,shiftk,spkpt,downsa
                  if(downsampling(3)<0 .and. mod(cds(1)+cds(2),2)/=0)cycle
 !              Body-centered case ! What is left : two are negative
                else   
-                 if(sum(cds(:))==1 .or. sum(cds(:))==2)cycle ! Either all are zero, or all are one, so skip when sum is 1 or 2.
+                 if(sum(mod(cds(:),2))==1 .or. sum(mod(cds(:),2))==2)cycle ! Either all are zero, or all are one, so skip when sum is 1 or 2.
                endif
              else
                if(downsampling(1)==0 .and. mod(cds(2)+cds(3),2)/=0)cycle
@@ -377,6 +377,15 @@ subroutine smpbz(brav,iout,kptrlatt,mkpt,nkpt,nshiftk,option,shiftk,spkpt,downsa
      write(message, '(a,i8,a,a,a,i8,a)' )&
 &     'The number of k points ',nkpt,'  is not equal to',ch10,&
 &     'nkptlatt*nshiftk which is',nkptlatt*nshiftk,'.'
+!DEBUG
+! write(std_out,*)' smpbz : brav,iout,mkpt,nkpt,option=',brav,iout,mkpt,nkpt,option
+! write(std_out,*)' smpbz : kptrlatt(:,:)=',kptrlatt(:,:)
+! write(std_out,*)' smpbz : nshiftk=',nshiftk
+! write(std_out,*)' smpbz : shiftk(:,:)=',shiftk(:,:)
+! write(std_out,*)' smpbz : downsampling(:)=',downsampling(:)
+! write(std_out,*)message 
+! stop
+!ENDDEBUG
      MSG_BUG(message)
    end if
 

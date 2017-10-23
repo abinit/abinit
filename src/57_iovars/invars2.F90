@@ -2596,7 +2596,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
  ii=0;if (mod(dtset%wfoptalg,10)==4) ii=2
  if ((dtset%ngfft(7)==314).or.(dtset%usefock==1)) ii=1
 
- call inkpts(bravais,dtset%chksymbreak,iout,iscf,dtset%istwfk(1:nkpt),jdtset,&
+ call inkpts(bravais,dtset%chksymbreak,dtset%fockdownsampling,iout,iscf,dtset%istwfk(1:nkpt),jdtset,&
 & dtset%kpt(:,1:nkpt),dtset%kptns_hf(:,1:nkpthf),kptopt,dtset%kptnrm,&
 & dtset%kptrlatt_orig,dtset%kptrlatt,kptrlen,lenstr,nsym,&
 & nkpt,nkpthf,nqpt,dtset%ngkpt,dtset%nshiftk,dtset%nshiftk_orig,dtset%shiftk_orig,nsym,&
