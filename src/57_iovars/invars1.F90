@@ -919,8 +919,9 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  dtset%usepawu=0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'usepawu',tread,'INT')
  if(tread==1) dtset%usepawu=intarr(1)
+ if ( dtset%usedmft > 0 .and. dtset%usepawu >= 0 ) dtset%usepawu = 1
 
- if (dtset%usepawu > 0 .and. dtset%usedmft > 0) then
+ if (dtset%usepawu > 0 ) then
    write(message, '(7a)' )&
 &   'usedmft and usepawu are both activated ',ch10,&
 &   'This is not an usual calculation:',ch10,&
@@ -928,18 +929,11 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
 &   'LDA+U potential and energy will be put to zero'
    MSG_WARNING(message)
  end if
- if (dtset%nbandkss==0) then
-   if ( dtset%usedmft > 0 .and. dtset%usepawu == 4 ) then
-     dtset%usepawu = 14
-   else if ( dtset%usedmft > 0 .and. dtset%usepawu >= 0 ) then
-     dtset%usepawu = 10
-   endif
- endif
-
 
  dtset%usedmatpu=0
  dtset%lpawu(1:dtset%ntypat)=-1
- if (dtset%usepawu>0) then
+ if (dtset%usepawu>0.or.dtset%usedmft>0) then
+
    call intagm(dprarr,intarr,jdtset,marr,dtset%ntypat,string(1:lenstr),'lpawu',tread,'INT')
    if(tread==1) dtset%lpawu(1:dtset%ntypat)=intarr(1:dtset%ntypat)
 

@@ -111,7 +111,7 @@
  integer :: lmexexch,lmkyc,lmn_size,lmn2_size,lmpawu,lpawu
  integer :: m1,m11,m2,m21,m3,m31,m4,m41
  integer :: mesh_size,int_meshsz,mkyc,sz1
- real(dp) :: ak,f4of2,f6of2,int1,intg,!testj,testu,testumj
+ real(dp) :: ak,f4of2,f6of2,int1,intg!,testj,testu,testumj
  character(len=500) :: message
 !arrays
  integer,ABI_CONTIGUOUS pointer :: indlmn(:,:)
