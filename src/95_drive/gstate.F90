@@ -242,7 +242,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  integer :: pwind_alloc,rdwrpaw,comm,tim_mkrho,use_sc_dmft
  integer :: cnt,spin,band,ikpt
  real(dp) :: cpus,ecore,ecut_eff,ecutdg_eff,etot,fermie
- real(dp) :: gsqcut_eff,gsqcut_shp,gsqcutc_eff,hyb_range,residm,ucvol
+ real(dp) :: gsqcut_eff,gsqcut_shp,gsqcutc_eff,hyb_range_fock,residm,ucvol
  logical :: read_wf_or_den,has_to_init,call_pawinit,write_wfk
  logical :: wvlbigdft=.false.,wvl_debug=.false.
  character(len=500) :: message
@@ -909,8 +909,8 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    if (psp_gencond==1.or.call_pawinit) then
      call timab(553,1,tsec)
      gsqcut_shp=two*abs(dtset%diecut)*dtset%dilatmx**2/pi**2
-     hyb_range=zero;if (dtset%ixc<0) call libxc_functionals_get_hybridparams(hyb_range=hyb_range)
-     call pawinit(gnt_option,gsqcut_shp,hyb_range,dtset%pawlcutd,dtset%pawlmix,&
+     hyb_range_fock=zero;if (dtset%ixc<0) call libxc_functionals_get_hybridparams(hyb_range=hyb_range_fock)
+     call pawinit(gnt_option,gsqcut_shp,hyb_range_fock,dtset%pawlcutd,dtset%pawlmix,&
 &     psps%mpsang,dtset%pawnphi,dtset%nsym,dtset%pawntheta,&
 &     pawang,pawrad,dtset%pawspnorb,pawtab,dtset%pawxcdev,dtset%xclevel,dtset%usepotzero)
 

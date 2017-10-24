@@ -282,7 +282,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
 !     qvec(:)=kpoint_i(:)-kpoint_j(:)
    qvec_j(:)=gs_ham%kpt_k(:)-fockbz%kptns_bz(:,jkpt)
    call bare_vqg(qvec_j,fockcommon%gsqcut,gs_ham%gmet,fockcommon%usepaw,fockcommon%hybrid_mixing,&
-&   fockcommon%hybrid_mixing_sr,fockcommon%hybrid_range,nfftf,fockbz%nkpt_bz,ngfftf,gs_ham%ucvol,vqg)
+&   fockcommon%hybrid_mixing_sr,fockcommon%hybrid_range_fock,nfftf,fockbz%nkpt_bz,ngfftf,gs_ham%ucvol,vqg)
 
    
 
@@ -359,7 +359,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
 
      if(fockcommon%optstr.and.(fockcommon%ieigen/=0)) then
        call strfock(gs_ham%gprimd,fockcommon%gsqcut,fockstr,fockcommon%hybrid_mixing,fockcommon%hybrid_mixing_sr,&
-&       fockcommon%hybrid_range,mpi_enreg,nfftf,ngfftf,fockbz%nkpt_bz,rhog_munu,gs_ham%ucvol,qvec_j)
+&       fockcommon%hybrid_range_fock,mpi_enreg,nfftf,ngfftf,fockbz%nkpt_bz,rhog_munu,gs_ham%ucvol,qvec_j)
        fockcommon%stress_ikpt(:,fockcommon%ieigen)=fockcommon%stress_ikpt(:,fockcommon%ieigen)+fockstr(:)*occ*wtk
        if (fockcommon%usepaw==0.and.(.not.need_ghc)) then
          if (allocated(fockbz%cgocc)) then
