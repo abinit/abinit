@@ -800,21 +800,21 @@ subroutine fock_init(atindx,cplex,dtset,fock,gsqcut,kg,mpi_enreg,nattyp,npwarr,p
    if (dtset%ixc<0) then
      call libxc_functionals_get_hybridparams(hyb_mixing=fockcommon%hyb_mixing,hyb_mixing_sr=fockcommon%hyb_mixing_sr,&
 &                                            hyb_range=fockcommon%hyb_range_dft)
-     fockcommon%hyb_range_fock=fockcommon%hybrid_range_dft
+     fockcommon%hyb_range_fock=fockcommon%hyb_range_dft
    end if
 
 !  Take the values from the input variables
-   if(abs(dtset%hyb_mixing+one)>tol8)fockcommon%hyb_mixing=dtset%hybrid_mixing
-   if(abs(dtset%hyb_mixing_sr+one)>tol8)fockcommon%hyb_mixing_sr=dtset%hybrid_mixing_sr
-   if(abs(dtset%hyb_range_dft+one)>tol8 .and. abs(dtset%hybrid_range_fock+one)>tol8)then
-     fockcommon%hyb_range_dft=dtset%hybrid_range_dft
-     fockcommon%hyb_range_fock=dtset%hybrid_range_fock
-  else if(abs(dtset%hyb_range_dft+one)>tol8 .and. abs(dtset%hybrid_range_fock+one)<tol8)then
-     fockcommon%hyb_range_dft=dtset%hybrid_range_dft
-     fockcommon%hyb_range_fock=dtset%hybrid_range_dft
-  else if(abs(dtset%hyb_range_dft+one)<tol8 .and. abs(dtset%hybrid_range_fock+one)>tol8)then
-     fockcommon%hyb_range_dft=dtset%hybrid_range_fock
-     fockcommon%hyb_range_fock=dtset%hybrid_range_fock
+   if(abs(dtset%hyb_mixing+one)>tol8)fockcommon%hyb_mixing=dtset%hyb_mixing
+   if(abs(dtset%hyb_mixing_sr+one)>tol8)fockcommon%hyb_mixing_sr=dtset%hyb_mixing_sr
+   if(abs(dtset%hyb_range_dft+one)>tol8 .and. abs(dtset%hyb_range_fock+one)>tol8)then
+     fockcommon%hyb_range_dft=dtset%hyb_range_dft
+     fockcommon%hyb_range_fock=dtset%hyb_range_fock
+  else if(abs(dtset%hyb_range_dft+one)>tol8 .and. abs(dtset%hyb_range_fock+one)<tol8)then
+     fockcommon%hyb_range_dft=dtset%hyb_range_dft
+     fockcommon%hyb_range_fock=dtset%hyb_range_dft
+  else if(abs(dtset%hyb_range_dft+one)<tol8 .and. abs(dtset%hyb_range_fock+one)>tol8)then
+     fockcommon%hyb_range_dft=dtset%hyb_range_fock
+     fockcommon%hyb_range_fock=dtset%hyb_range_fock
   endif
 
 !  Possibly modify the values from libxc
@@ -822,7 +822,7 @@ subroutine fock_init(atindx,cplex,dtset,fock,gsqcut,kg,mpi_enreg,nattyp,npwarr,p
      call libxc_functionals_set_hybridparams(hyb_mixing=fockcommon%hyb_mixing,hyb_mixing_sr=fockcommon%hyb_mixing_sr,&
 &                                            hyb_range=fockcommon%hyb_range_dft)
 !DEBUG
-!    write(std_out,*)' m_fock.F90/fock_init.F90 : fockcommon%hyb_range=',fockcommon%hybrid_range
+!    write(std_out,*)' m_fock.F90/fock_init.F90 : fockcommon%hyb_range=',fockcommon%hyb_range
 !    write(std_out,*)' m_fock.F90/fock_init.F90 : fockcommon%hyb_mixing=',fockcommon%hyb_mixing
 !    write(std_out,*)' m_fock.F90/fock_init.F90 : fockcommon%hyb_mixing_sr=',fockcommon%hyb_mixing_sr
 !    fockcommon%hyb_range=1.587
@@ -2420,7 +2420,7 @@ subroutine bare_vqg(qphon,gsqcut,gmet,izero,hyb_mixing,hyb_mixing_sr,hyb_range_f
        ii1=2
        ! value of the integration of the Coulomb singularity 4pi\int_BZ 1/q^2 dq
        vqg(1+i23)=hyb_mixing*divgq0
-       if (abs(hyb_range_fock)>tol8) vqg(1+i23)=vqg(1+i23)+hyb_mixing_sr*pi/(hybrid_range_fock**2)
+       if (abs(hyb_range_fock)>tol8) vqg(1+i23)=vqg(1+i23)+hyb_mixing_sr*pi/(hyb_range_fock**2)
      end if
 
      ! Final inner loop on the first dimension (note the lower limit)

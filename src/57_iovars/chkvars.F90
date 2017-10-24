@@ -134,7 +134,7 @@ subroutine chkvars (string)
  list_vars=trim(list_vars)//' gwls_first_seed gwls_model_parameter gwls_npt_gauss_quad'
  list_vars=trim(list_vars)//' gwls_diel_model gwls_print_debug gwls_band_index gwls_exchange gwls_correlation'
 !H
- list_vars=trim(list_vars)//' hyb_mixing hyb_mixing_sr hyb_range_dft hybrid_range_fock'
+ list_vars=trim(list_vars)//' hyb_mixing hyb_mixing_sr hyb_range_dft hyb_range_fock'
 !I
  list_vars=trim(list_vars)//' iatcon iatfix iatfixx iatfixy iatfixz iatsph'
  list_vars=trim(list_vars)//' iboxcut icoulomb icutcoul ieig2rf'

@@ -1127,7 +1127,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
      end if
 
      !Used locally
-     hyb_mixing=fock%fock_common%hyb_mixing ; hybrid_mixing_sr=fock%fock_common%hybrid_mixing_sr
+     hyb_mixing=fock%fock_common%hyb_mixing ; hyb_mixing_sr=fock%fock_common%hyb_mixing_sr
 
    end if ! usefock
 
