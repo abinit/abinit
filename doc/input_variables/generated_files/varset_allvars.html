@@ -4,6 +4,7 @@
 <!--                                                                                     -->
 <html>
 <head><title>Input variables</title>
+<link rel=stylesheet type="text/css" href="../../formabinit.css">
 <link rel=stylesheet type="text/css" href="../formabinit.css">
 <script type="text/javascript" src="../../js_files/smart_input_variables.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -34,7 +35,7 @@ The internal variables (see the varset_<a href="../../input_variables/generated_
 See <a href="../../input_variables/generated_files/varset_aim.html#">aim</a>, <a href="../../input_variables/generated_files/varset_anaddb.html#">anaddb</a> or <a href="../../input_variables/generated_files/varset_optic.html#">optic</a> for the subset of input variables for the executables AIM(Bader), ANADDB and OPTIC. Such input variables are specifically
 labelled @aim, @anaddb, or @optic in the input variable database.
 <p>Enter any string to search in the database. Clicking without any request will give all variables.
-<input type="text" id="InputSearch" onkeyup="searchInput()" onClick="searchInput()" onblur="defaultClick()" placeholder="Search">
+<input type="text" id="InputSearch" onkeyup="searchInput()" onClick="searchInput()" placeholder="Search">
 
  
  <div class="TabsLetter"><a class="TabLetterLink" href="#A" onClick="openLetter(event,'A')" id="clickA">A</a> <a class="TabLetterLink" href="#B" onClick="openLetter(event,'B')" id="clickB">B</a> <a class="TabLetterLink" href="#C" onClick="openLetter(event,'C')" id="clickC">C</a> <a class="TabLetterLink" href="#D" onClick="openLetter(event,'D')" id="clickD">D</a> <a class="TabLetterLink" href="#E" onClick="openLetter(event,'E')" id="clickE">E</a> <a class="TabLetterLink" href="#F" onClick="openLetter(event,'F')" id="clickF">F</a> <a class="TabLetterLink" href="#G" onClick="openLetter(event,'G')" id="clickG">G</a> <a class="TabLetterLink" href="#H" onClick="openLetter(event,'H')" id="clickH">H</a> <a class="TabLetterLink" href="#I" onClick="openLetter(event,'I')" id="clickI">I</a> <a class="TabLetterLink" href="#J" onClick="openLetter(event,'J')" id="clickJ">J</a> <a class="TabLetterLink" href="#K" onClick="openLetter(event,'K')" id="clickK">K</a> <a class="TabLetterLink" href="#L" onClick="openLetter(event,'L')" id="clickL">L</a> <a class="TabLetterLink" href="#M" onClick="openLetter(event,'M')" id="clickM">M</a> <a class="TabLetterLink" href="#N" onClick="openLetter(event,'N')" id="clickN">N</a> <a class="TabLetterLink" href="#O" onClick="openLetter(event,'O')" id="clickO">O</a> <a class="TabLetterLink" href="#P" onClick="openLetter(event,'P')" id="clickP">P</a> <a class="TabLetterLink" href="#Q" onClick="openLetter(event,'Q')" id="clickQ">Q</a> <a class="TabLetterLink" href="#R" onClick="openLetter(event,'R')" id="clickR">R</a> <a class="TabLetterLink" href="#S" onClick="openLetter(event,'S')" id="clickS">S</a> <a class="TabLetterLink" href="#T" onClick="openLetter(event,'T')" id="clickT">T</a> <a class="TabLetterLink" href="#U" onClick="openLetter(event,'U')" id="clickU">U</a> <a class="TabLetterLink" href="#V" onClick="openLetter(event,'V')" id="clickV">V</a> <a class="TabLetterLink" href="#W" onClick="openLetter(event,'W')" id="clickW">W</a> <a class="TabLetterLink" href="#X" onClick="openLetter(event,'X')" id="clickX">X</a> <a class="TabLetterLink" href="#Y" onClick="openLetter(event,'Y')" id="clickY">Y</a> <a class="TabLetterLink" href="#Z" onClick="openLetter(event,'Z')" id="clickZ">Z</a> </div>
@@ -60,6 +61,8 @@ labelled @aim, @anaddb, or @optic in the input variable database.
  <li class="col-s-6 col-m-3 col-l-2 col-xl-2 col-xxl-1"><a href="varset_aim.html#atrad@aim">atrad@aim</a></li>
  <li class="col-s-6 col-m-3 col-l-2 col-xl-2 col-xxl-1"><a href="varset_ffield.html#atvshift">atvshift</a></li>
  <li class="col-s-6 col-m-3 col-l-2 col-xl-2 col-xxl-1"><a href="varset_paral.html#autoparal">autoparal</a></li>
+ <li class="col-s-6 col-m-3 col-l-2 col-xl-2 col-xxl-1"><a href="varset_gstate.html#auxc_ixc">auxc_ixc</a></li>
+ <li class="col-s-6 col-m-3 col-l-2 col-xl-2 col-xxl-1"><a href="varset_gstate.html#auxc_scal">auxc_scal</a></li>
  <li class="col-s-6 col-m-3 col-l-2 col-xl-2 col-xxl-1"><a href="varset_gw.html#awtr">awtr</a></li>
  </ul></li>
 <li>
@@ -111,9 +114,9 @@ labelled @aim, @anaddb, or @optic in the input variable database.
  <li class="col-s-6 col-m-3 col-l-2 col-xl-2 col-xxl-1"><a href="varset_gw.html#cd_imfrqs">cd_imfrqs</a></li>
  <li class="col-s-6 col-m-3 col-l-2 col-xl-2 col-xxl-1"><a href="varset_gw.html#cd_max_freq">cd_max_freq</a></li>
  <li class="col-s-6 col-m-3 col-l-2 col-xl-2 col-xxl-1"><a href="varset_gw.html#cd_subset_freq">cd_subset_freq</a></li>
- <li class="col-s-6 col-m-3 col-l-2 col-xl-2 col-xxl-1"><a href="varset_dev.html#cgtyphf">cgtyphf</a></li>
  <li class="col-s-6 col-m-3 col-l-2 col-xl-2 col-xxl-1"><a href="varset_gstate.html#charge">charge</a></li>
  <li class="col-s-6 col-m-3 col-l-2 col-xl-2 col-xxl-1"><a href="varset_geo.html#chempot">chempot</a></li>
+ <li class="col-s-6 col-m-3 col-l-2 col-xl-2 col-xxl-1"><a href="varset_rlx.html#chkdilatmx">chkdilatmx</a></li>
  <li class="col-s-6 col-m-3 col-l-2 col-xl-2 col-xxl-1"><a href="varset_gstate.html#chkexit">chkexit</a></li>
  <li class="col-s-6 col-m-3 col-l-2 col-xl-2 col-xxl-1"><a href="varset_gstate.html#chkprim">chkprim</a></li>
  <li class="col-s-6 col-m-3 col-l-2 col-xl-2 col-xxl-1"><a href="varset_gstate.html#chksymbreak">chksymbreak</a></li>
@@ -271,6 +274,8 @@ labelled @aim, @anaddb, or @optic in the input variable database.
  <li class="col-s-6 col-m-3 col-l-2 col-xl-2 col-xxl-1"><a href="varset_dev.html#fftalg">fftalg</a></li>
  <li class="col-s-6 col-m-3 col-l-2 col-xl-2 col-xxl-1"><a href="varset_dev.html#fftcache">fftcache</a></li>
  <li class="col-s-6 col-m-3 col-l-2 col-xl-2 col-xxl-1"><a href="varset_gw.html#fftgw">fftgw</a></li>
+ <li class="col-s-6 col-m-3 col-l-2 col-xl-2 col-xxl-1"><a href="varset_gstate.html#fockdownsampling">fockdownsampling</a></li>
+ <li class="col-s-6 col-m-3 col-l-2 col-xl-2 col-xxl-1"><a href="varset_gstate.html#fockoptmix">fockoptmix</a></li>
  <li class="col-s-6 col-m-3 col-l-2 col-xl-2 col-xxl-1"><a href="varset_aim.html#foldep@aim">foldep@aim</a></li>
  <li class="col-s-6 col-m-3 col-l-2 col-xl-2 col-xxl-1"><a href="varset_aim.html#follow@aim">follow@aim</a></li>
  <li class="col-s-6 col-m-3 col-l-2 col-xl-2 col-xxl-1"><a href="varset_aim.html#folstp@aim">folstp@aim</a></li>
@@ -442,6 +447,7 @@ labelled @aim, @anaddb, or @optic in the input variable database.
  <li class="col-s-6 col-m-3 col-l-2 col-xl-2 col-xxl-1"><a href="varset_gw.html#kptgw">kptgw</a></li>
  <li class="col-s-6 col-m-3 col-l-2 col-xl-2 col-xxl-1"><a href="varset_basic.html#kptnrm">kptnrm</a></li>
  <li class="col-s-6 col-m-3 col-l-2 col-xl-2 col-xxl-1"><a href="varset_internal.html#kptns">%kptns</a></li>
+ <li class="col-s-6 col-m-3 col-l-2 col-xl-2 col-xxl-1"><a href="varset_internal.html#kptns_hf">%kptns_hf</a></li>
  <li class="col-s-6 col-m-3 col-l-2 col-xl-2 col-xxl-1"><a href="varset_basic.html#kptopt">kptopt</a></li>
  <li class="col-s-6 col-m-3 col-l-2 col-xl-2 col-xxl-1"><a href="varset_gstate.html#kptrlatt">kptrlatt</a></li>
  <li class="col-s-6 col-m-3 col-l-2 col-xl-2 col-xxl-1"><a href="varset_anaddb.html#kptrlatt@anaddb">kptrlatt@anaddb</a></li>
@@ -891,6 +897,7 @@ labelled @aim, @anaddb, or @optic in the input variable database.
  <li class="col-s-6 col-m-3 col-l-2 col-xl-2 col-xxl-1"><a href="varset_anaddb.html#tempermin@anaddb">tempermin@anaddb</a></li>
  <li class="col-s-6 col-m-3 col-l-2 col-xl-2 col-xxl-1"><a href="varset_dev.html#tfkinfunc">tfkinfunc</a></li>
  <li class="col-s-6 col-m-3 col-l-2 col-xl-2 col-xxl-1"><a href="varset_dev.html#tfw_toldfe">tfw_toldfe</a></li>
+ <li class="col-s-6 col-m-3 col-l-2 col-xl-2 col-xxl-1"><a href="varset_anaddb.html#thermal_supercell@anaddb">thermal_supercell@anaddb</a></li>
  <li class="col-s-6 col-m-3 col-l-2 col-xl-2 col-xxl-1"><a href="varset_aim.html#thetamax@aim">thetamax@aim</a></li>
  <li class="col-s-6 col-m-3 col-l-2 col-xl-2 col-xxl-1"><a href="varset_aim.html#thetamin@aim">thetamin@aim</a></li>
  <li class="col-s-6 col-m-3 col-l-2 col-xl-2 col-xxl-1"><a href="varset_anaddb.html#thmflag@anaddb">thmflag@anaddb</a></li>

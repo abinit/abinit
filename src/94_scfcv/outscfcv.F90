@@ -240,9 +240,8 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  integer :: bantot,fform,collect,timrev
  integer :: accessfil,coordn
  integer :: ii,ierr,ifft,ikpt,ispden,isppol,itypat
- integer :: jfft
  integer :: me_fft,n1,n2,n3
- integer :: ifgd, iatom, iatom_, iatom_tot,nradint
+ integer :: ifgd, iatom, iatom_tot,nradint
  integer :: me,my_natom_tmp
  integer :: occopt
  integer :: prtnabla
@@ -594,6 +593,11 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
    nradint = 1000 ! radial integration grid density
    ABI_ALLOCATE(vpaw,(nfft,nspden))
    vpaw(:,:)=zero
+   if (me == master .and. my_natom > 0) then  
+     if (paw_an(1)%cplex > 1) then
+       MSG_WARNING('cplex = 2 : complex hartree potential in PAW spheres. This is not coded yet. Imag part ignored')
+     end if
+   end if
 
    do ispden=1,nspden
      ! for points inside spheres, replace with full AE hartree potential.
@@ -607,7 +611,9 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
        ABI_ALLOCATE(vh1_interp,(pawfgrtab(iatom)%nfgd))
        ABI_ALLOCATE(radii,(pawfgrtab(iatom)%nfgd))
        ABI_ALLOCATE(isort,(pawfgrtab(iatom)%nfgd))
-       vh1_corrector(:) = paw_an(iatom)%vh1(:,1,ispden)-paw_an(iatom)%vht1(:,1,ispden)
+       ! vh1 vht1 contain the spherical first moments of the Hartree potentials, so re-divide by Y_00 = sqrt(four_pi)
+       vh1_corrector(:) = (paw_an(iatom)%vh1(:,1,ispden)-paw_an(iatom)%vht1(:,1,ispden)) / sqrt(four_pi) 
+
        ! get end point derivatives
        call bound_deriv(vh1_corrector, pawrad(itypat), pawrad(itypat)%mesh_size, yp1, ypn)
        ! spline the vh1 function

@@ -12,7 +12,7 @@
  Corning Inc. and other collaborators, see ~abinit/doc/developers/contributors.txt .
  Please read ~abinit/doc/users/acknowledgments.html for suggested
  acknowledgments of the ABINIT effort.
- For more information, see http://www.abinit.org .
+ For more information, see https://www.abinit.org .
 
 .Starting date : Mon  4 Apr 2016.
 - ( at 09h33 )
@@ -1019,7 +1019,7 @@ P           mkmem           1
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm: epsatm=    0.00001257
+ pspatm : epsatm=    0.00001257
          --- l  ekb(1:nproj) -->
  pspatm: atomic psp has been read  and splines computed
 
@@ -1132,7 +1132,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm: epsatm=    0.00001257
+ pspatm : epsatm=    0.00001257
          --- l  ekb(1:nproj) -->
  pspatm: atomic psp has been read  and splines computed
 
@@ -1244,7 +1244,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm: epsatm=    0.00001257
+ pspatm : epsatm=    0.00001257
          --- l  ekb(1:nproj) -->
  pspatm: atomic psp has been read  and splines computed
 
@@ -1356,7 +1356,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm: epsatm=    0.00001257
+ pspatm : epsatm=    0.00001257
          --- l  ekb(1:nproj) -->
  pspatm: atomic psp has been read  and splines computed
 
@@ -1468,7 +1468,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm: epsatm=    0.00001257
+ pspatm : epsatm=    0.00001257
          --- l  ekb(1:nproj) -->
  pspatm: atomic psp has been read  and splines computed
 
@@ -1580,7 +1580,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm: epsatm=    0.00001257
+ pspatm : epsatm=    0.00001257
          --- l  ekb(1:nproj) -->
  pspatm: atomic psp has been read  and splines computed
 
@@ -1692,7 +1692,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm: epsatm=    0.00001257
+ pspatm : epsatm=    0.00001257
          --- l  ekb(1:nproj) -->
  pspatm: atomic psp has been read  and splines computed
 
@@ -1804,7 +1804,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm: epsatm=    0.00001257
+ pspatm : epsatm=    0.00001257
          --- l  ekb(1:nproj) -->
  pspatm: atomic psp has been read  and splines computed
 
@@ -1916,7 +1916,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm: epsatm=    0.00001257
+ pspatm : epsatm=    0.00001257
          --- l  ekb(1:nproj) -->
  pspatm: atomic psp has been read  and splines computed
 
@@ -2028,7 +2028,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm: epsatm=    0.00001257
+ pspatm : epsatm=    0.00001257
          --- l  ekb(1:nproj) -->
  pspatm: atomic psp has been read  and splines computed
 
@@ -2140,7 +2140,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm: epsatm=    0.00001257
+ pspatm : epsatm=    0.00001257
          --- l  ekb(1:nproj) -->
  pspatm: atomic psp has been read  and splines computed
 
@@ -2252,7 +2252,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm: epsatm=    0.00001257
+ pspatm : epsatm=    0.00001257
          --- l  ekb(1:nproj) -->
  pspatm: atomic psp has been read  and splines computed
 
@@ -2364,7 +2364,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm: epsatm=    0.00001257
+ pspatm : epsatm=    0.00001257
          --- l  ekb(1:nproj) -->
  pspatm: atomic psp has been read  and splines computed
 
@@ -2476,7 +2476,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm: epsatm=    0.00001257
+ pspatm : epsatm=    0.00001257
          --- l  ekb(1:nproj) -->
  pspatm: atomic psp has been read  and splines computed
 
@@ -2588,7 +2588,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm: epsatm=    0.00001257
+ pspatm : epsatm=    0.00001257
          --- l  ekb(1:nproj) -->
  pspatm: atomic psp has been read  and splines computed
 
@@ -2700,7 +2700,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm: epsatm=    0.00001257
+ pspatm : epsatm=    0.00001257
          --- l  ekb(1:nproj) -->
  pspatm: atomic psp has been read  and splines computed
 
@@ -2812,7 +2812,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm: epsatm=    0.00001257
+ pspatm : epsatm=    0.00001257
          --- l  ekb(1:nproj) -->
  pspatm: atomic psp has been read  and splines computed
 
@@ -2924,7 +2924,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm: epsatm=    0.00001257
+ pspatm : epsatm=    0.00001257
          --- l  ekb(1:nproj) -->
  pspatm: atomic psp has been read  and splines computed
 
@@ -3036,7 +3036,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm: epsatm=    0.00001257
+ pspatm : epsatm=    0.00001257
          --- l  ekb(1:nproj) -->
  pspatm: atomic psp has been read  and splines computed
 
@@ -3148,7 +3148,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm: epsatm=    0.00001257
+ pspatm : epsatm=    0.00001257
          --- l  ekb(1:nproj) -->
  pspatm: atomic psp has been read  and splines computed
 
@@ -3260,7 +3260,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm: epsatm=    0.00001257
+ pspatm : epsatm=    0.00001257
          --- l  ekb(1:nproj) -->
  pspatm: atomic psp has been read  and splines computed
 
@@ -3372,7 +3372,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm: epsatm=    0.00001257
+ pspatm : epsatm=    0.00001257
          --- l  ekb(1:nproj) -->
  pspatm: atomic psp has been read  and splines computed
 
@@ -3484,7 +3484,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm: epsatm=    0.00001257
+ pspatm : epsatm=    0.00001257
          --- l  ekb(1:nproj) -->
  pspatm: atomic psp has been read  and splines computed
 
@@ -3596,7 +3596,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm: epsatm=    0.00001257
+ pspatm : epsatm=    0.00001257
          --- l  ekb(1:nproj) -->
  pspatm: atomic psp has been read  and splines computed
 
@@ -3708,7 +3708,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm: epsatm=    0.00001257
+ pspatm : epsatm=    0.00001257
          --- l  ekb(1:nproj) -->
  pspatm: atomic psp has been read  and splines computed
 
@@ -3820,7 +3820,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm: epsatm=    0.00001257
+ pspatm : epsatm=    0.00001257
          --- l  ekb(1:nproj) -->
  pspatm: atomic psp has been read  and splines computed
 
@@ -3932,7 +3932,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm: epsatm=    0.00001257
+ pspatm : epsatm=    0.00001257
          --- l  ekb(1:nproj) -->
  pspatm: atomic psp has been read  and splines computed
 
@@ -4044,7 +4044,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm: epsatm=    0.00001257
+ pspatm : epsatm=    0.00001257
          --- l  ekb(1:nproj) -->
  pspatm: atomic psp has been read  and splines computed
 
@@ -4156,7 +4156,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm: epsatm=    0.00001257
+ pspatm : epsatm=    0.00001257
          --- l  ekb(1:nproj) -->
  pspatm: atomic psp has been read  and splines computed
 
@@ -4268,7 +4268,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm: epsatm=    0.00001257
+ pspatm : epsatm=    0.00001257
          --- l  ekb(1:nproj) -->
  pspatm: atomic psp has been read  and splines computed
 
@@ -4380,7 +4380,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm: epsatm=    0.00001257
+ pspatm : epsatm=    0.00001257
          --- l  ekb(1:nproj) -->
  pspatm: atomic psp has been read  and splines computed
 
@@ -4492,7 +4492,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm: epsatm=    0.00001257
+ pspatm : epsatm=    0.00001257
          --- l  ekb(1:nproj) -->
  pspatm: atomic psp has been read  and splines computed
 
@@ -4604,7 +4604,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm: epsatm=    0.00001257
+ pspatm : epsatm=    0.00001257
          --- l  ekb(1:nproj) -->
  pspatm: atomic psp has been read  and splines computed
 
@@ -4716,7 +4716,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm: epsatm=    0.00001257
+ pspatm : epsatm=    0.00001257
          --- l  ekb(1:nproj) -->
  pspatm: atomic psp has been read  and splines computed
 
@@ -4828,7 +4828,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm: epsatm=    0.00001257
+ pspatm : epsatm=    0.00001257
          --- l  ekb(1:nproj) -->
  pspatm: atomic psp has been read  and splines computed
 
@@ -4940,7 +4940,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm: epsatm=    0.00001257
+ pspatm : epsatm=    0.00001257
          --- l  ekb(1:nproj) -->
  pspatm: atomic psp has been read  and splines computed
 
@@ -5052,7 +5052,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm: epsatm=    0.00001257
+ pspatm : epsatm=    0.00001257
          --- l  ekb(1:nproj) -->
  pspatm: atomic psp has been read  and splines computed
 
@@ -5164,7 +5164,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm: epsatm=    0.00001257
+ pspatm : epsatm=    0.00001257
          --- l  ekb(1:nproj) -->
  pspatm: atomic psp has been read  and splines computed
 
@@ -5276,7 +5276,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm: epsatm=    0.00001257
+ pspatm : epsatm=    0.00001257
          --- l  ekb(1:nproj) -->
  pspatm: atomic psp has been read  and splines computed
 
@@ -5388,7 +5388,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm: epsatm=    0.00001257
+ pspatm : epsatm=    0.00001257
          --- l  ekb(1:nproj) -->
  pspatm: atomic psp has been read  and splines computed
 
@@ -5500,7 +5500,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm: epsatm=    0.00001257
+ pspatm : epsatm=    0.00001257
          --- l  ekb(1:nproj) -->
  pspatm: atomic psp has been read  and splines computed
 
@@ -5612,7 +5612,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm: epsatm=    0.00001257
+ pspatm : epsatm=    0.00001257
          --- l  ekb(1:nproj) -->
  pspatm: atomic psp has been read  and splines computed
 
@@ -5724,7 +5724,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm: epsatm=    0.00001257
+ pspatm : epsatm=    0.00001257
          --- l  ekb(1:nproj) -->
  pspatm: atomic psp has been read  and splines computed
 
@@ -5836,7 +5836,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm: epsatm=    0.00001257
+ pspatm : epsatm=    0.00001257
          --- l  ekb(1:nproj) -->
  pspatm: atomic psp has been read  and splines computed
 
@@ -5948,7 +5948,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm: epsatm=    0.00001257
+ pspatm : epsatm=    0.00001257
          --- l  ekb(1:nproj) -->
  pspatm: atomic psp has been read  and splines computed
 
@@ -6331,7 +6331,7 @@ P           mkmem           1
  Note also that it will be of great value to readers of publications presenting these results,
  to read papers enabling them to understand the theoretical formalism and details
  of the ABINIT implementation.
- For information on why they are suggested, see also http://www.abinit.org/about/?text=acknowledgments.
+ For information on why they are suggested, see also https://www.abinit.org/about/?text=acknowledgments.
 -
 - [1] Libxc: A library of exchange and correlation functionals for density functional theory.
 - M.A.L. Marques, M.J.T. Oliveira, T. Burnus, Computer Physics Communications 183, 2227 (2012).
@@ -6347,7 +6347,7 @@ P           mkmem           1
 - Computer Phys. Comm. 180, 2582-2615 (2009).
 - Comment : the third generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
-- is available at http://www.abinit.org/about/ABINIT_CPC_v10.pdf .
+- is available at https://www.abinit.org/about/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 -
 - [3] A brief introduction to the ABINIT software package.
@@ -6358,7 +6358,7 @@ P           mkmem           1
 - Comment : the second generic paper describing the ABINIT project. Note that this paper
 - should be cited especially if you are using the GW part of ABINIT, as several authors
 - of this part are not in the list of authors of the first or third paper.
-- The .pdf of the latter paper is available at http://www.abinit.org/about/zfk_0505-06_558-562.pdf.
+- The .pdf of the latter paper is available at https://www.abinit.org/about/zfk_0505-06_558-562.pdf.
 - Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
 - the licence allows the authors to put it on the Web).
 -

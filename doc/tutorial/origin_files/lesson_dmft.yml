@@ -576,9 +576,9 @@ sec4:
   <pre>
    Energy window:                              <i>t<SUB>2g</SUB></i>-like bands         <i>t<SUB>2g</SUB></i>-like+<i>O-p</i>-like bands
    dmftbandi/dmftbandf:                             21/23                      12/23
-   Norm:                                                       0.66                        0.78
-   LDA Number of electrons (before &perp;):     0.66(=0.11*6)        1.42(=0.235*6)
-   LDA Number of electrons (after  &perp;):       1.02                       1.81
+   Norm:                                            0.66                        0.78
+   LDA Number of electrons (before &perp;):             0.66(=0.11*6)          1.42(=0.235*6)
+   LDA Number of electrons (after  &perp;):             1.02                        1.81
   </pre>
   
   For the large window, as we use more Kohn Sham states, both the occupation and the norm are larger,

@@ -30,10 +30,12 @@
 !! PARENTS
 !!
 !! CHILDREN
-!!      abi_io_redirect,abimem_init,abinit_doctor,cut3d_hirsh,cut3d_lineint
-!!      cut3d_planeint,cut3d_pointint,cut3d_rrho,cut3d_volumeint,cut3d_wffile
-!!      destroy_mpi_enreg,flush_unit,hdr_echo,hdr_free,hdr_read_from_fname
-!!      herald,initmpi_seq,metric,timein,wrtout,xmpi_end,xmpi_init,xred2xcart
+!!      abi_io_redirect,abimem_init,abinit_doctor,crystal_free,crystal_from_hdr
+!!      cut3d_hirsh,cut3d_lineint,cut3d_planeint,cut3d_pointint,cut3d_rrho
+!!      cut3d_volumeint,cut3d_wffile,destroy_mpi_enreg,fftdatar_write
+!!      flush_unit,hdr_echo,hdr_free,hdr_read_from_fname,herald
+!!      init_distribfft_seq,initmpi_seq,metric,ngfft_seq,timein,wrtout,xmpi_end
+!!      xmpi_init,xred2xcart
 !!
 !! SOURCE
 
@@ -762,19 +764,19 @@ program cut3d
            close(unt)
            exit
 
-        case (15)
+         case (15)
             ! Write netcdf file.
-            timrev = 2; if (any(hdr%kptopt == [3, 4])) timrev = 1
-            call crystal_from_hdr(cryst, hdr, timrev)
-            call ngfft_seq(ngfft, [nr1, nr2, nr3])
-            ngfft(4:6) = ngfft(1:3)
-            nfft = product(ngfft(1:3))
-            cplex = 1
-            call init_distribfft_seq(mpi_enreg%distribfft, 'c', ngfft(2), ngfft(3), 'all')
-            call init_distribfft_seq(mpi_enreg%distribfft, 'f', ngfft(2), ngfft(3), 'all')
+           timrev = 2; if (any(hdr%kptopt == [3, 4])) timrev = 1
+           call crystal_from_hdr(cryst, hdr, timrev)
+           call ngfft_seq(ngfft, [nr1, nr2, nr3])
+           ngfft(4:6) = ngfft(1:3)
+           nfft = product(ngfft(1:3))
+           cplex = 1
+           call init_distribfft_seq(mpi_enreg%distribfft, 'c', ngfft(2), ngfft(3), 'all')
+           call init_distribfft_seq(mpi_enreg%distribfft, 'f', ngfft(2), ngfft(3), 'all')
 
-            call fftdatar_write(varname,filnam,IO_MODE_ETSF,hdr,cryst,ngfft,cplex,nfft,nspden,grid_full,mpi_enreg)
-            call crystal_free(cryst)
+           call fftdatar_write(varname,filnam,IO_MODE_ETSF,hdr,cryst,ngfft,cplex,nfft,nspden,grid_full,mpi_enreg)
+           call crystal_free(cryst)
 
          case(0)
            write(std_out,*)' Exit requested by user'

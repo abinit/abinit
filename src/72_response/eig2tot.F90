@@ -70,11 +70,10 @@
 !!      respfn
 !!
 !! CHILDREN
-!!      crystal_free,crystal_init,distrb2,ebands_free,ebands_init
-!!      eigr2d_free,eigr2d_init,eigr2d_ncwrite,fan_free,fan_init,fan_ncwrite
-!!      gkk_free,gkk_init,gkk_ncwrite,kptfine_av,outbsd,smeared_delta
-!!      ddb_hdr_init, ddb_hdr_free, ddb_hdr_open_write
-!!      timab,xmpi_sum
+!!      crystal_free,crystal_init,ddb_hdr_free,ddb_hdr_init,ddb_hdr_open_write
+!!      distrb2,ebands_free,ebands_init,eigr2d_free,eigr2d_init,eigr2d_ncwrite
+!!      fan_free,fan_init,fan_ncwrite,gkk_free,gkk_init,gkk_ncwrite,kptfine_av
+!!      outbsd,smeared_delta,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -150,8 +149,8 @@ subroutine eig2tot(dtfil,xred,psps,pawtab,natom,bdeigrf,clflg,dim_eig2nkq,eigen0
 !Local variables-------------------------------
 !tolerance for non degenerated levels
 !scalars
- integer :: band2tot_index,band_index,bantot,bandtot_index,choice,fullinit,iband,idir1,idir2
- integer :: ikpt,ipert1,ipert2,isppol,jband,nkpt_sub,ikpt2,nblok,unitout,vrsddb,ncid
+ integer :: band2tot_index,band_index,bantot,bandtot_index,iband,idir1,idir2
+ integer :: ikpt,ipert1,ipert2,isppol,jband,nkpt_sub,ikpt2,unitout,ncid
 !integer :: ipw
  character(len=fnlen) :: dscrpt,fname
  integer :: master,me,spaceworld,ierr
@@ -160,7 +159,7 @@ subroutine eig2tot(dtfil,xred,psps,pawtab,natom,bdeigrf,clflg,dim_eig2nkq,eigen0
 !real(dp),parameter :: etol=zero 
  real(dp) :: ar,ai,deltae,den,eig1_i1,eig1_i2,eigen_corr
  real(dp) :: eig1_r1,eig1_r2,eig2_diai,den_av
- real(dp) :: eig2_diar,eigbrd_i,eigbrd_r,tolwfr,wgt_int
+ real(dp) :: eig2_diar,eigbrd_i,eigbrd_r,wgt_int
  character(len=500) :: message
  logical :: remove_inv,test_do_band
  type(crystal_t) :: Crystal
@@ -525,7 +524,7 @@ subroutine eig2tot(dtfil,xred,psps,pawtab,natom,bdeigrf,clflg,dim_eig2nkq,eigen0
      unitout = dtfil%unddb
 
      call ddb_hdr_init(ddb_hdr,dtset,psps,pawtab,DDB_VERSION,dscrpt,&
-&                      1,xred=xred,occ=occ_rbz)
+&     1,xred=xred,occ=occ_rbz)
 
      call ddb_hdr_open_write(ddb_hdr, dtfil%fnameabo_eigr2d, unitout)
 
@@ -617,7 +616,7 @@ subroutine eig2tot(dtfil,xred,psps,pawtab,natom,bdeigrf,clflg,dim_eig2nkq,eigen0
        dscrpt=' Note : temporary (transfer) database '
 
        call ddb_hdr_init(ddb_hdr,dtset,psps,pawtab,DDB_VERSION,dscrpt,&
-&                        1,xred=xred,occ=occ_rbz)
+&       1,xred=xred,occ=occ_rbz)
 
        call ddb_hdr_open_write(ddb_hdr, dtfil%fnameabo_eigi2d, unitout)
 

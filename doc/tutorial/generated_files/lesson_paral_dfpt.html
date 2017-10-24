@@ -4,7 +4,7 @@
 <!--                                                                                     -->
 <html>
 <head><title>Parallelism in the DFPT formalism</title>
-<link rel=stylesheet type="text/css" href="../formabinit.css">
+<link rel=stylesheet type="text/css" href="../../formabinit.css">
 <script type="text/x-mathjax-config">
 MathJax.Hub.Config({
   jax: ["input/TeX","output/HTML-CSS"],
@@ -37,7 +37,7 @@ on the basis of the density-functional perturbation theory (DFPT) part of ABINIT
     are non-zero,
    which activates <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>=1.
   You are supposed to be well-familiarized with such calculations before starting the present tutorial.
-  See the input variables described  in the file <a href="#">[[FAKE LINK:varrf]]</a>
+  See the input variables described  in <a href="../../input_variables/generated_files/varset_dfpt.html#">dfpt</a>
   and the tutorial <a href="lesson_rf1.html">Response-Function 1</a> and subsequent tutorials.
 <p>
   You will learn about the basic implementation of parallelism for DFPT calculations,
@@ -290,7 +290,7 @@ timed sections of the code, only "inwffil" and "vtorho3:synchro" will not benefi
 parallelism.
 <br>
 "inwffil" is a subroutine whose job is to read the ground-state wavefunctions
-(you can find the source of the "inwffil" routine in <a href="http://www.abinit.org/robodoc">the latest ABINIT sources</a>).
+(you can find the source of the "inwffil" routine in <a href="https://www.abinit.org/robodoc">the latest ABINIT sources</a>).
 As mentioned in the section 1, the reading of the ground-state wavefunctions is not done in parallel in the case of the DFPT
 computations (note that the reading is actually parallelized for e.g. ground-state calculations).
 In the output file provided as a reference (with four computing cores), the "inwffil" wall clock time 

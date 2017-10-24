@@ -1193,6 +1193,38 @@
     varset: paral
     vartype: integer
 - !variable
+    abivarname: auxc_ixc
+    characteristics: null
+    commentdefault: null
+    commentdims: null
+    defaultval: 1
+    dimensions: scalar
+    excludes: null
+    mnemonics: AUXiliary XC functional, IXC number
+    requires: null
+    text: |-
+        Specification of an auxiliary exchange-correlation functional,  thanks to its [[ixc]] value, to possibly replace the heavy evaluation of an hybrid functional at specific occasions, e.g. when the Fock operator is frozen during the self-consistent cycle, thanks to [[fockoptmix]]==11, or when evaluating the correction to forces due to the density residual. This auxiliary exchange-correlation functional might be rescaled, thanks to [[auxc_scal]] when [[fockoptmix]]==11.
+    topics: Hybrids_useful
+    varset: gstate
+    vartype: integer
+- !variable
+    abivarname: auxc_scal
+    characteristics: null
+    commentdefault: null
+    commentdims: null
+    defaultval: 1.0
+    dimensions: scalar
+    excludes: null
+    mnemonics: FOCK AUXiliary xc functional - SCALing factor
+    requires: null
+    text: |-
+        Possible scaling factor for the auxiliary exchange-correlation functional defined by [[auxc_ixc]] that has the goal to replace the Fock operator or hybrid functional when [[fockoptmix]]==11.
+        <p>
+        The default value 1.0 corresponds to the unmodified xc functional. When the auxiliary functional is used to replace the hybrid functional in SCF loops, a value of 1.5 has been observed to speed up somehow the convergence.
+    topics: Hybrids_useful
+    varset: gstate
+    vartype: real
+- !variable
     abivarname: awtr
     characteristics: null
     commentdefault: null
@@ -2890,31 +2922,6 @@
     varset: gw
     vartype: integer
 - !variable
-    abivarname: cgtyphf
-    characteristics:
-    - '[[DEVELOP]]'
-    commentdefault: null
-    commentdims: null
-    defaultval: !valuewithconditions
-        '[[usefock]] == 1': 2
-        defaultval: 0
-    dimensions: scalar
-    excludes: null
-    mnemonics: Conjugate Gradient TYPe used for Hartree Fock exact exchange
-    requires: null
-    text: |-
-        <p>
-         Gives how is calculated Fock exact exchange contribution in the conjugate gradient,
-        in the SCF case.
-         <br />
-        The value 2 corresponds to calculate the Fock
-        exact exchange contribution each time in the conjugate gradient. The value 1 corresponds to calculate the Fock
-        exact exchange contribution only for the initial guess (not for the gradient direction) in the conjugate gradient
-        </p>
-    topics: Hybrids_expert
-    varset: dev
-    vartype: integer
-- !variable
     abivarname: charge
     characteristics: null
     commentdefault: null
@@ -2963,8 +2970,8 @@
     defaultval: 0.0
     dimensions:
     - 3
-    -   -   - nzchempot
-    -   -   - ntype
+    - '[[nzchempot]]'
+    - '[[ntypat]]'
     excludes: null
     mnemonics: spatially varying CHEMical POTential
     requires: '[[nzchempot]]/=0'
@@ -2983,6 +2990,22 @@
     topics: Artificial_expert
     varset: geo
     vartype: real
+- !variable
+    abivarname: chkdilatmx
+    characteristics: null
+    commentdefault: null
+    commentdims: null
+    defaultval: 1
+    dimensions: scalar
+    excludes: null
+    mnemonics: CHecK DILATMX
+    requires: null
+    text: |-
+        If 0, will not stop the execution if the [[dilatmx]] threshold is exceeded, but simply issue a warning. There will be no rescaling.
+        If 1, after tentative rescalings as described in [[dilatmx]], will stop the execution.
+    topics: GeoOpt_expert
+    varset: rlx
+    vartype: integer
 - !variable
     abivarname: chkexit
     characteristics: null
@@ -4326,13 +4349,14 @@
     requires: null
     text: |-
         <p>
-         Gives the maximal permitted scaling of
+        Gives the maximal permitted scaling of
         the lattice parameters when the cell shape and
-        dimension is varied (see variable [[optcell]]).
-        It is used to define the sphere of plane waves
+        dimension is varied (see variable [[optcell]]). Accordingly defines the plane wave basis set for this purpose. The [[dilatmx]] threshold might be exceeded if [[chkdilatmx]]=0, otherwise ABINIT exits after three tentative rescalings, as described below.
+        <p>
+        [[dilatmx]] is used to define the sphere of plane waves
         and FFT box coherent with the possible modifications
         of the cell ([[ionmov]]==2 and
-        [[optcell] /=0).
+        [[optcell]] /=0).
         For these definitions, it is equivalent
         to changing [[ecut]] by multiplying it by [[dilatmx]]
          <sup>
@@ -4364,6 +4388,8 @@
         [[optcell]] =0, but
         a value larger than 1.0 will be a waste.
         </p>
+        <p>
+        When the [[dilatmx]] threshold is exceeded, ABINIT will rescale uniformly the tentative new primitive vectors to a value that leads at most to 90% of the maximal allowed [[dilatmx]] deviation from 1. It will do this three times (to forbid the geometry optimization algorithms to have take a too large trial step), but afterwards will exit. Setting [[chkdilatmx]]==0 allows the definition of an appropriate planewave basis, but will not lead to an exit when the threshold is exceeded.
     topics: GeoOpt_basic
     varset: rlx
     vartype: real
@@ -4465,7 +4491,7 @@
          The occupation matrix is in the basis of real spherical harmonics Slm (note that this differs from the choice made when
          [[prtdosm]]=1
          , that is in the basis of complex spherical harmonics).
-        Their are ordered by increasing m, and are defined e.g. in [[Blancoa1997]]
+        They are ordered by increasing m, and are defined e.g. in [[Blancoa1997]]
          </a>
          .
         For the case l=2 (d states), the five columns corresponds respectively to (the normalisation factor has been dropped)
@@ -4892,9 +4918,9 @@
            <a href="http://dx.doi.org/10.1016/j.cpc.2015.10.023">
             Comp. Phys. Comm. 200, 274 (2016)
            </a>. Before using it, it has to be installed following
-            instructions at https://triqs.ipht.cnrs.fr/1.3/applications/cthyb/install.html.
-            The current interface is valid for TRIQS 1.3 and TRIQS/CTHYB 1.3.
-            An example of a config .ac file to compile ABINIT with TRIQS can be found in ~/doc/build/config-examples/ubu_gnu_4.9_mpich.ac.
+            instructions at https://triqs.ipht.cnrs.fr/1.x/install.html.
+            Starting from release 8.6.0, the interface is valid only for TRIQS 1.4 and TRIQS/CTHYB 1.4.
+            An example of a config .ac file to compile ABINIT with TRIQS can be found in ~/doc/build/config-examples/ubu_gnu_4.9_triqs.ac.
          <br />
          See the useful variables for CT-QMC solver :
         [[dmftctqmc_basis]],
@@ -6597,7 +6623,8 @@
     excludes: null
     mnemonics: 'Electron-PHonon: EXTRA ELectrons'
     requires: null
-    text: null
+    text: |-
+        Number of electrons per unit cell to be added to the initial value computed from the pseudopotentials and unit cell.
     topics: ElPhonInt_expert
     varset: eph
     vartype: real
@@ -7201,6 +7228,58 @@
     varset: gw
     vartype: integer
 - !variable
+    abivarname: fockdownsampling
+    characteristics: null
+    commentdefault: null
+    commentdims: null
+    defaultval: 3*1
+    dimensions:
+    - 3
+    excludes: null
+    mnemonics: FOCK operator, k-grid DOWNSAMPLING
+    requires: '[[usefock]]==1'
+    text: |-
+        The k wavevector grid used to compute the Fock operator in the full Brillouin Zone might be a subset of the full Brillouin Zone 
+        of the k point grid used for the wavefunctions (see [[kptopt]] for its definition). 
+        [[fockdownsampling]] allows one to define such a reduced set of k  wavevectors, yielding a significant speed up at the expense (possibly) of accuracy.
+        The final grid has [[nkpthf]] k points, with coordinates [[kptns_hf]].
+        <p>
+        In the simplest case, the three values of [[fockdownsampling]] are equal, and simply gives the factor by which the initial k point grid will be downsampled along every direction. If [[fockdownsampling]] is 3*1, the sampling for the Fock operator is the same as the sampling for the wavefunctions. If [[fockdownsampling]] is 3*2 the sampling will have 8 times less k points. Conventionally, if [[fockdownsampling]] is 3*0, then the Fock operator is obtained solely from the Gamma point. Also, as soon as [[fockdownsampling]] is not 3*1 or 3*0, the k point grid from which a subset will be taken is obtained by imposing [[nshiftk]]=1.
+        <p>
+        A more accurate description is now given, as one can achieve a better control than described above, with differing values of [[fockdownsampling]] and also with negative numbers. One starts from the k point grid defined by [[kptrlatt]], with [[nshiftk]]=1. The absolute value of each of the three numbers of [[fockdownsampling]] is used to sample the corresponding axis (in reduced coordinate), as described above. Moreover, the obtained k grid might even be further downsampled by specifying negative numbers : if all three are negative, one further downsamples each 2x2x2 subset of k points by taking its FCC subset (so, 4 points instead of 8); if two are negative, one downsamples each 2x2x2 subset of k points by taking its BCC subset (so, 2 points instead of 8); is only one is negative, then the two other axes are sampled using a face-centered sampling.
+        Finally, some of the values might be taken as 0, in which case the corresponding direction is sampled by only one layer of points (if two are zero, a line of points is obtained).
+    topics: Hybrids_useful
+    varset: gstate
+    vartype: integer
+- !variable
+    abivarname: fockoptmix
+    characteristics: null
+    commentdefault: null
+    commentdims: null
+    defaultval: 0
+    dimensions: scalar
+    excludes: null
+    mnemonics: 'FOCK operator : OPTions for MIXing'
+    requires: '[[usefock]]==1'
+    text: |-
+        Governs the mixing algorithm at the level of the Fock operator, i.e.
+        how to mix it, and how the underlying SCF calculation is to be performed. It is the most relevant when the Fock operator is not updated at each SCF step ([[nnsclohf]]/=0).
+        <p>
+        The last digit of [[fockoptmix]] governs what happens at the level of the SCF algorithm, when the Fock operator is updated.
+        <ol>
+        <li>
+        If [[fockoptmix]]==0 : the SCF algorithm is not restarted (it continues to use the previous potential/density pairs without worrying).</li>
+        <li>
+        If [[fockoptmix]]==1 : the SCF algorithm is restarted (the previous potential/density pairs are discarted).</li>
+        </ol>
+        <p>
+        The second-to-last (dozen) digit governs the possible modification of the XC functional inside the SCF loop to take into account the lack of update of the Fock operator. Irrelevant when the unit digit is 0. If the value 1 is used (so, e.g. [[fockoptmix]]==11), an auxiliary xc functional is used inside the SCF loop, for a frozen ACE Fock operator. This auxiliary functional is specified thanks to [[auxc_ixc]] and [[auxc_scal]].
+        <p>
+        The third-to-last (hundreds) digit governs the mixing of the Fock operator itself with its previous occurrences. Irrelevant when the unit digit is 0.
+    topics: Hybrids_basic
+    varset: gstate
+    vartype: integer
+- !variable
     abivarname: foldep@aim
     characteristics: null
     commentdefault: null
@@ -7677,7 +7756,7 @@
         <p>
          Different genetic rules have been implemented and the user has the change to choose between any of them.
         The chosen number of rules have been defined in
-        [[ga_n_rules]
+        [[ga_n_rules]]
          <br />
          <br />
          Implemented rules are
@@ -9934,7 +10013,7 @@
         That is, the states associated to band index [[gwls_first_seed]] to [[gwls_first_seed]]+[[gwls_nseeds]]-1 are used to generate the seed vectors.
         </p>
         <p>
-        The default [[gwls_first_seed]]==[[gwls_band_index]] and [[gwls_nseeds]]==1 has been touroughly tested and seems to be the most performant.
+        The default [[gwls_first_seed]]==[[gwls_band_index]] and [[gwls_nseeds]]==1 has been thoroughly tested and seems to be the most performant.
         Users should therefore keep the default value.
         </p>
     topics: GWls_expert
@@ -14403,7 +14482,7 @@
         remapping is easily done by adding or subtracting 1 from
         each component until it is in the range [-1,1].  That is,
         given the k point normalization [[kptnrm]] described below,
-        each component must lie in [-[[kptnrm]],[[kptnrm]]].
+        each component must lie in [ -[[kptnrm]], [[kptnrm]] ].
          <br />
          Note: a global shift can be provided by [[qptn]]
          <br />
@@ -14774,6 +14853,27 @@
         it is [[kpt]] renormalized by
         [[kptnrm]], then shifted
         by [[qptn]](1:3).
+        </p>
+    topics: k-points_internal
+    varset: internal
+    vartype: real
+- !variable
+    abivarname: kptns_hf
+    characteristics:
+    - '[[INTERNAL_ONLY]]'
+    commentdefault: null
+    commentdims: null
+    defaultval: null
+    dimensions:
+    - 3
+    - '[[nkpthf]]'
+    excludes: null
+    mnemonics: K-PoinTs re-Normalized and Shifted, for the Hartree-Fock operator
+    requires: null
+    text: |-
+        <p>
+        [[kptns_hf]] is the subset of the full Brillouin Zone k point grid for wavefunctions,
+        used to build the Fock operator, see [[fockdownsampling]]. 
         </p>
     topics: k-points_internal
     varset: internal
@@ -17705,8 +17805,7 @@
 - !variable
     abivarname: nkpthf
     characteristics: null
-    commentdefault: ' the total number of k-point in the full Brillouin zone
-        (TODO : provide the mathematical formulation)'
+    commentdefault: null
     commentdims: null
     defaultval: null
     dimensions: scalar
@@ -17716,6 +17815,8 @@
     text: |-
         <p>
          [[nkpthf]] gives the number of k points used to sample the full Brillouin zone for the Fock exact exchange contribution.
+         It is obtained from the specification of the wavefunction k point grid (see [[kptopt]]),
+         possibly downfolded as specified by [[fockdownsampling]].
         </p>
     topics: Hybrids_expert
     varset: basic
@@ -17763,7 +17864,7 @@
         of levels at the Fermi energy may require a larger value of
         [[nline]] (5 or 6 ?)
         Line minimizations will be stopped anyway when improvement
-        gets small. With the input variable [[nnsclo]],
+        gets small (governed by [[tolrde]]). With the input variable [[nnsclo]],
         governs the convergence of the wavefunctions
         for fixed potential.
          <br />
@@ -20182,7 +20283,7 @@
         a small variation of input parameters might lead to
         a jump of total energy, because there might be two or even
         three possible values of the Fermi energy, and the
-        bissection algorithm find one or the other.
+        bissection algorithm finds one or the other.
         </p>
     topics: BandOcc_basic, STM_compulsory
     varset: basic
@@ -20227,7 +20328,7 @@
     text: |-
         <p>
          The maximum distance from the KS energy where to evaluate Sigma. Sigma is evaluated at
-        [KS_energy - [[omegasrdmax]], KS_energy + [[omegasrdmax]]] sampled [[nomegasrd]] times.
+        [ KS_energy - [[omegasrdmax]], KS_energy + [[omegasrdmax]] ] sampled [[nomegasrd]] times.
         </p>
     topics: SelfEnergy_basic
     varset: gw
@@ -20611,7 +20712,7 @@
         <p>
          For additional information,
         download F. Bottin presentation at the
-         <a href="http://www.abinit.org/community/events/program3rd">
+         <a href="https://www.abinit.org/sites/default/files/oldsites/workshop_07/program.html">
           ABINIT workshop 2007
          </a>
         </p>
@@ -21147,7 +21248,7 @@
           - [[pawovlp]]&gt;0. and &lt;100. : overlap is allowed only if it is less than [[pawovlp]] %
          </div>
         </p>
-    topics: PAW_expert
+    topics: PAW_useful
     varset: paw
     vartype: real
 - !variable
@@ -21174,7 +21275,7 @@
         The indexing of the bands start with one for the lowest occupied band
         and goes up from there.
         </p>
-    topics: PAW_useful
+    topics: PAW_expert
     varset: dev
     vartype: integer
 - !variable
@@ -21205,7 +21306,7 @@
          </b>
          in the beginning of the run.
         </p>
-    topics: PAW_useful
+    topics: PAW_expert
     varset: dev
     vartype: integer
 - !variable
@@ -21311,7 +21412,7 @@
          When [[pawprtvol]]&lt;0, all components of rho_ij and D_ij matrices for all atoms are printed.
          <br />
         </p>
-    topics: PAW_useful
+    topics: PAW_expert
     varset: paw
     vartype: integer
 - !variable
@@ -21606,7 +21707,7 @@
          <br />
          Be careful: GGA requires [[pawxcdev]] &gt; 0
         </p>
-    topics: PAW_expert
+    topics: PAW_useful
     varset: paw
     vartype: integer
 - !variable
@@ -25572,7 +25673,7 @@
     defaultval: !valuewithconditions
         defaultval: 2.0
         usepaw==1:
-        -   - AUTO_FROM_PSP
+        - '[[AUTO_FROM_PSP]]'
     dimensions:
     - '[[ntypat]]'
     excludes: null
@@ -26753,7 +26854,8 @@
     excludes: null
     mnemonics: SCALing of the cartesian coordinates
     requires: null
-    text: null
+    text: |-
+        SCALing of the cartesian coordinates.
     topics: Bader_expert
     varset: aim
     vartype: real
@@ -27676,7 +27778,7 @@
         other values are used for the analysis of the effect of the spin-orbit interaction,
         but are not expected to correspond to any physical situation.
         </p>
-    topics: PAW_useful, spinpolarisation_useful
+    topics: PAW_expert, spinpolarisation_useful
     varset: paw
     vartype: real
 - !variable
@@ -28359,6 +28461,28 @@
     varset: dev
     vartype: real
 - !variable
+    abivarname: thermal_supercell@anaddb
+    characteristics:
+    - '[[DEVELOP]]'
+    commentdefault: do not calculate any thermalized supercells
+    commentdims: null
+    defaultval: (/(/0,0,0/),  (/0,0,0/),  (/0,0,0/)/)
+    dimensions:
+    - 3
+    - 3
+    excludes: null
+    mnemonics: THERMALized SUPERCELL lattice vectors
+    requires: null
+    text: |-
+        <p>Thermal_supercell defines the real space supercell in which a thermalized atomic configuration should be produced, following the prescription of Zacharias and Giustino (PRB 94 075125 (2016)). The displacements are chosen for each phonon mode according to a temperature, and the displacements are alternated in sign/direction to obtain maximal compensation of the linear electron phonon coupling. In this way in the PRB dielectric properties at finite T can be obtained from a single supercell calculation instead of lots of MD and configuration averaging.</p>
+
+        <p>The supercell vectors are not constrained to be collinear with the normal lattice vectors: this effect is obtained by using a diagonal Thermal_supercell. The lines of the matrix describe the linear combination of the primitive cell lattice vectors yielding the supercell vectors, as for kptrlatt.</p>
+
+        <p>For the moment this feature is under development and it looks like the relative phases of the displacements are not fixed properly yet... (Aug 2017)</p>
+    topics: Phonons_expert
+    varset: anaddb
+    vartype: integer
+- !variable
     abivarname: thetamax@aim
     characteristics: null
     commentdefault: null
@@ -28631,10 +28755,7 @@
         geometry characteristics. When all forces vanish by symmetry (e.g. optimization of the lattice parameters
         of a high-symmetry crystal), then place [[toldfe]] to 1.0d-12, or use (better) [[tolvrs]].
          <br />
-         Since [[toldfe]], [[toldff]],
-        [[tolrff]],
-        [[tolvrs]] and [[tolwfr]]
-        are aimed at the same goal (causing the SCF cycle to stop),
+        Since [[toldfe]], [[toldff]], [[tolrff]], [[tolvrs]] and [[tolwfr]] are aimed at the same goal (causing the SCF cycle to stop),
         they are seen as a unique input variable at reading. Hence, it is forbidden that two of these input variables
         have non-zero values for the same dataset, or generically (for all datasets).
         However, a non-zero value for one such variable for one dataset will have precedence on the non-zero value for another
@@ -28673,14 +28794,7 @@
          <br />
          This stopping criterion is not allowed for RF calculations.
          <br />
-         Since
-         <b>
-          toldfe
-         </b>
-         , [[toldff]],
-        [[tolrff]],
-        [[tolvrs]] and [[tolwfr]]
-        are aimed at the same goal (causing the SCF cycle to stop),
+        Since [[toldfe]], [[toldff]], [[tolrff]], [[tolvrs]] and [[tolwfr]] are aimed at the same goal (causing the SCF cycle to stop),
         they are seen as a unique input variable at reading. Hence, it is forbidden that two of these input variables
         have non-zero values for the same dataset, or generically (for all datasets).
         However, a non-zero value for one such variable for one dataset will have precedence on the non-zero value for another
@@ -28853,14 +28967,7 @@
          <br />
          This stopping criterion is not allowed for RF calculations.
          <br />
-         Since
-         <b>
-          toldfe
-         </b>
-         , [[toldff]],
-        [[tolrff]],
-        [[tolvrs]] and [[tolwfr]]
-        are aimed at the same goal (causing the SCF cycle to stop),
+         Since [[toldfe]], [[toldff]], [[tolrff]], [[tolvrs]] and [[tolwfr]] are aimed at the same goal (causing the SCF cycle to stop),
         they are seen as a unique input variable at reading. Hence, it is forbidden that two of these input variables
         have non-zero values for the same dataset, or generically (for all datasets).
         However, a non-zero value for one such variable for one dataset will have precedence on the non-zero value for another
@@ -28928,14 +29035,7 @@
         then summing the square of this function over all FFT grid points. The result should be
         lower than [[tolvrs]].
          <br />
-         Since
-         <b>
-          toldfe
-         </b>
-         , [[toldff]],
-        [[tolrff]],
-        [[tolvrs]] and [[tolwfr]]
-        are aimed at the same goal (causing the SCF cycle to stop),
+        Since [[toldfe]], [[toldff]], [[tolrff]], [[tolvrs]] and [[tolwfr]] are aimed at the same goal (causing the SCF cycle to stop),
         they are seen as a unique input variable at reading. Hence, it is forbidden that two of these input variables
         have non-zero values for the same dataset, or generically (for all datasets).
         However, a non-zero value for one such variable for one dataset will have precedence on the non-zero value for another
@@ -29023,14 +29123,7 @@
          .
         </p>
         <br />
-        Since
-        <b>
-         toldfe
-        </b>
-        , [[toldff]],
-        [[tolrff]],
-        [[tolvrs]] and [[tolwfr]]
-        are aimed at the same goal (causing the SCF cycle to stop),
+        Since [[toldfe]], [[toldff]], [[tolrff]], [[tolvrs]] and [[tolwfr]] are aimed at the same goal (causing the SCF cycle to stop),
         they are seen as a unique input variable at reading. Hence, it is forbidden that two of these input variables
         have non-zero values for the same dataset, or generically (for all datasets).
         However, a non-zero value for one such variable for one dataset will have precedence on the non-zero value for another
@@ -29734,7 +29827,7 @@
          - B. Amadon, F. Jollet and M. Torrent, Phys. Rev. B 77, 155104 (2008).
          <br />
         </p>
-    topics: DFT+U_compulsory, GW_useful, SelfEnergy_useful
+    topics: DFT+U_compulsory, PAW_useful, GW_useful, SelfEnergy_useful
     varset: paw
     vartype: integer
 - !variable

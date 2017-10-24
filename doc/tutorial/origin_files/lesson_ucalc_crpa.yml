@@ -503,7 +503,7 @@ sec3:
      4  0.478  0.478  0.400 16.041  0.482
      5  0.249  0.478  0.555  0.482 16.567
   
-     bare interaction value of J=U-1/((2l+1)(2l)) \sum_{m1/=m2} (U(m1,m2,m1,m2)-U(m1,m1,m2,m2))=    0.6667    0.0000
+     bare interaction value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m1,m2,m2))=    0.6667    0.0000
   </pre>
   
   <li> Then, the cRPA effective interactions are given for all frequency.
@@ -529,7 +529,7 @@ sec3:
      4  0.435  0.436  0.378  3.434  0.446
      5  0.247  0.442  0.444  0.446  3.641
   
-     cRPA interaction value of J=U-1/((2l+1)(2l)) \sum_{m1/=m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=    0.5997    0.0000
+     cRPA interaction value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=    0.5997    0.0000
   </pre>
   
   <li>At the end of the calculation, the value of <i>U</i> and <i>J</i> as a function of frequency are gathered.

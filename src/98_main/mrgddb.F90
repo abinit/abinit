@@ -38,8 +38,9 @@
 !! PARENTS
 !!
 !! CHILDREN
-!!      abi_io_redirect,abimem_init,abinit_doctor
-!!      get_command_argument,herald,mblktyp1,mblktyp5,timein,wrtout,xmpi_init
+!!      abi_io_redirect,abimem_init,abinit_doctor,ddb_hdr_free
+!!      ddb_hdr_open_read,get_command_argument,herald,mblktyp1,mblktyp5,timein
+!!      wrtout,xmpi_init
 !!
 !! SOURCE
 
@@ -79,7 +80,7 @@ program mrgddb
 !scalars
  integer,parameter :: mddb=5000,ddbun=2 ! mddb=maximum number of databases (cannot be made dynamic)
  integer :: chkopt
- integer :: iddb,ii,mblktyp,mblktyptmp,nddb,nfiles_cli,nargs,msym,comm,my_rank,fcnt
+ integer :: iddb,ii,mblktyp,mblktyptmp,nddb,nfiles_cli,nargs,msym,comm,my_rank
  real(dp) :: tcpu,tcpui,twall,twalli
  logical :: cannot_overwrite=.True.
  character(len=24) :: codename
@@ -221,7 +222,7 @@ program mrgddb
  mblktyptmp=1
  do iddb=1,nddb
    call ddb_hdr_open_read(ddb_hdr,filnam(iddb+1),ddbun,DDB_VERSION,&
-&                         dimonly=1)
+&   dimonly=1)
 
    if(ddb_hdr%mblktyp > mblktyptmp) mblktyptmp = ddb_hdr%mblktyp
 

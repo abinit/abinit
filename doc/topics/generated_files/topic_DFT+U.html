@@ -4,7 +4,7 @@
 <!--                                                                                     -->
 <html>
 <head><title>DFT+U </title>
-<link rel=stylesheet type="text/css" href="../formabinit.css">
+<link rel=stylesheet type="text/css" href="../../formabinit.css">
 <script type="text/x-mathjax-config">
 MathJax.Hub.Config({
   jax: ["input/TeX","output/HTML-CSS"],
@@ -32,7 +32,7 @@ src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-
 
 <script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
 
- Mentioned in &nbsp; <a href="../../users/generated_files/help_features.html#5">help_features#5</a> &nbsp;
+ Mentioned in &nbsp; <a href="../../users/generated_files/help_features.html#5">help_features#5</a>. 
  <hr>
  <h3><b>Table of content: </b></h3> 
  <ul> <li>1. <a href="topic_DFT+U.html#1">Introduction.</a><li>2. <a href="topic_DFT+U.html#2">Related lesson(s) of the tutorial.</a><li>3. <a href="topic_DFT+U.html#3">Related input variables.</a><li>4. <a href="topic_DFT+U.html#4">Selected input files.</a><li>5. <a href="topic_DFT+U.html#5">References.</a></ul>
@@ -48,7 +48,7 @@ src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-
 Two choices of double counting are provided: the Full Localized limit
 and the Around Mean Field approximation.
 Our implementation is described in <a href="../../biblio/generated_files/bib_biblio.html#Amadon2008a">[Amadon2008a]</a>.
-It follows the main lines of <a href="../../biblio/generated_files/bib_biblio.html#Bengone2000">[Bengone2000]</a>. See als <a href="../../biblio/generated_files/bib_biblio.html#Czyzyk1994">[Czyzyk1994]</a>.
+It follows the main lines of <a href="../../biblio/generated_files/bib_biblio.html#Bengone2000">[Bengone2000]</a>. See also <a href="../../biblio/generated_files/bib_biblio.html#Czyzyk1994">[Czyzyk1994]</a>.
 Forces and stress are implemented.
 For details on keywords 
 (<a href="../../input_variables/generated_files/varset_paw.html#lpawu">lpawu</a>,<a href="../../input_variables/generated_files/varset_paw.html#upawu">upawu</a>,<a href="../../input_variables/generated_files/varset_paw.html#jpawu">jpawu</a>,<a href="../../input_variables/generated_files/varset_paw.html#usedmatpu">usedmatpu</a>,<a href="../../input_variables/generated_files/varset_paw.html#dmatpuopt">dmatpuopt</a>,<a href="../../input_variables/generated_files/varset_paw.html#dmatudiag">dmatudiag</a>) 
@@ -60,12 +60,15 @@ see keyword <a href="../../input_variables/generated_files/varset_paw.html#usepa
   counting term, and sum of the two) in the log file.
 <p>- The orbital density matrix (n_{m,m'}^{\sigma}), also called occupation
  matrix (corresponding to Eq.(9) of <a href="../../biblio/generated_files/bib_biblio.html#Bengone2000">[Bengone2000]</a> and Eq.(1) of <a href="../../biblio/generated_files/bib_biblio.html#Liechtenstein1995">[Liechtenstein1995]</a>, see also
-  [5] and variable <a href="../../input_variables/generated_files/varset_paw.html#dmatpuopt">dmatpuopt</a>) is also
+  <a href="../../biblio/generated_files/bib_biblio.html#Amadon2008a">[Amadon2008a]</a> and variable <a href="../../input_variables/generated_files/varset_paw.html#dmatpuopt">dmatpuopt</a>) is also
   given for each atom in the basis of real spherical harmonics.
   It is given at each SCF step in the log file: one can thus check the
   convergency of the calculation.
 
 <p> Consistency between total energy and forces in DFT+U have been checked.
+
+<p> The implementation of DFT+U in ABINIT allows also to impose a starting density matrix in order
+to compare the energy of various electronic configuration (see keywords <a href="../../input_variables/generated_files/varset_paw.html#usedmatpu">usedmatpu</a> and <a href="../../input_variables/generated_files/varset_paw.html#dmatpawu">dmatpawu</a>).
 
 <p>
 <br><br><a href=#top>Go to the top</a>

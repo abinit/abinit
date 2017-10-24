@@ -4,7 +4,7 @@
 <!--                                                                                     -->
 <html>
 <head><title>Hybrid functionals </title>
-<link rel=stylesheet type="text/css" href="../formabinit.css">
+<link rel=stylesheet type="text/css" href="../../formabinit.css">
 <script type="text/x-mathjax-config">
 MathJax.Hub.Config({
   jax: ["input/TeX","output/HTML-CSS"],
@@ -32,7 +32,7 @@ src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-
 
 <script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
 
- Mentioned in &nbsp; <a href="../../users/generated_files/help_features.html#2.2">help_features#2.2</a> &nbsp;&nbsp; <a href="../../users/generated_files/help_features.html#5">help_features#5</a> &nbsp;
+ Mentioned in &nbsp; <a href="../../users/generated_files/help_features.html#2.2">help_features#2.2</a>, &nbsp; <a href="../../users/generated_files/help_features.html#5">help_features#5</a>. 
  <hr>
  <h3><b>Table of content: </b></h3> 
  <ul> <li>1. <a href="topic_Hybrids.html#1">Introduction.</a><li>2. <a href="topic_Hybrids.html#2">Related input variables.</a><li>3. <a href="topic_Hybrids.html#3">Selected input files.</a></ul>
@@ -67,11 +67,14 @@ Some details about the implementation in ABINIT can be found <a href="../documen
 
 
 <p>Compulsory input variables:<p>... <a href="../../input_variables/generated_files/varset_basic.html#ixc">ixc</a>   [Index of eXchange-Correlation functional]<br>
-<p>Useful input variables:<p>... <a href="../../input_variables/generated_files/varset_basic.html#nbandhf">nbandhf</a>   [Number of BANDs for (Hartree)-Fock exact exchange]<br>
+<p>Basic input variables:<p>... <a href="../../input_variables/generated_files/varset_gstate.html#fockoptmix">fockoptmix</a>   [FOCK operator : OPTions for MIXing]<br>
+<p>Useful input variables:<p>... <a href="../../input_variables/generated_files/varset_gstate.html#auxc_ixc">auxc_ixc</a>   [AUXiliary XC functional, IXC number]<br>
+... <a href="../../input_variables/generated_files/varset_gstate.html#auxc_scal">auxc_scal</a>   [FOCK AUXiliary xc functional - SCALing factor]<br>
+... <a href="../../input_variables/generated_files/varset_gstate.html#fockdownsampling">fockdownsampling</a>   [FOCK operator, k-grid DOWNSAMPLING]<br>
+... <a href="../../input_variables/generated_files/varset_basic.html#nbandhf">nbandhf</a>   [Number of BANDs for (Hartree)-Fock exact exchange]<br>
 ... <a href="../../input_variables/generated_files/varset_paral.html#nphf">nphf</a>   [Number of Processors for (Hartree)-Fock exact exchange]<br>
 <p>Relevant internal variables:<p>... <a href="../../input_variables/generated_files/varset_internal.html#usefock">%usefock</a>   [USE FOCK exact exchange]<br>
-<p>Input variables for experts:<p>... <a href="../../input_variables/generated_files/varset_dev.html#cgtyphf">cgtyphf</a>   [Conjugate Gradient TYPe used for Hartree Fock exact exchange]<br>
-... <a href="../../input_variables/generated_files/varset_basic.html#nkpthf">nkpthf</a>   [Number of K - Points for (Hartree) Fock exact exchange]<br>
+<p>Input variables for experts:<p>... <a href="../../input_variables/generated_files/varset_basic.html#nkpthf">nkpthf</a>   [Number of K - Points for (Hartree) Fock exact exchange]<br>
 ... <a href="../../input_variables/generated_files/varset_dev.html#nnsclohf">nnsclohf</a>   [Number of Non-Self Consistent LOops for (Hartree)-Fock exact exchange]<br>
 
 <br><br><a href=#top>Go to the top</a>
@@ -87,6 +90,10 @@ Some details about the implementation in ABINIT can be found <a href="../documen
 <br><br>The user can find some related example input files in the ABINIT package in the directory /tests, or on the Web:
 <p> tests/v7/Input: <a href="../../tests/v7/Input/t65.in">t65.in</a> 
 <a href="../../tests/v7/Input/t66.in">t66.in</a> 
+<a href="../../tests/v7/Input/t67.in">t67.in</a> 
+<p> tests/libxc/Input: <a href="../../tests/libxc/Input/t67.in">t67.in</a> 
+<a href="../../tests/libxc/Input/t68.in">t68.in</a> 
+<a href="../../tests/libxc/Input/t69.in">t69.in</a> 
 <p> tests/paral/Input: <a href="../../tests/paral/Input/t93.in">t93.in</a> 
 <a href="../../tests/paral/Input/t94.in">t94.in</a> 
 <br>

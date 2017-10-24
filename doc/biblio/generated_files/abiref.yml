@@ -12,6 +12,20 @@
   publisher : Dover, New-York
 -
   ENTRYTYPE : article
+  ID : Adler1962
+  author : Adler, Stephen L.
+  title : Quantum Theory of the Dielectric Constant in Real Solids
+  journal : Physical Review
+  year : 1962
+  volume : 126
+  pages : 413-420
+  publisher : American Physical Society (APS)
+  doi : 10.1103/physrev.126.413
+  issn : 0031-899X
+  source : Crossref
+  month : pr, number = {2
+-
+  ENTRYTYPE : article
   ID : Albrecht1998
   author : Albrecht, S. and Reining, L. and Del Sole, R. and Onida, G.
   title : Ab Initio Calculation of Excitonic Effects in the Optical Spectra of Semiconductors
@@ -299,6 +313,20 @@
   issue : 24
 -
   ENTRYTYPE : article
+  ID : Baroni1986
+  author : Baroni, Stefano and Resta, Raffaele
+  title : Ab initiocalculation of the macroscopic dielectric constant in silicon
+  journal : Phys. Rev. B
+  year : 1986
+  volume : 33
+  pages : 7017-7021
+  publisher : American Physical Society (APS)
+  url : https://journals.aps.org/prb/abstract/10.1103/PhysRevB.33.7017
+  issn : 0163-1829
+  source : Crossref
+  month : ay, number = {10
+-
+  ENTRYTYPE : article
   ID : Baroni1987
   author : Baroni, S. and Giannozzi, P. and Testa, A.
   title : Green's-function approach to linear response in solids
@@ -342,25 +370,19 @@
   pages : 16392
 -
   ENTRYTYPE : article
-  ID : Bergeron2015
-  author : Bergeron, D. and Tremblay, A.-M. S.
-  title : Algorithms for optimized maximum entropy and diagnostic tools for analytic continuation
-  journal : arXiv e-prints
-  year : 2015
-  month : jul
-  adsnote : Provided by the SAO/NASA Astrophysics Data System
-  url : http://adsabs.harvard.edu/abs/2015arXiv150701012B
-  eprint : 1507.01012
-  archiveprefix : arXiv:cond-mat.str-el
--
-  ENTRYTYPE : article
   ID : Bergeron2016
-  author : D. Bergeron and A.-M.S. Tremblay
+  author : Bergeron, Dominic and Tremblay, A.-M. S.
   title : Algorithms for optimized maximum entropy and diagnostic tools for analytic continuation
   journal : Phys. Rev. E
   year : 2016
   volume : 94
   pages : 023303
+  numpages : 25
+  doi : 10.1103/PhysRevE.94.023303
+  url : https://link.aps.org/doi/10.1103/PhysRevE.94.023303
+  publisher : American Physical Society
+  month : Aug
+  issue : 2
 -
   ENTRYTYPE : article
   ID : Bieder2014
@@ -1000,6 +1022,20 @@
   address : Amsterdam
 -
   ENTRYTYPE : article
+  ID : Gruning2009
+  author : Grüning, Myrta and Marini, Andrea and Gonze, Xavier
+  title : Exciton-Plasmon States in Nanoscale Materials: {Breakdown} of the {Tamm−Dancoff} Approximation
+  journal : Nano Lett.
+  year : 2009
+  volume : 9
+  pages : 2820-2824
+  publisher : American Chemical Society (ACS)
+  url : http://pubs.acs.org/doi/abs/10.1021/nl803717g
+  issn : 1530-6984, 1530-6992
+  source : Crossref
+  month : ug, number = {8
+-
+  ENTRYTYPE : article
   ID : Gull2011
   author : Gull, E. and Millis, A.J. and Liechtenstein, A. I. and Rubtsov, A.N. and Troyer, M. and Werner, P.
   title : Continuous-time Monte Carlo methods for quantum impurity models
@@ -1199,6 +1235,21 @@
   issue : 16
 -
   ENTRYTYPE : article
+  ID : Hybertsen1985
+  author : Hybertsen, Mark S. and Louie, Steven G.
+  title : First-Principles Theory of Quasiparticles: {Calculation} of Band Gaps in Semiconductors and Insulators
+  journal : Phys. Rev. Lett.
+  year : 1985
+  volume : 55
+  pages : 1418-1421
+  publisher : American Physical Society (APS)
+  doi : 10.1103/physrevlett.55.1418
+  url : 10.1103/physrevlett.55.1418
+  issn : 0031-9007
+  source : Crossref
+  month : ep, number = {13
+-
+  ENTRYTYPE : article
   ID : Hybertsen1986
   author : M. S. Hybertsen and S. G. Louie
   title : Electron correlation in semiconductors and insulators: Band gaps and quasiparticle energies
@@ -1323,6 +1374,19 @@
   year : 2016
   volume : 93
   pages : 205147
+-
+  ENTRYTYPE : article
+  ID : Lebegue2003
+  author : Lebègue, S. and Arnaud, B. and Alouani, M. and Bloechl, P. E.
+  title : Implementation of an all-electron {GW} approximation based on the projector augmented wave method without plasmon pole approximation: {Application} to Si, {SiC,} {AlAs,} {InAs,} {NaH,} and {KH}
+  journal : Phys. Rev. B
+  year : 2003
+  volume : 67
+  publisher : American Physical Society (APS)
+  doi : 10.1103/physrevb.67.155208
+  issn : 0163-1829, 1095-3795
+  source : Crossref
+  month : pr, number = {15
 -
   ENTRYTYPE : article
   ID : Lebegue2010
@@ -1458,6 +1522,17 @@
   volume : 104
   pages : 4077
 -
+  ENTRYTYPE : book
+  ID : Mattuck1976
+  author : Mattuck, R.D.
+  title : A Guide to Feynman Diagrams in the Many-body Problem
+  year : 1976
+  publisher : Dover Publications, Incorporated
+  isbn : 9780486670478
+  lccn : 92004895
+  series : Dover Books on Physics Series
+  url : http://books.google.co.uk/books?id=pe-v8zfxE68C
+-
   ENTRYTYPE : article
   ID : Mecholsky2014
   author : Mecholsky, N.A. and Resca, L. and Pegg, I.L. and Fornari, M.
@@ -1497,6 +1572,20 @@
   pages : 1124
   publisher : APS
   number : 7
+-
+  ENTRYTYPE : article
+  ID : Miyake2000
+  author : Miyake, T. and Aryasetiawan, F.
+  title : Efficient algorithm for calculating noninteracting frequency-dependent linear response functions
+  journal : Phys. Rev. B
+  year : 2000
+  volume : 61
+  pages : 7172-7175
+  publisher : American Physical Society (APS)
+  doi : 10.1103/physrevb.61.7172
+  issn : 0163-1829, 1095-3795
+  source : Crossref
+  month : ar, number = {11
 -
   ENTRYTYPE : article
   ID : Momma2011
@@ -1693,7 +1782,7 @@
   ENTRYTYPE : article
   ID : Profeta2003
   author : M. Profeta and F. Mauri and C. J. Pickard
-  title : Accurate First Principles Prediction of 17 O NMR Parameters in SiO2:? Assignment of the Zeolite Ferrierite Spectrum
+  title : Accurate First Principles Prediction of 17 O NMR Parameters in SiO2: Assignment of the Zeolite Ferrierite Spectrum
   journal : J. Am. Chem. Soc.
   year : 2003
   volume : 125
@@ -1905,6 +1994,19 @@
   volume : 85
   pages : 045132
   doi : 10.1103/PhysRevB.85.045132
+-
+  ENTRYTYPE : article
+  ID : Shishkin2006
+  author : Shishkin, M. and Kresse, G.
+  title : Implementation and performance of the frequency-{dependentGWmethod} within the {PAW} framework
+  journal : Phys. Rev. B
+  year : 2006
+  volume : 74
+  publisher : American Physical Society (APS)
+  doi : 10.1103/physrevb.74.035101
+  issn : 1098-0121, 1550-235X
+  source : Crossref
+  month : ul, number = {3
 -
   ENTRYTYPE : article
   ID : Silvestrelli2008
@@ -2238,6 +2340,20 @@
   issue : 12
 -
   ENTRYTYPE : article
+  ID : Wiser1963
+  author : Wiser, Nathan
+  title : Dielectric Constant with Local Field Effects Included
+  journal : Phys. Rev.
+  year : 1963
+  volume : 129
+  pages : 62-69
+  publisher : American Physical Society (APS)
+  doi : 10.1103/physrev.129.62
+  issn : 0031-899X
+  source : Crossref
+  month : an, number = {1
+-
+  ENTRYTYPE : article
   ID : Xu2014
   author : Xu, B. and Verstraete, M. J.
   title : First Principles Explanation of the Positive Seebeck Coefficient of {L}ithium
@@ -2284,7 +2400,7 @@
 -
   ENTRYTYPE : article
   ID : Zwanziger2008
-  author : Zwanziger, J. W.and Torrent, M.
+  author : Zwanziger, J. W. and Torrent, M.
   title : First-Principles Calculation of Electric Field Gradients in Metals, Semiconductors, and Insulators
   journal : Applied Magnetic Resonance
   year : 2008
@@ -2297,7 +2413,7 @@
 -
   ENTRYTYPE : article
   ID : Zwanziger2009
-  author : J W Zwanziger
+  author : J. W. Zwanziger
   title : Computation of M\"ossbauer isomer shifts from first principles
   journal : Journal of Physics: Condensed Matter
   year : 2009

@@ -59,7 +59,6 @@ subroutine hybrid_corr(dtset,ixc,nkxc,mpi_enreg,nfft,ngfft,nspden,rhor,rprimd,hy
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'hybrid_corr'
- use interfaces_56_xc, except_this_one => hybrid_corr
 !End of the abilint section
 
  implicit none

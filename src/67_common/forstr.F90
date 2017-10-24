@@ -82,7 +82,7 @@
 !!              (ngfftf=ngfft for norm-conserving potential runs)
 !!  ngrvdw=size of grvdw(:,:); can be 0 or natom according to dtset%vdw_xc
 !!  nhat(nfftf,nspden*psps%usepaw)= -PAW only- compensation density
-!!  nkxc=second dimension of the array kxc, see rhohxc.f for a description
+!!  nkxc=second dimension of the array kxc, see rhotoxc.f for a description
 !!  npwarr(nkpt)=number of planewaves in basis and on boundary for each k
 !!  ntypat=number of types of atoms
 !!  nvresid(nfftf,nspden)=array for the residual of the density/potential
@@ -197,8 +197,8 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
  use m_pawfgrtab,        only : pawfgrtab_type
  use m_pawrhoij,         only : pawrhoij_type
  use m_pawfgr,           only : pawfgr_type
- use m_pawcprj,          only : pawcprj_type
- use m_fock,             only : fock_type,fock_updatecwaveocc
+ use m_pawcprj,          only : pawcprj_type,pawcprj_free,pawcprj_getdim,pawcprj_alloc
+ use m_fock,             only : fock_type
  use libxc_functionals,  only : libxc_functionals_is_hybrid
 
 !This section has been created automatically by the script Abilint (TD).
@@ -207,6 +207,7 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
 #define ABI_FUNC 'forstr'
  use interfaces_18_timing
  use interfaces_41_geometry
+ use interfaces_56_recipspace
  use interfaces_56_xc
  use interfaces_62_wvl_wfs
  use interfaces_65_paw
@@ -264,14 +265,16 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
 !Local variables-------------------------------
 !scalars
 
- integer :: comm_grid,ifft,ispden,occopt_,optgr,optgr2,option,optnc,optstr,optstr2,iorder_cprj,ctocprj_choice,idir,iatom,unpaw
+ integer :: comm_grid,ifft,ispden,ncpgr,occopt_,optgr,optgr2,option,optnc,optstr,optstr2,iorder_cprj,ctocprj_choice
+ integer :: idir,iatom,unpaw,mcgbz
+ integer,allocatable :: dimcprj(:)
  real(dp) ::dum,dum1,ucvol_
  logical :: apply_residual
 !arrays
  real(dp),parameter :: k0(3)=(/zero,zero,zero/)
  real(dp) :: kinstr(6),nlstr(6),tsec(2),strdum(6),gmet(3,3),gprimd(3,3),rmet(3,3)
  real(dp) :: dummy(0)
- real(dp),allocatable :: grnl(:),vlocal(:,:),vxc_hf(:,:),xcart(:,:)
+ real(dp),allocatable :: grnl(:),vlocal(:,:),vxc_hf(:,:),xcart(:,:),ylmbz(:,:),ylmgrbz(:,:,:)
  real(dp), ABI_CONTIGUOUS pointer :: resid(:,:)
 
 
@@ -309,14 +312,52 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
  else if (dtset%usewvl==0) then
    occopt_=0 ! This means that occ are now fixed
    if(dtset%usefock==1 .and. associated(fock)) then
-     if((dtset%optstress/=0).and.(psps%usepaw==1)) then
-       iatom=-1;idir=0;ctocprj_choice=3;iorder_cprj=0;unpaw=26
+!     if((dtset%optstress/=0).and.(psps%usepaw==1)) then
+     if((psps%usepaw==1).and.((dtset%optstress/=0).or.(dtset%optforces==2))) then
+       if(dtset%optstress==0) then 
+         ctocprj_choice=2
+         ncpgr=3
+       end if
+       if(dtset%optstress/=0) then
+         ctocprj_choice=20*optfor+3*dtset%optstress
+         ncpgr=6*dtset%optstress+3*optfor
+       end if
+       if (allocated(fock%fock_BZ%cwaveocc_prj)) then
+         call pawcprj_free(fock%fock_BZ%cwaveocc_prj)
+         ABI_DATATYPE_DEALLOCATE(fock%fock_BZ%cwaveocc_prj)
+         ABI_DATATYPE_ALLOCATE(fock%fock_BZ%cwaveocc_prj,(dtset%natom,fock%fock_BZ%mcprj))
+         ABI_ALLOCATE(dimcprj,(dtset%natom))
+         call pawcprj_getdim(dimcprj,dtset%natom,nattyp,dtset%ntypat,dtset%typat,pawtab,'O')
+         call pawcprj_alloc(fock%fock_BZ%cwaveocc_prj,ncpgr,dimcprj)
+         ABI_DEALLOCATE(dimcprj)
+       end if
+       iatom=-1;idir=0;iorder_cprj=0;unpaw=26
        call metric(gmet,gprimd,-1,rmet,rprimd,dum)
-       call ctocprj(fock%atindx,fock%cgocc,ctocprj_choice,fock%cwaveocc_prj,gmet,gprimd,iatom,idir,&
-&       iorder_cprj,fock%istwfk_bz,fock%kg_bz,fock%kptns_bz,fock%mband,mcg,fock%mcprj,dtset%mgfft,fock%mkpt,mpi_enreg,psps%mpsang,&
-&       dtset%mpw,dtset%natom,nattyp,fock%nbandocc_bz,dtset%natom,dtset%ngfft,fock%nkpt_bz,dtset%nloalg,fock%npwarr,dtset%nspinor,&
-&       dtset%nsppol,dtset%ntypat,dtset%paral_kgb,ph1d,psps,rmet,dtset%typat,ucvol,unpaw,&
-&       xred,ylm,ylmgr)
+       if (fock%fock_BZ%mkpt/=dtset%mkmem.or.(fock%fock_BZ%mpi_enreg%paral_hf ==1)) then
+         ABI_ALLOCATE(ylmbz,(dtset%mpw*fock%fock_BZ%mkpt,psps%mpsang*psps%mpsang*psps%useylm))
+         ABI_ALLOCATE(ylmgrbz,(dtset%mpw*fock%fock_BZ%mkpt,3,psps%mpsang*psps%mpsang*psps%useylm))
+         option=1; mcgbz=dtset%mpw*fock%fock_BZ%mkptband*fock%fock_common%my_nsppol
+         call initylmg(gprimd,fock%fock_BZ%kg_bz,fock%fock_BZ%kptns_bz,fock%fock_BZ%mkpt,fock%fock_BZ%mpi_enreg,&
+&         psps%mpsang,dtset%mpw,fock%fock_BZ%nbandocc_bz,fock%fock_BZ%mkpt,&
+&         fock%fock_BZ%npwarr,dtset%nsppol,option,rprimd,ylmbz,ylmgrbz)
+         call ctocprj(fock%fock_common%atindx,fock%fock_BZ%cgocc,ctocprj_choice,fock%fock_BZ%cwaveocc_prj,gmet,gprimd,iatom,idir,&
+&         iorder_cprj,fock%fock_BZ%istwfk_bz,fock%fock_BZ%kg_bz,fock%fock_BZ%kptns_bz,fock%fock_common%mband,mcgbz,&
+&         fock%fock_BZ%mcprj,dtset%mgfft,fock%fock_BZ%mkpt,fock%fock_BZ%mpi_enreg,psps%mpsang,&
+&         dtset%mpw,dtset%natom,nattyp,fock%fock_BZ%nbandocc_bz,dtset%natom,dtset%ngfft,fock%fock_BZ%mkpt,&
+&         dtset%nloalg,fock%fock_BZ%npwarr,dtset%nspinor,&
+&         dtset%nsppol,dtset%ntypat,dtset%paral_kgb,ph1d,psps,rmet,dtset%typat,ucvol,unpaw,&
+&         xred,ylmbz,ylmgrbz)
+         ABI_DEALLOCATE(ylmbz)
+         ABI_DEALLOCATE(ylmgrbz)
+       else
+         call ctocprj(fock%fock_common%atindx,fock%fock_BZ%cgocc,ctocprj_choice,fock%fock_BZ%cwaveocc_prj,gmet,gprimd,iatom,idir,&
+&         iorder_cprj,fock%fock_BZ%istwfk_bz,fock%fock_BZ%kg_bz,fock%fock_BZ%kptns_bz,fock%fock_common%mband,mcg,&
+&         fock%fock_BZ%mcprj,dtset%mgfft,fock%fock_BZ%mkpt,mpi_enreg,psps%mpsang,&
+&         dtset%mpw,dtset%natom,nattyp,fock%fock_BZ%nbandocc_bz,dtset%natom,dtset%ngfft,fock%fock_BZ%mkpt,&
+&         dtset%nloalg,fock%fock_BZ%npwarr,dtset%nspinor,&
+&         dtset%nsppol,dtset%ntypat,dtset%paral_kgb,ph1d,psps,rmet,dtset%typat,ucvol,unpaw,&
+&         xred,ylm,ylmgr)
+       end if
      end if
    end if
    call forstrnps(cg,cprj,dtset%ecut,dtset%ecutsm,dtset%effmass_free,eigen,electronpositron,fock,grnl,&
@@ -364,6 +405,7 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
 &   pawang,pawfgrtab,pawrhoij,pawtab,ph1df,psps,k0,rprimd,symrec,dtset%typat,ucvol_,vlocal,vxc,xred,&
 &   mpi_atmtab=mpi_enreg%my_atmtab, comm_atom=mpi_enreg%comm_atom,mpi_comm_grid=comm_grid)
    ABI_DEALLOCATE(vlocal)
+
  end if
  call timab(912,2,tsec)
  call timab(913,1,tsec)
@@ -408,8 +450,9 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
 !==========================================================================
 
  if (stress_needed==1.and.dtset%usewvl==0) then
-   if (dtset%usefock==1 .and. associated(fock).and.fock%optstr.and.psps%usepaw==0) then
-     fock%stress(1:3)=fock%stress(1:3)-energies%e_fock/ucvol
+!   if (dtset%usefock==1 .and. associated(fock).and.fock%fock_common%optstr.and.psps%usepaw==0) then
+   if (dtset%usefock==1 .and. associated(fock).and.fock%fock_common%optstr) then
+     fock%fock_common%stress(1:3)=fock%fock_common%stress(1:3)-energies%e_fock/ucvol
      if (n3xccc>0.and.psps%usepaw==0 .and. &
 &     (dtset%ixc==41.or.dtset%ixc==42.or.libxc_functionals_is_hybrid())) then
        ABI_ALLOCATE(vxc_hf,(nfftf,dtset%nspden))

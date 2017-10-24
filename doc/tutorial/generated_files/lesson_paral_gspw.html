@@ -4,7 +4,7 @@
 <!--                                                                                     -->
 <html>
 <head><title>Parallelism for the ground state</title>
-<link rel=stylesheet type="text/css" href="../formabinit.css">
+<link rel=stylesheet type="text/css" href="../../formabinit.css">
 <script type="text/x-mathjax-config">
 MathJax.Hub.Config({
   jax: ["input/TeX","output/HTML-CSS"],
@@ -128,7 +128,8 @@ Mancini, S. Mazevet, M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel,
 G.-M. Rignanese, D. Sangalli, R. Shaltaf, M. Torrent, M.J. Verstraete,
 G. Zerah, J.W. Zwanziger</em><cite>,
     Computer Phys. Commun. 180, 2582-2615 (2009).
-    "ABINIT : First-principles approach of materials and nanosystem properties."</cite></li><li><font id="text">the presentation at the <a href="http://www.abinit.org/community/events/program3rd">ABINIT workshop 2007</a></font></li>
+    "ABINIT : First-principles approach of materials and nanosystem properties."</cite></li>
+  <li><font id="text">the presentation of F. Bottin at the <a href="https://www.abinit.org/sites/default/files/oldsites/workshop_07/program.html">ABINIT workshop 2007</a> (Monday 29, session 2).</font></li>
 </ul>
 <font id="text">You are strongly suggested to read these documents before beginning this tutorial. You might learn a lot of useful things. <br>
 <br>
@@ -378,7 +379,7 @@ to improve the convergence whatever the timing</span><span style="font-weight: b
  <p>Up to now, we only performed a GB parallelization. This implies
 parallelization over 2 levels of PWs or over 2 levels of bands and FFTs,
 for different sections of the code (see the <a href="https://arxiv.org/abs/0707.3405">paper</a>
-or <a href="http://www.abinit.org/community/events/program3rd">presentation</a>). If the system
+or <a href="https://www.abinit.org/community/events/program3rd">presentation</a>). If the system
 has more than 1 <span style="font-weight: bold;">k</span>-point,
 one can add a third level of parallelization and perform a real KBG
 parallelization. There is no additional difficulty in adding 
