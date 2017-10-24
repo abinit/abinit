@@ -133,6 +133,8 @@ subroutine chkvars (string)
  list_vars=trim(list_vars)//' gwls_list_proj_freq gwls_nseeds gwls_n_proj_freq gwls_recycle'
  list_vars=trim(list_vars)//' gwls_first_seed gwls_model_parameter gwls_npt_gauss_quad'
  list_vars=trim(list_vars)//' gwls_diel_model gwls_print_debug gwls_band_index gwls_exchange gwls_correlation'
+!H
+ list_vars=trim(list_vars)//' hybrid_mixing hybrid_mixing_sr hybrid_range_dft hybrid_range_fock'
 !I
  list_vars=trim(list_vars)//' iatcon iatfix iatfixx iatfixy iatfixz iatsph'
  list_vars=trim(list_vars)//' iboxcut icoulomb icutcoul ieig2rf'

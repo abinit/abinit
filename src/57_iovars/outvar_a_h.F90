@@ -1156,6 +1156,18 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
  dprarr(1,:)=dtsets(:)%gw_toldfeig
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'gw_toldfeig','ENE',0)
 
+ dprarr(1,:)=dtsets(:)%hybrid_mixing
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'hybrid_mixing','DPR',0)
+
+ dprarr(1,:)=dtsets(:)%hybrid_mixing_sr
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'hybrid_mixing_sr','DPR',0)
+
+ dprarr(1,:)=dtsets(:)%hybrid_range_dft
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'hybrid_range_dft','DPR',0)
+
+ dprarr(1,:)=dtsets(:)%hybrid_range_fock
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'hybrid_range_fock','DPR',0)
+
 
 !###########################################################
 !## Deallocation for generic arrays, and for n-z variables
