@@ -12,7 +12,7 @@
  Corning Inc. and other collaborators, see ~abinit/doc/developers/contributors.txt .
  Please read ~abinit/doc/users/acknowledgments.html for suggested
  acknowledgments of the ABINIT effort.
- For more information, see https://www.abinit.org .
+ For more information, see http://www.abinit.org .
 
 .Starting date : Mon  4 Apr 2016.
 - ( at 12h04 )
@@ -1578,8 +1578,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     117.926     117.783
   Has kij   ......................................    0
   Has tproj ......................................    0
   Has tvale ......................................    0
-  Has vhtnzc .....................................    2
-  Has vhnzc ......................................    2
+  Has vhtnzc .....................................    0
+  Has vhnzc ......................................    0
   Has nabla ......................................    2
   Has shapefuncg .................................    0
   Has wvl ........................................    0
@@ -1620,8 +1620,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     117.926     117.783
   Has kij   ......................................    0
   Has tproj ......................................    0
   Has tvale ......................................    0
-  Has vhtnzc .....................................    2
-  Has vhnzc ......................................    2
+  Has vhtnzc .....................................    0
+  Has vhnzc ......................................    0
   Has nabla ......................................    2
   Has shapefuncg .................................    0
   Has wvl ........................................    0
@@ -1660,8 +1660,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     117.926     117.783
   Has kij   ......................................    0
   Has tproj ......................................    0
   Has tvale ......................................    0
-  Has vhtnzc .....................................    2
-  Has vhnzc ......................................    2
+  Has vhtnzc .....................................    0
+  Has vhnzc ......................................    0
   Has nabla ......................................    2
   Has shapefuncg .................................    0
   Has wvl ........................................    0
@@ -2165,8 +2165,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     117.926     117.783
   Has kij   ......................................    0
   Has tproj ......................................    0
   Has tvale ......................................    0
-  Has vhtnzc .....................................    2
-  Has vhnzc ......................................    2
+  Has vhtnzc .....................................    0
+  Has vhnzc ......................................    0
   Has nabla ......................................    0
   Has shapefuncg .................................    0
   Has wvl ........................................    0
@@ -2207,8 +2207,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     117.926     117.783
   Has kij   ......................................    0
   Has tproj ......................................    0
   Has tvale ......................................    0
-  Has vhtnzc .....................................    2
-  Has vhnzc ......................................    2
+  Has vhtnzc .....................................    0
+  Has vhnzc ......................................    0
   Has nabla ......................................    0
   Has shapefuncg .................................    0
   Has wvl ........................................    0
@@ -2247,8 +2247,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     117.926     117.783
   Has kij   ......................................    0
   Has tproj ......................................    0
   Has tvale ......................................    0
-  Has vhtnzc .....................................    2
-  Has vhnzc ......................................    2
+  Has vhtnzc .....................................    0
+  Has vhnzc ......................................    0
   Has nabla ......................................    0
   Has shapefuncg .................................    0
   Has wvl ........................................    0
@@ -2394,7 +2394,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     117.926     117.783
    4  0.241  0.241  0.097  9.978  0.209
    5  0.041  0.202  0.194  0.209  9.089
 
-   bare interaction value of J=1/((2l+1)(2l)) \sum_{m1/=m2} U(m1,m2,m2,m1)=    0.1831   -0.0000
+   bare interaction value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=    0.2510   -0.0000
 
   Hund coupling J2=U(m1,m2,m2,m1) for the bare interaction
  -      1      2      3      4      5
@@ -2440,7 +2440,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     117.926     117.783
    4  0.216  0.216  0.088  3.429  0.184
    5  0.040  0.180  0.172  0.184  3.107
 
-   cRPA interaction value of J=1/((2l+1)(2l)) \sum_{m1/=m2} U(m1,m2,m2,m1)=    0.1631    0.0000
+   cRPA interaction value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=    0.2232    0.0000
 
   Hund coupling J2=U(m1,m2,m2,m1) for the cRPA interaction
  -      1      2      3      4      5
@@ -2480,7 +2480,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     117.926     117.783
    4  0.215  0.215  0.088  3.553  0.185
    5  0.040  0.180  0.172  0.185  3.098
 
-   cRPA interaction value of J=1/((2l+1)(2l)) \sum_{m1/=m2} U(m1,m2,m2,m1)=    0.1630   -0.0005
+   cRPA interaction value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=    0.2233   -0.0009
 
   Hund coupling J2=U(m1,m2,m2,m1) for the cRPA interaction
  -      1      2      3      4      5
@@ -2520,7 +2520,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     117.926     117.783
    4  0.213  0.213  0.088  2.471  0.184
    5  0.040  0.179  0.167  0.184  2.262
 
-   cRPA interaction value of J=1/((2l+1)(2l)) \sum_{m1/=m2} U(m1,m2,m2,m1)=    0.1614   -0.0030
+   cRPA interaction value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=    0.2197   -0.0050
 
   Hund coupling J2=U(m1,m2,m2,m1) for the cRPA interaction
  -      1      2      3      4      5
@@ -2560,7 +2560,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     117.926     117.783
    4  0.213  0.213  0.087  3.496  0.181
    5  0.040  0.179  0.172  0.181  3.201
 
-   cRPA interaction value of J=1/((2l+1)(2l)) \sum_{m1/=m2} U(m1,m2,m2,m1)=    0.1614   -0.0056
+   cRPA interaction value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=    0.2210   -0.0073
 
   Hund coupling J2=U(m1,m2,m2,m1) for the cRPA interaction
  -      1      2      3      4      5
@@ -2574,10 +2574,10 @@ _setup2: Arith. and geom. avg. npw (full set) are     117.926     117.783
             Average U and J as a function of frequency
    -------------------------------------------------------------
          omega           U(omega)            J(omega)
-        0.000      3.0005   -0.0000      0.1631    0.0000
-        2.000      3.0244   -0.1604      0.1630   -0.0005
-        4.000      2.1166   -0.6069      0.1614   -0.0030
-        6.000      3.0699   -1.5916      0.1614   -0.0056
+        0.000      3.0005   -0.0000      0.2232    0.0000
+        2.000      3.0244   -0.1604      0.2233   -0.0009
+        4.000      2.1166   -0.6069      0.2197   -0.0050
+        6.000      3.0699   -1.5916      0.2210   -0.0073
    -------------------------------------------------------------
 
 == END DATASET(S) ==============================================================
@@ -3002,7 +3002,7 @@ P           mkmem           4
  Note also that it will be of great value to readers of publications presenting these results,
  to read papers enabling them to understand the theoretical formalism and details
  of the ABINIT implementation.
- For information on why they are suggested, see also https://www.abinit.org/about/?text=acknowledgments.
+ For information on why they are suggested, see also http://www.abinit.org/about/?text=acknowledgments.
 -
 - [1] Screened Coulomb interaction calculations: cRPA implementation and applications 
 - to dynamical screening and self-consistency in uranium dioxide and cerium
@@ -3033,7 +3033,7 @@ P           mkmem           4
 - Computer Phys. Comm. 180, 2582-2615 (2009).
 - Comment : the third generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
-- is available at https://www.abinit.org/about/ABINIT_CPC_v10.pdf .
+- is available at http://www.abinit.org/about/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 -
 - [6] A brief introduction to the ABINIT software package.
@@ -3044,7 +3044,7 @@ P           mkmem           4
 - Comment : the second generic paper describing the ABINIT project. Note that this paper
 - should be cited especially if you are using the GW part of ABINIT, as several authors
 - of this part are not in the list of authors of the first or third paper.
-- The .pdf of the latter paper is available at https://www.abinit.org/about/zfk_0505-06_558-562.pdf.
+- The .pdf of the latter paper is available at http://www.abinit.org/about/zfk_0505-06_558-562.pdf.
 - Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
 - the licence allows the authors to put it on the Web).
 -
