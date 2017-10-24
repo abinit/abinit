@@ -83,6 +83,7 @@
 !!  usepaw= 0 for non paw calculation; =1 for paw calculation
 !!  vtrial(nfft,nspden)=the trial potential that gave vresid.
 !!  xred(3,natom)=reduced dimensionless atomic coordinates
+!!  tauresid(nfft,nspden*dtset%usekden)=array for kinetic energy density residue (out - in)
 !!
 !! OUTPUT
 !!  dbl_nnsclo=1 if nnsclo has to be doubled to secure the convergence.
@@ -99,6 +100,9 @@
 !!    pawrhoij(natom)%nrhoijsel=number of non-zero values of rhoij
 !!    pawrhoij(natom)%rhoijp(cplex*lmn2_size,nspden)= new (mixed) value of rhoij quantities in PACKED STORAGE
 !!    pawrhoij(natom)%rhoijselect(lmn2_size)=select the non-zero values of rhoij
+!!  taug(2,nfft*dtset%usekden)=array for Fourier transform of kinetic
+!!     energy density
+!!  taur(nfft,nspden*dtset%usekden)=array for kinetic energy density
 !!
 !! NOTES
 !!  In case of PAW calculations:
@@ -130,7 +134,8 @@ subroutine newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,dtset,etotal,
 &  moved_atm_inside,mpi_enreg,my_natom,nattyp,nfft,&
 &  nfftmix,nfftmix_per_nfft,ngfft,ngfftmix,nkxc,npawmix,npwdiel,&
 &  nresid,ntypat,n1xccc,pawrhoij,pawtab,&
-&  ph1d,psps,rhog,rhor,rprimd,susmat,usepaw,vtrial,wvl,wvl_den,xred)
+&  ph1d,psps,rhog,rhor,rprimd,susmat,usepaw,vtrial,wvl,wvl_den,xred,&
+&  taug,taur,tauresid)
 
  use defs_basis
  use defs_datatypes
@@ -182,12 +187,17 @@ subroutine newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,dtset,etotal,
  real(dp),intent(in), target :: vtrial(nfft,dtset%nspden)
  real(dp),intent(inout) :: dielinv(2,npwdiel,dtset%nspden,npwdiel,dtset%nspden)
  real(dp),intent(inout), target :: dtn_pc(3,dtset%natom)
- real(dp), intent(inout) :: gmet(3,3)
+ real(dp),intent(inout) :: gmet(3,3)
+!TODO: nresid appears to be only intent in here.
  real(dp),intent(inout) :: kxc(nfft,nkxc),nresid(nfft,dtset%nspden)
  real(dp),intent(inout) :: ph1d(2,3*(2*mgfft+1)*dtset%natom)
  real(dp),intent(inout) :: rhor(nfft,dtset%nspden)
- real(dp), intent(inout), target :: xred(3,dtset%natom)
+ real(dp),intent(inout), target :: xred(3,dtset%natom)
  real(dp),intent(inout) :: rhog(2,nfft) !vz_i
+ real(dp),intent(inout), optional :: taug(2,nfft*dtset%usekden) 
+ real(dp),intent(inout), optional :: taur(nfft,dtset%nspden*dtset%usekden) 
+ real(dp),intent(inout), optional :: tauresid(nfft,dtset%nspden*dtset%usekden) 
+ 
  type(pawrhoij_type),intent(inout) :: pawrhoij(my_natom*psps%usepaw)
  type(pawtab_type),intent(in) :: pawtab(ntypat*psps%usepaw)
 
@@ -205,7 +215,11 @@ subroutine newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,dtset,etotal,
  real(dp),allocatable :: magng(:,:,:)
  real(dp),allocatable :: nresid0(:,:),nrespc(:,:),nreswk(:,:,:)
  real(dp),allocatable :: rhoijrespc(:),rhoijtmp(:,:)
+! TODO : these should be allocatables not pointers: is there some reason to
+!  keep them this way, eg an interface somewhere?
  real(dp), pointer :: rhomag(:,:), npaw(:)
+ real(dp),allocatable :: tauresid0(:,:)
+ real(dp),allocatable :: taumag(:,:)
 
 ! *************************************************************************
 
@@ -227,6 +241,12 @@ subroutine newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,dtset,etotal,
      message = 'newrho: usewvl == 1 and wvl_bigdft_comp==1 not allowed!'
      MSG_BUG(message)
    end if
+ end if
+
+ if (usepaw==1 .and. dtset%usekden>0) then
+   write (message, "(2a)") 'PAW mixing not coded yet for kinetic energy density.',&
+&     ' No mixing will be done on PAW bits, something may explode'
+   MSG_WARNING(message)
  end if
 
  if(ispmix/=2.and.nfftmix/=nfft) then
@@ -253,9 +273,17 @@ subroutine newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,dtset,etotal,
 !Select components of density to be mixed
  ABI_ALLOCATE(rhomag,(ispmix*nfftmix,dtset%nspden))
  ABI_ALLOCATE(nresid0,(ispmix*nfftmix,dtset%nspden))
+ ABI_ALLOCATE(taumag,(ispmix*nfftmix,dtset%nspden*dtset%usekden))
+ ABI_ALLOCATE(tauresid0,(ispmix*nfftmix,dtset%nspden*dtset%usekden))
+ ! real space and all fft points are here
  if (ispmix==1.and.nfft==nfftmix) then
    rhomag(:,1:dtset%nspden)=rhor(:,1:dtset%nspden)
    nresid0(:,1:dtset%nspden)=nresid(:,1:dtset%nspden)
+   if (dtset%usekden>0) then
+     taumag(:,1:dtset%nspden)=taur(:,1:dtset%nspden)
+     tauresid0(:,1:dtset%nspden)=tauresid(:,1:dtset%nspden)
+   end if
+ ! recip space and all fft points are here
  else if (nfft==nfftmix) then
    do ispden=1,dtset%nspden
      call fourdp(1,nresid0(:,ispden),nresid(:,ispden),-1,mpi_enreg,nfft,ngfft,dtset%paral_kgb,tim_fourdp9)
@@ -266,7 +294,24 @@ subroutine newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,dtset,etotal,
        call fourdp(1,rhomag(:,ispden),rhor(:,ispden),-1,mpi_enreg,nfft,ngfft,dtset%paral_kgb,tim_fourdp9)
      end do
    end if
+   if (dtset%usekden>0) then
+     do ispden=1,dtset%nspden
+       call fourdp(1,tauresid0(:,ispden),tauresid(:,ispden),-1,mpi_enreg,nfft,ngfft,dtset%paral_kgb,tim_fourdp9)
+     end do
+     taumag(:,1)=reshape(taug,(/2*nfft/))
+     if (dtset%nspden>1) then
+       do ispden=2,dtset%nspden
+         call fourdp(1,taumag(:,ispden),taur(:,ispden),-1,mpi_enreg,nfft,ngfft,dtset%paral_kgb,tim_fourdp9)
+       end do
+     end if
+   end if
+ ! not all fft points are here - presumes recip space
  else
+   if (dtset%usekden>0) then
+     write (message, "(2a)") 'ffttomix not coded yet for kinetic energy density.',&
+&       ' No mixing will be done or something will explode'
+     MSG_WARNING(message)
+   end if
    fact=dielar(4)-1._dp
    ABI_ALLOCATE(nreswk,(2,nfft,dtset%nspden))
    do ispden=1,dtset%nspden
@@ -302,11 +347,18 @@ subroutine newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,dtset,etotal,
 
 !Retrieve "input" density from "output" density and density residual
  rhomag(:,1:dtset%nspden)=rhomag(:,1:dtset%nspden)-nresid0(:,1:dtset%nspden)
+ if (dtset%usekden>0) then
+   taumag(:,1:dtset%nspden)=taumag(:,1:dtset%nspden)-tauresid0(:,1:dtset%nspden)
+ end if
 
 !If nspden==2, separate density and magnetization
  if (dtset%nspden==2) then
    rhomag (:,2)=two*rhomag (:,2)-rhomag (:,1)
    nresid0(:,2)=two*nresid0(:,2)-nresid0(:,1)
+   if (dtset%usekden>0) then
+     taumag (:,2)=two*taumag (:,2)-taumag (:,1)
+     tauresid0(:,2)=two*tauresid0(:,2)-tauresid0(:,1)
+   end if
  end if
  if (usepaw==1.and.my_natom>0) then
    if (pawrhoij(1)%nspden==2) then
@@ -372,6 +424,7 @@ subroutine newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,dtset,etotal,
  end if
  ABI_DEALLOCATE(nresid0)
  ABI_DEALLOCATE(nrespc)
+ ABI_DEALLOCATE(tauresid0)
 
 !PAW: either use the array f_paw or the array f_paw_disk
  if (usepaw==1) then
@@ -543,8 +596,13 @@ subroutine newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,dtset,etotal,
      pawrhoij(iatom)%nrhoijsel=nselect
      ABI_DEALLOCATE(rhoijtmp)
    end do
- end if
+ end if   ! usepaw==1.and.dtset%iscf/=15.and.dtset%iscf/=16
  ABI_DEALLOCATE(npaw)
+
+!MGGA: apply a simple mixing to taur
+ if (dtset%usekden > 0)then
+   
+ end if
 
 !Eventually write the data on disk and deallocate f_fftgr_disk
  call ab7_mixing_eval_deallocate(mix)
@@ -555,12 +613,29 @@ subroutine newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,dtset,etotal,
    if(dtset%usewvl==0) then
      call fourdp(1,rhog,rhor(:,1),-1,mpi_enreg,nfft,ngfft,dtset%paral_kgb,tim_fourdp9)
    end if
+   if (dtset%usekden>0) then
+     taur(:,1:dtset%nspden*dtset%usekden)=taumag(:,1:dtset%nspden*dtset%usekden)
+     if(dtset%usewvl==0) then
+       call fourdp(1,taug,taur(:,1),-1,mpi_enreg,nfft,ngfft,dtset%paral_kgb,tim_fourdp9)
+     end if
+   end if
  else if (nfft==nfftmix) then
    do ispden=1,dtset%nspden
      call fourdp(1,rhomag(:,ispden),rhor(:,ispden),+1,mpi_enreg,nfft,ngfft,dtset%paral_kgb,tim_fourdp9)
    end do
    rhog(:,:)=reshape(rhomag(:,1),(/2,nfft/))
+   if (dtset%usekden>0) then
+     do ispden=1,dtset%nspden
+       call fourdp(1,taumag(:,ispden),taur(:,ispden),+1,mpi_enreg,nfft,ngfft,dtset%paral_kgb,tim_fourdp9)
+     end do
+     taug(:,:)=reshape(taumag(:,1),(/2,nfft/))
+   end if
  else
+   if (dtset%usekden>0) then
+     write (message, "(2a)") 'ffttomix not coded yet for kinetic energy density.',&
+&       ' No mixing will be done or something will explode'
+     MSG_WARNING(message)
+   end if
    do ifft=1,nfftmix
      jfft=mixtofft(ifft)
      rhog(1:2,jfft)=rhomag(2*ifft-1:2*ifft,1)
@@ -578,6 +653,7 @@ subroutine newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,dtset,etotal,
    end if
  end if
  ABI_DEALLOCATE(rhomag)
+ ABI_DEALLOCATE(taumag)
 
 !Set back rho in (up+dn,up) form if nspden=2
  if (dtset%nspden==2) rhor(:,2)=half*(rhor(:,1)+rhor(:,2))
