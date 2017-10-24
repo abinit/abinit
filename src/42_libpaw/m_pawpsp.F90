@@ -1815,7 +1815,7 @@ subroutine pawpsp_calc(core_mesh,epsatm,ffspl,imainmesh,ixc,lnmax,&
 !Perfom tests on meshes
 
 ! initialise logical 
- non_magnetic_xc=.true. 
+ non_magnetic_xc=.false. 
 
 !Are radial meshes for Phi and Vloc compatibles ?
 ! if (vloc_mesh%rmax<pawrad%rmax) then
