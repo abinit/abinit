@@ -165,7 +165,7 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
  real(dp) :: boxcut,compch_fft,compch_sph,ecore,ecut_eff,ecutdg_eff,ecutf
  real(dp) :: eei,epaw,epawdc,enxc,etot,fermie
  real(dp) :: gsqcut,gsqcut_eff,gsqcutc_eff
- real(dp) :: rdum,residm,tolwfr,ucvol,vxcavg
+ real(dp) :: rdum,residm,ucvol,vxcavg
  character(len=500) :: message
  character(len=fnlen) :: dscrpt
  type(pawang_type) :: pawang1
@@ -1064,17 +1064,6 @@ end if
    call status(0,dtfil%filstat,iexit,level,'call ioddb8_ou')
 
    dscrpt=' Note : temporary (transfer) database '
-!  tolwfr must be initialized here, but it is a dummy value
-   tolwfr=1.0_dp
-   call ddb_io_out(dscrpt,dtfil%fnameabo_ddb,natom,dtset%mband,&
-&   dtset%nkpt,dtset%nsym,psps%ntypat,dtfil%unddb,DDB_VERSION,&
-&   dtset%acell_orig(1:3,1),dtset%amu_orig(:,1),dtset%dilatmx,dtset%ecut,dtset%ecutsm,&
-&   dtset%intxc,dtset%iscf,dtset%ixc,dtset%kpt,dtset%kptnrm,&
-&   natom,dtset%nband,dtset%ngfft,dtset%nkpt,dtset%nspden,dtset%nspinor,&
-&   dtset%nsppol,dtset%nsym,psps%ntypat,occ,dtset%occopt,dtset%pawecutdg,&
-&   dtset%rprim_orig(1:3,1:3,1),dtset%dfpt_sciss,dtset%spinat,dtset%symafm,dtset%symrel,&
-&   dtset%tnons,tolwfr,dtset%tphysel,dtset%tsmear,&
-&   dtset%typat,dtset%usepaw,dtset%wtk,xred,psps%ziontypat,dtset%znucl)
 
    call ddb_hdr_init(ddb_hdr,dtset,psps,pawtab,DDB_VERSION,dscrpt,&
 &                    1,xred=xred,occ=occ)
