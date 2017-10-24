@@ -593,7 +593,7 @@ P           mkmem           8
    4  0.008  0.008  0.003  4.814  0.007
    5  0.002  0.007  0.013  0.007  4.926
 
-   bare interaction value of J=U-1/((2l+1)(2l)) \sum_{m1/=m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=    0.0136   -0.0000
+   bare interaction value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=    0.0136   -0.0000
 
   Hund coupling J2=U(m1,m2,m2,m1) for the bare interaction
  -      1      2      3      4      5
@@ -639,7 +639,7 @@ P           mkmem           8
    4  0.006  0.006  0.003  0.115  0.006
    5  0.002  0.006  0.010  0.006  0.169
 
-   cRPA interaction value of J=U-1/((2l+1)(2l)) \sum_{m1/=m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=    0.0099    0.0000
+   cRPA interaction value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=    0.0099    0.0000
 
   Hund coupling J2=U(m1,m2,m2,m1) for the cRPA interaction
  -      1      2      3      4      5
