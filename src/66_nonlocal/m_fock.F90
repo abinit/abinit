@@ -137,10 +137,10 @@ module m_fock
     !  cutoff value on G**2 for sphere inside fft box.
     !   (gsqcut=(boxcut**2)*ecut/(2.d0*(Pi**2)). Used in hartre
 
-  real(dp) :: hybrid_mixing
+  real(dp) :: hyb_mixing
     ! hybrid mixing coefficient for the Fock contribution
 
-  real(dp) :: hybrid_mixing_sr
+  real(dp) :: hyb_mixing_sr
     ! hybrid mixing coefficient for the short-range Fock contribution
 
   real(dp) :: hyb_range_dft
@@ -768,44 +768,44 @@ subroutine fock_init(atindx,cplex,dtset,fock,gsqcut,kg,mpi_enreg,nattyp,npwarr,p
    fockcommon%ixc = dtset%ixc
 
 !  Default values for the parameters
-   fockcommon%hybrid_mixing=zero
-   fockcommon%hybrid_mixing_sr=zero
+   fockcommon%hyb_mixing=zero
+   fockcommon%hyb_mixing_sr=zero
    fockcommon%hyb_range_dft=zero
    fockcommon%hyb_range_fock=zero
 
    if (dtset%ixc==40) then
-     fockcommon%hybrid_mixing=one
-     fockcommon%hybrid_mixing_sr=zero
+     fockcommon%hyb_mixing=one
+     fockcommon%hyb_mixing_sr=zero
      fockcommon%hyb_range_dft=zero
      fockcommon%hyb_range_fock=zero
      msg=' - This is an Hartree-Fock calculation. The mixing coefficient alpha is set to 1.'
      call wrtout(std_out,msg,'COLL')
    end if
    if (dtset%ixc==41) then
-     fockcommon%hybrid_mixing=one/four
-     fockcommon%hybrid_mixing_sr=zero
+     fockcommon%hyb_mixing=one/four
+     fockcommon%hyb_mixing_sr=zero
      fockcommon%hyb_range_dft=zero
      fockcommon%hyb_range_fock=zero
      msg=' - This is a standard PBE0 calculation. The mixing coefficient alpha is set to 0.25.'
      call wrtout(std_out,msg,'COLL')
    end if
    if (dtset%ixc==42) then
-     fockcommon%hybrid_mixing=one/three
-     fockcommon%hybrid_mixing_sr=zero
+     fockcommon%hyb_mixing=one/three
+     fockcommon%hyb_mixing_sr=zero
      fockcommon%hyb_range_dft=zero
      fockcommon%hyb_range_fock=zero
      msg=' - This is a modified PBE0 calculation. The mixing coefficient alpha is set to 0.33.'
      call wrtout(std_out,msg,'COLL')
    end if
    if (dtset%ixc<0) then
-     call libxc_functionals_get_hybridparams(hyb_mixing=fockcommon%hybrid_mixing,hyb_mixing_sr=fockcommon%hybrid_mixing_sr,&
+     call libxc_functionals_get_hybridparams(hyb_mixing=fockcommon%hyb_mixing,hyb_mixing_sr=fockcommon%hybrid_mixing_sr,&
 &                                            hyb_range=fockcommon%hyb_range_dft)
      fockcommon%hyb_range_fock=fockcommon%hybrid_range_dft
    end if
 
 !  Take the values from the input variables
-   if(abs(dtset%hybrid_mixing+one)>tol8)fockcommon%hybrid_mixing=dtset%hybrid_mixing
-   if(abs(dtset%hybrid_mixing_sr+one)>tol8)fockcommon%hybrid_mixing_sr=dtset%hybrid_mixing_sr
+   if(abs(dtset%hyb_mixing+one)>tol8)fockcommon%hybrid_mixing=dtset%hybrid_mixing
+   if(abs(dtset%hyb_mixing_sr+one)>tol8)fockcommon%hybrid_mixing_sr=dtset%hybrid_mixing_sr
    if(abs(dtset%hyb_range_dft+one)>tol8 .and. abs(dtset%hybrid_range_fock+one)>tol8)then
      fockcommon%hyb_range_dft=dtset%hybrid_range_dft
      fockcommon%hyb_range_fock=dtset%hybrid_range_fock
@@ -819,15 +819,15 @@ subroutine fock_init(atindx,cplex,dtset,fock,gsqcut,kg,mpi_enreg,nattyp,npwarr,p
 
 !  Possibly modify the values from libxc
    if (dtset%ixc<0) then
-     call libxc_functionals_set_hybridparams(hyb_mixing=fockcommon%hybrid_mixing,hyb_mixing_sr=fockcommon%hybrid_mixing_sr,&
+     call libxc_functionals_set_hybridparams(hyb_mixing=fockcommon%hyb_mixing,hyb_mixing_sr=fockcommon%hybrid_mixing_sr,&
 &                                            hyb_range=fockcommon%hyb_range_dft)
 !DEBUG
 !    write(std_out,*)' m_fock.F90/fock_init.F90 : fockcommon%hyb_range=',fockcommon%hybrid_range
-!    write(std_out,*)' m_fock.F90/fock_init.F90 : fockcommon%hybrid_mixing=',fockcommon%hybrid_mixing
-!    write(std_out,*)' m_fock.F90/fock_init.F90 : fockcommon%hybrid_mixing_sr=',fockcommon%hybrid_mixing_sr
+!    write(std_out,*)' m_fock.F90/fock_init.F90 : fockcommon%hyb_mixing=',fockcommon%hybrid_mixing
+!    write(std_out,*)' m_fock.F90/fock_init.F90 : fockcommon%hyb_mixing_sr=',fockcommon%hybrid_mixing_sr
 !    fockcommon%hyb_range=1.587
 !ENDDEBUG
-     if (abs(fockcommon%hybrid_mixing)>tol8.or.abs(fockcommon%hybrid_mixing_sr)>tol8) then
+     if (abs(fockcommon%hyb_mixing)>tol8.or.abs(fockcommon%hybrid_mixing_sr)>tol8) then
        msg=' - This is a hybrid XC functional from LibXC.' 
        msg=msg//' The mixing and range coeffs are set accordingly, then possibly overriden by expert user.'
        call wrtout(std_out,msg,'COLL')
@@ -1424,8 +1424,8 @@ subroutine fock_common_destroy(fock)
 !* [description of divergence in |q+G|=0]
 !* Put the real (dp) to 0
  fock%gsqcut=zero
- fock%hybrid_mixing=zero
- fock%hybrid_mixing_sr=zero
+ fock%hyb_mixing=zero
+ fock%hyb_mixing_sr=zero
  fock%hyb_range_dft=zero
  fock%hyb_range_fock=zero
 
@@ -1698,8 +1698,8 @@ subroutine fock_update_exc(fock_energy,xc_energy,xcdc_energy)
 
 ! *************************************************************************
 
-!xc_energy = fock%hybrid_mixing*fock_energy
-!xcdc_energy = two*fock%hybrid_mixing*fock_energy
+!xc_energy = fock%hyb_mixing*fock_energy
+!xcdc_energy = two*fock%hyb_mixing*fock_energy
  xc_energy =  fock_energy
  xcdc_energy = two*fock_energy
 !CMartins : For an atom, ewald should be set to zero (at the beginning of the loop) and
@@ -2270,8 +2270,8 @@ subroutine fock_print(fockcommon,fockbz,header,unit,mode_paral,prtvol)
  ! Options
  call wrtout(my_unt,sjoin(" nnsclo_hf .......",itoa(fockcommon%nnsclo_hf)),my_mode)
  call wrtout(my_unt,sjoin(" ixc .............",itoa(fockcommon%ixc)),my_mode)
- call wrtout(my_unt,sjoin(" hybrid mixing....",ftoa(fockcommon%hybrid_mixing)),my_mode)
- call wrtout(my_unt,sjoin(" hybrid SR mixing ",ftoa(fockcommon%hybrid_mixing_sr)),my_mode)
+ call wrtout(my_unt,sjoin(" hybrid mixing....",ftoa(fockcommon%hyb_mixing)),my_mode)
+ call wrtout(my_unt,sjoin(" hybrid SR mixing ",ftoa(fockcommon%hyb_mixing_sr)),my_mode)
  call wrtout(my_unt,sjoin(" hybrid range DFT ",ftoa(fockcommon%hyb_range_dft)),my_mode)
  call wrtout(my_unt,sjoin(" hybrid range Fock",ftoa(fockcommon%hyb_range_fock)),my_mode)
 
@@ -2303,8 +2303,8 @@ end subroutine fock_print
 !!  divgq0= value of the integration of the Coulomb singularity 4pi\int_BZ 1/q^2 dq. Used if q = Gamma
 !!  gmet(3,3)=metrix tensor in G space in Bohr**-2.
 !!  izero=if 1, unbalanced components of V(q,g) are set to zero
-!!  hybrid_mixing=hybrid mixing coefficient for the Fock contribution
-!!  hybrid_mixing_sr=hybrid mixing coefficient for the short-range Fock contribution
+!!  hyb_mixing=hybrid mixing coefficient for the Fock contribution
+!!  hyb_mixing_sr=hybrid mixing coefficient for the short-range Fock contribution
 !!  hyb_range_fock=hybrid range for separation
 !!  nfft=Total number of FFT grid points.
 !!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
@@ -2325,7 +2325,7 @@ end subroutine fock_print
 !!
 !! SOURCE
 
-subroutine bare_vqg(qphon,gsqcut,gmet,izero,hybrid_mixing,hybrid_mixing_sr,hyb_range_fock,nfft,nkpt_bz,ngfft,ucvol,vqg)
+subroutine bare_vqg(qphon,gsqcut,gmet,izero,hyb_mixing,hybrid_mixing_sr,hyb_range_fock,nfft,nkpt_bz,ngfft,ucvol,vqg)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -2340,7 +2340,7 @@ subroutine bare_vqg(qphon,gsqcut,gmet,izero,hybrid_mixing,hybrid_mixing_sr,hyb_r
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: izero,nfft,nkpt_bz
- real(dp),intent(in) :: gsqcut,hybrid_mixing,hybrid_mixing_sr,hyb_range_fock,ucvol
+ real(dp),intent(in) :: gsqcut,hyb_mixing,hybrid_mixing_sr,hyb_range_fock,ucvol
 !arrays
  integer,intent(in) :: ngfft(18)
  real(dp),intent(in) :: gmet(3,3),qphon(3)
@@ -2361,7 +2361,7 @@ subroutine bare_vqg(qphon,gsqcut,gmet,izero,hybrid_mixing,hybrid_mixing_sr,hyb_r
 
 ! *************************************************************************
 
- if (abs(hybrid_mixing_sr)>tol8.and.abs(hyb_range_fock)<tol8) then
+ if (abs(hyb_mixing_sr)>tol8.and.abs(hyb_range_fock)<tol8) then
    msg='SR mixing<>0 while range separation=0!'
    MSG_BUG(msg)
  end if
@@ -2419,8 +2419,8 @@ subroutine bare_vqg(qphon,gsqcut,gmet,izero,hybrid_mixing,hybrid_mixing_sr,hyb_r
      if (i23==0 .and. qeq0==1  .and. ig2==0 .and. ig3==0) then
        ii1=2
        ! value of the integration of the Coulomb singularity 4pi\int_BZ 1/q^2 dq
-       vqg(1+i23)=hybrid_mixing*divgq0
-       if (abs(hyb_range_fock)>tol8) vqg(1+i23)=vqg(1+i23)+hybrid_mixing_sr*pi/(hybrid_range_fock**2)
+       vqg(1+i23)=hyb_mixing*divgq0
+       if (abs(hyb_range_fock)>tol8) vqg(1+i23)=vqg(1+i23)+hyb_mixing_sr*pi/(hybrid_range_fock**2)
      end if
 
      ! Final inner loop on the first dimension (note the lower limit)
@@ -2441,12 +2441,12 @@ subroutine bare_vqg(qphon,gsqcut,gmet,izero,hybrid_mixing,hybrid_mixing_sr,hyb_r
          den=piinv/gs
 
 !        Spencer-Alavi screening
-         if (abs(hybrid_mixing)>tol8) &
-&          vqg(ii)=vqg(ii)+hybrid_mixing*den*(one-cos(rcut*sqrt(four_pi/den)))
-!&          vqg(ii)=vqg(ii)+hybrid_mixing*den
+         if (abs(hyb_mixing)>tol8) &
+&          vqg(ii)=vqg(ii)+hyb_mixing*den*(one-cos(rcut*sqrt(four_pi/den)))
+!&          vqg(ii)=vqg(ii)+hyb_mixing*den
 !        Erfc screening
-         if (abs(hybrid_mixing_sr)>tol8) &
-&          vqg(ii)=vqg(ii)+hybrid_mixing_sr*den*(one-exp(-pi/(den*hyb_range_fock**2)))
+         if (abs(hyb_mixing_sr)>tol8) &
+&          vqg(ii)=vqg(ii)+hyb_mixing_sr*den*(one-exp(-pi/(den*hyb_range_fock**2)))
 
        end if ! Cut-off
      end do ! End loop on i1
@@ -2502,8 +2502,8 @@ end subroutine bare_vqg
 !!  gsqcut=cutoff value on $G^2$ for (large) sphere inside fft box.
 !!  $gsqcut=(boxcut^2)*ecut/(2._dp*(\pi^2))$
 !!  gprimd(3,3)=reciprocal space dimensional primitive translations
-!!  hybrid_mixing=hybrid mixing coefficient for the Fock contribution
-!!  hybrid_mixing_sr=hybrid mixing coefficient for the short-range Fock contribution
+!!  hyb_mixing=hybrid mixing coefficient for the Fock contribution
+!!  hyb_mixing_sr=hybrid mixing coefficient for the short-range Fock contribution
 !!  hyb_range_fock=hybrid range for separation
 !!  mpi_enreg=informations about MPI parallelization
 !!  nfft=(effective) number of FFT grid points (for this processor)
@@ -2536,7 +2536,7 @@ end subroutine bare_vqg
 #include "abi_common.h"
 
 
-subroutine strfock(gprimd,gsqcut,fockstr,hybrid_mixing,hybrid_mixing_sr,hyb_range_fock,mpi_enreg,nfft,ngfft,&
+subroutine strfock(gprimd,gsqcut,fockstr,hyb_mixing,hybrid_mixing_sr,hyb_range_fock,mpi_enreg,nfft,ngfft,&
 &                  nkpt_bz,rhog,ucvol,qphon,&
 &                 rhog2) ! optional argument
 
@@ -2553,7 +2553,7 @@ subroutine strfock(gprimd,gsqcut,fockstr,hybrid_mixing,hybrid_mixing_sr,hyb_rang
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nfft,nkpt_bz
- real(dp),intent(in) :: gsqcut,hybrid_mixing,hybrid_mixing_sr,hyb_range_fock,ucvol
+ real(dp),intent(in) :: gsqcut,hyb_mixing,hybrid_mixing_sr,hyb_range_fock,ucvol
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: ngfft(18)
@@ -2576,7 +2576,7 @@ subroutine strfock(gprimd,gsqcut,fockstr,hybrid_mixing,hybrid_mixing_sr,hyb_rang
 
  call timab(568,1,tsec)
 
- if (abs(hybrid_mixing_sr)>tol8.and.abs(hyb_range_fock)<tol8) then
+ if (abs(hyb_mixing_sr)>tol8.and.abs(hyb_range_fock)<tol8) then
    msg='strfock: SR mixing<>0 while range separation=0!'
    MSG_BUG(msg)
  end if
@@ -2625,26 +2625,26 @@ subroutine strfock(gprimd,gsqcut,fockstr,hybrid_mixing,hybrid_mixing_sr,hyb_rang
          end if
 !        Case G=0:
          if(gsquar<tol10) then
-           if (abs(hybrid_mixing_sr)>tol8) cycle
-           if (abs(hybrid_mixing)>tol8) then
-             fockstr(1)=fockstr(1)+hybrid_mixing*divgq0*rhogsq
-             fockstr(2)=fockstr(2)+hybrid_mixing*divgq0*rhogsq
-             fockstr(3)=fockstr(3)+hybrid_mixing*divgq0*rhogsq
+           if (abs(hyb_mixing_sr)>tol8) cycle
+           if (abs(hyb_mixing)>tol8) then
+             fockstr(1)=fockstr(1)+hyb_mixing*divgq0*rhogsq
+             fockstr(2)=fockstr(2)+hyb_mixing*divgq0*rhogsq
+             fockstr(3)=fockstr(3)+hyb_mixing*divgq0*rhogsq
              cycle
            end if
          end if
 
 !        Spencer-Alavi screening
-         if (abs(hybrid_mixing)>tol8) then
+         if (abs(hyb_mixing)>tol8) then
            arg=two_pi*rcut*sqrt(gsquar)
-           tot=hybrid_mixing*rhogsq*piinv/(gsquar**2)*(1-cos(arg)-arg*sin(arg)/two)
-           tot1=hybrid_mixing*rhogsq/three*rcut*sin(arg)/sqrt(gsquar)
+           tot=hyb_mixing*rhogsq*piinv/(gsquar**2)*(1-cos(arg)-arg*sin(arg)/two)
+           tot1=hyb_mixing*rhogsq/three*rcut*sin(arg)/sqrt(gsquar)
          end if
 
 !        Erfc screening
-         if (abs(hybrid_mixing_sr)>tol8) then
+         if (abs(hyb_mixing_sr)>tol8) then
            arg=-gsquar*pi**2/(hyb_range_fock**2)
-           tot=tot+hybrid_mixing_sr*rhogsq*piinv/(gsquar**2)*(1.d0-exp(arg)*(1-arg))
+           tot=tot+hyb_mixing_sr*rhogsq*piinv/(gsquar**2)*(1.d0-exp(arg)*(1-arg))
          end if
          fockstr(1)=fockstr(1)+tot*gcart(1)*gcart(1)+tot1
          fockstr(2)=fockstr(2)+tot*gcart(2)*gcart(2)+tot1

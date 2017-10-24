@@ -357,8 +357,8 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%gwls_correlation=3
    dtsets(idtset)%gwls_first_seed=0
 !  H
-   dtsets(idtset)%hybrid_mixing=-1.0_dp
-   dtsets(idtset)%hybrid_mixing_sr=-1.0_dp
+   dtsets(idtset)%hyb_mixing=-1.0_dp
+   dtsets(idtset)%hyb_mixing_sr=-1.0_dp
    dtsets(idtset)%hyb_range_dft=-1.0_dp
    dtsets(idtset)%hyb_range_fock=-1.0_dp
 !  I

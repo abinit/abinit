@@ -434,11 +434,11 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
  if(tread==1) dtset%gwrpacorr=intarr(1)
 
 
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'hybrid_mixing',tread,'DPR')
- if(tread==1) dtset%hybrid_mixing=dprarr(1)
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'hyb_mixing',tread,'DPR')
+ if(tread==1) dtset%hyb_mixing=dprarr(1)
 
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'hybrid_mixing_sr',tread,'DPR')
- if(tread==1) dtset%hybrid_mixing_sr=dprarr(1)
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'hyb_mixing_sr',tread,'DPR')
+ if(tread==1) dtset%hyb_mixing_sr=dprarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'hyb_range_dft',tread,'DPR')
  if(tread==1) dtset%hyb_range_dft=dprarr(1)
