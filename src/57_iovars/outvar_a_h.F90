@@ -1162,11 +1162,11 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
  dprarr(1,:)=dtsets(:)%hybrid_mixing_sr
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'hybrid_mixing_sr','DPR',0)
 
- dprarr(1,:)=dtsets(:)%hybrid_range_dft
- call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'hybrid_range_dft','DPR',0)
+ dprarr(1,:)=dtsets(:)%hyb_range_dft
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'hyb_range_dft','DPR',0)
 
- dprarr(1,:)=dtsets(:)%hybrid_range_fock
- call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'hybrid_range_fock','DPR',0)
+ dprarr(1,:)=dtsets(:)%hyb_range_fock
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'hyb_range_fock','DPR',0)
 
 
 !###########################################################

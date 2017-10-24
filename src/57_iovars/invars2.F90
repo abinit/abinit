@@ -440,11 +440,11 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'hybrid_mixing_sr',tread,'DPR')
  if(tread==1) dtset%hybrid_mixing_sr=dprarr(1)
 
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'hybrid_range_dft',tread,'DPR')
- if(tread==1) dtset%hybrid_range_dft=dprarr(1)
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'hyb_range_dft',tread,'DPR')
+ if(tread==1) dtset%hyb_range_dft=dprarr(1)
 
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'hybrid_range_fock',tread,'DPR')
- if(tread==1) dtset%hybrid_range_fock=dprarr(1)
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'hyb_range_fock',tread,'DPR')
+ if(tread==1) dtset%hyb_range_fock=dprarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'supercell',tread,'INT')
  if(tread==1) dtset%supercell(1:3)=intarr(1:3)

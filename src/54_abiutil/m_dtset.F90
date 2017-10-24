@@ -587,8 +587,8 @@ subroutine dtset_copy(dtout, dtin)
  dtout%gwls_recycle         = dtin%gwls_recycle
  dtout%hybrid_mixing      = dtin%hybrid_mixing
  dtout%hybrid_mixing_sr   = dtin%hybrid_mixing_sr
- dtout%hybrid_range_dft   = dtin%hybrid_range_dft
- dtout%hybrid_range_fock  = dtin%hybrid_range_fock
+ dtout%hyb_range_dft   = dtin%hybrid_range_dft
+ dtout%hyb_range_fock  = dtin%hybrid_range_fock
  dtout%iboxcut            = dtin%iboxcut
  dtout%icoulomb           = dtin%icoulomb
  dtout%icutcoul           = dtin%icutcoul

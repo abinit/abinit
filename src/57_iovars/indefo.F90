@@ -359,8 +359,8 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
 !  H
    dtsets(idtset)%hybrid_mixing=-1.0_dp
    dtsets(idtset)%hybrid_mixing_sr=-1.0_dp
-   dtsets(idtset)%hybrid_range_dft=-1.0_dp
-   dtsets(idtset)%hybrid_range_fock=-1.0_dp
+   dtsets(idtset)%hyb_range_dft=-1.0_dp
+   dtsets(idtset)%hyb_range_fock=-1.0_dp
 !  I
    if(dtsets(idtset)%natsph/=0) then
 !    do not use iatsph(:) but explicit boundaries
