@@ -798,14 +798,14 @@ subroutine fock_init(atindx,cplex,dtset,fock,gsqcut,kg,mpi_enreg,nattyp,npwarr,p
      call wrtout(std_out,msg,'COLL')
    end if
    if (dtset%ixc<0) then
-     call libxc_functionals_get_hybridparams(hyb_mixing=fockcommon%hyb_mixing,hyb_mixing_sr=fockcommon%hybrid_mixing_sr,&
+     call libxc_functionals_get_hybridparams(hyb_mixing=fockcommon%hyb_mixing,hyb_mixing_sr=fockcommon%hyb_mixing_sr,&
 &                                            hyb_range=fockcommon%hyb_range_dft)
      fockcommon%hyb_range_fock=fockcommon%hybrid_range_dft
    end if
 
 !  Take the values from the input variables
-   if(abs(dtset%hyb_mixing+one)>tol8)fockcommon%hybrid_mixing=dtset%hybrid_mixing
-   if(abs(dtset%hyb_mixing_sr+one)>tol8)fockcommon%hybrid_mixing_sr=dtset%hybrid_mixing_sr
+   if(abs(dtset%hyb_mixing+one)>tol8)fockcommon%hyb_mixing=dtset%hybrid_mixing
+   if(abs(dtset%hyb_mixing_sr+one)>tol8)fockcommon%hyb_mixing_sr=dtset%hybrid_mixing_sr
    if(abs(dtset%hyb_range_dft+one)>tol8 .and. abs(dtset%hybrid_range_fock+one)>tol8)then
      fockcommon%hyb_range_dft=dtset%hybrid_range_dft
      fockcommon%hyb_range_fock=dtset%hybrid_range_fock
@@ -819,15 +819,15 @@ subroutine fock_init(atindx,cplex,dtset,fock,gsqcut,kg,mpi_enreg,nattyp,npwarr,p
 
 !  Possibly modify the values from libxc
    if (dtset%ixc<0) then
-     call libxc_functionals_set_hybridparams(hyb_mixing=fockcommon%hyb_mixing,hyb_mixing_sr=fockcommon%hybrid_mixing_sr,&
+     call libxc_functionals_set_hybridparams(hyb_mixing=fockcommon%hyb_mixing,hyb_mixing_sr=fockcommon%hyb_mixing_sr,&
 &                                            hyb_range=fockcommon%hyb_range_dft)
 !DEBUG
 !    write(std_out,*)' m_fock.F90/fock_init.F90 : fockcommon%hyb_range=',fockcommon%hybrid_range
-!    write(std_out,*)' m_fock.F90/fock_init.F90 : fockcommon%hyb_mixing=',fockcommon%hybrid_mixing
-!    write(std_out,*)' m_fock.F90/fock_init.F90 : fockcommon%hyb_mixing_sr=',fockcommon%hybrid_mixing_sr
+!    write(std_out,*)' m_fock.F90/fock_init.F90 : fockcommon%hyb_mixing=',fockcommon%hyb_mixing
+!    write(std_out,*)' m_fock.F90/fock_init.F90 : fockcommon%hyb_mixing_sr=',fockcommon%hyb_mixing_sr
 !    fockcommon%hyb_range=1.587
 !ENDDEBUG
-     if (abs(fockcommon%hyb_mixing)>tol8.or.abs(fockcommon%hybrid_mixing_sr)>tol8) then
+     if (abs(fockcommon%hyb_mixing)>tol8.or.abs(fockcommon%hyb_mixing_sr)>tol8) then
        msg=' - This is a hybrid XC functional from LibXC.' 
        msg=msg//' The mixing and range coeffs are set accordingly, then possibly overriden by expert user.'
        call wrtout(std_out,msg,'COLL')
@@ -2325,7 +2325,7 @@ end subroutine fock_print
 !!
 !! SOURCE
 
-subroutine bare_vqg(qphon,gsqcut,gmet,izero,hyb_mixing,hybrid_mixing_sr,hyb_range_fock,nfft,nkpt_bz,ngfft,ucvol,vqg)
+subroutine bare_vqg(qphon,gsqcut,gmet,izero,hyb_mixing,hyb_mixing_sr,hyb_range_fock,nfft,nkpt_bz,ngfft,ucvol,vqg)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -2340,7 +2340,7 @@ subroutine bare_vqg(qphon,gsqcut,gmet,izero,hyb_mixing,hybrid_mixing_sr,hyb_rang
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: izero,nfft,nkpt_bz
- real(dp),intent(in) :: gsqcut,hyb_mixing,hybrid_mixing_sr,hyb_range_fock,ucvol
+ real(dp),intent(in) :: gsqcut,hyb_mixing,hyb_mixing_sr,hyb_range_fock,ucvol
 !arrays
  integer,intent(in) :: ngfft(18)
  real(dp),intent(in) :: gmet(3,3),qphon(3)
@@ -2536,7 +2536,7 @@ end subroutine bare_vqg
 #include "abi_common.h"
 
 
-subroutine strfock(gprimd,gsqcut,fockstr,hyb_mixing,hybrid_mixing_sr,hyb_range_fock,mpi_enreg,nfft,ngfft,&
+subroutine strfock(gprimd,gsqcut,fockstr,hyb_mixing,hyb_mixing_sr,hyb_range_fock,mpi_enreg,nfft,ngfft,&
 &                  nkpt_bz,rhog,ucvol,qphon,&
 &                 rhog2) ! optional argument
 
@@ -2553,7 +2553,7 @@ subroutine strfock(gprimd,gsqcut,fockstr,hyb_mixing,hybrid_mixing_sr,hyb_range_f
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nfft,nkpt_bz
- real(dp),intent(in) :: gsqcut,hyb_mixing,hybrid_mixing_sr,hyb_range_fock,ucvol
+ real(dp),intent(in) :: gsqcut,hyb_mixing,hyb_mixing_sr,hyb_range_fock,ucvol
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: ngfft(18)
