@@ -131,7 +131,7 @@ subroutine xchybrid_ncpp_cc(dtset,enxc,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,s
    ixc_gga = 11
  else if (dtset%ixc<0) then
    if (libxc_functionals_gga_from_hybrid(gga_id=gga_id)) then
-     ixc_gga=-gga_id(1)*1000-gga_id(2)
+     ixc_gga=-gga_id(2)*1000-gga_id(1)
    else
      return
    end if
