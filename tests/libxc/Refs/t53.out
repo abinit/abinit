@@ -1,5 +1,5 @@
 
-.Version 8.7.0 of ABINIT 
+.Version 8.7.1 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
 
 .Copyright (C) 1998-2017 ABINIT group . 
@@ -14,15 +14,15 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 20 Oct 2017.
-- ( at 08h11 )
+.Starting date : Wed 25 Oct 2017.
+- ( at 13h47 )
   
 - input  file    -> t53.in
 - output file    -> t53.out
 - root for input  files -> t53i
 - root for output files -> t53o
 
-- inpspheads : Reading pseudopotential header in XML form from /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_ace_6/tests/Psps_for_tests/C.GGA_X_PBE+GGA_C_PBE-paw.xml
+- inpspheads : Reading pseudopotential header in XML form from /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/jollet_develop/tests/Psps_for_tests/C.GGA_X_PBE+GGA_C_PBE-paw.xml
 
  DATASET    1 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -209,7 +209,6 @@ P           mkmem           4
              nsym          48
            ntypat           1
               occ      2.000000  2.000000  2.000000  2.000000  0.000000
-        optstress           0
         pawecutdg      1.20000000E+01 Hartree
            prtvol          10
             rprim      0.0000000000E+00  5.0000000000E-01  5.0000000000E-01
@@ -316,9 +315,9 @@ P           mkmem           4
          ecut(hartree)=     12.000   => boxcut(ratio)=   2.15267
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_ace_6/tests/Psps_for_tests/C.GGA_X_PBE+GGA_C_PBE-paw.xml
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_ace_6/tests/Psps_for_tests/C.GGA_X_PBE+GGA_C_PBE-paw.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_ace_6/tests/Psps_for_tests/C.GGA_X_PBE+GGA_C_PBE-paw.xml
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/jollet_develop/tests/Psps_for_tests/C.GGA_X_PBE+GGA_C_PBE-paw.xml
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/jollet_develop/tests/Psps_for_tests/C.GGA_X_PBE+GGA_C_PBE-paw.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/jollet_develop/tests/Psps_for_tests/C.GGA_X_PBE+GGA_C_PBE-paw.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.51316612
@@ -489,6 +488,12 @@ _setup2: Arith. and geom. avg. npw (full set) are     115.519     115.508
  kpt#   4, nband=  5, wtk=  0.44444, kpt= -0.3333  0.3333  0.0000 (reduced coord)
   -0.14102   -0.02607    0.03141    0.20427    0.60863
 
+ Cartesian components of stress tensor (hartree/bohr^3)
+  sigma(1 1)= -9.64724335E-05  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)= -9.64724335E-05  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)= -9.64724335E-05  sigma(2 1)=  0.00000000E+00
+
+
  scprqt:  WARNING -
   nstep=   10 was not enough SCF cycles to converge;
   maximum energy difference=  2.093E-12 exceeds toldfe=  1.000E-12
@@ -643,6 +648,16 @@ _setup2: Arith. and geom. avg. npw (full set) are     115.519     115.508
     1       0.000000000001      0.000000000001      0.000000000001
     2      -0.000000000001     -0.000000000001     -0.000000000001
 
+ Cartesian components of stress tensor (hartree/bohr^3)
+  sigma(1 1)= -9.64724335E-05  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)= -9.64724335E-05  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)= -9.64724335E-05  sigma(2 1)=  0.00000000E+00
+
+-Cartesian components of stress tensor (GPa)         [Pressure=  2.8383E+00 GPa]
+- sigma(1 1)= -2.83831651E+00  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)= -2.83831651E+00  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)= -2.83831651E+00  sigma(2 1)=  0.00000000E+00
+
 ================================================================================
 == DATASET  2 ==================================================================
 -   nproc =    1
@@ -667,9 +682,9 @@ _setup2: Arith. and geom. avg. npw (full set) are     115.519     115.508
          ecut(hartree)=     12.000   => boxcut(ratio)=   2.15267
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_ace_6/tests/Psps_for_tests/C.GGA_X_PBE+GGA_C_PBE-paw.xml
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_ace_6/tests/Psps_for_tests/C.GGA_X_PBE+GGA_C_PBE-paw.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_ace_6/tests/Psps_for_tests/C.GGA_X_PBE+GGA_C_PBE-paw.xml
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/jollet_develop/tests/Psps_for_tests/C.GGA_X_PBE+GGA_C_PBE-paw.xml
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/jollet_develop/tests/Psps_for_tests/C.GGA_X_PBE+GGA_C_PBE-paw.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/jollet_develop/tests/Psps_for_tests/C.GGA_X_PBE+GGA_C_PBE-paw.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.51316612
@@ -713,6 +728,12 @@ _setup2: Arith. and geom. avg. npw (full set) are     115.519     115.508
   -0.35401    0.05774    0.13352    0.13352    0.55368
  kpt#   4, nband=  5, wtk=  0.44444, kpt= -0.3333  0.3333  0.0000 (reduced coord)
   -0.21922   -0.09319   -0.02551    0.15813    0.63810
+
+ Cartesian components of stress tensor (hartree/bohr^3)
+  sigma(1 1)=  8.92456937E-04  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)=  8.92456937E-04  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  8.92456937E-04  sigma(2 1)=  0.00000000E+00
+
 
  scprqt:  WARNING -
   nstep=    1 was not enough SCF cycles to converge;
@@ -868,6 +889,16 @@ _setup2: Arith. and geom. avg. npw (full set) are     115.519     115.508
     1       0.000000000000      0.000000000000      0.000000000000
     2       0.000000000000      0.000000000000      0.000000000000
 
+ Cartesian components of stress tensor (hartree/bohr^3)
+  sigma(1 1)=  8.92456937E-04  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)=  8.92456937E-04  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  8.92456937E-04  sigma(2 1)=  0.00000000E+00
+
+-Cartesian components of stress tensor (GPa)         [Pressure= -2.6257E+01 GPa]
+- sigma(1 1)=  2.62569852E+01  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  2.62569852E+01  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  2.62569852E+01  sigma(2 1)=  0.00000000E+00
+
 ================================================================================
 == DATASET  3 ==================================================================
 -   nproc =    1
@@ -916,6 +947,12 @@ _setup2: Arith. and geom. avg. npw (full set) are     115.519     115.508
   -0.35401    0.05774    0.13352    0.13352    0.55368
  kpt#   4, nband=  5, wtk=  0.44444, kpt= -0.3333  0.3333  0.0000 (reduced coord)
   -0.21922   -0.09319   -0.02551    0.15813    0.63810
+
+ Cartesian components of stress tensor (hartree/bohr^3)
+  sigma(1 1)=  8.92456937E-04  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)=  8.92456937E-04  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  8.92456937E-04  sigma(2 1)=  0.00000000E+00
+
 
  scprqt:  WARNING -
   nstep=    1 was not enough SCF cycles to converge;
@@ -1071,6 +1108,16 @@ _setup2: Arith. and geom. avg. npw (full set) are     115.519     115.508
     1      -0.000000000000     -0.000000000000     -0.000000000000
     2      -0.000000000000     -0.000000000000     -0.000000000000
 
+ Cartesian components of stress tensor (hartree/bohr^3)
+  sigma(1 1)=  8.92456937E-04  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)=  8.92456937E-04  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  8.92456937E-04  sigma(2 1)=  0.00000000E+00
+
+-Cartesian components of stress tensor (GPa)         [Pressure= -2.6257E+01 GPa]
+- sigma(1 1)=  2.62569852E+01  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  2.62569852E+01  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  2.62569852E+01  sigma(2 1)=  0.00000000E+00
+
 == END DATASET(S) ==============================================================
 ================================================================================
   
@@ -1148,19 +1195,18 @@ P           mkmem           4
              nsym          48
            ntypat           1
               occ      2.000000  2.000000  2.000000  2.000000  0.000000
-        optstress           0
         pawecutdg      1.20000000E+01 Hartree
            prtvol          10
             rprim      0.0000000000E+00  5.0000000000E-01  5.0000000000E-01
                        5.0000000000E-01  0.0000000000E+00  5.0000000000E-01
                        5.0000000000E-01  5.0000000000E-01  0.0000000000E+00
           spgroup         227
-           strten1     9.9999999999E+99  9.9999999999E+99  9.9999999999E+99
-                       9.9999999999E+99  9.9999999999E+99  9.9999999999E+99
-           strten2     9.9999999999E+99  9.9999999999E+99  9.9999999999E+99
-                       9.9999999999E+99  9.9999999999E+99  9.9999999999E+99
-           strten3     9.9999999999E+99  9.9999999999E+99  9.9999999999E+99
-                       9.9999999999E+99  9.9999999999E+99  9.9999999999E+99
+           strten1    -9.6472433454E-05 -9.6472433454E-05 -9.6472433454E-05
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+           strten2     8.9245693718E-04  8.9245693718E-04  8.9245693718E-04
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+           strten3     8.9245693718E-04  8.9245693718E-04  8.9245693718E-04
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            symrel      1  0  0   0  1  0   0  0  1      -1  0  0   0 -1  0   0  0 -1
                        0 -1  1   0 -1  0   1 -1  0       0  1 -1   0  1  0  -1  1  0
                       -1  0  0  -1  0  1  -1  1  0       1  0  0   1  0 -1   1 -1  0
@@ -1298,10 +1344,10 @@ P           mkmem           4
 - Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
 - the licence allows the authors to put it on the Web).
 -
-- Proc.   0 individual time (sec): cpu=         34.6  wall=         34.9
+- Proc.   0 individual time (sec): cpu=         36.5  wall=         41.0
 
 ================================================================================
 
  Calculation completed.
 .Delivered  12 WARNINGs and   0 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         34.6  wall=         34.9
++Overall time at end (sec) : cpu=         36.5  wall=         41.0
