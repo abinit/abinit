@@ -1157,15 +1157,43 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'gw_toldfeig','ENE',0)
 
  dprarr(1,:)=dtsets(:)%hyb_mixing
+   do idtset=1,ndtset_alloc
+     if(dprarr(1,idtset)>tol8)then
+       dprarr(1,idtset)=-999.0_dp ! This is the default, so will not be printed
+     else
+       dprarr(1,idtset)=abs(dprarr(1,idtset))
+     endif
+   enddo
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'hyb_mixing','DPR',0)
 
  dprarr(1,:)=dtsets(:)%hyb_mixing_sr
+   do idtset=1,ndtset_alloc
+     if(dprarr(1,idtset)>tol8)then
+       dprarr(1,idtset)=-999.0_dp ! This is the default, so will not be printed
+     else
+       dprarr(1,idtset)=abs(dprarr(1,idtset))
+     endif
+   enddo
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'hyb_mixing_sr','DPR',0)
 
  dprarr(1,:)=dtsets(:)%hyb_range_dft
+   do idtset=1,ndtset_alloc
+     if(dprarr(1,idtset)>tol8)then
+       dprarr(1,idtset)=-999.0_dp ! This is the default, so will not be printed
+     else
+       dprarr(1,idtset)=abs(dprarr(1,idtset))
+     endif
+   enddo
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'hyb_range_dft','DPR',0)
 
  dprarr(1,:)=dtsets(:)%hyb_range_fock
+   do idtset=1,ndtset_alloc
+     if(dprarr(1,idtset)>tol8)then
+       dprarr(1,idtset)=-999.0_dp ! This is the default, so will not be printed
+     else
+       dprarr(1,idtset)=abs(dprarr(1,idtset))
+     endif
+   enddo
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'hyb_range_fock','DPR',0)
 
 

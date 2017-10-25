@@ -112,7 +112,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
  integer :: bantot,berryopt,dmatsize,ndim,getocc,iat,iatom,iband,ii,iimage,ikpt,intimage,ionmov,isppol
  integer :: densfor_pred,ipsp,iscf,isiz,itypat,jj,kptopt,lpawu,marr,natom,nband1,nberry,mkpt
  integer :: niatcon,nimage,nkpt,nkpthf,npspalch,nqpt,nsp,nspinor,nsppol,nsym,ntypalch,ntypat,ntyppure
- integer :: occopt,occopt_tmp,response,sumnbl,tfband,tnband,tread,tread_alt,tread_key
+ integer :: occopt,occopt_tmp,response,sumnbl,tfband,tnband,tread,tread_alt,tread_dft,tread_fock,tread_key
  integer :: itol, itol_gen, ds_input, ifreq,ncerr !nkpt_fullbz,
  real(dp) :: areaxy,charge,fband,kptrlen,nelectjell
  real(dp) :: rhoavg,zelect,zval
@@ -432,19 +432,6 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gwrpacorr',tread,'INT')
  if(tread==1) dtset%gwrpacorr=intarr(1)
-
-
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'hyb_mixing',tread,'DPR')
- if(tread==1) dtset%hyb_mixing=dprarr(1)
-
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'hyb_mixing_sr',tread,'DPR')
- if(tread==1) dtset%hyb_mixing_sr=dprarr(1)
-
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'hyb_range_dft',tread,'DPR')
- if(tread==1) dtset%hyb_range_dft=dprarr(1)
-
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'hyb_range_fock',tread,'DPR')
- if(tread==1) dtset%hyb_range_fock=dprarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'supercell',tread,'INT')
  if(tread==1) dtset%supercell(1:3)=intarr(1:3)
@@ -1335,6 +1322,68 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
 !If the default value had been given, possibly switch on the auxc_ixc corresponding to ixc, if the latter is an hybrid
  if(dtset%auxc_ixc==0)then
    call get_auxc_ixc(dtset%auxc_ixc,dtset%ixc)
+ endif
+
+!Now take care of the parameters for hybrid functionals
+ if(dtset%usefock==1)then 
+
+   if(dtset%ixc ==40 .or. dtset%ixc ==41 .or. dtset%ixc ==42)then 
+     dtset%hyb_mixing_sr=zero 
+     dtset%hyb_range_dft=zero ; dtset%hyb_range_fock=zero
+     if(dtset%ixc==40)dtset%hyb_mixing=one
+     if(dtset%ixc==41)dtset%hyb_mixing=quarter
+     if(dtset%ixc==42)dtset%hyb_mixing=third
+   endif
+   if (dtset%ixc<0) then
+     call libxc_functionals_init(dtset%ixc,dtset%nspden)
+     call libxc_functionals_get_hybridparams(hyb_mixing=dtset%hyb_mixing,hyb_mixing_sr=dtset%hyb_mixing_sr,&
+&                                            hyb_range=dtset%hyb_range_dft)
+     call libxc_functionals_end()
+     dtset%hyb_range_fock=dtset%hyb_range_dft
+   end if
+
+!  Warning : the user-defined parameters for hybrids are by convention stored as negative numbers
+!  This trick will allow to echo them, and only them.
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'hyb_mixing',tread,'DPR')
+   if(tread==1)then
+     if(dprarr(1)<tol8)then
+       write(message, '(5a)' )&
+&        ' A negative value for hyb_mixing is not allowed, while at input hyb_mixing=',dprarr(1),ch10,&
+&        ' Action: modify hyb_mixing in the input file.'
+       MSG_ERROR(message)
+     endif
+     dtset%hyb_mixing=-dprarr(1) ! Note the minus sign
+
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'hyb_mixing_sr',tread,'DPR')
+     if(dprarr(1)<tol8)then
+       write(message, '(5a)' )&
+&        ' A negative value for hyb_mixing_sr is not allowed, while at input hyb_mixing_sr=',dprarr(1),ch10,&
+&        ' Action: modify hyb_mixing_sr in the input file.'
+       MSG_ERROR(message)
+     endif
+   if(tread==1) dtset%hyb_mixing_sr=-dprarr(1) ! Note the minus sign
+
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'hyb_range_dft',tread_dft,'DPR')
+     if(dprarr(1)<tol8)then
+       write(message, '(5a)' )&
+&        ' A negative value for hyb_range_dft is not allowed, while at input hyb_range_dft=',dprarr(1),ch10,&
+&        ' Action: modify hyb_range_dft in the input file.'
+       MSG_ERROR(message)
+     endif
+   if(tread_dft==1) dtset%hyb_range_dft=-dprarr(1) ! Note the minus sign
+
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'hyb_range_fock',tread_fock,'DPR')
+     if(dprarr(1)<tol8)then
+       write(message, '(5a)' )&
+&        ' A negative value for hyb_range_fock is not allowed, while at input hyb_range_fock=',dprarr(1),ch10,&
+&        ' Action: modify hyb_range_fock in the input file.'
+       MSG_ERROR(message)
+     endif
+   if(tread_fock==1) dtset%hyb_range_fock=-dprarr(1) ! Note the minus sign
+   
+   if(tread_fock==1 .and. tread_dft==0)dtset%hyb_range_dft=dtset%hyb_range_fock
+   if(tread_fock==0 .and. tread_dft==1)dtset%hyb_range_fock=dtset%hyb_range_dft
+
  endif
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'vdw_df_acutmin',tread,'DPR')
