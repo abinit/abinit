@@ -108,13 +108,14 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
 !Local variables-------------------------------
 !scalars
  integer,parameter :: nkpt_max=50
- integer :: idtset,ii,iimage,ga_n_rules,nn
+ integer :: defo,idtset,ii,iimage,ga_n_rules,nn
  integer :: lpawu1,narr,mxnsp
  integer :: natom,nimfrqs,nimage
  integer :: ntypalch,ntypat,size1,size2,tmpimg0
  logical :: compute_static_images
  real(dp) :: cpus
  character(len=1) :: firstchar_fftalg,firstchar_gpu
+ character(len=14) :: str_hyb
 !arrays
  integer,allocatable :: narrm(:)
  integer,allocatable :: nimagem(:),prtimg(:,:)
@@ -1156,46 +1157,37 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
  dprarr(1,:)=dtsets(:)%gw_toldfeig
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'gw_toldfeig','ENE',0)
 
- dprarr(1,:)=dtsets(:)%hyb_mixing
-   do idtset=1,ndtset_alloc
-     if(dprarr(1,idtset)>tol8)then
-       dprarr(1,idtset)=-999.0_dp ! This is the default, so will not be printed
-     else
-       dprarr(1,idtset)=abs(dprarr(1,idtset))
-     endif
-   enddo
- call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'hyb_mixing','DPR',0)
+!DEBUG
+!write(std_out,*)' hyb_mixing=',dtsets(0:ndtset_alloc)%hyb_mixing
+!write(std_out,*)' hyb_mixing_sr=',dtsets(0:ndtset_alloc)%hyb_mixing_sr
+!write(std_out,*)' hyb_mixing_dft=',dtsets(0:ndtset_alloc)%hyb_range_dft
+!write(std_out,*)' hyb_mixing_fock=',dtsets(0:ndtset_alloc)%hyb_range_fock
+!ENDDEBUG
 
- dprarr(1,:)=dtsets(:)%hyb_mixing_sr
+!Special treatment of the default values for the hybrid functional parameters.
+ do ii=1,4
+   if(ii==1)dprarr(1,:)=dtsets(:)%hyb_mixing
+   if(ii==2)dprarr(1,:)=dtsets(:)%hyb_mixing_sr
+   if(ii==3)dprarr(1,:)=dtsets(:)%hyb_range_dft
+   if(ii==4)dprarr(1,:)=dtsets(:)%hyb_range_fock
+   defo=1
    do idtset=1,ndtset_alloc
-     if(dprarr(1,idtset)>tol8)then
-       dprarr(1,idtset)=-999.0_dp ! This is the default, so will not be printed
-     else
-       dprarr(1,idtset)=abs(dprarr(1,idtset))
-     endif
+     if(dprarr(1,idtset)<-tol8 .and. abs(dprarr(1,idtset)+999.0_dp)>tol8)defo=0
    enddo
- call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'hyb_mixing_sr','DPR',0)
-
- dprarr(1,:)=dtsets(:)%hyb_range_dft
-   do idtset=1,ndtset_alloc
-     if(dprarr(1,idtset)>tol8)then
-       dprarr(1,idtset)=-999.0_dp ! This is the default, so will not be printed
-     else
-       dprarr(1,idtset)=abs(dprarr(1,idtset))
-     endif
-   enddo
- call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'hyb_range_dft','DPR',0)
-
- dprarr(1,:)=dtsets(:)%hyb_range_fock
-   do idtset=1,ndtset_alloc
-     if(dprarr(1,idtset)>tol8)then
-       dprarr(1,idtset)=-999.0_dp ! This is the default, so will not be printed
-     else
-       dprarr(1,idtset)=abs(dprarr(1,idtset))
-     endif
-   enddo
- call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'hyb_range_fock','DPR',0)
-
+   if(defo==0)then
+     do idtset=1,ndtset_alloc
+!      Change the sign of user defined input value 
+       if(dprarr(1,idtset)<-tol8 .and. abs(dprarr(1,idtset)+999.0_dp)>tol8)then 
+         dprarr(1,idtset)=abs(dprarr(1,idtset))
+       endif
+     enddo
+     if(ii==1)str_hyb='hyb_mixing'
+     if(ii==2)str_hyb='hyb_mixing_sr'
+     if(ii==3)str_hyb='hyb_range_dft'
+     if(ii==4)str_hyb='hyb_range_fock'
+     call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,str_hyb,'DPR',0)
+   endif
+ enddo
 
 !###########################################################
 !## Deallocation for generic arrays, and for n-z variables

@@ -1333,8 +1333,10 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
      if(dtset%ixc==40)dtset%hyb_mixing=one
      if(dtset%ixc==41)dtset%hyb_mixing=quarter
      if(dtset%ixc==42)dtset%hyb_mixing=third
-   endif
-   if (dtset%ixc<0) then
+   else if(dtset%ixc==-427)then   ! Special case of HSE03
+     dtset%hyb_mixing=zero  ; dtset%hyb_mixing_sr=quarter
+     dtset%hyb_range_dft=0.15_dp*two**third  ; dtset%hyb_range_fock=0.15_dp*sqrt(half)
+   else if (dtset%ixc<0) then
      call libxc_functionals_init(dtset%ixc,dtset%nspden)
      call libxc_functionals_get_hybridparams(hyb_mixing=dtset%hyb_mixing,hyb_mixing_sr=dtset%hyb_mixing_sr,&
 &                                            hyb_range=dtset%hyb_range_dft)
@@ -1353,33 +1355,40 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
        MSG_ERROR(message)
      endif
      dtset%hyb_mixing=-dprarr(1) ! Note the minus sign
+   endif
 
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'hyb_mixing_sr',tread,'DPR')
+   if(tread==1)then
      if(dprarr(1)<tol8)then
        write(message, '(5a)' )&
 &        ' A negative value for hyb_mixing_sr is not allowed, while at input hyb_mixing_sr=',dprarr(1),ch10,&
 &        ' Action: modify hyb_mixing_sr in the input file.'
        MSG_ERROR(message)
      endif
-   if(tread==1) dtset%hyb_mixing_sr=-dprarr(1) ! Note the minus sign
+     dtset%hyb_mixing_sr=-dprarr(1) ! Note the minus sign
+   endif
 
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'hyb_range_dft',tread_dft,'DPR')
+   if(tread_dft==1)then
      if(dprarr(1)<tol8)then
        write(message, '(5a)' )&
 &        ' A negative value for hyb_range_dft is not allowed, while at input hyb_range_dft=',dprarr(1),ch10,&
 &        ' Action: modify hyb_range_dft in the input file.'
        MSG_ERROR(message)
      endif
-   if(tread_dft==1) dtset%hyb_range_dft=-dprarr(1) ! Note the minus sign
+     dtset%hyb_range_dft=-dprarr(1) ! Note the minus sign
+   endif
 
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'hyb_range_fock',tread_fock,'DPR')
+   if(tread_fock==1)then
      if(dprarr(1)<tol8)then
        write(message, '(5a)' )&
 &        ' A negative value for hyb_range_fock is not allowed, while at input hyb_range_fock=',dprarr(1),ch10,&
 &        ' Action: modify hyb_range_fock in the input file.'
        MSG_ERROR(message)
      endif
-   if(tread_fock==1) dtset%hyb_range_fock=-dprarr(1) ! Note the minus sign
+     dtset%hyb_range_fock=-dprarr(1) ! Note the minus sign
+   endif
    
    if(tread_fock==1 .and. tread_dft==0)dtset%hyb_range_dft=dtset%hyb_range_fock
    if(tread_fock==0 .and. tread_dft==1)dtset%hyb_range_fock=dtset%hyb_range_dft

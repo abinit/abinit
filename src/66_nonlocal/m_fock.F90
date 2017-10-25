@@ -144,7 +144,8 @@ module m_fock
     ! hybrid mixing coefficient for the short-range Fock contribution
 
   real(dp) :: hyb_range_dft
-    ! hybrid range for separation, used in the DFT functional (should be equal fo hyb_range_fock, but not true for HSE03)
+    ! hybrid range for separation, used in the DFT functional 
+    ! (should be equal to hyb_range_fock, but this is not true for HSE03)
 
   real(dp) :: hyb_range_fock
     ! hybrid range for separation, used in the fock contribution 
@@ -774,7 +775,7 @@ subroutine fock_init(atindx,cplex,dtset,fock,gsqcut,kg,mpi_enreg,nattyp,npwarr,p
    fockcommon%hyb_range_fock=abs(dtset%hyb_range_fock)
 
 !  Set the hybrid parameters if functional from libxc. Usually, these parameters were obtained from libxc,
-!  but the user might have possibly modified them. By the way, must define them, since otherwise
+!  but the user might have possibly modified them. By the way, must define them here, since otherwise
 !  might inherit them from the previous dataset !
    if (dtset%ixc<0)then
      call libxc_functionals_set_hybridparams(hyb_mixing=fockcommon%hyb_mixing,&
@@ -786,7 +787,6 @@ subroutine fock_init(atindx,cplex,dtset,fock,gsqcut,kg,mpi_enreg,nattyp,npwarr,p
 !    write(std_out,*)' m_fock.F90/fock_init.F90 : fockcommon%hyb_mixing_sr=',fockcommon%hyb_mixing_sr
 !    fockcommon%hyb_range=1.587
 !ENDDEBUG
-     endif
    end if
 
 
