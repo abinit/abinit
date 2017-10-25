@@ -7239,8 +7239,8 @@
     mnemonics: FOCK operator, k-grid DOWNSAMPLING
     requires: '[[usefock]]==1'
     text: |-
-        The k wavevector grid used to compute the Fock operator in the full Brillouin Zone might be a subset of the full Brillouin Zone 
-        of the k point grid used for the wavefunctions (see [[kptopt]] for its definition). 
+        The k wavevector grid used to compute the Fock operator in the full Brillouin Zone might be a subset of the full Brillouin Zone
+        of the k point grid used for the wavefunctions (see [[kptopt]] for its definition).
         [[fockdownsampling]] allows one to define such a reduced set of k  wavevectors, yielding a significant speed up at the expense (possibly) of accuracy.
         The final grid has [[nkpthf]] k points, with coordinates [[kptns_hf]].
         <p>
@@ -10375,6 +10375,87 @@
     topics: RPACorrEn_expert
     varset: gw
     vartype: integer
+- !variable
+    abivarname: hyb_mixing
+    characteristics: null
+    commentdefault: 'With the default, [[hyb_mixing]] is initialized from
+        [[ixc]]. '
+    commentdims: null
+    defaultval: -999.0d0
+    dimensions: scalar
+    excludes: null
+    mnemonics: HYBrid MIXING coefficient for unscreened fock operator
+    requires: '[[usefock]]>0'
+    text: |-
+        Mixing coefficient for the unscreened Fock operator in case of hybrid functionals. Hartree-Fock corresponds to 1.0, PBE0 to 0.25.
+        <p>ABINIT knows the correct value from [[ixc]]. Experts might nevertheless tune this mixing coefficient.
+    topics: Hybrids_expert
+    varset: gstate
+    vartype: real
+- !variable
+    abivarname: hyb_mixing_sr
+    characteristics: null
+    commentdefault: 'With the default, [[hyb_mixing_sr]] is initialized from
+        [[ixc]]. '
+    commentdims: null
+    defaultval: -999.0d0
+    dimensions: scalar
+    excludes: null
+    mnemonics: HYBrid MIXING coefficient for Short-Range screened fock operator
+    requires: '[[usefock]]>0'
+    text: |-
+        Mixing coefficient for the screened Fock operator in case of hybrid functionals. HSE has 0.25, B2LYP has 0.2.
+        <p>ABINIT knows the correct value from [[ixc]]. Experts might nevertheless tune this mixing coefficient.
+    topics: Hybrids_expert
+    varset: gstate
+    vartype: real
+- !variable
+    abivarname: hyb_range_dft
+    characteristics: null
+    commentdefault: 'With the default, [[hyb_range_dft]] is initialized from
+        [[ixc]]. '
+    commentdims: null
+    defaultval: -999.0d0
+    dimensions: scalar
+    excludes: null
+    mnemonics: HYBrid RANGE for the DFT leftover from the screened fock operator
+    requires: '[[usefock]]>0'
+    text: |-
+        Range of the DFT leftover from the screened Fock operator in case of hybrid functionals (actually, coefficient of the distance appearing in the erf function,
+        thus it has the dimension of an inverse distance).
+        <p>
+        As described in the LibXC sources (and copied in the ABINIT doc, see [[ixc]]=-428), there is a mess due to an error in the original publication.
+        ABINIT knows the LibXC value from [[ixc]], that might not agree with the definitions from other codes.
+        Usually, [[hyb_range_dft]] is the same as [[hyb_range_fock]], see the latter for the different values. However, there is a noticeable exception,
+        the HSE03 from the original paper (not the HSE03 from VASP), for which [[hyb_range_dft]]=0.188988 while [[hyb_range_fock]]=0.106066 .
+    topics: Hybrids_expert
+    varset: gstate
+    vartype: real
+- !variable
+    abivarname: hyb_range_fock
+    characteristics: null
+    commentdefault: 'With the default, [[hyb_range_fock]] is initialized from
+        [[ixc]]. '
+    commentdims: null
+    defaultval: -999.0d0
+    dimensions: scalar
+    excludes: null
+    mnemonics: HYBrid RANGE for the screened FOCK operator
+    requires: '[[usefock]]>0'
+    text: |-
+        Range of the screened Fock operator in case of hybrid functionals (actually, coefficient of the distance appearing in the erf function,
+        thus it has the dimension of an inverse distance).
+        <p>
+        As described in the LibXC sources (and copied in the ABINIT doc, see [[ixc]]=-428), there is a mess due to an error in the original publication.
+        ABINIT knows the LibXC value from [[ixc]], that might not agree with the definitions from other codes.
+        Usually, [[hyb_range_dft]] is the same as [[hyb_range_fock]], with one exception explained in [[hyb_range_dft]].
+        <br>
+        The HSE06 value from LibCX is 0.11, the one of Espresso is 0.106, the one of VASP is 0.105835 (=0.2 Angstrom$^-1$).
+        <br>
+        The HSE03 value from LibCX is 0.106066 (=0.15/sqrt(2)), the one of VASP is 0.1587531 (=0.3 Angstrom$^-1$).
+    topics: Hybrids_expert
+    varset: gstate
+    vartype: real
 - !variable
     abivarname: iatcon
     characteristics:
@@ -14873,7 +14954,7 @@
     text: |-
         <p>
         [[kptns_hf]] is the subset of the full Brillouin Zone k point grid for wavefunctions,
-        used to build the Fock operator, see [[fockdownsampling]]. 
+        used to build the Fock operator, see [[fockdownsampling]].
         </p>
     topics: k-points_internal
     varset: internal
