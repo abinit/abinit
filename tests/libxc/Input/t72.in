@@ -1,6 +1,6 @@
 # Crystalline aluminum : testing of downsampling, for HSE06, PBE0, HSE03.
 
- ndtset 4
+ ndtset 9
 
 #Definition of the k-point grid
  ngkpt  3*2      # This is a 2x2x2 FCC grid, based on the primitive vectors
@@ -14,17 +14,42 @@
 
 #DATASET 1  LDA (the pseudopotential for Al is with LDA)
 
-#DATASET 2  HSE06
+#DATASET 2  HSE06 (LibXC)
  ixc2  -428
- getwfk2   1
 
 #DATASET 3  PBE0
  ixc3  41
- getwfk3   2
 
-#DATASET 4  HSE03
+#DATASET 4  HSE03 (LibXC)
  ixc4  -427
- getwfk4   1
+
+#DATASET 5  HSE03 (VASP)
+ ixc5  -427
+ hyb_range_fock5 0.1587531
+
+#DATASET 6  HSE06 (VASP)
+ ixc6  -428
+ hyb_range_fock6 0.105835
+
+#DATASET 7  HSE06 (Espresso)
+ ixc7  -428
+ hyb_range_fock7 0.106
+
+#DATASET 8  HSE03 (LibXC) Fool LibXC by imposing to HSE06 the HSE03 parameters
+# So, gives the same as dataset 4
+ ixc8  -428                              # This should be HSE06
+ hyb_range_fock8 0.106066                # But these lines redefine the parameters to the libxc HSE03
+ hyb_range_dft8 0.188988                
+
+#DATASET 9  HSE06 (LibXC) Fool LibXC by imposing to HSE03 the HSE06 parameter(s)
+# So, gives the same as dataset 2
+ ixc9  -427                              # This should be HSE03
+ hyb_range_fock9 0.11                    # But this redefines the parameters to the libxc HSE06
+
+
+#
+ getwfk1 0
+ getwfk  1
 
 #Definition of occupation numbers
 occopt 7
@@ -74,5 +99,6 @@ ecut  6.0         # Maximal kinetic energy cut-off, in Hartree
 #%%   Tests were performed with a k-point grid 16x16x16 (without additional shift),
 #%%   to try to recover the nice behaviour of the HSE03 with down sampling 
 #%%   shown in Marsman et al JPCM 20, 064201 (2008), Fig. 1 (there, the reference was 24x24x24)
-#%%   Unfortunately, the same behaviour as for PBE0 was observed ?!
+#%%   In all the cases (HSE03 libxc, HSE03 VASP, HSE06 - even clearing the issue with the definition of HSE03 dataset 4&5)
+#%%   the downsampling does NOT perform well ...
 #%%<END TEST_INFO>
