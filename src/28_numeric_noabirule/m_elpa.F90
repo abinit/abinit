@@ -269,9 +269,9 @@ subroutine elpa_func_allocate(elpa_hdl,mpi_comm_parent,process_row,process_col,g
 
  call elpa_func_error_handler(err_code=err,err_varname="gpu")
 
- call elpa_func_get_communicators(elpa_hdl,mpi_comm_parent,process_row,process_row)
-
  elpa_hdl%is_allocated=.true.
+
+ call elpa_func_get_communicators(elpa_hdl,mpi_comm_parent,process_row,process_col)
 
 end subroutine elpa_func_allocate
 !!***
@@ -454,11 +454,11 @@ subroutine elpa_func_get_communicators(elpa_hdl,mpi_comm_parent,process_row,proc
    call elpa_hdl%elpa%set(trim(varname),mpi_comm_parent,err)
  end if
  if (err==0) then
-   varname='process_col'
+   varname='process_row'
    call elpa_hdl%elpa%set(trim(varname),process_row,err)
  end if
  if (err==0) then
-   varname='process_row'
+   varname='process_col'
    call elpa_hdl%elpa%set(trim(varname),process_col,err)
  end if
  if (err==0) then
