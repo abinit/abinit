@@ -561,7 +561,7 @@ subroutine outvar_i_n (dtsets,iout,&
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,narr,narrm,ncid,ndtset_alloc,'kptgw','DPR',multivals%nkptgw)
 
 
-!kpthf 
+!kptns_hf 
  if(sum(dtsets(1:ndtset_alloc)%usefock)/=0)then
    tnkpt=0
    dprarr(:,0)=0
@@ -895,13 +895,14 @@ subroutine outvar_i_n (dtsets,iout,&
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'nkptgw','INT',0)
 
  if(sum(dtsets(1:ndtset_alloc)%usefock)/=0)then
-   do idtset=1,ndtset_alloc       ! specific size for each dataset
-     if(dtsets(idtset)%usefock/=0)then
-       intarr(1,idtset)=dtsets(idtset)%nkpthf
-     else
-       intarr(1,idtset)=0
-     endif
-   enddo
+   intarr(1,:)=dtsets(:)%nkpthf
+!  do idtset=1,ndtset_alloc       ! specific size for each dataset
+!    if(dtsets(idtset)%usefock/=0)then
+!      intarr(1,idtset)=dtsets(idtset)%nkpthf
+!    else
+!      intarr(1,idtset)=0
+!    endif
+!  enddo
    call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'nkpthf','INT',0)
  endif
 

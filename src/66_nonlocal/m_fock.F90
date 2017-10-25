@@ -819,8 +819,8 @@ subroutine fock_init(atindx,cplex,dtset,fock,gsqcut,kg,mpi_enreg,nattyp,npwarr,p
 
 !  Possibly modify the values from libxc
    if (dtset%ixc<0) then
-     call libxc_functionals_set_hybridparams(hyb_mixing=fockcommon%hyb_mixing,hyb_mixing_sr=fockcommon%hyb_mixing_sr,&
-&                                            hyb_range=fockcommon%hyb_range_dft)
+!     call libxc_functionals_set_hybridparams(hyb_mixing=fockcommon%hyb_mixing,hyb_mixing_sr=fockcommon%hyb_mixing_sr,&
+!&                                            hyb_range=fockcommon%hyb_range_dft)
 !DEBUG
 !    write(std_out,*)' m_fock.F90/fock_init.F90 : fockcommon%hyb_range=',fockcommon%hyb_range
 !    write(std_out,*)' m_fock.F90/fock_init.F90 : fockcommon%hyb_mixing=',fockcommon%hyb_mixing

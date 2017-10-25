@@ -1,5 +1,5 @@
 
-.Version 8.7.0 of ABINIT 
+.Version 8.7.1 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu6.3 computer) 
 
 .Copyright (C) 1998-2017 ABINIT group . 
@@ -14,16 +14,16 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu 19 Oct 2017.
-- ( at 11h20 )
+.Starting date : Wed 25 Oct 2017.
+- ( at 09h01 )
   
 - input  file    -> t71.in
 - output file    -> t71.out
 - root for input  files -> t71i
 - root for output files -> t71o
 
-- inpspheads : Reading pseudopotential header in XML form from /cea/dsku/u-basque/hal1/home/abinit/abinit/REPOSITORY/GONZE/ace_6/tests/Psps_for_tests/C.xml
-- inpspheads : Reading pseudopotential header in XML form from /cea/dsku/u-basque/hal1/home/abinit/abinit/REPOSITORY/GONZE/ace_6/tests/Psps_for_tests/H4.GGA_X_PBE+GGA_C_PBE-paw.xml
+- inpspheads : Reading pseudopotential header in XML form from /cea/dsku/u-basque/hal1/home/abinit/abinit/REPOSITORY/GONZE/ace_1/tests/Psps_for_tests/C.xml
+- inpspheads : Reading pseudopotential header in XML form from /cea/dsku/u-basque/hal1/home/abinit/abinit/REPOSITORY/GONZE/ace_1/tests/Psps_for_tests/H4.GGA_X_PBE+GGA_C_PBE-paw.xml
 
  DATASET    1 : space group Pm m 2 (# 25); Bravais oP (primitive ortho.)
 ================================================================================
@@ -89,6 +89,7 @@ _ WF disk file :      0.068 Mbytes ; DEN or POT disk file :      0.669 Mbytes.
               ixc1    -101130
               ixc2         41
            jdtset        1    2
+         kptns_hf2     0.00000000E+00  0.00000000E+00  0.00000000E+00
          kptrlatt        1    0    0      0    1    0      0    0    1
           kptrlen      6.61404147E+00
 P           mkmem           1
@@ -157,9 +158,9 @@ P           mkmem           1
          ecut(hartree)=     35.000   => boxcut(ratio)=   2.04379
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /cea/dsku/u-basque/hal1/home/abinit/abinit/REPOSITORY/GONZE/ace_6/tests/Psps_for_tests/C.xml
-- pspatm: opening atomic psp file    /cea/dsku/u-basque/hal1/home/abinit/abinit/REPOSITORY/GONZE/ace_6/tests/Psps_for_tests/C.xml
-- pspatm : Reading pseudopotential header in XML form from /cea/dsku/u-basque/hal1/home/abinit/abinit/REPOSITORY/GONZE/ace_6/tests/Psps_for_tests/C.xml
+- pspini: atom type   1  psp file is /cea/dsku/u-basque/hal1/home/abinit/abinit/REPOSITORY/GONZE/ace_1/tests/Psps_for_tests/C.xml
+- pspatm: opening atomic psp file    /cea/dsku/u-basque/hal1/home/abinit/abinit/REPOSITORY/GONZE/ace_1/tests/Psps_for_tests/C.xml
+- pspatm : Reading pseudopotential header in XML form from /cea/dsku/u-basque/hal1/home/abinit/abinit/REPOSITORY/GONZE/ace_1/tests/Psps_for_tests/C.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.50736703
@@ -177,9 +178,9 @@ P           mkmem           1
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /cea/dsku/u-basque/hal1/home/abinit/abinit/REPOSITORY/GONZE/ace_6/tests/Psps_for_tests/H4.GGA_X_PBE+GGA_C_PBE-paw.xml
-- pspatm: opening atomic psp file    /cea/dsku/u-basque/hal1/home/abinit/abinit/REPOSITORY/GONZE/ace_6/tests/Psps_for_tests/H4.GGA_X_PBE+GGA_C_PBE-paw.xml
-- pspatm : Reading pseudopotential header in XML form from /cea/dsku/u-basque/hal1/home/abinit/abinit/REPOSITORY/GONZE/ace_6/tests/Psps_for_tests/H4.GGA_X_PBE+GGA_C_PBE-paw.xml
+- pspini: atom type   2  psp file is /cea/dsku/u-basque/hal1/home/abinit/abinit/REPOSITORY/GONZE/ace_1/tests/Psps_for_tests/H4.GGA_X_PBE+GGA_C_PBE-paw.xml
+- pspatm: opening atomic psp file    /cea/dsku/u-basque/hal1/home/abinit/abinit/REPOSITORY/GONZE/ace_1/tests/Psps_for_tests/H4.GGA_X_PBE+GGA_C_PBE-paw.xml
+- pspatm : Reading pseudopotential header in XML form from /cea/dsku/u-basque/hal1/home/abinit/abinit/REPOSITORY/GONZE/ace_1/tests/Psps_for_tests/H4.GGA_X_PBE+GGA_C_PBE-paw.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  2 (lmn_size=  2), orbitals=   0   0
  Spheres core radius: rc_sph= 0.89889493
@@ -535,9 +536,9 @@ _setup2: Arith. and geom. avg. npw (full set) are    1081.000    1081.000
          ecut(hartree)=     35.000   => boxcut(ratio)=   2.04379
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /cea/dsku/u-basque/hal1/home/abinit/abinit/REPOSITORY/GONZE/ace_6/tests/Psps_for_tests/C.xml
-- pspatm: opening atomic psp file    /cea/dsku/u-basque/hal1/home/abinit/abinit/REPOSITORY/GONZE/ace_6/tests/Psps_for_tests/C.xml
-- pspatm : Reading pseudopotential header in XML form from /cea/dsku/u-basque/hal1/home/abinit/abinit/REPOSITORY/GONZE/ace_6/tests/Psps_for_tests/C.xml
+- pspini: atom type   1  psp file is /cea/dsku/u-basque/hal1/home/abinit/abinit/REPOSITORY/GONZE/ace_1/tests/Psps_for_tests/C.xml
+- pspatm: opening atomic psp file    /cea/dsku/u-basque/hal1/home/abinit/abinit/REPOSITORY/GONZE/ace_1/tests/Psps_for_tests/C.xml
+- pspatm : Reading pseudopotential header in XML form from /cea/dsku/u-basque/hal1/home/abinit/abinit/REPOSITORY/GONZE/ace_1/tests/Psps_for_tests/C.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.50736703
@@ -555,9 +556,9 @@ _setup2: Arith. and geom. avg. npw (full set) are    1081.000    1081.000
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /cea/dsku/u-basque/hal1/home/abinit/abinit/REPOSITORY/GONZE/ace_6/tests/Psps_for_tests/H4.GGA_X_PBE+GGA_C_PBE-paw.xml
-- pspatm: opening atomic psp file    /cea/dsku/u-basque/hal1/home/abinit/abinit/REPOSITORY/GONZE/ace_6/tests/Psps_for_tests/H4.GGA_X_PBE+GGA_C_PBE-paw.xml
-- pspatm : Reading pseudopotential header in XML form from /cea/dsku/u-basque/hal1/home/abinit/abinit/REPOSITORY/GONZE/ace_6/tests/Psps_for_tests/H4.GGA_X_PBE+GGA_C_PBE-paw.xml
+- pspini: atom type   2  psp file is /cea/dsku/u-basque/hal1/home/abinit/abinit/REPOSITORY/GONZE/ace_1/tests/Psps_for_tests/H4.GGA_X_PBE+GGA_C_PBE-paw.xml
+- pspatm: opening atomic psp file    /cea/dsku/u-basque/hal1/home/abinit/abinit/REPOSITORY/GONZE/ace_1/tests/Psps_for_tests/H4.GGA_X_PBE+GGA_C_PBE-paw.xml
+- pspatm : Reading pseudopotential header in XML form from /cea/dsku/u-basque/hal1/home/abinit/abinit/REPOSITORY/GONZE/ace_1/tests/Psps_for_tests/H4.GGA_X_PBE+GGA_C_PBE-paw.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  2 (lmn_size=  2), orbitals=   0   0
  Spheres core radius: rc_sph= 0.89889493
@@ -744,6 +745,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    1081.000    1081.000
               ixc1    -101130
               ixc2         41
            jdtset        1    2
+         kptns_hf2     0.00000000E+00  0.00000000E+00  0.00000000E+00
          kptrlatt        1    0    0      0    1    0      0    0    1
           kptrlen      6.61404147E+00
 P           mkmem           1
@@ -861,10 +863,10 @@ P           mkmem           1
 - Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
 - the licence allows the authors to put it on the Web).
 -
-- Proc.   0 individual time (sec): cpu=         13.0  wall=         13.1
+- Proc.   0 individual time (sec): cpu=         13.4  wall=         13.5
 
 ================================================================================
 
  Calculation completed.
 .Delivered  53 WARNINGs and   0 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         13.0  wall=         13.1
++Overall time at end (sec) : cpu=         13.4  wall=         13.5

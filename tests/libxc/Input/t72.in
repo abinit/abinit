@@ -12,7 +12,7 @@
  nstep 15          # Maximal number of SCF cycles
  toldfe 1.0d-8     # Will stop when, twice in a row, the difference
 
-#DATASET 1  PBE (the pseudopotential for Al is with PBE XC)
+#DATASET 1  LDA (the pseudopotential for Al is with LDA)
 
 #DATASET 2  HSE06
  ixc2  -428

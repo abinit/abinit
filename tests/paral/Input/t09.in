@@ -23,7 +23,7 @@
  nstep 15          # Maximal number of SCF cycles
  toldfe 1.0d-8     # Will stop when, twice in a row, the difference
 
-#DATASET 11  PBE (the pseudopotential for Al is with PBE XC)
+#DATASET 11  LDA (the pseudopotential for Al is with LDA)
 
 #DATASET 2?  PBE0
  ixc2?      41
@@ -62,11 +62,18 @@ ecut  6.0         # Maximal kinetic energy cut-off, in Hartree
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% files_to_test =
-#%%   t09.out, tolnlines=  0, tolabs=  0.0e-00, tolrel=  0.0e-00
 #%% psp_files = 13al.pspgth
 #%% [paral_info]
+#%% nprocs_to_test = 1, 2, 4, 10
 #%% max_nprocs = 10
+#%% [NCPU_1]
+#%% files_to_test = t09_MPI1.out, tolnlines=   0,   tolabs=  0.0,      tolrel= 0.0
+#%% [NCPU_2]
+#%% files_to_test = t09_MPI2.out, tolnlines=   0,   tolabs=  0.0,      tolrel= 0.0
+#%% [NCPU_4]
+#%% files_to_test = t09_MPI4.out, tolnlines=   0,   tolabs=  0.0,      tolrel= 0.0
+#%% [NCPU_10]
+#%% files_to_test = t09_MPI10.out, tolnlines=   0,   tolabs=  0.0,      tolrel= 0.0
 #%% [extra_info]
 #%% authors = X. Gonze
 #%% keywords =

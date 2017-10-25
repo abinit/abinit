@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 23 Oct 2017.
-- ( at 08h46 )
+.Starting date : Wed 25 Oct 2017.
+- ( at 09h02 )
   
 - input  file    -> t72.in
 - output file    -> t72.out
@@ -105,6 +105,7 @@ _ WF disk file :      0.025 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
               amu      2.69815390E+01
              ecut      6.00000000E+00 Hartree
 -          fftalg         312
+ fockdownsampling           2       2       2
            getwfk1          0
            getwfk2          1
            getwfk3          2
@@ -124,7 +125,15 @@ _ WF disk file :      0.025 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
                       -2.50000000E-01  5.00000000E-01  2.50000000E-01
                        5.00000000E-01  0.00000000E+00  0.00000000E+00
                        0.00000000E+00  0.00000000E+00  0.00000000E+00
-         kptns_hf      5.00000000E-01  5.00000000E-01  0.00000000E+00
+         kptns_hf2     5.00000000E-01  5.00000000E-01  0.00000000E+00
+                       0.00000000E+00  0.00000000E+00  0.00000000E+00
+                       5.00000000E-01  0.00000000E+00  5.00000000E-01
+                       0.00000000E+00  5.00000000E-01  5.00000000E-01
+         kptns_hf3     5.00000000E-01  5.00000000E-01  0.00000000E+00
+                       0.00000000E+00  0.00000000E+00  0.00000000E+00
+                       5.00000000E-01  0.00000000E+00  5.00000000E-01
+                       0.00000000E+00  5.00000000E-01  5.00000000E-01
+         kptns_hf4     5.00000000E-01  5.00000000E-01  0.00000000E+00
                        0.00000000E+00  0.00000000E+00  0.00000000E+00
                        5.00000000E-01  0.00000000E+00  5.00000000E-01
                        0.00000000E+00  5.00000000E-01  5.00000000E-01
@@ -216,8 +225,8 @@ P           mkmem           6
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.02508
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is ../Psps_for_tests/13al.pspgth
-- pspatm: opening atomic psp file    ../Psps_for_tests/13al.pspgth
+- pspini: atom type   1  psp file is /cea/dsku/u-basque/hal1/home/abinit/abinit/REPOSITORY/GONZE/ace_1/tests/Psps_for_tests/13al.pspgth
+- pspatm: opening atomic psp file    /cea/dsku/u-basque/hal1/home/abinit/abinit/REPOSITORY/GONZE/ace_1/tests/Psps_for_tests/13al.pspgth
 - Goedecker-Teter-Hutter  Tue May 28 09:24:05 EDT 1996
 - 13.00000   3.00000    960528                znucl, zion, pspdat
     2    1    1    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -343,8 +352,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      78.656      78.566
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.02508
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is ../Psps_for_tests/13al.pspgth
-- pspatm: opening atomic psp file    ../Psps_for_tests/13al.pspgth
+- pspini: atom type   1  psp file is /cea/dsku/u-basque/hal1/home/abinit/abinit/REPOSITORY/GONZE/ace_1/tests/Psps_for_tests/13al.pspgth
+- pspatm: opening atomic psp file    /cea/dsku/u-basque/hal1/home/abinit/abinit/REPOSITORY/GONZE/ace_1/tests/Psps_for_tests/13al.pspgth
 - Goedecker-Teter-Hutter  Tue May 28 09:24:05 EDT 1996
 - 13.00000   3.00000    960528                znucl, zion, pspdat
     2    1    1    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -483,8 +492,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      78.656      78.566
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.02508
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is ../Psps_for_tests/13al.pspgth
-- pspatm: opening atomic psp file    ../Psps_for_tests/13al.pspgth
+- pspini: atom type   1  psp file is /cea/dsku/u-basque/hal1/home/abinit/abinit/REPOSITORY/GONZE/ace_1/tests/Psps_for_tests/13al.pspgth
+- pspatm: opening atomic psp file    /cea/dsku/u-basque/hal1/home/abinit/abinit/REPOSITORY/GONZE/ace_1/tests/Psps_for_tests/13al.pspgth
 - Goedecker-Teter-Hutter  Tue May 28 09:24:05 EDT 1996
 - 13.00000   3.00000    960528                znucl, zion, pspdat
     2    1    1    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -620,8 +629,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      78.656      78.566
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.02508
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is ../Psps_for_tests/13al.pspgth
-- pspatm: opening atomic psp file    ../Psps_for_tests/13al.pspgth
+- pspini: atom type   1  psp file is /cea/dsku/u-basque/hal1/home/abinit/abinit/REPOSITORY/GONZE/ace_1/tests/Psps_for_tests/13al.pspgth
+- pspatm: opening atomic psp file    /cea/dsku/u-basque/hal1/home/abinit/abinit/REPOSITORY/GONZE/ace_1/tests/Psps_for_tests/13al.pspgth
 - Goedecker-Teter-Hutter  Tue May 28 09:24:05 EDT 1996
 - 13.00000   3.00000    960528                znucl, zion, pspdat
     2    1    1    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -755,6 +764,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      78.656      78.566
             fcart3    -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
             fcart4    -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
 -          fftalg         312
+ fockdownsampling           2       2       2
            getwfk1          0
            getwfk2          1
            getwfk3          2
@@ -774,7 +784,15 @@ _setup2: Arith. and geom. avg. npw (full set) are      78.656      78.566
                       -2.50000000E-01  5.00000000E-01  2.50000000E-01
                        5.00000000E-01  0.00000000E+00  0.00000000E+00
                        0.00000000E+00  0.00000000E+00  0.00000000E+00
-         kptns_hf      5.00000000E-01  5.00000000E-01  0.00000000E+00
+         kptns_hf2     5.00000000E-01  5.00000000E-01  0.00000000E+00
+                       0.00000000E+00  0.00000000E+00  0.00000000E+00
+                       5.00000000E-01  0.00000000E+00  5.00000000E-01
+                       0.00000000E+00  5.00000000E-01  5.00000000E-01
+         kptns_hf3     5.00000000E-01  5.00000000E-01  0.00000000E+00
+                       0.00000000E+00  0.00000000E+00  0.00000000E+00
+                       5.00000000E-01  0.00000000E+00  5.00000000E-01
+                       0.00000000E+00  5.00000000E-01  5.00000000E-01
+         kptns_hf4     5.00000000E-01  5.00000000E-01  0.00000000E+00
                        0.00000000E+00  0.00000000E+00  0.00000000E+00
                        5.00000000E-01  0.00000000E+00  5.00000000E-01
                        0.00000000E+00  5.00000000E-01  5.00000000E-01
@@ -938,10 +956,10 @@ P           mkmem           6
 - Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7
 - Comment : the original paper describing the ABINIT project.
 -
-- Proc.   0 individual time (sec): cpu=          1.3  wall=          1.5
+- Proc.   0 individual time (sec): cpu=          1.3  wall=          1.4
 
 ================================================================================
 
  Calculation completed.
-.Delivered  34 WARNINGs and   6 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          1.3  wall=          1.5
+.Delivered  34 WARNINGs and   4 COMMENTs to log file.
++Overall time at end (sec) : cpu=          1.3  wall=          1.4

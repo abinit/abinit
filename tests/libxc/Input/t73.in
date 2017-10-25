@@ -13,7 +13,7 @@
  nstep 15          # Maximal number of SCF cycles
  toldfe 1.0d-8     # Will stop when, twice in a row, the difference
 
-#DATASET 1  PBE (the pseudopotential for Al is with PBE XC)
+#DATASET 1  LDA (the pseudopotential for Al is with LDA)
 
 #DATASET 2  HSE06
  ixc2  -428
@@ -78,12 +78,12 @@ ecut  6.0         # Maximal kinetic energy cut-off, in Hartree
 #%%   The observed difference is only due to the differing xc correlation real space sampling.
 #%%   Of course, the total energy from the present test is to be divided by 4, to find a total energy per atom.
 #%%   The results are, in Ha/atom (present test for conventional cell / previous for primitive cell / difference):
-#%%   PBE    -2.075 716 / -2.075 718 / 0.000 002
+#%%   LDA    -2.075 716 / -2.075 718 / 0.000 002
 #%%   HSE06  -2.095 513 / -2.095 539 / 0.000 026
 #%%   PBE0   -2.081 192 / -2.081 193 / 0.000 001
 #%%   HSE03  -2.123 089 / -2.123 117 / 0.000 028
 #%%   The real space grid sampling cannot appear at the level of the Fock operator,
 #%%   that is completely formulated in reciprocal space. The real space functional 
 #%%   from HSE06 and HSE03 is apparently more affected by the real space sampling than
-#%%   the one from PBE and PBE0 ...
+#%%   the one from LDA and PBE0 ...
 #%%<END TEST_INFO>

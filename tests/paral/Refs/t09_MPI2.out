@@ -14,13 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 23 Oct 2017.
-- ( at 12h10 )
+.Starting date : Wed 25 Oct 2017.
+- ( at 09h38 )
   
 - input  file    -> t09.in
-- output file    -> t09.out
-- root for input  files -> t09i
-- root for output files -> t09o
+- output file    -> t09_MPI2.out
+- root for input  files -> t09_MPI2i
+- root for output files -> t09_MPI2o
 
 
  DATASET   11 : the unit cell is not primitive
@@ -173,7 +173,7 @@ P           mkmem           5
            ndtset           5
             ngfft          18      18      18
              nkpt          10
-           nkpthf11         0
+           nkpthf11        64
            nkpthf21         1
            nkpthf22         2
            nkpthf23         4
@@ -539,7 +539,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     306.203     306.131
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  7.600000000000  7.600000000000  7.600000000000 bohr
               =  4.021746785284  4.021746785284  4.021746785284 angstroms
- prteigrs : about to open file t09o_DS11_EIG
+ prteigrs : about to open file t09_MPI2o_DS11_EIG
  Fermi (or HOMO) energy (hartree) =   0.34304   Average Vxc (hartree)=  -0.34543
  Eigenvalues (hartree) for nkpt=  10  k points:
  kpt#   1, nband=  8, wtk=  0.01563, kpt=  0.0000  0.0000  0.0000 (reduced coord)
@@ -622,7 +622,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     306.203     306.131
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t09o_DS11_WFK
+-inwffil : will read wavefunctions from disk file t09_MPI2o_DS11_WFK
 _setup2: Arith. and geom. avg. npw (full set) are     306.203     306.131
 
 ================================================================================
@@ -694,7 +694,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     306.203     306.131
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  7.600000000000  7.600000000000  7.600000000000 bohr
               =  4.021746785284  4.021746785284  4.021746785284 angstroms
- prteigrs : about to open file t09o_DS21_EIG
+ prteigrs : about to open file t09_MPI2o_DS21_EIG
  Fermi (or HOMO) energy (hartree) =   0.33488   Average Vxc (hartree)=  -0.27135
  Eigenvalues (hartree) for nkpt=  10  k points:
  kpt#   1, nband=  8, wtk=  0.01563, kpt=  0.0000  0.0000  0.0000 (reduced coord)
@@ -760,7 +760,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     306.203     306.131
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.14792
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t09o_DS11_WFK
+-inwffil : will read wavefunctions from disk file t09_MPI2o_DS11_WFK
 _setup2: Arith. and geom. avg. npw (full set) are     306.203     306.131
 
 ================================================================================
@@ -827,7 +827,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     306.203     306.131
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  7.600000000000  7.600000000000  7.600000000000 bohr
               =  4.021746785284  4.021746785284  4.021746785284 angstroms
- prteigrs : about to open file t09o_DS22_EIG
+ prteigrs : about to open file t09_MPI2o_DS22_EIG
  Fermi (or HOMO) energy (hartree) =   0.32011   Average Vxc (hartree)=  -0.27133
  Eigenvalues (hartree) for nkpt=  10  k points:
  kpt#   1, nband=  8, wtk=  0.01563, kpt=  0.0000  0.0000  0.0000 (reduced coord)
@@ -893,7 +893,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     306.203     306.131
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.14792
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t09o_DS11_WFK
+-inwffil : will read wavefunctions from disk file t09_MPI2o_DS11_WFK
 _setup2: Arith. and geom. avg. npw (full set) are     306.203     306.131
 
 ================================================================================
@@ -969,7 +969,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     306.203     306.131
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  7.600000000000  7.600000000000  7.600000000000 bohr
               =  4.021746785284  4.021746785284  4.021746785284 angstroms
- prteigrs : about to open file t09o_DS23_EIG
+ prteigrs : about to open file t09_MPI2o_DS23_EIG
  Fermi (or HOMO) energy (hartree) =   0.33165   Average Vxc (hartree)=  -0.27125
  Eigenvalues (hartree) for nkpt=  10  k points:
  kpt#   1, nband=  8, wtk=  0.01563, kpt=  0.0000  0.0000  0.0000 (reduced coord)
@@ -1035,7 +1035,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     306.203     306.131
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.14792
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t09o_DS11_WFK
+-inwffil : will read wavefunctions from disk file t09_MPI2o_DS11_WFK
 _setup2: Arith. and geom. avg. npw (full set) are     306.203     306.131
 
 ================================================================================
@@ -1103,7 +1103,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     306.203     306.131
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  7.600000000000  7.600000000000  7.600000000000 bohr
               =  4.021746785284  4.021746785284  4.021746785284 angstroms
- prteigrs : about to open file t09o_DS24_EIG
+ prteigrs : about to open file t09_MPI2o_DS24_EIG
  Fermi (or HOMO) energy (hartree) =   0.35871   Average Vxc (hartree)=  -0.27134
  Eigenvalues (hartree) for nkpt=  10  k points:
  kpt#   1, nband=  8, wtk=  0.01563, kpt=  0.0000  0.0000  0.0000 (reduced coord)
@@ -1233,7 +1233,7 @@ P           mkmem           5
            ndtset           5
             ngfft          18      18      18
              nkpt          10
-           nkpthf11         0
+           nkpthf11        64
            nkpthf21         1
            nkpthf22         2
            nkpthf23         4
@@ -1639,10 +1639,10 @@ P           mkmem           5
 - Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7
 - Comment : the original paper describing the ABINIT project.
 -
-- Proc.   0 individual time (sec): cpu=         19.1  wall=         19.3
+- Proc.   0 individual time (sec): cpu=         19.2  wall=         19.4
 
 ================================================================================
 
  Calculation completed.
 .Delivered   1 WARNINGs and   2 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         38.4  wall=         38.7
++Overall time at end (sec) : cpu=         38.6  wall=         38.8
