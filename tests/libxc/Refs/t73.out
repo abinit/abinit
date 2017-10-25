@@ -1,6 +1,6 @@
 
 .Version 8.7.1 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu6.3 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
 
 .Copyright (C) 1998-2017 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 23 Oct 2017.
-- ( at 08h51 )
+.Starting date : Wed 25 Oct 2017.
+- ( at 13h03 )
   
 - input  file    -> t73.in
 - output file    -> t73.out
@@ -98,13 +98,14 @@ _ WF disk file :      0.158 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
 -   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
 -
 - outvars: echo of global parameters not present in the input file              
--  max_nthreads =    1
+-  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
             acell      7.6000000000E+00  7.6000000000E+00  7.6000000000E+00 Bohr
               amu      2.69815390E+01
              ecut      6.00000000E+00 Hartree
 -          fftalg         312
+ fockdownsampling           2       2       2
            getwfk1          0
            getwfk2          1
            getwfk3          2
@@ -122,6 +123,9 @@ _ WF disk file :      0.158 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
                        5.00000000E-01  0.00000000E+00  0.00000000E+00
                        5.00000000E-01  5.00000000E-01  0.00000000E+00
                        5.00000000E-01  5.00000000E-01  5.00000000E-01
+         kptns_hf2     0.00000000E+00  0.00000000E+00  0.00000000E+00
+         kptns_hf3     0.00000000E+00  0.00000000E+00  0.00000000E+00
+         kptns_hf4     0.00000000E+00  0.00000000E+00  0.00000000E+00
          kptrlatt        2    0    0      0    2    0      0    0    2
           kptrlen      1.52000000E+01
 P           mkmem           4
@@ -388,8 +392,8 @@ P           mkmem           4
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.14792
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is ../Psps_for_tests/13al.pspgth
-- pspatm: opening atomic psp file    ../Psps_for_tests/13al.pspgth
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_ace_1/tests/Psps_for_tests/13al.pspgth
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_ace_1/tests/Psps_for_tests/13al.pspgth
 - Goedecker-Teter-Hutter  Tue May 28 09:24:05 EDT 1996
 - 13.00000   3.00000    960528                znucl, zion, pspdat
     2    1    1    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -421,12 +425,12 @@ _setup2: Arith. and geom. avg. npw (full set) are     314.625     314.565
  ETOT  1  -8.2993479746050    -8.299E+00 2.721E-03 8.783E-01
  ETOT  2  -8.3028330537759    -3.485E-03 4.934E-07 2.381E-02
  ETOT  3  -8.3028648267628    -3.177E-05 1.667E-06 9.811E-05
- ETOT  4  -8.3028649541128    -1.273E-07 5.542E-10 5.161E-07
- ETOT  5  -8.3028649547174    -6.046E-10 2.194E-09 1.494E-09
- ETOT  6  -8.3028649547187    -1.265E-12 2.436E-11 2.198E-11
+ ETOT  4  -8.3028649541128    -1.274E-07 5.542E-10 5.161E-07
+ ETOT  5  -8.3028649547175    -6.047E-10 2.194E-09 1.494E-09
+ ETOT  6  -8.3028649547186    -1.135E-12 2.436E-11 2.198E-11
 
  At SCF step    6, etot is converged : 
-  for the second time, diff in etot=  1.265E-12 < toldfe=  1.000E-08
+  for the second time, diff in etot=  1.135E-12 < toldfe=  1.000E-08
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  1.88523754E-04  sigma(3 2)=  0.00000000E+00
@@ -490,20 +494,20 @@ _setup2: Arith. and geom. avg. npw (full set) are     314.625     314.565
 --------------------------------------------------------------------------------
  Components of total free energy (in Hartree) :
 
-    Kinetic energy  =  3.57769629464820E+00
-    Hartree energy  =  1.83956826857188E-02
-    XC energy       = -3.22153051886251E+00
+    Kinetic energy  =  3.57769629463257E+00
+    Hartree energy  =  1.83956826861462E-02
+    XC energy       = -3.22153051886262E+00
     Ewald energy    = -1.08588838597432E+01
     PspCore energy  = -6.55098036669955E-01
-    Loc. psp. energy=  1.35793527369161E+00
-    NL   psp  energy=  1.52188818989002E+00
-    >>>>> Internal E= -8.25959697436016E+00
+    Loc. psp. energy=  1.35793527370545E+00
+    NL   psp  energy=  1.52188818989151E+00
+    >>>>> Internal E= -8.25959697436014E+00
 
-    -kT*entropy     = -4.32679803584973E-02
-    >>>>>>>>> Etotal= -8.30286495471866E+00
+    -kT*entropy     = -4.32679803584971E-02
+    >>>>>>>>> Etotal= -8.30286495471864E+00
 
  Other information on the energy :
-    Total energy(eV)= -2.25932445420591E+02 ; Band energy (Ha)=   2.2970742291E+00
+    Total energy(eV)= -2.25932445420590E+02 ; Band energy (Ha)=   2.2970742291E+00
 --------------------------------------------------------------------------------
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -533,8 +537,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     314.625     314.565
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.14792
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is ../Psps_for_tests/13al.pspgth
-- pspatm: opening atomic psp file    ../Psps_for_tests/13al.pspgth
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_ace_1/tests/Psps_for_tests/13al.pspgth
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_ace_1/tests/Psps_for_tests/13al.pspgth
 - Goedecker-Teter-Hutter  Tue May 28 09:24:05 EDT 1996
 - 13.00000   3.00000    960528                znucl, zion, pspdat
     2    1    1    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -563,15 +567,15 @@ _setup2: Arith. and geom. avg. npw (full set) are     314.625     314.565
 ================================================================================
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -8.3795192684212    -8.380E+00 2.877E-12 1.231E-02
+ ETOT  1  -8.3795192684213    -8.380E+00 2.877E-12 1.231E-02
  ETOT  2  -8.3820136456057    -2.494E-03 1.088E-13 8.355E-04
  ETOT  3  -8.3820556429294    -4.200E-05 1.676E-09 6.228E-06
  ETOT  4  -8.3820515833613     4.060E-06 1.194E-12 1.634E-07
  ETOT  5  -8.3820517063770    -1.230E-07 6.464E-13 8.045E-09
  ETOT  6  -8.3820514205619     2.858E-07 3.009E-14 3.046E-10
- ETOT  7  -8.3820513644100     5.615E-08 1.754E-15 7.179E-12
+ ETOT  7  -8.3820513644099     5.615E-08 1.754E-15 7.179E-12
  ETOT  8  -8.3820513573508     7.059E-09 3.466E-13 1.224E-13
- ETOT  9  -8.3820513532845     4.066E-09 2.443E-13 7.231E-14
+ ETOT  9  -8.3820513532846     4.066E-09 2.443E-13 7.231E-14
 
  At SCF step    9, etot is converged : 
   for the second time, diff in etot=  4.066E-09 < toldfe=  1.000E-08
@@ -638,27 +642,27 @@ _setup2: Arith. and geom. avg. npw (full set) are     314.625     314.565
 --------------------------------------------------------------------------------
  Components of total free energy (in Hartree) :
 
-    Kinetic energy  =  3.55524296141413E+00
-    Hartree energy  =  1.63955144304081E-02
-    XC energy       = -3.30136831345065E+00
+    Kinetic energy  =  3.55524296141441E+00
+    Hartree energy  =  1.63955144304037E-02
+    XC energy       = -3.30136831345072E+00
     Ewald energy    = -1.08588838597432E+01
     PspCore energy  = -6.55098036669955E-01
-    Loc. psp. energy=  1.38302921696043E+00
-    NL   psp  energy=  1.50997616446238E+00
-    >>>>> Internal E= -8.35070635259650E+00
+    Loc. psp. energy=  1.38302921696031E+00
+    NL   psp  energy=  1.50997616446219E+00
+    >>>>> Internal E= -8.35070635259659E+00
 
-    -kT*entropy     = -3.13450006880218E-02
-    >>>>>>>>> Etotal= -8.38205135328452E+00
+    -kT*entropy     = -3.13450006880216E-02
+    >>>>>>>>> Etotal= -8.38205135328461E+00
 
  "Double-counting" decomposition of free energy:
-    Band energy     =  1.83600895343142E+00
+    Band energy     =  1.83600895343135E+00
     Ewald energy    = -1.08588838597432E+01
     PspCore energy  = -6.55098036669955E-01
-    Dble-C XC-energy=  1.32726658959716E+00
-    >>>>> Internal E= -8.35070635338462E+00
+    Dble-C XC-energy=  1.32726658959708E+00
+    >>>>> Internal E= -8.35070635338476E+00
 
-    -kT*entropy     = -3.13450006880218E-02
-    >>>> Etotal (DC)= -8.38205135407264E+00
+    -kT*entropy     = -3.13450006880216E-02
+    >>>> Etotal (DC)= -8.38205135407278E+00
 --------------------------------------------------------------------------------
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -691,8 +695,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     314.625     314.565
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.14792
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is ../Psps_for_tests/13al.pspgth
-- pspatm: opening atomic psp file    ../Psps_for_tests/13al.pspgth
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_ace_1/tests/Psps_for_tests/13al.pspgth
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_ace_1/tests/Psps_for_tests/13al.pspgth
 - Goedecker-Teter-Hutter  Tue May 28 09:24:05 EDT 1996
 - 13.00000   3.00000    960528                znucl, zion, pspdat
     2    1    1    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -722,7 +726,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     314.625     314.565
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -8.3248985781592    -8.325E+00 1.065E-12 3.530E-05
- ETOT  2  -8.3247527359697     1.458E-04 1.679E-14 3.504E-06
+ ETOT  2  -8.3247527359698     1.458E-04 1.679E-14 3.504E-06
  ETOT  3  -8.3247638106600    -1.107E-05 5.975E-11 3.173E-07
  ETOT  4  -8.3247676199154    -3.809E-06 5.236E-13 1.855E-09
  ETOT  5  -8.3247682149082    -5.950E-07 2.162E-13 1.560E-09
@@ -730,7 +734,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     314.625     314.565
  ETOT  7  -8.3247684941934    -4.119E-08 2.630E-14 8.161E-15
  ETOT  8  -8.3247685050111    -1.082E-08 1.821E-14 1.658E-13
  ETOT  9  -8.3247685085797    -3.569E-09 1.241E-14 8.063E-14
- ETOT 10  -8.3247685098367    -1.257E-09 8.764E-15 1.517E-14
+ ETOT 10  -8.3247685098368    -1.257E-09 8.764E-15 1.517E-14
 
  At SCF step   10, etot is converged : 
   for the second time, diff in etot=  1.257E-09 < toldfe=  1.000E-08
@@ -797,27 +801,27 @@ _setup2: Arith. and geom. avg. npw (full set) are     314.625     314.565
 --------------------------------------------------------------------------------
  Components of total free energy (in Hartree) :
 
-    Kinetic energy  =  3.55640190505096E+00
-    Hartree energy  =  1.62421837779994E-02
-    XC energy       = -3.24380880140313E+00
+    Kinetic energy  =  3.55640190505090E+00
+    Hartree energy  =  1.62421837779986E-02
+    XC energy       = -3.24380880140308E+00
     Ewald energy    = -1.08588838597432E+01
     PspCore energy  = -6.55098036669955E-01
     Loc. psp. energy=  1.38198863415106E+00
-    NL   psp  energy=  1.51128646000912E+00
-    >>>>> Internal E= -8.29187151482718E+00
+    NL   psp  energy=  1.51128646000910E+00
+    >>>>> Internal E= -8.29187151482722E+00
 
-    -kT*entropy     = -3.28969950095525E-02
-    >>>>>>>>> Etotal= -8.32476850983674E+00
+    -kT*entropy     = -3.28969950095540E-02
+    >>>>>>>>> Etotal= -8.32476850983678E+00
 
  "Double-counting" decomposition of free energy:
-    Band energy     =  1.78969558819477E+00
+    Band energy     =  1.78969558819473E+00
     Ewald energy    = -1.08588838597432E+01
     PspCore energy  = -6.55098036669955E-01
-    Dble-C XC-energy=  1.43241479271461E+00
-    >>>>> Internal E= -8.29187151550382E+00
+    Dble-C XC-energy=  1.43241479271462E+00
+    >>>>> Internal E= -8.29187151550384E+00
 
-    -kT*entropy     = -3.28969950095525E-02
-    >>>> Etotal (DC)= -8.32476851051337E+00
+    -kT*entropy     = -3.28969950095540E-02
+    >>>> Etotal (DC)= -8.32476851051340E+00
 --------------------------------------------------------------------------------
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -847,8 +851,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     314.625     314.565
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.14792
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is ../Psps_for_tests/13al.pspgth
-- pspatm: opening atomic psp file    ../Psps_for_tests/13al.pspgth
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_ace_1/tests/Psps_for_tests/13al.pspgth
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_ace_1/tests/Psps_for_tests/13al.pspgth
 - Goedecker-Teter-Hutter  Tue May 28 09:24:05 EDT 1996
 - 13.00000   3.00000    960528                znucl, zion, pspdat
     2    1    1    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -877,13 +881,13 @@ _setup2: Arith. and geom. avg. npw (full set) are     314.625     314.565
 ================================================================================
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -8.4897753143050    -8.490E+00 6.915E-12 1.054E-02
+ ETOT  1  -8.4897753143049    -8.490E+00 6.915E-12 1.054E-02
  ETOT  2  -8.4923166822921    -2.541E-03 1.711E-13 7.124E-04
- ETOT  3  -8.4923575576366    -4.088E-05 1.323E-09 3.776E-06
+ ETOT  3  -8.4923575576365    -4.088E-05 1.323E-09 3.776E-06
  ETOT  4  -8.4923557791271     1.779E-06 8.926E-13 1.249E-07
  ETOT  5  -8.4923562258035    -4.467E-07 5.099E-13 6.428E-09
  ETOT  6  -8.4923560847175     1.411E-07 9.806E-15 2.078E-11
- ETOT  7  -8.4923560862152    -1.498E-09 4.979E-13 4.263E-13
+ ETOT  7  -8.4923560862153    -1.498E-09 4.979E-13 4.263E-13
  ETOT  8  -8.4923560895422    -3.327E-09 3.493E-13 1.134E-13
 
  At SCF step    8, etot is converged : 
@@ -951,27 +955,27 @@ _setup2: Arith. and geom. avg. npw (full set) are     314.625     314.565
 --------------------------------------------------------------------------------
  Components of total free energy (in Hartree) :
 
-    Kinetic energy  =  3.55666308149138E+00
-    Hartree energy  =  1.65008498049132E-02
-    XC energy       = -3.41180024553463E+00
+    Kinetic energy  =  3.55666308149098E+00
+    Hartree energy  =  1.65008498049213E-02
+    XC energy       = -3.41180024553471E+00
     Ewald energy    = -1.08588838597432E+01
     PspCore energy  = -6.55098036669955E-01
-    Loc. psp. energy=  1.38523403765022E+00
-    NL   psp  energy=  1.50625828782122E+00
+    Loc. psp. energy=  1.38523403765042E+00
+    NL   psp  energy=  1.50625828782149E+00
     >>>>> Internal E= -8.46112588518010E+00
 
-    -kT*entropy     = -3.12302043620819E-02
+    -kT*entropy     = -3.12302043620818E-02
     >>>>>>>>> Etotal= -8.49235608954218E+00
 
  "Double-counting" decomposition of free energy:
-    Band energy     =  1.70393664433005E+00
+    Band energy     =  1.70393664433011E+00
     Ewald energy    = -1.08588838597432E+01
     PspCore energy  = -6.55098036669955E-01
-    Dble-C XC-energy=  1.34891936884034E+00
-    >>>>> Internal E= -8.46112588324280E+00
+    Dble-C XC-energy=  1.34891936884035E+00
+    >>>>> Internal E= -8.46112588324273E+00
 
-    -kT*entropy     = -3.12302043620819E-02
-    >>>> Etotal (DC)= -8.49235608760488E+00
+    -kT*entropy     = -3.12302043620818E-02
+    >>>> Etotal (DC)= -8.49235608760481E+00
 --------------------------------------------------------------------------------
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1012,6 +1016,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     314.625     314.565
                       -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
                       -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
 -          fftalg         312
+ fockdownsampling           2       2       2
            getwfk1          0
            getwfk2          1
            getwfk3          2
@@ -1029,6 +1034,9 @@ _setup2: Arith. and geom. avg. npw (full set) are     314.625     314.565
                        5.00000000E-01  0.00000000E+00  0.00000000E+00
                        5.00000000E-01  5.00000000E-01  0.00000000E+00
                        5.00000000E-01  5.00000000E-01  5.00000000E-01
+         kptns_hf2     0.00000000E+00  0.00000000E+00  0.00000000E+00
+         kptns_hf3     0.00000000E+00  0.00000000E+00  0.00000000E+00
+         kptns_hf4     0.00000000E+00  0.00000000E+00  0.00000000E+00
          kptrlatt        2    0    0      0    2    0      0    0    2
           kptrlen      1.52000000E+01
 P           mkmem           4
@@ -1075,7 +1083,7 @@ P           mkmem           4
                        2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
                        2.000000  2.000000
            occopt           7
-           strten1     1.8852375418E-04  1.8852375418E-04  1.8852375418E-04
+           strten1     1.8852375419E-04  1.8852375419E-04  1.8852375419E-04
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            strten2     4.0469218139E-04  4.0469218139E-04  4.0469218139E-04
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -1373,10 +1381,10 @@ P           mkmem           4
 - Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7
 - Comment : the original paper describing the ABINIT project.
 -
-- Proc.   0 individual time (sec): cpu=          4.9  wall=          5.1
+- Proc.   0 individual time (sec): cpu=          7.8  wall=          8.0
 
 ================================================================================
 
  Calculation completed.
-.Delivered  36 WARNINGs and  10 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          4.9  wall=          5.1
+.Delivered  36 WARNINGs and   8 COMMENTs to log file.
++Overall time at end (sec) : cpu=          7.8  wall=          8.0
