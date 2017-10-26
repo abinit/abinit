@@ -36,6 +36,7 @@ module m_xcdata
  implicit none
 
  private
+
 !!***
 
 !!****t* m_xcdata/xcdata_type
@@ -54,12 +55,19 @@ module m_xcdata
 
 ! Integer scalars
 
+  integer :: auxc_ixc
+    ! Choice of auxiliary exchange-correlation functional. See input variable documentation
+    ! If 0, there is no auxiliary xc functional, the one corresponding to ixc has to be used.
+
   integer :: intxc
     ! 1 if the XC functional has to be interpolated on a more refined mesh than the FFT one.
     ! 0 stick to the original FFT mesh
 
   integer :: ixc
     ! Choice of exchange-correlation functional. See input variable documentation
+
+  integer :: usefock
+    ! 1 if the XC functional includes a (possibly screened) Fock contribution
 
   integer :: usekden
     ! 1 if the XC functional depends on the kinetic energy density
@@ -91,6 +99,7 @@ module m_xcdata
 
  public :: xcdata_init                ! Initialize the object.
  public :: get_xclevel                ! Get the xclevel from ixc (as well as usefock)
+ public :: get_auxc_ixc               ! Get the auxiliary xc functional (if it exists)
 
 contains
 !!***
@@ -103,6 +112,7 @@ contains
 !!  Init the structure. Mostly copy input variables, except compute xclevel.
 !!
 !! INPUTS
+!!  auxc_ixc = possibly the index of the auxiliary xc functional, otherwise 0.
 !!  intxc = 1 if the XC functional has to be interpolated on a more refined mesh than the FFT one
 !!  ixc= index of exchange-correlation functional
 !!  nelect = Number of electrons in the cell (for Fermi-Amaldi only)
@@ -122,7 +132,7 @@ contains
 !!
 !! SOURCE
 
-subroutine xcdata_init(intxc,ixc,nelect,tphysel,usekden,vdw_xc,xc_tb09_c,xc_denpos,xcdata)
+subroutine xcdata_init(auxc_ixc,intxc,ixc,nelect,tphysel,usekden,vdw_xc,xc_tb09_c,xc_denpos,xcdata)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -135,14 +145,15 @@ subroutine xcdata_init(intxc,ixc,nelect,tphysel,usekden,vdw_xc,xc_tb09_c,xc_denp
 
 !Arguments ------------------------------------
 !scalars
- integer, intent(in) :: intxc,ixc,usekden,vdw_xc
+ integer, intent(in) :: auxc_ixc,intxc,ixc,usekden,vdw_xc
  real(dp),intent(in) :: nelect,tphysel,xc_denpos,xc_tb09_c
  type(xcdata_type), intent(out) :: xcdata
 !Local variables-------------------------------
- integer :: xclevel
+ integer :: usefock,xclevel
 
 ! *************************************************************************
 
+ xcdata%auxc_ixc=auxc_ixc
  xcdata%intxc=intxc
  xcdata%ixc=ixc
  xcdata%usekden=usekden
@@ -154,8 +165,9 @@ subroutine xcdata_init(intxc,ixc,nelect,tphysel,usekden,vdw_xc,xc_tb09_c,xc_denp
  xcdata%xc_tb09_c=xc_tb09_c
 
 !Compute xclevel 
- call get_xclevel(ixc,xclevel)
+ call get_xclevel(ixc,xclevel,usefock=usefock)
  xcdata%xclevel=xclevel
+ xcdata%usefock=usefock
 
 end subroutine xcdata_init
 !!***
@@ -211,6 +223,7 @@ subroutine get_xclevel(ixc,xclevel,usefock)
  if( (11<=ixc .and. ixc<=19).or.(23<=ixc .and. ixc<=29) )xclevel=2 ! GGA
  if( 20<=ixc .and. ixc<=22 )xclevel=3 ! ixc for TDDFT kernel tests
  if(present(usefock))then
+   usefock=0
    if( ixc>=40 .and. ixc<=42 )usefock=1 ! Hartree-Fock or internal hybrid functionals
  endif
  if( ixc>=41 .and. ixc<=42)xclevel=2 ! ixc for internal hybrids using GGA
@@ -241,6 +254,76 @@ subroutine get_xclevel(ixc,xclevel,usefock)
  end if
 
 end subroutine get_xclevel
+!!***
+
+!!****f* m_xcdata/get_auxc_ixc
+!! NAME
+!!  get_auxc_ixc
+!!
+!! FUNCTION
+!!  Returns the ixc of an auxiliary XC functional to be used instead of the input ixc 
+!!  For most of the functionals, there is no need of an auxiliary functional, in which case auxc_ixc=0
+!!  For hybrid functionals, on the contrary, some speedup can be achieved by using such an auxiliary functional
+!!  Note that this XC functional intend to replace the whole ixc functional. Generally speakin, it should be
+!!  mistaken for the GGA part of the hybrid functional (that is for exchange only, actually).
+!!
+!!  At present, always return ixc=1, but this might change in the future ...
+!!
+!! INPUTS
+!!  ixc= index of exchange-correlation functional
+!!
+!! OUTPUT
+!!  auxc_ixc= 0 if no need of an auxiliary functional, otherwise, returns the ixc of an auxiliary functional.
+!!
+!! SIDE EFFECTS
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine get_auxc_ixc(auxc_ixc,ixc)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'get_auxc_ixc'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer, intent(in) :: ixc
+ integer, intent(out) :: auxc_ixc
+
+!Local variables-------------------------------
+ integer :: gga_id(2),usefock,xclevel
+
+! *************************************************************************
+
+ auxc_ixc=11
+!Native hybrid functionals from ABINIT
+ if (ixc==40.or.ixc==41.or.ixc==42) then
+   auxc_ixc = 11
+!Hybrid functionals from libxc
+ else if (ixc<0) then
+   call get_xclevel(ixc,xclevel,usefock)
+   if(usefock==1)then
+     auxc_ixc=11
+!    if (libxc_functionals_gga_from_hybrid(hybrid_id=ixc,gga_id=gga_id)) then
+!      auxc_ixc=-gga_id(1)*1000-gga_id(2)
+!    endif
+   end if
+ end if
+
+!DEBUG
+ write(std_out,'(a,2i8)')'get_auxc_ixc, : ixc, auxc_ixc=',ixc, auxc_ixc
+!ENDDEBUG
+
+end subroutine get_auxc_ixc
 
 end module m_xcdata
 !!***

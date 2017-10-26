@@ -3951,7 +3951,7 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
 !scalars
  integer,parameter :: dummy_npw=1,nsig=1,tim_getgh1c=1,berryopt0=0,timrev1=1
  integer,parameter :: useylmgr=0,useylmgr1=0,master=0,ndat1=1
- integer :: my_rank,nproc,iomode,mband,my_minb,my_maxb,nsppol,nkpt,idir,ipert,iq_ibz
+ integer :: my_rank,nproc,iomode,mband,nsppol,nkpt,idir,ipert,iq_ibz
  integer :: cplex,db_iqpt,natom,natom3,ipc,ipc1,ipc2,nspinor,onpw
  integer :: bstart_k,bstart_kq,nband_k,nband_kq,ib1,ib2,band !band1,band2,
  integer :: ik_ibz,ik_bz,ikq_bz,ikq_ibz,isym_k,isym_kq,trev_k,trev_kq,timerev_q
@@ -4106,13 +4106,24 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
  end if
 
  ! Initialize the wave function descriptor.
- ! For the time being, no memory distribution, each node has the full set of states.
- my_minb = 1; my_maxb = mband
-
  ABI_MALLOC(nband, (nkpt, nsppol))
  ABI_MALLOC(bks_mask,(mband, nkpt, nsppol))
  ABI_MALLOC(keep_ur,(mband, nkpt ,nsppol))
- nband=mband; bks_mask=.True.; keep_ur=.False.
+ nband=mband; bks_mask=.False.; keep_ur=.False.
+
+ ! Only wavefunctions on the FS are stored in wfd.
+ ! Need all k-points on the FS because of k+q, spin is not distributed for the time being.
+ ! One could reduce the memory allocated per MPI-rank via MPI-FFT or OpenMP...
+ do spin=1,nsppol
+   fs => fstab(spin)
+   do ik_bz=1,fs%nkfs
+     ik_ibz = fs%istg0(1, ik_bz)
+     bstart_k = fs%bstcnt_ibz(1, ik_ibz); nband_k = fs%bstcnt_ibz(2, ik_ibz)
+     bks_mask(bstart_k:bstart_k+nband_k-1, ik_ibz, spin) = .True.
+   end do
+ end do
+ ! no memory distribution, each node has the full set of states.
+ !bks_mask(1:mband,:,:) = .True.
 
  ecut = dtset%ecut ! dtset%dilatmx
  call wfd_init(wfd,cryst,pawtab,psps,keep_ur,dtset%paral_kgb,dummy_npw,mband,nband,nkpt,nsppol,bks_mask,&

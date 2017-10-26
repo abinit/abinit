@@ -1105,6 +1105,9 @@
  intarr(1,:)=dtsets(:)%useexexch
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'useexexch','INT',0)
 
+ intarr(1,:)=dtsets(:)%usefock
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'usefock','INT',0)
+
  intarr(1,:)=dtsets(:)%usepotzero
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'usepotzero','INT',0)
 

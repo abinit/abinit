@@ -82,6 +82,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
  use m_fstrings,  only : sjoin, itoa, ltoa, tolower, rmquotes
  use m_ingeo_img, only : ingeo_img
  use m_dtset,     only : dtset_chkneu
+ use m_xcdata,    only : get_auxc_ixc, get_xclevel
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -108,9 +109,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
 
 !Local variables-------------------------------
 !scalars
- integer :: bantot,berryopt,dmatsize,ndim,getocc,iat,iatom,ii,iimage,ikpt,ionmov,intimage
+ integer :: bantot,berryopt,dmatsize,ndim,getocc,iat,iatom,iband,ii,iimage,ikpt,intimage,ionmov,isppol
  integer :: densfor_pred,ipsp,iscf,isiz,itypat,jj,kptopt,lpawu,marr,natom,nband1,nberry,mkpt
- integer :: niatcon,nimage,nkpt,npspalch,nqpt,nsp,nspinor,nsppol,nsym,ntypalch,ntypat,ntyppure,nkpt_hf
+ integer :: niatcon,nimage,nkpt,nkpthf,npspalch,nqpt,nsp,nspinor,nsppol,nsym,ntypalch,ntypat,ntyppure
  integer :: occopt,occopt_tmp,response,sumnbl,tfband,tnband,tread,tread_alt,tread_key
  integer :: itol, itol_gen, ds_input, ifreq,ncerr !nkpt_fullbz,
  real(dp) :: areaxy,charge,fband,kptrlen,nelectjell
@@ -127,7 +128,6 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
  real(dp),allocatable :: dmatpawu_tmp(:)
  real(dp),allocatable :: dprarr(:) !Dummy arguments for subroutine 'intagm' to parse input file
  !real(dp),allocatable :: kpt_fullbz(:,:)
- real(dp),allocatable :: kptns_hf(:,:) !Dummy arguments for subroutine 'smpbz' to calculate the value of nkpthf
 
 ! *************************************************************************
 
@@ -137,6 +137,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
  natom=dtset%natom
  nimage=dtset%nimage
  nkpt=dtset%nkpt
+ nkpthf=dtset%nkpthf
  npspalch=dtset%npspalch
  nspinor=dtset%nspinor
  nsppol=dtset%nsppol
@@ -431,6 +432,19 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gwrpacorr',tread,'INT')
  if(tread==1) dtset%gwrpacorr=intarr(1)
+
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'hyb_mixing',tread,'DPR')
+ if(tread==1) dtset%hyb_mixing=dprarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'hyb_mixing_sr',tread,'DPR')
+ if(tread==1) dtset%hyb_mixing_sr=dprarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'hyb_range_dft',tread,'DPR')
+ if(tread==1) dtset%hyb_range_dft=dprarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'hyb_range_fock',tread,'DPR')
+ if(tread==1) dtset%hyb_range_fock=dprarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'supercell',tread,'INT')
  if(tread==1) dtset%supercell(1:3)=intarr(1:3)
@@ -987,6 +1001,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
 
 !All checking should be done in chkinp.f
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'auxc_scal',tread,'DPR')
+ if(tread==1) dtset%auxc_scal=dprarr(1)
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'builtintest',tread,'INT')
  if(tread==1) dtset%builtintest=intarr(1)
 
@@ -995,12 +1012,6 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'chksymbreak',tread,'INT')
  if(tread==1) dtset%chksymbreak=intarr(1)
-
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'fockaux_ixc',tread,'INT')
- if(tread==1) dtset%fockaux_ixc=intarr(1)
-
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'fockaux_scal',tread,'DPR')
- if(tread==1) dtset%fockaux_scal=dprarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'fockoptmix',tread,'INT')
  if(tread==1) dtset%fockoptmix=intarr(1)
@@ -1317,31 +1328,15 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
      tread=1
    end if
  end if
- dtset%xclevel=0
- if( ( 1<=dtset%ixc .and. dtset%ixc<=10).or.(30<=dtset%ixc .and. dtset%ixc<=39).or.(dtset%ixc==50) )dtset%xclevel=1 ! LDA
- if( (11<=dtset%ixc .and. dtset%ixc<=19).or.(23<=dtset%ixc .and. dtset%ixc<=29) )dtset%xclevel=2 ! GGA
- if( 20<=dtset%ixc .and. dtset%ixc<=22 )dtset%xclevel=3 ! ixc for TDDFT kernel tests
- if( dtset%ixc>=40 .and. dtset%ixc<=42 )dtset%usefock=1 ! Hartree-Fock or internal hybrid functionals
- if( dtset%ixc>=41 .and. dtset%ixc<=42) dtset%xclevel=2 ! ixc for internal hybrids using GGA
- if (dtset%ixc<0) then                                  ! libXC: metaGGA and hybrid functionals
-   dtset%xclevel=1
-   do isiz=1,2
-     if (isiz==1) ii=-dtset%ixc/1000
-     if (isiz==2) ii=-dtset%ixc-ii*1000
-     jj=libxc_functionals_family_from_id(ii)
-     if (jj==XC_FAMILY_GGA    .or.jj==XC_FAMILY_MGGA) dtset%xclevel=2
-     if (jj==XC_FAMILY_HYB_GGA.or.jj==XC_FAMILY_HYB_MGGA) then
-       dtset%xclevel=2 ; dtset%usefock=1
-       if (.not.libxc_functionals_gga_from_hybrid(hybrid_id=ii)) then
-         write(message, '(a,i8,i5)' )&
-&         'ixc=',dtset%ixc,' (libXC hybrid functional) is presently not allowed with',ch10,&
-&         'Norm-Conserving PseudoPotentials.',ch10,&
-&         'Action: try another hybrid functional or use PAW.'
-         MSG_ERROR(message)
-       end if
-     end if
-   end do
- end if
+!Initialize xclevel and usefock
+ call get_xclevel(dtset%ixc,dtset%xclevel,dtset%usefock)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'auxc_ixc',tread,'INT')
+ if(tread==1) dtset%auxc_ixc=intarr(1)
+!If the default value had been given, possibly switch on the auxc_ixc corresponding to ixc, if the latter is an hybrid
+ if(dtset%auxc_ixc==0)then
+   call get_auxc_ixc(dtset%auxc_ixc,dtset%ixc)
+ endif
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'vdw_df_acutmin',tread,'DPR')
  if(tread==1) dtset%vdw_df_acutmin=dprarr(1)
@@ -1966,6 +1961,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nnsclo',tread,'INT')
  if(tread==1) dtset%nnsclo=intarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nnsclohf',tread,'INT')
+ if(tread==1) dtset%nnsclohf=intarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nstep',tread,'INT')
  if(tread==1) dtset%nstep=intarr(1)
@@ -2612,9 +2610,10 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
  ii=0;if (mod(dtset%wfoptalg,10)==4) ii=2
  if ((dtset%ngfft(7)==314).or.(dtset%usefock==1)) ii=1
 
- call inkpts(bravais,dtset%chksymbreak,iout,iscf,dtset%istwfk(1:nkpt),jdtset,&
-& dtset%kpt(:,1:nkpt),kptopt,dtset%kptnrm,dtset%kptrlatt_orig,dtset%kptrlatt,kptrlen,lenstr,nsym,&
-& nkpt,nqpt,dtset%ngkpt,dtset%nshiftk,dtset%nshiftk_orig,dtset%shiftk_orig,nsym,&
+ call inkpts(bravais,dtset%chksymbreak,dtset%fockdownsampling,iout,iscf,dtset%istwfk(1:nkpt),jdtset,&
+& dtset%kpt(:,1:nkpt),dtset%kptns_hf(:,1:nkpthf),kptopt,dtset%kptnrm,&
+& dtset%kptrlatt_orig,dtset%kptrlatt,kptrlen,lenstr,nsym,&
+& nkpt,nkpthf,nqpt,dtset%ngkpt,dtset%nshiftk,dtset%nshiftk_orig,dtset%shiftk_orig,nsym,&
 & occopt,dtset%qptn,response,dtset%rprimd_orig(1:3,1:3,intimage),dtset%shiftk,string,&
 & dtset%symafm(1:nsym),dtset%symrel(:,:,1:nsym),vacuum,dtset%wtk(1:nkpt),&
 & impose_istwf_1=ii)
@@ -2627,6 +2626,10 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
    dtset%kptns(2,1:nkpt)=dtset%kptns(2,1:nkpt)+dtset%qptn(2)
    dtset%kptns(3,1:nkpt)=dtset%kptns(3,1:nkpt)+dtset%qptn(3)
  end if
+
+ if(nkpthf/=0)then
+   dtset%kptns_hf(:,1:nkpthf)=dtset%kptns_hf(:,1:nkpthf)/dtset%kptnrm
+ endif
 
  ! Read variables defining the k-path
  ! If kptopt < 0  --> Band structure and kptbounds size is given by abs(kptopt)
@@ -2715,7 +2718,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
  end if
 
  if(dtset%nkptgw>0) then
-   ! Read nkptgw and bdgw.
+   ! Read bdgw.
    call intagm(dprarr,intarr,jdtset,marr,2*dtset%nkptgw*dtset%nsppol,string(1:lenstr),'bdgw',tread,'INT')
    if(tread==1) then
      dtset%bdgw(1:2,1:dtset%nkptgw,1:dtset%nsppol) =  &
@@ -2786,6 +2789,35 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
  if(getocc/=0)occopt_tmp=1
  call dtset_chkneu(charge,dtset,occopt_tmp)
 
+!Now that the occupation numbers have been initialized, can meaningfully define nbandhf.
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nbandhf',tread,'INT')
+ if(tread==1) then
+   dtset%nbandhf=intarr(1)
+ else
+!  If the occupation numbers might change, must keep the maximum number of bands
+   if(occopt>=3 .and. occopt<=8)then
+     dtset%nbandhf=maxval(dtset%nband(1:nkpt*nsppol))
+   else if(occopt==0 .or. occopt==1 .or. occopt==2) then ! Eliminate all the bands that are never occupied
+     nband1=0 ; bantot=0
+     do isppol=1,dtset%nsppol
+       do ikpt=1,dtset%nkpt
+         do iband=1,dtset%nband(ikpt+(isppol-1)*dtset%nkpt)
+           bantot=bantot+1
+           if(abs(dtset%occ_orig(bantot))>tol8)then
+             if(iband>nband1)nband1=iband
+           endif
+         end do
+       end do
+     end do
+     dtset%nbandhf=nband1
+   else
+     write(message, '(a,i0,3a)' )&
+&     'occopt=',occopt,' not allowed.',ch10,&
+&     'Action: correct your input file.'
+     MSG_ERROR(message)
+   end if
+ end if
+
 !Initialize Berry phase vectors
 !Should check that nberry is smaller than 20
  if(berryopt>0 .and. nberry>0)then
@@ -2806,75 +2838,6 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
  if(tread==1)then
    dtset%so_psp(1:npsp)=intarr(1:npsp)
  end if
-
-!@ HF or hybrid functionals
- if (dtset%usefock==1) then
-
-! integer scalars (used to dimension specific arrays)
-   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'cgtyphf',tread,'INT')
-   if(tread==1) dtset%cgtyphf=intarr(1)
-
-   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nbandhf',tread,'INT')
-   if(tread==1) then
-     dtset%nbandhf=intarr(1)
-   else
-!!  First compute the total valence charge
-!     zval=0.0_dp
-!     do iatom=1,natom
-!       zval=zval+dtset%ziontypat(dtset%typat(iatom))
-!     end do
-!!  Only take into account negative charge, to compute maximum number of bands
-!     if(charge > 0.0_dp)charge=0.0_dp
-!     zelect=zval-charge
-
-!!  Then select the minimum number of bands, and add the required number
-!!  Note that this number might be smaller than the one computed
-!!  by a slightly different formula in invars1
-!     dtset%nbandhf=dtset%nspinor*((ceiling(zelect-1.0d-10)+1)/2)
-!
-!     if (occopt>2) dtset%nbandhf=dtset%nbandhf+dtset%nspinor*(ceiling(dtset%fband*natom-1.0d-10))
-!!  More precisely, nbandhf = default value for nband = the number of occupied bands
-!!                                                    + extra bands according to fband
-     dtset%nbandhf=dtset%nband(1)
-   end if
-
-   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nnsclohf',tread,'INT')
-   if(tread==1) dtset%nnsclohf=intarr(1)
-
-   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nkpthf',tread,'INT')
-   if (dtset%kptopt==0.or.dtset%kptopt==3) then
-     dtset%nkpthf=dtset%nkpt
-   else
-!* Default value for nkpthf is the total number of k-points in BZ.
-
-!* Compute the maximum number of k-points mkpt in the reciprocal space unit cell
-!* (same formula as used in getkgrid)
-     mkpt=dtset%nshiftk*(dtset%kptrlatt(1,1)*dtset%kptrlatt(2,2)*dtset%kptrlatt(3,3) &
-&     +dtset%kptrlatt(1,2)*dtset%kptrlatt(2,3)*dtset%kptrlatt(3,1) &
-&     +dtset%kptrlatt(1,3)*dtset%kptrlatt(2,1)*dtset%kptrlatt(3,2) &
-&     -dtset%kptrlatt(1,2)*dtset%kptrlatt(2,1)*dtset%kptrlatt(3,3) &
-&     -dtset%kptrlatt(1,3)*dtset%kptrlatt(2,2)*dtset%kptrlatt(3,1) &
-&     -dtset%kptrlatt(1,1)*dtset%kptrlatt(2,3)*dtset%kptrlatt(3,2))
-
-     ABI_ALLOCATE(kptns_hf,(3,mkpt))
-     kptns_hf=0.0_dp
-!* Generate all the k-points in BZ (Monkhorst-Pack grid)
-
-!* brav=1 to treat all Bravais lattices ; iout=0 since we do not want any output ; option=0 since we consider k-points
-     call smpbz(1,0,dtset%kptrlatt,mkpt,nkpt_hf,dtset%nshiftk,0,dtset%shiftk,kptns_hf)
-!* kptns_hf contains the special k points obtained by the Monkhorst & Pack method, in reduced coordinates. (output)
-     ABI_DEALLOCATE(kptns_hf)
-
-     if((tread==1).AND.(nkpt_hf/=intarr(1))) then
-       write(message, '(3a)' )&
-&       'This option is not yet fully implemented.',&
-&       'The default value should be equal to the total number of k-point in BZ.'
-       MSG_ERROR(message)
-     end if
-     dtset%nkpthf=nkpt_hf
-
-   end if
- end if ! usefock
 
 !LOTF variables
 #if defined HAVE_LOTF
@@ -3014,6 +2977,6 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
  ABI_DEALLOCATE(dprarr)
 
  call timab(191,2,tsec)
-
+ 
 end subroutine invars2
 !!***
