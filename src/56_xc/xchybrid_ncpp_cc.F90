@@ -143,10 +143,8 @@ subroutine xchybrid_ncpp_cc(dtset,enxc,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,s
  end if
 
 !Define xcdata_hybrid as well as xcdata_gga
- call xcdata_init(dtset%auxc_ixc,dtset%hyb_mixing,dtset%intxc,dtset%ixc,&
-&    dtset%nelect,dtset%tphysel,dtset%usekden,dtset%vdw_xc,dtset%xc_tb09_c,dtset%xc_denpos,xcdata_hybrid)
- call xcdata_init(0,dtset%intxc,dtset%hyb_mixing,ixc_gga,&
-&    dtset%nelect,dtset%tphysel,dtset%usekden,dtset%vdw_xc,dtset%xc_tb09_c,dtset%xc_denpos,xcdata_gga)
+ call xcdata_init(xcdata_hybrid,dtset=dtset)
+ call xcdata_init(xcdata_gga,dtset=dtset,auxc_ixc=0,ixc=ixc_gga)
 
  nkxc=0;ndim=0;usexcnhat=0;n3xccc_null=0
  ABI_ALLOCATE(kxc_dum,(nfft,nkxc))
