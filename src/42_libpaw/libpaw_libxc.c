@@ -25,7 +25,13 @@
 #if defined LIBPAW_HAVE_LIBXC
 
 #include "xc.h"
+#include "xc_version.h"
+/* if version before 4 get config file*/
+#if ( XC_MAJOR_VERSION < 4 )
 #include "xc_config.h"
+#else
+#  define FLOAT double
+#endif
 
 /* ===============================================================
  * Get the SINGLE_PRECISION constant
@@ -119,8 +125,13 @@ int libpaw_xc_get_info_kind(XC(func_type) *xc_func)
  {return xc_func_info_get_kind(xc_func->info);}
 char const *libpaw_xc_get_info_refs(XC(func_type) *xc_func, const int *number)
  {if (*number>=0&&*number<=4)
+#if ( XC_MAJOR_VERSION < 4 ) 
    {if (xc_func_info_get_ref(xc_func->info,*number) != NULL)
     {return xc_func_info_get_ref(xc_func->info,*number);}}
+#else
+   {if (xc_func_info_get_references(xc_func->info,*number) != NULL)
+    {return xc_func_info_get_references(xc_func->info,*number);}}
+#endif
   else {return NULL;}}
 #else
  /* libXC before v3.0 */

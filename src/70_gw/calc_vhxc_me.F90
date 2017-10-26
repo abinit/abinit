@@ -147,7 +147,7 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,nfftf,ngfftf,&
 
 !Local variables-------------------------------
 !scalars
- integer :: iat,ikc,ik_ibz,ib,jb,is,b_start,b_stop,istwf_k
+ integer :: auxc_ixc,iat,ikc,ik_ibz,ib,jb,is,b_start,b_stop,istwf_k
  integer :: itypat,lmn_size,j0lmn,jlmn,ilmn,klmn,klmn1,lmn2_size_max
  integer :: isppol,cplex_dij,npw_k
  integer :: nspinor,nsppol,nspden,nk_calc
@@ -243,7 +243,7 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,nfftf,ngfftf,&
  ABI_MALLOC(kxc_,(nfftf,nkxc))
  ABI_MALLOC(vxc_val,(nfftf,nspden))
 
- call xcdata_init(dtset%intxc,dtset%ixc,&
+ call xcdata_init(dtset%auxc_ixc,dtset%intxc,dtset%ixc,&
 &  dtset%nelect,dtset%tphysel,dtset%usekden,dtset%vdw_xc,dtset%xc_tb09_c,dtset%xc_denpos,xcdata)
 
  call rhotoxc(enxc_val,kxc_,MPI_enreg_seq,nfftf,ngfftf,&
@@ -264,8 +264,9 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,nfftf,ngfftf,&
      else ! Dtset%gwcalctyp > 300
        ixc_hybrid=-402         ! B3LYP
      end if
+     call get_auxc_ixc(auxc_ixc,ixc_hybrid)
 
-     call xcdata_init(dtset%intxc,ixc_hybrid,&
+     call xcdata_init(auxc_ixc,dtset%intxc,ixc_hybrid,&
 &      dtset%nelect,dtset%tphysel,dtset%usekden,dtset%vdw_xc,dtset%xc_tb09_c,dtset%xc_denpos,xcdata_hybrid)
 
      ! reinitialize the libxc module with the overriden values

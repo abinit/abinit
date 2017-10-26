@@ -1,0 +1,78 @@
+# Crystalline aluminum : testing of downsampling, for HSE06, PBE0, HSE03.
+
+ ndtset 4
+
+#Definition of the k-point grid
+ ngkpt  3*2      # This is a 2x2x2 FCC grid, based on the primitive vectors
+ nshiftk 4  shiftk 0.0 0.0 0.0  0.0 0.5 0.5  0.5 0.0 0.5  0.5 0.5 0.0
+
+#k-point downsampling for Fock operator
+ fockdownsampling 3*2    
+
+ nstep 15          # Maximal number of SCF cycles
+ toldfe 1.0d-8     # Will stop when, twice in a row, the difference
+
+#DATASET 1  LDA (the pseudopotential for Al is with LDA)
+
+#DATASET 2  HSE06
+ ixc2  -428
+ getwfk2   1
+
+#DATASET 3  PBE0
+ ixc3  41
+ getwfk3   2
+
+#DATASET 4  HSE03
+ ixc4  -427
+ getwfk4   1
+
+#Definition of occupation numbers
+occopt 7
+tsmear 0.04
+
+#Definition of the unit cell
+acell 3*7.60           # This is equivalent to   7.60 7.60 7.60
+rprim  0.0  0.5  0.5   # FCC primitive vectors (to be scaled by acell)
+       0.5  0.0  0.5
+       0.5  0.5  0.0
+
+#Definition of the atom types
+ntypat 1          # There is only one type of atom
+znucl 13          # The keyword "znucl" refers to the atomic number of the
+                  # possible type(s) of atom. The pseudopotential(s)
+                  # mentioned in the "files" file must correspond
+                  # to the type(s) of atom. Here, the only type is Aluminum
+
+
+#Definition of the atoms
+natom 1           # There is only one atom per cell
+typat 1           # This atom is of type 1, that is, Aluminum
+xred              # This keyword indicate that the location of the atoms
+                  # will follow, one triplet of number for each atom
+   0.0  0.0  0.0     # Triplet giving the REDUCED coordinate of atom 1.
+
+#Definition of the planewave basis set
+ecut  6.0         # Maximal kinetic energy cut-off, in Hartree
+
+## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test =
+#%%   t72.out, tolnlines=  1, tolabs=  4.0e-10, tolrel=  2.0e-04
+#%% psp_files = 13al.pspgth
+#%% [paral_info]
+#%% max_nprocs = 4
+#%% [extra_info]
+#%% authors = X. Gonze
+#%% keywords =
+#%% description =
+#%%   Crystalline aluminum, primitive cell. Test of downsampling for HSE06, PBE0, HSE03.
+#%%   2x2x2 with 4 shifts for the k point grid in the FBZ
+#%%   1x1x1 with 4 shifts for the k point grid for the Fock operator in the FBZ
+#%%   Tests were performed with a k-point grid 16x16x16 (without additional shift),
+#%%   to try to recover the nice behaviour of the HSE03 with down sampling 
+#%%   shown in Marsman et al JPCM 20, 064201 (2008), Fig. 1 (there, the reference was 24x24x24)
+#%%   Unfortunately, the same behaviour as for PBE0 was observed ?!
+#%%<END TEST_INFO>

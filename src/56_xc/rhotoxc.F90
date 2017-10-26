@@ -33,7 +33,7 @@
 !!        10 for xc  and kxc with only partial derivatives wrt density part (d2Exc/drho^2)
 !!        12 for xc and kxc with only partial derivatives wrt density part (d2Exc/drho^2)
 !!              and, in the case of hybrid functionals, substitution of the hybrid functional
-!!              by the related fallback GGA functional for the computation of the xc kernel (not for other quantities)
+!!              by the related auxiliary GGA functional for the computation of the xc kernel (not for other quantities)
 !!         3 for xc, kxc and k3xc
 !!        -2 for xc and kxc (with paramagnetic part if nspden=1)
 !!  paral_kgb=Flag related to the kpoint-band-fft parallelism
@@ -262,7 +262,7 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
 
 !Local variables-------------------------------
 !scalars
- integer :: cplex,ierr,ifft,ii,ixc,ixc_fallbackkxc_hyb,indx,ipositron,ipts,ishift,ispden,iwarn,iwarnp
+ integer :: auxc_ixc,cplex,ierr,ifft,ii,ixc,indx,ipositron,ipts,ishift,ispden,iwarn,iwarnp
  integer :: jj,mpts,ndvxc,nd2vxc,nfftot,ngr,ngr2,ngrad,ngrad_apn,nkxc_eff,npts
  integer :: nspden_apn,nspden_eff,nspden_updn,nspgrad,nvxcgrho,order,mgga,usefxc
  integer :: nproc_fft,comm_fft
@@ -304,6 +304,7 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
 
 !Check options
  ixc=xcdata%ixc
+ auxc_ixc=xcdata%auxc_ixc
  if(option==3)then
    allow3=(ixc > 0).and.(ixc /= 3).and.(ixc /= 7).and.(ixc /= 8)
    if(.not.allow3)then
@@ -407,17 +408,6 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
 
 !  Number of kcxc components depends on option (force LDA type if option==10 or 12)
    nkxc_eff=nkxc;if (option==10.or.option==12) nkxc_eff=min(nkxc,3)
-
-!  Define the fallback GGA xc kernel in case of hybrid functionals
-   ixc_fallbackkxc_hyb=ixc
-   if (option==12) then
-     if(ixc==41 .or. ixc==42)ixc_fallbackkxc_hyb=11
-     if(ixc==-406 .or. ixc==-427 .or. ixc==-428 .or. ixc==-456)then
-       if (libxc_functionals_gga_from_hybrid(gga_id=gga_id)) then
-         ixc_fallbackkxc_hyb=-gga_id(1)*1000-gga_id(2)
-       end if
-     end if
-   end if
 
 !  The different components of depsxc will be
 !  for nspden=1,   depsxc(:,1)=d(rho.exc)/d(rho) == (depsxcdrho) == (vxcrho)
@@ -706,15 +696,17 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
          end if
        end do
 
-!      In case of a hybrid functional, if one needs to compute the fallback GGA Kxc, a separate call to drivexc_main
-!      is first needed to compute Kxc using such fallback GGA, 
+!      In case of a hybrid functional, if one needs to compute the auxiliary GGA Kxc, a separate call to drivexc_main
+!      is first needed to compute Kxc using such auxiliary GGA, 
 !      before calling again drivexc_main using the correct functional for Exc and Vxc
-       if(ixc_fallbackkxc_hyb/=ixc)then
-         if (ixc<0) then
-           call libxc_functionals_end()
-           call libxc_functionals_init(ixc_fallbackkxc_hyb,nspden)
+       if(xcdata%usefock==1 .and. auxc_ixc/=0)then
+         if (auxc_ixc<0) then
+           if(ixc<0)then
+             call libxc_functionals_end()
+           endif
+           call libxc_functionals_init(auxc_ixc,nspden)
          end if
-         call drivexc_main(exc_b,ixc_fallbackkxc_hyb,mgga,ndvxc,nd2vxc,ngr2,npts,nspden_updn,nvxcgrho,order,&
+         call drivexc_main(exc_b,auxc_ixc,mgga,ndvxc,nd2vxc,ngr2,npts,nspden_updn,nvxcgrho,order,&
 &         rho_b_updn,vxcrho_b_updn,xcdata%xclevel, &
 &         dvxc=dvxc_b,d2vxc=d2vxc_b,grho2=grho2_b_updn,vxcgrho=vxcgrho_b, &
 &         lrho=lrho_b_updn,tau=tau_b_updn,vxclrho=vxclrho_b_updn,vxctau=vxctau_b_updn, &
@@ -728,9 +720,11 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
            kxc(ifft:ifft+npts-1,2)=dvxc_b(1:npts,10)
            kxc(ifft:ifft+npts-1,3)=dvxc_b(1:npts,2)+dvxc_b(1:npts,11)
          end if
-         if (ixc<0) then
+         if (auxc_ixc<0) then
            call libxc_functionals_end()
-           call libxc_functionals_init(ixc,nspden)
+           if(ixc<0)then
+             call libxc_functionals_init(ixc,nspden)
+           endif
          end if
        end if
 
@@ -932,7 +926,7 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
        end if
 
 !      Transfer the xc kernel (if this must be done, and has not yet been done)
-       if (nkxc_eff>0.and.ndvxc>0 .and. ixc_fallbackkxc_hyb==ixc) then
+       if (nkxc_eff>0.and.ndvxc>0 .and. (xcdata%usefock==0 .or. auxc_ixc==0)) then
          if (nkxc_eff==1.and.ndvxc==15) then
            kxc(ifft:ifft+npts-1,1)=half*(dvxc_b(1:npts,1)+dvxc_b(1:npts,9)+dvxc_b(1:npts,10))
          else if (nkxc_eff==3.and.ndvxc==15) then

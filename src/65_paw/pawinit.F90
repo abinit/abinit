@@ -37,7 +37,7 @@
 !!  gnt_option=flag activated if pawang%gntselect and pawang%realgnt have to be allocated
 !!             also determine the size of these pointers
 !!  gsqcut_shp=effective cut-off to determine shape functions in reciprocal space
-!!  hyb_range=range coefficient for screened hybrid XC functionals
+!!  hyb_range_fock=range coefficient for screened hybrid XC functionals
 !!  lcutdens=max. l for densities/potentials moments computations
 !!  lmix=max. l for which spherical terms will be mixed durinf SCF cycle
 !!  mpsang=1+maximum angular momentum
@@ -121,7 +121,7 @@
 
 #include "abi_common.h"
 
-subroutine pawinit(gnt_option,gsqcut_eff,hyb_range,lcutdens,lmix,mpsang,nphi,nsym,ntheta,&
+subroutine pawinit(gnt_option,gsqcut_eff,hyb_range_fock,lcutdens,lmix,mpsang,nphi,nsym,ntheta,&
 &                  pawang,pawrad,pawspnorb,pawtab,pawxcdev,xclevel,usepotzero)
 
  use defs_basis
@@ -149,7 +149,7 @@ subroutine pawinit(gnt_option,gsqcut_eff,hyb_range,lcutdens,lmix,mpsang,nphi,nsy
 !scalars
  integer,intent(in) :: gnt_option,lcutdens,lmix,mpsang,nphi,nsym,ntheta
  integer,intent(in) :: pawspnorb,pawxcdev,xclevel,usepotzero
- real(dp),intent(in) :: gsqcut_eff,hyb_range
+ real(dp),intent(in) :: gsqcut_eff,hyb_range_fock
  type(pawang_type),intent(inout) :: pawang
 !arrays
  type(pawrad_type),intent(in) :: pawrad(:)
@@ -453,7 +453,7 @@ subroutine pawinit(gnt_option,gsqcut_eff,hyb_range,lcutdens,lmix,mpsang,nphi,nsy
      ABI_DEALLOCATE(pawtab(itypat)%eijkl)
    end if
    ABI_ALLOCATE(pawtab(itypat)%eijkl,(lmn2_size,lmn2_size))
-   if (abs(hyb_range)>tol8) then
+   if (abs(hyb_range_fock)>tol8) then
      if (allocated(pawtab(itypat)%eijkl_sr))  then
        ABI_DEALLOCATE(pawtab(itypat)%eijkl_sr)
      end if
@@ -463,7 +463,7 @@ subroutine pawinit(gnt_option,gsqcut_eff,hyb_range,lcutdens,lmix,mpsang,nphi,nsy
 !  First loop is for eijkl (Hartree)
 !  2nd loop is for eijkl_sr (short-range screened Fock exchange)
    do iloop=1,2
-     if (iloop==2.and.abs(hyb_range)<=tol8) cycle
+     if (iloop==2.and.abs(hyb_range_fock)<=tol8) cycle
      if (iloop==1) eijkl => pawtab(itypat)%eijkl
      if (iloop==2) eijkl => pawtab(itypat)%eijkl_sr
 
@@ -480,7 +480,7 @@ subroutine pawinit(gnt_option,gsqcut_eff,hyb_range,lcutdens,lmix,mpsang,nphi,nsy
        vhatl(1)=zero;ff(1)=zero
        ff(2:mesh_size)=pawtab(itypat)%shapefunc(2:mesh_size,il)*rad(2:mesh_size)**2
        if (iloop==1) call poisson(ff,il-1,pawrad(itypat),vhatl)
-       if (iloop==2) call poisson(ff,il-1,pawrad(itypat),vhatl,screened_sr_separation=hyb_range)
+       if (iloop==2) call poisson(ff,il-1,pawrad(itypat),vhatl,screened_sr_separation=hyb_range_fock)
        vhatl(2:mesh_size)=two*vhatl(2:mesh_size)/rad(2:mesh_size)
        gg(1:mesh_size)=vhatl(1:mesh_size)*ff(1:mesh_size)
        call simp_gen(intvhatl(il),gg,pawrad(itypat))
@@ -512,10 +512,10 @@ subroutine pawinit(gnt_option,gsqcut_eff,hyb_range,lcutdens,lmix,mpsang,nphi,nsy
          lm0=ll*ll+ll+1
          ff(1:meshsz)=pawtab(itypat)%phiphj  (1:meshsz,kln)
          if (iloop==1) call poisson(ff,ll,pawrad(itypat),gg)
-         if (iloop==2) call poisson(ff,ll,pawrad(itypat),gg,screened_sr_separation=hyb_range)
+         if (iloop==2) call poisson(ff,ll,pawrad(itypat),gg,screened_sr_separation=hyb_range_fock)
          ff(1:meshsz)=pawtab(itypat)%tphitphj(1:meshsz,kln)
          if (iloop==1) call poisson(ff,ll,pawrad(itypat),hh)
-         if (iloop==2) call poisson(ff,ll,pawrad(itypat),hh,screened_sr_separation=hyb_range)
+         if (iloop==2) call poisson(ff,ll,pawrad(itypat),hh,screened_sr_separation=hyb_range_fock)
          do klmn1=klmn,lmn2_size
            klm1=indklmn_(1,klmn1);kln1=indklmn_(2,klmn1)
            lmin1=indklmn_(3,klmn1);lmax1=indklmn_(4,klmn1)

@@ -508,7 +508,7 @@ AC_DEFUN([ABI_CONNECT_DFT],[
           ;;
 
         libxc)
-          _ABI_DFT_CHECK_LIBXC(2,2,3,1)
+          _ABI_DFT_CHECK_LIBXC(2,2,4,0)
           if test "${abi_dft_libxc_serial}" = "yes" -o \
                   "${enable_fallbacks}" = "yes"; then
             AC_DEFINE([HAVE_LIBXC],1,
