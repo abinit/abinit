@@ -82,6 +82,11 @@ module m_xcdata
     ! 2 if GGA-type XC functional
     ! 3 if for TDDFT kernel
 
+! Real scalars
+
+  real(dp) :: hyb_mixing
+    ! Parameter for mixing Fock exchange in native PBEx functionals
+
   real(dp) :: nelect
     ! Number of electrons in the cell (for Fermi-Amaldi only)
 
@@ -113,6 +118,7 @@ contains
 !!
 !! INPUTS
 !!  auxc_ixc = possibly the index of the auxiliary xc functional, otherwise 0.
+!!  hyb_mixing = parameter for mixing Fock exchange in native PBEx functionals
 !!  intxc = 1 if the XC functional has to be interpolated on a more refined mesh than the FFT one
 !!  ixc= index of exchange-correlation functional
 !!  nelect = Number of electrons in the cell (for Fermi-Amaldi only)
@@ -132,7 +138,7 @@ contains
 !!
 !! SOURCE
 
-subroutine xcdata_init(auxc_ixc,intxc,ixc,nelect,tphysel,usekden,vdw_xc,xc_tb09_c,xc_denpos,xcdata)
+subroutine xcdata_init(auxc_ixc,hyb_mixing,intxc,ixc,nelect,tphysel,usekden,vdw_xc,xc_tb09_c,xc_denpos,xcdata)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -146,7 +152,7 @@ subroutine xcdata_init(auxc_ixc,intxc,ixc,nelect,tphysel,usekden,vdw_xc,xc_tb09_
 !Arguments ------------------------------------
 !scalars
  integer, intent(in) :: auxc_ixc,intxc,ixc,usekden,vdw_xc
- real(dp),intent(in) :: nelect,tphysel,xc_denpos,xc_tb09_c
+ real(dp),intent(in) :: hyb_mixing,nelect,tphysel,xc_denpos,xc_tb09_c
  type(xcdata_type), intent(out) :: xcdata
 !Local variables-------------------------------
  integer :: usefock,xclevel
@@ -159,6 +165,7 @@ subroutine xcdata_init(auxc_ixc,intxc,ixc,nelect,tphysel,usekden,vdw_xc,xc_tb09_
  xcdata%usekden=usekden
  xcdata%vdw_xc=vdw_xc
 
+ xcdata%hyb_mixing=hyb_mixing
  xcdata%nelect=nelect
  xcdata%tphysel=tphysel
  xcdata%xc_denpos=xc_denpos

@@ -333,7 +333,7 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
 
  call hartre(1,gsqcut,usepaw,mpi_enreg,nfft,ngfft,dtset%paral_kgb,rhog,rprimd,vhartr)
 
- call xcdata_init(dtset%auxc_ixc,dtset%intxc,dtset%ixc,&
+ call xcdata_init(dtset%auxc_ixc,dtset%hyb_mixing,dtset%intxc,dtset%ixc,&
 &  dtset%nelect,dtset%tphysel,dtset%usekden,dtset%vdw_xc,dtset%xc_tb09_c,dtset%xc_denpos,xcdata)
 
 !Compute xc potential (separate up and down if spin-polarized)

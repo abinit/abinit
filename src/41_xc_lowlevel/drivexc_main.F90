@@ -66,6 +66,7 @@
 !!    and both are half the total kinetic energy density.
 !!    If nspden=2, the spin-up and spin-down kinetic energy densities must be given
 !!  [xc_tb09_c]=c parameter for the TB09 functional
+!!  [hyb_mixing]= mixing parameter for the native PBEx functionals (ixc=41 and 42)
 
 !! OUTPUT
 !!  exc(npts)=exchange-correlation energy density (hartree)
@@ -129,7 +130,7 @@
 #include "abi_common.h"
 
 subroutine drivexc_main(exc,ixc,mgga,ndvxc,nd2vxc,ngr2,npts,nspden,nvxcgrho,order,rho,vxcrho,xclevel, &
-&                       dvxc,d2vxc,el_temp,exexch,fxcT,grho2,lrho,tau,vxcgrho,vxclrho,vxctau,xc_tb09_c) ! Optional arguments
+&                       dvxc,d2vxc,el_temp,exexch,fxcT,grho2,hyb_mixing,lrho,tau,vxcgrho,vxclrho,vxctau,xc_tb09_c) ! Optional arguments
 
  use defs_basis
  use m_profiling_abi
@@ -149,7 +150,7 @@ subroutine drivexc_main(exc,ixc,mgga,ndvxc,nd2vxc,ngr2,npts,nspden,nvxcgrho,orde
 !scalars
  integer,intent(in) :: ixc,mgga,ndvxc,nd2vxc,ngr2,npts,nspden,nvxcgrho,order,xclevel
  integer,intent(in),optional :: exexch
- real(dp),intent(in),optional :: el_temp,xc_tb09_c
+ real(dp),intent(in),optional :: el_temp,hyb_mixing,xc_tb09_c
 !arrays
  real(dp),intent(in) :: rho(npts,nspden)
  real(dp),intent(in),optional :: grho2(npts,ngr2),lrho(npts,nspden*mgga),tau(npts,nspden*mgga)
@@ -159,7 +160,7 @@ subroutine drivexc_main(exc,ixc,mgga,ndvxc,nd2vxc,ngr2,npts,nspden,nvxcgrho,orde
 
 !Local variables-------------------------------
 !scalars
- real(dp) :: xc_tb09_c_
+ real(dp) :: hyb_mixing_,xc_tb09_c_
 
 !  *************************************************************************
 
@@ -185,6 +186,9 @@ subroutine drivexc_main(exc,ixc,mgga,ndvxc,nd2vxc,ngr2,npts,nspden,nvxcgrho,orde
  end if
 
  xc_tb09_c_=99.99_dp;if (present(xc_tb09_c)) xc_tb09_c_=xc_tb09_c
+ if(ixc==41)hyb_mixing_=quarter
+ if(ixc==42)hyb_mixing_=third
+ if (present(hyb_mixing)) hyb_mixing_=hyb_mixing
 
  if (ixc<0) then
    if (mgga==1) then
@@ -264,11 +268,11 @@ subroutine drivexc_main(exc,ixc,mgga,ndvxc,nd2vxc,ngr2,npts,nspden,nvxcgrho,orde
        if (ixc/=13) then
          if (present(exexch)) then
            call drivexc(exc,ixc,npts,nspden,order,rho,vxcrho,ndvxc,ngr2,nd2vxc,nvxcgrho, &
-&           grho2_updn=grho2,vxcgrho=vxcgrho, &
+&           hyb_mixing=hyb_mixing_,grho2_updn=grho2,vxcgrho=vxcgrho, &
 &           exexch=exexch)
          else
            call drivexc(exc,ixc,npts,nspden,order,rho,vxcrho,ndvxc,ngr2,nd2vxc,nvxcgrho, &
-&           grho2_updn=grho2,vxcgrho=vxcgrho)
+&           hyb_mixing=hyb_mixing_,grho2_updn=grho2,vxcgrho=vxcgrho)
          end if
        else
          if (present(exexch)) then
@@ -284,11 +288,11 @@ subroutine drivexc_main(exc,ixc,mgga,ndvxc,nd2vxc,ngr2,npts,nspden,nvxcgrho,orde
        if (ixc/=13) then
          if (present(exexch)) then
            call drivexc(exc,ixc,npts,nspden,order,rho,vxcrho,ndvxc,ngr2,nd2vxc,nvxcgrho, &
-&           dvxc=dvxc,grho2_updn=grho2,vxcgrho=vxcgrho, &
+&           hyb_mixing=hyb_mixing_,dvxc=dvxc,grho2_updn=grho2,vxcgrho=vxcgrho, &
 &           exexch=exexch)
          else
            call drivexc(exc,ixc,npts,nspden,order,rho,vxcrho,ndvxc,ngr2,nd2vxc,nvxcgrho, &
-&           dvxc=dvxc,grho2_updn=grho2,vxcgrho=vxcgrho)
+&           hyb_mixing=hyb_mixing_,dvxc=dvxc,grho2_updn=grho2,vxcgrho=vxcgrho)
          end if
        else
          if (present(exexch)) then
@@ -305,10 +309,10 @@ subroutine drivexc_main(exc,ixc,mgga,ndvxc,nd2vxc,ngr2,npts,nspden,nvxcgrho,orde
          if (present(exexch)) then
            call drivexc(exc,ixc,npts,nspden,order,rho,vxcrho,ndvxc,ngr2,nd2vxc,nvxcgrho, &
 &           dvxc=dvxc,d2vxc=d2vxc,grho2_updn=grho2,vxcgrho=vxcgrho, &
-&           exexch=exexch)
+&           hyb_mixing=hyb_mixing_,exexch=exexch)
          else
            call drivexc(exc,ixc,npts,nspden,order,rho,vxcrho,ndvxc,ngr2,nd2vxc,nvxcgrho, &
-&           dvxc=dvxc,d2vxc=d2vxc,grho2_updn=grho2,vxcgrho=vxcgrho)
+&           hyb_mixing=hyb_mixing_,dvxc=dvxc,d2vxc=d2vxc,grho2_updn=grho2,vxcgrho=vxcgrho)
          end if
        else
          if (present(exexch)) then

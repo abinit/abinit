@@ -259,7 +259,7 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,nfftf,ngfftf,&
  ABI_MALLOC(kxc_,(nfftf,nkxc))
  ABI_MALLOC(vxc_val,(nfftf,nspden))
 
- call xcdata_init(dtset%auxc_ixc,dtset%intxc,dtset%ixc,&
+ call xcdata_init(dtset%auxc_ixc,dtset%hyb_mixing,dtset%intxc,dtset%ixc,&
 &  dtset%nelect,dtset%tphysel,dtset%usekden,dtset%vdw_xc,dtset%xc_tb09_c,dtset%xc_denpos,xcdata)
 
  call rhotoxc(enxc_val,kxc_,MPI_enreg_seq,nfftf,ngfftf,&
@@ -284,7 +284,7 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,nfftf,ngfftf,&
      end if
      call get_auxc_ixc(auxc_ixc,ixc_hybrid)
 
-     call xcdata_init(auxc_ixc,dtset%intxc,ixc_hybrid,&
+     call xcdata_init(auxc_ixc,dtset%hyb_mixing,dtset%intxc,ixc_hybrid,&
 &      dtset%nelect,dtset%tphysel,dtset%usekden,dtset%vdw_xc,dtset%xc_tb09_c,dtset%xc_denpos,xcdata_hybrid)
 
      ! reinitialize the libxc module with the overriden values

@@ -710,7 +710,7 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
 &         rho_b_updn,vxcrho_b_updn,xcdata%xclevel, &
 &         dvxc=dvxc_b,d2vxc=d2vxc_b,grho2=grho2_b_updn,vxcgrho=vxcgrho_b, &
 &         lrho=lrho_b_updn,tau=tau_b_updn,vxclrho=vxclrho_b_updn,vxctau=vxctau_b_updn, &
-&         fxcT=fxc_b,el_temp=xcdata%tphysel, &
+&         fxcT=fxc_b,hyb_mixing=xcdata%hyb_mixing,el_temp=xcdata%tphysel, &
 &         xc_tb09_c=xcdata%xc_tb09_c)
 !        Transfer the xc kernel
          if (nkxc_eff==1.and.ndvxc==15) then
@@ -733,7 +733,7 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
 &       rho_b_updn,vxcrho_b_updn,xcdata%xclevel, &
 &       dvxc=dvxc_b,d2vxc=d2vxc_b,grho2=grho2_b_updn,vxcgrho=vxcgrho_b, &
 &       lrho=lrho_b_updn,tau=tau_b_updn,vxclrho=vxclrho_b_updn,vxctau=vxctau_b_updn, &
-&       fxcT=fxc_b,el_temp=xcdata%tphysel, &
+&       fxcT=fxc_b,hyb_mixing=xcdata%hyb_mixing,el_temp=xcdata%tphysel, &
 &       xc_tb09_c=xcdata%xc_tb09_c)
 
 !      Gradient Weiszacker correction to a Thomas-Fermi functional

@@ -599,7 +599,7 @@ subroutine prcref(atindx,dielar,dielinv,&
      call hartre(1,gsqcut,psps%usepaw,mpi_enreg,nfft,ngfft,dtset%paral_kgb,rhog_wk,rprimd,vhartr_wk)
 
 !    Prepare the call to rhotoxc
-     call xcdata_init(dtset%auxc_ixc,dtset%intxc,dtset%ixc,&
+     call xcdata_init(dtset%auxc_ixc,dtset%hyb_mixing,dtset%intxc,dtset%ixc,&
 &      dtset%nelect,dtset%tphysel,dtset%usekden,dtset%vdw_xc,dtset%xc_tb09_c,dtset%xc_denpos,xcdata)
      nk3xc=1
      call rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft,&

@@ -245,7 +245,7 @@ subroutine nres2vres(dtset,gsqcut,izero,kxc,mpi_enreg,my_natom,nfft,ngfft,nhat,&
    option=2;if (dtset%xclevel==2.and.optxc==0) option=12
 
    call hartre(1,gsqcut,izero,mpi_enreg,nfft,ngfft,dtset%paral_kgb,nresg,rprimd,vhres)
-   call xcdata_init(dtset%auxc_ixc,dtset%intxc,dtset%ixc,&
+   call xcdata_init(dtset%auxc_ixc,dtset%hyb_mixing,dtset%intxc,dtset%ixc,&
 &    dtset%nelect,dtset%tphysel,dtset%usekden,dtset%vdw_xc,dtset%xc_tb09_c,dtset%xc_denpos,xcdata)
 
 !  To be adjusted for the call to rhotoxc

@@ -67,6 +67,7 @@
 !!    and both are half the total kinetic energy density.
 !!    If nspden=2, the spin-up and spin-down kinetic energy densities must be given
 !!  [xc_tb09_c]= c parameter for the Tran-Blaha mGGA functional
+!!  [hyb_mixing]= mixing parameter for the native PBEx functionals (ixc=41 and 42)
 !!
 !! OUTPUT
 !!  exc(npts)=exchange-correlation energy density (hartree)
@@ -135,7 +136,7 @@
 
 subroutine drivexc(exc,ixc,npts,nspden,order,rho_updn,vxcrho,ndvxc,ngr2,nd2vxc,nvxcgrho, &
 &   dvxc,d2vxc,grho2_updn,vxcgrho,el_temp,exexch,fxcT,&
-&   lrho_updn,vxclrho,tau_updn,vxctau,xc_tb09_c)  !Optional arguments
+&   hyb_mixing,lrho_updn,vxclrho,tau_updn,vxctau,xc_tb09_c)  !Optional arguments
 
 
  use defs_basis
@@ -156,7 +157,7 @@ subroutine drivexc(exc,ixc,npts,nspden,order,rho_updn,vxcrho,ndvxc,ngr2,nd2vxc,n
 !scalars
  integer,intent(in) :: ixc,ndvxc,ngr2,nd2vxc,npts,nspden,nvxcgrho,order
  integer,intent(in),optional :: exexch
- real(dp),intent(in),optional :: el_temp,xc_tb09_c
+ real(dp),intent(in),optional :: el_temp,hyb_mixing,xc_tb09_c
 !arrays
  real(dp),intent(in) :: rho_updn(npts,nspden)
  real(dp),intent(in),optional :: grho2_updn(npts,ngr2)
@@ -623,8 +624,8 @@ subroutine drivexc(exc,ixc,npts,nspden,order,rho_updn,vxcrho,ndvxc,ngr2,nd2vxc,n
  else if(ixc>=41.and.ixc<=42) then
 !  Requires to evaluate exchange-correlation with PBE (optpbe=2)
 !  minus alpha*exchange with PBE (optpbe=-2)
-   if (ixc==41) alpha=one/four
-   if (ixc==42) alpha=one/three
+!  if (ixc==41) alpha=one/four
+!  if (ixc==42) alpha=one/three
    ndvxc_x=8
    ABI_ALLOCATE(exc_x,(npts))
    ABI_ALLOCATE(vxcrho_x,(npts,nspden))
@@ -637,9 +638,9 @@ subroutine drivexc(exc,ixc,npts,nspden,order,rho_updn,vxcrho,ndvxc,ngr2,nd2vxc,n
      optpbe=-2 !PBE exchange-only
      call xcpbe(exc_x,npts,nspden,optpbe,order,rho_updn,vxcrho_x,ndvxc,ngr2,nd2vxc,&
 &     dvxcdgr=vxcgrho_x,exexch=exexch_,grho2_updn=grho2_updn)
-     exc=exc-exc_x*alpha
-     vxcrho=vxcrho-vxcrho_x*alpha
-     vxcgrho=vxcgrho-vxcgrho_x*alpha
+     exc=exc-exc_x*hyb_mixing
+     vxcrho=vxcrho-vxcrho_x*hyb_mixing
+     vxcgrho=vxcgrho-vxcgrho_x*hyb_mixing
    else if (order /=3) then
      ABI_ALLOCATE(dvxc_x,(npts,ndvxc_x))
      optpbe=2 !PBE exchange correlation
@@ -648,10 +649,10 @@ subroutine drivexc(exc,ixc,npts,nspden,order,rho_updn,vxcrho,ndvxc,ngr2,nd2vxc,n
      optpbe=-2 !PBE exchange-only
      call xcpbe(exc_x,npts,nspden,optpbe,order,rho_updn,vxcrho_x,ndvxc_x,ngr2,nd2vxc,&
 &     dvxcdgr=vxcgrho_x,dvxci=dvxc_x,grho2_updn=grho2_updn)
-     exc=exc-exc_x*alpha
-     vxcrho=vxcrho-vxcrho_x*alpha
-     vxcgrho=vxcgrho-vxcgrho_x*alpha
-     dvxc(:,1:ndvxc_x)=dvxc(:,1:ndvxc_x)-dvxc_x(:,1:ndvxc_x)*alpha
+     exc=exc-exc_x*hyb_mixing
+     vxcrho=vxcrho-vxcrho_x*hyb_mixing
+     vxcgrho=vxcgrho-vxcgrho_x*hyb_mixing
+     dvxc(:,1:ndvxc_x)=dvxc(:,1:ndvxc_x)-dvxc_x(:,1:ndvxc_x)*hyb_mixing
      ABI_DEALLOCATE(dvxc_x)
    else if (order ==3) then
 !    The size of exchange-correlation with PBE (optpbe=2)
@@ -664,11 +665,11 @@ subroutine drivexc(exc,ixc,npts,nspden,order,rho_updn,vxcrho,ndvxc,ngr2,nd2vxc,n
      optpbe=-2 !PBE exchange-only
      call xcpbe(exc_x,npts,nspden,optpbe,order,rho_updn,vxcrho_x,ndvxc_x,ngr2,nd2vxc,&
 &     d2vxci=d2vxc_x,dvxcdgr=vxcgrho_x,dvxci=dvxc_x,grho2_updn=grho2_updn)
-     exc=exc-exc_x*alpha
-     vxcrho=vxcrho-vxcrho_x*alpha
-     vxcgrho=vxcgrho-vxcgrho_x*alpha
-     d2vxc=d2vxc-d2vxc_x*alpha
-     dvxc(:,1:ndvxc_x)=dvxc(:,1:ndvxc_x)-dvxc_x(:,1:ndvxc_x)*alpha
+     exc=exc-exc_x*hyb_mixing
+     vxcrho=vxcrho-vxcrho_x*hyb_mixing
+     vxcgrho=vxcgrho-vxcgrho_x*hyb_mixing
+     d2vxc=d2vxc-d2vxc_x*hyb_mixing 
+     dvxc(:,1:ndvxc_x)=dvxc(:,1:ndvxc_x)-dvxc_x(:,1:ndvxc_x)*hyb_mixing
      ABI_DEALLOCATE(dvxc_x)
      ABI_DEALLOCATE(d2vxc_x)
    end if
