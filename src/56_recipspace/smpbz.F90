@@ -116,7 +116,11 @@ subroutine smpbz(brav,iout,kptrlatt,mkpt,nkpt,nshiftk,option,shiftk,spkpt,downsa
 ! *********************************************************************
 
 !DEBUG
-!write(std_out,*)' smpbz : kptrlatt(:,:)=',kptrlatt(1,1),kptrlatt(2,2)
+!write(std_out,*)' smpbz : brav,iout,mkpt,nkpt,option=',brav,iout,mkpt,nkpt,option
+!write(std_out,*)' smpbz : kptrlatt(:,:)=',kptrlatt(:,:)
+!write(std_out,*)' smpbz : nshiftk=',nshiftk
+!write(std_out,*)' smpbz : shiftk(:,:)=',shiftk(:,:)
+!write(std_out,*)' smpbz : downsampling(:)=',downsampling(:)
 !ENDDEBUG
 
  if(option/=0)then
@@ -152,7 +156,7 @@ subroutine smpbz(brav,iout,kptrlatt,mkpt,nkpt,nshiftk,option,shiftk,spkpt,downsa
    end if
  end if
 
-!Just in case the user wants the Gamma point, checks that it is present, and possibly exits
+!Just in case the user wants the grid downsampled to the Gamma point, checks that it is present, and possibly exits
  if(present(downsampling))then
    if(sum(abs(downsampling(:)))==0)then
      do ikshft=1,nshiftk
@@ -225,6 +229,12 @@ subroutine smpbz(brav,iout,kptrlatt,mkpt,nkpt,nshiftk,option,shiftk,spkpt,downsa
    rlatt(:,:)=kptrlatt(:,:)
    call matr3inv(rlatt,klatt)
 
+!DEBUG
+!        write(std_out,*)' First primitive vector of the k lattice :',klatt(:,1)
+!        write(std_out,*)' Second primitive vector of the k lattice :',klatt(:,2)
+!        write(std_out,*)' Third primitive vector of the k lattice :',klatt(:,3)
+!ENDDEBUG
+
 !  Now, klatt contains the three primitive vectors of the k lattice,
 !  in reduced coordinates. One builds all k vectors that
 !  are contained in the first Brillouin zone, with coordinates
@@ -237,7 +247,7 @@ subroutine smpbz(brav,iout,kptrlatt,mkpt,nkpt,nshiftk,option,shiftk,spkpt,downsa
 !    it to incorporate completely the [0,1]^3 box. Then take the minimum and maximum
 !    of these coordinates, and round them negatively and positively to the next integer.
 !    This can be done easily using kptrlatt, considering each coordinate in turn
-!    and boils down to enlarging the boundaries for jj by the value of kptrlatt(:,jj),
+!    and boils down to enlarging the boundaries for jj by the value of kptrlatt(:,jj), 
 !    acting on boundmin or boundmax depending on the sign ot kptrlatt(:,jj). 
 !    XG171020 The coding before 171020 was correct, despite being very simple.
      boundmin(jj)=0 ; boundmax(jj)=0
@@ -294,7 +304,7 @@ subroutine smpbz(brav,iout,kptrlatt,mkpt,nkpt,nshiftk,option,shiftk,spkpt,downsa
                  if(downsampling(3)<0 .and. mod(cds(1)+cds(2),2)/=0)cycle
 !              Body-centered case ! What is left : two are negative
                else   
-                 if(sum(cds(:))==1 .or. sum(cds(:))==2)cycle ! Either all are zero, or all are one, so skip when sum is 1 or 2.
+                 if(sum(mod(cds(:),2))==1 .or. sum(mod(cds(:),2))==2)cycle ! Either all are zero, or all are one, so skip when sum is 1 or 2.
                endif
              else
                if(downsampling(1)==0 .and. mod(cds(2)+cds(3),2)/=0)cycle
@@ -307,6 +317,7 @@ subroutine smpbz(brav,iout,kptrlatt,mkpt,nkpt,nshiftk,option,shiftk,spkpt,downsa
          do ikshft=1,nshiftk
 
 !          Only the first shiftk is taken into account if downsampling
+!          if(.false.)then
            if(present(downsampling))then
              if(.not.(downsampling(1)==1 .and. downsampling(2)==1 .and. downsampling(3)==1))then
                if(ikshft>1)cycle
@@ -353,6 +364,15 @@ subroutine smpbz(brav,iout,kptrlatt,mkpt,nkpt,nshiftk,option,shiftk,spkpt,downsa
      write(message, '(a,i8,a,a,a,i8,a)' )&
 &     'The number of k points ',nkpt,'  is not equal to',ch10,&
 &     'nkptlatt*nshiftk which is',nkptlatt*nshiftk,'.'
+!DEBUG
+! write(std_out,*)' smpbz : brav,iout,mkpt,nkpt,option=',brav,iout,mkpt,nkpt,option
+! write(std_out,*)' smpbz : kptrlatt(:,:)=',kptrlatt(:,:)
+! write(std_out,*)' smpbz : nshiftk=',nshiftk
+! write(std_out,*)' smpbz : shiftk(:,:)=',shiftk(:,:)
+! write(std_out,*)' smpbz : downsampling(:)=',downsampling(:)
+! write(std_out,*)message 
+! stop
+!ENDDEBUG
      MSG_BUG(message)
    end if
 

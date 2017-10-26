@@ -610,7 +610,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    end if
 
 !  Find the k point grid
-   call inkpts(bravais,chksymbreak,iout,iscf,istwfk,jdtset,&
+   call inkpts(bravais,chksymbreak,dtset%fockdownsampling,iout,iscf,istwfk,jdtset,&
 &   kpt,kpthf,dtset%kptopt,kptnrm,dtset%kptrlatt_orig,dtset%kptrlatt,kptrlen,lenstr,msym,&
 &   nkpt,nkpthf,nqpt,dtset%ngkpt,dtset%nshiftk,dtset%nshiftk_orig,dtset%shiftk_orig,dtset%nsym,&
 &   occopt,dtset%qptn,response,dtset%rprimd_orig(1:3,1:3,intimage),dtset%shiftk,&
