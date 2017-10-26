@@ -145,6 +145,8 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%adpimd_gamma=one
    dtsets(idtset)%accuracy=0
    dtsets(idtset)%atvshift(:,:,:)=zero
+   dtsets(idtset)%auxc_ixc=11
+   dtsets(idtset)%auxc_scal=one
    dtsets(idtset)%awtr=1
 !  B
    dtsets(idtset)%bdberry(1:4)=0
@@ -174,7 +176,6 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%chksymbreak=1
    dtsets(idtset)%cineb_start=7
    dtsets(idtset)%corecs(:) = zero
-   dtsets(idtset)%cgtyphf = 0
 !  D
    dtsets(idtset)%ddamp=0.1_dp
    dtsets(idtset)%delayperm=0
@@ -270,10 +271,9 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
 !  F
    dtsets(idtset)%fermie_nest=zero
    dtsets(idtset)%fftgw=21
-   dtsets(idtset)%fockaux_ixc=0
-   dtsets(idtset)%fockaux_scal=one
    dtsets(idtset)%focktoldfe=zero
    dtsets(idtset)%fockoptmix=0
+   dtsets(idtset)%fockdownsampling(:)=1
    dtsets(idtset)%freqim_alpha=five
    dtsets(idtset)%freqremin=zero
    dtsets(idtset)%freqremax=zero
@@ -356,7 +356,11 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%gwls_exchange=1
    dtsets(idtset)%gwls_correlation=3
    dtsets(idtset)%gwls_first_seed=0
-
+!  H
+   dtsets(idtset)%hyb_mixing=-1.0_dp
+   dtsets(idtset)%hyb_mixing_sr=-1.0_dp
+   dtsets(idtset)%hyb_range_dft=-1.0_dp
+   dtsets(idtset)%hyb_range_fock=-1.0_dp
 !  I
    if(dtsets(idtset)%natsph/=0) then
 !    do not use iatsph(:) but explicit boundaries
@@ -422,6 +426,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%kpt(:,:)=zero
    dtsets(idtset)%kptgw(:,:)=zero
    dtsets(idtset)%kptnrm=one
+   dtsets(idtset)%kptns_hf(:,:)=zero
    dtsets(idtset)%kptopt=1
    if(dtsets(idtset)%nspden==4)dtsets(idtset)%kptopt=4
    dtsets(idtset)%kptrlen=30.0_dp
