@@ -598,7 +598,7 @@
    nk3xc=1
    ABI_ALLOCATE(work,(0))
    call rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft,&
-&   work,0,work,0,nkxc,nk3xc,dtset%nspden,n3xccc,option,dtset%paral_kgb,rhor_wk,rprimd,strsxc,1,&
+&   work,0,work,0,nkxc,nk3xc,n3xccc,option,dtset%paral_kgb,rhor_wk,rprimd,strsxc,1,&
 &   vxc_wk,vxcavg,xccc3d,xcdata,vhartr=vhartr_wk)
    ABI_DEALLOCATE(work)
    ABI_DEALLOCATE(xccc3d)

@@ -38,7 +38,7 @@
 !!    If nspden=2, the spin-up and spin-down density must be given
 !!  Optional inputs:
 !!  [el_temp]= electronic temperature (to be used for finite temperature XC functionals)
-!!  [exexch]= choice of <<<local>>> exact exchange. Active if exexch=3 (only for GGA)
+!!  [exexch]= choice of <<<local>>> exact exchange. Active if exexch=3 (only for GGA, and NOT for libxc)
 !!  [grho2_updn(npts,ngr2)]=the square of the gradients of
 !!    spin-up, spin-down, and total density
 !!    If nspden=1, only the square of the gradient of the spin-up density
@@ -54,6 +54,7 @@
 !!     gradient of the spin-up and spin-down densities,
 !!     because the gradients are not usually aligned.
 !!     This is not the case when nspden=1.
+!!  [hyb_mixing]= mixing parameter for the native PBEx functionals (ixc=41 and 42)
 !!  [lrho_updn(npts,nspden)]=the Laplacian of spin-up and spin-down densities
 !!    If nspden=1, only the spin-up Laplacian density must be given.
 !!    In the calling routine, the spin-down Laplacian density must
@@ -66,8 +67,9 @@
 !!    be equal to the spin-up kinetic energy density,
 !!    and both are half the total kinetic energy density.
 !!    If nspden=2, the spin-up and spin-down kinetic energy densities must be given
-!!  [xc_tb09_c]= c parameter for the Tran-Blaha mGGA functional
-!!  [hyb_mixing]= mixing parameter for the native PBEx functionals (ixc=41 and 42)
+!!  [xc_funcs(2)]= <type(libxc_functional_type)>, optional : libxc XC functionals. 
+!!    If not specified, the underlying xc_global(2) is used by libxc.
+!!  [xc_tb09_c]= c parameter for the Tran-Blaha mGGA functional, within libxc
 !!
 !! OUTPUT
 !!  exc(npts)=exchange-correlation energy density (hartree)
@@ -136,7 +138,7 @@
 
 subroutine drivexc(exc,ixc,npts,nspden,order,rho_updn,vxcrho,ndvxc,ngr2,nd2vxc,nvxcgrho, &
 &   dvxc,d2vxc,grho2_updn,vxcgrho,el_temp,exexch,fxcT,&
-&   hyb_mixing,lrho_updn,vxclrho,tau_updn,vxctau,xc_tb09_c)  !Optional arguments
+&   hyb_mixing,lrho_updn,vxclrho,tau_updn,vxctau,xc_funcs,xc_tb09_c)  !Optional arguments
 
 
  use defs_basis
@@ -166,11 +168,13 @@ subroutine drivexc(exc,ixc,npts,nspden,order,rho_updn,vxcrho,ndvxc,ngr2,nd2vxc,n
  real(dp),intent(out),optional :: d2vxc(npts,nd2vxc),dvxc(npts,ndvxc),fxcT(:)
  real(dp),intent(out),optional :: vxcgrho(npts,nvxcgrho)
  real(dp),intent(out),optional :: vxclrho(npts,nspden),vxctau(npts,nspden)
+ type(libxc_functional_type),intent(inout),optional :: xc_funcs(2)
 
 !Local variables-------------------------------
 !scalars
- integer :: exexch_,ixc1,ixc2,ndvxc_x,optpbe,ispden
+ integer :: exexch_,ixc_from_lib,ixc1,ixc2,ndvxc_x,optpbe,ispden
  logical :: libxc_test,xc_err_ndvxc,xc_err_nvxcgrho1,xc_err_nvxcgrho2
+ logical :: is_gga,is_mgga
  real(dp) :: alpha
  real(dp),parameter :: rsfac=0.6203504908994000e0_dp
  character(len=500) :: message
@@ -237,8 +241,20 @@ subroutine drivexc(exc,ixc,npts,nspden,order,rho_updn,vxcrho,ndvxc,ngr2,nd2vxc,n
 !Check libXC
  if (ixc<0) then
    libxc_test=libxc_functionals_check(stop_if_error=.true.)
+
+!  Prepare the tests
+   if(present(xc_funcs))then
+     is_gga=libxc_functionals_isgga(xc_functionals=xc_funcs)
+     is_mgga=libxc_functionals_ismgga(xc_functionals=xc_funcs)
+     ixc_from_lib=libxc_functionals_ixc(xc_functionals=xc_funcs)
+   else
+     is_gga=libxc_functionals_isgga()
+     is_mgga=libxc_functionals_ismgga()
+     ixc_from_lib=libxc_functionals_ixc()
+   end if
+
 !  Check whether all the necessary arrays are present and have the correct dimensions
-   if (libxc_functionals_isgga() .or. libxc_functionals_ismgga()) then
+   if (is_gga .or. is_mgga) then
      if ( (.not. present(grho2_updn)) .or. (.not. present(vxcgrho)))  then
        write(message, '(5a,i7,a,i6,a,i6)' )&
 &       'At least one of the functionals is a GGA or a MGGA,',ch10,&
@@ -254,7 +270,7 @@ subroutine drivexc(exc,ixc,npts,nspden,order,rho_updn,vxcrho,ndvxc,ngr2,nd2vxc,n
        MSG_BUG(message)
      end if
    end if
-   if (libxc_functionals_ismgga()) then
+   if (is_mgga) then
      if ( (.not. present(lrho_updn)) .or. (.not. present(vxclrho)) .or. &
      (.not. present(tau_updn))  .or. (.not. present(vxctau))          )  then
        write(message, '(5a,i7)' )&
@@ -264,11 +280,11 @@ subroutine drivexc(exc,ixc,npts,nspden,order,rho_updn,vxcrho,ndvxc,ngr2,nd2vxc,n
        MSG_BUG(message)
      end if
    end if
-!  Check consistency betwee ixc passed in input and the one used to initialize the library.
-   if (ixc /= libxc_functionals_ixc()) then
+!  Check consistency between ixc passed in input and the one used to initialize the library.
+   if (ixc /= ixc_from_lib) then
      write(message, '(a,i0,2a,i0,2a)')&
 &     'The value of ixc specified in input, ixc = ',ixc,ch10,&
-&     'differs from the one used to initialize the functional ',libxc_functionals_ixc(),ch10,&
+&     'differs from the one used to initialize the functional ',ixc_from_lib,ch10,&
 &     'Action: reinitialize the global structure funcs, see NOTES in m_libxc_functionals'
      MSG_BUG(message)
    end if
@@ -623,9 +639,10 @@ subroutine drivexc(exc,ixc,npts,nspden,order,rho_updn,vxcrho,ndvxc,ngr2,nd2vxc,n
 !>>>>> Hybrid PBE0 (1/4 and 1/3)
  else if(ixc>=41.and.ixc<=42) then
 !  Requires to evaluate exchange-correlation with PBE (optpbe=2)
-!  minus alpha*exchange with PBE (optpbe=-2)
-!  if (ixc==41) alpha=one/four
-!  if (ixc==42) alpha=one/three
+!  minus hyb_mixing*exchange with PBE (optpbe=-2)
+!DEBUG
+   write(std_out,*)' drivexc : hyb_mixing=',hyb_mixing
+!ENDDEBUG
    ndvxc_x=8
    ABI_ALLOCATE(exc_x,(npts))
    ABI_ALLOCATE(vxcrho_x,(npts,nspden))
@@ -744,14 +761,24 @@ subroutine drivexc(exc,ixc,npts,nspden,order,rho_updn,vxcrho,ndvxc,ngr2,nd2vxc,n
 
 !>>>>> All libXC functionals
  else if( ixc<0 ) then
-   if (libxc_functionals_ismgga()) then
-     if (PRESENT(xc_tb09_c)) then
-       call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc,&
-&       vxcrho,grho2_updn,vxcgrho,lrho_updn,vxclrho,tau_updn,vxctau,xc_tb09_c=xc_tb09_c)
+   if (is_mgga) then
+     if(present(xc_funcs))then
+       if (PRESENT(xc_tb09_c)) then
+         call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc,&
+&         vxcrho,grho2_updn,vxcgrho,lrho_updn,vxclrho,tau_updn,vxctau,xc_functionals=xc_funcs,xc_tb09_c=xc_tb09_c)
+       else
+         call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc,&
+&         vxcrho,grho2_updn,vxcgrho,lrho_updn,vxclrho,tau_updn,vxctau,xc_functionals=xc_funcs)
+       end if
      else
-       call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc,&
-&       vxcrho,grho2_updn,vxcgrho,lrho_updn,vxclrho,tau_updn,vxctau)
-     end if
+       if (PRESENT(xc_tb09_c)) then
+         call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc,&
+&         vxcrho,grho2_updn,vxcgrho,lrho_updn,vxclrho,tau_updn,vxctau,xc_tb09_c=xc_tb09_c)
+       else
+         call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc,&
+&         vxcrho,grho2_updn,vxcgrho,lrho_updn,vxclrho,tau_updn,vxctau)
+       end if
+     endif
      ixc1 = (-ixc)/1000
      ixc2 = (-ixc) - ixc1*1000
      if(ixc1==206 .or. ixc1==207 .or. ixc1==208 .or. ixc1==209 .or. &
@@ -761,25 +788,48 @@ subroutine drivexc(exc,ixc,npts,nspden,order,rho_updn,vxcrho,ndvxc,ngr2,nd2vxc,n
        vxclrho(:,:)=zero
        vxctau(:,:)=zero
      end if
-   elseif (libxc_functionals_isgga()) then
-     if (order**2 <= 1) then
-       call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc,&
-&       vxcrho,grho2=grho2_updn,vxcgr=vxcgrho)
+   elseif (is_gga) then
+     if(present(xc_funcs))then
+       if (order**2 <= 1) then
+         call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc,&
+&         vxcrho,grho2=grho2_updn,vxcgr=vxcgrho,xc_functionals=xc_funcs)
+       else
+         call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc,&
+&         vxcrho,grho2=grho2_updn,vxcgr=vxcgrho,dvxc=dvxc,xc_functionals=xc_funcs)
+       end if
      else
-       call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc,&
-&       vxcrho,grho2=grho2_updn,vxcgr=vxcgrho,dvxc=dvxc)
-     end if
+       if (order**2 <= 1) then
+         call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc,&
+&         vxcrho,grho2=grho2_updn,vxcgr=vxcgrho)
+       else
+         call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc,&
+&         vxcrho,grho2=grho2_updn,vxcgr=vxcgrho,dvxc=dvxc)
+       endif
+     endif
    else
-     if (order**2 <= 1) then
-       call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc,&
-&       vxcrho)
-     elseif (order**2 <= 4) then
-       call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc,&
-&       vxcrho,dvxc=dvxc)
+     if(present(xc_funcs))then
+       if (order**2 <= 1) then
+         call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc,&
+&         vxcrho,xc_functionals=xc_funcs)
+       elseif (order**2 <= 4) then
+         call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc,&
+&         vxcrho,dvxc=dvxc,xc_functionals=xc_funcs)
+       else
+         call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc,&
+&         vxcrho,dvxc=dvxc,d2vxc=d2vxc,xc_functionals=xc_funcs)
+       end if
      else
-       call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc,&
-&       vxcrho,dvxc=dvxc,d2vxc=d2vxc)
-     end if
+       if (order**2 <= 1) then
+         call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc,&
+&         vxcrho)
+       elseif (order**2 <= 4) then
+         call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc,&
+&         vxcrho,dvxc=dvxc)
+       else
+         call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc,&
+&         vxcrho,dvxc=dvxc,d2vxc=d2vxc)
+       end if
+     endif
    end if
 
  end if
@@ -797,6 +847,10 @@ subroutine drivexc(exc,ixc,npts,nspden,order,rho_updn,vxcrho,ndvxc,ngr2,nd2vxc,n
  if(allocated(zeta)) then
    ABI_DEALLOCATE(zeta)
  end if
+
+!DEBUG
+ write(std_out,*)' drivexc : exc(1:5)=',exc(1:5)
+!ENDDEBUG
 
 end subroutine drivexc
 !!***

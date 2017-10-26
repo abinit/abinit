@@ -66,6 +66,9 @@ module m_xcdata
   integer :: ixc
     ! Choice of exchange-correlation functional. See input variable documentation
 
+  integer :: nspden
+    ! Number of spin components of the density
+
   integer :: usefock
     ! 1 if the XC functional includes a (possibly screened) Fock contribution
 
@@ -139,8 +142,9 @@ contains
 !!
 !! SOURCE
 
-subroutine xcdata_init(xcdata,auxc_ixc,dtset,hyb_mixing,intxc,ixc,nelect,tphysel,usekden,vdw_xc,xc_tb09_c,xc_denpos)
+subroutine xcdata_init(xcdata,auxc_ixc,dtset,hyb_mixing,intxc,ixc,nelect,nspden,tphysel,usekden,vdw_xc,xc_tb09_c,xc_denpos)
 
+ use defs_abitypes, only : dataset_type
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -152,9 +156,9 @@ subroutine xcdata_init(xcdata,auxc_ixc,dtset,hyb_mixing,intxc,ixc,nelect,tphysel
 
 !Arguments ------------------------------------
 !scalars
- integer, intent(in),optional :: auxc_ixc,intxc,ixc,usekden,vdw_xc
+ integer, intent(in),optional :: auxc_ixc,intxc,ixc,nspden,usekden,vdw_xc
  real(dp),intent(in),optional :: hyb_mixing,nelect,tphysel,xc_denpos,xc_tb09_c
- type(dtset_type), intent(in),optional :: dtset
+ type(dataset_type), intent(in),optional :: dtset
  type(xcdata_type), intent(out) :: xcdata
 !Local variables-------------------------------
  integer :: usefock,xclevel
@@ -166,10 +170,12 @@ subroutine xcdata_init(xcdata,auxc_ixc,dtset,hyb_mixing,intxc,ixc,nelect,tphysel
    xcdata%auxc_ixc=dtset%auxc_ixc
    xcdata%intxc=dtset%intxc
    xcdata%ixc=dtset%ixc
+   xcdata%nspden=dtset%nspden
    xcdata%usekden=dtset%usekden
    xcdata%vdw_xc=dtset%vdw_xc
 
-   xcdata%hyb_mixing=dtset%hyb_mixing
+   xcdata%hyb_mixing=abs(dtset%hyb_mixing) ! Warning : the absolute value is needed, because of the singular way
+                                           ! to define the default values for this input variable.
    xcdata%nelect=dtset%nelect
    xcdata%tphysel=dtset%tphysel
    xcdata%xc_denpos=dtset%xc_denpos
@@ -178,9 +184,10 @@ subroutine xcdata_init(xcdata,auxc_ixc,dtset,hyb_mixing,intxc,ixc,nelect,tphysel
  else
    if(.not.(present(auxc_ixc).and.present(intxc).and.present(ixc).and.&
 &           present(usekden).and.present(vdw_xc).and.present(hyb_mixing).and.&
-&           present(nelect).and.present(tphysel).and.present(xc_denpos).and.&
-&           present(xc_tb09_c))then
-     write(message,'(a)')) &
+&           present(nelect).and.present(nspden).and.&
+&           present(tphysel).and.present(xc_denpos).and.&
+&           present(xc_tb09_c)))then
+     write(message,'(a)') &
 &     ' If dtset is not provided, all the other optional arguments must be provided, which is not the case.'
      MSG_BUG(message)
    endif
@@ -189,17 +196,18 @@ subroutine xcdata_init(xcdata,auxc_ixc,dtset,hyb_mixing,intxc,ixc,nelect,tphysel
  if(present(auxc_ixc))  xcdata%auxc_ixc=auxc_ixc
  if(present(intxc))     xcdata%intxc=intxc
  if(present(ixc))       xcdata%ixc=ixc
- if(present(usekedn))   xcdata%usekden=usekden
+ if(present(nspden))    xcdata%nspden=nspden
+ if(present(usekden))   xcdata%usekden=usekden
  if(present(vdw_xc))    xcdata%vdw_xc=vdw_xc
 
  if(present(hyb_mixing))xcdata%hyb_mixing=hyb_mixing
  if(present(nelect))    xcdata%nelect=nelect
  if(present(tphysel))   xcdata%tphysel=tphysel
  if(present(xc_denpos)) xcdata%xc_denpos=xc_denpos
- if(presentxc_tb09_c))  xcdata%xc_tb09_c=xc_tb09_c
+ if(present(xc_tb09_c))  xcdata%xc_tb09_c=xc_tb09_c
 
 !Compute xclevel 
- call get_xclevel(ixc,xclevel,usefock=usefock)
+ call get_xclevel(xcdata%ixc,xclevel,usefock=usefock)
  xcdata%xclevel=xclevel
  xcdata%usefock=usefock
 
@@ -346,7 +354,8 @@ subroutine get_auxc_ixc(auxc_ixc,ixc)
  else if (ixc<0) then
    call get_xclevel(ixc,xclevel,usefock)
    if(usefock==1)then
-     auxc_ixc=11
+!    auxc_ixc=11
+     auxc_ixc=-130101
 !    if (libxc_functionals_gga_from_hybrid(hybrid_id=ixc,gga_id=gga_id)) then
 !      auxc_ixc=-gga_id(1)*1000-gga_id(2)
 !    endif

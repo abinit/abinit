@@ -471,7 +471,7 @@ subroutine kxc_alda(dtset,ixc,kxcg,mpi_enreg,nfft,ngfft,nspden,option,rhor,rhocu
  ABI_MALLOC(vhartree,(nfft))
  ABI_MALLOC(vxc,(nfft,nspden))
 
- call xcdata_init(xcdata,dtset=dtset,intxc=0,ixc=ixc)
+ call xcdata_init(xcdata,dtset=dtset,intxc=0,ixc=ixc,nspden=nspden)
 
  ! Reinitialize the libxc module with the overriden values
  if (dtset%ixc<0) then
@@ -528,7 +528,7 @@ subroutine kxc_alda(dtset,ixc,kxcg,mpi_enreg,nfft,ngfft,nspden,option,rhor,rhocu
    optionrhoxc = 2 !See rhotoxc.f
 
    call hartre(1,gsqcut,0,mpi_enreg,nfft,ngfft,dtset%paral_kgb,rhog,rprimd,vhartree)
-   call rhotoxc(enxc,kxcr,mpi_enreg,nfft,ngfft,dum,0,dum,0,nkxc,nk3xc,nspden,n3xccc,&
+   call rhotoxc(enxc,kxcr,mpi_enreg,nfft,ngfft,dum,0,dum,0,nkxc,nk3xc,n3xccc,&
 &   optionrhoxc,dtset%paral_kgb,rhorcut,rprimd,strsxc,1,vxc,vxcavg,xccc3d,xcdata,vhartr=vhartree)
 
 !  DEBUG
@@ -583,7 +583,7 @@ subroutine kxc_alda(dtset,ixc,kxcg,mpi_enreg,nfft,ngfft,nspden,option,rhor,rhocu
    optionrhoxc = -2 !See rhotoxc.f
 
    call hartre(1,gsqcut,0,mpi_enreg,nfft,ngfft,dtset%paral_kgb,rhog,rprimd,vhartree)
-   call rhotoxc(enxc,kxcr,mpi_enreg,nfft,ngfft,dum,0,dum,0,nkxc,nk3xc,nspden,n3xccc,&
+   call rhotoxc(enxc,kxcr,mpi_enreg,nfft,ngfft,dum,0,dum,0,nkxc,nk3xc,n3xccc,&
 &   optionrhoxc,dtset%paral_kgb,rhorcut,rprimd,strsxc,1,vxc,vxcavg,xccc3d,xcdata,vhartr=vhartree)
 
    kxcr(:,2) = 0.5_dp*kxcr(:,2)
@@ -1118,7 +1118,7 @@ subroutine kxc_driver(Dtset,Cryst,ixc,ngfft,nfft_tot,nspden,rhor,npw,dim_kxcg,kx
  write(msg,'(a,i3)') ' kxc_driver: calculating exchange-correlation kernel using ixc = ',ixc
  call wrtout(std_out,msg,'COLL')
 
- call xcdata_init(xcdata,dtset=Dtset,intxc=0,ixc=ixc)
+ call xcdata_init(xcdata,dtset=Dtset,intxc=0,ixc=ixc,nspden=nspden)
 
  if (ALL(xcdata%xclevel/=(/1,2/))) then
    write(msg,'(a,i0)')"Unsupported xclevel = ",xcdata%xclevel
@@ -1170,7 +1170,7 @@ subroutine kxc_driver(Dtset,Cryst,ixc,ngfft,nfft_tot,nspden,rhor,npw,dim_kxcg,kx
 
 !Compute the kernel.
  call rhotoxc(enxc,kxcr,MPI_enreg_seq,nfft_tot,ngfft,&
-& dum,0,dum,0,nkxc,nk3xc,nspden,n3xccc,option,Dtset%paral_kgb,rhor,Cryst%rprimd,&
+& dum,0,dum,0,nkxc,nk3xc,n3xccc,option,Dtset%paral_kgb,rhor,Cryst%rprimd,&
 & strsxc,1,vxclda,vxcavg,xccc3d,xcdata,vhartr=vhartr)
 
  ABI_FREE(rhog)
@@ -1404,7 +1404,7 @@ subroutine kxc_ADA(Dtset,Cryst,ixc,ngfft,nfft,nspden,rhor,&
  call wrtout(std_out,msg,'COLL')
  inv_kappa_sq = one/(kappa*kappa)
 
- call xcdata_init(xcdata,dtset=dtset,intxc=0,ixc=ixc)
+ call xcdata_init(xcdata,dtset=dtset,intxc=0,ixc=ixc,nspden=nspden)
 
  if (ALL(xcdata%xclevel/=(/1,2/))) then
    write(msg,'(a,i0)')"Unsupported xclevel = ",xcdata%xclevel
@@ -1495,7 +1495,7 @@ subroutine kxc_ADA(Dtset,Cryst,ixc,ngfft,nfft,nspden,rhor,&
 
  call hartre(1,gsqcut,izero,MPI_enreg_seq,nfft,ngfft,dtset%paral_kgb,rhog,Cryst%rprimd,vhartr)
  call rhotoxc(enxc,kxcr,MPI_enreg_seq,nfft,ngfft,&
-& dum,0,dum,0,nkxc,nk3xc,nspden,n3xccc,option,dtset%paral_kgb,my_rhor,Cryst%rprimd,&
+& dum,0,dum,0,nkxc,nk3xc,n3xccc,option,dtset%paral_kgb,my_rhor,Cryst%rprimd,&
 & strsxc,1,vxclda,vxcavg,xccc3d,xcdata,vhartr=vhartr)
 
 !Check for extreme (NaN) values

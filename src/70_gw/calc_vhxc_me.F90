@@ -259,10 +259,10 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,nfftf,ngfftf,&
  ABI_MALLOC(kxc_,(nfftf,nkxc))
  ABI_MALLOC(vxc_val,(nfftf,nspden))
 
- call xcdata_init(xcdata,dtset=dtset)
+ call xcdata_init(xcdata,dtset=Dtset)
 
  call rhotoxc(enxc_val,kxc_,MPI_enreg_seq,nfftf,ngfftf,&
-& nhat,Wfd%usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,nspden,n3xccc_,option,dtset%paral_kgb,rhor,Cryst%rprimd,&
+& nhat,Wfd%usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,n3xccc_,option,dtset%paral_kgb,rhor,Cryst%rprimd,&
 & strsxc,usexcnhat,vxc_val,vxcval_avg,xccc3d_,xcdata,taug=taug,taur=taur)
 
  !
@@ -282,7 +282,7 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,nfftf,ngfftf,&
        ixc_hybrid=-402         ! B3LYP
      end if
      call get_auxc_ixc(auxc_ixc,ixc_hybrid)
-     call xcdata_init(xcdata_hybrid,dtset=dtset,auxc_ixc=auxc_ixc,ixc=ixc_hybrid)
+     call xcdata_init(xcdata_hybrid,dtset=Dtset,auxc_ixc=auxc_ixc,ixc=ixc_hybrid)
 
      ! reinitialize the libxc module with the overriden values
      if(Dtset%ixc<0) then
@@ -307,7 +307,7 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,nfftf,ngfftf,&
      ABI_MALLOC(vxc_val_hybrid,(nfftf,nspden))
 
      call rhotoxc(enxc_hybrid_val,kxc_,MPI_enreg_seq,nfftf,ngfftf,&
-&     nhat,Wfd%usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,nspden,n3xccc_,option,dtset%paral_kgb,rhor,Cryst%rprimd,&
+&     nhat,Wfd%usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,n3xccc_,option,dtset%paral_kgb,rhor,Cryst%rprimd,&
 &     strsxc,usexcnhat,vxc_val_hybrid,vxcval_hybrid_avg,xccc3d_,xcdata_hybrid)
 
      ! Fix the libxc module with the original settings

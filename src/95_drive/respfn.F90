@@ -861,7 +861,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 
  call xcdata_init(xcdata,dtset=dtset)
  call rhotoxc(enxc,kxc,mpi_enreg,nfftf,ngfftf,&
-& nhat,nhatdim,nhatgr,nhatgrdim,nkxc,nk3xc,dtset%nspden,n3xccc,option,dtset%paral_kgb,rhor,&
+& nhat,nhatdim,nhatgr,nhatgrdim,nkxc,nk3xc,n3xccc,option,dtset%paral_kgb,rhor,&
 & rprimd,strsxc,usexcnhat,vxc,vxcavg,xccc3d,xcdata,vhartr=vhartr)
 
 !Compute local + Hxc potential, and subtract mean potential.

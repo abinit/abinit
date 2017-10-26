@@ -156,7 +156,7 @@ subroutine xchybrid_ncpp_cc(dtset,enxc,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,s
    ABI_ALLOCATE(xccc3d_null,(n3xccc_null))
 !  Compute Vxc^Hybrid(rho_val)
    call rhotoxc(enxc,kxc_dum,mpi_enreg,nfft,ngfft,nhat,ndim,nhatgr,ndim,nkxc,nkxc,&
-&   dtset%nspden,n3xccc_null,option,dtset%paral_kgb,rhor,rprimd,&
+&   n3xccc_null,option,dtset%paral_kgb,rhor,rprimd,&
 &   strsxc,usexcnhat,vxc,vxcavg,xccc3d_null,xcdata_hybrid)
 
 !  Initialize GGA functional
@@ -167,7 +167,7 @@ subroutine xchybrid_ncpp_cc(dtset,enxc,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,s
 
 !Add Vxc^GGA(rho_core+rho_val)
    call rhotoxc(enxc_corr,kxc_dum,mpi_enreg,nfft,ngfft,nhat,ndim,nhatgr,ndim,nkxc,nkxc,&
-&   dtset%nspden,n3xccc,option,dtset%paral_kgb,rhor,rprimd,&
+&   n3xccc,option,dtset%paral_kgb,rhor,rprimd,&
 &   strsxc_corr,usexcnhat,vxc_corr,vxcavg_corr,xccc3d,xcdata_gga)
    enxc=enxc+enxc_corr
    vxc(:,:)=vxc(:,:)+vxc_corr(:,:)
@@ -176,7 +176,7 @@ subroutine xchybrid_ncpp_cc(dtset,enxc,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,s
 
 !Substract Vxc^GGA(rho_val)
    call rhotoxc(enxc_corr,kxc_dum,mpi_enreg,nfft,ngfft,nhat,ndim,nhatgr,ndim,nkxc,nkxc,&
-&   dtset%nspden,n3xccc_null,option,dtset%paral_kgb,rhor,rprimd,strsxc_corr,usexcnhat,&
+&   n3xccc_null,option,dtset%paral_kgb,rhor,rprimd,strsxc_corr,usexcnhat,&
 &   vxc_corr,vxcavg_corr,xccc3d_null,xcdata_gga)
    enxc=enxc-enxc_corr
    vxc(:,:)=vxc(:,:)-vxc_corr(:,:)
@@ -203,7 +203,7 @@ subroutine xchybrid_ncpp_cc(dtset,enxc,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,s
 &   ngfft(3),option,rprimd,dtset%typat,ucvol,vxc_corr,xcccrc,xccc1d,xccc3d_null,xred)
 !Add Vxc^GGA(rho_core+rho_val)
    call rhotoxc(enxc_corr,kxc_dum,mpi_enreg,nfft,ngfft,nhat,ndim,nhatgr,ndim,nkxc,nkxc,&
-&   dtset%nspden,n3xccc,option,dtset%paral_kgb,&
+&   n3xccc,option,dtset%paral_kgb,&
 &   rhor,rprimd,strsxc_corr,usexcnhat,vxc_corr,vxcavg_corr,xccc3d_null,xcdata_gga)
    option=2
    call mkcore(strsxc_corr,dyfrx2_dum,grxc,mpi_enreg,dtset%natom,nfft,dtset%nspden,dtset%ntypat,ngfft(1),n1xccc,ngfft(2),&
@@ -221,7 +221,7 @@ subroutine xchybrid_ncpp_cc(dtset,enxc,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,s
 !calculate Vxc^GGA(rho_core+rho_val)
    option=0
    call rhotoxc(enxc_corr,kxc_dum,mpi_enreg,nfft,ngfft,nhat,ndim,nhatgr,ndim,nkxc,nkxc,&
-&   dtset%nspden,n3xccc,option,dtset%paral_kgb,rhor,rprimd,&
+&   n3xccc,option,dtset%paral_kgb,rhor,rprimd,&
 &   strsxc_corr,usexcnhat,vxc,vxcavg_corr,xccc3d,xcdata_gga)
  end if 
 

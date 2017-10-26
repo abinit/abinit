@@ -1566,7 +1566,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
        nk3xc=1
        if(dtset%icoulomb==0 .and. dtset%usewvl==0) then
          call rhotoxc(edum,kxc,mpi_enreg,nfftf,&
-&         ngfftf,nhat,psps%usepaw,nhatgr,0,nkxc,nk3xc,dtset%nspden,n3xccc,&
+&         ngfftf,nhat,psps%usepaw,nhatgr,0,nkxc,nk3xc,n3xccc,&
 &         optxc,dtset%paral_kgb,rhor,rprimd,dummy2,0,vxc,vxcavg_dum,xccc3d,xcdata,&
 &         add_tfw=tfw_activated,taug=taug,taur=taur,vhartr=vhartr,vxctau=vxctau)
        else if(.not. wvlbigdft) then

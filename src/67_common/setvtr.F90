@@ -505,7 +505,7 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
 !        Compute energies%e_xc and associated quantities
          if(.not.is_hybrid_ncpp .or. mod(dtset%fockoptmix,100)==11)then 
            call rhotoxc(energies%e_xc,kxc,mpi_enreg,nfft,ngfft,&
-&            nhat,psps%usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,dtset%nspden,n3xccc,&
+&            nhat,psps%usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,n3xccc,&
 &            option,dtset%paral_kgb,rhor,rprimd,strsxc,usexcnhat,vxc,vxcavg,xccc3d,xcdata,&
 &            taug=taug,taur=taur,vhartr=vhartr,vxctau=vxctau,add_tfw=add_tfw_)
          else
@@ -519,7 +519,7 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
 !          This call to rhotoxc uses the hybrid xc functional 
            if(.not.is_hybrid_ncpp)then
              call rhotoxc(energies%e_hybcomp_E0,kxc,mpi_enreg,nfft,ngfft,&
-&              nhat,psps%usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,dtset%nspden,n3xccc,&
+&              nhat,psps%usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,n3xccc,&
 &              option,dtset%paral_kgb,rhor,rprimd,strsxc,usexcnhat,vxc_hybcomp,vxcavg,xccc3d,xcdatahyb,&
 &              taug=taug,taur=taur,vhartr=vhartr,vxctau=vxctau,add_tfw=add_tfw_)
            else
@@ -537,7 +537,7 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
 
        else if (ipositron==2) then
          call rhotoxc(energies%e_xc,kxc,mpi_enreg,nfft,ngfft,&
-&         nhat,psps%usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,dtset%nspden,n3xccc,&
+&         nhat,psps%usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,n3xccc,&
 &         option,dtset%paral_kgb,rhor,rprimd,strsxc,usexcnhat,vxc,vxcavg,xccc3d,xcdata,&
 &         taug=taug,taur=taur,vhartr=vhartr,vxctau=vxctau,add_tfw=add_tfw_,&
 &         electronpositron=electronpositron)
