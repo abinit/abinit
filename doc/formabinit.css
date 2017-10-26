@@ -17,3 +17,12 @@ a:hover {
  font-weight: 600;
  text-decoration: none;
 }
+
+pre
+{
+font-family:courier, "courier new", monospace;
+font-size:1em;
+color:rgb(25,25,25);
+background-color:#fff;
+}
+
