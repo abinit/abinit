@@ -79,7 +79,7 @@ program multibinit
 
 !Local variables-------------------------------
 ! Set array dimensions
- integer,parameter :: ddbun=2,master=0 ! FIXME: these should not be reserved unit numbers!
+ integer,parameter :: master=0 ! FIXME: these should not be reserved unit numbers!
  integer :: comm,filetype,ii,ierr,lenstr
  integer :: natom,nph1l,nrpt,ntypat,nproc,my_rank
  integer :: option
@@ -221,7 +221,7 @@ program multibinit
      call wrtout(std_out,message,'COLL')
    end if
  else
-   if(inp%ncoeff/=zero) then
+   if(inp%ncoeff/=0) then
      write(message, '(5a)' )&
 &     'ncoeff is specified in the input but,',ch10,&
 &     'there is no file for the coefficients ',ch10,&
@@ -354,6 +354,13 @@ program multibinit
 
 !****************************************************************************************
 
+!****************************************************************************************
+!Effective Hamiltonian, compute the energy for given patern
+! call mover_effpot(inp,filnam,reference_effective_potential,2,comm,hist=hist)
+
+!****************************************************************************************
+
+ 
 !****************************************************************************************
 !Print the effective potential system + coefficients (only master CPU)
  if(iam_master) then

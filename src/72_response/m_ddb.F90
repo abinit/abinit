@@ -28,7 +28,9 @@
 MODULE m_ddb
 
  use defs_basis
- use m_profiling_abi
+ use m_profiling_abi 
+ use defs_abitypes
+ use defs_datatypes
  use m_errors
  use m_xmpi
 
@@ -41,7 +43,10 @@ MODULE m_ddb
  use m_crystal,        only : crystal_t, crystal_init
  use m_dynmat,         only : cart29, d2sym3, cart39, d3sym, chneu9, asria_calc, asria_corr, asrprs, &
 &                             dfpt_phfrq, sytens
-
+ use m_pawtab,         only : pawtab_type, pawtab_nullify, pawtab_free
+ use m_psps,           only : psps_copy, psps_free
+ use m_dtset
+ 
  implicit none
 
  private
@@ -141,6 +146,7 @@ MODULE m_ddb
                                     ! a direct diagonalizatin of the dynamical matrix.
  public :: ddb_get_asrq0            ! Return object used to enforce the acoustic sum rule
                                     ! from the Dynamical matrix at Gamma. Used in ddb_diagoq.
+ public :: ddb_to_dtset        ! Transfer ddb_hdr to dtset datatype
 
  ! TODO: Add option to change amu.
  !public :: ddb_change_amu
@@ -3276,6 +3282,136 @@ subroutine ddb_write_blok(ddb,iblok,choice,mband,mpert,msize,nkpt,nunit,&
  end if !ddb%typ(iblok)
 
 end subroutine ddb_write_blok
+!!***
+
+
+!----------------------------------------------------------------------
+
+
+!!****f* m_ddb/ddb_to_dtset
+!! NAME
+!! ddb_to_dtset
+!!
+!! FUNCTION
+!!   Initialize a dataset object from ddb.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+
+subroutine ddb_to_dtset(comm,ddb, dtset,filename,psps,pawtab)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'ddb_to_dtset'
+!End of the abilint section
+
+ implicit none
+
+ !Arguments ------------------------------------
+ integer,intent(in) :: comm
+ type(ddb_type),intent(out) :: ddb
+ type(dataset_type),intent(inout) :: dtset
+ type(pseudopotential_type),intent(inout) :: psps
+ type(pawtab_type),intent(inout) :: pawtab(psps%ntypat*psps%usepaw)
+ character(len=*),intent(in) :: filename
+!Local variables -------------------------
+ integer :: ii, nn,ddbun
+ type(ddb_hdr_type) :: ddb_hdr
+
+! ************************************************************************
+
+!Free the ouput
+ call dtset_free(dtset)
+
+! Must read natom from the DDB before being able to allocate some arrays needed for invars9
+ ddbun = get_unit()
+ call ddb_hdr_open_read(ddb_hdr,filename,ddbun,DDB_VERSION,comm=comm,&
+&                       dimonly=1)
+
+ dtset%ngfft = ddb_hdr%ngfft
+ 
+ call psps_copy(psps, ddb_hdr%psps)
+
+! Copy scalars from ddb
+ dtset%natom = ddb_hdr%natom
+ dtset%mband = ddb_hdr%mband
+ dtset%nkpt = ddb_hdr%nkpt
+ !dtset%msym = ddb_hdr%maxnsym
+ dtset%nsym = ddb_hdr%nsym
+ dtset%ntypat = ddb_hdr%ntypat
+
+ dtset%nspden = ddb_hdr%nspden
+ dtset%nspinor = ddb_hdr%nspinor
+ dtset%nsppol = ddb_hdr%nsppol
+
+ dtset%occopt = ddb_hdr%occopt
+ dtset%usepaw = ddb_hdr%usepaw
+
+ dtset%intxc = ddb_hdr%intxc
+ dtset%ixc = ddb_hdr%ixc
+ dtset%iscf = ddb_hdr%iscf
+
+ dtset%dilatmx = ddb_hdr%dilatmx
+ dtset%ecut = ddb_hdr%ecut
+ dtset%ecutsm = ddb_hdr%ecutsm
+ dtset%pawecutdg = ddb_hdr%pawecutdg
+ dtset%kptnrm = ddb_hdr%kptnrm
+ dtset%dfpt_sciss = ddb_hdr%dfpt_sciss
+ dtset%tolwfr = 1.0_dp  ! dummy
+ dtset%tphysel = ddb_hdr%tphysel
+ dtset%tsmear = ddb_hdr%tsmear
+
+ ! Copy arrays from dtset
+ dtset%acell_orig(1:3,1) = ddb_hdr%acell(:)
+ dtset%rprim_orig(1:3,1:3,1) = ddb_hdr%rprim(:,:)
+ dtset%amu_orig(:,1) = ddb_hdr%amu(:)
+ dtset%nband(:) = ddb_hdr%nband(1:ddb_hdr%mkpt*ddb_hdr%nsppol)
+ dtset%symafm(:) = ddb_hdr%symafm(1:ddb_hdr%msym)
+ dtset%symrel(:,:,:) = ddb_hdr%symrel(1:3,1:3,1:ddb_hdr%msym)
+ dtset%typat(:) = ddb_hdr%typat(1:ddb_hdr%matom)
+ dtset%kpt(:,:) = ddb_hdr%kpt(1:3,1:ddb_hdr%mkpt)
+ dtset%wtk(:) = ddb_hdr%wtk(1:ddb_hdr%mkpt)
+ dtset%spinat(:,:) = ddb_hdr%spinat(1:3,1:ddb_hdr%matom)
+ dtset%tnons(:,:) = ddb_hdr%tnons(1:3,1:ddb_hdr%msym)
+ dtset%ziontypat(1:ddb_hdr%mtypat) = ddb_hdr%zion(1:ddb_hdr%mtypat)
+ dtset%znucl(:) = ddb_hdr%znucl(1:ddb_hdr%mtypat)
+ dtset%xred_orig(:,:,1) = ddb_hdr%xred(1:3,1:ddb_hdr%matom)
+ dtset%occ_orig(:) = ddb_hdr%occ(1:ddb_hdr%mband*ddb_hdr%nkpt*ddb_hdr%nsppol)
+
+
+ ! GA: I had way too much problems implementing pawtab_copy.
+ !     The script check-libpaw would report all sorts of errors.
+ !     Therefore, I do a cheap copy here, copying only the relevant info.
+ !call pawtab_copy(pawtab, ddb_hdr%pawtab)
+ ! nn=size(pawtab)
+ ! if (nn.gt.0) then
+ !   do ii=1,nn
+ !     pawtab(ii)%basis_size =ddb_hdr%pawtab(ii)%basis_size
+ !     pawtab(ii)%lmn_size =ddb_hdr%pawtab(ii)%lmn_size
+ !     pawtab(ii)%lmn2_size =ddb_hdr%pawtab(ii)%lmn2_size
+ !     pawtab(ii)%rpaw =ddb_hdr%pawtab(ii)%rpaw
+ !     pawtab(ii)%rshp =ddb_hdr%pawtab(ii)%rshp
+ !     pawtab(ii)%shape_type =ddb_hdr%pawtab(ii)%shape_type
+ !    if (allocated(pawtab(ii)%dij0)) then
+ !      call alloc_copy(ddb_hdr%pawtab(ii)%dij0,  pawtab(ii)%dij0)
+ !    end if
+ !   end do
+ ! end if
+ 
+ call ddb_hdr_free(ddb_hdr)
+
+end subroutine ddb_to_dtset
 !!***
 
 !----------------------------------------------------------------------
