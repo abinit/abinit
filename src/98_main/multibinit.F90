@@ -348,15 +348,17 @@ program multibinit
 !try to bound the model with mover_effpot
 !we need to use the molecular dynamics
  if(inp%fit_bound==1)then
-   call mover_effpot(inp,filnam,reference_effective_potential,1,comm,hist=hist)
+   call mover_effpot(inp,filnam,reference_effective_potential,-1,comm,hist=hist)
  end if
 !TEST_AM
 
 !****************************************************************************************
 
 !****************************************************************************************
+!TEST_AM
 !Effective Hamiltonian, compute the energy for given patern
-! call mover_effpot(inp,filnam,reference_effective_potential,2,comm,hist=hist)
+! call mover_effpot(inp,filnam,reference_effective_potential,-2,comm,hist=hist)
+!TEST_AM
 
 !****************************************************************************************
 

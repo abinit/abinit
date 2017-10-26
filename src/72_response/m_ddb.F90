@@ -3307,7 +3307,7 @@ end subroutine ddb_write_blok
 !! SOURCE
 
 
-subroutine ddb_to_dtset(comm,ddb, dtset,filename,psps,pawtab)
+subroutine ddb_to_dtset(comm,dtset,filename,psps)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -3320,48 +3320,42 @@ subroutine ddb_to_dtset(comm,ddb, dtset,filename,psps,pawtab)
 
  !Arguments ------------------------------------
  integer,intent(in) :: comm
- type(ddb_type),intent(out) :: ddb
  type(dataset_type),intent(inout) :: dtset
  type(pseudopotential_type),intent(inout) :: psps
- type(pawtab_type),intent(inout) :: pawtab(psps%ntypat*psps%usepaw)
+ ! type(pawtab_type),intent(inout) :: pawtab(psps%ntypat*psps%usepaw)
  character(len=*),intent(in) :: filename
-!Local variables -------------------------
- integer :: ii, nn,ddbun
+ !Local variables -------------------------
+ integer :: ii,mxnimage, nn,ddbun
  type(ddb_hdr_type) :: ddb_hdr
 
 ! ************************************************************************
 
-!Free the ouput
- call dtset_free(dtset)
-
+!Set variables
+ mxnimage = 1 ! Only 1 image in the DDB
+ 
 ! Must read natom from the DDB before being able to allocate some arrays needed for invars9
  ddbun = get_unit()
- call ddb_hdr_open_read(ddb_hdr,filename,ddbun,DDB_VERSION,comm=comm,&
-&                       dimonly=1)
-
+ call ddb_hdr_open_read(ddb_hdr,filename,ddbun,DDB_VERSION,comm=comm)
+!close ddb file, just want to read the headers
+ close(ddbun)
  dtset%ngfft = ddb_hdr%ngfft
  
- call psps_copy(psps, ddb_hdr%psps)
+! call psps_copy(psps, ddb_hdr%psps)
 
 ! Copy scalars from ddb
  dtset%natom = ddb_hdr%natom
  dtset%mband = ddb_hdr%mband
  dtset%nkpt = ddb_hdr%nkpt
- !dtset%msym = ddb_hdr%maxnsym
- dtset%nsym = ddb_hdr%nsym
+ dtset%nsym = ddb_hdr%msym
  dtset%ntypat = ddb_hdr%ntypat
-
  dtset%nspden = ddb_hdr%nspden
  dtset%nspinor = ddb_hdr%nspinor
  dtset%nsppol = ddb_hdr%nsppol
-
  dtset%occopt = ddb_hdr%occopt
  dtset%usepaw = ddb_hdr%usepaw
-
  dtset%intxc = ddb_hdr%intxc
  dtset%ixc = ddb_hdr%ixc
  dtset%iscf = ddb_hdr%iscf
-
  dtset%dilatmx = ddb_hdr%dilatmx
  dtset%ecut = ddb_hdr%ecut
  dtset%ecutsm = ddb_hdr%ecutsm
@@ -3372,24 +3366,91 @@ subroutine ddb_to_dtset(comm,ddb, dtset,filename,psps,pawtab)
  dtset%tphysel = ddb_hdr%tphysel
  dtset%tsmear = ddb_hdr%tsmear
 
- ! Copy arrays from dtset
+ ! Copy arrays from ddb
+ if (allocated(dtset%acell_orig)) then
+   ABI_DEALLOCATE(dtset%acell_orig)
+ end if
+ ABI_ALLOCATE(dtset%acell_orig,(3,mxnimage))
  dtset%acell_orig(1:3,1) = ddb_hdr%acell(:)
+ 
+ if (allocated(dtset%rprim_orig)) then
+   ABI_DEALLOCATE(dtset%rprim_orig)
+ end if
+ ABI_ALLOCATE(dtset%rprim_orig,(3,3,mxnimage))
  dtset%rprim_orig(1:3,1:3,1) = ddb_hdr%rprim(:,:)
+ 
+ if (allocated(dtset%amu_orig)) then
+   ABI_DEALLOCATE(dtset%amu_orig)
+ end if
+ ABI_ALLOCATE(dtset%amu_orig,(dtset%ntypat,mxnimage))
  dtset%amu_orig(:,1) = ddb_hdr%amu(:)
- dtset%nband(:) = ddb_hdr%nband(1:ddb_hdr%mkpt*ddb_hdr%nsppol)
- dtset%symafm(:) = ddb_hdr%symafm(1:ddb_hdr%msym)
- dtset%symrel(:,:,:) = ddb_hdr%symrel(1:3,1:3,1:ddb_hdr%msym)
+ 
+ if (allocated(dtset%typat)) then
+   ABI_DEALLOCATE(dtset%typat)
+ end if
+ ABI_ALLOCATE(dtset%typat,(dtset%natom))
  dtset%typat(:) = ddb_hdr%typat(1:ddb_hdr%matom)
- dtset%kpt(:,:) = ddb_hdr%kpt(1:3,1:ddb_hdr%mkpt)
- dtset%wtk(:) = ddb_hdr%wtk(1:ddb_hdr%mkpt)
+ 
+ if (allocated(dtset%spinat)) then
+   ABI_DEALLOCATE(dtset%spinat)
+ end if
+ ABI_ALLOCATE(dtset%spinat,(3,dtset%natom))
  dtset%spinat(:,:) = ddb_hdr%spinat(1:3,1:ddb_hdr%matom)
- dtset%tnons(:,:) = ddb_hdr%tnons(1:3,1:ddb_hdr%msym)
- dtset%ziontypat(1:ddb_hdr%mtypat) = ddb_hdr%zion(1:ddb_hdr%mtypat)
- dtset%znucl(:) = ddb_hdr%znucl(1:ddb_hdr%mtypat)
+ 
+ if (allocated(dtset%xred_orig)) then
+   ABI_DEALLOCATE(dtset%xred_orig)
+ end if
+ ABI_ALLOCATE(dtset%xred_orig,(3,dtset%natom,mxnimage))
  dtset%xred_orig(:,:,1) = ddb_hdr%xred(1:3,1:ddb_hdr%matom)
- dtset%occ_orig(:) = ddb_hdr%occ(1:ddb_hdr%mband*ddb_hdr%nkpt*ddb_hdr%nsppol)
 
-
+ if (allocated(dtset%ziontypat)) then
+   ABI_DEALLOCATE(dtset%ziontypat)
+ end if
+ ABI_ALLOCATE(dtset%ziontypat,(dtset%ntypat))
+ dtset%ziontypat(1:ddb_hdr%mtypat) = ddb_hdr%zion(1:ddb_hdr%mtypat)
+ 
+ if (allocated(dtset%znucl)) then
+   ABI_DEALLOCATE(dtset%znucl)
+ end if
+ ABI_ALLOCATE(dtset%znucl,(dtset%ntypat))
+ dtset%znucl(:) = ddb_hdr%znucl(1:ddb_hdr%mtypat)   
+ 
+ if (allocated(dtset%nband)) then
+   ABI_DEALLOCATE(dtset%nband)
+ end if
+ ABI_ALLOCATE(dtset%nband,(dtset%nkpt)) 
+ dtset%nband(:) = ddb_hdr%nband(1:ddb_hdr%mkpt*ddb_hdr%nsppol)
+ 
+ if (allocated(dtset%symafm)) then
+   ABI_DEALLOCATE(dtset%symafm)
+ end if
+ ABI_ALLOCATE(dtset%symafm,(dtset%nsym))
+ dtset%symafm(:) = ddb_hdr%symafm(1:ddb_hdr%msym)
+ 
+ if (allocated(dtset%symrel)) then
+   ABI_DEALLOCATE(dtset%symrel)
+ end if
+ ABI_ALLOCATE(dtset%symrel,(3,3,dtset%nsym))
+ dtset%symrel(:,:,:) = ddb_hdr%symrel(1:3,1:3,1:ddb_hdr%msym)
+ 
+ if (allocated(dtset%tnons)) then
+   ABI_DEALLOCATE(dtset%tnons)
+ end if
+ ABI_ALLOCATE(dtset%tnons,(3,dtset%nsym))
+ dtset%tnons(:,:) = ddb_hdr%tnons(1:3,1:ddb_hdr%msym)
+ 
+ if (allocated(dtset%kpt)) then
+   ABI_DEALLOCATE(dtset%kpt)
+ end if
+ ABI_ALLOCATE(dtset%kpt,(3,dtset%nkpt))
+ dtset%kpt(:,:) = ddb_hdr%kpt(1:3,1:ddb_hdr%mkpt)
+ 
+ if (allocated(dtset%wtk)) then
+   ABI_DEALLOCATE(dtset%wtk)
+ end if
+ ABI_ALLOCATE(dtset%wtk,(dtset%nkpt))
+ dtset%wtk(:) = ddb_hdr%wtk(1:ddb_hdr%mkpt)
+ 
  ! GA: I had way too much problems implementing pawtab_copy.
  !     The script check-libpaw would report all sorts of errors.
  !     Therefore, I do a cheap copy here, copying only the relevant info.

@@ -141,7 +141,7 @@
 
 # C compiler additional custom flags
 #
-CFLAGS_EXTRA="-I/usr/include/libxml2 -O2"
+CFLAGS_EXTRA="-I/usr/include/libxml2"
 
 # Forced C compiler flags
 # Note: will override build-system configuration - USE AT YOUR OWN RISKS!
@@ -983,7 +983,7 @@ with_wannier90_libs="-L${FALLBACKS_PATH}/wannier90/lib -lwannier90"
 
 # Flag to enable LIBXML library
 #
-enable_xml=yes
+enable_xml="yes"
 
 # ---------------------------------------------------------------------------- #
 # DMFT library connector                                                        #

@@ -102,7 +102,7 @@ implicit none
 !Local variables-------------------------------
 !scalar
  integer :: conv_retcode,icoeff_bound,ii,jj,kk,nproc,ncoeff,nmodels,ncoeff_bound,ncoeff_max
- integer :: model_bound,model_ncoeffbound,my_rank
+ integer :: model_bound,model_ncoeffbound,my_rank,type
  real(dp):: cutoff,freq_q,freq_b,qmass,bmass
  logical :: iam_master
  integer, parameter:: master=0
@@ -139,7 +139,7 @@ implicit none
  type(polynomial_coeff_type),dimension(:),allocatable :: coeffs_all,coeffs_tmp,coeffs_bound
  character(len=fnlen) :: filename
  type(electronpositron_type),pointer :: electronpositron
-! type(pawtab_type),allocatable :: pawtab(:)
+ type(pawtab_type),allocatable :: pawtab(:)
 !TEST_AM
  !real(dp) :: tsec(2),tcpu,tcpui,twall,twalli
  !real(dp),allocatable :: energy(:)
@@ -191,89 +191,114 @@ implicit none
 
 !  convert new xcart
    call xcart2xred(effective_potential%crystal%natom,effective_potential%crystal%rprimd,&
-& effective_potential%crystal%xcart,xred)
+&                  effective_potential%crystal%xcart,xred)
    call xred2xcart(effective_potential%crystal%natom, rprimd, xcart, xred)
 !  Generate supercell for the simulation
    call effective_potential_setSupercell(effective_potential,comm,n_cell=sc_size)
 
- ABI_DEALLOCATE(xred)
- ABI_DEALLOCATE(xcart)
-
+   ABI_DEALLOCATE(xred)
+   ABI_DEALLOCATE(xcart)
+ 
 !***************************************************************
 !1 Convert some parameters into the structures used by mover.F90
 !***************************************************************
 
-!Set mpi_eng
- mpi_enreg%comm_cell  = comm
- mpi_enreg%me = my_rank
- if (option /= 0) then
-   !TEST_AM
-   !Try to copy ddb to dtset
-   !  call ddb_to_dtset(comm,ddb, dtset,filename,psps,pawtab)
-     
-   !Set the fake abinit dataset 
-     !Scalar
-     dtset%dmft_entropy = 0
-     dtset%nctime = 0     ! NetCdf TIME between output of molecular dynamics informations 
-     dtset%delayperm = 0  ! DELAY between trials to PERMUTE atoms
-     dtset%dilatmx = 1.0  ! DILATation : MaXimal value
-     dtset%diismemory = 8 ! Direct Inversion in the Iterative Subspace MEMORY
-     dtset%friction = 0.0001 ! internal FRICTION coefficient
-     dtset%goprecon = 0   ! Geometry Optimization PREconditioner equations
-     dtset%jellslab = 0   ! include a JELLium SLAB in the cell
-     dtset%mdwall = 10000 ! Molecular Dynamics WALL location
-     dtset%natom = effective_potential%supercell%natom
-     dtset%ntypat = effective_potential%crystal%ntypat
-     dtset%nconeq = 0     ! Number of CONstraint EQuations
-     dtset%noseinert = 1.d-5 ! NOSE INERTia factor
-     dtset%nnos = inp%nnos   ! Number of nose masses Characteristic
-     dtset%nsym = 1       ! Number of SYMmetry operations
-     dtset%prtxml = 0     ! print the xml
-     dtset%signperm = 1   ! SIGN of PERMutation potential      
-     dtset%strprecon = 1  ! STRess PRECONditioner
-     dtset%tolmxf = 2.0d-5
-     dtset%tsmear = 0.009500446 !
-     dtset%vis = 100      ! VIScosity
-     dtset%usewvl = 0     !
-     dtset%useylm = 0     !
-     
-     !array
-     ABI_ALLOCATE(dtset%iatfix,(3,dtset%natom)) ! Indices of AToms that are FIXed
-     dtset%iatfix = 0
-     dtset%goprecprm(:) = zero !Geometry Optimization PREconditioner PaRaMeters equations
-     ABI_ALLOCATE(dtset%prtatlist,(dtset%natom)) !PRinT by ATom LIST of ATom
-     dtset%prtatlist(:) = 0
-     
-     if(option  > 0)then
-       verbose = .TRUE.
-       writeHIST = .TRUE.
-       dtset%dtion = inp%dtion  ! Delta Time for IONs
-       dtset%ionmov = inp%dynamics  ! Number for the dynamic
-       dtset%ntime = inp%ntime  ! Number of TIME steps 
-       dtset%optcell = inp%optcell    ! OPTimize the CELL shape and dimensions Characteristic
-       dtset%restartxf = inp%restartxf  ! RESTART from (X,F) history
-       dtset%mdtemp(1) = inp%temperature   !Molecular Dynamics Temperatures 
-       dtset%mdtemp(2) = inp%temperature   !Molecular Dynamics Temperatures
-       dtset%strtarget(1:6) = -1 * inp%strtarget(1:6) / 29421.033d0 ! STRess TARGET
-     else
-       !    Set default for the fit
-       verbose = .FALSE.
-       writeHIST = .FALSE.
-       dtset%restartxf = 0  ! RESTART from (X,F) history
-       dtset%dtion = 100  ! Delta Time for IONs
-       dtset%ionmov = 13  ! Number for the dynamic
-       dtset%ntime = inp%fit_boundStep  ! Number of TIME steps 
-       dtset%optcell = 2    ! OPTimize the CELL shape and dimensions Characteristic 
-       dtset%mdtemp(1) = inp%fit_boundTemp   !Molecular Dynamics Temperatures 
-       dtset%mdtemp(2) = inp%fit_boundTemp !Molecular Dynamics Temperatures 
-       dtset%strtarget(1:6) = zero
+!  Free dtset
+   call dtset_free(dtset)
+
+!  Set mpi_eng
+   mpi_enreg%comm_cell  = comm
+   mpi_enreg%me = my_rank
+   
+!  Set the abinit dataset for mover with fake values
+!  Scalar 
+   dtset%dmft_entropy = 0
+   dtset%nctime = 0     ! NetCdf TIME between output of molecular dynamics informations 
+   dtset%delayperm = 0  ! DELAY between trials to PERMUTE atoms
+   dtset%dilatmx = 1.0  ! DILATation : MaXimal value
+   dtset%diismemory = 8 ! Direct Inversion in the Iterative Subspace MEMORY
+   dtset%friction = 0.0001 ! internal FRICTION coefficient
+   dtset%goprecon = 0   ! Geometry Optimization PREconditioner equations
+   dtset%jellslab = 0   ! include a JELLium SLAB in the cell
+   dtset%mdwall = 10000 ! Molecular Dynamics WALL location
+   dtset%natom = effective_potential%supercell%natom
+   dtset%ntypat = effective_potential%crystal%ntypat
+   dtset%nconeq = 0     ! Number of CONstraint EQuations
+   dtset%noseinert = 1.d-5 ! NOSE INERTia factor
+   dtset%nnos = inp%nnos   ! Number of nose masses Characteristic
+   dtset%nsym = 1       ! Number of SYMmetry operations
+   dtset%prtxml = 0     ! print the xml
+   dtset%signperm = 1   ! SIGN of PERMutation potential      
+   dtset%strprecon = 1  ! STRess PRECONditioner
+   dtset%tolmxf = 2.0d-5
+   dtset%tsmear = 0.009500446 !
+   dtset%vis = 100      ! VIScosity
+   dtset%usewvl = 0     !
+   dtset%useylm = 0     !
+   
+   if(option == -2) then
+     write(message,'(a)')'Read the DDB file to fill the dtset array'
+     call wrtout(std_out,message,"COLL")
+!    Copy real informtions from the ddb   
+     call effective_potential_file_getType(filnam(3),type)
+     if(type /= 1) then
+       write(message, '(5a)' )&
+&         ' You need to provide DDB file in the input to compute ahnarmonic',ch10,&
+&         ' part of effective Hamiltionian',ch10,&
+&         'Action: add DDB file in the inputs'
+       MSG_BUG(message)       
      end if
+     call ddb_to_dtset(comm, dtset,filnam(3),psps)
+
+   else
+!    Need to init some values
+     ABI_ALLOCATE(symrel,(3,3,dtset%nsym))
+     symrel = 1
+     call alloc_copy(symrel,dtset%symrel)
+     ABI_ALLOCATE(tnons,(3,dtset%nsym))
+     tnons = zero
+     call alloc_copy(tnons,dtset%tnons)
+     call alloc_copy(effective_potential%supercell%typat,dtset%typat)
+     call alloc_copy(effective_potential%crystal%znucl,dtset%znucl)
+     ABI_DEALLOCATE(symrel)
+     ABI_DEALLOCATE(tnons)
    end if
-
-
+   
+   !array
+   ABI_ALLOCATE(dtset%iatfix,(3,dtset%natom)) ! Indices of AToms that are FIXed
+   dtset%iatfix = 0
+   dtset%goprecprm(:) = zero !Geometry Optimization PREconditioner PaRaMeters equations
+   ABI_ALLOCATE(dtset%prtatlist,(dtset%natom)) !PRinT by ATom LIST of ATom
+   dtset%prtatlist(:) = 0
+       
+   if(option  > 0)then
+     verbose = .TRUE.
+     writeHIST = .TRUE.
+     dtset%dtion = inp%dtion  ! Delta Time for IONs
+     dtset%ionmov = inp%dynamics  ! Number for the dynamic
+     dtset%ntime = inp%ntime  ! Number of TIME steps 
+     dtset%optcell = inp%optcell    ! OPTimize the CELL shape and dimensions Characteristic
+     dtset%restartxf = inp%restartxf  ! RESTART from (X,F) history
+     dtset%mdtemp(1) = inp%temperature   !Molecular Dynamics Temperatures 
+     dtset%mdtemp(2) = inp%temperature   !Molecular Dynamics Temperatures
+     dtset%strtarget(1:6) = -1 * inp%strtarget(1:6) / 29421.033d0 ! STRess TARGET
+   else if(option == -1) then
+!    Set default for the fit
+     verbose = .FALSE.
+     writeHIST = .FALSE.
+     dtset%restartxf = 0  ! RESTART from (X,F) history
+     dtset%dtion = 100  ! Delta Time for IONs
+     dtset%ionmov = 13  ! Number for the dynamic
+     dtset%ntime = inp%fit_boundStep  ! Number of TIME steps 
+     dtset%optcell = 2    ! OPTimize the CELL shape and dimensions Characteristic 
+     dtset%mdtemp(1) = inp%fit_boundTemp   !Molecular Dynamics Temperatures 
+     dtset%mdtemp(2) = inp%fit_boundTemp !Molecular Dynamics Temperatures 
+     dtset%strtarget(1:6) = zero
+   end if
+   
 !  Set the barostat and thermonstat if ionmov == 13
    if(dtset%ionmov == 13)then
-
+       
 !    Select frequency of the barostat as a function of temperature
 !    For small temperature, we need huge barostat and inversely
      if(dtset%mdtemp(1) <= 10) then
@@ -290,7 +315,7 @@ implicit none
        freq_b = 0.02
      end if
 
-!TEST_AM
+     !TEST_AM
      freq_q = 0.1
      freq_b = 0.01
 !TEST_AM
@@ -303,8 +328,8 @@ implicit none
        ABI_ALLOCATE(dtset%qmass,(dtset%nnos))
        dtset%qmass(:)  = qmass
        write(message,'(3a,F20.1,a)')&
-&       ' WARNING: nnos is set to zero in the input',ch10,&
-&       '          value by default for qmass: ',dtset%qmass(:),ch10
+&         ' WARNING: nnos is set to zero in the input',ch10,&
+&         '          value by default for qmass: ',dtset%qmass(:),ch10
        if(verbose)call wrtout(std_out,message,"COLL")
      else
        ABI_ALLOCATE(dtset%qmass,(dtset%nnos)) ! Q thermostat mass
@@ -313,22 +338,14 @@ implicit none
      if (inp%bmass == zero) then
        dtset%bmass = bmass
        write(message,'(3a,F20.4,a)')&
-&       ' WARNING: bmass is set to zero in the input',ch10,&
-&       '          value by default for bmass: ',dtset%bmass,ch10
+&         ' WARNING: bmass is set to zero in the input',ch10,&
+&         '          value by default for bmass: ',dtset%bmass,ch10
        if(verbose)call wrtout(std_out,message,"COLL")
      else
        dtset%bmass = inp%bmass  ! Barostat mass
      end if
    end if
    
-   ABI_ALLOCATE(symrel,(3,3,dtset%nsym))
-   symrel = 1
-   call alloc_copy(symrel,dtset%symrel)
-   ABI_ALLOCATE(tnons,(3,dtset%nsym))
-   tnons = zero
-   call alloc_copy(tnons,dtset%tnons)
-   call alloc_copy(effective_potential%supercell%typat,dtset%typat)
-   call alloc_copy(effective_potential%crystal%znucl,dtset%znucl)   
 
 !  set psps 
    psps%useylm = dtset%useylm
@@ -362,7 +379,7 @@ implicit none
    nullify (electronpositron)
    ABI_ALLOCATE(rhog,(2,1))
    ABI_ALLOCATE(rhor,(2,1))
-   
+
 !  Initialize xf history (should be put in inwffil)
 !  Not yet implemented for ionmov 2 3 10 11 22 (memory problem...)
 !  ab_xfh%mxfh=(ab_xfh%nxfh-dtset%restartxf+1)+dtset%ntime+5 
@@ -371,8 +388,8 @@ implicit none
    ABI_ALLOCATE(ab_xfh%xfhist,(3,dtset%natom+4,2,ab_xfh%mxfh))
    if (any((/2,3,10,11,22/)==dtset%ionmov)) then
      write(message, '(3a)' )&
-&     ' This dynamics can not be used with effective potential',ch10,&
-&     'Action: correct dynamics input'
+&       ' This dynamics can not be used with effective potential',ch10,&
+&       'Action: correct dynamics input'
      MSG_BUG(message)
    end if
 
@@ -380,6 +397,9 @@ implicit none
 !2  initialization of the structure for the dynamics
 !***************************************************************
 
+   if (allocated(dtset%rprim_orig)) then
+     ABI_DEALLOCATE(dtset%rprim_orig)
+   end if
    ABI_ALLOCATE(dtset%rprimd_orig,(3,3,1))
    dtset%rprimd_orig(:,:,1) = effective_potential%supercell%rprimd
    
@@ -627,7 +647,7 @@ implicit none
          ABI_DEALLOCATE(list_bound)
          ABI_DEALLOCATE(isPositive)
          
-!       Exit if the model is bounded
+!        Exit if the model is bounded
          if(effective_potential%anharmonics_terms%bounded) then
 !         Final transfert
            write(message, '(3a)' ) ch10,' => The model is now bounded'
@@ -697,18 +717,18 @@ implicit none
 
      end if
      
-!   else  if (option == -2) then
+   else  if (option == -2) then
 !*************************************************************
 !   Call the routine for calculation of the energy for specific 
 !   partern of displacement or strain for the effective 
 !   Hamiltonian
 !*************************************************************
-!      write(message, '((80a),4a)' ) ('-',ii=1,80), ch10,&
-! &     ' Effective Hamiltonian calculation'
-!      call wrtout(ab_out,message,'COLL')
-!      call wrtout(std_out,message,'COLL')
+     write(message, '((80a),4a)' ) ('-',ii=1,80), ch10,&
+&     ' Effective Hamiltonian calculation'
+     call wrtout(ab_out,message,'COLL')
+     call wrtout(std_out,message,'COLL')
 
-!      call scfcv_run(scfcv_args,electronpositron,rhog,rhor,rprimd,xred,xred_old,conv_retcode)
+     call scfcv_run(scfcv_args,electronpositron,rhog,rhor,rprimd,xred,xred_old,conv_retcode)
    
    end if
 
@@ -722,13 +742,12 @@ implicit none
    ABI_DEALLOCATE(indsym)
    ABI_DEALLOCATE(rhog)
    ABI_DEALLOCATE(rhor)
-   ABI_DEALLOCATE(symrel)
-   ABI_DEALLOCATE(tnons)
    ABI_DEALLOCATE(vel)
    ABI_DEALLOCATE(xred)
    ABI_DEALLOCATE(xred_old)
    ABI_DEALLOCATE(ab_xfh%xfhist)
 
+   
    call dtset_free(dtset)
    call destroy_results_gs(results_gs)
    call scfcv_destroy(scfcv_args)
