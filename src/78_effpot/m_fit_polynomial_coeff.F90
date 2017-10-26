@@ -2141,7 +2141,6 @@ subroutine fit_polynomial_printSystemFiles(eff_pot,hist)
 end subroutine fit_polynomial_printSystemFiles
 !!***
 
-!!      polynomial_coeff_init,polynomial_term_free,polynomial_term_init,wrtout
 recursive subroutine genereList(i,m,m_max,n_max,list,list_out,size)
 
 
