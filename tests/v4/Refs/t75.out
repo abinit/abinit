@@ -426,6 +426,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      72.500      72.452
  Computing the ddk (Berry phase) for reciprocal vector:
   0.50000  0.00000  0.00000 (in reduced coordinates)
  -0.04710  0.04710  0.04710 (in cartesian coordinates - atomic units)
+ Mean square residual over all n,k,spin=   0.0000E+00; max=  0.0000E+00
 
  Summary of the results
  Electronic Berry phase     1.536759194E-02
@@ -436,7 +437,6 @@ _setup2: Arith. and geom. avg. npw (full set) are      72.500      72.452
            Polarization    -1.505234608E-02 (a.u. of charge)/bohr^2
            Polarization    -8.612163907E-01 C/m^2
 
- Mean square residual over all n,k,spin=   0.0000E+00; max=  0.0000E+00
 
  Computing the polarization (Berry phase) for reciprocal vector:
   0.00000  0.50000  0.00000 (in reduced coordinates)
@@ -447,6 +447,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      72.500      72.452
  Computing the ddk (Berry phase) for reciprocal vector:
   0.00000  0.50000  0.00000 (in reduced coordinates)
   0.04710 -0.04710  0.04710 (in cartesian coordinates - atomic units)
+ Mean square residual over all n,k,spin=   0.0000E+00; max=  0.0000E+00
 
  Summary of the results
  Electronic Berry phase     1.536759194E-02
@@ -457,7 +458,6 @@ _setup2: Arith. and geom. avg. npw (full set) are      72.500      72.452
            Polarization    -1.505234608E-02 (a.u. of charge)/bohr^2
            Polarization    -8.612163907E-01 C/m^2
 
- Mean square residual over all n,k,spin=   0.0000E+00; max=  0.0000E+00
 
  Computing the polarization (Berry phase) for reciprocal vector:
   0.00000  0.00000  0.50000 (in reduced coordinates)
@@ -468,6 +468,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      72.500      72.452
  Computing the ddk (Berry phase) for reciprocal vector:
   0.00000  0.00000  0.50000 (in reduced coordinates)
   0.04710  0.04710 -0.04710 (in cartesian coordinates - atomic units)
+ Mean square residual over all n,k,spin=   0.0000E+00; max=  0.0000E+00
 
  Summary of the results
  Electronic Berry phase     1.536759194E-02
@@ -478,7 +479,6 @@ _setup2: Arith. and geom. avg. npw (full set) are      72.500      72.452
            Polarization    -1.505234608E-02 (a.u. of charge)/bohr^2
            Polarization    -8.612163907E-01 C/m^2
 
- Mean square residual over all n,k,spin=   0.0000E+00; max=  0.0000E+00
 
  Polarization in cartesian coordinates (a.u.):
  (the sum of the electronic and ionic Berry phase has been folded into [-1, 1])
@@ -601,7 +601,6 @@ _setup2: Arith. and geom. avg. npw (full set) are      72.500      72.452
 -inwffil : will read wavefunctions from disk file t75o_DS2_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t75o_DS2_WFK
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -662,7 +661,6 @@ _setup2: Arith. and geom. avg. npw (full set) are      72.500      72.452
 -inwffil : will read wavefunctions from disk file t75o_DS2_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t75o_DS2_WFK
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -722,7 +720,6 @@ _setup2: Arith. and geom. avg. npw (full set) are      72.500      72.452
 -inwffil : will read wavefunctions from disk file t75o_DS2_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t75o_DS2_WFK
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 -dfpt_looppert : read the ddk wavefunctions from file: t75o_DS2_1WF7
@@ -776,7 +773,6 @@ _setup2: Arith. and geom. avg. npw (full set) are      72.500      72.452
 -inwffil : will read wavefunctions from disk file t75o_DS2_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t75o_DS2_WFK
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -838,7 +834,6 @@ _setup2: Arith. and geom. avg. npw (full set) are      72.500      72.452
 -inwffil : will read wavefunctions from disk file t75o_DS2_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t75o_DS2_WFK
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -900,7 +895,6 @@ _setup2: Arith. and geom. avg. npw (full set) are      72.500      72.452
 -inwffil : will read wavefunctions from disk file t75o_DS2_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t75o_DS2_WFK
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -962,7 +956,6 @@ _setup2: Arith. and geom. avg. npw (full set) are      72.500      72.452
 -inwffil : will read wavefunctions from disk file t75o_DS2_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t75o_DS2_WFK
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -1024,7 +1017,6 @@ _setup2: Arith. and geom. avg. npw (full set) are      72.500      72.452
 -inwffil : will read wavefunctions from disk file t75o_DS2_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t75o_DS2_WFK
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -1086,7 +1078,6 @@ _setup2: Arith. and geom. avg. npw (full set) are      72.500      72.452
 -inwffil : will read wavefunctions from disk file t75o_DS2_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t75o_DS2_WFK
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
