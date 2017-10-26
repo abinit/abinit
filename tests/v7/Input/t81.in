@@ -1,4 +1,4 @@
-# Test for the calculation of effective mass tensor in Ge.
+# Test for the calculation of effective mass tensor in Si.
 # Tensor is calculated for the first valence band 
 # (which is nondegenerate) at \Gamma.
 
