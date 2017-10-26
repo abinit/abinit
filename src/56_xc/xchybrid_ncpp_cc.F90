@@ -45,6 +45,9 @@
 !!   Vxc=Vx[rho_core+rho_val] - alpha*Vx[rho_val] + Vc[rho_core+rho_val]
 !!  To accomodate libXC convention, Vxc is computed as follows:
 !!   Vxc=Vxc_libXC[rho_val] + Vxc_gga[rho_core+rho_val] - Vxc_gga[rho_val]
+!!  Note that this is equivalent to
+!!   Vxc=Vx_libXC[rho_val] + Vxc_gga[rho_core+rho_val] - Vx_gga[rho_val]
+!!  but needs one less call to libxc
 !!
 !! PARENTS
 !!      forces,forstr,rhotov,setvtr

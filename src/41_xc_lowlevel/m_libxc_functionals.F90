@@ -31,7 +31,7 @@
 !!    !!!!! >>>> Compute XC stuff here.
 !!    !!!!! if (new_ixc<0) call libxc_functionals_end()
 !!    !!!!! if (old_ixc<0) call libxc_functionals_init(old_ixc,nspden)
-!!  * It is also to define a local (private) variable of type libxc_functional_type.
+!!  * It is also possible to define a local (private) variable of type libxc_functional_type.
 !!    For that, the different methods have to be called with an extra optional
 !!    argument (called xc_funcs in this example):
 !!    !!!!! call libxc_functionals_init(ixc,nspden,xc_funcs)
@@ -1789,6 +1789,16 @@ function libxc_functionals_gga_from_hybrid(gga_id,hybrid_id,xc_functionals)
 
  c_name="unknown" ; x_name="unknown"
 
+!Specific treatment of the B3LYP functional, whose GGA counterpart does not exist in LibXC
+ if(trial_id(1)==-402)then
+   libxc_functionals_gga_from_hybrid=.true.
+   if (present(gga_id)) then
+     gga_id(1)=0
+     gga_id(2)=1402
+   endif
+   return
+ endif
+
  do ii = 1, 2
 
    if (trial_id(ii)==0) cycle
@@ -1821,6 +1831,7 @@ function libxc_functionals_gga_from_hybrid(gga_id,hybrid_id,xc_functionals)
      x_name="GGA_X_PBE"
      libxc_functionals_gga_from_hybrid=.true.
    end if
+
 
 #endif
 
