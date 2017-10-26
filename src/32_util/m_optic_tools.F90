@@ -474,7 +474,7 @@ integer, intent(in) :: nmesh
 real(dp), intent(in) :: de
 real(dp), intent(in) :: sc
 real(dp), intent(in) :: brod
-character(256), intent(in) :: fnam
+character(len=*), intent(in) :: fnam
 integer, intent(in) :: comm
 complex(dpc), allocatable, intent(out) :: eps(:)
 real(dp), allocatable, intent(out) :: wmesh(:)
@@ -500,7 +500,7 @@ real(dp) :: renorm_factor,emin,emax
 real(dp) :: ene
 complex(dpc) :: b11,b12
 complex(dpc) :: ieta,w
-character(256) :: fnam1
+character(len=fnlen) :: fnam1
 character(len=500) :: msg
 ! local allocatable arrays
 real(dp) :: s(3,3),sym(3,3)
@@ -779,6 +779,8 @@ end subroutine linopt
 !! Compute optical frequency dependent second harmonic generation susceptibility for semiconductors
 !!
 !! INPUTS
+!!  icomp=Sequential index associated to computed tensor components (used for netcdf output)
+!!  itemp=Temperature index (used for netcdf output)
 !!  nspin = number of spins(integer)
 !!  omega = crystal volume in au (real)
 !!  nkpt  = total number of kpoints (integer)
@@ -820,7 +822,7 @@ end subroutine linopt
 !!
 !! SOURCE
 
-subroutine nlinopt(nspin,omega,nkpt,wkpt,nsymcrys,symcrys,nstval,evalv,efermi, &
+subroutine nlinopt(icomp,itemp,nspin,omega,nkpt,wkpt,nsymcrys,symcrys,nstval,evalv,efermi, &
   pmat,v1,v2,v3,nmesh,de,sc,brod,tol,fnam,ncid,comm)
 
 !This section has been created automatically by the script Abilint (TD).
@@ -833,7 +835,7 @@ subroutine nlinopt(nspin,omega,nkpt,wkpt,nsymcrys,symcrys,nstval,evalv,efermi, &
 
 !Arguments ------------------------------------
 !no_abirules
-integer, intent(in) :: nspin, ncid
+integer, intent(in) :: icomp,itemp,nspin, ncid
 real(dp), intent(in) :: omega
 integer, intent(in) :: nkpt
 real(dp), intent(in) :: wkpt(nkpt)
@@ -852,7 +854,7 @@ real(dp), intent(in) :: de
 real(dp), intent(in) :: sc
 real(dp), intent(in) :: brod
 real(dp), intent(in) :: tol
-character(256), intent(in) :: fnam
+character(len=*), intent(in) :: fnam
 
 !Local variables -------------------------
 integer :: iw
@@ -862,7 +864,7 @@ integer :: ist1,ist2,istl,istn,istm
 integer,parameter :: master=0
 integer :: my_rank, nproc
 integer :: my_k1, my_k2
-integer :: ierr, itemp
+integer :: ierr
 integer :: fout1,fout2,fout3,fout4,fout5,fout6,fout7
 real(dp) :: f1,f2,f3
 real(dp) :: ha2ev
@@ -878,10 +880,10 @@ complex(dpc) :: b111,b121,b131,b112,b122,b132,b113,b123,b133
 complex(dpc) :: b241,b242,b243,b221,b222,b223,b211,b212,b213,b231
 complex(dpc) :: b311,b312,b313,b331
 complex(dpc) :: b24,b21_22,b11,b12_13,b31_32
-character(256) :: fnam1,fnam2,fnam3,fnam4,fnam5,fnam6,fnam7
+character(len=fnlen) :: fnam1,fnam2,fnam3,fnam4,fnam5,fnam6,fnam7
 character(500) :: msg
 ! local allocatable arrays
-integer :: start(6),count(6)
+integer :: start4(4),count4(4)
 real(dp) :: s(3,3),sym(3,3,3)
 complex(dpc), allocatable :: px(:,:,:,:,:)
 complex(dpc), allocatable :: py(:,:,:,:,:)
@@ -1037,12 +1039,12 @@ complex(dpc), allocatable :: intra1wS(:),chi2tot(:)
 
  my_emin=HUGE(0._dp)
  my_emax=-HUGE(0._dp)
-!start loop over kpts
+! loop over kpts
  do ik=my_k1,my_k2
    write(std_out,*) "P-",my_rank,": ",ik,'of',nkpt
-!  start loop over spins
+! loop over spins
    do isp=1,nspin
-!    start loop over states
+!  loop over states
      do ist1=1,nstval
        e1=evalv(ist1,ik,isp)
        if (e1.lt.efermi) then   ! ist1 is a valence state
@@ -1374,20 +1376,18 @@ complex(dpc), allocatable :: intra1wS(:),chi2tot(:)
  if (my_rank == master) then
    ! write output in SI units and esu (esu to SI(m/v)=(value_esu)*(4xpi)/30000)
 
-   itemp = 1
    if (ncid /= nctk_noid) then
-     start = [1, 1, v1, v2, v3, itemp]
-     count = [2, nmesh, 1, 1, 1, 1]
+     start4 = [1, 1, icomp, itemp]
+     count4 = [2, nmesh, 1, 1]
      ABI_MALLOC(chi2tot, (nmesh))
      chi2tot = inter2w + inter1w + intra2w + intra1w + intra1wS
 #ifdef HAVE_NETCDF
-     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "shg_inter2w"), c2r(inter2w), start=start, count=count))
-     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "shg_inter1w"), c2r(inter1w), start=start, count=count))
-     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "shg_intra2w"), c2r(intra2w), start=start, count=count))
-     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "shg_intra1w"), c2r(intra1w), start=start, count=count))
-     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "shg_intra1wS"), c2r(intra1wS), start=start, count=count))
-     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "shg_chi2tot"), c2r(chi2tot), start=start, count=count))
-     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "shg_mask"), 1, start=[v1, v2, v3]))
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "shg_inter2w"), c2r(inter2w), start=start4, count=count4))
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "shg_inter1w"), c2r(inter1w), start=start4, count=count4))
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "shg_intra2w"), c2r(intra2w), start=start4, count=count4))
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "shg_intra1w"), c2r(intra1w), start=start4, count=count4))
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "shg_intra1wS"), c2r(intra1wS), start=start4, count=count4))
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "shg_chi2tot"), c2r(chi2tot), start=start4, count=count4))
 #endif
      ABI_FREE(chi2tot)
    end if
@@ -1561,6 +1561,8 @@ end subroutine nlinopt
 !! Compute optical frequency dependent linear electro-optic susceptibility for semiconductors
 !!
 !! INPUTS
+!!  icomp=Sequential index associated to computed tensor components (used for netcdf output)
+!!  itemp=Temperature index (used for netcdf output)
 !!  nspin = number of spins(integer)
 !!  omega = crystal volume in au (real)
 !!  nkpt  = total number of kpoints (integer)
@@ -1608,7 +1610,7 @@ end subroutine nlinopt
 !!
 !! SOURCE
 
-subroutine linelop(nspin,omega,nkpt,wkpt,nsymcrys,symcrys,nstval,evalv,occv,efermi, &
+subroutine linelop(icomp,itemp,nspin,omega,nkpt,wkpt,nsymcrys,symcrys,nstval,evalv,occv,efermi, &
   pmat,v1,v2,v3,nmesh,de,sc,brod,tol,fnam,do_antiresonant,ncid,comm)
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1621,7 +1623,7 @@ subroutine linelop(nspin,omega,nkpt,wkpt,nsymcrys,symcrys,nstval,evalv,occv,efer
 
 !Arguments ------------------------------------
 !no_abirules
-integer, intent(in) :: nspin, ncid
+integer, intent(in) :: icomp,itemp,nspin, ncid
 real(dp), intent(in) :: omega
 integer, intent(in) :: nkpt
 real(dp), intent(in) :: wkpt(nkpt)
@@ -1641,7 +1643,7 @@ real(dp), intent(in) :: de
 real(dp), intent(in) :: sc
 real(dp), intent(in) :: brod
 real(dp), intent(in) :: tol
-character(256), intent(in) :: fnam
+character(len=*), intent(in) :: fnam
 logical, intent(in) :: do_antiresonant
 
 !Local variables -------------------------
@@ -1650,7 +1652,7 @@ logical, intent(in) :: do_antiresonant
 integer :: iw
 integer :: i,j,k,lx,ly,lz
 integer :: isp,isym,ik
-integer :: ist1,istl,istn,istm,itemp
+integer :: ist1,istl,istn,istm
 real(dp) :: ha2ev
 real(dp) :: t1,t2,t3,tst
 real(dp) :: ene,totre,totabs,totim
@@ -1659,12 +1661,11 @@ real(dp) :: emin,emax,my_emin,my_emax
 real(dp) :: const_esu,const_au,au2esu
 real(dp) :: wmn,wnm,wln,wnl,wml,wlm
 complex(dpc) :: idel,w,zi
-character(256) :: fnam1,fnam2,fnam3,fnam4,fnam5
+character(len=fnlen) :: fnam1,fnam2,fnam3,fnam4,fnam5
 ! local allocatable arrays
 real(dp), allocatable :: s(:,:)
 real(dp), allocatable :: sym(:,:,:)
-integer :: start(6),count(6)
-
+integer :: start4(4),count4(4)
 ! DBYG
  integer :: istp
  real(dp) :: ep, wmp, wpn
@@ -1837,10 +1838,10 @@ integer :: start(6),count(6)
  ! Split work
  call xmpi_split_work(nkpt,comm,my_k1,my_k2,msg,ierr)
 
-!start loop over kpts
+! loop over kpts
  do ik=my_k1,my_k2
    write(std_out,*) "P-",my_rank,": ",ik,'of',nkpt
-!  start loop over spins
+!  loop over spins
    do isp=1,nspin
 !    Calculate the scissor corrected energies and the energy window
      do ist1=1,nstval
@@ -1991,18 +1992,16 @@ integer :: start(6),count(6)
 
  if (my_rank == master) then
 
-   itemp = 1
    if (ncid /= nctk_noid) then
-     start = [1, 1, v1, v2, v3, itemp]
-     count = [2, nmesh, 1, 1, 1, 1]
+     start4 = [1, 1, icomp, itemp]
+     count4 = [2, nmesh, 1, 1]
      ABI_MALLOC(chi2tot, (nmesh))
      chi2tot = chi + eta + sigma
 #ifdef HAVE_NETCDF
-     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "leo_chi"), c2r(chi), start=start, count=count))
-     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "leo_eta"), c2r(eta), start=start, count=count))
-     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "leo_sigma"), c2r(sigma), start=start, count=count))
-     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "leo_chi2tot"), c2r(chi2tot), start=start, count=count))
-     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "leo_mask"), 1, start=[v1, v2, v3]))
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "leo_chi"), c2r(chi), start=start4, count=count4))
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "leo_eta"), c2r(eta), start=start4, count=count4))
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "leo_sigma"), c2r(sigma), start=start4, count=count4))
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "leo_chi2tot"), c2r(chi2tot), start=start4, count=count4))
 #endif
      ABI_FREE(chi2tot)
    end if
@@ -2143,6 +2142,8 @@ end subroutine linelop
 !! Compute optical frequency dependent linear electro-optic susceptibility for semiconductors
 !!
 !! INPUTS
+!!  icomp=Sequential index associated to computed tensor components (used for netcdf output)
+!!  itemp=Temperature index (used for netcdf output)
 !!  nspin = number of spins(integer)
 !!  omega = crystal volume in au (real)
 !!  nkpt  = total number of kpoints (integer)
@@ -2190,7 +2191,7 @@ end subroutine linelop
 !!
 !! SOURCE
 
-subroutine nonlinopt(nspin,omega,nkpt,wkpt,nsymcrys,symcrys,nstval,evalv,occv,efermi, &
+subroutine nonlinopt(icomp,itemp,nspin,omega,nkpt,wkpt,nsymcrys,symcrys,nstval,evalv,occv,efermi, &
   pmat,v1,v2,v3,nmesh,de,sc,brod,tol,fnam,do_antiresonant,ncid,comm)
 
 !This section has been created automatically by the script Abilint (TD).
@@ -2203,7 +2204,7 @@ subroutine nonlinopt(nspin,omega,nkpt,wkpt,nsymcrys,symcrys,nstval,evalv,occv,ef
 
 !Arguments ------------------------------------
 !no_abirules
-integer, intent(in) :: nspin, ncid
+integer, intent(in) :: icomp,itemp,nspin, ncid
 real(dp), intent(in) :: omega
 integer, intent(in) :: nkpt
 real(dp), intent(in) :: wkpt(nkpt)
@@ -2223,13 +2224,13 @@ real(dp), intent(in) :: de
 real(dp), intent(in) :: sc
 real(dp), intent(in) :: brod
 real(dp), intent(in) :: tol
-character(256), intent(in) :: fnam
+character(len=*), intent(in) :: fnam
 logical, intent(in) :: do_antiresonant
 
 !Local variables -------------------------
 integer :: iw
 integer :: i,j,k,lx,ly,lz
-integer :: isp,isym,ik,itemp
+integer :: isp,isym,ik
 integer :: ist1,istl,istn,istm
 real(dp) :: ha2ev
 real(dp) :: t1,t2,t3,tst
@@ -2239,9 +2240,9 @@ real(dp) :: emin,emax, my_emin,my_emax
 real(dp) :: const_esu,const_au,au2esu
 real(dp) :: wmn,wnm,wln,wnl,wml,wlm
 complex(dpc) :: idel,w,zi
-character(256) :: fnam1,fnam2,fnam3,fnam4,fnam5,fnam6,fnam7
+character(len=fnlen) :: fnam1,fnam2,fnam3,fnam4,fnam5,fnam6,fnam7
 ! local allocatable arrays
-integer :: start(6),count(6)
+ integer :: start4(4),count4(4)
  real(dp) :: s(3,3),sym(3,3,3)
  integer :: istp
  real(dp) :: ep, wmp, wpn
@@ -2421,7 +2422,7 @@ integer :: start(6),count(6)
  ! Split work
  call xmpi_split_work(nkpt,comm,my_k1,my_k2,msg,ierr)
 
-!start loop over kpts
+! loop over kpts
  do ik=my_k1,my_k2
    write(std_out,*) "P-",my_rank,": ",ik,'of',nkpt
    do isp=1,nspin
@@ -2600,20 +2601,18 @@ integer :: start(6),count(6)
  ! Master writes the output
  if (my_rank == master) then
 
-   itemp = 1
    if (ncid /= nctk_noid) then
-     start = [1, 1, v1, v2, v3, itemp]
-     count = [2, nmesh, 1, 1, 1, 1]
+     start4 = [1, 1, icomp, itemp]
+     count4 = [2, nmesh, 1, 1]
      ABI_MALLOC(chi2tot, (nmesh))
      chi2tot = chiw + chi2w + etaw + eta2w + sigmaw
 #ifdef HAVE_NETCDF
-     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "leo2_chi2tot"), c2r(chi2tot), start=start, count=count))
-     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "leo2_chiw"), c2r(chiw), start=start, count=count))
-     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "leo2_etaw"), c2r(etaw), start=start, count=count))
-     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "leo2_chi2w"), c2r(chi2w), start=start, count=count))
-     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "leo2_eta2w"), c2r(eta2w), start=start, count=count))
-     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "leo2_sigmaw"), c2r(sigmaw), start=start, count=count))
-     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "leo2_mask"), 1, start=[v1, v2, v3]))
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "leo2_chi2tot"), c2r(chi2tot), start=start4, count=count4))
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "leo2_chiw"), c2r(chiw), start=start4, count=count4))
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "leo2_etaw"), c2r(etaw), start=start4, count=count4))
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "leo2_chi2w"), c2r(chi2w), start=start4, count=count4))
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "leo2_eta2w"), c2r(eta2w), start=start4, count=count4))
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "leo2_sigmaw"), c2r(sigmaw), start=start4, count=count4))
 #endif
      ABI_FREE(chi2tot)
    end if

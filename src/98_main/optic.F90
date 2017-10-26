@@ -98,11 +98,11 @@ program optic
  use netcdf
 #endif
 
- use m_time ,       only : asctime
- use m_io_tools,    only : flush_unit, open_file, file_exists, get_unit
- use m_numeric_tools, only : c2r
- use m_fstrings,    only : int2char4, itoa, sjoin, strcat, endswith
- use m_crystal_io,  only : crystal_ncwrite
+ use m_time ,          only : asctime
+ use m_io_tools,       only : flush_unit, open_file, file_exists, get_unit
+ use m_numeric_tools,  only : c2r
+ use m_fstrings,       only : int2char4, itoa, sjoin, strcat, endswith
+ use m_crystal_io,     only : crystal_ncwrite
  !use m_specialmsg,only : specialmsg_getcount
 
 !This section has been created automatically by the script Abilint (TD).
@@ -137,7 +137,6 @@ program optic
  integer :: autoparal=0,max_ncpus=0
  integer :: nonlin_comp(27) = 0, linel_comp(27) = 0, nonlin2_comp(27) = 0
  integer :: lin_comp(9) = [11, 22 ,33, 12, 13, 21, 23, 31, 32]
- integer :: idummy33(3,3),idummy333(3,3,3)
  real(dp) :: domega,ecut,fermie, eff
  real(dp) :: broadening,ucvol,maxomega,scissor,tolerance,tphysel
  real(dp) :: tcpu,tcpui,twall,twalli,nelect
@@ -173,7 +172,7 @@ program optic
  character(len=24) :: start_datetime
  character(len=500) :: msg
  character(len=fnlen) :: ep_nc_fname
- type(wfk_t) :: wfk0 !,wfk1,wfk2,wfk3
+ type(wfk_t) :: wfk0
  type(wfk_t) :: wfks(0:3)
 
  ! Input file
@@ -538,7 +537,7 @@ program optic
 
 #ifdef HAVE_NETCDF
    ! Open netcdf file that will contain output results (only master is supposed to write)
-   NCF_CHECK_MSG(nctk_open_create(optic_ncid, strcat(prefix, "_optic.nc"), xmpi_comm_self), "Creating optic.nc")
+   NCF_CHECK_MSG(nctk_open_create(optic_ncid, strcat(prefix, "_OPTIC.nc"), xmpi_comm_self), "Creating _OPTIC.nc")
 
    ! Add header, crystal, and ks_ebands
    ! Note that we write the KS bands without EPH interaction (if any).
@@ -547,13 +546,9 @@ program optic
    NCF_CHECK(ebands_ncwrite(ks_ebands, optic_ncid))
 
    ! Add optic input variables.
-   ncerr = nctk_def_dims(optic_ncid, [ &
-     nctkdim_t("ntemp", ep_ntemp), nctkdim_t("nomega", nomega) &
-   ], defmode=.True.)
-   NCF_CHECK(ncerr)
+   NCF_CHECK(nctk_def_dims(optic_ncid, [nctkdim_t("ntemp", ep_ntemp), nctkdim_t("nomega", nomega)], defmode=.True.))
 
-   ncerr = nctk_def_iscalars(optic_ncid, [character(len=nctk_slen) :: &
-     "do_antiresonant", "do_ep_renorm"])
+   ncerr = nctk_def_iscalars(optic_ncid, [character(len=nctk_slen) :: "do_antiresonant", "do_ep_renorm"])
    NCF_CHECK(ncerr)
    ncerr = nctk_def_dpscalars(optic_ncid, [character(len=nctk_slen) :: &
      "broadening", "domega", "maxomega", "scissor", "tolerance"])
@@ -561,64 +556,77 @@ program optic
 
    ! Define arrays containing output results
    ncerr = nctk_def_arrays(optic_ncid, [ &
-     nctkarr_t('wmesh', "dp", "nomega"), &
-     nctkarr_t('linopt_mask', "int", "three, three"), &
-     nctkarr_t('shg_mask', "int", "three, three, three"), &
-     nctkarr_t('leo_mask', "int", "three, three, three"), &
-     nctkarr_t('leo2_mask', "int", "three, three, three") &
+     nctkarr_t('wmesh', "dp", "nomega") &
    ])
    NCF_CHECK(ncerr)
 
    if (num_lin_comp > 0) then
      ! Linear optic results.
-     ncerr = nctk_def_arrays(optic_ncid, nctkarr_t('linopt_epsilon', "dp", "two, nomega, three, three, ntemp"))
+     NCF_CHECK(nctk_def_dims(optic_ncid, nctkdim_t("linopt_ncomp", num_lin_comp)))
+     ncerr = nctk_def_arrays(optic_ncid, [ &
+        nctkarr_t('linopt_components', "int", "linopt_ncomp"), &
+        nctkarr_t('linopt_epsilon', "dp", "two, nomega, linopt_ncomp, ntemp") &
+     ])
      NCF_CHECK(ncerr)
    end if
 
    if (num_nonlin_comp > 0) then
-     ! second harmonic generation.
+     ! Second harmonic generation.
+     NCF_CHECK(nctk_def_dims(optic_ncid, nctkdim_t("shg_ncomp", num_nonlin_comp)))
      ncerr = nctk_def_arrays(optic_ncid, [ &
-       nctkarr_t('shg_inter2w', "dp", "two, nomega, three, three, three, ntemp"), &
-       nctkarr_t('shg_inter1w', "dp", "two, nomega, three, three, three, ntemp"), &
-       nctkarr_t('shg_intra2w', "dp", "two, nomega, three, three, three, ntemp"), &
-       nctkarr_t('shg_intra1w', "dp", "two, nomega, three, three, three, ntemp"), &
-       nctkarr_t('shg_intra1wS', "dp", "two, nomega, three, three, three, ntemp"), &
-       nctkarr_t('shg_chi2tot', "dp", "two, nomega, three, three, three, ntemp") &
+       nctkarr_t('shg_components', "int", "shg_ncomp"), &
+       nctkarr_t('shg_inter2w', "dp", "two, nomega, shg_ncomp, ntemp"), &
+       nctkarr_t('shg_inter1w', "dp", "two, nomega, shg_ncomp, ntemp"), &
+       nctkarr_t('shg_intra2w', "dp", "two, nomega, shg_ncomp, ntemp"), &
+       nctkarr_t('shg_intra1w', "dp", "two, nomega, shg_ncomp, ntemp"), &
+       nctkarr_t('shg_intra1wS', "dp", "two, nomega, shg_ncomp, ntemp"), &
+       nctkarr_t('shg_chi2tot', "dp", "two, nomega, shg_ncomp, ntemp") &
      ])
      NCF_CHECK(ncerr)
    end if
 
    if (num_linel_comp > 0) then
      ! linear electro-optic (LEO) susceptibility
+     NCF_CHECK(nctk_def_dims(optic_ncid, nctkdim_t("leo_ncomp", num_linel_comp)))
      ncerr = nctk_def_arrays(optic_ncid, [ &
-       nctkarr_t('leo_chi', "dp", "two, nomega, three, three, three, ntemp"), &
-       nctkarr_t('leo_eta', "dp", "two, nomega, three, three, three, ntemp"), &
-       nctkarr_t('leo_sigma', "dp", "two, nomega, three, three, three, ntemp"), &
-       nctkarr_t('leo_chi2tot', "dp", "two, nomega, three, three, three, ntemp") &
+       nctkarr_t('leo_components', "int", "leo_ncomp"), &
+       nctkarr_t('leo_chi', "dp", "two, nomega, leo_ncomp, ntemp"), &
+       nctkarr_t('leo_eta', "dp", "two, nomega, leo_ncomp, ntemp"), &
+       nctkarr_t('leo_sigma', "dp", "two, nomega, leo_ncomp, ntemp"), &
+       nctkarr_t('leo_chi2tot', "dp", "two, nomega, leo_ncomp, ntemp") &
      ])
      NCF_CHECK(ncerr)
    end if
 
    if (num_nonlin2_comp > 0) then
      ! non-linear electro-optic susceptibility
+     NCF_CHECK(nctk_def_dims(optic_ncid, nctkdim_t("leo2_ncomp", num_nonlin2_comp)))
      ncerr = nctk_def_arrays(optic_ncid, [ &
-       nctkarr_t('leo2_chiw', "dp", "two, nomega, three, three, three, ntemp"), &
-       nctkarr_t('leo2_etaw', "dp", "two, nomega, three, three, three, ntemp"), &
-       nctkarr_t('leo2_chi2w', "dp", "two, nomega, three, three, three, ntemp"), &
-       nctkarr_t('leo2_eta2w', "dp", "two, nomega, three, three, three, ntemp"), &
-       nctkarr_t('leo2_sigmaw', "dp", "two, nomega, three, three, three, ntemp"), &
-       nctkarr_t('leo2_chi2tot', "dp", "two, nomega, three, three, three, ntemp") &
+       nctkarr_t('leo2_components', "int", "leo2_ncomp"), &
+       nctkarr_t('leo2_chiw', "dp", "two, nomega, leo2_ncomp, ntemp"), &
+       nctkarr_t('leo2_etaw', "dp", "two, nomega, leo2_ncomp, ntemp"), &
+       nctkarr_t('leo2_chi2w', "dp", "two, nomega, leo2_ncomp, ntemp"), &
+       nctkarr_t('leo2_eta2w', "dp", "two, nomega, leo2_ncomp, ntemp"), &
+       nctkarr_t('leo2_sigmaw', "dp", "two, nomega, leo2_ncomp, ntemp"), &
+       nctkarr_t('leo2_chi2tot', "dp", "two, nomega, leo2_ncomp, ntemp") &
      ])
      NCF_CHECK(ncerr)
    end if
 
    NCF_CHECK(nctk_set_datamode(optic_ncid))
-   ! Init all masks with zeros.
-   idummy33 = 0; idummy333 = 0
-   NCF_CHECK(nf90_put_var(optic_ncid, nctk_idname(optic_ncid, "linopt_mask"), idummy33))
-   NCF_CHECK(nf90_put_var(optic_ncid, nctk_idname(optic_ncid, "shg_mask"), idummy333))
-   NCF_CHECK(nf90_put_var(optic_ncid, nctk_idname(optic_ncid, "leo_mask"), idummy333))
-   NCF_CHECK(nf90_put_var(optic_ncid, nctk_idname(optic_ncid, "leo2_mask"), idummy333))
+
+   if (num_lin_comp > 0) then
+     NCF_CHECK(nf90_put_var(optic_ncid, nctk_idname(optic_ncid, "linopt_components"), lin_comp(1:num_lin_comp)))
+   end if
+   if (num_nonlin_comp > 0) then
+     NCF_CHECK(nf90_put_var(optic_ncid, nctk_idname(optic_ncid, "shg_components"), nonlin_comp(1:num_nonlin_comp)))
+   end if
+   if (num_linel_comp > 0) then
+     NCF_CHECK(nf90_put_var(optic_ncid, nctk_idname(optic_ncid, "leo_components"), linel_comp(1:num_linel_comp)))
+   end if
+   if (num_nonlin2_comp > 0) then
+     NCF_CHECK(nf90_put_var(optic_ncid, nctk_idname(optic_ncid, "leo2_components"), nonlin2_comp(1:num_nonlin2_comp)))
+   end if
 
    ! Write optic input variables.
    ii = 0; if (do_antiresonant) ii = 1
@@ -678,11 +686,9 @@ program optic
      lin1,lin2,nomega,domega,scissor,broadening,tmp_radix,wmesh,eps,comm)
 #ifdef HAVE_NETCDF
      if (my_rank == master) then
-       ncerr = nf90_put_var(optic_ncid, nctk_idname(optic_ncid, "linopt_epsilon"), c2r(eps), &
-         start=[1, 1, lin1, lin2, itemp])
+       ncerr = nf90_put_var(optic_ncid, nctk_idname(optic_ncid, "linopt_epsilon"), c2r(eps), start=[1, 1, ii, itemp])
        NCF_CHECK(ncerr)
-       if (itemp == 1) then
-         NCF_CHECK(nf90_put_var(optic_ncid, nctk_idname(optic_ncid, "linopt_mask"), 1, start=[lin1, lin2]))
+       if (ii == 1 .and. itemp == 1) then
          NCF_CHECK(nf90_put_var(optic_ncid, nctk_idname(optic_ncid, "wmesh"), wmesh))
        end if
      end if
@@ -710,7 +716,8 @@ program optic
    ABI_CHECK((s2(1:1)/='#'),'Bug: string length too short!')
    ABI_CHECK((s3(1:1)/='#'),'Bug: string length too short!')
    tmp_radix = trim(prefix)//"_"//trim(s1)//"_"//trim(s2)//"_"//trim(s3)
-   call nlinopt(nsppol,ucvol,nkpt,wtk,nsym,symcart,mband,eigen0,fermie,pmat,&
+   itemp = 1
+   call nlinopt(ii,itemp,nsppol,ucvol,nkpt,wtk,nsym,symcart,mband,eigen0,fermie,pmat,&
 &   nlin1,nlin2,nlin3,nomega,domega,scissor,broadening,tolerance,tmp_radix,optic_ncid,comm)
  end do
 
@@ -726,7 +733,8 @@ program optic
    call int2char4(linel2,s2)
    call int2char4(linel3,s3)
    tmp_radix = trim(prefix)//"_"//trim(s1)//"_"//trim(s2)//"_"//trim(s3)
-   call linelop(nsppol,ucvol,nkpt,wtk,nsym,symcart,mband,eigen0,occ,fermie,pmat,&
+   itemp = 1
+   call linelop(ii,itemp,nsppol,ucvol,nkpt,wtk,nsym,symcart,mband,eigen0,occ,fermie,pmat,&
 &   linel1,linel2,linel3,nomega,domega,scissor,broadening,tolerance,tmp_radix,do_antiresonant,optic_ncid,comm)
  end do
 
@@ -741,7 +749,8 @@ program optic
    call int2char4(nonlin2,s2)
    call int2char4(nonlin3,s3)
    tmp_radix = trim(prefix)//"_"//trim(s1)//"_"//trim(s2)//"_"//trim(s3)
-   call nonlinopt(nsppol,ucvol,nkpt,wtk,nsym,symcart,mband,eigen0,occ,fermie,pmat,&
+   itemp = 1
+   call nonlinopt(ii,itemp,nsppol,ucvol,nkpt,wtk,nsym,symcart,mband,eigen0,occ,fermie,pmat,&
 &   nonlin1,nonlin2,nonlin3,nomega,domega,scissor,broadening,tolerance,tmp_radix,do_antiresonant,optic_ncid,comm)
  end do
 
