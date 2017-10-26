@@ -10412,10 +10412,10 @@
 - !variable
     abivarname: hyb_range_dft
     characteristics: null
-    commentdefault: 'With the default, [[hyb_range_dft]] is initialized from
-        [[ixc]]. '
+    commentdefault: 'With the default=-999.0d0, [[hyb_range_dft]] is initialized
+        from [[ixc]]. '
     commentdims: null
-    defaultval: -999.0d0
+    defaultval: -999.0d0 or [[hyb_range_fock]] if it is defined by the user
     dimensions: scalar
     excludes: null
     mnemonics: HYBrid RANGE for the DFT leftover from the screened fock operator
@@ -10434,10 +10434,10 @@
 - !variable
     abivarname: hyb_range_fock
     characteristics: null
-    commentdefault: 'With the default, [[hyb_range_fock]] is initialized from
+    commentdefault: 'With the default=-999.0d0, [[hyb_range_fock]] is initialized from
         [[ixc]]. '
     commentdims: null
-    defaultval: -999.0d0
+    defaultval: -999.0d0 or [[hyb_range_dft]] if it is defined by the user 
     dimensions: scalar
     excludes: null
     mnemonics: HYBrid RANGE for the screened FOCK operator
