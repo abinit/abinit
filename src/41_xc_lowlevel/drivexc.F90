@@ -676,6 +676,63 @@ subroutine drivexc(exc,ixc,npts,nspden,order,rho_updn,vxcrho,ndvxc,ngr2,nd2vxc,n
    ABI_DEALLOCATE(vxcrho_x)
    ABI_DEALLOCATE(vxcgrho_x)
 
+!>>>>> GGA counterpart of the B3LYP functional
+ else if(ixc==1402) then
+!  Requires to evaluate exchange-correlation with PBE (optpbe=2)
+!  minus alpha*exchange with PBE (optpbe=-2)
+   if (ixc==41) alpha=one/four
+   if (ixc==42) alpha=one/three
+   ndvxc_x=8
+   ABI_ALLOCATE(exc_x,(npts))
+   ABI_ALLOCATE(vxcrho_x,(npts,nspden))
+   ABI_ALLOCATE(vxcgrho_x,(npts,nvxcgrho))
+   exc_x=zero;vxcrho_x=zero;vxcgrho_x=zero
+   if (order**2 <= 1) then
+     optpbe=2 !PBE exchange correlation
+     call xcpbe(exc,npts,nspden,optpbe,order,rho_updn,vxcrho,ndvxc,ngr2,nd2vxc,&
+&     dvxcdgr=vxcgrho,exexch=exexch_,grho2_updn=grho2_updn)
+     optpbe=-2 !PBE exchange-only
+     call xcpbe(exc_x,npts,nspden,optpbe,order,rho_updn,vxcrho_x,ndvxc,ngr2,nd2vxc,&
+&     dvxcdgr=vxcgrho_x,exexch=exexch_,grho2_updn=grho2_updn)
+     exc=exc-exc_x*alpha
+     vxcrho=vxcrho-vxcrho_x*alpha
+     vxcgrho=vxcgrho-vxcgrho_x*alpha
+   else if (order /=3) then
+     ABI_ALLOCATE(dvxc_x,(npts,ndvxc_x))
+     optpbe=2 !PBE exchange correlation
+     call xcpbe(exc,npts,nspden,optpbe,order,rho_updn,vxcrho,ndvxc,ngr2,nd2vxc,&
+     dvxcdgr=vxcgrho,dvxci=dvxc,grho2_updn=grho2_updn)
+     optpbe=-2 !PBE exchange-only
+     call xcpbe(exc_x,npts,nspden,optpbe,order,rho_updn,vxcrho_x,ndvxc_x,ngr2,nd2vxc,&
+&     dvxcdgr=vxcgrho_x,dvxci=dvxc_x,grho2_updn=grho2_updn)
+     exc=exc-exc_x*alpha
+     vxcrho=vxcrho-vxcrho_x*alpha
+     vxcgrho=vxcgrho-vxcgrho_x*alpha
+     dvxc(:,1:ndvxc_x)=dvxc(:,1:ndvxc_x)-dvxc_x(:,1:ndvxc_x)*alpha
+     ABI_DEALLOCATE(dvxc_x)
+   else if (order ==3) then
+!    The size of exchange-correlation with PBE (optpbe=2)
+!    is the one which defines the size for ndvxc.
+     ABI_ALLOCATE(dvxc_x,(npts,ndvxc_x))
+     ABI_ALLOCATE(d2vxc_x,(npts,nd2vxc))
+     optpbe=2 !PBE exchange correlation
+     call xcpbe(exc,npts,nspden,optpbe,order,rho_updn,vxcrho,ndvxc,ngr2,nd2vxc,&
+&     d2vxci=d2vxc,dvxcdgr=vxcgrho,dvxci=dvxc,grho2_updn=grho2_updn)
+     optpbe=-2 !PBE exchange-only
+     call xcpbe(exc_x,npts,nspden,optpbe,order,rho_updn,vxcrho_x,ndvxc_x,ngr2,nd2vxc,&
+&     d2vxci=d2vxc_x,dvxcdgr=vxcgrho_x,dvxci=dvxc_x,grho2_updn=grho2_updn)
+     exc=exc-exc_x*alpha
+     vxcrho=vxcrho-vxcrho_x*alpha
+     vxcgrho=vxcgrho-vxcgrho_x*alpha
+     d2vxc=d2vxc-d2vxc_x*alpha
+     dvxc(:,1:ndvxc_x)=dvxc(:,1:ndvxc_x)-dvxc_x(:,1:ndvxc_x)*alpha
+     ABI_DEALLOCATE(dvxc_x)
+     ABI_DEALLOCATE(d2vxc_x)
+   end if
+   ABI_DEALLOCATE(exc_x)
+   ABI_DEALLOCATE(vxcrho_x)
+   ABI_DEALLOCATE(vxcgrho_x)
+
 !>>>>> Ichimaru,Iyetomi,Tanaka,  XC at finite temp (e- gaz)
  else if (ixc==50) then
    if (order**2 <= 1) then
