@@ -196,7 +196,7 @@ subroutine dfpt_wfkfermi(cg,cgq,cplex,cprj,cprjq,&
  berryopt=0;usevnl=0;sij_opt=-gs_hamkq%usepaw;tim_getgh1c=3
  optlocal=0;optnl=1;opt_gvnl1=0
  if(ipert==gs_hamkq%natom+5) optnl=0;    ! no 1st order NL in H(1), also no kin, but this will be taken into account later
- if(ipert==gs_hamkq%natom+5) optlocal=1; ! 1st order LOCAL potential present
+!if(ipert==gs_hamkq%natom+5) optlocal=0; ! 1st order LOCAL potential present
 
 !Arguments of the dfpt_accrho routine
  tim_fourwf=5 ; opt_accrho=1 ; opt_corr=0

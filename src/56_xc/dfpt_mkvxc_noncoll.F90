@@ -130,7 +130,7 @@ subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,bxc,mpi_enreg,nfft,ngfft,nhat1,nhat1
 
  call timab(181,1,tsec)
 
- rotation=2
+ rotation=3
 
  if(nspden/=4) then
    MSG_BUG('only for nspden=4!')
@@ -320,7 +320,7 @@ subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,bxc,mpi_enreg,nfft,ngfft,nhat1,nhat1
                  !vxc1rot2(ifft,4)=vxc1(ifft,4)
                else
 
-                 write(*,*) 'small magnetization point'
+                 !write(*,*) 'small magnetization point'
                  mx1=rhor1(ifft,2);
                  my1=rhor1(ifft,3);
                  mz1=rhor1(ifft,4);
@@ -336,19 +336,25 @@ subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,bxc,mpi_enreg,nfft,ngfft,nhat1,nhat1
                                             ! At the moment numerically unstable
                if(m_norm(ifft)>m_norm_min)then
 
-                  theta0 =-acos(rhor(ifft,4)/m_norm(ifft)) 
+                  theta0 = acos(rhor(ifft,4)/m_norm(ifft)) 
                   nx     =-rhor(ifft,3)/sqrt(rhor(ifft,2)**2+rhor(ifft,3)**2)            
                   ny     = rhor(ifft,2)/sqrt(rhor(ifft,2)**2+rhor(ifft,3)**2)      
                   nz     = 0.0 
 
-                  theta1 = -rhor(ifft,4)*(rhor(ifft,2)*rhor1(ifft,2)+rhor(ifft,3)*rhor1(ifft,3))
-                  theta1 =  theta1 + rhor1(ifft,4)*(rhor(ifft,2)**2+rhor(ifft,3)**2)
+                  fact   = sin(theta0)/sqrt(rhor(ifft,2)**2+rhor(ifft,3)**2)
+
+                  theta1 =  rhor(ifft,4)*(rhor(ifft,2)*rhor1(ifft,2)+rhor(ifft,3)*rhor1(ifft,3))
+                  theta1 =  theta1 - rhor1(ifft,4)*(rhor(ifft,2)**2+rhor(ifft,3)**2)
                   theta1 =  theta1/m_norm(ifft)**2/sqrt(rhor(ifft,2)**2+rhor(ifft,3)**2)
  
                   nx1    = rhor(ifft,2)*(rhor(ifft,3)*rhor1(ifft,2)-rhor(ifft,2)*rhor1(ifft,3)) 
-                  nx1    = nx1/sqrt(rhor(ifft,2)**2+rhor(ifft,3)**2)/(rhor(ifft,2)**2+rhor(ifft,3)**2)
-                  ny1    = rhor(ifft,3)*(rhor(ifft,3)*rhor1(ifft,2)-rhor(ifft,2)*rhor1(ifft,3)) 
-                  ny1    = ny1/sqrt(rhor(ifft,2)**2+rhor(ifft,3)**2)/(rhor(ifft,2)**2+rhor(ifft,3)**2)
+                  nx1    = nx1/(rhor(ifft,2)**2+rhor(ifft,3)**2)
+                  nx1    = nx1*fact                                  ! the factor with sin(theta) to regularize the expression
+                    
+                  ny1    = -(nx/ny)*nx1
+
+                  !ny1    = rhor(ifft,3)*(rhor(ifft,3)*rhor1(ifft,2)-rhor(ifft,2)*rhor1(ifft,3)) 
+                  !ny1    = ny1/sqrt(rhor(ifft,2)**2+rhor(ifft,3)**2)/(rhor(ifft,2)**2+rhor(ifft,3)**2)
            
                   ! U^(0)*.vxc1.U^(0) part
 
@@ -359,18 +365,25 @@ subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,bxc,mpi_enreg,nfft,ngfft,nhat1,nhat1
                   vxc1(ifft,3)= rhor(ifft,2)*fact ! Real part
                   vxc1(ifft,4)=-rhor(ifft,3)*fact ! Imaginary part
 
-                  vxc0=(vxc(ifft,1)+vxc(ifft,2))/2.0
-                  bxc0=(vxc(ifft,1)-vxc(ifft,2))*m_norm(ifft)/rhor(ifft,4)/2.0
+                  !vxc0=(vxc(ifft,1)+vxc(ifft,2))/2.0
+                  !bxc0=(vxc(ifft,1)-vxc(ifft,2))*m_norm(ifft)/rhor(ifft,4)/2.0
 
                   ! U^(1)*.vxc0.U^(0) + U^(0)*.vxc0.U^(1)
-                  vxc1(ifft,1) = vxc1(ifft,1) -   sin(theta0/2)*cos(theta0/2)*theta1*((bxc0-vxc0)*(nx**2+ny**2)+(bxc0+vxc0));
-                  vxc1(ifft,1) = vxc1(ifft,1) - 2*sin(theta0/2)**2*(bxc0-vxc0)*(nx1*nx+ny1*ny);
+                  
+                  vxc1(ifft,1) = vxc1(ifft,1) - (bxc(ifft)*m_norm(ifft))*sin(theta0)*theta1
+                  vxc1(ifft,2) = vxc1(ifft,2) + (bxc(ifft)*m_norm(ifft))*sin(theta0)*theta1
 
-                  vxc1(ifft,2) = vxc1(ifft,2) +   sin(theta0/2)*cos(theta0/2)*theta1*((bxc0+vxc0)*(nx**2+ny**2)+(bxc0-vxc0));
-                  vxc1(ifft,2) = vxc1(ifft,2) + 2*sin(theta0/2)**2*(bxc0+vxc0)*(nx1*nx+ny1*ny);
+                  vxc1(ifft,3) = vxc1(ifft,3) + (bxc(ifft)*m_norm(ifft))*(ny1+cos(theta0)*ny*theta1)
+                  vxc1(ifft,4) = vxc1(ifft,4) + (bxc(ifft)*m_norm(ifft))*(nx1+cos(theta0)*nx*theta1)
+
+                  !vxc1(ifft,1) = vxc1(ifft,1) -   sin(theta0/2)*cos(theta0/2)*theta1*((bxc0-vxc0)*(nx**2+ny**2)+(bxc0+vxc0));
+                  !vxc1(ifft,1) = vxc1(ifft,1) - 2*sin(theta0/2)**2*(bxc0-vxc0)*(nx1*nx+ny1*ny);
+
+                  !vxc1(ifft,2) = vxc1(ifft,2) +   sin(theta0/2)*cos(theta0/2)*theta1*((bxc0+vxc0)*(nx**2+ny**2)+(bxc0-vxc0));
+                  !vxc1(ifft,2) = vxc1(ifft,2) + 2*sin(theta0/2)**2*(bxc0+vxc0)*(nx1*nx+ny1*ny);
         
-                  vxc1(ifft,3) = vxc1(ifft,3) - bxc0*(ny*theta1*cos(theta0) + ny1*sin(theta0))
-                  vxc1(ifft,4) = vxc1(ifft,4) - bxc0*(nx*theta1*cos(theta0) + nx1*sin(theta0))
+                  !vxc1(ifft,3) = vxc1(ifft,3) - bxc0*(ny*theta1*cos(theta0) + ny1*sin(theta0))
+                  !vxc1(ifft,4) = vxc1(ifft,4) - bxc0*(nx*theta1*cos(theta0) + nx1*sin(theta0))
 
                else
                   vxc1(ifft,1:2)=dvdn
