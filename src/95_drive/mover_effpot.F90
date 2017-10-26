@@ -170,20 +170,19 @@ implicit none
 
 !a new supercell is compute
 !Initialisaton of variable
- if(option == 1) then
+ if(option == -1) then
+!  Bound process option
    sc_size(:) = inp%fit_boundCell
- else if(option == 2) then
+ else if(option == -2) then
+!  Heff option
    sc_size(:) = (/1,1,1/)
  else
+!  Normal dynamics   
    sc_size(:) = inp%n_cell
  end if
 
- if(option==1.or.option==2.or.&
-& inp%dynamics==12.or.&
-& inp%dynamics==13.or.&
-& inp%dynamics==24.or.&
-& inp%dynamics==25)then
-
+ if(option/=0)then
+   
    acell = one
    rprimd = effective_potential%crystal%rprimd
  
@@ -205,12 +204,12 @@ implicit none
 !***************************************************************
 
 !Set mpi_eng
-   mpi_enreg%comm_cell  = comm
-   mpi_enreg%me = my_rank
-   if (option >= 0) then
-     !TEST_AM
-     !Try to copy ddb to dtset
-     !  call ddb_to_dtset(comm,ddb, dtset,filename,psps,pawtab)
+ mpi_enreg%comm_cell  = comm
+ mpi_enreg%me = my_rank
+ if (option /= 0) then
+   !TEST_AM
+   !Try to copy ddb to dtset
+   !  call ddb_to_dtset(comm,ddb, dtset,filename,psps,pawtab)
      
    !Set the fake abinit dataset 
      !Scalar
@@ -245,7 +244,7 @@ implicit none
      ABI_ALLOCATE(dtset%prtatlist,(dtset%natom)) !PRinT by ATom LIST of ATom
      dtset%prtatlist(:) = 0
      
-     if(option==0)then
+     if(option  > 0)then
        verbose = .TRUE.
        writeHIST = .TRUE.
        dtset%dtion = inp%dtion  ! Delta Time for IONs
@@ -405,7 +404,7 @@ implicit none
 !4   Call main routine for the bound process,
 !    monte carlo / molecular dynamics / project
 !*********************************************************
-   if(option==0)then
+   if(option > 0)then
      !*************************************************************
      !  call mover in case of NPT or NVT simulation
      !*************************************************************
@@ -417,7 +416,7 @@ implicit none
 &     rhog,rhor,dtset%rprimd_orig,vel,vel_cell,xred,xred_old,&
 &     effective_potential=effective_potential,verbose=verbose,writeHIST=writeHIST)
 
-   else if(option==1)then
+   else if(option== -1)then
      !*************************************************************
      !   Try to bound the model
      !*************************************************************
@@ -698,7 +697,7 @@ implicit none
 
      end if
      
-!   else  if (option == 2) then
+!   else  if (option == -2) then
 !*************************************************************
 !   Call the routine for calculation of the energy for specific 
 !   partern of displacement or strain for the effective 
