@@ -441,7 +441,15 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 
  call timab(701,2,tsec)
  call timab(33,3,tsec)
-
+ if (psps%usepaw==1.and.dtset%usefock==1)then
+   do itypat=1,dtset%ntypat
+     if(pawtab(itypat)%has_fock==0) then
+       write(message, '(a)' )&
+&       'The PAW data file does not contain Fock information. Change the PAW data file.'
+       MSG_BUG(message)
+     end if
+   end do
+ end if
 !In case of isolated computations, ecore must set to zero
 !because its contribution is counted in the ewald energy as the ion-ion interaction.
  if (dtset%icoulomb == 1) ecore = zero
