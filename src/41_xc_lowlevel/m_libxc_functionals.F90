@@ -1814,11 +1814,11 @@ function libxc_functionals_gga_from_hybrid(gga_id,hybrid_id,xc_functionals)
  c_name="unknown" ; x_name="unknown"
 
 !Specific treatment of the B3LYP functional, whose GGA counterpart does not exist in LibXC
- if(trial_id(1)==-402)then
+ if(trial_id(1)==402)then
    libxc_functionals_gga_from_hybrid=.true.
    if (present(gga_id)) then
-     gga_id(1)=0
-     gga_id(2)=1402
+     gga_id(1)=-1402 ! This sends back to a native ABINIT functional, actually a composite from different LibXC functionals.
+     gga_id(2)=0
    endif
    return
  endif
