@@ -274,6 +274,14 @@ FAIL:  getdkde  does not appear in any var*html files
 FAIL:  getdkde  does not appear in the central varset_allvars.html file 
 FAIL:  getpawden  does not appear in any var*html files 
 FAIL:  getpawden  does not appear in the central varset_allvars.html file 
+FAIL:  hyb_mixing  does not appear in any var*html files 
+FAIL:  hyb_mixing  does not appear in the central varset_allvars.html file 
+FAIL:  hyb_mixing_sr  does not appear in any var*html files 
+FAIL:  hyb_mixing_sr  does not appear in the central varset_allvars.html file 
+FAIL:  hyb_range_dft  does not appear in any var*html files 
+FAIL:  hyb_range_dft  does not appear in the central varset_allvars.html file 
+FAIL:  hyb_range_fock  does not appear in any var*html files 
+FAIL:  hyb_range_fock  does not appear in the central varset_allvars.html file
 FAIL:  irdpawden  does not appear in any var*html files 
 FAIL:  irdpawden  does not appear in the central varset_allvars.html file 
 FAIL:  rf2_dkde  does not appear in any var*html files 
@@ -324,6 +332,10 @@ FAIL:  getpawden  does not appear in automatic test suite
 FAIL:  gw_nstep  does not appear in automatic test suite 
 FAIL:  gw_sctype  does not appear in automatic test suite 
 FAIL:  gw_toldfeig  does not appear in automatic test suite 
+FAIL:  hyb_mixing  does not appear in automatic test suite 
+FAIL:  hyb_mixing_sr  does not appear in automatic test suite 
+FAIL:  hyb_range_dft  does not appear in automatic test suite 
+FAIL:  hyb_range_fock  does not appear in automatic test suite 
 FAIL:  irdbscoup  does not appear in automatic test suite 
 FAIL:  irdhaydock  does not appear in automatic test suite 
 FAIL:  irdpawden  does not appear in automatic test suite 
