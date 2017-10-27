@@ -1,4 +1,4 @@
-++ EXPERIMENTAL ++ self-intraction-corrected psp for oxygen (D. R. Hamann)
+++ EXPERIMENTAL ++ self-interaction-corrected psp for oxygen (D. R. Hamann)
       8.0000      6.0000    040701    zatom,zion,pspd
      8     2     2     2   602     0    pspcod,pspxc,lmax,lloc,mmax,r2well
   1.09202501  1.00000000  0.00000000    rchrg fchrg qchrg

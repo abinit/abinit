@@ -4,7 +4,7 @@ README
 This README is in the bindings directory of the abinit package.
 See the file 'new_user_guide.html' in the 'doc/users'
 directory for more information. 
-See also http://www.abinit.org/documentation/helpfiles
+See also https://www.abinit.org/documentation/helpfiles
 
 The ABINIT project is described in several publications, including :
 "ABINIT: First-principles approach to material and nanosystem properties", Computer Physics Communications 180, 2582--2615 (2009)
@@ -12,7 +12,7 @@ The ABINIT project is described in several publications, including :
 
 For installation, compilation and tests,
 see a recent version of the 'install' file, in the 'doc/install_notes'
-subdirectory. This file is also available on the Web, see http://www.abinit.org/documentation/helpfiles.
+subdirectory. This file is also available on the Web, see https://www.abinit.org/documentation/helpfiles.
 
 *******************************************************************
 

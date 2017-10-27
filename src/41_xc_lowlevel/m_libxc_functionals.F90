@@ -48,6 +48,9 @@
 #endif
 
 #include "abi_common.h"
+#if defined HAVE_LIBXC 
+#include "xc_version.h"
+#endif
 
 module libxc_functionals
 
@@ -213,6 +216,7 @@ module libxc_functionals
    end subroutine xc_mgga
  end interface
 !
+#if ( XC_MAJOR_VERSION < 4 )
  interface
    subroutine xc_hyb_gga_xc_pbeh_set_params(xc_func, alpha) bind(C)
      use iso_c_binding, only : C_DOUBLE,C_PTR
@@ -244,6 +248,7 @@ module libxc_functionals
      type(C_PTR) :: xc_func
    end subroutine xc_mgga_x_tb09_set_params
  end interface
+#endif
 !
  interface
    subroutine xc_get_singleprecision_constant(xc_cst_singleprecision) bind(C)
@@ -479,7 +484,7 @@ contains
 !!                     XC functionals to initialize
 !!
 !! PARENTS
-!!      calc_vhxc_me,driver,hybrid_corr,m_kxc,m_xc_vdw,xchybrid_ncpp_cc
+!!      calc_vhxc_me,driver,m_kxc,m_xc_vdw,rhotoxc,xchybrid_ncpp_cc
 !!
 !! CHILDREN
 !!
@@ -510,7 +515,6 @@ contains
  integer(C_INT) :: func_id_c,iref_c,nspin_c,success_c
  real(C_DOUBLE) :: alpha_c,beta_c,omega_c
  character(kind=C_CHAR,len=1),pointer :: strg_c
- character(kind=C_CHAR,len=1) :: msg_c(500)
  type(C_PTR) :: func_ptr_c
 #endif
 
@@ -586,7 +590,14 @@ contains
 !  Special treatment for LDA_C_XALPHA functional
    if (xc_func%id==libxc_functionals_getid('XC_LDA_C_XALPHA')) then
      alpha_c=real(zero,kind=C_DOUBLE)
+#if ( XC_MAJOR_VERSION < 4 )
      call xc_lda_c_xalpha_set_params(xc_func%conf,alpha_c);
+#else
+     msg='seems set_params has disappeared for xalpha in libxc 4. defaults are being used'
+     MSG_WARNING(msg)
+     !call xc_hyb_gga_xc_pbeh_init(xc_func%conf)
+#endif
+
    end if
 
 !  Get functional kind
@@ -651,7 +662,7 @@ end subroutine libxc_functionals_init
 !!                     XC functionals to initialize
 !!
 !! PARENTS
-!!      calc_vhxc_me,driver,hybrid_corr,m_kxc,m_xc_vdw,xchybrid_ncpp_cc
+!!      calc_vhxc_me,driver,m_kxc,m_xc_vdw,rhotoxc,xchybrid_ncpp_cc
 !!
 !! CHILDREN
 !!
@@ -1534,7 +1545,7 @@ end subroutine libxc_functionals_getvxc
 !!  [hyb_range]    = Range (for separation)
 !!
 !! PARENTS
-!!      calc_vhxc_me,m_fock
+!!      m_fock
 !!
 !! CHILDREN
 !!
@@ -1698,12 +1709,24 @@ subroutine libxc_functionals_set_hybridparams(hyb_mixing,hyb_mixing_sr,hyb_range
 
 !  PBE0: set parameters
    if (is_pbe0) then
-       call xc_hyb_gga_xc_pbeh_set_params(xc_func%conf,alpha_c)
+#if ( XC_MAJOR_VERSION < 4 )
+     call xc_hyb_gga_xc_pbeh_set_params(xc_func%conf,alpha_c)
+#else
+     msg='seems set_params has disappeared for pbeh in libxc 4. defaults are being used'
+     MSG_WARNING(msg)
+     !call xc_hyb_gga_xc_pbeh_init(xc_func%conf)
+#endif
    end if
 
 !  HSE: set parameters
    if (is_hse) then
+#if ( XC_MAJOR_VERSION < 4 )
      call xc_hyb_gga_xc_hse_set_params(xc_func%conf,beta_c,omega_c)
+#else
+     msg='seems set_params has disappeared for hse in libxc 4. defaults are being used'
+     MSG_WARNING(msg)
+     !call hyb_gga_xc_hse_init(xc_func%conf)
+#endif
    end if
 #endif
 
@@ -1942,7 +1965,13 @@ end function libxc_functionals_gga_from_hybrid
    do ii=1,2
      if (xc_funcs(ii)%id==libxc_functionals_getid('XC_MGGA_X_TB09')) then
 #if defined HAVE_LIBXC && defined HAVE_FC_ISO_C_BINDING
+#if ( XC_MAJOR_VERSION < 4 )
        call xc_mgga_x_tb09_set_params(xc_funcs(ii)%conf,cc)
+#else
+       msg='seems set_params has disappeared for tb09 in libxc 4. defaults are being used'
+       MSG_WARNING(msg)
+       !call xc_hyb_gga_xc_tb09_init(xc_func%conf)
+#endif
 #endif
      end if
    end do

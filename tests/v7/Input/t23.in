@@ -145,4 +145,5 @@ jpawu      0.0000000000000000  0.0  0.0  eV
 #%% keywords = GW, DMFT, FAILS_IFMPI, cRPA
 #%% authors = T. Applencourt, B. Amadon
 #%% description = For SrVO3, compute density, WFC and KSS files.
+#%% topics = CRPA
 #%%<END TEST_INFO>

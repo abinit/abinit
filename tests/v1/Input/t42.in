@@ -100,4 +100,5 @@
 #%%  - Si (100) unreconstructed surface : 2*2*2 objects of eight atoms
 #%%  - 16 H atoms at the bottom
 #%%  This test is not realistic (it would take too much time).
+#%% topics = AtomManipulator
 #%%<END TEST_INFO>

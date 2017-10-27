@@ -3681,7 +3681,7 @@ abinit_include = { "mpif.h": mpif_file,
 
 
 #Exclude files
-abinit_exclude = [ "m_build_info.F90", "quarantine" ]
+abinit_exclude = [ "m_build_info.F90", "psp9cc.F90", "quarantine" ]
 
 
 #Files to generate generic routines

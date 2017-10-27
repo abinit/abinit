@@ -83,80 +83,87 @@ robodoc:
 	rm -rf robodoc-html tmp-robodoc
 	cat $(top_srcdir)/doc/developers/robodoc.doc.txt >> robodoc.err
 
-# infos_html-x.x.x.tar contains all html files needed for the Web site
+# infos_html-x.x.x.tar contains all html files needed for the Web site ... Should be generated in python !
 infos_html:
 	-rm -fr infos_htm* tmp-infos*
 	cp -fr doc tmp-infos-$(VERSION)
-	cp developers/various/var-file-index.py tmp-infos-$(VERSION)
+	rm tmp-infos-$(VERSION)/tests
 	cp -fr KNOWN_PROBLEMS tmp-infos-$(VERSION)/known_problems
-	mkdir tmp-infos-$(VERSION)/Tests
-	mkdir tmp-infos-$(VERSION)/Tests/Test_atompaw
-	mkdir tmp-infos-$(VERSION)/Tests/Test_bigdft 
-	mkdir tmp-infos-$(VERSION)/Tests/Test_bigdft_paral
-	mkdir tmp-infos-$(VERSION)/Tests/Test_etsf_io
-	mkdir tmp-infos-$(VERSION)/Tests/Test_fast
-	mkdir tmp-infos-$(VERSION)/Tests/Test_gpu
-	mkdir tmp-infos-$(VERSION)/Tests/Test_libxc 
-	mkdir tmp-infos-$(VERSION)/Tests/Test_mpiio 
-	mkdir tmp-infos-$(VERSION)/Tests/Test_paral
-	mkdir tmp-infos-$(VERSION)/Tests/Test_psml
-	mkdir tmp-infos-$(VERSION)/Tests/Test_seq
-	mkdir tmp-infos-$(VERSION)/Tests/Test_tutoparal
-	mkdir tmp-infos-$(VERSION)/Tests/Test_tutoplugs
-	mkdir tmp-infos-$(VERSION)/Tests/Test_tutorespfn
-	mkdir tmp-infos-$(VERSION)/Tests/Test_tutorial 
-	mkdir tmp-infos-$(VERSION)/Tests/Test_unitary
-	mkdir tmp-infos-$(VERSION)/Tests/Test_v1
-	mkdir tmp-infos-$(VERSION)/Tests/Test_v2
-	mkdir tmp-infos-$(VERSION)/Tests/Test_v3
-	mkdir tmp-infos-$(VERSION)/Tests/Test_v4
-	mkdir tmp-infos-$(VERSION)/Tests/Test_v5
-	mkdir tmp-infos-$(VERSION)/Tests/Test_v6
-	mkdir tmp-infos-$(VERSION)/Tests/Test_v67mbpt
-	mkdir tmp-infos-$(VERSION)/Tests/Test_v7
-	mkdir tmp-infos-$(VERSION)/Tests/Test_v8
-	mkdir tmp-infos-$(VERSION)/Tests/Test_vdwxc
-	mkdir tmp-infos-$(VERSION)/Tests/Test_wannier90 
-	cp -fr tests/atompaw/Input tmp-infos-$(VERSION)/Tests/Test_atompaw
-	cp -fr tests/bigdft/Input tmp-infos-$(VERSION)/Tests/Test_bigdft
-	cp -fr tests/bigdft_paral/Input tmp-infos-$(VERSION)/Tests/Test_bigdft_paral
-	cp -fr tests/etsf_io/Input tmp-infos-$(VERSION)/Tests/Test_etsf_io
-	cp -fr tests/fast/Input tmp-infos-$(VERSION)/Tests/Test_fast
-	cp -fr tests/gpu/Input tmp-infos-$(VERSION)/Tests/Test_gpu
-	cp -fr tests/libxc/Input tmp-infos-$(VERSION)/Tests/Test_libxc
-	cp -fr tests/mpiio/Input tmp-infos-$(VERSION)/Tests/Test_mpiio
-	cp -fr tests/paral/Input tmp-infos-$(VERSION)/Tests/Test_paral
-	cp -fr tests/psml/Input tmp-infos-$(VERSION)/Tests/Test_psml
-	cp -fr tests/seq/Input tmp-infos-$(VERSION)/Tests/Test_seq
-	cp -fr tests/tutoparal/Input tmp-infos-$(VERSION)/Tests/Test_tutoparal
-	cp -fr tests/tutoplugs/Input tmp-infos-$(VERSION)/Tests/Test_tutoplugs
-	cp -fr tests/tutorespfn/Input tmp-infos-$(VERSION)/Tests/Test_tutorespfn
-	cp -fr tests/tutorial/Input tmp-infos-$(VERSION)/Tests/Test_tutorial
-	cp -fr tests/unitary/Input tmp-infos-$(VERSION)/Tests/Test_unitary
-	cp -fr tests/v1/Input tmp-infos-$(VERSION)/Tests/Test_v1
-	cp -fr tests/v2/Input tmp-infos-$(VERSION)/Tests/Test_v2
-	cp -fr tests/v3/Input tmp-infos-$(VERSION)/Tests/Test_v3
-	cp -fr tests/v4/Input tmp-infos-$(VERSION)/Tests/Test_v4
-	cp -fr tests/v5/Input tmp-infos-$(VERSION)/Tests/Test_v5
-	cp -fr tests/v6/Input tmp-infos-$(VERSION)/Tests/Test_v6
-	cp -fr tests/v67mbpt/Input tmp-infos-$(VERSION)/Tests/Test_v67mbpt
-	cp -fr tests/v7/Input tmp-infos-$(VERSION)/Tests/Test_v7
-	cp -fr tests/v8/Input tmp-infos-$(VERSION)/Tests/Test_v8
-	cp -fr tests/vdwxc/Input tmp-infos-$(VERSION)/Tests/Test_vdwxc
-	cd tmp-infos-$(VERSION) ; python var-file-index.py
-	cp tmp-infos-$(VERSION)/developers/contributing.html tmp-infos-$(VERSION)
-	-rm -f tmp-infos-$(VERSION)/features/features.html tmp-infos-$(VERSION)/release_notes/release_notes.html tmp-infos-$(VERSION)/installation_notes/install.html
-	cp -fr tmp-infos-$(VERSION)/features/features_v$(ABINIT_VERSION_MAJOR).$(ABINIT_VERSION_MINOR).html tmp-infos-$(VERSION)/features/features.html
+	mkdir tmp-infos-$(VERSION)/tests
+	mkdir tmp-infos-$(VERSION)/tests/atompaw
+	mkdir tmp-infos-$(VERSION)/tests/bigdft 
+	mkdir tmp-infos-$(VERSION)/tests/bigdft_paral
+	mkdir tmp-infos-$(VERSION)/tests/etsf_io
+	mkdir tmp-infos-$(VERSION)/tests/fast
+	mkdir tmp-infos-$(VERSION)/tests/gpu
+	mkdir tmp-infos-$(VERSION)/tests/libxc 
+	mkdir tmp-infos-$(VERSION)/tests/mpiio 
+	mkdir tmp-infos-$(VERSION)/tests/paral
+	mkdir tmp-infos-$(VERSION)/tests/psml
+	mkdir tmp-infos-$(VERSION)/tests/seq
+	mkdir tmp-infos-$(VERSION)/tests/tutoparal
+	mkdir tmp-infos-$(VERSION)/tests/tutoplugs
+	mkdir tmp-infos-$(VERSION)/tests/tutorespfn
+	mkdir tmp-infos-$(VERSION)/tests/tutorial 
+	mkdir tmp-infos-$(VERSION)/tests/unitary
+	mkdir tmp-infos-$(VERSION)/tests/v1
+	mkdir tmp-infos-$(VERSION)/tests/v2
+	mkdir tmp-infos-$(VERSION)/tests/v3
+	mkdir tmp-infos-$(VERSION)/tests/v4
+	mkdir tmp-infos-$(VERSION)/tests/v5
+	mkdir tmp-infos-$(VERSION)/tests/v6
+	mkdir tmp-infos-$(VERSION)/tests/v67mbpt
+	mkdir tmp-infos-$(VERSION)/tests/v7
+	mkdir tmp-infos-$(VERSION)/tests/v8
+	mkdir tmp-infos-$(VERSION)/tests/vdwxc
+	mkdir tmp-infos-$(VERSION)/tests/wannier90 
+	cp -fr tests/atompaw/Input tmp-infos-$(VERSION)/tests/atompaw/Input
+	cp -fr tests/bigdft/Input tmp-infos-$(VERSION)/tests/bigdft/Input
+	cp -fr tests/bigdft_paral/Input tmp-infos-$(VERSION)/tests/bigdft_paral/Input
+	cp -fr tests/etsf_io/Input tmp-infos-$(VERSION)/tests/etsf_io/Input
+	cp -fr tests/fast/Input tmp-infos-$(VERSION)/tests/fast/Input
+	cp -fr tests/gpu/Input tmp-infos-$(VERSION)/tests/gpu/Input
+	cp -fr tests/libxc/Input tmp-infos-$(VERSION)/tests/libxc/Input
+	cp -fr tests/mpiio/Input tmp-infos-$(VERSION)/tests/mpiio/Input
+	cp -fr tests/paral/Input tmp-infos-$(VERSION)/tests/paral/Input
+	cp -fr tests/psml/Input tmp-infos-$(VERSION)/tests/psml/Input
+	cp -fr tests/seq/Input tmp-infos-$(VERSION)/tests/seq/Input
+	cp -fr tests/tutoparal/Input tmp-infos-$(VERSION)/tests/tutoparal/Input
+	cp -fr tests/tutoparal/Refs tmp-infos-$(VERSION)/tests/tutoparal/Refs 
+	cp -fr tests/tutoplugs/Input tmp-infos-$(VERSION)/tests/tutoplugs/Input
+	cp -fr tests/tutoplugs/Refs tmp-infos-$(VERSION)/tests/tutoplugs/Refs
+	cp -fr tests/tutorespfn/Input tmp-infos-$(VERSION)/tests/tutorespfn/Input
+	cp -fr tests/tutorespfn/Refs tmp-infos-$(VERSION)/tests/tutorespfn/Refs
+	cp -fr tests/tutorial/Input tmp-infos-$(VERSION)/tests/tutorial/Input
+	cp -fr tests/tutorial/Refs tmp-infos-$(VERSION)/tests/tutorial/Refs
+	cp -fr tests/unitary/Input tmp-infos-$(VERSION)/tests/unitary/Input
+	cp -fr tests/v1/Input tmp-infos-$(VERSION)/tests/v1/Input
+	cp -fr tests/v2/Input tmp-infos-$(VERSION)/tests/v2/Input
+	cp -fr tests/v3/Input tmp-infos-$(VERSION)/tests/v3/Input
+	cp -fr tests/v4/Input tmp-infos-$(VERSION)/tests/v4/Input
+	cp -fr tests/v5/Input tmp-infos-$(VERSION)/tests/v5/Input
+	cp -fr tests/v6/Input tmp-infos-$(VERSION)/tests/v6/Input
+	cp -fr tests/v67mbpt/Input tmp-infos-$(VERSION)/tests/v67mbpt/Input
+	cp -fr tests/v7/Input tmp-infos-$(VERSION)/tests/v7/Input
+	cp -fr tests/v8/Input tmp-infos-$(VERSION)/tests/v8/Input
+	cp -fr tests/vdwxc/Input tmp-infos-$(VERSION)/tests/vdwxc/Input
+	-rm -f tmp-infos-$(VERSION)/release_notes/release_notes.html tmp-infos-$(VERSION)/installation_notes/install.html
 	cp -fr tmp-infos-$(VERSION)/release_notes/rel*_v$(ABINIT_VERSION_MAJOR).$(ABINIT_VERSION_MINOR).html tmp-infos-$(VERSION)/release_notes/release_notes.html
 	cp -fr tmp-infos-$(VERSION)/inst*_notes/inst*_v$(ABINIT_VERSION_MAJOR).$(ABINIT_VERSION_MINOR).html tmp-infos-$(VERSION)/install_notes/install.html
 	tar -cvf infos_html-$(VERSION).tar                \
-          tmp-infos-$(VERSION)/Tests \
-          tmp-infos-$(VERSION)/input_variables tmp-infos-$(VERSION)/users tmp-infos-$(VERSION)/tutorial tmp-infos-$(VERSION)/known_problems \
+          tmp-infos-$(VERSION)/biblio \
+          tmp-infos-$(VERSION)/input_variables \
+          tmp-infos-$(VERSION)/tests \
+          tmp-infos-$(VERSION)/theory \
+          tmp-infos-$(VERSION)/topics \
+          tmp-infos-$(VERSION)/tutorial \
+          tmp-infos-$(VERSION)/users \
+          tmp-infos-$(VERSION)/js_files \
+          tmp-infos-$(VERSION)/formabinit.css \
+          tmp-infos-$(VERSION)/known_problems \
           tmp-infos-$(VERSION)/gallery/Plot1.jpg tmp-infos-$(VERSION)/gallery/pcpm.gif tmp-infos-$(VERSION)/gallery/mode.png  \
-          tmp-infos-$(VERSION)/*/*.css \
-          tmp-infos-$(VERSION)/install_notes/install.html tmp-infos-$(VERSION)/install_notes/list_internal_links.js \
+          tmp-infos-$(VERSION)/install_notes/install.html \
           tmp-infos-$(VERSION)/release_notes/release_notes.html \
-          tmp-infos-$(VERSION)/features/features.html tmp-infos-$(VERSION)/features/list_internal_links.js \
           tmp-infos-$(VERSION)/presentation/presentation.pdf
 	gzip infos_html-$(VERSION).tar
 	-rm -fr tmp-infos-$(VERSION)
@@ -230,7 +237,7 @@ binary_package_lite:
 
 dist-lite: distdir
 	tardir=$(distdir) && \
-	  cd $(distdir)/doc; rm -rf build* features inp* t* users  && \
+	  cd $(distdir)/doc; rm -rf build* inp* t* users  && \
 	  cd ../tests; rm -rf v* tuto* Psps* paral mpiio libxc gpu fast bigdft* && \
 	  cd ../abichecks; rm -rf abirules buildsys && \
 	  cd ../..; \

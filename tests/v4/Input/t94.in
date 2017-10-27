@@ -63,4 +63,5 @@
 #%% description = 
 #%%   Test of Ca, simple cubic , 2  k-point.
 #%%   Testing GS  PAW  energy and lobpcg algorithm.
+#%% topics = PAW
 #%%<END TEST_INFO>

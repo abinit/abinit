@@ -126,4 +126,5 @@ xred
 #%%   Silicon: Computation of the excitonic levels with the Bethe-Salpeter equation.
 #%%   Dataset3 uses the band-by-band conjugate gradient method to compute the lowest 10 states
 #%%   Dataset4 performs the same task with partial direct diagonalization (Lapack)
+#%% topics = BSE
 #%%<END TEST_INFO>

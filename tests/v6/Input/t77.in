@@ -78,4 +78,5 @@ qph1l
 #%% description = 
 #%%   anaddb run using fine k-gird for Fermi surface integration use_k_fine
 #%%   should give identical results to 75, but does not work as yet
+#%% topics = PhononWidth, ElPhonTransport
 #%%<END TEST_INFO>

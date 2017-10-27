@@ -1,0 +1,19 @@
+body { color :  #333 ;
+}
+a { color : #893e3e ;  text-decoration : none ;
+}
+a:hover { color : #F18F34 ;
+}
+a:visited { color : #a14409 ;
+}
+a {
+ font-weight: 600;
+ color:  #e67e22 ;
+ text-decoration: none;
+}
+
+a:hover {
+ color: #E33A37;
+ font-weight: 600;
+ text-decoration: none;
+}

@@ -12,7 +12,7 @@
  Corning Inc. and other collaborators, see ~abinit/doc/developers/contributors.txt .
  Please read ~abinit/doc/users/acknowledgments.html for suggested
  acknowledgments of the ABINIT effort.
- For more information, see http://www.abinit.org .
+ For more information, see https://www.abinit.org .
 
 .Starting date : Mon  4 Apr 2016.
 - ( at 09h38 )
@@ -185,7 +185,7 @@ P           mkmem          10
     1   3.283   5.836    0   2.4315963        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     2.44451305764117    0.01373030920382    0.17502673260160   rchrg,fchrg,qchrg
- pspatm: epsatm=   -1.77437869
+ pspatm : epsatm=   -1.77437869
          --- l  ekb(1:nproj) -->
              0    1.242797
  pspatm: atomic psp has been read  and splines computed
@@ -200,7 +200,7 @@ P           mkmem          10
     1  24.372  32.350    0   1.3876018        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     0.49406148701180    6.36128955091623    0.66947621353748   rchrg,fchrg,qchrg
- pspatm: epsatm=    1.80528525
+ pspatm : epsatm=    1.80528525
          --- l  ekb(1:nproj) -->
              0    6.310228
  pspatm: atomic psp has been read  and splines computed
@@ -510,7 +510,7 @@ P           mkmem          10
  Note also that it will be of great value to readers of publications presenting these results,
  to read papers enabling them to understand the theoretical formalism and details
  of the ABINIT implementation.
- For information on why they are suggested, see also http://www.abinit.org/about/?text=acknowledgments.
+ For information on why they are suggested, see also https://www.abinit.org/about/?text=acknowledgments.
 -
 - [1] Sharing electronic structure and crystallographic data with ETSF_IO
 - D. Caliste, Y. Pouillon, M.J. Verstraete, V. Olevano, X. Gonze,
@@ -526,7 +526,7 @@ P           mkmem          10
 - Computer Phys. Comm. 180, 2582-2615 (2009).
 - Comment : the third generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
-- is available at http://www.abinit.org/about/ABINIT_CPC_v10.pdf .
+- is available at https://www.abinit.org/about/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 -
 - [3] A brief introduction to the ABINIT software package.
@@ -537,7 +537,7 @@ P           mkmem          10
 - Comment : the second generic paper describing the ABINIT project. Note that this paper
 - should be cited especially if you are using the GW part of ABINIT, as several authors
 - of this part are not in the list of authors of the first or third paper.
-- The .pdf of the latter paper is available at http://www.abinit.org/about/zfk_0505-06_558-562.pdf.
+- The .pdf of the latter paper is available at https://www.abinit.org/about/zfk_0505-06_558-562.pdf.
 - Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
 - the licence allows the authors to put it on the Web).
 -

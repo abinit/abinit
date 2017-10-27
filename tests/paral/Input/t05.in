@@ -61,4 +61,5 @@
 #%% description = 
 #%%   N2 molecule
 #%%   Test TDDFT in parallel, with nsppol=2 even if the molecule is non spin-polarized
+#%% topics = TDDFT
 #%%<END TEST_INFO>

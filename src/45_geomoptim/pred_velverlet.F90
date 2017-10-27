@@ -89,19 +89,18 @@ subroutine pred_velverlet(ab_mover,hist,itime,ntime,zDEBUG,iexit,hmcflag,icycle,
 !Local variables-------------------------------
 
  integer  :: ii,jj                                                              ! dummy integers for loop indexes
- real(dp) :: etotal,epot,ekin,ekin_tmp                                          ! total, potential (electronic), kinetic (ionic) energies  
- real(dp) :: xcart(3,ab_mover%natom),xcart_next(3,ab_mover%natom)               ! Cartesian coordinates of all ions
- real(dp) :: xred(3,ab_mover%natom),xred_next(3,ab_mover%natom)                 ! reduced coordinates of all ions
+ real(dp) :: epot,ekin,ekin_tmp                                                 ! potential (electronic), kinetic (ionic) energies  
+ real(dp) :: xcart(3,ab_mover%natom)                                            ! Cartesian coordinates of all ions
+ real(dp) :: xred(3,ab_mover%natom)                                             ! reduced coordinates of all ions
  real(dp) :: vel(3,ab_mover%natom),vel_nexthalf(3,ab_mover%natom)               ! ionic velocities in Cartesian coordinates
  real(dp) :: fcart(3,ab_mover%natom),fred(3,ab_mover%natom)                     ! forces, Cartesian and reduced coordinates
- real(dp) :: fred_corrected(3,ab_mover%natom),fcart_corrected(3,ab_mover%natom)
  real(dp) :: factor                                                             ! factor, indicating change of time step at last iteration
  integer :: hmcflag_
  integer :: icycle_
  integer :: ncycle_
 
  real(dp) :: acell(3)                                                           ! lattice parameters
- real(dp) :: rprimd(3,3),rprim(3,3)                                             ! lattice vectors
+ real(dp) :: rprimd(3,3)                                                        ! lattice vectors
  real(dp),allocatable,save :: vel_prev(:,:)                                     ! velocities at the end of each time step (half time step ahead of coordinates)
 
 !***************************************************************************
@@ -267,7 +266,7 @@ subroutine pred_velverlet(ab_mover,hist,itime,ntime,zDEBUG,iexit,hmcflag,icycle,
  !Update the history with the new coordinates, velocities, etc.
 
  !Increase indexes
- hist%ihist=hist%ihist+1
+ hist%ihist=abihist_findIndex(hist,+1)
 
  call xcart2xred(ab_mover%natom,rprimd,xcart,xred)
  call var2hist(acell,hist,ab_mover%natom,rprimd,xred,zDEBUG)

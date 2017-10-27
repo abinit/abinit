@@ -90,7 +90,7 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsph
  integer,parameter :: ishift=5
  integer :: i1,i2,i3,iatom,ierr,ifft_local,ix,iy,iz,izloc,n1,n1a,n1b,n2,ifft
  integer :: n2a,n2b,n3,n3a,n3b,nd3,nfftot
- integer :: ii,is,npts(natom) 
+ integer :: ii
  real(dp),parameter :: delta=0.99_dp
  real(dp) :: difx,dify,difz,r2,r2atsph,rr1,rr2,rr3,rx,ry,rz
  real(dp) :: fsm, ratsm, ratsm2 
@@ -172,6 +172,7 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsph
          dify=dble(i2)/dble(n2)-xred(2,iatom)
          do i1=n1a,n1b
            ix=mod(i1+ishift*n1,n1)
+
            difx=dble(i1)/dble(n1)-xred(1,iatom)
            rx=difx*rprimd(1,1)+dify*rprimd(1,2)+difz*rprimd(1,3)
            ry=difx*rprimd(2,1)+dify*rprimd(2,2)+difz*rprimd(2,3)

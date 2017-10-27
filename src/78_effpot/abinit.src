@@ -24,11 +24,13 @@ sources = [
     "m_anharmonics_terms.F90",
     "m_effective_potential.F90",
     "m_effective_potential_file.F90",
+    "m_effpot_mpi.F90",
+    "m_fit_data.F90",
     "m_fit_polynomial_coeff.F90",
     "m_harmonics_terms.F90",
     "m_multibinit_dataset.F90",
-    "m_monte_carlo.F90",
     "m_polynomial_coeff.F90",
+    "m_polynomial_conf.F90",
     "m_polynomial_term.F90",
  ]
 # IMPORTANT : please use the alphabetic order in the previous list. Do NOT add the new routine names at the end of the list.

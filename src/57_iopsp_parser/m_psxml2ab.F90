@@ -19,6 +19,7 @@
 !!
 !! OUTPUT
 !! psphead = psp information structure 
+!! atmsymb = atomic symbol 
 !!
 !! PARENTS
 !!      inpspheads,pspatm_abinit
@@ -49,7 +50,7 @@ public :: psxml2abheader
 CONTAINS
 
 
-subroutine psxml2abheader(psxmlfile, psphead, iwrite)
+subroutine psxml2abheader(psxmlfile, psphead, atmsymb, creator, iwrite)
 
  use defs_basis
  use defs_datatypes
@@ -71,14 +72,17 @@ subroutine psxml2abheader(psxmlfile, psphead, iwrite)
  integer, intent(in) :: iwrite
  character(len=fnlen), intent(in) :: psxmlfile
  type(pspheader_type),intent(inout) :: psphead
-
+ character(len=3), intent(out) :: atmsymb
+ character(len=30), intent(out) :: creator
 
 !Local variables-------------------------------
 !scalars
+ integer :: dd,dm,dy
  integer :: il,lmm,ii
  integer :: iproj, ishell, ll, ll_previous
  integer,parameter :: n1xccc_default=2501
  character(len=500) :: message, frmt_str
+ character(len=1) :: g1,g2
  type(ps_t) :: psxml
 !arrays
  integer, allocatable :: idx_sr(:), idx_so(:)
@@ -90,8 +94,14 @@ subroutine psxml2abheader(psxmlfile, psphead, iwrite)
  call psml_reader(psxmlfile, psxml, debug=.true.)
 
 
+ atmsymb = ps_AtomicLabel(psxml)
+ creator = ps_Creator(psxml)
  psphead%znuclpsp  = ps_AtomicNumber(psxml)
  psphead%zionpsp   = ps_Zpseudo(psxml)
+
+ message = ps_Date(psxml)
+ read (message, '(I4,A1,I2,A1,I2)') dy, g1, dm, g2, dd
+ psphead%pspdat = MODULO(dy,100) * 10000 + dm * 100 + dd
 
  psphead%pspcod = 9
 
@@ -103,13 +113,13 @@ subroutine psxml2abheader(psxmlfile, psphead, iwrite)
  psphead%pspxc = -psphead%pspxc
 
  if (iwrite == 1) then
-   write (message,'(a,a)') 'ps_PseudoFlavor ', ps_PseudoFlavor(psxml)
+   write (message,'(a,a)') '- psxml2ab: ps_PseudoFlavor ', ps_PseudoFlavor(psxml)
 !  call wrtout(ab_out,  message,'COLL')
    call wrtout(std_out,  message,'COLL')
-   write (message,'(a,I5)') 'ps_NLibxcFunctionals ', ps_NLibxcFunctionals(psxml)
+   write (message,'(a,I5)') '- psxml2ab: ps_NLibxcFunctionals ', ps_NLibxcFunctionals(psxml)
 !  call wrtout(ab_out,  message,'COLL')
    call wrtout(std_out,  message,'COLL')
-   write (message,'(a,I5)') 'ps_NValenceShells ', ps_NValenceShells(psxml)
+   write (message,'(a,I5)') '- psxml2ab: ps_NValenceShells ', ps_NValenceShells(psxml)
 !  call wrtout(ab_out,  message,'COLL')
    call wrtout(std_out,  message,'COLL')
  end if
@@ -121,10 +131,10 @@ subroutine psxml2abheader(psxmlfile, psphead, iwrite)
  frmt_str="(a"
  do ishell = 1, ps_NValenceShells(psxml)
    if (iwrite == 1) then
-     write (message,'(a,I5)') 'ps_ValenceShellN ', ps_ValenceShellN(psxml,ishell)
+     write (message,'(a,I5)') '- psxml2ab: ps_ValenceShellN ', ps_ValenceShellN(psxml,ishell)
 !    call wrtout(ab_out,  message,'COLL')
      call wrtout(std_out,  message,'COLL')
-     write (message,'(a,I5)') 'ps_ValenceShellL ', ps_ValenceShellL(psxml,ishell)
+     write (message,'(a,I5)') '- psxml2ab: ps_ValenceShellL ', ps_ValenceShellL(psxml,ishell)
 !    call wrtout(ab_out,  message,'COLL')
      call wrtout(std_out,  message,'COLL')
    end if
@@ -138,10 +148,10 @@ subroutine psxml2abheader(psxmlfile, psphead, iwrite)
  end do
  frmt_str = trim(frmt_str) // ")"
  if (iwrite == 1) then
-   write (message,frmt_str) 'zeld ', zeld
+   write (message,frmt_str) '- psxml2ab: zeld ', zeld
 !  call wrtout(ab_out,  message,'COLL')
    call wrtout(std_out,  message,'COLL')
-   write (message,frmt_str) 'zelu ', zelu
+   write (message,frmt_str) '- psxml2ab: zelu ', zelu
 !  call wrtout(ab_out,  message,'COLL')
    call wrtout(std_out,  message,'COLL')
  end if
@@ -149,10 +159,10 @@ subroutine psxml2abheader(psxmlfile, psphead, iwrite)
 !    Find the number of projectors per angular momentum shell
  psphead%nproj(:)=0
  if (ps_Number_Of_Projectors(psxml, SET_NONREL) > 0) then
-   idx_sr = ps_Projector_Indexes(psxml, SET_NONREL)
+   call ps_Get_Projector_Indexes(psxml, SET_NONREL, idx_sr)
    do iproj = 1, ps_Number_Of_Projectors(psxml, SET_NONREL)
      if (iwrite == 1) then
-       write (message,'(a,2I5)') 'iproj, idx for nonrel ', iproj, idx_sr(iproj)
+       write (message,'(a,2I5)') '- psxml2ab: iproj, idx for nonrel ', iproj, idx_sr(iproj)
 !      call wrtout(ab_out,  message,'COLL')
        call wrtout(std_out,  message,'COLL')
      end if
@@ -160,10 +170,10 @@ subroutine psxml2abheader(psxmlfile, psphead, iwrite)
      psphead%nproj(il) = psphead%nproj(il) + 1
    end do
  else if (ps_Number_Of_Projectors(psxml, SET_SREL) > 0) then
-   idx_sr = ps_Projector_Indexes(psxml, SET_SREL)
+   call ps_Get_Projector_Indexes(psxml, SET_SREL, idx_sr)
    do iproj = 1, ps_Number_Of_Projectors(psxml, SET_SREL)
      if (iwrite == 1) then
-       write (message,'(a,2I5)') 'iproj, idx for srel ', iproj, idx_sr(iproj)
+       write (message,'(a,2I5)') '- psxml2ab: iproj, idx for srel ', iproj, idx_sr(iproj)
 !      call wrtout(ab_out,  message,'COLL')
        call wrtout(std_out,  message,'COLL')
      end if
@@ -175,10 +185,10 @@ subroutine psxml2abheader(psxmlfile, psphead, iwrite)
  end if
 
  psphead%nprojso(:)=0
- idx_so = ps_Projector_Indexes(psxml, SET_SO)
+ call ps_Get_Projector_Indexes(psxml, SET_SO, idx_so)
  do iproj = 1, ps_Number_of_Projectors(psxml, SET_SO)
    if (iwrite == 1) then
-     write (message,'(a,2I5)') 'iproj, idx for soc ', iproj, idx_so(iproj)
+     write (message,'(a,2I5)') '- psxml2ab: iproj, idx for soc ', iproj, idx_so(iproj)
 !    call wrtout(ab_out,  message,'COLL')
      call wrtout(std_out,  message,'COLL')
    end if
@@ -186,10 +196,10 @@ subroutine psxml2abheader(psxmlfile, psphead, iwrite)
    psphead%nprojso(il) = psphead%nprojso(il) + 1
  end do
  if (iwrite == 1) then
-   write (message,'(a,5I5)') 'nproj ', psphead%nproj
+   write (message,'(a,5I5)') '- psxml2ab: nproj ', psphead%nproj
 !  call wrtout(ab_out,  message,'COLL')
    call wrtout(std_out,  message,'COLL')
-   write (message,'(a,5I5)') 'nprojso ', psphead%nprojso
+   write (message,'(a,5I5)') '- psxml2ab: nprojso ', psphead%nprojso
 !  call wrtout(ab_out,  message,'COLL')
    call wrtout(std_out,  message,'COLL')
  end if
@@ -206,11 +216,11 @@ subroutine psxml2abheader(psxmlfile, psphead, iwrite)
 
  psphead%lmax = 0
  if (iwrite == 1) then
-   write (message,'(a,I5)') ' ps_Number_of_Projectors not relativistic ',&
+   write (message,'(a,I5)') '- psxml2ab: ps_Number_of_Projectors not relativistic ',&
 &        ps_Number_of_Projectors(psxml, SET_NONREL)
    call wrtout(ab_out,  message,'COLL')
    call wrtout(std_out,  message,'COLL')
-   write (message,'(a,I5)') ' ps_Number_of_Projectors scalar relativistic ', &
+   write (message,'(a,I5)') '- psxml2ab: ps_Number_of_Projectors scalar relativistic ', &
 &        ps_Number_of_Projectors(psxml, SET_SREL)
    call wrtout(ab_out,  message,'COLL')
    call wrtout(std_out,  message,'COLL')
@@ -220,12 +230,12 @@ subroutine psxml2abheader(psxmlfile, psphead, iwrite)
    ll = ps_Projector_L(psxml, idx_sr(iproj))
    if (iwrite == 1) then
      if(ll/=ll_previous)then
-       write (message,'(a,I5)') ' ps_Projector_L ', ll
+       write (message,'(a,I5)') '- psxml2ab: ps_Projector_L ', ll
        call wrtout(ab_out,  message,'COLL')
        call wrtout(std_out,  message,'COLL')
        ll_previous=ll
      endif
-     write (message,'(a,E20.10)') ' ps_Projector_Ekb ', ps_Projector_Ekb(psxml, idx_sr(iproj))
+     write (message,'(a,E20.10)') '- psxml2ab: ps_Projector_Ekb ', ps_Projector_Ekb(psxml, idx_sr(iproj))
      call wrtout(ab_out,  message,'COLL')
      call wrtout(std_out,  message,'COLL')
    end if
@@ -233,7 +243,7 @@ subroutine psxml2abheader(psxmlfile, psphead, iwrite)
  end do
 
  if (iwrite == 1) then
-   write (message,'(a,I5)') ' ps_Number_of_Projectors SOC ', ps_Number_of_Projectors(psxml, SET_SO)
+   write (message,'(a,I5)') '- psxml2ab: ps_Number_of_Projectors SOC ', ps_Number_of_Projectors(psxml, SET_SO)
    call wrtout(ab_out,  message,'COLL')
    call wrtout(std_out,  message,'COLL')
  end if
@@ -242,12 +252,12 @@ subroutine psxml2abheader(psxmlfile, psphead, iwrite)
    ll = ps_Projector_L(psxml, idx_so(iproj))
    if (iwrite == 1) then
      if(ll/=ll_previous)then
-       write (message,'(a,I5)') ' ps_Projector_L ', ll
+       write (message,'(a,I5)') '- psxml2ab: ps_Projector_L ', ll
        call wrtout(ab_out,  message,'COLL')
        call wrtout(std_out,  message,'COLL')
        ll_previous=ll
      endif
-     write (message,'(a,E20.10)') ' ps_Projector_Ekb ', ps_Projector_Ekb(psxml, idx_so(iproj))
+     write (message,'(a,E20.10)') '- psxml2ab: ps_Projector_Ekb ', ps_Projector_Ekb(psxml, idx_so(iproj))
      call wrtout(ab_out,  message,'COLL')
      call wrtout(std_out,  message,'COLL')
    end if
@@ -257,63 +267,63 @@ subroutine psxml2abheader(psxmlfile, psphead, iwrite)
  lmm     = max( ps_Number_of_Projectors(psxml, SET_SREL), ps_Number_of_Projectors(psxml, SET_NONREL))
  lmm     = max( lmm, ps_Number_of_Projectors(psxml, SET_SO))
 
- write(std_out,'(a,f5.1,a,i4,a,i4)' ) '  read the values zionpsp=',&
+ write(std_out,'(a,f5.1,a,i4,a,i4)' ) '- psxml2ab:  read the values zionpsp=',&
 & psphead%zionpsp,' , pspcod=',psphead%pspcod,' , lmax=',psphead%lmax
 
  if ( iwrite .eq. 1 ) then
 
    write(message,'(a,a)') &
-&   ' psxml2ab: Atomic Label:                      ', &
+&   '- psxml2ab: Atomic Label:                      ', &
 &  ps_AtomicLabel(psxml)
    call wrtout(ab_out,  message,'COLL')
    call wrtout(std_out,  message,'COLL')
 
    write(message,'(a,f12.5)') &
-&   ' psxml2ab: Atomic Number:                     ', &
+&   '- psxml2ab: Atomic Number:                     ', &
 &   ps_AtomicNumber(psxml)
    call wrtout(ab_out,  message,'COLL')
    call wrtout(std_out,  message,'COLL')
 
    write(message,'(a,f12.5)') &
-&   ' psxml2ab: Valence charge:                    ', &
+&   '- psxml2ab: Valence charge:                    ', &
 &   ps_ZPseudo(psxml)
    call wrtout(ab_out,  message,'COLL')
    call wrtout(std_out,  message,'COLL')
 
    write(message,'(a,a)') &
-&   ' psxml2ab: Pseudopotential generator code :    ', &
+&   '- psxml2ab: Pseudopotential generator code :    ', &
 &   ps_Creator(psxml)
    call wrtout(ab_out,  message,'COLL')
    call wrtout(std_out,  message,'COLL')
 
    write(message,'(a,a)') &
-&   ' psxml2ab: Date of pseudopotential generation: ', &
+&   '- psxml2ab: Date of pseudopotential generation: ', &
 &   ps_Date(psxml)
    call wrtout(ab_out,  message,'COLL')
    call wrtout(std_out,  message,'COLL')
 
    write(message,'(a,a)') &
-&   ' psxml2ab: Pseudopotential flavor:             ', &
+&   '- psxml2ab: Pseudopotential flavor:             ', &
 &   ps_PseudoFlavor(psxml)
    call wrtout(ab_out,  message,'COLL')
    call wrtout(std_out,  message,'COLL')
 
    do ii = 1, ps_NLibxcFunctionals(psxml)
      write(message,'(a,I4,2a)') &
-&     ' psxml2ab: Exchange-correlation functional ',ii,' :    ', &
+&     '- psxml2ab: Exchange-correlation functional ',ii,' :    ', &
 &     ps_LibxcName(psxml,ii)
      call wrtout(ab_out,  message,'COLL')
      call wrtout(std_out,  message,'COLL')
    end do
 
    write(message,'(2a)') &
-&   ' psxml2ab: Relativistically generated pseudopotential (not necessarily SOC!):   ', &
+&   '- psxml2ab: Relativistically generated pseudopotential (not necessarily SOC!):   ', &
 &   trim(ps_Relativity(psxml))
    call wrtout(ab_out,  message,'COLL')
    call wrtout(std_out,  message,'COLL')
 
    write(message,'(2a)') &
-&   ' psxml2ab: Spin-polarized pseudopotential:     ', &
+&   '- psxml2ab: Spin-polarized pseudopotential:     ', &
 &   yesno(ps_IsSpinPolarized(psxml))
    call wrtout(ab_out,  message,'COLL')
    call wrtout(std_out,  message,'COLL')

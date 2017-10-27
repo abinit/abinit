@@ -27,14 +27,14 @@ ndtset 3
  gwls_band_index3 4        # This is the band for which the matrix element of the Self-energy is requested : <gwls_band_index|\Sigma(gw_freqsp)|gwls_band_index>
  gw_customnfreqsp3 1       # This is the number if frequencies at which the matrix element of the Self-energy is requested.
  gw_freqsp3 -0.5558150504  # These are the frequencies at which the matrix element of the Self-energy is requested.
- gwls_sternheimer_kmax3 8  # This controls the convergence with respect to the size of the dielectric matrix.
+ gwls_stern_kmax3 8  # This controls the convergence with respect to the size of the dielectric matrix.
  gwls_kmax_complement3 8   # This controls the convergence with respect to the size of the MODEL dielectric matrix.
  icutcoul3 0               # For molecules, the coulomb potential needs to be spherically truncated.
  rcut3 9.0                 # The spherical truncation has this radius. 
 
  prtwf3 0                  # By default, WFs would be printed with mpiio. However, the NAG compiler (on petrus) takes forever to do so. Since these WFs are totally unuseful and this is not a mpiio test, printing WFs is disabled. 
  prtden3 0                 # Same reason as WFs.
- gwls_recycle3 1           # The writing to file (gwls_recycle3 2) is more desirable as it saves a lot of RAM on production runs, but petrus + NAG 5.3.1 + OpenMPI 1.6.2 cause a BUG with writing / rreading unformatted fortran files. For the time being, we won't test this, then.
+ gwls_recycle3 1           # The writing to file (gwls_recycle3 2) is more desirable as it saves a lot of RAM on production runs, but petrus + NAG 5.3.1 + OpenMPI 1.6.2 cause a BUG with writing / reading unformatted fortran files. For the time being, we won't test this, then.
 
 ### Common variables
 
@@ -100,4 +100,5 @@ xcart
 #%% keywords = GW, GWLS
 #%% description = 
 #%%  Molecular SiH4 in GWLS (G0W0 with Lanczos basis and Sternheimer equations)
+#%% topics = GWls
 #%%<END TEST_INFO>

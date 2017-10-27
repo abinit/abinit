@@ -82,4 +82,5 @@
 #%%  The main reason being that the initialization of large q-point (same for k-point) grid
 #%%  is extremely slow. Inputing manually the qpt and wtq in the input file avoid such 
 #%%  inefficient initialization.
+#%% topics = TDepES
 #%%<END TEST_INFO>

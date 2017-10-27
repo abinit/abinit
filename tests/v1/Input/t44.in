@@ -59,4 +59,5 @@
 #%%   Same test as number 22a of fast, except for the change
 #%%   of ionmov, no reading of wavefunctions, iscf to 2, and different
 #%%   tolerance criteria.
+#%% topics = GeoOpt
 #%%<END TEST_INFO>

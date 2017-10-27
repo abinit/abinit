@@ -53,4 +53,5 @@
 #%% keywords = 
 #%% description = 
 #%%   SiH4 molecule with default parameters. This routine tests the program with several different atoms.
+#%% topics = Wavelets
 #%%<END TEST_INFO>

@@ -12,7 +12,7 @@
  Corning Inc. and other collaborators, see ~abinit/doc/developers/contributors.txt .
  Please read ~abinit/doc/users/acknowledgments.html for suggested
  acknowledgments of the ABINIT effort.
- For more information, see http://www.abinit.org .
+ For more information, see https://www.abinit.org .
 
 .Starting date : Mon  4 Apr 2016.
 - ( at 11h58 )
@@ -189,7 +189,7 @@ P          mk1mem           4
     6    2    3    1      1295   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
     5.00000000000000    1.00000000000000    0.00000000000000   rchrg,fchrg,qchrg
   1.012000          amesh (Hamman grid)
- pspatm: epsatm=  138.07249370
+ pspatm : epsatm=  138.07249370
          --- l  ekb(1:nproj) -->
              0   -0.249207
              2   -1.677910
@@ -203,7 +203,7 @@ P          mk1mem           4
     6    2    2    2      1249   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
     4.00000000000000    1.00000000000000    0.00000000000000   rchrg,fchrg,qchrg
   1.012000          amesh (Hamman grid)
- pspatm: epsatm=   26.49435566
+ pspatm : epsatm=   26.49435566
          --- l  ekb(1:nproj) -->
              0    2.605584
              1    1.737897
@@ -1234,7 +1234,7 @@ P          mk1mem           4
  Note also that it will be of great value to readers of publications presenting these results,
  to read papers enabling them to understand the theoretical formalism and details
  of the ABINIT implementation.
- For information on why they are suggested, see also http://www.abinit.org/about/?text=acknowledgments.
+ For information on why they are suggested, see also https://www.abinit.org/about/?text=acknowledgments.
 -
 - [1] Metric tensor formulation of strain in density-functional perturbation theory, 
 - D. R. Hamann, X. Wu, K. M. Rabe, and D. Vanderbilt, Phys. Rev. B71, 035117 (2005).
@@ -1254,7 +1254,7 @@ P          mk1mem           4
 - Computer Phys. Comm. 180, 2582-2615 (2009).
 - Comment : the third generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
-- is available at http://www.abinit.org/about/ABINIT_CPC_v10.pdf .
+- is available at https://www.abinit.org/about/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 -
 - [4] A brief introduction to the ABINIT software package.
@@ -1265,7 +1265,7 @@ P          mk1mem           4
 - Comment : the second generic paper describing the ABINIT project. Note that this paper
 - should be cited especially if you are using the GW part of ABINIT, as several authors
 - of this part are not in the list of authors of the first or third paper.
-- The .pdf of the latter paper is available at http://www.abinit.org/about/zfk_0505-06_558-562.pdf.
+- The .pdf of the latter paper is available at https://www.abinit.org/about/zfk_0505-06_558-562.pdf.
 - Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
 - the licence allows the authors to put it on the Web).
 -

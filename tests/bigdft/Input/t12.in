@@ -60,4 +60,5 @@
 #%% description = 
 #%%   Pt single atom with semi-core electrons, Krack pseudopotentials (pspcod = 10),
 #%%   and colinear spin polarisation (GGA functional).
+#%% topics = Wavelets
 #%%<END TEST_INFO>

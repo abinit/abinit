@@ -1,8 +1,8 @@
 ##############################################################################
 #Test for multibinit, just read xml and generate the effective potential into XML file
 ##############################################################################
-prt_effpot = 3
-
+prt_model = 3
+dipdip_prt = 1
 n_cell =   2 2 2
 dynamics =  12
 temperature = 1000
@@ -12,7 +12,6 @@ ntime  = 50
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = multibinit
-#%% exclude_builders = ubu_intel_17.0_openmpi
 #%% test_chain = t95,t96,t97,t98.in
 #%% [files]
 #%% [paral_info]

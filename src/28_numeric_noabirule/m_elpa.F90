@@ -120,6 +120,8 @@ CONTAINS  !=====================================================================
 !!      m_abi_linalg
 !!
 !! CHILDREN
+!!      elpa_deallocate,elpa_hdl%hermitian_multiply,elpa_hdl%set
+!!      mult_ah_b_complex
 !!
 !! SOURCE
 
@@ -180,6 +182,8 @@ end subroutine elpa_func_init
 !!      m_abi_linalg
 !!
 !! CHILDREN
+!!      elpa_deallocate,elpa_hdl%hermitian_multiply,elpa_hdl%set
+!!      mult_ah_b_complex
 !!
 !! SOURCE
 
@@ -418,6 +422,8 @@ end subroutine elpa_func_error_handler
 !! PARENTS
 !!
 !! CHILDREN
+!!      elpa_deallocate,elpa_hdl%hermitian_multiply,elpa_hdl%set
+!!      mult_ah_b_complex
 !!
 !! SOURCE
 
@@ -598,9 +604,10 @@ end subroutine elpa_func_set_matrix
 !!  elpa_hdl(type<elpa_hdl_t>)=handler for ELPA object
 !!
 !! PARENTS
-!!      m_slk
 !!
 !! CHILDREN
+!!      elpa_deallocate,elpa_hdl%hermitian_multiply,elpa_hdl%set
+!!      mult_ah_b_complex
 !!
 !! SOURCE
 
@@ -699,9 +706,10 @@ end subroutine elpa_func_solve_evp_1stage_real
 !!  elpa_hdl(type<elpa_hdl_t>)=handler for ELPA object
 !!
 !! PARENTS
-!!      m_slk
 !!
 !! CHILDREN
+!!      elpa_deallocate,elpa_hdl%hermitian_multiply,elpa_hdl%set
+!!      mult_ah_b_complex
 !!
 !! SOURCE
 
@@ -794,9 +802,10 @@ end subroutine elpa_func_solve_evp_1stage_complex
 !!  elpa_hdl(type<elpa_hdl_t>)=handler for ELPA object
 !!
 !! PARENTS
-!!      m_slk
 !!
 !! CHILDREN
+!!      elpa_deallocate,elpa_hdl%hermitian_multiply,elpa_hdl%set
+!!      mult_ah_b_complex
 !!
 !! SOURCE
 
@@ -882,9 +891,10 @@ end subroutine elpa_func_cholesky_real
 !!  elpa_hdl(type<elpa_hdl_t>)=handler for ELPA object
 !!
 !! PARENTS
-!!      m_slk
 !!
 !! CHILDREN
+!!      elpa_deallocate,elpa_hdl%hermitian_multiply,elpa_hdl%set
+!!      mult_ah_b_complex
 !!
 !! SOURCE
 
@@ -970,9 +980,10 @@ end subroutine elpa_func_cholesky_complex
 !!  elpa_hdl(type<elpa_hdl_t>)=handler for ELPA object
 !!
 !! PARENTS
-!!      m_slk
 !!
 !! CHILDREN
+!!      elpa_deallocate,elpa_hdl%hermitian_multiply,elpa_hdl%set
+!!      mult_ah_b_complex
 !!
 !! SOURCE
 
@@ -1059,9 +1070,10 @@ end subroutine elpa_func_invert_triangular_real
 !!  elpa_hdl(type<elpa_hdl_t>)=handler for ELPA object
 !!
 !! PARENTS
-!!      m_slk
 !!
 !! CHILDREN
+!!      elpa_deallocate,elpa_hdl%hermitian_multiply,elpa_hdl%set
+!!      mult_ah_b_complex
 !!
 !! SOURCE
 
@@ -1167,9 +1179,10 @@ end subroutine elpa_func_invert_triangular_complex
 !!  elpa_hdl(type<elpa_hdl_t>)=handler for ELPA object
 !!
 !! PARENTS
-!!      m_slk
 !!
 !! CHILDREN
+!!      elpa_deallocate,elpa_hdl%hermitian_multiply,elpa_hdl%set
+!!      mult_ah_b_complex
 !!
 !! SOURCE
 
@@ -1277,9 +1290,10 @@ end subroutine elpa_func_hermitian_multiply_real
 !!  elpa_hdl(type<elpa_hdl_t>)=handler for ELPA object
 !!
 !! PARENTS
-!!      m_slk
 !!
 !! CHILDREN
+!!      elpa_deallocate,elpa_hdl%hermitian_multiply,elpa_hdl%set
+!!      mult_ah_b_complex
 !!
 !! SOURCE
 

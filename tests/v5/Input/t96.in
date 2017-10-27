@@ -95,4 +95,5 @@ znucl 28
 #%% description = 
 #%%   FCC Ni - get phonons and ddk in preparation for an electron-phonon coupling run.
 #%%   a few extra features are used compared to the tutorial.
+#%% topics = ElPhonInt
 #%%<END TEST_INFO>

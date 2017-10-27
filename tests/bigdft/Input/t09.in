@@ -58,4 +58,5 @@
 #%% description = 
 #%%   SiH4 molecule with truncated convergence to test the computation of the tail
 #%%   correction (see the tl_radius) parameter in the input file.
+#%% topics = Wavelets
 #%%<END TEST_INFO>

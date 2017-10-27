@@ -183,6 +183,7 @@ MODULE m_crystal
  public :: isalchemical            ! True if we are using alchemical pseudopotentials.
  public :: adata_type              ! Return atomic data from the itypat index.
  public :: symbol_type             ! Return the atomic symbol from the itypat index.
+ public :: symbols_crystal         ! Return an array with the atomic symbol:["Sr","Ru","O1","O2","O3"]
  public :: crystal_point_group     ! Return the symmetries of the point group of the crystal.
 !!***
 
@@ -232,8 +233,8 @@ CONTAINS  !=====================================================================
 !!
 !! PARENTS
 !!      dfpt_looppert,eig2tot,gwls_hamiltonian,m_crystal_io,m_ddb
-!!      m_effective_potential,m_effective_potential_file,mover,optic,outddbnc
-!!      outscfcv,vtorho
+!!      m_effective_potential,m_effective_potential_file,mover,optic,outscfcv
+!!      respfn,vtorho
 !!
 !! CHILDREN
 !!      mati3inv,sg_multable
@@ -389,7 +390,7 @@ subroutine crystal_init(amu,Cryst,space_group,natom,npsp,ntypat,nsym,rprimd,typa
  ! * indsym(4,  isym,iat) gives iat_sym in the original unit cell.
  ! * indsym(1:3,isym,iat) gives the lattice vector $R_0$.
  !
- ABI_MALLOC(indsym,(4,Cryst%nsym,natom))
+ ABI_MALLOC(indsym,(4,Cryst%nsym,natom)); indsym(:,:,:)=zero
  tolsym8=tol8
  call symatm(indsym,natom,Cryst%nsym,Cryst%symrec,Cryst%tnons,tolsym8,Cryst%typat,Cryst%xred)
 
@@ -416,10 +417,11 @@ end subroutine crystal_init
 !!  Destroy the dynamic arrays in a crystal_t data type.
 !!
 !! PARENTS
-!!      anaddb,bethe_salpeter,dfpt_looppert,eig2tot,eph,gstate,gwls_hamiltonian
-!!      m_ddk,m_dvdb,m_effective_potential,m_effective_potential_file
-!!      m_gruneisen,m_ioarr,m_iowf,m_wfd,m_wfk,mlwfovlp_qp,mover,mrgscr,optic
-!!      outddbnc,outscfcv,screening,sigma,vtorho,wfk_analyze
+!!      anaddb,bethe_salpeter,cut3d,dfpt_looppert,eig2tot,eph,fold2Bloch,gstate
+!!      gwls_hamiltonian,m_ddk,m_dvdb,m_effective_potential
+!!      m_effective_potential_file,m_gruneisen,m_ioarr,m_iowf,m_wfd,m_wfk
+!!      mlwfovlp_qp,mover,mrgscr,optic,outscfcv,respfn,screening,sigma,vtorho
+!!      wfk_analyze
 !!
 !! CHILDREN
 !!      mati3inv,sg_multable
@@ -525,8 +527,8 @@ end subroutine crystal_free
 !!  Only printing
 !!
 !! PARENTS
-!!      eph,gwls_hamiltonian,m_dvdb,m_effective_potential,m_gruneisen,setup_bse
-!!      setup_screening,setup_sigma,wfk_analyze
+!!      eph,gwls_hamiltonian,m_dvdb,m_gruneisen,setup_bse,setup_screening
+!!      setup_sigma,wfk_analyze
 !!
 !! CHILDREN
 !!      mati3inv,sg_multable
@@ -676,6 +678,86 @@ subroutine print_symmetries(nsym,symrel,tnons,symafm,unit,mode_paral)
 
 end subroutine print_symmetries
 !!***
+
+!!****f* m_crystal/symbols_crystal
+!!
+!! NAME
+!! symbols_crystal
+!!
+!! FUNCTION
+!! Return a array with the symbol of each atoms
+!! with indexation
+!! ["Sr","Ru","O1","O2","O3"] for example
+!!
+!! INPUTS
+!! natom = number of atoms
+!! ntypat = number of typat
+!! npsp =  number of pseudopotentials
+!! znucl = Nuclear charge for each type of pseudopotential
+!! 
+!! OUTPUT
+!! symbols = array with the symbol of each atoms
+!!
+!! PARENTS
+!!      m_effective_potential_file,m_fit_polynomial_coeff
+!!
+!! CHILDREN
+!!      mati3inv,sg_multable
+!!
+!! SOURCE
+
+subroutine symbols_crystal(natom,ntypat,npsp,symbols,typat,znucl)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'symbols_crystal'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: natom,ntypat,npsp
+!arrays
+ real(dp),intent(in):: znucl(npsp)
+ integer,intent(in) :: typat(natom)
+ character(len=5),intent(out) :: symbols(natom)
+ character(len=3) :: powerchar
+!Local variables-------------------------------
+!scalar
+ integer :: ia,ii,itypat,jj
+!arrays
+! *************************************************************************
+
+!  Fill the symbols array
+   do ia=1,natom
+     symbols(ia) = adjustl(znucl2symbol(znucl(typat(ia))))
+   end do
+   itypat = zero
+   do itypat =1,ntypat
+     ii = zero
+     do ia=1,natom
+       if(typat(ia)==itypat) then
+         ii = ii + 1
+       end if
+     end do
+     if(ii>1)then
+       jj=1
+       do ia=1,natom
+         if(typat(ia)==itypat) then
+           write(powerchar,'(I0)') jj
+           symbols(ia) = trim(symbols(ia))//trim(powerchar)
+           jj=jj+1
+         end if
+       end do
+     end if
+   end do
+
+end subroutine symbols_crystal
+!!***
+
 
 !----------------------------------------------------------------------
 

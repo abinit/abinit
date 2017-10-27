@@ -61,4 +61,5 @@ xred 3*0
 #%%   Going to 100 Ha cut-off gives -0.5001 Ha.
 #%%   Going to 150 Ha cut-off gives -0.5002 Ha.
 #%%   For speed-up, it begins with the wavefunctions from test 21.
+#%% topics = xc
 #%%<END TEST_INFO>

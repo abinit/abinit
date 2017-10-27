@@ -83,4 +83,5 @@ nshiftk1  2
 #%% description = 
 #%%   BCC Molybdenum. Test the k point generator : Monkhorst-Pack
 #%%   grid, then band structure.
+#%% topics = k-points
 #%%<END TEST_INFO>

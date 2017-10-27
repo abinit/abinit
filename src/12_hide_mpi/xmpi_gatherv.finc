@@ -133,7 +133,7 @@ subroutine xmpi_gatherv_int1_dp1(buf_int,buf_int_size,buf_dp,buf_dp_size, &
 !Local variables--------------
 !scalars
  integer :: buf_pack_size,ierr,ii,iproc,istart_dp,istart_int
- integer :: lg,lg1,lg2,lg_int,lg_dp,me,n1,nproc,position
+ integer :: lg,lg1,lg2,lg_int,lg_dp,me,nproc,position
  integer :: totalbufcount
  logical,parameter :: use_pack=.false.
 !arrays
@@ -143,7 +143,6 @@ subroutine xmpi_gatherv_int1_dp1(buf_int,buf_int_size,buf_dp,buf_dp_size, &
  integer,allocatable :: disp_dp(:),disp_int(:),displ(:),displ_dp(:),displ_int(:)
  integer,allocatable :: pos_all(:)
  integer,pointer:: outbuf_int(:)
- real(dp ) :: tsec(2)
  real(dp),pointer :: outbuf_dp(:)
  character,allocatable :: buf_pack(:),buf_pack_tot(:)
 

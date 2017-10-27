@@ -51,4 +51,5 @@
 #%% description = 
 #%%   H2 molecule with default parameters. No forces are computed, with steepest decent
 #%%   for the direct minimisation of the wavefunctions.
+#%% topics = Wavelets
 #%%<END TEST_INFO>

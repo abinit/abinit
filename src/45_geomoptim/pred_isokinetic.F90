@@ -84,7 +84,7 @@ subroutine pred_isokinetic(ab_mover,hist,itime,ntime,zDEBUG,iexit)
 
 !Local variables-------------------------------
 !scalars
- integer  :: ii,kk,iatom,idim,idum=5,nfirst,ifirst
+ integer  :: kk,iatom,idim,idum=5,nfirst,ifirst
  real(dp) :: a,as,b,sqb,s,s1,s2,scdot,sigma2,vtest,v2gauss
  real(dp),parameter :: v2tol=tol8
  real(dp) :: etotal,rescale_vel
@@ -417,9 +417,9 @@ subroutine pred_isokinetic(ab_mover,hist,itime,ntime,zDEBUG,iexit)
  xcart=xcart_next
  xred=xred_next
 
-!Increase indexes
- hist%ihist=hist%ihist+1
-
+!increment the ihist
+ hist%ihist = abihist_findIndex(hist,+1)
+ 
 !Fill the history with the variables
 !xred, acell, rprimd, vel
  call var2hist(acell,hist,ab_mover%natom,rprimd,xred,zDEBUG)

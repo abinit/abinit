@@ -84,5 +84,6 @@
 #%%   Bulk Aluminium, FCC, with 10 special points, occopt=7 and tsmear=0.05 .
 #%%   Start from the wavefunctions of case 4, reformatted by case 6.
 #%%   Ask to compute the DOS. See the WARNING described in case 6.
-#%%   Cannot use more that 2 processoes due to t04.in
+#%%   Cannot use more that 2 processors due to t04.in
+#%% topics = ElecDOS
 #%%<END TEST_INFO>

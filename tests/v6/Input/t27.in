@@ -67,4 +67,5 @@ ngkpt 1 1 1
 #%%   Hydrogen has been used as an example. No physical meaning.
 #%%   Number of images is only 10 but experience shows that at
 #%%   least 20 are fine.
+#%% topics = GeoOpt
 #%%<END TEST_INFO>

@@ -231,7 +231,7 @@ subroutine pawang_init(Pawang,gnt_option,lmax,nphi,nsym,ntheta,pawxcdev,use_ls_y
  end if
 
  if (use_ylm>0.and.Pawang%angl_size>0) then
-   if (xclevel>=1) ll=Pawang%l_size_max
+   if (xclevel>=0) ll=Pawang%l_size_max
    if (xclevel>=2) ll=ll+1
    Pawang%ylm_size=ll**2
    LIBPAW_ALLOCATE(Pawang%ylmr,(Pawang%ylm_size,Pawang%angl_size))

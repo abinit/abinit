@@ -101,7 +101,7 @@ CONTAINS  !=====================================================================
 !!
 !! CHILDREN
 !!      destroy_mpi_enreg,dtset_copy,dtset_free,fourdp,fourdp_6d,initmpi_seq
-!!      libxc_functionals_end,libxc_functionals_init,printxsf,rhohxc,wrtout
+!!      libxc_functionals_end,libxc_functionals_init,printxsf,wrtout
 !!
 !! SOURCE
 
@@ -199,7 +199,7 @@ end subroutine kxc_rpa
 !!
 !! CHILDREN
 !!      destroy_mpi_enreg,dtset_copy,dtset_free,fourdp,fourdp_6d,initmpi_seq
-!!      libxc_functionals_end,libxc_functionals_init,printxsf,rhohxc,wrtout
+!!      libxc_functionals_end,libxc_functionals_init,printxsf,wrtout
 !!
 !! SOURCE
 
@@ -402,12 +402,13 @@ end subroutine kxc_local
 !!
 !! CHILDREN
 !!      destroy_mpi_enreg,dtset_copy,dtset_free,fourdp,fourdp_6d,initmpi_seq
-!!      libxc_functionals_end,libxc_functionals_init,printxsf,rhohxc,wrtout
+!!      libxc_functionals_end,libxc_functionals_init,printxsf,rhotoxc,wrtout
 !!
 !! SOURCE
 
 subroutine kxc_alda(dtset,ixc,kxcg,mpi_enreg,nfft,ngfft,nspden,option,rhor,rhocut,rprimd)
 
+ use m_xcdata
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -438,14 +439,14 @@ subroutine kxc_alda(dtset,ixc,kxcg,mpi_enreg,nfft,ngfft,nspden,option,rhor,rhocu
 !integer :: i1,i2,i3,k1,n1,n2,n3
 !real(dp) :: kx,rho,rhomax,ftest
 !scalars
- integer :: ifft,ikxc,isp,n3xccc,ncut,nk3xc,nkxc,optionrhoxc,tim_fourdp
+ integer :: ifft,ikxc,intxc,isp,n3xccc,ncut,nk3xc,nkxc,optionrhoxc,tim_fourdp
  real(dp),parameter :: gsqcut=1._dp
  real(dp) :: enxc,rhocuttot,rhomin,vxcavg
  character(len=500) :: message
- type(dataset_type) :: dtLocal
+ type(xcdata_type) :: xcdata
 !arrays
  real(dp) :: strsxc(6)
- real(dp) :: dum(0)
+ real(dp) :: dum(0),qphon(3)
  real(dp),allocatable :: kxcr(:,:),rhog(:,:),rhorcut(:,:),vhartree(:)
  real(dp),allocatable :: vxc(:,:),xccc3d(:)
 
@@ -470,21 +471,19 @@ subroutine kxc_alda(dtset,ixc,kxcg,mpi_enreg,nfft,ngfft,nspden,option,rhor,rhocu
  ABI_MALLOC(vhartree,(nfft))
  ABI_MALLOC(vxc,(nfft,nspden))
 
-!Copy the input variables from the current dataset to a temporary one
-!to tune some parameters
- call dtset_copy(dtLocal, dtset)
- dtLocal%intxc = 0
- dtLocal%ixc   = ixc
+ intxc=0
+ call xcdata_init(dtset%auxc_ixc,intxc,ixc,&
+&  dtset%nelect,dtset%tphysel,dtset%usekden,dtset%vdw_xc,dtset%xc_tb09_c,dtset%xc_denpos,xcdata)
 
  ! Reinitialize the libxc module with the overriden values
  if (dtset%ixc<0) then
    call libxc_functionals_end()
  end if
- if (dtLocal%ixc<0) then
-   call libxc_functionals_init(dtLocal%ixc,dtLocal%nspden)
+ if (ixc<0) then
+   call libxc_functionals_init(ixc,dtset%nspden)
  end if
 
-!to be adjusted for the call to rhohxc
+!to be adjusted for the call to rhotoxc
  nk3xc=1
 
 !Cut-off the density.
@@ -528,10 +527,11 @@ subroutine kxc_alda(dtset,ixc,kxcg,mpi_enreg,nfft,ngfft,nspden,option,rhor,rhocu
    ABI_MALLOC(kxcr,(nfft,nkxc))
    ABI_MALLOC(xccc3d,(n3xccc))
 
-   optionrhoxc = 2 !See rhohxc.f
+   optionrhoxc = 2 !See rhotoxc.f
 
-   call rhohxc(dtLocal,enxc,gsqcut,0,kxcr,mpi_enreg,nfft,ngfft,dum,0,dum,0,nkxc,nk3xc,nspden,n3xccc,&
-&   optionrhoxc,rhog,rhorcut,rprimd,strsxc,1,vhartree,vxc,vxcavg,xccc3d)
+   call hartre(1,gsqcut,0,mpi_enreg,nfft,ngfft,dtset%paral_kgb,rhog,rprimd,vhartree)
+   call rhotoxc(enxc,kxcr,mpi_enreg,nfft,ngfft,dum,0,dum,0,nkxc,nk3xc,nspden,n3xccc,&
+&   optionrhoxc,dtset%paral_kgb,rhorcut,rprimd,strsxc,1,vxc,vxcavg,xccc3d,xcdata,vhartr=vhartree)
 
 !  DEBUG
 !  fx for tests.
@@ -582,10 +582,11 @@ subroutine kxc_alda(dtset,ixc,kxcg,mpi_enreg,nfft,ngfft,nspden,option,rhor,rhocu
    ABI_MALLOC(kxcr,(nfft,nkxc))
    ABI_MALLOC(xccc3d,(n3xccc))
 
-   optionrhoxc = -2 !See rhohxc.f
+   optionrhoxc = -2 !See rhotoxc.f
 
-   call rhohxc(dtLocal,enxc,gsqcut,0,kxcr,mpi_enreg,nfft,ngfft,dum,0,dum,0,nkxc,nk3xc,nspden,n3xccc,&
-&   optionrhoxc,rhog,rhorcut,rprimd,strsxc,1,vhartree,vxc,vxcavg,xccc3d)
+   call hartre(1,gsqcut,0,mpi_enreg,nfft,ngfft,dtset%paral_kgb,rhog,rprimd,vhartree)
+   call rhotoxc(enxc,kxcr,mpi_enreg,nfft,ngfft,dum,0,dum,0,nkxc,nk3xc,nspden,n3xccc,&
+&   optionrhoxc,dtset%paral_kgb,rhorcut,rprimd,strsxc,1,vxc,vxcavg,xccc3d,xcdata,vhartr=vhartree)
 
    kxcr(:,2) = 0.5_dp*kxcr(:,2)
 
@@ -604,7 +605,7 @@ subroutine kxc_alda(dtset,ixc,kxcg,mpi_enreg,nfft,ngfft,nspden,option,rhor,rhocu
 !ENDDEBUG
 
 ! Revert libxc module to the original settings
- if (dtLocal%ixc<0) then
+ if (ixc<0) then
    call libxc_functionals_end()
  end if
  if (dtset%ixc<0) then
@@ -612,7 +613,6 @@ subroutine kxc_alda(dtset,ixc,kxcg,mpi_enreg,nfft,ngfft,nspden,option,rhor,rhocu
  end if
 
 !Free memory.
- call dtset_free(dtLocal)
  ABI_FREE(rhorcut)
  ABI_FREE(rhog)
  ABI_FREE(vhartree)
@@ -664,7 +664,7 @@ end subroutine kxc_alda
 !!
 !! CHILDREN
 !!      destroy_mpi_enreg,dtset_copy,dtset_free,fourdp,fourdp_6d,initmpi_seq
-!!      libxc_functionals_end,libxc_functionals_init,printxsf,rhohxc,wrtout
+!!      libxc_functionals_end,libxc_functionals_init,printxsf,wrtout
 !!
 !! SOURCE
 
@@ -892,7 +892,7 @@ end subroutine kxc_pgg
 !!
 !! CHILDREN
 !!      destroy_mpi_enreg,dtset_copy,dtset_free,fourdp,fourdp_6d,initmpi_seq
-!!      libxc_functionals_end,libxc_functionals_init,printxsf,rhohxc,wrtout
+!!      libxc_functionals_end,libxc_functionals_init,printxsf,wrtout
 !!
 !! SOURCE
 
@@ -1058,12 +1058,13 @@ end subroutine kxc_eok
 !!
 !! CHILDREN
 !!      destroy_mpi_enreg,dtset_copy,dtset_free,fourdp,fourdp_6d,initmpi_seq
-!!      libxc_functionals_end,libxc_functionals_init,printxsf,rhohxc,wrtout
+!!      libxc_functionals_end,libxc_functionals_init,printxsf,rhotoxc,wrtout
 !!
 !! SOURCE
 
 subroutine kxc_driver(Dtset,Cryst,ixc,ngfft,nfft_tot,nspden,rhor,npw,dim_kxcg,kxcg,gvec,comm,dbg_mode)
 
+ use m_xcdata
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1091,11 +1092,11 @@ subroutine kxc_driver(Dtset,Cryst,ixc,ngfft,nfft_tot,nspden,rhor,npw,dim_kxcg,kx
 !Local variables ------------------------------
 !scalars
  integer,parameter :: paral_kgb0=0
- integer :: cplex,i1,i2,i3,ig,igp,iq,ir,n3xccc,ngfft1,ngfft2,izero
+ integer :: cplex,i1,i2,i3,ig,igp,intxc,iq,ir,n3xccc,ngfft1,ngfft2,izero
  integer :: ngfft3,nkxc,option,ikxc,nk3xc,my_rank,master,unt_dmp
  real(dp) :: enxc,expo,gpqx,gpqy,gpqz,gsqcut,vxcavg
  character(len=500) :: msg,fname
- type(dataset_type) :: DtGW
+ type(xcdata_type) :: xcdata
  type(MPI_type) :: MPI_enreg_seq 
 !arrays
  real(dp) :: qphon(3),strsxc(6),dum(0)
@@ -1119,18 +1120,12 @@ subroutine kxc_driver(Dtset,Cryst,ixc,ngfft,nfft_tot,nspden,rhor,npw,dim_kxcg,kx
  write(msg,'(a,i3)') ' kxc_driver: calculating exchange-correlation kernel using ixc = ',ixc
  call wrtout(std_out,msg,'COLL')
 
- call dtset_copy(DtGW,Dtset)
- DtGW%intxc = 0
- DtGW%ixc   = ixc
+ intxc=0
+ call xcdata_init(Dtset%auxc_ixc,intxc,ixc,&
+&  Dtset%nelect,Dtset%tphysel,Dtset%usekden,Dtset%vdw_xc,Dtset%xc_tb09_c,Dtset%xc_denpos,xcdata)
 
-!Redefine xclevel.
- DtGW%xclevel=0
- if ( ( 1<=DtGW%ixc .and. DtGW%ixc<=10).or.(30<=DtGW%ixc .and. DtGW%ixc<=39) ) DtGW%xclevel=1 ! LDA
- if ( (11<=DtGW%ixc .and. DtGW%ixc<=19).or.(23<=DtGW%ixc .and. DtGW%ixc<=29) ) DtGW%xclevel=2 ! GGA
- if ( 20<=DtGW%ixc .and. DtGW%ixc<=22 ) DtGW%xclevel=3 ! ixc for TDDFT kernel tests
-
- if (ALL(DtGW%xclevel/=(/1,2/))) then
-   write(msg,'(a,i0)')"Unsupported xclevel = ",DtGW%xclevel
+ if (ALL(xcdata%xclevel/=(/1,2/))) then
+   write(msg,'(a,i0)')"Unsupported xclevel = ",xcdata%xclevel
    MSG_ERROR(msg)
  end if
 
@@ -1148,7 +1143,7 @@ subroutine kxc_driver(Dtset,Cryst,ixc,ngfft,nfft_tot,nspden,rhor,npw,dim_kxcg,kx
 
  ABI_MALLOC(kxcr,(nfft_tot,nkxc))
 
-!gsqcut and rhog are zeroed because they are not used by rhohxc if 1<=ixc<=16 and option=0
+!gsqcut and rhog are zeroed because they are not used by rhotoxc if 1<=ixc<=16 and option=0
  gsqcut=zero
 
  ABI_MALLOC(rhog,(2,nfft_tot))
@@ -1163,7 +1158,7 @@ subroutine kxc_driver(Dtset,Cryst,ixc,ngfft,nfft_tot,nspden,rhor,npw,dim_kxcg,kx
  option=2 ! 2 for Hxc and kxcr (no paramagnetic part if nspden=1)
  qphon =zero
 
-!to be adjusted for the call to rhohxc
+!to be adjusted for the call to rhotoxc
  nk3xc=1
  izero=0
 
@@ -1171,14 +1166,16 @@ subroutine kxc_driver(Dtset,Cryst,ixc,ngfft,nfft_tot,nspden,rhor,npw,dim_kxcg,kx
  if (dtset%ixc<0) then
    call libxc_functionals_end()
  end if
- if (DtGW%ixc<0) then
-   call libxc_functionals_init(DtGW%ixc,DtGW%nspden)
+ if (ixc<0) then
+   call libxc_functionals_init(ixc,Dtset%nspden)
  end if
 
+ call hartre(1,gsqcut,izero,MPI_enreg_seq,nfft_tot,ngfft,dtset%paral_kgb,rhog,Cryst%rprimd,vhartr)
+
 !Compute the kernel.
- call rhohxc(DtGW,enxc,gsqcut,izero,kxcr,MPI_enreg_seq,nfft_tot,ngfft,&
-& dum,0,dum,0,nkxc,nk3xc,nspden,n3xccc,option,rhog,rhor,Cryst%rprimd,&
-& strsxc,1,vhartr,vxclda,vxcavg,xccc3d)
+ call rhotoxc(enxc,kxcr,MPI_enreg_seq,nfft_tot,ngfft,&
+& dum,0,dum,0,nkxc,nk3xc,nspden,n3xccc,option,Dtset%paral_kgb,rhor,Cryst%rprimd,&
+& strsxc,1,vxclda,vxcavg,xccc3d,xcdata,vhartr=vhartr)
 
  ABI_FREE(rhog)
  ABI_FREE(vhartr)
@@ -1214,7 +1211,7 @@ subroutine kxc_driver(Dtset,Cryst,ixc,ngfft,nfft_tot,nspden,rhor,npw,dim_kxcg,kx
  ABI_FREE(my_kxcg)
 
 !MG this part is never executed, but one should use dfpt_mkvxc for the GGA kernel.
- if (DtGW%xclevel==2) then
+ if (xcdata%xclevel==2) then
    MSG_ERROR("check GGA implementation")
    cplex=2
    ABI_MALLOC(phas,(cplex*nfft_tot,npw,nspden))
@@ -1276,7 +1273,7 @@ subroutine kxc_driver(Dtset,Cryst,ixc,ngfft,nfft_tot,nspden,rhor,npw,dim_kxcg,kx
  end if !xclevel==2
 
 ! Revert libxc module to the original settings
- if (DtGW%ixc<0) then
+ if (ixc<0) then
    call libxc_functionals_end()
  end if
  if (dtset%ixc<0) then
@@ -1284,7 +1281,6 @@ subroutine kxc_driver(Dtset,Cryst,ixc,ngfft,nfft_tot,nspden,rhor,npw,dim_kxcg,kx
  end if
 
  call destroy_mpi_enreg(MPI_enreg_seq)
- call dtset_free(DtGW)
  ABI_FREE(kxcr)
 
 end subroutine kxc_driver
@@ -1326,13 +1322,14 @@ end subroutine kxc_driver
 !!
 !! CHILDREN
 !!      destroy_mpi_enreg,dtset_copy,dtset_free,fourdp,fourdp_6d,initmpi_seq
-!!      libxc_functionals_end,libxc_functionals_init,printxsf,rhohxc,wrtout
+!!      libxc_functionals_end,libxc_functionals_init,printxsf,rhotoxc,wrtout
 !!
 !! SOURCE
 
 subroutine kxc_ADA(Dtset,Cryst,ixc,ngfft,nfft,nspden,rhor,&
 &                  npw,nqibz,qibz,fxc_ADA,gvec,comm,kappa_init,dbg_mode)
 
+ use m_xcdata
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1351,8 +1348,8 @@ subroutine kxc_ADA(Dtset,Cryst,ixc,ngfft,nfft,nspden,rhor,&
  integer,intent(in) :: ixc,nfft,nspden,npw,comm
  real(dp),intent(in),optional :: kappa_init
  logical,optional,intent(in) :: dbg_mode
- type(dataset_type),intent(in) :: Dtset
  type(crystal_t),intent(in) :: Cryst
+ type(dataset_type),intent(in) :: Dtset
 !arrays
  integer,intent(in) :: gvec(3,npw),ngfft(18)
  integer,intent(in) :: nqibz
@@ -1363,15 +1360,15 @@ subroutine kxc_ADA(Dtset,Cryst,ixc,ngfft,nfft,nspden,rhor,&
 !Local variables ------------------------------
 !scalars
  integer,parameter :: paral_kgb0=0
- integer :: i1,i2,i3,ig,igp,ir,irp,n3xccc,ngfft1,ngfft2,izero !,isp
+ integer :: i1,i2,i3,ig,igp,intxc,ir,irp,n3xccc,ngfft1,ngfft2,izero !,isp
  integer :: ngfft3,nkxc,option,ikxc,ierr,nproc
  integer :: nk3xc,igrid,iqbz,my_rank,master,unt_dmp,gmgp_idx
  real(dp) :: enxc,gsqcut,ucvol !,rs,Kx,Kc
  real(dp) :: vxcavg,kappa,abs_qpg_sq,abs_qpgp_sq
  real(dp) :: difx,dify,difz,inv_kappa_sq
  character(len=500) :: msg,fname
- type(dataset_type) :: DtGW
  type(MPI_type) :: MPI_enreg_seq 
+ type(xcdata_type) :: xcdata
 !arrays
  real(dp) :: qpg(3),qpgp(3),qphon(3),strsxc(6),q_point(3),dum(0)
  real(dp),allocatable :: kxcr(:,:)
@@ -1411,18 +1408,12 @@ subroutine kxc_ADA(Dtset,Cryst,ixc,ngfft,nfft,nspden,rhor,&
  call wrtout(std_out,msg,'COLL')
  inv_kappa_sq = one/(kappa*kappa)
 
- call dtset_copy(DtGW,Dtset)
- DtGW%intxc = 0
- DtGW%ixc   = ixc
+ intxc=0
+ call xcdata_init(dtset%auxc_ixc,intxc,ixc,&
+&  dtset%nelect,dtset%tphysel,dtset%usekden,dtset%vdw_xc,dtset%xc_tb09_c,dtset%xc_denpos,xcdata)
 
-!Redefine xclevel.
- DtGW%xclevel=0
- if( ( 1<=DtGW%ixc .and. DtGW%ixc<=10).or.(30<=DtGW%ixc .and. DtGW%ixc<=39) )DtGW%xclevel=1 ! LDA
- if( (11<=DtGW%ixc .and. DtGW%ixc<=19).or.(23<=DtGW%ixc .and. DtGW%ixc<=29) )DtGW%xclevel=2 ! GGA
- if( 20<=DtGW%ixc .and. DtGW%ixc<=22 )DtGW%xclevel=3 ! ixc for TDDFT kernel tests
-
- if (ALL(DtGW%xclevel/=(/1,2/))) then
-   write(msg,'(a,i0)')"Unsupported xclevel = ",DtGW%xclevel
+ if (ALL(xcdata%xclevel/=(/1,2/))) then
+   write(msg,'(a,i0)')"Unsupported xclevel = ",xcdata%xclevel
    MSG_ERROR(msg)
  end if
  
@@ -1430,17 +1421,17 @@ subroutine kxc_ADA(Dtset,Cryst,ixc,ngfft,nfft,nspden,rhor,&
  ngfft2=ngfft(2)
  ngfft3=ngfft(3)
 
- if (ixc>=1.and.ixc<11) then     ! LDA case
-   nkxc= 2*min(DtGW%nspden,2)-1  ! 1 or 3
- else                            ! GGA case
-   nkxc=12*min(DtGW%nspden,2)-5  ! 7 or 19
+ if (ixc>=1.and.ixc<11) then      ! LDA case
+   nkxc= 2*min(Dtset%nspden,2)-1  ! 1 or 3
+ else                             ! GGA case
+   nkxc=12*min(Dtset%nspden,2)-5  ! 7 or 19
    ABI_CHECK(dtset%xclevel==2,"Functional should be GGA")
    MSG_ERROR("GGA functional not implemented for ADA vertex")
  end if
  
  ABI_MALLOC(kxcr,(nfft,nkxc))
 
-!gsqcut and rhog are zeroed because they are not used by rhohxc if 1<=ixc<=16 and option=0
+!gsqcut and rhog are zeroed because they are not used by rhotoxc if 1<=ixc<=16 and option=0
  gsqcut=zero
 
  ABI_MALLOC(rhog,(2,nfft))
@@ -1453,9 +1444,9 @@ subroutine kxc_ADA(Dtset,Cryst,ixc,ngfft,nfft,nspden,rhor,&
  ABI_MALLOC(vxclda,(nfft,nspden))
 
  option=2 ! 2 for Hxc and kxcr (no paramagnetic part if nspden=1)
- qphon(:)=0.0
+ qphon(:)=zero
 
-!to be adjusted for the call to rhohxc
+!to be adjusted for the call to rhotoxc
  nk3xc=1
 
 !Compute the kernel.
@@ -1504,13 +1495,14 @@ subroutine kxc_ADA(Dtset,Cryst,ixc,ngfft,nfft,nspden,rhor,&
  if (dtset%ixc<0) then
    call libxc_functionals_end()
  end if
- if (DtGW%ixc<0) then
-   call libxc_functionals_init(DtGW%ixc,DtGW%nspden)
+ if (ixc<0) then
+   call libxc_functionals_init(ixc,Dtset%nspden)
  end if
 
- call rhohxc(DtGW,enxc,gsqcut,izero,kxcr,MPI_enreg_seq,nfft,ngfft,&
-& dum,0,dum,0,nkxc,nk3xc,nspden,n3xccc,option,rhog,my_rhor,Cryst%rprimd,&
-& strsxc,1,vhartr,vxclda,vxcavg,xccc3d)
+ call hartre(1,gsqcut,izero,MPI_enreg_seq,nfft,ngfft,dtset%paral_kgb,rhog,Cryst%rprimd,vhartr)
+ call rhotoxc(enxc,kxcr,MPI_enreg_seq,nfft,ngfft,&
+& dum,0,dum,0,nkxc,nk3xc,nspden,n3xccc,option,dtset%paral_kgb,my_rhor,Cryst%rprimd,&
+& strsxc,1,vxclda,vxcavg,xccc3d,xcdata,vhartr=vhartr)
 
 !Check for extreme (NaN) values
 !do ir=1,nfft
@@ -1742,14 +1734,14 @@ subroutine kxc_ADA(Dtset,Cryst,ixc,ngfft,nfft,nspden,rhor,&
    ABI_FREE(my_fxc_ADA_rrp)
    ABI_FREE(FT_fxc_ADA_ggpq)
    
-   if (DtGW%xclevel==2) then
+   if (xcdata%xclevel==2) then
      MSG_ERROR(" GGA not implemented for kxc_ADA")
    end if !xclevel==2
 
  end if ! Debugging section
 
 ! Revert libxc module to the original settings
- if (DtGW%ixc<0) then
+ if (ixc<0) then
    call libxc_functionals_end()
  end if
  if (dtset%ixc<0) then
@@ -1757,7 +1749,6 @@ subroutine kxc_ADA(Dtset,Cryst,ixc,ngfft,nfft,nspden,rhor,&
  end if
 
  call destroy_mpi_enreg(MPI_enreg_seq)
- call dtset_free(DtGW)
  ABI_FREE(my_kxcg)
  ABI_FREE(my_rhor)
  ABI_FREE(rhotilder)

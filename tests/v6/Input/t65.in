@@ -113,4 +113,5 @@ nbdbuf 0
 #%% description = 
 #%%   NaCl Molecule in a big box
 #%%   3DTE calculation with only one k-point
+#%% topics = nonlinear
 #%%<END TEST_INFO>

@@ -383,7 +383,6 @@ subroutine write_vkb(kss_unt,ikpt,kpoint,kss_npw,gbig,rprimd,Psps,iomode)
 !Local variables-------------------------------
 !scalars
  integer :: itypat,il,ig,mpsang,ntypat
- character(len=500) :: msg
 !array
  real(dp),allocatable :: vkb(:,:,:),vkbd(:,:,:)
  real(dp),allocatable :: dum_vkbsign(:,:)
@@ -527,9 +526,8 @@ subroutine write_kss_wfgk(kss_unt,ikpt,isppol,kpoint,nspinor,kss_npw,npw_k,kg_k,
 !Local variables-------------------------------
 !scalars
  integer :: ib,ibsp,ig,ispinor,iatom,ii !,ierr
- character(len=500) :: msg
 #ifdef HAVE_NETCDF
- integer :: kg_varid,eig_varid,occ_varid,cg_varid,ncerr
+ integer :: kg_varid,cg_varid,ncerr
  character(len=nctk_slen) :: kdep
 #endif
 
@@ -1323,8 +1321,8 @@ subroutine gshgg_mkncwrite(istep, dtset, dtfil, psps, hdr, pawtab, pawfgr, paw_i
      ! Set up remaining of the Hamiltonian
      ! Compute (1/2) (2 Pi)**2 (k+G)**2:
      ABI_ALLOCATE(kinpw,(npw_k))
-!     call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass,gmet,kg_k,kinpw,kpoint,npw_k)
-     call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass,gmet,kg_k,kinpw,kpoint,npw_k,0,0)
+!     call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass_free,gmet,kg_k,kinpw,kpoint,npw_k)
+     call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass_free,gmet,kg_k,kinpw,kpoint,npw_k,0,0)
 
      ! Compute (k+G) vectors (only if useylm=1)
      nkpg=3*dtset%nloalg(3)
@@ -1577,7 +1575,7 @@ subroutine kss_calc_vkb(Psps,kpoint,npw_k,kg_k,rprimd,vkbsign,vkb,vkbd)
 !scalars
  integer :: dimffnl,ider,idir,itypat,nkpg,il0,in
  integer :: il,ilmn,ig,is
- real(dp) :: ucvol,effmass,ecutsm,ecut
+ real(dp) :: ucvol,effmass_free,ecutsm,ecut
 !arrays
  real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3)
  real(dp),allocatable :: ffnl(:,:,:,:),kpg_dum(:,:),modkplusg(:)
@@ -1631,9 +1629,9 @@ subroutine kss_calc_vkb(Psps,kpoint,npw_k,kg_k,rprimd,vkbsign,vkb,vkbd)
 
  ABI_MALLOC(modkplusg,(npw_k))
 
- effmass=one; ecutsm=zero; ecut=HUGE(one)
-! call mkkin(ecut,ecutsm,effmass,gmet,kg_k,modkplusg,kpoint,npw_k)
- call mkkin(ecut,ecutsm,effmass,gmet,kg_k,modkplusg,kpoint,npw_k,0,0)
+ effmass_free=one; ecutsm=zero; ecut=HUGE(one)
+! call mkkin(ecut,ecutsm,effmass_free,gmet,kg_k,modkplusg,kpoint,npw_k)
+ call mkkin(ecut,ecutsm,effmass_free,gmet,kg_k,modkplusg,kpoint,npw_k,0,0)
  modkplusg(:)=SQRT(half/pi**2*modkplusg(:))
  modkplusg(:)=MAX(modkplusg(:),tol10)
 

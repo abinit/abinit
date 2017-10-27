@@ -48,10 +48,11 @@
 !!      driver
 !!
 !! CHILDREN
-!!      d3sym,ddb_io_out,dfptnl_doutput,dfptnl_loop,ebands_free,fourdp,getcut
-!!      getkgrid,getshell,hdr_free,hdr_init,hdr_update,initmv,inwffil,kpgio
-!!      mkcore,nlopt,psddb8,pspini,read_rhor,rhohxc,setsym,setup1,status
-!!      symmetrize_xred,sytens,timab,wffclose,wrtout
+!!      d3sym,ddb_hdr_free,ddb_hdr_init,ddb_hdr_open_write,dfptnl_doutput
+!!      dfptnl_loop,ebands_free,fourdp,getcut,getkgrid,getshell,hdr_free
+!!      hdr_init,hdr_update,initmv,inwffil,kpgio,mkcore,nlopt,pspini,read_rhor
+!!      rhotoxc,setsym,setup1,status,symmetrize_xred,sytens,timab,wffclose
+!!      wrtout
 !!
 !! SOURCE
 
@@ -75,9 +76,11 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,&
  use m_xmpi
  use m_hdr
  use m_ebands
+ use m_xcdata
 
  use m_dynmat,   only : d3sym, sytens
- use m_ddb,      only : psddb8, nlopt, DDB_VERSION
+ use m_ddb,      only : nlopt, DDB_VERSION
+ use m_ddb_hdr,  only : ddb_hdr_type, ddb_hdr_init, ddb_hdr_free, ddb_hdr_open_write
  use m_ioarr,    only : read_rhor
  use m_pawrad,   only : pawrad_type
  use m_pawtab,   only : pawtab_type
@@ -122,18 +125,20 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,&
 !Local variables-------------------------------
 !scalars
  integer,parameter :: level=50,response=1,cplex1=1
- integer :: ask_accurate,bantot,choice,dum_nshiftk,flag
- integer :: formeig,fullinit,gencond,gscase,i1dir,i1pert,i2dir,i2pert,i3dir
- integer :: i3pert,ierr,ireadwf,mcg,mkmem_max,mpert,n1,n2,n3,n3xccc,nblok
+ integer :: ask_accurate,bantot,dum_nshiftk,flag
+ integer :: formeig,gencond,gscase,i1dir,i1pert,i2dir,i2pert,i3dir
+ integer :: i3pert,ierr,ireadwf,mcg,mkmem_max,mpert,n1,n2,n3,n3xccc
  integer :: nkpt3,nkxc,nk3xc,nneigh,option,optorth,rdwrpaw,comm_cell
  real(dp) :: boxcut,ecore,ecut_eff,enxc,fermie,gsqcut,gsqcut_eff,gsqcut_eff2,gsqcutdg_eff
- real(dp) :: rdum,residm,tolwfr,ucvol,vxcavg
+ real(dp) :: rdum,residm,ucvol,vxcavg
  character(len=500) :: message
  character(len=fnlen) :: dscrpt
  type(ebands_t) :: bstruct
  type(hdr_type) :: hdr,hdr_den
+ type(ddb_hdr_type) :: ddb_hdr
  type(wffile_type) :: wffgs,wfftgs
  type(wvl_data) :: wvl
+ type(xcdata_type) :: xcdata
 !arrays
  integer :: dum_kptrlatt(3,3),dum_vacuum(3),perm(6)
  integer,allocatable :: blkflg(:,:,:,:,:,:),carflg(:,:,:,:,:,:),cgindex(:,:)
@@ -417,7 +422,9 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,&
    ABI_DEALLOCATE(dyfrx2)
  end if
 
-!Comput kxc (second- and third-order exchange-correlation kernel)
+ call hartre(1,gsqcut,psps%usepaw,mpi_enreg,nfft,dtset%ngfft,dtset%paral_kgb,rhog,rprimd,vhartr)
+
+!Compute kxc (second- and third-order exchange-correlation kernel)
  option=3
  nkxc=2*nspden-1 ! LDA
  if(dtset%xclevel==2.and.nspden==1) nkxc=7  ! non-polarized GGA
@@ -426,11 +433,13 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,&
  ABI_ALLOCATE(kxc,(nfft,nkxc))
  ABI_ALLOCATE(k3xc,(nfft,nk3xc))
 
- call status(0,dtfil%filstat,iexit,level,'call rhohxc   ')
+ call status(0,dtfil%filstat,iexit,level,'call rhotoxc   ')
  ABI_ALLOCATE(work,(0))
- call rhohxc(dtset,enxc,gsqcut,psps%usepaw,kxc,mpi_enreg,nfft,dtset%ngfft,&
-& work,0,work,0,nkxc,nk3xc,nspden,n3xccc,option,rhog,rhor,rprimd,strsxc,1,&
-& vhartr,vxc,vxcavg,xccc3d,k3xc)
+ call xcdata_init(dtset%auxc_ixc,dtset%intxc,dtset%ixc,&
+&    dtset%nelect,dtset%tphysel,dtset%usekden,dtset%vdw_xc,dtset%xc_tb09_c,dtset%xc_denpos,xcdata)
+ call rhotoxc(enxc,kxc,mpi_enreg,nfft,dtset%ngfft,&
+& work,0,work,0,nkxc,nk3xc,nspden,n3xccc,option,dtset%paral_kgb,rhor,rprimd,strsxc,1,&
+& vxc,vxcavg,xccc3d,xcdata,k3xc=k3xc,vhartr=vhartr)
  ABI_DEALLOCATE(work)
 
  ABI_DEALLOCATE(vhartr)
@@ -506,22 +515,13 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,&
    call status(0,dtfil%filstat,iexit,level,'call ioddb8_ou')
 
    dscrpt=' Note : temporary (transfer) database '
-!  tolwfr must be initialized here, but it is a dummy value
-   tolwfr=1.0_dp
-   call ddb_io_out(dscrpt,dtfil%fnameabo_ddb,natom,mband,&
-&   nkpt,nsym,psps%ntypat,dtfil%unddb,DDB_VERSION,&
-&   dtset%acell_orig(1:3,1),dtset%amu_orig(:,1),dtset%dilatmx,dtset%ecut,dtset%ecutsm,&
-&   dtset%intxc,dtset%iscf,dtset%ixc,dtset%kpt,dtset%kptnrm,&
-&   natom,dtset%nband,dtset%ngfft,nkpt,nspden,nspinor,&
-&   nsppol,nsym,psps%ntypat,occ,dtset%occopt,dtset%pawecutdg,&
-&   dtset%rprim_orig(1:3,1:3,1),dtset%dfpt_sciss,dtset%spinat,dtset%symafm,dtset%symrel,&
-&   dtset%tnons,tolwfr,dtset%tphysel,dtset%tsmear,&
-&   dtset%typat,dtset%usepaw,dtset%wtk,xred,psps%ziontypat,dtset%znucl)
 
-   nblok=1 ; fullinit=1 ; choice=2
-   call psddb8 (choice,psps%dimekb,psps%ekb,fullinit,psps%indlmn,&
-&   psps%lmnmax,nblok,psps%ntypat,dtfil%unddb,&
-&   pawtab,psps%pspso,psps%usepaw,psps%useylm,DDB_VERSION)
+   call ddb_hdr_init(ddb_hdr,dtset,psps,pawtab,DDB_VERSION,dscrpt,&
+&   1,xred=xred,occ=occ)
+
+   call ddb_hdr_open_write(ddb_hdr, dtfil%fnameabo_ddb, dtfil%unddb)
+
+   call ddb_hdr_free(ddb_hdr)
 
 !  Call main output routine
    call dfptnl_doutput(blkflg,d3lo,dtset%mband,mpert,dtset%nkpt,dtset%natom,dtset%ntypat,dtfil%unddb)

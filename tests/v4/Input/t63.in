@@ -71,4 +71,5 @@ nshiftk   1
 #%%   symmetry among the cartesian internal strain terms.  In particular,
 #%%   certain diagonal and shear terms are identical, such as 1 1 1 7 (x, xx)
 #%%   and 2 1 3 8 (y, xy) where (.,.) means (force, strain).
+#%% topics = DFPT
 #%%<END TEST_INFO>
