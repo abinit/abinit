@@ -714,7 +714,11 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
            call libxc_functionals_init(auxc_ixc,nspden,xc_functionals=xc_funcs_auxc)
          end if
 !DEBUG
-         write(std_out,*)' rhotoxc : call drivexc_main inside auxc_ixc/=0, ixc(auxc_ixc)=',auxc_ixc
+!         write(std_out,*)' rhotoxc : call drivexc_main inside auxc_ixc/=0, ixc(auxc_ixc)=',auxc_ixc
+!         write(std_out,*)' rhotoxc : present status with ixc=',ixc
+!         call libxc_functionals_get_hybridparams(hyb_mixing=hyb_mixing,hyb_mixing_sr=hyb_mixing_sr,&
+!&                                            hyb_range=hyb_range)
+!         write(std_out,*)' hyb_mixing, hyb_mixing_sr, hyb_range=',hyb_mixing, hyb_mixing_sr, hyb_range
 !ENDDEBUG
          call drivexc_main(exc_b,auxc_ixc,mgga,ndvxc,nd2vxc,ngr2,npts,nspden_updn,nvxcgrho,order,&
 &         rho_b_updn,vxcrho_b_updn,xcdata%xclevel, &

@@ -519,6 +519,7 @@ subroutine fock_init(atindx,cplex,dtset,fock,gsqcut,kg,mpi_enreg,nattyp,npwarr,p
  integer :: n1,n2,n3,n4,n5,n6,nband,ncpgr,nkpt,nkpt_bz,nproc_hf,npwj,timrev,use_ACE,v1,v2,v3
  integer :: my_jkpt,jkg_this_proc,my_nsppol,my_nspinor
  real(dp) :: dksqmax,arg
+ real(dp) :: hyb_mixing,hyb_mixing_sr,hyb_range
  character(len=500) :: msg
 !arrays
  integer :: indx(1),l_size_atm(dtset%natom),shiftg(3),symm(3,3),ident(3,3),symrec(3,3,dtset%nsym)
@@ -774,19 +775,34 @@ subroutine fock_init(atindx,cplex,dtset,fock,gsqcut,kg,mpi_enreg,nattyp,npwarr,p
    fockcommon%hyb_range_dft=abs(dtset%hyb_range_dft)
    fockcommon%hyb_range_fock=abs(dtset%hyb_range_fock)
 
-!  Set the hybrid parameters if functional from libxc. Usually, these parameters were obtained from libxc,
-!  but the user might have possibly modified them. By the way, must define them here, since otherwise
-!  might inherit them from the previous dataset !
-   if (dtset%ixc<0)then
-     call libxc_functionals_set_hybridparams(hyb_mixing=fockcommon%hyb_mixing,&
+!  Set the hybrid parameters if functional from libxc for which parameters can be changed, or if the user asked to do so. 
+!  Usually, these parameters were obtained from libxc,
+!  but the user might have possibly modified them. By the way, must define them here if the usual changeable fonctionals, 
+!  since otherwise might inherit them from the previous dataset !
+   if(dtset%ixc<0)then
+     if (dtset%ixc==-406.or.dtset%ixc==-427.or.dtset%ixc==-428 .or. &
+&      min(dtset%hyb_mixing,dtset%hyb_mixing_sr,dtset%hyb_range_dft,dtset%hyb_range_fock)<-tol8)then
+
+!DEBUG
+!     write(std_out,*)' m_fock.F90/fock_init.F90 : call libxc_functionals_set_hybridparams with ixc=',dtset%ixc
+!     write(std_out,*)' hyb_mixing, hyb_mixing_sr, hyb_range_dft, hyb_range_fock=',&
+!&                      dtset%hyb_mixing, dtset%hyb_mixing_sr, dtset%hyb_range_dft, dtset%hyb_range_fock
+!ENDDEBUG
+
+       call libxc_functionals_set_hybridparams(hyb_mixing=fockcommon%hyb_mixing,&
 &                                              hyb_mixing_sr=fockcommon%hyb_mixing_sr,&
 &                                              hyb_range=fockcommon%hyb_range_dft)
 !DEBUG
-!    write(std_out,*)' m_fock.F90/fock_init.F90 : fockcommon%hyb_range=',fockcommon%hyb_range
 !    write(std_out,*)' m_fock.F90/fock_init.F90 : fockcommon%hyb_mixing=',fockcommon%hyb_mixing
 !    write(std_out,*)' m_fock.F90/fock_init.F90 : fockcommon%hyb_mixing_sr=',fockcommon%hyb_mixing_sr
-!    fockcommon%hyb_range=1.587
+!    write(std_out,*)' m_fock.F90/fock_init.F90 : fockcommon%hyb_range=',fockcommon%hyb_range_dft
+!    write(std_out,*)' m_fock.F90/fock_init.F90 : fockcommon%hyb_range=',fockcommon%hyb_range_fock
+!    write(std_out,*)' rhotoxc : present status with dtset%ixc=',dtset%ixc
+!    call libxc_functionals_get_hybridparams(hyb_mixing=hyb_mixing,hyb_mixing_sr=hyb_mixing_sr,&
+!&                                        hyb_range=hyb_range)
+!    write(std_out,*)' hyb_mixing, hyb_mixing_sr, hyb_range=',hyb_mixing, hyb_mixing_sr, hyb_range
 !ENDDEBUG
+     end if
    end if
 
 
@@ -2373,7 +2389,18 @@ subroutine bare_vqg(qphon,gsqcut,gmet,izero,hyb_mixing,hyb_mixing_sr,hyb_range_f
        ii1=2
        ! value of the integration of the Coulomb singularity 4pi\int_BZ 1/q^2 dq
        vqg(1+i23)=hyb_mixing*divgq0
-       if (abs(hyb_range_fock)>tol8) vqg(1+i23)=vqg(1+i23)+hyb_mixing_sr*pi/(hyb_range_fock**2)
+
+!      if(abs(abs(hyb_mixing)-0.00000003)<tol8)then
+!        vqg(1+i23)=hyb_mixing_sr*min(divgq0,pi/(hyb_range_fock**2))
+!      else
+!        if (abs(hyb_range_fock)>tol8) vqg(1+i23)=vqg(1+i23)+hyb_mixing_sr*pi/(hyb_range_fock**2)
+!      endif
+
+!      Note the combination of Spencer-Alavi and Erfc screening
+       if (abs(hyb_range_fock)>tol8)then
+         vqg(1+i23)=vqg(1+i23)+hyb_mixing_sr*min(divgq0,pi/(hyb_range_fock**2))
+       endif
+
      end if
 
      ! Final inner loop on the first dimension (note the lower limit)
@@ -2393,13 +2420,30 @@ subroutine bare_vqg(qphon,gsqcut,gmet,izero,hyb_mixing,hyb_mixing_sr,hyb_range_f
 
          den=piinv/gs
 
-!        Spencer-Alavi screening
-         if (abs(hyb_mixing)>tol8) &
-&          vqg(ii)=vqg(ii)+hyb_mixing*den*(one-cos(rcut*sqrt(four_pi/den)))
-!&          vqg(ii)=vqg(ii)+hyb_mixing*den
-!        Erfc screening
-         if (abs(hyb_mixing_sr)>tol8) &
-&          vqg(ii)=vqg(ii)+hyb_mixing_sr*den*(one-exp(-pi/(den*hyb_range_fock**2)))
+!        Make a try with combined Spencer-Alavi and Erfc screening
+!        for a specific value of hyb_mixing , namely 0.123456 in absolute value
+!        However, might become the default if this works well ...
+!        if(abs(abs(hyb_mixing)-0.00000003)<tol8)then
+!           vqg(ii)=vqg(ii)+&
+!&            hyb_mixing_sr*den*(one-exp(-pi/(den*hyb_range_fock**2)))*(one-cos(rcut*sqrt(four_pi/den)))
+!         else
+
+!          Spencer-Alavi screening
+           if (abs(hyb_mixing)>tol8)then
+             vqg(ii)=vqg(ii)+hyb_mixing*den*(one-cos(rcut*sqrt(four_pi/den)))
+!&            vqg(ii)=vqg(ii)+hyb_mixing*den
+           endif
+!          Erfc screening
+           if (abs(hyb_mixing_sr)>tol8) then
+!            This combines Erfc and Spencer-Alavi screening in case rcut is too small or hyb_range_fock too large
+             if(divgq0<pi/(hyb_range_fock**2))then
+               vqg(ii)=vqg(ii)+hyb_mixing_sr*den*&
+&                (one-exp(-pi/(den*hyb_range_fock**2)))*(one-cos(rcut*sqrt(four_pi/den)))
+             else
+               vqg(ii)=vqg(ii)+hyb_mixing_sr*den*(one-exp(-pi/(den*hyb_range_fock**2)))
+             endif
+           endif
+!        endif
 
        end if ! Cut-off
      end do ! End loop on i1

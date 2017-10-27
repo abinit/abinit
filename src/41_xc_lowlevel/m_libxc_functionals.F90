@@ -1666,8 +1666,9 @@ subroutine libxc_functionals_set_hybridparams(hyb_mixing,hyb_mixing_sr,hyb_range
  real(dp),intent(in),optional :: hyb_mixing,hyb_mixing_sr,hyb_range
  type(libxc_functional_type),intent(in),optional,target :: xc_functionals(2)
 !Local variables -------------------------------
- integer :: ii
+ integer :: ii,id_pbe0,id_hse03,id_hse06
  logical :: is_pbe0,is_hse
+ integer :: func_id(2)
  character(len=500) :: msg
 #if defined HAVE_LIBXC && defined HAVE_FC_ISO_C_BINDING
  real(C_DOUBLE) :: alpha_c,beta_c,omega_c
@@ -1678,6 +1679,9 @@ subroutine libxc_functionals_set_hybridparams(hyb_mixing,hyb_mixing_sr,hyb_range
 
  is_pbe0=.false.
  is_hse =.false.
+ id_pbe0=libxc_functionals_getid('HYB_GGA_XC_PBEH')
+ id_hse03=libxc_functionals_getid('HYB_GGA_XC_HSE03')
+ id_hse06=libxc_functionals_getid('HYB_GGA_XC_HSE06')
 
  do ii = 1, 2
 
@@ -1687,54 +1691,61 @@ subroutine libxc_functionals_set_hybridparams(hyb_mixing,hyb_mixing_sr,hyb_range
    else
      xc_func => xc_global(ii)
    end if
+   func_id(ii)=xc_func%id
 
 !  Doesnt work with all hybrid functionals
    if (is_pbe0.or.is_hse) then
      msg='Invalid XC functional: contains 2 hybrid exchange functionals!'
      MSG_ERROR(msg)
    end if
-   is_pbe0=(xc_func%id==libxc_functionals_getid('HYB_GGA_XC_PBEH'))
-   is_hse=((xc_func%id==libxc_functionals_getid('HYB_GGA_XC_HSE03')).or.&
-&          (xc_func%id==libxc_functionals_getid('HYB_GGA_XC_HSE06')))
+   is_pbe0=(xc_func%id==id_pbe0)
+   is_hse=((xc_func%id==id_hse03).or.(xc_func%id==id_hse06))
    if ((.not.is_pbe0).and.(.not.is_hse)) cycle
 
 #if defined HAVE_LIBXC && defined HAVE_FC_ISO_C_BINDING
-!  First retrieve current values of parameters
-   call xc_hyb_cam_coef(xc_func%conf,omega_c,alpha_c,beta_c)
-
 !  New values for parameters
-   if (present(hyb_mixing)) alpha_c=real(hyb_mixing,kind=C_DOUBLE)
-   if (present(hyb_mixing_sr)) beta_c=real(hyb_mixing_sr,kind=C_DOUBLE)
-   if (present(hyb_range)) omega_c=real(hyb_range,kind=C_DOUBLE)
 
-!  PBE0: set parameters
-   if (is_pbe0) then
+!  PBE0 type functionals
+   if (present(hyb_mixing))then
+     xc_func%hyb_mixing=hyb_mixing
+     alpha_c=real(xc_func%hyb_mixing,kind=C_DOUBLE)
+     if(is_pbe0)then
 #if ( XC_MAJOR_VERSION < 4 )
-     call xc_hyb_gga_xc_pbeh_set_params(xc_func%conf,alpha_c)
+       call xc_hyb_gga_xc_pbeh_set_params(xc_func%conf,alpha_c)
 #else
-     msg='seems set_params has disappeared for pbeh in libxc 4. defaults are being used'
-     MSG_WARNING(msg)
-     !call xc_hyb_gga_xc_pbeh_init(xc_func%conf)
+       msg='seems set_params has disappeared for pbeh in libxc 4. defaults are being used'
+       MSG_WARNING(msg)
+       !call xc_hyb_gga_xc_pbeh_init(xc_func%conf)
 #endif
-   end if
+     endif
+   endif
 
-!  HSE: set parameters
-   if (is_hse) then
+!  HSE type functionals
+   if(present(hyb_mixing_sr).or.present(hyb_range))then
+     if(present(hyb_mixing_sr))xc_func%hyb_mixing_sr=hyb_mixing_sr
+     if(present(hyb_range))xc_func%hyb_range=hyb_range
+     beta_c=real(xc_func%hyb_mixing_sr,kind=C_DOUBLE)
+     omega_c=real(xc_func%hyb_range,kind=C_DOUBLE)
+     if(is_hse)then
 #if ( XC_MAJOR_VERSION < 4 )
-     call xc_hyb_gga_xc_hse_set_params(xc_func%conf,beta_c,omega_c)
+       call xc_hyb_gga_xc_hse_set_params(xc_func%conf,beta_c,omega_c)
 #else
-     msg='seems set_params has disappeared for hse in libxc 4. defaults are being used'
-     MSG_WARNING(msg)
+       msg='seems set_params has disappeared for hse in libxc 4. defaults are being used'
+       MSG_WARNING(msg)
      !call hyb_gga_xc_hse_init(xc_func%conf)
 #endif
+     endif
    end if
+
 #endif
 
  end do
 
  if ((.not.is_pbe0).and.(.not.is_hse)) then
-   msg='Invalid XC functional: not able to change parameters for this functional!'
-   MSG_WARNING(msg)
+   write(msg,'(3a,2i6,a,a,i6,a,i6,a,i6,a)')'Invalid XC functional: not able to change parameters for this functional !',ch10,&
+&      'The IDs are ',func_id(:),ch10,&
+&      'Allowed HYB_GGA_XC_PBEH, HYB_GGA_XC_HSE03, and HYB_GGA_XC_HSE06 with IDs =',id_pbe0,',',id_hse03,',',id_hse06,'.'
+   MSG_ERROR(msg)
  end if
 
 end subroutine libxc_functionals_set_hybridparams

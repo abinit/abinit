@@ -354,8 +354,7 @@ subroutine get_auxc_ixc(auxc_ixc,ixc)
  else if (ixc<0) then
    call get_xclevel(ixc,xclevel,usefock)
    if(usefock==1)then
-!    auxc_ixc=11
-     auxc_ixc=-130101
+     auxc_ixc=11
 !    if (libxc_functionals_gga_from_hybrid(hybrid_id=ixc,gga_id=gga_id)) then
 !      auxc_ixc=-gga_id(1)*1000-gga_id(2)
 !    endif

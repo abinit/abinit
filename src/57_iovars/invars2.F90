@@ -1348,7 +1348,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
 !  This trick will allow to echo them, and only them.
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'hyb_mixing',tread,'DPR')
    if(tread==1)then
-     if(dprarr(1)<tol8)then
+     if(dprarr(1)<-tol14)then
        write(message, '(5a)' )&
 &        ' A negative value for hyb_mixing is not allowed, while at input hyb_mixing=',dprarr(1),ch10,&
 &        ' Action: modify hyb_mixing in the input file.'
@@ -1359,7 +1359,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
 
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'hyb_mixing_sr',tread,'DPR')
    if(tread==1)then
-     if(dprarr(1)<tol8)then
+     if(dprarr(1)<-tol14)then
        write(message, '(5a)' )&
 &        ' A negative value for hyb_mixing_sr is not allowed, while at input hyb_mixing_sr=',dprarr(1),ch10,&
 &        ' Action: modify hyb_mixing_sr in the input file.'
@@ -1370,7 +1370,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
 
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'hyb_range_dft',tread_dft,'DPR')
    if(tread_dft==1)then
-     if(dprarr(1)<tol8)then
+     if(dprarr(1)<-tol14)then
        write(message, '(5a)' )&
 &        ' A negative value for hyb_range_dft is not allowed, while at input hyb_range_dft=',dprarr(1),ch10,&
 &        ' Action: modify hyb_range_dft in the input file.'
@@ -1381,7 +1381,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
 
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'hyb_range_fock',tread_fock,'DPR')
    if(tread_fock==1)then
-     if(dprarr(1)<tol8)then
+     if(dprarr(1)<-tol14)then
        write(message, '(5a)' )&
 &        ' A negative value for hyb_range_fock is not allowed, while at input hyb_range_fock=',dprarr(1),ch10,&
 &        ' Action: modify hyb_range_fock in the input file.'
