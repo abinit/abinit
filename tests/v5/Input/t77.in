@@ -62,4 +62,5 @@ xred
 #%%   of the body-centered case is not broken. This test is run for two values of strprecon also,
 #%%   to test the strprecon variable.
 #%%   Coded and contributed by J. Zwanziger.
+#%% topics = GeoOpt, UnitCell, SmartSymm
 #%%<END TEST_INFO>

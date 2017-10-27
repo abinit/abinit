@@ -1,8 +1,8 @@
 
-.Version 8.1.6 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu4.8 computer) 
+.Version 8.6.0 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
 
-.Copyright (C) 1998-2016 ABINIT group . 
+.Copyright (C) 1998-2017 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -12,10 +12,10 @@
  Corning Inc. and other collaborators, see ~abinit/doc/developers/contributors.txt .
  Please read ~abinit/doc/users/acknowledgments.html for suggested
  acknowledgments of the ABINIT effort.
- For more information, see http://www.abinit.org .
+ For more information, see https://www.abinit.org .
 
-.Starting date : Fri 28 Oct 2016.
-- ( at 21h23 )
+.Starting date : Sun 24 Sep 2017.
+- ( at 18h37 )
   
 - input  file    -> t52.in
 - output file    -> t52.out
@@ -34,7 +34,7 @@
 -    mband =          10        mffmem =           1         mkmem =          10
        mpw =         295          nfft =        8000          nkpt =          10
 ================================================================================
-P This job should need less than                       3.357 Mbytes of memory.
+P This job should need less than                       3.321 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.452 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 ================================================================================
@@ -51,7 +51,7 @@ _ WF disk file :      0.452 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 -    mband =          14        mffmem =           1         mkmem =           3
        mpw =         151          nfft =        8000          nkpt =           3
 ================================================================================
-P This job should need less than                       1.948 Mbytes of memory.
+P This job should need less than                       1.929 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.099 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 ================================================================================
@@ -68,7 +68,7 @@ _ WF disk file :      0.099 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 -    mband =          14        mffmem =           1         mkmem =           8
        mpw =         151          nfft =        8000          nkpt =           8
 ================================================================================
-P This job should need less than                       2.128 Mbytes of memory.
+P This job should need less than                       2.110 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.260 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 ================================================================================
@@ -283,8 +283,8 @@ P          mk1mem6          8
              nqpt5          1
              nqpt6          1
             nstep1        500
-            nstep2        500
-            nstep3        500
+            nstep2          9
+            nstep3          9
             nstep4          1
             nstep5          1
             nstep6          1
@@ -438,8 +438,8 @@ P          mk1mem6          8
          ecut(hartree)=      8.000   => boxcut(ratio)=   2.17426
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/yannick/git-repos/tdepoptic/tests/Psps_for_tests/14si.pspnc
-- pspatm: opening atomic psp file    /home/yannick/git-repos/tdepoptic/tests/Psps_for_tests/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_release-8.6.0/tests/Psps_for_tests/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_release-8.6.0/tests/Psps_for_tests/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -450,7 +450,7 @@ P          mk1mem6          8
     2   0.000   0.000    0   2.0872718        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     1.80626423934776    0.22824404341771    1.17378968127746   rchrg,fchrg,qchrg
- pspatm: epsatm=    1.43386982
+  pspatm : epsatm=    1.43386982
          --- l  ekb(1:nproj) -->
              0    3.287949
              1    1.849886
@@ -464,20 +464,20 @@ _setup2: Arith. and geom. avg. npw (full set) are     289.031     289.009
 ================================================================================
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -8.8692010622503    -8.869E+00 2.063E-03 5.715E+00
- ETOT  2  -8.8755792189403    -6.378E-03 7.276E-08 1.576E-01
- ETOT  3  -8.8756561419833    -7.692E-05 3.172E-06 2.990E-03
- ETOT  4  -8.8756570364741    -8.945E-07 4.220E-08 1.086E-05
- ETOT  5  -8.8756570414108    -4.937E-09 1.945E-10 2.424E-08
- ETOT  6  -8.8756570414258    -1.503E-11 6.332E-13 1.671E-10
- ETOT  7  -8.8756570414260    -1.421E-13 2.197E-15 6.961E-13
- ETOT  8  -8.8756570414259     6.040E-14 1.502E-17 1.007E-15
- ETOT  9  -8.8756570414260    -1.208E-13 1.287E-20 1.653E-18
- ETOT 10  -8.8756570414260     5.329E-14 1.724E-23 1.721E-21
- ETOT 11  -8.8756570414259     7.105E-14 3.655E-27 9.804E-25
- ETOT 12  -8.8756570414259    -1.599E-14 9.856E-29 1.034E-27
+ ETOT  1  -8.8692010622497    -8.869E+00 2.063E-03 5.715E+00
+ ETOT  2  -8.8755792189396    -6.378E-03 7.276E-08 1.576E-01
+ ETOT  3  -8.8756561419827    -7.692E-05 3.172E-06 2.990E-03
+ ETOT  4  -8.8756570364735    -8.945E-07 4.220E-08 1.086E-05
+ ETOT  5  -8.8756570414101    -4.937E-09 1.945E-10 2.424E-08
+ ETOT  6  -8.8756570414252    -1.504E-11 6.332E-13 1.671E-10
+ ETOT  7  -8.8756570414253    -1.457E-13 2.197E-15 6.961E-13
+ ETOT  8  -8.8756570414252     6.217E-14 1.502E-17 1.007E-15
+ ETOT  9  -8.8756570414254    -1.172E-13 1.287E-20 1.653E-18
+ ETOT 10  -8.8756570414253     5.507E-14 1.723E-23 1.721E-21
+ ETOT 11  -8.8756570414252     6.395E-14 3.665E-27 9.642E-25
+ ETOT 12  -8.8756570414253    -1.599E-14 9.954E-29 8.553E-28
 
- At SCF step   12   max residual=  9.86E-29 < tolwfr=  1.00E-28 =>converged.
+ At SCF step   12   max residual=  9.95E-29 < tolwfr=  1.00E-28 =>converged.
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  3.38568145E-05  sigma(3 2)=  0.00000000E+00
@@ -532,13 +532,13 @@ _setup2: Arith. and geom. avg. npw (full set) are     289.031     289.009
     Hartree energy  =  5.38306610810999E-01
     XC energy       = -3.54190168818834E+00
     Ewald energy    = -8.43581958561899E+00
-    PspCore energy  =  8.60437873148613E-02
+    PspCore energy  =  8.60437873155177E-02
     Loc. psp. energy= -2.43141062814524E+00
     NL   psp  energy=  1.88324866267303E+00
-    >>>>>>>>> Etotal= -8.87565704142591E+00
+    >>>>>>>>> Etotal= -8.87565704142526E+00
 
  Other information on the energy :
-    Total energy(eV)= -2.41518910763952E+02 ; Band energy (Ha)=   2.2814322531E-01
+    Total energy(eV)= -2.41518910763935E+02 ; Band energy (Ha)=   2.2814322531E-01
 --------------------------------------------------------------------------------
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -577,14 +577,21 @@ _setup2: Arith. and geom. avg. npw (full set) are     289.031     289.009
 ================================================================================
  prteigrs : about to open file t52o_DS2_EIG
  Non-SCF case, kpt    1 (  0.00000  0.00000  0.00000), residuals and eigenvalues=
-  7.10E-30  6.70E-29  6.11E-30  3.01E-29  8.12E-29  2.27E-29  4.13E-30  7.23E-29
-  1.24E-29  8.58E-29  5.77E-30  1.25E-29  9.50E-29  2.10E-29
+  8.63E-30  6.65E-29  6.28E-30  3.04E-29  7.91E-29  2.31E-29  3.99E-30  7.15E-29
+  1.12E-29  8.61E-29  5.26E-30  7.85E-27  1.58E-25  2.09E-29
  -2.2715E-01  2.1698E-01  2.1698E-01  2.1698E-01  3.0999E-01  3.0999E-01
   3.0999E-01  3.3664E-01  4.9922E-01  5.0740E-01  5.0740E-01  6.2852E-01
   6.2852E-01  6.2852E-01
+  prteigrs : nnsclo,ikpt=    9    1 max resid (incl. the buffer)=  1.57813E-25
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-  prteigrs : nnsclo,ikpt=  500    2 max resid (incl. the buffer)=  1.89361E-26
+  prteigrs : nnsclo,ikpt=    9    2 max resid (incl. the buffer)=  1.89359E-26
+  prteigrs : nnsclo,ikpt=    9    3 max resid (incl. the buffer)=  3.69239E-24
+
+
+ scprqt:  WARNING -
+  nstep=    9 was not enough non-SCF iterations to converge;
+  maximum residual=  3.692E-24 exceeds tolwfr=  1.000E-28
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -595,7 +602,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     289.031     289.009
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   4.8551E-28; max=  1.8936E-26
+ Mean square residual over all n,k,spin=   9.7609E-26; max=  1.5781E-25
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.250000000000      0.250000000000      0.250000000000
@@ -642,8 +649,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     289.031     289.009
 ================================================================================
  prteigrs : about to open file t52o_DS3_EIG
  Non-SCF case, kpt    1 (  0.00000  0.00000  0.00000), residuals and eigenvalues=
-  7.41E-30  6.75E-29  6.16E-30  3.03E-29  7.95E-29  2.30E-29  4.25E-30  7.07E-29
-  1.22E-29  8.82E-29  5.73E-30  1.28E-29  9.49E-29  2.10E-29
+  8.69E-30  6.66E-29  6.62E-30  3.06E-29  8.08E-29  2.31E-29  3.89E-30  7.20E-29
+  1.11E-29  8.58E-29  4.94E-30  1.26E-29  9.42E-29  2.09E-29
  -2.2715E-01  2.1698E-01  2.1698E-01  2.1698E-01  3.0999E-01  3.0999E-01
   3.0999E-01  3.3664E-01  4.9922E-01  5.0740E-01  5.0740E-01  6.2852E-01
   6.2852E-01  6.2852E-01
@@ -659,7 +666,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     289.031     289.009
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   3.7436E-29; max=  9.7733E-29
+ Mean square residual over all n,k,spin=   3.7824E-29; max=  9.5362E-29
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.250000000000      0.250000000000      0.250000000000
@@ -724,7 +731,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     289.031     289.009
   ireadwf=   0
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  -19.394346763045     -1.939E+01 0.000E+00 0.000E+00
+-ETOT  1  -19.394346763046     -1.939E+01 0.000E+00 0.000E+00
 
  At SCF step    1   max residual=  0.00E+00 < tolwfr=  1.00E-28 =>converged.
 ================================================================================
@@ -738,8 +745,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     289.031     289.009
  Expectation of eigenvalue derivatives (hartree) for nkpt=   8  k points:
   (in case of degenerate eigenvalues, averaged derivative)
  kpt#   1, nband= 14, wtk=  0.12500, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-   0.00000    0.00000    0.00000    0.00000   -0.00000   -0.00000   -0.00000    0.00000
-  -0.00000   -0.00000   -0.00000   -0.00000   -0.00000   -0.00000
+  -0.00000    0.00000    0.00000    0.00000   -0.00000   -0.00000   -0.00000    0.00000
+  -0.00000    0.00000    0.00000    0.00000    0.00000    0.00000
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
 
@@ -827,7 +834,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     289.031     289.009
   ireadwf=   0
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  -19.394346762664     -1.939E+01 0.000E+00 0.000E+00
+-ETOT  1  -19.394346762666     -1.939E+01 0.000E+00 0.000E+00
 
  At SCF step    1   max residual=  0.00E+00 < tolwfr=  1.00E-28 =>converged.
 ================================================================================
@@ -841,8 +848,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     289.031     289.009
  Expectation of eigenvalue derivatives (hartree) for nkpt=   8  k points:
   (in case of degenerate eigenvalues, averaged derivative)
  kpt#   1, nband= 14, wtk=  0.12500, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-  -0.00000   -0.00000   -0.00000   -0.00000    0.00000    0.00000    0.00000   -0.00000
-  -0.00000   -0.00000   -0.00000    0.00000    0.00000    0.00000
+   0.00000   -0.00000   -0.00000   -0.00000    0.00000    0.00000    0.00000   -0.00000
+  -0.00000   -0.00000   -0.00000   -0.00000   -0.00000   -0.00000
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
 
@@ -930,7 +937,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     289.031     289.009
   ireadwf=   0
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  -19.394346762283     -1.939E+01 0.000E+00 0.000E+00
+-ETOT  1  -19.394346762285     -1.939E+01 0.000E+00 0.000E+00
 
  At SCF step    1   max residual=  0.00E+00 < tolwfr=  1.00E-28 =>converged.
 ================================================================================
@@ -944,8 +951,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     289.031     289.009
  Expectation of eigenvalue derivatives (hartree) for nkpt=   8  k points:
   (in case of degenerate eigenvalues, averaged derivative)
  kpt#   1, nband= 14, wtk=  0.12500, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-   0.00000    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000   -0.00000
-  -0.00000    0.00000    0.00000   -0.00000   -0.00000   -0.00000
+  -0.00000   -0.00000   -0.00000   -0.00000    0.00000    0.00000    0.00000    0.00000
+   0.00000    0.00000    0.00000    0.00000    0.00000    0.00000
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
 
@@ -1141,8 +1148,8 @@ P          mk1mem6          8
              nqpt5          1
              nqpt6          1
             nstep1        500
-            nstep2        500
-            nstep3        500
+            nstep2          9
+            nstep3          9
             nstep4          1
             nstep5          1
             nstep6          1
@@ -1193,7 +1200,7 @@ P          mk1mem6          8
            shiftk5     0.00000000E+00  0.00000000E+00  0.00000000E+00
            shiftk6     0.00000000E+00  0.00000000E+00  0.00000000E+00
           spgroup         227
-           strten1     3.3856814542E-05  3.3856814542E-05  3.3856814542E-05
+           strten1     3.3856814539E-05  3.3856814539E-05  3.3856814539E-05
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            symrel      1  0  0   0  1  0   0  0  1      -1  0  0   0 -1  0   0  0 -1
                        0 -1  1   0 -1  0   1 -1  0       0  1 -1   0  1  0  -1  1  0
@@ -1284,7 +1291,7 @@ P          mk1mem6          8
  Note also that it will be of great value to readers of publications presenting these results,
  to read papers enabling them to understand the theoretical formalism and details
  of the ABINIT implementation.
- For information on why they are suggested, see also http://www.abinit.org/about/?text=acknowledgments.
+ For information on why they are suggested, see also https://www.abinit.org/about/?text=acknowledgments.
 -
 - [1] Recent developments in the ABINIT software package.
 - Computer Phys. Comm. 205, 106 (2016).
@@ -1300,7 +1307,7 @@ P          mk1mem6          8
 - B.Xue, A.Zhou, J.W.Zwanziger.
 - Comment : the fourth generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
-- is available at http://www.abinit.org/about/ABINIT16.pdf .
+- is available at https://www.abinit.org/about/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 -
 - [2] First-principles responses of solids to atomic displacements and homogeneous electric fields:,
@@ -1321,7 +1328,7 @@ P          mk1mem6          8
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment : the third generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
-- is available at http://www.abinit.org/about/ABINIT_CPC_v10.pdf .
+- is available at https://www.abinit.org/about/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 -
 - [5] A brief introduction to the ABINIT software package.
@@ -1332,17 +1339,14 @@ P          mk1mem6          8
 - Comment : the second generic paper describing the ABINIT project. Note that this paper
 - should be cited especially if you are using the GW part of ABINIT, as several authors
 - of this part are not in the list of authors of the first or third paper.
-- The .pdf of the latter paper is available at http://www.abinit.org/about/zfk_0505-06_558-562.pdf.
+- The .pdf of the latter paper is available at https://www.abinit.org/about/zfk_0505-06_558-562.pdf.
 - Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
 - the licence allows the authors to put it on the Web).
 -
-- Proc.   0 individual time (sec): cpu=          2.8  wall=          2.8
+- Proc.   0 individual time (sec): cpu=          2.4  wall=          2.6
 
 ================================================================================
 
  Calculation completed.
-.Delivered  69 WARNINGs and   0 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          2.8  wall=          2.8
-- MEMORY CONSUMPTION REPORT:
--   There were 256768 allocations and 256768 deallocations
--   Remaining memory at the end of the calculation is 0
+.Delivered  70 WARNINGs and   0 COMMENTs to log file.
++Overall time at end (sec) : cpu=          2.4  wall=          2.6

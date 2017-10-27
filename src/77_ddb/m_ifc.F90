@@ -112,7 +112,7 @@ MODULE m_ifc
      ! These values are used to call anaddb routines that don't use rprimd, gprimd
 
    real(dp) :: dielt(3,3)
-     ! Dielectric tensor
+     ! Dielectric tensor (Cartesian coordinates)
 
    real(dp) :: omega_minmax(2)
      ! Min and max frequency obtained on the initial ab-initio q-mesh (-+ 30 cmm1)
@@ -168,6 +168,7 @@ MODULE m_ifc
    real(dp),allocatable :: zeff(:,:,:)
      ! zeff(3,3,natom)
      ! Effective charge on each atom, versus electric field and atomic displacement.
+     ! Cartesian coordinates
 
    real(dp),allocatable :: qibz(:,:)
      ! qibz(3,nqibz))
@@ -725,7 +726,8 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
  if (nsphere == -1) call ifc_autocutoff(ifc, crystal, comm)
 
  call cwtime(cpu, wall, gflops, "stop")
- write(std_out,"(2(a,f6.2))")" ifc_init: cpu: ",cpu,", wall: ",wall
+ write(message,"(2(a,f6.2))")" ifc_init: cpu: ",cpu,", wall: ",wall
+ call wrtout(std_out,message,'COLL')
 
 end subroutine ifc_init
 !!***
@@ -776,7 +778,6 @@ subroutine ifc_print(ifc,header,unit,prtvol)
 !Local variables-------------------------------
  integer :: unt,my_prtvol,iatom,ii
  character(len=500) :: msg
- real(dp) :: angdeg(3)
 ! *********************************************************************
 
  unt = std_out; if (present(unit)) unt = unit
@@ -1125,7 +1126,7 @@ subroutine ifc_speedofsound(ifc, crystal, qrad_tolkms, ncid, comm)
  integer :: ii,nu,igrid,my_rank,nprocs,ierr,converged,npts,num_negw,vs_ierr,ncerr
  integer :: iatom,iatref,num_acoustic,isacoustic
  real(dp) :: min_negw,cpu,wall,gflops
- real(dp) :: qrad,tolkms
+ real(dp) :: qrad,tolkms,diff
  character(len=500) :: msg
  type(lebedev_t) :: lgrid
 !arrays
@@ -1235,14 +1236,20 @@ subroutine ifc_speedofsound(ifc, crystal, qrad_tolkms, ncid, comm)
      " Lebedev-Laikov grid: ",igrid,", npts: ", npts, " vs_sphavg(ac_modes): ",quad, " <vs>: ",sum(quad)/3
 
    if (igrid > 1) then
-     if (abs(sum(quad - prev_quad)/3) < tolkms) then
-        converged = converged + 1; if (converged == 2) exit
+     diff = zero
+     do nu=1,3
+       diff = diff + abs(quad(nu) - prev_quad(nu)) / 3
+     end do
+     !if (abs(sum(quad - prev_quad)/3) < tolkms) then
+     if (diff < tolkms) then
+        converged = converged + 1
      else
         converged = 0
      end if
    end if
    prev_quad = quad
    vs(7, :) = quad
+   if (converged == 2) exit
  end do ! igrid
 
  if (my_rank == master) then
@@ -1346,10 +1353,9 @@ subroutine ifc_autocutoff(ifc, crystal, comm)
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master=0
- integer :: iq_ibz,ierr,my_rank,nprocs,ii,nsphere,num_negw,jl,ju,jm,jj,natom,nrpt
+ integer :: iq_ibz,ierr,my_rank,nprocs,ii,nsphere,num_negw,jl,ju,jm,natom,nrpt
  real(dp),parameter :: rifcsph0=zero
  real(dp) :: adiff,qrad,min_negw,xval,rcut_min
- character(len=500) :: msg
  type(lebedev_t) :: lgrid
 !arrays
  real(dp) :: displ_cart(2*3*ifc%natom*3*ifc%natom)
@@ -2668,7 +2674,7 @@ subroutine ifc_printbxsf(ifc, cryst, ngqpt, nqshft, qshft, path, comm)
  character(len=500) :: msg
 !arrays
  integer :: qptrlatt(3,3),dummy_symafm(cryst%nsym)
- real(dp) :: phfrq(3*cryst%natom),displ_cart(2,3*cryst%natom,3*cryst%natom)
+ real(dp) :: displ_cart(2,3*cryst%natom,3*cryst%natom)
  real(dp),allocatable :: qibz(:,:),wtq(:),qbz(:,:),freqs_qibz(:,:)
 
 ! *********************************************************************
@@ -2767,7 +2773,7 @@ type(phbspl_t) function ifc_build_phbspl(ifc, cryst, ngqpt, nshiftq, shiftq, ord
 !arrays
  integer :: qptrlatt(3,3)
  integer,allocatable :: bz2ibz(:,:)
- real(dp) :: phfrq(3*cryst%natom),qpt(3),displ_cart(2,3,cryst%natom,3*cryst%natom)
+ real(dp) :: displ_cart(2,3,cryst%natom,3*cryst%natom)
  real(dp),allocatable :: xvec(:),yvec(:),zvec(:),xyzdata(:,:,:)
  real(dp),allocatable :: ibz_freqs(:,:),ibzdata_qnu(:,:)
  real(dp),allocatable :: wtq(:),qbz(:,:),qfull(:,:),qibz(:,:)
@@ -3228,7 +3234,7 @@ subroutine ifc_test_phinterp(ifc, cryst, ngqpt, nshiftq, shiftq, ords, comm, tes
 !local variables-------------------------------
 !scalars
  integer,parameter :: master=0
- integer :: iq,nq,natom3,my_rank,nprocs,ierr,nu,ii
+ integer :: iq,nq,natom3,my_rank,nprocs,ierr,nu
  real(dp) :: mare_bspl,mae_bspl,mare_skw,mae_skw,dq
  real(dp) :: cpu,wall,gflops,cpu_fourq,wall_fourq,gflops_fourq
  real(dp) :: cpu_bspl,wall_bspl,gflops_bspl,cpu_skw,wall_skw,gflops_skw
@@ -3237,11 +3243,10 @@ subroutine ifc_test_phinterp(ifc, cryst, ngqpt, nshiftq, shiftq, ords, comm, tes
  type(skw_t) :: skw
  type(kpath_t) :: qpath
 !arrays
- integer :: imax(1)
- real(dp) :: phfrq(3*cryst%natom),ofreqs(3*cryst%natom),qpt(3),wnext(3*cryst%natom)
+ real(dp) :: phfrq(3*cryst%natom),ofreqs(3*cryst%natom),qpt(3)
  real(dp) :: adiff_mev(3*cryst%natom),rel_err(3*cryst%natom)
- real(dp) :: displ_cart(2,3,cryst%natom,3*cryst%natom),qvers_cart(3),qvers_red(3),qstep(3)
- real(dp) :: qred(3),shift(3),vals4(4),dwdq(3,3*cryst%natom)
+ real(dp) :: displ_cart(2,3,cryst%natom,3*cryst%natom),qvers_cart(3),qvers_red(3)
+ real(dp) :: vals4(4),dwdq(3,3*cryst%natom)
  real(dp) :: q1(3),q2(3)
  real(dp) :: bounds(3,5)
  real(dp),allocatable :: winterp(:,:),wdata(:,:)

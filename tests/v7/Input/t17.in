@@ -57,4 +57,5 @@ nshiftk   4
 #%%   The relativistic extension is documented in the code package.
 #%%   The Pt 5s and 5p semi-cores are treated as valence.
 #%%   A complete description of the input format is avaiable in  doc/psp_infos/psp8_info.txt.
+#%% topics = ElecDOS
 #%%<END TEST_INFO>

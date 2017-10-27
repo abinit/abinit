@@ -17,7 +17,7 @@
 !!  cwavef(2,npw*nspinor)=wavefunction for current band
 !!  ecut=cut-off energy for plane wave basis sphere (Ha)
 !!  ecutsm=smearing energy for plane wave kinetic energy (Ha)
-!!  effmass=effective mass for electrons (1. in common case)
+!!  effmass_free=effective mass for electrons (1. in common case)
 !!  gmet(3,3)=reciprocal lattice metric tensor ($\textrm{Bohr}^{-2}$)
 !!  gprimd(3,3)=primitive vectors in reciprocal space
 !!  istwfk=information about wavefunction storage
@@ -55,7 +55,7 @@
 #include "abi_common.h"
 
 
-subroutine d2kindstr2(cwavef,ecut,ecutsm,effmass,ekinout,gmet,gprimd,&
+subroutine d2kindstr2(cwavef,ecut,ecutsm,effmass_free,ekinout,gmet,gprimd,&
 &            istwfk,kg_k,kpt,npw,nspinor)
 
  use m_profiling_abi
@@ -73,7 +73,7 @@ subroutine d2kindstr2(cwavef,ecut,ecutsm,effmass,ekinout,gmet,gprimd,&
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: istwfk,npw,nspinor
- real(dp),intent(in) :: ecut,ecutsm,effmass
+ real(dp),intent(in) :: ecut,ecutsm,effmass_free
 !arrays
  integer,intent(in) :: kg_k(3,npw)
  real(dp),intent(in) :: cwavef(2,npw*nspinor),gmet(3,3),gprimd(3,3),kpt(3)
@@ -189,7 +189,7 @@ subroutine d2kindstr2(cwavef,ecut,ecutsm,effmass,ekinout,gmet,gprimd,&
        end do  !ig
      end do !ispinor
 
-     ekinout(istr1+6*(istr2-1))=d2kinacc/effmass
+     ekinout(istr1+6*(istr2-1))=d2kinacc/effmass_free
 
    end do !istr1
  end do !istr2

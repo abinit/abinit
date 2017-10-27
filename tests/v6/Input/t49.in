@@ -61,4 +61,5 @@ diemac 2.0
 #%% keywords = 
 #%% description = 
 #%%   Electric field gradients in ICl molecule, with and without spin orbit coupling.
+#%% topics = EFG
 #%%<END TEST_INFO>

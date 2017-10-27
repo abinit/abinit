@@ -81,6 +81,7 @@ subroutine psp8cc(mmax,n1xccc,rchrg,xccc1d)
    read(tmp_unit,*, err=10, iomsg=errmsg) idum,rad(irad),(ff(irad,jj),jj=1,5)
  end do
 
+
 !Check that rad grid is linear starting at zero
  amesh=rad(2)-rad(1)
  damesh=zero

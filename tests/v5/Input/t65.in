@@ -136,4 +136,5 @@ ixc     7
 #%%   Beta-SiC
 #%%   Calculation of the GW corrections with out-of-core solutions and
 #%%   extrapolar approximation. 
+#%% topics = GW
 #%%<END TEST_INFO>

@@ -174,24 +174,27 @@ subroutine smpbz(brav,iout,kptrlatt,mkpt,nkpt,nshiftk,option,shiftk,spkpt)
 !  in the interval [0,1[ . First generate boundaries of a big box.
 
    do jj=1,3
-!    To accomodate the shifts, boundmin and boundmax don't start from 0
 
-     if ( maxval(shiftk(jj,:)) .eq. zero ) then
-       boundmin(jj)=-1
-     else
-       boundmin(jj)=-ceiling(max(maxval(shiftk(jj,:)),tol14)) !-1
-     end if
-
-     if ( minval(shiftk(jj,:)) .eq. zero ) then
-       boundmax(jj)=0
-     else
-       boundmax(jj)=-floor(min(minval(shiftk(jj,:)),tol14)) !0
-     end if
-
+!    Mathematically, one has to find the coordinates of the corners of a
+!    rectangular paralleliped with integer coordinates, that multiplies the klatt primitive cell and allows
+!    it to incorporate completely the [0,1]^3 box. Then take the minimum and maximum
+!    of these coordinates, and round them negatively and positively to the next integer.
+!    This can be done easily using kptrlatt, considering each coordinate in turn
+!    and boils down to enlarging the boundaries for jj by the value of kptrlatt(:,jj),
+!    acting on boundmin or boundmax depending on the sign ot kptrlatt(:,jj). 
+!    XG171020 The coding before 171020 was correct, despite being very simple.
+     boundmin(jj)=0 ; boundmax(jj)=0
      do ii=1,3
        if(kptrlatt(ii,jj)<0)boundmin(jj)=boundmin(jj)+kptrlatt(ii,jj)
        if(kptrlatt(ii,jj)>0)boundmax(jj)=boundmax(jj)+kptrlatt(ii,jj)
      end do
+
+!    To accomodate the shifts, boundmin and boundmax don't start from 0, but are enlarged by one
+!    positively and/or negatively. 
+!    XG171020 Coding in v8.6.0 and before was not correct. This one is even simpler actually.
+     boundmin(jj)=boundmin(jj)-ceiling(maxval(shiftk(jj,:))+tol14)
+     boundmax(jj)=boundmax(jj)-floor(minval(shiftk(jj,:))-tol14)
+
    end do
 
    nn=1

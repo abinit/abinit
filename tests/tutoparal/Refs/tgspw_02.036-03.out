@@ -12,7 +12,7 @@
  Corning Inc. and other collaborators, see ~abinit/doc/developers/contributors.txt .
  Please read ~abinit/doc/users/acknowledgments.html for suggested
  acknowledgments of the ABINIT effort.
- For more information, see http://www.abinit.org .
+ For more information, see https://www.abinit.org .
 
 .Starting date : Sat  5 Nov 2011.
 - ( at 19h22 )
@@ -52,8 +52,8 @@ P This job should need less than                      28.816 Mbytes of memory.
         accesswff           1
             acell      2.3010000000E+01  2.3010000000E+01  2.3010000000E+01 Bohr
               amu      1.96966540E+02
+     densfor_pred           6
              ecut      5.00000000E+00 Hartree
-           densfor_pred           6
               kpt      2.50000000E-01  2.50000000E-01  2.50000000E-01
           kptrlen      4.60200000E+01
          kptrlatt      2  0  0   0  2  0   0  0  2
@@ -573,7 +573,7 @@ P           mkmem           1
     2  13.861  18.519    1   1.9261744        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     1.84225747565994    1.72828030557005    9.43000986633162   rchrg,fchrg,qchrg
- pspatm: epsatm=   90.81237674
+ pspatm : epsatm=   90.81237674
          --- l  ekb(1:nproj) -->
              1    0.637337
              2   -5.866564
@@ -1453,6 +1453,7 @@ P newkpt: treating    648 bands with npw=      59 for ikpt=   1 by node    0
         accesswff           1
             acell      2.3010000000E+01  2.3010000000E+01  2.3010000000E+01 Bohr
               amu      1.96966540E+02
+     densfor_pred           6
              ecut      5.00000000E+00 Hartree
            etotal     -3.7544460493E+03
             fcart      1.9130595343E-18 -8.6463534254E-02 -8.6463534254E-02
@@ -1562,7 +1563,6 @@ P newkpt: treating    648 bands with npw=      59 for ikpt=   1 by node    0
                        2.3178992018E-02  3.8152592970E-02  2.3178992018E-02
                        2.3178992018E-02  2.3178992018E-02  3.8152592970E-02
                        1.3966584590E-02  1.3966584590E-02  1.3966584590E-02
-           densfor_pred           6
               kpt      2.50000000E-01  2.50000000E-01  2.50000000E-01
           kptrlen      4.60200000E+01
          kptrlatt      2  0  0   0  2  0   0  0  2
@@ -2317,7 +2317,7 @@ P           mkmem           1
  Note also that it will be of great value to readers of publications presenting these results,
  to read papers enabling them to understand the theoretical formalism and details
  of the ABINIT implementation.
- For information on why they are suggested, see also http://www.abinit.org/about/?text=acknowledgments.
+ For information on why they are suggested, see also https://www.abinit.org/about/?text=acknowledgments.
 -
 - [1] Large scale ab initio calculations based on three levels of parallelization
 - F. Bottin, S. Leroux, A. Knyazev, G. Zerah, Comput. Mat. Science 42, 329, (2008).
@@ -2333,7 +2333,7 @@ P           mkmem           1
 - Computer Phys. Comm. 180, 2582-2615 (2009).
 - Comment : the third generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
-- is available at http://www.abinit.org/about/ABINIT_CPC_v10.pdf .
+- is available at https://www.abinit.org/about/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 -
 - [3] A brief introduction to the ABINIT software package.
@@ -2344,7 +2344,7 @@ P           mkmem           1
 - Comment : the second generic paper describing the ABINIT project. Note that this paper
 - should be cited especially if you are using the GW part of ABINIT, as several authors
 - of this part are not in the list of authors of the first or third paper.
-- The .pdf of the latter paper is available at http://www.abinit.org/about/zfk_0505-06_558-562.pdf.
+- The .pdf of the latter paper is available at https://www.abinit.org/about/zfk_0505-06_558-562.pdf.
 - Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
 - the licence allows the authors to put it on the Web).
 -

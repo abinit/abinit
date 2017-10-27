@@ -77,7 +77,7 @@ subroutine chkvars (string)
 !C
  list_vars=trim(list_vars)//' cd_customnimfrqs cd_frqim_method cd_full_grid cd_imfrqs'
  list_vars=trim(list_vars)//' cd_halfway_freq cd_max_freq cd_subset_freq'
- list_vars=trim(list_vars)//' charge chempot chkexit chkprim chksymbreak chneut cineb_start cpus cpum cpuh cgtyphf'
+ list_vars=trim(list_vars)//' charge chempot chkdilatmx chkexit chkprim chksymbreak chneut cineb_start cpus cpum cpuh cgtyphf'
 !D
  list_vars=trim(list_vars)//' ddamp ddb_ngqpt ddb_shiftq delayperm densfor_pred densty dfield'
  list_vars=trim(list_vars)//' dfpt_sciss diecut diegap dielam dielng diemac'
@@ -94,7 +94,7 @@ subroutine chkvars (string)
  list_vars=trim(list_vars)//' d3e_pert2_atpol d3e_pert2_dir d3e_pert2_elfd d3e_pert2_phon'
  list_vars=trim(list_vars)//' d3e_pert3_atpol d3e_pert3_dir d3e_pert3_elfd d3e_pert3_phon'
 !E
- list_vars=trim(list_vars)//' ecut ecuteps ecutsigx ecutsm ecutwfn effmass efmas'
+ list_vars=trim(list_vars)//' ecut ecuteps ecutsigx ecutsm ecutwfn effmass_free efmas'
  list_vars=trim(list_vars)//' efmas_bands efmas_calc_dirs efmas_deg efmas_deg_tol'
  list_vars=trim(list_vars)//' efmas_dim efmas_dirs efmas_n_dirs efmas_ntheta'
  list_vars=trim(list_vars)//' efield einterp elph2_imagden enunit eshift esmear exchmix exchn2n3d extrapwf'
@@ -103,6 +103,7 @@ subroutine chkvars (string)
 !F
  list_vars=trim(list_vars)//' fband fermie_nest'
  list_vars=trim(list_vars)//' fftalg fftcache fftgw'
+ list_vars=trim(list_vars)//' fockoptmix focktoldfe'
  list_vars=trim(list_vars)//' freqim_alpha freqremax freqremin freqspmax'
  list_vars=trim(list_vars)//' freqspmin'
  list_vars=trim(list_vars)//' friction frzfermi fxcartfactor '
@@ -122,11 +123,11 @@ subroutine chkvars (string)
  list_vars=trim(list_vars)//' gw_qprange gw_nqlwl gw_nstep gw_qlwl'
  list_vars=trim(list_vars)//' gw_sctype gw_sigxcore gw_toldfeig'
  list_vars=trim(list_vars)//' gwfockmix'
- list_vars=trim(list_vars)//' gwls_sternheimer_kmax gwls_kmax_complement gwls_kmax_poles'
+ list_vars=trim(list_vars)//' gwls_stern_kmax gwls_kmax_complement gwls_kmax_poles'
  list_vars=trim(list_vars)//' gwls_kmax_analytic gwls_kmax_numeric'
  list_vars=trim(list_vars)//' gwls_list_proj_freq gwls_nseeds gwls_n_proj_freq gwls_recycle'
- list_vars=trim(list_vars)//' gwls_first_seed gwls_model_parameter gwls_second_model_parameter gwls_npt_gauss_quad'
- list_vars=trim(list_vars)//' gwls_dielectric_model gwls_print_debug gwls_band_index gwls_exchange gwls_correlation'
+ list_vars=trim(list_vars)//' gwls_first_seed gwls_model_parameter gwls_npt_gauss_quad'
+ list_vars=trim(list_vars)//' gwls_diel_model gwls_print_debug gwls_band_index gwls_exchange gwls_correlation'
 !I
  list_vars=trim(list_vars)//' iatcon iatfix iatfixx iatfixy iatfixz iatsph'
  list_vars=trim(list_vars)//' iboxcut icoulomb icutcoul ieig2rf'
@@ -397,7 +398,7 @@ subroutine chkvars_in_string(protocol, list_vars, list_logicals, list_strings, s
        else
          write(message, '(7a)' )&
 &         'Found the token ',string(index_current:index_endword),' in the input file.',ch10,&
-&         'This name is not one of the registered input variable names (see http://www.abinit.org/doc).',ch10,&
+&         'This name is not one of the registered input variable names (see https://www.abinit.org/doc).',ch10,&
 &         'Action: check your input file. You likely mistyped the input variable.'
          MSG_ERROR(message)
        end if

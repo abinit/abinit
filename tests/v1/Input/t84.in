@@ -102,4 +102,5 @@
 #%% description = 
 #%%   2 special k point Si in 2-atom diamond unit cell.
 #%%   Double-loop over acell and ecut using metacharacters only.
+#%% topics = multidtset
 #%%<END TEST_INFO>

@@ -1,5 +1,5 @@
 
-.Version 8.1.1 of ABINIT 
+.Version 8.5.3 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
 
 .Copyright (C) 1998-2017 ABINIT group . 
@@ -12,10 +12,10 @@
  Corning Inc. and other collaborators, see ~abinit/doc/developers/contributors.txt .
  Please read ~abinit/doc/users/acknowledgments.html for suggested
  acknowledgments of the ABINIT effort.
- For more information, see http://www.abinit.org .
+ For more information, see https://www.abinit.org .
 
-.Starting date : Fri  1 Jul 2016.
-- ( at 11h00 )
+.Starting date : Tue 12 Sep 2017.
+- ( at 17h51 )
   
 - input  file    -> t85.in
 - output file    -> t85.out
@@ -1587,15 +1587,15 @@ P          mk1mem10       512
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.05208
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/mverstra_8.1.1-private/tests/Psps_for_tests/Al-psval.psp8
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/mverstra_8.1.1-private/tests/Psps_for_tests/Al-psval.psp8
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/pouillon_psml-new/tests/Psps_for_tests/Al-psval.psp8
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/pouillon_psml-new/tests/Psps_for_tests/Al-psval.psp8
 - Al    ONCVPSP  r_core=  1.77  1.77  1.71
 - 13.00000   3.00000    150709                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
     5.99000000000000    0.65000000000000    0.00000000000000   rchrg,fchrg,qchrg
      nproj     2     2     2
-extension_switch     1
- pspatm: epsatm=    5.28546056
+     extension_switch     1
+ pspatm : epsatm=    5.28546056
          --- l  ekb(1:nproj) -->
              0    5.190663    0.741808
              1    7.659439    0.819933
@@ -1796,11 +1796,11 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.244      74.168
   ireadwf=   0
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1 -0.14703689539817     -1.023E+01 1.729E-01 3.909E+00
+-ETOT  1 -0.14703689539815     -1.023E+01 1.729E-01 3.909E+00
  ETOT  2 -0.15317100028244     -6.134E-03 7.650E-03 3.445E-02
- ETOT  3 -0.15328717172267     -1.162E-04 1.270E-04 4.750E-04
- ETOT  4 -0.15328863161632     -1.460E-06 2.705E-04 1.365E-06
- ETOT  5 -0.15328862377772      7.839E-09 3.843E-05 2.864E-09
+ ETOT  3 -0.15328717172266     -1.162E-04 1.270E-04 4.750E-04
+ ETOT  4 -0.15328863161631     -1.460E-06 2.705E-04 1.365E-06
+ ETOT  5 -0.15328862377771      7.839E-09 3.843E-05 2.864E-09
 
  At SCF step    5       vres2   =  2.86E-09 < tolvrs=  1.00E-07 =>converged.
 ================================================================================
@@ -1875,16 +1875,16 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.244      74.168
   
    1    1   1    1        -0.0012064228         0.0000000000
    1    1   2    1         0.0000000000         0.0000000000
-   1    1   3    1         0.0000000000         0.0000000000
+   1    1   3    1        -0.0000000000         0.0000000000
   
    2    1   1    1         0.0000000000         0.0000000000
    2    1   2    1        -0.0012064228         0.0000000000
    2    1   3    1        -0.0000000000         0.0000000000
   
-   3    1   1    1         0.0000000000         0.0000000000
+   3    1   1    1        -0.0000000000         0.0000000000
    3    1   2    1        -0.0000000000         0.0000000000
    3    1   3    1        -0.0012064228         0.0000000000
- 
+
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
  Phonon energies in Hartree :
   -1.566161E-04 -1.566161E-04 -1.566161E-04
@@ -1914,15 +1914,15 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.244      74.168
          ecut(hartree)=      6.000   => boxcut(ratio)=   1.96751
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/mverstra_8.1.1-private/tests/Psps_for_tests/Al-psval.psp8
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/mverstra_8.1.1-private/tests/Psps_for_tests/Al-psval.psp8
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/pouillon_psml-new/tests/Psps_for_tests/Al-psval.psp8
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/pouillon_psml-new/tests/Psps_for_tests/Al-psval.psp8
 - Al    ONCVPSP  r_core=  1.77  1.77  1.71
 - 13.00000   3.00000    150709                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
     5.99000000000000    0.65000000000000    0.00000000000000   rchrg,fchrg,qchrg
      nproj     2     2     2
-extension_switch     1
- pspatm: epsatm=    5.28546056
+     extension_switch     1
+ pspatm : epsatm=    5.28546056
          --- l  ekb(1:nproj) -->
              0    5.190663    0.741808
              1    7.659439    0.819933
@@ -1968,8 +1968,8 @@ extension_switch     1
 -ETOT  1   5.9003161235138     -2.293E+01 6.944E-01 9.150E+03
  ETOT  2   1.1073916552134     -4.793E+00 4.492E-02 1.187E+03
  ETOT  3  0.39912552932726     -7.083E-01 1.215E-01 1.066E-01
- ETOT  4  0.39904655427137     -7.898E-05 1.320E-03 1.593E-04
- ETOT  5  0.39904617403099     -3.802E-07 7.867E-03 9.165E-06
+ ETOT  4  0.39904655427139     -7.898E-05 1.320E-03 1.593E-04
+ ETOT  5  0.39904617403102     -3.802E-07 7.867E-03 9.165E-06
  ETOT  6  0.39904616440047     -9.631E-09 9.149E-05 1.287E-07
  ETOT  7  0.39904616431716     -8.330E-11 5.430E-04 8.545E-10
 
@@ -2018,12 +2018,12 @@ extension_switch     1
   ireadwf=   0
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1 -0.10005456908537     -1.051E+01 5.876E+00 5.858E+00
+-ETOT  1 -0.10005456908538     -1.051E+01 5.876E+00 5.858E+00
  ETOT  2 -0.10578245134420     -5.728E-03 1.042E-01 4.187E-01
- ETOT  3 -0.10605088908678     -2.684E-04 2.622E-01 5.707E-02
+ ETOT  3 -0.10605088908679     -2.684E-04 2.622E-01 5.707E-02
  ETOT  4 -0.10608496206191     -3.407E-05 3.168E-02 1.815E-03
  ETOT  5 -0.10608611055326     -1.148E-06 2.293E-02 5.059E-07
- ETOT  6 -0.10608611119561     -6.423E-10 4.642E-03 7.492E-10
+ ETOT  6 -0.10608611119562     -6.424E-10 4.642E-03 7.492E-10
 
  At SCF step    6       vres2   =  7.49E-10 < tolvrs=  1.00E-07 =>converged.
 ================================================================================
@@ -2092,7 +2092,7 @@ extension_switch     1
    3    1   1    1        -0.0146660174        -0.0000000010
    3    1   2    1         0.0146660174         0.0000000010
    3    1   3    1         0.0167961021         0.0000000010
- 
+
   Phonon wavevector (reduced coordinates) :  0.25000  0.00000  0.00000
  Phonon energies in Hartree :
    2.081062E-04  2.081062E-04  9.684329E-04
@@ -2122,15 +2122,15 @@ extension_switch     1
          ecut(hartree)=      6.000   => boxcut(ratio)=   1.88496
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/mverstra_8.1.1-private/tests/Psps_for_tests/Al-psval.psp8
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/mverstra_8.1.1-private/tests/Psps_for_tests/Al-psval.psp8
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/pouillon_psml-new/tests/Psps_for_tests/Al-psval.psp8
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/pouillon_psml-new/tests/Psps_for_tests/Al-psval.psp8
 - Al    ONCVPSP  r_core=  1.77  1.77  1.71
 - 13.00000   3.00000    150709                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
     5.99000000000000    0.65000000000000    0.00000000000000   rchrg,fchrg,qchrg
      nproj     2     2     2
-extension_switch     1
- pspatm: epsatm=    5.28546056
+     extension_switch     1
+ pspatm : epsatm=    5.28546056
          --- l  ekb(1:nproj) -->
              0    5.190663    0.741808
              1    7.659439    0.819933
@@ -2225,11 +2225,11 @@ extension_switch     1
   ireadwf=   0
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  1.58936924421056E-02 -1.091E+01 2.805E+00 1.854E+00
+-ETOT  1  1.58936924420985E-02 -1.091E+01 2.805E+00 1.854E+00
  ETOT  2  1.38409031771438E-02 -2.053E-03 1.254E-02 1.042E-02
- ETOT  3  1.38264914406143E-02 -1.441E-05 3.772E-01 1.135E-04
- ETOT  4  1.38262868101720E-02 -2.046E-07 1.724E-03 1.631E-06
- ETOT  5  1.38262836614977E-02 -3.149E-09 3.773E-01 8.323E-09
+ ETOT  3  1.38264914406179E-02 -1.441E-05 3.772E-01 1.135E-04
+ ETOT  4  1.38262868101791E-02 -2.046E-07 1.724E-03 1.631E-06
+ ETOT  5  1.38262836615013E-02 -3.149E-09 3.773E-01 8.323E-09
 
  At SCF step    5       vres2   =  8.32E-09 < tolvrs=  1.00E-07 =>converged.
 ================================================================================
@@ -2298,7 +2298,7 @@ extension_switch     1
    3    1   1    1        -0.0305954830        -0.0000000001
    3    1   2    1         0.0305954830         0.0000000001
    3    1   3    1         0.0383709112         0.0000000001
- 
+
   Phonon wavevector (reduced coordinates) :  0.50000  0.00000  0.00000
  Phonon energies in Hartree :
    3.976022E-04  3.976022E-04  1.422765E-03
@@ -2328,15 +2328,15 @@ extension_switch     1
          ecut(hartree)=      6.000   => boxcut(ratio)=   1.96843
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/mverstra_8.1.1-private/tests/Psps_for_tests/Al-psval.psp8
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/mverstra_8.1.1-private/tests/Psps_for_tests/Al-psval.psp8
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/pouillon_psml-new/tests/Psps_for_tests/Al-psval.psp8
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/pouillon_psml-new/tests/Psps_for_tests/Al-psval.psp8
 - Al    ONCVPSP  r_core=  1.77  1.77  1.71
 - 13.00000   3.00000    150709                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
     5.99000000000000    0.65000000000000    0.00000000000000   rchrg,fchrg,qchrg
      nproj     2     2     2
-extension_switch     1
- pspatm: epsatm=    5.28546056
+     extension_switch     1
+ pspatm : epsatm=    5.28546056
          --- l  ekb(1:nproj) -->
              0    5.190663    0.741808
              1    7.659439    0.819933
@@ -2384,11 +2384,11 @@ extension_switch     1
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1   3.3764587367256     -1.982E+01 4.835E-01 4.004E+03
- ETOT  2  0.55268249243719     -2.824E+00 3.349E-02 4.004E+02
+ ETOT  2  0.55268249243720     -2.824E+00 3.349E-02 4.004E+02
  ETOT  3  0.24239343255356     -3.103E-01 8.944E-02 1.047E-01
- ETOT  4  0.24231238928000     -8.104E-05 1.239E-03 4.050E-04
+ ETOT  4  0.24231238928001     -8.104E-05 1.239E-03 4.050E-04
  ETOT  5  0.24231193845807     -4.508E-07 8.943E-02 2.493E-06
- ETOT  6  0.24231192576237     -1.270E-08 3.811E-05 3.494E-08
+ ETOT  6  0.24231192576239     -1.270E-08 3.811E-05 3.494E-08
 
  At SCF step    6       vres2   =  3.49E-08 < tolvrs=  1.00E-07 =>converged.
 ================================================================================
@@ -2452,12 +2452,12 @@ extension_switch     1
   
    2    1   1    1         0.0000000000         0.0000000000
    2    1   2    1         0.0057497730        -0.0000000000
-   2    1   3    1        -0.0000000000         0.0000000000
+   2    1   3    1         0.0000000000         0.0000000000
   
    3    1   1    1         0.0000000000         0.0000000000
    3    1   2    1        -0.0000000000         0.0000000000
    3    1   3    1         0.0389196892        -0.0000000000
- 
+
   Phonon wavevector (reduced coordinates) :  0.25000  0.25000  0.00000
  Phonon energies in Hartree :
    3.419101E-04  3.419101E-04  8.895519E-04
@@ -2487,15 +2487,15 @@ extension_switch     1
          ecut(hartree)=      6.000   => boxcut(ratio)=   1.88399
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/mverstra_8.1.1-private/tests/Psps_for_tests/Al-psval.psp8
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/mverstra_8.1.1-private/tests/Psps_for_tests/Al-psval.psp8
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/pouillon_psml-new/tests/Psps_for_tests/Al-psval.psp8
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/pouillon_psml-new/tests/Psps_for_tests/Al-psval.psp8
 - Al    ONCVPSP  r_core=  1.77  1.77  1.71
 - 13.00000   3.00000    150709                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
     5.99000000000000    0.65000000000000    0.00000000000000   rchrg,fchrg,qchrg
      nproj     2     2     2
-extension_switch     1
- pspatm: epsatm=    5.28546056
+     extension_switch     1
+ pspatm : epsatm=    5.28546056
          --- l  ekb(1:nproj) -->
              0    5.190663    0.741808
              1    7.659439    0.819933
@@ -2534,11 +2534,11 @@ extension_switch     1
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1   2.1770298886673     -2.260E+01 4.564E+00 6.231E+02
- ETOT  2  0.99107525634101     -1.186E+00 6.016E-01 1.090E+01
- ETOT  3  0.97231025145963     -1.877E-02 2.883E+00 5.807E-03
- ETOT  4  0.97230237986398     -7.872E-06 6.787E-02 6.582E-05
- ETOT  5  0.97230223723740     -1.426E-07 2.864E+00 1.830E-06
- ETOT  6  0.97230223344453     -3.793E-09 7.241E-03 9.692E-09
+ ETOT  2  0.99107525634100     -1.186E+00 6.016E-01 1.090E+01
+ ETOT  3  0.97231025145961     -1.877E-02 2.883E+00 5.807E-03
+ ETOT  4  0.97230237986397     -7.872E-06 6.787E-02 6.582E-05
+ ETOT  5  0.97230223723739     -1.426E-07 2.864E+00 1.830E-06
+ ETOT  6  0.97230223344452     -3.793E-09 7.241E-03 9.692E-09
 
  At SCF step    6       vres2   =  9.69E-09 < tolvrs=  1.00E-07 =>converged.
 ================================================================================
@@ -2586,10 +2586,10 @@ extension_switch     1
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1  0.81867093453375     -1.544E+01 9.320E-01 1.760E+02
- ETOT  2  0.46969998566847     -3.490E-01 6.870E-01 3.354E+00
+ ETOT  2  0.46969998566846     -3.490E-01 6.870E-01 3.354E+00
  ETOT  3  0.46405478653331     -5.645E-03 1.338E-01 5.069E-03
- ETOT  4  0.46404515277236     -9.634E-06 1.112E-01 5.855E-05
- ETOT  5  0.46404502525531     -1.275E-07 3.664E-02 5.258E-07
+ ETOT  4  0.46404515277235     -9.634E-06 1.112E-01 5.855E-05
+ ETOT  5  0.46404502525532     -1.275E-07 3.664E-02 5.258E-07
  ETOT  6  0.46404502387186     -1.383E-09 2.457E-02 2.687E-09
 
  At SCF step    6       vres2   =  2.69E-09 < tolvrs=  1.00E-07 =>converged.
@@ -2637,10 +2637,10 @@ extension_switch     1
   ireadwf=   0
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  0.25453340344038     -1.227E+01 4.557E+00 3.898E+00
- ETOT  2  0.24331870240004     -1.121E-02 3.135E-02 4.500E-02
+-ETOT  1  0.25453340344037     -1.227E+01 4.557E+00 3.898E+00
+ ETOT  2  0.24331870240003     -1.121E-02 3.135E-02 4.500E-02
  ETOT  3  0.24321395870948     -1.047E-04 2.065E-01 3.800E-04
- ETOT  4  0.24321319949587     -7.592E-07 1.633E-03 6.685E-06
+ ETOT  4  0.24321319949588     -7.592E-07 1.633E-03 6.685E-06
  ETOT  5  0.24321318480661     -1.469E-08 1.546E-02 8.130E-08
 
  At SCF step    5       vres2   =  8.13E-08 < tolvrs=  1.00E-07 =>converged.
@@ -2710,7 +2710,7 @@ extension_switch     1
    3    1   1    1        -0.0113024807        -0.0000000259
    3    1   2    1         0.0113024807         0.0000000259
    3    1   3    1         0.0559583700        -0.0000000011
- 
+
   Phonon wavevector (reduced coordinates) :  0.50000  0.25000  0.00000
  Phonon energies in Hartree :
    4.192992E-04  9.117303E-04  1.217517E-03
@@ -2740,15 +2740,15 @@ extension_switch     1
          ecut(hartree)=      6.000   => boxcut(ratio)=   1.97214
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/mverstra_8.1.1-private/tests/Psps_for_tests/Al-psval.psp8
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/mverstra_8.1.1-private/tests/Psps_for_tests/Al-psval.psp8
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/pouillon_psml-new/tests/Psps_for_tests/Al-psval.psp8
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/pouillon_psml-new/tests/Psps_for_tests/Al-psval.psp8
 - Al    ONCVPSP  r_core=  1.77  1.77  1.71
 - 13.00000   3.00000    150709                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
     5.99000000000000    0.65000000000000    0.00000000000000   rchrg,fchrg,qchrg
      nproj     2     2     2
-extension_switch     1
- pspatm: epsatm=    5.28546056
+     extension_switch     1
+ pspatm : epsatm=    5.28546056
          --- l  ekb(1:nproj) -->
              0    5.190663    0.741808
              1    7.659439    0.819933
@@ -2794,7 +2794,7 @@ extension_switch     1
  ETOT  2   1.4746622294702     -6.430E-01 9.048E-03 1.448E+01
  ETOT  3   1.4545658904313     -2.010E-02 6.572E-02 7.446E-03
  ETOT  4   1.4545543694018     -1.152E-05 4.056E-06 6.647E-05
- ETOT  5   1.4545541934924     -1.759E-07 6.585E-02 2.026E-06
+ ETOT  5   1.4545541934925     -1.759E-07 6.585E-02 2.026E-06
  ETOT  6   1.4545541891768     -4.316E-09 1.212E-08 1.354E-08
 
  At SCF step    6       vres2   =  1.35E-08 < tolvrs=  1.00E-07 =>converged.
@@ -2845,7 +2845,7 @@ extension_switch     1
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1  0.37481847576505     -1.084E+01 5.414E-01 2.463E+00
  ETOT  2  0.37156021446138     -3.258E-03 1.252E-03 2.937E-02
- ETOT  3  0.37149663663844     -6.358E-05 1.206E-02 7.842E-04
+ ETOT  3  0.37149663663843     -6.358E-05 1.206E-02 7.842E-04
  ETOT  4  0.37149593985153     -6.968E-07 1.589E-02 3.470E-05
  ETOT  5  0.37149601590666      7.606E-08 1.136E-01 1.273E-07
  ETOT  6  0.37149605749467      4.159E-08 1.607E-01 9.392E-10
@@ -2917,7 +2917,7 @@ extension_switch     1
    3    1   1    1        -0.0000000000         0.0000000000
    3    1   2    1        -0.0000000000        -0.0000000000
    3    1   3    1         0.0475441566         0.0000000000
- 
+
   Phonon wavevector (reduced coordinates) : -0.25000  0.25000  0.00000
  Phonon energies in Hartree :
    5.178286E-04  9.831848E-04  1.402504E-03
@@ -2947,15 +2947,15 @@ extension_switch     1
          ecut(hartree)=      6.000   => boxcut(ratio)=   1.88883
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/mverstra_8.1.1-private/tests/Psps_for_tests/Al-psval.psp8
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/mverstra_8.1.1-private/tests/Psps_for_tests/Al-psval.psp8
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/pouillon_psml-new/tests/Psps_for_tests/Al-psval.psp8
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/pouillon_psml-new/tests/Psps_for_tests/Al-psval.psp8
 - Al    ONCVPSP  r_core=  1.77  1.77  1.71
 - 13.00000   3.00000    150709                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
     5.99000000000000    0.65000000000000    0.00000000000000   rchrg,fchrg,qchrg
      nproj     2     2     2
-extension_switch     1
- pspatm: epsatm=    5.28546056
+     extension_switch     1
+ pspatm : epsatm=    5.28546056
          --- l  ekb(1:nproj) -->
              0    5.190663    0.741808
              1    7.659439    0.819933
@@ -3005,9 +3005,9 @@ extension_switch     1
 -ETOT  1   1.2688377617396     -1.995E+01 6.618E+00 2.131E+02
  ETOT  2  0.74507936315157     -5.238E-01 1.390E-01 8.659E-01
  ETOT  3  0.74374429733372     -1.335E-03 6.859E-01 2.426E-03
- ETOT  4  0.74374282083553     -1.476E-06 4.399E-02 1.568E-05
+ ETOT  4  0.74374282083554     -1.476E-06 4.399E-02 1.568E-05
  ETOT  5  0.74374296836478      1.475E-07 6.863E-01 1.314E-07
- ETOT  6  0.74374302923341      6.087E-08 2.255E-02 1.368E-09
+ ETOT  6  0.74374302923340      6.087E-08 2.255E-02 1.368E-09
 
  At SCF step    6       vres2   =  1.37E-09 < tolvrs=  1.00E-07 =>converged.
 ================================================================================
@@ -3076,7 +3076,7 @@ extension_switch     1
    3    1   1    1         0.0000000000         0.0000000000
    3    1   2    1        -0.0000000000         0.0000000000
    3    1   3    1         0.0792530638         0.0000000000
- 
+
   Phonon wavevector (reduced coordinates) :  0.50000  0.50000  0.00000
  Phonon energies in Hartree :
    5.982567E-04  5.982567E-04  1.269389E-03
@@ -3106,15 +3106,15 @@ extension_switch     1
          ecut(hartree)=      6.000   => boxcut(ratio)=   1.89270
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/mverstra_8.1.1-private/tests/Psps_for_tests/Al-psval.psp8
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/mverstra_8.1.1-private/tests/Psps_for_tests/Al-psval.psp8
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/pouillon_psml-new/tests/Psps_for_tests/Al-psval.psp8
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/pouillon_psml-new/tests/Psps_for_tests/Al-psval.psp8
 - Al    ONCVPSP  r_core=  1.77  1.77  1.71
 - 13.00000   3.00000    150709                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
     5.99000000000000    0.65000000000000    0.00000000000000   rchrg,fchrg,qchrg
      nproj     2     2     2
-extension_switch     1
- pspatm: epsatm=    5.28546056
+     extension_switch     1
+ pspatm : epsatm=    5.28546056
          --- l  ekb(1:nproj) -->
              0    5.190663    0.741808
              1    7.659439    0.819933
@@ -3209,10 +3209,10 @@ extension_switch     1
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1   1.3601314320213     -1.939E+01 1.755E-01 1.527E+02
- ETOT  2  0.92171267262137     -4.384E-01 1.117E-02 3.997E-01
- ETOT  3  0.92141522844744     -2.974E-04 8.343E-06 1.862E-03
- ETOT  4  0.92141304625724     -2.182E-06 5.583E-07 1.287E-05
- ETOT  5  0.92141302012249     -2.613E-08 1.620E-09 8.012E-08
+ ETOT  2  0.92171267262135     -4.384E-01 1.117E-02 3.997E-01
+ ETOT  3  0.92141522844742     -2.974E-04 8.343E-06 1.862E-03
+ ETOT  4  0.92141304625721     -2.182E-06 5.583E-07 1.287E-05
+ ETOT  5  0.92141302012248     -2.613E-08 1.620E-09 8.012E-08
 
  At SCF step    5       vres2   =  8.01E-08 < tolvrs=  1.00E-07 =>converged.
 ================================================================================
@@ -3281,7 +3281,7 @@ extension_switch     1
    3    1   1    1         0.0000000000         0.0000000000
    3    1   2    1        -0.0000000000         0.0000000000
    3    1   3    1         0.0584540161         0.0000000001
- 
+
   Phonon wavevector (reduced coordinates) : -0.25000  0.50000  0.25000
  Phonon energies in Hartree :
    9.515718E-04  1.090169E-03  1.090169E-03
@@ -3313,15 +3313,15 @@ extension_switch     1
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.05208
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/mverstra_8.1.1-private/tests/Psps_for_tests/Al-psval.psp8
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/mverstra_8.1.1-private/tests/Psps_for_tests/Al-psval.psp8
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/pouillon_psml-new/tests/Psps_for_tests/Al-psval.psp8
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/pouillon_psml-new/tests/Psps_for_tests/Al-psval.psp8
 - Al    ONCVPSP  r_core=  1.77  1.77  1.71
 - 13.00000   3.00000    150709                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
     5.99000000000000    0.65000000000000    0.00000000000000   rchrg,fchrg,qchrg
      nproj     2     2     2
-extension_switch     1
- pspatm: epsatm=    5.28546056
+     extension_switch     1
+ pspatm : epsatm=    5.28546056
          --- l  ekb(1:nproj) -->
              0    5.190663    0.741808
              1    7.659439    0.819933
@@ -3657,7 +3657,7 @@ extension_switch     1
            etotal1    -3.2697267983E+00
            etotal2    -1.5328862378E-01
            etotal3    -1.0608611120E-01
-           etotal4     1.3826283661E-02
+           etotal4     1.3826283662E-02
            etotal5     2.4231192576E-01
            etotal6     2.4321318481E-01
            etotal7     3.7149605749E-01
@@ -5041,9 +5041,10 @@ P          mk1mem10       512
  Note also that it will be of great value to readers of publications presenting these results,
  to read papers enabling them to understand the theoretical formalism and details
  of the ABINIT implementation.
- For information on why they are suggested, see also http://www.abinit.org/about/?text=acknowledgments.
+ For information on why they are suggested, see also https://www.abinit.org/about/?text=acknowledgments.
 -
-- [1] Recent developments in the ABINIT software package
+- [1] Recent developments in the ABINIT software package.
+- Computer Phys. Comm. 205, 106 (2016).
 - X.Gonze, F.Jollet, F.Abreu Araujo, D.Adams, B.Amadon, T.Applencourt,
 - C.Audouze, J.-M.Beuken, J.Bieder, A.Bokhanchuk, E.Bousquet, F.Bruneval
 - D.Caliste, M.Cote, F.Dahm, F.Da Pieve, M.Delaveau, M.Di Gennaro,
@@ -5052,9 +5053,11 @@ P          mk1mem10       512
 - A.Levitt, A.Lherbier, F.Liu, I.Lukacevic, A.Martin, C.Martins,
 - M.J.T.Oliveira, S.Ponce, Y.Pouillon, T.Rangel, G.-M.Rignanese,
 - A.H.Romero, B.Rousseau, O.Rubel, A.A.Shukri, M.Stankovski, M.Torrent,
+- M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
+- B.Xue, A.Zhou, J.W.Zwanziger.
 - Comment : the fourth generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
-- is available at http://www.abinit.org/about/ABINIT16.pdf .
+- is available at https://www.abinit.org/about/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 -
 - [2] First-principles responses of solids to atomic displacements and homogeneous electric fields:,
@@ -5071,33 +5074,33 @@ P          mk1mem10       512
 - Comment: Some pseudopotential generated using the ONCVPSP code were used.
 -
 - [5] ABINIT : First-principles approach of materials and nanosystem properties.
+- Computer Phys. Comm. 180, 2582-2615 (2009).
 - X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
 - D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
 - S. Goedecker, D.R. Hamann, P. Hermet, F. Jollet, G. Jomard, S. Leroux, M. Mancini, S. Mazevet,
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
-- Computer Phys. Comm. 180, 2582-2615 (2009).
 - Comment : the third generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
-- is available at http://www.abinit.org/about/ABINIT_CPC_v10.pdf .
+- is available at https://www.abinit.org/about/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 -
 - [6] A brief introduction to the ABINIT software package.
+- Z. Kristallogr. 220, 558-562 (2005).
 - X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
 - M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
 - L. Reining, R. Godby, G. Onida, D.R. Hamann, and D.C. Allan.
-- Z. Kristallogr. 220, 558-562 (2005).
 - Comment : the second generic paper describing the ABINIT project. Note that this paper
 - should be cited especially if you are using the GW part of ABINIT, as several authors
 - of this part are not in the list of authors of the first or third paper.
-- The .pdf of the latter paper is available at http://www.abinit.org/about/zfk_0505-06_558-562.pdf.
+- The .pdf of the latter paper is available at https://www.abinit.org/about/zfk_0505-06_558-562.pdf.
 - Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
 - the licence allows the authors to put it on the Web).
 -
-- Proc.   0 individual time (sec): cpu=        124.8  wall=        124.9
+- Proc.   0 individual time (sec): cpu=        134.3  wall=        135.3
 
 ================================================================================
 
  Calculation completed.
 .Delivered 126 WARNINGs and   0 COMMENTs to log file.
-+Overall time at end (sec) : cpu=        124.8  wall=        124.9
++Overall time at end (sec) : cpu=        134.3  wall=        135.3

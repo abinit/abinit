@@ -69,4 +69,5 @@ toldfe 1.0d-6
 #%%   H based fake crystals : magnetic groups, Shubnikov type III
 #%%   Test the generation and recognition of the
 #%%   triclinic and monoclinic space groups
+#%% topics = crystal, spinpolarisation, UnitCell
 #%%<END TEST_INFO>

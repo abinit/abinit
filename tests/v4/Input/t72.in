@@ -77,4 +77,5 @@ jdtset 11
 #%%   lattice. The Berry phase calculations are performed
 #%%   in three different datasets. For each datatset, ABINIT writes
 #%%   the polarization in reduced coordinates to a DDB.
+#%% topics = Berry
 #%%<END TEST_INFO>

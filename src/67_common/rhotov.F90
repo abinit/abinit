@@ -31,7 +31,7 @@
 !!  nhat(nfft,nspden*usepaw)= -PAW only- compensation density
 !!  nhatgr(nfft,nspden,3*nhatgrdim)= -PAW only- cartesian gradients of compensation density
 !!  nhatgrdim= -PAW only- 0 if nhatgr array is not used ; 1 otherwise
-!!  nkxc=second dimension of the array kxc, see rhohxc.f for a description
+!!  nkxc=second dimension of the array kxc, see rhohxc.F90 for a description
 !!  n3xccc=dimension of the xccc3d array (0 or nfft).
 !!  optene=option for the computation of additional energies
 !!  optres=0: the trial potential residual is computed ; the input potential value is kept
@@ -260,6 +260,7 @@ subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
 !  For PAW we recalculate this since nhat was not taken into account
 !  in psolver_rhohxc: E_H= int v_H (n+nhat) dr
    if(.not. wvlbigdft .and. (dtset%icoulomb==0 .or. dtset%usepaw==1 ) ) then
+
      call timab(942,1,tsec)
      call dotprod_vn(1,rhor,energies%e_hartree,doti,nfft,nfftot,1,1,vhartr,ucvol,mpi_comm_sphgrid=mpi_comm_sphgrid)
      energies%e_hartree=half*energies%e_hartree
@@ -370,6 +371,7 @@ subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
 
  if (optres==0) then
 
+
 !  ------ Compute potential residual -------------
 
    if (.not. wvlbigdft) then
@@ -389,6 +391,7 @@ subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
          end do
        end do
      end if
+
      offset   = 0
 
      if (dtset%iscf==0) vtrial=vnew

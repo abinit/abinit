@@ -423,6 +423,7 @@ subroutine dtset_copy(dtout, dtin)
  dtout%cd_customnimfrqs   = dtin%cd_customnimfrqs
  dtout%cd_frqim_method    = dtin%cd_frqim_method
  dtout%cd_full_grid       = dtin%cd_full_grid
+ dtout%chkdilatmx         = dtin%chkdilatmx
  dtout%chkexit            = dtin%chkexit
  dtout%chkprim            = dtin%chkprim
  dtout%chksymbreak        = dtin%chksymbreak
@@ -511,6 +512,7 @@ subroutine dtset_copy(dtout, dtin)
  dtout%pawfatbnd          = dtin%pawfatbnd
  dtout%fermie_nest        = dtin%fermie_nest
  dtout%fftgw              = dtin%fftgw
+ dtout%fockoptmix         = dtin%fockoptmix
  dtout%freqim_alpha       = dtin%freqim_alpha
  dtout%freqremin          = dtin%freqremin
  dtout%freqremax          = dtin%freqremax
@@ -566,9 +568,9 @@ subroutine dtset_copy(dtout, dtin)
  dtout%gw_sctype          = dtin%gw_sctype
  dtout%gw_sigxcore        = dtin%gw_sigxcore
  dtout%gw_toldfeig        = dtin%gw_toldfeig
- dtout%gwls_sternheimer_kmax= dtin%gwls_sternheimer_kmax
+ dtout%gwls_stern_kmax= dtin%gwls_stern_kmax
  dtout%gwls_npt_gauss_quad  = dtin%gwls_npt_gauss_quad
- dtout%gwls_dielectric_model= dtin%gwls_dielectric_model
+ dtout%gwls_diel_model= dtin%gwls_diel_model
  dtout%gwls_print_debug     = dtin%gwls_print_debug
  dtout%gwls_nseeds          = dtin%gwls_nseeds
  dtout%gwls_n_proj_freq     = dtin%gwls_n_proj_freq
@@ -804,6 +806,7 @@ subroutine dtset_copy(dtout, dtin)
  dtout%prtxml             = dtin%prtxml
  dtout%prt1dm             = dtin%prt1dm
  dtout%ptgroupma          = dtin%ptgroupma
+ dtout%qptopt             = dtin%qptopt
  dtout%random_atpos       = dtin%random_atpos
  dtout%recgratio          = dtin%recgratio
  dtout%recnpath           = dtin%recnpath
@@ -946,19 +949,18 @@ subroutine dtset_copy(dtout, dtin)
  dtout%ecutsigx           = dtin%ecutsigx
  dtout%ecutsm             = dtin%ecutsm
  dtout%ecutwfn            = dtin%ecutwfn
- dtout%effmass            = dtin%effmass
+ dtout%effmass_free       = dtin%effmass_free
  dtout%efmas_deg_tol      = dtin%efmas_deg_tol
  dtout%elph2_imagden      = dtin%elph2_imagden
  dtout%eshift             = dtin%eshift
  dtout%esmear             = dtin%esmear
  dtout%exchmix            = dtin%exchmix
  dtout%fband              = dtin%fband
- dtout%gwls_model_parameter = dtin%gwls_model_parameter
- dtout%gwls_second_model_parameter = dtin%gwls_second_model_parameter
- dtout%spinmagntarget     = dtin%spinmagntarget
+ dtout%focktoldfe         = dtin%focktoldfe
  dtout%friction           = dtin%friction
  dtout%fxcartfactor       = dtin%fxcartfactor
  dtout%ga_opt_percent     = dtin%ga_opt_percent
+ dtout%gwls_model_parameter = dtin%gwls_model_parameter
  dtout%kptnrm             = dtin%kptnrm
  dtout%kptrlen            = dtin%kptrlen
  dtout%maxestep           = dtin%maxestep
@@ -984,6 +986,7 @@ subroutine dtset_copy(dtout, dtin)
  dtout%rectolden          = dtin%rectolden
  dtout%dfpt_sciss         = dtin%dfpt_sciss
  dtout%mbpt_sciss         = dtin%mbpt_sciss
+ dtout%spinmagntarget     = dtin%spinmagntarget
  dtout%spbroad            = dtin%spbroad
  dtout%spnorbscl          = dtin%spnorbscl
  dtout%stmbias            = dtin%stmbias

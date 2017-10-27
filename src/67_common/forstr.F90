@@ -26,7 +26,7 @@
 !!   |  Pulay correction to stress tensor (hartree).  Should be <=0.
 !!   | ecut=cut-off energy for plane wave basis sphere (Ha)
 !!   | ecutsm=smearing energy for plane wave kinetic energy (Ha)
-!!   | effmass=effective mass for electrons (1. in common case)
+!!   | effmass_free=effective mass for electrons (1. in common case)
 !!   | efield = cartesian coordinates of the electric field in atomic units
 !!   | ionmov=governs the movement of atoms (see help file)
 !!   | densfor_pred=governs the mixed electronic-atomic part of the preconditioner
@@ -198,7 +198,7 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
  use m_pawrhoij,         only : pawrhoij_type
  use m_pawfgr,           only : pawfgr_type
  use m_pawcprj,          only : pawcprj_type
- use m_fock,             only : fock_type,fock_updatecwaveocc
+ use m_fock,             only : fock_type
  use libxc_functionals,  only : libxc_functionals_is_hybrid
 
 !This section has been created automatically by the script Abilint (TD).
@@ -312,14 +312,16 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
      if((dtset%optstress/=0).and.(psps%usepaw==1)) then
        iatom=-1;idir=0;ctocprj_choice=3;iorder_cprj=0;unpaw=26
        call metric(gmet,gprimd,-1,rmet,rprimd,dum)
-       call ctocprj(fock%atindx,fock%cgocc,ctocprj_choice,fock%cwaveocc_prj,gmet,gprimd,iatom,idir,&
-&       iorder_cprj,fock%istwfk_bz,fock%kg_bz,fock%kptns_bz,fock%mband,mcg,fock%mcprj,dtset%mgfft,fock%mkpt,mpi_enreg,psps%mpsang,&
-&       dtset%mpw,dtset%natom,nattyp,fock%nbandocc_bz,dtset%natom,dtset%ngfft,fock%nkpt_bz,dtset%nloalg,fock%npwarr,dtset%nspinor,&
+       call ctocprj(fock%fock_common%atindx,fock%fock_BZ%cgocc,ctocprj_choice,fock%fock_BZ%cwaveocc_prj,gmet,gprimd,iatom,idir,&
+&       iorder_cprj,fock%fock_BZ%istwfk_bz,fock%fock_BZ%kg_bz,fock%fock_BZ%kptns_bz,fock%fock_common%mband,mcg,&
+&       fock%fock_BZ%mcprj,dtset%mgfft,fock%fock_BZ%mkpt,mpi_enreg,psps%mpsang,&
+&       dtset%mpw,dtset%natom,nattyp,fock%fock_BZ%nbandocc_bz,dtset%natom,dtset%ngfft,fock%fock_BZ%nkpt_bz,&
+&       dtset%nloalg,fock%fock_BZ%npwarr,dtset%nspinor,&
 &       dtset%nsppol,dtset%ntypat,dtset%paral_kgb,ph1d,psps,rmet,dtset%typat,ucvol,unpaw,&
 &       xred,ylm,ylmgr)
      end if
    end if
-   call forstrnps(cg,cprj,dtset%ecut,dtset%ecutsm,dtset%effmass,eigen,electronpositron,fock,grnl,&
+   call forstrnps(cg,cprj,dtset%ecut,dtset%ecutsm,dtset%effmass_free,eigen,electronpositron,fock,grnl,&
 &   dtset%istwfk,kg,kinstr,nlstr,dtset%kptns,dtset%mband,mcg,mcprj,dtset%mgfft,dtset%mkmem,&
 &   mpi_enreg,psps%mpsang,dtset%mpw,my_natom,dtset%natom,dtset%nband,dtset%nfft,dtset%ngfft,&
 &   dtset%nkpt,dtset%nloalg,npwarr,dtset%nspden,dtset%nspinor,dtset%nsppol,dtset%nsym,ntypat,&
@@ -408,8 +410,8 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
 !==========================================================================
 
  if (stress_needed==1.and.dtset%usewvl==0) then
-   if (dtset%usefock==1 .and. associated(fock).and.fock%optstr.and.psps%usepaw==0) then
-     fock%stress(1:3)=fock%stress(1:3)-energies%e_fock/ucvol
+   if (dtset%usefock==1 .and. associated(fock).and.fock%fock_common%optstr.and.psps%usepaw==0) then
+     fock%fock_common%stress(1:3)=fock%fock_common%stress(1:3)-energies%e_fock/ucvol
      if (n3xccc>0.and.psps%usepaw==0 .and. &
 &     (dtset%ixc==41.or.dtset%ixc==42.or.libxc_functionals_is_hybrid())) then
        ABI_ALLOCATE(vxc_hf,(nfftf,dtset%nspden))

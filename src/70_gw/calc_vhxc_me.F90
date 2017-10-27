@@ -68,11 +68,10 @@
 !!
 !! CHILDREN
 !!      destroy_mpi_enreg,dtset_copy,dtset_free,init_distribfft_seq,initmpi_seq
-!!      libxc_functionals_end,libxc_functionals_get_hybridparams
-!!      libxc_functionals_init,libxc_functionals_set_hybridparams
-!!      melements_herm,melements_init,melements_mpisum,mkkin,paw_mknewh0
-!!      pawcprj_alloc,pawcprj_free,rhohxc,wfd_change_ngfft,wfd_distribute_bbp
-!!      wfd_get_cprj,wfd_get_ur,wrtout
+!!      libxc_functionals_end,libxc_functionals_init
+!!      libxc_functionals_set_hybridparams,melements_herm,melements_init
+!!      melements_mpisum,mkkin,paw_mknewh0,pawcprj_alloc,pawcprj_free,rhohxc
+!!      wfd_change_ngfft,wfd_distribute_bbp,wfd_get_cprj,wfd_get_ur,wrtout
 !!
 !! SOURCE
 
@@ -436,8 +435,8 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,gsqcutf_eff,nfftf,ngfftf,&
      if (Mflags%has_hbare==1) then
        ABI_MALLOC(kinpw,(npw_k))
        ABI_MALLOC(kinwf2,(npw_k*nspinor))
-!       call mkkin(Dtset%ecutwfn+0.1_dp,Dtset%ecutsm,Dtset%effmass,Cryst%gmet,kg_k,kinpw,kpt,Wfd%npwwfn)
-       call mkkin(Dtset%ecutwfn+0.1_dp,Dtset%ecutsm,Dtset%effmass,Cryst%gmet,kg_k,kinpw,kpt,Wfd%npwwfn,0,0)
+!       call mkkin(Dtset%ecutwfn+0.1_dp,Dtset%ecutsm,Dtset%effmass_free,Cryst%gmet,kg_k,kinpw,kpt,Wfd%npwwfn)
+       call mkkin(Dtset%ecutwfn+0.1_dp,Dtset%ecutsm,Dtset%effmass_free,Cryst%gmet,kg_k,kinpw,kpt,Wfd%npwwfn,0,0)
        where (kinpw>HUGE(zero)*1.d-11)
          kinpw=zero
        end where

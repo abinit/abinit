@@ -66,4 +66,5 @@ xred 3*0
 #%%   Increasing the cell size to 8x8x8, while keeping ecut to 70 Ha cut-off
 #%%   and 0.005 bohr decay length gives -0.4783 Ha.
 #%%   For speed-up, it begins with the wavefunctions from test 21.
+#%% topics = xc
 #%%<END TEST_INFO>

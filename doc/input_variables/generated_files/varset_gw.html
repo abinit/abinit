@@ -1,0 +1,3569 @@
+<!--                                                                                     -->
+<!-- This file has been produced by generate_doc.py using different .yml  or .bib files. -->
+<!-- It is useless to modify it. Modify the related .yml  or .bib files instead.         -->
+<!--                                                                                     -->
+<html>
+<head><title>Description of GW variables.</title>
+<link rel=stylesheet type="text/css" href="../../formabinit.css">
+<link rel=stylesheet type="text/css" href="../formabinit.css">
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  jax: ["input/TeX","output/HTML-CSS"],
+  tex2jax: {inlineMath: [['$','$']]},
+  displayAlign: "center",
+  TeX: { equationNumbers: { autoNumber: "AMS" } }
+});
+</script>
+<script type="text/javascript" async
+src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+</head>
+<body bgcolor="#ffffff">
+
+<hr>
+<a name="top"></a>
+
+<h1>ABINIT, GW input variables:</h1>
+
+<h2>List and description.
+</h2>
+<hr>
+<p>This document lists and provides the description
+of the name (keywords) of the "GW" input
+variables to be used in the main input file of the abinit code.
+
+<script type="text/javascript" src="../../js_files/generic_advice.js"> </script>
+<hr>
+
+<h5>Copyright (C) 1998-2017 ABINIT group (DCA,XG,RC,YG,FJ)
+<script type="text/javascript" src="../../js_files/copyright.js"> </script>
+</h5> 
+
+<script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
+
+<script type="text/javascript" src="../../js_files/list_htmlfiles_input_variables.js"> </script>
+
+<a name="list"></a>
+<h3><b> Content of the file : alphabetical list of "GW" variables.</b></h3>
+
+<br><a id='A'></a>A.
+ <a href="#awtr">awtr</a>&nbsp;&nbsp;
+ <br><a id='B'></a>B.
+ <a href="#bdgw">bdgw</a>&nbsp;&nbsp;
+ <br><a id='C'></a>C.
+ <a href="#cd_customnimfrqs">cd_customnimfrqs</a>&nbsp;&nbsp;
+ <a href="#cd_frqim_method">cd_frqim_method</a>&nbsp;&nbsp;
+ <a href="#cd_full_grid">cd_full_grid</a>&nbsp;&nbsp;
+ <a href="#cd_halfway_freq">cd_halfway_freq</a>&nbsp;&nbsp;
+ <a href="#cd_imfrqs">cd_imfrqs</a>&nbsp;&nbsp;
+ <a href="#cd_max_freq">cd_max_freq</a>&nbsp;&nbsp;
+ <a href="#cd_subset_freq">cd_subset_freq</a>&nbsp;&nbsp;
+ <br><a id='D'></a>D.
+ <br><a id='E'></a>E.
+ <a href="#ecuteps">ecuteps</a>&nbsp;&nbsp;
+ <a href="#ecutsigx">ecutsigx</a>&nbsp;&nbsp;
+ <a href="#ecutwfn">ecutwfn</a>&nbsp;&nbsp;
+ <br><a id='F'></a>F.
+ <a href="#fftgw">fftgw</a>&nbsp;&nbsp;
+ <a href="#freqim_alpha">freqim_alpha</a>&nbsp;&nbsp;
+ <a href="#freqremax">freqremax</a>&nbsp;&nbsp;
+ <a href="#freqremin">freqremin</a>&nbsp;&nbsp;
+ <a href="#freqspmax">freqspmax</a>&nbsp;&nbsp;
+ <a href="#freqspmin">freqspmin</a>&nbsp;&nbsp;
+ <br><a id='G'></a>G.
+ <a href="#gw_customnfreqsp">gw_customnfreqsp</a>&nbsp;&nbsp;
+ <a href="#gw_freqsp">gw_freqsp</a>&nbsp;&nbsp;
+ <a href="#gw_frqim_inzgrid">gw_frqim_inzgrid</a>&nbsp;&nbsp;
+ <a href="#gw_frqre_inzgrid">gw_frqre_inzgrid</a>&nbsp;&nbsp;
+ <a href="#gw_frqre_tangrid">gw_frqre_tangrid</a>&nbsp;&nbsp;
+ <a href="#gw_invalid_freq">gw_invalid_freq</a>&nbsp;&nbsp;
+ <a href="#gw_nqlwl">gw_nqlwl</a>&nbsp;&nbsp;
+ <a href="#gw_nstep">gw_nstep</a>&nbsp;&nbsp;
+ <a href="#gw_qlwl">gw_qlwl</a>&nbsp;&nbsp;
+ <a href="#gw_qprange">gw_qprange</a>&nbsp;&nbsp;
+ <a href="#gw_sctype">gw_sctype</a>&nbsp;&nbsp;
+ <a href="#gw_sigxcore">gw_sigxcore</a>&nbsp;&nbsp;
+ <a href="#gw_toldfeig">gw_toldfeig</a>&nbsp;&nbsp;
+ <a href="#gwcalctyp">gwcalctyp</a>&nbsp;&nbsp;
+ <a href="#gwcomp">gwcomp</a>&nbsp;&nbsp;
+ <a href="#gwencomp">gwencomp</a>&nbsp;&nbsp;
+ <a href="#gwfockmix">gwfockmix</a>&nbsp;&nbsp;
+ <a href="#gwgamma">gwgamma</a>&nbsp;&nbsp;
+ <a href="#gwls_band_index">gwls_band_index</a>&nbsp;&nbsp;
+ <a href="#gwls_correlation">gwls_correlation</a>&nbsp;&nbsp;
+ <a href="#gwls_diel_model">gwls_diel_model</a>&nbsp;&nbsp;
+ <a href="#gwls_exchange">gwls_exchange</a>&nbsp;&nbsp;
+ <a href="#gwls_first_seed">gwls_first_seed</a>&nbsp;&nbsp;
+ <a href="#gwls_kmax_analytic">gwls_kmax_analytic</a>&nbsp;&nbsp;
+ <a href="#gwls_kmax_complement">gwls_kmax_complement</a>&nbsp;&nbsp;
+ <a href="#gwls_kmax_numeric">gwls_kmax_numeric</a>&nbsp;&nbsp;
+ <a href="#gwls_kmax_poles">gwls_kmax_poles</a>&nbsp;&nbsp;
+ <a href="#gwls_list_proj_freq">gwls_list_proj_freq</a>&nbsp;&nbsp;
+ <a href="#gwls_model_parameter">gwls_model_parameter</a>&nbsp;&nbsp;
+ <a href="#gwls_n_proj_freq">gwls_n_proj_freq</a>&nbsp;&nbsp;
+ <a href="#gwls_npt_gauss_quad">gwls_npt_gauss_quad</a>&nbsp;&nbsp;
+ <a href="#gwls_nseeds">gwls_nseeds</a>&nbsp;&nbsp;
+ <a href="#gwls_print_debug">gwls_print_debug</a>&nbsp;&nbsp;
+ <a href="#gwls_recycle">gwls_recycle</a>&nbsp;&nbsp;
+ <a href="#gwls_stern_kmax">gwls_stern_kmax</a>&nbsp;&nbsp;
+ <a href="#gwmem">gwmem</a>&nbsp;&nbsp;
+ <a href="#gwrpacorr">gwrpacorr</a>&nbsp;&nbsp;
+ <br><a id='H'></a>H.
+ <br><a id='I'></a>I.
+ <a href="#icutcoul">icutcoul</a>&nbsp;&nbsp;
+ <a href="#inclvkb">inclvkb</a>&nbsp;&nbsp;
+ <br><a id='J'></a>J.
+ <br><a id='K'></a>K.
+ <a href="#kptgw">kptgw</a>&nbsp;&nbsp;
+ <br><a id='L'></a>L.
+ <br><a id='M'></a>M.
+ <a href="#mbpt_sciss">mbpt_sciss</a>&nbsp;&nbsp;
+ <a href="#mdf_epsinf">mdf_epsinf</a>&nbsp;&nbsp;
+ <br><a id='N'></a>N.
+ <a href="#nbandkss">nbandkss</a>&nbsp;&nbsp;
+ <a href="#nfreqim">nfreqim</a>&nbsp;&nbsp;
+ <a href="#nfreqmidm">nfreqmidm</a>&nbsp;&nbsp;
+ <a href="#nfreqre">nfreqre</a>&nbsp;&nbsp;
+ <a href="#nfreqsp">nfreqsp</a>&nbsp;&nbsp;
+ <a href="#nkptgw">nkptgw</a>&nbsp;&nbsp;
+ <a href="#nomegasf">nomegasf</a>&nbsp;&nbsp;
+ <a href="#nomegasi">nomegasi</a>&nbsp;&nbsp;
+ <a href="#nomegasrd">nomegasrd</a>&nbsp;&nbsp;
+ <a href="#npvel">npvel</a>&nbsp;&nbsp;
+ <a href="#npwkss">npwkss</a>&nbsp;&nbsp;
+ <a href="#nqptdm">nqptdm</a>&nbsp;&nbsp;
+ <br><a id='O'></a>O.
+ <a href="#omegasimax">omegasimax</a>&nbsp;&nbsp;
+ <a href="#omegasrdmax">omegasrdmax</a>&nbsp;&nbsp;
+ <br><a id='P'></a>P.
+ <a href="#ppmfrq">ppmfrq</a>&nbsp;&nbsp;
+ <a href="#ppmodel">ppmodel</a>&nbsp;&nbsp;
+ <a href="#pvelmax">pvelmax</a>&nbsp;&nbsp;
+ <br><a id='Q'></a>Q.
+ <a href="#qptdm">qptdm</a>&nbsp;&nbsp;
+ <br><a id='R'></a>R.
+ <a href="#rcut">rcut</a>&nbsp;&nbsp;
+ <a href="#rhoqpmix">rhoqpmix</a>&nbsp;&nbsp;
+ <br><a id='S'></a>S.
+ <a href="#spbroad">spbroad</a>&nbsp;&nbsp;
+ <a href="#spmeth">spmeth</a>&nbsp;&nbsp;
+ <a href="#symchi">symchi</a>&nbsp;&nbsp;
+ <a href="#symsigma">symsigma</a>&nbsp;&nbsp;
+ <br><a id='T'></a>T.
+ <br><a id='U'></a>U.
+ <a href="#ucrpa">ucrpa</a>&nbsp;&nbsp;
+ <a href="#ucrpa_bands">ucrpa_bands</a>&nbsp;&nbsp;
+ <a href="#ucrpa_window">ucrpa_window</a>&nbsp;&nbsp;
+ <br><a id='V'></a>V.
+ <a href="#vcutgeo">vcutgeo</a>&nbsp;&nbsp;
+ <br><a id='W'></a>W.
+ <br><a id='X'></a>X.
+ <br><a id='Y'></a>Y.
+ <br><a id='Z'></a>Z.
+ <a href="#zcut">zcut</a>&nbsp;&nbsp;
+<br><br><hr>
+<br><font id="title"><a name="awtr">awtr</a></font>
+<br><font id="mnemonics">Mnemonics: evaluate the Adler-Wiser expression of $\chi^{0}_{KS}$ assuming Time-Reversal</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_Susceptibility.html">Susceptibility</a>.</font>
+<br><font id="smalltext">Moderately used: [32/907] in abinit tests, [3/136] in tuto abinit tests. Tuto test list: {tutoparal:[<a href="../../tests/tutoparal/Input/tmbt_2.in">mbt_2</a>,<a href="../../tests/tutoparal/Input/tmbt_3.in">mbt_3</a>],tutorial:[<a href="../../tests/tutorial/Input/tbs_1.in">bs_1</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 1</font>
+<br><br><font id="requires">
+Only relevant if <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>==3
+</font>
+<br><font id="text">
+<p>
+<p>
+ This input variable defines whether the irreducible polarizability $\chi^{0}_{KS}$ is evaluated
+taking advantage of time-reversal symmetry or not.
+ <ul>
+  <li>
+   0 =&gt; Use the "standard" Adler-Wiser expression without assuming time-reversal symmetry.
+In this case, the irreducible polarizability is calculated summing over all possible electronic
+transitions (both resonant and antiresonant).
+  </li>
+  <li>
+   1 =&gt; Take advantage of time-reversal symmetry to halve the number of transitions to be
+explicitly considered. This method leads to a decrease in the CPU time by a factor two with respect
+to the <b>awtr</b>=0 case.
+  </li>
+ </ul>
+</p>
+<p>
+ Note that the parallel algorithm <a href="../../input_variables/generated_files/varset_paral.html#gwpara">gwpara</a>=2 is not compatible with
+the choice <b>awtr</b>=0.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="bdgw">bdgw</a></font>
+<br><font id="mnemonics">Mnemonics: BanDs for GW calculation</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topics: <a href="../../topics/generated_files/topic_GW.html">GW</a>, <a href="../../topics/generated_files/topic_SelfEnergy.html">SelfEnergy</a>.</font>
+<br><font id="smalltext">Moderately used: [52/907] in abinit tests, [11/136] in tuto abinit tests. Too many tests to report (>10).</font>
+<br><font id="vartype">Variable type: integer(2,<a href="../../input_variables/generated_files/varset_gw.html#nkptgw">nkptgw</a>,<a href="../../input_variables/generated_files/varset_basic.html#nsppol">nsppol</a>)</font>
+<br><font id="default">Default is *0</font>
+<br><br><font id="requires">
+Only relevant if <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>==4
+</font>
+<br><font id="text">
+<p>
+<p>
+ For each k-point with number ikptgw in the range (1:<a href="../../input_variables/generated_files/varset_gw.html#nkptgw">nkptgw</a>) and each
+spin index isppol,
+ <b>
+  bdgw(1,ikptgw,isppol)
+ </b>
+ is the number of the lowest band for which the GW computation must be done,
+and
+ <b>
+  bdgw(2,ikptgw,isppol)
+ </b>
+ is the number of the highest band for which the GW computation must be done.
+</p>
+<p>
+ When <a href="../../input_variables/generated_files/varset_gw.html#gwcalctyp">gwcalctyp</a> &#62;&#61; 20,
+the quasiparticle wavefunctions are computed and represented as linear combination of Kohn-Sham wavefunctions.
+In this case <b>bdgw</b> designates the range of KS wavefunctions used as basis set.
+For each k-point, indeed, the quasiparticle wavefunctions are expanded considering only the KS states between
+ <b>
+  bdgw(1,ikptgw,isppol)
+ </b>
+ and
+ <b>
+  bdgw(2,ikptgw,isppol)
+ </b>
+ .
+</p>
+<p>
+Note that the initial values given in the input file might be changed inside the code so that all
+the degenerate states at a given k-point and spin are included.
+This might happen when <a href="../../input_variables/generated_files/varset_gw.html#symsigma">symsigma</a>=1 is used or in the case of
+self-consistent GW calculations.
+</p>
+<p>
+ When <a href="../../input_variables/generated_files/varset_gw.html#symsigma">symsigma</a>=1, the diagonal matrix elements of the
+self-energy are obtained by averaging the unsymmetrized results in the subspace spanned by the degenerate states.
+</p>
+<p>
+ For self-consistent calculations, on the other hand, the basis set used to expand the GW
+wavefunctions should include all the degenerate states belonging to the same irreducible
+representation. Only in this case, indeed, the initial symmetries and energy degenerations are preserved.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="cd_customnimfrqs">cd_customnimfrqs</a></font>
+<br><font id="mnemonics">Mnemonics: Contour Deformation CUSTOM IMaginary FReQuencieS</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_FrequencyMeshMBPT.html">FrequencyMeshMBPT</a>.</font>
+<br><font id="smalltext">Rarely used: [1/907] in abinit tests, [0/136] in tuto abinit tests. Test list: {v67mbpt:[<a href="../../tests/v67mbpt/Input/t21.in">21</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><br><font id="requires">
+Only relevant if (<a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>==3 or <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>==4) and <a href="../../input_variables/generated_files/varset_gw.html#gwcalctyp">gwcalctyp</a> in [2,9,12,19,22,29]
+</font>
+<br><font id="text">
+<p>
+<p>
+ <b>cd_customnimfrqs</b> lets the user define the grid points along the imaginary axis by hand. Set this
+to the number of frequencies you want. The frequencies are specified with <a href="../../input_variables/generated_files/varset_gw.html#cd_imfrqs">cd_imfrqs</a>.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="cd_frqim_method">cd_frqim_method</a></font>
+<br><font id="mnemonics">Mnemonics: Contour Deformation FReQuency integration on IMaginary axis Method</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_FrequencyMeshMBPT.html">FrequencyMeshMBPT</a>.</font>
+<br><font id="smalltext">Rarely used: [1/907] in abinit tests, [0/136] in tuto abinit tests. Test list: {v67mbpt:[<a href="../../tests/v67mbpt/Input/t22.in">22</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 1</font>
+<br><br><font id="requires">
+Only relevant if <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>==4  and <a href="../../input_variables/generated_files/varset_gw.html#gwcalctyp">gwcalctyp</a> in [2,9,12,19,22,29]
+</font>
+<br><font id="text">
+<p>
+<p>
+ <b>cd_frqim_method</b> defines the choice of integration method along the imaginary frequency axis
+for Contour Deformation calculations. The default method is very robust, fast and optimal for the
+vast majority of cases. However, for very accurate (&ldquo;paranoid level&rdquo;) convergence studies,
+ABINIT offers the possibility of a variety of methods and grids. Note that as one starts to change
+the defaults, one needs to carefully consider the grid used. Therefore we recommend that in
+addition to reading the information below, the user reads the description of the
+input variables <a href="../../input_variables/generated_files/varset_gw.html#freqim_alpha">freqim_alpha</a>,
+<a href="../../input_variables/generated_files/varset_gw.html#nfreqim">nfreqim</a>, <a href="../../input_variables/generated_files/varset_gw.html#ppmfrq">ppmfrq</a>,
+<a href="../../input_variables/generated_files/varset_gw.html#gw_frqim_inzgrid">gw_frqim_inzgrid</a>.
+</p>
+<p>
+ The integration to be performed for each matrix element of the self energy along the imaginary axis is of the form:
+</p>
+<p align="center">
+ <img style="width: 461px; height: 49px;" src="../vargw_img/self_energy_cd.png" />
+</p>
+<p>
+ Where
+ <span style="font-family:Times,Serif">
+  <i>
+   &omega;
+  </i>
+ </span>
+ is the frequency point along the real axis,
+ <span style="font-family:Times,Serif">
+  <i>
+   &epsilon;
+   <sub>
+    s
+   </sub>
+  </i>
+ </span>
+ is an eigenvalue,
+and
+ <span style="font-family:Times,Serif">
+  <i>
+   i&omega;'
+  </i>
+ </span>
+ is the variable along the
+imaginary axis. Thus the function to be integrated
+is a Lorentzian weight function centred on the origin (whose FWHM is decided by
+|
+ <span style="font-family:Times,Serif">
+  <i>
+   &omega; - &epsilon;
+   <sub>
+    s
+   </sub>
+  </i>
+ </span>
+ |),
+times a function. The function is related to the inverse dielectric matrix. It might have a peaked structure near the origin and is very smooth otherwise. the function decays
+asymptotically as
+ <span style="font-family:Times,Serif">
+  1 /
+  <i>
+   i&omega;'
+  </i>
+ </span>
+ , so the whole
+integral converges as this to the third power.
+ <ul>
+  <li>
+   <b>
+    cd_frqim_method = 1 - Histogram:
+   </b>
+   This is the
+   <b>
+    default
+   </b>
+   method where the function
+   <span style="font-family:Times,Serif">
+    <i>
+     f(i&omega;')
+    </i>
+   </span>
+   is approximated by a histogram,
+and the Lorentzian is integrated analytically in each sub-interval. See the section on grids
+below for a description of the default grid. This method combined with the default grid is the
+fastest and optimised for the use of few points along the imaginary axis.
+  </li>
+  <li>
+   <b>
+    cd_frqim_method = 2 - Trapezoid:
+   </b>
+   The next step up from the histogram approximation in the previous
+method. The integration region is transformed
+   <span style="font-family:Times,Serif">
+    <i>
+     [0,&#8734;[ &rarr; [0,1]
+    </i>
+   </span>
+   with a proper
+weight depending on the width of the Lorentzian. In this space
+   <span style="font-family:Times,Serif">
+    <i>
+     f(i&omega;')
+    </i>
+   </span>
+   is approximated by a linear function between grid points (trapezoids), and the integrand is
+integrated analytically in each sub-interval. This method tends to slightly overestimate contributions
+while the default method tends to slightly underestimate them, so the results from methods
+1 and 2 should bracket the converged values. The asymptotic behaviour is explicitly taken
+into account by a fit using the last two grid points.
+  </li>
+  <li>
+   <b>
+    cd_frqim_method = 3, 4, 5 - Natural Spline:
+   </b>
+   The function is transfomed
+   <span style="font-family:Times,Serif">
+    <i>
+     [0,&#8734;[ &rarr; [0,1]
+    </i>
+   </span>
+   . In this space
+   <span style="font-family:Times,Serif">
+    <i>
+     f(i&omega;')
+    </i>
+   </span>
+   is approximated by a natural spline function whose starting and ending sections are linear. This transform is chosen so that the function should approach a linear function asymptotically as the integration interval approaches 1, so that the asymptotic behaviour is automatically taken into account. For each Lorentzian width
+(determined by |
+   <span style="font-family:Times,Serif">
+    <i>
+     &omega; - &epsilon;
+     <sub>
+      s
+     </sub>
+    </i>
+   </span>
+   |)
+the integrand is appropriately scaled in the interval
+   <span style="font-family:Times,Serif">
+    <i>
+     [0,1]
+    </i>
+   </span>
+   , and a nested Gauss-Kronrod (GK)
+numerical integration rule is performed. The integrand is evaluated at the GK nodes by means
+of a spline-fit. The order of the GK rule is controlled by the index of the method:
+   <ul>
+    <li>
+     <b>
+      3 =&gt; Gauss  7 point, Kronrod 15 point rule
+     </b>
+    </li>
+    <li>
+     <b>
+      4 =&gt; Gauss 11 point, Kronrod 23 point rule
+     </b>
+    </li>
+    <li>
+     <b>
+      5 =&gt; Gauss 15 point, Kronrod 31 point rule
+     </b>
+    </li>
+   </ul>
+   There is rarely any difference to machine precision between these rules, and the code will
+issue a warning if a higher-order rule is recommended.
+  </li>
+ </ul>
+</p>
+<p>
+ <b>
+  Grids for the integral along the imaginary axis:
+ </b>
+</p>
+<p>
+ All the methods above should execute no matter what grid is used along the imaginary axis, so this
+is very much under the control of the user. The only requirement is that the grid be strictly increasing.
+The point at zero frequency is assumed to lie on the real axis, so the calculation of that point
+is controlled by <a href="../../input_variables/generated_files/varset_gw.html#nfreqre">nfreqre</a> and corresponding variables. We highly
+recommend extracting various elements of the dielectric matrix from the _SCR file using
+the
+ <b>
+  Mrgscr
+ </b>
+ utility and plotting them for visual inspection.
+</p>
+<p>
+ <ul>
+  <li>
+   <b>
+    Default
+   </b>
+   - The default grid is an exponentially increasing grid given by the formula:
+   <p align="center">
+    <img style="width: 309px; height: 46px;" src="../vargw_img/cd_default_grid.png" />
+   </p>
+   Here
+   <span style="font-family:Times,Serif">
+    <i>
+     &omega;
+     <sub>
+      p
+     </sub>
+    </i>
+   </span>
+   is the
+plasma frequency (by default determined by the average density of the system, but this
+can be overridden by setting <a href="../../input_variables/generated_files/varset_gw.html#ppmfrq">ppmfrq</a>).
+   <span style="font-family:Times,Serif">
+    <i>
+     N
+    </i>
+   </span>
+   is the total number of grid points
+(set by <a href="../../input_variables/generated_files/varset_gw.html#nfreqim">nfreqim</a>).
+   <span style="font-family:Times,Serif">
+    <i>
+     &alpha;
+    </i>
+   </span>
+   is a parameter which determines
+how far out the final grid point will lie. The final point will be at
+   <span style="font-family:Times,Serif">
+    <i>
+     &alpha;&middot;&omega;
+     <sub>
+      p
+      <sub>
+      </sub>
+     </sub>
+    </i>
+   </span>
+   (the default is
+   <span style="font-family:Times,Serif">
+    <i>
+     &alpha; = 5
+    </i>
+   </span>
+   ,
+and was hard-coded in older versions of ABINIT).
+This grid is designed so that approximately half the grid points are always distributed
+to values lower than the plasma frequency, in order to resolve any peaked structure. If one
+seeks to increase the outermost reach by increasing <a href="../../input_variables/generated_files/varset_gw.html#ppmfrq">ppmfrq</a>
+one must simultaneously take care to increase <a href="../../input_variables/generated_files/varset_gw.html#nfreqim">nfreqim</a>
+in order to have the appropriate resolution for the low-frequency region.
+In more recent versions of ABINIT one can also simply adjust the parameter
+   <span style="font-family:Times,Serif">
+    <i>
+     &alpha;
+    </i>
+   </span>
+   by using
+<a href="../../input_variables/generated_files/varset_gw.html#freqim_alpha">freqim_alpha</a>. This grid is optimised for
+speed and accurate results with few grid points for
+   <b>
+    cd_frqim_method = 1
+   </b>
+   .
+  </li>
+  <li>
+   <b>
+    Inverse z transform
+   </b>
+   - This grid is activated by the use of the variable
+<a href="../../input_variables/generated_files/varset_gw.html#gw_frqim_inzgrid">gw_frqim_inzgrid</a>. This is the standard
+   <span style="font-family:Times,Serif">
+    <i>
+     [0,&#8734;[ &rarr; [0,1]
+    </i>
+   </span>
+   transform
+using the formula:
+   <p align="center">
+    <img style="width: 122px; height: 38px;" src="../vargw_img/cd_inzgrid.png" />
+   </p>
+   Here
+   <span style="font-family:Times,Serif">
+    <i>
+     &omega;
+     <sub>
+      p
+     </sub>
+    </i>
+   </span>
+   is the
+plasma frequency (default can be overridden by setting <a href="../../input_variables/generated_files/varset_gw.html#ppmfrq">ppmfrq</a>).
+The grid points are then picked by an equidistant grid (number of points set by
+<a href="../../input_variables/generated_files/varset_gw.html#nfreqim">nfreqim</a>) in the interval
+   <span style="font-family:Times,Serif">
+    <i>
+     z &sub; [0,1]
+    </i>
+   </span>
+   . This grid can easily
+be uniquely converged by just increasing <a href="../../input_variables/generated_files/varset_gw.html#nfreqim">nfreqim</a>. Again
+the points are distributed so that approximately half of them lie below the plasma frequency.
+  </li>
+  <li>
+   <b>
+    User defined
+   </b>
+   - The user can also define their own grid using the variables <a href="../../input_variables/generated_files/varset_gw.html#cd_customnimfrqs">cd_customnimfrqs</a>
+   and <a href="../../input_variables/generated_files/varset_gw.html#cd_imfrqs">cd_imfrqs</a>
+   .
+   <i>
+    With great power comes great responsibility!
+   </i>
+  </li>
+ </ul>
+</p>
+<p>
+ The
+ <b>
+  Mrgscr
+ </b>
+ utility is handy in optimising the numerical effort expended in convergence studies.
+By estimating the densest grid one can afford to calculate in the SCR file, and successively removing
+frequencies from a single file (using the utility), one only needs to perform the screening
+calculation
+ <b>
+  once
+ </b>
+ on the dense mesh for a given convergence study. One can also use the utility to
+merge independent screening calculations over q-points and frequency sections.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="cd_full_grid">cd_full_grid</a></font>
+<br><font id="mnemonics">Mnemonics: Contour Deformation FULL GRID in complex plane</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_FrequencyMeshMBPT.html">FrequencyMeshMBPT</a>.</font>
+<br><font id="smalltext">Rarely used: [1/907] in abinit tests, [0/136] in tuto abinit tests. Test list: {v67mbpt:[<a href="../../tests/v67mbpt/Input/t21.in">21</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><br><font id="requires">
+Only relevant if <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>==3 and <a href="../../input_variables/generated_files/varset_gw.html#gwcalctyp">gwcalctyp</a> in [2,9,12,19,22,29]
+</font>
+<br><font id="text">
+<p>
+<p>
+ <b>cd_full_grid</b> enables the calculation of the screening [both chi0 and epsilon^(-1)] on a grid in the first
+quadrant of the complex plane. The grid is determined by the (tensor) product of the grid in real frequency and
+the grid in imaginary frequency. In the SUS and SCR files the grid points are stored as follows:
+ <pre>
+  <b>
+   Index:
+  </b>
+  1   . . .   nfreqre   nfrqre+1 . . . nfreqre+nfreqim   nfreqre+nfreqim+1 . . . nfreqre*nfreqim
+  <b>
+   Entry:
+  </b>
+  | purely real freq.  |     purely imaginary freq.     |      gridpoints in complex plane        |
+ </pre>
+ The grid in the complex plane is stored looping over the real dimension as the inner loop and the imaginary as
+the outer loop. The contents of the generated SUS and SCR files can be extracted for visualisation and further
+analysis with the
+ <b>
+  Mrgscr
+ </b>
+ utility.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="cd_halfway_freq">cd_halfway_freq</a></font>
+<br><font id="mnemonics">Mnemonics: Contour Deformation tangent grid HALFWAY FREQuency</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#ENERGY">ENERGY</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_FrequencyMeshMBPT.html">FrequencyMeshMBPT</a>.</font>
+<br><font id="smalltext">Rarely used: [2/907] in abinit tests, [0/136] in tuto abinit tests. Test list: {libxc:[<a href="../../tests/libxc/Input/t14.in">14</a>],v67mbpt:[<a href="../../tests/v67mbpt/Input/t21.in">21</a>]}.</font>
+<br><font id="vartype">Variable type: real</font>
+<br><font id="default">Default is 100.0 eV</font>
+<br><br><font id="requires">
+Only relevant if (<a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>==3 or <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>==4) and <a href="../../input_variables/generated_files/varset_gw.html#gwcalctyp">gwcalctyp</a> in [2,9,12,19,22,29]
+</font>
+<br><font id="text">
+<p>
+<p>
+ <b>cd_halfway_freq</b> determines the frequency where half of the number of points defined in
+<a href="../../input_variables/generated_files/varset_gw.html#nfreqre">nfreqre</a> are used up. The tangent transformed grid is approximately
+linear up to this point. To be used in conjunction with <a href="../../input_variables/generated_files/varset_gw.html#gw_frqre_tangrid">gw_frqre_tangrid</a>.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="cd_imfrqs">cd_imfrqs</a></font>
+<br><font id="mnemonics">Mnemonics: Contour Deformation IMaginary FReQuencieS</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_FrequencyMeshMBPT.html">FrequencyMeshMBPT</a>.</font>
+<br><font id="smalltext">Rarely used: [1/907] in abinit tests, [0/136] in tuto abinit tests. Test list: {v67mbpt:[<a href="../../tests/v67mbpt/Input/t21.in">21</a>]}.</font>
+<br><font id="vartype">Variable type: real(<a href="../../input_variables/generated_files/varset_gw.html#cd_customnimfrqs">cd_customnimfrqs</a>)</font>
+<br><font id="default">No default</font>
+<br><br><font id="requires">
+Only relevant if <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>==3 and <a href="../../input_variables/generated_files/varset_gw.html#gwcalctyp">gwcalctyp</a> in [2,9,12,19,22,29] and <a href="../../input_variables/generated_files/varset_gw.html#cd_customnimfrqs">cd_customnimfrqs</a> != 0
+</font>
+<br><font id="text">
+<p>
+<p>
+ <b>cd_imfrqs</b> specifies the grid points for the imaginary axis.  The number of frequencies
+is set by the value of <a href="../../input_variables/generated_files/varset_gw.html#cd_customnimfrqs">cd_customnimfrqs</a>. Example:
+ <pre>
+cd_customnimfrqs   5
+nfreqim            5
+cd_imfrqs          0.1  0.2  0.5  1.0  5.0
+ </pre>
+ If <a href="../../input_variables/generated_files/varset_gw.html#nfreqim">nfreqim</a> is not equal to
+<a href="../../input_variables/generated_files/varset_gw.html#cd_customnimfrqs">cd_customnimfrqs</a> a warning will be issued.
+</p>
+<p>
+ <b>
+  Use at own risk!
+ </b>
+ The use of a custom grid makes it your responsibility that the SUS and
+SCR files are valid in self-energy (i.e. <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>=4)
+calculations, so caution is advised. Note that frequencies have to be strictly increasing, and the
+point at zero frequency is
+ <b>
+  not
+ </b>
+ considered to be part of the imaginary grid, but rather
+the grid along the real axis. The calculation of that point should be controlled by
+<a href="../../input_variables/generated_files/varset_gw.html#nfreqre">nfreqre</a> and related variables.
+</p>
+<p>
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="cd_max_freq">cd_max_freq</a></font>
+<br><font id="mnemonics">Mnemonics: Contour Deformation grid MAXimum FREQuency</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#ENERGY">ENERGY</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_FrequencyMeshMBPT.html">FrequencyMeshMBPT</a>.</font>
+<br><font id="smalltext">Rarely used: [2/907] in abinit tests, [0/136] in tuto abinit tests. Test list: {libxc:[<a href="../../tests/libxc/Input/t14.in">14</a>],v67mbpt:[<a href="../../tests/v67mbpt/Input/t21.in">21</a>]}.</font>
+<br><font id="vartype">Variable type: real</font>
+<br><font id="default">Default is 1000.0 eV</font>
+<br><br><font id="requires">
+Only relevant if (<a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>==3 or <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>==4) and <a href="../../input_variables/generated_files/varset_gw.html#gwcalctyp">gwcalctyp</a> in [2,9,12,19,22,29]
+</font>
+<br><font id="text">
+<p>
+<p>
+ <b>cd_max_freq</b> determines the frequency where all the points defined in
+<a href="../../input_variables/generated_files/varset_gw.html#nfreqre">nfreqre</a> are used up. To be used in conjunction with
+<a href="../../input_variables/generated_files/varset_gw.html#gw_frqre_tangrid">gw_frqre_tangrid</a>.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="cd_subset_freq">cd_subset_freq</a></font>
+<br><font id="mnemonics">Mnemonics: Contour Deformation grid calculate SUBSET of FREQuencies</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_FrequencyMeshMBPT.html">FrequencyMeshMBPT</a>.</font>
+<br><font id="smalltext">Rarely used: [1/907] in abinit tests, [0/136] in tuto abinit tests. Test list: {libxc:[<a href="../../tests/libxc/Input/t14.in">14</a>]}.</font>
+<br><font id="vartype">Variable type: integer(2)</font>
+<br><font id="default">Default is [1, '<a href="../../input_variables/generated_files/varset_gw.html#nfreqre">nfreqre</a>']</font>
+<br><br><font id="requires">
+Only relevant if <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>==3 and <a href="../../input_variables/generated_files/varset_gw.html#gwcalctyp">gwcalctyp</a> in [2,9,12,19,22,29] and  <a href="../../input_variables/generated_files/varset_gw.html#gw_frqre_tangrid">gw_frqre_tangrid</a>==0
+</font>
+<br><font id="text">
+<p>
+<p>
+ <b>cd_subset_freq</b> Specifies that only a subset of the frequencies defined by
+<a href="../../input_variables/generated_files/varset_gw.html#nfreqre">nfreqre</a> are to be calculated. The first index is the start and
+the second the end, with index number 1 always being the origin. For example a calculation with
+ <b>
+  <a href="../../input_variables/generated_files/varset_gw.html#nfreqre">nfreqre</a>=100
+ </b>
+ could be separated into two datasets with:
+ <pre>
+subset_freq1   1   50
+subset_freq2   51  100
+ </pre>
+ Any resulting susceptibility (_SUS) and screening (_SCR) files can then be merged with the
+ <b>
+  mrgscr
+ </b>
+ utility.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="ecuteps">ecuteps</a></font>
+<br><font id="mnemonics">Mnemonics: Energy CUT-off for EPSilon (the dielectric matrix)</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#ENERGY">ENERGY</a></font>
+<br><font id="characteristic">Mentioned in topics: <a href="../../topics/generated_files/topic_Susceptibility.html">Susceptibility</a>, <a href="../../topics/generated_files/topic_RandStopPow.html">RandStopPow</a>.</font>
+<br><font id="smalltext">Moderately used: [74/907] in abinit tests, [15/136] in tuto abinit tests. Too many tests to report (>10).</font>
+<br><font id="vartype">Variable type: real</font>
+<br><font id="default">Default is 0.0</font>
+<br><br><font id="requires">
+Only relevant if <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>==3 or <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>==4
+</font>
+<br><font id="text">
+<p>
+<p>
+ <b>ecuteps</b> determines the cut-off energy of the planewave set used to represent the
+independent-particle susceptibility $\chi^{0}_{KS}$, the dielectric matrix $\epsilon$, and its inverse.
+ <br />
+ It is not worth to take <b>ecuteps</b> bigger than four times <a href="../../input_variables/generated_files/varset_gw.html#ecutwfn">ecutwfn</a>,
+this latter limit corresponding to the highest Fourier components of a wavefunction convoluted with itself.
+Usually, even twice the value of <a href="../../input_variables/generated_files/varset_gw.html#ecutwfn">ecutwfn</a> might overkill. A value of <b>ecuteps</b>
+between 5 and 10 Hartree often (but not always) leads to converged results (at the level of 0.01 eV for the energy gap).
+In any case, a convergence study is worth.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="ecutsigx">ecutsigx</a></font>
+<br><font id="mnemonics">Mnemonics: Energy CUT-off for SIGma eXchange</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#ENERGY">ENERGY</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_SelfEnergy.html">SelfEnergy</a>.</font>
+<br><font id="smalltext">Moderately used: [58/907] in abinit tests, [11/136] in tuto abinit tests. Too many tests to report (>10).</font>
+<br><font id="vartype">Variable type: real</font>
+<br><font id="default">Default is 0.0</font>
+<br><br><font id="requires">
+Only relevant if <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>==4
+</font>
+<br><font id="text">
+<p>
+<p>
+ <b>ecutsigx</b> determines the cut-off energy of the planewave set used to generate the
+exchange part of the self-energy operator. For norm-conserving calculations, it is pointless
+to have <b>ecutsigx</b> bigger than 4*<a href="../../input_variables/generated_files/varset_basic.html#ecut">ecut</a>,
+while for PAW calculations, the maximal useful value is
+<a href="../../input_variables/generated_files/varset_paw.html#pawecutdg">pawecutdg</a>. Thus, if you do not care about CPU time, please use these
+values. If you want to spare some CPU time, you might try to use a value between <a href="../../input_variables/generated_files/varset_basic.html#ecut">ecut</a> and these
+upper limits.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="ecutwfn">ecutwfn</a></font>
+<br><font id="mnemonics">Mnemonics: Energy CUT-off for WaveFunctioNs</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#ENERGY">ENERGY</a></font>
+<br><font id="characteristic">Mentioned in topics: <a href="../../topics/generated_files/topic_Susceptibility.html">Susceptibility</a>, <a href="../../topics/generated_files/topic_SelfEnergy.html">SelfEnergy</a>.</font>
+<br><font id="smalltext">Moderately used: [79/907] in abinit tests, [19/136] in tuto abinit tests. Too many tests to report (>10).</font>
+<br><font id="vartype">Variable type: real</font>
+<br><font id="default">Default is <a href="../../input_variables/generated_files/varset_basic.html#ecut">ecut</a> if <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a> in [3, 4],
+0.0 otherwise.
+</font>
+<br><br><font id="requires">
+Only relevant if  <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>==3 or <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>==4
+</font>
+<br><font id="text">
+<p>
+<p>
+ <b>ecutwfn</b> determines the cut-off energy of the planewave set used to represent the wavefunctions
+in the formula that generates the independent-particle susceptibility $\chi^{0}_{KS}$
+(for <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>=3), or the
+self-energy (for <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>=4).
+ <br />
+ Usually, <b>ecutwfn</b> is smaller than <a href="../../input_variables/generated_files/varset_basic.html#ecut">ecut</a>,
+so that the wavefunctions are filtered, and some components are ignored.
+As a side effect, the wavefunctions are no more normalized, and also, no more orthogonal.
+Also, the set of plane waves can be much smaller for <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>=3,
+than for <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>=4, although a convergence
+study is needed to choose correctly both values.
+</p>
+<p>
+ The size of this set of planewaves is <a href="../../input_variables/generated_files/varset_internal.html#npwwfn">npwwfn</a>.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="fftgw">fftgw</a></font>
+<br><font id="mnemonics">Mnemonics: FFT for GW calculation</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topics: <a href="../../topics/generated_files/topic_GW.html">GW</a>, <a href="../../topics/generated_files/topic_Susceptibility.html">Susceptibility</a>, <a href="../../topics/generated_files/topic_SelfEnergy.html">SelfEnergy</a>.</font>
+<br><font id="smalltext">Moderately used: [12/907] in abinit tests, [0/136] in tuto abinit tests. Tuto test list: {}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 21</font>
+<br><br><font id="requires">
+Only relevant if  <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>==3 or <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>==4
+</font>
+<br><font id="text">
+<p>
+<p>
+ The basic ingredients needed to perform both a screening and a sigma calculation are the so-called
+oscillator matrix elements defined as
+ <br />
+ <br />
+&lt;
+ <b>
+  k-q
+ </b>
+ , b1 | e^{-i (
+ <b>
+  q+G
+ </b>
+ ).
+ <b>
+  r
+ </b>
+ } |
+ <b>
+  k
+ </b>
+ b2 &gt;
+ <br />
+ <br />
+ In reciprocal space, this expression is evaluated by a convolution in which the number of reciprocal
+lattice vectors employed to describe the wavefunctions is given
+by <a href="../../input_variables/generated_files/varset_gw.html#ecutwfn">ecutwfn</a>.
+In the case of screening calculations, the number of
+ <b>
+  G
+ </b>
+ vectors in the above expression is defined
+by <a href="../../input_variables/generated_files/varset_gw.html#ecuteps">ecuteps</a>,
+while <a href="../../input_variables/generated_files/varset_gw.html#ecutsigx">ecutsigx</a> defined the number of
+ <b>
+  G
+ </b>
+ used in sigma calculations.
+To improve the efficiency of the code, the oscillator matrix elements are evaluated
+in real space through FFT techniques, and the <b>fftgw</b> input variable is used to select the FFT
+mesh to be used.
+</p>
+<p>
+ <b>fftgw</b> is the concatenation of two digits, labelled (A) and (B) whose value is internally used
+to define the value of  <a href="../../input_variables/generated_files/varset_gstate.html#ngfft">ngfft</a>(1:3) (see the setmesh.F90 routine).
+</p>
+<p>
+ The first digit (A) defines the augmentation of the FFT grid. Possible values are 1, 2 and 3.
+ <ul>
+  <li>
+   0 =&gt; Use the FFT grid specified by the user through <a href="../../input_variables/generated_files/varset_gstate.html#ngfft">ngfft</a>(1:3)
+  </li>
+  <li>
+   1 =&gt; Use a coarse FFT grid which encloses a sphere in reciprocal space whose radius depends
+on the largest value between
+<a href="../../input_variables/generated_files/varset_gw.html#ecutwfn">ecutwfn</a> and <a href="../../input_variables/generated_files/varset_gw.html#ecuteps">ecuteps</a>
+  </li>
+  <li>
+   2 =&gt;  Use a slightly augmented FFT which is sufficient for the correct treatment of the
+convolution
+  </li>
+  <li>
+   3 =&gt; Doubled FFT grid (same mesh as that used for GS calculations).
+  </li>
+ </ul>
+</p>
+<p>
+ The second digit (B) can be chosen between 0 and 1. It defines whether a FFT grid compatible with all
+the symmetries of the space group must be enforced or not:
+ <ul>
+  <li>
+   0 =&gt; Use the smallest FFT mesh which is compatible with the FFT library (faster, save memory
+but is less accurate)
+  </li>
+  <li>
+   1 =&gt; Enforce a FFT grid which is compatible with all the symmetry operations of the space
+group. This method leads to an increase both of CPU time and memory, but the matrix elements
+are more accurate since the symmetry properties of the system are preserved.
+  </li>
+ </ul>
+ The behaviour of ABINIT before v5.5 corresponds to the default value 11.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="freqim_alpha">freqim_alpha</a></font>
+<br><font id="mnemonics">Mnemonics: FREQuencies along the IMaginary axis ALPHA parameter</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_SelfEnergy.html">SelfEnergy</a>.</font>
+<br><font id="smalltext">Rarely used: [1/907] in abinit tests, [0/136] in tuto abinit tests. Test list: {v67mbpt:[<a href="../../tests/v67mbpt/Input/t22.in">22</a>]}.</font>
+<br><font id="vartype">Variable type: real</font>
+<br><font id="default">Default is 5.0</font>
+<br><br><font id="requires">
+Only relevant if <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>==4
+</font>
+<br><font id="text">
+<p>
+<p>
+ <b>freqim_alpha</b> is used only for numerical integration of the GW self-energy
+(<a href="../../input_variables/generated_files/varset_gw.html#gwcalctyp">gwcalctyp</a>= 2, 12, 22, 9, 19, 29).
+ <br />
+ <b>freqim_alpha</b> determines the location of the maximum frequency point along the imaginary axis
+if the default grid is used in Contour Deformation (numerical integration) calculations. It is set
+as
+ <span style="font-family:Times,Serif">
+  <i>
+   &alpha;&middot;&omega;
+   <sub>
+    p
+    <sub>
+    </sub>
+   </sub>
+  </i>
+ </span>
+ , where
+ <span style="font-family:Times,Serif">
+  <i>
+   &omega;
+   <sub>
+    p
+    <sub>
+    </sub>
+   </sub>
+  </i>
+ </span>
+ is the plasma frequency
+determined by the average density of the system (this can be set by hand by using the variable <a href="../../input_variables/generated_files/varset_gw.html#ppmfrq">ppmfrq</a>). See the section on grids in the descriptive text for <a href="../../input_variables/generated_files/varset_gw.html#cd_frqim_method">cd_frqim_method</a> for a detailed description of the formula.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="freqremax">freqremax</a></font>
+<br><font id="mnemonics">Mnemonics: FREQuencies along the Real axis MAXimum</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#ENERGY">ENERGY</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_FrequencyMeshMBPT.html">FrequencyMeshMBPT</a>.</font>
+<br><font id="smalltext">Moderately used: [11/907] in abinit tests, [2/136] in tuto abinit tests. Tuto test list: {tutoparal:[<a href="../../tests/tutoparal/Input/tmbt_3.in">mbt_3</a>],tutorial:[<a href="../../tests/tutorial/Input/tgw2_2.in">gw2_2</a>]}.</font>
+<br><font id="vartype">Variable type: real</font>
+<br><font id="default">Default is 0.0</font>
+<br><br><font id="requires">
+Only relevant if <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>==3
+</font>
+<br><font id="text">
+<p>
+<p>
+ <b>freqremax</b> is used only for numerical integration of the GW self-energy
+(<a href="../../input_variables/generated_files/varset_gw.html#gwcalctyp">gwcalctyp</a>= 2, 12, 22, 9, 19, 29).
+ <br />
+ <b>freqremax</b> sets the maximum real frequency used to calculate the dielectric matrix in order
+to perform the numerical integration of the GW self-energy.
+<b>freqremax</b>, <a href="../../input_variables/generated_files/varset_gw.html#freqremin">freqremin</a> and <a href="../../input_variables/generated_files/varset_gw.html#nfreqre">nfreqre</a>
+define the spacing of the frequency mesh along the real axis.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="freqremin">freqremin</a></font>
+<br><font id="mnemonics">Mnemonics: FREQuencies along the Real axis MINimum</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#ENERGY">ENERGY</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_FrequencyMeshMBPT.html">FrequencyMeshMBPT</a>.</font>
+<br><font id="smalltext">Rarely used: [4/907] in abinit tests, [0/136] in tuto abinit tests. Test list: {v5:[<a href="../../tests/v5/Input/t71.in">71</a>],v67mbpt:[<a href="../../tests/v67mbpt/Input/t37.in">37</a>],v7:[<a href="../../tests/v7/Input/t78.in">78</a>,<a href="../../tests/v7/Input/t79.in">79</a>]}.</font>
+<br><font id="vartype">Variable type: real</font>
+<br><font id="default">Default is 0.0</font>
+<br><br><font id="requires">
+Only relevant if <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>==3
+</font>
+<br><font id="text">
+<p>
+<p>
+ <b>freqremin</b> is used only for numerical integration of the GW self-energy
+(<a href="../../input_variables/generated_files/varset_gw.html#gwcalctyp">gwcalctyp</a>= 2, 12, 22, 9, 19, 29).
+ <br />
+ <b>freqremin</b> sets the minimum real frequency used to calculate the dielectric matrix in order
+to perform the numerical integration of the GW self-energy.
+<b>freqremin</b> can be used to split a wide frequency interval into smaller subintervals that
+can be calculated independently.
+The different subintervals can then be merged together with the
+ <b>
+  Mrgscr
+ </b>
+ utility thus obtaining
+a single screening file that can used for self-energy calculations.
+
+Note that <a href="../../input_variables/generated_files/varset_gw.html#freqremax">freqremax</a>, <b>freqremin</b>
+and <a href="../../input_variables/generated_files/varset_gw.html#nfreqre">nfreqre</a> define the spacing of the frequency mesh along the real axis.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="freqspmax">freqspmax</a></font>
+<br><font id="mnemonics">Mnemonics: FREQuencies for the SPectral function MAXimum</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#ENERGY">ENERGY</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_SelfEnergy.html">SelfEnergy</a>.</font>
+<br><font id="smalltext">Rarely used: [7/907] in abinit tests, [1/136] in tuto abinit tests. Test list: {tutorial:[<a href="../../tests/tutorial/Input/tgw2_4.in">gw2_4</a>],v67mbpt:[<a href="../../tests/v67mbpt/Input/t02.in">02</a>],v7:[<a href="../../tests/v7/Input/t23.in">23</a>,<a href="../../tests/v7/Input/t24.in">24</a>,<a href="../../tests/v7/Input/t25.in">25</a>,<a href="../../tests/v7/Input/t78.in">78</a>,<a href="../../tests/v7/Input/t79.in">79</a>]}.</font>
+<br><font id="vartype">Variable type: real</font>
+<br><font id="default">Default is 0.0</font>
+<br><br><font id="requires">
+Only relevant if <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>==4
+</font>
+<br><font id="text">
+<p>
+<p>
+ <b>freqspmax</b> sets the maximum real frequency used to calculate the spectral function
+from the GW Green's function. <a href="../../input_variables/generated_files/varset_gw.html#freqspmin">freqspmin</a>, <b>freqspmax</b> and
+<a href="../../input_variables/generated_files/varset_gw.html#nfreqsp">nfreqsp</a> define the spacing of an equidistant frequency mesh along
+the real axis. Alternatively, the variables <a href="../../input_variables/generated_files/varset_gw.html#gw_customnfreqsp">gw_customnfreqsp</a> and
+<a href="../../input_variables/generated_files/varset_gw.html#gw_freqsp">gw_freqsp</a> can be used to make a user-defined grid.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="freqspmin">freqspmin</a></font>
+<br><font id="mnemonics">Mnemonics: FREQuencies for the SPectral function MINimum</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#ENERGY">ENERGY</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_SelfEnergy.html">SelfEnergy</a>.</font>
+<br><font id="smalltext">Rarely used: [6/907] in abinit tests, [0/136] in tuto abinit tests. Test list: {v67mbpt:[<a href="../../tests/v67mbpt/Input/t02.in">02</a>],v7:[<a href="../../tests/v7/Input/t23.in">23</a>,<a href="../../tests/v7/Input/t24.in">24</a>,<a href="../../tests/v7/Input/t25.in">25</a>,<a href="../../tests/v7/Input/t78.in">78</a>,<a href="../../tests/v7/Input/t79.in">79</a>]}.</font>
+<br><font id="vartype">Variable type: real</font>
+<br><font id="default">Default is -<a href="../../input_variables/generated_files/varset_gw.html#freqspmax">freqspmax</a></font>
+<br><br><font id="requires">
+Only relevant if <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>==4
+</font>
+<br><font id="text">
+<p>
+<p>
+ <b>freqspmin</b> sets the minimum real frequency used to calculate the spectral function
+from the GW Green's function. <b>freqspmin</b> is set to -<a href="../../input_variables/generated_files/varset_gw.html#freqspmax">freqspmax</a>
+if left undefined. <b>freqspmin</b>, <a href="../../input_variables/generated_files/varset_gw.html#freqspmax">freqspmax</a>, and
+<a href="../../input_variables/generated_files/varset_gw.html#nfreqsp">nfreqsp</a> define the spacing of an equidistant frequency mesh along
+the real axis. Alternatively, the variables <a href="../../input_variables/generated_files/varset_gw.html#gw_customnfreqsp">gw_customnfreqsp</a> and
+<a href="../../input_variables/generated_files/varset_gw.html#gw_freqsp">gw_freqsp</a> can be used to make a user-defined grid.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="gw_customnfreqsp">gw_customnfreqsp</a></font>
+<br><font id="mnemonics">Mnemonics: GW CUSTOM FREQuencies for SPectral function</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_FrequencyMeshMBPT.html">FrequencyMeshMBPT</a>.</font>
+<br><font id="smalltext">Rarely used: [3/907] in abinit tests, [0/136] in tuto abinit tests. Test list: {paral:[<a href="../../tests/paral/Input/t77.in">77</a>],v67mbpt:[<a href="../../tests/v67mbpt/Input/t02.in">02</a>,<a href="../../tests/v67mbpt/Input/t15.in">15</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><br><font id="requires">
+Only relevant if <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>==4 and <a href="../../input_variables/generated_files/varset_gw.html#gwcalctyp">gwcalctyp</a> in [2,9,12,19,22,29]
+</font>
+<br><font id="text">
+<p>
+<p>
+ <b>gw_customnfreqsp</b> lets the user define the grid points along the real frequency axis by hand
+for the calculation of the self-energy along the real axis. Set this to the number of frequencies
+you want. The frequencies are specified with <a href="../../input_variables/generated_files/varset_gw.html#gw_freqsp">gw_freqsp</a>.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="gw_freqsp">gw_freqsp</a></font>
+<br><font id="mnemonics">Mnemonics: GW SPectral FREQuencies</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_FrequencyMeshMBPT.html">FrequencyMeshMBPT</a>.</font>
+<br><font id="smalltext">Rarely used: [3/907] in abinit tests, [0/136] in tuto abinit tests. Test list: {paral:[<a href="../../tests/paral/Input/t77.in">77</a>],v67mbpt:[<a href="../../tests/v67mbpt/Input/t02.in">02</a>,<a href="../../tests/v67mbpt/Input/t15.in">15</a>]}.</font>
+<br><font id="vartype">Variable type: real(<a href="../../input_variables/generated_files/varset_gw.html#gw_customnfreqsp">gw_customnfreqsp</a>)</font>
+<br><font id="default">Default is [1 .. <a href="../../input_variables/generated_files/varset_gw.html#gw_customnfreqsp">gw_customnfreqsp</a>]</font>
+<br><br><font id="requires">
+Only relevant if <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>==4 and <a href="../../input_variables/generated_files/varset_gw.html#gw_customnfreqsp">gw_customnfreqsp</a> > 0 
+</font>
+<br><font id="text">
+<p>
+<p>
+ <b>gw_freqsp</b> specifies the grid points for the real frequency axis when the real and imaginary
+(spectral funtion) parts of sigma are calculated explicitly for post-processing or plotting.
+Only activated if
+<a href="../../input_variables/generated_files/varset_gw.html#gw_customnfreqsp">gw_customnfreqsp</a> is not equal to 0. The number of frequencies
+is set by the value of <a href="../../input_variables/generated_files/varset_gw.html#gw_customnfreqsp">gw_customnfreqsp</a>. Example:
+ <pre>
+gw_customnfreqsp   5
+nfreqsp            5
+gw_freqsp         -0.5  -0.1  0.0  1.0  10.0 eV
+ </pre>
+ If <a href="../../input_variables/generated_files/varset_gw.html#nfreqsp">nfreqsp</a> is not equal to
+<a href="../../input_variables/generated_files/varset_gw.html#gw_customnfreqsp">gw_customnfreqsp</a> a warning will be issued.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="gw_frqim_inzgrid">gw_frqim_inzgrid</a></font>
+<br><font id="mnemonics">Mnemonics: GW Contour Deformation FReQuencies on IMaginary axis Inverse Z Grid</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_FrequencyMeshMBPT.html">FrequencyMeshMBPT</a>.</font>
+<br><font id="smalltext">Rarely used: [1/907] in abinit tests, [0/136] in tuto abinit tests. Test list: {v67mbpt:[<a href="../../tests/v67mbpt/Input/t22.in">22</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><br><font id="requires">
+Only relevant if <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a> in [3,4] and <a href="../../input_variables/generated_files/varset_gw.html#gwcalctyp">gwcalctyp</a> in [2,9,12,19,22,29]
+</font>
+<br><font id="text">
+<p>
+<p>
+ <b>gw_frqim_inzgrid</b> creates gridpoints along the
+<b>
+  imaginary
+ </b>
+ frequency axis by using an
+equidistant grid in the variable
+ <span style="font-family:Times,Serif">
+  <i>
+   z &sub; [0,1]
+  </i>
+ </span>
+ where the transform is:
+</p>
+<p align="center">
+ <img style="width: 122px; height: 38px;" src="../vargw_img/cd_inzgrid.png" />
+</p>
+<p>
+ Here
+ <span style="font-family:Times,Serif">
+  <i>
+   &omega;
+   <sub>
+    p
+   </sub>
+  </i>
+ </span>
+ is the
+plasma frequency (default can be overridden by setting <a href="../../input_variables/generated_files/varset_gw.html#ppmfrq">ppmfrq</a>).
+The equidistant grid in z is determined uniquely by <a href="../../input_variables/generated_files/varset_gw.html#nfreqim">nfreqim</a>) and
+the points are distributed so that half of them lie below the plasma frequency.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="gw_frqre_inzgrid">gw_frqre_inzgrid</a></font>
+<br><font id="mnemonics">Mnemonics: GW Contour Deformation FReQuencies on REal axis Inverse Z Grid</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_FrequencyMeshMBPT.html">FrequencyMeshMBPT</a>.</font>
+<br><font id="smalltext">Rarely used: [1/907] in abinit tests, [0/136] in tuto abinit tests. Test list: {v67mbpt:[<a href="../../tests/v67mbpt/Input/t22.in">22</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><br><font id="requires">
+Only relevant if <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a> in [3,4] and <a href="../../input_variables/generated_files/varset_gw.html#gwcalctyp">gwcalctyp</a> in [2,9,12,19,22,29]
+</font>
+<br><font id="text">
+<p>
+<p>
+ <b>gw_frqre_inzgrid</b> creates grid points along the
+ <b>
+  real
+ </b>
+ frequency axis by using an
+equidistant grid in the variable
+ <span style="font-family:Times,Serif">
+  <i>
+   z &sub; [0,1]
+  </i>
+ </span>
+ where the transform is:
+</p>
+<p align="center">
+ <img style="width: 122px; height: 38px;" src="../vargw_img/cd_inzgrid_re.png" />
+</p>
+<p>
+ Here
+ <span style="font-family:Times,Serif">
+  <i>
+   &omega;
+   <sub>
+    p
+   </sub>
+  </i>
+ </span>
+ is the
+plasma frequency (default can be overridden by setting <a href="../../input_variables/generated_files/varset_gw.html#ppmfrq">ppmfrq</a>).
+The equidistant grid in z is determined uniquely by
+<a href="../../input_variables/generated_files/varset_gw.html#nfreqre">nfreqre</a> ) and
+the points are distributed so that half of them lie below the plasma frequency. This is useful in
+conjuction with <a href="../../input_variables/generated_files/varset_gw.html#gw_frqim_inzgrid">gw_frqim_inzgrid</a> if one needs to use a grid
+which maps
+ <span style="font-family:Times,Serif">
+  <i>
+   [0,&#8734;[ &rarr; [0,1]
+  </i>
+ </span>
+ . Note that
+typically
+ <i>
+  many
+ </i>
+ more points are needed along the real axis in order to properly resolve
+peak structures. In contrast, both the screening and self-energy are very smooth along the
+imaginary axis. Also, please note that this is
+ <b>
+  not
+ </b>
+ an efficient grid for
+ <b>
+  standard
+ </b>
+ Contour Deformation calculations, where typically only a smaller range of frequencies near the
+origin is required. The maximum value needed along the real frequency axis is output in the
+logfile during Contour Deformation sigma calculations.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="gw_frqre_tangrid">gw_frqre_tangrid</a></font>
+<br><font id="mnemonics">Mnemonics: GW Contour Deformation FReQencies on REal axis - Use Tangent Grid</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_FrequencyMeshMBPT.html">FrequencyMeshMBPT</a>.</font>
+<br><font id="smalltext">Rarely used: [1/907] in abinit tests, [0/136] in tuto abinit tests. Test list: {v67mbpt:[<a href="../../tests/v67mbpt/Input/t21.in">21</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><br><font id="requires">
+Only relevant if <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a> in [3,4] and <a href="../../input_variables/generated_files/varset_gw.html#gwcalctyp">gwcalctyp</a> in [2,9,12,19,22,29]
+</font>
+<br><font id="text">
+<p>
+<p>
+ <b>gw_frqre_tangrid</b> defines a nonuniform grid to be used in frequency, with stepsize increasing
+proportional to tan(x). This makes the grid approximately linear to start with, with a rapid increase
+towards the end. Also, this is the grid which gives equal importance to each point used in the integration
+of a function which decays as 1/x^2. To be used in conjunction with <a href="../../input_variables/generated_files/varset_gw.html#nfreqre">nfreqre</a>,
+<a href="../../input_variables/generated_files/varset_gw.html#cd_max_freq">cd_max_freq</a> and <a href="../../input_variables/generated_files/varset_gw.html#cd_halfway_freq">cd_halfway_freq</a>
+ which determine the parameters of the transformed grid.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="gw_invalid_freq">gw_invalid_freq</a></font>
+<br><font id="mnemonics">Mnemonics: GW treatment of INVALID FREQuency for Hybertsen-Louie PPM</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topics: <a href="../../topics/generated_files/topic_Susceptibility.html">Susceptibility</a>, <a href="../../topics/generated_files/topic_SelfEnergy.html">SelfEnergy</a>.</font>
+<br><font id="smalltext">Rarely used: [1/907] in abinit tests, [0/136] in tuto abinit tests. Test list: {v67mbpt:[<a href="../../tests/v67mbpt/Input/t41.in">41</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><br><font id="requires">
+Only relevant if <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a> in [3,4] and <a href="../../input_variables/generated_files/varset_gw.html#ppmodel">ppmodel</a> in [2]
+</font>
+<br><font id="text">
+<p>
+<p>
+ <b>gw_invalid_freq</b> sets the procedure to follow when a PPM frequency is invalid (negative or imaginary).
+  <ul>
+    <li>
+      <b>gw_invalid_freq</b>=0 : Drop them as proposed in Appendix B of PRB 34, 8, 5390, 1986.
+    </li>
+    <li>
+      <b>gw_invalid_freq</b>=1 : Set them to 1 hartree, as done for the PPM of Godby-Needs.
+    </li>
+    <li>
+      <b>gw_invalid_freq</b>=2 : Set them to infinity.
+    </li>
+  </ul>
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="gw_nqlwl">gw_nqlwl</a></font>
+<br><font id="mnemonics">Mnemonics: GW, Number of Q-points for the Long Wave-Length Limit</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topics: <a href="../../topics/generated_files/topic_GW.html">GW</a>, <a href="../../topics/generated_files/topic_BSE.html">BSE</a>, <a href="../../topics/generated_files/topic_Susceptibility.html">Susceptibility</a>, <a href="../../topics/generated_files/topic_SelfEnergy.html">SelfEnergy</a>.</font>
+<br><font id="smalltext">Rarely used: [1/907] in abinit tests, [0/136] in tuto abinit tests. Test list: {v67mbpt:[<a href="../../tests/v67mbpt/Input/t03.in">03</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 1</font>
+<br><br><font id="requires">
+Only relevant if <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a> in [3,4,99]
+</font>
+<br><font id="text">
+<p>
+<p>
+ Only relevant if <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>=3,4,99 that is, screening, sigma or Bethe-Salpeter
+calculations, although the actual meaning of the variable depends on the particular run-level (see
+discussion below).
+</p>
+<p>
+ <b>gw_nqlwl</b> defines the number of directions in reciprocal space used to describe the non-analytical behaviour
+of the heads (G = G'=0) and the wings (G=0 or G'=0) of the dielectric matrix in the optical limit
+(i.e. for q tending to zero).
+The number of directions is specified by the additional variable <a href="../../input_variables/generated_files/varset_gw.html#gw_qlwl">gw_qlwl</a>.
+</p>
+<p>
+ When <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>=3, <b>gw_nqlwl</b> and
+ <b>
+  gw_qlwl
+ </b>
+ define
+the set of "small" q that will be calculated and stored in the final SCR file. Therefore, the two
+variables can be used to analyze how the optical spectra depend on the direction
+of the incident phonon (useful especially in anisotropic systems).
+</p>
+<p>
+ When <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>=4, <b>gw_nqlwl</b> and
+ <b>
+  gw_qlwl
+ </b>
+ can be used
+to specify the heads and the wings to be used to perform the quadrature of the correlated
+part of the self-energy in the small region around the origin.
+(NB: not yet available, at present the quadrature is performed using a single direction in q-space)
+</p>
+<p>
+ When <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>=99, <b>gw_nqlwl</b> and
+ <b>
+  gw_qlwl
+ </b>
+ define
+the set of directions in q-space along which the macroscopic dielectric function is evaluated.
+By default the Bethe-Salpeter code calculates the macroscopic dielectric function using six different
+directions in q-space (the three basis vectors of the reciprocal lattice and the three Cartesian axis).
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="gw_nstep">gw_nstep</a></font>
+<br><font id="mnemonics">Mnemonics: GW Number of self-consistent STEPs</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_GW.html">GW</a>.</font>
+<br><font id="smalltext">Rarely used: [0/907] in abinit tests, [0/136] in tuto abinit tests.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 30</font>
+<br><br><font id="requires">
+Only relevant if <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>==8
+</font>
+<br><font id="text">
+<p>
+<p>
+ Gives the maximum number of self-consistent GW cycles (or "iterations").
+in which G and/or W will be updated until the quasi-particle energies are converged
+within <a href="../../input_variables/generated_files/varset_gw.html#gw_toldfeig">gw_toldfeig</a>.
+<a href="../../input_variables/generated_files/varset_gw.html#gwcalctyp">gwcalctyp</a> and <a href="../../input_variables/generated_files/varset_gw.html#gw_sctype">gw_sctype</a> are
+used to define the type of self-consistency.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="gw_qlwl">gw_qlwl</a></font>
+<br><font id="mnemonics">Mnemonics: GW, Q-points for the Long Wave-Length limit</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topics: <a href="../../topics/generated_files/topic_Susceptibility.html">Susceptibility</a>, <a href="../../topics/generated_files/topic_SelfEnergy.html">SelfEnergy</a>, <a href="../../topics/generated_files/topic_BSE.html">BSE</a>.</font>
+<br><font id="smalltext">Rarely used: [1/907] in abinit tests, [0/136] in tuto abinit tests. Test list: {v67mbpt:[<a href="../../tests/v67mbpt/Input/t03.in">03</a>]}.</font>
+<br><font id="vartype">Variable type: real(3,<a href="../../input_variables/generated_files/varset_gw.html#gw_nqlwl">gw_nqlwl</a>)</font>
+<br><font id="default">Default is [1e-05, 2e-05, 3e-05]</font>
+<br><br><font id="requires">
+Only relevant if <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a> in [3,4,99]
+</font>
+<br><font id="text">
+<p>
+<p>
+ When <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>=3,
+<b>gw_qlwl</b> defines the set of q-points around Gamma that are considered during the evaluation
+of the non-analytical behaviour of the dielectric matrix. Optical spectra (with and without
+non-local field effects) are evaluated for each direction specified by <b>gw_qlwl</b>.
+</p>
+<p>
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="gw_qprange">gw_qprange</a></font>
+<br><font id="mnemonics">Mnemonics: GW QuasiParticle RANGE policy</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_SelfEnergy.html">SelfEnergy</a>.</font>
+<br><font id="smalltext">Rarely used: [2/907] in abinit tests, [0/136] in tuto abinit tests. Test list: {libxc:[<a href="../../tests/libxc/Input/t42.in">42</a>,<a href="../../tests/libxc/Input/t43.in">43</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><br><font id="requires">
+Only relevant if <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>==4
+</font>
+<br><font id="text">
+<p>
+<p>
+ <b>gw_qprange</b> is active only when <a href="../../input_variables/generated_files/varset_gw.html#nkptgw">nkptgw</a> is equal to zero (default value).
+This variable simplifies the specification of the list of kpoints and of the bands to be used
+for the computation of the quasi-particle corrections.
+The possible values are:
+ <ul>
+  <li>
+   0    =&gt; Compute the QP corrections only for the fundamental and the optical gap
+  </li>
+  <li>
+   +num =&gt; Compute the QP corrections for all the k-points in the irreducible zone.
+and include `num` bands above and below the Fermi level.
+  </li>
+  <li>
+   -num =&gt; Compute the QP corrections for all the k-points in the irreducible zone.
+Include all occupied states and `num` empty states.
+  </li>
+ </ul>
+ The default value is 0 and is very handy for one-shot calculations.
+It is important to stress, however, that the position of the optical/fundamental gaps is deduced from the energies computed
+on the k-mesh used for the WFK file. Therefore the computed gaps might differ from the correct ones that can only be
+obtained with an appropriate sampling of the irreducible zone.
+
+Positive values are useful if we do not know the position of the GW HOMO, LOMO and we want to investigate
+the effect of the GW corrections on the states close to the gap
+Negative values are usually used for self-consistent calculations
+
+Note that, in the case of self-consistency or symsigma=1, the code might change the bands range
+so that all the degenerate states are included.
+
+Note also that <a href="../../input_variables/generated_files/varset_gw.html#kptgw">kptgw</a>, and
+ <a href="../../input_variables/generated_files/varset_gw.html#bdgw">bdgw</a>
+ are ignored when this options is used.
+If you want to select manually the list of k-points and bands, you have
+to provide the three variables <a href="../../input_variables/generated_files/varset_gw.html#nkptgw">nkptgw</a>, <a href="../../input_variables/generated_files/varset_gw.html#kptgw">kptgw</a>, and <a href="../../input_variables/generated_files/varset_gw.html#bdgw">bdgw</a>.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="gw_sctype">gw_sctype</a></font>
+<br><font id="mnemonics">Mnemonics: GW, Self-Consistency TYPE</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_GW.html">GW</a>.</font>
+<br><font id="smalltext">Rarely used: [0/907] in abinit tests, [0/136] in tuto abinit tests.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 1</font>
+<br><br><font id="requires">
+Only relevant if <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a> in [3,4]
+</font>
+<br><font id="text">
+<p>
+<p>
+ This variable is used to partially define the kind of self-consistency for GW calculations.
+The other piece of information is given by <a href="../../input_variables/generated_files/varset_gw.html#gwcalctyp">gwcalctyp</a>
+that defines the particular approximation for the self-energy operator as well as whether the
+wavefunctions have to replaced by quasi-particle amplitudes.
+</p>
+<p>
+ If <b>gw_sctype</b> is specified in the input file, the code will perform an iterative update
+of the quantities entering the GW equations until the quasi-particle energies are converged
+within <a href="../../input_variables/generated_files/varset_gw.html#gw_toldfeig">gw_toldfeig</a>. The maximum number of iterations is
+specified by <a href="../../input_variables/generated_files/varset_gw.html#gw_nstep">gw_nstep</a>.
+Possible values are:
+ <ul>
+  <li>
+   1 =&gt; standard one-shot method (one screening calculation followed by a single sigma run)
+  </li>
+  <li>
+   2 =&gt; self-consistency only on W (iterative update of W followed by a sigma run in which G
+is approximated with the Kohn-Sham independent-particle Green's function G0)
+  </li>
+  <li>
+   3 =&gt; self-consistency only of G (a single screening calculation to obtain the Kohn-Sham
+polarizability followed by an iterative update of the Green's functions in the self-energy)
+  </li>
+  <li>
+   4 =&gt; fully self-consistent algorithm (iterative update of both G and W)
+  </li>
+ </ul>
+ It is possible to initialize the self-consistent procedure by reading a previously calculated
+SCR or SUSC file via the variables <a href="../../input_variables/generated_files/varset_files.html#getscr">getscr</a> or
+<a href="../../input_variables/generated_files/varset_files.html#getsuscep">getsuscep</a>, respectively.
+<a href="../../input_variables/generated_files/varset_files.html#getqps">getqps</a> can be used to read a previous QPS file thus initializing
+the Green functions to be used in the first self-consistent iteration.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="gw_sigxcore">gw_sigxcore</a></font>
+<br><font id="mnemonics">Mnemonics: GW, SIGma (self-energy) for the CORE contribution</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_SelfEnergy.html">SelfEnergy</a>.</font>
+<br><font id="smalltext">Rarely used: [1/907] in abinit tests, [0/136] in tuto abinit tests. Test list: {v5:[<a href="../../tests/v5/Input/t66.in">66</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><br><font id="requires">
+Only relevant if <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>==4 and <a href="../../input_variables/generated_files/varset_internal.html#usepaw">usepaw</a>==1
+</font>
+<br><font id="text">
+<p>
+<p>
+ Only available for PAW and relevant if <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>=4 that is, sigma calculations.
+</p>
+<p>
+ Theoretical introduction: GW calculations performed on top of electronic calculations relying
+when the frozen-core approximation is used to separate inner-core electrons from valence electrons,
+only the contribution to the self-energy arising from valence electrons is explicitly accounted for.
+In the standard approach based on pseudopotentials the contribution to the self-energy due to core electrons is approximated
+by means of the KS exchange-correlation potential generated by the core density.
+In the case of GW calculations employing the PAW method, the core contribution to the self-energy
+can be more accurately estimated in terms of the Fock operator generated by the core wavefunctions.
+In the simplest approach, the only ingredients required for this more refined treatment are the wave
+functions of the core electrons in the reference atomic configuration that are calculated during the
+generation of the PAW setup. This is a good approximation provided that the core wave functions
+are strictly localized inside the PAW spheres.
+</p>
+<p>
+ <b>gw_sigxcore</b> defines the approximation used to evaluate the core contribution to sigma.
+ <ul>
+  <li>
+   <b>gw_sigxcore</b> = 0, standard approach, the core contribution is approximated with vxc.
+  </li>
+  <li>
+   <b>gw_sigxcore</b> = 1, the core term is approximated with the Fock operator inside the PAW spheres.
+  </li>
+ </ul>
+</p>
+<p>
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="gw_toldfeig">gw_toldfeig</a></font>
+<br><font id="mnemonics">Mnemonics: GW TOLerance on the DiFference of the EIGenvalues</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#ENERGY">ENERGY</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_GW.html">GW</a>.</font>
+<br><font id="smalltext">Rarely used: [0/907] in abinit tests, [0/136] in tuto abinit tests.</font>
+<br><font id="vartype">Variable type: real</font>
+<br><font id="default">Default is 0.1 eV</font>
+<br><br><font id="requires">
+Only relevant if <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>==8
+</font>
+<br><font id="text">
+<p>
+<p>
+ Sets a tolerance for absolute differences of QP energies that will cause one self-consistent GW cycle to stop.
+ <br />
+ Can be specified in Ha (the default), Ry, eV or Kelvin, since
+ <b>
+  toldfe
+ </b>
+ has the '<a href="../../users/generated_files/help_abinit.html#ENERGY">ENERGY</a>' characteristics (1 Ha=27.2113845 eV)
+ <br />
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="gwcalctyp">gwcalctyp</a></font>
+<br><font id="mnemonics">Mnemonics: GW CALCulation TYPe</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topics: <a href="../../topics/generated_files/topic_GW.html">GW</a>, <a href="../../topics/generated_files/topic_SelfEnergy.html">SelfEnergy</a>.</font>
+<br><font id="smalltext">Moderately used: [37/907] in abinit tests, [5/136] in tuto abinit tests. Tuto test list: {tutoparal:[<a href="../../tests/tutoparal/Input/tmbt_3.in">mbt_3</a>,<a href="../../tests/tutoparal/Input/tmbt_4.in">mbt_4</a>],tutorial:[<a href="../../tests/tutorial/Input/tgw2_2.in">gw2_2</a>,<a href="../../tests/tutorial/Input/tgw2_3.in">gw2_3</a>,<a href="../../tests/tutorial/Input/tgw2_4.in">gw2_4</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><br><font id="requires">
+Only relevant if <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a> in [3,4]
+</font>
+<br><font id="text">
+<p>
+<p>
+ <b>gwcalctyp</b> governs the choice between the different capabilities of the GW code.
+ <ul>
+  <li>
+   0 &#60;&#61; <b>gwcalctyp</b> &#60;&#61;  9 : standard "1 shot" quasiparticle method
+  </li>
+  <li>
+   10 &#60;&#61; <b>gwcalctyp</b> &#60;&#61; 19 : self-consistent quasiparticle method on energies only
+  </li>
+  <li>
+   20 &#60;&#61; <b>gwcalctyp</b> &#60;&#61; 29 : self-consistent quasiparticle method on energies and wavefunctions
+  </li>
+ </ul>
+</p>
+<p>
+ <ul>
+  <li>
+   <b>gwcalctyp</b> &#61; 0, 10, or 20 : standard Plasmon-Pole model GW calculation
+  </li>
+  <li>
+   <b>gwcalctyp</b> &#61; 1 : GW calculation where the self-energy along the real axis is obtained by performing the analytic continuation from the imaginary axis to the full complex plane via the Pade approximant. Only available for standard "1 shot" quasiparticle method.
+  </li>
+  <li>
+   <b>gwcalctyp</b> &#61; 2, 12, or 22 : GW calculation using numerical integration
+(contour deformation method, see e.g. S. Lebegue
+   <i>
+    et al.
+   </i>
+   PRB
+   <b>
+    67
+   </b>
+   , 155208 (2003).)
+  </li>
+  <li>
+   <b>gwcalctyp</b> &#61; 5, 15, or 25 : Hartree-Fock calculation
+  </li>
+  <li>
+   <b>gwcalctyp</b> &#61; 6, 16, or 26 : Screened Exchange calculation
+  </li>
+  <li>
+   <b>gwcalctyp</b> &#61; 7, 17, or 27 : COHSEX calculation
+  </li>
+  <li>
+   <b>gwcalctyp</b> &#61; 8, 18, or 28 : model GW calculation
+following S. Faleev
+   <i>
+    et al.
+   </i>
+   PRL
+   <b>
+    93
+   </b>
+   , 126406 (2004) using a Plasmon-Pole model
+  </li>
+  <li>
+   <b>gwcalctyp</b> &#61; 9, 19, or 29 : model GW calculation
+following S. Faleev
+   <i>
+    et al.
+   </i>
+   PRL
+   <b>
+    93
+   </b>
+   , 126406 (2004) using numerical integration
+(contour deformation method)
+  </li>
+ </ul>
+</p>
+<p>
+ Also
+ <ul>
+  <li>
+   <b>gwcalctyp</b> &#61; 105,125 : HSE06 calculations (1-shot and self-consistent)
+  </li>
+  <li>
+   <b>gwcalctyp</b> &#61; 205,225 : PBE0 calculations  (1-shot and self-consistent)
+  </li>
+  <li>
+   <b>gwcalctyp</b> &#61; 305,325 : B3LYP calculations (1-shot and self-consistent)
+  </li>
+ </ul>
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="gwcomp">gwcomp</a></font>
+<br><font id="mnemonics">Mnemonics: GW COMPleteness</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_SelfEnergy.html">SelfEnergy</a>.</font>
+<br><font id="smalltext">Rarely used: [5/907] in abinit tests, [0/136] in tuto abinit tests. Test list: {paral:[<a href="../../tests/paral/Input/t75.in">75</a>],v5:[<a href="../../tests/v5/Input/t65.in">65</a>,<a href="../../tests/v5/Input/t69.in">69</a>,<a href="../../tests/v5/Input/t72.in">72</a>],v67mbpt:[<a href="../../tests/v67mbpt/Input/t19.in">19</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><br><font id="requires">
+Only relevant if <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a> in [3,4]
+</font>
+<br><font id="text">
+<p>
+<p>
+ <b>gwcomp</b> governs the use of an extrapolar approximation. If <b>gwcomp</b>==1, one improves the completeness
+in a truncated sum over states. In practice, this permits one to reduce quite much the number of
+bands required in the calculation of the screening or of the self-energy.
+The energy parameter
+needed in the extrapolar approximation is set by <a href="../../input_variables/generated_files/varset_gw.html#gwencomp">gwencomp</a>.
+See F. Bruneval, X. Gonze, Phys. Rev. B 78, 085125 (2008) for a description of the methodology.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="gwencomp">gwencomp</a></font>
+<br><font id="mnemonics">Mnemonics: GW ENergy for COMPleteness</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topics: <a href="../../topics/generated_files/topic_SelfEnergy.html">SelfEnergy</a>, <a href="../../topics/generated_files/topic_Susceptibility.html">Susceptibility</a>.</font>
+<br><font id="smalltext">Rarely used: [5/907] in abinit tests, [0/136] in tuto abinit tests. Test list: {paral:[<a href="../../tests/paral/Input/t75.in">75</a>],v5:[<a href="../../tests/v5/Input/t65.in">65</a>,<a href="../../tests/v5/Input/t69.in">69</a>,<a href="../../tests/v5/Input/t72.in">72</a>],v67mbpt:[<a href="../../tests/v67mbpt/Input/t19.in">19</a>]}.</font>
+<br><font id="vartype">Variable type: real</font>
+<br><font id="default">Default is 2.0</font>
+<br><br><font id="requires">
+Only relevant if <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a> in [3,4] and <a href="../../input_variables/generated_files/varset_gw.html#gwcomp">gwcomp</a>==1
+</font>
+<br><font id="text">
+<p>
+<p>
+ <b>gwencomp</b> sets the energy parameter used in the extrapolar approximation used to improve
+completeness and make the convergence against the number of bands much faster.
+</p>
+<p>
+ See F. Bruneval, X. Gonze, Phys. Rev. B 78, 085125 (2008) for a description of the methodology.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="gwfockmix">gwfockmix</a></font>
+<br><font id="mnemonics">Mnemonics: GW FOCK exchange MIXing parameter</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_GW.html">GW</a>.</font>
+<br><font id="smalltext">Rarely used: [1/907] in abinit tests, [0/136] in tuto abinit tests. Test list: {libxc:[<a href="../../tests/libxc/Input/t43.in">43</a>]}.</font>
+<br><font id="vartype">Variable type: real</font>
+<br><font id="default">Default is 0.25</font>
+<br><br><font id="requires">
+Only relevant if <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>=4, <a href="../../input_variables/generated_files/varset_gw.html#gwcalctyp">gwcalctyp</a> = 1x5 (HSE) or 2x5 (PBE0).
+</font>
+<br><font id="text">
+<p>
+Mixing parameter of Fock exchange for PBE0 and HSE hybrid-functional calculations via the GW self-energy subroutine. <b>gwfockmix</b> ranges from 0 (essentially PBE) to 1.
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="gwgamma">gwgamma</a></font>
+<br><font id="mnemonics">Mnemonics: GW GAMMA</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topics: <a href="../../topics/generated_files/topic_Susceptibility.html">Susceptibility</a>, <a href="../../topics/generated_files/topic_SelfEnergy.html">SelfEnergy</a>.</font>
+<br><font id="smalltext">Rarely used: [3/907] in abinit tests, [0/136] in tuto abinit tests. Test list: {v67mbpt:[<a href="../../tests/v67mbpt/Input/t05.in">05</a>,<a href="../../tests/v67mbpt/Input/t36.in">36</a>],v7:[<a href="../../tests/v7/Input/t16.in">16</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><br><font id="requires">
+Only relevant if <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>=3 or 4 (Sigma calculations)
+</font>
+<br><font id="text">
+<p>
+<p>
+ If <b>gwgamma</b> is 1, the vertex correction will be included leading to what is known as "GW-Gamma" approximation.
+see R. Del Sole, L. Reining, and R. W. Godby, Phys. Rev. B  49, 8024 (1994).
+Note that, in order to include the vertex correction in W, one has to start the sigma calculation
+from the susceptibility file_SUSC instead of the _SCR file (see <a href="../../input_variables/generated_files/varset_files.html#getsuscep">getsuscep</a>&nbsp;&nbsp;
+and <a href="../../input_variables/generated_files/varset_files.html#irdsuscep">irdsuscep</a>&nbsp;&nbsp;)
+Not available for PAW calculations.
+</p>
+<p>
+<b>gwgamma</b>=-4 activates the bootstrap kernel of Sharma et al. [Phys. Rev. Lett. 107, 186401 (2011)] in the test-charge-test-charge dielectric function [cf. Chen and Pasquarello, Phys. Rev. B 92, 041115(R) (2015)]. A cheaper one-shot variant can be achieved with <b>gwgamma</b>=-6 using only the head of the kernel.
+</p>
+<p>
+<b>gwgamma</b>=-8 uses the RPA bootstrap-like kernel (one-shot) [Phys. Rev.  Lett. 115, 137402 (2015), ibid. 114, 146402 (2015)].
+</p>
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="gwls_band_index">gwls_band_index</a></font>
+<br><font id="mnemonics">Mnemonics: GWLS BAND INDEX</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_GWls.html">GWls</a>.</font>
+<br><font id="smalltext">Rarely used: [2/907] in abinit tests, [0/136] in tuto abinit tests. Test list: {paral:[<a href="../../tests/paral/Input/t77.in">77</a>],v67mbpt:[<a href="../../tests/v67mbpt/Input/t15.in">15</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 1</font>
+<br><br><font id="requires">
+Only relevant if <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>==66
+</font>
+<br><font id="text">
+<p>
+<p>
+Governs the DFT eigenstate |e> in which the self-energy will be evaluated, as shown in eq. (7) of  Phys. Rev. B 91, 125120 (2015).
+That is, it is the state to be corrected in the G0W0 scheme.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="gwls_correlation">gwls_correlation</a></font>
+<br><font id="mnemonics">Mnemonics: GWLS CORRELATION</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_GWls.html">GWls</a>.</font>
+<br><font id="smalltext">Rarely used: [1/907] in abinit tests, [0/136] in tuto abinit tests. Test list: {v67mbpt:[<a href="../../tests/v67mbpt/Input/t15.in">15</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 3</font>
+<br><br><font id="requires">
+Only relevant if <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>==66
+</font>
+<br><font id="text">
+<p>
+<p>
+Governs the use of a dielectric model (as explained in section V of Phys. Rev. B 91, 125120 (2015).
+and the use of the Lanczos scheme to solve eqs. (30) and (35) of the same reference at all external <a href="../../input_variables/generated_files/varset_gw.html#gw_freqsp">gw_freqsp</a> and integration (as generated from <a href="../../input_variables/generated_files/varset_gw.html#gwls_npt_gauss_quad">gwls_npt_gauss_quad</a>) frequencies.
+The different choices are:
+<ul>
+<li> <b>gwls_correlation</b> == 1 : GWLS calculation WITH the dielectric model and WITHOUT the shift Lanczos technique, </li>
+<li> <b>gwls_correlation</b> == 2 : GWLS calculation WITHOUT the dielectric model and WITHOUT the shift Lanczos technique, </li>
+<li> <b>gwls_correlation</b> == 3 : GWLS calculation WITH the dielectric model and WITH the shift Lanczos technique, </li>
+<li> <b>gwls_correlation</b> == 4 : GWLS calculation WITHOUT the dielectric model and WITH the shift Lanczos technique, </li>
+<li> <b>gwls_correlation</b> == 5 : Not a GWLS calculation; just calculate and print the eigenvalues of the (static) dielectric matrix (for debugging purposes). </li>
+</ul>
+</p>
+<p>
+The default, (<b>gwls_correlation</b> == 3), is the most performant option and should be kept by the user.
+Option 1, 2 and 5 are deprecated and will be removed.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="gwls_diel_model">gwls_diel_model</a></font>
+<br><font id="mnemonics">Mnemonics: GWLS dielectric model</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_GWls.html">GWls</a>.</font>
+<br><font id="smalltext">Rarely used: [1/907] in abinit tests, [0/136] in tuto abinit tests. Test list: {v67mbpt:[<a href="../../tests/v67mbpt/Input/t15.in">15</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 2</font>
+<br><br><font id="requires">
+Only relevant if <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>==66
+</font>
+<br><font id="text">
+<p>
+Not used yet.
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="gwls_exchange">gwls_exchange</a></font>
+<br><font id="mnemonics">Mnemonics: GWLS exact EXCHANGE</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_GWls.html">GWls</a>.</font>
+<br><font id="smalltext">Rarely used: [1/907] in abinit tests, [0/136] in tuto abinit tests. Test list: {v67mbpt:[<a href="../../tests/v67mbpt/Input/t15.in">15</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 1</font>
+<br><br><font id="requires">
+Only relevant if <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>==66
+</font>
+<br><font id="text">
+<p>
+<p>
+Governs whether the exact exchange for the state to be corrected (<a href="../../input_variables/generated_files/varset_gw.html#gwls_band_index">gwls_band_index</a>) is calculated (<b>gwls_exchange</b>==1) or not (<b>gwls_exchange</b>==0).
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="gwls_first_seed">gwls_first_seed</a></font>
+<br><font id="mnemonics">Mnemonics: GWLS FIRST SEED vector</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_GWls.html">GWls</a>.</font>
+<br><font id="smalltext">Rarely used: [1/907] in abinit tests, [0/136] in tuto abinit tests. Test list: {v67mbpt:[<a href="../../tests/v67mbpt/Input/t15.in">15</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is <a href="../../input_variables/generated_files/varset_gw.html#gwls_band_index">gwls_band_index</a></font>
+<br><br><font id="requires">
+Only relevant if <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>==66
+</font>
+<br><font id="text">
+<p>
+<p>
+This variable sets the band index to be used to generate the first seed vector to be used in the construction of the Lanczos basis for the (static) dielectric matrix in a GWLS calculation.
+See section IV of  Phys. Rev. B 91, 125120 (2015).
+Together with <a href="../../input_variables/generated_files/varset_gw.html#gwls_nseeds">gwls_nseeds</a>, defines the seeds for the Lanczos procedure.
+That is, the states associated to band index <b>gwls_first_seed</b> to <b>gwls_first_seed</b>+<a href="../../input_variables/generated_files/varset_gw.html#gwls_nseeds">gwls_nseeds</a>-1 are used to generate the seed vectors.
+</p>
+<p>
+The default <b>gwls_first_seed</b>==<a href="../../input_variables/generated_files/varset_gw.html#gwls_band_index">gwls_band_index</a> and <a href="../../input_variables/generated_files/varset_gw.html#gwls_nseeds">gwls_nseeds</a>==1 has been thoroughly tested and seems to be the most performant.
+Users should therefore keep the default value.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="gwls_kmax_analytic">gwls_kmax_analytic</a></font>
+<br><font id="mnemonics">Mnemonics: GWLS KMAX for the ANALYTIC term</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_GWls.html">GWls</a>.</font>
+<br><font id="smalltext">Rarely used: [1/907] in abinit tests, [0/136] in tuto abinit tests. Test list: {v67mbpt:[<a href="../../tests/v67mbpt/Input/t15.in">15</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 8</font>
+<br><br><font id="requires">
+Only relevant if <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>==66
+</font>
+<br><font id="text">
+<p>
+<p>
+Governs the number of iterations to be done in the shift Lanczos solution of eq. (35) of Phys. Rev. B 91, 125120 (2015) to solve it at all external frequencies requested by the user (<a href="../../input_variables/generated_files/varset_gw.html#gw_freqsp">gw_freqsp</a>).
+The default value is converged to a few 10s of meV for all molecules studied so far.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="gwls_kmax_complement">gwls_kmax_complement</a></font>
+<br><font id="mnemonics">Mnemonics: GWLS KMAX for the COMPLEMENT space.</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_GWls.html">GWls</a>.</font>
+<br><font id="smalltext">Rarely used: [2/907] in abinit tests, [0/136] in tuto abinit tests. Test list: {paral:[<a href="../../tests/paral/Input/t77.in">77</a>],v67mbpt:[<a href="../../tests/v67mbpt/Input/t15.in">15</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 1</font>
+<br><br><font id="requires">
+Only relevant if <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>==66
+</font>
+<br><font id="text">
+<p>
+<p>
+The G0W0 formalism involves the calculation of a summation conceptually linked to the trace of the dielectric matrix (see eq. (38)
+of  Phys. Rev. B 91, 125120 (2015).
+Since the eigenvalues spectrum of the dielectric matrix of formed by a few large discrete eigenvalues and an integrable divergence in the density of eigenvalues around 0, it is expensive to sample accurately this divergence using the exact dielectric operator.
+It this becomes interesting to calculate the 'trace' of the 'exact - model' dielectric matrix in a small basis and add it to the 'trace' of the 'model' dielectric matrix obtained in a large bais.
+In the context where the model dielectric matrix is used in the calculations, <a href="../../input_variables/generated_files/varset_gw.html#gwls_stern_kmax">gwls_stern_kmax</a> determines the size of the 'small' basis and <b>gwls_kmax_complement</b> determines the size of the 'large' basis.
+</p>
+<p>
+For more information on the exact role of these bases and on the model dielectric operator used, see section V of  Phys. Rev. B 91, 125120 (2015).
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="gwls_kmax_numeric">gwls_kmax_numeric</a></font>
+<br><font id="mnemonics">Mnemonics: GWLS KMAX for the NUMERIC term</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_GWls.html">GWls</a>.</font>
+<br><font id="smalltext">Rarely used: [1/907] in abinit tests, [0/136] in tuto abinit tests. Test list: {v67mbpt:[<a href="../../tests/v67mbpt/Input/t15.in">15</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 16</font>
+<br><br><font id="requires">
+Only relevant if <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>==66
+</font>
+<br><font id="text">
+<p>
+<p>
+Governs the number of iterations to be done in the shift Lanczos solution of eq. (30) of  Phys. Rev. B 91, 125120 (2015) to solve it simultaneously at all integration frequencies (generated automatically by the number of points <a href="../../input_variables/generated_files/varset_gw.html#gwls_npt_gauss_quad">gwls_npt_gauss_quad</a> to use in the gaussian quadrature) and all external frequencies requested by the user (<a href="../../input_variables/generated_files/varset_gw.html#gw_freqsp">gw_freqsp</a>).
+The default value is converged to a few 10s of meV for all molecules studied so far.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="gwls_kmax_poles">gwls_kmax_poles</a></font>
+<br><font id="mnemonics">Mnemonics: GWLS KMAX for the calculation of the POLES residue</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_GWls.html">GWls</a>.</font>
+<br><font id="smalltext">Rarely used: [1/907] in abinit tests, [0/136] in tuto abinit tests. Test list: {v67mbpt:[<a href="../../tests/v67mbpt/Input/t15.in">15</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 4</font>
+<br><br><font id="requires">
+Only relevant if <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>==66
+</font>
+<br><font id="text">
+<p>
+<p>
+The contour deformation technique, in the G0W0 context, will involve the calculation of pole residues associated to states lying between the one corrected (<a href="../../input_variables/generated_files/varset_gw.html#gwls_band_index">gwls_band_index</a>) and the fermi level.
+These residues take the form of a matrix element of the inverse dielectric matrix at a real frequency (see eq. (11) of Phys. Rev. B 91, 125120 (2015)).
+Therefore, the dielectric matrix must be constructed in some basis at these frequencies and inverted to calculate the matrix element.
+The present input variable sets the size of the Lanczos basis to be constructed for this purpose.
+The default value has proven to be very robust for many molecular systems and should therefore be left to the default value by the user.
+</p>
+<p>
+For more information on the Lanczos basis constructed for the calculation of the residues, see section IV of Phys. Rev. B 91, 125120 (2015).
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="gwls_list_proj_freq">gwls_list_proj_freq</a></font>
+<br><font id="mnemonics">Mnemonics: GWLS LIST of the PROJection FREQuencies</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_GWls.html">GWls</a>.</font>
+<br><font id="smalltext">Rarely used: [1/907] in abinit tests, [0/136] in tuto abinit tests. Test list: {v67mbpt:[<a href="../../tests/v67mbpt/Input/t15.in">15</a>]}.</font>
+<br><font id="vartype">Variable type: real(<a href="../../input_variables/generated_files/varset_gw.html#gwls_n_proj_freq">gwls_n_proj_freq</a>)</font>
+<br><font id="default">Default is *0.0</font>
+<br><br><font id="requires">
+Only relevant if <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>==66
+</font>
+<br><font id="text">
+<p>
+This variable sets the frequencies to be used to construct the basis in which the Hamiltonian is projected to accelerate the solution of the Sternheimer equations involved by the construction of the dielectric matrix at finite frequencies.
+See section VI of Phys. Rev. B 91, 125120 (2015).
+For most cases, since the frequencies \Infty and (if <a href="../../input_variables/generated_files/varset_gw.html#gwls_recycle">gwls_recycle</a>>0) 0.0 are used at no computational cost, <a href="../../input_variables/generated_files/varset_gw.html#gwls_n_proj_freq">gwls_n_proj_freq</a>==0 (which means no ADDITIONAL frequency is to be used) is fine and no frequencies need to be picked up.
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="gwls_model_parameter">gwls_model_parameter</a></font>
+<br><font id="mnemonics">Mnemonics: GWLS MODEL PARAMETER</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#ENERGY">ENERGY</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_GWls.html">GWls</a>.</font>
+<br><font id="smalltext">Rarely used: [1/907] in abinit tests, [0/136] in tuto abinit tests. Test list: {v67mbpt:[<a href="../../tests/v67mbpt/Input/t15.in">15</a>]}.</font>
+<br><font id="vartype">Variable type: real</font>
+<br><font id="default">Default is 1.0</font>
+<br><br><font id="requires">
+Only relevant if <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>==66
+</font>
+<br><font id="text">
+<p>
+<p>
+This is the width of the lorentzian, in Ha, used to model the frequency dependence of the dielectric matrix in the GWLS calculation
+(see eqs. (12), (13), (14), (15), (16) and (34) of  Phys. Rev. B 91, 125120 (2015)).
+More precisely, this parameter is the value of \alpha used in eq. (34).
+This model is then used to separate the integration over frequencies into a 'model' part (second term of eq. (12)) and a 'exact - model' part (first term of eq. (12)).
+Since the 'model' part can be integrated analytically (see eqs. (15), (16) and (34)), only the the 'exact - model' part needs to be integrated numerically.
+</p>
+<p>
+The only effect of this model is therefore to alleviate the numerical cost of the integration over frequencies in the G0W0 calculation.
+The value of the associated parameter has thus an impact on the convergence rate of the GWLS calculation with respect to the number of frequencies of integration (<a href="../../input_variables/generated_files/varset_gw.html#gwls_npt_gauss_quad">gwls_npt_gauss_quad</a>), but no impact on the converged result of the GWLS calculation.
+Typically, the default (<b>gwls_model_parameter</b>==1.0) is optimal.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="gwls_n_proj_freq">gwls_n_proj_freq</a></font>
+<br><font id="mnemonics">Mnemonics: GWLS Number of PROJection FREQuencies</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_GWls.html">GWls</a>.</font>
+<br><font id="smalltext">Rarely used: [1/907] in abinit tests, [0/136] in tuto abinit tests. Test list: {v67mbpt:[<a href="../../tests/v67mbpt/Input/t15.in">15</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><br><font id="requires">
+Only relevant if <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>==66
+</font>
+<br><font id="text">
+<p>
+This variable sets the number of frequencies, on top of \Infty and (if <a href="../../input_variables/generated_files/varset_gw.html#gwls_recycle">gwls_recycle</a>>0) 0.0, to be used for the construction of the basis in which the hamiltonian is projected to accelerate the solution of the Sternheimer equations involved in the construction of the dielectric matrix at finite frequencies.
+See section VI of  Phys. Rev. B 91, 125120 (2015).
+For most cases, the default (<b>gwls_n_proj_freq</b>==0) is fine.
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="gwls_npt_gauss_quad">gwls_npt_gauss_quad</a></font>
+<br><font id="mnemonics">Mnemonics: GWLS Number of PoinTs to use for the GAUSSian QUADrature </font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_GWls.html">GWls</a>.</font>
+<br><font id="smalltext">Rarely used: [1/907] in abinit tests, [0/136] in tuto abinit tests. Test list: {v67mbpt:[<a href="../../tests/v67mbpt/Input/t15.in">15</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 10</font>
+<br><br><font id="requires">
+Only relevant if <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>==66
+</font>
+<br><font id="text">
+<p>
+This variable defines the number of points used for the numerical integration of the self-energy over frequencies in GWLS computations
+(see eq. (12) of  Phys. Rev. B 91, 125120 (2015)).
+The default is fine for most cases.
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="gwls_nseeds">gwls_nseeds</a></font>
+<br><font id="mnemonics">Mnemonics: GWLS Number of SEED vectorS</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_GWls.html">GWls</a>.</font>
+<br><font id="smalltext">Rarely used: [1/907] in abinit tests, [0/136] in tuto abinit tests. Test list: {v67mbpt:[<a href="../../tests/v67mbpt/Input/t15.in">15</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 1</font>
+<br><br><font id="requires">
+Only relevant if <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>==66
+</font>
+<br><font id="text">
+<p>
+This variable sets the number of seed vectors to be used in the construction of the Lanczos basis for the (static) dielectric matrix in a GWLS calculation.
+See section IV of  Phys. Rev. B 91, 125120 (2015).
+Only <b>gwls_nseeds</b>==1 has been tested for now and users should keep this value.
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="gwls_print_debug">gwls_print_debug</a></font>
+<br><font id="mnemonics">Mnemonics: GWLS PRINT level for DEBUGging</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_GWls.html">GWls</a>.</font>
+<br><font id="smalltext">Rarely used: [1/907] in abinit tests, [0/136] in tuto abinit tests. Test list: {v67mbpt:[<a href="../../tests/v67mbpt/Input/t15.in">15</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><br><font id="requires">
+Only relevant if <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>==66
+</font>
+<br><font id="text">
+<p>
+Influences the level of verbosity for debugging purposes in a GWLS calculation. Users should keep its value at the default.
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="gwls_recycle">gwls_recycle</a></font>
+<br><font id="mnemonics">Mnemonics: GWLS RECYCLE</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_GWls.html">GWls</a>.</font>
+<br><font id="smalltext">Rarely used: [2/907] in abinit tests, [0/136] in tuto abinit tests. Test list: {paral:[<a href="../../tests/paral/Input/t77.in">77</a>],v67mbpt:[<a href="../../tests/v67mbpt/Input/t15.in">15</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 2</font>
+<br><br><font id="requires">
+Only relevant if <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>==66
+</font>
+<br><font id="text">
+<p>
+<p>
+This variable let the user choose if and how he wants to recycle the solutions of the Sternheimer equations involved in the construction of the static dielectric matrix.
+<ul>
+<li> <b>gwls_recycle</b>==0 : No recycling of the solutions </li>
+<li> <b>gwls_recycle</b>==1 : Recycle the solutions. To do so, store them in RAM. </li>
+<li> <b>gwls_recycle</b>==2 : Recycle the solutions. To do so, store them on disk. </li>
+</ul>
+If the user choose to recycle the solutions, they are used to construct the basis in which the hamiltonian is projected for the solution of the Sternheimer equations involved by the calculation of the dielectric matrix at finite frequencies.
+The other solutions used will be those at \omega \to \Infty (alwyas used) and those at \omega=<a href="../../input_variables/generated_files/varset_gw.html#gwls_list_proj_freq">gwls_list_proj_freq</a>.
+For more information of the basis constructed, see section IV of  Phys. Rev. B 91, 125120 (2015).
+</p>
+<p>
+It is important to note that the solutions rapidly take much space to store.
+Therefore, it is often not possible to store them in RAM in production calculations, yet still desirable to retain them.
+This is when it becomes interesting to store them on disk.
+It is particularly efficient to choose the path of the file to be on disk space local to the processor in large MPI calculations, since each processor need only his own solutions in the construction of the basis.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="gwls_stern_kmax">gwls_stern_kmax</a></font>
+<br><font id="mnemonics">Mnemonics: GWLS Kmax</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_GWls.html">GWls</a>.</font>
+<br><font id="smalltext">Rarely used: [2/907] in abinit tests, [0/136] in tuto abinit tests. Test list: {paral:[<a href="../../tests/paral/Input/t77.in">77</a>],v67mbpt:[<a href="../../tests/v67mbpt/Input/t15.in">15</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 1</font>
+<br><br><font id="requires">
+Only relevant if <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>==66
+</font>
+<br><font id="text">
+<p>
+This variable sets the dimension of the dielectric matrix used in a GWLS calculation (see section IV of  Phys. Rev. B 91, 125120 (2015)).
+Typically converged at a value of a few hundreds to a few thousands for a convergence criterion of 50meV on the  eigenenergies.
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="gwmem">gwmem</a></font>
+<br><font id="mnemonics">Mnemonics: GW MEMory</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topics: <a href="../../topics/generated_files/topic_Susceptibility.html">Susceptibility</a>, <a href="../../topics/generated_files/topic_SelfEnergy.html">SelfEnergy</a>.</font>
+<br><font id="smalltext">Rarely used: [5/907] in abinit tests, [0/136] in tuto abinit tests. Test list: {paral:[<a href="../../tests/paral/Input/t75.in">75</a>],v5:[<a href="../../tests/v5/Input/t65.in">65</a>,<a href="../../tests/v5/Input/t70.in">70</a>],v67mbpt:[<a href="../../tests/v67mbpt/Input/t11.in">11</a>,<a href="../../tests/v67mbpt/Input/t22.in">22</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 11</font>
+<br><br><font id="requires">
+Only relevant if <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a> in [3,4]
+</font>
+<br><font id="text">
+<p>
+<p>
+ <b>gwmem</b> governs the memory strategy during a screening and/or a sigma run.
+ <ul>
+  <li>
+   <b>gwmem</b> = 1x , the screening matrix are read for all q-vectors and stored in the memory.
+  </li>
+  <li>
+   <b>gwmem</b> = 0x , the screening matrix are read just a q-vector after another.
+   <br />
+  </li>
+  <li>
+   <b>gwmem</b> = x1 , the real-space wavefunctions are stored in the memory.
+  </li>
+  <li>
+   <b>gwmem</b> = x0 , the real-space wavefunctions are not stored, but rather recalculated on-fly each abinit needs them using FFTs.
+  </li>
+ </ul>
+ The default is <b>gwmem</b> = 11, which is the fastest, but also the most memory consuming.
+When experiencing memory shortage, one should try <b>gwmem</b> = 0.
+The first digit is only meaningful when performing sigma calculations.
+</p>
+<p>
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="gwrpacorr">gwrpacorr</a></font>
+<br><font id="mnemonics">Mnemonics: GW RPA CORRelation energy</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_RPACorrEn.html">RPACorrEn</a>.</font>
+<br><font id="smalltext">Rarely used: [1/907] in abinit tests, [0/136] in tuto abinit tests. Test list: {v67mbpt:[<a href="../../tests/v67mbpt/Input/t19.in">19</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><br><font id="requires">
+Only relevant if <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>==3 and <a href="../../input_variables/generated_files/varset_gw.html#gwcalctyp">gwcalctyp</a> in [1,11,21]
+</font>
+<br><font id="text">
+<p>
+<p>
+ <b>gwrpacorr</b> governs the calculation of the RPA correlation energy.
+ <ul>
+  <li>
+   <b>gwrpacorr</b> = 0, no RPA correlation energy is calculated
+  </li>
+  <li>
+   <b>gwrpacorr</b> = 1, the RPA correlation energy is calculated using an exact integration over the coupling constant: it requires one diagonalization of the polarizability matrix
+  </li>
+  <li>
+   <b>gwrpacorr</b> =
+   <i>
+    n
+   </i>
+   &gt; 1, the RPA correlation energy is calculated using
+   <i>
+    n
+   </i>
+   values for the coupling constant: it requires
+   <i>
+    n
+   </i>
+   inversions of the polarizability matrix
+  </li>
+ </ul>
+</p>
+<p>
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="icutcoul">icutcoul</a></font>
+<br><font id="mnemonics">Mnemonics: Integer that governs the CUT-off for COULomb interaction</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topics: <a href="../../topics/generated_files/topic_GWls.html">GWls</a>, <a href="../../topics/generated_files/topic_Susceptibility.html">Susceptibility</a>, <a href="../../topics/generated_files/topic_Coulomb.html">Coulomb</a>, <a href="../../topics/generated_files/topic_SelfEnergy.html">SelfEnergy</a>.</font>
+<br><font id="smalltext">Moderately used: [55/907] in abinit tests, [6/136] in tuto abinit tests. Tuto test list: {tutoparal:[<a href="../../tests/tutoparal/Input/tmbt_4.in">mbt_4</a>],tutorial:[<a href="../../tests/tutorial/Input/tbs_2.in">bs_2</a>,<a href="../../tests/tutorial/Input/tbs_3.in">bs_3</a>,<a href="../../tests/tutorial/Input/tbs_4.in">bs_4</a>,<a href="../../tests/tutorial/Input/tgw1_8.in">gw1_8</a>,<a href="../../tests/tutorial/Input/tgw2_4.in">gw2_4</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 6</font>
+<br><br><font id="requires">
+Only relevant if <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a> in [3,4]
+</font>
+<br><font id="text">
+<p>
+<p>
+ Many-body calculations for isolated systems present a slow convergence with respect to the size of
+the supercell due to the long ranged Coulomb interaction and the high degree of non-locality of the
+operators involved. A similar issue also occurs in fully periodic systems due to the presence
+of the integrable Coulomb singularity at G=0 that hinders the convergence with respect to the number
+of q-points used to sample the Brillouin zone.
+The convergence can be accelerated by replacing the true bare Coulomb interaction with other
+expressions.
+<p>
+<b>icutcoul</b> defines the particular expression to be used for the Coulomb term in reciprocal
+space. The choice of <b>icutcoul</b>  depends on the dimensionality of the system.
+Possible values of <b>icutcoul</b> are from 0 to 6. The corresponding influential variables are <a href="../../input_variables/generated_files/varset_gw.html#vcutgeo">vcutgeo</a>
+and <a href="../../input_variables/generated_files/varset_gw.html#rcut">rcut</a>.
+ <ul>
+  <li>
+   0 =&gt; sphere (molecules but also 3D-crystals)
+  </li>
+  <li>
+   1 =&gt; cylinder (nanowires, nanotubes)
+  </li>
+  <li>
+   2 =&gt; surface
+  </li>
+  <li>
+   3 =&gt; 3D crystal (no cut-off, integration in a spherical mini-Brillouin Zone, legacy value)
+  </li>
+  <li>
+   4 =&gt; ERF, long-range only Coulomb interaction
+  </li>
+  <li>
+   5 =&gt; ERFC, short-range only Coulomb interaction (e.g. as used in the HSE functional)
+  </li>
+  <li>
+   6 =&gt; auxiliary function integration for 3D systems from P. Carrier
+   <i>
+    et al.
+   </i>
+   , PRB
+   <b>
+    75
+   </b>
+   ,205126 (2007).
+  </li>
+  <li>
+   7 =&gt; auxiliary function for 3D systems of Gygi and Baldereschi [cf. Phys. Rev. B <b>34</b>, 4405 (1986) and Massidda et al., ibid. <b>48</b>, 5058 (1993)].
+  </li>
+ </ul>
+ Note that Spencer and Alavi PRB <b>77</b>, 193110 (2008) showed that the spherical cutoff can efficiently be used also for 3D systems.
+In the latter case, use a negative value for the cutoff radius of the sphere (<a href="../../input_variables/generated_files/varset_gw.html#rcut">rcut</a>&lt;0),
+which is automatically calculated so that the volume enclosed in the sphere is equal to the volume of the solid.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="inclvkb">inclvkb</a></font>
+<br><font id="mnemonics">Mnemonics: INCLude VKB</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topics: <a href="../../topics/generated_files/topic_Susceptibility.html">Susceptibility</a>, <a href="../../topics/generated_files/topic_BSE.html">BSE</a>.</font>
+<br><font id="smalltext">Moderately used: [49/907] in abinit tests, [7/136] in tuto abinit tests. Tuto test list: {tutoparal:[<a href="../../tests/tutoparal/Input/tmbt_2.in">mbt_2</a>,<a href="../../tests/tutoparal/Input/tmbt_3.in">mbt_3</a>,<a href="../../tests/tutoparal/Input/tmbt_5.in">mbt_5</a>],tutorial:[<a href="../../tests/tutorial/Input/tbs_1.in">bs_1</a>,<a href="../../tests/tutorial/Input/tbs_2.in">bs_2</a>,<a href="../../tests/tutorial/Input/tbs_3.in">bs_3</a>,<a href="../../tests/tutorial/Input/tbs_4.in">bs_4</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 2</font>
+<br><br><font id="requires">
+Only relevant if <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a> in [3,99]
+</font>
+<br><font id="text">
+<p>
+<p>
+Possible values of <b>inclvkb</b> are 0,1,2.
+If <b>inclvkb</b> is 1 or 2, the commutator of the non-local part of the pseudopotential with the position operator is correctly included in the q =&gt; 0 contribution.
+This is unfortunately time-consuming and in particular when the old algorithm implemented by inclvkb==1 is used (inclvkb=2 is the recommended option).
+When <b>inclvkb</b> is 0, this contribution is incorrectly
+omitted, but the computation is much faster.
+</p>
+<p>
+ The importance of this contribution depends on the number of k points. Turning off <b>inclvkb</b> is let to the choice of the user.
+</p>
+<p>
+In general, the use of <b>inclvkb</b>=0 is fine for GW calculations in crystalline systems provided that the k-point sampling is sufficiently converged.
+<p>
+The use of <b>inclvkb</b>=2 is strongly recommended for the calculation of optical properties.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="kptgw">kptgw</a></font>
+<br><font id="mnemonics">Mnemonics: K-PoinTs for GW calculations</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_SelfEnergy.html">SelfEnergy</a>.</font>
+<br><font id="smalltext">Moderately used: [52/907] in abinit tests, [11/136] in tuto abinit tests. Too many tests to report (>10).</font>
+<br><font id="vartype">Variable type: real(3,<a href="../../input_variables/generated_files/varset_gw.html#nkptgw">nkptgw</a>)</font>
+<br><font id="default">Default is *0.0</font>
+<br><br><font id="requires">
+Only relevant if <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>==4
+</font>
+<br><font id="text">
+<p>
+<p>
+ For each k-point with number igwpt in the range (1:<a href="../../input_variables/generated_files/varset_gw.html#nkptgw">nkptgw</a>),
+<b>kptgw</b>(1,igwpt)
+ is the reduced coordinate of the k-point where GW corrections are required.
+while <a href="../../input_variables/generated_files/varset_gw.html#bdgw">bdgw</a> (1:2,igwpt) specifies the range of bands to be considered.
+</p>
+<p>
+ At present, not all k-points are possible. Only those corresponding to the k-point
+grid defined with the same repetition parameters (
+<a href="../../input_variables/generated_files/varset_gstate.html#kptrlatt">kptrlatt</a>, or <a href="../../input_variables/generated_files/varset_basic.html#ngkpt">ngkpt</a>
+ ) than the GS one, but WITHOUT any shift, are allowed.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="mbpt_sciss">mbpt_sciss</a></font>
+<br><font id="mnemonics">Mnemonics: Many Body Perturbation Theory SCISSor operator</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#ENERGY">ENERGY</a></font>
+<br><font id="characteristic">Mentioned in topics: <a href="../../topics/generated_files/topic_GW.html">GW</a>, <a href="../../topics/generated_files/topic_Susceptibility.html">Susceptibility</a>, <a href="../../topics/generated_files/topic_SelfEnergy.html">SelfEnergy</a>.</font>
+<br><font id="smalltext">Moderately used: [17/907] in abinit tests, [4/136] in tuto abinit tests. Tuto test list: {tutoparal:[<a href="../../tests/tutoparal/Input/tmbt_5.in">mbt_5</a>],tutorial:[<a href="../../tests/tutorial/Input/tbs_2.in">bs_2</a>,<a href="../../tests/tutorial/Input/tbs_3.in">bs_3</a>,<a href="../../tests/tutorial/Input/tbs_4.in">bs_4</a>]}.</font>
+<br><font id="vartype">Variable type: real</font>
+<br><font id="default">Default is 0.0</font>
+<br><br><font id="requires">
+Only relevant if <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a> in [3,4,99]
+</font>
+<br><font id="text">
+<p>
+<p>
+ The Scissors operator energy added to the conductions states.
+In some cases, it mimics a second iteration self-consistent GW calculation.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="mdf_epsinf">mdf_epsinf</a></font>
+<br><font id="mnemonics">Mnemonics: Model Dielectric Function, EPSilon INFinity</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_BSE.html">BSE</a>.</font>
+<br><font id="smalltext">Rarely used: [9/907] in abinit tests, [0/136] in tuto abinit tests. Test list: {paral:[<a href="../../tests/paral/Input/t76.in">76</a>],v67mbpt:[<a href="../../tests/v67mbpt/Input/t11.in">11</a>,<a href="../../tests/v67mbpt/Input/t16.in">16</a>,<a href="../../tests/v67mbpt/Input/t29.in">29</a>,<a href="../../tests/v67mbpt/Input/t31.in">31</a>,<a href="../../tests/v67mbpt/Input/t32.in">32</a>,<a href="../../tests/v67mbpt/Input/t33.in">33</a>,<a href="../../tests/v67mbpt/Input/t34.in">34</a>,<a href="../../tests/v67mbpt/Input/t35.in">35</a>]}.</font>
+<br><font id="vartype">Variable type: real</font>
+<br><font id="default">Default is 0.0</font>
+<br><br><font id="requires">
+Only relevant if <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>==99 and <a href="../../input_variables/generated_files/varset_bse.html#bs_coulomb_term">bs_coulomb_term</a> in [20,21] (Bethe-Salpeter calculas with a model dielectric function
+</font>
+<br><font id="text">
+<p>
+<p>
+ <b>mdf_epsinf</b> specifies the value of the macroscopic dielectric function used
+to model the screening function (see Solid State Commun. <b>84</b>, 765 (1992)).
+The proper spatial symmetry of the screening W(r,r_prime) is enforced using Eq. (7) of Phys. Rev. B <b>37</b>, (1988)
+ <br />
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="nbandkss">nbandkss</a></font>
+<br><font id="mnemonics">Mnemonics: Number of BANDs in the KSS file</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topics: <a href="../../topics/generated_files/topic_GW.html">GW</a>, <a href="../../topics/generated_files/topic_Susceptibility.html">Susceptibility</a>, <a href="../../topics/generated_files/topic_SelfEnergy.html">SelfEnergy</a>.</font>
+<br><font id="smalltext">Moderately used: [12/907] in abinit tests, [2/136] in tuto abinit tests. Tuto test list: {tutoparal:[<a href="../../tests/tutoparal/Input/tdmft_1.in">dmft_1</a>,<a href="../../tests/tutoparal/Input/tucrpa_1.in">ucrpa_1</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p>
+ This input variable is used for the preparation of a GW calculation :
+it is used in a GS run (where <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>=0) to generate a _KSS file.
+In this run, <b>nbandkss</b> should be non-zero.
+The generated _KSS file can be subsequently used to calculate the irreducible polarizabilty
+$\chi^{(0)}_{KS}$ using <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>=3
+or to calculate GW corrections setting <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>=4.
+</p>
+<p>
+ <ul>
+  <li>
+   If <b>nbandkss</b>=0, no _KSS file is created
+  </li>
+  <li>
+   If <b>nbandkss</b>=-1, all the available eigenstates (energies and eigenfunctions) are stored in the
+abo_KSS file at the end of the ground state calculation. The number of states is forced to be
+the same for all k-points : it will be the minimum of the number of plane waves over all k-points.
+  </li>
+  <li>
+   If <b>nbandkss</b> is greater than 0, abinit stores (about) <b>nbandkss</b> eigenstates in the abo_KSS file.
+This number of states is forced to be the same for all k-points.
+  </li>
+ </ul>
+</p>
+<p>
+ See <a href="../../input_variables/generated_files/varset_gw.html#npwkss">npwkss</a> for the selection of the number of the planewave components of
+the eigenstates to be stored.
+ <br />
+ The input variable <a href="../../input_variables/generated_files/varset_dev.html#iomode">iomode</a> can be used
+to read and write KSS files according to different fileformat
+(presently only <a href="../../input_variables/generated_files/varset_dev.html#iomode">iomode</a>=0 and 3 are available in the GW part).
+ <br />
+ The precision of the KSS file can be tuned through the input variable <a href="../../input_variables/generated_files/varset_files.html#kssform">kssform</a>.
+ <br />
+ For more details about the format of the abo_KSS file, see the routine outkss.F90.
+</p>
+<p>
+ Very important : for the time being, <a href="../../input_variables/generated_files/varset_dev.html#istwfk">istwfk</a> must be 1 for all the k-points
+in order to generate a _KSS file.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="nfreqim">nfreqim</a></font>
+<br><font id="mnemonics">Mnemonics: Number of FREQuencies along the IMaginary axis</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_FrequencyMeshMBPT.html">FrequencyMeshMBPT</a>.</font>
+<br><font id="smalltext">Moderately used: [24/907] in abinit tests, [3/136] in tuto abinit tests. Tuto test list: {tutoparal:[<a href="../../tests/tutoparal/Input/tmbt_3.in">mbt_3</a>],tutorial:[<a href="../../tests/tutorial/Input/tbs_1.in">bs_1</a>,<a href="../../tests/tutorial/Input/tgw2_2.in">gw2_2</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><br><font id="requires">
+Only relevant if <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>==3 and <a href="../../input_variables/generated_files/varset_gw.html#gwcalctyp">gwcalctyp</a> in [2,12,22,9,19,29]
+</font>
+<br><font id="text">
+<p>
+<p>
+ <b>nfreqim</b> sets the number of pure imaginary frequencies used to calculate
+the dielectric matrix in order to perform the numerical integration of the GW self-energy.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="nfreqmidm">nfreqmidm</a></font>
+<br><font id="mnemonics">Mnemonics: Nth FREQuency Moment of the Imaginary part of the Dielectric Matrix</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_FrequencyMeshMBPT.html">FrequencyMeshMBPT</a>.</font>
+<br><font id="smalltext">Rarely used: [0/907] in abinit tests, [0/136] in tuto abinit tests.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">No default</font>
+<br><br><font id="requires">
+Only relevant if <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>==4
+</font>
+<br><font id="text">
+<p>
+<p>
+ depending on the value of
+ <b>nfreqmidm</b>
+ will calculate the frequency moment of the Dielectric matrix or its inverse,
+
+<ul>
+<li>if <b>nfreqmidm</b> is positive : calculate (nth=<b>nfreqmidm</b>) frequency moment of the Dielectric matrix</li>
+<li>if <b>nfreqmidm</b> is negative : calculate (nth=<b>nfreqmidm</b>) frequency moment of the inverse Dielectric matrix</li>
+<li>if <b>nfreqmidm</b> = 0 : calculate first frequency moment of the full polarizability</li>
+</ul>
+
+see M. Taut, J. Phys. C: Solid State Phys. 18 (1985) 2677-2690.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="nfreqre">nfreqre</a></font>
+<br><font id="mnemonics">Mnemonics: Number of FREQuencies along the REal axis</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_FrequencyMeshMBPT.html">FrequencyMeshMBPT</a>.</font>
+<br><font id="smalltext">Moderately used: [22/907] in abinit tests, [3/136] in tuto abinit tests. Tuto test list: {tutoparal:[<a href="../../tests/tutoparal/Input/tmbt_3.in">mbt_3</a>],tutorial:[<a href="../../tests/tutorial/Input/tbs_1.in">bs_1</a>,<a href="../../tests/tutorial/Input/tgw2_2.in">gw2_2</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><br><font id="requires">
+Only relevant if <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>==3 and <a href="../../input_variables/generated_files/varset_gw.html#gwcalctyp">gwcalctyp</a> in [2,12,22,9,19,29]
+</font>
+<br><font id="text">
+<p>
+<p>
+ <b>nfreqre</b> sets the number of real frequencies used to calculate
+the dielectric matrix in order to perform the numerical integration of the GW self-energy.
+</p>
+<p>
+ It can be used also in case of GW calculations with plasmon-pole models,
+ <i>
+  i.e
+ </i>
+ <a href="../../input_variables/generated_files/varset_gw.html#gwcalctyp">gwcalctyp</a>&lt;10,
+to reduce the number of frequencies used to evaluate the dielectric matrix from the (default) two to
+one frequency (omega=0) by setting <b>nfreqre</b>=1.
+This might be a good idea in case one is planning to use ppmodel&gt;1.
+This will force the calculation of the screening on a single frequency (omega=0) and hence
+reduce memory and disk space requirement.
+The only draw back is that the user will not be able to perform self energy calculation using
+<a href="../../input_variables/generated_files/varset_gw.html#ppmodel">ppmodel</a>=1,
+since in the last case the dielectric matrix calculated on two frequencies is required.
+If the user is not sure which ppmodel to use, then s/he is not advised
+to use this input variable.
+Using the default values, one must be able to get a screening file that can be used with any ppmodel.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="nfreqsp">nfreqsp</a></font>
+<br><font id="mnemonics">Mnemonics: Number of FREQuencies for the SPectral function</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_SelfEnergy.html">SelfEnergy</a>.</font>
+<br><font id="smalltext">Rarely used: [7/907] in abinit tests, [1/136] in tuto abinit tests. Test list: {tutorial:[<a href="../../tests/tutorial/Input/tgw2_4.in">gw2_4</a>],v67mbpt:[<a href="../../tests/v67mbpt/Input/t02.in">02</a>],v7:[<a href="../../tests/v7/Input/t23.in">23</a>,<a href="../../tests/v7/Input/t24.in">24</a>,<a href="../../tests/v7/Input/t25.in">25</a>,<a href="../../tests/v7/Input/t78.in">78</a>,<a href="../../tests/v7/Input/t79.in">79</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><br><font id="requires">
+Only relevant if <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>==4
+</font>
+<br><font id="text">
+<p>
+<p>
+ <b>nfreqsp</b> defines the number of real frequencies used to calculate the spectral function
+of the GW Green's function.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="nkptgw">nkptgw</a></font>
+<br><font id="mnemonics">Mnemonics: Number of K-PoinTs for GW corrections</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_SelfEnergy.html">SelfEnergy</a>.</font>
+<br><font id="smalltext">Moderately used: [57/907] in abinit tests, [11/136] in tuto abinit tests. Too many tests to report (>10).</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><br><font id="requires">
+Only relevant if <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>==4
+</font>
+<br><font id="text">
+<p>
+<p>
+ <b>nkptgw</b> gives the number of k-points for which the GW calculation must be done.
+It is used to dimension <a href="../../input_variables/generated_files/varset_gw.html#kptgw">kptgw</a>
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="nomegasf">nomegasf</a></font>
+<br><font id="mnemonics">Mnemonics: Number of OMEGA to evaluate the Spectral Function</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#ENERGY">ENERGY</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_Susceptibility.html">Susceptibility</a>.</font>
+<br><font id="smalltext">Rarely used: [6/907] in abinit tests, [1/136] in tuto abinit tests. Test list: {libxc:[<a href="../../tests/libxc/Input/t14.in">14</a>],tutoparal:[<a href="../../tests/tutoparal/Input/tmbt_3.in">mbt_3</a>],v5:[<a href="../../tests/v5/Input/t71.in">71</a>],v67mbpt:[<a href="../../tests/v67mbpt/Input/t02.in">02</a>,<a href="../../tests/v67mbpt/Input/t21.in">21</a>,<a href="../../tests/v67mbpt/Input/t37.in">37</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><br><font id="requires">
+Only relevant if <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>==3 and <a href="../../input_variables/generated_files/varset_gw.html#spmeth">spmeth</a>!=0
+</font>
+<br><font id="text">
+<p>
+<p>
+ <b>nomegasf</b> defines the number of real frequencies used to describe the spectral function
+associated to the irreducible polarizability $\chi^{(0)}_{KS}$.
+The frequency mesh will cover the interval between 0 and the maximum (positive) transition
+energy between occupied and empty states.
+The delta function entering the expression defining the spectral function is approximated using two
+different methods according to the value of the <a href="../../input_variables/generated_files/varset_gw.html#spmeth">spmeth</a> input variable.
+</p>
+<p>
+ It is important to notice that an accurate description of the imaginary part of $\chi^{(0)}_{KS}$
+requires an extremely dense frequency mesh. It should be kept in mind, however, that the memory required
+grows fast with the value of <b>nomegasf</b>.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="nomegasi">nomegasi</a></font>
+<br><font id="mnemonics">Mnemonics: Number of OMEGA(S) along the Imaginary axis</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_SelfEnergy.html">SelfEnergy</a>.</font>
+<br><font id="smalltext">Rarely used: [1/907] in abinit tests, [0/136] in tuto abinit tests. Test list: {v67mbpt:[<a href="../../tests/v67mbpt/Input/t02.in">02</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 12</font>
+<br><br><font id="requires">
+Only relevant if <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>==4 and <a href="../../input_variables/generated_files/varset_gw.html#gwcalctyp">gwcalctyp</a>==1
+</font>
+<br><font id="text">
+<p>
+<p>
+ <b>nomegasi</b> defines the number of frequency points used to sample the self-energy along the
+imaginary axis. The frequency mesh is linear and covers the interval between OMEGASIMIN=0.01 Hartree and
+<a href="../../input_variables/generated_files/varset_gw.html#omegasimax">omegasimax</a>.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="nomegasrd">nomegasrd</a></font>
+<br><font id="mnemonics">Mnemonics: Number of OMEGA to evaluate the Sigma Real axis Derivative</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_SelfEnergy.html">SelfEnergy</a>.</font>
+<br><font id="smalltext">Rarely used: [1/907] in abinit tests, [0/136] in tuto abinit tests. Test list: {v67mbpt:[<a href="../../tests/v67mbpt/Input/t01.in">01</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 9</font>
+<br><br><font id="requires">
+Only relevant if <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>==4
+</font>
+<br><font id="text">
+<p>
+<p>
+ The number of real frequencies around the KS energy where the self-energy Sigma is evaluated.
+From these values, the derivative of Sigma at the KS energy is numerically estimated through linear interpolation.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="npvel">npvel</a></font>
+<br><font id="mnemonics">Mnemonics: Number of Particle VELocities</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_RandStopPow.html">RandStopPow</a>.</font>
+<br><font id="smalltext">Rarely used: [1/907] in abinit tests, [0/136] in tuto abinit tests. Test list: {v7:[<a href="../../tests/v7/Input/t16.in">16</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><br><font id="requires">
+Only relevant if <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>==3
+</font>
+<br><font id="text">
+<p>
+<p>
+ In the context of the electronic stopping power of impinging ion in matter,
+<b>npvel</b> sets the number of the ion velocities to be calculated via linear response.
+ <br />
+ When <b>npvel</b>=0, no stopping power calculation is performed.
+ <br />
+ The direction and the velocity maximum are set with the input variable <a href="../../input_variables/generated_files/varset_gw.html#pvelmax">pvelmax</a>.
+Note that the results are output for a Z=1 impinging ion, i.e. a proton.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="npwkss">npwkss</a></font>
+<br><font id="mnemonics">Mnemonics: Number of PlaneWaves in the KSS file</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topics: <a href="../../topics/generated_files/topic_Susceptibility.html">Susceptibility</a>, <a href="../../topics/generated_files/topic_SelfEnergy.html">SelfEnergy</a>.</font>
+<br><font id="smalltext">Rarely used: [0/907] in abinit tests, [0/136] in tuto abinit tests.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p>
+ This input variable is used for the preparation of a GW calculation:
+the GS run (where <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>=1 and
+ <b>
+  nbandkss
+ </b>
+ /=0) should be followed
+with a run where <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>=3.
+Also, if <a href="../../input_variables/generated_files/varset_gw.html#nbandkss">nbandkss</a>=0, no use of <b>npwkss</b>.
+</p>
+<p>
+ <b>npwkss</b> defines the number of planewave components of the Kohn-Sham states
+to build the Hamiltonian, in the routine outkss.F90, and so, the size of the matrix, the size of eigenvectors,
+and the number of available states, to be stored in the abo_KSS file.
+If it is set to 0, then, the planewave basis set defined by the usual Ground State input variable
+<a href="../../input_variables/generated_files/varset_basic.html#ecut">ecut</a> is used to generate the superset of all planewaves used for all k-points.
+Note that this (large) planewave basis is the same for all k-points.
+</p>
+<p>
+ Very important : for the time being, <a href="../../input_variables/generated_files/varset_dev.html#istwfk">istwfk</a> must be 1 for all the k-points.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="nqptdm">nqptdm</a></font>
+<br><font id="mnemonics">Mnemonics: Number of Q-PoinTs for the Dielectric Matrix</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_Susceptibility.html">Susceptibility</a>.</font>
+<br><font id="smalltext">Rarely used: [1/907] in abinit tests, [0/136] in tuto abinit tests. Test list: {v3:[<a href="../../tests/v3/Input/t87.in">87</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><br><font id="requires">
+Only relevant if <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>==3
+</font>
+<br><font id="text">
+<p>
+<p>
+ If <b>nqptdm</b> is equal to 0, the set of q-points for computing the dielectric matrix is
+determined automatically considering all the possible differences between the k-points contained
+in the _KSS file. When <b>nqptdm</b> is non-zero, the list of q points is read from <a href="../../input_variables/generated_files/varset_gw.html#qptdm">qptdm</a>.
+This allows one to split the big calculation of all the dielectric matrices into smaller
+calculations that can be performed independently. The _SCR files generated in different runs
+can be merged thanks to the
+ <b>
+  Mrgscr
+ </b>
+ utility.
+If <b>nqptdm</b> is equal to -1, the code reports the list of q-points in the log file (YAML format) and then stops.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="omegasimax">omegasimax</a></font>
+<br><font id="mnemonics">Mnemonics: OMEGA to evaluate Sigma along the Imaginary axis D: MAXimal value</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#ENERGY">ENERGY</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_SelfEnergy.html">SelfEnergy</a>.</font>
+<br><font id="smalltext">Rarely used: [1/907] in abinit tests, [0/136] in tuto abinit tests. Test list: {v67mbpt:[<a href="../../tests/v67mbpt/Input/t02.in">02</a>]}.</font>
+<br><font id="vartype">Variable type: real</font>
+<br><font id="default">Default is 50 eV</font>
+<br><br><font id="requires">
+Only relevant if <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>==4 and <a href="../../input_variables/generated_files/varset_gw.html#gwcalctyp">gwcalctyp</a>==1
+</font>
+<br><font id="text">
+<p>
+<p>
+ <b>omegasimax</b> defines the maximum frequency along the imaginary the axis.
+In conjunction with <a href="../../input_variables/generated_files/varset_gw.html#nomegasi">nomegasi</a>,
+<b>omegasimax</b> uniquely defines the linear mesh employed to sample the self-energy along the imaginary axis.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="omegasrdmax">omegasrdmax</a></font>
+<br><font id="mnemonics">Mnemonics: OMEGA to evaluate the Sigma Real axis Derivative : MAXimal value</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#ENERGY">ENERGY</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_SelfEnergy.html">SelfEnergy</a>.</font>
+<br><font id="smalltext">Rarely used: [1/907] in abinit tests, [0/136] in tuto abinit tests. Test list: {v67mbpt:[<a href="../../tests/v67mbpt/Input/t01.in">01</a>]}.</font>
+<br><font id="vartype">Variable type: real</font>
+<br><font id="default">Default is 1.0 eV</font>
+<br><br><font id="requires">
+Only relevant if <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>==4
+</font>
+<br><font id="text">
+<p>
+<p>
+ The maximum distance from the KS energy where to evaluate Sigma. Sigma is evaluated at
+[ KS_energy - <b>omegasrdmax</b>, KS_energy + <b>omegasrdmax</b> ] sampled <a href="../../input_variables/generated_files/varset_gw.html#nomegasrd">nomegasrd</a> times.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="ppmfrq">ppmfrq</a></font>
+<br><font id="mnemonics">Mnemonics: Plasmon Pole Model FReQuency</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#ENERGY">ENERGY</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_SelfEnergy.html">SelfEnergy</a>.</font>
+<br><font id="smalltext">Moderately used: [21/907] in abinit tests, [9/136] in tuto abinit tests. Tuto test list: {tutorial:[<a href="../../tests/tutorial/Input/tgw1_1.in">gw1_1</a>,<a href="../../tests/tutorial/Input/tgw1_2.in">gw1_2</a>,<a href="../../tests/tutorial/Input/tgw1_3.in">gw1_3</a>,<a href="../../tests/tutorial/Input/tgw1_4.in">gw1_4</a>,<a href="../../tests/tutorial/Input/tgw1_5.in">gw1_5</a>,<a href="../../tests/tutorial/Input/tgw1_6.in">gw1_6</a>,<a href="../../tests/tutorial/Input/tgw1_7.in">gw1_7</a>,<a href="../../tests/tutorial/Input/tgw1_8.in">gw1_8</a>,<a href="../../tests/tutorial/Input/tgw1_9.in">gw1_9</a>]}.</font>
+<br><font id="vartype">Variable type: real</font>
+<br><font id="default">Default is 0.0 Ha</font>
+<br><br><font id="requires">
+Only relevant if <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a> in [3,4]
+</font>
+<br><font id="text">
+<p>
+<p>
+ <b>
+  In plasmon-pole calculations
+ </b>
+</p>
+<p>
+ Usually only effective if GW corrections are evaluated using the plasmon-pole model of Godby-Needs
+(<a href="../../input_variables/generated_files/varset_gw.html#ppmodel">ppmodel</a>==1).
+ <br />
+ <br />
+ In the present status of the GW code, the convolution in frequency space
+defining the self-energy operator can be evaluated using two different approaches:
+numerical integration and plasmon-pole models.
+ <br />
+ Methods based on the numerical integration (contour deformation, analytic continuation) require
+the knowledge of the screened interaction for several frequencies. These approaches give
+the most accurate results but at the price of an increase in the CPU time required.
+ <br />
+ Alternatively, it is possible to approximate the dynamical behaviour of the screened interaction
+through simple analytical expressions, the so-called plasmon-pole models.
+In the plasmon-pole model proposed by Godby-Needs (<a href="../../input_variables/generated_files/varset_gw.html#ppmodel">ppmodel</a>=1),
+the screening must be available at zero frequency, as well as at another imaginary frequency,
+of the order of the plasmon frequency (the peak in the EELS spectrum).
+This information is used to model the behaviour of the dielectric matrix
+for all frequencies.
+During the calculation of the screening, <b>ppmfrq</b> defines the imaginary frequency where the
+dielectric matrix is evaluated, in addition to the zero frequency.
+During the self-energy run, <b>ppmfrq</b> can be used to define the second frequency to be used
+to calculate the plasmon-pole parameters. This is particularly useful when the
+SCR file contains several frequencies along the imaginary axis.
+In this case the frequency whose value is the closest one to <b>ppmfrq</b> will be selected.
+Note that, if the plasmon-pole approximation is good, then, the
+choice of <b>ppmfrq</b> should have no influence on the final result.
+One should check whether this is the case. In general, the plasmon frequencies of bulk solids
+are of the order of 0.5 Hartree.
+ <br />
+ <br />
+ <b>
+  In Contour Deformation calculations
+ </b>
+</p>
+<p>
+ <b>ppmfrq</b> is here used to
+ <b>
+  override
+ </b>
+ the default value calculated from the average electronic
+density per unit cell. This can affect the distribution of gridpoints along the imaginary and
+real frequency axes. See
+<a href="../../input_variables/generated_files/varset_gw.html#cd_frqim_method">cd_frqim_method</a>, <a href="../../input_variables/generated_files/varset_gw.html#gw_frqim_inzgrid">gw_frqim_inzgrid</a> and <a href="../../input_variables/generated_files/varset_gw.html#gw_frqre_inzgrid">gw_frqre_inzgrid</a> for more details.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="ppmodel">ppmodel</a></font>
+<br><font id="mnemonics">Mnemonics: Plasmon Pole MODEL</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_SelfEnergy.html">SelfEnergy</a>.</font>
+<br><font id="smalltext">Moderately used: [20/907] in abinit tests, [1/136] in tuto abinit tests. Tuto test list: {tutoparal:[<a href="../../tests/tutoparal/Input/tmbt_4.in">mbt_4</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 1</font>
+<br><br><font id="requires">
+Only relevant if <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a> in [3,4]
+</font>
+<br><font id="text">
+<p>
+<p>
+ <ul>
+  <li>
+   <b>ppmodel</b>=1 : PP model of Godby and Needs,
+See Phys Rev Lett 62, 1169 (1989)
+  </li>
+  <li>
+   <b>ppmodel</b>=2 : PP model of Hybertsen and Louie,
+See Phys Rev B 34, 5390 (1986)
+  </li>
+  <li>
+   <b>ppmodel</b>=3 : PP model of  W. von der Linden
+and P. Horsh see Phys Rev B 37, 8351 (1988)
+  </li>
+  <li>
+   <b>ppmodel</b>=4 : PP model of Farid and Engel.
+See Phys Rev B47,15931 (1993)
+  </li>
+  <li>
+   <b>ppmodel</b>=0 : no PP model, numerical integration
+(contour deformation method, see e.g. S. Lebegue  et al. PRB  67, 155208 (2003).)
+  </li>
+ </ul>
+ Please note the difference between <b>ppmodel</b> 1 and <b>ppmodel</b> 2,3,4.
+In the first case (<b>ppmodel</b>=1), the plasmon-pole parameters are determined in order to reproduce
+the behaviour of the dielectric matrix at two calculated frequencies: the static limit (omega=0)
+and the imaginary frequency defined by <a href="../../input_variables/generated_files/varset_gw.html#ppmfrq">ppmfrq</a>.
+In the last three cases, instead, the plasmon-pole parameters are found
+by using the dielectric matrix calculated only at omega=0 and enforcing the so-called f-sum rule.
+See also <a href="../../input_variables/generated_files/varset_gw.html#nfreqre">nfreqre</a>.
+</p>
+<p>
+ Please note also that in the case of <b>ppmodel</b> 4, the plasmon energies are not simple mathematical parameters,
+but rather have a physical meaning (at least the lowest ones).
+Thus the calculated plasmon band structure (plasmon energy vs q vector) is reported in the output file for the
+lowest 10 bands.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="pvelmax">pvelmax</a></font>
+<br><font id="mnemonics">Mnemonics: Particle VELocity MAXimum</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_RandStopPow.html">RandStopPow</a>.</font>
+<br><font id="smalltext">Rarely used: [1/907] in abinit tests, [0/136] in tuto abinit tests. Test list: {v7:[<a href="../../tests/v7/Input/t16.in">16</a>]}.</font>
+<br><font id="vartype">Variable type: real(3)</font>
+<br><font id="default">Default is 3*1.0</font>
+<br><br><font id="requires">
+Only relevant if <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>==3
+</font>
+<br><font id="text">
+<p>
+<p>
+ When <a href="../../input_variables/generated_files/varset_gw.html#npvel">npvel</a> is larger than 0, it performs electronic stopping power calculations
+on a velocity grid along the direction determined by <b>pvelmax</b>.
+ <br />
+ The vector <b>pvelmax</b> defines both the direction and the maximum velocity.
+<b>pvelmax</b> is input in Cartesian coordinates.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="qptdm">qptdm</a></font>
+<br><font id="mnemonics">Mnemonics: Q-PoinTs for the Dielectric Matrix</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_Susceptibility.html">Susceptibility</a>.</font>
+<br><font id="smalltext">Rarely used: [1/907] in abinit tests, [0/136] in tuto abinit tests. Test list: {v3:[<a href="../../tests/v3/Input/t87.in">87</a>]}.</font>
+<br><font id="vartype">Variable type: real(3,<a href="../../input_variables/generated_files/varset_gw.html#nqptdm">nqptdm</a>)</font>
+<br><font id="default">Default is *0.0</font>
+<br><br><font id="requires">
+Only relevant if <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>==3 and <a href="../../input_variables/generated_files/varset_gw.html#nqptdm">nqptdm</a>!=0
+</font>
+<br><font id="text">
+<p>
+<p>
+ <b>qptdm</b> contains the set of q-points used in the screening part of ABINIT,
+instead of the automatic generation of the q points when <a href="../../input_variables/generated_files/varset_gw.html#nqptdm">nqptdm</a>=0.
+These q points are given in terms of reciprocal space primitive translations (NOT in cartesian coordinates!).
+For further explanation, see the input variable <a href="../../input_variables/generated_files/varset_gw.html#nqptdm">nqptdm</a>.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="rcut">rcut</a></font>
+<br><font id="mnemonics">Mnemonics: Radius of the CUT-off for coulomb interaction</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topics: <a href="../../topics/generated_files/topic_GWls.html">GWls</a>, <a href="../../topics/generated_files/topic_Susceptibility.html">Susceptibility</a>, <a href="../../topics/generated_files/topic_SelfEnergy.html">SelfEnergy</a>.</font>
+<br><font id="smalltext">Rarely used: [9/907] in abinit tests, [0/136] in tuto abinit tests. Test list: {libxc:[<a href="../../tests/libxc/Input/t41.in">41</a>,<a href="../../tests/libxc/Input/t42.in">42</a>,<a href="../../tests/libxc/Input/t43.in">43</a>],paral:[<a href="../../tests/paral/Input/t75.in">75</a>,<a href="../../tests/paral/Input/t77.in">77</a>],v67mbpt:[<a href="../../tests/v67mbpt/Input/t03.in">03</a>,<a href="../../tests/v67mbpt/Input/t09.in">09</a>,<a href="../../tests/v67mbpt/Input/t15.in">15</a>,<a href="../../tests/v67mbpt/Input/t19.in">19</a>]}.</font>
+<br><font id="vartype">Variable type: real</font>
+<br><font id="default">Default is 0.0</font>
+<br><font id="text">
+<p>
+<p>
+ Truncation of the Coulomb interaction in real space. The meaning of <b>rcut</b> is governed by the cutoff shape option <a href="../../input_variables/generated_files/varset_gw.html#icutcoul">icutcoul</a>.
+</p>
+<p>
+ If <b>rcut</b> is negative, the cutoff is automatically calculated so to enclose the same volume inside the cutoff as the volume of the primitive cell.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="rhoqpmix">rhoqpmix</a></font>
+<br><font id="mnemonics">Mnemonics: RHO QuasiParticle MIXing</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_GW.html">GW</a>.</font>
+<br><font id="smalltext">Rarely used: [5/907] in abinit tests, [0/136] in tuto abinit tests. Test list: {paral:[<a href="../../tests/paral/Input/t73.in">73</a>,<a href="../../tests/paral/Input/t74.in">74</a>],v4:[<a href="../../tests/v4/Input/t88.in">88</a>],v67mbpt:[<a href="../../tests/v67mbpt/Input/t36.in">36</a>],wannier90:[<a href="../../tests/wannier90/Input/t03.in">03</a>]}.</font>
+<br><font id="vartype">Variable type: real</font>
+<br><font id="default">Default is 1.0</font>
+<br><font id="text">
+<p>
+<p>
+ For self-consistent GW runs, <b>rhoqpmix</b> sets the mixing coefficient between the new and the previous
+electronic densities.
+This mixing damps the spurious oscillations in the Hartree potential when achieving self-consistency.
+<b>rhoqpmix</b> is meaningful only when doing self-consistency on the wavefunctions with
+<a href="../../input_variables/generated_files/varset_gw.html#gwcalctyp">gwcalctyp</a> &#62;&#61; 20.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="spbroad">spbroad</a></font>
+<br><font id="mnemonics">Mnemonics: SPectral BROADening</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#ENERGY">ENERGY</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_Susceptibility.html">Susceptibility</a>.</font>
+<br><font id="smalltext">Rarely used: [1/907] in abinit tests, [0/136] in tuto abinit tests. Test list: {v67mbpt:[<a href="../../tests/v67mbpt/Input/t02.in">02</a>]}.</font>
+<br><font id="vartype">Variable type: real</font>
+<br><font id="default">Default is 0.0</font>
+<br><br><font id="requires">
+Only relevant if <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>==3 and <a href="../../input_variables/generated_files/varset_gw.html#spmeth">spmeth</a>==2
+</font>
+<br><font id="text">
+<p>
+When a screening calculation (<a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>==3) uses a spectral representation of the irreducible polarizability in which
+the delta function is replaced by the gaussian approximant (<a href="../../input_variables/generated_files/varset_gw.html#spmeth">spmeth</a>==2), the standard deviation of the gaussian
+is given by <b>spbroad</b>.
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="spmeth">spmeth</a></font>
+<br><font id="mnemonics">Mnemonics: SPectral METHod</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_Susceptibility.html">Susceptibility</a>.</font>
+<br><font id="smalltext">Rarely used: [6/907] in abinit tests, [1/136] in tuto abinit tests. Test list: {libxc:[<a href="../../tests/libxc/Input/t14.in">14</a>],tutoparal:[<a href="../../tests/tutoparal/Input/tmbt_3.in">mbt_3</a>],v5:[<a href="../../tests/v5/Input/t71.in">71</a>],v67mbpt:[<a href="../../tests/v67mbpt/Input/t02.in">02</a>,<a href="../../tests/v67mbpt/Input/t21.in">21</a>,<a href="../../tests/v67mbpt/Input/t37.in">37</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><br><font id="requires">
+Only relevant if <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>==4
+</font>
+<br><font id="text">
+<p>
+<p>
+ The <b>spmeth</b> input variable defines the method used to calculate the irreducible
+polarizability $\chi^{(0)}_{KS}$.
+</p>
+<p>
+ By default $\chi^{(0)}_{KS}$ is calculated employing the Adler-Wiser expression (<b>spmeth</b>=0)
+with a CPU effort that scales linearly with the number of frequencies.
+This approach is convenient when few frequencies are required, and is usually
+used in conjunction with plasmon-pole models in which only one or two frequencies are calculated,
+according to the value of <a href="../../input_variables/generated_files/varset_gw.html#ppmodel">ppmodel</a>.
+ <br />
+ Unfortunately a calculation based on the Adler-Wiser expression might be quite CPU demanding
+if the matrix elements of the self-energy operator are evaluated by performing numerically
+the convolution defining the self-energy.
+The integrand function, indeed, has poles above and below the real axis, and
+the screened interaction has to be evaluated on a dense frequency mesh in order to obtain accurate
+results.
+</p>
+<p>
+ In the spectral method (<b>spmeth</b>=1 or 2) the irreducible polarizability is expressed as
+the Hilbert transform of the imaginary part.
+The advantage in using this approach consists in the fact that, once the spectral function is known,
+the irreducible polarizability for an arbitrary frequency can be easily obtained through inexpensive
+integrations. On the other hand an accurate evaluation of the imaginary part requires a dense
+frequency mesh due to the presence of delta functions.
+Two different approaches can be used to approximate these delta functions thus allowing the use
+of affordable frequency grids.
+</p>
+<p>
+ Summarizing:
+ <ul>
+  <li>
+   0 =&gt; use Adler-Wiser expression to calculate $\chi^{(0)}_{KS}$
+  </li>
+  <li>
+   1 =&gt; use the spectral method approximating the delta function with a triangular approximant
+as proposed in
+   <b>
+    REF TO BE ADDED
+   </b>
+  </li>
+  <li>
+   2 =&gt; use spectral method but approximating the delta function with a Taylor expansion of the exponential
+as proposed in
+   <b>
+    REF TO BE ADDED
+   </b>
+  </li>
+ </ul>
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="symchi">symchi</a></font>
+<br><font id="mnemonics">Mnemonics: SYMmetryze \chi_o</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#DEVELOP">DEVELOP</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_Susceptibility.html">Susceptibility</a>.</font>
+<br><font id="smalltext">Moderately used: [29/907] in abinit tests, [3/136] in tuto abinit tests. Tuto test list: {tutoparal:[<a href="../../tests/tutoparal/Input/tmbt_2.in">mbt_2</a>,<a href="../../tests/tutoparal/Input/tmbt_3.in">mbt_3</a>],tutorial:[<a href="../../tests/tutorial/Input/tbs_1.in">bs_1</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 1</font>
+<br><br><font id="requires">
+Only relevant if <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>==3
+</font>
+<br><font id="text">
+<p>
+<p>
+ The evaluation of the irreducible polarizability for a given q-point requires an
+integration over the Brillouin zone (BZ) which is approximated by a discrete sum over k-points.
+In principle the integrand function should be evaluated for each k-point in the BZ, however it is possible
+to reduce the number of points to be explicitly considered by taking advantage of symmetry properties.
+The development input variable <b>symchi</b> is used to choose between these two equivalent methods:
+ <ul>
+  <li>
+   0=&gt; the summation over k-points is performed considering ALL the points in the BZ (useful for testing and debugging).
+  </li>
+  <li>
+   1=&gt; the summation is restricted to the k-points belonging to the irreducible wedge
+defined by the little group associated to the external vector q.
+  </li>
+ </ul>
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="symsigma">symsigma</a></font>
+<br><font id="mnemonics">Mnemonics: SYMmetrization of SIGMA matrix elements</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_SelfEnergy.html">SelfEnergy</a>.</font>
+<br><font id="smalltext">Moderately used: [20/907] in abinit tests, [1/136] in tuto abinit tests. Tuto test list: {tutoparal:[<a href="../../tests/tutoparal/Input/tmbt_4.in">mbt_4</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><br><font id="requires">
+Only relevant if <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>==4
+</font>
+<br><font id="text">
+<p>
+<p>
+ This option is used to switch on the symmetrization of the self-energy matrix elements (<b>symsigma</b>=1).
+In this case the BZ integration defining the self-energy matrix elements is
+reduced to an appropriate irreducible wedge defined by the point group of the wave-vector k
+specified in the <a href="../../input_variables/generated_files/varset_gw.html#kptgw">kptgw</a> list.
+</p>
+<p>
+ The symmetrized expression leads to a considerable speedup of the run but, unfortunately,
+this option is not yet compatible with self-consistent GW calculations
+(see <a href="../../input_variables/generated_files/varset_gw.html#gwcalctyp">gwcalctyp</a>).
+</p>
+<p>
+ The algorithm implemented in <b>symsigma</b>=1
+constructs a symmetric invariant for the diagonal matrix elements of the self-energy
+by simply averaging the GW results within the degenerate subspace.
+
+Therefore particular care has to be taken in the presence of accidental degeneracies.
+since GW calculations performed with <b>symsigma</b>=1 will not be able to remove
+the initial accidental degeneracy.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="ucrpa">ucrpa</a></font>
+<br><font id="mnemonics">Mnemonics: calculation of the screened interaction U with the Constrained RPA method</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_CRPA.html">CRPA</a>.</font>
+<br><font id="smalltext">Rarely used: [5/907] in abinit tests, [0/136] in tuto abinit tests. Test list: {v7:[<a href="../../tests/v7/Input/t23.in">23</a>,<a href="../../tests/v7/Input/t24.in">24</a>,<a href="../../tests/v7/Input/t25.in">25</a>,<a href="../../tests/v7/Input/t78.in">78</a>,<a href="../../tests/v7/Input/t79.in">79</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><br><font id="requires">
+Only relevant if <a href="../../input_variables/generated_files/varset_gstate.html#nspinor">nspinor</a> == 1
+</font>
+<br><font id="text">
+<p>
+<p>
+ When equal to one or two, this variable allows for the calculation of U with the cRPA method.
+An explicit test is shown in automatic tests v7/t23-t24-t25 and in v7/t68-t69.
+The present implementation is parallelized (as for usual GW calculations), use symetry over k-points only for calculations involving one correlated atom,
+and can be use when correlated bands are entangled or not.
+The constrained calculation of the polarisability can be done by eliminating
+transition betweens correlated bands (and not orbitals) with the variable <a href="../../input_variables/generated_files/varset_gw.html#ucrpa_bands">ucrpa_bands</a>.
+</p>
+<p>
+ For <b>ucrpa</b> = 1, two solutions are possible. The first one is to specify
+(with the variable <a href="../../input_variables/generated_files/varset_gw.html#ucrpa_bands">ucrpa_bands</a>) the bands to exclude from the polarisability calculation.
+The second solution is to provide an energy window (with the variable <a href="../../input_variables/generated_files/varset_gw.html#ucrpa_window">ucrpa_window</a>). The electronic transitions
+inside this window will not be taken into account in
+the polarisability calculation.
+</p>
+<p>
+ For <b>ucrpa</b> = 2, the ucrpa_bands should be equal to the <a href="../../input_variables/generated_files/varset_dmft.html#dmftbandi">dmftbandi</a> and <a href="../../input_variables/generated_files/varset_dmft.html#dmftbandf">dmftbandf</a>
+values, and the polarisability of the correlated subspace
+is constructed with a band and k-point dependent weight.
+</p>
+<p>
+The implementation is restricted to the case of <a href="../../input_variables/generated_files/varset_gstate.html#nspinor">nspinor</a> = 1 (collinear case).
+</p>
+<p>
+A short presentation of the method and some aspect of the implementation can be found in Section II and Appendix A of
+ <a href="https://journals.aps.org/prb/abstract/10.1103/PhysRevB.89.125110">
+  B. Amadon, T. Applencourt and F. Bruneval Phys. Rev. B 89, 125110 (2014)
+ </a>
+ .
+</p>
+<p>
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="ucrpa_bands">ucrpa_bands</a></font>
+<br><font id="mnemonics">Mnemonics: For the calculation of U with the Constrained RPA method, gives correlated BANDS</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_CRPA.html">CRPA</a>.</font>
+<br><font id="smalltext">Rarely used: [4/907] in abinit tests, [0/136] in tuto abinit tests. Test list: {v7:[<a href="../../tests/v7/Input/t23.in">23</a>,<a href="../../tests/v7/Input/t24.in">24</a>,<a href="../../tests/v7/Input/t25.in">25</a>,<a href="../../tests/v7/Input/t78.in">78</a>]}.</font>
+<br><font id="vartype">Variable type: integer(2)</font>
+<br><font id="default">Default is [-1, -1] (Comment: That is, the default includes no band.)</font>
+<br><font id="text">
+<p>
+<p>
+ Gives the first and last correlated bands for the cRPA calculation of the polarisability.
+</p>
+<p>
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="ucrpa_window">ucrpa_window</a></font>
+<br><font id="mnemonics">Mnemonics: For the calculation of U with the Constrained RPA method, gives energy WINDOW</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_CRPA.html">CRPA</a>.</font>
+<br><font id="smalltext">Rarely used: [1/907] in abinit tests, [0/136] in tuto abinit tests. Test list: {v7:[<a href="../../tests/v7/Input/t79.in">79</a>]}.</font>
+<br><font id="vartype">Variable type: real(2)</font>
+<br><font id="default">Default is [-1, -1] (Comment: That is, the energy window is empty by default.)</font>
+<br><font id="text">
+<p>
+<p>
+ Specify a window of energy for the cRPA calculation of the polarisability.
+The transition inside this window will not be taken into account in the constrained polarisabilty calculations.
+</p>
+The lower bound and the upper bound energies must be specified (two real numbers) with respect to the position of the Fermi level.
+<p>
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="vcutgeo">vcutgeo</a></font>
+<br><font id="mnemonics">Mnemonics: V (potential) CUT-off GEOmetry</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topics: <a href="../../topics/generated_files/topic_GWls.html">GWls</a>, <a href="../../topics/generated_files/topic_Susceptibility.html">Susceptibility</a>, <a href="../../topics/generated_files/topic_SelfEnergy.html">SelfEnergy</a>.</font>
+<br><font id="smalltext">Rarely used: [1/907] in abinit tests, [0/136] in tuto abinit tests. Test list: {v67mbpt:[<a href="../../tests/v67mbpt/Input/t03.in">03</a>]}.</font>
+<br><font id="vartype">Variable type: real(3)</font>
+<br><font id="default">Default is 3*0.0</font>
+<br><br><font id="requires">
+Only relevant if <a href="../../input_variables/generated_files/varset_gw.html#icutcoul">icutcoul</a> in [1,2]
+</font>
+<br><font id="text">
+<p>
+<p>
+ <b>vcutgeo</b> is used in conjunction with <a href="../../input_variables/generated_files/varset_gw.html#icutcoul">icutcoul</a>
+to specify the geometry used to truncate the Coulomb interaction, as well as the
+particular approach to be used.
+It has a meaning only for the cylindrical symmetry
+(<a href="../../input_variables/generated_files/varset_gw.html#icutcoul">icutcoul</a>=1) or in the case of surfaces
+(<a href="../../input_variables/generated_files/varset_gw.html#icutcoul">icutcoul</a>=2).
+For each geometry, two different definitions of the cutoff region are available
+(see Phys. Rev. B 73, 233103 and Phys. Rev. B 73, 205119 for a complete description of the methods)
+</p>
+<p>
+ In Beigi method (Phys. Rev. B 73, 233103), the cutoff region is given by the Wigner-Seitz cell
+centered on the axis of the cylinder.
+The cutoff region is thus automatically defined by the unit cell and there is no need to specify
+When <a href="../../input_variables/generated_files/varset_gw.html#rcut">rcut</a>.
+</p>
+<p>
+To define a cylinder along the z-axis use the following lines.
+
+icutcoul 1
+vcutgeo  0 0 1
+</p>
+<p>
+ Please note that Beigi method is implemented only in the case if an orthorhombic
+Bravais lattic. For hexagonal lattices, one has to use the method of Rozzi (Phys. Rev. B 73, 205119)
+In this case, the interaction is truncated in a finite cylinder.
+Contrarily to the first approach, here one has to specify both the radius of the cylinder
+with <a href="../../input_variables/generated_files/varset_gw.html#rcut">rcut</a>
+as well as the length of the cylinder along the periodic dimension that should always be smaller
+than the extension of the Born von Karman box.
+The length of the cylinder is given in terms of the fraction of the primitive vector along the periodic direction.
+</p>
+<p>
+ For example, in order to define a finite cylinder along z of radius 2.5 Bohr and length 3*R3
+
+icutcoul 1
+vcutgeo  0 0 -3.0 # note the minus sign
+rcut     2.5
+</p>
+<p>
+ For surface calculations (<a href="../../input_variables/generated_files/varset_gw.html#icutcoul">icutcoul</a>=2),
+<b>vcutgeo</b> is used to define the two periodic directions defining the surface.
+Also in this case two different techniques are available.
+In the method of Beigi, the (positive) non-zero components of vcutgeo define the periodic
+directions of the infinite surface. The interaction is truncated within a slab
+of width L where L is the length of the primitive vector of the lattice along the non-periodic dimension.
+For example:
+
+icutcoul 2
+vcutgeo 1 1 0
+
+It is also possible to define a finite surface by employing negative values
+For example:
+
+icutcoul 2
+vcutgeo -3 -2 0
+
+defines ....
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="zcut">zcut</a></font>
+<br><font id="mnemonics">Mnemonics: Z-CUT</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#ENERGY">ENERGY</a></font>
+<br><font id="characteristic">Mentioned in topics: <a href="../../topics/generated_files/topic_Susceptibility.html">Susceptibility</a>, <a href="../../topics/generated_files/topic_BSE.html">BSE</a>, <a href="../../topics/generated_files/topic_SelfEnergy.html">SelfEnergy</a>.</font>
+<br><font id="smalltext">Moderately used: [17/907] in abinit tests, [4/136] in tuto abinit tests. Tuto test list: {tutoparal:[<a href="../../tests/tutoparal/Input/tmbt_5.in">mbt_5</a>],tutorial:[<a href="../../tests/tutorial/Input/tbs_2.in">bs_2</a>,<a href="../../tests/tutorial/Input/tbs_3.in">bs_3</a>,<a href="../../tests/tutorial/Input/tbs_4.in">bs_4</a>]}.</font>
+<br><font id="vartype">Variable type: real</font>
+<br><font id="default">Default is 0.0036749326 (Comment: 0.0036749326 Ha = 0.1 eV)</font>
+<br><br><font id="requires">
+Only relevant if <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a> in [3,4,99]
+</font>
+<br><font id="text">
+<p>
+<p>
+ It is meant to avoid some divergencies that might occur during the evaluation of the Adler-Wiser expression of
+the irreducible polarizability (<a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>=3) or during the numerical treatment
+of the integrals defining the contribution to the self-energy matrix elements
+(<a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>=4).
+If the denominator becomes smaller than <b>zcut</b>, a small imaginary part (depending on <b>zcut</b>) is added,
+in order to avoid the divergence.
+</p>
+<p>
+ When <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>=99, <b>zcut</b> defines the small complex shift
+used to avoid divergences in the expression for the macroscopic dieletric function.
+It simulates the experimental uncertainty and the finite lifetime of the quasiparticles
+(although the true lifetime should be k- and band-dependent).
+The value of <b>zcut</b> affects the number of iteration needed to achieve convergence
+in the Haydock iterative method. In this case, <b>zcut</b> should be
+larger than the typical distance between the eigenvalues of the exciton Hamiltonian.
+ <br />
+ Ideally, one should make a convergence study decreasing the value of <b>zcut</b> for increasing number of k-points.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+<script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
+
+</body>
+</html>
+

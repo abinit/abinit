@@ -12,7 +12,7 @@
  Corning Inc. and other collaborators, see ~abinit/doc/developers/contributors.txt .
  Please read ~abinit/doc/users/acknowledgments.html for suggested
  acknowledgments of the ABINIT effort.
- For more information, see http://www.abinit.org .
+ For more information, see https://www.abinit.org .
 
 .Starting date : Wed  1 Mar 2017.
 - ( at 13h27 )
@@ -91,6 +91,9 @@ _ WF disk file :      5.721 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
 -          iomode3          0
             acell      7.0000000000E+00  7.0000000000E+00  7.0000000000E+00 Bohr
               amu      1.20110000E+01
+     densfor_pred1          6
+     densfor_pred2          2
+     densfor_pred3          2
            diemac      1.20000000E+01
              ecut      1.50000000E+01 Hartree
 -          fftalg         312
@@ -100,9 +103,6 @@ _ WF disk file :      5.721 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
            get1wf1          0
            get1wf2          0
            get1wf3         -1
-     densfor_pred1          6
-     densfor_pred2          2
-     densfor_pred3          2
            jdtset        1    2    3
               kpt1    -1.25000000E-01 -2.50000000E-01  0.00000000E+00
                       -1.25000000E-01  5.00000000E-01  0.00000000E+00
@@ -403,7 +403,7 @@ P          mk1mem3         32
     1  15.431  21.987    0   1.4850707        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     0.83985002509544    0.99012430797080    0.51184907750884   rchrg,fchrg,qchrg
- pspatm: epsatm=    0.92590353
+ pspatm : epsatm=    0.92590353
          --- l  ekb(1:nproj) -->
              0    4.921466
  pspatm: atomic psp has been read  and splines computed
@@ -997,6 +997,9 @@ _setup2: Arith. and geom. avg. npw (full set) are      59.125      59.121
 -          iomode3          0
             acell      7.0000000000E+00  7.0000000000E+00  7.0000000000E+00 Bohr
               amu      1.20110000E+01
+     densfor_pred1          6
+     densfor_pred2          2
+     densfor_pred3          2
            diemac      1.20000000E+01
              ecut      1.50000000E+01 Hartree
            etotal1    -1.1997321788E+01
@@ -1015,9 +1018,6 @@ _setup2: Arith. and geom. avg. npw (full set) are      59.125      59.121
            get1wf1          0
            get1wf2          0
            get1wf3         -1
-     densfor_pred1          6
-     densfor_pred2          2
-     densfor_pred3          2
            jdtset        1    2    3
               kpt1    -1.25000000E-01 -2.50000000E-01  0.00000000E+00
                       -1.25000000E-01  5.00000000E-01  0.00000000E+00
@@ -1306,7 +1306,7 @@ P          mk1mem3         32
  Note also that it will be of great value to readers of publications presenting these results,
  to read papers enabling them to understand the theoretical formalism and details
  of the ABINIT implementation.
- For information on why they are suggested, see also http://www.abinit.org/about/?text=acknowledgments.
+ For information on why they are suggested, see also https://www.abinit.org/about/?text=acknowledgments.
 -
 - [1] Large scale ab initio calculations based on three levels of parallelization
 - F. Bottin, S. Leroux, A. Knyazev, G. Zerah, Comput. Mat. Science 42, 329, (2008).
@@ -1328,7 +1328,7 @@ P          mk1mem3         32
 - B.Xue, A.Zhou, J.W.Zwanziger.
 - Comment : the fourth generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
-- is available at http://www.abinit.org/about/ABINIT16.pdf .
+- is available at https://www.abinit.org/about/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 -
 - [3] First-principles responses of solids to atomic displacements and homogeneous electric fields:,
@@ -1349,7 +1349,7 @@ P          mk1mem3         32
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment : the third generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
-- is available at http://www.abinit.org/about/ABINIT_CPC_v10.pdf .
+- is available at https://www.abinit.org/about/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 -
 - [6] A brief introduction to the ABINIT software package.
@@ -1360,7 +1360,7 @@ P          mk1mem3         32
 - Comment : the second generic paper describing the ABINIT project. Note that this paper
 - should be cited especially if you are using the GW part of ABINIT, as several authors
 - of this part are not in the list of authors of the first or third paper.
-- The .pdf of the latter paper is available at http://www.abinit.org/about/zfk_0505-06_558-562.pdf.
+- The .pdf of the latter paper is available at https://www.abinit.org/about/zfk_0505-06_558-562.pdf.
 - Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
 - the licence allows the authors to put it on the Web).
 -

@@ -183,11 +183,12 @@
 !! CHILDREN
 !!      applyprojectorsonthefly,denspot_free_history,eigensystem_info,elpolariz
 !!      energies_copy,exchange_electronpositron,forstr,getph,hdr_update
-!!      kswfn_free_scf_data,last_orthon,metric,mkrho,nhatgrid,pawcprj_getdim
-!!      pawmkrho,pawmkrhoij,prtposcar,prtrhomxmn,scprqt,setnoccmmp,spin_current
-!!      timab,total_energies,write_energies,wrtout,wvl_eigen_abi2big,wvl_mkrho
-!!      wvl_nhatgrid,wvl_occ_abi2big,wvl_psitohpsi,wvl_rho_abi2big
-!!      wvl_tail_corrections,wvl_vtrial_abi2big,xcden,xmpi_sum,xred2xcart
+!!      kswfn_free_scf_data,last_orthon,metric,mkrho,nhatgrid,nonlop_test
+!!      pawcprj_getdim,pawmkrho,pawmkrhoij,prtposcar,prtrhomxmn,scprqt
+!!      setnoccmmp,spin_current,timab,total_energies,write_energies,wrtout
+!!      wvl_eigen_abi2big,wvl_mkrho,wvl_nhatgrid,wvl_occ_abi2big,wvl_psitohpsi
+!!      wvl_rho_abi2big,wvl_tail_corrections,wvl_vtrial_abi2big,xcden,xmpi_sum
+!!      xred2xcart
 !!
 !! SOURCE
 
@@ -257,6 +258,7 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  use interfaces_56_xc
  use interfaces_62_wvl_wfs
  use interfaces_65_paw
+ use interfaces_66_nonlocal
  use interfaces_67_common
  use interfaces_94_scfcv, except_this_one => afterscfloop
 !End of the abilint section
@@ -338,10 +340,9 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  character(len=500) :: message
  type(paw_dmft_type) :: paw_dmft
 #if defined HAVE_BIGDFT
- integer :: iwarn=0,mband_cprj
+ integer :: mband_cprj
  logical :: do_last_ortho
- real(dp) :: doti,dum,exchat
- character(len=1) :: datacode
+ real(dp) :: dum
 #endif
 !arrays
  real(dp) :: gmet(3,3),gprimd(3,3),pelev(3),rmet(3,3),tsec(2)
@@ -349,8 +350,7 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  real(dp),allocatable :: mpibuf(:,:),qphon(:),rhonow(:,:,:),sqnormgrhor(:,:),xcart(:,:)
 #if defined HAVE_BIGDFT
  integer,allocatable :: dimcprj_srt(:)
- real(dp),allocatable :: hpsi_tmp(:),rhowk(:,:),vxc_tmp(:,:)
- real(dp),pointer :: rhocore(:,:,:,:) => null()
+ real(dp),allocatable :: hpsi_tmp(:)
 #endif
 
 ! *************************************************************************
@@ -900,7 +900,7 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 & moved_atm_inside,mpi_enreg,dtset%nband,dtset%nkpt,&
 & dtset%nstep,occ,optres,prtfor,prtxml,quit,&
 & res2,resid,residm,response,tollist,psps%usepaw,vxcavg,dtset%wtk,xred,conv_retcode,&
-& electronpositron=electronpositron)
+& electronpositron=electronpositron, fock=fock)
 
 !output POSCAR and FORCES files, VASP style, for PHON code and friends.
  if (dtset%prtposcar == 1) then
@@ -1003,10 +1003,19 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
    results_gs%etotal = results_gs%etotal - dtset%tsmear * results_gs%entropy
  end if
 
- DBG_EXIT("COLL")
+!This call is only for testing purpose:
+!test of the nonlop routine (DFPT vs Finite Differences)
+ if (dtset%useria==112233) then
+   call nonlop_test(cg,eigen,dtset%istwfk,kg,dtset%kptns,dtset%mband,mcg,dtset%mgfft,dtset%mkmem,&
+&   mpi_enreg,dtset%mpw,my_natom,dtset%natom,dtset%nband,dtset%nfft,dtset%ngfft,dtset%nkpt,&
+&   dtset%nloalg,npwarr,dtset%nspden,dtset%nspinor,dtset%nsppol,dtset%ntypat,paw_ij,pawtab,&
+&   ph1d,psps,rprimd,dtset%typat,xred)
+ end if
 
  call timab(257,2,tsec)
  call timab(250,2,tsec)
+
+ DBG_EXIT("COLL")
 
 #if !defined HAVE_BIGDFT
  if (.false.) write(std_out,*) vtrial(1,1)

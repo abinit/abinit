@@ -12,7 +12,7 @@
  Corning Inc. and other collaborators, see ~abinit/doc/developers/contributors.txt .
  Please read ~abinit/doc/users/acknowledgments.html for suggested
  acknowledgments of the ABINIT effort.
- For more information, see http://www.abinit.org .
+ For more information, see https://www.abinit.org .
 
 .Starting date : Thu 27 Oct 2011.
 - ( at 14h18 )
@@ -55,10 +55,10 @@ P This job should need less than                      47.456 Mbytes of memory.
             acell      1.8897261329E+01  9.4486306644E+00  9.4486306644E+00 Bohr
               amu      1.59994000E+01  1.40067400E+01  1.00794000E+00
            charge      1.00000000E+00
+     densfor_pred           6
              ecut      2.00000000E+01 Hartree
            iatfix        1    4
            ionmov           3
-           densfor_pred           6
            istwfk        2
               ixc       -1009
            kptopt           0
@@ -1494,6 +1494,7 @@ P newkpt: treating     10 bands with npw=     182 for ikpt=   1 by node    0
             acell      1.8897261329E+01  9.4486306644E+00  9.4486306644E+00 Bohr
               amu      1.59994000E+01  1.40067400E+01  1.00794000E+00
            charge      1.00000000E+00
+     densfor_pred           6
              ecut      2.00000000E+01 Hartree
            etotal     -2.9487445156E+01
             fcart      7.8824263182E-03  1.3445976672E-04 -2.6041255992E-04
@@ -1506,7 +1507,6 @@ P newkpt: treating     10 bands with npw=     182 for ikpt=   1 by node    0
                       -2.6077595355E-05  3.0816287480E-05 -1.0692241215E-05
            iatfix        1    4
            ionmov           3
-           densfor_pred           6
            istwfk        2
               ixc       -1009
            kptopt           0
@@ -1585,7 +1585,7 @@ P           mkmem           1
  Note also that it will be of great value to readers of publications presenting these results,
  to read papers enabling them to understand the theoretical formalism and details
  of the ABINIT implementation.
- For information on why they are suggested, see also http://www.abinit.org/about/?text=acknowledgments.
+ For information on why they are suggested, see also https://www.abinit.org/about/?text=acknowledgments.
 -
 - [1] Large scale ab initio calculations based on three levels of parallelization
 - F. Bottin, S. Leroux, A. Knyazev, G. Zerah, Comput. Mat. Science 42, 329, (2008).
@@ -1605,7 +1605,7 @@ P           mkmem           1
 - Computer Phys. Comm. 180, 2582-2615 (2009).
 - Comment : the third generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
-- is available at http://www.abinit.org/about/ABINIT_CPC_v10.pdf .
+- is available at https://www.abinit.org/about/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 -
 - [4] A brief introduction to the ABINIT software package.
@@ -1616,7 +1616,7 @@ P           mkmem           1
 - Comment : the second generic paper describing the ABINIT project. Note that this paper
 - should be cited especially if you are using the GW part of ABINIT, as several authors
 - of this part are not in the list of authors of the first or third paper.
-- The .pdf of the latter paper is available at http://www.abinit.org/about/zfk_0505-06_558-562.pdf.
+- The .pdf of the latter paper is available at https://www.abinit.org/about/zfk_0505-06_558-562.pdf.
 - Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
 - the licence allows the authors to put it on the Web).
 -

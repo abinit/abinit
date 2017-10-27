@@ -378,7 +378,7 @@ subroutine dos_calcnwrite(dos,dtset,crystal,ebands,fildata,comm)
 !Local variables-------------------------------
 !scalars
  integer,parameter :: bcorr0=0,master=0
- integer :: iat,iband,iene,ifract,ikpt,isppol,natsph,natsph_extra,nkpt,nsppol,i1,i2
+ integer :: iat,iband,iene,ikpt,isppol,natsph,natsph_extra,nkpt,nsppol,i1,i2
  integer :: nene,prtdos,unitdos,ierr,prtdosm,paw_dos_flag,mbesslang,ndosfraction
  integer :: my_rank,nprocs,cnt,ifrac,ii
  real(dp),parameter :: dos_max=9999.9999_dp

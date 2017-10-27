@@ -55,4 +55,5 @@
 #%% keywords = 
 #%% description = 
 #%%   H2 molecule with geometry optimisation using BFGS (test the reformating part of the code).
+#%% topics = Wavelets
 #%%<END TEST_INFO>

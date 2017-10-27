@@ -455,8 +455,14 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
 &   narrm,ncid,ndtset_alloc,'chempot','DPR',1) 
  end if
  
+ intarr(1,:)=dtsets(:)%chkdilatmx
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'chksymbreak','INT',0)
+
  intarr(1,:)=dtsets(:)%chkexit
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'chkexit','INT',0)
+
+ intarr(1,:)=dtsets(:)%chkprim
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'chkprim','INT',0)
 
  intarr(1,:)=dtsets(:)%chksymbreak
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'chksymbreak','INT',0)
@@ -490,6 +496,9 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
 
  intarr(1,:)=dtsets(:)%delayperm
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'delayperm','INT',0)
+
+ intarr(1,:)=dtsets(:)%densfor_pred
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'densfor_pred','INT',0)
 
 !densty
  narr=mxvals%ntypat              ! default size for all datasets
@@ -687,8 +696,8 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
  dprarr(1,:)=dtsets(:)%ecutwfn
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'ecutwfn','ENE',0)
 
- dprarr(1,:)=dtsets(:)%effmass
- call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'effmass','DPR',0)
+ dprarr(1,:)=dtsets(:)%effmass_free
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'effmass_free','DPR',0)
 
  dprarr(1,:)=dtsets(:)%efield(1)
  dprarr(2,:)=dtsets(:)%efield(2)
@@ -864,6 +873,12 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
 
  intarr(1,:)=dtsets(:)%fftgw
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'fftgw','INT',0)
+
+ intarr(1,:)=dtsets(:)%fockoptmix
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'fockoptmix','INT',0)
+
+ dprarr(1,:)=dtsets(:)%focktoldfe
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'focktoldfe','DPR',0)
 
  dprarr(1,:)=dtsets(:)%freqim_alpha
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'freqim_alpha','DPR',0)

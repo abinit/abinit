@@ -68,4 +68,5 @@
 #%% description = 
 #%%   H2 molecule in a cell of variable size along the H2 chain => H polymer.
 #%%   Optimization of cell size and atomic distances (optcell=4).
+#%% topics = GeoOpt
 #%%<END TEST_INFO>

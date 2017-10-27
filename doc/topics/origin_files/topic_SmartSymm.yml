@@ -1,0 +1,25 @@
+- !components 
+    name      : SmartSymm
+    keyword   : Smart Symmetrizer
+    authors   : FJ
+    howto     : use the symetry information to build the system from the irreducible part of the primitive cell
+    header    : default
+    title     : <h1>Smart symmetrizer</h1>
+    subtitle  : default
+    copyright : default
+    links     : default
+    introduction : |- 
+         Sometimes, the user knows the space group of the system, the conventional cell vectors,
+         as well as the positions of atoms in the asymmetric (irreducible) part of the cell. 
+         From such data, ABINIT can generate the usual primitive cell vectors, as well as the coordinates of all the atoms in this cell.
+         <p>
+         This is activated if [[spgroup]]!=0 and [[brvltt]]=-1. 
+         The user needs to specify the number of atoms to be read [[natrd]] in the asymmetric part of the cell, 
+         as well as the expected number of atoms [[natom]] in the primitive cell. 
+         Some additional information on the axes orientation [[spgaxor]] and the cell origin [[spgorig]] 
+         might also have to be given. See <a href="../../users/spacegrouphelpfile.html">the space group help file</a>.
+         <p>
+         The specification of a magnetic space group is even possible (antiferromagnetic). See [[spgroupma]] and [[genafm]].
+         <p>
+         See also the [[topic_UnitCell]].
+    end : default 

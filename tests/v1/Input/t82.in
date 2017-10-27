@@ -59,4 +59,5 @@
 #%%   Start with deformed 2D hexagonal lattice,
 #%%   optimize the lattice towards hexagonal, 
 #%%   with conservation of inter-layer distance (optcell=7).
+#%% topics = GeoOpt
 #%%<END TEST_INFO>

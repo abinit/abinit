@@ -171,7 +171,7 @@ MODULE m_hdr
  !    Moreover the files produced by the DFPT code do not have a well-defined extension and, as a consequence,
  !    they require a special treatment. In python I would use regexp but Fortran is not python!
 
- type(abifile_t),private,parameter :: all_abifiles(44) = [ &
+ type(abifile_t),private,parameter :: all_abifiles(45) = [ &
 
     ! Files with wavefunctions:
     abifile_t(varname="coefficients_of_wavefunctions", fform=2, ext="WFK", class="wf_planewave"), &
@@ -181,7 +181,7 @@ MODULE m_hdr
 
     ! Files with density-like data.
     abifile_t(varname="density", fform=52, ext="DEN", class="density"), &    ! Official
-    abifile_t(varname="ep_density", fform=53, ext="POSITRON", class="density"), &
+    abifile_t(varname="positron_density", fform=53, ext="POSITRON", class="density"), &
     abifile_t(varname="first_order_density", fform=54, ext="DEN(\d+)", class="density"), &
     abifile_t(varname="pawrhor", fform=55, ext="PAWDEN", class="density"), &
     abifile_t(varname="pawrhor_core", fform=56, ext="ATMDEN_CORE", class="density"), &
@@ -242,7 +242,8 @@ MODULE m_hdr
    !abifile_t(varname="bse_ucoupling_q0", fform=1002, ext="BSC", class="bscoup"), &
 
    ! Miscellaneous
-   abifile_t(varname="dos_fractions", fform=3000, ext="FATBANDS", class="None") &
+   abifile_t(varname="dos_fractions", fform=3000, ext="FATBANDS", class="data"), &
+   abifile_t(varname="spectral_weights", fform=5000, ext="FOLD2BLOCH", class="data") &
   ]
 
  type(abifile_t),public,parameter :: abifile_none = abifile_t(varname="None", fform=0, ext="None", class="None")
@@ -364,7 +365,8 @@ character(len=nctk_slen) function varname_from_fname(filename) result(varname)
  if (endswith(filename, ".nc")) then
    ind = index(filename, ".nc", back=.True.)
  else
-   MSG_ERROR(sjoin("Don't know how to handle: ", filename))
+   !MSG_ERROR(sjoin("Don't know how to handle: ", filename))
+   ind = len_trim(filename) + 1
  end if
 
  ext = filename(:ind-1)
@@ -380,7 +382,7 @@ character(len=nctk_slen) function varname_from_fname(filename) result(varname)
  !case ("DEN1")
  !  varname = "first_order_density"
  case ("POSITRON")
-   varname = "ep_density"
+   varname = "positron_density"
  case ("PAWDEN")
    varname = "pawrhor"
    ! TODO: Other paw densities

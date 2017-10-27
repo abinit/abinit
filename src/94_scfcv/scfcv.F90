@@ -133,7 +133,8 @@
 !!      ab7_mixing_deallocate,ab7_mixing_new,ab7_mixing_use_disk_cache
 !!      afterscfloop,build_vxc,check_kxc,chkpawovlp,cprj_clean,cprj_paw_alloc
 !!      ctocprj,destroy_distribfft,destroy_mpi_enreg,energies_init,energy
-!!      etotfor,extraprho,fftdatar_write_from_hdr,first_rec,fock_destroy
+!!      etotfor,extraprho,fftdatar_write_from_hdr,first_rec,fock2ace
+!!      fock_ace_destroy,fock_bz_destroy,fock_common_destroy,fock_destroy
 !!      fock_init,fock_updatecwaveocc,fourdp,fresid,getcut,getmpw,getng,getph
 !!      gshgg_mkncwrite,hdr_update,init_distribfft,init_distribfft_seq
 !!      init_metricrec,initmpi_seq,initylmg,int2char4,kpgio,metric,newrho
@@ -203,7 +204,8 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
  use m_paw_ij,           only : paw_ij_type, paw_ij_init, paw_ij_free, paw_ij_nullify,&
 &                               paw_ij_reset_flags
  use m_paw_dmft,         only : paw_dmft_type
- use m_fock,             only : fock_type,fock_init,fock_destroy,fock_update_exc,fock_updatecwaveocc
+ use m_fock,             only : fock_type,fock_init,fock_destroy,fock_ACE_destroy,fock_common_destroy,&
+&                               fock_BZ_destroy,fock_update_exc,fock_updatecwaveocc
  use gwls_hamiltonian,   only : build_vxc
 #if defined HAVE_BIGDFT
  use BigDFT_API,         only : cprj_clean,cprj_paw_alloc
@@ -229,6 +231,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
  use interfaces_62_poisson
  use interfaces_65_paw
  use interfaces_66_nonlocal
+ use interfaces_66_wfs
  use interfaces_67_common
  use interfaces_68_recursion
  use interfaces_68_rsprc
@@ -296,7 +299,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
 !integer :: dtset_iprcel
  integer :: iatom,ider,idir,ierr,iexit,ii,ikpt,impose_dmat,denpot
  integer :: initialized0,iorder_cprj,ipert,ipositron,isave_den,isave_kden,iscf10,ispden
- integer :: ispmix,istep,istep_mix,itypat,izero,lmax_diel,lpawumax,mband_cprj,mcprj,me,me_wvl
+ integer :: ispmix,istep,istep_mix,istep_updatedfock,itypat,izero,lmax_diel,lpawumax,mband_cprj,mcprj,me,me_wvl
  integer :: mgfftdiel,mgfftf,moved_atm_inside,moved_rhor,my_nspinor,n1xccc
  integer :: n3xccc,ncpgr,nfftdiel,nfftmix,nfftmix_per_nfft,nfftotf,ngrvdw,nhatgrdim,nk3xc,nkxc
  integer :: npawmix,npwdiel,nstep,nzlmopt,optcut,optcut_hf,optene,optgr0,optgr0_hf
@@ -626,7 +629,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
    call paw_an_nullify(paw_an)
    call paw_ij_nullify(paw_ij)
    has_dijhat=0;if (dtset%iscf==22) has_dijhat=1
-   has_vhartree=0; if (dtset%prtvha > 0) has_vhartree=1
+   has_vhartree=0; if (dtset%prtvha > 0 .or. dtset%prtvclmb > 0) has_vhartree=1
    has_dijfock=0; if (usefock==1) has_dijfock=1
    has_dijnd=0; req_cplex_dij=1
    if(any(abs(dtset%nucdipmom)>tol8)) then
@@ -1062,13 +1065,13 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
        ! Initialize data_type fock for the calculation
        cplex_hf=cplex
        if (psps%usepaw==1) cplex_hf=dtset%pawcpxocc
-       call fock_init(atindx,cplex_hf,dtset,fock,gsqcut,indsym,kg,mpi_enreg,nattyp,npwarr,pawang,pawfgr,pawtab,rprimd)
-       if (fock%usepaw==1) then
+       call fock_init(atindx,cplex_hf,dtset,fock,gsqcut,kg,mpi_enreg,nattyp,npwarr,pawang,pawfgr,pawtab,rprimd)
+       if (fock%fock_common%usepaw==1) then
          optcut_hf = 0 ! use rpaw to construct local_pawfgrtab
          optgr0_hf = 0; optgr1_hf = 0; optgr2_hf = 0 ! dont need gY terms locally
          optrad_hf = 1 ! do store r-R
          call nhatgrid(atindx1,gmet,dtset%natom,dtset%natom,nattyp,ngfftf,psps%ntypat,&
-&         optcut_hf,optgr0_hf,optgr1_hf,optgr2_hf,optrad_hf,fock%pawfgrtab,pawtab,&
+&         optcut_hf,optgr0_hf,optgr1_hf,optgr2_hf,optrad_hf,fock%fock_common%pawfgrtab,pawtab,&
 &         rprimd,dtset%typat,ucvol,xred,typord=1)
          iatom=-1;idir=0
          call ctocprj(atindx,cg,ctocprj_choice,cprj,gmet,gprimd,iatom,idir,&
@@ -1079,12 +1082,47 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
        end if
      end if
 
-     if (fock%optfor) then
-       fock%forces=zero
+     !Fock energy
+     energies%e_exactX=zero
+     if (fock%fock_common%optfor) then
+       fock%fock_common%forces=zero
      end if
-     hybrid_mixing=fock%hybrid_mixing ; hybrid_mixing_sr=fock%hybrid_mixing_sr
-     ! Update data relative to the occupied states in fock
-     call fock_updatecwaveocc(cg,cprj,dtset,fock,energies%e_exactX,indsym,istep,mcg,mcprj,mpi_enreg,nattyp,npwarr,occ,ucvol)
+
+     if (istep==1 .or. istep_updatedfock==fock%fock_common%nnsclo_hf) then
+       ! Update data relative to the occupied states in fock
+       call fock_updatecwaveocc(cg,cprj,dtset,fock,indsym,istep,mcg,mcprj,mpi_enreg,nattyp,npwarr,occ,ucvol)
+       istep_updatedfock=1
+       ! Possibly (re)compute the ACE operator 
+       if(fock%fock_common%use_ACE/=0) then
+         call fock2ACE(cg,cprj,fock,dtset%istwfk,kg,dtset%kptns,dtset%mband,mcg,mcprj,dtset%mgfft,&
+&         dtset%mkmem,mpi_enreg,psps%mpsang,&
+&         dtset%mpw,dtset%natom,dtset%natom,dtset%nband,dtset%nfft,ngfft,dtset%nkpt,dtset%nloalg,npwarr,dtset%nspden,&
+&         dtset%nspinor,dtset%nsppol,dtset%nsym,dtset%ntypat,occ,dtset%optforces,paw_ij,pawtab,ph1d,psps,rprimd,&
+&         dtset%optstress,fock%fock_common%symrec,dtset%typat,usecprj,dtset%use_gpu_cuda,dtset%wtk,xred,ylm,ylmgr)
+       end if
+
+       !Should place a test on whether there should be the final exit of the istep loop. 
+       !This test should use focktoldfe. 
+       !This should update the info in fock%fock_common%fock_converged. 
+       !For the time being, fock%fock_common%fock_converged=.false. , so the loop end with the maximal value of nstep always,
+       !except when nnsclo_hf==1 (so the Fock operator is always updated), in which case, the usual exit tests (toldfe, tolvrs, etc) 
+       !work fine.
+       !if(fock%fock_common%nnsclo_hf==1 .and. fock%fock_common%use_ACE==0)then
+       if(fock%fock_common%nnsclo_hf==1)then
+         fock%fock_common%fock_converged=.TRUE.
+       end if
+
+       !Depending on fockoptmix, possibly restart the mixing procedure for the potential
+       if(mod(dtset%fockoptmix,10)==1)then
+         istep_mix=1
+       end if
+     else
+       istep_updatedfock=istep_updatedfock+1
+     end if
+
+     !Used locally
+     hybrid_mixing=fock%fock_common%hybrid_mixing ; hybrid_mixing_sr=fock%fock_common%hybrid_mixing_sr
+
    end if ! usefock
 
 !  Initialize/update data in the electron-positron case
@@ -1483,7 +1521,8 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
 &     dtfil%filnam_ds(1),initialized0,dtset%iscf,istep,dtset%kptns,&
 &     maxfor,moved_atm_inside,mpi_enreg,dtset%nband,dtset%nkpt,nstep,&
 &     occ,optres,prtfor,prtxml,quit,res2,resid,residm,response,tollist,&
-&     psps%usepaw,vxcavg,dtset%wtk,xred,conv_retcode,electronpositron=electronpositron)
+&     psps%usepaw,vxcavg,dtset%wtk,xred,conv_retcode,&
+&     electronpositron=electronpositron,fock=fock)
      call timab(52,2,tsec)
 
 !    Check if we need to exit the loop
@@ -1571,6 +1610,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
 !  Set XC computation flag
    optxc=1
    if (nkxc>0) then
+! MJV 2017 May 25: you should not be able to get here with iscf < 0
      if (dtset%iscf<0) optxc=2
      if (modulo(dtset%iprcel,100)>=61.and.(dtset%iprcel<71.or.dtset%iprcel>79).and. &
 &     dtset%iscf<10.and. &
@@ -1682,7 +1722,8 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
 &     dtfil%filnam_ds(1),initialized0,dtset%iscf,istep,dtset%kptns,&
 &     maxfor,moved_atm_inside,mpi_enreg,dtset%nband,dtset%nkpt,nstep,&
 &     occ,optres,prtfor,prtxml,quit,res2,resid,residm,response,tollist,&
-&     psps%usepaw,vxcavg,dtset%wtk,xred,conv_retcode,electronpositron=electronpositron)
+&     psps%usepaw,vxcavg,dtset%wtk,xred,conv_retcode,&
+&     electronpositron=electronpositron,fock=fock)
      call timab(52,2,tsec)
 
 !    Check if we need to exit the loop
@@ -2063,6 +2104,11 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
 
 ! Deallocate exact exchange data at the end of the calculation
  if (usefock==1) then
+   if (fock%fock_common%use_ACE/=0) then     
+     call fock_ACE_destroy(fock%fockACE)
+   end if
+   call fock_common_destroy(fock%fock_common)
+   call fock_BZ_destroy(fock%fock_BZ)
    call fock_destroy(fock)
    nullify(fock)
  end if

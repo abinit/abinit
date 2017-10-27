@@ -88,4 +88,5 @@ qph1l
 #%% keywords = EPH 
 #%% description = 
 #%%   anaddb electron-phonon run: instead of using uniform grid of q-points, treat only a given list
+#%% topics = PhononWidth, ElPhonTransport
 #%%<END TEST_INFO>

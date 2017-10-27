@@ -31,13 +31,13 @@
 !!
 !! PARENTS
 !!      driver,evdw_wannier,ingeo,m_cut3d,m_dens,m_effective_potential
-!!      m_effective_potential_file,m_mep,m_paw_pwaves_lmn,m_pred_lotf
-!!      mkcore_paw,mkcore_wvl,mover_effpot,pawmkaewf,pimd_langevin_npt
-!!      pimd_langevin_nvt,pimd_nosehoover_npt,pimd_nosehoover_nvt,prcref
-!!      prcref_PMA,pred_delocint,pred_diisrelax,pred_isokinetic,pred_isothermal
-!!      pred_langevin,pred_moldyn,pred_nose,pred_srkna14,pred_steepdesc
-!!      pred_velverlet,pred_verlet,relaxpol,wrt_moldyn_netcdf
-!!      wvl_setboxgeometry
+!!      m_effective_potential_file,m_fit_polynomial_coeff,m_mep
+!!      m_paw_pwaves_lmn,m_pred_lotf,mkcore_paw,mkcore_wvl,mover_effpot
+!!      pawmkaewf,pimd_langevin_npt,pimd_langevin_nvt,pimd_nosehoover_npt
+!!      pimd_nosehoover_nvt,prcref,prcref_PMA,pred_delocint,pred_diisrelax
+!!      pred_isokinetic,pred_isothermal,pred_langevin,pred_moldyn,pred_nose
+!!      pred_srkna14,pred_steepdesc,pred_velverlet,pred_verlet,relaxpol
+!!      wrt_moldyn_netcdf,wvl_setboxgeometry
 !!
 !! CHILDREN
 !!      matr3inv

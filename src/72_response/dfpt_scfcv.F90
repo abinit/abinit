@@ -346,7 +346,6 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  integer :: my_quit,quitsum_request,timelimit_exit,varid,ncerr,ncid
  integer ABI_ASYNC :: quitsum_async
  integer :: rdwrpaw,spaceComm,sz1,sz2,usexcnhat,Z_kappa
- integer :: mpi_comm_sphgrid
  logical :: need_fermie1,paral_atom,use_nhat_gga
  real(dp) :: wtime_step,now,prev
  real(dp) :: born,born_bar,boxcut,deltae,diffor,diel_q,dum,ecut,ecutf,elast
@@ -354,7 +353,6 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  real(dp) :: ucvol,vxcavg,elmag1
  character(len=500) :: msg
  character(len=fnlen) :: fi1o
- character(len=fnlen) :: fi1o_vtk
  type(ab7_mixing_object) :: mix
  type(efield_type) :: dtefield
 !arrays
@@ -1110,7 +1108,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 & (ipert==dtset%natom+3.or.ipert==dtset%natom+4)) then
    call status(0,dtfil%filstat,iexit,level,'enter dfpt_nselt  ')
    call dfpt_nselt(blkflg,cg,cg1,cplex,&
-&   d2bbb,d2lo,d2nl,ecut,dtset%ecutsm,dtset%effmass,&
+&   d2bbb,d2lo,d2nl,ecut,dtset%ecutsm,dtset%effmass_free,&
 &   gmet,gprimd,gsqcut,idir,&
 &   ipert,istwfk_rbz,kg,kg1,kpt_rbz,kxc,dtset%mband,mgfftf,&
 &   mkmem,mk1mem,mpert,mpi_enreg,psps%mpsang,mpw,mpw1,&

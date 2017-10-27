@@ -234,7 +234,7 @@ module defs_datatypes
 !!  This object contains TABulated data for NC pseudopotentials
 !!  It follows the conventions used in pawtab so that we can reuse
 !!  the PAW routines for the treatment of model core change as well
-!!  as well the code in the atm2fft routines used to build approximated densities
+!!  as the code in the atm2fft routines used to build approximated densities
 !!  from atomic quantities. Methods are defined in m_psps.
 !!
 !! SOURCE

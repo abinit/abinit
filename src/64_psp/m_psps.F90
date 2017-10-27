@@ -32,6 +32,7 @@ module m_psps
  use m_errors
  use m_xmpi
  use m_nctk
+ use m_copy
 #ifdef HAVE_NETCDF
  use netcdf
 #endif
@@ -54,11 +55,13 @@ module m_psps
  public :: psps_init_global        ! Allocate and init all part of psps structure that are independent of a given dataset.
  public :: psps_init_from_dtset    ! Allocate and init all part of psps structure that are dependent of a given dataset.
  public :: psps_free               ! Deallocate all memory of psps structure.
+ public :: psps_copy               ! Copy the psps structure.
  public :: psps_print              ! Print info on the pseudopotentials.
  public :: psps_ncwrite            ! Write psps data in netcdf format.
 
- public :: nctab_init              ! Create the object
+ public :: nctab_init              ! Create the object.
  public :: nctab_free              ! Free memory.
+ public :: nctab_copy              ! Copy the object.
  public :: nctab_eval_tvalespl     ! Evaluate spline-fit of the atomic pseudo valence charge in reciprocal space.
  public :: nctab_eval_tcorespl     ! Evalute spline-fit of the model core charge in reciprocal space.
  public :: nctab_mixalch           ! Mix the pseudopotential tables. Used for alchemical mixing.
@@ -531,7 +534,7 @@ end subroutine psps_init_from_dtset
 !! psps=<type pseudopotential_type>the pseudopotentials description
 !!
 !! PARENTS
-!!      driver
+!!      driver,m_ddb_hdr
 !!
 !! CHILDREN
 !!      nctab_free,nctab_init
@@ -638,6 +641,160 @@ subroutine psps_free(psps)
  end if
 
 end subroutine psps_free
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_psps/psps_copy
+!! NAME
+!! psps_copy
+!!
+!! FUNCTION
+!! Copy the psps structure.
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!
+!! PARENTS
+!!      m_ddb_hdr
+!!
+!! CHILDREN
+!!      nctab_free,nctab_init
+!!
+!! SOURCE
+
+subroutine psps_copy(pspsin, pspsout)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'psps_copy'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ type(pseudopotential_type),intent(in) :: pspsin
+ type(pseudopotential_type),intent(out) :: pspsout
+
+!Local variables-------------------------------
+!scalars
+ integer :: ii
+
+! *************************************************************************
+
+ ! integer
+ pspsout%dimekb         = pspsin%dimekb
+ pspsout%lmnmax         = pspsin%lmnmax
+ pspsout%lnmax          = pspsin%lnmax
+ pspsout%mproj          = pspsin%mproj
+ pspsout%mpsang         = pspsin%mpsang
+ pspsout%mpspso         = pspsin%mpspso
+ pspsout%mpssoang       = pspsin%mpssoang
+ pspsout%mqgrid_ff      = pspsin%mqgrid_ff
+ pspsout%mqgrid_vl      = pspsin%mqgrid_vl
+ pspsout%mtypalch       = pspsin%mtypalch
+ pspsout%npsp           = pspsin%npsp
+ pspsout%npspalch       = pspsin%npspalch
+ pspsout%ntypat         = pspsin%ntypat
+ pspsout%ntypalch       = pspsin%ntypalch
+ pspsout%ntyppure       = pspsin%ntyppure
+ pspsout%n1xccc         = pspsin%n1xccc
+ pspsout%optnlxccc      = pspsin%optnlxccc
+ pspsout%positron       = pspsin%positron
+ pspsout%usepaw         = pspsin%usepaw
+ pspsout%usewvl         = pspsin%usewvl
+ pspsout%useylm         = pspsin%useylm
+ pspsout%nc_xccc_gspace = pspsin%nc_xccc_gspace
+
+ ! logical
+ pspsout%vlspl_recipSpace = pspsin%vlspl_recipSpace
+
+ ! integer allocatable
+ if (allocated(pspsin%algalch)) then
+   call alloc_copy( pspsin%algalch, pspsout%algalch)
+ end if
+ if (allocated(pspsin%indlmn)) then
+   call alloc_copy( pspsin%indlmn, pspsout%indlmn)
+ end if
+ if (allocated(pspsin%pspdat)) then
+   call alloc_copy( pspsin%pspdat, pspsout%pspdat)
+ end if
+ if (allocated(pspsin%pspcod)) then
+   call alloc_copy( pspsin%pspcod, pspsout%pspcod)
+ end if
+ if (allocated(pspsin%pspso)) then
+   call alloc_copy( pspsin%pspso, pspsout%pspso)
+ end if
+ if (allocated(pspsin%pspxc)) then
+   call alloc_copy( pspsin%pspxc, pspsout%pspxc)
+ end if
+
+ ! real allocatable
+ if (allocated(pspsin%ekb)) then
+   call alloc_copy( pspsin%ekb, pspsout%ekb)
+ end if
+ if (allocated(pspsin%ffspl)) then
+   call alloc_copy( pspsin%ffspl, pspsout%ffspl)
+ end if
+ if (allocated(pspsin%mixalch)) then
+   call alloc_copy( pspsin%mixalch, pspsout%mixalch)
+ end if
+ if (allocated(pspsin%qgrid_ff)) then
+   call alloc_copy( pspsin%qgrid_ff, pspsout%qgrid_ff)
+ end if
+ if (allocated(pspsin%qgrid_vl)) then
+   call alloc_copy( pspsin%qgrid_vl, pspsout%qgrid_vl)
+ end if
+ if (allocated(pspsin%vlspl)) then
+   call alloc_copy( pspsin%vlspl, pspsout%vlspl)
+ end if
+ if (allocated(pspsin%dvlspl)) then
+   call alloc_copy( pspsin%dvlspl, pspsout%dvlspl)
+ end if
+ if (allocated(pspsin%xcccrc)) then
+   call alloc_copy( pspsin%xcccrc, pspsout%xcccrc)
+ end if
+ if (allocated(pspsin%xccc1d)) then
+   call alloc_copy( pspsin%xccc1d, pspsout%xccc1d)
+ end if
+ if (allocated(pspsin%zionpsp)) then
+   call alloc_copy( pspsin%zionpsp, pspsout%zionpsp)
+ end if
+ if (allocated(pspsin%ziontypat)) then
+   call alloc_copy( pspsin%ziontypat, pspsout%ziontypat)
+ end if
+ if (allocated(pspsin%znuclpsp)) then
+   call alloc_copy( pspsin%znuclpsp, pspsout%znuclpsp)
+ end if
+ if (allocated(pspsin%znucltypat)) then
+   call alloc_copy( pspsin%znucltypat, pspsout%znucltypat)
+ end if
+
+ ! allocate and copy character strings
+ ABI_ALLOCATE(pspsout%filpsp,(pspsout%npsp))
+ ABI_ALLOCATE(pspsout%title,(pspsout%npsp))
+ ABI_ALLOCATE(pspsout%md5_pseudos,(pspsout%npsp))
+ do ii=1,pspsout%npsp
+   pspsout%filpsp(ii) = pspsin%filpsp(ii)
+   pspsout%title(ii) = pspsin%title(ii)
+   pspsout%md5_pseudos(ii) = pspsin%md5_pseudos(ii)
+ end do
+
+ ! allocate and copy objects
+ if (allocated(pspsin%nctab)) then
+   ABI_DATATYPE_ALLOCATE(pspsout%nctab,(pspsout%ntypat))
+   do ii=1,pspsout%ntypat
+     call nctab_copy(pspsin%nctab(ii), pspsout%nctab(ii))
+   end do
+ end if
+
+ call psp2params_copy(pspsin%gth_params, pspsout%gth_params)
+
+end subroutine psps_copy
 !!***
 
 !----------------------------------------------------------------------
@@ -893,7 +1050,6 @@ subroutine psps_ncwrite(psps, path)
 !Local variables-------------------------------
 !scalars
  integer :: ipsp,itypat,ncid,ncerr
- character(len=500) :: msg
 
 ! *************************************************************************
 
@@ -1082,6 +1238,63 @@ end subroutine psp2params_init
 
 !----------------------------------------------------------------------
 
+!!****f* m_psps/psp2params_copy
+!! NAME
+!! psp2params_copy
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!      m_psps
+!!
+!! CHILDREN
+!!      nctab_free,nctab_init
+!!
+!! SOURCE
+
+subroutine psp2params_copy(gth_paramsin, gth_paramsout)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'psp2params_copy'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ type(pseudopotential_gth_type),intent(in) :: gth_paramsin
+ type(pseudopotential_gth_type),intent(out) :: gth_paramsout
+
+! *********************************************************************
+
+ if (allocated(gth_paramsin%psppar)) then
+   call alloc_copy( gth_paramsin%psppar, gth_paramsout%psppar)
+ end if
+ if (allocated(gth_paramsin%radii_cf)) then
+   call alloc_copy( gth_paramsin%radii_cf, gth_paramsout%radii_cf)
+ end if
+ if (allocated(gth_paramsin%psp_k_par)) then
+   call alloc_copy( gth_paramsin%psp_k_par, gth_paramsout%psp_k_par)
+ end if
+ if (allocated(gth_paramsin%hasGeometry)) then
+   call alloc_copy( gth_paramsin%hasGeometry, gth_paramsout%hasGeometry)
+ end if
+ if (allocated(gth_paramsin%set)) then
+   call alloc_copy( gth_paramsin%set, gth_paramsout%set)
+ end if
+
+end subroutine psp2params_copy
+!!***
+
+!----------------------------------------------------------------------
+
 !!****f* m_psps/psp2params_free
 !! NAME
 !! psp2params_free
@@ -1250,6 +1463,55 @@ subroutine nctab_free(nctab)
 end subroutine nctab_free
 !!***
 
+!!****f* m_psps/nctab_copy
+!! NAME
+!!  nctab_copy
+!!
+!! FUNCTION
+!!
+!! PARENTS
+!!      m_psps
+!!
+!! CHILDREN
+!!      nctab_free,nctab_init
+!!
+!! SOURCE
+
+subroutine nctab_copy(nctabin, nctabout)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'nctab_copy'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ type(nctab_t),intent(in) :: nctabin
+ type(nctab_t),intent(out) :: nctabout
+
+! *************************************************************************
+
+ nctabout%mqgrid_vl  = nctabin%mqgrid_vl
+ nctabout%has_tvale  = nctabin%has_tvale
+ nctabout%has_tcore  = nctabin%has_tcore
+ nctabout%dncdq0     = nctabin%dncdq0
+ nctabout%d2ncdq0    = nctabin%d2ncdq0
+ nctabout%dnvdq0     = nctabin%dnvdq0
+
+ if (allocated(nctabin%tvalespl)) then
+   call alloc_copy( nctabin%tvalespl, nctabout%tvalespl)
+ end if
+ if (allocated(nctabin%tcorespl)) then
+   call alloc_copy( nctabin%tcorespl, nctabout%tcorespl)
+ end if
+
+end subroutine nctab_copy
+!!***
+
 !!****f* m_psps/nctab_eval_tvalespl
 !! NAME
 !!  nctab_eval_tvalespl
@@ -1269,7 +1531,7 @@ end subroutine nctab_free
 !!  nctab%d2ncdq0
 !!
 !! PARENTS
-!!      psp8in
+!!      psp8in,psp9in
 !!
 !! CHILDREN
 !!      nctab_free,nctab_init
@@ -1298,7 +1560,7 @@ subroutine nctab_eval_tvalespl(nctab, zion, mesh, valr, mqgrid_vl, qgrid_vl)
 
 !Local variables-------------------------------
 !scalars
- real(dp) :: amesh,fact,yp1,ypn,d2nvdq0
+ real(dp) :: fact,yp1,ypn,d2nvdq0
 
 ! *************************************************************************
 
@@ -1377,7 +1639,6 @@ subroutine nctab_eval_tcorespl(nctab, n1xccc, xcccrc, xccc1d, mqgrid_vl, qgrid_v
 
 !Local variables-------------------------------
 !scalars
- integer :: iq
  real(dp) :: amesh,yp1,ypn 
  type(pawrad_type) :: core_mesh
 

@@ -201,7 +201,7 @@
  real(dp) :: vdwstr(6),vprtrb_dum(2)
  real(dp) :: dummy_in(0)
  real(dp) :: dummy_out1(0),dummy_out2(0),dummy_out3(0),dummy_out4(0),dummy_out5(0),dummy_out6(0),dummy_out7(0) 
- real(dp),allocatable :: dummy(:),dyfr_dum(:,:,:),gr_dum(:,:),rhog_ep(:,:),v_dum(:),vxc_loc(:,:)
+ real(dp),allocatable :: dummy(:),dyfr_dum(:,:,:),gr_dum(:,:),rhog_ep(:,:),v_dum(:)
  real(dp),allocatable :: vxctotg(:,:)
  character(len=10) :: EPName(1:2)=(/"Electronic","Positronic"/)
 
@@ -473,8 +473,8 @@
 !In cartesian coordinates (symmetric storage) 
 
  strten(:)=kinstr(:)+ewestr(:)+corstr(:)+strsxc(:)+harstr(:)+lpsstr(:)+nlstr(:)
- if (usefock==1 .and. associated(fock).and.fock%optstr) then
-   strten(:)=strten(:)+fock%stress(:)
+ if (usefock==1 .and. associated(fock).and.fock%fock_common%optstr) then
+   strten(:)=strten(:)+fock%fock_common%stress(:)
  end if
 
 !Add contributions for constant E or D calculation.

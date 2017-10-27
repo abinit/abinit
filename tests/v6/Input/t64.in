@@ -127,4 +127,5 @@ nbdbuf 0
 #%%   the molecule is non spin polarized 
 #%%   Over 1200 WARNINGS.
 #%%   This test must give the same results of the test 63
+#%% topics = nonlinear
 #%%<END TEST_INFO>

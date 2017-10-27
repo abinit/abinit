@@ -838,9 +838,10 @@ end function ebands_from_dtset
 !!  (only deallocate)
 !!
 !! PARENTS
-!!      bethe_salpeter,dfpt_looppert,eig2tot,elphon,eph,gstate,m_ebands
-!!      m_exc_spectra,m_haydock,m_ioarr,m_iowf,m_shirley,m_sigmaph,m_wfk
-!!      mlwfovlp_qp,nonlinear,optic,outscfcv,respfn,screening,sigma,wfk_analyze
+!!      bethe_salpeter,dfpt_looppert,eig2tot,elphon,eph,fold2Bloch,gstate
+!!      m_ebands,m_exc_spectra,m_haydock,m_ioarr,m_iowf,m_shirley,m_sigmaph
+!!      m_wfk,mlwfovlp_qp,nonlinear,optic,outscfcv,respfn,screening,sigma
+!!      wfk_analyze
 !!
 !! CHILDREN
 !!      alloc_copy,ebands_free,ebands_write,kpath_free,kpath_print,wrtout
@@ -1805,7 +1806,7 @@ subroutine ebands_get_erange(ebands, nkpts, kpoints, band_block, emin, emax)
 
 !Local variables-------------------------------
 !scalars
- integer :: spin,band,ik,ikpt,cnt
+ integer :: spin,ik,ikpt,cnt
  type(kptrank_type) :: krank
 
 ! *************************************************************************
@@ -2387,7 +2388,6 @@ subroutine ebands_set_scheme(ebands,occopt,tsmear,spinmagntarget,prtvol)
 !scalars
  real(dp),parameter :: stmbias0=zero
  integer :: my_prtvol
- character(len=500) :: msg
 
 ! *************************************************************************
 
@@ -3026,7 +3026,7 @@ type(edos_t) function ebands_get_edos(ebands,cryst,intmeth,step,broad,comm) resu
 
 !Local variables-------------------------------
 !scalars
- integer :: iw,nw,spin,band,ikpt,ief,nproc,my_rank,mpierr,cnt,ierr,bcorr
+ integer :: nw,spin,band,ikpt,ief,nproc,my_rank,mpierr,cnt,ierr,bcorr
  real(dp) :: max_ene,min_ene,wtk,max_occ
  character(len=500) :: msg
  type(stats_t) :: ediffs
@@ -4367,7 +4367,6 @@ subroutine ebands_get_jdos(ebands, cryst, intmeth, step, broad, comm, ierr)
  type(stats_t) :: ediffs
  type(t_tetrahedron) :: tetra
  character(len=500) :: msg
- character(len=80) :: errstr
  character(len=fnlen) :: path
 !arrays
  integer :: val_idx(ebands%nkpt,ebands%nsppol)
@@ -4588,7 +4587,7 @@ subroutine ebands_prtbltztrp(ebands, crystal, fname_radix, tau_k)
      MSG_ERROR(msg)
    end if
 
-   ewindow = 1.1_dp * ebands%fermie-minval(ebands%eig(1, :, isppol))
+   ewindow = 1.1_dp * (ebands%fermie-minval(ebands%eig(1, :, isppol)))
    write (iout, '(a)') "GENE                      # Format of input: generic format, with Symmetries"
    write (iout, '(a)') "0 0 0 0.0                 # iskip (not presently used) idebug setgap shiftgap"
    write (iout, '(E15.5,a,2F10.4,a)') ebands%fermie*ha2ryd, " 0.0005 ", ewindow*ha2ryd, nelec(isppol), &
@@ -5194,7 +5193,7 @@ subroutine ebands_write_gnuplot(ebands, prefix, kptbounds)
 
 !Local variables-------------------------------
 !scalars
- integer :: unt,gpl_unt,ik,spin,band,ii,start,nkbounds
+ integer :: unt,gpl_unt,ik,spin,ii,start,nkbounds
  character(len=500) :: msg,fmt
  character(len=fnlen) :: datafile,basefile
 !arrays
