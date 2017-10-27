@@ -262,7 +262,7 @@ subroutine elpa_func_allocate(elpa_hdl,mpi_comm_parent,process_row,process_col,g
 
 #ifdef HAVE_ELPA_FORTRAN2008
  elpa_hdl%elpa => elpa_allocate()
- if (err==0.and.present(gpu)) call elpa_hdl%elpa%set("gpu",gpu,err)
+ if (err==ELPA_OK.and.present(gpu)) call elpa_hdl%elpa%set("gpu",gpu,err)
 #else
  if (err==0.and.present(gpu)) elpa_hdl%gpu=gpu
 #endif
@@ -449,31 +449,36 @@ subroutine elpa_func_get_communicators(elpa_hdl,mpi_comm_parent,process_row,proc
  end if
 
 #if (defined HAVE_LINALG_ELPA_2017)
- if (err==0) then
+ if (err==ELPA_OK) then
    varname='mpi_comm_parent'
    call elpa_hdl%elpa%set(trim(varname),mpi_comm_parent,err)
  end if
- if (err==0) then
+ if (err==ELPA_OK) then
    varname='process_row'
    call elpa_hdl%elpa%set(trim(varname),process_row,err)
  end if
- if (err==0) then
+ if (err==ELPA_OK) then
    varname='process_col'
    call elpa_hdl%elpa%set(trim(varname),process_col,err)
  end if
- if (err==0) then
+ if (err==ELPA_OK) then
    varname=''
    if (elpa_hdl%elpa%setup()/=ELPA_OK) err=ELPA_ERROR
  endif
-#elif (defined HAVE_LINALG_ELPA_2016)
- err=elpa_get_communicators(mpi_comm_elpa,process_row,process_col,elpa_hdl%elpa_comm_rows,elpa_hdl%elpa_comm_cols)
+#else
+ elpa_hdl%mpi_comm_parent=mpi_comm_parent
+ elpa_hdl%process_row=process_row
+ elpa_hdl%process_col=process_col
+#if (defined HAVE_LINALG_ELPA_2016)
+ err=elpa_get_communicators(mpi_comm_parent,process_row,process_col,elpa_hdl%elpa_comm_rows,elpa_hdl%elpa_comm_cols)
 #elif (defined HAVE_LINALG_ELPA_2015)
- err=get_elpa_row_col_comms(mpi_comm_elpa,process_row,process_col,elpa_hdl%elpa_comm_rows,elpa_hdl%elpa_comm_cols)
+ err=get_elpa_row_col_comms(mpi_comm_parent,process_row,process_col,elpa_hdl%elpa_comm_rows,elpa_hdl%elpa_comm_cols)
 #elif (defined HAVE_LINALG_ELPA_2014) || (defined HAVE_LINALG_ELPA_2013)
- call get_elpa_row_col_comms(mpi_comm_elpa,process_row,process_col,elpa_hdl%elpa_comm_rows,elpa_hdl%elpa_comm_cols)
+ call get_elpa_row_col_comms(mpi_comm_parent,process_row,process_col,elpa_hdl%elpa_comm_rows,elpa_hdl%elpa_comm_cols)
 #else
 !ELPA-LEGACY-2017
- err=get_elpa_communicators(mpi_comm_elpa,process_row,process_col,elpa_hdl%elpa_comm_rows,elpa_hdl%elpa_comm_cols)
+ err=get_elpa_communicators(mpi_comm_parent,process_row,process_col,elpa_hdl%elpa_comm_rows,elpa_hdl%elpa_comm_cols)
+#endif
 #endif
 
  call elpa_func_error_handler(err_code=err,err_msg='Error in elpa_get_communicators',err_varname=varname)
@@ -536,19 +541,19 @@ subroutine elpa_func_set_matrix(elpa_hdl,na,nblk,local_nrows,local_ncols)
  end if
 
 #ifdef HAVE_ELPA_FORTRAN2008
- if (err==0) then
+ if (err==ELPA_OK) then
    varname="na"
    call elpa_hdl%elpa%set(trim(varname),na,err)
  end if
- if (err==0) then
+ if (err==ELPA_OK) then
    varname="nblk"
    call elpa_hdl%elpa%set(trim(varname),nblk,err)
  end if
- if (err==0) then
+ if (err==ELPA_OK) then
    varname="local_nrows"
    call elpa_hdl%elpa%set(trim(varname),local_nrows,err)
  end if
- if (err==0) then
+ if (err==ELPA_OK) then
    varname="local_ncols"
    call elpa_hdl%elpa%set(trim(varname),local_ncols,err)
  end if
@@ -586,7 +591,7 @@ end subroutine elpa_func_set_matrix
 !!                      even if only a part of the eigenvalues is needed.
 !!
 !! SIDE EFFECTS
-!! aa(local_nrows,local_ncols)=Distributed matrix for which eigenvalues are to be computed.
+!!  aa(local_nrows,local_ncols)=Distributed matrix for which eigenvalues are to be computed.
 !!                    Distribution is like in Scalapack.
 !!                    The full matrix must be set (not only one half like in scalapack).
 !!                    Destroyed on exit (upper and lower half).
@@ -643,13 +648,13 @@ subroutine elpa_func_solve_evp_1stage_real(elpa_hdl,aa,qq,ev,nev)
 #endif
 
 #if  (defined HAVE_LINALG_ELPA_2017)
- if (err==0) call elpa_hdl%elpa%set('nev',nev,err)
- if (err==0) call elpa_hdl%elpa%set("solver",ELPA_SOLVER_1STAGE,err)
- if (err==0) call elpa_hdl%elpa%eigenvectors(aa,ev,qq,err)
- success=(err==0)
+ if (err==ELPA_OK) call elpa_hdl%elpa%set('nev',nev,err)
+ if (err==ELPA_OK) call elpa_hdl%elpa%set("solver",ELPA_SOLVER_1STAGE,err)
+ if (err==ELPA_OK) call elpa_hdl%elpa%eigenvectors(aa,ev,qq,err)
+ success=(err==ELPA_OK)
 #elif  (defined HAVE_LINALG_ELPA_2016)
  success=elpa_solve_evp_real_1stage(elpa_hdl%na,nev,aa,elpa_hdl%local_nrows,ev,qq,elpa_hdl%local_nrows,&
-&                       elpa_hdl%nblk,elpa_hdl%local_cols,elpa_hdl%elpa_comm_rows,elpa_hdl%elpa_comm_cols)
+&                       elpa_hdl%nblk,elpa_hdl%local_ncols,elpa_hdl%elpa_comm_rows,elpa_hdl%elpa_comm_cols)
 #elif (defined HAVE_LINALG_ELPA_2015) || (defined HAVE_LINALG_ELPA_2014)
  success=solve_evp_real(elpa_hdl%na,nev,aa,elpa_hdl%local_nrows,ev,qq,elpa_hdl%local_nrows,&
 &                       elpa_hdl%nblk,elpa_hdl%elpa_comm_rows,elpa_hdl%elpa_comm_cols)
@@ -659,7 +664,7 @@ subroutine elpa_func_solve_evp_1stage_real(elpa_hdl,aa,qq,ev,nev)
 #else
 !ELPA-LEGACY-2017
  success=elpa_solve_evp_real_1stage_double(elpa_hdl%na,nev,aa,elpa_hdl%local_nrows,ev,qq,elpa_hdl%local_nrows,&
-&        elpa_hdl%nblk,elpa_hdl%local_ncols,elpa_hdl%elpa_comm_rows,elpa_hdl%elpa_comm_cols,elpa_hdl%mpi_comm_elpa,.false.)
+&        elpa_hdl%nblk,elpa_hdl%local_ncols,elpa_hdl%elpa_comm_rows,elpa_hdl%elpa_comm_cols,elpa_hdl%mpi_comm_parent,.false.)
 #endif
 
  if (.not.success) call elpa_func_error_handler(err_msg='Error in solve_evp_1stage_real!')
@@ -687,7 +692,7 @@ end subroutine elpa_func_solve_evp_1stage_real
 !!                      even if only a part of the eigenvalues is needed.
 !!
 !! SIDE EFFECTS
-!! aa(local_nrows,local_cols)=Distributed matrix for which eigenvalues are to be computed.
+!!  aa(local_nrows,local_ncols)=Distributed matrix for which eigenvalues are to be computed.
 !!                    Distribution is like in Scalapack.
 !!                    The full matrix must be set (not only one half like in scalapack).
 !!                    Destroyed on exit (upper and lower half).
@@ -745,13 +750,13 @@ subroutine elpa_func_solve_evp_1stage_complex(elpa_hdl,aa,qq,ev,nev)
 #endif
 
 #if  (defined HAVE_LINALG_ELPA_2017)
- if (err==0) call elpa_hdl%elpa%set('nev',nev,err)
- if (err==0) call elpa_hdl%elpa%set("solver",ELPA_SOLVER_1STAGE,err)
- if (err==0) call elpa_hdl%elpa%eigenvectors(aa,ev,qq,err)
- success=(err==0)
+ if (err==ELPA_OK) call elpa_hdl%elpa%set('nev',nev,err)
+ if (err==ELPA_OK) call elpa_hdl%elpa%set("solver",ELPA_SOLVER_1STAGE,err)
+ if (err==ELPA_OK) call elpa_hdl%elpa%eigenvectors(aa,ev,qq,err)
+ success=(err==ELPA_OK)
 #elif  (defined HAVE_LINALG_ELPA_2016)
  success=elpa_solve_evp_complex_1stage(elpa_hdl%na,nev,aa,elpa_hdl%local_nrows,ev,qq,elpa_hdl%local_nrows,&
-&                       elpa_hdl%nblk,elpa_hdl%local_cols,elpa_hdl%elpa_comm_rows,elpa_hdl%elpa_comm_cols)
+&                       elpa_hdl%nblk,elpa_hdl%local_ncols,elpa_hdl%elpa_comm_rows,elpa_hdl%elpa_comm_cols)
 #elif (defined HAVE_LINALG_ELPA_2015) || (defined HAVE_LINALG_ELPA_2014)
  success=solve_evp_complex(elpa_hdl%na,nev,aa,elpa_hdl%local_nrows,ev,qq,elpa_hdl%local_nrows,&
 &                       elpa_hdl%nblk,elpa_hdl%elpa_comm_rows,elpa_hdl%elpa_comm_cols)
@@ -761,7 +766,7 @@ subroutine elpa_func_solve_evp_1stage_complex(elpa_hdl,aa,qq,ev,nev)
 #else
 !ELPA-LEGACY-2017
  success=elpa_solve_evp_complex_1stage_double(elpa_hdl%na,nev,aa,elpa_hdl%local_nrows,ev,qq,elpa_hdl%local_nrows,&
-&        elpa_hdl%nblk,elpa_hdl%local_ncols,elpa_hdl%elpa_comm_rows,elpa_hdl%elpa_comm_cols,elpa_hdl%mpi_comm_elpa,.false.)
+&        elpa_hdl%nblk,elpa_hdl%local_ncols,elpa_hdl%elpa_comm_rows,elpa_hdl%elpa_comm_cols,elpa_hdl%mpi_comm_parent,.false.)
 #endif
 
  if (.not.success) call elpa_func_error_handler(err_msg='Error in solve_evp_1stage_complex!')
@@ -834,10 +839,10 @@ subroutine elpa_func_cholesky_real(elpa_hdl,aa)
 
 #if  (defined HAVE_LINALG_ELPA_2017)
  call elpa_hdl%elpa%cholesky(aa,err)
- success=(err==0)
+ success=(err==ELPA_OK)
 #elif (defined HAVE_LINALG_ELPA_2016)
  success = elpa_cholesky_real(elpa_hdl%na,aa,elpa_hdl%local_nrows,elpa_hdl%nblk,elpa_hdl%local_ncols,&
-&                             elpa_comm_rows,elpa_comm_cols,.false.)
+&                             elpa_hdl%elpa_comm_rows,elpa_hdl%elpa_comm_cols,.false.)
 #elif (defined HAVE_LINALG_ELPA_2015)
  call cholesky_real(elpa_hdl%na,aa,elpa_hdl%local_nrows,elpa_hdl%nblk,&
                     elpa_hdl%elpa_comm_rows,elpa_hdl%elpa_comm_cols,.false.,success)
@@ -867,13 +872,6 @@ end subroutine elpa_func_cholesky_real
 !!  Wrapper to elpa_cholesky_complex ELPA function
 !!
 !! INPUTS
-!!  na=Order of matrix
-!!  lda=Leading dimension of aa
-!!  matrixCols=local columns of matrix a
-!!  nblk=Blocksize of cyclic distribution, must be the same in both directions!
-!!  mpi_comm_elpa=Global communicator for the calculations
-!!  process_row=Row coordinate of the calling process in the process grid (in)
-!!  process_col=Column coordinate of the calling process in the process grid (in)
 !!
 !! SIDE EFFECTS
 !!  aa(local_nrows,local_ncols)=Distributed matrix which should be factorized.
@@ -929,10 +927,10 @@ subroutine elpa_func_cholesky_complex(elpa_hdl,aa)
 
 #if  (defined HAVE_LINALG_ELPA_2017)
  call elpa_hdl%elpa%cholesky(aa,err)
- success=(err==0)
+ success=(err==ELPA_OK)
 #elif (defined HAVE_LINALG_ELPA_2016)
  success = elpa_cholesky_complex(elpa_hdl%na,aa,elpa_hdl%local_nrows,elpa_hdl%nblk,elpa_hdl%local_ncols,&
-&                                elpa_comm_rows,elpa_comm_cols,.false.)
+&                                elpa_hdl%elpa_comm_rows,elpa_hdl%elpa_comm_cols,.false.)
 #elif (defined HAVE_LINALG_ELPA_2015)
  call cholesky_complex(elpa_hdl%na,aa,elpa_hdl%local_nrows,elpa_hdl%nblk,&
 &                      elpa_hdl%elpa_comm_rows,elpa_hdl%elpa_comm_cols,.false.,success)
@@ -1017,10 +1015,10 @@ subroutine elpa_func_invert_triangular_real(elpa_hdl,aa)
 
 #if  (defined HAVE_LINALG_ELPA_2017)
  call elpa_hdl%elpa%invert_triangular(aa,err)
- success=(err==0)
+ success=(err==ELPA_OK)
 #elif (defined HAVE_LINALG_ELPA_2016)
  success = elpa_invert_trm_real(elpa_hdl%na,aa,elpa_hdl%local_nrows,elpa_hdl%nblk,elpa_hdl%local_ncols,&
-&                               elpa_comm_rows,elpa_comm_cols,.false.)
+&                               elpa_hdl%elpa_comm_rows,elpa_hdl%elpa_comm_cols,.false.)
 #elif (defined HAVE_LINALG_ELPA_2015)
  call invert_trm_real(elpa_hdl%na,aa,elpa_hdl%local_nrows,elpa_hdl%nblk,&
                          elpa_hdl%elpa_comm_rows,elpa_hdl%elpa_comm_cols,.false.,success)
@@ -1106,10 +1104,10 @@ subroutine elpa_func_invert_triangular_complex(elpa_hdl,aa)
 
 #if  (defined HAVE_LINALG_ELPA_2017)
  call elpa_hdl%elpa%invert_triangular(aa,err)
- success=(err==0)
+ success=(err==ELPA_OK)
 #elif (defined HAVE_LINALG_ELPA_2016)
  success = elpa_invert_trm_complex(elpa_hdl%na,aa,elpa_hdl%local_nrows,elpa_hdl%nblk,elpa_hdl%local_ncols,&
-&                                  elpa_comm_rows,elpa_comm_cols,.false.)
+&                                  elpa_hdl%elpa_comm_rows,elpa_hdl%elpa_comm_cols,.false.)
 #elif (defined HAVE_LINALG_ELPA_2015)
  call invert_trm_complex(elpa_hdl%na,aa,elpa_hdl%local_nrows,elpa_hdl%nblk,&
                          elpa_hdl%elpa_comm_rows,elpa_hdl%elpa_comm_cols,.false.,success)
@@ -1221,19 +1219,19 @@ subroutine elpa_func_hermitian_multiply_real(elpa_hdl,uplo_a,uplo_c,ncb,aa,bb,lo
 #if  (defined HAVE_LINALG_ELPA_2017)
  call elpa_hdl%elpa%hermitian_multiply(uplo_a,uplo_c,ncb,aa,bb,local_nrows_b,local_ncols_b,&
 &                                      cc,local_nrows_c,local_ncols_c,err)
- success=(err==0)
+ success=(err==ELPA_OK)
 #elif (defined HAVE_LINALG_ELPA_2016)
  success = elpa_mult_at_b_real(uplo_a,uplo_c,elpa_hdl%na,ncb,aa,elpa_hdl%local_nrows,elpa_hdl%local_ncols,&
 &          bb,local_nrows_b,local_ncols_b,elpa_hdl%nblk,elpa_hdl%elpa_comm_rows,elpa_hdl%elpa_comm_cols,&
 &          cc,local_nrows_c,local_ncols_c)
 #elif (defined HAVE_LINALG_ELPA_2015) || (defined HAVE_LINALG_ELPA_2014) || (defined HAVE_LINALG_ELPA_2013)
- call mult_at_b_real(uplo_a,uplo_c,elpa_hdl%na,ncb,aa,elpa_hdl%local_nrows,bb,elpa_hdl%local_nrows_b,&
-&               elpa_hdl%nblk,elpa_hdl%elpa_comm_rows,elpa_hdl%elpa_comm_cols,cc,elpa_hdl%local_nrows_c)
+ call mult_at_b_real(uplo_a,uplo_c,elpa_hdl%na,ncb,aa,elpa_hdl%local_nrows,bb,local_nrows_b,&
+&               elpa_hdl%nblk,elpa_hdl%elpa_comm_rows,elpa_hdl%elpa_comm_cols,cc,local_nrows_c)
 #else
 !ELPA-LEGACY-2017
- success =  elpa_mult_at_b_real_double(uplo_a,uplo_c,elpa_hdl%na,ncb,aa,elpa_hdl%local_nrows,elpa_hdl%local_ncols,&
-&           bb,elpa_hdl%local_nrows_b,elpa_hdl%local_ncols_b,elpa_hdl%nblk,elpa_hdl%elpa_comm_rows,&
-&           elpa_hdl%elpa_comm_cols,cc,elpa_hdl%local_nrows_c,elpa_hdl%local_ncols_c)
+ success =  elpa_mult_at_b_real_double(uplo_a,uplo_c,elpa_hdl%na,ncb,aa,elpa_hdl%local_nrows,&
+&           elpa_hdl%local_ncols,bb,local_nrows_b,local_ncols_b,elpa_hdl%nblk,elpa_hdl%elpa_comm_rows,&
+&           elpa_hdl%elpa_comm_cols,cc,local_nrows_c,local_ncols_c)
 #endif
 
  if (.not.success) call elpa_func_error_handler(err_msg='Error in hermitian_multiply_real!')
@@ -1331,19 +1329,19 @@ subroutine elpa_func_hermitian_multiply_complex(elpa_hdl,uplo_a,uplo_c,ncb,aa,bb
 #if  (defined HAVE_LINALG_ELPA_2017)
  call elpa_hdl%elpa%hermitian_multiply(uplo_a,uplo_c,ncb,aa,bb,local_nrows_b,local_ncols_b,&
 &                                      cc,local_nrows_c,local_ncols_c,err)
- success=(err==0)
+ success=(err==ELPA_OK)
 #elif (defined HAVE_LINALG_ELPA_2016)
- success = elpa_mult_at_b_complex(uplo_a,uplo_c,elpa_hdl%na,ncb,aa,elpa_hdl%local_nrows,elpa_hdl%local_ncols,&
+ success = elpa_mult_ah_b_complex(uplo_a,uplo_c,elpa_hdl%na,ncb,aa,elpa_hdl%local_nrows,elpa_hdl%local_ncols,&
 &          bb,local_nrows_b,local_ncols_b,elpa_hdl%nblk,elpa_hdl%elpa_comm_rows,elpa_hdl%elpa_comm_cols,&
 &          cc,local_nrows_c,local_ncols_c)
 #elif (defined HAVE_LINALG_ELPA_2015) || (defined HAVE_LINALG_ELPA_2014) || (defined HAVE_LINALG_ELPA_2013)
- call mult_at_b_complex(uplo_a,uplo_c,elpa_hdl%na,ncb,aa,elpa_hdl%local_nrows,bb,elpa_hdl%local_nrows_b,&
-&               elpa_hdl%nblk,elpa_hdl%elpa_comm_rows,elpa_hdl%elpa_comm_cols,cc,elpa_hdl%local_nrows_c)
+ call mult_ah_b_complex(uplo_a,uplo_c,elpa_hdl%na,ncb,aa,elpa_hdl%local_nrows,bb,local_nrows_b,&
+&               elpa_hdl%nblk,elpa_hdl%elpa_comm_rows,elpa_hdl%elpa_comm_cols,cc,local_nrows_c)
 #else
 !ELPA-LEGACY-2017
- success =  elpa_mult_at_b_complex_double(uplo_a,uplo_c,elpa_hdl%na,ncb,aa,elpa_hdl%local_nrows,elpa_hdl%local_ncols,&
-&           bb,elpa_hdl%local_nrows_b,elpa_hdl%local_ncols_b,elpa_hdl%nblk,elpa_hdl%elpa_comm_rows,&
-&           elpa_hdl%elpa_comm_cols,cc,elpa_hdl%local_nrows_c,elpa_hdl%local_ncols_c)
+ success =  elpa_mult_ah_b_complex_double(uplo_a,uplo_c,elpa_hdl%na,ncb,aa,elpa_hdl%local_nrows,&
+&           elpa_hdl%local_ncols,bb,local_nrows_b,local_ncols_b,elpa_hdl%nblk,elpa_hdl%elpa_comm_rows,&
+&           elpa_hdl%elpa_comm_cols,cc,local_nrows_c,local_ncols_c)
 #endif
 
  if (.not.success) call elpa_func_error_handler(err_msg='Error in hermitian_multiply_complex!')

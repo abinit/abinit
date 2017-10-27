@@ -2482,16 +2482,16 @@ subroutine compute_generalized_eigen_problem(processor,matrix1,matrix2,results,e
   call  init_matrix_scalapack(tmp1,matrix1%sizeb_global(1),matrix1%sizeb_global(2),processor,istwf_k)
   call  init_matrix_scalapack(tmp2,matrix1%sizeb_global(1),matrix1%sizeb_global(2),processor,istwf_k)
   if (istwf_k/=2) then
-     call solve_gevp_complex(matrix1%sizeb_global(1),matrix1%sizeb_global(1), &
-&          matrix1%sizeb_local(1),matrix1%sizeb_local(1),matrix1%sizeb_blocs(1), &
+     call solve_gevp_complex(matrix1%sizeb_global(1),matrix1%sizeb_global(2), &
+&          matrix1%sizeb_local(1),matrix1%sizeb_local(2),matrix1%sizeb_blocs(1), &
 &          matrix1%buffer_cplx,matrix2%buffer_cplx,eigen,results%buffer_cplx, &
 &          tmp1%buffer_cplx,tmp2%buffer_cplx, &
 &          processor%coords(1),processor%coords(2), &
 &          processor%grid%dims(1),processor%grid%dims(2), &
 &          matrix1%descript%tab,processor%comm)
   else
-     call solve_gevp_real(matrix1%sizeb_global(1),matrix1%sizeb_global(1), &
-&          matrix1%sizeb_local(1),matrix1%sizeb_local(1),matrix1%sizeb_blocs(1), &
+     call solve_gevp_real(matrix1%sizeb_global(1),matrix1%sizeb_global(2), &
+&          matrix1%sizeb_local(1),matrix1%sizeb_local(2),matrix1%sizeb_blocs(1), &
 &          matrix1%buffer_real,matrix2%buffer_real,eigen,results%buffer_real, &
 &          tmp1%buffer_real,tmp2%buffer_real, &
 &          processor%coords(1),processor%coords(2), &
