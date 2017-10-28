@@ -46,6 +46,7 @@
          asr         2
  Interatomic Force Constants Inputs :
       dipdip         0
+  dipdip_prt         1
       ifcana         0
       ifcout   2000000
       natifc         5

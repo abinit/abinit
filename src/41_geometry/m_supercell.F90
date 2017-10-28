@@ -72,6 +72,7 @@ module m_supercell
  public :: prt_supercell_for_qpt
  public :: prt_supercell
  public :: copy_supercell
+ public :: distance_supercell
  public :: findBound_supercell
  public :: getPBCIndexes_supercell
  public :: destroy_supercell
@@ -754,6 +755,57 @@ subroutine findBound_supercell(min,max,n_cell)
 
 ! *********************************************************************
 end subroutine findBound_supercell
+!!***
+
+!!****f* m_supercell/distance_supercell
+!! NAME
+!!
+!! FUNCTION
+!! compute the distance_supercell betwen 2 atoms in different cell
+!!
+!! INPUTS
+!! xcart1(3) = cartesian coordinates of the first atom 
+!! xcart1(3) = cartesian coordinates of the second atom
+!! rprimd(3,3) = primitive lattice vectors
+!! cell1(3) = index of the cell of the first atom (for example -1 0 2)
+!! cell2(3) = index of the cell of the second atom (for example  0 0 2)
+!!
+!! OUTPUT
+!! distance_supercell = distance_supercell between the 2 atoms 
+!!
+!! SOURCE
+!!
+
+function distance_supercell(xcart1,xcart2,rprimd,cell1,cell2) result(dist)
+
+!Arguments ------------------------------------
+!scalar
+!array
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'distance_supercell'
+!End of the abilint section
+
+  real(dp),intent(in):: rprimd(3,3)
+  real(dp),intent(in):: xcart1(3),xcart2(3)
+  integer,intent(in) :: cell1(3),cell2(3)
+  real(dp) :: dist
+!Local variables -------------------------------
+  real(dp) :: rpt1(3),rpt2(3)
+  integer  :: mu
+!! *************************************************************************
+  do mu=1,3
+    rpt1(mu) = cell1(1)*rprimd(mu,1)+cell1(2)*rprimd(mu,2)+cell1(3)*rprimd(mu,3)
+    rpt2(mu) = cell2(1)*rprimd(mu,1)+cell2(2)*rprimd(mu,2)+cell2(3)*rprimd(mu,3)
+  end do
+
+  dist = ((xcart2(1)+rpt2(1)-xcart1(1)-rpt1(1))**2+&
+&         (xcart2(2)+rpt2(2)-xcart1(2)-rpt1(2))**2+&
+&         (xcart2(3)+rpt2(3)-xcart1(3)-rpt1(3))**2)**0.5
+
+end function distance_supercell
 !!***
 
 !****f* m_supercell/destroy_supercell
