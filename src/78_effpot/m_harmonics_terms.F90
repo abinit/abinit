@@ -202,16 +202,16 @@ subroutine harmonics_terms_init(harmonics_terms,ifcs,natom,nrpt,&
  harmonics_terms%ifcs%nrpt = nrpt
 
 !Allocation of total ifc
- ABI_ALLOCATE(harmonics_terms%ifcs%atmfrc,(2,3,natom,3,natom,nrpt))
- harmonics_terms%ifcs%atmfrc(:,:,:,:,:,:) = ifcs%atmfrc(:,:,:,:,:,:) 
+ ABI_ALLOCATE(harmonics_terms%ifcs%atmfrc,(3,natom,3,natom,nrpt))
+ harmonics_terms%ifcs%atmfrc(:,:,:,:,:) = ifcs%atmfrc(:,:,:,:,:) 
 
 !Allocation of ewald part of ifc
- ABI_ALLOCATE(harmonics_terms%ifcs%ewald_atmfrc,(2,3,natom,3,natom,nrpt))
- harmonics_terms%ifcs%ewald_atmfrc(:,:,:,:,:,:) = ifcs%ewald_atmfrc(:,:,:,:,:,:)
+ ABI_ALLOCATE(harmonics_terms%ifcs%ewald_atmfrc,(3,natom,3,natom,nrpt))
+ harmonics_terms%ifcs%ewald_atmfrc(:,:,:,:,:) = ifcs%ewald_atmfrc(:,:,:,:,:)
 
 !Allocation of short range part of ifc
- ABI_ALLOCATE(harmonics_terms%ifcs%short_atmfrc,(2,3,natom,3,natom,nrpt))
- harmonics_terms%ifcs%short_atmfrc(:,:,:,:,:,:) = ifcs%short_atmfrc(:,:,:,:,:,:)
+ ABI_ALLOCATE(harmonics_terms%ifcs%short_atmfrc,(3,natom,3,natom,nrpt))
+ harmonics_terms%ifcs%short_atmfrc(:,:,:,:,:) = ifcs%short_atmfrc(:,:,:,:,:)
 
 !Allocation of cell of ifc
  ABI_ALLOCATE(harmonics_terms%ifcs%cell,(3,nrpt))
@@ -839,7 +839,7 @@ subroutine harmonics_terms_applySumRule(asr,ifc,natom,option)
  real(dp) :: sum
  character(500) :: msg
 !array
- real(dp),pointer :: atmfrc(:,:,:,:,:,:)
+ real(dp),pointer :: atmfrc(:,:,:,:,:)
 ! *************************************************************************
 
  irpt_ref = 0
@@ -883,23 +883,23 @@ subroutine harmonics_terms_applySumRule(asr,ifc,natom,option)
 !      either in a symmetrical manner, or an unsymmetrical one.
          if(asr==1)then
            do irpt=1, ifc%nrpt
-             sum=sum+atmfrc(1,mu,ia,nu,ib,irpt)
+             sum=sum+atmfrc(mu,ia,nu,ib,irpt)
            end do
          else if(asr==2)then
            do irpt=1, ifc%nrpt
               sum=sum+&
-&                 (atmfrc(1,mu,ia,nu,ib,irpt)+&
-&                  atmfrc(1,nu,ia,mu,ib,irpt))/2
+&                 (atmfrc(mu,ia,nu,ib,irpt)+&
+&                  atmfrc(nu,ia,mu,ib,irpt))/2
             end do
           end if
         end do
 
 !      Correct the self-interaction in order to fulfill the ASR
-        atmfrc(1,mu,ia,nu,ia,irpt_ref)=&
-&       atmfrc(1,mu,ia,nu,ia,irpt_ref)-sum
+        atmfrc(mu,ia,nu,ia,irpt_ref)=&
+&       atmfrc(mu,ia,nu,ia,irpt_ref)-sum
         if(asr==2)then
-          atmfrc(1,nu,ia,mu,ia,irpt_ref)=&
-&         atmfrc(1,mu,ia,nu,ia,irpt_ref)
+          atmfrc(nu,ia,mu,ia,irpt_ref)=&
+&         atmfrc(mu,ia,nu,ia,irpt_ref)
         end if
       end do
     end do
