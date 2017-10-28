@@ -90,6 +90,7 @@ CONTAINS  !===========================================================
 
 subroutine sym2cart(gprimd,nsym,rprimd,symrel,symcart)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -159,6 +160,7 @@ end subroutine sym2cart
 !! SOURCE
 
 subroutine getwtk(kpt,nkpt,nsym,symrel,wtk)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -271,6 +273,7 @@ end subroutine getwtk
 
 subroutine pmat2cart(eigen11,eigen12,eigen13,mband,nkpt,nsppol,pmat,rprimd)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -345,6 +348,7 @@ end subroutine pmat2cart
 !! SOURCE
 
 subroutine pmat_renorm(efermi, evalv, mband, nkpt, nsppol, pmat, sc)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -447,6 +451,7 @@ end subroutine pmat_renorm
 
 subroutine linopt(nspin,omega,nkpt,wkpt,nsymcrys,symcrys,nstval,KSBSt,EPBSt,efermi,pmat, &
   v1,v2,nmesh,de,sc,brod,fnam,wmesh,eps,comm)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -824,6 +829,7 @@ end subroutine linopt
 
 subroutine nlinopt(icomp,itemp,nspin,omega,nkpt,wkpt,nsymcrys,symcrys,nstval,evalv,efermi, &
   pmat,v1,v2,v3,nmesh,de,sc,brod,tol,fnam,ncid,comm)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1613,6 +1619,7 @@ end subroutine nlinopt
 subroutine linelop(icomp,itemp,nspin,omega,nkpt,wkpt,nsymcrys,symcrys,nstval,evalv,occv,efermi, &
   pmat,v1,v2,v3,nmesh,de,sc,brod,tol,fnam,do_antiresonant,ncid,comm)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -2193,6 +2200,7 @@ end subroutine linelop
 
 subroutine nonlinopt(icomp,itemp,nspin,omega,nkpt,wkpt,nsymcrys,symcrys,nstval,evalv,occv,efermi, &
   pmat,v1,v2,v3,nmesh,de,sc,brod,tol,fnam,do_antiresonant,ncid,comm)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
