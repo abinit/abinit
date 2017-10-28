@@ -2442,10 +2442,10 @@ end subroutine wings3
 !! rpt(3,nprt)= Canonical coordinates of the R points in the unit cell
 !!  These coordinates are normalized (=> * acell(3)!!)
 !! wghatm(natom,natom,nrpt)= Weight associated to the couple of atoms and the R vector
-!! atmfrc(2,3,natom,3,natom,nrpt)= Interatomic Forces
+!! atmfrc(3,natom,3,natom,nrpt)= Interatomic Forces
 !!
 !! OUTPUT
-!! atmfrc(2,3,natom,3,natom,nrpt)= ASR-imposed Interatomic Forces
+!! atmfrc(3,natom,3,natom,nrpt)= ASR-imposed Interatomic Forces
 !!
 !! TODO
 !! List of ouput should be included.
@@ -2473,7 +2473,7 @@ subroutine asrif9(asr,atmfrc,natom,nrpt,rpt,wghatm)
  integer,intent(in) :: asr,natom,nrpt
 !arrays
  real(dp),intent(in) :: rpt(3,nrpt),wghatm(natom,natom,nrpt)
- real(dp),intent(inout) :: atmfrc(2,3,natom,3,natom,nrpt)
+ real(dp),intent(inout) :: atmfrc(3,natom,3,natom,nrpt)
 
 !Local variables -------------------------
 !scalars
@@ -2511,21 +2511,21 @@ subroutine asrif9(asr,atmfrc,natom,nrpt,rpt,wghatm)
 !          either in a symmetrical manner, or an unsymmetrical one.
            if(asr==1)then
              do irpt=1,nrpt
-               sumifc=sumifc+wghatm(ia,ib,irpt)*atmfrc(1,mu,ia,nu,ib,irpt)
+               sumifc=sumifc+wghatm(ia,ib,irpt)*atmfrc(mu,ia,nu,ib,irpt)
              end do
            else if(asr==2)then
              do irpt=1,nrpt
                sumifc=sumifc+&
-&               (wghatm(ia,ib,irpt)*atmfrc(1,mu,ia,nu,ib,irpt)+&
-&               wghatm(ia,ib,irpt)*atmfrc(1,nu,ia,mu,ib,irpt))/2
+&               (wghatm(ia,ib,irpt)*atmfrc(mu,ia,nu,ib,irpt)+&
+&               wghatm(ia,ib,irpt)*atmfrc(nu,ia,mu,ib,irpt))/2
              end do
            end if
          end do
 
 !        Correct the self-interaction in order to fulfill the ASR
-         atmfrc(1,mu,ia,nu,ia,izero)=atmfrc(1,mu,ia,nu,ia,izero)-sumifc
+         atmfrc(mu,ia,nu,ia,izero)=atmfrc(mu,ia,nu,ia,izero)-sumifc
          if(asr==2)then
-           atmfrc(1,nu,ia,mu,ia,izero)=atmfrc(1,mu,ia,nu,ia,izero)
+           atmfrc(nu,ia,mu,ia,izero)=atmfrc(mu,ia,nu,ia,izero)
          end if
 
        end do
@@ -3377,7 +3377,7 @@ end subroutine dist9
 !! spqpt(3,nqpt)= Reduced coordinates of the q vectors in reciprocal space
 !!
 !! OUTPUT
-!! atmfrc(2,3,natom,3,natom,nrpt)= Interatomic Forces in real space !!
+!! atmfrc(3,natom,3,natom,nrpt)= Interatomic Forces in real space !!
 !!  We used the imaginary part just for debugging !
 !!
 !! PARENTS
@@ -3403,7 +3403,7 @@ subroutine ftifc_q2r(atmfrc,dynmat,gprim,natom,nqpt,nrpt,rpt,spqpt)
  integer,intent(in) :: natom,nqpt,nrpt
 !arrays
  real(dp),intent(in) :: gprim(3,3),rpt(3,nrpt),spqpt(3,nqpt)
- real(dp),intent(out) :: atmfrc(2,3,natom,3,natom,nrpt)
+ real(dp),intent(out) :: atmfrc(3,natom,3,natom,nrpt)
  real(dp),intent(in) :: dynmat(2,3,natom,3,natom,nqpt)
 
 !Local variables -------------------------
@@ -3442,7 +3442,7 @@ subroutine ftifc_q2r(atmfrc,dynmat,gprim,natom,nqpt,nrpt,rpt,spqpt)
          do ia=1,natom
            do mu=1,3
 !            Real and imaginary part of the interatomic forces
-             atmfrc(1,mu,ia,nu,ib,irpt)=atmfrc(1,mu,ia,nu,ib,irpt)&
+             atmfrc(mu,ia,nu,ib,irpt)=atmfrc(mu,ia,nu,ib,irpt)&
 &             +re*dynmat(1,mu,ia,nu,ib,iqpt)&
 &             +im*dynmat(2,mu,ia,nu,ib,iqpt)
 !            The imaginary part should be equal to zero !!!!!!
@@ -3478,8 +3478,7 @@ end subroutine ftifc_q2r
 !!   to obtain dynamical matrices (reciprocal space).
 !!
 !! INPUTS
-!! atmfrc(2,3,natom,3,natom,nrpt)= Interatomic Forces in real space
-!!  We use the imaginary part just for debugging!
+!! atmfrc(3,natom,3,natom,nrpt)= Interatomic Forces in real space
 !! gprim(3,3)= Normalized coordinates in reciprocal space
 !! natom= Number of atoms in the unit cell
 !! nqpt= Number of q points in the Brillouin zone
@@ -3516,7 +3515,7 @@ subroutine ftifc_r2q(atmfrc,dynmat,gprim,natom,nqpt,nrpt,rpt,spqpt,wghatm)
 !arrays
  real(dp),intent(in) :: gprim(3,3),rpt(3,nrpt),spqpt(3,nqpt)
  real(dp),intent(in) :: wghatm(natom,natom,nrpt)
- real(dp),intent(in) :: atmfrc(2,3,natom,3,natom,nrpt)
+ real(dp),intent(in) :: atmfrc(3,natom,3,natom,nrpt)
  real(dp),intent(out) :: dynmat(2,3,natom,3,natom,nqpt)
 
 !Local variables -------------------------
@@ -3555,11 +3554,11 @@ subroutine ftifc_r2q(atmfrc,dynmat,gprim,natom,nqpt,nrpt,rpt,spqpt,wghatm)
              do mu=1,3
 !              Real and imaginary part of the dynamical matrices
                dynmat(1,mu,ia,nu,ib,iqpt)=dynmat(1,mu,ia,nu,ib,iqpt)&
-&               +factr*atmfrc(1,mu,ia,nu,ib,irpt)
+&               +factr*atmfrc(mu,ia,nu,ib,irpt)
 !              Atmfrc should be real
 !              &       -im*wghatm(ia,ib,irpt)*atmfrc(2,mu,ia,nu,ib,irpt)
                dynmat(2,mu,ia,nu,ib,iqpt)=dynmat(2,mu,ia,nu,ib,iqpt)&
-&               +facti*atmfrc(1,mu,ia,nu,ib,irpt)
+&               +facti*atmfrc(mu,ia,nu,ib,irpt)
 !              Atmfrc should be real
 !              &        +re*wghatm(ia,ib,irpt)*atmfrc(2,mu,ia,nu,ib,irpt)
              end do
@@ -3591,8 +3590,7 @@ end subroutine ftifc_r2q
 !! nrpt= Number of R points in the Big Box
 !! rpt(3,nprt)= Canonical coordinates of the R points in the unit cell
 !!   These coordinates are normalized (=> * acell(3)!!)
-!! atmfrc(2,3,natom,3,natom,nrpt)= Interatomic Forces in real space
-!!  We use the imaginary part just for debugging!
+!! atmfrc(3,natom,3,natom,nrpt)= Interatomic Forces in real space
 !! wghatm(natom,natom,nrpt)= Weights associated to a pair of atoms and to a R vector
 !!
 !! OUTPUT
@@ -3624,7 +3622,7 @@ subroutine dynmat_dq(qpt,natom,gprim,nrpt,rpt,atmfrc,wghatm,dddq)
 !arrays
  real(dp),intent(in) :: gprim(3,3),rpt(3,nrpt),qpt(3)
  real(dp),intent(in) :: wghatm(natom,natom,nrpt)
- real(dp),intent(in) :: atmfrc(2,3,natom,3,natom,nrpt)
+ real(dp),intent(in) :: atmfrc(3,natom,3,natom,nrpt)
  real(dp),intent(out) :: dddq(2,3,natom,3,natom,3)
 
 !Local variables -------------------------
@@ -3662,8 +3660,8 @@ subroutine dynmat_dq(qpt,natom,gprim,nrpt,rpt,atmfrc,wghatm,dddq)
              ! Real and imaginary part of the dynamical matrices
              ! Atmfrc should be real
              do ii=1,3
-               dddq(1,mu,ia,nu,ib,ii) = dddq(1,mu,ia,nu,ib,ii) + fact(1,ii) * atmfrc(1,mu,ia,nu,ib,irpt)
-               dddq(2,mu,ia,nu,ib,ii) = dddq(2,mu,ia,nu,ib,ii) + fact(2,ii) * atmfrc(1,mu,ia,nu,ib,irpt)
+               dddq(1,mu,ia,nu,ib,ii) = dddq(1,mu,ia,nu,ib,ii) + fact(1,ii) * atmfrc(mu,ia,nu,ib,irpt)
+               dddq(2,mu,ia,nu,ib,ii) = dddq(2,mu,ia,nu,ib,ii) + fact(2,ii) * atmfrc(mu,ia,nu,ib,irpt)
              end do
            end do
          end do
@@ -5305,7 +5303,7 @@ end subroutine nanal9
 !!
 !! INPUTS
 !! acell(3)=length scales by which rprim is to be multiplied
-!! atmfrc(2,3,natom,3,natom,nrpt) = Interatomic Forces in real space
+!! atmfrc(3,natom,3,natom,nrpt) = Interatomic Forces in real space
 !!  (imaginary part only for debugging)
 !! dielt(3,3) = dielectric tensor
 !! dipdip= if 0, no dipole-dipole interaction was subtracted in atmfrc
@@ -5361,7 +5359,7 @@ subroutine gtdyn9(acell,atmfrc,dielt,dipdip,&
  real(dp),intent(in) :: rmet(3,3),rprim(3,3),rpt(3,nrpt)
  real(dp),intent(in) :: trans(3,natom),wghatm(natom,natom,nrpt),xred(3,natom)
  real(dp),intent(in) :: zeff(3,3,natom)
- real(dp),intent(in) :: atmfrc(2,3,natom,3,natom,nrpt)
+ real(dp),intent(in) :: atmfrc(3,natom,3,natom,nrpt)
  real(dp),intent(in) :: dyewq0(3,3,natom)
  real(dp),intent(out) :: d2cart(2,3,mpert,3,mpert)
 

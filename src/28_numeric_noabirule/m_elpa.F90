@@ -48,13 +48,17 @@ module m_elpa
 
 !Public procedures
 !Had to choose names different from those provided by elpa
- public :: elpa_func_init
- public :: elpa_func_uninit
- public :: elpa_func_get_communicators
- public :: elpa_func_solve_evp_1stage
- public :: elpa_func_cholesky
- public :: elpa_func_invert_triangular
- public :: elpa_func_hermitian_multiply
+ public :: elpa_func_init                ! Init ELPA
+ public :: elpa_func_uninit              ! End ELPA
+ public :: elpa_func_allocate            ! Allocate a ELPA handle and set up MPI information
+ public :: elpa_func_deallocate          ! Deallocate a ELPA handle
+ public :: elpa_func_error_handler       ! Manage errors (print a readable message)
+ public :: elpa_func_get_communicators   ! Get rows and cols communicators (not supposed to be called directly)
+ public :: elpa_func_set_matrix          ! Set matrix specifications in a ELPA handle
+ public :: elpa_func_solve_evp_1stage    ! Solve the diagonalization problem (use a ELPA handle)
+ public :: elpa_func_cholesky            ! Apply Cholesky transformation (use a ELPA handle)
+ public :: elpa_func_invert_triangular   ! Invert triangular matrix (use a ELPA handle)
+ public :: elpa_func_hermitian_multiply  ! Perform C := A**H * B (use a ELPA handle)
 
  interface elpa_func_solve_evp_1stage
    module procedure elpa_func_solve_evp_1stage_real
@@ -76,15 +80,21 @@ module m_elpa
    module procedure elpa_func_hermitian_multiply_complex
  end interface elpa_func_hermitian_multiply
 
+!ELPA gneralized handle
+ type,public :: elpa_hdl_t
+   logical :: is_allocated=.false.
+   logical :: matrix_is_set=.false.
 #ifdef HAVE_ELPA_FORTRAN2008
-!Handle for ELPA type
- class(elpa_t),pointer,private :: elpa_hdl
+   class(elpa_t),pointer :: elpa
 #else
-!MPI-Communicator for rows
- integer,private,save :: elpa_comm_rows
-!MPI-Communicator for columns
- integer,private,save :: elpa_comm_cols
+   integer :: mpi_comm_parent
+   integer :: elpa_comm_rows,elpa_comm_cols
+   integer :: process_row,process_col
+   integer :: local_nrows,local_ncols
+   integer :: na,nblk
+   integer :: gpu=0
 #endif
+ end type elpa_hdl_t
 
 #endif
 
@@ -209,31 +219,142 @@ end subroutine elpa_func_uninit
 
 !----------------------------------------------------------------------
 
-!!****f* m_elpa/elpa_func_get_communicators
+!!****f* m_elpa/elpa_func_allocate
 !! NAME
-!!  elpa_func_get_communicators
+!!  elpa_func_allocate
 !!
 !! FUNCTION
-!!  Wrapper to elpa_get_communicators ELPA function
+!!  Allocate a ELPA handle and set it up with communicators specification
 !!
 !! INPUTS
-!!  mpi_comm=Global communicator for the calculations (in)
-!!  my_prow=Row coordinate of the calling process in the process grid (in)
-!!  my_pcol=Column coordinate of the calling process in the process grid (in)
+!!  mpi_comm_parent=Global communicator for the calculations
+!!  process_row=Row coordinate of the calling process in the process grid
+!!  process_col=Column coordinate of the calling process in the process grid
+!!  [gpu]= -- optional -- Flag (0 or 1): use GPU version
 !!
-!! OUTPUT
-!!  No output; store private variables elpa_comm_rows and elpa_comm_cols
+!! SIDE EFFECTS
+!!  elpa_hdl(type<elpa_hdl_t>)= ELPA handle
 !!
 !! PARENTS
-!!      m_slk
 !!
 !! CHILDREN
-!!      elpa_deallocate,elpa_hdl%hermitian_multiply,elpa_hdl%set
-!!      mult_ah_b_complex
 !!
 !! SOURCE
 
-subroutine elpa_func_get_communicators(mpi_comm,my_prow,my_pcol)
+subroutine elpa_func_allocate(elpa_hdl,mpi_comm_parent,process_row,process_col,gpu)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'elpa_func_allocate'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+ integer,intent(in) :: mpi_comm_parent,process_row,process_col
+ integer,intent(in),optional :: gpu
+ type(elpa_hdl_t),intent(inout) :: elpa_hdl
+
+!Local variables-------------------------------
+ integer :: err
+
+! *********************************************************************
+
+ err=0
+
+#ifdef HAVE_ELPA_FORTRAN2008
+ elpa_hdl%elpa => elpa_allocate()
+ if (err==ELPA_OK.and.present(gpu)) call elpa_hdl%elpa%set("gpu",gpu,err)
+#else
+ if (err==0.and.present(gpu)) elpa_hdl%gpu=gpu
+#endif
+
+ call elpa_func_error_handler(err_code=err,err_varname="gpu")
+
+ elpa_hdl%is_allocated=.true.
+
+ call elpa_func_get_communicators(elpa_hdl,mpi_comm_parent,process_row,process_col)
+
+end subroutine elpa_func_allocate
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_elpa/elpa_func_deallocate
+!! NAME
+!!  elpa_func_deallocate_matrix
+!!
+!! FUNCTION
+!!  Deallocate a ELPA handle
+!!
+!! INPUTS
+!!
+!! SIDE EFFECTS
+!!  elpa_hdl(type<elpa_hdl_t>)= ELPA handle
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine elpa_func_deallocate(elpa_hdl)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'elpa_func_deallocate'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+ type(elpa_hdl_t),intent(inout) :: elpa_hdl
+
+!Local variables-------------------------------
+ integer :: err
+
+! *********************************************************************
+
+ err=0
+
+#ifdef HAVE_ELPA_FORTRAN2008
+ call elpa_deallocate(elpa_hdl%elpa)
+#endif
+
+ elpa_hdl%matrix_is_set=.false.
+ elpa_hdl%is_allocated=.false.
+
+end subroutine elpa_func_deallocate
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_elpa/elpa_func_error_handler
+!! NAME
+!!  elpa_func_error_handler
+!!
+!! FUNCTION
+!!  Handle ELPA errors
+!!
+!! INPUTS
+!!  [err_code]= --optional-- Error code
+!!  [err_msg]= --optional-- Generic error message
+!!  [err_varname]= -- optional-- Name of the ELPA variable related to the error
+!!
+!! OUTPUT
+!!  No output, only printing
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine elpa_func_error_handler(err_code,err_msg,err_varname)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -245,33 +366,215 @@ subroutine elpa_func_get_communicators(mpi_comm,my_prow,my_pcol)
  implicit none
 
 !Arguments ------------------------------------
- integer,intent(in)  :: mpi_comm,my_prow,my_pcol
+ integer,optional :: err_code
+ character(len=*),optional :: err_msg,err_varname
 
 !Local variables-------------------------------
- integer  :: mpierr
+ integer :: err_code_
+ character(len=500) :: msg
+ character(len=100) :: err_strg
 
 ! *********************************************************************
 
- mpierr=0
+ err_code_=-100;if (present(err_code)) err_code_=err_code
+ if (err_code_==0) return
 
-#if (defined HAVE_LINALG_ELPA_2017)
-!This function doesnt exist anymore in the F2008 interface
-#elif (defined HAVE_LINALG_ELPA_2016)
- mpierr=elpa_get_communicators(mpi_comm,my_prow,my_pcol,elpa_comm_rows,elpa_comm_cols)
-#elif (defined HAVE_LINALG_ELPA_2015)
- mpierr=get_elpa_row_col_comms(mpi_comm,my_prow,my_pcol,elpa_comm_rows,elpa_comm_cols)
-#elif (defined HAVE_LINALG_ELPA_2014) || (defined HAVE_LINALG_ELPA_2013)
- call get_elpa_row_col_comms(mpi_comm,my_prow,my_pcol,elpa_comm_rows,elpa_comm_cols)
-#else
-!ELPA-LEGACY-2017
- mpierr=get_elpa_communicators(mpi_comm,my_prow,my_pcol,elpa_comm_rows,elpa_comm_cols)
+ err_strg=''
+#ifdef HAVE_ELPA_FORTRAN2008
+ if (err_code_==ELPA_ERROR) err_strg='ELPA_ERROR'
+ if (err_code_==ELPA_ERROR_ENTRY_READONLY) err_strg='ELPA_ERROR_ENTRY_READONLY'
+ if (err_code_==ELPA_ERROR_ENTRY_NOT_FOUND) err_strg='ELPA_ERROR_ENTRY_NOT_FOUND'
+ if (err_code_==ELPA_ERROR_ENTRY_ALREADY_SET) err_strg='ELPA_ERROR_ENTRY_ALREADY_SET'
+ if (err_code_==ELPA_ERROR_ENTRY_INVALID_VALUE) err_strg='ELPA_ERROR_ENTRY_INVALID_VALUE'
+ if (err_code_==ELPA_ERROR_ENTRY_NO_STRING_REPRESENTATION) err_strg='ELPA_ERROR_NO_STRING_REPRESENTATION'
 #endif
 
- if (mpierr/=0) then
-   MSG_ERROR('Problem with ELPA (elpa_get_communicators)!')
+ write(msg,'(a)') 'ELPA library error!'
+ if (present(err_msg)) then
+   if (trim(err_msg)/="") write(msg,'(3a)') trim(msg),ch10,trim(err_msg)
+ end if
+ if (present(err_varname)) then
+   if (trim(err_varname)/="") write(msg,'(4a)') trim(msg),ch10,'Variable: ',trim(err_varname)
+ end if
+ if (trim(err_strg)/="") write(msg,'(4a)') trim(msg),ch10,'Error code: ',trim(err_strg)
+   MSG_ERROR(msg)
+
+end subroutine elpa_func_error_handler
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_elpa/elpa_func_get_communicators
+!! NAME
+!!  elpa_func_get_communicators
+!!
+!! FUNCTION
+!!  Wrapper to elpa_get_communicators ELPA function
+!!
+!! INPUTS
+!!  mpi_comm_parent=Global communicator for the calculations (in)
+!!  process_row=Row coordinate of the calling process in the process grid (in)
+!!  process_col=Column coordinate of the calling process in the process grid (in)
+!!
+!! SIDE EFFECTS
+!!  elpa_hdl(type<elpa_hdl_t>)= ELPA handle
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!      elpa_deallocate,elpa_hdl%hermitian_multiply,elpa_hdl%set
+!!      mult_ah_b_complex
+!!
+!! SOURCE
+
+subroutine elpa_func_get_communicators(elpa_hdl,mpi_comm_parent,process_row,process_col)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'elpa_func_get_communicators'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+ integer,intent(in)  :: mpi_comm_parent,process_row,process_col
+ type(elpa_hdl_t),intent(inout) :: elpa_hdl
+
+!Local variables-------------------------------
+ integer  :: err
+ character(len=20) :: varname
+
+! *********************************************************************
+
+ err=0 ; varname=''
+
+ if (.not.elpa_hdl%is_allocated) then
+   MSG_BUG('ELPA handle not allocated!')
  end if
 
+#if (defined HAVE_LINALG_ELPA_2017)
+ if (err==ELPA_OK) then
+   varname='mpi_comm_parent'
+   call elpa_hdl%elpa%set(trim(varname),mpi_comm_parent,err)
+ end if
+ if (err==ELPA_OK) then
+   varname='process_row'
+   call elpa_hdl%elpa%set(trim(varname),process_row,err)
+ end if
+ if (err==ELPA_OK) then
+   varname='process_col'
+   call elpa_hdl%elpa%set(trim(varname),process_col,err)
+ end if
+ if (err==ELPA_OK) then
+   varname=''
+   if (elpa_hdl%elpa%setup()/=ELPA_OK) err=ELPA_ERROR
+ endif
+#else
+ elpa_hdl%mpi_comm_parent=mpi_comm_parent
+ elpa_hdl%process_row=process_row
+ elpa_hdl%process_col=process_col
+#if (defined HAVE_LINALG_ELPA_2016)
+ err=elpa_get_communicators(mpi_comm_parent,process_row,process_col,elpa_hdl%elpa_comm_rows,elpa_hdl%elpa_comm_cols)
+#elif (defined HAVE_LINALG_ELPA_2015)
+ err=get_elpa_row_col_comms(mpi_comm_parent,process_row,process_col,elpa_hdl%elpa_comm_rows,elpa_hdl%elpa_comm_cols)
+#elif (defined HAVE_LINALG_ELPA_2014) || (defined HAVE_LINALG_ELPA_2013)
+ call get_elpa_row_col_comms(mpi_comm_parent,process_row,process_col,elpa_hdl%elpa_comm_rows,elpa_hdl%elpa_comm_cols)
+#else
+!ELPA-LEGACY-2017
+ err=get_elpa_communicators(mpi_comm_parent,process_row,process_col,elpa_hdl%elpa_comm_rows,elpa_hdl%elpa_comm_cols)
+#endif
+#endif
+
+ call elpa_func_error_handler(err_code=err,err_msg='Error in elpa_get_communicators',err_varname=varname)
+
 end subroutine elpa_func_get_communicators
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_elpa/elpa_func_set_matrix
+!! NAME
+!!  elpa_func_set_matrix
+!!
+!! FUNCTION
+!!  Set parameters decribing a matrix and it's MPI distribution
+!!  in a ELPA handle
+!!
+!! INPUTS
+!!  na=Order of matrix A
+!!  nblk=Blocksize of cyclic distribution, must be the same in both directions!
+!!  local_nrows=Leading dimension of A
+!!  local_ncols=Local columns of matrixes A and Q (eigenvectors)
+!!
+!! SIDE EFFECTS
+!!  elpa_hdl(type<elpa_hdl_t>)=handler for ELPA object
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine elpa_func_set_matrix(elpa_hdl,na,nblk,local_nrows,local_ncols)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'elpa_func_set_matrix'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: na,nblk,local_nrows,local_ncols
+ type(elpa_hdl_t),intent(inout) :: elpa_hdl
+!arrays
+
+!Local variables-------------------------------
+ integer :: err
+ character(len=15) :: varname
+
+! *********************************************************************
+
+ err=0 ; varname=''
+
+ if (.not.elpa_hdl%is_allocated) then
+   MSG_BUG('ELPA handle not allocated!')
+ end if
+
+#ifdef HAVE_ELPA_FORTRAN2008
+ if (err==ELPA_OK) then
+   varname="na"
+   call elpa_hdl%elpa%set(trim(varname),na,err)
+ end if
+ if (err==ELPA_OK) then
+   varname="nblk"
+   call elpa_hdl%elpa%set(trim(varname),nblk,err)
+ end if
+ if (err==ELPA_OK) then
+   varname="local_nrows"
+   call elpa_hdl%elpa%set(trim(varname),local_nrows,err)
+ end if
+ if (err==ELPA_OK) then
+   varname="local_ncols"
+   call elpa_hdl%elpa%set(trim(varname),local_ncols,err)
+ end if
+#else
+ elpa_hdl%na=na
+ elpa_hdl%nblk=nblk
+ elpa_hdl%local_nrows=local_nrows
+ elpa_hdl%local_ncols=local_ncols
+#endif
+
+ call elpa_func_error_handler(err_code=err,err_msg='Error during matrix initialization',err_varname=varname)
+
+ elpa_hdl%matrix_is_set=.true.
+
+end subroutine elpa_func_set_matrix
 !!***
 
 !----------------------------------------------------------------------
@@ -284,28 +587,21 @@ end subroutine elpa_func_get_communicators
 !!  Wrapper to elpa_solve_evp_real_1stage ELPA function
 !!
 !! INPUTS
-!!  na=Order of matrix aa
 !!  nev=Number of eigenvalues needed.
-!!  lda=Leading dimension of aa
-!!  ldq=Leading dimension of qq
-!!  nblk=Blocksize of cyclic distribution, must be the same in both directions!
-!!  matrixCols=Distributed number of matrix columns
-!!  mpi_comm=Global communicator for the calculations
-!!  my_prow=Row coordinate of the calling process in the process grid (in)
-!!  my_pcol=Column coordinate of the calling process in the process grid (in)
 !!
 !! OUTPUT
 !!  ev(na)=Eigenvalues of a, every processor gets the complete set
-!!  qq(ldq,matrixCols)=Eigenvectors of aa
+!!  qq(local_nrows,local_ncols)=Eigenvectors of aa
 !!                     Distribution is like in Scalapack.
 !!                     Must be always dimensioned to the full size (corresponding to (na,na))
 !!                      even if only a part of the eigenvalues is needed.
 !!
 !! SIDE EFFECTS
-!! aa(lda,matrixCols)=Distributed matrix for which eigenvalues are to be computed.
+!!  aa(local_nrows,local_ncols)=Distributed matrix for which eigenvalues are to be computed.
 !!                    Distribution is like in Scalapack.
 !!                    The full matrix must be set (not only one half like in scalapack).
 !!                    Destroyed on exit (upper and lower half).
+!!  elpa_hdl(type<elpa_hdl_t>)=handler for ELPA object
 !!
 !! PARENTS
 !!
@@ -315,8 +611,7 @@ end subroutine elpa_func_get_communicators
 !!
 !! SOURCE
 
-subroutine elpa_func_solve_evp_1stage_real(na,nev,aa,lda,ev,qq,ldq,nblk,matrixCols,&
-&                                          mpi_comm,my_prow,my_pcol)
+subroutine elpa_func_solve_evp_1stage_real(elpa_hdl,aa,qq,ev,nev)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -329,48 +624,57 @@ subroutine elpa_func_solve_evp_1stage_real(na,nev,aa,lda,ev,qq,ldq,nblk,matrixCo
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in)  :: na,nev,lda,ldq,nblk,matrixCols
- integer,intent(in)  :: mpi_comm,my_prow,my_pcol
+ integer,intent(in)  :: nev
+ type(elpa_hdl_t),intent(inout) :: elpa_hdl
 !arrays
- real(dp),intent(inout) :: aa(lda,matrixCols)
- real(dp),intent(out) :: ev(na),qq(ldq,matrixCols)
+ real(dp),intent(inout) :: aa(:,:)
+ real(dp),intent(out) :: ev(:),qq(:,:)
 
 !Local variables-------------------------------
- integer :: error
+ integer :: err
  logical  :: success
- character(len=100) :: errmsg
 
 ! *********************************************************************
 
- success=.true. ; error=0 ; errmsg=""
+ success=.true. ; err=0
 
-#if  (defined HAVE_LINALG_ELPA_2017)
- elpa_hdl => elpa_allocate()
- success=elpa_func_set_matrix_params(errmsg,na,nblk,lda,matrixCols,mpi_comm,my_prow,my_pcol,&
-&                                    nev=nev,ldq=ldq)
- if (success) then
-   call elpa_hdl%set("solver",ELPA_SOLVER_1STAGE,error)
-   if (error==0) call elpa_hdl%eigenvectors(aa,ev,qq,error)
-   success=(error==0)
+ if (.not.elpa_hdl%is_allocated) then
+   MSG_BUG('ELPA handle not allocated!')
  end if
- call elpa_deallocate(elpa_hdl)
-#elif  (defined HAVE_LINALG_ELPA_2016)
- success=elpa_solve_evp_real_1stage(na,nev,aa,lda,ev,qq,ldq,nblk,matrixCols,&
-&                                   elpa_comm_rows,elpa_comm_cols)
-#elif (defined HAVE_LINALG_ELPA_2015) || (defined HAVE_LINALG_ELPA_2014)
- success=solve_evp_real(na,nev,aa,lda,ev,qq,ldq,nblk,elpa_comm_rows,elpa_comm_cols)
-#elif (defined HAVE_LINALG_ELPA_2013)
- call solve_evp_real(na,nev,aa,lda,ev,qq,ldq,nblk,elpneva_comm_rows,elpa_comm_cols)
+ if (.not.elpa_hdl%matrix_is_set) then
+   MSG_BUG('Matrix not set in ELPA handle!')
+ end if
+#ifdef HAVE_ELPA_FORTRAN2008
+ ABI_CHECK(size(aa)==elpa_hdl%elpa%local_nrows*elpa_hdl%elpa%local_ncols,'BUG: matrix A has wrong sizes!')
+ ABI_CHECK(size(qq)==elpa_hdl%elpa%local_nrows*elpa_hdl%elpa%local_ncols,'BUG: matrix Q has wrong sizes!')
+ ABI_CHECK(size(ev)==elpa_hdl%elpa%na,'BUG: matrix EV has wrong sizes!')
 #else
-!ELPA-LEGACY-2017
- success=elpa_solve_evp_real_1stage_double(na,nev,aa,lda,ev,qq,ldq,nblk,matrixCols,&
-&                                          elpa_comm_rows,elpa_comm_cols,mpi_comm,.false.)
+ ABI_CHECK(size(aa)==elpa_hdl%local_nrows*elpa_hdl%local_ncols,'BUG: matrix A has wrong sizes!')
+ ABI_CHECK(size(qq)==elpa_hdl%local_nrows*elpa_hdl%local_ncols,'BUG: matrix Q has wrong sizes!')
+ ABI_CHECK(size(ev)==elpa_hdl%na,'BUG: matrix EV has wrong sizes!')
 #endif
 
- if (.not.success) then
-   if (trim(errmsg)=="") errmsg="Problem with ELPA (solve_evp_1stage_real)!"
-   MSG_ERROR(errmsg)
- end if
+#if  (defined HAVE_LINALG_ELPA_2017)
+ if (err==ELPA_OK) call elpa_hdl%elpa%set('nev',nev,err)
+ if (err==ELPA_OK) call elpa_hdl%elpa%set("solver",ELPA_SOLVER_1STAGE,err)
+ if (err==ELPA_OK) call elpa_hdl%elpa%eigenvectors(aa,ev,qq,err)
+ success=(err==ELPA_OK)
+#elif  (defined HAVE_LINALG_ELPA_2016)
+ success=elpa_solve_evp_real_1stage(elpa_hdl%na,nev,aa,elpa_hdl%local_nrows,ev,qq,elpa_hdl%local_nrows,&
+&                       elpa_hdl%nblk,elpa_hdl%local_ncols,elpa_hdl%elpa_comm_rows,elpa_hdl%elpa_comm_cols)
+#elif (defined HAVE_LINALG_ELPA_2015) || (defined HAVE_LINALG_ELPA_2014)
+ success=solve_evp_real(elpa_hdl%na,nev,aa,elpa_hdl%local_nrows,ev,qq,elpa_hdl%local_nrows,&
+&                       elpa_hdl%nblk,elpa_hdl%elpa_comm_rows,elpa_hdl%elpa_comm_cols)
+#elif (defined HAVE_LINALG_ELPA_2013)
+ call solve_evp_real(elpa_hdl%na,nev,aa,elpa_hdl%local_nrows,ev,qq,elpa_hdl%local_nrows,&
+&                    elpa_hdl%nblk,elpa_hdl%elpa_comm_rows,elpa_hdl%elpa_comm_cols)
+#else
+!ELPA-LEGACY-2017
+ success=elpa_solve_evp_real_1stage_double(elpa_hdl%na,nev,aa,elpa_hdl%local_nrows,ev,qq,elpa_hdl%local_nrows,&
+&        elpa_hdl%nblk,elpa_hdl%local_ncols,elpa_hdl%elpa_comm_rows,elpa_hdl%elpa_comm_cols,elpa_hdl%mpi_comm_parent,.false.)
+#endif
+
+ if (.not.success) call elpa_func_error_handler(err_msg='Error in solve_evp_1stage_real!')
 
 end subroutine elpa_func_solve_evp_1stage_real
 !!***
@@ -385,28 +689,21 @@ end subroutine elpa_func_solve_evp_1stage_real
 !!  Wrapper to elpa_solve_evp_complex_1stage ELPA function
 !!
 !! INPUTS
-!!  na=Order of matrix aa
 !!  nev=Number of eigenvalues needed.
-!!  lda=Leading dimension of aa
-!!  ldq=Leading dimension of qq
-!!  nblk=Blocksize of cyclic distribution, must be the same in both directions!
-!!  matrixCols=Distributed number of matrix columns
-!!  mpi_comm=Global communicator for the calculations
-!!  my_prow=Row coordinate of the calling process in the process grid (in)
-!!  my_pcol=Column coordinate of the calling process in the process grid (in)
 !!
 !! OUTPUT
 !!  ev(na)=Eigenvalues of a, every processor gets the complete set
-!!  qq(ldq,matrixCols)=Eigenvectors of aa
+!!  qq(local_nrows,local_ncols)=Eigenvectors of aa
 !!                     Distribution is like in Scalapack.
 !!                     Must be always dimensioned to the full size (corresponding to (na,na))
 !!                      even if only a part of the eigenvalues is needed.
 !!
 !! SIDE EFFECTS
-!! aa(lda,matrixCols)=Distributed matrix for which eigenvalues are to be computed.
+!!  aa(local_nrows,local_ncols)=Distributed matrix for which eigenvalues are to be computed.
 !!                    Distribution is like in Scalapack.
 !!                    The full matrix must be set (not only one half like in scalapack).
 !!                    Destroyed on exit (upper and lower half).
+!!  elpa_hdl(type<elpa_hdl_t>)=handler for ELPA object
 !!
 !! PARENTS
 !!
@@ -416,8 +713,7 @@ end subroutine elpa_func_solve_evp_1stage_real
 !!
 !! SOURCE
 
-subroutine elpa_func_solve_evp_1stage_complex(na,nev,aa,lda,ev,qq,ldq,nblk,matrixCols,&
-&                                             mpi_comm,my_prow,my_pcol)
+subroutine elpa_func_solve_evp_1stage_complex(elpa_hdl,aa,qq,ev,nev)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -430,49 +726,58 @@ subroutine elpa_func_solve_evp_1stage_complex(na,nev,aa,lda,ev,qq,ldq,nblk,matri
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in)  :: na,nev,lda,ldq,nblk,matrixCols
- integer,intent(in)  :: mpi_comm,my_prow,my_pcol
+ integer,intent(in)  :: nev
+ type(elpa_hdl_t),intent(inout) :: elpa_hdl
 !arrays
- complex(dpc),intent(inout) :: aa(lda,matrixCols)
- real(dp),intent(out) :: ev(na)
- complex(dpc),intent(out) :: qq(ldq,matrixCols)
+ complex(dpc),intent(inout) :: aa(:,:)
+ real(dp),intent(out) :: ev(:)
+ complex(dpc),intent(out) :: qq(:,:)
 
 !Local variables-------------------------------
- integer :: error
+ integer :: err
  logical  :: success
- character(len=100) :: errmsg
 
 ! *********************************************************************
 
- success=.true. ; error=0 ; errmsg=""
+ success=.true. ; err=0
 
-#if  (defined HAVE_LINALG_ELPA_2017)
- elpa_hdl => elpa_allocate()
- success=elpa_func_set_matrix_params(errmsg,na,nblk,lda,matrixCols,mpi_comm,my_prow,my_pcol,&
-&                                    nev=nev,ldq=ldq)
- if (success) then
-   call elpa_hdl%set("solver",ELPA_SOLVER_1STAGE,error)
-   if (error==0) call elpa_hdl%eigenvectors(aa,ev,qq,error)
-   success=(error==0)
+ if (.not.elpa_hdl%is_allocated) then
+   MSG_BUG('ELPA handle not allocated!')
  end if
- call elpa_deallocate(elpa_hdl)
-#elif (defined HAVE_LINALG_ELPA_2016)
- success=elpa_solve_evp_complex_1stage(na,nev,aa,lda,ev,qq,ldq,nblk,matrixCols,&
-&                                      elpa_comm_rows,elpa_comm_cols)
-#elif (defined HAVE_LINALG_ELPA_2015) || (defined HAVE_LINALG_ELPA_2014)
- success=solve_evp_complex(na,nev,aa,lda,ev,qq,ldq,nblk,elpa_comm_rows,elpa_comm_cols)
-#elif (defined HAVE_LINALG_ELPA_2013)
- call solve_evp_complex(na,nev,aa,lda,ev,qq,ldq,nblk,elpa_comm_rows,elpa_comm_cols)
+ if (.not.elpa_hdl%matrix_is_set) then
+   MSG_BUG('Matrix not set in ELPA handle!')
+ end if
+#ifdef HAVE_ELPA_FORTRAN2008
+ ABI_CHECK(size(aa)==elpa_hdl%elpa%local_nrows*elpa_hdl%elpa%local_ncols,'BUG: matrix A has wrong sizes!')
+ ABI_CHECK(size(qq)==elpa_hdl%elpa%local_nrows*elpa_hdl%elpa%local_ncols,'BUG: matrix Q has wrong sizes!')
+ ABI_CHECK(size(ev)==elpa_hdl%elpa%na,'BUG: matrix EV has wrong sizes!')
 #else
-!ELPA-LEGACY-2017
- success=elpa_solve_evp_complex_1stage_double(na,nev,aa,lda,ev,qq,ldq,nblk,matrixCols,&
-&                                             elpa_comm_rows,elpa_comm_cols,mpi_comm,.false.)
+ ABI_CHECK(size(aa)==elpa_hdl%local_nrows*elpa_hdl%local_ncols,'BUG: matrix A has wrong sizes!')
+ ABI_CHECK(size(qq)==elpa_hdl%local_nrows*elpa_hdl%local_ncols,'BUG: matrix Q has wrong sizes!')
+ ABI_CHECK(size(ev)==elpa_hdl%na,'BUG: matrix EV has wrong sizes!')
 #endif
 
- if (.not.success) then
-   if (trim(errmsg)=="") errmsg="Problem with ELPA (solve_evp_1stage_complex)!"
-   MSG_ERROR(errmsg)
- end if
+#if  (defined HAVE_LINALG_ELPA_2017)
+ if (err==ELPA_OK) call elpa_hdl%elpa%set('nev',nev,err)
+ if (err==ELPA_OK) call elpa_hdl%elpa%set("solver",ELPA_SOLVER_1STAGE,err)
+ if (err==ELPA_OK) call elpa_hdl%elpa%eigenvectors(aa,ev,qq,err)
+ success=(err==ELPA_OK)
+#elif  (defined HAVE_LINALG_ELPA_2016)
+ success=elpa_solve_evp_complex_1stage(elpa_hdl%na,nev,aa,elpa_hdl%local_nrows,ev,qq,elpa_hdl%local_nrows,&
+&                       elpa_hdl%nblk,elpa_hdl%local_ncols,elpa_hdl%elpa_comm_rows,elpa_hdl%elpa_comm_cols)
+#elif (defined HAVE_LINALG_ELPA_2015) || (defined HAVE_LINALG_ELPA_2014)
+ success=solve_evp_complex(elpa_hdl%na,nev,aa,elpa_hdl%local_nrows,ev,qq,elpa_hdl%local_nrows,&
+&                       elpa_hdl%nblk,elpa_hdl%elpa_comm_rows,elpa_hdl%elpa_comm_cols)
+#elif (defined HAVE_LINALG_ELPA_2013)
+ call solve_evp_complex(elpa_hdl%na,nev,aa,elpa_hdl%local_nrows,ev,qq,elpa_hdl%local_nrows,&
+&                    elpa_hdl%nblk,elpa_hdl%elpa_comm_rows,elpa_hdl%elpa_comm_cols)
+#else
+!ELPA-LEGACY-2017
+ success=elpa_solve_evp_complex_1stage_double(elpa_hdl%na,nev,aa,elpa_hdl%local_nrows,ev,qq,elpa_hdl%local_nrows,&
+&        elpa_hdl%nblk,elpa_hdl%local_ncols,elpa_hdl%elpa_comm_rows,elpa_hdl%elpa_comm_cols,elpa_hdl%mpi_comm_parent,.false.)
+#endif
+
+ if (.not.success) call elpa_func_error_handler(err_msg='Error in solve_evp_1stage_complex!')
 
 end subroutine elpa_func_solve_evp_1stage_complex
 !!***
@@ -487,20 +792,14 @@ end subroutine elpa_func_solve_evp_1stage_complex
 !!  Wrapper to elpa_cholesky_real ELPA function
 !!
 !! INPUTS
-!!  na=Order of matrix
-!!  lda=Leading dimension of aa
-!!  matrixCols=local columns of matrix a
-!!  nblk=Blocksize of cyclic distribution, must be the same in both directions!
-!!  mpi_comm=Global communicator for the calculations
-!!  my_prow=Row coordinate of the calling process in the process grid (in)
-!!  my_pcol=Column coordinate of the calling process in the process grid (in)
 !!
 !! SIDE EFFECTS
-!!  aa(lda,matrixCols)=Distributed matrix which should be factorized.
+!!  aa(local_nrows,local_ncols)=Distributed matrix which should be factorized.
 !!                     Distribution is like in Scalapack.
 !!                     Only upper triangle is needs to be set.
 !!                     On return, the upper triangle contains the Cholesky factor
 !!                     and the lower triangle is set to 0.
+!!  elpa_hdl(type<elpa_hdl_t>)=handler for ELPA object
 !!
 !! PARENTS
 !!
@@ -510,8 +809,7 @@ end subroutine elpa_func_solve_evp_1stage_complex
 !!
 !! SOURCE
 
-subroutine elpa_func_cholesky_real(na,aa,lda,nblk,matrixCols,&
-&                                  mpi_comm,my_prow,my_pcol)
+subroutine elpa_func_cholesky_real(elpa_hdl,aa)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -524,45 +822,52 @@ subroutine elpa_func_cholesky_real(na,aa,lda,nblk,matrixCols,&
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in)  :: na,lda,nblk,matrixCols
- integer,intent(in)  :: mpi_comm,my_prow,my_pcol
+ type(elpa_hdl_t),intent(inout) :: elpa_hdl
 !arrays
- real(dp),intent(inout) :: aa(lda,matrixCols)
+ real(dp),intent(inout) :: aa(:,:)
 
 !Local variables-------------------------------
- integer :: error
+ integer :: err
  logical :: success
- character(len=100) :: errmsg
 
 ! *********************************************************************
 
- success=.true. ; error=0 ; errmsg=""
+ success=.true. ; err=0
 
-#if  (defined HAVE_LINALG_ELPA_2017)
- elpa_hdl => elpa_allocate()
- success=elpa_func_set_matrix_params(errmsg,na,nblk,lda,matrixCols,mpi_comm,my_prow,my_pcol)
- if (success) then
-   call elpa_hdl%cholesky(aa,error)
-   success=(error==0)
+ if (.not.elpa_hdl%is_allocated) then
+   MSG_BUG('ELPA handle not allocated!')
  end if
- call elpa_deallocate(elpa_hdl)
-#elif (defined HAVE_LINALG_ELPA_2016)
- success = elpa_cholesky_real(na,aa,lda,nblk,matrixCols,elpa_comm_rows,elpa_comm_cols,.false.)
-#elif (defined HAVE_LINALG_ELPA_2015)
- call cholesky_real(na,aa,lda,nblk,elpa_comm_rows,elpa_comm_cols,.false.,success)
-#elif (defined HAVE_LINALG_ELPA_2014)
- call cholesky_real(na,aa,lda,nblk,elpa_comm_rows,elpa_comm_cols,success)
-#elif (defined HAVE_LINALG_ELPA_2013)
- call cholesky_real(na,aa,lda,nblk,elpa_comm_rows,elpa_comm_cols)
+ if (.not.elpa_hdl%matrix_is_set) then
+   MSG_BUG('Matrix not set in ELPA handle!')
+ end if
+#ifdef HAVE_ELPA_FORTRAN2008
+ ABI_CHECK(size(aa)==elpa_hdl%elpa%local_nrows*elpa_hdl%elpa%local_ncols,'BUG: matrix A has wrong sizes!')
 #else
-!ELPA-LEGACY-2017
- success = elpa_cholesky_real_double(na,aa,lda,nblk,matrixCols,elpa_comm_rows,elpa_comm_cols,.false.)
+ ABI_CHECK(size(aa)==elpa_hdl%local_nrows*elpa_hdl%local_ncols,'BUG: matrix A has wrong sizes!')
 #endif
 
- if (.not.success) then
-   if (trim(errmsg)=="") errmsg="Problem with ELPA (cholesky_real)!"
-   MSG_ERROR(errmsg)
- end if
+#if  (defined HAVE_LINALG_ELPA_2017)
+ call elpa_hdl%elpa%cholesky(aa,err)
+ success=(err==ELPA_OK)
+#elif (defined HAVE_LINALG_ELPA_2016)
+ success = elpa_cholesky_real(elpa_hdl%na,aa,elpa_hdl%local_nrows,elpa_hdl%nblk,elpa_hdl%local_ncols,&
+&                             elpa_hdl%elpa_comm_rows,elpa_hdl%elpa_comm_cols,.false.)
+#elif (defined HAVE_LINALG_ELPA_2015)
+ call cholesky_real(elpa_hdl%na,aa,elpa_hdl%local_nrows,elpa_hdl%nblk,&
+                    elpa_hdl%elpa_comm_rows,elpa_hdl%elpa_comm_cols,.false.,success)
+#elif (defined HAVE_LINALG_ELPA_2014)
+ call cholesky_real(elpa_hdl%na,aa,elpa_hdl%local_nrows,elpa_hdl%nblk,&
+&                   elpa_hdl%elpa_comm_rows,elpa_hdl%elpa_comm_cols,success)
+#elif (defined HAVE_LINALG_ELPA_2013)
+ call cholesky_real(elpa_hdl%na,aa,elpa_hdl%local_nrows,elpa_hdl%nblk,&
+&                   elpa_hdl%elpa_comm_rows,elpa_hdl%elpa_comm_cols)
+#else
+!ELPA-LEGACY-2017
+ success = elpa_cholesky_real_double(elpa_hdl%na,aa,elpa_hdl%local_nrows,elpa_hdl%nblk,elpa_hdl%local_ncols,&
+&                                    elpa_hdl%elpa_comm_rows,elpa_hdl%elpa_comm_cols,.false.)
+#endif
+
+ if (.not.success) call elpa_func_error_handler(err_msg='Error in solve_cholesky_real!')
 
 end subroutine elpa_func_cholesky_real
 !!***
@@ -576,20 +881,14 @@ end subroutine elpa_func_cholesky_real
 !!  Wrapper to elpa_cholesky_complex ELPA function
 !!
 !! INPUTS
-!!  na=Order of matrix
-!!  lda=Leading dimension of aa
-!!  matrixCols=local columns of matrix a
-!!  nblk=Blocksize of cyclic distribution, must be the same in both directions!
-!!  mpi_comm=Global communicator for the calculations
-!!  my_prow=Row coordinate of the calling process in the process grid (in)
-!!  my_pcol=Column coordinate of the calling process in the process grid (in)
 !!
 !! SIDE EFFECTS
-!!  aa(lda,matrixCols)=Distributed matrix which should be factorized.
+!!  aa(local_nrows,local_ncols)=Distributed matrix which should be factorized.
 !!                     Distribution is like in Scalapack.
 !!                     Only upper triangle is needs to be set.
 !!                     On return, the upper triangle contains the Cholesky factor
-!!                     and the lower triangle is set to 0.
+!!                     and the lower triangle is set to 0.#elif (defined HAVE_LINALG_ELPA_2016)
+!!  elpa_hdl(type<elpa_hdl_t>)=handler for ELPA object
 !!
 !! PARENTS
 !!
@@ -599,8 +898,7 @@ end subroutine elpa_func_cholesky_real
 !!
 !! SOURCE
 
-subroutine elpa_func_cholesky_complex(na,aa,lda,nblk,matrixCols,&
-&                                     mpi_comm,my_prow,my_pcol)
+subroutine elpa_func_cholesky_complex(elpa_hdl,aa)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -613,45 +911,52 @@ subroutine elpa_func_cholesky_complex(na,aa,lda,nblk,matrixCols,&
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in)  :: na,lda,nblk,matrixCols
- integer,intent(in)  :: mpi_comm,my_prow,my_pcol
+ type(elpa_hdl_t),intent(inout) :: elpa_hdl
 !arrays
- complex(dpc),intent(inout) :: aa(lda,matrixCols)
+ complex(dpc),intent(inout) :: aa(:,:)
 
 !Local variables-------------------------------
- integer :: error
+ integer :: err
  logical :: success
- character(len=100) :: errmsg
 
 ! *********************************************************************
 
- success=.true. ; error=0 ; errmsg=""
+ success=.true. ; err=0
 
-#if  (defined HAVE_LINALG_ELPA_2017)
- elpa_hdl => elpa_allocate()
- success=elpa_func_set_matrix_params(errmsg,na,nblk,lda,matrixCols,mpi_comm,my_prow,my_pcol)
- if (success) then
-   call elpa_hdl%cholesky(aa,error)
-   success=(error==0)
+ if (.not.elpa_hdl%is_allocated) then
+   MSG_BUG('ELPA handle not allocated!')
  end if
- call elpa_deallocate(elpa_hdl)
-#elif (defined HAVE_LINALG_ELPA_2016)
- success = elpa_cholesky_complex(na,aa,lda,nblk,matrixCols,elpa_comm_rows,elpa_comm_cols,.false.)
-#elif (defined HAVE_LINALG_ELPA_2015)
- call cholesky_complex(na,aa,lda,nblk,elpa_comm_rows,elpa_comm_cols,.false.,success)
-#elif (defined HAVE_LINALG_ELPA_2014)
- call cholesky_complex(na,aa,lda,nblk,elpa_comm_rows,elpa_comm_cols,success)
-#elif (defined HAVE_LINALG_ELPA_2013)
- call cholesky_complex(na,aa,lda,nblk,elpa_comm_rows,elpa_comm_cols)
+ if (.not.elpa_hdl%matrix_is_set) then
+   MSG_BUG('Matrix not set in ELPA handle!')
+ end if
+#ifdef HAVE_ELPA_FORTRAN2008
+ ABI_CHECK(size(aa)==elpa_hdl%elpa%local_nrows*elpa_hdl%elpa%local_ncols,'BUG: matrix A has wrong sizes!')
 #else
-!ELPA-LEGACY-2017
- success = elpa_cholesky_complex_double(na,aa,lda,nblk,matrixCols,elpa_comm_rows,elpa_comm_cols,.false.)
+ ABI_CHECK(size(aa)==elpa_hdl%local_nrows*elpa_hdl%local_ncols,'BUG: matrix A has wrong sizes!')
 #endif
 
- if (.not.success) then
-   if (trim(errmsg)=="") errmsg="Problem with ELPA (cholesky_complex)!"
-   MSG_ERROR(errmsg)
- end if
+#if  (defined HAVE_LINALG_ELPA_2017)
+ call elpa_hdl%elpa%cholesky(aa,err)
+ success=(err==ELPA_OK)
+#elif (defined HAVE_LINALG_ELPA_2016)
+ success = elpa_cholesky_complex(elpa_hdl%na,aa,elpa_hdl%local_nrows,elpa_hdl%nblk,elpa_hdl%local_ncols,&
+&                                elpa_hdl%elpa_comm_rows,elpa_hdl%elpa_comm_cols,.false.)
+#elif (defined HAVE_LINALG_ELPA_2015)
+ call cholesky_complex(elpa_hdl%na,aa,elpa_hdl%local_nrows,elpa_hdl%nblk,&
+&                      elpa_hdl%elpa_comm_rows,elpa_hdl%elpa_comm_cols,.false.,success)
+#elif (defined HAVE_LINALG_ELPA_2014)
+ call cholesky_complex(elpa_hdl%na,aa,elpa_hdl%local_nrows,elpa_hdl%nblk,&
+&                      elpa_hdl%elpa_comm_rows,elpa_hdl%elpa_comm_cols,success)
+#elif (defined HAVE_LINALG_ELPA_2013)
+ call cholesky_complex(elpa_hdl%na,aa,elpa_hdl%local_nrows,elpa_hdl%nblk,&
+&                      elpa_hdl%elpa_comm_rows,elpa_hdl%elpa_comm_cols)
+#else
+!ELPA-LEGACY-2017
+ success = elpa_cholesky_complex_double(elpa_hdl%na,aa,elpa_hdl%local_nrows,elpa_hdl%nblk,elpa_hdl%local_ncols,&
+&                                       elpa_hdl%elpa_comm_rows,elpa_hdl%elpa_comm_cols,.false.)
+#endif
+
+ if (.not.success) call elpa_func_error_handler(err_msg='Error in solve_cholesky_complex!')
 
 end subroutine elpa_func_cholesky_complex
 !!***
@@ -666,19 +971,13 @@ end subroutine elpa_func_cholesky_complex
 !!  Wrapper to elpa_invert_triangular_real ELPA function
 !!
 !! INPUTS
-!!  na=Order of matrix
-!!  lda=Leading dimension of aa
-!!  matrixCols=local columns of matrix a
-!!  nblk=Blocksize of cyclic distribution, must be the same in both directions!
-!!  mpi_comm=Global communicator for the calculations
-!!  my_prow=Row coordinate of the calling process in the process grid (in)
-!!  my_pcol=Column coordinate of the calling process in the process grid (in)
 !!
 !! SIDE EFFECTS
-!!  aa(lda,matrixCols)=Distributed matrix which should be factorized.
+!!  aa(local_nrows,local_ncols)=Distributed matrix which should be factorized.
 !!                     Distribution is like in Scalapack.
 !!                     Only upper triangle is needs to be set.
 !!                     The lower triangle is not referenced.
+!!  elpa_hdl(type<elpa_hdl_t>)=handler for ELPA object
 !!
 !! PARENTS
 !!
@@ -688,8 +987,7 @@ end subroutine elpa_func_cholesky_complex
 !!
 !! SOURCE
 
-subroutine elpa_func_invert_triangular_real(na,aa,lda,nblk,matrixCols,&
-&                                           mpi_comm,my_prow,my_pcol)
+subroutine elpa_func_invert_triangular_real(elpa_hdl,aa)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -702,46 +1000,53 @@ subroutine elpa_func_invert_triangular_real(na,aa,lda,nblk,matrixCols,&
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in)  :: na,lda,nblk,matrixCols
- integer,intent(in)  :: mpi_comm,my_prow,my_pcol
+ type(elpa_hdl_t),intent(inout) :: elpa_hdl
 !arrays
- real(dp),intent(inout) :: aa(lda,matrixCols)
+ real(dp),intent(inout) :: aa(:,:)
 
 !Local variables-------------------------------
- integer :: error
+ integer :: err
  logical :: success
- character(len=100) :: errmsg
 
 ! *********************************************************************
 
- success=.true. ; error=0 ; errmsg=""
+ success=.true. ; err=0
 
-#if  (defined HAVE_LINALG_ELPA_2017)
- elpa_hdl => elpa_allocate()
- success=elpa_func_set_matrix_params(errmsg,na,nblk,lda,matrixCols,mpi_comm,my_prow,my_pcol)
- if (success) then
-   call elpa_hdl%invert_triangular(aa,error)
-   success=(error==0)
+ if (.not.elpa_hdl%is_allocated) then
+   MSG_BUG('ELPA handle not allocated!')
  end if
- call elpa_deallocate(elpa_hdl)
-#elif (defined HAVE_LINALG_ELPA_2016)
- success = elpa_invert_trm_real(na,aa,lda,nblk,matrixCols,elpa_comm_rows,elpa_comm_cols,.false.)
-#elif (defined HAVE_LINALG_ELPA_2015)
- call invert_trm_real(na,aa,lda,nblk,elpa_comm_rows,elpa_comm_cols,.false.,success)
-#elif (defined HAVE_LINALG_ELPA_2014)
- call invert_trm_real(na,aa,lda,nblk,elpa_comm_rows,elpa_comm_cols,success)
- success=.true. ! Sometimes get unexpected success=false
-#elif (defined HAVE_LINALG_ELPA_2013)
- call invert_trm_real(na,aa,lda,nblk,elpa_comm_rows,elpa_comm_cols)
+ if (.not.elpa_hdl%matrix_is_set) then
+   MSG_BUG('Matrix not set in ELPA handle!')
+ end if
+#ifdef HAVE_ELPA_FORTRAN2008
+ ABI_CHECK(size(aa)==elpa_hdl%elpa%local_nrows*elpa_hdl%elpa%local_ncols,'BUG: matrix A has wrong sizes!')
 #else
-!ELPA-LEGACY-2017
- success = elpa_invert_trm_real_double(na,aa,lda,nblk,matrixCols,elpa_comm_rows,elpa_comm_cols,.false.)
+ ABI_CHECK(size(aa)==elpa_hdl%local_nrows*elpa_hdl%local_ncols,'BUG: matrix A has wrong sizes!')
 #endif
 
- if (.not.success) then
-   if (trim(errmsg)=="") errmsg="Problem with ELPA (invert_triangular_real)!"
-   MSG_ERROR(errmsg)
- end if
+#if  (defined HAVE_LINALG_ELPA_2017)
+ call elpa_hdl%elpa%invert_triangular(aa,err)
+ success=(err==ELPA_OK)
+#elif (defined HAVE_LINALG_ELPA_2016)
+ success = elpa_invert_trm_real(elpa_hdl%na,aa,elpa_hdl%local_nrows,elpa_hdl%nblk,elpa_hdl%local_ncols,&
+&                               elpa_hdl%elpa_comm_rows,elpa_hdl%elpa_comm_cols,.false.)
+#elif (defined HAVE_LINALG_ELPA_2015)
+ call invert_trm_real(elpa_hdl%na,aa,elpa_hdl%local_nrows,elpa_hdl%nblk,&
+                         elpa_hdl%elpa_comm_rows,elpa_hdl%elpa_comm_cols,.false.,success)
+#elif (defined HAVE_LINALG_ELPA_2014)
+ call invert_trm_real(elpa_hdl%na,aa,elpa_hdl%local_nrows,elpa_hdl%nblk,&
+&                     elpa_hdl%elpa_comm_rows,elpa_hdl%elpa_comm_cols,success)
+ success=.true. ! Sometimes get unexpected success=false
+#elif (defined HAVE_LINALG_ELPA_2013)
+ call invert_trm_real(elpa_hdl%na,aa,elpa_hdl%local_nrows,elpa_hdl%nblk,&
+&                     elpa_hdl%elpa_comm_rows,elpa_hdl%elpa_comm_cols)
+#else
+!ELPA-LEGACY-2017
+ success = elpa_invert_trm_real_double(elpa_hdl%na,aa,elpa_hdl%local_nrows,elpa_hdl%nblk,elpa_hdl%local_ncols,&
+&                                      elpa_hdl%elpa_comm_rows,elpa_hdl%elpa_comm_cols,.false.)
+#endif
+
+ if (.not.success) call elpa_func_error_handler(err_msg='Error in invert_trianguler_real!')
 
 end subroutine elpa_func_invert_triangular_real
 !!***
@@ -756,19 +1061,13 @@ end subroutine elpa_func_invert_triangular_real
 !!  Wrapper to elpa_invert_triangular_complex ELPA function
 !!
 !! INPUTS
-!!  na=Order of matrix
-!!  lda=Leading dimension of aa
-!!  matrixCols=local columns of matrix a
-!!  nblk=Blocksize of cyclic distribution, must be the same in both directions!
-!!  mpi_comm=Global communicator for the calculations
-!!  my_prow=Row coordinate of the calling process in the process grid (in)
-!!  my_pcol=Column coordinate of the calling process in the process grid (in)
 !!
 !! SIDE EFFECTS
-!!  aa(lda,matrixCols)=Distributed matrix which should be factorized.
+!!  aa(local_nrows,local_ncols)=Distributed matrix which should be factorized.
 !!                     Distribution is like in Scalapack.
 !!                     Only upper triangle is needs to be set.
 !!                     The lower triangle is not referenced.
+!!  elpa_hdl(type<elpa_hdl_t>)=handler for ELPA object
 !!
 !! PARENTS
 !!
@@ -778,8 +1077,7 @@ end subroutine elpa_func_invert_triangular_real
 !!
 !! SOURCE
 
-subroutine elpa_func_invert_triangular_complex(na,aa,lda,nblk,matrixCols,&
-&                                              mpi_comm,my_prow,my_pcol)
+subroutine elpa_func_invert_triangular_complex(elpa_hdl,aa)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -792,46 +1090,53 @@ subroutine elpa_func_invert_triangular_complex(na,aa,lda,nblk,matrixCols,&
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in)  :: na,lda,nblk,matrixCols
- integer,intent(in)  :: mpi_comm,my_prow,my_pcol
+ type(elpa_hdl_t),intent(inout) :: elpa_hdl
 !arrays
- complex(dpc),intent(inout) :: aa(lda,matrixCols)
+ complex(dpc),intent(inout) :: aa(:,:)
 
 !Local variables-------------------------------
- integer :: error
+ integer :: err
  logical :: success
- character(len=100) :: errmsg
 
 ! *********************************************************************
 
- success=.true. ; error=0 ; errmsg=""
+ success=.true. ; err=0
 
-#if  (defined HAVE_LINALG_ELPA_2017)
- elpa_hdl => elpa_allocate()
- success=elpa_func_set_matrix_params(errmsg,na,nblk,lda,matrixCols,mpi_comm,my_prow,my_pcol)
- if (success) then
-   call elpa_hdl%invert_triangular(aa,error)
-   success=(error==0)
+ if (.not.elpa_hdl%is_allocated) then
+   MSG_BUG('ELPA handle not allocated!')
  end if
- call elpa_deallocate(elpa_hdl)
-#elif (defined HAVE_LINALG_ELPA_2016)
- success = elpa_invert_trm_complex(na,aa,lda,nblk,matrixCols,elpa_comm_rows,elpa_comm_cols,.false.)
-#elif (defined HAVE_LINALG_ELPA_2015)
- call invert_trm_complex(na,aa,lda,nblk,elpa_comm_rows,elpa_comm_cols,.false.,success)
-#elif (defined HAVE_LINALG_ELPA_2014)
- call invert_trm_complex(na,aa,lda,nblk,elpa_comm_rows,elpa_comm_cols,success)
- success=.true. ! Sometimes get unexpected success=false
-#elif (defined HAVE_LINALG_ELPA_2013)
- call invert_trm_complex(na,aa,lda,nblk,elpa_comm_rows,elpa_comm_cols)
+ if (.not.elpa_hdl%matrix_is_set) then
+   MSG_BUG('Matrix not set in ELPA handle!')
+ end if
+#ifdef HAVE_ELPA_FORTRAN2008
+ ABI_CHECK(size(aa)==elpa_hdl%elpa%local_nrows*elpa_hdl%elpa%local_ncols,'BUG: matrix A has wrong sizes!')
 #else
-!ELPA-LEGACY-2017
- success = elpa_invert_trm_complex_double(na,aa,lda,nblk,matrixCols,elpa_comm_rows,elpa_comm_cols,.false.)
+ ABI_CHECK(size(aa)==elpa_hdl%local_nrows*elpa_hdl%local_ncols,'BUG: matrix A has wrong sizes!')
 #endif
 
- if (.not.success) then
-   if (trim(errmsg)=="") errmsg="Problem with ELPA (invert_triangular_complex)!"
-   MSG_ERROR(errmsg)
- end if
+#if  (defined HAVE_LINALG_ELPA_2017)
+ call elpa_hdl%elpa%invert_triangular(aa,err)
+ success=(err==ELPA_OK)
+#elif (defined HAVE_LINALG_ELPA_2016)
+ success = elpa_invert_trm_complex(elpa_hdl%na,aa,elpa_hdl%local_nrows,elpa_hdl%nblk,elpa_hdl%local_ncols,&
+&                                  elpa_hdl%elpa_comm_rows,elpa_hdl%elpa_comm_cols,.false.)
+#elif (defined HAVE_LINALG_ELPA_2015)
+ call invert_trm_complex(elpa_hdl%na,aa,elpa_hdl%local_nrows,elpa_hdl%nblk,&
+                         elpa_hdl%elpa_comm_rows,elpa_hdl%elpa_comm_cols,.false.,success)
+#elif (defined HAVE_LINALG_ELPA_2014)
+ call invert_trm_complex(elpa_hdl%na,aa,elpa_hdl%local_nrows,elpa_hdl%nblk,&
+&                        elpa_hdl%elpa_comm_rows,elpa_hdl%elpa_comm_cols,success)
+ success=.true. ! Sometimes get unexpected success=false
+#elif (defined HAVE_LINALG_ELPA_2013)
+ call invert_trm_complex(elpa_hdl%na,aa,elpa_hdl%local_nrows,elpa_hdl%nblk,&
+&                        elpa_hdl%elpa_comm_rows,elpa_hdl%elpa_comm_cols)
+#else
+!ELPA-LEGACY-2017
+ success = elpa_invert_trm_complex_double(elpa_hdl%na,aa,elpa_hdl%local_nrows,elpa_hdl%nblk,elpa_hdl%local_ncols,&
+&                                         elpa_hdl%elpa_comm_rows,elpa_hdl%elpa_comm_cols,.false.)
+#endif
+
+ if (.not.success) call elpa_func_error_handler(err_msg='Error in invert_trianguler_complex!')
 
 end subroutine elpa_func_invert_triangular_complex
 !!***
@@ -859,21 +1164,19 @@ end subroutine elpa_func_invert_triangular_complex
 !!         anything else if the full matrix C is needed
 !!         Please note: Even when uplo_c is 'U' or 'L', the other triangle may be
 !!         written to a certain extent, i.e. one shouldn't rely on the content there!
-!!  aa=Matrix A
-!!  bb=Matrix B
-!!  lda=Leading dimension of aa
-!!  ldb=Leading dimension of bb
-!!  ldc=Leading dimension of cc
-!!  na=Number of rows/columns of A, number of rows of B and C
-!!  ncb=Number of columns  of B and C
-!!  nblk=Blocksize of cyclic distribution, must be the same in both directions!
-!!  matrixCols=local columns of matrix a
-!!  mpi_comm=Global communicator for the calculations
-!!  my_prow=Row coordinate of the calling process in the process grid (in)
-!!  my_pcol=Column coordinate of the calling process in the process grid (in)
+!!  ncb=Number of columns of B and C
+!!  aa(local_nrows,local_ncols)=Matrix A
+!!  bb(ldb,local_ncols_c)=Matrix B
+!!  local_nrows_b=Local rows of matrix B
+!!  local_ncols_b=Local columns of matrix B
+!!  local_nrows_c=Local rows of matrix C
+!!  local_ncols_c=Local columns of matrix C
 !!
 !! OUTPUT
-!!  cc=Matrix C
+!!  cc(local_nrows_c,local_ncols_c)=Matrix C
+!!
+!! SIDE EFFECTS
+!!  elpa_hdl(type<elpa_hdl_t>)=handler for ELPA object
 !!
 !! PARENTS
 !!
@@ -883,8 +1186,8 @@ end subroutine elpa_func_invert_triangular_complex
 !!
 !! SOURCE
 
-subroutine elpa_func_hermitian_multiply_real(uplo_a,uplo_c,na,ncb,aa,lda,bb,ldb,cc,ldc,&
-&                                            nblk,matrixCols,mpi_comm,my_prow,my_pcol)
+subroutine elpa_func_hermitian_multiply_real(elpa_hdl,uplo_a,uplo_c,ncb,aa,bb,local_nrows_b,local_ncols_b,&
+&                                            cc,local_nrows_c,local_ncols_c)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -897,46 +1200,54 @@ subroutine elpa_func_hermitian_multiply_real(uplo_a,uplo_c,na,ncb,aa,lda,bb,ldb,
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in)  :: na,ncb,lda,ldb,ldc,nblk,matrixCols
- integer,intent(in)  :: mpi_comm,my_prow,my_pcol
- character*1 :: uplo_a, uplo_c
+ integer,intent(in)  :: ncb,local_nrows_b,local_nrows_c,local_ncols_b,local_ncols_c
+ character*1 :: uplo_a,uplo_c
+ type(elpa_hdl_t),intent(inout) :: elpa_hdl
 !arrays
- real(dp),intent(in) :: aa(lda,matrixCols),bb(ldb,matrixCols)
- real(dp),intent(out) :: cc(ldc,matrixCols)
+ real(dp),intent(in) :: aa(:,:),bb(:,:)
+ real(dp),intent(out) :: cc(:,:)
 
 !Local variables-------------------------------
- integer :: error
+ integer :: err
  logical :: success
- character(len=100) :: errmsg
 
 ! *********************************************************************
 
- success=.true. ; error=0 ; errmsg=""
+ success=.true. ; err=0
+
+ if (.not.elpa_hdl%is_allocated) then
+   MSG_BUG('ELPA handle not allocated!')
+ end if
+ if (.not.elpa_hdl%matrix_is_set) then
+   MSG_BUG('Matrix not set in ELPA handle!')
+ end if
+#ifdef HAVE_ELPA_FORTRAN2008
+ ABI_CHECK(size(aa)==elpa_hdl%elpa%local_nrows*elpa_hdl%elpa%local_ncols,'BUG: matrix A has wrong sizes!')
+#else
+ ABI_CHECK(size(aa)==elpa_hdl%local_nrows*elpa_hdl%local_ncols,'BUG: matrix A has wrong sizes!')
+#endif
+ ABI_CHECK(size(bb)==local_nrows_b*local_ncols_b,'BUG: matrix B has wrong sizes!')
+ ABI_CHECK(size(cc)==local_nrows_c*local_ncols_c,'BUG: matrix C has wrong sizes!')
 
 #if  (defined HAVE_LINALG_ELPA_2017)
- elpa_hdl => elpa_allocate()
- success=elpa_func_set_matrix_params(errmsg,na,nblk,lda,matrixCols,mpi_comm,my_prow,my_pcol)
- if (success) then
-   call elpa_hdl%hermitian_multiply(uplo_a,uplo_c,ncb,aa,bb,ldb,matrixCols,cc,ldc,matrixCols,error)
-   success=(error==0)
- end if
- call elpa_deallocate(elpa_hdl)
+ call elpa_hdl%elpa%hermitian_multiply(uplo_a,uplo_c,ncb,aa,bb,local_nrows_b,local_ncols_b,&
+&                                      cc,local_nrows_c,local_ncols_c,err)
+ success=(err==ELPA_OK)
 #elif (defined HAVE_LINALG_ELPA_2016)
- success = elpa_mult_at_b_real(uplo_a,uplo_c,na,ncb,aa,lda,matrixCols,bb,ldb,matrixCols,nblk, &
-&                              elpa_comm_rows,elpa_comm_cols,cc,ldc,matrixCols)
+ success = elpa_mult_at_b_real(uplo_a,uplo_c,elpa_hdl%na,ncb,aa,elpa_hdl%local_nrows,elpa_hdl%local_ncols,&
+&          bb,local_nrows_b,local_ncols_b,elpa_hdl%nblk,elpa_hdl%elpa_comm_rows,elpa_hdl%elpa_comm_cols,&
+&          cc,local_nrows_c,local_ncols_c)
 #elif (defined HAVE_LINALG_ELPA_2015) || (defined HAVE_LINALG_ELPA_2014) || (defined HAVE_LINALG_ELPA_2013)
- call mult_at_b_real(uplo_a,uplo_c,na,ncb,aa,lda,bb,ldb,nblk, &
-&                    elpa_comm_rows,elpa_comm_cols,cc,ldc)
+ call mult_at_b_real(uplo_a,uplo_c,elpa_hdl%na,ncb,aa,elpa_hdl%local_nrows,bb,local_nrows_b,&
+&               elpa_hdl%nblk,elpa_hdl%elpa_comm_rows,elpa_hdl%elpa_comm_cols,cc,local_nrows_c)
 #else
 !ELPA-LEGACY-2017
- success =  elpa_mult_at_b_real_double(uplo_a,uplo_c,na,ncb,aa,lda,matrixCols,bb,ldb,matrixCols,nblk, &
-&                                      elpa_comm_rows,elpa_comm_cols,cc,ldc,matrixCols)
+ success =  elpa_mult_at_b_real_double(uplo_a,uplo_c,elpa_hdl%na,ncb,aa,elpa_hdl%local_nrows,&
+&           elpa_hdl%local_ncols,bb,local_nrows_b,local_ncols_b,elpa_hdl%nblk,elpa_hdl%elpa_comm_rows,&
+&           elpa_hdl%elpa_comm_cols,cc,local_nrows_c,local_ncols_c)
 #endif
 
- if (.not.success) then
-   if (trim(errmsg)=="") errmsg="Problem with ELPA (hermitian_multiply_real)!"
-   MSG_ERROR(errmsg)
- end if
+ if (.not.success) call elpa_func_error_handler(err_msg='Error in hermitian_multiply_real!')
 
 end subroutine elpa_func_hermitian_multiply_real
 !!***
@@ -964,20 +1275,19 @@ end subroutine elpa_func_hermitian_multiply_real
 !!         anything else if the full matrix C is needed
 !!         Please note: Even when uplo_c is 'U' or 'L', the other triangle may be
 !!         written to a certain extent, i.e. one shouldn't rely on the content there!
-!!  aa=Matrix A
-!!  bb=Matrix B
-!!  lda=Leading dimension of aa
-!!  ldb=Leading dimension of bb
-!!  ldc=Leading dimension of cc
-!!  na=Number of rows/columns of A, number of rows of B and C
-!!  ncb=Number of columns  of B and C
-!!  nblk=Blocksize of cyclic distribution, must be the same in both directions!
-!!  matrixCols=local columns of matrix a
-!!  elpa_comm_rows=MPI-Communicator for rows
-!!  elpa_comm_cols=MPI-Communicator for columns
+!!  ncb=Number of columns of B and C
+!!  aa(local_nrows,local_ncols)=Matrix A
+!!  bb(ldb,local_ncols_c)=Matrix B
+!!  local_nrows_b=Local rows of matrix B
+!!  local_ncols_b=Local columns of matrix B
+!!  local_nrows_c=Local rows of matrix C
+!!  local_ncols_c=Local columns of matrix C
 !!
 !! OUTPUT
-!!  cc=Matrix C
+!!  cc(local_nrows_c,local_ncols_c)=Matrix C
+!!
+!! SIDE EFFECTS
+!!  elpa_hdl(type<elpa_hdl_t>)=handler for ELPA object
 !!
 !! PARENTS
 !!
@@ -987,8 +1297,8 @@ end subroutine elpa_func_hermitian_multiply_real
 !!
 !! SOURCE
 
-subroutine elpa_func_hermitian_multiply_complex(uplo_a,uplo_c,na,ncb,aa,lda,bb,ldb,cc,ldc, &
-&                                               nblk,matrixCols,mpi_comm,my_prow,my_pcol)
+subroutine elpa_func_hermitian_multiply_complex(elpa_hdl,uplo_a,uplo_c,ncb,aa,bb,local_nrows_b,local_ncols_b,&
+&                                               cc,local_nrows_c,local_ncols_c)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1001,180 +1311,61 @@ subroutine elpa_func_hermitian_multiply_complex(uplo_a,uplo_c,na,ncb,aa,lda,bb,l
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in)  :: na,ncb,lda,ldb,ldc,nblk,matrixCols
- integer,intent(in)  :: mpi_comm,my_prow,my_pcol
- character*1 :: uplo_a, uplo_c
+ integer,intent(in)  :: ncb,local_nrows_b,local_nrows_c,local_ncols_b,local_ncols_c
+ character*1 :: uplo_a,uplo_c
+ type(elpa_hdl_t),intent(inout) :: elpa_hdl
 !arrays
- complex(dpc),intent(in) :: aa(lda,matrixCols),bb(ldb,matrixCols)
- complex(dpc),intent(out) :: cc(ldc,matrixCols)
+ complex(dpc),intent(in) :: aa(:,:),bb(:,:)
+ complex(dpc),intent(out) :: cc(:,:)
 
 !Local variables-------------------------------
- integer :: error
+ integer :: err
  logical :: success
- character(len=100) :: errmsg
 
 ! *********************************************************************
 
- success=.true. ; error=0 ; errmsg=""
+ success=.true. ; err=0
+
+ if (.not.elpa_hdl%is_allocated) then
+   MSG_BUG('ELPA handle not allocated!')
+ end if
+ if (.not.elpa_hdl%matrix_is_set) then
+   MSG_BUG('Matrix not set in ELPA handle!')
+ end if
+#ifdef HAVE_ELPA_FORTRAN2008
+ ABI_CHECK(size(aa)==elpa_hdl%elpa%local_nrows*elpa_hdl%elpa%local_ncols,'BUG: matrix A has wrong sizes!')
+#else
+ ABI_CHECK(size(aa)==elpa_hdl%local_nrows*elpa_hdl%local_ncols,'BUG: matrix A has wrong sizes!')
+#endif
+ ABI_CHECK(size(bb)==local_nrows_b*local_ncols_b,'BUG: matrix B has wrong sizes!')
+ ABI_CHECK(size(cc)==local_nrows_c*local_ncols_c,'BUG: matrix C has wrong sizes!')
 
 #if  (defined HAVE_LINALG_ELPA_2017)
- elpa_hdl => elpa_allocate()
- success=elpa_func_set_matrix_params(errmsg,na,nblk,lda,matrixCols,mpi_comm,my_prow,my_pcol)
- if (success) then
-   call elpa_hdl%hermitian_multiply(uplo_a,uplo_c,ncb,aa,bb,ldb,matrixCols,cc,ldc,matrixCols,error)
-   success=(error==0)
- end if
- call elpa_deallocate(elpa_hdl)
+ call elpa_hdl%elpa%hermitian_multiply(uplo_a,uplo_c,ncb,aa,bb,local_nrows_b,local_ncols_b,&
+&                                      cc,local_nrows_c,local_ncols_c,err)
+ success=(err==ELPA_OK)
 #elif (defined HAVE_LINALG_ELPA_2016)
-  success = elpa_mult_ah_b_complex(uplo_a,uplo_c,na,ncb,aa,lda,matrixCols,bb,ldb,matrixCols,nblk, &
-&                                  elpa_comm_rows,elpa_comm_cols,cc,ldc,matrixCols)
+ success = elpa_mult_ah_b_complex(uplo_a,uplo_c,elpa_hdl%na,ncb,aa,elpa_hdl%local_nrows,elpa_hdl%local_ncols,&
+&          bb,local_nrows_b,local_ncols_b,elpa_hdl%nblk,elpa_hdl%elpa_comm_rows,elpa_hdl%elpa_comm_cols,&
+&          cc,local_nrows_c,local_ncols_c)
 #elif (defined HAVE_LINALG_ELPA_2015) || (defined HAVE_LINALG_ELPA_2014) || (defined HAVE_LINALG_ELPA_2013)
- call mult_ah_b_complex(uplo_a,uplo_c,na,ncb,aa,lda,bb,ldb,nblk, &
-&                       elpa_comm_rows,elpa_comm_cols,cc,ldc)
+ call mult_ah_b_complex(uplo_a,uplo_c,elpa_hdl%na,ncb,aa,elpa_hdl%local_nrows,bb,local_nrows_b,&
+&               elpa_hdl%nblk,elpa_hdl%elpa_comm_rows,elpa_hdl%elpa_comm_cols,cc,local_nrows_c)
 #else
 !ELPA-LEGACY-2017
-  success = elpa_mult_ah_b_complex_double(uplo_a,uplo_c,na,ncb,aa,lda,matrixCols,bb,ldb,matrixCols,nblk, &
-&                                         elpa_comm_rows,elpa_comm_cols,cc,ldc,matrixCols)
+ success =  elpa_mult_ah_b_complex_double(uplo_a,uplo_c,elpa_hdl%na,ncb,aa,elpa_hdl%local_nrows,&
+&           elpa_hdl%local_ncols,bb,local_nrows_b,local_ncols_b,elpa_hdl%nblk,elpa_hdl%elpa_comm_rows,&
+&           elpa_hdl%elpa_comm_cols,cc,local_nrows_c,local_ncols_c)
 #endif
 
- if (.not.success) then
-   if (trim(errmsg)=="") errmsg="Problem with ELPA (hermitian_multiply_complex)!"
-   MSG_ERROR(errmsg)
- end if
+ if (.not.success) call elpa_func_error_handler(err_msg='Error in hermitian_multiply_complex!')
 
 end subroutine elpa_func_hermitian_multiply_complex
 !!***
 
 !----------------------------------------------------------------------
 
-#ifdef HAVE_ELPA_FORTRAN2008
-
-!!****f* m_elpa/elpa_func_set_matrix_params
-!! NAME
-!!  elpa_func_set_matrix_params
-!!
-!! FUNCTION
-!!  Set parameters decribing a matrix and it's MPI distribution
-!!
-!! INPUTS
-!!  na=Order of matrix A
-!!  nblk=Blocksize of cyclic distribution, must be the same in both directions!
-!!  local_nrows=Leading dimension of A
-!!  local_ncols=Local columns of matrixes A and Q (eigenvectors)
-!!  mpi_comm_parent=Global communicator for the calculations
-!!  process_row=Row coordinate of the calling process in the process grid
-!!  process_col=Column coordinate of the calling process in the process grid
-!!  [nev]= -- optional -- Number of (smallest) eigenvalues/eigenvectors to be computed
-!!  [ldq]= -- optional -- For testing purpose: leading dimension of Q
-!!  [gpu]= -- optional -- Flag (0 or 1): use GPU version
-!!
-!! OUTPUT
-!!  errmsg=error message if any
-!!  success=.TRUE. if successful
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!
-!! SOURCE
-
-function elpa_func_set_matrix_params(errmsg,na,nblk,local_nrows,local_ncols,&
-&             mpi_comm_parent,process_row,process_col,nev,ldq,gpu) &
-& result(success)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'elpa_func_set_matrix_params'
-!End of the abilint section
-
- implicit none
-
-!Arguments ------------------------------------
-!scalars
- integer,intent(in) :: na,nblk,local_nrows,local_ncols
- integer,intent(in) :: mpi_comm_parent,process_row,process_col
- integer,intent(in),optional :: nev,ldq,gpu
- logical :: success
- character(len=*) :: errmsg
-!arrays
-
-!Local variables-------------------------------
- integer :: err
-
-! *********************************************************************
-
- success=.true. ; errmsg=""
-
- if (present(ldq)) then
-   if (local_nrows/=ldq) then
-     MSG_BUG('Problem with ELPA (lda/=ldq)!')
-   end if
- end if
-
- call elpa_hdl%set("na",na,err)
- if (err/=0) then
-   errmsg="Cannot setup ELPA instance (na)!";success=.false.;return
- endif
-
- call elpa_hdl%set("nblk",nblk,err)
- if (err/=0) then
-   errmsg="Cannot setup ELPA instance (nblk)!";success=.false.;return
- endif
-
- call elpa_hdl%set("local_nrows",local_nrows,err)
- if (err/=0) then
-   errmsg="Cannot setup ELPA instance (local_nrows)!";success=.false.;return
- endif
-
- call elpa_hdl%set("local_ncols",local_ncols,err)
- if (err/=0) then
-   errmsg="Cannot setup ELPA instance (local_ncols)!";success=.false.;return
- endif
-
- call elpa_hdl%set("process_row",process_row,err)
- if (err/=0) then
-   errmsg="Cannot setup ELPA instance (process_row)!";success=.false.;return
- endif
-
- call elpa_hdl%set("process_col",process_col,err)
- if (err/=0) then
-   errmsg="Cannot setup ELPA instance (process_col)!";success=.false.;return
- endif
-
- call elpa_hdl%set("mpi_comm_parent",mpi_comm_parent,err)
- if (err/=0) then
-   errmsg="Cannot setup ELPA instance (mpi_comm_parent)!";success=.false.;return
- endif
-
- if (present(nev)) then
-   call elpa_hdl%set("nev",nev,err)
-   if (err/=0) then
-     errmsg="Cannot setup ELPA instance (nev)!";success=.false.;return
-   endif
- end if
-
- if (present(gpu)) then
-   call elpa_hdl%set("gpu",gpu,err)
-   if (err/=0) then
-     errmsg="Cannot setup ELPA instance (gpu)!";success=.false.;return
-   endif
- end if
-
- if (elpa_hdl%setup()/=ELPA_OK) then
-   errmsg="Cannot setup ELPA instance!"
-   success=.false.;return
- endif
-
-end function elpa_func_set_matrix_params
-!!***
-
-!----------------------------------------------------------------------
 #endif
-
-#endif
-
 
 END MODULE m_elpa
 !!***

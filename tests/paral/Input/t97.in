@@ -2,7 +2,7 @@
 #Test for multibinit, just read xml and generate the effective potential into XML file
 ##############################################################################
 prt_model = 3
-
+dipdip_prt = 1
 n_cell =   2 2 2
 dynamics =  12
 temperature = 1000

@@ -37,7 +37,7 @@ MODULE m_ddb_hdr
  use m_io_tools,  only : open_file
  use m_copy,      only : alloc_copy
  use m_fstrings,  only : sjoin
-
+ 
  implicit none
 
  private
@@ -150,7 +150,6 @@ MODULE m_ddb_hdr
  public :: ddb_hdr_open_write      ! Open the DDB file and write the header.
  public :: ddb_hdr_open_read       ! Open the DDB file and read the header.
  public :: ddb_hdr_compare         ! Compare two DDB headers.
-
 
 CONTAINS  !===========================================================
 !!***
@@ -303,7 +302,7 @@ subroutine ddb_hdr_init(ddb_hdr, dtset, psps, pawtab, ddb_version, dscrpt, &
 end subroutine ddb_hdr_init
 !!***
 
-!----------------------------------------------------------------------
+
 
 !!****f* m_ddb_hdr/ddb_hdr_malloc
 !! NAME
