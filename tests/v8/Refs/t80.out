@@ -1,5 +1,5 @@
 
-.Version 8.5.0 of ABINIT 
+.Version 8.7.1 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
 
 .Copyright (C) 1998-2017 ABINIT group . 
@@ -12,15 +12,15 @@
  Corning Inc. and other collaborators, see ~abinit/doc/developers/contributors.txt .
  Please read ~abinit/doc/users/acknowledgments.html for suggested
  acknowledgments of the ABINIT effort.
- For more information, see http://www.abinit.org .
+ For more information, see https://www.abinit.org .
 
-.Starting date : Sat 27 May 2017.
-- ( at 12h51 )
+.Starting date : Sat 28 Oct 2017.
+- ( at 17h09 )
   
-- input  file    -> t60.in
-- output file    -> t60.out
-- root for input  files -> t60i
-- root for output files -> t60o
+- input  file    -> t80.in
+- output file    -> t80.out
+- root for input  files -> t80i
+- root for output files -> t80o
 
 
  DATASET    1 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
@@ -463,7 +463,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     289.047     288.933
  frms,max,avg= 3.3880144E-28 3.3880144E-28   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales= 10.217000000000 10.217000000000 10.217000000000 bohr
               =  5.406603540164  5.406603540164  5.406603540164 angstroms
- prteigrs : about to open file t60o_DS1_EIG
+ prteigrs : about to open file t80o_DS1_EIG
  Fermi (or HOMO) energy (hartree) =   0.16596   Average Vxc (hartree)=  -0.34232
  Eigenvalues (hartree) for nkpt=   8  k points:
  kpt#   1, nband=  8, wtk=  0.01563, kpt=  0.0000  0.0000  0.0000 (reduced coord)
@@ -519,7 +519,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     289.047     288.933
          ecut(hartree)=      8.000   => boxcut(ratio)=   2.17426
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t60o_DS1_WFK
+-inwffil : will read wavefunctions from disk file t80o_DS1_WFK
 _setup2: Arith. and geom. avg. npw (full set) are     289.047     288.933
 
 ================================================================================
@@ -566,7 +566,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     289.047     288.933
  frms,max,avg= 5.0820216E-28 5.0820216E-28   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales= 10.217000000000 10.217000000000 10.217000000000 bohr
               =  5.406603540164  5.406603540164  5.406603540164 angstroms
- prteigrs : about to open file t60o_DS2_EIG
+ prteigrs : about to open file t80o_DS2_EIG
  Fermi (or HOMO) energy (hartree) =   0.16596   Average Vxc (hartree)=  -0.34232
  Eigenvalues (hartree) for nkpt=   8  k points:
  kpt#   1, nband= 16, wtk=  0.01563, kpt=  0.0000  0.0000  0.0000 (reduced coord)
@@ -643,7 +643,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     289.047     288.933
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t60o_DS2_WFK
+-inwffil : will read wavefunctions from disk file t80o_DS2_WFK
 _setup2: Arith. and geom. avg. npw (full set) are     289.047     288.933
 
 ================================================================================
@@ -698,7 +698,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     289.047     288.933
  frms,max,avg= 4.3739078E-28 6.7760288E-28   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales= 10.217000000000 10.217000000000 10.217000000000 bohr
               =  5.406603540164  5.406603540164  5.406603540164 angstroms
- prteigrs : about to open file t60o_DS3_EIG
+ prteigrs : about to open file t80o_DS3_EIG
  Fermi (or HOMO) energy (hartree) =   0.16655   Average Vxc (hartree)=  -0.34232
  Eigenvalues (hartree) for nkpt=   8  k points:
  kpt#   1, nband= 16, wtk=  0.01563, kpt=  0.0000  0.0000  0.0000 (reduced coord)
@@ -1428,7 +1428,7 @@ P           mkmem           8
  Note also that it will be of great value to readers of publications presenting these results,
  to read papers enabling them to understand the theoretical formalism and details
  of the ABINIT implementation.
- For information on why they are suggested, see also http://www.abinit.org/about/?text=acknowledgments.
+ For information on why they are suggested, see also https://www.abinit.org/about/?text=acknowledgments.
 -
 - [1] Recent developments in the ABINIT software package.
 - Computer Phys. Comm. 205, 106 (2016).
@@ -1444,7 +1444,7 @@ P           mkmem           8
 - B.Xue, A.Zhou, J.W.Zwanziger.
 - Comment : the fourth generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
-- is available at http://www.abinit.org/about/ABINIT16.pdf .
+- is available at https://www.abinit.org/about/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 -
 - [2] Optimized norm-conserving Vanderbilt pseudopotentials.
@@ -1460,7 +1460,7 @@ P           mkmem           8
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment : the third generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
-- is available at http://www.abinit.org/about/ABINIT_CPC_v10.pdf .
+- is available at https://www.abinit.org/about/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 -
 - [4] A brief introduction to the ABINIT software package.
@@ -1471,7 +1471,7 @@ P           mkmem           8
 - Comment : the second generic paper describing the ABINIT project. Note that this paper
 - should be cited especially if you are using the GW part of ABINIT, as several authors
 - of this part are not in the list of authors of the first or third paper.
-- The .pdf of the latter paper is available at http://www.abinit.org/about/zfk_0505-06_558-562.pdf.
+- The .pdf of the latter paper is available at https://www.abinit.org/about/zfk_0505-06_558-562.pdf.
 - Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
 - the licence allows the authors to put it on the Web).
 -
