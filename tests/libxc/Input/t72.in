@@ -24,7 +24,6 @@
 
 #DATASET 3  HSE06 (LibXC)
  ixc3  -428
- hyb_range_fock3 0.005d0
 
 #DATASET 4  HSE06 (VASP)
  ixc4  -428
@@ -74,13 +73,12 @@
  hyb_range_fock14 0.106066d0              # But these lines redefine the parameters to the libxc HSE03
  hyb_range_dft14 0.188988d0              
 
-#DATASET 15  Get PBE0. Fool LibXC by imposing to HSE06 a screening only at very large distances
+#DATASET 15  Imposing to HSE06 a screening only at very large distances does NOT give the PBE0 at the same k point grid,
+#because in the latter, the Spencer-Alavi trick is used. The present dataset leads to a divergence with the
+#inverse square of hyb_range_fock .
 # So, gives the same as datasets 8 & 9. DOES NOT WORK, although the difference is at the level of the fourth digit.
  ixc15  -428                         # This should be HSE06
- hyb_range_fock15 0.00001d0          # But these lines redefine the parameters to the HF within tolerance
-                    # Note that Spencer-Alavi approach had to be combined seamlessly
-                    # with HSE-type functionals to reach this result.
-                    # Otherwise, the difference with PBE0 diverges with the inverse square of hyb_range_fock
+ hyb_range_fock15 0.00001d0          
 
 #DATASET 16  Get PBE. Fool LibXC by imposing to HSE06 an extremely small mixing parameter
 # So, gives the same as dataset 1 or 2. DOES NOT WORK, although the difference is at the level of 1.0d-4 !

@@ -2390,15 +2390,12 @@ subroutine bare_vqg(qphon,gsqcut,gmet,izero,hyb_mixing,hyb_mixing_sr,hyb_range_f
        ! value of the integration of the Coulomb singularity 4pi\int_BZ 1/q^2 dq
        vqg(1+i23)=hyb_mixing*divgq0
 
-!      if(abs(abs(hyb_mixing)-0.00000003)<tol8)then
-!        vqg(1+i23)=hyb_mixing_sr*min(divgq0,pi/(hyb_range_fock**2))
-!      else
-!        if (abs(hyb_range_fock)>tol8) vqg(1+i23)=vqg(1+i23)+hyb_mixing_sr*pi/(hyb_range_fock**2)
-!      endif
-
 !      Note the combination of Spencer-Alavi and Erfc screening
        if (abs(hyb_range_fock)>tol8)then
-         vqg(1+i23)=vqg(1+i23)+hyb_mixing_sr*min(divgq0,pi/(hyb_range_fock**2))
+         vqg(1+i23)=vqg(1+i23)+hyb_mixing_sr*(pi/hyb_range_fock**2)
+!        This would give a combination of Spencer-Alavi and Erfc screening,
+!        unfortunately, it modifies also the tests for pure HSE06, so was not retained.
+!        vqg(1+i23)=vqg(1+i23)+hyb_mixing_sr*min(divgq0,pi/(hyb_range_fock**2))
        endif
 
      end if
@@ -2420,30 +2417,20 @@ subroutine bare_vqg(qphon,gsqcut,gmet,izero,hyb_mixing,hyb_mixing_sr,hyb_range_f
 
          den=piinv/gs
 
-!        Make a try with combined Spencer-Alavi and Erfc screening
-!        for a specific value of hyb_mixing , namely 0.123456 in absolute value
-!        However, might become the default if this works well ...
-!        if(abs(abs(hyb_mixing)-0.00000003)<tol8)then
-!           vqg(ii)=vqg(ii)+&
-!&            hyb_mixing_sr*den*(one-exp(-pi/(den*hyb_range_fock**2)))*(one-cos(rcut*sqrt(four_pi/den)))
-!         else
-
-!          Spencer-Alavi screening
-           if (abs(hyb_mixing)>tol8)then
-             vqg(ii)=vqg(ii)+hyb_mixing*den*(one-cos(rcut*sqrt(four_pi/den)))
-!&            vqg(ii)=vqg(ii)+hyb_mixing*den
-           endif
-!          Erfc screening
-           if (abs(hyb_mixing_sr)>tol8) then
-!            This combines Erfc and Spencer-Alavi screening in case rcut is too small or hyb_range_fock too large
-             if(divgq0<pi/(hyb_range_fock**2))then
-               vqg(ii)=vqg(ii)+hyb_mixing_sr*den*&
-&                (one-exp(-pi/(den*hyb_range_fock**2)))*(one-cos(rcut*sqrt(four_pi/den)))
-             else
-               vqg(ii)=vqg(ii)+hyb_mixing_sr*den*(one-exp(-pi/(den*hyb_range_fock**2)))
-             endif
-           endif
-!        endif
+!        Spencer-Alavi screening
+         if (abs(hyb_mixing)>tol8)then
+           vqg(ii)=vqg(ii)+hyb_mixing*den*(one-cos(rcut*sqrt(four_pi/den)))
+!&         vqg(ii)=vqg(ii)+hyb_mixing*den
+         endif
+!        Erfc screening
+         if (abs(hyb_mixing_sr)>tol8) then
+           vqg(ii)=vqg(ii)+hyb_mixing_sr*den*(one-exp(-pi/(den*hyb_range_fock**2)))
+!          This other possibility combines Erfc and Spencer-Alavi screening in case rcut is too small or hyb_range_fock too large
+!          if(divgq0<pi/(hyb_range_fock**2))then
+!            vqg(ii)=vqg(ii)+hyb_mixing_sr*den*&
+!&             (one-exp(-pi/(den*hyb_range_fock**2)))*(one-cos(rcut*sqrt(four_pi/den)))
+!          endif
+         endif
 
        end if ! Cut-off
      end do ! End loop on i1
