@@ -1,5 +1,6 @@
 # Crystalline aluminum : testing of many hybrid functionals (variations of the hyb_* input variables),
 # as well as downsampling, for HSE06, HSE03, PBE0, PBE0-1/3, B3LYP.
+# The pseudopotential has a non-linear core-correction, unlike test libxc#72
 
  ndtset 25
 #ndtset 4
@@ -182,7 +183,7 @@ ecut  6.0         # Maximal kinetic energy cut-off, in Hartree
 #%% [files]
 #%% files_to_test =
 #%%   t72.out, tolnlines=  1, tolabs=  4.0e-10, tolrel=  2.0e-04
-#%% psp_files = 13al.pspgth
+#%% psp_files = 13al.pspnc
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]
@@ -190,12 +191,7 @@ ecut  6.0         # Maximal kinetic energy cut-off, in Hartree
 #%% keywords =
 #%% description =
 #%%   Crystalline aluminum, primitive cell. Test of downsampling for HSE06, PBE0, HSE03.
-#%%   2x2x2 with 4 shifts for the k point grid in the FBZ
-#%%   1x1x1 with 4 shifts for the k point grid for the Fock operator in the FBZ
-#%%   Testing of many hybrid functionals (variations of the hyb_* input variables),
-#%%   Tests were performed with a k-point grid 16x16x16 (without additional shift),
-#%%   to try to recover the nice behaviour of the HSE03 with down sampling 
-#%%   shown in Marsman et al JPCM 20, 064201 (2008), Fig. 1 (there, the reference was 24x24x24)
-#%%   In all the cases (HSE03 libxc, HSE03 VASP, HSE06 - even clearing the issue with the definition of HSE03 dataset 4&5)
-#%%   the downsampling does NOT perform well ...
+#%%   Testing of many hybrid functionals (variations of the hyb_* input variables).
+#%%   See more information in test libxc#72. The present test differns by the use of a
+#%%   different pseudopotential, that includes a non-linear core correction.
 #%%<END TEST_INFO>
