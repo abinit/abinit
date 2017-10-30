@@ -28692,26 +28692,6 @@
     characteristics: null
     commentdefault: null
     commentdims: null
-    defaultval:
-    - 5.0
-    - 59.0
-    - 6
-    definition: Temperature MESH
-    dimensions:
-    - 3
-    excludes: null
-    requires: null
-    section: varbas
-    text: |-
-        This variable defines the linear mesh of temperatures used
-        in the EPH code ([[optdriver]] = 7).
-        The first entry gives the initial temperature in Kelvin, the second entry the linear step in Kelvin, the third entry is the number of points in the mesh. The default value corresponds to 6 points between 5 K and 300 K.
-    varname: tmesh
-    vartype: real
-- !variable
-    characteristics: null
-    commentdefault: null
-    commentdims: null
     defaultval: null
     dimensions:
     - 3
@@ -28737,6 +28717,25 @@
         </p>
     topics: crystal_useful
     varset: basic
+    vartype: real
+- !variable
+    abivarname: tmesh
+    characteristics: null
+    commentdefault: null
+    commentdims: null
+    defaultval:
+    - 5.0
+    - 59.0
+    - 6
+    dimensions:
+    - 3
+    excludes: null
+    mnemonics: Temperature MESH
+    requires: null
+    text: |-
+        This variable defines the linear mesh of temperatures used in the EPH code ([[optdriver]] = 7).
+        The first entry gives the initial temperature in Kelvin, the second entry the linear step in Kelvin, the third entry is the number of points in the mesh. The default value corresponds to 6 points between 5 K and 300 K.
+    varset: varbas
     vartype: real
 - !variable
     abivarname: toldfe
