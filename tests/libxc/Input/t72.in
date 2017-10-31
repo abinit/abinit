@@ -15,7 +15,7 @@
 #nstep 15          # Maximal number of SCF cycles
  toldfe 1.0d-8     # Will stop when, twice in a row, the difference
 
-#DATASET 1 PBE (ABINIT - the pseudopotential for Al is with LDA but this deos not matter)
+#DATASET 1 PBE (ABINIT - the pseudopotential for Al is with LDA but this does not matter)
  ixc1  11
 
 #DATASET 2 PBE (LibXC)

@@ -16,7 +16,7 @@
 #nstep 15          # Maximal number of SCF cycles
  toldfe 1.0d-8     # Will stop when, twice in a row, the difference
 
-#DATASET 1 PBE (ABINIT - the pseudopotential for Al is with LDA but this deos not matter)
+#DATASET 1 PBE (ABINIT - the pseudopotential for Al is with LDA but this does not matter)
  ixc1  11
 
 #DATASET 2 PBE (LibXC)
@@ -182,7 +182,7 @@ ecut  6.0         # Maximal kinetic energy cut-off, in Hartree
 #%% executable = abinit
 #%% [files]
 #%% files_to_test =
-#%%   t72.out, tolnlines=  1, tolabs=  4.0e-10, tolrel=  2.0e-04
+#%%   t74.out, tolnlines=  0, tolabs=  0.0e-00, tolrel=  0.0e-00
 #%% psp_files = 13al.pspnc
 #%% [paral_info]
 #%% max_nprocs = 4

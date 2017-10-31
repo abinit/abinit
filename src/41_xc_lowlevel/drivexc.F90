@@ -849,7 +849,7 @@ subroutine drivexc(exc,ixc,npts,nspden,order,rho_updn,vxcrho,ndvxc,ngr2,nd2vxc,n
  end if
 
 !DEBUG
- write(std_out,*)' drivexc : exc(1:5)=',exc(1:5)
+ write(std_out,'(a,5es16.6)')' drivexc, exit : exc(1:5)=',exc(1:5)
 !ENDDEBUG
 
 end subroutine drivexc

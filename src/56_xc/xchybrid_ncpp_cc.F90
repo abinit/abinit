@@ -102,7 +102,7 @@ subroutine xchybrid_ncpp_cc(dtset,enxc,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,s
 
 !Local variables -------------------------------------------------------
 !scalars
- integer :: ixc_gga,ndim,nkxc,n3xccc_null,option,optstr_loc,usexcnhat
+ integer :: ixc_gga,libxc_gga_initialized,ndim,nkxc,n3xccc_null,option,optstr_loc,usexcnhat
  real(dp) :: enxc_corr,ucvol,vxcavg_corr
  character(len=500) :: msg
  type(xcdata_type) :: xcdata_gga,xcdata_hybrid 
@@ -111,8 +111,13 @@ subroutine xchybrid_ncpp_cc(dtset,enxc,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,s
  integer :: gga_id(2)
  real(dp) :: nhat(1,0),nhatgr(1,1,0),strsxc_corr(6),gmet(3,3),gprimd(3,3),rmet(3,3)
  real(dp),allocatable :: kxc_dum(:,:),vxc_corr(:,:),xccc3d_null(:),dyfrx2_dum(:,:,:)
+ type(libxc_functional_type) :: xc_funcs_gga(2)
 
 ! *************************************************************************
+
+!DEBUG
+ write(std_out,*)' xchybrid_ncpp_cc : enter'
+!ENDDEBUG
 
  DBG_ENTER("COLL")
 
@@ -145,6 +150,7 @@ subroutine xchybrid_ncpp_cc(dtset,enxc,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,s
 !Define xcdata_hybrid as well as xcdata_gga
  call xcdata_init(xcdata_hybrid,dtset=dtset)
  call xcdata_init(xcdata_gga,dtset=dtset,auxc_ixc=0,ixc=ixc_gga)
+ libxc_gga_initialized=0
 
  nkxc=0;ndim=0;usexcnhat=0;n3xccc_null=0
  ABI_ALLOCATE(kxc_dum,(nfft,nkxc))
@@ -155,29 +161,39 @@ subroutine xchybrid_ncpp_cc(dtset,enxc,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,s
    option=0 ! XC only
    ABI_ALLOCATE(xccc3d_null,(n3xccc_null))
 !  Compute Vxc^Hybrid(rho_val)
+
+!DEBUG
+ write(std_out,*)' xchybrid_ncpp_cc : call rhotoxc (1), xcdata_hybrid%ixc=',xcdata_hybrid%ixc
+!ENDDEBUG
    call rhotoxc(enxc,kxc_dum,mpi_enreg,nfft,ngfft,nhat,ndim,nhatgr,ndim,nkxc,nkxc,&
 &   n3xccc_null,option,dtset%paral_kgb,rhor,rprimd,&
 &   strsxc,usexcnhat,vxc,vxcavg,xccc3d_null,xcdata_hybrid)
 
 !  Initialize GGA functional
    if (ixc_gga<0) then
-     call libxc_functionals_end()
-     call libxc_functionals_init(ixc_gga,dtset%nspden)
+     call libxc_functionals_init(ixc_gga,dtset%nspden,xc_functionals=xc_funcs_gga)
+     libxc_gga_initialized=1
    end if
 
 !Add Vxc^GGA(rho_core+rho_val)
+!DEBUG
+ write(std_out,*)' xchybrid_ncpp_cc : call rhotoxc (2), xcdata_gga%ixc=',xcdata_gga%ixc
+!ENDDEBUG
    call rhotoxc(enxc_corr,kxc_dum,mpi_enreg,nfft,ngfft,nhat,ndim,nhatgr,ndim,nkxc,nkxc,&
 &   n3xccc,option,dtset%paral_kgb,rhor,rprimd,&
-&   strsxc_corr,usexcnhat,vxc_corr,vxcavg_corr,xccc3d,xcdata_gga)
+&   strsxc_corr,usexcnhat,vxc_corr,vxcavg_corr,xccc3d,xcdata_gga,xc_funcs=xc_funcs_gga)
    enxc=enxc+enxc_corr
    vxc(:,:)=vxc(:,:)+vxc_corr(:,:)
    vxcavg=vxcavg+vxcavg_corr
    strsxc(:)=strsxc(:)+strsxc_corr(:)
 
 !Substract Vxc^GGA(rho_val)
+!DEBUG
+ write(std_out,*)' xchybrid_ncpp_cc : call rhotoxc (3), xcdata_gga%ixc=',xcdata_gga%ixc
+!ENDDEBUG
    call rhotoxc(enxc_corr,kxc_dum,mpi_enreg,nfft,ngfft,nhat,ndim,nhatgr,ndim,nkxc,nkxc,&
 &   n3xccc_null,option,dtset%paral_kgb,rhor,rprimd,strsxc_corr,usexcnhat,&
-&   vxc_corr,vxcavg_corr,xccc3d_null,xcdata_gga)
+&   vxc_corr,vxcavg_corr,xccc3d_null,xcdata_gga,xc_funcs=xc_funcs_gga)
    enxc=enxc-enxc_corr
    vxc(:,:)=vxc(:,:)-vxc_corr(:,:)
    vxcavg=vxcavg-vxcavg_corr
@@ -191,9 +207,9 @@ subroutine xchybrid_ncpp_cc(dtset,enxc,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,s
 
    call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
 !  Initialize GGA functional
-   if (ixc_gga<0) then
-     call libxc_functionals_end()
-     call libxc_functionals_init(ixc_gga,dtset%nspden)
+   if (ixc_gga<0 .and. libxc_gga_initialized==0) then
+     call libxc_functionals_init(ixc_gga,dtset%nspden,xc_functionals=xc_funcs_gga)
+     libxc_gga_initialized=1
    end if
    ABI_ALLOCATE(dyfrx2_dum,(3,3,dtset%natom))
    ABI_ALLOCATE(xccc3d_null,(n3xccc))
@@ -204,7 +220,7 @@ subroutine xchybrid_ncpp_cc(dtset,enxc,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,s
 !Add Vxc^GGA(rho_core+rho_val)
    call rhotoxc(enxc_corr,kxc_dum,mpi_enreg,nfft,ngfft,nhat,ndim,nhatgr,ndim,nkxc,nkxc,&
 &   n3xccc,option,dtset%paral_kgb,&
-&   rhor,rprimd,strsxc_corr,usexcnhat,vxc_corr,vxcavg_corr,xccc3d_null,xcdata_gga)
+&   rhor,rprimd,strsxc_corr,usexcnhat,vxc_corr,vxcavg_corr,xccc3d_null,xcdata_gga,xc_funcs=xc_funcs_gga)
    option=2
    call mkcore(strsxc_corr,dyfrx2_dum,grxc,mpi_enreg,dtset%natom,nfft,dtset%nspden,dtset%ntypat,ngfft(1),n1xccc,ngfft(2),&
 &   ngfft(3),option,rprimd,dtset%typat,ucvol,vxc_corr,xcccrc,xccc1d,xccc3d_null,xred)
@@ -214,26 +230,29 @@ subroutine xchybrid_ncpp_cc(dtset,enxc,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,s
 
  if(optstr_loc==1) then
 !  Initialize GGA functional
-   if (ixc_gga<0) then
-     call libxc_functionals_end()
-     call libxc_functionals_init(ixc_gga,dtset%nspden)
+   if (ixc_gga<0 .and. libxc_gga_initialized==0) then
+     call libxc_functionals_init(ixc_gga,dtset%nspden,xc_functionals=xc_funcs_gga)
+     libxc_gga_initialized=1
    end if
 !calculate Vxc^GGA(rho_core+rho_val)
    option=0
    call rhotoxc(enxc_corr,kxc_dum,mpi_enreg,nfft,ngfft,nhat,ndim,nhatgr,ndim,nkxc,nkxc,&
 &   n3xccc,option,dtset%paral_kgb,rhor,rprimd,&
-&   strsxc_corr,usexcnhat,vxc,vxcavg_corr,xccc3d,xcdata_gga)
+&   strsxc_corr,usexcnhat,vxc,vxcavg_corr,xccc3d,xcdata_gga,xc_funcs=xc_funcs_gga)
  end if 
 
-! Revert libxc to original settings
- if (ixc_gga<0) then
-   call libxc_functionals_end()
-   call libxc_functionals_init(dtset%ixc,dtset%nspden)
+! Suppress the temporary used xc functional
+ if(libxc_gga_initialized==1) then
+   call libxc_functionals_end(xc_functionals=xc_funcs_gga)
  end if
  ABI_DEALLOCATE(vxc_corr)
  ABI_DEALLOCATE(kxc_dum)
 
  DBG_EXIT("COLL")
+
+!DEBUG
+ write(std_out,*)' xchybrid_ncpp_cc : exit'
+!ENDDEBUG
 
 end subroutine xchybrid_ncpp_cc
 !!***

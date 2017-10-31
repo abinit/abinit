@@ -49,6 +49,7 @@
 !!  [add_tfw]=flag controling the addition of Weiszacker gradient correction to Thomas-Fermi kin energy
 !!  [taur(nfftf,xcdata%nspden*xcdata%usekden)]=array for kinetic energy density
 !!  [taug(2,nfftf*xcdata%usekden)]=array for Fourier transform of kinetic energy density
+!!  [xc_funcs(2)]= <type(libxc_functional_type)>, optional : libxc XC functionals. Must be coherent with xcdata.
 !!
 !! OUTPUT
 !!  enxc=returned exchange and correlation energy (hartree).
@@ -212,7 +213,7 @@
 subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
 & nhat,nhatdim,nhatgr,nhatgrdim,nkxc,nk3xc,n3xccc,option,paral_kgb, &
 & rhor,rprimd,strsxc,usexcnhat,vxc,vxcavg,xccc3d,xcdata, &
-& k3xc,electronpositron,taug,taur,vhartr,vxctau,exc_vdw_out,add_tfw) ! optional arguments
+& add_tfw,exc_vdw_out,electronpositron,k3xc,taug,taur,vhartr,vxctau,xc_funcs) ! optional arguments
 
  use defs_basis
  use defs_abitypes
@@ -258,10 +259,11 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
  real(dp),intent(out) :: kxc(nfft,nkxc),strsxc(6),vxc(nfft,xcdata%nspden)
  real(dp),intent(in),optional :: taug(:,:),taur(:,:),vhartr(nfft)
  real(dp),intent(out),optional :: k3xc(1:nfft,1:nk3xc),vxctau(:,:,:)
+ type(libxc_functional_type),intent(inout),optional :: xc_funcs(2)
 
 !Local variables-------------------------------
 !scalars
- integer :: auxc_ixc,cplex,ierr,ifft,ii,ixc,indx,ipositron,ipts,ishift,ispden,iwarn,iwarnp
+ integer :: auxc_ixc,cplex,ierr,ifft,ii,ixc,ixc_from_lib,indx,ipositron,ipts,ishift,ispden,iwarn,iwarnp
  integer :: jj,mpts,ndvxc,nd2vxc,nfftot,ngr,ngr2,ngrad,ngrad_apn,nkxc_eff,npts
  integer :: nspden,nspden_apn,nspden_eff,nspden_updn,nspgrad,nvxcgrho,order,mgga,usefxc
  integer :: nproc_fft,comm_fft
@@ -294,7 +296,7 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
  DBG_ENTER("COLL")
 
 !DEBUG
-
+ write(std_out,*)' rhotoxc : enter, ixc= ',xcdata%ixc
 !ENDDEBUG
 
 !Just to keep taug as an argument while in development
@@ -350,6 +352,22 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
      MSG_BUG(message)
    end if
  end if
+
+ if(ixc<0)then
+   if(present(xc_funcs))then
+     ixc_from_lib=libxc_functionals_ixc(xc_functionals=xc_funcs)
+   else
+     ixc_from_lib=libxc_functionals_ixc()
+   end if
+!  Check consistency between ixc passed in input and the one used to initialize the library.
+   if (ixc /= ixc_from_lib) then
+     write(message, '(a,i0,2a,i0,2a)')&
+&     'The value of ixc specified in input, ixc = ',ixc,ch10,&
+&     'differs from the one used to initialize the functional ',ixc_from_lib,ch10,&
+&     'Action: reinitialize the global structure funcs, see NOTES in m_libxc_functionals'
+     MSG_BUG(message)
+   end if
+ endif
  
  comm_fft = mpi_enreg%comm_fft; nproc_fft = mpi_enreg%nproc_fft
 
@@ -708,18 +726,9 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
 !      before calling again drivexc_main using the correct functional for Exc and Vxc
        if(xcdata%usefock==1 .and. auxc_ixc/=0)then
          if (auxc_ixc<0) then
-!          if(ixc<0)then
-!            call libxc_functionals_end()
-!          endif
            call libxc_functionals_init(auxc_ixc,nspden,xc_functionals=xc_funcs_auxc)
          end if
-!DEBUG
-!         write(std_out,*)' rhotoxc : call drivexc_main inside auxc_ixc/=0, ixc(auxc_ixc)=',auxc_ixc
-!         write(std_out,*)' rhotoxc : present status with ixc=',ixc
-!         call libxc_functionals_get_hybridparams(hyb_mixing=hyb_mixing,hyb_mixing_sr=hyb_mixing_sr,&
-!&                                            hyb_range=hyb_range)
-!         write(std_out,*)' hyb_mixing, hyb_mixing_sr, hyb_range=',hyb_mixing, hyb_mixing_sr, hyb_range
-!ENDDEBUG
+         write(std_out,*)' rhotoxc : auxiliary call to drivexc_main, auxc_ixc=',auxc_ixc
          call drivexc_main(exc_b,auxc_ixc,mgga,ndvxc,nd2vxc,ngr2,npts,nspden_updn,nvxcgrho,order,&
 &         rho_b_updn,vxcrho_b_updn,xcdata%xclevel, &
 &         dvxc=dvxc_b,d2vxc=d2vxc_b,grho2=grho2_b_updn,vxcgrho=vxcgrho_b, &
@@ -736,9 +745,6 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
          end if
          if (auxc_ixc<0) then
            call libxc_functionals_end(xc_funcs_auxc)
-!          if(ixc<0)then
-!            call libxc_functionals_init(ixc,nspden)
-!          endif
          end if
        end if
 
@@ -749,12 +755,21 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
 &                                            hyb_range=hyb_range)
        write(std_out,*)' hyb_mixing, hyb_mixing_sr, hyb_range=',hyb_mixing, hyb_mixing_sr, hyb_range
 !ENDDEBUG
-       call drivexc_main(exc_b,ixc,mgga,ndvxc,nd2vxc,ngr2,npts,nspden_updn,nvxcgrho,order,&
-&       rho_b_updn,vxcrho_b_updn,xcdata%xclevel, &
-&       dvxc=dvxc_b,d2vxc=d2vxc_b,grho2=grho2_b_updn,vxcgrho=vxcgrho_b, &
-&       lrho=lrho_b_updn,tau=tau_b_updn,vxclrho=vxclrho_b_updn,vxctau=vxctau_b_updn, &
-&       fxcT=fxc_b,hyb_mixing=xcdata%hyb_mixing,el_temp=xcdata%tphysel, &
-&       xc_tb09_c=xcdata%xc_tb09_c)
+       if(present(xc_funcs))then
+         call drivexc_main(exc_b,ixc,mgga,ndvxc,nd2vxc,ngr2,npts,nspden_updn,nvxcgrho,order,&
+&         rho_b_updn,vxcrho_b_updn,xcdata%xclevel, &
+&         dvxc=dvxc_b,d2vxc=d2vxc_b,grho2=grho2_b_updn,vxcgrho=vxcgrho_b, &
+&         lrho=lrho_b_updn,tau=tau_b_updn,vxclrho=vxclrho_b_updn,vxctau=vxctau_b_updn, &
+&         fxcT=fxc_b,hyb_mixing=xcdata%hyb_mixing,el_temp=xcdata%tphysel,xc_funcs=xc_funcs, &
+&         xc_tb09_c=xcdata%xc_tb09_c)
+       else
+         call drivexc_main(exc_b,ixc,mgga,ndvxc,nd2vxc,ngr2,npts,nspden_updn,nvxcgrho,order,&
+&         rho_b_updn,vxcrho_b_updn,xcdata%xclevel, &
+&         dvxc=dvxc_b,d2vxc=d2vxc_b,grho2=grho2_b_updn,vxcgrho=vxcgrho_b, &
+&         lrho=lrho_b_updn,tau=tau_b_updn,vxclrho=vxclrho_b_updn,vxctau=vxctau_b_updn, &
+&         fxcT=fxc_b,hyb_mixing=xcdata%hyb_mixing,el_temp=xcdata%tphysel, &
+&         xc_tb09_c=xcdata%xc_tb09_c)
+       endif
 
 !      Gradient Weiszacker correction to a Thomas-Fermi functional
        if (add_tfw_) then
