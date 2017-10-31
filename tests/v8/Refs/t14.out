@@ -35,7 +35,7 @@
      strcpli        -1
  Fit the coefficients :
         fit_coeff  1
- fit_generateTerm  1
+ fit_generateTerm  0
        fit_cutoff0.0
        fit_option  0
        fit_ncycle  2

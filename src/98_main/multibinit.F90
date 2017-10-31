@@ -81,7 +81,7 @@ program multibinit
 !Local variables-------------------------------
 ! Set array dimensions
  integer,parameter :: master=0 ! FIXME: these should not be reserved unit numbers!
- integer :: comm,filetype,ii,ierr,lenstr,iexit
+ integer :: comm,filetype,ii,ierr,lenstr
  integer :: natom,nph1l,nrpt,ntypat,nproc,my_rank
  integer :: option
  logical :: iam_master
@@ -144,7 +144,6 @@ program multibinit
 ! Call the parser from the parser module.
  filstat = trim("_STATUS")
  call ab7_invars_set_flags(.true., .true., status_file = filstat, timab_tsec = tsec)
- call status(0,filstat,iexit,1,'call outvars(1)')
  
 !******************************************************************
 

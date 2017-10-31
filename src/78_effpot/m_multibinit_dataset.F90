@@ -4,7 +4,7 @@
 !!  m_multibinit_dataset
 !!
 !! FUNCTION
-!!  module with the type for the input of multibinit
+!!  module with the type for the input of multibinit (should be clean)
 !!
 !! COPYRIGHT
 !!  Copyright (C) 2014-2017 ABINIT group (AM)
@@ -213,10 +213,7 @@ subroutine multibinit_dtset_init(multibinit_dtset,natom)
 !scalars
  integer,intent(in) :: natom
  type(multibinit_dtset_type),intent(inout) :: multibinit_dtset 
-
 !Local variables -------------------------
-!Dummy arguments for subroutine 'intagm' to parse input file
-!Set routine version number here:
 !scalars
 !arrays
 
