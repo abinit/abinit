@@ -34,17 +34,18 @@
    prt_model         2
      strcpli        -1
  Fit the coefficients :
-        fit_coeff         1
-       fit_cutoff       7.0
-       fit_option         0
-       fit_ncycle         4
-         fit_grid         1         1         1
-   fit_rangePower         3         4
-   fit_anhaStrain         0
-   fit_SPCoupling         1
-    fit_nbancoeff         0
+        fit_coeff  1
+ fit_generateTerm  1
+       fit_cutoff7.0
+       fit_option  0
+       fit_ncycle  4
+         fit_grid  1  1  1
+   fit_rangePower  3  4
+   fit_anhaStrain  0
+   fit_SPCoupling  1
+    fit_nbancoeff  0
      fit_bancoeff
-    fit_nfixcoeff         0
+    fit_nfixcoeff  0
      fit_fixcoeff
  Miscellaneous information :
          asr         2
@@ -200,7 +201,7 @@
 
 --------------------------------------------------------------------------------
 
- The coefficients for the fit must be generate...
+ The coefficients for the fit must  will be generate
  1633 coefficients generated 
 
  Mean Standard Deviation values at the begining of the fit process (meV/f.u.):
