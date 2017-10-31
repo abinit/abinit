@@ -130,7 +130,7 @@ subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,bxc,mpi_enreg,nfft,ngfft,nhat1,nhat1
 
  call timab(181,1,tsec)
 
- rotation=2
+ rotation=3
 
  if(nspden/=4) then
    MSG_BUG('only for nspden=4!')

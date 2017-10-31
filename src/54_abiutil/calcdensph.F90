@@ -250,8 +250,8 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsph
    rho_tot_im=0
    do ifft=1,nfft
      jfft=(cmplex_den+1)*ifft
-!   rho_up=rho_up+rhor(ifft,2)
-!   rho_dn=rho_dn+(rhor(ifft,2)-rhor(ifft,1))
+!    rho_up=rho_up+rhor(ifft,2)
+!    rho_dn=rho_dn+(rhor(ifft,2)-rhor(ifft,1))
      rho_tot=rho_tot+rhor(jfft-cmplex_den,1)             ! real parts of density and magnetization
      mag_coll=mag_coll+2*rhor(jfft-cmplex_den,2)-rhor(jfft-cmplex_den,1)
 
@@ -292,8 +292,8 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsph
 
    call xmpi_sum(rho_tot_im,mpi_enreg%comm_fft,ierr)  
    call xmpi_sum(mag_coll_im,mpi_enreg%comm_fft,ierr) 
-!   call xmpi_sum(rho_up,mpi_enreg%comm_fft,ierr)  ! EB
-!   call xmpi_sum(rho_dn,mpi_enreg%comm_fft,ierr)  ! EB
+!  call xmpi_sum(rho_up,mpi_enreg%comm_fft,ierr)  ! EB
+!  call xmpi_sum(rho_dn,mpi_enreg%comm_fft,ierr)  ! EB
    call xmpi_sum(mag_x,mpi_enreg%comm_fft,ierr)    ! EB
    call xmpi_sum(mag_y,mpi_enreg%comm_fft,ierr)    ! EB
    call xmpi_sum(mag_z,mpi_enreg%comm_fft,ierr)    ! EB
@@ -310,6 +310,7 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsph
  sum_rho_tot=zero
 
  if (prtopt==1) then
+
    if (nspden==1) then
      write(message, '(4a)' ) &
 &     ' Integrated electronic density in atomic spheres:',ch10,&
@@ -349,13 +350,12 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsph
      call wrtout(nunit,message,'COLL')
      write(message, '(a,f14.6)') ' Total magnetization (exact up - dn):                 ', mag_coll
      call wrtout(nunit,message,'COLL')
-!  SPr for dfpt debug
-!  write(message, '(a,f14.6)') ' Total density (exact)              :                 ', rho_tot 
-!  call wrtout(nunit,message,'COLL')
    ! EB for testing purpose print rho_up, rho_dn and rho_tot
 !    write(message, '(a,3f14.4,2i8)') ' rho_up, rho_dn, rho_tot, nfftot, nfft: ', rho_up,rho_dn,rho_tot,nfft,nfft
 !   call wrtout(nunit,message,'COLL')   
+
    else if(nspden==4) then
+
      write(message, '(4a)' ) &
 &     ' Integrated electronic and magnetization densities in atomic spheres:',ch10,&
 &     ' ---------------------------------------------------------------------'
@@ -383,7 +383,9 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsph
 !    write(message, '(a,f12.6)') ' Total density (exact)           ', rho_tot
 !   call wrtout(nunit,message,'COLL')
    end if
+
  else if(prtopt==-1) then
+
    write(message, '(2a)') ch10,' ------------------------------------------------------------------------'
    call wrtout(nunit,message,'COLL')
 
@@ -424,7 +426,8 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsph
    call wrtout(nunit,message,'COLL')
 
 
- else   ! prtopt different from 1 (regular printout option) and -1 (fermi charge/magn densities) (either 2,3 or 4)
+ else   
+ ! prtopt different from 1 and -1 (either 2,3 or 4)
 
    If(abs(rho_tot)<1.0d-10) then
      rho_tot=0
@@ -470,7 +473,7 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsph
    write(message, '(3a)') ch10,' ------------------------------------------------------------------------',ch10
    call wrtout(nunit,message,'COLL')
 
- end if ! prtopt if conditions
+ end if 
 
  if (present(intgden)) then
    intgden = intgden_
