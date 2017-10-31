@@ -34,17 +34,18 @@
    prt_model         1
      strcpli        -1
  Fit the coefficients :
-        fit_coeff         1
-       fit_cutoff       0.0
-       fit_option         0
-       fit_ncycle         2
-         fit_grid         1         1         1
-   fit_rangePower         3         4
-   fit_anhaStrain         0
-   fit_SPCoupling         1
-    fit_nbancoeff         0
+        fit_coeff  1
+ fit_generateTerm  1
+       fit_cutoff0.0
+       fit_option  0
+       fit_ncycle  2
+         fit_grid  1  1  1
+   fit_rangePower  3  4
+   fit_anhaStrain  0
+   fit_SPCoupling  1
+    fit_nbancoeff  0
      fit_bancoeff
-    fit_nfixcoeff         2
+    fit_nfixcoeff  2
      fit_fixcoeff         1     2
  Miscellaneous information :
          asr         2

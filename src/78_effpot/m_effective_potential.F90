@@ -766,9 +766,9 @@ subroutine effective_potential_generateDipDip(eff_pot,n_cell,option,asr,comm)
 
    irpt_ref = 0
    irpt     = 0
-   min1_cell = zero; max1_cell = zero
-   min2_cell = zero; max2_cell = zero
-   min3_cell = zero; max3_cell = zero
+   min1_cell = 0; max1_cell = 0
+   min2_cell = 0; max2_cell = 0
+   min3_cell = 0; max3_cell = 0
 
    call findBound_supercell(min1_cell,max1_cell,n_cell(1))
    call findBound_supercell(min2_cell,max2_cell,n_cell(2))
@@ -830,7 +830,7 @@ subroutine effective_potential_generateDipDip(eff_pot,n_cell,option,asr,comm)
 
    ifc_tmp%nrpt = irpt
    ABI_ALLOCATE(ifc_tmp%cell,(3,ifc_tmp%nrpt))
-   ifc_tmp%cell(:,:) = zero
+   ifc_tmp%cell(:,:) = 0
 
 !  Set MPI here and not at the begining because the number of cell is adjust just before
 !  Here we store in my_irpt a list with the number of each cell to be treat by this CPU
@@ -852,8 +852,8 @@ subroutine effective_potential_generateDipDip(eff_pot,n_cell,option,asr,comm)
    ABI_ALLOCATE(my_irpt,(my_nrpt))
    ABI_ALLOCATE(my_index_rpt,(3,my_nrpt))
 
-   my_irpt = zero
-   my_index_rpt(:,:) = zero
+   my_irpt = 0
+   my_index_rpt(:,:) = 0
    ifc_tmp%atmfrc(:,:,:,:,:) = zero
    ifc_tmp%short_atmfrc(:,:,:,:,:) = zero
    ifc_tmp%ewald_atmfrc(:,:,:,:,:) = zero
@@ -988,7 +988,7 @@ subroutine effective_potential_generateDipDip(eff_pot,n_cell,option,asr,comm)
    ifc_tmp%atmfrc = ifc_tmp%short_atmfrc + ifc_tmp%ewald_atmfrc
 
 !  Count the rpt inferior to the tolerance
-   irpt2 = zero
+   irpt2 = 0
    do irpt=1,ifc_tmp%nrpt
      if(any(abs(ifc_tmp%atmfrc(:,:,:,:,irpt)) > tol20))then
        irpt2 = irpt2 + 1
@@ -1009,7 +1009,7 @@ subroutine effective_potential_generateDipDip(eff_pot,n_cell,option,asr,comm)
     ABI_ALLOCATE(eff_pot%harmonics_terms%ifcs%ewald_atmfrc,(3,natom_uc,3,natom_uc,irpt2))
     ABI_ALLOCATE(eff_pot%harmonics_terms%ifcs%cell,(3,irpt2))
 
-    irpt2 = zero
+    irpt2 = 0
     do irpt = 1,ifc_tmp%nrpt
      if(any(abs(ifc_tmp%atmfrc(:,:,:,:,irpt)) > tol20))then
        irpt2 = irpt2 + 1
@@ -1099,7 +1099,7 @@ subroutine effective_potential_setCoeffs(coeffs,eff_pot,ncoeff)
 ! Check if the strain coupling is present
  do ii=1,ncoeff
    do jj=1,coeffs(ii)%nterm
-     if (any(coeffs(ii)%terms(jj)%direction(:) < zero)) then
+     if (any(coeffs(ii)%terms(jj)%direction(:) < 0)) then
        has_straincoupling = .TRUE.
      end if
    end do
@@ -1815,7 +1815,7 @@ subroutine effective_potential_writeXML(eff_pot,option,filename,prt_dipdip)
  use m_errors
  use m_profiling_abi
  use m_fstrings,   only : replace
- use m_multibinit_dataset, only : multibinit_dataset_type
+ use m_multibinit_dataset, only : multibinit_dtset_type
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1845,7 +1845,6 @@ subroutine effective_potential_writeXML(eff_pot,option,filename,prt_dipdip)
  character(len=10) :: natom
  logical :: new_file = .FALSE.,need_prtdipdip = .FALSE.
 !arrays
-! MJV 21/5/2017 put to (dp) - Alex: check and remove this comment
  real(dp) :: strain(9,6)
 
 ! *************************************************************************
@@ -2162,7 +2161,7 @@ subroutine effective_potential_writeAbiInput(eff_pot,filename,strain)
  use defs_basis
  use m_errors
  use m_profiling_abi
- use m_multibinit_dataset, only : multibinit_dataset_type
+ use m_multibinit_dataset, only : multibinit_dtset_type
  use m_fstrings, only : ftoa,itoa,int2char4
 
 !This section has been created automatically by the script Abilint (TD).
@@ -2919,7 +2918,7 @@ subroutine effective_potential_getDisp(displacement,du_delta,natom,rprimd_hist,r
     my_natom = my_natom  + 1
   end if
   ABI_ALLOCATE(my_atoms,(my_natom))
-  my_atoms = zero
+  my_atoms = 0
   do ii=1,my_natom
     if(my_rank >= (nproc-natom_alone))then
       my_atoms(ii)=(aint(real(natom,sp)/nproc))*(my_rank)+&
@@ -3563,7 +3562,7 @@ subroutine effective_potential_writeNETCDF(eff_pot,option,filename)
  use defs_basis
  use m_errors
  use m_profiling_abi
- use m_multibinit_dataset, only : multibinit_dataset_type
+ use m_multibinit_dataset, only : multibinit_dtset_type
  use m_nctk
 #if defined HAVE_NETCDF
  use netcdf

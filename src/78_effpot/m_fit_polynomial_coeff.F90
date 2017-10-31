@@ -75,6 +75,7 @@ CONTAINS  !=====================================================================
 !! fixcoeff(nfixcoeff) = list of fixed coefficient, these coefficients will be 
 !!                       imposed during the fit process
 !! hist<type(abihist)> = The history of the MD (or snapshot of DFT)
+!! generateterm = term to activate the generation of the term set
 !! nbancoeff = number of banned coeffcients 
 !! ncycle_in = number of maximum cycle (maximum coefficient to be fitted)
 !! nfixcoeff = Number of coefficients imposed during the fit process
@@ -100,8 +101,8 @@ CONTAINS  !=====================================================================
 !!
 !! SOURCE
 
-subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,powers,nbancoeff,ncycle_in,&
-&                                   nfixcoeff,option,comm,cutoff_in,&
+subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,powers,&
+&                                   nbancoeff,ncycle_in,nfixcoeff,option,comm,cutoff_in,&
 &                                   positive,verbose,anharmstr,spcoupling)
 
 
@@ -117,7 +118,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,powers,nbanco
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ncycle_in,nfixcoeff,comm
- integer,intent(in) :: nbancoeff,option
+ integer,intent(in) :: generateterm,nbancoeff,option
 !arrays
  integer,intent(in) :: fixcoeff(nfixcoeff), bancoeff(nbancoeff)
  integer,intent(in) :: powers(2)
@@ -127,8 +128,8 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,powers,nbanco
  logical,optional,intent(in) :: verbose,positive,anharmstr,spcoupling
 !Local variables-------------------------------
 !scalar
- integer :: ii,icoeff,icycle,icycle_tmp,ierr,info,index_min,iproc,isweep
- integer :: master,my_rank,my_ncoeff,ncoeff_tot,natom_sc,ncell,ncycle
+ integer :: ii,icoeff,icycle,icycle_tmp,ierr,info,index_min,iproc,isweep,jj
+ integer :: master,my_rank,my_ncoeff,ncoeff_model,ncoeff_tot,natom_sc,ncell,ncycle
  integer :: ncycle_tot,ncycle_max,nproc,ntime,ncoeff_alone,nsweep,size_mpi
  integer :: rank_to_send
  real(dp) :: cutoff,time
@@ -202,31 +203,23 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,powers,nbanco
 ! get from the eff_pot type (from the input)
 ! or
 ! regenerate the list
+ ncoeff_tot = 0
+ ncoeff_model = eff_pot%anharmonics_terms%ncoeff
  if(iam_master)then
-   if(eff_pot%anharmonics_terms%ncoeff > 0)then
+!  Reset ncoeff_tot   
+   if(ncoeff_model > 0)then
      if(need_verbose)then
        write(message, '(4a)' )ch10,' The coefficients present in the effective',&
 &      ' potential will be used for the fit'
        call wrtout(std_out,message,'COLL')
        call wrtout(ab_out,message,'COLL')
      end if
-
-!    Copy the initial coefficients from the model
-     ncoeff_tot = eff_pot%anharmonics_terms%ncoeff
-     ABI_DATATYPE_ALLOCATE(coeffs_in,(ncoeff_tot))
-     do ii=1,ncoeff_tot
-       call polynomial_coeff_init(eff_pot%anharmonics_terms%coefficients(ii)%coefficient,&
-&                                 eff_pot%anharmonics_terms%coefficients(ii)%nterm,&
-&                                 coeffs_in(ii),&
-&                                 eff_pot%anharmonics_terms%coefficients(ii)%terms,&
-&                                 eff_pot%anharmonics_terms%coefficients(ii)%name,&
-&                                 check=.false.) 
-     end do
-   else
-!    Or we need to regerate them
+   end if
+   
+   if(generateterm == 1)then
+!    we need to regerate them
      if(need_verbose)then
-       write(message, '(4a)' )ch10,' The coefficients for the fit must',&
-&                                  ' be generate... '
+       write(message, '(4a)' )ch10,' The coefficients for the fit must  will be generate'
        call wrtout(std_out,message,'COLL')
        call wrtout(ab_out,message,'COLL')
 
@@ -234,17 +227,46 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,powers,nbanco
        call wrtout(std_out,message,'COLL') 
      end if
 
-     call polynomial_coeff_getNorder(coeffs_in,eff_pot%crystal,cutoff,ncoeff_tot,powers,0,comm,&
+     call polynomial_coeff_getNorder(coeffs_tmp,eff_pot%crystal,cutoff,ncoeff_tot,powers,0,comm,&
 &                                        anharmstr=need_anharmstr,spcoupling=need_spcoupling)
 
      filename = "terms_set.xml"
 !     call polynomial_coeff_writeXML(coeffs_in,ncoeff_tot,filename=filename,newfile=.true.)
-     
+
      if(need_verbose)then
        write(message,'(1x,I0,2a)') ncoeff_tot,' coefficients generated ',ch10     
        call wrtout(ab_out,message,'COLL')
        call wrtout(std_out,message,'COLL') 
      end if
+   end if
+
+!  Copy the initial coefficients from the model
+   ncoeff_tot = ncoeff_tot + ncoeff_model
+   ABI_DATATYPE_ALLOCATE(coeffs_in,(ncoeff_tot))   
+   if(ncoeff_model > 0)then
+     do ii=1,ncoeff_model
+       call polynomial_coeff_init(eff_pot%anharmonics_terms%coefficients(ii)%coefficient,&
+&                                 eff_pot%anharmonics_terms%coefficients(ii)%nterm,&
+&                                 coeffs_in(ii),&
+&                                 eff_pot%anharmonics_terms%coefficients(ii)%terms,&
+&                                 eff_pot%anharmonics_terms%coefficients(ii)%name,&
+&                                 check=.false.) 
+     end do
+   end if
+   if(generateterm == 1)then
+     jj = 0
+     do ii= ncoeff_model+1,ncoeff_tot
+       jj = jj + 1
+       call polynomial_coeff_init(coeffs_tmp(jj)%coefficient,&
+&                                 coeffs_tmp(jj)%nterm,&
+&                                 coeffs_in(ii),&
+&                                 coeffs_tmp(jj)%terms,&
+&                                 coeffs_tmp(jj)%name,&
+&                                 check=.false.)
+       !    Free the memory     
+       call polynomial_coeff_free(coeffs_tmp(jj))
+     end do
+     ABI_DEALLOCATE(coeffs_tmp)
    end if
  end if!End iam_master
 
@@ -354,8 +376,9 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,powers,nbanco
 !Do not reset this variable...
  ncycle_tot = 0
  if (nfixcoeff == -1)then
-   write(message, '(2a)')' nfixcoeff is set to -1, so all the coefficients are imposed.',ch10
-     ncycle_tot = ncycle_tot + ncoeff_tot
+   write(message, '(3a)')' nfixcoeff is set to -1, the coefficients present in the model',&
+&                        ' are imposed.',ch10
+   ncycle_tot = ncycle_tot + ncoeff_model
  else
    if (nfixcoeff > 0)then
      if(maxval(fixcoeff(:)) > ncoeff_tot) then
@@ -382,7 +405,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,powers,nbanco
  ncycle_max = ncycle_in + ncycle_tot
 
 !Check if the number of request cycle + the initial number of coeff is superior to 
-!the maximum number of coefficient allowed
+ !the maximum number of coefficient allowed
  if(ncycle_max > ncoeff_tot) then
    ncycle = ncoeff_tot - ncycle_tot
    ncycle_max = ncoeff_tot
@@ -414,7 +437,9 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,powers,nbanco
  if(ncycle_tot > 0)then
    do ii = 1,ncycle_tot
      if(nfixcoeff == -1)then
-       list_coeffs(ii) = ii
+       if(ii <= ncoeff_model)then  
+         list_coeffs(ii) = ii
+       end if
      else
        list_coeffs(ii) = fixcoeff(ii)
      end if
@@ -444,7 +469,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,powers,nbanco
  do ii = 1, 3
    sc_size(ii) = eff_pot%supercell%rlatt(ii,ii)
  end do
- 
+
  call fit_polynomial_coeff_getFS(my_coeffs,fit_data%training_set%du_delta,&
 &                                fit_data%training_set%displacement,&
 &                                energy_coeffs,fcart_coeffs,natom_sc,eff_pot%crystal%natom,&
@@ -477,10 +502,10 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,powers,nbanco
    buffdisp(ii) = buffdisp(ii-1) + buffsize(ii-1)
  end do
  size_mpi = 5*nproc
-
 !If some coeff are imposed by the input, we need to fill the arrays 
 !with this coeffs and broadcast to the others CPUs :
  if(ncycle_tot>=1)then
+
    do icycle = 1,ncycle_tot
      list_coeffs_tmp(icycle) = icycle
      rank_to_send = 0
@@ -522,6 +547,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,powers,nbanco
 !Compute GF, coeff_values,strten_coeffs and fcart_coeffs are set to zero
 !it means that only the harmonic part wiil be computed
  coeff_values = zero
+
  call fit_polynomial_coeff_computeGF(coeff_values,energy_coeffs,fit_data%energy_diff,fcart_coeffs,&
 &                                    fit_data%fcart_diff,gf_values(:,1),int((/1/)),natom_sc,&
 &                                    0,my_ncoeff,ntime,strten_coeffs,fit_data%strten_diff,&
@@ -616,10 +642,12 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,powers,nbanco
 &                                      fit_data%training_set%sqomega,fit_data%training_set%ucvol)
 
        if(info==0)then
-         if (need_positive.and.any(coeff_values(nfixcoeff+1:icycle) < zero))then
-           write(message, '(a)') ' Negative values detected...'
-           gf_values(:,icoeff) = zero
-           coeff_values = zero
+         if (need_positive)then
+           if (any(coeff_values(nfixcoeff+1:icycle) < zero)) then
+             write(message, '(a)') ' Negative values detected...'
+             gf_values(:,icoeff) = zero
+             coeff_values = zero
+           end if
          else
            call fit_polynomial_coeff_computeGF(coeff_values(1:icycle),energy_coeffs_tmp,&
 &                                            fit_data%energy_diff,fcart_coeffs_tmp,fit_data%fcart_diff,&

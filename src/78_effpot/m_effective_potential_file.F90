@@ -216,7 +216,7 @@ CONTAINS  !=====================================================================
 !! INPUTS
 !! filename = path of the file
 !! hist<type(abihist)> = optional,The history of the MD (or snapshot of DFT)
-!! inp<type(multibinit_dataset_type)> = optional,datatype with all the input variables (mantadory to 
+!! inp<type(multibinit_dtset_type)> = optional,datatype with all the input variables (mantadory to 
 !!                                      read DDB file)
 !! comm=MPI communicator
 !!
@@ -254,7 +254,7 @@ subroutine effective_potential_file_read(filename,eff_pot,inp,comm,hist)
   character(len=fnlen),intent(in) :: filename
 !array
   type(effective_potential_type), intent(inout)  :: eff_pot
-  type(multibinit_dataset_type),optional,intent(in) :: inp
+  type(multibinit_dtset_type),optional,intent(in) :: inp
   type(ddb_type) :: ddb
   type(crystal_t) :: Crystal
   type(abihist),optional :: hist
@@ -1344,7 +1344,7 @@ end subroutine system_getDimFromXML
 
  use m_atomdata
  use m_effective_potential, only : effective_potential_type
- use m_multibinit_dataset, only : multibinit_dataset_type
+ use m_multibinit_dataset, only : multibinit_dtset_type
  use m_ab7_symmetry
 
 !This section has been created automatically by the script Abilint (TD).
@@ -2278,7 +2278,7 @@ end subroutine system_xml2effpot
 !! INPUTS
 !! crytal<type(crystal_t)> = datatype with all the information for the crystal
 !! ddb<type(ddb_type)> = datatype with the ddb
-!! inp<type(multibinit_dataset_type)> = datatype with the input variables of multibinit
+!! inp<type(multibinit_dtset_type)> = datatype with the input variables of multibinit
 !! comm = MPI communicator
 !!
 !! OUTPUT
@@ -2309,7 +2309,7 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
  use m_ifc
  use m_copy,            only : alloc_copy
  use m_crystal,         only : crystal_t,crystal_print
- use m_multibinit_dataset, only : multibinit_dataset_type
+ use m_multibinit_dataset, only : multibinit_dtset_type
  use m_effective_potential, only : effective_potential_type, effective_potential_free
 
 !This section has been created automatically by the script Abilint (TD).
@@ -2331,7 +2331,7 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
  type(ddb_type),intent(inout) :: ddb
  type(effective_potential_type), intent(inout) :: effective_potential
  type(crystal_t),intent(in) :: crystal
- type(multibinit_dataset_type),intent(in) :: inp
+ type(multibinit_dtset_type),intent(in) :: inp
 
 !Local variables-------------------------------
 !scalar
@@ -2378,7 +2378,7 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
 
 !Tranfert the ddb into usable array (ipert and idir format like in abinit)
   ABI_ALLOCATE(blkval,(2,3,mpert,3,mpert,nblok))
-  blkval = zero
+  blkval = 0
   blkval = reshape(ddb%val,(/2,3,mpert,3,mpert,nblok/))
 
 !**********************************************************************

@@ -36,7 +36,8 @@ module m_multibinit_dataset
 
  private
 
- public :: multibinit_dataset_type
+ public :: multibinit_dtset_type
+ public :: multibinit_dtset_init
  public :: multibinit_dtset_free
  public :: outvars_multibinit
  public :: invars10
@@ -44,17 +45,17 @@ module m_multibinit_dataset
 
 !----------------------------------------------------------------------
 
-!!****t* m_multibinit_dataset/multibinit_dataset_type
+!!****t* m_multibinit_dataset/multibinit_dtset_type
 !! NAME
-!! multibinit_dataset_type
+!! multibinit_dtset_type
 !!
 !! FUNCTION
-!! The multibinit_dataset_type structured datatype
+!! The multibinit_dtset_type structured datatype
 !! gather all the input variables for the multibinit code.
 !!
 !! SOURCE
 
- type multibinit_dataset_type
+ type multibinit_dtset_type
 
 ! Variables should be declared on separated lines in order to reduce the occurence of bzr conflicts.
 ! Since all these input variables are described in the multibinit_help.html
@@ -75,6 +76,7 @@ module m_multibinit_dataset
   integer :: fit_boundStep
   integer :: fit_anhaStrain
   integer :: fit_SPCoupling
+  integer :: fit_generateTerm
   integer :: fit_coeff
   integer :: fit_option
   integer :: fit_ncycle
@@ -166,12 +168,146 @@ module m_multibinit_dataset
   real(dp), allocatable :: qph2l(:,:)
   ! qph2l(3,nph2l)
 
- end type multibinit_dataset_type
+ end type multibinit_dtset_type
 !!***
 
 contains 
 !!***
 
+!!****f* m_multibinit_dataset/multibinit_dtset_init
+!!
+!! NAME
+!! multibinit_dtset_init
+!!
+!! FUNCTION
+!! Init the dtset datatype
+!!
+!! INPUTS
+!! natom=number of atoms, needed for atifc
+!!
+!! OUTPUT
+!! multibinit_dtset <type(multibinit_dtset_type)> = datatype with all the input variables
+!!
+!! NOTES
+!! Should be executed by one processor only.
+!!
+!! PARENTS
+!!      multibinit
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine multibinit_dtset_init(multibinit_dtset,natom)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'multibinit_dtset_init'
+!End of the abilint section
+
+ implicit none
+
+!Arguments -------------------------------
+!scalars
+ integer,intent(in) :: natom
+ type(multibinit_dtset_type),intent(inout) :: multibinit_dtset 
+
+!Local variables -------------------------
+!Dummy arguments for subroutine 'intagm' to parse input file
+!Set routine version number here:
+!scalars
+!arrays
+
+!*********************************************************************
+
+!copy natom to multibinit_dtset
+ multibinit_dtset%natom=natom
+
+!=====================================================================
+!Scalars
+!=====================================================================
+ multibinit_dtset%asr=2
+ multibinit_dtset%brav=1
+ multibinit_dtset%bmass=0
+ multibinit_dtset%chneut=0
+ multibinit_dtset%confinement=0
+ multibinit_dtset%conf_power_disp=0
+ multibinit_dtset%conf_power_strain=0
+ multibinit_dtset%conf_power_fact_disp=100
+ multibinit_dtset%conf_power_fact_strain=100
+ multibinit_dtset%delta_df= 1d-02
+ multibinit_dtset%dipdip=1
+ multibinit_dtset%dipdip_prt=0
+ multibinit_dtset%dtion=100
+ multibinit_dtset%dynamics=0
+ multibinit_dtset%eivec=0
+ multibinit_dtset%energy_reference= zero
+ multibinit_dtset%enunit=0
+ multibinit_dtset%fit_anhaStrain=0
+ multibinit_dtset%fit_bound=0
+ multibinit_dtset%fit_boundTerm=4
+ multibinit_dtset%fit_boundTemp=325
+ multibinit_dtset%fit_boundStep=1000
+ multibinit_dtset%fit_coeff=0
+ multibinit_dtset%fit_cutoff=0 
+ multibinit_dtset%fit_nbancoeff=0
+ multibinit_dtset%fit_ncycle=0
+ multibinit_dtset%fit_nfixcoeff=0
+ multibinit_dtset%fit_option=0
+ multibinit_dtset%fit_SPCoupling=1
+ multibinit_dtset%fit_generateTerm=1
+ multibinit_dtset%ifcana=0
+ multibinit_dtset%ifcflag=1
+ multibinit_dtset%ifcout=-1
+ multibinit_dtset%prtsrlr=0
+ multibinit_dtset%ntime=200
+ multibinit_dtset%natifc=natom
+ multibinit_dtset%ncoeff=0
+ multibinit_dtset%nph1l=1
+ multibinit_dtset%nph2l=0
+ multibinit_dtset%nqshft=1
+ multibinit_dtset%nnos=0
+ multibinit_dtset%nsphere=0
+ multibinit_dtset%optcell=0
+ multibinit_dtset%prt_model=0
+ multibinit_dtset%prt_phfrq=0
+ multibinit_dtset%prt_ifc = 0
+ multibinit_dtset%strcpling = -1
+ multibinit_dtset%qrefine=1
+ multibinit_dtset%restartxf=0
+ multibinit_dtset%rfmeth=1
+ multibinit_dtset%rifcsph=zero
+ multibinit_dtset%symdynmat=1
+ multibinit_dtset%temperature=325
+ 
+!=======================================================================
+!Arrays
+!=======================================================================
+ multibinit_dtset%acell(:) = one
+ multibinit_dtset%conf_cutoff_strain(1:6) = zero
+ multibinit_dtset%dipdip_range(:)= (/0,0,0/)
+ multibinit_dtset%fit_grid(:)= one
+ multibinit_dtset%fit_rangePower(:)= (/3,4/)
+ multibinit_dtset%fit_boundPower(:)= (/6,6/)
+ multibinit_dtset%fit_boundCell(:)= (/6,6,6/)
+ multibinit_dtset%n_cell(:)= 0
+ multibinit_dtset%ngqpt(:) = 0
+ multibinit_dtset%ng2qpt(:)= 0
+ multibinit_dtset%strtarget(1:6) = zero
+ multibinit_dtset%qmass(:)= zero
+ multibinit_dtset%rprim(:,:)= zero
+ multibinit_dtset%strten_reference(:)= zero
+
+ ABI_ALLOCATE(multibinit_dtset%atifc,(natom))
+ multibinit_dtset%atifc(:)=zero
+ ABI_ALLOCATE(multibinit_dtset%conf_cutoff_disp,(multibinit_dtset%natom))
+ multibinit_dtset%conf_cutoff_disp(:)=zero
+
+end subroutine multibinit_dtset_init
+!!***
+  
 !!****f* m_multibinit_dataset/multibinit_dtset_free
 !!
 !! NAME
@@ -181,10 +317,10 @@ contains
 !!  deallocate remaining arrays in the multibinit_dtset datastructure
 !!
 !! INPUTS
-!!  multibinit_dtset <type(multibinit_dataset_type)> = multibinit_dataset structure
+!!  multibinit_dtset <type(multibinit_dtset_type)> = multibinit_dataset structure
 !!
 !! OUTPUTS
-!!  multibinit_dtset <type(multibinit_dataset_type)> = multibinit_dataset structure
+!!  multibinit_dtset <type(multibinit_dtset_type)> = multibinit_dataset structure
 !!
 !! PARENTS
 !!      multibinit
@@ -206,7 +342,7 @@ subroutine multibinit_dtset_free(multibinit_dtset)
 
 !Arguments ------------------------------------
 !scalars
- type(multibinit_dataset_type), intent(inout) :: multibinit_dtset
+ type(multibinit_dtset_type), intent(inout) :: multibinit_dtset
 
 ! *************************************************************************
  
@@ -260,7 +396,7 @@ end subroutine multibinit_dtset_free
 !! string*(*)=string of characters containing all input variables and data
 !!
 !! OUTPUT
-!! multibinit_dtset <type(multibinit_dataset_type)> = datatype with all the input variables
+!! multibinit_dtset <type(multibinit_dtset_type)> = datatype with all the input variables
 !!
 !! NOTES
 !! Should be executed by one processor only.
@@ -289,7 +425,7 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
 !scalars
  integer,intent(in) :: lenstr,natom
  character(len=*),intent(in) :: string
- type(multibinit_dataset_type),intent(inout) :: multibinit_dtset 
+ type(multibinit_dtset_type),intent(inout) :: multibinit_dtset 
 
 !Local variables -------------------------
 !Dummy arguments for subroutine 'intagm' to parse input file
@@ -508,7 +644,7 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
  multibinit_dtset%fit_nfixcoeff=0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'fit_nfixcoeff',tread,'INT')
  if(tread==1) multibinit_dtset%fit_nfixcoeff=intarr(1)
- if(multibinit_dtset%fit_nfixcoeff<-1)then
+ if(multibinit_dtset%fit_nfixcoeff<-2)then
    write(message, '(a,i8,a,a,a,a,a)' )&
 &   'fit_nfixcoeff is',multibinit_dtset%fit_nfixcoeff,', but the only allowed values',ch10,&
 &   'are -1 or positives for multibinit.',ch10,&
@@ -734,6 +870,17 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
 &   'prt_phfrq is',multibinit_dtset%prtsrlr,', but the only allowed values',ch10,&
 &   'are 0, 1 or 2.',ch10,&
 &   'Action: correct prt_phfrq in your input file.'
+   MSG_ERROR(message)
+ end if
+
+ multibinit_dtset%fit_generateTerm=1
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'fit_generateTerm',tread,'INT')
+ if(tread==1) multibinit_dtset%fit_generateTerm=intarr(1)
+ if(multibinit_dtset%fit_generateTerm<0.or.multibinit_dtset%fit_generateTerm>1)then
+   write(message, '(a,i8,a,a,a,a,a)' )&
+&   'fit_generateTerm is',multibinit_dtset%prtsrlr,', but the only allowed values',ch10,&
+&   'are 0, 1 or 2.',ch10,&
+&   'Action: correct fit_generateTerm in your input file.'
    MSG_ERROR(message)
  end if
 
@@ -1428,6 +1575,8 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
 end subroutine invars10
 !!***
 
+
+
 !----------------------------------------------------------------------
 
 !!****f* m_multibinit_dataset/outvars_multibinit
@@ -1440,7 +1589,7 @@ end subroutine invars10
 !! echoes the input information.
 !!
 !! INPUTS
-!! multibinit_dtset <type(multibinit_dataset_type)> datatype with all the input variables 
+!! multibinit_dtset <type(multibinit_dtset_type)> datatype with all the input variables 
 !! nunit=unit number for input or output
 !!
 !! OUTPUT
@@ -1470,7 +1619,7 @@ subroutine outvars_multibinit (multibinit_dtset,nunit)
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: nunit
- type(multibinit_dataset_type),intent(in) :: multibinit_dtset
+ type(multibinit_dtset_type),intent(in) :: multibinit_dtset
 
 !Local variables -------------------------
 !Set routine version number here:
@@ -1526,19 +1675,20 @@ subroutine outvars_multibinit (multibinit_dtset,nunit)
 
  if(multibinit_dtset%fit_coeff/=0)then
    write(nunit,'(a)')' Fit the coefficients :'
-   write(nunit,'(3x,a14,I10.1)')'     fit_coeff',multibinit_dtset%fit_coeff
-   write(nunit,'(3x,a14,F10.1)')'    fit_cutoff',multibinit_dtset%fit_cutoff
-   write(nunit,'(3x,a14,I10.1)')'    fit_option',multibinit_dtset%fit_option
-   write(nunit,'(3x,a14,I10.1)')'    fit_ncycle',multibinit_dtset%fit_ncycle
-   write(nunit,'(3x,a14,3i10)') '      fit_grid',multibinit_dtset%fit_grid
-   write(nunit,'(3x,a14,2i10)') 'fit_rangePower',multibinit_dtset%fit_rangePower
-   write(nunit,'(3x,a14,I10)')  'fit_anhaStrain',multibinit_dtset%fit_anhaStrain
-   write(nunit,'(3x,a14,I10)')  'fit_SPCoupling',multibinit_dtset%fit_SPCoupling
-   write(nunit,'(3x,a14,I10)')  ' fit_nbancoeff',multibinit_dtset%fit_nbancoeff
-   write(nunit,'(3x,a14)',advance='no')' fit_bancoeff'
+   write(nunit,'(1x,a16,I3.1)')'       fit_coeff',multibinit_dtset%fit_coeff
+   write(nunit,'(1x,a16,I3.1)')'fit_generateTerm',multibinit_dtset%fit_generateTerm
+   write(nunit,'(1x,a16,F3.1)')'      fit_cutoff',multibinit_dtset%fit_cutoff
+   write(nunit,'(1x,a16,I3.1)')'      fit_option',multibinit_dtset%fit_option
+   write(nunit,'(1x,a16,I3.1)')'      fit_ncycle',multibinit_dtset%fit_ncycle
+   write(nunit,'(1x,a16,3i3)') '        fit_grid',multibinit_dtset%fit_grid
+   write(nunit,'(1x,a16,2i3)') '  fit_rangePower',multibinit_dtset%fit_rangePower
+   write(nunit,'(1x,a16,I3)')  '  fit_anhaStrain',multibinit_dtset%fit_anhaStrain
+   write(nunit,'(1x,a16,I3)')  '  fit_SPCoupling',multibinit_dtset%fit_SPCoupling
+   write(nunit,'(1x,a16,I3)')  '   fit_nbancoeff',multibinit_dtset%fit_nbancoeff
+   write(nunit,'(1x,a16)',advance='no')'   fit_bancoeff'
    write(nunit,'(4x,9i6)') (multibinit_dtset%fit_bancoeff(ii),ii=1,multibinit_dtset%fit_nbancoeff)
-   write(nunit,'(3x,a14,I10)')  ' fit_nfixcoeff',multibinit_dtset%fit_nfixcoeff
-   write(nunit,'(3x,a14)',advance='no')' fit_fixcoeff'
+   write(nunit,'(1x,a16,I3)')  '   fit_nfixcoeff',multibinit_dtset%fit_nfixcoeff
+   write(nunit,'(1x,a16)',advance='no')'   fit_fixcoeff'
    write(nunit,'(4x,9i6)') (multibinit_dtset%fit_fixcoeff(ii),ii=1,multibinit_dtset%fit_nfixcoeff)
  end if
 

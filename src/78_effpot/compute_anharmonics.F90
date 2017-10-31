@@ -10,7 +10,7 @@
 !!
 !! INPUTS
 !! filenames(17) = path with all name files
-!! inp <type(multibinit_dataset_type)> = datatype with all the input variables
+!! inp <type(multibinit_dtset_type)> = datatype with all the input variables
 !! comm=MPI communicator
 !!
 !! OUTPUT
@@ -47,7 +47,7 @@ subroutine compute_anharmonics(eff_pot,filenames,inp,comm)
  use m_anharmonics_terms
  use m_effective_potential
  use m_effective_potential_file
- use m_multibinit_dataset, only : multibinit_dataset_type
+ use m_multibinit_dataset, only : multibinit_dtset_type
  use m_strain
  use m_fstrings, only : itoa,int2char4,ftoa
 
@@ -65,7 +65,7 @@ subroutine compute_anharmonics(eff_pot,filenames,inp,comm)
   integer, intent(in) :: comm
   character(len=fnlen),intent(in) :: filenames(17)
   type(effective_potential_type),target, intent(inout) :: eff_pot
-  type(multibinit_dataset_type),intent(in) :: inp
+  type(multibinit_dtset_type),intent(in) :: inp
  !arrays
 
  !Local variables-------------------------------
