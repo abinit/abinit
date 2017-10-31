@@ -171,7 +171,6 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
  use interfaces_61_occeig
  use interfaces_65_paw
  use interfaces_66_nonlocal
- use interfaces_66_wfs
  use interfaces_67_common
  use interfaces_72_response, except_this_one => dfpt_rhofermi
 !End of the abilint section

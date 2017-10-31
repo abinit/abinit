@@ -431,7 +431,7 @@ subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,bxc,mpi_enreg,nfft,ngfft,nhat1,nhat1
 !      ABI_DEALLOCATE(rhor1_)
 !    end if
 
-   end if ! option==1 or 2
+!   end if ! option==1 or 2
 
  end if ! nkxc=1 or nkxc=3
 
