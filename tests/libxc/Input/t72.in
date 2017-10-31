@@ -77,7 +77,7 @@
 #because in the latter, the Spencer-Alavi trick is used. The present dataset leads to a divergence with the
 #inverse square of hyb_range_fock .
  ixc15  -428                         # This should be HSE06
- hyb_range_fock15 0.00001d0          # This should transform it to PBE0 in the limit of infinite number of k points
+ hyb_range_fock15 0.001d0          # This should transform it to PBE0 in the limit of infinite number of k points
 
 #DATASET 16  Get PBE. Fool LibXC by imposing to HSE06 an extremely small mixing parameter
 # So, gives the same as dataset 1 or 2. DOES NOT WORK, although the difference is at the level of 1.0d-4 !
@@ -181,7 +181,7 @@ ecut  6.0         # Maximal kinetic energy cut-off, in Hartree
 #%% executable = abinit
 #%% [files]
 #%% files_to_test =
-#%%   t72.out, tolnlines=  1, tolabs=  4.0e-10, tolrel=  2.0e-04
+#%%   t72.out, tolnlines=  1, tolabs=  4.0e-10, tolrel=  2.0e-04, fld_options = -medium
 #%% psp_files = 13al.pspgth
 #%% [paral_info]
 #%% max_nprocs = 4
