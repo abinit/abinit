@@ -77,8 +77,8 @@
 #DATASET 15  Imposing to HSE06 a screening only at very large distances does NOT give the PBE0 at the same k point grid,
 #because in the latter, the Spencer-Alavi trick is used. The present dataset leads to a divergence with the
 #inverse square of hyb_range_fock .
- ixc15  -428                         # This should be HSE06
- hyb_range_fock15 0.00001d0          # This should transform it to PBE0 in the limit of infinite number of k points
+ ixc15  -428                      # This should be HSE06
+ hyb_range_fock15 0.001d0         # This should transform it to PBE0 in the limit of infinite number of k points
 
 #DATASET 16  Get PBE. Fool LibXC by imposing to HSE06 an extremely small mixing parameter
 # So, gives the same as dataset 1 or 2. DOES NOT WORK, although the difference is at the level of 1.0d-4 !
