@@ -418,7 +418,10 @@ subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,bxc,mpi_enreg,nfft,ngfft,nhat1,nhat1
      end if ! optnc==1
 
      ABI_DEALLOCATE(rhor1_diag)
+     ABI_DEALLOCATE(rhor1_offdiag)
+     ABI_DEALLOCATE(vxc_diag)
      ABI_DEALLOCATE(vxc1_diag)
+     ABI_DEALLOCATE(vxc1_)
      ABI_DEALLOCATE(m_norm)
 
 
