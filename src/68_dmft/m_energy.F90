@@ -372,11 +372,10 @@ subroutine compute_energy(cryst_struc,energies_dmft,green,paw_dmft,pawprtvol,paw
 !Local variables-------------------------------
  integer :: iatom,lpawu
  integer :: natom,nspinor,nsppol
- real(dp) :: beta,eband2
+ real(dp) :: beta
  character(len=500) :: message
  real(dp), allocatable :: e_hu_migdal(:)
  real(dp) :: e_hu_migdal_tot
- real(dp) :: tsec(2)
 ! *********************************************************************
  if(part=='both') then
    write(message,'(2a)') ch10,"  == Compute LDA+DMFT energy terms "
@@ -684,6 +683,10 @@ end subroutine compute_band_energy
 !! SOURCE
 
 subroutine compute_migdal_energy(cryst_struc,e_hu_migdal,e_hu_migdal_tot,green,paw_dmft,pawprtvol,self)
+
+#ifdef FC_INTEL
+!DEC$ NOOPTIMIZE
+#endif
 
  use defs_basis
  use m_crystal, only : crystal_t

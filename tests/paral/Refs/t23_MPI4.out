@@ -12,7 +12,7 @@
  Corning Inc. and other collaborators, see ~abinit/doc/developers/contributors.txt .
  Please read ~abinit/doc/users/acknowledgments.html for suggested
  acknowledgments of the ABINIT effort.
- For more information, see http://www.abinit.org .
+ For more information, see https://www.abinit.org .
 
 .Starting date : Thu 28 Aug 2008.
   
@@ -192,6 +192,7 @@ P This job should need less than                      12.371 Mbytes of memory.
  -outvars: echo values of preprocessed input variables --------
      acell    7.0000000000E+00  7.0000000000E+00  7.0000000000E+00 Bohr
        amu    1.20110000E+01
+    densfor_pred         1
     diecut1   4.00000000E+00 Hartree
     diecut2   4.00000000E+00 Hartree
     diecut3   2.20000000E+00 Hartree
@@ -240,7 +241,6 @@ P This job should need less than                      12.371 Mbytes of memory.
     ionmov7        3
     ionmov8        3
     ionmov9        0
-    densfor_pred         1
     iprcel1       45
     iprcel2       45
     iprcel3        0
@@ -5056,6 +5056,7 @@ P newkpt: treating     12 bands with npw=      63 for ikpt=   1 by node    0
      acell8   6.6937836336E+00  6.6937836336E+00  6.6937836336E+00 Bohr
      acell9   7.0000000000E+00  7.0000000000E+00  7.0000000000E+00 Bohr
        amu    1.20110000E+01
+    densfor_pred         1
     diecut1   4.00000000E+00 Hartree
     diecut2   4.00000000E+00 Hartree
     diecut3   2.20000000E+00 Hartree
@@ -5131,7 +5132,6 @@ P newkpt: treating     12 bands with npw=      63 for ikpt=   1 by node    0
     ionmov7        3
     ionmov8        3
     ionmov9        0
-    densfor_pred         1
     iprcel1       45
     iprcel2       45
     iprcel3        0

@@ -190,13 +190,13 @@ subroutine mklocl_realspace(grtn,icoulomb,mpi_enreg,natom,nattyp,nfft,ngfft,nscf
    if (option==1) then
 
      call psolver_kernel( (/ hgx, hgy, hgz /), 2, icoulomb, me_fft, kernel, comm_fft, &
-&                         (/n1,n2,n3/), nproc_fft, nscforder)
+&     (/n1,n2,n3/), nproc_fft, nscforder)
 
      call createIonicPotential_new(fftn3_distrib,ffti3_local,&
-&       geocode,me_fft, nproc_fft, natom, &
-&       ntypat, typat, psps%gth_params%psppar, &
-&       int(psps%ziontypat), xcart,gridcart, hgx,hgy,hgz, &
-&       n1,n2,n3d,n3, kernel, vpsp, comm_fft,pawtab,psps%usepaw)
+&     geocode,me_fft, nproc_fft, natom, &
+&     ntypat, typat, psps%gth_params%psppar, &
+&     int(psps%ziontypat), xcart,gridcart, hgx,hgy,hgz, &
+&     n1,n2,n3d,n3, kernel, vpsp, comm_fft,pawtab,psps%usepaw)
 
 !----------------------------------------------------------------------
 ! ----- Option 2: compute forces induced by local ionic potential -----
@@ -213,15 +213,15 @@ subroutine mklocl_realspace(grtn,icoulomb,mpi_enreg,natom,nattyp,nfft,ngfft,nscf
 
 !    Calculate local part of the forces grtn (inspired from BigDFT routine)
      call local_forces_new(fftn3_distrib,ffti3_local,geocode,me_fft, ntypat, natom, &
-&         typat, xcart, gridcart, psps%gth_params%psppar, int(psps%ziontypat), &
-&         hgx,hgy,hgz, n1,n2,n3,n3d, rhor,vhartr, gxyz, pawtab,psps%usepaw)
+&     typat, xcart, gridcart, psps%gth_params%psppar, int(psps%ziontypat), &
+&     hgx,hgy,hgz, n1,n2,n3,n3d, rhor,vhartr, gxyz, pawtab,psps%usepaw)
 
 !    Forces should be in reduced coordinates.
      do ia = 1, natom, 1
        do igeo = 1, 3, 1
          grtn(igeo, ia) = - rprimd(1, igeo) * gxyz(1, ia) &
-&                         - rprimd(2, igeo) * gxyz(2, ia) &
-&                         - rprimd(3, igeo) * gxyz(3, ia)
+&         - rprimd(2, igeo) * gxyz(2, ia) &
+&         - rprimd(3, igeo) * gxyz(3, ia)
        end do
      end do
 
@@ -595,7 +595,6 @@ end subroutine mklocl_realspace
 !!      mklocl_realspace
 !!
 !! CHILDREN
-!!      ind_positions_mklocl
 !!
 !! SOURCE
 subroutine createIonicPotential_new(fftn3_distrib,ffti3_local,geocode,iproc,&
@@ -888,6 +887,7 @@ implicit none
 !! OUTPUT
 !!
 !! PARENTS
+!!      mklocl_realspace
 !!
 !! CHILDREN
 !!
@@ -919,7 +919,7 @@ subroutine calcVloc_mklocl(yy,xx,rloc,Z)
    call derf_ab(tt,arg)
    yy=-Z/xx*tt
 
-end subroutine calcVloc_mklocl
+ end subroutine calcVloc_mklocl
 !!***
 
 !----------------------------------------------------------------------
@@ -974,34 +974,34 @@ function vloc_zero_mklocl(charge,rloc,msz,rad,vloc,d2vloc)
 ! *************************************************************************
 
 !Select 3 points x1,x2,x3 near 0
- if (rad(1)>1.d-10) then
-   xx(1:3)=rad(1:3)
- else
-   xx(1:3)=rad(2:4)
- end if
+   if (rad(1)>1.d-10) then
+     xx(1:3)=rad(1:3)
+   else
+     xx(1:3)=rad(2:4)
+   end if
 
 !Find the corresponding values of y=(V^PAW(x)-V^HGH(x))/x
- call paw_splint(msz,rad,vloc,d2vloc,3,xx,yy)
- call calcVloc_mklocl(y1,xx(1),rloc,charge)
- call calcVloc_mklocl(y2,xx(2),rloc,charge)
- call calcVloc_mklocl(y3,xx(3),rloc,charge)
- yy(1)= yy(1)-y1
- yy(2)= yy(2)-y2
- yy(3)= yy(3)-y3
+   call paw_splint(msz,rad,vloc,d2vloc,3,xx,yy)
+   call calcVloc_mklocl(y1,xx(1),rloc,charge)
+   call calcVloc_mklocl(y2,xx(2),rloc,charge)
+   call calcVloc_mklocl(y3,xx(3),rloc,charge)
+   yy(1)= yy(1)-y1
+   yy(2)= yy(2)-y2
+   yy(3)= yy(3)-y3
 
 !Find a polynomial of the form (z=0):
 !P(z) = y1.L1(z) + y2.L2(z) + y3.L3(z)
 
 !L1(z) = (z-x2)(z-x3)/((x1-x2)(x1-x3))
- ll(1)=(zz-xx(2))*(zz-xx(3))/((xx(1)-xx(2))*(xx(1)-xx(3)))
+   ll(1)=(zz-xx(2))*(zz-xx(3))/((xx(1)-xx(2))*(xx(1)-xx(3)))
 !L2(z) = (z-x1)(z-x3)/((x2-x1)(x2-x3))
- ll(2)=(zz-xx(1))*(zz-xx(3))/((xx(2)-xx(1))*(xx(2)-xx(3)))
+   ll(2)=(zz-xx(1))*(zz-xx(3))/((xx(2)-xx(1))*(xx(2)-xx(3)))
 !L3(z) = (z-x1)(z-x2)/((x3-x1)(x3-x2))
- ll(3)=(zz-xx(1))*(zz-xx(2))/((xx(3)-xx(1))*(xx(3)-xx(2)))
+   ll(3)=(zz-xx(1))*(zz-xx(2))/((xx(3)-xx(1))*(xx(3)-xx(2)))
 
- vloc_zero_mklocl=yy(1)*ll(1)+yy(2)*ll(2)+yy(3)*ll(3)
+   vloc_zero_mklocl=yy(1)*ll(1)+yy(2)*ll(2)+yy(3)*ll(3)
 
-end function vloc_zero_mklocl
+ end function vloc_zero_mklocl
 !!***
 
 end subroutine createIonicPotential_new
@@ -1023,7 +1023,6 @@ end subroutine createIonicPotential_new
 !!      mklocl_realspace
 !!
 !! CHILDREN
-!!      ind_positions_mklocl
 !!
 !! SOURCE
 subroutine local_forces_new(fftn3_distrib,ffti3_local,&
@@ -1073,151 +1072,151 @@ subroutine local_forces_new(fftn3_distrib,ffti3_local,&
 
 ! *********************************************************************
 
- if (iproc == 0) write(std_out,'(1x,a)',advance='no')'Calculate local forces...'
+   if (iproc == 0) write(std_out,'(1x,a)',advance='no')'Calculate local forces...'
 
 !Conditions for periodicity in the three directions
- perx=(geocode /= 'F')
- pery=(geocode == 'P')
- perz=(geocode /= 'F')
+   perx=(geocode /= 'F')
+   pery=(geocode == 'P')
+   perz=(geocode /= 'F')
 
- forceleaked=zero
+   forceleaked=zero
 
- do iat=1,nat
-   ityp=iatype(iat)
+   do iat=1,nat
+     ityp=iatype(iat)
 !  Coordinates of the center
-   rx=rxyz(1,iat)
-   ry=rxyz(2,iat)
-   rz=rxyz(3,iat)
+     rx=rxyz(1,iat)
+     ry=rxyz(2,iat)
+     rz=rxyz(3,iat)
 
 !  Initialization of the forces
 !  ion-electron term, error function part
-   fxerf=zero
-   fyerf=zero
-   fzerf=zero
+     fxerf=zero
+     fyerf=zero
+     fzerf=zero
 !  ion-electron term, gaussian part
-   fxgau=zero
-   fygau=zero
-   fzgau=zero
+     fxgau=zero
+     fygau=zero
+     fzgau=zero
 
 !  Building array of coefficients of the derivative of the gaussian part
-   cprime(1)=2._dp*psppar(0,2,ityp)-psppar(0,1,ityp)
-   cprime(2)=4._dp*psppar(0,3,ityp)-psppar(0,2,ityp)
-   cprime(3)=6._dp*psppar(0,4,ityp)-psppar(0,3,ityp)
-   cprime(4)=-psppar(0,4,ityp)
+     cprime(1)=2._dp*psppar(0,2,ityp)-psppar(0,1,ityp)
+     cprime(2)=4._dp*psppar(0,3,ityp)-psppar(0,2,ityp)
+     cprime(3)=6._dp*psppar(0,4,ityp)-psppar(0,3,ityp)
+     cprime(4)=-psppar(0,4,ityp)
 
 !  Determine number of local terms (HGH pot)
-   nloc=0
-   do iloc=1,4
-     if (psppar(0,iloc,ityp).ne.zero) nloc=iloc
-   end do
+     nloc=0
+     do iloc=1,4
+       if (psppar(0,iloc,ityp).ne.zero) nloc=iloc
+     end do
 
 !  Some constants depending on the atom type
-   rloc=psppar(0,0,ityp) ; rloc2=rloc**2
-   charge=real(nelpsp(ityp),kind=dp)
-   prefactor=charge/(2._dp*pi*sqrt(2._dp*pi)*rloc**5)
+     rloc=psppar(0,0,ityp) ; rloc2=rloc**2
+     charge=real(nelpsp(ityp),kind=dp)
+     prefactor=charge/(2._dp*pi*sqrt(2._dp*pi)*rloc**5)
 
 !  PAW specifics
-   if (usepaw==1) then
-     msz=pawtab(ityp)%wvl%rholoc%msz
-     rad    => pawtab(ityp)%wvl%rholoc%rad(1:msz)
-     vloc   => pawtab(ityp)%wvl%rholoc%d(1:msz,3)
-     d2vloc => pawtab(ityp)%wvl%rholoc%d(1:msz,4)
-     rzero=rad(1);if (rad(1)<=1.d-10) rzero=rad(2)
-   end if
+     if (usepaw==1) then
+       msz=pawtab(ityp)%wvl%rholoc%msz
+       rad    => pawtab(ityp)%wvl%rholoc%rad(1:msz)
+       vloc   => pawtab(ityp)%wvl%rholoc%d(1:msz,3)
+       d2vloc => pawtab(ityp)%wvl%rholoc%d(1:msz,4)
+       rzero=rad(1);if (rad(1)<=1.d-10) rzero=rad(2)
+     end if
 
 !  Maximum extension of the gaussian
-   cutoff=10._dp*rloc
-   isx=floor((rx-cutoff)/hxh)
-   isy=floor((ry-cutoff)/hyh)
-   isz=floor((rz-cutoff)/hzh)
-   iex=ceiling((rx+cutoff)/hxh)
-   iey=ceiling((ry+cutoff)/hyh)
-   iez=ceiling((rz+cutoff)/hzh)
+     cutoff=10._dp*rloc
+     isx=floor((rx-cutoff)/hxh)
+     isy=floor((ry-cutoff)/hyh)
+     isz=floor((rz-cutoff)/hzh)
+     iex=ceiling((rx+cutoff)/hxh)
+     iey=ceiling((ry+cutoff)/hyh)
+     iez=ceiling((rz+cutoff)/hzh)
 
 !  Calculate the forces near the atom due to the gaussian
 !  and error function parts of the potential
-   do i3=isz,iez
-     z=real(i3,kind=dp)*hzh-rz
-     call ind_positions_mklocl(perz,i3,n3,j3,goz)
-     if(fftn3_distrib(j3)==iproc) then
-       i3loc=ffti3_local(j3)
-       do i2=isy,iey
-         y=real(i2,kind=dp)*hyh-ry
-         call ind_positions_mklocl(pery,i2,n2,j2,goy)
-         do i1=isx,iex
-           x=real(i1,kind=dp)*hxh-rx
-           call ind_positions_mklocl(perx,i1,n1,j1,gox)
+     do i3=isz,iez
+       z=real(i3,kind=dp)*hzh-rz
+       call ind_positions_mklocl(perz,i3,n3,j3,goz)
+       if(fftn3_distrib(j3)==iproc) then
+         i3loc=ffti3_local(j3)
+         do i2=isy,iey
+           y=real(i2,kind=dp)*hyh-ry
+           call ind_positions_mklocl(pery,i2,n2,j2,goy)
+           do i1=isx,iex
+             x=real(i1,kind=dp)*hxh-rx
+             call ind_positions_mklocl(perx,i1,n1,j1,gox)
 
-           if (goz.and.goy.and.gox) then
-             ind=j1+(j2-1)*n1+(i3loc-1)*n1*n2
-             x=(gridcart(1,ind)-rx)
-             y=(gridcart(2,ind)-ry)
-             z=(gridcart(3,ind)-rz)
-             r2=x**2+y**2+z**2
-             xp=exp(-0.5_dp*r2/rloc**2)
+             if (goz.and.goy.and.gox) then
+               ind=j1+(j2-1)*n1+(i3loc-1)*n1*n2
+               x=(gridcart(1,ind)-rx)
+               y=(gridcart(2,ind)-ry)
+               z=(gridcart(3,ind)-rz)
+               r2=x**2+y**2+z**2
+               xp=exp(-0.5_dp*r2/rloc**2)
 
 !            Short range part
-             rhoel=rho(ind)
+               rhoel=rho(ind)
 !            HGH: V_S^prime=gaussian
-             if (usepaw==0) then
-               if (nloc/=0) then
-                 arg=r2/rloc**2
-                 tt=cprime(nloc)
-                 do iloc=nloc-1,1,-1
-                   tt=arg*tt+cprime(iloc)
-                 end do
-                 forceloc=xp*tt*rhoel
-               else
-                 forceloc=zero
-               end if
+               if (usepaw==0) then
+                 if (nloc/=0) then
+                   arg=r2/rloc**2
+                   tt=cprime(nloc)
+                   do iloc=nloc-1,1,-1
+                     tt=arg*tt+cprime(iloc)
+                   end do
+                   forceloc=xp*tt*rhoel
+                 else
+                   forceloc=zero
+                 end if
 !            PAW: V_PAW^prime-V_L^prime
-             else
-               rr(1)=sqrt(r2)
-               if (rr(1)>=rzero) then
-                 call paw_splint_der(msz,rad,vloc,d2vloc,1,rr,dvpawdr)
-                 call calcdVloc_mklocl(dvhgh,rr(1),rloc,charge)
-                 forceloc=rhoel*rloc2*(dvpawdr(1)-dvhgh)/rr(1)
                else
-                 forceloc=rhoel*rloc2*dvloc_zero_mklocl(charge,rloc,msz,rad,vloc,d2vloc)
+                 rr(1)=sqrt(r2)
+                 if (rr(1)>=rzero) then
+                   call paw_splint_der(msz,rad,vloc,d2vloc,1,rr,dvpawdr)
+                   call calcdVloc_mklocl(dvhgh,rr(1),rloc,charge)
+                   forceloc=rhoel*rloc2*(dvpawdr(1)-dvhgh)/rr(1)
+                 else
+                   forceloc=rhoel*rloc2*dvloc_zero_mklocl(charge,rloc,msz,rad,vloc,d2vloc)
+                 end if
                end if
-             end if
 
-             fxgau=fxgau+forceloc*x
-             fygau=fygau+forceloc*y
-             fzgau=fzgau+forceloc*z
+               fxgau=fxgau+forceloc*x
+               fygau=fygau+forceloc*y
+               fzgau=fzgau+forceloc*z
 
 !            Long range part: error function
-             Vel=pot(ind)
-             fxerf=fxerf+xp*Vel*x
-             fyerf=fyerf+xp*Vel*y
-             fzerf=fzerf+xp*Vel*z
+               Vel=pot(ind)
+               fxerf=fxerf+xp*Vel*x
+               fyerf=fyerf+xp*Vel*y
+               fzerf=fzerf+xp*Vel*z
 
-           else if (nloc>0) then
-             r2=x**2+y**2+z**2
-             arg=r2/rloc**2
-             xp=exp(-0.5_dp*arg)
-             tt=cprime(nloc)
-             do iloc=nloc-1,1,-1
-               tt=arg*tt+cprime(iloc)
-             end do
-             forceleaked=forceleaked+xp*(1._dp+tt)
-           end if
+             else if (nloc>0) then
+               r2=x**2+y**2+z**2
+               arg=r2/rloc**2
+               xp=exp(-0.5_dp*arg)
+               tt=cprime(nloc)
+               do iloc=nloc-1,1,-1
+                 tt=arg*tt+cprime(iloc)
+               end do
+               forceleaked=forceleaked+xp*(1._dp+tt)
+             end if
+           end do
          end do
-       end do
-     end if
-   end do
+       end if
+     end do
 
 !  Final result of the forces
-   floc(1,iat)=(hxh*hyh*hzh*prefactor)*fxerf+(hxh*hyh*hzh/rloc**2)*fxgau
-   floc(2,iat)=(hxh*hyh*hzh*prefactor)*fyerf+(hxh*hyh*hzh/rloc**2)*fygau
-   floc(3,iat)=(hxh*hyh*hzh*prefactor)*fzerf+(hxh*hyh*hzh/rloc**2)*fzgau
+     floc(1,iat)=(hxh*hyh*hzh*prefactor)*fxerf+(hxh*hyh*hzh/rloc**2)*fxgau
+     floc(2,iat)=(hxh*hyh*hzh*prefactor)*fyerf+(hxh*hyh*hzh/rloc**2)*fygau
+     floc(3,iat)=(hxh*hyh*hzh*prefactor)*fzerf+(hxh*hyh*hzh/rloc**2)*fzgau
 
- end do
+   end do
 
- forceleaked=forceleaked*prefactor*hxh*hyh*hzh
- if (iproc.eq.0) write(std_out,'(a,1pe12.5)') 'done. Leaked force: ',forceleaked
+   forceleaked=forceleaked*prefactor*hxh*hyh*hzh
+   if (iproc.eq.0) write(std_out,'(a,1pe12.5)') 'done. Leaked force: ',forceleaked
 
- CONTAINS
+   CONTAINS
 !!***
 
 !----------------------------------------------------------------------
@@ -1240,6 +1239,9 @@ subroutine local_forces_new(fftn3_distrib,ffti3_local,&
 !! OUTPUT
 !!
 !! PARENTS
+!!      mklocl_realspace
+!!
+!! CHILDREN
 !!
 !! SOURCE
 subroutine calcdVloc_mklocl(yy,xx,rloc,Z)
@@ -1265,11 +1267,11 @@ subroutine calcdVloc_mklocl(yy,xx,rloc,Z)
 
 ! *************************************************************************
 
- arg=xx/(sqrt(2._dp)*rloc)
- call derf_ab(tt,arg)
- yy=(Z/(xx**2))* ( tt - 2._dp/sqrt(pi)*arg*exp(-arg**2) )
+     arg=xx/(sqrt(2._dp)*rloc)
+     call derf_ab(tt,arg)
+     yy=(Z/(xx**2))* ( tt - 2._dp/sqrt(pi)*arg*exp(-arg**2) )
 
-end subroutine calcdVloc_mklocl
+   end subroutine calcdVloc_mklocl
 !!***
 
 !----------------------------------------------------------------------
@@ -1324,34 +1326,34 @@ function dvloc_zero_mklocl(charge,rloc,msz,rad,vloc,d2vloc)
 ! *************************************************************************
 
 !Select 3 points x1,x2,x3 near 0
- if (rad(1)>1.d-10) then
-   xx(1:3)=rad(1:3)
- else
-   xx(1:3)=rad(2:4)
- end if
+     if (rad(1)>1.d-10) then
+       xx(1:3)=rad(1:3)
+     else
+       xx(1:3)=rad(2:4)
+     end if
 
 !Find the corresponding values of y=(V^PAW(x)-V^HGH(x))/x
- call paw_splint_der(msz,rad,vloc,d2vloc,3,xx,yy)
- call calcdVloc_mklocl(y1,xx(1),rloc,charge)
- call calcdVloc_mklocl(y2,xx(2),rloc,charge)
- call calcdVloc_mklocl(y3,xx(3),rloc,charge)
- yy(1)=(yy(1)-y1)/xx(1)
- yy(2)=(yy(2)-y2)/xx(2)
- yy(3)=(yy(3)-y3)/xx(3)
+     call paw_splint_der(msz,rad,vloc,d2vloc,3,xx,yy)
+     call calcdVloc_mklocl(y1,xx(1),rloc,charge)
+     call calcdVloc_mklocl(y2,xx(2),rloc,charge)
+     call calcdVloc_mklocl(y3,xx(3),rloc,charge)
+     yy(1)=(yy(1)-y1)/xx(1)
+     yy(2)=(yy(2)-y2)/xx(2)
+     yy(3)=(yy(3)-y3)/xx(3)
 
 !Find a polynomial of the form (z=0):
 !P(z) = y1.L1(z) + y2.L2(z) + y3.L3(z)
 
 !L1(z) = (z-x2)(z-x3)/((x1-x2)(x1-x3))
- ll(1)=(zz-xx(2))*(zz-xx(3))/((xx(1)-xx(2))*(xx(1)-xx(3)))
+     ll(1)=(zz-xx(2))*(zz-xx(3))/((xx(1)-xx(2))*(xx(1)-xx(3)))
 !L2(z) = (z-x1)(z-x3)/((x2-x1)(x2-x3))
- ll(2)=(zz-xx(1))*(zz-xx(3))/((xx(2)-xx(1))*(xx(2)-xx(3)))
+     ll(2)=(zz-xx(1))*(zz-xx(3))/((xx(2)-xx(1))*(xx(2)-xx(3)))
 !L3(z) = (z-x1)(z-x2)/((x3-x1)(x3-x2))
- ll(3)=(zz-xx(1))*(zz-xx(2))/((xx(3)-xx(1))*(xx(3)-xx(2)))
+     ll(3)=(zz-xx(1))*(zz-xx(2))/((xx(3)-xx(1))*(xx(3)-xx(2)))
 
- dvloc_zero_mklocl=yy(1)*ll(1)+yy(2)*ll(2)+yy(3)*ll(3)
+     dvloc_zero_mklocl=yy(1)*ll(1)+yy(2)*ll(2)+yy(3)*ll(3)
 
-end function dvloc_zero_mklocl
+   end function dvloc_zero_mklocl
 !!***
 
 end subroutine local_forces_new
@@ -1372,7 +1374,7 @@ end subroutine local_forces_new
 !! OUTPUT
 !!
 !! PARENTS
-!!      mklocl_realspace,local_forces_new
+!!      mklocl_realspace
 !!
 !! CHILDREN
 !!
@@ -1398,13 +1400,13 @@ subroutine ind_positions_mklocl(periodic,i,n,j,go)
 
 ! *********************************************************************
 
- if (periodic) then
-   go=.true.
-   j=modulo(i-1,n)+1
- else
-   j=i
-   go=(i >= 1 .and. i <= n)
- end if
+     if (periodic) then
+       go=.true.
+       j=modulo(i-1,n)+1
+     else
+       j=i
+       go=(i >= 1 .and. i <= n)
+     end if
 
-end subroutine ind_positions_mklocl
+   end subroutine ind_positions_mklocl
 !!***

@@ -89,4 +89,5 @@
 #%%   Mg crystal, 1 atom per unit cell. Start with deformed FCC lattice,
 #%%   optimize the lattice towards FCC (optcell=2).
 #%%   Also test the output of the HIST.nc file (restartxf==-1)
+#%% topics = GeoOpt
 #%%<END TEST_INFO>

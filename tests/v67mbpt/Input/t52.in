@@ -27,12 +27,14 @@
     iscf2 -2  
   kptopt2  1
    getden2 1   ! Usual file handling data
+    nstep2 9   ! Only for portability of tests. Do not keep in production runs.
 
 #Third dataset : NSC run with large number of bands, and points in the the full BZ
     iscf3 -2  
   kptopt3  3
   getwfk3  2   
    getden3 1   ! Usual file handling data
+    nstep3 9   ! Only for portability of tests. Do not keep in production runs.
 
 #Fourth dataset : ddk response function along axis 1
    iscf4 -3
@@ -111,4 +113,5 @@
 #%% description = 
 #%%   Silicon: Solution of optic with temperature-dependent renormalization
 #%%   WARNING: This feature is still under testing, files and variables could change in the next versions
+#%% topics = Optic
 #%%<END TEST_INFO>

@@ -30,6 +30,8 @@ def report_runtime(f):
 def create_directory(fname):
     """Create the directory containing a file name if it noes not exist."""
     dirname = os.path.dirname(fname)
+    if not dirname:
+        return
     if not os.path.exists(dirname):
         os.system('mkdir -p ' + dirname)
 

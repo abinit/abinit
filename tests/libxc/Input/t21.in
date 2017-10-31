@@ -1,12 +1,12 @@
 # Bi atom : reference test (very quick) for all LibXC functionals. nstep=1, nline=1.
 # Not accurate, only portability check.
 
-ndtset 45
-jdtset  1  2  3  4  5  6  7      
+ndtset 38
+jdtset  1  2  3  4  5  6  7
     10 11 12 13 14 15 16 17 18 19
     20 21 22 23 24 25 26    28 29
-    30 31 32 33 34 35 36 37 38 39
-       41 42 43 44 45 46 47 48 49
+    30 31 32 33 34 35 36 37 38
+                44 45 46
 
 
 # (S)LDAs X + different correlations
@@ -19,9 +19,9 @@ ixc6  -1031
 
 # GGAs : different exchanges + LYP correlation
 ixc7  -90131
-#ixc8  -91131   ! Was giving NaN on ibm
-#ixc9  -92131   ! Was giving NaN on ibm
-ixc10 -98131   
+# ixc8  -91131  ! Was giving NaN on ibm
+# ixc9  -92131  ! Was giving NaN on ibm
+ixc10 -98131
 ixc11 -150131
 ixc12 -151131
 ixc13 -158131
@@ -40,7 +40,7 @@ ixc23 -106084
 ixc24 -106085
 ixc25 -106086
 ixc26 -106087
-# ixc27 -106088  ! Not portable
+# ixc27 -106088 ! Not portable
 ixc28 -106089
 ixc29 -106099
 ixc30 -106100
@@ -54,17 +54,17 @@ ixc35  -93
 ixc36  -94
 ixc37  -95
 ixc38  -96
-ixc39  -97
-#ixc40  -154 ! Not portable
-ixc41  -155
-ixc42  -156
-ixc43  -157
+# ixc39  -97   ! Not portable from libxc v2 to v3 (fix in libxc v3.0)
+# ixc40  -154  ! Not portable
+# ixc41  -155  ! Not portable from libxc v2 to v3 (fix in libxc v3.0)
+# ixc42  -156  ! Not portable from libxc v2 to v3 (fix in libxc v3.0)
+# ixc43  -157  ! Not portable from libxc v2 to v3 (fix in libxc v3.0)
 ixc44  -194
 ixc45  -195
 ixc46  -196
-ixc47  -197
-ixc48  -198
-ixc49  -199
+# ixc47  -197  ! Not portable from libxc v2 to v3 (fix in libxc v3.0)
+# ixc48  -198  ! Not portable from libxc v2 to v3 (fix in libxc v3.0)
+# ixc49  -199  ! Not portable from libxc v2 to v3 (fix in libxc v3.0)
 
 #Common data
 acell 3*10
@@ -115,5 +115,5 @@ prteig 0
 #%%   Test functionals from libXC 2.0.1 that were untested before ABINIT v7.2 (libxc 1.1 was used).
 #%%   Spin-polarized case.
 #%%   This is to check the portability for different platform.
-#%%   Extremely quick (nstep=1, nline=1). Less than 20 secs to test 19 functionals ...
+#%%   Extremely quick (nstep=1, nline=1). Less than 10 secs to test 40 functionals ...
 #%%<END TEST_INFO>

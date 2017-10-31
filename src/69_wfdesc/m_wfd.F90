@@ -293,7 +293,7 @@ MODULE m_wfd
   !logical :: gamma_centered=.FALSE.
    ! .TRUE. if ug are given on the Gamma-centered G-sphere. Flag nedded to preserve the old Implementation.
 
-  !% real(dp) :: effmass
+  !% real(dp) :: effmass_free
   ! Effective mass for electrons
 
 !arrays
@@ -4931,7 +4931,7 @@ end subroutine wfd_get_cprj
 !! PARENTS
 !!      calc_sigc_me,calc_sigx_me,calc_vhxc_me,cchi0,cchi0q0,cchi0q0_intraband
 !!      classify_bands,cohsex_me,exc_build_block,exc_build_ham,exc_plot
-!!      m_interp,m_shirley,m_wfd,prep_calc_ucrpa,screening,sigma,wfd_mkrho
+!!      m_bseinterp,m_shirley,m_wfd,prep_calc_ucrpa,screening,sigma,wfd_mkrho
 !!      wfk_analyze
 !!
 !! CHILDREN
@@ -5327,7 +5327,7 @@ end subroutine wfd_barrier
 !!
 !! PARENTS
 !!      calc_sigc_me,calc_sigx_me,cchi0,cchi0q0,cohsex_me,debug_tools
-!!      exc_build_block,exc_plot,m_interp,m_shirley
+!!      exc_build_block,exc_plot,m_bseinterp,m_shirley
 !!
 !! CHILDREN
 !!      fft_ug,get_bz_item

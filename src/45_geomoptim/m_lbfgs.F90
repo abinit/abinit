@@ -157,8 +157,12 @@ subroutine lbfgs_destroy()
 
 implicit none
 
- ABI_DEALLOCATE(lbfgs_plan%work)
- ABI_DEALLOCATE(lbfgs_plan%diag)
+ if(allocated (lbfgs_plan%work)) then
+   ABI_DEALLOCATE(lbfgs_plan%work)
+ end if
+ if(allocated (lbfgs_plan%diag)) then
+   ABI_DEALLOCATE(lbfgs_plan%diag)
+ end if
 
 end subroutine lbfgs_destroy
 !!***
@@ -457,7 +461,6 @@ subroutine mcsrch(N,X,F,G,S,STP,FTOL,MAXFEV,INFO,NFEV,WA, &
  real(dp),parameter :: P5     = 0.50_dp
  real(dp),parameter :: P66    = 0.66_dp
  real(dp),parameter :: XTRAPF = 4.00_dp
- integer :: J
  real(dp) :: DG,DGM,DGTEST,DGXM,DGYM, &
         FTEST1,FM,FXM,FYM,WIDTH,WIDTH1
 !***************************************************************************

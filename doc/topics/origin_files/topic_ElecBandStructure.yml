@@ -1,0 +1,25 @@
+- !components 
+    name      : ElecBandStructure
+    keyword   : ElecBandStructure
+    authors   : XG
+    howto     : generate the electronic band structure related topics
+    header    : default
+    title     : <h1>Electronic band structure and related topics</h1>
+    subtitle  : default
+    copyright : default
+    links     : default
+    introduction : |
+      The eigenenergies along a set of segments can be computed (non-self-consistent calculations [[iscf]]=-2)
+      using a negative value of [[kptopt]], 
+      with [[kptbounds]] defining the end points of the segments, and [[ndivsm]] (or [[ndivk]]) defining the 
+      sampling. 
+      <p>A band structure can even be represented using weights proportional to the orbital content (so-called "Fat Bands"),
+      in case of PAW calculation, see [[pawfatbnd]], and related variables.
+      <p>Different interpolation schemes for the band energies can be defined thanks to [[einterp]]. 
+      The Wannier interpolation is also available through the use of the [[lesson:wannier90]] post-processor.
+      <p>The band structure from a supercell calculation can be unfolded to the (large) Brillouin zone of the (small) primitive cell 
+      thanks to the [[help:fold2bloch]] post-processor. See the related [[topic_Unfolding]].
+      <p>Different plotting postprocessors exist to produce graphical representations of electronic band structures from ABINIT. The most 
+      powerful is based on [[topic:Abipy]]. Simpler tools also exist, and can be found in ~abinit/scripts/post_processing,
+      e.g. AbinitBandStructureMaker.py, plot_bandstructure.py or abinit_eignc_to_bandstructure.py.
+    end : default 

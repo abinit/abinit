@@ -81,7 +81,13 @@ module m_fstab
    ! Number of smearing values used for Gaussian integration
 
    integer :: nene
-   ! Number of chemical potential values used for inelastic tetrahedron integration
+   ! Number of chemical potential values used for inelastic integration
+
+   real(dp) :: enemin
+   ! Minimal chemical potential value used for inelastic integration
+
+   real(dp) :: deltaene
+   ! Chemical potential increment for inelastic integration
 
    type(kptrank_type) :: krank
    ! rank/inverse_rank pair for the k-points on the FS (kpts).
@@ -412,9 +418,20 @@ subroutine fstab_init(fstab, ebands, cryst, fsewin, integ_method, kptrlatt, nshi
  call wrtout(std_out,msg,"COLL",do_flush=.True.)
  call cwtime(cpu,wall,gflops,"start")
 
+ ! fix window around fermie for tetrahedron or gaussian weight calculation
+ ! this is spin independent
+ nene = 100 ! TODO: make this variable and maybe temperature dependent???
+ deltaene = 2*fsewin/dble(nene-1)
+ ifermi = int(nene/2)
+ enemin = ebands%fermie - dble(ifermi-1)*deltaene
+ enemax = enemin + dble(nene-1)*deltaene
+
  ! Setup FS integration
  do spin=1,ebands%nsppol
    fs => fstab(spin)
+   fs%nene = nene
+   fs%enemin = enemin
+   fs%deltaene = deltaene
    fs%nsig = 1
    fs%integ_method = integ_method
  end do
@@ -430,15 +447,6 @@ subroutine fstab_init(fstab, ebands, cryst, fsewin, integ_method, kptrlatt, nshi
    ABI_CHECK(ierr==0, errstr)
    ABI_FREE(bs2ibz)
 
-   ! Compute weights for FS integration.
-   ! fix small window around fermie for tetrahedron weight calculation
-   ! this is spin independent
-   nene = 100
-   deltaene = 2*fsewin/dble(nene-1)
-   ifermi = int(nene/2)
-   enemin = ebands%fermie - dble(ifermi-1)*deltaene
-   enemax = enemin + dble(nene-1)*deltaene
-
    ABI_MALLOC(tmp_eigen, (nkibz))
    ABI_MALLOC(btheta, (nene, nkibz))
    ABI_MALLOC(bdelta, (nene,nkibz))
@@ -451,7 +459,6 @@ subroutine fstab_init(fstab, ebands, cryst, fsewin, integ_method, kptrlatt, nshi
 
    do spin=1,ebands%nsppol
      fs => fstab(spin)
-     fs%nene = nene
      ABI_CALLOC(fs%tetra_wtk, (fs%maxnb, nkibz))
      ABI_CALLOC(fs%tetra_wtk_ene, (fs%maxnb, nkibz, fs%nene))
 
@@ -486,9 +493,9 @@ subroutine fstab_init(fstab, ebands, cryst, fsewin, integ_method, kptrlatt, nshi
            fs%tetra_wtk(ib,ik_ibz) = bdelta(ifermi,ik_ibz) * nkibz
            fs%tetra_wtk_ene(ib,ik_ibz,1:fs%nene) = bdelta(1:fs%nene,ik_ibz) * nkibz
          end if
-       end do
-     end do
-   end do
+       end do ! ik_ibz
+     end do ! band
+   end do ! sppol
 
    ABI_FREE(tmp_eigen)
    ABI_FREE(btheta)
@@ -569,6 +576,7 @@ end function fstab_findkg0
 !!
 !! FUNCTION
 !!  Return the weights for the integration on the Fermi-surface
+!!  NB: single spin version - should have an array (nsppol) of the fstab objects
 !!
 !! INPUTS
 !!  ebands<ebands_type>=GS band structure.
@@ -580,7 +588,7 @@ end function fstab_findkg0
 !!   wtk(fs%nsig,fs%maxnb)=Weights for FS integration.
 !!
 !! PARENTS
-!!      m_phgamma
+!!      m_ddk,m_phgamma
 !!
 !! CHILDREN
 !!      wrtout
@@ -612,6 +620,7 @@ subroutine fstab_weights_ibz(fs, ebands, ik_ibz, spin, sigmas, wtk, iene)
 !scalars
  integer :: ib,bstart_k,nband_k,band,isig
  real(dp) :: arg
+ real(dp) :: chempot
 
 ! *************************************************************************
 
@@ -619,11 +628,16 @@ subroutine fstab_weights_ibz(fs, ebands, ik_ibz, spin, sigmas, wtk, iene)
  bstart_k = fs%bstcnt_ibz(1, ik_ibz); nband_k = fs%bstcnt_ibz(2, ik_ibz)
  ABI_CHECK(nband_k >= 1 .and. nband_k <= fs%maxnb, "wrong nband_k")
 
+! TODO: add iene looping for chemical potential in gaussian case too
  select case (fs%integ_method)
  case (1)
+   chempot = ebands%fermie
+   if (present(iene)) then
+     chempot = fs%enemin + (iene-1)*fs%deltaene
+   end if
    do ib=1,nband_k
      band = ib + bstart_k - 1
-     arg = ebands%eig(band,ik_ibz,spin) - ebands%fermie
+     arg = ebands%eig(band,ik_ibz,spin) - chempot
      do isig=1,fs%nsig
        wtk(isig,ib) = dirac_delta(arg, sigmas(isig))
      end do

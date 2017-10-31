@@ -84,13 +84,7 @@ contains  !=====================================================================
 !! NOTES
 !!
 !! CHILDREN
-!!      appdig,cwtime,destroy_hamiltonian,destroy_rf_hamiltonian,dotprod_g
-!!      dvdb_ftinterp_qpt,dvdb_open_read,dvdb_readsym_allv1,findqg0,get_kg
-!!      getgh1c,getgh1c_setup,getph,gkk_free,gkk_init,gkk_ncwrite
-!!      init_hamiltonian,init_rf_hamiltonian,littlegroup_q
-!!      load_spin_hamiltonian,load_spin_rf_hamiltonian,pawcprj_free
-!!      rf_transgrid_and_pack,wfd_copy_cg,wfd_free,wfd_init,wfd_print
-!!      wfd_read_wfk,wfd_test_ortho,wrtout,xmpi_split_work,xmpi_sum_master
+!!      get_kg
 !!
 !! SOURCE
 
@@ -171,7 +165,7 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
  integer :: ib1,ib2,band
  integer :: ik,ikq,timerev_q
  integer :: spin,istwf_k,istwf_kq,npw_k,npw_kq
- integer :: mpw,my_mpw,ierr,my_kstart,my_kstop,cnt,ncid
+ integer :: mpw,mpw_k,mpw_kq,ierr,my_kstart,my_kstop,ncid
  integer :: n1,n2,n3,n4,n5,n6,nspden
  integer :: sij_opt,usecprj,usevnl,optlocal,optnl,opt_gvnl1
  integer :: nfft,nfftf,mgfft,mgfftf,nkpg,nkpg1
@@ -185,7 +179,7 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
  character(len=fnlen) :: fname, gkkfilnam
 !arrays
  integer :: g0_k(3),symq(4,2,cryst%nsym),dummy_gvec(3,dummy_npw)
- integer,allocatable :: kg_k(:,:),kg_kq(:,:),gtmp(:,:),nband(:,:),nband_kq(:,:),blkflg(:,:)
+ integer,allocatable :: kg_k(:,:),kg_kq(:,:),nband(:,:),nband_kq(:,:),blkflg(:,:)
  real(dp) :: kk(3),kq(3),qpt(3)
  real(dp),allocatable :: grad_berry(:,:),kinpw1(:),kpg1_k(:,:),kpg_k(:,:),dkinpw(:)
  real(dp),allocatable :: ffnlk(:,:,:,:),ffnl1(:,:,:,:),ph3d(:,:,:),ph3d1(:,:,:)
@@ -214,6 +208,7 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
  i_am_master = (my_rank == master)
 
  ! Copy important dimensions
+ cplex = 2
  natom = cryst%natom
  natom3 = 3 * natom
  nsppol = ebands_k%nsppol
@@ -252,6 +247,7 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
  ABI_MALLOC(keep_ur_kq,(mband_kq, nkpt_kq ,nsppol))
  nband_kq=mband_kq; bks_mask_kq=.False.; keep_ur_kq=.False.
 
+
  ! Distribute the k-points over the processors
  call xmpi_split_work(nkpt,comm,my_kstart,my_kstop,msg,ierr)
  do ik=1,nkpt
@@ -264,6 +260,7 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
    bks_mask(:,ik,:) = .True.
    bks_mask_kq(:,ikq,:) = .True.
  end do
+
 
  ! Initialize the wavefunction descriptors
  call wfd_init(wfd_k,cryst,pawtab,psps,keep_ur,dtset%paral_kgb,dummy_npw,mband,nband,nkpt,nsppol,bks_mask,&
@@ -299,28 +296,9 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
  call getph(cryst%atindx,natom,n1,n2,n3,ph1d,cryst%xred)
 
  ! Find the appropriate value of mpw
- mpw = 0; cnt=0
- do spin=1,nsppol
-   do ik=1,nkpt
-     cnt = cnt + 1; if (mod(cnt, nproc) /= my_rank) cycle
-     kk = ebands_k%kptns(:,ik)
-     call get_kg(kk,1,ecut,cryst%gmet,onpw,gtmp)
-     ABI_FREE(gtmp)
-     mpw = max(mpw, onpw)
-   end do
- end do
- cnt=0
- do spin=1,nsppol
-   do ikq=1,nkpt_kq
-     cnt = cnt + 1; if (mod(cnt, nproc) /= my_rank) cycle
-     kq = ebands_kq%kptns(:,ikq)
-     call get_kg(kq,1,ecut,cryst%gmet,onpw,gtmp)
-     ABI_FREE(gtmp)
-     mpw = max(mpw, onpw)
-   end do
- end do
- my_mpw = mpw; call xmpi_max(my_mpw, mpw, comm, ierr)
-
+ call find_mpw(mpw_k, ebands_k%kptns(:,:), nsppol, nkpt, cryst%gmet,ecut,comm)
+ call find_mpw(mpw_kq, ebands_kq%kptns(:,:), nsppol, nkpt_kq, cryst%gmet,ecut,comm)
+ mpw = max(mpw_k, mpw_kq)
 
  ! Allow PW-arrays dimensioned with mpw
  ABI_MALLOC(kg_k, (3, mpw))
@@ -377,10 +355,11 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
    if (dtset%prtvol > 0) call wrtout(std_out, sjoin("Could not find: ",ktoa(qpt), "in DVDB - interpolating"))
    ! Fourier interpolate of the potential
    ABI_CHECK(any(abs(qpt) > tol12), "qpt cannot be zero if Fourier interpolation is used")
-   cplex = 2
-   call dvdb_ftinterp_setup(dvdb,ifc%ngqpt,ifc%nqshft,ifc%qshft,nfft,ngfft,comm,cryst)
-   ABI_MALLOC(v1scf, (cplex,nfftf,nspden,natom3))
-   call dvdb_ftinterp_qpt(dvdb, qpt, nfftf, ngfftf, v1scf, comm)
+
+   ! This call allocates v1scf(cplex, nfftf, nspden, 3*natom))
+   call dvdb_interpolate_v1scf(dvdb,cryst,qpt,ifc%ngqpt,ifc%nqshft,ifc%qshft, &
+   &                           nfft, ngfft, nfftf, ngfftf, v1scf, comm)
+
  end if
 
  ! Examine the symmetries of the q wavevector
@@ -391,6 +370,10 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
  ABI_CHECK(ierr==0, "oom vlocal1")
 
  ABI_MALLOC(gkk, (2*mband*nsppol,nkpt,1,1,mband_kq))
+
+ ! ========================================================================== !
+ ! Begin loop on perturbations, spins and k-points
+ ! ========================================================================== !
 
  ! Loop over all 3*natom perturbations.
  do ipc=1,natom3
@@ -546,7 +529,10 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
  call wrtout(ab_out, msg, "COLL", do_flush=.True.)
  call wrtout(std_out, msg, "COLL", do_flush=.True.)
 
+ ! ========================================================================== !
  ! Free memory
+ ! ========================================================================== !
+
  ABI_FREE(gkk)
  ABI_FREE(v1scf)
  ABI_FREE(vlocal1)
@@ -573,6 +559,80 @@ end subroutine eph_gkk
 !!***
 
 !----------------------------------------------------------------------
+
+!!****f* m_gkk/find_mpw
+!! NAME
+!!  find_mpw
+!!
+!! FUNCTION
+!!  Look at all k-points and spins to find the maximum
+!!  number of plane waves.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!      m_gkk
+!!
+!! NOTES
+!!
+!! CHILDREN
+!!      get_kg
+!!
+!! SOURCE
+
+subroutine find_mpw(mpw, kpts, nsppol, nkpt, gmet, ecut, comm)
+
+ use defs_basis
+ use m_profiling_abi
+ use m_xmpi
+ use m_errors
+ use m_fftcore,         only : get_kg
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'find_mpw'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(out) :: mpw
+ integer,intent(in) :: nsppol, nkpt
+ integer,intent(in) :: comm
+ real(dp),intent(in) :: ecut
+!arrays
+ real(dp),intent(in) :: kpts(3,nkpt)
+ real(dp),intent(in) :: gmet(3,3)
+
+!Local variables ------------------------------
+!scalars
+ integer :: my_rank, cnt, nproc, ierr
+ integer :: ispin, ikpt
+ integer :: my_mpw, onpw
+ integer,allocatable :: gtmp(:,:)
+ real(dp) :: kpt(3)
+
+ my_rank = xmpi_comm_rank(comm)
+ nproc = xmpi_comm_size(comm)
+
+ mpw = 0; cnt=0
+ do ispin=1,nsppol
+   do ikpt=1,nkpt
+     cnt = cnt + 1; if (mod(cnt, nproc) /= my_rank) cycle
+     kpt = kpts(:,ikpt)
+     call get_kg(kpt,1,ecut,gmet,onpw,gtmp)
+     ABI_FREE(gtmp)
+     mpw = max(mpw, onpw)
+   end do
+ end do
+ my_mpw = mpw; call xmpi_max(my_mpw, mpw, comm, ierr)
+
+end subroutine find_mpw
+!!***
 
 end module m_gkk
 !!***

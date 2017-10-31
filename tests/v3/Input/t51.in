@@ -64,4 +64,5 @@ diemix 0.5
 #%% description = 
 #%%   Fe BCC crystal.
 #%%   Constraint the magnetic moment, using the input variable spinmagntarget.
+#%% topics = spinpolarisation
 #%%<END TEST_INFO>

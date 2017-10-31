@@ -28,10 +28,10 @@
 !!  dipole(nspden)=mean value of the dipole of input array, for each nspden component
 !!
 !! PARENTS
-!!      multipoles_fftr
+!!      multipoles_out
 !!
 !! CHILDREN
-!!      multipoles_fftr,wrtout
+!!      destroy_distribfft,init_distribfft_seq,xmpi_sum
 !!
 !! SOURCE
 
@@ -130,7 +130,7 @@ subroutine multipoles_fftr(arraysp,dipole,nfft,ngfft,nspden,rprimd,origin,&
 !$OMP SINGLE
      dipole_tmp=zero
 !$OMP END SINGLE
-!$OMP DO COLLAPSE(2), REDUCTION(+:dipole_tmp)
+!$OMP DO COLLAPSE(2) REDUCTION(+:dipole_tmp)
      do ifft2=1,n2
        do ifft1=1,n1
          i2=mod(ifft2-1+ishift*n2,n2)

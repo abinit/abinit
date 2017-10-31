@@ -1,7 +1,7 @@
 !{\src2tex{textfont=tt}}
-!!****f* ABINIT/Psolver_rhohxc
+!!****f* ABINIT/psolver_rhohxc
 !! NAME
-!! Psolver_rhohxc
+!! psolver_rhohxc
 !!
 !! FUNCTION
 !! Given rho(r), compute Hartree potential considering the system as
@@ -10,7 +10,7 @@
 !! Psolver() developped for BigDFT.
 !! It can compute the xc energy and potential if required. This computation is
 !! built on the drivexc() routine of ABINIT but access it directly from real
-!! space. The present routine is a real space counter part to rhohxc().
+!! space. The present routine is a real space counter part to rhotoxc().
 !!
 !! COPYRIGHT
 !! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR,TRangel).
@@ -44,7 +44,7 @@
 !!
 !! CHILDREN
 !!      h_potential,mean_fftr,metric,mkdenpos,psolver_kernel,wrtout
-!!      wvl_rhov_abi2big,wvl_vhartr_abi2big,wvl_vxc_abi2big,xc_potential
+!!      wvl_rhov_abi2big,xc_potential
 !!
 !! SOURCE
 
@@ -456,7 +456,7 @@ subroutine psolver_rhohxc(enhartr, enxc, envxc, icoulomb, ixc, &
 
 !Pass vhartr and vxc to BigDFT objects (useless?)
 !if(usewvl==1) then
-!  write(message, '(a,a,a,a)' ) ch10, ' rhohxc_wvlpaw : but why are you copying me :..o('
+!  write(message, '(a,a,a,a)' ) ch10, ' rhotoxc_wvlpaw : but why are you copying me :..o('
 ! call wvl_vhartr_abi2big(1,vhartr,wvl_den)
 !  (this can be commented out, since we do not use denspot%v_xc
 ! call wvl_vxc_abi2big(1,vxc,wvl_den)

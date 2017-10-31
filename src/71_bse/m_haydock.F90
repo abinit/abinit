@@ -98,7 +98,6 @@ CONTAINS  !=====================================================================
 !!      bethe_salpeter
 !!
 !! CHILDREN
-!!      continued_fract,hexc_matmul_full,wrtout
 !!
 !! SOURCE
 
@@ -635,7 +634,6 @@ end subroutine exc_haydock_driver
 !!      m_haydock
 !!
 !! CHILDREN
-!!      continued_fract,hexc_matmul_full,wrtout
 !!
 !! SOURCE
 
@@ -926,7 +924,6 @@ end subroutine haydock_herm
 !!      m_haydock
 !!
 !! CHILDREN
-!!      continued_fract,hexc_matmul_full,wrtout
 !!
 !! SOURCE
 
@@ -1114,7 +1111,6 @@ end subroutine haydock_herm_algo
 !!      m_haydock
 !!
 !! CHILDREN
-!!      continued_fract,hexc_matmul_full,wrtout
 !!
 !! SOURCE
 
@@ -1242,7 +1238,6 @@ end subroutine haydock_restart
 !!      m_haydock
 !!
 !! CHILDREN
-!!      continued_fract,hexc_matmul_full,wrtout
 !!
 !! SOURCE
 
@@ -1378,7 +1373,6 @@ end subroutine haydock_mdf_to_tensor
 !!      m_haydock
 !!
 !! CHILDREN
-!!      continued_fract,hexc_matmul_full,wrtout
 !!
 !! SOURCE
 
@@ -1643,7 +1637,6 @@ end subroutine haydock_psherm
 !!      m_haydock
 !!
 !! CHILDREN
-!!      continued_fract,hexc_matmul_full,wrtout
 !!
 !! SOURCE
 
@@ -1949,7 +1942,6 @@ end subroutine haydock_psherm_optalgo
 !!      m_haydock
 !!
 !! CHILDREN
-!!      continued_fract_general,hexc_matmul_full,wrtout
 !!
 !! SOURCE
 
@@ -2266,7 +2258,6 @@ end subroutine haydock_bilanczos
 !!      m_haydock
 !!
 !! CHILDREN
-!!      continued_fract,hexc_matmul_full,wrtout
 !!
 !! SOURCE
 
@@ -2310,18 +2301,14 @@ subroutine haydock_bilanczos_optalgo(niter_done,niter_tot,nomega,omega,tol_iter,
 
 !Local variables ------------------------------
 !scalars
- integer :: my_nt,niter_min,nconv,parity,ii,jj,tdim !,ierr
- integer :: row_max,col_max,nlev
+ integer :: my_nt,niter_min,nconv !,ierr
  character(len=500) :: msg
- real(dp) :: max_err,mean_err,mean_err2,std_dev,err
  logical :: keep_vectors=.TRUE.
 !arrays
  real(dp) :: abs_err(nomega,2) !,ww_err(nomega,2)
- complex(dpc) :: gn0(nomega,niter_tot)
  complex(dpc),allocatable :: oldg(:),newg(:) 
  complex(dpc),allocatable :: hphi_np1(:),hphit_np1(:),save_phi(:,:),save_phit(:,:)
- complex(dpc),allocatable ::  alpha(:,:),beta(:,:),ovlp(:,:)
- complex(dpc),allocatable :: phi_test(:),phi_test2(:),g00(:)
+ complex(dpc),allocatable :: g00(:)
  logical :: test(2)
  integer :: ierr
 

@@ -59,7 +59,7 @@ MODULE m_hdr
  use defs_datatypes,  only : ebands_t, pseudopotential_type
  use defs_abitypes,   only : hdr_type, dataset_type
  use m_pawtab,        only : pawtab_type
- use m_pawrhoij,      only : pawrhoij_type, pawrhoij_alloc, pawrhoij_copy, pawrhoij_free, pawrhoij_io
+ use m_pawrhoij,      only : pawrhoij_type, pawrhoij_alloc, pawrhoij_copy, pawrhoij_free, pawrhoij_io, pawrhoij_get_nspden
 
  implicit none
 
@@ -171,7 +171,7 @@ MODULE m_hdr
  !    Moreover the files produced by the DFPT code do not have a well-defined extension and, as a consequence,
  !    they require a special treatment. In python I would use regexp but Fortran is not python!
 
- type(abifile_t),private,parameter :: all_abifiles(41) = [ &
+ type(abifile_t),private,parameter :: all_abifiles(45) = [ &
 
     ! Files with wavefunctions:
     abifile_t(varname="coefficients_of_wavefunctions", fform=2, ext="WFK", class="wf_planewave"), &
@@ -181,7 +181,7 @@ MODULE m_hdr
 
     ! Files with density-like data.
     abifile_t(varname="density", fform=52, ext="DEN", class="density"), &    ! Official
-    abifile_t(varname="ep_density", fform=53, ext="POSITRON", class="density"), &
+    abifile_t(varname="positron_density", fform=53, ext="POSITRON", class="density"), &
     abifile_t(varname="first_order_density", fform=54, ext="DEN(\d+)", class="density"), &
     abifile_t(varname="pawrhor", fform=55, ext="PAWDEN", class="density"), &
     abifile_t(varname="pawrhor_core", fform=56, ext="ATMDEN_CORE", class="density"), &
@@ -218,6 +218,10 @@ MODULE m_hdr
     ! fform 111 contains an extra record with rhog1_q(G=0) after the DFPT potential(r).
     abifile_t(varname="first_order_potential", fform=111, ext="POT(\d+)", class="potential"), &
 
+    abifile_t(varname="first_order_vhartree", fform=112, ext="VHA(\d+)", class="potential"), &
+    abifile_t(varname="first_order_vpsp", fform=113, ext="VPSP(\d+)", class="potential"), &
+    abifile_t(varname="first_order_vxc", fform=114, ext="VXC(\d+)", class="potential"), &
+
    ! Data used in conducti
     abifile_t(varname="pawnabla", fform=610, ext="OPT1", class="data"), &
     abifile_t(varname="pawnabla_core", fform=611, ext="OPT2", class="data"), &
@@ -238,7 +242,8 @@ MODULE m_hdr
    !abifile_t(varname="bse_ucoupling_q0", fform=1002, ext="BSC", class="bscoup"), &
 
    ! Miscellaneous
-   abifile_t(varname="dos_fractions", fform=3000, ext="FATBANDS", class="None") &
+   abifile_t(varname="dos_fractions", fform=3000, ext="FATBANDS", class="data"), &
+   abifile_t(varname="spectral_weights", fform=5000, ext="FOLD2BLOCH", class="data") &
   ]
 
  type(abifile_t),public,parameter :: abifile_none = abifile_t(varname="None", fform=0, ext="None", class="None")
@@ -360,7 +365,8 @@ character(len=nctk_slen) function varname_from_fname(filename) result(varname)
  if (endswith(filename, ".nc")) then
    ind = index(filename, ".nc", back=.True.)
  else
-   MSG_ERROR(sjoin("Don't know how to handle: ", filename))
+   !MSG_ERROR(sjoin("Don't know how to handle: ", filename))
+   ind = len_trim(filename) + 1
  end if
 
  ext = filename(:ind-1)
@@ -376,7 +382,7 @@ character(len=nctk_slen) function varname_from_fname(filename) result(varname)
  !case ("DEN1")
  !  varname = "first_order_density"
  case ("POSITRON")
-   varname = "ep_density"
+   varname = "positron_density"
  case ("PAWDEN")
    varname = "pawrhor"
    ! TODO: Other paw densities
@@ -429,6 +435,30 @@ character(len=nctk_slen) function varname_from_fname(filename) result(varname)
    read(ext(4:), *, iostat=ierr) pertcase
    if (ierr == 0) then
       varname = "first_order_potential"; return
+   end if
+ end if
+
+ ! Handle VXC[pertcase]
+ if (startswith(ext, "VXC")) then
+   read(ext(4:), *, iostat=ierr) pertcase
+   if (ierr == 0) then
+      varname = "first_order_vxc"; return
+   end if
+ end if
+
+ ! Handle VHA[pertcase]
+ if (startswith(ext, "VHA")) then
+   read(ext(4:), *, iostat=ierr) pertcase
+   if (ierr == 0) then
+      varname = "first_order_vhartree"; return
+   end if
+ end if
+
+ ! Handle VPSP[pertcase]
+ if (startswith(ext, "VPSP")) then
+   read(ext(4:), *, iostat=ierr) pertcase
+   if (ierr == 0) then
+      varname = "first_order_vpsp"; return
    end if
  end if
 
@@ -804,8 +834,8 @@ subroutine hdr_init(ebands,codvsn,dtset,hdr,pawtab,pertcase,psps,wvl, &
    if (present(mpi_atmtab)) then
      call hdr_init_lowlvl(hdr,ebands,psps,pawtab,wvl,codvsn,pertcase,&
 &     dtset%natom,dtset%nsym,dtset%nspden,dtset%ecut,dtset%pawecutdg,dtset%ecutsm,dtset%dilatmx,&
-&     dtset%intxc,dtset%ixc,dtset%stmbias,dtset%usewvl,dtset%pawcpxocc,dtset%ngfft,dtset%ngfftdg,dtset%so_psp,&
-&     dtset%qptn, dtset%rprimd_orig(:,:,image),dtset%xred_orig(:,:,image),&
+&     dtset%intxc,dtset%ixc,dtset%stmbias,dtset%usewvl,dtset%pawcpxocc,dtset%pawspnorb,dtset%ngfft,dtset%ngfftdg,&
+&     dtset%so_psp,dtset%qptn, dtset%rprimd_orig(:,:,image),dtset%xred_orig(:,:,image),&
 &     dtset%symrel,dtset%tnons,dtset%symafm,dtset%typat,dtset%amu_orig(:,image),dtset%icoulomb,&
 &     dtset%kptopt,dtset%nelect,dtset%charge,dtset%kptrlatt_orig,dtset%kptrlatt,&
 &     dtset%nshiftk_orig,dtset%nshiftk,dtset%shiftk_orig,dtset%shiftk,&
@@ -813,8 +843,8 @@ subroutine hdr_init(ebands,codvsn,dtset,hdr,pawtab,pertcase,psps,wvl, &
    else
      call hdr_init_lowlvl(hdr,ebands,psps,pawtab,wvl,codvsn,pertcase,&
 &     dtset%natom,dtset%nsym,dtset%nspden,dtset%ecut,dtset%pawecutdg,dtset%ecutsm,dtset%dilatmx,&
-&     dtset%intxc,dtset%ixc,dtset%stmbias,dtset%usewvl,dtset%pawcpxocc,dtset%ngfft,dtset%ngfftdg,dtset%so_psp,&
-&     dtset%qptn, dtset%rprimd_orig(:,:,image),dtset%xred_orig(:,:,image),&
+&     dtset%intxc,dtset%ixc,dtset%stmbias,dtset%usewvl,dtset%pawcpxocc,dtset%pawspnorb,dtset%ngfft,dtset%ngfftdg,&
+&     dtset%so_psp,dtset%qptn, dtset%rprimd_orig(:,:,image),dtset%xred_orig(:,:,image),&
 &     dtset%symrel,dtset%tnons,dtset%symafm,dtset%typat,dtset%amu_orig(:,image),dtset%icoulomb,&
 &     dtset%kptopt,dtset%nelect,dtset%charge,dtset%kptrlatt_orig,dtset%kptrlatt,&
 &     dtset%nshiftk_orig,dtset%nshiftk,dtset%shiftk_orig,dtset%shiftk,&
@@ -823,8 +853,8 @@ subroutine hdr_init(ebands,codvsn,dtset,hdr,pawtab,pertcase,psps,wvl, &
  else
    call hdr_init_lowlvl(hdr,ebands,psps,pawtab,wvl,codvsn,pertcase,&
 &   dtset%natom,dtset%nsym,dtset%nspden,dtset%ecut,dtset%pawecutdg,dtset%ecutsm,dtset%dilatmx,&
-&   dtset%intxc,dtset%ixc,dtset%stmbias,dtset%usewvl,dtset%pawcpxocc,dtset%ngfft,dtset%ngfftdg,dtset%so_psp,&
-&   dtset%qptn, dtset%rprimd_orig(:,:,image),dtset%xred_orig(:,:,image),dtset%symrel,&
+&   dtset%intxc,dtset%ixc,dtset%stmbias,dtset%usewvl,dtset%pawcpxocc,dtset%pawspnorb,dtset%ngfft,dtset%ngfftdg,&
+&   dtset%so_psp,dtset%qptn, dtset%rprimd_orig(:,:,image),dtset%xred_orig(:,:,image),dtset%symrel,&
 &   dtset%tnons,dtset%symafm,dtset%typat,dtset%amu_orig(:,image),dtset%icoulomb,&
 &   dtset%kptopt,dtset%nelect,dtset%charge,dtset%kptrlatt_orig,dtset%kptrlatt,&
 &   dtset%nshiftk_orig,dtset%nshiftk,dtset%shiftk_orig,dtset%shiftk)
@@ -1211,7 +1241,7 @@ end function hdr_nelect_fromocc
 
 subroutine hdr_init_lowlvl(hdr,ebands,psps,pawtab,wvl,&
 &  codvsn,pertcase,natom,nsym,nspden,ecut,pawecutdg,ecutsm,dilatmx,&
-&  intxc,ixc,stmbias,usewvl,pawcpxocc,ngfft,ngfftdg,so_psp,qptn,&
+&  intxc,ixc,stmbias,usewvl,pawcpxocc,pawspnorb,ngfft,ngfftdg,so_psp,qptn,&
 &  rprimd,xred,symrel,tnons,symafm,typat,amu,icoulomb,&
 &  kptopt,nelect,charge,kptrlatt_orig,kptrlatt,&
 &  nshiftk_orig,nshiftk,shiftk_orig,shiftk,&
@@ -1228,7 +1258,7 @@ subroutine hdr_init_lowlvl(hdr,ebands,psps,pawtab,wvl,&
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: natom,nsym,nspden,intxc,ixc,usewvl,pawcpxocc,pertcase
+ integer,intent(in) :: natom,nsym,nspden,intxc,ixc,usewvl,pawcpxocc,pawspnorb,pertcase
  integer,intent(in) :: kptopt,nshiftk_orig,nshiftk,icoulomb
  integer, intent(in),optional :: comm_atom
  real(dp),intent(in) :: ecut,ecutsm,dilatmx,stmbias,pawecutdg,nelect,charge
@@ -1236,7 +1266,7 @@ subroutine hdr_init_lowlvl(hdr,ebands,psps,pawtab,wvl,&
  type(ebands_t),intent(in) :: ebands
  type(pseudopotential_type),intent(in) :: psps
  type(wvl_internal_type),intent(in) :: wvl
- type(hdr_type),intent(inout) :: hdr !vz_i
+ type(hdr_type),intent(inout) :: hdr
 !arrays
  integer,intent(in) :: typat(natom)
  integer,intent(in) :: so_psp(psps%npsp)
@@ -1251,7 +1281,7 @@ subroutine hdr_init_lowlvl(hdr,ebands,psps,pawtab,wvl,&
 
 !Local variables-------------------------------
 !scalars
- integer :: bantot,date,nkpt,npsp,ntypat,nsppol,nspinor
+ integer :: bantot,date,nkpt,npsp,ntypat,nsppol,nspinor,nspden_rhoij
  integer :: idx,isppol,ikpt,iband,ipsp
  character(len=8) :: date_time
 
@@ -1347,18 +1377,19 @@ subroutine hdr_init_lowlvl(hdr,ebands,psps,pawtab,wvl,&
  hdr%amu = amu
 
  if (psps%usepaw==1)then
+   nspden_rhoij=pawrhoij_get_nspden(nspden,nspinor,pawspnorb)
    ABI_DT_MALLOC(hdr%pawrhoij,(natom))
    !Values of nspden/nspinor/nsppol are dummy ones; they are overwritten later (by hdr_update)
    if (present(comm_atom)) then
      if (present(mpi_atmtab)) then
-       call pawrhoij_alloc(hdr%pawrhoij,pawcpxocc,nspden,nspinor,nsppol,typat, &
+       call pawrhoij_alloc(hdr%pawrhoij,pawcpxocc,nspden_rhoij,nspinor,nsppol,typat, &
 &                       pawtab=pawtab,comm_atom=comm_atom,mpi_atmtab=mpi_atmtab)
      else
-       call pawrhoij_alloc(hdr%pawrhoij,pawcpxocc,nspden,nspinor,nsppol,typat, &
+       call pawrhoij_alloc(hdr%pawrhoij,pawcpxocc,nspden_rhoij,nspinor,nsppol,typat, &
 &                       pawtab=pawtab,comm_atom=comm_atom)
      end if
    else
-     call pawrhoij_alloc(hdr%pawrhoij,pawcpxocc,nspden,nspinor,nsppol,typat,pawtab=pawtab)
+     call pawrhoij_alloc(hdr%pawrhoij,pawcpxocc,nspden_rhoij,nspinor,nsppol,typat,pawtab=pawtab)
    end if
  end if
 
@@ -2031,8 +2062,7 @@ end subroutine hdr_io_int
 !!  Only writing
 !!
 !! PARENTS
-!!      cut3d,initaim,ioprof,m_ddk,m_dvdb,m_hdr,m_io_kss,m_wfd,m_wfk,mrggkk
-!!      rchkgsheader
+!!      cut3d,initaim,ioprof,m_ddk,m_dvdb,m_hdr,m_wfd,m_wfk,mrggkk,rchkgsheader
 !!
 !! CHILDREN
 !!
@@ -2522,8 +2552,7 @@ end subroutine hdr_update
 !! This routine is called only in the case of MPI version of the code.
 !!
 !! PARENTS
-!!      elphon,initaim,m_dvdb,m_hdr,m_io_kss,m_io_screening,m_ioarr,m_wfk,optic
-!!      read_gkk
+!!      elphon,initaim,m_dvdb,m_hdr,m_io_screening,m_ioarr,m_wfk,optic,read_gkk
 !!
 !! CHILDREN
 !!
@@ -2851,8 +2880,8 @@ end subroutine hdr_bcast
 !! The file is supposed to be open already
 !!
 !! PARENTS
-!!      elphon,initaim,inpgkk,m_bse_io,m_cut3d,m_dvdb,m_hdr,m_io_kss
-!!      m_io_screening,m_ioarr,macroave,mrggkk,rchkgsheader,read_gkk
+!!      elphon,initaim,inpgkk,m_bse_io,m_cut3d,m_dvdb,m_hdr,m_io_screening
+!!      m_ioarr,macroave,mrggkk,rchkgsheader,read_gkk
 !!
 !! CHILDREN
 !!
@@ -2983,7 +3012,7 @@ end subroutine hdr_fort_read
 !!  fform=kind of the array in the file. if the reading fails, return fform=0
 !!
 !! PARENTS
-!!      initaim,inwffil,m_dvdb,m_hdr,m_io_kss,m_io_screening,m_ioarr,macroave
+!!      initaim,inwffil,m_dvdb,m_hdr,m_io_screening,m_ioarr,macroave
 !!
 !! CHILDREN
 !!

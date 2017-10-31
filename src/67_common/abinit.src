@@ -48,7 +48,6 @@ sources = [
  "fresid.F90",
  "fresidrsp.F90",
  "getcgqphase.F90",
- "hartre1.F90",
  "init_e_field_vars.F90",
  "initberry.F90",
  "initmv.F90",

@@ -111,7 +111,7 @@ contains
 !!
 !! PARENTS
 !!      ep_el_weights,ep_fs_weights,ep_ph_weights,gstate,m_ebands,m_epjdos
-!!      m_fstab,m_phgamma,m_phonons,thmeig,wfk_analyze
+!!      m_fstab,m_gruneisen,m_phgamma,m_phonons,thmeig,wfk_analyze
 !!
 !! CHILDREN
 !!      get_onetetra_,sort_tetra
@@ -1584,7 +1584,7 @@ pure subroutine get_onetetra_(tetra,itetra,eigen_1tetra,enemin,enemax,max_occ,ne
 !    for ikpt = 1 we add a point below eigen(1) which doesnt
 !    contribute to the DOS in any tetrahedron
 !scalars
- integer :: ieps,nn1,nn2,nn3,nn4,my_start,my_stop
+ integer :: ieps,nn1,nn2,nn3,nn4
  double precision  :: cc,cc1,cc2,cc3,dcc1de,dcc2de,dcc3de,dccde,deltaene,eps
  double precision  :: epsilon21,epsilon31,epsilon32,epsilon41,epsilon42,epsilon43
  double precision  :: gau_prefactor,gau_width,gau_width2,inv_epsilon21,inv_epsilon31
@@ -1896,7 +1896,7 @@ end subroutine get_onetetra_
 !!    for a given (band, k-point, spin).
 !!
 !! PARENTS
-!!      m_ebands,m_epjdos,m_phgamma
+!!      m_ebands,m_epjdos,m_gruneisen,m_phgamma
 !!
 !! CHILDREN
 !!      get_onetetra_,sort_tetra
@@ -1926,7 +1926,7 @@ subroutine tetra_get_onewk(tetra,ik_ibz,bcorr,nene,nkibz,eig_ibz,enemin,enemax,m
 !Local variables-------------------------------
 !scalars
  integer :: itetra,ii
- double precision :: deltaene,volconst,volconst_mult
+ double precision :: deltaene
 !arrays
  integer :: ind_ibz(4)
  double precision :: tweight_tmp(nene,4),dtweightde_tmp(nene,4)
@@ -1934,7 +1934,6 @@ subroutine tetra_get_onewk(tetra,ik_ibz,bcorr,nene,nkibz,eig_ibz,enemin,enemax,m
 
 ! *********************************************************************
 
- !volconst = tetra%vv/4.d0
  if (nene <= 1) then
    TETRA_ERROR('tetra_blochl_weights: nene must be at least 2')
  else
@@ -1945,7 +1944,6 @@ subroutine tetra_get_onewk(tetra,ik_ibz,bcorr,nene,nkibz,eig_ibz,enemin,enemax,m
 
  ! For each tetrahedron
  do itetra=1,tetra%ntetra
-   !volconst_mult = max_occ*volconst*float(tetra%tetra_mult(itetra))
 
    ! Here we need the original ordering to reference the correct irred kpoints
    ind_ibz(1) = tetra%tetra_full(1,1,itetra)

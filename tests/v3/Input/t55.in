@@ -127,4 +127,5 @@
 #%%   differences for the triplet states.
 #%%   When this functional will be coded in ABINIT, it will be 
 #%%   worth to complete the present test.
+#%% topics = TDDFT
 #%%<END TEST_INFO>

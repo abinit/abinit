@@ -31,15 +31,15 @@
 !!
 !! CHILDREN
 !!      add_matlu,checkreal_matlu,compute_levels,copy_green,copy_matlu
-!!      ctqmc_printgreen,ctqmc_triqs_run,ctqmcinterface_finalize
-!!      ctqmcinterface_init,ctqmcinterface_run,ctqmcinterface_setopts
-!!      data4entropydmft_setdocc,destroy_green,destroy_matlu,destroy_oper
-!!      diag_matlu,diff_matlu,fac_matlu,flush_unit,fourier_green
-!!      hybridization_asymptotic_coefficient,identity_matlu,init_green
-!!      init_matlu,init_oper,int_fct,inverse_oper,jbessel,occup_green_tau
-!!      print_green,print_matlu,printocc_green,printplot_matlu,prod_matlu
-!!      rotate_matlu,rotatevee_hu,sbf8,shift_matlu,slm2ylm_matlu,sym_matlu
-!!      testcode_ctqmc,vee_ndim2tndim_hu_r,wrtout,xginv,xmpi_barrier,xmpi_bcast
+!!      ctqmc_triqs_run,ctqmcinterface_finalize,ctqmcinterface_init
+!!      ctqmcinterface_run,ctqmcinterface_setopts,data4entropydmft_setdocc
+!!      destroy_green,destroy_matlu,destroy_oper,diag_matlu,diff_matlu
+!!      fac_matlu,flush_unit,fourier_green,hybridization_asymptotic_coefficient
+!!      identity_matlu,init_green,init_matlu,init_oper,int_fct,inverse_oper
+!!      jbessel,occup_green_tau,print_green,print_matlu,printocc_green
+!!      printplot_matlu,prod_matlu,rotate_matlu,rotatevee_hu,sbf8,shift_matlu
+!!      slm2ylm_matlu,sym_matlu,testcode_ctqmc,vee_ndim2tndim_hu_r,wrtout,xginv
+!!      xmpi_barrier,xmpi_bcast
 !!
 !! SOURCE
 
@@ -110,12 +110,11 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
  character(len=2) :: gtau_iter,iatomnb
  integer :: iatom,ierr,if1,if2,iflavor,iflavor1,iflavor2,iflavor3,ifreq,im,im1,ispinor,ispinor1,isppol,itau,itypat,im2,ispinor2
  integer :: lpawu,master,mbandc,natom,nflavor,nkpt,nspinor,nsppol,nsppol_imp,tndim,ispa,ispb,ima,imb
- integer :: nproc,spacecomm,opt_diag,opt_nondiag,testcode,testrot,dmft_nwlo,opt_fk,useylm,nomega,opt_rot
+ integer :: nproc,opt_diag,opt_nondiag,testcode,testrot,dmft_nwlo,opt_fk,useylm,nomega,opt_rot
  integer :: ier,rot_type_vee
- complex(dpc) :: omega_current,integral(2,2),xsum
- real(dp) :: Doccsum,Noise,omega
+ complex(dpc) :: omega_current,integral(2,2)
+ real(dp) :: omega
  real(dp) :: facd,facnd
- real(dp) :: tsec(2)
  logical :: nondiaglevels
 ! arrays
  real(dp), allocatable :: docc(:,:)
@@ -124,7 +123,6 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
  complex(dpc), allocatable :: hybri_limit(:,:)
  real(dp), allocatable, target :: gtmp_nd(:,:,:)
  real(dp) :: umod(2,2)
- character(len=4) :: tag_proc
  character(len=30) :: tmpfil
  complex(dpc), allocatable :: fw1(:,:),gw_tmp(:,:)
  complex(dpc), allocatable, target :: gw_tmp_nd(:,:,:) !modif
@@ -150,27 +148,25 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
  type(green_type) :: greenlda
  type(matlu_type), allocatable  :: hybri_coeff(:)
 ! Var added to the code for TRIQS_CTQMC test and default value -----------------------------------------------------------
- 
  logical(kind=1) :: rot_inv = .false.
  logical(kind=1) :: leg_measure = .true.
+#if defined HAVE_TRIQS
  logical(kind=1) :: hist = .false.
  logical(kind=1) :: wrt_files = .true.
  logical(kind=1) :: tot_not = .true.
+#endif
  
  integer :: nfreq,unt,unt2
  integer :: ntau ! >= 2*nfreq + 1
  integer :: nleg 
  integer :: ileg
  integer :: verbosity_solver ! min 0 -> max 3
- integer :: seed
- integer :: comm 
 
  real(dp) :: beta,besp,bespp,xx
  complex(dpc) :: u_nl
 
  complex(dpc), allocatable, target ::fw1_nd_tmp(:,:,:)
  complex(dpc), allocatable, target :: g_iw(:,:,:)
- real(dp), allocatable, target :: levels_ctqmc_(:)
  real(dp), allocatable, target :: u_mat_ij(:,:)
  real(dp), allocatable, target :: u_mat_ijkl(:,:,:,:)
  real(dp), allocatable, target :: u_mat_ijkl_tmp(:,:,:,:)
@@ -1757,7 +1753,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
            write(unt,'(29f21.14)') float(itau-1)/float(paw_dmft%dmftqmc_l)/paw_dmft%temp,&
            (gtmp(itau,iflavor), iflavor=1, nflavor) 
          end do
-           write(unt,'(29f21.14)') 1/paw_dmft%temp, (-1_dp-gtmp(1,iflavor), iflavor=1, nflavor) 
+         write(unt,'(29f21.14)') 1/paw_dmft%temp, (-1_dp-gtmp(1,iflavor), iflavor=1, nflavor) 
          close(unt)
          !open(unit=4243, file=trim(paw_dmft%filapp)//"_atom_"//iatomnb//"_F_"//gtau_iter//".dat")
          !call BathOperator_printF(paw_dmft%hybrid(iatom)%hybrid%bath,4243) !Already comment here

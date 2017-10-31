@@ -55,6 +55,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
  use m_profiling_abi
  use m_errors
  use m_xmpi
+ use m_xomp
  use libxc_functionals
 
  use m_numeric_tools,  only : iseven
@@ -195,6 +196,9 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 !  autoparal
    call chkint_eq(0,0,cond_string,cond_values,ierr,'autoparal',dt%autoparal,5,(/0,1,2,3,4/),iout)
 
+!  auxc_scal
+   call chkdpr(0,0,cond_string,cond_values,ierr,'auxc_scal',dt%auxc_scal,1,0.0_dp,iout)
+
 !  bdberry
    if(dt%berryopt>0.and.dt%nberry>0.and.&
 &   dt%berryopt/= 4.and.dt%berryopt/= 6.and.dt%berryopt/= 7.and.&
@@ -273,7 +277,9 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
    end if
 !  Non-zero berryopt and usepaw==1 and kptopt/=3 cannot be done unless symmorphi=0
 !  (that is, nonsymmorphic symmetries do not work yet
+!  Update MT 2017-05-31: nonsymmorphic symmetries seem also to be an issue for NCPP
    if (usepaw==1.and.dt%berryopt/=0.and.dt%kptopt/=3) then
+  !if (dt%berryopt/=0.and.dt%kptopt/=3) then
      cond_string(1)='usepaw'; cond_values(1)=1
      cond_string(2)='berryopt'; cond_values(2)=dt%berryopt
      cond_string(3)='kptopt'; cond_values(3)=dt%kptopt
@@ -408,6 +414,18 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
          end if
        end do
      end do
+   end if
+
+!  densfor_pred
+   if(dt%iscf>0)then
+     cond_string(1)='iscf';cond_values(1)=dt%iscf
+     call chkint_le(0,1,cond_string,cond_values,ierr,'densfor_pred',dt%densfor_pred,6,iout)
+     call chkint_ge(0,1,cond_string,cond_values,ierr,'densfor_pred',dt%densfor_pred,-6,iout)
+     if (dt%densfor_pred<0.and.mod(dt%iprcel,100)>=61.and.(dt%iprcel<71.or.dt%iprcel>79)) then
+       cond_string(1)='iscf';cond_values(1)=dt%iscf
+       cond_string(2)='iprcel';cond_values(2)=dt%iprcel
+       call chkint_ge(1,2,cond_string,cond_values,ierr,'densfor_pred',dt%densfor_pred,0,iout)
+     end if
    end if
 
 !  diecut
@@ -631,6 +649,12 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 !    Check for GW calculations that are not implemented.
      !cond_string(1)='optdriver' ; cond_values(1)=optdriver
      !call chkint_eq(1,1,cond_string,cond_values,ierr,'nspinor',dt%nspinor,1,(/1/),iout)
+
+     if (maxval(abs(dt%istwfk(1:nkpt))) > 1 .and. mod(dt%gwcalctyp, 100) >= 20) then
+       write(msg, "(3a)")"Self-consistent GW with istwfk > 1 not supported.",ch10, &
+       "Please regenerate your WFK file with istwfk *1"
+       MSG_ERROR_NOSTOP(msg, ierr)
+     end if
 !
 !    Avoid wasting CPUs if nsppol==2.
      if (dt%nsppol==2.and..not.iseven(nproc).and.nproc>1) then
@@ -716,7 +740,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 !  eph variables
    if (optdriver==RUNL_EPH) then
      cond_string(1)='optdriver' ; cond_values(1)=RUNL_EPH
-     call chkint_eq(1,1,cond_string,cond_values,ierr,'eph_task',dt%eph_task,5,[0,1,2,3,4],iout)
+     call chkint_eq(1,1,cond_string,cond_values,ierr,'eph_task',dt%eph_task,6,[0,1,2,3,4,5],iout)
 
      if (any(dt%ddb_ngqpt <= 0)) then
        MSG_ERROR_NOSTOP("ddb_ngqpt must be specified when performing EPH calculations.", ierr)
@@ -745,6 +769,9 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 
 !  fftgw
    call chkint_eq(0,0,cond_string,cond_values,ierr,'fftgw',dt%fftgw,8, [00,01,10,11,20,21,30,31],iout)
+
+!  fockoptmix
+   call chkint_eq(0,0,cond_string,cond_values,ierr,'fockoptmix',dt%fockoptmix,3,(/0,1,11/),iout)
 
 !  frzfermi
    call chkint_eq(0,0,cond_string,cond_values,ierr,'frzfermi',dt%frzfermi,2,(/0,1/),iout)
@@ -843,23 +870,18 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
      end if
    end if
 
-!  gwls_sternheimer_kmax
-   call chkint_ge(0,0,cond_string,cond_values,ierr,'gwls_sternheimer_kmax',dt%gwls_sternheimer_kmax,1,iout)
+!  gwls_stern_kmax
+   call chkint_ge(0,0,cond_string,cond_values,ierr,'gwls_stern_kmax',dt%gwls_stern_kmax,1,iout)
 
 !  gwls_npt_gauss_quad
    call chkint_ge(0,0,cond_string,cond_values,ierr,'gwls_npt_gauss_quad',dt%gwls_npt_gauss_quad,1,iout)
 
-! gwls_dielectric_model
-   call chkint_ge(0,0,cond_string,cond_values,ierr,'gwls_dielectric_model',dt%gwls_dielectric_model,1,iout)
-   call chkint_le(0,0,cond_string,cond_values,ierr,'gwls_dielectric_model',dt%gwls_dielectric_model,3,iout)
+! gwls_diel_model
+   call chkint_ge(0,0,cond_string,cond_values,ierr,'gwls_diel_model',dt%gwls_diel_model,1,iout)
+   call chkint_le(0,0,cond_string,cond_values,ierr,'gwls_diel_model',dt%gwls_diel_model,3,iout)
 
 ! gwls_model_parameter
    call chkdpr(0,0,cond_string,cond_values,ierr,'gwls_model_parameter',dt%gwls_model_parameter,1,zero,iout)
-
-! gwls_second_model_parameter
-   call chkdpr(0,0,cond_string,cond_values,ierr,'gwls_second_model_parameter',  &
-   dt%gwls_second_model_parameter,1,-1000.0_dp,iout)
-
 
 ! gwls_print_debug
    call chkint_ge(0,0,cond_string,cond_values,ierr,'gwls_print_debug',dt%gwls_print_debug,0,iout)
@@ -895,8 +917,6 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 ! gwls_recycle
    call chkint_ge(0,0,cond_string,cond_values,ierr,'gwls_recycle',dt%gwls_recycle,0,iout)
    call chkint_le(0,0,cond_string,cond_values,ierr,'gwls_recycle',dt%gwls_recycle,2,iout)
-
-
 
 !  iatsph between 1 and natom
    maxiatsph=maxval(dt%iatsph(1:dt%natsph))
@@ -967,21 +987,6 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
      cond_string(1)='ionmov' ; cond_values(1)=dt%ionmov
 !    Make sure that nnos is not null
      call chkint_ge(1,1,cond_string,cond_values,ierr,'nnos',dt%nnos,1,iout)
-   end if
-
-!  densfor_pred
-!  if (abs(dt%densfor_pred)>=1.and.dt%iscf>=10.and.nspden==4) then
-!  write(message,'(8a)')ch10,&
-!  &   ' chkinp : ERROR -',ch10,&
-!  &   '  When non-collinear magnetism is activated (nspden=4),',ch10,&
-!  &   '  densfor_pred/=0 is not compatible with SCF mixing on density (iscf>=10) !',ch10,&
-!  &   '  Action : choose SCF mixing on potential (iscf<10) or change densfor_pred value.'
-!  call wrtout(std_out,message,'COLL')
-!  ierr=ierr+1
-!  end if
-   if (dt%densfor_pred<0.and.mod(dt%iprcel,100)>=61.and.(dt%iprcel<71.or.dt%iprcel>79)) then
-     cond_string(1)='iprcel';cond_values(1)=dt%iprcel
-     call chkint_ge(0,2,cond_string,cond_values,ierr,'densfor_pred',dt%densfor_pred,0,iout)
    end if
 
 !  iprcel
@@ -1057,6 +1062,13 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
    end if
 
 !  istwfk
+   if(dt%usefock==1 .and. maxval( abs(dt%istwfk(1:nkpt)-1) ) >0)then
+     write(message,'(3a)' )&
+&     'When usefock==1, all the components of istwfk must be 1.',ch10,&
+&     'Action: set istwfk to 1 for all k-points'
+     MSG_ERROR_NOSTOP(message,ierr)
+   end if
+
    if(dt%usewvl==1 .and. maxval( abs(dt%istwfk(1:nkpt)-1) ) >0)then
      write(message,'(3a)' )&
 &     'When usewvl==1, all the components of istwfk must be 1.',ch10,&
@@ -1123,6 +1135,24 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 !    Make sure that ixc is 0, 1 , the gga, or Fermi-Amaldi, or negative
      call chkint(1,1,cond_string,cond_values,ierr,&
 &     'ixc',dt%ixc,24,(/0,1,7,8,9,11,12,13,14,15,16,17,20,23,24,26,27,31,32,33,34,40,41,42/),-1,0,iout)
+   end if
+   if(dt%usepaw>0.and.dt%ixc<0) then
+     if (libxc_functionals_is_hybrid()) then
+       message='Meta-GGA functionals are not compatible with PAW!'
+       MSG_ERROR_NOSTOP(message,ierr)
+     end if
+   end if
+   if (dt%usepaw>0.and.(dt%ixc==-427.or.dt%ixc==-428)) then
+     message='Range-separated Hybrid Functionals have not been extensively tested in PAW!!!'
+     MSG_WARNING(message)
+   end if
+   allow=(dt%ixc > 0).and.(dt%ixc /= 3).and.(dt%ixc /= 7).and.(dt%ixc /= 8)
+   if(.not.allow)then
+     allow=(dt%ixc < 0).and.(libxc_functionals_is_hybrid().or.libxc_functionals_ismgga())
+   end if
+   if(allow)then
+     cond_string(1)='ixc' ; cond_values(1)=dt%ixc
+     call chkint_ne(1,1,cond_string,cond_values,ierr,'optdriver',dt%optdriver,1,(/RUNL_NONLINEAR/),iout)
    end if
 
 !  ixcpositron
@@ -1539,6 +1569,16 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
      cond_string(2)='pawmixdg' ; cond_values(2)=dt%pawmixdg
      call chkint_eq(1,2,cond_string,cond_values,ierr,'npfft',dt%npfft,1,(/1/),iout)
    end if
+#ifdef HAVE_OPENMP
+   if (dt%wfoptalg==114) then
+     if ( xomp_get_num_threads(.true.) > 1 .and. dt%npfft > 1 ) then
+       write(message,'(4a,i4,a,i4,a)') "When compilied with OpenMP, the FFT parallelization is not ",&
+&       "compatible with multiple threads.",ch10,"Please set npfft to 1 (currently npfft=",&
+&       dt%npfft, ") or export OMP_NUM_THREADS=1 (currently ",xomp_get_num_threads(.true.),")"
+       MSG_ERROR_NOSTOP(message, ierr)
+     end if
+   end if
+#endif
 
 !  npimage
 !  Must be greater or equal to 1
@@ -1569,6 +1609,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 !    nprojmax(ilang)=maxval(pspheads(1:npsp)%nproj(ilang)) ! Likely problems with HP compiler
      nprojmax(ilang)=pspheads(1)%nproj(ilang)
      if(npsp>=2)then
+
        do ii=2,npsp
          nprojmax(ilang)=max(pspheads(ii)%nproj(ilang),nprojmax(ilang))
        end do
@@ -1649,7 +1690,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 !  When ionmov=4 and iscf>10, nspden must be 1 or 2
    if(dt%ionmov==4.and.dt%iscf>10)then
      cond_string(1)='ionmov' ; cond_values(1)=dt%ionmov
-     cond_string(1)='iscf' ; cond_values(1)=dt%densfor_pred
+     cond_string(1)='iscf' ; cond_values(1)=dt%iscf
      call chkint_eq(1,2,cond_string,cond_values,ierr,'nspden',nspden,2,(/1,2/),iout)
    end if
 !  When iprcel>49, nspden must be 1 or 2
@@ -1770,26 +1811,26 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
        do iz=2,dt%nzchempot
          dz=dt%chempot(1,iz,itypat)-dt%chempot(1,iz-1,itypat)
          if(dz<-tol12)then
-           write(message, '(a,2i6,a,a,d16.10,a,a, a,d16.10,a,a, a,a,a)' )&
-&            ' For izchempot,itypat=',iz,itypat,ch10,&
-&            ' chempot(1,izchempot-1,itypat) = ',dt%chempot(1,iz-1,itypat),' and', ch10,&
-&            ' chempot(1,izchempot  ,itypat) = ',dt%chempot(1,iz  ,itypat),',',ch10,&
-&            ' while they should be ordered in increasing values =>stop',ch10,&
-&            'Action: correct chempot(1,*,itypat) in input file.'
+           write(message, '(a,2i6,a,a,d17.10,a,a, a,d17.10,a,a, a,a,a)' )&
+&           ' For izchempot,itypat=',iz,itypat,ch10,&
+&           ' chempot(1,izchempot-1,itypat) = ',dt%chempot(1,iz-1,itypat),' and', ch10,&
+&           ' chempot(1,izchempot  ,itypat) = ',dt%chempot(1,iz  ,itypat),',',ch10,&
+&           ' while they should be ordered in increasing values =>stop',ch10,&
+&           'Action: correct chempot(1,*,itypat) in input file.'
            MSG_ERROR_NOSTOP(message,ierr)
-         endif
-       enddo
+         end if
+       end do
        dz=dt%chempot(1,dt%nzchempot,itypat)-dt%chempot(1,1,itypat)
        if(dz>one)then
-         write(message, '(a,2i6,a,a,d16.10,a,a, a,d16.10,a,a, a,a,a)' )&
-&          ' For nzchempot,itypat=',dt%nzchempot,itypat,ch10,&
-&          ' chempot(1,1,itypat) = ',dt%chempot(1,1,itypat),' and', ch10,&
-&          ' chempot(1,nzchempot  ,itypat) = ',dt%chempot(1,dt%nzchempot,itypat),'.',ch10,&
-&          ' However, the latter should, at most, be one more than the former =>stop',ch10,&
-&          'Action: correct chempot(1,nzchempot,itypat) in input file.'
+         write(message, '(a,2i6,a,a,d17.10,a,a, a,d17.10,a,a, a,a,a)' )&
+&         ' For nzchempot,itypat=',dt%nzchempot,itypat,ch10,&
+&         ' chempot(1,1,itypat) = ',dt%chempot(1,1,itypat),' and', ch10,&
+&         ' chempot(1,nzchempot  ,itypat) = ',dt%chempot(1,dt%nzchempot,itypat),'.',ch10,&
+&         ' However, the latter should, at most, be one more than the former =>stop',ch10,&
+&         'Action: correct chempot(1,nzchempot,itypat) in input file.'
          MSG_ERROR_NOSTOP(message,ierr)
-       endif
-     enddo
+       end if
+     end do
    end if
 
 !  occ
@@ -1871,7 +1912,8 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
      call chkint_eq(1,1,cond_string,cond_values,ierr,&
 &     'optdriver',optdriver,6,[RUNL_GSTATE,RUNL_RESPFN,RUNL_SCREENING,RUNL_SIGMA,RUNL_BSE, RUNL_WFK],iout)
    end if
-!  Non-linear response calculations
+
+!  Linear and Non-linear response calculations
    if(nspinor/=1)then
      cond_string(1)='nspinor' ; cond_values(1)=nspinor
      call chkint_ne(1,1,cond_string,cond_values,ierr,'optdriver',dt%optdriver,1,(/RUNL_NONLINEAR/),iout)
@@ -1884,9 +1926,9 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
      cond_string(1)='mkmem' ; cond_values(1)=dt%mkmem
      call chkint_ne(1,1,cond_string,cond_values,ierr,'optdriver',dt%optdriver,1,(/RUNL_NONLINEAR/),iout)
    end if
-   if(dt%kptopt/=2 .and. dt%kptopt/=3)then
+   if(dt%kptopt==1 .or. dt%kptopt==4) then
      cond_string(1)='kptopt' ; cond_values(1)=dt%kptopt
-     call chkint_ne(1,1,cond_string,cond_values,ierr,'optdriver',dt%optdriver,1,(/RUNL_NONLINEAR/),iout)
+     call chkint_ne(1,1,cond_string,cond_values,ierr,'optdriver',dt%optdriver,2,(/RUNL_RESPFN,RUNL_NONLINEAR/),iout)
    end if
    allow=(dt%ixc > 0).and.(dt%ixc /= 3).and.(dt%ixc /= 7).and.(dt%ixc /= 8)
    if(.not.allow)then
@@ -1955,6 +1997,10 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
    end if
    if(dt%paral_kgb==1.and.dt%nstep==0) then
      message='When k-points/bands/FFT parallelism is activated, nstep=0 is not allowed!'
+     MSG_ERROR_NOSTOP(message,ierr)
+   end if
+   if(dt%paral_kgb==1.and.dt%usefock>0) then
+     message='Hartree-Fock or Hybrid Functionals are not compatible with bands/FFT parallelism!'
      MSG_ERROR_NOSTOP(message,ierr)
    end if
 
@@ -2969,6 +3015,11 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 
 !  vdw_xc
    call chkint_eq(0,1,cond_string,cond_values,ierr,'vdw_xc',dt%vdw_xc,9,(/0,1,2,5,6,7,10,11,14/),iout)
+   if (dt%usepaw==1.and.(.not.(dt%vdw_xc==0.or.dt%vdw_xc==5.or.dt%vdw_xc==6.or.dt%vdw_xc==7))) then
+     write(message,'(a,i2,a)')&
+&     'vdw_xc=',dt%vdw_xc,' is not yet available with Projector Augmented-Wave (PAW) formalism!'
+     MSG_ERROR_NOSTOP(message, ierr)
+   end if
 !  vdw DFT-D2
    if (dt%vdw_xc==5.or.dt%vdw_xc==6.or.dt%vdw_xc==7) then
 !    Only for GS or RF calculations
@@ -3008,8 +3059,9 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
        if(dt%ixc/=11.and.dt%ixc/=-101130.and.dt%ixc/=-130101.and. &
 &       dt%ixc/=18.and.dt%ixc/=-106131.and.dt%ixc/=-131106.and. &
 &       dt%ixc/=19.and.dt%ixc/=-106132.and.dt%ixc/=-132106.and. &
-&       dt%ixc/=-202231.and.dt%ixc/=-231202.and.dt%ixc/=-170.and.&
-&       dt%ixc/=41) then
+&       dt%ixc/=-202231.and.dt%ixc/=-231202.and.&
+&       dt%ixc/=14.and.dt%ixc/=-102130.and.dt%ixc/=-130102.and. &
+&       dt%ixc/=-170.and.dt%ixc/=41.and.dt%ixc/=-406) then
          write(message,'(4a,i2,5a)') ch10,&
 &         ' chkinp : ERROR -',ch10,&
 &         '  Van der Waals DFT-D correction (vdw_xc=',dt%vdw_xc,') only available for the following XC functionals:',ch10,&

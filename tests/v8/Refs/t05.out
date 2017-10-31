@@ -12,7 +12,7 @@
  Corning Inc. and other collaborators, see ~abinit/doc/developers/contributors.txt .
  Please read ~abinit/doc/users/acknowledgments.html for suggested
  acknowledgments of the ABINIT effort.
- For more information, see http://www.abinit.org .
+ For more information, see https://www.abinit.org .
 
 .Starting date : Thu  2 Mar 2017.
 - ( at 18h41 )
@@ -148,7 +148,7 @@ P           mkmem           1
  Pressure (primitive estimator) =      -1.689829639 GPa
 
  Blue Moon Ensemble method is activated:
-  - Reaction coordinate =      7.1988918433
+  - Reaction coordinate =      1.4397783687
   - Instantaneous force on the reaction coord. =     -0.0064470886
 
  Atomic positions:
@@ -237,7 +237,7 @@ P           mkmem           1
  Pressure (primitive estimator) =      -1.760497282 GPa
 
  Blue Moon Ensemble method is activated:
-  - Reaction coordinate =      7.1988918433
+  - Reaction coordinate =      1.4397783687
   - Instantaneous force on the reaction coord. =     -0.0051823127
 
  Atomic positions:
@@ -326,7 +326,7 @@ P           mkmem           1
  Pressure (primitive estimator) =      -1.832748122 GPa
 
  Blue Moon Ensemble method is activated:
-  - Reaction coordinate =      7.1988918433
+  - Reaction coordinate =      1.4397783687
   - Instantaneous force on the reaction coord. =      0.0036140206
 
  Atomic positions:
@@ -415,7 +415,7 @@ P           mkmem           1
  Pressure (primitive estimator) =      -1.904483786 GPa
 
  Blue Moon Ensemble method is activated:
-  - Reaction coordinate =      7.1988918433
+  - Reaction coordinate =      1.4397783687
   - Instantaneous force on the reaction coord. =      0.0011556901
 
  Atomic positions:
@@ -504,7 +504,7 @@ P           mkmem           1
  Pressure (primitive estimator) =      -1.975867896 GPa
 
  Blue Moon Ensemble method is activated:
-  - Reaction coordinate =      7.1988918433
+  - Reaction coordinate =      1.4397783687
   - Instantaneous force on the reaction coord. =     -0.0000777716
 
  Atomic positions:
@@ -603,7 +603,7 @@ P           mkmem           1
  Pressure (primitive estimator) =      -2.047943347 GPa
 
  Blue Moon Ensemble method is activated:
-  - Reaction coordinate =      7.1988918433
+  - Reaction coordinate =      1.4397783687
   - Instantaneous force on the reaction coord. =      0.0081400143
 
  Atomic positions:
@@ -702,7 +702,7 @@ P           mkmem           1
  Pressure (primitive estimator) =      -2.122220741 GPa
 
  Blue Moon Ensemble method is activated:
-  - Reaction coordinate =      7.1988918433
+  - Reaction coordinate =      1.4397783687
   - Instantaneous force on the reaction coord. =      0.0028770726
 
  Atomic positions:
@@ -801,7 +801,7 @@ P           mkmem           1
  Pressure (primitive estimator) =      -2.197464637 GPa
 
  Blue Moon Ensemble method is activated:
-  - Reaction coordinate =      7.1988918433
+  - Reaction coordinate =      1.4397783687
   - Instantaneous force on the reaction coord. =     -0.0027623104
 
  Atomic positions:
@@ -900,7 +900,7 @@ P           mkmem           1
  Pressure (primitive estimator) =      -2.278982413 GPa
 
  Blue Moon Ensemble method is activated:
-  - Reaction coordinate =      7.1988918433
+  - Reaction coordinate =      1.4397783687
   - Instantaneous force on the reaction coord. =     -0.0031482164
 
  Atomic positions:
@@ -999,7 +999,7 @@ P           mkmem           1
  Pressure (primitive estimator) =      -2.360095705 GPa
 
  Blue Moon Ensemble method is activated:
-  - Reaction coordinate =      7.1988918433
+  - Reaction coordinate =      1.4397783687
   - Instantaneous force on the reaction coord. =     -0.0004099945
 
  Atomic positions:
@@ -1313,7 +1313,7 @@ P           mkmem           1
  Note also that it will be of great value to readers of publications presenting these results,
  to read papers enabling them to understand the theoretical formalism and details
  of the ABINIT implementation.
- For information on why they are suggested, see also http://www.abinit.org/about/?text=acknowledgments.
+ For information on why they are suggested, see also https://www.abinit.org/about/?text=acknowledgments.
 -
 - [1] Implementation of the Projector Augmented-Wave Method in the ABINIT code.
 - M. Torrent, F. Jollet, F. Bottin, G. Zerah, and X. Gonze Comput. Mat. Science 42, 337, (2008).
@@ -1333,7 +1333,7 @@ P           mkmem           1
 - B.Xue, A.Zhou, J.W.Zwanziger.
 - Comment : the fourth generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
-- is available at http://www.abinit.org/about/ABINIT16.pdf .
+- is available at https://www.abinit.org/about/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 -
 - [3] ABINIT : First-principles approach of materials and nanosystem properties.
@@ -1345,7 +1345,7 @@ P           mkmem           1
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment : the third generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
-- is available at http://www.abinit.org/about/ABINIT_CPC_v10.pdf .
+- is available at https://www.abinit.org/about/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 -
 - [4] A brief introduction to the ABINIT software package.
@@ -1356,7 +1356,7 @@ P           mkmem           1
 - Comment : the second generic paper describing the ABINIT project. Note that this paper
 - should be cited especially if you are using the GW part of ABINIT, as several authors
 - of this part are not in the list of authors of the first or third paper.
-- The .pdf of the latter paper is available at http://www.abinit.org/about/zfk_0505-06_558-562.pdf.
+- The .pdf of the latter paper is available at https://www.abinit.org/about/zfk_0505-06_558-562.pdf.
 - Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
 - the licence allows the authors to put it on the Web).
 -

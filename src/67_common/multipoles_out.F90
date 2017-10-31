@@ -70,7 +70,7 @@ subroutine multipoles_out(rhor,mpi_enreg,natom,nfft,ngfft,nspden,&
  real(dp),intent(in) :: rhor(nfft,nspden),rprimd(3,3),xred(3,natom),ziontypat(ntypat)
 !Local variables ------------------------------
 !scalars
- integer :: iatom,ispden,nspden_updn
+ integer :: iatom,nspden_updn
  real(dp) :: ziontotal
  character(len=500) :: message
 !arrays
@@ -98,7 +98,7 @@ subroutine multipoles_out(rhor,mpi_enreg,natom,nfft,ngfft,nspden,&
 !Get electronic part of dipole with respect to center of charge of ions (in cart. coord.)
  dipole_el = zero
  call multipoles_fftr(rhor(:,1:nspden_updn),dipole_el(:,1:nspden_updn),nfft,ngfft,nspden_updn,&
-&     rprimd,center_of_charge,distribfft=mpi_enreg%distribfft,mpi_comm_grid=mpi_enreg%comm_fft)
+& rprimd,center_of_charge,distribfft=mpi_enreg%distribfft,mpi_comm_grid=mpi_enreg%comm_fft)
  dipole_el(1:3,1:nspden_updn)=dipole_el(1:3,1:nspden_updn)*ucvol
 
 !Take into account storage of rhor (up+dn,up)
@@ -118,28 +118,28 @@ subroutine multipoles_out(rhor,mpi_enreg,natom,nfft,ngfft,nspden,&
  write (message, '(2a)') ch10,' ----- Electric nuclear dipole wrt the center of ionic charge ----- '
  call wrtout(unit_out, message, 'COLL')
  write (message, '(a,3(1x,ES12.5))') &
-&   ' Center of charge for ionic distribution (red. coord.): ',center_of_charge(1:3)
+& ' Center of charge for ionic distribution (red. coord.): ',center_of_charge(1:3)
  call wrtout(unit_out, message, 'COLL')
  write (message, '(3a,3(1x,E16.6),3a,3(1x,E16.6),a)') ' -----',ch10,&
-&          ' Ionic dipole (cart. coord.)     = ',dipole_ions_cart, ' (a.u.)',ch10, &
-&          '                                 = ',dipole_ions_cart/dipole_moment_debye,' (D)'
+& ' Ionic dipole (cart. coord.)     = ',dipole_ions_cart, ' (a.u.)',ch10, &
+& '                                 = ',dipole_ions_cart/dipole_moment_debye,' (D)'
  call wrtout(unit_out, message, 'COLL')
  if (nspden/=2) then
    !This is compatible with nspden=4
    write (message, '(3a,3(1x,E16.6),3a,3(1x,E16.6),a)') ' -----',ch10,&
-&          ' Electronic dipole (cart. coord.)= ',dipole_el(:,1),' (a.u.)',ch10,&
-&          '                                 = ',dipole_el(:,1)/dipole_moment_debye,' (D)'
+&   ' Electronic dipole (cart. coord.)= ',dipole_el(:,1),' (a.u.)',ch10,&
+&   '                                 = ',dipole_el(:,1)/dipole_moment_debye,' (D)'
  else
    write (message, '(3a,3(1x,E16.6),a,3(2a,3(1x,E16.6),a))') ' -----',ch10,&
-&          ' Electronic dipole (cart. coord.)= ',dipole_el(:,1),' up (a.u.)',ch10,&
-&          '                                 = ',dipole_el(:,2),' dn (a.u.)',ch10,&
-&          '                                 = ',dipole_el(:,1)/dipole_moment_debye,' up (D)',ch10,&
-&          '                                 = ',dipole_el(:,2)/dipole_moment_debye,' dn (D)'
+&   ' Electronic dipole (cart. coord.)= ',dipole_el(:,1),' up (a.u.)',ch10,&
+&   '                                 = ',dipole_el(:,2),' dn (a.u.)',ch10,&
+&   '                                 = ',dipole_el(:,1)/dipole_moment_debye,' up (D)',ch10,&
+&   '                                 = ',dipole_el(:,2)/dipole_moment_debye,' dn (D)'
  end if
  call wrtout(unit_out, message, 'COLL')
  write (message, '(3a,3(1x,E16.6),3a,3(1x,E16.6),a)') ' -----',ch10,&
-&          ' Total dipole (cart. coord.)     = ',dipole_tot,' (a.u.)',ch10,&
-&          '                                 = ',dipole_tot/dipole_moment_debye,' (D)'
+& ' Total dipole (cart. coord.)     = ',dipole_tot,' (a.u.)',ch10,&
+& '                                 = ',dipole_tot/dipole_moment_debye,' (D)'
  call wrtout(unit_out, message, 'COLL')
  call wrtout(unit_out, ' ', 'COLL')
 

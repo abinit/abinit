@@ -42,6 +42,7 @@ MODULE m_ddk
  use defs_abitypes,   only : hdr_type
  use m_crystal,       only : crystal_t, crystal_free
  use m_crystal_io,    only : crystal_from_hdr
+ use defs_datatypes,  only : ebands_t
 
  implicit none
 
@@ -95,6 +96,9 @@ MODULE m_ddk
   integer :: nspinor
    ! Number of spinor components.
 
+  integer :: nene
+    ! Number of energy points we may need the fsavg at
+
   integer :: nkfs
     ! Number of k-points on the Fermi-surface (FS-BZ).
 
@@ -121,6 +125,10 @@ MODULE m_ddk
    ! (3,maxnb,nkfs,nsppol)
    ! velocity on the FS in cartesian coordinates.
 
+  real(dp), allocatable :: velocity_fsavg (:,:,:)
+   ! (3,nene,nsppol)
+   ! velocity on the FS in cartesian coordinates.
+
   type(crystal_t) :: cryst
    ! Crystal structure read from file
 
@@ -128,6 +136,7 @@ MODULE m_ddk
 
  public :: ddk_init              ! Initialize the object.
  public :: ddk_read_fsvelocities ! Read FS velocities from file.
+ public :: ddk_fs_average_veloc  ! find FS average of velocity squared
  public :: ddk_free              ! Close the file and release the memory allocated.
  public :: ddk_print             ! output values
 !!***
@@ -179,8 +188,7 @@ subroutine ddk_init(ddk, path, comm)
 !Local variables-------------------------------
 !scalars
  integer,parameter :: timrev2=2
- integer :: ierr,fform,fform_ref,my_rank,restart, restartpaw
- character(len=500) :: msg
+ integer :: fform,fform_ref,my_rank,restart, restartpaw
  type(hdr_type) :: hdr1,hdr_ref
 !arrays
  real(dp), allocatable :: eigen1(:)
@@ -268,18 +276,16 @@ subroutine ddk_read_fsvelocities(ddk, fstab, comm)
 
 !Local variables-------------------------------
 !scalars
- integer :: idir,ierr,ikfs, ikpt, isppol, ik_ibz
+ integer :: idir, ikfs, isppol, ik_ibz
  integer :: symrankkpt, ikpt_ddk,iband, bd2tot_index
- integer :: mband,bstart_k, nband_k, nband_in, vdim
+ integer :: bstart_k, nband_k, nband_in, vdim
  type(hdr_type) :: hdr1
  type(kptrank_type) :: kptrank_t
  type(fstab_t), pointer :: fs
  character(len=500) :: msg
 !arrays
- real(dp) :: tmpveloc(3), tmpveloc2(3)
  real(dp), allocatable :: eigen1(:)
  real(dp), allocatable :: velocityp(:,:)
- real(dp), allocatable :: velocitypp(:,:)
 
 !************************************************************************
 
@@ -334,11 +340,8 @@ subroutine ddk_read_fsvelocities(ddk, fstab, comm)
  ! use DGEMM better here on whole matrix and then reshape?
  vdim = ddk%maxnb*ddk%nkfs*ddk%nsppol
  ABI_MALLOC(velocityp, (3,vdim))
- velocityp = reshape (ddk%velocity, [3,vdim])
- ABI_MALLOC(velocitypp, (3,vdim))
- velocitypp = zero
- call dgemm('n','n',3,vdim,3,one,ddk%cryst%rprimd,3,velocityp,3,zero,velocitypp,3)
- ABI_FREE(velocityp)
+ velocityp = zero
+ call dgemm('n','n',3,vdim,3,one,ddk%cryst%rprimd,3,ddk%velocity,3,zero,velocityp,3)
 
 ! do isppol = 1, ddk%nsppol
 !   do ikpt = 1, ddk%nkfs
@@ -350,13 +353,106 @@ subroutine ddk_read_fsvelocities(ddk, fstab, comm)
 !   end do
 ! end do
 
- ddk%velocity = reshape (velocitypp, [3,ddk%maxnb,ddk%nkfs,ddk%nsppol])
+ ddk%velocity = reshape (velocityp, [3,ddk%maxnb,ddk%nkfs,ddk%nsppol])
 
- ABI_FREE(velocitypp)
+ ABI_FREE(velocityp)
  call destroy_kptrank (kptrank_t)
 
 end subroutine ddk_read_fsvelocities
 !!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_ddk/ddk_fs_average_veloc
+!! NAME
+!!  ddk_fs_average_veloc
+!!
+!! FUNCTION
+!!  Perform Fermi surface average of velocity squared then square rooted, print and store in ddk object
+!!
+!! INPUTS
+!!   ddk = object with electron band velocities
+!!   fstab(ddk%nsppol)=Tables with the correspondence between points of the Fermi surface (FS)
+!!     and the k-points in the IBZ
+!!   comm=MPI communicator
+!!
+!! PARENTS
+!!      m_phgamma
+!!
+!! CHILDREN
+!!      wrtout
+!!
+!! SOURCE
+
+subroutine ddk_fs_average_veloc(ddk, ebands, fstab, sigmas, comm)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'ddk_fs_average_veloc'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: comm  ! could distribute this over k in the future
+ real(dp),intent(in) :: sigmas(:)
+ type(ebands_t),intent(in) :: ebands
+ type(ddk_t),intent(inout) :: ddk
+ type(fstab_t),target,intent(in) :: fstab(ddk%nsppol)
+
+!Local variables-------------------------------
+!scalars
+ integer :: idir, ikfs, isppol, ik_ibz, iene
+ integer :: iband
+ integer :: mnb, nband_k
+ integer :: nsig
+ type(fstab_t), pointer :: fs
+!arrays
+ real(dp), allocatable :: wtk(:,:)
+
+!************************************************************************
+
+ ddk%nene = fstab(1)%nene
+ ABI_MALLOC(ddk%velocity_fsavg, (3,ddk%nene,ddk%nsppol))
+ ddk%velocity_fsavg = zero
+
+ nsig = size(sigmas, dim=1)
+ mnb = 1
+ do isppol=1,ddk%nsppol
+   fs => fstab(isppol)
+   mnb = max(mnb, maxval(fs%bstcnt_ibz(2, :)))
+ end do
+ ABI_MALLOC(wtk, (nsig,mnb))
+
+ do isppol=1,ddk%nsppol
+   fs => fstab(isppol)
+   do iene = 1, fs%nene
+     do ikfs=1,fs%nkfs
+       ik_ibz = fs%istg0(1,ikfs)
+       nband_k = fs%bstcnt_ibz(2, ik_ibz)
+       call fstab_weights_ibz(fs, ebands, ik_ibz, isppol, sigmas, wtk, iene)
+
+       do idir = 1,3
+         do iband = 1, nband_k
+           ddk%velocity_fsavg(idir, iene, isppol) = ddk%velocity_fsavg(idir, iene, isppol) + &
+&             wtk(1,iband) * ddk%velocity(idir, iband, ikfs, isppol)**2
+!&             fs%tetra_wtk_ene(iband,ik_ibz,iene) * ddk%velocity(idir, iband, ikfs, isppol)**2
+         end do
+       end do ! idir
+     end do ! ikfs
+   end do ! iene
+  ! sqrt is element wise on purpose
+   ddk%velocity_fsavg(:,:,isppol) = sqrt(ddk%velocity_fsavg(:,:,isppol)) / dble(fs%nkfs)
+ end do ! isppol
+
+ ABI_DEALLOCATE(wtk)
+
+end subroutine ddk_fs_average_veloc
+!!***
+
 
 !----------------------------------------------------------------------
 
@@ -396,7 +492,10 @@ subroutine ddk_free(ddk)
 
  ! real arrays
  if (allocated(ddk%velocity)) then
-   ABI_FREE(ddk%velocity)
+   ABI_DEALLOCATE(ddk%velocity)
+ end if
+ if (allocated(ddk%velocity_fsavg)) then
+   ABI_DEALLOCATE(ddk%velocity_fsavg)
  end if
 
  ! types

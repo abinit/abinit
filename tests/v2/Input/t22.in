@@ -46,7 +46,7 @@
 #%% executable = anaddb
 #%% [files]
 #%% files_to_test = 
-#%%   t22.out, tolnlines = 2, tolabs = 4.0e-10, tolrel = 1.1e+00
+#%%   t22.out, tolnlines = 3, tolabs = 4.0e-10, tolrel = 1.1e+00
 #%% extra_inputs = t22.ddb.in.gz
 #%% [paral_info]
 #%% max_nprocs = 4
@@ -80,4 +80,5 @@
 #%%   More points are needed for better results, the next interesting grid
 #%%   being obtained by changing ngqpt from 2 2 2 to 4 4 4 in the t22.in file.
 #%%   Two additional dynamical matrices are then needed.
+#%% topics = PhononBands
 #%%<END TEST_INFO>

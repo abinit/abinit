@@ -73,6 +73,10 @@
 !! OUTPUT
 !!  energies <type(energies_type)>=all part of total energy.
 !!   | e_xc=exchange-correlation energy (hartree)
+!!   | In case of hybrid compensation algorithm:
+!!   | e_hybcomp_E0=energy compensation term for hybrid exchange-correlation energy (hartree) at fixed density
+!!   | e_hybcomp_v0=potential compensation term for hybrid exchange-correlation energy (hartree) at fixed density
+!!   | e_hybcomp_v=potential compensation term for hybrid exchange-correlation energy (hartree) at self-consistent density
 !!  ==== if optene==2 or 4
 !!   | e_localpsp=local psp energy (hartree)
 !!  ==== if dtset%icoulomb == 0
@@ -87,7 +91,7 @@
 !!  grewtn(3,natom)=grads of Ewald energy (hartree)
 !!  grvdw(3,ngrvdw)=gradients of energy due to Van der Waals DFT-D2 dispersion (hartree)
 !!  kxc(nfft,nkxc)=exchange-correlation kernel, will be computed if nkxc/=0 .
-!!                 see routine rhohxc for a more complete description
+!!                 see routine rhotoxc for a more complete description
 !!  strsxc(6)=xc contribution to stress tensor (hartree/bohr^3)
 !!  vxcavg=mean of the vxc potential
 !!
@@ -98,6 +102,8 @@
 !!  vpsp(nfft)=local psp (Hartree)
 !!  vtrial(nfft,nspden)= trial potential (Hartree)
 !!  vxc(nfft,nspden)= xc potential (Hartree)
+!!  [vxc_hybcomp(nfft,nspden)= compensation xc potential (Hartree) in case of hybrids] Optional output
+!!       i.e. difference between the hybrid Vxc at fixed density and the auxiliary Vxc at fixed density
 !!  [vxctau(nfftf,dtset%nspden,4*dtset%usekden)]=derivative of XC energy density with respect to
 !!    kinetic energy density (metaGGA cases) (optional output)
 !!  xccc3d(n3xccc)=3D core electron density for XC core correction, bohr^-3
@@ -116,9 +122,9 @@
 !!
 !! CHILDREN
 !!      atm2fft,denspot_set_history,dotprod_vn,ewald,ionion_realspace
-!!      ionion_surface,jellium,mag_constr,mkcore,mkcore_paw,mkcore_wvl,mklocl
-!!      psolver_rhohxc,rhohxc,rhohxcpositron,timab,vdw_dftd2,vdw_dftd3
-!!      wvl_psitohpsi,wvl_vtrial_abi2big,xchybrid_ncpp_cc,xred2xcart
+!!      ionion_surface,jellium,mag_constr,mkcore,mkcore_alt,mkcore_wvl,mklocl
+!!      psolver_rhohxc,rhotoxc,rhohxcpositron,spatialchempot,timab,vdw_dftd2
+!!      vdw_dftd3,wvl_psitohpsi,wvl_vtrial_abi2big,xchybrid_ncpp_cc,xred2xcart
 !!
 !! SOURCE
 
@@ -133,7 +139,7 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
 &  nattyp,nfft,ngfft,ngrvdw,nhat,nhatgr,nhatgrdim,nkxc,ntypat,n1xccc,n3xccc,&
 &  optene,pawrad,pawtab,ph1d,psps,rhog,rhor,rmet,rprimd,strsxc,&
 &  ucvol,usexcnhat,vhartr,vpsp,vtrial,vxc,vxcavg,wvl,xccc3d,xred,&
-&  electronpositron,taug,taur,vxctau,add_tfw) ! optionals arguments
+&  electronpositron,taug,taur,vxc_hybcomp,vxctau,add_tfw) ! optionals arguments
 
  use defs_basis
  use defs_datatypes
@@ -143,6 +149,7 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
  use m_errors
  use m_abi2big
  use m_xmpi
+ use m_xcdata
 
  use m_ewald,             only : ewald
  use m_energies,          only : energies_type
@@ -198,6 +205,7 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
  real(dp),intent(inout),optional :: taur(nfft,dtset%nspden*dtset%usekden)
  real(dp),intent(inout) :: vtrial(nfft,dtset%nspden),vxc(nfft,dtset%nspden)
  real(dp),intent(out),optional :: vxctau(nfft,dtset%nspden,4*dtset%usekden)
+ real(dp),intent(out),optional :: vxc_hybcomp(:,:) ! (nfft,nspden)
  real(dp),intent(inout) :: xccc3d(n3xccc)
  real(dp),intent(in) :: xred(3,dtset%natom)
  real(dp),intent(out) :: grchempottn(3,dtset%natom)
@@ -210,10 +218,11 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
  integer :: coredens_method,mpi_comm_sphgrid,nk3xc
  integer :: iatom,ifft,ipositron,ispden,nfftot
  integer :: optatm,optdyfr,opteltfr,optgr,option,optn,optn2,optstr,optv,vloc_method
- real(dp) :: doti,e_chempot,e_xcdc_vxctau,ebb,ebn,evxc,ucvol_local,rpnrm
+ real(dp) :: doti,e_xcdc_vxctau,ebb,ebn,evxc,ucvol_local,rpnrm
  logical :: add_tfw_,is_hybrid_ncpp,with_vxctau,wvlbigdft
  real(dp), allocatable :: xcart(:,:)
  character(len=500) :: message
+ type(xcdata_type) :: xcdata,xcdatahyb
 !arrays
  real(dp),parameter :: identity(1:4)=(/1._dp,1._dp,0._dp,0._dp/)
  real(dp) :: dummy6(6),tsec(2)
@@ -233,8 +242,8 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
 !Check that usekden is not 0 if want to use vxctau
  with_vxctau = (present(vxctau).and.present(taur).and.(dtset%usekden/=0))
 
-!Check if we're in hybrid and norm conserving pseudopotential
- is_hybrid_ncpp=(psps%usepaw==0 .and. &
+!Check if we're in hybrid norm conserving pseudopotential with a core correction
+ is_hybrid_ncpp=(dtset%usepaw==0 .and. n3xccc/=0 .and. &
 & (dtset%ixc==41.or.dtset%ixc==42.or.libxc_functionals_is_hybrid()))
 
 !If usewvl: wvlbigdft indicates that the BigDFT workflow will be followed
@@ -279,7 +288,7 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
    end if
    if (dtset%nzchempot>0) then
      call spatialchempot(energies%e_chempot,dtset%chempot,grchempottn,dtset%natom,ntypat,dtset%nzchempot,dtset%typat,xred)
-   endif
+   end if
    if (dtset%vdw_xc==5.and.ngrvdw==dtset%natom) then
      call vdw_dftd2(energies%e_vdw_dftd,dtset%ixc,dtset%natom,ntypat,1,dtset%typat,rprimd,&
 &     dtset%vdw_tol,xred,psps%znucltypat,fred_vdw_dftd2=grvdw)
@@ -366,12 +375,12 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
    ABI_ALLOCATE(dyfr_dum,(3,3,dtset%natom))
    if (psps%usewvl==0.and.psps%usepaw==0.and.dtset%icoulomb==0) then
      call mkcore(dummy6,dyfr_dum,gr_dum,mpi_enreg,dtset%natom,nfft,dtset%nspden,ntypat,&
-&                ngfft(1),n1xccc,ngfft(2),ngfft(3),option,rprimd,dtset%typat,ucvol,&
-&                vxc,psps%xcccrc,psps%xccc1d,xccc3d,xred)
+&     ngfft(1),n1xccc,ngfft(2),ngfft(3),option,rprimd,dtset%typat,ucvol,&
+&     vxc,psps%xcccrc,psps%xccc1d,xccc3d,xred)
    else if (psps%usewvl==0.and.(psps%usepaw==1.or.dtset%icoulomb==1)) then
      call mkcore_alt(atindx1,dummy6,dyfr_dum,gr_dum,dtset%icoulomb,mpi_enreg,dtset%natom,&
-&         nfft,dtset%nspden,nattyp,ntypat,ngfft(1),n1xccc,ngfft(2),ngfft(3),option,rprimd,&
-&         ucvol,vxc,psps%xcccrc,psps%xccc1d,xccc3d,xred,pawrad,pawtab,psps%usepaw)
+&     nfft,dtset%nspden,nattyp,ntypat,ngfft(1),n1xccc,ngfft(2),ngfft(3),option,rprimd,&
+&     ucvol,vxc,psps%xcccrc,psps%xccc1d,xccc3d,xred,pawrad,pawtab,psps%usepaw)
    else if (psps%usewvl==1.and.psps%usepaw==1) then
 #if defined HAVE_BIGDFT
 !      call mkcore_wvl_old(atindx1,dummy6,dyfr_dum,wvl%descr%atoms%astruct%geocode,gr_dum,wvl%descr%h,&
@@ -380,9 +389,9 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
 ! &         wvl%descr%Glr%d%n2i,wvl%descr%Glr%d%n3,wvl%den%denspot%dpbox%n3pi,n3xccc,option,&
 ! &         pawrad,pawtab,psps%gth_params%psppar,rprimd,ucvol_local,vxc,xccc3d,xred,&
 ! &         mpi_comm_wvl=mpi_enreg%comm_wvl)
-    call mkcore_wvl(atindx1,dummy6,gr_dum,dtset%natom,nattyp,nfft,dtset%nspden,ntypat,&
-&                   n1xccc,n3xccc,option,pawrad,pawtab,rprimd,vxc,psps%xccc1d,xccc3d,&
-&                   psps%xcccrc,xred,wvl%den,wvl%descr,mpi_comm_wvl=mpi_enreg%comm_wvl)
+     call mkcore_wvl(atindx1,dummy6,gr_dum,dtset%natom,nattyp,nfft,dtset%nspden,ntypat,&
+&     n1xccc,n3xccc,option,pawrad,pawtab,rprimd,vxc,psps%xccc1d,xccc3d,&
+&     psps%xcccrc,xred,wvl%den,wvl%descr,mpi_comm_wvl=mpi_enreg%comm_wvl)
 #endif
    end if
    ABI_DEALLOCATE(gr_dum)
@@ -464,35 +473,78 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
 !write(std_out,*)' setvtr : istep,n1xccc,moved_rhor=',istep,n1xccc,moved_rhor
 !ENDDEBUG
 
- if(istep==1 .or. n1xccc/=0 .or. moved_rhor==1 .or. dtset%positron<0) then
+ if(istep==1 .or. n1xccc/=0 .or. moved_rhor==1 .or. dtset%positron<0 .or. mod(dtset%fockoptmix,100)==11) then
 
    option=0
-   if(istep==1 .or. moved_rhor==1 .or. dtset%positron<0) option=1
+   if(istep==1 .or. moved_rhor==1 .or. dtset%positron<0 .or. mod(dtset%fockoptmix,100)==11) option=1
    if (nkxc>0) option=2
    if (dtset%xclevel==2.and.(nkxc==3-2*mod(dtset%nspden,2))) option=12
    if(dtset%iscf==-1) option=-2
    if (ipositron/=1) then
      if (dtset%icoulomb == 0 .and. dtset%usewvl == 0) then
+       if(option/=0 .and. option/=10)then
+         call hartre(1,gsqcut,psps%usepaw,mpi_enreg,nfft,ngfft,dtset%paral_kgb,rhog,rprimd,vhartr)
+       endif
+       call xcdata_init(dtset%auxc_ixc,dtset%intxc,dtset%ixc,&
+&        dtset%nelect,dtset%tphysel,dtset%usekden,dtset%vdw_xc,dtset%xc_tb09_c,dtset%xc_denpos,xcdata)
+       if(mod(dtset%fockoptmix,100)==11)then
+         xcdatahyb=xcdata
+!        Setup the auxiliary xc functional information 
+         call xcdata_init(0,dtset%intxc,dtset%auxc_ixc,&
+&          dtset%nelect,dtset%tphysel,dtset%usekden,dtset%vdw_xc,dtset%xc_tb09_c,dtset%xc_denpos,xcdata)
+       endif
 !      Use the periodic solver to compute Hxc
        nk3xc=1
 !write(80,*)"setvtr"
 !xccc3d=zero
        if (ipositron==0) then
-         call rhohxc(dtset,energies%e_xc,gsqcut,psps%usepaw,kxc,mpi_enreg,nfft,ngfft,&
-&         nhat,psps%usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,dtset%nspden,n3xccc,&
-&         option,rhog,rhor,rprimd,strsxc,usexcnhat,vhartr,vxc,vxcavg,xccc3d,&
-&         taug=taug,taur=taur,vxctau=vxctau,add_tfw=add_tfw_)
+
+!DEBUG
+         write(std_out,*)' setvtr : is_hybrid_ncpp=',is_hybrid_ncpp
+         write(std_out,*)' setvtr : n3xccc=',n3xccc
+!ENDDEBUG
+
+!        Compute energies%e_xc and associated quantities
+         if(.not.is_hybrid_ncpp .or. mod(dtset%fockoptmix,100)==11)then 
+           call rhotoxc(energies%e_xc,kxc,mpi_enreg,nfft,ngfft,&
+&            nhat,psps%usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,dtset%nspden,n3xccc,&
+&            option,dtset%paral_kgb,rhor,rprimd,strsxc,usexcnhat,vxc,vxcavg,xccc3d,xcdata,&
+&            taug=taug,taur=taur,vhartr=vhartr,vxctau=vxctau,add_tfw=add_tfw_)
+         else
+!          Only when is_hybrid_ncpp, and moreover, the xc functional is not the auxiliary xc functional, then call xchybrid_ncpp_cc
+           call xchybrid_ncpp_cc(dtset,energies%e_xc,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,&
+&            strsxc,vxcavg,xccc3d,vxc=vxc)
+         endif
+
+!        Possibly compute energies%e_hybcomp_E0
+         if(mod(dtset%fockoptmix,100)==11)then
+!          This call to rhotoxc uses the hybrid xc functional 
+           if(.not.is_hybrid_ncpp)then
+             call rhotoxc(energies%e_hybcomp_E0,kxc,mpi_enreg,nfft,ngfft,&
+&              nhat,psps%usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,dtset%nspden,n3xccc,&
+&              option,dtset%paral_kgb,rhor,rprimd,strsxc,usexcnhat,vxc_hybcomp,vxcavg,xccc3d,xcdatahyb,&
+&              taug=taug,taur=taur,vhartr=vhartr,vxctau=vxctau,add_tfw=add_tfw_)
+           else
+             call xchybrid_ncpp_cc(dtset,energies%e_hybcomp_E0,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,&
+&              strsxc,vxcavg,xccc3d,vxc=vxc_hybcomp)
+           endif
+
+!          Combine hybrid and auxiliary quantities
+           energies%e_xc=energies%e_xc*dtset%auxc_scal
+           energies%e_hybcomp_E0=energies%e_hybcomp_E0-energies%e_xc
+           vxc(:,:)=vxc(:,:)*dtset%auxc_scal
+           vxc_hybcomp(:,:)=vxc_hybcomp(:,:)-vxc(:,:)
+
+         endif
+
        else if (ipositron==2) then
-         call rhohxc(dtset,energies%e_xc,gsqcut,psps%usepaw,kxc,mpi_enreg,nfft,ngfft,&
+         call rhotoxc(energies%e_xc,kxc,mpi_enreg,nfft,ngfft,&
 &         nhat,psps%usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,dtset%nspden,n3xccc,&
-&         option,rhog,rhor,rprimd,strsxc,usexcnhat,vhartr,vxc,vxcavg,xccc3d,&
-&         taug=taug,taur=taur,vxctau=vxctau,add_tfw=add_tfw_,&
+&         option,dtset%paral_kgb,rhor,rprimd,strsxc,usexcnhat,vxc,vxcavg,xccc3d,xcdata,&
+&         taug=taug,taur=taur,vhartr=vhartr,vxctau=vxctau,add_tfw=add_tfw_,&
 &         electronpositron=electronpositron)
        end if
-       if (is_hybrid_ncpp) then
-         call xchybrid_ncpp_cc(dtset,energies%e_xc,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,&
-&         strsxc,vxcavg,xccc3d,vxc=vxc)
-       end if
+
      elseif(.not. wvlbigdft) then
 !      Use the free boundary solver
        call psolver_rhohxc(energies%e_hartree, energies%e_xc, evxc, &
@@ -556,6 +608,11 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
      end do
    end if
 
+!  Adds the compensating vxc for hybrids
+   if(mod(dtset%fockoptmix,100)==11)then
+     vtrial(:,:)=vtrial(:,:)+vxc_hybcomp(:,:)
+   endif
+
    if(dtset%usewvl==1) then
      call wvl_vtrial_abi2big(1,vtrial,wvl%den)
    end if
@@ -568,7 +625,7 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
    wvl%e%energs%eion = energies%e_ewald
 !  Setup the mixing, if necessary
    call denspot_set_history(wvl%den%denspot,dtset%iscf,dtset%nsppol, &
-&     wvl%den%denspot%dpbox%ndims(1),wvl%den%denspot%dpbox%ndims(2))
+&   wvl%den%denspot%dpbox%ndims(1),wvl%den%denspot%dpbox%ndims(2))
 #endif
    ABI_ALLOCATE(xcart,(3, dtset%natom))
    call xred2xcart(dtset%natom, rprimd, xcart, xred)
@@ -586,8 +643,8 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
  if (any(abs(dtset%zeemanfield(:))>tol8)) then
    vzeeman(:) = zero                            ! vzeeman_ij = -1/2*sigma_ij^alpha*B_alpha
    if(dtset%nspden==2)then
-      vzeeman(1) = -half*dtset%zeemanfield(3)   ! v_dwndwn = -1/2*B_z  
-      vzeeman(2) =  half*dtset%zeemanfield(3)   ! v_upup   =  1/2*B_z
+     vzeeman(1) = -half*dtset%zeemanfield(3)   ! v_dwndwn = -1/2*B_z  
+     vzeeman(2) =  half*dtset%zeemanfield(3)   ! v_upup   =  1/2*B_z
      do ifft=1,nfft
        vtrial(ifft,1) = vtrial(ifft,1) + vzeeman(1) !SPr: added 1st component
        vtrial(ifft,2) = vtrial(ifft,2) + vzeeman(2)
@@ -649,6 +706,14 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
      energies%e_hartree=zero
    end if
  end if
+
+ if(mod(dtset%fockoptmix,100)==11)then
+   if (.not. wvlbigdft) then
+     call dotprod_vn(1,rhor,energies%e_hybcomp_v0,doti,nfft,nfftot,1,1,vxc_hybcomp,ucvol_local,&
+&      mpi_comm_sphgrid=mpi_comm_sphgrid)
+     energies%e_hybcomp_v=energies%e_hybcomp_v0
+   endif 
+ endif 
 
  if (optene==2.or.optene==4 .and. .not. wvlbigdft) then
 !  Compute local psp energy eei

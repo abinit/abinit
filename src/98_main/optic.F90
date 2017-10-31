@@ -61,12 +61,13 @@
 !! PARENTS
 !!
 !! CHILDREN
-!!      abi_io_redirect,abimem_init,abinit_doctor,ebands_free,ebands_init
-!!      ebands_update_occ,flush_unit,hdr_bcast,hdr_copy,hdr_free,herald
-!!      int2char4,linelop,linopt,mati3inv,matr3inv,metric,nctk_fort_or_ncfile
-!!      nlinopt,nonlinopt,pmat2cart,pmat_renorm,sym2cart,timein,wfk_close
-!!      wfk_open_read,wfk_read_eigk,wrtout,xmpi_bcast,xmpi_end,xmpi_init
-!!      xmpi_sum
+!!      abi_io_redirect,abimem_init,abinit_doctor,crystal_free,crystal_init
+!!      ebands_copy,ebands_free,ebands_init,ebands_update_occ,eprenorms_bcast
+!!      eprenorms_free,eprenorms_from_epnc,flush_unit,hdr_bcast,hdr_copy
+!!      hdr_free,herald,int2char4,linelop,linopt,mati3inv,matr3inv,metric
+!!      nctk_fort_or_ncfile,nlinopt,nonlinopt,pmat2cart,pmat_renorm,renorm_bst
+!!      sym2cart,timein,wfk_close,wfk_open_read,wfk_read_eigk,wrtout,xmpi_bcast
+!!      xmpi_end,xmpi_init,xmpi_sum
 !!
 !! SOURCE
 
@@ -420,9 +421,9 @@ program optic
  if(hdr%nspden == 4) remove_inv = .true.
  !space_group = 0
  call crystal_init(hdr%amu, Cryst, 0, hdr%natom, hdr%npsp, hdr%ntypat, &
-&  hdr%nsym, rprimd, hdr%typat, hdr%xred, hdr%zionpsp, hdr%znuclpsp, 1, &
-&  (hdr%nspden==2 .and. hdr%nsppol==1),remove_inv, hdr%title,&
-&  symrel, hdr%tnons, hdr%symafm)
+& hdr%nsym, rprimd, hdr%typat, hdr%xred, hdr%zionpsp, hdr%znuclpsp, 1, &
+& (hdr%nspden==2 .and. hdr%nsppol==1),remove_inv, hdr%title,&
+& symrel, hdr%tnons, hdr%symafm)
 
  if(my_rank == master) then
    write(std_out,*)

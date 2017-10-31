@@ -73,7 +73,7 @@ subroutine pred_simple(ab_mover,hist,iexit)
 
 !Local variables-------------------------------
 !scalars
- integer  :: kk,jj
+ integer  :: ihist_next,kk,jj
 
 !***************************************************************************
 !Beginning of executable session
@@ -86,27 +86,28 @@ subroutine pred_simple(ab_mover,hist,iexit)
 !All the operations are internal to scfcv.F90
 
 !XRED, FCART and VEL
+ ihist_next = abihist_findIndex(hist,+1)
  do kk=1,ab_mover%natom
    do jj=1,3
-     hist%xred(jj,kk, hist%ihist+1)=hist%xred (jj,kk,hist%ihist)
-     hist%fcart(jj,kk,hist%ihist+1)=hist%fcart(jj,kk,hist%ihist)
-     hist%vel(jj,kk,hist%ihist+1)=hist%vel(jj,kk,hist%ihist)
+     hist%xred(jj,kk, ihist_next)=hist%xred (jj,kk,hist%ihist)
+     hist%fcart(jj,kk,ihist_next)=hist%fcart(jj,kk,hist%ihist)
+     hist%vel(jj,kk,ihist_next)=hist%vel(jj,kk,hist%ihist)
    end do
  end do
 
 !ACELL
  do jj=1,3
-   hist%acell(jj,hist%ihist+1)=hist%acell(jj,hist%ihist)
+   hist%acell(jj,ihist_next)=hist%acell(jj,hist%ihist)
  end do
 
 !RPRIMD
  do kk=1,3
    do jj=1,3
-     hist%rprimd(jj,kk,hist%ihist+1)=hist%rprimd(jj,kk,hist%ihist)
+     hist%rprimd(jj,kk,ihist_next)=hist%rprimd(jj,kk,hist%ihist)
    end do
  end do
 
- hist%ihist=hist%ihist+1
+ hist%ihist=ihist_next
 
 end subroutine pred_simple
 !!***

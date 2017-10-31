@@ -356,11 +356,12 @@ subroutine ddb_internalstr(asr,crystal,blkval,asrq0,d2asr,iblok,instrain,iout,mp
 !Check the unstable phonon modes, if the first is negative then print
 !warning message
  if(eigval(1)<-1.0*tol8)then
-   write(message,'(a,a,a,a)') ch10,&
-&   'Unstable eigenvalue detected in force constant matrix at Gamma point',ch10,&
-&   'The system under calculation is physically unstable.'
-   MSG_WARNING(message)
-   call wrtout(iout,message,'COLL')
+   write(message,'(9a)') ch10,&
+&   ' --- !WARNING',ch10,&
+&   '     Unstable eigenvalue detected in force constant matrix at Gamma point',ch10,&
+&   '     The system under calculation is physically unstable.',ch10,&
+&   ' ---',ch10
+   call wrtout(std_out,message,'COLL')
  end if
 
 !Do the matrix muplication to get pseudoinverse inverse matrix
@@ -427,7 +428,7 @@ subroutine ddb_internalstr(asr,crystal,blkval,asrq0,d2asr,iblok,instrain,iout,mp
    end do
  end do
 
-!Now the inverse in in Cpmatr
+!Now the inverse is in Cpmatr
  kmatrix(:,:)=Cpmatr(:,:)
 !transfer the inverse of k-matrix back to the k matrix
 !so now the inverse of k matrix is in the kmatrix

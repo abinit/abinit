@@ -51,7 +51,7 @@
 !!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
 !!  ngrvdw=size of grvdw(:,:); can be 0 or natom according to dtset%vdw_xc
 !!  nhat(nfft,nspden*usepaw)= -PAW only- compensation density
-!!  nkxc=second dimension of the array kxc, see rhohxc.f for a description
+!!  nkxc=second dimension of the array kxc, see rhotoxc.f for a description
 !!  ntypat=number of types of atoms in unit cell.
 !!  nvresid(nfft,nspden)=potential or density residual
 !!  n1xccc=dimension of xccc1d ; 0 if no XC core correction is used
@@ -107,6 +107,9 @@
 !!   | e_vdw_dftd(IN)=VdW DFT-D energy
 !!   | e_hartree(IN)=Hartree part of total energy (hartree units)
 !!   | e_corepsp(IN)=psp core-core energy
+!!   | e_hybcomp_E0(IN)=energy compensation energy for the hybrid functionals at frozen density
+!!   | e_hybcomp_v0(IN)=potential compensation energy for the hybrid functionals at frozen density
+!!   | e_hybcomp_v (IN)=potential compensation energy for the hybrid functionals at self-consistent density
 !!   | e_kinetic(IN)=kinetic energy part of total energy.
 !!   | e_nonlocalpsp(IN)=nonlocal pseudopotential part of total energy.
 !!   | e_xc(IN)=exchange-correlation energy (hartree)
@@ -140,7 +143,7 @@
 !!      scfcv
 !!
 !! CHILDREN
-!!      forces,metric,nres2vres,pawgrnl,timab
+!!      forces,nres2vres,pawgrnl,timab
 !!
 !! SOURCE
 
@@ -328,7 +331,8 @@ subroutine etotfor(atindx1,deltae,diffor,dtefield,dtset,&
    if (optene==0) then
      etotal = energies%e_kinetic + energies%e_hartree + energies%e_xc + &
 &     energies%e_localpsp + energies%e_corepsp + energies%e_fock+&
-&     energies%e_entropy + energies%e_elecfield + energies%e_magfield
+&     energies%e_entropy + energies%e_elecfield + energies%e_magfield+&
+&     energies%e_hybcomp_E0 - energies%e_hybcomp_v0 + energies%e_hybcomp_v
      etotal = etotal + energies%e_ewald + energies%e_chempot + energies%e_vdw_dftd
      if (usepaw==0) etotal = etotal + energies%e_nonlocalpsp
      if (usepaw/=0) etotal = etotal + energies%e_paw
@@ -338,7 +342,8 @@ subroutine etotfor(atindx1,deltae,diffor,dtefield,dtset,&
    if (optene==1) then
      etotal = energies%e_eigenvalues - energies%e_hartree + energies%e_xc &
 &     - energies%e_xcdc + energies%e_corepsp - energies%e_corepspdc+ energies%e_fock- energies%e_fockdc &
-&     + energies%e_entropy + energies%e_elecfield + energies%e_magfield
+&     + energies%e_entropy + energies%e_elecfield + energies%e_magfield &
+&     + energies%e_hybcomp_E0 - energies%e_hybcomp_v0
      etotal = etotal + energies%e_ewald + energies%e_chempot + energies%e_vdw_dftd
      if (usepaw/=0) etotal = etotal + energies%e_pawdc
    end if
@@ -391,9 +396,9 @@ subroutine etotfor(atindx1,deltae,diffor,dtefield,dtset,&
        end do
      end if
      ucvol_=ucvol
-#    if defined HAVE_BIGDFT
+#if defined HAVE_BIGDFT
      if (dtset%usewvl==1) ucvol_=product(wvl_den%denspot%dpbox%hgrids)*real(product(wvl_den%denspot%dpbox%ndims),dp)
-#    endif
+#endif
      dimnhat=0;optgr=1;optgr2=0;optstr=0;optstr2=0
      comm_grid=mpi_enreg%comm_fft;if(dtset%usewvl==1) comm_grid=mpi_enreg%comm_wvl
      call pawgrnl(atindx1,dimnhat,dummy,1,dummy,grnl,gsqcut,mgfft,my_natom, &
@@ -405,7 +410,7 @@ subroutine etotfor(atindx1,deltae,diffor,dtefield,dtset,&
    end if
 
    apply_residual=(optres==1 .and. dtset%usewvl==0.and.abs(dtset%densfor_pred)>=1 .and. &
-&                  abs(dtset%densfor_pred)<=6.and.abs(dtset%densfor_pred)/=5)
+&   abs(dtset%densfor_pred)<=6.and.abs(dtset%densfor_pred)/=5)
 
 !  If residual is a density residual (and forces from residual asked),
 !  has to convert it into a potential residualbefore calling forces routine
@@ -420,10 +425,10 @@ subroutine etotfor(atindx1,deltae,diffor,dtefield,dtset,&
      resid => nvresid
    end if
    call forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,forold,fred,grchempottn,gresid,grewtn,&
-&     grhf,grnl,grvdw,grxc,gsqcut,indsym,maxfor,mgfft,mpi_enreg,&
-&     n1xccc,n3xccc,nattyp,nfft,ngfft,ngrvdw,ntypat,&
-&     pawrad,pawtab,ph1d,psps,rhog,rhor,rprimd,symrec,synlgr,dtset%usefock,resid,vxc,wvl,wvl_den,xred,&
-&     electronpositron=electronpositron)
+&   grhf,grnl,grvdw,grxc,gsqcut,indsym,maxfor,mgfft,mpi_enreg,&
+&   n1xccc,n3xccc,nattyp,nfft,ngfft,ngrvdw,ntypat,&
+&   pawrad,pawtab,ph1d,psps,rhog,rhor,rprimd,symrec,synlgr,dtset%usefock,resid,vxc,wvl,wvl_den,xred,&
+&   electronpositron=electronpositron)
    if (apply_residual) then
      ABI_DEALLOCATE(resid)
    end if

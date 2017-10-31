@@ -68,4 +68,5 @@ nshiftk   1
 #%% description = 
 #%%   Fe fcc structure with two atoms per unit cell for test of antiferromagnetic
 #%%   This is the simplest fcc structure compatible with a X point spiral
+#%% topics = ElecDOS
 #%%<END TEST_INFO>

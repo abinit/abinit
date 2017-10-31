@@ -39,6 +39,7 @@
 !! PARENTS
 !!
 !! CHILDREN
+!!      xmpi_gather
 !!
 !! SOURCE
 
@@ -82,8 +83,7 @@ subroutine printmagvtk(mpi_enreg,cplex,nspden,nfft,ngfft,rhor,rprimd,fname)
  integer :: ii,jj,kk,ind,jfft
  integer :: mpi_comm,mpi_head,mpi_rank,ierr
  real    :: rx,ry,rz
- integer :: me_fft,nproc_fft,i1,i2,i3,ir
- real(dp):: den,magn(3)
+ integer :: nproc_fft,ir
  character(len=500) :: msg
 !arrays
  real(dp),allocatable :: rhorfull(:,:)
@@ -113,26 +113,26 @@ subroutine printmagvtk(mpi_enreg,cplex,nspden,nfft,ngfft,rhor,rprimd,fname)
 
   !if 1 or two component density then write out either 1 or 2 scalar density fields
   !if 4, then write one scalar field (density) and one vector field (magnetization density)
-  if(nspden/=4)then
-    nfields=nspden
-  else
-    nfields=2
-  endif
+ if(nspden/=4)then
+   nfields=nspden
+ else
+   nfields=2
+ end if
 
   nfields=nfields*cplex
 
   ! FFT mesh specifications: full grid
-  nx=ngfft(1)        ! number of points along 1st lattice vector
-  ny=ngfft(2)        ! number of points along 2nd lattice vector
-  nz=ngfft(3)        ! number of points along 3rd lattice vector
-  nfft_tot=nx*ny*nz  ! total number of fft mesh points (can be different from nfft in case of distributed memory of nproc_fft processors)
+ nx=ngfft(1)        ! number of points along 1st lattice vector
+ ny=ngfft(2)        ! number of points along 2nd lattice vector
+ nz=ngfft(3)        ! number of points along 3rd lattice vector
+ nfft_tot=nx*ny*nz  ! total number of fft mesh points (can be different from nfft in case of distributed memory of nproc_fft processors)
  
 
   ! Gather information about memory distribution
-  mpi_head=0
-  mpi_comm = mpi_enreg%comm_fft
-  mpi_rank = xmpi_comm_rank(mpi_comm)
-  nproc_fft=ngfft(10)
+ mpi_head=0
+ mpi_comm = mpi_enreg%comm_fft
+ mpi_rank = xmpi_comm_rank(mpi_comm)
+ nproc_fft=ngfft(10)
 
   ! Create array to host full FFT mesh
   if(mpi_rank==mpi_head)then
@@ -148,36 +148,35 @@ subroutine printmagvtk(mpi_enreg,cplex,nspden,nfft,ngfft,rhor,rprimd,fname)
     enddo
   endif
 
-  if(mpi_rank==mpi_head)then
+ if(mpi_rank==mpi_head)then
 
     ! Open the output vtk file
-    if (open_file(fname,msg,newunit=denvtk,status='replace',form='formatted') /=0) then
-      MSG_WARNING(msg)
-      RETURN
-    endif
-
+   if (open_file(fname,msg,newunit=denvtk,status='replace',form='formatted') /=0) then
+     MSG_WARNING(msg)
+     RETURN
+   endif
 
     ! Write the header of the output vtk file
-    write(denvtk,"(a)") '# vtk DataFile Version 2.0'
-    write(denvtk,"(a)") 'Electron density components'
-    write(denvtk,"(a)") 'ASCII'
-    write(denvtk,"(a)") 'DATASET STRUCTURED_GRID'
-    write(denvtk,"(a,3i6)") 'DIMENSIONS ', nx,ny,nz
-    write(denvtk,"(a,i18,a)") 'POINTS ',nfft_tot,' double'
+   write(denvtk,"(a)") '# vtk DataFile Version 2.0'
+   write(denvtk,"(a)") 'Electron density components'
+   write(denvtk,"(a)") 'ASCII'
+   write(denvtk,"(a)") 'DATASET STRUCTURED_GRID'
+   write(denvtk,"(a,3i6)") 'DIMENSIONS ', nx,ny,nz
+   write(denvtk,"(a,i18,a)") 'POINTS ',nfft_tot,' double'
 
     ! Write out information about grid points
-    do kk=0,nz-1
-      do jj=0,ny-1
-        do ii=0,nx-1
+   do kk=0,nz-1
+     do jj=0,ny-1
+       do ii=0,nx-1
 
-           rx=(dble(ii)/nx)*rprimd(1,1)+(dble(jj)/ny)*rprimd(1,2)+(dble(kk)/nz)*rprimd(1,3)
-           ry=(dble(ii)/nx)*rprimd(2,1)+(dble(jj)/ny)*rprimd(2,2)+(dble(kk)/nz)*rprimd(2,3)
-           rz=(dble(ii)/nx)*rprimd(3,1)+(dble(jj)/ny)*rprimd(3,2)+(dble(kk)/nz)*rprimd(3,3)
-           write(denvtk,'(3f16.8)') rx,ry,rz  !coordinates of the grid point
+         rx=(dble(ii)/nx)*rprimd(1,1)+(dble(jj)/ny)*rprimd(1,2)+(dble(kk)/nz)*rprimd(1,3)
+         ry=(dble(ii)/nx)*rprimd(2,1)+(dble(jj)/ny)*rprimd(2,2)+(dble(kk)/nz)*rprimd(2,3)
+         rz=(dble(ii)/nx)*rprimd(3,1)+(dble(jj)/ny)*rprimd(3,2)+(dble(kk)/nz)*rprimd(3,3)
+         write(denvtk,'(3f16.8)') rx,ry,rz  !coordinates of the grid point
 
-        enddo
-      enddo
-    enddo
+       end do
+     end do
+   end do
 
     ! Write out information about field defined on the FFT mesh
     write(denvtk,"(a,i18)") 'POINT_DATA ',nfft_tot
@@ -354,9 +353,9 @@ subroutine printmagvtk(mpi_enreg,cplex,nspden,nfft,ngfft,rhor,rprimd,fname)
     close (denvtk)
 
     !clean up the gathered FFT mesh
-    ABI_DEALLOCATE(rhorfull)
+   ABI_DEALLOCATE(rhorfull)
 
-  endif
+ end if
 
 
 end subroutine printmagvtk

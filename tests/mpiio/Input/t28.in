@@ -48,6 +48,7 @@ kptrlatt 2 2 -2
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
+#%% exclude_hosts = nag@abiref
 #%% [files]
 #%% psp_files = 31Ga_LDA_abinit, 33As_LDA_abinit
 #%% [paral_info]
@@ -59,8 +60,6 @@ kptrlatt 2 2 -2
 #%%   t28_MPI4o_DS1_DOS_TOTAL, tolnlines=50, tolabs=0.05, tolrel=0.01, fld_options = -ridiculous;
 #%%   t28_MPI4o_DS1_DOS_AT0001, tolnlines=50, tolabs=0.05, tolrel=0.01, fld_options = -ridiculous;
 #%%   t28_MPI4o_DS2_DOS_AT0001, tolnlines=50, tolabs=0.05, tolrel=0.01, fld_options = -ridiculous;
-#%%   t28_MPI4o_DS1_VCLMB_1DM, tolnlines=0, tolabs=0., tolrel=0.01, fld_options = -ridiculous;
-#%%   t28_MPI4o_DS2_VCLMB_1DM, tolnlines=0, tolabs=0., tolrel=0.01, fld_options = -ridiculous;
 #%% [extra_info]
 #%% keywords = PAW 
 #%% authors = M. Giantomassi

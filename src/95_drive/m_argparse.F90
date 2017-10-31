@@ -270,6 +270,10 @@ end function args_parser
 !!  Print object.
 !!
 !! PARENTS
+!!      m_argparse
+!!
+!! CHILDREN
+!!      wrtout
 !!
 !! SOURCE
 

@@ -73,8 +73,7 @@
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% exclude_hosts = ibm@ibm6
-#%% need_cpp_vars = HAVE_ETSF_IO
+#%% need_cpp_vars = HAVE_NETCDF
 #%% [shell] 
 #%% post_commands = 
 #%% [files]

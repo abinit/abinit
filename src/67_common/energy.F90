@@ -139,7 +139,7 @@
 !!      pawaccrhoij,pawcprj_alloc,pawcprj_free,pawcprj_gather_spin,pawmknhat
 !!      pawrhoij_alloc,pawrhoij_free,pawrhoij_free_unpacked
 !!      pawrhoij_init_unpacked,pawrhoij_mpisum_unpacked,prep_bandfft_tabs
-!!      prep_nonlop,psolver_rhohxc,rhohxc,rhohxcpositron,symrhoij,timab
+!!      prep_nonlop,psolver_rhohxc,rhotoxc,rhohxcpositron,symrhoij,timab
 !!      transgrid,xmpi_sum
 !!
 !! SOURCE
@@ -167,6 +167,7 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
  use m_errors
  use m_xmpi
  use m_gemm_nonlop
+ use m_xcdata
 
  use m_energies,         only : energies_type
  use m_electronpositron, only : electronpositron_type,electronpositron_calctype
@@ -177,7 +178,7 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
  use m_paw_ij,           only : paw_ij_type
  use m_pawfgrtab,        only : pawfgrtab_type
  use m_pawrhoij,         only : pawrhoij_type,pawrhoij_alloc,pawrhoij_free,pawrhoij_init_unpacked,&
-&                               pawrhoij_mpisum_unpacked,pawrhoij_free_unpacked,symrhoij
+&                               pawrhoij_mpisum_unpacked,pawrhoij_free_unpacked,pawrhoij_get_nspden,symrhoij
  use m_pawcprj,          only : pawcprj_type,pawcprj_alloc,pawcprj_free,pawcprj_gather_spin
  use m_pawfgr,           only : pawfgr_type
  use m_paw_dmft,         only : paw_dmft_type
@@ -257,10 +258,11 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
  real(dp) :: dotr,doti,eeigk,ekk,enlk,evxc,e_xcdc_vxctau,ucvol,ucvol_local,vxcavg
  !character(len=500) :: message
  type(gs_hamiltonian_type) :: gs_hamk
+ type(xcdata_type) :: xcdata
 !arrays
  integer,allocatable :: kg_k(:,:)
  real(dp) :: gmet(3,3),gprimd(3,3),kpg_dum(0,0),kpoint(3),nonlop_out(1,1)
- real(dp) :: qpt(3),rhodum(1),rmet(3,3),tsec(2),ylmgr_dum(1,1,1)
+ real(dp) :: qphon(3),qpt(3),rhodum(1),rmet(3,3),tsec(2),ylmgr_dum(1,1,1)
  real(dp) :: vzeeman(4)
  real(dp),allocatable :: buffer(:),cgrvtrial(:,:)
  real(dp),allocatable :: cwavef(:,:),eig_k(:),enlout(:),ffnl(:,:,:,:),ffnl_sav(:,:,:,:)
@@ -326,21 +328,24 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
 
    if (dtset%icoulomb == 0) then
 !    Use the periodic solver to compute Hxc.
+     call hartre(1,gsqcut,psps%usepaw,mpi_enreg,nfftf,ngfftf,dtset%paral_kgb,rhog,rprimd,vhartr)
+     call xcdata_init(dtset%auxc_ixc,dtset%intxc,dtset%ixc,&
+&      dtset%nelect,dtset%tphysel,dtset%usekden,dtset%vdw_xc,dtset%xc_tb09_c,dtset%xc_denpos,xcdata)
      ABI_ALLOCATE(kxc,(1,nkxc))
-!    to be adjusted for the call to rhohxc
+!    to be adjusted for the call to rhotoxc
      nk3xc=1
      if (ipositron==0) then
-       call rhohxc(dtset,energies%e_xc,gsqcut,psps%usepaw,kxc, &
+       call rhotoxc(energies%e_xc,kxc, &
 &       mpi_enreg,nfftf,ngfftf,nhat,psps%usepaw,nhatgr,nhatgrdim, &
-&       nkxc,nk3xc,dtset%nspden,n3xccc,option,rhog,rhor,rprimd,strsxc, &
-&       usexcnhat,vhartr,vxc,vxcavg,xccc3d,taug=taug,taur=taur, &
+&       nkxc,nk3xc,dtset%nspden,n3xccc,option,dtset%paral_kgb,rhor,rprimd,strsxc, &
+&       usexcnhat,vxc,vxcavg,xccc3d,xcdata,taug=taug,taur=taur,vhartr=vhartr, &
 &       vxctau=vxctau,exc_vdw_out=energies%e_xc_vdw,add_tfw=add_tfw_)
      else
-       call rhohxc(dtset,energies%e_xc,gsqcut,psps%usepaw,kxc, &
+       call rhotoxc(energies%e_xc,kxc, &
 &       mpi_enreg,nfftf,ngfftf,nhat,psps%usepaw,nhatgr,nhatgrdim, &
-&       nkxc,nk3xc,dtset%nspden,n3xccc,option,rhog,rhor,rprimd,strsxc, &
-&       usexcnhat,vhartr,vxc,vxcavg,xccc3d, &
-&       electronpositron=electronpositron,taug=taug,taur=taur, &
+&       nkxc,nk3xc,dtset%nspden,n3xccc,option,dtset%paral_kgb,rhor,rprimd,strsxc, &
+&       usexcnhat,vxc,vxcavg,xccc3d,xcdata, &
+&       electronpositron=electronpositron,taug=taug,taur=taur,vhartr=vhartr, &
 &       vxctau=vxctau,exc_vdw_out=energies%e_xc_vdw,add_tfw=add_tfw_)
      end if
      ABI_DEALLOCATE(kxc)
@@ -497,7 +502,7 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
    end if
    if (paral_atom) then
      ABI_DATATYPE_ALLOCATE(pawrhoij_unsym,(dtset%natom))
-     nspden_rhoij=dtset%nspden;if (dtset%pawspnorb>0.and.dtset%nspinor==2) nspden_rhoij=4
+     nspden_rhoij=pawrhoij_get_nspden(dtset%nspden,dtset%nspinor,dtset%pawspnorb)
      call pawrhoij_alloc(pawrhoij_unsym,dtset%pawcpxocc,nspden_rhoij,dtset%nspinor,&
 &     dtset%nsppol,dtset%typat,pawtab=pawtab,use_rhoijp=0,use_rhoij_=1)
    else
@@ -605,8 +610,8 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
 
 !    Compute kinetic energy
      ABI_ALLOCATE(kinpw,(npw_k))
-!     call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass,gmet,kg_k,kinpw,kpoint,npw_k)
-     call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass,gmet,kg_k,kinpw,kpoint,npw_k,0,0)
+!     call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass_free,gmet,kg_k,kinpw,kpoint,npw_k)
+     call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass_free,gmet,kg_k,kinpw,kpoint,npw_k,0,0)
 
 !    Compute kinetic energy of each band
      do iblock=1,nblockbd
@@ -655,8 +660,8 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
      if (gemm_nonlop_use_gemm) then
        gemm_nonlop_ikpt_this_proc_being_treated = my_ikpt
        call make_gemm_nonlop(my_ikpt,gs_hamk%npw_fft_k,gs_hamk%lmnmax, &
-&          gs_hamk%ntypat, gs_hamk%indlmn, gs_hamk%nattyp, gs_hamk%istwf_k, gs_hamk%ucvol, gs_hamk%ffnl_k,&
-&          gs_hamk%ph3d_k)
+&       gs_hamk%ntypat, gs_hamk%indlmn, gs_hamk%nattyp, gs_hamk%istwf_k, gs_hamk%ucvol, gs_hamk%ffnl_k,&
+&       gs_hamk%ph3d_k)
      end if
 
 #if defined HAVE_GPU_CUDA
@@ -778,12 +783,12 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
 !Compute total (free) energy
  if (optene==0.or.optene==2) then
    etotal = energies%e_kinetic + energies%e_hartree + energies%e_xc + &
-&           energies%e_localpsp + energies%e_corepsp
+&   energies%e_localpsp + energies%e_corepsp
    if (psps%usepaw==0) etotal=etotal + energies%e_nonlocalpsp
    if (psps%usepaw==1) etotal=etotal + energies%e_paw
  else if (optene==1.or.optene==3) then
    etotal = energies%e_eigenvalues - energies%e_hartree + energies%e_xc - &
-&           energies%e_xcdc + energies%e_corepsp - energies%e_corepspdc
+&   energies%e_xcdc + energies%e_corepsp - energies%e_corepspdc
    if (psps%usepaw==1) etotal=etotal + energies%e_pawdc
  end if
  etotal = etotal + energies%e_ewald + energies%e_chempot + energies%e_vdw_dftd

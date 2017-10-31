@@ -68,19 +68,19 @@
 !! CHILDREN
 !!      bs_parameters_free,chkpawovlp,crystal_free,denfgr,destroy_mpi_enreg
 !!      double_grid_free,ebands_free,ebands_update_occ,energies_init
-!!      exc_build_ham,exc_den,exc_diago_driver,exc_haydock_driver,fourdp
-!!      get_gftt,getph,gsph_free,hdr_free,init_distribfft_seq,initmpi_seq
-!!      kmesh_free,metric,mkdenpos,mkrdim,nhatgrid,paw_an_free,paw_an_init
-!!      paw_an_nullify,paw_gencond,paw_ij_free,paw_ij_init,paw_ij_nullify
-!!      pawdenpot,pawdij,pawfgr_destroy,pawfgr_init,pawfgrtab_free
-!!      pawfgrtab_init,pawhur_free,pawhur_init,pawinit,pawmknhat,pawnabla_init
-!!      pawprt,pawpuxinit,pawpwff_free,pawpwff_init,pawrhoij_alloc
-!!      pawrhoij_copy,pawrhoij_free,pawtab_get_lsize,pawtab_print,print_ngfft
-!!      prtrhomxmn,pspini,rdqps,rotate_fft_mesh,screen_free,screen_init
-!!      screen_nullify,setsymrhoij,setup_bse,setup_bse_interp,setvtr,symdij
-!!      test_charge,timab,vcoul_free,wfd_free,wfd_init,wfd_mkrho,wfd_print
-!!      wfd_read_wfk,wfd_reset_ur_cprj,wfd_rotate,wfd_test_ortho,wfd_wave_free
-!!      wrtout,xmpi_bcast
+!!      eprenorms_free,exc_build_ham,exc_den,exc_diago_driver
+!!      exc_haydock_driver,fourdp,get_gftt,getph,gsph_free,hdr_free
+!!      init_distribfft_seq,initmpi_seq,kmesh_free,metric,mkdenpos,mkrdim
+!!      nhatgrid,paw_an_free,paw_an_init,paw_an_nullify,paw_gencond,paw_ij_free
+!!      paw_ij_init,paw_ij_nullify,pawdenpot,pawdij,pawfgr_destroy,pawfgr_init
+!!      pawfgrtab_free,pawfgrtab_init,pawhur_free,pawhur_init,pawinit,pawmknhat
+!!      pawnabla_init,pawprt,pawpuxinit,pawpwff_free,pawpwff_init
+!!      pawrhoij_alloc,pawrhoij_copy,pawrhoij_free,pawtab_get_lsize
+!!      pawtab_print,print_ngfft,prtrhomxmn,pspini,rdqps,rotate_fft_mesh
+!!      screen_free,screen_init,screen_nullify,setsymrhoij,setup_bse
+!!      setup_bse_interp,setvtr,symdij,test_charge,timab,vcoul_free,wfd_free
+!!      wfd_init,wfd_mkrho,wfd_print,wfd_read_wfk,wfd_reset_ur_cprj,wfd_rotate
+!!      wfd_test_ortho,wfd_wave_free,wrtout,xmpi_bcast
 !!
 !! SOURCE
 
@@ -133,7 +133,7 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
  use m_paw_ij,          only : paw_ij_type, paw_ij_init, paw_ij_free, paw_ij_nullify
  use m_pawfgrtab,       only : pawfgrtab_type, pawfgrtab_free, pawfgrtab_init
  use m_pawrhoij,        only : pawrhoij_type, pawrhoij_alloc, pawrhoij_copy,&
-&                              pawrhoij_free, symrhoij
+&                              pawrhoij_free, pawrhoij_get_nspden, symrhoij
  use m_pawdij,          only : pawdij, symdij
  use m_pawfgr,          only : pawfgr_type, pawfgr_init, pawfgr_destroy
  use m_pawhr,           only : pawhur_t, pawhur_free, pawhur_init
@@ -343,7 +343,7 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
    call chkpawovlp(Cryst%natom,Cryst%ntypat,Dtset%pawovlp,Pawtab,Cryst%rmet,Cryst%typat,xred)
 
    ABI_DT_MALLOC(KS_Pawrhoij,(Cryst%natom))
-   nspden_rhoij=Dtset%nspden; if (Dtset%pawspnorb>0.and.Dtset%nspinor==2) nspden_rhoij=4
+   nspden_rhoij=pawrhoij_get_nspden(Dtset%nspden,Dtset%nspinor,Dtset%pawspnorb)
    call pawrhoij_alloc(KS_Pawrhoij,Dtset%pawcpxocc,nspden_rhoij,Dtset%nspinor,Dtset%nsppol,Cryst%typat,pawtab=Pawtab)
 
    ! Initialize values for several basic arrays ===
@@ -602,8 +602,8 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
    call paw_an_nullify(KS_paw_an)
 
    nkxc1=0
-   call paw_an_init(KS_paw_an,Cryst%natom,Cryst%ntypat,nkxc1,Dtset%nspden,cplex1,&
-&   Dtset%pawxcdev,Cryst%typat,Pawang,Pawtab,has_vxc=1,has_vxcval=0)
+   call paw_an_init(KS_paw_an,Cryst%natom,Cryst%ntypat,nkxc1,Dtset%nspden,&
+&   cplex1,Dtset%pawxcdev,Cryst%typat,Pawang,Pawtab,has_vxc=1,has_vxcval=0)
 
    ! Calculate onsite vxc with and without core charge ===
    nzlmopt=-1; option=0; compch_sph=greatest_real
@@ -916,43 +916,43 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
  call timab(659,2,tsec) ! bse(make_pawhur_t)
 
  select case (BSp%algorithm)
-   case (BSE_ALGO_NONE)
-     MSG_COMMENT("Skipping solution of the BSE equation")
+ case (BSE_ALGO_NONE)
+   MSG_COMMENT("Skipping solution of the BSE equation")
 
-   case (BSE_ALGO_DDIAGO, BSE_ALGO_CG)
-     call timab(660,1,tsec) ! bse(exc_diago_driver)
-     call exc_diago_driver(Wfd,Bsp,BS_files,KS_BSt,QP_BSt,Cryst,Kmesh,Psps,&
-&     Pawtab,Hur,Hdr_bse,drude_plsmf,Epren)
-     call timab(660,2,tsec) ! bse(exc_diago_driver)
+ case (BSE_ALGO_DDIAGO, BSE_ALGO_CG)
+   call timab(660,1,tsec) ! bse(exc_diago_driver)
+   call exc_diago_driver(Wfd,Bsp,BS_files,KS_BSt,QP_BSt,Cryst,Kmesh,Psps,&
+&   Pawtab,Hur,Hdr_bse,drude_plsmf,Epren)
+   call timab(660,2,tsec) ! bse(exc_diago_driver)
 
-     if (.FALSE.) then ! Calculate electron-hole excited state density. Not tested at all.
-       call exc_den(BSp,BS_files,ngfftf,nfftf,Kmesh,ktabr,Wfd)
-     end if
+   if (.FALSE.) then ! Calculate electron-hole excited state density. Not tested at all.
+     call exc_den(BSp,BS_files,ngfftf,nfftf,Kmesh,ktabr,Wfd)
+   end if
 
-     if (.FALSE.) then
-       paw_add_onsite=.FALSE.; spin_opt=1; which_fixed=1; eh_rcoord=(/zero,zero,zero/); nrcell=(/2,2,2/)
+   if (.FALSE.) then
+     paw_add_onsite=.FALSE.; spin_opt=1; which_fixed=1; eh_rcoord=(/zero,zero,zero/); nrcell=(/2,2,2/)
 !    call exc_plot(Bsp,Bs_files,Wfd,Kmesh,Cryst,Psps,Pawtab,Pawrad,paw_add_onsite,spin_opt,which_fixed,eh_rcoord,nrcell,ngfftf)
-     end if
+   end if
 
-     if (BSp%use_interp) then
-       MSG_ERROR("Interpolation technique not coded for diagonalization and CG")
-     end if   
+   if (BSp%use_interp) then
+     MSG_ERROR("Interpolation technique not coded for diagonalization and CG")
+   end if   
 
-   case (BSE_ALGO_Haydock)
-     call timab(661,1,tsec) ! bse(exc_haydock_driver)
+ case (BSE_ALGO_Haydock)
+   call timab(661,1,tsec) ! bse(exc_haydock_driver)
 
-     if (BSp%use_interp) then
-       
-       call exc_haydock_driver(BSp,BS_files,Cryst,Kmesh,Hdr_bse,KS_BSt,QP_BSt,Wfd,Psps,Pawtab,Hur,Epren,&
-&       Kmesh_dense,KS_BSt_dense,QP_BSt_dense,Wfd_dense,Vcp_dense,grid)
-     else
-       call exc_haydock_driver(BSp,BS_files,Cryst,Kmesh,Hdr_bse,KS_BSt,QP_BSt,Wfd,Psps,Pawtab,Hur,Epren)
-     end if
+   if (BSp%use_interp) then
+     
+     call exc_haydock_driver(BSp,BS_files,Cryst,Kmesh,Hdr_bse,KS_BSt,QP_BSt,Wfd,Psps,Pawtab,Hur,Epren,&
+&     Kmesh_dense,KS_BSt_dense,QP_BSt_dense,Wfd_dense,Vcp_dense,grid)
+   else
+     call exc_haydock_driver(BSp,BS_files,Cryst,Kmesh,Hdr_bse,KS_BSt,QP_BSt,Wfd,Psps,Pawtab,Hur,Epren)
+   end if
    
-     call timab(661,2,tsec) ! bse(exc_haydock_driver)
-   case default
-     write(msg,'(a,i0)')" Wrong BSE algorithm: ",BSp%algorithm
-     MSG_ERROR(msg)
+   call timab(661,2,tsec) ! bse(exc_haydock_driver)
+ case default
+   write(msg,'(a,i0)')" Wrong BSE algorithm: ",BSp%algorithm
+   MSG_ERROR(msg)
  end select
 
  call timab(657,2,tsec) ! bse(mkexceps)

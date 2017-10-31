@@ -112,30 +112,33 @@ MODULE m_ifc
      ! These values are used to call anaddb routines that don't use rprimd, gprimd
 
    real(dp) :: dielt(3,3)
-     ! Dielectric tensor
+     ! Dielectric tensor (Cartesian coordinates)
 
    real(dp) :: omega_minmax(2)
      ! Min and max frequency obtained on the initial ab-initio q-mesh (-+ 30 cmm1)
      ! Used to generate frequency meshes for DOSes.
 
+   real(dp) :: r_inscribed_sphere
+     ! radius of biggest sphere inscribed in the WS supercell
+
    real(dp),allocatable :: amu(:)
      ! amu(ntypat)
      ! mass of the atoms (atomic mass unit)
 
-   real(dp),allocatable :: atmfrc(:,:,:,:,:,:)
-     ! atmfrc(2,3,natom,3,natom,nrpt)
+   real(dp),allocatable :: atmfrc(:,:,:,:,:)
+     ! atmfrc(3,natom,3,natom,nrpt)
      ! Inter atomic forces in real space
 
    integer,allocatable :: cell(:,:)
      ! cell(nrpt,3)
      ! Give the index of the the cell and irpt
 
-   real(dp),allocatable :: ewald_atmfrc(:,:,:,:,:,:)
-     ! Ewald_atmfrc(2,3,natom,3,natom,nrpt)
+   real(dp),allocatable :: ewald_atmfrc(:,:,:,:,:)
+     ! Ewald_atmfrc(3,natom,3,natom,nrpt)
      ! Ewald Inter atomic forces in real space
 
-   real(dp),allocatable :: short_atmfrc(:,:,:,:,:,:)
-     ! short_atmfrc(2,3,natom,3,natom,nrpt)
+   real(dp),allocatable :: short_atmfrc(:,:,:,:,:)
+     ! short_atmfrc(3,natom,3,natom,nrpt)
      ! Short range part of Inter atomic forces in real space
 
    real(dp),allocatable :: qshft(:,:)
@@ -165,6 +168,7 @@ MODULE m_ifc
    real(dp),allocatable :: zeff(:,:,:)
      ! zeff(3,3,natom)
      ! Effective charge on each atom, versus electric field and atomic displacement.
+     ! Cartesian coordinates
 
    real(dp),allocatable :: qibz(:,:)
      ! qibz(3,nqibz))
@@ -195,9 +199,10 @@ MODULE m_ifc
  public :: ifc_print         ! Print info on the object.
  public :: ifc_fourq         ! Use Fourier interpolation to compute interpolated frequencies w(q) and eigenvectors e(q)
  public :: ifc_speedofsound  ! Compute the speed of sound by averaging phonon group velocities.
- public :: ifc_write          ! Print the ifc (output, netcdf and text file)
+ public :: ifc_write         ! Print the ifc (output, netcdf and text file)
  public :: ifc_outphbtrap    ! Print out phonon frequencies on regular grid for BoltzTrap code.
  public :: ifc_printbxsf     ! Output phonon isosurface in Xcrysden format.
+ public :: ifc_calcnwrite_nana_terms   ! Compute phonons for q--> 0 with LO-TO
 !!***
 
 !----------------------------------------------------------------------
@@ -252,12 +257,11 @@ CONTAINS  !===========================================================
 !!
 !! PARENTS
 !!      anaddb,compute_anharmonics,eph,m_anharmonics_terms
-!!      m_effective_potential,m_effective_potential_file,m_harmonics_terms
-!!      m_ifc
+!!      m_effective_potential,m_effective_potential_file,m_gruneisen
+!!      m_harmonics_terms,m_ifc
 !!
 !! CHILDREN
-!!      cwtime,ifc_fourq,phbspl_evalq,phbspl_free,random_number,skw_eval_bks
-!!      skw_free,wrap2_pmhalf,xmpi_sum
+!!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
 !!
 !! SOURCE
 
@@ -381,11 +385,10 @@ end subroutine ifc_free
 !! Ifc<ifc_type>=Object containing the dynamical matrix and the IFCs.
 !!
 !! PARENTS
-!!      anaddb,eph,m_effective_potential_file
+!!      anaddb,eph,m_effective_potential_file,m_gruneisen
 !!
 !! CHILDREN
-!!      cwtime,ifc_fourq,phbspl_evalq,phbspl_free,random_number,skw_eval_bks
-!!      skw_free,wrap2_pmhalf,xmpi_sum
+!!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
 !!
 !! SOURCE
 
@@ -431,6 +434,7 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
  integer :: nprocs,my_rank,ierr
  real(dp),parameter :: qphnrm=one
  real(dp) :: xval,cpu,wall,gflops,rcut_min
+ real(dp) :: r_inscribed_sphere
  character(len=500) :: message
  type(ifc_type) :: ifc_tmp
 !arrays
@@ -610,10 +614,11 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
 ! MG FIXME: Why ngqpt is intent(inout)?
  ABI_MALLOC(ifc_tmp%wghatm,(natom,natom,ifc_tmp%nrpt))
  new_wght = 0
- call wght9(Ifc%brav,gprim,natom,ngqpt,nqbz,nqshft,ifc_tmp%nrpt,q1shft,rcan,ifc_tmp%rpt,rprimd,new_wght,ifc_tmp%wghatm)
+ call wght9(Ifc%brav,gprim,natom,ngqpt,nqbz,nqshft,ifc_tmp%nrpt,q1shft,rcan,&
+&     ifc_tmp%rpt,rprimd,r_inscribed_sphere,new_wght,ifc_tmp%wghatm)
 
 ! Fourier transformation of the dynamical matrices (q-->R)
- ABI_MALLOC(ifc_tmp%atmfrc,(2,3,natom,3,natom,ifc_tmp%nrpt))
+ ABI_MALLOC(ifc_tmp%atmfrc,(3,natom,3,natom,ifc_tmp%nrpt))
  call ftifc_q2r(ifc_tmp%atmfrc,Ifc%dynmat,gprim,natom,nqbz,ifc_tmp%nrpt,ifc_tmp%rpt,qbz)
 
 ! Eventually impose Acoustic Sum Rule to the interatomic forces
@@ -644,20 +649,21 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
    if (sum(ifc_tmp%wghatm(:,:,irpt)) /= 0) Ifc%nrpt = Ifc%nrpt+1
  end do
 
- ABI_CALLOC(Ifc%atmfrc,(2,3,natom,3,natom,Ifc%nrpt))
+ ABI_CALLOC(Ifc%atmfrc,(3,natom,3,natom,Ifc%nrpt))
  ABI_CALLOC(Ifc%rpt,(3,Ifc%nrpt))
  ABI_CALLOC(Ifc%cell,(3,Ifc%nrpt))
  ABI_CALLOC(Ifc%wghatm,(natom,natom,Ifc%nrpt))
- ABI_CALLOC(Ifc%short_atmfrc,(2,3,natom,3,natom,Ifc%nrpt))
- ABI_CALLOC(Ifc%ewald_atmfrc,(2,3,natom,3,natom,Ifc%nrpt))
+ ABI_CALLOC(Ifc%short_atmfrc,(3,natom,3,natom,Ifc%nrpt))
+ ABI_CALLOC(Ifc%ewald_atmfrc,(3,natom,3,natom,Ifc%nrpt))
 
  irpt_new = 1
  do irpt = 1, ifc_tmp%nrpt
    if (sum(ifc_tmp%wghatm(:,:,irpt)) /= 0) then
-     Ifc%atmfrc(:,:,:,:,:,irpt_new) = ifc_tmp%atmfrc(:,:,:,:,:,irpt)
+     Ifc%atmfrc(:,:,:,:,irpt_new) = ifc_tmp%atmfrc(:,:,:,:,irpt)
      Ifc%rpt(:,irpt_new) = ifc_tmp%rpt(:,irpt)
      Ifc%wghatm(:,:,irpt_new) = ifc_tmp%wghatm(:,:,irpt)
      Ifc%cell(:,irpt_new) = ifc_tmp%cell(:,irpt)
+     Ifc%r_inscribed_sphere = r_inscribed_sphere
      irpt_new = irpt_new + 1
    end if
  end do
@@ -720,7 +726,8 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
  if (nsphere == -1) call ifc_autocutoff(ifc, crystal, comm)
 
  call cwtime(cpu, wall, gflops, "stop")
- write(std_out,"(2(a,f6.2))")" ifc_init: cpu: ",cpu,", wall: ",wall
+ write(message,"(2(a,f6.2))")" ifc_init: cpu: ",cpu,", wall: ",wall
+ call wrtout(std_out,message,'COLL')
 
 end subroutine ifc_init
 !!***
@@ -743,8 +750,10 @@ end subroutine ifc_init
 !!  Only printing
 !!
 !! PARENTS
+!!      anaddb,eph
 !!
 !! CHILDREN
+!!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
 !!
 !! SOURCE
 
@@ -769,7 +778,6 @@ subroutine ifc_print(ifc,header,unit,prtvol)
 !Local variables-------------------------------
  integer :: unt,my_prtvol,iatom,ii
  character(len=500) :: msg
- real(dp) :: angdeg(3)
 ! *********************************************************************
 
  unt = std_out; if (present(unit)) unt = unit
@@ -839,13 +847,12 @@ end subroutine ifc_print
 !!  [dwdq(3,3*natom)] = Group velocities i.e. d(omega(q))/dq in Cartesian coordinates.
 !!
 !! PARENTS
-!!      get_nv_fs_en,get_tau_k,harmonic_thermo,interpolate_gkk,m_ifc,m_phgamma
-!!      m_phonons,m_phpi,m_sigmaph,mka2f,mka2f_tr,mka2f_tr_lova,mkph_linwid
-!!      read_gkk
+!!      get_nv_fs_en,get_tau_k,harmonic_thermo,interpolate_gkk,m_gruneisen
+!!      m_ifc,m_phgamma,m_phonons,m_phpi,m_sigmaph,mka2f,mka2f_tr,mka2f_tr_lova
+!!      mkph_linwid,read_gkk
 !!
 !! CHILDREN
-!!      cwtime,ifc_fourq,phbspl_evalq,phbspl_free,random_number,skw_eval_bks
-!!      skw_free,wrap2_pmhalf,xmpi_sum
+!!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
 !!
 !! SOURCE
 
@@ -962,8 +969,10 @@ end subroutine ifc_fourq
 !!    \nabla_q w(q, nu) = 1/(2 w(q, nu))  <u(q, nu)| \nabla_q D(q) | u(q, nu)>
 !!
 !! PARENTS
+!!      m_ifc
 !!
 !! CHILDREN
+!!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
 !!
 !! SOURCE
 
@@ -1074,22 +1083,24 @@ end subroutine ifc_get_dwdq
 !! INPUTS
 !! ifc<ifc_type>=Object containing the dynamical matrix and the IFCs.
 !! crystal<crystal_t> = Information on the crystalline structure.
-!! qrad_tolms(2):
+!! qrad_tolkms(2):
 !!   qrad=Radius of the sphere in reciprocal space
-!!   atols_ms=Absolute tolerance in meter/second. The code generates spherical meshes
-!!     until the results are converged twice within atols_ms.
+!!   atols_kms=Absolute tolerance in kilometer/second. The code generates spherical meshes
+!!     until the results are converged twice within atols_kms.
 !! ncid=the id of the open NetCDF file. Use nctk_noid to disable netcdf output.
 !! comm=MPI communicator.
 !!
 !! OUTPUT
 !!
 !! PARENTS
+!!      anaddb,m_gruneisen
 !!
 !! CHILDREN
+!!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
 !!
 !! SOURCE
 
-subroutine ifc_speedofsound(ifc, crystal, qrad_tolms, ncid, comm)
+subroutine ifc_speedofsound(ifc, crystal, qrad_tolkms, ncid, comm)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1107,7 +1118,7 @@ subroutine ifc_speedofsound(ifc, crystal, qrad_tolms, ncid, comm)
  type(ifc_type),intent(in) :: ifc
  type(crystal_t),intent(in) :: crystal
 !arrays
- real(dp),intent(in) :: qrad_tolms(2)
+ real(dp),intent(in) :: qrad_tolkms(2)
 
 !Local variables -------------------------
 !scalars
@@ -1115,7 +1126,7 @@ subroutine ifc_speedofsound(ifc, crystal, qrad_tolms, ncid, comm)
  integer :: ii,nu,igrid,my_rank,nprocs,ierr,converged,npts,num_negw,vs_ierr,ncerr
  integer :: iatom,iatref,num_acoustic,isacoustic
  real(dp) :: min_negw,cpu,wall,gflops
- real(dp) :: qrad,tolms
+ real(dp) :: qrad,tolkms,diff
  character(len=500) :: msg
  type(lebedev_t) :: lgrid
 !arrays
@@ -1129,9 +1140,9 @@ subroutine ifc_speedofsound(ifc, crystal, qrad_tolms, ncid, comm)
  my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
 
  if (ifc%asr == 0) MSG_WARNING("Computing speed of sound with asr == 0! Use asr > 0")
- qrad = qrad_tolms(1); tolms = qrad_tolms(2)
+ qrad = qrad_tolkms(1); tolkms = qrad_tolkms(2)
  ABI_CHECK(qrad > zero, "vs_qrad <= 0")
- ABI_CHECK(tolms > zero, "vs_tolms <= 0")
+ ABI_CHECK(tolkms > zero, "vs_tolkms <= 0")
 
  call cwtime(cpu, wall, gflops, "start")
 
@@ -1176,19 +1187,19 @@ subroutine ifc_speedofsound(ifc, crystal, qrad_tolms, ncid, comm)
    call ifc_fourq(ifc, crystal, qred, phfrqs, displ_cart, dwdq=dwdq)
 
    do nu=1,3
-     vs(ii, nu) = sqrt(sum(dwdq(1:3,asnu(nu)) ** 2)) * Bohr_meter / Time_Sec
+     vs(ii, nu) = sqrt(sum(dwdq(1:3,asnu(nu)) ** 2)) * Bohr_meter * 0.001_dp / Time_Sec
    end do
-   write(std_out,"(a,3es12.4,a)")" ||vs(nu)||:",vs(ii,:), " [m/s]"
+   write(std_out,"(a,3es12.4,a)")" ||vs(nu)||:",vs(ii,:), " [km/s]"
 
    qvers_cart = matmul(crystal%gprimd, qvers_red) * two_pi
    do nu=1,3
-     vs(ii, nu) = dot_product(dwdq(1:3,asnu(nu)), qvers_cart) * Bohr_meter / Time_Sec
+     vs(ii, nu) = dot_product(dwdq(1:3,asnu(nu)), qvers_cart) * Bohr_meter * 0.001_dp / Time_Sec
    end do
-   write(std_out,"(a,3es12.4,a)")" <q|vs(nu)>:",vs(ii,:), " [m/s]"
+   write(std_out,"(a,3es12.4,a)")" <q|vs(nu)>:",vs(ii,:), " [km/s]"
 
    !do nu=1,3
    !  write(std_out,"(a,3es12.4,a)")" vs(nu)_vect_red:",&
-   !     matmul(crystal%gprimd, dwdq(1:3,asnu(nu))) * Bohr_meter / Time_Sec, " [m/s]"
+   !     matmul(crystal%gprimd, dwdq(1:3,asnu(nu))) * Bohr_meter * 0.001_dp / Time_Sec, " [km/s]"
    !end do
  end do
 
@@ -1215,7 +1226,8 @@ subroutine ifc_speedofsound(ifc, crystal, qrad_tolms, ncid, comm)
      end do
    end do
 
-   quad = quad * Bohr_meter / Time_Sec
+!  Will use km/sec unit for echo purposes
+   quad = quad * Bohr_meter * 0.001_dp / Time_Sec
    call xmpi_sum(quad, comm, ierr)
    call xmpi_sum(num_negw, comm, ierr)
    call lebedev_free(lgrid)
@@ -1224,28 +1236,34 @@ subroutine ifc_speedofsound(ifc, crystal, qrad_tolms, ncid, comm)
      " Lebedev-Laikov grid: ",igrid,", npts: ", npts, " vs_sphavg(ac_modes): ",quad, " <vs>: ",sum(quad)/3
 
    if (igrid > 1) then
-     if (abs(sum(quad - prev_quad)/3) < tolms) then
-        converged = converged + 1; if (converged == 2) exit
+     diff = zero
+     do nu=1,3
+       diff = diff + abs(quad(nu) - prev_quad(nu)) / 3
+     end do
+     !if (abs(sum(quad - prev_quad)/3) < tolkms) then
+     if (diff < tolkms) then
+        converged = converged + 1
      else
         converged = 0
      end if
    end if
    prev_quad = quad
    vs(7, :) = quad
+   if (converged == 2) exit
  end do ! igrid
 
  if (my_rank == master) then
    ! vs_err: 1 if not converged, < 0 if negative freqs, == 0 if success.
    vs_ierr = 0
    do ii=1,3
-     write(ab_out,"(a,3es12.4,a,i1)")" Speed of sound:",vs(ii,:)," [m/s] along reduced direction: ",ii
+     write(ab_out,"(a,3es12.4,a,i1)")" Speed of sound:",vs(ii,:)," [km/s] along reduced direction: ",ii
    end do
    write(ab_out,'(2(a,es12.4),a,i0)') &
-     " Lebedev-Laikov integration with qradius: ", qrad, " tolms: ",tolms, " [m/s], npts: ", npts
-   write(ab_out,"(a,3es12.4,a,es12.4)")" Spherical average:",vs(7,:)," [m/s], ",sum(vs(7,:))/3
+     " Lebedev-Laikov integration with qradius: ", qrad, " tolkms: ",tolkms, " [km/s], npts: ", npts
+   write(ab_out,"(a,3es12.4,a,es12.4)")" Spherical average:",vs(7,:)," [km/s], ",sum(vs(7,:))/3
    if (converged /= 2) then
      vs_ierr = 1
-     write(msg,'(a,es12.4,a)')" WARNING: Results are not converged within: ",tolms, " [m/s]"
+     write(msg,'(a,es12.4,a)')" WARNING: Results are not converged within: ",tolkms, " [km/s]"
      call wrtout(ab_out, msg)
      MSG_WARNING(msg)
    end if
@@ -1265,7 +1283,7 @@ subroutine ifc_speedofsound(ifc, crystal, qrad_tolms, ncid, comm)
      NCF_CHECK(ncerr)
      ncerr = nctk_def_iscalars(ncid, [character(len=nctk_slen) :: "vsound_ierr"])
      NCF_CHECK(ncerr)
-     ncerr = nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: "vsound_qrad", "vsound_tolms"])
+     ncerr = nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: "vsound_qrad", "vsound_tolkms"])
      NCF_CHECK(ncerr)
      ncerr = nctk_def_arrays(ncid, [nctkarr_t("asnu", "i", "three")], defmode=.True.)
      NCF_CHECK(ncerr)
@@ -1273,7 +1291,7 @@ subroutine ifc_speedofsound(ifc, crystal, qrad_tolms, ncid, comm)
      NCF_CHECK(nctk_set_datamode(ncid))
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vsound_ierr"), vs_ierr))
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vsound_qrad"), qrad))
-     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vsound_tolms"), tolms))
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vsound_tolkms"), tolkms))
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vsound"), vs))
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "asnu"), asnu))
 #endif
@@ -1308,8 +1326,10 @@ end subroutine ifc_speedofsound
 !!  ifc%atmfrc(2,3,natom,3,natom,nrpt)= ASR-imposed Interatomic Forces
 !!
 !! PARENTS
+!!      m_ifc
 !!
 !! CHILDREN
+!!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
 !!
 !! SOURCE
 
@@ -1333,16 +1353,15 @@ subroutine ifc_autocutoff(ifc, crystal, comm)
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master=0
- integer :: iq_ibz,ierr,my_rank,nprocs,ii,nsphere,num_negw,jl,ju,jm,jj,natom,nrpt
+ integer :: iq_ibz,ierr,my_rank,nprocs,ii,nsphere,num_negw,jl,ju,jm,natom,nrpt
  real(dp),parameter :: rifcsph0=zero
  real(dp) :: adiff,qrad,min_negw,xval,rcut_min
- character(len=500) :: msg
  type(lebedev_t) :: lgrid
 !arrays
  real(dp) :: displ_cart(2*3*ifc%natom*3*ifc%natom)
  real(dp) :: qred(3),qred_vers(3),phfrqs(3*ifc%natom) !,dwdq(3,3*ifc%natom)
  real(dp),allocatable :: ref_phfrq(:,:),cut_phfrq(:,:)
- real(dp),allocatable :: save_wghatm(:,:,:),save_atmfrc(:,:,:,:,:,:)
+ real(dp),allocatable :: save_wghatm(:,:,:),save_atmfrc(:,:,:,:,:)
 
 ! *********************************************************************
 
@@ -1358,7 +1377,7 @@ subroutine ifc_autocutoff(ifc, crystal, comm)
  call xmpi_sum(ref_phfrq, comm, ierr)
 
  ABI_MALLOC(save_wghatm, (natom,natom,nrpt))
- ABI_MALLOC(save_atmfrc, (2,3,natom,3,natom,ifc%nrpt))
+ ABI_MALLOC(save_atmfrc, (3,natom,3,natom,ifc%nrpt))
  save_wghatm = ifc%wghatm; save_atmfrc = ifc%atmfrc
 
  ABI_MALLOC(cut_phfrq, (3*natom, ifc%nqibz))
@@ -1472,8 +1491,7 @@ end subroutine ifc_autocutoff
 !!      m_ifc
 !!
 !! CHILDREN
-!!      cwtime,ifc_fourq,phbspl_evalq,phbspl_free,random_number,skw_eval_bks
-!!      skw_free,wrap2_pmhalf,xmpi_sum
+!!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
 !!
 !! SOURCE
 
@@ -1611,8 +1629,7 @@ end subroutine corsifc9
 !!      anaddb
 !!
 !! CHILDREN
-!!      cwtime,ifc_fourq,phbspl_evalq,phbspl_free,random_number,skw_eval_bks
-!!      skw_free,wrap2_pmhalf,xmpi_sum
+!!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
 !!
 !! SOURCE
 
@@ -1638,10 +1655,11 @@ subroutine ifc_write(Ifc,ifcana,atifc,ifcout,prt_ifc,ncid)
 
 !Local variables -------------------------
 !scalars
- integer :: ia,ii,ncerr,iatifc,ifcout1,mu,nu,iout, irpt
-! unit number to print out ifc information for dynamical matrix (AI2PS)
+ integer :: ia,ib,ii,ncerr,iatifc,ifcout1,mu,nu,iout, irpt
+! unit number to print out ifc information for dynamical matrix (AI2PS) 
  integer :: unit_ifc, unit_tdep
  real(dp) :: detdlt
+ real(dp) :: maxdist_tdep
  character(len=500) :: message
  character(len=4) :: str1, str2
 !arrays
@@ -1726,8 +1744,12 @@ subroutine ifc_write(Ifc,ifcana,atifc,ifcout,prt_ifc,ncid)
 &   ' constants in TDEP format. This is because prt_ifc==1. '
    ! Print necessary stuff for TDEP
    write(unit_tdep,"(1X,I10,15X,'How many atoms per unit cell')") Ifc%natom
-
-   write(unit_tdep,"(1X,F20.15,5X,'Realspace cutoff (A)')") maxval(dist)*Bohr_Ang+1E-5_dp
+ 
+   ! look at all pairs, find furthest one with weight 1
+!   do ia 
+!Ifc%wghatm(ia,ib,irpt)
+   maxdist_tdep = Ifc%r_inscribed_sphere !maxval(dist)*0.8_dp
+   write(unit_tdep,"(1X,F20.15,5X,'Realspace cutoff (A)')") maxdist_tdep*Bohr_Ang
  end if
 
 #ifdef HAVE_NETCDF
@@ -1805,21 +1827,29 @@ subroutine ifc_write(Ifc,ifcana,atifc,ifcout,prt_ifc,ncid)
 
 
      if (prt_ifc == 1) then
-       write(unit_tdep,"(1X,I10,15X,'How many neighbours does atom ',I3,' have')") ifcout1, ia
+       do ii=1,ifcout1
+         if (wkdist(ii) > maxdist_tdep) exit
+       end do
+       ii = ii - 1
+       write(unit_tdep,"(1X,I10,15X,'How many neighbours does atom ',I3,' have')") ii, ia
 
        do ii=1,ifcout1
+         ib = indngb(ii)
+         irpt = (list(ii)-1)/Ifc%natom+1
+         ! limit printing to maximum distance for tdep
+         if (wkdist(ii) > maxdist_tdep) cycle
+
          !TDEP
          call int2char4(ii, str1)
          call int2char4(ia, str2)
-         write(unit_tdep,"(1X,I10,15X,a,a,a,a)") indngb(ii), &
+         write(unit_tdep,"(1X,I10,15X,a,a,a,a)") ib, &
 &            'In the unit cell, what is the index of neighbour ', &
 &            trim(str1), " of atom ", trim(str2)
          ! The lattice vector needs to be in reduced coordinates?
          ! TODO: check whether this is correct for TDEP: might need just lattice
          ! vector part and not full vector, and could be in integers instead of
          ! cartesian vector...
-         irpt=(list(ii)-1)/Ifc%natom+1
-         write(unit_tdep,'(3es28.16)') matmul(Ifc%rpt(1:3,irpt),Ifc%gprim)
+         write (unit_tdep,'(3es28.16)') matmul(Ifc%rpt(1:3,irpt),Ifc%gprim) 
 
          !AI2PS
          write(unit_ifc,'(i6,i6)') ia,ii
@@ -1828,8 +1858,9 @@ subroutine ifc_write(Ifc,ifcana,atifc,ifcout,prt_ifc,ncid)
            !TDEp
            ! And the actual short ranged forceconstant: TODO: check if
            ! a transpose is needed or a swap between the nu and the mu
-           write(unit_tdep,'(3f28.16)') (sriaf(nu,mu,ii)*Ha_eV/amu_emass, mu=1, 3)
-
+           !write(unit_tdep,'(3f28.16)') (sriaf(nu,mu,ii)*Ha_eV/amu_emass, mu=1, 3)
+           write(unit_tdep,'(3f28.16)') (Ifc%short_atmfrc(mu,ia,nu,ib,irpt)*Ha_eV/Bohr_Ang**2, mu=1, 3)
+           
            !AI2PS
            write(unit_ifc,'(3f28.16)')(rsiaf(nu,mu,ii),mu=1,3)
          end do
@@ -1959,8 +1990,7 @@ end subroutine ifc_write
 !!      m_ifc
 !!
 !! CHILDREN
-!!      cwtime,ifc_fourq,phbspl_evalq,phbspl_free,random_number,skw_eval_bks
-!!      skw_free,wrap2_pmhalf,xmpi_sum
+!!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
 !!
 !! SOURCE
 
@@ -2082,7 +2112,7 @@ implicit none
      ! without taking into account the dipole-dipole interaction
      do mu=1,3
        do nu=1,3
-         rsiaf(mu,nu,ii)=Ifc%atmfrc(1,mu,ia,nu,ib,irpt) * Ifc%wghatm(ia,ib,irpt)
+         rsiaf(mu,nu,ii)=Ifc%atmfrc(mu,ia,nu,ib,irpt) * Ifc%wghatm(ia,ib,irpt)
        end do
      end do
      ! Output of the ifcs in cartesian coordinates
@@ -2091,8 +2121,7 @@ implicit none
          write(iout, '(1x,3f9.5)' )(rsiaf(mu,nu,ii)+tol10,mu=1,3)
 !       transfer short range and long range
          do mu=1,3
-           Ifc%short_atmfrc(1,mu,ia,nu,ib,irpt) = rsiaf(mu,nu,ii) + tol10
-           Ifc%ewald_atmfrc(1,mu,ia,nu,ib,irpt) = zero
+           Ifc%short_atmfrc(mu,ia,nu,ib,irpt) = rsiaf(mu,nu,ii) + tol10
          end do
 
        end do
@@ -2183,7 +2212,7 @@ implicit none
      ! "total" force constants (=real space FC)
      do mu=1,3
        do nu=1,3
-         sriaf(mu,nu,ii)=Ifc%atmfrc(1,mu,ia,nu,ib,irpt)* Ifc%wghatm(ia,ib,irpt)
+         sriaf(mu,nu,ii)=Ifc%atmfrc(mu,ia,nu,ib,irpt)* Ifc%wghatm(ia,ib,irpt)
          rsiaf(mu,nu,ii)=ewiaf1(mu,nu)+sriaf(mu,nu,ii)
        end do
      end do
@@ -2198,8 +2227,8 @@ implicit none
 
 !       transfer short range and long range
          do mu=1,3
-           Ifc%short_atmfrc(1,mu,ia,nu,ib,irpt) = sriaf(mu,nu,ii) + tol10
-           Ifc%ewald_atmfrc(1,mu,ia,nu,ib,irpt) = ewiaf1(mu,nu) + tol10
+           Ifc%short_atmfrc(mu,ia,nu,ib,irpt) = sriaf(mu,nu,ii) + tol10
+           Ifc%ewald_atmfrc(mu,ia,nu,ib,irpt) = ewiaf1(mu,nu) + tol10
          end do
        end do
      end if
@@ -2283,8 +2312,7 @@ end subroutine ifc_getiaf
 !!      m_ifc
 !!
 !! CHILDREN
-!!      cwtime,ifc_fourq,phbspl_evalq,phbspl_free,random_number,skw_eval_bks
-!!      skw_free,wrap2_pmhalf,xmpi_sum
+!!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
 !!
 !! SOURCE
 
@@ -2487,8 +2515,7 @@ end subroutine omega_decomp
 !!      anaddb,eph
 !!
 !! CHILDREN
-!!      cwtime,ifc_fourq,phbspl_evalq,phbspl_free,random_number,skw_eval_bks
-!!      skw_free,wrap2_pmhalf,xmpi_sum
+!!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
 !!
 !! SOURCE
 
@@ -2613,8 +2640,7 @@ end subroutine ifc_outphbtrap
 !!      eph
 !!
 !! CHILDREN
-!!      cwtime,ifc_fourq,phbspl_evalq,phbspl_free,random_number,skw_eval_bks
-!!      skw_free,wrap2_pmhalf,xmpi_sum
+!!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
 !!
 !! SOURCE
 
@@ -2647,7 +2673,7 @@ subroutine ifc_printbxsf(ifc, cryst, ngqpt, nqshft, qshft, path, comm)
  character(len=500) :: msg
 !arrays
  integer :: qptrlatt(3,3),dummy_symafm(cryst%nsym)
- real(dp) :: phfrq(3*cryst%natom),displ_cart(2,3*cryst%natom,3*cryst%natom)
+ real(dp) :: displ_cart(2,3*cryst%natom,3*cryst%natom)
  real(dp),allocatable :: qibz(:,:),wtq(:),qbz(:,:),freqs_qibz(:,:)
 
 ! *********************************************************************
@@ -2746,7 +2772,7 @@ type(phbspl_t) function ifc_build_phbspl(ifc, cryst, ngqpt, nshiftq, shiftq, ord
 !arrays
  integer :: qptrlatt(3,3)
  integer,allocatable :: bz2ibz(:,:)
- real(dp) :: phfrq(3*cryst%natom),qpt(3),displ_cart(2,3,cryst%natom,3*cryst%natom)
+ real(dp) :: displ_cart(2,3,cryst%natom,3*cryst%natom)
  real(dp),allocatable :: xvec(:),yvec(:),zvec(:),xyzdata(:,:,:)
  real(dp),allocatable :: ibz_freqs(:,:),ibzdata_qnu(:,:)
  real(dp),allocatable :: wtq(:),qbz(:,:),qfull(:,:),qibz(:,:)
@@ -2913,8 +2939,7 @@ end function ifc_build_phbspl
 !!      m_ifc
 !!
 !! CHILDREN
-!!      cwtime,ifc_fourq,phbspl_evalq,phbspl_free,random_number,skw_eval_bks
-!!      skw_free,wrap2_pmhalf,xmpi_sum
+!!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
 !!
 !! SOURCE
 
@@ -2990,8 +3015,7 @@ end subroutine phbspl_evalq
 !!      m_ifc
 !!
 !! CHILDREN
-!!      cwtime,ifc_fourq,phbspl_evalq,phbspl_free,random_number,skw_eval_bks
-!!      skw_free,wrap2_pmhalf,xmpi_sum
+!!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
 !!
 !! SOURCE
 
@@ -3179,8 +3203,7 @@ end function ifc_build_skw
 !!      eph
 !!
 !! CHILDREN
-!!      cwtime,ifc_fourq,phbspl_evalq,phbspl_free,random_number,skw_eval_bks
-!!      skw_free,wrap2_pmhalf,xmpi_sum
+!!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
 !!
 !! SOURCE
 
@@ -3210,7 +3233,7 @@ subroutine ifc_test_phinterp(ifc, cryst, ngqpt, nshiftq, shiftq, ords, comm, tes
 !local variables-------------------------------
 !scalars
  integer,parameter :: master=0
- integer :: iq,nq,natom3,my_rank,nprocs,ierr,nu,ii
+ integer :: iq,nq,natom3,my_rank,nprocs,ierr,nu
  real(dp) :: mare_bspl,mae_bspl,mare_skw,mae_skw,dq
  real(dp) :: cpu,wall,gflops,cpu_fourq,wall_fourq,gflops_fourq
  real(dp) :: cpu_bspl,wall_bspl,gflops_bspl,cpu_skw,wall_skw,gflops_skw
@@ -3219,11 +3242,10 @@ subroutine ifc_test_phinterp(ifc, cryst, ngqpt, nshiftq, shiftq, ords, comm, tes
  type(skw_t) :: skw
  type(kpath_t) :: qpath
 !arrays
- integer :: imax(1)
- real(dp) :: phfrq(3*cryst%natom),ofreqs(3*cryst%natom),qpt(3),wnext(3*cryst%natom)
+ real(dp) :: phfrq(3*cryst%natom),ofreqs(3*cryst%natom),qpt(3)
  real(dp) :: adiff_mev(3*cryst%natom),rel_err(3*cryst%natom)
- real(dp) :: displ_cart(2,3,cryst%natom,3*cryst%natom),qvers_cart(3),qvers_red(3),qstep(3)
- real(dp) :: qred(3),shift(3),vals4(4),dwdq(3,3*cryst%natom)
+ real(dp) :: displ_cart(2,3,cryst%natom,3*cryst%natom),qvers_cart(3),qvers_red(3)
+ real(dp) :: vals4(4),dwdq(3,3*cryst%natom)
  real(dp) :: q1(3),q2(3)
  real(dp) :: bounds(3,5)
  real(dp),allocatable :: winterp(:,:),wdata(:,:)
@@ -3367,6 +3389,118 @@ subroutine ifc_test_phinterp(ifc, cryst, ngqpt, nshiftq, shiftq, ords, comm, tes
  MSG_COMMENT("ifc_test_phinterp done")
 
 end subroutine ifc_test_phinterp
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_gruneisen/ifc_calcnwrite_nana_terms
+!! NAME
+!!  ifc_calcnwrite_nana_terms
+!!
+!! FUNCTION
+!!  Compute frequencies and phonon displacement for q-->0 in the presence of non-analytical behaviour.
+!!
+!! INPUTS
+!!  nph2l=Number of qpoints.
+!!  qph2l(3,nph2l)=List of phonon wavevector directions along which the non-analytical correction
+!!    to the Gamma-point phonon frequencies will be calculated
+!!    The direction is in CARTESIAN COORDINATES
+!!  qnrml2(nph2l)=Normalizatin factor.
+!!
+!! OUTPUT
+!!  Only writing.
+!!
+!! NOTES:
+!!  This routine should be called by master node and when ifcflag == 1.
+!!
+!! PARENTS
+!!      m_gruneisen,m_phonons
+!!
+!! CHILDREN
+!!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
+!!
+!! SOURCE
+
+subroutine ifc_calcnwrite_nana_terms(ifc, crystal, nph2l, qph2l, qnrml2, ncid)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'ifc_calcnwrite_nana_terms'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+ integer,intent(in) :: nph2l, ncid
+ type(ifc_type),intent(in) :: ifc
+ type(crystal_t),intent(in) :: crystal
+!arrays
+ real(dp),intent(in) :: qph2l(3, nph2l), qnrml2(nph2l)
+
+!Local variables-------------------------------
+!scalars
+ integer :: iphl2
+ !character(len=500) :: msg
+!arrays
+ real(dp) :: qphnrm(3),qphon(3,3)
+ real(dp),allocatable :: displ_cart(:,:,:),phfrq(:),d2cart(:,:,:),eigvec(:,:,:),eigval(:)
+
+! ************************************************************************
+
+ if (nph2l == 0) return
+
+ !Now treat the second list of vectors (only at the Gamma point, but can include non-analyticities)
+ ABI_MALLOC(phfrq, (3*crystal%natom))
+ ABI_MALLOC(displ_cart, (2, 3*crystal%natom, 3*crystal%natom))
+ ABI_MALLOC(d2cart, (2, 3*ifc%mpert, 3*ifc%mpert))
+ ABI_MALLOC(eigvec, (2, 3*crystal%natom, 3*crystal%natom))
+ ABI_MALLOC(eigval, (3*crystal%natom))
+
+ ! Before examining every direction or the dielectric tensor, generates the dynamical matrix at gamma
+ qphon(:,1)=zero; qphnrm(1)=zero
+
+ ! Generation of the dynamical matrix in cartesian coordinates
+ ! Get d2cart using the interatomic forces and the
+ ! long-range coulomb interaction through Ewald summation
+ call gtdyn9(ifc%acell,ifc%atmfrc,ifc%dielt,ifc%dipdip, &
+   ifc%dyewq0,d2cart,crystal%gmet,ifc%gprim,ifc%mpert,crystal%natom, &
+   ifc%nrpt,qphnrm(1),qphon,crystal%rmet,ifc%rprim,ifc%rpt, &
+   ifc%trans,crystal%ucvol,ifc%wghatm,crystal%xred,ifc%zeff)
+
+#ifdef HAVE_NETCDF
+ iphl2 = 0
+ call nctk_defwrite_nonana_terms(ncid, iphl2, nph2l, qph2l, crystal%natom, phfrq, displ_cart, "define")
+#endif
+
+ ! Examine every wavevector of this list
+ do iphl2=1,nph2l
+   ! Initialisation of the phonon wavevector
+   qphon(:,1) = qph2l(:,iphl2)
+   qphnrm(1) = qnrml2(iphl2)
+
+   ! Calculation of the eigenvectors and eigenvalues of the dynamical matrix
+   call dfpt_phfrq(ifc%amu,displ_cart,d2cart,eigval,eigvec,crystal%indsym, &
+      ifc%mpert,crystal%nsym,crystal%natom,crystal%nsym,crystal%ntypat,phfrq,qphnrm(1),qphon, &
+      crystal%rprimd,ifc%symdynmat,crystal%symrel,crystal%symafm,crystal%typat,crystal%ucvol)
+
+   ! Write the phonon frequencies
+   !call dfpt_prtph(displ_cart,inp%eivec,inp%enunit,ab_out,natom,phfrq,qphnrm(1),qphon)
+
+#ifdef HAVE_NETCDF
+   ! Loop is not MPI-parallelized --> no need for MPI-IO API.
+   call nctk_defwrite_nonana_terms(ncid, iphl2, nph2l, qph2l, crystal%natom, phfrq, displ_cart, "write")
+#endif
+ end do ! iphl2
+
+ ABI_FREE(phfrq)
+ ABI_FREE(displ_cart)
+ ABI_FREE(d2cart)
+ ABI_FREE(eigvec)
+ ABI_FREE(eigval)
+
+end subroutine ifc_calcnwrite_nana_terms
 !!***
 
 !----------------------------------------------------------------------

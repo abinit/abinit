@@ -12,7 +12,7 @@
  Corning Inc. and other collaborators, see ~abinit/doc/developers/contributors.txt .
  Please read ~abinit/doc/users/acknowledgments.html for suggested
  acknowledgments of the ABINIT effort.
- For more information, see http://www.abinit.org .
+ For more information, see https://www.abinit.org .
 
 .Starting date : Wed 28 May 2008.
   
@@ -79,6 +79,7 @@ P This job should need less than                      24.956 Mbytes of memory.
  accesswff         1
      acell    1.0366000000E+01  1.0366000000E+01  1.0366000000E+01 Bohr
        amu    1.20110000E+01
+    densfor_pred         0
     diemac    1.20000000E+01
       ecut    1.00000000E+01 Hartree
     enunit         2
@@ -88,7 +89,6 @@ P This job should need less than                      24.956 Mbytes of memory.
     getwfk1        0
     getwfk2       -1
     getwfk3        0
-    densfor_pred         0
     jdtset      1    2    3
        kpt    5.00000000E-01  2.50000000E-01  5.00000000E-01
    kptrlen    7.32986889E+00
@@ -1105,6 +1105,7 @@ P newkpt: treating     12 bands with npw=     105 for ikpt=   1 by node    0
  accesswff         1
      acell    1.0366000000E+01  1.0366000000E+01  1.0366000000E+01 Bohr
        amu    1.20110000E+01
+    densfor_pred         0
     diemac    1.20000000E+01
       ecut    1.00000000E+01 Hartree
     enunit         2
@@ -1123,7 +1124,6 @@ P newkpt: treating     12 bands with npw=     105 for ikpt=   1 by node    0
     getwfk1        0
     getwfk2       -1
     getwfk3        0
-    densfor_pred         0
     jdtset      1    2    3
        kpt    5.00000000E-01  2.50000000E-01  5.00000000E-01
    kptrlen    7.32986889E+00

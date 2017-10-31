@@ -57,7 +57,7 @@
 !!  kg(3,mpw*mkmem)=reduced planewave coordinates at k
 !!  kg1(3,mpw1*mk1mem)=reduced planewave coordinates at k+q, with RF k points
 !!  kpt_rbz(3,nkpt_rbz)=reduced coordinates of k points.
-!!  kxc(nfftf,nkxc)=exchange and correlation kernel (see rhohxc.f)
+!!  kxc(nfftf,nkxc)=exchange and correlation kernel (see rhotoxc.f)
 !!  mgfftf=maximum size of 1D FFTs for the "fine" grid (see NOTES in respfn.F90)
 !!  mkmem =number of k points treated by this node (GS data)
 !!  mkqmem =number of k+q points which can fit in memory (GS data); 0 if use disk
@@ -173,15 +173,15 @@
 !!
 !! CHILDREN
 !!      ab7_mixing_deallocate,ab7_mixing_new,ab7_mixing_use_disk_cache,appdig
-!!      destroy_efield,dfpt_etot,dfpt_newvtr,dfpt_nselt,dfpt_nstdy,dfpt_nstpaw
-!!      dfpt_rhofermi,dfpt_rhotov,dfpt_vtorho,dfptff_bec,dfptff_die,dfptff_ebp
-!!      dfptff_edie,dfptff_initberry,fftdatar_write_from_hdr,fourdp,getcut
-!!      hdr_update,metric,newfermie1,paw_an_free,paw_an_init,paw_an_nullify
-!!      paw_an_reset_flags,paw_ij_free,paw_ij_init,paw_ij_nullify
-!!      paw_ij_reset_flags,pawcprj_alloc,pawcprj_free,pawcprj_getdim,pawdenpot
-!!      pawdij,pawdijfr,pawmknhat,pawnhatfr,pawrhoij_alloc,pawrhoij_free
-!!      qmatrix,rf2_getidirs,scprqt,status,symdij,timab,wfk_close,wrtout
-!!      xmpi_barrier,xmpi_isum,xmpi_sum,xmpi_wait
+!!      calcdensph,destroy_efield,dfpt_etot,dfpt_newvtr,dfpt_nselt,dfpt_nstdy
+!!      dfpt_nstpaw,dfpt_rhofermi,dfpt_rhotov,dfpt_vtorho,dfptff_bec,dfptff_die
+!!      dfptff_ebp,dfptff_edie,dfptff_initberry,fftdatar_write_from_hdr,fourdp
+!!      getcut,hdr_update,metric,newfermie1,paw_an_free,paw_an_init
+!!      paw_an_nullify,paw_an_reset_flags,paw_ij_free,paw_ij_init
+!!      paw_ij_nullify,paw_ij_reset_flags,pawcprj_alloc,pawcprj_free
+!!      pawcprj_getdim,pawdenpot,pawdij,pawdijfr,pawmknhat,pawnhatfr
+!!      pawrhoij_alloc,pawrhoij_free,qmatrix,rf2_getidirs,scprqt,status,symdij
+!!      timab,wfk_close,wrtout,xmpi_barrier,xmpi_isum,xmpi_sum,xmpi_wait
 !!
 !! SOURCE
 
@@ -236,7 +236,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  use m_paw_an,   only : paw_an_type, paw_an_init, paw_an_free, paw_an_nullify, paw_an_reset_flags
  use m_paw_ij,   only : paw_ij_type, paw_ij_init, paw_ij_free, paw_ij_nullify, paw_ij_reset_flags
  use m_pawfgrtab,only : pawfgrtab_type
- use m_pawrhoij, only : pawrhoij_type, pawrhoij_alloc, pawrhoij_free, pawrhoij_io
+ use m_pawrhoij, only : pawrhoij_type, pawrhoij_alloc, pawrhoij_free, pawrhoij_io, pawrhoij_get_nspden
  use m_pawcprj,  only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_getdim
  use m_pawdij,   only : pawdij, pawdijfr, symdij
  use m_pawfgr,   only : pawfgr_type
@@ -346,7 +346,6 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  integer :: my_quit,quitsum_request,timelimit_exit,varid,ncerr,ncid
  integer ABI_ASYNC :: quitsum_async
  integer :: rdwrpaw,spaceComm,sz1,sz2,usexcnhat,Z_kappa
- integer :: mpi_comm_sphgrid
  logical :: need_fermie1,paral_atom,use_nhat_gga
  real(dp) :: wtime_step,now,prev
  real(dp) :: born,born_bar,boxcut,deltae,diffor,diel_q,dum,ecut,ecutf,elast
@@ -372,6 +371,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  real(dp),allocatable :: fcart(:,:),nhat1(:,:),nhat1gr(:,:,:),nhatfermi(:,:),nvresid1(:,:),nvresid2(:,:)
  real(dp),allocatable :: qmat(:,:,:,:,:,:),resid2(:),rhog2(:,:),rhor2(:,:),rhorfermi(:,:)
  real(dp),allocatable :: susmat(:,:,:,:,:),vhartr1(:),vxc1(:,:)
+ real(dp),allocatable :: vhartr1_tmp(:,:)
  real(dp),allocatable,target :: vtrial1(:,:),vtrial2(:,:)
  real(dp),pointer :: vtrial1_tmp(:,:)
  type(pawcprj_type),allocatable :: cprj1(:,:)
@@ -475,8 +475,8 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
    call paw_ij_nullify(paw_ij1)
 
    has_dijfr=0;if (ipert/=dtset%natom+1.and.ipert/=dtset%natom+10) has_dijfr=1
-   call paw_an_init(paw_an1,dtset%natom,dtset%ntypat,0,dtset%nspden,cplex,dtset%pawxcdev,&
-&   dtset%typat,pawang,pawtab,has_vxc=1,&
+   call paw_an_init(paw_an1,dtset%natom,dtset%ntypat,0,dtset%nspden,&
+&   cplex,dtset%pawxcdev,dtset%typat,pawang,pawtab,has_vxc=1,&
 &   comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
 
    call paw_ij_init(paw_ij1,cplex,dtset%nspinor,dtset%nsppol,dtset%nspden,0,dtset%natom,&
@@ -493,7 +493,8 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 !Various allocations (potentials)
  ABI_ALLOCATE(vhartr1,(cplex*nfftf))
  ABI_ALLOCATE(vtrial1,(cplex*nfftf,nspden))
- ABI_ALLOCATE(vxc1,(cplex*nfftf,nspden*(1-usexcnhat)*psps%usepaw)) ! Not always needed
+! TODO: for non collinear case this should always be nspden, in NCPP case as well!!!
+ ABI_ALLOCATE(vxc1,(cplex*nfftf,nspden*(1-usexcnhat))) ! Not always needed
  vtrial1_tmp => vtrial1   ! this is to avoid errors when vtrial1_tmp is unused
 
 !Several parameters and arrays for the SCF mixing:
@@ -699,12 +700,12 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
        ABI_DATATYPE_ALLOCATE(pawrhoijfermi,(my_natom*psps%usepaw))
        if (psps%usepaw==1) then
          cplex_rhoij=max(cplex,dtset%pawcpxocc)
-         nspden_rhoij=dtset%nspden;if (dtset%pawspnorb>0.and.dtset%nspinor==2) nspden_rhoij=4
+         nspden_rhoij=pawrhoij_get_nspden(dtset%nspden,dtset%nspinor,dtset%pawspnorb)
          call pawrhoij_alloc(pawrhoijfermi,cplex_rhoij,nspden_rhoij,dtset%nspinor,&
 &         dtset%nsppol,dtset%typat,pawtab=pawtab,mpi_atmtab=mpi_enreg%my_atmtab,&
 &         comm_atom=mpi_enreg%comm_atom)
        end if
-      
+       
        call dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
 &       doccde_rbz,docckqde,dtfil,dtset,eigenq,eigen0,eigen1,fe1fixed,gmet,gprimd,idir,&
 &       indsy1,ipert,irrzon1,istwfk_rbz,kg,kg1,kpt_rbz,dtset%mband,mkmem,mkqmem,mk1mem,mpi_enreg,&
@@ -1125,7 +1126,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 & (ipert==dtset%natom+3.or.ipert==dtset%natom+4)) then
    call status(0,dtfil%filstat,iexit,level,'enter dfpt_nselt  ')
    call dfpt_nselt(blkflg,cg,cg1,cplex,&
-&   d2bbb,d2lo,d2nl,ecut,dtset%ecutsm,dtset%effmass,&
+&   d2bbb,d2lo,d2nl,ecut,dtset%ecutsm,dtset%effmass_free,&
 &   gmet,gprimd,gsqcut,idir,&
 &   ipert,istwfk_rbz,kg,kg1,kpt_rbz,kxc,dtset%mband,mgfftf,&
 &   mkmem,mk1mem,mpert,mpi_enreg,psps%mpsang,mpw,mpw1,&
@@ -1223,11 +1224,12 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 
   prtopt=1
   if(ipert==dtset%natom+5) prtopt=idir+1;
+    call calcdensph(gmet,mpi_enreg,dtset%natom,nfftf,ngfftf,nspden,&
+&     dtset%ntypat,ab_out,dtset%ratsph,rhor1,rprimd,dtset%typat,ucvol,xred,&
+&     prtopt,cplex,intgden=intgden,dentot=dentot)
+  endif
 
-  call calcdensph(gmet,mpi_enreg,dtset%natom,nfftf,ngfftf,nspden,&
-&   dtset%ntypat,ab_out,dtset%ratsph,rhor1,rprimd,dtset%typat,ucvol,xred,&
-&   prtopt,cplex,intgden=intgden,dentot=dentot)
- endif
+ end if
 
  if (iwrite_fftdatar(mpi_enreg)) then
    if (dtset%prtden>0) then
@@ -1245,6 +1247,39 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
    ! TODO: should we write pawrhoij1 or pawrhoij. Note that ioarr writes hdr%pawrhoij
    call fftdatar_write_from_hdr("first_order_potential",fi1o,dtset%iomode,hdr,&
    ngfftf,cplex,nfftf,dtset%nspden,vtrial1,mpi_enreg)
+
+! output files for perturbed potential components: vhartr1,vpsp1,vxc
+! NB: only 1 spin for these
+   if (dtset%prtvha > 0) then
+     rdwrpaw=0
+     ABI_ALLOCATE(vhartr1_tmp, (cplex*nfftf, dtset%nspden))
+     vhartr1_tmp = zero
+     vhartr1_tmp(:,1) = vhartr1(:) 
+     call appdig(pertcase,dtfil%fnameabo_vha,fi1o)
+     ! TODO: should we write pawrhoij1 or pawrhoij. Note that ioarr writes hdr%pawrhoij
+     call fftdatar_write_from_hdr("first_order_vhartree",fi1o,dtset%iomode,hdr,&
+     ngfftf,cplex,nfftf,dtset%nspden,vhartr1_tmp,mpi_enreg)
+     ABI_DEALLOCATE(vhartr1_tmp)
+   end if
+   
+
+! vpsp1 needs to be copied to a temp array - intent(inout) in fftdatar_write_from_hdr though I do not know why
+!   if (dtset%prtvpsp > 0) then
+!     rdwrpaw=0
+!     call appdig(pertcase,dtfil%fnameabo_vpsp,fi1o)
+!     ! TODO: should we write pawrhoij1 or pawrhoij. Note that ioarr writes hdr%pawrhoij
+!     call fftdatar_write_from_hdr("first_order_vpsp",fi1o,dtset%iomode,hdr,&
+!       ngfftf,cplex,nfftf,1,vpsp1,mpi_enreg)
+!   end if
+   
+   if (dtset%prtvxc > 0) then
+     rdwrpaw=0
+     call appdig(pertcase,dtfil%fnameabo_vxc,fi1o)
+     ! TODO: should we write pawrhoij1 or pawrhoij. Note that ioarr writes hdr%pawrhoij
+     call fftdatar_write_from_hdr("first_order_vxc",fi1o,dtset%iomode,hdr,&
+     ngfftf,cplex,nfftf,dtset%nspden,vxc1,mpi_enreg)
+   end if
+
 
    ! Add rhog1(G=0) to file
    if (mpi_enreg%me_g0 == 1) then
@@ -1268,7 +1303,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
      end if
    end if
 
- end if
+ end if ! iwrite_fftdatar(mpi_enreg)
 
 !All procs waiting here...
  if(mpi_enreg%paral_kgb==1)then

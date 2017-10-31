@@ -56,8 +56,8 @@
 !!      mover
 !!
 !! CHILDREN
-!!      hist2var,metric,mkrdim,var2hist,wrtout,xcart2xred,xfpack_f2vout
-!!      xfpack_vin2x,xfpack_x2vin,xred2xcart
+!!      fcart2fred,hist2var,metric,mkrdim,var2hist,wrtout,xcart2xred
+!!      xfpack_f2vout,xfpack_vin2x,xfpack_x2vin,xred2xcart
 !!
 !! SOURCE
 
@@ -534,7 +534,7 @@ subroutine pred_verlet(ab_mover,hist,ionmov,itime,ntime,zDEBUG,iexit)
 !### 08. Update the history with the prediction
 
 !Increase indexes
- hist%ihist=hist%ihist+1
+ hist%ihist=abihist_findIndex(hist,+1)
 
 !Fill the history with the variables
 !xred, acell, rprimd, vel

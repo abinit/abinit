@@ -525,7 +525,7 @@ subroutine dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eig
 !        Get first-order exchange-correlation potential (core-correction contribution only !)
          if(psps%n1xccc/=0)then
            option=0
-!FR EB non-collinear magnetism
+!FR SPr EB non-collinear magnetism
            if (nspden==4.and.present(rhor).and.(present(bxc)).and.present(vxc)) then
              optnc=1
              optxc=1

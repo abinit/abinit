@@ -1,5 +1,5 @@
-# Crystalline diamond : computation of the total energy
-#
+# Crystalline silicon : computation of the total energy using PBE0 functional, with nsppol 2
+# Norm-conserving
 
 ndtset 2         # Two datasets : 1) LDA 2) PBE0
 
@@ -51,7 +51,6 @@ ixc2 41           # Calculation with PBE0 functional
 getwfk2 -1        # Start from previous LDA wavefunctions to ease convergence
 
 #Additional (and facultative) variables for Hartree-Fock
-cgtyphf2 2         # always 2 for exact exchange
 nnsclohf2 1        # always 1 for exact exchange
 nkpthf2 27          # number of k-point in the full-BZ 
 nbandhf2 4         # number of occupied states
@@ -75,4 +74,5 @@ nbandhf2 4         # number of occupied states
 #%% authors = C. Martins
 #%% keywords = HF, PBE0, FAILS_IFMPI
 #%% description = Test of PBE0 in sequential case
+#%% topics = Hybrids
 #%%<END TEST_INFO>

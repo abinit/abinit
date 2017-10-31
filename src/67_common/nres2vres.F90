@@ -31,7 +31,7 @@
 !! nfft=(effective) number of FFT grid points (for this processor)
 !! ngfft(18)=contain all needed information about 3D FFT
 !! nhat(nfft,nspden*usepaw)= -PAW only- compensation density
-!! nkxc=second dimension of the array kxc, see rhohxc.F90 for a description
+!! nkxc=second dimension of the array kxc, see rhotoxc.F90 for a description
 !! nresid(nfft,nspden)= the input density residual
 !! n3xccc=dimension of the xccc3d array (0 or nfft).
 !! optnc=option for non-collinear magnetism (nspden=4):
@@ -62,7 +62,7 @@
 !!
 !! CHILDREN
 !!      dfpt_mkvxc,dfpt_mkvxc_noncoll,fourdp,hartre,metric,pawmknhat
-!!      psolver_hartree,rhohxc
+!!      psolver_hartree,rhotoxc
 !!
 !! SOURCE
 
@@ -80,6 +80,7 @@ subroutine nres2vres(dtset,gsqcut,izero,kxc,mpi_enreg,my_natom,nfft,ngfft,nhat,&
  use defs_abitypes
  use m_errors
  use m_xmpi
+ use m_xcdata
 
  use m_pawang,   only : pawang_type
  use m_pawtab,   only : pawtab_type
@@ -120,8 +121,10 @@ subroutine nres2vres(dtset,gsqcut,izero,kxc,mpi_enreg,my_natom,nfft,ngfft,nhat,&
 !Local variables-------------------------------
 !scalars
  integer :: cplex,ider,idir,ipert,ispden,nhatgrdim,nkxc_cur,option,me,nproc,comm,usexcnhat
+ logical :: has_nkxc_gga
  real(dp) :: dum,energy,m_norm_min,ucvol,vxcavg
  character(len=500) :: message
+ type(xcdata_type) :: xcdata
 !arrays
  integer :: nk3xc
  real(dp) :: dummy6(6),gmet(3,3),gprimd(3,3),qq(3),rmet(3,3)
@@ -132,6 +135,8 @@ subroutine nres2vres(dtset,gsqcut,izero,kxc,mpi_enreg,my_natom,nfft,ngfft,nhat,&
 ! *************************************************************************
 
 !Compatibility tests:
+ has_nkxc_gga=(nkxc==7.or.nkxc==19)
+
  if(optxc<-1.or.optxc>1)then
    write(message,'(a,i0)')' Wrong value for optxc ',optxc
    MSG_BUG(message)
@@ -147,7 +152,7 @@ subroutine nres2vres(dtset,gsqcut,izero,kxc,mpi_enreg,my_natom,nfft,ngfft,nhat,&
    MSG_BUG(message)
  end if
 
- if(dtset%nspden==4.and.dtset%xclevel==2.and.optxc==1.and.nkxc/=23)then
+ if(dtset%nspden==4.and.dtset%xclevel==2.and.optxc==1.and.(.not.has_nkxc_gga))then
    MSG_ERROR(' Wrong values for optxc and nkxc !')
  end if
 
@@ -158,8 +163,8 @@ subroutine nres2vres(dtset,gsqcut,izero,kxc,mpi_enreg,my_natom,nfft,ngfft,nhat,&
  nkxc_cur=0
  m_norm_min=EPSILON(0.0_dp)**2
  usexcnhat=0;if (usepaw==1) usexcnhat=maxval(pawtab(1:dtset%ntypat)%usexcnhat)
- if (dtset%xclevel==1.or.optxc==0) nkxc_cur=3-2*mod(dtset%nspden,2)
- if (dtset%xclevel==2.and.optxc==1) nkxc_cur=23
+ if (dtset%xclevel==1.or.optxc==0) nkxc_cur= 2*min(dtset%nspden,2)-1 ! LDA: nkxc=1,3
+ if (dtset%xclevel==2.and.optxc==1)nkxc_cur=12*min(dtset%nspden,2)-5 ! GGA: nkxc=7,19
  ABI_ALLOCATE(vhres,(nfft))
 
 !Compute different geometric tensor, as well as ucvol, from rprimd
@@ -176,7 +181,7 @@ subroutine nres2vres(dtset,gsqcut,izero,kxc,mpi_enreg,my_natom,nfft,ngfft,nhat,&
 
 !For GGA, has to recompute gradients of nhat
  nhatgrdim=0
- if ((nkxc==nkxc_cur.and.nkxc==23).or.(optxc==-1.and.nkxc==23).or.&
+ if ((nkxc==nkxc_cur.and.has_nkxc_gga).or.(optxc==-1.and.has_nkxc_gga).or.&
 & (optxc/=-1.and.nkxc/=nkxc_cur)) then
    if (usepaw==1.and.dtset%xclevel==2.and.usexcnhat>0.and.dtset%pawnhatxc>0) then
      nhatgrdim=1
@@ -202,7 +207,7 @@ subroutine nres2vres(dtset,gsqcut,izero,kxc,mpi_enreg,my_natom,nfft,ngfft,nhat,&
 
 !  Compute VH(n^res)(r)
    if (dtset%icoulomb == 0) then
-     call hartre(1,gmet,gsqcut,izero,mpi_enreg,nfft,ngfft,dtset%paral_kgb,qq,nresg,vhres)
+     call hartre(1,gsqcut,izero,mpi_enreg,nfft,ngfft,dtset%paral_kgb,nresg,rprimd,vhres)
    else
      comm=mpi_enreg%comm_cell
      nproc=xmpi_comm_size(comm)
@@ -250,11 +255,15 @@ subroutine nres2vres(dtset,gsqcut,izero,kxc,mpi_enreg,my_natom,nfft,ngfft,nhat,&
  
    option=2;if (dtset%xclevel==2.and.optxc==0) option=12
 
-!  to be adjusted for the call rhohxc
+   call hartre(1,gsqcut,izero,mpi_enreg,nfft,ngfft,dtset%paral_kgb,nresg,rprimd,vhres)
+   call xcdata_init(dtset%auxc_ixc,dtset%intxc,dtset%ixc,&
+&    dtset%nelect,dtset%tphysel,dtset%usekden,dtset%vdw_xc,dtset%xc_tb09_c,dtset%xc_denpos,xcdata)
+
+!  To be adjusted for the call to rhotoxc
    nk3xc=1
-   call rhohxc(dtset,energy,gsqcut,izero,kxc_cur,mpi_enreg,nfft,ngfft,&
-&   nhat,usepaw,nhatgr,nhatgrdim,nkxc_cur,nk3xc,dtset%nspden,n3xccc,option,nresg,&
-&   rhor0,rprimd,dummy6,usexcnhat,vhres,vresid,vxcavg,xccc3d,bxc=bxc_cur)  !vresid=work space
+   call rhotoxc(energy,kxc_cur,mpi_enreg,nfft,ngfft,&
+&   nhat,usepaw,nhatgr,nhatgrdim,nkxc_cur,nk3xc,dtset%nspden,n3xccc,option,dtset%paral_kgb,&
+&   rhor0,rprimd,dummy6,usexcnhat,vresid,vxcavg,xccc3d,xcdata,vhartr=vhres,bxc=bxc_cur)  !vresid=work space
    if (dtset%nspden/=4)  then
      ABI_DEALLOCATE(rhor0)
    end if

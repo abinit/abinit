@@ -107,7 +107,7 @@ subroutine pred_isothermal(ab_mover,hist,itime,mttk_vars,ntime,zDEBUG,iexit)
  real(dp) :: mttk_alc(3),mttk_alc2(3),mttk_blc(3),mttk_psh(3)
  real(dp) :: mttk_tv(3,3),mttk_vt(3,3),mttk_ubox(3,3)
  real(dp) :: mttk_uu(3),mttk_uv(3),mttk_veig(3)
- real(dp) :: acell(3),acell0(3),acell_next(3),favg_(3)
+ real(dp) :: acell(3),acell0(3),acell_next(3)
  real(dp) :: rprimd(3,3),rprimd0(3,3),rprim(3,3),rprimd_next(3,3),rprim_next(3,3)
  real(dp) :: gprimd(3,3)
  real(dp) :: gmet(3,3)
@@ -568,10 +568,10 @@ subroutine pred_isothermal(ab_mover,hist,itime,mttk_vars,ntime,zDEBUG,iexit)
 
 !write(std_out,*) 'isothermal 06'
 !##########################################################
-!### 06. Update the history with the prediction
+ !### 06. Update the history with the prediction
 
 !Increase indexes
- hist%ihist=hist%ihist+1
+ hist%ihist = abihist_findIndex(hist,+1)
 
 !Fill the history with the variables
 !xred, acell, rprimd, vel

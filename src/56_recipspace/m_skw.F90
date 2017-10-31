@@ -183,7 +183,7 @@ type(skw_t) function skw_new(cryst, params, cplex, nband, nkpt, nsppol, kpts, ei
 !scalars
  integer,parameter :: master=0,prtvol=1
  integer :: my_rank,nprocs,cnt,bstop,bstart,bcount,lwork
- integer :: ir,ik,ib,ii,jj,nr,band,spin,isym,ierr,i1,i2,i3,lpratio,nrwant
+ integer :: ir,ik,ib,ii,jj,nr,band,spin,ierr,lpratio,nrwant
  real(dp),parameter :: c1=0.25_dp,c2=0.25_dp
  real(dp) :: r2,r2min,mare,mae_meV,adiff_meV,rel_err,rcut,rsigma
  real(dp) :: cpu_tot,wall_tot,gflops_tot,cpu,wall,gflops,rval
@@ -416,6 +416,7 @@ end function skw_new
 !!      m_skw
 !!
 !! CHILDREN
+!!      get_irredg,sort_dp,xmpi_allgatherv,xmpi_split_work2_i4b,xmpi_sum
 !!
 !! SOURCE
 
@@ -471,9 +472,10 @@ end subroutine skw_print
 !!  [oder2(3,3)]=Second-order derivatives wrt k in reduced coordinates.
 !!
 !! PARENTS
-!!      m_ifc,m_skw
+!!      m_ebands,m_ifc,m_skw
 !!
 !! CHILDREN
+!!      get_irredg,sort_dp,xmpi_allgatherv,xmpi_split_work2_i4b,xmpi_sum
 !!
 !! SOURCE
 
@@ -573,6 +575,7 @@ end subroutine skw_eval_bks
 !! PARENTS
 !!
 !! CHILDREN
+!!      get_irredg,sort_dp,xmpi_allgatherv,xmpi_split_work2_i4b,xmpi_sum
 !!
 !! SOURCE
 
@@ -693,9 +696,10 @@ end subroutine skw_eval_fft
 !!  Free memory
 !!
 !! PARENTS
-!!      eph,m_ifc
+!!      m_ebands,m_ifc
 !!
 !! CHILDREN
+!!      get_irredg,sort_dp,xmpi_allgatherv,xmpi_split_work2_i4b,xmpi_sum
 !!
 !! SOURCE
 
@@ -767,6 +771,7 @@ end subroutine skw_free
 !!      m_skw
 !!
 !! CHILDREN
+!!      get_irredg,sort_dp,xmpi_allgatherv,xmpi_split_work2_i4b,xmpi_sum
 !!
 !! SOURCE
 
@@ -791,7 +796,6 @@ subroutine mkstar(skw, kpt, srk)
 !Local variables-------------------------------
 !scalars
  integer :: ir,isym
- logical :: found
 !arrays
  real(dp) :: sk(3)
 
@@ -828,6 +832,7 @@ end subroutine mkstar
 !!      m_skw
 !!
 !! CHILDREN
+!!      get_irredg,sort_dp,xmpi_allgatherv,xmpi_split_work2_i4b,xmpi_sum
 !!
 !! SOURCE
 
@@ -891,6 +896,7 @@ end subroutine mkstar_dk1
 !!      m_skw
 !!
 !! CHILDREN
+!!      get_irredg,sort_dp,xmpi_allgatherv,xmpi_split_work2_i4b,xmpi_sum
 !!
 !! SOURCE
 
@@ -968,8 +974,10 @@ end subroutine mkstar_dk2
 !!  or2vals(skw%nr)=||R||**2
 !!
 !! PARENTS
+!!      m_skw
 !!
 !! CHILDREN
+!!      get_irredg,sort_dp,xmpi_allgatherv,xmpi_split_work2_i4b,xmpi_sum
 !!
 !! SOURCE
 

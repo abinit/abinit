@@ -185,7 +185,7 @@
    ndgxdt=1
  end if
  if(cwaveprj(1,1)%ncpgr<ndgxdt+nd2gxdt) then
-     MSG_BUG('Incorrect size for ncpgr')
+   MSG_BUG('Incorrect size for ncpgr')
  end if
 !Eventually re-compute (k+G) vectors (and related data)
  if (nkpg==0) then
@@ -206,7 +206,6 @@
  cplex=2;if (istwf_k>1) cplex=1
  choice_=choice;if (cpopt==1) choice_=-choice
  signs=1;if (idir>0) signs=2
-
 !Eventually allocate temporary array for ph3d
  if (nloalg(2)<=0) then
    matblk=mincat

@@ -12,7 +12,7 @@
  Corning Inc. and other collaborators, see ~abinit/doc/developers/contributors.txt .
  Please read ~abinit/doc/users/acknowledgments.html for suggested
  acknowledgments of the ABINIT effort.
- For more information, see http://www.abinit.org .
+ For more information, see https://www.abinit.org .
 
 .Starting date : Mon  4 Apr 2016.
 - ( at 11h58 )
@@ -269,7 +269,7 @@ P          mk1mem3         16
     2   0.000   0.000    0   2.2761078        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     2.09673076353074    0.12648111154518    1.01742091001718   rchrg,fchrg,qchrg
- pspatm: epsatm=    0.22155260
+ pspatm : epsatm=    0.22155260
          --- l  ekb(1:nproj) -->
              0    2.540658
              1    1.353815
@@ -285,7 +285,7 @@ P          mk1mem3         16
     1   2.745   5.580    0   2.5306160        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     2.05731715564010    0.36322996461007    2.76014815959125   rchrg,fchrg,qchrg
- pspatm: epsatm=   27.20579911
+ pspatm : epsatm=   27.20579911
          --- l  ekb(1:nproj) -->
              0    0.838751
  pspatm: atomic psp has been read  and splines computed
@@ -426,6 +426,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      72.500      72.452
  Computing the ddk (Berry phase) for reciprocal vector:
   0.50000  0.00000  0.00000 (in reduced coordinates)
  -0.04710  0.04710  0.04710 (in cartesian coordinates - atomic units)
+ Mean square residual over all n,k,spin=   0.0000E+00; max=  0.0000E+00
 
  Summary of the results
  Electronic Berry phase     1.536759194E-02
@@ -436,7 +437,6 @@ _setup2: Arith. and geom. avg. npw (full set) are      72.500      72.452
            Polarization    -1.505234608E-02 (a.u. of charge)/bohr^2
            Polarization    -8.612163907E-01 C/m^2
 
- Mean square residual over all n,k,spin=   0.0000E+00; max=  0.0000E+00
 
  Computing the polarization (Berry phase) for reciprocal vector:
   0.00000  0.50000  0.00000 (in reduced coordinates)
@@ -447,6 +447,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      72.500      72.452
  Computing the ddk (Berry phase) for reciprocal vector:
   0.00000  0.50000  0.00000 (in reduced coordinates)
   0.04710 -0.04710  0.04710 (in cartesian coordinates - atomic units)
+ Mean square residual over all n,k,spin=   0.0000E+00; max=  0.0000E+00
 
  Summary of the results
  Electronic Berry phase     1.536759194E-02
@@ -457,7 +458,6 @@ _setup2: Arith. and geom. avg. npw (full set) are      72.500      72.452
            Polarization    -1.505234608E-02 (a.u. of charge)/bohr^2
            Polarization    -8.612163907E-01 C/m^2
 
- Mean square residual over all n,k,spin=   0.0000E+00; max=  0.0000E+00
 
  Computing the polarization (Berry phase) for reciprocal vector:
   0.00000  0.00000  0.50000 (in reduced coordinates)
@@ -468,6 +468,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      72.500      72.452
  Computing the ddk (Berry phase) for reciprocal vector:
   0.00000  0.00000  0.50000 (in reduced coordinates)
   0.04710  0.04710 -0.04710 (in cartesian coordinates - atomic units)
+ Mean square residual over all n,k,spin=   0.0000E+00; max=  0.0000E+00
 
  Summary of the results
  Electronic Berry phase     1.536759194E-02
@@ -478,7 +479,6 @@ _setup2: Arith. and geom. avg. npw (full set) are      72.500      72.452
            Polarization    -1.505234608E-02 (a.u. of charge)/bohr^2
            Polarization    -8.612163907E-01 C/m^2
 
- Mean square residual over all n,k,spin=   0.0000E+00; max=  0.0000E+00
 
  Polarization in cartesian coordinates (a.u.):
  (the sum of the electronic and ionic Berry phase has been folded into [-1, 1])
@@ -601,7 +601,6 @@ _setup2: Arith. and geom. avg. npw (full set) are      72.500      72.452
 -inwffil : will read wavefunctions from disk file t75o_DS2_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t75o_DS2_WFK
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -662,7 +661,6 @@ _setup2: Arith. and geom. avg. npw (full set) are      72.500      72.452
 -inwffil : will read wavefunctions from disk file t75o_DS2_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t75o_DS2_WFK
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -722,7 +720,6 @@ _setup2: Arith. and geom. avg. npw (full set) are      72.500      72.452
 -inwffil : will read wavefunctions from disk file t75o_DS2_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t75o_DS2_WFK
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 -dfpt_looppert : read the ddk wavefunctions from file: t75o_DS2_1WF7
@@ -776,7 +773,6 @@ _setup2: Arith. and geom. avg. npw (full set) are      72.500      72.452
 -inwffil : will read wavefunctions from disk file t75o_DS2_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t75o_DS2_WFK
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -838,7 +834,6 @@ _setup2: Arith. and geom. avg. npw (full set) are      72.500      72.452
 -inwffil : will read wavefunctions from disk file t75o_DS2_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t75o_DS2_WFK
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -900,7 +895,6 @@ _setup2: Arith. and geom. avg. npw (full set) are      72.500      72.452
 -inwffil : will read wavefunctions from disk file t75o_DS2_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t75o_DS2_WFK
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -962,7 +956,6 @@ _setup2: Arith. and geom. avg. npw (full set) are      72.500      72.452
 -inwffil : will read wavefunctions from disk file t75o_DS2_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t75o_DS2_WFK
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -1024,7 +1017,6 @@ _setup2: Arith. and geom. avg. npw (full set) are      72.500      72.452
 -inwffil : will read wavefunctions from disk file t75o_DS2_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t75o_DS2_WFK
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -1086,7 +1078,6 @@ _setup2: Arith. and geom. avg. npw (full set) are      72.500      72.452
 -inwffil : will read wavefunctions from disk file t75o_DS2_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t75o_DS2_WFK
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -1792,7 +1783,7 @@ P          mk1mem3         16
  Note also that it will be of great value to readers of publications presenting these results,
  to read papers enabling them to understand the theoretical formalism and details
  of the ABINIT implementation.
- For information on why they are suggested, see also http://www.abinit.org/about/?text=acknowledgments.
+ For information on why they are suggested, see also https://www.abinit.org/about/?text=acknowledgments.
 -
 - [1] Metric tensor formulation of strain in density-functional perturbation theory, 
 - D. R. Hamann, X. Wu, K. M. Rabe, and D. Vanderbilt, Phys. Rev. B71, 035117 (2005).
@@ -1816,7 +1807,7 @@ P          mk1mem3         16
 - Computer Phys. Comm. 180, 2582-2615 (2009).
 - Comment : the third generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
-- is available at http://www.abinit.org/about/ABINIT_CPC_v10.pdf .
+- is available at https://www.abinit.org/about/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 -
 - [5] A brief introduction to the ABINIT software package.
@@ -1827,7 +1818,7 @@ P          mk1mem3         16
 - Comment : the second generic paper describing the ABINIT project. Note that this paper
 - should be cited especially if you are using the GW part of ABINIT, as several authors
 - of this part are not in the list of authors of the first or third paper.
-- The .pdf of the latter paper is available at http://www.abinit.org/about/zfk_0505-06_558-562.pdf.
+- The .pdf of the latter paper is available at https://www.abinit.org/about/zfk_0505-06_558-562.pdf.
 - Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
 - the licence allows the authors to put it on the Web).
 -

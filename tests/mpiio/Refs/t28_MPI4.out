@@ -12,7 +12,7 @@
  Corning Inc. and other collaborators, see ~abinit/doc/developers/contributors.txt .
  Please read ~abinit/doc/users/acknowledgments.html for suggested
  acknowledgments of the ABINIT effort.
- For more information, see http://www.abinit.org .
+ For more information, see https://www.abinit.org .
 
 .Starting date : Wed  1 Mar 2017.
 - ( at 13h27 )
@@ -75,6 +75,7 @@ _ WF disk file :      0.490 Mbytes ; DEN or POT disk file :      0.055 Mbytes.
 -          iomode           1
             acell      1.0683188747E+01  1.0683188747E+01  1.0683188747E+01 Bohr
               amu      6.97230000E+01  7.49215900E+01
+     densfor_pred           6
            diemac      8.00000000E+00
              ecut      5.00000000E+00 Hartree
 -          fftalg         312
@@ -82,7 +83,6 @@ _ WF disk file :      0.490 Mbytes ; DEN or POT disk file :      0.055 Mbytes.
            getwfk2         -1
            iatsph1       1    2
            iatsph2       1    2
-     densfor_pred           6
               ixc           7
            jdtset        1    2
               kpt     -2.50000000E-01  0.00000000E+00  0.00000000E+00
@@ -268,7 +268,6 @@ _setup2: Arith. and geom. avg. npw (full set) are      79.500      79.495
   sigma(2 2)=  5.31050075E-01  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  5.31050075E-01  sigma(2 1)=  0.00000000E+00
 
- io1dm : about to open file t28_MPI4o_DS1_VCLMB_1DM
  Integrated electronic and magnetization densities in atomic spheres:
  ---------------------------------------------------------------------
  Note:      this is a rough approximation of local magnetic moments
@@ -883,7 +882,6 @@ _setup2: Arith. and geom. avg. npw (full set) are      79.500      79.495
   sigma(2 2)=  5.31050149E-01  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  5.31050149E-01  sigma(2 1)=  0.00000000E+00
 
- io1dm : about to open file t28_MPI4o_DS2_VCLMB_1DM
  Integrated electronic and magnetization densities in atomic spheres:
  ---------------------------------------------------------------------
  Note:      this is a rough approximation of local magnetic moments
@@ -1454,6 +1452,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      79.500      79.495
 -          iomode           1
             acell      1.0683188747E+01  1.0683188747E+01  1.0683188747E+01 Bohr
               amu      6.97230000E+01  7.49215900E+01
+     densfor_pred           6
            diemac      8.00000000E+00
              ecut      5.00000000E+00 Hartree
            etotal1    -4.9957911023E+02
@@ -1467,7 +1466,6 @@ _setup2: Arith. and geom. avg. npw (full set) are      79.500      79.495
            getwfk2         -1
            iatsph1       1    2
            iatsph2       1    2
-     densfor_pred           6
               ixc           7
            jdtset        1    2
               kpt     -2.50000000E-01  0.00000000E+00  0.00000000E+00
@@ -1566,7 +1564,7 @@ P           mkmem2          4
  Note also that it will be of great value to readers of publications presenting these results,
  to read papers enabling them to understand the theoretical formalism and details
  of the ABINIT implementation.
- For information on why they are suggested, see also http://www.abinit.org/about/?text=acknowledgments.
+ For information on why they are suggested, see also https://www.abinit.org/about/?text=acknowledgments.
 -
 - [1] Implementation of the Projector Augmented-Wave Method in the ABINIT code.
 - M. Torrent, F. Jollet, F. Bottin, G. Zerah, and X. Gonze Comput. Mat. Science 42, 337, (2008).
@@ -1592,7 +1590,7 @@ P           mkmem2          4
 - B.Xue, A.Zhou, J.W.Zwanziger.
 - Comment : the fourth generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
-- is available at http://www.abinit.org/about/ABINIT16.pdf .
+- is available at https://www.abinit.org/about/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 -
 - [4] ABINIT : First-principles approach of materials and nanosystem properties.
@@ -1604,7 +1602,7 @@ P           mkmem2          4
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment : the third generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
-- is available at http://www.abinit.org/about/ABINIT_CPC_v10.pdf .
+- is available at https://www.abinit.org/about/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 -
 - [5] A brief introduction to the ABINIT software package.
@@ -1615,7 +1613,7 @@ P           mkmem2          4
 - Comment : the second generic paper describing the ABINIT project. Note that this paper
 - should be cited especially if you are using the GW part of ABINIT, as several authors
 - of this part are not in the list of authors of the first or third paper.
-- The .pdf of the latter paper is available at http://www.abinit.org/about/zfk_0505-06_558-562.pdf.
+- The .pdf of the latter paper is available at https://www.abinit.org/about/zfk_0505-06_558-562.pdf.
 - Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
 - the licence allows the authors to put it on the Web).
 -

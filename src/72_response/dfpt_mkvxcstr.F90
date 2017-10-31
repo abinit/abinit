@@ -20,7 +20,7 @@
 !!     if 2, COMPLEX
 !!  idir=direction of the current perturbation
 !!  ipert=type of the perturbation
-!!  kxc(nfft,nkxc)=exchange and correlation kernel (see rhohxc.f)
+!!  kxc(nfft,nkxc)=exchange and correlation kernel (see rhotoxc.f)
 !!  mpi_enreg=information about MPI parallelization
 !!  natom=number of atoms in cell.
 !!  nfft=(effective) number of FFT grid points (for this processor)
@@ -98,12 +98,11 @@ subroutine dfpt_mkvxcstr(cplex,idir,ipert,kxc,mpi_enreg,natom,nfft,ngfft,nhat,nh
 
 !Local variables-------------------------------
 !scalars
- integer :: ii,ir,istr,jj,ka,kb
- real(dp) :: rho1_dn,rho1_up
+ integer :: ii,ir,istr
+ real(dp) :: rho1_dn,rho1_up,spin_scale,str_scale
  character(len=500) :: message
 !arrays
- integer,save :: idx(12)=(/1,1,2,2,3,3,3,2,3,1,2,1/)
- real(dp) :: dgprimdds(3,3),gprimd(3,3),tsec(2)
+ real(dp) :: gprimd(3,3),tsec(2)
  real(dp),allocatable :: rhor1tmp(:,:),rhowk1(:,:)
  real(dp),pointer :: rhor_(:,:),rhor1_(:,:)
  
@@ -146,8 +145,9 @@ subroutine dfpt_mkvxcstr(cplex,idir,ipert,kxc,mpi_enreg,natom,nfft,ngfft,nhat,nh
      rhowk1(:,:)=rhor1_(:,:)
    end if
  end if
+
 !Treat first LDA
- if(nkxc/=23)then
+ if(nkxc==1.or.nkxc==3)then
 
 !  Case without non-linear core correction
    if(n3xccc==0)then
@@ -166,7 +166,7 @@ subroutine dfpt_mkvxcstr(cplex,idir,ipert,kxc,mpi_enreg,natom,nfft,ngfft,nhat,nh
          vxc1(ir,2)=kxc(ir,2)*rhowk1(ir,2)+kxc(ir,3)*rho1_dn
        end do
      end if ! nspden==1
-     
+
 !    Treat case with non-linear core correction
    else
      if(nspden==1)then
@@ -183,21 +183,16 @@ subroutine dfpt_mkvxcstr(cplex,idir,ipert,kxc,mpi_enreg,natom,nfft,ngfft,nhat,nh
      end if ! nspden==1
 
    end if ! n3xccc==0
-   
-!  Treat GGA
- else
 
-   ABI_ALLOCATE(rhor1tmp,(cplex*nfft,2))
+!  Treat GGA
+ else if (nkxc==7.or.nkxc==19) then
 
 !  Generates gprimd and its strain derivative
 !  Note that unlike the implicitly symmetric metric tensor strain
 !  derivatives, we must explicltly symmetrize the strain derivative
 !  here.
-
    call matr3inv(rprimd,gprimd)
-
    istr=idir + 3*(ipert-natom-3)
-
    if(istr<1 .or. istr>6)then
      write(message, '(a,i10,a,a,a)' )&
 &     'Input dir gives istr=',istr,' not allowed.',ch10,&
@@ -205,20 +200,14 @@ subroutine dfpt_mkvxcstr(cplex,idir,ipert,kxc,mpi_enreg,natom,nfft,ngfft,nhat,nh
      MSG_BUG(message)
    end if
 
-   dgprimdds(:,:)=zero
-   ka=idx(2*istr-1);kb=idx(2*istr)
-   do ii=1,3
-     do jj=1,3
-       if(jj==ka) dgprimdds(jj,ii)=-half*gprimd(kb,ii)
-       if(jj==kb) dgprimdds(jj,ii)=dgprimdds(jj,ii)-half*gprimd(ka,ii)
-     end do
-   end do
+!  Rescalling needed for use in dfpt_eltfrxc for elastic tensor (not internal strain tensor).
+   str_scale=one;if(option==2) str_scale=two
 
-!  First transfer the data to spin-polarized storage
+!  FTransfer the data to spin-polarized storage
+   ABI_ALLOCATE(rhor1tmp,(cplex*nfft,nspden))
    if(nspden==1)then
      do ir=1,cplex*nfft
-       rhor1tmp(ir,1)=rhowk1(ir,1)*half
-       rhor1tmp(ir,2)=rhowk1(ir,1)*half
+       rhor1tmp(ir,1)=rhowk1(ir,1)
      end do
    else
      do ir=1,cplex*nfft
@@ -228,20 +217,22 @@ subroutine dfpt_mkvxcstr(cplex,idir,ipert,kxc,mpi_enreg,natom,nfft,ngfft,nhat,nh
      end do
    end if ! nspden==1
    if(n3xccc/=0)then
-     do ir=1,cplex*nfft
-       rhor1tmp(ir,1)=rhor1tmp(ir,1)+xccc3d1(ir)*half
-       rhor1tmp(ir,2)=rhor1tmp(ir,2)+xccc3d1(ir)*half
+     spin_scale=one;if (nspden==2) spin_scale=half
+     do ii=1,nspden
+       do ir=1,cplex*nfft
+         rhor1tmp(ir,ii)=rhor1tmp(ir,ii)+xccc3d1(ir)*spin_scale
+       end do
      end do
    end if
 
-!  Rescalling needed for use in dfpt_eltfrxc for elastic tensor (not internal
-!  strain tensor).
-   if(option==2) dgprimdds(:,:)=2.0_dp*dgprimdds(:,:)
-   call dfpt_mkvxcstrgga(cplex,dgprimdds,gprimd,kxc,mpi_enreg,nfft,ngfft,nkxc,&
-&   nspden,paral_kgb,qphon,rhor1tmp,vxc1)
+   call dfpt_mkvxcstrgga(cplex,gprimd,istr,kxc,mpi_enreg,nfft,ngfft,nkxc,&
+&   nspden,paral_kgb,qphon,rhor1tmp,str_scale,vxc1)
    ABI_DEALLOCATE(rhor1tmp)
 
- end if
+ else
+   MSG_BUG('Invalid nkxc!')
+
+ end if ! LDA or GGA
 
  if (usepaw==1.and.usexcnhat==0) then
    ABI_DEALLOCATE(rhor_)
@@ -253,10 +244,6 @@ subroutine dfpt_mkvxcstr(cplex,idir,ipert,kxc,mpi_enreg,natom,nfft,ngfft,nhat,nh
  ABI_DEALLOCATE(rhowk1)
 
  call timab(181,2,tsec)
-
- !if (.False.) then
- !  call wrtout(std_out,"Make abilint add the interface for wrtout",mode_paral="COLL",do_flush=.False.)
- !end if
 
 end subroutine dfpt_mkvxcstr
 !!***

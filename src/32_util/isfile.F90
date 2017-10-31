@@ -26,8 +26,8 @@
 !! and returns new name in redefined filnam if new file already exists.
 !!
 !! PARENTS
-!!      anaddb,compute_anharmonics,iofn1,m_effective_potential
-!!      m_polynomial_coeff,m_vcoul,multibinit,ujdet
+!!      anaddb,iofn1,m_effective_potential,m_polynomial_coeff,m_vcoul
+!!      multibinit,ujdet
 !!
 !! CHILDREN
 !!      clib_rename,int2char4

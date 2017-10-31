@@ -345,7 +345,7 @@ module m_lobpcg2
     type(xgBlock_t) :: eigenBlock   ! 
     type(xgBlock_t) :: residuBlock
     type(xgBlock_t):: RR_eig ! Will be eigenvaluesXN
-    double precision :: maxResidu, minResidu
+    double precision :: maxResidu, minResidu, average, deviation
     double precision :: prevMaxResidu
     double precision :: dlamch
     integer :: eigResiduMax, eigResiduMin
@@ -430,9 +430,9 @@ module m_lobpcg2
 
       do iline = 1, nline
 
-        if ( nrestart == 1 .or. ierr /= 0 ) then
-          MSG_WARNING("I feel bad, I have to move on...")
-          exit
+        if ( ierr /= 0 ) then
+          !MSG_COMMENT("Consider using more bands and nbdbuf if necessary.")
+          ierr = 0
         end if
 
         !write(*,*) "    -> Iteration ", iline
@@ -454,6 +454,9 @@ module m_lobpcg2
           write(std_out,'(2x,a1,es10.3,a1,es10.3,a,i4,a,i4,a)') &
             "(",minResidu,",",maxResidu, ") for eigen vectors (", &
             eigResiduMin,",",eigResiduMax,")"
+          call xgBlock_average(residuBlock,average)
+          call xgBlock_deviation(residuBlock,deviation)
+          write(std_out,'(a,es21.14,a,es21.14)') "Average : ", average, " +/-", deviation
           if ( maxResidu < lobpcg%tolerance ) then
             write(std_out,*) "Block ", iblock, "converged at iline =", iline
             exit
@@ -478,7 +481,9 @@ module m_lobpcg2
         !call lobpcg_Borthonormalize(lobpcg,VAR_W,.true.) ! Do rotate AW
 
         ! DO RR in the correct subspace
-        if ( iline == 1 ) then
+        ! if residu starts to be too small, there is an accumulation error in
+        ! P with values such as 1e-29 that make the eigenvectors diverge
+        if ( iline == 1 .or. minResidu <= 1e-28) then 
           ! Do RR on XW to get the eigen vectors
           call lobpcg_Borthonormalize(lobpcg,VAR_XW,.true.,ierr) ! Do rotate AW
           RR_var = VAR_XW

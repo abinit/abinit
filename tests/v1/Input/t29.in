@@ -72,4 +72,5 @@
 #%%   difference formula ( stress=d(Etot)/d(Vol) ), 
 #%%   giving 6.0287495E-04 Ha/Bohr^3 .
 #%%   From the stresses, the interpolation is 6.0286924E-04 Ha/Bohr^3 .
+#%% topics = xc
 #%%<END TEST_INFO>

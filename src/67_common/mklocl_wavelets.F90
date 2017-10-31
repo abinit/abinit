@@ -44,8 +44,7 @@
 !!      mklocl,wvl_wfsinp_scratch
 !!
 !! CHILDREN
-!!      createionicpotential,h_potential,local_forces,wrtout,wvl_rhov_abi2big
-!!      xmpi_sum
+!!      calcdvloc_wvl,derf_ab,paw_splint_der
 !!
 !! SOURCE
 
@@ -96,10 +95,10 @@ subroutine mklocl_wavelets(efield, grtn, mpi_enreg, natom, nfft, &
 #if defined HAVE_BIGDFT
 !scalars
  integer :: i,i1,i2,i3,ia,ierr,igeo,me,nproc,shift,comm
- real(dp) :: charge,energ
+ real(dp) :: energ
  character(len=500) :: message
 !arrays
- real(dp) :: epot(3),locstrten(6,4)
+ real(dp) :: epot(3)
  real(dp) :: elecfield(3)=(/zero,zero,zero/) ! Not used here
  real(dp),allocatable :: gxyz(:,:),vhartr(:),rhov(:,:)
 #endif
@@ -133,7 +132,7 @@ subroutine mklocl_wavelets(efield, grtn, mpi_enreg, natom, nfft, &
    call wrtout(std_out,message,'COLL')
 
    shift = 1 + wvl_den%denspot%dpbox%ndims(1) * wvl_den%denspot%dpbox%ndims(2) &
-&            * wvl_den%denspot%dpbox%i3xcsh
+&   * wvl_den%denspot%dpbox%i3xcsh
 
 !  Call the BigDFT routine
    call createIonicPotential(wvl_descr%atoms%astruct%geocode, me, nproc, (me == 0), wvl_descr%atoms, &
@@ -207,14 +206,14 @@ subroutine mklocl_wavelets(efield, grtn, mpi_enreg, natom, nfft, &
 
 !  Calculate local part of the forces grtn (modified BigDFT routine)
    call local_forces_wvl(me,natom,xcart,&
-&         wvl_den%denspot%dpbox%hgrids(1),&
-&         wvl_den%denspot%dpbox%hgrids(2),&
-&         wvl_den%denspot%dpbox%hgrids(3),&
-&         wvl_descr%Glr%d%n1,wvl_descr%Glr%d%n2,wvl_descr%Glr%d%n3,&
-&         wvl_den%denspot%dpbox%n3p,&
-&         wvl_den%denspot%dpbox%i3s+wvl_den%denspot%dpbox%i3xcsh,&
-&         wvl_den%denspot%dpbox%ndims(1),wvl_den%denspot%dpbox%ndims(2),&
-&         rhov,vhartr,gxyz,wvl_descr)
+&   wvl_den%denspot%dpbox%hgrids(1),&
+&   wvl_den%denspot%dpbox%hgrids(2),&
+&   wvl_den%denspot%dpbox%hgrids(3),&
+&   wvl_descr%Glr%d%n1,wvl_descr%Glr%d%n2,wvl_descr%Glr%d%n3,&
+&   wvl_den%denspot%dpbox%n3p,&
+&   wvl_den%denspot%dpbox%i3s+wvl_den%denspot%dpbox%i3xcsh,&
+&   wvl_den%denspot%dpbox%ndims(1),wvl_den%denspot%dpbox%ndims(2),&
+&   rhov,vhartr,gxyz,wvl_descr)
 !    call local_forces(me, wvl_descr%atoms, xcart, &
 ! &   wvl_den%denspot%dpbox%hgrids(1), wvl_den%denspot%dpbox%hgrids(2), &
 ! &   wvl_den%denspot%dpbox%hgrids(3), &
@@ -234,8 +233,8 @@ subroutine mklocl_wavelets(efield, grtn, mpi_enreg, natom, nfft, &
    do ia = 1, natom, 1
      do igeo = 1, 3, 1
        grtn(igeo, ia) = - rprimd(1, igeo) * gxyz(1, ia) &
-&                       - rprimd(2, igeo) * gxyz(2, ia) &
-&                       - rprimd(3, igeo) * gxyz(3, ia)
+&       - rprimd(2, igeo) * gxyz(2, ia) &
+&       - rprimd(3, igeo) * gxyz(3, ia)
      end do
    end do
 
@@ -288,7 +287,7 @@ end subroutine mklocl_wavelets
 !!      mklocl_wavelets
 !!
 !! CHILDREN
-!!      ind_positions
+!!      calcdvloc_wvl,derf_ab,paw_splint_der
 !!
 !! SOURCE
 
@@ -498,7 +497,7 @@ subroutine local_forces_wvl(iproc,natom,rxyz,hxh,hyh,hzh,n1,n2,n3,n3pi,i3s,n1i,n
 #else
  BIGDFT_NOTENABLED_ERROR()
  if (.false.) write(std_out,*) i3s,iproc,n1,n1i,n2,n2i,n3,n3pi,natom,hxh,hyh,hzh,&
-&  rxyz(1,1),floc(1,1),rho(1),pot(1),wvl%h(1)
+& rxyz(1,1),floc(1,1),rho(1),pot(1),wvl%h(1)
 #endif
 
  CONTAINS
@@ -524,6 +523,10 @@ subroutine local_forces_wvl(iproc,natom,rxyz,hxh,hyh,hzh,n1,n2,n3,n3pi,i3s,n1i,n
 !! OUTPUT
 !!
 !! PARENTS
+!!      mklocl_wavelets
+!!
+!! CHILDREN
+!!      calcdvloc_wvl,derf_ab,paw_splint_der
 !!
 !! SOURCE
 
@@ -550,11 +553,11 @@ subroutine calcdVloc_wvl(yy,xx,rloc,Z)
 
 ! *************************************************************************
 
- arg=xx/(sqrt(2._dp)*rloc)
- call derf_ab(tt,arg)
- yy=(Z/(xx**2))* ( tt - 2._dp/sqrt(pi)*arg*exp(-arg**2) )
+   arg=xx/(sqrt(2._dp)*rloc)
+   call derf_ab(tt,arg)
+   yy=(Z/(xx**2))* ( tt - 2._dp/sqrt(pi)*arg*exp(-arg**2) )
 
-end subroutine calcdVloc_wvl
+ end subroutine calcdVloc_wvl
 !!***
 
 !----------------------------------------------------------------------
@@ -609,34 +612,34 @@ function dvloc_zero_wvl(charge,rloc,msz,rad,vloc,d2vloc)
 ! *************************************************************************
 
 !Select 3 points x1,x2,x3 near 0
- if (rad(1)>1.d-10) then
-   xx(1:3)=rad(1:3)
- else
-   xx(1:3)=rad(2:4)
- end if
+   if (rad(1)>1.d-10) then
+     xx(1:3)=rad(1:3)
+   else
+     xx(1:3)=rad(2:4)
+   end if
 
 !Find the corresponding values of y=(V^PAW(x)-V^HGH(x))/x
- call paw_splint_der(msz,rad,vloc,d2vloc,3,xx,yy)
- call calcdVloc_wvl(y1,xx(1),rloc,charge)
- call calcdVloc_wvl(y2,xx(2),rloc,charge)
- call calcdVloc_wvl(y3,xx(3),rloc,charge)
- yy(1)=(yy(1)-y1)/xx(1)
- yy(2)=(yy(2)-y2)/xx(2)
- yy(3)=(yy(3)-y3)/xx(3)
+   call paw_splint_der(msz,rad,vloc,d2vloc,3,xx,yy)
+   call calcdVloc_wvl(y1,xx(1),rloc,charge)
+   call calcdVloc_wvl(y2,xx(2),rloc,charge)
+   call calcdVloc_wvl(y3,xx(3),rloc,charge)
+   yy(1)=(yy(1)-y1)/xx(1)
+   yy(2)=(yy(2)-y2)/xx(2)
+   yy(3)=(yy(3)-y3)/xx(3)
 
 !Find a polynomial of the form (z=0):
 !P(z) = y1.L1(z) + y2.L2(z) + y3.L3(z)
 
 !L1(z) = (z-x2)(z-x3)/((x1-x2)(x1-x3))
- ll(1)=(zz-xx(2))*(zz-xx(3))/((xx(1)-xx(2))*(xx(1)-xx(3)))
+   ll(1)=(zz-xx(2))*(zz-xx(3))/((xx(1)-xx(2))*(xx(1)-xx(3)))
 !L2(z) = (z-x1)(z-x3)/((x2-x1)(x2-x3))
- ll(2)=(zz-xx(1))*(zz-xx(3))/((xx(2)-xx(1))*(xx(2)-xx(3)))
+   ll(2)=(zz-xx(1))*(zz-xx(3))/((xx(2)-xx(1))*(xx(2)-xx(3)))
 !L3(z) = (z-x1)(z-x2)/((x3-x1)(x3-x2))
- ll(3)=(zz-xx(1))*(zz-xx(2))/((xx(3)-xx(1))*(xx(3)-xx(2)))
+   ll(3)=(zz-xx(1))*(zz-xx(2))/((xx(3)-xx(1))*(xx(3)-xx(2)))
 
- dvloc_zero_wvl=yy(1)*ll(1)+yy(2)*ll(2)+yy(3)*ll(3)
+   dvloc_zero_wvl=yy(1)*ll(1)+yy(2)*ll(2)+yy(3)*ll(3)
 
-end function dvloc_zero_wvl
+ end function dvloc_zero_wvl
 !!***
 
 end subroutine local_forces_wvl

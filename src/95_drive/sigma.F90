@@ -56,26 +56,27 @@
 !! CHILDREN
 !!      calc_sigc_me,calc_sigx_me,calc_ucrpa,calc_vhxc_me,chkpawovlp
 !!      classify_bands,cohsex_me,crystal_free,denfgr,destroy_mpi_enreg
-!!      ebands_copy,ebands_free,ebands_report_gap,ebands_update_occ
-!!      em1results_free,energies_init,esymm_free,fftdatar_write,fourdp,get_gftt
-!!      getem1_from_ppm,getph,gsph_free,hdr_free,init_distribfft_seq
-!!      initmpi_seq,kmesh_free,kxc_ada,kxc_driver,littlegroup_free
-!!      littlegroup_init,melements_free,melements_print,melements_zero
-!!      melflags_reset,metric,mkdump_er,mkrdim,nhatgrid,paw_an_free,paw_an_init
-!!      paw_an_nullify,paw_check_symcprj,paw_dijhf,paw_gencond,paw_ij_free
-!!      paw_ij_init,paw_ij_nullify,paw_ij_print,paw_mkdijexc_core
-!!      paw_pwaves_lmn_free,paw_pwaves_lmn_init,paw_qpscgw,pawcprj_alloc
-!!      pawcprj_free,pawdenpot,pawdij,pawfgr_destroy,pawfgr_init,pawfgrtab_free
-!!      pawfgrtab_init,pawfgrtab_print,pawinit,pawmknhat,pawprt,pawpuxinit
-!!      pawpwff_free,pawpwff_init,pawrhoij_alloc,pawrhoij_copy,pawrhoij_free
-!!      pawtab_get_lsize,pawtab_print,ppm_free,ppm_init,prep_calc_ucrpa
-!!      print_ngfft,prtrhomxmn,pspini,rdgw,rdqps,read_rhor,setsymrhoij
-!!      setup_ppmodel,setup_sigma,setvtr,show_qp,sigma_bksmask,sigma_free
-!!      sigma_init,sigma_tables,sigparams_free,solve_dyson,symdij,symdij_all
-!!      test_charge,timab,updt_m_lda_to_qp,vcoul_free,wfd_change_ngfft,wfd_copy
-!!      wfd_free,wfd_get_cprj,wfd_init,wfd_mkrho,wfd_print,wfd_read_wfk
-!!      wfd_reset_ur_cprj,wfd_rotate,wfd_test_ortho,write_sigma_header
-!!      write_sigma_results,wrqps,wrtout,xmpi_barrier,xmpi_bcast,xmpi_sum
+!!      ebands_copy,ebands_free,ebands_interpolate_kpath,ebands_report_gap
+!!      ebands_update_occ,em1results_free,energies_init,esymm_free
+!!      fftdatar_write,fourdp,get_gftt,getem1_from_ppm,getph,gsph_free,hdr_free
+!!      init_distribfft_seq,initmpi_seq,kmesh_free,kxc_ada,kxc_driver
+!!      littlegroup_free,littlegroup_init,melements_free,melements_print
+!!      melements_zero,melflags_reset,metric,mkdump_er,mkrdim,nhatgrid
+!!      paw_an_free,paw_an_init,paw_an_nullify,paw_check_symcprj,paw_dijhf
+!!      paw_gencond,paw_ij_free,paw_ij_init,paw_ij_nullify,paw_ij_print
+!!      paw_mkdijexc_core,paw_pwaves_lmn_free,paw_pwaves_lmn_init,paw_qpscgw
+!!      pawcprj_alloc,pawcprj_free,pawdenpot,pawdij,pawfgr_destroy,pawfgr_init
+!!      pawfgrtab_free,pawfgrtab_init,pawfgrtab_print,pawinit,pawmknhat,pawprt
+!!      pawpuxinit,pawpwff_free,pawpwff_init,pawrhoij_alloc,pawrhoij_copy
+!!      pawrhoij_free,pawtab_get_lsize,pawtab_print,ppm_free,ppm_init
+!!      prep_calc_ucrpa,print_ngfft,prtrhomxmn,pspini,rdgw,rdqps,read_rhor
+!!      setsymrhoij,setup_ppmodel,setup_sigma,setvtr,show_qp,sigma_bksmask
+!!      sigma_free,sigma_init,sigma_tables,sigparams_free,solve_dyson,symdij
+!!      symdij_all,test_charge,timab,updt_m_lda_to_qp,vcoul_free
+!!      wfd_change_ngfft,wfd_copy,wfd_free,wfd_get_cprj,wfd_init,wfd_mkrho
+!!      wfd_print,wfd_read_wfk,wfd_reset_ur_cprj,wfd_rotate,wfd_test_ortho
+!!      write_sigma_header,write_sigma_results,wrqps,wrtout,xmpi_barrier
+!!      xmpi_bcast,xmpi_sum
 !!
 !! SOURCE
 
@@ -139,7 +140,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  use m_paw_an,        only : paw_an_type, paw_an_init, paw_an_free, paw_an_nullify
  use m_paw_ij,        only : paw_ij_type, paw_ij_init, paw_ij_free, paw_ij_nullify, paw_ij_print
  use m_pawfgrtab,     only : pawfgrtab_type, pawfgrtab_init, pawfgrtab_free, pawfgrtab_print
- use m_pawrhoij,      only : pawrhoij_type, pawrhoij_alloc, pawrhoij_copy, pawrhoij_free, symrhoij
+ use m_pawrhoij,      only : pawrhoij_type, pawrhoij_alloc, pawrhoij_copy, pawrhoij_free, pawrhoij_get_nspden, symrhoij
  use m_pawcprj,       only : pawcprj_type, pawcprj_alloc, pawcprj_free, paw_overlap
  use m_pawdij,        only : pawdij, symdij_all
  use m_pawfgr,        only : pawfgr_type, pawfgr_init, pawfgr_destroy
@@ -319,8 +320,8 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
    end if
    if(Dtset%gwcalctyp>=100 .AND. Dtset%gwcalctyp <200) then
      if( Dtset%rcut<tol6 ) then
-       msg='For HSE calculation, the cutoff radius rcut has to be set to 9.090909 bohr!'
-       MSG_ERROR(msg)
+       msg='The cutoff radius rcut is not specified for HSE calculations. Default values will be used!'
+       MSG_WARNING(msg)
      end if
      if( Dtset%icutcoul /=5 .AND. Dtset%icutcoul /=15 ) then
        msg='For HSE calculation, abinit requires short-range only exchange (icutcoul=5)'
@@ -434,7 +435,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
    cplex_dij=Dtset%nspinor; cplex=1; ndij=1
 
    ABI_DT_MALLOC(KS_Pawrhoij,(Cryst%natom))
-   nspden_rhoij=Dtset%nspden; if (Dtset%pawspnorb>0.and.Dtset%nspinor==2) nspden_rhoij=4
+   nspden_rhoij=pawrhoij_get_nspden(Dtset%nspden,Dtset%nspinor,Dtset%pawspnorb)
    call pawrhoij_alloc(KS_Pawrhoij,Dtset%pawcpxocc,nspden_rhoij,Dtset%nspinor,Dtset%nsppol,Cryst%typat,pawtab=Pawtab)
 
    ! Initialize values for several basic arrays
@@ -884,8 +885,8 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
    nkxc1=0
    ABI_DT_MALLOC(KS_paw_an,(Cryst%natom))
    call paw_an_nullify(KS_paw_an)
-   call paw_an_init(KS_paw_an,Cryst%natom,Cryst%ntypat,nkxc1,Dtset%nspden,cplex,Dtset%pawxcdev,&
-&   Cryst%typat,Pawang,Pawtab,has_vxc=1,has_vxcval=1)
+   call paw_an_init(KS_paw_an,Cryst%natom,Cryst%ntypat,nkxc1,Dtset%nspden,&
+&   cplex,Dtset%pawxcdev,Cryst%typat,Pawang,Pawtab,has_vxc=1,has_vxcval=1)
 !
 !  Calculate onsite vxc with and without core charge.
    nzlmopt=-1; option=0; compch_sph=greatest_real
@@ -1050,10 +1051,10 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  end do
 
  if (Dtset%gwfockmix < 0.0_dp .or. (Dtset%gwfockmix-1.0_dp) > tol8) then
-    MSG_ERROR('gwfockmix is invalid.')
+   MSG_ERROR('gwfockmix is invalid.')
  end if
 
- call calc_vhxc_me(Wfd,KS_mflags,KS_me,Cryst,Dtset,gsqcutf_eff,nfftf,ngfftf,&
+ call calc_vhxc_me(Wfd,KS_mflags,KS_me,Cryst,Dtset,nfftf,ngfftf,&
 & ks_vtrial,ks_vhartr,ks_vxc,Psps,Pawtab,KS_paw_an,Pawang,Pawfgrtab,KS_paw_ij,dijexc_core,&
 & ks_rhor,ks_rhog,usexcnhat,ks_nhat,ks_nhatgr,nhatgrdim,tmp_kstab,taug=ks_taug,taur=ks_taur)
  ABI_FREE(tmp_kstab)
@@ -1531,7 +1532,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
      end do
    end do
 
-   call calc_vhxc_me(Wfd,QP_mflags,QP_me,Cryst,Dtset,gsqcutf_eff,nfftf,ngfftf,&
+   call calc_vhxc_me(Wfd,QP_mflags,QP_me,Cryst,Dtset,nfftf,ngfftf,&
 &   qp_vtrial,qp_vhartr,qp_vxc,Psps,Pawtab,QP_paw_an,Pawang,Pawfgrtab,QP_paw_ij,dijexc_core,&
 &   qp_rhor,qp_rhog,usexcnhat,qp_nhat,qp_nhatgr,nhatgrdim,tmp_kstab,taug=qp_taug,taur=qp_taur)
    ABI_FREE(tmp_kstab)

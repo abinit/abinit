@@ -42,8 +42,8 @@
 !!      mover
 !!
 !! CHILDREN
-!!      dcopy,dgemv,dsysv,hessinit,hessupdt,hist2var,metric,mkrdim,var2hist
-!!      xcart2xred
+!!      dcopy,dgemv,dsysv,hessinit,hessupdt,hist2var,var2hist,xcart2xred
+!!      xred2xcart
 !!
 !! SOURCE
 
@@ -83,7 +83,7 @@ implicit none
 
 !Local variables-------------------------------
 !scalars
- integer  :: ndim,nhist,shift,diisSize
+ integer  :: ihist_prev,ndim,nhist,shift,diisSize
  integer  :: ii,jj,kk,info
  real(dp) :: etotal
  real(dp) :: suma
@@ -568,7 +568,7 @@ implicit none
 !### 11. Update the history with the prediction
 
 !Increase indexes
- hist%ihist=hist%ihist+1
+ hist%ihist = abihist_findIndex(hist,+1)
 
 !Compute xred from xcart and rprimd
  call xcart2xred(ab_mover%natom,rprimd,xcart,xred)
@@ -576,7 +576,8 @@ implicit none
 !Fill the history with the variables
 !xred, acell, rprimd, vel
  call var2hist(acell,hist,ab_mover%natom,rprimd,xred,zDEBUG)
- hist%vel(:,:,hist%ihist)=hist%vel(:,:,hist%ihist-1)
+ ihist_prev = abihist_findIndex(hist,-1)
+ hist%vel(:,:,hist%ihist)=hist%vel(:,:,ihist_prev)
 
  if (.false.) write(std_out,*) ntime
 

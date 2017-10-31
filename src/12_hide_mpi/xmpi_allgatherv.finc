@@ -182,7 +182,7 @@ subroutine xmpi_allgatherv_int1_dp1(buf_int,buf_int_size,buf_dp,buf_dp_size,&
 !Local variables--------------
 !scalars
  integer :: buf_pack_size,ierr,ii,iproc,istart_dp,istart_int,lg,lg1,lg2,lg_dp,lg_int
- integer :: n1,nproc,position,totalbufcount
+ integer :: nproc,position,totalbufcount
  logical,parameter :: use_pack=.false.
 !arrays
  integer :: buf_size(2),pos(3)

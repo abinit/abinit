@@ -263,8 +263,8 @@
 !!
 !! PARENTS
 !!      d2frnl,dfpt_nsteltwf,dfptnl_resp,energy,fock_getghc,forstrnps,getgh1c
-!!      getgh2c,getghc,getgsc,m_invovl,make_grad_berry,prep_nonlop,vtowfk
-!!      wfd_vnlpsi
+!!      getgh2c,getghc,getgsc,m_invovl,m_lobpcgwf,make_grad_berry,nonlop_test
+!!      prep_nonlop,vtowfk,wfd_vnlpsi
 !!
 !! CHILDREN
 !!      gemm_nonlop,nonlop_gpu,nonlop_pl,nonlop_ylm,pawcprj_alloc,pawcprj_copy
@@ -335,7 +335,6 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
  real(dp),pointer :: phkxredin(:,:),phkxredin_(:,:),phkxredout(:,:),phkxredout_(:,:)
  real(dp), ABI_CONTIGUOUS pointer :: enl_(:,:,:),ph1d_(:,:),sij_(:,:)
  type(pawcprj_type),pointer :: cprjin_(:,:)
-  integer :: useylm
   integer :: b0,b1,b2,b3,b4,e0,e1,e2,e3,e4
 
 ! **********************************************************************
@@ -635,7 +634,7 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
 
  else
    !$omp parallel do default(shared), &
-   !$omp& firstprivate(ndat,npwin,my_nspinor,choice,signs,paw_opt,npwout,cpopt,useylm,nnlout), &
+   !$omp& firstprivate(ndat,npwin,my_nspinor,choice,signs,paw_opt,npwout,cpopt,nnlout), &
    !$omp& private(b0,b1,b2,b3,b4,e0,e1,e2,e3,e4)
    !!$omp& schedule(static), if(hamk%use_gpu_cuda==0)
    do idat=1, ndat
@@ -644,40 +643,40 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
      e0 = npwin*my_nspinor*idat
      if (choice/=0.and.signs==2.and.paw_opt/=3) then
        !vectout_idat => vectout(:,1+npwout*my_nspinor*(idat-1):npwout*my_nspinor*idat)
-      b1 = 1+npwout*my_nspinor*(idat-1)
-      e1 = npwout*my_nspinor*idat
+       b1 = 1+npwout*my_nspinor*(idat-1)
+       e1 = npwout*my_nspinor*idat
      else
        !vectout_idat => vectout
-      b1 = lbound(vectout,dim=2)
-      e1 = ubound(vectout,dim=2)
+       b1 = lbound(vectout,dim=2)
+       e1 = ubound(vectout,dim=2)
      end if
      if (choice/=0.and.signs==2.and.paw_opt>=3) then
        !svectout_idat => svectout(:,1+npwout*my_nspinor*(idat-1):npwout*my_nspinor*idat)
-      b2 = 1+npwout*my_nspinor*(idat-1)
-      e2 = npwout*my_nspinor*idat
+       b2 = 1+npwout*my_nspinor*(idat-1)
+       e2 = npwout*my_nspinor*idat
      else
        !svectout_idat => svectout
-      b2 = lbound(svectout,dim=2)
-      e2 = ubound(svectout,dim=2)
+       b2 = lbound(svectout,dim=2)
+       e2 = ubound(svectout,dim=2)
      end if
 
      if (cpopt>=0) then
        !cprjin_idat => cprjin_(:,my_nspinor*(idat-1)+1:my_nspinor*(idat))
-      b3 = my_nspinor*(idat-1)+1
-      e3 = my_nspinor*(idat)
+       b3 = my_nspinor*(idat-1)+1
+       e3 = my_nspinor*(idat)
      else
        !cprjin_idat => cprjin_
-      b3 = lbound(cprjin_,dim=2)
-      e3 = ubound(cprjin_,dim=2)
+       b3 = lbound(cprjin_,dim=2)
+       e3 = ubound(cprjin_,dim=2)
      end if
      if (nnlout>0) then
       !enlout_idat => enlout((idat-1)*nnlout+1:(idat*nnlout))
-      b4 = (idat-1)*nnlout+1
-      e4 = (idat*nnlout)
+       b4 = (idat-1)*nnlout+1
+       e4 = (idat*nnlout)
      else
       !enlout_idat => enlout
-      b4 = lbound(enlout,dim=1)
-      e4 = ubound(enlout,dim=1)
+       b4 = lbound(enlout,dim=1)
+       e4 = ubound(enlout,dim=1)
      end if
 
 !    Legendre Polynomials version

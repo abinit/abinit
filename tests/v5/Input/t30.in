@@ -66,4 +66,5 @@ diemac 12.0
 #%% description = 
 #%%   Compute DDK response in PAW formalism for two different but equivalent input
 #%%   variables: rfddk 1, rfelfd 2
+#%% topics = DFPT
 #%%<END TEST_INFO>

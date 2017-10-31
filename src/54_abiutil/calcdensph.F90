@@ -38,7 +38,7 @@
 !!  Rest is printing
 !!
 !! PARENTS
-!!      mag_constr,mag_constr_e,outscfcv
+!!      dfpt_scfcv,mag_constr,mag_constr_e,outscfcv
 !!
 !! CHILDREN
 !!      timab,wrtout,xmpi_sum
@@ -175,6 +175,7 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsph
          dify=dble(i2)/dble(n2)-xred(2,iatom)
          do i1=n1a,n1b
            ix=mod(i1+ishift*n1,n1)
+
            difx=dble(i1)/dble(n1)-xred(1,iatom)
            rx=difx*rprimd(1,1)+dify*rprimd(1,2)+difz*rprimd(1,3)
            ry=difx*rprimd(2,1)+dify*rprimd(2,2)+difz*rprimd(2,3)
@@ -417,13 +418,13 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsph
      call wrtout(nunit,message,'COLL')
      write(message, '(a,f13.8)') '     mz_f  = ',mag_z
      call wrtout(nunit,message,'COLL')
-   endif
+   end if
 
    write(message, '(3a)') ch10,' ------------------------------------------------------------------------',ch10
    call wrtout(nunit,message,'COLL')
 
 
- else   ! prtopt different from 1 (either 2,3 or 4)
+ else   ! prtopt different from 1 (regular printout option) and -1 (fermi charge/magn densities) (either 2,3 or 4)
    write(message, '(2a)') ch10,' ------------------------------------------------------------------------'
    call wrtout(nunit,message,'COLL')
 
@@ -479,7 +480,7 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsph
      dentot(2)=mag_x
      dentot(3)=mag_y
      dentot(4)=mag_z
-   endif
+   end if
  end if 
 
 end subroutine calcdensph
