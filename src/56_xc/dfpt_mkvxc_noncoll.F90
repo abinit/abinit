@@ -130,7 +130,7 @@ subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,bxc,mpi_enreg,nfft,ngfft,nhat1,nhat1
 
  call timab(181,1,tsec)
 
- rotation=3
+ rotation=2
 
  if(nspden/=4) then
    MSG_BUG('only for nspden=4!')
@@ -180,6 +180,8 @@ subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,bxc,mpi_enreg,nfft,ngfft,nhat1,nhat1
      ABI_ALLOCATE(vxc1rot3,(nfft,nspden))
      vxc1rot1=0.0d0
 
+     if(option/=0) then
+
 !      -- Rotate rho(r)^(1)
        do ifft=1,nfft
          rhor1_diag(ifft,1)=rhor1(ifft,1) !FR it is the tr[rhor1] see symrhg.F90
@@ -197,6 +199,7 @@ subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,bxc,mpi_enreg,nfft,ngfft,nhat1,nhat1
          end if
        end do
 
+      end if
 !      -- Compute Kxc(r).n^res(r)_rotated
 
      call dfpt_mkvxc(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat1,nhat1dim,nhat1gr,nhat1grdim,&
@@ -320,7 +323,6 @@ subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,bxc,mpi_enreg,nfft,ngfft,nhat1,nhat1
                  !vxc1rot2(ifft,4)=vxc1(ifft,4)
                else
 
-                 !write(*,*) 'small magnetization point'
                  mx1=rhor1(ifft,2);
                  my1=rhor1(ifft,3);
                  mz1=rhor1(ifft,4);

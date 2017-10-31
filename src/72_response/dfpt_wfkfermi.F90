@@ -269,8 +269,6 @@ subroutine dfpt_wfkfermi(cg,cgq,cplex,cprj,cprjq,&
      
 !    Accumulate contribution to density and PAW occupation matrix
   
-     write(*,*) 'SPr deb: nvloc=',gs_hamkq%nvloc,' opt_accrho=',opt_accrho, 'fe1fixed=',fe1fixed_k(iband)
-
      call dfpt_accrho(counter,cplex,cwave0,cwaveq,cwaveq,cwaveprj0,cwaveprjq,dotr,&
 &     dtfil%filstat,gs_hamkq,iband,0,0,isppol,kptopt,mpi_enreg,gs_hamkq%natom,nband_k,ncpgr,&
 &     npw_k,npw1_k,nspinor,occ_k,opt_accrho,pawrhoijfermi,prtvol,rhoaug,tim_fourwf,&

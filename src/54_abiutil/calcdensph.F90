@@ -382,6 +382,47 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsph
 !    write(message, '(a,f12.6)') ' Total density (exact)           ', rho_tot
 !   call wrtout(nunit,message,'COLL')
    end if
+ else if(prtopt==-1) then
+   write(message, '(2a)') ch10,' ------------------------------------------------------------------------'
+   call wrtout(nunit,message,'COLL')
+
+   if(nspden==1) then
+     write(message, '(4a)' ) &
+&     ' Fermi level charge density n_f:',ch10,&
+&     ' ------------------------------------------------------------------------',ch10
+   else
+     write(message, '(4a)' ) &
+&     ' Fermi level charge density n_f and magnetization m_f:',ch10,&
+&     ' ------------------------------------------------------------------------',ch10
+   endif
+   call wrtout(nunit,message,'COLL')
+
+   if(cmplex_den==0) then
+     write(message, '(a,f13.8)') '     n_f   = ',rho_tot
+   else
+     write(message, '(a,f13.8,a,f13.8)') '  Re[n_f]= ', rho_tot,"   Im[n_f]= ",rho_tot_im
+   endif
+   call wrtout(nunit,message,'COLL')
+   if (nspden==2) then
+     if(cmplex_den==0) then
+       write(message, '(a,f13.8)') '     m_f    = ', mag_coll
+     else
+       write(message, '(a,f13.8,a,f13.8)') '  Re[m_f]= ', mag_coll,"   Im[m_f]= ",mag_coll_im
+     endif
+     call wrtout(nunit,message,'COLL')
+   else if (nspden==4) then
+     write(message, '(a,f13.8)') '     mx_f  = ',mag_x
+     call wrtout(nunit,message,'COLL')
+     write(message, '(a,f13.8)') '     my_f  = ',mag_y
+     call wrtout(nunit,message,'COLL')
+     write(message, '(a,f13.8)') '     mz_f  = ',mag_z
+     call wrtout(nunit,message,'COLL')
+   endif
+
+   write(message, '(3a)') ch10,' ------------------------------------------------------------------------',ch10
+   call wrtout(nunit,message,'COLL')
+
+
  else   ! prtopt different from 1 (either 2,3 or 4)
    write(message, '(2a)') ch10,' ------------------------------------------------------------------------'
    call wrtout(nunit,message,'COLL')
@@ -398,25 +439,25 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsph
    call wrtout(nunit,message,'COLL')
 
    if(cmplex_den==0) then
-     write(message, '(a,f13.8)') '     n^(1)    = ', rho_tot
+     write(message, '(a,e13.6)') '     n^(1)    = ', rho_tot
    else
-     write(message, '(a,f13.8,a,f13.8)') '  Re[n^(1)]= ', rho_tot,"   Im[n^(1)]= ",rho_tot_im
+     write(message, '(a,e13.6,a,e13.6)') '  Re[n^(1)]= ', rho_tot,"   Im[n^(1)]= ",rho_tot_im
    endif
    call wrtout(nunit,message,'COLL')
 
    if (nspden==2) then
      if(cmplex_den==0) then
-       write(message, '(a,f13.8)') '     m^(1)    = ', mag_coll
+       write(message, '(a,e13.6)') '     m^(1)    = ', mag_coll
      else
-       write(message, '(a,f13.8,a,f13.8)') '  Re[m^(1)]= ', mag_coll,"   Im[m^(1)]= ",mag_coll_im
+       write(message, '(a,e13.6,a,e13.6)') '  Re[m^(1)]= ', mag_coll,"   Im[m^(1)]= ",mag_coll_im
      endif
      call wrtout(nunit,message,'COLL')
    else if (nspden==4) then
-     write(message, '(a,i1,a,f13.8)') '     mx^(1)_',prtopt-1,' = ',mag_x
+     write(message, '(a,i1,a,e13.6)') '     mx^(1)_',prtopt-1,' = ',mag_x
      call wrtout(nunit,message,'COLL')
-     write(message, '(a,i1,a,f13.8)') '     my^(1)_',prtopt-1,' = ',mag_y
+     write(message, '(a,i1,a,e13.6)') '     my^(1)_',prtopt-1,' = ',mag_y
      call wrtout(nunit,message,'COLL')
-     write(message, '(a,i1,a,f13.8)') '     mz^(1)_',prtopt-1,' = ',mag_z
+     write(message, '(a,i1,a,e13.6)') '     mz^(1)_',prtopt-1,' = ',mag_z
      call wrtout(nunit,message,'COLL')
    endif
 

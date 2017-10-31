@@ -355,6 +355,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  character(len=500) :: msg
  character(len=fnlen) :: fi1o
  character(len=fnlen) :: fi1o_vtk
+ integer  :: prtopt
  type(ab7_mixing_object) :: mix
  type(efield_type) :: dtefield
 !arrays
@@ -713,12 +714,9 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &       phnons1,ph1d,dtset%prtvol,psps,rhorfermi,rmet,rprimd,symaf1,symrc1,symrl1,&
 &       ucvol,usecprj,useylmgr1,vtrial,vxc,wtk_rbz,xred,ylm,ylm1,ylmgr1)
 
-        write(*,*) 'WRITING FERMI LEVEL CALCDEN'
-
-        call calcdensph(gmet,mpi_enreg,dtset%natom,nfftf,ngfftf,nspden,&
-&        dtset%ntypat,ab_out,dtset%ratsph,rhorfermi,rprimd,dtset%typat,ucvol,xred,&
-&        1,cplex) !dbg
-
+!        call calcdensph(gmet,mpi_enreg,dtset%natom,nfftf,ngfftf,nspden,&
+!&        dtset%ntypat,ab_out,dtset%ratsph,rhorfermi,rprimd,dtset%typat,ucvol,xred,&
+!&        -1,cplex) !dbg
 
      end if
 
@@ -824,9 +822,9 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
      end if
    end if
 
-  call calcdensph(gmet,mpi_enreg,dtset%natom,nfftf,ngfftf,nspden,&
-&   dtset%ntypat,ab_out,dtset%ratsph,rhor1,rprimd,dtset%typat,ucvol,xred,&
-&   idir+1,cplex,intgden=intgden,dentot=dentot) !SPr remove
+!  call calcdensph(gmet,mpi_enreg,dtset%natom,nfftf,ngfftf,nspden,&
+!&   dtset%ntypat,ab_out,dtset%ratsph,rhor1,rprimd,dtset%typat,ucvol,xred,&
+!&   idir+1,cplex,intgden=intgden,dentot=dentot) !SPr remove
 !     write(*,*) 'SPr: n (Cr 1,2)',intgden(1,1),' ',intgden(1,2)
 !     write(*,*) 'SPr: mx(Cr 1,2)',intgden(2,1),' ',intgden(2,2)
 !     write(*,*) 'SPr: my(Cr 1,2)',intgden(3,1),' ',intgden(3,2)
@@ -1219,12 +1217,16 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 
  if(ipert==dtset%natom+5.or.ipert<=dtset%natom)then
   !debug: write out the vtk first-order density components
-  call appdig(pertcase,dtfil%fnameabo_den,fi1o_vtk)
-  call printmagvtk(mpi_enreg,cplex,nspden,nfftf,ngfftf,rhor1,rprimd,adjustl(adjustr(fi1o_vtk)//".vtk"))
+  !call appdig(pertcase,dtfil%fnameabo_den,fi1o_vtk)
+  !call printmagvtk(mpi_enreg,cplex,nspden,nfftf,ngfftf,rhor1,rprimd,adjustl(adjustr(fi1o_vtk)//".vtk"))
   !compute the contributions to susceptibility from different attomic spheres:
+
+  prtopt=1
+  if(ipert==dtset%natom+5) prtopt=idir+1;
+
   call calcdensph(gmet,mpi_enreg,dtset%natom,nfftf,ngfftf,nspden,&
 &   dtset%ntypat,ab_out,dtset%ratsph,rhor1,rprimd,dtset%typat,ucvol,xred,&
-&   idir+1,cplex,intgden=intgden,dentot=dentot)
+&   prtopt,cplex,intgden=intgden,dentot=dentot)
  endif
 
  if (iwrite_fftdatar(mpi_enreg)) then

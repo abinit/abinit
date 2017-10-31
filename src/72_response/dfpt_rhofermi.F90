@@ -654,7 +654,6 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
 
    call timab(125,2,tsec)
    
-
 !  Transfer density on augmented fft grid to normal fft grid in real space
 !  Also take into account the spin.
    if (nspden/=4) then
@@ -665,15 +664,11 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
      end if
    else
      if (psps%usepaw==0) then
-       call fftpac(1,mpi_enreg,nspden,cplex*n1,n2,n3,cplex*n4,n5,n6,dtset%ngfft,rhorfermi,rhoaug4(:,:,:,1),1)
-       call fftpac(2,mpi_enreg,nspden,cplex*n1,n2,n3,cplex*n4,n5,n6,dtset%ngfft,rhorfermi,rhoaug4(:,:,:,2),1)
-       call fftpac(3,mpi_enreg,nspden,cplex*n1,n2,n3,cplex*n4,n5,n6,dtset%ngfft,rhorfermi,rhoaug4(:,:,:,3),1)
-       call fftpac(4,mpi_enreg,nspden,cplex*n1,n2,n3,cplex*n4,n5,n6,dtset%ngfft,rhorfermi,rhoaug4(:,:,:,4),1)
+       call fftpac(isppol,mpi_enreg,nspden,cplex*n1,n2,n3,cplex*n4,n5,n6,dtset%ngfft,rhorfermi,rhoaug4(:,:,:,1),1)
+       do ispden=2,4
+         call fftpac(ispden,mpi_enreg,nspden,cplex*n1,n2,n3,cplex*n4,n5,n6,dtset%ngfft,rhorfermi,rhoaug4(:,:,:,ispden),1)
+       end do
      endif
-     write(*,*) 'SPR deb: writing out debug info on rhorfermi:'
-     do ii=1,nfftf
-        write(239,*) rhorfermi(ii,:)
-     enddo
    endif
  end do ! End loop over spins
  
@@ -776,6 +771,14 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
 !Normalize the fixed part of fermie1
  invfe1norm = zero ; if (abs(fe1norm) > tol10) invfe1norm=one/fe1norm
  fe1fixed=fe1fixed*invfe1norm
+
+
+ if(nspden==4) then
+! FR symrhg will manage correctly this rearrangement
+     rhorfermi(:,2)=rhorfermi(:,2)+(rhorfermi(:,1)+rhorfermi(:,4))    !(n+mx)
+     rhorfermi(:,3)=rhorfermi(:,3)+(rhorfermi(:,1)+rhorfermi(:,4))    !(n+my)
+     call timab(17,2,tsec)
+ end if
 
 !Symmetrize the density
  call status(0,dtfil%filstat,iexit,level,'call symrhg   ')
