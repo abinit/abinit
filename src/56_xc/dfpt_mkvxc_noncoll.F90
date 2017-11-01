@@ -105,9 +105,9 @@ subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,bxc,mpi_enreg,nfft,ngfft,nhat1,nhat1
 !Local variables-------------------------------
 !scalars
  integer :: ifft, ir, rotation
-! EB-FB option = 1 --> U matrix version
-!   SPr option = 2 --> Bxc version (explicit LSDA expression)
-!   SPr option = 3 --> U matrices expressed through angles/rotation axis
+! EB-FB rotation = 1 --> U matrix version
+!   SPr rotation = 2 --> Bxc version (explicit LSDA expression)
+!   SPr rotation = 3 --> U matrices expressed through angles/rotation axis
  real(dp),parameter :: m_norm_min=1.d-8
  real(dp) :: dum,dvdn,dvdz,fact,m_dot_m1
  real(dp) :: mx1,my1,mz1,mdirx,mdiry,mdirz
@@ -227,7 +227,7 @@ subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,bxc,mpi_enreg,nfft,ngfft,nhat1,nhat1
         
            select case (rotation)
            case (1)  ! U matrix version
-
+             
               ! define the U^(0) transformation matrix 
               rho_updn=(rhor(ifft,2)+(0.,1.)*rhor(ifft,3))
               d1=sqrt(( m_norm(ifft)+rhor(ifft,4))**2+rho_updn**2)
