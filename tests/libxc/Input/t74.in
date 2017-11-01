@@ -180,9 +180,10 @@ ecut  6.0         # Maximal kinetic energy cut-off, in Hartree
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
+#%% exclude_hosts = nag@petrus
 #%% [files]
 #%% files_to_test =
-#%%   t74.out, tolnlines=  8, tolabs=  3.0e-04, tolrel=  8.0e-05, fld_options = -easy
+#%%   t74.out, tolnlines=  8, tolabs=  3.0e-04, tolrel=  9.0e-05, fld_options = -easy
 #%% psp_files = 13al.pspnc
 #%% [paral_info]
 #%% max_nprocs = 4
