@@ -12,7 +12,7 @@
  Corning Inc. and other collaborators, see ~abinit/doc/developers/contributors.txt .
  Please read ~abinit/doc/users/acknowledgments.html for suggested
  acknowledgments of the ABINIT effort.
- For more information, see http://www.abinit.org .
+ For more information, see https://www.abinit.org .
 
 .Starting date : Wed  1 Mar 2017.
 - ( at 13h28 )
@@ -56,11 +56,11 @@ _ WF disk file :      0.026 Mbytes ; DEN or POT disk file :      0.714 Mbytes.
             acell      7.0000000000E+00  7.0000000000E+00  7.0000000000E+00 Bohr
               amu      1.20110000E+01
            bandpp           2
+     densfor_pred           6
            diemac      1.20000000E+01
              ecut      1.50000000E+01 Hartree
            enunit           2
 -          fftalg         401
-     densfor_pred           6
            istwfk        2
            kptopt           0
 P           mkmem           1
@@ -586,6 +586,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     129.000     129.000
             acell      7.0000000000E+00  7.0000000000E+00  7.0000000000E+00 Bohr
               amu      1.20110000E+01
            bandpp           2
+     densfor_pred           6
            diemac      1.20000000E+01
              ecut      1.50000000E+01 Hartree
            enunit           2
@@ -593,7 +594,6 @@ _setup2: Arith. and geom. avg. npw (full set) are     129.000     129.000
             fcart     -2.3548889685E-01 -2.3548889685E-01 -2.3548889685E-01
                        2.3548889685E-01  2.3548889685E-01  2.3548889685E-01
 -          fftalg         401
-     densfor_pred           6
            istwfk        2
            kptopt           0
 P           mkmem           1
@@ -668,7 +668,7 @@ P           mkmem           1
  Note also that it will be of great value to readers of publications presenting these results,
  to read papers enabling them to understand the theoretical formalism and details
  of the ABINIT implementation.
- For information on why they are suggested, see also http://www.abinit.org/about/?text=acknowledgments.
+ For information on why they are suggested, see also https://www.abinit.org/about/?text=acknowledgments.
 -
 - [1] Implementation of the Projector Augmented-Wave Method in the ABINIT code.
 - M. Torrent, F. Jollet, F. Bottin, G. Zerah, and X. Gonze Comput. Mat. Science 42, 337, (2008).
@@ -694,7 +694,7 @@ P           mkmem           1
 - B.Xue, A.Zhou, J.W.Zwanziger.
 - Comment : the fourth generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
-- is available at http://www.abinit.org/about/ABINIT16.pdf .
+- is available at https://www.abinit.org/about/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 -
 - [4] ABINIT : First-principles approach of materials and nanosystem properties.
@@ -706,7 +706,7 @@ P           mkmem           1
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment : the third generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
-- is available at http://www.abinit.org/about/ABINIT_CPC_v10.pdf .
+- is available at https://www.abinit.org/about/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 -
 - [5] A brief introduction to the ABINIT software package.
@@ -717,7 +717,7 @@ P           mkmem           1
 - Comment : the second generic paper describing the ABINIT project. Note that this paper
 - should be cited especially if you are using the GW part of ABINIT, as several authors
 - of this part are not in the list of authors of the first or third paper.
-- The .pdf of the latter paper is available at http://www.abinit.org/about/zfk_0505-06_558-562.pdf.
+- The .pdf of the latter paper is available at https://www.abinit.org/about/zfk_0505-06_558-562.pdf.
 - Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
 - the licence allows the authors to put it on the Web).
 -

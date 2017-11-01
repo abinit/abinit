@@ -74,7 +74,7 @@ subroutine herald(code_name,code_version,iout)
 
 !RELEASE TIME FROM ABIRULES
  year_rel=2017
- mm_rel=08
+ mm_rel=10
 !END OF RELEASE TIME
 
 !The technique used hereafter is the only one that we have found to obtain
@@ -108,7 +108,7 @@ subroutine herald(code_name,code_version,iout)
 & ' Corning Inc. and other collaborators, see ~abinit/doc/developers/contributors.txt .',&
 & ' Please read ~abinit/doc/users/acknowledgments.html for suggested',&
 & ' acknowledgments of the ABINIT effort.',&
-& ' For more information, see http://www.abinit.org .'
+& ' For more information, see https://www.abinit.org .'
 
 !Get year, month and day
  call date_and_time(strdat,strtime,strzone,values)

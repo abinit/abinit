@@ -8,7 +8,6 @@ t07o_DS3_DDB
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = mrgddb
-#%% exclude_builders = ubu_intel_17.0_openmpi
 #%% test_chain = t07.in,t08.in,t09.in,t10.in,t11.in
 #%% [files]
 #%% files_to_test = 

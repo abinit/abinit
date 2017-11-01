@@ -236,7 +236,7 @@ subroutine drivexc(exc,ixc,npts,nspden,order,rho_updn,vxcrho,ndvxc,ngr2,nd2vxc,n
 !Check libXC
  if (ixc<0) then
    libxc_test=libxc_functionals_check(stop_if_error=.true.)
-!  Check is all the necessary arrays are present and have the correct dimensions
+!  Check whether all the necessary arrays are present and have the correct dimensions
    if (libxc_functionals_isgga() .or. libxc_functionals_ismgga()) then
      if ( (.not. present(grho2_updn)) .or. (.not. present(vxcgrho)))  then
        write(message, '(5a,i7,a,i6,a,i6)' )&

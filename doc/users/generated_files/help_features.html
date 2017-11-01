@@ -1,0 +1,290 @@
+<!--                                                                                     -->
+<!-- This file has been produced by generate_doc.py using different .yml  or .bib files. -->
+<!-- It is useless to modify it. Modify the related .yml  or .bib files instead.         -->
+<!--                                                                                     -->
+<html>
+<head><title>ABINIT features</title>
+<link rel=stylesheet type="text/css" href="../../formabinit.css">
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  jax: ["input/TeX","output/HTML-CSS"],
+  tex2jax: {inlineMath: [['$','$']]},
+  displayAlign: "center",
+  TeX: { equationNumbers: { autoNumber: "AMS" } }
+});
+</script>
+<script type="text/javascript" async
+src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+</head>
+<body bgcolor="#ffffff">
+
+<hr>
+<a name="top"></a>
+
+<h1> ABINIT settings and features.</h1>
+<h2>An overview of ABINIT settings and features, for beginners and more experienced users.</h2>
+<hr>
+This document gives an overview of the features implemented in the ABINIT package,
+grouped in different topics, for the beginner as well as more experienced user. 
+It might answer the question "How to ... with ABINIT ?", to some extent.
+<br>It also gives a synthetic view on the needed settings.
+<hr>
+<h5>Copyright (C) 1998-2017 ABINIT group (FJ,XG)
+<script type="text/javascript" src="../../js_files/copyright.js"> </script>
+</h5> 
+
+<script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
+
+<a name="list"></a>
+<h3><b> Table of contents:</b></h3>
+<ul> 
+  <li>1. <a href="#foreword">Foreword</a></li>
+  <li>2. <a href="#atoms">ABINIT specifications for static DFT calculations</a></li>
+
+   <ul> 
+    <li>2.1. <a href="#atoms">Settings for atoms : cell, atoms, atomic positions, and symmetries</a></li>
+    <li>2.2. <a href="#electrons">Physical settings for electrons : XC functionals, atomic/pseudo potentials, metal/insulator, spin, Coulomb interaction ...</a></li>
+    <li>2.3. <a href="#numerical">Numerical settings for electrons : basis set, planewaves and real space sampling, Brillouin zone sampling, ...</a></li>
+    <li>2.4. <a href="#control">SCF algorithms, tuning and stopping criteria</a></li>
+    <li>2.5. <a href="#added">Added electric/magnetic field, other artificial constraints/modifications, and related properties ...</a></li>
+
+   </ul> 
+  <li>3. <a href="#control">Global control parameters : flow, parallelism, output files, output content, timing and memory control, ...</a></li>
+  <li>4. <a href="#moldyn">Molecular dynamics, geometry optimization, transition paths</a></li>
+  <li>5. <a href="#correlated">Correlated electrons</a></li>
+  <li>6. <a href="#dfpt">Adiabatic response properties (phonons, low-frequency dielectric, Raman, elasticity, temperature dependence ...)</a></li>
+  <li>7. <a href="#excited">Excited state calculations, and frequency-dependent electronic and optical properties</a></li>
+  <li>8. <a href="#other_physics">Electronic properties and analysis tools (DOS, STM, Wannier, band plotting and interpolating...)</a></li>
+  <li>9. <a href="#other_physics">Other physical properties (e.g. positron)</a></li>
+  <li>10. <a href="#postprocess">Analysis/postprocessing tools</a></li>
+  <li>11. <a href="#miscellaneous">Miscellaneous topics</a></li>
+
+ </ul> 
+ <hr><br><a name="foreword"> </a>
+<a name="1"> </a>
+<h3><b>1. Foreword</b></h3>
+ <p><p> Documenting the features of a large scientific code is a complex task. The present list of features
+refers to different "topics". Each topic has a dedicated page, which should be quick to read,
+unlike the <a href="../../tutorial/generated_files/lesson_welcome.html#">lessons of the tutorial</a>, each of which is usually at least one hour work. 
+Many of the topics make the link between a physical property or quantity 
+(including bibliographical references for the theory, and sometimes pointing to published work using this feature)
+and the way it is to be computed with ABINIT (e.g. corresponding input variable, example input files, and possibly tutorial(s)).
+
+<p> This "topic"-based approach might be used by the beginner to get a broad overview of the capabilities of ABINIT 
+as well as to the more expert user to quickly find the way to compute some existing quantity, or to 
+remember which input variable is useful or mandatory for the calculation of a given property.
+Some topics are rather "input"-oriented (e.g. how to specify the atomic geometry, the occupation numbers, etc),
+other are more "property"-oriented (e.g. how to compute the elastic constants, the temperature-dependence of the electronic structure, etc),
+other are related to proper/better usage of the code. 
+
+<p> Care is taken not to duplicate existing more complete documentation in ABINIT, but to point to it if appropriate.
+Not all the ABINIT documentation is covered by the Web-accessible documents, there are still a few unlinked documents 
+in the subdirectories of ~abinit/doc (work is in progress to make it all available). 
+Discussions on the <a href="https://forum.abinit.org">ABINIT forum</a> might also allow to get information.
+<br><br><a href=#top>Go to the top</a>
+<hr>
+<br><a name="atoms"> </a>
+<a name="2"> </a>
+<h3><b>2. ABINIT specifications for static DFT calculations</b></h3>
+ <p>The topic <a href="../../topics/generated_files/topic_GSintroduction.html#">Building an input file</a> briefly explains the content of an ABINIT input file.
+The following topics go more into the details, however restricting to <b>static DFT calculations</b>, without
+doing anything fancy with the exchange-correlation functionals. Going beyond these is left 
+for other sections (<a href="../../users/generated_files/help_features.html#3">Sec. 3</a> and beyond). In particular, for any accurate electronic properties, e.g.
+correct band structure, optical response, or for strongly correlated electrons, please go beyond the present sec. 2.
+Also, topics related to global control parameters, that apply, generally speaking, to all types of calculations
+are explained later.
+<br><a name="atoms"> </a>
+<a name="2.1"> </a>
+<h4><b>2.1. Settings for atoms : cell, atoms, atomic positions, and symmetries</b></h4>
+ <p><ol>
+<li><a href="../../topics/generated_files/topic_UnitCell.html#">Unit cell</a></li>
+<li><a href="../../topics/generated_files/topic_AtomTypes.html#">Types of atoms and alchemy</a></li>
+<li><a href="../../topics/generated_files/topic_crystal.html#">Crystalline structure and symmetries</a></li>
+<li><a href="../../topics/generated_files/topic_SmartSymm.html#">Smart symmetrizer</a></li>
+<li><a href="../../topics/generated_files/topic_AtomManipulator.html#">Atom manipulator</a> (advanced topic)</li>
+</ol>
+<br><a name="electrons"> </a>
+<a name="2.2"> </a>
+<h4><b>2.2. Physical settings for electrons : XC functionals, atomic/pseudo potentials, metal/insulator, spin, Coulomb interaction ...</b></h4>
+ <p><ol>
+<li><a href="../../topics/generated_files/topic_xc.html#">Overview of available exchange and correlation functionals</a></li>
+<li><a href="../../topics/generated_files/topic_Hybrids.html#">Hybrid functionals</a></li>
+<li><a href="../../topics/generated_files/topic_vdw.html#">Van der Waals functionals</a></li>
+<li><a href="../../topics/generated_files/topic_RPACorrEn.html#">Correlation energy within RPA</a></li>
+<li><a href="../../topics/generated_files/topic_PseudosPAW.html#">Pseudopotentials and PAW atomic datasets</a></li>
+<li><a href="../../topics/generated_files/topic_BandOcc.html#">Bands and occupation numbers for metals and insulators</a></li>
+<li><a href="../../topics/generated_files/topic_spinpolarisation.html#">Spin-polarised systems and spin-orbit coupling</a></li>
+<li><a href="../../topics/generated_files/topic_Coulomb.html#">Coulomb interaction and charged cells</a></li>
+</ol>
+<br><a name="numerical"> </a>
+<a name="2.3"> </a>
+<h4><b>2.3. Numerical settings for electrons : basis set, planewaves and real space sampling, Brillouin zone sampling, ...</b></h4>
+ <p><ol>
+<li><a href="../../topics/generated_files/topic_Planewaves.html#">Planewaves and real space sampling</a></li>
+<li><a href="../../topics/generated_files/topic_PAW.html#">PAW special settings</a></li>
+<li><a href="../../topics/generated_files/topic_Wavelets.html#">Wavelets in ABINIT</a></li>
+<li><a href="../../topics/generated_files/topic_k-points.html#">Wavevector sampling (k point grid)</a></li>
+</ol>
+<br><a name="control"> </a>
+<a name="2.4"> </a>
+<h4><b>2.4. SCF algorithms, tuning and stopping criteria</b></h4>
+ <p><ol>
+<li><a href="../../topics/generated_files/topic_SCFAlgorithms.html#">SCF algorithms</a></li>
+<li><a href="../../topics/generated_files/topic_SCFControl.html#">SCF control, tolerances and stopping criteria</a></li>
+<li><a href="../../topics/generated_files/topic_ForcesStresses.html#">Forces and stresses</a></li>
+<li><a href="../../topics/generated_files/topic_TuningSpeed.html#">Tuning the speed of the calculation</a></li>
+<li><a href="../../topics/generated_files/topic_Recursion.html#">Recursion methods and orbital free calculations</a> (not in production)</li>
+</ol>
+<br><a name="added"> </a>
+<a name="2.5"> </a>
+<h4><b>2.5. Added electric/magnetic field, other artificial constraints/modifications, and related properties ...</b></h4>
+ <p><ol>
+<li><a href="../../topics/generated_files/topic_Berry.html#">Electric polarization and finite electric field</a></li>
+<li><a href="../../topics/generated_files/topic_MagField.html#">External magnetic field</a></li>
+<li><a href="../../topics/generated_files/topic_MagMom.html#">Constrained atomic magnetic moment</a></li>
+<li><a href="../../topics/generated_files/topic_EFG.html#">Electric field gradients</a></li>
+<li><a href="../../topics/generated_files/topic_Artificial.html#">Artificial modifications of the system</a></li>
+</ol>
+<br><br><a href=#top>Go to the top</a>
+<hr>
+<br><a name="control"> </a>
+<a name="3"> </a>
+<h3><b>3. Global control parameters : flow, parallelism, output files, output content, timing and memory control, ...</b></h3>
+ <p><ol>
+ <li><a href="../../topics/generated_files/topic_multidtset.html#">Multi-dataset calculations</a></li>
+ <li><a href="../../topics/generated_files/topic_parallelism.html#">Parallelism and ABINIT</a></li>
+ <li><a href="../../topics/generated_files/topic_printing.html#">Printing files</a></li>
+ <li><a href="../../topics/generated_files/topic_Output.html#">Tuning the output content in different files</a></li>
+ <li><a href="../../topics/generated_files/topic_Control.html#">Time and memory control</a></li>
+</ol>
+<br><br><a href=#top>Go to the top</a>
+<hr>
+<br><a name="moldyn"> </a>
+<a name="4"> </a>
+<h3><b>4. Molecular dynamics, geometry optimization, transition paths</b></h3>
+ <p><ol>
+<li><a href="../../topics/generated_files/topic_GeoOpt.html#">Geometry optimization</a></li>
+<li><a href="../../topics/generated_files/topic_MolecularDynamics.html#">Molecular dynamics</a></li>
+<li><a href="../../topics/generated_files/topic_TransPath.html#">Transition path searches: NEB and string method</a></li>
+<li><a href="../../topics/generated_files/topic_GeoConstraints.html#">Geometry constraints</a></li>
+<li><a href="../../topics/generated_files/topic_PIMD.html#">Path-integral molecular dynamics (PIMD)</a></li>
+<li><a href="../../topics/generated_files/topic_LOTF.html#">Learn-on-the-flight (LOTF)</a> (not in production)</li>
+</ol>
+<br><br><a href=#top>Go to the top</a>
+<hr>
+<br><a name="correlated"> </a>
+<a name="5"> </a>
+<h3><b>5. Correlated electrons</b></h3>
+ <p>When correlated electrons are to be considered (in most cases, when <b>d and f orbitals</b> plpay an active role), 
+it is necessary to go beyond the standard DFT framework. 
+ABINIT enables the following possibilities:
+<ol>
+ <li><a href="../../topics/generated_files/topic_Hybrids.html#">Hybrid functionals</a></li>
+ <li><a href="../../topics/generated_files/topic_DFT+U.html#">DFT+U approximation</a></li>
+ <li><a href="../../topics/generated_files/topic_DMFT.html#">Dynamical Mean Field Theory (DMFT)</a></li>
+ <li><a href="../../topics/generated_files/topic_CRPA.html#">Calculation of the effective Coulomb interaction</a></li>
+</ol>
+<br><br><a href=#top>Go to the top</a>
+<hr>
+<br><a name="dfpt"> </a>
+<a name="6"> </a>
+<h3><b>6. Adiabatic response properties (phonons, low-frequency dielectric, Raman, elasticity, temperature dependence ...)</b></h3>
+ <p>Many properties can be obtained in the approximation that the electrons <b>stay in their ground state</b> (adiabatic responses). 
+The poweful Density-Functional Perturbation Theory (DFPT) framework allows ABINIT to address directly all such properties 
+in the case that are connected to derivatives of the total energy with respect to some perturbation. 
+This includes all dynamical effects due to phonons and their coupling, 
+thus also temperature-dependent properties due to phonons.
+<ol>
+ <li><a href="../../topics/generated_files/topic_DFPT.html#">Generalities about DFPT</a>
+ <li><a href="../../topics/generated_files/topic_q-points.html#">Wavevectors for phonons (q-points)</a>
+ <li><a href="../../topics/generated_files/topic_Phonons.html#">Vibrational and dielectric properties (phonon frequencies and modes, IR and Raman spectra, Born effective charges)</a></li>
+ <li><a href="../../topics/generated_files/topic_PhononBands.html#">Phonon bands and DOS, interatomic force constants, sound velocity</a></li>
+ <li><a href="../../topics/generated_files/topic_Temperature.html#">Temperature dependent properties (free energy, entropy, specific heat, atomic temperature factors, thermal expansion)</a></li>
+ <li><a href="../../topics/generated_files/topic_Elastic.html#">Elasticity and piezoelectricity</a></li>
+ <li><a href="../../topics/generated_files/topic_nonlinear.html#">Raman intensities and electro-optic properties</a></li>
+ <li><a href="../../topics/generated_files/topic_ElPhonInt.html#">Electron-phonon interaction</a></li>
+ <li><a href="../../topics/generated_files/topic_PhononWidth.html#">Phonon linewidth due to the electron-phonon interaction</a></li>
+ <li><a href="../../topics/generated_files/topic_ElPhonTransport.html#">Electronic transport properties from electron-phonon interaction (resistivity, superconductivity, thermal)</a></li>
+ <li><a href="../../topics/generated_files/topic_TDepES.html#">Temperature dependence of the electronic structure from electron-phonon interaction</a></li>
+ <li><a href="../../topics/generated_files/topic_ConstrainedPol.html#">Constrained polarization geometry optimization</a> (advanced topic)</li>
+</ol>
+<br><br><a href=#top>Go to the top</a>
+<hr>
+<br><a name="excited"> </a>
+<a name="7"> </a>
+<h3><b>7. Excited state calculations, and frequency-dependent electronic and optical properties</b></h3>
+ <p>Excited-state calculations and frequency-dependent properties (for frequencies that are non-negligible with respect to the
+electronic gap), can be addressed by a variety of methodologies, usually trading accuracy for speed. At the lowest level,
+one encounters the independent-particle approximation, building upon some previously obtained band structure (e.g. Kohn-Sham
+band structure from DFT). For charged excitations, allowing to obtain a quasiparticle band structure without the 
+well-known DFT band gap problem, one has to resort to (costly) GW calculations. For neutral excitations (i.e. optical),
+the (costly) Bethe-Salpeter approach is the most accurate formalism presently available. TDDFT and &Delta;-SCF calculations
+are cheaper but will work well for molecules and for isolated defects in a solid, not for e.g. correcting the band gap.
+<ol>
+ <li><a href="../../topics/generated_files/topic_Optic.html#">Linear and non-linear optical properties in the independent-particle approximation</a></li>
+ <li><a href="../../topics/generated_files/topic_FrequencyMeshMBPT.html#">Definition of frequency meshes for Many-body perturbation theory</a></li>
+ <li><a href="../../topics/generated_files/topic_Susceptibility.html#">Frequency-dependent susceptibility matrix, and related dielectric matrix and screened Coulomb interaction</a></li>
+ <li><a href="../../topics/generated_files/topic_SelfEnergy.html#">Electronic self-energy</a></li>
+ <li><a href="../../topics/generated_files/topic_GW.html#">GW calculations for accurate band structure, including self-consistency</a></li>
+ <li><a href="../../topics/generated_files/topic_BSE.html#">Bethe-Salpeter calculations for accurate optical properties</a></li>
+ <li><a href="../../topics/generated_files/topic_TDDFT.html#">TDDFT calculations</a></li>
+ <li><a href="../../topics/generated_files/topic_DeltaSCF.html#">DeltaSCF calculations</a></li>
+ <li><a href="../../topics/generated_files/topic_RandStopPow.html#">Random electronic stopping power</a></li>
+ <li><a href="../../topics/generated_files/topic_GWls.html#">GW- Lanczos-Sternheimer method</a> (not in production)</li>
+</ol>
+<br><br><a href=#top>Go to the top</a>
+<hr>
+<br><a name="other_physics"> </a>
+<a name="8"> </a>
+<h3><b>8. Electronic properties and analysis tools (DOS, STM, Wannier, band plotting and interpolating...)</b></h3>
+ <p>Many properties are directly deduced from the knowledge of the electronic wavefunctions, eigenenergies, density, potential, etc.
+Some necessitates additional tuning parameters or are linked to postprocessing tools and are described in the following topics. 
+Some others are actually activated through a single printing parameter, such as the Electron Localization Function (ELF - see <a href="../../input_variables/generated_files/varset_files.html#prtelf">prtelf</a>). 
+See the list of "printing" input variables in <a href="../../topics/generated_files/topic_printing.html#">topic_printing</a>.
+<ol>
+ <li><a href="../../topics/generated_files/topic_ElecBandStructure.html#">Electronic band structure and related topics</a></li>
+ <li><a href="../../topics/generated_files/topic_ElecDOS.html#">Electronic DOS and related topics</a></li>
+ <li><a href="../../topics/generated_files/topic_EffMass.html#">Effective mass calculations</a></li>
+ <li><a href="../../topics/generated_files/topic_Unfolding.html#">Unfolding supercell band structures</a></li>
+ <li><a href="../../topics/generated_files/topic_DensityPotential.html#">Manipulating the density and potentials</a></li>
+ <li><a href="../../topics/generated_files/topic_STM.html#">Scanning Tunneling Microscopy map</a></li>
+ <li><a href="../../topics/generated_files/topic_Wannier.html#">Wannier functions</a></li>
+ <li><a href="../../topics/generated_files/topic_Bader.html#">Bader Atom-In-Molecule analysis</a></li>
+</ol>
+<br><br><a href=#top>Go to the top</a>
+<hr>
+<br><a name="other_physics"> </a>
+<a name="9"> </a>
+<h3><b>9. Other physical properties (e.g. positron)</b></h3>
+ <p><ol>
+ <li><a href="../../topics/generated_files/topic_positron.html#">Positron calculations</a></li>
+</ol>
+<br><br><a href=#top>Go to the top</a>
+<hr>
+<br><a name="postprocess"> </a>
+<a name="10"> </a>
+<h3><b>10. Analysis/postprocessing tools</b></h3>
+ <p><ol>
+ <li><a href="../../topics/generated_files/topic_Abipy.html#">Abipy - ABINIT swiss knife</a></li>
+ <li><a href="../../topics/generated_files/topic_APPA.html#">Abinit Post-Processor Application (APPA), for molecular-dynamics trajectory analysis</a></li>
+ <li><a href="../../topics/generated_files/topic_Band2eps.html#">Band2eps for phonon dispersion curves</a></li>
+</ol>
+<br><br><a href=#top>Go to the top</a>
+<hr>
+<br><a name="miscellaneous"> </a>
+<a name="11"> </a>
+<h3><b>11. Miscellaneous topics</b></h3>
+ <p><ol>
+ <li><a href="../../topics/generated_files/topic_Verification.html#">Verification of the implementation</a></li>
+ <li><a href="../../topics/generated_files/topic_PortabilityNonRegression.html#">Portability and non-regression tests</a></li>
+ <li><a href="../../topics/generated_files/topic_Git.html#">Git, gitlab and github for the ABINIT project</a></li>
+ <li><a href="../../topics/generated_files/topic_Dev.html#">Miscellaneous for developers</a></li>
+</ol>
+<br><br><a href=#top>Go to the top</a>
+<hr>
+<script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
+
+</body>
+</html>
+

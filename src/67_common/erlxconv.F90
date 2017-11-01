@@ -37,13 +37,14 @@
 #include "abi_common.h"
 
 
-subroutine erlxconv(etotals,iexit,ihist,itime,mxhist,ntime,tolmxde)
+subroutine erlxconv(hist,iexit,itime,itime_hist,ntime,tolmxde)
     
  use defs_basis
  use m_errors
  use m_profiling_abi
 
  use m_fstrings,  only : indent
+ use m_abihist, only : abihist,abihist_findIndex
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -56,25 +57,28 @@ subroutine erlxconv(etotals,iexit,ihist,itime,mxhist,ntime,tolmxde)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: ihist,itime,mxhist,ntime
+ integer,intent(in) :: itime,itime_hist,ntime
  integer,intent(inout) :: iexit
  real(dp), intent(in) :: tolmxde
 !arrays
- real(dp),intent(in) :: etotals(mxhist)
+ type(abihist),intent(inout) :: hist
 
 !Local variables-------------------------------
+ integer :: ihist,ihist_prev,ihist_prev2
  real(dp) :: ediff1,ediff2,maxediff
- character(len=500) :: message                   
- 
+ character(len=500) :: message
 ! *************************************************************************
 
- if (ihist<3) then
+ if (itime_hist<3) then
    write(message, '(a,a,a)' ) ch10,&
 &   ' erlxconv : minimum 3 Broyd/MD steps to check convergence of energy in relaxations',ch10
    call wrtout(std_out,message,'COLL')
  else
-   ediff1 = etotals(ihist)-etotals(ihist-1)
-   ediff2 = etotals(ihist)-etotals(ihist-2)
+   ihist = hist%ihist
+   ihist_prev  = abihist_findIndex(hist,-1)
+   ihist_prev2 = abihist_findIndex(hist,-2)
+   ediff1 = hist%etot(ihist) - hist%etot(ihist_prev)
+   ediff2 = hist%etot(ihist) - hist%etot(ihist_prev2)
    if ((abs(ediff1)<tolmxde).and.(abs(ediff2)<tolmxde)) then
      write(message, '(a,a,i4,a,a,a,a,a,es11.4,a,a)' ) ch10,&
 &     ' At Broyd/MD step',itime,', energy is converged : ',ch10,&

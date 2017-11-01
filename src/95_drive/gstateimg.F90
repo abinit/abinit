@@ -215,7 +215,7 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
  integer,parameter :: formeig=0,level=100,ndtpawuj=0,response=0
  integer :: history_size,idelta,idynimage,ierr,ifirst
  integer :: ii,iimage,ih,itimimage,itimimage_eff,itimimage_prev,ndynimage,nocc
- integer :: ntimimage,ntimimage_stored,ntimimage_max,similar
+ integer :: ntimimage,ntimimage_stored,ntimimage_max
  logical :: check_conv,compute_all_images,compute_static_images
  logical :: isVused,isARused,is_master,is_mep,is_pimd
  logical :: call_predictor,use_hist,use_hist_prev
@@ -374,7 +374,7 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
  dtion=one;if (is_pimd) dtion=pimd_param%dtion
 
 !In some cases, need amass variable
- if (use_hist.and.is_pimd) then
+ if (use_hist) then
    ABI_ALLOCATE(amass,(dtset%natom,nimage))
    do iimage=1,nimage
      if (any(amu_img(:,iimage)/=amu_img(:,1))) then
@@ -507,9 +507,9 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
        occ(:)       =occ_img(:,iimage)
 
        call args_gs_init(args_gs, &
-&       res_img(iimage)%amu(:),&
-&       res_img(iimage)%mixalch(:,:),&
-&       dtset%dmatpawu(:,:,:,:,ii),dtset%upawu(:,ii),dtset%jpawu(:,ii))
+&       res_img(iimage)%amu(:),res_img(iimage)%mixalch(:,:),&
+&       dtset%dmatpawu(:,:,:,:,ii),dtset%upawu(:,ii),dtset%jpawu(:,ii),&
+&       dtset%rprimd_orig(:,:,ii))
 
        call timab(705,2,tsec)
 
@@ -588,9 +588,9 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
 #if defined HAVE_NETCDF
    if (use_hist.and.mpi_enreg%me_cell==0) then
      ifirst=merge(0,1,itimimage>1)
-     call write_md_hist_img(hist,hist_filename,ifirst,dtset%natom,dtset%ntypat,&
+     call write_md_hist_img(hist,hist_filename,ifirst,itimimage,dtset%natom,dtset%ntypat,&
 &     dtset%typat,amu_img(:,1),dtset%znucl,dtion,&
-&     nimage=dtset%nimage,comm_img=mpi_enreg%comm_img,&
+&     nimage=dtset%nimage,imgmov=dtset%imgmov,mdtemp=dtset%mdtemp,comm_img=mpi_enreg%comm_img,&
 &     imgtab=mpi_enreg%my_imgtab)
    end if
 #endif
@@ -638,7 +638,7 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
    end if
 
 !Temporary statement
-    110 continue
+   110 continue
 
 !  Dont call the predictor at last time step
    if (itimimage>=ntimimage_max) call_predictor=(call_predictor.and.is_pimd)

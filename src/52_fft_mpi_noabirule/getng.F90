@@ -109,7 +109,7 @@ subroutine getng(boxcutmin,ecut,gmet,kpt,me_fft,mgfft,nfft,ngfft,nproc_fft,nsym,
  integer :: plane,testok,tobechecked,ount,fftalga
  real(dp),parameter :: minbox=0.75_dp
  real(dp) :: dsqmax,dsqmin,ecutmx,prodcurrent,prodtrial,xx,yy
- logical :: testdiv 
+ logical :: testdiv
  character(len=500) :: message
  integer,parameter :: largest_ngfft=mg ! Goedecker FFT: any powers of 2, 3, and 5 - must be coherent with defs_fftdata.F90
  integer,parameter :: maxpow2 =16      ! int(log(largest_ngfft+half)/log(two))
@@ -445,12 +445,12 @@ subroutine getng(boxcutmin,ecut,gmet,kpt,me_fft,mgfft,nfft,ngfft,nproc_fft,nsym,
  ngfft(4)=2*(ngfft(1)/2)+1
  ngfft(5)=2*(ngfft(2)/2)+1
  ngfft(6)=ngfft(3)
- if (any(fftalga == [FFT_FFTW3, FFT_DFTI])) then  
+ if (any(fftalga == [FFT_FFTW3, FFT_DFTI])) then
    ! FFTW3 supports leading dimensions but at the price of a larger number of FFTs
    ! to be executed along z when the zero-padded version is used.
    ! One should check whether the augmentation is beneficial for FFTW3.
-   ngfft(4)=2*(ngfft(1)/2)+1  
-   ngfft(5)=2*(ngfft(2)/2)+1  
+   ngfft(4)=2*(ngfft(1)/2)+1
+   ngfft(5)=2*(ngfft(2)/2)+1
    !ngfft(4)=ngfft(1)
    !ngfft(5)=ngfft(2)
    ngfft(6)=ngfft(3)

@@ -59,4 +59,5 @@
 #%%   Also compare the halved spin-orbit interaction alchemical mixing
 #%%   with a pseudopotential directly prepared with halved spin-orbit interaction.
 #%%   The agreement is perfect.
+#%% topics = AtomTypes
 #%%<END TEST_INFO>

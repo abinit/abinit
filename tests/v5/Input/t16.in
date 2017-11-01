@@ -270,4 +270,5 @@ pawprtvol 3
 #%%   7- non-collinear magnetism LDA+U+SO nsppol/nspden/nspinor=1/4/2
 #%%   8- non-magnetic LDA+U+SO            nsppol/nspden/nspinor=1/1/2
 #%%   Cut-off and k-points are unrealistic.
+#%% topics = DFT+U, spinpolarisation
 #%%<END TEST_INFO>

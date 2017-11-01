@@ -77,4 +77,5 @@
 #%% description = 
 #%%   PAW: test of some variables reserved to experienced users or developers
 #%%   BCC iron, ferromagnetic, GGA, PAW. Also tests maxnsym keyword.
+#%% topics = PAW
 #%%<END TEST_INFO>

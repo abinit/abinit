@@ -711,11 +711,11 @@ with_trio_flavor="netcdf+psml"
 
 # Include flags for the psml library (default is unset)
 #
-with_psml_incs="-I/usr/local/psml-0.8_gcc61/include"
+with_psml_incs="-I${FALLBACKS_PATH}/xmlf90/1.5.0/include -I${FALLBACKS_PATH}/libpsml/1.1.5/include"
 
 # Link flags for the psml library (default is unset)
 #
-with_psml_libs="-L/usr/local/psml-0.8_gcc61/lib -lpsml"
+with_psml_libs="-L${FALLBACKS_PATH}/libpsml/1.1.5/lib -lpsml -L${FALLBACKS_PATH}/xmlf90/1.5.0/lib -lxmlf90"
 
                        # ------------------------------ #
 
@@ -923,7 +923,7 @@ with_linalg_flavor="none"
 #
 # You may specify any combination, using '+' as a separator
 #
-with_dft_flavor="atompaw+bigdft+libxc+wannier90"
+with_dft_flavor="atompaw+libxc+wannier90"
 
                        # ------------------------------ #
 

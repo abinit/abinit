@@ -221,7 +221,7 @@ class AbimemParser(object):
     def yield_all_entries(self):
         with open(self.path, "rt") as fh:
             for lineno, line in enumerate(fh):
-                if lineno == 0: continue
+                if lineno == 0: continue # skip header line of abimem files
                 yield Entry.from_line(line, lineno)
 
     @catchall
@@ -237,7 +237,7 @@ class AbimemParser(object):
             if len(peaks) == 0:
                 peaks.append(e); continue
 
-            # TODO: Should remove redondant entries.
+            # TODO: Should remove redundant entries.
             if size > peaks[0].size:
                 peaks.append(e)
                 peaks = deque(sorted(peaks, key=lambda x: x.size), maxlen=maxlen)
@@ -283,8 +283,9 @@ class AbimemParser(object):
                 if p not in heap:
                     if newe.isalloc:
                         heap[p] = [newe]
+                    # isfree found but ptr has not been allocated:
                     else:
-                        # Likely reallocation
+                        # Likely comes from a reallocation
                         reallocs.append(newe)
 
                 else:
@@ -305,7 +306,8 @@ class AbimemParser(object):
                         #    deallocate(foo)              ! p2 = &foo
                         #
                         #    In this case, p2 != p0
-                        #print("WARN:", newe.ptr, newe, "ptr already on the heap")
+                        print("WARN:", newe.ptr, newe, "ptr already on the heap ", len(heap[p]), \
+                           " sizes = ", heap[p][0].size, newe.size)
                         #print("HEAP:", heap[newe.ptr])
                         locus = newe.locus
                         if locus not in stack:

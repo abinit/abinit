@@ -90,4 +90,5 @@
 #%%   For example, for occopt=4, the difference between tsmear=0.101 and
 #%%   tsmear=0.099 is -11.149450d-6 Ha , while the value of -kT.entropy
 #%%   is -5.574709d-4Ha, that is about 500 larger, as expected. 
+#%% topics = BandOcc
 #%%<END TEST_INFO>

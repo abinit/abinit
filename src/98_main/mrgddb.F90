@@ -38,8 +38,9 @@
 !! PARENTS
 !!
 !! CHILDREN
-!!      abi_io_redirect,abimem_init,abinit_doctor,ddb_getdims
-!!      get_command_argument,herald,mblktyp1,mblktyp5,timein,wrtout,xmpi_init
+!!      abi_io_redirect,abimem_init,abinit_doctor,ddb_hdr_free
+!!      ddb_hdr_open_read,get_command_argument,herald,mblktyp1,mblktyp5,timein
+!!      wrtout,xmpi_init
 !!
 !! SOURCE
 
@@ -56,11 +57,12 @@ program mrgddb
  use m_profiling_abi
  use m_errors
  use m_xmpi
+ use m_ddb_hdr
 
  use m_time ,        only : asctime
  use m_io_tools,     only : file_exists
  use m_fstrings,     only : sjoin
- use m_ddb,          only : ddb_getdims, DDB_VERSION
+ use m_ddb,          only : DDB_VERSION
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -83,6 +85,7 @@ program mrgddb
  logical :: cannot_overwrite=.True.
  character(len=24) :: codename
  character(len=fnlen) :: dscrpt
+ type(ddb_hdr_type) :: ddb_hdr
 !arrays
  real(dp) :: tsec(2)
  character(len=fnlen) :: filnam(mddb+1)
@@ -228,10 +231,13 @@ program mrgddb
  ! msym = maximum number of symmetry elements in space group
  mblktyptmp=1
  do iddb=1,nddb
-   call ddb_getdims(dummy,filnam(iddb+1),dummy1,dummy2,mblktyp,&
-&   msym,dummy3,dummy4,dummy5,dummy6,ddbun,dummy7,DDB_VERSION,comm)
+   call ddb_hdr_open_read(ddb_hdr,filnam(iddb+1),ddbun,DDB_VERSION,&
+&   dimonly=1)
 
-   if(mblktyp > mblktyptmp) mblktyptmp = mblktyp
+   if(ddb_hdr%mblktyp > mblktyptmp) mblktyptmp = ddb_hdr%mblktyp
+
+   call ddb_hdr_free(ddb_hdr)
+
  end do
 
  mblktyp = mblktyptmp

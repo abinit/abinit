@@ -60,4 +60,5 @@
 #%%   The first psp is Si, the second one is Ge, the
 #%%   mixing coefficients are 0.5 and 0.5 . The 
 #%%   pseudopotentials differ from the ones of test #93 .
+#%% topics = AtomTypes
 #%%<END TEST_INFO>

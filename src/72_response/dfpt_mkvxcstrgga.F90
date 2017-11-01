@@ -19,7 +19,7 @@
 !!    if 2, COMPLEX
 !!  gprimd(3,3)=dimensional primitive translations in reciprocal space (bohr^-1)
 !!  istr=index of the strain perturbation (1..6)
-!!  kxc(nfft,nkxc)=exchange and correlation kernel (see rhohxc.f)
+!!  kxc(nfft,nkxc)=exchange and correlation kernel (see rhotoxc.f)
 !!  mpi_enreg=information about MPI parallelization
 !!  nfft=(effective) number of FFT grid points (for this processor)
 !!  ngfft(18)=contain all needed information about 3D FFT,

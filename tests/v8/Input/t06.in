@@ -2,12 +2,13 @@
 #Test for multibinit, just read xml and generate the effective potential into XML file
 # without regeneration of dipole-dipole just reading xml
 ##############################################################################
-prt_effpot = -1
+prt_model = 2
 
 #---------------------------------------------------------------
 #Generation of the IFC
 #---------------------------------------------------------------
 dipdip = 0
+dipdip_prt = 1
 
 #---------------------------------------------------------------
 #Inputs for the fitted coefficients
@@ -28,7 +29,6 @@ optcell = 2
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = multibinit
-#%% exclude_builders = ubu_intel_17.0_openmpi
 #%% system_xml = t06_sys.xml
 #%% coeff_xml = t06_coeff.xml
 #%% [files]

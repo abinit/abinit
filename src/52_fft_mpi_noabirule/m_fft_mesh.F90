@@ -541,7 +541,7 @@ subroutine setmesh(gmet,gvec,ngfft,npwvec,npwsigx,npwwfn,nfftot,method,mG0,Cryst
  else
    ! === Determine the best size for the FFT grid considering symm ops ===
    ! * Ideally n=2*m+1 but this could not be allowed by the FFT library (at present only Goedecker)
-   call wrtout(ount,'Finding a FFT mesh compatible with all the symmetries','COLL')
+   call wrtout(ount,' Finding a FFT mesh compatible with all the symmetries','COLL')
 
    ! 1) Find a FFT mesh compatible with the non-symmorphic operations
    fftnons(:)=1
@@ -1178,6 +1178,7 @@ end function g2ifft
 !!
 !! PARENTS
 !!      bethe_salpeter,calc_sigc_me,cchi0,cchi0q0,cohsex_me,screening,sigma
+!!      m_dvdb
 !!
 !! CHILDREN
 !!      xcopy
@@ -1627,6 +1628,7 @@ end subroutine times_eigr
 !!  ur(2,nfft)= contains u(r) in input. output: u(r) e^{ig.r} on the real-space FFT mesh.
 !!
 !! PARENTS
+!!  m_dvdb
 !!
 !! CHILDREN
 !!

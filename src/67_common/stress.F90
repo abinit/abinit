@@ -201,7 +201,7 @@
  real(dp) :: vdwstr(6),vprtrb_dum(2)
  real(dp) :: dummy_in(0)
  real(dp) :: dummy_out1(0),dummy_out2(0),dummy_out3(0),dummy_out4(0),dummy_out5(0),dummy_out6(0),dummy_out7(0) 
- real(dp),allocatable :: dummy(:),dyfr_dum(:,:,:),gr_dum(:,:),rhog_ep(:,:),v_dum(:),vxc_loc(:,:)
+ real(dp),allocatable :: dummy(:),dyfr_dum(:,:,:),gr_dum(:,:),rhog_ep(:,:),v_dum(:)
  real(dp),allocatable :: vxctotg(:,:)
  character(len=10) :: EPName(1:2)=(/"Electronic","Positronic"/)
 
@@ -311,7 +311,7 @@
 !======================= Hartree energy contribution ===================
 !=======================================================================
 
- call strhar(ehart,gprimd,gsqcut,harstr,mpi_enreg,nfft,ngfft,rhog,ucvol)
+ call strhar(ehart,gsqcut,harstr,mpi_enreg,nfft,ngfft,rhog,rprimd)
 
 !=======================================================================
 !======================= Ewald contribution ============================
@@ -473,14 +473,15 @@
 !In cartesian coordinates (symmetric storage) 
 
  strten(:)=kinstr(:)+ewestr(:)+corstr(:)+strsxc(:)+harstr(:)+lpsstr(:)+nlstr(:)
- if (usefock==1 .and. associated(fock).and.fock%optstr) then
-   strten(:)=strten(:)+fock%stress(:)
+
+ if (usefock==1 .and. associated(fock).and.fock%fock_common%optstr) then
+   strten(:)=strten(:)+fock%fock_common%stress(:)
  end if
 
 !Add contributions for constant E or D calculation.
  if ( efield_flag ) then
    strten(:)=strten(:)+Maxstr(:)
-   if ( calc_epaw3_stress ) strten(:) = strten(:) + epaws3red(:) 
+   if ( calc_epaw3_stress ) strten(:) = strten(:) + epaws3red(:)
  end if
  if (vdw_xc>=5.and.vdw_xc<=7) strten(:)=strten(:)+vdwstr(:)
 
@@ -504,7 +505,7 @@
    ABI_ALLOCATE(dummy,(6))
    call fourdp(1,rhog_ep,electronpositron%rhor_ep,-1,mpi_enreg,nfft,ngfft,paral_kgb,0)
    rhog_ep=-rhog_ep
-   call strhar(electronpositron%e_hartree,gprimd,gsqcut,dummy,mpi_enreg,nfft,ngfft,rhog_ep,ucvol)
+   call strhar(electronpositron%e_hartree,gsqcut,dummy,mpi_enreg,nfft,ngfft,rhog_ep,rprimd)
    strten(:)=strten(:)+dummy(:);harstr(:)=harstr(:)+dummy(:)
    ABI_DEALLOCATE(rhog_ep)
    ABI_DEALLOCATE(dummy)

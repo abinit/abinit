@@ -141,7 +141,7 @@
 
 # C compiler additional custom flags
 #
-#CFLAGS_EXTRA="-O2"
+CFLAGS_EXTRA="-I/usr/include/libxml2"
 
 # Forced C compiler flags
 # Note: will override build-system configuration - USE AT YOUR OWN RISKS!
@@ -365,7 +365,7 @@ FCFLAGS_EXTRA="-O2 -g -Wall -Wno-maybe-uninitialized -ffpe-trap=invalid,zero,ove
 
 # Fortran linker additional custom libraries
 #
-#FC_LIBS_EXTRA="-lsvml"
+FC_LIBS_EXTRA="`xml2-config --libs`"
 
 # Forced Fortran linker libraries
 # Note: will override build-system configuration - USE AT YOUR OWN RISKS!
@@ -711,11 +711,11 @@ with_trio_flavor="netcdf+psml"
 
 # Include flags for the psml library (default is unset)
 #
-with_psml_incs="-I/usr/local/psml-gcc53/include"
+with_psml_incs="-I${FALLBACKS_PATH}/xmlf90/1.5.0/include -I${FALLBACKS_PATH}/libpsml/1.1.5/include"
 
 # Link flags for the psml library (default is unset)
 #
-with_psml_libs="-L/usr/local/psml-gcc53/lib -lpsml"
+with_psml_libs="-L${FALLBACKS_PATH}/libpsml/1.1.5/lib -lpsml -L${FALLBACKS_PATH}/xmlf90/1.5.0/lib -lxmlf90"
 
                        # ------------------------------ #
 
@@ -923,7 +923,7 @@ with_linalg_libs="-L/usr/local/OpenBLAS/lib -lopenblas -lpthread"
 #
 # You may specify any combination, using '+' as a separator
 #
-with_dft_flavor="atompaw+libxc+wannier90+bigdft"
+with_dft_flavor="atompaw+libxc+wannier90"
 
                        # ------------------------------ #
 
@@ -983,7 +983,7 @@ with_wannier90_libs="-L${FALLBACKS_PATH}/wannier90/lib -lwannier90"
 
 # Flag to enable LIBXML library
 #
-#enable_xml=no
+enable_xml="yes"
 
 # ---------------------------------------------------------------------------- #
 # DMFT library connector                                                        #

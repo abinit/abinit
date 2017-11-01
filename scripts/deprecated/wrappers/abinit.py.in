@@ -22,7 +22,6 @@ parser = OptionParser(usage="%prog [options] [files_filename]",
 parser.add_option("-c","--config",dest="cnf_file",
                   help="read configuration from FILE",metavar="FILE")
 parser.add_option("-d","--datadir",dest="dat_dir",
-                  help="look for auxilliary data (e.g. psps) in DIR",
                   metavar="DIR")
 parser.add_option("-f","--files",dest="inp_list",
                   help="read file list from FILE",metavar="FILE")

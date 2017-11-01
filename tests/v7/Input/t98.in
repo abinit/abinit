@@ -118,4 +118,5 @@ vdw_tol 1d-10 # Tolerance on the pair-wise term
 #%%   In this test the following properties are thus tested: contribution
 #%%   to the energy and to the stress of DFT-D3(BJ) as well as 
 #%%   the contribution to the dynamical matrix
+#%% topics = vdw
 #%%<END TEST_INFO>

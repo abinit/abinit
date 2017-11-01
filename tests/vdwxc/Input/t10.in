@@ -72,4 +72,5 @@ prteig 0
 #%% keywords = 
 #%% description = 
 #%%   Argon FCC. Test the vdW-DFT-D2 (Grimme) semi-empirical potential.
+#%% topics = vdw
 #%%<END TEST_INFO>

@@ -78,4 +78,5 @@
 #%%   (HeH)+ in a big box. Computation of excitation energies in TDDFT,
 #%%   in the following approximations : TDxOEP/xOEP, TDLDA/xOEP,
 #%%   BPG hybrid/xOEP.
+#%% topics = TDDFT
 #%%<END TEST_INFO>

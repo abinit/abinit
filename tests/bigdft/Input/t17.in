@@ -82,4 +82,5 @@ iomode 3  # ETSF IO access
 #%% description = 
 #%%   CO molecule to test the ETSF restart on wavefunctions, without wavefunction
 #%%   reformating (same parameters, still need compilation with --enable-bigdft).
+#%% topics = Wavelets
 #%%<END TEST_INFO>

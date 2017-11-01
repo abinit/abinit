@@ -12,7 +12,7 @@
  Corning Inc. and other collaborators, see ~abinit/doc/developers/contributors.txt .
  Please read ~abinit/doc/users/acknowledgments.html for suggested
  acknowledgments of the ABINIT effort.
- For more information, see http://www.abinit.org .
+ For more information, see https://www.abinit.org .
 
 .Starting date : Wed  7 Dec 2016.
 - ( at 20h18 )
@@ -53,12 +53,12 @@ _ WF disk file :      0.057 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
             acell      7.1287592924E+00  7.1287592924E+00  7.1287592924E+00 Bohr
               amu      4.00260200E+00
         boxcutmin      1.00000000E+00
+     densfor_pred           0
             dtion      5.00000000E+01
              ecut      5.00000000E+00 Hartree
            enunit           2
 -          fftalg         401
            ionmov          12
-     densfor_pred           0
            istwfk        1
            kptopt           0
            mdtemp      1.00000000E+06  1.00000000E+06
@@ -152,7 +152,7 @@ coarse grid =  3  3  3
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm: epsatm=   -0.00346443
+ pspatm : epsatm=   -0.00346443
          --- l  ekb(1:nproj) -->
  pspatm: atomic psp has been read  and splines computed
 
@@ -403,6 +403,7 @@ _setup2: Arith. and geom. avg. npw (full set) are       0.000       0.000
             acell      7.1287592924E+00  7.1287592924E+00  7.1287592924E+00 Bohr
               amu      4.00260200E+00
         boxcutmin      1.00000000E+00
+     densfor_pred           0
             dtion      5.00000000E+01
              ecut      5.00000000E+00 Hartree
            enunit           2
@@ -413,7 +414,6 @@ _setup2: Arith. and geom. avg. npw (full set) are       0.000       0.000
                        1.8911440232E-01 -6.6466793881E-01  1.3761611966E-01
 -          fftalg         401
            ionmov          12
-     densfor_pred           0
            istwfk        1
            kptopt           0
            mdtemp      1.00000000E+06  1.00000000E+06
@@ -662,7 +662,7 @@ P           mkmem           1
  Note also that it will be of great value to readers of publications presenting these results,
  to read papers enabling them to understand the theoretical formalism and details
  of the ABINIT implementation.
- For information on why they are suggested, see also http://www.abinit.org/about/?text=acknowledgments.
+ For information on why they are suggested, see also https://www.abinit.org/about/?text=acknowledgments.
 -
 - [1] Recent developments in the ABINIT software package.
 - Computer Phys. Comm. 205, 106 (2016).
@@ -678,7 +678,7 @@ P           mkmem           1
 - B.Xue, A.Zhou, J.W.Zwanziger.
 - Comment : the fourth generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
-- is available at http://www.abinit.org/about/ABINIT16.pdf .
+- is available at https://www.abinit.org/about/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 -
 - [2] ABINIT : First-principles approach of materials and nanosystem properties.
@@ -690,7 +690,7 @@ P           mkmem           1
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment : the third generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
-- is available at http://www.abinit.org/about/ABINIT_CPC_v10.pdf .
+- is available at https://www.abinit.org/about/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 -
 - [3] A brief introduction to the ABINIT software package.
@@ -701,7 +701,7 @@ P           mkmem           1
 - Comment : the second generic paper describing the ABINIT project. Note that this paper
 - should be cited especially if you are using the GW part of ABINIT, as several authors
 - of this part are not in the list of authors of the first or third paper.
-- The .pdf of the latter paper is available at http://www.abinit.org/about/zfk_0505-06_558-562.pdf.
+- The .pdf of the latter paper is available at https://www.abinit.org/about/zfk_0505-06_558-562.pdf.
 - Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
 - the licence allows the authors to put it on the Web).
 -

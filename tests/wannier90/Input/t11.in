@@ -67,4 +67,5 @@ vdw_supercell2 2 2 2  # Supercell composed of 64 unit cells
 #%% keywords = 
 #%% description = 
 #%%   Argon FCC. Test the approach of Silvestrelli to access van der Waals interactions.
+#%% topics = vdw, Wannier
 #%%<END TEST_INFO>

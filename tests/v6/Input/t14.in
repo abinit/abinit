@@ -88,4 +88,5 @@ xred
 #%%   k-path is automatically defined via the ndivsm input variable.
 #%%   The third dataset tests the calculation and the output of the Fermi surface (prtfsurf=1)
 #%%   in the Xcrysden format. 
+#%% topics = ElecBandStructure
 #%%<END TEST_INFO>

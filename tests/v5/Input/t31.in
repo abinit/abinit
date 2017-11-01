@@ -68,4 +68,5 @@ diemac 3.0
 #%%   This tests the implementation of the PAW-based
 #%%   efg algorithm as outlined in Profeta, Mauri, and Pickard, J. Am. Chem. Soc.
 #%%   125, 541-548 (2003). Coded by J. Zwanziger and M. Torrent.
+#%% topics = EFG
 #%%<END TEST_INFO>

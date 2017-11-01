@@ -29,6 +29,7 @@ MODULE m_sigma
  use defs_basis
  use defs_datatypes
  use defs_abitypes
+ use m_xmpi
  use m_profiling_abi
  use m_errors
  use iso_c_binding
@@ -36,11 +37,12 @@ MODULE m_sigma
 #ifdef HAVE_NETCDF
  use netcdf
 #endif
+ use m_wfd
 
  use m_numeric_tools,  only : c2r
  use m_gwdefs,         only : unt_gw, unt_sig, unt_sgr, unt_sgm, unt_gwdiag, sigparams_t, sigma_needs_w
  use m_crystal,        only : crystal_t
- use m_bz_mesh,        only : kmesh_t
+ use m_bz_mesh,        only : kmesh_t, littlegroup_t, findqg0
  use m_screening,      only : epsilonm1_results
 
  implicit none
@@ -186,7 +188,7 @@ MODULE m_sigma
   ! Diagonal matrix elements of \Sigma_c around the zeroth order eigenvalue (usually KS).
 
   complex(dpc),allocatable :: sigxcme(:,:,:,:)
-  ! sigxme(b1gw:b2gw,nkibz,nomega_r,nsppol*nsig_ab))
+  ! sigxcme(b1gw:b2gw,nkibz,nomega_r,nsppol*nsig_ab))
   ! $\<nks|\Sigma_{xc}(E)|nks\>$ at each real frequency frequency.
 
   complex(dpc),allocatable :: sigxcmesi(:,:,:,:)
@@ -220,6 +222,7 @@ MODULE m_sigma
  public  :: write_sigma_results
  public  :: print_Sigma_perturbative
  public  :: print_Sigma_QPSC
+ public  :: sigma_distribute_bks
 !!***
 
 
@@ -976,9 +979,9 @@ subroutine sigma_init(Sigp,nkibz,usepawu,Sr)
 ! *************************************************************************
 
  !@sigma_t
- ! === Copy important dimensions ===
  mod10=MOD(Sigp%gwcalctyp,10)
 
+ ! Copy important dimensions
  Sr%nkptgw     =Sigp%nkptgw
  Sr%gwcalctyp  =Sigp%gwcalctyp
  Sr%deltae     =Sigp%deltae
@@ -1015,9 +1018,8 @@ subroutine sigma_init(Sigp,nkibz,usepawu,Sr)
  ! hhartree(b1,b2,k,s)= <b1,k,s|T+v_{loc}+v_{nl}+v_{H}|b2,k,s>
  ABI_CALLOC(Sr%hhartree,(b1gw:b2gw,b1gw:b2gw,Sr%nkibz,Sr%nsppol*Sr%nsig_ab))
 
- ! QP amplitudes and energies ===
+ ! QP amplitudes and energies
  ABI_CALLOC(Sr%en_qp_diago,(Sr%nbnds,Sr%nkibz,Sr%nsppol))
-
  ABI_CALLOC(Sr%eigvec_qp,(Sr%nbnds,Sr%nbnds,Sr%nkibz,Sr%nsppol))
 
  ! Dont know if it is better to do this here or in the sigma
@@ -1043,7 +1045,7 @@ subroutine sigma_init(Sigp,nkibz,usepawu,Sr)
  ABI_CALLOC(Sr%e0gap,(Sr%nkibz,Sr%nsppol))
  ABI_CALLOC(Sr%degwgap,(Sr%nkibz,Sr%nsppol))
  ABI_CALLOC(Sr%egwgap,(Sr%nkibz,Sr%nsppol))
- !
+
  ! These quantities are used to evaluate $\Sigma(E)$ around the KS\QP eigenvalue
  ABI_CALLOC(Sr%omega4sd,(b1gw:b2gw,Sr%nkibz,Sr%nomega4sd,Sr%nsppol))
  ABI_CALLOC(Sr%sigcme4sd,(b1gw:b2gw,Sr%nkibz,Sr%nomega4sd,Sr%nsppol*Sr%nsig_ab))
@@ -1056,9 +1058,9 @@ subroutine sigma_init(Sigp,nkibz,usepawu,Sr)
    Sr%omega_r(:)=Sigp%omega_r(:)
  end if
 
- ! === Analytical Continuation ===
+ ! Analytical Continuation
+ ! FIXME omegasi should not be in Sigp% here we should construct the mesh
  if (mod10==1) then
-   ! FIXME omegasi should not be in Sigp% here we should construct the mesh
    ABI_MALLOC(Sr%omega_i,(Sr%nomega_i))
    Sr%omega_i=Sigp%omegasi
    ABI_MALLOC(Sr%sigcmesi ,(b1gw:b2gw,Sr%nkibz,Sr%nomega_i,Sr%nsppol*Sr%nsig_ab))
@@ -1658,7 +1660,7 @@ integer function sigma_ncwrite(Sigp,Er,Sr,ncid) result (ncerr)
 #endif
 
 contains
- integer function vid(vname) 
+ integer function vid(vname)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1672,6 +1674,148 @@ contains
  end function vid
 
 end function sigma_ncwrite
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_sigma/sigma_distribute_bks
+!! NAME
+!!  sigma_distribute_bks
+!!
+!! FUNCTION
+!!  Distribute the loop over (b,k,s) used to calculate the self-energy matrix elements
+!!  taking into account the MPI distribution of the wavefunctions and the use of
+!!  symmetries to reduce the BZ sum to an appropriate irreducible wedge.
+!!
+!! INPUTS
+!! nsppol
+!! can_symmetrize(nsppol)=.TRUE if symmetries can be used to reduce the number of k-points to be summed.
+!! Kmesh<kmesh_t>
+!! Qmesh<kmesh_t>
+!! Ltg_kgw<littlegroup_t>
+!! Wfd(wfd_t),intent(inout) ::
+!! mg0(3)
+!! kptgw(3)
+!! [bks_mask(Wfd%mband,Kmesh%nbz,nsppol)]
+!! [got(Wfd%nproc)]=The number of tasks already assigned to the nodes.
+!! [global]=If true, an MPI global communication is performed such that each node will have the same table. Useful
+!!   if for implementing algorithms in which each node needs to know the global distribution of the tasks, not only
+!!   the task it has to complete. Defaults to .FALSE.
+!!
+!! OUTPUT
+!!  my_nbks
+!!  proc_distrb(Wfd%mband,Kmesh%nbz,nsppol)
+!!
+!! SIDE EFFECTS
+!!  Wfd%bks_tab
+!!
+!! PARENTS
+!!      calc_sigc_me,calc_sigx_me,cohsex_me
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine sigma_distribute_bks(Wfd,Kmesh,Ltg_kgw,Qmesh,nsppol,can_symmetrize,kptgw,mg0,my_nbks,proc_distrb,got,bks_mask,global)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'sigma_distribute_bks'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: nsppol
+ integer,intent(out) :: my_nbks
+ logical,optional,intent(in) :: global
+ type(kmesh_t),intent(in) :: Kmesh,Qmesh
+ type(littlegroup_t),intent(in) :: Ltg_kgw
+ type(wfd_t),intent(inout) :: Wfd
+!arrays
+ integer,intent(in) :: mg0(3)
+ integer,optional,intent(inout) :: got(Wfd%nproc)
+ integer,intent(out) :: proc_distrb(Wfd%mband,Kmesh%nbz,nsppol)
+ real(dp),intent(in) :: kptgw(3)
+ logical,intent(in) :: can_symmetrize(Wfd%nsppol)
+ logical,optional,intent(in) :: bks_mask(Wfd%mband,Kmesh%nbz,nsppol)
+
+!Local variables-------------------------------
+!scalars
+ integer :: ierr,ik_bz,ik_ibz,spin,iq_bz,my_nband
+ !character(len=500) :: msg
+!arrays
+ integer :: g0(3)
+ real(dp) :: kgwmk(3)
+ integer :: get_more(Wfd%nproc),my_band_list(Wfd%mband)
+ !integer :: test(Wfd%mband,Kmesh%nbz,nsppol)
+ logical :: bmask(Wfd%mband)
+
+!************************************************************************
+
+ call wfd_update_bkstab(Wfd)
+
+ get_more=0; if (PRESENT(got)) get_more=got
+
+ ! Different distribution of tasks depending whether symmetries can be used or not.
+ proc_distrb= xmpi_undefined_rank
+
+ do spin=1,Wfd%nsppol
+
+   if (can_symmetrize(spin)) then
+     do ik_bz=1,Kmesh%nbz
+       ik_ibz = Kmesh%tab(ik_bz)
+       kgwmk= kptgw-Kmesh%bz(:,ik_bz) ! kptgw must be inside the BZ
+       call findqg0(iq_bz,g0,kgwmk,Qmesh%nbz,Qmesh%bz,mG0) ! Identify q_bz and G0 where q_bz+G0=k_gw-k_bz
+       if (Ltg_kgw%ibzq(iq_bz)==1) then
+         bmask=.FALSE.; bmask(1:Wfd%nband(ik_ibz,spin))=.TRUE.
+         if (PRESENT(bks_mask)) bmask = bks_mask(:,ik_bz,spin)
+         call wfd_distribute_bands(Wfd,ik_ibz,spin,my_nband,my_band_list,got=get_more,bmask=bmask)
+         if (my_nband>0) proc_distrb(my_band_list(1:my_nband),ik_bz,spin)=Wfd%my_rank
+       end if
+     end do
+
+   else
+     ! No symmetries for this spin. Divide the full BZ among procs.
+     do ik_bz=1,Kmesh%nbz
+       ik_ibz = Kmesh%tab(ik_bz)
+       bmask=.FALSE.; bmask(1:Wfd%nband(ik_ibz,spin))=.TRUE.
+       if (PRESENT(bks_mask)) bmask = bks_mask(:,ik_bz,spin)
+       call wfd_distribute_bands(Wfd,ik_ibz,spin,my_nband,my_band_list,got=get_more,bmask=bmask)
+       if (my_nband>0) proc_distrb(my_band_list(1:my_nband),ik_bz,spin)=Wfd%my_rank
+     end do
+   end if
+ end do ! spin
+
+ if (PRESENT(global)) then
+   if (global) then ! Each node will have the same table so that it will know how the tasks are distributed.
+     proc_distrb = proc_distrb + 1
+     where (proc_distrb == xmpi_undefined_rank+1)
+       proc_distrb = 0
+     end where
+     call xmpi_sum(proc_distrb,Wfd%comm,ierr)
+     where (proc_distrb == 0)
+       proc_distrb = xmpi_undefined_rank
+     elsewhere
+       proc_distrb = proc_distrb -1
+     end where
+     !where (proc_distrb /= xmpi_undefined_rank)
+     !  ltest = (ANY(proc_distrb == (/(ii,ii=0,Wfd%nproc-1)/)))
+     !end where
+     !if (.not.ltest) then
+     !  write(std_out,*)proc_distrb
+     !  MSG_BUG("Bug in the generation of proc_distrb table")
+     !end if
+   end if
+ end if
+
+ my_nbks = COUNT(proc_distrb==Wfd%my_rank)
+ if (PRESENT(got)) got=get_more
+
+end subroutine sigma_distribute_bks
 !!***
 
 !----------------------------------------------------------------------

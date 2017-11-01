@@ -66,6 +66,7 @@
 !!      if (choice=51) <G|d(right)V_nonlocal/d(k)|vect_in>
 !!      if (choice=52) <G|d(left)V_nonlocal/d(k)|vect_in>
 !!      if (choice=53) <G|d(twist)V_nonlocal/d(k)|vect_in>
+!!      if (choice=54) <G|d[d(right)V_nonlocal/d(k)]/d(atm. pos)|vect_in>
 !!      if (choice=8)  <G|d2V_nonlocal/d(k)d(k)|vect_in>
 !!      if (choice=81) <G|d[d(right)V_nonlocal/d(k)]/d(k)|vect_in>
 !!  if (paw_opt=2)
@@ -77,6 +78,7 @@
 !!      if (choice=51) <G|d(right)[V_nonlocal-lamdba.(I+S)]/d(k)|vect_in>
 !!      if (choice=52) <G|d(left)[V_nonlocal-lamdba.(I+S)]/d(k)|vect_in>
 !!      if (choice=53) <G|d(twist)[V_nonlocal-lamdba.(I+S)]/d(k)|vect_in>
+!!      if (choice=54) <G|d[d(right)V_nonlocal/d(k)]/d(atm. pos)|vect_in>
 !!      if (choice=8)  <G|d2[V_nonlocal-lamdba.(I+S)]/d(k)d(k)|vect_in>
 !!      if (choice=81) <G|d[d(right[V_nonlocal-lamdba.(I+S)]/d(k)]/d(k)|vect_in>
 !! --if (paw_opt=3 or 4)
@@ -89,6 +91,7 @@
 !!      if (choice=51) <G|d(right)S/d(k)|vect_in>
 !!      if (choice=52) <G|d(left)S/d(k)|vect_in>
 !!      if (choice=53) <G|d(twist)S/d(k)|vect_in>
+!!      if (choice=54) <G|d[d(right)V_nonlocal/d(k)]/d(atm. pos)|vect_in>
 !!      if (choice=7)  <G|sum_i[p_i><p_i]|vect_in>
 !!      if (choice=8)  <G|d2S/d(k)d(k)|vect_in>
 !!      if (choice=81) <G|d[d(right)S/d(k)]/d(k)|vect_in>
@@ -158,6 +161,7 @@ subroutine opernlb_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
 !arrays
  integer,parameter :: ffnl_dir_dat(6)=(/3,4,4,2,2,3/)
  integer,parameter :: gamma(3,3)=reshape((/1,6,5,6,2,4,5,4,3/),(/3,3/))
+ integer,parameter :: idir1(9)=(/1,1,1,2,2,2,3,3,3/),idir2(9)=(/1,2,3,1,2,3,1,2,3/)
  real(dp),allocatable :: d2gxdtfac_(:,:,:),d2gxdtfacs_(:,:,:),dgxdtfac_(:,:,:),dgxdtfacs_(:,:,:),gxfac_(:,:),gxfacs_(:,:)
  complex(dpc),allocatable :: ztab(:)
 
@@ -187,7 +191,7 @@ subroutine opernlb_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
      ABI_ALLOCATE(dgxdtfac_,(2,ndgxdtfac,nlmn))
      if(ndgxdtfac>0) dgxdtfac_(:,:,:)=zero
    end if
-   if (choice==8.or.choice==81) then
+   if (choice==54.or.choice==8.or.choice==81) then
      ABI_ALLOCATE(d2gxdtfac_,(2,nd2gxdtfac,nlmn))
      if(nd2gxdtfac>0) d2gxdtfac_(:,:,:)=zero
    end if
@@ -199,7 +203,7 @@ subroutine opernlb_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
      ABI_ALLOCATE(dgxdtfacs_,(2,ndgxdtfac,nlmn))
      if (ndgxdtfac>0) dgxdtfacs_(:,:,:)=zero
    end if
-   if (choice==8.or.choice==81) then
+   if (choice==54.or.choice==8.or.choice==81) then
      ABI_ALLOCATE(d2gxdtfacs_,(2,nd2gxdtfac,nlmn))
      if (nd2gxdtfac>0) d2gxdtfacs_(:,:,:)=zero
    end if
@@ -270,7 +274,7 @@ subroutine opernlb_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
              end if
            end do
          end if
-         if (choice==8.or.choice==81) then
+         if (choice==54.or.choice==8.or.choice==81) then
            do ilmn=1,nlmn
              il=mod(indlmn(1,ilmn),4);parity=(mod(il,2)==0)
              scale=wt;if (il>1) scale=-scale
@@ -357,7 +361,7 @@ subroutine opernlb_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
              end if
            end do
          end if
-         if (choice==8.or.choice==81) then
+         if (choice==54.or.choice==8.or.choice==81) then
            do ilmn=1,nlmn
              il=mod(indlmn(1,ilmn),4);parity=(mod(il,2)==0)
              scale=wt;if (il>1) scale=-scale
@@ -471,9 +475,20 @@ subroutine opernlb_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
          end if
 
 !        ------
+         if (choice==54) then ! mixed derivative w.r.t. atm. pos and (right) k
+           do ilmn=1,nlmn
+             ztab(:)=ztab(:)+ffnl(:,1,ilmn)*cmplx(dgxdtfac_(2,1,ilmn),-dgxdtfac_(1,1,ilmn),kind=dp)
+           end do
+           ztab(:)=two_pi*kpg(:,idir1(idir))*ztab(:)
+           do ilmn=1,nlmn
+             ztab(:)=ztab(:)+ffnl(:,1,ilmn)*cmplx(d2gxdtfac_(1,1,ilmn),d2gxdtfac_(2,1,ilmn),kind=dp)
+           end do
+         end if
+
+!        ------
          if (choice==8) then ! full second order derivative w.r.t. k
            !idir= (xx=1, xy=2, xz=3, yx=4, yy=5, yz=6, zx=7, zy=8, zz=9)
-           ffnl_dir(1)=(idir-1)/3+1; ffnl_dir(2)=mod((idir-1),3)+1
+           ffnl_dir(1)=idir1(idir); ffnl_dir(2)=idir2(idir)
            ffnl_dir(3) = gamma(ffnl_dir(1),ffnl_dir(2))
            do ilmn=1,nlmn
              ztab(:)=ztab(:) &
@@ -485,10 +500,11 @@ subroutine opernlb_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
          end if
 
 !        ------
-         if (choice==81) then ! partial second order derivative w.r.t. k
-                              ! full derivative w.r.t. k1, right derivative w.r.t. k2
+         if (choice==81) then
+           ! partial second order derivative w.r.t. k
+           ! full derivative w.r.t. k1, right derivative w.r.t. k2
            !idir= (xx=1, xy=2, xz=3, yx=4, yy=5, yz=6, zx=7, zy=8, zz=9)
-           ffnl_dir(1)=(idir-1)/3+1
+           ffnl_dir(1)=1; if(dimffnl>2) ffnl_dir(1)=idir1(idir)
            do ilmn=1,nlmn
              ztab(:)=ztab(:) &
 &             +ffnl(:,1            ,ilmn)*cmplx(d2gxdtfac_(1,1,ilmn),d2gxdtfac_(2,1,ilmn),kind=dp)&
@@ -497,7 +513,6 @@ subroutine opernlb_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
          end if
 
 !        ------
-!write(87,*) "ztab",ztab(487),ph3d(1,487,iaph3d),iaph3d
          ztab(:)=ztab(:)*cmplx(ph3d(1,:,iaph3d),-ph3d(2,:,iaph3d),kind=dp)
 
          vect(1,1+ipwshft:npw+ipwshft)=vect(1,1+ipwshft:npw+ipwshft)+real(ztab(:))
@@ -583,8 +598,19 @@ subroutine opernlb_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
          end if
 
 !        ------
+         if (choice==54) then ! mixed derivative w.r.t. atm. pos and k
+           do ilmn=1,nlmn
+             ztab(:)=ztab(:)+ffnl(:,1,ilmn)*cmplx(dgxdtfacs_(2,1,ilmn),-dgxdtfacs_(1,1,ilmn),kind=dp)
+           end do
+           ztab(:)=two_pi*kpg(:,idir1(idir))*ztab(:)
+           do ilmn=1,nlmn
+             ztab(:)=ztab(:)+ffnl(:,1,ilmn)*cmplx(d2gxdtfacs_(1,1,ilmn),d2gxdtfacs_(2,1,ilmn),kind=dp)
+           end do
+         end if
+
+!        ------
          if (choice==8) then ! full second order derivative w.r.t. k
-           ffnl_dir(1)=(idir-1)/3+1; ffnl_dir(2)=mod((idir-1),3)+1
+           ffnl_dir(1)=idir1(idir); ffnl_dir(2)=idir2(idir)
            ffnl_dir(3) = gamma(ffnl_dir(1),ffnl_dir(2))
            do ilmn=1,nlmn
              ztab(:)=ztab(:) &
@@ -596,10 +622,11 @@ subroutine opernlb_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
          end if
 
 !        ------
-         if (choice==81) then ! partial second order derivative w.r.t. k
-                              ! full derivative w.r.t. k1, right derivative w.r.t. k2
+         if (choice==81) then
+           ! partial second order derivative w.r.t. k
+           ! full derivative w.r.t. k1, right derivative w.r.t. k2
            !idir= (xx=1, xy=2, xz=3, yx=4, yy=5, yz=6, zx=7, zy=8, zz=9)
-           ffnl_dir(1)=(idir-1)/3+1
+           ffnl_dir(1)=1; if(dimffnl>2) ffnl_dir(1)=idir1(idir)
            do ilmn=1,nlmn
              ztab(:)=ztab(:) &
 &             +ffnl(:,1            ,ilmn)*cmplx(d2gxdtfacs_(1,1,ilmn),d2gxdtfacs_(2,1,ilmn),kind=dp)&
@@ -688,7 +715,7 @@ subroutine opernlb_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
            end do
 !$OMP END DO
          end if
-         if (choice==8.or.choice==81) then
+         if (choice==54.or.choice==8.or.choice==81) then
 !$OMP DO
            do ilmn=1,nlmn
              il=mod(indlmn(1,ilmn),4);parity=(mod(il,2)==0)
@@ -783,7 +810,7 @@ subroutine opernlb_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
            end do
 !$OMP END DO
          end if
-         if (choice==8.or.choice==81) then
+         if (choice==54.or.choice==8.or.choice==81) then
 !$OMP DO
            do ilmn=1,nlmn
              il=mod(indlmn(1,ilmn),4);parity=(mod(il,2)==0)
@@ -932,9 +959,24 @@ subroutine opernlb_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
 !$OMP END DO
 
 !        ------
+         else if (choice==54) then ! mixed derivative w.r.t. atm. pos and k
+!$OMP DO
+           do ipw=1,npw
+             ztab(ipw)=czero
+             do ilmn=1,nlmn
+               ztab(ipw)=ztab(ipw)+ffnl(ipw,1,ilmn)*cmplx(dgxdtfac_(2,1,ilmn),-dgxdtfac_(1,1,ilmn),kind=dp)
+             end do
+             ztab(ipw)=two_pi*kpg(ipw,idir1(idir))*ztab(ipw)
+             do ilmn=1,nlmn
+               ztab(ipw)=ztab(ipw)+ffnl(ipw,1,ilmn)*cmplx(d2gxdtfac_(1,1,ilmn),d2gxdtfac_(2,1,ilmn),kind=dp)
+             end do
+           end do
+!$OMP END DO
+
+!        ------
          else if (choice==8) then ! full second order derivative w.r.t. k
            !idir= (xx=1, xy=2, xz=3, yx=4, yy=5, yz=6, zx=7, zy=8, zz=9)
-           ffnl_dir(1)=(idir-1)/3+1; ffnl_dir(2)=mod((idir-1),3)+1
+           ffnl_dir(1)=idir1(idir); ffnl_dir(2)=idir2(idir)
            ffnl_dir(3) = gamma(ffnl_dir(1),ffnl_dir(2))
 !$OMP DO
            do ipw=1,npw
@@ -950,10 +992,11 @@ subroutine opernlb_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
 !$OMP END DO
 
 !        ------
-         else if (choice==81) then ! partial second order derivative w.r.t. k
-                              ! full derivative w.r.t. k1, right derivative w.r.t. k2
+         else if (choice==81) then
+           ! partial second order derivative w.r.t. k
+           ! full derivative w.r.t. k1, right derivative w.r.t. k2
            !idir= (xx=1, xy=2, xz=3, yx=4, yy=5, yz=6, zx=7, zy=8, zz=9)
-           ffnl_dir(1)=(idir-1)/3+1
+           ffnl_dir(1)=1; if(dimffnl>2) ffnl_dir(1)=idir1(idir)
 !$OMP DO
            do ipw=1,npw
              ztab(ipw)=czero
@@ -1094,9 +1137,24 @@ subroutine opernlb_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
 !$OMP END DO
 
 !        ------
+         else if (choice==54) then ! mixed derivative w.r.t. atm. pos and k
+!$OMP DO
+           do ipw=1,npw
+             ztab(ipw)=czero
+             do ilmn=1,nlmn
+               ztab(ipw)=ztab(ipw)+ffnl(ipw,1,ilmn)*cmplx(dgxdtfacs_(2,1,ilmn),-dgxdtfacs_(1,1,ilmn),kind=dp)
+             end do
+             ztab(ipw)=two_pi*kpg(ipw,idir1(idir))*ztab(ipw)
+             do ilmn=1,nlmn
+               ztab(ipw)=ztab(ipw)+ffnl(ipw,1,ilmn)*cmplx(d2gxdtfacs_(1,1,ilmn),d2gxdtfacs_(2,1,ilmn),kind=dp)
+             end do
+           end do
+!$OMP END DO
+
+!        ------
          else if (choice==8) then ! full second order derivative w.r.t. k
            !idir= (xx=1, xy=2, xz=3, yx=4, yy=5, yz=6, zx=7, zy=8, zz=9)
-           ffnl_dir(1)=(idir-1)/3+1; ffnl_dir(2)=mod((idir-1),3)+1
+           ffnl_dir(1)=idir1(idir); ffnl_dir(2)=idir2(idir)
            ffnl_dir(3) = gamma(ffnl_dir(1),ffnl_dir(2))
 !$OMP DO
            do ipw=1,npw
@@ -1112,10 +1170,11 @@ subroutine opernlb_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
 !$OMP END DO
 
 !        ------
-         else if (choice==81) then ! partial second order derivative w.r.t. k
-                              ! full derivative w.r.t. k1, right derivative w.r.t. k2
+         else if (choice==81) then
+           ! partial second order derivative w.r.t. k
+           ! full derivative w.r.t. k1, right derivative w.r.t. k2
            !idir= (xx=1, xy=2, xz=3, yx=4, yy=5, yz=6, zx=7, zy=8, zz=9)
-           ffnl_dir(1)=(idir-1)/3+1
+           ffnl_dir(1)=1; if(dimffnl>2) ffnl_dir(1)=idir1(idir)
 !$OMP DO
            do ipw=1,npw
              ztab(ipw)=czero

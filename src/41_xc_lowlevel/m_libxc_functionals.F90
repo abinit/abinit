@@ -12,7 +12,7 @@
 !! COPYRIGHT
 !! Copyright (C) 2008-2017 ABINIT group (MOliveira,LHH,FL,GMR,MT)
 !! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
+!! GNU Gener_al Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! NOTES
@@ -48,6 +48,9 @@
 #endif
 
 #include "abi_common.h"
+#if defined HAVE_LIBXC 
+#include "xc_version.h"
+#endif
 
 module libxc_functionals
 
@@ -212,7 +215,8 @@ module libxc_functionals
      type(C_PTR) :: xc_func
    end subroutine xc_mgga
  end interface
-!PBE0
+!
+#if ( XC_MAJOR_VERSION < 4 )
  interface
    subroutine xc_hyb_gga_xc_pbeh_set_params(xc_func, alpha) bind(C)
      use iso_c_binding, only : C_DOUBLE,C_PTR
@@ -220,7 +224,7 @@ module libxc_functionals
      type(C_PTR) :: xc_func
    end subroutine xc_hyb_gga_xc_pbeh_set_params
  end interface
-!HSE
+!
  interface
    subroutine xc_hyb_gga_xc_hse_set_params(xc_func, alpha, omega) bind(C)
      use iso_c_binding, only : C_DOUBLE,C_PTR
@@ -244,6 +248,7 @@ module libxc_functionals
      type(C_PTR) :: xc_func
    end subroutine xc_mgga_x_tb09_set_params
  end interface
+#endif
 !
  interface
    subroutine xc_get_singleprecision_constant(xc_cst_singleprecision) bind(C)
@@ -301,9 +306,10 @@ module libxc_functionals
  end interface
 !
  interface
-   type(C_PTR) function xc_get_info_refs(xc_func) bind(C)
-     use iso_c_binding, only : C_PTR
+   type(C_PTR) function xc_get_info_refs(xc_func,iref) bind(C)
+     use iso_c_binding, only : C_INT,C_PTR
      type(C_PTR) :: xc_func
+     integer(C_INT) :: iref
    end function xc_get_info_refs
  end interface
 !
@@ -478,7 +484,7 @@ contains
 !!                     XC functionals to initialize
 !!
 !! PARENTS
-!!      calc_vhxc_me,driver,hybrid_corr,m_kxc,m_xc_vdw,xchybrid_ncpp_cc
+!!      calc_vhxc_me,driver,m_kxc,m_xc_vdw,rhotoxc,xchybrid_ncpp_cc
 !!
 !! CHILDREN
 !!
@@ -506,7 +512,7 @@ contains
  type(libxc_functional_type),pointer :: xc_func
 #if defined HAVE_LIBXC && defined HAVE_FC_ISO_C_BINDING
  integer :: flags
- integer(C_INT) :: func_id_c,nspin_c,success_c
+ integer(C_INT) :: func_id_c,iref_c,nspin_c,success_c
  real(C_DOUBLE) :: alpha_c,beta_c,omega_c
  character(kind=C_CHAR,len=1),pointer :: strg_c
  type(C_PTR) :: func_ptr_c
@@ -560,7 +566,7 @@ contains
      write(msg, '(a,i8,2a,i8,6a)' )&
 &      'Invalid IXC = ',ixc,ch10,&
 &      'The LibXC functional family ',xc_func%family,&
-&      'is currently unsupported by ABINIT',ch10,&
+&      ' is currently unsupported by ABINIT',ch10,&
 &      '(-1 means the family is unknown to the LibXC itself)',ch10,&
 &      'Please consult the LibXC documentation',ch10
      MSG_ERROR(msg)
@@ -584,7 +590,14 @@ contains
 !  Special treatment for LDA_C_XALPHA functional
    if (xc_func%id==libxc_functionals_getid('XC_LDA_C_XALPHA')) then
      alpha_c=real(zero,kind=C_DOUBLE)
+#if ( XC_MAJOR_VERSION < 4 )
      call xc_lda_c_xalpha_set_params(xc_func%conf,alpha_c);
+#else
+     msg='seems set_params has disappeared for xalpha in libxc 4. defaults are being used'
+     MSG_WARNING(msg)
+     !call xc_hyb_gga_xc_pbeh_init(xc_func%conf)
+#endif
+
    end if
 
 !  Get functional kind
@@ -607,15 +620,25 @@ contains
 
 !  Dump functional information
    call c_f_pointer(xc_get_info_name(xc_func%conf),strg_c)
-   call xc_char_to_f(strg_c,msg)
+   call xc_char_to_f(strg_c,msg);msg=' '//trim(msg)
    call wrtout(std_out,msg,'COLL')
-   call c_f_pointer(xc_get_info_refs(xc_func%conf),strg_c)
-   call xc_char_to_f(strg_c,msg)
-   call wrtout(std_out,msg,'COLL')
+   iref_c=0
+   do while (iref_c>=0)
+     call c_f_pointer(xc_get_info_refs(xc_func%conf,iref_c),strg_c)
+     if (associated(strg_c)) then
+       call xc_char_to_f(strg_c,msg);msg=' '//trim(msg)
+       call wrtout(std_out,msg,'COLL')
+       iref_c=iref_c+1
+     else
+       iref_c=-1
+     end if
+   end do
 
 #endif
 
  end do
+
+ msg='';call wrtout(std_out,msg,'COLL')
 
 end subroutine libxc_functionals_init
 !!***
@@ -639,7 +662,7 @@ end subroutine libxc_functionals_init
 !!                     XC functionals to initialize
 !!
 !! PARENTS
-!!      calc_vhxc_me,driver,hybrid_corr,m_kxc,m_xc_vdw,xchybrid_ncpp_cc
+!!      calc_vhxc_me,driver,m_kxc,m_xc_vdw,rhotoxc,xchybrid_ncpp_cc
 !!
 !! CHILDREN
 !!
@@ -1522,7 +1545,7 @@ end subroutine libxc_functionals_getvxc
 !!  [hyb_range]    = Range (for separation)
 !!
 !! PARENTS
-!!      calc_vhxc_me,m_fock
+!!      m_fock
 !!
 !! CHILDREN
 !!
@@ -1686,12 +1709,24 @@ subroutine libxc_functionals_set_hybridparams(hyb_mixing,hyb_mixing_sr,hyb_range
 
 !  PBE0: set parameters
    if (is_pbe0) then
-       call xc_hyb_gga_xc_pbeh_set_params(xc_func%conf,alpha_c)
+#if ( XC_MAJOR_VERSION < 4 )
+     call xc_hyb_gga_xc_pbeh_set_params(xc_func%conf,alpha_c)
+#else
+     msg='seems set_params has disappeared for pbeh in libxc 4. defaults are being used'
+     MSG_WARNING(msg)
+     !call xc_hyb_gga_xc_pbeh_init(xc_func%conf)
+#endif
    end if
 
 !  HSE: set parameters
    if (is_hse) then
+#if ( XC_MAJOR_VERSION < 4 )
      call xc_hyb_gga_xc_hse_set_params(xc_func%conf,beta_c,omega_c)
+#else
+     msg='seems set_params has disappeared for hse in libxc 4. defaults are being used'
+     MSG_WARNING(msg)
+     !call hyb_gga_xc_hse_init(xc_func%conf)
+#endif
    end if
 #endif
 
@@ -1930,7 +1965,13 @@ end function libxc_functionals_gga_from_hybrid
    do ii=1,2
      if (xc_funcs(ii)%id==libxc_functionals_getid('XC_MGGA_X_TB09')) then
 #if defined HAVE_LIBXC && defined HAVE_FC_ISO_C_BINDING
+#if ( XC_MAJOR_VERSION < 4 )
        call xc_mgga_x_tb09_set_params(xc_funcs(ii)%conf,cc)
+#else
+       msg='seems set_params has disappeared for tb09 in libxc 4. defaults are being used'
+       MSG_WARNING(msg)
+       !call xc_hyb_gga_xc_tb09_init(xc_func%conf)
+#endif
 #endif
      end if
    end do

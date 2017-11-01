@@ -139,7 +139,7 @@
 !!      pawaccrhoij,pawcprj_alloc,pawcprj_free,pawcprj_gather_spin,pawmknhat
 !!      pawrhoij_alloc,pawrhoij_free,pawrhoij_free_unpacked
 !!      pawrhoij_init_unpacked,pawrhoij_mpisum_unpacked,prep_bandfft_tabs
-!!      prep_nonlop,psolver_rhohxc,rhohxc,rhohxcpositron,symrhoij,timab
+!!      prep_nonlop,psolver_rhohxc,rhotoxc,rhohxcpositron,symrhoij,timab
 !!      transgrid,xmpi_sum
 !!
 !! SOURCE
@@ -167,6 +167,7 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
  use m_errors
  use m_xmpi
  use m_gemm_nonlop
+ use m_xcdata
 
  use m_energies,         only : energies_type
  use m_electronpositron, only : electronpositron_type,electronpositron_calctype
@@ -257,10 +258,11 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
  real(dp) :: dotr,doti,eeigk,ekk,enlk,evxc,e_xcdc_vxctau,ucvol,ucvol_local,vxcavg
  !character(len=500) :: message
  type(gs_hamiltonian_type) :: gs_hamk
+ type(xcdata_type) :: xcdata
 !arrays
  integer,allocatable :: kg_k(:,:)
  real(dp) :: gmet(3,3),gprimd(3,3),kpg_dum(0,0),kpoint(3),nonlop_out(1,1)
- real(dp) :: qpt(3),rhodum(1),rmet(3,3),tsec(2),ylmgr_dum(1,1,1)
+ real(dp) :: qphon(3),qpt(3),rhodum(1),rmet(3,3),tsec(2),ylmgr_dum(1,1,1)
  real(dp) :: vzeeman(4)
  real(dp),allocatable :: buffer(:),cgrvtrial(:,:)
  real(dp),allocatable :: cwavef(:,:),eig_k(:),enlout(:),ffnl(:,:,:,:),ffnl_sav(:,:,:,:)
@@ -326,21 +328,24 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
 
    if (dtset%icoulomb == 0) then
 !    Use the periodic solver to compute Hxc.
+     call hartre(1,gsqcut,psps%usepaw,mpi_enreg,nfftf,ngfftf,dtset%paral_kgb,rhog,rprimd,vhartr)
+     call xcdata_init(dtset%auxc_ixc,dtset%intxc,dtset%ixc,&
+&      dtset%nelect,dtset%tphysel,dtset%usekden,dtset%vdw_xc,dtset%xc_tb09_c,dtset%xc_denpos,xcdata)
      ABI_ALLOCATE(kxc,(1,nkxc))
-!    to be adjusted for the call to rhohxc
+!    to be adjusted for the call to rhotoxc
      nk3xc=1
      if (ipositron==0) then
-       call rhohxc(dtset,energies%e_xc,gsqcut,psps%usepaw,kxc, &
+       call rhotoxc(energies%e_xc,kxc, &
 &       mpi_enreg,nfftf,ngfftf,nhat,psps%usepaw,nhatgr,nhatgrdim, &
-&       nkxc,nk3xc,dtset%nspden,n3xccc,option,rhog,rhor,rprimd,strsxc, &
-&       usexcnhat,vhartr,vxc,vxcavg,xccc3d,taug=taug,taur=taur, &
+&       nkxc,nk3xc,dtset%nspden,n3xccc,option,dtset%paral_kgb,rhor,rprimd,strsxc, &
+&       usexcnhat,vxc,vxcavg,xccc3d,xcdata,taug=taug,taur=taur,vhartr=vhartr, &
 &       vxctau=vxctau,exc_vdw_out=energies%e_xc_vdw,add_tfw=add_tfw_)
      else
-       call rhohxc(dtset,energies%e_xc,gsqcut,psps%usepaw,kxc, &
+       call rhotoxc(energies%e_xc,kxc, &
 &       mpi_enreg,nfftf,ngfftf,nhat,psps%usepaw,nhatgr,nhatgrdim, &
-&       nkxc,nk3xc,dtset%nspden,n3xccc,option,rhog,rhor,rprimd,strsxc, &
-&       usexcnhat,vhartr,vxc,vxcavg,xccc3d, &
-&       electronpositron=electronpositron,taug=taug,taur=taur, &
+&       nkxc,nk3xc,dtset%nspden,n3xccc,option,dtset%paral_kgb,rhor,rprimd,strsxc, &
+&       usexcnhat,vxc,vxcavg,xccc3d,xcdata, &
+&       electronpositron=electronpositron,taug=taug,taur=taur,vhartr=vhartr, &
 &       vxctau=vxctau,exc_vdw_out=energies%e_xc_vdw,add_tfw=add_tfw_)
      end if
      ABI_DEALLOCATE(kxc)
@@ -605,8 +610,8 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
 
 !    Compute kinetic energy
      ABI_ALLOCATE(kinpw,(npw_k))
-!     call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass,gmet,kg_k,kinpw,kpoint,npw_k)
-     call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass,gmet,kg_k,kinpw,kpoint,npw_k,0,0)
+!     call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass_free,gmet,kg_k,kinpw,kpoint,npw_k)
+     call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass_free,gmet,kg_k,kinpw,kpoint,npw_k,0,0)
 
 !    Compute kinetic energy of each band
      do iblock=1,nblockbd

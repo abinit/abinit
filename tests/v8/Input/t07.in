@@ -86,7 +86,6 @@ ndtset 3 jdtset 1 2 3
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% exclude_builders = ubu_intel_17.0_openmpi
 #%% test_chain = t07.in,t08.in,t09.in,t10.in,t11.in
 #%% [files]
 #%% files_to_test = 
@@ -101,4 +100,5 @@ ndtset 3 jdtset 1 2 3
 #%%   Computation of elastic tensor and internal strain in DFPT+PAW
 #%%   Ground state is computed.
 #%%   DFPT is computed
+#%% topics = DFPT
 #%%<END TEST_INFO>

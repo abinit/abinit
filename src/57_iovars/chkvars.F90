@@ -64,7 +64,8 @@ subroutine chkvars (string)
 !<ABINIT_VARS>
 !A
  list_vars=                 ' accuracy acell adpimd adpimd_gamma'
- list_vars=trim(list_vars)//' algalch amu angdeg asr atvshift autoparal awtr'
+ list_vars=trim(list_vars)//' algalch amu angdeg asr atvshift autoparal'
+ list_vars=trim(list_vars)//' auxc_ixc auxc_scal awtr'
 !B
  list_vars=trim(list_vars)//' bandpp bdberry bdeigrf bdgw berryopt berrysav berrystep bfield bmass'
  list_vars=trim(list_vars)//' boxcenter boxcutmin brvltt builtintest'
@@ -77,7 +78,8 @@ subroutine chkvars (string)
 !C
  list_vars=trim(list_vars)//' cd_customnimfrqs cd_frqim_method cd_full_grid cd_imfrqs'
  list_vars=trim(list_vars)//' cd_halfway_freq cd_max_freq cd_subset_freq'
- list_vars=trim(list_vars)//' charge chempot chkexit chkprim chksymbreak chneut cineb_start cpus cpum cpuh cgtyphf'
+ list_vars=trim(list_vars)//' charge chempot chkdilatmx chkexit chkprim' 
+ list_vars=trim(list_vars)//' chksymbreak chneut cineb_start cpus cpum cpuh'
 !D
  list_vars=trim(list_vars)//' ddamp ddb_ngqpt ddb_shiftq delayperm densfor_pred densty dfield'
  list_vars=trim(list_vars)//' dfpt_sciss diecut diegap dielam dielng diemac'
@@ -89,20 +91,23 @@ subroutine chkvars (string)
  list_vars=trim(list_vars)//' dmftctqmc_check dmftctqmc_correl dmftctqmc_gmove'
  list_vars=trim(list_vars)//' dmftctqmc_grnns dmftctqmc_meas dmftctqmc_mrka' 
  list_vars=trim(list_vars)//' dmftctqmc_mov dmftctqmc_order dmftctqmc_triqs_nleg'
- list_vars=trim(list_vars)//' dmftcheck dmftqmc_l dmftqmc_n dmftqmc_seed dmftqmc_therm dosdeltae dtion dynimage'
+ list_vars=trim(list_vars)//' dmftcheck dmftqmc_l dmftqmc_n dmftqmc_seed dmftqmc_therm' 
+ list_vars=trim(list_vars)//' dosdeltae dtion dynimage'
  list_vars=trim(list_vars)//' d3e_pert1_atpol d3e_pert1_dir d3e_pert1_elfd d3e_pert1_phon'
  list_vars=trim(list_vars)//' d3e_pert2_atpol d3e_pert2_dir d3e_pert2_elfd d3e_pert2_phon'
  list_vars=trim(list_vars)//' d3e_pert3_atpol d3e_pert3_dir d3e_pert3_elfd d3e_pert3_phon'
 !E
- list_vars=trim(list_vars)//' ecut ecuteps ecutsigx ecutsm ecutwfn effmass efmas'
+ list_vars=trim(list_vars)//' ecut ecuteps ecutsigx ecutsm ecutwfn effmass_free efmas'
  list_vars=trim(list_vars)//' efmas_bands efmas_calc_dirs efmas_deg efmas_deg_tol'
  list_vars=trim(list_vars)//' efmas_dim efmas_dirs efmas_n_dirs efmas_ntheta'
- list_vars=trim(list_vars)//' efield einterp elph2_imagden enunit eshift esmear exchmix exchn2n3d extrapwf'
+ list_vars=trim(list_vars)//' efield einterp elph2_imagden enunit eshift'
+ list_vars=trim(list_vars)//' esmear exchmix exchn2n3d extrapwf'
  list_vars=trim(list_vars)//' eph_intmeth eph_extrael eph_fermie eph_fsmear eph_fsewin eph_mustar '
  list_vars=trim(list_vars)//' eph_ngqpt_fine eph_task eph_transport'
 !F
  list_vars=trim(list_vars)//' fband fermie_nest'
  list_vars=trim(list_vars)//' fftalg fftcache fftgw'
+ list_vars=trim(list_vars)//' fockoptmix focktoldfe fockdownsampling'
  list_vars=trim(list_vars)//' freqim_alpha freqremax freqremin freqspmax'
  list_vars=trim(list_vars)//' freqspmin'
  list_vars=trim(list_vars)//' friction frzfermi fxcartfactor '
@@ -114,7 +119,8 @@ subroutine chkvars (string)
  list_vars=trim(list_vars)//' gethaydock getocc getpawden getqps getscr'
  list_vars=trim(list_vars)//' getwfkfine'
  list_vars=trim(list_vars)//' getsuscep '
- list_vars=trim(list_vars)//' getvel getwfk getwfq getxcart getxred get1den get1wf goprecon goprecprm'
+ list_vars=trim(list_vars)//' getvel getwfk getwfq getxcart getxred'
+ list_vars=trim(list_vars)//' get1den get1wf goprecon goprecprm'
  list_vars=trim(list_vars)//' gpu_devices gpu_linalg_limit gwcalctyp gwcomp gwencomp gwgamma gwmem'
  list_vars=trim(list_vars)//' gwpara gwrpacorr gw_customnfreqsp'
  list_vars=trim(list_vars)//' gw_frqim_inzgrid gw_frqre_inzgrid gw_frqre_tangrid gw_freqsp'
@@ -122,11 +128,13 @@ subroutine chkvars (string)
  list_vars=trim(list_vars)//' gw_qprange gw_nqlwl gw_nstep gw_qlwl'
  list_vars=trim(list_vars)//' gw_sctype gw_sigxcore gw_toldfeig'
  list_vars=trim(list_vars)//' gwfockmix'
- list_vars=trim(list_vars)//' gwls_sternheimer_kmax gwls_kmax_complement gwls_kmax_poles'
+ list_vars=trim(list_vars)//' gwls_stern_kmax gwls_kmax_complement gwls_kmax_poles'
  list_vars=trim(list_vars)//' gwls_kmax_analytic gwls_kmax_numeric'
  list_vars=trim(list_vars)//' gwls_list_proj_freq gwls_nseeds gwls_n_proj_freq gwls_recycle'
- list_vars=trim(list_vars)//' gwls_first_seed gwls_model_parameter gwls_second_model_parameter gwls_npt_gauss_quad'
- list_vars=trim(list_vars)//' gwls_dielectric_model gwls_print_debug gwls_band_index gwls_exchange gwls_correlation'
+ list_vars=trim(list_vars)//' gwls_first_seed gwls_model_parameter gwls_npt_gauss_quad'
+ list_vars=trim(list_vars)//' gwls_diel_model gwls_print_debug gwls_band_index gwls_exchange gwls_correlation'
+!H
+ list_vars=trim(list_vars)//' hyb_mixing hyb_mixing_sr hyb_range_dft hyb_range_fock'
 !I
  list_vars=trim(list_vars)//' iatcon iatfix iatfixx iatfixy iatfixz iatsph'
  list_vars=trim(list_vars)//' iboxcut icoulomb icutcoul ieig2rf'
@@ -136,7 +144,8 @@ subroutine chkvars (string)
  list_vars=trim(list_vars)//' irdhaydock irdpawden irdqps'
  list_vars=trim(list_vars)//' irdscr irdsuscep irdwfk irdwfq ird1den'
  list_vars=trim(list_vars)//' irdwfkfine'
- list_vars=trim(list_vars)//' ird1wf iscf isecur istatimg istatr istatshft istwfk ixc ixcpositron'
+ list_vars=trim(list_vars)//' ird1wf iscf isecur istatimg istatr'
+ list_vars=trim(list_vars)//' istatshft istwfk ixc ixcpositron'
  list_vars=trim(list_vars)//' irdvdw'
 !J
  list_vars=trim(list_vars)//' jdtset jellslab jfielddir jpawu'
@@ -175,7 +184,8 @@ subroutine chkvars (string)
  list_vars=trim(list_vars)//' pawecutdg pawfatbnd pawlcutd pawlmix'
  list_vars=trim(list_vars)//' pawmixdg pawnhatxc pawnphi pawntheta pawnzlm pawoptmix pawoptosc pawovlp'
  list_vars=trim(list_vars)//' pawprtdos pawprtvol pawprtwf pawprt_b pawprt_k pawspnorb pawstgylm'
- list_vars=trim(list_vars)//' pawsushat pawujat pawujrad pawujv pawusecp pawxcdev pimass pimd_constraint'
+ list_vars=trim(list_vars)//' pawsushat pawujat pawujrad pawujv'
+ list_vars=trim(list_vars)//' pawusecp pawxcdev pimass pimd_constraint'
  list_vars=trim(list_vars)//' pitransform ph_ndivsm ph_nqpath ph_qpath ph_ngqpt'
  list_vars=trim(list_vars)//' ph_wstep ph_intmeth ph_smear ph_nqshift ph_qshift'
  list_vars=trim(list_vars)//' plowan_bandi plowan_bandf plowan_compute plowan_iatom plowan_it plowan_lcalc'
@@ -397,7 +407,7 @@ subroutine chkvars_in_string(protocol, list_vars, list_logicals, list_strings, s
        else
          write(message, '(7a)' )&
 &         'Found the token ',string(index_current:index_endword),' in the input file.',ch10,&
-&         'This name is not one of the registered input variable names (see http://www.abinit.org/doc).',ch10,&
+&         'This name is not one of the registered input variable names (see https://www.abinit.org/doc).',ch10,&
 &         'Action: check your input file. You likely mistyped the input variable.'
          MSG_ERROR(message)
        end if
