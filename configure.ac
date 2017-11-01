@@ -25,23 +25,7 @@
 
 # Initialize Autoconf
 AC_PREREQ(2.59)
-<<<<<<< HEAD
-<<<<<<< HEAD
-AC_INIT([ABINIT],[8.5.0],[https://bugs.launchpad.net/abinit/],[abinit])
-=======
-AC_INIT([ABINIT],[8.4.4],[https://bugs.launchpad.net/abinit/],[abinit])
->>>>>>> trunk/hotfix-8.4
-||||||| merged common ancestors
-<<<<<<<<< Temporary merge branch 1
-AC_INIT([ABINIT],[8.5.0],[https://bugs.launchpad.net/abinit/],[abinit])
-||||||||| merged common ancestors
-AC_INIT([ABINIT],[8.4.0],[https://bugs.launchpad.net/abinit/],[abinit])
-=========
-AC_INIT([ABINIT],[8.4.4],[https://bugs.launchpad.net/abinit/],[abinit])
->>>>>>>>> Temporary merge branch 2
-=======
 AC_INIT([ABINIT],[8.7.1],[https://bugs.launchpad.net/abinit/],[abinit])
->>>>>>> remotes/trunk/develop
 AC_REVISION([Autotools support for ABINIT 7])
 AC_CONFIG_AUX_DIR([config/gnu])
 AC_CONFIG_MACRO_DIR([config/m4])
