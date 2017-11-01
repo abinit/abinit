@@ -348,38 +348,6 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
 & mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom,mpi_spintab=mpi_enreg%my_isppoltab)
 
 
-! if (ipert==natom+5) then !SPr deb, not "cplex safe" (only cplex=1 is ok for now)
-
-!    ABI_ALLOCATE(vlocal1,(cplex*n4,n5,n6,rf_hamkq%nvloc))
-!    ABI_ALLOCATE(vlocal_tmp,(cplex*n4,n5,n6,rf_hamkq%nvloc))
-!    ABI_ALLOCATE(v1zeeman,(cplex*nfftf,nspden))
-!    ABI_ALLOCATE(vtrial_tmp,(cplex*nfftf,nspden))
-
-!    do ispden=1,nspden
-!      vtrial_tmp(:,ispden)= 0.0d0
-!    enddo
-
-!    if (nspden==2) then
-!      v1zeeman(:,1)=-0.5d0
-!      v1zeeman(:,2)=+0.5d0
-!    else if(nspden==4) then
-
-!      v1zeeman(:,:)= 0.0d0
-
-!      if(idir==1) then 
-!        v1zeeman(:,1)=-0.5d0
-!        v1zeeman(:,2)= 0.5d0
-!      else if(idir==2) then
-!        v1zeeman(:,4)= 0.5d0
-!      else
-!        v1zeeman(:,3)=-0.5d0
-!      endif
-
-!    else
-!      v1zeeman(:,1)= 0.0d0
-!    endif
-
-! endif
 
 !LOOP OVER SPINS
  do isppol=1,nsppol
@@ -389,14 +357,6 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
 !  call load_spin_rf_hamiltonian(rf_hamkq,gs_hamkq,isppol,with_nonlocal=.true.)
 
    call load_spin_rf_hamiltonian(rf_hamkq,gs_hamkq,isppol,with_nonlocal=.true.)
-!   if (ipert/=natom+5) then 
-!   else
-     !add the local part (zeeman perturbation), not the best way to do (for now debugging purposes only)
-!     call rf_transgrid_and_pack(isppol,nspden,psps%usepaw,cplex,nfftf,dtset%nfft,dtset%ngfft,&
-!&    gs_hamkq%nvloc,pawfgr,mpi_enreg,vtrial_tmp,v1zeeman,vlocal_tmp,vlocal1)
-!     call load_spin_rf_hamiltonian(rf_hamkq,gs_hamkq,isppol,vlocal1=vlocal1)
-!    call load_spin_rf_hamiltonian(rf_hamkq,gs_hamkq,isppol,with_nonlocal=.true.)
-!   endif
 
 
 !  Nullify contribution to density at EFermi from this k-point
@@ -671,14 +631,6 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
 
  end do ! End loop over spins
  
-! if (ipert==natom+5) then
-!   ABI_DEALLOCATE(v1zeeman)
-!   ABI_DEALLOCATE(vlocal1)
-!   ABI_DEALLOCATE(vlocal_tmp)
-!   ABI_DEALLOCATE(vtrial_tmp)
-! endif
-
-
  !if(xmpi_paral==1)then
  !  call timab(166,1,tsec)
  !  call wrtout(std_out,'dfpt_rhofermi: loop on k-points and spins done in parallel','COLL')

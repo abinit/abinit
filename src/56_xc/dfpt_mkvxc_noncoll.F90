@@ -106,7 +106,8 @@ subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,bxc,mpi_enreg,nfft,ngfft,nhat1,nhat1
 !scalars
  integer :: ifft, ir, rotation
 ! EB-FB option = 1 --> U matrix version
-!       option = 2 --> Bxc version
+!   SPr option = 2 --> Bxc version (explicit LSDA expression)
+!   SPr option = 3 --> U matrices expressed through angles/rotation axis
  real(dp),parameter :: m_norm_min=1.d-8
  real(dp) :: dum,dvdn,dvdz,fact,m_dot_m1
  real(dp) :: mx1,my1,mz1,mdirx,mdiry,mdirz
@@ -181,7 +182,7 @@ subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,bxc,mpi_enreg,nfft,ngfft,nhat1,nhat1
      vxc1rot1=0.0d0
 
      if(option/=0) then
-
+!    SPr for option=0 the rhor is not used, only core density xccc3d1
 !      -- Rotate rho(r)^(1)
        do ifft=1,nfft
          rhor1_diag(ifft,1)=rhor1(ifft,1) !FR it is the tr[rhor1] see symrhg.F90
@@ -200,8 +201,8 @@ subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,bxc,mpi_enreg,nfft,ngfft,nhat1,nhat1
        end do
 
       end if
-!      -- Compute Kxc(r).n^res(r)_rotated
 
+!      -- Compute Kxc(r).n^res(r)_rotated
      call dfpt_mkvxc(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat1,nhat1dim,nhat1gr,nhat1grdim,&
 &     nkxc,2,n3xccc,option,paral_kgb,qphon,rhor1_diag,rprimd,usexcnhat,vxc1_diag,xccc3d1)
 
@@ -277,16 +278,10 @@ subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,bxc,mpi_enreg,nfft,ngfft,nhat1,nhat1
                  vxc1(ifft,3:4)=zero
               end if
 
-              !vxc1rot1(ifft,1) = vxc1(ifft,1)
-              !vxc1rot1(ifft,2) = vxc1(ifft,2)
-              !vxc1rot1(ifft,3) = vxc1(ifft,3)
-              !vxc1rot1(ifft,4) = vxc1(ifft,4)
 
-            !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-            ! case 2nd method for vxc potential rotation
-
-            case (2)                        ! Explicit calculation of the rotated xc functional (derivatives of the analitic experssion)
-
+            case (2)     
+            ! SPr 2nd method for vxc potential rotation
+            ! Explicit calculation of the rotated xc functional (derivatives of the analitic experssion)
 
 
                if(m_norm(ifft)>m_norm_min) then
@@ -306,21 +301,11 @@ subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,bxc,mpi_enreg,nfft,ngfft,nhat1,nhat1
                  my1=rhor1(ifft,3); mdiry=rhor(ifft,3)/m_norm(ifft);
                  mz1=rhor1(ifft,4); mdirz=rhor(ifft,4)/m_norm(ifft);
  
-                 vxc1(ifft,1) = vxc1(ifft,1) + bxc(ifft)*( mz1 - mdirz*m_dot_m1 ) ! bxc is Bxc^(0)/|m|
-                 vxc1(ifft,2) = vxc1(ifft,2) + bxc(ifft)*(-mz1 + mdirz*m_dot_m1 ) 
-                 vxc1(ifft,3) = vxc1(ifft,3) + bxc(ifft)*( mx1 - mdirx*m_dot_m1 )
-                 vxc1(ifft,4) = vxc1(ifft,4) + bxc(ifft)*(-my1 + mdiry*m_dot_m1 )
+                 vxc1(ifft,1) = vxc1(ifft,1) + bxc(ifft)*( mz1 - mdirz*m_dot_m1 ) ! bxc is Bxc^(0)/|m|. In principle,
+                 vxc1(ifft,2) = vxc1(ifft,2) + bxc(ifft)*(-mz1 + mdirz*m_dot_m1 ) ! bxc = (vxc(ifft,1)-vxc(ifft,2))/m_norm/2.0 
+                 vxc1(ifft,3) = vxc1(ifft,3) + bxc(ifft)*( mx1 - mdirx*m_dot_m1 ) ! but for small magnetization, the correct limit
+                 vxc1(ifft,4) = vxc1(ifft,4) + bxc(ifft)*(-my1 + mdiry*m_dot_m1 ) ! is computed in rhotoxc.F90
 
-                 !bxc0=(vxc(ifft,1)-vxc(ifft,2))/rhor(ifft,4)/2.0
-                 !vxc1(ifft,1) = vxc1(ifft,1) + bxc0*( mz1 - mdirz*m_dot_m1 ) ! bxc is Bxc^(0)/|m|
-                 !vxc1(ifft,2) = vxc1(ifft,2) + bxc0*(-mz1 + mdirz*m_dot_m1 ) 
-                 !vxc1(ifft,3) = vxc1(ifft,3) + bxc0*( mx1 - mdirx*m_dot_m1 )
-                 !vxc1(ifft,4) = vxc1(ifft,4) + bxc0*(-my1 + mdiry*m_dot_m1 )
-
-                 !vxc1rot2(ifft,1)=vxc1(ifft,1)
-                 !vxc1rot2(ifft,2)=vxc1(ifft,2)
-                 !vxc1rot2(ifft,3)=vxc1(ifft,3)
-                 !vxc1rot2(ifft,4)=vxc1(ifft,4)
                else
 
                  mx1=rhor1(ifft,2);
@@ -334,11 +319,12 @@ subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,bxc,mpi_enreg,nfft,ngfft,nhat1,nhat1
                  
                end if
 
-            case (3)                        ! Alternative method (explicitely calculated roation matrices)
-                                            ! At the moment numerically unstable
+            case (3)                        
+            ! Alternative method (explicitely calculated roation matrices)
+            ! Currently numerically unstable for mx=0 && my=0
                if(m_norm(ifft)>m_norm_min)then
 
-                  theta0 = acos(rhor(ifft,4)/m_norm(ifft)) 
+                  theta0 = acos(rhor(ifft,4)/m_norm(ifft))
                   nx     =-rhor(ifft,3)/sqrt(rhor(ifft,2)**2+rhor(ifft,3)**2)            
                   ny     = rhor(ifft,2)/sqrt(rhor(ifft,2)**2+rhor(ifft,3)**2)      
                   nz     = 0.0 
@@ -377,15 +363,6 @@ subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,bxc,mpi_enreg,nfft,ngfft,nhat1,nhat1
 
                   vxc1(ifft,3) = vxc1(ifft,3) + (bxc(ifft)*m_norm(ifft))*(ny1+cos(theta0)*ny*theta1)
                   vxc1(ifft,4) = vxc1(ifft,4) + (bxc(ifft)*m_norm(ifft))*(nx1+cos(theta0)*nx*theta1)
-
-                  !vxc1(ifft,1) = vxc1(ifft,1) -   sin(theta0/2)*cos(theta0/2)*theta1*((bxc0-vxc0)*(nx**2+ny**2)+(bxc0+vxc0));
-                  !vxc1(ifft,1) = vxc1(ifft,1) - 2*sin(theta0/2)**2*(bxc0-vxc0)*(nx1*nx+ny1*ny);
-
-                  !vxc1(ifft,2) = vxc1(ifft,2) +   sin(theta0/2)*cos(theta0/2)*theta1*((bxc0+vxc0)*(nx**2+ny**2)+(bxc0-vxc0));
-                  !vxc1(ifft,2) = vxc1(ifft,2) + 2*sin(theta0/2)**2*(bxc0+vxc0)*(nx1*nx+ny1*ny);
-        
-                  !vxc1(ifft,3) = vxc1(ifft,3) - bxc0*(ny*theta1*cos(theta0) + ny1*sin(theta0))
-                  !vxc1(ifft,4) = vxc1(ifft,4) - bxc0*(nx*theta1*cos(theta0) + nx1*sin(theta0))
 
                else
                   vxc1(ifft,1:2)=dvdn
