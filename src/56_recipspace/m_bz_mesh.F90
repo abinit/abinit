@@ -428,12 +428,10 @@ subroutine kmesh_init(Kmesh,Cryst,nkibz,kibz,kptopt,wrap_1zone,ref_bz,break_symm
  !@kmesh_t
  ! === Initial tests on input arguments ===
  ltest=(Cryst%timrev==1.or.Cryst%timrev==2)
- write(msg,'(a,i0)')'Wrong value for timrev= ',Cryst%timrev
- ABI_CHECK(ltest,msg)
+ ABI_CHECK(ltest, sjoin('Wrong value for timrev= ', itoa(Cryst%timrev)))
 
  if (ALL(kptopt/=(/1,3/))) then
-   write(msg,'(a,i0)')" Not allowed value for kptopt: ",kptopt
-   MSG_BUG(msg)
+   MSG_WARNING(sjoin("Not allowed value for kptopt: ", itoa(kptopt)))
  end if
 
  Kmesh%kptopt = kptopt
@@ -701,7 +699,6 @@ subroutine kmesh_print(Kmesh,header,unit,prtvol,mode_paral)
  end do
 
  SELECT CASE (Kmesh%timrev)
-
  CASE (1)
    write(msg,'(2a,i2,3a,i5,a)')ch10,&
 &    ' Together with ',Kmesh%nsym,' symmetry operations (time-reversal symmetry not used) ',ch10,&
@@ -713,8 +710,7 @@ subroutine kmesh_print(Kmesh,header,unit,prtvol,mode_paral)
 &    ' yields ',Kmesh%nbz,' points in the full Brillouin Zone.'
 
  CASE DEFAULT
-   write(msg,'(a,i3)')' Wrong value for timrev = ',Kmesh%timrev
-   MSG_BUG(msg)
+   MSG_BUG(sjoin('Wrong value for timrev:', itoa(Kmesh%timrev)))
  END SELECT
 
  call wrtout(my_unt,msg,my_mode)
@@ -1034,15 +1030,10 @@ subroutine get_IBZ_item(Kmesh,ik_ibz,kibz,wtk)
 !arrays
  real(dp),intent(out) :: kibz(3)
 
-!Local variables-------------------------------
-!scalars
- character(len=500) :: msg
-
 ! *********************************************************************
 
  if (ik_ibz>Kmesh%nibz.or.ik_ibz<=0) then
-   write(msg,'(a,i3)')' wrong value for ik_ibz: ',ik_ibz
-   MSG_BUG(msg)
+   MSG_BUG(sjoin('wrong value for ik_ibz: ',itoa(ik_ibz)))
  end if
 
  kibz=Kmesh%ibz(:,ik_ibz)
@@ -1132,8 +1123,7 @@ subroutine get_BZ_diff(Kmesh,k1,k2,idiff_bz,g0,nfound)
    if (nfound==0) then
      MSG_WARNING(" k1-k2-G0 not found in BZ")
    else
-     write(msg,'(a,i3)')' Multiple k1-k2-G0 found in BZ, nfound= ',nfound
-     MSG_WARNING(msg)
+     MSG_WARNING(sjoin(' Multiple k1-k2-G0 found in BZ, nfound= ', itoa(nfound)))
    end if
    write(msg,'(4a,3(a,3f12.6,a))')&
 &    ' k1    = ',k1   ,ch10,&
@@ -1494,7 +1484,7 @@ subroutine make_mesh(Kmesh,Cryst,kptopt,kptrlatt,nshiftk,shiftk,&
 !Local variables -------------------------
 !scalars
  integer,parameter :: chksymbreak0=0
- integer :: timrev,iscf,nkbz,nkibz,nkpt_computed,my_nshiftk
+ integer :: iscf,nkbz,nkibz,nkpt_computed,my_nshiftk
  real(dp) :: kptrlen
  character(len=500) :: msg
  logical :: my_break_symmetry
@@ -1509,11 +1499,8 @@ subroutine make_mesh(Kmesh,Cryst,kptopt,kptrlatt,nshiftk,shiftk,&
  !@kmesh_t
  !if (ALL(kptopt/=(/1,2,3,4/))) then
  if (ALL(kptopt/=(/1,3/))) then
-   write(msg,'(a,i0)')" Not allowed value for kptopt: ",kptopt
-   MSG_BUG(msg)
+   MSG_WARNING(sjoin(" Not allowed value for kptopt: ", itoa(kptopt)))
  end if
-
- timrev=0; if (Cryst%timrev==2) timrev=1  !FIXME there an incompatibly between Cryst%timrev and symkpt
  !
  ! ======================================================================
  ! ==== First call to getkgrid to obtain nkibz as well as the BZ set ====
@@ -1725,8 +1712,7 @@ subroutine identk(kibz,nkibz,nkbzmx,nsym,timrev,symrec,symafm,kbz,ktab,ktabi,kta
          nkbz=nkbz+1
          wtk(ikibz)=wtk(ikibz)+one
          if (nkbz>nkbzmx) then
-           write(msg,'(a,i0,a)')' nkbzmx too small, nkbzmx = ',nkbzmx,', increase nkbzmx !'
-           MSG_BUG(msg)
+           MSG_BUG(sjoin('nkbzmx too small, nkbzmx = ',itoa(nkbzmx),', increase nkbzmx !'))
          end if
          kbz(:,nkbz) = knew(:)
          ktab (nkbz) = ikibz
@@ -2392,8 +2378,7 @@ subroutine findq(nkbz,kbz,nsym,symrec,symafm,gprimd,nqibz,qibz,timrev)
    if (.not.found) then
      iq=iq+1
      if (iq>nqibz) then
-       write(msg,'(a,i5)')' iq > nqibz= ',nqibz
-       MSG_BUG(msg)
+       MSG_BUG(sjoin('iq > nqibz= ',itoa(nqibz)))
      end if
      qibz(:,iq)=qposs(:)
    end if
@@ -2571,8 +2556,6 @@ subroutine findqg0(iq,g0,kmkp,nqbz,qbz,mG0)
    if (iq==0) then
      write(msg,'(a,3f9.5)')' q = k-kp+G0 not found. kmkp = ',kmkp
      MSG_ERROR(msg)
-!   else
-!     write(msg,'(a,3f9.5)')' q = k-kp+G0 found. kmkp = ',kmkp
    end if
 
  end if
@@ -2865,13 +2848,11 @@ subroutine littlegroup_init(ext_pt,Kmesh,Cryst,use_umklp,Ltg,npwe,gvec)
  ABI_FREE(ktest)
 
  if (ntest/=nbz) then
-   write(msg,'(a,i5)')' ntest-nbz = ',ntest-nbz
-   MSG_BUG(msg)
+   MSG_BUG(sjoin('ntest - nbz = ',itoa(ntest-nbz)))
  end if
 
  if (SUM(Ltg%wtksym)/=nbz) then
-   write(msg,'(a,i5)')' sum(Ltg%wtksym)-nbz = ',SUM(Ltg%wtksym)-nbz
-   MSG_BUG(msg)
+   MSG_BUG(sjoin('sum(Ltg%wtksym)-nbz = ', itoa(SUM(Ltg%wtksym)-nbz)))
  end if
 
  Ltg%max_kin_gmG0=zero

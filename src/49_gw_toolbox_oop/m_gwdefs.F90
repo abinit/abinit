@@ -41,20 +41,20 @@ MODULE m_gwdefs
  integer,public,parameter :: unt_sgm = 20  ! Sigma on the Matsubara axis
  integer,public,parameter :: unt_gwdiag  = 40 ! GW diagonal
 
- real(dp),public,parameter :: GW_TOLQ =0.0001_dp  
+ real(dp),public,parameter :: GW_TOLQ =0.0001_dp
  ! Tolerance below which two BZ points are considered equal within a RL vector:
  ! for each red. direct. the abs value of the difference btw the two coord must be smaller that tolq.
 
- real(dp),public,parameter :: GW_TOLQ0=0.001_dp   
+ real(dp),public,parameter :: GW_TOLQ0=0.001_dp
  ! Tolerance below which a q-point is treated as zero (long wavelength limit)
 
- real(dp),public,parameter :: GW_TOL_DOCC=0.01_dp 
+ real(dp),public,parameter :: GW_TOL_DOCC=0.01_dp
  ! Tolerance on the difference between two occupation numbers.
  ! below this value, the contribution of the transition is neglected in the evaluation of chi0
 
- real(dp),public,parameter :: GW_TOL_W0=0.001_dp 
- ! Tolerance on the real part of the frequency appearing in the denominator of the 
- ! non-interacting Green function G0. Above this value, a small purely imaginary 
+ real(dp),public,parameter :: GW_TOL_W0=0.001_dp
+ ! Tolerance on the real part of the frequency appearing in the denominator of the
+ ! non-interacting Green function G0. Above this value, a small purely imaginary
  ! complex shift is added to the denominator during the evaluation of chi0.
 
  real(gwp),public,parameter :: one_gw =1._gwp
@@ -177,7 +177,6 @@ MODULE m_gwdefs
  integer,public,parameter :: GWSC_only_G        =3
  integer,public,parameter :: GWSC_both_G_and_W  =4
 
-
 ! Flags defining the approximation used for the self-energy (used in csigme).
  integer,public,parameter :: SIG_GW_PPM      =0  ! standard GW with PPM
  integer,public,parameter :: SIG_GW_AC       =1  ! standard GW without PPM (analytical continuation)
@@ -255,11 +254,11 @@ MODULE m_gwdefs
   integer :: mG0(3)
   ! For each reduced direction gives the max G0 component to account for umklapp processes
 
-  real(dp),allocatable :: qcalc(:,:) 
+  real(dp),allocatable :: qcalc(:,:)
   ! qcalc(3,nqcalc)
   ! q-points that are explicitely calculated (subset of qibz).
 
-  real(dp),allocatable :: qibz(:,:) 
+  real(dp),allocatable :: qibz(:,:)
   ! qibz(3,nqibz)
   ! q-points in the IBZ.
 
@@ -277,7 +276,7 @@ MODULE m_gwdefs
 
  end type em1params_t
 
- public :: em1params_free 
+ public :: em1params_free
 !!***
 
  type,public :: sigij_col_t
@@ -327,7 +326,7 @@ MODULE m_gwdefs
   integer :: ppmodel                     ! Integer defining the plasmon pole model used, 0 for None.
   integer :: symsigma                    ! 0 ==> do not use symmetries to reduce the k-points summed over in sigma
                                          ! 1 ==> take advantage of space group symmetries as well as time-reversal
-  integer :: use_sigxcore                ! 1 if core contribution to sigma is estimated by using Hartree-Fock 
+  integer :: use_sigxcore                ! 1 if core contribution to sigma is estimated by using Hartree-Fock
 
   real(dp) :: mbpt_sciss                   ! Scissor energy used in G0
   real(dp) :: gwencomp                   ! Extrapolar energy used if gwcomp==1.
@@ -348,9 +347,9 @@ MODULE m_gwdefs
   real(dp) :: ecutwfn                    ! cutoff energy for the wavefunctions.
   real(dp) :: ecutsigx                   ! cutoff energy for the the exchange parth of Sigma.
   real(dp) :: ecuteps                    ! cutoff energy for W
-  
 
-  integer,allocatable :: kptgw2bz(:) 
+
+  integer,allocatable :: kptgw2bz(:)
   ! kptgw2bz(nkptgw)
   ! For each k-point where GW corrections are calculated, the corresponding index in the BZ.
 
@@ -373,9 +372,9 @@ MODULE m_gwdefs
   ! omega_r(nomegasr)
   ! Frequencies used to evaluate the spectral function.
 
-  type(sigijtab_t),allocatable :: Sigcij_tab(:,:) 
+  type(sigijtab_t),allocatable :: Sigcij_tab(:,:)
   ! Sigcij_tab(nkptgw,nsppol)%col(kb)%bidx(ii)  gived the index of the left wavefunction.
-  ! in the <i,kgw,s|\Sigma_c|j,kgw,s> matrix elements that has to be calculated in cisgme. 
+  ! in the <i,kgw,s|\Sigma_c|j,kgw,s> matrix elements that has to be calculated in cisgme.
   ! in the case of self-consistent GW on wavefunctions.
 
   type(sigijtab_t),allocatable :: Sigxij_tab(:,:)
@@ -383,7 +382,7 @@ MODULE m_gwdefs
 
  end type sigparams_t
 
- public :: sigparams_free 
+ public :: sigparams_free
 !!***
 
 CONTAINS  !==============================================================================
@@ -494,14 +493,14 @@ subroutine sigijtab_free(Sigijtab)
  !@sigijtab_t
   do jj=1,SIZE(Sigijtab,DIM=2)
     do ii=1,SIZE(Sigijtab,DIM=1)
-                                                                       
+
       ilow=LBOUND(Sigijtab(ii,jj)%col,DIM=1)
       iup =UBOUND(Sigijtab(ii,jj)%col,DIM=1)
       do kk=ilow,iup
         ABI_FREE(Sigijtab(ii,jj)%col(kk)%bidx)
       end do
       ABI_DT_FREE(Sigijtab(ii,jj)%col)
-                                                                       
+
     end do
   end do
 
@@ -572,15 +571,15 @@ subroutine sigparams_free(Sigp)
    ABI_FREE(Sigp%omega_r)
  end if
 
-!logical 
+!logical
 
 !types
- if (allocated(Sigp%Sigcij_tab)) then 
+ if (allocated(Sigp%Sigcij_tab)) then
    call sigijtab_free(Sigp%Sigcij_tab)
    ABI_DT_FREE(Sigp%Sigcij_tab)
  end if
 
- if (allocated(Sigp%Sigxij_tab)) then 
+ if (allocated(Sigp%Sigxij_tab)) then
    call sigijtab_free(Sigp%Sigxij_tab)
    ABI_DT_FREE(Sigp%Sigxij_tab)
  end if
@@ -688,7 +687,7 @@ pure logical function sigma_is_herm(Sigp)
  mod10=MOD(Sigp%gwcalctyp,10)
  sigma_is_herm = ANY(mod10 == [SIG_HF, SIG_SEX, SIG_COHSEX])
 
-end function sigma_is_herm  
+end function sigma_is_herm
 !!***
 
 !----------------------------------------------------------------------
@@ -698,7 +697,7 @@ end function sigma_is_herm
 !! sigma_needs_w
 !!
 !! FUNCTION
-!!  Return .TRUE. if self-energy requires the screened interaction W. 
+!!  Return .TRUE. if self-energy requires the screened interaction W.
 !!  For example HF does not need the SCR file.
 !!
 !! INPUTS
@@ -812,7 +811,7 @@ function g0g0w(omega,numerator,delta_ene,zcut,TOL_W0,opt_poles)
 !scalars
  integer,intent(in):: opt_poles
  real(dp),intent(in) :: TOL_W0,delta_ene,numerator,zcut
- complex(dpc) :: g0g0w 
+ complex(dpc) :: g0g0w
  complex(dpc),intent(in) :: omega
 
 !Local variables ------------------------------
@@ -833,7 +832,7 @@ function g0g0w(omega,numerator,delta_ene,zcut,TOL_W0,opt_poles)
        g0g0w =  numerator / (omega + delta_ene)&
 &              -numerator / (omega - delta_ene)
      end if
-   
+
    else if (opt_poles == 1) then ! Only resonant contribution is included.
      if (DABS(REAL(omega))>TOL_W0) then
        g0g0w =  numerator / (omega + delta_ene - j_dpc*sgn*zcut)
