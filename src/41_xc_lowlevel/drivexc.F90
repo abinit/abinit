@@ -181,7 +181,7 @@ subroutine drivexc(exc,ixc,npts,nspden,order,rho_updn,vxcrho,ndvxc,ngr2,nd2vxc,n
 !arrays
  real(dp),allocatable :: exci_rpa(:)
  real(dp),allocatable :: rhotot(:),rspts(:),vxci_rpa(:,:),zeta(:)
- real(dp),allocatable :: exc_c(:),exc_x(:),vxcrho_c(:,:),vxcrho_c(:,:)
+ real(dp),allocatable :: exc_c(:),exc_x(:),vxcrho_c(:,:),vxcrho_x(:,:)
  real(dp),allocatable :: d2vxc_c(:,:),d2vxc_x(:,:),dvxc_c(:,:),dvxc_x(:,:)
  real(dp),allocatable :: vxcgrho_x(:,:)
  type(libxc_functional_type) :: xc_funcs_vwn3(2),xc_funcs_lyp(2)
@@ -728,6 +728,7 @@ subroutine drivexc(exc,ixc,npts,nspden,order,rho_updn,vxcrho,ndvxc,ngr2,nd2vxc,n
      else
          call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc,&
 &         vxcrho,dvxc=dvxc,d2vxc=d2vxc)
+     end if
    endif
 
 !  Then renormalize B3LYP and subtract VWN3 contribution
