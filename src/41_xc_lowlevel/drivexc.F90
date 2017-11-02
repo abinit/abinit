@@ -700,34 +700,42 @@ subroutine drivexc(exc,ixc,npts,nspden,order,rho_updn,vxcrho,ndvxc,ngr2,nd2vxc,n
    ABI_DEALLOCATE(vxcrho_x)
    ABI_DEALLOCATE(vxcgrho_x)
 
+!>>>>> Ichimaru,Iyetomi,Tanaka,  XC at finite temp (e- gaz)
+ else if (ixc==50) then
+   if (order**2 <= 1) then
+     call xciit(exc,fxcT,npts,order,rspts,el_temp,vxcrho(:,1))
+   else
+     call xciit(exc,fxcT,npts,order,rspts,el_temp,vxcrho(:,1),dvxc)
+   end if
+
 !>>>>> GGA counterpart of the B3LYP functional
- else if(ixc==1402) then
+ else if(ixc==1402000) then
 !  Requires to evaluate exchange-correlation 
 !  with 5/4 B3LYP - 1/4 B3LYPc, where
 !  B3LYPc = (0.19 Ec VWN3 + 0.81 Ec LYP)
 
 !  First evaluate B3LYP. 
    if(present(xc_funcs))then
-     if (order**2 <= 1) then
+     if (abs(order)==1) then
        call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc,&
-&        vxcrho,xc_functionals=xc_funcs)
-     elseif (order**2 <= 4) then
+&        vxcrho,grho2=grho2_updn,vxcgr=vxcgrho,xc_functionals=xc_funcs)
+     elseif (abs(order)==2) then
        call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc,&
-&        vxcrho,dvxc=dvxc,xc_functionals=xc_funcs)
-     else
+&        vxcrho,grho2=grho2_updn,vxcgr=vxcgrho,dvxc=dvxc,xc_functionals=xc_funcs)
+     else 
        call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc,&
-&        vxcrho,dvxc=dvxc,d2vxc=d2vxc,xc_functionals=xc_funcs)
+&        vxcrho,grho2=grho2_updn,vxcgr=vxcgrho,dvxc=dvxc,d2vxc=d2vxc,xc_functionals=xc_funcs)
      end if
    else
-     if (order**2 <= 1) then
+     if (abs(order)==1) then
        call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc,&
-&         vxcrho)
-     elseif (order**2 <= 4) then
+&         vxcrho,grho2=grho2_updn,vxcgr=vxcgrho)
+     elseif (abs(order)==2) then
        call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc,&
-&         vxcrho,dvxc=dvxc)
+&         vxcrho,grho2=grho2_updn,vxcgr=vxcgrho,dvxc=dvxc)
      else
          call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc,&
-&         vxcrho,dvxc=dvxc,d2vxc=d2vxc)
+&         vxcrho,grho2=grho2_updn,vxcgr=vxcgrho,dvxc=dvxc,d2vxc=d2vxc)
      end if
    endif
 
@@ -762,19 +770,19 @@ subroutine drivexc(exc,ixc,npts,nspden,order,rho_updn,vxcrho,ndvxc,ngr2,nd2vxc,n
    call libxc_functionals_init(-131,nspden,xc_functionals=xc_funcs_lyp)
    if (order**2 <= 1) then
      call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc_c,&
-&        vxcrho_c,xc_functionals=xc_funcs_lyp)
+&        vxcrho_c,grho2=grho2_updn,vxcgr=vxcgrho,xc_functionals=xc_funcs_lyp)
    elseif (order**2 <= 4) then
      ABI_ALLOCATE(dvxc_c,(npts,ndvxc))
      dvxc_c=zero
      call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc_c,&
-&        vxcrho_c,dvxc=dvxc_c,xc_functionals=xc_funcs_lyp)
+&        vxcrho_c,grho2=grho2_updn,vxcgr=vxcgrho,dvxc=dvxc_c,xc_functionals=xc_funcs_lyp)
    else
      ABI_ALLOCATE(dvxc_c,(npts,ndvxc))
      ABI_ALLOCATE(d2vxc_c,(npts,nd2vxc))
      dvxc_c=zero
      d2vxc_c=zero
      call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc_c,&
-&        vxcrho_c,dvxc=dvxc_c,d2vxc=d2vxc,xc_functionals=xc_funcs_lyp)
+&        vxcrho_c,grho2=grho2_updn,vxcgr=vxcgrho,dvxc=dvxc_c,d2vxc=d2vxc,xc_functionals=xc_funcs_lyp)
    end if
    exc=exc-quarter*0.81d0*exc_c
    vxcrho=vxcrho-quarter*0.81d0*vxcrho_c
@@ -786,14 +794,6 @@ subroutine drivexc(exc,ixc,npts,nspden,order,rho_updn,vxcrho,ndvxc,ngr2,nd2vxc,n
    ABI_DEALLOCATE(vxcrho_c)
    if(order**2>1)ABI_DEALLOCATE(dvxc_c)
    if(order**2>4)ABI_DEALLOCATE(d2vxc_c)
-
-!>>>>> Ichimaru,Iyetomi,Tanaka,  XC at finite temp (e- gaz)
- else if (ixc==50) then
-   if (order**2 <= 1) then
-     call xciit(exc,fxcT,npts,order,rspts,el_temp,vxcrho(:,1))
-   else
-     call xciit(exc,fxcT,npts,order,rspts,el_temp,vxcrho(:,1),dvxc)
-   end if
 
 !>>>>> All libXC functionals
  else if( ixc<0 ) then
@@ -883,10 +883,6 @@ subroutine drivexc(exc,ixc,npts,nspden,order,rho_updn,vxcrho,ndvxc,ngr2,nd2vxc,n
  if(allocated(zeta)) then
    ABI_DEALLOCATE(zeta)
  end if
-
-!DEBUG
- write(std_out,'(a,5es16.6)')' drivexc, exit : exc(1:5)=',exc(1:5)
-!ENDDEBUG
 
 end subroutine drivexc
 !!***

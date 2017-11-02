@@ -1770,7 +1770,7 @@ end subroutine libxc_functionals_set_hybridparams
 !! INPUTS
 !! [hybrid_id]=<type(libxc_functional_type)>, optional : id of an input hybrid functional
 !! [xc_functionals(2)]=<type(libxc_functional_type)>, optional : XC functionals from which
-!!                     the id(s) can to be used
+!!                     the id(s) can be used
 !!
 !! OUTPUT
 !! [gga_id(2)]=array that contains the GGA libXC id(s)
@@ -1825,12 +1825,13 @@ function libxc_functionals_gga_from_hybrid(gga_id,hybrid_id,xc_functionals)
  c_name="unknown" ; x_name="unknown"
 
 !Specific treatment of the B3LYP functional, whose GGA counterpart does not exist in LibXC
- if(trial_id(1)==402)then
+ if(trial_id(1)==402 .or. trial_id(2)==402)then
    libxc_functionals_gga_from_hybrid=.true.
    if (present(gga_id)) then
-     gga_id(1)=-1402 ! This sends back to a native ABINIT functional, 
-                     ! actually a composite from different LibXC functionals.
-     gga_id(2)=0
+     gga_id(1)=0    
+     gga_id(2)=-1402 ! This corresponds to a native ABINIT functional,
+                     ! actually a composite from different LibXC functionals! 
+     write(std_out,*)' libxc_functionals_gga_from_hybrid, return with gga_id=',gga_id
    endif
    return
  endif
@@ -1882,7 +1883,7 @@ function libxc_functionals_gga_from_hybrid(gga_id,hybrid_id,xc_functionals)
    end if
  end if
 
-!Note that in the case of B3LYP functional, the returned happened immediately after the setup of B3LYP parameters.
+!Note that in the case of B3LYP functional, the return happened immediately after the setup of B3LYP parameters.
 
 end function libxc_functionals_gga_from_hybrid
 !!***

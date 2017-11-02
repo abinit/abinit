@@ -35,7 +35,7 @@
 !!
 !! SIDE EFFECTS
 !!  enxc= exchange correlation energy
-!!  grxc= correction yo the forces 
+!!  grxc= correction to the forces 
 !!  strsxc(6)= exchange correlation contribution to stress tensor
 !!  vxc= exchange correlation potential
 !!  vxcavg= unit cell average of Vxc
@@ -115,10 +115,6 @@ subroutine xchybrid_ncpp_cc(dtset,enxc,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,s
 
 ! *************************************************************************
 
-!DEBUG
- write(std_out,*)' xchybrid_ncpp_cc : enter'
-!ENDDEBUG
-
  DBG_ENTER("COLL")
 
 !Not relevant for PAW
@@ -162,9 +158,6 @@ subroutine xchybrid_ncpp_cc(dtset,enxc,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,s
    ABI_ALLOCATE(xccc3d_null,(n3xccc_null))
 !  Compute Vxc^Hybrid(rho_val)
 
-!DEBUG
- write(std_out,*)' xchybrid_ncpp_cc : call rhotoxc (1), xcdata_hybrid%ixc=',xcdata_hybrid%ixc
-!ENDDEBUG
    call rhotoxc(enxc,kxc_dum,mpi_enreg,nfft,ngfft,nhat,ndim,nhatgr,ndim,nkxc,nkxc,&
 &   n3xccc_null,option,dtset%paral_kgb,rhor,rprimd,&
 &   strsxc,usexcnhat,vxc,vxcavg,xccc3d_null,xcdata_hybrid)
@@ -176,9 +169,6 @@ subroutine xchybrid_ncpp_cc(dtset,enxc,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,s
    end if
 
 !Add Vxc^GGA(rho_core+rho_val)
-!DEBUG
- write(std_out,*)' xchybrid_ncpp_cc : call rhotoxc (2), xcdata_gga%ixc=',xcdata_gga%ixc
-!ENDDEBUG
    call rhotoxc(enxc_corr,kxc_dum,mpi_enreg,nfft,ngfft,nhat,ndim,nhatgr,ndim,nkxc,nkxc,&
 &   n3xccc,option,dtset%paral_kgb,rhor,rprimd,&
 &   strsxc_corr,usexcnhat,vxc_corr,vxcavg_corr,xccc3d,xcdata_gga,xc_funcs=xc_funcs_gga)
@@ -188,9 +178,6 @@ subroutine xchybrid_ncpp_cc(dtset,enxc,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,s
    strsxc(:)=strsxc(:)+strsxc_corr(:)
 
 !Substract Vxc^GGA(rho_val)
-!DEBUG
- write(std_out,*)' xchybrid_ncpp_cc : call rhotoxc (3), xcdata_gga%ixc=',xcdata_gga%ixc
-!ENDDEBUG
    call rhotoxc(enxc_corr,kxc_dum,mpi_enreg,nfft,ngfft,nhat,ndim,nhatgr,ndim,nkxc,nkxc,&
 &   n3xccc_null,option,dtset%paral_kgb,rhor,rprimd,strsxc_corr,usexcnhat,&
 &   vxc_corr,vxcavg_corr,xccc3d_null,xcdata_gga,xc_funcs=xc_funcs_gga)
@@ -249,10 +236,6 @@ subroutine xchybrid_ncpp_cc(dtset,enxc,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,s
  ABI_DEALLOCATE(kxc_dum)
 
  DBG_EXIT("COLL")
-
-!DEBUG
- write(std_out,*)' xchybrid_ncpp_cc : exit'
-!ENDDEBUG
 
 end subroutine xchybrid_ncpp_cc
 !!***

@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 31 Oct 2017.
-- ( at 19h18 )
+.Starting date : Thu  2 Nov 2017.
+- ( at 13h43 )
   
 - input  file    -> t74.in
 - output file    -> t74.out
@@ -889,8 +889,8 @@ P           mkmem           6
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.02508
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_ace_2/tests/Psps_for_tests/13al.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_ace_2/tests/Psps_for_tests/13al.pspnc
+- pspini: atom type   1  psp file is /home/gonze/ABINITgit/ace_2/tests/Psps_for_tests/13al.pspnc
+- pspatm: opening atomic psp file    /home/gonze/ABINITgit/ace_2/tests/Psps_for_tests/13al.pspnc
 -  Troullier-Martins psp for element  Al        Thu Oct 27 17:31:05 EDT 1994
 - 13.00000   3.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1012,8 +1012,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      78.656      78.566
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.02508
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_ace_2/tests/Psps_for_tests/13al.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_ace_2/tests/Psps_for_tests/13al.pspnc
+- pspini: atom type   1  psp file is /home/gonze/ABINITgit/ace_2/tests/Psps_for_tests/13al.pspnc
+- pspatm: opening atomic psp file    /home/gonze/ABINITgit/ace_2/tests/Psps_for_tests/13al.pspnc
 -  Troullier-Martins psp for element  Al        Thu Oct 27 17:31:05 EDT 1994
 - 13.00000   3.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1132,8 +1132,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      78.656      78.566
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.02508
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_ace_2/tests/Psps_for_tests/13al.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_ace_2/tests/Psps_for_tests/13al.pspnc
+- pspini: atom type   1  psp file is /home/gonze/ABINITgit/ace_2/tests/Psps_for_tests/13al.pspnc
+- pspatm: opening atomic psp file    /home/gonze/ABINITgit/ace_2/tests/Psps_for_tests/13al.pspnc
 -  Troullier-Martins psp for element  Al        Thu Oct 27 17:31:05 EDT 1994
 - 13.00000   3.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1494,8 +1494,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      78.656      78.566
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.02508
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_ace_2/tests/Psps_for_tests/13al.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_ace_2/tests/Psps_for_tests/13al.pspnc
+- pspini: atom type   1  psp file is /home/gonze/ABINITgit/ace_2/tests/Psps_for_tests/13al.pspnc
+- pspatm: opening atomic psp file    /home/gonze/ABINITgit/ace_2/tests/Psps_for_tests/13al.pspnc
 -  Troullier-Martins psp for element  Al        Thu Oct 27 17:31:05 EDT 1994
 - 13.00000   3.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1743,8 +1743,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      78.656      78.566
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.02508
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_ace_2/tests/Psps_for_tests/13al.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_ace_2/tests/Psps_for_tests/13al.pspnc
+- pspini: atom type   1  psp file is /home/gonze/ABINITgit/ace_2/tests/Psps_for_tests/13al.pspnc
+- pspatm: opening atomic psp file    /home/gonze/ABINITgit/ace_2/tests/Psps_for_tests/13al.pspnc
 -  Troullier-Martins psp for element  Al        Thu Oct 27 17:31:05 EDT 1994
 - 13.00000   3.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1875,8 +1875,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      78.656      78.566
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.02508
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_ace_2/tests/Psps_for_tests/13al.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_ace_2/tests/Psps_for_tests/13al.pspnc
+- pspini: atom type   1  psp file is /home/gonze/ABINITgit/ace_2/tests/Psps_for_tests/13al.pspnc
+- pspatm: opening atomic psp file    /home/gonze/ABINITgit/ace_2/tests/Psps_for_tests/13al.pspnc
 -  Troullier-Martins psp for element  Al        Thu Oct 27 17:31:05 EDT 1994
 - 13.00000   3.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2010,8 +2010,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      78.656      78.566
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.02508
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_ace_2/tests/Psps_for_tests/13al.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_ace_2/tests/Psps_for_tests/13al.pspnc
+- pspini: atom type   1  psp file is /home/gonze/ABINITgit/ace_2/tests/Psps_for_tests/13al.pspnc
+- pspatm: opening atomic psp file    /home/gonze/ABINITgit/ace_2/tests/Psps_for_tests/13al.pspnc
 -  Troullier-Martins psp for element  Al        Thu Oct 27 17:31:05 EDT 1994
 - 13.00000   3.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2142,8 +2142,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      78.656      78.566
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.02508
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_ace_2/tests/Psps_for_tests/13al.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_ace_2/tests/Psps_for_tests/13al.pspnc
+- pspini: atom type   1  psp file is /home/gonze/ABINITgit/ace_2/tests/Psps_for_tests/13al.pspnc
+- pspatm: opening atomic psp file    /home/gonze/ABINITgit/ace_2/tests/Psps_for_tests/13al.pspnc
 -  Troullier-Martins psp for element  Al        Thu Oct 27 17:31:05 EDT 1994
 - 13.00000   3.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2274,8 +2274,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      78.656      78.566
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.02508
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_ace_2/tests/Psps_for_tests/13al.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_ace_2/tests/Psps_for_tests/13al.pspnc
+- pspini: atom type   1  psp file is /home/gonze/ABINITgit/ace_2/tests/Psps_for_tests/13al.pspnc
+- pspatm: opening atomic psp file    /home/gonze/ABINITgit/ace_2/tests/Psps_for_tests/13al.pspnc
 -  Troullier-Martins psp for element  Al        Thu Oct 27 17:31:05 EDT 1994
 - 13.00000   3.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2300,36 +2300,33 @@ _setup2: Arith. and geom. avg. npw (full set) are      78.656      78.566
 ================================================================================
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -1.3513859416008    -1.351E+00 1.890E-09 1.812E-01
- ETOT  2  -1.3525184965896    -1.133E-03 2.795E-09 1.184E-02
- ETOT  3  -1.3526025785082    -8.408E-05 3.296E-07 4.248E-04
- ETOT  4  -1.3525509431501     5.164E-05 5.450E-09 1.048E-04
- ETOT  5  -1.3525611108255    -1.017E-05 2.916E-09 5.904E-07
- ETOT  6  -1.3525577390336     3.372E-06 1.218E-10 2.278E-08
- ETOT  7  -1.3525574733514     2.657E-07 5.981E-11 2.045E-08
- ETOT  8  -1.3525572907308     1.826E-07 3.494E-11 1.026E-08
- ETOT  9  -1.3525574018593    -1.111E-07 5.889E-11 4.914E-11
- ETOT 10  -1.3525573852734     1.659E-08 3.369E-11 4.080E-12
- ETOT 11  -1.3525573786924     6.581E-09 3.495E-11 7.978E-14
- ETOT 12  -1.3525573781095     5.829E-10 3.035E-11 4.615E-17
+ ETOT  1  -2.3921371975989    -2.392E+00 4.931E-08 1.724E-03
+ ETOT  2  -2.3925145836540    -3.774E-04 3.719E-10 1.103E-04
+ ETOT  3  -2.3925222080064    -7.624E-06 1.094E-08 2.903E-07
+ ETOT  4  -2.3925219403567     2.676E-07 1.671E-09 1.336E-08
+ ETOT  5  -2.3925216881043     2.523E-07 6.343E-10 1.696E-09
+ ETOT  6  -2.3925216096260     7.848E-08 2.503E-10 4.640E-11
+ ETOT  7  -2.3925215879910     2.164E-08 1.695E-10 6.630E-12
+ ETOT  8  -2.3925215885702    -5.792E-10 9.529E-11 5.733E-13
+ ETOT  9  -2.3925215870415     1.529E-09 7.580E-11 2.464E-14
 
- At SCF step   12, etot is converged : 
-  for the second time, diff in etot=  5.829E-10 < toldfe=  1.000E-08
+ At SCF step    9, etot is converged : 
+  for the second time, diff in etot=  1.529E-09 < toldfe=  1.000E-08
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)= -1.32799453E-03  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)= -1.32799453E-03  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)= -1.32799453E-03  sigma(2 1)=  0.00000000E+00
+  sigma(1 1)=  5.26579442E-05  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)=  5.26579442E-05  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  5.26579442E-05  sigma(2 1)=  0.00000000E+00
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
-    1        2.00000          0.82986201
+    1        2.00000          0.88452511
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   1.7516E-12; max=  3.0349E-11
+ Mean square residual over all n,k,spin=   4.2569E-12; max=  7.5804E-11
  reduced coordinates (array xred) for    1 atoms
        0.000000000000      0.000000000000      0.000000000000
  rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
@@ -2348,10 +2345,10 @@ _setup2: Arith. and geom. avg. npw (full set) are      78.656      78.566
  length scales=  7.600000000000  7.600000000000  7.600000000000 bohr
               =  4.021746785284  4.021746785284  4.021746785284 angstroms
  prteigrs : about to open file t74o_DS12_EIG
- Fermi (or HOMO) energy (hartree) =   0.59618   Average Vxc (hartree)=   0.00000
+ Fermi (or HOMO) energy (hartree) =   0.30116   Average Vxc (hartree)=  -0.30103
  Eigenvalues (hartree) for nkpt=   6  k points:
  kpt#   1, nband=  3, wtk=  0.18750, kpt= -0.2500 -0.2500  0.0000 (reduced coord)
-   0.20169    0.91381    0.91381
+  -0.09892    0.60555    0.60555
       occupation numbers for kpt#   1
    2.00000    0.00000    0.00000
  prteigrs : prtvol=0 or 1, do not print more k-points.
@@ -2360,38 +2357,38 @@ _setup2: Arith. and geom. avg. npw (full set) are      78.656      78.566
 --------------------------------------------------------------------------------
  Components of total free energy (in Hartree) :
 
-    Kinetic energy  =  8.72948702576526E-01
-    Hartree energy  =  4.39133978896724E-03
-    XC energy       = -1.39591591575766E-01
+    Kinetic energy  =  8.81669689533548E-01
+    Hartree energy  =  4.08052107022209E-03
+    XC energy       = -1.18174567531858E+00
     Ewald energy    = -2.71472096493581E+00
     PspCore energy  =  6.05643856626115E-03
-    Loc. psp. energy=  2.41767705019674E-01
-    NL   psp  energy=  3.85406748568157E-01
-    >>>>> Internal E= -1.34374162199199E+00
+    Loc. psp. energy=  1.87322399307334E-01
+    NL   psp  energy=  4.33567018657104E-01
+    >>>>> Internal E= -2.38377057311992E+00
 
-    -kT*entropy     = -8.81575611751681E-03
-    >>>>>>>>> Etotal= -1.35255737810951E+00
+    -kT*entropy     = -8.75101392157337E-03
+    >>>>>>>>> Etotal= -2.39252158704149E+00
 
  "Double-counting" decomposition of free energy:
-    Band energy     =  1.22972265259792E+00
+    Band energy     =  3.29843074141122E-01
     Ewald energy    = -2.71472096493581E+00
     PspCore energy  =  6.05643856626115E-03
-    Dble-C XC-energy=  1.35200251786799E-01
-    >>>>> Internal E= -1.34374162198483E+00
+    Dble-C XC-energy= -4.94912204608905E-03
+    >>>>> Internal E= -2.38377057427452E+00
 
-    -kT*entropy     = -8.81575611751681E-03
-    >>>> Etotal (DC)= -1.35255737810235E+00
+    -kT*entropy     = -8.75101392157337E-03
+    >>>> Etotal (DC)= -2.39252158819609E+00
 --------------------------------------------------------------------------------
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)= -1.32799453E-03  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)= -1.32799453E-03  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)= -1.32799453E-03  sigma(2 1)=  0.00000000E+00
+  sigma(1 1)=  5.26579442E-05  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)=  5.26579442E-05  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  5.26579442E-05  sigma(2 1)=  0.00000000E+00
 
--Cartesian components of stress tensor (GPa)         [Pressure=  3.9071E+01 GPa]
-- sigma(1 1)= -3.90709414E+01  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)= -3.90709414E+01  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)= -3.90709414E+01  sigma(2 1)=  0.00000000E+00
+-Cartesian components of stress tensor (GPa)         [Pressure= -1.5492E+00 GPa]
+- sigma(1 1)=  1.54924995E+00  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  1.54924995E+00  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  1.54924995E+00  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET 13 ==================================================================
@@ -2413,8 +2410,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      78.656      78.566
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.02508
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_ace_2/tests/Psps_for_tests/13al.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_ace_2/tests/Psps_for_tests/13al.pspnc
+- pspini: atom type   1  psp file is /home/gonze/ABINITgit/ace_2/tests/Psps_for_tests/13al.pspnc
+- pspatm: opening atomic psp file    /home/gonze/ABINITgit/ace_2/tests/Psps_for_tests/13al.pspnc
 -  Troullier-Martins psp for element  Al        Thu Oct 27 17:31:05 EDT 1994
 - 13.00000   3.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2569,8 +2566,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      78.656      78.566
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.02508
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_ace_2/tests/Psps_for_tests/13al.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_ace_2/tests/Psps_for_tests/13al.pspnc
+- pspini: atom type   1  psp file is /home/gonze/ABINITgit/ace_2/tests/Psps_for_tests/13al.pspnc
+- pspatm: opening atomic psp file    /home/gonze/ABINITgit/ace_2/tests/Psps_for_tests/13al.pspnc
 -  Troullier-Martins psp for element  Al        Thu Oct 27 17:31:05 EDT 1994
 - 13.00000   3.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3054,8 +3051,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      78.656      78.566
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.02508
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_ace_2/tests/Psps_for_tests/13al.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_ace_2/tests/Psps_for_tests/13al.pspnc
+- pspini: atom type   1  psp file is /home/gonze/ABINITgit/ace_2/tests/Psps_for_tests/13al.pspnc
+- pspatm: opening atomic psp file    /home/gonze/ABINITgit/ace_2/tests/Psps_for_tests/13al.pspnc
 -  Troullier-Martins psp for element  Al        Thu Oct 27 17:31:05 EDT 1994
 - 13.00000   3.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3191,8 +3188,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      78.656      78.566
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.02508
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_ace_2/tests/Psps_for_tests/13al.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_ace_2/tests/Psps_for_tests/13al.pspnc
+- pspini: atom type   1  psp file is /home/gonze/ABINITgit/ace_2/tests/Psps_for_tests/13al.pspnc
+- pspatm: opening atomic psp file    /home/gonze/ABINITgit/ace_2/tests/Psps_for_tests/13al.pspnc
 -  Troullier-Martins psp for element  Al        Thu Oct 27 17:31:05 EDT 1994
 - 13.00000   3.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3572,8 +3569,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      78.656      78.566
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.02508
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_ace_2/tests/Psps_for_tests/13al.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_ace_2/tests/Psps_for_tests/13al.pspnc
+- pspini: atom type   1  psp file is /home/gonze/ABINITgit/ace_2/tests/Psps_for_tests/13al.pspnc
+- pspatm: opening atomic psp file    /home/gonze/ABINITgit/ace_2/tests/Psps_for_tests/13al.pspnc
 -  Troullier-Martins psp for element  Al        Thu Oct 27 17:31:05 EDT 1994
 - 13.00000   3.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3950,8 +3947,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      78.656      78.566
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.02508
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_ace_2/tests/Psps_for_tests/13al.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_ace_2/tests/Psps_for_tests/13al.pspnc
+- pspini: atom type   1  psp file is /home/gonze/ABINITgit/ace_2/tests/Psps_for_tests/13al.pspnc
+- pspatm: opening atomic psp file    /home/gonze/ABINITgit/ace_2/tests/Psps_for_tests/13al.pspnc
 -  Troullier-Martins psp for element  Al        Thu Oct 27 17:31:05 EDT 1994
 - 13.00000   3.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -4083,7 +4080,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      78.656      78.566
            etotal9    -2.4251785927E+00
            etotal10   -2.4266039470E+00
            etotal11   -2.4266036169E+00
-           etotal12   -1.3525573781E+00
+           etotal12   -2.3925215870E+00
            etotal13   -1.9130307221E+00
            etotal14   -2.4669653060E+00
            etotal15   -3.9374500649E+02
@@ -4479,9 +4476,9 @@ P           mkmem           6
                        2.000000  2.000000  0.000000
                        2.000000  0.000000  0.000000
               occ12    2.000000  0.000000  0.000000
-                       2.000000  0.045197  0.000039
-                       1.999996  1.995134  0.000000
-                       1.799111  1.799111  1.313740
+                       2.000000  0.080142  0.000145
+                       1.999999  1.997243  0.000000
+                       1.869807  1.869807  1.101191
                        2.000000  2.000000  0.000000
                        2.000000  0.000000  0.000000
               occ13    2.000000  0.000000  0.000000
@@ -4589,7 +4586,7 @@ P           mkmem           6
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            strten11    2.1119898550E-04  2.1119898550E-04  2.1119898550E-04
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-           strten12   -1.3279945292E-03 -1.3279945292E-03 -1.3279945292E-03
+           strten12    5.2657944248E-05  5.2657944248E-05  5.2657944248E-05
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            strten13   -1.2746424387E-04 -1.2746424387E-04 -1.2746424387E-04
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -4748,10 +4745,10 @@ P           mkmem           6
 - Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7
 - Comment : the original paper describing the ABINIT project.
 -
-- Proc.   0 individual time (sec): cpu=         17.6  wall=         18.9
+- Proc.   0 individual time (sec): cpu=         17.4  wall=         18.6
 
 ================================================================================
 
  Calculation completed.
 .Delivered 295 WARNINGs and   0 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         17.6  wall=         18.9
++Overall time at end (sec) : cpu=         17.4  wall=         18.6

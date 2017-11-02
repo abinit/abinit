@@ -76,7 +76,7 @@ subroutine size_dvxc(ixc,ndvxc,ngr2,nd2vxc,nspden,nvxcdgr,order,add_tfw)
 
 !Dimension for the gradient of the density (only allocated for GGA or mGGA)
  if ((ixc>=11.and.ixc<=17).or.(ixc>=23.and.ixc<=24).or.ixc==26.or.ixc==27.or. &
-& (ixc>=31.and.ixc<=34).or.(ixc==41.or.ixc==42).or.(add_tfw_)) ngr2=2*min(nspden,2)-1
+& (ixc>=31.and.ixc<=34).or.(ixc==41.or.ixc==42).or.ixc==1402000.or.(add_tfw_)) ngr2=2*min(nspden,2)-1
  if (ixc<0.and.(libxc_functionals_isgga().or.libxc_functionals_ismgga().or.libxc_functionals_is_hybrid() )) &
 & ngr2=2*min(nspden,2)-1
 
@@ -84,7 +84,7 @@ subroutine size_dvxc(ixc,ndvxc,ngr2,nd2vxc,nspden,nvxcdgr,order,add_tfw)
 !=======================================================================================
  if (order**2 <= 1) then
    if (((ixc>=11 .and. ixc<=15) .and. ixc/=13) .or. (ixc>=23 .and. ixc<=24) .or. &
-&   (ixc==41 .or. ixc==42)) nvxcdgr=3
+&   (ixc==41 .or. ixc==42) .or. ixc==1402000) nvxcdgr=3
    if (ixc==16.or.ixc==17.or.ixc==26.or.ixc==27) nvxcdgr=2
    if (ixc<0) nvxcdgr=3
    if (ixc>=31 .and. ixc<=34) nvxcdgr=3 !Native fake metaGGA functionals (for testing purpose only)
@@ -119,6 +119,9 @@ subroutine size_dvxc(ixc,ndvxc,ngr2,nd2vxc,nspden,nvxcdgr,order,add_tfw)
      nvxcdgr=2
    else if (ixc==50) then
      ndvxc=1 !  IIT xc (no spin-pol)
+   else if (ixc==1402000) then
+     ndvxc=15
+     nvxcdgr=3
    else if (ixc<0) then
      if(libxc_functionals_isgga() .or. libxc_functionals_ismgga() .or. libxc_functionals_is_hybrid()) then
        ndvxc=15
@@ -136,6 +139,7 @@ subroutine size_dvxc(ixc,ndvxc,ngr2,nd2vxc,nspden,nvxcdgr,order,add_tfw)
      if ((ixc>=7 .and. ixc<=10) .or. (ixc==13)) nd2vxc=3*min(nspden,2)-2
 !    Following line to be corrected when the calculation of d2vxcar is implemented for these functionals
      if ((ixc>=11 .and. ixc<=15 .and. ixc/=13) .or. (ixc==23.and.ixc<=24) .or. (ixc==41.or.ixc==42)) nd2vxc=1
+     if(ixc==1402000)nd2vxc=3*min(nspden,2)-2
      if ((ixc<0.and.(.not.(libxc_functionals_isgga().or.libxc_functionals_ismgga().or.libxc_functionals_is_hybrid() )))) &
 &     nd2vxc=3*min(nspden,2)-2
    end if
