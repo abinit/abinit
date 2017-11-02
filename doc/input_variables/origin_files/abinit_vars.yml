@@ -10404,7 +10404,7 @@
     mnemonics: HYBrid MIXING coefficient for Short-Range screened fock operator
     requires: '[[usefock]]>0'
     text: |-
-        Mixing coefficient for the screened Fock operator in case of hybrid functionals. HSE has 0.25, B2LYP has 0.2.
+        Mixing coefficient for the screened Fock operator in case of hybrid functionals. HSE has 0.25, B3LYP has 0.2.
         <p>ABINIT knows the correct value from [[ixc]]. Experts might nevertheless tune this mixing coefficient.
     topics: Hybrids_expert
     varset: gstate

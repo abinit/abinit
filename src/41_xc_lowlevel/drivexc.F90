@@ -183,6 +183,7 @@ subroutine drivexc(exc,ixc,npts,nspden,order,rho_updn,vxcrho,ndvxc,ngr2,nd2vxc,n
  real(dp),allocatable :: rhotot(:),rspts(:),vxci_rpa(:,:),zeta(:)
  real(dp),allocatable :: exc_x(:),vxcrho_x(:,:)
  real(dp),allocatable :: d2vxc_x(:,:),dvxc_x(:,:),vxcgrho_x(:,:)
+ type(libxc_functional_type) :: xc_funcs_vwn3(2),xc_funcs_lyp(2)
 
 ! *************************************************************************
 
@@ -239,9 +240,11 @@ subroutine drivexc(exc,ixc,npts,nspden,order,rho_updn,vxcrho,ndvxc,ngr2,nd2vxc,n
  end if
 
 !Check libXC
- if (ixc<0) then
+ if (ixc<0 .or. ixc==1402) then
    libxc_test=libxc_functionals_check(stop_if_error=.true.)
+ endif
 
+ if (ixc<0) then
 !  Prepare the tests
    if(present(xc_funcs))then
      is_gga=libxc_functionals_isgga(xc_functionals=xc_funcs)
@@ -252,7 +255,20 @@ subroutine drivexc(exc,ixc,npts,nspden,order,rho_updn,vxcrho,ndvxc,ngr2,nd2vxc,n
      is_mgga=libxc_functionals_ismgga()
      ixc_from_lib=libxc_functionals_ixc()
    end if
+!  Check consistency between ixc passed in input and the one used to initialize the library.
+   if (ixc /= ixc_from_lib) then
+     write(message, '(a,i0,2a,i0,2a)')&
+&     'The value of ixc specified in input, ixc = ',ixc,ch10,&
+&     'differs from the one used to initialize the functional ',ixc_from_lib,ch10,&
+&     'Action: reinitialize the global structure funcs, see NOTES in m_libxc_functionals'
+     MSG_BUG(message)
+   end if
+ else if (ixc==1420)then
+   is_gga=.true.
+   is_mgga=.false.
+ endif
 
+ if (ixc<0 .or. ixc==1402) then
 !  Check whether all the necessary arrays are present and have the correct dimensions
    if (is_gga .or. is_mgga) then
      if ( (.not. present(grho2_updn)) .or. (.not. present(vxcgrho)))  then
@@ -280,14 +296,6 @@ subroutine drivexc(exc,ixc,npts,nspden,order,rho_updn,vxcrho,ndvxc,ngr2,nd2vxc,n
        MSG_BUG(message)
      end if
    end if
-!  Check consistency between ixc passed in input and the one used to initialize the library.
-   if (ixc /= ixc_from_lib) then
-     write(message, '(a,i0,2a,i0,2a)')&
-&     'The value of ixc specified in input, ixc = ',ixc,ch10,&
-&     'differs from the one used to initialize the functional ',ixc_from_lib,ch10,&
-&     'Action: reinitialize the global structure funcs, see NOTES in m_libxc_functionals'
-     MSG_BUG(message)
-   end if
  end if
 
 !Checks the compatibility between the inputs and the presence of the optional arguments
@@ -302,7 +310,7 @@ subroutine drivexc(exc,ixc,npts,nspden,order,rho_updn,vxcrho,ndvxc,ngr2,nd2vxc,n
  end if
  if(present(d2vxc))then
    if(order/=3.or.(ixc/=3.and.(((ixc>15).and.(ixc/=23)) .or.&
-&   (ixc>=0.and.ixc<7).or.(ixc>=40))) )then
+&   (ixc>=0.and.ixc<7).or.(ixc>=40 .and. ixc/=1402))) )then
      write(message, '(5a,i6,a,i0)' )&
 &     'The value of the number of the XC functional ixc',ch10,&
 &     'or the value of order is not compatible with the presence of the array d2vxc',ch10,&
@@ -313,7 +321,7 @@ subroutine drivexc(exc,ixc,npts,nspden,order,rho_updn,vxcrho,ndvxc,ngr2,nd2vxc,n
  if(present(vxcgrho))then
    if(nvxcgrho==0.or. &
 &   ((((ixc>17.and.ixc/=23.and.ixc/=24.and.ixc/=26.and.ixc/=27) .or.&
-&   (ixc>= 0.and.ixc<7).or.(ixc>=40)) .and. nvxcgrho /=3 ))) then
+&   (ixc>= 0.and.ixc<7).or.(ixc>=40 .and. ixc/=1402)) .and. nvxcgrho /=3 ))) then
      if(ixc<31.and.ixc>34)then !! additional if to include ixc 31 to 34 in the list (these ixc are used for mgga test see below)
        write(message, '(5a,i0,a,i0)' )&
 &       'The value of the number of the XC functional ixc',ch10,&
@@ -640,9 +648,6 @@ subroutine drivexc(exc,ixc,npts,nspden,order,rho_updn,vxcrho,ndvxc,ngr2,nd2vxc,n
  else if(ixc>=41.and.ixc<=42) then
 !  Requires to evaluate exchange-correlation with PBE (optpbe=2)
 !  minus hyb_mixing*exchange with PBE (optpbe=-2)
-!DEBUG
-   write(std_out,*)' drivexc : hyb_mixing=',hyb_mixing
-!ENDDEBUG
    ndvxc_x=8
    ABI_ALLOCATE(exc_x,(npts))
    ABI_ALLOCATE(vxcrho_x,(npts,nspden))
@@ -696,60 +701,89 @@ subroutine drivexc(exc,ixc,npts,nspden,order,rho_updn,vxcrho,ndvxc,ngr2,nd2vxc,n
 
 !>>>>> GGA counterpart of the B3LYP functional
  else if(ixc==1402) then
-!  Requires to evaluate exchange-correlation with PBE (optpbe=2)
-!  minus alpha*exchange with PBE (optpbe=-2)
-   if (ixc==41) alpha=one/four
-   if (ixc==42) alpha=one/three
-   ndvxc_x=8
-   ABI_ALLOCATE(exc_x,(npts))
-   ABI_ALLOCATE(vxcrho_x,(npts,nspden))
-   ABI_ALLOCATE(vxcgrho_x,(npts,nvxcgrho))
-   exc_x=zero;vxcrho_x=zero;vxcgrho_x=zero
+!  Requires to evaluate exchange-correlation 
+!  with 5/4 B3LYP - 1/4 B3LYPc, where
+!  B3LYPc = (0.19 Ec VWN3 + 0.81 Ec LYP)
+
+!  First evaluate B3LYP. 
+   if(present(xc_funcs))then
+     if (order**2 <= 1) then
+       call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc,&
+&        vxcrho,xc_functionals=xc_funcs)
+     elseif (order**2 <= 4) then
+       call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc,&
+&        vxcrho,dvxc=dvxc,xc_functionals=xc_funcs)
+     else
+       call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc,&
+&        vxcrho,dvxc=dvxc,d2vxc=d2vxc,xc_functionals=xc_funcs)
+     end if
+   else
+     if (order**2 <= 1) then
+       call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc,&
+&         vxcrho)
+     elseif (order**2 <= 4) then
+       call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc,&
+&         vxcrho,dvxc=dvxc)
+     else
+         call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc,&
+&         vxcrho,dvxc=dvxc,d2vxc=d2vxc)
+   endif
+
+!  Then renormalize B3LYP and subtract VWN3 contribution
+   ABI_ALLOCATE(exc_c,(npts))
+   ABI_ALLOCATE(vxcrho_c,(npts,nspden))
+   exc_c=zero;vxcrho_c=zero
+   call libxc_functionals_init(-30,nspden,xc_functionals=xc_funcs_vwn3)
    if (order**2 <= 1) then
-     optpbe=2 !PBE exchange correlation
-     call xcpbe(exc,npts,nspden,optpbe,order,rho_updn,vxcrho,ndvxc,ngr2,nd2vxc,&
-&     dvxcdgr=vxcgrho,exexch=exexch_,grho2_updn=grho2_updn)
-     optpbe=-2 !PBE exchange-only
-     call xcpbe(exc_x,npts,nspden,optpbe,order,rho_updn,vxcrho_x,ndvxc,ngr2,nd2vxc,&
-&     dvxcdgr=vxcgrho_x,exexch=exexch_,grho2_updn=grho2_updn)
-     exc=exc-exc_x*alpha
-     vxcrho=vxcrho-vxcrho_x*alpha
-     vxcgrho=vxcgrho-vxcgrho_x*alpha
-   else if (order /=3) then
-     ABI_ALLOCATE(dvxc_x,(npts,ndvxc_x))
-     optpbe=2 !PBE exchange correlation
-     call xcpbe(exc,npts,nspden,optpbe,order,rho_updn,vxcrho,ndvxc,ngr2,nd2vxc,&
-     dvxcdgr=vxcgrho,dvxci=dvxc,grho2_updn=grho2_updn)
-     optpbe=-2 !PBE exchange-only
-     call xcpbe(exc_x,npts,nspden,optpbe,order,rho_updn,vxcrho_x,ndvxc_x,ngr2,nd2vxc,&
-&     dvxcdgr=vxcgrho_x,dvxci=dvxc_x,grho2_updn=grho2_updn)
-     exc=exc-exc_x*alpha
-     vxcrho=vxcrho-vxcrho_x*alpha
-     vxcgrho=vxcgrho-vxcgrho_x*alpha
-     dvxc(:,1:ndvxc_x)=dvxc(:,1:ndvxc_x)-dvxc_x(:,1:ndvxc_x)*alpha
-     ABI_DEALLOCATE(dvxc_x)
-   else if (order ==3) then
-!    The size of exchange-correlation with PBE (optpbe=2)
-!    is the one which defines the size for ndvxc.
-     ABI_ALLOCATE(dvxc_x,(npts,ndvxc_x))
-     ABI_ALLOCATE(d2vxc_x,(npts,nd2vxc))
-     optpbe=2 !PBE exchange correlation
-     call xcpbe(exc,npts,nspden,optpbe,order,rho_updn,vxcrho,ndvxc,ngr2,nd2vxc,&
-&     d2vxci=d2vxc,dvxcdgr=vxcgrho,dvxci=dvxc,grho2_updn=grho2_updn)
-     optpbe=-2 !PBE exchange-only
-     call xcpbe(exc_x,npts,nspden,optpbe,order,rho_updn,vxcrho_x,ndvxc_x,ngr2,nd2vxc,&
-&     d2vxci=d2vxc_x,dvxcdgr=vxcgrho_x,dvxci=dvxc_x,grho2_updn=grho2_updn)
-     exc=exc-exc_x*alpha
-     vxcrho=vxcrho-vxcrho_x*alpha
-     vxcgrho=vxcgrho-vxcgrho_x*alpha
-     d2vxc=d2vxc-d2vxc_x*alpha
-     dvxc(:,1:ndvxc_x)=dvxc(:,1:ndvxc_x)-dvxc_x(:,1:ndvxc_x)*alpha
-     ABI_DEALLOCATE(dvxc_x)
-     ABI_DEALLOCATE(d2vxc_x)
+     call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc_c,&
+&        vxcrho_c,xc_functionals=xc_funcs_vwn3)
+   elseif (order**2 <= 4) then
+     ABI_ALLOCATE(dvxc_c,(npts,ndvxc))
+     dvxc_c=zero
+     call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc_c,&
+&        vxcrho_c,dvxc=dvxc_c,xc_functionals=xc_funcs_vwn3)
+   else
+     ABI_ALLOCATE(dvxc_c,(npts,ndvxc))
+     ABI_ALLOCATE(d2vxc_c,(npts,nd2vxc))
+     dvxc_c=zero
+     d2vxc_c=zero
+     call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc_c,&
+&        vxcrho_c,dvxc=dvxc_c,d2vxc=d2vxc,xc_functionals=xc_funcs_vwn3)
    end if
-   ABI_DEALLOCATE(exc_x)
-   ABI_DEALLOCATE(vxcrho_x)
-   ABI_DEALLOCATE(vxcgrho_x)
+   exc=1.25d0*exc-quarter*0.19d0*exc_c
+   vxcrho=1.25d0*vxcrho-quarter*0.19d0*vxcrho_c
+   if(order**2>1)dvxc=1.25d0*dvxc-quarter*0.19d0*dvxc_c
+   if(order**2>4)d2vxc=1.25d0*d2vxc-quarter*0.19d0*d2vxc_c
+   call libxc_functionals_end(xc_functionals=xc_funcs_vwn3)
+
+!  Then subtract LYP contribution
+   call libxc_functionals_init(-131,nspden,xc_functionals=xc_funcs_lyp)
+   if (order**2 <= 1) then
+     call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc_c,&
+&        vxcrho_c,xc_functionals=xc_funcs_lyp)
+   elseif (order**2 <= 4) then
+     ABI_ALLOCATE(dvxc_c,(npts,ndvxc))
+     dvxc_c=zero
+     call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc_c,&
+&        vxcrho_c,dvxc=dvxc_c,xc_functionals=xc_funcs_lyp)
+   else
+     ABI_ALLOCATE(dvxc_c,(npts,ndvxc))
+     ABI_ALLOCATE(d2vxc_c,(npts,nd2vxc))
+     dvxc_c=zero
+     d2vxc_c=zero
+     call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc_c,&
+&        vxcrho_c,dvxc=dvxc_c,d2vxc=d2vxc,xc_functionals=xc_funcs_lyp)
+   end if
+   exc=exc-quarter*0.81d0*exc_c
+   vxcrho=vxcrho-quarter*0.81d0*vxcrho_c
+   if(order**2>1)dvxc=dvxc-quarter*0.81d0*dvxc_c
+   if(order**2>4)d2vxc=d2vxc-quarter*0.81d0*d2vxc_c
+   call libxc_functionals_end(xc_functionals=xc_funcs_lyp)
+
+   ABI_DEALLOCATE(exc_c)
+   ABI_DEALLOCATE(vxcrho_c)
+   if(order**2>1)ABI_DEALLOCATE(dvxc_c)
+   if(order**2>4)ABI_DEALLOCATE(d2vxc_c)
 
 !>>>>> Ichimaru,Iyetomi,Tanaka,  XC at finite temp (e- gaz)
  else if (ixc==50) then
