@@ -281,9 +281,7 @@ subroutine get_xclevel(ixc,xclevel,usefock)
        if(present(usefock))then
          usefock=1
        endif
-       if (.not.libxc_functionals_gga_from_hybrid(hybrid_id=ii) .and. &
-!           B3LYP is allowed inside the scGW approach, not yet inside the SCF approach
-&           ixc/=-402 ) then
+       if (.not.libxc_functionals_gga_from_hybrid(hybrid_id=ii)) then
          write(message, '(a,i8,3a,i8,2a,2i8,2a)' )&
 &         'ixc=',ixc,' (libXC hybrid functional) is presently not allowed.',ch10,&
 !&         'XC_FAMILY_HYB_GGA=',XC_FAMILY_HYB_GGA,ch10,&

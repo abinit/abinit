@@ -1828,7 +1828,8 @@ function libxc_functionals_gga_from_hybrid(gga_id,hybrid_id,xc_functionals)
  if(trial_id(1)==402)then
    libxc_functionals_gga_from_hybrid=.true.
    if (present(gga_id)) then
-     gga_id(1)=-1402 ! This sends back to a native ABINIT functional, actually a composite from different LibXC functionals.
+     gga_id(1)=-1402 ! This sends back to a native ABINIT functional, 
+                     ! actually a composite from different LibXC functionals.
      gga_id(2)=0
    endif
    return
@@ -1880,6 +1881,8 @@ function libxc_functionals_gga_from_hybrid(gga_id,hybrid_id,xc_functionals)
      gga_id(:)=-1
    end if
  end if
+
+!Note that in the case of B3LYP functional, the returned happened immediately after the setup of B3LYP parameters.
 
 end function libxc_functionals_gga_from_hybrid
 !!***
