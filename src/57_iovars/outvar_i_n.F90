@@ -457,8 +457,13 @@ subroutine outvar_i_n (dtsets,iout,&
  intarr(1,:)=dtsets(:)%ixc
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'ixc','INT',0)
 
+!ixcpositron
  intarr(1,:)=dtsets(:)%ixcpositron
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'ixcpositron','INT',0)
+
+!ixc_adv
+ intarr(1,:)=dtsets(:)%ixc_adv
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'ixc_adv','INT',0)
 
 !write(ab_out,*)' outvar_i_n : J '
 !call flush(ab_out)

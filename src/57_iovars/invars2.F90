@@ -109,7 +109,8 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
 
 !Local variables-------------------------------
 !scalars
- integer :: bantot,berryopt,dmatsize,ndim,getocc,iat,iatom,iband,ii,iimage,ikpt,intimage,ionmov,isppol
+ integer :: bantot,berryopt,dmatsize,ndim,getocc
+ integer :: iat,iatom,iband,ii,iimage,ikpt,intimage,ionmov,isppol,ixc_current
  integer :: densfor_pred,ipsp,iscf,isiz,itypat,jj,kptopt,lpawu,marr,natom,nband1,nberry,mkpt
  integer :: niatcon,nimage,nkpt,nkpthf,npspalch,nqpt,nsp,nspinor,nsppol,nsym,ntypalch,ntypat,ntyppure
  integer :: occopt,occopt_tmp,response,sumnbl,tfband,tnband,tread,tread_alt,tread_dft,tread_fock,tread_key
@@ -1314,30 +1315,39 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
      tread=1
    end if
  end if
+ ixc_current=dtset%ixc
+
+!Read the ixc for an advanced functional (if present, the other internal variable will be adjusted to this other functional)
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ixc_adv',tread,'INT')
+ if(tread==1)then
+   dtset%ixc_adv=intarr(1)
+   ixc_current=dtset%ixc_adv
+ endif
+
 !Initialize xclevel and usefock
- call get_xclevel(dtset%ixc,dtset%xclevel,dtset%usefock)
+ call get_xclevel(ixc_current,dtset%xclevel,dtset%usefock)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'auxc_ixc',tread,'INT')
  if(tread==1) dtset%auxc_ixc=intarr(1)
 !If the default value had been given, possibly switch on the auxc_ixc corresponding to ixc, if the latter is an hybrid
  if(dtset%auxc_ixc==0)then
-   call get_auxc_ixc(dtset%auxc_ixc,dtset%ixc)
+   call get_auxc_ixc(dtset%auxc_ixc,ixc_current)
  endif
 
 !Now take care of the parameters for hybrid functionals
  if(dtset%usefock==1)then 
 
-   if(dtset%ixc ==40 .or. dtset%ixc ==41 .or. dtset%ixc ==42)then 
+   if(ixc_current ==40 .or. ixc_current ==41 .or. ixc_current ==42)then 
      dtset%hyb_mixing_sr=zero 
      dtset%hyb_range_dft=zero ; dtset%hyb_range_fock=zero
-     if(dtset%ixc==40)dtset%hyb_mixing=one
-     if(dtset%ixc==41)dtset%hyb_mixing=quarter
-     if(dtset%ixc==42)dtset%hyb_mixing=third
-   else if(dtset%ixc==-427)then   ! Special case of HSE03
+     if(ixc_current==40)dtset%hyb_mixing=one
+     if(ixc_current==41)dtset%hyb_mixing=quarter
+     if(ixc_current==42)dtset%hyb_mixing=third
+   else if(ixc_current==-427)then   ! Special case of HSE03
      dtset%hyb_mixing=zero  ; dtset%hyb_mixing_sr=quarter
      dtset%hyb_range_dft=0.15_dp*two**third  ; dtset%hyb_range_fock=0.15_dp*sqrt(half)
-   else if (dtset%ixc<0) then
-     call libxc_functionals_init(dtset%ixc,dtset%nspden)
+   else if (ixc_current<0) then
+     call libxc_functionals_init(ixc_current,dtset%nspden)
      call libxc_functionals_get_hybridparams(hyb_mixing=dtset%hyb_mixing,hyb_mixing_sr=dtset%hyb_mixing_sr,&
 &                                            hyb_range=dtset%hyb_range_dft)
      call libxc_functionals_end()
