@@ -13187,16 +13187,19 @@
         <p>
          Controls the choice of exchange and correlation (xc). The list of XC functionals is given
         below. Positive values are for ABINIT native library of XC functionals, while negative values are for calling
-        the much wider set of functionals from the ETSF LibXC library (by M. Marques), also available at the
-         <a href="http://www.etsf.eu/resources/software/libraries_and_tools">
-          ETSF library Web page
+        the much wider set of functionals from the ETSF LibXC library (by M. Marques), available at the
+         <a href="http://octopus-code.org/wiki/Libxc">
+          LibXC home page
          </a>
          <br />
-         Note that the choice made here should agree with the choice
+         Note that the choice made here should preferably agree with the choice
         made in generating the original pseudopotential, except
         for [[ixc]]=0 (usually only used for debugging).
         A warning is issued if this is not the case.
-        However, the choices [[ixc]]=1, 2, 3 and 7 are fits to the same data, from
+        Unfortunately, pseudopotential (or PAW) generators for hybrid functionals and mGGA are currently under development,
+        so that one usually uses GGA or LDA pseudopotentials instead. The error should be limited when GGA or LDA pseudopotentials
+        with semi-core states are used. Still this is a non-controlled error..
+        Moreover, the choices [[ixc]]=1, 2, 3 and 7 are fits to the same data, from
         Ceperley-Alder, and are rather similar, at least for spin-unpolarized systems.
          <br />
          The choice between the non-spin-polarized and spin-polarized case
