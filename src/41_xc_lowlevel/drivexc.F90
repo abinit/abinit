@@ -181,8 +181,9 @@ subroutine drivexc(exc,ixc,npts,nspden,order,rho_updn,vxcrho,ndvxc,ngr2,nd2vxc,n
 !arrays
  real(dp),allocatable :: exci_rpa(:)
  real(dp),allocatable :: rhotot(:),rspts(:),vxci_rpa(:,:),zeta(:)
- real(dp),allocatable :: exc_x(:),vxcrho_x(:,:)
- real(dp),allocatable :: d2vxc_x(:,:),dvxc_x(:,:),vxcgrho_x(:,:)
+ real(dp),allocatable :: exc_c(:),exc_x(:),vxcrho_c(:,:),vxcrho_c(:,:)
+ real(dp),allocatable :: d2vxc_c(:,:),d2vxc_x(:,:),dvxc_c(:,:),dvxc_x(:,:)
+ real(dp),allocatable :: vxcgrho_x(:,:)
  type(libxc_functional_type) :: xc_funcs_vwn3(2),xc_funcs_lyp(2)
 
 ! *************************************************************************
