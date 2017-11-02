@@ -112,6 +112,7 @@ variables to be used in the main input file of the abinit code.
  <br><a id='I'></a>I.
  <a href="#icutcoul">icutcoul</a>&nbsp;&nbsp;
  <a href="#inclvkb">inclvkb</a>&nbsp;&nbsp;
+ <a href="#ixc_adv">ixc_adv</a>&nbsp;&nbsp;
  <br><a id='J'></a>J.
  <br><a id='K'></a>K.
  <a href="#kptgw">kptgw</a>&nbsp;&nbsp;
@@ -2484,6 +2485,33 @@ In general, the use of <b>inclvkb</b>=0 is fine for GW calculations in crystalli
 <p>
 The use of <b>inclvkb</b>=2 is strongly recommended for the calculation of optical properties.
 </p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="ixc_adv">ixc_adv</a></font>
+<br><font id="mnemonics">Mnemonics: Index of eXchange-Correlation functional - ADVanced functional</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topics: <a href="../../topics/generated_files/topic_xc.html">xc</a>, <a href="../../topics/generated_files/topic_Hybrids.html">Hybrids</a>.</font>
+<br><font id="smalltext">Rarely used: [0/912] in abinit tests, [0/136] in tuto abinit tests.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 1 (Comment: Default corresponds to Teter parametrization.)</font>
+<br><br><font id="requires">
+Only relevant if mod(<a href="../../input_variables/generated_files/varset_gw.html#gwcalctyp">gwcalctyp</a>,10)==5
+</font>
+<br><font id="text">
+<p>
+<p>When <a href="../../input_variables/generated_files/varset_gw.html#gwcalctyp">gwcalctyp</a>==5, 15 or 25, <b>ixc_adv</b> gives the advanced functional (usually a hybrid) that
+is used perturbatively or self-consistently to obtain the improved electronic structure.
+<p>The meaning of the values of <b>ixc_adv</b> is the same as the ones of <a href="../../input_variables/generated_files/varset_basic.html#ixc">ixc</a>, so we refer to the latter for the list
+of possible values.
+<p>This input variable is introduced because in such calculation
+with <a href="../../input_variables/generated_files/varset_gw.html#gwcalctyp">gwcalctyp</a>==5, 15 or 25, there is an underlying primary exchange-correlation functional, that was used to obtain the starting wavefunctions and eigenenergies. The definition of both <a href="../../input_variables/generated_files/varset_basic.html#ixc">ixc</a> and <b>ixc_adv</b> allows to bypass possible sources of confusion.
+<p>Note however that in the case where <a href="../../input_variables/generated_files/varset_gw.html#gwcalctyp">gwcalctyp</a>==5, 15 or 25, the values of the input variables <a href="../../input_variables/generated_files/varset_gstate.html#auxc_ixc">auxc_ixc</a>,
+<a href="../../input_variables/generated_files/varset_gstate.html#hyb_mixing">hyb_mixing</a>, <a href="../../input_variables/generated_files/varset_gstate.html#hyb_mixing_sr">hyb_mixing_sr</a>, <a href="../../input_variables/generated_files/varset_gstate.html#hyb_range_fock">hyb_range_fock</a> and <a href="../../input_variables/generated_files/varset_gstate.html#hyb_range_dft">hyb_range_dft</a> refers to the advanced functional,
+and not the primary one.
 </font>
 
 <br><br><a href=#top>Go to the top</a>

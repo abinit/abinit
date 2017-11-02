@@ -1204,6 +1204,8 @@
     requires: null
     text: |-
         Specification of an auxiliary exchange-correlation functional,  thanks to its [[ixc]] value, to possibly replace the heavy evaluation of an hybrid functional at specific occasions, e.g. when the Fock operator is frozen during the self-consistent cycle, thanks to [[fockoptmix]]==11, or when evaluating the correction to forces due to the density residual. This auxiliary exchange-correlation functional might be rescaled, thanks to [[auxc_scal]] when [[fockoptmix]]==11.
+
+        If [[gwcalctyp]]==5, 15 or 25, [[auxc_ixc]] refers to [[ixc_adv]] instead of [[ixc]].
     topics: Hybrids_useful
     varset: gstate
     vartype: integer
@@ -10389,6 +10391,8 @@
     text: |-
         Mixing coefficient for the unscreened Fock operator in case of hybrid functionals. Hartree-Fock corresponds to 1.0, PBE0 to 0.25.
         <p>ABINIT knows the correct value from [[ixc]]. Experts might nevertheless tune this mixing coefficient.
+
+        <p> If [[gwcalctyp]]==5, 15 or 25, [[auxc_ixc]] refers to [[ixc_adv]] instead of [[ixc]].
     topics: Hybrids_expert
     varset: gstate
     vartype: real
@@ -10406,6 +10410,8 @@
     text: |-
         Mixing coefficient for the screened Fock operator in case of hybrid functionals. HSE has 0.25, B3LYP has 0.2.
         <p>ABINIT knows the correct value from [[ixc]]. Experts might nevertheless tune this mixing coefficient.
+
+        <p> If [[gwcalctyp]]==5, 15 or 25, [[auxc_ixc]] refers to [[ixc_adv]] instead of [[ixc]].
     topics: Hybrids_expert
     varset: gstate
     vartype: real
@@ -10428,16 +10434,18 @@
         ABINIT knows the LibXC value from [[ixc]], that might not agree with the definitions from other codes.
         Usually, [[hyb_range_dft]] is the same as [[hyb_range_fock]], see the latter for the different values. However, there is a noticeable exception,
         the HSE03 from the original paper (not the HSE03 from VASP), for which [[hyb_range_dft]]=0.188988 while [[hyb_range_fock]]=0.106066 .
+
+        <p> If [[gwcalctyp]]==5, 15 or 25, [[auxc_ixc]] refers to [[ixc_adv]] instead of [[ixc]].
     topics: Hybrids_expert
     varset: gstate
     vartype: real
 - !variable
     abivarname: hyb_range_fock
     characteristics: null
-    commentdefault: 'With the default=-999.0d0, [[hyb_range_fock]] is initialized from
-        [[ixc]]. '
+    commentdefault: 'With the default=-999.0d0, [[hyb_range_fock]] is initialized
+        from [[ixc]]. '
     commentdims: null
-    defaultval: -999.0d0 or [[hyb_range_dft]] if it is defined by the user 
+    defaultval: -999.0d0 or [[hyb_range_dft]] if it is defined by the user
     dimensions: scalar
     excludes: null
     mnemonics: HYBrid RANGE for the screened FOCK operator
@@ -10453,6 +10461,8 @@
         The HSE06 value from LibCX is 0.11, the one of Espresso is 0.106, the one of VASP is 0.105835 (=0.2 Angstrom$^-1$).
         <br>
         The HSE03 value from LibCX is 0.106066 (=0.15/sqrt(2)), the one of VASP is 0.1587531 (=0.3 Angstrom$^-1$).
+
+        <p> If [[gwcalctyp]]==5, 15 or 25, [[auxc_ixc]] refers to [[ixc_adv]] instead of [[ixc]].
     topics: Hybrids_expert
     varset: gstate
     vartype: real
@@ -14188,6 +14198,29 @@
         </p>
     topics: xc_basic, Hybrids_compulsory, TDDFT_useful
     varset: basic
+    vartype: integer
+- !variable
+    abivarname: ixc_adv
+    characteristics: null
+    commentdefault: Default corresponds to Teter parametrization.
+    commentdims: null
+    defaultval: 1
+    dimensions: scalar
+    excludes: null
+    mnemonics: Index of eXchange-Correlation functional - ADVanced functional
+    requires: mod([[gwcalctyp]],10)==5
+    text: |-
+        <p>When [[gwcalctyp]]==5, 15 or 25, [[ixc_adv]] gives the advanced functional (usually a hybrid) that
+        is used perturbatively or self-consistently to obtain the improved electronic structure.
+        <p>The meaning of the values of [[ixc_adv]] is the same as the ones of [[ixc]], so we refer to the latter for the list
+        of possible values.
+        <p>This input variable is introduced because in such calculation
+        with [[gwcalctyp]]==5, 15 or 25, there is an underlying primary exchange-correlation functional, that was used to obtain the starting wavefunctions and eigenenergies. The definition of both [[ixc]] and [[ixc_adv]] allows to bypass possible sources of confusion.
+        <p>Note however that in the case where [[gwcalctyp]]==5, 15 or 25, the values of the input variables [[auxc_ixc]],
+        [[hyb_mixing]], [[hyb_mixing_sr]], [[hyb_range_fock]] and [[hyb_range_dft]] refers to the advanced functional,
+        and not the primary one.
+    topics: xc_expert, Hybrids_expert
+    varset: gw
     vartype: integer
 - !variable
     abivarname: ixcpositron

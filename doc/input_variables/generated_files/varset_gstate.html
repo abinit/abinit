@@ -238,6 +238,8 @@ mixing coefficients
 <br><font id="text">
 <p>
 Specification of an auxiliary exchange-correlation functional,  thanks to its <a href="../../input_variables/generated_files/varset_basic.html#ixc">ixc</a> value, to possibly replace the heavy evaluation of an hybrid functional at specific occasions, e.g. when the Fock operator is frozen during the self-consistent cycle, thanks to <a href="../../input_variables/generated_files/varset_gstate.html#fockoptmix">fockoptmix</a>==11, or when evaluating the correction to forces due to the density residual. This auxiliary exchange-correlation functional might be rescaled, thanks to <a href="../../input_variables/generated_files/varset_gstate.html#auxc_scal">auxc_scal</a> when <a href="../../input_variables/generated_files/varset_gstate.html#fockoptmix">fockoptmix</a>==11.
+
+If <a href="../../input_variables/generated_files/varset_gw.html#gwcalctyp">gwcalctyp</a>==5, 15 or 25, <b>auxc_ixc</b> refers to <a href="../../input_variables/generated_files/varset_gw.html#ixc_adv">ixc_adv</a> instead of <a href="../../input_variables/generated_files/varset_basic.html#ixc">ixc</a>.
 </font>
 
 <br><br><a href=#top>Go to the top</a>
@@ -1063,6 +1065,8 @@ Only relevant if <a href="../../input_variables/generated_files/varset_internal.
 <p>
 Mixing coefficient for the unscreened Fock operator in case of hybrid functionals. Hartree-Fock corresponds to 1.0, PBE0 to 0.25.
 <p>ABINIT knows the correct value from <a href="../../input_variables/generated_files/varset_basic.html#ixc">ixc</a>. Experts might nevertheless tune this mixing coefficient.
+
+<p> If <a href="../../input_variables/generated_files/varset_gw.html#gwcalctyp">gwcalctyp</a>==5, 15 or 25, <a href="../../input_variables/generated_files/varset_gstate.html#auxc_ixc">auxc_ixc</a> refers to <a href="../../input_variables/generated_files/varset_gw.html#ixc_adv">ixc_adv</a> instead of <a href="../../input_variables/generated_files/varset_basic.html#ixc">ixc</a>.
 </font>
 
 <br><br><a href=#top>Go to the top</a>
@@ -1083,6 +1087,8 @@ Only relevant if <a href="../../input_variables/generated_files/varset_internal.
 <p>
 Mixing coefficient for the screened Fock operator in case of hybrid functionals. HSE has 0.25, B3LYP has 0.2.
 <p>ABINIT knows the correct value from <a href="../../input_variables/generated_files/varset_basic.html#ixc">ixc</a>. Experts might nevertheless tune this mixing coefficient.
+
+<p> If <a href="../../input_variables/generated_files/varset_gw.html#gwcalctyp">gwcalctyp</a>==5, 15 or 25, <a href="../../input_variables/generated_files/varset_gstate.html#auxc_ixc">auxc_ixc</a> refers to <a href="../../input_variables/generated_files/varset_gw.html#ixc_adv">ixc_adv</a> instead of <a href="../../input_variables/generated_files/varset_basic.html#ixc">ixc</a>.
 </font>
 
 <br><br><a href=#top>Go to the top</a>
@@ -1108,6 +1114,8 @@ As described in the LibXC sources (and copied in the ABINIT doc, see <a href="..
 ABINIT knows the LibXC value from <a href="../../input_variables/generated_files/varset_basic.html#ixc">ixc</a>, that might not agree with the definitions from other codes.
 Usually, <b>hyb_range_dft</b> is the same as <a href="../../input_variables/generated_files/varset_gstate.html#hyb_range_fock">hyb_range_fock</a>, see the latter for the different values. However, there is a noticeable exception,
 the HSE03 from the original paper (not the HSE03 from VASP), for which <b>hyb_range_dft</b>=0.188988 while <a href="../../input_variables/generated_files/varset_gstate.html#hyb_range_fock">hyb_range_fock</a>=0.106066 .
+
+<p> If <a href="../../input_variables/generated_files/varset_gw.html#gwcalctyp">gwcalctyp</a>==5, 15 or 25, <a href="../../input_variables/generated_files/varset_gstate.html#auxc_ixc">auxc_ixc</a> refers to <a href="../../input_variables/generated_files/varset_gw.html#ixc_adv">ixc_adv</a> instead of <a href="../../input_variables/generated_files/varset_basic.html#ixc">ixc</a>.
 </font>
 
 <br><br><a href=#top>Go to the top</a>
@@ -1136,6 +1144,8 @@ Usually, <a href="../../input_variables/generated_files/varset_gstate.html#hyb_r
 The HSE06 value from LibCX is 0.11, the one of Espresso is 0.106, the one of VASP is 0.105835 (=0.2 Angstrom$^-1$).
 <br>
 The HSE03 value from LibCX is 0.106066 (=0.15/sqrt(2)), the one of VASP is 0.1587531 (=0.3 Angstrom$^-1$).
+
+<p> If <a href="../../input_variables/generated_files/varset_gw.html#gwcalctyp">gwcalctyp</a>==5, 15 or 25, <a href="../../input_variables/generated_files/varset_gstate.html#auxc_ixc">auxc_ixc</a> refers to <a href="../../input_variables/generated_files/varset_gw.html#ixc_adv">ixc_adv</a> instead of <a href="../../input_variables/generated_files/varset_basic.html#ixc">ixc</a>.
 </font>
 
 <br><br><a href=#top>Go to the top</a>
