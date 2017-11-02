@@ -742,19 +742,18 @@ subroutine drivexc(exc,ixc,npts,nspden,order,rho_updn,vxcrho,ndvxc,ngr2,nd2vxc,n
 !  Then renormalize B3LYP and subtract VWN3 contribution
    ABI_ALLOCATE(exc_c,(npts))
    ABI_ALLOCATE(vxcrho_c,(npts,nspden))
+   if(order**2>1)ABI_ALLOCATE(dvxc_c,(npts,ndvxc))
+   if(order**2>4)ABI_ALLOCATE(d2vxc_c,(npts,nd2vxc))
    exc_c=zero;vxcrho_c=zero
    call libxc_functionals_init(-30,nspden,xc_functionals=xc_funcs_vwn3)
    if (order**2 <= 1) then
      call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc_c,&
 &        vxcrho_c,xc_functionals=xc_funcs_vwn3)
    elseif (order**2 <= 4) then
-     ABI_ALLOCATE(dvxc_c,(npts,ndvxc))
      dvxc_c=zero
      call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc_c,&
 &        vxcrho_c,dvxc=dvxc_c,xc_functionals=xc_funcs_vwn3)
    else
-     ABI_ALLOCATE(dvxc_c,(npts,ndvxc))
-     ABI_ALLOCATE(d2vxc_c,(npts,nd2vxc))
      dvxc_c=zero
      d2vxc_c=zero
      call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc_c,&
@@ -772,13 +771,10 @@ subroutine drivexc(exc,ixc,npts,nspden,order,rho_updn,vxcrho,ndvxc,ngr2,nd2vxc,n
      call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc_c,&
 &        vxcrho_c,grho2=grho2_updn,vxcgr=vxcgrho,xc_functionals=xc_funcs_lyp)
    elseif (order**2 <= 4) then
-     ABI_ALLOCATE(dvxc_c,(npts,ndvxc))
      dvxc_c=zero
      call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc_c,&
 &        vxcrho_c,grho2=grho2_updn,vxcgr=vxcgrho,dvxc=dvxc_c,xc_functionals=xc_funcs_lyp)
    else
-     ABI_ALLOCATE(dvxc_c,(npts,ndvxc))
-     ABI_ALLOCATE(d2vxc_c,(npts,nd2vxc))
      dvxc_c=zero
      d2vxc_c=zero
      call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc_c,&
