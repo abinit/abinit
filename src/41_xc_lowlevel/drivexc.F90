@@ -792,8 +792,8 @@ subroutine drivexc(exc,ixc,npts,nspden,order,rho_updn,vxcrho,ndvxc,ngr2,nd2vxc,n
 
    ABI_DEALLOCATE(exc_c)
    ABI_DEALLOCATE(vxcrho_c)
-   if(order**2>1)ABI_DEALLOCATE(dvxc_c)
-   if(order**2>4)ABI_DEALLOCATE(d2vxc_c)
+   if(allocated(dvxc_c))ABI_DEALLOCATE(dvxc_c)
+   if(allocated(d2vxc_c))ABI_DEALLOCATE(d2vxc_c)
 
 !>>>>> All libXC functionals
  else if( ixc<0 ) then
