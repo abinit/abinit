@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 31 Oct 2017.
-- ( at 21h05 )
+.Starting date : Thu  2 Nov 2017.
+- ( at 17h57 )
   
 - input  file    -> t72.in
 - output file    -> t72.out
@@ -749,6 +749,31 @@ P           mkmem           6
             ngfft          12      12      12
              nkpt           6
            nkpthf           4
+            nstep1         30
+            nstep2         30
+            nstep3         30
+            nstep4         30
+            nstep5         30
+            nstep6         30
+            nstep7         30
+            nstep8         30
+            nstep9         30
+            nstep10        30
+            nstep11        30
+            nstep12        30
+            nstep13        30
+            nstep14        30
+            nstep15        25
+            nstep16        30
+            nstep17        30
+            nstep18        30
+            nstep19        30
+            nstep20        30
+            nstep21        30
+            nstep22        30
+            nstep23        30
+            nstep24        30
+            nstep25        30
              nsym          48
            ntypat           1
               occ      2.000000  1.000000  0.000000
@@ -2782,11 +2807,6 @@ _setup2: Arith. and geom. avg. npw (full set) are      78.656      78.566
  ETOT 23  -393.40102992198    -1.508E-08 2.261E-07 1.259E-08
  ETOT 24  -393.40102993885    -1.687E-08 2.250E-07 1.507E-08
  ETOT 25  -393.40102995549    -1.664E-08 2.240E-07 1.745E-08
- ETOT 26  -393.40102997667    -2.118E-08 2.230E-07 9.884E-09
- ETOT 27  -393.40102999078    -1.411E-08 2.220E-07 1.446E-08
- ETOT 28  -393.40103000700    -1.622E-08 2.209E-07 1.798E-08
- ETOT 29  -393.40103003079    -2.379E-08 2.200E-07 5.986E-09
- ETOT 30  -393.40103004225    -1.146E-08 3.435E-07 1.324E-08
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  3.56636188E+00  sigma(3 2)=  0.00000000E+00
@@ -2795,18 +2815,18 @@ _setup2: Arith. and geom. avg. npw (full set) are      78.656      78.566
 
 
  scprqt:  WARNING -
-  nstep=   30 was not enough SCF cycles to converge;
-  maximum energy difference=  1.146E-08 exceeds toldfe=  1.000E-08
+  nstep=   25 was not enough SCF cycles to converge;
+  maximum energy difference=  1.664E-08 exceeds toldfe=  1.000E-08
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
-    1        2.00000          0.87602716
+    1        2.00000          0.87602883
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   3.5723E-08; max=  3.4346E-07
+ Mean square residual over all n,k,spin=   1.9407E-08; max=  2.2399E-07
  reduced coordinates (array xred) for    1 atoms
        0.000000000000      0.000000000000      0.000000000000
  rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
@@ -2837,27 +2857,27 @@ _setup2: Arith. and geom. avg. npw (full set) are      78.656      78.566
 --------------------------------------------------------------------------------
  Components of total free energy (in Hartree) :
 
-    Kinetic energy  =  8.89477315295001E-01
-    Hartree energy  =  4.12830801743688E-03
-    XC energy       = -3.92130936361728E+02
+    Kinetic energy  =  8.89482107412941E-01
+    Hartree energy  =  4.12854224966976E-03
+    XC energy       = -3.92130936684334E+02
     Ewald energy    = -2.71472096493581E+00
     PspCore energy  = -1.63774509167489E-01
-    Loc. psp. energy=  3.45958769225218E-01
-    NL   psp  energy=  3.76570897835673E-01
-    >>>>> Internal E= -3.93393296545458E+02
+    Loc. psp. energy=  3.45963589526611E-01
+    NL   psp  energy=  3.76561444073468E-01
+    >>>>> Internal E= -3.93393296475174E+02
 
-    -kT*entropy     = -7.73349679362043E-03
-    >>>>>>>>> Etotal= -3.93401030042252E+02
+    -kT*entropy     = -7.73348031589663E-03
+    >>>>>>>>> Etotal= -3.93401029955490E+02
 
  "Double-counting" decomposition of free energy:
-    Band energy     = -7.82192620905747E+02
+    Band energy     = -7.82192620795244E+02
     Ewald energy    = -2.71472096493581E+00
     PspCore energy  = -1.63774509167489E-01
-    Dble-C XC-energy=  3.91677819663169E+02
-    >>>>> Internal E= -3.93393296716681E+02
+    Dble-C XC-energy=  3.91677819593920E+02
+    >>>>> Internal E= -3.93393296675428E+02
 
-    -kT*entropy     = -7.73349679362043E-03
-    >>>> Etotal (DC)= -3.93401030213475E+02
+    -kT*entropy     = -7.73348031589663E-03
+    >>>> Etotal (DC)= -3.93401030155744E+02
 --------------------------------------------------------------------------------
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -4146,7 +4166,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      78.656      78.566
            etotal12   -2.0522404402E+00
            etotal13   -1.9668880112E+00
            etotal14   -2.1231166928E+00
-           etotal15   -3.9340103004E+02
+           etotal15   -3.9340102996E+02
            etotal16   -2.0775493956E+00
            etotal17   -2.0775495842E+00
            etotal18   -2.0955386729E+00
@@ -4470,6 +4490,31 @@ P           mkmem           6
             ngfft          12      12      12
              nkpt           6
            nkpthf           4
+            nstep1         30
+            nstep2         30
+            nstep3         30
+            nstep4         30
+            nstep5         30
+            nstep6         30
+            nstep7         30
+            nstep8         30
+            nstep9         30
+            nstep10        30
+            nstep11        30
+            nstep12        30
+            nstep13        30
+            nstep14        30
+            nstep15        25
+            nstep16        30
+            nstep17        30
+            nstep18        30
+            nstep19        30
+            nstep20        30
+            nstep21        30
+            nstep22        30
+            nstep23        30
+            nstep24        30
+            nstep25        30
              nsym          48
            ntypat           1
               occ1     2.000000  0.000000  0.000000
@@ -4557,9 +4602,9 @@ P           mkmem           6
                        2.000000  2.000000  0.000000
                        2.000000  0.000000  0.000000
               occ15    2.000000  0.000000  0.000000
-                       2.000000  0.035828  0.000048
+                       2.000000  0.035829  0.000048
                        2.000000  2.000000  0.000000
-                       1.870495  1.870495  1.187261
+                       1.870498  1.870498  1.187253
                        2.000000  2.000000  0.000000
                        2.000000  0.000000  0.000000
               occ16    2.000000  0.000000  0.000000
@@ -4655,7 +4700,7 @@ P           mkmem           6
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            strten14    4.5146867187E-04  4.5146867187E-04  4.5146867187E-04
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-           strten15    3.5663618794E+00  3.5663618794E+00  3.5663618794E+00
+           strten15    3.5663618831E+00  3.5663618831E+00  3.5663618831E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            strten16    2.2104868774E-04  2.2104868774E-04  2.2104868774E-04
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -4808,10 +4853,10 @@ P           mkmem           6
 - Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7
 - Comment : the original paper describing the ABINIT project.
 -
-- Proc.   0 individual time (sec): cpu=         13.6  wall=         19.7
+- Proc.   0 individual time (sec): cpu=         11.6  wall=         12.5
 
 ================================================================================
 
  Calculation completed.
 .Delivered 293 WARNINGs and  15 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         13.6  wall=         19.7
++Overall time at end (sec) : cpu=         11.6  wall=         12.5
