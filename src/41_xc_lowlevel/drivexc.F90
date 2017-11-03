@@ -742,8 +742,12 @@ subroutine drivexc(exc,ixc,npts,nspden,order,rho_updn,vxcrho,ndvxc,ngr2,nd2vxc,n
 !  Then renormalize B3LYP and subtract VWN3 contribution
    ABI_ALLOCATE(exc_c,(npts))
    ABI_ALLOCATE(vxcrho_c,(npts,nspden))
-   if(order**2>1)ABI_ALLOCATE(dvxc_c,(npts,ndvxc))
-   if(order**2>4)ABI_ALLOCATE(d2vxc_c,(npts,nd2vxc))
+   if(order**2>1)then
+     ABI_ALLOCATE(dvxc_c,(npts,ndvxc))
+   endif
+   if(order**2>4)then
+     ABI_ALLOCATE(d2vxc_c,(npts,nd2vxc))
+   endif
    exc_c=zero;vxcrho_c=zero
    call libxc_functionals_init(-30,nspden,xc_functionals=xc_funcs_vwn3)
    if (order**2 <= 1) then
