@@ -49,7 +49,7 @@ E. For the second and other merges of a production version
 -----------------------------------------------
 Prepare the release, which means (send a letter to JMB) :
 E.1 Make available the files tar.gz, infos.html, robodoc (from abiref*debug)
-E.2 Also update install notes, features. 
+E.2 Also update install notes and topics.
 (The delivery of binary packages has been disabled, as of v7.11.5)
 *******************************************************************
 [This file can be found at doc/maintainers/check_list.txt]
