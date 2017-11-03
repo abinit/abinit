@@ -77,7 +77,10 @@ def READ_INPUT(user_filein):
                     vararray[5] = str(l[1])
         #set output file name
         global outname
-        outname=vararray[5]
+        #check for output file
+        outname = CHECK_REPEAT(outname)  
+
+        vararray[5] = outname
         printout('Input file located and read in.\n')
                     
     #Now check that the user put a valid name in for the anaddb output file
@@ -89,8 +92,6 @@ def READ_INPUT(user_filein):
     else:
         printout('The anaddb output file was found in the directory.')
 
-    #check for output file
-    outname = CHECK_REPEAT(outname)  
 
     return vararray
 
@@ -229,7 +230,7 @@ def CALL_RAMAN_MENU(output,keywords,vararray):
         ramanplot = RAMAN_POWDER(menergy,rarray,input2,width,T)
         
         #After the calculation completes we print the results to a file
-        outfile = 'raman_powder.out'
+        outfile = outname+'_intensity_powder'
         printout('Printing results to an output file named %s' %outfile)
         printout('')
         
@@ -268,7 +269,7 @@ def CALL_RAMAN_MENU(output,keywords,vararray):
         ramanzz = RAMAN_POLAR(menergy,rarray,input2,'ZZ',width,T)
         
         #After the calculation completes we print the results to a file
-        outfile = 'raman_ij.out'
+        outfile = outname+'_intensity_ij'
         printout('Printing results to an output file named %s' %outfile)
         printout('')
         
@@ -305,7 +306,7 @@ def CALL_RAMAN_MENU(output,keywords,vararray):
         ramanplot = RAMAN_POLAR(menergy,rarray,input2,'THETA',width,T)
         
         #After the calculation completes we print the results to a file
-        outfile = 'raman_theta.out'
+        outfile = outname+'_intensity_theta'
         printout('Printing results to an output file named %s' %outfile)
         printout('')
         
@@ -766,7 +767,7 @@ def DETER_MENU(var_array):
     for i in range(len(keywords)):
         if keywords[i]== 'True' and i == 1:
             #run module to print Dielectric tensor as a function of frequency
-            outfile = 'dielectric.freq'
+            outfile = outname+'_dielectric_freq'
             printoutfile('# Freq    dielectric      Reflectivity',outfile)
             printoutfile('#           x y z x y z  ',outfile)
             for j in range(int(keywords[2])):
