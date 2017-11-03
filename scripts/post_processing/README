@@ -52,3 +52,11 @@ post-processing tools
 - wannier_bandstructure.py
     Plot the bandstructure from _EIG.nc file.
 
+- Raman_spec.py
+    Determines the Raman spectra from the anaddb output file.  If the user
+    runs this script in the directory containing  "anaddb.out" the program
+    will locate the file, extract the raman matrix and ask the user for 
+    some input information.  Additionally, this program also extracts the 
+    dielectric tensor as a function of frequency and dumps it to a file auto-
+    matically.  The code is documented internally.
+

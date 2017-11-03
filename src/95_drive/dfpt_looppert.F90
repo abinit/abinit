@@ -123,7 +123,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 &  ddkfil,dtfil,dtset,dyew,dyfrlo,dyfrnl,dyfrx1,dyfrx2,dyvdw,&
 &  dyfr_cplex,dyfr_nondiag,d2bbb,d2lo,d2nl,d2ovl,efmasdeg,efmasfr,eigbrd,eig2nkq,&
 &  eltcore,elteew,eltfrhar,eltfrkin,eltfrloc,eltfrnl,eltfrxc,eltvdw,&
-&  etotal,fermie,iexit,indsym,kxc,&
+&  etotal,fermie,iexit,indsym,kxc,bxc,&
 &  mkmem,mkqmem,mk1mem,mpert,mpi_enreg,my_natom,nattyp,&
 &  nfftf,nhat,nkpt,nkxc,nspden,nsym,occ,&
 &  paw_an,paw_ij,pawang,pawfgr,pawfgrtab,pawrad,pawrhoij,pawtab,&
@@ -230,7 +230,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  real(dp), intent(in) :: eltfrkin(6,6),eltfrloc(6+3*dtset%natom,6)
  real(dp), intent(in) :: eltfrnl(6+3*dtset%natom,6)
  real(dp), intent(in) :: eltfrxc(6+3*dtset%natom,6),eltvdw(6+3*dtset%natom,6*usevdw)
- real(dp), intent(in) ::  kxc(nfftf,nkxc),nhat(nfftf,nspden)
+ real(dp), intent(in) :: kxc(nfftf,nkxc),bxc(nfftf),nhat(nfftf,nspden)
  real(dp), intent(in) :: occ(dtset%mband*nkpt*dtset%nsppol)
  real(dp), intent(in) :: rhog(2,nfftf),rhor(nfftf,nspden),vxc(nfftf,nspden)
  real(dp), intent(in) :: vtrial(nfftf,nspden)
@@ -1613,7 +1613,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 &     ehart01,ehart1,eigenq,eigen0,eigen1,eii,ek0,ek1,eloc0,elpsp1,&
 &     enl0,enl1,eovl1,epaw1,etotal,evdw,exc1,fermie,gh0c1_set,gh1c_set,hdr,idir,&
 &     indkpt1,indsy1,initialized,ipert,irrzon1,istwfk_rbz,&
-&     kg,kg1,kpt_rbz,kxc,mgfftf,mkmem_rbz,mkqmem_rbz,mk1mem_rbz,&
+&     kg,kg1,kpt_rbz,kxc,bxc,mgfftf,mkmem_rbz,mkqmem_rbz,mk1mem_rbz,&
 &     mpert,mpi_enreg,mpw,mpw1,my_natom,&
 &     nattyp,nband_rbz,ncpgr,nfftf,ngfftf,nhat,nkpt,nkpt_rbz,nkxc,&
 &     npwarr,npwar1,nspden,&

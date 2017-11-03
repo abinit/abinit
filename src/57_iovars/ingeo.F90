@@ -100,7 +100,7 @@
 
 #include "abi_common.h"
 
-subroutine ingeo (acell,amu,dtset,bravais,&  
+subroutine ingeo (acell,amu,dtset,bravais,&
 & genafm,iatfix,icoulomb,iimage,iout,jdtset,jellslab,lenstr,mixalch,&
 & msym,natom,nimage,npsp,npspalch,nspden,nsppol,nsym,ntypalch,ntypat,&
 & nucdipmom,nzchempot,pawspnorb,&
@@ -142,9 +142,9 @@ subroutine ingeo (acell,amu,dtset,bravais,&
  integer,intent(inout) :: symafm(msym) !vz_i
  integer,intent(inout) :: symrel(3,3,msym) !vz_i
  integer,intent(out) :: typat(natom)
- real(dp),intent(inout) :: nucdipmom(3,natom)  
+ real(dp),intent(inout) :: nucdipmom(3,natom)
  real(dp),intent(in) :: ratsph(ntypat)
- real(dp),intent(inout) :: spinat(3,natom)  
+ real(dp),intent(inout) :: spinat(3,natom)
  real(dp),intent(out) :: acell(3),amu(ntypat),genafm(3),mixalch(npspalch,ntypalch)
  real(dp),intent(inout) :: rprim(3,3),tnons(3,msym) !vz_i
  real(dp),intent(out) :: vel(3,natom),vel_cell(3,3),xred(3,natom)
@@ -166,7 +166,7 @@ subroutine ingeo (acell,amu,dtset,bravais,&
 !arrays
  integer,allocatable :: ptsymrel(:,:,:),typat_read(:),symrec(:,:,:),indsym(:,:,:)
  integer,allocatable :: intarr(:)
- real(dp) :: angdeg(3), field_xred(3),gmet(3,3),gprimd(3,3),rmet(3,3),rcm(3) 
+ real(dp) :: angdeg(3), field_xred(3),gmet(3,3),gprimd(3,3),rmet(3,3),rcm(3)
  real(dp) :: rprimd(3,3),rprimd_new(3,3),scalecart(3)
 !real(dp) :: tsec(2)
  real(dp),allocatable :: mass_psp(:)
@@ -800,12 +800,12 @@ subroutine ingeo (acell,amu,dtset,bravais,&
          end do
        else if (dtset%berryopt == 6 ) then
          do ii=1,3
-           field_xred(ii)=dot_product(dtset%dfield(:),gprimd(:,ii))     
+           field_xred(ii)=dot_product(dtset%dfield(:),gprimd(:,ii))
            field_xred(ii)=field_xred(ii)+ dot_product(dtset%efield(:),gprimd(:,ii)) ! note: symmetry broken by D and E
          end do
        else if (dtset%berryopt == 14) then
          do ii=1,3
-           field_xred(ii)=dot_product(dtset%red_efieldbar(:),gmet(:,ii))     
+           field_xred(ii)=dot_product(dtset%red_efieldbar(:),gmet(:,ii))
          end do
        else if (dtset%berryopt == 16) then
          do ii=1,3
@@ -813,7 +813,7 @@ subroutine ingeo (acell,amu,dtset,bravais,&
          end do
        else if (dtset%berryopt == 17) then
          do ii=1,3
-           field_xred(ii)=dot_product(dtset%red_efieldbar(:),gmet(:,ii))     
+           field_xred(ii)=dot_product(dtset%red_efieldbar(:),gmet(:,ii))
            if(dtset%jfielddir(ii)==2) field_xred(ii)=dtset%red_dfield(ii)
          end do
        end if
@@ -978,7 +978,7 @@ subroutine ingeo (acell,amu,dtset,bravais,&
 !  Checks the validity of natfix
    if (natfix<0 .or. natfix>natom) then
      write(message, '(a,a,a,i0,a,i4,a,a,a)' )&
-&     'The input variables natfix, 0atfixx, natfixy and natfixz must be',ch10,&
+&     'The input variables natfix, natfixx, natfixy and natfixz must be',ch10,&
 &     'between 0 and natom (= ',natom,'), while one of them is ',natfix,'.',ch10,&
 &     'Action: correct that occurence in your input file.'
      MSG_ERROR(message)
