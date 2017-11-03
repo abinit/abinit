@@ -32,7 +32,7 @@ Bugs:   If you find a bug with this program or wish to see a feature added to
 """
 Start of definations and other useful information
 """
-def READ_INPUT(user_filein,outname):
+def READ_INPUT(user_filein):
     """
     Author: Nicholas Pike
     Email: Nicholas.pike@ulg.ac.be
@@ -45,23 +45,17 @@ def READ_INPUT(user_filein,outname):
     vararray = [0,0,0,0,0,0]
     
     #check if file exists
-    check = CHECK_FILE(user_filein)
-    
-    #check for output file
-    outname = CHECK_REPEAT(outname)  
-    
-    vararray[5] = outname  #saved here just in case
+    check = CHECK_FILE(user_filein)  
     
     if check == False:
-        printout('')
-        printout('The input file was not found in the directory. \n Please correct this.')
-        printout('\n Remember the input file should be formated as follows:\n\n '\
-                 'file name "name of file"\n temp "temperature in Kelvin"\n frequency '\
+        print('')
+        print('The input file was not found in the directory. \n Please correct this.')
+        print('\n Remember the input file should be formated as follows:\n\n '\
+                 'filename "name of file"\n outname "name of outfile"\n temp "temperature in Kelvin"\n frequency '\
                  '"frequency in cm^-1"\n spread "spread of lorentz in cm^-1"\n '\
                  'calctype "type of calculation 0- abort, 1- powder, 2-ij polarization, 3- angle"\n')
         sys.exit()
     else:
-        printout('Input file located.  Reading input file.')
         for line in open(user_filein):
             li=line.strip('\n')        #Removes any newline command
             if not li.startswith("#"): #Checks if the line does not start with a # 
@@ -79,6 +73,12 @@ def READ_INPUT(user_filein,outname):
                     fill = 0
                 elif l[0] == 'calctype':        # calculation type
                     vararray[4] = int(l[1])
+                elif l[0] == 'outname':        # calculation type
+                    vararray[5] = str(l[1])
+        #set output file name
+        global outname
+        outname=vararray[5]
+        printout('Input file located and read in.\n')
                     
     #Now check that the user put a valid name in for the anaddb output file
     check = CHECK_FILE(vararray[0])
@@ -88,6 +88,9 @@ def READ_INPUT(user_filein,outname):
         sys.exit()
     else:
         printout('The anaddb output file was found in the directory.')
+
+    #check for output file
+    outname = CHECK_REPEAT(outname)  
 
     return vararray
 
@@ -334,13 +337,13 @@ def LOAD_ANADDB(infile):
     find keywords, and the second time to extract dat
     
     """
-    keywords = np.array(['', #Abinit version
-                         False, #dieflag - frequency dependent dielectric constant
-                         False, #nfreq   - number of frequency steps
-                         False, #nlflag  - Raman tensor and nonlinear optical tensor
-                         False, #elaflag - elastic tensor flag
-                         False, #piezoflag - Piezoelectric tensor
-                         ])
+    keywords =['', #Abinit version
+               False, #dieflag - frequency dependent dielectric constant
+               False, #nfreq   - number of frequency steps
+               False, #nlflag  - Raman tensor and nonlinear optical tensor
+               False, #elaflag - elastic tensor flag
+               False, #piezoflag - Piezoelectric tensor
+               ]
     #First, read the output file and determine if any of the keywords are present
     with open(infile,'r') as f:
         for num,line in enumerate(f,1):
@@ -350,22 +353,22 @@ def LOAD_ANADDB(infile):
             elif line.startswith( '     dieflag'):
                 l = line.strip('\n').split(' ')
                 if int(l[len(l)-1]) > 0:
-                    keywords[1] = True 
+                    keywords[1] = 'True' 
                 else:
-                    keywords[1] = False
+                    keywords[1] = 'False'
             elif line.startswith( '       nfreq'):
                 l = line.strip('\n').split(' ')
                 if int(l[len(l)-1]) > 10:
                     keywords[2] = int(l[len(l)-1])
                 else:
                     keywords[2] = 0
-                    keywords[1] = False
+                    keywords[1] = 'False'
             elif line.startswith( '      nlflag'):
                 l = line.strip('\n').split(' ')
                 if int(l[len(l)-1])> 0:
-                    keywords[3] = True
+                    keywords[3] = 'True'
                 else: 
-                    keywords[3] = False
+                    keywords[3] = 'False'
             else:
                 keywords[0]=keywords[0]
     
@@ -523,7 +526,6 @@ def RAMAN_POWDER(menergy,rarray,laser,width,T):
         intstep = 0.0
         #counts modes
         for j in range(len(menergy)):
-            spread = width/((freq*Hz_to_Ha-menergy[j][0])**2+width**2)
             G0 = 1.0/3.0*(rarray[j][0][0]+rarray[j][1][1]+rarray[j][2][2])**2
             G1 = 1.0/2.0*((rarray[j][0][1]-rarray[j][1][2])**2+(rarray[j][1][2]-rarray[j][2][0])**2+(rarray[j][2][0]-rarray[j][0][1])**2)
             G2 = 1.0/2.0*((rarray[j][0][1]+rarray[j][1][2])**2 +(rarray[j][1][2]+rarray[j][2][0])**2+(rarray[j][2][0]+rarray[j][0][1])**2) + 1.0/3.0*((rarray[j][0][0]-rarray[j][1][1])**2+(rarray[j][1][1]-rarray[j][2][2])**2+(rarray[j][2][2]-rarray[j][0][0])**2)
@@ -532,8 +534,12 @@ def RAMAN_POWDER(menergy,rarray,laser,width,T):
             Gterm = Ipar +Iperp
             if menergy[j][0]==0.0:
                 intstep += 0.0
+            elif width <0:
+                intstep += Gterm 
             else:
-                intstep += spread*Gterm   
+                spread = width/((freq*Hz_to_Ha-menergy[j][0])**2+width**2)
+                intstep += spread*Gterm
+                
         ramanplot[i][1] = intstep
         
     return ramanplot
@@ -586,7 +592,10 @@ def RAMAN_POLAR(menergy,rarray,laser,option,width,T):
                 Gterm = np.dot(Outpol,np.dot(modearray,Inpol))
                 if menergy[j][0]==0.0:
                     intstep += 0.0
+                elif width <0:
+                    intstep += Gterm[0]**2*(1.0/(2.0*menergy[j][0]))*(menergy[j][0] - las)**4/clight**4*(mbose[j]+1.0)
                 else:
+                    spread = width/((freq*Hz_to_Ha-menergy[j][0])**2+width**2)
                     intstep += spread*Gterm[0]**2*(1.0/(2.0*menergy[j][0]))*(menergy[j][0] - las)**4/clight**4*(mbose[j]+1.0) 
                 ramanplot[i][1] = intstep
         
@@ -608,7 +617,10 @@ def RAMAN_POLAR(menergy,rarray,laser,option,width,T):
                 Gterm = np.dot(Outpol,np.dot(modearray,Inpol))
                 if menergy[j][0]==0.0:
                     intstep += 0.0
+                elif width <0:
+                    intstep += Gterm[0]**2*(1.0/(2.0*menergy[j][0]))*(menergy[j][0] - las)**4/clight**4*(mbose[j]+1.0)
                 else:
+                    spread = width/((freq*Hz_to_Ha-menergy[j][0])**2+width**2)
                     intstep += spread*Gterm[0]**2*(1.0/(2.0*menergy[j][0]))*(menergy[j][0] - las)**4/clight**4*(mbose[j]+1.0) 
                 ramanplot[i][1] = intstep
                 
@@ -629,7 +641,10 @@ def RAMAN_POLAR(menergy,rarray,laser,option,width,T):
                 Gterm = np.dot(Outpol,np.dot(modearray,Inpol))
                 if menergy[j][0]==0.0:
                     intstep += 0.0
+                elif width <0:
+                    intstep += Gterm[0]**2*(1.0/(2.0*menergy[j][0]))*(menergy[j][0] - las)**4/clight**4*(mbose[j]+1.0)
                 else:
+                    spread = width/((freq*Hz_to_Ha-menergy[j][0])**2+width**2)
                     intstep += spread*Gterm[0]**2*(1.0/(2.0*menergy[j][0]))*(menergy[j][0] - las)**4/clight**4*(mbose[j]+1.0) 
                 ramanplot[i][1] = intstep
                 
@@ -650,7 +665,10 @@ def RAMAN_POLAR(menergy,rarray,laser,option,width,T):
                 Gterm = np.dot(Outpol,np.dot(modearray,Inpol))
                 if menergy[j][0]==0.0:
                     intstep += 0.0
+                elif width <0:
+                    intstep += Gterm[0]**2*(1.0/(2.0*menergy[j][0]))*(menergy[j][0] - las)**4/clight**4*(mbose[j]+1.0)
                 else:
+                    spread = width/((freq*Hz_to_Ha-menergy[j][0])**2+width**2)
                     intstep += spread*Gterm[0]**2*(1.0/(2.0*menergy[j][0]))*(menergy[j][0] - las)**4/clight**4*(mbose[j]+1.0) 
                 ramanplot[i][1] = intstep
                 
@@ -671,7 +689,10 @@ def RAMAN_POLAR(menergy,rarray,laser,option,width,T):
                 Gterm = np.dot(Outpol,np.dot(modearray,Inpol))
                 if menergy[j][0]==0.0:
                     intstep += 0.0
+                elif width <0:
+                    intstep += Gterm[0]**2*(1.0/(2.0*menergy[j][0]))*(menergy[j][0] - las)**4/clight**4*(mbose[j]+1.0)
                 else:
+                    spread = width/((freq*Hz_to_Ha-menergy[j][0])**2+width**2)
                     intstep += spread*Gterm[0]**2*(1.0/(2.0*menergy[j][0]))*(menergy[j][0] - las)**4/clight**4*(mbose[j]+1.0) 
                 ramanplot[i][1] = intstep
                 
@@ -692,7 +713,10 @@ def RAMAN_POLAR(menergy,rarray,laser,option,width,T):
                 Gterm = np.dot(Outpol,np.dot(modearray,Inpol))
                 if menergy[j][0]==0.0:
                     intstep += 0.0
+                elif width <0:
+                    intstep += Gterm[0]**2*(1.0/(2.0*menergy[j][0]))*(menergy[j][0] - las)**4/clight**4*(mbose[j]+1.0)
                 else:
+                    spread = width/((freq*Hz_to_Ha-menergy[j][0])**2+width**2)
                     intstep += spread*Gterm[0]**2*(1.0/(2.0*menergy[j][0]))*(menergy[j][0] - las)**4/clight**4*(mbose[j]+1.0) 
                 ramanplot[i][1] = intstep
                 
@@ -793,7 +817,6 @@ if __name__ == '__main__':
     global clight
     global width
     
-    outname        = 'Ramanspec.out'
     cm1_to_hartree = 4.55633E-6         # conversion factor between cm-1 and Hartree
     cm1_to_hz      = 2.99793E10         # conversion factor between cm-1 and Hz
     Hz_to_Ha       = 1.519828500716E-16 # conversion factor between Hz and Hartree 
@@ -810,9 +833,9 @@ if __name__ == '__main__':
         user_inputfile = sys.argv[1] #input should be python program_name tfile 
           
     #Name of default input file 
-    vararray = READ_INPUT(user_inputfile,outname) #The program will look for the specified input file
+    vararray = READ_INPUT(user_inputfile) #The program will look for the specified input file
     
-    
+       
     #Print header file and start the calculation
     PRINT_HEADER()
     
