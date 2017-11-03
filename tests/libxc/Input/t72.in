@@ -180,7 +180,6 @@ ecut  6.0         # Maximal kinetic energy cut-off, in Hartree
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% exclude_hosts = max2_gnu_5.3_mpich
 #%% [files]
 #%% files_to_test =
 #%%   t72.out, tolnlines=  1, tolabs=  4.0e-10, tolrel=  2.0e-04, fld_options = -easy
