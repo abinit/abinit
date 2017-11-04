@@ -10,12 +10,16 @@ Purpose: To calculate the Raman spectrum, at a user defined orientation and angl
          extract the needed data, and output the result for plotting with your 
          favorite program. 
          
+To run:  To run this script simply execute the following code
+         python Raman_spec.py "name of input file"
+         
 Version: 0.0 - Initial building of program
          0.1 - Additional for angle dependent calculation
          0.2 - Additional user input required and number of output files reduced
+         0.3 - Moved all user prompted input to an input file
 
 Output: Program will output a text file containing the raman spectrum vs frequency
-        and a logfile which outlines what happens in the calculation.
+        and an outfile which outlines what happens in the calculation.
 
 Bugs:   If you find a bug with this program or wish to see a feature added to 
         this script please let me know at Nicholas.pike@ulg.ac.be
@@ -28,6 +32,69 @@ Bugs:   If you find a bug with this program or wish to see a feature added to
 """
 Start of definations and other useful information
 """
+def READ_INPUT(user_filein):
+    """
+    Author: Nicholas Pike
+    Email: Nicholas.pike@ulg.ac.be
+    
+    Purpose: Reads the input file and determines if the user's input is acceptable.
+    
+    Output:  array of input information used by program
+    """
+    #declare array of  values
+    vararray = [0,0,0,0,0,0]
+    
+    #check if file exists
+    check = CHECK_FILE(user_filein)  
+    
+    if check == False:
+        print('')
+        print('The input file was not found in the directory. \n Please correct this.')
+        print('\n Remember the input file should be formated as follows:\n\n '\
+                 'filename "name of file"\n outname "name of outfile"\n temp "temperature in Kelvin"\n frequency '\
+                 '"frequency in cm^-1"\n spread "spread of lorentz in cm^-1"\n '\
+                 'calctype "type of calculation 0- abort, 1- powder, 2-ij polarization, 3- angle"\n')
+        sys.exit()
+    else:
+        for line in open(user_filein):
+            li=line.strip('\n')        #Removes any newline command
+            if not li.startswith("#"): #Checks if the line does not start with a # 
+                                       #character
+                l = li.split(' ')
+                if l[0] == 'filename':          # name of the anaddb output file
+                    vararray[0] = str(l[1])
+                elif l[0] == 'temp':            # temperature
+                    vararray[1] = float(l[1])
+                elif l[0] == 'frequency':       # laser frequency
+                    vararray[2] = float(l[1])
+                elif l[0] == 'spread':          # spread of lorentz
+                    vararray[3] = float(l[1])
+                elif l[0] == '':                # passes over spaces
+                    fill = 0
+                elif l[0] == 'calctype':        # calculation type
+                    vararray[4] = int(l[1])
+                elif l[0] == 'outname':        # calculation type
+                    vararray[5] = str(l[1])
+        #set output file name
+        global outname
+        #check for output file
+        outname = CHECK_REPEAT(outname)  
+
+        vararray[5] = outname
+        printout('Input file located and read in.\n')
+                    
+    #Now check that the user put a valid name in for the anaddb output file
+    check = CHECK_FILE(vararray[0])
+    if check == False:
+        printout('')
+        printout('The anaddb output file was not found in the directory.\n Please correct this.')
+        sys.exit()
+    else:
+        printout('The anaddb output file was found in the directory.')
+
+
+    return vararray
+
 def CHECK_FILE(filename): 
     """
     Author: Nicholas Pike
@@ -63,6 +130,7 @@ def PRINT_HEADER():
              'that\n information to a file.')
     printout('')
     printout('Author: Nicholas Pike')
+    printout('Email:  Nicholas.pike@ulg.ac.be')
     printout('')
            
     return 
@@ -119,34 +187,17 @@ def CHECK_REPEAT(filename):
 
 
     
-def CALL_RAMAN_MENU(output,keywords):
+def CALL_RAMAN_MENU(output,keywords,vararray):
     """
     Author:Nicholas Pike
     Email: Nicholas.pike@ulg.ac.be
     
     Purpose: To call and activate the raman spectrum part of this calculation.
     """
-    #Determine which type of calculation to run
-    printout('Choose a number for type of raman calculation:')
-    printout('1 - Raman spectrum for powder sample.')
-    printout('2 - Raman spectrum for ij polarization.')
-    printout('3 - Raman spectrum at an angle theta.')
-    printout('0 - Abort calculation.')
-    printout('')
-    print('Choose a number for type of raman calculation:')
-    print('1 - Raman spectrum for powder sample.')
-    print('2 - Raman spectrum for ij polarization.')
-    print('3 - Raman spectrum at an angle theta.')
-    print('0 - Abort calculation.')
-    print('')
-    
-    if systemversion[0] >= 3:
-        choice1 =int(input('What raman spectrum would you like to calculate? '))
-    else:
-        choice1 =int(raw_input('What raman spectrum would you like to calculate? '))
-        
-    printout('User input: %s' %choice1)
-    print('User input: %s' %choice1)
+    T       = vararray[1]
+    input2  = vararray[2]
+    width   = vararray[3]
+    choice1 = vararray[4]
     
     #Decide what to do when the user makes a choice
     ramanplot = 0
@@ -156,26 +207,6 @@ def CALL_RAMAN_MENU(output,keywords):
 
     elif choice1 == 1: 
         printout('Calculating the raman spectrum for a powder sample.')
-        print('Calculating the raman spectrum for a powder sample.')
-        if systemversion[0] >= 3:
-            input2 = float(input('What is the laser frequency (cm-1): '))
-            T      = float(input('What temperature is used for the calculation (K): '))
-            width  = float(input('What Lorentz relaxation parameter: '))
-        else:
-            input2 = float(raw_input('What is the laser frequency (cm-1): '))
-            T      = float(raw_input('What temperature is used for the calculation (K): '))
-            width  = float(raw_input('What Lorentz relaxation parameter: '))
-        
-        printout('User input frequency: %s ' %input2)
-        printout('User input temperature: %s' %T)
-        printout('User input width: %s' %width)
-        printout('')
-        printout('Starting calculation...')
-        print('User input frequency: %s ' %input2)
-        print('User input temperature: %s' %T)
-        print('User input width: %s' %width)
-        print('')
-        print('Starting calculation...')
         
         #remainder of printing goes to log file only
         printout('')
@@ -199,11 +230,9 @@ def CALL_RAMAN_MENU(output,keywords):
         ramanplot = RAMAN_POWDER(menergy,rarray,input2,width,T)
         
         #After the calculation completes we print the results to a file
-        outfile = 'raman_powder.out'
+        outfile = outname+'_intensity_powder'
         printout('Printing results to an output file named %s' %outfile)
         printout('')
-        print('Printing results to an output file named %s' %outfile)
-        print('')
         
         printoutfile('#Freq:        Raman Intensity',outfile)
         for j in range(ramanplot.shape[0]):
@@ -211,33 +240,10 @@ def CALL_RAMAN_MENU(output,keywords):
             
         printout('Printing to output file complete.')
         printout('')
-        print('Printing to output file complete.')
-        print('')
                 
     elif choice1 == 2:
         printout('Calculating the raman spectrum for ij polarization.')
-        print('Calculating the raman spectrum for ij polarization.')
-
-        if systemversion[0] >= 3:
-            input2 = float(input('What is the laser frequency (cm-1): '))
-            T      = float(input('What temperature is used for the calculation (K): '))
-            width  = float(input('What Lorentz relaxation parameter: '))
-        else:
-            input2 = float(raw_input('What is the laser frequency (cm-1): '))
-            T      = float(raw_input('What temperature is used for the calculation (K): '))
-            width  = float(raw_input('What Lorentz relaxation parameter: '))
-        
-        printout('User input frequency: %s ' %input2)
-        printout('User input temperature: %s' %T)
-        printout('User input width: %s' %width)
-        printout('')
-        printout('Starting calculation...')
-        print('User input frequency: %s ' %input2)
-        print('User input temperature: %s' %T)
-        print('User input width: %s' %width)
-        print('')
-        print('Starting calculation...')
-               
+                       
         printout('Anaddb created with Abinit Version: %s' %keywords[0])
         printout('')
         printout('Phonon Mode Energies (cm-1).')
@@ -263,11 +269,9 @@ def CALL_RAMAN_MENU(output,keywords):
         ramanzz = RAMAN_POLAR(menergy,rarray,input2,'ZZ',width,T)
         
         #After the calculation completes we print the results to a file
-        outfile = 'raman_ij.out'
+        outfile = outname+'_intensity_ij'
         printout('Printing results to an output file named %s' %outfile)
         printout('')
-        print('Printing results to an output file named %s' %outfile)
-        print('')
         
         printoutfile('#Freq:        Raman Intensity ( XX, XY, XZ, YY, YZ, ZZ):',outfile)
         for j in range(ramanxx.shape[0]):
@@ -278,22 +282,10 @@ def CALL_RAMAN_MENU(output,keywords):
             
         printout('Printing to output file complete.')
         printout('')
-        print('Printing to output file complete.')
-        print('')
         
     elif choice1 == 3:
         printout('Calculating the raman spectrum as a function of the angle theta.')
-        print('Calculating the raman spectrum as a function of the angle theta.')
-        
-        if systemversion[0] >= 3:
-            input2 = float(input('What is the laser frequency (cm-1): '))
-            T      = float(input('What temperature is used for the calculation (K): '))
-            width  = float(input('What Lorentz relaxation parameter: '))
-        else:
-            input2 = float(raw_input('What is the laser frequency (cm-1): '))
-            T      = float(raw_input('What temperature is used for the calculation (K): '))
-            width  = float(raw_input('What Lorentz relaxation parameter: '))
-        
+                
         printout('Anaddb created with Abinit Version: %s' %keywords[0])
         printout('')
         printout('Phonon Mode Energies (cm-1).')
@@ -314,7 +306,7 @@ def CALL_RAMAN_MENU(output,keywords):
         ramanplot = RAMAN_POLAR(menergy,rarray,input2,'THETA',width,T)
         
         #After the calculation completes we print the results to a file
-        outfile = 'raman_theta.out'
+        outfile = outname+'_intensity_theta'
         printout('Printing results to an output file named %s' %outfile)
         printout('')
         
@@ -335,37 +327,7 @@ def CALL_RAMAN_MENU(output,keywords):
         sys.exit()
         
     return 
-    
-def GET_INPUT_FILE(infile):
-    """
-    Author: Nicholas Pike
-    Email: Nicholas.pike@ulg.ac.be
-    
-    Purpose: To check if the input file is in the root directory and if not, ask
-    the user to name the input file.
-    """
-    #Check if the input file is found in the directory    
-    logic = CHECK_FILE(infile)
-    if logic == True:
-        printout('The input file was found in the directory. Reading it now...')
-        printout('')
-    else:
-        if systemversion[0] >=3:
-            infile = str(input('Please enter the name of the input file: '))
-        else:
-            infile = str(raw_input('Please enter the name of the input file: '))
-        logic2 = CHECK_FILE(infile)
-        printout('User input: %s' %infile)
-        if logic2 ==True:
-            printout('The input file is now %s. Reading it now...'%infile)
-            printout('')
-        else:
-            printout('Check for typos and try again.')
-            printout('')
-            sys.exit()
-            
-    return infile
-    
+        
 def LOAD_ANADDB(infile):
     """
     Author: Nicholas Pike
@@ -376,13 +338,13 @@ def LOAD_ANADDB(infile):
     find keywords, and the second time to extract dat
     
     """
-    keywords = np.array(['', #Abinit version
-                         False, #dieflag - frequency dependent dielectric constant
-                         False, #nfreq   - number of frequency steps
-                         False, #nlflag  - Raman tensor and nonlinear optical tensor
-                         False, #elaflag - elastic tensor flag
-                         False, #piezoflag - Piezoelectric tensor
-                         ])
+    keywords =['', #Abinit version
+               False, #dieflag - frequency dependent dielectric constant
+               False, #nfreq   - number of frequency steps
+               False, #nlflag  - Raman tensor and nonlinear optical tensor
+               False, #elaflag - elastic tensor flag
+               False, #piezoflag - Piezoelectric tensor
+               ]
     #First, read the output file and determine if any of the keywords are present
     with open(infile,'r') as f:
         for num,line in enumerate(f,1):
@@ -392,22 +354,22 @@ def LOAD_ANADDB(infile):
             elif line.startswith( '     dieflag'):
                 l = line.strip('\n').split(' ')
                 if int(l[len(l)-1]) > 0:
-                    keywords[1] = True 
+                    keywords[1] = 'True' 
                 else:
-                    keywords[1] = False
+                    keywords[1] = 'False'
             elif line.startswith( '       nfreq'):
                 l = line.strip('\n').split(' ')
                 if int(l[len(l)-1]) > 10:
                     keywords[2] = int(l[len(l)-1])
                 else:
                     keywords[2] = 0
-                    keywords[1] = False
+                    keywords[1] = 'False'
             elif line.startswith( '      nlflag'):
                 l = line.strip('\n').split(' ')
                 if int(l[len(l)-1])> 0:
-                    keywords[3] = True
+                    keywords[3] = 'True'
                 else: 
-                    keywords[3] = False
+                    keywords[3] = 'False'
             else:
                 keywords[0]=keywords[0]
     
@@ -464,7 +426,7 @@ def LOAD_ANADDB(infile):
                                 c+=1  
             outinfo[1] = modeenergy
                             
-            modedata=np.zeros((len(modeenergy)/2,9))
+            modedata=np.zeros((int(len(modeenergy)/2),9))
             with open(infile,'r') as g:
                 d = 1
                 for num,line in enumerate(g,1):
@@ -565,7 +527,6 @@ def RAMAN_POWDER(menergy,rarray,laser,width,T):
         intstep = 0.0
         #counts modes
         for j in range(len(menergy)):
-            spread = width/((freq*Hz_to_Ha-menergy[j][0])**2+width**2)
             G0 = 1.0/3.0*(rarray[j][0][0]+rarray[j][1][1]+rarray[j][2][2])**2
             G1 = 1.0/2.0*((rarray[j][0][1]-rarray[j][1][2])**2+(rarray[j][1][2]-rarray[j][2][0])**2+(rarray[j][2][0]-rarray[j][0][1])**2)
             G2 = 1.0/2.0*((rarray[j][0][1]+rarray[j][1][2])**2 +(rarray[j][1][2]+rarray[j][2][0])**2+(rarray[j][2][0]+rarray[j][0][1])**2) + 1.0/3.0*((rarray[j][0][0]-rarray[j][1][1])**2+(rarray[j][1][1]-rarray[j][2][2])**2+(rarray[j][2][2]-rarray[j][0][0])**2)
@@ -574,8 +535,12 @@ def RAMAN_POWDER(menergy,rarray,laser,width,T):
             Gterm = Ipar +Iperp
             if menergy[j][0]==0.0:
                 intstep += 0.0
+            elif width <0:
+                intstep += Gterm 
             else:
-                intstep += spread*Gterm   
+                spread = width/((freq*Hz_to_Ha-menergy[j][0])**2+width**2)
+                intstep += spread*Gterm
+                
         ramanplot[i][1] = intstep
         
     return ramanplot
@@ -628,7 +593,10 @@ def RAMAN_POLAR(menergy,rarray,laser,option,width,T):
                 Gterm = np.dot(Outpol,np.dot(modearray,Inpol))
                 if menergy[j][0]==0.0:
                     intstep += 0.0
+                elif width <0:
+                    intstep += Gterm[0]**2*(1.0/(2.0*menergy[j][0]))*(menergy[j][0] - las)**4/clight**4*(mbose[j]+1.0)
                 else:
+                    spread = width/((freq*Hz_to_Ha-menergy[j][0])**2+width**2)
                     intstep += spread*Gterm[0]**2*(1.0/(2.0*menergy[j][0]))*(menergy[j][0] - las)**4/clight**4*(mbose[j]+1.0) 
                 ramanplot[i][1] = intstep
         
@@ -650,7 +618,10 @@ def RAMAN_POLAR(menergy,rarray,laser,option,width,T):
                 Gterm = np.dot(Outpol,np.dot(modearray,Inpol))
                 if menergy[j][0]==0.0:
                     intstep += 0.0
+                elif width <0:
+                    intstep += Gterm[0]**2*(1.0/(2.0*menergy[j][0]))*(menergy[j][0] - las)**4/clight**4*(mbose[j]+1.0)
                 else:
+                    spread = width/((freq*Hz_to_Ha-menergy[j][0])**2+width**2)
                     intstep += spread*Gterm[0]**2*(1.0/(2.0*menergy[j][0]))*(menergy[j][0] - las)**4/clight**4*(mbose[j]+1.0) 
                 ramanplot[i][1] = intstep
                 
@@ -671,7 +642,10 @@ def RAMAN_POLAR(menergy,rarray,laser,option,width,T):
                 Gterm = np.dot(Outpol,np.dot(modearray,Inpol))
                 if menergy[j][0]==0.0:
                     intstep += 0.0
+                elif width <0:
+                    intstep += Gterm[0]**2*(1.0/(2.0*menergy[j][0]))*(menergy[j][0] - las)**4/clight**4*(mbose[j]+1.0)
                 else:
+                    spread = width/((freq*Hz_to_Ha-menergy[j][0])**2+width**2)
                     intstep += spread*Gterm[0]**2*(1.0/(2.0*menergy[j][0]))*(menergy[j][0] - las)**4/clight**4*(mbose[j]+1.0) 
                 ramanplot[i][1] = intstep
                 
@@ -692,7 +666,10 @@ def RAMAN_POLAR(menergy,rarray,laser,option,width,T):
                 Gterm = np.dot(Outpol,np.dot(modearray,Inpol))
                 if menergy[j][0]==0.0:
                     intstep += 0.0
+                elif width <0:
+                    intstep += Gterm[0]**2*(1.0/(2.0*menergy[j][0]))*(menergy[j][0] - las)**4/clight**4*(mbose[j]+1.0)
                 else:
+                    spread = width/((freq*Hz_to_Ha-menergy[j][0])**2+width**2)
                     intstep += spread*Gterm[0]**2*(1.0/(2.0*menergy[j][0]))*(menergy[j][0] - las)**4/clight**4*(mbose[j]+1.0) 
                 ramanplot[i][1] = intstep
                 
@@ -713,7 +690,10 @@ def RAMAN_POLAR(menergy,rarray,laser,option,width,T):
                 Gterm = np.dot(Outpol,np.dot(modearray,Inpol))
                 if menergy[j][0]==0.0:
                     intstep += 0.0
+                elif width <0:
+                    intstep += Gterm[0]**2*(1.0/(2.0*menergy[j][0]))*(menergy[j][0] - las)**4/clight**4*(mbose[j]+1.0)
                 else:
+                    spread = width/((freq*Hz_to_Ha-menergy[j][0])**2+width**2)
                     intstep += spread*Gterm[0]**2*(1.0/(2.0*menergy[j][0]))*(menergy[j][0] - las)**4/clight**4*(mbose[j]+1.0) 
                 ramanplot[i][1] = intstep
                 
@@ -734,7 +714,10 @@ def RAMAN_POLAR(menergy,rarray,laser,option,width,T):
                 Gterm = np.dot(Outpol,np.dot(modearray,Inpol))
                 if menergy[j][0]==0.0:
                     intstep += 0.0
+                elif width <0:
+                    intstep += Gterm[0]**2*(1.0/(2.0*menergy[j][0]))*(menergy[j][0] - las)**4/clight**4*(mbose[j]+1.0)
                 else:
+                    spread = width/((freq*Hz_to_Ha-menergy[j][0])**2+width**2)
                     intstep += spread*Gterm[0]**2*(1.0/(2.0*menergy[j][0]))*(menergy[j][0] - las)**4/clight**4*(mbose[j]+1.0) 
                 ramanplot[i][1] = intstep
                 
@@ -766,7 +749,7 @@ def RAMAN_POLAR(menergy,rarray,laser,option,width,T):
     
     return ramanplot
     
-def DETER_MENU(infile):
+def DETER_MENU(var_array):
     """
     Author: Nicholas Pike
     Email : Nicholas.pike@ulg.ac.be
@@ -777,15 +760,14 @@ def DETER_MENU(infile):
     
     Args: infile - name of input file (assumed to be anaddb.out)
     """
-    #First, we read the input file and look for keywords (an array truth statements)
-    infilename = GET_INPUT_FILE(infile) #reads the input file
+    infile = var_array[0]
     
-    keywords,output = LOAD_ANADDB(infilename)
+    keywords,output = LOAD_ANADDB(infile)
            
     for i in range(len(keywords)):
         if keywords[i]== 'True' and i == 1:
             #run module to print Dielectric tensor as a function of frequency
-            outfile = 'dielectric.freq'
+            outfile = outname+'_dielectric_freq'
             printoutfile('# Freq    dielectric      Reflectivity',outfile)
             printoutfile('#           x y z x y z  ',outfile)
             for j in range(int(keywords[2])):
@@ -794,13 +776,11 @@ def DETER_MENU(infile):
             #Choose to identify the modes characteristics or make a Raman Spectrum  
             printout('Entering Raman Spectrum Calculation.')
             printout('')
-            CALL_RAMAN_MENU(output,keywords) #Calls the menu for the Raman calculation
+            CALL_RAMAN_MENU(output,keywords,var_array) #Calls the menu for the Raman calculation
               
     printout('Thank you for using this program.')
     
     return 
-    
-    
     
     
 """
@@ -814,7 +794,7 @@ if __name__ == '__main__':
     __copyright__  = 'none'
     __credits__    = 'none'
     __license__    = 'none'
-    __version__    = '0.2'
+    __version__    = '0.3'
     __maintainer__ = 'Nicholas Pike'
     __email__      = 'Nicholas.pike@ulg.ac.be'
     __status__     = 'production'
@@ -838,7 +818,6 @@ if __name__ == '__main__':
     global clight
     global width
     
-    outname        = 'Ramanspec.out'
     cm1_to_hartree = 4.55633E-6         # conversion factor between cm-1 and Hartree
     cm1_to_hz      = 2.99793E10         # conversion factor between cm-1 and Hz
     Hz_to_Ha       = 1.519828500716E-16 # conversion factor between Hz and Hartree 
@@ -848,20 +827,21 @@ if __name__ == '__main__':
     clight         = 137.0359997566     # Speed of light in atomic units
     width          = 0.0                # spread of lorentian (user input variable)
 
-        
+    if any('SPYDER' in name for name in os.environ):
+        user_inputfile = 'input_raman'
+    else:
+        #Determines what the program is to do if it is run from command line
+        user_inputfile = sys.argv[1] #input should be python program_name tfile 
+          
     #Name of default input file 
-    infile = 'anaddb.out' #Program will look for a file called anaddb.out in the 
-                         # current directory. If not found, then it asks the user
-                         # for the input file name.
+    vararray = READ_INPUT(user_inputfile) #The program will look for the specified input file
     
-    #Check if the output file exists, if it does, renameit.
-    outname = CHECK_REPEAT(outname)    
-    
+       
     #Print header file and start the calculation
     PRINT_HEADER()
     
     #Read anaddb.out file and determine what type of calculation to run
-    DETER_MENU(infile)
+    DETER_MENU(vararray)
     
     
 #Ends program
