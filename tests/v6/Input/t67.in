@@ -36,7 +36,8 @@ ndtset 10    udtset 2 5
 
 #Parameters of the SCF cycles
 #****************************
-   nstep       100
+#  nstep       100
+   nstep       26 
 
 
 #Plane wave basis
