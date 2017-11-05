@@ -4,8 +4,7 @@
 !! getspinrot
 !!
 !! FUNCTION
-!! From the symmetry matrix symrel_conv expressed
-!! in the coordinate system rprimd,
+!! From the symmetry matrix symrel_conv expressed in the coordinate system rprimd,
 !! compute the components of the spinor rotation matrix
 !!
 !! COPYRIGHT

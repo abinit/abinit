@@ -2394,7 +2394,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     117.926     117.783
    4  0.241  0.241  0.097  9.978  0.209
    5  0.041  0.202  0.194  0.209  9.089
 
-   bare interaction value of J=1/((2l+1)(2l)) \sum_{m1/=m2} U(m1,m2,m2,m1)=    0.1831   -0.0000
+   bare interaction value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=    0.2510   -0.0000
 
   Hund coupling J2=U(m1,m2,m2,m1) for the bare interaction
  -      1      2      3      4      5
@@ -2440,7 +2440,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     117.926     117.783
    4  0.216  0.216  0.088  3.429  0.184
    5  0.040  0.180  0.172  0.184  3.107
 
-   cRPA interaction value of J=1/((2l+1)(2l)) \sum_{m1/=m2} U(m1,m2,m2,m1)=    0.1631    0.0000
+   cRPA interaction value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=    0.2232    0.0000
 
   Hund coupling J2=U(m1,m2,m2,m1) for the cRPA interaction
  -      1      2      3      4      5
@@ -2480,7 +2480,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     117.926     117.783
    4  0.215  0.215  0.088  3.553  0.185
    5  0.040  0.180  0.172  0.185  3.098
 
-   cRPA interaction value of J=1/((2l+1)(2l)) \sum_{m1/=m2} U(m1,m2,m2,m1)=    0.1630   -0.0005
+   cRPA interaction value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=    0.2233   -0.0009
 
   Hund coupling J2=U(m1,m2,m2,m1) for the cRPA interaction
  -      1      2      3      4      5
@@ -2520,7 +2520,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     117.926     117.783
    4  0.213  0.213  0.088  2.471  0.184
    5  0.040  0.179  0.167  0.184  2.262
 
-   cRPA interaction value of J=1/((2l+1)(2l)) \sum_{m1/=m2} U(m1,m2,m2,m1)=    0.1614   -0.0030
+   cRPA interaction value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=    0.2197   -0.0050
 
   Hund coupling J2=U(m1,m2,m2,m1) for the cRPA interaction
  -      1      2      3      4      5
@@ -2560,7 +2560,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     117.926     117.783
    4  0.213  0.213  0.087  3.496  0.181
    5  0.040  0.179  0.172  0.181  3.201
 
-   cRPA interaction value of J=1/((2l+1)(2l)) \sum_{m1/=m2} U(m1,m2,m2,m1)=    0.1614   -0.0056
+   cRPA interaction value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=    0.2210   -0.0073
 
   Hund coupling J2=U(m1,m2,m2,m1) for the cRPA interaction
  -      1      2      3      4      5
@@ -2574,10 +2574,10 @@ _setup2: Arith. and geom. avg. npw (full set) are     117.926     117.783
             Average U and J as a function of frequency
    -------------------------------------------------------------
          omega           U(omega)            J(omega)
-        0.000      3.0005   -0.0000      0.1631    0.0000
-        2.000      3.0244   -0.1604      0.1630   -0.0005
-        4.000      2.1166   -0.6069      0.1614   -0.0030
-        6.000      3.0699   -1.5916      0.1614   -0.0056
+        0.000      3.0005   -0.0000      0.2232    0.0000
+        2.000      3.0244   -0.1604      0.2233   -0.0009
+        4.000      2.1166   -0.6069      0.2197   -0.0050
+        6.000      3.0699   -1.5916      0.2210   -0.0073
    -------------------------------------------------------------
 
 == END DATASET(S) ==============================================================
