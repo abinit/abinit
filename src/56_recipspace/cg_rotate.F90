@@ -16,18 +16,18 @@
 !!  isym
 !!  itimrev
 !!  nspinor
-!!  ndat 
-!!  npw1,npw2 
+!!  ndat
+!!  npw1,npw2
 !!  istwf1,istwf2
 !!  cryst<crystal_t>
 !!  shiftg(3)
 !!  kg1(3,npw1), kg2(3,npw2)
 !!  work_ngfft(18)
 !!  kpt1(3)
-!!  cg1(2,npw1,nspinor,ndat) 
+!!  cg1(2,npw1,nspinor,ndat)
 !!
 !! OUTPUT
-!!  cg2(2,npw2,nspinor,ndat) 
+!!  cg2(2,npw2,nspinor,ndat)
 !!  work(2,work_ngfft(4),work_ngfft(5),work_ngfft(6)) !*ndat),
 !!
 !! PARENTS
@@ -75,8 +75,8 @@ subroutine cg_rotate(cryst,kpt1,isym,itimrev,shiftg,nspinor,ndat,&
  integer,intent(in) :: shiftg(3),kg1(3,npw1),kg2(3,npw2)
  integer,intent(in) :: work_ngfft(18)
  real(dp),intent(in) :: kpt1(3)
- real(dp),intent(in) :: cg1(2,npw1,nspinor,ndat) 
- real(dp),intent(out) :: cg2(2,npw2,nspinor,ndat) 
+ real(dp),intent(in) :: cg1(2,npw1,nspinor,ndat)
+ real(dp),intent(out) :: cg2(2,npw2,nspinor,ndat)
  real(dp),intent(out) :: work(2,work_ngfft(4),work_ngfft(5),work_ngfft(6)) !*ndat) for threads?
 
 !Local variables ------------------------------
@@ -88,7 +88,7 @@ subroutine cg_rotate(cryst,kpt1,isym,itimrev,shiftg,nspinor,ndat,&
 !arrays
  integer,parameter :: no_shift(3)=0,atindx(1)=1
  integer :: symm(3,3),symrel_conv(3,3)
- real(dp) :: phktnons(2,1),tnons_conv(3),spinrot(4) 
+ real(dp) :: phktnons(2,1),tnons_conv(3),spinrot(4)
  real(dp),allocatable :: phase1d(:,:),phase3d(:,:),wavef1(:,:)
 
 !************************************************************************
@@ -98,7 +98,7 @@ subroutine cg_rotate(cryst,kpt1,isym,itimrev,shiftg,nspinor,ndat,&
 
  symrel_conv = cryst%symrel(:,:,isym)
  call mati3inv(symrel_conv, symm)
- tnons_conv = cryst%tnons(:,isym) ! 
+ tnons_conv = cryst%tnons(:,isym) !
  have_phase = sum(tnons_conv**2) > tol8
 
  ! Compute rotation in spinor space
@@ -137,7 +137,7 @@ subroutine cg_rotate(cryst,kpt1,isym,itimrev,shiftg,nspinor,ndat,&
      end if
 
      ! Take into account time-reversal symmetry, if needed, in the scalar case
-     if (itimrev == 1 .and. nspinor == 1) wavef1(2,:npw1) = -wavef1(2,:npw1) 
+     if (itimrev == 1 .and. nspinor == 1) wavef1(2,:npw1) = -wavef1(2,:npw1)
 
      ! Insert wavef1 in work array.
      call sphere(wavef1,1,npw1,work,n1,n2,n3,n4,n5,n6,kg1,istwf1,tobox,me_g0,no_shift,identity_3d,one)
@@ -163,7 +163,7 @@ subroutine cg_rotate(cryst,kpt1,isym,itimrev,shiftg,nspinor,ndat,&
        end do
      end if ! itimrev==1
 
-     ! Rotation in spinor space
+     ! Rotation in spinor space (see also wfconv)
      spinrots = spinrot(1)
      spinrotx = spinrot(2)
      spinroty = spinrot(3)

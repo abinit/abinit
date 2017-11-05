@@ -84,7 +84,7 @@
 
 subroutine dfpt_dyxc1(atindx,blkflgfrx1,dyfrx1,gmet,gsqcut,ixc,kxc,mgfft,mpert,mpi_enreg,mqgrid,&
 &          natom,nfft,ngfft,nkxc,nspden,ntypat,n1xccc,paral_kgb,psps,pawtab,&
-&          ph1d,qgrid,qphon,rfdir,rfpert,rprimd,timrev,typat,ucvol,usepaw,xcccrc,xccc1d,xred,rhor)
+&          ph1d,qgrid,qphon,rfdir,rfpert,rprimd,timrev,typat,ucvol,usepaw,xcccrc,xccc1d,xred,rhor,bxc,vxc)
 
  use defs_basis
  use defs_abitypes
@@ -125,6 +125,8 @@ subroutine dfpt_dyxc1(atindx,blkflgfrx1,dyfrx1,gmet,gsqcut,ixc,kxc,mgfft,mpert,m
  type(pawtab_type),intent(in) :: pawtab(ntypat*usepaw)
 !optional
  real(dp),optional,intent(in) :: rhor(nfft,nspden)
+ real(dp),optional,intent(in) :: bxc(nfft)
+ real(dp),optional,intent(in) :: vxc(nfft,nspden)
 
 !Local variables-------------------------------
 !scalars
@@ -183,11 +185,11 @@ subroutine dfpt_dyxc1(atindx,blkflgfrx1,dyfrx1,gmet,gsqcut,ixc,kxc,mgfft,mpert,m
      option=0
      ABI_ALLOCATE(rhor1,(cplex*nfft,nspden))
      rhor1=zero
-!FR EB Non-collinear magnetism
-     if (nspden==4.and.present(rhor)) then
+!FR SPr EB Non-collinear magnetism
+     if (nspden==4.and.present(rhor).and.present(bxc).and.present(vxc)) then
        optnc=1 ; optxc=1
-       call dfpt_mkvxc_noncoll(1,ixc,kxc,mpi_enreg,nfft,ngfft,dum_nhat,0,dum_nhat,0,nkxc,&
-&       nkxc,nspden,n3xccc,optnc,option,optxc,paral_kgb,qphon,rhor,rhor1,rprimd,0,vxc10,xcccwk1) 
+       call dfpt_mkvxc_noncoll(1,ixc,kxc,bxc,mpi_enreg,nfft,ngfft,dum_nhat,0,dum_nhat,0,nkxc,&
+&       nkxc,nspden,n3xccc,optnc,option,optxc,paral_kgb,qphon,rhor,rhor1,rprimd,0,vxc,vxc10,xcccwk1) 
      else
        call dfpt_mkvxc(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,dum_nhat,0,dum_nhat,0,nkxc,&
 &       nspden,n3xccc,option,paral_kgb,qphon,rhor1,rprimd,0,vxc10,xcccwk1)

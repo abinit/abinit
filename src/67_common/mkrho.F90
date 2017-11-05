@@ -64,8 +64,7 @@
 !! OUTPUT
 !! rhog(2,nfft)=total electron density in G space
 !! rhor(nfft,nspden)=electron density in r space
-!!   (if spin polarized, array contains total density in first half and
-!!    spin-up density in second half)
+!!   (if spin polarized, array contains total density in first half and spin-up density in second half)
 !!   (for non-collinear magnetism, first element: total density, 3 next ones: mx,my,mz in units of hbar/2)
 !!
 !! PARENTS

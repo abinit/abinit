@@ -420,7 +420,7 @@ subroutine etotfor(atindx1,deltae,diffor,dtefield,dtset,&
      optnc=1;if (dtset%nspden==4.and.(abs(dtset%densfor_pred)==4.or.abs(dtset%densfor_pred)==6)) optnc=2
      call nres2vres(dtset,gsqcut,usepaw,kxc,mpi_enreg,my_natom,nfft,ngfft,nhat,&
 &     nkxc,nvresid,n3xccc,optnc,option,pawang,pawfgrtab,pawrhoij,pawtab,&
-&     rhor,rprimd,usepaw,resid,xccc3d,xred)
+&     rhor,rprimd,usepaw,resid,xccc3d,xred,vxc)
    else
      resid => nvresid
    end if

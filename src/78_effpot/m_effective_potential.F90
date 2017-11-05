@@ -141,13 +141,13 @@ end interface
 
 CONTAINS  !===========================================================================================
 
-!!****f* m_phonon_effective_potential/effective_potential_init
+!!****f* m_effective_potential/effective_potential_init
 !!
 !! NAME
 !! effective_potential_init
 !!
 !! FUNCTION
-!! Initialize scell datatype, from unit cell vectors, qpoint chosen, and atoms
+!! Initialize effective_potential datatype
 !!
 !! INPUTS
 !! crytal<type(crystal_t)> = datatype with all the information for the crystal
@@ -358,7 +358,7 @@ end subroutine effective_potential_init
 !!***
 
 
-!!****f* m_phonon_effective_potential/effective_potential_initmpi
+!!****f* m_effective_potential/effective_potential_initmpi
 !! NAME
 !!  effective_potential_initmpi
 !!
@@ -487,7 +487,6 @@ subroutine effective_potential_free(eff_pot)
 !scalars
 !array
   type(effective_potential_type), intent(inout) :: eff_pot
-
 !Local variables-------------------------------
 !scalars
 !array
@@ -847,17 +846,17 @@ subroutine effective_potential_generateDipDip(eff_pot,n_cell,option,asr,comm)
 
 !  Initialisation of ifc temporary
    ABI_ALLOCATE(buff_ewald,(2,3,natom_uc,3,natom_uc,my_nrpt))
-   ABI_ALLOCATE(ifc_tmp%short_atmfrc,(2,3,natom_uc,3,natom_uc,ifc_tmp%nrpt))
-   ABI_ALLOCATE(ifc_tmp%ewald_atmfrc,(2,3,natom_uc,3,natom_uc,ifc_tmp%nrpt))
-   ABI_ALLOCATE(ifc_tmp%atmfrc,(2,3,natom_uc,3,natom_uc,ifc_tmp%nrpt))
+   ABI_ALLOCATE(ifc_tmp%short_atmfrc,(3,natom_uc,3,natom_uc,ifc_tmp%nrpt))
+   ABI_ALLOCATE(ifc_tmp%ewald_atmfrc,(3,natom_uc,3,natom_uc,ifc_tmp%nrpt))
+   ABI_ALLOCATE(ifc_tmp%atmfrc,(3,natom_uc,3,natom_uc,ifc_tmp%nrpt))
    ABI_ALLOCATE(my_irpt,(my_nrpt))
    ABI_ALLOCATE(my_index_rpt,(3,my_nrpt))
 
    my_irpt = zero
    my_index_rpt(:,:) = zero
-   ifc_tmp%atmfrc(:,:,:,:,:,:) = zero
-   ifc_tmp%short_atmfrc(:,:,:,:,:,:) = zero
-   ifc_tmp%ewald_atmfrc(:,:,:,:,:,:) = zero
+   ifc_tmp%atmfrc(:,:,:,:,:) = zero
+   ifc_tmp%short_atmfrc(:,:,:,:,:) = zero
+   ifc_tmp%ewald_atmfrc(:,:,:,:,:) = zero
    buff_ewald(:,:,:,:,:,:) = zero
 
 !  Allocation of array
@@ -950,9 +949,9 @@ subroutine effective_potential_generateDipDip(eff_pot,n_cell,option,asr,comm)
 
 !  Set the bufsize for mpi allgather
    do ii = 1,nproc
-     bufsize(ii) = int(real(ifc_tmp%nrpt,sp)/nproc)*2*3*natom_uc*3*natom_uc
+     bufsize(ii) = int(real(ifc_tmp%nrpt,sp)/nproc)*3*natom_uc*3*natom_uc
      if(ii > (nproc-nrpt_alone)) then
-       bufsize(ii) = bufsize(ii) + 2*3*natom_uc*3*natom_uc
+       bufsize(ii) = bufsize(ii) + 3*natom_uc*3*natom_uc
      end if
    end do
 
@@ -961,8 +960,8 @@ subroutine effective_potential_generateDipDip(eff_pot,n_cell,option,asr,comm)
      bufdisp(ii) = bufdisp(ii-1) + bufsize(ii-1)
    end do
 
-   size = 2*3*natom_uc*3*natom_uc*my_nrpt
-   call xmpi_allgatherv(buff_ewald,size,ifc_tmp%ewald_atmfrc,bufsize,bufdisp, comm, ierr)
+   size = 3*natom_uc*3*natom_uc*my_nrpt
+   call xmpi_allgatherv(buff_ewald(1,:,:,:,:,:),size,ifc_tmp%ewald_atmfrc,bufsize,bufdisp, comm, ierr)
 
    ABI_DEALLOCATE(bufsize)
    ABI_DEALLOCATE(bufdisp)
@@ -975,9 +974,9 @@ subroutine effective_potential_generateDipDip(eff_pot,n_cell,option,asr,comm)
          if(eff_pot%harmonics_terms%ifcs%cell(1,irpt2)==ifc_tmp%cell(1,irpt).and.&
 &           eff_pot%harmonics_terms%ifcs%cell(2,irpt2)==ifc_tmp%cell(2,irpt).and.&
 &           eff_pot%harmonics_terms%ifcs%cell(3,irpt2)==ifc_tmp%cell(3,irpt).and.&
-&           any(abs(eff_pot%harmonics_terms%ifcs%short_atmfrc(:,:,:,:,:,irpt2)) > tol20)) then
-           ifc_tmp%short_atmfrc(:,:,:,:,:,irpt) = &
-&                               eff_pot%harmonics_terms%ifcs%short_atmfrc(:,:,:,:,:,irpt2)
+&           any(abs(eff_pot%harmonics_terms%ifcs%short_atmfrc(:,:,:,:,irpt2)) > tol20)) then
+           ifc_tmp%short_atmfrc(:,:,:,:,irpt) = &
+&                               eff_pot%harmonics_terms%ifcs%short_atmfrc(:,:,:,:,irpt2)
          end if
        end do
      end do
@@ -991,7 +990,7 @@ subroutine effective_potential_generateDipDip(eff_pot,n_cell,option,asr,comm)
 !  Count the rpt inferior to the tolerance
    irpt2 = zero
    do irpt=1,ifc_tmp%nrpt
-     if(any(abs(ifc_tmp%atmfrc(:,:,:,:,:,irpt)) > tol20))then
+     if(any(abs(ifc_tmp%atmfrc(:,:,:,:,irpt)) > tol20))then
        irpt2 = irpt2 + 1
      end if
    end do
@@ -1005,18 +1004,18 @@ subroutine effective_potential_generateDipDip(eff_pot,n_cell,option,asr,comm)
    
 !  Fill the effective potential with new atmfr
     eff_pot%harmonics_terms%ifcs%nrpt = irpt2
-    ABI_ALLOCATE(eff_pot%harmonics_terms%ifcs%atmfrc,(2,3,natom_uc,3,natom_uc,irpt2))
-    ABI_ALLOCATE(eff_pot%harmonics_terms%ifcs%short_atmfrc,(2,3,natom_uc,3,natom_uc,irpt2))
-    ABI_ALLOCATE(eff_pot%harmonics_terms%ifcs%ewald_atmfrc,(2,3,natom_uc,3,natom_uc,irpt2))
+    ABI_ALLOCATE(eff_pot%harmonics_terms%ifcs%atmfrc,(3,natom_uc,3,natom_uc,irpt2))
+    ABI_ALLOCATE(eff_pot%harmonics_terms%ifcs%short_atmfrc,(3,natom_uc,3,natom_uc,irpt2))
+    ABI_ALLOCATE(eff_pot%harmonics_terms%ifcs%ewald_atmfrc,(3,natom_uc,3,natom_uc,irpt2))
     ABI_ALLOCATE(eff_pot%harmonics_terms%ifcs%cell,(3,irpt2))
 
     irpt2 = zero
     do irpt = 1,ifc_tmp%nrpt
-     if(any(abs(ifc_tmp%atmfrc(:,:,:,:,:,irpt)) > tol20))then
+     if(any(abs(ifc_tmp%atmfrc(:,:,:,:,irpt)) > tol20))then
        irpt2 = irpt2 + 1
-       eff_pot%harmonics_terms%ifcs%atmfrc(:,:,:,:,:,irpt2) = ifc_tmp%atmfrc(:,:,:,:,:,irpt)
-       eff_pot%harmonics_terms%ifcs%short_atmfrc(:,:,:,:,:,irpt2) = ifc_tmp%short_atmfrc(:,:,:,:,:,irpt)
-       eff_pot%harmonics_terms%ifcs%ewald_atmfrc(:,:,:,:,:,irpt2) = ifc_tmp%ewald_atmfrc(:,:,:,:,:,irpt)
+       eff_pot%harmonics_terms%ifcs%atmfrc(:,:,:,:,irpt2) = ifc_tmp%atmfrc(:,:,:,:,irpt)
+       eff_pot%harmonics_terms%ifcs%short_atmfrc(:,:,:,:,irpt2) = ifc_tmp%short_atmfrc(:,:,:,:,irpt)
+       eff_pot%harmonics_terms%ifcs%ewald_atmfrc(:,:,:,:,irpt2) = ifc_tmp%ewald_atmfrc(:,:,:,:,irpt)
        eff_pot%harmonics_terms%ifcs%cell(:,irpt2) = ifc_tmp%cell(:,irpt)
      end if
    end do
@@ -1732,8 +1731,8 @@ subroutine effective_potential_printSupercell(eff_pot,supercell)
 
  do ii = 1,3
    write(msg,'(3E23.14,3E23.14,3E23.14)') supercell_tmp%rprimd(1,ii),&
-&                                             supercell_tmp%rprimd(2,ii),&
-&                                             supercell_tmp%rprimd(3,ii)
+&                                         supercell_tmp%rprimd(2,ii),&
+&                                         supercell_tmp%rprimd(3,ii)
    call wrtout(ab_out,msg,'COLL')
    call wrtout(std_out,msg,'COLL')
  end do
@@ -1941,7 +1940,7 @@ subroutine effective_potential_writeXML(eff_pot,option,filename,prt_dipdip)
 !           When you read ifc from XML file with fotran, you have to tranpose the matrix
 !
    do irpt=1,eff_pot%harmonics_terms%ifcs%nrpt
-     if(any(abs(eff_pot%harmonics_terms%ifcs%short_atmfrc(1,:,:,:,:,irpt))>tol20)) then
+     if(any(abs(eff_pot%harmonics_terms%ifcs%short_atmfrc(:,:,:,:,irpt))>tol20)) then
        WRITE(unit_xml,'("  <local_force_constant units=""hartree/bohrradius**2"">")')
        WRITE(unit_xml,'("    <data>")')
        do ia=1,eff_pot%crystal%natom
@@ -1949,7 +1948,7 @@ subroutine effective_potential_writeXML(eff_pot,option,filename,prt_dipdip)
            do ib=1,eff_pot%crystal%natom
              do  nu=1,3
                WRITE(unit_xml,'(e22.14)', advance="no")&
-&                         (eff_pot%harmonics_terms%ifcs%short_atmfrc(1,mu,ia,nu,ib,irpt))
+&                         (eff_pot%harmonics_terms%ifcs%short_atmfrc(mu,ia,nu,ib,irpt))
              end do
            end do
            WRITE(unit_xml,'(a)')''
@@ -1970,8 +1969,8 @@ subroutine effective_potential_writeXML(eff_pot,option,filename,prt_dipdip)
 !      [z1 z2 ....]
 !      ....       ]
      if(need_prtdipdip)then
-       if(all(abs(eff_pot%harmonics_terms%ifcs%atmfrc(1,:,:,:,:,irpt))<tol20)) then
-         if(any(abs(eff_pot%harmonics_terms%ifcs%short_atmfrc(1,:,:,:,:,irpt))>tol20)) then
+       if(all(abs(eff_pot%harmonics_terms%ifcs%atmfrc(:,:,:,:,irpt))<tol20)) then
+         if(any(abs(eff_pot%harmonics_terms%ifcs%short_atmfrc(:,:,:,:,irpt))>tol20)) then
            write(msg, '(a,a,a,a)' )&
 &         ' There is no total range but short range in your effective potential',ch10,&
 &         'Action: contact abinit group'
@@ -1985,7 +1984,7 @@ subroutine effective_potential_writeXML(eff_pot,option,filename,prt_dipdip)
              do ib=1,eff_pot%crystal%natom
                do nu=1,3
                  WRITE(unit_xml,'(e22.14)', advance="no")&
-&                   (eff_pot%harmonics_terms%ifcs%atmfrc(1,mu,ia,nu,ib,irpt))
+&                   (eff_pot%harmonics_terms%ifcs%atmfrc(mu,ia,nu,ib,irpt))
                end do
              end do
              WRITE(unit_xml,'(a)')''
@@ -2066,7 +2065,7 @@ subroutine effective_potential_writeXML(eff_pot,option,filename,prt_dipdip)
                do ib=1,eff_pot%crystal%natom
                  do  nu=1,3
                    WRITE(unit_xml,'(e22.14)', advance="no")&
-&                      (eff_pot%anharmonics_terms%phonon_strain(ii)%atmfrc(1,mu,ia,nu,ib,irpt))
+&                      (eff_pot%anharmonics_terms%phonon_strain(ii)%atmfrc(mu,ia,nu,ib,irpt))
                  end do
                end do
                WRITE(unit_xml,'(a)')''
@@ -2395,7 +2394,6 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
   integer, parameter:: master = 0
 !array
   type(strain_type) :: strain_t
-  integer  :: supercell(3)
   integer :: sc_size(3)
   real(dp) :: disp_tmp(3,natom)
   real(dp) :: du_delta_tmp(6,3,natom)
@@ -2412,9 +2410,6 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
   iam_master = (eff_pot%mpi_ifc%my_rank == master)
 
 ! Set variables
-  supercell(1) = eff_pot%supercell%rlatt(1,1)
-  supercell(2) = eff_pot%supercell%rlatt(2,2)
-  supercell(3) = eff_pot%supercell%rlatt(3,3)
   ncell          = eff_pot%supercell%ncells
   do ii = 1, 3
     sc_size(ii) = eff_pot%supercell%rlatt(ii,ii)  
@@ -2555,7 +2550,7 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
   energy_part    = zero
   fcart_part(:,:)= zero
 
-  call harmonics_terms_evaluateIFC(eff_pot%harmonics_terms%ifcs%atmfrc(1,:,:,:,:,:),disp_tmp,&
+  call harmonics_terms_evaluateIFC(eff_pot%harmonics_terms%ifcs%atmfrc(:,:,:,:,:),disp_tmp,&
 &                                  energy_part,fcart_part,eff_pot%mpi_ifc%my_cells,&
 &                                  eff_pot%supercell%natom,&
 &                                  eff_pot%crystal%natom,eff_pot%mpi_ifc%my_ncell,&
