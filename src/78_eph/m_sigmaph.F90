@@ -48,7 +48,7 @@ module m_sigmaph
  use defs_datatypes,   only : ebands_t, pseudopotential_type
  use m_time,           only : cwtime, sec2str
  use m_fstrings,       only : itoa, ftoa, sjoin, ktoa, ltoa, strcat
- use m_numeric_tools,  only : arth
+ use m_numeric_tools,  only : arth, c2r
  use m_io_tools,       only : iomode_from_fname
  use m_special_funcs,  only : dirac_delta, gspline_t, gspline_new, gspline_eval, gspline_free
  use m_fftcore,        only : ngfft_seq
@@ -91,7 +91,7 @@ module m_sigmaph
 !!
 !! FUNCTION
 !! Container for the (diagonal) matrix elements of the electronic self-energy (phonon contribution)
-!! computed in the KS representation i.e. Sigma_ph(omega, T, band, k, spin).
+!! computed in the KS representation i.e. Sigma_eph(omega, T, band, k, spin).
 !! Provides methods to compute the QP corrections, the spectral functions and save the results to file.
 !!
 !! TODO
@@ -219,11 +219,11 @@ module m_sigmaph
 
   complex(dpc),allocatable :: vals_e0ks(:,:)
    ! vals_e0ks(ntemp, max_nbcalc)
-   ! Sigma_ph(omega=eKS, kT, band) for fixed (kcalc, spin).
+   ! Sigma_eph(omega=eKS, kT, band) for fixed (kcalc, spin).
 
   complex(dpc),allocatable :: dvals_de0ks(:,:)
    ! dvals_de0ks(ntemp, max_nbcalc) for fixed (kcalc, spin)
-   ! d Sigma_ph(omega, kT, band, kcalc, spin) / d omega (omega=eKS)
+   ! d Sigma_eph(omega, kT, band, kcalc, spin) / d omega (omega=eKS)
 
   real(dp),allocatable :: dw_vals(:,:)
   !  dw_vals(ntemp, max_nbcalc) for fixed (kcalc, spin)
@@ -239,7 +239,7 @@ module m_sigmaph
 
   complex(dpc),allocatable :: vals_wr(:,:,:)
    ! vals_wr(nwr, ntemp, max_nbcalc)
-   ! Sigma_ph(omega, kT, band) for given (k, spin).
+   ! Sigma_eph(omega, kT, band) for given (k, spin).
    ! enk_KS corresponds to nwr/2 + 1.
    ! This array depends on (ikcalc, spin)
 
@@ -1113,7 +1113,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
  end do !ikcalc
 
  call cwtime(cpu_all, wall_all, gflops_all, "stop")
- call wrtout(std_out, "Computation of Sigma_ph completed", do_flush=.True.)
+ call wrtout(std_out, "Computation of Sigma_eph completed", do_flush=.True.)
  call wrtout(std_out, sjoin("Total wall-time:", sec2str(cpu_all), ", Total cpu time:", sec2str(wall_all), ch10, ch10))
 
  ! Free memory
@@ -1698,7 +1698,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
  ! Prepare calculation of generalized Eliashberg functions.
  new%gfw_nomega = 0; ph_wstep = one/Ha_cmm1
 
- if (ph_wstep > zero) then
+ if (new%gfw_nomega /= 0 .and. ph_wstep > zero) then
    new%gfw_nomega = nint((ifc%omega_minmax(2) - ifc%omega_minmax(1) ) / ph_wstep) + 1
    ABI_MALLOC(new%gfw_mesh, (new%gfw_nomega))
    new%gfw_mesh = arth(ifc%omega_minmax(1), ph_wstep, new%gfw_nomega)
@@ -1714,13 +1714,13 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
 #ifdef HAVE_NETCDF
  if (my_rank == master) then
    ! Master creates the netcdf file used to store the results of the calculation.
-   NCF_CHECK(nctk_open_create(new%ncid, strcat(dtfil%filnam_ds(4), "_SIGMAPH.nc"), comm))
+   NCF_CHECK(nctk_open_create(new%ncid, strcat(dtfil%filnam_ds(4), "_SIGEPH.nc"), comm))
    ncid = new%ncid
 
    NCF_CHECK(crystal_ncwrite(cryst, ncid))
    NCF_CHECK(ebands_ncwrite(ebands, ncid))
 
-   ! Add sigma_ph dimensions.
+   ! Add sigma_eph dimensions.
    ncerr = nctk_def_dims(ncid, [ &
      nctkdim_t("nkcalc", new%nkcalc), nctkdim_t("max_nbcalc", new%max_nbcalc), &
      nctkdim_t("nsppol", new%nsppol), nctkdim_t("ntemp", new%ntemp), nctkdim_t("natom3", 3 * cryst%natom), &
@@ -1735,7 +1735,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
      NCF_CHECK(nctk_def_dims(ncid, [nctkdim_t("gfw_nomega", new%gfw_nomega)]))
    end if
 
-   ncerr = nctk_def_iscalars(ncid, [character(len=nctk_slen) :: "symsigma"])
+   ncerr = nctk_def_iscalars(ncid, [character(len=nctk_slen) :: "symsigma", "nbsum"])
    NCF_CHECK(ncerr)
    ncerr = nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: "eta", "wr_step"])
    NCF_CHECK(ncerr)
@@ -1744,7 +1744,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
      nctkarr_t("ngqpt", "int", "three"), &
      nctkarr_t("bstart_ks", "int", "nkcalc, nsppol"), &
      nctkarr_t("nbcalc_ks", "int", "nkcalc, nsppol"), &
-     nctkarr_t("kcalc", "int", "three, nkcalc"), &
+     nctkarr_t("kcalc", "dp", "three, nkcalc"), &
      nctkarr_t("kTmesh", "dp", "ntemp"), &
      nctkarr_t("mu_e", "dp", "ntemp"), &
      nctkarr_t("vals_e0ks", "dp", "two, ntemp, max_nbcalc, nkcalc, nsppol"), &
@@ -1752,6 +1752,8 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
      nctkarr_t("dw_vals", "dp", "ntemp, max_nbcalc, nkcalc, nsppol"), &
      nctkarr_t("qpadb_enes", "dp", "two, ntemp, max_nbcalc, nkcalc, nsppol"), &
      nctkarr_t("qp_enes", "dp", "two, ntemp, max_nbcalc, nkcalc, nsppol"), &
+     nctkarr_t("ze0_vals", "dp", "ntemp, max_nbcalc, nkcalc, nsppol"), &
+     nctkarr_t("ks_enes", "dp", "max_nbcalc, nkcalc, nsppol"), &
      nctkarr_t("ks_gaps", "dp", "nkcalc, nsppol"), &
      nctkarr_t("qpadb_gaps", "dp", "ntemp, nkcalc, nsppol"), &
      nctkarr_t("qp_gaps", "dp", "ntemp, nkcalc, nsppol") &
@@ -1790,30 +1792,33 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
    ! Write data that do not depend on the (kpt, spin) loop.
    ! ======================================================
    NCF_CHECK(nctk_set_datamode(ncid))
-   ncerr = nctk_write_iscalars(ncid, [character(len=nctk_slen) :: "symsigma"], [new%symsigma])
+   ncerr = nctk_write_iscalars(ncid, &
+       [character(len=nctk_slen) :: "symsigma", "nbsum"], &
+       [new%symsigma, new%nbsum])
    NCF_CHECK(ncerr)
    ncerr = nctk_write_dpscalars(ncid, &
      [character(len=nctk_slen) :: "eta", "wr_step"], &
-     [real(new%ieta), new%wr_step])
+     [aimag(new%ieta), new%wr_step])
    NCF_CHECK(ncerr)
 
-   NCF_CHECK(nf90_put_var(ncid, nctk_idname(new%ncid, "ngqpt"), new%ngqpt))
-   NCF_CHECK(nf90_put_var(ncid, nctk_idname(new%ncid, "bstart_ks"), new%bstart_ks))
-   NCF_CHECK(nf90_put_var(ncid, nctk_idname(new%ncid, "nbcalc_ks"), new%nbcalc_ks))
-   NCF_CHECK(nf90_put_var(ncid, nctk_idname(new%ncid, "kcalc"), new%kcalc))
-   NCF_CHECK(nf90_put_var(ncid, nctk_idname(new%ncid, "kTmesh"), new%kTmesh))
-   NCF_CHECK(nf90_put_var(ncid, nctk_idname(new%ncid, "mu_e"), new%mu_e))
-   NCF_CHECK(nf90_put_var(ncid, nctk_idname(new%ncid, "eta"), real(new%ieta)))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "ngqpt"), new%ngqpt))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "bstart_ks"), new%bstart_ks))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "nbcalc_ks"), new%nbcalc_ks))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "kcalc"), new%kcalc))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "kTmesh"), new%kTmesh))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "mu_e"), new%mu_e))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "eta"), aimag(new%ieta)))
    if (new%gfw_nomega > 0) then
-     NCF_CHECK(nf90_put_var(ncid, nctk_idname(new%ncid, "gfw_mesh"), new%gfw_mesh))
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "gfw_mesh"), new%gfw_mesh))
    end if
+   NCF_CHECK(nf90_close(ncid))
  end if ! master
 
  ! Now reopen the file in parallel.
- !call xmpi_barrier(comm)
- !NCF_CHECK(nctk_open_modify(new%ncid, strcat(dtfil%filnam_ds(4), "_SIGMAPH.nc"), comm))
+ call xmpi_barrier(comm)
+ !NCF_CHECK(nctk_open_modify(new%ncid, strcat(dtfil%filnam_ds(4), "_SIGEPH.nc"), comm))
  !NCF_CHECK(nctk_set_datamode(new%ncid))
- NCF_CHECK(nctk_open_modify(new%ncid, strcat(dtfil%filnam_ds(4), "_SIGMAPH.nc"), xmpi_comm_self))
+ NCF_CHECK(nctk_open_modify(new%ncid, strcat(dtfil%filnam_ds(4), "_SIGEPH.nc"), xmpi_comm_self))
  NCF_CHECK(nctk_set_datamode(new%ncid))
 #endif
 
@@ -2053,11 +2058,12 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, comm)
  complex(dpc) :: sig0c,zc,qpe,qpe_prev,qpe_val,qpe_cond,cavg1,cavg2
 !arrays
  integer :: shape3(3),shape4(4),shape5(5),shape6(6)
- integer, ABI_CONTIGUOUS pointer :: bids(:)
  real(dp), ABI_CONTIGUOUS pointer :: rdata3(:,:,:),rdata4(:,:,:,:),rdata5(:,:,:,:,:),rdata6(:,:,:,:,:,:)
+ integer, ABI_CONTIGUOUS pointer :: bids(:)
  real(dp) :: qp_gaps(self%ntemp),qpadb_gaps(self%ntemp)
  real(dp),allocatable :: aw(:,:,:)
  complex(dpc),target :: qpadb_enes(self%ntemp, self%max_nbcalc),qp_enes(self%ntemp, self%max_nbcalc)
+ real(dp) :: ks_enes(self%max_nbcalc),ze0_vals(self%ntemp, self%max_nbcalc)
 
 ! *************************************************************************
 
@@ -2112,8 +2118,9 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, comm)
 
  ! Compute QP energies and Gaps.
  ib_val = nint(ebands%nelect / two); ib_cond = ib_val + 1
- kse_val = huge(one); kse_cond = huge(one)
- qp_enes = huge(one); qpadb_enes = huge(one)
+ kse_val = huge(one) * tol6; kse_cond = huge(one) * tol6
+ qp_enes = huge(one) * tol6; qpadb_enes = huge(one) * tol6
+ ks_enes = huge(one) * tol6; ze0_vals = huge(one) * tol6
  ks_gap = -one; qpadb_gaps = -one; qp_gaps = -one
 
  ! Write legend.
@@ -2131,25 +2138,29 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, comm)
    write(ab_out,"(a)")" "
  end if
 
- ! FIXME
- !do it=1,self%ntemp
- do it=1,1
-   if (self%nsppol == 1) then
-     write(ab_out,"(a)")sjoin("K-point:", ktoa(self%kcalc(:,ikcalc)))
-   else
-     write(ab_out,"(a)")sjoin("K-point:", ktoa(self%kcalc(:,ikcalc)), ", spin:", itoa(spin))
+ do it=1,self%ntemp
+ !do it=1,1
+   ! FIXME
+   if (it == 1) then
+     if (self%nsppol == 1) then
+       write(ab_out,"(a)")sjoin("K-point:", ktoa(self%kcalc(:,ikcalc)))
+     else
+       write(ab_out,"(a)")sjoin("K-point:", ktoa(self%kcalc(:,ikcalc)), ", spin:", itoa(spin))
+     end if
+     write(ab_out,"(a)")"   B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP"
    end if
-   write(ab_out,"(a)")"   B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP"
 
    do ibc=1,self%nbcalc_ks(ikcalc,spin)
      band = self%bstart_ks(ikcalc,spin) + ibc - 1
      kse = ebands%eig(band,ik_ibz,spin)
+     ks_enes(ibc) = kse
      sig0c = self%vals_e0ks(it, ibc)
      dw = self%dw_vals(it, ibc)
      fan0 = real(sig0c) - dw
-     ! Note that here I use the full Sigma including the imaginary part
+     ! TODO: Note that here I use the full Sigma including the imaginary part
      zc = one / (one - self%dvals_de0ks(it, ibc))
      !zc = one / (one - real(self%dvals_de0ks(it, ibc))
+     ze0_vals(it, ibc) = real(zc)
      qpe = kse + sig0c
      if (ibc == 1) then
        kse_prev = kse; qpe_prev = qpe
@@ -2160,10 +2171,12 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, comm)
      if (band == ib_cond) then
        kse_cond = kse; qpe_cond = qpe
      end if
-     write(ab_out, "(i4,10(f8.3,1x))") &
-       band, kse * Ha_eV, real(qpe) * Ha_eV, (real(qpe) - kse) * Ha_eV, &
-       real(sig0c) * Ha_eV, aimag(sig0c) * Ha_eV, real(zc), &
-       fan0 * Ha_eV, dw * Ha_eV, (kse - kse_prev) * Ha_eV, real(qpe - qpe_prev) * Ha_eV
+     if (it == 1) then
+       write(ab_out, "(i4,10(f8.3,1x))") &
+         band, kse * Ha_eV, real(qpe) * Ha_eV, (real(qpe) - kse) * Ha_eV, &
+         real(sig0c) * Ha_eV, aimag(sig0c) * Ha_eV, real(zc), &
+         fan0 * Ha_eV, dw * Ha_eV, (kse - kse_prev) * Ha_eV, real(qpe - qpe_prev) * Ha_eV
+     end if
      if (ibc > 1) then
        kse_prev = kse; qpe_prev = qpe
      end if
@@ -2178,7 +2191,7 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, comm)
    end do ! ibc
 
    ! Print KS and QP gap
-   if (kse_val /= huge(one) .and. kse_cond /= huge(one)) then
+   if (it == 1 .and. kse_val /= huge(one) .and. kse_cond /= huge(one)) then
      write(ab_out, "(a)")" "
      write(ab_out, "(a,f8.3,1x,2(a,i0),a)")" KS gap: ",ks_gap * Ha_eV, &
        "(assuming bval:",ib_val," ==> bcond:",ib_cond,")"
@@ -2192,28 +2205,27 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, comm)
  ! (use iso_c_binding to associate a real pointer to complex data because netcdf does not support complex types).
 
 #ifdef HAVE_NETCDF
- shape3(1) = 2; shape4(1) = 2; shape5(1) = 2; shape6(1) = 2
+ ! Write self-energy matrix elements for this (kpt, spin)
+ ! Cannot use c_loc with gcc <= 4.8 due to internal compiler error so use c2r and stack
+ !shape3(1) = 2; shape4(1) = 2; shape5(1) = 2; shape6(1) = 2
 
-#if 0
- ! Dump self-energy matrix elements for this (kpt, spin)
- shape3(2:) = shape(self%vals_e0ks)
- call c_f_pointer(c_loc(self%vals_e0ks), rdata3, shape3)
- NCF_CHECK(nf90_put_var(self%ncid, nctk_idname(self%ncid, "vals_e0ks"), rdata3, start=[1,1,1,ikcalc,spin]))
+ !shape3(2:) = shape(self%vals_e0ks); call c_f_pointer(c_loc(self%vals_e0ks), rdata3, shape3)
+ NCF_CHECK(nf90_put_var(self%ncid, nctk_idname(self%ncid, "vals_e0ks"), c2r(self%vals_e0ks), start=[1,1,1,ikcalc,spin]))
 
- shape3(2:) = shape(self%dvals_de0ks)
- call c_f_pointer(c_loc(self%dvals_de0ks), rdata3, shape3)
- NCF_CHECK(nf90_put_var(self%ncid, nctk_idname(self%ncid, "dvals_de0ks"), rdata3, start=[1,1,1,ikcalc,spin]))
+ !shape3(2:) = shape(self%dvals_de0ks); call c_f_pointer(c_loc(self%dvals_de0ks), rdata3, shape3)
+ NCF_CHECK(nf90_put_var(self%ncid, nctk_idname(self%ncid, "dvals_de0ks"), c2r(self%dvals_de0ks), start=[1,1,1,ikcalc,spin]))
 
  NCF_CHECK(nf90_put_var(self%ncid, nctk_idname(self%ncid, "dw_vals"), self%dw_vals, start=[1,1,ikcalc,spin]))
 
  ! Dump QP energies and gaps for this (kpt, spin)
- shape3(2:) = shape(qpadb_enes)
- call c_f_pointer(c_loc(qpadb_enes), rdata3, shape3)
- NCF_CHECK(nf90_put_var(self%ncid, nctk_idname(self%ncid, "qpadb_enes"), rdata3, start=[1,1,1,ikcalc,spin]))
- shape3(2:) = shape(qp_enes)
- call c_f_pointer(c_loc(qp_enes), rdata3, shape3)
- NCF_CHECK(nf90_put_var(self%ncid, nctk_idname(self%ncid, "qp_enes"), rdata3, start=[1,1,1,ikcalc,spin]))
+ !shape3(2:) = shape(qpadb_enes); call c_f_pointer(c_loc(qpadb_enes), rdata3, shape3)
+ NCF_CHECK(nf90_put_var(self%ncid, nctk_idname(self%ncid, "qpadb_enes"), c2r(qpadb_enes), start=[1,1,1,ikcalc,spin]))
 
+ !shape3(2:) = shape(qp_enes); call c_f_pointer(c_loc(qp_enes), rdata3, shape3)
+ NCF_CHECK(nf90_put_var(self%ncid, nctk_idname(self%ncid, "qp_enes"), c2r(qp_enes), start=[1,1,1,ikcalc,spin]))
+ NCF_CHECK(nf90_put_var(self%ncid, nctk_idname(self%ncid, "ze0_vals"), ze0_vals, start=[1,1,ikcalc,spin]))
+
+ NCF_CHECK(nf90_put_var(self%ncid, nctk_idname(self%ncid, "ks_enes"), ks_enes, start=[1,ikcalc,spin]))
  NCF_CHECK(nf90_put_var(self%ncid, nctk_idname(self%ncid, "ks_gaps"), ks_gap, start=[ikcalc,spin]))
  NCF_CHECK(nf90_put_var(self%ncid, nctk_idname(self%ncid, "qpadb_gaps"), qpadb_gaps, start=[1,ikcalc,spin]))
  NCF_CHECK(nf90_put_var(self%ncid, nctk_idname(self%ncid, "qp_gaps"), qp_gaps, start=[1,ikcalc,spin]))
@@ -2222,9 +2234,8 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, comm)
  if (self%nwr > 0) then
    NCF_CHECK(nf90_put_var(self%ncid, nctk_idname(self%ncid, "wrmesh_b"), self%wrmesh_b, start=[1,1,ikcalc,spin]))
 
-   shape4(2:) = shape(self%vals_wr)
-   call c_f_pointer(c_loc(self%vals_wr), rdata4, shape4)
-   NCF_CHECK(nf90_put_var(self%ncid, nctk_idname(self%ncid, "vals_wr"), rdata4, start=[1,1,1,1,ikcalc,spin]))
+   !shape4(2:) = shape(self%vals_wr); call c_f_pointer(c_loc(self%vals_wr), rdata4, shape4)
+   NCF_CHECK(nf90_put_var(self%ncid, nctk_idname(self%ncid, "vals_wr"), c2r(self%vals_wr), start=[1,1,1,1,ikcalc,spin]))
 
    ! Compute spectral function.
    ! A = 1/pi [Im Sigma(ww)] / ([ww - ee - Re Sigma(ww)] **2 + Im Sigma(ww) ** 2])
@@ -2244,17 +2255,14 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, comm)
 
  ! Write Eliashberg functions
  if (self%gfw_nomega > 0) then
-   shape5(2:) = shape(self%gfw_vals)
-   call c_f_pointer(c_loc(self%gfw_vals), rdata5, shape5)
-   NCF_CHECK(nf90_put_var(self%ncid, nctk_idname(self%ncid, "gfw_vals"), rdata5, start=[1,1,1,1,1,ikcalc,spin]))
+   !shape5(2:) = shape(self%gfw_vals); call c_f_pointer(c_loc(self%gfw_vals), rdata5, shape5)
+   NCF_CHECK(nf90_put_var(self%ncid, nctk_idname(self%ncid, "gfw_vals"), c2r(self%gfw_vals), start=[1,1,1,1,1,ikcalc,spin]))
  end if
 
  if (self%has_nuq_terms) then
-   shape6(2:) = shape(self%vals_nuq)
-   call c_f_pointer(c_loc(self%vals_nuq), rdata6, shape6)
-   NCF_CHECK(nf90_put_var(self%ncid, nctk_idname(self%ncid, "vals_nuq"), rdata6, start=[1,1,1,1,1,1,ikcalc,spin]))
+   !shape6(2:) = shape(self%vals_nuq); call c_f_pointer(c_loc(self%vals_nuq), rdata6, shape6)
+   NCF_CHECK(nf90_put_var(self%ncid, nctk_idname(self%ncid, "vals_nuq"), c2r(self%vals_nuq), start=[1,1,1,1,1,1,ikcalc,spin]))
  end if
-#endif
 #endif
 
 end subroutine sigmaph_gather_and_write
