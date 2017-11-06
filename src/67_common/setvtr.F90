@@ -505,7 +505,7 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
 !        Compute energies%e_xc and associated quantities
          if(.not.is_hybrid_ncpp .or. mod(dtset%fockoptmix,100)==11)then 
 !DEBUG
-         write(std_out,*)' setvtr : call rhotoxc (1) '
+         write(std_out,*)' setvtr : call rhotoxc (1), option,nkxc=  ',option,nkxc
 !ENDDEBUG
            call rhotoxc(energies%e_xc,kxc,mpi_enreg,nfft,ngfft,&
 &            nhat,psps%usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,n3xccc,&
