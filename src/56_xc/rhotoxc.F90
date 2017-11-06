@@ -270,7 +270,7 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
  integer :: jj,mpts,ndvxc,nd2vxc,nfftot,ngr,ngr2,ngrad,ngrad_apn,nkxc_eff,npts
  integer :: nspden,nspden_apn,nspden_eff,nspden_updn,nspgrad,nvxcgrho,order,mgga,usefxc
  integer :: nproc_fft,comm_fft
- logical :: add_tfw_
+ logical :: add_tfw_,isgga,ismgga,is_hybrid
  real(dp),parameter :: mot=-one/3.0_dp
  real(dp) :: coeff,divshft,doti,dstrsxc,dvdn,dvdz,epsxc,exc_str,factor,m_norm_min,s1,s2,s3
  real(dp) :: strdiag,strsxc1_tot,strsxc2_tot,strsxc3_tot,strsxc4_tot
@@ -314,14 +314,26 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
 
  nspden=xcdata%nspden
 
+ isgga=.false. ; ismgga=.false. ; is_hybrid=.false.
+ if(ixc<0)then
+   if(present(xc_funcs))then
+     isgga=libxc_functionals_isgga(xc_functionals=xc_funcs)
+     ismgga=libxc_functionals_ismgga(xc_functionals=xc_funcs)
+     is_hybrid=libxc_functionals_is_hybrid(xc_functionals=xc_funcs)
+   else
+     isgga=libxc_functionals_isgga()
+     ismgga=libxc_functionals_ismgga()
+     is_hybrid=libxc_functionals_is_hybrid()
+   endif
+ endif
+
 !Check options
  ixc=xcdata%ixc
  auxc_ixc=xcdata%auxc_ixc
  if(option==3)then
    allow3=(ixc > 0).and.(ixc /= 3).and.(ixc /= 7).and.(ixc /= 8)
    if(.not.allow3)then
-     allow3=(ixc < 0).and. &
-&     (libxc_functionals_isgga().or.libxc_functionals_ismgga())
+     allow3=(ixc < 0).and. isgga .and. ismgga 
    end if
    if(allow3)then
      write(message, '(3a,i0)' )&
@@ -336,7 +348,7 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
 
 !Is the functional a MGGA?
  mgga=0;if(ixc>=31 .and. ixc<=34) mgga=1
- if (ixc<0.and.libxc_functionals_ismgga()) mgga=1
+ if (ixc<0.and.ismgga) mgga=1
  if (mgga==1) then
    if (.not.present(taur)) then
      message='taur arg must be present for metaGGA!'
@@ -355,6 +367,15 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
      MSG_BUG(message)
    end if
  end if
+
+ if(ixc>0)then
+   if(present(xc_funcs))then
+     write(message, '(a,i0,2a,i0,2a)')&
+&     'The value of ixc specified in input, ixc = ',ixc,ch10,&
+&     'is not coherent with the presence of optional argument xc_funcs'
+     MSG_BUG(message)
+   end if
+ endif
 
  if(ixc<0)then
    if(present(xc_funcs))then
@@ -675,7 +696,11 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
        ABI_ALLOCATE(vxcrho_b_updn,(npts,nspden_updn))
        vxcrho_b_updn(:,:)=zero
 !      Allocation of optional arguments
-       call size_dvxc(ixc,ndvxc,ngr2,nd2vxc,nspden_updn,nvxcgrho,order,add_tfw_)
+       if(present(xc_funcs))then
+         call size_dvxc(ixc,ndvxc,ngr2,nd2vxc,nspden_updn,nvxcgrho,order,add_tfw=add_tfw_,xc_funcs=xc_funcs)
+       else
+         call size_dvxc(ixc,ndvxc,ngr2,nd2vxc,nspden_updn,nvxcgrho,order,add_tfw=add_tfw_)
+       endif
 
 !      Allocation of optional arguments
        ABI_ALLOCATE(dvxc_b,(npts,ndvxc))

@@ -71,11 +71,12 @@ subroutine size_dvxc(ixc,ndvxc,ngr2,nd2vxc,nspden,nvxcdgr,order,&
 ! *************************************************************************
 
  add_tfw_=.false.;if (present(add_tfw)) add_tfw_=add_tfw
+ isgga=.false. ; ismgga=.false. ; is_hybrid=.false.
  if(ixc<0)then
    if(present(xc_funcs))then
-     isgga=libxc_functionals_isgga(xc_functionals=xc_funcs))
-     ismgga=libxc_functionals_ismgga(xc_functionals=xc_funcs))
-     is_hybrid=libxc_functionals_is_hybrid(xc_functionals=xc_funcs))
+     isgga=libxc_functionals_isgga(xc_functionals=xc_funcs)
+     ismgga=libxc_functionals_ismgga(xc_functionals=xc_funcs)
+     is_hybrid=libxc_functionals_is_hybrid(xc_functionals=xc_funcs)
    else
      isgga=libxc_functionals_isgga()
      ismgga=libxc_functionals_ismgga()
