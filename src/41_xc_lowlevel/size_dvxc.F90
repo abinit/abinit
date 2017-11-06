@@ -22,6 +22,7 @@
 !!    2=also computes the kernel (return exc,vxc,kxc)
 !!   -2=like 2, except (to be described)
 !!    3=also computes the derivative of the kernel (return exc,vxc,kxc,k3xc)
+!!  [xc_funcs(2)]= <type(libxc_functional_type)>
 !!
 !! OUTPUT
 !!  ndvxc size of the array dvxc(npts,ndvxc) for allocation
@@ -43,7 +44,8 @@
 #include "abi_common.h"
 
 
-subroutine size_dvxc(ixc,ndvxc,ngr2,nd2vxc,nspden,nvxcdgr,order,add_tfw)
+subroutine size_dvxc(ixc,ndvxc,ngr2,nd2vxc,nspden,nvxcdgr,order,&
+& add_tfw,xc_funcs) ! Optional 
 
  use defs_basis
  use m_profiling_abi
@@ -61,13 +63,25 @@ subroutine size_dvxc(ixc,ndvxc,ngr2,nd2vxc,nspden,nvxcdgr,order,add_tfw)
  integer, intent(in) :: ixc,nspden,order
  integer, intent(out) :: ndvxc,nd2vxc,ngr2,nvxcdgr
  logical, intent(in), optional :: add_tfw
+ type(libxc_functional_type),intent(in),optional :: xc_funcs(2)
 
 !Local variables----------------
- logical :: add_tfw_
+ logical :: add_tfw_,isgga,ismgga,is_hybrid
 
 ! *************************************************************************
 
  add_tfw_=.false.;if (present(add_tfw)) add_tfw_=add_tfw
+ if(ixc<0)then
+   if(present(xc_funcs))then
+     isgga=libxc_functionals_isgga(xc_functionals=xc_funcs))
+     ismgga=libxc_functionals_ismgga(xc_functionals=xc_funcs))
+     is_hybrid=libxc_functionals_is_hybrid(xc_functionals=xc_funcs))
+   else
+     isgga=libxc_functionals_isgga()
+     ismgga=libxc_functionals_ismgga()
+     is_hybrid=libxc_functionals_is_hybrid()
+   endif
+ endif
 
  ngr2=0
  nvxcdgr=0
@@ -77,8 +91,7 @@ subroutine size_dvxc(ixc,ndvxc,ngr2,nd2vxc,nspden,nvxcdgr,order,add_tfw)
 !Dimension for the gradient of the density (only allocated for GGA or mGGA)
  if ((ixc>=11.and.ixc<=17).or.(ixc>=23.and.ixc<=24).or.ixc==26.or.ixc==27.or. &
 & (ixc>=31.and.ixc<=34).or.(ixc==41.or.ixc==42).or.ixc==1402000.or.(add_tfw_)) ngr2=2*min(nspden,2)-1
- if (ixc<0.and.(libxc_functionals_isgga().or.libxc_functionals_ismgga().or.libxc_functionals_is_hybrid() )) &
-& ngr2=2*min(nspden,2)-1
+ if (ixc<0.and.isgga.or.ismgga.or.is_hybrid) ngr2=2*min(nspden,2)-1
 
 !A-Only Exc and Vxc
 !=======================================================================================

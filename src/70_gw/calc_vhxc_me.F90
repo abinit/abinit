@@ -177,6 +177,7 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,nfftf,ngfftf,&
  complex(dpc),allocatable :: vxcab(:),vxcab_val(:),vxcab_val_hybrid(:),u1cjg_u2dpc(:),kinwf2(:),veffh0_ab(:)
  logical,allocatable :: bbp_mask(:,:)
  type(pawcprj_type),allocatable ::  Cprj_b1ks(:,:),Cprj_b2ks(:,:)
+ type(libxc_functional_type) :: xc_funcs_hybrid(2)
 
 ! *************************************************************************
 
@@ -268,10 +269,10 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,nfftf,ngfftf,&
      call xcdata_init(xcdata_hybrid,dtset=Dtset,auxc_ixc=auxc_ixc,ixc=ixc_hybrid)
 
      ! reinitialize the libxc module with the overriden values
-     if(Dtset%ixc<0) then
-       call libxc_functionals_end()
-     end if
-     call libxc_functionals_init(ixc_hybrid,Dtset%nspden)
+!    if(Dtset%ixc<0) then
+!      call libxc_functionals_end()
+!    end if
+     call libxc_functionals_init(ixc_hybrid,Dtset%nspden,xc_functionals=xc_funcs_hybrid)
 !    if (ixc_hybrid==-406) then !PBE0
 !      call libxc_functionals_set_hybridparams(hyb_mixing=Dtset%gwfockmix)
 !    else if (ixc_hybrid==-428) then !HSE06
@@ -292,7 +293,7 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,nfftf,ngfftf,&
        call flush(std_out)
 !ENDDEBUG
        call libxc_functionals_set_hybridparams(hyb_range=abs(Dtset%hyb_range_dft),&
-&        hyb_mixing=abs(Dtset%hyb_mixing),hyb_mixing_sr=abs(Dtset%hyb_mixing_sr))
+&        hyb_mixing=abs(Dtset%hyb_mixing),hyb_mixing_sr=abs(Dtset%hyb_mixing_sr),xc_functionals=xc_funcs_hybrid)
      endif
 !    write(msg, '(a, f4.2)') ' Fock fraction = ', Dtset%gwfockmix
      write(msg, '(a, f4.2)') ' Fock fraction = ', max(Dtset%hyb_mixing,Dtset%hyb_mixing_sr)
@@ -305,13 +306,13 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,nfftf,ngfftf,&
 
      call rhotoxc(enxc_hybrid_val,kxc_,MPI_enreg_seq,nfftf,ngfftf,&
 &     nhat,Wfd%usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,n3xccc_,option,dtset%paral_kgb,rhor,Cryst%rprimd,&
-&     strsxc,usexcnhat,vxc_val_hybrid,vxcval_hybrid_avg,xccc3d_,xcdata_hybrid)
+&     strsxc,usexcnhat,vxc_val_hybrid,vxcval_hybrid_avg,xccc3d_,xcdata_hybrid,xc_funcs=xc_funcs_hybrid)
 
      ! Fix the libxc module with the original settings
-     call libxc_functionals_end()
-     if(Dtset%ixc<0) then
-       call libxc_functionals_init(Dtset%ixc,Dtset%nspden)
-     end if
+     call libxc_functionals_end(xc_functionals=xc_funcs_hybrid)
+!    if(Dtset%ixc<0) then
+!      call libxc_functionals_init(Dtset%ixc,Dtset%nspden)
+!    end if
 
    else
      call wrtout(std_out, 'LIBXC is not present: hybrid functionals are not available')

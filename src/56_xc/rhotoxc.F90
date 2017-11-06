@@ -731,7 +731,10 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
          if (auxc_ixc<0) then
            call libxc_functionals_init(auxc_ixc,nspden,xc_functionals=xc_funcs_auxc)
          end if
+!        DEBUG
          write(std_out,*)' rhotoxc : auxiliary call to drivexc_main, auxc_ixc=',auxc_ixc
+         write(std_out,*)' rhotoxc : ngr2,nspden_updn=',ngr2,nspden_updn
+!        ENDDEBUG
          call drivexc_main(exc_b,auxc_ixc,mgga,ndvxc,nd2vxc,ngr2,npts,nspden_updn,nvxcgrho,order,&
 &         rho_b_updn,vxcrho_b_updn,xcdata%xclevel, &
 &         dvxc=dvxc_b,d2vxc=d2vxc_b,grho2=grho2_b_updn,vxcgrho=vxcgrho_b, &
@@ -747,18 +750,17 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
            kxc(ifft:ifft+npts-1,3)=dvxc_b(1:npts,2)+dvxc_b(1:npts,11)
          end if
          if (auxc_ixc<0) then
-           call libxc_functionals_end(xc_funcs_auxc)
+           call libxc_functionals_end(xc_functionals=xc_funcs_auxc)
          end if
        end if
 
 !      Call to main XC driver
 !DEBUG
        write(std_out,*)' rhotoxc : main call to drivexc_main, ixc=',ixc
-       call libxc_functionals_get_hybridparams(hyb_mixing=hyb_mixing,hyb_mixing_sr=hyb_mixing_sr,&
-&                                            hyb_range=hyb_range)
-       write(std_out,*)' hyb_mixing, hyb_mixing_sr, hyb_range=',hyb_mixing, hyb_mixing_sr, hyb_range
 !ENDDEBUG
        if(present(xc_funcs))then
+         call libxc_functionals_get_hybridparams(hyb_mixing=hyb_mixing,hyb_mixing_sr=hyb_mixing_sr,&
+&                                            hyb_range=hyb_range,xc_functionals=xc_funcs)
          call drivexc_main(exc_b,ixc,mgga,ndvxc,nd2vxc,ngr2,npts,nspden_updn,nvxcgrho,order,&
 &         rho_b_updn,vxcrho_b_updn,xcdata%xclevel, &
 &         dvxc=dvxc_b,d2vxc=d2vxc_b,grho2=grho2_b_updn,vxcgrho=vxcgrho_b, &
@@ -766,6 +768,8 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
 &         fxcT=fxc_b,hyb_mixing=xcdata%hyb_mixing,el_temp=xcdata%tphysel,xc_funcs=xc_funcs, &
 &         xc_tb09_c=xcdata%xc_tb09_c)
        else
+         call libxc_functionals_get_hybridparams(hyb_mixing=hyb_mixing,hyb_mixing_sr=hyb_mixing_sr,&
+&                                            hyb_range=hyb_range)
          call drivexc_main(exc_b,ixc,mgga,ndvxc,nd2vxc,ngr2,npts,nspden_updn,nvxcgrho,order,&
 &         rho_b_updn,vxcrho_b_updn,xcdata%xclevel, &
 &         dvxc=dvxc_b,d2vxc=d2vxc_b,grho2=grho2_b_updn,vxcgrho=vxcgrho_b, &

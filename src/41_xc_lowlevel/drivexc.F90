@@ -137,7 +137,7 @@
 #include "abi_common.h"
 
 subroutine drivexc(exc,ixc,npts,nspden,order,rho_updn,vxcrho,ndvxc,ngr2,nd2vxc,nvxcgrho, &
-&   dvxc,d2vxc,grho2_updn,vxcgrho,el_temp,exexch,fxcT,&
+&   dvxc,d2vxc,grho2_updn,vxcgrho,el_temp,exexch,fxcT,& !Optional arguments
 &   hyb_mixing,lrho_updn,vxclrho,tau_updn,vxctau,xc_funcs,xc_tb09_c)  !Optional arguments
 
 
