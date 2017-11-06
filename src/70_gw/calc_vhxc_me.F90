@@ -256,42 +256,13 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,nfftf,ngfftf,&
    if(libxc_functionals_check()) then
 
      call wrtout(std_out,' Hybrid functional xc potential is being set')
-     !Define ixc_hybrid
-!    if(Dtset%gwcalctyp<200) then
-!      ixc_hybrid=-428         ! HSE06
-!    else if(Dtset%gwcalctyp<300) then
-!      ixc_hybrid=-406         ! PBE0
-!    else ! Dtset%gwcalctyp > 300
-!      ixc_hybrid=-402         ! B3LYP
-!    end if
      ixc_hybrid=Dtset%ixc_adv
      call get_auxc_ixc(auxc_ixc,ixc_hybrid)
      call xcdata_init(xcdata_hybrid,dtset=Dtset,auxc_ixc=auxc_ixc,ixc=ixc_hybrid)
 
-     ! reinitialize the libxc module with the overriden values
-!    if(Dtset%ixc<0) then
-!      call libxc_functionals_end()
-!    end if
-     call libxc_functionals_init(ixc_hybrid,Dtset%nspden,xc_functionals=xc_funcs_hybrid)
-!    if (ixc_hybrid==-406) then !PBE0
-!      call libxc_functionals_set_hybridparams(hyb_mixing=Dtset%gwfockmix)
-!    else if (ixc_hybrid==-428) then !HSE06
-!      if (Dtset%rcut>tol6) then
-!        omega = one/Dtset%rcut
-!      else
-!        omega = 0.11_dp
-!      end if
-!      call libxc_functionals_set_hybridparams(hyb_range=omega,hyb_mixing_sr=Dtset%gwfockmix)
-!    end if
-
 !    Do not forget, negative values of hyb_mixing(_sr),hyb_range_* means that they have been user-defined.
      if (dtset%ixc==-406.or.dtset%ixc==-427.or.dtset%ixc==-428 .or. &
 &      min(Dtset%hyb_mixing,Dtset%hyb_mixing_sr,Dtset%hyb_range_dft,Dtset%hyb_range_fock)<-tol8)then
-!DEBUG
-       write(std_out,*)' calc_vhxc_me : Dtset%hyb_mixing,Dtset%hyb_mixing_sr,Dtset%hyb_range_dft,Dtset%hyb_range_fock=',&
-&       Dtset%hyb_mixing,Dtset%hyb_mixing_sr,Dtset%hyb_range_dft,Dtset%hyb_range_fock
-       call flush(std_out)
-!ENDDEBUG
        call libxc_functionals_set_hybridparams(hyb_range=abs(Dtset%hyb_range_dft),&
 &        hyb_mixing=abs(Dtset%hyb_mixing),hyb_mixing_sr=abs(Dtset%hyb_mixing_sr),xc_functionals=xc_funcs_hybrid)
      endif
