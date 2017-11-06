@@ -1,5 +1,5 @@
 # Hybrid functional calculation for C in the diamond structure.
-# The fraction of Fock exchange in HSE06 is adjusted by `gwfockmix'.
+# The fraction of Fock exchange in HSE06 is adjusted by `hyb_mixing_sr'.
 # Dataset 1: ground state calculation with WFK output
 # Dataset 2: calculation of the one-shot HSE using the default mixing.
 # Dataset 3: calculation of the one-shot HSE with a varied mixing parameter.

@@ -102,9 +102,6 @@ _ WF disk file :      0.125 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
            getwfk2          1
            getwfk3          1
         gwcalctyp         125
-        gwfockmix1     2.5000000000E-01
-        gwfockmix2     2.5000000000E-01
-        gwfockmix3     3.5000000000E-01
        gw_qprange         -14
    hyb_mixing_sr 1    -9.9900000000E+02
    hyb_mixing_sr 2     2.5000000000E-01
@@ -1030,9 +1027,6 @@ _setup2: Arith. and geom. avg. npw (full set) are     151.891     151.843
            getwfk2          1
            getwfk3          1
         gwcalctyp         125
-        gwfockmix1     2.5000000000E-01
-        gwfockmix2     2.5000000000E-01
-        gwfockmix3     3.5000000000E-01
        gw_qprange         -14
    hyb_mixing_sr 1    -9.9900000000E+02
    hyb_mixing_sr 2     2.5000000000E-01

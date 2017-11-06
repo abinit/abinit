@@ -9778,7 +9778,7 @@
            , 155208 (2003).)
           </li>
           <li>
-           [[gwcalctyp]] &#61; 5, 15, or 25 : Hartree-Fock calculation
+           [[gwcalctyp]] &#61; 5, 15, or 25 : Hybrid functional or Hartree-Fock calculation, with the identifier of the functional given by [[ixc_adv]]. See the latter for the definition of other related variables.
           </li>
           <li>
            [[gwcalctyp]] &#61; 6, 16, or 26 : Screened Exchange calculation
@@ -9814,19 +9814,6 @@
          </ul>
         </p>
         <p>
-         Also
-         <ul>
-          <li>
-           [[gwcalctyp]] &#61; 105,125 : HSE06 calculations (1-shot and self-consistent)
-          </li>
-          <li>
-           [[gwcalctyp]] &#61; 205,225 : PBE0 calculations  (1-shot and self-consistent)
-          </li>
-          <li>
-           [[gwcalctyp]] &#61; 305,325 : B3LYP calculations (1-shot and self-consistent)
-          </li>
-         </ul>
-        </p>
     topics: GW_basic, SelfEnergy_basic
     varset: gw
     vartype: integer
@@ -9871,21 +9858,6 @@
          See F. Bruneval, X. Gonze, Phys. Rev. B 78, 085125 (2008) for a description of the methodology.
         </p>
     topics: SelfEnergy_useful, Susceptibility_useful
-    varset: gw
-    vartype: real
-- !variable
-    abivarname: gwfockmix
-    characteristics: null
-    commentdefault: null
-    commentdims: null
-    defaultval: 0.25
-    dimensions: scalar
-    excludes: null
-    mnemonics: GW FOCK exchange MIXing parameter
-    requires: '[[optdriver]]=4, [[gwcalctyp]] = 1x5 (HSE) or 2x5 (PBE0).'
-    text: |-
-        Mixing parameter of Fock exchange for PBE0 and HSE hybrid-functional calculations via the GW self-energy subroutine. [[gwfockmix]] ranges from 0 (essentially PBE) to 1.
-    topics: GW_useful
     varset: gw
     vartype: real
 - !variable
@@ -14210,15 +14182,15 @@
     mnemonics: Index of eXchange-Correlation functional - ADVanced functional
     requires: mod([[gwcalctyp]],10)==5
     text: |-
-        <p>When [[gwcalctyp]]==5, 15 or 25, [[ixc_adv]] gives the advanced functional (usually a hybrid) that
+        <p>When [[gwcalctyp]]==5, 15 or 25, [[ixc_adv]] gives the identifier of the advanced functional (usually a hybrid) that
         is used perturbatively or self-consistently to obtain the improved electronic structure.
         <p>The meaning of the values of [[ixc_adv]] is the same as the ones of [[ixc]], so we refer to the latter for the list
         of possible values.
         <p>This input variable is introduced because in such calculation
-        with [[gwcalctyp]]==5, 15 or 25, there is an underlying primary exchange-correlation functional, that was used to obtain the starting wavefunctions and eigenenergies. The definition of both [[ixc]] and [[ixc_adv]] allows to bypass possible sources of confusion.
+        with [[gwcalctyp]]==5, 15 or 25, there is an underlying primary exchange-correlation functional, that was used to obtain the starting wavefunctions and eigenenergies, whose identified is [[ixc]]. The definition of both [[ixc]] and [[ixc_adv]] allows one to bypass possible sources of confusion.
         <p>Note however that in the case where [[gwcalctyp]]==5, 15 or 25, the values of the input variables [[auxc_ixc]],
         [[hyb_mixing]], [[hyb_mixing_sr]], [[hyb_range_fock]] and [[hyb_range_dft]] refers to the advanced functional,
-        and not the primary one.
+        and not the primary one. Also, [[icutcoul]] and [[rcut]] have precedence over [[hyb_mixing]], [[hyb_mixing_sr]], [[hyb_range_fock]] and [[hyb_range_dft]] to define the parameters of the hybrid functional.
     topics: xc_expert, Hybrids_expert
     varset: gw
     vartype: integer
