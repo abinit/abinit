@@ -273,9 +273,11 @@ subroutine drivexc(exc,ixc,npts,nspden,order,rho_updn,vxcrho,ndvxc,ngr2,nd2vxc,n
 !  Check whether all the necessary arrays are present and have the correct dimensions
    if (is_gga .or. is_mgga) then
      if ( (.not. present(grho2_updn)) .or. (.not. present(vxcgrho)))  then
-       write(message, '(5a,i7,a,i6,a,i6)' )&
+       write(message, '(5a,2L2,2a,2L2,2a,i10,a,i5,a,i5)' )&
 &       'At least one of the functionals is a GGA or a MGGA,',ch10,&
 &       'but not all the necessary arrays are present.',ch10,&
+&       'is_gga, is_mgga=',is_gga,is_mgga,ch10,&
+&       'present(grho2_updn),present(vxcgrho)=',present(grho2_updn),present(vxcgrho),ch10,&
 &       'ixc=',ixc,'  nvxcgrho=',nvxcgrho,'  ngr2=',ngr2
        MSG_BUG(message)
      end if

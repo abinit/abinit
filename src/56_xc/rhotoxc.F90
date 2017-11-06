@@ -313,6 +313,8 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
  call timab(81,1,tsec)
 
  nspden=xcdata%nspden
+ ixc=xcdata%ixc
+ auxc_ixc=xcdata%auxc_ixc
 
  isgga=.false. ; ismgga=.false. ; is_hybrid=.false.
  if(ixc<0)then
@@ -327,9 +329,12 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
    endif
  endif
 
+!DEBUG
+ write(std_out,*)' rhotoxc : main call to drivexc_main, ixc=',ixc
+ write(std_out,*)' rhotoxc : ismgga=',ismgga
+!ENDDEBUG
+
 !Check options
- ixc=xcdata%ixc
- auxc_ixc=xcdata%auxc_ixc
  if(option==3)then
    allow3=(ixc > 0).and.(ixc /= 3).and.(ixc /= 7).and.(ixc /= 8)
    if(.not.allow3)then
@@ -782,6 +787,8 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
 !      Call to main XC driver
 !DEBUG
        write(std_out,*)' rhotoxc : main call to drivexc_main, ixc=',ixc
+       write(std_out,*)' rhotoxc : ismgga,mgga=',ismgga,mgga
+       write(std_out,*)' rhotoxc : present(xc_funcs)=',present(xc_funcs)
 !ENDDEBUG
        if(present(xc_funcs))then
          call libxc_functionals_get_hybridparams(hyb_mixing=hyb_mixing,hyb_mixing_sr=hyb_mixing_sr,&
