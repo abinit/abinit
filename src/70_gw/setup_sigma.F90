@@ -834,11 +834,23 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
  end if
 
  rcut = Dtset%rcut
+
  if ((Dtset%gwcalctyp < 200) .and. (Dtset%gwcalctyp > 100)) then
     if (Dtset%rcut < tol6) then
       rcut = 9.090909 ! default value for HSE06
     end if
  end if
+
+ Sigp%sigma_mixing=one
+ if(mod(Dtset%gwcalctyp,10)==5)then
+   if(abs(Dtset%hyb_mixing)>tol8)then
+!    Warning : the absolute value is needed, because of the singular way used to define the default for this input variable
+     Sigp%sigma_mixing=abs(Dtset%hyb_mixing)
+   else if(abs(Dtset%hyb_mixing_sr)>tol8)then
+     Sigp%sigma_mixing=abs(Dtset%hyb_mixing_sr)
+   endif
+!  if(abs(Dtset%hyb_range_fock)>tol8)rcut=one/Dtset%hyb_range_fock
+ endif
 
 #if 1
  if (Gsph_x%ng > Gsph_c%ng) then
