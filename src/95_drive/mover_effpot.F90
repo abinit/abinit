@@ -264,6 +264,9 @@ implicit none
 !      call ddb_to_dtset(comm, dtset,filnam(3),psps)
 !      ABI_ALLOCATE(dtset%kptns,(3,dtset%nkpt))
 !      dtset%kptns(:,:) = dtset%kpt(:,:)
+!      ABI_ALLOCATE(dtset%istwfk,(dtset%nkpt))
+!      dtset%istwfk(:) = 1
+
 !    else
 !    Need to init some values
      ABI_ALLOCATE(symrel,(3,3,dtset%nsym))
@@ -286,8 +289,6 @@ implicit none
    dtset%prtatlist(:) = 0
    ABI_ALLOCATE(dtset%mixalch_orig,(dtset%npspalch,dtset%ntypalch,1))
    dtset%mixalch_orig(:,:,:)=zero
-   ABI_ALLOCATE(dtset%istwfk,(dtset%nkpt))
-   dtset%istwfk(:) = 1
    if(option  > 0)then
      verbose = .TRUE.
      writeHIST = .TRUE.
@@ -365,6 +366,7 @@ implicit none
    
 
 !  set psps
+   psps%useylm = dtset%useylm
 !    if(option == -2)then
 !      mtypalch = 0
 !      npsp = dtset%ntypat
@@ -377,7 +379,7 @@ implicit none
 !      call psps_init_global(mtypalch, npsp, psps, pspheads)
 !      call psps_init_from_dtset(dtset, 1, psps, pspheads)
 !    end if
-!    psps%useylm = dtset%useylm
+
 ! !  The correct dimension of pawrad/tab is ntypat. In case of alchemical psps
 ! !  pawrad/tab(ipsp) is invoked with ipsp<=npsp. So, in order to avoid any problem,
 ! !  declare pawrad/tab at paw_size=max(ntypat,npsp).
