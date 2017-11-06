@@ -251,7 +251,8 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  complex(dpc),allocatable :: hlda(:,:,:,:),htmp(:,:,:,:),uks2qp(:,:)
  complex(gwpc),allocatable :: kxcg(:,:),fxc_ADA(:,:,:)
  complex(gwpc),ABI_CONTIGUOUS pointer :: ug1(:)
- complex(dpc),pointer :: sigcme_p(:,:,:,:)
+!complex(dpc),pointer :: sigcme_p(:,:,:,:)
+ complex(dpc),allocatable :: sigcme_k(:,:,:,:)
  complex(dpc), allocatable :: rhot1_q_m(:,:,:,:,:,:,:)
  complex(dpc), allocatable :: M1_q_m(:,:,:,:,:,:,:)
  logical,allocatable :: bks_mask(:,:,:),keep_ur(:,:,:),bmask(:)
@@ -2204,19 +2205,24 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
        ib1=MINVAL(Sigp%minbnd(ikcalc,:)) ! min and max band indices for GW corrections (for this k-point)
        ib2=MAXVAL(Sigp%maxbnd(ikcalc,:))
 
-       sigcme_p => sigcme(:,ib1:ib2,ib1:ib2,ikcalc,:)
-
+!      sigcme_p => sigcme(:,ib1:ib2,ib1:ib2,ikcalc,:) ! Causes annoying Fortran runtime warning on abiref.
+       ABI_ALLOCATE(sigcme_k,(nomega_sigc,ib2-ib1+1,ib2-ib1+1,Sigp%nsppol*Sigp%nsig_ab))
+       sigcme_k=czero
        if (any(mod10 == [SIG_SEX, SIG_COHSEX])) then
          ! Calculate static COHSEX or SEX using the coarse gwc_ngfft mesh.
          call cohsex_me(ik_ibz,ikcalc,nomega_sigc,ib1,ib2,Cryst,QP_BSt,Sigp,Sr,Er,Gsph_c,Vcp,Kmesh,Qmesh,&
 &         Ltg_k(ikcalc),Pawtab,Pawang,Paw_pwff,Psps,Wfd,QP_sym,&
-&         gwc_ngfft,Dtset%iomode,Dtset%prtvol,sigcme_p)
+!&         gwc_ngfft,Dtset%iomode,Dtset%prtvol,sigcme_p)
+&         gwc_ngfft,Dtset%iomode,Dtset%prtvol,sigcme_k)
        else
          ! Compute correlated part using the coarse gwc_ngfft mesh.
          call calc_sigc_me(ik_ibz,ikcalc,nomega_sigc,ib1,ib2,Dtset,Cryst,QP_BSt,Sigp,Sr,Er,Gsph_Max,Gsph_c,Vcp,Kmesh,Qmesh,&
 &         Ltg_k(ikcalc),PPm,Pawtab,Pawang,Paw_pwff,Pawfgrtab,Paw_onsite,Psps,Wfd,Wfdf,QP_sym,&
-&         gwc_ngfft,ngfftf,nfftf,ks_rhor,use_aerhor,ks_aepaw_rhor,sigcme_p)
+!&         gwc_ngfft,ngfftf,nfftf,ks_rhor,use_aerhor,ks_aepaw_rhor,sigcme_p)
+&         gwc_ngfft,ngfftf,nfftf,ks_rhor,use_aerhor,ks_aepaw_rhor,sigcme_k)
        end if
+       sigcme(:,ib1:ib2,ib1:ib2,ikcalc,:)=sigcme_k
+       ABI_DEALLOCATE(sigcme_k) 
 
      end do
    end if
@@ -2238,9 +2244,13 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
      ib1=MINVAL(Sigp%minbnd(ikcalc,:)) ! min and max band indeces for GW corrections (for this k-point)
      ib2=MAXVAL(Sigp%maxbnd(ikcalc,:))
 
-     sigcme_p => sigcme(:,ib1:ib2,ib1:ib2,ikcalc,:)
+!    sigcme_p => sigcme(:,ib1:ib2,ib1:ib2,ikcalc,:)   ! Causes annoying Fortran runtime warning on abiref.
+     ABI_ALLOCATE(sigcme_k,(nomega_sigc,ib2-ib1+1,ib2-ib1+1,Sigp%nsppol*Sigp%nsig_ab))
+     sigcme_k=sigcme(:,ib1:ib2,ib1:ib2,ikcalc,:)
 
-     call solve_dyson(ikcalc,ib1,ib2,nomega_sigc,Sigp,Kmesh,sigcme_p,QP_BSt%eig,Sr,Dtset%prtvol,Dtfil,Wfd%comm)
+!    call solve_dyson(ikcalc,ib1,ib2,nomega_sigc,Sigp,Kmesh,sigcme_p,QP_BSt%eig,Sr,Dtset%prtvol,Dtfil,Wfd%comm)
+     call solve_dyson(ikcalc,ib1,ib2,nomega_sigc,Sigp,Kmesh,sigcme_k,QP_BSt%eig,Sr,Dtset%prtvol,Dtfil,Wfd%comm)
+     ABI_DEALLOCATE(sigcme_k) 
      !
      ! Calculate direct gap for each spin and print out final results.
      ! We use the valence index of the KS system because we still do not know
