@@ -689,11 +689,11 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
  call xmpi_sum(sigx, wfd%comm, ierr)
 
  ! Multiply by constants. For 3D systems sqrt(4pi) is included in vc_sqrt_qbz.
- sigxme_tmp = (one/(Cryst%ucvol*Kmesh%nbz)) * sigxme_tmp * alpha_hybrid
- sigx       = (one/(Cryst%ucvol*Kmesh%nbz)) * sigx       * alpha_hybrid
+!sigxme_tmp = (one/(Cryst%ucvol*Kmesh%nbz)) * sigxme_tmp * alpha_hybrid
+!sigx       = (one/(Cryst%ucvol*Kmesh%nbz)) * sigx       * alpha_hybrid
 
-!sigxme_tmp = (one/(Cryst%ucvol*Kmesh%nbz)) * sigxme_tmp * Sigp%sigma_mixing
-!sigx       = (one/(Cryst%ucvol*Kmesh%nbz)) * sigx       * Sigp%sigma_mixing
+ sigxme_tmp = (one/(Cryst%ucvol*Kmesh%nbz)) * sigxme_tmp * Sigp%sigma_mixing
+ sigx       = (one/(Cryst%ucvol*Kmesh%nbz)) * sigx       * Sigp%sigma_mixing
 
  !
  ! If we have summed over the IBZ_q now we have to average over degenerate states.

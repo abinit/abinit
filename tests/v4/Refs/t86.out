@@ -1,5 +1,5 @@
 
-.Version 8.0.3 of ABINIT 
+.Version 8.7.1 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
 
 .Copyright (C) 1998-2017 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon  4 Apr 2016.
-- ( at 11h58 )
+.Starting date : Mon  6 Nov 2017.
+- ( at 06h23 )
   
 - input  file    -> t86.in
 - output file    -> t86.out
@@ -34,7 +34,7 @@
 -    mband =          35        mffmem =           1         mkmem =           8
        mpw =         200          nfft =        5832          nkpt =           8
 ================================================================================
-P This job should need less than                       3.173 Mbytes of memory.
+P This job should need less than                       3.148 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.856 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
 ================================================================================
@@ -51,7 +51,7 @@ _ WF disk file :      0.856 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
 -    mband =          16        mffmem =           1         mkmem =           8
        mpw =         200          nfft =        4096          nkpt =           8
 ================================================================================
-P This job should need less than                       2.179 Mbytes of memory.
+P This job should need less than                       2.155 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.393 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
@@ -64,11 +64,11 @@ _ WF disk file :      0.393 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
      lnmax =       2     mgfft =      16  mpssoang =       3    mqgrid =    3001
      natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
     nsppol =       1      nsym =      48    n1xccc =    2501    ntypat =       1
-    occopt =       1   xclevel =       1
+    occopt =       1   xclevel =       0
 -    mband =           5        mffmem =           1         mkmem =           8
        mpw =         200          nfft =        4096          nkpt =           8
 ================================================================================
-P This job should need less than                       1.890 Mbytes of memory.
+P This job should need less than                       1.866 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.124 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
@@ -85,7 +85,7 @@ _ WF disk file :      0.124 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 -    mband =           5        mffmem =           1         mkmem =           8
        mpw =         200          nfft =        4096          nkpt =           8
 ================================================================================
-P This job should need less than                       1.890 Mbytes of memory.
+P This job should need less than                       1.866 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.124 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
@@ -102,7 +102,7 @@ _ WF disk file :      0.124 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 -    mband =           5        mffmem =           1         mkmem =           8
        mpw =         200          nfft =        4096          nkpt =           8
 ================================================================================
-P This job should need less than                       1.890 Mbytes of memory.
+P This job should need less than                       1.866 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.124 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
@@ -112,7 +112,7 @@ _ WF disk file :      0.124 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 --------------------------------------------------------------------------------
 -
 - outvars: echo of selected default values                                      
--   accesswff0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+-   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
 -
 - outvars: echo of global parameters not present in the input file              
 -  max_nthreads =    0
@@ -171,6 +171,11 @@ _ WF disk file :      0.124 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
          icutcoul4          3
          icutcoul5          3
            istwfk        1    0    1    0    0    0    1    0
+          ixc_adv1          1
+          ixc_adv2          1
+          ixc_adv3         40
+          ixc_adv4          1
+          ixc_adv5          1
            jdtset        1    2    3    4    5
               kpt      0.00000000E+00  0.00000000E+00  0.00000000E+00
                        2.50000000E-01  0.00000000E+00  0.00000000E+00
@@ -186,6 +191,57 @@ _ WF disk file :      0.124 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
                        5.00000000E-01  5.00000000E-01  0.00000000E+00
             kptgw5     0.00000000E+00  0.00000000E+00  0.00000000E+00
                        5.00000000E-01  5.00000000E-01  0.00000000E+00
+         kptns_hf3     0.00000000E+00  0.00000000E+00  0.00000000E+00
+                       2.50000000E-01  0.00000000E+00  0.00000000E+00
+                       5.00000000E-01  0.00000000E+00  0.00000000E+00
+                      -2.50000000E-01  0.00000000E+00  0.00000000E+00
+                       0.00000000E+00  2.50000000E-01  0.00000000E+00
+                       2.50000000E-01  2.50000000E-01  0.00000000E+00
+                       5.00000000E-01  2.50000000E-01  0.00000000E+00
+                      -2.50000000E-01  2.50000000E-01  0.00000000E+00
+                       0.00000000E+00  5.00000000E-01  0.00000000E+00
+                       2.50000000E-01  5.00000000E-01  0.00000000E+00
+                       5.00000000E-01  5.00000000E-01  0.00000000E+00
+                      -2.50000000E-01  5.00000000E-01  0.00000000E+00
+                       0.00000000E+00 -2.50000000E-01  0.00000000E+00
+                       2.50000000E-01 -2.50000000E-01  0.00000000E+00
+                       5.00000000E-01 -2.50000000E-01  0.00000000E+00
+                      -2.50000000E-01 -2.50000000E-01  0.00000000E+00
+                       0.00000000E+00  0.00000000E+00  2.50000000E-01
+                       2.50000000E-01  0.00000000E+00  2.50000000E-01
+                       5.00000000E-01  0.00000000E+00  2.50000000E-01
+                      -2.50000000E-01  0.00000000E+00  2.50000000E-01
+                       0.00000000E+00  2.50000000E-01  2.50000000E-01
+                       2.50000000E-01  2.50000000E-01  2.50000000E-01
+                       5.00000000E-01  2.50000000E-01  2.50000000E-01
+                      -2.50000000E-01  2.50000000E-01  2.50000000E-01
+                       0.00000000E+00  5.00000000E-01  2.50000000E-01
+                       2.50000000E-01  5.00000000E-01  2.50000000E-01
+                       5.00000000E-01  5.00000000E-01  2.50000000E-01
+                      -2.50000000E-01  5.00000000E-01  2.50000000E-01
+                       0.00000000E+00 -2.50000000E-01  2.50000000E-01
+                       2.50000000E-01 -2.50000000E-01  2.50000000E-01
+                       5.00000000E-01 -2.50000000E-01  2.50000000E-01
+                      -2.50000000E-01 -2.50000000E-01  2.50000000E-01
+                       0.00000000E+00  0.00000000E+00  5.00000000E-01
+                       2.50000000E-01  0.00000000E+00  5.00000000E-01
+                       5.00000000E-01  0.00000000E+00  5.00000000E-01
+                      -2.50000000E-01  0.00000000E+00  5.00000000E-01
+                       0.00000000E+00  2.50000000E-01  5.00000000E-01
+                       2.50000000E-01  2.50000000E-01  5.00000000E-01
+                       5.00000000E-01  2.50000000E-01  5.00000000E-01
+                      -2.50000000E-01  2.50000000E-01  5.00000000E-01
+                       0.00000000E+00  5.00000000E-01  5.00000000E-01
+                       2.50000000E-01  5.00000000E-01  5.00000000E-01
+                       5.00000000E-01  5.00000000E-01  5.00000000E-01
+                      -2.50000000E-01  5.00000000E-01  5.00000000E-01
+                       0.00000000E+00 -2.50000000E-01  5.00000000E-01
+                       2.50000000E-01 -2.50000000E-01  5.00000000E-01
+                       5.00000000E-01 -2.50000000E-01  5.00000000E-01
+                      -2.50000000E-01 -2.50000000E-01  5.00000000E-01
+                       0.00000000E+00  0.00000000E+00 -2.50000000E-01
+                       2.50000000E-01  0.00000000E+00 -2.50000000E-01
+                       outvar_i_n : Printing only first  50 k-points.
          kptrlatt        4    0    0      0    4    0      0    0    4
           kptrlen      2.90281476E+01
 P           mkmem           8
@@ -195,6 +251,7 @@ P           mkmem           8
             nband3          5
             nband4          5
             nband5          5
+          nbandhf           4
            nbdbuf1          5
            nbdbuf2          0
            nbdbuf3          0
@@ -212,6 +269,7 @@ P           mkmem           8
            nkptgw3          2
            nkptgw4          2
            nkptgw5          2
+           nkpthf          64
            npweps1          0
            npweps2         51
            npweps3         51
@@ -306,6 +364,11 @@ P           mkmem           8
            tolwfr4     0.00000000E+00
            tolwfr5     0.00000000E+00
             typat      1  1
+          usefock1          0
+          usefock2          0
+          usefock3          1
+          usefock4          0
+          usefock5          0
               wtk        0.01563    0.12500    0.06250    0.09375    0.37500    0.18750
                          0.04688    0.09375
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -355,8 +418,8 @@ P           mkmem           8
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/14si.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/14si.pspnc
+- pspini: atom type   1  psp file is /home/gonze/ABINITgit/ace_3/tests/Psps_for_tests/14si.pspnc
+- pspatm: opening atomic psp file    /home/gonze/ABINITgit/ace_3/tests/Psps_for_tests/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -367,7 +430,7 @@ P           mkmem           8
     2   0.000   0.000    0   2.0872718        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     1.80626423934776    0.22824404341771    1.17378968127746   rchrg,fchrg,qchrg
- pspatm : epsatm=    1.43386982
+  pspatm : epsatm=    1.43386982
          --- l  ekb(1:nproj) -->
              0    3.287949
              1    1.849886
@@ -500,8 +563,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     188.297     188.215
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/14si.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/14si.pspnc
+- pspini: atom type   1  psp file is /home/gonze/ABINITgit/ace_3/tests/Psps_for_tests/14si.pspnc
+- pspatm: opening atomic psp file    /home/gonze/ABINITgit/ace_3/tests/Psps_for_tests/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -512,7 +575,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     188.297     188.215
     2   0.000   0.000    0   2.0872718        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     1.80626423934776    0.22824404341771    1.17378968127746   rchrg,fchrg,qchrg
- pspatm : epsatm=    1.43386982
+  pspatm : epsatm=    1.43386982
          --- l  ekb(1:nproj) -->
              0    3.287949
              1    1.849886
@@ -594,10 +657,10 @@ _setup2: Arith. and geom. avg. npw (full set) are     188.297     188.215
    Upper and lower wings at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
       0.042   0.004  -0.004  -0.011   0.011   0.011  -0.011  -0.004   0.004
-     -0.000   0.004   0.004  -0.011  -0.011   0.011   0.011  -0.004  -0.004
+      0.000   0.004   0.004  -0.011  -0.011   0.011   0.011  -0.004  -0.004
        1       2       3       4       5       6       7       8       9
       0.042   0.004  -0.004  -0.011   0.011   0.011  -0.011  -0.004   0.004
-     -0.000  -0.004  -0.004   0.011   0.011  -0.011  -0.011   0.004   0.004
+      0.000  -0.004  -0.004   0.011   0.011  -0.011  -0.011   0.004   0.004
 
 
 
@@ -1145,6 +1208,11 @@ _setup2: Arith. and geom. avg. npw (full set) are     188.297     188.215
          icutcoul4          3
          icutcoul5          3
            istwfk        1    0    1    0    0    0    1    0
+          ixc_adv1          1
+          ixc_adv2          1
+          ixc_adv3         40
+          ixc_adv4          1
+          ixc_adv5          1
            jdtset        1    2    3    4    5
               kpt      0.00000000E+00  0.00000000E+00  0.00000000E+00
                        2.50000000E-01  0.00000000E+00  0.00000000E+00
@@ -1160,6 +1228,57 @@ _setup2: Arith. and geom. avg. npw (full set) are     188.297     188.215
                        5.00000000E-01  5.00000000E-01  0.00000000E+00
             kptgw5     0.00000000E+00  0.00000000E+00  0.00000000E+00
                        5.00000000E-01  5.00000000E-01  0.00000000E+00
+         kptns_hf3     0.00000000E+00  0.00000000E+00  0.00000000E+00
+                       2.50000000E-01  0.00000000E+00  0.00000000E+00
+                       5.00000000E-01  0.00000000E+00  0.00000000E+00
+                      -2.50000000E-01  0.00000000E+00  0.00000000E+00
+                       0.00000000E+00  2.50000000E-01  0.00000000E+00
+                       2.50000000E-01  2.50000000E-01  0.00000000E+00
+                       5.00000000E-01  2.50000000E-01  0.00000000E+00
+                      -2.50000000E-01  2.50000000E-01  0.00000000E+00
+                       0.00000000E+00  5.00000000E-01  0.00000000E+00
+                       2.50000000E-01  5.00000000E-01  0.00000000E+00
+                       5.00000000E-01  5.00000000E-01  0.00000000E+00
+                      -2.50000000E-01  5.00000000E-01  0.00000000E+00
+                       0.00000000E+00 -2.50000000E-01  0.00000000E+00
+                       2.50000000E-01 -2.50000000E-01  0.00000000E+00
+                       5.00000000E-01 -2.50000000E-01  0.00000000E+00
+                      -2.50000000E-01 -2.50000000E-01  0.00000000E+00
+                       0.00000000E+00  0.00000000E+00  2.50000000E-01
+                       2.50000000E-01  0.00000000E+00  2.50000000E-01
+                       5.00000000E-01  0.00000000E+00  2.50000000E-01
+                      -2.50000000E-01  0.00000000E+00  2.50000000E-01
+                       0.00000000E+00  2.50000000E-01  2.50000000E-01
+                       2.50000000E-01  2.50000000E-01  2.50000000E-01
+                       5.00000000E-01  2.50000000E-01  2.50000000E-01
+                      -2.50000000E-01  2.50000000E-01  2.50000000E-01
+                       0.00000000E+00  5.00000000E-01  2.50000000E-01
+                       2.50000000E-01  5.00000000E-01  2.50000000E-01
+                       5.00000000E-01  5.00000000E-01  2.50000000E-01
+                      -2.50000000E-01  5.00000000E-01  2.50000000E-01
+                       0.00000000E+00 -2.50000000E-01  2.50000000E-01
+                       2.50000000E-01 -2.50000000E-01  2.50000000E-01
+                       5.00000000E-01 -2.50000000E-01  2.50000000E-01
+                      -2.50000000E-01 -2.50000000E-01  2.50000000E-01
+                       0.00000000E+00  0.00000000E+00  5.00000000E-01
+                       2.50000000E-01  0.00000000E+00  5.00000000E-01
+                       5.00000000E-01  0.00000000E+00  5.00000000E-01
+                      -2.50000000E-01  0.00000000E+00  5.00000000E-01
+                       0.00000000E+00  2.50000000E-01  5.00000000E-01
+                       2.50000000E-01  2.50000000E-01  5.00000000E-01
+                       5.00000000E-01  2.50000000E-01  5.00000000E-01
+                      -2.50000000E-01  2.50000000E-01  5.00000000E-01
+                       0.00000000E+00  5.00000000E-01  5.00000000E-01
+                       2.50000000E-01  5.00000000E-01  5.00000000E-01
+                       5.00000000E-01  5.00000000E-01  5.00000000E-01
+                      -2.50000000E-01  5.00000000E-01  5.00000000E-01
+                       0.00000000E+00 -2.50000000E-01  5.00000000E-01
+                       2.50000000E-01 -2.50000000E-01  5.00000000E-01
+                       5.00000000E-01 -2.50000000E-01  5.00000000E-01
+                      -2.50000000E-01 -2.50000000E-01  5.00000000E-01
+                       0.00000000E+00  0.00000000E+00 -2.50000000E-01
+                       2.50000000E-01  0.00000000E+00 -2.50000000E-01
+                       outvar_i_n : Printing only first  50 k-points.
          kptrlatt        4    0    0      0    4    0      0    0    4
           kptrlen      2.90281476E+01
 P           mkmem           8
@@ -1169,6 +1288,7 @@ P           mkmem           8
             nband3          5
             nband4          5
             nband5          5
+          nbandhf           4
            nbdbuf1          5
            nbdbuf2          0
            nbdbuf3          0
@@ -1186,6 +1306,7 @@ P           mkmem           8
            nkptgw3          2
            nkptgw4          2
            nkptgw5          2
+           nkpthf          64
            npweps1          0
            npweps2         51
            npweps3         51
@@ -1290,6 +1411,11 @@ P           mkmem           8
            tolwfr4     0.00000000E+00
            tolwfr5     0.00000000E+00
             typat      1  1
+          usefock1          0
+          usefock2          0
+          usefock3          1
+          usefock4          0
+          usefock5          0
               wtk        0.01563    0.12500    0.06250    0.09375    0.37500    0.18750
                          0.04688    0.09375
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -1322,23 +1448,40 @@ P           mkmem           8
  of the ABINIT implementation.
  For information on why they are suggested, see also https://www.abinit.org/about/?text=acknowledgments.
 -
-- [1] ABINIT : First-principles approach of materials and nanosystem properties.
+- [1] Recent developments in the ABINIT software package.
+- Computer Phys. Comm. 205, 106 (2016).
+- X.Gonze, F.Jollet, F.Abreu Araujo, D.Adams, B.Amadon, T.Applencourt,
+- C.Audouze, J.-M.Beuken, J.Bieder, A.Bokhanchuk, E.Bousquet, F.Bruneval
+- D.Caliste, M.Cote, F.Dahm, F.Da Pieve, M.Delaveau, M.Di Gennaro,
+- B.Dorado, C.Espejo, G.Geneste, L.Genovese, A.Gerossier, M.Giantomassi,
+- Y.Gillet, D.R.Hamann, L.He, G.Jomard, J.Laflamme Janssen, S.Le Roux,
+- A.Levitt, A.Lherbier, F.Liu, I.Lukacevic, A.Martin, C.Martins,
+- M.J.T.Oliveira, S.Ponce, Y.Pouillon, T.Rangel, G.-M.Rignanese,
+- A.H.Romero, B.Rousseau, O.Rubel, A.A.Shukri, M.Stankovski, M.Torrent,
+- M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
+- B.Xue, A.Zhou, J.W.Zwanziger.
+- Comment : the fourth generic paper describing the ABINIT project.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- is available at https://www.abinit.org/about/ABINIT16.pdf .
+- The licence allows the authors to put it on the Web.
+-
+- [2] ABINIT : First-principles approach of materials and nanosystem properties.
+- Computer Phys. Comm. 180, 2582-2615 (2009).
 - X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
 - D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
 - S. Goedecker, D.R. Hamann, P. Hermet, F. Jollet, G. Jomard, S. Leroux, M. Mancini, S. Mazevet,
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
-- Computer Phys. Comm. 180, 2582-2615 (2009).
 - Comment : the third generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/about/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 -
-- [2] A brief introduction to the ABINIT software package.
+- [3] A brief introduction to the ABINIT software package.
+- Z. Kristallogr. 220, 558-562 (2005).
 - X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
 - M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
 - L. Reining, R. Godby, G. Onida, D.R. Hamann, and D.C. Allan.
-- Z. Kristallogr. 220, 558-562 (2005).
 - Comment : the second generic paper describing the ABINIT project. Note that this paper
 - should be cited especially if you are using the GW part of ABINIT, as several authors
 - of this part are not in the list of authors of the first or third paper.
@@ -1348,20 +1491,16 @@ P           mkmem           8
 -
 - And optionally:
 -
-- [3] First-principles computation of material properties : the ABINIT software project. 
+- [4] First-principles computation of material properties : the ABINIT software project. 
 - X. Gonze, J.-M. Beuken, R. Caracas, F. Detraux, M. Fuchs, G.-M. Rignanese, L. Sindic,
 - M. Verstraete, G. Zerah, F. Jollet, M. Torrent, A. Roy, M. Mikami, Ph. Ghosez, J.-Y. Raty, D.C. Allan.
 - Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7
 - Comment : the original paper describing the ABINIT project.
 -
-- [4] Fast radix 2, 3, 4 and 5 kernels for Fast Fourier Transformations
-- on computers with overlapping multiply-add instructions.
-- S. Goedecker, SIAM J. on Scientific Computing 18, 1605 (1997).
--
-- Proc.   0 individual time (sec): cpu=          9.9  wall=         10.1
+- Proc.   0 individual time (sec): cpu=          7.8  wall=          8.0
 
 ================================================================================
 
  Calculation completed.
-.Delivered   1 WARNINGs and   7 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          9.9  wall=         10.1
+.Delivered   0 WARNINGs and   6 COMMENTs to log file.
++Overall time at end (sec) : cpu=          7.8  wall=          8.0
