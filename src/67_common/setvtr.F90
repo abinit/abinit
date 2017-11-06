@@ -504,14 +504,26 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
 
 !        Compute energies%e_xc and associated quantities
          if(.not.is_hybrid_ncpp .or. mod(dtset%fockoptmix,100)==11)then 
+!DEBUG
+         write(std_out,*)' setvtr : call rhotoxc (1) '
+!ENDDEBUG
            call rhotoxc(energies%e_xc,kxc,mpi_enreg,nfft,ngfft,&
 &            nhat,psps%usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,n3xccc,&
 &            option,dtset%paral_kgb,rhor,rprimd,strsxc,usexcnhat,vxc,vxcavg,xccc3d,xcdata,&
 &            taug=taug,taur=taur,vhartr=vhartr,vxctau=vxctau,add_tfw=add_tfw_)
+!DEBUG
+         write(std_out,*)' setvtr : exit rhotoxc (1) '
+!ENDDEBUG
          else
+!DEBUG
+         write(std_out,*)' setvtr : call xchybrid_ncpp_cc '
+!ENDDEBUG
 !          Only when is_hybrid_ncpp, and moreover, the xc functional is not the auxiliary xc functional, then call xchybrid_ncpp_cc
            call xchybrid_ncpp_cc(dtset,energies%e_xc,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,&
 &            strsxc,vxcavg,xccc3d,vxc=vxc)
+!DEBUG
+         write(std_out,*)' setvtr : exit xchybrid_ncpp_cc '
+!ENDDEBUG
          endif
 
 !        Possibly compute energies%e_hybcomp_E0
