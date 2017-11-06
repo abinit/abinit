@@ -100,11 +100,7 @@ sec2:
  body: |
   This ANADDB utility is able to perform many different tasks, each governed by a
   selected set of input variables, with also some input variables common to many of the
-  different tasks. 
-  <li> <a href="../../topics/generated_files/topic_anaddbCommon.html"> anaddb common input variables</a></li>
-  <li> <a href="../../topics/generated_files/topic_anaddbSpec.html"> anaddb tasks</a></li>
-  <li> <a href="../../topics/generated_files/topic_anaddbEPC.html"> anaddb electron-phonon input variables</a> </li>
-
+  different tasks. The 'flag' variables activates the different tasks (e.g. [[dieflag@anaddb]], [[thmflag@anaddb]], [[elphflag@anaddb]], ...).
   <p>
   <p>The list of input variables for the anaddb input file are presented in the [[varset:anaddb]] variable set. In order
   to discover them, it is easier to use the different lessons of the tutorial:
