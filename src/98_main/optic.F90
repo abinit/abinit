@@ -160,7 +160,6 @@ program optic
  real(dp),pointer :: outeig(:)
  real(dp),allocatable :: occ(:),wtk(:),eigtmp(:)
  complex(dpc),allocatable :: pmat(:,:,:,:,:)
- complex(dpc), allocatable :: eps(:)
  logical :: use_ncddk(0:3)
  character(len=fnlen) :: filnam,wfkfile,ddkfile_1,ddkfile_2,ddkfile_3,filnam_out, epfile
  character(len=fnlen) :: infiles(0:3)
@@ -615,6 +614,17 @@ program optic
 
    NCF_CHECK(nctk_set_datamode(optic_ncid))
 
+   ! Write wmesh here.
+   ABI_ALLOCATE(wmesh, (nomega))
+   do ii=1,nomega
+     ! This to be consistent with the value used in m_optic_tools
+     ! In principle wmesh should be passed to the children and a lot of code
+     ! should be rewritten to be more cache-friendly ...
+     wmesh(ii) = (ii-1)*domega * (13.60569172*2._dp)
+   end do
+   NCF_CHECK(nf90_put_var(optic_ncid, nctk_idname(optic_ncid, "wmesh"), wmesh))
+   ABI_FREE(wmesh)
+
    if (num_lin_comp > 0) then
      NCF_CHECK(nf90_put_var(optic_ncid, nctk_idname(optic_ncid, "linopt_components"), lin_comp(1:num_lin_comp)))
    end if
@@ -682,19 +692,8 @@ program optic
      ABI_CHECK((stemp(1:1)/='#'),'Bug: string length too short!')
      tmp_radix = trim(prefix)//"_"//trim(s1)//"_"//trim(s2)
      if (do_ep_renorm) tmp_radix = trim(prefix)//"_"//trim(s1)//"_"//trim(s2)//"_T"//trim(stemp)
-     call linopt(nsppol,ucvol,nkpt,wtk,nsym,symcart,mband,ks_ebands,eph_ebands,fermie,pmat, &
-     lin1,lin2,nomega,domega,scissor,broadening,tmp_radix,wmesh,eps,comm)
-#ifdef HAVE_NETCDF
-     if (my_rank == master) then
-       ncerr = nf90_put_var(optic_ncid, nctk_idname(optic_ncid, "linopt_epsilon"), c2r(eps), start=[1, 1, ii, itemp])
-       NCF_CHECK(ncerr)
-       if (ii == 1 .and. itemp == 1) then
-         NCF_CHECK(nf90_put_var(optic_ncid, nctk_idname(optic_ncid, "wmesh"), wmesh))
-       end if
-     end if
-#endif
-     ABI_FREE(eps)
-     ABI_FREE(wmesh)
+     call linopt(ii,itemp,nsppol,ucvol,nkpt,wtk,nsym,symcart,mband,ks_ebands,eph_ebands,fermie,pmat, &
+     lin1,lin2,nomega,domega,scissor,broadening,tmp_radix,optic_ncid,comm)
    end do
    call ebands_free(eph_ebands)
  end do

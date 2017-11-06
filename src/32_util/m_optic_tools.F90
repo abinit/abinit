@@ -411,6 +411,8 @@ end subroutine pmat_renorm
 !! Compute optical frequency dependent dielectric function for semiconductors
 !!
 !! INPUTS
+!!  icomp=Sequential index associated to computed tensor components (used for netcdf output)
+!!  itemp=Temperature index (used for netcdf output)
 !!  nspin=number of spins(integer)
 !!  omega=crystal volume in au (real)
 !!  nkpt=total number of kpoints (integer)
@@ -428,10 +430,7 @@ end subroutine pmat_renorm
 !!  sc=scissors shift in Ha(real)
 !!  brod=broadening in Ha(real)
 !!  fnam=root for filename that will contain the output filename will be trim(fnam)//'-linopt.out'
-!!
-!! OUTPUT
-!!   wmesh(:) = Frequency mesh in eV. Must be deallocated by the caller.
-!!   eps(:) = Component of the dielectric function tensor. Must be deallocated by the caller.
+!!  ncid=Netcdf id to save output data.
 !!
 !! SIDE EFFECTS
 !!  Dielectric function for semiconductors, on a desired energy mesh and for a desired
@@ -449,8 +448,8 @@ end subroutine pmat_renorm
 !!
 !! SOURCE
 
-subroutine linopt(nspin,omega,nkpt,wkpt,nsymcrys,symcrys,nstval,KSBSt,EPBSt,efermi,pmat, &
-  v1,v2,nmesh,de,sc,brod,fnam,wmesh,eps,comm)
+subroutine linopt(icomp,itemp,nspin,omega,nkpt,wkpt,nsymcrys,symcrys,nstval,KSBSt,EPBSt,efermi,pmat, &
+  v1,v2,nmesh,de,sc,brod,fnam,ncid,comm)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -463,7 +462,7 @@ subroutine linopt(nspin,omega,nkpt,wkpt,nsymcrys,symcrys,nstval,KSBSt,EPBSt,efer
 
 !Arguments ------------------------------------
 !no_abirules
-integer, intent(in) :: nspin
+integer, intent(in) :: icomp,itemp,nspin,ncid
 real(dp), intent(in) :: omega
 integer, intent(in) :: nkpt
 real(dp), intent(in) :: wkpt(nkpt)
@@ -481,8 +480,8 @@ real(dp), intent(in) :: sc
 real(dp), intent(in) :: brod
 character(len=*), intent(in) :: fnam
 integer, intent(in) :: comm
-complex(dpc), allocatable, intent(out) :: eps(:)
-real(dp), allocatable, intent(out) :: wmesh(:)
+
+
 
 !Local variables -------------------------
 !no_abirules
@@ -493,6 +492,9 @@ integer :: ist1,ist2,iw
 integer :: my_rank, nproc
 integer,parameter :: master=0
 integer :: my_k1, my_k2
+#ifdef HAVE_NETCDF
+integer :: ncerr
+#endif
 integer :: ierr
 integer :: fout1
 logical :: do_lifetime
@@ -510,7 +512,7 @@ character(len=500) :: msg
 ! local allocatable arrays
 real(dp) :: s(3,3),sym(3,3)
 complex(dpc), allocatable :: chi(:)
-
+complex(dpc), allocatable :: eps(:)
 
 ! *********************************************************************
 
@@ -589,7 +591,6 @@ complex(dpc), allocatable :: chi(:)
 !allocate local arrays
  ABI_ALLOCATE(chi,(nmesh))
  ABI_ALLOCATE(eps,(nmesh))
- ABI_ALLOCATE(wmesh,(nmesh))
  ieta=(0._dp,1._dp)*brod
  renorm_factor=1._dp/(omega*dble(nsymcrys))
  ha2ev=13.60569172*2._dp
@@ -683,13 +684,12 @@ complex(dpc), allocatable :: chi(:)
  call xmpi_sum(chi,comm,ierr)
 
  ! calculate epsilon
- eps(1) = zero; wmesh(1) = zero
+ eps(1) = zero
  deltav1v2=zero; if (v1 == v2) deltav1v2=one
  do iw=2,nmesh
    ene=(iw-1)*de
    ene=ene*ha2ev
    eps(iw)=deltav1v2+4._dp*pi*chi(iw)
-   wmesh(iw) = ene
  end do
 
  if (my_rank == master) then
@@ -767,9 +767,17 @@ complex(dpc), allocatable :: chi(:)
 
    ! close output file
    close(fout1)
+
+#ifdef HAVE_NETCDF
+   if (ncid /= nctk_noid) then
+     ncerr = nf90_put_var(ncid, nctk_idname(ncid, "linopt_epsilon"), c2r(eps), start=[1, 1, icomp, itemp])
+     NCF_CHECK(ncerr)
+   end if
+#endif
  end if
 
  ABI_DEALLOCATE(chi)
+ ABI_FREE(eps)
 
 end subroutine linopt
 !!***
