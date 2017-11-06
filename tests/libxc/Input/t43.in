@@ -34,7 +34,6 @@ optdriver2  4
 
 # Dataset3: Calculation with the Fock mixing of 0.35.
 optdriver3  4
-gwfockmix3  0.35      # To define the fraction of Fock exchange in HSE
 hyb_mixing_sr3  0.35      # To define the fraction of Fock exchange in HSE
 
 

@@ -259,6 +259,7 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,nfftf,ngfftf,&
      ixc_hybrid=Dtset%ixc_adv
      call get_auxc_ixc(auxc_ixc,ixc_hybrid)
      call xcdata_init(xcdata_hybrid,dtset=Dtset,auxc_ixc=auxc_ixc,ixc=ixc_hybrid)
+     call libxc_functionals_init(ixc_hybrid,Dtset%nspden,xc_functionals=xc_funcs_hybrid)
 
 !    Do not forget, negative values of hyb_mixing(_sr),hyb_range_* means that they have been user-defined.
      if (dtset%ixc==-406.or.dtset%ixc==-427.or.dtset%ixc==-428 .or. &
@@ -266,10 +267,8 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,nfftf,ngfftf,&
        call libxc_functionals_set_hybridparams(hyb_range=abs(Dtset%hyb_range_dft),&
 &        hyb_mixing=abs(Dtset%hyb_mixing),hyb_mixing_sr=abs(Dtset%hyb_mixing_sr),xc_functionals=xc_funcs_hybrid)
      endif
-!    write(msg, '(a, f4.2)') ' Fock fraction = ', Dtset%gwfockmix
      write(msg, '(a, f4.2)') ' Fock fraction = ', max(Dtset%hyb_mixing,Dtset%hyb_mixing_sr)
      call wrtout(std_out,msg,'COLL')
-!    write(msg, '(a, f5.2, a)') ' Fock inverse screening length = ',omega,' (bohr^-1)'
      write(msg, '(a, f5.2, a)') ' Fock inverse screening length = ',Dtset%hyb_range_dft, ' (bohr^-1)'
      call wrtout(std_out,msg,'COLL')
 
