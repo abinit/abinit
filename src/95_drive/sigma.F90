@@ -952,7 +952,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  optene=4; moved_atm_inside=0; moved_rhor=0; istep=1
 
 !DEBUG
- write(std_out,*)' sigma : call setvtr (1), nkxc, Dtset%nspden, Dtset%ixc'
+ write(std_out,*)' sigma : call setvtr (1), nkxc, Dtset%nspden, Dtset%ixc',nkxc, Dtset%nspden, Dtset%ixc
 !ENDDEBUG
 
  call setvtr(Cryst%atindx1,Dtset,KS_energies,gmet,gprimd,grchempottn,grewtn,grvdw,gsqcutf_eff,&
