@@ -7,21 +7,23 @@ import os.path
 import glob
 
 gnu_warnings = { # ( warning_string, warno, src_excluded )
-    #3  : ( 'Unused variable', ['12_hide_mpi','68_dmft'] ),
-    3  : ( 'Unused variable', ['12_hide_mpi','64_psp','68_dmft'] ),
-    #4  : ( 'Unused dummy argument',  [] ),
-    4  : ( 'Unused dummy argument',  ['64_psp'] ),
+    #3  : ( 'Unused variable', ['12_hide_mpi','64_psp','68_dmft'] ),
+    3  : ( 'Unused variable', [] ),
+    #4  : ( 'Unused dummy argument',  ['64_psp'] ),
+    4  : ( 'Unused dummy argument',  [] ),
     5  : ( 'Nonstandard type declaration',  ['interfaces','28_numeric_noabirule','01_macroavnew_ext','01_linalg_ext','11_memory_mpi'] ),
     6  : ( 'Same actual argument associated with INTENT', []),  
-    7  : ( 'CHARACTER expression will be truncated in assignment',  ["57_iopsp_parser",] ),
+    #7  : ( 'CHARACTER expression will be truncated in assignment',  ["57_iopsp_parser",] ),
+    7  : ( 'CHARACTER expression will be truncated in assignment',  [] ),
     8  : ( 'Limit of 39 continuations exceeded',  [] ),
     9  : ( 'DOUBLE COMPLEX at (1) does not conform to the Fortran 95 standard',  ['interfaces','01_linalg_ext'] ),
     10 : ( 'at (1) defined but not used', [] ),
     11 : ( 'Character length of actual argument shorter than of dummy argument', [] ),
-    #12 : ( 'may be used uninitialized',  [] ), FIXME Disabled cause it sigfaults
+    #12 : ( 'may be used uninitialized',  [] ), FIXME Disabled cause it segfaults
     13 : ( 'Obsolescent', [] ),
     14 : ( 'Type specified for intrinsic function', [] ),
     15 : ( 'Nonconforming tab character', [] ),
+    20 : ( 'Wunused-value', [] ),
 }
 
 def abinit_suite_generator():
@@ -52,46 +54,23 @@ def main(warno, home_dir=""):
     cwd_dir = os.getcwd()
     if os.path.isabs(sys.argv[0]):
         home_dir = os.path.normpath(os.path.join(os.path.dirname(sys.argv[0]), "../.."))
-        inp_dir = os.path.join(home_dir, "tests/abirules/Input")
+        inp_dir = os.path.join(home_dir, "abichecks/abirules/Input")
     else:
         inp_dir = os.path.join("..", "Input")
         home_dir = os.path.join(cwd_dir,"../../..")
 
   else:
-    inp_dir = pj(home_dir, "tests", "abirules", "Input")
-
-  #print "home_dir", home_dir
+    inp_dir = pj(home_dir, "abichecks", "abirules", "Input")
+  
   warno = int(warno)
   Warning      = gnu_warnings[warno][0]
+  Warning_len  = len(Warning.split(" "))
   src_excluded = gnu_warnings[warno][1]
-
-  # read variable from file : warnings and src_excluded
-  #try:
-  #    test_number = pj(inp_dir, "warnings_"+str(warno)+".in")
-  #except IndexError:
-  #    usage()
-  #    sys.exit(2)
-  #except:
-  #    print "unknown error : ", sys.exc_info()[0]
-  #    raise
-  #src_excluded = []
-  #Warning = ""
-  #try:
-  #    f=open(test_number, 'r')
-  #    exec f
-  #    f.close()
-  #except IOError:
-  #    print "%s: no such file" % test_number
-  #    sys.exit(4)
-  #if Warning == "":
-  #    print "Pattern not defined..."
-  #    sys.exit(3)
 
   # header
   print( "**********************************************************************")
   print( "Warning pattern : '"+Warning+"'")
   print( "**********************************************************************")
-  #if len(src_excluded) > 0: print src_excluded
 
   makelog = pj(home_dir, "make.log")
   logfile = open(makelog)
@@ -103,7 +82,6 @@ def main(warno, home_dir=""):
   start = False
   for line in logfile:
       linec = linec + 1
-      #print 'linec : %d' % linec
       if linec > 5 : Buffer.pop(0)
       Buffer.append(line)
       if start == False :
@@ -111,7 +89,6 @@ def main(warno, home_dir=""):
           if line.find("Making all in 10_defs") == -1 :
               continue
           else:
-              #print linec
               start = True
       if line.find(Warning) != -1 :
           if debug:
@@ -130,7 +107,6 @@ def main(warno, home_dir=""):
                       pass
                   pattern = pj(home_dir, "src") + "/*/"+source
                   #pattern = '../../../src/*/'+source
-                  #print pattern
                   path = glob.glob(pattern)
                   assert len(path) < 2
                   try:
@@ -143,11 +119,21 @@ def main(warno, home_dir=""):
                   except ValueError:
                       warning_count += 1
                       try:
-                          print (source + ' : var = ' + Buffer[4].split("'")[1] +' ['+source_dir[-2]+']')
+                          if warno in [3,4]:
+                             print(source + ' : line= ' + sourceline + ', var= ' + Buffer[4].split(" ")[Warning_len+1] +' ['+source_dir[-2]+']')
+                          elif warno in [6,7]:
+                             print(source + ' : line= ' + sourceline + ', warn= ' + Buffer[4].split(":")[1])
+                          elif warno in [16]:
+                             a = Buffer[4].split(":")[1].split(" declared")[0]
+                             print(source + ' : line= ' + sourceline + ', warn=' + a + ' ['+source_dir[-2]+']')
+                          else:
+                             print(source + ' : line= ' + sourceline +' ['+source_dir[-2]+']')
+
                       except IndexError:
-                          print (source + ' : line = ' + sourceline +' ['+source_dir[-2]+']')
+                          print(source + ' : line = ' + sourceline +' ['+source_dir[-2]+']')
               else:
                   print (" ***** Can't determine source but warning exists...")
+              if debug: break
           else:
               source = Buffer[4].split(":")[0]
               sourceline = Buffer[4].split(":")[1]
