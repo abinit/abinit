@@ -240,10 +240,10 @@ subroutine outvars(choice,dmatpuflag,dtsets,filnam4,iout,&
      if(dtsets(1)%cd_customnimfrqs  /=dtsets(idtset)%cd_customnimfrqs  ) multivals%nimfrqs  =1
      if(dtsets(1)%nkpt     /=dtsets(idtset)%nkpt     ) multivals%nkpt     =1
      if(dtsets(1)%nkptgw   /=dtsets(idtset)%nkptgw   ) multivals%nkptgw   =1
-     if(dtsets(1)%nkpthf   /=dtsets(idtset)%nkpthf   ) multivals%nkpthf   =1
+     if(dtsets(1)%nkpthf*dtsets(1)%usefock /=dtsets(idtset)%nkpthf*dtsets(idtset)%usefock) multivals%nkpthf=1
      if(dtsets(1)%nnos     /=dtsets(idtset)%nnos     ) multivals%nnos     =1
      if(dtsets(1)%nqptdm   /=dtsets(idtset)%nqptdm   ) multivals%nqptdm   =1
-     if(dtsets(1)%nsppol*dtsets(1)%nspinor/=dtsets(idtset)%nsppol*dtsets(idtset)%nspinor)multivals%nsp=1
+     if(dtsets(1)%nsppol*dtsets(1)%nspinor/=dtsets(idtset)%nsppol*dtsets(idtset)%nspinor) multivals%nsp=1
      if(dtsets(1)%nsppol   /=dtsets(idtset)%nsppol   ) multivals%nsppol   =1
      if(dtsets(1)%nspinor  /=dtsets(idtset)%nspinor  ) multivals%nspinor  =1
      if(dtsets(1)%nsym     /=dtsets(idtset)%nsym     ) multivals%nsym     =1
@@ -252,6 +252,11 @@ subroutine outvars(choice,dmatpuflag,dtsets,filnam4,iout,&
      if(dtsets(1)%nzchempot/=dtsets(idtset)%nzchempot) multivals%nzchempot=1
    end do
  end if
+
+!DEBUG
+   write(std_out,*)' outvars : multivals%nkpthf =',multivals%nkpthf
+   write(std_out,*)' outvars : dtsets(1:ndtset_alloc)%nkpthf =',dtsets(1:ndtset_alloc)%nkpthf
+!ENDDEBUG
 
  nshiftk=1
  if(sum((dtsets(1:ndtset_alloc)%kptopt)**2)/=0)then

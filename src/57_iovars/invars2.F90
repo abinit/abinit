@@ -433,6 +433,19 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gwrpacorr',tread,'INT')
  if(tread==1) dtset%gwrpacorr=intarr(1)
 
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'hyb_mixing',tread,'DPR')
+ if(tread==1) dtset%hyb_mixing=dprarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'hyb_mixing_sr',tread,'DPR')
+ if(tread==1) dtset%hyb_mixing_sr=dprarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'hyb_range_dft',tread,'DPR')
+ if(tread==1) dtset%hyb_range_dft=dprarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'hyb_range_fock',tread,'DPR')
+ if(tread==1) dtset%hyb_range_fock=dprarr(1)
+
  call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'supercell',tread,'INT')
  if(tread==1) dtset%supercell(1:3)=intarr(1:3)
 
@@ -2596,7 +2609,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
  ii=0;if (mod(dtset%wfoptalg,10)==4) ii=2
  if ((dtset%ngfft(7)==314).or.(dtset%usefock==1)) ii=1
 
- call inkpts(bravais,dtset%chksymbreak,iout,iscf,dtset%istwfk(1:nkpt),jdtset,&
+ call inkpts(bravais,dtset%chksymbreak,dtset%fockdownsampling,iout,iscf,dtset%istwfk(1:nkpt),jdtset,&
 & dtset%kpt(:,1:nkpt),dtset%kptns_hf(:,1:nkpthf),kptopt,dtset%kptnrm,&
 & dtset%kptrlatt_orig,dtset%kptrlatt,kptrlen,lenstr,nsym,&
 & nkpt,nkpthf,nqpt,dtset%ngkpt,dtset%nshiftk,dtset%nshiftk_orig,dtset%shiftk_orig,nsym,&

@@ -333,7 +333,7 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
        end if
        iatom=-1;idir=0;iorder_cprj=0;unpaw=26
        call metric(gmet,gprimd,-1,rmet,rprimd,dum)
-       if (fock%fock_BZ%mkpt/=dtset%mkmem) then
+       if (fock%fock_BZ%mkpt/=dtset%mkmem.or.(fock%fock_BZ%mpi_enreg%paral_hf ==1)) then
          ABI_ALLOCATE(ylmbz,(dtset%mpw*fock%fock_BZ%mkpt,psps%mpsang*psps%mpsang*psps%useylm))
          ABI_ALLOCATE(ylmgrbz,(dtset%mpw*fock%fock_BZ%mkpt,3,psps%mpsang*psps%mpsang*psps%useylm))
          option=1; mcgbz=dtset%mpw*fock%fock_BZ%mkptband*fock%fock_common%my_nsppol
@@ -343,7 +343,7 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
          call ctocprj(fock%fock_common%atindx,fock%fock_BZ%cgocc,ctocprj_choice,fock%fock_BZ%cwaveocc_prj,gmet,gprimd,iatom,idir,&
 &         iorder_cprj,fock%fock_BZ%istwfk_bz,fock%fock_BZ%kg_bz,fock%fock_BZ%kptns_bz,fock%fock_common%mband,mcgbz,&
 &         fock%fock_BZ%mcprj,dtset%mgfft,fock%fock_BZ%mkpt,fock%fock_BZ%mpi_enreg,psps%mpsang,&
-&         dtset%mpw,dtset%natom,nattyp,fock%fock_BZ%nbandocc_bz,dtset%natom,dtset%ngfft,fock%fock_BZ%nkpt_bz,&
+&         dtset%mpw,dtset%natom,nattyp,fock%fock_BZ%nbandocc_bz,dtset%natom,dtset%ngfft,fock%fock_BZ%mkpt,&
 &         dtset%nloalg,fock%fock_BZ%npwarr,dtset%nspinor,&
 &         dtset%nsppol,dtset%ntypat,dtset%paral_kgb,ph1d,psps,rmet,dtset%typat,ucvol,unpaw,&
 &         xred,ylmbz,ylmgrbz)
@@ -353,7 +353,7 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
          call ctocprj(fock%fock_common%atindx,fock%fock_BZ%cgocc,ctocprj_choice,fock%fock_BZ%cwaveocc_prj,gmet,gprimd,iatom,idir,&
 &         iorder_cprj,fock%fock_BZ%istwfk_bz,fock%fock_BZ%kg_bz,fock%fock_BZ%kptns_bz,fock%fock_common%mband,mcg,&
 &         fock%fock_BZ%mcprj,dtset%mgfft,fock%fock_BZ%mkpt,mpi_enreg,psps%mpsang,&
-&         dtset%mpw,dtset%natom,nattyp,fock%fock_BZ%nbandocc_bz,dtset%natom,dtset%ngfft,fock%fock_BZ%nkpt_bz,&
+&         dtset%mpw,dtset%natom,nattyp,fock%fock_BZ%nbandocc_bz,dtset%natom,dtset%ngfft,fock%fock_BZ%mkpt,&
 &         dtset%nloalg,fock%fock_BZ%npwarr,dtset%nspinor,&
 &         dtset%nsppol,dtset%ntypat,dtset%paral_kgb,ph1d,psps,rmet,dtset%typat,ucvol,unpaw,&
 &         xred,ylm,ylmgr)
@@ -405,6 +405,7 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
 &   pawang,pawfgrtab,pawrhoij,pawtab,ph1df,psps,k0,rprimd,symrec,dtset%typat,ucvol_,vlocal,vxc,xred,&
 &   mpi_atmtab=mpi_enreg%my_atmtab, comm_atom=mpi_enreg%comm_atom,mpi_comm_grid=comm_grid)
    ABI_DEALLOCATE(vlocal)
+
  end if
  call timab(912,2,tsec)
  call timab(913,1,tsec)
@@ -424,7 +425,7 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
      optnc=1;if (dtset%nspden==4.and.(abs(dtset%densfor_pred)==4.or.abs(dtset%densfor_pred)==6)) optnc=2
      call nres2vres(dtset,gsqcut,psps%usepaw,kxc,mpi_enreg,my_natom,nfftf,ngfftf,nhat,&
 &     nkxc,nvresid,n3xccc,optnc,option,pawang,pawfgrtab,pawrhoij,pawtab,&
-&     rhor,rprimd,psps%usepaw,resid,xccc3d,xred)
+&     rhor,rprimd,psps%usepaw,resid,xccc3d,xred,vxc)
    else
      resid => nvresid
    end if
@@ -449,7 +450,8 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
 !==========================================================================
 
  if (stress_needed==1.and.dtset%usewvl==0) then
-   if (dtset%usefock==1 .and. associated(fock).and.fock%fock_common%optstr.and.psps%usepaw==0) then
+!   if (dtset%usefock==1 .and. associated(fock).and.fock%fock_common%optstr.and.psps%usepaw==0) then
+   if (dtset%usefock==1 .and. associated(fock).and.fock%fock_common%optstr) then
      fock%fock_common%stress(1:3)=fock%fock_common%stress(1:3)-energies%e_fock/ucvol
      if (n3xccc>0.and.psps%usepaw==0 .and. &
 &     (dtset%ixc==41.or.dtset%ixc==42.or.libxc_functionals_is_hybrid())) then
