@@ -36,8 +36,11 @@ MODULE m_ddk
  use m_kptrank
  use m_fstab
  use m_wfk
+#ifdef HAVE_NETCDF
+ use netcdf
+#endif
 
- use m_fstrings,      only : sjoin, itoa
+ use m_fstrings,      only : sjoin, itoa, endswith
  use m_io_tools,      only : iomode_from_fname
  use defs_abitypes,   only : hdr_type
  use m_crystal,       only : crystal_t, crystal_free
@@ -115,7 +118,7 @@ MODULE m_ddk
   logical :: debug=.False.
    ! Debug flag
 
-  character(len=fnlen) :: path(3) = ABI_NOFILE
+  character(len=fnlen) :: paths(3) = ABI_NOFILE
    ! File name
 
   real(dp) :: acell(3),rprim(3,3),gprim(3,3)
@@ -128,6 +131,9 @@ MODULE m_ddk
   real(dp), allocatable :: velocity_fsavg (:,:,:)
    ! (3,nene,nsppol)
    ! velocity on the FS in cartesian coordinates.
+
+  logical :: use_ncddk(3)
+   ! True if we are readin DDK matrix elements from DDK.nc instead of WFK file
 
   type(crystal_t) :: cryst
    ! Crystal structure read from file
@@ -155,7 +161,7 @@ CONTAINS
 !!  by each process in the MPI communicator comm.
 !!
 !! INPUTS
-!!   path=Filename.
+!!   paths=3 Filenames (could be either DFPT WFK files of DKK.nc files.
 !!   comm=MPI communicator.
 !!
 !! PARENTS
@@ -166,7 +172,7 @@ CONTAINS
 !!
 !! SOURCE
 
-subroutine ddk_init(ddk, path, comm)
+subroutine ddk_init(ddk, paths, comm)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -181,55 +187,48 @@ subroutine ddk_init(ddk, path, comm)
 
 !Arguments ------------------------------------
 !scalars
- character(len=*),intent(in) :: path(3)
+ character(len=*),intent(in) :: paths(3)
  integer,intent(in) :: comm
  type(ddk_t),intent(inout) :: ddk
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: timrev2=2
- integer :: fform,fform_ref,my_rank,restart, restartpaw
- type(hdr_type) :: hdr1,hdr_ref
+ integer,parameter :: timrev2=2,fform2=2
+ integer :: my_rank, restart, restartpaw, ii
 !arrays
- real(dp), allocatable :: eigen1(:)
+ integer :: fforms(3)
+ type(hdr_type) :: hdrs(3)
 
 !************************************************************************
 
  my_rank = xmpi_comm_rank(comm)
- ddk%path = path; ddk%comm = comm
- ddk%iomode = iomode_from_fname(path(1))
+ ddk%paths = paths; ddk%comm = comm
+ ddk%iomode = iomode_from_fname(paths(1))
 
-! in this call everything is broadcast properly to the whole comm
- call wfk_read_h1mat(path(1), eigen1, hdr_ref, comm)
- fform_ref = 2
- ABI_FREE(eigen1)
- if (ddk%debug) call hdr_echo(hdr_ref,fform_ref,4,unit=std_out)
+ ! In this calls everything is broadcast properly to the whole comm
+ do ii=1,3
+   ddk%use_ncddk(ii) = endswith(paths(ii), "_DDK.nc")
+   call hdr_read_from_fname(hdrs(ii), paths(ii), fforms(ii), comm)
+   if (ddk%debug) call hdr_echo(hdrs(ii), fforms(ii), 4, unit=std_out)
+   ! check that 2 headers are compatible
+   if (ii > 1) call hdr_check(fform2, fform2, hdrs(ii-1), hdrs(ii), 'COLL', restart, restartpaw)
+ end do
 
- ! check that the other 2 headers are compatible
- call wfk_read_h1mat(path(2), eigen1, hdr1, comm)
- fform = 2
- ABI_FREE(eigen1)
- call hdr_check(fform,fform_ref,hdr1,hdr_ref,'COLL',restart,restartpaw)
- call hdr_free(hdr1)
-
- call wfk_read_h1mat(path(3), eigen1, hdr1, comm)
- fform = 2
- ABI_FREE(eigen1)
- call hdr_check(fform,fform_ref,hdr1,hdr_ref,'COLL',restart,restartpaw)
- call hdr_free(hdr1)
-
- ddk%nsppol = hdr_ref%nsppol
- ddk%nspinor = hdr_ref%nspinor
- ddk%usepaw = hdr_ref%usepaw
+ ddk%nsppol = hdrs(1)%nsppol
+ ddk%nspinor = hdrs(1)%nspinor
+ ddk%usepaw = hdrs(1)%usepaw
  ABI_CHECK(ddk%usepaw == 0, "PAW not yet supported")
 
  ! Init crystal_t
- call crystal_from_hdr(ddk%cryst,hdr_ref,timrev2)
- call hdr_free(hdr_ref)
+ call crystal_from_hdr(ddk%cryst, hdrs(1), timrev2)
 
  ! Compute rprim, and gprimd. Used for slow FFT q--r if multiple shifts
  call mkradim(ddk%acell,ddk%rprim,ddk%cryst%rprimd)
  call matr3inv(ddk%rprim,ddk%gprim)
+
+ do ii=1,3
+   call hdr_free(hdrs(ii))
+ end do
 
 end subroutine ddk_init
 !!***
@@ -276,9 +275,12 @@ subroutine ddk_read_fsvelocities(ddk, fstab, comm)
 
 !Local variables-------------------------------
 !scalars
- integer :: idir, ikfs, isppol, ik_ibz
+ integer :: idir, ikfs, isppol, ik_ibz, ii
  integer :: symrankkpt, ikpt_ddk,iband, bd2tot_index
  integer :: bstart_k, nband_k, nband_in, vdim
+#ifdef HAVE_NETCDF
+ integer :: ncid, varid, nc_fform
+#endif
  type(hdr_type) :: hdr1
  type(kptrank_type) :: kptrank_t
  type(fstab_t), pointer :: fs
@@ -301,14 +303,27 @@ subroutine ddk_read_fsvelocities(ddk, fstab, comm)
  call wrtout(std_out, sjoin('Read DDK FILES with iomode=', itoa(ddk%iomode)), 'COLL')
  do idir = 1,3
    ! Open the files. All procs in comm receive hdr1 and eigen1
-   call wfk_read_h1mat (ddk%path(idir), eigen1, hdr1, comm)
+   if (ddk%use_ncddk(idir)) then
+#ifdef HAVE_NETCDF
+     NCF_CHECK(nctk_open_read(ncid, ddk%paths(ii), comm))
+     call hdr_ncread(hdr1, ncid, nc_fform)
+     varid = nctk_idname(ncid, "h1_matrix_elements")
+     ABI_MALLOC(eigen1, (2*hdr1%mband*hdr1%mband*hdr1%nkpt*ddk%nsppol))
+     !NCF_CHECK(nctk_set_collective(ncid, varid))
+     NCF_CHECK(nf90_get_var(ncid, varid, eigen1, count=[2, hdr1%mband, hdr1%mband, hdr1%nkpt, hdr1%nsppol]))
+     NCF_CHECK(nf90_close(ncid))
+#else
+     MSG_ERROR("Netcdf not available!")
+#endif
+   else
+     call wfk_read_h1mat(ddk%paths(idir), eigen1, hdr1, comm)
+   end if
    nband_in = maxval(hdr1%nband)
 
    ! need correspondence hash between the DDK and the fs k-points
    call mkkptrank (hdr1%kptns,hdr1%nkpt,kptrank_t)
    do isppol=1,ddk%nsppol
      fs => fstab(isppol)
-
      do ikfs=1,fs%nkfs
        ik_ibz = fs%istg0(1,ikfs)
        call get_rank_1kpt (fs%kpts(:,ikfs),symrankkpt, kptrank_t)
@@ -327,14 +342,13 @@ subroutine ddk_read_fsvelocities(ddk, fstab, comm)
        do iband = bstart_k, bstart_k+nband_k-1
          ddk%velocity(idir, iband-bstart_k+1, ikfs, isppol)=eigen1(bd2tot_index + 2*nband_in*(iband-1) + iband)
        end do
-
      end do
    end do
 
    ABI_FREE(eigen1)
-   call destroy_kptrank (kptrank_t)
+   call destroy_kptrank(kptrank_t)
    call hdr_free(hdr1)
- end do
+ end do ! idir
 
  ! process the eigenvalues(1): rotate to cartesian and divide by 2 pi
  ! use DGEMM better here on whole matrix and then reshape?
@@ -566,10 +580,10 @@ subroutine ddk_print(ddk, header, unit, prtvol, mode_paral)
  write(std_out,*)"Number of FS bands: ",ddk%maxnb
  write(std_out,*)"Number of FS k-points: ",ddk%nkfs
  write(std_out,*)"Number of spin channels: ",ddk%nsppol
- write(std_out,*)"Path to files: "
- write(std_out,*)"  ", trim(ddk%path(1))
- write(std_out,*)"  ", trim(ddk%path(2))
- write(std_out,*)"  ", trim(ddk%path(3))
+ write(std_out,*)"Paths to files: "
+ write(std_out,*)"  ", trim(ddk%paths(1))
+ write(std_out,*)"  ", trim(ddk%paths(2))
+ write(std_out,*)"  ", trim(ddk%paths(3))
 
 end subroutine ddk_print
 !!***
