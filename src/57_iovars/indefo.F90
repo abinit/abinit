@@ -339,7 +339,6 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%gwmem=11
    dtsets(idtset)%gwpara=2
    dtsets(idtset)%gwrpacorr=0
-   dtsets(idtset)%gwfockmix=0.25_dp
    dtsets(idtset)%gwls_stern_kmax=1
    dtsets(idtset)%gwls_model_parameter=1.0_dp
    dtsets(idtset)%gwls_npt_gauss_quad=10
