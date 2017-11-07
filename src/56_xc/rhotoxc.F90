@@ -335,7 +335,7 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
      message='invalid size for taur!'
      MSG_BUG(message)
    end if
- end if  
+ end if
  with_vxctau=(present(vxctau).and.present(taur))
  if (with_vxctau) with_vxctau=(size(vxctau)>0)
  if (with_vxctau) then
@@ -344,7 +344,7 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
      MSG_BUG(message)
    end if
  end if
- 
+
  comm_fft = mpi_enreg%comm_fft; nproc_fft = mpi_enreg%nproc_fft
 
 !Compute different geometric tensor, as well as ucvol, from rprimd
@@ -503,8 +503,10 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
        ABI_ALLOCATE(nhat_up,(nfft))
        do ifft=1,nfft
          if (m_norm(ifft)>m_norm_min) then
-           nhat_up(ifft)=half*(nhat(ifft,1)+(rhor_(ifft,2)*nhat(ifft,2) &
-&           +rhor_(ifft,3)*nhat(ifft,3)+rhor_(ifft,4)*nhat(ifft,4))/m_norm(ifft))
+           nhat_up(ifft)=half*(nhat(ifft,1) &
+&                    +(rhor_(ifft,2)*nhat(ifft,2) &
+&                     +rhor_(ifft,3)*nhat(ifft,3) &
+&                     +rhor_(ifft,4)*nhat(ifft,4))/m_norm(ifft))
          else
            nhat_up(ifft)=half*(nhat(ifft,1) &
 &           +sqrt(nhat(ifft,2)**2+nhat(ifft,3)**2+nhat(ifft,4)**2))
@@ -698,7 +700,7 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
        end do
 
 !      In case of a hybrid functional, if one needs to compute the auxiliary GGA Kxc, a separate call to drivexc_main
-!      is first needed to compute Kxc using such auxiliary GGA, 
+!      is first needed to compute Kxc using such auxiliary GGA,
 !      before calling again drivexc_main using the correct functional for Exc and Vxc
        if(xcdata%usefock==1 .and. auxc_ixc/=0)then
          if (auxc_ixc<0) then
@@ -1033,9 +1035,9 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
        end if
 
        if (present(bxc)) then
-         bxc(:) = 0.0d0
+         bxc(:) = zero
        endif
- 
+
      else
 
 !      If non-collinear magnetism, restore potential in proper axis before adding it
@@ -1050,7 +1052,7 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
            else
              bxc(ifft) = half*(half*(kxc(ifft,1)+kxc(ifft,3))-kxc(ifft,2))
            endif
-         end do  
+         end do
        endif
 
        do ifft=1,nfft
@@ -1174,7 +1176,7 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
 !    kernel will be modified in tddft. No other use of kxc should be made with ixc==20
      if(nkxc/=0 .and. ixc==20) kxc(:,:)=zero
 !    For ixc=21 or 22, the LDA (ixc=1) kernel has been computed previously.
- 
+
    else
 
      MSG_BUG('When ixc=20,21 or 22, vhartr needs to be present in the call to rhotoxc !')

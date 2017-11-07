@@ -131,8 +131,7 @@ subroutine dfpt_dyxc1(atindx,blkflgfrx1,dyfrx1,gmet,gsqcut,ixc,kxc,mgfft,mpert,m
 !Local variables-------------------------------
 !scalars
  integer :: cplex,iat1,iatom1,iatom2,idir1,idir2,ierr,ifft,my_natom,comm_atom
- integer :: n1,n2,n3,n3xccc,nfftot,option,upperdir
- integer :: optnc, optxc
+ integer :: n1,n2,n3,n3xccc,nfftot,option,upperdir,optnc
  logical :: paral_atom
  real(dp) :: valuei,valuer
 !arrays
@@ -187,9 +186,9 @@ subroutine dfpt_dyxc1(atindx,blkflgfrx1,dyfrx1,gmet,gsqcut,ixc,kxc,mgfft,mpert,m
      rhor1=zero
 !FR SPr EB Non-collinear magnetism
      if (nspden==4.and.present(rhor).and.present(bxc).and.present(vxc)) then
-       optnc=1 ; optxc=1
-       call dfpt_mkvxc_noncoll(1,ixc,kxc,bxc,mpi_enreg,nfft,ngfft,dum_nhat,0,dum_nhat,0,nkxc,&
-&       nkxc,nspden,n3xccc,optnc,option,optxc,paral_kgb,qphon,rhor,rhor1,rprimd,0,vxc,vxc10,xcccwk1) 
+       optnc=1
+       call dfpt_mkvxc_noncoll(1,ixc,kxc,bxc,mpi_enreg,nfft,ngfft,dum_nhat,0,dum_nhat,0,dum_nhat,0,nkxc,&
+&       nkxc,nspden,n3xccc,optnc,option,paral_kgb,qphon,rhor,rhor1,rprimd,0,vxc,vxc10,xcccwk1)
      else
        call dfpt_mkvxc(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,dum_nhat,0,dum_nhat,0,nkxc,&
 &       nspden,n3xccc,option,paral_kgb,qphon,rhor1,rprimd,0,vxc10,xcccwk1)

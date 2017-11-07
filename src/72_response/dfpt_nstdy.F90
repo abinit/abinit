@@ -167,8 +167,7 @@ subroutine dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eig
  integer :: ban2tot,bantot,bdtot_index,ddkcase,iband,icg,icg1,idir1
  integer :: ierr,ifft,ii,ikg,ikg1,ikpt,ilm,ipert1,ispden,isppol
  integer :: istwf_k,isym,jj,master,me,n1,n2,n3,n3xccc,n4,n5,n6
- integer :: nband_k,nfftot,npw1_k,npw_k,nspinor_,option,spaceworld
- integer :: optnc,optxc
+ integer :: nband_k,nfftot,npw1_k,npw_k,nspinor_,option,spaceworld,optnc
  real(dp) :: doti,dotr,wtk_k
  logical :: t_exist
  character(len=500) :: msg
@@ -528,9 +527,8 @@ subroutine dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eig
 !FR SPr EB non-collinear magnetism
            if (nspden==4.and.present(rhor).and.(present(bxc)).and.present(vxc)) then
              optnc=1
-             optxc=1
-             call dfpt_mkvxc_noncoll(1,dtset%ixc,kxc,bxc,mpi_enreg,nfft,ngfft,rhodummy,0,rhodummy,0,&
-&             nkxc,nkxc,nspden,n3xccc,optnc,option,optxc,dtset%paral_kgb,dtset%qptn,rhodummy,rhodummy,&
+             call dfpt_mkvxc_noncoll(1,dtset%ixc,kxc,bxc,mpi_enreg,nfft,ngfft,rhodummy,0,rhodummy,0,rhodummy,0,&
+&             nkxc,nkxc,nspden,n3xccc,optnc,option,dtset%paral_kgb,dtset%qptn,rhodummy,rhodummy,&
 &             rprimd,0,vxc,vxc1,xccc3d1)
            else
              call dfpt_mkvxc(cplex,dtset%ixc,kxc,mpi_enreg,nfft,ngfft,rhodummy,0,rhodummy,0,&
