@@ -298,10 +298,6 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
 
  DBG_ENTER("COLL")
 
-!DEBUG
- write(std_out,*)' rhotoxc : enter, ixc= ',xcdata%ixc
-!ENDDEBUG
-
 !Just to keep taug as an argument while in development
  ABI_UNUSED(taug(1,1))
 
@@ -328,11 +324,6 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
      is_hybrid=libxc_functionals_is_hybrid()
    endif
  endif
-
-!DEBUG
- write(std_out,*)' rhotoxc : main call to drivexc_main, ixc=',ixc
- write(std_out,*)' rhotoxc : ismgga=',ismgga
-!ENDDEBUG
 
 !Check options
  if(option==3)then
@@ -761,10 +752,6 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
          if (auxc_ixc<0) then
            call libxc_functionals_init(auxc_ixc,nspden,xc_functionals=xc_funcs_auxc)
          end if
-!        DEBUG
-         write(std_out,*)' rhotoxc : auxiliary call to drivexc_main, auxc_ixc=',auxc_ixc
-         write(std_out,*)' rhotoxc : ngr2,nspden_updn=',ngr2,nspden_updn
-!        ENDDEBUG
          call drivexc_main(exc_b,auxc_ixc,mgga,ndvxc,nd2vxc,ngr2,npts,nspden_updn,nvxcgrho,order,&
 &         rho_b_updn,vxcrho_b_updn,xcdata%xclevel, &
 &         dvxc=dvxc_b,d2vxc=d2vxc_b,grho2=grho2_b_updn,vxcgrho=vxcgrho_b, &
@@ -785,11 +772,6 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
        end if
 
 !      Call to main XC driver
-!DEBUG
-       write(std_out,*)' rhotoxc : main call to drivexc_main, ixc=',ixc
-       write(std_out,*)' rhotoxc : ismgga,mgga=',ismgga,mgga
-       write(std_out,*)' rhotoxc : present(xc_funcs)=',present(xc_funcs)
-!ENDDEBUG
        if(present(xc_funcs))then
          call libxc_functionals_get_hybridparams(hyb_mixing=hyb_mixing,hyb_mixing_sr=hyb_mixing_sr,&
 &                                            hyb_range=hyb_range,xc_functionals=xc_funcs)
@@ -1276,11 +1258,6 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
  call timab(81,2,tsec)
 
  DBG_EXIT("COLL")
-
-!DEBUG
- write(std_out,*)' rhotoxc : enxc=',enxc
- write(std_out,*)' rhotoxc : exit '
-!ENDDEBUG
 
 end subroutine rhotoxc
 !!***
