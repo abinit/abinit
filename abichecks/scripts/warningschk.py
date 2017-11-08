@@ -123,7 +123,7 @@ def main(warno, home_dir=""):
                              print(source + ' : line= ' + sourceline + ', var= ' + Buffer[4].split(" ")[Warning_len+1] +' ['+source_dir[-2]+']')
                           elif warno in [6,7]:
                              print(source + ' : line= ' + sourceline + ', warn= ' + Buffer[4].split(":")[1])
-                          elif warno in [16]:
+                          elif warno in [20]:
                              a = Buffer[4].split(":")[1].split(" declared")[0]
                              print(source + ' : line= ' + sourceline + ', warn=' + a + ' ['+source_dir[-2]+']')
                           else:
