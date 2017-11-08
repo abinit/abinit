@@ -1,5 +1,5 @@
 
-.Version 8.7.0 of ABINIT 
+.Version 8.7.1 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
 
 .Copyright (C) 1998-2017 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 20 Oct 2017.
-- ( at 08h24 )
+.Starting date : Wed 25 Oct 2017.
+- ( at 14h49 )
   
 - input  file    -> t66.in
 - output file    -> t66.out
@@ -83,7 +83,7 @@ _ WF disk file :      0.120 Mbytes ; DEN or POT disk file :      0.065 Mbytes.
                        3.33333333E-01  0.00000000E+00  0.00000000E+00
                        3.33333333E-01  3.33333333E-01  0.00000000E+00
                       -3.33333333E-01  3.33333333E-01  0.00000000E+00
-            kpthf      0.00000000E+00  0.00000000E+00  0.00000000E+00
+         kptns_hf2     0.00000000E+00  0.00000000E+00  0.00000000E+00
                        3.33333333E-01  0.00000000E+00  0.00000000E+00
                       -3.33333333E-01  0.00000000E+00  0.00000000E+00
                        0.00000000E+00  3.33333333E-01  0.00000000E+00
@@ -234,8 +234,8 @@ P           mkmem           4
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.00850
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_ace_6/tests/Psps_for_tests/14si.pspgth
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_ace_6/tests/Psps_for_tests/14si.pspgth
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_ace_1/tests/Psps_for_tests/14si.pspgth
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_ace_1/tests/Psps_for_tests/14si.pspgth
 - Goedecker-Teter-Hutter  Fri May 31 17:22:04 EDT 1996
 - 14.00000   4.00000    960531                znucl, zion, pspdat
     2    1    1    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -377,8 +377,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     186.259     186.184
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.00850
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_ace_6/tests/Psps_for_tests/14si.pspgth
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_ace_6/tests/Psps_for_tests/14si.pspgth
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_ace_1/tests/Psps_for_tests/14si.pspgth
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_ace_1/tests/Psps_for_tests/14si.pspgth
 - Goedecker-Teter-Hutter  Fri May 31 17:22:04 EDT 1996
 - 14.00000   4.00000    960531                znucl, zion, pspdat
     2    1    1    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -532,7 +532,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     186.259     186.184
                        3.33333333E-01  0.00000000E+00  0.00000000E+00
                        3.33333333E-01  3.33333333E-01  0.00000000E+00
                       -3.33333333E-01  3.33333333E-01  0.00000000E+00
-            kpthf      0.00000000E+00  0.00000000E+00  0.00000000E+00
+         kptns_hf2     0.00000000E+00  0.00000000E+00  0.00000000E+00
                        3.33333333E-01  0.00000000E+00  0.00000000E+00
                       -3.33333333E-01  0.00000000E+00  0.00000000E+00
                        0.00000000E+00  3.33333333E-01  0.00000000E+00
@@ -722,10 +722,10 @@ P           mkmem           4
 - Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7
 - Comment : the original paper describing the ABINIT project.
 -
-- Proc.   0 individual time (sec): cpu=         14.5  wall=         14.7
+- Proc.   0 individual time (sec): cpu=         14.9  wall=         15.2
 
 ================================================================================
 
  Calculation completed.
 .Delivered   4 WARNINGs and   2 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         14.5  wall=         14.7
++Overall time at end (sec) : cpu=         14.9  wall=         15.2

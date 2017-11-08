@@ -166,7 +166,7 @@ sec5:
  title: "Correlated electrons"
  tag: correlated
  body: |
-  When correlated electrons are to be considered (in most cases, when <b>d and f orbitals</b> plpay an active role), 
+  When correlated electrons are to be considered (in most cases, when <b>d and f orbitals</b> play an active role), 
   it is necessary to go beyond the standard DFT framework. 
   ABINIT enables the following possibilities:
   <ol>

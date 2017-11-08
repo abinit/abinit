@@ -699,6 +699,10 @@ type dataset_type
  real(dp) :: gwfockmix
  real(dp) :: gwls_model_parameter         ! Parameter used in modelization of dielectric function
  real(dp) :: gw_toldfeig
+ real(dp) :: hyb_mixing
+ real(dp) :: hyb_mixing_sr
+ real(dp) :: hyb_range_dft
+ real(dp) :: hyb_range_fock
  real(dp) :: kptnrm
  real(dp) :: kptrlen
  real(dp) :: magcon_lambda

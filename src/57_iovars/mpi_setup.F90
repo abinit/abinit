@@ -111,7 +111,6 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
  real(dp),pointer :: nband_rbz(:,:)
  character(len=6) :: nm_mkmem(3)
 
-
 !*************************************************************************
 
  DBG_ENTER("COLL")
