@@ -289,6 +289,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
 ! =================================================
 ! === Loop on the band indices jband of cgocc_k ===
 ! =================================================
+
    do jband=1,nband_k
 
 !*   occ = occupancy of jband at this k point
