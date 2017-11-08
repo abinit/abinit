@@ -262,12 +262,12 @@ subroutine pawdfptenergy(delta_energy,ipert1,ipert2,ixc,my_natom,natom,ntypat,nz
        call pawxc3(pawtab(itypat)%coredens,cplex_a,cplex_a,eexc,ixc,paw_an0(iatom)%kxc1,&
 &       lm_size_a,lmselect_a,nhat1,paw_an0(iatom)%nkxc1,mesh_size,nspden,optvxc,&
 &       pawang,pawrad(itypat),rho1,usecore,0,&
-&       paw_an1(iatom)%vxc1,xclevel)
+&       paw_an0(iatom)%vxc1,paw_an1(iatom)%vxc1,xclevel)
        call pawxc3(pawtab(itypat)%tcoredens(:,1),&
 &       cplex_a,cplex_a,eexc,ixc,paw_an0(iatom)%kxct1,&
 &       lm_size_a,lmselect_a,nhat1,paw_an0(iatom)%nkxc1,mesh_size,nspden,optvxc,&
 &       pawang,pawrad(itypat),trho1,usetcore,2*usexcnhat,&
-&       paw_an1(iatom)%vxct1,xclevel)
+&       paw_an0(iatom)%vxct1,paw_an1(iatom)%vxct1,xclevel)
      end if
 
      paw_an1(iatom)%has_vxc=2
@@ -320,13 +320,13 @@ subroutine pawdfptenergy(delta_energy,ipert1,ipert2,ixc,my_natom,natom,ntypat,nz
      ABI_ALLOCATE(kxc_dum,(mesh_size,lm_size_b,0))
      call pawxc3(pawtab(itypat)%coredens,cplex_b,cplex_a,eexc,ixc,kxc_dum,&
 &     lm_size_b,lmselect_b,nhat1,0,mesh_size,nspden,optexc,pawang,pawrad(itypat),&
-&     rho1,usecore,0,paw_an1(iatom)%vxc1,xclevel,d2enxc_im=eexc_im)
+&     rho1,usecore,0,paw_an0(iatom)%vxc1,paw_an1(iatom)%vxc1,xclevel,d2enxc_im=eexc_im)
      delta_energy_xc(1)=delta_energy_xc(1)+eexc
      delta_energy_xc(2)=delta_energy_xc(2)+eexc_im
      call pawxc3(pawtab(itypat)%tcoredens(:,1),&
 &     cplex_b,cplex_a,eexc,ixc,kxc_dum,&
 &     lm_size_b,lmselect_b,nhat1,0,mesh_size,nspden,optexc,pawang,pawrad(itypat),&
-&     trho1,usetcore,2*usexcnhat,paw_an1(iatom)%vxct1,xclevel,&
+&     trho1,usetcore,2*usexcnhat,paw_an0(iatom)%vxct1,paw_an1(iatom)%vxct1,xclevel,&
 &     d2enxc_im=eexc_im)
      ABI_DEALLOCATE(kxc_dum)
      delta_energy_xc(1)=delta_energy_xc(1)-eexc

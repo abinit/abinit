@@ -795,6 +795,7 @@ end subroutine pawxc_mkdenpos_wrapper
 !!    if nspden>=2: kxc(:,1)= d2Exc/drho_up drho_up
 !!                  kxc(:,2)= d2Exc/drho_up drho_dn
 !!                  kxc(:,3)= d2Exc/drho_dn drho_dn
+!!    if nspden==4: kxc(:,4:6)= (m_x, m_y, m_z) (magnetization)
 !!   ===== if GGA
 !!    if nspden==1:
 !!       kxc(:,1)= d2Exc/drho2
@@ -824,6 +825,8 @@ end subroutine pawxc_mkdenpos_wrapper
 !!       kxc(:,17)=grady(rho_dn)
 !!       kxc(:,18)=gradz(rho_up)
 !!       kxc(:,19)=gradz(rho_dn)
+!!    if nspden==4:
+!!       kxc(:,20:22)= (m_x, m_y, m_z) (magnetization)
 !!
 !! PARENTS
 !!      m_pawpsp,pawdenpot
@@ -864,15 +867,15 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,lm_size,lmselect,nhat,nkxc,nrad,nspd
 !scalars
  integer :: ii,ilm,ipts,ir,ispden,iwarn,lm_size_eff,mgga,ndvxc,nd2vxc,ngr2,ngrad,npts
  integer :: nspden_eff,nspden_updn,nspgrad,nvxcdgr,order
- real(dp) :: dvdn,dvdz,enxcr,factor,m_norm_min,vxcrho
+ real(dp) :: dvdn,dvdz,enxcr,factor,vxcrho
  character(len=500) :: msg
 !arrays
 ! real(dp) :: tsec(2)
  real(dp),allocatable :: dgxc(:),dnexcdn(:,:),drho(:),drhocore(:),dvxcdgr(:,:),dvxci(:,:)
- real(dp),allocatable :: dylmdr(:,:,:),exci(:),ff(:),grho2_updn(:,:),gxc(:,:,:,:),m_norm(:)
- real(dp),allocatable :: rhoarr(:,:),rhonow(:,:,:),rho_updn(:,:),vxci(:,:),vxci_diag(:,:),vxci_nc(:,:)
+ real(dp),allocatable :: dylmdr(:,:,:),exci(:),ff(:),grho2_updn(:,:),gxc(:,:,:,:)
+ real(dp),allocatable :: rhoarr(:,:),rhonow(:,:,:),rho_updn(:,:),vxci(:,:)
  real(dp),allocatable,target :: rhohat(:,:,:)
- real(dp),pointer :: rho_(:,:,:)
+ real(dp),pointer :: rho_(:,:,:),vxc_diag(:,:),vxc_nc(:,:),vxc_updn(:,:,:)
 
 ! *************************************************************************
 
@@ -950,12 +953,16 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,lm_size,lmselect,nhat,nkxc,nrad,nspd
      LIBPAW_ALLOCATE(rhohat,(nrad,lm_size,nspden))
      rhohat(:,:,:)=rhor(:,:,:)+nhat(:,:,:)
    end if
-   if (nspden==4)  then
-     LIBPAW_ALLOCATE(m_norm,(nrad))
-   end if
    if (xclevel==2.and.usecore==1) then
      LIBPAW_ALLOCATE(drhocore,(nrad))
      call nderiv_gen(drhocore,corexc,pawrad)
+   end if
+   if (option/=3.and.option/=4) then
+     if (nspden=/=4) then
+       vxc_updn => vxc
+     else
+       LIBPAW_ALLOCATE(vxc_updn,(nrad,npts,nspden_updn))
+     end if
    end if
 
 !  Allocation of mandatory arguments of drivexc
@@ -969,9 +976,9 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,lm_size,lmselect,nhat,nkxc,nrad,nspd
    LIBPAW_ALLOCATE(grho2_updn,(nrad,ngr2))
    LIBPAW_ALLOCATE(dnexcdn,(nrad,nspgrad))
 
+!  GGA: convert Ylm derivatives from normalized to standard cartesian coordinates
+!  dYlm/dr_i = { dYlm/dr_i^hat - Sum_j[ dYlm/dr_j^hat (r_j/r)] } * (1/r)
    if (xclevel==2) then
-!    Convert Ylm derivatives from normalized to standard cartesian coordinates
-!    dYlm/dr_i = { dYlm/dr_i^hat - Sum_j[ dYlm/dr_j^hat (r_j/r)] } * (1/r)
      LIBPAW_ALLOCATE(dylmdr,(3,npts,pawang%ylm_size))
      do ilm=1,pawang%ylm_size
        do ipts=1,npts
@@ -1065,10 +1072,7 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,lm_size,lmselect,nhat,nkxc,nrad,nspd
          grho2_updn(1:nrad,3)=rhonow(1:nrad,1,2)**2+rhonow(1:nrad,1,3)**2+rhonow(1:nrad,1,4)**2
        end if
      else if (nspden==4) then
-       call rotate_mag(rhonow(:,:,1),rho_updn,rhonow(:,2:4,1),nrad,mag_norm_out=m_norm)
-!       m_norm(1:nrad)=sqrt(rhonow(1:nrad,2,1)**2+rhonow(1:nrad,3,1)**2+rhonow(1:nrad,4,1)**2)
-!       rho_updn(1:nrad,1)=(rhonow(1:nrad,1,1)+m_norm(1:nrad))*half
-!       rho_updn(1:nrad,2)=(rhonow(1:nrad,1,1)-m_norm(1:nrad))*half
+       call rotate_mag(rhonow(:,:,1),rho_updn,rhonow(:,2:4,1),nrad)
      end if
 
 !    Make the density positive everywhere (but do not care about gradients)
@@ -1085,7 +1089,7 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,lm_size,lmselect,nhat,nkxc,nrad,nspd
      if (nkxc>0.and.ndvxc>0) then
        if (nkxc==1.and.ndvxc==15) then
          kxc(1:nrad,ipts,1)=half*(dvxci(1:nrad,1)+dvxci(1:nrad,9)+dvxci(1:nrad,10))
-       else if (nkxc==3.and.ndvxc==15) then
+       else if ((nkxc==3.or.nkxc==6).and.ndvxc==15) then
          kxc(1:nrad,ipts,1)=dvxci(1:nrad,1)+dvxci(1:nrad,9)
          kxc(1:nrad,ipts,2)=dvxci(1:nrad,10)
          kxc(1:nrad,ipts,3)=dvxci(1:nrad,2)+dvxci(1:nrad,11)
@@ -1099,7 +1103,7 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,lm_size,lmselect,nhat,nkxc,nrad,nspd
          kxc(1:nrad,ipts,2)=half*dvxci(1:nrad,3)+dvxci(1:nrad,12)
          kxc(1:nrad,ipts,3)=quarter*dvxci(1:nrad,5)+dvxci(1:nrad,13)
          kxc(1:nrad,ipts,4)=eighth*dvxci(1:nrad,7)+dvxci(1:nrad,15)
-       else if (nkxc==19.and.ndvxc==15) then
+       else if ((nkxc==19.or.nkxc==22).and.ndvxc==15) then
          kxc(1:nrad,ipts,1)=dvxci(1:nrad,1)+dvxci(1:nrad,9)
          kxc(1:nrad,ipts,2)=dvxci(1:nrad,10)
          kxc(1:nrad,ipts,3)=dvxci(1:nrad,2)+dvxci(1:nrad,11)
@@ -1121,7 +1125,7 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,lm_size,lmselect,nhat,nkxc,nrad,nspd
          kxc(1:nrad,ipts,5)=rhonow(1:nrad,1,2)
          kxc(1:nrad,ipts,6)=rhonow(1:nrad,1,3)
          kxc(1:nrad,ipts,7)=rhonow(1:nrad,1,4)
-       else if (nkxc==19) then
+       else if (nkxc==19.or.nkxc==22) then
          kxc(1:nrad,ipts,14)=rhonow(1:nrad,1,2)
          kxc(1:nrad,ipts,15)=rhonow(1:nrad,2,2)
          kxc(1:nrad,ipts,16)=rhonow(1:nrad,1,3)
@@ -1129,6 +1133,11 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,lm_size,lmselect,nhat,nkxc,nrad,nspd
          kxc(1:nrad,ipts,18)=rhonow(1:nrad,1,4)
          kxc(1:nrad,ipts,19)=rhonow(1:nrad,2,4)
        end if
+       if (nkxc==6.or.nkxc==22) then
+         kxc(1:nrad,ipts,nkxc-2)=rhonow(1:nrad,2,1)
+         kxc(1:nrad,ipts,nkxc-1)=rhonow(1:nrad,3,1)
+         kxc(1:nrad,ipts,nkxc  )=rhonow(1:nrad,4,1)
+       endif
      end if
 
 !    ----------------------------------------------------------------------
@@ -1137,8 +1146,8 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,lm_size,lmselect,nhat,nkxc,nrad,nspd
 
      if (option/=3.and.option/=4) then
 
-       do ispden=1,nspden
-         vxc(1:nrad,ipts,ispden)=vxci(1:nrad,ispden)
+       do ispden=1,nspden_updn
+         vxc_updn(1:nrad,ipts,ispden)=vxci(1:nrad,ispden)
        end do
 
 !      For GGAs, additional terms appear
@@ -1226,7 +1235,7 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,lm_size,lmselect,nhat,nkxc,nrad,nspd
 !    Compute divergence of gxc and substract it from Vxc
      LIBPAW_ALLOCATE(dgxc,(nrad))
 !    Need to multiply gxc by 2 in the non-polarised case
-     factor=one;if (nspden==1) factor=two
+     factor=one;if (nspden_updn==1) factor=two
      if (option/=4.and.option/=5) then
        LIBPAW_ALLOCATE(ff,(nrad))
        do ispden=1,nspden_updn
@@ -1237,7 +1246,7 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,lm_size,lmselect,nhat,nkxc,nrad,nspd
              ff(2:nrad)=ff(2:nrad)/pawrad%rad(2:nrad)
              call pawrad_deducer0(ff,nrad,pawrad)
              do ipts=1,npts
-               vxc(1:nrad,ipts,ispden)=vxc(1:nrad,ipts,ispden) &
+               vxc_updn(1:nrad,ipts,ispden)=vxc_updn(1:nrad,ipts,ispden) &
 &               -factor*(dgxc(1:nrad)*pawang%anginit(ii,ipts)*pawang%ylmr(ilm,ipts) &
 &               +ff(1:nrad)*dylmdr(ii,ipts,ilm))
              end do
@@ -1248,7 +1257,7 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,lm_size,lmselect,nhat,nkxc,nrad,nspd
      else ! option==4 or option==5
        do ispden=1,nspden_updn
          call nderiv_gen(dgxc,gxc(:,1,1,ispden),pawrad)
-         vxc(2:nrad,1,ispden)=vxc(2:nrad,1,ispden) &
+         vxc_updn(2:nrad,1,ispden)=vxc_updn(2:nrad,1,ispden) &
 &         -factor*(dgxc(2:nrad)+two*gxc(2:nrad,1,1,ispden)/pawrad%rad(2:nrad))
          call pawrad_deducer0(vxc(:,1,ispden),nrad,pawrad)
        end do
@@ -1260,36 +1269,10 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,lm_size,lmselect,nhat,nkxc,nrad,nspd
 !  ----- If non-collinear, rotate back potential according to magnetization
 !  ----------------------------------------------------------------------
    if (option/=3.and.option/=4.and.nspden==4) then
-     LIBPAW_ALLOCATE(vxci_diag,(nrad,nspden_updn))
-     LIBPAW_ALLOCATE(vxci_nc,(nrad,nspden))
-     do ipts=1,npts
-       do ispden=1,nspden
-         vxci_diag(1:nrad,ispden)=vxc(1:nrad,ipts,ispden)
-       end do
-       call rotate_back_mag(vxci_diag,vxci_nc,rhonow(:,:,1),nrad,&
-&                           mag_norm_in=m_norm)
-       do ispden=1,nspden
-         vxc(1:nrad,ipts,ispden)=vxci_nc(1:nrad,ispden)
-       end do
-!          m_norm_min=tol8
-!          do ir=1,nrad
-!            dvdn=(vxci(ir,1)+vxci(ir,2))*half
-!            dvdz=(vxci(ir,1)-vxci(ir,2))*half
-!            if(m_norm(ir)>m_norm_min)then
-! !            if(m_norm(ir)>rhonow(ir,1,1)*tol10+tol14)then
-!              factor=dvdz/m_norm(ir)
-!              vxc(ir,ipts,1)=dvdn+rhonow(ir,4,1)*factor
-!              vxc(ir,ipts,2)=dvdn-rhonow(ir,4,1)*factor
-!              vxc(ir,ipts,3)= rhonow(ir,2,1)*factor
-!              vxc(ir,ipts,4)=-rhonow(ir,3,1)*factor
-!            else
-!              vxc(ir,ipts,1:2)=dvdn
-!              vxc(ir,ipts,3:4)=zero
-!            end if
-!          end do
-     end do
-     LIBPAW_DEALLOCATE(vxci_diag)
-     LIBPAW_DEALLOCATE(vxci_nc)
+     call c_f_pointer(c_loc(vxc_updn),vxc_diag,shape=[nrad*npts,nspden_updn])
+     call c_f_pointer(c_loc(vxc),vxc_nc,shape=[nrad*npts,nspden])
+     call rotate_back_mag(vxc_diag,vxc_nc,rhonow(:,:,1),nrad*npts)
+     LIBPAW_DEALLOCATE(vxc_updn)
    end if
 
 !  ----------------------------------------------------------------------
@@ -1341,9 +1324,6 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,lm_size,lmselect,nhat,nkxc,nrad,nspd
    if (xclevel==2) then
      LIBPAW_DEALLOCATE(gxc)
      LIBPAW_DEALLOCATE(dylmdr)
-   end if
-   if (nspden==4)  then
-     LIBPAW_DEALLOCATE(m_norm)
    end if
 
 !  ------------------------------------
@@ -1675,6 +1655,7 @@ end subroutine pawxcpositron
 !!  usexcnhat= 0 if compensation density does not have to be used
 !!             1 if compensation density has to be used in d2Exc only
 !!             2 if compensation density (nhat) has to be used in d2Exc and Vxc1
+!!  vxc(nrad,pawang%angl_size,nspden)=GS xc potential
 !!  xclevel= XC functional level
 !!
 !! OUTPUT
@@ -1697,6 +1678,7 @@ end subroutine pawxcpositron
 !!    if nspden>=2: kxc(:,1)= d2Exc/drho_up drho_up
 !!                  kxc(:,2)= d2Exc/drho_up drho_dn
 !!                  kxc(:,3)= d2Exc/drho_dn drho_dn
+!!    if nspden==4: kxc(:,4:6)= (m_x, m_y, m_z) (magnetization)
 !!   ===== if GGA
 !!    if nspden==1:
 !!       kxc(:,1)= d2Exc/drho2
@@ -1726,7 +1708,9 @@ end subroutine pawxcpositron
 !!       kxc(:,17)=grady(rho_dn)
 !!       kxc(:,18)=gradz(rho_up)
 !!       kxc(:,19)=gradz(rho_dn)
-
+!!    if nspden==4:
+!!       kxc(:,20:22)= (m_x, m_y, m_z) (magnetization)
+!!
 !! PARENTS
 !!      pawdenpot,pawdfptenergy
 !!
@@ -1736,7 +1720,7 @@ end subroutine pawxcpositron
 !! SOURCE
 
 subroutine pawxc3(corexc1,cplex_den,cplex_vxc,d2enxc,ixc,kxc,lm_size,lmselect,nhat1,nkxc,nrad,nspden,&
-&                 option,pawang,pawrad,rhor1,usecore,usexcnhat,vxc1,xclevel,&
+&                 option,pawang,pawrad,rhor1,usecore,usexcnhat,vxc,vxc1,xclevel,&
 &                 d2enxc_im) ! optional
 
 
@@ -1760,6 +1744,7 @@ subroutine pawxc3(corexc1,cplex_den,cplex_vxc,d2enxc,ixc,kxc,lm_size,lmselect,nh
  logical,intent(in) :: lmselect(lm_size)
  real(dp),intent(in) :: corexc1(cplex_den*nrad)
  real(dp),intent(in) :: kxc(nrad,pawang%angl_size,nkxc)
+ real(dp),intent(in) :: vxc(nrad,pawang%angl_size,nspden)
  real(dp),intent(in) :: nhat1(cplex_den*nrad,lm_size,nspden*((usexcnhat+1)/2))
  real(dp),intent(in),target :: rhor1(cplex_den*nrad,lm_size,nspden)
  real(dp),intent(inout),target :: vxc1(cplex_vxc*nrad,pawang%angl_size,nspden)
@@ -1784,9 +1769,9 @@ subroutine pawxc3(corexc1,cplex_den,cplex_vxc,d2enxc,ixc,kxc,lm_size,lmselect,nh
  real(dp) :: gxc1i(3,2),gxc1r(3,2)
  real(dp),allocatable :: dgxc1(:),drho1(:,:),drho1core(:,:),dylmdr(:,:,:)
  real(dp),allocatable :: ff(:),gg(:),grho1arr(:,:,:),gxc1(:,:,:,:)
- real(dp),allocatable :: m_norm(:),vxc1_diag(:,:),vxc1_nc(:,:)
  real(dp),allocatable,target :: rhohat1(:,:,:),rho1arr(:,:)
- real(dp),pointer :: rho1_(:,:,:),rho1arr_(:,:),vxc1_(:,:,:),vxc1_updn(:,:,:)
+ real(dp),pointer :: mag(:,:),rho1_(:,:,:),rho1arr_(:,:)
+ real(dp),pointer :: vxc1_(:,:,:),vxc1_diag(:,:),vxc1_nc(:,:),vxc1_updn(:,:,:)
 
 ! *************************************************************************
 
@@ -1904,9 +1889,9 @@ subroutine pawxc3(corexc1,cplex_den,cplex_vxc,d2enxc,ixc,kxc,lm_size,lmselect,nh
  if (option/=3) then
 
    if (nspden=/=4) then
+     rho1arr_ => rho1arr
      vxc1_updn => vxc1_
    else
-     LIBPAW_ALLOCATE(m_norm,(cplex_den*nrad))
      LIBPAW_ALLOCATE(rho1arr_,(cplex_den*nrad,nspden_updn))
      LIBPAW_ALLOCATE(vxc1_updn,(nrad,npts,nspden_updn))
    end if
@@ -1931,10 +1916,7 @@ subroutine pawxc3(corexc1,cplex_den,cplex_vxc,d2enxc,ixc,kxc,lm_size,lmselect,nh
 
 !    Non-collinear magnetism: rotate magnetization and get a collinear density
      if (nspden==4) then
-       call rotate_mag(rho1arr,rho1arr_,rhoarr(:,2:4),nrad,&
-&                      rho_out_format=2,mag_norm_out=m_norm)
-     else
-       rho1arr_ => rho1arr
+       call rotate_mag(rho1arr,rho1arr_,rhoarr(:,2:4),nrad,rho_out_format=2)
      end if
 
 !    =======================================================================
@@ -2314,21 +2296,12 @@ subroutine pawxc3(corexc1,cplex_den,cplex_vxc,d2enxc,ixc,kxc,lm_size,lmselect,nh
 !  ----- If non-collinear, rotate back potential according to magnetization
 !  ----------------------------------------------------------------------
  if (option/=3.and.nspden==4) then
-   LIBPAW_ALLOCATE(vxc1_diag,(nrad,nspden_updn))
-   LIBPAW_ALLOCATE(vxc1_nc,(nrad,nspden))
-   do ipts=1,npts
-     do ispden=1,nspden
-       vxc1_diag(1:nrad,ispden)=vxc1_updn(1:nrad,ipts,ispden)
-     end do
-     call dfpt_rotate_back_mag(vxc1_diag,vxc1_nc,xxxxvxc,rho1arr,rhoarr(:,2:4),nrad,&
-&                              mag_norm_in=m_norm,rot_method=1)
-     do ispden=1,nspden
-       vxc1_(1:nrad,ipts,ispden)=vxc1_nc(1:nrad,ispden)
-     end do
-   end do
-   LIBPAW_DEALLOCATE(vxc1_nc)
+   call c_f_pointer(c_loc(vxc1_updn),vxc1_diag,shape=[nrad*npts,nspden_updn])
+   call c_f_pointer(c_loc(vxc1_),vxc1_nc,shape=[nrad*npts,nspden])
+   call c_f_pointer(c_loc(kxc(:,:,nkxc-2:nkxc),mag,shape=[nrad*npts,3])
+   call dfpt_rotate_back_mag(vxc1_diag,vxc1_nc,vxc,rho1arr,mag,nrad*npts,&
+&                            rot_method=1)
    LIBPAW_DEALLOCATE(vxc1_updn)
-   LIBPAW_DEALLOCATE(m_norm)
  end if
 
 !----------------------------------------------------------------------
@@ -3623,6 +3596,7 @@ end subroutine pawxcsphpositron
 !!    if nspden>=2: kxc(:,1)= d2Exc/drho_up drho_up
 !!                  kxc(:,2)= d2Exc/drho_up drho_dn
 !!                  kxc(:,3)= d2Exc/drho_dn drho_dn
+!!    if nspden==4: kxc(:,4:6)= (m_x, m_y, m_z) (magnetization)
 !!   ===== if GGA
 !!    if nspden==1:
 !!       kxc(:,1)= d2Exc/drho2
@@ -3652,6 +3626,8 @@ end subroutine pawxcsphpositron
 !!       kxc(:,17)=grady(rho_dn)
 !!       kxc(:,18)=gradz(rho_up)
 !!       kxc(:,19)=gradz(rho_dn)
+!!    if nspden==4:
+!!       kxc(:,20:22)= (m_x, m_y, m_z) (magnetization)
 !!
 !! PARENTS
 !!      m_pawpsp,pawdenpot
@@ -4244,6 +4220,15 @@ end subroutine pawxcsphpositron
      end do
    end if
 
+!  Non-collinear magnetism: need to store magnetization in kxc
+   if (nkxc==6.or.nkxc==22) then
+     do ilm=2,lm_size
+       kxc(1:nrad,ilm,nkxc-2)=rho_updn(1:nrad,ilm,2)
+       kxc(1:nrad,ilm,nkxc-1)=rho_updn(1:nrad,ilm,3)
+       kxc(1:nrad,ilm,nkxc  )=rho_updn(1:nrad,ilm,4)
+     end if
+   end if
+
  end if ! nkxc>0
 
  if (nspden==4)  then
@@ -4452,7 +4437,7 @@ end subroutine pawxcsphpositron
 !!  xclevel= XC functional level
 !!
 !! OUTPUT
-!!  == if option=0 or 2 or 3 ==
+!!  == if option=0 or 2 or 3 ==rho1_updn
 !!    d2enxc=returned exchange-cor. contribution to 2nd-order XC energy
 !!
 !! SIDE EFFECTS
