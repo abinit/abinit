@@ -3,6 +3,7 @@ from __future__ import division, print_function, absolute_import #unicode_litera
 
 import sys
 import os
+import re
 import os.path
 import glob
 
@@ -130,20 +131,21 @@ def main(warno, home_dir=""):
                       warning_count += 1
                       try:
                           if warno in [3,4]:
-                             print(source + ' = line: ' + sourceline + ', var: ' + Buffer[4].split(" ")[Warning_len+1] +' ['+source_dir[-2]+']')
+                             warn_msg=re.sub(u"(\u2018|\u2019)", "'",Buffer[4].split(" ")[Warning_len+1])
+                             print(source + ' = line: ' + sourceline + ', var: ' + warn_msg +' ['+source_dir[-2]+']')
                           elif warno in [6]:
-                             warn_msg=Buffer[4].split(":")[1].rstrip()
+                             warn_msg=re.sub(u"(\u2018|\u2019)", "'",Buffer[4].split(":")[1].rstrip())
                              warn_code=Buffer[2].rstrip()
                              warn_pos=Buffer[3].rstrip()
                              print("%s = line: %s, " % (source,sourceline),end='')
-                             cprint("warn: %s" % (warn_msg),"blue")
+                             cprint("warn: %s" % (warn_msg),"red")
                              cprint("  ->%s\n  ->%s" % (warn_code,warn_pos),"red")
                           elif warno in [7]:
                              warn_code=Buffer[2].rstrip().lstrip()
                              print("%s = line: %s, " % (source,sourceline),end='')
-                             cprint("code: %s" % (warn_code),"blue")
+                             cprint("code: %s" % (warn_code),"red")
                           elif warno in [20]:
-                             a = Buffer[4].split(":")[1].split(" declared")[0]
+                             a = re.sub(u"(\u2018|\u2019)", "'",Buffer[4].split(":")[1].split(" declared")[0])
                              print(source + ' = line: ' + sourceline + ', warn:' + a + ' ['+source_dir[-2]+']')
                           else:
                              print(source + ' = line: ' + sourceline +' ['+source_dir[-2]+']')
