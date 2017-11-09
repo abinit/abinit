@@ -124,13 +124,18 @@ subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,bxc,mpi_enreg,nfft,ngfft,nhat,nhatdi
  real(dp),allocatable :: m_norm(:)
  real(dp),allocatable :: rhor1_diag(:,:)
  real(dp),allocatable :: vxc1_diag(:,:),vxc_diag(:,:)
- real(dp),pointer :: rhor_(:,:),rhor1_(:,:)
+ real(dp), ABI_CONTIGUOUS pointer :: mag(:,:),rhor_(:,:),rhor1_(:,:)
  complex(dpc) :: d1,d2,d3,d4,rho_updn
  complex(dpc),allocatable :: rhor1_offdiag(:,:),vxc1_(:,:)
  complex(dpc),dimension(2,2) :: u0,u0_1
  complex(dpc),dimension(2,2) :: u0v1,v1tmp,vxc1tmp,u0_1r1,r1tmp,rhor1_tmp
 
 ! *************************************************************************
+
+!  Non-collinear magnetism
+!  Has to locally "rotate" rho(r)^(1) (according to magnetization),
+!  compute Vxc(r)^(1) and rotate it back
+!FR  The collinear routine dfpt_mkvxc wants a general density built as (tr[rho],rho_upup)
 
  DBG_ENTER("COLL")
 
@@ -160,41 +165,39 @@ subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,bxc,mpi_enreg,nfft,ngfft,nhat,nhatdi
 
    dvdn=zero; dvdz=zero; dum=zero; fact=zero; vxc1(:,:)=zero
 
-!  Non-collinear magnetism
-!  Has to locally "rotate" rho(r)^(1) (according to magnetization),
-!  compute Vxc(r)^(1) and rotate it back
-!FR  The collinear routine dfpt_mkvxc wants a general density built as (tr[rho],rho_upup)
+!  PAW: possibly substract compensation density
+   if (usexcnhat==0.and.nhatdim==1) then
+     ABI_ALLOCATE(rhor_,(nfft,nspden))
+     rhor_(:,:) =rhor(:,:)-nhat(:,:)
+   else
+     rhor_ => rhor
+   end if
+   if (usexcnhat==0.and.nhat1dim==1) then
+     ABI_ALLOCATE(rhor1_,(cplex*nfft,nspden))
+     rhor1_(:,:)=rhor1(:,:)-nhat1(:,:)
+   else
+     rhor1_ => rhor1
+   end if
 
-!    PAW: possibly substract compensation density
-     if (usexcnhat==0.and.nhatdim==1) then
-       ABI_ALLOCATE(rhor_,(nfft,nspden))
-       rhor_(:,:) =rhor(:,:)-nhat(:,:)
-     else
-       rhor_ => rhor
-     end if
-     if (usexcnhat==0.and.nhat1dim==1) then
-       ABI_ALLOCATE(rhor1_,(cplex*nfft,nspden))
-       rhor1_(:,:)=rhor1(:,:)-nhat1(:,:)
-     else
-       rhor1_ => rhor1
-     end if
+!  Magnetization
+   mag => rhor_(:,2:4)
 
-     ABI_ALLOCATE(rhor1_diag,(nfft,2))
-     ABI_ALLOCATE(rhor1_offdiag,(nfft,2))
-     ABI_ALLOCATE(vxc_diag,(cplex*nfft,2))
-     ABI_ALLOCATE(vxc1_diag,(cplex*nfft,2))
-     ABI_ALLOCATE(vxc1_,(cplex*nfft,nspden))
-     ABI_ALLOCATE(m_norm,(nfft))
+   ABI_ALLOCATE(rhor1_diag,(nfft,2))
+   ABI_ALLOCATE(rhor1_offdiag,(nfft,2))
+   ABI_ALLOCATE(vxc_diag,(cplex*nfft,2))
+   ABI_ALLOCATE(vxc1_diag,(cplex*nfft,2))
+   ABI_ALLOCATE(vxc1_,(cplex*nfft,nspden))
+   ABI_ALLOCATE(m_norm,(nfft))
 
-     ABI_ALLOCATE(vxc1rot1,(nfft,nspden))
-     ABI_ALLOCATE(vxc1rot2,(nfft,nspden))
-     ABI_ALLOCATE(vxc1rot3,(nfft,nspden))
-     vxc1rot1=zero
+   ABI_ALLOCATE(vxc1rot1,(nfft,nspden))
+   ABI_ALLOCATE(vxc1rot2,(nfft,nspden))
+   ABI_ALLOCATE(vxc1rot3,(nfft,nspden))
+   vxc1rot1=zero
 
 !    -- Rotate rho(r)^(1)
      if(option/=0) then
 !      SPr for option=0 the rhor is not used, only core density xccc3d1
-       call rotate_mag(rhor1_,rhor1_diag,rhor_(:,2:4),nfft,mag_norm_out=m_norm,&
+       call rotate_mag(rhor1_,rhor1_diag,mag,nfft,mag_norm_out=m_norm,&
 &                      rho_out_format=2)
      end if
 !     -- Compute Kxc(r).n^res(r)_rotated
@@ -211,7 +214,7 @@ subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,bxc,mpi_enreg,nfft,ngfft,nhat,nhatdi
            vxc1(ifft,3:4)=zero
          end do
        else
-         call dfpt_rotate_back_mag(vxc1_diag,vxc1,vxc,rhor1_,rhor_(:,2:4),nfft,&
+         call dfpt_rotate_back_mag(vxc1_diag,vxc1,vxc,rhor1_,mag,nfft,&
 &                                  mag_norm_in=m_norm,bxc=bxc)
        end if
      else

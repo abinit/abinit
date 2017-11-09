@@ -26,12 +26,16 @@ module m_pawxc
  USE_MSG_HANDLING
  USE_MEMORY_PROFILING
 
+#ifdef LIBPAW_ISO_C_BINDING
+ use iso_c_binding, only : c_loc,c_f_pointer
+#endif
+
  use m_libpaw_libxc
 
  use m_pawang, only : pawang_type
  use m_pawrad, only : pawrad_type, nderiv_gen, pawrad_deducer0, simp_gen
 
- use m_xc_noncoll, only :: rotate_mag
+ use m_xc_noncoll, only : rotate_mag,rotate_back_mag,dfpt_rotate_back_mag
 
  implicit none
  private
@@ -861,7 +865,7 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,lm_size,lmselect,nhat,nkxc,nrad,nspd
  real(dp),intent(in) :: nhat(nrad,lm_size,nspden*((usexcnhat+1)/2))
  real(dp),intent(in),target :: rhor(nrad,lm_size,nspden)
  real(dp),intent(out) :: kxc(nrad,pawang%angl_size,nkxc)
- real(dp),intent(out) :: vxc(nrad,pawang%angl_size,nspden)
+ real(dp),intent(out),target :: vxc(nrad,pawang%angl_size,nspden)
 
 !Local variables-------------------------------
 !scalars
@@ -873,9 +877,10 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,lm_size,lmselect,nhat,nkxc,nrad,nspd
 ! real(dp) :: tsec(2)
  real(dp),allocatable :: dgxc(:),dnexcdn(:,:),drho(:),drhocore(:),dvxcdgr(:,:),dvxci(:,:)
  real(dp),allocatable :: dylmdr(:,:,:),exci(:),ff(:),grho2_updn(:,:),gxc(:,:,:,:)
- real(dp),allocatable :: rhoarr(:,:),rhonow(:,:,:),rho_updn(:,:),vxci(:,:)
- real(dp),allocatable,target :: rhohat(:,:,:)
- real(dp),pointer :: rho_(:,:,:),vxc_diag(:,:),vxc_nc(:,:),vxc_updn(:,:,:)
+ real(dp),allocatable :: rhoarr(:,:),rho_updn(:,:),vxci(:,:)
+ real(dp),allocatable,target :: mag(:,:,:),rhohat(:,:,:),rhonow(:,:,:)
+ real(dp), ABI_CONTIGUOUS pointer :: mag_(:,:),rho_(:,:,:)
+ real(dp), ABI_CONTIGUOUS pointer :: vxc_diag(:,:),vxc_nc(:,:),vxc_updn(:,:,:)
 
 ! *************************************************************************
 
@@ -958,10 +963,11 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,lm_size,lmselect,nhat,nkxc,nrad,nspd
      call nderiv_gen(drhocore,corexc,pawrad)
    end if
    if (option/=3.and.option/=4) then
-     if (nspden=/=4) then
+     if (nspden/=4) then
        vxc_updn => vxc
      else
        LIBPAW_ALLOCATE(vxc_updn,(nrad,npts,nspden_updn))
+       LIBPAW_ALLOCATE(mag,(nrad,npts,3))
      end if
    end if
 
@@ -1072,7 +1078,9 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,lm_size,lmselect,nhat,nkxc,nrad,nspd
          grho2_updn(1:nrad,3)=rhonow(1:nrad,1,2)**2+rhonow(1:nrad,1,3)**2+rhonow(1:nrad,1,4)**2
        end if
      else if (nspden==4) then
-       call rotate_mag(rhonow(:,:,1),rho_updn,rhonow(:,2:4,1),nrad)
+       mag_ => rhonow(1:nrad,2:4,1)
+       mag(1:nrad,ipts,1:3)=mag_(1:nrad,1:3)
+       call rotate_mag(rhonow(:,:,1),rho_updn,mag_,nrad)
      end if
 
 !    Make the density positive everywhere (but do not care about gradients)
@@ -1137,7 +1145,7 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,lm_size,lmselect,nhat,nkxc,nrad,nspd
          kxc(1:nrad,ipts,nkxc-2)=rhonow(1:nrad,2,1)
          kxc(1:nrad,ipts,nkxc-1)=rhonow(1:nrad,3,1)
          kxc(1:nrad,ipts,nkxc  )=rhonow(1:nrad,4,1)
-       endif
+       end if
      end if
 
 !    ----------------------------------------------------------------------
@@ -1269,10 +1277,27 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,lm_size,lmselect,nhat,nkxc,nrad,nspd
 !  ----- If non-collinear, rotate back potential according to magnetization
 !  ----------------------------------------------------------------------
    if (option/=3.and.option/=4.and.nspden==4) then
+     ! Use of C pointers to avoid copies (when ISO C bindings are available)
+#ifdef LIBPAW_ISO_C_BINDING
      call c_f_pointer(c_loc(vxc_updn),vxc_diag,shape=[nrad*npts,nspden_updn])
      call c_f_pointer(c_loc(vxc),vxc_nc,shape=[nrad*npts,nspden])
-     call rotate_back_mag(vxc_diag,vxc_nc,rhonow(:,:,1),nrad*npts)
+     call c_f_pointer(c_loc(mag),mag_,shape=[nrad*npts,3])
+#else
+     LIBPAW_ALLOCATE(vxc_diag,(nrad*npts,nspden_updn))
+     LIBPAW_ALLOCATE(vxc_nc,(nrad*npts,nspden))
+     LIBPAW_ALLOCATE(mag_,(nrad*npts,3))
+     vxc_diag=reshape(vxc_updn,[nrad*npts,nspden_updn])
+     mag_=reshape(mag,[nrad*npts,3])
+#endif
+     call rotate_back_mag(vxc_diag,vxc_nc,mag_,nrad*npts)
+#ifndef LIBPAW_ISO_C_BINDING
+     vxc=reshape(vxc_nc,[nrad,npts,nspden])
+     LIBPAW_DEALLOCATE(vxc_diag)
+     LIBPAW_DEALLOCATE(mag_)
+     LIBPAW_DEALLOCATE(vxc_nc)
+#endif
      LIBPAW_DEALLOCATE(vxc_updn)
+     LIBPAW_DEALLOCATE(mag)
    end if
 
 !  ----------------------------------------------------------------------
@@ -1743,9 +1768,9 @@ subroutine pawxc3(corexc1,cplex_den,cplex_vxc,d2enxc,ixc,kxc,lm_size,lmselect,nh
 !arrays
  logical,intent(in) :: lmselect(lm_size)
  real(dp),intent(in) :: corexc1(cplex_den*nrad)
- real(dp),intent(in) :: kxc(nrad,pawang%angl_size,nkxc)
  real(dp),intent(in) :: vxc(nrad,pawang%angl_size,nspden)
  real(dp),intent(in) :: nhat1(cplex_den*nrad,lm_size,nspden*((usexcnhat+1)/2))
+ real(dp),intent(in),target :: kxc(nrad,pawang%angl_size,nkxc)
  real(dp),intent(in),target :: rhor1(cplex_den*nrad,lm_size,nspden)
  real(dp),intent(inout),target :: vxc1(cplex_vxc*nrad,pawang%angl_size,nspden)
 
@@ -1770,8 +1795,8 @@ subroutine pawxc3(corexc1,cplex_den,cplex_vxc,d2enxc,ixc,kxc,lm_size,lmselect,nh
  real(dp),allocatable :: dgxc1(:),drho1(:,:),drho1core(:,:),dylmdr(:,:,:)
  real(dp),allocatable :: ff(:),gg(:),grho1arr(:,:,:),gxc1(:,:,:,:)
  real(dp),allocatable,target :: rhohat1(:,:,:),rho1arr(:,:)
- real(dp),pointer :: mag(:,:),rho1_(:,:,:),rho1arr_(:,:)
- real(dp),pointer :: vxc1_(:,:,:),vxc1_diag(:,:),vxc1_nc(:,:),vxc1_updn(:,:,:)
+ real(dp), ABI_CONTIGUOUS pointer :: mag(:,:),rho1_(:,:,:),rho1arr_(:,:)
+ real(dp), ABI_CONTIGUOUS pointer :: vxc1_(:,:,:),vxc1_diag(:,:),vxc1_nc(:,:),vxc1_updn(:,:,:)
 
 ! *************************************************************************
 
@@ -1888,12 +1913,13 @@ subroutine pawxc3(corexc1,cplex_den,cplex_vxc,d2enxc,ixc,kxc,lm_size,lmselect,nh
 
  if (option/=3) then
 
-   if (nspden=/=4) then
+   if (nspden/=4) then
      rho1arr_ => rho1arr
      vxc1_updn => vxc1_
    else
      LIBPAW_ALLOCATE(rho1arr_,(cplex_den*nrad,nspden_updn))
      LIBPAW_ALLOCATE(vxc1_updn,(nrad,npts,nspden_updn))
+     LIBPAW_ALLOCATE(mag,(nrad,3))
    end if
 
 !  Do loop on the angular part (theta,phi)
@@ -1916,7 +1942,10 @@ subroutine pawxc3(corexc1,cplex_den,cplex_vxc,d2enxc,ixc,kxc,lm_size,lmselect,nh
 
 !    Non-collinear magnetism: rotate magnetization and get a collinear density
      if (nspden==4) then
-       call rotate_mag(rho1arr,rho1arr_,rhoarr(:,2:4),nrad,rho_out_format=2)
+       do ii=1,3
+         mag(1:nrad,ii)=kxc(:,ipts,ii)
+       end do
+       call rotate_mag(rho1arr,rho1arr_,mag,nrad,rho_out_format=2)
      end if
 
 !    =======================================================================
@@ -2228,6 +2257,7 @@ subroutine pawxc3(corexc1,cplex_den,cplex_vxc,d2enxc,ixc,kxc,lm_size,lmselect,nh
    end if
    if (nspden==4) then
      LIBPAW_DEALLOCATE(rho1arr_)
+     LIBPAW_DEALLOCATE(mag)
    end if
 
  end if ! option/=3
@@ -2296,11 +2326,26 @@ subroutine pawxc3(corexc1,cplex_den,cplex_vxc,d2enxc,ixc,kxc,lm_size,lmselect,nh
 !  ----- If non-collinear, rotate back potential according to magnetization
 !  ----------------------------------------------------------------------
  if (option/=3.and.nspden==4) then
+    ! Use of C pointers to avoid copies (when ISO C bindings are available)
+#ifdef LIBPAW_ISO_C_BINDING
    call c_f_pointer(c_loc(vxc1_updn),vxc1_diag,shape=[nrad*npts,nspden_updn])
    call c_f_pointer(c_loc(vxc1_),vxc1_nc,shape=[nrad*npts,nspden])
-   call c_f_pointer(c_loc(kxc(:,:,nkxc-2:nkxc),mag,shape=[nrad*npts,3])
+   call c_f_pointer(c_loc(kxc(:,:,nkxc-2:nkxc)),mag,shape=[nrad*npts,3])
+#else
+   LIBPAW_ALLOCATE(vxc1_diag,(nrad*npts,nspden_updn))
+   LIBPAW_ALLOCATE(vxc1_nc,(nrad*npts,nspden))
+   LIBPAW_ALLOCATE(mag,(nrad*npts,3))
+   vxc1_diag=reshape(vxc1_updn,[nrad*npts,nspden_updn])
+   mag=reshape(kxc(1:nrad,1:npts,nkxc-2:nkxc),[nrad*npts,3])
+#endif
    call dfpt_rotate_back_mag(vxc1_diag,vxc1_nc,vxc,rho1arr,mag,nrad*npts,&
 &                            rot_method=1)
+#ifndef LIBPAW_ISO_C_BINDING
+   vxc1_=reshape(vxc1_nc,[nrad,npts,nspden])
+   LIBPAW_DEALLOCATE(vxc1_diag)
+   LIBPAW_DEALLOCATE(vxc1_nc)
+   LIBPAW_DEALLOCATE(mag)
+#endif
    LIBPAW_DEALLOCATE(vxc1_updn)
  end if
 
@@ -4226,7 +4271,7 @@ end subroutine pawxcsphpositron
        kxc(1:nrad,ilm,nkxc-2)=rho_updn(1:nrad,ilm,2)
        kxc(1:nrad,ilm,nkxc-1)=rho_updn(1:nrad,ilm,3)
        kxc(1:nrad,ilm,nkxc  )=rho_updn(1:nrad,ilm,4)
-     end if
+     end do
    end if
 
  end if ! nkxc>0

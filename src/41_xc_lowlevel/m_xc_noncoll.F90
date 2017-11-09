@@ -294,6 +294,7 @@ subroutine dfpt_rotate_back_mag(vxc1_in,vxc1_out,vxc,rho1,mag,vectsize,&
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: vectsize
+ integer,intent(in),optional :: rot_method
 !arrays
  real(dp),intent(in) :: vxc(vectsize,4),vxc1_in(vectsize,2)
  real(dp),intent(in) :: mag(vectsize,3),rho1(vectsize,4)
