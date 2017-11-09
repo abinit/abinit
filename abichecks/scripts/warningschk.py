@@ -6,6 +6,14 @@ import os
 import os.path
 import glob
 
+pack_dir, x = os.path.split(os.path.abspath(__file__))
+pack_dir, x = os.path.split(pack_dir)
+sys.path.insert(0,pack_dir)
+pack_dir, x = os.path.split(pack_dir)
+sys.path.insert(0,pack_dir)
+
+from tests.pymods.termcolor import cprint
+
 gnu_warnings = { # ( warning_string, warno, src_excluded )
     #3  : ( 'Unused variable', ['12_hide_mpi','64_psp','68_dmft'] ),
     3  : ( 'Unused variable', [] ),
@@ -128,12 +136,12 @@ def main(warno, home_dir=""):
                              warn_code=Buffer[2].rstrip()
                              warn_pos=Buffer[3].rstrip()
                              print("%s = line: %s, " % (source,sourceline),end='')
-                             termcolor.cprint("warn: %s" % (warn_msg),"blue")
-                             termcolor.cprint("  ->%s\n  ->%s" % (warn_code,warn_pos),"red")
+                             cprint("warn: %s" % (warn_msg),"blue")
+                             cprint("  ->%s\n  ->%s" % (warn_code,warn_pos),"red")
                           elif warno in [7]:
                              warn_code=Buffer[2].rstrip().lstrip()
                              print("%s = line: %s, " % (source,sourceline),end='')
-                             termcolor.cprint("code: %s" % (warn_code),"blue")
+                             cprint("code: %s" % (warn_code),"blue")
                           elif warno in [20]:
                              a = Buffer[4].split(":")[1].split(" declared")[0]
                              print(source + ' = line: ' + sourceline + ', warn:' + a + ' ['+source_dir[-2]+']')
