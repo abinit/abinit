@@ -121,8 +121,14 @@ def main(warno, home_dir=""):
                       try:
                           if warno in [3,4]:
                              print(source + ' : line= ' + sourceline + ', var= ' + Buffer[4].split(" ")[Warning_len+1] +' ['+source_dir[-2]+']')
-                          elif warno in [6,7]:
-                             print(source + ' : line= ' + sourceline + ', warn= ' + Buffer[4].split(":")[1])
+                          elif warno in [6]:
+                             warn_msg=Buffer[4].split(":")[1].rstrip()
+                             warn_code=Buffer[2].rstrip()
+                             warn_pos=Buffer[3].rstrip()
+                             print("%s : line= %s, warn= %s\n  ->%s\n  ->%s" % (source,sourceline,warn_msg,warn_code,warn_pos))
+                          elif warno in [7]:
+                             warn_code=Buffer[2].rstrip().lstrip()
+                             print("%s : line= %s, code= %s" % (source,sourceline,warn_code))
                           elif warno in [20]:
                              a = Buffer[4].split(":")[1].split(" declared")[0]
                              print(source + ' : line= ' + sourceline + ', warn=' + a + ' ['+source_dir[-2]+']')
