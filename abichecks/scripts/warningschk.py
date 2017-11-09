@@ -3,7 +3,7 @@ from __future__ import division, print_function, absolute_import #unicode_litera
 
 import sys
 import os
-import re
+#import re
 import os.path
 import glob
 
@@ -83,8 +83,9 @@ def main(warno, home_dir=""):
 
   makelog = pj(home_dir, "make.log")
   # make.log contains utf-8 characters
-  import io
-  logfile = io.open(makelog, "r", encoding="utf-8")
+  #import io
+  #logfile = io.open(makelog, "r", encoding="utf-8")
+  logfile = open(makelog)
 
   words = []
   Buffer = []
@@ -105,6 +106,7 @@ def main(warno, home_dir=""):
           if debug:
               print("[DEBUG] Buffer[0]:", Buffer[0])  # source.F90:line.pos:
               print("[DEBUG] Buffer[2]:", Buffer[2])  # instruction
+              print("[DEBUG] Buffer[1]:", Buffer[1])  # position
               print("[DEBUG] Buffer[4]:", Buffer[4])  # Warning: msg
           if True:
               if debug: print("[DEBUG] len of Buffer[0]:", len(Buffer[0].strip()))
@@ -131,10 +133,10 @@ def main(warno, home_dir=""):
                       warning_count += 1
                       try:
                           if warno in [3,4]:
-                             warn_msg=re.sub(u"(\u2018|\u2019)", "'",Buffer[4].split(" ")[Warning_len+1])
+                             warn_msg=Buffer[4].split(" ")[Warning_len+1]
                              print(source + ' = line: ' + sourceline + ', var: ' + warn_msg +' ['+source_dir[-2]+']')
                           elif warno in [6]:
-                             warn_msg=re.sub(u"(\u2018|\u2019)", "'",Buffer[4].split(":")[1].rstrip())
+                             warn_msg=Buffer[4].split(":")[1].rstrip()
                              warn_code=Buffer[2].rstrip()
                              warn_pos=Buffer[3].rstrip()
                              print("%s = line: %s, " % (source,sourceline),end='')
@@ -145,7 +147,7 @@ def main(warno, home_dir=""):
                              print("%s = line: %s, " % (source,sourceline),end='')
                              cprint("code: %s" % (warn_code),"red")
                           elif warno in [20]:
-                             a = re.sub(u"(\u2018|\u2019)", "'",Buffer[4].split(":")[1].split(" declared")[0])
+                             a = Buffer[4].split(":")[1].split(" declared")[0]
                              print(source + ' = line: ' + sourceline + ', warn:' + a + ' ['+source_dir[-2]+']')
                           else:
                              print(source + ' = line: ' + sourceline +' ['+source_dir[-2]+']')
