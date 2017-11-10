@@ -49,21 +49,25 @@
 
 program dummy_tests
 
+ use defs_basis
+ use m_build_info
+ use m_profiling_abi
+ use m_errors
+ use m_xmpi
+ use m_dummy_tests
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dummy_tests'
+ use interfaces_10_dumpinfo
  use interfaces_14_hidewrite
  use interfaces_18_timing
+ use interfaces_32_util
  use interfaces_51_manage_mpi
- use interfaces_98_main
 !End of the abilint section
 
  implicit none
-
- use defs_basis
- use m_xmpi
 
 !Local variables-------------------------------
 !scalars
@@ -101,14 +105,13 @@ program dummy_tests
  used_variable=1
  used_arg=used_variable
  call test_unused_arg(used_arg,unused_arg)
- write(std_out,'(a,i4)')' dummy_tests : used_arg is ',used arg
+ write(std_out,'(a,i4)')' dummy_tests : used_arg is ',used_arg
 
  call test_same_actual_arg(dummy_out,dummy_out,used_arg)
 
  dummy_string="This is too long !"
 
  call test_dummy(dummy_out,used_arg)
-
 
 !**********************************************************************
 
