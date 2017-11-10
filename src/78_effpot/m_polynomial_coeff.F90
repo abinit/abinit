@@ -68,7 +68,7 @@ module m_polynomial_coeff
    character(len=100) :: name = ""
 !     Name of the polynomial_coeff (Sr_y-O1_y)^3) for example
 
-   integer :: nterm = zero
+   integer :: nterm = 0
 !     Number of terms (short range interaction) for this polynomial_coeff
 
    real(dp) :: coefficient = zero
@@ -264,7 +264,7 @@ subroutine polynomial_coeff_free(polynomial_coeff)
    ABI_DATATYPE_DEALLOCATE(polynomial_coeff%terms)
  end if
  polynomial_coeff%name = ""
- polynomial_coeff%nterm = zero
+ polynomial_coeff%nterm = 0
  polynomial_coeff%coefficient = zero
 
 end subroutine polynomial_coeff_free
@@ -2438,14 +2438,14 @@ subroutine polynomial_coeff_getOrder1(cell,coeffs_out,cutoff_in,list_symcoeff,li
  ABI_ALLOCATE(terms,(nterm_max))
 
 
- icoeff_tmp = zero 
+ icoeff_tmp = 0
  ABI_ALLOCATE(atindx,(2,ndisp))
  ABI_ALLOCATE(cells,(3,2,ndisp))
  ABI_ALLOCATE(dir_int,(ndisp))
  ABI_ALLOCATE(powers,(ndisp))
 
 !Found the ref cell
- irpt_ref = one 
+ irpt_ref = 1
  do irpt=1,nrpt
    if(all(cell(:,irpt)==0))then
      irpt_ref = irpt
@@ -2459,7 +2459,7 @@ subroutine polynomial_coeff_getOrder1(cell,coeffs_out,cutoff_in,list_symcoeff,li
 
  do icoeff=1,ncoeff
 !  Reset counter
-   iterm = zero
+   iterm = 0
    coefficient = one
    do isym=1,nsym
 !    Get index of this displacement term
@@ -2472,7 +2472,7 @@ subroutine polynomial_coeff_getOrder1(cell,coeffs_out,cutoff_in,list_symcoeff,li
      atindx(1,1) = ia; atindx(2,1) = ib; dir_char(1) = mutodir(mu);
      dir_int(1)  = mu
      ndisp  = 1
-     powers(:)   = one
+     powers(:)   = 1
      cells(:,1,1) = (/0,0,0/)
      cells(:,2,1) = cell(:,irpt)
      iterm = iterm + 1
@@ -2498,7 +2498,7 @@ subroutine polynomial_coeff_getOrder1(cell,coeffs_out,cutoff_in,list_symcoeff,li
  ABI_DEALLOCATE(powers)
 
 !Count the number of terms
- ncoeff_out = zero
+ ncoeff_out = 0
  do icoeff_tmp=1,ncoeff_max
    if (coeffs_tmp(icoeff_tmp)%coefficient/=zero)then
      ncoeff_out = ncoeff_out + 1
@@ -2507,7 +2507,7 @@ subroutine polynomial_coeff_getOrder1(cell,coeffs_out,cutoff_in,list_symcoeff,li
 
 !Transfer in the final array
  ABI_ALLOCATE(coeffs_out,(ncoeff_out))
- icoeff = zero
+ icoeff = 0
  do icoeff_tmp=1,ncoeff_max
    if (coeffs_tmp(icoeff_tmp)%coefficient/=zero)then
 !    Get the name of this coefficient

@@ -829,7 +829,7 @@ subroutine fock_init(atindx,cplex,dtset,fock,gsqcut,kg,mpi_enreg,nattyp,npwarr,p
 !ENDDEBUG
      if (abs(fockcommon%hyb_mixing)>tol8.or.abs(fockcommon%hyb_mixing_sr)>tol8) then
        msg=' - This is a hybrid XC functional from LibXC.' 
-       msg=msg//' The mixing and range coeffs are set accordingly, then possibly overriden by expert user.'
+       msg=trim(msg)//' The mixing and range coeffs are set accordingly, then possibly overriden by expert user.'
        call wrtout(std_out,msg,'COLL')
      end if
    end if
