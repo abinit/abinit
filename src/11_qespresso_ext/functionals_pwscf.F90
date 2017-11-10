@@ -63,9 +63,10 @@ module funct_pwscf
   PRIVATE :: discard_input_dft
   PRIVATE :: isgradient, ismeta, ishybrid
   PRIVATE :: exx_fraction, exx_started
+  !PRIVATE :: dft_shortname
   !
   character (len=50) :: dft = 'not set'
-  character (len=4)  :: dft_shortname = ' '
+  !character (len=4)  :: dft_shortname = ' '
   !
   ! dft is the exchange-correlation functional, described by
   ! any nonconflicting combination of the following keywords
