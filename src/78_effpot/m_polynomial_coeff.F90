@@ -589,7 +589,7 @@ subroutine polynomial_coeff_broadcast(coefficients, source, comm)
   if (xmpi_comm_rank(comm) /= source) then
     do ii = 1,coefficients%nterm
       ABI_ALLOCATE(coefficients%terms(ii)%atindx,(2,coefficients%terms(ii)%ndisp))
-      coefficients%terms(ii)%atindx = zero
+      coefficients%terms(ii)%atindx = 0
       ABI_ALLOCATE(coefficients%terms(ii)%direction,(coefficients%terms(ii)%ndisp))
       ABI_ALLOCATE(coefficients%terms(ii)%cell,(3,2,coefficients%terms(ii)%ndisp))      
       ABI_ALLOCATE(coefficients%terms(ii)%power,(coefficients%terms(ii)%ndisp))
@@ -752,7 +752,7 @@ subroutine polynomial_coeff_MPIrecv(coefficients, tag, source, comm)
 ! Allocate arrays on the other nodes
   do ii = 1,coefficients%nterm
     ABI_ALLOCATE(coefficients%terms(ii)%atindx,(2,coefficients%terms(ii)%ndisp))
-    coefficients%terms(ii)%atindx = zero
+    coefficients%terms(ii)%atindx = 0
     ABI_ALLOCATE(coefficients%terms(ii)%direction,(coefficients%terms(ii)%ndisp))
     ABI_ALLOCATE(coefficients%terms(ii)%cell,(3,2,coefficients%terms(ii)%ndisp))      
     ABI_ALLOCATE(coefficients%terms(ii)%power,(coefficients%terms(ii)%ndisp))
@@ -1310,7 +1310,7 @@ subroutine polynomial_coeff_getList(cell,crystal,cutoff,dist,list_symcoeff,list_
  ncoeff_max = nrpt*natom*natom*3*3
 
 !Found the ref cell
- irpt_ref = one 
+ irpt_ref = 1
  do irpt=1,nrpt
    if(all(cell(:,irpt)==0))then
      irpt_ref = irpt
@@ -1335,7 +1335,7 @@ subroutine polynomial_coeff_getList(cell,crystal,cutoff,dist,list_symcoeff,list_
 
 !1-Fill strain list
  ABI_ALLOCATE(list_symstr_tmp,(6,nsym))
- list_symstr_tmp = one
+ list_symstr_tmp = 1
  do ia=1,6
    if(list_symstr_tmp(ia,1)==0)cycle
 !  Transform the voigt notation
@@ -1386,7 +1386,7 @@ subroutine polynomial_coeff_getList(cell,crystal,cutoff,dist,list_symcoeff,list_
   end do
 
 !Count the number of strain and transfert into the final array
-  nstr_sym = zero
+  nstr_sym = 0
   do ia=1,6
     if(list_symstr_tmp(ia,1)/=zero) nstr_sym = nstr_sym + 1
   end do
@@ -1407,9 +1407,9 @@ subroutine polynomial_coeff_getList(cell,crystal,cutoff,dist,list_symcoeff,list_
 
 !Set to one blkval, all the coeff have to be compute
  blkval = one 
- icoeff = one
- icoeff_tot = one
- list_symcoeff_tmp = zero
+ icoeff = 1
+ icoeff_tot = 1
+ list_symcoeff_tmp = 0
 
 !2-Fill atom list
 !Big loop over generic atom 
@@ -1537,7 +1537,7 @@ subroutine polynomial_coeff_getList(cell,crystal,cutoff,dist,list_symcoeff,list_
 !icoeff is the position of this coefficients in the list_fullcoeff array
 
 !1/ step remove the zero coeff in this array
- ncoeff = zero
+ ncoeff = 0
  do icoeff = 1,ncoeff_max
    if(.not.(all(list_symcoeff_tmp(:,icoeff,1)==zero)))then
      ncoeff = ncoeff + 1
@@ -1545,8 +1545,8 @@ subroutine polynomial_coeff_getList(cell,crystal,cutoff,dist,list_symcoeff,list_
  end do
 
  ABI_ALLOCATE(list_symcoeff_tmp2,(6,ncoeff,nsym))
- list_symcoeff_tmp2 = zero
- icoeff = zero
+ list_symcoeff_tmp2 = 0
+ icoeff = 0
  do icoeff_tmp = 1,ncoeff_max
    if(.not.(all(list_symcoeff_tmp(:,icoeff_tmp,1)==zero)))then
      icoeff = icoeff + 1
@@ -1626,7 +1626,7 @@ subroutine polynomial_coeff_getList(cell,crystal,cutoff,dist,list_symcoeff,list_
    do isym = 1,nsym
      icoeff2 = list_symcoeff_tmp2(6,icoeff,isym)
      if (icoeff2> icoeff)then
-       list_symcoeff_tmp2(:,icoeff2,1) = zero
+       list_symcoeff_tmp2(:,icoeff2,1) = 0
      end if
      do jsym=1,nsym
        icoeff2 = getCoeffFromList(list_symcoeff_tmp2(:,:,jsym),&
@@ -1636,14 +1636,14 @@ subroutine polynomial_coeff_getList(cell,crystal,cutoff,dist,list_symcoeff,list_
 &                                 list_symcoeff_tmp2(1,icoeff,isym),&
 &                                 real(list_symcoeff_tmp2(5,icoeff,isym),dp),ncoeff)
        if (icoeff2> icoeff)then
-         list_symcoeff_tmp2(:,icoeff2,1) = zero
+         list_symcoeff_tmp2(:,icoeff2,1) = 0
        end if
      end do
    end do
  end do
 
 !4/ Recount the number of coeff after step 3
- ncoeff2 = zero
+ ncoeff2 = 0
  do icoeff = 1,ncoeff
    if(.not.(all(list_symcoeff_tmp2(:,icoeff,1)==zero)))then
      ncoeff2 = ncoeff2 + 1
@@ -1653,8 +1653,8 @@ subroutine polynomial_coeff_getList(cell,crystal,cutoff,dist,list_symcoeff,list_
  ABI_DEALLOCATE(list_symcoeff_tmp)
  ABI_ALLOCATE(list_symcoeff_tmp,(6,ncoeff2,nsym))
 
- list_symcoeff_tmp = zero
- icoeff = zero
+ list_symcoeff_tmp = 0
+ icoeff = 0
 
  do icoeff_tmp = 1,ncoeff
    if(.not.(all(list_symcoeff_tmp2(:,icoeff_tmp,1)==zero)))then
@@ -1665,8 +1665,8 @@ subroutine polynomial_coeff_getList(cell,crystal,cutoff,dist,list_symcoeff,list_
 
 !5/ Final transfert
  ABI_ALLOCATE(list_symcoeff,(6,ncoeff2,nsym))
- list_symcoeff = zero
- icoeff = zero
+ list_symcoeff = 0
+ icoeff = 0
  do icoeff = 1,ncoeff2
    list_symcoeff(1:6,icoeff,:) = list_symcoeff_tmp(1:6,icoeff,:)
    do isym=1,nsym
@@ -1839,10 +1839,10 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,powers,
 !WARNING:
 !Put the reference cell into the first element
 !the code will first deal with the atoms of the first cell
- irpt = one
- irpt_ref = one 
+ irpt = 1
+ irpt_ref = 1
  rpt(:,1) = zero
- cell(:,irpt)=zero
+ cell(:,irpt)=0
 !Fill other rpt:
  do r1=lim1,-lim1,-1
    do r2=lim2,-lim2,-1
@@ -1885,7 +1885,7 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,powers,
 ! 0: the mix between these coefficient is not possible 
 ! 1: the mix between these coefficient is possible 
  ABI_ALLOCATE(compatibleCoeffs,(ncoeff_tot,ncoeff_tot))
- compatibleCoeffs(:,:) = one
+ compatibleCoeffs(:,:) = 1
 
  do icoeff=1,ncoeff_tot
    do icoeff2=1,ncoeff_tot     
@@ -1897,7 +1897,7 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,powers,
      if(icoeff2<=ncoeff_sym.and.icoeff2>ncoeff_sym)cycle
      if((icoeff>ncoeff_sym.or.icoeff2>ncoeff_sym).and.&
 &       .not.need_anharmstr.and..not.need_spcoupling) then
-       compatibleCoeffs(icoeff,icoeff2) = zero
+       compatibleCoeffs(icoeff,icoeff2) = 0
      end if
      if(icoeff2<=ncoeff_sym.and.icoeff2<=ncoeff_sym)then
        if(distance_supercell(xcart(:,list_symcoeff(2,icoeff,1)),&
@@ -1913,7 +1913,7 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,powers,
 &                  xcart(:,list_symcoeff(3,icoeff2,1)),rprimd,&
 &                  cell(:,list_symcoeff(4,icoeff,1)),&
 &                  cell(:,list_symcoeff(4,icoeff2,1)))>=cutoff)then
-         compatibleCoeffs(icoeff,icoeff2) = zero
+         compatibleCoeffs(icoeff,icoeff2) = 0
        end if
      end if
    end do
@@ -1946,7 +1946,7 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,powers,
 
 !Final tranfert
 !1- Count the total number of coefficient
- ncoeff = zero
+ ncoeff = 0
  do icoeff=1,ncoeff_max
    if (coeffs_tmp(icoeff)%coefficient /= zero) then
      ncoeff = ncoeff + 1
@@ -1955,7 +1955,7 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,powers,
 
 !2- Transfer
  ABI_ALLOCATE(coefficients,(ncoeff))
- icoeff2 = zero
+ icoeff2 = 0
  do icoeff=1,ncoeff_max
    if (coeffs_tmp(icoeff)%coefficient /= zero) then
      icoeff2 = icoeff2 + 1
@@ -2099,7 +2099,7 @@ recursive subroutine computeNorder(cell,coeffs_out,compatibleCoeffs,list_coeff,l
    nterm_max  = nsym
    ncoeff_max = (ncoeff+nstr)
    ndisp = power
-   icoeff_tmp = zero
+   icoeff_tmp = 0
    ABI_ALLOCATE(coeffs_tmp,(ncoeff_max))
    ABI_ALLOCATE(terms,(nterm_max))
    ABI_ALLOCATE(atindx,(2,ndisp))
@@ -2123,7 +2123,7 @@ recursive subroutine computeNorder(cell,coeffs_out,compatibleCoeffs,list_coeff,l
      possible   = .TRUE.
 
      index_coeff(power) = icoeff1
-     iterm = zero
+     iterm = 0
      coefficient = one
 
      if(power >= power_min) then
@@ -2177,8 +2177,8 @@ recursive subroutine computeNorder(cell,coeffs_out,compatibleCoeffs,list_coeff,l
 !        ------------
 !        2-Check if this terms is compatible with nbody
          if(nbody_in > zero)then
-           pa = one ; pb = one
-           ia = zero ; ib = zero
+           pa = 1   ; pb = 1
+           ia = 0   ; ib = 0
 !          Count the number of terms and the power           
            do ii=1,terms(1)%ndisp
              if(terms(1)%direction(ii) < zero) then
@@ -2243,7 +2243,7 @@ recursive subroutine computeNorder(cell,coeffs_out,compatibleCoeffs,list_coeff,l
    ABI_DEALLOCATE(powers)
 
 !  Transfer in the final array
-   icoeff1 = zero
+   icoeff1 = 0
    do icoeff_tmp=1,ncoeff_max
      if (coeffs_tmp(icoeff_tmp)%coefficient/=zero)then
 !      Increase icoeff and fill the coeffs_out array
@@ -2328,7 +2328,7 @@ function getCoeffFromList(list_coeff,ia,ib,irpt,mu,weight,ncoeff) result(coeff)
 !arrays
 
 ! *************************************************************************
- coeff = zero
+ coeff = 0
  do icoeff = 1,ncoeff
    if(mu==list_coeff(1,icoeff).and.&
 &     ia==list_coeff(2,icoeff).and.&
