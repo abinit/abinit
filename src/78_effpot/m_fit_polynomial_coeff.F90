@@ -37,7 +37,7 @@ module m_fit_polynomial_coeff
  use m_effective_potential,only : effective_potential_type, effective_potential_evaluate
  use m_effective_potential,only : effective_potential_freeCoeffs,effective_potential_setCoeffs
  use m_effective_potential_file, only : effective_potential_file_mapHistToRef
- use m_io_tools,   only : open_file
+ use m_io_tools,   only : open_file,get_unit
  use m_abihist, only : abihist,abihist_free,abihist_init,abihist_copy
  use m_random_zbq
  use m_fit_data
@@ -150,7 +150,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
  real(dp),allocatable :: strten_coeffs(:,:,:)
  type(polynomial_coeff_type),allocatable :: coeffs_tmp(:),coeffs_in(:),my_coeffs(:)
  type(fit_data_type) :: fit_data
- character(len=500) :: message
+ character(len=1000) :: message
  character(len=fnlen) :: filename
  character(len=3)  :: i_char
  character(len=7)  :: j_char
@@ -200,9 +200,9 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
  if(option==2) ditributed_coefficients = .false.
  
 !Get the list of coefficients to fit:
-! get from the eff_pot type (from the input)
-! or
-! regenerate the list
+!get from the eff_pot type (from the input)
+!or
+!regenerate the list
  ncoeff_tot = 0
  ncoeff_model = eff_pot%anharmonics_terms%ncoeff
  if(iam_master)then
@@ -229,9 +229,6 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
 
      call polynomial_coeff_getNorder(coeffs_tmp,eff_pot%crystal,cutoff,ncoeff_tot,powers,0,comm,&
 &                                        anharmstr=need_anharmstr,spcoupling=need_spcoupling)
-
-     filename = "terms_set.xml"
-!     call polynomial_coeff_writeXML(coeffs_in,ncoeff_tot,filename=filename,newfile=.true.)
 
      if(need_verbose)then
        write(message,'(1x,I0,2a)') ncoeff_tot,' coefficients generated ',ch10     
@@ -263,11 +260,15 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
 &                                 coeffs_tmp(jj)%terms,&
 &                                 coeffs_tmp(jj)%name,&
 &                                 check=.false.)
-       !    Free the memory     
+!      Free the memory     
        call polynomial_coeff_free(coeffs_tmp(jj))
      end do
      ABI_DEALLOCATE(coeffs_tmp)
    end if
+
+   filename = "terms_set.xml"
+!   call polynomial_coeff_writeXML(coeffs_in,ncoeff_tot,filename=filename,newfile=.true.)
+
  end if!End iam_master
 
 !Reset the output (we free the memory)
@@ -948,6 +949,10 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
 !  Set the final set of coefficients into the eff_pot type
    call effective_potential_setCoeffs(coeffs_tmp(1:ncycle_tot),eff_pot,ncycle_tot)
 
+   call fit_polynomial_coeff_computeMSE(eff_pot,hist,gf_values(4,1),gf_values(2,1),gf_values(1,1),&
+&                                       natom_sc,ntime,fit_data%training_set%sqomega,&
+&                                       compute_anharmonic=.TRUE.,print_file=.TRUE.)
+   
  else
    if(need_verbose) then
      write(message, '(9a)' )ch10,&
@@ -1182,7 +1187,7 @@ subroutine fit_polynomial_coeff_getPositive(eff_pot,hist,coeff_values,isPositive
    
    if(info==0)then
      if (any(coeff_values(imodel,nfixcoeff+1:ncoeff) < zero))then
-       coeff_values(imodel,:) = zero
+!       coeff_values(imodel,:) = zero
        isPositive(imodel) = 0
      else
        isPositive(imodel) = one
@@ -1836,6 +1841,7 @@ end subroutine fit_polynomial_coeff_getFS
 !! sqomega =  Shepard and al Factors \Omega^{2} see J.Chem Phys 136, 074103 (2012)
 !! compute_anharmonic = TRUE if the anharmonic part of the effective potential 
 !!                           has to be taking into acount
+!! print_file = if True, a ASCII file with the difference in energy will be print
 !!
 !! OUTPUT
 !! mse  =  Mean square error of the energy   (Hatree) 
@@ -1851,7 +1857,7 @@ end subroutine fit_polynomial_coeff_getFS
 !! SOURCE
 
 subroutine fit_polynomial_coeff_computeMSE(eff_pot,hist,mse,msef,mses,natom,ntime,sqomega,&
-&                                          compute_anharmonic)
+&                                          compute_anharmonic,print_file)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1866,16 +1872,16 @@ subroutine fit_polynomial_coeff_computeMSE(eff_pot,hist,mse,msef,mses,natom,ntim
 !scalars
  integer, intent(in) :: natom,ntime
  real(dp),intent(out):: mse,msef,mses
- logical,optional,intent(in) :: compute_anharmonic
+ logical,optional,intent(in) :: compute_anharmonic,print_file
 !arrays
  real(dp) :: sqomega(ntime)
  type(effective_potential_type),intent(in) :: eff_pot
  type(abihist),intent(in) :: hist
 !Local variables-------------------------------
 !scalar
- integer :: ii,ia,mu
- real(dp):: energy
- logical :: need_anharmonic = .TRUE.
+ integer :: ii,ia,mu,unit_ts,unit_mod
+ real(dp):: energy,energy_harm
+ logical :: need_anharmonic = .TRUE.,need_print=.FALSE.
 !arrays
  real(dp):: fcart(3,natom),fred(3,natom),strten(6),rprimd(3,3),xred(3,natom)
  character(len=500) :: msg
@@ -1896,6 +1902,15 @@ subroutine fit_polynomial_coeff_computeMSE(eff_pot,hist,mse,msef,mses,natom,ntim
    need_anharmonic = compute_anharmonic
  end if
 
+ if(present(print_file))then   
+   need_print=print_file
+   unit_ts = 563
+   unit_mod= 478
+   if (open_file('diff_model',msg,unit=unit_ts,form="formatted",&
+&     status="replace",action="write") /= 0) then
+     MSG_ERROR(msg)
+   end if
+ end if
 
  mse  = zero
  msef = zero
@@ -1904,9 +1919,17 @@ subroutine fit_polynomial_coeff_computeMSE(eff_pot,hist,mse,msef,mses,natom,ntim
  do ii=1,ntime
    xred(:,:)   = hist%xred(:,:,ii)
    rprimd(:,:) = hist%rprimd(:,:,ii)
+   call effective_potential_evaluate(eff_pot,energy_harm,fcart,fred,strten,natom,rprimd,&
+&                                    xred=xred,compute_anharmonic=.False.,verbose=.false.)
+
    call effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,rprimd,&
 &                                    xred=xred,compute_anharmonic=need_anharmonic,verbose=.false.)
 
+   if(need_print)then
+     WRITE(unit_ts ,'(I10,5(F23.14))') ii,hist%etot(ii),energy_harm,energy,&
+&                                       abs(hist%etot(ii) - energy_harm),&
+&                                       abs(hist%etot(ii) - energy)
+   end if
    mse  = mse  + abs(hist%etot(ii) - energy)
    do ia=1,natom
      do mu=1,3
@@ -1922,6 +1945,10 @@ subroutine fit_polynomial_coeff_computeMSE(eff_pot,hist,mse,msef,mses,natom,ntim
  msef = msef / (3*natom*ntime)
  mses = mses / (6*ntime)
 
+ if(need_print)then
+   close(unit_ts)
+ end if
+ 
 end subroutine fit_polynomial_coeff_computeMSE
 !!***
 

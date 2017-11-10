@@ -575,7 +575,7 @@ implicit none
        model_bound = 0
        model_ncoeffbound = 0
        
-       do ii=3,inp%fit_boundTerm
+       do ii=1,inp%fit_boundTerm
 !       Compute the number of possible combination         
          nmodels = factorial(ncoeff_bound) / (factorial(ii)*factorial(ncoeff_bound-ii))
 

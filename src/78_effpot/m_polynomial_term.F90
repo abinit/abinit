@@ -346,7 +346,7 @@ pure function terms_compare(t1,t2) result (res)
       do idisp2=1,t2%ndisp
         if(blkval(2,idisp2)==one)cycle!already found
         found = .false.
-        if((t1%direction(idisp1) <= zero .and.t2%direction(idisp2) <= zero).and.&
+        if((t1%direction(idisp1) <= 0 .and.t2%direction(idisp2) <= 0).and.&
 &          (t1%direction(idisp1) /= t2%direction(idisp2)))then
           cycle
         end if

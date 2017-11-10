@@ -1377,11 +1377,9 @@ subroutine polynomial_coeff_getList(cell,crystal,cutoff,dist,list_symcoeff,list_
        end do
      end do
 !    Remove the symetric
-!TEST_AM
-!      if(list_symstr_tmp(ia,isym) > ia) then
-!        list_symstr_tmp(list_symstr_tmp(ia,isym),:) = zero
-!      end if
-!TEST_AM
+     if(list_symstr_tmp(ia,isym) > ia) then
+       list_symstr_tmp(list_symstr_tmp(ia,isym),:) = zero
+     end if
    end do
   end do
 
@@ -1578,7 +1576,7 @@ subroutine polynomial_coeff_getList(cell,crystal,cutoff,dist,list_symcoeff,list_
      if(list_symcoeff_tmp2(6,icoeff,isym)==0)then
        write(message, '(a,i0,a,I0,4a)' )&
 &           'The coefficient number ',icoeff,' with the symetrie ',isym,ch10,&
-&           'have no equivalent',ch10,&
+&           'has no equivalent',ch10,&
 &           'Action: Contact abinit group'
        MSG_BUG(message)
      else
@@ -1819,9 +1817,9 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,powers,
 &          anint(cutoff/rprimd(2,2))+1,&
 &          anint(cutoff/rprimd(3,3))+1/)
 
- lim1=((ncell(1)/2))
- lim2=((ncell(2)/2))
- lim3=((ncell(3)/2))
+ lim1=((ncell(1)/2)) + 1
+ lim2=((ncell(2)/2)) + 1
+ lim3=((ncell(3)/2)) + 1 
  if(mod(ncell(1),2)/=0) lim1=lim1+1
  if(mod(ncell(2),2)/=0) lim2=lim2+1
  if(mod(ncell(3),2)/=0) lim3=lim3+1
