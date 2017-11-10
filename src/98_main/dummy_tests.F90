@@ -60,7 +60,6 @@ program dummy_tests
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dummy_tests'
- use interfaces_10_dumpinfo
  use interfaces_14_hidewrite
  use interfaces_18_timing
  use interfaces_32_util
@@ -73,10 +72,7 @@ program dummy_tests
 !scalars
  integer :: comm,dummy_out,my_rank
  integer :: unused_arg,unused_variable,used_arg,used_variable
- real(dp) :: tcpu,tcpui,twall,twalli
- character(len=24) :: codename
 !arrays
- real(dp) :: tsec(2)
  character(len=10) :: dummy_string
 
 !******************************************************************
@@ -95,11 +91,6 @@ program dummy_tests
  call abimem_init(0)
 #endif
 
- call timein(tcpui,twalli)
-
- codename='DUMMY_TESTS'//repeat(' ',13)
- call herald(codename,abinit_version,std_out)
-
 !**********************************************************************
 
  used_variable=1
@@ -114,17 +105,6 @@ program dummy_tests
  call test_dummy(dummy_out,used_arg)
 
 !**********************************************************************
-
- call timein(tcpu,twall)
-
- tsec(1)=tcpu-tcpui
- tsec(2)=twall-twalli
-
- write(std_out, '(a,a,a,f13.1,a,f13.1)' ) &
-& '-',ch10,'- Proc.   0 individual time (sec): cpu=',tsec(1),'  wall=',tsec(2)
- call wrtout(std_out,'+dummy_tests : the run completed successfully ','COLL', do_flush=.True.)
-
- call abinit_doctor("__dummy_tests")
 
  100 call xmpi_end()
 
