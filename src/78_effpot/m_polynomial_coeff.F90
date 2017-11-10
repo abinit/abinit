@@ -65,7 +65,7 @@ module m_polynomial_coeff
 
  type, public :: polynomial_coeff_type
 
-   character(len=100) :: name = ""
+   character(len=200) :: name = ""
 !     Name of the polynomial_coeff (Sr_y-O1_y)^3) for example
 
    integer :: nterm = 0
@@ -134,7 +134,7 @@ subroutine polynomial_coeff_init(coefficient,nterm,polynomial_coeff,terms,name,c
  real(dp),intent(in) :: coefficient
  logical,optional,intent(in) :: check
 !arrays
- character(len=100),optional,intent(in) :: name
+ character(len=200),optional,intent(in) :: name
  type(polynomial_term_type),intent(in) :: terms(nterm)
  type(polynomial_coeff_type), intent(out) :: polynomial_coeff
 !Local variables-------------------------------
@@ -145,7 +145,7 @@ subroutine polynomial_coeff_init(coefficient,nterm,polynomial_coeff,terms,name,c
  logical :: check_in = .false.
 !arrays
  real(dp) :: weights(nterm)
- character(len=100) :: name_tmp
+ character(len=200) :: name_tmp
 ! *************************************************************************
  
 !First free before initilisation
@@ -410,7 +410,7 @@ subroutine polynomial_coeff_getName(name,natom,polynomial_coeff,symbols,recomput
  integer,optional,intent(in) :: iterm
 !arrays
  character(len=5),intent(in) :: symbols(:)
- character(len=100),intent(out):: name
+ character(len=200),intent(out):: name
  type(polynomial_coeff_type),optional, intent(in) :: polynomial_coeff
  logical,optional,intent(in) :: recompute
 !Local variables-------------------------------
@@ -2079,7 +2079,7 @@ recursive subroutine computeNorder(cell,coeffs_out,compatibleCoeffs,list_coeff,l
  integer,allocatable :: atindx(:,:)
  integer,allocatable :: cells(:,:,:),dir_int(:)
  integer,allocatable :: powers(:)
- character(len=100):: name
+ character(len=200):: name
  type(polynomial_term_type),dimension(:),allocatable :: terms
  type(polynomial_coeff_type),allocatable :: coeffs_tmp(:)
 ! *************************************************************************
@@ -2420,7 +2420,7 @@ subroutine polynomial_coeff_getOrder1(cell,coeffs_out,cutoff_in,list_symcoeff,li
  integer,allocatable :: powers(:)
  character(len=1) :: dir_char(3)
  character(len=1) :: mutodir(9) = (/"x","y","z","1","2","3","4","5","6"/)
- character(len=100):: name
+ character(len=200):: name
  character(len=500) :: message
  type(polynomial_term_type),dimension(:),allocatable :: terms
  type(polynomial_coeff_type),allocatable :: coeffs_tmp(:)
