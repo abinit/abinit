@@ -147,9 +147,14 @@
 
  call timab(157,1,tsec)
 
- !FR EB
+ !FR EB SPr
  if (nspden==4) then
-   MSG_WARNING('DFPT with nspden=4 works just for m quantization axis along z, for insulators and norm-conserving psp!')
+   if(usepaw==1) then
+     MSG_ERROR('DFPT with nspden=4 works only for norm-conserving psp!')
+   endif
+   if(cplex==2) then
+     MSG_WARNING('DFPT with nspden=4 and qphon!=(0,0,0) is under development')
+   endif
  end if
 
 !Get size of FFT grid
@@ -256,7 +261,7 @@
      optxc=1
      nkxc_cur=nkxc ! TODO: remove nkxc_cur?
 
-     call dfpt_mkvxc_noncoll(1,ixc,kxc,bxc,mpi_enreg,nfft,ngfft,nhat1,usepaw,nhat1gr,nhat1grdim,nkxc,&
+     call dfpt_mkvxc_noncoll(cplex,ixc,kxc,bxc,mpi_enreg,nfft,ngfft,nhat1,usepaw,nhat1gr,nhat1grdim,nkxc,&
 &     nkxc_cur,nspden,n3xccc,optnc,option,optxc,paral_kgb,qphon,rhor,rhor1,rprimd,usexcnhat,vxc,vxc1_,xccc3d1)
 
    else
@@ -283,6 +288,7 @@
        call dotprod_vn(cplex,rhor1_,elpsp1 ,doti,nfft,nfftot,1     ,1,vpsp1,ucvol)
      end if
    end if
+
 !  Note that there is a factor 2 difference with the similar GS formula
    elpsp1=two*(elpsp1+elpsp10)
  end if
@@ -291,13 +297,14 @@
 !Compute XC valence contribution exc1 and complete eventually Vxc^(1)
  if (optene>0) then
    ABI_ALLOCATE(vxc1val,(cplex*nfft,nspden))
+   vxc1val=zero
    option=2
 !FR SPr EB non-collinear magnetism
    if (nspden==4) then
      optnc=1
      optxc=1
      nkxc_cur=nkxc
-     call dfpt_mkvxc_noncoll(1,ixc,kxc,bxc,mpi_enreg,nfft,ngfft,nhat1,usepaw,nhat1gr,nhat1grdim,nkxc,&
+     call dfpt_mkvxc_noncoll(cplex,ixc,kxc,bxc,mpi_enreg,nfft,ngfft,nhat1,usepaw,nhat1gr,nhat1grdim,nkxc,&
 &     nkxc_cur,nspden,n3xccc,optnc,option,optxc,paral_kgb,qphon,rhor,rhor1,rprimd,usexcnhat,vxc,vxc1val,xccc3d1)
    else
      call dfpt_mkvxc(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat1,usepaw,nhat1gr,nhat1grdim,nkxc,&

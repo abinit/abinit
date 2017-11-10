@@ -128,7 +128,7 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
  real(dp) :: enlout(1),tsec(2),svectout_dum(1,1),vectout_dum(1,1)
  real(dp),allocatable :: cwave_sp(:,:),cwavef1(:,:),cwavef2(:,:)
  real(dp),allocatable :: gh1c_sp(:,:),gh1c1(:,:),gh1c2(:,:),gh1c3(:,:),gh1c4(:,:),gvnl2(:,:)
- real(dp),allocatable :: nonlop_out(:,:),vlocal_tmp(:,:,:),work(:,:,:,:)
+ real(dp),allocatable :: nonlop_out(:,:),vlocal1_tmp(:,:,:),work(:,:,:,:)
  real(dp),ABI_CONTIGUOUS pointer :: gvnl1_(:,:)
  real(dp),pointer :: dkinpw(:),kinpw1(:)
  type(pawcprj_type),allocatable,target :: cwaveprj_tmp(:,:)
@@ -276,14 +276,13 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
        ABI_DEALLOCATE(gh1c_sp)
      end if
    else ! Non-Collinear magnetism for nvloc=4
-
      if (gs_hamkq%nspinor==2) then
        ABI_ALLOCATE(gh1c1,(2,npw1))
        ABI_ALLOCATE(gh1c2,(2,npw1))
        ABI_ALLOCATE(gh1c3,(2,npw1))
        ABI_ALLOCATE(gh1c4,(2,npw1))
        gh1c1(:,:)=zero; gh1c2(:,:)=zero; gh1c3(:,:)=zero ;  gh1c4(:,:)=zero
-       ABI_ALLOCATE(vlocal_tmp,(gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6))
+       ABI_ALLOCATE(vlocal1_tmp,(rf_hamkq%cplex*gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6)) !SPr: notation/dimension corrected vlocal_tmp -> vlocal1_tmp
        ABI_ALLOCATE(cwavef1,(2,npw))
        ABI_ALLOCATE(cwavef2,(2,npw))
        do ipw=1,npw
@@ -291,30 +290,42 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
          cwavef2(1:2,ipw)=cwave(1:2,ipw+npw)
        end do
 !      gh1c1=v11*phi1
-       vlocal_tmp(:,:,:)=rf_hamkq%vlocal1(:,:,:,1)
-       call fourwf(rf_hamkq%cplex,vlocal_tmp,cwavef1,gh1c1,work,gs_hamkq%gbound_k,gs_hamkq%gbound_kp,&
+       vlocal1_tmp(:,:,:)=rf_hamkq%vlocal1(:,:,:,1)
+       call fourwf(rf_hamkq%cplex,vlocal1_tmp,cwavef1,gh1c1,work,gs_hamkq%gbound_k,gs_hamkq%gbound_kp,&
 &       gs_hamkq%istwf_k,gs_hamkq%kg_k,gs_hamkq%kg_kp,gs_hamkq%mgfft,mpi_enreg,1,gs_hamkq%ngfft,&
 &       npw,npw1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,2,mpi_enreg%paral_kgb,tim_fourwf,weight,weight,&
 &       use_gpu_cuda=gs_hamkq%use_gpu_cuda)
 !      gh1c2=v22*phi2
-       vlocal_tmp(:,:,:)=rf_hamkq%vlocal1(:,:,:,2)
-       call fourwf(rf_hamkq%cplex,vlocal_tmp,cwavef2,gh1c2,work,gs_hamkq%gbound_k,gs_hamkq%gbound_kp,&
+       vlocal1_tmp(:,:,:)=rf_hamkq%vlocal1(:,:,:,2)
+       call fourwf(rf_hamkq%cplex,vlocal1_tmp,cwavef2,gh1c2,work,gs_hamkq%gbound_k,gs_hamkq%gbound_kp,&
 &       gs_hamkq%istwf_k,gs_hamkq%kg_k,gs_hamkq%kg_kp,gs_hamkq%mgfft,mpi_enreg,1,gs_hamkq%ngfft,&
 &       npw,npw1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,2,mpi_enreg%paral_kgb,tim_fourwf,weight,weight,&
 &       use_gpu_cuda=gs_hamkq%use_gpu_cuda)
-       ABI_DEALLOCATE(vlocal_tmp)
+       ABI_DEALLOCATE(vlocal1_tmp)
        cplex1=2
-       ABI_ALLOCATE(vlocal_tmp,(cplex1*gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6))
+       ABI_ALLOCATE(vlocal1_tmp,(cplex1*gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6))
 !      gh1c3=(re(v12)-im(v12))*phi1
-       do i3=1,gs_hamkq%n6
-         do i2=1,gs_hamkq%n5
-           do i1=1,gs_hamkq%n4
-             vlocal_tmp(2*i1-1,i2,i3)= rf_hamkq%vlocal1(i1,i2,i3,3)
-             vlocal_tmp(2*i1  ,i2,i3)=-rf_hamkq%vlocal1(i1,i2,i3,4)
+       if(rf_hamkq%cplex==1) then
+         do i3=1,gs_hamkq%n6
+           do i2=1,gs_hamkq%n5
+             do i1=1,gs_hamkq%n4
+               vlocal1_tmp(2*i1-1,i2,i3)= rf_hamkq%vlocal1(i1,i2,i3,3)
+               vlocal1_tmp(2*i1  ,i2,i3)=-rf_hamkq%vlocal1(i1,i2,i3,4)
+             end do
            end do
          end do
-       end do
-       call fourwf(cplex1,vlocal_tmp,cwavef1,gh1c3,work,gs_hamkq%gbound_k,gs_hamkq%gbound_kp,&
+       else
+       !SPr: different deffinition of potential components for cplex=2 (see dotprod_vn)
+         do i3=1,gs_hamkq%n6
+           do i2=1,gs_hamkq%n5
+             do i1=1,gs_hamkq%n4
+               vlocal1_tmp(2*i1-1,i2,i3)= rf_hamkq%vlocal1(2*i1-1,i2,i3,3)
+               vlocal1_tmp(2*i1  ,i2,i3)=-rf_hamkq%vlocal1(2*i1  ,i2,i3,3)
+             end do
+           end do
+         end do
+       endif
+       call fourwf(cplex1,vlocal1_tmp,cwavef1,gh1c3,work,gs_hamkq%gbound_k,gs_hamkq%gbound_kp,&
 &       gs_hamkq%istwf_k,gs_hamkq%kg_k,gs_hamkq%kg_kp,gs_hamkq%mgfft,mpi_enreg,1,gs_hamkq%ngfft,&
 &       npw,npw1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,2,mpi_enreg%paral_kgb,tim_fourwf,weight,weight,&
 &       use_gpu_cuda=gs_hamkq%use_gpu_cuda)
@@ -322,15 +333,15 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
        do i3=1,gs_hamkq%n6
          do i2=1,gs_hamkq%n5
            do i1=1,gs_hamkq%n4
-             vlocal_tmp(2*i1,i2,i3)=-vlocal_tmp(2*i1,i2,i3)
+             vlocal1_tmp(2*i1,i2,i3)=-vlocal1_tmp(2*i1,i2,i3)
            end do
          end do
        end do
-       call fourwf(cplex1,vlocal_tmp,cwavef2,gh1c4,work,gs_hamkq%gbound_k,gs_hamkq%gbound_kp,&
+       call fourwf(cplex1,vlocal1_tmp,cwavef2,gh1c4,work,gs_hamkq%gbound_k,gs_hamkq%gbound_kp,&
 &       gs_hamkq%istwf_k,gs_hamkq%kg_k,gs_hamkq%kg_kp,gs_hamkq%mgfft,mpi_enreg,1,gs_hamkq%ngfft,&
 &       npw,npw1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,2,mpi_enreg%paral_kgb,tim_fourwf,weight,weight,&
 &       use_gpu_cuda=gs_hamkq%use_gpu_cuda)
-       ABI_DEALLOCATE(vlocal_tmp)
+       ABI_DEALLOCATE(vlocal1_tmp)
 !      Build gh1c from pieces
 !      gh1c_1 = (v11, v12) (psi1) matrix vector product
 !      gh1c_2 = (v12*,v22) (psi2)
@@ -843,7 +854,7 @@ subroutine rf_transgrid_and_pack(isppol,nspden,usepaw,cplex,nfftf,nfft,ngfft,nvl
    vtrial_ptr=>vtrial
    vtrial1_ptr=>vtrial1
    ABI_ALLOCATE(vlocal_tmp,(n4,n5,n6))
-   ABI_ALLOCATE(vlocal1_tmp,(n4,n5,n6))
+   ABI_ALLOCATE(vlocal1_tmp,(cplex*n4,n5,n6))
    if (usepaw==0.or.pawfgr%usefinegrid==0) then
      do ispden=1,nspden
        call fftpac(ispden,mpi_enreg,nspden,n1,n2,n3,n4,n5,n6,ngfft,vtrial_ptr,vlocal_tmp,2)
