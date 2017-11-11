@@ -152,7 +152,7 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,nfftf,ngfftf,&
  integer :: isppol,cplex_dij,npw_k
  integer :: nspinor,nsppol,nspden,nk_calc
  integer :: rank,comm,master,nprocs
- integer :: iab,isp1,isp2,ixc_hybrid,nsploop,nkxc,option,n3xccc_,nk3xc,my_nbbp,my_nmels
+ integer :: iab,isp1,isp2,ixc_sigma,nsploop,nkxc,option,n3xccc_,nk3xc,my_nbbp,my_nmels
  real(dp) :: nfftfm1,fact,DijH,enxc_val,enxc_hybrid_val,vxcval_avg,vxcval_hybrid_avg,h0dij,vxc1,vxc1_val,re_p,im_p,dijsigcx
  real(dp) :: omega ! HSE Fock exchange screening parameter
  complex(dpc) :: cdot
@@ -256,10 +256,10 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,nfftf,ngfftf,&
    if(libxc_functionals_check()) then
 
      call wrtout(std_out,' Hybrid functional xc potential is being set')
-     ixc_hybrid=Dtset%ixc_adv
-     call get_auxc_ixc(auxc_ixc,ixc_hybrid)
-     call xcdata_init(xcdata_hybrid,dtset=Dtset,auxc_ixc=auxc_ixc,ixc=ixc_hybrid)
-     call libxc_functionals_init(ixc_hybrid,Dtset%nspden,xc_functionals=xc_funcs_hybrid)
+     ixc_sigma=Dtset%ixc_sigma
+     call get_auxc_ixc(auxc_ixc,ixc_sigma)
+     call xcdata_init(xcdata_hybrid,dtset=Dtset,auxc_ixc=auxc_ixc,ixc=ixc_sigma)
+     call libxc_functionals_init(ixc_sigma,Dtset%nspden,xc_functionals=xc_funcs_hybrid)
 
 !    Do not forget, negative values of hyb_mixing(_sr),hyb_range_* means that they have been user-defined.
      if (dtset%ixc==-406.or.dtset%ixc==-427.or.dtset%ixc==-428 .or. &
