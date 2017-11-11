@@ -108,7 +108,7 @@ _ WF disk file :      0.125 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
    hyb_mixing_sr 3     3.5000000000E-01
          icutcoul           5
            istwfk        1    0    1    0    0    0    1    0
-          ixc_adv        -428
+        ixc_sigma        -428
            jdtset        1    2    3
               kpt      0.00000000E+00  0.00000000E+00  0.00000000E+00
                        2.50000000E-01  0.00000000E+00  0.00000000E+00
@@ -1033,7 +1033,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     151.891     151.843
    hyb_mixing_sr 3     3.5000000000E-01
          icutcoul           5
            istwfk        1    0    1    0    0    0    1    0
-          ixc_adv        -428
+        ixc_sigma        -428
            jdtset        1    2    3
               kpt      0.00000000E+00  0.00000000E+00  0.00000000E+00
                        2.50000000E-01  0.00000000E+00  0.00000000E+00
