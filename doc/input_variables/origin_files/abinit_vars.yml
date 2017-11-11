@@ -1204,6 +1204,8 @@
     requires: null
     text: |-
         Specification of an auxiliary exchange-correlation functional,  thanks to its [[ixc]] value, to possibly replace the heavy evaluation of an hybrid functional at specific occasions, e.g. when the Fock operator is frozen during the self-consistent cycle, thanks to [[fockoptmix]]==11, or when evaluating the correction to forces due to the density residual. This auxiliary exchange-correlation functional might be rescaled, thanks to [[auxc_scal]] when [[fockoptmix]]==11.
+
+        If [[gwcalctyp]]==5, 15 or 25, [[auxc_ixc]] refers to [[ixc_sigma]] instead of [[ixc]].
     topics: Hybrids_useful
     varset: gstate
     vartype: integer
@@ -7239,8 +7241,8 @@
     mnemonics: FOCK operator, k-grid DOWNSAMPLING
     requires: '[[usefock]]==1'
     text: |-
-        The k wavevector grid used to compute the Fock operator in the full Brillouin Zone might be a subset of the full Brillouin Zone 
-        of the k point grid used for the wavefunctions (see [[kptopt]] for its definition). 
+        The k wavevector grid used to compute the Fock operator in the full Brillouin Zone might be a subset of the full Brillouin Zone
+        of the k point grid used for the wavefunctions (see [[kptopt]] for its definition).
         [[fockdownsampling]] allows one to define such a reduced set of k  wavevectors, yielding a significant speed up at the expense (possibly) of accuracy.
         The final grid has [[nkpthf]] k points, with coordinates [[kptns_hf]].
         <p>
@@ -9776,7 +9778,7 @@
            , 155208 (2003).)
           </li>
           <li>
-           [[gwcalctyp]] &#61; 5, 15, or 25 : Hartree-Fock calculation
+           [[gwcalctyp]] &#61; 5, 15, or 25 : Hybrid functional or Hartree-Fock calculation, with the identifier of the functional given by [[ixc_sigma]]. See the latter for the definition of other related variables.
           </li>
           <li>
            [[gwcalctyp]] &#61; 6, 16, or 26 : Screened Exchange calculation
@@ -9812,19 +9814,6 @@
          </ul>
         </p>
         <p>
-         Also
-         <ul>
-          <li>
-           [[gwcalctyp]] &#61; 105,125 : HSE06 calculations (1-shot and self-consistent)
-          </li>
-          <li>
-           [[gwcalctyp]] &#61; 205,225 : PBE0 calculations  (1-shot and self-consistent)
-          </li>
-          <li>
-           [[gwcalctyp]] &#61; 305,325 : B3LYP calculations (1-shot and self-consistent)
-          </li>
-         </ul>
-        </p>
     topics: GW_basic, SelfEnergy_basic
     varset: gw
     vartype: integer
@@ -9869,21 +9858,6 @@
          See F. Bruneval, X. Gonze, Phys. Rev. B 78, 085125 (2008) for a description of the methodology.
         </p>
     topics: SelfEnergy_useful, Susceptibility_useful
-    varset: gw
-    vartype: real
-- !variable
-    abivarname: gwfockmix
-    characteristics: null
-    commentdefault: null
-    commentdims: null
-    defaultval: 0.25
-    dimensions: scalar
-    excludes: null
-    mnemonics: GW FOCK exchange MIXing parameter
-    requires: '[[optdriver]]=4, [[gwcalctyp]] = 1x5 (HSE) or 2x5 (PBE0).'
-    text: |-
-        Mixing parameter of Fock exchange for PBE0 and HSE hybrid-functional calculations via the GW self-energy subroutine. [[gwfockmix]] ranges from 0 (essentially PBE) to 1.
-    topics: GW_useful
     varset: gw
     vartype: real
 - !variable
@@ -10375,6 +10349,95 @@
     topics: RPACorrEn_expert
     varset: gw
     vartype: integer
+- !variable
+    abivarname: hyb_mixing
+    characteristics: null
+    commentdefault: 'With the default, [[hyb_mixing]] is initialized from
+        [[ixc]]. '
+    commentdims: null
+    defaultval: -999.0d0
+    dimensions: scalar
+    excludes: null
+    mnemonics: HYBrid MIXING coefficient for unscreened fock operator
+    requires: '[[usefock]]>0'
+    text: |-
+        Mixing coefficient for the unscreened Fock operator in case of hybrid functionals. Hartree-Fock corresponds to 1.0, PBE0 to 0.25.
+        <p>ABINIT knows the correct value from [[ixc]]. Experts might nevertheless tune this mixing coefficient.
+
+        <p> If [[gwcalctyp]]==5, 15 or 25, [[auxc_ixc]] refers to [[ixc_sigma]] instead of [[ixc]].
+    topics: Hybrids_expert
+    varset: gstate
+    vartype: real
+- !variable
+    abivarname: hyb_mixing_sr
+    characteristics: null
+    commentdefault: 'With the default, [[hyb_mixing_sr]] is initialized from
+        [[ixc]]. '
+    commentdims: null
+    defaultval: -999.0d0
+    dimensions: scalar
+    excludes: null
+    mnemonics: HYBrid MIXING coefficient for Short-Range screened fock operator
+    requires: '[[usefock]]>0'
+    text: |-
+        Mixing coefficient for the screened Fock operator in case of hybrid functionals. HSE has 0.25, B3LYP has 0.2.
+        <p>ABINIT knows the correct value from [[ixc]]. Experts might nevertheless tune this mixing coefficient.
+
+        <p> If [[gwcalctyp]]==5, 15 or 25, [[auxc_ixc]] refers to [[ixc_sigma]] instead of [[ixc]].
+    topics: Hybrids_expert
+    varset: gstate
+    vartype: real
+- !variable
+    abivarname: hyb_range_dft
+    characteristics: null
+    commentdefault: 'With the default=-999.0d0, [[hyb_range_dft]] is initialized
+        from [[ixc]]. '
+    commentdims: null
+    defaultval: -999.0d0 or [[hyb_range_fock]] if it is defined by the user
+    dimensions: scalar
+    excludes: null
+    mnemonics: HYBrid RANGE for the DFT leftover from the screened fock operator
+    requires: '[[usefock]]>0'
+    text: |-
+        Range of the DFT leftover from the screened Fock operator in case of hybrid functionals (actually, coefficient of the distance appearing in the erf function,
+        thus it has the dimension of an inverse distance).
+        <p>
+        As described in the LibXC sources (and copied in the ABINIT doc, see [[ixc]]=-428), there is a mess due to an error in the original publication.
+        ABINIT knows the LibXC value from [[ixc]], that might not agree with the definitions from other codes.
+        Usually, [[hyb_range_dft]] is the same as [[hyb_range_fock]], see the latter for the different values. However, there is a noticeable exception,
+        the HSE03 from the original paper (not the HSE03 from VASP), for which [[hyb_range_dft]]=0.188988 while [[hyb_range_fock]]=0.106066 .
+
+        <p> If [[gwcalctyp]]==5, 15 or 25, [[auxc_ixc]] refers to [[ixc_sigma]] instead of [[ixc]].
+    topics: Hybrids_expert
+    varset: gstate
+    vartype: real
+- !variable
+    abivarname: hyb_range_fock
+    characteristics: null
+    commentdefault: 'With the default=-999.0d0, [[hyb_range_fock]] is initialized
+        from [[ixc]]. '
+    commentdims: null
+    defaultval: -999.0d0 or [[hyb_range_dft]] if it is defined by the user
+    dimensions: scalar
+    excludes: null
+    mnemonics: HYBrid RANGE for the screened FOCK operator
+    requires: '[[usefock]]>0'
+    text: |-
+        Range of the screened Fock operator in case of hybrid functionals (actually, coefficient of the distance appearing in the erf function,
+        thus it has the dimension of an inverse distance).
+        <p>
+        As described in the LibXC sources (and copied in the ABINIT doc, see [[ixc]]=-428), there is a mess due to an error in the original publication.
+        ABINIT knows the LibXC value from [[ixc]], that might not agree with the definitions from other codes.
+        Usually, [[hyb_range_dft]] is the same as [[hyb_range_fock]], with one exception explained in [[hyb_range_dft]].
+        <br>
+        The HSE06 value from LibCX is 0.11, the one of Espresso is 0.106, the one of VASP is 0.105835 (=0.2 Angstrom$^-1$).
+        <br>
+        The HSE03 value from LibCX is 0.106066 (=0.15/sqrt(2)), the one of VASP is 0.1587531 (=0.3 Angstrom$^-1$).
+
+        <p> If [[gwcalctyp]]==5, 15 or 25, [[auxc_ixc]] refers to [[ixc_sigma]] instead of [[ixc]].
+    topics: Hybrids_expert
+    varset: gstate
+    vartype: real
 - !variable
     abivarname: iatcon
     characteristics:
@@ -13106,16 +13169,19 @@
         <p>
          Controls the choice of exchange and correlation (xc). The list of XC functionals is given
         below. Positive values are for ABINIT native library of XC functionals, while negative values are for calling
-        the much wider set of functionals from the ETSF LibXC library (by M. Marques), also available at the
-         <a href="http://www.etsf.eu/resources/software/libraries_and_tools">
-          ETSF library Web page
+        the much wider set of functionals from the ETSF LibXC library (by M. Marques), available at the
+         <a href="http://octopus-code.org/wiki/Libxc">
+          LibXC home page
          </a>
          <br />
-         Note that the choice made here should agree with the choice
+         Note that the choice made here should preferably agree with the choice
         made in generating the original pseudopotential, except
         for [[ixc]]=0 (usually only used for debugging).
         A warning is issued if this is not the case.
-        However, the choices [[ixc]]=1, 2, 3 and 7 are fits to the same data, from
+        Unfortunately, pseudopotential (or PAW) generators for hybrid functionals and mGGA are currently under development,
+        so that one usually uses GGA or LDA pseudopotentials instead. The error should be limited when GGA or LDA pseudopotentials
+        with semi-core states are used. Still this is a non-controlled error..
+        Moreover, the choices [[ixc]]=1, 2, 3 and 7 are fits to the same data, from
         Ceperley-Alder, and are rather similar, at least for spin-unpolarized systems.
          <br />
          The choice between the non-spin-polarized and spin-polarized case
@@ -14106,6 +14172,29 @@
     varset: basic
     vartype: integer
 - !variable
+    abivarname: ixc_sigma
+    characteristics: null
+    commentdefault: Default corresponds to Teter parametrization.
+    commentdims: null
+    defaultval: 1
+    dimensions: scalar
+    excludes: null
+    mnemonics: Index of eXchange-Correlation functional - ADVanced functional
+    requires: mod([[gwcalctyp]],10)==5
+    text: |-
+        <p>When [[gwcalctyp]]==5, 15 or 25, [[ixc_sigma]] gives the identifier of the advanced functional (usually a hybrid) that
+        is used perturbatively or self-consistently to obtain the improved electronic structure.
+        <p>The meaning of the values of [[ixc_sigma]] is the same as the ones of [[ixc]], so we refer to the latter for the list
+        of possible values.
+        <p>This input variable is introduced because in such calculation
+        with [[gwcalctyp]]==5, 15 or 25, there is an underlying primary exchange-correlation functional, that was used to obtain the starting wavefunctions and eigenenergies, whose identified is [[ixc]]. The definition of both [[ixc]] and [[ixc_sigma]] allows one to bypass possible sources of confusion.
+        <p>Note however that in the case where [[gwcalctyp]]==5, 15 or 25, the values of the input variables [[auxc_ixc]],
+        [[hyb_mixing]], [[hyb_mixing_sr]], [[hyb_range_fock]] and [[hyb_range_dft]] refers to the advanced functional,
+        and not the primary one. Also, [[icutcoul]] and [[rcut]] have precedence over [[hyb_mixing]], [[hyb_mixing_sr]], [[hyb_range_fock]] and [[hyb_range_dft]] to define the parameters of the hybrid functional.
+    topics: xc_expert, Hybrids_expert
+    varset: gw
+    vartype: integer
+- !variable
     abivarname: ixcpositron
     characteristics: null
     commentdefault: (Teter parameterization). However, if all the pseudopotentials have the same value of pspxc, the initial value of ixc will be that common value
@@ -14873,7 +14962,7 @@
     text: |-
         <p>
         [[kptns_hf]] is the subset of the full Brillouin Zone k point grid for wavefunctions,
-        used to build the Fock operator, see [[fockdownsampling]]. 
+        used to build the Fock operator, see [[fockdownsampling]].
         </p>
     topics: k-points_internal
     varset: internal

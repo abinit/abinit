@@ -144,7 +144,8 @@ module m_fock
     ! hybrid mixing coefficient for the short-range Fock contribution
 
   real(dp) :: hyb_range_dft
-    ! hybrid range for separation, used in the DFT functional (should be equal fo hyb_range_fock, but not true for HSE03)
+    ! hybrid range for separation, used in the DFT functional 
+    ! (should be equal to hyb_range_fock, but this is not true for HSE03)
 
   real(dp) :: hyb_range_fock
     ! hybrid range for separation, used in the fock contribution 
@@ -518,6 +519,7 @@ subroutine fock_init(atindx,cplex,dtset,fock,gsqcut,kg,mpi_enreg,nattyp,npwarr,p
  integer :: n1,n2,n3,n4,n5,n6,nband,ncpgr,nkpt,nkpt_bz,nproc_hf,npwj,timrev,use_ACE,v1,v2,v3
  integer :: my_jkpt,jkg_this_proc,my_nsppol,my_nspinor
  real(dp) :: dksqmax,arg
+ real(dp) :: hyb_mixing,hyb_mixing_sr,hyb_range
  character(len=500) :: msg
 !arrays
  integer :: indx(1),l_size_atm(dtset%natom),shiftg(3),symm(3,3),ident(3,3),symrec(3,3,dtset%nsym)
@@ -766,71 +768,23 @@ subroutine fock_init(atindx,cplex,dtset,fock,gsqcut,kg,mpi_enreg,nattyp,npwarr,p
 ! === Initialize the hybrid coefficient ===
 ! =========================================
    fockcommon%ixc = dtset%ixc
+!  By convention, positive values are the default values for the ixc, 
+!  while negative values have been set by the user (and stored as negative numbers)
+   fockcommon%hyb_mixing=abs(dtset%hyb_mixing)
+   fockcommon%hyb_mixing_sr=abs(dtset%hyb_mixing_sr)
+   fockcommon%hyb_range_dft=abs(dtset%hyb_range_dft)
+   fockcommon%hyb_range_fock=abs(dtset%hyb_range_fock)
 
-!  Default values for the parameters
-   fockcommon%hyb_mixing=zero
-   fockcommon%hyb_mixing_sr=zero
-   fockcommon%hyb_range_dft=zero
-   fockcommon%hyb_range_fock=zero
-
-   if (dtset%ixc==40) then
-     fockcommon%hyb_mixing=one
-     fockcommon%hyb_mixing_sr=zero
-     fockcommon%hyb_range_dft=zero
-     fockcommon%hyb_range_fock=zero
-     msg=' - This is an Hartree-Fock calculation. The mixing coefficient alpha is set to 1.'
-     call wrtout(std_out,msg,'COLL')
-   end if
-   if (dtset%ixc==41) then
-     fockcommon%hyb_mixing=one/four
-     fockcommon%hyb_mixing_sr=zero
-     fockcommon%hyb_range_dft=zero
-     fockcommon%hyb_range_fock=zero
-     msg=' - This is a standard PBE0 calculation. The mixing coefficient alpha is set to 0.25.'
-     call wrtout(std_out,msg,'COLL')
-   end if
-   if (dtset%ixc==42) then
-     fockcommon%hyb_mixing=one/three
-     fockcommon%hyb_mixing_sr=zero
-     fockcommon%hyb_range_dft=zero
-     fockcommon%hyb_range_fock=zero
-     msg=' - This is a modified PBE0 calculation. The mixing coefficient alpha is set to 0.33.'
-     call wrtout(std_out,msg,'COLL')
-   end if
-   if (dtset%ixc<0) then
-     call libxc_functionals_get_hybridparams(hyb_mixing=fockcommon%hyb_mixing,hyb_mixing_sr=fockcommon%hyb_mixing_sr,&
-&                                            hyb_range=fockcommon%hyb_range_dft)
-     fockcommon%hyb_range_fock=fockcommon%hyb_range_dft
-   end if
-
-!  Take the values from the input variables
-   if(abs(dtset%hyb_mixing+one)>tol8)fockcommon%hyb_mixing=dtset%hyb_mixing
-   if(abs(dtset%hyb_mixing_sr+one)>tol8)fockcommon%hyb_mixing_sr=dtset%hyb_mixing_sr
-   if(abs(dtset%hyb_range_dft+one)>tol8 .and. abs(dtset%hyb_range_fock+one)>tol8)then
-     fockcommon%hyb_range_dft=dtset%hyb_range_dft
-     fockcommon%hyb_range_fock=dtset%hyb_range_fock
-  else if(abs(dtset%hyb_range_dft+one)>tol8 .and. abs(dtset%hyb_range_fock+one)<tol8)then
-     fockcommon%hyb_range_dft=dtset%hyb_range_dft
-     fockcommon%hyb_range_fock=dtset%hyb_range_dft
-  else if(abs(dtset%hyb_range_dft+one)<tol8 .and. abs(dtset%hyb_range_fock+one)>tol8)then
-     fockcommon%hyb_range_dft=dtset%hyb_range_fock
-     fockcommon%hyb_range_fock=dtset%hyb_range_fock
-  endif
-
-!  Possibly modify the values from libxc
-   if (dtset%ixc<0) then
-!     call libxc_functionals_set_hybridparams(hyb_mixing=fockcommon%hyb_mixing,hyb_mixing_sr=fockcommon%hyb_mixing_sr,&
-!&                                            hyb_range=fockcommon%hyb_range_dft)
-!DEBUG
-!    write(std_out,*)' m_fock.F90/fock_init.F90 : fockcommon%hyb_range=',fockcommon%hyb_range
-!    write(std_out,*)' m_fock.F90/fock_init.F90 : fockcommon%hyb_mixing=',fockcommon%hyb_mixing
-!    write(std_out,*)' m_fock.F90/fock_init.F90 : fockcommon%hyb_mixing_sr=',fockcommon%hyb_mixing_sr
-!    fockcommon%hyb_range=1.587
-!ENDDEBUG
-     if (abs(fockcommon%hyb_mixing)>tol8.or.abs(fockcommon%hyb_mixing_sr)>tol8) then
-       msg=' - This is a hybrid XC functional from LibXC.' 
-       msg=trim(msg)//' The mixing and range coeffs are set accordingly, then possibly overriden by expert user.'
-       call wrtout(std_out,msg,'COLL')
+!  Set the hybrid parameters if functional from libxc for which parameters can be changed, or if the user asked to do so. 
+!  Usually, these parameters were obtained from libxc,
+!  but the user might have possibly modified them. By the way, must define them here for the usual changeable fonctionals, 
+!  since otherwise might inherit them from the previous dataset !
+   if(dtset%ixc<0)then
+     if (dtset%ixc==-406.or.dtset%ixc==-427.or.dtset%ixc==-428 .or. &
+&      min(dtset%hyb_mixing,dtset%hyb_mixing_sr,dtset%hyb_range_dft,dtset%hyb_range_fock)<-tol8)then
+       call libxc_functionals_set_hybridparams(hyb_mixing=fockcommon%hyb_mixing,&
+&                                              hyb_mixing_sr=fockcommon%hyb_mixing_sr,&
+&                                              hyb_range=fockcommon%hyb_range_dft)
      end if
    end if
 
@@ -1799,10 +1753,6 @@ subroutine fock_updatecwaveocc(cg,cprj,dtset,fock,indsym,istep,mcg,mcprj,&
  type(fock_BZ_type),pointer :: fockbz
 ! *************************************************************************
 
-! DEBUG
-! write (std_out,*) ' fock_updatecwaveocc : enter'
-! ENDDEBUG
-
  call timab(1502,1,tsec)
 
  ABI_CHECK(associated(fock),"fock must be associated")
@@ -2121,10 +2071,6 @@ subroutine fock_updatecwaveocc(cg,cprj,dtset,fock,indsym,istep,mcg,mcprj,&
 
  call timab(1502,2,tsec)
 
-! DEBUG
-!write (std_out,*) ' fock_updatecwaveocc : exit'
-! ENDDEBUG
-
 end subroutine fock_updatecwaveocc
 !!***
 
@@ -2418,7 +2364,15 @@ subroutine bare_vqg(qphon,gsqcut,gmet,izero,hyb_mixing,hyb_mixing_sr,hyb_range_f
        ii1=2
        ! value of the integration of the Coulomb singularity 4pi\int_BZ 1/q^2 dq
        vqg(1+i23)=hyb_mixing*divgq0
-       if (abs(hyb_range_fock)>tol8) vqg(1+i23)=vqg(1+i23)+hyb_mixing_sr*pi/(hyb_range_fock**2)
+
+!      Note the combination of Spencer-Alavi and Erfc screening
+       if (abs(hyb_range_fock)>tol8)then
+         vqg(1+i23)=vqg(1+i23)+hyb_mixing_sr*(pi/hyb_range_fock**2)
+!        This would give a combination of Spencer-Alavi and Erfc screening,
+!        unfortunately, it modifies also the tests for pure HSE06, so was not retained.
+!        vqg(1+i23)=vqg(1+i23)+hyb_mixing_sr*min(divgq0,pi/(hyb_range_fock**2))
+       endif
+
      end if
 
      ! Final inner loop on the first dimension (note the lower limit)
@@ -2439,12 +2393,19 @@ subroutine bare_vqg(qphon,gsqcut,gmet,izero,hyb_mixing,hyb_mixing_sr,hyb_range_f
          den=piinv/gs
 
 !        Spencer-Alavi screening
-         if (abs(hyb_mixing)>tol8) &
-&          vqg(ii)=vqg(ii)+hyb_mixing*den*(one-cos(rcut*sqrt(four_pi/den)))
-!&          vqg(ii)=vqg(ii)+hyb_mixing*den
+         if (abs(hyb_mixing)>tol8)then
+           vqg(ii)=vqg(ii)+hyb_mixing*den*(one-cos(rcut*sqrt(four_pi/den)))
+!&         vqg(ii)=vqg(ii)+hyb_mixing*den
+         endif
 !        Erfc screening
-         if (abs(hyb_mixing_sr)>tol8) &
-&          vqg(ii)=vqg(ii)+hyb_mixing_sr*den*(one-exp(-pi/(den*hyb_range_fock**2)))
+         if (abs(hyb_mixing_sr)>tol8) then
+           vqg(ii)=vqg(ii)+hyb_mixing_sr*den*(one-exp(-pi/(den*hyb_range_fock**2)))
+!          This other possibility combines Erfc and Spencer-Alavi screening in case rcut is too small or hyb_range_fock too large
+!          if(divgq0<pi/(hyb_range_fock**2))then
+!            vqg(ii)=vqg(ii)+hyb_mixing_sr*den*&
+!&             (one-exp(-pi/(den*hyb_range_fock**2)))*(one-cos(rcut*sqrt(four_pi/den)))
+!          endif
+         endif
 
        end if ! Cut-off
      end do ! End loop on i1
