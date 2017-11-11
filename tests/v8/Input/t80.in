@@ -20,7 +20,7 @@ nkptgw      2
 kptgw
     0 0 0 
     0.5 0 0 
-ixc_adv 40
+ixc_sigma 40
 
 #################
 ### DATASET 1 ###

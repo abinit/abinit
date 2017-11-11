@@ -32,7 +32,7 @@ gwcalctyp   125
  icutcoul   5          # short-range exchange only
      rcut   9.090909   # corresponds to omega = 1/rc = 0.11 bohr^1
 getqps     -1
-ixc_adv     -428
+ixc_sigma   -428
 
 # Dataset2: Calculation of the 1st HSE06 iteration
 optdriver2  4 

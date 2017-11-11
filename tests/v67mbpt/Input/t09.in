@@ -27,7 +27,7 @@ kptgw  0.00000000E+00  0.00000000E+00  0.00000000E+00
 bdgw
  1 5
  1 5
-ixc_adv 40
+ixc_sigma 40
 
 ##################################
 #Variables common to all datasets.
