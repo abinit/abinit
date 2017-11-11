@@ -135,7 +135,7 @@ def main(warno, home_dir=""):
                           if warno in [3,4]:
                              warn_msg=Buffer[4].split(" ")[Warning_len+1]
                              print(source + ' = line: ' + sourceline + ', var: ' + warn_msg +' ['+source_dir[-2]+']')
-                          elif warno in [6]:
+                          elif warno in [6,10]:
                              warn_msg=Buffer[4].split(":")[1].rstrip()
                              warn_code=Buffer[2].rstrip()
                              warn_pos=Buffer[3].rstrip()
