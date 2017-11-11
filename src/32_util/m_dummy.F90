@@ -26,6 +26,12 @@
 !!
 !! SOURCE
 
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
  subroutine test_unused_arg(used_arg,unused_arg)
 
 
@@ -79,6 +85,12 @@
 !!
 !! SOURCE
 
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
  subroutine test_same_actual_arg(dummy_out1,dummy_out2,used_arg)
 
 
@@ -131,6 +143,13 @@
 !! CHILDREN
 !!
 !! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
  module m_dummy_tests
 
  implicit none
