@@ -1,6 +1,7 @@
+!{\src2tex{textfont=tt}}
 !!****p* ABINIT/dummy_tests
 !! NAME
-!! dummy_test
+!! dummy_tests
 !!
 !! FUNCTION
 !! This code is supposed to be compiled, and generate warnings when it does not fulfills the abirules.
