@@ -861,6 +861,9 @@
  intarr(1,:)=dtsets(:)%spgroup
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'spgroup','INT',0)
 
+ intarr(1,:)=dtsets(:)%spinalign
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'spinalign','INT',0)
+
 !spinat
  dprarr(:,0)=0.0_dp
  narr=3*natom ! default size for all datasets

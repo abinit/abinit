@@ -691,6 +691,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%spbroad=0.1
    dtsets(idtset)%spgaxor = -1
    dtsets(idtset)%spgorig = -1
+   dtsets(idtset)%spinalign = 0
    dtsets(idtset)%spinmagntarget=-99.99_dp
    dtsets(idtset)%spmeth=0
    dtsets(idtset)%spnorbscl=one

@@ -146,10 +146,6 @@ subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,bxc,mpi_enreg,nfft,ngfft,nhat1,nhat1
    MSG_BUG('so far cplex=2 case only works with rotation=2')
  end if
 
- if(option==1) then
-   MSG_WARNING('option=1! XC core corrections + XC from charge density calculation might not work properly')
- end if
-
 !Special case: no XC applied
  if (ixc==0.or.nkxc==0) then
    MSG_WARNING('Note that no xc is applied (ixc=0)')
@@ -270,14 +266,14 @@ subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,bxc,mpi_enreg,nfft,ngfft,nhat1,nhat1
          if(option==0) then
            select case(cplex)
            case(1)
-               vxc1(ifft,1)=dvdn+dvdz
-               vxc1(ifft,1)=dvdn-dvdz
+               vxc1(ifft,1)=dvdn
+               vxc1(ifft,1)=dvdn
                vxc1(ifft,3:4)=zero
            case(2)
-               vxc1(2*ifft-1,1)=dvdn_re+dvdz_re
-               vxc1(2*ifft  ,1)=dvdn_im+dvdz_im
-               vxc1(2*ifft-1,2)=dvdn_re-dvdz_re
-               vxc1(2*ifft  ,2)=dvdn_im-dvdz_im
+               vxc1(2*ifft-1,1)=dvdn_re
+               vxc1(2*ifft  ,1)=dvdn_im
+               vxc1(2*ifft-1,2)=dvdn_re
+               vxc1(2*ifft  ,2)=dvdn_im
                vxc1(2*ifft-1,3:4)=zero   
                vxc1(2*ifft  ,3:4)=zero   
            end select
@@ -362,7 +358,7 @@ subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,bxc,mpi_enreg,nfft,ngfft,nhat1,nhat1
                   mz1=rhor1(ifft,4); mdirz=rhor(ifft,4)/m_norm(ifft);
  
                   vxc1(ifft,1) = vxc1(ifft,1) + bxc(ifft)*( mz1 - mdirz*m_dot_m1 ) ! bxc is Bxc^(0)/|m|. In principle,
-                  vxc1(ifft,2) = vxc1(ifft,2) + bxc(ifft)*(-mz1 + mdirz*m_dot_m1 ) ! bxc = (vxc(ifft,1)-vxc(ifft,2))/m_norm/2.0 
+                  vxc1(ifft,2) = vxc1(ifft,2) + bxc(ifft)*(-mz1 + mdirz*m_dot_m1 ) ! bxc = (vxc0(ifft,1)-vxc0(ifft,2))/m_norm/2.0 
                   vxc1(ifft,3) = vxc1(ifft,3) + bxc(ifft)*( mx1 - mdirx*m_dot_m1 ) ! but for small magnetization, the correct limit
                   vxc1(ifft,4) = vxc1(ifft,4) + bxc(ifft)*(-my1 + mdiry*m_dot_m1 ) ! is computed in rhotoxc.F90
                 else
@@ -418,9 +414,9 @@ subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,bxc,mpi_enreg,nfft,ngfft,nhat1,nhat1
                   vxc1(2*ifft-1,2) = vxc1(2*ifft-1,2) + bxc(ifft)*(-mz1_re + mdirz*m_dot_m1_re ) ! Re[V^22]
                   vxc1(2*ifft  ,2) = vxc1(2*ifft  ,2) + bxc(ifft)*(-mz1_im + mdirz*m_dot_m1_im ) ! Im[V^22]
 
-                  !    v12  = bxc*(   (mx1    - mdirx*m_dot_m1   ) + i.(-my1    + mdiry*m_dot_m1   )   )
-                  ! Re[v12] = bxc*(   (mx1_re - mdirx*m_dot_m1_re) +   ( my1_im - mdiry*m_dot_m1_im)   )
-                  ! Im[v12] = bxc*(   (mx1_im - mdirx*m_dot_m1_im) +   (-my1_re + mdiry*m_dot_m1_re)   )
+                  !    v12  += bxc*(   (mx1    - mdirx*m_dot_m1   ) + i.(-my1    + mdiry*m_dot_m1   )   )
+                  ! Re[v12] += bxc*(   (mx1_re - mdirx*m_dot_m1_re) +   ( my1_im - mdiry*m_dot_m1_im)   )
+                  ! Im[v12] += bxc*(   (mx1_im - mdirx*m_dot_m1_im) +   (-my1_re + mdiry*m_dot_m1_re)   )
 
                   vxc1(2*ifft-1,3) = vxc1(2*ifft-1,3) + bxc(ifft)*( mx1_re - mdirx*m_dot_m1_re ) ! Re[V^12]
                   vxc1(2*ifft-1,3) = vxc1(2*ifft-1,3) + bxc(ifft)*( my1_im - mdiry*m_dot_m1_im ) ! Re[V^12]
@@ -447,6 +443,7 @@ subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,bxc,mpi_enreg,nfft,ngfft,nhat1,nhat1
                   vxc1(2*ifft-1,4)= -vxc1(2*ifft  ,3)  ! Re[i.V^12] =-Im[V^12]
                   vxc1(2*ifft  ,4)=  vxc1(2*ifft-1,3)  ! Im[i.V^12] = Re[V^12]
                 end if
+
               end select ! cplex 1 or 2
 
             case (3)                        
@@ -505,7 +502,6 @@ subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,bxc,mpi_enreg,nfft,ngfft,nhat1,nhat1
 
       end do
      else
-       write(*,*) 'optnc is WRONG!'
        do ifft=1,nfft
          dvdn=(vxc1_diag(ifft,1)+vxc1_diag(ifft,2))*half
          dvdz=(vxc1_diag(ifft,1)-vxc1_diag(ifft,2))*half

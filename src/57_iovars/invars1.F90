@@ -376,6 +376,10 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    dtset%nspden=dtset%nsppol
  end if
 
+!See whether the spins should be always aligned with z quantization axis, no matter nspden 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'spinalign',tread,'INT')
+ if(tread==1) dtset%spinalign=intarr(1)
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ntypalch',tread,'INT')
  if(tread==1) dtset%ntypalch=intarr(1)
 

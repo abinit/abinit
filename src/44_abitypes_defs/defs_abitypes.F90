@@ -544,6 +544,7 @@ type dataset_type
  integer :: spgaxor
  integer :: spgorig
  integer :: spgroup
+ integer :: spinalign
  integer :: spmeth
  integer :: string_algo
  integer :: symmorphi

@@ -840,6 +840,7 @@ subroutine dtset_copy(dtout, dtin)
  dtout%spgaxor            = dtin%spgaxor
  dtout%spgorig            = dtin%spgorig
  dtout%spgroup            = dtin%spgroup
+ dtout%spinalign          = dtin%spinalign
  dtout%spmeth             = dtin%spmeth
  dtout%string_algo        = dtin%string_algo
  dtout%symchi             = dtin%symchi

@@ -798,7 +798,8 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
 !
    if (psps%usepaw==0) then
      call symrhg(cplex,gprimd,irrzon1,mpi_enreg,dtset%nfft,dtset%nfft,dtset%ngfft,&
-&     nspden,nsppol,nsym1,dtset%paral_kgb,phnons1,rhog1  ,rhor1  ,rprimd,symaf1,symrl1)
+&     nspden,nsppol,nsym1,dtset%paral_kgb,phnons1,rhog1  ,rhor1  ,rprimd,symaf1,symrl1,&
+&     spinalign=dtset%spinalign)
    else
      call symrhg(cplex,gprimd,irrzon1,mpi_enreg,dtset%nfft,dtset%nfft,dtset%ngfft,&
 &     nspden,nsppol,nsym1,dtset%paral_kgb,phnons1,rho1wfg,rho1wfr,rprimd,symaf1,symrl1)

@@ -823,22 +823,22 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
      end if
    end if
 
+!  SPr: don't remove the following comments for debugging
 !  call calcdensph(gmet,mpi_enreg,dtset%natom,nfftf,ngfftf,nspden,&
 !&   dtset%ntypat,ab_out,dtset%ratsph,rhor1,rprimd,dtset%typat,ucvol,xred,&
-!&   idir+1,cplex,intgden=intgden,dentot=dentot) !SPr remove
-!     write(*,*) 'SPr: n (Cr 1,2)',intgden(1,1),' ',intgden(1,2)
-!     write(*,*) 'SPr: mx(Cr 1,2)',intgden(2,1),' ',intgden(2,2)
-!     write(*,*) 'SPr: my(Cr 1,2)',intgden(3,1),' ',intgden(3,2)
-!     write(*,*) 'SPr: mz(Cr 1,2)',intgden(4,1),' ',intgden(4,2)
+!&   idir+1,cplex)
+!     write(*,*) ' n ( 1,2)',intgden(1,1),' ',intgden(1,2)
+!     write(*,*) ' mx( 1,2)',intgden(2,1),' ',intgden(2,2)
+!     write(*,*) ' my( 1,2)',intgden(3,1),' ',intgden(3,2)
+!     write(*,*) ' mz( 1,2)',intgden(4,1),' ',intgden(4,2)
 !  call dfpt_etot(dtset%berryopt,deltae,eberry,edocc,eeig0,eew,efrhar,efrkin,&
 !&     efrloc,efrnl,efrx1,efrx2,ehart1,ek0,ek1,eii,elast,eloc0,elpsp1,&
 !&     enl0,enl1,epaw1,etotal,evar,evdw,exc1,elmag1,ipert,dtset%natom,optene)
-!     write(*,*) 'SPr: ek1=',ek1,'  exc1=',exc1,' elmag1=',elmag1!SPr remove
- 
-   !if (ipert==dtset%natom+5) then
-   !calculate 1st order magnetic potential contribution to the energy
-   !  call dfpt_e1mag(e1mag,rhor1,rhog1);
-   !endif
+!     write(*,*) 'SPr: ek1=',ek1,'  exc1=',exc1,' elmag1=',elmag
+!  if (ipert==dtset%natom+5) then
+!  !calculate 1st order magnetic potential contribution to the energy
+!    call dfpt_e1mag(e1mag,rhor1,rhog1);
+!  endif
 
 !  ######################################################################
 !  Skip out of step loop if non-SCF (completed)

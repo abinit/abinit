@@ -355,6 +355,7 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
      end do
    end do
 
+
 !  If electric field, the derivative of the wf should be read, and multiplied by i.
    if(test_ddk==1) then
      ii = wfk_findk(ddk_f(1), gs_hamkq%kpt_k)
@@ -432,7 +433,7 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
        nskip=nskip+1
      else
 !      Compute the 0-order kinetic operator contribution (with cwavef)
-       call meanvalue_g(ar,kinpw1,0,gs_hamkq%istwf_k,mpi_enreg,npw1_k,nspinor,cwavef,cwavef,0)
+       call meanvalue_g(ar,kinpw1,1,gs_hamkq%istwf_k,mpi_enreg,npw1_k,nspinor,cwavef,cwavef,0)
 !      There is an additional factor of 2 with respect to the bare matrix element
        ek0_k(iband)=energy_factor*ar
 !      Compute the 1-order kinetic operator contribution (with cwave1 and cwave0), if needed.

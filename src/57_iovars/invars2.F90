@@ -2509,6 +2509,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
    dtset%prtdensph=1
  end if
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'spinalign',tread,'INT')
+ if(tread==1) dtset%spinalign=intarr(1)
+
 !Initialize atvshift
  if(dtset%natvshift>0)then
    call intagm(dprarr,intarr,jdtset,marr,dtset%natvshift*nsppol*dtset%natom,string(1:lenstr),'atvshift',tread,'ENE')

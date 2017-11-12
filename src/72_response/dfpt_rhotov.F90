@@ -118,7 +118,7 @@
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  real(dp),intent(in) :: gmet(3,3),gprimd(3,3),kxc(nfft,nkxc)
- real(dp),intent(in) :: vxc(cplex*nfft,nspden),bxc(nfft)
+ real(dp),intent(in) :: vxc(nfft,nspden),bxc(nfft)
  real(dp),intent(in) :: nhat(nfft,nspden)
  real(dp),intent(in) :: nhat1(cplex*nfft,nspden)  !vz_d
  real(dp),intent(in) :: nhat1gr(cplex*nfft,nspden,3*nhat1grdim)
@@ -184,29 +184,55 @@
 
  ABI_ALLOCATE(v1zeeman,(cplex*nfft,nspden))
  if(ipert==natom+5)then
-   if (nspden==4) then
-     if(idir==3)then       ! Zeeman field along the 3rd axis (z)   
-       v1zeeman(:,1)=-0.5d0
-       v1zeeman(:,2)=+0.5d0
-       v1zeeman(:,3)= 0.0d0
-       v1zeeman(:,4)= 0.0d0
-     else if(idir==2)then  ! Zeeman field along the 2nd axis (y)
-       v1zeeman(:,1)= 0.0d0
-       v1zeeman(:,2)= 0.0d0
-       v1zeeman(:,3)= 0.0d0
-       v1zeeman(:,4)=+0.5d0   
-     else                  ! Zeeman field along the 1st axis (x)
-       v1zeeman(:,1)= 0.0d0
-       v1zeeman(:,2)= 0.0d0
-       v1zeeman(:,3)=-0.5d0
-       v1zeeman(:,4)= 0.0d0
+   select case(cplex)
+   case(1)
+     if (nspden==4) then
+       if(idir==3)then       ! Zeeman field along the 3rd axis (z)   
+         v1zeeman(:,1)=-0.5d0
+         v1zeeman(:,2)=+0.5d0
+         v1zeeman(:,3)= 0.0d0
+         v1zeeman(:,4)= 0.0d0
+       else if(idir==2)then  ! Zeeman field along the 2nd axis (y)
+         v1zeeman(:,1)= 0.0d0
+         v1zeeman(:,2)= 0.0d0
+         v1zeeman(:,3)= 0.0d0
+         v1zeeman(:,4)=+0.5d0   
+       else                  ! Zeeman field along the 1st axis (x)
+         v1zeeman(:,1)= 0.0d0
+         v1zeeman(:,2)= 0.0d0
+         v1zeeman(:,3)=-0.5d0
+         v1zeeman(:,4)= 0.0d0
+       end if
+     else if (nspden==2) then
+       v1zeeman(:,1)=-0.5e0
+       v1zeeman(:,2)= 0.5e0
+     else 
+       v1zeeman(:,1)= 0.0e0
      end if
-   else if (nspden==2) then
-     v1zeeman(:,1)=-0.5d0
-     v1zeeman(:,2)= 0.5d0
-   else 
-     v1zeeman(:,1)= 0.0d0
-   end if
+   case(2)
+     if (nspden==2) then
+       do ifft=1,nfft
+         v1zeeman(2*ifft-1,1)  =-0.5e0
+         v1zeeman(2*ifft  ,1)  = 0.0e0
+         v1zeeman(2*ifft-1,2)  = 0.5e0
+         v1zeeman(2*ifft  ,2)  = 0.0e0
+       enddo
+     else if (nspden==4) then
+       select case(idir)
+       case(3)
+         do ifft=1,nfft
+           v1zeeman(2*ifft-1,1)=-0.5e0
+           v1zeeman(2*ifft  ,1)= 0.0e0
+           v1zeeman(2*ifft-1,2)= 0.5e0
+           v1zeeman(2*ifft  ,2)= 0.0e0
+           v1zeeman(2*ifft-1,3)= 0.0e0
+           v1zeeman(2*ifft  ,3)= 0.0e0
+           v1zeeman(2*ifft-1,4)= 0.0e0
+           v1zeeman(2*ifft  ,4)= 0.0e0
+         enddo
+       end select
+     endif
+   end select
  else
    if (nspden==4) then
      v1zeeman(:,1)= 0.0d0

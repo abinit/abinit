@@ -215,7 +215,7 @@ subroutine chkvars (string)
 !S
  list_vars=trim(list_vars)//' scalecart shiftk shiftq signperm'
  list_vars=trim(list_vars)//' slabwsrad slabzbeg slabzend smdelta so_psp'
- list_vars=trim(list_vars)//' spbroad spgaxor spgorig spgroup spgroupma spinat spinmagntarget spmeth '
+ list_vars=trim(list_vars)//' spbroad spgaxor spgorig spgroup spgroupma spinalign spinat spinmagntarget spmeth'
  list_vars=trim(list_vars)//' spnorbscl stmbias strfact string_algo strprecon strtarget supercell'
  list_vars=trim(list_vars)//' symafm symchi symdynmat symmorphi symrel symsigma'
 !T

@@ -63,7 +63,7 @@
 #include "abi_common.h"
 
 subroutine symrhg(cplex,gprimd,irrzon,mpi_enreg,nfft,nfftot,ngfft,nspden,nsppol,nsym,paral_kgb,&
-&                 phnons,rhog,rhor,rprimd,symafm,symrel)
+&                 phnons,rhog,rhor,rprimd,symafm,symrel,spinalign)
 
  use defs_basis
  use defs_abitypes
@@ -88,6 +88,7 @@ subroutine symrhg(cplex,gprimd,irrzon,mpi_enreg,nfft,nfftot,ngfft,nspden,nsppol,
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: cplex,nfft,nfftot,nspden,nsppol,nsym,paral_kgb
+ integer,intent(in),optional :: spinalign
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: irrzon(nfftot**(1-1/nsym),2,(nspden/nsppol)-3*(nspden/4)),ngfft(18)
@@ -150,6 +151,15 @@ subroutine symrhg(cplex,gprimd,irrzon,mpi_enreg,nfft,nfftot,ngfft,nspden,nsppol,
    rhor(:,2)=rhor(:,2)-rhor(:,1)     !mx (n+mx-n)
    rhor(:,3)=rhor(:,3)-rhor(:,1)     !my (n+my-n)
    rhor(:,4)=rhor(:,1)-two*rhor(:,4) !mz=n-2ndown
+   !SPr mostly for debugging, but can be useful for simulations also
+   !forcibly algin the magnetization with z axis
+   !at the moment,the following is a crude fix, proper way to do is to rotate wavefunctions
+   if(present(spinalign)) then
+     if(spinalign==1) then
+       rhor(:,2)=zero
+       rhor(:,3)=zero
+     endif
+   endif
    call timab(17,2,tsec)
  end if
 
