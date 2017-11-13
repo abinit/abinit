@@ -1795,7 +1795,7 @@ subroutine pawxc3(corexc1,cplex_den,cplex_vxc,d2enxc,ixc,kxc,lm_size,lmselect,nh
  real(dp),allocatable :: dgxc1(:),drho1(:,:),drho1core(:,:),dylmdr(:,:,:)
  real(dp),allocatable :: ff(:),gg(:),grho1arr(:,:,:),gxc1(:,:,:,:)
  real(dp),allocatable,target :: rhohat1(:,:,:),rho1arr(:,:)
- real(dp), ABI_CONTIGUOUS pointer :: mag(:,:),rho1_(:,:,:),rho1arr_(:,:)
+ real(dp), ABI_CONTIGUOUS pointer :: kxc_(:,:),mag(:,:),rho1_(:,:,:),rho1arr_(:,:)
  real(dp), ABI_CONTIGUOUS pointer :: vxc1_(:,:,:),vxc1_diag(:,:),vxc1_nc(:,:),vxc1_updn(:,:,:)
 
 ! *************************************************************************
@@ -2330,20 +2330,24 @@ subroutine pawxc3(corexc1,cplex_den,cplex_vxc,d2enxc,ixc,kxc,lm_size,lmselect,nh
 #ifdef LIBPAW_ISO_C_BINDING
    call c_f_pointer(c_loc(vxc1_updn),vxc1_diag,shape=[nrad*npts,nspden_updn])
    call c_f_pointer(c_loc(vxc1_),vxc1_nc,shape=[nrad*npts,nspden])
+   call c_f_pointer(c_loc(kxc),kxc_,shape=[nrad*npts,3])
    call c_f_pointer(c_loc(kxc(:,:,nkxc-2:nkxc)),mag,shape=[nrad*npts,3])
 #else
    LIBPAW_ALLOCATE(vxc1_diag,(nrad*npts,nspden_updn))
    LIBPAW_ALLOCATE(vxc1_nc,(nrad*npts,nspden))
+   LIBPAW_ALLOCATE(kxc_,(nrad*npts,3))
    LIBPAW_ALLOCATE(mag,(nrad*npts,3))
    vxc1_diag=reshape(vxc1_updn,[nrad*npts,nspden_updn])
+   kxc_=reshape(kxc(1:nrad,1:npts,1:3),[nrad*npts,3])
    mag=reshape(kxc(1:nrad,1:npts,nkxc-2:nkxc),[nrad*npts,3])
 #endif
-   call dfpt_rotate_back_mag(vxc1_diag,vxc1_nc,vxc,rho1arr,mag,nrad*npts,&
+   call dfpt_rotate_back_mag(vxc1_diag,vxc1_nc,vxc,kxc_,rho1arr,mag,nrad*npts,&
 &                            rot_method=1)
 #ifndef LIBPAW_ISO_C_BINDING
    vxc1_=reshape(vxc1_nc,[nrad,npts,nspden])
    LIBPAW_DEALLOCATE(vxc1_diag)
    LIBPAW_DEALLOCATE(vxc1_nc)
+   LIBPAW_DEALLOCATE(kxc_)
    LIBPAW_DEALLOCATE(mag)
 #endif
    LIBPAW_DEALLOCATE(vxc1_updn)

@@ -19,7 +19,7 @@
 !!  cplex= if 1, real space 1-order functions on FFT grid are REAL,
 !!         if 2, COMPLEX
 !!  ixc= choice of exchange-correlation scheme
-!!  kxc(nfft,nkxc)=exchange and correlation kernel (see rhotoxc.f)
+!!  kxc(nfft,nkxc)=exchange and correlation kernel (see rhotoxc.F90)
 !!  mpi_enreg=information about MPI parallelization
 !!  nfft=(effective) number of FFT grid points (for this processor)
 !!  ngfft(18)=contain all needed information about 3D FFT,
@@ -186,8 +186,8 @@ subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,bxc,mpi_enreg,nfft,ngfft,nhat,nhatdi
          vxc1(ifft,3:4)=zero
        end do
      else
-       call dfpt_rotate_back_mag(vxc1_diag,vxc1,vxc,rhor1_,mag,nfft,&
-&                                mag_norm_in=m_norm,bxc=bxc)
+       call dfpt_rotate_back_mag(vxc1_diag,vxc1,vxc,kxc,rhor1_,mag,nfft,&
+&                                mag_norm_in=m_norm)
      end if
    else
      call rotate_back_mag(vxc1_diag,vxc1,mag,nfft,mag_norm_in=m_norm)

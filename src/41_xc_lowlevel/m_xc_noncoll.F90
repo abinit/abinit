@@ -47,7 +47,7 @@ MODULE m_xc_noncoll
 !Tolerance on magnetization norm
  real(dp),parameter :: m_norm_min=tol8
 
-!Default rotatino method for DFPT
+!Default rotation method for DFPT
  integer,parameter :: rotation_method_default=1
 
 CONTAINS
@@ -261,7 +261,7 @@ end subroutine rotate_back_mag
 !!  vxc1_in(vectsize,2)=input 1st-order collinear XC potential
 !!  vectsize=size of vector fields
 !!  [mag_norm_in(vectsize)]= --optional-- norm of 0-order mag(:) at each point of the grid
-!!  [bxc(vectsize)]= --optional-- XC magnetic field (associated to vxc_in)
+!!  [kxc(vectsize,nkxc)]= --optional-- XC kernel (associated to vxc_in)
 !!  [rot_method]=Select method used to compute rotation matrix (1, 2 or 3)
 !!
 !! NOTES
@@ -282,8 +282,8 @@ end subroutine rotate_back_mag
 !!
 !! SOURCE
 
-subroutine dfpt_rotate_back_mag(vxc1_in,vxc1_out,vxc,rho1,mag,vectsize,&
-&                               mag_norm_in,rot_method,bxc) ! optional arguments
+subroutine dfpt_rotate_back_mag(vxc1_in,vxc1_out,vxc,kxc,rho1,mag,vectsize,&
+&                               mag_norm_in,rot_method) ! optional arguments
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -299,17 +299,17 @@ subroutine dfpt_rotate_back_mag(vxc1_in,vxc1_out,vxc,rho1,mag,vectsize,&
  integer,intent(in) :: vectsize
  integer,intent(in),optional :: rot_method
 !arrays
- real(dp),intent(in) :: vxc(vectsize,4),vxc1_in(vectsize,2)
+ real(dp),intent(in) :: kxc(:,:)
  real(dp),intent(in) :: mag(vectsize,3),rho1(vectsize,4)
- real(dp),intent(out) :: vxc1_out(vectsize,4)
- real(dp),intent(in),optional :: bxc(vectsize)
+ real(dp),intent(in) :: vxc(vectsize,4),vxc1_in(vectsize,2)
  real(dp),intent(in),optional :: mag_norm_in(vectsize)
+ real(dp),intent(out) :: vxc1_out(vectsize,4)
 
 !Local variables-------------------------------
 !scalars
  integer :: ipt,rotation_method
  logical :: has_mag_norm
- real(dp) :: d1,d2,d3,d4,dum,dvdn,dvdz,fact,m_dot_m1,m_norm
+ real(dp) :: bxc_over_m,d1,d2,d3,d4,dum,dvdn,dvdz,fact,m_dot_m1,m_norm
  real(dp) :: mdirx,mdiry,mdirz,mxy,mx1,my1,mz1,nx,ny,nz,nx1,ny1
  real(dp) :: theta0,theta1
  complex(dpc) :: rho_updn
@@ -322,9 +322,15 @@ subroutine dfpt_rotate_back_mag(vxc1_in,vxc1_out,vxc,rho1,mag,vectsize,&
 
 !DBG_ENTER("COLL")
 
+!Optional arguments
  has_mag_norm=present(mag_norm_in)
  rotation_method=rotation_method_default
  if (present(rot_method)) rotation_method=rot_method
+
+!Check Kxc
+ if (size(kxc)<3*vectsize) then
+     MSG_ERROR('Cannot use Kxc from GGA!')
+ end if
 
  select case (rotation_method)
 
@@ -390,8 +396,14 @@ subroutine dfpt_rotate_back_mag(vxc1_in,vxc1_out,vxc,rho1,mag,vectsize,&
        vxc1_out(ipt,4)=real(aimag(vxc1tmp(1,2)),kind=dp)
 
      else ! Magnetization is zero
-       vxc1_out(ipt,1:2)=(vxc1_in(ipt,1)+vxc1_in(ipt,2))*half
-       vxc1_out(ipt,3:4)=zero
+       dvdn=(vxc1_in(ipt,1)+vxc1_in(ipt,2))*half
+       mx1=rho1(ipt,2) ; my1=rho1(ipt,3) ; mz1=rho1(ipt,4)
+!      Compute Bxc/|m| from Kxc (zero limit)
+       bxc_over_m = half*(half*(kxc(ipt,1)+kxc(ipt,3))-kxc(ipt,2))
+       vxc1_out(ipt,1)= dvdn + bxc_over_m*mz1
+       vxc1_out(ipt,2)= dvdn - bxc_over_m*mz1
+       vxc1_out(ipt,3)= bxc_over_m*mx1
+       vxc1_out(ipt,4)=-bxc_over_m*my1
      end if
 
    end do ! ipt
@@ -402,10 +414,6 @@ subroutine dfpt_rotate_back_mag(vxc1_in,vxc1_out,vxc,rho1,mag,vectsize,&
  case (2)
    !SPr Alternative method (explicitely calculated rotation matrices)
    !Currently numerically unstable for mx=0 && my=0
-
-   if (.not.present(bxc)) then
-     MSG_BUG('Need Bxc!')
-   endif
 
    do ipt=1,vectsize
 
@@ -423,7 +431,6 @@ subroutine dfpt_rotate_back_mag(vxc1_in,vxc1_out,vxc,rho1,mag,vectsize,&
        dvdz=(vxc1_in(ipt,1)-vxc1_in(ipt,2))*half
 
        mxy = sqrt(mag(ipt,1)**2+mag(ipt,2)**2)
-
        nx     =-mag(ipt,2)/mxy
        ny     = mag(ipt,1)/mxy
        nz     = zero
@@ -450,14 +457,21 @@ subroutine dfpt_rotate_back_mag(vxc1_in,vxc1_out,vxc,rho1,mag,vectsize,&
        vxc1_out(ipt,4)=-mag(ipt,2)*fact ! Imaginary part
 
        !U^(1)*.Vxc0.U^(0) + U^(0)*.Vxc0.U^(1)
-       vxc1_out(ipt,1) = vxc1_out(ipt,1) - (bxc(ipt)*m_norm)*sin(theta0)*theta1
-       vxc1_out(ipt,2) = vxc1_out(ipt,2) + (bxc(ipt)*m_norm)*sin(theta0)*theta1
-       vxc1_out(ipt,3) = vxc1_out(ipt,3) + (bxc(ipt)*m_norm)*(ny1+cos(theta0)*ny*theta1)
-       vxc1_out(ipt,4) = vxc1_out(ipt,4) + (bxc(ipt)*m_norm)*(nx1+cos(theta0)*nx*theta1)
+       bxc_over_m = (vxc(ipt,1)-vxc(ipt,2))*half/mag(ipt,3)
+       vxc1_out(ipt,1) = vxc1_out(ipt,1) - (bxc_over_m*m_norm)*sin(theta0)*theta1
+       vxc1_out(ipt,2) = vxc1_out(ipt,2) + (bxc_over_m*m_norm)*sin(theta0)*theta1
+       vxc1_out(ipt,3) = vxc1_out(ipt,3) + (bxc_over_m*m_norm)*(ny1+cos(theta0)*ny*theta1)
+       vxc1_out(ipt,4) = vxc1_out(ipt,4) + (bxc_over_m*m_norm)*(nx1+cos(theta0)*nx*theta1)
 
      else ! Magnetization is zero
-        vxc1_out(ipt,1:2)=(vxc1_in(ipt,1)+vxc1_in(ipt,2))*half
-        vxc1_out(ipt,3:4)=zero
+       dvdn=(vxc1_in(ipt,1)+vxc1_in(ipt,2))*half
+       mx1=rho1(ipt,2) ; my1=rho1(ipt,3) ; mz1=rho1(ipt,4)
+!      Compute Bxc/|m| from Kxc (zero limit)
+       bxc_over_m = half*(half*(kxc(ipt,1)+kxc(ipt,3))-kxc(ipt,2))
+       vxc1_out(ipt,1)= dvdn + bxc_over_m*mz1
+       vxc1_out(ipt,2)= dvdn - bxc_over_m*mz1
+       vxc1_out(ipt,3)= bxc_over_m*mx1
+       vxc1_out(ipt,4)=-bxc_over_m*my1
      end if
 
    end do ! ipt
@@ -468,11 +482,7 @@ subroutine dfpt_rotate_back_mag(vxc1_in,vxc1_out,vxc,rho1,mag,vectsize,&
  case (3)
    ! SPr 2nd method for Vxc potential rotation
    ! Explicit calculation of the rotated xc functional
-   ! (derivatives of the analitic expression)
-
-   if (.not.present(bxc)) then
-     MSG_BUG('Need Bxc!')
-   endif
+   ! (derivatives of the analytical expression)
 
    do ipt=1,vectsize
 
@@ -506,16 +516,19 @@ subroutine dfpt_rotate_back_mag(vxc1_in,vxc1_out,vxc,rho1,mag,vectsize,&
        mdiry=mag(ipt,2)/m_norm
        mdirz=mag(ipt,3)/m_norm
 
-       vxc1_out(ipt,1) = vxc1_out(ipt,1) + bxc(ipt)*( mz1 - mdirz*m_dot_m1 ) ! bxc is Bxc^(0)/|m|. In principle,
-       vxc1_out(ipt,2) = vxc1_out(ipt,2) + bxc(ipt)*(-mz1 + mdirz*m_dot_m1 ) ! bxc = (vxc(ipt,1)-vxc(ipt,2))/m_norm/2.0
-       vxc1_out(ipt,3) = vxc1_out(ipt,3) + bxc(ipt)*( mx1 - mdirx*m_dot_m1 ) ! but for small magnetization, the correct limit
-       vxc1_out(ipt,4) = vxc1_out(ipt,4) + bxc(ipt)*(-my1 + mdiry*m_dot_m1 ) ! is computed in rhotoxc.F90
+       bxc_over_m = (vxc(ipt,1)-vxc(ipt,2))*half/mag(ipt,3)
+       vxc1_out(ipt,1) = vxc1_out(ipt,1) + bxc_over_m*( mz1 - mdirz*m_dot_m1 ) ! bxc is Bxc^(0)/|m|. In principle,
+       vxc1_out(ipt,2) = vxc1_out(ipt,2) + bxc_over_m*(-mz1 + mdirz*m_dot_m1 ) ! bxc = (vxc(ipt,1)-vxc(ipt,2))/m_norm/2.0
+       vxc1_out(ipt,3) = vxc1_out(ipt,3) + bxc_over_m*( mx1 - mdirx*m_dot_m1 ) ! but for small magnetization, the correct limit
+       vxc1_out(ipt,4) = vxc1_out(ipt,4) + bxc_over_m*(-my1 + mdiry*m_dot_m1 ) ! is computed in rhotoxc.F90
 
      else
-       vxc1_out(ipt,1)= dvdn + bxc(ipt)*mz1
-       vxc1_out(ipt,2)= dvdn - bxc(ipt)*mz1
-       vxc1_out(ipt,3)= bxc(ipt)*mx1
-       vxc1_out(ipt,4)=-bxc(ipt)*my1
+!      Compute Bxc/|m| from Kxc (zero limit)
+       bxc_over_m = half*(half*(kxc(ipt,1)+kxc(ipt,3))-kxc(ipt,2))
+       vxc1_out(ipt,1)= dvdn + bxc_over_m*mz1
+       vxc1_out(ipt,2)= dvdn - bxc_over_m*mz1
+       vxc1_out(ipt,3)= bxc_over_m*mx1
+       vxc1_out(ipt,4)=-bxc_over_m*my1
      end if
 
    end do ! ipt
