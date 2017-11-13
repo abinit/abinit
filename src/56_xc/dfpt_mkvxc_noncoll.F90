@@ -106,42 +106,36 @@ subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,bxc,mpi_enreg,nfft,ngfft,nhat,nhatdi
 
 !Local variables-------------------------------
 !scalars
- integer :: ifft, ir, rotation
+ integer :: ifft
+!arrays
+ real(dp) :: nhat1_zero(0,0),nhat1gr_zero(0,0,0),tsec(2)
+ real(dp),allocatable :: m_norm(:),rhor1_diag(:,:),vxc1_diag(:,:)
+ real(dp), ABI_CONTIGUOUS pointer :: mag(:,:),rhor_(:,:),rhor1_(:,:)
+
+! integer :: rotation=3,ir
 ! EB-FB rotation = 1 --> U matrix version
 !   SPr rotation = 2 --> Bxc version (explicit LSDA expression)
 !   SPr rotation = 3 --> U matrices expressed through angles/rotation axis
- real(dp),parameter :: m_norm_min=1.d-8
- real(dp) :: dum,dvdn,dvdz,fact,m_dot_m1
- real(dp) :: mx1,my1,mz1,mdirx,mdiry,mdirz
-!arrays
- real(dp),allocatable    :: vxc1rot1(:,:)
- real(dp),allocatable    :: vxc1rot2(:,:)
- real(dp),allocatable    :: vxc1rot3(:,:)
- real(dp)                :: U0_re(2,2),U0_im(2,2),theta0,nx,ny,nz,bxc0
- real(dp)                :: U1_re(2,2),U1_im(2,2),theta1,nx1,ny1,nz1,vxc0
- real(dp) :: nhat1_zero(0,0),nhat1gr_zero(0,0,0)
- real(dp) :: tsec(2)
- real(dp),allocatable :: m_norm(:)
- real(dp),allocatable :: rhor1_diag(:,:)
- real(dp),allocatable :: vxc1_diag(:,:),vxc_diag(:,:)
- real(dp), ABI_CONTIGUOUS pointer :: mag(:,:),rhor_(:,:),rhor1_(:,:)
- complex(dpc) :: d1,d2,d3,d4,rho_updn
- complex(dpc),allocatable :: rhor1_offdiag(:,:),vxc1_(:,:)
- complex(dpc),dimension(2,2) :: u0,u0_1
- complex(dpc),dimension(2,2) :: u0v1,v1tmp,vxc1tmp,u0_1r1,r1tmp,rhor1_tmp
+! real(dp) :: dum,dvdn,dvdz,fact,m_dot_m1
+! real(dp),parameter :: m_norm_min=1.d-8
+! real(dp) :: mx1,my1,mz1,mdirx,mdiry,mdirz
+! real(dp)                :: U0_re(2,2),U0_im(2,2),theta0,nx,ny,nz,bxc0
+! real(dp)                :: U1_re(2,2),U1_im(2,2),theta1,nx1,ny1,nz1,vxc0
+! complex(dpc) :: d1,d2,d3,d4,rho_updn
+! complex(dpc),dimension(2,2) :: u0,u0_1
+! complex(dpc),dimension(2,2) :: u0v1,v1tmp,vxc1tmp,u0_1r1,r1tmp,rhor1_tmp
+! complex(dpc),allocatable :: rhor1_offdiag(:,:),vxc_diag(:,:),vxc1_(:,:)
+! real(dp),allocatable    :: vxc1rot1(:,:),vxc1rot2(:,:),vxc1rot3(:,:)
 
 ! *************************************************************************
 
 !  Non-collinear magnetism
 !  Has to locally "rotate" rho(r)^(1) (according to magnetization),
-!  compute Vxc(r)^(1) and rotate it back
-!FR  The collinear routine dfpt_mkvxc wants a general density built as (tr[rho],rho_upup)
+!  Compute Vxc(r)^(1) and rotate it back
 
  DBG_ENTER("COLL")
 
  call timab(181,1,tsec)
-
- rotation=3
 
  if(nspden/=4) then
    MSG_BUG('only for nspden=4!')
@@ -163,7 +157,7 @@ subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,bxc,mpi_enreg,nfft,ngfft,nhat,nhatdi
 ! acts only on the electronic density (i.e., NOT on the magnetization density).
 ! Then, the corrections on vxc1(:,3:4) are ZERO.
 
-   dvdn=zero; dvdz=zero; dum=zero; fact=zero; vxc1(:,:)=zero
+   vxc1(:,:)=zero
 
 !  PAW: possibly substract compensation density
    if (usexcnhat==0.and.nhatdim==1) then
@@ -183,44 +177,48 @@ subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,bxc,mpi_enreg,nfft,ngfft,nhat,nhatdi
    mag => rhor_(:,2:4)
 
    ABI_ALLOCATE(rhor1_diag,(nfft,2))
-   ABI_ALLOCATE(rhor1_offdiag,(nfft,2))
-   ABI_ALLOCATE(vxc_diag,(cplex*nfft,2))
    ABI_ALLOCATE(vxc1_diag,(cplex*nfft,2))
-   ABI_ALLOCATE(vxc1_,(cplex*nfft,nspden))
    ABI_ALLOCATE(m_norm,(nfft))
 
-   ABI_ALLOCATE(vxc1rot1,(nfft,nspden))
-   ABI_ALLOCATE(vxc1rot2,(nfft,nspden))
-   ABI_ALLOCATE(vxc1rot3,(nfft,nspden))
-   vxc1rot1=zero
+
+!   ABI_ALLOCATE(vxc1_,(cplex*nfft,nspden))
+!   ABI_ALLOCATE(vxc_diag,(cplex*nfft,2))
+!   ABI_ALLOCATE(vxc_diag,(cplex*nfft,2))
+!   ABI_ALLOCATE(rhor1_offdiag,(nfft,2))
+!   ABI_ALLOCATE(vxc1rot1,(nfft,nspden))
+!   ABI_ALLOCATE(vxc1rot2,(nfft,nspden))
+!   ABI_ALLOCATE(vxc1rot3,(nfft,nspden))
+!   vxc1rot1=zero
+!   dum=zero;dvdn=zero;dvdz=zero;fact=zero
 
 !    -- Rotate rho(r)^(1)
-     if(option/=0) then
-!      SPr for option=0 the rhor is not used, only core density xccc3d1
-       call rotate_mag(rhor1_,rhor1_diag,mag,nfft,mag_norm_out=m_norm,&
-&                      rho_out_format=2)
-     end if
-!     -- Compute Kxc(r).n^res(r)_rotated
-!     Note for PAW: nhat has already been substracted; don't use it in dfpt_mkvxc
-!                   (put all nhat options to zero).
-     call dfpt_mkvxc(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat1_zero,0,nhat1gr_zero,0,&
-&      nkxc,2,n3xccc,option,paral_kgb,qphon,rhor1_diag,rprimd,0,vxc1_diag,xccc3d1)
+   if(option/=0) then
+!    SPr for option=0 the rhor is not used, only core density xccc3d1
+     call rotate_mag(rhor1_,rhor1_diag,mag,nfft,mag_norm_out=m_norm,&
+&                    rho_out_format=2)
+   end if
+!   -- Compute Vxc(r)^(1)=Kxc(r).rho(r)^(1)_rotated
+!   Note for PAW: nhat has already been substracted; don't use it in dfpt_mkvxc
+!                 (put all nhat options to zero).
+!  The collinear routine dfpt_mkvxc wants a general density built as (tr[rho],rho_upup)
+   call dfpt_mkvxc(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat1_zero,0,nhat1gr_zero,0,&
+&    nkxc,2,n3xccc,option,paral_kgb,qphon,rhor1_diag,rprimd,0,vxc1_diag,xccc3d1)
 
-!    -- Rotate back Vxc(r)^(1)
-     if (optnc==1) then
-       if (option==0) then
-         do ifft=1,nfft
-           vxc1(ifft,1:2)=half*(vxc1_diag(ifft,1)+vxc1_diag(ifft,2))
-           vxc1(ifft,3:4)=zero
-         end do
-       else
-         call dfpt_rotate_back_mag(vxc1_diag,vxc1,vxc,rhor1_,mag,nfft,&
-&                                  mag_norm_in=m_norm,bxc=bxc)
-       end if
+!  -- Rotate back Vxc(r)^(1)
+   if (optnc==1) then
+     if (option==0) then
+       do ifft=1,nfft
+         vxc1(ifft,1:2)=half*(vxc1_diag(ifft,1)+vxc1_diag(ifft,2))
+         vxc1(ifft,3:4)=zero
+       end do
      else
-       call rotate_back_mag(vxc1_diag,vxc1,rhor_(:,2:4),nfft,mag_norm_in=m_norm)
-       vxc1(:,3:4)=zero
+       call dfpt_rotate_back_mag(vxc1_diag,vxc1,vxc,rhor1_,mag,nfft,&
+&                                mag_norm_in=m_norm,bxc=bxc)
      end if
+   else
+     call rotate_back_mag(vxc1_diag,vxc1,mag,nfft,mag_norm_in=m_norm)
+     vxc1(:,3:4)=zero
+   end if
 
 !        do ifft=1,nfft
 !
@@ -362,26 +360,23 @@ subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,bxc,mpi_enreg,nfft,ngfft,nhat,nhatdi
 !        end do
 !      end if ! optnc==1
 
-     ABI_DEALLOCATE(rhor1_diag)
-     ABI_DEALLOCATE(rhor1_offdiag)
-     ABI_DEALLOCATE(vxc_diag)
-     ABI_DEALLOCATE(vxc1_diag)
-     ABI_DEALLOCATE(vxc1_)
-     ABI_DEALLOCATE(m_norm)
+   ABI_DEALLOCATE(rhor1_diag)
+   ABI_DEALLOCATE(vxc1_diag)
+   ABI_DEALLOCATE(m_norm)
+   if (usexcnhat==0.and.nhatdim==1) then
+     ABI_DEALLOCATE(rhor_)
+   end if
+   if (usexcnhat==0.and.nhat1dim==1) then
+     ABI_DEALLOCATE(rhor1_)
+   end if
 
-     ABI_DEALLOCATE(vxc1rot1)
-     ABI_DEALLOCATE(vxc1rot2)
-     ABI_DEALLOCATE(vxc1rot3)
+!   ABI_DEALLOCATE(vxc1_)
+!   ABI_DEALLOCATE(rhor1_offdiag)
+!   ABI_DEALLOCATE(vxc_diag)
+!   ABI_DEALLOCATE(vxc1rot1)
+!   ABI_DEALLOCATE(vxc1rot2)
+!   ABI_DEALLOCATE(vxc1rot3)
 
-     !PAW
-     if (usexcnhat==0.and.nhatdim==1) then
-       ABI_DEALLOCATE(rhor_)
-     end if
-     if (usexcnhat==0.and.nhat1dim==1) then
-       ABI_DEALLOCATE(rhor1_)
-     end if
-
-!   end if ! option==1 or 2
 
  end if ! nkxc=1 or nkxc=3
 
