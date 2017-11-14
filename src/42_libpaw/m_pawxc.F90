@@ -27,7 +27,7 @@ module m_pawxc
  USE_MEMORY_PROFILING
 
 #ifdef LIBPAW_ISO_C_BINDING
- use iso_c_binding, only : c_loc,c_f_pointer
+ use iso_c_binding, only : c_ptr,c_loc,c_f_pointer
 #endif
 
  use m_libpaw_libxc
@@ -875,13 +875,15 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,lm_size,lmselect,nhat,nkxc,nrad,nspd
  real(dp) :: dvdn,dvdz,enxcr,factor,vxcrho
  character(len=500) :: msg
 !arrays
-! real(dp) :: tsec(2)
  real(dp),allocatable :: dgxc(:),dnexcdn(:,:),drho(:),drhocore(:),dvxcdgr(:,:),dvxci(:,:)
  real(dp),allocatable :: dylmdr(:,:,:),exci(:),ff(:),grho2_updn(:,:),gxc(:,:,:,:)
  real(dp),allocatable :: rhoarr(:,:),rho_updn(:,:),vxci(:,:)
  real(dp),allocatable,target :: mag(:,:,:),rhohat(:,:,:),rhonow(:,:,:)
  real(dp), ABI_CONTIGUOUS pointer :: mag_(:,:),rho_(:,:,:)
  real(dp), ABI_CONTIGUOUS pointer :: vxc_diag(:,:),vxc_nc(:,:),vxc_updn(:,:,:)
+#ifdef LIBPAW_ISO_C_BINDING
+ type(C_PTR) :: cptr
+#endif
 
 ! *************************************************************************
 
@@ -1276,10 +1278,14 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,lm_size,lmselect,nhat,nkxc,nrad,nspd
 !  ----------------------------------------------------------------------
    if (option/=3.and.option/=4.and.nspden==4) then
      ! Use of C pointers to avoid copies (when ISO C bindings are available)
+     ! %@1$ xlf v15 compiler requires a auxilliary cptr variable
 #ifdef LIBPAW_ISO_C_BINDING
-     call c_f_pointer(c_loc(vxc_updn(1,1,1)),vxc_diag,shape=[nrad*npts,nspden_updn])
-     call c_f_pointer(c_loc(vxc(1,1,1)),vxc_nc,shape=[nrad*npts,nspden])
-     call c_f_pointer(c_loc(mag(1,1,1)),mag_,shape=[nrad*npts,3])
+     cptr=c_loc(vxc_updn(1,1,1))
+     call c_f_pointer(cptr,vxc_diag,shape=[nrad*npts,nspden_updn])
+     cptr=c_loc(vxc(1,1,1))
+     call c_f_pointer(cptr,vxc_nc,shape=[nrad*npts,nspden])
+     cptr=c_loc(mag(1,1,1))
+     call c_f_pointer(cptr,mag_,shape=[nrad*npts,3])
 #else
      LIBPAW_ALLOCATE(vxc_diag,(nrad*npts,nspden_updn))
      LIBPAW_ALLOCATE(vxc_nc,(nrad*npts,nspden))
@@ -1795,6 +1801,9 @@ subroutine pawxc_dfpt(corexc1,cplex_den,cplex_vxc,d2enxc,ixc,kxc,lm_size,lmselec
  real(dp),allocatable,target :: rhohat1(:,:,:),rho1arr(:,:)
  real(dp), ABI_CONTIGUOUS pointer :: kxc_(:,:),mag(:,:),rho1_(:,:,:),rho1arr_(:,:)
  real(dp), ABI_CONTIGUOUS pointer :: vxc1_(:,:,:),vxc1_diag(:,:),vxc1_nc(:,:),vxc1_updn(:,:,:)
+#ifdef LIBPAW_ISO_C_BINDING
+ type(C_PTR) :: cptr
+#endif
 
 ! *************************************************************************
 
@@ -2325,11 +2334,16 @@ subroutine pawxc_dfpt(corexc1,cplex_den,cplex_vxc,d2enxc,ixc,kxc,lm_size,lmselec
 !  ----------------------------------------------------------------------
  if (option/=3.and.nspden==4) then
     ! Use of C pointers to avoid copies (when ISO C bindings are available)
+    ! %@1$ xlf v15 compiler requires a auxilliary cptr variable
 #ifdef LIBPAW_ISO_C_BINDING
-   call c_f_pointer(c_loc(vxc1_updn(1,1,1)),vxc1_diag,shape=[nrad*npts,nspden_updn])
-   call c_f_pointer(c_loc(vxc1_(1,1,1)),vxc1_nc,shape=[nrad*npts,nspden])
-   call c_f_pointer(c_loc(kxc(1,1,1)),kxc_,shape=[nrad*npts,3])
-   call c_f_pointer(c_loc(kxc(1,1,nkxc-2)),mag,shape=[nrad*npts,3])
+   cptr=c_loc(vxc1_updn(1,1,1))
+   call c_f_pointer(cptr,vxc1_diag,shape=[nrad*npts,nspden_updn])
+   cptr=c_loc(vxc1_(1,1,1))
+   call c_f_pointer(cptr,vxc1_nc,shape=[nrad*npts,nspden])
+   cptr=c_loc(kxc(1,1,1))
+   call c_f_pointer(cptr,kxc_,shape=[nrad*npts,3])
+   cptr=c_loc(kxc(1,1,nkxc-2))
+   call c_f_pointer(cptr,mag,shape=[nrad*npts,3])
 #else
    LIBPAW_ALLOCATE(vxc1_diag,(nrad*npts,nspden_updn))
    LIBPAW_ALLOCATE(vxc1_nc,(nrad*npts,nspden))
