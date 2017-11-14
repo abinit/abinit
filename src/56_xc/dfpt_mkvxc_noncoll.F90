@@ -44,6 +44,7 @@
 !!  rhor1(cplex*nfft,nspden)=1st-order electron density in real space
 !!  rprimd(3,3)=dimensional primitive translations in real space (bohr)
 !!  usexcnhat= -PAW only- 1 if nhat density has to be taken into account in Vxc
+!!  vxc(nfft,nspden)=GS XC potential
 !!
 !!
 !! OUTPUT
@@ -68,7 +69,7 @@
 
 #include "abi_common.h"
 
-subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,bxc,mpi_enreg,nfft,ngfft,nhat,nhatdim,nhat1,nhat1dim,&
+subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat,nhatdim,nhat1,nhat1dim,&
 &          nhat1gr,nhat1grdim,nkxc,nkxc_cur,nspden,n3xccc,optnc,option,paral_kgb,qphon,rhor,rhor1,&
 &          rprimd,usexcnhat,vxc,vxc1,xccc3d1)
 
@@ -98,7 +99,7 @@ subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,bxc,mpi_enreg,nfft,ngfft,nhat,nhatdi
  integer,intent(in) :: ngfft(18)
  real(dp),intent(in) :: nhat1gr(cplex*nfft,nspden,3*nhat1grdim)
  real(dp),intent(in) :: kxc(nfft,nkxc)
- real(dp),intent(in) :: bxc(nfft),vxc(cplex*nfft,nspden)
+ real(dp),intent(in) :: vxc(cplex*nfft,nspden)
  real(dp),intent(in) :: nhat(nfft,nspden*nhatdim),nhat1(cplex*nfft,nspden*nhat1dim)
  real(dp),intent(in),target :: rhor(cplex*nfft,nspden),rhor1(cplex*nfft,nspden)
  real(dp),intent(in) :: qphon(3),rprimd(3,3),xccc3d1(cplex*n3xccc)

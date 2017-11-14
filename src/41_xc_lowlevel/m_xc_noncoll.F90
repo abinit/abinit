@@ -327,7 +327,7 @@ subroutine rotate_back_mag_dfpt(vxc1_in,vxc1_out,vxc,kxc,rho1,mag,vectsize,&
  if (present(rot_method)) rotation_method=rot_method
 
 !Check Kxc
- if (size(kxc)<3*vectsize) then
+ if (size(kxc)>3*vectsize) then
      MSG_ERROR('Cannot use Kxc from GGA!')
  end if
 

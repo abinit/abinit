@@ -61,10 +61,7 @@ program dummy_tests
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dummy_tests'
- use interfaces_14_hidewrite
- use interfaces_18_timing
  use interfaces_32_util
- use interfaces_51_manage_mpi
 !End of the abilint section
 
  implicit none

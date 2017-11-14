@@ -22,9 +22,9 @@
 
 module m_pawxc
 
- use defs_basis
- use m_errors, only : msg_hndl, netcdf_check
- use m_profiling_abi
+ USE_DEFS
+ USE_MSG_HANDLING
+ USE_MEMORY_PROFILING
 
 #ifdef LIBPAW_ISO_C_BINDING
  use iso_c_binding, only : c_loc,c_f_pointer

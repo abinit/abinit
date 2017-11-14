@@ -99,7 +99,7 @@ subroutine dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eig
 &          gmet,gsqcut,idir,indkpt1,indsy1,ipert,istwfk_rbz,kg,kg1,kpt_rbz,kxc,mkmem,mk1mem,&
 &          mpert,mpi_enreg,mpw,mpw1,nattyp,nband_rbz,nfft,ngfft,nkpt,nkpt_rbz,nkxc,&
 &          npwarr,npwar1,nspden,nsppol,nsym1,occ_rbz,ph1d,psps,rhor1,rmet,rprimd,&
-&          symrc1,ucvol,wtk_rbz,xred,ylm,ylm1,rhor,bxc,vxc)
+&          symrc1,ucvol,wtk_rbz,xred,ylm,ylm1,rhor,vxc)
 
  use defs_basis
  use defs_datatypes
@@ -158,7 +158,6 @@ subroutine dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eig
  real(dp),intent(inout) :: d2lo(2,3,mpert,3,mpert),d2nl(2,3,mpert,3,mpert) !vz_i
 ! optional
  real(dp),optional,intent(in) :: rhor(nfft,nspden)
- real(dp),optional,intent(in) :: bxc(nfft)
  real(dp),optional,intent(in) :: vxc(cplex*nfft,nspden)
 
 !Local variables-------------------------------
@@ -525,9 +524,9 @@ subroutine dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eig
          if(psps%n1xccc/=0)then
            option=0
 !FR SPr EB non-collinear magnetism
-           if (nspden==4.and.present(rhor).and.(present(bxc)).and.present(vxc)) then
+           if (nspden==4.and.present(rhor).and.present(vxc)) then
              optnc=1
-             call dfpt_mkvxc_noncoll(1,dtset%ixc,kxc,bxc,mpi_enreg,nfft,ngfft,rhodummy,0,rhodummy,0,rhodummy,0,&
+             call dfpt_mkvxc_noncoll(1,dtset%ixc,kxc,mpi_enreg,nfft,ngfft,rhodummy,0,rhodummy,0,rhodummy,0,&
 &             nkxc,nkxc,nspden,n3xccc,optnc,option,dtset%paral_kgb,dtset%qptn,rhodummy,rhodummy,&
 &             rprimd,0,vxc,vxc1,xccc3d1)
            else
