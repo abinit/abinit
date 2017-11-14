@@ -119,7 +119,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
 !Local variables-------------------------------
 !scalars
  integer,parameter :: pertcase0=0,master=0
- integer :: bantot,enforce_sym,ib,ibtot,ii,ikcalc,ikibz,io,isppol,itypat,jj,method
+ integer :: bantot,enforce_sym,ib,ibtot,icutcoul_eff,ii,ikcalc,ikibz,io,isppol,itypat,jj,method
  integer :: mod10,mod100,mqmem,mband,ng_kss,nsheps,ikcalc2bz,ierr,gap_err,ng
  integer :: gwc_nfftot,gwx_nfftot,nqlwl,test_npwkss,my_rank,nprocs,ik,nk_found,ifo,timrev
  integer :: iqbz,isym,iq_ibz,itim,ic,pinv,ig1,ng_sigx,spin,gw_qprange
@@ -834,22 +834,29 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
  end if
 
  rcut = Dtset%rcut
- if ((Dtset%gwcalctyp < 200) .and. (Dtset%gwcalctyp > 100)) then
-    if (Dtset%rcut < tol6) then
-      rcut = 9.090909 ! default value for HSE06
-    end if
- end if
+ icutcoul_eff=Dtset%icutcoul
+ Sigp%sigma_mixing=one
+ if(mod(Dtset%gwcalctyp,10)==5)then
+   if(abs(Dtset%hyb_mixing)>tol8)then
+!    Warning : the absolute value is needed, because of the singular way used to define the default for this input variable
+     Sigp%sigma_mixing=abs(Dtset%hyb_mixing)
+   else if(abs(Dtset%hyb_mixing_sr)>tol8)then
+     Sigp%sigma_mixing=abs(Dtset%hyb_mixing_sr)
+     icutcoul_eff=5
+   endif
+   if(abs(rcut)<tol6 .and. abs(Dtset%hyb_range_fock)>tol8)rcut=one/Dtset%hyb_range_fock
+ endif
 
 #if 1
  if (Gsph_x%ng > Gsph_c%ng) then
-   call vcoul_init(Vcp,Gsph_x,Cryst,Qmesh,Kmesh,rcut,Dtset%icutcoul,Dtset%vcutgeo,&
+   call vcoul_init(Vcp,Gsph_x,Cryst,Qmesh,Kmesh,rcut,icutcoul_eff,Dtset%vcutgeo,&
 &    Dtset%ecutsigx,Gsph_x%ng,nqlwl,qlwl,ngfftf,comm)
  else
-   call vcoul_init(Vcp,Gsph_c,Cryst,Qmesh,Kmesh,rcut,Dtset%icutcoul,Dtset%vcutgeo,&
+   call vcoul_init(Vcp,Gsph_c,Cryst,Qmesh,Kmesh,rcut,icutcoul_eff,Dtset%vcutgeo,&
 &    Dtset%ecutsigx,Gsph_c%ng,nqlwl,qlwl,ngfftf,comm)
  end if
 #else
-   call vcoul_init(Vcp,Gsph_Max,Cryst,Qmesh,Kmesh,rcut,Dtset%icutcoul,Dtset%vcutgeo,&
+   call vcoul_init(Vcp,Gsph_Max,Cryst,Qmesh,Kmesh,rcut,icutcoul_eff,Dtset%vcutgeo,&
 &  Dtset%ecutsigx,Sigp%npwx,nqlwl,qlwl,ngfftf,comm)
 #endif
 

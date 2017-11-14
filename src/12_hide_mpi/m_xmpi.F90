@@ -81,9 +81,11 @@ MODULE m_xmpi
  integer,public,parameter :: xmpi_info_null      = 0
 #endif
 
+#ifdef HAVE_MPI
  integer,save,private  :: xmpi_tag_ub=32767
  ! The tag upper bound value must be at least 32767. An MPI implementation is free to make
  ! the value of MPI_TAG_UB larger than this hence xmpi_tag_ub is redefined when MPI is init in xmpi_init.
+#endif
 
  ! Size in bytes of the entries used in MPI datatypes.
  integer,save, public ABI_PROTECTED:: xmpi_bsize_ch =0

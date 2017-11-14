@@ -102,7 +102,7 @@
 
 subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsph_x,Vcp,Kmesh,Qmesh,&
 & Ltg_k,Pawtab,Pawang,Paw_pwff,Pawfgrtab,Paw_onsite,Psps,Wfd,Wfdf,allQP_sym,gwx_ngfft,ngfftf,&
-& prtvol,pawcross,gwfockmix)
+& prtvol,pawcross)
 
  use defs_basis
  use defs_datatypes
@@ -148,7 +148,6 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: sigmak_ibz,ikcalc,prtvol,minbnd,maxbnd,pawcross
- real(dp), intent(in) :: gwfockmix
  type(crystal_t),intent(in) :: Cryst
  type(ebands_t),target,intent(in) :: QP_BSt
  type(kmesh_t),intent(in) :: Kmesh,Qmesh
@@ -180,7 +179,7 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
  integer :: isym_kgw,isym_ki,gwx_mgfft,use_padfft,use_padfftf,gwx_fftalga,gwx_fftalgb
  integer :: gwx_nfftot,nfftf,mgfftf,nhat12_grdim,npwx
  real(dp) :: cpu_time,wall_time,gflops
- real(dp) :: alpha_hybrid,fact_sp,theta_mu_minus_esum,tol_empty,norm
+ real(dp) :: fact_sp,theta_mu_minus_esum,tol_empty,norm
  complex(dpc) :: ctmp,scprod,ph_mkgwt,ph_mkt
  complex(gwpc) :: gwpc_sigxme
  logical :: iscompatibleFFT,q_is_gamma
@@ -248,18 +247,6 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
 &  ' Calculating <nk|Sigma_x|nk> at k= ',kgw,ch10,&
 &  ' bands from ',ib1,' to ',ib2,ch10
  call wrtout(std_out,msg,'COLL')
-
- ! Select the mixing alpha for hybrid functional calculations if gwcalctyp >= 100
- if(Sigp%gwcalctyp<100) then
-   alpha_hybrid = one
- else if (Sigp%gwcalctyp>=300) then
-   ! B3LYP factor = 0.20
-   alpha_hybrid = 0.2_dp
- else
-   ! PBE0 and HSE06 mixing determined by gwfockmix
-   ! default 0.25
-   alpha_hybrid = gwfockmix
- endif
 
  if (ANY(gwx_ngfft(1:3) /= Wfd%ngfft(1:3)) ) call wfd_change_ngfft(Wfd,Cryst,Psps,gwx_ngfft)
  gwx_mgfft = MAXVAL(gwx_ngfft(1:3))
@@ -689,8 +676,9 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
  call xmpi_sum(sigx, wfd%comm, ierr)
 
  ! Multiply by constants. For 3D systems sqrt(4pi) is included in vc_sqrt_qbz.
- sigxme_tmp = (one/(Cryst%ucvol*Kmesh%nbz)) * sigxme_tmp * alpha_hybrid
- sigx       = (one/(Cryst%ucvol*Kmesh%nbz)) * sigx       * alpha_hybrid
+ sigxme_tmp = (one/(Cryst%ucvol*Kmesh%nbz)) * sigxme_tmp * Sigp%sigma_mixing
+ sigx       = (one/(Cryst%ucvol*Kmesh%nbz)) * sigx       * Sigp%sigma_mixing
+
  !
  ! If we have summed over the IBZ_q now we have to average over degenerate states.
  ! NOTE: Presently only diagonal terms are considered

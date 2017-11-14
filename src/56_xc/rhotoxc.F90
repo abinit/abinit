@@ -20,26 +20,25 @@
 !!  mpi_enreg=information about MPI parallelization
 !!  nfft=(effective) number of FFT grid points (for this processor)
 !!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
-!!  nhat(nfft,nspden*nhatdim)= -PAW only- compensation density
+!!  nhat(nfft,xcdata%nspden*nhatdim)= -PAW only- compensation density
 !!  nhatdim= -PAW only- 0 if nhat array is not used ; 1 otherwise
-!!  nhatgr(nfft,nspden,3*nhatgrdim)= -PAW only- cartesian gradients of compensation density
+!!  nhatgr(nfft,xcdata%nspden,3*nhatgrdim)= -PAW only- cartesian gradients of compensation density
 !!  nhatgrdim= -PAW only- 0 if nhatgr array is not used ; 1 otherwise
 !!  nkxc=second dimension of the kxc array. If /=0,
 !!   the exchange-correlation kernel must be computed.
-!!  nspden=number of spin-density components
 !!  n3xccc=dimension of the xccc3d array (0 or nfft or cplx*nfft).
 !!  option=0 or 1 for xc only (exc, vxc, strsxc),
-!!         2 for xc and kxc (no paramagnetic part if nspden=1)
+!!         2 for xc and kxc (no paramagnetic part if xcdata%nspden=1)
 !!        10 for xc  and kxc with only partial derivatives wrt density part (d2Exc/drho^2)
 !!        12 for xc and kxc with only partial derivatives wrt density part (d2Exc/drho^2)
 !!              and, in the case of hybrid functionals, substitution of the hybrid functional
 !!              by the related auxiliary GGA functional for the computation of the xc kernel (not for other quantities)
 !!         3 for xc, kxc and k3xc
-!!        -2 for xc and kxc (with paramagnetic part if nspden=1)
+!!        -2 for xc and kxc (with paramagnetic part if xcdata%nspden=1)
 !!  paral_kgb=Flag related to the kpoint-band-fft parallelism
-!!  rhor(nfft,nspden)=electron density in real space in electrons/bohr**3
-!!   (total in first half and spin-up in second half if nspden=2)
-!!   (total in first comp. and magnetization in comp. 2 to 4 if nspden=4)
+!!  rhor(nfft,xcdata%nspden)=electron density in real space in electrons/bohr**3
+!!   (total in first half and spin-up in second half if xcdata%nspden=2)
+!!   (total in first comp. and magnetization in comp. 2 to 4 if xcdata%nspden=4)
 !!  rprimd(3,3)=dimensional primitive translations in real space (bohr)
 !!  usexcnhat= -PAW only- 1 if nhat density has to be taken into account in Vxc
 !!  [vhartr(nfft)=Hartree potential (only needed for Fermi-Amaldi functional)]
@@ -48,8 +47,9 @@
 !!
 !!  === optional inputs ===
 !!  [add_tfw]=flag controling the addition of Weiszacker gradient correction to Thomas-Fermi kin energy
-!!  [taur(nfftf,nspden*xcdata%usekden)]=array for kinetic energy density
+!!  [taur(nfftf,xcdata%nspden*xcdata%usekden)]=array for kinetic energy density
 !!  [taug(2,nfftf*xcdata%usekden)]=array for Fourier transform of kinetic energy density
+!!  [xc_funcs(2)]= <type(libxc_functional_type)>, optional : libxc XC functionals. Must be coherent with xcdata.
 !!
 !! OUTPUT
 !!  enxc=returned exchange and correlation energy (hartree).
@@ -61,23 +61,23 @@
 !!               - depsxc_drho(up,i)*rhor(up,i)-depsxc_drho(dn,i)*rhor(dn,i)]
 !!     - gradrho(up,mu)*gradrho(up,nu) * depsxc_dgradrho(up,i) / gradrho(up,i)
 !!     - gradrho(dn,mu)*gradrho(dn,nu) * depsxc_dgradrho(dn,i) / gradrho(dn,i) )
-!!  vxc(nfft,nspden)=xc potential
-!!    (spin up in first half and spin down in second half if nspden=2)
-!!    (v^11, v^22, Re[V^12], Im[V^12] if nspden=4)
+!!  vxc(nfft,xcdata%nspden)=xc potential
+!!    (spin up in first half and spin down in second half if xcdata%nspden=2)
+!!    (v^11, v^22, Re[V^12], Im[V^12] if xcdata%nspden=4)
 !!  vxcavg=<Vxc>=unit cell average of Vxc = (1/ucvol) Int [Vxc(r) d^3 r].
 !!
 !!  === Only if abs(option)=2, -2, 3, 10, 12 (in case 12, for hybrids, substitution of the related GGA) ===
 !!  kxc(nfft,nkxc)=exchange and correlation kernel (returned only if nkxc/=0)
 !!    Content of Kxc array:
 !!   ===== if LDA
-!!    if nspden==1: kxc(:,1)= d2Exc/drho2
+!!    if xcdata%nspden==1: kxc(:,1)= d2Exc/drho2
 !!       that is 1/2 ( d2Exc/drho_up drho_up + d2Exc/drho_up drho_dn )
 !!                 (kxc(:,2)= d2Exc/drho_up drho_dn)
-!!    if nspden>=2: kxc(:,1)= d2Exc/drho_up drho_up
+!!    if xcdata%nspden>=2: kxc(:,1)= d2Exc/drho_up drho_up
 !!                  kxc(:,2)= d2Exc/drho_up drho_dn
 !!                  kxc(:,3)= d2Exc/drho_dn drho_dn
 !!   ===== if GGA
-!!    if nspden==1:
+!!    if xcdata%nspden==1:
 !!       kxc(:,1)= d2Exc/drho2
 !!       kxc(:,2)= 1/|grad(rho)| dExc/d|grad(rho)|
 !!       kxc(:,3)= 1/|grad(rho)| d2Exc/d|grad(rho)| drho
@@ -85,7 +85,7 @@
 !!       kxc(:,5)= gradx(rho)
 !!       kxc(:,6)= grady(rho)
 !!       kxc(:,7)= gradz(rho)
-!!    if nspden>=2:
+!!    if xcdata%nspden>=2:
 !!       kxc(:,1)= d2Exc/drho_up drho_up
 !!       kxc(:,2)= d2Exc/drho_up drho_dn
 !!       kxc(:,3)= d2Exc/drho_dn drho_dn
@@ -111,15 +111,17 @@
 !!    at each point of the real space grid (only in the LDA or LSDA)
 !!    Content of K3xc array:
 !!    ===== if LDA
-!!    if nspden==1: k3xc(:,1)= d3Exc/drho3
-!!    if nspden>=2, k3xc(:,1)= d3Exc/drho_up drho_up drho_up
+!!    if xcdata%nspden==1: k3xc(:,1)= d3Exc/drho3
+!!    if xcdata%nspden>=2, k3xc(:,1)= d3Exc/drho_up drho_up drho_up
 !!                  k3xc(:,2)= d3Exc/drho_up drho_up drho_dn
 !!                  k3xc(:,3)= d3Exc/drho_up drho_dn drho_dn
 !!                  k3xc(:,4)= d3Exc/drho_dn drho_dn drho_dn
 
 !! === Additional optional output ===
+!!  [bxc(nfft)]=in case nspden==4 and for response-function calculations, xc magnetic field divided by the magnetization Bxc^(0)/|m|
+!!              In principle, bxc = (vxc(ifft,1)-vxc(ifft,2))/m_norm/2.0, but for small magnetization, the correct limit is computed here.
 !!  [exc_vdw_out]= vdW-DF contribution to enxc (hartree)
-!!  [vxctau(nfft,nspden,4*xcdata%usekden)]=(only for meta-GGA)=
+!!  [vxctau(nfft,xcdata%nspden,4*xcdata%usekden)]=(only for meta-GGA)=
 !!    vxctau(:,:,1): derivative of XC energy density with respect to kinetic energy density (depsxcdtau).
 !!    vxctau(:,:,2:4): gradient of vxctau (gvxctau)
 !!
@@ -188,7 +190,7 @@
 !!   d... --> without the occurence of the second "d" means that this is an array of several derivative of the same quantity (e.g. : depsxc)
 !!
 !!   ..._b ----> means a block of the quantity "..." (use in mpi loops which treat the data block by block)
-!!   ..._updn -> means that spin up and spin down is available in that array as (..,1) and (..,2). (if nspden >=2 of course).
+!!   ..._updn -> means that spin up and spin down is available in that array as (..,1) and (..,2). (if xcdata%nspden >=2 of course).
 !!   ..._apn --> in case of positrons are concerned.
 !!
 !!   for more details about notations please see pdf in /doc/theory/MGGA/
@@ -211,9 +213,9 @@
 #include "abi_common.h"
 
 subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
-& nhat,nhatdim,nhatgr,nhatgrdim,nkxc,nk3xc,nspden,n3xccc,option,paral_kgb, &
+& nhat,nhatdim,nhatgr,nhatgrdim,nkxc,nk3xc,n3xccc,option,paral_kgb, &
 & rhor,rprimd,strsxc,usexcnhat,vxc,vxcavg,xccc3d,xcdata, &
-& k3xc,electronpositron,taug,taur,vhartr,vxctau,exc_vdw_out,add_tfw,bxc) ! optional arguments
+& add_tfw,bxc,exc_vdw_out,electronpositron,k3xc,taug,taur,vhartr,vxctau,xc_funcs) ! optional arguments
 
  use defs_basis
  use defs_abitypes
@@ -242,7 +244,7 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: nk3xc,n3xccc,nfft,nhatdim,nhatgrdim,nkxc,nspden,option,paral_kgb
+ integer,intent(in) :: nk3xc,n3xccc,nfft,nhatdim,nhatgrdim,nkxc,option,paral_kgb
  integer,intent(in) :: usexcnhat
  logical,intent(in),optional :: add_tfw
  real(dp),intent(out) :: enxc,vxcavg
@@ -252,28 +254,30 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
  type(xcdata_type), intent(in) :: xcdata
 !arrays
  integer,intent(in) :: ngfft(18)
- real(dp),intent(in) :: nhat(nfft,nspden*nhatdim)
- real(dp),intent(in) :: nhatgr(nfft,nspden,3*nhatgrdim)
- real(dp),intent(in),target :: rhor(nfft,nspden)
+ real(dp),intent(in) :: nhat(nfft,xcdata%nspden*nhatdim)
+ real(dp),intent(in) :: nhatgr(nfft,xcdata%nspden,3*nhatgrdim)
+ real(dp),intent(in),target :: rhor(nfft,xcdata%nspden)
  real(dp),intent(in) :: rprimd(3,3),xccc3d(n3xccc)
- real(dp),intent(out) :: kxc(nfft,nkxc),strsxc(6),vxc(nfft,nspden)
+ real(dp),intent(out) :: kxc(nfft,nkxc),strsxc(6),vxc(nfft,xcdata%nspden)
  real(dp),intent(in),optional :: taug(:,:),taur(:,:),vhartr(nfft)
- real(dp),intent(out),optional :: k3xc(1:nfft,1:nk3xc),vxctau(:,:,:)
  real(dp),intent(out),optional :: bxc(1:nfft)
+ real(dp),intent(out),optional :: k3xc(1:nfft,1:nk3xc),vxctau(:,:,:)
+ type(libxc_functional_type),intent(inout),optional :: xc_funcs(2)
 
 !Local variables-------------------------------
 !scalars
- integer :: auxc_ixc,cplex,ierr,ifft,ii,ixc,indx,ipositron,ipts,ishift,ispden,iwarn,iwarnp
+ integer :: auxc_ixc,cplex,ierr,ifft,ii,ixc,ixc_from_lib,indx,ipositron,ipts,ishift,ispden,iwarn,iwarnp
  integer :: jj,mpts,ndvxc,nd2vxc,nfftot,ngr,ngr2,ngrad,ngrad_apn,nkxc_eff,npts
- integer :: nspden_apn,nspden_eff,nspden_updn,nspgrad,nvxcgrho,order,mgga,usefxc
+ integer :: nspden,nspden_apn,nspden_eff,nspden_updn,nspgrad,nvxcgrho,order,mgga,usefxc
  integer :: nproc_fft,comm_fft
- logical :: add_tfw_
+ logical :: add_tfw_,isgga,ismgga,is_hybrid
  real(dp),parameter :: mot=-one/3.0_dp
  real(dp) :: coeff,divshft,doti,dstrsxc,dvdn,dvdz,epsxc,exc_str,factor,m_norm_min,s1,s2,s3
  real(dp) :: strdiag,strsxc1_tot,strsxc2_tot,strsxc3_tot,strsxc4_tot
  real(dp) :: strsxc5_tot,strsxc6_tot,ucvol
  logical :: allow3,test_nhat,with_vxctau
  character(len=500) :: message
+ real(dp) :: hyb_mixing, hyb_mixing_sr, hyb_range 
 !arrays
  integer :: gga_id(2)
  real(dp) :: gm_norm(3),grho(3),gmet(3,3),gprimd(3,3),qphon(3),rmet(3,3)
@@ -286,8 +290,9 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
  real(dp),allocatable,target :: rhonow(:,:,:)
  real(dp),ABI_CONTIGUOUS pointer :: rhonow_ptr(:,:,:),rhor_(:,:)
  real(dp) :: deltae_vdw,exc_vdw
- real(dp) :: decdrho_vdw(nspden),decdgrho_vdw(3,nspden)
+ real(dp) :: decdrho_vdw(xcdata%nspden),decdgrho_vdw(3,xcdata%nspden)
  real(dp) :: strsxc_vdw(3,3)
+ type(libxc_functional_type) :: xc_funcs_auxc(2)
 
 ! *************************************************************************
 
@@ -303,14 +308,28 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
 
  call timab(81,1,tsec)
 
-!Check options
+ nspden=xcdata%nspden
  ixc=xcdata%ixc
  auxc_ixc=xcdata%auxc_ixc
+
+ isgga=.false. ; ismgga=.false. ; is_hybrid=.false.
+ if(ixc<0)then
+   if(present(xc_funcs))then
+     isgga=libxc_functionals_isgga(xc_functionals=xc_funcs)
+     ismgga=libxc_functionals_ismgga(xc_functionals=xc_funcs)
+     is_hybrid=libxc_functionals_is_hybrid(xc_functionals=xc_funcs)
+   else
+     isgga=libxc_functionals_isgga()
+     ismgga=libxc_functionals_ismgga()
+     is_hybrid=libxc_functionals_is_hybrid()
+   endif
+ endif
+
+!Check options
  if(option==3)then
    allow3=(ixc > 0).and.(ixc /= 3).and.(ixc /= 7).and.(ixc /= 8)
    if(.not.allow3)then
-     allow3=(ixc < 0).and. &
-&     (libxc_functionals_isgga().or.libxc_functionals_ismgga())
+     allow3=(ixc < 0).and. isgga .and. ismgga 
    end if
    if(allow3)then
      write(message, '(3a,i0)' )&
@@ -325,7 +344,7 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
 
 !Is the functional a MGGA?
  mgga=0;if(ixc>=31 .and. ixc<=34) mgga=1
- if (ixc<0.and.libxc_functionals_ismgga()) mgga=1
+ if (ixc<0.and.ismgga) mgga=1
  if (mgga==1) then
    if (.not.present(taur)) then
      message='taur arg must be present for metaGGA!'
@@ -344,6 +363,31 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
      MSG_BUG(message)
    end if
  end if
+
+ if(ixc>0)then
+   if(present(xc_funcs))then
+     write(message, '(a,i0,2a,i0,2a)')&
+&     'The value of ixc specified in input, ixc = ',ixc,ch10,&
+&     'is not coherent with the presence of optional argument xc_funcs'
+     MSG_BUG(message)
+   end if
+ endif
+
+ if(ixc<0)then
+   if(present(xc_funcs))then
+     ixc_from_lib=libxc_functionals_ixc(xc_functionals=xc_funcs)
+   else
+     ixc_from_lib=libxc_functionals_ixc()
+   end if
+!  Check consistency between ixc passed in input and the one used to initialize the library.
+   if (ixc /= ixc_from_lib) then
+     write(message, '(a,i0,2a,i0,2a)')&
+&     'The value of ixc specified in input, ixc = ',ixc,ch10,&
+&     'differs from the one used to initialize the functional ',ixc_from_lib,ch10,&
+&     'Action: reinitialize the global structure funcs, see NOTES in m_libxc_functionals'
+     MSG_BUG(message)
+   end if
+ endif
  
  comm_fft = mpi_enreg%comm_fft; nproc_fft = mpi_enreg%nproc_fft
 
@@ -648,7 +692,11 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
        ABI_ALLOCATE(vxcrho_b_updn,(npts,nspden_updn))
        vxcrho_b_updn(:,:)=zero
 !      Allocation of optional arguments
-       call size_dvxc(ixc,ndvxc,ngr2,nd2vxc,nspden_updn,nvxcgrho,order,add_tfw_)
+       if(present(xc_funcs))then
+         call size_dvxc(ixc,ndvxc,ngr2,nd2vxc,nspden_updn,nvxcgrho,order,add_tfw=add_tfw_,xc_funcs=xc_funcs)
+       else
+         call size_dvxc(ixc,ndvxc,ngr2,nd2vxc,nspden_updn,nvxcgrho,order,add_tfw=add_tfw_)
+       endif
 
 !      Allocation of optional arguments
        ABI_ALLOCATE(dvxc_b,(npts,ndvxc))
@@ -702,16 +750,13 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
 !      before calling again drivexc_main using the correct functional for Exc and Vxc
        if(xcdata%usefock==1 .and. auxc_ixc/=0)then
          if (auxc_ixc<0) then
-           if(ixc<0)then
-             call libxc_functionals_end()
-           endif
-           call libxc_functionals_init(auxc_ixc,nspden)
+           call libxc_functionals_init(auxc_ixc,nspden,xc_functionals=xc_funcs_auxc)
          end if
          call drivexc_main(exc_b,auxc_ixc,mgga,ndvxc,nd2vxc,ngr2,npts,nspden_updn,nvxcgrho,order,&
 &         rho_b_updn,vxcrho_b_updn,xcdata%xclevel, &
 &         dvxc=dvxc_b,d2vxc=d2vxc_b,grho2=grho2_b_updn,vxcgrho=vxcgrho_b, &
 &         lrho=lrho_b_updn,tau=tau_b_updn,vxclrho=vxclrho_b_updn,vxctau=vxctau_b_updn, &
-&         fxcT=fxc_b,el_temp=xcdata%tphysel, &
+&         fxcT=fxc_b,hyb_mixing=xcdata%hyb_mixing,el_temp=xcdata%tphysel,xc_funcs=xc_funcs_auxc, &
 &         xc_tb09_c=xcdata%xc_tb09_c)
 !        Transfer the xc kernel
          if (nkxc_eff==1.and.ndvxc==15) then
@@ -722,20 +767,30 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
            kxc(ifft:ifft+npts-1,3)=dvxc_b(1:npts,2)+dvxc_b(1:npts,11)
          end if
          if (auxc_ixc<0) then
-           call libxc_functionals_end()
-           if(ixc<0)then
-             call libxc_functionals_init(ixc,nspden)
-           endif
+           call libxc_functionals_end(xc_functionals=xc_funcs_auxc)
          end if
        end if
 
 !      Call to main XC driver
-       call drivexc_main(exc_b,ixc,mgga,ndvxc,nd2vxc,ngr2,npts,nspden_updn,nvxcgrho,order,&
-&       rho_b_updn,vxcrho_b_updn,xcdata%xclevel, &
-&       dvxc=dvxc_b,d2vxc=d2vxc_b,grho2=grho2_b_updn,vxcgrho=vxcgrho_b, &
-&       lrho=lrho_b_updn,tau=tau_b_updn,vxclrho=vxclrho_b_updn,vxctau=vxctau_b_updn, &
-&       fxcT=fxc_b,el_temp=xcdata%tphysel, &
-&       xc_tb09_c=xcdata%xc_tb09_c)
+       if(present(xc_funcs))then
+         call libxc_functionals_get_hybridparams(hyb_mixing=hyb_mixing,hyb_mixing_sr=hyb_mixing_sr,&
+&                                            hyb_range=hyb_range,xc_functionals=xc_funcs)
+         call drivexc_main(exc_b,ixc,mgga,ndvxc,nd2vxc,ngr2,npts,nspden_updn,nvxcgrho,order,&
+&         rho_b_updn,vxcrho_b_updn,xcdata%xclevel, &
+&         dvxc=dvxc_b,d2vxc=d2vxc_b,grho2=grho2_b_updn,vxcgrho=vxcgrho_b, &
+&         lrho=lrho_b_updn,tau=tau_b_updn,vxclrho=vxclrho_b_updn,vxctau=vxctau_b_updn, &
+&         fxcT=fxc_b,hyb_mixing=xcdata%hyb_mixing,el_temp=xcdata%tphysel,xc_funcs=xc_funcs, &
+&         xc_tb09_c=xcdata%xc_tb09_c)
+       else
+         call libxc_functionals_get_hybridparams(hyb_mixing=hyb_mixing,hyb_mixing_sr=hyb_mixing_sr,&
+&                                            hyb_range=hyb_range)
+         call drivexc_main(exc_b,ixc,mgga,ndvxc,nd2vxc,ngr2,npts,nspden_updn,nvxcgrho,order,&
+&         rho_b_updn,vxcrho_b_updn,xcdata%xclevel, &
+&         dvxc=dvxc_b,d2vxc=d2vxc_b,grho2=grho2_b_updn,vxcgrho=vxcgrho_b, &
+&         lrho=lrho_b_updn,tau=tau_b_updn,vxclrho=vxclrho_b_updn,vxctau=vxctau_b_updn, &
+&         fxcT=fxc_b,hyb_mixing=xcdata%hyb_mixing,el_temp=xcdata%tphysel, &
+&         xc_tb09_c=xcdata%xc_tb09_c)
+       endif
 
 !      Gradient Weiszacker correction to a Thomas-Fermi functional
        if (add_tfw_) then

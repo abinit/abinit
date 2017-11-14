@@ -1,5 +1,5 @@
 # Hybrid functional calculation for C in the diamond structure.
-# The fraction of Fock exchange in HSE06 is adjusted by `gwfockmix'.
+# The fraction of Fock exchange in HSE06 is adjusted by `hyb_mixing_sr'.
 # Dataset 1: ground state calculation with WFK output
 # Dataset 2: calculation of the one-shot HSE using the default mixing.
 # Dataset 3: calculation of the one-shot HSE with a varied mixing parameter.
@@ -27,13 +27,14 @@ ecutsigx    11.5     # Planewaves to be used to represent the exchange operator
 gwcalctyp   125
  icutcoul   5          # short-range exchange only
      rcut   9.090909   # corresponds to omega = 1/rc = 0.11 bohr^1
+ixc_sigma  -428
 
 # Dataset2: Calculation of the HSE06 with the default mixing (0.25).
 optdriver2  4 
 
 # Dataset3: Calculation with the Fock mixing of 0.35.
 optdriver3  4
-gwfockmix3  0.35      # To define the fraction of Fock exchange in HSE
+hyb_mixing_sr3  0.35      # To define the fraction of Fock exchange in HSE
 
 
 # Definition of the unit cell: fcc
