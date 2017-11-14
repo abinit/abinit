@@ -945,6 +945,7 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,lm_size,lmselect,nhat,nkxc,nrad,nspd
  if (option/=3.and.option/=4) vxc(:,:,:)=zero
  if (nkxc>0) kxc(:,:,:)=zero
  mgga=0 !metaGGA contributions are not taken into account here
+ order=1;if (nkxc>0) order=2 ! to which der. of the energy the computation must be done
 
  if (xclevel==0.or.ixc==0) then
    msg='Note that no xc is applied (ixc=0).'
@@ -1057,10 +1058,6 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,lm_size,lmselect,nhat,nkxc,nrad,nspd
          end if
        end if
      end if
-
-!    The variable order indicates to which derivative of the energy
-!    the computation must be done. Here, no derivative, except if Kxc is requested.
-     order=1;if (nkxc>0) order=2
 
 !    Storage of density (and gradient) in (up,dn) format
      if (nspden==1) then
@@ -1280,9 +1277,9 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,lm_size,lmselect,nhat,nkxc,nrad,nspd
    if (option/=3.and.option/=4.and.nspden==4) then
      ! Use of C pointers to avoid copies (when ISO C bindings are available)
 #ifdef LIBPAW_ISO_C_BINDING
-     call c_f_pointer(c_loc(vxc_updn),vxc_diag,shape=[nrad*npts,nspden_updn])
-     call c_f_pointer(c_loc(vxc),vxc_nc,shape=[nrad*npts,nspden])
-     call c_f_pointer(c_loc(mag),mag_,shape=[nrad*npts,3])
+     call c_f_pointer(c_loc(vxc_updn(1,1,1)),vxc_diag,shape=[nrad*npts,nspden_updn])
+     call c_f_pointer(c_loc(vxc(1,1,1)),vxc_nc,shape=[nrad*npts,nspden])
+     call c_f_pointer(c_loc(mag(1,1,1)),mag_,shape=[nrad*npts,3])
 #else
      LIBPAW_ALLOCATE(vxc_diag,(nrad*npts,nspden_updn))
      LIBPAW_ALLOCATE(vxc_nc,(nrad*npts,nspden))
@@ -2329,10 +2326,10 @@ subroutine pawxc3(corexc1,cplex_den,cplex_vxc,d2enxc,ixc,kxc,lm_size,lmselect,nh
  if (option/=3.and.nspden==4) then
     ! Use of C pointers to avoid copies (when ISO C bindings are available)
 #ifdef LIBPAW_ISO_C_BINDING
-   call c_f_pointer(c_loc(vxc1_updn),vxc1_diag,shape=[nrad*npts,nspden_updn])
-   call c_f_pointer(c_loc(vxc1_),vxc1_nc,shape=[nrad*npts,nspden])
-   call c_f_pointer(c_loc(kxc),kxc_,shape=[nrad*npts,3])
-   call c_f_pointer(c_loc(kxc(:,:,nkxc-2:nkxc)),mag,shape=[nrad*npts,3])
+   call c_f_pointer(c_loc(vxc1_updn(1,1,1)),vxc1_diag,shape=[nrad*npts,nspden_updn])
+   call c_f_pointer(c_loc(vxc1_(1,1,1)),vxc1_nc,shape=[nrad*npts,nspden])
+   call c_f_pointer(c_loc(kxc(1,1,1)),kxc_,shape=[nrad*npts,3])
+   call c_f_pointer(c_loc(kxc(1,1,nkxc-2)),mag,shape=[nrad*npts,3])
 #else
    LIBPAW_ALLOCATE(vxc1_diag,(nrad*npts,nspden_updn))
    LIBPAW_ALLOCATE(vxc1_nc,(nrad*npts,nspden))
