@@ -188,6 +188,9 @@ parser.add_option("-l", "--without-abilint", action="store_false",
 parser.add_option("-m", "--without-makefiles", action="store_false",
   dest="run_makefiles", default=True,
   help="Skip makefile generation")
+parser.add_option("-n", "--no-split", action="store_false",
+  dest="split_source", default=True,
+  help="Behave as if the source tree were not split")
 parser.add_option("-s", "--without-source", action="store_false",
   dest="run_source", default=True,
   help="Skip source tree update (will skip abilint as well)")

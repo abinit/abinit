@@ -286,6 +286,6 @@ body : |
   
   <p>NOTE that not all features of ABINIT are covered by these
   tutorials. For a complete feature list, please see the
-  ~abinit/doc/features/ directory. For examples on how to use these
+  [[help_features]]. For examples on how to use these
   features, please see the ~abinit/tests/* directories and their
   accompanying README files.</p>

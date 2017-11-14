@@ -335,6 +335,7 @@ type dataset_type
  integer :: istatr
  integer :: istatshft
  integer :: ixc
+ integer :: ixc_sigma
  integer :: ixcpositron
  integer :: jdtset !  jdtset contains the current dataset number
  integer :: jellslab
@@ -696,7 +697,6 @@ type dataset_type
  real(dp) :: fxcartfactor
  real(dp) :: ga_opt_percent
  real(dp) :: gwencomp
- real(dp) :: gwfockmix
  real(dp) :: gwls_model_parameter         ! Parameter used in modelization of dielectric function
  real(dp) :: gw_toldfeig
  real(dp) :: hyb_mixing

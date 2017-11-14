@@ -339,7 +339,6 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%gwmem=11
    dtsets(idtset)%gwpara=2
    dtsets(idtset)%gwrpacorr=0
-   dtsets(idtset)%gwfockmix=0.25_dp
    dtsets(idtset)%gwls_stern_kmax=1
    dtsets(idtset)%gwls_model_parameter=1.0_dp
    dtsets(idtset)%gwls_npt_gauss_quad=10
@@ -357,10 +356,10 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%gwls_correlation=3
    dtsets(idtset)%gwls_first_seed=0
 !  H
-   dtsets(idtset)%hyb_mixing=-1.0_dp
-   dtsets(idtset)%hyb_mixing_sr=-1.0_dp
-   dtsets(idtset)%hyb_range_dft=-1.0_dp
-   dtsets(idtset)%hyb_range_fock=-1.0_dp
+   dtsets(idtset)%hyb_mixing=-999.0_dp
+   dtsets(idtset)%hyb_mixing_sr=-999.0_dp
+   dtsets(idtset)%hyb_range_dft=-999.0_dp
+   dtsets(idtset)%hyb_range_fock=-999.0_dp
 !  I
    if(dtsets(idtset)%natsph/=0) then
 !    do not use iatsph(:) but explicit boundaries
@@ -416,6 +415,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%istatimg = 1
    dtsets(idtset)%istwfk(:)=0
    dtsets(idtset)%ixc=1
+   dtsets(idtset)%ixc_sigma=1
    dtsets(idtset)%ixcpositron=1
 !  J
    dtsets(idtset)%f4of2_sla(:)=-one
