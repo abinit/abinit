@@ -139,7 +139,10 @@ subroutine rotate_mag(rho_in,rho_out,mag,vectsize,&
      rho_out(ipt,2)=half*rho_in(ipt,1)
    end if
 
-   if (out_mag_norm) mag_norm_out(ipt)=m_norm
+   if (out_mag_norm) then
+     if (m_norm >m_norm_min) mag_norm_out(ipt)=m_norm
+     if (m_norm<=m_norm_min) mag_norm_out(ipt)=zero
+   end if
 
  end do
 

@@ -61,6 +61,9 @@ module m_pawxc
  private :: pawxc_xcmult_wrapper     ! wrapper for xcmult
  private :: pawxc_size_dvxc_wrapper  ! wrapper for size_dvxc
  private :: pawxc_xcpositron_wrapper ! wrapper for xcpositron
+
+!Zero of density
+ real(dp),parameter :: rho_min=tol14
 !!***
 
 CONTAINS !===========================================================
@@ -3730,16 +3733,20 @@ end subroutine pawxcsphpositron
  integer :: ilm,ir,ir1,ir2,ispden,iwarn,jr,nspden_updn,nsums
  real(dp),parameter :: delta=1.d-4
  real(dp) :: dvxc1,dvxc2,dvxc3,dvxc4,dvxca,dvxcb,dvxcc,dvxcd
- real(dp) :: fact,invsqfpi,invsqfpi2,m_norm,m_norm_min,sqfpi,sqfpi2
+ real(dp) :: fact,invsqfpi,invsqfpi2,m_norm,rho_norm_min,sqfpi,sqfpi2
  character(len=500) :: msg
 !arrays
-! real(dp) :: tsec(2)
  real(dp),allocatable :: d1kxc(:,:),d2kxc(:,:),d1vxc(:,:),d2vxc(:,:)
  real(dp),allocatable :: exc_(:),exci(:),ff(:),gg(:)
  real(dp),allocatable :: kxc1(:,:),kxc2(:,:),kxcdn1(:,:),kxcdn2(:,:),kxci(:,:)
- real(dp),allocatable :: m_norm_inv(:),rho_(:,:),rho_updn(:,:,:),rhoinv(:,:),rhosph(:,:)
+ real(dp),allocatable :: m_norm_inv(:),rho_(:,:),rhoinv(:,:),rhosph(:,:)
  real(dp),allocatable :: v0sum(:,:),v1sum(:,:),v2sum(:,:,:)
  real(dp),allocatable :: vxc1(:,:),vxc2(:,:),vxcdn1(:,:),vxcdn2(:,:),vxci(:,:)
+ real(dp),allocatable,target :: rho_updn(:,:,:)
+ real(dp), ABI_CONTIGUOUS pointer :: mag_(:,:),rho_nc(:,:)
+#ifdef LIBPAW_ISO_C_BINDING
+ type(C_PTR) :: cptr
+#endif
 
 !************************************************************************
 
@@ -3828,17 +3835,23 @@ end subroutine pawxcsphpositron
 !  obtained by rotating rho_updn
  else if (nspden==4) then
    LIBPAW_ALLOCATE(m_norm_inv,(nrad))
-   m_norm_min=tol8   ! Too small : EPSILON(0.0_dp)**2
+#ifdef LIBPAW_ISO_C_BINDING
+   cptr=c_loc(rho_updn(1,1,1));call c_f_pointer(cptr,rho_nc,shape=[nrad,nspden])
+   cptr=c_loc(rho_updn(1,1,2));call c_f_pointer(cptr,mag_,shape=[nrad,3])
+#else
+   LIBPAW_ALLOCATE(rho_nc,(nrad,nspden))
+   LIBPAW_ALLOCATE(mag_,(nrad,3))
+   rho_nc=reshape(rho_updn(1:nrad,1,1:nspden),[nrad,nspden])
+   mag_=reshape(rho_updn(1:nrad,1,2:4),[nrad,3])
+#endif
+   call pawxc_rotate_mag(rho_nc,rhosph,mag_,nrad,mag_norm_out=m_norm_inv)
+#ifndef LIBPAW_ISO_C_BINDING
+     LIBPAW_DEALLOCATE(rho_nc)
+     LIBPAW_DEALLOCATE(mag_)
+#endif
+   rhosph(:,1:2)=rhosph(:,1:2)*invsqfpi
    do ir=1,nrad
-     m_norm=sqrt(rho_updn(ir,1,2)**2+rho_updn(ir,1,3)**2+rho_updn(ir,1,4)**2)
-     rhosph(ir,1)=(rho_updn(ir,1,1)+m_norm)*invsqfpi2
-     rhosph(ir,2)=(rho_updn(ir,1,1)-m_norm)*invsqfpi2
-     if (m_norm>m_norm_min) then
-!      if (m_norm>abs(rho_updn(ir,1,1))*tol10+tol14) then
-       m_norm_inv(ir)=one/m_norm
-     else
-       m_norm_inv(ir)=zero
-     end if
+     m_norm_inv(ir)=merge(one/m_norm_inv(ir),zero,m_norm_inv(ir)>rho_min)
    end do
  end if
 
@@ -3901,7 +3914,7 @@ end subroutine pawxcsphpositron
    fact=one/delta;if (nspden_updn==1) fact=half*fact
    do ispden=1,nspden_updn
      do ir=1,nrad
-       if (rhosph(ir,ispden)>tol14) then
+       if (rhosph(ir,ispden)>rho_min) then
          rhoinv(ir,ispden)=fact/rhosph(ir,ispden)
        else
          rhoinv(ir,ispden)=zero
@@ -4150,11 +4163,11 @@ end subroutine pawxcsphpositron
 !  === Pathological case: if rho(r) is negative, interpolate Vxc
 !  -------------------------------------------------------------
    if (lmselect(1)) then
-     m_norm_min=xc_denpos*(one+tol6)
+     rho_norm_min=xc_denpos*(one+tol6)
      do ispden=1,nspden_updn
        ir1=0;ir2=0
        do ir=1,nrad
-         if (rho_updn(ir,1,ispden)<m_norm_min) then
+         if (rho_updn(ir,1,ispden)<rho_norm_min) then
            if (ir1==0) ir1=ir-1
            ir2=ir+1
          else if (ir1>0) then
@@ -4260,11 +4273,11 @@ end subroutine pawxcsphpositron
 
 !  NOT OK for spin polarized
    if (lmselect(1)) then
-     m_norm_min=xc_denpos*(one+tol6)
+     rho_norm_min=xc_denpos*(one+tol6)
      do ispden=1,nspden_updn
        ir1=0;ir2=0
        do ir=1,nrad
-         if (rho_updn(ir,1,ispden)<m_norm_min) then
+         if (rho_updn(ir,1,ispden)<rho_norm_min) then
            if (ir1==0) ir1=ir-1
            ir2=ir+1
          else if (ir1>0) then
@@ -5026,12 +5039,12 @@ subroutine pawxcmpositron(calctype,corexc,enxc,enxcdc,ixcpositron,lm_size,lmsele
    LIBPAW_ALLOCATE(rhoinv_ep,(nrad))
    fact=one/delta
    do ir=1,nrad
-     if (rhosph(ir)>tol14) then
+     if (rhosph(ir)>rho_min) then
        rhoinv(ir)=fact/rhosph(ir)
      else
        rhoinv(ir)=zero
      end if
-     if (rhosph_ep(ir)>tol14) then
+     if (rhosph_ep(ir)>rho_min) then
        rhoinv_ep(ir)=fact/rhosph_ep(ir)
      else
        rhoinv_ep(ir)=zero
@@ -5179,7 +5192,7 @@ subroutine pawxcmpositron(calctype,corexc,enxc,enxcdc,ixcpositron,lm_size,lmsele
 !  if (lmselect_ep(1)) then
 !  ir1=0;ir2=0
 !  do ir=1,nrad
-!  if (rhotot_ep(ir,1)<tol14) then
+!  if (rhotot_ep(ir,1)<rho_min) then
 !  if (ir1==0) ir1=ir-1
 !  ir2=ir+1
 !  else if (ir1>0) then
@@ -5537,6 +5550,7 @@ end subroutine pawxc_drivexc_wrapper
 !!
 !! OUTPUT
 !!  rho_out(vectsize,2)=output (projected, collinear) density
+!!  [mag_norm_out(vectsize)]= --optional-- norm of mag(:) at each point of the grid
 !! PARENTS
 !!
 !!      m_pawxc
@@ -5545,7 +5559,7 @@ end subroutine pawxc_drivexc_wrapper
 !!
 !! SOURCE
 
- subroutine pawxc_rotate_mag(rho_in,rho_out,mag,vectsize,rho_out_format)
+ subroutine pawxc_rotate_mag(rho_in,rho_out,mag,vectsize,mag_norm_out,rho_out_format)
 
 #if defined HAVE_LIBPAW_ABINIT
  use m_xc_noncoll, only : rotate_mag
@@ -5566,12 +5580,12 @@ end subroutine pawxc_drivexc_wrapper
 !arrays
  real(dp),intent(in) :: rho_in(vectsize,4),mag(vectsize,3)
  real(dp),intent(out) :: rho_out(vectsize,2)
+ real(dp),intent(out),optional :: mag_norm_out(vectsize)
 
 !Local variables-------------------------------
 !scalars
 #if ! defined HAVE_LIBPAW_ABINIT
  integer :: ipt
- real(dp),parameter :: m_norm_min=tol8
  real(dp) :: m_norm,rho_up,rhoin_dot_mag,rho_up
 #endif
 !arrays
@@ -5597,6 +5611,8 @@ end subroutine pawxc_drivexc_wrapper
      rho_out(ipt,1)=half*rho_in(ipt,1)
      rho_out(ipt,2)=half*rho_in(ipt,1)
    end if
+   if (present(mag_norm_out).and.m_norm> m_norm_min) mag_norm_out(ipt)=m_norm
+   if (present(mag_norm_out).and.m_norm<=m_norm_min) mag_norm_out(ipt)=zero
  end do
  if (present(rho_out_format)) then
    if (rho_out_format==2) then
@@ -5663,7 +5679,6 @@ end subroutine pawxc_rotate_mag
 !scalars
 #if ! defined HAVE_LIBPAW_ABINIT
  integer :: ipt
- real(dp),parameter :: m_norm_min=tol8
  real(dp) :: dvdn,dvdz,m_norm
 #endif
 !arrays
