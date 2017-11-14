@@ -38,29 +38,29 @@ module m_pawxc
  implicit none
  private
 
- public:: pawxc           ! Compute xc correlation potential and energies inside a paw sphere. USE (r,theta,phi)
- public:: pawxcpositron   ! Compute electron-positron correlation potential and energies inside a PAW sphere. USE (r,theta,phi)
- public:: pawxc3          ! Compute first-order change of XC potential and contribution to
+ public :: pawxc          ! Compute xc correlation potential and energies inside a paw sphere. USE (r,theta,phi)
+ public :: pawxcpositron  ! Compute electron-positron correlation potential and energies inside a PAW sphere. USE (r,theta,phi)
+ public :: pawxc_dfpt     ! Compute first-order change of XC potential and contribution to
                           ! 2nd-order change of XC energy inside a PAW sphere. USE (r,theta,phi)
- public:: pawxcsum        ! Compute useful sums of moments of densities needed to compute on-site contributions to XC energy and potential
- public:: pawxcm          ! Compute xc correlation potential and energies inside a paw sphere. USE (L,M) MOMENTS
- public:: pawxcmpositron  ! Compute electron-positron correlation potential and energies inside a PAW sphere. USE (L,M) MOMENTS
- public:: pawxcm3         ! Compute first-order change of XC potential and contribution to 2nd-order change of XC energy inside a PAW sphere. USE (L,M) MOMENTS
+ public :: pawxcsum       ! Compute useful sums of moments of densities needed to compute on-site contributions to XC energy and potential
+ public :: pawxcm         ! Compute xc correlation potential and energies inside a paw sphere. USE (L,M) MOMENTS
+ public :: pawxcmpositron ! Compute electron-positron correlation potential and energies inside a PAW sphere. USE (L,M) MOMENTS
+ public :: pawxcm_dfpt    ! Compute first-order change of XC potential and contribution to 2nd-order change of XC energy inside a PAW sphere. USE (L,M) MOMENTS
 
 !Private procedures
- private:: pawxcsph                 ! Compute XC energy and potential for a spherical density rho(r) given as (up,dn)
- private:: pawxcsphpositron         ! Compute electron-positron XC energy and potential for spherical densities rho_el(r) rho_pos(r)
- private:: pawxcsph3                ! Compute XC 1st-order potential for a 1st-order spherical density rho1(r)
- private :: pawxc_rotate_mag            ! Rotate a non-collinear density wrt a magnetization
- private :: pawxc_rotate_back_mag       ! Rotate back a collinear XC potential wrt a magnetization
- private :: pawxc_rotate_back_mag_dfpt  ! Rotate back a collinear 1st-order XC potential wrt a magnetization
+ private :: pawxcsph                   ! Compute XC energy and potential for a spherical density rho(r) given as (up,dn)
+ private :: pawxcsphpositron           ! Compute electron-positron XC energy and potential for spherical densities rho_el(r) rho_pos(r)
+ private :: pawxcsph_dfpt              ! Compute XC 1st-order potential for a 1st-order spherical density rho1(r)
+ private :: pawxc_rotate_mag           ! Rotate a non-collinear density wrt a magnetization
+ private :: pawxc_rotate_back_mag      ! Rotate back a collinear XC potential wrt a magnetization
+ private :: pawxc_rotate_back_mag_dfpt ! Rotate back a collinear 1st-order XC potential wrt a magnetization
 
 !Wrappers
- private:: pawxc_drivexc_wrapper    ! wrapper for drivexc_main
- private:: pawxc_mkdenpos_wrapper   ! wrapper for mkdenpos
- private:: pawxc_xcmult_wrapper     ! wrapper for xcmult
- private:: pawxc_size_dvxc_wrapper  ! wrapper for size_dvxc
- private:: pawxc_xcpositron_wrapper ! wrapper for xcpositron
+ private :: pawxc_drivexc_wrapper    ! wrapper for drivexc_main
+ private :: pawxc_mkdenpos_wrapper   ! wrapper for mkdenpos
+ private :: pawxc_xcmult_wrapper     ! wrapper for xcmult
+ private :: pawxc_size_dvxc_wrapper  ! wrapper for size_dvxc
+ private :: pawxc_xcpositron_wrapper ! wrapper for xcpositron
 !!***
 
 CONTAINS !===========================================================
@@ -1645,9 +1645,9 @@ end subroutine pawxcpositron
 
 !----------------------------------------------------------------------
 
-!!****f* m_pawxc/pawxc3
+!!****f* m_pawxc/pawxc_dfpt
 !! NAME
-!! pawxc3
+!! pawxc_dfpt
 !!
 !! FUNCTION
 !! Compute first-order change of XC potential and contribution to
@@ -1742,7 +1742,7 @@ end subroutine pawxcpositron
 !!
 !! SOURCE
 
-subroutine pawxc3(corexc1,cplex_den,cplex_vxc,d2enxc,ixc,kxc,lm_size,lmselect,nhat1,nkxc,nrad,nspden,&
+subroutine pawxc_dfpt(corexc1,cplex_den,cplex_vxc,d2enxc,ixc,kxc,lm_size,lmselect,nhat1,nkxc,nrad,nspden,&
 &                 option,pawang,pawrad,rhor1,usecore,usexcnhat,vxc,vxc1,xclevel,&
 &                 d2enxc_im) ! optional
 
@@ -1750,7 +1750,7 @@ subroutine pawxc3(corexc1,cplex_den,cplex_vxc,d2enxc,ixc,kxc,lm_size,lmselect,nh
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'pawxc3'
+#define ABI_FUNC 'pawxc_dfpt'
 !End of the abilint section
 
  implicit none
@@ -2521,7 +2521,7 @@ subroutine pawxc3(corexc1,cplex_den,cplex_vxc,d2enxc,ixc,kxc,lm_size,lmselect,nh
    LIBPAW_DEALLOCATE(dylmdr)
  end if
 
-end subroutine pawxc3
+end subroutine pawxc_dfpt
 !!***
 
 !----------------------------------------------------------------------
@@ -2809,9 +2809,9 @@ end subroutine pawxcsph
 
 !----------------------------------------------------------------------
 
-!!****f* m_pawxc/pawxcsph3
+!!****f* m_pawxc/pawxcsph_dfpt
 !! NAME
-!! pawxcsph3
+!! pawxcsph_dfpt
 !!
 !! FUNCTION
 !! Compute XC 1st-order potential for a 1st-order spherical density rho1(r)
@@ -2844,13 +2844,13 @@ end subroutine pawxcsph
 !! SOURCE
 
 
-subroutine pawxcsph3(cplex_den,cplex_vxc,ixc,nrad,nspden,pawrad,rho_updn,rho1_updn,vxc1,xclevel)
+subroutine pawxcsph_dfpt(cplex_den,cplex_vxc,ixc,nrad,nspden,pawrad,rho_updn,rho1_updn,vxc1,xclevel)
 
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'pawxcsph3'
+#define ABI_FUNC 'pawxcsph_dfpt'
 !End of the abilint section
 
  implicit none
@@ -3121,7 +3121,7 @@ subroutine pawxcsph3(cplex_den,cplex_vxc,ixc,nrad,nspden,pawrad,rho_updn,rho1_up
    LIBPAW_DEALLOCATE(grho1_updn)
  end if
 
-end subroutine pawxcsph3
+end subroutine pawxcsph_dfpt
 !!***
 
 !----------------------------------------------------------------------
@@ -4447,9 +4447,9 @@ end subroutine pawxcsphpositron
 
 !----------------------------------------------------------------------
 
-!!****f* m_pawxc/pawxcm3
+!!****f* m_pawxc/pawxcm_dfpt
 !! NAME
-!! pawxcm3
+!! pawxcm_dfpt
 !!
 !! FUNCTION
 !! Compute first-order change of XC potential and contribution to
@@ -4500,7 +4500,7 @@ end subroutine pawxcsphpositron
 !!
 !! SOURCE
 
- subroutine pawxcm3(corexc1,cplex_den,cplex_vxc,d2enxc,ixc,kxc,lm_size,lmselect,nhat1,nkxc,nrad,nspden,&
+ subroutine pawxcm_dfpt(corexc1,cplex_den,cplex_vxc,d2enxc,ixc,kxc,lm_size,lmselect,nhat1,nkxc,nrad,nspden,&
 &                   option,pawang,pawrad,rhor1,usecore,usexcnhat,vxc1,xclevel,&
 &                   d2enxc_im) ! optional
 
@@ -4508,7 +4508,7 @@ end subroutine pawxcsphpositron
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'pawxcm3'
+#define ABI_FUNC 'pawxcm_dfpt'
 !End of the abilint section
 
  implicit none
@@ -4767,7 +4767,7 @@ end subroutine pawxcsphpositron
    LIBPAW_POINTER_DEALLOCATE(vxc1_)
  end if
 
- end subroutine pawxcm3
+ end subroutine pawxcm_dfpt
 !!***
 
 !----------------------------------------------------------------------

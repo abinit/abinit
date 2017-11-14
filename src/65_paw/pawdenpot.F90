@@ -83,8 +83,8 @@
 !!
 !! CHILDREN
 !!      free_my_atmtab,get_my_atmtab,pawdensities,pawdijfock,pawdijhartree
-!!      pawdijnd,pawdijso,pawrad_deducer0,pawuenergy,pawxc,pawxc3,pawxcm
-!!      pawxcm3,pawxcmpositron,pawxcpositron,pawxenergy,pawxpot,poisson
+!!      pawdijnd,pawdijso,pawrad_deducer0,pawuenergy,pawxc,pawxc_dfpt,pawxcm
+!!      pawxcm_dfpt,pawxcmpositron,pawxcpositron,pawxenergy,pawxpot,poisson
 !!      setnoccmmp,timab,wrtout,xmpi_sum
 !!
 !! SOURCE
@@ -112,7 +112,7 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
  use m_paw_ij, only : paw_ij_type
  use m_pawrhoij,only: pawrhoij_type
  use m_pawdij,  only: pawdijhartree, pawdijnd, pawdijso, pawxpot ,pawdijfock
- use m_pawxc,   only: pawxc, pawxc3, pawxcm, pawxcm3, pawxcpositron, pawxcmpositron
+ use m_pawxc,   only: pawxc, pawxc_dfpt, pawxcm, pawxcm_dfpt, pawxcpositron, pawxcmpositron
  use m_paral_atom, only : get_my_atmtab, free_my_atmtab
  use m_electronpositron, only: electronpositron_type,electronpositron_calctype
 
@@ -425,7 +425,7 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
 &         paw_an(iatom)%lmselect,nhat1,nkxc1,mesh_size,nspden,option,&
 &         pawang,pawrad(itypat),pawxcdev,rho1,usecore,0,vxc_tmp,xclevel,xc_denpos)
        else
-         call pawxcm3(pawtab(itypat)%coredens,cplex,cplex,eexc,ixc,paw_an0(iatom)%kxc1,lm_size,&
+         call pawxcm_dfpt(pawtab(itypat)%coredens,cplex,cplex,eexc,ixc,paw_an0(iatom)%kxc1,lm_size,&
 &         paw_an(iatom)%lmselect,nhat1,paw_an0(iatom)%nkxc1,mesh_size,nspden,option,&
 &         pawang,pawrad(itypat),rho1,usecore,0,vxc_tmp,xclevel)
          eexcdc=zero
@@ -436,7 +436,7 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
 &         paw_an(iatom)%lmselect,nhat1,nkxc1,mesh_size,nspden,option,&
 &         pawang,pawrad(itypat),rho1,usecore,0,vxc_tmp,xclevel,xc_denpos)
        else
-         call pawxc3(pawtab(itypat)%coredens,cplex,cplex,eexc,ixc,paw_an0(iatom)%kxc1,lm_size,&
+         call pawxc_dfpt(pawtab(itypat)%coredens,cplex,cplex,eexc,ixc,paw_an0(iatom)%kxc1,lm_size,&
 &         paw_an(iatom)%lmselect,nhat1,paw_an0(iatom)%nkxc1,mesh_size,nspden,option,&
 &         pawang,pawrad(itypat),rho1,usecore,0,paw_an0(iatom)%vxc1,vxc_tmp,xclevel)
          eexcdc=zero
@@ -487,7 +487,7 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
 &         pawang,pawrad(itypat),pawxcdev,trho1,usetcore,2*usexcnhat,vxc_tmp,xclevel,xc_denpos)
            !ABI_DEALLOCATE(kxc_tmp)
        else
-         call pawxcm3(pawtab(itypat)%tcoredens(:,1),&
+         call pawxcm_dfpt(pawtab(itypat)%tcoredens(:,1),&
 &         cplex,cplex,eexc,ixc,paw_an0(iatom)%kxct1,lm_size,&
 &         paw_an(iatom)%lmselect,nhat1,paw_an0(iatom)%nkxc1,mesh_size,nspden,option,&
 &         pawang,pawrad(itypat),trho1,usetcore,2*usexcnhat,vxc_tmp,xclevel)
@@ -500,7 +500,7 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
 &         paw_an(iatom)%lmselect,nhat1,nkxc1,mesh_size,nspden,option,&
 &         pawang,pawrad(itypat),trho1,usetcore,2*usexcnhat,vxc_tmp,xclevel,xc_denpos)
        else
-         call pawxc3(pawtab(itypat)%tcoredens(:,1),&
+         call pawxc_dfpt(pawtab(itypat)%tcoredens(:,1),&
 &         cplex,cplex,eexc,ixc,paw_an0(iatom)%kxct1,lm_size,&
 &         paw_an(iatom)%lmselect,nhat1,paw_an0(iatom)%nkxc1,mesh_size,nspden,option,&
 &         pawang,pawrad(itypat),trho1,usetcore,2*usexcnhat,paw_an0(iatom)%vxct1,vxc_tmp,xclevel)
