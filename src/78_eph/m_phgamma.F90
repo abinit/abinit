@@ -4330,7 +4330,7 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
 
        if (dksqmax > tol12) then
          write(msg, '(7a,es16.6,4a)' )&
-          'The WFK file cannot be used to start thee present calculation ',ch10,&
+          'The WFK file cannot be used to start the present calculation ',ch10,&
           'It was asked that the wavefunctions be accurate, but',ch10,&
           'at least one of the k points could not be generated from a symmetrical one.',ch10,&
           'dksqmax=',dksqmax,ch10,&
@@ -4641,6 +4641,12 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
 #endif
 
  ! Interpolate linewidths along the q-path.
+ if (dtset%ph_nqpath <= 0) then
+   write(msg, '(7a,es16.6,4a)' )&
+    'You have not specified a path for the linewidth calculation - no interpolation or output will be done ',ch10,&
+    'Action: check your input variables ph_nqpath and ph_qpath'
+   MSG_ERROR(msg)
+ end if
  call phgamma_linwid(gams,cryst,ifc,dtset%ph_ndivsm,dtset%ph_nqpath,dtset%ph_qpath,dtfil%filnam_ds(4),ncid,wminmax,comm)
 
  ! Compute a2Fw using ab-initio q-points (no interpolation)
