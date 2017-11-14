@@ -22,9 +22,9 @@
 
 module m_pawxc
 
- USE_DEFS
- USE_MSG_HANDLING
- USE_MEMORY_PROFILING
+ use defs_basis
+ use m_errors, only : msg_hndl, netcdf_check
+ use m_profiling_abi
 
 #ifdef LIBPAW_ISO_C_BINDING
  use iso_c_binding, only : c_loc,c_f_pointer
@@ -34,8 +34,6 @@ module m_pawxc
 
  use m_pawang, only : pawang_type
  use m_pawrad, only : pawrad_type, nderiv_gen, pawrad_deducer0, simp_gen
-
- use m_xc_noncoll, only : rotate_mag,rotate_back_mag,dfpt_rotate_back_mag
 
  implicit none
  private
@@ -53,6 +51,9 @@ module m_pawxc
  private:: pawxcsph                 ! Compute XC energy and potential for a spherical density rho(r) given as (up,dn)
  private:: pawxcsphpositron         ! Compute electron-positron XC energy and potential for spherical densities rho_el(r) rho_pos(r)
  private:: pawxcsph3                ! Compute XC 1st-order potential for a 1st-order spherical density rho1(r)
+ private :: pawxc_rotate_mag            ! Rotate a non-collinear density wrt a magnetization
+ private :: pawxc_rotate_back_mag       ! Rotate back a collinear XC potential wrt a magnetization
+ private :: pawxc_rotate_back_mag_dfpt  ! Rotate back a collinear 1st-order XC potential wrt a magnetization
 
 !Wrappers
  private:: pawxc_drivexc_wrapper    ! wrapper for drivexc_main
@@ -1080,7 +1081,7 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,lm_size,lmselect,nhat,nkxc,nrad,nspd
      else if (nspden==4) then
        mag_ => rhonow(1:nrad,2:4,1)
        mag(1:nrad,ipts,1:3)=mag_(1:nrad,1:3)
-       call rotate_mag(rhonow(:,:,1),rho_updn,mag_,nrad)
+       call pawxc_rotate_mag(rhonow(:,:,1),rho_updn,mag_,nrad)
      end if
 
 !    Make the density positive everywhere (but do not care about gradients)
@@ -1289,7 +1290,7 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,lm_size,lmselect,nhat,nkxc,nrad,nspd
      vxc_diag=reshape(vxc_updn,[nrad*npts,nspden_updn])
      mag_=reshape(mag,[nrad*npts,3])
 #endif
-     call rotate_back_mag(vxc_diag,vxc_nc,mag_,nrad*npts)
+     call pawxc_rotate_back_mag(vxc_diag,vxc_nc,mag_,nrad*npts)
 #ifndef LIBPAW_ISO_C_BINDING
      vxc=reshape(vxc_nc,[nrad,npts,nspden])
      LIBPAW_DEALLOCATE(vxc_diag)
@@ -1945,7 +1946,7 @@ subroutine pawxc3(corexc1,cplex_den,cplex_vxc,d2enxc,ixc,kxc,lm_size,lmselect,nh
        do ii=1,3
          mag(1:nrad,ii)=kxc(:,ipts,ii)
        end do
-       call rotate_mag(rho1arr,rho1arr_,mag,nrad,rho_out_format=2)
+       call pawxc_rotate_mag(rho1arr,rho1arr_,mag,nrad,rho_out_format=2)
      end if
 
 !    =======================================================================
@@ -2341,8 +2342,7 @@ subroutine pawxc3(corexc1,cplex_den,cplex_vxc,d2enxc,ixc,kxc,lm_size,lmselect,nh
    kxc_=reshape(kxc(1:nrad,1:npts,1:3),[nrad*npts,3])
    mag=reshape(kxc(1:nrad,1:npts,nkxc-2:nkxc),[nrad*npts,3])
 #endif
-   call dfpt_rotate_back_mag(vxc1_diag,vxc1_nc,vxc,kxc_,rho1arr,mag,nrad*npts,&
-&                            rot_method=1)
+   call pawxc_rotate_back_mag_dfpt(vxc1_diag,vxc1_nc,vxc,kxc_,rho1arr,mag,nrad*npts)
 #ifndef LIBPAW_ISO_C_BINDING
    vxc1_=reshape(vxc1_nc,[nrad,npts,nspden])
    LIBPAW_DEALLOCATE(vxc1_diag)
@@ -5342,7 +5342,7 @@ end subroutine pawxcmpositron
 !One could add here a section for other codes (i.e. BigDFT, ...)
 #if defined HAVE_LIBPAW_ABINIT
  call pawxc_drivexc_abinit()
-#elif defined LIBPAW_HAVE_LIBXC
+#elif defined HAVE_LIBXC
  call pawxc_drivexc_libxc()
 #else
  write(msg,'(5a)') 'libPAW XC driving routine only implemented in the following cases:',ch10, &
@@ -5357,7 +5357,7 @@ contains
 !!***
 
 #if defined HAVE_LIBPAW_ABINIT
-!!****f* pawxc_drivexc_wrapper/pawxc_drivexc_abinit
+!!****f* m_pawxc/pawxc_drivexc_abinit
 !! NAME
 !!  pawxc_drivexc_abinit
 !!
@@ -5412,8 +5412,8 @@ end subroutine pawxc_drivexc_abinit
 !!***
 #endif
 
-#if defined LIBPAW_HAVE_LIBXC
-!!****f* pawxc_drivexc_wrapper/pawxc_drivexc_libxc
+#if defined HAVE_LIBXC
+!!****f* m_pawxc/pawxc_drivexc_libxc
 !! NAME
 !!  pawxc_drivexc_libxc
 !!
@@ -5504,6 +5504,253 @@ end subroutine pawxc_drivexc_libxc
 #endif
 
 end subroutine pawxc_drivexc_wrapper
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_pawxc/pawxc_rotate_mag
+!! NAME
+!! pawxc_rotate_mag
+!!
+!! FUNCTION
+!!  Project (rotate) a non-collinear density (stored as density+magn.)
+!!   on a magnetization and give a collinear density (stored as [up,dn] or [up+dn,up]).
+!!
+!! INPUTS
+!!  rho_in(vectsize,4)=input non-collinear density and magnetization
+!!  mag(vectsize,3)=magnetization used for projection
+!!  vectsize=size of vector fields
+!!  [rho_out_format]= 1=rho_out is stored as [up,dn]
+!!                    2=rho_out is stored as [up+dn,up]
+!!                    Default=1
+!!
+!! OUTPUT
+!!  rho_out(vectsize,2)=output (projected, collinear) density
+!! PARENTS
+!!
+!!      m_pawxc
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+ subroutine pawxc_rotate_mag(rho_in,rho_out,mag,vectsize,rho_out_format)
+
+#if defined HAVE_LIBPAW_ABINIT
+ use m_xc_noncoll, only : rotate_mag
+#endif
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'pawxc_rotate_mag'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: vectsize
+ integer,intent(in),optional :: rho_out_format
+!arrays
+ real(dp),intent(in) :: rho_in(vectsize,4),mag(vectsize,3)
+ real(dp),intent(out) :: rho_out(vectsize,2)
+
+!Local variables-------------------------------
+!scalars
+#if ! defined HAVE_LIBPAW_ABINIT
+ integer :: ipt
+ real(dp),parameter :: m_norm_min=tol8
+ real(dp) :: m_norm,rho_up,rhoin_dot_mag,rho_up
+#endif
+!arrays
+
+! *************************************************************************
+
+!One could add here a section for other codes (i.e. BigDFT, ...)
+#if defined HAVE_LIBPAW_ABINIT
+ if (present(rho_out_format)) then
+   call rotate_mag(rho_in,rho_out,mag,vectsize,rho_out_format=rho_out_format)
+ else
+   call rotate_mag(rho_in,rho_out,mag,vectsize)
+ end if
+#else
+ do ipt=1,vectsize
+   m_norm=sqrt(mag(ipt,1)**2+mag(ipt,2)**2+mag(ipt,3)**2)
+   rhoin_dot_mag=rho_in(ipt,2)*mag(ipt,1)+rho_in(ipt,3)*mag(ipt,2) &
+&               +rho_in(ipt,4)*mag(ipt,3)
+   if(m_norm>m_norm_min)then
+     rho_out(ipt,1)=half*(rho_in(ipt,1)+rhoin_dot_mag/m_norm)
+     rho_out(ipt,2)=half*(rho_in(ipt,1)-rhoin_dot_mag/m_norm)
+   else
+     rho_out(ipt,1)=half*rho_in(ipt,1)
+     rho_out(ipt,2)=half*rho_in(ipt,1)
+   end if
+ end do
+ if (present(rho_out_format)) then
+   if (rho_out_format==2) then
+     do ipt=1,vectsize
+       rho_up=rho_out(ipt,1)
+       rho_out(ipt,1)=rho_up+rho_out(ipt,2)
+       rho_out(ipt,2)=rho_up
+     end do
+   end if
+ end if
+#endif
+
+end subroutine pawxc_rotate_mag
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_pawxc/pawxc_rotate_back_mag
+!! NAME
+!! pawxc_rotate_back_mag
+!!
+!! FUNCTION
+!!  Rotate back a collinear XC potential (stored as up+dn) with respect to
+!!   a magnetization and give a non-collinear XC potential
+!!   (stored as up_up, dn_dn, Re{up_dn}, Im{up_dn}).
+!!
+!! INPUTS
+!!  vxc_in(vectsize,2)=input collinear XC potential
+!!  mag(vectsize,3)=magnetization used for projection
+!!  vectsize=size of vector fields
+!!
+!! OUTPUT
+!!  vxc_out(vectsize,4)=output non-collinear XC potential
+!!
+!! PARENTS
+!!      m_pawxc
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+ subroutine pawxc_rotate_back_mag(vxc_in,vxc_out,mag,vectsize)
+
+#if defined HAVE_LIBPAW_ABINIT
+ use m_xc_noncoll, only : rotate_back_mag
+#endif
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'pawxc_rotate_back_mag'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: vectsize
+!arrays
+ real(dp),intent(in) :: vxc_in(vectsize,2),mag(vectsize,3)
+ real(dp),intent(out) :: vxc_out(vectsize,4)
+
+!Local variables-------------------------------
+!scalars
+#if ! defined HAVE_LIBPAW_ABINIT
+ integer :: ipt
+ real(dp),parameter :: m_norm_min=tol8
+ real(dp) :: dvdn,dvdz,m_norm
+#endif
+!arrays
+
+! *************************************************************************
+
+!One could add here a section for other codes (i.e. BigDFT, ...)
+#if defined HAVE_LIBPAW_ABINIT
+ call rotate_back_mag(vxc_in,vxc_out,mag,vectsize)
+#else
+ do ipt=1,vectsize
+   m_norm=sqrt(mag(ipt,1)**2+mag(ipt,2)**2+mag(ipt,3)**2)
+   dvdn=half*(vxc_in(ipt,1)+vxc_in(ipt,2))
+   if (m_norm>m_norm_min) then
+     dvdz=half*(vxc_in(ipt,1)-vxc_in(ipt,2))/m_norm
+     vxc_out(ipt,1)=dvdn+mag(ipt,3)*dvdz
+     vxc_out(ipt,2)=dvdn-mag(ipt,3)*dvdz
+     vxc_out(ipt,3)= mag(ipt,1)*dvdz
+     vxc_out(ipt,4)=-mag(ipt,2)*dvdz
+   else
+     vxc_out(ipt,1:2)=dvdn
+     vxc_out(ipt,3:4)=zero
+   end if
+ end do
+#endif
+
+end subroutine pawxc_rotate_back_mag
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_pawxc/pawxc_rotate_back_mag_dfpt
+!! NAME
+!! pawxc_rotate_back_mag_dfpt
+!!
+!! FUNCTION
+!!  Rotate back a 1st-order collinear XC potential (stored as up+dn) with respect to
+!!   a magnetization and give a 1st-order non-collinear XC potential
+!!   (stored as up_up, dn_dn, Re{up_dn}, Im{up_dn}).
+!!
+!! INPUTS
+!!  mag(vectsize,3)=0-order magnetization used for projection
+!!  rho1(vectsize,4)=1st-order non-collinear density and magnetization
+!!  vxc(vectsize,4)=0-order non-collinear XC potential
+!!  kxc(vectsize,nkxc)=0-order XC kernel (associated to vxc)
+!!  vxc1_in(vectsize,2)=input 1st-order collinear XC potential
+!!  vectsize=size of vector fields
+!!
+!! OUTPUT
+!!  vxc1_out(vectsize,4)=output 1st-order non-collinear XC potential
+!!
+!! PARENTS
+!!      m_pawxc
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+ subroutine pawxc_rotate_back_mag_dfpt(vxc1_in,vxc1_out,vxc,kxc,rho1,mag,vectsize)
+
+#if defined HAVE_LIBPAW_ABINIT
+ use m_xc_noncoll, only : rotate_back_mag_dfpt
+#endif
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'pawxc_rotate_back_mag_dfpt'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: vectsize
+!arrays
+ real(dp),intent(in) :: kxc(:,:),mag(vectsize,3),rho1(vectsize,4)
+ real(dp),intent(in) :: vxc(vectsize,4),vxc1_in(vectsize,2)
+ real(dp),intent(out) :: vxc1_out(vectsize,4)
+
+!Local variables-------------------------------
+!scalars
+#if ! defined HAVE_LIBPAW_ABINIT
+ character(len=100) :: msg
+#endif
+!arrays
+
+! *************************************************************************
+
+!One could add here a section for other codes (i.e. BigDFT, ...)
+#if defined HAVE_LIBPAW_ABINIT
+ call rotate_back_mag_dfpt(vxc1_in,vxc1_out,vxc,kxc,rho1,mag,vectsize)
+#else
+ msg='[LIBPAW] Non-collinear DFPT not available (only in ABINIT)!'
+ MSG_ERROR(msg)
+#endif
+
+end subroutine pawxc_rotate_back_mag_dfpt
 !!***
 
 !----------------------------------------------------------------------

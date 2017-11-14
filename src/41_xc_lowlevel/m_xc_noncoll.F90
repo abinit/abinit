@@ -42,7 +42,7 @@ MODULE m_xc_noncoll
 ! public procedures
  public :: rotate_mag           ! Rotate a non-collinear density wrt a magnetization
  public :: rotate_back_mag      ! Rotate back a collinear XC potential wrt a magnetization
- public :: dfpt_rotate_back_mag ! Rotate back a collinear 1st-order XC potential wrt a magnetization
+ public :: rotate_back_mag_dfpt ! Rotate back a collinear 1st-order XC potential wrt a magnetization
 
 !Tolerance on magnetization norm
  real(dp),parameter :: m_norm_min=tol8
@@ -245,9 +245,9 @@ subroutine rotate_back_mag(vxc_in,vxc_out,mag,vectsize,&
 end subroutine rotate_back_mag
 !!***
 
-!!****t* m_xc_noncoll/dfpt_rotate_back_mag
+!!****t* m_xc_noncoll/rotate_back_mag_dfpt
 !! NAME
-!!  dfpt_rotate_back_mag
+!!  rotate_back_mag_dfpt
 !!
 !! FUNCTION
 !!  Rotate back a 1st-order collinear XC potential (stored as up+dn) with respect to
@@ -258,10 +258,10 @@ end subroutine rotate_back_mag
 !!  mag(vectsize,3)=0-order magnetization used for projection
 !!  rho1(vectsize,4)=1st-order non-collinear density and magnetization
 !!  vxc(vectsize,4)=0-order non-collinear XC potential
+!!  kxc(vectsize,nkxc)=0-order XC kernel (associated to vxc)
 !!  vxc1_in(vectsize,2)=input 1st-order collinear XC potential
 !!  vectsize=size of vector fields
 !!  [mag_norm_in(vectsize)]= --optional-- norm of 0-order mag(:) at each point of the grid
-!!  [kxc(vectsize,nkxc)]= --optional-- XC kernel (associated to vxc_in)
 !!  [rot_method]=Select method used to compute rotation matrix (1, 2 or 3)
 !!
 !! NOTES
@@ -282,14 +282,14 @@ end subroutine rotate_back_mag
 !!
 !! SOURCE
 
-subroutine dfpt_rotate_back_mag(vxc1_in,vxc1_out,vxc,kxc,rho1,mag,vectsize,&
+subroutine rotate_back_mag_dfpt(vxc1_in,vxc1_out,vxc,kxc,rho1,mag,vectsize,&
 &                               mag_norm_in,rot_method) ! optional arguments
 
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'dfpt_rotate_back_mag'
+#define ABI_FUNC 'rotate_back_mag_dfpt'
 !End of the abilint section
 
  implicit none
@@ -299,8 +299,7 @@ subroutine dfpt_rotate_back_mag(vxc1_in,vxc1_out,vxc,kxc,rho1,mag,vectsize,&
  integer,intent(in) :: vectsize
  integer,intent(in),optional :: rot_method
 !arrays
- real(dp),intent(in) :: kxc(:,:)
- real(dp),intent(in) :: mag(vectsize,3),rho1(vectsize,4)
+ real(dp),intent(in) :: kxc(:,:),mag(vectsize,3),rho1(vectsize,4)
  real(dp),intent(in) :: vxc(vectsize,4),vxc1_in(vectsize,2)
  real(dp),intent(in),optional :: mag_norm_in(vectsize)
  real(dp),intent(out) :: vxc1_out(vectsize,4)
@@ -537,7 +536,7 @@ subroutine dfpt_rotate_back_mag(vxc1_in,vxc1_out,vxc,kxc,rho1,mag,vectsize,&
 
 !DBG_EXIT("COLL")
 
-end subroutine dfpt_rotate_back_mag
+end subroutine rotate_back_mag_dfpt
 !!***
 
 !----------------------------------------------------------------------

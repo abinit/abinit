@@ -58,7 +58,7 @@
 !!      dfpt_dyxc1,dfpt_nstdy,dfpt_nstpaw,dfpt_rhotov,nres2vres
 !!
 !! CHILDREN
-!!      dfpt_mkvxc,timab
+!!      dfpt_mkvxc,timab,rotate_mag,rotate_back_mag,rotate_back_mag_dfpt
 !!
 !! SOURCE
 
@@ -186,7 +186,7 @@ subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,bxc,mpi_enreg,nfft,ngfft,nhat,nhatdi
          vxc1(ifft,3:4)=zero
        end do
      else
-       call dfpt_rotate_back_mag(vxc1_diag,vxc1,vxc,kxc,rhor1_,mag,nfft,&
+       call rotate_back_mag_dfpt(vxc1_diag,vxc1,vxc,kxc,rhor1_,mag,nfft,&
 &                                mag_norm_in=m_norm)
      end if
    else
