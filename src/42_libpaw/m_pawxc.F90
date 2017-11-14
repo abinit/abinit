@@ -882,8 +882,8 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,lm_size,lmselect,nhat,nkxc,nrad,nspd
  real(dp),allocatable :: dylmdr(:,:,:),exci(:),ff(:),grho2_updn(:,:),gxc(:,:,:,:)
  real(dp),allocatable :: rhoarr(:,:),rho_updn(:,:),vxci(:,:)
  real(dp),allocatable,target :: mag(:,:,:),rhohat(:,:,:),rhonow(:,:,:)
- real(dp), ABI_CONTIGUOUS pointer :: mag_(:,:),rho_(:,:,:)
- real(dp), ABI_CONTIGUOUS pointer :: vxc_diag(:,:),vxc_nc(:,:),vxc_updn(:,:,:)
+ real(dp), LIBPAW_CONTIGUOUS pointer :: mag_(:,:),rho_(:,:,:)
+ real(dp), LIBPAW_CONTIGUOUS pointer :: vxc_diag(:,:),vxc_nc(:,:),vxc_updn(:,:,:)
 #ifdef LIBPAW_ISO_C_BINDING
  type(C_PTR) :: cptr
 #endif
@@ -1802,8 +1802,8 @@ subroutine pawxc_dfpt(corexc1,cplex_den,cplex_vxc,d2enxc,ixc,kxc,lm_size,lmselec
  real(dp),allocatable :: dgxc1(:),drho1(:,:),drho1core(:,:),dylmdr(:,:,:)
  real(dp),allocatable :: ff(:),gg(:),grho1arr(:,:,:),gxc1(:,:,:,:)
  real(dp),allocatable,target :: rhohat1(:,:,:),rho1arr(:,:)
- real(dp), ABI_CONTIGUOUS pointer :: kxc_(:,:),mag(:,:),rho1_(:,:,:),rho1arr_(:,:)
- real(dp), ABI_CONTIGUOUS pointer :: vxc1_(:,:,:),vxc1_diag(:,:),vxc1_nc(:,:),vxc1_updn(:,:,:)
+ real(dp), LIBPAW_CONTIGUOUS pointer :: kxc_(:,:),mag(:,:),rho1_(:,:,:),rho1arr_(:,:)
+ real(dp), LIBPAW_CONTIGUOUS pointer :: vxc1_(:,:,:),vxc1_diag(:,:),vxc1_nc(:,:),vxc1_updn(:,:,:)
 #ifdef LIBPAW_ISO_C_BINDING
  type(C_PTR) :: cptr
 #endif
@@ -3743,7 +3743,7 @@ end subroutine pawxcsphpositron
  real(dp),allocatable :: v0sum(:,:),v1sum(:,:),v2sum(:,:,:)
  real(dp),allocatable :: vxc1(:,:),vxc2(:,:),vxcdn1(:,:),vxcdn2(:,:),vxci(:,:)
  real(dp),allocatable,target :: rho_updn(:,:,:)
- real(dp), ABI_CONTIGUOUS pointer :: mag_(:,:),rho_nc(:,:)
+ real(dp), LIBPAW_CONTIGUOUS pointer :: mag_(:,:),rho_nc(:,:)
 #ifdef LIBPAW_ISO_C_BINDING
  type(C_PTR) :: cptr
 #endif
