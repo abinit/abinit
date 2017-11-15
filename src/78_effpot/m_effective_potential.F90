@@ -3596,7 +3596,7 @@ subroutine effective_potential_writeNETCDF(eff_pot,option,filename)
  character(len=500) :: msg
  character(len=fnlen) :: namefile
 !arrays
- real :: strain(9,6)
+ real(dp) :: strain(9,6)
 
 ! *************************************************************************
 

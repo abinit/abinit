@@ -127,7 +127,7 @@ subroutine effpot_mpi_init(cell_number,effpot_mpi,ndiv,nrpt,comm)
  integer :: i1,i2,i3,icell,ii,irpt
  integer :: my_rank,ncell_alone,ncell,nproc
  integer :: npcell,nprpt,virt_rank
- integer :: master = zero
+ integer :: master = 0
  logical :: iam_master = .false.
  character(len=500) :: msg
 !array
@@ -179,8 +179,8 @@ subroutine effpot_mpi_init(cell_number,effpot_mpi,ndiv,nrpt,comm)
 !Allocation of array
  ABI_ALLOCATE(effpot_mpi%my_cells,(effpot_mpi%my_ncell))
  ABI_ALLOCATE(effpot_mpi%my_index_cells,(effpot_mpi%my_ncell,3))
- effpot_mpi%my_cells = zero
- effpot_mpi%my_index_cells = zero
+ effpot_mpi%my_cells = 0
+ effpot_mpi%my_index_cells = 0
 
  virt_rank = aint(real(my_rank,sp)/(ndiv))
  
@@ -288,17 +288,17 @@ subroutine effpot_mpi_free(effpot_mpi)
  effpot_mpi%my_nrpt = 0
 
  if (allocated(effpot_mpi%my_cells)) then
-   effpot_mpi%my_cells(:) = zero
+   effpot_mpi%my_cells(:) = 0
    ABI_DEALLOCATE(effpot_mpi%my_cells)
  end if
 
  if (allocated(effpot_mpi%my_index_cells)) then
-   effpot_mpi%my_index_cells(:,:) = zero
+   effpot_mpi%my_index_cells(:,:) = 0
    ABI_DEALLOCATE(effpot_mpi%my_index_cells)
  end if
 
  if (allocated(effpot_mpi%my_rpt)) then
-   effpot_mpi%my_rpt(:) = zero
+   effpot_mpi%my_rpt(:) = 0
    ABI_DEALLOCATE(effpot_mpi%my_rpt)
  end if
 

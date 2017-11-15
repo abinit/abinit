@@ -79,7 +79,7 @@ CONTAINS  !=====================================================================
 !! nbancoeff = number of banned coeffcients 
 !! ncycle_in = number of maximum cycle (maximum coefficient to be fitted)
 !! nfixcoeff = Number of coefficients imposed during the fit process
-!! powers(2) = array with the minimal and maximal power to be computed
+!! power_disps(2) = array with the minimal and maximal power_disp to be computed
 !! comm = MPI communicator
 !! cutoff_in = optional,cut off to apply to the range of interation if 
 !!           the coefficient are genereted in this routine
@@ -101,7 +101,7 @@ CONTAINS  !=====================================================================
 !!
 !! SOURCE
 
-subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,powers,&
+subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,power_disps,&
 &                                   nbancoeff,ncycle_in,nfixcoeff,option,comm,cutoff_in,&
 &                                   positive,verbose,anharmstr,spcoupling)
 
@@ -121,7 +121,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
  integer,intent(in) :: generateterm,nbancoeff,option
 !arrays
  integer,intent(in) :: fixcoeff(nfixcoeff), bancoeff(nbancoeff)
- integer,intent(in) :: powers(2)
+ integer,intent(in) :: power_disps(2)
  type(effective_potential_type),intent(inout) :: eff_pot
  type(abihist),intent(inout) :: hist
  real(dp),optional,intent(in) :: cutoff_in
@@ -227,7 +227,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
        call wrtout(std_out,message,'COLL') 
      end if
 
-     call polynomial_coeff_getNorder(coeffs_tmp,eff_pot%crystal,cutoff,ncoeff_tot,powers,0,comm,&
+     call polynomial_coeff_getNorder(coeffs_tmp,eff_pot%crystal,cutoff,ncoeff_tot,power_disps,0,comm,&
 &                                        anharmstr=need_anharmstr,spcoupling=need_spcoupling)
 
      if(need_verbose)then
@@ -1320,7 +1320,7 @@ subroutine fit_polynomial_coeff_solve(coefficients,fcart_coeffs,fcart_diff,&
  ABI_ALLOCATE(IWORK,(N))
  ABI_ALLOCATE(SWORK,(N*(N+NRHS)))
  A=zero; B=zero;
- AF = zero; IPIV = one; 
+ AF = zero; IPIV = 1; 
  R = one; C = one; 
  FERR = zero; BERR = zero
  IWORK = 0; WORK = 0
@@ -1604,8 +1604,9 @@ subroutine fit_polynomial_coeff_getFS(coefficients,du_delta,displacement,energy_
  type(polynomial_coeff_type), intent(in) :: coefficients(ncoeff_max)
 !Local variables-------------------------------
 !scalar
- integer :: i1,i2,i3,ia1,ia2,ib1,ib2,ii,icell,icoeff,icoeff_tmp
- integer :: idir1,idir2,idisp1,idisp2,iterm,itime,power
+ integer :: i1,i2,i3,ia1,ia2,ib1,ib2,ii,icell,icoeff,icoeff_tmp 
+ integer :: idir1,idir2,idisp1,idisp2,idisp1_strain,idisp2_strain
+ integer :: iterm,itime,ndisp,ndisp_tot,nstrain,power_disp,power_strain
  real(dp):: disp1,disp2,tmp1,tmp2,tmp3,weight
 !arrays
  integer :: cell_atoma1(3),cell_atoma2(3)
@@ -1633,38 +1634,42 @@ subroutine fit_polynomial_coeff_getFS(coefficients,du_delta,displacement,energy_
            icoeff = coeffs(icoeff_tmp)
 !          Loop over terms of this coefficient
            do iterm=1,coefficients(icoeff)%nterm
+             ndisp = coefficients(icoeff)%terms(iterm)%ndisp
+             nstrain = coefficients(icoeff)%terms(iterm)%nstrain
+             ndisp_tot = ndisp + nstrain
 !            Set the weight of this term
              weight =coefficients(icoeff)%terms(iterm)%weight
              tmp1 = one
 !            Loop over displacement and strain
-             do idisp1=1,coefficients(icoeff)%terms(iterm)%ndisp
+             do idisp1=1,ndisp_tot
 
 !              Set to one the acculation of forces and strain
                tmp2 = one
                tmp3 = one
-
-!              Set the power of the displacement:
-               power = coefficients(icoeff)%terms(iterm)%power(idisp1)
-
-!              Get the direction of the displacement or strain
-               idir1 = coefficients(icoeff)%terms(iterm)%direction(idisp1)
-
 !              Strain case idir => -6, -5, -4, -3, -2 or -1
-               if (idir1 < 0)then
-                 if(abs(strain(abs(idir1),itime)) > tol10)then
+               if (idisp1 > ndisp)then
+                 idisp1_strain = idisp1 - ndisp
+                 power_strain = coefficients(icoeff)%terms(iterm)%power_strain(idisp1_strain)
+!                Get the direction of the displacement or strain
+                 idir1 = coefficients(icoeff)%terms(iterm)%strain(idisp1_strain)                 
+                 if(abs(strain(idir1,itime)) > tol10)then
 !                  Accumulate energy fo each displacement (\sum ((A_x-O_x)^Y(A_y-O_c)^Z))
-                   tmp1 = tmp1 * (strain(abs(idir1),itime))**power
-                   if(power > 1) then
+                   tmp1 = tmp1 * (strain(idir1,itime))**power_strain
+                   if(power_disp > 1) then
 !                    Accumulate stress for each strain (\sum (Y(eta_2)^Y-1(eta_2)^Z+...))
-                     tmp3 = tmp3 *  power*(strain(abs(idir1),itime))**(power-1)
+                     tmp3 = tmp3 *  power_strain*(strain(idir1,itime))**(power_strain-1)
                    end if
                  else
                    tmp1 = zero
-                   if(power > 1) then
+                   if(power_disp > 1) then
                      tmp3 = zero
                    end if
                  end if
                else
+!              Set the power_disp of the displacement:
+                 power_disp = coefficients(icoeff)%terms(iterm)%power_disp(idisp1)
+  !              Get the direction of the displacement or strain
+                 idir1 = coefficients(icoeff)%terms(iterm)%direction(idisp1)
 !                Displacement case idir = 1, 2  or 3
 !                indexes of the cell of the atom a
                  cell_atoma1 = coefficients(icoeff)%terms(iterm)%cell(:,1,idisp1)
@@ -1708,35 +1713,39 @@ subroutine fit_polynomial_coeff_getFS(coefficients,du_delta,displacement,energy_
 
                  if(abs(disp1) > tol10 .or. abs(disp2)> tol10)then
 !                  Accumulate energy fo each displacement (\sum ((A_x-O_x)^Y(A_y-O_c)^Z))
-                   tmp1 = tmp1 * (disp1-disp2)**power
-                   if(power > 1) then
+                   tmp1 = tmp1 * (disp1-disp2)**power_disp
+                   if(power_disp > 1) then
 !                    Accumulate forces for each displacement (\sum (Y(A_x-O_x)^Y-1(A_y-O_c)^Z+...))
-                     tmp2 = tmp2 * power*(disp1-disp2)**(power-1)
+                     tmp2 = tmp2 * power_disp*(disp1-disp2)**(power_disp-1)
                    end if
                  else
                    tmp1 = zero
-                   if(power > 1) then
+                   if(power_disp > 1) then
                      tmp2 = zero
                    end if
                  end if
                end if
              
-               do idisp2=1,coefficients(icoeff)%terms(iterm)%ndisp               
+               do idisp2=1,ndisp_tot
                  if(idisp2 /= idisp1) then
 
-!                 Set the power of the displacement:
-                   power = coefficients(icoeff)%terms(iterm)%power(idisp2)
-!                  Set the direction of the displacement:
-                   idir2 = coefficients(icoeff)%terms(iterm)%direction(idisp2)
-
 !                  Strain case
-                   if (idir2 < 0)then
+                   if (idisp2 > ndisp)then
+                     idisp2_strain = idisp2 - ndisp
+                     idir2 = coefficients(icoeff)%terms(iterm)%strain(idisp2_strain)
+!                    Set the power_strain of the strain:
+                     power_strain = coefficients(icoeff)%terms(iterm)%power_strain(idisp2_strain)
 !                    Accumulate energy forces
-                     tmp2 = tmp2 * (strain(abs(idir2),itime))**power
+                     tmp2 = tmp2 * (strain(idir2,itime))**power_strain
 !                    Accumulate stress for each strain (\sum (Y(eta_2)^Y-1(eta_2)^Z+...))
-                     tmp3 = tmp3 * (strain(abs(idir2),itime))**power
+                     tmp3 = tmp3 * (strain(idir2,itime))**power_strain
 !                  Atomic displacement case
                    else
+!                    Set the power_disp of the displacement:
+                     power_disp = coefficients(icoeff)%terms(iterm)%power_disp(idisp2)
+!                    Set the direction of the displacement:
+                     idir2 = coefficients(icoeff)%terms(iterm)%direction(idisp2)
+
                      cell_atoma2=coefficients(icoeff)%terms(iterm)%cell(:,1,idisp2)
                      if(cell_atoma2(1)/=0.or.cell_atoma2(2)/=0.or.cell_atoma2(3)/=0) then
                        cell_atoma2(1) =  i1 + cell_atoma2(1)
@@ -1775,16 +1784,16 @@ subroutine fit_polynomial_coeff_getFS(coefficients,du_delta,displacement,energy_
                      disp1 = displacement(idir2,ia2,itime)
                      disp2 = displacement(idir2,ib2,itime)
                    
-                     tmp2 = tmp2 * (disp1-disp2)**power
-                     tmp3 = tmp3 * (disp1-disp2)**power
+                     tmp2 = tmp2 * (disp1-disp2)**power_disp
+                     tmp3 = tmp3 * (disp1-disp2)**power_disp
 
                    end if
                  end if
                end do
                
-               if(idir1<0)then
+               if(idisp1 > ndisp)then
 !                Accumule stress tensor
-                 strten_out(abs(idir1),itime,icoeff_tmp) = strten_out(abs(idir1),itime,icoeff_tmp) + &
+                 strten_out(idir1,itime,icoeff_tmp) = strten_out(idir1,itime,icoeff_tmp) + &
 &                                                      weight * tmp3 / ucvol(itime)
                else
 !                Accumule  forces

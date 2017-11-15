@@ -116,15 +116,18 @@ module m_effective_potential_file
 
  interface
    subroutine effpot_xml_readCoeff(filename,ncoeff,ndisp,nterm,&
-&                                 coefficient,atindx,cell,direction,power,weight)&
+&                                 coefficient,atindx,cell,direction,power_disp,&
+&                                 power_strain,strain,weight)&
 &                          bind(C,name="effpot_xml_readCoeff")
      use iso_c_binding, only : C_CHAR,C_DOUBLE,C_INT
      character(kind=C_CHAR) :: filename(*)
+     integer(C_INT) :: ncoeff,ndisp,nterm
      integer(C_INT) :: atindx(ncoeff,nterm,2,ndisp)
      integer(C_INT) :: cell(ncoeff,nterm,3,2,ndisp)
-     integer(C_INT) :: ncoeff,ndisp,nterm
      integer(C_INT) :: direction(ncoeff,nterm,ndisp)
-     integer(C_INT) :: power(ncoeff,nterm,ndisp)
+     integer(C_INT) :: strain(ncoeff,nterm,ndisp)
+     integer(C_INT) :: power_disp(ncoeff,nterm,ndisp)
+     integer(C_INT) :: power_strain(ncoeff,nterm,ndisp)
      real(C_DOUBLE) :: coefficient(ncoeff)
      real(C_DOUBLE) :: weight(ncoeff,nterm)
    end subroutine effpot_xml_readCoeff
@@ -156,7 +159,7 @@ module m_effective_potential_file
      character(kind=C_CHAR) :: filename(*)
 !     character(kind=C_CHAR) :: name(*)
      type(C_PTR) :: name
-     integer(C_INT) :: coeff,ndisp_max,nterm_max
+     integer(C_INT) :: ncoeff,ndisp_max,nterm_max
    end subroutine effpot_xml_getDimCoeff
  end interface
 
@@ -561,6 +564,7 @@ subroutine effective_potential_file_getType(filename,filetype)
      return
    end if
  end if
+ ncerr = nf90_close(ncid)
 #endif
 
  if(filetype/=0) return
@@ -3009,7 +3013,7 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
 
  !Local variables-------------------------------
  !scalar
- integer :: ii,jj,my_rank,ndisp,ncoeff,nterm_max,ndisp_max,nproc,nterm
+ integer :: ii,jj,my_rank,ndisp,ncoeff,nterm_max,nstrain,ndisp_max,nproc,nterm
 ! character(len=200),allocatable :: name(:)
  character(len=200) :: name
 #ifdef HAVE_LIBXML
@@ -3018,7 +3022,7 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
 
 #ifndef HAVE_LIBXML
  integer :: funit = 1,ios = 0
- integer :: icoeff,idisp,iterm,mu
+ integer :: icoeff,idisp,istrain,iterm,mu
  logical :: found,found2,displacement
  character (len=XML_RECL) :: line,readline
  character (len=XML_RECL) :: strg,strg1
@@ -3030,7 +3034,8 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
  logical :: debug =.FALSE.
  !arrays
  real(dp),allocatable :: coefficient(:),weight(:,:)
- integer,allocatable :: atindx(:,:,:,:), cell(:,:,:,:,:),direction(:,:,:),power(:,:,:)
+ integer,allocatable :: atindx(:,:,:,:), cell(:,:,:,:,:),direction(:,:,:),power_disp(:,:,:)
+ integer,allocatable :: strain(:,:,:),power_strain(:,:,:)
  type(polynomial_coeff_type),dimension(:),allocatable :: coeffs
  type(polynomial_term_type),dimension(:,:),allocatable :: terms
 
@@ -3047,10 +3052,10 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
  iam_master = (my_rank == master)
 
 !Get Dimention of system and allocation/initialisation of array
- ncoeff = 0
- nterm  = 0
- ndisp  = 0
-
+ ncoeff  = 0
+ nterm   = 0
+ ndisp   = 0
+ nstrain = 0
  call effective_potential_file_getDimCoeff(filename,ncoeff,ndisp_max,nterm_max)
 
 !  Do some checks
@@ -3096,12 +3101,15 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
    ABI_ALLOCATE(coefficient,(ncoeff))
    ABI_ALLOCATE(cell,(ncoeff,nterm_max,3,2,ndisp_max))
    ABI_ALLOCATE(direction,(ncoeff,nterm_max,ndisp_max))
-   ABI_ALLOCATE(power,(ncoeff,nterm_max,ndisp_max))
+   ABI_ALLOCATE(strain,(ncoeff,nterm_max,ndisp_max))
+   ABI_ALLOCATE(power_disp,(ncoeff,nterm_max,ndisp_max))
+   ABI_ALLOCATE(power_strain,(ncoeff,nterm_max,ndisp_max))
    ABI_ALLOCATE(weight,(ncoeff,nterm_max))
 
 !  Read the values of this term with libxml
    call effpot_xml_readCoeff(char_f2c(trim(filename)),ncoeff,ndisp_max,nterm_max,&
-&                            coefficient,atindx,cell,direction,power,weight) !  
+&                            coefficient,atindx,cell,direction,power_disp,power_strain,&
+&                            strain,weight)
 !  In the XML the atom index begin to zero
 !  Need to shift for fortran array
    atindx(:,:,:,:) = atindx(:,:,:,:) + 1
@@ -3110,8 +3118,9 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
      do iterm=1,nterm_max
 !      Initialisation of the polynomial_term structure with the values from the
        call polynomial_term_init(atindx(icoeff,iterm,:,:),cell(icoeff,iterm,:,:,:),&
-&                                direction(icoeff,iterm,:),ndisp_max,terms(icoeff,iterm),&
-&                                power(icoeff,iterm,:),weight(icoeff,iterm),check=.true.)
+&                                direction(icoeff,iterm,:),ndisp_max,ndisp_max,terms(icoeff,iterm),&
+&                                power_disp(icoeff,iterm,:),power_strain(icoeff,iterm,:),&
+&                                strain(icoeff,iterm,:),weight(icoeff,iterm),check=.true.)
      end do
 !    Initialisation of the polynomial_coefficent structure with the values
      call polynomial_coeff_init(coefficient(icoeff),nterm_max,coeffs(icoeff),&
@@ -3139,7 +3148,9 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
    ABI_ALLOCATE(coefficient,(1))
    ABI_ALLOCATE(cell,(1,1,3,2,ndisp_max))
    ABI_ALLOCATE(direction,(1,1,ndisp_max))
-   ABI_ALLOCATE(power,(1,1,ndisp_max))
+   ABI_ALLOCATE(strain,(1,1,ndisp_max))
+   ABI_ALLOCATE(power_disp,(1,1,ndisp_max))
+   ABI_ALLOCATE(power_strain,(1,1,ndisp_max))
    ABI_ALLOCATE(weight,(1,1))
 !  Loop over the file
 !  Read the values of all the terms with fortran
@@ -3178,13 +3189,12 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
 !          End read headers of coefficient
 !          Reset counter
            found  = .false.
-           atindx = 0
-           cell   = 0
-           direction = 0
-           power  = 0           
-           iterm  = 0
-           idisp  = 0  
-           nterm  = 0
+           atindx = 0;  cell   = 0 ;  direction = 0
+           strain = 0; power_strain = 0;  power_disp  = 0
+           iterm   = 0
+           idisp   = 0
+           istrain = 0
+           nterm   = 0
            do while (.not.found)
              read(funit,'(a)',iostat=ios) readline
              call rmtabfromline(readline)
@@ -3196,7 +3206,9 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
              if ((line(1:5)==char(60)//'term')) then
                nterm = nterm + 1
                ndisp = 0
+               nstrain = 0
                idisp = 0
+               istrain = 0
                displacement = .true.
                call rdfromline('weight',line,strg)
                if (strg/="") then
@@ -3211,21 +3223,17 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
                    displacement = .false.
                  end if
                  if ((line(1:7)==char(60)//'strain')) then
-                   ndisp = ndisp + 1
-                   idisp = idisp + 1
+                   nstrain = nstrain + 1
+                   istrain = istrain + 1
                    call rdfromline('power',line,strg)
                    if (strg/="") then 
                      strg1=trim(strg)
-                     read(strg1,*) power(1,1,idisp)
+                     read(strg1,*) power_strain(1,1,istrain)
                    end if
                    call rdfromline('voigt',line,strg)
                    if (strg/="") then 
                      strg1=trim(strg)
-                     read(strg1,*) direction(1,1,idisp) 
-                     direction(1,1,idisp) = -1*direction(1,1,idisp) 
-!                    Set to -1 the useless quantitiers for strain                       
-                     atindx(1,1,:,idisp)  = -1
-                     cell(1,1,:,:,idisp)  = -1
+                     read(strg1,*) strain(1,1,istrain) 
                    end if
                  end if
                  if ((line(1:18)==char(60)//'displacement_diff')) then
@@ -3252,7 +3260,7 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
                    call rdfromline('power',line,strg)
                    if (strg/="") then
                      strg1=trim(strg)
-                     read(strg1,*) power(1,1,idisp)
+                     read(strg1,*) power_disp(1,1,idisp)
                    end if
                    do while(found2)
                      read(funit,'(a)',iostat=ios) readline
@@ -3309,8 +3317,9 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
 !              previous step
                iterm = iterm + 1
                call polynomial_term_init(atindx(1,1,:,:),cell(1,1,:,:,:),&
-&                                        direction(1,1,:),ndisp,terms(1,iterm),&
-&                                        power(1,1,:),weight(1,1),check=.true.)
+&                                        direction(1,1,:),ndisp,nstrain,terms(1,iterm),&
+&                                        power_disp(1,1,:),power_strain(1,1,:),&
+&                                        strain(1,1,:),weight(1,1),check=.true.)
              end if!end if term
            end do!end do while found (coeff)
 
@@ -3337,7 +3346,9 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
      ABI_DEALLOCATE(coefficient)
      ABI_DEALLOCATE(cell)
      ABI_DEALLOCATE(direction)
-     ABI_DEALLOCATE(power)
+     ABI_DEALLOCATE(strain)
+     ABI_DEALLOCATE(power_disp)
+     ABI_DEALLOCATE(power_strain)
      ABI_DEALLOCATE(weight)
      ABI_DEALLOCATE(symbols)
    end if !End if master
@@ -3359,7 +3370,7 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
        write(200+my_rank,*)"cell1",coeffs(ii)%terms(jj)%cell(:,1,:)
        write(200+my_rank,*)"cell2",coeffs(ii)%terms(jj)%cell(:,2,:)
        write(200+my_rank,*)"direction",coeffs(ii)%terms(jj)%direction
-       write(200+my_rank,*)"power",coeffs(ii)%terms(jj)%power
+       write(200+my_rank,*)"power_disp",coeffs(ii)%terms(jj)%power_disp
        write(200+my_rank,*)"weight",coeffs(ii)%terms(jj)%weight
 #else
        write(300+my_rank,*)"ii,jj,ndisp,nterm",ii,jj,coeffs(ii)%nterm,coeffs(ii)%terms(jj)%ndisp
@@ -3367,7 +3378,7 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
        write(300+my_rank,*)"cell1",coeffs(ii)%terms(jj)%cell(:,1,:)
        write(300+my_rank,*)"cell2",coeffs(ii)%terms(jj)%cell(:,2,:)
        write(300+my_rank,*)"direction",coeffs(ii)%terms(jj)%direction
-       write(300+my_rank,*)"power",coeffs(ii)%terms(jj)%power
+       write(300+my_rank,*)"power_disp",coeffs(ii)%terms(jj)%power_disp
        write(300+my_rank,*)"weight",coeffs(ii)%terms(jj)%weight
 #endif
      end do
@@ -3622,8 +3633,8 @@ subroutine effective_potential_file_mapHistToRef(eff_pot,hist,comm,verbose)
  ABI_ALLOCATE(list,(natom_hist))
  ABI_ALLOCATE(xred_hist,(3,natom_hist))
  ABI_ALLOCATE(xred_ref,(3,natom_hist))
- blkval = one
- list   = zero
+ blkval = 1
+ list   = 0
  call xcart2xred(eff_pot%supercell%natom,eff_pot%supercell%rprimd,&
 &                eff_pot%supercell%xcart,xred_ref)
 
