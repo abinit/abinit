@@ -319,14 +319,16 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
      end if
 
    else if (abs(dtset%eph_extrael) > tol12) then
-     NOT_IMPLEMENTED_ERROR()
+     !NOT_IMPLEMENTED_ERROR()
      ! TODO: Be careful with the trick used in elphon for passing the concentration
-     !call ebands_set_nelect(ebands, dtset%eph_extrael, dtset%spinmagntarget, msg)
-     !call wrtout(ab_out,msg)
-     !if (use_wfq) then
-     !  call ebands_set_nelect(ebands_kq, dtset%eph_extrael, dtset%spinmagntarget, msg)
-     !  call wrtout(ab_out,msg)
-     !end if
+     call ebands_set_scheme(ebands, dtset%occopt, dtset%tsmear, dtset%spinmagntarget, dtset%prtvol)
+     call ebands_set_nelect(ebands, dtset%eph_extrael, dtset%spinmagntarget, msg)
+     call wrtout(ab_out,msg)
+     if (use_wfq) then
+       call ebands_set_scheme(ebands_kq, dtset%occopt, dtset%tsmear, dtset%spinmagntarget, dtset%prtvol)
+       call ebands_set_nelect(ebands_kq, dtset%eph_extrael, dtset%spinmagntarget, msg)
+       call wrtout(ab_out,msg)
+     end if
    end if
 
    ! Recompute occupations. This is needed if WFK files have been produced in a NSCF run
