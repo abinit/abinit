@@ -436,9 +436,9 @@ pure function terms_compare(t1,t2) result (res)
     end if
 !   Check displacement
     do idisp1=1,t1%ndisp
-      if(blkval(1,idisp1)==one)cycle!already found
+      if(blkval(1,idisp1)==1)cycle!already found
       do idisp2=1,t2%ndisp
-        if(blkval(2,idisp2)==one)cycle!already found
+        if(blkval(2,idisp2)==1)cycle!already found
         found = .false.
         if(t1%atindx(1,idisp1)  ==  t2%atindx(1,idisp2).and.&
 &          t1%atindx(2,idisp1)  ==  t2%atindx(2,idisp2).and.&

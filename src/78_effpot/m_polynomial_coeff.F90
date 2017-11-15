@@ -2619,18 +2619,25 @@ pure function coeffs_compare(c1,c2) result (res)
   type(polynomial_coeff_type), intent(in) :: c1,c2
   logical :: res
 !local
+!variable  
   integer :: iterm1,iterm2
+!array  
+  integer :: blkval(2,c1%nterm)
 ! *************************************************************************
   res = .false.
-
+  blkval = 0
   do iterm1=1,c1%nterm
+    if(blkval(1,iterm1)==1)cycle!already found
     do iterm2=1,c2%nterm
+      if(blkval(2,iterm2)==1)cycle!already found
       if(c1%terms(iterm1)==c2%terms(iterm2)) then
-        res = .true.
+        blkval(1,iterm1) = 1
+        blkval(2,iterm2) = 1
       end if
     end do
   end do
-
+  if(.not.any(blkval(:,:)==zero))res = .true.
+  
 end function coeffs_compare
 !!***
 
