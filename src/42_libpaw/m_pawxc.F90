@@ -3739,14 +3739,11 @@ end subroutine pawxcsphpositron
  real(dp),allocatable :: d1kxc(:,:),d2kxc(:,:),d1vxc(:,:),d2vxc(:,:)
  real(dp),allocatable :: exc_(:),exci(:),ff(:),gg(:)
  real(dp),allocatable :: kxc1(:,:),kxc2(:,:),kxcdn1(:,:),kxcdn2(:,:),kxci(:,:)
- real(dp),allocatable :: m_norm_inv(:),rho_(:,:),rhoinv(:,:),rhosph(:,:)
+ real(dp),allocatable :: m_norm_inv(:),rhoinv(:,:),rhosph(:,:)
  real(dp),allocatable :: v0sum(:,:),v1sum(:,:),v2sum(:,:,:)
  real(dp),allocatable :: vxc1(:,:),vxc2(:,:),vxcdn1(:,:),vxcdn2(:,:),vxci(:,:)
- real(dp),allocatable,target :: rho_updn(:,:,:)
- real(dp), LIBPAW_CONTIGUOUS pointer :: mag_(:,:),rho_nc(:,:)
-#ifdef LIBPAW_ISO_C_BINDING
- type(C_PTR) :: cptr
-#endif
+ real(dp),allocatable,target :: rho_(:,:),rho_updn(:,:,:)
+ real(dp), LIBPAW_CONTIGUOUS pointer :: mag_(:,:)
 
 !************************************************************************
 
@@ -3835,23 +3832,15 @@ end subroutine pawxcsphpositron
 !  obtained by rotating rho_updn
  else if (nspden==4) then
    LIBPAW_ALLOCATE(m_norm_inv,(nrad))
-#ifdef LIBPAW_ISO_C_BINDING
-   cptr=c_loc(rho_updn(1,1,1));call c_f_pointer(cptr,rho_nc,shape=[nrad,nspden])
-   cptr=c_loc(rho_updn(1,1,2));call c_f_pointer(cptr,mag_,shape=[nrad,3])
-#else
-   LIBPAW_ALLOCATE(rho_nc,(nrad,nspden))
-   LIBPAW_ALLOCATE(mag_,(nrad,3))
-   rho_nc=reshape(rho_updn(1:nrad,1,1:nspden),[nrad,nspden])
-   mag_=reshape(rho_updn(1:nrad,1,2:4),[nrad,3])
-#endif
-   call pawxc_rotate_mag(rho_nc,rhosph,mag_,nrad,mag_norm_out=m_norm_inv)
-#ifndef LIBPAW_ISO_C_BINDING
-     LIBPAW_DEALLOCATE(rho_nc)
-     LIBPAW_DEALLOCATE(mag_)
-#endif
-   rhosph(:,1:2)=rhosph(:,1:2)*invsqfpi
+   LIBPAW_ALLOCATE(rho_,(nrad,nspden))
+   do ispden=1,nspden
+     rho_(1:nrad,ispden)=rho_updn(1:nrad,1,ispden)*invsqfpi
+   end do
+   mag_ => rho_(:,2:4)
+   call pawxc_rotate_mag(rho_,rhosph,mag_,nrad,mag_norm_out=m_norm_inv)
+   LIBPAW_DEALLOCATE(rho_)
    do ir=1,nrad
-     m_norm_inv(ir)=merge(one/m_norm_inv(ir),zero,m_norm_inv(ir)>rho_min)
+     m_norm_inv(ir)=merge(invsqfpi/m_norm_inv(ir),zero,m_norm_inv(ir)>rho_min)
    end do
  end if
 
@@ -5594,8 +5583,13 @@ end subroutine pawxc_drivexc_wrapper
 
 !One could add here a section for other codes (i.e. BigDFT, ...)
 #if defined HAVE_LIBPAW_ABINIT
- if (present(rho_out_format)) then
+ if (present(rho_out_format).and.present(mag_norm_out)) then
+   call rotate_mag(rho_in,rho_out,mag,vectsize, &
+&          rho_out_format=rho_out_format,mag_norm_out=mag_norm_out)
+ else if (present(rho_out_format).and..not.present(mag_norm_out)) then
    call rotate_mag(rho_in,rho_out,mag,vectsize,rho_out_format=rho_out_format)
+ else if (.not.present(rho_out_format).and.present(mag_norm_out)) then
+   call rotate_mag(rho_in,rho_out,mag,vectsize,mag_norm_out=mag_norm_out)
  else
    call rotate_mag(rho_in,rho_out,mag,vectsize)
  end if
