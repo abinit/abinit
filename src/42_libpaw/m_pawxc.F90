@@ -3733,17 +3733,17 @@ end subroutine pawxcsphpositron
  integer :: ilm,ir,ir1,ir2,ispden,iwarn,jr,nspden_updn,nsums
  real(dp),parameter :: delta=1.d-4
  real(dp) :: dvxc1,dvxc2,dvxc3,dvxc4,dvxca,dvxcb,dvxcc,dvxcd
- real(dp) :: fact,invsqfpi,invsqfpi2,m_norm,rho_norm_min,sqfpi,sqfpi2
+ real(dp) :: fact,invsqfpi,invsqfpi2,sqfpi,sqfpi2,tol_rho
  character(len=500) :: msg
 !arrays
  real(dp),allocatable :: d1kxc(:,:),d2kxc(:,:),d1vxc(:,:),d2vxc(:,:)
  real(dp),allocatable :: exc_(:),exci(:),ff(:),gg(:)
  real(dp),allocatable :: kxc1(:,:),kxc2(:,:),kxcdn1(:,:),kxcdn2(:,:),kxci(:,:)
- real(dp),allocatable :: m_norm_inv(:),rhoinv(:,:),rhosph(:,:)
- real(dp),allocatable :: v0sum(:,:),v1sum(:,:),v2sum(:,:,:)
+ real(dp),allocatable :: m_norm_inv(:),rho_(:,:),rhoinv(:,:),rhosph(:,:)
+ real(dp),allocatable :: v1sum(:,:),v2sum(:,:,:)
  real(dp),allocatable :: vxc1(:,:),vxc2(:,:),vxcdn1(:,:),vxcdn2(:,:),vxci(:,:)
- real(dp),allocatable,target :: rho_(:,:),rho_updn(:,:,:)
- real(dp), LIBPAW_CONTIGUOUS pointer :: mag_(:,:)
+ real(dp),allocatable,target :: rho_nc(:,:),rho_updn(:,:,:),vxc_diag(:,:),vxc_nc(:,:)
+ real(dp), LIBPAW_CONTIGUOUS pointer :: mag_nc(:,:),rho_dn(:,:),rho_up(:,:)
 
 !************************************************************************
 
@@ -3815,12 +3815,16 @@ end subroutine pawxcsphpositron
    LIBPAW_DEALLOCATE(ff)
  end if
 
+!Direct links to rho_up and rho_dn
+ rho_up => rho_updn(:,:,1)
+ rho_dn => rho_updn(:,:,nspden_updn)
+
 !rhoSPH contains the spherical part of effective density
 !(including Y00 spherical harmonic)
 !-----------------------------------------------------------------
  LIBPAW_ALLOCATE(rhosph,(nrad,nspden_updn))
 
-!Non-magnetic system: rhoSPH(;,1)=(1/2).rhoSPH_total
+!  Non-magnetic system: rhoSPH(;,1)=(1/2).rhoSPH_total
  if (nspden==1) then
    rhosph(:,1)=rho_updn(:,1,1)*invsqfpi2
 
@@ -3829,16 +3833,15 @@ end subroutine pawxcsphpositron
    rhosph(:,1:2)=rho_updn(:,1,1:2)*invsqfpi
 
 !  Non-collinear magnetism: rhoSPH = (rhoSPH_up, rhoSPH_dn)
-!  obtained by rotating rho_updn
+!    obtained by rotating rho_updn
  else if (nspden==4) then
    LIBPAW_ALLOCATE(m_norm_inv,(nrad))
-   LIBPAW_ALLOCATE(rho_,(nrad,nspden))
+   LIBPAW_ALLOCATE(rho_nc,(nrad,nspden))
    do ispden=1,nspden
-     rho_(1:nrad,ispden)=rho_updn(1:nrad,1,ispden)*invsqfpi
+     rho_nc(1:nrad,ispden)=rho_updn(1:nrad,1,ispden)*invsqfpi
    end do
-   mag_ => rho_(:,2:4)
-   call pawxc_rotate_mag(rho_,rhosph,mag_,nrad,mag_norm_out=m_norm_inv)
-   LIBPAW_DEALLOCATE(rho_)
+   mag_nc => rho_nc(:,2:4)
+   call pawxc_rotate_mag(rho_nc,rhosph,mag_nc,nrad,mag_norm_out=m_norm_inv)
    do ir=1,nrad
      m_norm_inv(ir)=merge(invsqfpi/m_norm_inv(ir),zero,m_norm_inv(ir)>rho_min)
    end do
@@ -4022,15 +4025,15 @@ end subroutine pawxcsphpositron
 
  if (option/=4.and.option/=5) then
 
-!  Non-collinear magnetism: V0SUM=(m_0.m_L)/|m_0|
-!  --------------------------------------------------
+!  Non-collinear magnetism: replace rho_dn by (m_0.dot.m)/|m_0|
    if (nspden==4) then
-     LIBPAW_ALLOCATE(v0sum,(nrad,lm_size))
-     v0sum(:,1)=zero
+     LIBPAW_ALLOCATE(rho_dn,(nrad,lm_size))
+     rho_dn(:,1)=zero
      do ilm=2,lm_size
-       v0sum(1:nrad,ilm)=(rho_updn(1:nrad,1,2)*rho_updn(1:nrad,ilm,2) &
-&       +rho_updn(1:nrad,1,3)*rho_updn(1:nrad,ilm,3) &
-&       +rho_updn(1:nrad,1,4)*rho_updn(1:nrad,ilm,4))*m_norm_inv(1:nrad)
+       rho_dn(1:nrad,ilm)=m_norm_inv(1:nrad) &
+&        *(rho_updn(1:nrad,1,2)*rho_updn(1:nrad,ilm,2) &
+&         +rho_updn(1:nrad,1,3)*rho_updn(1:nrad,ilm,3) &
+&         +rho_updn(1:nrad,1,4)*rho_updn(1:nrad,ilm,4))
      end do
    end if
 
@@ -4064,13 +4067,8 @@ end subroutine pawxcsphpositron
    else
      LIBPAW_ALLOCATE(v2sum,(0,0,0))
    end if
-   if (nspden/=4) then
-     call pawxcsum(1,1,1,lmselect,lmselect,lm_size,nrad,nsums,pawxcdev,pawang,&
-&     rho_updn(:,:,1),rho_updn(:,:,nspden_updn),v1sum,v2sum)
-   else
-     call pawxcsum(1,1,1,lmselect,lmselect,lm_size,nrad,nsums,pawxcdev,pawang,&
-&     rho_updn(:,:,1),v0sum(:,:),v1sum,v2sum)
-   end if
+   call pawxcsum(1,1,1,lmselect,lmselect,lm_size,nrad,nsums,pawxcdev,pawang,&
+&                rho_up,rho_dn,v1sum,v2sum)
 
  end if !option
 
@@ -4084,19 +4082,19 @@ end subroutine pawxcsphpositron
 !  ---------------------------
    if (pawxcdev>=1) then
 
-!    Non-magnetic system:
+!    Non-magnetic system
      if (nspden_updn==1) then
        vxc(1:nrad,1,1)=vxci(1:nrad,1)*sqfpi
        if (option/=5) then
          vxc(1:nrad,1,1)=vxc(1:nrad,1,1)+v1sum(1:nrad,1)*d2vxc(1:nrad,1)*invsqfpi2
          do ilm=2,lm_size
            if (lmselect(ilm)) then
-             vxc(1:nrad,ilm,1)=d1vxc(1:nrad,1)*rho_updn(1:nrad,ilm,1)
+             vxc(1:nrad,ilm,1)=d1vxc(1:nrad,1)*rho_up(1:nrad,ilm)
            end if
          end do
        end if
 
-!      Magnetic system:
+!      Magnetic system (including non-collinear magn.)
      else if (nspden_updn==2) then
        vxc(1:nrad,1,1)=vxci(1:nrad,1)*sqfpi
        vxc(1:nrad,1,2)=vxci(1:nrad,2)*sqfpi
@@ -4105,25 +4103,14 @@ end subroutine pawxcsphpositron
 &         +two*v1sum(1:nrad,2)*d2vxc(1:nrad,2)+v1sum(1:nrad,3)*d2vxc(1:nrad,3))
          vxc(1:nrad,1,2)=vxc(1:nrad,1,2)+invsqfpi2*(v1sum(1:nrad,1)*d2vxc(1:nrad,2) &
 &         +two*v1sum(1:nrad,2)*d2vxc(1:nrad,3)+v1sum(1:nrad,3)*d2vxc(1:nrad,4))
-         if (nspden==2) then
-           do ilm=2,lm_size
-             if (lmselect(ilm)) then
-               vxc(1:nrad,ilm,1)=vxc(1:nrad,ilm,1)+d1vxc(1:nrad,1)*rho_updn(1:nrad,ilm,1) &
-&               +d1vxc(1:nrad,2)*rho_updn(1:nrad,ilm,2)
-               vxc(1:nrad,ilm,2)=vxc(1:nrad,ilm,2)+d1vxc(1:nrad,2)*rho_updn(1:nrad,ilm,1) &
-&               +d1vxc(1:nrad,3)*rho_updn(1:nrad,ilm,2)
-             end if
-           end do
-         else if (nspden==4) then
-           do ilm=2,lm_size
-             if (lmselect(ilm)) then
-               vxc(1:nrad,ilm,1)=vxc(1:nrad,ilm,1)+d1vxc(1:nrad,1)*rho_updn(1:nrad,ilm,1) &
-&               +d1vxc(1:nrad,2)*v0sum(1:nrad,ilm)
-               vxc(1:nrad,ilm,2)=vxc(1:nrad,ilm,2)+d1vxc(1:nrad,2)*rho_updn(1:nrad,ilm,1) &
-&               +d1vxc(1:nrad,3)*v0sum(1:nrad,ilm)
-             end if
-           end do
-         end if
+         do ilm=2,lm_size
+           if (lmselect(ilm)) then
+             vxc(1:nrad,ilm,1)=vxc(1:nrad,ilm,1) &
+&             +d1vxc(1:nrad,1)*rho_up(1:nrad,ilm)+d1vxc(1:nrad,2)*rho_dn(1:nrad,ilm)
+             vxc(1:nrad,ilm,2)=vxc(1:nrad,ilm,2) &
+&             +d1vxc(1:nrad,2)*rho_up(1:nrad,ilm)+d1vxc(1:nrad,3)*rho_dn(1:nrad,ilm)
+           end if
+         end do
        end if
      end if
    end if ! pawxcdev>=1
@@ -4132,13 +4119,13 @@ end subroutine pawxcsphpositron
 !  ---------------------------
    if (pawxcdev>=2.and.option/=5) then
 
-!    Non-magnetic system:
+!    Non-magnetic system
      if (nspden_updn==1) then
        do ilm=2,lm_size
          vxc(1:nrad,ilm,1)=vxc(1:nrad,ilm,1)+half*d2vxc(1:nrad,1)*v2sum(1:nrad,ilm,1)
        end do
 
-!      Magnetic system:
+!      Magnetic system  (including non-collinear magn.)
      else if (nspden_updn==2) then
        do ilm=2,lm_size
          vxc(1:nrad,ilm,1)=vxc(1:nrad,ilm,1)+d2vxc(1:nrad,2)*v2sum(1:nrad,ilm,2) &
@@ -4152,11 +4139,11 @@ end subroutine pawxcsphpositron
 !  === Pathological case: if rho(r) is negative, interpolate Vxc
 !  -------------------------------------------------------------
    if (lmselect(1)) then
-     rho_norm_min=xc_denpos*(one+tol6)
+     tol_rho=xc_denpos*(one+tol6)
      do ispden=1,nspden_updn
        ir1=0;ir2=0
        do ir=1,nrad
-         if (rho_updn(ir,1,ispden)<rho_norm_min) then
+         if (rho_updn(ir,1,ispden)<tol_rho) then
            if (ir1==0) ir1=ir-1
            ir2=ir+1
          else if (ir1>0) then
@@ -4175,18 +4162,19 @@ end subroutine pawxcsphpositron
 !  === Non-collinear magnetism: "rotate" back the XC potential
 !  ------- ---------------------------------------------------
    if (nspden==4) then
+     LIBPAW_ALLOCATE(vxc_diag,(nrad,nspden_updn))
+     LIBPAW_ALLOCATE(vxc_nc,(nrad,nspden))
      do ilm=1,lm_size
-       do ir=1,nrad
-         dvxca=vxc(ir,ilm,1)
-         fact=vxc(ir,ilm,2)*m_norm_inv(ir)
-         vxc(ir,ilm,1)=dvxca+fact*rho_updn(ir,1,4)
-         vxc(ir,ilm,2)=dvxca-fact*rho_updn(ir,1,4)
-         vxc(ir,ilm,3)=      fact*rho_updn(ir,1,2)
-         vxc(ir,ilm,4)=     -fact*rho_updn(ir,1,3)
+       vxc_diag(:,1)=vxc(:,ilm,1)+vxc(:,ilm,2) ! Get V from (V_up+V_dn)/2
+       vxc_diag(:,2)=vxc(:,ilm,1)-vxc(:,ilm,2) !        and (V_up-V_dn)/2
+       call pawxc_rotate_back_mag(vxc_diag,vxc_nc,mag_nc,nrad)
+       do ispden=1,nspden
+         vxc(1:nrad,ilm,ispden)=vxc_nc(1:nrad,ispden)
        end do
      end do
+     LIBPAW_DEALLOCATE(vxc_diag)
+     LIBPAW_DEALLOCATE(vxc_nc)
    end if
-
  end if !option/=3 and option/=4
 
 !----------------------------------------------------------------------
@@ -4205,7 +4193,7 @@ end subroutine pawxcsphpositron
          kxc(1:nrad,1,1)=kxc(1:nrad,1,1)+invsqfpi2*v1sum(1:nrad,1)*d2kxc(1:nrad,1)
          do ilm=2,lm_size
            if (lmselect(ilm)) then
-             kxc(1:nrad,ilm,1)=d1kxc(1:nrad,1)*rho_updn(1:nrad,ilm,1)
+             kxc(1:nrad,ilm,1)=d1kxc(1:nrad,1)*rho_up(1:nrad,ilm)
            end if
          end do
        end if
@@ -4223,12 +4211,12 @@ end subroutine pawxcsphpositron
 &         +two*v1sum(1:nrad,2)*d2kxc(1:nrad,4)+v1sum(1:nrad,3)*d2kxc(1:nrad,5))
          do ilm=2,lm_size
            if (lmselect(ilm)) then
-             kxc(1:nrad,ilm,1)=kxc(1:nrad,ilm,1)+d1kxc(1:nrad,1)*rho_updn(1:nrad,ilm,1) &
-&             +d1kxc(1:nrad,2)*rho_updn(1:nrad,ilm,2)
-             kxc(1:nrad,ilm,2)=kxc(1:nrad,ilm,2)+d1kxc(1:nrad,2)*rho_updn(1:nrad,ilm,1) &
-&             +d1kxc(1:nrad,3)*rho_updn(1:nrad,ilm,2)
-             kxc(1:nrad,ilm,3)=kxc(1:nrad,ilm,3)+d1kxc(1:nrad,3)*rho_updn(1:nrad,ilm,1) &
-&             +d1kxc(1:nrad,4)*rho_updn(1:nrad,ilm,2)
+             kxc(1:nrad,ilm,1)=kxc(1:nrad,ilm,1) &
+&             +d1kxc(1:nrad,1)*rho_up(1:nrad,ilm)+d1kxc(1:nrad,2)*rho_dn(1:nrad,ilm)
+             kxc(1:nrad,ilm,2)=kxc(1:nrad,ilm,2) &
+&             +d1kxc(1:nrad,2)*rho_up(1:nrad,ilm)+d1kxc(1:nrad,3)*rho_dn(1:nrad,ilm)
+             kxc(1:nrad,ilm,3)=kxc(1:nrad,ilm,3) &
+&             +d1kxc(1:nrad,3)*rho_up(1:nrad,ilm)+d1kxc(1:nrad,4)*rho_dn(1:nrad,ilm)
            end if
          end do
        end if
@@ -4262,11 +4250,11 @@ end subroutine pawxcsphpositron
 
 !  NOT OK for spin polarized
    if (lmselect(1)) then
-     rho_norm_min=xc_denpos*(one+tol6)
+     tol_rho=xc_denpos*(one+tol6)
      do ispden=1,nspden_updn
        ir1=0;ir2=0
        do ir=1,nrad
-         if (rho_updn(ir,1,ispden)<rho_norm_min) then
+         if (rho_updn(ir,1,ispden)<tol_rho) then
            if (ir1==0) ir1=ir-1
            ir2=ir+1
          else if (ir1>0) then
@@ -4294,6 +4282,7 @@ end subroutine pawxcsphpositron
  end if ! nkxc>0
 
  if (nspden==4)  then
+   LIBPAW_DEALLOCATE(rho_nc)
    LIBPAW_DEALLOCATE(m_norm_inv)
  end if
 
@@ -4339,38 +4328,30 @@ end subroutine pawxcsphpositron
        gg=zero
        do ilm=2,lm_size
          if (lmselect(ilm)) then
-           gg(1:nrad)=gg(1:nrad)+v2sum(1:nrad,ilm,1)*rho_updn(1:nrad,ilm,1)
+           gg(1:nrad)=gg(1:nrad)+v2sum(1:nrad,ilm,1)*rho_up(1:nrad,ilm)
          end if
        end do
        ff(1:nrad)=ff(1:nrad)+gg(1:nrad)*d2vxc(1:nrad,1)/6._dp
 
-       if (nspden_updn==2) then
+       if (nspden_updn==2) then ! Spin polarized (including non-coll. magn.)
          gg=zero
-         if (nspden==2) then
-           do ilm=2,lm_size
-             if (lmselect(ilm)) then
-               gg(1:nrad)=gg(1:nrad)+v2sum(1:nrad,ilm,3)*rho_updn(1:nrad,ilm,2)
-             end if
-           end do
-         else if (nspden==4) then
-           do ilm=2,lm_size
-             if (lmselect(ilm)) then
-               gg(1:nrad)=gg(1:nrad)+v2sum(1:nrad,ilm,3)*v0sum(1:nrad,ilm)
-             end if
-           end do
-         end if
+         do ilm=2,lm_size
+           if (lmselect(ilm)) then
+             gg(1:nrad)=gg(1:nrad)+v2sum(1:nrad,ilm,3)*rho_dn(1:nrad,ilm)
+           end if
+         end do
          ff(1:nrad)=ff(1:nrad)+gg(1:nrad)*d2vxc(1:nrad,4)/6._dp
          gg=zero
          do ilm=2,lm_size
            if (lmselect(ilm)) then
-             gg(1:nrad)=gg(1:nrad)+v2sum(1:nrad,ilm,2)*rho_updn(1:nrad,ilm,1)
+             gg(1:nrad)=gg(1:nrad)+v2sum(1:nrad,ilm,2)*rho_up(1:nrad,ilm)
            end if
          end do
          ff(1:nrad)=ff(1:nrad)+half*gg(1:nrad)*d2vxc(1:nrad,2)
          gg=zero
          do ilm=2,lm_size
            if (lmselect(ilm)) then
-             gg(1:nrad)=gg(1:nrad)+v2sum(1:nrad,ilm,3)*rho_updn(1:nrad,ilm,1)
+             gg(1:nrad)=gg(1:nrad)+v2sum(1:nrad,ilm,3)*rho_up(1:nrad,ilm)
            end if
          end do
          ff(1:nrad)=ff(1:nrad)+half*gg(1:nrad)*d2vxc(1:nrad,3)
@@ -4387,22 +4368,20 @@ end subroutine pawxcsphpositron
 
  LIBPAW_DEALLOCATE(exci)
  LIBPAW_DEALLOCATE(vxci)
- if (nspden==4  .and.option/=4.and.option/=5)  then
-   LIBPAW_DEALLOCATE(v0sum)
+ if (nspden==4.and.option/=4.and.option/=5)  then
+   LIBPAW_DEALLOCATE(rho_dn)
  end if
- !if (pawxcdev>=1.and.option/=4.and.option/=5)  then
  if (allocated(v1sum))  then
    LIBPAW_DEALLOCATE(v1sum)
  end if
- !if (pawxcdev>=2.and.option/=4.and.option/=5)  then
  if (allocated(v2sum))  then
    LIBPAW_DEALLOCATE(v2sum)
  end if
- if (option/=4.and.option/=5.and.(option/=3.or.pawxcdev>=2))  then
-   LIBPAW_DEALLOCATE(d2vxc)
- end if
- if (option/=4.and.option/=5)  then
+ if (allocated(d1vxc)) then
    LIBPAW_DEALLOCATE(d1vxc)
+ end if
+ if (allocated(d2vxc)) then
+   LIBPAW_DEALLOCATE(d2vxc)
  end if
 
 !----- Calculate Excdc double counting term
@@ -5575,7 +5554,8 @@ end subroutine pawxc_drivexc_wrapper
 !scalars
 #if ! defined HAVE_LIBPAW_ABINIT
  integer :: ipt
- real(dp) :: m_norm,rho_up,rhoin_dot_mag,rho_up
+ real(dp),parameter :: m_norm_min=tol8
+ real(dp) :: m_norm,rhoin_dot_mag,rho_up
 #endif
 !arrays
 
@@ -5673,6 +5653,7 @@ end subroutine pawxc_rotate_mag
 !scalars
 #if ! defined HAVE_LIBPAW_ABINIT
  integer :: ipt
+ real(dp),parameter :: m_norm_min=tol8
  real(dp) :: dvdn,dvdz,m_norm
 #endif
 !arrays
