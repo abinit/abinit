@@ -1,4 +1,4 @@
-# -*- Autoconf -*-
+ -*- Autoconf -*-
 #
 # Copyright (C) 2011-2017 ABINIT Group (Yann Pouillon)
 #

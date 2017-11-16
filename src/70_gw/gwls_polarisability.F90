@@ -57,7 +57,7 @@ integer, public :: index_solution=0
 integer, public :: recy_unit
 logical, public :: write_solution=.false.
 
-integer          :: io_unit
+!integer          :: io_unit
 !!***
 
 public :: Pk, epsilon_k

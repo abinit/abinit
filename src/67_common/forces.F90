@@ -186,7 +186,7 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,&
 !scalars
  integer :: coredens_method,fdir,iatom,idir,indx,ipositron,itypat,mu
  integer :: optatm,optdyfr,opteltfr,optgr,option,optn,optn2,optstr,optv,vloc_method
- real(dp) :: eei_dum,ucvol,ucvol_local,vol_element
+ real(dp) :: eei_dum1,eei_dum2,ucvol,ucvol_local,vol_element
  logical :: calc_epaw3_forces, efield_flag
  logical :: is_hybrid_ncpp
 !arrays
@@ -287,7 +287,7 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,&
    ABI_ALLOCATE(dyfrlo_dum,(3,3,dtset%natom))
    ABI_ALLOCATE(grtn_indx,(3,dtset%natom))
    ABI_ALLOCATE(v_dum,(nfft))
-   call mklocl(dtset,dyfrlo_dum,eei_dum,gmet,gprimd,grtn_indx,gsqcut,dummy6,mgfft,&
+   call mklocl(dtset,dyfrlo_dum,eei_dum1,gmet,gprimd,grtn_indx,gsqcut,dummy6,mgfft,&
 &   mpi_enreg,dtset%natom,nattyp,nfft,ngfft,dtset%nspden,ntypat,option,pawtab,ph1d,psps,&
 &   qprtrb_dum,rhog,rhor,rprimd,ucvol,vprtrb_dum,v_dum,wvl,wvl_den,xred)
    do iatom=1,dtset%natom
@@ -315,8 +315,8 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,&
      ABI_ALLOCATE(dyfrx2_dum,(3,3,dtset%natom))
      ABI_ALLOCATE(xccc3d_dum,(n3xccc))
      if (is_hybrid_ncpp) then
-       call xchybrid_ncpp_cc(dtset,eei_dum,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,&
-&       dummy6,eei_dum,xccc3d_dum,grxc=grxc,xcccrc=psps%xcccrc,xccc1d=psps%xccc1d,xred=xred,n1xccc=n1xccc)
+       call xchybrid_ncpp_cc(dtset,eei_dum1,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,&
+&       dummy6,eei_dum2,xccc3d_dum,grxc=grxc,xcccrc=psps%xcccrc,xccc1d=psps%xccc1d,xred=xred,n1xccc=n1xccc)
      else
        if (psps%usewvl==0.and.psps%usepaw==0.and.dtset%icoulomb==0) then
          call mkcore(dummy6,dyfrx2_dum,grxc,mpi_enreg,dtset%natom,nfft,dtset%nspden,ntypat,&

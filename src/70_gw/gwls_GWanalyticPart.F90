@@ -54,8 +54,8 @@ save
 private
 !!***
 
-real(dp),allocatable :: epsilon_eigenvalues_complement(:)
-real(dp),allocatable :: lanczos_basis_complement(:,:,:)
+!real(dp),allocatable :: epsilon_eigenvalues_complement(:)
+!real(dp),allocatable :: lanczos_basis_complement(:,:,:)
 
 
 complex(dpc),public, allocatable :: A_array(:,:)

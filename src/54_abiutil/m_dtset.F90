@@ -558,7 +558,6 @@ subroutine dtset_copy(dtout, dtin)
  dtout%gwpara             = dtin%gwpara
  dtout%gwgamma            = dtin%gwgamma
  dtout%gwrpacorr          = dtin%gwrpacorr
- dtout%gwfockmix          = dtin%gwfockmix
  dtout%gw_customnfreqsp   = dtin%gw_customnfreqsp
  dtout%gw_nqlwl           = dtin%gw_nqlwl
  dtout%gw_nstep           = dtin%gw_nstep
@@ -624,6 +623,7 @@ subroutine dtset_copy(dtout, dtin)
  dtout%istatr             = dtin%istatr
  dtout%istatshft          = dtin%istatshft
  dtout%ixc                = dtin%ixc
+ dtout%ixc_sigma          = dtin%ixc_sigma
  dtout%ixcpositron        = dtin%ixcpositron
  dtout%jdtset             = dtin%jdtset
  dtout%jellslab           = dtin%jellslab
