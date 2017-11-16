@@ -134,6 +134,8 @@ subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,bxc,mpi_enreg,nfft,ngfft,nhat1,nhat1
 
  rotation=2
 
+ write(*,*) 'SPr: CPLEX=',cplex
+
  if(nspden/=4) then
    MSG_BUG('only for nspden=4!')
  end if
@@ -448,48 +450,62 @@ subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,bxc,mpi_enreg,nfft,ngfft,nhat1,nhat1
 
             case (3)                        
             ! Alternative method (explicitely calculated roation matrices)
-            ! Currently numerically unstable for mx=0 && my=0
+            ! Requires special treatment for (mx^2+my^2) -> 0
                if(m_norm(ifft)>m_norm_min)then
-
-                  theta0 = acos(rhor(ifft,4)/m_norm(ifft))
-                  nx     =-rhor(ifft,3)/sqrt(rhor(ifft,2)**2+rhor(ifft,3)**2)            
-                  ny     = rhor(ifft,2)/sqrt(rhor(ifft,2)**2+rhor(ifft,3)**2)      
-                  nz     = 0.0 
-
-                  fact   = sin(theta0)/sqrt(rhor(ifft,2)**2+rhor(ifft,3)**2)
-
-                  theta1 =  rhor(ifft,4)*(rhor(ifft,2)*rhor1(ifft,2)+rhor(ifft,3)*rhor1(ifft,3))
-                  theta1 =  theta1 - rhor1(ifft,4)*(rhor(ifft,2)**2+rhor(ifft,3)**2)
-                  theta1 =  theta1/m_norm(ifft)**2/sqrt(rhor(ifft,2)**2+rhor(ifft,3)**2)
- 
-                  nx1    = rhor(ifft,2)*(rhor(ifft,3)*rhor1(ifft,2)-rhor(ifft,2)*rhor1(ifft,3)) 
-                  nx1    = nx1/(rhor(ifft,2)**2+rhor(ifft,3)**2)
-                  nx1    = nx1*fact                                  ! the factor with sin(theta) to regularize the expression
-                    
-                  ny1    = -(nx/ny)*nx1
-
-                  !ny1    = rhor(ifft,3)*(rhor(ifft,3)*rhor1(ifft,2)-rhor(ifft,2)*rhor1(ifft,3)) 
-                  !ny1    = ny1/sqrt(rhor(ifft,2)**2+rhor(ifft,3)**2)/(rhor(ifft,2)**2+rhor(ifft,3)**2)
-           
-                  ! U^(0)*.vxc1.U^(0) part
-
-                  fact=dvdz/m_norm(ifft)    ! dvdz is deltaBxc (magnetization magnitude part)
-                  dum=rhor(ifft,4)*fact     ! dvdn is deltaVxc (density only part)
-                  vxc1(ifft,1)=dvdn+dum
-                  vxc1(ifft,2)=dvdn-dum
-                  vxc1(ifft,3)= rhor(ifft,2)*fact ! Real part
-                  vxc1(ifft,4)=-rhor(ifft,3)*fact ! Imaginary part
-
-                  !vxc0=(vxc(ifft,1)+vxc(ifft,2))/2.0
-                  !bxc0=(vxc(ifft,1)-vxc(ifft,2))*m_norm(ifft)/rhor(ifft,4)/2.0
-
-                  ! U^(1)*.vxc0.U^(0) + U^(0)*.vxc0.U^(1)
                   
-                  vxc1(ifft,1) = vxc1(ifft,1) - (bxc(ifft)*m_norm(ifft))*sin(theta0)*theta1
-                  vxc1(ifft,2) = vxc1(ifft,2) + (bxc(ifft)*m_norm(ifft))*sin(theta0)*theta1
+                  if(sqrt(rhor(ifft,2)**2+rhor(ifft,3)**2)>1.0d-5) then
 
-                  vxc1(ifft,3) = vxc1(ifft,3) + (bxc(ifft)*m_norm(ifft))*(ny1+cos(theta0)*ny*theta1)
-                  vxc1(ifft,4) = vxc1(ifft,4) + (bxc(ifft)*m_norm(ifft))*(nx1+cos(theta0)*nx*theta1)
+                    theta0 = acos(rhor(ifft,4)/m_norm(ifft))
+                    nx     =-rhor(ifft,3)/sqrt(rhor(ifft,2)**2+rhor(ifft,3)**2)            
+                    ny     = rhor(ifft,2)/sqrt(rhor(ifft,2)**2+rhor(ifft,3)**2)      
+                    nz     = 0.0 
+
+                    fact   = sin(theta0)/sqrt(rhor(ifft,2)**2+rhor(ifft,3)**2)
+
+                    theta1 =  rhor(ifft,4)*(rhor(ifft,2)*rhor1(ifft,2)+rhor(ifft,3)*rhor1(ifft,3))
+                    theta1 =  theta1 - rhor1(ifft,4)*(rhor(ifft,2)**2+rhor(ifft,3)**2)
+                    theta1 =  theta1/m_norm(ifft)**2/sqrt(rhor(ifft,2)**2+rhor(ifft,3)**2)
+ 
+                    nx1    = rhor(ifft,2)*(rhor(ifft,3)*rhor1(ifft,2)-rhor(ifft,2)*rhor1(ifft,3)) 
+                    nx1    = nx1/(rhor(ifft,2)**2+rhor(ifft,3)**2)
+                    nx1    = nx1*fact                                  ! the factor with sin(theta) to regularize the expression
+                    
+                    ny1    = -(nx/ny)*nx1
+
+                    !ny1    = rhor(ifft,3)*(rhor(ifft,3)*rhor1(ifft,2)-rhor(ifft,2)*rhor1(ifft,3)) 
+                    !ny1    = ny1/sqrt(rhor(ifft,2)**2+rhor(ifft,3)**2)/(rhor(ifft,2)**2+rhor(ifft,3)**2)
+           
+                    ! U^(0)*.vxc1.U^(0) part
+
+                    fact=dvdz/m_norm(ifft)    ! dvdz is deltaBxc (magnetization magnitude part)
+                    dum=rhor(ifft,4)*fact     ! dvdn is deltaVxc (density only part)
+                    vxc1(ifft,1)=dvdn+dum
+                    vxc1(ifft,2)=dvdn-dum
+                    vxc1(ifft,3)= rhor(ifft,2)*fact ! Real part
+                    vxc1(ifft,4)=-rhor(ifft,3)*fact ! Imaginary part
+
+                    !vxc0=(vxc(ifft,1)+vxc(ifft,2))/2.0
+                    !bxc0=(vxc(ifft,1)-vxc(ifft,2))*m_norm(ifft)/rhor(ifft,4)/2.0
+
+                    ! U^(1)*.vxc0.U^(0) + U^(0)*.vxc0.U^(1)
+                  
+                    vxc1(ifft,1) = vxc1(ifft,1) - (bxc(ifft)*m_norm(ifft))*sin(theta0)*theta1
+                    vxc1(ifft,2) = vxc1(ifft,2) + (bxc(ifft)*m_norm(ifft))*sin(theta0)*theta1
+
+                    vxc1(ifft,3) = vxc1(ifft,3) + (bxc(ifft)*m_norm(ifft))*(ny1+cos(theta0)*ny*theta1)
+                    vxc1(ifft,4) = vxc1(ifft,4) + (bxc(ifft)*m_norm(ifft))*(nx1+cos(theta0)*nx*theta1)
+                 else !alginment along the z axis
+                    ! U0^dagger. vxc^(1) . U^(0)  part stays the way it was
+                    fact=dvdz/m_norm(ifft)    ! dvdz is deltaBxc (magnetization magnitude part)
+                    dum=rhor(ifft,4)*fact     ! dvdn is deltaVxc (density only part)
+                    vxc1(ifft,1)=dvdn+dum
+                    vxc1(ifft,2)=dvdn-dum
+                    vxc1(ifft,3)= rhor(ifft,2)*fact ! Real part
+                    vxc1(ifft,4)=-rhor(ifft,3)*fact ! Imaginary part
+                    ! the change of rotation matrix is now different (analytical expression)
+                    vxc1(ifft,3)= vxc1(ifft,3)+bxc(ifft)*rhor1(ifft,2)/rhor(ifft,4)
+
+                 endif
 
                else
                   vxc1(ifft,1:2)=dvdn
