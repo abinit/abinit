@@ -777,31 +777,14 @@ subroutine fock_init(atindx,cplex,dtset,fock,gsqcut,kg,mpi_enreg,nattyp,npwarr,p
 
 !  Set the hybrid parameters if functional from libxc for which parameters can be changed, or if the user asked to do so. 
 !  Usually, these parameters were obtained from libxc,
-!  but the user might have possibly modified them. By the way, must define them here if the usual changeable fonctionals, 
+!  but the user might have possibly modified them. By the way, must define them here for the usual changeable fonctionals, 
 !  since otherwise might inherit them from the previous dataset !
    if(dtset%ixc<0)then
      if (dtset%ixc==-406.or.dtset%ixc==-427.or.dtset%ixc==-428 .or. &
 &      min(dtset%hyb_mixing,dtset%hyb_mixing_sr,dtset%hyb_range_dft,dtset%hyb_range_fock)<-tol8)then
-
-!DEBUG
-!     write(std_out,*)' m_fock.F90/fock_init.F90 : call libxc_functionals_set_hybridparams with ixc=',dtset%ixc
-!     write(std_out,*)' hyb_mixing, hyb_mixing_sr, hyb_range_dft, hyb_range_fock=',&
-!&                      dtset%hyb_mixing, dtset%hyb_mixing_sr, dtset%hyb_range_dft, dtset%hyb_range_fock
-!ENDDEBUG
-
        call libxc_functionals_set_hybridparams(hyb_mixing=fockcommon%hyb_mixing,&
 &                                              hyb_mixing_sr=fockcommon%hyb_mixing_sr,&
 &                                              hyb_range=fockcommon%hyb_range_dft)
-!DEBUG
-!    write(std_out,*)' m_fock.F90/fock_init.F90 : fockcommon%hyb_mixing=',fockcommon%hyb_mixing
-!    write(std_out,*)' m_fock.F90/fock_init.F90 : fockcommon%hyb_mixing_sr=',fockcommon%hyb_mixing_sr
-!    write(std_out,*)' m_fock.F90/fock_init.F90 : fockcommon%hyb_range=',fockcommon%hyb_range_dft
-!    write(std_out,*)' m_fock.F90/fock_init.F90 : fockcommon%hyb_range=',fockcommon%hyb_range_fock
-!    write(std_out,*)' rhotoxc : present status with dtset%ixc=',dtset%ixc
-!    call libxc_functionals_get_hybridparams(hyb_mixing=hyb_mixing,hyb_mixing_sr=hyb_mixing_sr,&
-!&                                        hyb_range=hyb_range)
-!    write(std_out,*)' hyb_mixing, hyb_mixing_sr, hyb_range=',hyb_mixing, hyb_mixing_sr, hyb_range
-!ENDDEBUG
      end if
    end if
 
@@ -1770,10 +1753,6 @@ subroutine fock_updatecwaveocc(cg,cprj,dtset,fock,indsym,istep,mcg,mcprj,&
  type(fock_BZ_type),pointer :: fockbz
 ! *************************************************************************
 
-! DEBUG
-! write (std_out,*) ' fock_updatecwaveocc : enter'
-! ENDDEBUG
-
  call timab(1502,1,tsec)
 
  ABI_CHECK(associated(fock),"fock must be associated")
@@ -2091,10 +2070,6 @@ subroutine fock_updatecwaveocc(cg,cprj,dtset,fock,indsym,istep,mcg,mcprj,&
  end if
 
  call timab(1502,2,tsec)
-
-! DEBUG
-!write (std_out,*) ' fock_updatecwaveocc : exit'
-! ENDDEBUG
 
 end subroutine fock_updatecwaveocc
 !!***

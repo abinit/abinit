@@ -952,19 +952,11 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
 
  optene=4; moved_atm_inside=0; moved_rhor=0; istep=1
 
-!DEBUG
- write(std_out,*)' sigma : call setvtr (1), nkxc, Dtset%nspden, Dtset%ixc',nkxc, Dtset%nspden, Dtset%ixc
-!ENDDEBUG
-
  call setvtr(Cryst%atindx1,Dtset,KS_energies,gmet,gprimd,grchempottn,grewtn,grvdw,gsqcutf_eff,&
 & istep,kxc,mgfftf,moved_atm_inside,moved_rhor,MPI_enreg_seq,&
 & Cryst%nattyp,nfftf,ngfftf,ngrvdw,ks_nhat,ks_nhatgr,nhatgrdim,nkxc,Cryst%ntypat,Psps%n1xccc,n3xccc,&
 & optene,pawrad,Pawtab,ph1df,Psps,ks_rhog,ks_rhor,Cryst%rmet,Cryst%rprimd,strsxc,&
 & Cryst%ucvol,usexcnhat,ks_vhartr,vpsp,ks_vtrial,ks_vxc,vxcavg,Wvl,xccc3d,Cryst%xred,taug=ks_taug,taur=ks_taur)
-
-!DEBUG
- write(std_out,*)' sigma : exit setvtr (1)'
-!ENDDEBUG
 
 !============================
 !==== Compute KS PAW Dij ====
@@ -1335,21 +1327,12 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
 
    optene=4; moved_atm_inside=0; moved_rhor=0; istep=1
 
-!DEBUG
- write(std_out,*)' sigma : call setvtr (2)'
-!ENDDEBUG
-
    call setvtr(Cryst%atindx1,Dtset,QP_energies,gmet,gprimd,grchempottn,grewtn,grvdw,gsqcutf_eff,&
 &   istep,qp_kxc,mgfftf,moved_atm_inside,moved_rhor,MPI_enreg_seq,&
 &   Cryst%nattyp,nfftf,ngfftf,ngrvdw,qp_nhat,qp_nhatgr,nhatgrdim,nkxc,Cryst%ntypat,Psps%n1xccc,n3xccc,&
 &   optene,pawrad,Pawtab,ph1df,Psps,qp_rhog,qp_rhor,Cryst%rmet,Cryst%rprimd,strsxc,&
 &   Cryst%ucvol,usexcnhat,qp_vhartr,vpsp,qp_vtrial,qp_vxc,vxcavg_qp,Wvl,&
 &   xccc3d,Cryst%xred,taug=qp_taug,taur=qp_taur)
-
-!DEBUG
- write(std_out,*)' sigma : exit setvtr (2)'
-!ENDDEBUG
-
 
    if (allocated(qp_kxc)) then
      ABI_FREE(qp_kxc)

@@ -469,10 +469,6 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
 !or at initialisation.
 !--------------------------------------------------------------
 
-!DEBUG
-!write(std_out,*)' setvtr : istep,n1xccc,moved_rhor=',istep,n1xccc,moved_rhor
-!ENDDEBUG
-
  if(istep==1 .or. n1xccc/=0 .or. moved_rhor==1 .or. dtset%positron<0 .or. mod(dtset%fockoptmix,100)==11) then
 
    option=0
@@ -492,20 +488,10 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
        endif
 !      Use the periodic solver to compute Hxc
        nk3xc=1
-!write(80,*)"setvtr"
-!xccc3d=zero
        if (ipositron==0) then
-
-!DEBUG
-         write(std_out,*)' setvtr : is_hybrid_ncpp=',is_hybrid_ncpp
-         write(std_out,*)' setvtr : n3xccc=',n3xccc
-!ENDDEBUG
 
 !        Compute energies%e_xc and associated quantities
          if(.not.is_hybrid_ncpp .or. mod(dtset%fockoptmix,100)==11)then 
-!DEBUG
-         write(std_out,*)' setvtr : call rhotoxc (1), xcdata%ixc,option,nkxc,nspden,xclevel=  ',xcdata%ixc,option,nkxc,dtset%nspden,xcdata%xclevel
-!ENDDEBUG
 !          Not yet able to deal fully with the full XC kernel in case of GGA + spin
            option_eff=option
            if(xcdata%xclevel==2.and.(nkxc==3-2*mod(xcdata%nspden,2))) option_eff=12
@@ -513,19 +499,10 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
 &            nhat,psps%usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,n3xccc,&
 &            option_eff,dtset%paral_kgb,rhor,rprimd,strsxc,usexcnhat,vxc,vxcavg,xccc3d,xcdata,&
 &            taug=taug,taur=taur,vhartr=vhartr,vxctau=vxctau,add_tfw=add_tfw_)
-!DEBUG
-         write(std_out,*)' setvtr : exit rhotoxc (1) '
-!ENDDEBUG
          else
-!DEBUG
-         write(std_out,*)' setvtr : call xchybrid_ncpp_cc '
-!ENDDEBUG
 !          Only when is_hybrid_ncpp, and moreover, the xc functional is not the auxiliary xc functional, then call xchybrid_ncpp_cc
            call xchybrid_ncpp_cc(dtset,energies%e_xc,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,&
 &            strsxc,vxcavg,xccc3d,vxc=vxc)
-!DEBUG
-         write(std_out,*)' setvtr : exit xchybrid_ncpp_cc '
-!ENDDEBUG
          endif
 
 !        Possibly compute energies%e_hybcomp_E0
