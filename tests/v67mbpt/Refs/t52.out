@@ -15,7 +15,7 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Thu 16 Nov 2017.
-- ( at 08h34 )
+- ( at 10h42 )
   
 - input  file    -> t52.in
 - output file    -> t52.out
@@ -284,7 +284,7 @@ P          mk1mem6          8
              nqpt6          1
             nstep1        500
             nstep2          9
-            nstep3          9
+            nstep3          6
             nstep4          1
             nstep5          1
             nstep6          1
@@ -385,7 +385,7 @@ P          mk1mem6          8
                        0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
            tolwfr1     1.00000000E-28
            tolwfr2     1.00000000E-28
-           tolwfr3     1.00000000E-31
+           tolwfr3     1.00000000E-27
            tolwfr4     1.00000000E-28
            tolwfr5     1.00000000E-28
            tolwfr6     1.00000000E-28
@@ -443,8 +443,8 @@ P          mk1mem6          8
          ecut(hartree)=      8.000   => boxcut(ratio)=   2.17426
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/torrent_dfpt-nc/tests/Psps_for_tests/14si.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/torrent_dfpt-nc/tests/Psps_for_tests/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__torrent/tests/Psps_for_tests/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__torrent/tests/Psps_for_tests/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -654,26 +654,13 @@ _setup2: Arith. and geom. avg. npw (full set) are     289.031     289.009
 ================================================================================
  prteigrs : about to open file t52o_DS3_EIG
  Non-SCF case, kpt    1 (  0.00000  0.00000  0.00000), residuals and eigenvalues=
-  3.48E-31  7.52E-32  1.55E-31  1.19E-31  3.58E-32  4.40E-32  1.12E-31  7.46E-32
-  3.31E-31  1.00E-31  3.73E-32  5.40E-32  2.22E-31  1.18E-31
+  8.69E-30  6.66E-29  6.62E-30  3.06E-29  8.08E-29  2.31E-29  3.89E-30  7.20E-29
+  1.11E-29  8.58E-29  4.94E-30  2.81E-28  4.91E-28  2.09E-29
  -2.2715E-01  2.1698E-01  2.1698E-01  2.1698E-01  3.0999E-01  3.0999E-01
   3.0999E-01  3.3664E-01  4.9922E-01  5.0740E-01  5.0740E-01  6.2852E-01
   6.2852E-01  6.2852E-01
-  prteigrs : nnsclo,ikpt=    9    1 max resid (incl. the buffer)=  3.48179E-31
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-  prteigrs : nnsclo,ikpt=    9    2 max resid (incl. the buffer)=  3.12068E-31
-  prteigrs : nnsclo,ikpt=    9    3 max resid (incl. the buffer)=  2.35524E-31
-  prteigrs : nnsclo,ikpt=    9    4 max resid (incl. the buffer)=  3.41443E-31
-  prteigrs : nnsclo,ikpt=    9    5 max resid (incl. the buffer)=  6.88945E-31
-  prteigrs : nnsclo,ikpt=    9    6 max resid (incl. the buffer)=  3.66732E-31
-  prteigrs : nnsclo,ikpt=    9    7 max resid (incl. the buffer)=  3.68416E-31
-  prteigrs : nnsclo,ikpt=    9    8 max resid (incl. the buffer)=  2.77058E-31
-
-
- scprqt:  WARNING -
-  nstep=    9 was not enough non-SCF iterations to converge;
-  maximum residual=  6.889E-31 exceeds tolwfr=  1.000E-31
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -684,7 +671,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     289.031     289.009
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   1.9045E-31; max=  6.8894E-31
+ Mean square residual over all n,k,spin=   2.6360E-28; max=  8.9830E-28
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.250000000000      0.250000000000      0.250000000000
@@ -763,8 +750,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     289.031     289.009
  Expectation of eigenvalue derivatives (hartree) for nkpt=   8  k points:
   (in case of degenerate eigenvalues, averaged derivative)
  kpt#   1, nband= 14, wtk=  0.12500, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-   0.00000   -0.00000   -0.00000   -0.00000    0.00000    0.00000    0.00000    0.00000
-   0.00000   -0.00000   -0.00000    0.00000    0.00000    0.00000
+   0.00000   -0.00000   -0.00000   -0.00000   -0.00000   -0.00000   -0.00000    0.00000
+   0.00000    0.00000    0.00000   -0.00000   -0.00000   -0.00000
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
 
@@ -866,8 +853,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     289.031     289.009
  Expectation of eigenvalue derivatives (hartree) for nkpt=   8  k points:
   (in case of degenerate eigenvalues, averaged derivative)
  kpt#   1, nband= 14, wtk=  0.12500, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-   0.00000   -0.00000   -0.00000   -0.00000   -0.00000   -0.00000   -0.00000    0.00000
-  -0.00000    0.00000    0.00000   -0.00000   -0.00000   -0.00000
+  -0.00000    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000
+   0.00000    0.00000    0.00000   -0.00000   -0.00000   -0.00000
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
 
@@ -969,8 +956,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     289.031     289.009
  Expectation of eigenvalue derivatives (hartree) for nkpt=   8  k points:
   (in case of degenerate eigenvalues, averaged derivative)
  kpt#   1, nband= 14, wtk=  0.12500, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-   0.00000   -0.00000   -0.00000   -0.00000    0.00000    0.00000    0.00000   -0.00000
-   0.00000    0.00000    0.00000   -0.00000   -0.00000   -0.00000
+  -0.00000   -0.00000   -0.00000   -0.00000    0.00000    0.00000    0.00000    0.00000
+   0.00000   -0.00000   -0.00000    0.00000    0.00000    0.00000
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
 
@@ -1167,7 +1154,7 @@ P          mk1mem6          8
              nqpt6          1
             nstep1        500
             nstep2          9
-            nstep3          9
+            nstep3          6
             nstep4          1
             nstep5          1
             nstep6          1
@@ -1270,7 +1257,7 @@ P          mk1mem6          8
                        0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
            tolwfr1     1.00000000E-28
            tolwfr2     1.00000000E-28
-           tolwfr3     1.00000000E-31
+           tolwfr3     1.00000000E-27
            tolwfr4     1.00000000E-28
            tolwfr5     1.00000000E-28
            tolwfr6     1.00000000E-28
@@ -1371,5 +1358,5 @@ P          mk1mem6          8
 ================================================================================
 
  Calculation completed.
-.Delivered  79 WARNINGs and   0 COMMENTs to log file.
+.Delivered  70 WARNINGs and   0 COMMENTs to log file.
 +Overall time at end (sec) : cpu=          2.8  wall=          3.0
