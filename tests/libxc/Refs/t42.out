@@ -135,7 +135,7 @@ _ WF disk file :      0.162 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
        gw_qprange         -14
          icutcoul           5
            istwfk        0    0    1    0    1    1
-          ixc_adv        -428
+        ixc_sigma        -428
            jdtset        1    2    3    4
               kpt     -2.50000000E-01 -2.50000000E-01  0.00000000E+00
                       -2.50000000E-01  2.50000000E-01  0.00000000E+00
@@ -1351,7 +1351,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     154.531     154.481
        gw_qprange         -14
          icutcoul           5
            istwfk        0    0    1    0    1    1
-          ixc_adv        -428
+        ixc_sigma        -428
            jdtset        1    2    3    4
               kpt     -2.50000000E-01 -2.50000000E-01  0.00000000E+00
                       -2.50000000E-01  2.50000000E-01  0.00000000E+00
