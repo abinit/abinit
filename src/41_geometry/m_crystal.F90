@@ -316,7 +316,7 @@ subroutine crystal_init(amu,Cryst,space_group,natom,npsp,ntypat,nsym,rprimd,typa
  call xred2xcart(natom,rprimd,Cryst%xcart,Cryst%xred)
 
  ABI_MALLOC(Cryst%title,(ntypat))
- Cryst%title=title
+ Cryst%title = title
  !
  ! === Generate index table of atoms, in order for them to be used type after type ===
  ABI_MALLOC(Cryst%atindx,(natom))
@@ -694,7 +694,7 @@ end subroutine print_symmetries
 !! ntypat = number of typat
 !! npsp =  number of pseudopotentials
 !! znucl = Nuclear charge for each type of pseudopotential
-!! 
+!!
 !! OUTPUT
 !! symbols = array with the symbol of each atoms
 !!

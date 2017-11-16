@@ -18,6 +18,10 @@ ABI_SRC_DEP = 2     # The file depends on other files
 
 # Source files
 sources = [
+"m_electronpositron.F90",
+"m_kxc.F90",
+"m_xcdata.F90",
+"m_xc_vdw.F90",
 "calc_smeared_density.F90",
 "dfpt_mkvxc.F90",
 "dfpt_mkvxc_noncoll.F90",
@@ -26,10 +30,6 @@ sources = [
 "gammapositron_fft.F90",
 "hartre.F90",
 "interfaces_56_xc.F90",
-"m_electronpositron.F90",
-"m_kxc.F90",
-"m_xcdata.F90",
-"m_xc_vdw.F90",
 "mkcore.F90",
 "phase.F90",
 "rhohxcpositron.F90",

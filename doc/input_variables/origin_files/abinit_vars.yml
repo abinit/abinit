@@ -14172,7 +14172,7 @@
     varset: basic
     vartype: integer
 - !variable
-    abivarname: ixc_sigma 
+    abivarname: ixc_sigma
     characteristics: null
     commentdefault: Default corresponds to Teter parametrization.
     commentdims: null

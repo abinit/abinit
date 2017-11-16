@@ -413,7 +413,7 @@ subroutine etotfor(atindx1,deltae,diffor,dtefield,dtset,&
 &   abs(dtset%densfor_pred)<=6.and.abs(dtset%densfor_pred)/=5)
 
 !  If residual is a density residual (and forces from residual asked),
-!  has to convert it into a potential residualbefore calling forces routine
+!  has to convert it into a potential residual before calling forces routine
    if (apply_residual) then
      ABI_ALLOCATE(resid,(nfft,dtset%nspden))
      option=0; if (dtset%densfor_pred<0) option=1
