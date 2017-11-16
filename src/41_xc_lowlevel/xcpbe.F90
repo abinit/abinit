@@ -244,7 +244,7 @@ subroutine xcpbe(exci,npts,nspden,option,order,rho_updn,vxci,ndvxci,ngr2,nd2vxci
 
 !Checks the compatibility between the presence of dvxci and ndvxci
  if(ndvxci /=0 .neqv. present(dvxci))then
-   message = ' If ndvxci/=0 there must the optional arguments dvxci'
+   message = ' If ndvxci/=0 there must the optional argument dvxci'
    MSG_BUG(message)
  end if
 

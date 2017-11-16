@@ -71,11 +71,11 @@
 !!    Content of Kxc array:
 !!   ===== if LDA
 !!    if xcdata%nspden==1: kxc(:,1)= d2Exc/drho2
-!!       that is 1/2 ( d2Exc/drho_up drho_up + d2Exc/drho_up drho_dn )
-!!                 (kxc(:,2)= d2Exc/drho_up drho_dn)
+!!              that is 1/2 ( d2Exc/drho_up drho_up + d2Exc/drho_up drho_dn )
+!!                         kxc(:,2)= d2Exc/drho_up drho_dn
 !!    if xcdata%nspden>=2: kxc(:,1)= d2Exc/drho_up drho_up
-!!                  kxc(:,2)= d2Exc/drho_up drho_dn
-!!                  kxc(:,3)= d2Exc/drho_dn drho_dn
+!!                         kxc(:,2)= d2Exc/drho_up drho_dn
+!!                         kxc(:,3)= d2Exc/drho_dn drho_dn
 !!   ===== if GGA
 !!    if xcdata%nspden==1:
 !!       kxc(:,1)= d2Exc/drho2
@@ -118,8 +118,6 @@
 !!                  k3xc(:,4)= d3Exc/drho_dn drho_dn drho_dn
 
 !! === Additional optional output ===
-!!  [bxc(nfft)]=in case nspden==4 and for response-function calculations, xc magnetic field divided by the magnetization Bxc^(0)/|m|
-!!              In principle, bxc = (vxc(ifft,1)-vxc(ifft,2))/m_norm/2.0, but for small magnetization, the correct limit is computed here.
 !!  [exc_vdw_out]= vdW-DF contribution to enxc (hartree)
 !!  [vxctau(nfft,xcdata%nspden,4*xcdata%usekden)]=(only for meta-GGA)=
 !!    vxctau(:,:,1): derivative of XC energy density with respect to kinetic energy density (depsxcdtau).
@@ -215,7 +213,7 @@
 subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
 & nhat,nhatdim,nhatgr,nhatgrdim,nkxc,nk3xc,n3xccc,option,paral_kgb, &
 & rhor,rprimd,strsxc,usexcnhat,vxc,vxcavg,xccc3d,xcdata, &
-& add_tfw,bxc,exc_vdw_out,electronpositron,k3xc,taug,taur,vhartr,vxctau,xc_funcs) ! optional arguments
+& add_tfw,exc_vdw_out,electronpositron,k3xc,taug,taur,vhartr,vxctau,xc_funcs) ! optional arguments
 
  use defs_basis
  use defs_abitypes
@@ -260,7 +258,6 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
  real(dp),intent(in) :: rprimd(3,3),xccc3d(n3xccc)
  real(dp),intent(out) :: kxc(nfft,nkxc),strsxc(6),vxc(nfft,xcdata%nspden)
  real(dp),intent(in),optional :: taug(:,:),taur(:,:),vhartr(nfft)
- real(dp),intent(out),optional :: bxc(1:nfft)
  real(dp),intent(out),optional :: k3xc(1:nfft,1:nk3xc),vxctau(:,:,:)
  type(libxc_functional_type),intent(inout),optional :: xc_funcs(2)
 
@@ -277,7 +274,7 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
  real(dp) :: strsxc5_tot,strsxc6_tot,ucvol
  logical :: allow3,test_nhat,with_vxctau
  character(len=500) :: message
- real(dp) :: hyb_mixing, hyb_mixing_sr, hyb_range 
+ real(dp) :: hyb_mixing, hyb_mixing_sr, hyb_range
 !arrays
  integer :: gga_id(2)
  real(dp) :: gm_norm(3),grho(3),gmet(3,3),gprimd(3,3),qphon(3),rmet(3,3)
@@ -329,7 +326,7 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
  if(option==3)then
    allow3=(ixc > 0).and.(ixc /= 3).and.(ixc /= 7).and.(ixc /= 8)
    if(.not.allow3)then
-     allow3=(ixc < 0).and. isgga .and. ismgga 
+     allow3=(ixc < 0).and. isgga .and. ismgga
    end if
    if(allow3)then
      write(message, '(3a,i0)' )&
@@ -354,7 +351,7 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
      message='invalid size for taur!'
      MSG_BUG(message)
    end if
- end if  
+ end if
  with_vxctau=(present(vxctau).and.present(taur))
  if (with_vxctau) with_vxctau=(size(vxctau)>0)
  if (with_vxctau) then
@@ -388,7 +385,7 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
      MSG_BUG(message)
    end if
  endif
- 
+
  comm_fft = mpi_enreg%comm_fft; nproc_fft = mpi_enreg%nproc_fft
 
 !Compute different geometric tensor, as well as ucvol, from rprimd
@@ -547,8 +544,10 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
        ABI_ALLOCATE(nhat_up,(nfft))
        do ifft=1,nfft
          if (m_norm(ifft)>m_norm_min) then
-           nhat_up(ifft)=half*(nhat(ifft,1)+(rhor_(ifft,2)*nhat(ifft,2) &
-&           +rhor_(ifft,3)*nhat(ifft,3)+rhor_(ifft,4)*nhat(ifft,4))/m_norm(ifft))
+           nhat_up(ifft)=half*(nhat(ifft,1) &
+&                    +(rhor_(ifft,2)*nhat(ifft,2) &
+&                     +rhor_(ifft,3)*nhat(ifft,3) &
+&                     +rhor_(ifft,4)*nhat(ifft,4))/m_norm(ifft))
          else
            nhat_up(ifft)=half*(nhat(ifft,1) &
 &           +sqrt(nhat(ifft,2)**2+nhat(ifft,3)**2+nhat(ifft,4)**2))
@@ -746,7 +745,7 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
        end do
 
 !      In case of a hybrid functional, if one needs to compute the auxiliary GGA Kxc, a separate call to drivexc_main
-!      is first needed to compute Kxc using such auxiliary GGA, 
+!      is first needed to compute Kxc using such auxiliary GGA,
 !      before calling again drivexc_main using the correct functional for Exc and Vxc
        if(xcdata%usefock==1 .and. auxc_ixc/=0)then
          if (auxc_ixc<0) then
@@ -1087,10 +1086,6 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
 &         paral_kgb,qphon,rhonow_ptr,vxc)
        end if
 
-       if (present(bxc)) then
-         bxc(:) = 0.0d0
-       endif
- 
      else
 
 !      If non-collinear magnetism, restore potential in proper axis before adding it
@@ -1098,16 +1093,6 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
        vxcrho_b_updn=zero
        call xcpot(cplex,depsxc,gprimd,ishift,mgga,mpi_enreg,nfft,ngfft,ngrad,nspden_eff,nspgrad,&
 &       paral_kgb,qphon,rhonow_ptr,vxcrho_b_updn)
-       if (present(bxc)) then
-         do ifft=1,nfft
-           if(m_norm(ifft)>m_norm_min) then
-             bxc(ifft) = half*(vxcrho_b_updn(ifft,1)-vxcrho_b_updn(ifft,2))/m_norm(ifft)
-           else
-             bxc(ifft) = half*(half*(kxc(ifft,1)+kxc(ifft,3))-kxc(ifft,2))
-           endif
-         end do  
-       endif
-
        do ifft=1,nfft
          dvdn=half*(vxcrho_b_updn(ifft,1)+vxcrho_b_updn(ifft,2))
          if(m_norm(ifft)>m_norm_min) then
@@ -1229,7 +1214,7 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
 !    kernel will be modified in tddft. No other use of kxc should be made with ixc==20
      if(nkxc/=0 .and. ixc==20) kxc(:,:)=zero
 !    For ixc=21 or 22, the LDA (ixc=1) kernel has been computed previously.
- 
+
    else
 
      MSG_BUG('When ixc=20,21 or 22, vhartr needs to be present in the call to rhotoxc !')

@@ -32,13 +32,12 @@ module m_eprenorms
  use defs_datatypes
  use m_errors
  use m_xmpi
-
- use m_crystal, only :       crystal_t
-
 #ifdef HAVE_NETCDF
  use netcdf
 #endif
  use m_nctk
+
+ use m_crystal, only :       crystal_t
 
  implicit none
  private
@@ -463,7 +462,7 @@ subroutine renorm_bst(Epren,Bst,Cryst,itemp,do_lifetime,do_check)
      ! Upgrade energies
      Bst%eig(1:nband_tmp,ikpt,isppol) = BSt%eig(1:nband_tmp,ikpt,isppol) + Epren%renorms(1,1:nband_tmp,ik_eph,isppol,itemp)
 
-     if(do_lifetime) then
+     if (do_lifetime) then
        Bst%lifetime(1:nband_tmp,ikpt,isppol) = Epren%lifetimes(1,1:nband_tmp,ik_eph,isppol,itemp)
      end if
    end do

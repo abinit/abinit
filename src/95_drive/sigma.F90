@@ -312,10 +312,12 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
      msg='Hybrid functional calculations require the compilation with LIBXC library'
      MSG_ERROR(msg)
    end if
-   if(gwcalctyp<10) then
-     msg='gwcalctyp should enforce update of the energies and/or wavefunctions when performing hybrid functional calculation'
-     MSG_ERROR(msg)
-   end if
+!  XG 20171116 : I do not agree with this condition, as one might like to do a one-shot hybrid functional calculation
+!  on top of a LDA/GGA calculation ... give the power (and risks) to the user !
+!  if(gwcalctyp<10) then
+!    msg='gwcalctyp should enforce update of the energies and/or wavefunctions when performing hybrid functional calculation'
+!    MSG_ERROR(msg)
+!  end if
    if(Dtset%usepaw==1) then
      msg='PAW version of hybrid functional calculations is not implemented'
      MSG_ERROR(msg)
