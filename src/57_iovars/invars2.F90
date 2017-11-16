@@ -1316,10 +1316,10 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
 
 !Read the ixc for an advanced functional
 !If present, and relevant (only specific values for gcalctyp), the other internal variable will be adjusted to this other functional)
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ixc_adv',tread,'INT')
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ixc_sigma',tread,'INT')
  if(tread==1)then
-   dtset%ixc_adv=intarr(1)
-   if( dtset%optdriver==RUNL_SIGMA .and. mod(dtset%gwcalctyp,10)==5)ixc_current=dtset%ixc_adv
+   dtset%ixc_sigma=intarr(1)
+   if( dtset%optdriver==RUNL_SIGMA .and. mod(dtset%gwcalctyp,10)==5)ixc_current=dtset%ixc_sigma
  endif
 
 !Initialize xclevel and usefock

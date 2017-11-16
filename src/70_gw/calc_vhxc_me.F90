@@ -256,7 +256,7 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,nfftf,ngfftf,&
    if(libxc_functionals_check()) then
 
      call wrtout(std_out,' Hybrid functional xc potential is being set')
-     ixc_hybrid=Dtset%ixc_adv
+     ixc_hybrid=Dtset%ixc_sigma
      call get_auxc_ixc(auxc_ixc,ixc_hybrid)
      call xcdata_init(xcdata_hybrid,dtset=Dtset,auxc_ixc=auxc_ixc,ixc=ixc_hybrid)
      call libxc_functionals_init(ixc_hybrid,Dtset%nspden,xc_functionals=xc_funcs_hybrid)
