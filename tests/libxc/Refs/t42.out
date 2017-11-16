@@ -133,7 +133,6 @@ _ WF disk file :      0.162 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
            getwfk4          1
         gwcalctyp          25
        gw_qprange         -14
-         icutcoul           5
            istwfk        0    0    1    0    1    1
         ixc_sigma        -428
            jdtset        1    2    3    4
@@ -278,7 +277,6 @@ P           mkmem           6
         prtebands2          1
         prtebands3          1
         prtebands4          2
-             rcut      9.09090900E+00 Bohr
             rprim      0.0000000000E+00  5.0000000000E-01  5.0000000000E-01
                        5.0000000000E-01  0.0000000000E+00  5.0000000000E-01
                        5.0000000000E-01  5.0000000000E-01  0.0000000000E+00
@@ -1349,7 +1347,6 @@ _setup2: Arith. and geom. avg. npw (full set) are     154.531     154.481
            getwfk4          1
         gwcalctyp          25
        gw_qprange         -14
-         icutcoul           5
            istwfk        0    0    1    0    1    1
         ixc_sigma        -428
            jdtset        1    2    3    4
@@ -1494,7 +1491,6 @@ P           mkmem           6
         prtebands2          1
         prtebands3          1
         prtebands4          2
-             rcut      9.09090900E+00 Bohr
             rprim      0.0000000000E+00  5.0000000000E-01  5.0000000000E-01
                        5.0000000000E-01  0.0000000000E+00  5.0000000000E-01
                        5.0000000000E-01  5.0000000000E-01  0.0000000000E+00
