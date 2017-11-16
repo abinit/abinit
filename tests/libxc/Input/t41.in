@@ -34,20 +34,20 @@ symsigma    1
 
 # Dataset2: Calculation of the HSE06 band gap
 optdriver2  4 
-gwcalctyp2  115
+gwcalctyp2  15
  icutcoul2  5          # short-range exchange only
      rcut2  9.090909   # corresponds to omega = 1/rc = 0.11 bohr^1
 ixc_sigma2  -428  # HSE06
 
 # Dataset3: Calculation of the PBE0  band gap
 optdriver3  4
-gwcalctyp3  215
+gwcalctyp3  15
  icutcoul3  6          # full range exchange
 ixc_sigma3  -406  # PBE0 
 
 # Dataset4: Calculation of the B3LYP band gap
 optdriver4  4
-gwcalctyp4  315
+gwcalctyp4  15
  icutcoul4  6          # full range exchange
 ixc_sigma4  -402  # B3LYP
 

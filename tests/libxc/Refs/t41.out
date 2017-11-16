@@ -124,9 +124,9 @@ _ WF disk file :      0.297 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
            getwfk3          1
            getwfk4          1
         gwcalctyp1          0
-        gwcalctyp2        115
-        gwcalctyp3        215
-        gwcalctyp4        315
+        gwcalctyp2         15
+        gwcalctyp3         15
+        gwcalctyp4         15
          icutcoul1          6
          icutcoul2          5
          icutcoul3          6
@@ -1098,9 +1098,9 @@ _setup2: Arith. and geom. avg. npw (full set) are     151.996     151.959
            getwfk3          1
            getwfk4          1
         gwcalctyp1          0
-        gwcalctyp2        115
-        gwcalctyp3        215
-        gwcalctyp4        315
+        gwcalctyp2         15
+        gwcalctyp3         15
+        gwcalctyp4         15
          icutcoul1          6
          icutcoul2          5
          icutcoul3          6

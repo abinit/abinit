@@ -101,12 +101,11 @@ _ WF disk file :      0.125 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
            getwfk1          0
            getwfk2          1
            getwfk3          1
-        gwcalctyp         125
+        gwcalctyp          25
        gw_qprange         -14
    hyb_mixing_sr 1    -9.9900000000E+02
    hyb_mixing_sr 2     2.5000000000E-01
    hyb_mixing_sr 3     3.5000000000E-01
-         icutcoul           5
            istwfk        1    0    1    0    0    0    1    0
         ixc_sigma        -428
            jdtset        1    2    3
@@ -245,7 +244,6 @@ P           mkmem           8
         optdriver1          0
         optdriver2          4
         optdriver3          4
-             rcut      9.09090900E+00 Bohr
             rprim      0.0000000000E+00  5.0000000000E-01  5.0000000000E-01
                        5.0000000000E-01  0.0000000000E+00  5.0000000000E-01
                        5.0000000000E-01  5.0000000000E-01  0.0000000000E+00
@@ -1026,12 +1024,11 @@ _setup2: Arith. and geom. avg. npw (full set) are     151.891     151.843
            getwfk1          0
            getwfk2          1
            getwfk3          1
-        gwcalctyp         125
+        gwcalctyp          25
        gw_qprange         -14
    hyb_mixing_sr 1    -9.9900000000E+02
    hyb_mixing_sr 2     2.5000000000E-01
    hyb_mixing_sr 3     3.5000000000E-01
-         icutcoul           5
            istwfk        1    0    1    0    0    0    1    0
         ixc_sigma        -428
            jdtset        1    2    3
@@ -1170,7 +1167,6 @@ P           mkmem           8
         optdriver1          0
         optdriver2          4
         optdriver3          4
-             rcut      9.09090900E+00 Bohr
             rprim      0.0000000000E+00  5.0000000000E-01  5.0000000000E-01
                        5.0000000000E-01  0.0000000000E+00  5.0000000000E-01
                        5.0000000000E-01  5.0000000000E-01  0.0000000000E+00
