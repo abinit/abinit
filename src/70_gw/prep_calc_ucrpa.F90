@@ -167,9 +167,9 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
 !scalars
  integer,parameter :: use_pawnhat=0,ider0=0,ndat1=1
  integer :: bandinf,bandsup
- integer :: izero,ib_sum,ib,ib1,ib2,ig,ig_rot,ii,iik,itim_q,i2
+ integer :: gwcalctyp,izero,ib_sum,ib,ib1,ib2,ig,ig_rot,ii,iik,itim_q,i2
  integer :: ik_bz,ik_ibz,isym_q,iq_bz,iq_ibz,spin,isym,itypatcor_read,jb,iat
- integer :: jik,jk_bz,jk_ibz,lcor,m1,m3,mod100,nspinor,nsppol,ifft
+ integer :: jik,jk_bz,jk_ibz,lcor,m1,m3,nspinor,nsppol,ifft
  integer :: ibsp,dimcprj_gw
  integer :: spad
  integer :: comm
@@ -218,7 +218,7 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
 
  call timab(430,1,tsec) ! csigme (SigX)
 
- mod100=MOD(Sigp%gwcalctyp,100)
+ gwcalctyp=Sigp%gwcalctyp
  !
  ! === Initialize MPI variables ===
  comm = Wfd%comm
@@ -288,7 +288,7 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
  can_symmetrize = .FALSE.
  if (Sigp%symsigma>0) then
    can_symmetrize = .TRUE.
-   if (mod100 >= 20) then
+   if (gwcalctyp >= 20) then
     do spin=1,Wfd%nsppol
       can_symmetrize(spin) = .not.esymm_failed(QP_sym(spin))
       if (.not.can_symmetrize(spin)) then

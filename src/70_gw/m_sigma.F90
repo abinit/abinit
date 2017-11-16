@@ -275,7 +275,7 @@ subroutine write_sigma_header(Sigp,Er,Cryst,Kmesh,Qmesh)
 
 !Local variables-------------------------------
 !scalars
- integer :: mod10,mod100
+ integer :: gwcalctyp,mod10
  character(len=500) :: msg
 
 ! *************************************************************************
@@ -284,8 +284,9 @@ subroutine write_sigma_header(Sigp,Er,Cryst,Kmesh,Qmesh)
  call wrtout(std_out,msg,'COLL')
  call wrtout(ab_out,msg,'COLL')
 
+ gwcalctyp=Sigp%gwcalctyp
  mod10=MOD(Sigp%gwcalctyp,10)
- mod100=MOD(Sigp%gwcalctyp,100)
+
  SELECT CASE (mod10)
  CASE (0)
    write(msg,'(a,i2)')' PLASMON POLE MODEL ',Sigp%ppmodel
@@ -409,9 +410,9 @@ subroutine write_sigma_header(Sigp,Er,Cryst,Kmesh,Qmesh)
  call wrtout(std_out,msg,'COLL')
  call wrtout(ab_out,msg,'COLL')
 
- if (mod100<10) then
+ if (gwcalctyp<10) then
    write(msg,'(a)')' Perturbative Calculation'
- else if (mod100<20) then
+ else if (gwcalctyp<20) then
    write(msg,'(a)')' Self-Consistent on Energies only'
  else
    write(msg,'(a)')' Self-Consistent on Energies and Wavefunctions'
@@ -472,15 +473,15 @@ subroutine write_sigma_results(ikcalc,ikibz,Sigp,Sr,KS_BSt)
 !Local variables-------------------------------
 !scalars
  integer :: ib,io,is
- integer :: mod10,mod100
+ integer :: gwcalctyp,mod10
  character(len=500) :: msg
 !arrays
  character(len=12) :: tag_spin(2)
 
 ! *************************************************************************
 
+ gwcalctyp=Sigp%gwcalctyp
  mod10=MOD(Sigp%gwcalctyp,10)
- mod100=MOD(Sigp%gwcalctyp,100)
 
  !unt_gw  File with GW corrections.
  !unt_sig Self-energy as a function of frequency.
@@ -499,7 +500,7 @@ subroutine write_sigma_results(ikcalc,ikibz,Sigp,Sr,KS_BSt)
      msg = ' Band     E0 <VxcLDA>   <H_U>  SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E'
    end if
 
-   if (mod100>=10) then
+   if (gwcalctyp>=10) then
      write(msg,'(2a)')&
 &     ' Band     E_lda   <Vxclda>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]',&
 &     '    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago'
@@ -520,7 +521,7 @@ subroutine write_sigma_results(ikcalc,ikibz,Sigp,Sr,KS_BSt)
    write(unt_sgr,'("# b = ",2i10)')Sigp%minbnd(ikcalc,is),Sigp%maxbnd(ikcalc,is)
 
    do ib=Sigp%minbnd(ikcalc,is),Sigp%maxbnd(ikcalc,is)
-     if (mod100>=10) then
+     if (gwcalctyp>=10) then
        call print_Sigma_QPSC(Sr,ikibz,ib,is,KS_BSt,unit=ab_out)
        call print_Sigma_QPSC(Sr,ikibz,ib,is,KS_BSt,unit=std_out,prtvol=1)
 

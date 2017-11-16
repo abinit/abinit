@@ -119,8 +119,8 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
 !Local variables-------------------------------
 !scalars
  integer,parameter :: pertcase0=0,master=0
- integer :: bantot,enforce_sym,ib,ibtot,icutcoul_eff,ii,ikcalc,ikibz,io,isppol,itypat,jj,method
- integer :: mod10,mod100,mqmem,mband,ng_kss,nsheps,ikcalc2bz,ierr,gap_err,ng
+ integer :: bantot,enforce_sym,gwcalctyp,ib,ibtot,icutcoul_eff,ii,ikcalc,ikibz,io,isppol,itypat,jj,method
+ integer :: mod10,mqmem,mband,ng_kss,nsheps,ikcalc2bz,ierr,gap_err,ng
  integer :: gwc_nfftot,gwx_nfftot,nqlwl,test_npwkss,my_rank,nprocs,ik,nk_found,ifo,timrev
  integer :: iqbz,isym,iq_ibz,itim,ic,pinv,ig1,ng_sigx,spin,gw_qprange
  real(dp),parameter :: OMEGASIMIN=0.01d0,tol_enediff=0.001_dp*eV_Ha
@@ -167,8 +167,8 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
  ! === For HF, SEX or COHSEX use Hybertsen-Louie PPM (only $\omega=0$) ===
  ! * Use fake screening for HF.
  ! FIXME Why, we should not redefine Sigp%ppmodel
+ gwcalctyp=Sigp%gwcalctyp
  mod10 =MOD(Sigp%gwcalctyp,10)
- mod100=MOD(Sigp%gwcalctyp,100)
  if (mod10==5.or.mod10==6.or.mod10==7) Sigp%ppmodel=2
  if (mod10<5.and.MOD(Sigp%gwcalctyp,1)/=1) then ! * One shot GW (PPM or contour deformation).
    if (Dtset%nomegasrd==1) then ! avoid division by zero!
@@ -238,7 +238,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
    end if
  end if
 
- if (Sigp%symsigma/=0.and.mod100>=20) then
+ if (Sigp%symsigma/=0.and.gwcalctyp>=20) then
    MSG_WARNING("SC-GW with symmetries is still under development. Use at your own risk!")
  end if
 
@@ -354,7 +354,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
 
  ! Check input
  if (Sigp%ppmodel==3.or.Sigp%ppmodel==4) then
-   if (mod100>=10) then
+   if (gwcalctyp>=10) then
      write(msg,'(a,i3,a)')' The ppmodel chosen and gwcalctyp ',Dtset%gwcalctyp,' are not compatible. '
      MSG_ERROR(msg)
    end if
@@ -628,7 +628,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
  ! Make sure that all the degenerate states are included.
  ! * We will have to average the GW corrections over degenerate states if symsigma=1 is used.
  ! * KS states belonging to the same irreducible representation should be included in the basis set used for SCGW.
- if (Sigp%symsigma/=0 .or. mod100>=10) then
+ if (Sigp%symsigma/=0 .or. gwcalctyp>=10) then
    do isppol=1,Sigp%nsppol
      do ikcalc=1,Sigp%nkptgw
 
@@ -689,7 +689,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
  end do
  !
  ! Warn the user if SCGW run and not all the k-points are included.
- if (mod100>=10 .and. Sigp%nkptgw/=Hdr_wfk%nkpt) then
+ if (gwcalctyp>=10 .and. Sigp%nkptgw/=Hdr_wfk%nkpt) then
    write(msg,'(3a,2(a,i0),2a)')ch10,&
 &    " COMMENT: In a self-consistent GW run, the QP corrections should be calculated for all the k-points of the KSS file ",ch10,&
 &    " but nkptgw= ",Sigp%nkptgw," and WFK nkpt= ",Hdr_wfk%nkpt,ch10,&
@@ -1037,7 +1037,7 @@ subroutine sigma_tables(Sigp,Kmesh,Bnd_sym)
 
 !Local variables-------------------------------
 !scalars
- integer :: mod100,spin,ikcalc,ik_ibz,bmin,bmax,bcol,brow
+ integer :: gwcalctyp,spin,ikcalc,ik_ibz,bmin,bmax,bcol,brow
  integer :: ii,idx_x,idx_c,irr_idx1,irr_idx2
 !arrays
  integer,allocatable :: sigc_bidx(:),sigx_bidx(:)
@@ -1045,7 +1045,7 @@ subroutine sigma_tables(Sigp,Kmesh,Bnd_sym)
 
 ! *************************************************************************
 
- mod100=MOD(Sigp%gwcalctyp,100)
+ gwcalctyp=Sigp%gwcalctyp
 
  ! Recreate the Sig_ij tables taking advantage of the classification of the bands.
  if (allocated(Sigp%Sigxij_tab)) then
@@ -1075,7 +1075,7 @@ subroutine sigma_tables(Sigp,Kmesh,Bnd_sym)
      ik_ibz = Kmesh%tab(Sigp%kptgw2bz(ikcalc))
 
      if (use_sym_at(ik_ibz,spin)) then
-       if (mod100<20) then
+       if (gwcalctyp<20) then
          MSG_ERROR("You should not be here!")
        end if
 
@@ -1140,7 +1140,7 @@ subroutine sigma_tables(Sigp,Kmesh,Bnd_sym)
        ABI_DT_MALLOC(Sigp%Sigcij_tab(ikcalc,spin)%col,(bmin:bmax))
        ABI_DT_MALLOC(Sigp%Sigxij_tab(ikcalc,spin)%col,(bmin:bmax))
 
-       if (mod100<20) then  ! QP wavefunctions == KS, therefore only diagonal elements are calculated.
+       if (gwcalctyp<20) then  ! QP wavefunctions == KS, therefore only diagonal elements are calculated.
          do bcol=bmin,bmax
            ABI_MALLOC(Sigp%Sigcij_tab(ikcalc,spin)%col(bcol)%bidx,(1:1))
            Sigp%Sigcij_tab(ikcalc,spin)%col(bcol)%size1= 1
