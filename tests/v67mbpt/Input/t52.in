@@ -35,7 +35,7 @@
   getwfk3  2   
    getden3 1   ! Usual file handling data
     nstep3 9   ! Only for portability of tests. Do not keep in production runs.
- tolwfr3 5.e-28 ! Also for portability of tests.
+ tolwfr3 1.e-31 ! Also for portability of tests.
 
 #Fourth dataset : ddk response function along axis 1
    iscf4 -3
