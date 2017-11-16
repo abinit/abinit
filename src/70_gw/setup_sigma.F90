@@ -860,6 +860,19 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
 &  Dtset%ecutsigx,Sigp%npwx,nqlwl,qlwl,ngfftf,comm)
 #endif
 
+! Now treat the case of ixc being one of the hybrids, which excludes (in the present implementation) mod(Dtset%gwcalctyp,10)==5
+ if(Dtset%usefock==1)then
+   if(mod(Dtset%gwcalctyp,10)==5)then
+     write(msg,'(4a,i3,2(2a,f8.3),a)')ch10,&
+&    ' The starting wavefunctions were obtained from self-consistent calculations in the planewave basis set',ch10,&
+&    ' with ixc = ',Dtset%ixc,' associated with usefock =',Dtset%usefock,ch10,&
+&    ' In this case, the present implementation does not allow that the self-energy for sigma corresponds to',ch10,&
+&    '  mod(gwcalctyp,10)==5, while your gwcalctyp= ',Dtset%gwcalctyp
+     MSG_ERROR(msg)
+   endif
+! HERE
+ endif
+
 #if 0
  ! Using the random q for the optical limit is one of the reasons
  ! why sigma breaks the initial energy degeneracies.
