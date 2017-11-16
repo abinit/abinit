@@ -303,29 +303,22 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  call wrtout(std_out,msg,'COLL')
  call wrtout(ab_out,msg,'COLL')
 
+ mod10 =MOD(Dtset%gwcalctyp,10)
+ mod100=MOD(Dtset%gwcalctyp,100)
+
  ! Perform some additional checks for hybrid functional calculations
- if(Dtset%gwcalctyp>=100) then
-   if (.not.libxc_functionals_check()) then
+ if(mod10==5) then
+   if (Dtset%ixc_sigma<0 .and. .not.libxc_functionals_check()) then
      msg='Hybrid functional calculations require the compilation with LIBXC library'
      MSG_ERROR(msg)
    end if
-   if(MOD(Dtset%gwcalctyp,100)<10) then
-     msg='gwcalctyp should enforce updated of the energies and/or wavefunctions when performing hybrid functional calculation'
+   if(mod100<10) then
+     msg='gwcalctyp should enforce update of the energies and/or wavefunctions when performing hybrid functional calculation'
      MSG_ERROR(msg)
    end if
    if(Dtset%usepaw==1) then
      msg='PAW version of hybrid functional calculations is not implemented'
      MSG_ERROR(msg)
-   end if
-   if(Dtset%gwcalctyp>=100 .AND. Dtset%gwcalctyp <200) then
-     if( Dtset%rcut<tol6 ) then
-       msg='The cutoff radius rcut is not specified for HSE calculations. Default values will be used!'
-       MSG_WARNING(msg)
-     end if
-     if( Dtset%icutcoul /=5 .AND. Dtset%icutcoul /=15 ) then
-       msg='For HSE calculation, abinit requires short-range only exchange (icutcoul=5)'
-       MSG_ERROR(msg)
-     end if
    end if
  end if
 
@@ -402,8 +395,6 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  call print_ngfft(gwc_ngfft,header='FFT mesh for oscillator strengths used for Sigma_c')
  call print_ngfft(gwx_ngfft,header='FFT mesh for oscillator strengths used for Sigma_x')
 
- mod10 =MOD(Sigp%gwcalctyp,10)
- mod100=MOD(Sigp%gwcalctyp,100)
  b1gw=Sigp%minbdgw
  b2gw=Sigp%maxbdgw
 
@@ -1517,7 +1508,10 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
    if (Dtset%usepaw==1)    QP_mflags%has_hbare  =1
 !  QP_mflags%has_vxc     =1
 !  QP_mflags%has_vxcval  =1
-   if (Sigp%gwcalctyp >100) QP_mflags%has_vxcval_hybrid=1
+!  if (Sigp%gwcalctyp >100) QP_mflags%has_vxcval_hybrid=1
+   if (mod10==5 .and. &
+&      (Dtset%ixc_sigma==-402 .or. Dtset%ixc_sigma==-406 .or. Dtset%ixc_sigma==-427 .or. Dtset%ixc_sigma==-428))&
+&      QP_mflags%has_vxcval_hybrid=1
 !  if (Sigp%use_sigxcore==1) QP_mflags%has_sxcore =1
 !  if (Dtset%usepawu>0)    QP_mflags%has_vu     =1
 !  if (Dtset%useexexch>0)  QP_mflags%has_lexexch=1
