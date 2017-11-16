@@ -5,7 +5,7 @@
 # Dataset 3: calculation of the HSE06 second iteration
 # Dataset 4: calculation of the HSE06 third iteration
 #
-ndtset   5
+ndtset   9
 gwpara   2
 enunit   1
 gw_qprange -14  # Compute correction for all the bands 
@@ -27,12 +27,13 @@ istwfk     *1           # Option needed for Gamma
 
 getwfk1     0
 
-# Common to all hybrid calculations
+# Common to all hybrid/GW calculations
 getwfk      1        # Obtain WFK file from previous dataset
 ecutwfn     11.5     # Planewaves to be used to represent the wavefunctions
 #ecutwfn    20     # Planewaves to be used to represent the wavefunctions
 ecutsigx    11.5   # Planewaves to be used to represent the exchange operator
 #ecutsigx   40     # Planewaves to be used to represent the exchange operator
+ecuteps     2
 gwcalctyp   25
 getqps     -1
 ixc_sigma  -428
@@ -52,6 +53,29 @@ optdriver4  4
    getwfk5  1
       ixc5 -428
     nband5  8
+
+# Dataset6: Computation of the dielectric matrix on top of scGGA in the PW basus
+optdriver6  3
+gwcalctyp6  0
+
+# Dataset7: One-shot G0W0 on top of scGGA in the Kohn-Sham basis
+optdriver7  4
+gwcalctyp7  0
+   getscr7 -1
+gw_qprange7 0
+
+# Dataset8: Computation of the dielectric matrix on top of scHSE06 in the Kohn-Sham basis
+optdriver8  3
+gwcalctyp8  20
+   getqps8  4
+
+# Dataset9: One-shot G0W0 on top of scHSE06 in the Kohn-Sham basis
+optdriver9  4
+gwcalctyp9  20
+   getqps9  4
+   getscr9 -1
+gw_qprange9 0
+
 
 
 # Definition of the unit cell: fcc

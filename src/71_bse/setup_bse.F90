@@ -284,7 +284,7 @@ subroutine setup_bse(codvsn,acell,rprim,ngfftf,ngfft_osc,Dtset,Dtfil,BS_files,Ps
    ! Init Qmesh from the K-mesh reported in the WFK file.
    call find_qmesh(Qmesh,Cryst,Kmesh)
 
-   ! The G-sphere for W and Sigma_c is initialized from ecutesp.
+   ! The G-sphere for W and Sigma_c is initialized from ecuteps.
    call gsph_init(Gsph_c,Cryst,0,ecut=Dtset%ecuteps)
    Dtset%npweps = Gsph_c%ng 
  end if
