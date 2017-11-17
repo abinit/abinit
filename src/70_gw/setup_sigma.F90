@@ -81,6 +81,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
  use m_pawrhoij,      only : pawrhoij_type, pawrhoij_alloc, pawrhoij_copy, pawrhoij_free
  use m_io_kss,        only : make_gvec_kss
  use m_wfk,           only : wfk_read_eigenvalues
+ use m_xcdata,        only : get_xclevel
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -121,8 +122,8 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
  integer,parameter :: pertcase0=0,master=0
  integer :: bantot,enforce_sym,gwcalctyp,ib,ibtot,icutcoul_eff,ii,ikcalc,ikibz,io,isppol,itypat,jj,method
  integer :: mod10,mqmem,mband,ng_kss,nsheps,ikcalc2bz,ierr,gap_err,ng
- integer :: gwc_nfftot,gwx_nfftot,nqlwl,test_npwkss,my_rank,nprocs,ik,nk_found,ifo,timrev
- integer :: iqbz,isym,iq_ibz,itim,ic,pinv,ig1,ng_sigx,spin,gw_qprange,ivcoul_init,nvcoul_init
+ integer :: gwc_nfftot,gwx_nfftot,nqlwl,test_npwkss,my_rank,nprocs,ik,nk_found,ifo,timrev,usefock_ixc
+ integer :: iqbz,isym,iq_ibz,itim,ic,pinv,ig1,ng_sigx,spin,gw_qprange,ivcoul_init,nvcoul_init,xclevel_ixc
  real(dp),parameter :: OMEGASIMIN=0.01d0,tol_enediff=0.001_dp*eV_Ha
  real(dp) :: domegas,domegasi,ucvol,rcut
  logical,parameter :: linear_imag_mesh=.TRUE.
@@ -836,13 +837,15 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
 
 !The Coulomb interaction used here might have two terms : 
 !the first term generates the usual sigma self-energy, but possibly, one should subtract
-!from it the Coulomb interaction already present in the Kohn-Sham basis, in case it comes from a hybrid calculation (Dtset%usefock==1)
+!from it the Coulomb interaction already present in the Kohn-Sham basis, 
+!if the usefock associated to ixc is one.
 !The latter excludes (in the present implementation) mod(Dtset%gwcalctyp,10)==5
- if(Dtset%usefock==1)then
+ call get_xclevel(Dtset%ixc,xclevel_ixc,usefock_ixc)
+ if(usefock_ixc==1)then
    if(mod(Dtset%gwcalctyp,10)==5)then
-     write(msg,'(4a,i3,2(2a,f8.3),a)')ch10,&
+     write(msg,'(4a,i3,a,i3,4a,i5)')ch10,&
 &     ' The starting wavefunctions were obtained from self-consistent calculations in the planewave basis set',ch10,&
-&     ' with ixc = ',Dtset%ixc,' associated with usefock =',Dtset%usefock,ch10,&
+&     ' with ixc = ',Dtset%ixc,' associated with usefock =',usefock_ixc,ch10,&
 &     ' In this case, the present implementation does not allow that the self-energy for sigma corresponds to',ch10,&
 &     '  mod(gwcalctyp,10)==5, while your gwcalctyp= ',Dtset%gwcalctyp
      MSG_ERROR(msg)
@@ -850,7 +853,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
  endif
 
  nvcoul_init=1
- if(Dtset%usefock==1)nvcoul_init=2
+ if(usefock_ixc==1)nvcoul_init=2
 
  do ivcoul_init=1,nvcoul_init
    rcut = Dtset%rcut
@@ -877,6 +880,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
 &        Dtset%ecutsigx,Gsph_c%ng,nqlwl,qlwl,ngfftf,comm)
      end if
    else
+!    Use a temporary Vcp_ks to compute the Coulomb interaction already present in the Fock part of the Kohn-Sham Hamiltonian
      if (Gsph_x%ng > Gsph_c%ng) then
        call vcoul_init(Vcp_ks,Gsph_x,Cryst,Qmesh,Kmesh,rcut,icutcoul_eff,Dtset%vcutgeo,&
 &        Dtset%ecutsigx,Gsph_x%ng,nqlwl,qlwl,ngfftf,comm)
