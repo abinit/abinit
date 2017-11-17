@@ -280,9 +280,6 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,nfftf,ngfftf,&
 
      ! Fix the libxc module with the original settings
      call libxc_functionals_end(xc_functionals=xc_funcs_hybrid)
-!    if(Dtset%ixc<0) then
-!      call libxc_functionals_init(Dtset%ixc,Dtset%nspden)
-!    end if
 
    else
      call wrtout(std_out, 'LIBXC is not present: hybrid functionals are not available')

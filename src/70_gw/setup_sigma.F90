@@ -840,8 +840,10 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
 !from it the Coulomb interaction already present in the Kohn-Sham basis, 
 !if the usefock associated to ixc is one.
 !The latter excludes (in the present implementation) mod(Dtset%gwcalctyp,10)==5
+ nvcoul_init=1
  call get_xclevel(Dtset%ixc,xclevel_ixc,usefock_ixc)
  if(usefock_ixc==1)then
+   nvcoul_init=2
    if(mod(Dtset%gwcalctyp,10)==5)then
      write(msg,'(4a,i3,a,i3,4a,i5)')ch10,&
 &     ' The starting wavefunctions were obtained from self-consistent calculations in the planewave basis set',ch10,&
@@ -852,14 +854,11 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
    endif
  endif
 
- nvcoul_init=1
- if(usefock_ixc==1)nvcoul_init=2
-
  do ivcoul_init=1,nvcoul_init
    rcut = Dtset%rcut
    icutcoul_eff=Dtset%icutcoul
    Sigp%sigma_mixing=one
-   if( ((mod(Dtset%gwcalctyp,10)==5).and.ivcoul_init==1) .or. ivcoul_init==2)then
+   if( mod(Dtset%gwcalctyp,10)==5 .or. ivcoul_init==2)then
      if(abs(Dtset%hyb_mixing)>tol8)then
 !      Warning : the absolute value is needed, because of the singular way used to define the default for this input variable
        Sigp%sigma_mixing=abs(Dtset%hyb_mixing)
@@ -872,6 +871,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
 
 !#if 1
    if(ivcoul_init==1)then
+
      if (Gsph_x%ng > Gsph_c%ng) then
        call vcoul_init(Vcp,Gsph_x,Cryst,Qmesh,Kmesh,rcut,icutcoul_eff,Dtset%vcutgeo,&
 &        Dtset%ecutsigx,Gsph_x%ng,nqlwl,qlwl,ngfftf,comm)
@@ -879,7 +879,9 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
        call vcoul_init(Vcp,Gsph_c,Cryst,Qmesh,Kmesh,rcut,icutcoul_eff,Dtset%vcutgeo,&
 &        Dtset%ecutsigx,Gsph_c%ng,nqlwl,qlwl,ngfftf,comm)
      end if
+
    else
+
 !    Use a temporary Vcp_ks to compute the Coulomb interaction already present in the Fock part of the Kohn-Sham Hamiltonian
      if (Gsph_x%ng > Gsph_c%ng) then
        call vcoul_init(Vcp_ks,Gsph_x,Cryst,Qmesh,Kmesh,rcut,icutcoul_eff,Dtset%vcutgeo,&
@@ -888,9 +890,17 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
        call vcoul_init(Vcp_ks,Gsph_c,Cryst,Qmesh,Kmesh,rcut,icutcoul_eff,Dtset%vcutgeo,&
 &        Dtset%ecutsigx,Gsph_c%ng,nqlwl,qlwl,ngfftf,comm)
      end if
+
 !    Now compute the residual Coulomb interaction
-     Vcp%vc_sqrt_resid=sqrt(Vcp%vc_sqrt**2-Vcp_ks%vc_sqrt**2)
+     Vcp%vc_sqrt_resid=sqrt(Vcp%vc_sqrt**2-Sigp%sigma_mixing*Vcp_ks%vc_sqrt**2)
+!    The mixing factor has already been accounted for, so set it back to one
+     Sigp%sigma_mixing=one
      call vcoul_free(Vcp_ks)
+
+!DEBUG
+     write(std_out,'(a)')' setup_sigma : the residual Coulomb interaction has been computed'
+!ENDDEBUG
+
    endif
 !#else
 !   call vcoul_init(Vcp,Gsph_Max,Cryst,Qmesh,Kmesh,rcut,icutcoul_eff,ivcoul_init,Dtset%vcutgeo,&

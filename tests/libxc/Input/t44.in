@@ -1,11 +1,11 @@
 # Hybrid functional calculation for C in the diamond structure
 # in a self-consistent approach
 # Dataset 1: ground state calculation with WFK output
-# Dataset 2: calculation of the HSE06 first iteration
-# Dataset 3: calculation of the HSE06 second iteration
-# Dataset 4: calculation of the HSE06 third iteration
+# Dataset 2-4: calculation of three iterations of HSE06 in the Kohn-Sham basis
+# Dataset 5: HSE06 stand-alone calculation
+# Dataset 6-11: G0W0 calculations, on top of GGA, HSE06 (Kohn-Sham) and HSE06 (planewaves).
 #
-ndtset   9
+ndtset  11
 gwpara   2
 enunit   1
 gw_qprange -14  # Compute correction for all the bands 
@@ -27,8 +27,8 @@ istwfk     *1           # Option needed for Gamma
 
 getwfk1     0
 
-# Common to all hybrid/GW calculations
-getwfk      1        # Obtain WFK file from previous dataset
+# Common to most hybrid/GW calculations
+getwfk      1        # Obtain WFK file from dataset 1
 ecutwfn     11.5     # Planewaves to be used to represent the wavefunctions
 #ecutwfn    20     # Planewaves to be used to represent the wavefunctions
 ecutsigx    11.5   # Planewaves to be used to represent the exchange operator
@@ -76,7 +76,19 @@ gwcalctyp9  20
    getscr9 -1
 gw_qprange9 0
 
+# Dataset10: Computation of the dielectric matrix on top of scHSE06 in the Kohn-Sham basis
+optdriver10  3
+   getwfk10  5
+gwcalctyp10  20
+   getqps10  0
 
+# Dataset11: One-shot G0W0 on top of scHSE06 in the Kohn-Sham basis
+optdriver11  4
+   getwfk11  5
+gwcalctyp11  20
+   getqps11  0
+   getscr11 -1
+gw_qprange11 0
 
 # Definition of the unit cell: fcc
 acell 3*6.7406530878521345  #Same parameters as Shiskin
