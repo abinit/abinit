@@ -73,19 +73,19 @@ CONTAINS
 !!  [rho_out_format]= 1=rho_out is stored as [up,dn]
 !!                    2=rho_out is stored as [up+dn,up]
 !!                    Default=1
-!!
-!!     Explicit formulae:
-!!     1=>
-!!     rho_out(1) = half*( rho_in(1) + (mag,rho_in(2:4))/|mag|) // where (*,*) is scalar product
-!!     rho_out(2) = half*( rho_in(1) - (mag,rho_in(2:4))/|mag|)
-!!
-!!     2=>
-!!     rho_out(1) = rho_in(1)
-!!     rho_out(2) = half*( rho_in(1) + (mag,rho_in(2:4))/|mag|)
-!!
-!! OUTPUT
+! OUTPUT
 !!  rho_out(vectsize,2)=output (projected, collinear) (1st order if rho_in is 1st order NC density matrix)
 !!  [mag_norm_out(vectsize)]= --optional-- norm of mag(:) at each point of the grid
+!!
+!!     Explicit formulae:
+!!     rho_out_format=1
+!!       rho_out(1) = half*( rho_in(1) + (mag,rho_in(2:4))/|mag|) // where (*,*) is scalar product
+!!       rho_out(2) = half*( rho_in(1) - (mag,rho_in(2:4))/|mag|)
+!!
+!!     rho_out_format=2
+!!       rho_out(1) = rho_in(1)
+!!       rho_out(2) = half*( rho_in(1) + (mag,rho_in(2:4))/|mag|)
+!!
 !!
 !! PARENTS
 !!
@@ -144,11 +144,14 @@ subroutine rotate_mag(rho_in,rho_out,mag,vectsize,cplex,&
 &                 +rho_in(ipt,4)*mag(ipt,3)
 
      if(m_norm>m_norm_min)then
-       mm=rhoin_dot_mag/m_norm
+       mm=rhoin_dot_mag/m_norm                ! mm is in fact |m|^(1)
        rho_out(ipt,1)=half*(rho_in(ipt,1)+mm)
        rho_out(ipt,2)=half*(rho_in(ipt,1)-mm)
      else 
-
+       !it is a trick to set |m|^(1) to zero if |m|^(0)~0, to be exercised with caution 
+       !|m|^(1) is needed to compute bxc^(1) using dfpt_mkvxc
+       !since |m|^(1)=0 here, dfpt_mkvxc call will return bxc^(1)=0, which is not correct!
+       !however, if |m|^(0)~0, correct bxc^(1) value will be recomputed in rotate_back_mag_dfpt
        rho_out(ipt,1)=half*rho_in(ipt,1)
        rho_out(ipt,2)=half*rho_in(ipt,1)
 
@@ -184,6 +187,7 @@ subroutine rotate_mag(rho_in,rho_out,mag,vectsize,cplex,&
        rho_out(2*ipt  ,1)=half*(rho_in(2*ipt ,1)+mm)
        rho_out(2*ipt  ,2)=half*(rho_in(2*ipt ,1)-mm)
      else
+       !same trick as for cplex=1
        rho_out(2*ipt-1,1)=half*rho_in(2*ipt-1,1)
        rho_out(2*ipt-1,2)=half*rho_in(2*ipt-1,2)
        rho_out(2*ipt  ,1)=half*rho_in(2*ipt  ,1)
@@ -266,8 +270,6 @@ subroutine rotate_back_mag(vxc_in,vxc_out,mag,vectsize,&
  integer :: ipt
  logical :: has_mag_norm
  real(dp) :: dvdn,dvdz,m_norm
- real(dp) :: dvdn_re,dvdn_im
- real(dp) :: dvdz_re,dvdz_im
 !arrays
 
 ! *************************************************************************
@@ -292,8 +294,18 @@ subroutine rotate_back_mag(vxc_in,vxc_out,mag,vectsize,&
      vxc_out(ipt,3)= mag(ipt,1)*dvdz
      vxc_out(ipt,4)=-mag(ipt,2)*dvdz
    else
+     !SPr: see m->0 case in rotate_mag and rotate_back_mag_dfpt
+     !dvdz should not be set to zero! For m->0 case
+     !half(vxc_in(ipt,1)-vxc_in(ipt,2)) is proportional to |m_norm| 
+     !so dvdn = constant that can be computed from kxc
      vxc_out(ipt,1:2)=dvdn
      vxc_out(ipt,3:4)=zero
+     !the correct formulas are:
+     !dvdz= half*(half*(kxc(ipt,1)+kxc(ipt,3))-kxc(ipt,2))
+     !vxc_out(ipt,1)=dvdn+mag(ipt,3)*dvdz
+     !vxc_out(ipt,2)=dvdn-mag(ipt,3)*dvdz
+     !vxc_out(ipt,3)= mag(ipt,1)*dvdz
+     !vxc_out(ipt,4)=-mag(ipt,2)*dvdz
    end if
  end do
 
@@ -367,13 +379,12 @@ subroutine rotate_back_mag_dfpt(vxc1_in,vxc1_out,vxc,kxc,rho1,mag,vectsize,cplex
  integer  :: ipt,rotation_method
  logical  :: has_mag_norm
  real(dp) :: bxc_over_m,d1,d2,d3,d4,dum,dvdn,dvdz,fact,m_dot_m1,m_norm
- real(dp) :: mdirx,mdiry,mdirz,mxy,mx1,my1,mz1,nx,ny,nz,nx1,ny1
  real(dp) :: dvdn_re,dvdn_im,dvdz_re,dvdz_im
  complex(dpc) :: rho_updn
+ real(dp) :: mdirx,mdiry,mdirz,mxy,mx1,my1,mz1,wx,wy,wx1,wy1
  real(dp) :: theta0,theta1,theta1_re,theta1_im
- real(dp) :: nx1_re,nx1_im
- real(dp) :: ny1_re,ny1_im
- real(dp) :: nz1_re,nz1_im
+ real(dp) :: wx1_re,wx1_im
+ real(dp) :: wy1_re,wy1_im
  real(dp) :: mx1_re,mx1_im,my1_re,my1_im,mz1_re,mz1_im
  real(dp) :: m_dot_m1_re,m_dot_m1_im
  real(dp) :: fact_re,fact_im
@@ -480,7 +491,7 @@ subroutine rotate_back_mag_dfpt(vxc1_in,vxc1_out,vxc,kxc,rho1,mag,vectsize,cplex
 ! Analytical expression of U rotation matrix
 !----------------------------------------
  case (2)
-   !SPr Alternative method (explicitely calculated rotation matrices)
+   !SPr: Alternative method (explicitely calculated rotation matrices)
    !Vxc^(1) =   phixc^(1).Id +                                               // <= change of "electrostatic" XC potential  (phixc^(1) is denoted dvdn)
    !          + bxc^(1)*( Udag^(0).sigma_z.U^(0) )  +                        // <= this part describes the change of XC magnetic field magnitude bxc^(1)
    !          + bxc^(0)*( Udag^(1).sigma_z.U^(0) + Udag^(0).sigma_z.U^(1) )  // <= remaining terms describe the cost of magnetization rotation
@@ -495,6 +506,11 @@ subroutine rotate_back_mag_dfpt(vxc1_in,vxc1_out,vxc,kxc,rho1,mag,vectsize,cplex
          m_norm=sqrt(mag(ipt,1)**2+mag(ipt,2)**2+mag(ipt,3)**2)
        end if
 
+       mxy = sqrt(mag(ipt,1)**2+mag(ipt,2)**2)
+
+       mdirx=mag(ipt,1)/m_norm; mdiry=mag(ipt,2)/m_norm; mdirz=mag(ipt,3)/m_norm
+       mx1= rho1(ipt,2); my1=rho1(ipt,3); mz1=rho1(ipt,4)
+
        if (m_norm>m_norm_min) then
 
 !        dvdn is phixc^(1) (density only part)
@@ -502,10 +518,9 @@ subroutine rotate_back_mag_dfpt(vxc1_in,vxc1_out,vxc,kxc,rho1,mag,vectsize,cplex
          dvdn=(vxc1_in(ipt,1)+vxc1_in(ipt,2))*half
          dvdz=(vxc1_in(ipt,1)-vxc1_in(ipt,2))*half
 
-         mxy = sqrt(mag(ipt,1)**2+mag(ipt,2)**2)
-         nx     =-mag(ipt,2)/mxy
-         ny     = mag(ipt,1)/mxy
-         nz     = zero
+         wx     =-mag(ipt,2)/mxy
+         wy     = mag(ipt,1)/mxy
+         wz     = zero
 
          theta0 = acos(mag(ipt,3)/m_norm)
          fact   = sin(theta0)/mxy
@@ -556,13 +571,13 @@ subroutine rotate_back_mag_dfpt(vxc1_in,vxc1_out,vxc,kxc,rho1,mag,vectsize,cplex
 ! Explicit calculation of rotated XC functional
 !----------------------------------------
  case (3)
-   ! SPr 2nd method for Vxc potential rotation
+   ! SPr: Brute-force derivative of Vxc
    ! Explicit calculation of the rotated xc functional
-   ! (derivatives of the analytical expression)
+   ! (derivatives of the analytical expression) (Eq. A)
    ! Vxc^(1) =   phixc^(1).Id +                    // <= change of "electrostatic" XC potential  (phixc^(1) is denoted dvdn)
    !           + bxc^(1)*(sigma,m^(0))/|m^(0)|  +  // <= this term is equivalent to ( Udag^(0).sigma_z.U^(0) ) term in rotation_method=2
-   !           +(bxc^(0)/|m^(0)|)*(sigma,m^(1)) -  // <= the last terms are equivalent to ( Udag^(1).sigma_z.U^(0) + Udag^(0).sigma_z.U^(1) )
-   !           -(bxc^(0)/|m^(0)|)*(sigma,m^(0))*(m^(1),m^(0))/|m^(0)|^2
+   !           + bxc^(0)*(sigma,m^(1)))/|m^(0)| -  // <= the last terms are equivalent to ( Udag^(1).sigma_z.U^(0) + Udag^(0).sigma_z.U^(1) )
+   !           - bxc^(0)*(sigma,m^(0))*(m^(1),m^(0))/|m^(0)|**3
    select case(cplex)
    case(1)
 
@@ -574,8 +589,8 @@ subroutine rotate_back_mag_dfpt(vxc1_in,vxc1_out,vxc,kxc,rho1,mag,vectsize,cplex
          m_norm=sqrt(mag(ipt,1)**2+mag(ipt,2)**2+mag(ipt,3)**2)
        end if
 
-!      dvdn is deltaVxc (density only part)
-!      dvdz is deltaBxc (magnetization magnitude part)
+!      dvdn is phixc^(1) (density only part)
+!      dvdz is bxc^(1)   (magnetization magnitude part)
        dvdn=(vxc1_in(ipt,1)+vxc1_in(ipt,2))*half
        dvdz=(vxc1_in(ipt,1)-vxc1_in(ipt,2))*half
 
@@ -583,29 +598,28 @@ subroutine rotate_back_mag_dfpt(vxc1_in,vxc1_out,vxc,kxc,rho1,mag,vectsize,cplex
 
        if(m_norm>m_norm_min) then
 
+         mdirx=mag(ipt,1)/m_norm; mdiry=mag(ipt,2)/m_norm; mdirz=mag(ipt,3)/m_norm
 
          !This part describes the change of the magnitude of the xc magnetic field
-         ! and the change of the scalar part of the xc electrostatic potential
-         fact=dvdz/m_norm ; dum=mag(ipt,3)*fact
-         vxc1_out(ipt,1)= dvdn+dum
-         vxc1_out(ipt,2)= dvdn-dum
-         vxc1_out(ipt,3)= mag(ipt,1)*fact ! Real part
-         vxc1_out(ipt,4)=-mag(ipt,2)*fact ! Imaginary part
+         !and the change of the scalar part of the xc electrostatic potential, 1st + 2nd term in Eq.A 
+         !phixc^(1).Id + bxc^(1) (sigma,m^(0))/|m^(0)|
+         vxc1_out(ipt,1)= dvdn+dvdz*mdirz
+         vxc1_out(ipt,2)= dvdn-dvdz*mdirz
+         vxc1_out(ipt,3)= dvdz*mdirx   ! Real part
+         vxc1_out(ipt,4)=-dvdz*mdiry   ! Imaginary part, minus sign comes from sigma_y
 
          !Add remaining contributions comming from the change of magnetization direction
-         m_dot_m1=(mag(ipt,1)*rho1(ipt,2)+mag(ipt,2)*rho1(ipt,3)+mag(ipt,3)*rho1(ipt,4))/m_norm
-         mdirx=mag(ipt,1)/m_norm
-         mdiry=mag(ipt,2)/m_norm
-         mdirz=mag(ipt,3)/m_norm
+         !projection of m^(1) on gs magnetization direction
+         m_dot_m1=(mdirx*rho1(ipt,2)+mdiry*rho1(ipt,3)+mdirz*rho1(ipt,4))
 
-         bxc_over_m = (vxc(ipt,1)-vxc(ipt,2))*half/mag(ipt,3)
-         vxc1_out(ipt,1) = vxc1_out(ipt,1) + bxc_over_m*( mz1 - mdirz*m_dot_m1 ) ! bxc is Bxc^(0)/|m|. In principle,
-         vxc1_out(ipt,2) = vxc1_out(ipt,2) + bxc_over_m*(-mz1 + mdirz*m_dot_m1 ) ! bxc = (vxc(ipt,1)-vxc(ipt,2))/m_norm/2.0
-         vxc1_out(ipt,3) = vxc1_out(ipt,3) + bxc_over_m*( mx1 - mdirx*m_dot_m1 ) ! but for small magnetization, the correct limit
-         vxc1_out(ipt,4) = vxc1_out(ipt,4) + bxc_over_m*(-my1 + mdiry*m_dot_m1 ) ! is computed in rhotoxc.F90
+         bxc_over_m = (vxc(ipt,1)-vxc(ipt,2))*half/m_norm                        ! bug: replaced mag(ipt,3)-> m_norm
+         vxc1_out(ipt,1) = vxc1_out(ipt,1) + bxc_over_m*( mz1 - mdirz*m_dot_m1 ) !
+         vxc1_out(ipt,2) = vxc1_out(ipt,2) + bxc_over_m*(-mz1 + mdirz*m_dot_m1 ) !
+         vxc1_out(ipt,3) = vxc1_out(ipt,3) + bxc_over_m*( mx1 - mdirx*m_dot_m1 ) !
+         vxc1_out(ipt,4) = vxc1_out(ipt,4) + bxc_over_m*(-my1 + mdiry*m_dot_m1 ) !
 
        else
-!        Compute Bxc/|m| from Kxc (zero limit)
+!        Compute Bxc/|m| from Kxc (|m^(0)| -> zero limit)
          bxc_over_m = half*(half*(kxc(ipt,1)+kxc(ipt,3))-kxc(ipt,2))
          vxc1_out(ipt,1)= dvdn + bxc_over_m*mz1
          vxc1_out(ipt,2)= dvdn - bxc_over_m*mz1
@@ -626,50 +640,74 @@ subroutine rotate_back_mag_dfpt(vxc1_in,vxc1_out,vxc,kxc,rho1,mag,vectsize,cplex
          m_norm=sqrt(mag(ipt,1)**2+mag(ipt,2)**2+mag(ipt,3)**2)
        end if
 
-!      dvdn is deltaVxc (density only part)
-!      dvdz is deltaBxc (magnetization magnitude part)
-       dvdn=(vxc1_in(ipt,1)+vxc1_in(ipt,2))*half
-       dvdz=(vxc1_in(ipt,1)-vxc1_in(ipt,2))*half
+!      see cplex=1 case for details
+       dvdn_re=(vxc1_in(2*ipt-1,1)+vxc1_in(2*ipt-1,2))*half
+       dvdn_im=(vxc1_in(2*ipt  ,1)+vxc1_in(2*ipt  ,2))*half
+       dvdz_re=(vxc1_in(2*ipt-1,1)-vxc1_in(2*ipt-1,2))*half
+       dvdz_im=(vxc1_in(2*ipt  ,1)-vxc1_in(2*ipt  ,2))*half
 
-       mx1=rho1(ipt,2) ; my1=rho1(ipt,3) ; mz1=rho1(ipt,4)
+       mx1_re=rho1(2*ipt-1,2); mx1_im=rho1(2*ipt,2) 
+       my1_re=rho1(2*ipt-1,3); my1_im=rho1(2*ipt,3) 
+       mz1_re=rho1(2*ipt-1,4); mz1_im=rho1(2*ipt,4) 
 
        if(m_norm>m_norm_min) then
 
+         mdirx=mag(ipt,1)/m_norm; mdiry=mag(ipt,2)/m_norm; mdirz=mag(ipt,3)/m_norm
 
-         !This part describes the change of the magnitude of the xc magnetic field
-         ! and the change of the scalar part of the xc electrostatic potential
-         fact=dvdz/m_norm ; dum=mag(ipt,3)*fact
-         vxc1_out(ipt,1)= dvdn+dum
-         vxc1_out(ipt,2)= dvdn-dum
-         vxc1_out(ipt,3)= mag(ipt,1)*fact ! Real part
-         vxc1_out(ipt,4)=-mag(ipt,2)*fact ! Imaginary part
+         !first two terms:
+         vxc1_out(2*ipt-1,1)= dvdn_re+dvdz_re*mdirz; vxc1_out(2*ipt,1)= dvdn_re+dvdz_im*mdirz
+         vxc1_out(2*ipt-1,2)= dvdn_re-dvdz_re*mdirz; vxc1_out(2*ipt,2)= dvdn_im-dvdz_im*mdirz
+         !NOTE: change of definition of the potential matrix components
+         !      vxc1_out(:,3) =   V_updn
+         !      vxc1_out(:,4) = i.V_updn
 
-         !Add remaining contributions comming from the change of magnetization direction
-         m_dot_m1=(mag(ipt,1)*rho1(ipt,2)+mag(ipt,2)*rho1(ipt,3)+mag(ipt,3)*rho1(ipt,4))/m_norm
-         mdirx=mag(ipt,1)/m_norm
-         mdiry=mag(ipt,2)/m_norm
-         mdirz=mag(ipt,3)/m_norm
+         !  V^12 =   dvdz*mx/|m| - i.dvdz*my/|m| = (Re[dvdz]*mx/|m| + Im[dvdz]*my/|m|) + i.(Im[dvdz]*mx/|m| - Re[dvdz]*my/|m|) => vxc1(:,3)
+         !i.V^12 = i.dvdz*mx/|m| +   dvdz*my/|m| = (Re[dvdz]*my/|m| - Im[dvdz]*mx/|m|) + i.(Im[dvdz]*my/|m| + Re[dvdz]*mx/|m|) => vxc1(:,4)
+         ! no need for explicit formulas for vxc1(:,4), it will be computed later from vxc1(:,3)
+         vxc1_out(2*ifft-1,3)= dvdz_re*mdirx + dvdz_im*mdiry   !Re[  V^12]
+         vxc1_out(2*ifft  ,3)= dvdz_im*mdirx - dvdz_re*mdiry   !Im[  V^12]
 
-         bxc_over_m = (vxc(ipt,1)-vxc(ipt,2))*half/mag(ipt,3)
-         vxc1_out(ipt,1) = vxc1_out(ipt,1) + bxc_over_m*( mz1 - mdirz*m_dot_m1 ) ! bxc is Bxc^(0)/|m|. In principle,
-         vxc1_out(ipt,2) = vxc1_out(ipt,2) + bxc_over_m*(-mz1 + mdirz*m_dot_m1 ) ! bxc = (vxc(ipt,1)-vxc(ipt,2))/m_norm/2.0
-         vxc1_out(ipt,3) = vxc1_out(ipt,3) + bxc_over_m*( mx1 - mdirx*m_dot_m1 ) ! but for small magnetization, the correct limit
-         vxc1_out(ipt,4) = vxc1_out(ipt,4) + bxc_over_m*(-my1 + mdiry*m_dot_m1 ) ! is computed in rhotoxc.F90
+         !remaining contributions:
+         m_dot_m1_re= mdirx*mx1_re + mdiry*my1_re + mdirz*mz1_re
+         m_dot_m1_re= mdirx*mx1_im + mdiry*my1_im + mdirz*mz1_im
+         bxc_over_m = (vxc(ipt,1)-vxc(ipt,2))*half/m_norm         ! vxc^(0) => Real quantity
+
+         vxc1_out(2*ifft-1,1) = vxc1_out(2*ifft-1,1) + bxc_over_m*( mz1_re - mdirz*m_dot_m1_re ) ! Re[V^11]
+         vxc1_out(2*ifft  ,1) = vxc1_out(2*ifft  ,1) + bxc_over_m*( mz1_im - mdirz*m_dot_m1_im ) ! Im[V^11]
+         vxc1_out(2*ifft-1,2) = vxc1_out(2*ifft-1,2) + bxc_over_m*(-mz1_re + mdirz*m_dot_m1_re ) ! Re[V^22]
+         vxc1_out(2*ifft  ,2) = vxc1_out(2*ifft  ,2) + bxc_over_m*(-mz1_im + mdirz*m_dot_m1_im ) ! Im[V^22]
+
+         !    v12  += bxc_over_m*(   (mx1    - mdirx*m_dot_m1   ) + i.(-my1    + mdiry*m_dot_m1   )   )  <= see cplex=2
+         ! Re[v12] += bxc_over_m*(   (mx1_re - mdirx*m_dot_m1_re) +   ( my1_im - mdiry*m_dot_m1_im)   )
+         ! Im[v12] += bxc_over_m*(   (mx1_im - mdirx*m_dot_m1_im) +   (-my1_re + mdiry*m_dot_m1_re)   )
+         vxc1_out(2*ifft-1,3) = vxc1_out(2*ifft-1,3) + bxc_over_m*( mx1_re - mdirx*m_dot_m1_re ) ! Re[V^12]
+         vxc1_out(2*ifft-1,3) = vxc1_out(2*ifft-1,3) + bxc_over_m*( my1_im - mdiry*m_dot_m1_im ) ! Re[V^12]
+         vxc1_out(2*ifft  ,3) = vxc1_out(2*ifft  ,3) + bxc_over_m*( mx1_im - mdirx*m_dot_m1_im ) ! Im[V^12]
+         vxc1_out(2*ifft  ,3) = vxc1_out(2*ifft  ,3) + bxc_over_m*(-my1_re + mdiry*m_dot_m1_re ) ! Im[V^12]
 
        else
-!        Compute Bxc/|m| from Kxc (zero limit)
+
+!        Compute Bxc/|m| from Kxc (|m^(0)| -> zero limit)
          bxc_over_m = half*(half*(kxc(ipt,1)+kxc(ipt,3))-kxc(ipt,2))
-         vxc1_out(ipt,1)= dvdn + bxc_over_m*mz1
-         vxc1_out(ipt,2)= dvdn - bxc_over_m*mz1
-         vxc1_out(ipt,3)= bxc_over_m*mx1
-         vxc1_out(ipt,4)=-bxc_over_m*my1
+         vxc1_out(2*ipt-1,1)= dvdn_re + bxc_over_m*mz1_re
+         vxc1_out(2*ipt-1,2)= dvdn_re - bxc_over_m*mz1_re
+         vxc1_out(2*ipt  ,1)= dvdn_im + bxc_over_m*mz1_im
+         vxc1_out(2*ipt  ,2)= dvdn_im - bxc_over_m*mz1_im
+
+         vxc1_out(2*ipt-1,3)= bxc_over_m*(mx1_re+my1_re) 
+         vxc1_out(2*ipt  ,3)= bxc_over_m*(mx1_im-my1_im) 
+
        end if
+
+       !finally reconstruct i.V^12 from V^12
+       vxc1_out(2*ifft-1,4) = -vxc1_out(2*ifft  ,3)  ! Re[i.V^12] =-Im[V^12]
+       vxc1_out(2*ifft  ,4) =  vxc1_out(2*ifft-1,3)  ! Im[i.V^12] = Re[V^12]
 
      end do ! ipt
 
-   end select
+   end select !cplex
 
- end select
+ end select ! rotation_method
 
 !DBG_EXIT("COLL")
 
