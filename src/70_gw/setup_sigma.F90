@@ -73,7 +73,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
 &                            get_bz_item, has_IBZ_item, find_qmesh
  use m_ebands,        only : ebands_init, enclose_degbands, get_valence_idx, ebands_update_occ, ebands_report_gap, &
 &                            get_gaps, gaps_free, gaps_t, gaps_print
- use m_vcoul,         only : vcoul_t, vcoul_init
+ use m_vcoul,         only : vcoul_t, vcoul_init, vcoul_free
  use m_fft_mesh,      only : setmesh
  use m_gsphere,       only : gsphere_t, gsph_init, merge_and_sort_kg, gsph_extend, setshells
  use m_screening,     only : init_er_from_file, epsilonm1_results
@@ -122,7 +122,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
  integer :: bantot,enforce_sym,gwcalctyp,ib,ibtot,icutcoul_eff,ii,ikcalc,ikibz,io,isppol,itypat,jj,method
  integer :: mod10,mqmem,mband,ng_kss,nsheps,ikcalc2bz,ierr,gap_err,ng
  integer :: gwc_nfftot,gwx_nfftot,nqlwl,test_npwkss,my_rank,nprocs,ik,nk_found,ifo,timrev
- integer :: iqbz,isym,iq_ibz,itim,ic,pinv,ig1,ng_sigx,spin,gw_qprange
+ integer :: iqbz,isym,iq_ibz,itim,ic,pinv,ig1,ng_sigx,spin,gw_qprange,ivcoul_init,nvcoul_init
  real(dp),parameter :: OMEGASIMIN=0.01d0,tol_enediff=0.001_dp*eV_Ha
  real(dp) :: domegas,domegasi,ucvol,rcut
  logical,parameter :: linear_imag_mesh=.TRUE.
@@ -841,10 +841,10 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
  if(Dtset%usefock==1)then
    if(mod(Dtset%gwcalctyp,10)==5)then
      write(msg,'(4a,i3,2(2a,f8.3),a)')ch10,&
-&    ' The starting wavefunctions were obtained from self-consistent calculations in the planewave basis set',ch10,&
-&    ' with ixc = ',Dtset%ixc,' associated with usefock =',Dtset%usefock,ch10,&
-&    ' In this case, the present implementation does not allow that the self-energy for sigma corresponds to',ch10,&
-&    '  mod(gwcalctyp,10)==5, while your gwcalctyp= ',Dtset%gwcalctyp
+&     ' The starting wavefunctions were obtained from self-consistent calculations in the planewave basis set',ch10,&
+&     ' with ixc = ',Dtset%ixc,' associated with usefock =',Dtset%usefock,ch10,&
+&     ' In this case, the present implementation does not allow that the self-energy for sigma corresponds to',ch10,&
+&     '  mod(gwcalctyp,10)==5, while your gwcalctyp= ',Dtset%gwcalctyp
      MSG_ERROR(msg)
    endif
  endif
@@ -870,18 +870,18 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
 !#if 1
    if(ivcoul_init==1)then
      if (Gsph_x%ng > Gsph_c%ng) then
-       call vcoul_init(Vcp,Gsph_x,Cryst,Qmesh,Kmesh,rcut,icutcoul_eff,ivcoul_init,Dtset%vcutgeo,&
+       call vcoul_init(Vcp,Gsph_x,Cryst,Qmesh,Kmesh,rcut,icutcoul_eff,Dtset%vcutgeo,&
 &        Dtset%ecutsigx,Gsph_x%ng,nqlwl,qlwl,ngfftf,comm)
      else
-       call vcoul_init(Vcp,Gsph_c,Cryst,Qmesh,Kmesh,rcut,icutcoul_eff,ivcoul_init,Dtset%vcutgeo,&
+       call vcoul_init(Vcp,Gsph_c,Cryst,Qmesh,Kmesh,rcut,icutcoul_eff,Dtset%vcutgeo,&
 &        Dtset%ecutsigx,Gsph_c%ng,nqlwl,qlwl,ngfftf,comm)
      end if
    else
      if (Gsph_x%ng > Gsph_c%ng) then
-       call vcoul_init(Vcp_ks,Gsph_x,Cryst,Qmesh,Kmesh,rcut,icutcoul_eff,ivcoul_init,Dtset%vcutgeo,&
+       call vcoul_init(Vcp_ks,Gsph_x,Cryst,Qmesh,Kmesh,rcut,icutcoul_eff,Dtset%vcutgeo,&
 &        Dtset%ecutsigx,Gsph_x%ng,nqlwl,qlwl,ngfftf,comm)
      else
-       call vcoul_init(Vcp_ks,Gsph_c,Cryst,Qmesh,Kmesh,rcut,icutcoul_eff,ivcoul_init,Dtset%vcutgeo,&
+       call vcoul_init(Vcp_ks,Gsph_c,Cryst,Qmesh,Kmesh,rcut,icutcoul_eff,Dtset%vcutgeo,&
 &        Dtset%ecutsigx,Gsph_c%ng,nqlwl,qlwl,ngfftf,comm)
      end if
 !    Now compute the residual Coulomb interaction
@@ -893,7 +893,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
 !&    Dtset%ecutsigx,Sigp%npwx,nqlwl,qlwl,ngfftf,comm)
 !#endif
 
- endif
+ enddo
 
 #if 0
  ! Using the random q for the optical limit is one of the reasons
