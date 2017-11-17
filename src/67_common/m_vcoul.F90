@@ -134,6 +134,14 @@ MODULE m_vcoul
     ! vcqs_sqrt(ng,nqlwl)
     ! Square root of the Coulomb term calculated for small q-points
 
+  complex(gwpc),allocatable :: vc_sqrt_resid(:,:)
+    ! vc_sqrt_resid(ng,nqibz)
+    ! Square root of the residual difference between the Coulomb interaction in the sigma self-energy for exchange,
+    ! and the Coulomb interaction already present in the generalized Kohn-Sham eigenenergies (when they come from an hybrid)
+    ! Given in reciprocal space. At the call to vcoul_init, it is simply initialized at the value of vc_sqrt(:,:),
+    ! and only later modified.
+    ! A cut might be applied.
+
  end type vcoul_t
 
  public ::  vcoul_init           ! Main creation method. 
@@ -940,8 +948,10 @@ subroutine vcoul_init(Vcp,Gsph,Cryst,Qmesh,Kmesh,rcut,icutcoul,vcutgeo,ecut,ng,n
  ! * Rozzi"s cutoff can give real negative values 
 
  ABI_MALLOC(Vcp%vc_sqrt,(ng,Vcp%nqibz))
+ ABI_MALLOC(Vcp%vc_sqrt_resid,(ng,Vcp%nqibz))
  Vcp%vc_sqrt=CMPLX(vcoul,zero) 
  Vcp%vc_sqrt=SQRT(Vcp%vc_sqrt) 
+ Vcp%vc_sqrt_resid=Vcp%vc_sqrt
  call vcoul_plot(Vcp,Qmesh,Gsph,ng,vcoul,comm)
  ABI_FREE(vcoul)
 
@@ -1509,6 +1519,9 @@ subroutine vcoul_free(Vcp)
  end if
  if (allocated(Vcp%vc_sqrt))   then
    ABI_FREE(Vcp%vc_sqrt)
+ end if
+ if (allocated(Vcp%vc_sqrt_resid))   then
+   ABI_FREE(Vcp%vc_sqrt_resid)
  end if
  if (allocated(Vcp%vcqlwl_sqrt)) then
    ABI_FREE(Vcp%vcqlwl_sqrt)

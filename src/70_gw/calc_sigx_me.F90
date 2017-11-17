@@ -509,7 +509,7 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
      ! The same relation holds for 0-D systems, but not in 1-D or 2D systems. It depends on S.
      do ig=1,npwx
        ig_rot = Gsph_x%rottb(ig,itim_q,isym_q)
-       vc_sqrt_qbz(ig_rot)=Vcp%vc_sqrt(ig,iq_ibz)
+       vc_sqrt_qbz(ig_rot)=Vcp%vc_sqrt_resid(ig,iq_ibz)
      end do
 
      ! Sum over (occupied) bands.

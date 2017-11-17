@@ -140,6 +140,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
  real(dp),pointer :: energies_p(:,:,:)
  real(dp),allocatable :: doccde(:),eigen(:),occfact(:),qlwl(:,:)
  type(Pawrhoij_type),allocatable :: Pawrhoij(:)
+ type(vcoul_t) :: Vcp_ks
 
 ! *************************************************************************
 
@@ -833,34 +834,10 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
    qlwl(:,:)=Dtset%gw_qlwl(:,1:nqlwl)
  end if
 
- rcut = Dtset%rcut
- icutcoul_eff=Dtset%icutcoul
- Sigp%sigma_mixing=one
- if(mod(Dtset%gwcalctyp,10)==5)then
-   if(abs(Dtset%hyb_mixing)>tol8)then
-!    Warning : the absolute value is needed, because of the singular way used to define the default for this input variable
-     Sigp%sigma_mixing=abs(Dtset%hyb_mixing)
-   else if(abs(Dtset%hyb_mixing_sr)>tol8)then
-     Sigp%sigma_mixing=abs(Dtset%hyb_mixing_sr)
-     icutcoul_eff=5
-   endif
-   if(abs(rcut)<tol6 .and. abs(Dtset%hyb_range_fock)>tol8)rcut=one/Dtset%hyb_range_fock
- endif
-
-#if 1
- if (Gsph_x%ng > Gsph_c%ng) then
-   call vcoul_init(Vcp,Gsph_x,Cryst,Qmesh,Kmesh,rcut,icutcoul_eff,Dtset%vcutgeo,&
-&    Dtset%ecutsigx,Gsph_x%ng,nqlwl,qlwl,ngfftf,comm)
- else
-   call vcoul_init(Vcp,Gsph_c,Cryst,Qmesh,Kmesh,rcut,icutcoul_eff,Dtset%vcutgeo,&
-&    Dtset%ecutsigx,Gsph_c%ng,nqlwl,qlwl,ngfftf,comm)
- end if
-#else
-   call vcoul_init(Vcp,Gsph_Max,Cryst,Qmesh,Kmesh,rcut,icutcoul_eff,Dtset%vcutgeo,&
-&  Dtset%ecutsigx,Sigp%npwx,nqlwl,qlwl,ngfftf,comm)
-#endif
-
-! Now treat the case of ixc being one of the hybrids, which excludes (in the present implementation) mod(Dtset%gwcalctyp,10)==5
+!The Coulomb interaction used here might have two terms : 
+!the first term generates the usual sigma self-energy, but possibly, one should subtract
+!from it the Coulomb interaction already present in the Kohn-Sham basis, in case it comes from a hybrid calculation (Dtset%usefock==1)
+!The latter excludes (in the present implementation) mod(Dtset%gwcalctyp,10)==5
  if(Dtset%usefock==1)then
    if(mod(Dtset%gwcalctyp,10)==5)then
      write(msg,'(4a,i3,2(2a,f8.3),a)')ch10,&
@@ -870,7 +847,52 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
 &    '  mod(gwcalctyp,10)==5, while your gwcalctyp= ',Dtset%gwcalctyp
      MSG_ERROR(msg)
    endif
-! HERE
+ endif
+
+ nvcoul_init=1
+ if(Dtset%usefock==1)nvcoul_init=2
+
+ do ivcoul_init=1,nvcoul_init
+   rcut = Dtset%rcut
+   icutcoul_eff=Dtset%icutcoul
+   Sigp%sigma_mixing=one
+   if( ((mod(Dtset%gwcalctyp,10)==5).and.ivcoul_init==1) .or. ivcoul_init==2)then
+     if(abs(Dtset%hyb_mixing)>tol8)then
+!      Warning : the absolute value is needed, because of the singular way used to define the default for this input variable
+       Sigp%sigma_mixing=abs(Dtset%hyb_mixing)
+     else if(abs(Dtset%hyb_mixing_sr)>tol8)then
+       Sigp%sigma_mixing=abs(Dtset%hyb_mixing_sr)
+       icutcoul_eff=5
+     endif
+     if(abs(rcut)<tol6 .and. abs(Dtset%hyb_range_fock)>tol8)rcut=one/Dtset%hyb_range_fock
+   endif
+
+!#if 1
+   if(ivcoul_init==1)then
+     if (Gsph_x%ng > Gsph_c%ng) then
+       call vcoul_init(Vcp,Gsph_x,Cryst,Qmesh,Kmesh,rcut,icutcoul_eff,ivcoul_init,Dtset%vcutgeo,&
+&        Dtset%ecutsigx,Gsph_x%ng,nqlwl,qlwl,ngfftf,comm)
+     else
+       call vcoul_init(Vcp,Gsph_c,Cryst,Qmesh,Kmesh,rcut,icutcoul_eff,ivcoul_init,Dtset%vcutgeo,&
+&        Dtset%ecutsigx,Gsph_c%ng,nqlwl,qlwl,ngfftf,comm)
+     end if
+   else
+     if (Gsph_x%ng > Gsph_c%ng) then
+       call vcoul_init(Vcp_ks,Gsph_x,Cryst,Qmesh,Kmesh,rcut,icutcoul_eff,ivcoul_init,Dtset%vcutgeo,&
+&        Dtset%ecutsigx,Gsph_x%ng,nqlwl,qlwl,ngfftf,comm)
+     else
+       call vcoul_init(Vcp_ks,Gsph_c,Cryst,Qmesh,Kmesh,rcut,icutcoul_eff,ivcoul_init,Dtset%vcutgeo,&
+&        Dtset%ecutsigx,Gsph_c%ng,nqlwl,qlwl,ngfftf,comm)
+     end if
+!    Now compute the residual Coulomb interaction
+     Vcp%vc_sqrt_resid=sqrt(Vcp%vc_sqrt**2-Vcp_ks%vc_sqrt**2)
+     call vcoul_free(Vcp_ks)
+   endif
+!#else
+!   call vcoul_init(Vcp,Gsph_Max,Cryst,Qmesh,Kmesh,rcut,icutcoul_eff,ivcoul_init,Dtset%vcutgeo,&
+!&    Dtset%ecutsigx,Sigp%npwx,nqlwl,qlwl,ngfftf,comm)
+!#endif
+
  endif
 
 #if 0
