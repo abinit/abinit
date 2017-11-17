@@ -5662,7 +5662,7 @@ end subroutine pawxc_rotate_mag
 
 !One could add here a section for other codes (i.e. BigDFT, ...)
 #if defined HAVE_LIBPAW_ABINIT
- call rotate_back_mag(vxc_in,vxc_out,mag,vectsize,1)
+ call rotate_back_mag(vxc_in,vxc_out,mag,vectsize)
 #else
  do ipt=1,vectsize
    m_norm=sqrt(mag(ipt,1)**2+mag(ipt,2)**2+mag(ipt,3)**2)

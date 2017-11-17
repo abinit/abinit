@@ -162,7 +162,7 @@ subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat,nhatdim,nh
 
 !  Magnetization
    mag => rhor_(:,2:4)
-   ABI_ALLOCATE(rhor1_diag,(nfft,2))
+   ABI_ALLOCATE(rhor1_diag,(cplex*nfft,2))
    ABI_ALLOCATE(vxc1_diag,(cplex*nfft,2))
    ABI_ALLOCATE(m_norm,(nfft))
 
@@ -192,8 +192,7 @@ subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat,nhatdim,nh
 &                                mag_norm_in=m_norm)
      end if
    else
-     !SPr: check that all is ok with optnc=0!!!!
-     call rotate_back_mag(vxc1_diag,vxc1,mag,nfft,cplex,mag_norm_in=m_norm)
+     call rotate_back_mag(vxc1_diag,vxc1,mag,nfft,mag_norm_in=m_norm)
      vxc1(:,3:4)=zero
    end if
 
