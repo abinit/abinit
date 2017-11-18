@@ -497,17 +497,25 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsph
      else
        write(message, '(a,e16.8,a,e16.8)') '  Re[m^(1)] = ', mag_coll,"   Im[m^(1)] = ",mag_coll_im
      endif
-       call wrtout(nunit,message,'COLL')
-     elseif (nspden==4) then
+     call wrtout(nunit,message,'COLL')
 
-       write(message, '(a,e16.8,a,e16.8)') '  Re[mx^(1)]= ',  mag_x, "   Im[mx^(1)]= ", mag_x_im
-       call wrtout(nunit,message,'COLL')
-       write(message, '(a,e16.8,a,e16.8)') '  Re[my^(1)]= ',  mag_y, "   Im[my^(1)]= ", mag_y_im
-       call wrtout(nunit,message,'COLL')
-       write(message, '(a,e16.8,a,e16.8)') '  Re[mz^(1)]= ',  mag_z, "   Im[mz^(1)]= ", mag_z_im
-       call wrtout(nunit,message,'COLL')
-
-     endif
+   elseif (nspden==4) then
+       if(cmplex_den==0) then
+         write(message, '(a,e16.8)') '     mx^(1)   = ', mag_x
+         call wrtout(nunit,message,'COLL')
+         write(message, '(a,e16.8)') '     my^(1)   = ', mag_y
+         call wrtout(nunit,message,'COLL')
+         write(message, '(a,e16.8)') '     mz^(1)   = ', mag_z
+         call wrtout(nunit,message,'COLL')
+       else
+         write(message, '(a,e16.8,a,e16.8)') '  Re[mx^(1)]= ',  mag_x, "   Im[mx^(1)]= ", mag_x_im
+         call wrtout(nunit,message,'COLL')
+         write(message, '(a,e16.8,a,e16.8)') '  Re[my^(1)]= ',  mag_y, "   Im[my^(1)]= ", mag_y_im
+         call wrtout(nunit,message,'COLL')
+         write(message, '(a,e16.8,a,e16.8)') '  Re[mz^(1)]= ',  mag_z, "   Im[mz^(1)]= ", mag_z_im
+         call wrtout(nunit,message,'COLL')
+       endif
+    endif
 
      write(message, '(3a)') ch10,' ------------------------------------------------------------------------',ch10
      call wrtout(nunit,message,'COLL')

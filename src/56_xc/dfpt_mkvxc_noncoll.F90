@@ -130,16 +130,14 @@ subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat,nhatdim,nh
    MSG_BUG('nspden=4 works only with LSDA.')
  end if
 
-! if(cplex==2) then
-!   MSG_BUG('so far cplex=2 case only works with rotation=2')
-! end if
-
 !Special case: no XC applied
  if (ixc==0.or.nkxc==0) then
    MSG_WARNING('Note that no xc is applied (ixc=0)')
    vxc1(:,:)=zero
    return
  end if
+
+
 
 !Treat first LDA
  if(nkxc==1.or.nkxc==3)then

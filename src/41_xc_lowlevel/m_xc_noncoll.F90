@@ -416,6 +416,7 @@ subroutine rotate_back_mag_dfpt(vxc1_in,vxc1_out,vxc,kxc,rho1,mag,vectsize,cplex
      MSG_ERROR('rotation_method=1 is not available for cplex=2 case!')
  endif
 
+
  select case (rotation_method)
 
 !----------------------------------------
@@ -496,7 +497,7 @@ subroutine rotate_back_mag_dfpt(vxc1_in,vxc1_out,vxc,kxc,rho1,mag,vectsize,cplex
 ! Analytical expression of U rotation matrix
 !----------------------------------------
  case (2)
-   !SPr: Alternative method (explicitely calculated rotation matrices)
+   !Alternative method (explicitely calculated rotation matrices)
    !Vxc^(1) =   phixc^(1).Id +                                               // <= change of "electrostatic" XC potential  (phixc^(1) is denoted dvdn)
    !          + bxc^(1)*( Udag^(0).sigma_z.U^(0) )  +                        // <= this part describes the change of XC magnetic field magnitude bxc^(1)
    !          + bxc^(0)*( Udag^(1).sigma_z.U^(0) + Udag^(0).sigma_z.U^(1) )  // <= remaining terms describe the cost of magnetization rotation
@@ -517,8 +518,8 @@ subroutine rotate_back_mag_dfpt(vxc1_in,vxc1_out,vxc,kxc,rho1,mag,vectsize,cplex
        mdirx=mag(ipt,1)/m_norm; mdiry=mag(ipt,2)/m_norm; mdirz=mag(ipt,3)/m_norm
        mx1= rho1(ipt,2); my1=rho1(ipt,3); mz1=rho1(ipt,4)
 
-       dvdn=(vxc1_in(ipt,1)+vxc1_in(ipt,2))*half
-       dvdz=(vxc1_in(ipt,1)-vxc1_in(ipt,2))*half
+       dvdn=(vxc1_in(ipt,1)+vxc1_in(ipt,2))*half  !phixc^(1)
+       dvdz=(vxc1_in(ipt,1)-vxc1_in(ipt,2))*half  !bxc^(1)  
 
        if (m_norm>m_norm_min) then
 
@@ -541,11 +542,11 @@ subroutine rotate_back_mag_dfpt(vxc1_in,vxc1_out,vxc,kxc,rho1,mag,vectsize,cplex
          vxc1_out(ipt,4)=-dvdz*mdiry   ! Imaginary part, minus sign comes from sigma_y
 
          !U^(1)*.Vxc0.U^(0) + U^(0)*.Vxc0.U^(1)
-         bxc = (vxc(ipt,1)-vxc(ipt,2))*half
-         vxc1_out(ipt,1) = vxc1_out(ipt,1) - (bxc)*dsin(theta0)*theta1
-         vxc1_out(ipt,2) = vxc1_out(ipt,2) + (bxc)*dsin(theta0)*theta1
-         vxc1_out(ipt,3) = vxc1_out(ipt,3) - (bxc)*(wy1+dcos(theta0)*wy*theta1)
-         vxc1_out(ipt,4) = vxc1_out(ipt,4) + (bxc)*(wx1+dcos(theta0)*wx*theta1)
+         bxc = dsqrt(((vxc(ipt,1)-vxc(ipt,2))*half)**2+vxc(ipt,3)**2+vxc(ipt,4)**2) !this is bxc^(0)
+         vxc1_out(ipt,1) = vxc1_out(ipt,1) - bxc*dsin(theta0)*theta1
+         vxc1_out(ipt,2) = vxc1_out(ipt,2) + bxc*dsin(theta0)*theta1
+         vxc1_out(ipt,3) = vxc1_out(ipt,3) - bxc*(wy1+dcos(theta0)*wy*theta1)
+         vxc1_out(ipt,4) = vxc1_out(ipt,4) - bxc*(wx1+dcos(theta0)*wx*theta1)
 
        else ! Magnetization is zero
 !        Compute Bxc/|m| from Kxc (zero limit)
@@ -558,8 +559,6 @@ subroutine rotate_back_mag_dfpt(vxc1_in,vxc1_out,vxc,kxc,rho1,mag,vectsize,cplex
      end do ! ipt
 
    case(2) !cplex=2
-     ! some blablabla
-     ! more blablabla
 
      do ipt=1,vectsize
 
@@ -648,10 +647,10 @@ subroutine rotate_back_mag_dfpt(vxc1_in,vxc1_out,vxc,kxc,rho1,mag,vectsize,cplex
    end select
 
 !----------------------------------------
-! Explicit calculation of rotated XC functional
+! Explicit derivative of the rotated XC functional
 !----------------------------------------
  case (3)
-   ! SPr: Brute-force derivative of Vxc
+   ! Brute-force derivative of Vxc
    ! Explicit calculation of the rotated xc functional
    ! (derivatives of the analytical expression) (Eq. A)
    ! Vxc^(1) =   phixc^(1).Id +                    // <= change of "electrostatic" XC potential  (phixc^(1) is denoted dvdn)
@@ -692,14 +691,15 @@ subroutine rotate_back_mag_dfpt(vxc1_in,vxc1_out,vxc,kxc,rho1,mag,vectsize,cplex
          !projection of m^(1) on gs magnetization direction
          m_dot_m1=(mdirx*rho1(ipt,2)+mdiry*rho1(ipt,3)+mdirz*rho1(ipt,4))
 
-         bxc_over_m = (vxc(ipt,1)-vxc(ipt,2))*half/m_norm                        ! bug: replaced mag(ipt,3)-> m_norm
+         bxc_over_m = dsqrt(((vxc(ipt,1)-vxc(ipt,2))*half)**2+vxc(ipt,3)**2+vxc(ipt,4)**2) !this is bxc^(0)
+         bxc_over_m = bxc_over_m/m_norm
          vxc1_out(ipt,1) = vxc1_out(ipt,1) + bxc_over_m*( mz1 - mdirz*m_dot_m1 ) !
          vxc1_out(ipt,2) = vxc1_out(ipt,2) + bxc_over_m*(-mz1 + mdirz*m_dot_m1 ) !
          vxc1_out(ipt,3) = vxc1_out(ipt,3) + bxc_over_m*( mx1 - mdirx*m_dot_m1 ) !
          vxc1_out(ipt,4) = vxc1_out(ipt,4) + bxc_over_m*(-my1 + mdiry*m_dot_m1 ) !
 
        else
-!        Compute Bxc/|m| from Kxc (|m^(0)| -> zero limit)
+!        Compute bxc^(0)/|m| from kxc (|m^(0)| -> zero limit)
          bxc_over_m = half*(half*(kxc(ipt,1)+kxc(ipt,3))-kxc(ipt,2))
          vxc1_out(ipt,1)= dvdn + bxc_over_m*mz1
          vxc1_out(ipt,2)= dvdn - bxc_over_m*mz1
