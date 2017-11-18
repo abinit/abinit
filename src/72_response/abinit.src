@@ -61,6 +61,7 @@ sources = [
  "dfpt_vlocal.F90",
  "dfpt_vtorho.F90",
  "dfpt_vtowfk.F90",
+ "dfpt_v1zeeman.F90",
  "dfpt_wfkfermi.F90",
  "d2kindstr2.F90",
  "d2frnl.F90",

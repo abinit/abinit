@@ -153,7 +153,7 @@
      MSG_ERROR('DFPT with nspden=4 works only for norm-conserving psp!')
    endif
    if(cplex==2) then
-     MSG_WARNING('DFPT with nspden=4 and qphon!=(0,0,0) is under development')
+     MSG_WARNING('DFPT with nspden=4 and qpt!=(0,0,0) is under development')
    endif
  end if
 
@@ -182,70 +182,11 @@
    rhor1_ => rhor1
  end if
 
- ABI_ALLOCATE(v1zeeman,(cplex*nfft,nspden))
+
  if(ipert==natom+5)then
-   select case(cplex)
-   case(1)
-     if (nspden==4) then
-       if(idir==3)then       ! Zeeman field along the 3rd axis (z)   
-         v1zeeman(:,1)=-0.5d0
-         v1zeeman(:,2)=+0.5d0
-         v1zeeman(:,3)= 0.0d0
-         v1zeeman(:,4)= 0.0d0
-       else if(idir==2)then  ! Zeeman field along the 2nd axis (y)
-         v1zeeman(:,1)= 0.0d0
-         v1zeeman(:,2)= 0.0d0
-         v1zeeman(:,3)= 0.0d0
-         v1zeeman(:,4)=+0.5d0   
-       else                  ! Zeeman field along the 1st axis (x)
-         v1zeeman(:,1)= 0.0d0
-         v1zeeman(:,2)= 0.0d0
-         v1zeeman(:,3)=-0.5d0
-         v1zeeman(:,4)= 0.0d0
-       end if
-     else if (nspden==2) then
-       v1zeeman(:,1)=-0.5e0
-       v1zeeman(:,2)= 0.5e0
-     else 
-       v1zeeman(:,1)= 0.0e0
-     end if
-   case(2)
-     if (nspden==2) then
-       do ifft=1,nfft
-         v1zeeman(2*ifft-1,1)  =-0.5e0
-         v1zeeman(2*ifft  ,1)  = 0.0e0
-         v1zeeman(2*ifft-1,2)  = 0.5e0
-         v1zeeman(2*ifft  ,2)  = 0.0e0
-       enddo
-     else if (nspden==4) then
-       select case(idir)
-       case(3)
-         do ifft=1,nfft
-           v1zeeman(2*ifft-1,1)=-0.5e0
-           v1zeeman(2*ifft  ,1)= 0.0e0
-           v1zeeman(2*ifft-1,2)= 0.5e0
-           v1zeeman(2*ifft  ,2)= 0.0e0
-           v1zeeman(2*ifft-1,3)= 0.0e0
-           v1zeeman(2*ifft  ,3)= 0.0e0
-           v1zeeman(2*ifft-1,4)= 0.0e0
-           v1zeeman(2*ifft  ,4)= 0.0e0
-         enddo
-       end select
-     endif
-   end select
- else
-   if (nspden==4) then
-     v1zeeman(:,1)= 0.0d0
-     v1zeeman(:,2)= 0.0d0
-     v1zeeman(:,3)= 0.0d0
-     v1zeeman(:,4)= 0.0d0
-   else if (nspden==2) then
-     v1zeeman(:,1)= 0.0d0
-     v1zeeman(:,2)= 0.0d0   
-   else
-     v1zeeman(:,1)= 0.0d0         
-   end if
- end if
+   ABI_ALLOCATE(v1zeeman,(cplex*nfft,nspden))
+   call dfpt_v1zeeman(nspden,nfft,cplex,idir,v1zeeman)
+ endif
 
 !------ Compute 1st-order Hartree potential (and energy) ----------------------
 
@@ -300,7 +241,9 @@
    if (usepaw==0) then
      call dotprod_vn(cplex,rhor1,elpsp10,doti,nfft,nfftot,nspden,1,vxc1_,ucvol)
      call dotprod_vn(cplex,rhor1,elpsp1 ,doti,nfft,nfftot,1     ,1,vpsp1,ucvol)
-     call dotprod_vn(cplex,rhor1,elmag1 ,doti,nfft,nfftot,nspden,1,v1zeeman,ucvol)
+     if (ipert==natom+5) then
+       call dotprod_vn(cplex,rhor1,elmag1 ,doti,nfft,nfftot,nspden,1,v1zeeman,ucvol)
+     end if
    else
      if (usexcnhat/=0) then
        ABI_ALLOCATE(rhor1_nohat,(cplex*nfft,1))
@@ -366,18 +309,21 @@
 !$OMP PARALLEL DO COLLAPSE(2)
    do ispden=1,min(nspden,2)
      do ifft=1,cplex*nfft
-       vresid1(ifft,ispden)=vhartr1_(ifft)+vxc1_(ifft,ispden)+vpsp1(ifft)-vtrial1(ifft,ispden)+v1zeeman(ifft,ispden)
+       vresid1(ifft,ispden)=vhartr1_(ifft)+vxc1_(ifft,ispden)+vpsp1(ifft)-vtrial1(ifft,ispden)
      end do
    end do
    if(nspden==4)then
 !$OMP PARALLEL DO COLLAPSE(2)
      do ispden=3,4
        do ifft=1,cplex*nfft
-         vresid1(ifft,ispden)=vxc1_(ifft,ispden)+v1zeeman(ifft,ispden)-vtrial1(ifft,ispden)
+         vresid1(ifft,ispden)=vxc1_(ifft,ispden)-vtrial1(ifft,ispden)
        end do
      end do
    end if
 
+   if (ipert==natom+5) then
+     vresid1 = vresid1 + v1zeeman
+   endif
 !  Compute square norm vres2 of potential residual vresid
    call sqnorm_v(cplex,nfft,vres2,nspden,optres,vresid1)
 
@@ -389,17 +335,21 @@
 !$OMP PARALLEL DO COLLAPSE(2)
    do ispden=1,min(nspden,2)
      do ifft=1,cplex*nfft
-       vtrial1(ifft,ispden)=vhartr1_(ifft)+vxc1_(ifft,ispden)+vpsp1(ifft)+v1zeeman(ifft,ispden)
+       vtrial1(ifft,ispden)=vhartr1_(ifft)+vxc1_(ifft,ispden)+vpsp1(ifft)
      end do
    end do
    if(nspden==4)then
 !$OMP PARALLEL DO COLLAPSE(2)
      do ispden=3,4
        do ifft=1,cplex*nfft
-         vtrial1(ifft,ispden)=vxc1_(ifft,ispden)+v1zeeman(ifft,ispden)
+         vtrial1(ifft,ispden)=vxc1_(ifft,ispden)
        end do
      end do
    end if
+
+   if (ipert==natom+5) then
+     vtrial1 = vtrial1 + v1zeeman
+   endif
 
  end if
 
@@ -411,7 +361,9 @@
    ABI_DEALLOCATE(vxc1_)
  end if
 
- ABI_DEALLOCATE(v1zeeman)
+ if (ipert==natom+5) then
+   ABI_DEALLOCATE(v1zeeman)
+ end if
 
  call timab(157,2,tsec)
 
