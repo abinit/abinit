@@ -48,7 +48,7 @@ MODULE m_xc_noncoll
  real(dp),parameter :: m_norm_min=tol8
 
 !Default rotation method for DFPT
- integer,parameter :: rotation_method_default=1
+ integer,parameter :: rotation_method_default=3
 
 CONTAINS
 
@@ -145,7 +145,7 @@ subroutine rotate_mag(rho_in,rho_out,mag,vectsize,cplex,&
 &                 +rho_in(ipt,4)*mag(ipt,3)
 
      if(m_norm>m_norm_min)then
-       mm=rhoin_dot_mag/m_norm                ! mm is in fact |m|^(1)
+       mm=rhoin_dot_mag/m_norm                ! mm is |m|^(1)
        rho_out(ipt,1)=half*(rho_in(ipt,1)+mm)
        rho_out(ipt,2)=half*(rho_in(ipt,1)-mm)
      else 
@@ -750,7 +750,9 @@ subroutine rotate_back_mag_dfpt(vxc1_in,vxc1_out,vxc,kxc,rho1,mag,vectsize,cplex
          !remaining contributions:
          m_dot_m1_re= mdirx*mx1_re + mdiry*my1_re + mdirz*mz1_re
          m_dot_m1_re= mdirx*mx1_im + mdiry*my1_im + mdirz*mz1_im
-         bxc_over_m = (vxc(ipt,1)-vxc(ipt,2))*half/m_norm         ! vxc^(0) => Real quantity
+
+         bxc_over_m = dsqrt(((vxc(ipt,1)-vxc(ipt,2))*half)**2+vxc(ipt,3)**2+vxc(ipt,4)**2) !this is bxc^(0)
+         bxc_over_m = bxc_over_m/m_norm
 
          vxc1_out(2*ipt-1,1) = vxc1_out(2*ipt-1,1) + bxc_over_m*( mz1_re - mdirz*m_dot_m1_re ) ! Re[V^11]
          vxc1_out(2*ipt  ,1) = vxc1_out(2*ipt  ,1) + bxc_over_m*( mz1_im - mdirz*m_dot_m1_im ) ! Im[V^11]

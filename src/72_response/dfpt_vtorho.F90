@@ -478,7 +478,7 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
      end if
 
      kpoint(:)=kpt_rbz(:,ikpt)
-     kpq(:)=kpoint(:);if (ipert<natom+3) kpq(:)=kpq(:)+dtset%qptn(1:3)
+     kpq(:)=kpoint(:);if (ipert<natom+3.or.ipert==natom+5) kpq(:)=kpq(:)+dtset%qptn(1:3)
      ABI_ALLOCATE(kg_k,(3,npw_k))
      ABI_ALLOCATE(kg1_k,(3,npw1_k))
      ABI_ALLOCATE(ylm_k,(npw_k,psps%mpsang*psps%mpsang*psps%useylm))
