@@ -130,7 +130,7 @@ subroutine hartre(cplex,gsqcut,izero,mpi_enreg,nfft,ngfft,paral_kgb,rhog,rprimd,
    qpt_=qpt
  else 
    qpt_=zero
- endif
+ end if
  qeq0=0 
  if(qpt_(1)**2+qpt_(2)**2+qpt_(3)**2<1.d-15) qeq0=1
  qeq05=0

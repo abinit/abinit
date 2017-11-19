@@ -320,8 +320,8 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
      isgga=libxc_functionals_isgga()
      ismgga=libxc_functionals_ismgga()
      is_hybrid=libxc_functionals_is_hybrid()
-   endif
- endif
+   end if
+ end if
 
 !Check options
  if(option==3)then
@@ -369,7 +369,7 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
 &     'is not coherent with the presence of optional argument xc_funcs'
      MSG_BUG(message)
    end if
- endif
+ end if
 
  if(ixc<0)then
    if(present(xc_funcs))then
@@ -385,7 +385,7 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
 &     'Action: reinitialize the global structure funcs, see NOTES in m_libxc_functionals'
      MSG_BUG(message)
    end if
- endif
+ end if
 
  comm_fft = mpi_enreg%comm_fft; nproc_fft = mpi_enreg%nproc_fft
 
@@ -546,9 +546,9 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
        do ifft=1,nfft
          if (m_norm(ifft)>m_norm_min) then
            nhat_up(ifft)=half*(nhat(ifft,1) &
-&                    +(rhor_(ifft,2)*nhat(ifft,2) &
-&                     +rhor_(ifft,3)*nhat(ifft,3) &
-&                     +rhor_(ifft,4)*nhat(ifft,4))/m_norm(ifft))
+&           +(rhor_(ifft,2)*nhat(ifft,2) &
+&           +rhor_(ifft,3)*nhat(ifft,3) &
+&           +rhor_(ifft,4)*nhat(ifft,4))/m_norm(ifft))
          else
            nhat_up(ifft)=half*(nhat(ifft,1) &
 &           +sqrt(nhat(ifft,2)**2+nhat(ifft,3)**2+nhat(ifft,4)**2))
@@ -696,7 +696,7 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
          call size_dvxc(ixc,ndvxc,ngr2,nd2vxc,nspden_updn,nvxcgrho,order,add_tfw=add_tfw_,xc_funcs=xc_funcs)
        else
          call size_dvxc(ixc,ndvxc,ngr2,nd2vxc,nspden_updn,nvxcgrho,order,add_tfw=add_tfw_)
-       endif
+       end if
 
 !      Allocation of optional arguments
        ABI_ALLOCATE(dvxc_b,(npts,ndvxc))
@@ -774,7 +774,7 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
 !      Call to main XC driver
        if(present(xc_funcs))then
          call libxc_functionals_get_hybridparams(hyb_mixing=hyb_mixing,hyb_mixing_sr=hyb_mixing_sr,&
-&                                            hyb_range=hyb_range,xc_functionals=xc_funcs)
+&         hyb_range=hyb_range,xc_functionals=xc_funcs)
          call drivexc_main(exc_b,ixc,mgga,ndvxc,nd2vxc,ngr2,npts,nspden_updn,nvxcgrho,order,&
 &         rho_b_updn,vxcrho_b_updn,xcdata%xclevel, &
 &         dvxc=dvxc_b,d2vxc=d2vxc_b,grho2=grho2_b_updn,vxcgrho=vxcgrho_b, &
@@ -783,14 +783,14 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
 &         xc_tb09_c=xcdata%xc_tb09_c)
        else
          call libxc_functionals_get_hybridparams(hyb_mixing=hyb_mixing,hyb_mixing_sr=hyb_mixing_sr,&
-&                                            hyb_range=hyb_range)
+&         hyb_range=hyb_range)
          call drivexc_main(exc_b,ixc,mgga,ndvxc,nd2vxc,ngr2,npts,nspden_updn,nvxcgrho,order,&
 &         rho_b_updn,vxcrho_b_updn,xcdata%xclevel, &
 &         dvxc=dvxc_b,d2vxc=d2vxc_b,grho2=grho2_b_updn,vxcgrho=vxcgrho_b, &
 &         lrho=lrho_b_updn,tau=tau_b_updn,vxclrho=vxclrho_b_updn,vxctau=vxctau_b_updn, &
 &         fxcT=fxc_b,hyb_mixing=xcdata%hyb_mixing,el_temp=xcdata%tphysel, &
 &         xc_tb09_c=xcdata%xc_tb09_c)
-       endif
+       end if
 
 !      Gradient Weiszacker correction to a Thomas-Fermi functional
        if (add_tfw_) then

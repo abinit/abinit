@@ -1512,8 +1512,8 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
 !  QP_mflags%has_vxcval  =1
 !  if (Sigp%gwcalctyp >100) QP_mflags%has_vxcval_hybrid=1
    if (mod10==5 .and. &
-&      (Dtset%ixc_sigma==-402 .or. Dtset%ixc_sigma==-406 .or. Dtset%ixc_sigma==-427 .or. Dtset%ixc_sigma==-428))&
-&      QP_mflags%has_vxcval_hybrid=1
+&   (Dtset%ixc_sigma==-402 .or. Dtset%ixc_sigma==-406 .or. Dtset%ixc_sigma==-427 .or. Dtset%ixc_sigma==-428))&
+&   QP_mflags%has_vxcval_hybrid=1
 !  if (Sigp%use_sigxcore==1) QP_mflags%has_sxcore =1
 !  if (Dtset%usepawu>0)    QP_mflags%has_vu     =1
 !  if (Dtset%useexexch>0)  QP_mflags%has_lexexch=1

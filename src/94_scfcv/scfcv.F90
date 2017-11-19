@@ -1146,8 +1146,8 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
    end if
 
    if ((moved_atm_inside==1 .or. istep==1).or.&
-&      (dtset%positron<0.and.istep_mix==1).or.&
-&      (mod(dtset%fockoptmix,100)==11 .and. istep_updatedfock==1)) then
+&   (dtset%positron<0.and.istep_mix==1).or.&
+&   (mod(dtset%fockoptmix,100)==11 .and. istep_updatedfock==1)) then
 !    PAW only: we sometimes have to compute compensation density
 !    and eventually add it to density from WFs
      nhatgrdim=0

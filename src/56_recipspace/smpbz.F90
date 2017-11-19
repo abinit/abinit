@@ -164,9 +164,9 @@ subroutine smpbz(brav,iout,kptrlatt,mkpt,nkpt,nshiftk,option,shiftk,spkpt,downsa
        nkpt=1
        spkpt(:,1)=zero
        return
-     enddo
-   endif
- endif
+     end do
+   end if
+ end if
 
 !*********************************************************************
 
@@ -185,34 +185,34 @@ subroutine smpbz(brav,iout,kptrlatt,mkpt,nkpt,nshiftk,option,shiftk,spkpt,downsa
      if(.not.(downsampling(1)==1 .and. downsampling(2)==1 .and. downsampling(3)==1))then
        if(nshiftk>1)then
          write(message, '(a,3i4,2a,i4,4a)' )&
-&          'Real downsampling is activated, with downsampling(1:3)=',downsampling(1:3),ch10,&
-&          'However, nshiftk must be 1 in this case, while the input nshiftk=',nshiftk,ch10,&
-&          'Action: either choose not to downsample the k point grid (e.g. fockdownsampling=1),',ch10,&
-&          'or set nshiftk=1.'
+&         'Real downsampling is activated, with downsampling(1:3)=',downsampling(1:3),ch10,&
+&         'However, nshiftk must be 1 in this case, while the input nshiftk=',nshiftk,ch10,&
+&         'Action: either choose not to downsample the k point grid (e.g. fockdownsampling=1),',ch10,&
+&         'or set nshiftk=1.'
          MSG_ERROR(message)
-       endif
+       end if
        proddown=downsampling(1)*downsampling(2)*downsampling(3)
        if(proddown/=0)then
          dividedown=abs(proddown)
          if(minval(downsampling(:))<0)then   ! If there is at least one negative number
            dividedown=dividedown*2
            if(proddown>0)dividedown=dividedown*2 ! If there are two negative numbers
-         endif
-       endif
+         end if
+       end if
        if(mod(nkptlatt,dividedown)==0)then
          nkptlatt=nkptlatt/dividedown
        else
          write(message, '(a,3i4,2a,i4,4a)' )&
-&          'The requested downsampling, with downsampling(1:3)=',downsampling(1:3),ch10,&
-&          'is not compatible with kptrlatt=',ch10,&
-&          kptrlatt(:,:),ch10,& 
-&          'that gives nkptlatt=',nkptlatt,ch10,&
-&          'Action: either choose not to downsample the k point grid (e.g. fockdownsampling=1),',ch10,&
-&          'or modify your k-point grid and/or your downsampling in order for them to be compatible.'
+&         'The requested downsampling, with downsampling(1:3)=',downsampling(1:3),ch10,&
+&         'is not compatible with kptrlatt=',ch10,&
+&         kptrlatt(:,:),ch10,& 
+&         'that gives nkptlatt=',nkptlatt,ch10,&
+&         'Action: either choose not to downsample the k point grid (e.g. fockdownsampling=1),',ch10,&
+&         'or modify your k-point grid and/or your downsampling in order for them to be compatible.'
          MSG_ERROR(message)
-       endif
-     endif
-   endif
+       end if
+     end if
+   end if
 
 !  Simple Lattice
    if (prtvol > 0) call wrtout(std_out,'       Simple Lattice Grid ','COLL')
@@ -269,7 +269,7 @@ subroutine smpbz(brav,iout,kptrlatt,mkpt,nkpt,nshiftk,option,shiftk,spkpt,downsa
      ABI_ALLOCATE(found2,(boundmin(1):boundmax(1),boundmin(3):boundmax(3)))
      ABI_ALLOCATE(found3,(boundmin(1):boundmax(1),boundmin(2):boundmax(2)))
      found1=0 ; found2=0 ; found3=0
-   endif
+   end if
 
    nn=1
    do kk=boundmin(3),boundmax(3)
@@ -305,14 +305,14 @@ subroutine smpbz(brav,iout,kptrlatt,mkpt,nkpt,nshiftk,option,shiftk,spkpt,downsa
 !              Body-centered case ! What is left : two are negative
                else   
                  if(sum(mod(cds(:),2))==1 .or. sum(mod(cds(:),2))==2)cycle ! Either all are zero, or all are one, so skip when sum is 1 or 2.
-               endif
+               end if
              else
                if(downsampling(1)==0 .and. mod(cds(2)+cds(3),2)/=0)cycle
                if(downsampling(2)==0 .and. mod(cds(1)+cds(3),2)/=0)cycle
                if(downsampling(3)==0 .and. mod(cds(1)+cds(2),2)/=0)cycle
-             endif
-           endif  
-         endif
+             end if
+           end if  
+         end if
 
          do ikshft=1,nshiftk
 
@@ -321,8 +321,8 @@ subroutine smpbz(brav,iout,kptrlatt,mkpt,nkpt,nshiftk,option,shiftk,spkpt,downsa
            if(present(downsampling))then
              if(.not.(downsampling(1)==1 .and. downsampling(2)==1 .and. downsampling(3)==1))then
                if(ikshft>1)cycle
-             endif
-           endif
+             end if
+           end if
 
 !          Coordinates of the trial k point with respect to the k primitive lattice
            k1(1)=ii+shiftk(1,ikshft)
@@ -345,7 +345,7 @@ subroutine smpbz(brav,iout,kptrlatt,mkpt,nkpt,nshiftk,option,shiftk,spkpt,downsa
              found1(coord(2),coord(3))=1
              found2(coord(1),coord(3))=1
              found3(coord(1),coord(2))=1
-           endif
+           end if
 
          end do
        end do
@@ -357,7 +357,7 @@ subroutine smpbz(brav,iout,kptrlatt,mkpt,nkpt,nshiftk,option,shiftk,spkpt,downsa
      ABI_DEALLOCATE(found1)
      ABI_DEALLOCATE(found2)
      ABI_DEALLOCATE(found3)
-   endif
+   end if
 
 
    if(nkpt/=nkptlatt*nshiftk)then

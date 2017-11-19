@@ -81,8 +81,8 @@ subroutine size_dvxc(ixc,ndvxc,ngr2,nd2vxc,nspden,nvxcdgr,order,&
      isgga=libxc_functionals_isgga()
      ismgga=libxc_functionals_ismgga()
      is_hybrid=libxc_functionals_is_hybrid()
-   endif
- endif
+   end if
+ end if
 
  ngr2=0
  nvxcdgr=0

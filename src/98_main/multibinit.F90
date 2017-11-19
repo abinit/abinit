@@ -326,7 +326,7 @@ program multibinit
        if (iam_master) then
          call fit_polynomial_printSystemFiles(reference_effective_potential,hist)
        end if
-       else if (option==1.or.option==2)then
+     else if (option==1.or.option==2)then
 !      option = 1
        call fit_polynomial_coeff_fit(reference_effective_potential,&
 &       inp%fit_bancoeff,inp%fit_fixcoeff,hist,&
@@ -373,7 +373,7 @@ program multibinit
      call wrtout(std_out,message,'COLL')
      name = replace(trim(filnam(2)),".out","")
      call effective_potential_writeXML(reference_effective_potential,inp%prt_model,filename=name,&
-&                                      prt_dipdip=inp%dipdip_prt==1)
+&     prt_dipdip=inp%dipdip_prt==1)
    else if (inp%prt_model == -2)then
 !    NetCDF case, in progress
      name = trim(filnam(2))//"_sys.nc"

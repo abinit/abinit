@@ -1322,7 +1322,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
  if(tread==1)then
    dtset%ixc_sigma=intarr(1)
    if( dtset%optdriver==RUNL_SIGMA .and. mod(dtset%gwcalctyp,10)==5)ixc_current=dtset%ixc_sigma
- endif
+ end if
 
 !Initialize xclevel and usefock
  call get_xclevel(ixc_current,dtset%xclevel,dtset%usefock)
@@ -1332,7 +1332,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
 !If the default value had been given, possibly switch on the auxc_ixc corresponding to ixc, if the latter is an hybrid
  if(dtset%auxc_ixc==0)then
    call get_auxc_ixc(dtset%auxc_ixc,ixc_current)
- endif
+ end if
 
 !Now take care of the parameters for hybrid functionals
  if(dtset%usefock==1)then 
@@ -1349,7 +1349,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
    else if (ixc_current<0) then
      call libxc_functionals_init(ixc_current,dtset%nspden)
      call libxc_functionals_get_hybridparams(hyb_mixing=dtset%hyb_mixing,hyb_mixing_sr=dtset%hyb_mixing_sr,&
-&                                            hyb_range=dtset%hyb_range_dft)
+&     hyb_range=dtset%hyb_range_dft)
      call libxc_functionals_end()
      dtset%hyb_range_fock=dtset%hyb_range_dft
    end if
@@ -1360,50 +1360,50 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
    if(tread==1)then
      if(dprarr(1)<-tol14)then
        write(message, '(5a)' )&
-&        ' A negative value for hyb_mixing is not allowed, while at input hyb_mixing=',dprarr(1),ch10,&
-&        ' Action: modify hyb_mixing in the input file.'
+&       ' A negative value for hyb_mixing is not allowed, while at input hyb_mixing=',dprarr(1),ch10,&
+&       ' Action: modify hyb_mixing in the input file.'
        MSG_ERROR(message)
-     endif
+     end if
      dtset%hyb_mixing=-dprarr(1) ! Note the minus sign
-   endif
+   end if
 
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'hyb_mixing_sr',tread,'DPR')
    if(tread==1)then
      if(dprarr(1)<-tol14)then
        write(message, '(5a)' )&
-&        ' A negative value for hyb_mixing_sr is not allowed, while at input hyb_mixing_sr=',dprarr(1),ch10,&
-&        ' Action: modify hyb_mixing_sr in the input file.'
+&       ' A negative value for hyb_mixing_sr is not allowed, while at input hyb_mixing_sr=',dprarr(1),ch10,&
+&       ' Action: modify hyb_mixing_sr in the input file.'
        MSG_ERROR(message)
-     endif
+     end if
      dtset%hyb_mixing_sr=-dprarr(1) ! Note the minus sign
-   endif
+   end if
 
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'hyb_range_dft',tread_dft,'DPR')
    if(tread_dft==1)then
      if(dprarr(1)<-tol14)then
        write(message, '(5a)' )&
-&        ' A negative value for hyb_range_dft is not allowed, while at input hyb_range_dft=',dprarr(1),ch10,&
-&        ' Action: modify hyb_range_dft in the input file.'
+&       ' A negative value for hyb_range_dft is not allowed, while at input hyb_range_dft=',dprarr(1),ch10,&
+&       ' Action: modify hyb_range_dft in the input file.'
        MSG_ERROR(message)
-     endif
+     end if
      dtset%hyb_range_dft=-dprarr(1) ! Note the minus sign
-   endif
+   end if
 
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'hyb_range_fock',tread_fock,'DPR')
    if(tread_fock==1)then
      if(dprarr(1)<-tol14)then
        write(message, '(5a)' )&
-&        ' A negative value for hyb_range_fock is not allowed, while at input hyb_range_fock=',dprarr(1),ch10,&
-&        ' Action: modify hyb_range_fock in the input file.'
+&       ' A negative value for hyb_range_fock is not allowed, while at input hyb_range_fock=',dprarr(1),ch10,&
+&       ' Action: modify hyb_range_fock in the input file.'
        MSG_ERROR(message)
-     endif
+     end if
      dtset%hyb_range_fock=-dprarr(1) ! Note the minus sign
-   endif
+   end if
    
    if(tread_fock==1 .and. tread_dft==0)dtset%hyb_range_dft=dtset%hyb_range_fock
    if(tread_fock==0 .and. tread_dft==1)dtset%hyb_range_fock=dtset%hyb_range_dft
 
- endif
+ end if
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'vdw_df_acutmin',tread,'DPR')
  if(tread==1) dtset%vdw_df_acutmin=dprarr(1)
@@ -2697,7 +2697,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
 
  if(nkpthf/=0)then
    dtset%kptns_hf(:,1:nkpthf)=dtset%kptns_hf(:,1:nkpthf)/dtset%kptnrm
- endif
+ end if
 
  ! Read variables defining the k-path
  ! If kptopt < 0  --> Band structure and kptbounds size is given by abs(kptopt)
@@ -2873,7 +2873,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
            bantot=bantot+1
            if(abs(dtset%occ_orig(bantot))>tol8)then
              if(iband>nband1)nband1=iband
-           endif
+           end if
          end do
        end do
      end do
