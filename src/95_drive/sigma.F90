@@ -58,7 +58,7 @@
 !!      classify_bands,cohsex_me,crystal_free,denfgr,destroy_mpi_enreg
 !!      ebands_copy,ebands_free,ebands_interpolate_kpath,ebands_report_gap
 !!      ebands_update_occ,em1results_free,energies_init,esymm_free
-!!      fftdatar_write,fourdp,get_gftt,getem1_from_ppm,getph,gsph_free,hdr_free
+!!      fftdatar_write,fourdp,get_gftt,getph,gsph_free,hdr_free
 !!      init_distribfft_seq,initmpi_seq,kmesh_free,kxc_ada,kxc_driver
 !!      littlegroup_free,littlegroup_init,melements_free,melements_print
 !!      melements_zero,melflags_reset,metric,mkdump_er,mkrdim,nhatgrid
@@ -73,10 +73,10 @@
 !!      setsymrhoij,setup_ppmodel,setup_sigma,setvtr,show_qp,sigma_bksmask
 !!      sigma_free,sigma_init,sigma_tables,sigparams_free,solve_dyson,symdij
 !!      symdij_all,test_charge,timab,updt_m_lda_to_qp,vcoul_free
-!!      wfd_change_ngfft,wfd_copy,wfd_free,wfd_get_cprj,wfd_init,wfd_mkrho
-!!      wfd_print,wfd_read_wfk,wfd_reset_ur_cprj,wfd_rotate,wfd_test_ortho
-!!      write_sigma_header,write_sigma_results,wrqps,wrtout,xmpi_barrier
-!!      xmpi_bcast,xmpi_sum
+!!      wfd_change_ngfft,wfd_copy,wfd_distribute_bands,wfd_free,wfd_get_cprj
+!!      wfd_init,wfd_mkrho,wfd_print,wfd_read_wfk,wfd_reset_ur_cprj,wfd_rotate
+!!      wfd_test_ortho,write_sigma_header,write_sigma_results,wrqps,wrtout
+!!      xmpi_barrier,xmpi_bcast,xmpi_sum
 !!
 !! SOURCE
 

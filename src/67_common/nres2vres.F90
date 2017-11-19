@@ -62,7 +62,7 @@
 !!
 !! CHILDREN
 !!      dfpt_mkvxc,dfpt_mkvxc_noncoll,fourdp,hartre,metric,pawmknhat
-!!      psolver_hartree,rhotoxc
+!!      psolver_hartree,rhotoxc,xcdata_init
 !!
 !! SOURCE
 

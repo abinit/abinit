@@ -143,10 +143,11 @@
 !!      paw_ij_free,paw_ij_init,paw_ij_nullify,paw_ij_reset_flags,pawcprj_alloc
 !!      pawcprj_free,pawcprj_getdim,pawcprj_reorder,pawdenpot,pawdij
 !!      pawfgrtab_free,pawfgrtab_init,pawmknhat,pawtab_get_lsize,pawuj_red
-!!      prc_mem_free,prtene,psolver_rhohxc,rhotoxc,rhotov,scprqt,setnoccmmp
+!!      prc_mem_free,prtene,psolver_rhohxc,rhotov,rhotoxc,scprqt,setnoccmmp
 !!      setrhoijpbe0,setsym,setup_positron,setvtr,sphereboundary,status,symdij
 !!      symmetrize_xred,timab,update_e_field_vars,vtorho,vtorhorec,vtorhotf
-!!      wrtout,wvl_cprjreorder,wvl_nhatgrid,xmpi_isum,xmpi_sum,xmpi_wait
+!!      wrtout,wvl_cprjreorder,wvl_nhatgrid,xcdata_init,xmpi_isum,xmpi_sum
+!!      xmpi_wait
 !!
 !! SOURCE
 

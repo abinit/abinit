@@ -2420,8 +2420,8 @@ end subroutine findq
 !!  g0(3)=reciprocal space vector, to be used in igfft
 !!
 !! PARENTS
-!!      calc_sigc_me,calc_sigx_me,cohsex_me,exc_build_block,gw_tools,m_gkk
-!!      m_phpi,prep_calc_ucrpa
+!!      calc_sigc_me,calc_sigx_me,cohsex_me,exc_build_block,m_gkk,m_phpi
+!!      m_sigma,prep_calc_ucrpa
 !!
 !! CHILDREN
 !!

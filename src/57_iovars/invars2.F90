@@ -54,8 +54,10 @@
 !!      invars2m,m_ab7_invars_f90
 !!
 !! CHILDREN
-!!      dtset_chkneu,get_kpt_fullbz,ingeo_img,inkpts,intagm,invacuum,matr3inv
-!!      smpbz,sort_int,timab,wrtout
+!!      dtset_chkneu,get_auxc_ixc,get_kpt_fullbz,get_xclevel,ingeo_img,inkpts
+!!      intagm,invacuum,libxc_functionals_end
+!!      libxc_functionals_get_hybridparams,libxc_functionals_init,matr3inv
+!!      sort_int,timab,wrtout
 !!
 !! SOURCE
 

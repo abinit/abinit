@@ -53,8 +53,8 @@
 !!      forces,forstr,rhotov,setvtr
 !!
 !! CHILDREN
-!!      dtset_copy,dtset_free,libxc_functionals_end,libxc_functionals_init
-!!      metric,mkcore,rhotoxc
+!!      libxc_functionals_end,libxc_functionals_init,metric,mkcore,rhotoxc
+!!      xcdata_init
 !!
 !! SOURCE
 

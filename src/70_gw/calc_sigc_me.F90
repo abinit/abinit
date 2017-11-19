@@ -103,13 +103,12 @@
 !! CHILDREN
 !!      calc_coh_comp,calc_sig_ppm,calc_sig_ppm_comp,calc_sigc_cd,calc_wfwfg
 !!      coeffs_gausslegint,cwtime,epsm1_symmetrizer,epsm1_symmetrizer_inplace
-!!      esymm_symmetrize_mels,findqg0,get_bz_item,get_epsm1,get_gftt,get_uug
+!!      esymm_symmetrize_mels,findqg0,get_bz_item,get_epsm1,get_gftt
 !!      gsph_fft_tabs,littlegroup_print,paw_cross_rho_tw_g,paw_rho_tw_g
 !!      paw_symcprj,pawcprj_alloc,pawcprj_copy,pawcprj_free,pawpwij_free
 !!      pawpwij_init,ppm_get_qbz,rho_tw_g,rotate_fft_mesh,setup_ppmodel
 !!      sigma_distribute_bks,timab,wfd_change_ngfft,wfd_get_cprj
-!!      wfd_get_many_ur,wfd_get_ur,wfd_paw_get_aeur,wfd_sym_ur,wrtout,xmpi_max
-!!      xmpi_sum
+!!      wfd_get_many_ur,wfd_get_ur,wfd_paw_get_aeur,wrtout,xmpi_max,xmpi_sum
 !!
 !! SOURCE
 

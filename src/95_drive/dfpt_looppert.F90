@@ -101,15 +101,15 @@
 !!      disable_timelimit,distrb2,dtset_copy,dtset_free,ebands_free,ebands_init
 !!      efmas_main,eig2stern,eigen_meandege,eigr2d_free,eigr2d_init
 !!      eigr2d_ncwrite,exit_check,fourdp,getcgqphase,getcut,getmpw,getnel,getph
-!!      gkk_free,gkk_init,gkk_ncwrite,hdr_free,hdr_init,hdr_update,initmpi_band
-!!      initylmg,inwffil,kpgio,littlegroup_pert,localfilnam,localrdfile
-!!      localredirect,localwrfile,metric,mkrdim,outbsd,outgkk,outwf,pawang_free
-!!      pawang_init,pawcprj_alloc,pawcprj_copy,pawcprj_free,pawcprj_getdim
-!!      pawrhoij_alloc,pawrhoij_copy,pawrhoij_free,pawrhoij_nullify,prteigrs
-!!      read_rhor,rf2_getidirs,rotate_rho,set_pert_comm,set_pert_paw,setsym
-!!      setsymrhoij,status,symkpt,timab,transgrid,unset_pert_comm
-!!      unset_pert_paw,vlocalstr,wffclose,wfk_open_read,wfk_read_eigenvalues
-!!      wrtout,xmpi_sum
+!!      gkk_free,gkk_init,gkk_ncwrite,hdr_copy,hdr_free,hdr_init,hdr_update
+!!      initmpi_band,initylmg,inwffil,kpgio,littlegroup_pert,localfilnam
+!!      localrdfile,localredirect,localwrfile,metric,mkrdim,outbsd,outgkk,outwf
+!!      pawang_free,pawang_init,pawcprj_alloc,pawcprj_copy,pawcprj_free
+!!      pawcprj_getdim,pawrhoij_alloc,pawrhoij_copy,pawrhoij_free
+!!      pawrhoij_nullify,prteigrs,put_eneocc_vect,read_rhor,rf2_getidirs
+!!      rotate_rho,set_pert_comm,set_pert_paw,setsym,setsymrhoij,status,symkpt
+!!      timab,transgrid,unset_pert_comm,unset_pert_paw,vlocalstr,wffclose
+!!      wfk_open_read,wfk_read_eigenvalues,wrtout,xmpi_sum
 !!
 !! SOURCE
 

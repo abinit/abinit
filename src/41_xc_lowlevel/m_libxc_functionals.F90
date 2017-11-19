@@ -484,7 +484,8 @@ contains
 !!                     XC functionals to initialize
 !!
 !! PARENTS
-!!      calc_vhxc_me,driver,m_kxc,m_xc_vdw,rhotoxc,xchybrid_ncpp_cc
+!!      calc_vhxc_me,driver,drivexc,invars2,m_kxc,m_xc_vdw,rhotoxc
+!!      xchybrid_ncpp_cc
 !!
 !! CHILDREN
 !!
@@ -662,7 +663,8 @@ end subroutine libxc_functionals_init
 !!                     XC functionals to initialize
 !!
 !! PARENTS
-!!      calc_vhxc_me,driver,m_kxc,m_xc_vdw,rhotoxc,xchybrid_ncpp_cc
+!!      calc_vhxc_me,driver,drivexc,invars2,m_kxc,m_xc_vdw,rhotoxc
+!!      xchybrid_ncpp_cc
 !!
 !! CHILDREN
 !!
@@ -1551,7 +1553,7 @@ end subroutine libxc_functionals_getvxc
 !!  [hyb_range]    = Range (for separation)
 !!
 !! PARENTS
-!!      m_fock
+!!      invars2,rhotoxc
 !!
 !! CHILDREN
 !!
@@ -1651,7 +1653,7 @@ end subroutine libxc_functionals_get_hybridparams
 !! OUTPUT
 !!
 !! PARENTS
-!!      calc_vhxc_me
+!!      calc_vhxc_me,m_fock
 !!
 !! CHILDREN
 !!

@@ -121,10 +121,11 @@
 !!      bethe_salpeter,scfcv,screening,sigma
 !!
 !! CHILDREN
-!!      atm2fft,denspot_set_history,dotprod_vn,ewald,ionion_realspace
+!!      atm2fft,denspot_set_history,dotprod_vn,ewald,hartre,ionion_realspace
 !!      ionion_surface,jellium,mag_constr,mkcore,mkcore_alt,mkcore_wvl,mklocl
-!!      psolver_rhohxc,rhotoxc,rhohxcpositron,spatialchempot,timab,vdw_dftd2
-!!      vdw_dftd3,wvl_psitohpsi,wvl_vtrial_abi2big,xchybrid_ncpp_cc,xred2xcart
+!!      psolver_rhohxc,rhohxcpositron,rhotoxc,spatialchempot,timab,vdw_dftd2
+!!      vdw_dftd3,wvl_psitohpsi,wvl_vtrial_abi2big,xcdata_init,xchybrid_ncpp_cc
+!!      xred2xcart
 !!
 !! SOURCE
 

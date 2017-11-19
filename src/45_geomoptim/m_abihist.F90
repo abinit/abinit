@@ -1039,7 +1039,7 @@ end subroutine vel2hist
 !!  hist_out <type(abihist)>
 !!
 !! PARENTS
-!!      gstateimg,m_fit_polynomial_coeff
+!!      gstateimg,m_effective_potential_file
 !!
 !! CHILDREN
 !!
@@ -1528,7 +1528,7 @@ end subroutine write_md_hist_img
 !!                     cell dims and energies,
 !!
 !! PARENTS
-!!      m_effective_potential_file,mover
+!!      m_effective_potential_file,m_tdep_readwrite,mover
 !!
 !! CHILDREN
 !!
@@ -1971,7 +1971,7 @@ end subroutine def_file_hist
 !! OUTPUT
 !!
 !! PARENTS
-!!      m_abihist
+!!      m_abihist,m_tdep_readwrite
 !!
 !! CHILDREN
 !!
@@ -2157,6 +2157,7 @@ end subroutine get_varid_hist
 !! OUTPUT
 !!
 !! PARENTS
+!!      m_tdep_readwrite
 !!
 !! CHILDREN
 !!

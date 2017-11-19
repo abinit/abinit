@@ -59,7 +59,7 @@
 !!      dfpt_dyxc1,dfpt_nstdy,dfpt_nstpaw,dfpt_rhotov,nres2vres
 !!
 !! CHILDREN
-!!      dfpt_mkvxc,timab,rotate_mag,rotate_back_mag,rotate_back_mag_dfpt
+!!      dfpt_mkvxc,rotate_back_mag,rotate_back_mag_dfpt,rotate_mag,timab
 !!
 !! SOURCE
 

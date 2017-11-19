@@ -119,9 +119,10 @@
 !!      newrho
 !!
 !! CHILDREN
-!!      atm2fft,dielmt,dieltcel,fourdp,fresid,getph,indirect_parallel_fourier
-!!      kgindex,mean_fftr,metric,mkcore,mklocl,moddiel,prcrskerker1
-!!      prcrskerker2,rhotoxc,testsusmat,xcart2xred,xmpi_sum,zerosym
+!!      atm2fft,dielmt,dieltcel,fourdp,fresid,getph,hartre
+!!      indirect_parallel_fourier,kgindex,mean_fftr,metric,mkcore,mklocl
+!!      moddiel,prcrskerker1,prcrskerker2,rhotoxc,testsusmat,xcart2xred
+!!      xcdata_init,xmpi_sum,zerosym
 !!
 !! SOURCE
 

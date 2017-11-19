@@ -101,9 +101,9 @@
 !!      scfcv
 !!
 !! CHILDREN
-!!      dotprod_vn,mag_constr,mean_fftr,psolver_rhohxc,rhotoxc,rhohxcpositron
-!!      sqnorm_v,timab,wvl_psitohpsi,wvl_vtrial_abi2big,xchybrid_ncpp_cc
-!!      xred2xcart
+!!      dotprod_vn,hartre,mag_constr,mean_fftr,psolver_rhohxc,rhohxcpositron
+!!      rhotoxc,sqnorm_v,timab,wvl_psitohpsi,wvl_vtrial_abi2big,xcdata_init
+!!      xchybrid_ncpp_cc,xred2xcart
 !!
 !! SOURCE
 

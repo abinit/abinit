@@ -100,8 +100,9 @@ CONTAINS  !=====================================================================
 !! PARENTS
 !!
 !! CHILDREN
-!!      destroy_mpi_enreg,dtset_copy,dtset_free,fourdp,fourdp_6d,initmpi_seq
-!!      libxc_functionals_end,libxc_functionals_init,printxsf,wrtout
+!!      destroy_mpi_enreg,fourdp,fourdp_6d,hartre,initmpi_seq
+!!      libxc_functionals_end,libxc_functionals_init,printxsf,rhotoxc,wrtout
+!!      xcdata_init
 !!
 !! SOURCE
 
@@ -198,8 +199,9 @@ end subroutine kxc_rpa
 !! PARENTS
 !!
 !! CHILDREN
-!!      destroy_mpi_enreg,dtset_copy,dtset_free,fourdp,fourdp_6d,initmpi_seq
-!!      libxc_functionals_end,libxc_functionals_init,printxsf,wrtout
+!!      destroy_mpi_enreg,fourdp,fourdp_6d,hartre,initmpi_seq
+!!      libxc_functionals_end,libxc_functionals_init,printxsf,rhotoxc,wrtout
+!!      xcdata_init
 !!
 !! SOURCE
 
@@ -401,8 +403,9 @@ end subroutine kxc_local
 !! PARENTS
 !!
 !! CHILDREN
-!!      destroy_mpi_enreg,dtset_copy,dtset_free,fourdp,fourdp_6d,initmpi_seq
+!!      destroy_mpi_enreg,fourdp,fourdp_6d,hartre,initmpi_seq
 !!      libxc_functionals_end,libxc_functionals_init,printxsf,rhotoxc,wrtout
+!!      xcdata_init
 !!
 !! SOURCE
 
@@ -661,8 +664,9 @@ end subroutine kxc_alda
 !! PARENTS
 !!
 !! CHILDREN
-!!      destroy_mpi_enreg,dtset_copy,dtset_free,fourdp,fourdp_6d,initmpi_seq
-!!      libxc_functionals_end,libxc_functionals_init,printxsf,wrtout
+!!      destroy_mpi_enreg,fourdp,fourdp_6d,hartre,initmpi_seq
+!!      libxc_functionals_end,libxc_functionals_init,printxsf,rhotoxc,wrtout
+!!      xcdata_init
 !!
 !! SOURCE
 
@@ -889,8 +893,9 @@ end subroutine kxc_pgg
 !! PARENTS
 !!
 !! CHILDREN
-!!      destroy_mpi_enreg,dtset_copy,dtset_free,fourdp,fourdp_6d,initmpi_seq
-!!      libxc_functionals_end,libxc_functionals_init,printxsf,wrtout
+!!      destroy_mpi_enreg,fourdp,fourdp_6d,hartre,initmpi_seq
+!!      libxc_functionals_end,libxc_functionals_init,printxsf,rhotoxc,wrtout
+!!      xcdata_init
 !!
 !! SOURCE
 
@@ -1055,8 +1060,9 @@ end subroutine kxc_eok
 !!      screening,sigma
 !!
 !! CHILDREN
-!!      destroy_mpi_enreg,dtset_copy,dtset_free,fourdp,fourdp_6d,initmpi_seq
+!!      destroy_mpi_enreg,fourdp,fourdp_6d,hartre,initmpi_seq
 !!      libxc_functionals_end,libxc_functionals_init,printxsf,rhotoxc,wrtout
+!!      xcdata_init
 !!
 !! SOURCE
 
@@ -1317,8 +1323,9 @@ end subroutine kxc_driver
 !!      screening,sigma
 !!
 !! CHILDREN
-!!      destroy_mpi_enreg,dtset_copy,dtset_free,fourdp,fourdp_6d,initmpi_seq
+!!      destroy_mpi_enreg,fourdp,fourdp_6d,hartre,initmpi_seq
 !!      libxc_functionals_end,libxc_functionals_init,printxsf,rhotoxc,wrtout
+!!      xcdata_init
 !!
 !! SOURCE
 

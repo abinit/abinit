@@ -125,8 +125,9 @@
 !!      drivexc_main
 !!
 !! CHILDREN
-!!      invcb,libxc_functionals_getvxc,xchcth,xchelu,xciit,xclb,xcpbe,xcpzca
-!!      xcspol,xctetr,xcwign,xcxalp
+!!      invcb,libxc_functionals_end,libxc_functionals_getvxc
+!!      libxc_functionals_init,xchcth,xchelu,xciit,xclb,xcpbe,xcpzca,xcspol
+!!      xctetr,xcwign,xcxalp
 !!
 !! SOURCE
 
