@@ -433,6 +433,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%kssform=1
 !  L
    dtsets(idtset)%localrdwf=1
+
 #if defined HAVE_LOTF
    dtsets(idtset)%lotf_classic=5
    dtsets(idtset)%lotf_nitex=10

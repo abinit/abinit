@@ -634,6 +634,7 @@ type dataset_type
  integer, allocatable ::  istwfk(:)     ! istwfk(nkpt)
  integer, allocatable ::  kberry(:,:)   ! kberry(3,nberry)
  integer, allocatable ::  lexexch(:)    ! lexexch(ntypat)
+ integer, allocatable ::  ldaminushalf(:) !lminushalf(ntypat)
  integer, allocatable ::  lpawu(:)      ! lpawu(ntypat)
  integer, allocatable ::  nband(:)      ! nband(nkpt*nsppol)
  integer, allocatable ::  plowan_iatom(:)    ! plowan_iatom(plowan_natom)

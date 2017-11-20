@@ -145,6 +145,7 @@ MODULE m_pawtab
    ! if 1, onsite matrix elements of the kinetic operator are allocated
    ! if 2, onsite matrix elements of the kinetic operator are computed and stored
 
+ 
   integer :: has_shapefncg
    ! if 1, the spherical Fourier transforms of the radial shape functions are allocated
    ! if 2, the spherical Fourier transforms of the radial shape functions are computed and stored
@@ -170,6 +171,10 @@ MODULE m_pawtab
   integer :: has_vhnzc
    ! if 1, space for vhnzc is allocated
    ! if 2, vhnzc has been computed and stored
+
+  integer :: has_vminushalf
+   ! has_vminushalf=0 ; vminushal is not allocated
+   ! has_vminushalf=1 ; vminushal is not allocated and stored
 
   integer :: has_wvl
    ! if 1, data for wavelets (pawwvl) are allocated
@@ -517,6 +522,11 @@ MODULE m_pawtab
    ! Hartree potential for Zc density, v_H[n_{Zc}]
    ! constructed from core density in PAW file (see psp7in.F90)
 
+  real(dp), allocatable :: vminushalf(:)
+   ! vminushalf(mesh_size)
+   ! External potential for LDA minus half calculation
+   ! read in from PAW file
+
   real(dp), allocatable :: zioneff(:)
    ! zioneff(ij_proj)
    ! "Effective charge"*n "seen" at r_paw, deduced from Phi at r_paw, n:
@@ -602,6 +612,7 @@ subroutine pawtab_nullify_0D(Pawtab)
  Pawtab%has_tvale=0
  Pawtab%has_vhtnzc=0
  Pawtab%has_vhnzc=0
+ Pawtab%has_vminushalf=0
  Pawtab%has_nabla=0
  Pawtab%has_shapefncg=0
  Pawtab%has_wvl=0
@@ -844,6 +855,9 @@ subroutine pawtab_free_0D(Pawtab)
  if (allocated(Pawtab%VHnZC))  then
    LIBPAW_DEALLOCATE(Pawtab%VHnZC)
  end if
+ if (allocated(Pawtab%vminushalf))  then
+   LIBPAW_DEALLOCATE(Pawtab%vminushalf)
+ end if
  if (allocated(Pawtab%zioneff))  then
    LIBPAW_DEALLOCATE(Pawtab%zioneff)
  end if
@@ -859,6 +873,7 @@ subroutine pawtab_free_0D(Pawtab)
 !Pawtab%has_tvale=0
 !Pawtab%has_vhtnzc=0
 !Pawtab%has_vhnzc=0
+!Pawtab%has_vminushalf=0
 !Pawtab%has_nabla=0
 !Pawtab%has_shapefncg=0
 !Pawtab%has_wvl=0
@@ -1207,6 +1222,8 @@ subroutine pawtab_print(Pawtab,header,unit,prtvol,mode_paral)
   call wrtout(my_unt,msg,my_mode)
   write(msg,'(a,i4)')'  Has vhnzc ...................................... ',Pawtab(ityp)%has_vhnzc
   call wrtout(my_unt,msg,my_mode)
+  write(msg,'(a,i4)')'  Has vminushalf.................................. ',Pawtab(ityp)%has_vhnzc
+  call wrtout(my_unt,msg,my_mode)
   write(msg,'(a,i4)')'  Has nabla ...................................... ',Pawtab(ityp)%has_nabla
   call wrtout(my_unt,msg,my_mode)
   write(msg,'(a,i4)')'  Has shapefuncg ................................. ',Pawtab(ityp)%has_shapefncg
@@ -1411,7 +1428,7 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
  integer :: siz_qgrid_shp,siz_qijl,siz_rad_for_spline,siz_rhoij0,siz_shape_alpha
  integer :: siz_shape_q,siz_shapefunc,siz_shapefncg,siz_sij,siz_tcoredens,siz_tcorespl
  integer :: siz_tphi,siz_tphitphj,siz_tproj,siz_tvalespl,siz_vee,siz_vex,siz_vhtnzc
- integer :: siz_vhnzc,siz_zioneff
+ integer :: siz_vhnzc,siz_vminushalf,siz_zioneff
  integer :: siz_wvlpaw,siz_wvl_pngau,siz_wvl_parg,siz_wvl_pfac
  integer :: siz_wvl_rholoc_rad,siz_wvl_rholoc_d,sz1,sz2
  logical :: full_broadcast
@@ -1506,6 +1523,7 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
    siz_shape_q=0  ; siz_shapefunc=0; siz_tcoredens=0
    siz_tcorespl=0 ; siz_tphi=0     ; siz_tproj=0
    siz_tvalespl=0 ; siz_vhtnzc=0   ; siz_vhnzc=0
+   siz_vminushalf=0
    nn_int=nn_int+16
    if (allocated(pawtab%coredens)) then
      siz_coredens=size(pawtab%coredens)             !(core_mesh_size)
@@ -1590,7 +1608,11 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
      if (siz_vhnzc/=pawtab%mesh_size) msg=trim(msg)//' vhnzc'
      nn_dpr=nn_dpr+siz_vhnzc
    end if
-
+   if (allocated(pawtab%vminushalf)) then
+     siz_vminushalf=size(pawtab%vminushalf)                 !(mesh_size)
+     if (siz_vminushalf/=pawtab%mesh_size) msg=trim(msg)//' vvminushalf'
+     nn_dpr=nn_dpr+siz_vminushalf
+   end if
 !Reals arrays (depending on the parameters of the calculation)
 !-------------------------------------------------------------------------
    siz_dltij=0    ; siz_dshpfunc=0 ; siz_eijkl=0    ; siz_eijkl_sr=0
@@ -1803,6 +1825,7 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
    list_int(ii)=siz_tvalespl  ;ii=ii+1
    list_int(ii)=siz_vhtnzc  ;ii=ii+1
    list_int(ii)=siz_vhnzc  ;ii=ii+1
+   list_int(ii)=siz_vminushalf  ;ii=ii+1
    list_int(ii)=siz_wvlpaw  ;ii=ii+1
 !Integers (read from psp file)
    list_int(ii)=pawtab%basis_size  ;ii=ii+1
@@ -1814,6 +1837,7 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
    list_int(ii)=pawtab%has_tvale  ;ii=ii+1
    list_int(ii)=pawtab%has_vhtnzc  ;ii=ii+1
    list_int(ii)=pawtab%has_vhnzc  ;ii=ii+1
+   list_int(ii)=pawtab%has_vminushalf  ;ii=ii+1
    list_int(ii)=pawtab%has_wvl  ;ii=ii+1
    list_int(ii)=pawtab%ij_size  ;ii=ii+1
    list_int(ii)=pawtab%l_size  ;ii=ii+1
@@ -1952,6 +1976,7 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
    siz_tvalespl=list_int(ii)  ;ii=ii+1
    siz_vhtnzc=list_int(ii)  ;ii=ii+1
    siz_vhnzc=list_int(ii)  ;ii=ii+1
+   siz_vminushalf=list_int(ii)  ;ii=ii+1
    siz_wvlpaw=list_int(ii)  ;ii=ii+1
 !Integers (read from psp file)
    pawtab%basis_size=list_int(ii)  ;ii=ii+1
@@ -1963,6 +1988,7 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
    pawtab%has_tvale=list_int(ii)  ;ii=ii+1
    pawtab%has_vhtnzc=list_int(ii)  ;ii=ii+1
    pawtab%has_vhnzc=list_int(ii)  ;ii=ii+1
+   pawtab%has_vminushalf=list_int(ii)  ;ii=ii+1
    pawtab%has_wvl=list_int(ii)  ;ii=ii+1
    pawtab%ij_size=list_int(ii)  ;ii=ii+1
    pawtab%l_size=list_int(ii)  ;ii=ii+1
@@ -2187,6 +2213,10 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
    if (siz_vhnzc>0) then
      list_dpr(ii:ii+siz_vhnzc-1)=pawtab%vhnzc(1:siz_vhnzc)
      ii=ii+siz_vhnzc
+   end if
+   if (siz_vminushalf>0) then
+     list_dpr(ii:ii+siz_vminushalf-1)=pawtab%vminushalf(1:siz_vhnzc)
+     ii=ii+siz_vminushalf
    end if
 !Reals in datastructures (read from psp file)
    if (siz_wvlpaw==1) then
@@ -2465,6 +2495,14 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
      LIBPAW_ALLOCATE(pawtab%vhnzc,(pawtab%mesh_size))
      pawtab%vhnzc=list_dpr(ii:ii+pawtab%mesh_size-1)
      ii=ii+siz_vhnzc
+   end if
+   if (allocated(pawtab%vminushalf)) then
+     LIBPAW_DEALLOCATE(pawtab%vminushalf)
+   end if
+   if (siz_vminushalf>0) then
+     LIBPAW_ALLOCATE(pawtab%vminushalf,(pawtab%mesh_size))
+     pawtab%vminushalf=list_dpr(ii:ii+pawtab%mesh_size-1)
+     ii=ii+siz_vminushalf
    end if
 !Reals in datastructures (read from psp file)
    if (siz_wvlpaw==1) then
