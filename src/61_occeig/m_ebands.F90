@@ -2563,7 +2563,7 @@ subroutine ebands_set_nelect(ebands, nelect, spinmagntarget, msg, prtvol)
 
  my_prtvol = 0; if (present(prtvol)) my_prtvol = prtvol
 
- if (ebands_has_metal_scheme(ebands)) then
+ if (.not. ebands_has_metal_scheme(ebands)) then
    msg = "set_nelect assumes a metallic occupation scheme. Use ebands_set_scheme!"
    MSG_ERROR(msg)
  end if

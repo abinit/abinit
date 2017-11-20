@@ -4097,6 +4097,7 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
      bks_mask(bstart_k:bstart_k+nband_k-1, ik_ibz, spin) = .True.
    end do
  end do
+
  ! no memory distribution, each node has the full set of states.
  !bks_mask(1:mband,:,:) = .True.
 
@@ -4112,7 +4113,9 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
  ABI_FREE(keep_ur)
 
  iomode = iomode_from_fname(wfk0_path)
+
  call wfd_read_wfk(wfd,wfk0_path,iomode)
+
  if (.False.) call wfd_test_ortho(wfd,cryst,pawtab,unit=std_out,mode_paral="PERS")
 
  ! ph1d(2,3*(2*mgfft+1)*natom)=one-dimensional structure factor information on the coarse grid.
@@ -4168,11 +4171,15 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
  gmax = 2*gmax + 1
  call ngfft_seq(work_ngfft, gmax)
  write(std_out,*)"work_ngfft(1:3): ",work_ngfft(1:3)
- ABI_MALLOC(work, (2, work_ngfft(4),work_ngfft(5),work_ngfft(6)))
+ ABI_STAT_MALLOC(work, (2, work_ngfft(4),work_ngfft(5),work_ngfft(6)), ierr)
+ ABI_CHECK(ierr==0, 'out of memory in work')
 
  ! Allow PW-arrays dimensioned with mpw
- ABI_MALLOC(kg_k, (3, mpw))
- ABI_MALLOC(kg_kq, (3, mpw))
+ ABI_STAT_MALLOC(kg_k, (3, mpw), ierr)
+ ABI_CHECK(ierr==0, 'out of memory in kg_k')
+ ABI_STAT_MALLOC(kg_kq, (3, mpw), ierr)
+ ABI_CHECK(ierr==0, 'out of memory in kg_kq')
+
 
  ! Spherical Harmonics for useylm==1.
  ABI_MALLOC(ylm_k,(mpw, psps%mpsang*psps%mpsang*psps%useylm))
@@ -4182,6 +4189,7 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
  ! TODO FOR PAW
  usecprj = 0
  ABI_DT_MALLOC(cwaveprj0, (natom, nspinor*usecprj))
+
 
  ! Prepare call to getgh1c
  usevnl = 0
@@ -4230,11 +4238,14 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
  ABI_MALLOC(resvv_in, (2,gams%ndir_transp**2))
  ABI_MALLOC(resvv_out, (2,gams%ndir_transp**2))
  ABI_CALLOC(dummy_vtrial, (nfftf,nspden))
- ABI_CALLOC(gvals_qibz, (2,natom3,natom3,nsig,gams%nqibz,nsppol))
+ ABI_STAT_MALLOC(gvals_qibz, (2,natom3,natom3,nsig,gams%nqibz,nsppol), ierr)
+ ABI_CHECK(ierr==0, 'out of memory in gvals_qibz')
 ! TODO: if we remove the nsig dependency we can remove this intermediate array
 ! and save a lot of memory
- ABI_CALLOC(gvvvals_in_qibz, (2,gams%ndir_transp**2,natom3,natom3,nsig,gams%nqibz,nsppol))
- ABI_CALLOC(gvvvals_out_qibz, (2,gams%ndir_transp**2,natom3,natom3,nsig,gams%nqibz,nsppol))
+ ABI_STAT_MALLOC(gvvvals_in_qibz, (2,gams%ndir_transp**2,natom3,natom3,nsig,gams%nqibz,nsppol), ierr)
+ ABI_CHECK(ierr==0, 'out of memory in gvvvals_in_qibz')
+ ABI_STAT_MALLOC(gvvvals_out_qibz, (2,gams%ndir_transp**2,natom3,natom3,nsig,gams%nqibz,nsppol), ierr)
+ ABI_CHECK(ierr==0, 'out of memory in gvvvals_out_qibz')
 
  do iq_ibz=1,gams%nqibz
    qpt = gams%qibz(:,iq_ibz)
