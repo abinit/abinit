@@ -178,6 +178,8 @@ subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat,nhatdim,nh
    call dfpt_mkvxc(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat1_zero,0,nhat1gr_zero,0,&
 &    nkxc,2,n3xccc,option,paral_kgb,qphon,rhor1_diag,rprimd,0,vxc1_diag,xccc3d1)
 
+   !call test_rotations(0,1)
+
 !  -- Rotate back Vxc(r)^(1)
    if (optnc==1) then
      if (option==0) then

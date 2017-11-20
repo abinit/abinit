@@ -43,12 +43,13 @@ MODULE m_xc_noncoll
  public :: rotate_mag           ! Rotate a non-collinear density wrt a magnetization
  public :: rotate_back_mag      ! Rotate back a collinear XC potential wrt a magnetization
  public :: rotate_back_mag_dfpt ! Rotate back a collinear 1st-order XC potential wrt a magnetization
+ public :: test_rotations       ! test whether methods in rotate_back_mag_dfpt give similar results
 
 !Tolerance on magnetization norm
  real(dp),parameter :: m_norm_min=tol8
 
 !Default rotation method for DFPT
- integer,parameter :: rotation_method_default=3
+ integer,parameter :: rotation_method_default=2
 
 CONTAINS
 
@@ -305,7 +306,7 @@ subroutine rotate_back_mag(vxc_in,vxc_out,mag,vectsize,&
      !the correct formulas are:
      !dvdz= half*(half*(kxc(ipt,1)+kxc(ipt,3))-kxc(ipt,2))
      !if kxc is not available, simply leave the finite difference for dvdz (see rotate_mag)
-     !dvdz=half*(vxc_in(ipt,1)-vxc_in(ipt,2))/m_norm
+     !dvdz=half*(vxc_in(ipt,1)-vxc_in(ipt,2))/m_norm_min 
      !vxc_out(ipt,1)=dvdn+mag(ipt,3)*dvdz
      !vxc_out(ipt,2)=dvdn-mag(ipt,3)*dvdz
      !vxc_out(ipt,3)= mag(ipt,1)*dvdz
@@ -512,28 +513,25 @@ subroutine rotate_back_mag_dfpt(vxc1_in,vxc1_out,vxc,kxc,rho1,mag,vectsize,cplex
          m_norm=dsqrt(mag(ipt,1)**2+mag(ipt,2)**2+mag(ipt,3)**2)
        end if
 
-       mxy = dsqrt(mag(ipt,1)**2+mag(ipt,2)**2)
-       small_angle=(mxy<tol8)
 
-       mdirx=mag(ipt,1)/m_norm; mdiry=mag(ipt,2)/m_norm; mdirz=mag(ipt,3)/m_norm
-       mx1= rho1(ipt,2); my1=rho1(ipt,3); mz1=rho1(ipt,4)
+       mx1 =rho1(ipt,2);       
+       my1 =rho1(ipt,3);       
+       mz1 =rho1(ipt,4)
 
        dvdn=(vxc1_in(ipt,1)+vxc1_in(ipt,2))*half  !phixc^(1)
        dvdz=(vxc1_in(ipt,1)-vxc1_in(ipt,2))*half  !bxc^(1)  
 
        if (m_norm>m_norm_min) then
 
+         mxy = dsqrt(mag(ipt,1)**2+mag(ipt,2)**2)
+         small_angle=(mxy/m_norm<tol8)            !condition for sin(x)~x to be valid
+                                                  !even possible to set to tol6
+         mdirx=mag(ipt,1)/m_norm
+         mdiry=mag(ipt,2)/m_norm
+         mdirz=mag(ipt,3)/m_norm
+
 !        dvdn is phixc^(1) (density only part)
 !        dvdz is bxc^(1)   (magnetization magnitude part)
-
-         wx     = mag(ipt,2)/mxy
-         wy     =-mag(ipt,1)/mxy
-       
-         theta0 = dacos(mag(ipt,3)/m_norm)
-         theta1 = (mdirz*(mdirx*mx1+mdiry*my1))/mxy - mz1*mxy/m_norm**2   
-
-         wx1    = (mag(ipt,1)**2*my1 - mag(ipt,1)*mag(ipt,2)*mx1)/mxy**2/m_norm  ! wx1 multiplied by sin(theta)=mxy/m_norm
-         wy1    =-(wx/wy)*wx1                                                
 
          !U^(0)*.Vxc1.U^(0) part
          vxc1_out(ipt,1)= dvdn+dvdz*mdirz
@@ -541,12 +539,33 @@ subroutine rotate_back_mag_dfpt(vxc1_in,vxc1_out,vxc,kxc,rho1,mag,vectsize,cplex
          vxc1_out(ipt,3)= dvdz*mdirx   ! Real part
          vxc1_out(ipt,4)=-dvdz*mdiry   ! Imaginary part, minus sign comes from sigma_y
 
-         !U^(1)*.Vxc0.U^(0) + U^(0)*.Vxc0.U^(1)
-         bxc = dsqrt(((vxc(ipt,1)-vxc(ipt,2))*half)**2+vxc(ipt,3)**2+vxc(ipt,4)**2) !this is bxc^(0)
-         vxc1_out(ipt,1) = vxc1_out(ipt,1) - bxc*dsin(theta0)*theta1
-         vxc1_out(ipt,2) = vxc1_out(ipt,2) + bxc*dsin(theta0)*theta1
-         vxc1_out(ipt,3) = vxc1_out(ipt,3) - bxc*(wy1+dcos(theta0)*wy*theta1)
-         vxc1_out(ipt,4) = vxc1_out(ipt,4) - bxc*(wx1+dcos(theta0)*wx*theta1)
+         !U^(1)*.Vxc0.U^(0) + U^(0)*.Vxc0.U^(1) part
+
+         bxc = dsqrt(((vxc(ipt,1)-vxc(ipt,2))*half)**2+vxc(ipt,3)**2+vxc(ipt,4)**2) !bxc^(0)
+         if (.not.small_angle) then
+           wx     = mag(ipt,2)/mxy
+           wy     =-mag(ipt,1)/mxy       
+           theta0 = dacos(mag(ipt,3)/m_norm)
+
+           theta1 = (mdirz*(mdirx*mx1+mdiry*my1))/mxy - mz1*mxy/m_norm**2   
+           wx1    = (+mag(ipt,1)**2*my1 - mag(ipt,1)*mag(ipt,2)*mx1)/mxy**2/m_norm  ! wx1 multiplied by sin(theta)=mxy/m_norm
+           wy1    = (-mag(ipt,2)**2*mx1 + mag(ipt,1)*mag(ipt,2)*my1)/mxy**2/m_norm  ! wx1 multiplied by sin(theta)=mxy/m_norm
+
+           vxc1_out(ipt,1) = vxc1_out(ipt,1) - bxc*dsin(theta0)*theta1
+           vxc1_out(ipt,2) = vxc1_out(ipt,2) + bxc*dsin(theta0)*theta1
+           vxc1_out(ipt,3) = vxc1_out(ipt,3) - bxc*(wy1+dcos(theta0)*wy*theta1)
+           vxc1_out(ipt,4) = vxc1_out(ipt,4) - bxc*(wx1+dcos(theta0)*wx*theta1)
+         else
+           !zero order terms O(1)
+           vxc1_out(ipt,3) = vxc1_out(ipt,3) + bxc*mx1/abs(mag(ipt,3))
+           vxc1_out(ipt,4) = vxc1_out(ipt,4) - bxc*my1/abs(mag(ipt,3))
+           !first order terms O(theta)
+           fact = bxc/(mag(ipt,3)*abs(mag(ipt,3)))
+           vxc1_out(ipt,1) = vxc1_out(ipt,1) - (mag(ipt,1)*mx1+mag(ipt,2)*my1)*fact
+           vxc1_out(ipt,2) = vxc1_out(ipt,2) + (mag(ipt,1)*mx1+mag(ipt,2)*my1)*fact
+           vxc1_out(ipt,3) = vxc1_out(ipt,3) -  mag(ipt,1)*mz1*fact
+           vxc1_out(ipt,4) = vxc1_out(ipt,4) +  mag(ipt,2)*mz1*fact
+         endif
 
        else ! Magnetization is zero
 !        Compute Bxc/|m| from Kxc (zero limit)
@@ -568,13 +587,6 @@ subroutine rotate_back_mag_dfpt(vxc1_in,vxc1_out,vxc,kxc,rho1,mag,vectsize,cplex
          m_norm=dsqrt(mag(ipt,1)**2+mag(ipt,2)**2+mag(ipt,3)**2)
        end if
 
-       mxy = dsqrt(mag(ipt,1)**2+mag(ipt,2)**2)
-       
-
-       mdirx=mag(ipt,1)/m_norm 
-       mdiry=mag(ipt,2)/m_norm 
-       mdirz=mag(ipt,3)/m_norm
-
        mx1_re= rho1(2*ipt-1,2); mx1_im= rho1(2*ipt,2)
        my1_re= rho1(2*ipt-1,3); my1_im= rho1(2*ipt,3)
        mz1_re= rho1(2*ipt-1,4); mz1_im= rho1(2*ipt,4)
@@ -586,57 +598,89 @@ subroutine rotate_back_mag_dfpt(vxc1_in,vxc1_out,vxc,kxc,rho1,mag,vectsize,cplex
 
        if (m_norm>m_norm_min) then
 
-         small_angle=(mxy/m_norm<tol8)
+         mdirx=mag(ipt,1)/m_norm 
+         mdiry=mag(ipt,2)/m_norm 
+         mdirz=mag(ipt,3)/m_norm
+
+         mxy = dsqrt(mag(ipt,1)**2+mag(ipt,2)**2)
+         small_angle=(mxy/m_norm<tol8)            !condition for sin(x)~x to be valid
+                                                  !
+         mdirx=mag(ipt,1)/m_norm
+         mdiry=mag(ipt,2)/m_norm
+         mdirz=mag(ipt,3)/m_norm
+
 !        dvdn is phixc^(1) (density only part)
 !        dvdz is bxc^(1)   (magnetization magnitude part)
 
          !U^(0)*.Vxc1.U^(0) part
-         vxc1_out(2*ipt-1,1) = dvdn_re+dvdz_re*mdirz
-         vxc1_out(2*ipt  ,1) = dvdn_im+dvdz_im*mdirz
-         vxc1_out(2*ipt-1,2) = dvdn_re-dvdz_re*mdirz
-         vxc1_out(2*ipt  ,2) = dvdn_im-dvdz_im*mdirz
-         vxc1_out(2*ipt-1,3) = dvdz_re*mdirx + dvdz_im*mdiry   !Re[  V^12]
-         vxc1_out(2*ipt  ,3) = dvdz_im*mdirx - dvdz_re*mdiry   !Im[  V^12]
+         vxc1_out(2*ipt-1,1)= dvdn_re+dvdz_re*mdirz
+         vxc1_out(2*ipt  ,1)= dvdn_im+dvdz_im*mdirz
+         vxc1_out(2*ipt-1,2)= dvdn_re-dvdz_re*mdirz
+         vxc1_out(2*ipt  ,2)= dvdn_im-dvdz_im*mdirz
+         !NOTE: change of definition of the potential matrix components
+         !      vxc1_out(:,3) =   V_updn
+         !      vxc1_out(:,4) = i.V_updn
+         vxc1_out(2*ipt-1,3)= dvdz_re*mdirx + dvdz_im*mdiry   !Re[  V^12]
+         vxc1_out(2*ipt  ,3)= dvdz_im*mdirx - dvdz_re*mdiry   !Im[  V^12]
 
-         if(.not.small_angle) then
+         !U^(1)*.Vxc0.U^(0) + U^(0)*.Vxc0.U^(1) part
+         bxc = dsqrt(((vxc(ipt,1)-vxc(ipt,2))*half)**2+vxc(ipt,3)**2+vxc(ipt,4)**2) !bxc^(0)
 
+         if (.not.small_angle) then
            wx     = mag(ipt,2)/mxy
            wy     =-mag(ipt,1)/mxy
            theta0 = dacos(mag(ipt,3)/m_norm)
 
 
-           theta1_re = (mdirz*(mdirx*mx1_re+mdiry*my1_re))/mxy - mz1_re*mxy/m_norm**2   
-           theta1_im = (mdirz*(mdirx*mx1_im+mdiry*my1_im))/mxy - mz1_im*mxy/m_norm**2   
+           theta1_re = (mdirz*(mdirx*mx1_re+mdiry*my1_re))/mxy - mz1_re*mxy/m_norm**2
+           theta1_im = (mdirz*(mdirx*mx1_im+mdiry*my1_im))/mxy - mz1_im*mxy/m_norm**2
 
-           wx1_re = (mag(ipt,1)**2*my1_re - mag(ipt,1)*mag(ipt,2)*mx1_re)/mxy**2/m_norm  ! wx1 multiplied by sin(theta)=mxy/m_norm
-           wx1_im = (mag(ipt,1)**2*my1_im - mag(ipt,1)*mag(ipt,2)*mx1_im)/mxy**2/m_norm  ! wx1 multiplied by sin(theta)=mxy/m_norm
-           wy1_re =-(wx/wy)*wx1_re                                             
-           wy1_im =-(wx/wy)*wx1_im                                             
+           wx1_re = (+mag(ipt,1)**2*my1_re - mag(ipt,1)*mag(ipt,2)*mx1_re)/mxy**2/m_norm  ! wx1 multiplied by sin(theta)=mxy/m_norm
+           wx1_im = (+mag(ipt,1)**2*my1_im - mag(ipt,1)*mag(ipt,2)*mx1_im)/mxy**2/m_norm  
+           wy1_re = (-mag(ipt,2)**2*mx1_re + mag(ipt,1)*mag(ipt,2)*my1_re)/mxy**2/m_norm  ! wy1 multiplied by sin(theta)=mxy/m_norm
+           wy1_im = (-mag(ipt,2)**2*mx1_im + mag(ipt,1)*mag(ipt,2)*my1_im)/mxy**2/m_norm  
 
            !U^(1)*.Vxc0.U^(0) + U^(0)*.Vxc0.U^(1)
-           bxc = (vxc(ipt,1)-vxc(ipt,2))*half
-           vxc1_out(2*ipt-1,1) = vxc1_out(2*ipt-1,1) - (bxc)*dsin(theta0)*theta1_re
-           vxc1_out(2*ipt  ,1) = vxc1_out(2*ipt  ,1) - (bxc)*dsin(theta0)*theta1_im
-           vxc1_out(2*ipt-1,2) = vxc1_out(2*ipt-1,2) + (bxc)*dsin(theta0)*theta1_re
-           vxc1_out(2*ipt  ,2) = vxc1_out(2*ipt  ,2) + (bxc)*dsin(theta0)*theta1_im
+           vxc1_out(2*ipt-1,1) = vxc1_out(2*ipt-1,1) - bxc*dsin(theta0)*theta1_re
+           vxc1_out(2*ipt  ,1) = vxc1_out(2*ipt  ,1) - bxc*dsin(theta0)*theta1_im
+           vxc1_out(2*ipt-1,2) = vxc1_out(2*ipt-1,2) + bxc*dsin(theta0)*theta1_re
+           vxc1_out(2*ipt  ,2) = vxc1_out(2*ipt  ,2) + bxc*dsin(theta0)*theta1_im
            !cplex=1 part:
-           !vxc1_out(ipt,3) += - (bxc)*(wy1+dcos(theta0)*wy*theta1)
-           !vxc1_out(ipt,4) += + (bxc)*(nx1+dcos(theta0)*nx*theta1)
+           !v12 +=   -(bxc)*(wy1+dcos(theta0)*wy*theta1)-
+           !       -i.(bxc)*(wx1+dcos(theta0)*wx*theta1)
            vxc1_out(2*ipt-1,3) = vxc1_out(2*ipt-1,3) - bxc*(wy1_re+dcos(theta0)*wy*theta1_re)
-           vxc1_out(2*ipt-1,3) = vxc1_out(2*ipt-1,3) - bxc*(wx1_im+dcos(theta0)*wx*theta1_im)
-           vxc1_out(2*ipt  ,3) = vxc1_out(2*ipt  ,3) + bxc*(wx1_re+dcos(theta0)*wx*theta1_re)
+           vxc1_out(2*ipt-1,3) = vxc1_out(2*ipt-1,3) + bxc*(wx1_im+dcos(theta0)*wx*theta1_im)
            vxc1_out(2*ipt  ,3) = vxc1_out(2*ipt  ,3) - bxc*(wy1_im+dcos(theta0)*wy*theta1_im)
+           vxc1_out(2*ipt  ,3) = vxc1_out(2*ipt  ,3) - bxc*(wx1_re+dcos(theta0)*wx*theta1_re)
          else
-         !small theta case:
-           
+           !small theta case:
+           !zero order terms O(1)
+           vxc1_out(2*ipt-1,3) = vxc1_out(2*ipt-1,3) + bxc*mx1_re/abs(mag(ipt,3))
+           vxc1_out(2*ipt-1,3) = vxc1_out(2*ipt-1,3) + bxc*my1_im/abs(mag(ipt,3))
+           vxc1_out(2*ipt  ,3) = vxc1_out(2*ipt  ,3) + bxc*mx1_im/abs(mag(ipt,3))
+           vxc1_out(2*ipt  ,3) = vxc1_out(2*ipt  ,3) - bxc*my1_re/abs(mag(ipt,3))
+           !first order terms:
+           fact = bxc/(mag(ipt,3)*abs(mag(ipt,3)))
+           vxc1_out(2*ipt-1,1) = vxc1_out(2*ipt-1,1) - (mag(ipt,1)*mx1_re+mag(ipt,2)*my1_re)*fact
+           vxc1_out(2*ipt-1,2) = vxc1_out(2*ipt-1,2) + (mag(ipt,1)*mx1_re+mag(ipt,2)*my1_re)*fact
+           vxc1_out(2*ipt  ,1) = vxc1_out(2*ipt  ,1) - (mag(ipt,1)*mx1_im+mag(ipt,2)*my1_im)*fact
+           vxc1_out(2*ipt  ,2) = vxc1_out(2*ipt  ,2) + (mag(ipt,1)*mx1_im+mag(ipt,2)*my1_im)*fact
+
+           vxc1_out(2*ipt-1,3) = vxc1_out(2*ipt-1,3) -  mag(ipt,1)*mz1_re*fact
+           vxc1_out(2*ipt-1,3) = vxc1_out(2*ipt-1,3) -  mag(ipt,2)*mz1_im*fact
+           vxc1_out(2*ipt  ,3) = vxc1_out(2*ipt  ,3) +  mag(ipt,2)*mz1_re*fact
+           vxc1_out(2*ipt  ,3) = vxc1_out(2*ipt  ,3) -  mag(ipt,1)*mz1_im*fact
          endif
-       else ! Magnetization is zero
+
+       else ! Magnetization is practically zero
 !        Compute Bxc/|m| from Kxc (zero limit)
          bxc_over_m = half*(half*(kxc(ipt,1)+kxc(ipt,3))-kxc(ipt,2))
-         vxc1_out(ipt,1)= dvdn + bxc_over_m*mz1
-         vxc1_out(ipt,2)= dvdn - bxc_over_m*mz1
-         vxc1_out(ipt,3)= bxc_over_m*mx1
-         vxc1_out(ipt,4)=-bxc_over_m*my1
+         vxc1_out(2*ipt-1,1)= dvdn_re + bxc_over_m*mz1_re
+         vxc1_out(2*ipt  ,1)= dvdn_im + bxc_over_m*mz1_im
+         vxc1_out(2*ipt-1,2)= dvdn_re - bxc_over_m*mz1_re
+         vxc1_out(2*ipt  ,2)= dvdn_im - bxc_over_m*mz1_im
+         vxc1_out(2*ipt-1,3)= bxc_over_m*( mx1_re+my1_im)
+         vxc1_out(2*ipt  ,3)= bxc_over_m*(-my1_re+mx1_im)
        end if
        !finally reconstruct i.V^12 from V^12
        vxc1_out(2*ipt-1,4) = -vxc1_out(2*ipt  ,3)  ! Re[i.V^12] =-Im[V^12]
@@ -735,8 +779,10 @@ subroutine rotate_back_mag_dfpt(vxc1_in,vxc1_out,vxc,kxc,rho1,mag,vectsize,cplex
          mdirx=mag(ipt,1)/m_norm; mdiry=mag(ipt,2)/m_norm; mdirz=mag(ipt,3)/m_norm
 
          !first two terms:
-         vxc1_out(2*ipt-1,1)= dvdn_re+dvdz_re*mdirz; vxc1_out(2*ipt,1)= dvdn_re+dvdz_im*mdirz
-         vxc1_out(2*ipt-1,2)= dvdn_re-dvdz_re*mdirz; vxc1_out(2*ipt,2)= dvdn_im-dvdz_im*mdirz
+         vxc1_out(2*ipt-1,1)= dvdn_re+dvdz_re*mdirz 
+         vxc1_out(2*ipt  ,1)= dvdn_im+dvdz_im*mdirz
+         vxc1_out(2*ipt-1,2)= dvdn_re-dvdz_re*mdirz
+         vxc1_out(2*ipt  ,2)= dvdn_im-dvdz_im*mdirz
          !NOTE: change of definition of the potential matrix components
          !      vxc1_out(:,3) =   V_updn
          !      vxc1_out(:,4) = i.V_updn
@@ -749,7 +795,7 @@ subroutine rotate_back_mag_dfpt(vxc1_in,vxc1_out,vxc,kxc,rho1,mag,vectsize,cplex
 
          !remaining contributions:
          m_dot_m1_re= mdirx*mx1_re + mdiry*my1_re + mdirz*mz1_re
-         m_dot_m1_re= mdirx*mx1_im + mdiry*my1_im + mdirz*mz1_im
+         m_dot_m1_im= mdirx*mx1_im + mdiry*my1_im + mdirz*mz1_im
 
          bxc_over_m = dsqrt(((vxc(ipt,1)-vxc(ipt,2))*half)**2+vxc(ipt,3)**2+vxc(ipt,4)**2) !this is bxc^(0)
          bxc_over_m = bxc_over_m/m_norm
@@ -759,7 +805,7 @@ subroutine rotate_back_mag_dfpt(vxc1_in,vxc1_out,vxc,kxc,rho1,mag,vectsize,cplex
          vxc1_out(2*ipt-1,2) = vxc1_out(2*ipt-1,2) + bxc_over_m*(-mz1_re + mdirz*m_dot_m1_re ) ! Re[V^22]
          vxc1_out(2*ipt  ,2) = vxc1_out(2*ipt  ,2) + bxc_over_m*(-mz1_im + mdirz*m_dot_m1_im ) ! Im[V^22]
 
-         !    v12  += bxc_over_m*(   (mx1    - mdirx*m_dot_m1   ) + i.(-my1    + mdiry*m_dot_m1   )   )  <= see cplex=2
+         !    v12  += bxc_over_m*(   (mx1    - mdirx*m_dot_m1   ) + i.(-my1    + mdiry*m_dot_m1   )   )  <= see cplex=1
          ! Re[v12] += bxc_over_m*(   (mx1_re - mdirx*m_dot_m1_re) +   ( my1_im - mdiry*m_dot_m1_im)   )
          ! Im[v12] += bxc_over_m*(   (mx1_im - mdirx*m_dot_m1_im) +   (-my1_re + mdiry*m_dot_m1_re)   )
          vxc1_out(2*ipt-1,3) = vxc1_out(2*ipt-1,3) + bxc_over_m*( mx1_re - mdirx*m_dot_m1_re ) ! Re[V^12]
@@ -776,9 +822,8 @@ subroutine rotate_back_mag_dfpt(vxc1_in,vxc1_out,vxc,kxc,rho1,mag,vectsize,cplex
          vxc1_out(2*ipt  ,1)= dvdn_im + bxc_over_m*mz1_im
          vxc1_out(2*ipt  ,2)= dvdn_im - bxc_over_m*mz1_im
 
-         vxc1_out(2*ipt-1,3)= bxc_over_m*(mx1_re+my1_re) 
-         vxc1_out(2*ipt  ,3)= bxc_over_m*(mx1_im-my1_im) 
-
+         vxc1_out(2*ipt-1,3)= bxc_over_m*(mx1_re+my1_im)
+         vxc1_out(2*ipt  ,3)= bxc_over_m*(mx1_im-my1_re)
        end if
 
        !finally reconstruct i.V^12 from V^12
@@ -795,6 +840,241 @@ subroutine rotate_back_mag_dfpt(vxc1_in,vxc1_out,vxc,kxc,rho1,mag,vectsize,cplex
 
 end subroutine rotate_back_mag_dfpt
 !!***
+
+
+!!****f* ABINIT/m_xc_noncoll/test_rotations
+!! NAME
+!!  test_rotations
+!!
+!! FUNCTION
+!!  Test three different methods in rotate_back_mag_dfpt
+!!
+!! INPUTS
+!!  option=types of tests to perform
+!!  cplex = complex or real potential and first order magnetization
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!
+!! NOTES
+!!
+!!  For debug purposes
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine test_rotations(option,cplex)
+    
+ use defs_basis
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'test_rotations'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+ integer , intent(in)  :: option
+ integer , intent(in)  :: cplex
+
+!Local variables-------------------------------                                  
+ real(dp) :: m0(1,3),vxc0(1,4),kxc(1,3)
+ real(dp) :: n1(cplex,4),vxc1_in(cplex,4),vxc1_out(cplex,4)
+ real(dp) :: delta_12(cplex,4),delta_23(cplex,4)
+ real(dp) :: m0_norm,dvdn,dvdz,err12,err23,wrong_comp
+ real(dp) :: theta0,phi0,theta1,phi1,err,m1_norm
+ integer  :: ii,dir0,dir1
+! *************************************************************************
+
+ DBG_ENTER("COLL")
+ 
+! if (option/=1 .and. option/=2 ) then
+!  write(msg,'(3a,i0)')&
+!&  'The argument option should be 1 or 2,',ch10,&
+!&  'however, option=',option
+!  MSG_BUG(msg)
+! end if
+!
+! if (sizein<1) then
+!  write(msg,'(3a,i0)')&
+!&  '  The argument sizein should be a positive number,',ch10,&
+!&  '  however, sizein=',sizein
+!  MSG_ERROR(msg)
+! end if
+
+ DBG_EXIT("COLL")
+
+ write(*,*)    'VXC_NONCOLL TESTS================================================================'
+ if (cplex==1) then
+    write(*,*) '  cplex=1------------------------------------------------------------------------'
+   
+    write(*,*) '    TEST: simple  m* orietnations, bxc^(1) part'
+    dvdn=zero;dvdz=1.0!
+    err23=zero 
+    do dir0=1,3
+    m0=zero; n1=zero
+      do dir1=2,4
+        m0(1,dir0)=0.1
+        m0_norm=sqrt(m0(1,1)**2+m0(1,2)**2+m0(1,3)**2)    
+        n1(1,dir1)=0.8     ! any number would do here
+     
+        vxc0=zero;     ! no bxc^(0) part at all 
+
+        vxc1_in(1,1)= dvdn+dvdz
+        vxc1_in(1,2)= dvdn-dvdz
+
+        call rotate_back_mag_dfpt(vxc1_in,vxc1_out,vxc0,kxc,n1,m0,1,1,rot_method=1)
+        !write(*,*) '  1=>',vxc1_out(1,1:4)
+        call rotate_back_mag_dfpt(vxc1_in,vxc1_out,vxc0,kxc,n1,m0,1,1,rot_method=2)
+        !write(*,*) '  2=>',vxc1_out(1,1:4)
+        delta_23=vxc1_out
+        call rotate_back_mag_dfpt(vxc1_in,vxc1_out,vxc0,kxc,n1,m0,1,1,rot_method=3)
+        delta_23=abs(delta_23-vxc1_out)
+        !write(*,*) '  3=>',vxc1_out(1,1:4)
+        !write(*,*) 'm0=>',dir0,',m1=>',dir1-1,'|',delta_23
+        err=max(delta_23(1,1),delta_23(1,2),delta_23(1,3),delta_23(1,4))
+        if (err23<err) err23=err;
+
+      enddo
+    enddo
+    write(*,*) '    maximum mismatch between methods 2 and 3:',err23
+
+    write(*,*) '    TEST: simple  m* orietnations, bxc^(0) part'
+
+    err23=zero
+    dvdn=zero;dvdz=1.0
+    do dir0=1,3
+    m0=zero; n1=zero
+      do dir1=2,4
+        m0(1,dir0)=0.1    
+        m0_norm=sqrt(m0(1,1)**2+m0(1,2)**2+m0(1,3)**2)
+        n1(1,dir1)=0.8     ! =m^1, any number would do here
+
+        vxc0(1,1) = dvdn+dvdz*m0(1,3)/m0_norm
+        vxc0(1,2) = dvdn-dvdz*m0(1,3)/m0_norm
+        vxc0(1,3) = dvdz*m0(1,1)/m0_norm
+        vxc0(1,4) =-dvdz*m0(1,2)/m0_norm
+
+        vxc1_in=zero !vxc^(1) collinear is zero
+
+        !write(*,*) 'm0=>',dir0,',m1=>',dir1-1
+        call rotate_back_mag_dfpt(vxc1_in,vxc1_out,vxc0,kxc,n1,m0,1,1,rot_method=1)
+        !write(*,*) '  1=>',vxc1_out(1,1:4)
+        call rotate_back_mag_dfpt(vxc1_in,vxc1_out,vxc0,kxc,n1,m0,1,1,rot_method=2)
+        !write(*,*) '  2=>',vxc1_out(1,1:4)
+        delta_23=vxc1_out
+        call rotate_back_mag_dfpt(vxc1_in,vxc1_out,vxc0,kxc,n1,m0,1,1,rot_method=3)
+        delta_23=abs(delta_23-vxc1_out)
+        !write(*,*) '  3=>',vxc1_out(1,1:4)
+        !write(*,*) 'm0=>',dir0,',m1=>',dir1-1,'|',delta_23
+        err=maxval(abs(delta_23(1,:)))
+        if (err23<err) err23=err;
+      enddo
+    enddo
+    write(*,*) '    maximum mismatch between methods 2 and 3:',err23
+
+    write(*,*) '    TEST: general m0 orietnations, bxc^(0) part'
+
+    theta0=zero
+    err23=zero
+    m0_norm=0.3
+    do while(theta0<=pi)
+      phi0=zero
+      do while(phi0<=2*pi)
+        m0(1,1)=m0_norm*sin(theta0)*cos(phi0)
+        m0(1,2)=m0_norm*sin(theta0)*sin(phi0)
+        m0(1,3)=m0_norm*cos(theta0)
+
+        do  dir1=2,4
+          n1=zero
+          n1(1,dir1)=0.8     ! =m^1, any number would do here
+
+          !vxc0=zero;     !
+          vxc0(1,1) = dvdn+dvdz*m0(1,3)/m0_norm
+          vxc0(1,2) = dvdn-dvdz*m0(1,3)/m0_norm
+          vxc0(1,3) = dvdz*m0(1,1)/m0_norm
+          vxc0(1,4) =-dvdz*m0(1,2)/m0_norm
+
+          vxc1_in=zero
+
+          !call rotate_back_mag_dfpt(vxc1_in,vxc1_out,vxc0,kxc,n1,m0,1,1,rot_method=1)
+          call rotate_back_mag_dfpt(vxc1_in,vxc1_out,vxc0,kxc,n1,m0,1,1,rot_method=2)
+          delta_23=vxc1_out
+          call rotate_back_mag_dfpt(vxc1_in,vxc1_out,vxc0,kxc,n1,m0,1,1,rot_method=3)
+          delta_23=abs(delta_23-vxc1_out)
+          err=maxval(abs(delta_23(1,:)))
+          if (err23<err) err23=err;
+        enddo
+        phi0=phi0+2*pi/100.0
+      enddo
+      theta0=theta0+pi/100.0
+    enddo
+    write(*,*) '    maximum mismatch between methods 2 and 3:',err23
+
+    if(option==2) then
+    write(*,*) '    TEST: general m* orietnations, bxc^(0) part'
+    dvdn=zero;dvdz=1.0
+
+    theta0=zero
+    err23=zero
+    m0_norm=0.3
+    m1_norm=10.5
+    do while(theta0<=pi) !loops on orientation of m^(0)
+      phi0=zero
+      do while(phi0<=2*pi)
+        m0(1,1)=m0_norm*sin(theta0)*cos(phi0)
+        m0(1,2)=m0_norm*sin(theta0)*sin(phi0)
+        m0(1,3)=m0_norm*cos(theta0)
+
+        vxc0(1,1) = dvdn+dvdz*m0(1,3)/m0_norm
+        vxc0(1,2) = dvdn-dvdz*m0(1,3)/m0_norm
+        vxc0(1,3) = dvdz*m0(1,1)/m0_norm
+        vxc0(1,4) =-dvdz*m0(1,2)/m0_norm
+
+        vxc1_in=zero
+       
+        theta1=zero
+        do while(theta1<=pi) !loops on orientation of m^(1)
+          phi1=zero
+          do while(phi1<=2*pi)
+            n1(1,1)=zero
+            n1(1,2)=m1_norm*sin(theta1)*cos(phi1)
+            n1(1,3)=m1_norm*sin(theta1)*sin(phi1)
+            n1(1,4)=m1_norm*cos(theta1)
+
+            !vxc0=zero;     !
+            !call rotate_back_mag_dfpt(vxc1_in,vxc1_out,vxc0,kxc,n1,m0,1,1,rot_method=1)
+            call rotate_back_mag_dfpt(vxc1_in,vxc1_out,vxc0,kxc,n1,m0,1,1,rot_method=2)
+            delta_23=vxc1_out
+            call rotate_back_mag_dfpt(vxc1_in,vxc1_out,vxc0,kxc,n1,m0,1,1,rot_method=3)
+            delta_23=abs(delta_23-vxc1_out)
+            err=maxval(abs(delta_23(1,:)))
+            if (err23<err) err23=err;
+            phi1=phi1+2*pi/100.0
+          enddo
+          theta1=theta1+pi/100.0
+        enddo
+
+        phi0=phi0+2*pi/100.0
+      enddo
+      theta0=theta0+pi/100.0
+    enddo
+    write(*,*) '    maximum mismatch between methods 2 and 3:',err23
+    endif
+
+ else !cplex=2
+
+ endif
+
+end subroutine test_rotations
+!!***
+
 
 !----------------------------------------------------------------------
 
