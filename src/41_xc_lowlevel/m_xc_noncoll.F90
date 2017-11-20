@@ -49,7 +49,7 @@ MODULE m_xc_noncoll
  real(dp),parameter :: m_norm_min=tol8
 
 !Default rotation method for DFPT
- integer,parameter :: rotation_method_default=2
+ integer,parameter :: rotation_method_default=3
 
 CONTAINS
 
@@ -850,7 +850,9 @@ end subroutine rotate_back_mag_dfpt
 !!  Test three different methods in rotate_back_mag_dfpt
 !!
 !! INPUTS
-!!  option=types of tests to perform
+!!  option= types of tests to perform
+!!          0=> only quick tests
+!!          1=> quick and slow tests
 !!  cplex = complex or real potential and first order magnetization
 !!
 !! OUTPUT
@@ -910,11 +912,11 @@ subroutine test_rotations(option,cplex)
 
  DBG_EXIT("COLL")
 
- write(*,*)    'VXC_NONCOLL TESTS================================================================'
+ !write(*,*)    'VXC_NONCOLL TESTS================================================================'
  if (cplex==1) then
-    write(*,*) '  cplex=1------------------------------------------------------------------------'
+    !write(*,*) '  cplex=1------------------------------------------------------------------------'
    
-    write(*,*) '    TEST: simple  m* orietnations, bxc^(1) part'
+    !write(*,*) '    TEST: simple  m* orietnations, bxc^(1) part'
     dvdn=zero;dvdz=1.0!
     err23=zero 
     do dir0=1,3
@@ -930,22 +932,18 @@ subroutine test_rotations(option,cplex)
         vxc1_in(1,2)= dvdn-dvdz
 
         call rotate_back_mag_dfpt(vxc1_in,vxc1_out,vxc0,kxc,n1,m0,1,1,rot_method=1)
-        !write(*,*) '  1=>',vxc1_out(1,1:4)
         call rotate_back_mag_dfpt(vxc1_in,vxc1_out,vxc0,kxc,n1,m0,1,1,rot_method=2)
-        !write(*,*) '  2=>',vxc1_out(1,1:4)
         delta_23=vxc1_out
         call rotate_back_mag_dfpt(vxc1_in,vxc1_out,vxc0,kxc,n1,m0,1,1,rot_method=3)
         delta_23=abs(delta_23-vxc1_out)
-        !write(*,*) '  3=>',vxc1_out(1,1:4)
-        !write(*,*) 'm0=>',dir0,',m1=>',dir1-1,'|',delta_23
         err=max(delta_23(1,1),delta_23(1,2),delta_23(1,3),delta_23(1,4))
         if (err23<err) err23=err;
 
       enddo
     enddo
-    write(*,*) '    maximum mismatch between methods 2 and 3:',err23
+    !write(*,*) '    maximum mismatch between methods 2 and 3:',err23
 
-    write(*,*) '    TEST: simple  m* orietnations, bxc^(0) part'
+    !write(*,*) '    TEST: simple  m* orietnations, bxc^(0) part'
 
     err23=zero
     dvdn=zero;dvdz=1.0
@@ -963,23 +961,18 @@ subroutine test_rotations(option,cplex)
 
         vxc1_in=zero !vxc^(1) collinear is zero
 
-        !write(*,*) 'm0=>',dir0,',m1=>',dir1-1
         call rotate_back_mag_dfpt(vxc1_in,vxc1_out,vxc0,kxc,n1,m0,1,1,rot_method=1)
-        !write(*,*) '  1=>',vxc1_out(1,1:4)
         call rotate_back_mag_dfpt(vxc1_in,vxc1_out,vxc0,kxc,n1,m0,1,1,rot_method=2)
-        !write(*,*) '  2=>',vxc1_out(1,1:4)
         delta_23=vxc1_out
         call rotate_back_mag_dfpt(vxc1_in,vxc1_out,vxc0,kxc,n1,m0,1,1,rot_method=3)
         delta_23=abs(delta_23-vxc1_out)
-        !write(*,*) '  3=>',vxc1_out(1,1:4)
-        !write(*,*) 'm0=>',dir0,',m1=>',dir1-1,'|',delta_23
         err=maxval(abs(delta_23(1,:)))
         if (err23<err) err23=err;
       enddo
     enddo
-    write(*,*) '    maximum mismatch between methods 2 and 3:',err23
+    !write(*,*) '    maximum mismatch between methods 2 and 3:',err23
 
-    write(*,*) '    TEST: general m0 orietnations, bxc^(0) part'
+    !write(*,*) '    TEST: general m0 orietnations, bxc^(0) part'
 
     theta0=zero
     err23=zero
@@ -1015,10 +1008,10 @@ subroutine test_rotations(option,cplex)
       enddo
       theta0=theta0+pi/100.0
     enddo
-    write(*,*) '    maximum mismatch between methods 2 and 3:',err23
+    !write(*,*) '    maximum mismatch between methods 2 and 3:',err23
 
     if(option==2) then
-    write(*,*) '    TEST: general m* orietnations, bxc^(0) part'
+    !write(*,*) '    TEST: general m* orietnations, bxc^(0) part'
     dvdn=zero;dvdz=1.0
 
     theta0=zero
@@ -1065,10 +1058,10 @@ subroutine test_rotations(option,cplex)
       enddo
       theta0=theta0+pi/100.0
     enddo
-    write(*,*) '    maximum mismatch between methods 2 and 3:',err23
+    !write(*,*) '    maximum mismatch between methods 2 and 3:',err23
     endif
 
- else !cplex=2
+ !else !cplex=2
 
  endif
 
