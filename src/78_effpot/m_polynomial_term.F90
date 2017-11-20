@@ -47,11 +47,11 @@ module m_polynomial_term
 
  type, public :: polynomial_term_type
 
-   integer :: ndisp = zero
+   integer :: ndisp = 0
 !     Number of displacement for this terms
 !     1 for (X_y-O_y)^3, 2 for (X_y-O_y)(X_x-O_y)^2...
 
-   integer :: nstrain = zero
+   integer :: nstrain = 0
 !     Number of strain for this terms
 
    integer,allocatable :: atindx(:,:)
@@ -219,7 +219,7 @@ subroutine polynomial_term_init(atindx,cell,direction,ndisp,nstrain,polynomial_t
 
 ! Count the number of power_disp avec the previous check
 ! or just remove the power_disp equal to zero
-   ndisp_tmp=zero
+   ndisp_tmp = 0
    do idisp1=1,ndisp
      if(power_disp_tmp(idisp1) > zero) then
        ndisp_tmp = ndisp_tmp + 1
@@ -241,7 +241,7 @@ subroutine polynomial_term_init(atindx,cell,direction,ndisp,nstrain,polynomial_t
 
 ! Count the number of power_strain avec the previous check
 ! or just remove the power_strain equal to zero
-   nstrain_tmp=zero
+   nstrain_tmp = 0
    do idisp1=1,nstrain
      if(power_strain_tmp(idisp1) > zero) then
        nstrain_tmp = nstrain_tmp + 1
@@ -266,7 +266,7 @@ subroutine polynomial_term_init(atindx,cell,direction,ndisp,nstrain,polynomial_t
  ABI_ALLOCATE(polynomial_term%strain,(polynomial_term%nstrain))
 
 !Transfert displacement 
- idisp2 = zero
+ idisp2 = 0
  do idisp1=1,ndisp
    if(power_disp_tmp(idisp1) > zero)then
      idisp2 =  idisp2 + 1
@@ -279,7 +279,7 @@ subroutine polynomial_term_init(atindx,cell,direction,ndisp,nstrain,polynomial_t
  end do
 
 !Transfert strain 
- idisp2 = zero
+ idisp2 = 0
  do idisp1=1,nstrain
    if(power_strain_tmp(idisp1) > zero)then
      idisp2 =  idisp2 + 1
@@ -411,10 +411,10 @@ pure function terms_compare(t1,t2) result (res)
   integer :: blkval(2,t1%ndisp+t1%nstrain)
 ! *************************************************************************
   res = .true.
-  blkval = zero
+  blkval(:,:) = 0
   if(t1%ndisp==t2%ndisp.and.t1%nstrain==t2%nstrain)then
 !   Check strain    
-    blkval = zero
+    blkval(:,:) = 0
     do idisp1=1,t1%nstrain
       if(blkval(1,t1%ndisp+idisp1)==one)cycle!already found
       do idisp2=1,t2%nstrain
@@ -460,7 +460,7 @@ pure function terms_compare(t1,t2) result (res)
         end if
       end do
     end do
-    if(any(blkval(:,:)==zero))res = .false.
+    if(any(blkval(:,:)==0))res = .false.
   else
     res = .false.
   end if

@@ -260,8 +260,8 @@ subroutine fit_data_free(fit_data)
 ! *************************************************************************
 
 ! Reset integer values
-  fit_data%ntime = zero
-  fit_data%natom = zero
+  fit_data%ntime = 0
+  fit_data%natom = 0
 
 ! Deallocate arrays  
   if(allocated(fit_data%energy_diff)) then
@@ -431,7 +431,7 @@ subroutine fit_data_compute(fit_data,eff_pot,hist,comm,verbose)
    
 !Check if the initial stresses of the reference is set to the potential
  if(all(eff_pot%strten(:)==zero))then
-   ii = zero
+   ii = 0
 !  Try to find if any snapshot corresponding to the reference, 
 !  in order to fill the initial stresses...
    found = .FALSE.
@@ -608,8 +608,8 @@ subroutine training_set_free(ts)
 ! *************************************************************************
 
 ! Reset integer values
-  ts%ntime = zero
-  ts%natom = zero
+  ts%ntime = 0
+  ts%natom = 0
 
 ! Deallocate arrays  
   if(allocated(ts%displacement)) then

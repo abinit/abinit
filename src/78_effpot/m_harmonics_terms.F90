@@ -585,6 +585,8 @@ end subroutine harmonics_terms_setDynmat
 !!  natom_sc = number of atoms in the supercell
 !!  natom_uc = number of atoms in the unit cell
 !!  nrpt  = number of rpt
+!!  atmrpt_index(nrpt,cell) = For each cell in the supercell and each rpt,
+!!                            give the index of the first atoms in the rpt cell
 !!  rpt(nrpt) = index of rpt in  atmfrc (6th dimension)
 !!  index_cells(3,ncell) = indexes of the cells into  supercell (-1 -1 -1 ,...,1 1 1)
 !!  index_rpt(3,nrpt)  = indexes of the rpt into atmfrc
@@ -608,7 +610,7 @@ end subroutine harmonics_terms_setDynmat
 !! SOURCE
 
 subroutine harmonics_terms_evaluateIFC(atmfrc,disp,energy,fcart,cells,natom_sc,natom_uc,ncell,nrpt,&
-&                                      index_cells,index_rpt,sc_size,rpt,comm)
+&                                      atmrpt_index,index_cells,index_rpt,sc_size,rpt,comm)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -625,8 +627,8 @@ subroutine harmonics_terms_evaluateIFC(atmfrc,disp,energy,fcart,cells,natom_sc,n
   integer,intent(in) :: natom_uc,natom_sc,ncell,nrpt
   integer,intent(in) :: comm
 ! array
-  integer,intent(in) :: sc_size(3)
-  integer,intent(in) ::  index_rpt(3,nrpt),cells(ncell),index_cells(ncell,3),rpt(nrpt)
+  integer,intent(in) :: sc_size(3),atmrpt_index(nrpt,ncell)
+  integer,intent(in) ::  index_rpt(3,nrpt),cells(ncell),index_cells(4,ncell),rpt(nrpt)
   real(dp),intent(in) :: atmfrc(3,natom_uc,3,natom_uc,nrpt)
   real(dp),intent(in) :: disp(3,natom_sc)
   real(dp),intent(out) :: fcart(3,natom_sc)
@@ -650,9 +652,10 @@ subroutine harmonics_terms_evaluateIFC(atmfrc,disp,energy,fcart,cells,natom_sc,n
 ! Initialisation of variables
   energy   = zero
   fcart(:,:) = zero
+
   do icell = 1,ncell
     ii = (cells(icell)-1)*natom_uc
-    i1=index_cells(icell,1); i2=index_cells(icell,2); i3=index_cells(icell,3)
+    i1=index_cells(1,icell); i2=index_cells(2,icell); i3=index_cells(3,icell)
     do irpt_tmp = 1,nrpt
       irpt = rpt(irpt_tmp)
 !     do irpt = 1,eff_pot%harmonics_terms%ifcs%nrpt
@@ -665,6 +668,17 @@ subroutine harmonics_terms_evaluateIFC(atmfrc,disp,energy,fcart,cells,natom_sc,n
       jj = ((cell_atom2(1)-1)*sc_size(2)*sc_size(3))*natom_uc+&
 &          ((cell_atom2(2)-1)*sc_size(3))*natom_uc+&
 &          ((cell_atom2(3)-1))*natom_uc
+!   do icell = 1,ncell
+!     i1 = index_cells(1,icell)
+!     i2 = index_cells(2,icell)
+!     i3 = index_cells(3,icell)
+! !   index of the first atom in the current cell
+!     ii = index_cells(4,icell)
+!     do irpt_tmp = 1,nrpt
+!       irpt = rpt(irpt_tmp)
+! !     index of the first atom in the irpt cell
+!       jj = atmrpt_index(irpt_tmp,icell)
+!     Loop over the atom in the cell      
       do ib = 1, natom_uc
         ll = jj + ib
         do nu=1,3
@@ -674,14 +688,14 @@ subroutine harmonics_terms_evaluateIFC(atmfrc,disp,energy,fcart,cells,natom_sc,n
             do mu=1,3
               disp1 = disp(mu,kk)
               ifc = atmfrc(mu,ia,nu,ib,irpt)
-              if(abs(ifc) > tol10)then
+!              if(abs(ifc) > tol10)then
                 tmp = disp2 * ifc
 !               accumule energy
                 tmp2 = disp1*tmp
                 energy =  energy + tmp2
 !               accumule forces
                 fcart(mu,kk) = fcart(mu,kk) + tmp
-              end if
+!              end if
             end do
           end do
         end do

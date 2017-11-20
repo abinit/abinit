@@ -171,7 +171,6 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
  need_spcoupling = .TRUE.
  if(present(spcoupling)) need_spcoupling = spcoupling
 
-!if the cutoff_in == zero,
 !we set to the lenght of the cell parameters
  cutoff = zero
  if(present(cutoff_in))then
@@ -552,7 +551,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
  call fit_polynomial_coeff_computeGF(coeff_values,energy_coeffs,fit_data%energy_diff,fcart_coeffs,&
 &                                    fit_data%fcart_diff,gf_values(:,1),int((/1/)),natom_sc,&
 &                                    0,my_ncoeff,ntime,strten_coeffs,fit_data%strten_diff,&
-&                                    fit_data%training_set%sqomega,fit_data%training_set%ucvol)
+&                                    fit_data%training_set%sqomega)
 
 !Print the standard deviation before the fit
  write(message,'(3a,ES24.16,4a,ES24.16,2a,ES24.16,2a,ES24.16,a)' ) &
@@ -640,7 +639,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
        call fit_polynomial_coeff_solve(coeff_values(1:icycle),fcart_coeffs_tmp,fit_data%fcart_diff,&
 &                                      info,list_coeffs_tmp(1:icycle),natom_sc,icycle,&
 &                                      ncycle_max,ntime,strten_coeffs_tmp,fit_data%strten_diff,&
-&                                      fit_data%training_set%sqomega,fit_data%training_set%ucvol)
+&                                      fit_data%training_set%sqomega)
 
        if(info==0)then
          if (need_positive)then
@@ -654,8 +653,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
 &                                            fit_data%energy_diff,fcart_coeffs_tmp,fit_data%fcart_diff,&
 &                                            gf_values(:,icoeff),list_coeffs_tmp(1:icycle),natom_sc,&
 &                                            icycle,ncycle_max,ntime,strten_coeffs_tmp,&
-&                                            fit_data%strten_diff,fit_data%training_set%sqomega,&
-&                                            fit_data%training_set%ucvol)
+&                                            fit_data%strten_diff,fit_data%training_set%sqomega)
 
 
            write (j_char, '(i7)') my_coeffindexes(icoeff)
@@ -811,14 +809,14 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
        call fit_polynomial_coeff_solve(coeff_values(1:icycle_tmp),fcart_coeffs_tmp,fit_data%fcart_diff,&
 &                                      info,list_coeffs_tmp(1:icycle_tmp),natom_sc,icycle_tmp,&
 &                                      ncycle_max,ntime,strten_coeffs_tmp,fit_data%strten_diff,&
-&                                      fit_data%training_set%sqomega,fit_data%training_set%ucvol)
+&                                      fit_data%training_set%sqomega)
        if(info==0)then
          call fit_polynomial_coeff_computeGF(coeff_values(1:icycle_tmp),energy_coeffs_tmp,&
 &                                            fit_data%energy_diff,fcart_coeffs_tmp,fit_data%fcart_diff,&
 &                                            gf_values(:,1),list_coeffs_tmp(1:icycle_tmp),natom_sc,&
 &                                            icycle_tmp,ncycle_max,ntime,strten_coeffs_tmp,&
-&                                            fit_data%strten_diff,fit_data%training_set%sqomega,&
-&                                            fit_data%training_set%ucvol)
+&                                            fit_data%strten_diff,fit_data%training_set%sqomega)
+
        else!In this case the matrix is singular
          gf_values(:,icoeff) = zero
          singular_coeffs(icoeff) = 1
@@ -903,8 +901,8 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
    call fit_polynomial_coeff_solve(coeff_values(1:ncycle_tot),fcart_coeffs_tmp,fit_data%fcart_diff,&
 &                                  info,list_coeffs_tmp(1:ncycle_tot),natom_sc,ncycle_tot,&
 &                                  ncycle_max,ntime,strten_coeffs_tmp,&
-&                                  fit_data%strten_diff,fit_data%training_set%sqomega,&
-&                                  fit_data%training_set%ucvol)
+&                                  fit_data%strten_diff,fit_data%training_set%sqomega)
+   
    if(need_verbose) then   
      write(message, '(3a)') ch10,' Fitted coefficients at the end of the fit process: '
      call wrtout(ab_out,message,'COLL')
@@ -926,8 +924,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
 &                                      fit_data%energy_diff,fcart_coeffs_tmp,fit_data%fcart_diff,&
 &                                      gf_values(:,1),list_coeffs_tmp(1:ncycle_tot),natom_sc,&
 &                                      ncycle_tot,ncycle_max,ntime,strten_coeffs_tmp,&
-&                                      fit_data%strten_diff,fit_data%training_set%sqomega,&
-&                                      fit_data%training_set%ucvol)
+&                                      fit_data%strten_diff,fit_data%training_set%sqomega)
 
    if(need_verbose) then
 !  Print the standard deviation after the fit
@@ -1063,7 +1060,6 @@ subroutine fit_polynomial_coeff_getPositive(eff_pot,hist,coeff_values,isPositive
  integer :: ierr,ii,info,imodel,my_nmodel,nmodel_alone
  integer :: master,my_rank,ncoeff_tot,natom_sc,ncell
  integer :: nproc,ntime
- real(dp),parameter :: HaBohr_meVAng = 27.21138386 / 0.529177249
  logical :: iam_master,need_verbose
 !arrays
  integer :: sc_size(3)
@@ -1183,7 +1179,7 @@ subroutine fit_polynomial_coeff_getPositive(eff_pot,hist,coeff_values,isPositive
    call fit_polynomial_coeff_solve(coeff_values(imodel,1:ncoeff),fcart_coeffs,fit_data%fcart_diff,&
 &                                  info,list_coeff(imodel,1:ncoeff),natom_sc,ncoeff,&
 &                                  ncoeff_tot,ntime,strten_coeffs,fit_data%strten_diff,&
-&                                  fit_data%training_set%sqomega,fit_data%training_set%ucvol)
+&                                  fit_data%training_set%sqomega)
    
    if(info==0)then
      if (any(coeff_values(imodel,nfixcoeff+1:ncoeff) < zero))then
@@ -1239,7 +1235,6 @@ end subroutine fit_polynomial_coeff_getPositive
 !! strten_diff(6,natom) = Difference of stress tensor between DFT calculation and 
 !!                        fixed part of the model (more often harmonic part)
 !! sqomega(ntime) =  Shepard and al Factors \Omega^{2} see J.Chem Phys 136, 074103 (2012)
-!! ucvol(ntime) = Volume of the system for each time
 !!
 !! OUTPUT
 !! coefficients(ncoeff_fit) = Values of the coefficients
@@ -1262,7 +1257,7 @@ end subroutine fit_polynomial_coeff_getPositive
 
 subroutine fit_polynomial_coeff_solve(coefficients,fcart_coeffs,fcart_diff,&
 &                                     info_out,list_coeffs,natom,ncoeff_fit,ncoeff_max,ntime,&
-&                                     strten_coeffs,strten_diff,sqomega,ucvol)
+&                                     strten_coeffs,strten_diff,sqomega)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1282,7 +1277,7 @@ subroutine fit_polynomial_coeff_solve(coefficients,fcart_coeffs,fcart_diff,&
  real(dp),intent(in) :: fcart_coeffs(3,natom,ncoeff_max,ntime)
  real(dp),intent(in) :: fcart_diff(3,natom,ntime)
  real(dp),intent(in) :: strten_coeffs(6,ntime,ncoeff_max)
- real(dp),intent(in) :: strten_diff(6,ntime),sqomega(ntime),ucvol(ntime)
+ real(dp),intent(in) :: strten_diff(6,ntime),sqomega(ntime)
  real(dp),intent(out):: coefficients(ncoeff_fit)
 !Local variables-------------------------------
 !scalar
@@ -1435,7 +1430,6 @@ end subroutine fit_polynomial_coeff_solve
 !! strten_diff(6,natom) = Difference of stress tensor between DFT calculation and 
 !!                        fixed part of the model (more often harmonic part)
 !! sqomega =  Shepard and al Factors \Omega^{2} see J.Chem Phys 136, 074103 (2012)
-!! ucvol(ntime) = Volume of the supercell for each time (Bohr^3)
 !!
 !! OUTPUT
 !! gf_value(4) = Goal function 
@@ -1452,7 +1446,7 @@ end subroutine fit_polynomial_coeff_solve
 subroutine fit_polynomial_coeff_computeGF(coefficients,energy_coeffs,energy_diff,&
 &                                         fcart_coeffs,fcart_diff,gf_value,list_coeffs,&
 &                                         natom,ncoeff_fit,ncoeff_max,ntime,strten_coeffs,&
-&                                         strten_diff,sqomega,ucvol)
+&                                         strten_diff,sqomega)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1475,7 +1469,6 @@ subroutine fit_polynomial_coeff_computeGF(coefficients,energy_coeffs,energy_diff
  real(dp),intent(in) :: strten_coeffs(6,ntime,ncoeff_max)
  real(dp),intent(in) :: strten_diff(6,ntime),sqomega(ntime)
  real(dp),intent(in) :: coefficients(ncoeff_fit)
- real(dp),intent(in) :: ucvol(ntime)
  real(dp),intent(out) :: gf_value(4)
 !Local variables-------------------------------
 !scalar
@@ -1914,8 +1907,7 @@ subroutine fit_polynomial_coeff_computeMSE(eff_pot,hist,mse,msef,mses,natom,ntim
  if(present(print_file))then   
    need_print=print_file
    unit_ts = 563
-   unit_mod= 478
-   if (open_file('diff_model',msg,unit=unit_ts,form="formatted",&
+   if (open_file('fit_diff_model.dat',msg,unit=unit_ts,form="formatted",&
 &     status="replace",action="write") /= 0) then
      MSG_ERROR(msg)
    end if

@@ -1022,7 +1022,7 @@ subroutine polynomial_coeff_evaluate(coefficients,disp,energy,fcart,natom_sc,nat
   real(dp),intent(in) :: strain(6)
   real(dp),intent(out):: fcart(3,natom_sc)
   real(dp),intent(in) :: disp(3,natom_sc)
-  integer,intent(in) ::   cells(ncell),index_cells(ncell,3)
+  integer,intent(in) :: cells(ncell),index_cells(4,ncell)
   integer,intent(in) :: sc_size(3)
   type(polynomial_coeff_type),intent(in) :: coefficients(ncoeff)
  !Local variables-------------------------------
@@ -1049,8 +1049,8 @@ subroutine polynomial_coeff_evaluate(coefficients,disp,energy,fcart,natom_sc,nat
   strten(:)  = zero
 
   do icell = 1,ncell
-    ii = (cells(icell)-1)*natom_uc
-    i1=index_cells(icell,1); i2=index_cells(icell,2); i3=index_cells(icell,3)
+    ii = index_cells(4,icell);
+    i1=index_cells(1,icell); i2=index_cells(2,icell); i3=index_cells(3,icell)
 !   Loop over coefficients
     do icoeff=1,ncoeff
 !     Set the value of the coefficient

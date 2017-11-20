@@ -109,7 +109,7 @@ module m_effective_potential
 !    initial stresses (Ha/bohr^3) of the system
 
    type(harmonics_terms_type) :: harmonics_terms
-!     type with all information for anharmonics terms
+!     type with all information for harmonics terms
 
    type(anharmonics_terms_type) :: anharmonics_terms
 !     type with all information for anharmonics terms
@@ -438,12 +438,14 @@ subroutine effective_potential_initmpi(eff_pot,comm)
 !First mpi_ifc
  ndiv = 1
  call effpot_mpi_free(eff_pot%mpi_ifc)
- call effpot_mpi_init(cell_number,eff_pot%mpi_ifc,ndiv,eff_pot%harmonics_terms%ifcs%nrpt,comm)
+ call effpot_mpi_init(eff_pot%harmonics_terms%ifcs%cell,cell_number,eff_pot%mpi_ifc,&
+&                     eff_pot%crystal%natom,ndiv,eff_pot%harmonics_terms%ifcs%nrpt,comm)
 
 !Second mpi_coeff
  ndiv = 1
  call effpot_mpi_free(eff_pot%mpi_coeff)
- call effpot_mpi_init(cell_number,eff_pot%mpi_coeff,ndiv,eff_pot%harmonics_terms%ifcs%nrpt,comm)
+ call effpot_mpi_init(eff_pot%harmonics_terms%ifcs%cell,cell_number,eff_pot%mpi_coeff,&
+&                     eff_pot%crystal%natom,ndiv,eff_pot%harmonics_terms%ifcs%nrpt,comm)
  
 end subroutine effective_potential_initmpi
 !!***
@@ -2536,7 +2538,7 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
   strten = eff_pot%strten / ucvol
 
   if(need_verbose)then
-    write(msg, '(a,a,1ES24.16,a)' ) ch10,' Energy of the reference strucure          :',&
+    write(msg, '(a,a,1ES24.16,a)' ) ch10,' Energy of the reference structure         :',&
 &                                          energy,' Hartree'
     call wrtout(ab_out,msg,'COLL')
     call wrtout(std_out,msg,'COLL')
@@ -2553,8 +2555,8 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
 &                                  energy_part,fcart_part,eff_pot%mpi_ifc%my_cells,&
 &                                  eff_pot%supercell%natom,&
 &                                  eff_pot%crystal%natom,eff_pot%mpi_ifc%my_ncell,&
-&                                  eff_pot%mpi_ifc%my_nrpt,eff_pot%mpi_ifc%my_index_cells,&
-&                                  eff_pot%harmonics_terms%ifcs%cell,&
+&                                  eff_pot%mpi_ifc%my_nrpt,eff_pot%mpi_ifc%my_atmrpt_index,&
+&                                  eff_pot%mpi_ifc%my_index_cells,eff_pot%harmonics_terms%ifcs%cell,&
 &                                  sc_size,eff_pot%mpi_ifc%my_rpt,eff_pot%mpi_ifc%comm)
 
   if(need_verbose)then
