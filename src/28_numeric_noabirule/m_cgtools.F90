@@ -1746,8 +1746,8 @@ end subroutine sqnorm_v
 !!  meansp(nspden)=mean value for each nspden component
 !!
 !! PARENTS
-!!      fresid,newvtr,pawmknhat,prcref,prcref_PMA,psolver_rhohxc,rhotoxc
-!!      rhohxcpositron,rhotov
+!!      fresid,newvtr,pawmknhat,prcref,prcref_PMA,psolver_rhohxc,rhohxcpositron
+!!      rhotov,rhotoxc
 !!
 !! CHILDREN
 !!
@@ -1844,10 +1844,10 @@ subroutine  cg_getspin(cgcband, npw_k, spin, cgcmat)
 
 !Local variables-------------------------------
 !scalars
- complex(dpc) :: pauli_0(2,2) = reshape([cone,czero,czero,cone], [2,2])
- complex(dpc) :: pauli_x(2,2) = reshape([czero,cone,cone,czero], [2,2])
- complex(dpc) :: pauli_y(2,2) = reshape([czero,j_dpc,-j_dpc,czero], [2,2])
- complex(dpc) :: pauli_z(2,2) = reshape([cone,czero,czero,-cone], [2,2])
+ complex(dpc),parameter :: pauli_0(2,2) = reshape([cone,czero,czero,cone], [2,2])
+ complex(dpc),parameter :: pauli_x(2,2) = reshape([czero,cone,cone,czero], [2,2])
+ complex(dpc),parameter :: pauli_y(2,2) = reshape([czero,j_dpc,-j_dpc,czero], [2,2])
+ complex(dpc),parameter :: pauli_z(2,2) = reshape([cone,czero,czero,-cone], [2,2])
  complex(dpc) :: cspin(0:3), cgcmat_(2,2)
 ! ***********************************************************************
 

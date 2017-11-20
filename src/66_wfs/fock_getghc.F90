@@ -33,9 +33,9 @@
 !!      fock2ACE,forstrnps,getghc
 !!
 !! CHILDREN
-!!      bare_vqg,dotprod_g,fftpac,fourdp,fourwf,hartre,load_k_hamiltonian
-!!      load_kprime_hamiltonian,matr3inv,nonlop,pawdijhat,pawmknhat_psipsi
-!!      sphereboundary,strfock,timab,xmpi_sum
+!!      bare_vqg,dotprod_g,fftpac,fourdp,fourwf,hartre,load_kprime_hamiltonian
+!!      matr3inv,nonlop,pawdijhat,pawmknhat_psipsi,sphereboundary,strfock,timab
+!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -281,11 +281,10 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
 !* the vector qvec is expressed in reduced coordinates.
 !     qvec(:)=kpoint_i(:)-kpoint_j(:)
    qvec_j(:)=gs_ham%kpt_k(:)-fockbz%kptns_bz(:,jkpt)
-   call bare_vqg(qvec_j,fockcommon%gsqcut,gs_ham%gmet,fockcommon%usepaw,fockcommon%hybrid_mixing,&
-&   fockcommon%hybrid_mixing_sr,fockcommon%hybrid_range,nfftf,fockbz%nkpt_bz,ngfftf,gs_ham%ucvol,vqg)
+   call bare_vqg(qvec_j,fockcommon%gsqcut,gs_ham%gmet,fockcommon%usepaw,fockcommon%hyb_mixing,&
+&   fockcommon%hyb_mixing_sr,fockcommon%hyb_range_fock,nfftf,fockbz%nkpt_bz,ngfftf,gs_ham%ucvol,vqg)
 
    
-
 
 ! =================================================
 ! === Loop on the band indices jband of cgocc_k ===
@@ -295,7 +294,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
 !*   occ = occupancy of jband at this k point
      occ=fockbz%occ_bz(jband+bdtot_jindex,my_jsppol)
      if(occ<tol8) cycle 
-!if(jband/=fockcommon%ieigen.or.(fockcommon%ieigen/=1)) cycle
+
 ! ==============================================
 ! === Get cwaveocc_r in real space using FFT ===
 ! ==============================================
@@ -310,14 +309,13 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
        cwaveocc_r=cwaveocc_r*invucvol
      end if
 
-! if((jkpt/=fockcommon%ikpt).or.(jband/=fockcommon%ieigen)) cycle
-
-! ================================================hatstr
+! ================================================
 ! === Get the overlap density matrix rhor_munu ===
 ! ================================================
 !* Calculate the overlap density matrix in real space = conj(cwaveocc_r)*cwavef_r
 !* rhor_munu will contain the overlap density matrix.
 ! vfock=-int{conj(cwaveocc_r)*cwavef_r*dr'/|r-r'|}
+
      call timab(1508,1,tsec)
      ind=0
      do i3=1,n3f
@@ -358,8 +356,8 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
      call timab(1509,2,tsec)
 
      if(fockcommon%optstr.and.(fockcommon%ieigen/=0)) then
-       call strfock(gs_ham%gprimd,fockcommon%gsqcut,fockstr,fockcommon%hybrid_mixing,fockcommon%hybrid_mixing_sr,&
-&       fockcommon%hybrid_range,mpi_enreg,nfftf,ngfftf,fockbz%nkpt_bz,rhog_munu,gs_ham%ucvol,qvec_j)
+       call strfock(gs_ham%gprimd,fockcommon%gsqcut,fockstr,fockcommon%hyb_mixing,fockcommon%hyb_mixing_sr,&
+&       fockcommon%hyb_range_fock,mpi_enreg,nfftf,ngfftf,fockbz%nkpt_bz,rhog_munu,gs_ham%ucvol,qvec_j)
        fockcommon%stress_ikpt(:,fockcommon%ieigen)=fockcommon%stress_ikpt(:,fockcommon%ieigen)+fockstr(:)*occ*wtk
        if (fockcommon%usepaw==0.and.(.not.need_ghc)) then
          if (allocated(fockbz%cgocc)) then
@@ -378,7 +376,6 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
 !* vfock = FFT( rhog_munu/|g+qvec|^2 )
      call timab(1510,1,tsec)
 #if 0
-!    rhog_munu=rhog_munu*fockbz%wtk_bz(jkpt)
 
      call hartre(cplex_fock,fockcommon%gsqcut,fockcommon%usepaw,mpi_enreg,nfftf,ngfftf,&
 &     mpi_enreg%paral_kgb,rhog_munu,rprimd,vfock,divgq0=fock%divgq0,qpt=qvec_j)
@@ -430,6 +427,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
 
        if (fockcommon%optfor.and.(fockcommon%ieigen/=0)) then
          choice=2; dotr=zero;doti=zero;cpopt=4
+
          do iatom=1,natom
            do idir=1,3
              call nonlop(choice,cpopt,cwaveocc_prj,enlout_dum,gs_ham,idir,(/zero/),mpi_enreg,&
@@ -444,7 +442,6 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
 &               vfock(2*ind)*grnhat_12(2,ind,1,idir,iatom)
              end do
            end do
-
            do idir=1,3
              for12(idir)=rprimd(1,idir)*for1(1)+rprimd(2,idir)*for1(2)+rprimd(3,idir)*for1(3)
              forikpt(idir,iatom)=forikpt(idir,iatom)-(for12(idir)*gs_ham%ucvol/nfftf+dotr(idir))*occ*wtk
@@ -454,13 +451,9 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
 
 ! Stresses calculation
        if (fockcommon%optstr.and.(fockcommon%ieigen/=0)) then
-
          signs=2;choice=3;cpopt=4
 
        ! first contribution 
-!         call load_kprime_hamiltonian(gs_ham,ffnl_kp=fockcommon%ffnl_str)
-         call load_k_hamiltonian(gs_ham,ffnl_k=fockcommon%ffnl_str)
-!         strout=zero
          dotr=zero
          do idir=1,6
            call nonlop(choice,cpopt,cwaveocc_prj,enlout_dum,gs_ham,idir,(/zero/),mpi_enreg,&
@@ -494,17 +487,18 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
            fockcommon%stress_ikpt(idir,fockcommon%ieigen)=fockcommon%stress_ikpt(idir,fockcommon%ieigen)+&
 &           fockstr(idir)/nfftf*occ*wtk
          end do
+
        ! third contribution
          doti=zero
          do ifft=1,nfftf
            doti=doti+vfock(2*ifft-1)*rho12(1,ifft,nspinor)-vfock(2*ifft)*rho12(2,ifft,nspinor)
          end do
          fockcommon%stress_ikpt(1:3,fockcommon%ieigen)=fockcommon%stress_ikpt(1:3,fockcommon%ieigen)-doti/nfftf*occ*wtk
-         doti=zero
-         do ifft=1,nfftf
-           doti=doti+vfock(2*ifft-1)*rhor_munu(1,ifft)-vfock(2*ifft)*rhor_munu(2,ifft)
-         end do
-         fockcommon%stress_ikpt(1:3,fockcommon%ieigen)=fockcommon%stress_ikpt(1:3,fockcommon%ieigen)+doti/nfftf*occ*wtk*half
+!         doti=zero
+!         do ifft=1,nfftf
+!           doti=doti+vfock(2*ifft-1)*rhor_munu(1,ifft)-vfock(2*ifft)*rhor_munu(2,ifft)
+!         end do
+!         fockcommon%stress_ikpt(1:3,fockcommon%ieigen)=fockcommon%stress_ikpt(1:3,fockcommon%ieigen)+doti/nfftf*occ*wtk*half
        end if ! end stresses
 
        ABI_DEALLOCATE(dijhat)
@@ -514,7 +508,6 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
 ! =============================================================
 ! === Apply the local potential vfockloc_munu to cwaveocc_r ===
 ! =============================================================
-
      call timab(1507,1,tsec)
      ind=0
      do i3=1,ngfftf(3)
@@ -533,6 +526,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
      if (allocated(fockbz%cgocc)) then
        ABI_DEALLOCATE(cwaveocc_r)
      end if
+
    end do ! jband
 
 ! ================================================
@@ -561,7 +555,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
      end do
    end if
  end if
- if(fockcommon%optstr) then
+ if(fockcommon%optstr.and.(fockcommon%ieigen/=0)) then
    call xmpi_sum(fockcommon%stress_ikpt,mpi_enreg%comm_hf,ier)
  end if
 

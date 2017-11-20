@@ -38,7 +38,7 @@ MODULE m_qparticles
 
  use m_io_tools,       only : open_file, file_exists, isncfile
  use m_fstrings,       only : int2char10, itoa, sjoin
- use m_numeric_tools,  only : linfit, c2r, set2unit, interpol3d
+ use m_numeric_tools,  only : linfit, c2r, set2unit, interpol3d, rhophi
  use m_gwdefs,         only : sigparams_t
  use m_crystal,        only : crystal_t
  use m_crystal_io,     only : crystal_ncwrite
@@ -173,7 +173,7 @@ subroutine wrqps(fname,Sigp,Cryst,Kmesh,Psps,Pawtab,Pawrhoij,nspden,nscf,nfftot,
 
  ABI_MALLOC(mtmp,(Sigp%nbnds,Sigp%nbnds))
 
- if (nscf>=0) then 
+ if (nscf>=0) then
    ! Write the new m_lda_to_qp on file.
    do is=1,Sigp%nsppol
      do ik=1,Kmesh%nibz
@@ -184,7 +184,7 @@ subroutine wrqps(fname,Sigp,Cryst,Kmesh,Psps,Pawtab,Pawrhoij,nspden,nscf,nfftot,
        end do
      end do
    end do
- else if (nscf==-1) then 
+ else if (nscf==-1) then
    ! Write fake QPS file with KS band structure (Mainly used for G0W)
    call set2unit(mtmp)
    do is=1,Sigp%nsppol
@@ -202,11 +202,19 @@ subroutine wrqps(fname,Sigp,Cryst,Kmesh,Psps,Pawtab,Pawrhoij,nspden,nscf,nfftot,
 
  ABI_FREE(mtmp)
 
- ! === Write FFT dimensions and QP density ===
+ write(msg,'(a,f9.4)')' (wrqps) planewave contribution to nelect: ',SUM(rho_qp(:,1))*Cryst%ucvol/nfftot
+ call wrtout(std_out,msg,'COLL')
+ if (nspden == 4) then
+   write(msg,'(a,3f9.4)')' mx, my, mz: ',&
+     SUM(rho_qp(:,2))*Cryst%ucvol/nfftot,SUM(rho_qp(:,3))*Cryst%ucvol/nfftot,SUM(rho_qp(:,4))*Cryst%ucvol/nfftot
+   call wrtout(std_out,msg,'COLL')
+ end if
+
+ ! Write FFT dimensions and QP density
  write(unqps,*)ngfftf(1:3)
  write(unqps,*)rho_qp(:,:)
 
- if (Psps%usepaw==1) then 
+ if (Psps%usepaw==1) then
    ! Write QP rhoij to be used for on-site density mixing.
    ABI_MALLOC(nlmn_type,(Cryst%ntypat))
    do itypat=1,Cryst%ntypat
@@ -248,10 +256,6 @@ end subroutine wrqps
 !!  fname=Name of the file
 !!  dimrho=1 if density has to be read, 0 otherwise
 !!  BSt<ebands_t>=Structure containing the initial band structure.
-!!     %nsppol=1 for unpolarized, 2 for spin-polarized.
-!!     %mband=Max number of bands used
-!!     %nkpt=number of irreducible k-points.
-!!     %kptns(3,nkpt)=reduced coordinates of each irreducible k-point.
 !!  ucvol=Volume of the unit cell
 !!
 !! OUTPUT
@@ -336,7 +340,7 @@ subroutine rdqps(BSt,fname,usepaw,nspden,dimrho,nscf,&
  !% my_rank = xmpi_comm_rank(MPI_enreg%spaceComm)
  my_rank = MPI_enreg%me_kpt
 
- ! * Check whether file exists or not.
+ ! Check whether file exists or not.
  write(msg,'(5a)')ch10,&
 &  ' rdqps: reading QP wavefunctions of the previous step ',ch10,&
 &  '        looking for file ',TRIM(fname)
@@ -351,7 +355,7 @@ subroutine rdqps(BSt,fname,usepaw,nspden,dimrho,nscf,&
  end if
 
  if (.not.isncfile(fname)) then
-   if (open_file(fname,msg,newunit=unqps,form='formatted',status='unknown') /=0) then
+   if (open_file(fname,msg,newunit=unqps,form='formatted',status='unknown') /= 0) then
      MSG_ERROR(msg)
    end if
 
@@ -363,8 +367,7 @@ subroutine rdqps(BSt,fname,usepaw,nspden,dimrho,nscf,&
 
    read(unqps,*)nkibzR
    if (nkibzR/=BSt%nkpt) then
-     write(msg,'(2(a,i0))')&
-&      'Wrong number of k-points; Expected: ',BSt%nkpt,', Found: ',nkibzR
+     write(msg,'(2(a,i0))')'Wrong number of k-points; Expected: ',BSt%nkpt,', Found: ',nkibzR
      MSG_ERROR(msg)
    end if
 
@@ -390,8 +393,8 @@ subroutine rdqps(BSt,fname,usepaw,nspden,dimrho,nscf,&
    read(unqps,*)nsppolR
 
    ABI_CHECK(nsppolR==BSt%nsppol,"QPS generated with different nsppol")
-   !
-   ! === Read energies and transformation for each k-point and spin ===
+
+   ! Read energies and transformation for each k-point and spin.
    ! TODO: The format of the QPS file must be standardized !
    ! For example we might add the occupation numbers.
    do isppol=1,BSt%nsppol
@@ -406,11 +409,11 @@ subroutine rdqps(BSt,fname,usepaw,nspden,dimrho,nscf,&
          read(unqps,*)mtmp(:,ib)
        end do
 
-       ! === Store transformation and update energies ===
+       ! Store transformation and update energies.
        m_lda_to_qp(1:nbsc,1:nbsc,ik,isppol)=mtmp(1:nbsc,1:nbsc)
        BSt%eig(1:nbsc,ik,isppol)=en_tmp(1:nbsc)
 
-       ! * Chech if matrix is unitary.
+       ! Chech if matrix is unitary.
        ABI_MALLOC(utest,(nbsc,nbsc))
        utest(:,:) = TRANSPOSE(mtmp(1:nbsc,1:nbsc)) !this is just for the buggy gfortran
        utest(:,:) = MATMUL(CONJG(utest),mtmp(1:nbsc,1:nbsc))
@@ -428,13 +431,13 @@ subroutine rdqps(BSt,fname,usepaw,nspden,dimrho,nscf,&
 
    ABI_FREE(mtmp)
    ABI_FREE(en_tmp)
-   !
-   ! === Read the QP density ===
-   ! * The two FFT grids might differ. In case perform an FFT interpolation to have rhor on the input mesh.
+
+   ! Read the QP density.
+   ! The two FFT grids might differ. In case perform an FFT interpolation to have rhor on the input mesh.
    if (dimrho==1) then
      read(unqps,*)n1,n2,n3
 
-     if ( ALL(ngfftf(1:3)==(/n1,n2,n3/)) ) then
+     if (all(ngfftf(1:3)== [n1, n2, n3]) ) then
        read(unqps,*)rhor_out(:,:)
      else
        write(msg,'(2a,a,5(i3,a),i3)')&
@@ -463,7 +466,7 @@ subroutine rdqps(BSt,fname,usepaw,nspden,dimrho,nscf,&
          call fourier_interpol(cplex_fft,nspden,optin,optout,nfft_found,ngfft_found,nfftot,ngfftf,&
 &          paral_kgb,MPI_enreg,rhor_tmp,rhor_out,rhogdum,rhogdum)
 
-       else 
+       else
          ! Linear interpolation.
          do ispden=1,nspden
            do ir3=0,ngfftf(3)-1
@@ -482,10 +485,10 @@ subroutine rdqps(BSt,fname,usepaw,nspden,dimrho,nscf,&
 
        ABI_FREE(rhor_tmp)
      end if
-     !
-     ! === Test the normalization of the QPS density ===
-     ! * There might be errors due to the interpolation or the truncation of the G basis set
-     ! * Density will be renormalized in the caller since for PAW we still have to add the onsite contribution.
+
+     ! Test the normalization of the QPS density.
+     ! There might be errors due to the interpolation or the truncation of the G basis set
+     ! Density will be renormalized in the caller since for PAW we still have to add the onsite contribution.
      if (usepaw==0) then
        nelect_qps=SUM(rhor_out(:,1))*ucvol/nfftot; ratio=BSt%nelect/nelect_qps
        write(msg,'(3(a,f9.4))')&
@@ -494,7 +497,7 @@ subroutine rdqps(BSt,fname,usepaw,nspden,dimrho,nscf,&
        !!rhor_out(:,:)=ratio*rhor_out(:,:)
      end if
 
-     if (usepaw==1) then 
+     if (usepaw==1) then
        ! Write QP_rhoij for on-site density mixing.
        read(unqps,*,iostat=ios)natomR,ntypatR
        if (ios/=0) then
@@ -608,10 +611,13 @@ subroutine show_QP(Bst,m_lda_to_qp,fromb,tob,unit,prtvol,tolmat,kmask)
 !Local variables-------------------------------
 !scalars
  integer,parameter :: NBRA=5
+ logical,parameter :: use_rhophi=.True.
  integer :: ib_start,ib_stop,my_prtvol,counter,ib_KS,ib_QP,ikibz,isp,nspace,my_unt,nband_k
- real(dp) :: my_tolmat
+ real(dp) :: my_tolmat,rho,phi
  character(len=10) :: bks,bqp,k_tag,spin_tag
  character(len=500) :: KS_row,KS_ket,tmpstr,QP_ket
+!arrays
+ real(dp) :: cx(2)
 
 ! *********************************************************************
 
@@ -621,7 +627,7 @@ subroutine show_QP(Bst,m_lda_to_qp,fromb,tob,unit,prtvol,tolmat,kmask)
  ib_stop  =Bst%mband; if (PRESENT(tob   )) ib_stop  =tob
  my_tolmat=0.001    ; if (PRESENT(tolmat)) my_tolmat=ABS(tolmat)
 
- ! * I suppose nband_k is constant thus the check is done here.
+ ! I suppose nband_k is constant thus the check is done here.
  if (ib_start<=0       ) ib_start=1
  if (ib_start>Bst%mband) ib_start=Bst%mband
  if (ib_stop<=0        ) ib_stop=1
@@ -633,6 +639,11 @@ subroutine show_QP(Bst,m_lda_to_qp,fromb,tob,unit,prtvol,tolmat,kmask)
 &  ' ***** QP amplitudes expressed as linear combination of KS eigenstates. *****',&
 &  ' ***** Only KS components whose modulus is larger than ',my_tolmat,' are shown  ***** ',&
 &  ' '//REPEAT('*',76)
+ if (use_rhophi) then
+   write(my_unt,"(a)")"Complex coefficients given in (rho, phi) polar representation."
+ else
+   write(my_unt,"(a)")"Complex coefficients given in (Re, Im) representation."
+ end if
 
  if (PRESENT(kmask)) then
    if (.not.ALL(kmask)) write(my_unt,'(/,a,i3,a)')' Only ',COUNT(kmask),' k-points are reported '
@@ -662,7 +673,17 @@ subroutine show_QP(Bst,m_lda_to_qp,fromb,tob,unit,prtvol,tolmat,kmask)
          counter=counter+1
          call int2char10(ib_KS,bks)
          write(tmpstr,'(3a)')' |',TRIM(bks),'>'
-         write(KS_ket,'(1x,2f7.3,a,1x)')m_lda_to_qp(ib_KS,ib_QP,ikibz,isp),TRIM(tmpstr)
+
+         if (use_rhophi) then
+           ! coefficient as (rho, phi)
+           cx(1) = real(m_lda_to_qp(ib_KS,ib_QP,ikibz,isp))
+           cx(2) = aimag(m_lda_to_qp(ib_KS,ib_QP,ikibz,isp))
+           call rhophi(cx, phi, rho)
+           write(KS_ket,'(1x,2f7.3,a,1x)')rho, phi, TRIM(tmpstr)
+         else
+           ! coefficient as (Re, Im)
+           write(KS_ket,'(1x,2f7.3,a,1x)')m_lda_to_qp(ib_KS,ib_QP,ikibz,isp),TRIM(tmpstr)
+         end if
          KS_row=TRIM(KS_row)//TRIM(KS_ket)
          if (MOD(counter,NBRA)==0) then  ! nbra KS kets per row
            write(my_unt,'(a)')TRIM(KS_row)
@@ -753,7 +774,7 @@ subroutine rdgw(Bst,fname,igwene,extrapolate)
 
  if (open_file(fname,msg,newunit=unt,status='old') /=0) then
    MSG_ERROR(msg)
- end if 
+ end if
 
  read(unt,*)nkibzR,nsppolR
 
@@ -962,7 +983,7 @@ subroutine updt_m_lda_to_qp(Sigp,Kmesh,nscf,Sr,m_lda_to_qp)
 
 ! *************************************************************************
 
- if (nscf>=0) then 
+ if (nscf>=0) then
    ! Calculate the new m_lda_to_qp
    ABI_MALLOC(mtmp,(Sigp%nbnds,Sigp%nbnds))
    do is=1,Sigp%nsppol

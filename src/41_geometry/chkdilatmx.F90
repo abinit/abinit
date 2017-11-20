@@ -137,7 +137,7 @@ subroutine chkdilatmx(chkdilatmx_,dilatmx,rprimd,rprimd_orig,dilatmx_errmsg)
 &     'An adequate value would have been dilatmx_new=',dilatmx_new,ch10,&
 &     'As chkdilatmx=0, assume experienced user. Execution will continue.'
      MSG_WARNING(message)
-   endif
+   end if
 
  end if
 

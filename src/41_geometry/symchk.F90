@@ -35,7 +35,7 @@
 !! transl(3)=primitive cell translation to make iatom same as tratom (integers)
 !!
 !! PARENTS
-!!      m_fit_polynomial_coeff,symatm
+!!      m_polynomial_coeff,symatm
 !!
 !! CHILDREN
 !!

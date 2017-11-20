@@ -48,7 +48,8 @@ private
 !!***
 
 real(dp) :: dv=0.
-integer :: nx=0, ny=0, nz=0, nk=0, nb=0, ng=0, i=0, j=0, k=0, cbf=1, cf=1, cb=1
+integer :: nx=0, ny=0, nz=0, nk=0, nb=0, ng=0, i=0, cbf=1, cf=1, cb=1
+!integer :: j=0, k=0
 !!***
 
 public :: set_wf, norm_k, norm_kc, scprod_kc, scprod_k

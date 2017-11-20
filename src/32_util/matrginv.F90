@@ -25,7 +25,7 @@
 !!
 !! PARENTS
 !!      calc_optical_mels,ddb_elast,ddb_piezo,get_tau_k,linear_optics_paw
-!!      m_chi0,m_haydock,m_vcoul,matpointsym,mka2f_tr,mlwfovlp_ylmfar,setup_bse
+!!      m_haydock,m_vcoul,matpointsym,mka2f_tr,mlwfovlp_ylmfar,setup_bse
 !!      strainsym
 !!
 !! CHILDREN

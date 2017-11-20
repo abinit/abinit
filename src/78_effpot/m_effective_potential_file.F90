@@ -49,6 +49,7 @@ module m_effective_potential_file
  public :: effective_potential_file_getDimSystem
  public :: effective_potential_file_getDimStrainCoupling
  public :: effective_potential_file_getType
+ public :: effective_potential_file_mapHistToRef
  public :: effective_potential_file_read
  public :: effective_potential_file_readDisplacement
  public :: effective_potential_file_readMDfile
@@ -87,9 +88,9 @@ module m_effective_potential_file
      real(C_DOUBLE) :: energy
      real(C_DOUBLE) :: dynmat(2,3,natom,3,natom,nqpt)
      real(C_DOUBLE) :: phfrq(3*natom,nqpt),qph1l(3,nqpt)
-     real(C_DOUBLE) :: atmfrc(2,3,natom,3,natom,nrpt)
-     real(C_DOUBLE) :: short_atmfrc(2,3,natom,3,natom,nrpt)
-     real(C_DOUBLE) :: ewald_atmfrc(2,3,natom,3,natom,nrpt)
+     real(C_DOUBLE) :: atmfrc(3,natom,3,natom,nrpt)
+     real(C_DOUBLE) :: short_atmfrc(3,natom,3,natom,nrpt)
+     real(C_DOUBLE) :: ewald_atmfrc(3,natom,3,natom,nrpt)
      real(C_DOUBLE) :: amu(ntypat),rprimd(3,3),epsilon_inf(3,3)
      real(C_DOUBLE) :: zeff(3,3,natom)
      real(C_DOUBLE) :: elastic_constants(6,6),xcart(3,natom)
@@ -383,7 +384,7 @@ subroutine effective_potential_file_read(filename,eff_pot,inp,comm,hist)
 &      '     or might be fitted',ch10,&
 &      ' ---',ch10
         call wrtout(std_out,message,'COLL')
-        if(inp%fit_coeff <= zero .and. &
+        if(inp%fit_coeff <= 0 .and. &
 &          all(eff_pot%anharmonics_terms%coefficients(:)%coefficient == zero)) then
 
           write(message,'(12a)') ch10,&
@@ -460,7 +461,7 @@ end subroutine effective_potential_file_read
 !!             41 ASCII file with history of MD or snapshot
 !!
 !! PARENTS
-!!      m_effective_potential_file,multibinit
+!!      m_effective_potential_file,mover_effpot,multibinit
 !!
 !! CHILDREN
 !!
@@ -1286,7 +1287,7 @@ subroutine system_getDimFromXML(filename,natom,ntypat,nph1l,nrpt)
 
 !Check the RPT
  if (nrpt2/=nrpt1) then
-   if(nrpt1> 0 .and. nrpt2==0 ) then
+   if(nrpt1> 0 .and. nrpt2== 0) then
      continue;
    else if (nrpt1==0.and.nrpt2>=0) then
      write(message, '(5a)' )ch10,&
@@ -1385,13 +1386,12 @@ end subroutine system_getDimFromXML
  !arrays
  integer :: bravais(11)
  integer,allocatable :: typat(:)
- integer,allocatable  :: symrel(:,:,:),symafm(:)
- integer,allocatable ::  ptsymrel(:,:,:)
+ integer,allocatable  :: symrel(:,:,:),symafm(:),ptsymrel(:,:,:)
  real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3),rprimd(3,3)
  real(dp) :: elastic_constants(6,6),elastic3rd(6,6,6),epsilon_inf(3,3)
  real(dp),allocatable :: all_amu(:), cell_local(:,:),cell_total(:,:)
  real(dp),allocatable :: elastic_displacement(:,:,:,:),dynmat(:,:,:,:,:,:)
- real(dp),allocatable :: local_atmfrc(:,:,:,:,:,:),total_atmfrc(:,:,:,:,:,:)
+ real(dp),allocatable :: local_atmfrc(:,:,:,:,:),total_atmfrc(:,:,:,:,:)
  real(dp),allocatable :: spinat(:,:),strain_coupling(:,:,:),phfrq(:,:),qph1l(:,:),tnons(:,:)
  real(dp),allocatable :: xcart(:,:),xred(:,:),zeff(:,:,:),znucl(:),zion(:)
  character(len=132),allocatable :: title(:)
@@ -1427,13 +1427,13 @@ end subroutine system_getDimFromXML
  ABI_ALLOCATE(cell_local,(3,nrpt))
  ABI_ALLOCATE(cell_total,(3,nrpt))
  ABI_ALLOCATE(elastic_displacement,(6,6,3,natom))
- ABI_ALLOCATE(ifcs%atmfrc,(2,3,natom,3,natom,nrpt))
+ ABI_ALLOCATE(ifcs%atmfrc,(3,natom,3,natom,nrpt))
  ABI_ALLOCATE(ifcs%cell,(3,nrpt))
- ABI_ALLOCATE(ifcs%short_atmfrc,(2,3,natom,3,natom,nrpt))
- ABI_ALLOCATE(ifcs%ewald_atmfrc,(2,3,natom,3,natom,nrpt))
+ ABI_ALLOCATE(ifcs%short_atmfrc,(3,natom,3,natom,nrpt))
+ ABI_ALLOCATE(ifcs%ewald_atmfrc,(3,natom,3,natom,nrpt))
  ABI_ALLOCATE(strain_coupling,(6,3,natom))
- ABI_ALLOCATE(total_atmfrc,(2,3,natom,3,natom,nrpt))
- ABI_ALLOCATE(local_atmfrc,(2,3,natom,3,natom,nrpt))
+ ABI_ALLOCATE(total_atmfrc,(3,natom,3,natom,nrpt))
+ ABI_ALLOCATE(local_atmfrc,(3,natom,3,natom,nrpt))
  ABI_ALLOCATE(dynmat,(2,3,natom,3,natom,nph1l))
  ABI_ALLOCATE(typat,(natom))
  ABI_ALLOCATE(phfrq,(3*natom,nph1l))
@@ -1449,7 +1449,7 @@ end subroutine system_getDimFromXML
  do ii = 1,6
 !  Get The size of the strainPhonon-coupling
    call effective_potential_file_getDimStrainCoupling(filename,nrpt_scoupling,ii-1)
-   ABI_ALLOCATE(phonon_strain(ii)%atmfrc,(2,3,natom,3,natom,nrpt_scoupling))
+   ABI_ALLOCATE(phonon_strain(ii)%atmfrc,(3,natom,3,natom,nrpt_scoupling))
    ABI_ALLOCATE(phonon_strain(ii)%cell,(3,nrpt_scoupling))
    phonon_strain(ii)%nrpt   = nrpt_scoupling
    phonon_strain(ii)%atmfrc = zero
@@ -1463,13 +1463,13 @@ end subroutine system_getDimFromXML
  elastic3rd(:,:,:) = zero
  elastic_displacement(:,:,:,:) = zero
  ifcs%nrpt = nrpt
- ifcs%atmfrc(:,:,:,:,:,:)  = zero
+ ifcs%atmfrc(:,:,:,:,:)  = zero
  ifcs%cell(:,:)  = 0
- ifcs%ewald_atmfrc(:,:,:,:,:,:) = zero
- ifcs%short_atmfrc(:,:,:,:,:,:) = zero
+ ifcs%ewald_atmfrc(:,:,:,:,:) = zero
+ ifcs%short_atmfrc(:,:,:,:,:) = zero
  strain_coupling(:,:,:) = zero
  phfrq = zero
- qph1l = zero
+ qph1l = 0
  xcart = zero
  zeff  = zero
  znucl = zero
@@ -1484,11 +1484,11 @@ end subroutine system_getDimFromXML
    call wrtout(ab_out,message,'COLL')
    call wrtout(std_out,message,'COLL')
 
-!Read with libxml library
+!  Read with libxml library
    call effpot_xml_readSystem(char_f2c(trim(filename)),natom,ntypat,nrpt,nph1l,all_amu,&
 &                       ifcs%atmfrc,ifcs%cell,dynmat,elastic_constants,energy,&
-&                       epsilon_inf,ifcs%ewald_atmfrc,phfrq,rprimd,qph1l,ifcs%short_atmfrc,&
-&                       typat,xcart,zeff)
+&                       epsilon_inf,ifcs%ewald_atmfrc,phfrq,rprimd,qph1l,&
+&                       ifcs%short_atmfrc,typat,xcart,zeff)
 
 !  convert atomic mass unit to znucl
    do itypat=1,ntypat
@@ -1516,7 +1516,7 @@ end subroutine system_getDimFromXML
 
 !      Check if the 3rd order strain_coupling is present
        if(any(elastic3rd>tol10).or.any(elastic_displacement>tol10)) has_anharmonics = .TRUE.
-       phonon_strain(voigt)%atmfrc(1,:,:,:,:,:) = phonon_strain_atmfrc(:,:,:,:,:)
+       phonon_strain(voigt)%atmfrc(:,:,:,:,:) = phonon_strain_atmfrc(:,:,:,:,:)
        phonon_strain(voigt)%cell(:,:)   = phonon_strain_cell(:,:)
        if(any(phonon_strain(voigt)%atmfrc > tol10)) has_anharmonics = .TRUE.
 
@@ -1753,14 +1753,14 @@ end subroutine system_getDimFromXML
                    strg1=trim(line)
                  end if
                  read(strg1,*) (work2(3*natom,nu),nu=1,3*natom)
-                 local_atmfrc(1,:,:,:,:,irpt1) = reshape(work2,(/3,natom,3,natom/))
+                 local_atmfrc(:,:,:,:,irpt1) = reshape(work2,(/3,natom,3,natom/))
                  ABI_DEALLOCATE(work2)
                else
                  ABI_ALLOCATE(work2,(3*natom,3*natom))
                  do mu=1,3*natom
                    read(funit,*)(work2(mu,nu),nu=1,3*natom)
                  end do
-                 local_atmfrc(1,:,:,:,:,irpt1) =  reshape(work2,(/3,natom,3,natom/))
+                 local_atmfrc(:,:,:,:,irpt1) =  reshape(work2,(/3,natom,3,natom/))
                  ABI_DEALLOCATE(work2)
                end if
              end if
@@ -1804,14 +1804,14 @@ end subroutine system_getDimFromXML
                    strg1=trim(line)
                  end if
                  read(strg1,*) (work2(3*natom,nu),nu=1,3*natom)
-                 total_atmfrc(1,:,:,:,:,irpt2) = reshape(work2,(/3,natom,3,natom/))
+                 total_atmfrc(:,:,:,:,irpt2) = reshape(work2,(/3,natom,3,natom/))
                  ABI_DEALLOCATE(work2)
                else
                  ABI_ALLOCATE(work2,(3*natom,3*natom))
                  do mu=1,3*natom
                    read(funit,*)(work2(mu,nu),nu=1,3*natom)
                  end do
-                 total_atmfrc(1,:,:,:,:,irpt2) = reshape(work2,(/3,natom,3,natom/))
+                 total_atmfrc(:,:,:,:,irpt2) = reshape(work2,(/3,natom,3,natom/))
                  ABI_DEALLOCATE(work2)
                end if
              end if
@@ -2033,7 +2033,7 @@ end subroutine system_getDimFromXML
                    strg1=trim(line)
                    read(strg1,*) (work2(3*natom,nu),nu=1,3*natom)
                  end if
-                 phonon_strain(voigt)%atmfrc(1,:,:,:,:,irpt) = &
+                 phonon_strain(voigt)%atmfrc(:,:,:,:,irpt) = &
 &                           reshape(work2,(/3,natom,3,natom/))
                  ABI_DEALLOCATE(work2)
                else
@@ -2041,7 +2041,7 @@ end subroutine system_getDimFromXML
                  do mu=1,3*natom
                    read(funit,*)(work2(mu,nu),nu=1,3*natom)
                  end do
-                 phonon_strain(voigt)%atmfrc(1,:,:,:,:,irpt) =&
+                 phonon_strain(voigt)%atmfrc(:,:,:,:,irpt) =&
 &              reshape(work2,(/3,natom,3,natom/))
                  ABI_DEALLOCATE(work2)
                end if
@@ -2076,16 +2076,16 @@ end subroutine system_getDimFromXML
 ! Case 1: only local in the xml
    if (irpt1>0 .and. irpt2==0) then
      ifcs%cell(:,:) = cell_local(:,:)
-     ifcs%atmfrc(:,:,:,:,:,:)  = local_atmfrc(:,:,:,:,:,:)
-     ifcs%short_atmfrc(:,:,:,:,:,:) = local_atmfrc(:,:,:,:,:,:)
-     ifcs%ewald_atmfrc(:,:,:,:,:,:) = zero
+     ifcs%atmfrc(:,:,:,:,:)  = local_atmfrc(:,:,:,:,:)
+     ifcs%short_atmfrc(:,:,:,:,:) = local_atmfrc(:,:,:,:,:)
+     ifcs%ewald_atmfrc(:,:,:,:,:) = zero
 
 ! Case 2: only total in the xml
    else if(irpt1==0 .and. irpt2>0)then
      ifcs%cell(:,:) = cell_total(:,:)
-     ifcs%atmfrc(:,:,:,:,:,:)  = total_atmfrc(:,:,:,:,:,:)
-     ifcs%short_atmfrc(:,:,:,:,:,:) = zero
-     ifcs%ewald_atmfrc(:,:,:,:,:,:) = total_atmfrc(:,:,:,:,:,:)
+     ifcs%atmfrc(:,:,:,:,:)  = total_atmfrc(:,:,:,:,:)
+     ifcs%short_atmfrc(:,:,:,:,:) = zero
+     ifcs%ewald_atmfrc(:,:,:,:,:) = total_atmfrc(:,:,:,:,:)
 
 ! Case 3: local + total in the xml
    else if (irpt1>0 .and. irpt2>0)then
@@ -2093,10 +2093,10 @@ end subroutine system_getDimFromXML
        irpt3 = 0
        do ii=1,irpt2
          ifcs%cell(:,ii) = cell_total(:,ii)
-         ifcs%atmfrc(:,:,:,:,:,ii)  = total_atmfrc(:,:,:,:,:,ii)
+         ifcs%atmfrc(:,:,:,:,ii)  = total_atmfrc(:,:,:,:,ii)
          do jj=1,irpt1
            if (all(cell_local(:,jj)== ifcs%cell(:,ii))) then
-             ifcs%short_atmfrc(:,:,:,:,:,ii) = local_atmfrc(:,:,:,:,:,jj)
+             ifcs%short_atmfrc(:,:,:,:,ii) = local_atmfrc(:,:,:,:,jj)
              irpt3 = irpt3 + 1
            end if
          end do
@@ -2181,10 +2181,10 @@ end subroutine system_getDimFromXML
  ABI_ALLOCATE(symrel,(3,3,msym))
  ABI_ALLOCATE(tnons,(3,msym))
  use_inversion=1
- spinat = zero;
+ spinat = 0;
  symrel = 0;
  symafm = 0;
- tnons = zero ; 
+ tnons = 0 ; 
  space_group = 0;
  call symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tolsym)
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
@@ -2317,6 +2317,7 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
 #undef ABI_FUNC
 #define ABI_FUNC 'system_ddb2effpot'
  use interfaces_14_hidewrite
+ use interfaces_41_geometry
  use interfaces_72_response
  use interfaces_77_ddb
 !End of the abilint section
@@ -2341,19 +2342,24 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
  integer :: my_rank,nproc
  logical :: iam_master=.FALSE.
  integer,parameter :: master=0
+ integer :: nptsym,nsym
+ integer :: msym = 192,  use_inversion = 1, space_group
+ real(dp):: tolsym = tol8
 !arrays
- integer :: cell_number(3),cell2(3)
+ integer :: bravais(11),cell_number(3),cell2(3)
  integer :: shift(3),rfelfd(4),rfphon(4),rfstrs(4)
  real(dp):: dielt(3,3),elast_clamped(6,6),fact
  real(dp):: red(3,3),qphnrm(3),qphon(3,3)
  real(dp),allocatable :: blkval(:,:,:,:,:,:),d2asr(:,:,:,:,:)
  real(dp),allocatable :: instrain(:,:),zeff(:,:,:)
- real(dp),pointer :: atmfrc_red(:,:,:,:,:,:),cell_red(:,:),wghatm_red(:,:,:)
+ real(dp),pointer :: atmfrc_red(:,:,:,:,:),cell_red(:,:),wghatm_red(:,:,:)
  character(len=500) :: message
  type(asrq0_t) :: asrq0
  type(ifc_type) :: ifc
  real(dp),allocatable :: d2cart(:,:,:,:,:),displ(:)
  real(dp),allocatable :: eigval(:,:),eigvec(:,:,:,:,:),phfrq(:)
+ real(dp),allocatable :: spinat(:,:),tnons(:,:)
+ integer,allocatable  :: symrel(:,:,:),symafm(:),ptsymrel(:,:,:)
 
 ! *************************************************************************
 
@@ -2378,15 +2384,40 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
 !**********************************************************************
 ! Transfert crystal values 
 !**********************************************************************
+! Re-generate symmetry operations from the lattice and atomic coordinates
+  ABI_ALLOCATE(spinat,(3,natom))
+  ABI_ALLOCATE(ptsymrel,(3,3,msym))
+  ABI_ALLOCATE(symafm,(msym))
+  ABI_ALLOCATE(symrel,(3,3,msym))
+  ABI_ALLOCATE(tnons,(3,msym))
+  spinat = zero;  symrel = zero;  symafm = zero;  tnons = zero ; space_group = zero;
+  call symlatt(bravais,msym,nptsym,ptsymrel,crystal%rprimd,tolsym)
+  call symfind(0,(/zero,zero,zero/),crystal%gprimd,0,msym,crystal%natom,0,nptsym,nsym,&
+&              0,ptsymrel,spinat,symafm,symrel,tnons,tolsym,&
+&              crystal%typat,use_inversion,crystal%xred)
+  if(crystal%nsym/=nsym)then
+    write(message,'(4a,I0,3a,I0,3a)') ch10,&
+&          ' --- !WARNING:',ch10,&
+&          '     There is ',nsym,' found for the crystal',ch10,&
+&          '     but ',crystal%nsym,' found in the DDB',ch10,&
+&          ' ---'
+      call wrtout(std_out,message,'COLL')
+  end if
   call crystal_init(ddb%amu,effective_potential%crystal,&
-&                   crystal%space_group,crystal%natom,crystal%npsp,&
-&                   crystal%ntypat,crystal%nsym,crystal%rprimd,&
+&                   space_group,crystal%natom,crystal%npsp,&
+&                   crystal%ntypat,nsym,crystal%rprimd,&
 &                   crystal%typat,crystal%xred,crystal%zion,&
 &                   crystal%znucl,crystal%timrev,crystal%use_antiferro,&
 &                   .FALSE.,crystal%title,&
-&                   symrel=crystal%symrel,tnons=crystal%tnons,&
-&                   symafm=crystal%symafm)
+&                   symrel=symrel,tnons=tnons,&
+&                   symafm=symafm)
 
+  ABI_DEALLOCATE(spinat)
+  ABI_DEALLOCATE(ptsymrel)
+  ABI_DEALLOCATE(symafm)
+  ABI_DEALLOCATE(symrel)
+  ABI_DEALLOCATE(tnons)
+  
 !**********************************************************************
 ! Transfert energy from input file
 !**********************************************************************
@@ -2728,7 +2759,7 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
   nrpt_new = product(cell_number(:))
 
 ! Allocate temporary array
-  ABI_ALLOCATE(atmfrc_red,(2,3,natom,3,natom,nrpt_new))
+  ABI_ALLOCATE(atmfrc_red,(3,natom,3,natom,nrpt_new))
   ABI_ALLOCATE(wghatm_red,(natom,natom,nrpt_new))
   ABI_ALLOCATE(cell_red,(3,nrpt_new))
 
@@ -2786,7 +2817,7 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
                      i2  ==  cell2(2)  .and.&
                      i3  ==  cell2(3)) then
                    wghatm_red(ia,ib,irpt2) =  ifc%wghatm(ia,ib,irpt)
-                   atmfrc_red(:,:,ia,:,ib,irpt2) = ifc%atmfrc(:,:,ia,:,ib,irpt)
+                   atmfrc_red(:,ia,:,ib,irpt2) = ifc%atmfrc(:,ia,:,ib,irpt)
                    cell_red(1,irpt2) = i1
                    cell_red(2,irpt2) = i2
                    cell_red(3,irpt2) = i3
@@ -2823,9 +2854,9 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
   effective_potential%harmonics_terms%ifcs%nrpt = nrpt_new2
 
 ! Allocation of the final arrays
-  ABI_ALLOCATE(effective_potential%harmonics_terms%ifcs%atmfrc,(2,3,natom,3,natom,nrpt_new2))
-  ABI_ALLOCATE(effective_potential%harmonics_terms%ifcs%short_atmfrc,(2,3,natom,3,natom,nrpt_new2))
-  ABI_ALLOCATE(effective_potential%harmonics_terms%ifcs%ewald_atmfrc,(2,3,natom,3,natom,nrpt_new2))
+  ABI_ALLOCATE(effective_potential%harmonics_terms%ifcs%atmfrc,(3,natom,3,natom,nrpt_new2))
+  ABI_ALLOCATE(effective_potential%harmonics_terms%ifcs%short_atmfrc,(3,natom,3,natom,nrpt_new2))
+  ABI_ALLOCATE(effective_potential%harmonics_terms%ifcs%ewald_atmfrc,(3,natom,3,natom,nrpt_new2))
   ABI_ALLOCATE(effective_potential%harmonics_terms%ifcs%cell,(3,nrpt_new2))
   ABI_ALLOCATE(effective_potential%harmonics_terms%ifcs%wghatm,(natom,natom,nrpt_new2))
 
@@ -2836,19 +2867,19 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
 !     Apply weight on each R point
       do ia=1,effective_potential%crystal%natom
         do ib=1,effective_potential%crystal%natom
-          atmfrc_red(:,:,ia,:,ib,irpt) = atmfrc_red(:,:,ia,:,ib,irpt)*wghatm_red(ia,ib,irpt)
+          atmfrc_red(:,ia,:,ib,irpt) = atmfrc_red(:,ia,:,ib,irpt)*wghatm_red(ia,ib,irpt)
         end do
       end do
       effective_potential%harmonics_terms%ifcs%cell(:,irpt2) = cell_red(:,irpt)
-      effective_potential%harmonics_terms%ifcs%atmfrc(:,:,:,:,:,irpt2) = atmfrc_red(:,:,:,:,:,irpt)
+      effective_potential%harmonics_terms%ifcs%atmfrc(:,:,:,:,irpt2) = atmfrc_red(:,:,:,:,irpt)
       if (inp%dipdip == 1) then
-        effective_potential%harmonics_terms%ifcs%short_atmfrc(:,:,:,:,:,irpt2)=&
-&                                                                     atmfrc_red(:,:,:,:,:,irpt)
+        effective_potential%harmonics_terms%ifcs%short_atmfrc(:,:,:,:,irpt2)=&
+&                                                                     atmfrc_red(:,:,:,:,irpt)
       else
-        effective_potential%harmonics_terms%ifcs%short_atmfrc(:,:,:,:,:,irpt2) = zero
+        effective_potential%harmonics_terms%ifcs%short_atmfrc(:,:,:,:,irpt2) = zero
       end if
-      effective_potential%harmonics_terms%ifcs%short_atmfrc(:,:,:,:,:,irpt2)=atmfrc_red(:,:,:,:,:,irpt)
-      effective_potential%harmonics_terms%ifcs%ewald_atmfrc(:,:,:,:,:,irpt2) = zero
+      effective_potential%harmonics_terms%ifcs%short_atmfrc(:,:,:,:,irpt2)=atmfrc_red(:,:,:,:,irpt)
+      effective_potential%harmonics_terms%ifcs%ewald_atmfrc(:,:,:,:,irpt2) = zero
       effective_potential%harmonics_terms%ifcs%wghatm(:,:,irpt2) =  wghatm_red(:,:,irpt)
     end if
   end do
@@ -3150,9 +3181,9 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
            atindx = 0
            cell   = 0
            direction = 0
-           power  = 0
+           power  = 0           
            iterm  = 0
-           idisp  = 0
+           idisp  = 0  
            nterm  = 0
            do while (.not.found)
              read(funit,'(a)',iostat=ios) readline
@@ -3462,6 +3493,237 @@ subroutine effective_potential_file_readMDfile(filename,hist)
  end if!end if type
  
 end subroutine effective_potential_file_readMDfile
+!!***
+
+!!****f* m_effective_potential_file/effective_potential_file_mapHistToRef
+!!
+!! NAME
+!! effective_potential_file_mapHistToRef
+!!
+!! FUNCTION
+!! Generate the supercell in the effective potential according to the size of the 
+!! supercell in the hist file
+!! Check if the hist file match to reference supercell in the effective potential
+!! If not, the hist file is reordering 
+!!
+!! INPUTS
+!! eff_pot<type(effective_potential)> = effective potential
+!! hist<type(abihist)> = The history of the MD
+!! comm = MPI communicator
+!!
+!! OUTPUT
+!! hist<type(abihist)> = The history of the MD
+!!
+!! PARENTS
+!!      m_fit_polynomial_coeff,multibinit
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine effective_potential_file_mapHistToRef(eff_pot,hist,comm,verbose)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'effective_potential_file_mapHistToRef'
+ use interfaces_14_hidewrite
+ use interfaces_41_geometry
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: comm
+ logical,optional,intent(in) :: verbose
+!arrays
+ type(effective_potential_type),intent(inout) :: eff_pot
+ type(abihist),intent(inout) :: hist
+!Local variables-------------------------------
+!scalar
+ integer :: factE_hist,ia,ib,ii,jj,natom_hist,ncell,nstep_hist
+ real(dp):: factor
+ logical :: revelant_factor,need_map,need_verbose
+!arrays
+ real(dp) :: rprimd_hist(3,3),rprimd_ref(3,3),scale_cell(3)
+ integer :: n_cell(3)
+ integer,allocatable  :: blkval(:),list(:)
+ real(dp),allocatable :: xred_hist(:,:),xred_ref(:,:)
+ character(len=500) :: msg
+ type(abihist) :: hist_tmp
+! *************************************************************************
+
+!Set optional values
+ need_verbose = .false.
+ if (present(verbose)) need_verbose = verbose
+ 
+ natom_hist = size(hist%xred,2)
+ nstep_hist = size(hist%xred,3)
+
+!Try to set the supercell according to the hist file
+ rprimd_ref(:,:)  = eff_pot%crystal%rprimd
+ rprimd_hist(:,:) = hist%rprimd(:,:,1)
+
+ do ia=1,3
+   scale_cell(:) = zero
+   do ii=1,3
+     if(abs(rprimd_ref(ii,ia)) > tol10)then
+       scale_cell(ii) = rprimd_hist(ii,ia) / rprimd_ref(ii,ia)
+     end if
+   end do
+!  Check if the factor for the supercell is revelant
+   revelant_factor = .TRUE.
+   do ii=1,3
+     if(abs(scale_cell(ii)) < tol10) cycle
+     factor = abs(scale_cell(ii))
+     do jj=ii,3
+       if(abs(scale_cell(jj)) < tol10) cycle
+       if(abs(abs(scale_cell(ii))-abs(scale_cell(jj))) > tol10) revelant_factor = .FALSE.
+     end do
+   end do
+   if(.not.revelant_factor)then
+     write(msg, '(3a)' )&
+&         'unable to map the hist file ',ch10,&
+&         'Action: check/change your MD file'
+     MSG_ERROR(msg)
+   else
+     n_cell(ia) = nint(factor)
+   end if
+ end do
+
+ ncell = product(n_cell)
+ 
+!Check if the energy store in the hist is revelant, sometimes some MD files gives
+!the energy of the unit cell... This is not suppose to happen... But just in case...
+ do ii=1,nstep_hist
+   factE_hist = anint(hist%etot(ii) / eff_pot%energy)
+   if(factE_hist == 1) then
+!    In this case we mutiply the energy of the hist by the number of cell
+     hist%etot(ii) = hist%etot(ii)  * ncell
+   end if
+   if(factE_hist /=1 .and. factE_hist /= ncell)then
+     write(msg, '(4a,I0,a,I0,2a,I0,3a,I0,3a)' )ch10,&
+&          ' --- !WARNING',ch10,&
+&          '     The energy of the step ',ii,' seems to be with multiplicity of ',factE_hist,ch10,&
+&          '     However, the multiplicity of the cell is ',ncell,'.',ch10,&
+&          '     Please check the energy of the step ',ii,ch10,&
+&          ' ---',ch10
+     if(need_verbose) call wrtout(std_out,msg,'COLL') 
+   end if
+ end do
+
+ 
+!Set the new supercell datatype into the effective potential reference
+ call effective_potential_setSupercell(eff_pot,comm,n_cell)
+
+!allocation
+ ABI_ALLOCATE(blkval,(natom_hist))
+ ABI_ALLOCATE(list,(natom_hist))
+ ABI_ALLOCATE(xred_hist,(3,natom_hist))
+ ABI_ALLOCATE(xred_ref,(3,natom_hist))
+ blkval = one
+ list   = zero
+ call xcart2xred(eff_pot%supercell%natom,eff_pot%supercell%rprimd,&
+&                eff_pot%supercell%xcart,xred_ref)
+
+ xred_hist = hist%xred(:,:,1)
+
+ if(need_verbose) then 
+   write(msg,'(2a,I2,a,I2,a,I2)') ch10,&
+&       ' The size of the supercell for the fit is ',n_cell(1),' ',n_cell(2),' ',n_cell(3)
+   call wrtout(std_out,msg,'COLL') 
+   call wrtout(ab_out,msg,'COLL')
+ end if
+ 
+!try to map
+ do ia=1,natom_hist
+   do ib=1,natom_hist
+     if(blkval(ib)==1)then
+       if(abs((xred_ref(1,ia)-xred_hist(1,ib))) < 0.1 .and.&
+&         abs((xred_ref(2,ia)-xred_hist(2,ib))) < 0.1 .and.&
+&         abs((xred_ref(3,ia)-xred_hist(3,ib))) < 0.1) then
+         blkval(ib) = 0
+         list(ib) = ia
+       end if
+     end if
+   end do
+ end do
+
+!Check before transfert
+ if(.not.all(blkval==0))then
+   write(msg, '(5a)' )&
+&         'Unable to map the molecular dynamic file ',ch10,&
+&         'on the reference supercell structure',ch10,&
+&         'Action: change the MD file'
+     MSG_ERROR(msg)
+ end if
+
+ do ia=1,natom_hist
+   if(.not.any(list(:)==ia))then
+     write(msg, '(5a)' )&
+&         'Unable to map the molecular dynamic file  ',ch10,&
+&         'on the reference supercell structure',ch10,&
+&         'Action: change the MD file'
+     MSG_ERROR(msg)
+   end if
+ end do
+
+ need_map = .FALSE.
+ do ia=1,natom_hist
+   if(list(ia) /= ia) need_map = .TRUE.
+ end do
+ if(need_map)then
+   if(need_verbose) then
+     write(msg, '(11a)' )ch10,&
+&      ' --- !WARNING',ch10,&
+&      '     The ordering of the atoms in the hist file is different,',ch10,&
+&      '     of the one built by multibinit. The hist file will be map,',ch10,&
+&      '     on the ordering of multibinit.',ch10,&
+&      ' ---',ch10
+     call wrtout(ab_out,msg,'COLL')
+     call wrtout(std_out,msg,'COLL')
+   end if
+
+! Allocate hist datatype 
+   call abihist_init(hist_tmp,natom_hist,nstep_hist,.false.,.false.)
+! copy all the information
+   do ia=1,nstep_hist
+     hist%ihist = ia
+     hist_tmp%ihist = ia
+     call abihist_copy(hist,hist_tmp)
+   end do
+   hist_tmp%mxhist = nstep_hist
+
+! reoder array
+   do ia=1,natom_hist
+     hist_tmp%xred(:,list(ia),:)=hist%xred(:,ia,:)
+     hist_tmp%fcart(:,list(ia),:)=hist%fcart(:,ia,:)
+     hist_tmp%vel(:,list(ia),:)=hist%vel(:,ia,:)
+   end do
+
+! free the old hist and reinit
+   call abihist_free(hist)
+   call abihist_init(hist,natom_hist,nstep_hist,.false.,.false.)
+! copy the temporary hist into output
+   do ia=1,nstep_hist
+     hist%ihist = ia
+     hist_tmp%ihist = ia
+     call abihist_copy(hist_tmp,hist)
+   end do
+   hist_tmp%mxhist = nstep_hist
+
+   call abihist_free(hist_tmp)
+ end if
+
+!deallocation
+ ABI_DEALLOCATE(blkval)
+ ABI_DEALLOCATE(list)
+ ABI_DEALLOCATE(xred_hist)
+ ABI_DEALLOCATE(xred_ref)
+
+end subroutine effective_potential_file_mapHistToRef
 !!***
 
 

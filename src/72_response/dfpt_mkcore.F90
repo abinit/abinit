@@ -7,7 +7,7 @@
 !! Compute the derivative of the core electron density
 !! with respect to one specific atom displacement
 !! In case of derivative with respect to k or
-!! electric field perturbation, the 1st-order core electron density
+!! electric (magnetic) field perturbation, the 1st-order core electron density
 !! vanishes.
 !!
 !! COPYRIGHT

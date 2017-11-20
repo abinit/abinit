@@ -1,5 +1,5 @@
 
-.Version 8.3.3 of ABINIT 
+.Version 8.7.1 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu5.4 computer) 
 
 .Copyright (C) 1998-2017 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 24 Apr 2017.
-- ( at 19h45 )
+.Starting date : Tue 31 Oct 2017.
+- ( at 15h47 )
   
 - input  file    -> t20.in
 - output file    -> t20.out
@@ -251,7 +251,7 @@ P          mk1mem           8
     2  18.664  23.972    1   2.2918558        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     1.56404770202776    2.06158206779471    6.88331421535388   rchrg,fchrg,qchrg
- pspatm : epsatm=   62.03296659
+  pspatm : epsatm=   62.03296659
          --- l  ekb(1:nproj) -->
              1    1.561134
              2   -8.115829
@@ -501,12 +501,11 @@ P newkpt: treating     22 bands with npw=     370 for ikpt=   8 by node    0
   for the second time, diff in etot=  9.656E-10 < toldfe=  1.000E-06
 
  ------------------------------------------------------------------------
- Magnetic susceptibility (integrated first order magnetization density):
+ Integrals of the first order density n^(1) and magnetization m^(1):
  ------------------------------------------------------------------------
 
-           chi_33 =   30.17720454
-
-   n^(1) integral =    0.00000000
+     n^(1)    =   0.00000000E+00
+     m^(1)    =   0.30177205E+02
 
  ------------------------------------------------------------------------
 
@@ -785,10 +784,10 @@ P          mk1mem           8
 - Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7
 - Comment : the original paper describing the ABINIT project.
 -
-- Proc.   0 individual time (sec): cpu=          9.2  wall=          9.2
+- Proc.   0 individual time (sec): cpu=         10.6  wall=         10.6
 
 ================================================================================
 
  Calculation completed.
-.Delivered   7 WARNINGs and   0 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          9.2  wall=          9.2
+.Delivered   5 WARNINGs and   0 COMMENTs to log file.
++Overall time at end (sec) : cpu=         10.6  wall=         10.6

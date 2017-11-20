@@ -57,8 +57,8 @@ module m_lobpcg2
 #else
   integer, save :: eigenSolver = EIGENVX     ! Type of eigen solver to use
 #endif
-  double precision, save :: eigenSolverTime(10) = tiny(0.d0)      ! Store time for each solver
-  double precision, save :: eigenSolverCount(10) = 0      ! Store time for each solver
+  !double precision, save :: eigenSolverTime(10) = tiny(0.d0)      ! Store time for each solver
+  !double precision, save :: eigenSolverCount(10) = 0      ! Store time for each solver
 
   type, public :: lobpcg_t
     logical :: is_nested                     ! For OpenMP nested region

@@ -40,7 +40,7 @@
 !! NOTES
 !!
 !! PARENTS
-!!      ingeo,m_ab7_symmetry,m_use_ga
+!!      ingeo,m_ab7_symmetry,m_tdep_sym,m_use_ga
 !!
 !! CHILDREN
 !!      chkprimit,getptgroupma,symbrav,symlatt,symptgroup,symspgr,wrtout

@@ -71,8 +71,8 @@
 !!      bandfft_kpt_restoretabs,bandfft_kpt_savetabs,destroy_hamiltonian
 !!      dotprod_g,fock_getghc,init_hamiltonian,load_k_hamiltonian
 !!      load_spin_hamiltonian,mkffnl,mkkpg,pawcprj_alloc,pawcprj_free
-!!      pawcprj_get,pawcprj_reorder,prep_bandfft_tabs,timab,xmpi_sum
-!!      zpotrf,ztrtrs
+!!      pawcprj_get,pawcprj_reorder,prep_bandfft_tabs,timab,xmpi_sum,zpotrf
+!!      ztrtrs
 !!
 !! SOURCE
 
@@ -136,7 +136,7 @@ subroutine fock2ACE(cg,cprj,fock,istwfk,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_e
  type(fock_type),pointer, intent(inout) :: fock
 !Local variables-------------------------------
 !scalars
- integer :: bandpp,bdtot_index,dimffnl,dimffnl_str,iband,iband_cprj,iband_last,ibg,icg,ider,ider_str
+ integer :: bandpp,bdtot_index,dimffnl,iband,iband_cprj,iband_last,ibg,icg,ider,ider_str
  integer :: idir,idir_str,ierr,ii,ikg,ikpt,ilm,ipw,isppol,istwf_k,kk,ll
  integer :: mband_cprj,me_distrb,my_ikpt,my_nspinor,nband_k,nband_cprj_k,ndat,nkpg
  integer :: npw_k,spaceComm
