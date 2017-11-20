@@ -127,7 +127,6 @@ subroutine chkvars (string)
  list_vars=trim(list_vars)//' gw_invalid_freq '
  list_vars=trim(list_vars)//' gw_qprange gw_nqlwl gw_nstep gw_qlwl'
  list_vars=trim(list_vars)//' gw_sctype gw_sigxcore gw_toldfeig'
- list_vars=trim(list_vars)//' gwfockmix'
  list_vars=trim(list_vars)//' gwls_stern_kmax gwls_kmax_complement gwls_kmax_poles'
  list_vars=trim(list_vars)//' gwls_kmax_analytic gwls_kmax_numeric'
  list_vars=trim(list_vars)//' gwls_list_proj_freq gwls_nseeds gwls_n_proj_freq gwls_recycle'
@@ -145,7 +144,7 @@ subroutine chkvars (string)
  list_vars=trim(list_vars)//' irdscr irdsuscep irdwfk irdwfq ird1den'
  list_vars=trim(list_vars)//' irdwfkfine'
  list_vars=trim(list_vars)//' ird1wf iscf isecur istatimg istatr'
- list_vars=trim(list_vars)//' istatshft istwfk ixc ixcpositron'
+ list_vars=trim(list_vars)//' istatshft istwfk ixc ixc_sigma ixcpositron'
  list_vars=trim(list_vars)//' irdvdw'
 !J
  list_vars=trim(list_vars)//' jdtset jellslab jfielddir jpawu'

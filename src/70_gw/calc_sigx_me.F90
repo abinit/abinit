@@ -85,12 +85,12 @@
 !!      sigma
 !!
 !! CHILDREN
-!!      cwtime,esymm_symmetrize_mels,findqg0,get_bz_item,get_uug,gsph_fft_tabs
+!!      cwtime,esymm_symmetrize_mels,findqg0,get_bz_item,gsph_fft_tabs
 !!      hermitianize,littlegroup_print,paw_cross_rho_tw_g,paw_rho_tw_g
 !!      paw_symcprj,pawcprj_alloc,pawcprj_copy,pawcprj_free,pawmknhat_psipsi
 !!      pawpwij_free,pawpwij_init,rho_tw_g,rotate_fft_mesh,sigma_distribute_bks
 !!      timab,wfd_change_ngfft,wfd_get_cprj,wfd_get_many_ur,wfd_get_ur
-!!      wfd_paw_get_aeur,wfd_sym_ur,wrtout,xmpi_sum
+!!      wfd_paw_get_aeur,wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -102,7 +102,7 @@
 
 subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsph_x,Vcp,Kmesh,Qmesh,&
 & Ltg_k,Pawtab,Pawang,Paw_pwff,Pawfgrtab,Paw_onsite,Psps,Wfd,Wfdf,allQP_sym,gwx_ngfft,ngfftf,&
-& prtvol,pawcross,gwfockmix)
+& prtvol,pawcross)
 
  use defs_basis
  use defs_datatypes
@@ -148,7 +148,6 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: sigmak_ibz,ikcalc,prtvol,minbnd,maxbnd,pawcross
- real(dp), intent(in) :: gwfockmix
  type(crystal_t),intent(in) :: Cryst
  type(ebands_t),target,intent(in) :: QP_BSt
  type(kmesh_t),intent(in) :: Kmesh,Qmesh
@@ -172,15 +171,15 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
 !scalars
  integer,parameter :: tim_fourdp=2,ndat1=1
  integer,parameter :: use_pawnhat=0,ider0=0
- integer :: izero,iab,ib_sum,ib,ib1,ib2,ierr,ig,ig_rot,ii,iik,itim_q,i2
+ integer :: gwcalctyp,izero,iab,ib_sum,ib,ib1,ib2,ierr,ig,ig_rot,ii,iik,itim_q,i2
  integer :: ik_bz,ik_ibz,isym_q,iq_bz,iq_ibz,spin,isym,jb,is_idx
- integer :: jik,jk_bz,jk_ibz,kb,mod100,nspinor,nsppol,ifft
+ integer :: jik,jk_bz,jk_ibz,kb,nspinor,nsppol,ifft
  integer :: nq_summed,ibsp,dimcprj_gw,dim_rtwg
  integer :: spad,spadx1,spadx2,irow,npw_k,ndegs,wtqm,wtqp,my_nbks
  integer :: isym_kgw,isym_ki,gwx_mgfft,use_padfft,use_padfftf,gwx_fftalga,gwx_fftalgb
  integer :: gwx_nfftot,nfftf,mgfftf,nhat12_grdim,npwx
  real(dp) :: cpu_time,wall_time,gflops
- real(dp) :: alpha_hybrid,fact_sp,theta_mu_minus_esum,tol_empty,norm
+ real(dp) :: fact_sp,theta_mu_minus_esum,tol_empty,norm
  complex(dpc) :: ctmp,scprod,ph_mkgwt,ph_mkt
  complex(gwpc) :: gwpc_sigxme
  logical :: iscompatibleFFT,q_is_gamma
@@ -219,7 +218,7 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
  call cwtime(cpu_time,wall_time,gflops,"start")
 
  ! Initialize some values.
- mod100=MOD(Sigp%gwcalctyp,100)
+ gwcalctyp=Sigp%gwcalctyp
  nspinor = Wfd%nspinor; nsppol = Wfd%nsppol; npwx = sigp%npwx
  dim_rtwg = 1; if (nspinor == 2) dim_rtwg = 2
  spinor_padx = RESHAPE([0, 0, npwx, npwx, 0, npwx, npwx, 0], [2, 4])
@@ -249,18 +248,6 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
 &  ' bands from ',ib1,' to ',ib2,ch10
  call wrtout(std_out,msg,'COLL')
 
- ! Select the mixing alpha for hybrid functional calculations if gwcalctyp >= 100
- if(Sigp%gwcalctyp<100) then
-   alpha_hybrid = one
- else if (Sigp%gwcalctyp>=300) then
-   ! B3LYP factor = 0.20
-   alpha_hybrid = 0.2_dp
- else
-   ! PBE0 and HSE06 mixing determined by gwfockmix
-   ! default 0.25
-   alpha_hybrid = gwfockmix
- endif
-
  if (ANY(gwx_ngfft(1:3) /= Wfd%ngfft(1:3)) ) call wfd_change_ngfft(Wfd,Cryst,Psps,gwx_ngfft)
  gwx_mgfft = MAXVAL(gwx_ngfft(1:3))
  gwx_fftalga = gwx_ngfft(7)/100; gwx_fftalgb = MOD(gwx_ngfft(7),100)/10
@@ -270,7 +257,7 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
  can_symmetrize = .FALSE.
  if (Sigp%symsigma>0) then
    can_symmetrize = .TRUE.
-   if (mod100 >= 20) then
+   if (gwcalctyp >= 20) then
      do spin=1,Wfd%nsppol
        can_symmetrize(spin) = .not. esymm_failed(QP_sym(spin))
        if (.not.can_symmetrize(spin)) then
@@ -625,8 +612,8 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
          rhotwgp(:) = rhotwg_ki(:,kb)
 
          ! Loop over the non-zero row elements of this column.
-         ! If mod100 <  20: only diagonal elements since QP == KS.
-         ! If mod100 >= 20:
+         ! If gwcalctyp <  20: only diagonal elements since QP == KS.
+         ! If gwcalctyp >= 20:
          !      * Only off-diagonal elements connecting states with same character.
          !      * Only the upper triangle if HF, SEX, or COHSEX.
          do irow=1,Sigxij_tab(spin)%col(kb)%size1
@@ -689,8 +676,9 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
  call xmpi_sum(sigx, wfd%comm, ierr)
 
  ! Multiply by constants. For 3D systems sqrt(4pi) is included in vc_sqrt_qbz.
- sigxme_tmp = (one/(Cryst%ucvol*Kmesh%nbz)) * sigxme_tmp * alpha_hybrid
- sigx       = (one/(Cryst%ucvol*Kmesh%nbz)) * sigx       * alpha_hybrid
+ sigxme_tmp = (one/(Cryst%ucvol*Kmesh%nbz)) * sigxme_tmp * Sigp%sigma_mixing
+ sigx       = (one/(Cryst%ucvol*Kmesh%nbz)) * sigx       * Sigp%sigma_mixing
+
  !
  ! If we have summed over the IBZ_q now we have to average over degenerate states.
  ! NOTE: Presently only diagonal terms are considered
@@ -721,7 +709,7 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
        sym_sigx(ib,ib,:) = sym_sigx(ib,ib,:) / ndegs
      end do
 
-     if (mod100 >= 20) then
+     if (gwcalctyp >= 20) then
        call esymm_symmetrize_mels(QP_sym(spin),ib1,ib2,sigx(:,:,:,spin),sym_sigx(:,:,1))
      end if
 
@@ -742,7 +730,7 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
    end if
  end do
 
- if (mod100>=20) then
+ if (gwcalctyp>=20) then
    ! Reconstruct the full sigma_x matrix from the upper triangle.
    if (nspinor == 1) then
      do spin=1,nsppol

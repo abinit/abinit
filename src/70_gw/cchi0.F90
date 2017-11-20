@@ -81,12 +81,12 @@
 !! CHILDREN
 !!      accumulate_chi0sumrule,approxdelta,assemblychi0_sym,assemblychi0sf
 !!      calc_wfwfg,chi0_bbp_mask,completechi0_deltapart,cwtime,flush_unit
-!!      get_bz_diff,get_bz_item,get_gftt,get_uug,gsph_fft_tabs,gsph_free
-!!      gsph_in_fftbox,hilbert_transform,littlegroup_print,make_transitions
-!!      paw_cross_rho_tw_g,paw_rho_tw_g,paw_symcprj,pawcprj_alloc,pawcprj_free
-!!      pawpwij_free,pawpwij_init,read_plowannier,rho_tw_g,setup_spectral
+!!      get_bz_diff,get_bz_item,get_gftt,gsph_fft_tabs,gsph_free,gsph_in_fftbox
+!!      hilbert_transform,littlegroup_print,make_transitions,paw_cross_rho_tw_g
+!!      paw_rho_tw_g,paw_symcprj,pawcprj_alloc,pawcprj_free,pawpwij_free
+!!      pawpwij_init,read_plowannier,rho_tw_g,setup_spectral
 !!      symmetrize_afm_chi0,timab,wfd_change_ngfft,wfd_distribute_kb_kpbp
-!!      wfd_get_cprj,wfd_get_ur,wfd_paw_get_aeur,wfd_sym_ur,wrtout,xmpi_sum
+!!      wfd_get_cprj,wfd_get_ur,wfd_paw_get_aeur,wrtout,xmpi_sum
 !!
 !! SOURCE
 

@@ -1,6 +1,6 @@
 
 .Version 8.7.1 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu6.3 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
 
 .Copyright (C) 1998-2017 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed 25 Oct 2017.
-- ( at 08h44 )
+.Starting date : Tue 31 Oct 2017.
+- ( at 17h23 )
   
 - input  file    -> t67.in
 - output file    -> t67.out
@@ -64,7 +64,7 @@ _ WF disk file :      0.061 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 -   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
 -
 - outvars: echo of global parameters not present in the input file              
--  max_nthreads =    1
+-  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
             acell      1.0217000000E+01  1.0217000000E+01  1.0217000000E+01 Bohr
@@ -222,8 +222,8 @@ P           mkmem           4
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.00850
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /cea/dsku/u-basque/hal1/home/abinit/abinit/REPOSITORY/GONZE/ace_1/tests/Psps_for_tests/14si.pspgth
-- pspatm: opening atomic psp file    /cea/dsku/u-basque/hal1/home/abinit/abinit/REPOSITORY/GONZE/ace_1/tests/Psps_for_tests/14si.pspgth
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_ace_2/tests/Psps_for_tests/14si.pspgth
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_ace_2/tests/Psps_for_tests/14si.pspgth
 - Goedecker-Teter-Hutter  Fri May 31 17:22:04 EDT 1996
 - 14.00000   4.00000    960531                znucl, zion, pspdat
     2    1    1    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -258,12 +258,12 @@ _setup2: Arith. and geom. avg. npw (full set) are     186.259     186.184
  ETOT  4  -7.9087483429793    -4.504E-07 7.662E-09 2.211E-05
  ETOT  5  -7.9087483514155    -8.436E-09 4.997E-10 4.314E-07
  ETOT  6  -7.9087483515951    -1.796E-10 1.406E-11 8.884E-10
- ETOT  7  -7.9087483515956    -4.654E-13 1.137E-12 1.048E-11
- ETOT  8  -7.9087483515956     9.770E-15 2.392E-14 4.786E-14
- ETOT  9  -7.9087483515956    -2.132E-14 2.038E-15 9.393E-17
+ ETOT  7  -7.9087483515956    -4.645E-13 1.137E-12 1.048E-11
+ ETOT  8  -7.9087483515956     1.155E-14 2.392E-14 4.786E-14
+ ETOT  9  -7.9087483515956    -2.309E-14 2.038E-15 9.393E-17
  ETOT 10  -7.9087483515956     3.020E-14 4.396E-17 4.375E-18
- ETOT 11  -7.9087483515956    -3.642E-14 3.696E-18 6.893E-20
- ETOT 12  -7.9087483515956     1.066E-14 9.591E-19 1.435E-21
+ ETOT 11  -7.9087483515956    -3.819E-14 3.696E-18 6.893E-20
+ ETOT 12  -7.9087483515956     1.421E-14 9.591E-19 1.430E-21
 
  At SCF step   12   max residual=  9.59E-19 < tolwfr=  1.00E-18 =>converged.
 
@@ -316,13 +316,13 @@ _setup2: Arith. and geom. avg. npw (full set) are     186.259     186.184
  Components of total free energy (in Hartree) :
 
     Kinetic energy  =  3.20457092314906E+00
-    Hartree energy  =  6.18662263262414E-01
+    Hartree energy  =  6.18662263262415E-01
     XC energy       = -2.48023705803106E+00
     Ewald energy    = -8.43581958561899E+00
     PspCore energy  = -2.64619322653027E-01
     Loc. psp. energy= -2.30236478319590E+00
     NL   psp  energy=  1.75105921149189E+00
-    >>>>>>>>> Etotal= -7.90874835159562E+00
+    >>>>>>>>> Etotal= -7.90874835159561E+00
 
  Other information on the energy :
     Total energy(eV)= -2.15207987247411E+02 ; Band energy (Ha)=   6.5798796243E-01
@@ -358,8 +358,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     186.259     186.184
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.00850
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /cea/dsku/u-basque/hal1/home/abinit/abinit/REPOSITORY/GONZE/ace_1/tests/Psps_for_tests/14si.pspgth
-- pspatm: opening atomic psp file    /cea/dsku/u-basque/hal1/home/abinit/abinit/REPOSITORY/GONZE/ace_1/tests/Psps_for_tests/14si.pspgth
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_ace_2/tests/Psps_for_tests/14si.pspgth
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_ace_2/tests/Psps_for_tests/14si.pspgth
 - Goedecker-Teter-Hutter  Fri May 31 17:22:04 EDT 1996
 - 14.00000   4.00000    960531                znucl, zion, pspdat
     2    1    1    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -391,37 +391,37 @@ _setup2: Arith. and geom. avg. npw (full set) are     186.259     186.184
  ETOT  1  -7.6200013410177    -7.620E+00 9.152E-10 7.389E-02
  ETOT  2  -7.6200264535545    -2.511E-05 1.417E-12 8.142E-04
  ETOT  3  -7.6175779271416     2.449E-03 3.700E-06 1.421E-03
- ETOT  4  -7.6206224873707    -3.045E-03 1.089E-08 1.178E-05
- ETOT  5  -7.6206333906669    -1.090E-05 8.099E-07 3.596E-04
- ETOT  6  -7.6224019015393    -1.769E-03 4.900E-09 2.973E-06
- ETOT  7  -7.6224559618511    -5.406E-05 1.932E-07 8.812E-05
- ETOT  8  -7.6233505891248    -8.946E-04 1.510E-09 7.246E-07
+ ETOT  4  -7.6206224873706    -3.045E-03 1.089E-08 1.178E-05
+ ETOT  5  -7.6206333906670    -1.090E-05 8.099E-07 3.596E-04
+ ETOT  6  -7.6224019015392    -1.769E-03 4.900E-09 2.973E-06
+ ETOT  7  -7.6224559618514    -5.406E-05 1.932E-07 8.812E-05
+ ETOT  8  -7.6233505891249    -8.946E-04 1.510E-09 7.246E-07
  ETOT  9  -7.6233680158786    -1.743E-05 4.987E-08 2.078E-05
- ETOT 10  -7.6238060756821    -4.381E-04 4.011E-10 1.768E-07
- ETOT 11  -7.6238093046744    -3.229E-06 1.328E-08 4.873E-06
- ETOT 12  -7.6240220437691    -2.127E-04 1.012E-10 4.340E-08
- ETOT 13  -7.6240215989735     4.448E-07 3.549E-09 1.146E-06
- ETOT 14  -7.6241248103945    -1.032E-04 2.502E-11 1.064E-08
- ETOT 15  -7.6241238543030     9.561E-07 9.394E-10 2.707E-07
- ETOT 16  -7.6241740096902    -5.016E-05 6.125E-12 2.665E-09
- ETOT 17  -7.6241732684589     7.412E-07 2.454E-10 6.435E-08
- ETOT 18  -7.6241976806284    -2.441E-05 1.495E-12 6.480E-10
- ETOT 19  -7.6241972079870     4.726E-07 6.333E-11 1.532E-08
- ETOT 20  -7.6242091227647    -1.191E-05 3.629E-13 1.592E-10
- ETOT 21  -7.6242088499318     2.728E-07 1.616E-11 3.668E-09
- ETOT 22  -7.6242146699847    -5.820E-06 8.826E-14 3.902E-11
- ETOT 23  -7.6242145205607     1.494E-07 4.085E-12 8.795E-10
- ETOT 24  -7.6242173680015    -2.847E-06 2.142E-14 9.535E-12
- ETOT 25  -7.6242172885800     7.942E-08 1.025E-12 2.114E-10
- ETOT 26  -7.6242186834713    -1.395E-06 5.200E-15 2.329E-12
+ ETOT 10  -7.6238060756819    -4.381E-04 4.011E-10 1.768E-07
+ ETOT 11  -7.6238093046741    -3.229E-06 1.328E-08 4.873E-06
+ ETOT 12  -7.6240220437694    -2.127E-04 1.012E-10 4.340E-08
+ ETOT 13  -7.6240215989733     4.448E-07 3.549E-09 1.146E-06
+ ETOT 14  -7.6241248103944    -1.032E-04 2.502E-11 1.064E-08
+ ETOT 15  -7.6241238543026     9.561E-07 9.394E-10 2.707E-07
+ ETOT 16  -7.6241740096906    -5.016E-05 6.125E-12 2.665E-09
+ ETOT 17  -7.6241732684608     7.412E-07 2.454E-10 6.435E-08
+ ETOT 18  -7.6241976806271    -2.441E-05 1.495E-12 6.480E-10
+ ETOT 19  -7.6241972079867     4.726E-07 6.333E-11 1.532E-08
+ ETOT 20  -7.6242091227644    -1.191E-05 3.629E-13 1.592E-10
+ ETOT 21  -7.6242088499348     2.728E-07 1.616E-11 3.668E-09
+ ETOT 22  -7.6242146699841    -5.820E-06 8.826E-14 3.902E-11
+ ETOT 23  -7.6242145205609     1.494E-07 4.085E-12 8.795E-10
+ ETOT 24  -7.6242173680013    -2.847E-06 2.142E-14 9.535E-12
+ ETOT 25  -7.6242172885799     7.942E-08 1.025E-12 2.114E-10
+ ETOT 26  -7.6242186834712    -1.395E-06 5.200E-15 2.329E-12
  ETOT 27  -7.6242186419910     4.148E-08 2.555E-13 5.094E-11
  ETOT 28  -7.6242193261370    -6.841E-07 1.262E-15 5.679E-13
- ETOT 29  -7.6242193047354     2.140E-08 6.340E-14 1.229E-11
- ETOT 30  -7.6242196405908    -3.359E-07 3.064E-16 1.385E-13
+ ETOT 29  -7.6242193047353     2.140E-08 6.340E-14 1.229E-11
+ ETOT 30  -7.6242196405907    -3.359E-07 3.064E-16 1.385E-13
  ETOT 31  -7.6242196296577     1.093E-08 1.567E-14 2.971E-12
  ETOT 32  -7.6242197946753    -1.650E-07 7.440E-17 3.377E-14
  ETOT 33  -7.6242197891277     5.548E-09 3.859E-15 7.190E-13
- ETOT 34  -7.6242198702633    -8.114E-08 1.807E-17 8.227E-15
+ ETOT 34  -7.6242198702632    -8.114E-08 1.807E-17 8.227E-15
  ETOT 35  -7.6242198674592     2.804E-09 9.483E-16 1.742E-13
  ETOT 36  -7.6242199073772    -3.992E-08 4.391E-18 2.004E-15
  ETOT 37  -7.6242199059684     1.409E-09 2.325E-16 4.223E-14
@@ -440,11 +440,11 @@ _setup2: Arith. and geom. avg. npw (full set) are     186.259     186.184
  ETOT 50  -7.6242199430333    -2.816E-10 2.211E-22 1.023E-19
  ETOT 51  -7.6242199430225     1.080E-11 1.182E-20 2.117E-18
  ETOT 52  -7.6242199431614    -1.389E-10 5.383E-23 2.487E-20
- ETOT 53  -7.6242199431561     5.353E-12 2.880E-21 5.156E-19
- ETOT 54  -7.6242199432246    -6.859E-11 1.311E-23 6.098E-21
- ETOT 55  -7.6242199432220     2.684E-12 7.018E-22 1.255E-19
- ETOT 56  -7.6242199432557    -3.378E-11 3.193E-24 1.485E-21
- ETOT 57  -7.6242199432544     1.315E-12 1.709E-22 3.057E-20
+ ETOT 53  -7.6242199431561     5.347E-12 2.880E-21 5.156E-19
+ ETOT 54  -7.6242199432247    -6.859E-11 1.311E-23 6.099E-21
+ ETOT 55  -7.6242199432220     2.686E-12 7.017E-22 1.255E-19
+ ETOT 56  -7.6242199432557    -3.378E-11 3.192E-24 1.485E-21
+ ETOT 57  -7.6242199432544     1.314E-12 1.709E-22 3.057E-20
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  2.89386048E-03  sigma(3 2)=  0.00000000E+00
@@ -454,7 +454,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     186.259     186.184
 
  scprqt:  WARNING -
   nstep=   57 was not enough SCF cycles to converge;
-  maximum energy difference=  1.315E-12 exceeds toldfe=  1.000E-12
+  maximum energy difference=  1.314E-12 exceeds toldfe=  1.000E-12
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -509,7 +509,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     186.259     186.184
     >>>>>>>>> Etotal= -7.62421994325443E+00
 
  "Double-counting" decomposition of free energy:
-    Band energy     = -5.09660334717203E-01
+    Band energy     = -5.09660334717205E-01
     Ewald energy    = -8.43581958561899E+00
     PspCore energy  = -2.64619322653027E-01
     Dble-C XC-energy=  1.58587929966884E+00
@@ -601,7 +601,7 @@ P           mkmem           4
                        5.0000000000E-01  0.0000000000E+00  5.0000000000E-01
                        5.0000000000E-01  5.0000000000E-01  0.0000000000E+00
           spgroup         227
-           strten1     8.4096238978E-05  8.4096238978E-05  8.4096238978E-05
+           strten1     8.4096238979E-05  8.4096238979E-05  8.4096238979E-05
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            strten2     2.8938604819E-03  2.8938604819E-03  2.8938604819E-03
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -740,10 +740,10 @@ P           mkmem           4
 - Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7
 - Comment : the original paper describing the ABINIT project.
 -
-- Proc.   0 individual time (sec): cpu=         17.2  wall=         17.2
+- Proc.   0 individual time (sec): cpu=         19.7  wall=         19.8
 
 ================================================================================
 
  Calculation completed.
 .Delivered  34 WARNINGs and   2 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         17.2  wall=         17.2
++Overall time at end (sec) : cpu=         19.7  wall=         19.8

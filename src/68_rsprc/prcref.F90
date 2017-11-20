@@ -119,9 +119,10 @@
 !!      newrho
 !!
 !! CHILDREN
-!!      atm2fft,dielmt,dieltcel,fourdp,fresid,getph,indirect_parallel_fourier
-!!      kgindex,mean_fftr,metric,mkcore,mklocl,moddiel,prcrskerker1
-!!      prcrskerker2,rhotoxc,testsusmat,xcart2xred,xmpi_sum,zerosym
+!!      atm2fft,dielmt,dieltcel,fourdp,fresid,getph,hartre
+!!      indirect_parallel_fourier,kgindex,mean_fftr,metric,mkcore,mklocl
+!!      moddiel,prcrskerker1,prcrskerker2,rhotoxc,testsusmat,xcart2xred
+!!      xcdata_init,xmpi_sum,zerosym
 !!
 !! SOURCE
 
@@ -599,11 +600,10 @@ subroutine prcref(atindx,dielar,dielinv,&
      call hartre(1,gsqcut,psps%usepaw,mpi_enreg,nfft,ngfft,dtset%paral_kgb,rhog_wk,rprimd,vhartr_wk)
 
 !    Prepare the call to rhotoxc
-     call xcdata_init(dtset%auxc_ixc,dtset%intxc,dtset%ixc,&
-&      dtset%nelect,dtset%tphysel,dtset%usekden,dtset%vdw_xc,dtset%xc_tb09_c,dtset%xc_denpos,xcdata)
+     call xcdata_init(xcdata,dtset=dtset)
      nk3xc=1
      call rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft,&
-&     work,0,work,0,nkxc,nk3xc,dtset%nspden,n3xccc,option,dtset%paral_kgb,rhor_wk,rprimd,strsxc,1,&
+&     work,0,work,0,nkxc,nk3xc,n3xccc,option,dtset%paral_kgb,rhor_wk,rprimd,strsxc,1,&
 &     vxc_wk,vxcavg,xccc3d,xcdata,vhartr=vhartr_wk)
      ABI_DEALLOCATE(xccc3d)
 

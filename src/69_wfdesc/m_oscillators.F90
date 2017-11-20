@@ -96,7 +96,6 @@ CONTAINS  !=====================================================================
 !!      exc_build_block,exc_build_ham,m_fft_prof,prep_calc_ucrpa
 !!
 !! CHILDREN
-!!      fftbox_execute,fftbox_plan3_many
 !!
 !! SOURCE
 
@@ -246,11 +245,8 @@ end subroutine rho_tw_g
 !! usug(npw*ndat)=density of a pair of states, in reciprocal space
 !!
 !! PARENTS
-!!      calc_sigc_me,calc_sigx_me,cchi0,cchi0q0,cohsex_me,exc_build_block
-!!      exc_build_ham
 !!
 !! CHILDREN
-!!      fftbox_execute,fftbox_plan3_many
 !!
 !! SOURCE
 
@@ -355,7 +351,6 @@ end subroutine get_uug
 !!      m_oscillators
 !!
 !! CHILDREN
-!!      fftbox_execute,fftbox_plan3_many
 !!
 !! SOURCE
 
@@ -458,7 +453,6 @@ end subroutine ts_usug_kkp_bz
 !!      m_oscillators
 !!
 !! CHILDREN
-!!      fftbox_execute,fftbox_plan3_many
 !!
 !! SOURCE
 
@@ -633,7 +627,6 @@ end subroutine usur_kkp_bz
 !!      m_oscillators
 !!
 !! CHILDREN
-!!      fftbox_execute,fftbox_plan3_many
 !!
 !! SOURCE
 
@@ -714,7 +707,6 @@ end subroutine gw_box2gsph
 !!      calc_sigc_me,cchi0,cchi0q0,cohsex_me
 !!
 !! CHILDREN
-!!      fftbox_execute,fftbox_plan3_many
 !!
 !! SOURCE
 
@@ -897,6 +889,7 @@ end function sym_rhotwgq0
 !! OUTPUT
 !!
 !! PARENTS
+!!      m_oscillators
 !!
 !! CHILDREN
 !!

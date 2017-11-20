@@ -40,11 +40,11 @@
 !!  vhartr(cplex*nfft)=Hartree potential in real space, either REAL or COMPLEX
 !!
 !! PARENTS
-!!      dfpt_rhotov,dfptnl_loop,fock_getghc,nres2vres,rhotoxc,setup_positron
-!!      tddft
+!!      dfpt_rhotov,dfptnl_loop,energy,fock_getghc,m_kxc,nonlinear,nres2vres
+!!      odamix,prcref,prcref_PMA,respfn,rhotov,setup_positron,setvtr,tddft
 !!
 !! CHILDREN
-!!      fourdp,ptabs_fourdp,timab,zerosym
+!!      fourdp,metric,ptabs_fourdp,timab,zerosym
 !!
 !! SOURCE
 
@@ -130,7 +130,7 @@ subroutine hartre(cplex,gsqcut,izero,mpi_enreg,nfft,ngfft,paral_kgb,rhog,rprimd,
    qpt_=qpt
  else 
    qpt_=zero
- endif
+ end if
  qeq0=0 
  if(qpt_(1)**2+qpt_(2)**2+qpt_(3)**2<1.d-15) qeq0=1
  qeq05=0
