@@ -134,13 +134,13 @@
 !! CHILDREN
 !!      bandfft_kpt_restoretabs,bandfft_kpt_savetabs,destroy_hamiltonian
 !!      dotprod_vn,fftpac,fourdp,gpu_finalize_ffnl_ph3d,gpu_update_ffnl_ph3d
-!!      init_hamiltonian,load_k_hamiltonian,load_spin_hamiltonian,mag_constr
-!!      make_gemm_nonlop,meanvalue_g,metric,mkffnl,mkkin,mkresi,mkrho,nonlop
-!!      pawaccrhoij,pawcprj_alloc,pawcprj_free,pawcprj_gather_spin,pawmknhat
-!!      pawrhoij_alloc,pawrhoij_free,pawrhoij_free_unpacked
+!!      hartre,init_hamiltonian,load_k_hamiltonian,load_spin_hamiltonian
+!!      mag_constr,make_gemm_nonlop,meanvalue_g,metric,mkffnl,mkkin,mkresi
+!!      mkrho,nonlop,pawaccrhoij,pawcprj_alloc,pawcprj_free,pawcprj_gather_spin
+!!      pawmknhat,pawrhoij_alloc,pawrhoij_free,pawrhoij_free_unpacked
 !!      pawrhoij_init_unpacked,pawrhoij_mpisum_unpacked,prep_bandfft_tabs
-!!      prep_nonlop,psolver_rhohxc,rhotoxc,rhohxcpositron,symrhoij,timab
-!!      transgrid,xmpi_sum
+!!      prep_nonlop,psolver_rhohxc,rhohxcpositron,rhotoxc,symrhoij,timab
+!!      transgrid,xcdata_init,xmpi_sum
 !!
 !! SOURCE
 

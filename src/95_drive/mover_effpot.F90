@@ -31,13 +31,13 @@
 !!      multibinit
 !!
 !! CHILDREN
-!!      alloc_copy,destroy_mpi_enreg,destroy_results_gs,dtset_free
-!!      effective_potential_setcoeffs,effective_potential_setsupercell
-!!      fit_polynomial_coeff_fit,fit_polynomial_coeff_getnorder
+!!      alloc_copy,ddb_to_dtset,destroy_mpi_enreg,destroy_results_gs,dtset_free
+!!      effective_potential_file_gettype,effective_potential_setcoeffs
+!!      effective_potential_setsupercell,fit_polynomial_coeff_fit
 !!      fit_polynomial_coeff_getpositive,generelist,init_results_gs,mover
-!!      polynomial_coeff_free,polynomial_coeff_init
+!!      polynomial_coeff_free,polynomial_coeff_getnorder,polynomial_coeff_init
 !!      polynomial_coeff_setcoefficient,polynomial_coeff_writexml,scfcv_destroy
-!!      wrtout,xcart2xred,xred2xcart
+!!      scfcv_run,wrtout,xcart2xred,xred2xcart
 !!
 !! SOURCE
 
@@ -185,20 +185,20 @@ implicit none
    
    acell = one
    rprimd = effective_potential%crystal%rprimd
- 
+   
    ABI_ALLOCATE(xred,(3,effective_potential%crystal%natom))
    ABI_ALLOCATE(xcart,(3,effective_potential%crystal%natom))
 
 !  convert new xcart
    call xcart2xred(effective_potential%crystal%natom,effective_potential%crystal%rprimd,&
-&                  effective_potential%crystal%xcart,xred)
+&   effective_potential%crystal%xcart,xred)
    call xred2xcart(effective_potential%crystal%natom, rprimd, xcart, xred)
 !  Generate supercell for the simulation
    call effective_potential_setSupercell(effective_potential,comm,n_cell=sc_size)
 
    ABI_DEALLOCATE(xred)
    ABI_DEALLOCATE(xcart)
- 
+   
 !***************************************************************
 !1 Convert some parameters into the structures used by mover.F90
 !***************************************************************
@@ -243,9 +243,9 @@ implicit none
      call effective_potential_file_getType(filnam(3),type)
      if(type /= 1) then
        write(message, '(5a)' )&
-&         ' You need to provide DDB file in the input to compute ahnarmonic',ch10,&
-&         ' part of effective Hamiltionian',ch10,&
-&         'Action: add DDB file in the inputs'
+&       ' You need to provide DDB file in the input to compute ahnarmonic',ch10,&
+&       ' part of effective Hamiltionian',ch10,&
+&       'Action: add DDB file in the inputs'
        MSG_BUG(message)       
      end if
      call ddb_to_dtset(comm, dtset,filnam(3),psps)
@@ -270,7 +270,7 @@ implicit none
    dtset%goprecprm(:) = zero !Geometry Optimization PREconditioner PaRaMeters equations
    ABI_ALLOCATE(dtset%prtatlist,(dtset%natom)) !PRinT by ATom LIST of ATom
    dtset%prtatlist(:) = 0
-       
+   
    if(option  > 0)then
      verbose = .TRUE.
      writeHIST = .TRUE.
@@ -298,7 +298,7 @@ implicit none
    
 !  Set the barostat and thermonstat if ionmov == 13
    if(dtset%ionmov == 13)then
-       
+     
 !    Select frequency of the barostat as a function of temperature
 !    For small temperature, we need huge barostat and inversely
      if(dtset%mdtemp(1) <= 10) then
@@ -328,8 +328,8 @@ implicit none
        ABI_ALLOCATE(dtset%qmass,(dtset%nnos))
        dtset%qmass(:)  = qmass
        write(message,'(3a,F20.1,a)')&
-&         ' WARNING: nnos is set to zero in the input',ch10,&
-&         '          value by default for qmass: ',dtset%qmass(:),ch10
+&       ' WARNING: nnos is set to zero in the input',ch10,&
+&       '          value by default for qmass: ',dtset%qmass(:),ch10
        if(verbose)call wrtout(std_out,message,"COLL")
      else
        ABI_ALLOCATE(dtset%qmass,(dtset%nnos)) ! Q thermostat mass
@@ -338,8 +338,8 @@ implicit none
      if (inp%bmass == zero) then
        dtset%bmass = bmass
        write(message,'(3a,F20.4,a)')&
-&         ' WARNING: bmass is set to zero in the input',ch10,&
-&         '          value by default for bmass: ',dtset%bmass,ch10
+&       ' WARNING: bmass is set to zero in the input',ch10,&
+&       '          value by default for bmass: ',dtset%bmass,ch10
        if(verbose)call wrtout(std_out,message,"COLL")
      else
        dtset%bmass = inp%bmass  ! Barostat mass
@@ -388,8 +388,8 @@ implicit none
    ABI_ALLOCATE(ab_xfh%xfhist,(3,dtset%natom+4,2,ab_xfh%mxfh))
    if (any((/2,3,10,11,22/)==dtset%ionmov)) then
      write(message, '(3a)' )&
-&       ' This dynamics can not be used with effective potential',ch10,&
-&       'Action: correct dynamics input'
+&     ' This dynamics can not be used with effective potential',ch10,&
+&     'Action: correct dynamics input'
      MSG_BUG(message)
    end if
 
@@ -467,10 +467,10 @@ implicit none
        end do
        cutoff = cutoff / 3.0
        
-      call polynomial_coeff_getNorder(coeffs_bound,effective_potential%crystal,cutoff,&
-&                                     ncoeff_bound,inp%fit_boundPower,1,comm,&
-&                                     anharmstr=inp%fit_anhaStrain==1,&
-&                                     spcoupling=inp%fit_SPCoupling==1)
+       call polynomial_coeff_getNorder(coeffs_bound,effective_potential%crystal,cutoff,&
+&       ncoeff_bound,inp%fit_boundPower,1,comm,&
+&       anharmstr=inp%fit_anhaStrain==1,&
+&       spcoupling=inp%fit_SPCoupling==1)
 
        if(iam_master)then
          filename=trim(filnam(2))//"_boundcoeff.xml"
@@ -607,8 +607,8 @@ implicit none
                call effective_potential_setCoeffs(coeffs_tmp(1:ncoeff+ii),effective_potential,&
 &               ncoeff+ii)
                call fit_polynomial_coeff_fit(effective_potential,&
-&                                           (/0/),(/0/),hist,(/0,0/),1,0,&
-&                                           -1,1,comm,verbose=.false.,positive=.false.) 
+&               (/0/),(/0/),hist,(/0,0/),1,0,&
+&               -1,1,comm,verbose=.false.,positive=.false.) 
                call effective_potential_setSupercell(effective_potential,comm,n_cell=sc_size)
                dtset%rprimd_orig(:,:,1) = effective_potential%supercell%rprimd
                acell(1) = dtset%rprimd_orig(1,1,1)
@@ -678,13 +678,13 @@ implicit none
          model_ncoeffbound = 0
          model_bound = 0
        end if
-        
+       
 !      Fit the final model
        call effective_potential_setCoeffs(coeffs_tmp(1:ncoeff+model_ncoeffbound),effective_potential,&
 &       ncoeff+model_ncoeffbound)
 
        call fit_polynomial_coeff_fit(effective_potential,(/0/),(/0/),hist,(/0,0/),1,0,&
-&                                   -1,1,comm,verbose=.false.,positive=.false.,anharmstr=.false.)
+&       -1,1,comm,verbose=.false.,positive=.false.,anharmstr=.false.)
        
        write(message, '(3a)') ch10,' Fitted coefficients at the end of the fit bound process: '
        call wrtout(ab_out,message,'COLL')
@@ -729,7 +729,7 @@ implicit none
      call wrtout(std_out,message,'COLL')
 
      call scfcv_run(scfcv_args,electronpositron,rhog,rhor,rprimd,xred,xred_old,conv_retcode)
-   
+     
    end if
 
 !***************************************************************

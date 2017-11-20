@@ -49,10 +49,10 @@
 !!
 !! CHILDREN
 !!      d3sym,ddb_hdr_free,ddb_hdr_init,ddb_hdr_open_write,dfptnl_doutput
-!!      dfptnl_loop,ebands_free,fourdp,getcut,getkgrid,getshell,hdr_free
+!!      dfptnl_loop,ebands_free,fourdp,getcut,getkgrid,getshell,hartre,hdr_free
 !!      hdr_init,hdr_update,initmv,inwffil,kpgio,mkcore,nlopt,pspini,read_rhor
 !!      rhotoxc,setsym,setup1,status,symmetrize_xred,sytens,timab,wffclose
-!!      wrtout
+!!      wrtout,xcdata_init
 !!
 !! SOURCE
 

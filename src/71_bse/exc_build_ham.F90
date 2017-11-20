@@ -42,7 +42,7 @@
 !!      bethe_salpeter
 !!
 !! CHILDREN
-!!      cwtime,get_bz_item,get_uug,gsph_fft_tabs,paw_rho_tw_g,pawcprj_alloc
+!!      cwtime,get_bz_item,gsph_fft_tabs,paw_rho_tw_g,pawcprj_alloc
 !!      pawcprj_free,pawpwij_free,pawpwij_init,rho_tw_g,timab,wfd_change_ngfft
 !!      wfd_get_cprj,wfd_get_ur,wrtout,xmpi_distab,xmpi_sum
 !!
@@ -208,7 +208,7 @@ end subroutine exc_build_ham
 !!      exc_build_ham
 !!
 !! CHILDREN
-!!      cwtime,get_bz_item,get_uug,gsph_fft_tabs,paw_rho_tw_g,pawcprj_alloc
+!!      cwtime,get_bz_item,gsph_fft_tabs,paw_rho_tw_g,pawcprj_alloc
 !!      pawcprj_free,pawpwij_free,pawpwij_init,rho_tw_g,timab,wfd_change_ngfft
 !!      wfd_get_cprj,wfd_get_ur,wrtout,xmpi_distab,xmpi_sum
 !!

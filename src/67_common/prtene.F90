@@ -234,8 +234,8 @@ subroutine prtene(dtset,energies,iout,usepaw)
 &     eneName            ,enevalue,ch10,&
 &     '    PspCore energy  = ',energies%e_corepsp-energies%e_corepspdc,ch10,&
 &     '    Dble-C XC-energy= ',-energies%e_hartree+energies%e_xc-energies%e_xcdc+&
-&                               energies%e_fock-energies%e_fockdc+&
-&                               energies%e_hybcomp_E0-energies%e_hybcomp_v0  
+&     energies%e_fock-energies%e_fockdc+&
+&     energies%e_hybcomp_E0-energies%e_hybcomp_v0  
      call wrtout(iout,message,'COLL')
    end if
    if ((dtset%berryopt==4 .or.  dtset%berryopt==6 .or. dtset%berryopt==7 .or.  &

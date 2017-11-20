@@ -88,17 +88,17 @@
 !!      dfpt_eltfrkin,dfpt_eltfrloc,dfpt_eltfrxc,dfpt_ewald,dfpt_gatherdy
 !!      dfpt_looppert,dfpt_phfrq,dfpt_prtph,ebands_free,efmasdeg_free_array
 !!      efmasfr_free_array,eig2tot,eigen_meandege,elph2_fanddw,elt_ewald
-!!      exit_check,fourdp,getcut,getph,hdr_free,hdr_init,hdr_update,initrhoij
-!!      initylmg,inwffil,irreducible_set_pert,kpgio,littlegroup_q,matr3inv
-!!      mkcore,mklocl,mkrho,newocc,nhatgrid,outddbnc,paw_an_free,paw_an_init
-!!      paw_an_nullify,paw_gencond,paw_ij_free,paw_ij_init,paw_ij_nullify
-!!      pawdenpot,pawdij,pawexpiqr,pawfgr_destroy,pawfgr_init,pawfgrtab_free
-!!      pawfgrtab_init,pawinit,pawmknhat,pawpuxinit,pawrhoij_alloc
-!!      pawrhoij_bcast,pawrhoij_copy,pawrhoij_free,pawrhoij_nullify
-!!      pawtab_get_lsize,prteigrs,pspini,q0dy3_apply,q0dy3_calc,read_rhor
-!!      rhotoxc,setsym,setsymrhoij,setup1,status,symdij,symmetrize_xred,sytens
-!!      timab,transgrid,vdw_dftd2,vdw_dftd3,wffclose,wings3,wrtloctens,wrtout
-!!      xmpi_bcast
+!!      exit_check,fourdp,getcut,getph,hartre,hdr_free,hdr_init,hdr_update
+!!      initrhoij,initylmg,inwffil,irreducible_set_pert,kpgio,littlegroup_q
+!!      matr3inv,mkcore,mklocl,mkrho,newocc,nhatgrid,outddbnc,paw_an_free
+!!      paw_an_init,paw_an_nullify,paw_gencond,paw_ij_free,paw_ij_init
+!!      paw_ij_nullify,pawdenpot,pawdij,pawexpiqr,pawfgr_destroy,pawfgr_init
+!!      pawfgrtab_free,pawfgrtab_init,pawinit,pawmknhat,pawpuxinit
+!!      pawrhoij_alloc,pawrhoij_bcast,pawrhoij_copy,pawrhoij_free
+!!      pawrhoij_nullify,pawtab_get_lsize,prteigrs,pspini,q0dy3_apply
+!!      q0dy3_calc,read_rhor,rhotoxc,setsym,setsymrhoij,setup1,status,symdij
+!!      symmetrize_xred,sytens,timab,transgrid,vdw_dftd2,vdw_dftd3,wffclose
+!!      wings3,wrtloctens,wrtout,xcdata_init,xmpi_bcast
 !!
 !! SOURCE
 

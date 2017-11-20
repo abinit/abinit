@@ -48,14 +48,13 @@
 !!      atm2fft,bethe_salpeter,calc_smeared_density,dfpt_atm2fft,dfpt_dyfro
 !!      dfpt_eltfrxc,dfpt_looppert,dfpt_newvtr,dfpt_scfcv,dfpt_vlocal
 !!      dfptnl_loop,dieltcel,energy,fock_getghc,forces,fourdp_6d,fresidrsp
-!!      green_kernel,gstate,hartre,hartrestr,initro,jellium,laplacian
-!!      m_dvdb,m_electronpositron,m_epjdos,m_fft_prof,m_hidecudarec,m_kxc
-!!      m_ppmodel,m_screening,make_efg_el,mklocl_realspace,mklocl_recipspace
-!!      moddiel,moddiel_csrb,mrgscr,newrho,newvtr,nonlinear,nres2vres,odamix
-!!      pawmknhat,pawmknhat_psipsi,pawmkrho,posdoppler,prcref,prcref_PMA
-!!      recursion,recursion_nl,redgr,respfn,rotate_rho,scfcv,screening
-!!      setup_positron,sigma,stress,symrhg,tddft,transgrid,vlocalstr,xcden
-!!      xcpot
+!!      green_kernel,gstate,hartre,hartrestr,initro,jellium,laplacian,m_dvdb
+!!      m_electronpositron,m_epjdos,m_fft_prof,m_hidecudarec,m_kxc,m_ppmodel
+!!      m_screening,make_efg_el,mklocl_realspace,mklocl_recipspace,moddiel
+!!      moddiel_csrb,mrgscr,newrho,newvtr,nonlinear,nres2vres,odamix,pawmknhat
+!!      pawmknhat_psipsi,pawmkrho,posdoppler,prcref,prcref_PMA,recursion
+!!      recursion_nl,redgr,respfn,rotate_rho,scfcv,screening,setup_positron
+!!      sigma,stress,symrhg,tddft,transgrid,vlocalstr,xcden,xcpot
 !!
 !! CHILDREN
 !!      ccfft,dfti_seqfourdp,fftw3_mpifourdp,fftw3_seqfourdp,fourdp_mpi

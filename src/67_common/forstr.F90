@@ -159,8 +159,9 @@
 !!      afterscfloop,setup_positron
 !!
 !! CHILDREN
-!!      ctocprj,forces,forstrnps,metric,nres2vres,pawgrnl,stress,timab
-!!      wvl_nl_gradient,xchybrid_ncpp_cc,xred2xcart
+!!      ctocprj,forces,forstrnps,initylmg,metric,nres2vres,pawcprj_alloc
+!!      pawcprj_free,pawcprj_getdim,pawgrnl,stress,timab,wvl_nl_gradient
+!!      xchybrid_ncpp_cc,xred2xcart
 !!
 !! SOURCE
 

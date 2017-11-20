@@ -59,7 +59,7 @@
 !!      dfpt_dyxc1,dfpt_nstdy,dfpt_nstpaw,dfpt_rhotov,nres2vres
 !!
 !! CHILDREN
-!!      dfpt_mkvxc,timab,rotate_mag,rotate_back_mag,rotate_back_mag_dfpt
+!!      dfpt_mkvxc,rotate_back_mag,rotate_back_mag_dfpt,rotate_mag,timab
 !!
 !! SOURCE
 
@@ -176,7 +176,7 @@ subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat,nhatdim,nh
 !                 (put all nhat options to zero).
 !  The collinear routine dfpt_mkvxc wants a general density built as (tr[rho],rho_upup)
    call dfpt_mkvxc(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat1_zero,0,nhat1gr_zero,0,&
-&    nkxc,2,n3xccc,option,paral_kgb,qphon,rhor1_diag,rprimd,0,vxc1_diag,xccc3d1)
+&   nkxc,2,n3xccc,option,paral_kgb,qphon,rhor1_diag,rprimd,0,vxc1_diag,xccc3d1)
 
    !call test_rotations(0,1)
 

@@ -203,7 +203,7 @@ subroutine drivexc_main(exc,ixc,mgga,ndvxc,nd2vxc,ngr2,npts,nspden,nvxcgrho,orde
      is_gga=libxc_functionals_isgga(xc_functionals=xc_funcs)
    else
      is_gga=libxc_functionals_isgga()
-   endif
+   end if
 
    if (mgga==1) then
      if (abs(xc_tb09_c_-99.99_dp)>tol12) then

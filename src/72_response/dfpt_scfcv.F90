@@ -1222,13 +1222,13 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
   !call printmagvtk(mpi_enreg,cplex,nspden,nfftf,ngfftf,rhor1,rprimd,adjustl(adjustr(fi1o_vtk)//".vtk"))
   !compute the contributions to susceptibility from different attomic spheres:
 
-  prtopt=1
-  if(ipert==dtset%natom+5) then
-    prtopt=idir+1;
-    call calcdensph(gmet,mpi_enreg,dtset%natom,nfftf,ngfftf,nspden,&
+   prtopt=1
+   if(ipert==dtset%natom+5) then
+     prtopt=idir+1;
+     call calcdensph(gmet,mpi_enreg,dtset%natom,nfftf,ngfftf,nspden,&
 &     dtset%ntypat,ab_out,dtset%ratsph,rhor1,rprimd,dtset%typat,ucvol,xred,&
 &     prtopt,cplex,intgden=intgden,dentot=dentot)
-  endif
+   end if
 
  end if
 

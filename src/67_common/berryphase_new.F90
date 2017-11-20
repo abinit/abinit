@@ -535,9 +535,9 @@ subroutine berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,&
      dkinv = one/(two*dk(idir))
 
      write(message,'(a,a,a,3f9.5,a,a,3f9.5,a)')ch10,&
-&      ' Computing the ddk (Berry phase) for reciprocal vector:',ch10,&
-&      dk(:),' (in reduced coordinates)',ch10,&
-&      gpard(1:3),' (in cartesian coordinates - atomic units)'
+&     ' Computing the ddk (Berry phase) for reciprocal vector:',ch10,&
+&     dk(:),' (in reduced coordinates)',ch10,&
+&     gpard(1:3),' (in cartesian coordinates - atomic units)'
      call wrtout(std_out,message,'COLL')
      if (unit_out /= 0) then
        call wrtout(unit_out,message,'COLL')
@@ -917,9 +917,9 @@ subroutine berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,&
 &           mpw,dtefield%mband_occ,dtefield%nband_occ(isppol),&
 &           npw_k1,npw_k3(istep),my_nspinor,pwind_k_mult(:,istep),pwnsfac_k,sflag_k_mult(:,istep),&
 &           shiftbd,smat_inv,smat_k,smat_k_paw,usepaw)
-             
+           
 ! in finite electric field case with paw must save additional F3 term in forces 
-             if(calc_epaw3_force) then
+           if(calc_epaw3_force) then
 ! when ncpgr = 3, gradients are wrt to atom displacements
 ! but when ncpgr = 9, first 6 gradients are wrt strains, last three are displacements
              icpgr_offset = 0
@@ -985,8 +985,8 @@ subroutine berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,&
 ! for IBZ k-points and first step, add 
            if ((ddkflag==1 .and.((det_inv_smat == 1).or.(det_inv_smat == 11))) .and. inibz == 1 .and. istep == 1) then
              cg1(:,icg + 1: icg + npw_k1*my_nspinor*nband_k) = &
-               cg1(:,icg + 1:icg + npw_k1*my_nspinor*nband_k) + &
-               dkinv*cg1_k(:,1:npw_k1*my_nspinor*nband_k)
+             cg1(:,icg + 1:icg + npw_k1*my_nspinor*nband_k) + &
+             dkinv*cg1_k(:,1:npw_k1*my_nspinor*nband_k)
            end if
 
            ABI_DEALLOCATE(cgq)

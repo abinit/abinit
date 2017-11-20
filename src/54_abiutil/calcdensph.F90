@@ -119,7 +119,7 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsph
 
    ratsm = 0.05_dp ! default value for the smearing region radius - may become input variable later
 
- endif
+ end if
 
 !Get the distrib associated with this fft_grid
  grid_found=.false.
@@ -132,9 +132,9 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsph
      ffti3_local => mpi_enreg%distribfft%tab_fftdp3_local
      grid_found=.true.
 
-   endif
+   end if
 
- endif
+ end if
 
  if(n2 == mpi_enreg%distribfft%n2_fine ) then
 
@@ -144,14 +144,14 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsph
      ffti3_local => mpi_enreg%distribfft%tab_fftdp3dg_local
      grid_found = .true.
 
-   endif
+   end if
 
- endif
+ end if
  if(.not.(grid_found)) then
 
    MSG_BUG("Unable to find an allocated distrib for this fft grid")
 
- endif
+ end if
 
 !Loop over atoms
 !-------------------------------------------
@@ -202,7 +202,7 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsph
 !          Identify the fft indexes of the rectangular grid around the atom
            if(r2 > r2atsph) then
              cycle
-           endif
+           end if
 
            fsm = radsmear(r2, r2atsph, ratsm2)
 
@@ -230,12 +230,12 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsph
              intgden_(2,iatom)=intgden_(2,iatom)+fsm*rhor(ifft_local,2)
              intgden_(3,iatom)=intgden_(3,iatom)+fsm*rhor(ifft_local,3)
              intgden_(4,iatom)=intgden_(4,iatom)+fsm*rhor(ifft_local,4)
-           endif
+           end if
 
-         enddo
-       enddo
-     endif
-   enddo
+         end do
+       end do
+     end if
+   end do
 
    intgden_(:,iatom)=intgden_(:,iatom)*ucvol/dble(nfftot)
 
@@ -251,7 +251,7 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsph
 !  End loop over atoms
 !  -------------------------------------------
    
- enddo
+ end do
 
 ! EB  - Compute magnetization of the whole cell
 ! SPr - in case of complex density array set cmplex_den to one
@@ -261,7 +261,7 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsph
 
    cmplex_den=1
 
- endif
+ end if
 
  if(nspden==2) then
    mag_coll=0
@@ -277,7 +277,7 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsph
 
      rho_tot_im=rho_tot_im+rhor(jfft,1)                  ! imaginary parts of density and magnetization
      mag_coll_im=mag_coll_im+2*rhor(jfft,2)-rhor(jfft,1) ! in case of real array both are equal to corresponding real parts
-   enddo
+   end do
    mag_coll=mag_coll*ucvol/dble(nfftot)
    rho_tot =rho_tot *ucvol/dble(nfftot)
 
@@ -334,7 +334,7 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsph
    call xmpi_sum(mag_y_im,mpi_enreg%comm_fft,ierr)    ! EB
    call xmpi_sum(mag_z_im,mpi_enreg%comm_fft,ierr)    ! EB
    call timab(48,2,tsec)
- endif
+ end if
 
 !Printing 
  sum_mag=zero
@@ -357,7 +357,7 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsph
      do iatom=1,natom
        write(message, '(i5,f15.5,f20.8)' ) iatom,ratsph(typat(iatom)),intgden_(1,iatom)
        call wrtout(nunit,message,'COLL')
-     enddo
+     end do
    elseif(nspden==2) then
      write(message, '(4a)' ) &
 &     ' Integrated electronic and magnetization densities in atomic spheres:',ch10,&
@@ -377,7 +377,7 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsph
        sum_rho_up=sum_rho_up+intgden_(1,iatom)
        sum_rho_dn=sum_rho_dn+intgden_(2,iatom)
        sum_rho_tot=sum_rho_tot+intgden_(1,iatom)+intgden_(2,iatom)
-     enddo
+     end do
      write(message, '(a)') ' ---------------------------------------------------------------------'
      call wrtout(nunit,message,'COLL')
      write(message, '(a,2f13.6,a,f12.6,a,f12.6)') '  Sum:         ', sum_rho_up,sum_rho_dn,'  ',sum_rho_tot,' ',sum_mag
@@ -407,7 +407,7 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsph
        sum_mag_x=sum_mag_x+intgden_(2,iatom)
        sum_mag_y=sum_mag_y+intgden_(3,iatom)
        sum_mag_z=sum_mag_z+intgden_(4,iatom)
-     enddo
+     end do
      write(message, '(a)') ' ---------------------------------------------------------------------'
      call wrtout(nunit,message,'COLL')
 !    write(message, '(a,f12.6,f12.6,f12.6)') ' Total magnetization :           ', sum_mag_x,sum_mag_y,sum_mag_z
@@ -418,7 +418,7 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsph
 !    SPr for dfpt debug
 !    write(message, '(a,f12.6)') ' Total density (exact)           ', rho_tot
 !   call wrtout(nunit,message,'COLL')
-   endif
+   end if
 
  elseif(prtopt==-1) then
 
@@ -433,21 +433,21 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsph
      write(message, '(4a)' ) &
 &     ' Fermi level charge density n_f and magnetization m_f:',ch10,&
 &     ' ------------------------------------------------------------------------',ch10
-   endif
+   end if
    call wrtout(nunit,message,'COLL')
 
    if(cmplex_den==0) then
      write(message, '(a,f13.8)') '     n_f   = ',rho_tot
    else
      write(message, '(a,f13.8,a,f13.8)') '  Re[n_f]= ', rho_tot,"   Im[n_f]= ",rho_tot_im
-   endif
+   end if
    call wrtout(nunit,message,'COLL')
    if(nspden==2) then
      if(cmplex_den==0) then
        write(message, '(a,f13.8)') '     m_f    = ', mag_coll
      else
        write(message, '(a,f13.8,a,f13.8)') '  Re[m_f]= ', mag_coll,"   Im[m_f]= ",mag_coll_im
-     endif
+     end if
      call wrtout(nunit,message,'COLL')
    elseif (nspden==4) then
      write(message, '(a,f13.8)') '     mx_f  = ',mag_x
@@ -456,7 +456,7 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsph
      call wrtout(nunit,message,'COLL')
      write(message, '(a,f13.8)') '     mz_f  = ',mag_z
      call wrtout(nunit,message,'COLL')
-   endif
+   end if
 
    write(message, '(3a)') ch10,' ------------------------------------------------------------------------',ch10
    call wrtout(nunit,message,'COLL')
@@ -467,7 +467,7 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsph
 
    if(abs(rho_tot)<1.0d-10) then
      rho_tot=0
-   endif
+   end if
 
    write(message, '(2a)') ch10,' ------------------------------------------------------------------------'
    call wrtout(nunit,message,'COLL')
@@ -480,7 +480,7 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsph
      write(message, '(4a)' ) &
 &     ' Integrals of the first order density n^(1) and magnetization m^(1):',ch10,&
 &     ' ------------------------------------------------------------------------',ch10
-   endif
+   end if
    call wrtout(nunit,message,'COLL')
 
    if(cmplex_den==0) then
@@ -517,14 +517,14 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsph
        endif
     endif
 
-     write(message, '(3a)') ch10,' ------------------------------------------------------------------------',ch10
-     call wrtout(nunit,message,'COLL')
+   write(message, '(3a)') ch10,' ------------------------------------------------------------------------',ch10
+   call wrtout(nunit,message,'COLL')
 
-   endif 
+ end if 
 
  if(present(intgden)) then
    intgden = intgden_
- endif
+ end if
 
  if(present(dentot)) then
    if(nspden==2) then
@@ -535,8 +535,8 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsph
      dentot(2)=mag_x
      dentot(3)=mag_y
      dentot(4)=mag_z
-   endif
- endif 
+   end if
+ end if 
 
 end subroutine calcdensph
 !!***
