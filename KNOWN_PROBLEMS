@@ -5,7 +5,7 @@ at the time a version of ABINIT is released.
 Note that bugs discovered later than the
 release are NOT described here...
 
-The present release ABINITv8.6.1 is for production
+The present release ABINITv8.7.2 is for development
 0. List of platforms
 1. Batteries of tests
 2. List of known problems
@@ -13,7 +13,7 @@ The present release ABINITv8.6.1 is for production
 ================================================================
 0. Platforms
 
-For ABINITv8.6.1, list closed on 2017 11 03
+For ABINITv8.7.2, list closed on 2017 12 XX
 after installation and successful tests for the standard set of platforms,
 as mentioned on 
 https://bbportal.abinit.org/#/status
@@ -803,3 +803,8 @@ So, for the time being, keep coba2_intel13 .
 P811.3 (XG160701)
 With abiref_nag_6.1_openmpi, erratically, one test fail with a timeout (900 secs). Likely due to the execution with -j .
 Still, this was not the case with petrus_nag. So, for the time being, keep the latter.
+
+P871.1 (XG171106)
+Tutorial positron#4 on bob with Openmp 2 threads, the tolwfr is likely not openmp-shared correcty, because the difference 
+with the reference for this quantity can be very large, while the difference for the total energy and other quantities
+is very small.

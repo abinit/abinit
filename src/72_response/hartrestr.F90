@@ -48,7 +48,7 @@
 !!      dfpt_nselt,dfpt_nstpaw,dfpt_rhotov
 !!
 !! CHILDREN
-!!      fourdp,ptabs_fourdp
+!!      fourdp,metric,ptabs_fourdp
 !!
 !! SOURCE
 

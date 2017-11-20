@@ -111,7 +111,6 @@ CONTAINS  !=====================================================================
 !!      cchi0,cchi0q0_intraband
 !!
 !! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -272,10 +271,8 @@ end subroutine assemblychi0_sym
 !!  rhotwg_I(npw)=Required linear combination of the oscillator matrix elements.
 !!
 !! PARENTS
-!!      m_chi0
 !!
 !! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -381,7 +378,6 @@ end subroutine mkrhotwg_sigma
 !!      cchi0,cchi0q0,cchi0q0_intraband
 !!
 !! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -672,7 +668,6 @@ end subroutine symmetrize_afm_chi0
 !!      cchi0q0
 !!
 !! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -914,7 +909,6 @@ end subroutine accumulate_chi0_q0
 !!      cchi0q0
 !!
 !! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -1162,7 +1156,6 @@ end subroutine accumulate_sfchi0_q0
 !!      cchi0
 !!
 !! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -1364,7 +1357,6 @@ end subroutine assemblychi0sf
 !!      cchi0,cchi0q0
 !!
 !! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -1457,7 +1449,6 @@ end subroutine approxdelta
 !!      m_chi0
 !!
 !! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 !!
@@ -1567,7 +1558,6 @@ end subroutine calc_kkweight
 !!      cchi0,cchi0q0
 !!
 !! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -1721,7 +1711,6 @@ end subroutine setup_spectral
 !!      cchi0,cchi0q0
 !!
 !! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -1808,7 +1797,6 @@ end subroutine hilbert_transform
 !!      cchi0q0
 !!
 !! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 

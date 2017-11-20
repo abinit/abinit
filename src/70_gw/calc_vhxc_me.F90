@@ -66,11 +66,12 @@
 !!      sigma
 !!
 !! CHILDREN
-!!      destroy_mpi_enreg,dtset_copy,dtset_free,init_distribfft_seq,initmpi_seq
+!!      destroy_mpi_enreg,get_auxc_ixc,init_distribfft_seq,initmpi_seq
 !!      libxc_functionals_end,libxc_functionals_init
 !!      libxc_functionals_set_hybridparams,melements_herm,melements_init
 !!      melements_mpisum,mkkin,paw_mknewh0,pawcprj_alloc,pawcprj_free,rhotoxc
 !!      wfd_change_ngfft,wfd_distribute_bbp,wfd_get_cprj,wfd_get_ur,wrtout
+!!      xcdata_init
 !!
 !! SOURCE
 
@@ -152,7 +153,7 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,nfftf,ngfftf,&
  integer :: isppol,cplex_dij,npw_k
  integer :: nspinor,nsppol,nspden,nk_calc
  integer :: rank,comm,master,nprocs
- integer :: iab,isp1,isp2,ixc_hybrid,nsploop,nkxc,option,n3xccc_,nk3xc,my_nbbp,my_nmels
+ integer :: iab,isp1,isp2,ixc_sigma,nsploop,nkxc,option,n3xccc_,nk3xc,my_nbbp,my_nmels
  real(dp) :: nfftfm1,fact,DijH,enxc_val,enxc_hybrid_val,vxcval_avg,vxcval_hybrid_avg,h0dij,vxc1,vxc1_val,re_p,im_p,dijsigcx
  real(dp) :: omega ! HSE Fock exchange screening parameter
  complex(dpc) :: cdot
@@ -177,6 +178,7 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,nfftf,ngfftf,&
  complex(dpc),allocatable :: vxcab(:),vxcab_val(:),vxcab_val_hybrid(:),u1cjg_u2dpc(:),kinwf2(:),veffh0_ab(:)
  logical,allocatable :: bbp_mask(:,:)
  type(pawcprj_type),allocatable ::  Cprj_b1ks(:,:),Cprj_b2ks(:,:)
+ type(libxc_functional_type) :: xc_funcs_hybrid(2)
 
 ! *************************************************************************
 
@@ -243,11 +245,10 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,nfftf,ngfftf,&
  ABI_MALLOC(kxc_,(nfftf,nkxc))
  ABI_MALLOC(vxc_val,(nfftf,nspden))
 
- call xcdata_init(dtset%auxc_ixc,dtset%intxc,dtset%ixc,&
-&  dtset%nelect,dtset%tphysel,dtset%usekden,dtset%vdw_xc,dtset%xc_tb09_c,dtset%xc_denpos,xcdata)
+ call xcdata_init(xcdata,dtset=Dtset)
 
  call rhotoxc(enxc_val,kxc_,MPI_enreg_seq,nfftf,ngfftf,&
-& nhat,Wfd%usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,nspden,n3xccc_,option,dtset%paral_kgb,rhor,Cryst%rprimd,&
+& nhat,Wfd%usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,n3xccc_,option,dtset%paral_kgb,rhor,Cryst%rprimd,&
 & strsxc,usexcnhat,vxc_val,vxcval_avg,xccc3d_,xcdata,taug=taug,taur=taur)
 
  ! FABIEN's development
@@ -256,50 +257,33 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,nfftf,ngfftf,&
    if(libxc_functionals_check()) then
 
      call wrtout(std_out,' Hybrid functional xc potential is being set')
-     !Define ixc_hybrid
-     if(Dtset%gwcalctyp<200) then
-       ixc_hybrid=-428         ! HSE06
-     else if(Dtset%gwcalctyp<300) then
-       ixc_hybrid=-406         ! PBE0
-     else ! Dtset%gwcalctyp > 300
-       ixc_hybrid=-402         ! B3LYP
-     end if
-     call get_auxc_ixc(auxc_ixc,ixc_hybrid)
+     ixc_sigma=Dtset%ixc_sigma
+     call get_auxc_ixc(auxc_ixc,ixc_sigma)
+     call xcdata_init(xcdata_hybrid,dtset=Dtset,auxc_ixc=auxc_ixc,ixc=ixc_sigma)
+     call libxc_functionals_init(ixc_sigma,Dtset%nspden,xc_functionals=xc_funcs_hybrid)
 
-     call xcdata_init(auxc_ixc,dtset%intxc,ixc_hybrid,&
-&      dtset%nelect,dtset%tphysel,dtset%usekden,dtset%vdw_xc,dtset%xc_tb09_c,dtset%xc_denpos,xcdata_hybrid)
-
-     ! reinitialize the libxc module with the overriden values
-     if(Dtset%ixc<0) then
-       call libxc_functionals_end()
-     end if
-     call libxc_functionals_init(ixc_hybrid,Dtset%nspden)
-     if (ixc_hybrid==-406) then !PBE0
-       call libxc_functionals_set_hybridparams(hyb_mixing=Dtset%gwfockmix)
-     else if (ixc_hybrid==-428) then !HSE06
-       if (Dtset%rcut>tol6) then
-         omega = one/Dtset%rcut
-       else
-         omega = 0.11_dp
-       end if
-       call libxc_functionals_set_hybridparams(hyb_range=omega,hyb_mixing_sr=Dtset%gwfockmix)
-     end if
-     write(msg, '(a, f4.2)') ' Fock fraction = ', Dtset%gwfockmix
+!    Do not forget, negative values of hyb_mixing(_sr),hyb_range_* means that they have been user-defined.
+     if (dtset%ixc==-406.or.dtset%ixc==-427.or.dtset%ixc==-428 .or. &
+&      min(Dtset%hyb_mixing,Dtset%hyb_mixing_sr,Dtset%hyb_range_dft,Dtset%hyb_range_fock)<-tol8)then
+       call libxc_functionals_set_hybridparams(hyb_range=abs(Dtset%hyb_range_dft),&
+&        hyb_mixing=abs(Dtset%hyb_mixing),hyb_mixing_sr=abs(Dtset%hyb_mixing_sr),xc_functionals=xc_funcs_hybrid)
+     endif
+     write(msg, '(a, f4.2)') ' Fock fraction = ', max(Dtset%hyb_mixing,Dtset%hyb_mixing_sr)
      call wrtout(std_out,msg,'COLL')
-     write(msg, '(a, f5.2, a)') ' Fock inverse screening length = ', omega, ' (bohr^-1)'
+     write(msg, '(a, f5.2, a)') ' Fock inverse screening length = ',Dtset%hyb_range_dft, ' (bohr^-1)'
      call wrtout(std_out,msg,'COLL')
 
      ABI_MALLOC(vxc_val_hybrid,(nfftf,nspden))
 
      call rhotoxc(enxc_hybrid_val,kxc_,MPI_enreg_seq,nfftf,ngfftf,&
-&     nhat,Wfd%usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,nspden,n3xccc_,option,dtset%paral_kgb,rhor,Cryst%rprimd,&
-&     strsxc,usexcnhat,vxc_val_hybrid,vxcval_hybrid_avg,xccc3d_,xcdata_hybrid)
+&     nhat,Wfd%usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,n3xccc_,option,dtset%paral_kgb,rhor,Cryst%rprimd,&
+&     strsxc,usexcnhat,vxc_val_hybrid,vxcval_hybrid_avg,xccc3d_,xcdata_hybrid,xc_funcs=xc_funcs_hybrid)
 
      ! Fix the libxc module with the original settings
-     call libxc_functionals_end()
-     if(Dtset%ixc<0) then
-       call libxc_functionals_init(Dtset%ixc,Dtset%nspden)
-     end if
+     call libxc_functionals_end(xc_functionals=xc_funcs_hybrid)
+!    if(Dtset%ixc<0) then
+!      call libxc_functionals_init(Dtset%ixc,Dtset%nspden)
+!    end if
 
    else
      call wrtout(std_out, 'LIBXC is not present: hybrid functionals are not available')

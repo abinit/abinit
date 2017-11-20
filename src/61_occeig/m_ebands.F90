@@ -1340,7 +1340,7 @@ end subroutine get_eneocc_vect
 !!  ebands<ebands_t>=The object with updated values depending on the value of arr_name
 !!
 !! PARENTS
-!!      m_ebands
+!!      dfpt_looppert,m_ebands
 !!
 !! CHILDREN
 !!      alloc_copy,ebands_free,ebands_write,kpath_free,kpath_print,wrtout

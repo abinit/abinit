@@ -2451,7 +2451,7 @@ end subroutine wings3
 !! List of ouput should be included.
 !!
 !! PARENTS
-!!      ddb_hybrid,m_ifc
+!!      ddb_hybrid,m_ifc,m_tdep_abitypes
 !!
 !! CHILDREN
 !!

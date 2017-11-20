@@ -143,10 +143,11 @@
 !!      paw_ij_free,paw_ij_init,paw_ij_nullify,paw_ij_reset_flags,pawcprj_alloc
 !!      pawcprj_free,pawcprj_getdim,pawcprj_reorder,pawdenpot,pawdij
 !!      pawfgrtab_free,pawfgrtab_init,pawmknhat,pawtab_get_lsize,pawuj_red
-!!      prc_mem_free,prtene,psolver_rhohxc,rhotoxc,rhotov,scprqt,setnoccmmp
+!!      prc_mem_free,prtene,psolver_rhohxc,rhotov,rhotoxc,scprqt,setnoccmmp
 !!      setrhoijpbe0,setsym,setup_positron,setvtr,sphereboundary,status,symdij
 !!      symmetrize_xred,timab,update_e_field_vars,vtorho,vtorhorec,vtorhotf
-!!      wrtout,wvl_cprjreorder,wvl_nhatgrid,xmpi_isum,xmpi_sum,xmpi_wait
+!!      wrtout,wvl_cprjreorder,wvl_nhatgrid,xcdata_init,xmpi_isum,xmpi_sum
+!!      xmpi_wait
 !!
 !! SOURCE
 
@@ -1145,8 +1146,8 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
    end if
 
    if ((moved_atm_inside==1 .or. istep==1).or.&
-&      (dtset%positron<0.and.istep_mix==1).or.&
-&      (mod(dtset%fockoptmix,100)==11 .and. istep_updatedfock==1)) then
+&   (dtset%positron<0.and.istep_mix==1).or.&
+&   (mod(dtset%fockoptmix,100)==11 .and. istep_updatedfock==1)) then
 !    PAW only: we sometimes have to compute compensation density
 !    and eventually add it to density from WFs
      nhatgrdim=0
@@ -1561,13 +1562,12 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
      if (nkxc>0.and.modulo(dtset%iprcel,100)>=61.and.(dtset%iprcel<71.or.dtset%iprcel>79) &
 &     .and.((istep==1.or.istep==dielstrt).or.(dtset%iprcel>=100))) then
        optxc=10
-       call xcdata_init(dtset%auxc_ixc,dtset%intxc,dtset%ixc,&
-&        dtset%nelect,dtset%tphysel,dtset%usekden,dtset%vdw_xc,dtset%xc_tb09_c,dtset%xc_denpos,xcdata)
+       call xcdata_init(xcdata,dtset=dtset)
 !      to be adjusted for the call to rhotoxc
        nk3xc=1
        if(dtset%icoulomb==0 .and. dtset%usewvl==0) then
          call rhotoxc(edum,kxc,mpi_enreg,nfftf,&
-&         ngfftf,nhat,psps%usepaw,nhatgr,0,nkxc,nk3xc,dtset%nspden,n3xccc,&
+&         ngfftf,nhat,psps%usepaw,nhatgr,0,nkxc,nk3xc,n3xccc,&
 &         optxc,dtset%paral_kgb,rhor,rprimd,dummy2,0,vxc,vxcavg_dum,xccc3d,xcdata,&
 &         add_tfw=tfw_activated,taug=taug,taur=taur,vhartr=vhartr,vxctau=vxctau)
        else if(.not. wvlbigdft) then

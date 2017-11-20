@@ -153,7 +153,7 @@ program mrgddb
        'Action: change mddb in mrgddb.f90 and recompile.'
        MSG_ERROR(msg)
      end if
-     filnam(nfiles_cli) = arg
+     filnam(nfiles_cli) = trim(arg)
    end if
  end do
 
@@ -203,16 +203,16 @@ program mrgddb
        !actually number of ddb files entered by the user.
        read(std_in, '(a)',IOSTAT =ios ) filnam(iddb+1)
        if (ios < 0) then
-        write(msg, '(a,i0,a,a,a,a)' )&
-&        'The number of input ddb files: ',nddb,' exceeds the number ',&
-&        'of ddb file names.', ch10, &
-&        'Action: change the number of ddb files in the mrgddb input file.'
-        MSG_ERROR(msg) 
+         write(msg, '(a,i0,a,a,a,a)' )&
+&         'The number of input ddb files: ',nddb,' exceeds the number ',&
+&         'of ddb file names.', ch10, &
+&         'Action: change the number of ddb files in the mrgddb input file.'
+         MSG_ERROR(msg) 
        else 
-       write(std_out,*)' Give name for derivative database number',iddb,' : '
-       write(std_out,'(a,a)' )' ',trim(filnam(iddb+1))
+         write(std_out,*)' Give name for derivative database number',iddb,' : '
+         write(std_out,'(a,a)' )' ',trim(filnam(iddb+1))
        end if
-      end do
+     end do
    end if
 
  else

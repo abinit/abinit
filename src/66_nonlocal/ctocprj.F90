@@ -81,8 +81,8 @@
 !!
 !! CHILDREN
 !!      getcprj,mkffnl,mkkpg,pawcprj_alloc,pawcprj_free,pawcprj_mpi_sum
-!!      pawcprj_put,pawcprj_set_zero,ph1d3d,xmpi_allgather,xmpi_allgatherv
-!!      xmpi_alltoallv
+!!      pawcprj_put,pawcprj_set_zero,ph1d3d,strconv,xmpi_allgather
+!!      xmpi_allgatherv,xmpi_alltoallv
 !!
 !! SOURCE
 

@@ -385,7 +385,7 @@ end subroutine ifc_free
 !! Ifc<ifc_type>=Object containing the dynamical matrix and the IFCs.
 !!
 !! PARENTS
-!!      anaddb,eph,m_effective_potential_file,m_gruneisen
+!!      anaddb,eph,m_effective_potential_file,m_gruneisen,m_tdep_abitypes
 !!
 !! CHILDREN
 !!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
@@ -750,7 +750,7 @@ end subroutine ifc_init
 !!  Only printing
 !!
 !! PARENTS
-!!      anaddb,eph
+!!      anaddb,eph,m_tdep_abitypes
 !!
 !! CHILDREN
 !!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
@@ -848,8 +848,8 @@ end subroutine ifc_print
 !!
 !! PARENTS
 !!      get_nv_fs_en,get_tau_k,harmonic_thermo,interpolate_gkk,m_gruneisen
-!!      m_ifc,m_phgamma,m_phonons,m_phpi,m_sigmaph,mka2f,mka2f_tr,mka2f_tr_lova
-!!      mkph_linwid,read_gkk
+!!      m_ifc,m_phgamma,m_phonons,m_phpi,m_sigmaph,m_tdep_phdos,mka2f,mka2f_tr
+!!      mka2f_tr_lova,mkph_linwid,read_gkk
 !!
 !! CHILDREN
 !!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms

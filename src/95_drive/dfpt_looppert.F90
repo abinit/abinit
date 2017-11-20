@@ -101,15 +101,15 @@
 !!      disable_timelimit,distrb2,dtset_copy,dtset_free,ebands_free,ebands_init
 !!      efmas_main,eig2stern,eigen_meandege,eigr2d_free,eigr2d_init
 !!      eigr2d_ncwrite,exit_check,fourdp,getcgqphase,getcut,getmpw,getnel,getph
-!!      gkk_free,gkk_init,gkk_ncwrite,hdr_free,hdr_init,hdr_update,initmpi_band
-!!      initylmg,inwffil,kpgio,littlegroup_pert,localfilnam,localrdfile
-!!      localredirect,localwrfile,metric,mkrdim,outbsd,outgkk,outwf,pawang_free
-!!      pawang_init,pawcprj_alloc,pawcprj_copy,pawcprj_free,pawcprj_getdim
-!!      pawrhoij_alloc,pawrhoij_copy,pawrhoij_free,pawrhoij_nullify,prteigrs
-!!      read_rhor,rf2_getidirs,rotate_rho,set_pert_comm,set_pert_paw,setsym
-!!      setsymrhoij,status,symkpt,timab,transgrid,unset_pert_comm
-!!      unset_pert_paw,vlocalstr,wffclose,wfk_open_read,wfk_read_eigenvalues
-!!      wrtout,xmpi_sum
+!!      gkk_free,gkk_init,gkk_ncwrite,hdr_copy,hdr_free,hdr_init,hdr_update
+!!      initmpi_band,initylmg,inwffil,kpgio,littlegroup_pert,localfilnam
+!!      localrdfile,localredirect,localwrfile,metric,mkrdim,outbsd,outgkk,outwf
+!!      pawang_free,pawang_init,pawcprj_alloc,pawcprj_copy,pawcprj_free
+!!      pawcprj_getdim,pawrhoij_alloc,pawrhoij_copy,pawrhoij_free
+!!      pawrhoij_nullify,prteigrs,put_eneocc_vect,read_rhor,rf2_getidirs
+!!      rotate_rho,set_pert_comm,set_pert_paw,setsym,setsymrhoij,status,symkpt
+!!      timab,transgrid,unset_pert_comm,unset_pert_paw,vlocalstr,wffclose
+!!      wfk_open_read,wfk_read_eigenvalues,wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -123,7 +123,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 &  ddkfil,dtfil,dtset,dyew,dyfrlo,dyfrnl,dyfrx1,dyfrx2,dyvdw,&
 &  dyfr_cplex,dyfr_nondiag,d2bbb,d2lo,d2nl,d2ovl,efmasdeg,efmasfr,eigbrd,eig2nkq,&
 &  eltcore,elteew,eltfrhar,eltfrkin,eltfrloc,eltfrnl,eltfrxc,eltvdw,&
-&  etotal,fermie,iexit,indsym,kxc,bxc,&
+&  etotal,fermie,iexit,indsym,kxc,&
 &  mkmem,mkqmem,mk1mem,mpert,mpi_enreg,my_natom,nattyp,&
 &  nfftf,nhat,nkpt,nkxc,nspden,nsym,occ,&
 &  paw_an,paw_ij,pawang,pawfgr,pawfgrtab,pawrad,pawrhoij,pawtab,&
@@ -230,7 +230,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  real(dp), intent(in) :: eltfrkin(6,6),eltfrloc(6+3*dtset%natom,6)
  real(dp), intent(in) :: eltfrnl(6+3*dtset%natom,6)
  real(dp), intent(in) :: eltfrxc(6+3*dtset%natom,6),eltvdw(6+3*dtset%natom,6*usevdw)
- real(dp), intent(in) :: kxc(nfftf,nkxc),bxc(nfftf),nhat(nfftf,nspden)
+ real(dp), intent(in) :: kxc(nfftf,nkxc),nhat(nfftf,nspden)
  real(dp), intent(in) :: occ(dtset%mband*nkpt*dtset%nsppol)
  real(dp), intent(in) :: rhog(2,nfftf),rhor(nfftf,nspden),vxc(nfftf,nspden)
  real(dp), intent(in) :: vtrial(nfftf,nspden)
@@ -346,9 +346,9 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  call metric(gmet,gprimd,std_out,rmet,rprimd,ucvol)
 
  call crystal_init(dtset%amu_orig(:,1),crystal,dtset%spgroup,dtset%natom,dtset%npsp,&
-&  psps%ntypat,dtset%nsym,rprimd,dtset%typat,xred,dtset%ziontypat,dtset%znucl,1,&
-&  dtset%nspden==2.and.dtset%nsppol==1,remove_inv,psps%title,&
-&  symrel=dtset%symrel,tnons=dtset%tnons,symafm=dtset%symafm)
+& psps%ntypat,dtset%nsym,rprimd,dtset%typat,xred,dtset%ziontypat,dtset%znucl,1,&
+& dtset%nspden==2.and.dtset%nsppol==1,remove_inv,psps%title,&
+& symrel=dtset%symrel,tnons=dtset%tnons,symafm=dtset%symafm)
 
 !Get FFT grid(s) sizes (be careful !) See NOTES in the comments at the beginning of respfn.F90
  if (psps%usepaw==1.and.pawfgr%usefinegrid==1) then
@@ -1613,7 +1613,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 &     ehart01,ehart1,eigenq,eigen0,eigen1,eii,ek0,ek1,eloc0,elpsp1,&
 &     enl0,enl1,eovl1,epaw1,etotal,evdw,exc1,fermie,gh0c1_set,gh1c_set,hdr,idir,&
 &     indkpt1,indsy1,initialized,ipert,irrzon1,istwfk_rbz,&
-&     kg,kg1,kpt_rbz,kxc,bxc,mgfftf,mkmem_rbz,mkqmem_rbz,mk1mem_rbz,&
+&     kg,kg1,kpt_rbz,kxc,mgfftf,mkmem_rbz,mkqmem_rbz,mk1mem_rbz,&
 &     mpert,mpi_enreg,mpw,mpw1,my_natom,&
 &     nattyp,nband_rbz,ncpgr,nfftf,ngfftf,nhat,nkpt,nkpt_rbz,nkxc,&
 &     npwarr,npwar1,nspden,&
@@ -1809,28 +1809,28 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 
 #ifdef HAVE_NETCDF
   ! Output DDK file in netcdf format.
-  if (me == master .and. ipert == dtset%natom + 1) then
-    fname = strcat(dtfil%filnam_ds(4), "_DDK.nc")
-    NCF_CHECK_MSG(nctk_open_create(ncid, fname, xmpi_comm_self), "Creating DDK.nc file")
+   if (me == master .and. ipert == dtset%natom + 1) then
+     fname = strcat(dtfil%filnam_ds(4), "_DDK.nc")
+     NCF_CHECK_MSG(nctk_open_create(ncid, fname, xmpi_comm_self), "Creating DDK.nc file")
     ! Have to build hdr on k-grid with info about perturbation.
-    call hdr_copy(hdr0, hdr_tmp)
-    hdr_tmp%kptopt = dtset%kptopt
-    hdr_tmp%pertcase = pertcase
-    hdr_tmp%qptn = dtset%qptn(1:3)
-    NCF_CHECK(hdr_ncwrite(hdr_tmp, ncid, 43, nc_define=.True.))
-    call hdr_free(hdr_tmp)
-    NCF_CHECK(crystal_ncwrite(crystal, ncid))
-    NCF_CHECK(ebands_ncwrite(ebands_k, ncid))
-    ncerr = nctk_def_arrays(ncid, [ &
-      nctkarr_t('h1_matrix_elements', "dp", &
-       "two, max_number_of_states, max_number_of_states, number_of_kpoints, number_of_spins")], defmode=.True.)
-    NCF_CHECK(ncerr)
-    NCF_CHECK(nctk_set_datamode(ncid))
-    ncerr = nf90_put_var(ncid, nctk_idname(ncid, "h1_matrix_elements"), eigen1, &
-      count=[2, dtset%mband, dtset%mband, nkpt_rbz, dtset%nsppol])
-    NCF_CHECK(ncerr)
-    NCF_CHECK(nf90_close(ncid))
-  end if
+     call hdr_copy(hdr0, hdr_tmp)
+     hdr_tmp%kptopt = dtset%kptopt
+     hdr_tmp%pertcase = pertcase
+     hdr_tmp%qptn = dtset%qptn(1:3)
+     NCF_CHECK(hdr_ncwrite(hdr_tmp, ncid, 43, nc_define=.True.))
+     call hdr_free(hdr_tmp)
+     NCF_CHECK(crystal_ncwrite(crystal, ncid))
+     NCF_CHECK(ebands_ncwrite(ebands_k, ncid))
+     ncerr = nctk_def_arrays(ncid, [ &
+     nctkarr_t('h1_matrix_elements', "dp", &
+     "two, max_number_of_states, max_number_of_states, number_of_kpoints, number_of_spins")], defmode=.True.)
+     NCF_CHECK(ncerr)
+     NCF_CHECK(nctk_set_datamode(ncid))
+     ncerr = nf90_put_var(ncid, nctk_idname(ncid, "h1_matrix_elements"), eigen1, &
+     count=[2, dtset%mband, dtset%mband, nkpt_rbz, dtset%nsppol])
+     NCF_CHECK(ncerr)
+     NCF_CHECK(nf90_close(ncid))
+   end if
 #endif
 
 
