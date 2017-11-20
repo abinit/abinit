@@ -254,8 +254,8 @@ subroutine outvars(choice,dmatpuflag,dtsets,filnam4,iout,&
  end if
 
 !DEBUG
-   write(std_out,*)' outvars : multivals%nkpthf =',multivals%nkpthf
-   write(std_out,*)' outvars : dtsets(1:ndtset_alloc)%nkpthf =',dtsets(1:ndtset_alloc)%nkpthf
+ write(std_out,*)' outvars : multivals%nkpthf =',multivals%nkpthf
+ write(std_out,*)' outvars : dtsets(1:ndtset_alloc)%nkpthf =',dtsets(1:ndtset_alloc)%nkpthf
 !ENDDEBUG
 
  nshiftk=1

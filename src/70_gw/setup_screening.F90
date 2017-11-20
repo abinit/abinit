@@ -149,16 +149,16 @@ subroutine setup_screening(codvsn,acell,rprim,ngfftf,wfk_fname,dtfil,Dtset,Psps,
 
  DBG_ENTER('COLL')
 
- ! === Check for calculations that are not implemented ===
- ltest=ALL(Dtset%nband(1:Dtset%nkpt*Dtset%nsppol)==Dtset%nband(1))
- ABI_CHECK(ltest,'Dtset%nband(:) must be constant')
+ ! Check for calculations that are not implemented
+ ltest = ALL(Dtset%nband(1:Dtset%nkpt*Dtset%nsppol) == Dtset%nband(1))
+ ABI_CHECK(ltest, 'dtset%nband(:) must be constant in the GW code.')
 
- my_rank = xmpi_comm_rank(comm); nprocs  = xmpi_comm_size(comm)
+ my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
 
  call mkrdim(acell,rprim,rprimd)
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
 
- ! === Set up basic parameters of the calculation ===
+ ! Set up basic parameters of the calculation
  Ep%gwcalctyp            =Dtset%gwcalctyp
  Ep%plasmon_pole_model   =.TRUE.
  Ep%analytic_continuation=.FALSE.
@@ -188,6 +188,8 @@ subroutine setup_screening(codvsn,acell,rprim,ngfftf,wfk_fname,dtfil,Dtset,Psps,
  timrev = 2 ! This information is not reported in the header
             ! 1 --> do not use time-reversal symmetry
             ! 2 --> take advantage of time-reversal symmetry
+ if (any(dtset%kptopt == [3, 4])) timrev = 1
+
  if (timrev==1.and.Dtset%awtr/=0) then
    MSG_ERROR("awtr/=0 cannot be used when time-reversal symmetry doesn't hold")
  end if
@@ -195,7 +197,6 @@ subroutine setup_screening(codvsn,acell,rprim,ngfftf,wfk_fname,dtfil,Dtset,Psps,
  ! Read parameters from WFK and verifify them.
  call wfk_read_eigenvalues(wfk_fname,energies_p,Hdr_wfk,comm)
  mband = MAXVAL(Hdr_wfk%nband)
-
  call hdr_vs_dtset(Hdr_wfk,Dtset)
  remove_inv=.FALSE.
 
@@ -228,11 +229,11 @@ subroutine setup_screening(codvsn,acell,rprim,ngfftf,wfk_fname,dtfil,Dtset,Psps,
      write(std_out,*)" gvec_kss ",ig,"/",ng,gvec_kss(:,ig),test_gvec_kss(:,ig)
    end if
  end do
- ABI_CHECK(ierr==0,"Mismatch between gvec_kss and test_gvec_kss")
+ ABI_CHECK(ierr == 0, "Mismatch between gvec_kss and test_gvec_kss")
  ABI_FREE(test_gvec_kss)
 
- ! === Get important dimension from Hdr_wfk ===
- ! * Check also the consistency btw Hdr_wfk and Dtset.
+ ! Get important dimension from Hdr_wfk
+ ! Check also the consistency btw Hdr_wfk and Dtset.
  Ep%nsppol=Hdr_wfk%nsppol
  Ep%nkibz =Hdr_wfk%nkpt
 
@@ -264,11 +265,10 @@ subroutine setup_screening(codvsn,acell,rprim,ngfftf,wfk_fname,dtfil,Dtset,Psps,
 
  call kmesh_print(Kmesh,"K-mesh for the wavefunctions",std_out,Dtset%prtvol,"COLL")
  call kmesh_print(Kmesh,"K-mesh for the wavefunctions",ab_out, 0,           "COLL")
- !
+
  ! === Find Q-mesh, and do setup for long wavelength limit ===
  ! * Stop if a nonzero umklapp is needed to reconstruct the BZ. In this case, indeed,
  !   epsilon^-1(Sq) should be symmetrized in csigme using a different expression (G-G_o is needed)
- !
  call find_qmesh(Qmesh,Cryst,Kmesh)
 
  call kmesh_print(Qmesh,"Q-mesh for the screening function",std_out,Dtset%prtvol,"COLL")
@@ -310,13 +310,11 @@ subroutine setup_screening(codvsn,acell,rprim,ngfftf,wfk_fname,dtfil,Dtset,Psps,
  end if
  !write(std_out,*)" Using qlwl = ",Ep%qlwl
 
- ! === Find optimal value for G-sphere enlargment due to oscillator matrix elements ===
+ ! Find optimal value for G-sphere enlargment due to oscillator matrix elements
  call get_ng0sh(Kmesh%nbz,Kmesh%bz,Qmesh%nibz,Qmesh%ibz,Kmesh%nbz,Kmesh%bz,GW_TOLQ0,ng0sh_opt)
+ call wrtout(std_out,sjoin(' Optimal value for ng0sh:',ltoa(ng0sh_opt)),"COLL")
 
- call wrtout(std_out,sjoin('Optimal value for ng0sh:',ltoa(ng0sh_opt)),"COLL")
-
- Ep%mG0(:)=ng0sh_opt(:)
- !Ep%mG0(:)=(/3,3,3/)
+ Ep%mG0(:)=ng0sh_opt(:) !Ep%mG0(:) = [3, 3, 3]
 
  ! === In case of symmetrization, find the little group of the q"s ===
  ! * For the long-wavelength limit we consider a small but finite q. However the oscillators are
@@ -333,6 +331,7 @@ subroutine setup_screening(codvsn,acell,rprim,ngfftf,wfk_fname,dtfil,Dtset,Psps,
  end do
 
  ecutepspG0 = Dtset%ecuteps
+ ABI_CHECK(ecutepspG0 > zero, "ecuteps must be > 0")
  if (Ep%symchi/=0) then
    ecutepspG0=MAXVAL(Ltg_q(:)%max_kin_gmG0)+tol6; npwepG0=0; nshepspG0=0
    write(std_out,*)" Due to umklapp processes : ecutepspg0= ",ecutepspG0
@@ -400,7 +399,7 @@ subroutine setup_screening(codvsn,acell,rprim,ngfftf,wfk_fname,dtfil,Dtset,Psps,
  if (Dtset%fftgw==30 .or. Dtset%fftgw==31) method=3
  enforce_sym=MOD(Dtset%fftgw,10)
 
- ! npwepG0 to account for umklapps.
+ ! Use npwepG0 to account for umklapps.
  call setmesh(gmet,gvec_kss,ngfft_gw,Ep%npwvec,Ep%npwepG0,Ep%npwwfn,nfftgw_tot,method,Ep%mG0,Cryst,enforce_sym)
  !call new_setmesh(Cryst,ecut_osc,ecutwfn,nkpt,kpoints,method,Ep%mG0,enforce_sym,ngfft_gw,nfftgw_tot)
 
@@ -421,13 +420,13 @@ subroutine setup_screening(codvsn,acell,rprim,ngfftf,wfk_fname,dtfil,Dtset,Psps,
  ! Value of scissor energy
  Ep%mbpt_sciss=Dtset%mbpt_sciss
 
- ! === Define the frequency mesh for epsilon according to the method used ===
+ ! Define the frequency mesh for epsilon according to the method used.
  Ep%nomegaei=1
  Ep%nomegaer=1; if (is_static) Ep%nomegaer=0
  Ep%nomegaec=0
  Ep%omegaermax=zero
 
- ! === For ppmodels 2,3,4, only omega=0 is needed ===
+ ! For ppmodels 2,3,4, only omega=0 is needed.
  if (Ep%plasmon_pole_model.and.Dtset%nfreqre==1.and.Dtset%nfreqim==0) then
    Ep%nomegaer=1; Ep%nomegaei=0
    write(msg,'(7a)')ch10,&
@@ -437,8 +436,8 @@ subroutine setup_screening(codvsn,acell,rprim,ngfftf,wfk_fname,dtfil,Dtset,Psps,
    call wrtout(std_out,msg,'COLL')
    call wrtout(ab_out,msg,'COLL')
  end if
- !
- ! === Max number of omega along the imaginary axis ===
+
+ ! Max number of omega along the imaginary axis
  if (Ep%analytic_continuation.or.Ep%contour_deformation) then
    Ep%nomegaei=Dtset%nfreqim
    if (Dtset%gw_frqim_inzgrid==1) then
@@ -457,23 +456,23 @@ subroutine setup_screening(codvsn,acell,rprim,ngfftf,wfk_fname,dtfil,Dtset,Psps,
    end if
  end if
 
- ! === Range and total number of real frequencies ===
+ ! Range and total number of real frequencies.
  Ep%omegaermin = zero
  if (Ep%contour_deformation) then
    Ep%nomegaer=Dtset%nfreqre; Ep%omegaermin=Dtset%freqremin; Ep%omegaermax=Dtset%freqremax
    if (Dtset%gw_frqre_tangrid==1) then
      Ep%omegaermax=Dtset%cd_max_freq
-     MSG_WARNING(' Tangent transfom grid will be used for real frequency grid')
+     MSG_WARNING('Tangent transfom grid will be used for real frequency grid')
    end if
    if (Dtset%gw_frqre_tangrid==1) then
-     MSG_WARNING(' Tangent transfom grid will be used for real frequency grid')
+     MSG_WARNING('Tangent transfom grid will be used for real frequency grid')
    end if
    if (Ep%nomegaer==-1) then
      Ep%nomegaer=NOMEGAREAL
-     MSG_WARNING(sjoin(' Number of real frequencies set to default= ',itoa(NOMEGAREAL)))
+     MSG_WARNING(sjoin('Number of real frequencies set to default= ',itoa(NOMEGAREAL)))
    end if
    if (Ep%nomegaer==0) then
-     MSG_WARNING('  nfreqre = 0 ! Assuming experienced user.')
+     MSG_WARNING('nfreqre = 0 ! Assuming experienced user.')
    end if
    if (ABS(Ep%omegaermin)<TOL16) then
      Ep%omegaermin=zero
@@ -481,7 +480,7 @@ subroutine setup_screening(codvsn,acell,rprim,ngfftf,wfk_fname,dtfil,Dtset,Psps,
      MSG_WARNING(msg)
    end if
    if (Ep%omegaermin>Ep%omegaermax) then
-     MSG_ERROR(' freqremin > freqremax !')
+     MSG_ERROR('freqremin > freqremax !')
    end if
    if (Ep%omegaermax<TOL16) then
      Ep%omegaermax=OMEGAERMAX
@@ -511,10 +510,9 @@ subroutine setup_screening(codvsn,acell,rprim,ngfftf,wfk_fname,dtfil,Dtset,Psps,
 
  ! Check full grid calculations
  if (Dtset%cd_full_grid/=0) then
-   MSG_WARNING(' FULL GRID IN COMPLEX PLANE CALCULATED.')
-   MSG_WARNING(' YOU MIGHT NOT BE ABLE TO USE SCREENING FILES!')
+   MSG_WARNING("FULL GRID IN COMPLEX PLANE CALCULATED. YOU MIGHT NOT BE ABLE TO USE SCREENING FILES!")
    if (Dtset%cd_subset_freq(1)/=0) then
-     MSG_ERROR(' cd_subset_freq cannot be used with cd_full_grid!')
+     MSG_ERROR('cd_subset_freq cannot be used with cd_full_grid!')
    end if
    Ep%nomegaec = Ep%nomegaei*(Ep%nomegaer-1)
  end if
@@ -522,32 +520,30 @@ subroutine setup_screening(codvsn,acell,rprim,ngfftf,wfk_fname,dtfil,Dtset,Psps,
  Ep%nomega=Ep%nomegaer+Ep%nomegaei+Ep%nomegaec ! Total number of frequencies.
 
  ! ==== Setup of the spectral method ====
- Ep%spmeth  =Dtset%spmeth
- Ep%nomegasf=Dtset%nomegasf
- Ep%spsmear =Dtset%spbroad
+ Ep%spmeth  =Dtset%spmeth; Ep%nomegasf=Dtset%nomegasf; Ep%spsmear =Dtset%spbroad
 
  if (Ep%spmeth/=0) then
    write(msg,'(2a,i3,2a,i8)')ch10,&
-&    ' setup_screening : using spectral method = ',Ep%spmeth,ch10,&
-&    '  Number of frequencies for imaginary part = ',Ep%nomegasf
+&    ' setup_screening: using spectral method: ',Ep%spmeth,ch10,&
+&    ' Number of frequencies for imaginary part: ',Ep%nomegasf
    call wrtout(std_out,msg,'COLL')
    if (Ep%spmeth==2) then
-     write(msg,'(a,f8.5,a)')' gaussian broadening = ',Ep%spsmear*Ha_eV,' [eV]'
+     write(msg,'(a,f8.5,a)')' Gaussian broadening = ',Ep%spsmear*Ha_eV,' [eV]'
      call wrtout(std_out,msg,'COLL')
    end if
  end if
 
  Ep%nI=1; Ep%nJ=1
  if (Dtset%nspinor==2) then
-   if (Dtset%usepaw==1.and.Dtset%pawspnorb>0) then
-     Ep%nI=1; Ep%nJ=4
-   end if
+   !if (Dtset%usepaw==1.and.Dtset%pawspnorb>0) then
+   !  Ep%nI=1; Ep%nJ=4
+   !end if
    ! For spin-spin interaction
    ! Ep%nI=4; Ep%nJ=4
-   ABI_CHECK(Ep%npwepG0==Ep%npwe,"npwepG0 must be == npwe if spinor==2")
-   ABI_CHECK(Ep%symchi==0,"symchi/=0 and nspinor=2 not available")
+   ABI_CHECK(Ep%npwepG0 == Ep%npwe, "npwepG0 must be == npwe if spinor==2")
+   !ABI_CHECK(Ep%symchi == 0, "symchi/=0 and nspinor=2 not available")
  end if
- !
+
  ! === Enable the calculations of chi0 on user-specified q-points ===
  Ep%nqibz=Qmesh%nibz
  ABI_MALLOC(Ep%qibz,(3,Ep%nqibz))
@@ -564,10 +560,11 @@ subroutine setup_screening(codvsn,acell,rprim,ngfftf,wfk_fname,dtfil,Dtset,Psps,
 &    ' nqptdm and qptdm'
    call wrtout(std_out,msg,'COLL')
    call wrtout(ab_out,msg,'COLL')
-   ltest=(Ep%nqcalc<=Qmesh%nibz)
+   ltest= Ep%nqcalc <= Qmesh%nibz
    ABI_CHECK(ltest, 'nqptdm should not exceed the number of q points in the IBZ')
    Ep%qcalc(:,:)=Dtset%qptdm(:,1:Ep%nqcalc)
-   do iq=1,Ep%nqcalc ! * Check whether the q-points provided are correct.
+   ! Check whether the q-points provided are correct.
+   do iq=1,Ep%nqcalc
      found=.FALSE.
      do iqp=1,Qmesh%nibz
        qtmp(:)=Ep%qcalc(:,iq)-Qmesh%ibz(:,iqp)
@@ -601,7 +598,6 @@ subroutine setup_screening(codvsn,acell,rprim,ngfftf,wfk_fname,dtfil,Dtset,Psps,
  ! === Initialize the band structure datatype ===
  ! * Copy KSS energies and occupations up to Ep%nbnds==Dtset%nband(:)
  ! TODO Recheck symmorphy and inversion
-
  bantot=SUM(Dtset%nband(1:Dtset%nkpt*Dtset%nsppol))
 
  ABI_MALLOC(doccde,(bantot))
@@ -650,40 +646,37 @@ subroutine setup_screening(codvsn,acell,rprim,ngfftf,wfk_fname,dtfil,Dtset,Psps,
  ABI_FREE(eigen)
  ABI_FREE(npwarr)
 
- ! === Initialize abinit header for the screening part ===
+ ! Initialize abinit header for the screening part
  call hdr_init(KS_BSt,codvsn,Dtset,Hdr_out,Pawtab,pertcase0,Psps,wvl)
 
- ! === Get Pawrhoij from the header of the KSS file ===
+ ! Get Pawrhoij from the header.
  ABI_DT_MALLOC(Pawrhoij,(Cryst%natom*Dtset%usepaw))
  if (Dtset%usepaw==1) then
    call pawrhoij_alloc(Pawrhoij,1,Dtset%nspden,Dtset%nspinor,Dtset%nsppol,Cryst%typat,pawtab=Pawtab)
    call pawrhoij_copy(Hdr_wfk%Pawrhoij,Pawrhoij)
  end if
-
  call hdr_update(Hdr_out,bantot,1.0d20,1.0d20,1.0d20,Cryst%rprimd,occfact,Pawrhoij,Cryst%xred,dtset%amu_orig(:,1))
 
  ABI_FREE(occfact)
  call pawrhoij_free(Pawrhoij)
  ABI_DT_FREE(Pawrhoij)
- !
- ! ==== Setup of extrapolar technique ====
- Ep%gwcomp   = Dtset%gwcomp
- Ep%gwencomp = Dtset%gwencomp
 
- if (Ep%gwcomp==1) then
+ ! ==== Setup of extrapolar technique ====
+ Ep%gwcomp = Dtset%gwcomp; Ep%gwencomp = Dtset%gwencomp
+ if (Ep%gwcomp == 1) then
    write(msg,'(a,f8.2,a)')' Using the completeness correction with gwencomp ',Ep%gwencomp*Ha_eV,' [eV] '
    call wrtout(std_out,msg,'COLL')
  end if
 
- ! === Final compatibility tests ===
- if (ANY(KS_BSt%istwfk/=1)) then
+ ! Final compatibility tests
+ if (ANY(KS_BSt%istwfk /= 1)) then
    MSG_WARNING('istwfk/=1 is still under development')
  end if
 
- ltest=(KS_BSt%mband==Ep%nbnds.and.ALL(KS_BSt%nband==Ep%nbnds))
+ ltest = (KS_BSt%mband == Ep%nbnds .and. ALL(KS_BSt%nband == Ep%nbnds))
  ABI_CHECK(ltest,'BUG in definition of KS_BSt%nband')
 
- if (Ep%gwcomp==1.and.Ep%spmeth>0) then
+ if (Ep%gwcomp==1 .and. Ep%spmeth>0) then
    MSG_ERROR("Hilbert transform and extrapolar method are not compatible")
  end if
 

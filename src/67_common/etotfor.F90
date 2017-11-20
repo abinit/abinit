@@ -413,14 +413,14 @@ subroutine etotfor(atindx1,deltae,diffor,dtefield,dtset,&
 &   abs(dtset%densfor_pred)<=6.and.abs(dtset%densfor_pred)/=5)
 
 !  If residual is a density residual (and forces from residual asked),
-!  has to convert it into a potential residualbefore calling forces routine
+!  has to convert it into a potential residual before calling forces routine
    if (apply_residual) then
      ABI_ALLOCATE(resid,(nfft,dtset%nspden))
      option=0; if (dtset%densfor_pred<0) option=1
      optnc=1;if (dtset%nspden==4.and.(abs(dtset%densfor_pred)==4.or.abs(dtset%densfor_pred)==6)) optnc=2
      call nres2vres(dtset,gsqcut,usepaw,kxc,mpi_enreg,my_natom,nfft,ngfft,nhat,&
 &     nkxc,nvresid,n3xccc,optnc,option,pawang,pawfgrtab,pawrhoij,pawtab,&
-&     rhor,rprimd,usepaw,resid,xccc3d,xred)
+&     rhor,rprimd,usepaw,resid,xccc3d,xred,vxc)
    else
      resid => nvresid
    end if

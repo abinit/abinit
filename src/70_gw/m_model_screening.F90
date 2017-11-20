@@ -65,10 +65,10 @@ CONTAINS  !=====================================================================
 !!
 !!  The function is a sum in the complex plane:
 !!      f(z) = Sum_n  f_n * Im[ ((w_n^2-z^2) - i*gamma*z)^-1 ], z=a-i*b
-!!                         
+!!
 !!  Here, f_n is the oscillator strength, w_n the location of the peak for
 !!   the imaginary function, and gamma is related to the width
-!!  
+!!
 !! INPUTS
 !!  omega      = (complex) Real and imaginary part of the frequency points
 !!  coeff      = The coefficients in order: f_1,w_1,gamma_1,f_2,w_2,gamma_2,
@@ -86,7 +86,7 @@ CONTAINS  !=====================================================================
 !!
 !! SOURCE
 
-subroutine im_screening(omega,fval,nomega,coeff,ncoeff) 
+subroutine im_screening(omega,fval,nomega,coeff,ncoeff)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -104,7 +104,7 @@ subroutine im_screening(omega,fval,nomega,coeff,ncoeff)
   complex(dpc),intent(in)  :: omega(nomega)
   real(gwp)  ,intent(in)  :: coeff(ncoeff)
   real(gwp)  ,intent(out) :: fval(nomega)
- 
+
 !Local variables-------------------------------
 !scalars
   integer :: io,ip
@@ -147,8 +147,8 @@ end subroutine im_screening
 !!   where each pole occurs twice in a time-ordered fashion.
 !!
 !!  Here, the A are the oscillator strengths, B the real component of the position
-!!  of the pole, and C the imaginary component. 
-!!  
+!!  of the pole, and C the imaginary component.
+!!
 !! INPUTS
 !!  omega      = (complex) Real and imaginary part of the frequency points
 !!  coeff      = The coefficients in order: A_1,B_1,C_1,A_2,B_2,C_2,...,A_n,B_n,C_n
@@ -165,7 +165,7 @@ end subroutine im_screening
 !!
 !! SOURCE
 
-subroutine re_screening(omega,fval,nomega,coeff,ncoeff) 
+subroutine re_screening(omega,fval,nomega,coeff,ncoeff)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -183,7 +183,7 @@ subroutine re_screening(omega,fval,nomega,coeff,ncoeff)
   complex(dpc),intent(in)  :: omega(nomega)
   real(gwp)  ,intent(in)  :: coeff(ncoeff)
   real(gwp)  ,intent(out) :: fval(nomega)
- 
+
 !Local variables-------------------------------
 !scalars
   integer :: io,ip
@@ -226,8 +226,8 @@ end subroutine re_screening
 !!   where each pole occurs twice in a time-ordered fashion.
 !!
 !!  Here, the A are the oscillator strengths, B the real component of the position
-!!  of the pole, and C the imaginary component. 
-!!  
+!!  of the pole, and C the imaginary component.
+!!
 !! INPUTS
 !!  omega      = (complex) Real and imaginary part of the frequency points
 !!  coeff      = The coefficients in order: A_1,B_1,C_1,A_2,B_2,C_2,...,A_n,B_n,C_n
@@ -245,7 +245,7 @@ end subroutine re_screening
 !!
 !! SOURCE
 
-subroutine re_and_im_screening(omega,fval,nomega,coeff,ncoeff) 
+subroutine re_and_im_screening(omega,fval,nomega,coeff,ncoeff)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -263,7 +263,7 @@ subroutine re_and_im_screening(omega,fval,nomega,coeff,ncoeff)
   complex(dpc) ,intent(in)  :: omega(nomega)
   real(gwp)   ,intent(in)  :: coeff(ncoeff)
   complex(gwp),intent(out) :: fval(nomega)
- 
+
 !Local variables-------------------------------
 !scalars
   integer :: io,ip
@@ -309,8 +309,8 @@ end subroutine re_and_im_screening
 !!   where each pole occurs twice in a time-ordered fashion.
 !!
 !!  Here, the A are the oscillator strengths, B the real component of the position
-!!  of the pole, and C the imaginary component. 
-!!  
+!!  of the pole, and C the imaginary component.
+!!
 !! INPUTS
 !!  omega      = (complex) Real and imaginary part of the frequency points
 !!  coeff      = The coefficients in order: A_1,B_1,C_1,A_2,B_2,C_2,...,A_n,B_n,C_n
@@ -328,7 +328,7 @@ end subroutine re_and_im_screening
 !!
 !! SOURCE
 
-subroutine re_and_im_screening_with_phase(omega,fval,nomega,coeff,ncoeff) 
+subroutine re_and_im_screening_with_phase(omega,fval,nomega,coeff,ncoeff)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -346,7 +346,7 @@ subroutine re_and_im_screening_with_phase(omega,fval,nomega,coeff,ncoeff)
   complex(dpc) ,intent(in)  :: omega(nomega)
   real(gwp)   ,intent(in)  :: coeff(ncoeff)
   complex(gwpc),intent(out) :: fval(nomega)
- 
+
 !Local variables-------------------------------
 !scalars
   integer :: io,ip,npoles
@@ -417,7 +417,7 @@ end subroutine re_and_im_screening_with_phase
 !! SOURCE
 
 subroutine sequential_fitting(omega,refval,imfval,nomega,nfreqre,coeff,&
-& ncoeff,prtvol,startcoeff) 
+& ncoeff,prtvol,startcoeff)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -462,7 +462,7 @@ subroutine sequential_fitting(omega,refval,imfval,nomega,nfreqre,coeff,&
     ! Initialise pole
     call init_single_peak(omega,refval,imfval,nomega,nfreqre,thiscoeff,prtvol)
     if (present(startcoeff)) then
-      startcoeff(idx:idx+2) = thiscoeff(1:3) 
+      startcoeff(idx:idx+2) = thiscoeff(1:3)
     end if
     ! Make fit
 #ifdef HAVE_LEVMAR
@@ -477,7 +477,7 @@ subroutine sequential_fitting(omega,refval,imfval,nomega,nfreqre,coeff,&
     imfval(:) = imfval(:) - AIMAG(pole_func(:))
     coeff(idx:idx+2) = thiscoeff(1:3)
     coeff(idx) = norm*coeff(idx)
-  end do 
+  end do
 
 end subroutine sequential_fitting
 !!***
@@ -509,7 +509,7 @@ end subroutine sequential_fitting
 !!
 !! SOURCE
 
-subroutine init_peaks_from_grid(omega,fval,nomega,nfreqre,nfreqim,coeff,ncoeff,prtvol) 
+subroutine init_peaks_from_grid(omega,fval,nomega,nfreqre,nfreqim,coeff,ncoeff,prtvol)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -527,7 +527,7 @@ subroutine init_peaks_from_grid(omega,fval,nomega,nfreqre,nfreqim,coeff,ncoeff,p
   complex(dpc) ,intent(in)  :: omega(nomega)
   real(gwp)   ,intent(out) :: coeff(ncoeff)
   complex(gwpc),intent(in)  :: fval(nomega)
- 
+
 !Local variables-------------------------------
 !scalars
   integer :: npoles,iline,idx,ip
@@ -544,7 +544,7 @@ subroutine init_peaks_from_grid(omega,fval,nomega,nfreqre,nfreqim,coeff,ncoeff,p
 ! Map the evolution of peaks if prtvol>10
   if (prtvol>10) then
     call print_peaks(omega,fval,nomega,nfreqre,nfreqim)
-  end if ! prtvol>10 
+  end if ! prtvol>10
 
 ! Count the number of peaks per line and find the location of the
 ! constant-imaginary frequency line wich has at least a number of
@@ -556,7 +556,7 @@ subroutine init_peaks_from_grid(omega,fval,nomega,nfreqre,nfreqim,coeff,ncoeff,p
 !  direction is used to get a rough estimate of the width of
 !  the peak.
   do ip=1,npoles
-    pol  = REAL(omega(ploc(ip))) 
+    pol  = REAL(omega(ploc(ip)))
     maxv = AIMAG(fval(ploc(ip)))
     write(std_out,*) ' maxv:',maxv
     if (ploc(ip)<nfreqre+1) then ! We are right on the real axis
@@ -578,7 +578,7 @@ subroutine init_peaks_from_grid(omega,fval,nomega,nfreqre,nfreqim,coeff,ncoeff,p
       val2 = AIMAG(fval(ploc(ip)+1))
         write(std_out,*) '3: ploc:',ploc(ip),' b2:',b2,' val2:',val2
     else ! We are in the complex plane
-      idx  = ploc(ip)+nfreqre-1 
+      idx  = ploc(ip)+nfreqre-1
       b2   = AIMAG(omega(idx))
       val2 = AIMAG(fval(idx))
       write(std_out,*) '4: ploc:',ploc(ip),' idx:',idx,' b2:',b2,' val2:',val2
@@ -639,7 +639,7 @@ end subroutine init_peaks_from_grid
 !!
 !! SOURCE
 
-subroutine init_single_peak(omega,refval,imfval,nomega,nfreqre,coeff,prtvol) 
+subroutine init_single_peak(omega,refval,imfval,nomega,nfreqre,coeff,prtvol)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -657,7 +657,7 @@ subroutine init_single_peak(omega,refval,imfval,nomega,nfreqre,coeff,prtvol)
   complex(dpc),intent(in)  :: omega(nomega)
   real(gwp)  ,intent(out) :: coeff(3)
   real(gwp)  ,intent(in) :: refval(nomega),imfval(nomega)
- 
+
 !Local variables-------------------------------
 !scalars
   integer :: maxpos,idx
@@ -674,7 +674,7 @@ subroutine init_single_peak(omega,refval,imfval,nomega,nfreqre,coeff,prtvol)
   val2 = refval(idx)
   val1 = osc+val2*pol_sq+val2*AIMAG(omega(idx))*AIMAG(omega(idx))
   gam  = -ABS(val1/(AIMAG(omega(idx))*val2))
-  
+
   coeff(1) = osc
   coeff(2) = pol
   coeff(3) = gam
@@ -720,7 +720,7 @@ end subroutine init_single_peak
 !!
 !! SOURCE
 
-subroutine init_peaks_even_dist(omega,fval,nomega,nfreqre,coeff,ncoeff,prtvol) 
+subroutine init_peaks_even_dist(omega,fval,nomega,nfreqre,coeff,ncoeff,prtvol)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -738,7 +738,7 @@ subroutine init_peaks_even_dist(omega,fval,nomega,nfreqre,coeff,ncoeff,prtvol)
   complex(dpc) ,intent(in)  :: omega(nomega)
   real(gwp)   ,intent(out) :: coeff(ncoeff)
   complex(gwpc),intent(in)  :: fval(nomega)
- 
+
 !Local variables-------------------------------
 !scalars
   integer :: npoles,ip,idx,iw
@@ -759,17 +759,17 @@ subroutine init_peaks_even_dist(omega,fval,nomega,nfreqre,coeff,ncoeff,prtvol)
   norm = norm + fval(nfreqre)*half
   norm = norm*(omega(nfreqre)-omega(1))/real(nfreqre,gwp)
   norm = norm/div
- 
+
   do ip=1,npoles
     idx = 3*(ip-1)+1
     pol = delta*ip   ! Position of maximum
     gam = 0.1_gwp ! Spread of function
     val2 = gam*half
     val1 = SQRT(pol*pol-val2*val2)
-    osc = norm*val1*two 
+    osc = norm*val1*two
     coeff(idx  ) = osc!*(-1.0_gwp)**(ip-1)
     coeff(idx+1) = pol   ! Position of maximum
-    coeff(idx+2) = -gam ! Spread of function 
+    coeff(idx+2) = -gam ! Spread of function
     if (prtvol>9) then
       write(std_out,'(a,a,i0)') ch10,' Pole no,: ',ip
       write(std_out,'(a,ES16.8)')    '  Osc. strength:',osc
@@ -812,7 +812,7 @@ end subroutine init_peaks_even_dist
 !!
 !! SOURCE
 
-subroutine print_peaks(omega,fval,nomega,nfreqre,nfreqim) 
+subroutine print_peaks(omega,fval,nomega,nfreqre,nfreqim)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -829,7 +829,7 @@ subroutine print_peaks(omega,fval,nomega,nfreqre,nfreqim)
 !arrays
   complex(dpc) ,intent(in)  :: omega(nomega)
   complex(gwpc),intent(in)  :: fval(nomega)
- 
+
 !Local variables-------------------------------
 !scalars
   integer :: ire,iim,unt_tmp
@@ -909,10 +909,10 @@ subroutine print_peaks(omega,fval,nomega,nfreqre,nfreqim)
     else if (((val1>val2).AND.(val2<val3))) then
       if (sign(1.0_gwp,val2)>zero) CYCLE
       write(unt_tmp,'(2f8.2,4x,ES16.8)') rez*Ha_eV,imz*Ha_eV,val2
-    end if 
+    end if
   end do
 ! Check last point
-  idx1 = nfreqre-2 
+  idx1 = nfreqre-2
   idx2 = idx1 + 1
 !  write(std_out,*) ' idx1:',idx1,' idx2:',idx2
   rez = REAL(omega(idx2))
@@ -974,7 +974,7 @@ subroutine find_peaks(fval,nomega,nfreqre,nfreqim,ploc,npoles,iline)
 !arrays
   integer    ,intent(inout) :: ploc(npoles)
   complex(gwpc), intent(in) :: fval(nomega)
- 
+
 !Local variables-------------------------------
 !scalars
   integer    :: ire,iim,ipoles
@@ -990,7 +990,7 @@ subroutine find_peaks(fval,nomega,nfreqre,nfreqim,ploc,npoles,iline)
   ploc=-1; ploc_prev=-1
   pval=zero; pval_prev=zero; ipol=1; ipoles=0
 
-! First do a line along the real axis 
+! First do a line along the real axis
   idx1 = 1; idx2 = 2
   val1 = AIMAG(fval(idx1)); val2 = AIMAG(fval(idx2))
   if (ABS(val1)>ABS(val2)) then
@@ -1022,10 +1022,10 @@ subroutine find_peaks(fval,nomega,nfreqre,nfreqim,ploc,npoles,iline)
         write(std_out,*) ' pval:',pval
         write(std_out,*) ' ploc:',ploc
       end if
-    end if 
+    end if
   end do
 ! Check last point
-  idx1 = nfreqre-2 
+  idx1 = nfreqre-2
   idx2 = idx1 + 1
 !  write(std_out,*) ' idx1:',idx1,' idx2:',idx2
   val1 = AIMAG(fval(idx1))
@@ -1159,7 +1159,7 @@ subroutine remove_phase(fval,nomega,phase)
   real(gwp), intent(out) :: phase
 !arrays
   complex(gwpc), intent(inout) :: fval(nomega)
- 
+
 !Local variables-------------------------------
 !scalars
   integer       :: io

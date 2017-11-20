@@ -96,8 +96,7 @@ CONTAINS  !=====================================================================
 !!      mover_effpot,multibinit
 !!
 !! CHILDREN
-!!      generelist,polynomial_coeff_free,polynomial_coeff_getname
-!!      polynomial_coeff_init,polynomial_term_free,polynomial_term_init,wrtout
+!!      destroy_supercell,generelist,init_supercell,xred2xcart
 !!
 !! SOURCE
 
@@ -1027,8 +1026,7 @@ end subroutine fit_polynomial_coeff_fit
 !!      mover_effpot
 !!
 !! CHILDREN
-!!      generelist,polynomial_coeff_free,polynomial_coeff_getname
-!!      polynomial_coeff_init,polynomial_term_free,polynomial_term_init,wrtout
+!!      destroy_supercell,generelist,init_supercell,xred2xcart
 !!
 !! SOURCE
 
@@ -1250,8 +1248,7 @@ end subroutine fit_polynomial_coeff_getPositive
 !!      m_fit_polynomial_coeff
 !!
 !! CHILDREN
-!!      generelist,polynomial_coeff_free,polynomial_coeff_getname
-!!      polynomial_coeff_init,polynomial_term_free,polynomial_term_init,wrtout
+!!      destroy_supercell,generelist,init_supercell,xred2xcart
 !!
 !! SOURCE
 
@@ -1438,8 +1435,7 @@ end subroutine fit_polynomial_coeff_solve
 !!      m_fit_polynomial_coeff
 !!
 !! CHILDREN
-!!      generelist,polynomial_coeff_free,polynomial_coeff_getname
-!!      polynomial_coeff_init,polynomial_term_free,polynomial_term_init,wrtout
+!!      destroy_supercell,generelist,init_supercell,xred2xcart
 !!
 !! SOURCE
 
@@ -1563,8 +1559,7 @@ end subroutine fit_polynomial_coeff_computeGF
 !!      m_fit_polynomial_coeff
 !!
 !! CHILDREN
-!!      generelist,polynomial_coeff_free,polynomial_coeff_getname
-!!      polynomial_coeff_init,polynomial_term_free,polynomial_term_init,wrtout
+!!      destroy_supercell,generelist,init_supercell,xred2xcart
 !!
 !! SOURCE
 
@@ -1853,8 +1848,7 @@ end subroutine fit_polynomial_coeff_getFS
 !! PARENTS
 !!
 !! CHILDREN
-!!      generelist,polynomial_coeff_free,polynomial_coeff_getname
-!!      polynomial_coeff_init,polynomial_term_free,polynomial_term_init,wrtout
+!!      destroy_supercell,generelist,init_supercell,xred2xcart
 !!
 !! SOURCE
 
@@ -1975,8 +1969,7 @@ end subroutine fit_polynomial_coeff_computeMSE
 !!      multibinit
 !!
 !! CHILDREN
-!!      generelist,polynomial_coeff_free,polynomial_coeff_getname
-!!      polynomial_coeff_init,polynomial_term_free,polynomial_term_init,wrtout
+!!      destroy_supercell,generelist,init_supercell,xred2xcart
 !!
 !! SOURCE
 

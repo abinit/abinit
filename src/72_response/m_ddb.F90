@@ -227,6 +227,7 @@ CONTAINS  !===========================================================
 !!      m_effective_potential_file,m_gruneisen,mblktyp1,mblktyp5,thmeig
 !!
 !! CHILDREN
+!!      ddb_hdr_free,ddb_hdr_open_read
 !!
 !! SOURCE
 
@@ -283,6 +284,7 @@ end subroutine ddb_free
 !! PARENTS
 !!
 !! CHILDREN
+!!      ddb_hdr_free,ddb_hdr_open_read
 !!
 !! SOURCE
 
@@ -344,6 +346,7 @@ end subroutine ddb_copy
 !!      ddb_interpolate,dfptnl_doutput,gstate,m_ddb,mblktyp1,mblktyp5,thmeig
 !!
 !! CHILDREN
+!!      ddb_hdr_free,ddb_hdr_open_read
 !!
 !! SOURCE
 
@@ -408,6 +411,7 @@ end subroutine ddb_malloc
 !!      m_ddb
 !!
 !! CHILDREN
+!!      ddb_hdr_free,ddb_hdr_open_read
 !!
 !! SOURCE
 
@@ -514,6 +518,7 @@ end subroutine ddb_bcast
 !!      thmeig
 !!
 !! CHILDREN
+!!      ddb_hdr_free,ddb_hdr_open_read
 !!
 !! SOURCE
 
@@ -781,6 +786,7 @@ end subroutine gtblk9
 !!      m_ddb
 !!
 !! CHILDREN
+!!      ddb_hdr_free,ddb_hdr_open_read
 !!
 !! SOURCE
 
@@ -862,6 +868,7 @@ end subroutine gamma9
 !!      m_ddb,mblktyp1,mblktyp5,thmeig
 !!
 !! CHILDREN
+!!      ddb_hdr_free,ddb_hdr_open_read
 !!
 !! SOURCE
 
@@ -1122,6 +1129,7 @@ end subroutine read_blok8
 !!      m_ddb
 !!
 !! CHILDREN
+!!      ddb_hdr_free,ddb_hdr_open_read
 !!
 !! SOURCE
 
@@ -1374,6 +1382,7 @@ end subroutine rdddb9
 !!      m_ddb,thmeig
 !!
 !! CHILDREN
+!!      ddb_hdr_free,ddb_hdr_open_read
 !!
 !! SOURCE
 
@@ -1469,6 +1478,7 @@ end subroutine chkin9
 !!      m_ddb,nonlinear
 !!
 !! CHILDREN
+!!      ddb_hdr_free,ddb_hdr_open_read
 !!
 !! SOURCE
 
@@ -1628,6 +1638,7 @@ end subroutine nlopt
 !!      anaddb,dfpt_looppert,eph,m_effective_potential_file,m_gruneisen
 !!
 !! CHILDREN
+!!      ddb_hdr_free,ddb_hdr_open_read
 !!
 !! SOURCE
 
@@ -1854,6 +1865,7 @@ end subroutine ddb_from_file
 !!      thmeig
 !!
 !! CHILDREN
+!!      ddb_hdr_free,ddb_hdr_open_read
 !!
 !! SOURCE
 
@@ -1973,6 +1985,7 @@ end subroutine carttransf
 !!      m_ddb
 !!
 !! CHILDREN
+!!      ddb_hdr_free,ddb_hdr_open_read
 !!
 !! SOURCE
 
@@ -2084,6 +2097,7 @@ end subroutine carteig2d
 !!      m_ddb
 !!
 !! CHILDREN
+!!      ddb_hdr_free,ddb_hdr_open_read
 !!
 !! SOURCE
 
@@ -2184,6 +2198,7 @@ end subroutine dtech9
 !!      m_ddb
 !!
 !! CHILDREN
+!!      ddb_hdr_free,ddb_hdr_open_read
 !!
 !! SOURCE
 
@@ -2859,6 +2874,7 @@ end function ddb_get_asrq0
 !! PARENTS
 !!
 !! CHILDREN
+!!      ddb_hdr_free,ddb_hdr_open_read
 !!
 !! SOURCE
 
@@ -2959,6 +2975,7 @@ end subroutine ddb_diagoq
 !!      anaddb,m_ddb,m_phonons
 !!
 !! CHILDREN
+!!      ddb_hdr_free,ddb_hdr_open_read
 !!
 !! SOURCE
 
@@ -3016,6 +3033,7 @@ end subroutine asrq0_apply
 !!      anaddb,m_effective_potential_file
 !!
 !! CHILDREN
+!!      ddb_hdr_free,ddb_hdr_open_read
 !!
 !! SOURCE
 
@@ -3104,6 +3122,7 @@ end subroutine asrq0_free
 !!      ddb_interpolate,dfptnl_doutput,gstate,mblktyp1,mblktyp5
 !!
 !! CHILDREN
+!!      ddb_hdr_free,ddb_hdr_open_read
 !!
 !! SOURCE
 
@@ -3300,9 +3319,10 @@ end subroutine ddb_write_blok
 !! OUTPUT
 !!
 !! PARENTS
-!!
+!!      mover_effpot
 !!
 !! CHILDREN
+!!      ddb_hdr_free,ddb_hdr_open_read
 !!
 !! SOURCE
 

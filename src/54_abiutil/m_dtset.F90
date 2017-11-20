@@ -355,8 +355,7 @@ end subroutine dtset_chkneu
 !!  dtout <type(dataset_type)>
 !!
 !! PARENTS
-!!      calc_vhxc_me,chkinp,dfpt_looppert,driver,gwls_hamiltonian
-!!      m_io_kss,m_kxc,xchybrid_ncpp_cc
+!!      chkinp,dfpt_looppert,driver,gwls_hamiltonian,m_io_kss
 !!
 !! CHILDREN
 !!
@@ -558,7 +557,6 @@ subroutine dtset_copy(dtout, dtin)
  dtout%gwpara             = dtin%gwpara
  dtout%gwgamma            = dtin%gwgamma
  dtout%gwrpacorr          = dtin%gwrpacorr
- dtout%gwfockmix          = dtin%gwfockmix
  dtout%gw_customnfreqsp   = dtin%gw_customnfreqsp
  dtout%gw_nqlwl           = dtin%gw_nqlwl
  dtout%gw_nstep           = dtin%gw_nstep
@@ -624,6 +622,7 @@ subroutine dtset_copy(dtout, dtin)
  dtout%istatr             = dtin%istatr
  dtout%istatshft          = dtin%istatshft
  dtout%ixc                = dtin%ixc
+ dtout%ixc_sigma          = dtin%ixc_sigma
  dtout%ixcpositron        = dtin%ixcpositron
  dtout%jdtset             = dtin%jdtset
  dtout%jellslab           = dtin%jellslab
@@ -1210,8 +1209,8 @@ end subroutine dtset_copy
 !!  dtset <type(dataset_type)>=free all allocated allocatable.
 !!
 !! PARENTS
-!!      calc_vhxc_me,chkinp,dfpt_looppert,driver,gwls_hamiltonian
-!!      m_ab7_invars_f90,m_io_kss,m_kxc,mover_effpot,xchybrid_ncpp_cc
+!!      chkinp,dfpt_looppert,driver,gwls_hamiltonian,m_ab7_invars_f90,m_io_kss
+!!      mover_effpot
 !!
 !! CHILDREN
 !!

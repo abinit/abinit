@@ -464,7 +464,7 @@ end subroutine effective_potential_file_read
 !!             41 ASCII file with history of MD or snapshot
 !!
 !! PARENTS
-!!      m_effective_potential_file,multibinit
+!!      m_effective_potential_file,mover_effpot,multibinit
 !!
 !! CHILDREN
 !!
@@ -3526,6 +3526,7 @@ end subroutine effective_potential_file_readMDfile
 !! hist<type(abihist)> = The history of the MD
 !!
 !! PARENTS
+!!      m_fit_polynomial_coeff,multibinit
 !!
 !! CHILDREN
 !!

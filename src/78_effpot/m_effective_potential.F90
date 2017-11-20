@@ -1435,7 +1435,7 @@ end subroutine effective_potential_setConfinement
 !! eff_pot<type(effective_potential_type)> = effective_potential datatype
 !!
 !! PARENTS
-!!      m_effective_potential,m_fit_polynomial_coeff,mover_effpot
+!!      m_effective_potential,m_effective_potential_file,mover_effpot
 !!
 !! CHILDREN
 !!      ab_define_var,isfile,wrtout
@@ -2348,7 +2348,7 @@ end subroutine effective_potential_writeAbiInput
 !! strten(6) = stress tensor (Ha/Bohr^3)
 !!
 !! PARENTS
-!!      m_effective_potential,m_fit_polynomial_coeff,mover
+!!      m_effective_potential,m_fit_data,m_fit_polynomial_coeff,mover
 !!
 !! CHILDREN
 !!      ab_define_var,isfile,wrtout
@@ -2842,7 +2842,7 @@ end subroutine effective_potential_evaluate
 !! du_delta(6,3,natom)   = variation of the displacmeent wr to strain
 !!
 !! PARENTS
-!!      m_effective_potential,m_fit_polynomial_coeff
+!!      m_effective_potential,m_fit_data
 !!
 !! CHILDREN
 !!      ab_define_var,isfile,wrtout

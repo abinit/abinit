@@ -159,8 +159,9 @@
 !!      afterscfloop,setup_positron
 !!
 !! CHILDREN
-!!      ctocprj,forces,forstrnps,metric,nres2vres,pawgrnl,stress,timab
-!!      wvl_nl_gradient,xchybrid_ncpp_cc,xred2xcart
+!!      ctocprj,forces,forstrnps,initylmg,metric,nres2vres,pawcprj_alloc
+!!      pawcprj_free,pawcprj_getdim,pawgrnl,stress,timab,wvl_nl_gradient
+!!      xchybrid_ncpp_cc,xred2xcart
 !!
 !! SOURCE
 
@@ -425,7 +426,7 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
      optnc=1;if (dtset%nspden==4.and.(abs(dtset%densfor_pred)==4.or.abs(dtset%densfor_pred)==6)) optnc=2
      call nres2vres(dtset,gsqcut,psps%usepaw,kxc,mpi_enreg,my_natom,nfftf,ngfftf,nhat,&
 &     nkxc,nvresid,n3xccc,optnc,option,pawang,pawfgrtab,pawrhoij,pawtab,&
-&     rhor,rprimd,psps%usepaw,resid,xccc3d,xred)
+&     rhor,rprimd,psps%usepaw,resid,xccc3d,xred,vxc)
    else
      resid => nvresid
    end if

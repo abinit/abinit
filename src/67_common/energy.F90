@@ -134,13 +134,13 @@
 !! CHILDREN
 !!      bandfft_kpt_restoretabs,bandfft_kpt_savetabs,destroy_hamiltonian
 !!      dotprod_vn,fftpac,fourdp,gpu_finalize_ffnl_ph3d,gpu_update_ffnl_ph3d
-!!      init_hamiltonian,load_k_hamiltonian,load_spin_hamiltonian,mag_constr
-!!      make_gemm_nonlop,meanvalue_g,metric,mkffnl,mkkin,mkresi,mkrho,nonlop
-!!      pawaccrhoij,pawcprj_alloc,pawcprj_free,pawcprj_gather_spin,pawmknhat
-!!      pawrhoij_alloc,pawrhoij_free,pawrhoij_free_unpacked
+!!      hartre,init_hamiltonian,load_k_hamiltonian,load_spin_hamiltonian
+!!      mag_constr,make_gemm_nonlop,meanvalue_g,metric,mkffnl,mkkin,mkresi
+!!      mkrho,nonlop,pawaccrhoij,pawcprj_alloc,pawcprj_free,pawcprj_gather_spin
+!!      pawmknhat,pawrhoij_alloc,pawrhoij_free,pawrhoij_free_unpacked
 !!      pawrhoij_init_unpacked,pawrhoij_mpisum_unpacked,prep_bandfft_tabs
-!!      prep_nonlop,psolver_rhohxc,rhotoxc,rhohxcpositron,symrhoij,timab
-!!      transgrid,xmpi_sum
+!!      prep_nonlop,psolver_rhohxc,rhohxcpositron,rhotoxc,symrhoij,timab
+!!      transgrid,xcdata_init,xmpi_sum
 !!
 !! SOURCE
 
@@ -329,21 +329,20 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
    if (dtset%icoulomb == 0) then
 !    Use the periodic solver to compute Hxc.
      call hartre(1,gsqcut,psps%usepaw,mpi_enreg,nfftf,ngfftf,dtset%paral_kgb,rhog,rprimd,vhartr)
-     call xcdata_init(dtset%auxc_ixc,dtset%intxc,dtset%ixc,&
-&      dtset%nelect,dtset%tphysel,dtset%usekden,dtset%vdw_xc,dtset%xc_tb09_c,dtset%xc_denpos,xcdata)
+     call xcdata_init(xcdata,dtset=dtset)
      ABI_ALLOCATE(kxc,(1,nkxc))
 !    to be adjusted for the call to rhotoxc
      nk3xc=1
      if (ipositron==0) then
        call rhotoxc(energies%e_xc,kxc, &
 &       mpi_enreg,nfftf,ngfftf,nhat,psps%usepaw,nhatgr,nhatgrdim, &
-&       nkxc,nk3xc,dtset%nspden,n3xccc,option,dtset%paral_kgb,rhor,rprimd,strsxc, &
+&       nkxc,nk3xc,n3xccc,option,dtset%paral_kgb,rhor,rprimd,strsxc, &
 &       usexcnhat,vxc,vxcavg,xccc3d,xcdata,taug=taug,taur=taur,vhartr=vhartr, &
 &       vxctau=vxctau,exc_vdw_out=energies%e_xc_vdw,add_tfw=add_tfw_)
      else
        call rhotoxc(energies%e_xc,kxc, &
 &       mpi_enreg,nfftf,ngfftf,nhat,psps%usepaw,nhatgr,nhatgrdim, &
-&       nkxc,nk3xc,dtset%nspden,n3xccc,option,dtset%paral_kgb,rhor,rprimd,strsxc, &
+&       nkxc,nk3xc,n3xccc,option,dtset%paral_kgb,rhor,rprimd,strsxc, &
 &       usexcnhat,vxc,vxcavg,xccc3d,xcdata, &
 &       electronpositron=electronpositron,taug=taug,taur=taur,vhartr=vhartr, &
 &       vxctau=vxctau,exc_vdw_out=energies%e_xc_vdw,add_tfw=add_tfw_)

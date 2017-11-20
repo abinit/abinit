@@ -503,7 +503,7 @@ sec3:
      4  0.478  0.478  0.400 16.041  0.482
      5  0.249  0.478  0.555  0.482 16.567
   
-     bare interaction value of J=1/((2l+1)(2l)) \sum_{m1/=m2} U(m1,m2,m2,m1)=    0.4486    0.0000
+     bare interaction value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m1,m2,m2))=    0.6667    0.0000
   </pre>
   
   <li> Then, the cRPA effective interactions are given for all frequency.
@@ -529,7 +529,7 @@ sec3:
      4  0.435  0.436  0.378  3.434  0.446
      5  0.247  0.442  0.444  0.446  3.641
   
-     cRPA interaction value of J=1/((2l+1)(2l)) \sum_{m1/=m2} U(m1,m2,m2,m1)=    0.4092    0.0000
+     cRPA interaction value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=    0.5997    0.0000
   </pre>
   
   <li>At the end of the calculation, the value of <i>U</i> and <i>J</i> as a function of frequency are gathered.
@@ -539,7 +539,7 @@ sec3:
               Average U and J as a function of frequency
      -------------------------------------------------------------
            omega           U(omega)            J(omega)
-          0.000      2.7546   -0.0000      0.4092    0.0000
+          0.000      2.7546   -0.0000      0.5997    0.0000
      -------------------------------------------------------------
   </pre>
   
@@ -564,10 +564,10 @@ sec4:
   
   <pre>
      ecuteps (Ha)   U (eV)     J (eV)
-        3            3.22       0.43
-        5            3.01       0.42
-        7            2.99       0.40
-        9            2.99       0.40
+        3            3.22       0.63
+        5            3.01       0.60
+        7            2.99       0.59
+        9            2.99       0.58
   </pre>
   So, for [[nband]]=30, [[ecutsigx]]=30 and a 4x4x4 k-point grid,
   the effective interactions are converged with a precision of 0.02 eV for [[ecuteps]]=5.
@@ -577,10 +577,10 @@ sec4:
   also discussed in the <a href="../../theory/generated_files/theorydoc_mbt.html#RPA_Fourier_space">Notes on RPA calculations</a>.
   <pre>
      nband          U (eV)     J (eV)
-      30             3.01       0.42
-      50             2.75       0.41
-      70             2.71       0.41
-      90             2.70       0.40
+      30             3.01       0.61
+      50             2.75       0.60
+      70             2.71       0.59
+      90             2.70       0.59
   </pre>
   
   So, for [[ecuteps]]=5, [[ecutsigx]]=30 and a 4x4x4 k-point grid,
@@ -595,9 +595,9 @@ sec4:
   
   <pre>
        ecutsigx (Ha)            U_bare (eV)    J_bare (eV)      U (eV)       J (eV)
-           30                    15.38          0.45            3.22         0.43
-           50                    15.38          0.46            3.22         0.44
-           70                    15.38          0.47            3.22         0.45
+           30                    15.38          0.67            3.22         0.63
+           50                    15.38          0.68            3.22         0.65
+           70                    15.38          0.69            3.22         0.66
   </pre>
   For [[ecuteps]]=3, [[nband]]=30 and a 4 4 4 k-point grid, effective interactions are converged
   with a precision of 0.02 eV for [[ecutsigx]]=30 Ha.
@@ -607,10 +607,8 @@ sec4:
   important to check.
   <pre>
      kpoint grid     U_bare (eV)    J_bare (eV)     U (eV)       J (eV)
-        4 4 4          15.38          0.45           3.22         0.43
-        5 5 5          15.38          0.44           3.14         0.43
-        6 6 6          15.36          0.44           3.19         0.43
-        7 7 7          15.35          0.44           3.19         0.43
+        4 4 4          15.38          0.65           3.22         0.63
+        6 6 6          15.36          0.66           3.18         0.62
   </pre>
   
   For [[ecuteps]]=3, [[nband]]=30 and [[ecutsigx]]=30, effective interactions are converged to 0.01 eV for a
@@ -636,12 +634,12 @@ sec5:
   the value of bare and effective interactions.
   
   <pre><span style="color: #000000">
-        model      ucrpa dmftbandi/dmftbandf ucrpa_bands |  U<SUB>bare</SUB>    U<SUB>bare diag</SUB>   J<SUB>bare</SUB> |   U      U<SUB>diag</SUB>     J 
-   <i>     d - d     </i>   1        21/25            21 25     |  15.4      16.3      0.45  |  2.8     3.5     0.41
-   <i>    t2g-t2g    </i>   1        21/25            21 25     |  15.3      16.0      0.48  |  2.8     3.4     0.44
-   <i>     dp-dp     </i>   1        12/25            12 25     |  19.4      20.6      0.67  | 10.1    11.2     0.64
-   <i>     d -dp (a) </i>   1        12/25            21 25     |  19.4      20.6      0.67  |  3.4     4.4     0.62
-   <i>     d -dp (b) </i>   2        12/25            12 25     |  19.4      20.6      0.67  |  1.6     2.6     0.60
+        model      ucrpa dmftbandi/dmftbandf ucrpa_bands |  <i>U</i><SUB>bare</SUB>    <i>U</i><SUB>bare diag</SUB>   <i>J</i><SUB>bare</SUB> |   <i>U</i>      <i>U</i><SUB>diag</SUB>     <i>J</i>
+   <i>     d - d     </i>   1        21/25            21 25     |  15.4      16.3      0.66  |  2.8     3.5     0.60
+   <i>    t2g-t2g    </i>   1        21/25            21 25     |  15.3      16.0      0.54  |  2.8     3.4     0.47
+   <i>     dp-dp     </i>   1        12/25            12 25     |  19.4      20.6      0.96  | 10.8    12.0     0.91
+   <i>     d -dp (a) </i>   1        12/25            21 25     |  19.4      20.6      0.96  |  3.4     4.4     0.87
+   <i>     d -dp (b) </i>   2        12/25            12 25     |  19.4      20.6      0.96  |  1.6     2.6     0.86
   </pre></span>
   <!--   <i>     d -dp (a) </i>  convergency over ecutsigx                                         0.69                 4.5        0.63 -->
   <!--   <i>     d -dp (a) </i>  convergency over ecutsigx                                         0.70                            0.64 -->
@@ -654,8 +652,11 @@ sec5:
   in this table.
   <p>
   To obtain the results with only the <i>t<SUB>2g</SUB></i>  orbitals, one must use a specific input file, which is tucrpa_4.in, which
-  uses specific keywords, peculiar to this case (compare it with tucrpa_2.in).
+  uses specific keywords, peculiar to this case (compare it with tucrpa_2.in). In this peculiar case, the most common definition of J has to be deduced by direct
+  calculation from the interaction matrices using the Slater Kanamori expression (see e.g. [[Lechermann2006]] or [[Vaugier2012]]) and not 
+  using the value of <i>J</i> computed in the code).
   
+  <p>
   We now briefly comment the physics of the results.
   <ul> 
   <li> Bare interactions. When the number of bands used is larger, the Wannier orbitals extension is smaller. 
@@ -675,7 +676,7 @@ sec5:
   </ul>
   </ul>
   Finally, fully screened interactions (not discussed here) could also be computed for each definition
-  correlated orbitals by using the default values of [[ucrpa_bands]] .
+  of correlated orbitals by using the default values of [[ucrpa_bands]] .
   
 ## Each section must have a title, that will form the table of content.
 ## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
@@ -724,6 +725,6 @@ sec7:
  title: "Conclusion"
  tag: conclusion
  body: |
-  This simple tutorial showed how to compute effective interactions for SrVO<sub>3</sub>.
+  This tutorial showed how to compute effective interactions for SrVO<sub>3</sub>.
   It emphasized the importance of the definition of correlated
   orbitals and the definition of constrained polarizability.

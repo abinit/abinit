@@ -105,7 +105,7 @@ integer :: v
 integer :: nbandv                                    !Public
 integer :: mcg
 integer :: ktot                                      !Public
-integer :: tmp2i(2)
+!integer :: tmp2i(2)
 integer, parameter   :: iovar=6 !137                 !Public
 integer, allocatable :: gbound(:,:)
 integer, allocatable :: istwfk(:)                    !Public

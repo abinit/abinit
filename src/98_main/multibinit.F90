@@ -24,12 +24,12 @@
 !! CHILDREN
 !!      abi_io_redirect,abihist_bcast,abihist_free,abimem_init,abinit_doctor
 !!      compute_anharmonics,effective_potential_file_getdimsystem
-!!      effective_potential_file_gettype,effective_potential_file_read
-!!      effective_potential_file_readmdfile,effective_potential_free
-!!      effective_potential_setconfinement,effective_potential_writenetcdf
-!!      effective_potential_writexml,fit_polynomial_coeff_fit
-!!      fit_polynomial_coeff_maphisttoref,fit_polynomial_printsystemfiles
-!!      flush_unit,herald,init10,instrng,inupper,invars10,isfile,mover_effpot
+!!      effective_potential_file_gettype,effective_potential_file_maphisttoref
+!!      effective_potential_file_read,effective_potential_file_readmdfile
+!!      effective_potential_free,effective_potential_setconfinement
+!!      effective_potential_writenetcdf,effective_potential_writexml
+!!      fit_polynomial_coeff_fit,fit_polynomial_printsystemfiles,flush_unit
+!!      herald,init10,instrng,inupper,invars10,isfile,mover_effpot
 !!      multibinit_dtset_free,outvars_multibinit,timein,wrtout,xmpi_bcast
 !!      xmpi_init,xmpi_sum
 !!
@@ -332,7 +332,7 @@ program multibinit
        if (iam_master) then
          call fit_polynomial_printSystemFiles(reference_effective_potential,hist)
        end if
-       else if (option==1.or.option==2)then
+     else if (option==1.or.option==2)then
 !      option = 1
        call fit_polynomial_coeff_fit(reference_effective_potential,&
 &       inp%fit_bancoeff,inp%fit_fixcoeff,hist,inp%fit_generateTerm,&
@@ -379,7 +379,7 @@ program multibinit
      call wrtout(std_out,message,'COLL')
      name = replace(trim(filnam(2)),".out","")
      call effective_potential_writeXML(reference_effective_potential,inp%prt_model,filename=name,&
-&                                      prt_dipdip=inp%dipdip_prt==1)
+&     prt_dipdip=inp%dipdip_prt==1)
    else if (inp%prt_model == -2)then
 !    NetCDF case, in progress
      name = trim(filnam(2))//"_sys.nc"
