@@ -135,6 +135,9 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlc,lambda,mpi_enreg,nd
  logical :: k1_eq_k2,have_to_reequilibrate,has_fock
  logical :: nspinor1TreatedByThisProc,nspinor2TreatedByThisProc
  real(dp) :: ghcim,ghcre,weight
+!DEBUG
+ real(dp) :: energy_,doti
+!ENDDEBUG
  character(len=500) :: msg
 !arrays
  integer, pointer :: gbound_k1(:,:),gbound_k2(:,:),kg_k1(:,:),kg_k2(:,:)
@@ -701,6 +704,12 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlc,lambda,mpi_enreg,nd
    end if
 
  end if ! type_calc
+
+!DEBUG
+ write(std_out,*)' getghc : exit '
+ call dotprod_g(energy_,doti,gs_ham%istwf_k,npw_k1*my_nspinor,1,cwavef,ghc,mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
+ write(std_out,*)' getghc : energy=',energy_
+!ENDDEBUG
 
  call timab(200+tim_getghc,2,tsec)
 

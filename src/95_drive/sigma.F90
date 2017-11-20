@@ -1482,6 +1482,24 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
      ABI_MALLOC(htmp,(b1gw:b2gw,b1gw:b2gw,Kmesh%nibz,Sigp%nsppol*Sigp%nsig_ab))
      ABI_MALLOC(ctmp,(b1gw:b2gw,b1gw:b2gw))
      ABI_MALLOC(uks2qp,(b1gw:b2gw,b1gw:b2gw))
+
+!DEBUG
+     write(std_out,*)' Compute the vxcval and the hbare in the QP basis, for comparison '
+     htmp=KS_me%vxcval
+     do spin=1,Sigp%nsppol
+       do ik=1,Kmesh%nibz
+         uks2qp(:,:) = Sr%m_lda_to_qp(b1gw:b2gw,b1gw:b2gw,ik,spin)
+         do iab=1,Sigp%nsig_ab
+           is_idx=spin; if (Sigp%nsig_ab>1) is_idx=iab
+           ctmp(:,:)=MATMUL(htmp(:,:,ik,is_idx),uks2qp(:,:))
+           htmp(:,:,ik,is_idx)=MATMUL(TRANSPOSE(CONJG(uks2qp)),ctmp)
+         end do
+       end do
+       write(std_out,*)' vxcval ik=Kmesh%nibz ',&
+&        htmp(1,1,Kmesh%nibz,1),htmp(2,2,Kmesh%nibz,1),htmp(3,3,Kmesh%nibz,1),htmp(4,4,Kmesh%nibz,1) 
+     end do
+!ENDDEBUG
+
      htmp=hbare; hbare=czero
 
      do spin=1,Sigp%nsppol
@@ -1493,6 +1511,10 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
            hbare(:,:,ik,is_idx)=MATMUL(TRANSPOSE(CONJG(uks2qp)),ctmp)
          end do
        end do
+!DEBUG
+       write(std_out,*)' vxcval ik=Kmesh%nibz ',&
+&        hbare(1,1,Kmesh%nibz,1),hbare(2,2,Kmesh%nibz,1),hbare(3,3,Kmesh%nibz,1),hbare(4,4,Kmesh%nibz,1)
+!ENDDEBUG
      end do
      ABI_FREE(htmp)
      ABI_FREE(ctmp)

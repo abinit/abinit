@@ -89,8 +89,13 @@ MODULE m_vcoul
   real(dp) :: i_sz 
    ! Value of the integration of the Coulomb singularity 4\pi/V_BZ \int_BZ d^3q 1/q^2
 
+  real(dp) :: i_sz_resid
+   ! Residual difference between the i_sz in the sigma self-energy for exchange,
+   ! and the i_sz already present in the generalized Kohn-Sham eigenenergies
+   ! Initialized to the same value as i_sz
+
   real(dp) :: hcyl
-   ! Lenght of the finite cylinder along the periodic dimension
+   ! Length of the finite cylinder along the periodic dimension
 
   real(dp) :: ucvol
     ! Volume of the unit cell
@@ -167,6 +172,7 @@ CONTAINS  !=====================================================================
 !!
 !! FUNCTION
 !! Perform general check and initialize the data type containing information on the cutoff technique
+!! Note Vcp%vc_sqrt_resid and Vcp%i_sz_resid are simply initialized at the same value as Vcp%vc_sqrt and Vcp%i_sz
 !!
 !! INPUTS
 !!  Qmesh<kmesh_t>=Info on the q-point sampling.
@@ -952,6 +958,7 @@ subroutine vcoul_init(Vcp,Gsph,Cryst,Qmesh,Kmesh,rcut,icutcoul,vcutgeo,ecut,ng,n
  Vcp%vc_sqrt=CMPLX(vcoul,zero) 
  Vcp%vc_sqrt=SQRT(Vcp%vc_sqrt) 
  Vcp%vc_sqrt_resid=Vcp%vc_sqrt
+ Vcp%i_sz_resid=Vcp%i_sz
  call vcoul_plot(Vcp,Qmesh,Gsph,ng,vcoul,comm)
  ABI_FREE(vcoul)
 
@@ -959,8 +966,6 @@ subroutine vcoul_init(Vcp,Gsph,Cryst,Qmesh,Kmesh,rcut,icutcoul,vcutgeo,ecut,ng,n
  Vcp%vcqlwl_sqrt=CMPLX(vcoul_lwl,zero) 
  Vcp%vcqlwl_sqrt=SQRT(Vcp%vcqlwl_sqrt) 
  ABI_FREE(vcoul_lwl)
-
- !Vcp%i_sz=zero
 
  call vcoul_print(Vcp,unit=std_out)
 

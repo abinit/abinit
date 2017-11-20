@@ -586,7 +586,8 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
 
            if (nspinor==1) then
              rhotwg_ki(1,jb) = czero_gw
-             if (ib_sum == jb) rhotwg_ki(1,jb) = CMPLX(SQRT(Vcp%i_sz), 0.0_gwp)
+             !Note the use of i_sz_resid and not i_sz, to account for the possibility to have generalized KS basis set from hybrid
+             if (ib_sum == jb) rhotwg_ki(1,jb) = CMPLX(SQRT(Vcp%i_sz_resid), 0.0_gwp)
              !rhotwg_ki(1,jb) = czero_gw ! DEBUG
            else
              npw_k = Wfd%npwarr(ik_ibz)
@@ -595,9 +596,9 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
                cg_sum => Wfd%Wave(ib_sum,ik_ibz,spin)%ug
                cg_jb  => Wfd%Wave(jb,jk_ibz,spin)%ug
                ctmp = xdotc(npw_k, cg_sum(1:), 1, cg_jb(1:), 1)
-               rhotwg_ki(1, jb) = CMPLX(SQRT(Vcp%i_sz), 0.0_gwp) * real(ctmp)
+               rhotwg_ki(1, jb) = CMPLX(SQRT(Vcp%i_sz_resid), 0.0_gwp) * real(ctmp)
                ctmp = xdotc(npw_k, cg_sum(npw_k+1:), 1, cg_jb(npw_k+1:), 1)
-               rhotwg_ki(npwx+1, jb) = CMPLX(SQRT(Vcp%i_sz), 0.0_gwp) * real(ctmp)
+               rhotwg_ki(npwx+1, jb) = CMPLX(SQRT(Vcp%i_sz_resid), 0.0_gwp) * real(ctmp)
              end if
              !rhotwg_ki(1, jb) = zero; rhotwg_ki(npwx+1, jb) = zero
              ! PAW is missing
