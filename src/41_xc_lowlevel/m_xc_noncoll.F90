@@ -49,7 +49,7 @@ MODULE m_xc_noncoll
  real(dp),parameter :: m_norm_min=tol8
 
 !Default rotation method for DFPT
- integer,parameter :: rotation_method_default=3
+ integer,parameter :: rotation_method_default=2
 
 CONTAINS
 
@@ -544,7 +544,8 @@ subroutine rotate_back_mag_dfpt(vxc1_in,vxc1_out,vxc,kxc,rho1,mag,vectsize,cplex
 
          !U^(1)*.Vxc0.U^(0) + U^(0)*.Vxc0.U^(1) part
 
-         bxc = dsqrt(((vxc(ipt,1)-vxc(ipt,2))*half)**2+vxc(ipt,3)**2+vxc(ipt,4)**2) !bxc^(0)
+         !bxc = dsqrt(((vxc(ipt,1)-vxc(ipt,2))*half)**2+vxc(ipt,3)**2+vxc(ipt,4)**2) !bxc^(0)
+         bxc = (vxc(ipt,1)-vxc(ipt,2))*half/mag(ipt,3)*m_norm
          if (.not.small_angle) then
            wx     = mag(ipt,2)/mxy
            wy     =-mag(ipt,1)/mxy       
@@ -627,8 +628,8 @@ subroutine rotate_back_mag_dfpt(vxc1_in,vxc1_out,vxc,kxc,rho1,mag,vectsize,cplex
          vxc1_out(2*ipt  ,3)= dvdz_im*mdirx - dvdz_re*mdiry   !Im[  V^12]
 
          !U^(1)*.Vxc0.U^(0) + U^(0)*.Vxc0.U^(1) part
-         bxc = dsqrt(((vxc(ipt,1)-vxc(ipt,2))*half)**2+vxc(ipt,3)**2+vxc(ipt,4)**2) !bxc^(0)
-
+         !bxc = dsqrt(((vxc(ipt,1)-vxc(ipt,2))*half)**2+vxc(ipt,3)**2+vxc(ipt,4)**2) !bxc^(0)
+         bxc = (vxc(ipt,1)-vxc(ipt,2))*half/mag(ipt,3)*m_norm
          if (.not.small_angle) then
            wx     = mag(ipt,2)/mxy
            wy     =-mag(ipt,1)/mxy
@@ -738,8 +739,12 @@ subroutine rotate_back_mag_dfpt(vxc1_in,vxc1_out,vxc,kxc,rho1,mag,vectsize,cplex
          !projection of m^(1) on gs magnetization direction
          m_dot_m1=(mdirx*rho1(ipt,2)+mdiry*rho1(ipt,3)+mdirz*rho1(ipt,4))
 
-         bxc_over_m = dsqrt(((vxc(ipt,1)-vxc(ipt,2))*half)**2+vxc(ipt,3)**2+vxc(ipt,4)**2) !this is bxc^(0)
-         bxc_over_m = bxc_over_m/m_norm
+         !bxc_over_m = dsqrt(((vxc(ipt,1)-vxc(ipt,2))*half)**2+vxc(ipt,3)**2+vxc(ipt,4)**2) !this is bxc^(0)
+         !bxc_over_m = bxc_over_m/m_norm
+         !write(*,*)
+         bxc_over_m = (vxc(ipt,1)-vxc(ipt,2))*half/mag(ipt,3)
+         !write(111,*) ipt,vxc(ipt,1),vxc(ipt,2),vxc(ipt,3),vxc(ipt,4)
+         !write(222,*) bxc_over_m,(vxc(ipt,1)-vxc(ipt,2))*half/mag(ipt,3)
          vxc1_out(ipt,1) = vxc1_out(ipt,1) + bxc_over_m*( mz1 - mdirz*m_dot_m1 ) !
          vxc1_out(ipt,2) = vxc1_out(ipt,2) + bxc_over_m*(-mz1 + mdirz*m_dot_m1 ) !
          vxc1_out(ipt,3) = vxc1_out(ipt,3) + bxc_over_m*( mx1 - mdirx*m_dot_m1 ) !
@@ -800,8 +805,9 @@ subroutine rotate_back_mag_dfpt(vxc1_in,vxc1_out,vxc,kxc,rho1,mag,vectsize,cplex
          m_dot_m1_re= mdirx*mx1_re + mdiry*my1_re + mdirz*mz1_re
          m_dot_m1_im= mdirx*mx1_im + mdiry*my1_im + mdirz*mz1_im
 
-         bxc_over_m = dsqrt(((vxc(ipt,1)-vxc(ipt,2))*half)**2+vxc(ipt,3)**2+vxc(ipt,4)**2) !this is bxc^(0)
-         bxc_over_m = bxc_over_m/m_norm
+         !bxc_over_m = dsqrt(((vxc(ipt,1)-vxc(ipt,2))*half)**2+vxc(ipt,3)**2+vxc(ipt,4)**2) !this is bxc^(0)
+         !bxc_over_m = bxc_over_m/m_norm
+         bxc_over_m = (vxc(ipt,1)-vxc(ipt,2))*half/mag(ipt,3)
 
          vxc1_out(2*ipt-1,1) = vxc1_out(2*ipt-1,1) + bxc_over_m*( mz1_re - mdirz*m_dot_m1_re ) ! Re[V^11]
          vxc1_out(2*ipt  ,1) = vxc1_out(2*ipt  ,1) + bxc_over_m*( mz1_im - mdirz*m_dot_m1_im ) ! Im[V^11]
