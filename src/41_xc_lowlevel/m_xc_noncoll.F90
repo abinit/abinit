@@ -134,8 +134,6 @@ subroutine rotate_mag(rho_in,rho_out,mag,vectsize,cplex,&
  out_mag_norm=present(mag_norm_out)
  
  if(cplex==1) then
- !SPr TODO: make a loop on cplex inside the ipt loop?..
- !for now two separate cplex cases to render code more readable
    do ipt=1,vectsize
      if (has_mag_norm) then
        m_norm=mag_norm_in(ipt)
@@ -147,16 +145,10 @@ subroutine rotate_mag(rho_in,rho_out,mag,vectsize,cplex,&
 &                 +rho_in(ipt,4)*mag(ipt,3)
 
      if(m_norm>m_norm_min)then
-       mm=rhoin_dot_mag/m_norm                ! mm is |m|^(1)
+       mm=rhoin_dot_mag/m_norm                
        rho_out(ipt,1)=half*(rho_in(ipt,1)+mm)
        rho_out(ipt,2)=half*(rho_in(ipt,1)-mm)
      else 
-       !it is a trick to set |m|^(1) to zero if |m|^(0)~0, to be exercised with caution 
-       !|m|^(1) is needed to compute bxc^(1) using dfpt_mkvxc
-       !since |m|^(1)=0 here, dfpt_mkvxc call will return bxc^(1)=0, which is not correct!
-       !however, if |m|^(0)~0, correct bxc^(1) value will be recomputed in rotate_back_mag_dfpt
-       !if kxc is not available, one should simply add a small magnetization (e.g. m_norm_min) here
-       !and leave finite-difference expression in rotate_back_mag_dfpt
        rho_out(ipt,1)=half*rho_in(ipt,1)
        rho_out(ipt,2)=half*rho_in(ipt,1)
      end if
@@ -191,7 +183,6 @@ subroutine rotate_mag(rho_in,rho_out,mag,vectsize,cplex,&
        rho_out(2*ipt  ,1)=half*(rho_in(2*ipt ,1)+mm)
        rho_out(2*ipt  ,2)=half*(rho_in(2*ipt ,1)-mm)
      else
-       !same trick as for cplex=1
        rho_out(2*ipt-1,1)=half*rho_in(2*ipt-1,1)
        rho_out(2*ipt-1,2)=half*rho_in(2*ipt-1,2)
        rho_out(2*ipt  ,1)=half*rho_in(2*ipt  ,1)
@@ -299,20 +290,8 @@ subroutine rotate_back_mag(vxc_in,vxc_out,mag,vectsize,&
      vxc_out(ipt,3)= mag(ipt,1)*dvdz
      vxc_out(ipt,4)=-mag(ipt,2)*dvdz
    else
-     !SPr: see m->0 case in rotate_mag and rotate_back_mag_dfpt
-     !dvdz should not be set to zero! For m->0 case
-     !half(vxc_in(ipt,1)-vxc_in(ipt,2)) is proportional to |m_norm| 
-     !so dvdz = constant that can be computed from kxc, or using finite-difference approx
      vxc_out(ipt,1:2)=dvdn
      vxc_out(ipt,3:4)=zero
-     !the correct formulas are:
-     !dvdz= half*(half*(kxc(ipt,1)+kxc(ipt,3))-kxc(ipt,2))
-     !if kxc is not available, simply leave the finite difference for dvdz (see rotate_mag)
-     !dvdz=half*(vxc_in(ipt,1)-vxc_in(ipt,2))/m_norm_min 
-     !vxc_out(ipt,1)=dvdn+mag(ipt,3)*dvdz
-     !vxc_out(ipt,2)=dvdn-mag(ipt,3)*dvdz
-     !vxc_out(ipt,3)= mag(ipt,1)*dvdz
-     !vxc_out(ipt,4)=-mag(ipt,2)*dvdz
    end if
  end do
 
