@@ -125,8 +125,9 @@
 !!      drivexc_main
 !!
 !! CHILDREN
-!!      invcb,libxc_functionals_getvxc,xchcth,xchelu,xciit,xclb,xcpbe,xcpzca
-!!      xcspol,xctetr,xcwign,xcxalp
+!!      invcb,libxc_functionals_end,libxc_functionals_getvxc
+!!      libxc_functionals_init,xchcth,xchelu,xciit,xclb,xcpbe,xcpzca,xcspol
+!!      xctetr,xcwign,xcxalp
 !!
 !! SOURCE
 
@@ -243,7 +244,7 @@ subroutine drivexc(exc,ixc,npts,nspden,order,rho_updn,vxcrho,ndvxc,ngr2,nd2vxc,n
 !Check libXC
  if (ixc<0 .or. ixc==1402) then
    libxc_test=libxc_functionals_check(stop_if_error=.true.)
- endif
+ end if
 
  if (ixc<0) then
 !  Prepare the tests
@@ -267,7 +268,7 @@ subroutine drivexc(exc,ixc,npts,nspden,order,rho_updn,vxcrho,ndvxc,ngr2,nd2vxc,n
  else if (ixc==1420)then
    is_gga=.true.
    is_mgga=.false.
- endif
+ end if
 
  if (ixc<0 .or. ixc==1402) then
 !  Check whether all the necessary arrays are present and have the correct dimensions
@@ -720,50 +721,50 @@ subroutine drivexc(exc,ixc,npts,nspden,order,rho_updn,vxcrho,ndvxc,ngr2,nd2vxc,n
    if(present(xc_funcs))then
      if (abs(order)==1) then
        call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc,&
-&        vxcrho,grho2=grho2_updn,vxcgr=vxcgrho,xc_functionals=xc_funcs)
+&       vxcrho,grho2=grho2_updn,vxcgr=vxcgrho,xc_functionals=xc_funcs)
      elseif (abs(order)==2) then
        call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc,&
-&        vxcrho,grho2=grho2_updn,vxcgr=vxcgrho,dvxc=dvxc,xc_functionals=xc_funcs)
+&       vxcrho,grho2=grho2_updn,vxcgr=vxcgrho,dvxc=dvxc,xc_functionals=xc_funcs)
      else 
        call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc,&
-&        vxcrho,grho2=grho2_updn,vxcgr=vxcgrho,dvxc=dvxc,d2vxc=d2vxc,xc_functionals=xc_funcs)
+&       vxcrho,grho2=grho2_updn,vxcgr=vxcgrho,dvxc=dvxc,d2vxc=d2vxc,xc_functionals=xc_funcs)
      end if
    else
      if (abs(order)==1) then
        call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc,&
-&         vxcrho,grho2=grho2_updn,vxcgr=vxcgrho)
+&       vxcrho,grho2=grho2_updn,vxcgr=vxcgrho)
      elseif (abs(order)==2) then
        call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc,&
-&         vxcrho,grho2=grho2_updn,vxcgr=vxcgrho,dvxc=dvxc)
+&       vxcrho,grho2=grho2_updn,vxcgr=vxcgrho,dvxc=dvxc)
      else
-         call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc,&
-&         vxcrho,grho2=grho2_updn,vxcgr=vxcgrho,dvxc=dvxc,d2vxc=d2vxc)
+       call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc,&
+&       vxcrho,grho2=grho2_updn,vxcgr=vxcgrho,dvxc=dvxc,d2vxc=d2vxc)
      end if
-   endif
+   end if
 
 !  Then renormalize B3LYP and subtract VWN3 contribution
    ABI_ALLOCATE(exc_c,(npts))
    ABI_ALLOCATE(vxcrho_c,(npts,nspden))
    if(order**2>1)then
      ABI_ALLOCATE(dvxc_c,(npts,ndvxc))
-   endif
+   end if
    if(order**2>4)then
      ABI_ALLOCATE(d2vxc_c,(npts,nd2vxc))
-   endif
+   end if
    exc_c=zero;vxcrho_c=zero
    call libxc_functionals_init(-30,nspden,xc_functionals=xc_funcs_vwn3)
    if (order**2 <= 1) then
      call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc_c,&
-&        vxcrho_c,xc_functionals=xc_funcs_vwn3)
+&     vxcrho_c,xc_functionals=xc_funcs_vwn3)
    elseif (order**2 <= 4) then
      dvxc_c=zero
      call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc_c,&
-&        vxcrho_c,dvxc=dvxc_c,xc_functionals=xc_funcs_vwn3)
+&     vxcrho_c,dvxc=dvxc_c,xc_functionals=xc_funcs_vwn3)
    else
      dvxc_c=zero
      d2vxc_c=zero
      call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc_c,&
-&        vxcrho_c,dvxc=dvxc_c,d2vxc=d2vxc,xc_functionals=xc_funcs_vwn3)
+&     vxcrho_c,dvxc=dvxc_c,d2vxc=d2vxc,xc_functionals=xc_funcs_vwn3)
    end if
    exc=1.25d0*exc-quarter*0.19d0*exc_c
    vxcrho=1.25d0*vxcrho-quarter*0.19d0*vxcrho_c
@@ -775,16 +776,16 @@ subroutine drivexc(exc,ixc,npts,nspden,order,rho_updn,vxcrho,ndvxc,ngr2,nd2vxc,n
    call libxc_functionals_init(-131,nspden,xc_functionals=xc_funcs_lyp)
    if (order**2 <= 1) then
      call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc_c,&
-&        vxcrho_c,grho2=grho2_updn,vxcgr=vxcgrho,xc_functionals=xc_funcs_lyp)
+&     vxcrho_c,grho2=grho2_updn,vxcgr=vxcgrho,xc_functionals=xc_funcs_lyp)
    elseif (order**2 <= 4) then
      dvxc_c=zero
      call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc_c,&
-&        vxcrho_c,grho2=grho2_updn,vxcgr=vxcgrho,dvxc=dvxc_c,xc_functionals=xc_funcs_lyp)
+&     vxcrho_c,grho2=grho2_updn,vxcgr=vxcgrho,dvxc=dvxc_c,xc_functionals=xc_funcs_lyp)
    else
      dvxc_c=zero
      d2vxc_c=zero
      call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc_c,&
-&        vxcrho_c,grho2=grho2_updn,vxcgr=vxcgrho,dvxc=dvxc_c,d2vxc=d2vxc,xc_functionals=xc_funcs_lyp)
+&     vxcrho_c,grho2=grho2_updn,vxcgr=vxcgrho,dvxc=dvxc_c,d2vxc=d2vxc,xc_functionals=xc_funcs_lyp)
    end if
    exc=exc-quarter*0.81d0*exc_c
    vxcrho=vxcrho-quarter*0.81d0*vxcrho_c
@@ -796,10 +797,10 @@ subroutine drivexc(exc,ixc,npts,nspden,order,rho_updn,vxcrho,ndvxc,ngr2,nd2vxc,n
    ABI_DEALLOCATE(vxcrho_c)
    if(allocated(dvxc_c))then
      ABI_DEALLOCATE(dvxc_c)
-   endif
+   end if
    if(allocated(d2vxc_c))then
      ABI_DEALLOCATE(d2vxc_c)
-   endif
+   end if
 
 !>>>>> All libXC functionals
  else if( ixc<0 ) then
@@ -820,7 +821,7 @@ subroutine drivexc(exc,ixc,npts,nspden,order,rho_updn,vxcrho,ndvxc,ngr2,nd2vxc,n
          call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc,&
 &         vxcrho,grho2_updn,vxcgrho,lrho_updn,vxclrho,tau_updn,vxctau)
        end if
-     endif
+     end if
      ixc1 = (-ixc)/1000
      ixc2 = (-ixc) - ixc1*1000
      if(ixc1==206 .or. ixc1==207 .or. ixc1==208 .or. ixc1==209 .or. &
@@ -846,8 +847,8 @@ subroutine drivexc(exc,ixc,npts,nspden,order,rho_updn,vxcrho,ndvxc,ngr2,nd2vxc,n
        else
          call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc,&
 &         vxcrho,grho2=grho2_updn,vxcgr=vxcgrho,dvxc=dvxc)
-       endif
-     endif
+       end if
+     end if
    else
      if(present(xc_funcs))then
        if (order**2 <= 1) then
@@ -871,7 +872,7 @@ subroutine drivexc(exc,ixc,npts,nspden,order,rho_updn,vxcrho,ndvxc,ngr2,nd2vxc,n
          call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc,&
 &         vxcrho,dvxc=dvxc,d2vxc=d2vxc)
        end if
-     endif
+     end if
    end if
 
  end if

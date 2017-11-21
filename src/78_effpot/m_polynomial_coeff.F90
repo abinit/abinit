@@ -109,11 +109,12 @@ CONTAINS  !=====================================================================
 !!   polynomial_coeff<type(polynomial_coeff)> = polynomial_coeff datatype to be initialized
 !!
 !! PARENTS
-!!      m_anharmonics_terms,m_effective_potential_file,m_polynomial_coeff
-!!      mover_effpot
+!!      m_anharmonics_terms,m_effective_potential_file,m_fit_polynomial_coeff
+!!      m_polynomial_coeff,mover_effpot
 !!
 !! CHILDREN
-!!      getpbcindexes_supercell,xmpi_sum
+!!      polynomial_coeff_free,polynomial_coeff_getname,polynomial_coeff_init
+!!      polynomial_term_free,polynomial_term_init,wrtout
 !!
 !! SOURCE
 
@@ -227,11 +228,12 @@ end subroutine polynomial_coeff_init
 !! polynomial_coeff<type(polynomial_coeff)> = polynomial_coeff datatype
 !!
 !! PARENTS
-!!      m_anharmonics_terms,m_effective_potential_file,m_polynomial_coeff
+!!      m_anharmonics_terms,m_effective_potential_file,m_fit_polynomial_coeff
 !!      m_polynomial_coeff,mover_effpot
 !!
 !! CHILDREN
-!!      getpbcindexes_supercell,xmpi_sum
+!!      polynomial_coeff_free,polynomial_coeff_getname,polynomial_coeff_init
+!!      polynomial_term_free,polynomial_term_init,wrtout
 !!
 !! SOURCE
 
@@ -288,7 +290,8 @@ end subroutine polynomial_coeff_free
 !!      m_effective_potential_file,mover_effpot
 !!
 !! CHILDREN
-!!      getpbcindexes_supercell,xmpi_sum
+!!      polynomial_coeff_free,polynomial_coeff_getname,polynomial_coeff_init
+!!      polynomial_term_free,polynomial_term_init,wrtout
 !!
 !! SOURCE
 
@@ -336,7 +339,8 @@ end subroutine polynomial_coeff_setCoefficient
 !!      m_effective_potential_file
 !!
 !! CHILDREN
-!!      getpbcindexes_supercell,xmpi_sum
+!!      polynomial_coeff_free,polynomial_coeff_getname,polynomial_coeff_init
+!!      polynomial_term_free,polynomial_term_init,wrtout
 !!
 !! SOURCE
 
@@ -386,10 +390,11 @@ end subroutine polynomial_coeff_setName
 !! name = name xof the coefficients
 !!
 !! PARENTS
-!!      m_polynomial_coeff,m_polynomial_coeff
+!!      m_effective_potential_file,m_polynomial_coeff
 !!
 !! CHILDREN
-!!      getpbcindexes_supercell,xmpi_sum
+!!      polynomial_coeff_free,polynomial_coeff_getname,polynomial_coeff_init
+!!      polynomial_term_free,polynomial_term_init,wrtout
 !!
 !! SOURCE
 
@@ -534,7 +539,8 @@ end subroutine polynomial_coeff_getName
 !!      m_effective_potential_file,m_fit_polynomial_coeff
 !!
 !! CHILDREN
-!!      getpbcindexes_supercell,xmpi_sum
+!!      polynomial_coeff_free,polynomial_coeff_getname,polynomial_coeff_init
+!!      polynomial_term_free,polynomial_term_init,wrtout
 !!
 !! SOURCE
 
@@ -628,7 +634,8 @@ end subroutine polynomial_coeff_broadcast
 !!      m_fit_polynomial_coeff
 !!
 !! CHILDREN
-!!      getpbcindexes_supercell,xmpi_sum
+!!      polynomial_coeff_free,polynomial_coeff_getname,polynomial_coeff_init
+!!      polynomial_term_free,polynomial_term_init,wrtout
 !!
 !! SOURCE
 
@@ -700,7 +707,8 @@ end subroutine polynomial_coeff_MPIsend
 !!      m_fit_polynomial_coeff
 !!
 !! CHILDREN
-!!      getpbcindexes_supercell,xmpi_sum
+!!      polynomial_coeff_free,polynomial_coeff_getname,polynomial_coeff_init
+!!      polynomial_term_free,polynomial_term_init,wrtout
 !!
 !! SOURCE
 
@@ -796,10 +804,11 @@ end subroutine polynomial_coeff_MPIrecv
 !! OUTPUT
 !!
 !! PARENTS
-!!      m_effective_potential,m_polynomial_coeff
+!!      m_effective_potential,mover_effpot
 !!
 !! CHILDREN
-!!      getpbcindexes_supercell,xmpi_sum
+!!      polynomial_coeff_free,polynomial_coeff_getname,polynomial_coeff_init
+!!      polynomial_term_free,polynomial_term_init,wrtout
 !!
 !! SOURCE
 
@@ -978,7 +987,8 @@ end subroutine polynomial_coeff_writeXML
 !!      m_effective_potential
 !!
 !! CHILDREN
-!!      getpbcindexes_supercell,xmpi_sum
+!!      polynomial_coeff_free,polynomial_coeff_getname,polynomial_coeff_init
+!!      polynomial_term_free,polynomial_term_init,wrtout
 !!
 !! SOURCE
 !!
@@ -1248,7 +1258,8 @@ end subroutine polynomial_coeff_evaluate
 !!      m_polynomial_coeff
 !!
 !! CHILDREN
-!!      destroy_supercell,init_supercell,xred2xcart
+!!      polynomial_coeff_free,polynomial_coeff_getname,polynomial_coeff_init
+!!      polynomial_term_free,polynomial_term_init,wrtout
 !!
 !! SOURCE
 
@@ -1733,10 +1744,11 @@ end subroutine polynomial_coeff_getList
 !! ncoeff = number of coefficients
 !!
 !! PARENTS
-!!      multibinit
+!!      m_fit_polynomial_coeff,mover_effpot
 !!
 !! CHILDREN
-!!      destroy_supercell,init_supercell,xred2xcart
+!!      polynomial_coeff_free,polynomial_coeff_getname,polynomial_coeff_init
+!!      polynomial_term_free,polynomial_term_init,wrtout
 !!
 !! SOURCE
 
@@ -2378,10 +2390,10 @@ end function getCoeffFromList
 !! ncoeff_out = number of coefficients
 !!
 !! PARENTS
-!!      m_polynomial_coeff
 !!
 !! CHILDREN
-!!      destroy_supercell,init_supercell,xred2xcart
+!!      polynomial_coeff_free,polynomial_coeff_getname,polynomial_coeff_init
+!!      polynomial_term_free,polynomial_term_init,wrtout
 !!
 !! SOURCE
 

@@ -1170,21 +1170,21 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
    defo=1
    do idtset=1,ndtset_alloc
      if(dprarr(1,idtset)<-tol8 .and. abs(dprarr(1,idtset)+999.0_dp)>tol8)defo=0
-   enddo
+   end do
    if(defo==0)then
      do idtset=1,ndtset_alloc
 !      Change the sign of user defined input value 
        if(dprarr(1,idtset)<-tol8 .and. abs(dprarr(1,idtset)+999.0_dp)>tol8)then 
          dprarr(1,idtset)=abs(dprarr(1,idtset))
-       endif
-     enddo
+       end if
+     end do
      if(ii==1)str_hyb='hyb_mixing'
      if(ii==2)str_hyb='hyb_mixing_sr'
      if(ii==3)str_hyb='hyb_range_dft'
      if(ii==4)str_hyb='hyb_range_fock'
      call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,str_hyb,'DPR',0)
-   endif
- enddo
+   end if
+ end do
 
 !###########################################################
 !## Deallocation for generic arrays, and for n-z variables

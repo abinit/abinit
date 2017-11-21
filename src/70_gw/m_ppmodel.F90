@@ -900,7 +900,7 @@ end subroutine setup_ppmodel
 !! SIDE EFFECTS
 !!
 !! PARENTS
-!!      m_ppmodel,sigma
+!!      m_ppmodel
 !!
 !! CHILDREN
 !!

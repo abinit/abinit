@@ -1029,7 +1029,7 @@ end subroutine hdr_free
 !!  The present version deals with versions of the header up to 56.
 !!
 !! PARENTS
-!!      m_io_kss,m_io_screening,m_wfk,optic
+!!      dfpt_looppert,m_io_kss,m_io_screening,m_wfk,optic
 !!
 !! CHILDREN
 !!
@@ -1458,7 +1458,7 @@ end subroutine hdr_init_lowlvl
 !!
 !! PARENTS
 !!      conducti_paw,conducti_paw_core,cut3d,emispec_paw,finddistrproc,ioprof
-!!      linear_optics_paw,m_ioarr,m_wfd,m_wfk
+!!      linear_optics_paw,m_ddk,m_ioarr,m_wfd,m_wfk
 !!
 !! CHILDREN
 !!
@@ -3019,7 +3019,7 @@ end subroutine hdr_fort_read
 !!  fform=kind of the array in the file. if the reading fails, return fform=0
 !!
 !! PARENTS
-!!      initaim,inwffil,m_dvdb,m_hdr,m_io_screening,m_ioarr,macroave
+!!      initaim,inwffil,m_ddk,m_dvdb,m_hdr,m_io_screening,m_ioarr,macroave
 !!
 !! CHILDREN
 !!

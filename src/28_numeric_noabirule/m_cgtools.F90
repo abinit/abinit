@@ -1746,8 +1746,8 @@ end subroutine sqnorm_v
 !!  meansp(nspden)=mean value for each nspden component
 !!
 !! PARENTS
-!!      fresid,newvtr,pawmknhat,prcref,prcref_PMA,psolver_rhohxc,rhotoxc
-!!      rhohxcpositron,rhotov
+!!      fresid,newvtr,pawmknhat,prcref,prcref_PMA,psolver_rhohxc,rhohxcpositron
+!!      rhotov,rhotoxc
 !!
 !! CHILDREN
 !!

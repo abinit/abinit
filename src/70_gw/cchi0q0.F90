@@ -100,15 +100,14 @@
 !! CHILDREN
 !!      accumulate_chi0_q0,accumulate_chi0sumrule,accumulate_sfchi0_q0
 !!      approxdelta,calc_wfwfg,chi0_bbp_mask,completechi0_deltapart,cwtime
-!!      flush_unit,get_bz_item,get_gftt,get_uug,gsph_fft_tabs,gsph_free
-!!      gsph_in_fftbox,hilbert_transform,hilbert_transform_headwings
-!!      littlegroup_print,make_transitions,paw_cross_ihr_comm
-!!      paw_cross_rho_tw_g,paw_rho_tw_g,paw_symcprj,pawcprj_alloc,pawcprj_copy
-!!      pawcprj_free,pawhur_free,pawhur_init,pawpwij_free,pawpwij_init
-!!      print_gsphere,read_plowannier,rho_tw_g,setup_spectral
-!!      symmetrize_afm_chi0,vkbr_free,vkbr_init,wfd_change_ngfft
-!!      wfd_distribute_bbp,wfd_get_cprj,wfd_get_ur,wfd_paw_get_aeur,wfd_sym_ur
-!!      wrtout,xmpi_sum
+!!      flush_unit,get_bz_item,get_gftt,gsph_fft_tabs,gsph_free,gsph_in_fftbox
+!!      hilbert_transform,hilbert_transform_headwings,littlegroup_print
+!!      make_transitions,paw_cross_ihr_comm,paw_cross_rho_tw_g,paw_rho_tw_g
+!!      paw_symcprj,pawcprj_alloc,pawcprj_copy,pawcprj_free,pawhur_free
+!!      pawhur_init,pawpwij_free,pawpwij_init,print_gsphere,read_plowannier
+!!      rho_tw_g,setup_spectral,symmetrize_afm_chi0,vkbr_free,vkbr_init
+!!      wfd_change_ngfft,wfd_distribute_bbp,wfd_get_cprj,wfd_get_ur
+!!      wfd_paw_get_aeur,wrtout,xmpi_sum
 !!
 !! SOURCE
 

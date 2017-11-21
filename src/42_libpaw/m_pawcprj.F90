@@ -122,14 +122,14 @@ CONTAINS
 !!      calc_wf_qp,cchi0,cchi0q0,cchi0q0_intraband,cgwf,chebfi,classify_bands
 !!      cohsex_me,ctocprj,d2frnl,datafordmft,debug_tools,dfpt_accrho,dfpt_cgwf
 !!      dfpt_looppert,dfpt_nstpaw,dfpt_scfcv,dfpt_vtowfk,dfpt_wfkfermi,energy
-!!      exc_build_block,exc_build_ham,exc_plot,extrapwf,fock2ACE,forstrnps
-!!      getgh1c,getgh2c,getghc,getgsc,initberry,ks_ddiago,m_electronpositron
-!!      m_fock,m_invovl,m_io_kss,m_pawcprj,m_plowannier,m_shirley,m_wfd
-!!      make_grad_berry,nonlop,optics_paw,optics_paw_core,outkss
-!!      partial_dos_fractions_paw,paw_symcprj,pawmkaewf,pawmkrhoij,posdoppler
-!!      prep_calc_ucrpa,rf2_init,scfcv,setup_positron,sigma,smatrix_pawinit
-!!      suscep_stat,update_e_field_vars,vtorho,vtowfk,wfd_pawrhoij,wfd_vnlpsi
-!!      wvl_hpsitopsi
+!!      exc_build_block,exc_build_ham,exc_plot,extrapwf,fock2ACE,forstr
+!!      forstrnps,getgh1c,getgh2c,getghc,getgsc,initberry,ks_ddiago
+!!      m_electronpositron,m_fock,m_invovl,m_io_kss,m_pawcprj,m_plowannier
+!!      m_shirley,m_wfd,make_grad_berry,nonlop,optics_paw,optics_paw_core
+!!      outkss,partial_dos_fractions_paw,paw_symcprj,pawmkaewf,pawmkrhoij
+!!      posdoppler,prep_calc_ucrpa,rf2_init,scfcv,setup_positron,sigma
+!!      smatrix_pawinit,suscep_stat,update_e_field_vars,vtorho,vtowfk
+!!      wfd_pawrhoij,wfd_vnlpsi,wvl_hpsitopsi
 !!
 !! CHILDREN
 !!      xmpi_sum
@@ -207,14 +207,14 @@ end subroutine pawcprj_alloc
 !!      calc_wf_qp,cchi0,cchi0q0,cchi0q0_intraband,cgwf,chebfi,classify_bands
 !!      cohsex_me,ctocprj,d2frnl,datafordmft,debug_tools,dfpt_accrho,dfpt_cgwf
 !!      dfpt_looppert,dfpt_nstpaw,dfpt_scfcv,dfpt_vtowfk,dfpt_wfkfermi,energy
-!!      exc_build_block,exc_build_ham,exc_plot,extrapwf,fock2ACE,forstrnps
-!!      getgh1c,getgh2c,getghc,getgsc,ks_ddiago,m_efield,m_electronpositron
-!!      m_fock,m_gkk,m_invovl,m_io_kss,m_pawcprj,m_phgamma,m_phpi,m_plowannier
-!!      m_scf_history,m_shirley,m_sigmaph,m_wfd,make_grad_berry,nonlop
-!!      optics_paw,optics_paw_core,outkss,partial_dos_fractions_paw,paw_symcprj
-!!      pawmkaewf,pawmkrhoij,posdoppler,prep_calc_ucrpa,rf2_init,scfcv
-!!      setup_positron,sigma,smatrix_pawinit,suscep_stat,update_e_field_vars
-!!      vtorho,vtowfk,wfd_pawrhoij,wfd_vnlpsi
+!!      exc_build_block,exc_build_ham,exc_plot,extrapwf,fock2ACE,forstr
+!!      forstrnps,getgh1c,getgh2c,getghc,getgsc,ks_ddiago,m_efield
+!!      m_electronpositron,m_fock,m_gkk,m_invovl,m_io_kss,m_pawcprj,m_phgamma
+!!      m_phpi,m_plowannier,m_scf_history,m_shirley,m_sigmaph,m_wfd
+!!      make_grad_berry,nonlop,optics_paw,optics_paw_core,outkss
+!!      partial_dos_fractions_paw,paw_symcprj,pawmkaewf,pawmkrhoij,posdoppler
+!!      prep_calc_ucrpa,rf2_init,scfcv,setup_positron,sigma,smatrix_pawinit
+!!      suscep_stat,update_e_field_vars,vtorho,vtowfk,wfd_pawrhoij,wfd_vnlpsi
 !!
 !! CHILDREN
 !!      xmpi_sum
@@ -2876,8 +2876,9 @@ end subroutine pawcprj_bcast
 !!  dimcprj(natom)=Number of nlm elements in the <p_{lmn}^i|\psi> matrix elements for i=1,...,natom.
 !!
 !! PARENTS
-!!      afterscfloop,berryphase_new,dfpt_looppert,dfpt_scfcv,extrapwf,getghc
-!!      initberry,m_fock,m_hamiltonian,mlwfovlp_qp,outkss,scfcv,smatrix_pawinit
+!!      afterscfloop,berryphase_new,dfpt_looppert,dfpt_scfcv,extrapwf,forstr
+!!      getghc,initberry,m_fock,m_hamiltonian,mlwfovlp_qp,outkss,scfcv
+!!      smatrix_pawinit
 !!
 !! CHILDREN
 !!      xmpi_sum

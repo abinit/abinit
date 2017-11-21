@@ -183,7 +183,7 @@ CONTAINS  !=====================================================================
 !!  Only writing.
 !!
 !! PARENTS
-!!      anaddb,eph
+!!      anaddb,eph,m_tdep_phdos
 !!
 !! CHILDREN
 !!      ifc_fourq,kpath_free,phonons_ncwrite,phonons_write_gnuplot
@@ -685,7 +685,7 @@ end subroutine phdos_free
 !! the mesh is enlarged and the calculation is restarted.
 !!
 !! PARENTS
-!!      anaddb,eph
+!!      anaddb,eph,m_tdep_phdos
 !!
 !! CHILDREN
 !!      ifc_fourq,kpath_free,phonons_ncwrite,phonons_write_gnuplot
