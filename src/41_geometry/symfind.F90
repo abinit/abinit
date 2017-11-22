@@ -99,7 +99,7 @@
  integer :: isym,jj,kk,natom0,nclass,ntrial,printed,trialafm,trialok
  real(dp) :: spinatcl2,spinatcl20,det
  logical,parameter :: afm_noncoll=.true.
- logical :: test_sameabscollin,test_sameabsnoncoll,test_samespin
+ logical :: test_sameabscollin,test_sameabsnoncoll,test_samespin, test_afmspin_noncoll
  character(len=500) :: message
 !arrays
  integer,allocatable :: class(:,:),natomcl(:),typecl(:)
@@ -156,21 +156,30 @@
 !      Admit either identical spinat, or z-aligned spinat with same
 !      absolute magnitude
        if( typat(iatom)==typecl(iclass)) then
+! spins are vector identical
          test_samespin=  &
 &         abs(spinat(1,iatom)-spinatcl(1,iclass))<tolsym .and. &
 &         abs(spinat(2,iatom)-spinatcl(2,iclass))<tolsym .and. &
 &         abs(spinat(3,iatom)-spinatcl(3,iclass))<tolsym
+! spins are vector identical except z component which can have a sign flip
          test_sameabscollin= &
 &         noncoll==0 .and.&
 &         abs(spinat(1,iatom))<tolsym .and. abs(spinatcl(1,iclass))<tolsym .and.&
 &         abs(spinat(2,iatom))<tolsym .and. abs(spinatcl(2,iclass))<tolsym .and.&
 &         abs(abs(spinat(3,iatom))-abs(spinatcl(3,iclass)))<tolsym
-         test_sameabsnoncoll= &
+! spins are vector identical with an AFM sign flip
+         test_afmspin_noncoll= &
 &         noncoll==1 .and. afm_noncoll .and. &
 &         abs(spinat(1,iatom)+spinatcl(1,iclass))<tolsym .and. &
 &         abs(spinat(2,iatom)+spinatcl(2,iclass))<tolsym .and. &
 &         abs(spinat(3,iatom)+spinatcl(3,iclass))<tolsym
-         if( test_samespin .or. test_sameabscollin .or. test_sameabsnoncoll) then
+! spin vectors have the same norm... 
+! TODO: This has to be improved as it is not sufficient to assert they have the same class.
+         test_sameabsnoncoll= &
+&         noncoll==1 .and. afm_noncoll .and. &
+&         ( spinat(1,iatom)**2+spinat(2,iatom)**2+spinat(3,iatom)**2 - &
+&          (spinatcl(1,iatom)**2+spinatcl(2,iatom)**2+spinatcl(3,iatom)**2) < tolsym)
+         if( test_samespin .or. test_sameabscollin .or. test_afmspin_noncoll .or. test_sameabsnoncoll) then
 !          DEBUG
 !          write(std_out,*)' symfind : find it belongs to class iclass=',iclass
 !          write(std_out,*)' symfind : spinat(:,iatom)=',spinat(:,iatom)
@@ -292,17 +301,21 @@
 &   ptsymrel(:,3,isym)*xred(3,iatom0)
 
 !  From the set of possible images, deduce tentative translations,
-!  and magnetic factor then test whether it send each atom on a symmetric one
+!  and magnetic factor then test whether it sends each atom on a symmetric one
    ntrial=0
    do ii=1,natom0
      iatom1=class(ii,iclass0)
 
 !    The tentative translation is found
      trialnons(:)=xred(:,iatom1)-sxred0(:)
-     trialafm=1
-     if(abs(spinat(3,iatom1)-spinat(3,iatom0))>tolsym)trialafm=-1
-
-     if(sum(abs(spinat(:,iatom1)*trialafm-spinat(:,iatom0)))>tolsym)then
+!     trialafm=1
+!     if(sum(abs(spinat(:,iatom1)-spinat(:,iatom0))) > tolsym) then
+!       trialafm=-1
+!     end if
+!
+!     if(sum(abs(spinat(:,iatom1)*trialafm-spinat(:,iatom0))) > tolsym)then
+! Just impose the norms are equal. The turning spinat is dealt with below
+     if(sum(spinat(:,iatom1)**2)-sum(spinat(:,iatom0)**2)) > tolsym)then
        write(message,'(3a,3i5)')&
 &       'Problem with matching the spin part within a class.',ch10,&
 &       'isym,iatom0,iatom1=',isym,iatom0,iatom1
