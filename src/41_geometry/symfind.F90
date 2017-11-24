@@ -96,7 +96,7 @@
 !scalars
  integer :: found3,foundcl,iatom,iatom0,iatom1,iatom2,iatom3,iclass,iclass0,ii
  integer :: isym,jj,kk,natom0,nclass,ntrial,printed,trialafm,trialok
- integer :: itrialafm
+ integer :: itrialafm, tryafm
  real(dp) :: spinatcl2,spinatcl20,det
  logical,parameter :: afm_noncoll=.true.
  logical :: test_sameabscollin,test_sameabsnoncoll,test_samespin, test_afmspin_noncoll
@@ -238,6 +238,10 @@
    end do
  end if
 
+ tryafm = 0
+ if (spinatcl20 > tolsym) then
+   tryafm = 1
+ end if
  printed=0
 
 !DEBUG
@@ -337,9 +341,9 @@
 !    can not tell ahead of time which to choose
 !    start with FM to default to that if there is no spin on this atom
 !    NB: trialafm should be the same for all classes
-     do itrialafm = 1,0,-1
+     do itrialafm = 0,tryafm
        trialok=1
-       trialafm = itrialafm*2-1
+       trialafm = 1-itrialafm*2
 
 !    Loop over all classes, then all atoms in the class,
 !    to find whether they have a symmetric
@@ -410,6 +414,8 @@
              exit
            end if
          end do ! End loop over iatom2 in class iclass
+
+! if trial is already broken, forget it and exit
          if(trialok==0)exit
 
        end do ! End loop over all classes
