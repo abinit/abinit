@@ -97,6 +97,7 @@
 !scalars
  integer :: found3,foundcl,iatom,iatom0,iatom1,iatom2,iatom3,iclass,iclass0,ii
  integer :: isym,jj,kk,natom0,nclass,ntrial,printed,trialafm,trialok
+ integer :: itrialafm
  real(dp) :: spinatcl2,spinatcl20,det
  logical,parameter :: afm_noncoll=.true.
  logical :: test_sameabscollin,test_sameabsnoncoll,test_samespin, test_afmspin_noncoll
@@ -167,7 +168,7 @@
 &         abs(spinat(1,iatom))<tolsym .and. abs(spinatcl(1,iclass))<tolsym .and.&
 &         abs(spinat(2,iatom))<tolsym .and. abs(spinatcl(2,iclass))<tolsym .and.&
 &         abs(abs(spinat(3,iatom))-abs(spinatcl(3,iclass)))<tolsym
-! spins are vector identical with an AFM sign flip
+! spins are vector identical with an AFM sign flip to +
          test_afmspin_noncoll= &
 &         noncoll==1 .and. afm_noncoll .and. &
 &         abs(spinat(1,iatom)+spinatcl(1,iclass))<tolsym .and. &
@@ -178,14 +179,15 @@
          test_sameabsnoncoll= &
 &         noncoll==1 .and. afm_noncoll .and. &
 &         ( spinat(1,iatom)**2+spinat(2,iatom)**2+spinat(3,iatom)**2 - &
-&          (spinatcl(1,iatom)**2+spinatcl(2,iatom)**2+spinatcl(3,iatom)**2) < tolsym)
+&          (spinatcl(1,iclass)**2+spinatcl(2,iclass)**2+spinatcl(3,iclass)**2) < tolsym)
+
          if( test_samespin .or. test_sameabscollin .or. test_afmspin_noncoll .or. test_sameabsnoncoll) then
 !          DEBUG
 !          write(std_out,*)' symfind : find it belongs to class iclass=',iclass
 !          write(std_out,*)' symfind : spinat(:,iatom)=',spinat(:,iatom)
 !          write(std_out,*)' symfind : spinatcl(:,iclass)=',spinatcl(:,iclass)
-!          write(std_out,*)' symfind : test_samespin,test_sameabscollin,test_sameabsnoncoll=',&
-!          &      test_samespin,test_sameabscollin,test_sameabsnoncoll
+!          write(std_out,*)' symfind : test_samespin,test_sameabscollin,test_afmspin_noncoll,test_sameabsnoncoll=',&
+!          &      test_samespin,test_sameabscollin,test_afmspin_noncoll,test_sameabsnoncoll
 !          ENDDEBUG
            natomcl(iclass)=natomcl(iclass)+1
            class(natomcl(iclass),iclass)=iatom
@@ -193,7 +195,7 @@
            exit
          end if
        end if
-     end do
+     end do !loop over iclass
 !    If no class with these characteristics exist, create one
      if(foundcl==0)then
        nclass=nclass+1
@@ -202,7 +204,7 @@
        spinatcl(:,nclass)=spinat(:,iatom)
        class(1,nclass)=iatom
      end if
-   end do
+   end do ! loop over atoms
  end if
 
 !DEBUG
@@ -312,22 +314,23 @@
 !     if(sum(abs(spinat(:,iatom1)-spinat(:,iatom0))) > tolsym) then
 !       trialafm=-1
 !     end if
-!
+
 !     if(sum(abs(spinat(:,iatom1)*trialafm-spinat(:,iatom0))) > tolsym)then
 ! Just impose the norms are equal. The turning spinat is dealt with below
-     if(sum(spinat(:,iatom1)**2)-sum(spinat(:,iatom0)**2)) > tolsym)then
+     if(sum(spinat(:,iatom1)**2)-sum(spinat(:,iatom0)**2) > tolsym)then
        write(message,'(3a,3i5)')&
 &       'Problem with matching the spin part within a class.',ch10,&
 &       'isym,iatom0,iatom1=',isym,iatom0,iatom1
        MSG_ERROR_CLASS(message, "TolSymError")
      end if
+
 !    jellium slab case: check whether symmetry operation has no translational
 !    component along z
      if( jellslab/=0 .and. abs(trialnons(3)) > tolsym ) cycle
      trialok=1
 
 !    DEBUG
-!    write(std_out,*)' isym,trialnons(:),trialafm =',isym,trialnons(:),trialafm
+!    write(std_out,*)' isym,trialnons(:)=',isym,trialnons(:)
 !    ENDDEBUG
 
 !    Loop over all classes, then all atoms in the class,
@@ -338,54 +341,65 @@
          iatom2=class(jj,iclass)
 !        Generate the tentative symmetric position of iatom2
          symxred2(:)=ptsymrel(:,1,isym)*xred(1,iatom2)+ &
-&         ptsymrel(:,2,isym)*xred(2,iatom2)+ &
-&         ptsymrel(:,3,isym)*xred(3,iatom2)+ trialnons(:)
-!        Generate the tentative symmetric spinat of iatom2
-         if (noncoll==0) then
-           symspinat2(:)=trialafm*spinat(:,iatom2)
-         else
-           symspinat2(:)=trialafm*(ptsymrel(:,1,isym)*spinatred(1,iatom2)+ &
-&           ptsymrel(:,2,isym)*spinatred(2,iatom2)+ &
-&           ptsymrel(:,3,isym)*spinatred(3,iatom2))
-         end if
-         if(present(nucdipmom)) then
-!        Generate the tentative symmetric nuclear dipole moment of iatom2
-           symnucdipmom2(:)=(ptsymrel(:,1,isym)*nucdipmom(1,iatom2)+ &
-&           ptsymrel(:,2,isym)*nucdipmom(2,iatom2)+ &
-&           ptsymrel(:,3,isym)*nucdipmom(3,iatom2))
-         end if
+&                    ptsymrel(:,2,isym)*xred(2,iatom2)+ &
+&                    ptsymrel(:,3,isym)*xred(3,iatom2)+ trialnons(:)
 
-!        DEBUG
-!        write(std_out,'(a,3f12.4,a,3f12.4)') ' Send atom at xred=',xred(:,iatom2),' to ',symxred2(:)
-!        ENDDEBUG
-
-!        Check whether there exists an atom of the same class at the
-!        same location, with the correct spinat and nuclear dipole moment
-         do kk=1,natomcl(iclass)
-
-           found3=1
-           iatom3=class(kk,iclass)
-!          Check the location
-           diff(:)=xred(:,iatom3)-symxred2(:)
-           diff(:)=diff(:)-nint(diff(:))
-           if( (diff(1)**2+diff(2)**2+diff(3)**2) > tolsym**2 )found3=0
-!          Check the spinat
+!        added an explicit loop over FM and AFM - for non-collinear spins you
+!        can not tell ahead of time which to choose
+!        start with FM to default to that if there is no spin on this atom
+         do itrialafm = 1,0,-1
+           trialafm = itrialafm*2-1
+!          Generate the tentative symmetric spinat of iatom2
            if (noncoll==0) then
-             diff(:)=spinat(:,iatom3)-symspinat2(:)
+             symspinat2(:)=trialafm*spinat(:,iatom2)
            else
-             diff(:)=spinatred(:,iatom3)-symspinat2(:)
+             symspinat2(:)=trialafm*(ptsymrel(:,1,isym)*spinatred(1,iatom2)+ &
+&                                    ptsymrel(:,2,isym)*spinatred(2,iatom2)+ &
+&                                    ptsymrel(:,3,isym)*spinatred(3,iatom2))
            end if
-           if( (diff(1)**2+diff(2)**2+diff(3)**2) > tolsym**2 )found3=0
            if(present(nucdipmom)) then
-!            Check the nuclear dipole moment
-             diff(:) = nucdipmom(:,iatom3) - symnucdipmom2(:)
-             if(any(diff>tolsym))found3=0
+!          Generate the tentative symmetric nuclear dipole moment of iatom2
+! TODO: add trialafm? Does it make sense for the nuclear dipole moment, or do
+! these phases exist, which are AFM wrt nuclear moments?
+             symnucdipmom2(:)=(ptsymrel(:,1,isym)*nucdipmom(1,iatom2)+ &
+&                              ptsymrel(:,2,isym)*nucdipmom(2,iatom2)+ &
+&                              ptsymrel(:,3,isym)*nucdipmom(3,iatom2))
            end if
-           
-           if(found3==1)exit
 
-!          End loop over iatom3
-         end do
+!          DEBUG
+!          write(std_out,'(a,3i6,3f12.4,a,3f12.4)') ' iclass jj trialafm Send atom at xred=',&
+!&            iclass, jj, trialafm, xred(:,iatom2),' to ',symxred2(:)
+!          ENDDEBUG
+
+!          Check whether there exists an atom of the same class at the
+!          same location, with the correct spinat and nuclear dipole moment
+           do kk=1,natomcl(iclass)
+
+             found3=1
+             iatom3=class(kk,iclass)
+!            Check the location
+             diff(:)=xred(:,iatom3)-symxred2(:)
+             diff(:)=diff(:)-nint(diff(:))
+             if( (diff(1)**2+diff(2)**2+diff(3)**2) > tolsym**2 )found3=0
+!            Check the spinat
+             if (noncoll==0) then
+               diff(:)=spinat(:,iatom3)-symspinat2(:)
+             else
+               diff(:)=spinatred(:,iatom3)-symspinat2(:)
+             end if
+             if( (diff(1)**2+diff(2)**2+diff(3)**2) > tolsym**2 )found3=0
+             if(present(nucdipmom)) then
+!              Check the nuclear dipole moment
+               diff(:) = nucdipmom(:,iatom3) - symnucdipmom2(:)
+               if(any(diff>tolsym))found3=0
+             end if
+             
+             if(found3==1)exit
+
+!            End loop over iatom3
+           end do
+           if(found3==1)exit
+         end do ! itrialafm
 
          if(found3==0)then
            trialok=0
@@ -412,6 +426,9 @@
        end if
        ntrial=ntrial+1
        symrel(:,:,nsym)=ptsymrel(:,:,isym)
+! TODO: fix potential confusion if atoms in a class are both FM and AFM coupled.
+! This might lead to arbitrary values for trialafm = +-1
+! to be tested
        symafm(nsym)=trialafm
        tnons(:,nsym)=trialnons(:)-nint(trialnons(:)-tolsym)
      end if
@@ -431,15 +448,15 @@
  end if
 
 !DEBUG
- write(message,'(a,I0,a)')' symfind : exit, nsym=',nsym,ch10
- write(message,'(2a)') trim(message),'   symrel matrices, symafm and tnons are :'
- call wrtout(std_out,message,'COLL')
- do isym=1,nsym
-   write(message,'(i4,4x,3i4,2x,3i4,2x,3i4,4x,i4,4x,3f8.4)' ) isym,symrel(:,:,isym),&
-&   symafm(isym),tnons(:,isym)
-   call wrtout(std_out,message,'COLL')
- end do
-
+! write(message,'(a,I0,a)')' symfind : exit, nsym=',nsym,ch10
+! write(message,'(2a)') trim(message),'   symrel matrices, symafm and tnons are :'
+! call wrtout(std_out,message,'COLL')
+! do isym=1,nsym
+!   write(message,'(i4,4x,3i4,2x,3i4,2x,3i4,4x,i4,4x,3f8.4)' ) isym,symrel(:,:,isym),&
+!&   symafm(isym),tnons(:,isym)
+!   call wrtout(std_out,message,'COLL')
+! end do
+!
 !stop
 !ENDDEBUG
 
