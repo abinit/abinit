@@ -75,7 +75,6 @@
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'symfind'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -163,6 +162,8 @@
 &         abs(spinat(2,iatom)-spinatcl(2,iclass))<tolsym .and. &
 &         abs(spinat(3,iatom)-spinatcl(3,iclass))<tolsym
 ! spins are vector identical except z component which can have a sign flip
+! TODO: in noncoll case could be generalized to include arbitrary user choice of
+! orientation, as long as the spins are flipped properly...
          test_sameabscollin= &
 &         noncoll==0 .and.&
 &         abs(spinat(1,iatom))<tolsym .and. abs(spinatcl(1,iclass))<tolsym .and.&
@@ -327,28 +328,30 @@
 !    jellium slab case: check whether symmetry operation has no translational
 !    component along z
      if( jellslab/=0 .and. abs(trialnons(3)) > tolsym ) cycle
-     trialok=1
 
 !    DEBUG
 !    write(std_out,*)' isym,trialnons(:)=',isym,trialnons(:)
 !    ENDDEBUG
 
+!    added an explicit loop over FM and AFM - for non-collinear spins you
+!    can not tell ahead of time which to choose
+!    start with FM to default to that if there is no spin on this atom
+!    NB: trialafm should be the same for all classes
+     do itrialafm = 1,0,-1
+       trialok=1
+       trialafm = itrialafm*2-1
+
 !    Loop over all classes, then all atoms in the class,
 !    to find whether they have a symmetric
-     do iclass=1,nclass
-       do jj=1,natomcl(iclass)
+       do iclass=1,nclass
+         do jj=1,natomcl(iclass)
 
-         iatom2=class(jj,iclass)
-!        Generate the tentative symmetric position of iatom2
-         symxred2(:)=ptsymrel(:,1,isym)*xred(1,iatom2)+ &
+           iatom2=class(jj,iclass)
+!          Generate the tentative symmetric position of iatom2
+           symxred2(:)=ptsymrel(:,1,isym)*xred(1,iatom2)+ &
 &                    ptsymrel(:,2,isym)*xred(2,iatom2)+ &
 &                    ptsymrel(:,3,isym)*xred(3,iatom2)+ trialnons(:)
 
-!        added an explicit loop over FM and AFM - for non-collinear spins you
-!        can not tell ahead of time which to choose
-!        start with FM to default to that if there is no spin on this atom
-         do itrialafm = 1,0,-1
-           trialafm = itrialafm*2-1
 !          Generate the tentative symmetric spinat of iatom2
            if (noncoll==0) then
              symspinat2(:)=trialafm*spinat(:,iatom2)
@@ -369,6 +372,8 @@
 !          DEBUG
 !          write(std_out,'(a,3i6,3f12.4,a,3f12.4)') ' iclass jj trialafm Send atom at xred=',&
 !&            iclass, jj, trialafm, xred(:,iatom2),' to ',symxred2(:)
+!          write(std_out,'(a,3f12.4,a,3f12.4)') ' Send atom with spinat  =',&
+!&            spinat(:,iatom2), ' to ', symspinat2
 !          ENDDEBUG
 
 !          Check whether there exists an atom of the same class at the
@@ -393,45 +398,41 @@
                diff(:) = nucdipmom(:,iatom3) - symnucdipmom2(:)
                if(any(diff>tolsym))found3=0
              end if
-             
              if(found3==1)exit
 
 !            End loop over iatom3
            end do
-           if(found3==1)exit
-         end do ! itrialafm
 
-         if(found3==0)then
-           trialok=0
-           exit
+! if one of the atoms does not have symmetric in its class, scrap this trial tnons+trialafm for present symop
+! no need to loop further on atom2 or class
+           if(found3==0)then
+             trialok=0
+             exit
+           end if
+         end do ! End loop over iatom2 in class iclass
+         if(trialok==0)exit
+
+       end do ! End loop over all classes
+  
+       if(trialok==1)then
+         nsym=nsym+1
+         if(nsym>msym)then
+           write(message,'(3a,i0,4a)')&
+&           'The number of symmetries (including non-symmorphic translations)',ch10,&
+&           'is larger than maxnsym=',msym,ch10,&
+&           'Action: increase maxnsym in the input, or take a cell that is primitive, ',ch10,&
+&           'or at least smaller than the present one.'
+           MSG_ERROR(message)
          end if
-
-!        End loop over iatom2
-       end do
-
-       if(trialok==0)exit
-
-!      End loop over all classes
-     end do
-
-     if(trialok==1)then
-       nsym=nsym+1
-       if(nsym>msym)then
-         write(message,'(3a,i0,4a)')&
-&         'The number of symmetries (including non-symmorphic translations)',ch10,&
-&         'is larger than maxnsym=',msym,ch10,&
-&         'Action: increase maxnsym in the input, or take a cell that is primitive, ',ch10,&
-&         'or at least smaller than the present one.'
-         MSG_ERROR(message)
-       end if
-       ntrial=ntrial+1
-       symrel(:,:,nsym)=ptsymrel(:,:,isym)
+         ntrial=ntrial+1
+         symrel(:,:,nsym)=ptsymrel(:,:,isym)
 ! TODO: fix potential confusion if atoms in a class are both FM and AFM coupled.
 ! This might lead to arbitrary values for trialafm = +-1
 ! to be tested
-       symafm(nsym)=trialafm
-       tnons(:,nsym)=trialnons(:)-nint(trialnons(:)-tolsym)
-     end if
+         symafm(nsym)=trialafm
+         tnons(:,nsym)=trialnons(:)-nint(trialnons(:)-tolsym)
+       end if
+     end do ! itrialafm
 
 !    End the loop on tentative translations
    end do
@@ -448,15 +449,13 @@
  end if
 
 !DEBUG
-! write(message,'(a,I0,a)')' symfind : exit, nsym=',nsym,ch10
-! write(message,'(2a)') trim(message),'   symrel matrices, symafm and tnons are :'
+! write(message,'(a,I0,a,a)') ' symfind : exit, nsym=',nsym,ch10, '   symrel matrices, symafm and tnons are :'
 ! call wrtout(std_out,message,'COLL')
 ! do isym=1,nsym
 !   write(message,'(i4,4x,3i4,2x,3i4,2x,3i4,4x,i4,4x,3f8.4)' ) isym,symrel(:,:,isym),&
 !&   symafm(isym),tnons(:,isym)
 !   call wrtout(std_out,message,'COLL')
 ! end do
-!
 !stop
 !ENDDEBUG
 
