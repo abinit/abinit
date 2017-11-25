@@ -880,10 +880,6 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
 &        Dtset%ecutsigx,Gsph_c%ng,nqlwl,qlwl,ngfftf,comm)
      end if
 
-!DEBUG
-     write(std_out,*)' sigma_init 1 : rcut,icutcoul_eff=',rcut,icutcoul_eff
-!ENDDEBUG
-
    else
 
 !    Use a temporary Vcp_ks to compute the Coulomb interaction already present in the Fock part of the Kohn-Sham Hamiltonian
@@ -898,12 +894,6 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
 !    Now compute the residual Coulomb interaction
      Vcp%vc_sqrt_resid=sqrt(Vcp%vc_sqrt**2-Sigp%sigma_mixing*Vcp_ks%vc_sqrt**2)
      Vcp%i_sz_resid=Vcp%i_sz-Sigp%sigma_mixing*Vcp_ks%i_sz
-!DEBUG
-!    Vcp%vc_sqrt_resid=Vcp%vc_sqrt
-!    Vcp%i_sz_resid=Vcp%i_sz
-     write(std_out,*)' sigma_init 2 : Sigp%sigma_mixing=',Sigp%sigma_mixing
-     write(std_out,*)' sigma_init 2 : rcut,icutcoul_eff=',rcut,icutcoul_eff
-!ENDDEBUG
 !    The mixing factor has already been accounted for, so set it back to one
      Sigp%sigma_mixing=one
      call vcoul_free(Vcp_ks)
