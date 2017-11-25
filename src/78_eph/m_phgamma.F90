@@ -473,10 +473,7 @@ subroutine phgamma_init(gams,cryst,ifc,symdynmat,eph_scalprod,eph_transport,ngqp
  gams%natom = cryst%natom; gams%natom3 = 3*cryst%natom; gams%nsppol = nsppol; gams%nspinor = nspinor
  gams%symgamma = symdynmat; gams%eph_scalprod = eph_scalprod
 
- gams%ndir_transp = 0
- if (eph_transport > 0) then
-   gams%ndir_transp = 3
- end if
+ gams%ndir_transp = 0; if (eph_transport > 0) gams%ndir_transp = 3
 
  ABI_MALLOC(gams%n0, (nsppol))
  gams%n0 = n0
@@ -498,10 +495,11 @@ subroutine phgamma_init(gams,cryst,ifc,symdynmat,eph_scalprod,eph_transport,ngqp
  ABI_CHECK(ierr==0, "out of memory in %vals_in_qibz")
  gams%vals_in_qibz = zero
 
- ABI_STAT_MALLOC(gams%vals_out_qibz, (2,gams%ndir_transp**2,gams%natom3,gams%natom3,gams%nqibz,nsppol), ierr)
- ABI_CHECK(ierr==0, "out of memory in %vals_out_qibz")
- gams%vals_out_qibz = zero
-
+ if (eph_transport > 0) then
+   ABI_STAT_MALLOC(gams%vals_out_qibz, (2,gams%ndir_transp**2,gams%natom3,gams%natom3,gams%nqibz,nsppol), ierr)
+   ABI_CHECK(ierr==0, "out of memory in %vals_out_qibz")
+   gams%vals_out_qibz = zero
+ end if
 
  ! Prepare Fourier interpolation.
  gams%gprim = ifc%gprim
@@ -4152,22 +4150,26 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
 
  ! Allocate work space arrays.
  ABI_MALLOC(tgam, (2,natom3,natom3,nsig))
- ABI_MALLOC(tgamvv_in, (2,gams%ndir_transp**2,natom3,natom3,nsig))
- ABI_MALLOC(tgamvv_out, (2,gams%ndir_transp**2,natom3,natom3,nsig))
- ABI_MALLOC(resvv_in, (2,gams%ndir_transp**2))
- ABI_MALLOC(resvv_out, (2,gams%ndir_transp**2))
  ABI_CALLOC(dummy_vtrial, (nfftf,nspden))
  ABI_CALLOC(gvals_qibz, (2,natom3,natom3,nsig,gams%nqibz,nsppol))
-! TODO: if we remove the nsig dependency we can remove this intermediate array
-! and save a lot of memory
- ABI_CALLOC(gvvvals_in_qibz, (2,gams%ndir_transp**2,natom3,natom3,nsig,gams%nqibz,nsppol))
- ABI_CALLOC(gvvvals_out_qibz, (2,gams%ndir_transp**2,natom3,natom3,nsig,gams%nqibz,nsppol))
+
+ if (dtset%eph_transport > 0) then
+   ABI_MALLOC(tgamvv_in, (2,gams%ndir_transp**2,natom3,natom3,nsig))
+   ABI_MALLOC(tgamvv_out, (2,gams%ndir_transp**2,natom3,natom3,nsig))
+   ABI_MALLOC(resvv_in, (2,gams%ndir_transp**2))
+   ABI_MALLOC(resvv_out, (2,gams%ndir_transp**2))
+   ! TODO: if we remove the nsig dependency we can remove this intermediate array
+   ! and save a lot of memory
+   ABI_CALLOC(gvvvals_in_qibz, (2,gams%ndir_transp**2,natom3,natom3,nsig,gams%nqibz,nsppol))
+   ABI_CALLOC(gvvvals_out_qibz, (2,gams%ndir_transp**2,natom3,natom3,nsig,gams%nqibz,nsppol))
+ end if
 
  do iq_ibz=1,gams%nqibz
    qpt = gams%qibz(:,iq_ibz)
    tgam = zero
-   tgamvv_in = zero
-   tgamvv_out = zero
+   if (dtset%eph_transport > 0) then
+     tgamvv_in = zero; tgamvv_out = zero
+   end if
 
    call cwtime(cpu,wall,gflops,"start")
 
@@ -4220,8 +4222,10 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
      ABI_CALLOC(wt_k, (nsig, mnb))
      ABI_CALLOC(wt_kq, (nsig, mnb))
 
-     ABI_CALLOC(vv_kk, (gams%ndir_transp**2, mnb, mnb))
-     ABI_CALLOC(vv_kkq, (gams%ndir_transp**2, mnb, mnb))
+     if (dtset%eph_transport > 0) then
+       ABI_CALLOC(vv_kk, (gams%ndir_transp**2, mnb, mnb))
+       ABI_CALLOC(vv_kkq, (gams%ndir_transp**2, mnb, mnb))
+     end if
 
      ! =========================
      ! Integration over FS(spin)
@@ -4420,18 +4424,20 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
        call fstab_weights_ibz(fs, ebands, ikq_ibz, spin, sigmas, wt_kq)
 
        ! TODO : could almost make this a BLAS call plus a reshape...
-       do ib2 = 1,nband_k
-         do ipc2 = 1,gams%ndir_transp
-           do ib1 = 1,nband_kq
-             do ipc1 = 1,gams%ndir_transp
-               vv_kk(ipc1+(ipc2-1)*gams%ndir_transp, ib1,ib2)  = ddk%velocity(ipc1,ib1,ik_bz,spin) &
-&                 * ddk%velocity(ipc2,ib2,ik_bz,spin) ! vk vk
-               vv_kkq(ipc1+(ipc2-1)*gams%ndir_transp, ib1,ib2) = ddk%velocity(ipc1,ib1,ikq_bz,spin) &
-&                 * ddk%velocity(ipc2,ib2,ik_bz,spin) ! vk vk+q
+       if (dtset%eph_transport > 0) then
+         do ib2 = 1,nband_k
+           do ipc2 = 1,gams%ndir_transp
+             do ib1 = 1,nband_kq
+               do ipc1 = 1,gams%ndir_transp
+                 vv_kk(ipc1+(ipc2-1)*gams%ndir_transp, ib1,ib2)  = ddk%velocity(ipc1,ib1,ik_bz,spin) &
+                   * ddk%velocity(ipc2,ib2,ik_bz,spin) ! vk vk
+                 vv_kkq(ipc1+(ipc2-1)*gams%ndir_transp, ib1,ib2) = ddk%velocity(ipc1,ib1,ikq_bz,spin) &
+                   * ddk%velocity(ipc2,ib2,ik_bz,spin) ! vk vk+q
+               end do
              end do
            end do
          end do
-       end do
+       end if
 
        ! Accumulate results in tgam (sum over FS and bands).
        do ipc2=1,natom3
@@ -4442,19 +4448,25 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
                 rg = gkk_atm(:, ib1, ib2, ipc2)
                 res(1) = lf(1) * rg(1) + lf(2) * rg(2)
                 res(2) = lf(1) * rg(2) - lf(2) * rg(1)
-                resvv_in(1,:) = res(1) * vv_kkq(:,ib1,ib2)
-                resvv_in(2,:) = res(2) * vv_kkq(:,ib1,ib2)
-                resvv_out(1,:) = res(1) * vv_kk(:,ib1,ib2)
-                resvv_out(2,:) = res(2) * vv_kk(:,ib1,ib2)
+                if (dtset%eph_transport > 0) then
+                  resvv_in(1,:) = res(1) * vv_kkq(:,ib1,ib2)
+                  resvv_in(2,:) = res(2) * vv_kkq(:,ib1,ib2)
+                  resvv_out(1,:) = res(1) * vv_kk(:,ib1,ib2)
+                  resvv_out(2,:) = res(2) * vv_kk(:,ib1,ib2)
+                end if
+
                 ! Loop over smearing values.
                 do isig=1,nsig
                   tgam(:,ipc1,ipc2,isig) = tgam(:,ipc1,ipc2,isig) &
-&                   + res(:)     * wt_kq(isig, ib1) * wt_k(isig, ib2)
-                  tgamvv_in(:,:,ipc1,ipc2,isig)  = tgamvv_in(:,:,ipc1,ipc2,isig)  &
-&                   + resvv_in(:,:)  * wt_kq(isig, ib1) * wt_k(isig, ib2)
-                  tgamvv_out(:,:,ipc1,ipc2,isig) = tgamvv_out(:,:,ipc1,ipc2,isig) &
-&                   + resvv_out(:,:) * wt_kq(isig, ib1) * wt_k(isig, ib2)
-                  !write(std_out,*)res, wt_kq(isig, ib,  wt_k(isig, ib2)
+                   + res(:)     * wt_kq(isig, ib1) * wt_k(isig, ib2)
+
+                  if (dtset%eph_transport > 0) then
+                    tgamvv_in(:,:,ipc1,ipc2,isig)  = tgamvv_in(:,:,ipc1,ipc2,isig)  &
+                     + resvv_in(:,:)  * wt_kq(isig, ib1) * wt_k(isig, ib2)
+                    tgamvv_out(:,:,ipc1,ipc2,isig) = tgamvv_out(:,:,ipc1,ipc2,isig) &
+                     + resvv_out(:,:) * wt_kq(isig, ib1) * wt_k(isig, ib2)
+                    !write(std_out,*)res, wt_kq(isig, ib,  wt_k(isig, ib2)
+                  end if
                 end do
               end do
             end do
@@ -4470,12 +4482,14 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
      ABI_FREE(h1kets_kq)
      ABI_FREE(gkk_atm)
 
-     ABI_FREE(vv_kk)
-     ABI_FREE(vv_kkq)
-
      call xmpi_sum(tgam, comm, ierr)
-     call xmpi_sum(tgamvv_in, comm, ierr)
-     call xmpi_sum(tgamvv_out, comm, ierr)
+
+     if (dtset%eph_transport > 0) then
+       ABI_FREE(vv_kk)
+       ABI_FREE(vv_kkq)
+       call xmpi_sum(tgamvv_in, comm, ierr)
+       call xmpi_sum(tgamvv_out, comm, ierr)
+     end if
 
      if (eph_scalprod == 1) then
        ! Get phonon frequencies and displacements for this q-point
@@ -4496,8 +4510,11 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
        ! Save results for this (q-point, spin)
        !write(std_out,*)tgam(:,:,:,isig)
        gvals_qibz(:,:,:,isig,iq_ibz,spin) = tgam(:,:,:,isig)
-       gvvvals_in_qibz(:,:,:,:,isig,iq_ibz,spin)  = tgamvv_in(:,:,:,:,isig)
-       gvvvals_out_qibz(:,:,:,:,isig,iq_ibz,spin) = tgamvv_out(:,:,:,:,isig)
+
+       if (dtset%eph_transport > 0) then
+         gvvvals_in_qibz(:,:,:,:,isig,iq_ibz,spin)  = tgamvv_in(:,:,:,:,isig)
+         gvvvals_out_qibz(:,:,:,:,isig,iq_ibz,spin) = tgamvv_out(:,:,:,:,isig)
+       end if
      end do ! isig
    end do ! spin
 
@@ -4513,8 +4530,10 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
  do spin=1,nsppol
    !call xmpi_sum(gvals_qibz, comm_qpts, ierr) ! for the moment only split over k??
    gvals_qibz(:,:,:,:,:,spin) = gvals_qibz(:,:,:,:,:,spin) / fstab(spin)%nktot
-   gvvvals_in_qibz(:,:,:,:,:,:,spin) = gvvvals_in_qibz(:,:,:,:,:,:,spin) / fstab(spin)%nktot
-   gvvvals_out_qibz(:,:,:,:,:,:,spin) = gvvvals_out_qibz(:,:,:,:,:,:,spin) / fstab(spin)%nktot
+   if (dtset%eph_transport > 0) then
+     gvvvals_in_qibz(:,:,:,:,:,:,spin) = gvvvals_in_qibz(:,:,:,:,:,:,spin) / fstab(spin)%nktot
+     gvvvals_out_qibz(:,:,:,:,:,:,spin) = gvvvals_out_qibz(:,:,:,:,:,:,spin) / fstab(spin)%nktot
+   end if
  end do
  call wrtout(std_out, "Computation of tgamma matrices completed", "COLL", do_flush=.True.)
 
@@ -4531,10 +4550,12 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
  ABI_FREE(ylm_kq)
  ABI_FREE(ylmgr_kq)
  ABI_FREE(tgam)
- ABI_FREE(tgamvv_in)
- ABI_FREE(tgamvv_out)
- ABI_FREE(resvv_in)
- ABI_FREE(resvv_out)
+ if (dtset%eph_transport > 0) then
+   ABI_FREE(tgamvv_in)
+   ABI_FREE(tgamvv_out)
+   ABI_FREE(resvv_in)
+   ABI_FREE(resvv_out)
+ end if
 
  call destroy_hamiltonian(gs_hamkq)
  call wfd_free(wfd)
@@ -4549,12 +4570,16 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
  ! Initialize object used to interpolate linewidths, compute a2f, write results etc.
  ! TODO: also save values for isig > 1???
  gams%vals_qibz = gvals_qibz(:,:,:,1,:,:)
- gams%vals_in_qibz  = gvvvals_in_qibz(:,:,:,:,1,:,:)
- gams%vals_out_qibz = gvvvals_out_qibz(:,:,:,:,1,:,:)
  !write(std_out,*)gvals_qibz
  ABI_FREE(gvals_qibz)
- ABI_FREE(gvvvals_in_qibz)
- ABI_FREE(gvvvals_out_qibz)
+
+ if (dtset%eph_transport > 0) then
+   gams%vals_in_qibz  = gvvvals_in_qibz(:,:,:,:,1,:,:)
+   gams%vals_out_qibz = gvvvals_out_qibz(:,:,:,:,1,:,:)
+   ABI_FREE(gvvvals_in_qibz)
+   ABI_FREE(gvvvals_out_qibz)
+ end if
+
  call phgamma_finalize(gams,cryst,ifc)
 
  ! Interpolate linewidths along the q-path.
@@ -4596,8 +4621,7 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
      dtset%ph_ngqpt,dtset%ph_nqshift,dtset%ph_qshift,comm,qptopt=1)
    if (my_rank == master) call a2fw_tr_write(a2fw_tr, dtfil%filnam_ds(4), "_qintp", ncid)
 
-! calculate and output transport quantities
-
+   ! calculate and output transport quantities
    call a2fw_tr_free(a2fw_tr)
 
    ! Compute A2fw_tr using Fourier interpolation and full BZ for debugging purposes.
