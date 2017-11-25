@@ -4617,7 +4617,7 @@ subroutine dvdb_interpolate_and_write(dtfil, ngfft, ngfftf, cryst, dvdb, &
    end do
  end do
 
- close(ount)
+ if (my_rank == master) close(ount)
 
  ! ========================================================================== !
  ! Free memory
