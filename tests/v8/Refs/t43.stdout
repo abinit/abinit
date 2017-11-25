@@ -24,9 +24,13 @@
 >>> Enter name of POT file 3 : 
 >>> Enter name of POT file 4 : 
 - Reading header of file [1]: t41o_DS3_POT1
+- Merging file [1]: t41o_DS3_POT1
 - Reading header of file [2]: t41o_DS4_POT1
+- Merging file [2]: t41o_DS4_POT1
 - Reading header of file [3]: t41o_DS4_POT2
+- Merging file [3]: t41o_DS4_POT2
 - Reading header of file [4]: t41o_DS5_POT1
+- Merging file [4]: t41o_DS5_POT1
 Merged successfully 4 files
  ==== Info on the dvdb% object ====
 DVDB version: 2
@@ -38,6 +42,7 @@ List of q-points:
 [ 1 ] [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
 [ 2 ] [ 5.0000E-01,  0.0000E+00,  0.0000E+00]
 [ 3 ] [ 5.0000E-01,  5.0000E-01,  0.0000E+00]
+Have dielectric tensor and Born effective charges: no
 qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:
     1)  idir= 1, ipert=   1, type=independent, found=Yes

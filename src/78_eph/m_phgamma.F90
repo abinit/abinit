@@ -301,7 +301,7 @@ module m_phgamma
   !   vals_in(w,3,3,0,1:nsppol): a2f_tr(w) summed over phonons modes, decomposed in spin
 
   real(dp),allocatable :: vals_tr(:,:,:,:,:)
-  ! vals_tr(nomega,3,3,nsppol)
+  ! vals_tr(nomega,3,3,0:natom3,nsppol)
   ! transport spectral function = in-out
 
   real(dp),allocatable :: lambdaw_tr(:,:,:,:,:)
@@ -311,8 +311,7 @@ module m_phgamma
 
  public :: a2fw_tr_free            ! Free the memory allocated in the structure.
  public :: a2fw_tr_init            ! Calculates the FS averaged alpha^2F_tr,in,out(w, x, x') functions.
- public :: a2fw_tr_write           ! Write alpha^2F(w) to an external file in text form
- !public :: a2fw_tr_ncwrite        ! Write alpha^2F(w) to an external file in netcdf form
+ public :: a2fw_tr_write           ! Write alpha^2F(w) to an external file in text/netcdf format
 !!***
 
  real(dp),private,parameter :: EPH_WTOL=tol7
@@ -837,7 +836,7 @@ end subroutine phgamma_eval_qibz
 !! phgamma_interp
 !!
 !! FUNCTION
-!!  Interpolate the linewidths at a given q-point.
+!!  Interpolate the phonon linewidths at a given q-point.
 !!
 !! INPUTS
 !!  gams<phgamma_t>
@@ -1036,6 +1035,7 @@ subroutine phgamma_interp_setup(gams,cryst,action)
  integer,allocatable :: qirredtofull(:),qpttoqpt(:,:,:)
  real(dp) :: qirr(3),tmp_qpt(3)
  real(dp),allocatable :: coskr(:,:),sinkr(:,:)
+ real(dp),allocatable :: gamma_qpt(:,:,:,:)
 
 ! *************************************************************************
 
@@ -1097,8 +1097,20 @@ subroutine phgamma_interp_setup(gams,cryst,action)
      end do
 
      ! Complete vals_bz in the full BZ.
+     ! FIXME: Change complete_gamma API to pass (..., nsppol)
+     ABI_MALLOC(gamma_qpt, (2, gams%natom3**2, gams%nsppol, gams%nqbz))
+     do spin=1,gams%nsppol
+       gamma_qpt(:, :, spin, :) = gams%vals_bz(:, :, :, spin)
+     end do
+
      call complete_gamma(cryst,gams%natom3,gams%nsppol,gams%nqibz,gams%nqbz,&
-       gams%eph_scalprod,qirredtofull,qpttoqpt,gams%vals_bz)
+       gams%eph_scalprod,qirredtofull,qpttoqpt,gamma_qpt)
+       !gams%eph_scalprod,qirredtofull,qpttoqpt,gams%vals_bz)
+
+     do spin=1,gams%nsppol
+       gams%vals_bz(:, :, :, spin) = gamma_qpt(:, :, spin, :)
+     end do
+     ABI_FREE(gamma_qpt)
 
      ! TODO: idem for vv_vals 3x3 matrices
 
@@ -1460,7 +1472,7 @@ subroutine phgamma_vv_interp(gams,cryst,ifc,spin,qpt,phfrq,gamma_in_ph,gamma_out
          img(nu1) = tmp_gam1(2, nu1, nu1)
          if (abs(img(nu1)) > tol8) then
            write (msg,'(a,i0,a,es16.8)')' non-zero imaginary part for branch= ',nu1,', img= ',img(nu1)
-         MSG_WARNING(msg)
+           MSG_WARNING(msg)
          end if
        end do
 
@@ -1775,7 +1787,7 @@ end subroutine phgamma_vv_interp_setup
 !!  qverts(3,nvert) = vertices of reciprocal space trajectory
 !!  basename=name used to create the different output files (text format).
 !!  ncid=Netcdf file handler (already open in the caller).
-!!  MPI communicator
+!!  comm=MPI communicator
 !!
 !! OUTPUT
 !!  wminmax=Minimum and max phonon frequency obtained on the path (Hartree units)
@@ -2791,7 +2803,7 @@ subroutine a2fw_write(a2f, basename, post, ncid)
  if (ncid /= nctk_noid) then
 #ifdef HAVE_NETCDF
    ! Define dimensions.
-   dim1_name = strcat("af2_nomega", post)
+   dim1_name = strcat("a2f_nomega", post)
    ncerr = nctk_def_dims(ncid, [ &
      nctkdim_t(dim1_name, a2f%nomega), &
      nctkdim_t("natom3p1", a2f%natom3 + 1), nctkdim_t("number_of_spins", a2f%nsppol) &
@@ -3547,6 +3559,8 @@ end subroutine a2fw_tr_init
 !! INPUTS
 !!  a2f_tr<a2fw_tr_t>=Container storing the Eliashberg transport functions.
 !!  basename=Filename for output.
+!!  post=String appended to netcdf variables e.g. _qcoarse, _qintp
+!!  ncid=Netcdf file handler. Set it to nctk_noid to disable output.
 !!
 !! OUTPUT
 !!  Output is written to file. This routine should be called by one MPI proc.
@@ -3558,7 +3572,7 @@ end subroutine a2fw_tr_init
 !!
 !! SOURCE
 
-subroutine a2fw_tr_write(a2f_tr,basename)
+subroutine a2fw_tr_write(a2f_tr, basename, post, ncid)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -3571,13 +3585,18 @@ subroutine a2fw_tr_write(a2f_tr,basename)
 
 !Arguments ------------------------------------
 !scalars
- character(len=*),intent(in) :: basename
+ integer,intent(in) :: ncid
+ character(len=*),intent(in) :: basename, post
  type(a2fw_tr_t),intent(in) :: a2f_tr
 
 !Local variables -------------------------
 !scalars
  integer :: iw,spin,unt,ii,mu
  integer :: idir, jdir
+#ifdef HAVE_NETCDF
+ integer :: ncerr
+ character(len=500) :: dim1_name
+#endif
  character(len=500) :: msg
  character(len=fnlen) :: path
 
@@ -3663,6 +3682,30 @@ subroutine a2fw_tr_write(a2f_tr,basename)
  end if
 
  close(unt)
+
+ if (ncid /= nctk_noid) then
+#ifdef HAVE_NETCDF
+   ! Define dimensions.
+   dim1_name = strcat("a2ftr_nomega", post)
+   ncerr = nctk_def_dims(ncid, [ &
+     nctkdim_t(dim1_name, a2f_tr%nomega), &
+     nctkdim_t("natom3p1", a2f_tr%natom3 + 1), nctkdim_t("number_of_spins", a2f_tr%nsppol) &
+     ], defmode=.True.)
+   NCF_CHECK(ncerr)
+
+   ncerr = nctk_def_arrays(ncid, [ &
+     nctkarr_t(strcat('a2ftr_mesh', post), "dp", dim1_name), &
+     nctkarr_t(strcat('a2ftr_values', post), "dp", strcat(dim1_name, ", three, three, natom3p1, number_of_spins")), &
+     nctkarr_t(strcat('a2ftr_lambdaw', post), "dp", strcat(dim1_name, ", three, three, natom3p1, number_of_spins")) &
+     ])
+   NCF_CHECK(ncerr)
+
+   NCF_CHECK(nctk_set_datamode(ncid))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, strcat("a2ftr_mesh", post)), a2f_tr%omega))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, strcat("a2ftr_values", post)), a2f_tr%vals_tr))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, strcat("a2ftr_lambdaw", post)), a2f_tr%lambdaw_tr))
+#endif
+ end if
 
 contains
 
@@ -3834,7 +3877,7 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
  real(dp) :: displ_cart(2,3,cryst%natom,3*cryst%natom),displ_red(2,3,cryst%natom,3*cryst%natom)
  real(dp) :: temp_tgam(2,3*cryst%natom,3*cryst%natom)
  real(dp) :: sigmas(2),wminmax(2)
- real(dp) :: n0(ebands%nsppol),edos_enewin(2)
+ real(dp) :: n0(ebands%nsppol)
  real(dp),allocatable :: grad_berry(:,:),kinpw1(:),kpg1_k(:,:),kpg_k(:,:),dkinpw(:)
  real(dp),allocatable :: ffnlk(:,:,:,:),ffnl1(:,:,:,:),ph3d(:,:,:),ph3d1(:,:,:)
  real(dp),allocatable :: v1scf(:,:,:,:),tgam(:,:,:,:),gvals_qibz(:,:,:,:,:,:),gkk_atm(:,:,:,:)
@@ -3887,9 +3930,7 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
  !edos_intmeth = 1
  edos_step = dtset%dosdeltae; edos_broad = dtset%tsmear
  edos_step = 0.01 * eV_Ha; edos_broad = 0.3 * eV_Ha
- edos_enewin = [one, zero]
- !edos_enewin = [ebands%fermie - dtset%eph_fsewin, ebands%fermie + dtset%eph_fsewin]
- edos = ebands_get_edos(ebands,cryst,edos_intmeth,edos_step,edos_broad,edos_enewin,comm)
+ edos = ebands_get_edos(ebands,cryst,edos_intmeth,edos_step,edos_broad,comm)
 
  ! Store DOS per spin channels
  n0(:) = edos%gef(1:edos%nsppol)
@@ -3899,7 +3940,6 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
    call wrtout(ab_out, sjoin("- Writing electron DOS to file:", path))
    call edos_write(edos, path)
  end if
- call edos_free(edos)
 
  ! Find Fermi surface.
 
@@ -3918,6 +3958,18 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
    call ddk_read_fsvelocities(ddk, fstab, comm)
    call ddk_fs_average_veloc(ddk, ebands, fstab, sigmas, comm)
  end if
+
+ ncid = nctk_noid
+#ifdef HAVE_NETCDF
+ ! Open the netcdf file used to store the results of the calculation.
+ if (my_rank == master) then
+   NCF_CHECK(nctk_open_create(ncid, strcat(dtfil%filnam_ds(4), "_EPH.nc"), xmpi_comm_self))
+   NCF_CHECK(crystal_ncwrite(cryst, ncid))
+   NCF_CHECK(ebands_ncwrite(ebands, ncid))
+   NCF_CHECK(edos_ncwrite(edos, ncid))
+ end if
+#endif
+ call edos_free(edos)
 
  ! TODO: Support nsig in phgamma_init
  eph_scalprod = 0
@@ -4505,16 +4557,6 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
  ABI_FREE(gvvvals_out_qibz)
  call phgamma_finalize(gams,cryst,ifc)
 
- ncid = nctk_noid
-#ifdef HAVE_NETCDF
- ! Open the netcdf file used to store the results of the calculation.
- if (my_rank == master) then
-   NCF_CHECK(nctk_open_create(ncid, strcat(dtfil%filnam_ds(4), "_EPH.nc"), xmpi_comm_self))
-   NCF_CHECK(crystal_ncwrite(cryst, ncid))
-   NCF_CHECK(ebands_ncwrite(ebands, ncid))
- end if
-#endif
-
  ! Interpolate linewidths along the q-path.
  call phgamma_linwid(gams,cryst,ifc,dtset%ph_ndivsm,dtset%ph_nqpath,dtset%ph_qpath,dtfil%filnam_ds(4),ncid,wminmax,comm)
 
@@ -4546,13 +4588,13 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
    ! Compute a2Fw_tr using ab-initio q-points (no interpolation)
    call a2fw_tr_init(a2fw_tr,gams,cryst,ifc,dtset%ph_intmeth,dtset%ph_wstep,wminmax,dtset%ph_smear,&
      dtset%ph_ngqpt,dtset%ph_nqshift,dtset%ph_qshift,comm,qintp=.False.,qptopt=1)
-   if (my_rank == master) call a2fw_tr_write(a2fw_tr, strcat(dtfil%filnam_ds(4), "_NOINTP"))
+   if (my_rank == master) call a2fw_tr_write(a2fw_tr, strcat(dtfil%filnam_ds(4), "_NOINTP"), "_qcoarse", ncid)
    call a2fw_tr_free(a2fw_tr)
 
    ! Compute a2Fw_tr using Fourier interpolation.
    call a2fw_tr_init(a2fw_tr,gams,cryst,ifc,dtset%ph_intmeth,dtset%ph_wstep,wminmax,dtset%ph_smear,&
      dtset%ph_ngqpt,dtset%ph_nqshift,dtset%ph_qshift,comm,qptopt=1)
-   if (my_rank == master) call a2fw_tr_write(a2fw_tr, dtfil%filnam_ds(4))
+   if (my_rank == master) call a2fw_tr_write(a2fw_tr, dtfil%filnam_ds(4), "_qintp", ncid)
 
 ! calculate and output transport quantities
 
@@ -4561,7 +4603,7 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
    ! Compute A2fw_tr using Fourier interpolation and full BZ for debugging purposes.
    call a2fw_tr_init(a2fw_tr,gams,cryst,ifc,dtset%ph_intmeth,dtset%ph_wstep,wminmax,dtset%ph_smear,&
      dtset%ph_ngqpt,dtset%ph_nqshift,dtset%ph_qshift,comm,qptopt=3)
-   if (my_rank == master) call a2fw_tr_write(a2fw_tr, strcat(dtfil%filnam_ds(4), "_A2FWTR_QPTOPT3"))
+   if (my_rank == master) call a2fw_tr_write(a2fw_tr, strcat(dtfil%filnam_ds(4), "_A2FWTR_QPTOPT3"), "fake", nctk_noid)
 
    call a2fw_tr_free(a2fw_tr)
  end if

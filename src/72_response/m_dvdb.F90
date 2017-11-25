@@ -733,7 +733,7 @@ subroutine dvdb_print(db, header, unit, prtvol, mode_paral)
 
 !Local variables-------------------------------
 !scalars
- integer :: my_unt,my_prtvol,iv1,iq,idir,ipert
+ integer :: my_unt,my_prtvol,iv1,iq,idir,ipert,iatom
  character(len=4) :: my_mode
  character(len=500) :: msg
 
@@ -757,6 +757,21 @@ subroutine dvdb_print(db, header, unit, prtvol, mode_paral)
    write(std_out,"(a)")sjoin("[", itoa(iq),"]", ktoa(db%qpts(:,iq)))
  end do
 
+ write(std_out,"(a)")sjoin("Have dielectric tensor and Born effective charges:", yesno(db%has_dielt_zeff))
+ if (db%has_dielt_zeff) then
+   write(std_out, '(a,3(/,3es16.6))') ' Dielectric Tensor:', &
+     db%dielt(1,1), db%dielt(1,2), db%dielt(1,3), &
+     db%dielt(2,1), db%dielt(2,2), db%dielt(2,3), &
+     db%dielt(3,1), db%dielt(3,2), db%dielt(3,3)
+   write(std_out, '(a)') ' Effectives Charges: '
+   do iatom=1,db%natom
+     write(std_out,'(a,i0,3(/,3es16.6))')' iatom: ',iatom, &
+       db%zeff(1,1,iatom), db%zeff(1,2,iatom), db%zeff(1,3,iatom), &
+       db%zeff(2,1,iatom), db%zeff(2,2,iatom), db%zeff(2,3,iatom), &
+       db%zeff(3,1,iatom), db%zeff(3,2,iatom), db%zeff(3,3,iatom)
+   end do
+ end if
+
  if (my_prtvol > 0) then
    call crystal_print(db%cryst, header="Crystal structure in DVDB file")
    write(std_out,"(a)")"FFT mesh for potentials on file:"
@@ -766,7 +781,7 @@ subroutine dvdb_print(db, header, unit, prtvol, mode_paral)
      write(std_out,"(a)")sjoin(ktoa(db%qpts(:,iq)), itoa(idir), itoa(ipert), ltoa(db%ngfft3_v1(:,iv1)))
    end do
 
-   write(std_out, "(a)")"q-point, idir, iper, rhog1(q,G=0)"
+   write(std_out, "(a)")"q-point, idir, ipert, rhog1(q,G=0)"
    do iv1=1,db%numv1
      idir = db%iv_pinfoq(1, iv1); ipert = db%iv_pinfoq(2, iv1); iq = db%iv_pinfoq(4, iv1)
      write(std_out,"(a)")sjoin(ktoa(db%qpts(:,iq)), itoa(idir), itoa(ipert), &
@@ -1669,7 +1684,7 @@ subroutine v1phq_symmetrize(cryst,idir,ipert,symq,ngfft,cplex,nfft,nspden,nsppol
  ABI_MALLOC(phnons1, (2,nfft**(1-1/nsym1),(nspden/nsppol)-3*(nspden/4)))
  ABI_MALLOC(indsy1,(4,nsym1,cryst%natom))
 
- 
+
  call setsym(indsy1,irrzon1,iscf1,cryst%natom,nfft,ngfft,nspden,nsppol,&
    nsym1,phnons1,symafm1,symrc1,symrel1,tnons1,cryst%typat,cryst%xred)
 
@@ -2323,7 +2338,7 @@ end subroutine dvdb_ftinterp_qpt
 !!  Compute the phonon perturbation potential in real space lattice
 !!  representation.
 !!  This routine is meant to replace dvdb_ftinterp_setup
-!!  and performs the potential interpolation one perturbation at a time. 
+!!  and performs the potential interpolation one perturbation at a time.
 !!
 !! INPUTS
 !!  ngqpt(3)=Divisions of the ab-initio q-mesh.
@@ -2809,7 +2824,7 @@ end subroutine dvdb_get_v1scf_qpt
 !! FUNCTION
 !!  Interpolate the phonon perturbation potential.
 !!  This routine is meant to replace dvdb_ftinterp_setup and dvdb_ftinterp_qpt.
-!!  It performs the interpolation one perturbation at a time. 
+!!  It performs the interpolation one perturbation at a time.
 !!
 !! INPUTS
 !!  ngqpt(3)=Divisions of the ab-initio q-mesh.
@@ -2885,7 +2900,7 @@ subroutine dvdb_interpolate_v1scf(db, cryst, qpt, ngqpt, nqshift, qshift, &
    call dvdb_get_v1scf_rpt(db, cryst, ngqpt, nqshift, qshift, nfft, ngfft, &
    &                       db%nrpt, db%nspden, ipert, v1scf_rpt, comm)
 
-   call dvdb_get_v1scf_qpt(db, cryst, qpt, nfftf, ngfftf, db%nrpt, db%nspden, & 
+   call dvdb_get_v1scf_qpt(db, cryst, qpt, nfftf, ngfftf, db%nrpt, db%nspden, &
    &                       ipert, v1scf_rpt, v1scf(:,:,:,ipert), comm)
 
    ABI_FREE(db%rpt)
@@ -3423,14 +3438,14 @@ subroutine dvdb_merge_files(nfiles, v1files, dvdb_path, prtvol)
  end if
  write(ount, err=10, iomsg=msg) dvdb_last_version
  write(ount, err=10, iomsg=msg) nperts
- 
+
  ! Validate headers.
  ! TODO: Should perform consistency check on the headers, rearrange them in blocks of q-points.
  ! ignore POT1 files that do not correspond to atomic perturbations.
 
  do ii=1,nfiles
    write(std_out,"(a,i0,2a)")"- Reading header of file [",ii,"]: ",trim(v1files(ii))
-   
+
    if (endswith(v1files(ii), ".nc")) then
 #ifdef HAVE_NETCDF
       NCF_CHECK(nctk_open_read(units(ii), v1files(ii), xmpi_comm_self))
@@ -3498,7 +3513,7 @@ subroutine dvdb_merge_files(nfiles, v1files, dvdb_path, prtvol)
       if (dvdb_last_version > 1) write(ount, err=10, iomsg=msg) rhog1_g0
 #endif
    end if
-   
+
    if (.not. endswith(v1files(ii), ".nc")) then
      close(units(ii))
    else
@@ -4102,13 +4117,13 @@ end subroutine dvdb_test_ftinterp
 !! FUNCTION
 !!  Compute the long-range part of the phonon potential
 !!  due to the Born effective charges [PRL 115, 176401 (2015)].
-!!                                               
+!!
 !!    V^L_{iatom,idir}(r) = i (4pi/vol) sum_G (q+G) . Zeff_{iatom,idir}
 !!                           e^{i (q + G) . (r - tau_{iatom})} / ((q + G) . dielt . (q + G))
 !!
 !!  where Zeff and dielt are the Born effective charge tensor and the dielectric tensor,
 !!  tau is the atom position, and vol is the volume of the unit cell.
-!!                                               
+!!
 !! INPUTS
 !!  db = the DVDB object.
 !!  qpt = the q-point in reduced coordinates.
@@ -4118,7 +4133,7 @@ end subroutine dvdb_test_ftinterp
 !!  ngfft(18) = FFT mesh.
 !!
 !! OUTPUT
-!!  v1r_lr = dipole potential 
+!!  v1r_lr = dipole potential
 !!
 !!
 !! PARENTS
@@ -4446,7 +4461,7 @@ subroutine dvdb_interpolate_and_write(dtfil, ngfft, ngfftf, cryst, dvdb, &
 
      call wrtout(std_out, sjoin("Q-point: ",ktoa(qpt)," found in DVDB with index ",itoa(db_iqpt)))
      nqpt_read = nqpt_read + 1
-     q_read(:,nqpt_read) = qpt(:) 
+     q_read(:,nqpt_read) = qpt(:)
      iq_read(nqpt_read) = db_iqpt
 
      ! Count the perturbations
@@ -4460,7 +4475,7 @@ subroutine dvdb_interpolate_and_write(dtfil, ngfft, ngfftf, cryst, dvdb, &
 
      call wrtout(std_out, sjoin("Q-point: ",ktoa(qpt), "not found in DVDB. Will interpolate."))
      nqpt_interpolate = nqpt_interpolate + 1
-     q_interp(:,nqpt_interpolate) = qpt(:) 
+     q_interp(:,nqpt_interpolate) = qpt(:)
 
 
      ! Examine the symmetries of the q wavevector

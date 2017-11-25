@@ -259,7 +259,7 @@ module m_sigmaph
    ! First slice: Fan term at omega=e0_KS
    ! Second slice: DW term
 
-   type(degtab_t),allocatable :: degtab(:,:)
+  type(degtab_t),allocatable :: degtab(:,:)
    ! (nkcalc, nsppol)
 
  end type sigmaph_t

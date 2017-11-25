@@ -79,6 +79,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  use defs_abitypes
  use m_profiling_abi
  use m_xmpi
+ use m_xomp
  use m_errors
  use m_hdr
  use m_crystal
@@ -143,6 +144,8 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  integer,parameter :: nsphere0=0,prtsrlr0=0
  integer :: ii,comm,nprocs,my_rank,psp_gencond,mgfftf,nfftf !,nfftf_tot
  integer :: iblock,ddb_nqshift,ierr
+ integer :: omp_ncpus, work_size
+ real(dp):: eff,mempercpu_mb,max_wfsmem_mb,nonscal_mem !,ug_mem,ur_mem,cprj_mem
 #ifdef HAVE_NETCDF
  integer :: ncid,ncerr
 #endif
@@ -262,6 +265,46 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    call ddk_init(ddk, ddk_path, comm)
    ! TODO: Should perform consistency check
    !call hdr_vs_dtset(ddk_hdr(ii), dtset)
+ end if
+
+ ! autoparal section
+ ! TODO: This just to activate autoparal in abipy. Lot of things should be improved.
+ if (dtset%max_ncpus /=0) then
+   write(ab_out,'(a)')"--- !Autoparal"
+   write(ab_out,"(a)")"# Autoparal section for EPH runs"
+   write(ab_out,"(a)")   "info:"
+   write(ab_out,"(a,i0)")"    autoparal: ",dtset%autoparal
+   write(ab_out,"(a,i0)")"    max_ncpus: ",dtset%max_ncpus
+   write(ab_out,"(a,i0)")"    nkpt: ",dtset%nkpt
+   write(ab_out,"(a,i0)")"    nsppol: ",dtset%nsppol
+   write(ab_out,"(a,i0)")"    nspinor: ",dtset%nspinor
+   write(ab_out,"(a,i0)")"    mband: ",dtset%mband
+   write(ab_out,"(a,i0)")"    eph_task: ",dtset%eph_task
+
+   work_size = dtset%nkpt * dtset%nsppol
+   ! Non-scalable memory in Mb i.e. memory that is not distributed with MPI.
+   nonscal_mem = zero
+   max_wfsmem_mb = (two * dp * dtset%mpw * dtset%mband * dtset%nkpt * dtset%nsppol * dtset%nspinor * b2Mb) * 1.1_dp
+
+   ! List of configurations.
+   ! Assuming an OpenMP implementation with perfect speedup!
+   write(ab_out,"(a)")"configurations:"
+
+   do ii=1,dtset%max_ncpus
+     eff = (one * work_size) / ii
+     ! Add the non-scalable part and increase by 10% to account for other datastructures.
+     mempercpu_mb = (max_wfsmem_mb + nonscal_mem) * 1.1_dp
+
+     do omp_ncpus=1,1 !xomp_get_max_threads()
+       write(ab_out,"(a,i0)")"    - tot_ncpus: ",ii * omp_ncpus
+       write(ab_out,"(a,i0)")"      mpi_ncpus: ",ii
+       write(ab_out,"(a,i0)")"      omp_ncpus: ",omp_ncpus
+       write(ab_out,"(a,f12.9)")"      efficiency: ",eff
+       write(ab_out,"(a,f12.2)")"      mem_per_cpu: ",mempercpu_mb
+     end do
+   end do
+   write(ab_out,'(a)')"..."
+   MSG_ERROR_NODUMP("aborting now")
  end if
 
  call cwtime(cpu,wall,gflops,"start")

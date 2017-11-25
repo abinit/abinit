@@ -158,15 +158,13 @@ MODULE m_ebands
    ! gef(0:nsppol)
    ! DOS at the Fermi level. Total, spin up, spin down
 
-   !type(ebands_t),pointer :: ebands => null()
-   ! Reference to the bandstructure.
-
  end type edos_t
 
- public :: ebands_get_edos   ! Compute the dos from the band structure.
+ public :: ebands_get_edos   ! Compute electron DOS from band structure.
  public :: edos_free         ! Free memory
  public :: edos_write        ! Write results to file (formatted mode)
- public :: edos_print        ! Print DOS info to Fortran unit.
+ public :: edos_print        ! Print eDOS info to Fortran unit.
+ public :: edos_ncwrite      ! Write eDOS to netcdf file.
 !!***
 
 !----------------------------------------------------------------------
@@ -988,7 +986,7 @@ subroutine ebands_copy(ibands,obands)
  call alloc_copy(ibands%shiftk, obands%shiftk)
 
  if(allocated(ibands%lifetime)) then
-   call alloc_copy(ibands%lifetime, obands%lifetime)  
+   call alloc_copy(ibands%lifetime, obands%lifetime)
  end if
 
 end subroutine ebands_copy
@@ -3022,8 +3020,6 @@ end function ebands_ncwrite_path
 !!  broad=Gaussian broadening, If <0, the routine will use a default
 !!    value for the broadening computed from the mean of the energy level spacing.
 !!    No meaning for tetrahedrons
-!!  enewin(2)=Energy window for DOS. only bands whose energy is in [enewin(1), enenwin(2)] are included.
-!!    Ignored if enewin(2) <= enenwin(1).
 !!  comm=MPI communicator
 !!
 !! OUTPUT
@@ -3038,7 +3034,7 @@ end function ebands_ncwrite_path
 !!
 !! SOURCE
 
-type(edos_t) function ebands_get_edos(ebands,cryst,intmeth,step,broad,enewin,comm) result(edos)
+type(edos_t) function ebands_get_edos(ebands,cryst,intmeth,step,broad,comm) result(edos)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -3055,15 +3051,12 @@ type(edos_t) function ebands_get_edos(ebands,cryst,intmeth,step,broad,enewin,com
  real(dp),intent(in) :: step,broad
  type(ebands_t),target,intent(in)  :: ebands
  type(crystal_t),intent(in) :: cryst
-!arrays
- real(dp),intent(in) :: enewin(2)
 
 !Local variables-------------------------------
 !scalars
  integer :: nw,spin,band,ikpt,ief,nproc,my_rank,mpierr,cnt,ierr,bcorr
  real(dp) :: max_ene,min_ene,wtk,max_occ
  character(len=500) :: msg
- logical :: has_ewin
  type(stats_t) :: ediffs
  type(t_tetrahedron) :: tetra
 !arrays
@@ -3075,7 +3068,6 @@ type(edos_t) function ebands_get_edos(ebands,cryst,intmeth,step,broad,enewin,com
  nproc = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
  ierr = 0
 
- has_ewin = (enewin(2) > enewin(1))
  edos%nkibz = ebands%nkpt; edos%intmeth = intmeth; edos%nsppol = ebands%nsppol
 
  edos%broad = broad; edos%step = step
@@ -3087,11 +3079,7 @@ type(edos_t) function ebands_get_edos(ebands,cryst,intmeth,step,broad,enewin,com
  end if
 
  ! Compute the linear mesh so that it encloses all bands.
- if (has_ewin) then
-   eminmax_spin(1,:) = enewin(1); eminmax_spin(2,:) = enewin(2)
- else
-   eminmax_spin = get_minmax(ebands, "eig")
- end if
+ eminmax_spin = get_minmax(ebands, "eig")
  min_ene = minval(eminmax_spin(1,:)); min_ene = min_ene - 0.1_dp * abs(min_ene)
  max_ene = maxval(eminmax_spin(2,:)); max_ene = max_ene + 0.1_dp * abs(max_ene)
 
@@ -3114,7 +3102,6 @@ type(edos_t) function ebands_get_edos(ebands,cryst,intmeth,step,broad,enewin,com
        cnt = cnt + 1; if (mod(cnt, nproc) /= my_rank) cycle
        wtk = ebands%wtk(ikpt)
        do band=1,ebands%nband(ikpt+(spin-1)*ebands%nkpt)
-          if (has_ewin .and. .not. isinside(ebands%eig(band, ikpt, spin), enewin)) cycle
           wme0 = edos%mesh - ebands%eig(band, ikpt, spin)
           edos%dos(:, spin) = edos%dos(:, spin) + wtk * dirac_delta(wme0, edos%broad)
        end do
@@ -3145,7 +3132,6 @@ type(edos_t) function ebands_get_edos(ebands,cryst,intmeth,step,broad,enewin,com
        tmp_eigen = ebands%eig(band,:,spin)
        do ikpt=1,ebands%nkpt
          cnt = cnt + 1; if (mod(cnt, nproc) /= my_rank) cycle ! mpi parallelism.
-         if (has_ewin .and. .not. isinside(ebands%eig(band, ikpt, spin), enewin)) cycle
 
          ! Calculate integration weights at each irred k-point (Blochl et al PRB 49 16223)
          call tetra_get_onewk(tetra, ikpt, bcorr, nw, ebands%nkpt, tmp_eigen, min_ene, max_ene, one, wdt)
@@ -3354,6 +3340,78 @@ subroutine edos_write(edos, path)
  close(unt)
 
 end subroutine edos_write
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_ebands/edos_ncwrite
+!! NAME
+!! edos_ncwrite
+!!
+!! FUNCTION
+!!  Write results to netcdf file.
+!!
+!! INPUTS
+!!  edos<edos_t>=DOS container
+!!  ncid=NC file handle.
+!!
+!! OUTPUT
+!!  ncerr= netcdf exit status.
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+integer function edos_ncwrite(edos, ncid) result(ncerr)
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'edos_ncwrite'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+ integer,intent(in) :: ncid
+ type(edos_t),intent(in) :: edos
+
+#ifdef HAVE_NETCDF
+ ! Define dimensions.
+ ncerr = nctk_def_dims(ncid, [ &
+   nctkdim_t("nsppol_plus1", edos%nsppol + 1), nctkdim_t("edos_nw", edos%nw)], defmode=.True.)
+ NCF_CHECK(ncerr)
+
+ ! Define variables
+ NCF_CHECK(nctk_def_iscalars(ncid, [character(len=nctk_slen) :: "edos_intmeth", "edos_nkibz", "edos_ief"]))
+ NCF_CHECK(nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: "edos_broad"]))
+
+ ncerr = nctk_def_arrays(ncid, [ &
+   nctkarr_t("edos_mesh", "dp", "edos_nw"), &
+   nctkarr_t("edos_dos", "dp", "edos_nw, nsppol_plus1"), &
+   nctkarr_t("edos_idos", "dp", "edos_nw, nsppol_plus1"), &
+   nctkarr_t("edos_gef", "dp", "nsppol_plus1") &
+ ])
+ NCF_CHECK(ncerr)
+
+ ! Write data.
+ NCF_CHECK(nctk_set_datamode(ncid))
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "edos_intmeth"), edos%intmeth))
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "edos_nkibz"), edos%nkibz))
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "edos_ief"), edos%ief))
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "edos_broad"), edos%broad))
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "edos_mesh"), edos%mesh))
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "edos_dos"), edos%dos))
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "edos_idos"), edos%idos))
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "edos_gef"), edos%gef))
+
+#else
+ MSG_ERROR("netcdf library not available")
+#endif
+
+end function edos_ncwrite
 !!***
 
 !!****f* m_ebands/edos_print

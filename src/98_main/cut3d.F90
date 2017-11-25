@@ -765,7 +765,7 @@ program cut3d
            exit
 
          case (15)
-            ! Write netcdf file.
+           ! Write netcdf file.
            timrev = 2; if (any(hdr%kptopt == [3, 4])) timrev = 1
            call crystal_from_hdr(cryst, hdr, timrev)
            call ngfft_seq(ngfft, [nr1, nr2, nr3])

@@ -77,6 +77,7 @@ List of q-points:
 [ 6 ] [-2.5000E-01,  2.5000E-01,  0.0000E+00]
 [ 7 ] [ 5.0000E-01,  5.0000E-01,  0.0000E+00]
 [ 8 ] [-2.5000E-01,  5.0000E-01,  2.5000E-01]
+Have dielectric tensor and Born effective charges: no
 qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:
     1)  idir= 1, ipert=   1, type=independent, found=Yes
