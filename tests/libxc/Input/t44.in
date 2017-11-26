@@ -41,34 +41,22 @@ pawecutdg  40
 
 # Dataset2: Calculation of the 1st HSE06 iteration
 optdriver2  4 
- icutcoul2 0   # Will use the spherical average
-     rcut2 -1.0d0  # A negative number actually activates the computation of rcut using the Spencer-Alavi value
-
 
 # Dataset3: Calculation of the 2nd HSE06 iteration
 optdriver3  4
    getqps3 -1
- icutcoul3 0   # Will use the spherical average
-     rcut3 -1.0d0  # A negative number actually activates the computation of rcut using the Spencer-Alavi value
 
 # Dataset4: Calculation of the 3rd HSE06 iteration
 optdriver4  4
    getqps4 -1
- icutcoul4 0   # Will use the spherical average
-     rcut4 -1.0d0  # A negative number actually activates the computation of rcut using the Spencer-Alavi value
 
 # Dataset5: Calculation of the 4th HSE06 iteration
 optdriver5  4
    getqps5 -1
- icutcoul5 0   # Will use the spherical average
-     rcut5 -1.0d0  # A negative number actually activates the computation of rcut using the Spencer-Alavi value
 
 # Dataset6: Calculation of the 5th HSE06 iteration
 optdriver6  4
    getqps6 -1
- icutcoul6 0   # Will use the spherical average
-     rcut6 -1.0d0  # A negative number actually activates the computation of rcut using the Spencer-Alavi value
-
 
 # Dataset7: HSE06 stand alone calculation
    getwfk7  1
@@ -83,9 +71,6 @@ optdriver9  4
 gwcalctyp9  0
    getscr9 -1
 gw_qprange9 0
- icutcoul9 0   # Will use the spherical average
-     rcut9 -1.0d0  # A negative number actually activates the computation of rcut using the Spencer-Alavi value
-
 
 # Dataset10: Computation of the dielectric matrix on top of scHSE06 in the Kohn-Sham basis
 optdriver10  3
@@ -93,13 +78,11 @@ gwcalctyp10  20
    getqps10  6
 
 # Dataset11: One-shot G0W0 on top of scHSE06 in the Kohn-Sham basis 
-# (note however that all the bands and k points are considered, in orer to perform the correct rotation).
+# (note however that all the bands and k points are considered, in order to perform the correct rotation).
 optdriver11  4
 gwcalctyp11  20
    getqps11  6
    getscr11 -1
- icutcoul11 0   # Will use the spherical average
-     rcut11 -1.0d0  # A negative number actually activates the computation of rcut using the Spencer-Alavi value
 
 # Dataset12: Computation of the dielectric matrix on top of scHSE06 in the planewave basis
 optdriver12  3
@@ -115,8 +98,6 @@ gwcalctyp13  0
    getqps13  0
    getscr13 -1
 gw_qprange13 0
- icutcoul13 0   # Will use the spherical average
-     rcut13 -1.0d0  # A negative number actually activates the computation of rcut using the Spencer-Alavi value
 
 
 # Definition of the unit cell: fcc
@@ -167,27 +148,25 @@ diemac  12.0      # Although this is not mandatory, it is worth to
 #%%   
 #%%   First, with the scGW methodology based on a Kohn-Sham basis, 
 #%%   then doing the scHSE06 using the planewave basis, followed by a one-shot G0W0.
-#%%   The agreement is reasonable with the parameters used in the automatica test,
+#%%   The agreement is reasonable with the parameters used in the automatic test,
 #%%   but can be improved with better parameters (esp. nband), see later.
 #%%   At the PBE level, the (KS) band gap is 5.231 eV,
-#%%   At the scHSE06 level, the Kohn-Sham basis delivers 8.101 eV,
-#%%   while the plane wave basis delivers 8.122 eV.
-#%%   At the G0W0-scHSE06 level, the Kohn-Sham basis delivers 7.638 eV,
-#%%   while the plane wave basis delivers 7.659 eV.
+#%%   At the scHSE06 level, the Kohn-Sham basis delivers 6.834 eV,
+#%%   while the plane wave basis delivers 6.850 eV.
+#%%   At the G0W0-scHSE06 level, the Kohn-Sham basis delivers 7.314 eV,
+#%%   while the plane wave basis delivers 7.344 eV.
 #%%   The macroscopic dielectric constant (at Gamma) is 9.3698 from PBE,
-#%%   4.4126 from scHSE06(KS) and 4.4105 from scHSE06(planewaves).
+#%%   5.8309 from scHSE06(KS) and 5.8202 from scHSE06(planewaves).
 #%%   
 #%%   These calculations have also been done with better
 #%%   parameters, in order to observe a better agreement between the KS basis set and the
-#%%   planewave basis set (ecut 20  ecutsigx 20  nband 30 - note however that ecuteps 2 is low),
-#%%   at the expanse of CPU time.. 
-#%%   In this case, one used the HSE06 functional (ixc_sigma=41 or ixc_sigma=-406,
-#%%   of even isc_sigma=42 with hyb_mixing=0.25 - all the cases were checked).
+#%%   planewave basis set (ecut 20  ecutsigx 20  nband 30 gw_qprange 30 - note however that ecuteps 2 is low),
+#%%   at the expense of CPU time.. 
 #%%   At the PBE level, the (KS) band gap was 5.661 eV,
-#%%   At the scHSE06 level, the Kohn-Sham basis delivered 7.882 eV,
-#%%   while the plane wave basis delivered 7.884 eV.
-#%%   At the G0W0-scHSE06 level, the Kohn-Sham basis delivered 7.820 eV,
-#%%   while the plane wave basis delivered 7.827 eV.
+#%%   At the scHSE06 level, the Kohn-Sham basis delivered 7.340 eV,
+#%%   while the plane wave basis delivered 7.341 eV.
+#%%   At the G0W0-scHSE06 level, the Kohn-Sham basis delivered 7.806 eV,
+#%%   while the plane wave basis delivered 7.807 eV.
 #%%   The macroscopic dielectric constant (at Gamma) was 7.845 from PBE, 
-#%%   4.483 from scHSE06(KS) and 4.490 from scHSE06(planewaves).
+#%%   5.033 from scHSE06(KS) and 5.032 from scHSE06(planewaves).
 #%%<END TEST_INFO>
