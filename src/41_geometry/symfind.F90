@@ -96,8 +96,8 @@
 !scalars
  integer :: found3,foundcl,iatom,iatom0,iatom1,iatom2,iatom3,iclass,iclass0,ii
  integer :: isym,jj,kk,natom0,nclass,ntrial,printed,trialafm,trialok
- integer :: itrialxfm, tryafm
- integer :: ntrialxfm
+ integer :: itrialxfm, ntrialxfm
+ integer :: has_spin
  real(dp) :: spinatcl2,spinatcl20,det
  logical,parameter :: afm_noncoll=.true.
  logical :: test_sameabscollin,test_sameabsnoncoll,test_samespin, test_afmspin_noncoll
@@ -148,6 +148,7 @@
  typecl(1)=typat(1)
  spinatcl(:,1)=spinat(:,1)
  class(1,1)=1
+ has_spin = 0
  if(natom>1)then
    do iatom=2,natom
 !    DEBUG
@@ -206,6 +207,7 @@
        natomcl(nclass)=1
        typecl(nclass)=typat(iatom)
        spinatcl(:,nclass)=spinat(:,iatom)
+       if (sum(spinatcl(:,nclass)**2) > tolsym) has_spin = 1
        class(1,nclass)=iatom
      end if
    end do ! loop over atoms
@@ -241,10 +243,6 @@
    end do
  end if
 
- tryafm = 0
- if (spinatcl20 > tolsym) then
-   tryafm = 1
- end if
  printed=0
 
 !DEBUG
@@ -345,15 +343,17 @@
 !   real collinear AFM (inversion operation)
 !   mirror plane perpendicular to spin
 !   rotation axis C2 perpendicular to spin
-     if (sum((spinatred(:,iatom1)+spinatred(:,iatom0))**2) < tolsym) then
+     if (has_spin==1 .and. sum((spinatred(:,iatom1)+spinatred(:,iatom0))**2) < tolsym) then
        ntrialxfm = ntrialxfm+1
        trialsymmag(:,:,ntrialxfm) = inversion_3d
        symafm_ref(ntrialxfm) = -1
      end if
 
 ! other: symmag = ptsym
-     if (noncoll==1 .and. .not. (any(ptsymrel(:,:,isym)/=identity_3d))&
-&                   .and. .not. (any(ptsymrel(:,:,isym)/=inversion_3d)) ) then
+! TODO: add mirror plane and possible rotation axis perpendicular to spinat of
+! iatom0 and iatom1
+     if (noncoll==1 .and. any(ptsymrel(:,:,isym)/=identity_3d) &
+&                   .and. any(ptsymrel(:,:,isym)/=inversion_3d) ) then
        ntrialxfm = ntrialxfm+1
        trialsymmag(:,:,ntrialxfm) = ptsymrel(:,:,isym)
        symafm_ref(ntrialxfm) = 2
@@ -386,10 +386,14 @@
 !    can not tell ahead of time which to choose
 !    start with FM to default to that if there is no spin on this atom
 !    NB: trialafm should be the same for all classes
-!     do itrialxfm = 0,tryafm
-!       trialafm = 1-itrialxfm*2
      do itrialxfm = 1, ntrialxfm
        trialok=1
+
+!DEBUG
+!       write (std_out,'(a,2I6,3I6)') 'ntrialxfm, itrialxfm, symafm_ref ', ntrialxfm, itrialxfm, symafm_ref(itrialxfm)
+!       write (std_out,'(9I6)') trialsymmag(:,:,itrialxfm)
+!ENDDEBUG
+
 
 !      Loop over all classes, then all atoms in the class,
 !      to find whether they have a symmetric
@@ -410,7 +414,7 @@
 !&                                    ptsymrel(:,2,isym)*spinatred(2,iatom2)+ &
 !&                                    ptsymrel(:,3,isym)*spinatred(3,iatom2))
 !           end if
-           symspinat2(:)=matmul(trialsymmag(:,:,itrialxfm),spinatred(:,iatom2))
+           symspinat2(:)=matmul(real(trialsymmag(:,:,itrialxfm), kind=dp),spinatred(:,iatom2))
 
            if(present(nucdipmom)) then
 !          Generate the tentative symmetric nuclear dipole moment of iatom2
