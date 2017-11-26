@@ -154,10 +154,11 @@
  has_spin = 1
  if (sum(spinat(:,:)**2) < tolsym) has_spin = 0
 
+ has_canting = 0
+
  if (natom>1) then
 
 ! check if we have truly non collinear spins, not just FM or AFM
-   has_canting = 0
    do iatom0 = 1, natom
      norm2_0 = sum(spinat(:,iatom0)**2)
      do iatom1 = iatom0+1, natom
@@ -167,9 +168,6 @@
        end if
      end do
    end do
-   if (prtvol > 1) then
-     write(std_out,'(a,I6)')' symfind : has_canting = ',has_canting
-   end if
 
    do iatom=2,natom
 !    DEBUG
@@ -233,6 +231,7 @@
  end if
 
  if (prtvol > 1) then
+   write(std_out,'(a,I6)')' symfind : has_canting = ',has_canting
    write(std_out,*)' symfind : found ',nclass,' nclass of atoms'
    do iclass=1,nclass
      write(std_out,*)'  class number',iclass
