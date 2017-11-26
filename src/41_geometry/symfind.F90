@@ -148,7 +148,8 @@
  typecl(1)=typat(1)
  spinatcl(:,1)=spinat(:,1)
  class(1,1)=1
- has_spin = 0
+ has_spin = 1
+ if (sum(spinat(:,:)**2) < tolsym) has_spin = 0
  if(natom>1)then
    do iatom=2,natom
 !    DEBUG
@@ -207,7 +208,6 @@
        natomcl(nclass)=1
        typecl(nclass)=typat(iatom)
        spinatcl(:,nclass)=spinat(:,iatom)
-       if (sum(spinatcl(:,nclass)**2) > tolsym) has_spin = 1
        class(1,nclass)=iatom
      end if
    end do ! loop over atoms
