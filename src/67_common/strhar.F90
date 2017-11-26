@@ -35,7 +35,7 @@
 !!      stress
 !!
 !! CHILDREN
-!!      ptabs_fourdp,timab,xmpi_sum
+!!      metric,ptabs_fourdp,timab,xmpi_sum
 !!
 !! SOURCE
 

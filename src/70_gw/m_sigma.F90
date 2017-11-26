@@ -251,6 +251,7 @@ CONTAINS  !=====================================================================
 !!      sigma
 !!
 !! CHILDREN
+!!      findqg0,wfd_distribute_bands,wfd_update_bkstab,xmpi_sum
 !!
 !! SOURCE
 
@@ -447,6 +448,7 @@ end subroutine write_sigma_header
 !!      sigma
 !!
 !! CHILDREN
+!!      findqg0,wfd_distribute_bands,wfd_update_bkstab,xmpi_sum
 !!
 !! SOURCE
 !!
@@ -662,6 +664,7 @@ end function gw_spectral_function
 !!      m_sigma
 !!
 !! CHILDREN
+!!      findqg0,wfd_distribute_bands,wfd_update_bkstab,xmpi_sum
 !!
 !! SOURCE
 
@@ -815,6 +818,7 @@ end subroutine print_Sigma_perturbative
 !!      m_sigma
 !!
 !! CHILDREN
+!!      findqg0,wfd_distribute_bands,wfd_update_bkstab,xmpi_sum
 !!
 !! SOURCE
 
@@ -953,6 +957,7 @@ end subroutine print_Sigma_QPSC
 !!      sigma
 !!
 !! CHILDREN
+!!      findqg0,wfd_distribute_bands,wfd_update_bkstab,xmpi_sum
 !!
 !! SOURCE
 
@@ -1089,6 +1094,7 @@ end subroutine sigma_init
 !!      sigma
 !!
 !! CHILDREN
+!!      findqg0,wfd_distribute_bands,wfd_update_bkstab,xmpi_sum
 !!
 !! SOURCE
 
@@ -1292,6 +1298,7 @@ end function sigma_get_exene
 !! PARENTS
 !!
 !! CHILDREN
+!!      findqg0,wfd_distribute_bands,wfd_update_bkstab,xmpi_sum
 !!
 !! SOURCE
 
@@ -1714,6 +1721,7 @@ end function sigma_ncwrite
 !!      calc_sigc_me,calc_sigx_me,cohsex_me
 !!
 !! CHILDREN
+!!      findqg0,wfd_distribute_bands,wfd_update_bkstab,xmpi_sum
 !!
 !! SOURCE
 

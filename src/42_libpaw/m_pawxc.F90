@@ -121,7 +121,7 @@ CONTAINS !===========================================================
 !!      m_pawxc
 !!
 !! CHILDREN
-!!      libxc_functionals_getvxc
+!!      rotate_back_mag_dfpt
 !!
 !! SOURCE
 
@@ -173,7 +173,7 @@ contains
 !!      m_pawxc
 !!
 !! CHILDREN
-!!      libxc_functionals_getvxc
+!!      rotate_back_mag_dfpt
 !!
 !! SOURCE
 
@@ -220,7 +220,7 @@ end subroutine pawxc_xcpositron_abinit
 !!      m_pawxc
 !!
 !! CHILDREN
-!!      libxc_functionals_getvxc
+!!      rotate_back_mag_dfpt
 !!
 !! SOURCE
 
@@ -276,7 +276,7 @@ end subroutine pawxc_xcpositron_wrapper
 !!      m_pawxc
 !!
 !! CHILDREN
-!!      libxc_functionals_getvxc
+!!      rotate_back_mag_dfpt
 !!
 !! SOURCE
 
@@ -320,7 +320,7 @@ contains
 !!      m_pawxc
 !!
 !! CHILDREN
-!!      libxc_functionals_getvxc
+!!      rotate_back_mag_dfpt
 !!
 !! SOURCE
 
@@ -455,7 +455,7 @@ end subroutine pawxc_size_dvxc_wrapper
 !!      m_pawxc
 !!
 !! CHILDREN
-!!      libxc_functionals_getvxc
+!!      rotate_back_mag_dfpt
 !!
 !! SOURCE
 
@@ -502,7 +502,7 @@ contains
 !!      m_pawxc
 !!
 !! CHILDREN
-!!      libxc_functionals_getvxc
+!!      rotate_back_mag_dfpt
 !!
 !! SOURCE
 
@@ -584,7 +584,7 @@ end subroutine pawxc_xcmult_wrapper
 !!      m_pawxc
 !!
 !! CHILDREN
-!!      libxc_functionals_getvxc
+!!      rotate_back_mag_dfpt
 !!
 !! SOURCE
 
@@ -632,7 +632,7 @@ contains
 !!      m_pawxc
 !!
 !! CHILDREN
-!!      libxc_functionals_getvxc
+!!      rotate_back_mag_dfpt
 !!
 !! SOURCE
 
@@ -840,7 +840,7 @@ end subroutine pawxc_mkdenpos_wrapper
 !!      m_pawpsp,pawdenpot
 !!
 !! CHILDREN
-!!      libxc_functionals_getvxc
+!!      rotate_back_mag_dfpt
 !!
 !! SOURCE
 
@@ -1429,7 +1429,7 @@ end subroutine pawxc
 !!      pawdenpot
 !!
 !! CHILDREN
-!!      libxc_functionals_getvxc
+!!      rotate_back_mag_dfpt
 !!
 !! SOURCE
 
@@ -1747,7 +1747,7 @@ end subroutine pawxcpositron
 !!      pawdenpot,pawdfptenergy
 !!
 !! CHILDREN
-!!      libxc_functionals_getvxc
+!!      rotate_back_mag_dfpt
 !!
 !! SOURCE
 
@@ -2580,7 +2580,7 @@ end subroutine pawxc_dfpt
 !!      m_pawxc
 !!
 !! CHILDREN
-!!      libxc_functionals_getvxc
+!!      rotate_back_mag_dfpt
 !!
 !! SOURCE
 
@@ -2856,7 +2856,7 @@ end subroutine pawxcsph
 !! PARENTS
 !!
 !! CHILDREN
-!!      libxc_functionals_getvxc
+!!      rotate_back_mag_dfpt
 !!
 !! SOURCE
 
@@ -3177,7 +3177,7 @@ end subroutine pawxcsph_dfpt
 !!      m_pawxc
 !!
 !! CHILDREN
-!!      libxc_functionals_getvxc
+!!      rotate_back_mag_dfpt
 !!
 !! SOURCE
 
@@ -3307,7 +3307,7 @@ end subroutine pawxcsphpositron
 !!      m_pawxc,poslifetime,posratecore
 !!
 !! CHILDREN
-!!      libxc_functionals_getvxc
+!!      rotate_back_mag_dfpt
 !!
 !! SOURCE
 
@@ -3696,7 +3696,7 @@ end subroutine pawxcsphpositron
 !!      m_pawpsp,pawdenpot
 !!
 !! CHILDREN
-!!      libxc_functionals_getvxc
+!!      rotate_back_mag_dfpt
 !!
 !! SOURCE
 
@@ -4491,7 +4491,7 @@ end subroutine pawxcsphpositron
 !!      pawdenpot,pawdfptenergy
 !!
 !! CHILDREN
-!!      libxc_functionals_getvxc
+!!      rotate_back_mag_dfpt
 !!
 !! SOURCE
 
@@ -4829,7 +4829,7 @@ end subroutine pawxcsphpositron
 !!      pawdenpot
 !!
 !! CHILDREN
-!!      libxc_functionals_getvxc
+!!      rotate_back_mag_dfpt
 !!
 !! SOURCE
 
@@ -5297,7 +5297,7 @@ end subroutine pawxcmpositron
 !!      m_pawxc
 !!
 !! CHILDREN
-!!      libxc_functionals_getvxc
+!!      rotate_back_mag_dfpt
 !!
 !! SOURCE
 
@@ -5360,7 +5360,7 @@ contains
 !!      m_pawxc
 !!
 !! CHILDREN
-!!      libxc_functionals_getvxc
+!!      rotate_back_mag_dfpt
 !!
 !! SOURCE
 
@@ -5416,7 +5416,7 @@ end subroutine pawxc_drivexc_abinit
 !!      m_pawxc
 !!
 !! CHILDREN
-!!      libxc_functionals_getvxc
+!!      rotate_back_mag_dfpt
 !!
 !! SOURCE
 
@@ -5520,10 +5520,10 @@ end subroutine pawxc_drivexc_wrapper
 !!  rho_out(vectsize,2)=output (projected, collinear) density
 !!  [mag_norm_out(vectsize)]= --optional-- norm of mag(:) at each point of the grid
 !! PARENTS
-!!
 !!      m_pawxc
 !!
 !! CHILDREN
+!!      rotate_back_mag_dfpt
 !!
 !! SOURCE
 
@@ -5625,6 +5625,7 @@ end subroutine pawxc_rotate_mag
 !!      m_pawxc
 !!
 !! CHILDREN
+!!      rotate_back_mag_dfpt
 !!
 !! SOURCE
 
@@ -5709,6 +5710,7 @@ end subroutine pawxc_rotate_back_mag
 !!      m_pawxc
 !!
 !! CHILDREN
+!!      rotate_back_mag_dfpt
 !!
 !! SOURCE
 

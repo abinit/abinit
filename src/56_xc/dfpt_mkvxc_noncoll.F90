@@ -59,7 +59,7 @@
 !!      dfpt_dyxc1,dfpt_nstdy,dfpt_nstpaw,dfpt_rhotov,nres2vres
 !!
 !! CHILDREN
-!!      dfpt_mkvxc,timab,rotate_mag,rotate_back_mag,rotate_back_mag_dfpt
+!!      dfpt_mkvxc,rotate_back_mag,rotate_back_mag_dfpt,rotate_mag,timab
 !!
 !! SOURCE
 
@@ -170,14 +170,14 @@ subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat,nhatdim,nh
    if(option/=0) then
 !    SPr for option=0 the rhor is not used, only core density xccc3d1
      call rotate_mag(rhor1_,rhor1_diag,mag,nfft,mag_norm_out=m_norm,&
-&                    rho_out_format=2)
+&     rho_out_format=2)
    end if
 !   -- Compute Vxc(r)^(1)=Kxc(r).rho(r)^(1)_rotated
 !   Note for PAW: nhat has already been substracted; don't use it in dfpt_mkvxc
 !                 (put all nhat options to zero).
 !  The collinear routine dfpt_mkvxc wants a general density built as (tr[rho],rho_upup)
    call dfpt_mkvxc(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat1_zero,0,nhat1gr_zero,0,&
-&    nkxc,2,n3xccc,option,paral_kgb,qphon,rhor1_diag,rprimd,0,vxc1_diag,xccc3d1)
+&   nkxc,2,n3xccc,option,paral_kgb,qphon,rhor1_diag,rprimd,0,vxc1_diag,xccc3d1)
 
 !  -- Rotate back Vxc(r)^(1)
    if (optnc==1) then
@@ -188,7 +188,7 @@ subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat,nhatdim,nh
        end do
      else
        call rotate_back_mag_dfpt(vxc1_diag,vxc1,vxc,kxc,rhor1_,mag,nfft,&
-&                                mag_norm_in=m_norm)
+&       mag_norm_in=m_norm)
      end if
    else
      call rotate_back_mag(vxc1_diag,vxc1,mag,nfft,mag_norm_in=m_norm)

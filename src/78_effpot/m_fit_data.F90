@@ -154,10 +154,9 @@ CONTAINS  !=====================================================================
 !! fit_data<fit_data_type> = fit_data datatype to be initialized
 !!
 !! PARENTS
-!!
+!!      m_fit_data
 !!
 !! CHILDREN
-!!
 !!
 !! SOURCE
 
@@ -232,10 +231,9 @@ end subroutine fit_data_init
 !! OUTPUT
 !!
 !! PARENTS
-!!
+!!      m_fit_data,m_fit_polynomial_coeff
 !!
 !! CHILDREN
-!!
 !!
 !! SOURCE
 
@@ -300,10 +298,9 @@ end subroutine fit_data_free
 !! fit_data<fit_data_type> = fit_data is now filled
 !!
 !! PARENTS
-!! 
+!!      m_fit_polynomial_coeff
 !!
 !! CHILDREN
-!!
 !!
 !! SOURCE
 
@@ -513,10 +510,9 @@ end subroutine fit_data_compute
 !! ts<training_set_type> = training set to be initialized
 !!
 !! PARENTS
-!!
+!!      m_fit_data
 !!
 !! CHILDREN
-!!
 !!
 !! SOURCE
 
@@ -580,10 +576,9 @@ end subroutine training_set_init
 !! OUTPUT
 !!
 !! PARENTS
-!!
+!!      m_fit_data
 !!
 !! CHILDREN
-!!
 !!
 !! SOURCE
 

@@ -62,7 +62,7 @@
 !!
 !! PARENTS
 !!      get_npert_rbz,ingeo,initberry,m_ab7_symmetry,m_crystal,m_ddb
-!!      m_fit_polynomial_coeff,setsym,thmeig
+!!      m_polynomial_coeff,m_tdep_sym,setsym,thmeig
 !!
 !! CHILDREN
 !!      symchk,wrtout

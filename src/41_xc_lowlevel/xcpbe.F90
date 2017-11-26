@@ -275,7 +275,7 @@ subroutine xcpbe(exci,npts,nspden,option,order,rho_updn,vxci,ndvxci,ngr2,nd2vxci
  if (present(grho2_updn)) then
    if (ngr2/=2*nspden-1 ) then
      write(message, '(a,2i6)' )&
-&      ' ngr2 must be 2*nspden-1 ! ngr2,nspden=',ngr2,nspden
+&     ' ngr2 must be 2*nspden-1 ! ngr2,nspden=',ngr2,nspden
      MSG_BUG(message)
    end if
  end if

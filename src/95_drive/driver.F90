@@ -374,7 +374,7 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
 !            Check that the new acell and rprim are consistent with the input dilatmx
              call mkrdim(acell_img(:,iimage),rprim_img(:,:,iimage),rprimd)
              call chkdilatmx(dtset%chkdilatmx,dtset%dilatmx,rprimd,&
-&              dtset%rprimd_orig(1:3,1:3,iimage), dilatmx_errmsg)
+&             dtset%rprimd_orig(1:3,1:3,iimage), dilatmx_errmsg)
              _IBM6("dilatxm_errmsg: "//TRIM(dilatmx_errmsg))
              if (LEN_TRIM(dilatmx_errmsg) /= 0) then
                acell_img(1,iimage) = sqrt(sum(rprimd(:,1)**2))

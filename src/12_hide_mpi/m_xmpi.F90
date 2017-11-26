@@ -580,9 +580,9 @@ CONTAINS  !===========================================================
 !!  None
 !!
 !! PARENTS
-!!      abinit,aim,anaddb,band2eps,bsepostproc,conducti,cut3d,fftprof
-!!      fold2Bloch,ioprof,lapackprof,macroave,mrgddb,mrgdv,mrggkk,mrgscr
-!!      multibinit,optic,ujdet,vdw_kernelgen
+!!      abinit,aim,anaddb,band2eps,bsepostproc,conducti,cut3d,dummy_tests
+!!      fftprof,fold2Bloch,ioprof,lapackprof,macroave,mrgddb,mrgdv,mrggkk
+!!      mrgscr,multibinit,optic,tdep,ujdet,vdw_kernelgen
 !!
 !! CHILDREN
 !!      mpi_type_commit,mpi_type_size,xmpi_abort,xmpio_type_struct
@@ -722,7 +722,7 @@ end function xmpi_get_unit
 !!
 !! PARENTS
 !!      aim,anaddb,band2eps,bsepostproc,conducti,cut3d,eph,fold2Bloch
-!!      lapackprof,macroave,mrggkk,optic,ujdet,vdw_kernelgen
+!!      lapackprof,macroave,mrggkk,optic,tdep,ujdet,vdw_kernelgen
 !!
 !! CHILDREN
 !!      mpi_type_commit,mpi_type_size,xmpi_abort,xmpio_type_struct
@@ -1821,7 +1821,7 @@ end subroutine xmpi_comm_translate_ranks
 !!  comm=MPI communicator
 !!
 !! PARENTS
-!!      alloc_hamilt_gpu,atomden,calc_optical_mels,calc_ucrpa,chebfi,cohsex_me
+!!      alloc_hamilt_gpu,atomden,calc_optical_mels,calc_ucrpa,chebfi
 !!      datafordmft,denfgr,dfpt_nselt,dfpt_nstpaw,dfpt_scfcv,exc_build_block
 !!      fermisolverec,getcgqphase,gstateimg,iofn1,ks_ddiago,m_abihist,m_bse_io
 !!      m_dvdb,m_exc_diago,m_exc_itdiago,m_exc_spectra,m_fit_polynomial_coeff

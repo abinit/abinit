@@ -58,8 +58,8 @@
 !! $Yr_{l-m}(%theta ,%phi)=(Im{Y_{l-m}}-(-1)^m Im{Y_{lm}})/sqrt{2}
 !!
 !! PARENTS
-!!      debug_tools,dfpt_looppert,dfpt_nstpaw,dfptnl_loop,gstate,ks_ddiago
-!!      m_cut3d,m_pawpwij,m_shirley,m_wfd,mover,nonlop_test
+!!      debug_tools,dfpt_looppert,dfpt_nstpaw,dfptnl_loop,forstr,gstate
+!!      ks_ddiago,m_cut3d,m_pawpwij,m_shirley,m_wfd,mover,nonlop_test
 !!      partial_dos_fractions,respfn,scfcv
 !!
 !! CHILDREN

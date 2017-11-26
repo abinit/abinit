@@ -85,12 +85,12 @@
 !!      sigma
 !!
 !! CHILDREN
-!!      cwtime,esymm_symmetrize_mels,findqg0,get_bz_item,get_uug,gsph_fft_tabs
+!!      cwtime,esymm_symmetrize_mels,findqg0,get_bz_item,gsph_fft_tabs
 !!      hermitianize,littlegroup_print,paw_cross_rho_tw_g,paw_rho_tw_g
 !!      paw_symcprj,pawcprj_alloc,pawcprj_copy,pawcprj_free,pawmknhat_psipsi
 !!      pawpwij_free,pawpwij_init,rho_tw_g,rotate_fft_mesh,sigma_distribute_bks
 !!      timab,wfd_change_ngfft,wfd_get_cprj,wfd_get_many_ur,wfd_get_ur
-!!      wfd_paw_get_aeur,wfd_sym_ur,wrtout,xmpi_sum
+!!      wfd_paw_get_aeur,wrtout,xmpi_sum
 !!
 !! SOURCE
 
