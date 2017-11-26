@@ -2189,7 +2189,7 @@ end subroutine system_getDimFromXML
  call symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tolsym)
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
  call symfind(0,(/zero,zero,zero/),gprimd,0,msym,natom,0,nptsym,nsym,&
-&  0,ptsymrel,spinat,symafm,symrel,tnons,tolsym,typat,use_inversion,xred)
+&  0,0,ptsymrel,spinat,symafm,symrel,tnons,tolsym,typat,use_inversion,xred)
 
 !Initialisation of crystal
  npsp = ntypat; timrev = 1
@@ -2393,7 +2393,7 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
   spinat = zero;  symrel = zero;  symafm = zero;  tnons = zero ; space_group = zero;
   call symlatt(bravais,msym,nptsym,ptsymrel,crystal%rprimd,tolsym)
   call symfind(0,(/zero,zero,zero/),crystal%gprimd,0,msym,crystal%natom,0,nptsym,nsym,&
-&              0,ptsymrel,spinat,symafm,symrel,tnons,tolsym,&
+&              0,0,ptsymrel,spinat,symafm,symrel,tnons,tolsym,&
 &              crystal%typat,use_inversion,crystal%xred)
   if(crystal%nsym/=nsym)then
     write(message,'(4a,I0,3a,I0,3a)') ch10,&

@@ -64,7 +64,7 @@
 #include "abi_common.h"
 
  subroutine symfind(berryopt,efield,gprimd,jellslab,msym,natom,noncoll,nptsym,nsym,&
-&  nzchempot,ptsymrel,spinat,symafm,symrel,tnons,tolsym,typat,use_inversion,xred,&
+&  nzchempot,prtvol,ptsymrel,spinat,symafm,symrel,tnons,tolsym,typat,use_inversion,xred,&
 &  nucdipmom)
 
  use defs_basis
@@ -82,6 +82,7 @@
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: berryopt,jellslab,msym,natom,noncoll,nptsym,nzchempot,use_inversion
+ integer,intent(in) :: prtvol
  integer,intent(out) :: nsym
  real(dp),intent(in) :: tolsym
 !arrays
@@ -97,7 +98,8 @@
  integer :: found3,foundcl,iatom,iatom0,iatom1,iatom2,iatom3,iclass,iclass0,ii
  integer :: isym,jj,kk,natom0,nclass,ntrial,printed,trialafm,trialok
  integer :: itrialxfm, ntrialxfm
- integer :: has_spin
+ integer :: has_spin, has_canting
+ real(dp) :: norm2_0, norm2_1
  real(dp) :: spinatcl2,spinatcl20,det
  logical,parameter :: afm_noncoll=.true.
  logical :: test_sameabscollin,test_sameabsnoncoll,test_samespin, test_afmspin_noncoll
@@ -112,23 +114,23 @@
 
 !**************************************************************************
 
-!DEBUG
-! write(std_out,*)' symfind : enter'
-! call flush(6)
-! write(std_out,*)' symfind : nzchempot= ',nzchempot
-! write(std_out,*)'   ptsymrel matrices are :'
-! do isym=1,nptsym
-! write(std_out,'(i4,4x,9i4)' )isym,ptsymrel(:,:,isym)
-! end do
-! write(std_out,*)' symfind : natom=',natom
-! do iatom=1,natom
-! write(std_out,*)'  atom number',iatom
-! write(std_out,*)'   typat   =',typat(iatom)
-! write(std_out,*)'   spinat  =',spinat(:,iatom)
-! write(std_out,*)'   xred    =',xred(:,iatom)
-! end do
-! call flush(6)
-!ENDDEBUG
+ if(prtvol > 0) then
+   write(std_out,*)' symfind : enter'
+   call flush(std_out)
+   write(std_out,*)' symfind : nzchempot= ',nzchempot
+   write(std_out,*)'   ptsymrel matrices are :'
+   do isym=1,nptsym
+     write(std_out,'(i4,4x,9i4)' )isym,ptsymrel(:,:,isym)
+   end do
+   write(std_out,*)' symfind : natom=',natom
+   do iatom=1,natom
+     write(std_out,'(a,I8)')'  atom number',iatom
+     write(std_out,'(a,I6)')'   typat   =',typat(iatom)
+     write(std_out,'(a,3F12.4)')'   spinat  =',spinat(:,iatom)
+     write(std_out,'(a,3F12.4)')'   xred    =',xred(:,iatom)
+   end do
+   call flush(std_out)
+ end if
 
 !Find the number of classes of atoms (type and spinat must be identical,
 !spinat might differ by a sign, if aligned with the z direction)
@@ -148,9 +150,27 @@
  typecl(1)=typat(1)
  spinatcl(:,1)=spinat(:,1)
  class(1,1)=1
+
  has_spin = 1
  if (sum(spinat(:,:)**2) < tolsym) has_spin = 0
- if(natom>1)then
+
+ if (natom>1) then
+
+! check if we have truly non collinear spins, not just FM or AFM
+   has_canting = 0
+   do iatom0 = 1, natom
+     norm2_0 = sum(spinat(:,iatom0)**2)
+     do iatom1 = iatom0+1, natom
+       norm2_1 = sum(spinat(:,iatom1)**2)
+       if ( abs((sum(spinat(:,iatom0)*spinat(:,iatom1)))**2 - norm2_0 * norm2_1) > tolsym ) then
+         has_canting = 1
+       end if
+     end do
+   end do
+   if (prtvol > 1) then
+     write(std_out,'(a,I6)')' symfind : has_canting = ',has_canting
+   end if
+
    do iatom=2,natom
 !    DEBUG
 !    write(std_out,*)' symfind : examine iatom=',iatom
@@ -167,7 +187,7 @@
 &         abs(spinat(2,iatom)-spinatcl(2,iclass))<tolsym .and. &
 &         abs(spinat(3,iatom)-spinatcl(3,iclass))<tolsym
 ! spins are vector identical except z component which can have a sign flip
-! TODO: in noncoll case could be generalized to include arbitrary user choice of
+! TODO: in noncoll=0 case could be generalized to include arbitrary user choice of
 ! orientation, as long as the spins are flipped properly...
          test_sameabscollin= &
 &         noncoll==0 .and.&
@@ -181,20 +201,19 @@
 &         abs(spinat(2,iatom)+spinatcl(2,iclass))<tolsym .and. &
 &         abs(spinat(3,iatom)+spinatcl(3,iclass))<tolsym
 ! spin vectors have the same norm... 
-! TODO: This has to be improved as it is not sufficient to assert they have the same class.
          test_sameabsnoncoll= &
-&         noncoll==1 .and. afm_noncoll .and. &
-&         ( spinat(1,iatom)**2+spinat(2,iatom)**2+spinat(3,iatom)**2 - &
-&          (spinatcl(1,iclass)**2+spinatcl(2,iclass)**2+spinatcl(3,iclass)**2) < tolsym)
+&         noncoll==1 .and. afm_noncoll .and. has_canting .and. &
+&         (abs(spinat(1,iatom)**2   +spinat(2,iatom)**2   +spinat(3,iatom)**2 - &
+&              spinatcl(1,iclass)**2+spinatcl(2,iclass)**2+spinatcl(3,iclass)**2) < tolsym)
 
          if( test_samespin .or. test_sameabscollin .or. test_afmspin_noncoll .or. test_sameabsnoncoll) then
-!          DEBUG
-!          write(std_out,*)' symfind : find it belongs to class iclass=',iclass
-!          write(std_out,*)' symfind : spinat(:,iatom)=',spinat(:,iatom)
-!          write(std_out,*)' symfind : spinatcl(:,iclass)=',spinatcl(:,iclass)
-!          write(std_out,*)' symfind : test_samespin,test_sameabscollin,test_afmspin_noncoll,test_sameabsnoncoll=',&
-!          &      test_samespin,test_sameabscollin,test_afmspin_noncoll,test_sameabsnoncoll
-!          ENDDEBUG
+           if (prtvol >= 10) then
+             write(std_out,*)' symfind : find it belongs to class iclass=',iclass
+             write(std_out,*)' symfind : spinat(:,iatom)=',spinat(:,iatom)
+             write(std_out,*)' symfind : spinatcl(:,iclass)=',spinatcl(:,iclass)
+             write(std_out,*)' symfind : test_samespin,test_sameabscollin,test_afmspin_noncoll,test_sameabsnoncoll=',&
+&              test_samespin,test_sameabscollin,test_afmspin_noncoll,test_sameabsnoncoll
+           end if
            natomcl(iclass)=natomcl(iclass)+1
            class(natomcl(iclass),iclass)=iatom
            foundcl=1
@@ -213,16 +232,16 @@
    end do ! loop over atoms
  end if
 
-!DEBUG
-!write(std_out,*)' symfind : found ',nclass,' nclass of atoms'
-!do iclass=1,nclass
-!  write(std_out,*)'  class number',iclass
-!  write(std_out,*)'   natomcl =',natomcl(iclass)
-!  write(std_out,*)'   typecl  =',typecl(iclass)
-!  write(std_out,*)'   spinatcl=',spinatcl(:,iclass)
-!  write(std_out,*)'   class   =',(class(iatom,iclass),iatom=1,natomcl(iclass))
-!end do
-!ENDDEBUG
+ if (prtvol > 1) then
+   write(std_out,*)' symfind : found ',nclass,' nclass of atoms'
+   do iclass=1,nclass
+     write(std_out,*)'  class number',iclass
+     write(std_out,*)'   natomcl =',natomcl(iclass)
+     write(std_out,*)'   typecl  =',typecl(iclass)
+     write(std_out,*)'   spinatcl=',spinatcl(:,iclass)
+     write(std_out,*)'   class   =',(class(iatom,iclass),iatom=1,natomcl(iclass))
+   end do
+ end if
 
 !Select the class with the least number of atoms, and non-zero spinat if any
 !It is important to select a magnetic class of atom, if any, otherwise
@@ -245,14 +264,14 @@
 
  printed=0
 
-!DEBUG
-!write(std_out,*)' symfind : has selected iclass0=',iclass0
-!write(std_out,*)' #    iatom     xred             spinat '
-!do iatom0=1,natomcl(iclass0)
-!  iatom=class(iatom0,iclass0)
-!  write(std_out,'(2i4,6f10.4)' )iatom0,iatom,xred(:,iatom),spinat(:,iatom)
-!end do
-!ENDDEBUG
+ if (prtvol > 1) then
+   write(std_out,*)' symfind : has selected iclass0=',iclass0
+   write(std_out,*)' #    iatom     xred             spinat '
+   do iatom0=1,natomcl(iclass0)
+     iatom=class(iatom0,iclass0)
+     write(std_out,'(2i4,6f10.4)' )iatom0,iatom,xred(:,iatom),spinat(:,iatom)
+   end do
+ end if
 
 !If non-collinear spinat have to be used, transfer them in reduced coordinates
  ABI_ALLOCATE(spinatred,(3,natom))
@@ -288,9 +307,9 @@
 &     ptsymrel(2,1,isym)*ptsymrel(1,2,isym)*ptsymrel(3,3,isym)+&
 &     ptsymrel(3,2,isym)*ptsymrel(2,3,isym)*ptsymrel(1,1,isym))
      if(det==-1) then
-!DEBUG
-!       write (std_out,'(a)') 'can not use inversion symmetry, throw out all symops with determinant =-1'
-!ENDDEBUG
+       if (prtvol > 1) then
+         write (std_out,'(a)') 'can not use inversion symmetry, throw out all symops with determinant =-1'
+       end if
        cycle
      end if
    end if
@@ -352,8 +371,8 @@
 ! other: symmag = ptsym
 ! TODO: add mirror plane and possible rotation axis perpendicular to spinat of
 ! iatom0 and iatom1
-     if (noncoll==1 .and. any(ptsymrel(:,:,isym)/=identity_3d) &
-&                   .and. any(ptsymrel(:,:,isym)/=inversion_3d) ) then
+     if (has_canting==1 .and. any(ptsymrel(:,:,isym)/=identity_3d) &
+&      .and. noncoll==1 .and. any(ptsymrel(:,:,isym)/=inversion_3d) ) then
        ntrialxfm = ntrialxfm+1
        trialsymmag(:,:,ntrialxfm) = ptsymrel(:,:,isym)
        symafm_ref(ntrialxfm) = 2
@@ -364,19 +383,19 @@
 !     if(sum(abs(spinatred(:,iatom1)-spinatred(:,iatom0))) > tolsym) then
 !       trialafm=-1
 !     end if
-!    DEBUG
-!    write(std_out,'(a,i6,3E14.4)')'isym,trialnons(:)=',isym,trialnons(:)
-!    ENDDEBUG
+     if (prtvol > 1) then
+       write(std_out,'(a,i6,3E14.4,I6)')'isym,trialnons(:),ntrialxfm= ',isym,trialnons(:),ntrialxfm
+     end if
 
 
 !     if(sum(abs(spinatred(:,iatom1)*trialafm-spinatred(:,iatom0))) > tolsym)then
 ! Just impose the norms are equal. The turning spinat is dealt with below
-     if(sum(spinatred(:,iatom1)**2)-sum(spinatred(:,iatom0)**2) > tolsym)then
-       write(message,'(3a,3i5)')&
-&       'Problem with matching the spin part within a class.',ch10,&
-&       'isym,iatom0,iatom1=',isym,iatom0,iatom1
-       MSG_ERROR_CLASS(message, "TolSymError")
-     end if
+!     if(sum(spinatred(:,iatom1)**2)-sum(spinatred(:,iatom0)**2) > tolsym)then
+!       write(message,'(3a,3i5)')&
+!&       'Problem with matching the spin part within a class.',ch10,&
+!&       'isym,iatom0,iatom1=',isym,iatom0,iatom1
+!       MSG_ERROR_CLASS(message, "TolSymError")
+!     end if
 
 !    jellium slab case: check whether symmetry operation has no translational
 !    component along z
@@ -389,11 +408,10 @@
      do itrialxfm = 1, ntrialxfm
        trialok=1
 
-!DEBUG
-!       write (std_out,'(a,2I6,3I6)') 'ntrialxfm, itrialxfm, symafm_ref ', ntrialxfm, itrialxfm, symafm_ref(itrialxfm)
-!       write (std_out,'(9I6)') trialsymmag(:,:,itrialxfm)
-!ENDDEBUG
-
+       if (prtvol > 1) then
+         write (std_out,'(a,2I6,3I6)') 'ntrialxfm, itrialxfm, symafm_ref ', ntrialxfm, itrialxfm, symafm_ref(itrialxfm)
+         write (std_out,'(9I6)') trialsymmag(:,:,itrialxfm)
+       end if
 
 !      Loop over all classes, then all atoms in the class,
 !      to find whether they have a symmetric
@@ -426,11 +444,12 @@
            end if
 
 !          DEBUG
-!          write(std_out,'(a,3i6,3e12.4,a,3e12.4)') '   iclass jj itrialxfm Send atom at xred=',&
-!&           iclass, jj, itrialxfm, xred(:,iatom2),' to ',symxred2(:)
-!          write(std_out,'(a,3e12.4,a,3e12.4)') '   Send atom with spinatred  =',&
-!&           spinatred(:,iatom2), ' to ', symspinat2
-!          ENDDEBUG
+           if (prtvol >= 10) then
+             write(std_out,'(a,3i6,3e12.4,a,3e12.4)') '   iclass jj itrialxfm Send atom at xred=',&
+&              iclass, jj, itrialxfm, xred(:,iatom2),' to ',symxred2(:)
+             write(std_out,'(a,3e12.4,a,3e12.4)') '   Send atom with spinatred  =',&
+&              spinatred(:,iatom2), ' to ', symspinat2
+           end if
 
 !          Check whether there exists an atom of the same class at the
 !          same location, with the correct spinat and nuclear dipole moment
@@ -464,9 +483,9 @@
          end do ! End loop over iatom2 in class iclass
 
 ! if trial is already broken, forget it and exit
-!DEBUG
-!         write (std_out, '(a,i6,i6)') '   iclass trialok ', iclass, trialok
-!ENDDEBUG
+         if (prtvol >= 10) then
+           write (std_out, '(a,i6,i6)') '   iclass trialok ', iclass, trialok
+         end if
          if(trialok==0)exit
        end do ! End loop over all classes
 
@@ -503,14 +522,14 @@
  ABI_DEALLOCATE(trialsymmag)
  ABI_DEALLOCATE(symafm_ref)
 
-!DEBUG
-! write(std_out,'(a,I0,a,a)') ' symfind : exit, nsym=',nsym,ch10, '   symrel matrices, symafm and tnons are :'
-! do isym=1,nsym
-!   write(std_out,'(i4,4x,3i4,2x,3i4,2x,3i4,4x,i4,4x,3f8.4)' ) isym,symrel(:,:,isym),&
-!&   symafm(isym),tnons(:,isym)
-! end do
+ if (prtvol > 0) then
+   write(std_out,'(a,I0,a,a)') ' symfind : exit, nsym=',nsym,ch10, '   symrel matrices, symafm and tnons are :'
+   do isym=1,nsym
+     write(std_out,'(i4,4x,3i4,2x,3i4,2x,3i4,4x,i4,4x,3f8.4)' ) isym,symrel(:,:,isym),&
+&      symafm(isym),tnons(:,isym)
+   end do
 !stop
-!ENDDEBUG
+ end if
 
 end subroutine symfind
 !!***

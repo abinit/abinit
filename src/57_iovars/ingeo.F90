@@ -820,7 +820,7 @@ subroutine ingeo (acell,amu,dtset,bravais,&
 
 
        call symfind(dtset%berryopt,field_xred,gprimd,jellslab,msym,natom,noncoll,nptsym,nsym,&
-&       nzchempot,ptsymrel,spinat,symafm,symrel,tnons,tolsym,typat,use_inversion,xred,nucdipmom)
+&       nzchempot,dtset%prtvol,ptsymrel,spinat,symafm,symrel,tnons,tolsym,typat,use_inversion,xred,nucdipmom)
 
 !      If the tolerance on symmetries is bigger than 1.e-8, symmetrize the atomic positions
        if(tolsym>1.00001e-8)then

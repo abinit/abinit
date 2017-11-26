@@ -782,7 +782,7 @@ SUBROUTINE checksymmetrygroup(rprimd,xred,typat,msym,natom,ptgroupma,spgroup)
   call symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tol3)
 
   call symfind(berryopt,efield,gprimd,jellslab,msym,natom,noncoll,nptsym,nsym,&
-&           nzchempot,ptsymrel,spinat,symafm,symrel,tnons,tol3,typat,use_inversion,xred)
+&           nzchempot,0,ptsymrel,spinat,symafm,symrel,tnons,tol3,typat,use_inversion,xred)
 
   call symanal(bravais,chkprim,genafm,msym,nsym,ptgroupma,rprimd,spgroup,symafm,symrel,tnons,tol3)
 

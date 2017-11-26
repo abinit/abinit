@@ -189,7 +189,7 @@ contains
   ABI_MALLOC(Sym%symafm    ,(Sym%msym)) ; Sym%symafm(:)    =1
   ABI_MALLOC(tnons_tmp   ,(3,Sym%msym)) ; tnons_tmp   (:,:)=0.d0
   call symfind(berryopt,efield,Lattice%gprimd,jellslab,Sym%msym,InVar%natom_unitcell,noncoll,Sym%nptsym,nsym,&
-&      nzchempot,Sym%ptsymrel,spinat,Sym%symafm,symrel_tmp,tnons_tmp,tol8,InVar%typat_unitcell,use_inversion,xred_temp)
+&      nzchempot,0,Sym%ptsymrel,spinat,Sym%symafm,symrel_tmp,tnons_tmp,tol8,InVar%typat_unitcell,use_inversion,xred_temp)
   
   if (Sym%nptsym.eq.nsym) then
     symrel(:,:,:) =symrel_tmp(:,:,:)
