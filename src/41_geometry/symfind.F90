@@ -200,7 +200,7 @@
 &         abs(spinat(3,iatom)+spinatcl(3,iclass))<tolsym
 ! spin vectors have the same norm... 
          test_sameabsnoncoll= &
-&         noncoll==1 .and. afm_noncoll .and. has_canting .and. &
+&         noncoll==1 .and. afm_noncoll .and. has_canting==1 .and. &
 &         (abs(spinat(1,iatom)**2   +spinat(2,iatom)**2   +spinat(3,iatom)**2 - &
 &              spinatcl(1,iclass)**2+spinatcl(2,iclass)**2+spinatcl(3,iclass)**2) < tolsym)
 
