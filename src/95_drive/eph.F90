@@ -144,7 +144,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  integer,parameter :: nsphere0=0,prtsrlr0=0
  integer :: ii,comm,nprocs,my_rank,psp_gencond,mgfftf,nfftf !,nfftf_tot
  integer :: iblock,ddb_nqshift,ierr
- integer :: omp_ncpus, work_size
+ integer :: omp_ncpus, work_size, nks_per_proc
  real(dp):: eff,mempercpu_mb,max_wfsmem_mb,nonscal_mem !,ug_mem,ur_mem,cprj_mem
 #ifdef HAVE_NETCDF
  integer :: ncid,ncerr
@@ -291,7 +291,9 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    write(ab_out,"(a)")"configurations:"
 
    do ii=1,dtset%max_ncpus
-     eff = (one * work_size) / ii
+     nks_per_proc = work_size / ii
+     nks_per_proc = nks_per_proc + mod(work_size, ii)
+     eff = (one * work_size) / (ii * nks_per_proc)
      ! Add the non-scalable part and increase by 10% to account for other datastructures.
      mempercpu_mb = (max_wfsmem_mb + nonscal_mem) * 1.1_dp
 
