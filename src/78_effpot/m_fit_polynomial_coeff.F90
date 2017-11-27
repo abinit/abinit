@@ -121,15 +121,15 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
 !arrays
  integer,intent(in) :: fixcoeff(nfixcoeff), bancoeff(nbancoeff)
  integer,intent(in) :: power_disps(2)
- type(effective_potential_type),intent(inout) :: eff_pot
+ type(effective_potential_type),target,intent(inout) :: eff_pot
  type(abihist),intent(inout) :: hist
  real(dp),optional,intent(in) :: cutoff_in
  logical,optional,intent(in) :: verbose,positive,anharmstr,spcoupling
 !Local variables-------------------------------
 !scalar
- integer :: ii,icoeff,icycle,icycle_tmp,ierr,info,index_min,iproc,isweep,jj
+ integer :: ii,icoeff,icycle,icycle_tmp,ierr,info,index_min,iproc,isweep,jcoeff
  integer :: master,my_rank,my_ncoeff,ncoeff_model,ncoeff_tot,natom_sc,ncell,ncycle
- integer :: ncycle_tot,ncycle_max,nproc,ntime,ncoeff_alone,nsweep,size_mpi
+ integer :: ncycle_tot,ncycle_max,nproc,ntime,nsweep,size_mpi
  integer :: rank_to_send
  real(dp) :: cutoff,time
  real(dp),parameter :: HaBohr_meVAng = 27.21138386 / 0.529177249
@@ -138,7 +138,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
 !arrays
  real(dp) :: mingf(4)
  integer :: sc_size(3)
- integer,allocatable  :: buffsize(:),buffdisp(:)
+ integer,allocatable  :: buffsize(:),buffdisp(:),buffin(:)
  integer,allocatable  :: list_coeffs(:),list_coeffs_tmp(:),list_coeffs_tmp2(:)
  integer,allocatable  :: my_coeffindexes(:),singular_coeffs(:)
  integer,allocatable  :: my_coefflist(:) ,stat_coeff(:)
@@ -147,7 +147,9 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
  real(dp),allocatable :: fcart_coeffs(:,:,:,:),gf_values(:,:),gf_mpi(:,:)
  real(dp),allocatable :: fcart_coeffs_tmp(:,:,:,:),strten_coeffs_tmp(:,:,:)
  real(dp),allocatable :: strten_coeffs(:,:,:)
- type(polynomial_coeff_type),allocatable :: coeffs_tmp(:),coeffs_in(:),my_coeffs(:)
+ type(polynomial_coeff_type),allocatable :: my_coeffs(:)
+ type(polynomial_coeff_type),target,allocatable :: coeffs_tmp(:)
+ type(polynomial_coeff_type),pointer :: coeffs_in(:)
  type(fit_data_type) :: fit_data
  character(len=1000) :: message
  character(len=fnlen) :: filename
@@ -175,7 +177,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
  if(present(cutoff_in))then
    cutoff = cutoff_in
  end if 
- if(cutoff == zero)then
+ if(abs(cutoff)<tol16)then
    do ii=1,3
      cutoff = cutoff + eff_pot%crystal%rprimd(ii,ii)
    end do
@@ -201,73 +203,95 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
 !get from the eff_pot type (from the input)
 !or
 !regenerate the list
+ my_ncoeff = 0
  ncoeff_tot = 0
  ncoeff_model = eff_pot%anharmonics_terms%ncoeff
- if(iam_master)then
-!  Reset ncoeff_tot   
-   if(ncoeff_model > 0)then
-     if(need_verbose)then
-       write(message, '(4a)' )ch10,' The coefficients present in the effective',&
-&      ' potential will be used for the fit'
-       call wrtout(std_out,message,'COLL')
-       call wrtout(ab_out,message,'COLL')
-     end if
+
+!Reset ncoeff_tot   
+ if(ncoeff_model > 0)then
+   if(need_verbose)then
+     write(message, '(4a)' )ch10,' The coefficients present in the effective',&
+&    ' potential will be used for the fit'
+     call wrtout(std_out,message,'COLL')
+     call wrtout(ab_out,message,'COLL')
    end if
+ end if
    
-   if(generateterm == 1)then
-!    we need to regerate them
-     if(need_verbose)then
-       write(message, '(4a)' )ch10,' The coefficients for the fit must  will be generate'
-       call wrtout(std_out,message,'COLL')
-       call wrtout(ab_out,message,'COLL')
+ if(generateterm == 1)then
+! we need to regerate them
+   if(need_verbose)then
+     write(message, '(4a)' )ch10,' The coefficients for the fit must  will be generate'
+     call wrtout(std_out,message,'COLL')
+     call wrtout(ab_out,message,'COLL')
 
-       write(message,'(a,F6.3,a)') " Cut-off of ",cutoff," Angstrom is imposed"
-       call wrtout(std_out,message,'COLL') 
+     write(message,'(a,F6.3,a)') " Cut-off of ",cutoff," Angstrom is imposed"
+     call wrtout(std_out,message,'COLL') 
+   end if
+
+   call polynomial_coeff_getNorder(coeffs_tmp,eff_pot%crystal,cutoff,my_ncoeff,ncoeff_tot,power_disps,&
+&                                  0,comm,anharmstr=need_anharmstr,spcoupling=need_spcoupling)
+ end if
+
+!Copy the initial coefficients from the model on the CPU 0
+ ncoeff_tot = ncoeff_tot + ncoeff_model
+ if(iam_master .and. ncoeff_model > 0) my_ncoeff = my_ncoeff + ncoeff_model
+
+!Get the list with the number of coeff on each CPU
+!In order to be abble to compute the my_coeffindexes array which is for example:
+! if CPU0 has 200  Coeff and CPU1 has 203 Coeff then
+! for CPU0:my_coeffindexes=>1-200 and for CPU1:my_coeffindexes=>201-403
+!Also fill the my_coeffs array with the generated coefficients and/or the coefficient from the input xml
+ ABI_ALLOCATE(buffin,(nproc))
+ buffin = 0
+ buffin(my_rank+1) = my_ncoeff
+ call xmpi_sum(buffin,comm,ierr)
+ ABI_ALLOCATE(my_coeffindexes,(my_ncoeff))
+ ABI_ALLOCATE(my_coefflist,(my_ncoeff))
+ ABI_DATATYPE_ALLOCATE(my_coeffs,(my_ncoeff))
+ do icoeff=1,my_ncoeff
+
+   jcoeff = icoeff 
+   my_coefflist(icoeff) = icoeff
+   
+   if(my_rank==0) then
+     my_coeffindexes(icoeff) = icoeff
+   else
+     my_coeffindexes(icoeff) = sum(buffin(1:my_rank)) + icoeff
+   end if
+
+!  Only copy the input coefficients on the CPU0  
+   if(my_rank==0) then
+     if(icoeff <= ncoeff_model)then
+       coeffs_in => eff_pot%anharmonics_terms%coefficients
+     else
+       coeffs_in => coeffs_tmp
+       jcoeff = jcoeff-ncoeff_model
      end if
-
-     call polynomial_coeff_getNorder(coeffs_tmp,eff_pot%crystal,cutoff,ncoeff_tot,power_disps,0,comm,&
-&                                        anharmstr=need_anharmstr,spcoupling=need_spcoupling)
-
-     if(need_verbose)then
-       write(message,'(1x,I0,2a)') ncoeff_tot,' coefficients generated ',ch10     
-       call wrtout(ab_out,message,'COLL')
-       call wrtout(std_out,message,'COLL') 
-     end if
+   else
+     coeffs_in => coeffs_tmp
    end if
+   call polynomial_coeff_init(one,coeffs_in(jcoeff)%nterm,&
+&                             my_coeffs(icoeff),coeffs_in(jcoeff)%terms,&
+&                             coeffs_in(jcoeff)%name,&
+&                             check=.false.)
+   call polynomial_coeff_free(coeffs_in(jcoeff))   
+ end do
 
-!  Copy the initial coefficients from the model
-   ncoeff_tot = ncoeff_tot + ncoeff_model
-   ABI_DATATYPE_ALLOCATE(coeffs_in,(ncoeff_tot))   
-   if(ncoeff_model > 0)then
-     do ii=1,ncoeff_model
-       call polynomial_coeff_init(eff_pot%anharmonics_terms%coefficients(ii)%coefficient,&
-&                                 eff_pot%anharmonics_terms%coefficients(ii)%nterm,&
-&                                 coeffs_in(ii),&
-&                                 eff_pot%anharmonics_terms%coefficients(ii)%terms,&
-&                                 eff_pot%anharmonics_terms%coefficients(ii)%name,&
-&                                 check=.false.) 
-     end do
-   end if
-   if(generateterm == 1)then
-     jj = 0
-     do ii= ncoeff_model+1,ncoeff_tot
-       jj = jj + 1
-       call polynomial_coeff_init(coeffs_tmp(jj)%coefficient,&
-&                                 coeffs_tmp(jj)%nterm,&
-&                                 coeffs_in(ii),&
-&                                 coeffs_tmp(jj)%terms,&
-&                                 coeffs_tmp(jj)%name,&
-&                                 check=.false.)
-!      Free the memory     
-       call polynomial_coeff_free(coeffs_tmp(jj))
-     end do
-     ABI_DEALLOCATE(coeffs_tmp)
-   end if
+!Deallocation
+ if(allocated(coeffs_tmp)) then
+   ABI_DATATYPE_DEALLOCATE(coeffs_tmp)
+ end if
+ NULLIFY(coeffs_in)
+ ABI_DEALLOCATE(buffin)
+ 
+ !wait everybody 
+ call xmpi_barrier(comm)
 
-   filename = "terms_set.xml"
-!   call polynomial_coeff_writeXML(coeffs_in,ncoeff_tot,filename=filename,newfile=.true.)
-
- end if!End iam_master
+!Write the XML with the coefficient before the fit process 
+! if(iam_master)then
+    filename = "terms_set.xml"
+!    call polynomial_coeff_writeXML(my_coeffs,my_ncoeff,filename=filename,newfile=.true.)
+! end if
 
 !Reset the output (we free the memory)
  call effective_potential_freeCoeffs(eff_pot)
@@ -279,86 +303,6 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
    call effective_potential_file_mapHistToRef(eff_pot,hist,comm,verbose=need_verbose)
  end if
 
-!Set the MPI, we need to distribute the list of coeffiecients in
-!order  to recude de memory...
-!1:broadcast the number of coeff max
- call xmpi_bcast(ncoeff_tot, master, comm, ierr)
- if(ditributed_coefficients)then
-   ncoeff_alone = mod(ncoeff_tot,nproc)
-   my_ncoeff = aint(real(ncoeff_tot,sp)/(nproc))
-
-   if(my_rank >= (nproc-ncoeff_alone)) then
-     my_ncoeff = my_ncoeff  + 1
-   end if
-
-   ABI_ALLOCATE(my_coeffindexes,(my_ncoeff))
-   ABI_ALLOCATE(my_coefflist,(my_ncoeff))
-
-!2:compute the number of coefficients and the list of the corresponding
-!  coefficients for each CPU.
-   do icoeff=1,my_ncoeff
-     if(my_rank >= (nproc-ncoeff_alone))then
-       my_coeffindexes(icoeff)=(aint(real(ncoeff_tot,sp)/nproc))*(my_rank)+&
-&                              (my_rank - (nproc-ncoeff_alone)) + icoeff
-       my_coefflist(icoeff) = icoeff
-     else
-       my_coeffindexes(icoeff)=(my_ncoeff)*(my_rank)  + icoeff
-       my_coefflist(icoeff) = icoeff
-     end if
-   end do
-
-!3:MPI SEND the datas to the other CPUs
-   ABI_DATATYPE_ALLOCATE(my_coeffs,(my_ncoeff)) 
-   ii = 1
-   do icoeff = 1, ncoeff_tot
-!  Need to send the rank with the chosen coefficient
-     rank_to_send = 0
-     if (any(my_coeffindexes(:)==icoeff)) rank_to_send = my_rank
-     call xmpi_sum(rank_to_send, comm, ierr)
-     
-     if (iam_master) then
-       if(any(my_coeffindexes(:)==icoeff))then
-        call polynomial_coeff_init(coeffs_in(icoeff)%coefficient,coeffs_in(icoeff)%nterm,my_coeffs(ii),&
-&                                 coeffs_in(icoeff)%terms,coeffs_in(icoeff)%name,check=.false.) 
-         ii = ii + 1
-       else
-         call polynomial_coeff_MPIsend(coeffs_in(icoeff), icoeff, rank_to_send, comm)
-       end if
-     else
-       if(any(my_coeffindexes(:)==icoeff))then
-         call polynomial_coeff_MPIrecv(my_coeffs(ii), icoeff, master, comm)
-         ii = ii + 1
-       end if
-     end if
-     !Free memory on master CPU 
-     if (iam_master) call polynomial_coeff_free(coeffs_in(icoeff))
-   end do
- else
-!  With option==2, the fit process is Monte Carlo
-!  so all the CPU need access to all the coefficients, there is not distribution
-   my_ncoeff = ncoeff_tot
-   ABI_ALLOCATE(my_coeffindexes,(my_ncoeff))
-   ABI_ALLOCATE(my_coefflist,(my_ncoeff))
-   ABI_DATATYPE_ALLOCATE(my_coeffs,(my_ncoeff))
-   do icoeff=1,my_ncoeff
-     my_coeffindexes(icoeff) = icoeff
-     my_coefflist(icoeff) = icoeff
-!    MPI BROADCAST
-     if(iam_master)then
-       call polynomial_coeff_init(one,coeffs_in(icoeff)%nterm,&
-&                                 my_coeffs(icoeff),coeffs_in(icoeff)%terms,&
-&                                 coeffs_in(icoeff)%name,&
-&                                 check=.false.)
-       call polynomial_coeff_free(coeffs_in(icoeff))
-     end if
-     call polynomial_coeff_broadcast(my_coeffs(icoeff),master, comm)
-   end do
- end if
- 
-!Free memory on master CPU 
- if (iam_master) then
-   ABI_DATATYPE_DEALLOCATE(coeffs_in)
- end if
 
 !Check if ncycle_in is not zero or superior to ncoeff_tot
  if(need_verbose.and.(ncycle_in > ncoeff_tot).or.(ncycle_in<0.and.nfixcoeff /= -1)) then
@@ -492,8 +436,8 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
  ABI_ALLOCATE(buffdisp,(nproc))
  ABI_ALLOCATE(buffGF,(5,1))
  ABI_ALLOCATE(gf_mpi,(5,nproc))
- buffsize(:) = zero
- buffdisp(1) = zero
+ buffsize(:) = 0
+ buffdisp(1) = 0
  do ii= 1,nproc
    buffsize(ii) =  5
  end do
@@ -675,7 +619,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
      index_min = 0
      do icoeff=1,my_ncoeff
        if(gf_values(1,icoeff) < zero) cycle
-       if(gf_values(1,icoeff) == zero) cycle
+       if(abs(gf_values(1,icoeff)) <tol16) cycle
        if(gf_values(1,icoeff) < mingf(1) ) then
          mingf(:) = gf_values(:,icoeff)
          index_min = my_coeffindexes(icoeff)
@@ -693,10 +637,10 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
        index_min= 0
        do icoeff=1,nproc
          if(gf_mpi(2,icoeff) < zero) cycle
-         if(gf_mpi(2,icoeff) == zero) cycle
+         if(abs(gf_mpi(2,icoeff)) < tol16) cycle
          if(gf_mpi(2,icoeff) < mingf(1) ) then
            mingf(:) = gf_mpi(2:5,icoeff)
-           index_min = gf_mpi(1,icoeff)
+           index_min = int(gf_mpi(1,icoeff))
          end if
        end do
      end if
@@ -726,9 +670,9 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
          exit
        end if
      end do
-
 !    Need to send the rank with the chosen coefficient
      call xmpi_sum(rank_to_send, comm, ierr)
+
 !    Boadcast the coefficient
      call xmpi_bcast(energy_coeffs_tmp(icycle,:), rank_to_send, comm, ierr)
      call xmpi_bcast(fcart_coeffs_tmp(:,:,icycle,:) , rank_to_send, comm, ierr)
@@ -821,7 +765,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
          singular_coeffs(icoeff) = 1
        end if
        
-       if(gf_values(1,1) > zero.and.gf_values(1,1) /= zero.and.&
+       if(gf_values(1,1) > zero.and.abs(gf_values(1,1))>tol16.and.&
 &         gf_values(1,1) < mingf(1) ) then  
          mingf = gf_values(:,1)
          list_coeffs(1:icycle_tmp) = list_coeffs_tmp2(1:icycle_tmp)
@@ -854,10 +798,10 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
        index_min= 0
        do iproc=1,nproc
          if(gf_mpi(2,iproc) < zero) cycle
-         if(gf_mpi(2,iproc) == zero) cycle
+         if(abs(gf_mpi(2,iproc)) <tol16) cycle
          if(gf_mpi(2,iproc) < mingf(1) ) then
            mingf(:) = gf_mpi(2:5,iproc)
-           index_min = gf_mpi(1,iproc)
+           index_min = int(gf_mpi(1,iproc))
            rank_to_send = iproc-1
          end if
        end do
@@ -1147,7 +1091,7 @@ subroutine fit_polynomial_coeff_getPositive(eff_pot,hist,coeff_values,isPositive
 
 !set MPI, really basic stuff...
  nmodel_alone = mod(nmodel,nproc)
- my_nmodel = aint(real(nmodel,sp)/(nproc))
+ my_nmodel = int(aint(real(nmodel,sp)/(nproc)))
 
  if(my_rank >= (nproc-nmodel_alone)) then
    my_nmodel = my_nmodel  + 1
@@ -1159,7 +1103,7 @@ subroutine fit_polynomial_coeff_getPositive(eff_pot,hist,coeff_values,isPositive
 !2:compute the number of model and the list of the corresponding for each CPU.
  do imodel=1,my_nmodel
    if(my_rank >= (nproc-nmodel_alone))then
-     my_modelindexes(imodel)=(aint(real(nmodel,sp)/nproc))*(my_rank)+&
+     my_modelindexes(imodel)=(int(aint(real(nmodel,sp)/nproc)))*(my_rank)+&
 &                              (my_rank - (nproc-nmodel_alone)) + imodel
      my_modellist(imodel) = imodel
    else
@@ -1184,7 +1128,7 @@ subroutine fit_polynomial_coeff_getPositive(eff_pot,hist,coeff_values,isPositive
 !       coeff_values(imodel,:) = zero
        isPositive(imodel) = 0
      else
-       isPositive(imodel) = one
+       isPositive(imodel) = 1
      end if
    end if
  end do
@@ -1365,7 +1309,7 @@ subroutine fit_polynomial_coeff_solve(coefficients,fcart_coeffs,fcart_diff,&
 !   coefficients = zero
 ! end if
 
- call dsgesv(N,NRHS,A,LDA,IPIV,B,LDB,coefficients,LDX,WORK,SWORK,ITER,INFO)
+ call DSGESV(N,NRHS,A,LDA,IPIV,B,LDB,coefficients,LDX,WORK,SWORK,ITER,INFO)
 
 !other routine
 ! call dgesv(N,NRHS,A,LDA,IPIV,B,LDB,INFO)
@@ -1609,7 +1553,7 @@ subroutine fit_polynomial_coeff_getFS(coefficients,du_delta,displacement,energy_
  strten_out(:,:,:)  = zero
  energy_out(:,:)    = zero
 
- icell = 0
+ icell = 0; ib1=0; ia1=0
  do i1=1,sc_size(1)
    do i2=1,sc_size(2)
      do i3=1,sc_size(3)
@@ -1643,20 +1587,20 @@ subroutine fit_polynomial_coeff_getFS(coefficients,du_delta,displacement,energy_
                  if(abs(strain(idir1,itime)) > tol10)then
 !                  Accumulate energy fo each displacement (\sum ((A_x-O_x)^Y(A_y-O_c)^Z))
                    tmp1 = tmp1 * (strain(idir1,itime))**power_strain
-                   if(power_disp > 1) then
+                   if(power_strain > 1) then
 !                    Accumulate stress for each strain (\sum (Y(eta_2)^Y-1(eta_2)^Z+...))
                      tmp3 = tmp3 *  power_strain*(strain(idir1,itime))**(power_strain-1)
                    end if
                  else
                    tmp1 = zero
-                   if(power_disp > 1) then
+                   if(power_strain > 1) then
                      tmp3 = zero
                    end if
                  end if
                else
-!              Set the power_disp of the displacement:
+!                Set the power_disp of the displacement:
                  power_disp = coefficients(icoeff)%terms(iterm)%power_disp(idisp1)
-  !              Get the direction of the displacement or strain
+!                Get the direction of the displacement or strain
                  idir1 = coefficients(icoeff)%terms(iterm)%direction(idisp1)
 !                Displacement case idir = 1, 2  or 3
 !                indexes of the cell of the atom a
@@ -1875,7 +1819,7 @@ subroutine fit_polynomial_coeff_computeMSE(eff_pot,hist,mse,msef,mses,natom,ntim
  type(abihist),intent(in) :: hist
 !Local variables-------------------------------
 !scalar
- integer :: ii,ia,mu,unit_ts,unit_mod
+ integer :: ii,ia,mu,unit_ts
  real(dp):: energy,energy_harm
  logical :: need_anharmonic = .TRUE.,need_print=.FALSE.
 !arrays

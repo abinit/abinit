@@ -315,7 +315,7 @@ subroutine compute_anharmonics(eff_pot,filenames,inp,comm)
   end do
 
 ! check if strain exist
-  if(all(have_strain==zero).and.inp%strcpling /= 2) then
+  if(all(have_strain==0).and.inp%strcpling /= 2) then
       write(message, '(6a)' )&
 &    ' WARNING: There is no file corresponding to strain',&
 &    ' to compute 3rd order derivatives.',ch10,&
@@ -431,15 +431,15 @@ subroutine compute_anharmonics(eff_pot,filenames,inp,comm)
         delta1 = zero
         delta2 = zero
         do jj=1,size(eff_pots)
-          if (effpot_strain(jj)%direction==ii.and.(effpot_strain(jj)%direction/=zero))then
-            if (delta1==zero) then
+          if (effpot_strain(jj)%direction==ii.and.(effpot_strain(jj)%direction/=0))then
+            if (abs(delta1)<tol16) then
               delta1 = jj 
             else
               delta2 = jj
             end if
           end if
         end do
-        if (delta1/=0.and.delta1/=0)then
+        if (abs(delta1)>tol16.and.abs(delta1)>tol16)then
  !        check if delta1 < delta2, in this case, inverse delta1 and delta2
           if (effpot_strain(int(delta1))%delta < effpot_strain(int(delta2))%delta) then
             delta = delta1

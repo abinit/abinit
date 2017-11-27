@@ -72,8 +72,6 @@ module m_effective_potential_file
  public :: effpot_xml_getValue
  public :: effpot_xml_getAttribute
  public :: effpot_xml_getDimSystem
- private :: char_f2c
- private :: char_c2f
 
  interface
    subroutine effpot_xml_readSystem(filename,natom,&
@@ -288,7 +286,7 @@ subroutine effective_potential_file_read(filename,eff_pot,inp,comm,hist)
       call wrtout(std_out,message,'COLL')
       call wrtout(ab_out,message,'COLL')
 
-      call effective_potential_file_getDimSystem(filename,natom,ntypat,nqpt,nrpt,comm)!
+      call effective_potential_file_getDimSystem(filename,natom,ntypat,nqpt,nrpt)!
 
 !     In anaddb, inp%atifc is set to 1 2 3 ... natom (see anaddb help).
 !     Then in the next routine inp%atifc is convert with 0 or 1 (inp%atifc is now 1 1 1 1 0).
@@ -330,7 +328,7 @@ subroutine effective_potential_file_read(filename,eff_pot,inp,comm,hist)
 
 
 !     Assign the energy of the reference from input
-      if(inp%energy_reference/=zero)then
+      if(abs(inp%energy_reference)>tol16)then
         write(message,'(11a)') ch10,&
 &      ' --- !WARNING',ch10,&
 &      '     Energy of the reference structure is specify in ',ch10,&
@@ -342,7 +340,7 @@ subroutine effective_potential_file_read(filename,eff_pot,inp,comm,hist)
       end if
 
 !     Assign the stress tensor of the reference from input
-      if(any(inp%strten_reference==zero))then
+      if(any(abs(inp%strten_reference)<tol16))then
         write(message,'(9a)') ch10,&
 &      ' --- !WARNING',ch10,&
 &      '     The stress tensor of the reference structure is not specify in ',ch10,&
@@ -388,7 +386,7 @@ subroutine effective_potential_file_read(filename,eff_pot,inp,comm,hist)
 &      ' ---',ch10
         call wrtout(std_out,message,'COLL')
         if(inp%fit_coeff <= 0 .and. &
-&          all(eff_pot%anharmonics_terms%coefficients(:)%coefficient == zero)) then
+&          all(abs(eff_pot%anharmonics_terms%coefficients(:)%coefficient) <tol16)) then
 
           write(message,'(12a)') ch10,&
 &          ' --- !WARNING',ch10,&
@@ -589,7 +587,6 @@ end subroutine effective_potential_file_getType
 !!
 !! INPUTS
 !! filename = names of the files
-!! comm=MPI communicator
 !!
 !! OUTPUT
 !! natom = number of atoms
@@ -604,7 +601,7 @@ end subroutine effective_potential_file_getType
 !!
 !! SOURCE
 
-subroutine effective_potential_file_getDimSystem(filename,natom,ntypat,nqpt,nrpt,comm)
+subroutine effective_potential_file_getDimSystem(filename,natom,ntypat,nqpt,nrpt)
 
  use m_ddb
  use m_ddb_hdr
@@ -621,13 +618,11 @@ subroutine effective_potential_file_getDimSystem(filename,natom,ntypat,nqpt,nrpt
 !Arguments ------------------------------------
 !scalars
  character(len=fnlen),intent(in) :: filename
- integer,intent(in) :: comm
  integer,intent(out) :: natom,ntypat,nqpt,nrpt
 !arrays
 
 !Local variables-------------------------------
  !scalar
- integer,parameter :: vrsio8=100401,vrsio8_old=010929,vrsio8_old_old=990527
  integer :: filetype
 ! integer :: dimekb,lmnmax,mband,mtyp,msym,nblok,nkpt,usepaw
  integer :: ddbun = 666
@@ -1061,6 +1056,9 @@ subroutine effective_potential_file_getDimMD(filename,natom,nstep)
    rewind(unit=unit_md)
    ios = 0
    nstep   = 0
+   nrprimd = 0
+   natm_old= 0
+   natm_new= 0
    nenergy = 0
    compatible = .TRUE.
 
@@ -1184,7 +1182,7 @@ subroutine system_getDimFromXML(filename,natom,ntypat,nph1l,nrpt)
 #endif
   !arrays
 #ifndef HAVE_LIBXML
-  real,allocatable :: typat(:)
+  integer,allocatable :: typat(:)
 #endif
 
  ! *************************************************************************
@@ -1272,10 +1270,10 @@ subroutine system_getDimFromXML(filename,natom,ntypat,nph1l,nrpt)
        call rdfromline("mass",line,strg)
        strg1=trim(strg)
        read(unit=strg1,fmt=*) itypat
-       if (.not.any(typat==itypat)) then
+       if (.not.any(typat==int(itypat))) then
          ntypat= ntypat+1
        end if
-       typat(iatom) = itypat
+       typat(iatom) = int(itypat)
      end if
 
      if (line(1:6)==char(60)//'local') then
@@ -1393,7 +1391,7 @@ end subroutine system_getDimFromXML
  integer,allocatable  :: symrel(:,:,:),symafm(:),ptsymrel(:,:,:)
  real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3),rprimd(3,3)
  real(dp) :: elastic_constants(6,6),elastic3rd(6,6,6),epsilon_inf(3,3)
- real(dp),allocatable :: all_amu(:), cell_local(:,:),cell_total(:,:)
+ real(dp),allocatable :: all_amu(:),cell_local(:,:),cell_total(:,:)
  real(dp),allocatable :: elastic_displacement(:,:,:,:),dynmat(:,:,:,:,:,:)
  real(dp),allocatable :: local_atmfrc(:,:,:,:,:),total_atmfrc(:,:,:,:,:)
  real(dp),allocatable :: spinat(:,:),strain_coupling(:,:,:),phfrq(:,:),qph1l(:,:),tnons(:,:)
@@ -1424,7 +1422,7 @@ end subroutine system_getDimFromXML
  iam_master = (my_rank == master)
 
 !Get Dimention of system and allocation/initialisation of array
- call effective_potential_file_getDimSystem(filename,natom,ntypat,nph1l,nrpt,0)
+ call effective_potential_file_getDimSystem(filename,natom,ntypat,nph1l,nrpt)
  gmet= zero; gprimd = zero; rmet = zero; rprimd = zero
  elastic_constants = zero; epsilon_inf = zero; ncoeff = 0
  ABI_ALLOCATE(all_amu,(ntypat))
@@ -1661,9 +1659,9 @@ end subroutine system_getDimFromXML
            call rdfromline("mass",line,strg)
            strg1=trim(strg)
            read(strg1,*) amu
-           if (.not.any(all_amu==amu)) then
+           if (.not.any(abs(all_amu-amu)<tol16)) then
              all_amu(iamu) = amu
-             typat(iatom) = amu
+             typat(iatom) = int(amu)
              !convert atomic mass unit to znucl
              do ii=1,103
                call atomdata_from_znucl(atom,real(ii,dp))
@@ -1676,7 +1674,7 @@ end subroutine system_getDimFromXML
              iamu = iamu +1
            end if
            do itypat=1,ntypat
-             if(amu==all_amu(itypat)) then
+             if(abs(amu-all_amu(itypat))<tol16) then
                typat(iatom) = itypat
              end if
            end do
@@ -2079,14 +2077,14 @@ end subroutine system_getDimFromXML
 ! Reorder the ATMFRC
 ! Case 1: only local in the xml
    if (irpt1>0 .and. irpt2==0) then
-     ifcs%cell(:,:) = cell_local(:,:)
+     ifcs%cell(:,:) = int(cell_local(:,:))
      ifcs%atmfrc(:,:,:,:,:)  = local_atmfrc(:,:,:,:,:)
      ifcs%short_atmfrc(:,:,:,:,:) = local_atmfrc(:,:,:,:,:)
      ifcs%ewald_atmfrc(:,:,:,:,:) = zero
 
 ! Case 2: only total in the xml
    else if(irpt1==0 .and. irpt2>0)then
-     ifcs%cell(:,:) = cell_total(:,:)
+     ifcs%cell(:,:) = int(cell_total(:,:))
      ifcs%atmfrc(:,:,:,:,:)  = total_atmfrc(:,:,:,:,:)
      ifcs%short_atmfrc(:,:,:,:,:) = zero
      ifcs%ewald_atmfrc(:,:,:,:,:) = total_atmfrc(:,:,:,:,:)
@@ -2096,10 +2094,10 @@ end subroutine system_getDimFromXML
      if(irpt1 <= irpt2)then
        irpt3 = 0
        do ii=1,irpt2
-         ifcs%cell(:,ii) = cell_total(:,ii)
+         ifcs%cell(:,ii) = int(cell_total(:,ii))
          ifcs%atmfrc(:,:,:,:,ii)  = total_atmfrc(:,:,:,:,ii)
          do jj=1,irpt1
-           if (all(cell_local(:,jj)== ifcs%cell(:,ii))) then
+           if (all(abs(int(cell_local(:,jj))-ifcs%cell(:,ii))<tol16)) then
              ifcs%short_atmfrc(:,:,:,:,ii) = local_atmfrc(:,:,:,:,jj)
              irpt3 = irpt3 + 1
            end if
@@ -2126,13 +2124,13 @@ end subroutine system_getDimFromXML
      MSG_ERROR(message)
    end if
 
-   if (any(znucl==zero)) then
+   if (any(abs(znucl)<tol16)) then
      write(message, '(a,a,a)' )&
 &      ' Unable to read the atomic number ',trim(filename),ch10
      MSG_ERROR(message)
    end if
 
-   if (any(all_amu==zero)) then
+   if (any(abs(all_amu)<tol16)) then
      write(message, '(a,a,a)' )&
 &     ' Unable to read the atomic mass ',trim(filename),ch10
      MSG_ERROR(message)
@@ -2352,11 +2350,12 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
 !arrays
  integer :: bravais(11),cell_number(3),cell2(3)
  integer :: shift(3),rfelfd(4),rfphon(4),rfstrs(4)
+ integer,allocatable :: cell_red(:,:)
  real(dp):: dielt(3,3),elast_clamped(6,6),fact
  real(dp):: red(3,3),qphnrm(3),qphon(3,3)
  real(dp),allocatable :: blkval(:,:,:,:,:,:),d2asr(:,:,:,:,:)
  real(dp),allocatable :: instrain(:,:),zeff(:,:,:)
- real(dp),pointer :: atmfrc_red(:,:,:,:,:),cell_red(:,:),wghatm_red(:,:,:)
+ real(dp),pointer :: atmfrc_red(:,:,:,:,:),wghatm_red(:,:,:)
  character(len=500) :: message
  type(asrq0_t) :: asrq0
  type(ifc_type) :: ifc
@@ -2394,7 +2393,7 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
   ABI_ALLOCATE(symafm,(msym))
   ABI_ALLOCATE(symrel,(3,3,msym))
   ABI_ALLOCATE(tnons,(3,msym))
-  spinat = zero;  symrel = zero;  symafm = zero;  tnons = zero ; space_group = zero;
+  spinat = zero;  symrel = 0;  symafm = 0;  tnons = zero ; space_group = 0;
   call symlatt(bravais,msym,nptsym,ptsymrel,crystal%rprimd,tolsym)
   call symfind(0,(/zero,zero,zero/),crystal%gprimd,0,msym,crystal%natom,0,nptsym,nsym,&
 &              0,ptsymrel,spinat,symafm,symrel,tnons,tolsym,&
@@ -2430,7 +2429,7 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
   call wrtout(std_out,message,'COLL')
   call wrtout(ab_out,message,'COLL')
   if (ddb_get_etotal(ddb,effective_potential%energy) == 0) then
-    if(inp%energy_reference==zero)then
+    if(abs(inp%energy_reference) < tol16)then
       write(message,'(5a)')&
 &      ' Warning : Energy of the reference structure is not specify in',&
 &      ' the input file.',ch10,' Energy will set to zero',ch10
@@ -2440,7 +2439,7 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
       effective_potential%energy = inp%energy_reference
     end if
   else
-    if(inp%energy_reference/=zero)then
+    if(abs(inp%energy_reference) > tol16)then
       write(message,'(6a)')&
 &      ' Warning : Energy of the reference structure is specify in',&
 &      ' the input file.',ch10,' and in the DDB.',&
@@ -2496,7 +2495,7 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
   call gtblk9(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp)
 
   if (iblok /=0) then
-   if(any(inp%strten_reference/=zero))then
+   if(any(abs(inp%strten_reference)>tol16))then
      write(message,'(10a)') ch10,&
 &          ' --- !WARNING:',ch10,&
 &          '     The stress tensor of the reference structure is specify in the',ch10,&
@@ -2520,7 +2519,7 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
 !  Get forces
    effective_potential%fcart(:,1:natom) = blkval(1,:,1:natom,1,1,iblok)
  else
-   if(all(inp%strten_reference(:)==zero))then
+   if(all(abs(inp%strten_reference(:))<tol16))then
      write(message,'(8a)') ch10,&
 &          ' --- !WARNING:',ch10,&
 &          '     The stress tensor of the reference structure is not specify',ch10,&
@@ -2534,7 +2533,7 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
    end if
  end if
  
- if(any(effective_potential%strten(:) /= zero))then
+ if(any(abs(effective_potential%strten(:)) >tol16))then
    write(message, '(3a)' )ch10,&
 &   ' Cartesian components of forces (hartree/bohr)',ch10
    call wrtout(ab_out,message,'COLL')
@@ -2788,7 +2787,7 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
          end if
 
 !       Get the shift of cell
-        shift(:) = anint(red(2,:) - crystal%xred(:,ib)) - anint(red(1,:) - crystal%xred(:,ia))
+        shift(:) = int(anint(red(2,:) - crystal%xred(:,ib)) - anint(red(1,:) - crystal%xred(:,ia)))
 
         do irpt=1,ifc%nrpt
 
@@ -2849,7 +2848,7 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
 ! Only conserve the necessary points in rpt
   nrpt_new2 = 0
   do irpt = 1, nrpt_new
-    if (sum(wghatm_red(:,:,irpt)) /= 0) then
+    if (abs(sum(wghatm_red(:,:,irpt))) >tol16) then
       nrpt_new2 = nrpt_new2 + 1
     end if
   end do
@@ -2866,7 +2865,7 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
 
   irpt2 = 0
   do irpt = 1,nrpt_new
-    if (sum(wghatm_red(:,:,irpt)) /= 0) then
+    if (abs(sum(wghatm_red(:,:,irpt))) > tol16) then
       irpt2 = irpt2 + 1
 !     Apply weight on each R point
       do ia=1,effective_potential%crystal%natom
@@ -2899,7 +2898,7 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
     icount2 = icount2 + sum(effective_potential%harmonics_terms%ifcs%wghatm(:,:,irpt))
   end do
 
-  if (icount1 /= icount2) then
+  if (abs(icount1-icount2)>tol16) then
     write(message,'(2a,ES15.4,a,ES15.4,a)')'The total wghatm is no more the same',ch10,&
 &                        icount1,' before and ', icount2, ' now.'
     MSG_BUG(message)
@@ -3131,8 +3130,7 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
 !    reference cell (000) in order to compute the name correctly...
 !    If this coeff is not in the ref cell, take by default the first term
      if(coeffs(icoeff)%nterm > 0)then
-       call polynomial_coeff_getName(name,eff_pot%crystal%natom,coeffs(icoeff),&
-&                                    symbols,recompute=.true.)
+       call polynomial_coeff_getName(name,coeffs(icoeff),symbols,recompute=.true.)
        call polynomial_coeff_setName(name,coeffs(icoeff))
      end if
 
@@ -3327,8 +3325,7 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
 !          previous step
            icoeff = icoeff + 1
            call polynomial_coeff_init(coefficient(1),nterm,coeffs(icoeff),terms(1,:))
-           call polynomial_coeff_getName(name,eff_pot%crystal%natom,coeffs(icoeff),&
-&                                        symbols,recompute=.true.)
+           call polynomial_coeff_getName(name,coeffs(icoeff),symbols,recompute=.true.)
            call polynomial_coeff_setName(name,coeffs(icoeff))
 !          Deallocation of the terms array for this coefficient
            do jj=1,nterm_max
@@ -3609,7 +3606,7 @@ subroutine effective_potential_file_mapHistToRef(eff_pot,hist,comm,verbose)
 !Check if the energy store in the hist is revelant, sometimes some MD files gives
 !the energy of the unit cell... This is not suppose to happen... But just in case...
  do ii=1,nstep_hist
-   factE_hist = anint(hist%etot(ii) / eff_pot%energy)
+   factE_hist = int(anint(hist%etot(ii) / eff_pot%energy))
    if(factE_hist == 1) then
 !    In this case we mutiply the energy of the hist by the number of cell
      hist%etot(ii) = hist%etot(ii)  * ncell

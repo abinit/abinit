@@ -72,8 +72,8 @@ module m_effective_potential
  public :: effective_potential_writeXML
  !AM_EXPERIMENTAL
  public :: effective_potential_computeGradient
- public :: effective_potential_effpot2ddb
- public :: effective_potential_printPDOS
+! public :: effective_potential_effpot2ddb
+! public :: effective_potential_printPDOS
  public :: effective_potential_writeNETCDF
  public :: OPERATOR(==)
  !AM_EXPERIMENTAL
@@ -900,7 +900,7 @@ subroutine effective_potential_generateDipDip(eff_pot,n_cell,option,asr,comm)
    xred(:,:)       = zero
    xred_tmp(:,:)   = zero
    zeff_tmp(:,:,:) = zero
-   sumg0           = zero
+   sumg0           = 0
    acell           = one
 
    call matr3inv(supercell%rprimd,gprimd)
@@ -2552,12 +2552,11 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
   fcart_part(:,:)= zero
 
   call harmonics_terms_evaluateIFC(eff_pot%harmonics_terms%ifcs%atmfrc(:,:,:,:,:),disp_tmp,&
-&                                  energy_part,fcart_part,eff_pot%mpi_ifc%my_cells,&
-&                                  eff_pot%supercell%natom,&
+&                                  energy_part,fcart_part,eff_pot%supercell%natom,&
 &                                  eff_pot%crystal%natom,eff_pot%mpi_ifc%my_ncell,&
 &                                  eff_pot%mpi_ifc%my_nrpt,eff_pot%mpi_ifc%my_atmrpt_index,&
-&                                  eff_pot%mpi_ifc%my_index_cells,eff_pot%harmonics_terms%ifcs%cell,&
-&                                  sc_size,eff_pot%mpi_ifc%my_rpt,eff_pot%mpi_ifc%comm)
+&                                  eff_pot%mpi_ifc%my_index_cells,sc_size,eff_pot%mpi_ifc%my_rpt,&
+&                                  eff_pot%mpi_ifc%comm)
 
   if(need_verbose)then
     write(msg, '(a,1ES24.16,a)' ) ' Energy of the ifc part                    :',&
@@ -2565,7 +2564,7 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
     call wrtout(ab_out,msg,'COLL')
     call wrtout(std_out,msg,'COLL')
 
-    if(energy_part < zero.and.eff_pot%anharmonics_terms%ncoeff == zero)then
+    if(abs(energy_part) < tol16 .and. eff_pot%anharmonics_terms%ncoeff == 0)then
       write(msg, '(8a)' )ch10,&
 &        ' --- !WARNING!',ch10,&
 &        '        The harmonic part is negative, the simulation will diverge',ch10,&
@@ -2673,8 +2672,7 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
     call polynomial_coeff_evaluate(eff_pot%anharmonics_terms%coefficients,disp_tmp,&
 &                                  energy_part,fcart_part,eff_pot%supercell%natom,&
 &                                  eff_pot%crystal%natom,eff_pot%anharmonics_terms%ncoeff,&
-&                                  sc_size,strain_tmp,strten_part,&
-&                                  eff_pot%mpi_coeff%my_cells,eff_pot%mpi_coeff%my_ncell,&
+&                                  sc_size,strain_tmp,strten_part,eff_pot%mpi_coeff%my_ncell,&
 &                                  eff_pot%mpi_coeff%my_index_cells,eff_pot%mpi_coeff%comm)
 
     if(need_verbose)then
@@ -2746,6 +2744,12 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
 
   call fcart2fred(fcart,fred,rprimd,natom)
 
+  write(100,*) "====================="
+  do ia=1,natom
+    if(any(abs(disp_tmp(:,ia))>2.0))then
+      write(100,*) ia,disp_tmp(:,ia)
+    end if
+  end do
 !------------------------------------
 ! 9 - Final Print:
 !------------------------------------
@@ -2915,7 +2919,7 @@ subroutine effective_potential_getDisp(displacement,du_delta,natom,rprimd_hist,r
 !--------------------------------------------
   nproc = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
   natom_alone = mod(natom,nproc)
-  my_natom = aint(real(natom,sp)/(nproc))
+  my_natom = int(aint(real(natom,sp)/(nproc)))
   if(my_rank >= (nproc-natom_alone)) then
     my_natom = my_natom  + 1
   end if
@@ -2923,7 +2927,7 @@ subroutine effective_potential_getDisp(displacement,du_delta,natom,rprimd_hist,r
   my_atoms = 0
   do ii=1,my_natom
     if(my_rank >= (nproc-natom_alone))then
-      my_atoms(ii)=(aint(real(natom,sp)/nproc))*(my_rank)+&
+      my_atoms(ii)=(int(aint(real(natom,sp)/nproc)))*(my_rank)+&
 &                              (my_rank - (nproc-natom_alone)) + ii
     else
       my_atoms(ii)=(my_natom)*(my_rank)  + ii
@@ -3111,274 +3115,274 @@ pure function effective_potential_compare(e1,e2) result (res)
 &     e1%harmonics_terms%ifcs%nrpt==e2%harmonics_terms%ifcs%nrpt.and.&
 &     e1%crystal%ntypat==e2%crystal%ntypat.and.&
 &     e1%harmonics_terms%nqpt==e2%harmonics_terms%nqpt.and.&
-&     e1%energy==e2%energy.and.&
-&     e1%crystal%ucvol==e2%crystal%ucvol) then
+&     abs(e1%energy-e2%energy)<tol16.and.&
+&     abs(e1%crystal%ucvol-e2%crystal%ucvol)<tol16) then
     res = .true.
   end if
 
 end function effective_potential_compare
 !!***
 
-!****f* m_effective_potential/effective_potential_effpot2ddb
-!!
-!! NAME
-!! effective_potential_effpot2ddb
-!!
-!! FUNCTION
-!! Convert eff_pot into ddb datatype
-!!
-!! INPUTS
-!! eff_pot = effective potential datatype
-!!
-!! OUTPUT
-!! ddb   = ddb with all information
-!!
-!! PARENTS
-!!      m_effective_potential
-!!
-!! CHILDREN
-!!      ab_define_var,isfile,wrtout
-!!
-!! SOURCE
+! !****f* m_effective_potential/effective_potential_effpot2ddb
+! !!
+! !! NAME
+! !! effective_potential_effpot2ddb
+! !!
+! !! FUNCTION
+! !! Convert eff_pot into ddb datatype
+! !!
+! !! INPUTS
+! !! eff_pot = effective potential datatype
+! !!
+! !! OUTPUT
+! !! ddb   = ddb with all information
+! !!
+! !! PARENTS
+! !!      m_effective_potential
+! !!
+! !! CHILDREN
+! !!      ab_define_var,isfile,wrtout
+! !!
+! !! SOURCE
 
-subroutine effective_potential_effpot2ddb(ddb,crystal,eff_pot,n_cell,nph1l,option,qph1l)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'effective_potential_effpot2ddb'
- use interfaces_32_util
- use interfaces_41_geometry
-!End of the abilint section
-
-  implicit none
-
-!Arguments ------------------------------------
-!scalars
-  integer,intent(in) :: nph1l,option
-!array
-  integer,intent(in) :: n_cell(3)
-  real(dp),intent(in):: qph1l(3,nph1l)
-  type(effective_potential_type),intent(inout) :: eff_pot
-  type(ddb_type),intent(out) :: ddb
-  type(crystal_t),intent(out) :: crystal
-!Local variables-------------------------------
-!scalar
-  integer :: ii,jj,msym
-  real(dp):: ucvol
-
-! type(anaddb_dataset_type) :: inp
-!array
-  real(dp) :: gmet(3,3),rmet(3,3)
-  real(dp) :: gprimd(3,3),rprimd(3,3)
-  real(dp),allocatable :: xred(:,:)
-!  character :: title(eff_pot%crystal%ntypat)
-  integer,allocatable :: symrel(:,:,:),symafm(:)
-  real(dp),allocatable :: tnons(:,:)
-
-! *************************************************************************
-
-  ! Number of 2dte blocks in present object
-!  integer,allocatable :: flg(:,:)
-  ! flg(msize,nblok)
-  ! flag to indicate presence of a given block
-!  integer,allocatable :: typ(:)
-  ! typ(nblok)
-  ! type of each block - ddk, dde, phonon etc...
-!  real(dp),allocatable :: amu(:)
-  ! amu(ntypat)
-  ! mass of the atoms (atomic mass unit)
-!  real(dp),allocatable :: nrm(:,:)
-  ! nrm(3,nblok)
-  ! norm of the q-points for each block - can be 0 to indicate a direction of approach to gamma
-!  real(dp),allocatable :: qpt(:,:)
-  ! qpt(9,nblok)
-  ! q-point vector in reciprocal space (reduced lattice coordinates) for each block
-!  real(dp),allocatable :: val(:,:,:)
-  ! val(2,msize,nblok)
-  ! values of the second energy derivatives in each block
-
-! Useless value
-   ddb%nblok = -1
-
-  !option = 1 just print ddb for 1 1 1 cell
-  if(option==1) then
-!   Compute different matrices in real and reciprocal space, also
-!   checks whether ucvol is positive.
-    call metric(gmet,gprimd,-1,rmet,eff_pot%crystal%rprimd,ucvol)
-
-!   Convert to rprimd
-    do ii=1,3
-      do jj=1,3
-        rprimd(ii,jj)=eff_pot%crystal%rprimd(ii,jj)
-      end do
-    end do
-
-!   Obtain reciprocal space primitive transl g from inverse trans of r
-!   (Unlike in abinit, gprim is used throughout ifc; should be changed, later)
-    call matr3inv(rprimd,gprimd)
-
-!   transfert basic values
-    ddb%natom  = eff_pot%crystal%natom
-    ddb%mpert  = ddb%natom+6
-    ddb%msize  = 3*ddb%mpert*3*ddb%mpert;
-    ddb%ntypat = eff_pot%crystal%ntypat
-    ddb%occopt = 3 ! default value
-    ddb%prtvol = 0 ! default value
-    ddb%rprim  = rprimd ! dimensioless real space primitive vectors
-    ddb%gprim  = gprimd ! dimensioless reciprocal space primitive vectors
-    ddb%acell  = one
-    msym   = 1
-!  Setup crystal type
-    ABI_ALLOCATE(xred,(3,ddb%natom))
-!    call xcar2xred(ddb%natom,eff_pot%crystal%rprimd,eff_pot%crystal%xcart,xred)
-!Warning znucl is dimension with ntypat = nspsp hence alchemy is not supported here
-    ABI_ALLOCATE(symrel,(3,3,msym))
-    ABI_ALLOCATE(symafm,(msym))
-    ABI_ALLOCATE(tnons,(3,msym))
-
-!    call crystal_init(ddb%amu,crystal,1,ddb%natom,size(eff_pot%crystal%znucl),eff_pot%crystal%ntypat,1,&
-!&       eff_pot%crystal%rprimd,eff_pot%crystal%typat,xred,eff_pot%crystal%znucl,&
-!&       eff_pot%crystal%znucl,0,.FALSE.,.FALSE.,title)!,&
-!&       symrel=symrel,tnons=tnons,symafm=symafm)
-!    call crystal_print(crystal)
-!    stop
-!TEST_AM
-    ABI_DEALLOCATE(symrel)
-    ABI_DEALLOCATE(symafm)
-    ABI_DEALLOCATE(tnons)
-
-    ABI_DEALLOCATE(xred)
-
-   else  if (option==2) then
-!   Compute different matrices in real and reciprocal space, also
-!   checks whether ucvol is positive.
-    call metric(gmet,gprimd,-1,rmet,eff_pot%supercell%rprimd,ucvol)
-
-!   Convert to rprim (dimensionless)
-    do ii=1,3
-      do jj=1,3
-        rprimd(ii,jj)=eff_pot%supercell%rprimd(ii,jj)
-      end do
-    end do
-
-!   Obtain reciprocal space primitive transl g from inverse trans of r
-!   (Unlike in abinit, gprim is used throughout ifc; should be changed, later)
-    call matr3inv(rprimd,gprimd)
-
-!   transfert basic values
-    ddb%natom  = eff_pot%supercell%natom
-    ddb%ntypat = eff_pot%crystal%ntypat
-    ddb%mpert  = ddb%natom+6
-    ddb%msize  = 3*ddb%mpert*3*ddb%mpert;
-    ddb%occopt = 3 ! default value
-    ddb%prtvol = 0 ! default value
-    ddb%rprim  = rprimd ! dimensioless real space primitive vectors
-    ddb%gprim  = gprimd ! dimensioless reciprocal space primitive vectors
-    ddb%acell  = one
-
-   end if
-!TEST_AM
-    !write(std_out,*)"natom ",ddb%natom
-    !write(std_out,*)"ntypat",ddb%ntypat
-    !write(std_out,*)"mpert",ddb%mpert
-    !write(std_out,*)"msize",ddb%msize
-    !write(std_out,*)"occopt",ddb%occopt
-    !write(std_out,*)"prtvol",ddb%prtvol
-    !write(std_out,*)"rprim",ddb%rprim
-    !write(std_out,*)"gprim",ddb%gprim
-    !write(std_out,*)"acell",ddb%acell
-!TEST_AM
-
- end subroutine effective_potential_effpot2ddb
-!!***
+! subroutine effective_potential_effpot2ddb(ddb,crystal,eff_pot,n_cell,nph1l,option,qph1l)
 
 
-!****f* m_effective_potential/effective_potential_printPDOS
-!!
-!! NAME
-!! effective_potential_printPDOS
-!!
-!! FUNCTION
-!! Apply the acoustic sum rule on the effective potential
-!!
-!! INPUTS
-!! eff_pot = effective potential datatype
-!! option  = 0 (default) do nothing
-!!         = 1 print PHFRQ for specific qgrid (need nph1l and qph1l)
-!!         = 2 print PHFRQ for supercell (q=gamma) (need nph1l and qph1l and ncell)
-!! OUTPUT
-!! eff_pot
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      ab_define_var,isfile,wrtout
-!!
-!! SOURCE
+! !This section has been created automatically by the script Abilint (TD).
+! !Do not modify the following lines by hand.
+! #undef ABI_FUNC
+! #define ABI_FUNC 'effective_potential_effpot2ddb'
+!  use interfaces_32_util
+!  use interfaces_41_geometry
+! !End of the abilint section
 
-subroutine effective_potential_printPDOS(eff_pot,filename,n_cell,nph1l,option,qph1l)
+!   implicit none
+
+! !Arguments ------------------------------------
+! !scalars
+!   integer,intent(in) :: nph1l,option
+! !array
+!   integer,intent(in) :: n_cell(3)
+!   real(dp),intent(in):: qph1l(3,nph1l)
+!   type(effective_potential_type),intent(inout) :: eff_pot
+!   type(ddb_type),intent(out) :: ddb
+!   type(crystal_t),intent(out) :: crystal
+! !Local variables-------------------------------
+! !scalar
+!   integer :: ii,jj,msym
+!   real(dp):: ucvol
+
+! ! type(anaddb_dataset_type) :: inp
+! !array
+!   real(dp) :: gmet(3,3),rmet(3,3)
+!   real(dp) :: gprimd(3,3),rprimd(3,3)
+!   real(dp),allocatable :: xred(:,:)
+! !  character :: title(eff_pot%crystal%ntypat)
+!   integer,allocatable :: symrel(:,:,:),symafm(:)
+!   real(dp),allocatable :: tnons(:,:)
+
+! ! *************************************************************************
+
+!   ! Number of 2dte blocks in present object
+! !  integer,allocatable :: flg(:,:)
+!   ! flg(msize,nblok)
+!   ! flag to indicate presence of a given block
+! !  integer,allocatable :: typ(:)
+!   ! typ(nblok)
+!   ! type of each block - ddk, dde, phonon etc...
+! !  real(dp),allocatable :: amu(:)
+!   ! amu(ntypat)
+!   ! mass of the atoms (atomic mass unit)
+! !  real(dp),allocatable :: nrm(:,:)
+!   ! nrm(3,nblok)
+!   ! norm of the q-points for each block - can be 0 to indicate a direction of approach to gamma
+! !  real(dp),allocatable :: qpt(:,:)
+!   ! qpt(9,nblok)
+!   ! q-point vector in reciprocal space (reduced lattice coordinates) for each block
+! !  real(dp),allocatable :: val(:,:,:)
+!   ! val(2,msize,nblok)
+!   ! values of the second energy derivatives in each block
+
+! ! Useless value
+!    ddb%nblok = -1
+
+!   !option = 1 just print ddb for 1 1 1 cell
+!   if(option==1) then
+! !   Compute different matrices in real and reciprocal space, also
+! !   checks whether ucvol is positive.
+!     call metric(gmet,gprimd,-1,rmet,eff_pot%crystal%rprimd,ucvol)
+
+! !   Convert to rprimd
+!     do ii=1,3
+!       do jj=1,3
+!         rprimd(ii,jj)=eff_pot%crystal%rprimd(ii,jj)
+!       end do
+!     end do
+
+! !   Obtain reciprocal space primitive transl g from inverse trans of r
+! !   (Unlike in abinit, gprim is used throughout ifc; should be changed, later)
+!     call matr3inv(rprimd,gprimd)
+
+! !   transfert basic values
+!     ddb%natom  = eff_pot%crystal%natom
+!     ddb%mpert  = ddb%natom+6
+!     ddb%msize  = 3*ddb%mpert*3*ddb%mpert;
+!     ddb%ntypat = eff_pot%crystal%ntypat
+!     ddb%occopt = 3 ! default value
+!     ddb%prtvol = 0 ! default value
+!     ddb%rprim  = rprimd ! dimensioless real space primitive vectors
+!     ddb%gprim  = gprimd ! dimensioless reciprocal space primitive vectors
+!     ddb%acell  = one
+!     msym   = 1
+! !  Setup crystal type
+!     ABI_ALLOCATE(xred,(3,ddb%natom))
+! !    call xcar2xred(ddb%natom,eff_pot%crystal%rprimd,eff_pot%crystal%xcart,xred)
+! !Warning znucl is dimension with ntypat = nspsp hence alchemy is not supported here
+!     ABI_ALLOCATE(symrel,(3,3,msym))
+!     ABI_ALLOCATE(symafm,(msym))
+!     ABI_ALLOCATE(tnons,(3,msym))
+
+! !    call crystal_init(ddb%amu,crystal,1,ddb%natom,size(eff_pot%crystal%znucl),eff_pot%crystal%ntypat,1,&
+! !&       eff_pot%crystal%rprimd,eff_pot%crystal%typat,xred,eff_pot%crystal%znucl,&
+! !&       eff_pot%crystal%znucl,0,.FALSE.,.FALSE.,title)!,&
+! !&       symrel=symrel,tnons=tnons,symafm=symafm)
+! !    call crystal_print(crystal)
+! !    stop
+! !TEST_AM
+!     ABI_DEALLOCATE(symrel)
+!     ABI_DEALLOCATE(symafm)
+!     ABI_DEALLOCATE(tnons)
+
+!     ABI_DEALLOCATE(xred)
+
+!    else  if (option==2) then
+! !   Compute different matrices in real and reciprocal space, also
+! !   checks whether ucvol is positive.
+!     call metric(gmet,gprimd,-1,rmet,eff_pot%supercell%rprimd,ucvol)
+
+! !   Convert to rprim (dimensionless)
+!     do ii=1,3
+!       do jj=1,3
+!         rprimd(ii,jj)=eff_pot%supercell%rprimd(ii,jj)
+!       end do
+!     end do
+
+! !   Obtain reciprocal space primitive transl g from inverse trans of r
+! !   (Unlike in abinit, gprim is used throughout ifc; should be changed, later)
+!     call matr3inv(rprimd,gprimd)
+
+! !   transfert basic values
+!     ddb%natom  = eff_pot%supercell%natom
+!     ddb%ntypat = eff_pot%crystal%ntypat
+!     ddb%mpert  = ddb%natom+6
+!     ddb%msize  = 3*ddb%mpert*3*ddb%mpert;
+!     ddb%occopt = 3 ! default value
+!     ddb%prtvol = 0 ! default value
+!     ddb%rprim  = rprimd ! dimensioless real space primitive vectors
+!     ddb%gprim  = gprimd ! dimensioless reciprocal space primitive vectors
+!     ddb%acell  = one
+
+!    end if
+! !TEST_AM
+!     !write(std_out,*)"natom ",ddb%natom
+!     !write(std_out,*)"ntypat",ddb%ntypat
+!     !write(std_out,*)"mpert",ddb%mpert
+!     !write(std_out,*)"msize",ddb%msize
+!     !write(std_out,*)"occopt",ddb%occopt
+!     !write(std_out,*)"prtvol",ddb%prtvol
+!     !write(std_out,*)"rprim",ddb%rprim
+!     !write(std_out,*)"gprim",ddb%gprim
+!     !write(std_out,*)"acell",ddb%acell
+! !TEST_AM
+
+!  end subroutine effective_potential_effpot2ddb
+! !!***
 
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'effective_potential_printPDOS'
-!End of the abilint section
+! !****f* m_effective_potential/effective_potential_printPDOS
+! !!
+! !! NAME
+! !! effective_potential_printPDOS
+! !!
+! !! FUNCTION
+! !! Apply the acoustic sum rule on the effective potential
+! !!
+! !! INPUTS
+! !! eff_pot = effective potential datatype
+! !! option  = 0 (default) do nothing
+! !!         = 1 print PHFRQ for specific qgrid (need nph1l and qph1l)
+! !!         = 2 print PHFRQ for supercell (q=gamma) (need nph1l and qph1l and ncell)
+! !! OUTPUT
+! !! eff_pot
+! !!
+! !! PARENTS
+! !!
+! !! CHILDREN
+! !!      ab_define_var,isfile,wrtout
+! !!
+! !! SOURCE
 
-  implicit none
+! subroutine effective_potential_printPDOS(eff_pot,filename,n_cell,nph1l,option,qph1l)
 
-!Arguments ------------------------------------
-!scalars
-  integer,intent(in) :: nph1l,option
-!array
-  integer,intent(in) :: n_cell(3)
-  real(dp),intent(in):: qph1l(3,nph1l)
-  type(effective_potential_type),intent(inout) :: eff_pot
-  character(len=fnlen),intent(in) :: filename
-!Local variables-------------------------------
-!scalar
-! integer :: lenstr
-! character(len=strlen) :: string
-!array
- type(crystal_t) :: Crystal
-! type(anaddb_dataset_type) :: inp
- type(ddb_type) :: ddb
-! type(asrq0_t) :: asrq0
 
-! *************************************************************************
+! !This section has been created automatically by the script Abilint (TD).
+! !Do not modify the following lines by hand.
+! #undef ABI_FUNC
+! #define ABI_FUNC 'effective_potential_printPDOS'
+! !End of the abilint section
 
- if (option > 0) then
+!   implicit none
 
-!  First: transfer into ddb datatype:
-   call effective_potential_effpot2ddb(ddb,Crystal,eff_pot,n_cell,nph1l,option,qph1l)
+! !Arguments ------------------------------------
+! !scalars
+!   integer,intent(in) :: nph1l,option
+! !array
+!   integer,intent(in) :: n_cell(3)
+!   real(dp),intent(in):: qph1l(3,nph1l)
+!   type(effective_potential_type),intent(inout) :: eff_pot
+!   character(len=fnlen),intent(in) :: filename
+! !Local variables-------------------------------
+! !scalar
+! ! integer :: lenstr
+! ! character(len=strlen) :: string
+! !array
+!  type(crystal_t) :: Crystal
+! ! type(anaddb_dataset_type) :: inp
+!  type(ddb_type) :: ddb
+! ! type(asrq0_t) :: asrq0
 
-!  Setup fake anaddb_dataset
-!   string = ''
-!   lenstr = 0
-!   call invars9(inp,lenstr,ddb%natom,string)
-!  fill it with multibinit_dataset values
- !   inp%prt_ifc = 1
- !   inp%ifcflag = 1
- !   inp%qph1l   = qph1l
- !   inp%nph1l   = nph1l
+! ! *************************************************************************
 
- !   ! In case the interatomic forces are not calculated, the
- !   ! ASR-correction (asrq0%d2asr) has to be determined here from the Dynamical matrix at Gamma.
- !   if (inp%ifcflag == 0) then
- !     asrq0 = ddb_get_asrq0(ddb, inp%asr, inp%rfmeth, crystal%xcart)
- !   end if
+!  if (option > 0) then
 
- !  !MG: Note that I'm passing xmpi_comm_self here.
- !  call mkphbs(eff_pot%harmonics_terms%ifcs,Crystal,inp,ddb,asrq0,filename,xmpi_comm_self)
+! !  First: transfer into ddb datatype:
+!    call effective_potential_effpot2ddb(ddb,Crystal,eff_pot,n_cell,nph1l,option,qph1l)
 
- !  call asrq0_free(asrq0)
+! !  Setup fake anaddb_dataset
+! !   string = ''
+! !   lenstr = 0
+! !   call invars9(inp,lenstr,ddb%natom,string)
+! !  fill it with multibinit_dataset values
+!  !   inp%prt_ifc = 1
+!  !   inp%ifcflag = 1
+!  !   inp%qph1l   = qph1l
+!  !   inp%nph1l   = nph1l
 
-  end if
+!  !   ! In case the interatomic forces are not calculated, the
+!  !   ! ASR-correction (asrq0%d2asr) has to be determined here from the Dynamical matrix at Gamma.
+!  !   if (inp%ifcflag == 0) then
+!  !     asrq0 = ddb_get_asrq0(ddb, inp%asr, inp%rfmeth, crystal%xcart)
+!  !   end if
 
- end subroutine effective_potential_printPDOS
-!!***
+!  !  !MG: Note that I'm passing xmpi_comm_self here.
+!  !  call mkphbs(eff_pot%harmonics_terms%ifcs,Crystal,inp,ddb,asrq0,filename,xmpi_comm_self)
+
+!  !  call asrq0_free(asrq0)
+
+!   end if
+
+!  end subroutine effective_potential_printPDOS
+! !!***
 
 !****f* m_effective_potential/effective_potential_computeGradient
 !!
@@ -3436,7 +3440,7 @@ subroutine effective_potential_computeGradient(delta,fcart_out,eff_pot,natom,n_c
 
 !Do Some check
  do ii=1,3
-   if(eff_pot%supercell%qphon(ii) /= n_cell(ii))then
+   if(abs(eff_pot%supercell%qphon(ii)-n_cell(ii)) > tol16)then
      call effective_potential_setSupercell(eff_pot,comm,n_cell)
    end if
  end do
@@ -3446,6 +3450,7 @@ subroutine effective_potential_computeGradient(delta,fcart_out,eff_pot,natom,n_c
 !  call wrtout(ab_out,msg,'COLL')
 !  call wrtout(std_out,msg,'COLL')
 
+  npt = 3 !default
   select case (option)
   case (1)
 !    write(msg,'(2a)') ch10,' Finite differences on 1 points  '

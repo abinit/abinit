@@ -415,9 +415,9 @@ pure function terms_compare(t1,t2) result (res)
 !   Check strain    
     blkval(:,:) = 0
     do idisp1=1,t1%nstrain
-      if(blkval(1,t1%ndisp+idisp1)==one)cycle!already found
+      if(blkval(1,t1%ndisp+idisp1)==1)cycle!already found
       do idisp2=1,t2%nstrain
-        if(blkval(2,t1%ndisp+idisp2)==one)cycle!already found
+        if(blkval(2,t1%ndisp+idisp2)==1)cycle!already found
         found = .false.
         if(t1%strain(idisp1) ==  t2%strain(idisp2).and.&
 &          t1%power_strain(idisp1) == t2%power_strain(idisp2))then

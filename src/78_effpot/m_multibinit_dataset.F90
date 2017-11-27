@@ -146,7 +146,7 @@ module m_multibinit_dataset
   integer, allocatable :: fit_bancoeff(:)
   ! fit_bancoeffs(fit_nbancoeff)
 
-  integer, allocatable :: qmass(:)
+  real(dp), allocatable :: qmass(:)
   ! qmass(nnos)
 
 ! Real arrays
@@ -285,7 +285,7 @@ subroutine multibinit_dtset_init(multibinit_dtset,natom)
  multibinit_dtset%acell(:) = one
  multibinit_dtset%conf_cutoff_strain(1:6) = zero
  multibinit_dtset%dipdip_range(:)= (/0,0,0/)
- multibinit_dtset%fit_grid(:)= one
+ multibinit_dtset%fit_grid(:)= 1
  multibinit_dtset%fit_rangePower(:)= (/3,4/)
  multibinit_dtset%fit_boundPower(:)= (/6,6/)
  multibinit_dtset%fit_boundCell(:)= (/6,6,6/)
@@ -298,7 +298,7 @@ subroutine multibinit_dtset_init(multibinit_dtset,natom)
  multibinit_dtset%strten_reference(:)= zero
 
  ABI_ALLOCATE(multibinit_dtset%atifc,(natom))
- multibinit_dtset%atifc(:)=zero
+ multibinit_dtset%atifc(:)=0
  ABI_ALLOCATE(multibinit_dtset%conf_cutoff_disp,(multibinit_dtset%natom))
  multibinit_dtset%conf_cutoff_disp(:)=zero
 
@@ -428,7 +428,6 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
 !Dummy arguments for subroutine 'intagm' to parse input file
 !Set routine version number here:
 !scalars
- integer,parameter :: vrsddb=100401
  integer :: iatifc,ii,iph1,iph2,jdtset,jj,marr,tread
  character(len=500) :: message
 !arrays
@@ -757,7 +756,7 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
    end if
  end do
 
- multibinit_dtset%n_cell(:)= one
+ multibinit_dtset%n_cell(:)= 1
  call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'n_cell',tread,'INT')
  if(tread==1) multibinit_dtset%n_cell(1:3)=intarr(1:3)
  do ii=1,3
@@ -769,7 +768,7 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
    end if
  end do
 
- multibinit_dtset%ngqpt(:)= one
+ multibinit_dtset%ngqpt(:)= 1
  call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'ngqpt',tread,'INT')
  if(tread==1) multibinit_dtset%ngqpt(1:3)=intarr(1:3)
  do ii=1,3
@@ -1028,7 +1027,7 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
 
 
  ABI_ALLOCATE(multibinit_dtset%atifc,(natom))
- multibinit_dtset%atifc(:)=zero
+ multibinit_dtset%atifc(:)=0
  if(multibinit_dtset%natifc>=1)then
    if(multibinit_dtset%natifc>marr)then
      marr=multibinit_dtset%natifc
@@ -1059,7 +1058,7 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
      end if
      work(multibinit_dtset%atifc(iatifc))=1
    end do
-   multibinit_dtset%atifc(1:natom)=work(:)
+   multibinit_dtset%atifc(1:natom)=int(work(:))
    ABI_FREE(work)
  end if
 
@@ -1241,7 +1240,7 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
    MSG_ERROR(message)
  end if
 
- multibinit_dtset%fit_grid(:)= one
+ multibinit_dtset%fit_grid(:)= 1
  call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'fit_grid',tread,'INT')
  if(tread==1) multibinit_dtset%fit_grid(1:3)=intarr(1:3)
  do ii=1,3
@@ -1317,7 +1316,7 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
      ABI_DEALLOCATE(intarr)
      ABI_ALLOCATE(intarr,(marr))
    end if
-   multibinit_dtset%fit_bancoeff(:)=zero
+   multibinit_dtset%fit_bancoeff(:)=0
    call intagm(dprarr,intarr,jdtset,marr,multibinit_dtset%fit_nbancoeff,&
 &              string(1:lenstr),'fit_bancoeff',tread,'INT')
    if(tread==1)then
@@ -1334,7 +1333,7 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
      ABI_DEALLOCATE(intarr)
      ABI_ALLOCATE(intarr,(marr))
    end if
-   multibinit_dtset%fit_fixcoeff(:)=zero
+   multibinit_dtset%fit_fixcoeff(:)=0
    call intagm(dprarr,intarr,jdtset,marr,multibinit_dtset%fit_nfixcoeff,&
 &              string(1:lenstr),'fit_fixcoeff',tread,'INT')
    if(tread==1)then
@@ -1448,8 +1447,8 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
  if(tread==1) then
    multibinit_dtset%rprim(1:3,1:3)= reshape(dprarr(1:9),(/3,3/))
 ! check new rprimd
-   if(all(multibinit_dtset%rprim(1,:)==zero).or.&
-&    all(multibinit_dtset%rprim(2,:)==zero).or.all(multibinit_dtset%rprim(3,:)==zero)) then
+   if(all(abs(multibinit_dtset%rprim(1,:))<tol16).or.&
+&    all(abs(multibinit_dtset%rprim(2,:))<tol16).or.all(abs(multibinit_dtset%rprim(3,:))<tol16)) then
      write(message, '(3a)' )&
 &  ' There is a problem with rprim',ch10,&
 &   'Action: correct rprim'
@@ -1521,7 +1520,7 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
  end if
 
 ! check new rprimd
- if(all(multibinit_dtset%acell(:) > one).and.all(multibinit_dtset%rprim(:,:)==zero))then
+ if(all(multibinit_dtset%acell(:) > one).and.all(abs(multibinit_dtset%rprim(:,:))<tol16))then
    write(message, '(3a)' )&
 &         ' acell is defined but there is no rprim',ch10,&
 &         'Action: add rprim input'
@@ -1646,7 +1645,7 @@ subroutine outvars_multibinit (multibinit_dtset,nunit)
    write(nunit,'(3x,a9,3I10.1)')'    ntime',multibinit_dtset%ntime
    write(nunit,'(3x,a9,3i10)')  '    ncell',multibinit_dtset%n_cell
    write(nunit,'(3x,a9,3i10)')  '    dtion',multibinit_dtset%dtion
-   if (multibinit_dtset%restartxf /= zero ) then
+   if (multibinit_dtset%restartxf/=0) then
      write(nunit,'(3x,a9,3i10)')  'restartxf',multibinit_dtset%restartxf
    end if
    if(multibinit_dtset%dynamics==13)then

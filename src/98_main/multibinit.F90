@@ -186,7 +186,7 @@ program multibinit
  call wrtout(ab_out,message,'COLL')
  call wrtout(std_out,message,'COLL')
 
- call effective_potential_file_getDimSystem(filnam(3),natom,ntypat,nph1l,nrpt,comm)
+ call effective_potential_file_getDimSystem(filnam(3),natom,ntypat,nph1l,nrpt)
  
 !Read the input file, and store the information in a long string of characters
 !strlen from defs_basis module

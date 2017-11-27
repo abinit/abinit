@@ -509,9 +509,9 @@ void effpot_xml_readSystem(char *filename,int *natom,int *ntypat,int *nrpt,int *
 
 void effpot_xml_getDimStrainCoupling(char *filename, int *nrpt,int *voigt){
   xmlDocPtr doc;
-  int i,irpt;
+  int irpt;
   xmlNodePtr cur,cur2,cur3;
-  xmlChar *key,*uri;
+  xmlChar *uri;
 
   doc = xmlParseFile(filename);
   if (doc == NULL) printf(" error: could not parse file file.xml\n");
@@ -851,7 +851,6 @@ void effpot_xml_getDimCoeff(char *filename,int*ncoeff,char *nterm_max,int*ndisp_
   int icoeff,idisp,iterm;
   int count1,count2;
   xmlDocPtr doc;
-  char * pch;
   xmlNodePtr cur,cur2,cur3;
 
   icoeff = 0;
@@ -956,7 +955,7 @@ void effpot_xml_getValue(char *filename,char*name_key,char*result){
 void effpot_xml_getAttribute(char *filename,char*name_key,char*name_attributes,char*result){  
   xmlDocPtr doc;
   xmlNodePtr cur;
-  xmlChar *key, *uri;
+  xmlChar *uri;
 
   doc = xmlParseFile(filename);
   if (doc == NULL) printf(" error: could not parse file file.xml\n");

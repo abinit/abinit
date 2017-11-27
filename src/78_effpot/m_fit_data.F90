@@ -427,7 +427,7 @@ subroutine fit_data_compute(fit_data,eff_pot,hist,comm,verbose)
  end do
    
 !Check if the initial stresses of the reference is set to the potential
- if(all(eff_pot%strten(:)==zero))then
+ if(all(abs(eff_pot%strten(:))<tol16))then
    ii = 0
 !  Try to find if any snapshot corresponding to the reference, 
 !  in order to fill the initial stresses...

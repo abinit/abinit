@@ -134,7 +134,7 @@ subroutine effpot_mpi_init(index_rpt,sc_size,effpot_mpi,natom,ndiv,nrpt,comm)
 
 !Local variables-------------------------------
 !scalars
- integer :: i1,i2,i3,icell,ii,irpt,irpt_tmp,jj
+ integer :: i1,i2,i3,icell,ii,irpt,irpt_tmp
  integer :: my_rank,ncell_alone,ncell,nproc
  integer :: npcell,nprpt,virt_rank
  integer :: master = 0
@@ -179,7 +179,7 @@ subroutine effpot_mpi_init(index_rpt,sc_size,effpot_mpi,natom,ndiv,nrpt,comm)
  ncell_alone = mod(ncell,nproc)
 
 !TREAT CELL
- effpot_mpi%my_ncell = aint(real(ncell,sp)/(nproc))
+ effpot_mpi%my_ncell = int(aint(real(ncell,sp)/(nproc)))
 
  if(my_rank >= (nproc-ncell_alone)) then
    effpot_mpi%my_ncell = effpot_mpi%my_ncell  + 1
@@ -193,11 +193,11 @@ subroutine effpot_mpi_init(index_rpt,sc_size,effpot_mpi,natom,ndiv,nrpt,comm)
  effpot_mpi%my_cells = 0
  effpot_mpi%my_index_cells = 0
 
- virt_rank = aint(real(my_rank,sp)/(ndiv))
+ virt_rank = int(aint(real(my_rank,sp)/(ndiv)))
  
  do icell=1,effpot_mpi%my_ncell
    if(virt_rank >= (nproc-ncell_alone))then
-     effpot_mpi%my_cells(icell)=(aint(real(ncell,sp)/nproc))*(virt_rank)+&
+     effpot_mpi%my_cells(icell)=(int(aint(real(ncell,sp)/nproc)))*(virt_rank)+&
 &                              (virt_rank - (nproc-ncell_alone)) + icell
    else
      effpot_mpi%my_cells(icell)=(effpot_mpi%my_ncell)*(virt_rank)  + icell
