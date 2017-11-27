@@ -17,10 +17,10 @@
 .Starting date : Sun 26 Nov 2017.
 - ( at 10h43 )
   
-- input  file    -> t44.in
-- output file    -> t44.out
-- root for input  files -> t44i
-- root for output files -> t44o
+- input  file    -> t45.in
+- output file    -> t45.out
+- root for input  files -> t45i
+- root for output files -> t45o
 
 
  DATASET    1 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
@@ -924,7 +924,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      81.281      81.110
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  6.740653087852  6.740653087852  6.740653087852 bohr
               =  3.566999985103  3.566999985103  3.566999985103 angstroms
- prteigrs : about to open file t44o_DS1_EIG
+ prteigrs : about to open file t45o_DS1_EIG
  Fermi (or HOMO) energy (eV) =  31.90543   Average Vxc (eV)=   0.00000
  Eigenvalues (   eV  ) for nkpt=   6  k points:
  kpt#   1, nband= 14, wtk=  0.18750, kpt= -0.2500 -0.2500  0.0000 (reduced coord)
@@ -1057,7 +1057,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      81.281      81.110
 
 
  rdqps: reading QP wavefunctions of the previous step 
-        looking for file t44o_DS1_QPS
+        looking for file t45o_DS1_QPS
  file not found, 1st iteration initialized with KS eigenelements 
 
  Number of electrons calculated from density =    7.9799; Expected =    8.0000
@@ -1240,7 +1240,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      81.281      81.110
    Fundamental gap     =   3.4514 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
                                         Bottom of conduction at :   0.5000  0.5000  0.0000
 
- writing QP data on file : t44o_DS2_QPS
+ writing QP data on file : t45o_DS2_QPS
 
  Convergence of QP corrections
  >>>>> For spin  1 <<<<<
@@ -1316,7 +1316,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      81.281      81.110
 
 
  rdqps: reading QP wavefunctions of the previous step 
-        looking for file t44o_DS2_QPS
+        looking for file t45o_DS2_QPS
  Number of iteration(s) already performed:    1
 
  Number of electrons calculated from density =    7.9786; Expected =    8.0000
@@ -1499,7 +1499,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      81.281      81.110
    Fundamental gap     =   3.2400 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
                                         Bottom of conduction at :   0.5000  0.5000  0.0000
 
- writing QP data on file : t44o_DS3_QPS
+ writing QP data on file : t45o_DS3_QPS
 
  Convergence of QP corrections
  >>>>> For spin  1 <<<<<
@@ -1575,7 +1575,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      81.281      81.110
 
 
  rdqps: reading QP wavefunctions of the previous step 
-        looking for file t44o_DS3_QPS
+        looking for file t45o_DS3_QPS
  Number of iteration(s) already performed:    2
 
  Number of electrons calculated from density =    7.9787; Expected =    8.0000
@@ -1758,7 +1758,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      81.281      81.110
    Fundamental gap     =   3.2587 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
                                         Bottom of conduction at :   0.5000  0.5000  0.0000
 
- writing QP data on file : t44o_DS4_QPS
+ writing QP data on file : t45o_DS4_QPS
 
  Convergence of QP corrections
  >>>>> For spin  1 <<<<<
@@ -1834,7 +1834,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      81.281      81.110
 
 
  rdqps: reading QP wavefunctions of the previous step 
-        looking for file t44o_DS4_QPS
+        looking for file t45o_DS4_QPS
  Number of iteration(s) already performed:    3
 
  Number of electrons calculated from density =    7.9787; Expected =    8.0000
@@ -2017,7 +2017,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      81.281      81.110
    Fundamental gap     =   3.2575 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
                                         Bottom of conduction at :   0.5000  0.5000  0.0000
 
- writing QP data on file : t44o_DS5_QPS
+ writing QP data on file : t45o_DS5_QPS
 
  Convergence of QP corrections
  >>>>> For spin  1 <<<<<
@@ -2093,7 +2093,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      81.281      81.110
 
 
  rdqps: reading QP wavefunctions of the previous step 
-        looking for file t44o_DS5_QPS
+        looking for file t45o_DS5_QPS
  Number of iteration(s) already performed:    4
 
  Number of electrons calculated from density =    7.9787; Expected =    8.0000
@@ -2276,7 +2276,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      81.281      81.110
    Fundamental gap     =   3.2576 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
                                         Bottom of conduction at :   0.5000  0.5000  0.0000
 
- writing QP data on file : t44o_DS6_QPS
+ writing QP data on file : t45o_DS6_QPS
 
  Convergence of QP corrections
  >>>>> For spin  1 <<<<<
@@ -2327,7 +2327,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      81.281      81.110
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t44o_DS1_WFK
+-inwffil : will read wavefunctions from disk file t45o_DS1_WFK
 P newkpt: treating     14 bands with npw=      84 for ikpt=   1 by node    0
 P newkpt: treating     14 bands with npw=      79 for ikpt=   2 by node    0
 P newkpt: treating     14 bands with npw=      92 for ikpt=   3 by node    0
@@ -2407,7 +2407,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      81.281      81.110
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  6.740653087852  6.740653087852  6.740653087852 bohr
               =  3.566999985103  3.566999985103  3.566999985103 angstroms
- prteigrs : about to open file t44o_DS7_EIG
+ prteigrs : about to open file t45o_DS7_EIG
  Fermi (or HOMO) energy (eV) =  15.51080   Average Vxc (eV)= -10.73311
  Eigenvalues (   eV  ) for nkpt=   6  k points:
  kpt#   1, nband= 14, wtk=  0.18750, kpt= -0.2500 -0.2500  0.0000 (reduced coord)
@@ -2946,7 +2946,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      81.281      81.110
 
 
  rdqps: reading QP wavefunctions of the previous step 
-        looking for file t44o_DS6_QPS
+        looking for file t45o_DS6_QPS
  Number of iteration(s) already performed:    5
 
  Number of electrons calculated from density =    7.9787; Expected =    8.0000
@@ -3182,7 +3182,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      81.281      81.110
 
 
  rdqps: reading QP wavefunctions of the previous step 
-        looking for file t44o_DS6_QPS
+        looking for file t45o_DS6_QPS
  Number of iteration(s) already performed:    5
 
  Number of electrons calculated from density =    7.9787; Expected =    8.0000
@@ -3375,7 +3375,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      81.281      81.110
    Fundamental gap     =   2.8295 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
                                         Bottom of conduction at :   0.5000  0.5000  0.0000
 
- writing QP data on file : t44o_DS11_QPS
+ writing QP data on file : t45o_DS11_QPS
 
  Convergence of QP corrections
  >>>>> For spin  1 <<<<<
@@ -3450,7 +3450,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      81.281      81.110
 
 
  rdqps: reading QP wavefunctions of the previous step 
-        looking for file t44i_DS12_QPS
+        looking for file t45i_DS12_QPS
  file not found, 1st iteration initialized with KS eigenelements 
 
  Number of electrons calculated from density =    7.9789; Expected =    8.0000
