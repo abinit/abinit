@@ -2744,12 +2744,6 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
 
   call fcart2fred(fcart,fred,rprimd,natom)
 
-  write(100,*) "====================="
-  do ia=1,natom
-    if(any(abs(disp_tmp(:,ia))>2.0))then
-      write(100,*) ia,disp_tmp(:,ia)
-    end if
-  end do
 !------------------------------------
 ! 9 - Final Print:
 !------------------------------------

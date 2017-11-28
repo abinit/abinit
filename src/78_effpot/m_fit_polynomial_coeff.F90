@@ -229,7 +229,8 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
    end if
 
    call polynomial_coeff_getNorder(coeffs_tmp,eff_pot%crystal,cutoff,my_ncoeff,ncoeff_tot,power_disps,&
-&                                  0,comm,anharmstr=need_anharmstr,spcoupling=need_spcoupling)
+&                                  0,comm,anharmstr=need_anharmstr,spcoupling=need_spcoupling,&
+&                                  distributed=.true.)
  end if
 
 !Copy the initial coefficients from the model on the CPU 0
@@ -1320,7 +1321,7 @@ subroutine fit_polynomial_coeff_solve(coefficients,fcart_coeffs,fcart_diff,&
    coefficients = zero
  end if
 
- if(any(abs(coefficients)>1.0E10))then
+ if(any(abs(coefficients)>1.0E5))then
    INFO = 1
    coefficients = zero
  end if
@@ -2171,8 +2172,7 @@ recursive subroutine genereList(i,m,m_max,n_max,list,list_out,size)
      end if
    end do
  end if
-  
- 
+
 end subroutine genereList
 !!***
 

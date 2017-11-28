@@ -925,8 +925,8 @@ subroutine polynomial_coeff_writeXML(coeffs,ncoeff,filename,unit,newfile)
      WRITE(unit_xml,'("<?xml version=""1.0"" ?>")')
    end if
    WRITE(unit_xml,'("<Heff_definition>")')
-!   Close header
-    do icoeff = 1, ncoeff
+   !   Close header
+   do icoeff = 1, ncoeff     
       WRITE(unit_xml,'("  <coefficient number=""",I0,""" value=""",E19.10,""" text=""",a,""">")') &
          icoeff,coeffs(icoeff)%coefficient,trim(coeffs(icoeff)%name)
       do iterm = 1,coeffs(icoeff)%nterm
@@ -1818,7 +1818,7 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
  integer :: lim1,lim2,lim3
  integer :: master,my_rank,my_ncoeff,my_newncoeff,natom,ncombinaison,ncoeff_max,ncoeff_sym
  integer :: ncoeff_alone,ndisp_max,nproc,nrpt,nsym,nterm,nstr_sym,r1,r2,r3,my_size
- integer :: my_icoeff,rank_to_send,rank_to_receive
+ integer :: my_icoeff,rank_to_send,rank_to_receive,rank_to_send_save
  logical :: iam_master,need_anharmstr,need_spcoupling,need_distributed,need_verbose
  logical :: need_only_odd_power,need_only_even_power
 !arrays
@@ -2018,7 +2018,8 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
    call computeCombinaisonFromList(cell,compatibleCoeffs,list_symcoeff,list_symstr,&
 &                   list_coeff,list_combinaison,icoeff,icoeff2,natom,ncoeff_sym,nstr_sym,icoeff,nrpt,&
 &                   nsym,1,power_disps(1),power_disps(2),symbols,nbody=option,&
-&                   compute=.false.,anharmstr=need_anharmstr,spcoupling=need_spcoupling)
+&                   compute=.false.,anharmstr=need_anharmstr,spcoupling=need_spcoupling,&
+&                   only_odd_power=need_only_odd_power,only_even_power=need_only_even_power)
    ncombinaison  = icoeff2
    ABI_DEALLOCATE(list_coeff)
    ABI_DEALLOCATE(list_combinaison)
@@ -2039,7 +2040,8 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
 &                   list_coeff,list_combinaison_tmp,icoeff,icoeff2,natom,ncoeff_sym,nstr_sym,&
 &                   ncombinaison,nrpt,nsym,1,power_disps(1),power_disps(2),&
 &                   symbols,nbody=option,compute=.true.,&
-&                   anharmstr=need_anharmstr,spcoupling=need_spcoupling)
+&                   anharmstr=need_anharmstr,spcoupling=need_spcoupling,&
+&                   only_odd_power=need_only_odd_power,only_even_power=need_only_even_power)
    ABI_DEALLOCATE(list_coeff)
    ABI_DEALLOCATE(compatibleCoeffs)
    
@@ -2048,7 +2050,7 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
  ABI_DEALLOCATE(xcart)
  ABI_DEALLOCATE(xred)
 
- !MPI
+!MPI
  if(need_verbose .and. nproc > 1)then
    write(message,'(1a)')' Distribute the combinaisons over the CPU'
    call wrtout(std_out,message,'COLL')
@@ -2063,7 +2065,7 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
    my_ncoeff = my_ncoeff  + 1
  end if
 
-!  Set the buffsize for mpi scatterv
+!Set the buffsize for mpi scatterv
  ABI_ALLOCATE(buffsize,(nproc))
  ABI_ALLOCATE(buffdispl,(nproc))
  do ii = 1,nproc
@@ -2128,8 +2130,7 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
 !Get the total number of coefficients
 !ncoeff_max is the number of total coefficients before the symetries check
 !ncoeff_tot is the number of total coefficients after the symetries check
- 
- ncoeff_tot = ncoeff
+ ncoeff_tot = ncoeff!set the output
  call xmpi_sum(ncoeff_tot,comm,ierr)
  call xmpi_sum(ncoeff_max,comm,ierr)
 
@@ -2162,29 +2163,47 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
  ABI_DEALLOCATE(buffdispl)
 
 !Compute the new number of coefficient per CPU
- ncoeff_alone = mod(ncoeff_tot,nproc)
- my_newncoeff = int(aint(real(ncoeff_tot,sp)/(nproc)))
- if(my_rank >= (nproc-ncoeff_alone)) then
-   my_newncoeff = my_newncoeff  + 1
+ if(need_distributed) then
+   ncoeff_alone = mod(ncoeff_tot,nproc)
+   my_newncoeff = int(aint(real(ncoeff_tot,sp)/(nproc)))
+   if(my_rank >= (nproc-ncoeff_alone)) then
+     my_newncoeff = my_newncoeff  + 1
+   end if
+ else
+   my_newncoeff = ncoeff_tot
  end if
+
  ncoeff = my_newncoeff ! Set the output
+
 !2:compute the number of coefficients and the list of the corresponding
 !  coefficients for each CPU.
  ABI_ALLOCATE(my_newcoeffindexes,(my_newncoeff))
- do icoeff=1,my_newncoeff
-   if(my_rank >= (nproc-ncoeff_alone))then
-     my_newcoeffindexes(icoeff)=int(aint(real(ncoeff_tot,sp)/nproc))*(my_rank)+&
+ if(need_distributed) then
+   do icoeff=1,my_newncoeff   
+     if(my_rank >= (nproc-ncoeff_alone))then
+       my_newcoeffindexes(icoeff)=int(aint(real(ncoeff_tot,sp)/(nproc)))*(my_rank)+&
 &                              (my_rank - (nproc-ncoeff_alone)) + icoeff
-   else
-     my_newcoeffindexes(icoeff)=(my_newncoeff)*(my_rank)  + icoeff
-   end if
- end do
-
+     else
+       my_newcoeffindexes(icoeff)=(my_newncoeff)*(my_rank)  + icoeff
+     end if
+   end do
+ else
+   do icoeff=1,my_newncoeff
+     my_newcoeffindexes(icoeff) = icoeff
+   end do
+ end if
+ 
 !2- Transfer
- ABI_DATATYPE_ALLOCATE(coefficients,(my_newncoeff))
+ if(.not.need_distributed)then
+   if(.not.allocated(coefficients))then
+     ABI_DATATYPE_ALLOCATE(coefficients,(my_newncoeff))
+   end if
+ end if
  icoeff  = 0! icoeff is the current index in the total list of coefficients
  icoeff2 = 0! icoeff2 is the current index in the output coefficients array on each CPU
  icoeff3 = 0! icoeff3 is the current index in total new list of coefficients
+ rank_to_send_save = 0
+
  do icoeff=1,ncoeff_max
 !  Need to send the rank with the chosen coefficient
    rank_to_send = 0
@@ -2200,7 +2219,7 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
          call polynomial_coeff_free(coeffs_tmp(ii)) 
        end if
        exit
-     end if     
+     end if
    end do
    call xmpi_sum(rank_to_send, comm, ierr)
 !  This coefficient is not compute
@@ -2216,26 +2235,54 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
        rank_to_receive = my_rank
      end if
    end do
-   call xmpi_sum(rank_to_receive, comm, ierr)  
-   if(my_rank==rank_to_send)then
-     if(any(my_newcoeffindexes(:)==icoeff3))then
-       icoeff2 = icoeff2 + 1
-!      Get the name of this coefficient
+   call xmpi_sum(rank_to_receive, comm, ierr)
+   
+   if(need_distributed.and.rank_to_send /= rank_to_send_save) then
+     if(my_rank == rank_to_send_save)then
+       ABI_DATATYPE_DEALLOCATE(coeffs_tmp)!Free memory if the current CPU has already distribute
+                                          !all its own coefficients       
+     end if
+     rank_to_send_save = rank_to_send
+   end if
+
+   if(need_distributed.and.my_rank == rank_to_receive)then
+     if(.not.allocated(coefficients))then
+       ABI_DATATYPE_ALLOCATE(coefficients,(my_newncoeff))
+     end if    
+   end if
+   
+   if (need_distributed)then
+     if(my_rank==rank_to_send)then
+       if(any(my_newcoeffindexes(:)==icoeff3))then
+         icoeff2 = icoeff2 + 1
+!        Get the name of this coefficient
+         call polynomial_coeff_getName(name,coeffs_tmp(my_icoeff),symbols,recompute=.TRUE.)
+         call polynomial_coeff_init(one,coeffs_tmp(my_icoeff)%nterm,coefficients(icoeff2),&
+&                                  coeffs_tmp(my_icoeff)%terms,name=name,check=.false.)
+       else
+         call polynomial_coeff_MPIsend(coeffs_tmp(my_icoeff), icoeff, rank_to_receive, comm)
+       end if
+!      Free the coefficient   
+       call polynomial_coeff_free(coeffs_tmp(my_icoeff))
+     else
+       if(any(my_newcoeffindexes(:)==icoeff3))then
+         icoeff2 = icoeff2 + 1
+         call polynomial_coeff_MPIrecv(coefficients(icoeff2), icoeff, rank_to_send, comm)
+         call polynomial_coeff_getName(name,coefficients(icoeff2),symbols,recompute=.TRUE.)
+         call polynomial_coeff_SetName(name,coefficients(icoeff2))
+       end if
+     end if
+   else
+     icoeff2 = icoeff2 + 1
+!    Get the name of this coefficient
+     if(my_rank==rank_to_send)then
        call polynomial_coeff_getName(name,coeffs_tmp(my_icoeff),symbols,recompute=.TRUE.)
        call polynomial_coeff_init(one,coeffs_tmp(my_icoeff)%nterm,coefficients(icoeff2),&
-&                                  coeffs_tmp(my_icoeff)%terms,name=name)           
-     else
-       call polynomial_coeff_MPIsend(coeffs_tmp(my_icoeff), icoeff, rank_to_receive, comm)
-     end if
-!    Free the coefficient   
-     call polynomial_coeff_free(coeffs_tmp(my_icoeff))
-   else
-     if(any(my_newcoeffindexes(:)==icoeff3))then
-       icoeff2 = icoeff2 + 1
-       call polynomial_coeff_MPIrecv(coefficients(icoeff2), icoeff, rank_to_send, comm)
-       call polynomial_coeff_getName(name,coefficients(icoeff2),symbols,recompute=.TRUE.)
-       call polynomial_coeff_SetName(name,coefficients(icoeff2))
-     end if
+&                                 coeffs_tmp(my_icoeff)%terms,name=name,check=.false.)
+!      Free the coefficient   
+       call polynomial_coeff_free(coeffs_tmp(my_icoeff))
+     end if     
+     call polynomial_coeff_broadcast(coefficients(icoeff2),rank_to_send, comm)
    end if
  end do
 
@@ -2246,12 +2293,13 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
  end if
   
 !Final deallocation
- ABI_DATATYPE_DEALLOCATE(coeffs_tmp)
  ABI_DEALLOCATE(symbols)
  ABI_DEALLOCATE(my_coeffindexes)
  ABI_DEALLOCATE(my_newcoeffindexes)
  ABI_DEALLOCATE(my_coefflist)
- 
+ if(allocated(coeffs_tmp))then
+   ABI_DATATYPE_DEALLOCATE(coeffs_tmp)
+ end if
 end subroutine polynomial_coeff_getNorder
 !!***
 
@@ -2549,6 +2597,8 @@ end subroutine computeNorder
 !! anharmstr = logical, optional : TRUE, the anharmonic strain are computed
 !!                                   FALSE, (default) the anharmonic strain are not computed
 !! distributed = logical, optional : True, the coefficients will be distributed on the CPU
+!! only_odd_power = logical, optional : if TRUE return only odd power
+!! only_even_power= logical, optional : if TRUe return only even power
 !!
 !! OUTPUT
 !! icoeff = current indexes of the cofficients (start we 1)
@@ -2564,7 +2614,7 @@ end subroutine computeNorder
 recursive subroutine computeCombinaisonFromList(cell,compatibleCoeffs,list_coeff,list_str,&
 &                                  index_coeff_in,list_combinaison,icoeff,nmodel_tot,natom,ncoeff,nstr,&
 &                                  nmodel,nrpt,nsym,power_disp,power_disp_min,&
-&                                  power_disp_max,symbols,nbody,&
+&                                  power_disp_max,symbols,nbody,only_odd_power,only_even_power,&
 &                                  compute,anharmstr,spcoupling)
 
 
@@ -2582,6 +2632,7 @@ recursive subroutine computeCombinaisonFromList(cell,compatibleCoeffs,list_coeff
  integer,intent(inout) :: icoeff,nmodel_tot
  logical,optional,intent(in) :: compute,anharmstr,spcoupling
  integer,optional,intent(in) :: nbody
+ logical,optional,intent(in) :: only_odd_power,only_even_power
 !arrays
  integer,intent(in) :: cell(3,nrpt),compatibleCoeffs(ncoeff+nstr,ncoeff+nstr)
  integer,intent(in) :: list_coeff(6,ncoeff,nsym),list_str(nstr,nsym)
@@ -2591,7 +2642,8 @@ recursive subroutine computeCombinaisonFromList(cell,compatibleCoeffs,list_coeff
 !Local variables ---------------------------------------
 !scalar
  integer :: icoeff1,icoeff2,nbody_in,ii,jj
- logical :: need_compute,compatible,possible,need_anharmstr,need_spcoupling
+ logical :: need_compute,compatible,possible,need_anharmstr,need_spcoupling 
+ logical :: need_only_odd_power,need_only_even_power
 !arrays
  integer :: powers(power_disp)
  integer,allocatable :: index_coeff(:)
@@ -2601,11 +2653,16 @@ recursive subroutine computeCombinaisonFromList(cell,compatibleCoeffs,list_coeff
  need_compute = .TRUE.
  need_anharmstr = .TRUE.
  need_spcoupling = .TRUE.
+ need_only_odd_power = .FALSE.
+ need_only_even_power = .FALSE.
  nbody_in = 0 !all kind of terms
  if(present(compute)) need_compute = compute
  if(present(nbody)) nbody_in = nbody
  if(present(anharmstr)) need_anharmstr = anharmstr
  if(present(spcoupling)) need_spcoupling = spcoupling
+ if(present(only_odd_power)) need_only_odd_power = only_odd_power
+ if(present(only_even_power)) need_only_even_power = only_even_power
+
  if(power_disp <= power_disp_max)then
    
 !  Initialisation of variables
@@ -2626,11 +2683,11 @@ recursive subroutine computeCombinaisonFromList(cell,compatibleCoeffs,list_coeff
        end if
      end if
 !    If the distance between the 2 coefficients is superior than the cut-off, we cycle.
-     do icoeff2=1,power_disp-1
-       if(compatibleCoeffs(index_coeff(icoeff2),icoeff1)==0)then
-         compatible = .FALSE.
-       end if
-     end do
+    do icoeff2=1,power_disp-1
+      if(compatibleCoeffs(index_coeff(icoeff2),icoeff1)==0)then
+        compatible = .FALSE.
+      end if
+    end do
 
      if (.not.compatible) cycle !The distance is not compatible
 
@@ -2652,22 +2709,28 @@ recursive subroutine computeCombinaisonFromList(cell,compatibleCoeffs,list_coeff
      if(power_disp >= power_disp_min) then
 
 !      count the number of body
-       if(nbody_in /= 0)then
-         powers(:) = 1
-         do ii=1,power_disp
-           do jj=ii+1,power_disp
-             if (powers(jj) == 0) cycle
-             if(index_coeff(ii)==index_coeff(jj))then
-               powers(ii) = powers(ii) + 1
-               powers(jj) = 0
-             end if
-           end do
+       powers(:) = 1
+       do ii=1,power_disp
+         do jj=ii+1,power_disp
+           if (powers(jj) == 0) cycle
+           if(index_coeff(ii)==index_coeff(jj))then
+             powers(ii) = powers(ii) + 1
+             powers(jj) = 0
+           end if
          end do
+       end do
 
-         if(power_disp-count(powers==0) > nbody_in) then
-           possible = .false.
-           compatible = .false.
-         end if
+!      check the only_odd and only_even flags
+       if(any(mod(powers(1:power_disp-count(powers==0)),2) /=0) .and. need_only_even_power) then
+         possible = .false.
+       end if
+       if(any(mod(powers(1:power_disp-count(powers==0)),2) ==0) .and. need_only_odd_power)then
+         possible = .false.
+       end if
+!      Check the nbody flag
+       if(nbody_in /= 0 .and. power_disp-count(powers==0) > nbody_in) then
+         possible = .false.
+         compatible = .false.
        end if
 
        if(possible) then
@@ -2675,7 +2738,6 @@ recursive subroutine computeCombinaisonFromList(cell,compatibleCoeffs,list_coeff
          nmodel_tot = nmodel_tot + 1
          if(need_compute)then
            list_combinaison(1:power_disp,nmodel_tot) = index_coeff
-
          end if
        end if
      end if!end if power_disp < power_disp_min
@@ -2687,7 +2749,8 @@ recursive subroutine computeCombinaisonFromList(cell,compatibleCoeffs,list_coeff
 &                                     ncoeff,nstr,nmodel,nrpt,nsym,power_disp+1,&
 &                                     power_disp_min,power_disp_max,symbols,nbody=nbody_in,&
 &                                     compute=need_compute,anharmstr=need_anharmstr,&
-&                                     spcoupling=need_spcoupling)
+&                                     spcoupling=need_spcoupling,only_odd_power=need_only_odd_power,&
+&                                     only_even_power=need_only_even_power)
      end if
    end do
    ABI_DEALLOCATE(index_coeff)

@@ -110,7 +110,7 @@ implicit none
 !Local variables-------------------------------
 !scalar
  integer :: icoeff_bound,ii,iexit,initialized
- integer :: jj,kk,nproc,ncoeff,nmodels,ncoeff_bound,ncoeff_max
+ integer :: jj,kk,nproc,ncoeff,nmodels,ncoeff_bound,ncoeff_bound_tot,ncoeff_max
  integer :: mtypalch,model_bound,model_ncoeffbound,my_rank,paw_size,npsp,type
  integer,save :: paw_size_old=-1
  real(dp):: cutoff,freq_q,freq_b,qmass,bmass
@@ -514,7 +514,6 @@ implicit none
        write(message, '(2a)' ) trim(message),' is not bound'
        call wrtout(std_out,message,'COLL')
 
-
 !      Get the list of possible coefficients to bound the model
        cutoff = zero
        do ii=1,3
@@ -523,15 +522,17 @@ implicit none
        cutoff = cutoff / 3.0
        
        call polynomial_coeff_getNorder(coeffs_bound,effective_potential%crystal,cutoff,&
-&       ncoeff_bound,ncoeff_bound,inp%fit_boundPower,2,comm,anharmstr=inp%fit_anhaStrain==1,&
-&       spcoupling=inp%fit_SPCoupling==1)
+&       ncoeff_bound,ncoeff_bound_tot,inp%fit_boundPower,1,comm,anharmstr=inp%fit_anhaStrain==1,&
+&       spcoupling=inp%fit_SPCoupling==1,verbose=.true.,distributed=.false.,&
+&       only_even_power=.true.,only_odd_power=.false.)
 
        if(iam_master)then
          filename=trim(filnam(2))//"_boundcoeff.xml"
          call polynomial_coeff_writeXML(coeffs_bound,ncoeff_bound,filename=filename,newfile=.true.)
        end if
-       
-!     Store all the initial coefficients
+!      wait       
+       call xmpi_barrier(comm)
+!      Store all the initial coefficients
        ncoeff = effective_potential%anharmonics_terms%ncoeff
        ABI_DATATYPE_ALLOCATE(coeffs_all,(ncoeff+ncoeff_bound))
        do ii=1,ncoeff
@@ -601,12 +602,11 @@ implicit none
            listcoeff_bound(jj,ncoeff+1:ncoeff+ii) = list_bound(jj,:) + ncoeff
          end do
          
-!       Reset the simulation
+!        Reset the simulation
          call effective_potential_setCoeffs(coeffs_all,effective_potential,ncoeff+ncoeff_bound)
 
          call fit_polynomial_coeff_getPositive(effective_potential,hist,coeff_values,&
-&         isPositive,listcoeff_bound,ncoeff+ii,&
-&         ncoeff,nmodels,comm,verbose=.false.)
+&         isPositive,listcoeff_bound,ncoeff+ii,ncoeff,nmodels,comm,verbose=.false.)
          if(all(isPositive == 0)) then
            write(message, '(5a,I0,a)')ch10,'--',ch10,' No possible model ',&
 &           'with ', ii,' additional terms found'
@@ -614,7 +614,7 @@ implicit none
          else
 
            do jj=1,nmodels
-             if(isPositive(jj) == one.and.all(coeff_values(jj,:) < 10)) then
+             if(isPositive(jj) == 1 .and. all(abs(coeff_values(jj,:)) < 1.0E5)) then               
                write(message, '(2a,I0,a)') ch10,' The model number ',jj,' ['
                do kk=1,ncoeff+ii
                  if(kk<ncoeff+ii)then
