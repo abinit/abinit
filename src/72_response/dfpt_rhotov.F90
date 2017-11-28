@@ -243,6 +243,7 @@
      call dotprod_vn(cplex,rhor1,elpsp1 ,doti,nfft,nfftot,1     ,1,vpsp1,ucvol)
      if (ipert==natom+5) then
        call dotprod_vn(cplex,rhor1,elmag1 ,doti,nfft,nfftot,nspden,1,v1zeeman,ucvol)
+       !write(*,*) 'elmag1=',elmag1 Debug
      end if
    else
      if (usexcnhat/=0) then

@@ -40,6 +40,7 @@ sources = [
  "dfpt_etot.F90",
  "dfpt_ewald.F90",
  "dfpt_gatherdy.F90",
+ "dfpt_init_mag1.F90",
  "dfpt_mkrho.F90",
  "dfpt_mkvxcstr.F90",
  "dfpt_mkvxcstrgga.F90",

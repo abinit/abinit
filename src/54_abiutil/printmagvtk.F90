@@ -78,13 +78,14 @@ subroutine printmagvtk(mpi_enreg,cplex,nspden,nfft,ngfft,rhor,rprimd,fname)
 
 !Local variables-------------------------------
 !scalars
- integer :: denvtk,nfields
+ integer :: denvtk,denxyz,nfields
  integer :: nx,ny,nz,nfft_tot
- integer :: ii,jj,kk,ind,jfft
+ integer :: ii,jj,kk,ind,jfft,ispden
  integer :: mpi_comm,mpi_head,mpi_rank,ierr
  real    :: rx,ry,rz
  integer :: nproc_fft,ir
  character(len=500) :: msg
+ character(len=10)  :: outformat
 !arrays
  real(dp),allocatable :: rhorfull(:,:)
 
@@ -156,6 +157,11 @@ subroutine printmagvtk(mpi_enreg,cplex,nspden,nfft,ngfft,rhor,rprimd,fname)
      RETURN
    end if
 
+   if (open_file("DEN.xyz",msg,newunit=denxyz,status='replace',form='formatted') /=0) then
+     MSG_WARNING(msg)
+     RETURN
+   end if
+
     ! Write the header of the output vtk file
    write(denvtk,"(a)") '# vtk DataFile Version 2.0'
    write(denvtk,"(a)") 'Electron density components'
@@ -163,6 +169,14 @@ subroutine printmagvtk(mpi_enreg,cplex,nspden,nfft,ngfft,rhor,rprimd,fname)
    write(denvtk,"(a)") 'DATASET STRUCTURED_GRID'
    write(denvtk,"(a,3i6)") 'DIMENSIONS ', nx,ny,nz
    write(denvtk,"(a,i18,a)") 'POINTS ',nfft_tot,' double'
+
+   if (nspden==1) then
+     outformat="(4e16.8)"
+   else if (nspden==2) then
+     outformat="(5e16.8)"
+   else
+     outformat="(7e16.8)"
+   endif
 
     ! Write out information about grid points
    do kk=0,nz-1
@@ -173,10 +187,13 @@ subroutine printmagvtk(mpi_enreg,cplex,nspden,nfft,ngfft,rhor,rprimd,fname)
          ry=(dble(ii)/nx)*rprimd(2,1)+(dble(jj)/ny)*rprimd(2,2)+(dble(kk)/nz)*rprimd(2,3)
          rz=(dble(ii)/nx)*rprimd(3,1)+(dble(jj)/ny)*rprimd(3,2)+(dble(kk)/nz)*rprimd(3,3)
          write(denvtk,'(3f16.8)') rx,ry,rz  !coordinates of the grid point
-
+         ind=1+ii+nx*(jj+ny*kk)
+         write(denxyz,outformat) rx,ry,rz,(rhorfull(ind,ispden),ispden=1,nspden)
        end do
      end do
    end do
+
+   close(denxyz)
 
     ! Write out information about field defined on the FFT mesh
    write(denvtk,"(a,i18)") 'POINT_DATA ',nfft_tot

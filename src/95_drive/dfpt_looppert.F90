@@ -1508,7 +1508,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      rhor1(:,:)=zero ; rhog1(:,:)=zero
 !    PAW: rhoij have been set to zero in call to pawrhoij_alloc above
 
-     init_rhor1 = (ipert>=1 .and. ipert<=dtset%natom)
+     init_rhor1 = ((ipert>=1 .and. ipert<=dtset%natom).or.ipert==dtset%natom+5)
      ! This section is needed in order to maintain the old behavior and pass the automatic tests
      if (psps%usepaw == 0) then
        init_rhor1 = init_rhor1 .and. all(psps%nctab(:ntypat)%has_tvale)
@@ -1517,32 +1517,41 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      end if
 
      if (init_rhor1) then
-       ! Initialize rhor1 and rhog1 from the derivative of atomic densities/gaussians.
-       ndir = 1; optn2 = 3
-       if (psps%usepaw==1) then
-         ! FIXME: Here there's a bug because has_tvale == 0 or 1 instead of 2
-         if (all(pawtab(:ntypat)%has_tvale/=0)) optn2=2
-       else if (psps%usepaw==0) then
-         if (all(psps%nctab(:ntypat)%has_tvale)) optn2=2
-       end if
 
-       if (optn2 == 3) then
-         call wrtout(std_out," Initializing rhor1 from atom-centered gaussians", "COLL")
-         ABI_ALLOCATE(gauss,(2,ntypat))
-         call atom_gauss(ntypat, dtset%densty, psps%ziontypat, psps%znucltypat, gauss)
+       if(ipert/=dtset%natom+5) then
 
-         call dfpt_atm2fft(atindx,cplex,gmet,gprimd,gsqcut,idir,ipert,&
-         mgfftf,psps%mqgrid_vl,dtset%natom,ndir,nfftf,ngfftf,ntypat,&
-         ph1df,psps%qgrid_vl,dtset%qptn,dtset%typat,ucvol,psps%usepaw,xred,psps,pawtab,&
-         atmrhor1=rhor1,optn_in=1,optn2_in=3,gauss=gauss)
+         ! Initialize rhor1 and rhog1 from the derivative of atomic densities/gaussians.
+         ndir = 1; optn2 = 3
+         if (psps%usepaw==1) then
+           ! FIXME: Here there's a bug because has_tvale == 0 or 1 instead of 2
+           if (all(pawtab(:ntypat)%has_tvale/=0)) optn2=2
+         else if (psps%usepaw==0) then
+           if (all(psps%nctab(:ntypat)%has_tvale)) optn2=2
+         end if
 
-         ABI_FREE(gauss)
+         if (optn2 == 3) then
+           call wrtout(std_out," Initializing rhor1 from atom-centered gaussians", "COLL")
+           ABI_ALLOCATE(gauss,(2,ntypat))
+           call atom_gauss(ntypat, dtset%densty, psps%ziontypat, psps%znucltypat, gauss)
+
+           call dfpt_atm2fft(atindx,cplex,gmet,gprimd,gsqcut,idir,ipert,&
+           mgfftf,psps%mqgrid_vl,dtset%natom,ndir,nfftf,ngfftf,ntypat,&
+           ph1df,psps%qgrid_vl,dtset%qptn,dtset%typat,ucvol,psps%usepaw,xred,psps,pawtab,&
+           atmrhor1=rhor1,optn_in=1,optn2_in=3,gauss=gauss)
+
+           ABI_FREE(gauss)
+         else
+           call wrtout(std_out," Initializing rhor1 from valence densities taken from pseudopotential files", "COLL")
+           call dfpt_atm2fft(atindx,cplex,gmet,gprimd,gsqcut,idir,ipert,&
+           mgfftf,psps%mqgrid_vl,dtset%natom,ndir,nfftf,ngfftf,ntypat,&
+           ph1df,psps%qgrid_vl,dtset%qptn,dtset%typat,ucvol,psps%usepaw,xred,psps,pawtab,&
+           atmrhor1=rhor1,optn_in=1,optn2_in=2)
+         end if
+
        else
-         call wrtout(std_out," Initializing rhor1 from valence densities taken from pseudopotential files", "COLL")
-         call dfpt_atm2fft(atindx,cplex,gmet,gprimd,gsqcut,idir,ipert,&
-         mgfftf,psps%mqgrid_vl,dtset%natom,ndir,nfftf,ngfftf,ntypat,&
-         ph1df,psps%qgrid_vl,dtset%qptn,dtset%typat,ucvol,psps%usepaw,xred,psps,pawtab,&
-         atmrhor1=rhor1,optn_in=1,optn2_in=2)
+         !Magnetic field perturbation
+         call wrtout(std_out," Initializing rhor1 guess based on the ground state XC magnetic field", "COLL")
+         call dfpt_init_mag1(ipert,idir,rhor1,rhor,cplex,nfftf,nspden,vxc,kxc,nkxc)
        end if
 
        call fourdp(cplex,rhog1,rhor1,-1,mpi_enreg,nfftf,ngfftf,dtset%paral_kgb,0)

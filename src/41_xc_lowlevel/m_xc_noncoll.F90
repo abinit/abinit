@@ -49,7 +49,7 @@ MODULE m_xc_noncoll
  real(dp),parameter :: m_norm_min=tol8
 
 !Default rotation method for DFPT
- integer,parameter :: rotation_method_default=2
+ integer,parameter :: rotation_method_default=3
 
 CONTAINS
 
@@ -446,15 +446,15 @@ subroutine rotate_back_mag_dfpt(vxc1_in,vxc1_out,vxc,kxc,rho1,mag,vectsize,cplex
        v1tmp(2,2)=cmplx(real(vxc1_in(ipt,2),kind=dp),zero)
 
        !Tranforming the rhor1 with U0
-       rho1_updn(1,1)=rho1(ipt,1)+rho1(ipt,4)
-       rho1_updn(2,2)=rho1(ipt,1)-rho1(ipt,4)
-       rho1_updn(1,2)=rho1(ipt,2)-(zero,one)*rho1(ipt,3)
-       rho1_updn(2,1)=rho1(ipt,2)+(zero,one)*rho1(ipt,3)
+       rho1_updn(1,1)=half*(rho1(ipt,1)+rho1(ipt,4))
+       rho1_updn(2,2)=half*(rho1(ipt,1)-rho1(ipt,4))
+       rho1_updn(1,2)=half*(rho1(ipt,2)-(zero,one)*rho1(ipt,3))
+       rho1_updn(2,1)=half*(rho1(ipt,2)+(zero,one)*rho1(ipt,3))
        u0_1r1=matmul(u0_1,rho1_updn)
        r1tmp=matmul(u0_1r1,u0)
        rho1_offdiag(1)=r1tmp(1,2) ; rho1_offdiag(2)=r1tmp(2,1)
-       v1tmp(1,2)=-(rho1_offdiag(1)/m_norm)*(vxc_diag(1)-vxc_diag(2))
-       v1tmp(2,1)= (rho1_offdiag(2)/m_norm)*(vxc_diag(2)-vxc_diag(1))
+       v1tmp(1,2)=-(rho1_offdiag(1)/m_norm)*(vxc_diag(2)-vxc_diag(1))
+       v1tmp(2,1)= (rho1_offdiag(2)/m_norm)*(vxc_diag(1)-vxc_diag(2))
        !Rotate back the "diagonal" xc computing the term U^(0) Vxc1_^(1) U^(0)^-1
        u0v1=matmul(u0,v1tmp)
        vxc1tmp=matmul(u0v1,u0_1)
@@ -718,10 +718,10 @@ subroutine rotate_back_mag_dfpt(vxc1_in,vxc1_out,vxc,kxc,rho1,mag,vectsize,cplex
          !projection of m^(1) on gs magnetization direction
          m_dot_m1=(mdirx*rho1(ipt,2)+mdiry*rho1(ipt,3)+mdirz*rho1(ipt,4))
 
-         !bxc_over_m = dsqrt(((vxc(ipt,1)-vxc(ipt,2))*half)**2+vxc(ipt,3)**2+vxc(ipt,4)**2) !this is bxc^(0)
-         !bxc_over_m = bxc_over_m/m_norm
+         bxc_over_m =-dsqrt(((vxc(ipt,1)-vxc(ipt,2))*half)**2+vxc(ipt,3)**2+vxc(ipt,4)**2) !this is bxc^(0)
+         bxc_over_m = bxc_over_m/m_norm
          !write(*,*)
-         bxc_over_m = (vxc(ipt,1)-vxc(ipt,2))*half/mag(ipt,3)
+         !bxc_over_m = (vxc(ipt,1)-vxc(ipt,2))*half/mag(ipt,3)
          !write(111,*) ipt,vxc(ipt,1),vxc(ipt,2),vxc(ipt,3),vxc(ipt,4)
          !write(222,*) bxc_over_m,(vxc(ipt,1)-vxc(ipt,2))*half/mag(ipt,3)
          vxc1_out(ipt,1) = vxc1_out(ipt,1) + bxc_over_m*( mz1 - mdirz*m_dot_m1 ) !
