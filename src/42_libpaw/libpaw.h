@@ -113,7 +113,11 @@
 #  define BOUNDS(LBND,UBND) LBND .to. UBND
 
 /* libXC support */
-#  define LIBPAW_HAVE_LIBXC
+#  if (defined HAVE_LIBXC)
+#    define LIBPAW_HAVE_LIBXC HAVE_LIBXC
+#  else
+#    undef LIBPAW_HAVE_LIBXC
+#  endif
 
 /* Netcdf support */
 #  undef LIBPAW_HAVE_NETCDF
@@ -123,6 +127,7 @@
 
 /* F2008 support */
 #  define LIBPAW_CONTIGUOUS
+#  define LIBPAW_ISO_C_BINDING 1
 
 /* =============================
  * ========= DEFAULT ===========
@@ -170,6 +175,7 @@
 
 /* F2008 support */
 #  define LIBPAW_CONTIGUOUS
+#  define LIBPAW_ISO_C_BINDING 1
 
 /* =============================
  * =========== END =============

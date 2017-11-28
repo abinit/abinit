@@ -49,12 +49,12 @@
 !!      dfpt_vtowfk,dfpt_wfkfermi,dfptnl_loop,dielmt,dieltcel,dmft_solve
 !!      dotprodm_v,dotprodm_vn,driver,dyson,eig2stern,eig2tot,elt_ewald
 !!      eltxccore,energy,entropyrec,etotfor,exc_build_block,exc_build_ham
-!!      fermisolverec,first_rec,fock_getghc,forces,forstr,forstrnps,fourdp
-!!      fourwf,fxphas,getgh1c,getghc,getgsc,getngrec,gran_potrec,green_kernel
-!!      gstate,gstateimg,gwls_ComputeCorrelationEnergy,gwls_DielectricArray
-!!      gwls_QR_factorization,gwls_lineqsolver,gwls_model_polarisability
-!!      gwls_polarisability,gwls_sternheimer,hartre,hartre1,impurity_solve
-!!      initberry,initwf,inkpts,invars2,inwffil,listkk,lobpcgwf
+!!      fermisolverec,first_rec,fock2ACE,fock_getghc,forces,forstr,forstrnps
+!!      fourdp,fourwf,fxphas,getgh1c,getghc,getgsc,getngrec,gran_potrec
+!!      green_kernel,gstate,gstateimg,gwls_ComputeCorrelationEnergy
+!!      gwls_DielectricArray,gwls_QR_factorization,gwls_lineqsolver
+!!      gwls_model_polarisability,gwls_polarisability,gwls_sternheimer,hartre
+!!      impurity_solve,initberry,initwf,inkpts,invars2,inwffil,listkk,lobpcgwf
 !!      m_ab7_invars_f90,m_ab7_mixing,m_cgtools,m_dyson_solver,m_fftcore
 !!      m_fftw3,m_fock,m_green,m_haydock,m_hexc,m_invovl,m_iowf,m_lobpcg
 !!      m_lobpcg2,m_lobpcgwf,m_paral_pert,m_sg2002,m_wfutils,m_xg,mag_constr
@@ -65,7 +65,7 @@
 !!      pawinit,pawmknhat,pawmknhat_psipsi,pawmkrho,pawpolev,prep_bandfft_tabs
 !!      prep_calc_ucrpa,prep_fourwf,prep_getghc,prep_nonlop,pspatm
 !!      pspheads_comm,pspini,pw_orthon,rayleigh_ritz,recursion,recursion_nl
-!!      redgr,respfn,rhohxc,rhotov,rwwf,scfcv,screening,setsym,setvtr,sigma
+!!      respfn,rhotov,rhotoxc,rwwf,scfcv,screening,setsym,setvtr,sigma
 !!      sqnormm_v,status,stress,strhar,suscep_stat,susk,suskmm,symrhg,symsgcube
 !!      tddft,timana,vn_nl_rec,vtorho,vtorhorec,vtorhotf,vtowfk,wfconv
 !!      wfk_analyze,wfsinp,wvl_nhatgrid,xcden,xcpot

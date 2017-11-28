@@ -83,7 +83,7 @@ subroutine pred_langevin(ab_mover,hist,icycle,itime,ncycle,ntime,zDEBUG,iexit,sk
 
 !Local variables-------------------------------
 !scalars
- integer  :: ii,kk,iatom,idim,iatom1,iatom2,itypat,idum=5,mcfac
+ integer  :: ii,kk,iatom,idim,iatom1,iatom2,itypat,idum=5,ihist_prev,mcfac
  real(dp) :: ucvol,ucvol_next
  real(dp),parameter :: v2tol=tol8
  real(dp) :: etotal,rescale_vel,ran_num1,ran_num2
@@ -467,20 +467,21 @@ subroutine pred_langevin(ab_mover,hist,icycle,itime,ncycle,ntime,zDEBUG,iexit,sk
 !  and compute again
 
 !  write(std_out,*) ch10
-!  write(std_out,*) 'EVALUATION FORCES',etotal,hist%etot(hist%ihist-1)
+!  write(std_out,*) 'EVALUATION FORCES',etotal,hist%etot(abihist_findIndex(hist,-1))
 !  write(std_out,*) ch10
 
 !  This is the worst case (2 evaluations of SCFCV)
-   if (etotal>hist%etot(hist%ihist-1).and.icycle==2) then
+   ihist_prev = abihist_findIndex(hist,-1)
+   if (etotal>hist%etot(ihist_prev).and.icycle==2) then
 
 !    Discard the changes
-     acell(:)   =hist%acell(:,hist%ihist-1)
-     rprimd(:,:)=hist%rprimd(:,:,hist%ihist-1)
-     xred(:,:)  =hist%xred(:,:,hist%ihist-1)
-     fcart(:,:) =hist%fcart(:,:,hist%ihist-1)
-     strten(:)  =hist%strten(:,hist%ihist-1)
-     vel(:,:)   =hist%vel(:,:,hist%ihist-1)
-     etotal     =hist%etot(hist%ihist-1)
+     acell(:)   =hist%acell(:,ihist_prev)
+     rprimd(:,:)=hist%rprimd(:,:,ihist_prev)
+     xred(:,:)  =hist%xred(:,:,ihist_prev)
+     fcart(:,:) =hist%fcart(:,:,ihist_prev)
+     strten(:)  =hist%strten(:,ihist_prev)
+     vel(:,:)   =hist%vel(:,:,ihist_prev)
+     etotal     =hist%etot(ihist_prev)
      call xred2xcart(ab_mover%natom,rprimd,xcart,xred)
 
 !    distx=xcart(1,iatom1)
@@ -702,7 +703,7 @@ subroutine pred_langevin(ab_mover,hist,icycle,itime,ncycle,ntime,zDEBUG,iexit,sk
 !### 07. Update the history with the prediction
 
 !Increase indexes
- hist%ihist=hist%ihist+1
+ hist%ihist = abihist_findIndex(hist,+1)
 
  call var2hist(acell,hist,ab_mover%natom,rprimd,xred,zDEBUG)
  hist%vel(:,:,hist%ihist)=vel(:,:)

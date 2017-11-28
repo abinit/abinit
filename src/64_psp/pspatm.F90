@@ -58,7 +58,7 @@
 !!  xccc1d(n1xccc*(1-usepaw),6)=1D core charge function and five derivatives, from psp file (used in NC only)
 !!  nctab=<nctab_t>
 !!    has_tvale=True if the pseudo provides the valence density (used in NC only)
-!!    tvalespl(mqgrid_vl(1-usepaw),2)=the pseudo valence density and 2nd derivative in reciprocal space on a regular grid 
+!!    tvalespl(mqgrid_vl(1-usepaw),2)=the pseudo valence density and 2nd derivative in reciprocal space on a regular grid
 !!                                     (used in NC only)
 !!
 !! SIDE EFFECTS
@@ -108,8 +108,9 @@
 !! CHILDREN
 !!      nctab_eval_tcorespl,pawpsp_17in,pawpsp_7in,pawpsp_bcast
 !!      pawpsp_read_header_xml,pawpsp_read_pawheader,pawpsp_wvl,psp10in,psp1in
-!!      psp2in,psp3in,psp5in,psp6in,psp8in,psp9in,psxml2abheader
-!!      test_xml_xmlpaw_upf,timab,upf2abinit,wrtout,wvl_descr_psp_fill
+!!      psp2in,psp3in,psp5in,psp6in,psp8in,psp9in,psp_dump_outputs
+!!      psxml2abheader,test_xml_xmlpaw_upf,timab,upf2abinit,wrtout
+!!      wvl_descr_psp_fill
 !!
 !! SOURCE
 
@@ -189,6 +190,8 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
  real(dp),allocatable :: rms(:)
 #if defined HAVE_PSML
 !!  usexml= 0 for non xml ps format ; =1 for xml ps format
+ character(len=3) :: atmsymb
+ character(len=30) :: creator
  type(pspheader_type) :: psphead
 #endif
 
@@ -207,7 +210,7 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
    ABI_CHECK(psps%usepaw==1, "paral_mode==1 is only compatible with PAW, see call to pawpsp_bcast below")
  end if
 
- nctab%has_tvale = .False.; nctab%has_tcore = .False. 
+ nctab%has_tvale = .False.; nctab%has_tcore = .False.
 
  if (me==0) then
 !  Dimensions of form factors and Vloc q grids must be the same in Norm-Conserving case
@@ -240,7 +243,7 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
 !    Open atomic data file (note: formatted input file)
      if (open_file(psps%filpsp(ipsp), message, unit=tmp_unit, form='formatted', status='old') /= 0) then
        MSG_ERROR(message)
-     end if 
+     end if
      rewind (unit=tmp_unit,err=10,iomsg=errmsg)
 
 !    Read and write some description of file from first line (character data)
@@ -270,27 +273,43 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
 
 ! the following is probably useless - already read in everything in inpspheads
 #if defined HAVE_PSML
-     write(message,'(a,a)') &
-&     '- pspatm: Reading pseudopotential header in XML form from ', trim(psps%filpsp(ipsp))
-     call wrtout(ab_out,message,'COLL')
-     call wrtout(std_out,  message,'COLL')
+!     write(message,'(a,a)') &
+!&     '- pspatm: Reading pseudopotential header in XML form from ', trim(psps%filpsp(ipsp))
+!     call wrtout(ab_out,message,'COLL')
+!     call wrtout(std_out,  message,'COLL')
 
-     lloc   = 0 ! does this mean s? in psml case the local potential can be different from any l channel
-     r2well = 0
-
-     call psxml2abheader( psps%filpsp(ipsp), psphead, 1 )
+     call psxml2abheader( psps%filpsp(ipsp), psphead, atmsymb, creator, 0 )
      znucl = psphead%znuclpsp
      zion = psphead%zionpsp
+     pspdat = psphead%pspdat
      pspcod = psphead%pspcod 
      pspxc =  psphead%pspxc
      lmax = psphead%lmax
+     !lloc   = 0 ! does this mean s? in psml case the local potential can be different from any l channel
+     lloc = -1
+     mmax = -1
+     r2well = 0
      
+     write(message,'(a,1x,a3,3x,a)') "-",atmsymb,trim(creator)
+     call wrtout(ab_out,message,'COLL')
+     call wrtout(std_out,message,'COLL')
+     write(message,'(a,f9.5,f10.5,2x,i8,t47,a)')'-',znucl,zion,pspdat,'znucl, zion, pspdat'
+     call wrtout(ab_out,message,'COLL')
+     call wrtout(std_out,message,'COLL')
+     if(pspxc<0) then
+       write(message, '(i5,i8,2i5,i10,f10.5,t47,a)' ) &
+&       pspcod,pspxc,lmax,lloc,mmax,r2well,'pspcod,pspxc,lmax,lloc,mmax,r2well'
+     else
+       write(message, '(4i5,i10,f10.5,t47,a)' ) &
+&       pspcod,pspxc,lmax,lloc,mmax,r2well,'pspcod,pspxc,lmax,lloc,mmax,r2well'
+     end if
+     call wrtout(ab_out,message,'COLL')
+     call wrtout(std_out,message,'COLL')
 #else
      write(message,'(a,a)')  &
 &     'ABINIT is not compiled with XML support for reading this type of pseudopotential ', &
 &     trim(psps%filpsp(ipsp))
      MSG_BUG(message)
-     
 #endif
 ! END useless
    else if (usexml == 1 .and. xmlpaw == 1) then
@@ -484,15 +503,27 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
 !    DRH pseudopotentials
      call psp8in(ekb,epsatm,ffspl,indlmn,lloc,lmax,psps%lmnmax,psps%lnmax,mmax,&
 &     psps%mpsang,psps%mpssoang,psps%mqgrid_ff,psps%mqgrid_vl,nproj,psps%n1xccc,psps%pspso(ipsp),&
-&     qchrg,psps%qgrid_ff,psps%qgrid_vl,psps%useylm,vlspl,xcccrc,xccc1d,zion,psps%znuclpsp(ipsp),nctab)
+&     qchrg,psps%qgrid_ff,psps%qgrid_vl,psps%useylm,vlspl,xcccrc,xccc1d,zion,psps%znuclpsp(ipsp),nctab,maxrad)
+
+#if defined DEV_YP_DEBUG_PSP
+     call psp_dump_outputs("DBG",pspcod,psps%lmnmax,psps%lnmax,psps%mpssoang, &
+&     psps%mqgrid_ff,psps%n1xccc,mmax,maxrad,epsatm,qchrg,xcccrc,nctab, &
+&     indlmn,nproj,ekb,ffspl,vlspl,xccc1d)
+#endif
 
    else if (pspcod==9)then
 
 #if defined HAVE_PSML
      call psp9in(psps%filpsp(ipsp),ekb,epsatm,ffspl,indlmn,lloc,lmax,psps%lmnmax,psps%lnmax,mmax,&
-&     psps%mpsang,psps%mpssoang,psps%mqgrid_ff,nproj,psps%n1xccc, &
-&     psps%pspso(ipsp),qchrg,psps%qgrid_ff,psps%useylm,vlspl,&
-&     xcccrc,xccc1d,zion,psps%znuclpsp(ipsp))
+&     psps%mpsang,psps%mpssoang,psps%mqgrid_ff,psps%mqgrid_vl,nproj,psps%n1xccc, &
+&     psps%pspso(ipsp),qchrg,psps%qgrid_ff,psps%qgrid_vl,psps%useylm,vlspl,&
+&     xcccrc,xccc1d,zion,psps%znuclpsp(ipsp),nctab,maxrad)
+
+#if defined DEV_YP_DEBUG_PSP
+     call psp_dump_outputs("DBG",pspcod,psps%lmnmax,psps%lnmax,psps%mpssoang, &
+&     psps%mqgrid_ff,psps%n1xccc,mmax,maxrad,epsatm,qchrg,xcccrc,nctab, &
+&     indlmn,nproj,ekb,ffspl,vlspl,xccc1d)
+#endif
 #else
      write(message,'(2a)')  &
 &     'ABINIT is not compiled with XML support for reading this type of pseudopotential ', &
@@ -546,7 +577,7 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
    end if
 
    if (pspcod/=7.and.pspcod/=17) then
-     write(message, '(a,f14.8,a,a)' ) ' pspatm: epsatm=',epsatm,ch10,&
+     write(message, '(a,f14.8,a,a)' ) '  pspatm : epsatm=',epsatm,ch10,&
 &     '         --- l  ekb(1:nproj) -->'
      call wrtout(ab_out,message,'COLL')
      call wrtout(std_out,  message,'COLL')
@@ -557,6 +588,11 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
          il=indlmn(1,ilmn)
          if (indlmn(6,ilmn)==1) then
            iln0=iln0+nproj(il+1)
+           !if (dtset%optdriver == RUNL_SIGMA) then
+           !  do ii=0,nproj(il+1)-1
+           !    ekb(iln+ii) = zero
+           !  end do
+           !end if
            write(message, '(13x,i1,4f12.6)' ) il,(ekb(iln+ii),ii=0,nproj(il+1)-1)
          else
            iln0=iln0+nproj(il+psps%mpsang)
@@ -616,7 +652,7 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
      write (filnam, '(a,i0,a)') trim(dtfil%fnameabo_nlcc_derivs), ipsp, ".dat"
      if (open_file(filnam, message, newunit=unt) /= 0) then
        MSG_ERROR(message)
-     end if 
+     end if
      write (unt,*) '# Non-linear core corrections'
      write (unt,*) '#  r, pseudocharge, 1st, 2nd, 3rd, 4th, 5th derivatives'
      do ii = 1, psps%n1xccc
@@ -641,7 +677,7 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
  end if
 
 !--------------------------------------------------------------------
-!WVL+PAW: 
+!WVL+PAW:
  if (dtset%usepaw==1 .and. (dtset%icoulomb /= 0 .or. dtset%usewvl==1)) then
 #if defined HAVE_BIGDFT
    psps%gth_params%psppar(:,:,ipsp) = UNINITIALIZED(1._dp)
@@ -676,11 +712,11 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
    end if
 #endif
  end if
- 
+
 !end of WVL+PAW section
 !----------------------------------------------------
 
- return 
+ return
 
  ! Handle IO error
  10 continue

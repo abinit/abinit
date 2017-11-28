@@ -58,4 +58,5 @@ xred 3*0
 #%%   Treated with PBE GGA (ixc=11), with intxc=1.
 #%%   The total energy is -0.499588 Ha
 #%%   For speed-up, it begins with the wavefunctions from test 23.
+#%% topics = xc
 #%%<END TEST_INFO>

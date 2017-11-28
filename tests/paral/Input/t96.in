@@ -1,7 +1,8 @@
 ##############################################################################
 #Test for multibinit, read DDB and generate the effective potential into XML file
 ##############################################################################
-prt_effpot = -1
+prt_model = 3
+dipdip_prt = 1
 energy_reference = -1.7145176622E+01
 
 ifcsupercell = 1

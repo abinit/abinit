@@ -7,7 +7,7 @@ libdir=@libdir@
 Name: Abinit
 Description: Atomic-scale simulation software
 Version: @PACKAGE_VERSION@
-URL: http://www.abinit.org/
+URL: https://www.abinit.org/
 Requires: libatlas, netcdf
 Libs: -L${libdir} -lab7_parser
 Cflags: -I${includedir}/abinit

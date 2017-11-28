@@ -1,0 +1,2446 @@
+-
+  ENTRYTYPE : article
+  ID : Abrikosov1975
+  author : A.A. Abrikosov and L.P. Gorkov and E. Dzyaloshinskii
+  title :  Methods of quantum field theory in statistical physics
+  journal : Dover, New-York
+  year : 1975
+  volume : 
+  pages : 
+  numpages : 
+  doi : 
+  publisher : Dover, New-York
+-
+  ENTRYTYPE : article
+  ID : Adler1962
+  author : Adler, Stephen L.
+  title : Quantum Theory of the Dielectric Constant in Real Solids
+  journal : Physical Review
+  year : 1962
+  volume : 126
+  pages : 413-420
+  publisher : American Physical Society (APS)
+  doi : 10.1103/physrev.126.413
+  issn : 0031-899X
+  source : Crossref
+  month : pr, number = {2
+-
+  ENTRYTYPE : article
+  ID : Albrecht1998
+  author : Albrecht, S. and Reining, L. and Del Sole, R. and Onida, G.
+  title : Ab Initio Calculation of Excitonic Effects in the Optical Spectra of Semiconductors
+  journal : Phys. Rev. Lett.
+  year : 1998
+  volume : 80
+  pages : 4510--4513
+  numpages : 3
+  doi : 10.1103/PhysRevLett.80.4510
+  publisher : American Physical Society
+-
+  ENTRYTYPE : article
+  ID : Allen1976
+  author : Allen, P. B. and V. Heine
+  title : Theory of the temperature dependence of electronic band structures
+  journal : J. of Phys. C: Solid State Physics
+  year : 1976
+  volume : 9
+  pages : 2305
+-
+  ENTRYTYPE : article
+  ID : Allen1978
+  author : Allen, P. B.
+  title : New method for solving Boltzmann's equation for electrons in metals
+  journal : Phys. Rev. B
+  year : 1978
+  volume : 17
+  pages : 3725--3734
+  publisher : American Physical Society
+  doi : 10.1103/PhysRevB.17.3725
+  issue : 10
+-
+  ENTRYTYPE : article
+  ID : Allen1981
+  author : Allen, P. B. and Cardona, M.
+  title : Theory of the temperature dependence of the direct gap of germanium
+  journal : Phys. Rev. B
+  year : 1981
+  volume : 23
+  pages : 1495--1505
+-
+  ENTRYTYPE : article
+  ID : Allen1983
+  author : Allen, P. B. and Cardona, M.
+  title : Temperature dependence of the direct gap of {S}i and {G}e 
+  journal : Phys. Rev. B
+  year : 1983
+  volume : 27
+  pages : 4760--4769
+-
+  ENTRYTYPE : incollection
+  ID : Allen1996
+  author : Allen, P. B.
+  title : Boltzmann Theory and Resistivity of Metals
+  year : 1996
+  pages : 219-250
+  publisher : Kl{\"u}wer
+  booktitle : Quantum Theory of Real Materials
+  editor : Chelikowsky, J. R. and Louie, S. G.
+  address : Boston
+-
+  ENTRYTYPE : article
+  ID : Allen2013
+  author : Allen, P. B. and Berlijn, T. and Casavant, D. A. and Soler, J. M.
+  title : Recovering hidden Bloch character: Unfolding electrons, phonons, and slabs
+  journal : Phys. Rev. B
+  year : 2013
+  volume : 87
+  pages : 085322
+-
+  ENTRYTYPE : article
+  ID : Amadon2006
+  author : Amadon, B. and Biermann, S. and Georges, A. and Aryasetiawan, F.
+  title : The $\alpha$-$\gamma$ {T}ransition of {C}erium {I}s {E}ntropy {D}riven
+  journal : Phys. Rev. Lett.
+  year : 2006
+  volume : 96
+  pages : 066402
+  numpages : 4
+  doi : 10.1103/PhysRevLett.96.066402
+  publisher : American Physical Society
+  file : :/media/disk_iomega/BIBLIO/Cerium/DMFT/PhysRevLett.96.066402.pdf:PDF
+  issue : 6
+-
+  ENTRYTYPE : article
+  ID : Amadon2008
+  author : Amadon, B. and Lechermann, F. and Georges, A. and Jollet, F. and Wehling, T. O. and Liechtenstein, A. I.
+  title : Plane-wave based electronic structure calculations for correlated materials using dynamical mean-field theory and projected local orbitals
+  journal : Phys. Rev. B
+  year : 2008
+  volume : 77
+  pages : 205112
+  publisher : American Physical Society
+  doi : 10.1103/PhysRevB.77.205112
+  timestamp : 2012.08.08
+  number : 20
+  file : :/media/disk_iomega/BIBLIO/DMFT/PhysRevB.77.205112.pdf:PDF
+  owner : amadonb
+  refid : 10.1103/PhysRevB.77.205112
+-
+  ENTRYTYPE : article
+  ID : Amadon2008a
+  author : Amadon, B. and Jollet, F. and Torrent, M.
+  title : $\gamma$ and $\beta$ cerium: {LDA}+{U} calculations of ground-state parameters
+  journal : Phys. Rev. B
+  year : 2008
+  volume : 77
+  pages : 155104
+  numpages : 10
+  doi : 10.1103/PhysRevB.77.155104
+  publisher : American Physical Society
+  file : :/media/disk_iomega/BIBLIO/Cerium/PhysRevB.77.155104-1.pdf:PDF
+  issue : 15
+-
+  ENTRYTYPE : article
+  ID : Amadon2012
+  author : Amadon, B.
+  title : A self-consistent {DFT}+{DMFT} scheme in the projector augmented wave method: applications to cerium, {C}e$_2${O}$_3$ and {P}u$_2${O}$_3$ with the {H}ubbard {I} solver and comparison to {DFT}+{U}
+  journal : J. Phys.: Cond. Matt.
+  year : 2012
+  volume : 24
+  pages : 075604
+  issn : 0953-8984
+  url : http://iopscience.iop.org/article/10.1088/0953-8984/24/7/075604
+  timestamp : 2012.08.08
+  number : 7
+  file : :/media/disk_iomega/BIBLIO/DMFT/0953-8984_24_7_075604.pdf:PDF
+  owner : amadonb
+-
+  ENTRYTYPE : article
+  ID : Amadon2014
+  author : Amadon, B. and Applencourt, T. and Bruneval, F.
+  title : Screened Coulomb interaction calculations: c{RPA} implementation and applications to dynamical screening and self-consistency in uranium dioxide and cerium
+  journal : Phys. Rev. B
+  year : 2014
+  volume : 89
+  pages : 125110
+  numpages : 10
+  doi : 10.1103/PhysRevB.89.125110
+  publisher : American Physical Society
+  issue : 12
+-
+  ENTRYTYPE : article
+  ID : Amadon2015
+  author : Amadon, B. and Gerossier, A.
+  title : Comparative analysis of models for the $\alpha$-$\gamma$ phase transition in cerium: A DFT+DMFT study using Wannier orbitals
+  journal : Phys. Rev. B
+  year : 2015
+  volume : 91
+  pages : 161103
+  numpages : 5
+  doi : 10.1103/PhysRevB.91.161103
+  publisher : American Physical Society
+  issue : 16
+-
+  ENTRYTYPE : article
+  ID : Ambrosetti2012
+  author : Ambrosetti, A. and Silvestrelli, P. L.
+  title : van der {W}aals interactions in density functional theory using Wannier functions: Improved {C}6 and {C}3 coefficients by a different approach
+  journal : Phys. Rev. B
+  year : 2012
+  volume : 85
+  pages : 073101
+-
+  ENTRYTYPE : article
+  ID : Anisimov1991
+  author : Anisimov, V. I. and Gunnarsson, O.
+  title : Density-functional calculation of effective Coulomb interactions in metals
+  journal : Phys. Rev. B
+  year : 1991
+  volume : 43
+  pages : 7570--7574
+  publisher : American Physical Society
+  doi : 10.1103/PhysRevB.43.7570
+  timestamp : 2013.07.03
+  number : 10
+  owner : amadonb
+  refid : 10.1103/PhysRevB.43.7570
+-
+  ENTRYTYPE : article
+  ID : Antonius2014
+  author : Antonius, G. and Ponc\'e, S. and Boulanger, P. and C\^ot\'e, M. and Gonze, X.
+  title : Many-Body Effects on the Zero-Point Renormalization of the Band Structure
+  journal : Phys. Rev. Lett.
+  year : 2014
+  volume : 112
+  pages : 215501
+-
+  ENTRYTYPE : article
+  ID : Antonius2015
+  author : Antonius, G. and Ponc\'e, S. and Lantagne-Hurtubise, E. and Auclair, G. and Gonze, X. and C\^ot\'e, M.
+  title : Dynamical and anharmonic effects on the electron-phonon coupling and the zero-point renormalization of the electronic structure
+  journal : Phys. Rev. B
+  year : 2015
+  volume : 92
+  pages : 085137
+-
+  ENTRYTYPE : article
+  ID : Arponen1979
+  author : J. Arponen and E. Pajanne
+  title : Angular correlation in positron annihilation 
+  journal : J. Phys. F
+  year : 1979
+  volume : 9
+  pages : 2359
+  doi : 10.1088/0305-4608/9/12/009
+-
+  ENTRYTYPE : article
+  ID : Aryasetiawan2004
+  author : Aryasetiawan, F. and Imada, M. and Georges, A. and Kotliar, G. and Biermann, S. and Liechtenstein, A. I.
+  title : Frequency-dependent local interactions and low-energy effective models from electronic structure calculations
+  journal : Phys. Rev. B
+  year : 2004
+  volume : 70
+  pages : 195104--
+  publisher : American Physical Society
+  doi : 10.1103/PhysRevB.70.195104
+  timestamp : 2013.03.15
+  number : 19
+  owner : amadonb
+  keywords : cRPA
+  refid : 10.1103/PhysRevB.70.195104
+-
+  ENTRYTYPE : article
+  ID : Aryasetiawan2006
+  author : F. Aryasetiawan, K. Karlsson, O. Jepsen, and U. Sch\"onberger
+  title : Calculations of Hubbard U from first-principles
+  journal : Phys. Rev. B
+  year : 2006
+  volume : 74
+  pages : 125106
+-
+  ENTRYTYPE : article
+  ID : Audouze2006
+  author : Audouze,C. and Jollet,F. and Torrent,M. and Gonze,X.
+  title : Projector augmented-wave approach to density-functional perturbation theory
+  journal : Phys. Rev. B
+  year : 2006
+  volume : 73
+  pages : 235101
+-
+  ENTRYTYPE : article
+  ID : Audouze2008
+  author : Audouze,C. and Jollet,F. and Torrent,M. and Gonze,X.
+  title : Comparison between projector augmented-wave and ultrasoft pseudopotential formalisms at the density-functional perturbation theory level
+  journal : Phys. Rev. B
+  year : 2008
+  volume : 78
+  pages : 035105
+-
+  ENTRYTYPE : article
+  ID : Bachelet1982
+  author : Bachelet, G.B. and Hamann, D.R. and Schl\"uter, M.
+  title : Pseudopotentials that work: From {H} to {P}u
+  journal : Phys. Rev. B
+  year : 1982
+  volume : 26
+  pages : 4199--4228
+  numpages : 29
+  doi : 10.1103/PhysRevB.26.4199
+  publisher : American Physical Society
+-
+  ENTRYTYPE : article
+  ID : Bader1994
+  author : Bader, R. F. W.
+  title : Atoms in Molecules: A Quantum Theory
+  journal : Oxford University Press.
+  year : 1994
+  volume : ISBN 978-0-19-855865-1
+  pages : 
+  doi : 
+  url : 
+  number : 
+-
+  ENTRYTYPE : article
+  ID : Barbiellini1996
+  author : Barbiellini, B. and Puska, M. J. and Korhonen, T. and Harju, A. and Torsti, T. and Nieminen, R. M.
+  title : Calculation of positron states and annihilation in solids: A density-gradient-correction scheme
+  journal : Phys. Rev. B
+  year : 1996
+  volume : 53
+  pages : 16201
+  publisher : American Physical Society
+  doi : 10.1103/PhysRevB.53.16201
+  issue : 24
+-
+  ENTRYTYPE : article
+  ID : Baroni1986
+  author : Baroni, Stefano and Resta, Raffaele
+  title : Ab initiocalculation of the macroscopic dielectric constant in silicon
+  journal : Phys. Rev. B
+  year : 1986
+  volume : 33
+  pages : 7017-7021
+  publisher : American Physical Society (APS)
+  url : https://journals.aps.org/prb/abstract/10.1103/PhysRevB.33.7017
+  issn : 0163-1829
+  source : Crossref
+  month : ay, number = {10
+-
+  ENTRYTYPE : article
+  ID : Baroni1987
+  author : Baroni, S. and Giannozzi, P. and Testa, A.
+  title : Green's-function approach to linear response in solids
+  journal : Phys. Rev. Lett.
+  year : 1987
+  volume : 58
+  pages : 1861--1864
+-
+  ENTRYTYPE : article
+  ID : Becke1990
+  author : Becke, A. D. and Edgecombe, K. E.
+  title : A simple measure of electron localization in atomic and molecular systems
+  journal : J. Chem. Phys.
+  year : 1990
+  volume : 92
+  pages : 5397-5403
+  doi : 10.1063/1.458517
+  url : http://scitation.aip.org/content/aip/journal/jcp/92/9/10.1063/1.458517
+  number : 9
+-
+  ENTRYTYPE : article
+  ID : Benedict1998
+  author : Benedict, L. X. and Shirley, E. L. and Bohn, R. B.
+  title : Optical Absorption of Insulators and the Electron-Hole Interaction: An \textit{Ab Initio} Calculation
+  journal : Phys. Rev. Lett.
+  year : 1998
+  volume : 80
+  pages : 4514--4517
+  numpages : 0
+  doi : 10.1103/PhysRevLett.80.4514
+  publisher : American Physical Society
+  issue : 20
+-
+  ENTRYTYPE : article
+  ID : Bengone2000
+  author : O. Bengone, M. Alouani, P. Bl\"ochl, and J. Hugel
+  title : Implementation of the projector augmented-wave {LDA}+{U} method: Application to the electronic structure of {N}i{O}
+  journal : Phys. Rev. B
+  year : 1994
+  volume : 62
+  pages : 16392
+-
+  ENTRYTYPE : article
+  ID : Bergeron2016
+  author : Bergeron, Dominic and Tremblay, A.-M. S.
+  title : Algorithms for optimized maximum entropy and diagnostic tools for analytic continuation
+  journal : Phys. Rev. E
+  year : 2016
+  volume : 94
+  pages : 023303
+  numpages : 25
+  doi : 10.1103/PhysRevE.94.023303
+  url : https://link.aps.org/doi/10.1103/PhysRevE.94.023303
+  publisher : American Physical Society
+  month : Aug
+  issue : 2
+-
+  ENTRYTYPE : article
+  ID : Bieder2014
+  author : Bieder, J. and Amadon, B.
+  title : Thermodynamics of the $\alpha$-$\gamma$ transition in cerium from first principles
+  journal : Phys. Rev. B
+  year : 2014
+  volume : 89
+  pages : 195132
+  numpages : 7
+  doi : 10.1103/PhysRevB.89.195132
+  publisher : American Physical Society
+  issue : 19
+-
+  ENTRYTYPE : article
+  ID : Blancoa1997
+  author : Miguel A. Blancoa and M. Floreza and M. Bermejo
+  title : Evaluation of the rotation matrices in the basis of real spherical harmonics"
+  journal : Journal of Molecular Structure (Theochem)
+  year : 1997
+  volume : 419
+  pages : 19
+-
+  ENTRYTYPE : article
+  ID : Bloechl1994
+  author : Bl\"{o}chl, P.E.
+  title : Projector augmented-wave method
+  journal : Phys. Rev. B
+  year : 1994
+  volume : 50
+  pages : 17953-17979
+  doi : 10.1103/PhysRevB.50.17953
+-
+  ENTRYTYPE : article
+  ID : Bloechl1994a
+  author : Bl\"ochl, Peter E. and Jepsen, O. and Andersen, O. K.
+  title : Improved tetrahedron method for Brillouin-zone integrations
+  journal : Phys. Rev. B
+  year : 1994
+  volume : 49
+  pages : 16223--16233
+  numpages : 0
+  doi : 10.1103/PhysRevB.49.16223
+  url : https://link.aps.org/doi/10.1103/PhysRevB.49.16223
+  publisher : American Physical Society
+  month : Jun
+  issue : 23
+-
+  ENTRYTYPE : article
+  ID : Bockstedte1997
+  author : Bockstedte, M. and Kley,A. and Neugebauer, J.  and Scheffler, M. 
+  title : Density-functional theory calculations for poly-atomic systems: electronic structure, static and elastic properties and ab initio molecular dynamics
+  journal : Comp. Phys. Comm.
+  year : 1997
+  volume : 107
+  pages : 187
+-
+  ENTRYTYPE : article
+  ID : Boronski1986
+  author : Boro\'nski, E. and Nieminen, R. M.
+  title : Electron-positron density-functional theory
+  journal : Phys. Rev. B
+  year : 1986
+  volume : 34
+  pages : 3820
+  publisher : American Physical Society
+  doi : 10.1103/PhysRevB.34.3820
+  issue : 6
+-
+  ENTRYTYPE : article
+  ID : Bottin2008
+  author : Bottin, F. and Leroux, S. and Knyazev, A. and Z{\'e}rah, G.
+  title : Large-scale ab initio calculations based on three levels of parallelization
+  journal : Comp. Mat. Sci.
+  year : 2008
+  volume : 42
+  pages : 329--336
+  publisher : Elsevier
+  number : 2
+-
+  ENTRYTYPE : article
+  ID : Bousquet2011
+  author : Bousquet, E. and Spaldin, N. A. and Delaney, K. T.
+  title : Unexpectedly Large Electronic Contribution to Linear Magnetoelectricity
+  journal : Phys. Rev. Lett.
+  year : 2011
+  volume : 106
+  pages : 107202
+  doi : 10.1103/PhysRevLett.106.107202
+-
+  ENTRYTYPE : article
+  ID : Bruneval2006
+  author : F. Bruneval and N. Vast and L. Reining
+  title : Effect of self-consistency on quasiparticles in solids
+  journal : Phys. Rev. B
+  year : 2006
+  volume : 74
+  pages : 045102
+-
+  ENTRYTYPE : article
+  ID : Bruneval2008
+  author : Bruneval, F. and Gonze, X.
+  title : Accurate {GW} self-energies in a plane-wave basis using only a few empty states: Towards large systems
+  journal : Phys. Rev. B
+  year : 2008
+  volume : 78
+  pages : 085125
+  numpages : 9
+  doi : 10.1103/PhysRevB.78.085125
+  publisher : American Physical Society
+  issue : 8
+-
+  ENTRYTYPE : article
+  ID : Bruneval2012
+  author : Bruneval, F.
+  title : Range-Separated Approach to the {RPA} Correlation Applied to the van der Waals Bond and to Diffusion of Defects
+  journal : Phys. Rev. Lett.
+  year : 2012
+  volume : 108
+  pages : 256403
+  numpages : 5
+  doi : 10.1103/PhysRevLett.108.256403
+  publisher : American Physical Society
+  issue : 25
+-
+  ENTRYTYPE : article
+  ID : Bruneval2014
+  author : Bruneval, F. and Crocombette, J.-P. and Gonze, X. and Dorado, B. and Torrent, M. and Jollet, F.
+  title : Consistent treatment of charged systems within periodic boundary conditions: The projector augmented-wave and pseudopotential methods revisited
+  journal : Phys. Rev. B
+  year : 2014
+  volume : 89
+  pages : 045116
+  numpages : 13
+  doi : 10.1103/PhysRevB.89.045116
+  publisher : American Physical Society
+  issue : 4
+-
+  ENTRYTYPE : article
+  ID : Calloni2005
+  author : Calloni, A. and Dupasquier, A. and Ferragut, R. and Folegati, P. and Iglesias, M.M. and Makkonen, I. and Puska, M.J.
+  title : Positron localization effects on the Doppler broadening of the annihilation line: Aluminum as a case study
+  journal : Phys. Rev. B
+  year : 2005
+  volume : 72
+  pages : 054112
+  publisher : APS
+  number : 5
+-
+  ENTRYTYPE : article
+  ID : Campillo1998
+  author : I. Campillo and J. M. Pitarke and A. G. Eguiluz
+  title : Electronic stopping power of aluminum crystal
+  journal : Phys. Rev. B
+  year : 1998
+  volume : 58
+  pages : 10307 - 10314
+  doi : 10.1103/PhysRevB.58.10307
+  issue : 16
+-
+  ENTRYTYPE : article
+  ID : Cappellini1993
+  author : Cappellini, G. and Del Sole, R. and Reining, L. and Bechstedt, F.
+  title : Model dielectric function for semiconductors
+  journal : Phys. Rev. B
+  year : 1993
+  volume : 47
+  pages : 9892--9895
+  numpages : 0
+  doi : 10.1103/PhysRevB.47.9892
+  publisher : American Physical Society
+  month : Apr
+  issue : 15
+-
+  ENTRYTYPE : article
+  ID : Caracas2007
+  author : Caracas, R. and Cohen, R.E. 
+  title : Prediction of polar ordered oxynitride perovskites
+  journal : J. Appl. Phys. Lett.
+  year : 2007
+  volume : 91
+  pages : 092902
+  publisher : 
+  doi : 10.1063/1.2776370
+  number : 
+-
+  ENTRYTYPE : article
+  ID : Caracas2007a
+  author : Caracas, R. and Cohen, R.E. 
+  title : Post-perovskite phase in selected sesquioxides from density-functional calculations
+  journal : Phys. Rev. B
+  year : 2007
+  volume : 76
+  pages : 184101
+  publisher : 
+  doi : 
+  number : 
+-
+  ENTRYTYPE : article
+  ID : Caracas2008
+  author : Caracas, R. 
+  title : Dynamical Instabilities of Ice X
+  journal : Phys. Rev. Lett.
+  year : 2008
+  volume : 101
+  pages : 085502
+  publisher : 
+  doi : 10.1103/PhysRevLett.101.085502
+  number : 
+-
+  ENTRYTYPE : article
+  ID : Casida1998
+  author : Mark E. Casida and Christine Jamorski and Kim C. Casida and Dennis R. Salahub
+  title : Molecular excitation energies to high-lying bound states from time-dependent density-functional response theory: Characterization and correction of the time-dependent local density approximation ionization threshold
+  journal : J. Chem. Phys.
+  year : 1998
+  volume : 108
+  pages : 4439
+  doi : 10.1063/1.475855
+-
+  ENTRYTYPE : article
+  ID : Casida1998a
+  author : Mark E. Casida and Kim C. Casida and Dennis R. Salahub
+  title : Excited-state potential energy curves from time-dependent density-functional theory: A cross section of formaldehyde's 1A1 manifold
+  journal : International Journal of Quantum Chemistry
+  year : 1998
+  volume : 70
+  pages : 933
+-
+  ENTRYTYPE : article
+  ID : Cococcioni2005
+  author : Cococcioni, M. and de Gironcoli, S.
+  title : Linear response approach to the calculation of the effective interaction parameters in the {LDA}+{U} method
+  journal : Phys. Rev. B
+  year : 2005
+  volume : 71
+  pages : 035105
+  publisher : American Physical Society
+  doi : 10.1103/PhysRevB.71.035105
+  timestamp : 2012.06.21
+  number : 3
+  owner : amadonb
+  file : :/media/disk_iomega/BIBLIO/Interaction/PhysRevB.71.035105.pdf:PDF
+  keywords : DFTU interaction, cRPA
+  refid : 10.1103/PhysRevB.71.035105
+-
+  ENTRYTYPE : book
+  ID : Coleman2015
+  author : Piers Coleman
+  title : Introduction to Many-Body Physics
+  year : 2015
+  publisher : Cambridge University Press
+-
+  ENTRYTYPE : article
+  ID : Czyzyk1994
+  author : M. T. Czyzyk and G. A. Sawatzky
+  title : Local-density functional and on-site correlations: {T}he electronic structure of {L}a$_2${C}u{O}$_4$ and {L}a{C}u{O}$_3$
+  journal : Phys. Rev. B
+  year : 1994
+  volume : 49
+  pages : 14211
+-
+  ENTRYTYPE : book
+  ID : Daubechies1992
+  author : Daubechies, I.
+  title : 10 Lectures on Wavelets
+  year : 1992
+  publisher : Society for Industrial and Applied Mathematics ({SIAM}, 3600 {M}arket {S}treet, {F}loor 6, {P}hiladelphia, {PA} 19104)
+  isbn : 9780898712742
+  language : en
+  keywords : Mathematics / General, Mathematics / Infinity, Mathematics / Mathematical Analysis, Science / Waves \& Wave Mechanics, Technology \& Engineering  / General
+-
+  ENTRYTYPE : article
+  ID : Dion2004
+  author : Dion, M. and Rydberg, H. and Schr\"oder, E. and Langreth, D. C. and Lundqvist, B. I.
+  title : Van der Waals Density Functional for General Geometries
+  journal : Phys. Rev. Lett.
+  year : 2004
+  volume : 92
+  pages : 246401
+  note : Erratum: DOI:10.1103/PhysRevLett.95.109902
+  doi : 10.1103/PhysRevLett.92.246401
+-
+  ENTRYTYPE : article
+  ID : Espejo2012
+  author : Espejo, C. and Rangel, T. and Pouillon, Y. and Romero, A. H. and Gonze, X.
+  title : Wannier functions approach to van der {W}aals} interactions in {ABINIT} 
+  journal : Comp. Phys. Comm.
+  year : 2012
+  volume : 183
+  pages : 480
+-
+  ENTRYTYPE : article
+  ID : Fetter1971
+  author : A.L. Fetter and J.D. Walecka
+  title : Quantum Theory of Many-Particle Systems
+  journal : McGraw-Hill, New York
+  year : 1971
+  volume : 
+  pages : 
+  publisher : McGraw-Hill, New York
+-
+  ENTRYTYPE : article
+  ID : Folegati2007
+  author : Folegati, P. and Makkonen, I. and Ferragut, R. and Puska, M.J.
+  title : Analysis of electron-positron momentum spectra of metallic alloys as supported by first-principles calculations
+  journal : Phys. Rev. B
+  year : 2007
+  volume : 75
+  pages : 054201
+  publisher : APS
+  number : 5
+-
+  ENTRYTYPE : article
+  ID : Fresard1997
+  author : Raymond Fr\'esard and Gabriel Kotliar
+  title : Interplay of Mott transition and ferromagnetism in the orbitally degenerate Hubbard model
+  journal : Phys. Rev. B
+  year : 1997
+  volume : 56
+  pages : 12909
+-
+  ENTRYTYPE : article
+  ID : Freund1995
+  author : Freund, R. W. and Nachtigal, N. M.
+  title : Software for simplified {L}anczos and {QMR} algorithms
+  journal : Applied Numerical Mathematics
+  year : 1995
+  volume : 19
+  pages : 319
+  doi : 10.1016/0168-9274(95)00089-5
+-
+  ENTRYTYPE : article
+  ID : Fuchs1999
+  author : Fuchs,M. and Scheffler,M.
+  title : Ab initio pseudopotentials for electronic structure calculations of poly-atomic systems using density-functional theory 
+  journal : Comp. Phys. Comm.
+  year : 1999
+  volume : 119
+  pages : 67 - 98
+  note : 
+  doi : 10.1016/S0010-4655(98)00201-X
+  url : http://www.sciencedirect.com/science/article/pii/S001046559800201X
+  issn : 0010-4655
+  number : 1
+-
+  ENTRYTYPE : article
+  ID : Garrity2014
+  author : Garrity, K.F. and Bennett, J.W. and Rabe, K.M. and Vanderbilt, D.
+  title : Pseudopotentials for high-throughput {DFT} calculations 
+  journal : Comp. Mat. Sci. 
+  year : 2014
+  volume : 81
+  pages : 446 - 452
+  note : 
+  doi : 10.1016/j.commatsci.2013.08.053
+  url : http://www.sciencedirect.com/science/article/pii/S0927025613005077
+  issn : 0927-0256
+  number : 
+  keywords : Density functional theory 
+-
+  ENTRYTYPE : article
+  ID : Geneste2012
+  author : G. Geneste and M. Torrent and F. Bottin and P. Loubeyre
+  title : Strong Isotope Effect in Phase {I}{I} of Dense Solid Hydrogen and Deuterium
+  journal : Phys. Rev. Lett.
+  year : 2012
+  volume : 109
+  pages : 155303
+-
+  ENTRYTYPE : article
+  ID : Geneste2015
+  author : G. Geneste and A. Ottochian and J. Hermet and G. Dezanneau
+  title : Proton transport in barium stannate: classical, semi-classical and quantum regimes
+  journal : Phys. Chem. Chem. Phys.
+  year : 2015
+  volume : 17
+  pages : 19104
+-
+  ENTRYTYPE : unpublished
+  ID : Geneste2016
+  author : G. Geneste and B. Amadon and M. Torrent and G. Dezanneau
+  year : 2016
+-
+  ENTRYTYPE : article
+  ID : Genovese2008
+  author : Genovese,L. and Neelov,L. and Goedecker,S. and Deutsch,T. and Alireza Ghasemi,S. and Willand,A. and Caliste,D. and Zilberberg,O. and Rayson,M. and Bergman,A. and Schneider,R.
+  title : Daubechies wavelets as a basis set for density functional pseudopotential calculations
+  journal : J. Chem. Phys.
+  year : 2008
+  volume : 129
+  pages : 014109
+-
+  ENTRYTYPE : article
+  ID : Genovese2009
+  author : Genovese,L. and Ospici,M. and Deutsch,T. and M\'ehaut,J.-F. and Neelov,A. and Goedecker,S.
+  title :  Density Functional Theory calculation on many-cores hybrid {CPU}-{GPU} architectures in hybrid architecture
+  journal : J. Chem. Phys.
+  year : 2009
+  volume : 131
+  pages : 034103
+  number : 
+-
+  ENTRYTYPE : article
+  ID : Georges1996
+  author : Georges, A. and Kotliar, G. and Krauth, W. and Rozenberg, M.J.
+  title : Dynamical mean-field theory of strongly correlated fermion systems and the limit of infinite dimensions
+  journal : Rev. Mod. Phys.
+  year : 1996
+  volume : 68
+  pages : 13--125
+  publisher : American Physical Society
+  doi : 10.1103/RevModPhys.68.13
+  issue : 1
+-
+  ENTRYTYPE : article
+  ID : Georges2004
+  author : Georges, A.
+  title : Strongly Correlated Electron Materials: Dynamical Mean-Field Theory and Electronic Structure
+  journal : {AIP} {C}onf. {P}roc.
+  year : 2004
+  volume : 715
+  pages : 3--74
+  publisher : AIP
+  doi : 10.1063/1.1800733
+  timestamp : 2012.10.18
+  number : 1
+  owner : amadonb
+  file : :/media/disk_iomega/BIBLIO/DMFT/APC000003.pdf:PDF
+  keywords : strongly correlated electron systems, metal-insulator transition,	density functional theory, electronic structure, band theory, Green's function methods, spin systems, transport processes, critical phenomena, transition metal compounds, rare earth compounds, actinide compounds, oxygen compounds
+-
+  ENTRYTYPE : article
+  ID : Giannozzi2009
+  author : Giannozzi, P. and Baroni, S. and Bonini, N. and Calandra, M. and Car, R. and Cavazzoni, C. and Ceresoli, D. and Chiarotti, G.L. and  Cococcioni, M. and Dabo, I. and Dal Corso, A. and de Gironcoli, S. and Fabris, S. and Fratesi, G. and Gebauer, R. and Gerstmann, U. and Gougoussis, C. and Kokalj, A. and Lazzeri, M. and Martin-Samos, L. and Marzari, N. and Mauri, F. and Mazzarello, R. and Paolini, S. and Pasquarello, A. and Paulatto, L. and Sbraccia, C. and Scandolo, S. and Sclauzero, G. and Seitsonen, A.P. and Smogunov, A. and Umari, P. and Wentzcovitch, R.M.
+  title : {QUANTUM} {ESPRESSO}: a modular and open-source software project for quantum simulations of materials
+  journal : J. Phys.: Cond. Matt.
+  year : 2009
+  volume : 21
+  pages : 395502
+  url : http://iopscience.iop.org/article/10.1088/0953-8984/21/39/395502
+  number : 39
+-
+  ENTRYTYPE : article
+  ID : Giantomassi2011
+  author : Giantomassi, M. and Stankovski, M. and Shaltaf, R. and Gruning, M. and Bruneval, F. and Rinke, P. and Rignanese, G.M.
+  title : {Electronic properties of interfaces and defects from many-body perturbation theory: Recent developments and applications}
+  journal : Physica Status Solidi B
+  year : 2011
+  volume : 248
+  pages : 275--289
+  doi : 10.1002/pssb.201046094
+  number : 2
+-
+  ENTRYTYPE : article
+  ID : Gillet2013
+  author : Gillet, Y. and Giantomassi, M. and Gonze, X.
+  title : First-principles study of excitonic effects in Raman intensities
+  journal : Phys. Rev. B
+  year : 2013
+  volume : 88
+  pages : 094305
+  numpages : 9
+  doi : 10.1103/PhysRevB.88.094305
+  url : http://link.aps.org/doi/10.1103/PhysRevB.88.094305
+  publisher : American Physical Society
+  file : Gillet2013.pdf:Gillet2013.pdf:PDF;Gillet2013.pdf:Gillet2013.pdf:PDF
+  issue : 9
+-
+  ENTRYTYPE : article
+  ID : Gillet2015
+  author : Gillet, Y. and Giantomassi, M. and Gonze, X.
+  title : Efficient Interpolation Technique for {B}ethe-{S}alpeter Calculation of Optical Spectra
+  journal : Comput. Phys. Comm.
+  year : 2016
+  volume : 203C
+  pages : 83-93
+  doi : 10.1016/j.cpc.2016.02.008
+  timestamp : 2015.08.27
+  owner : yannick
+-
+  ENTRYTYPE : article
+  ID : Gillet2017
+  author : Yannick Gillet and Stefan Kontur and Matteo Giantomassi and Claudia Draxl and Xavier Gonze
+  title : Ab Initio Approach to Second-order Resonant Raman Scattering Including Exciton-Phonon Interaction
+  journal : Scientific Reports
+  year : 2017
+  volume : 7
+  pages : 7344
+-
+  ENTRYTYPE : article
+  ID : Godby1989
+  author : R. W. Godby and R. J. Needs
+  title : Metal-insulator transition in Kohn-Sham theory and quasiparticle theory
+  journal : Phys. Rev. Lett.
+  year : 1989
+  volume : 62
+  pages : 1169
+  numpages : 0
+  doi : 10.1103/PhysRevLett.62.1169
+  publisher : American Physical Society
+  issue : 
+-
+  ENTRYTYPE : article
+  ID : Goedecker1996
+  author : Goedecker, S. and Teter, M. and H\"utter, J.
+  title : Separable dual-space Gaussian pseudopotentials
+  journal : Phys. Rev. B
+  year : 1996
+  volume : 54
+  pages : 1703--1710
+  number : 3
+-
+  ENTRYTYPE : article
+  ID : Gonze1991
+  author : Gonze, X. and Stumpf, R. and Scheffler, M.
+  title : Analysis of separable potentials
+  journal : Phys. Rev. B
+  year : 1991
+  volume : 44
+  pages : 8503--8513
+  numpages : 0
+  doi : 10.1103/PhysRevB.44.8503
+  publisher : American Physical Society
+  issue : 16
+-
+  ENTRYTYPE : article
+  ID : Gonze1995
+  author : Gonze, X.
+  title : Adiabatic density-functional perturbation theory
+  journal : Phys. Rev. A
+  year : 1995
+  volume : 52
+  pages : 1096--1114
+  doi : 10.1103/PhysRevA.52.1096
+  number : 2
+-
+  ENTRYTYPE : article
+  ID : Gonze1997
+  author : Gonze, X.
+  title : First-principles responses of solids to atomic displacements and homogeneous electric fields: Implementation of a conjugate-gradient	algorithm
+  journal : Phys. Rev. B
+  year : 1997
+  volume : 55
+  pages : 10337--10354
+-
+  ENTRYTYPE : article
+  ID : Gonze1997a
+  author : Gonze,X. and Lee,C.
+  title : Dynamical matrices, Born effective charges, dielectric permittivity tensors, and interatomic force constants from density-functional perturbation theory
+  journal : Phys. Rev. B
+  year : 1997
+  volume : 55
+  pages : 10355
+-
+  ENTRYTYPE : article
+  ID : Gonze2002
+  author : X. Gonze and J.-M. Beuken and R. Caracas and F. Detraux and M. Fuchs and G.-M. Rignanese and L. Sindic and M. Verstraete and G. Zerah and F. Jollet and M. Torrent and A. Roy and M. Mikami and Ph. Ghosez and J.-Y. Raty and D.C. Allan
+  title : First-principles computation of material properties : the ABINIT software project
+  journal : Comp. Mat. Science
+  year : 2002
+  volume : 25
+  pages : 478--492
+-
+  ENTRYTYPE : article
+  ID : Gonze2005
+  author : X. Gonze and G.-M. Rignanese and M. Verstraete and J.-M. Beuken and Y. Pouillon and R. Caracas and F. Jollet and M. Torrent and G. Zerah and M. Mikami and Ph. Ghosez and M. Veithen and J.-Y. Raty and V. Olevano and F. Bruneval and L. Reining and R. Godby and G. Onida and D.R. Hamann an D.C. Allan
+  title : A brief introduction to the ABINIT software package
+  journal : Zeit. Kristallogr
+  year : 2005
+  volume : 220
+  pages : 558-562
+-
+  ENTRYTYPE : article
+  ID : Gonze2009
+  author : X. Gonze and B. Amadon and P.-M. Anglade and  J.-M. Beuken and F. Bottin and P. Boulanger and F. Bruneval and D. Caliste and R. Caracas and M. C\^{o}t\'{e} and T. Deutsch and L. Genovese and Ph. Ghosez and M. Giantomassi and S. Goedecker and D.R. Hamann and P. Hermet and F. Jollet and G. Jomard and S. Leroux and M. Mancini and S. Mazevet and M.J.T. Oliveira and G. Onida and Y. Pouillon and T. Rangel and G.-M. Rignanese and D. Sangalli and R. Shaltaf and M. Torrent and M.J. Verstraete and G. Zerah and J.W. Zwanziger
+  title : {ABINIT}: First-Principle approach to material and nanosystem properties
+  journal : Comp. Phys. Comm.
+  year : 2009
+  volume : 180
+  pages : 2582-2615
+-
+  ENTRYTYPE : article
+  ID : Gonze2011
+  author : Gonze, X. and Boulanger, P. and C\^ot\'e, M.
+  title : Theoretical approaches to the temperature and zero-point motion effects on the electronic band structure.
+  journal : Annalen der Physik
+  year : 2011
+  volume : 523
+  pages : 168
+-
+  ENTRYTYPE : article
+  ID : Gonze2016
+  author : X. Gonze and F. Jollet and F. Abreu Araujo and D. Adams and B. Amadon and T. Applencourt and C. Audouze and J.-M. Beuken and J. Bieder and A. Bokhanchuk and E. Bousquet and F. Bruneval and D. Caliste and M. C\^ot\'e and F. Dahm and F. Da Pieve and M. Delaveau and M. Di Gennaro and B. Dorado and C. Espejo and G. Geneste and L. Genovese and A. Gerossier and M. Giantomassi and Y. Gillet and D.R. Hamann and L. He and G. Jomard and J. Laflamme Janssen and S. Le Roux and A. Levitt and A. Lherbier and F. Liu and I. Lukacevic and A. Martin and C. Martins and M.J.T. Oliveira and S. Ponc\'e and Y. Pouillon and T. Rangel and G.-M. Rignanese and A.H. Romero and B. Rousseau and O. Rubel and A.A. Shukri and M. Stankovski and M. Torrent and M.J. Van Setten and B. Van troeye and M.J. Verstraete and D. Waroquier and J. Wiktor and B. Xue and A. Zhou and J.W. Zwanziger
+  title : Recent developments in the {ABINIT} software package
+  journal : Computer Physics Communications
+  year : 2016
+  volume : 205
+  pages : 106
+  doi : 10.1016/j.cpc.2016.04.003
+  url : http://www.sciencedirect.com/science/article/pii/S0010465516300923
+  issn : 0010-4655
+  keywords : Many-Body Perturbation Theory
+-
+  ENTRYTYPE : article
+  ID : Grimme2006
+  author : S. Grimme
+  title : Semiempirical {GGA}-Type Density Functional Constructed with a Long-Range Dispersion Correction
+  journal : J. Comput. Chem.
+  year : 2006
+  volume : 27
+  pages : 1787
+-
+  ENTRYTYPE : article
+  ID : Grimme2010
+  author : S. Grimme and J. Anthony and S. Ehrlich and H. Krieg
+  title : A consistent and accurate ab initio parametrization of density functional dispersion correction ({DFT}-{D})} for the 94 elements {H}-{P}u 
+  journal : J. Chem. Phys.
+  year : 2010
+  volume : 132
+  pages : 154104
+-
+  ENTRYTYPE : article
+  ID : Grimme2010a
+  author : S. Grimme and S. Ehrlich and L. Goerigk
+  title : Effect of the Damping Function in Dispersion Corrected Density Functional Theory
+  journal : J. Comput. Chem.
+  year : 2011
+  volume : 32
+  pages : 1456-1465
+-
+  ENTRYTYPE : book
+  ID : Grimvall1981
+  author : Grimvall, G.
+  title : The electron phonon interaction in metals
+  year : 1981
+  publisher : North-Holland
+  address : Amsterdam
+-
+  ENTRYTYPE : article
+  ID : Gruning2009
+  author : Grüning, Myrta and Marini, Andrea and Gonze, Xavier
+  title : Exciton-Plasmon States in Nanoscale Materials: {Breakdown} of the {Tamm−Dancoff} Approximation
+  journal : Nano Lett.
+  year : 2009
+  volume : 9
+  pages : 2820-2824
+  publisher : American Chemical Society (ACS)
+  url : http://pubs.acs.org/doi/abs/10.1021/nl803717g
+  issn : 1530-6984, 1530-6992
+  source : Crossref
+  month : ug, number = {8
+-
+  ENTRYTYPE : article
+  ID : Gull2011
+  author : Gull, E. and Millis, A.J. and Liechtenstein, A. I. and Rubtsov, A.N. and Troyer, M. and Werner, P.
+  title : Continuous-time Monte Carlo methods for quantum impurity models
+  journal : Rev. Mod. Phys.
+  year : 2011
+  volume : 83
+  pages : 349--404
+  publisher : American Physical Society
+  doi : 10.1103/RevModPhys.83.349
+  timestamp : 2012.06.22
+  number : 2
+  owner : amadonb
+  file : :/media/disk_iomega/BIBLIO/Interaction/RevModPhys.83.349-1.pdf:PDF
+  keywords : interaction CTQMC
+  refid : 10.1103/RevModPhys.83.349
+-
+  ENTRYTYPE : article
+  ID : Hamann1979
+  author : Hamann, D.R. and Schl\"uter, M. and Chiang, C.
+  title : Norm-Conserving Pseudopotentials
+  journal : Phys. Rev. Lett.
+  year : 1979
+  volume : 43
+  pages : 1494--1497
+  numpages : 3
+  doi : 10.1103/PhysRevLett.43.1494
+  publisher : American Physical Society
+-
+  ENTRYTYPE : article
+  ID : Hamann1989
+  author : Hamann, D. R.
+  title : Generalized norm-conserving pseudopotentials
+  journal : Phys. Rev. B
+  year : 1989
+  volume : 40
+  pages : 2980--2987
+  numpages : 0
+  doi : 10.1103/PhysRevB.40.2980
+  publisher : American Physical Society
+  issue : 5
+-
+  ENTRYTYPE : article
+  ID : Hamann2005
+  author : D. R. Hamann and X. Wu and K. M. Rabe and D. Vanderbilt
+  title : Metric tensor formulation of strain in density-functional perturbation theory
+  journal : Phys. Rev. B
+  year : 2005
+  volume : 71
+  pages : 035117
+-
+  ENTRYTYPE : article
+  ID : Hamann2013
+  author : Hamann, D. R.
+  title : Optimized norm-conserving Vanderbilt pseudopotentials
+  journal : Phys. Rev. B
+  year : 2013
+  volume : 88
+  pages : 085117
+  numpages : 10
+  doi : 10.1103/PhysRevB.88.085117
+  publisher : American Physical Society
+  issue : 8
+-
+  ENTRYTYPE : article
+  ID : Harju2013
+  author : Harju,A. and Siro,T. and Federici Canova,F. and Hakala,S. and Rantalaiho,T.
+  title : Computational Physics on Graphics Processing Units
+  journal : Lecture Notes in Computer Science
+  year : 2013
+  volume : 7782
+  pages : 3--26
+  number : 
+-
+  ENTRYTYPE : article
+  ID : Harl2010
+  author : Harl, J. and Schimka, L. and Kresse, G.
+  title : Assessing the quality of the random phase approximation for lattice constants and atomization energies of solids
+  journal : Phys. Rev. B
+  year : 2010
+  volume : 81
+  pages : 115126
+  numpages : 18
+  doi : 10.1103/PhysRevB.81.115126
+  publisher : American Physical Society
+  issue : 11
+-
+  ENTRYTYPE : article
+  ID : Hartwigsen1998
+  author : Hartwigsen, C. and Goedecker, S. and H\"utter, J.
+  title : Relativistic separable dual-space {G}aussian pseudopotentials from {H} to {R}n
+  journal : Phys. Rev. B
+  year : 1998
+  volume : 58
+  pages : 3641--3662
+  number : 7
+-
+  ENTRYTYPE : article
+  ID : Haydock1980
+  author : Haydock, R.
+  title : The recursive solution of the {S}chr\"{o}dinger equation
+  journal : Comp. Phys. Comm.
+  year : 1980
+  volume : 20
+  pages : 11 - 16
+  note : 
+  doi : 10.1016/0010-4655(80)90101-0
+  url : http://www.sciencedirect.com/science/article/pii/0010465580901010
+  issn : 0010-4655
+  number : 1
+-
+  ENTRYTYPE : article
+  ID : He2014
+  author : L. He and F. Liu and G. Hautier and M. J. T. Oliveira and M. A. L. Marques and F. D. Vila and J. J. Rehr and G.-M. Rignanese and A. Zhou
+  title : Accuracy of generalized gradient approximation functionals for density-functional perturbation theory calculations
+  journal : Phys. Rev. B
+  year : 2014
+  volume : 89
+  pages : 064305
+  doi : 10.1103/PhysRevB.89.064305
+-
+  ENTRYTYPE : article
+  ID : Hedin1965
+  author : L. Hedin 
+  title : New Method for Calculating the One-Particle Green's Function with Application to the Electron-Gas Problem
+  journal : Phys. Rev. A
+  year : 1965
+  volume : 139
+  pages : 796
+-
+  ENTRYTYPE : book
+  ID : Hellwege1985
+  author : Hellwege,K.-H. and Olsen,J.L. (Eds.)
+  title : Electrical Resistivity, Thermoelectrical Power and Optical Properties
+  year : 1985
+  volume : 15b
+  publisher : Springer
+  date-modified : 2014-03-04 10:21:33 +0000
+  address : Berlin Heidelberg
+  date-added : 2014-02-21 11:07:18 +0000
+-
+  ENTRYTYPE : article
+  ID : Henkelman2000
+  author : Henkelman, G. and J{\'o}nsson, H.
+  title : Improved tangent estimate in the nudged elastic band method for finding minimum energy paths and saddle points
+  journal : The Journal of chemical physics
+  year : 2000
+  volume : 113
+  pages : 9978--9985
+  publisher : AIP Publishing
+  number : 22
+-
+  ENTRYTYPE : article
+  ID : Hermet2009
+  author : Hermet, P. and Veithen, M. and Ghosez, P.
+  title : Raman scattering intensities in BaTiO(3) and PbTiO(3) prototypical ferroelectrics from density functional theory.
+  journal : J. Phys. : Condens. Matter
+  year : 2009
+  volume : 21
+  pages : 215901
+  publisher : 
+  doi : 10.1088/0953-8984/21/21/215901
+  number : 
+-
+  ENTRYTYPE : article
+  ID : Hohenberg1964
+  author : Hohenberg, P.  and Kohn, W. 
+  title : Inhomogeneous Electron Gas
+  journal : Phys. Rev.
+  year : 1964
+  volume : 136
+  pages : B864--B871
+  publisher : American Physical Society
+  doi : 10.1103/PhysRev.136.B864
+  number : 3B
+-
+  ENTRYTYPE : article
+  ID : Holzwarth2001
+  author : N.A.W. Holzwarth and A.R. Tackett and G.E. Matthews 
+  title : A Projector Augmented Wave ({PAW}) code for electronic structure calculations, Part {I}: {ATOMPAW} for generating atom-centered functions
+  journal : Comp. Phys. Comm.
+  year : 2001
+  volume : 135
+  pages : 329
+-
+  ENTRYTYPE : article
+  ID : Hughes1996
+  author : Hughes, J. L. P. and Sipe, J. E.
+  title : Calculation of second-order optical response in semiconductors
+  journal : Phys. Rev. B
+  year : 1996
+  volume : 53
+  pages : 10751--10763
+  publisher : American Physical Society
+  doi : 10.1103/PhysRevB.53.10751
+  timestamp : 2015.11.12
+  owner : yannick
+  issue : 16
+-
+  ENTRYTYPE : article
+  ID : Hybertsen1985
+  author : Hybertsen, Mark S. and Louie, Steven G.
+  title : First-Principles Theory of Quasiparticles: {Calculation} of Band Gaps in Semiconductors and Insulators
+  journal : Phys. Rev. Lett.
+  year : 1985
+  volume : 55
+  pages : 1418-1421
+  publisher : American Physical Society (APS)
+  doi : 10.1103/physrevlett.55.1418
+  url : 10.1103/physrevlett.55.1418
+  issn : 0031-9007
+  source : Crossref
+  month : ep, number = {13
+-
+  ENTRYTYPE : article
+  ID : Hybertsen1986
+  author : M. S. Hybertsen and S. G. Louie
+  title : Electron correlation in semiconductors and insulators: Band gaps and quasiparticle energies
+  journal : Phys. Rev. B
+  year : 1986
+  volume : 34
+  pages : 5390
+  doi : 10.1103/PhysRevB.34.5390
+  number : 
+-
+  ENTRYTYPE : article
+  ID : Janssen2015
+  author : Laflamme Janssen, J. and Rousseau, B. and C{\^o}t{\'e}, M.
+  title : Efficient dielectric matrix calculations using the {L}anczos algorithm for fast many-body {G}$_0${W}$_0$ implementations
+  journal : Phys. Rev. B
+  year : 2015
+  volume : 91
+  pages : 125120
+  doi : 10.1103/PhysRevB.91.125120
+  number : 12
+-
+  ENTRYTYPE : article
+  ID : Jia2017
+  author : Yongchao Jia and Samuel Ponc\'e and Anna Miglio and Masayoshi Mikami and Xavier Gonze
+  title : Assessment of First-Principles and Semiempirical Methodologies for Absorption and Emission Energies of Ce$^{3+}$-Doped Luminescent Materials
+  journal : Adv. Optical Mater.
+  year : 2017
+  volume : 5
+  pages : 1600997
+-
+  ENTRYTYPE : article
+  ID : Jollet2009
+  author : F. Jollet and G. Jomard and B. Amadon and J.P. Crocombette and D. Torumba
+  title : Hybrid functional for correlated electrons in the projector augmented-wave formalism: Study of multiple minima for actinide oxides
+  journal : Phys. Rev. B
+  year : 2009
+  volume : 80
+  pages : 235109
+-
+  ENTRYTYPE : article
+  ID : Jollet2014
+  author : F. Jollet and M. Torrent and N. Holzwarth
+  title : Generation of Projector Augmented-Wave atomic data: a 71 element validated table in the {XML} format
+  journal : Comp. Phys. Comm.
+  year : 2014
+  volume : 185
+  pages : 1246-1254
+-
+  ENTRYTYPE : article
+  ID : Kawasuso2005
+  author : Kawasuso, A. and Yoshikawa, M. and Itoh, H. and Chiba, T. and Higuchi, T. and Betsuyaku, K. and Redmann, F. and Krause-Rehberg, R.
+  title : Electron-positron momentum distributions associated with isolated silicon vacancies in 3 {C}-{S}i {C}
+  journal : Phys. Rev. B
+  year : 2005
+  volume : 72
+  pages : 045204
+  publisher : APS
+  number : 4
+-
+  ENTRYTYPE : article
+  ID : Kingsmith1993
+  author : King-Smith, R. D. and Vanderbilt, D. 
+  title : Theory of polarization of crystalline solids
+  journal : Phys. rev. B
+  year : 1993
+  volume : 47
+  pages : 1651--1654
+  number : 3
+-
+  ENTRYTYPE : article
+  ID : Kohn1965
+  author : Kohn, W.  and Sham, L. J.
+  title : Self-Consistent Equations Including Exchange and Correlation Effects
+  journal : Phys. Rev.
+  year : 1965
+  volume : 140
+  pages : A1133--A1138
+  publisher : American Physical Society
+  doi : 10.1103/PhysRev.140.A1133
+  number : 4A
+-
+  ENTRYTYPE : article
+  ID : Kolos1960
+  author : W. Kolos and C.C.J. Roothaan
+  title : Accurate Electronic Wave Functions for the H$_2$ Molecule
+  journal : Rev. Mod. Phys.
+  year : 1960
+  volume : 32
+  pages : 219
+-
+  ENTRYTYPE : article
+  ID : Kotliar2006
+  author : Kotliar, G. and Savrasov, S. Y. and Haule, K. and Oudovenko, V. S. and Parcollet, O. and Marianetti, C. A.
+  title : Electronic structure calculations with dynamical mean-field theory
+  journal : Rev. Mod. Phys.
+  year : 2006
+  volume : 78
+  pages : 865--951
+  publisher : American Physical Society
+  doi : 10.1103/RevModPhys.78.865
+  timestamp : 2012.07.13
+  number : 3
+  file : :/media/disk_iomega/BIBLIO/Review/RMP2006.pdf:PDF
+  owner : amadonb
+  refid : 10.1103/RevModPhys.78.865
+-
+  ENTRYTYPE : article
+  ID : Kresse1999
+  author : Kresse, G. and Joubert, D.
+  title : From ultrasoft pseudopotentials to the projector augmented-wave method
+  journal : Phys. Rev. B
+  year : 1999
+  volume : 59
+  pages : 1758--1775
+  doi : 10.1103/PhysRevB.59.1758
+-
+  ENTRYTYPE : article
+  ID : Laflamme2016
+  author : Laflamme Janssen, J. and Gillet, Y. and Ponc\'e, S. and Martin, A. and Torrent, M. and Gonze, X.
+  title : Precise Effective Masses from Density Functional Perturbation Theory
+  journal : Phys. Rev. B
+  year : 2016
+  volume : 93
+  pages : 205147
+-
+  ENTRYTYPE : article
+  ID : Lebegue2003
+  author : Lebègue, S. and Arnaud, B. and Alouani, M. and Bloechl, P. E.
+  title : Implementation of an all-electron {GW} approximation based on the projector augmented wave method without plasmon pole approximation: {Application} to Si, {SiC,} {AlAs,} {InAs,} {NaH,} and {KH}
+  journal : Phys. Rev. B
+  year : 2003
+  volume : 67
+  publisher : American Physical Society (APS)
+  doi : 10.1103/physrevb.67.155208
+  issn : 0163-1829, 1095-3795
+  source : Crossref
+  month : pr, number = {15
+-
+  ENTRYTYPE : article
+  ID : Lebegue2010
+  author : Leb\`egue, S. and Harl, J. and Gould, T. and \'Angy\'an, J. G. and Kresse, G. and Dobson, J. F.
+  title : Cohesive Properties and Asymptotics of the Dispersion Interaction in Graphite by the Random Phase Approximation
+  journal : Phys. Rev. Lett.
+  year : 2010
+  volume : 105
+  pages : 196401
+-
+  ENTRYTYPE : article
+  ID : Lechermann2006
+  author : F. Lechermann, A. Georges, A. Poteryaev, S. Biermann, M. Posternak, A. Yamasaki, and O. K. Andersen
+  title : Dynamical mean-field theory using Wannier functions: A flexible route to electronic structure calculations of strongly correlated materials
+  journal : Phys. Rev. B
+  year : 2006
+  volume : 74
+  pages : 125120
+-
+  ENTRYTYPE : article
+  ID : Lee1995
+  author : C. Lee and X. Gonze
+  title : Ab-initio calculation of the thermodynamic properties and atomic temperature factors of SiO$_2$ $\alpha$-quartz and stishovite
+  journal : Phys. Rev. B
+  year : 1995
+  volume : 51
+  pages : 8610
+-
+  ENTRYTYPE : article
+  ID : Lejaeghere2014
+  author : K. Lejaeghere and V. {V}an {S}peybroeck and G. {V}an {O}ost and S. Cottenier
+  title : Error estimates for solid-state density-functional theory predictions: an overview by means of the ground-state elemental crystals
+  journal : Crit. Rev. Solid State Mater. Sci.
+  year : 2014
+  volume : 39
+  pages : 1
+-
+  ENTRYTYPE : article
+  ID : Levitt2015
+  author : Levitt, A. and Torrent,M.
+  title : Parallel eigensolvers in plane-wave Density Functional Theory
+  journal : Comp. Phys. Comm.
+  year : 2015
+  volume : 187
+  pages : 98--105
+  number : 
+-
+  ENTRYTYPE : article
+  ID : Liechtenstein1995
+  author : Liechtenstein, A. I. and Anisimov, V. I. and Zaanen, J.
+  title : Density-functional theory and strong interactions: Orbital ordering in Mott-Hubbard insulators
+  journal : Phys. Rev. B
+  year : 1995
+  volume : 52
+  pages : R5467--R5470
+  publisher : American Physical Society
+  doi : 10.1103/PhysRevB.52.R5467
+  timestamp : 2012.06.14
+  number : 8
+  owner : amadonb
+  file : :/media/disk_iomega/BIBLIO/Interaction/PhysRevB.52.R5467.pdf:PDF
+  keywords : interaction, LDA+U GGA+U DFT+U
+  refid : 10.1103/PhysRevB.52.R5467
+-
+  ENTRYTYPE : article
+  ID : Lindhard1954
+  author : J. Lindhard
+  title : On the properties of a gas of charged particles
+  journal : Mat. Fys. Medd. Dan. Vid. Selsk.
+  year : 1954
+  volume : 28
+  pages : 8
+-
+  ENTRYTYPE : article
+  ID : Luttinger1955
+  author : Luttinger, J.M. and Kohn, W.
+  title : {Motion of Electrons and Holes in Perturbed Periodic Fields}
+  journal : Phys. Rev.
+  year : 1955
+  volume : 97
+  pages : 869--883
+  doi : 10.1103/PhysRev.97.869
+  number : 4
+-
+  ENTRYTYPE : article
+  ID : Ma2015
+  author : Ma, Pui-Wai and Dudarev, S. L.
+  title : Constrained density functional for noncollinear magnetism
+  journal : Phys. Rev. B
+  year : 2015
+  volume : 91
+  pages : 054420
+  numpages : 11
+  issue : 5
+-
+  ENTRYTYPE : article
+  ID : Maintz2012
+  author : Maintz,S. and Eck,B. and Dronskowski,R.
+  title : Speeding up plane-wave electronic-structure calculations using graphics-processing units
+  journal : Comp. Phys. Comm.
+  year : 2012
+  volume : 182
+  pages : 1421--1427
+  number : 7
+-
+  ENTRYTYPE : article
+  ID : Marek2014
+  author : Marek, A. and Blum, V. and Johanni, R. and Havu, V. and Lang, B. and Auckenthaler, T. and Heinecke, A. and Bungartz, H.-J. and Lederer, H.
+  title : The {ELPA} library: scalable parallel eigenvalue solutions for electronic structure theory and computational science
+  journal : J. Phys.: Cond. Matt.
+  year : 2014
+  volume : 26
+  pages : 1--15
+  number : 21
+-
+  ENTRYTYPE : article
+  ID : Marques2012
+  author : Marques, M. A. L. and Oliveira, M. J. T. and Burnus, T.
+  title : {Libxc: A library of exchange and correlation functionals for density functional theory}
+  journal : Comput. Phys. Commun.
+  year : 2012
+  volume : 183
+  pages : 2272--2281
+  doi : 10.1016/j.cpc.2012.05.007
+  issn : 00104655
+-
+  ENTRYTYPE : article
+  ID : Marx1996
+  author : D. Marx  and M. Parrinello
+  title : Ab initio path integral molecular dynamics: Basic ideas
+  journal : J. Chem. Phys.
+  year : 1996
+  volume : 104
+  pages : 4077
+-
+  ENTRYTYPE : book
+  ID : Mattuck1976
+  author : Mattuck, R.D.
+  title : A Guide to Feynman Diagrams in the Many-body Problem
+  year : 1976
+  publisher : Dover Publications, Incorporated
+  isbn : 9780486670478
+  lccn : 92004895
+  series : Dover Books on Physics Series
+  url : http://books.google.co.uk/books?id=pe-v8zfxE68C
+-
+  ENTRYTYPE : article
+  ID : Mecholsky2014
+  author : Mecholsky, N.A. and Resca, L. and Pegg, I.L. and Fornari, M.
+  title : {Theory of band warping and its effects on thermoelectronic transport properties}
+  journal : Phys. Rev. B
+  year : 2014
+  volume : 89
+  pages : 155131
+  doi : 10.1103/PhysRevB.89.155131
+  number : 15
+-
+  ENTRYTYPE : article
+  ID : Medeiros2014
+  author : Medeiros, Paulo V. C. and Stafstr\"om, Sven and Bj\"ork, Jonas
+  title : Effects of extrinsic and intrinsic perturbations on the electronic structure of graphene: Retaining an effective primitive cell band structure by band unfolding
+  journal : Phys. Rev. B
+  year : 2014
+  volume : 89
+  pages : 041407
+-
+  ENTRYTYPE : article
+  ID : Methfessel1989
+  author : M. Methfessel and T. Paxton
+  title : High-precision sampling for Brillouin-Zone integration in metals
+  journal : Phys. Rev. B
+  year : 1989
+  volume : 40
+  pages : 3616
+-
+  ENTRYTYPE : article
+  ID : Mills1994
+  author : Mills, G. and J{\'o}nsson, H.
+  title : Quantum and thermal effects in H$_2$ dissociative adsorption: Evaluation of free energy barriers in multidimensional quantum systems
+  journal : Phys. Rev. Lett.
+  year : 1994
+  volume : 72
+  pages : 1124
+  publisher : APS
+  number : 7
+-
+  ENTRYTYPE : article
+  ID : Miyake2000
+  author : Miyake, T. and Aryasetiawan, F.
+  title : Efficient algorithm for calculating noninteracting frequency-dependent linear response functions
+  journal : Phys. Rev. B
+  year : 2000
+  volume : 61
+  pages : 7172-7175
+  publisher : American Physical Society (APS)
+  doi : 10.1103/physrevb.61.7172
+  issn : 0163-1829, 1095-3795
+  source : Crossref
+  month : ar, number = {11
+-
+  ENTRYTYPE : article
+  ID : Momma2011
+  author : Momma, K. and Izumi, F.
+  title : {VESTA}3 for three-dimensional visualization of crystal, volumetric and morphology data
+  journal : J. Appl. Crystallogr.
+  year : 2011
+  volume : 44
+  pages : 1272--1276
+  number : 6
+-
+  ENTRYTYPE : phdthesis
+  ID : Moscaconte2007
+  author : Mosca Conte,A.
+  title : Quantum mechanical modeling of nano magnetism
+  year : 2007
+  school : SISSA
+  url : http://hdl.handle.net/20.500.11767/3935
+  address : Trieste Italy
+-
+  ENTRYTYPE : article
+  ID : Nieminen1985
+  author : Nieminen, R. M. and Boro\'nski, E. and Lantto, L. J.
+  title : Two-component density-functional theory: Application to positron states
+  journal : Phys. Rev. B
+  year : 1985
+  volume : 32
+  pages : 1377
+  publisher : American Physical Society
+  doi : 10.1103/PhysRevB.32.1377
+  issue : 2
+-
+  ENTRYTYPE : article
+  ID : Nunes2001
+  author : Nunes, R. W. and Gonze, X. 
+  title : Berry-phase treatment of the homogeneous electric field perturbation in insulators
+  journal : Phys. Rev. B
+  year : 2001
+  volume : 63
+  pages : 155107
+  number : 15
+-
+  ENTRYTYPE : article
+  ID : Ong2013
+  author : Ong, S.P. and Richards, W.D. and Jain, A. and Hautier, G. and Kocher, M. and Cholia, S. and Gunter, D. and Chevrier, V.L. and Persson, K.A. and Ceder, G.
+  title : Python Materials Genomics (pymatgen): A robust, open-source python library for materials analysis
+  journal : Comp. Mat. Sci. 
+  year : 2013
+  volume : 68
+  pages : 314 - 319
+  note : 
+  doi : 10.1016/j.commatsci.2012.10.028
+  url : http://www.sciencedirect.com/science/article/pii/S0927025612006295
+  issn : 0927-0256
+  number : 0
+  keywords : High-throughput 
+-
+  ENTRYTYPE : article
+  ID : Onida2002
+  author : Onida, G. and Reining, L. and Rubio, A.
+  title : Electronic excitations: density-functional versus many-body Green's-function approaches
+  journal : Rev. Mod. Phys.
+  year : 2002
+  volume : 74
+  pages : 601--659
+  numpages : 58
+  doi : 10.1103/RevModPhys.74.601
+  publisher : American Physical Society
+-
+  ENTRYTYPE : article
+  ID : Payne1992
+  author : Payne, M. C. and Teter, M. P. and Allan, D. C. and Arias, T. A. and Joannopoulos, J. D.
+  title : Iterative minimization techniques for \textit{ab initio}   total-energy calculations: molecular dynamics and conjugate gradients
+  journal : Rev. Mod. Phys.
+  year : 1992
+  volume : 64
+  pages : 1045--1097
+  numpages : 0
+  doi : 10.1103/RevModPhys.64.1045
+  publisher : American Physical Society
+  issue : 4
+-
+  ENTRYTYPE : article
+  ID : Perdew1981
+  author : J.P. Perdew and A. Zunger
+  title : Self-interaction correction to density-functional approximations for many-electron systems
+  journal : Phys. Rev. B
+  year : 1981
+  volume : 23
+  pages : 5048
+-
+  ENTRYTYPE : article
+  ID : Perrot1979
+  author : F. Perrot
+  title : Gradient correction to the statistical electronic free energy at non-zero temperatures: Application to equation-of-state calculations
+  journal : Phys. Rev. A
+  year : 1979
+  volume : 20
+  pages : 586-594
+-
+  ENTRYTYPE : article
+  ID : Petrilli1998
+  author : Petrilli, Helena M. and Bl\"ochl, Peter E. and Blaha, Peter and Schwarz, Karlheinz
+  title : Electric-field-gradient calculations using the projector augmented wave method
+  journal : Phys. Rev. B
+  year : 1998
+  volume : 57
+  pages : 14690--14697
+  numpages : 0
+  doi : 10.1103/PhysRevB.57.14690
+  url : https://link.aps.org/doi/10.1103/PhysRevB.57.14690
+  publisher : American Physical Society
+  month : Jun
+  issue : 23
+-
+  ENTRYTYPE : article
+  ID : Pickard2001
+  author : Pickard, Chris J. and Mauri, Francesco
+  title : All-electron magnetic response with pseudopotentials: NMR chemical shifts
+  journal : Phys. Rev. B
+  year : 2001
+  volume : 63
+  pages : 245101
+  numpages : 13
+  doi : 10.1103/PhysRevB.63.245101
+  url : https://link.aps.org/doi/10.1103/PhysRevB.63.245101
+  publisher : American Physical Society
+  month : May
+  issue : 24
+-
+  ENTRYTYPE : article
+  ID : Pickett1988
+  author : Warren E. Pickett, Henry Krakauer, and Philip B. Allen
+  title : Smooth Fourier interpolation of periodic functions
+  journal : Phys. Rev. B
+  year : 1988
+  volume : 38
+  pages : 2721
+-
+  ENTRYTYPE : article
+  ID : Ponce2014
+  author : S. Ponc\'e and G. Antonius and P. Boulanger and E. Cannuccia and A. Marini and M. C\^ot\'e and X. Gonze
+  title : Verification of first-principles codes: Comparison of total energies, phonon frequencies, electron--phonon coupling and zero-point motion correction to the gap between {ABINIT} and {QE}/{Y}ambo
+  journal : Comp. Mat. Sci.
+  year : 2014
+  volume : 83
+  pages : 341 - 348
+-
+  ENTRYTYPE : article
+  ID : Ponce2014a
+  author : Ponc\'e, S. and Antonius, G. and Gillet, Y. and Boulanger, P. and Laflamme Janssen, J. and Marini, A. and C\^ot\'e, M. and Gonze, X.
+  title : Temperature dependence of electronic eigenenergies in the adiabatic harmonic approximation
+  journal : Phys. Rev. B
+  year : 2014
+  volume : 90
+  pages : 214304
+-
+  ENTRYTYPE : article
+  ID : Ponce2015
+  author : Ponc\'e, S. and Gillet, Y. and Laflamme Janssen, J. and Marini, A. and Verstraete, M. and Gonze, X.
+  title : Temperature dependence of the electronic structure of semiconductors	and insulators
+  journal : J. Chem. Phys.
+  year : 2015
+  volume : 143
+  pages : 102813
+-
+  ENTRYTYPE : article
+  ID : Popescu2010
+  author : Popescu, V. and Zunger, A.
+  title : Effective Band Structure of Random Alloys
+  journal : Phys. Rev. Lett.
+  year : 2010
+  volume : 104
+  pages : 236403
+-
+  ENTRYTYPE : article
+  ID : Popescu2012
+  author : Popescu, V. and Zunger, A.
+  title : Extracting E versus k effective band structure from supercell calculations on alloys and impurities
+  journal : Phys. Rev. B
+  year : 2012
+  volume : 85
+  pages : 085201
+-
+  ENTRYTYPE : article
+  ID : Pouillon2011
+  author : Y. Pouillon and J. -M. Beuken  and T. Deutsch and M. Torrent and X. Gonze
+  title : Organizing software growth and distributed development: the case of {ABINIT}
+  journal : Comput. Sci. Eng.
+  year : 2011
+  volume : 13
+  pages : 62
+-
+  ENTRYTYPE : article
+  ID : Profeta2003
+  author : M. Profeta and F. Mauri and C. J. Pickard
+  title : Accurate First Principles Prediction of 17 O NMR Parameters in SiO2: Assignment of the Zeolite Ferrierite Spectrum
+  journal : J. Am. Chem. Soc.
+  year : 2003
+  volume : 125
+  pages : 541
+  publisher : 
+  doi : 10.1021/ja027124r
+  issue : 
+-
+  ENTRYTYPE : article
+  ID : Puska1994
+  author : Puska, M. J. and Nieminen, R. M.
+  title : Theory of positrons in solids and on solid surfaces
+  journal : Rev. Mod. Phys.
+  year : 1994
+  volume : 66
+  pages : 841
+  publisher : American Physical Society
+  doi : 10.1103/RevModPhys.66.841
+  issue : 3
+-
+  ENTRYTYPE : article
+  ID : Puska1995
+  author : Puska, M. J. and Seitsonen, A. P. and Nieminen, R. M.
+  title : Electron-positron {C}ar-{P}arrinello methods: {S}elf-consistent treatment of charge densities and ionic relaxations
+  journal : Phys. Rev. B
+  year : 1995
+  volume : 52
+  pages : 10947
+  publisher : American Physical Society
+  doi : 10.1103/PhysRevB.52.10947
+  issue : 15
+-
+  ENTRYTYPE : article
+  ID : Rangel2016
+  author : Rangel, T. and Caliste, D. and Genovese, L. and Torrent,M.
+  title : A wavelet-based Projector Augmented-Wave ({PAW}) method: {R}eaching frozen-core all-electron precision with a systematic, adaptive and localized wavelet basis set
+  journal : Computer Physics Communication
+  year : 2016
+  volume : 208
+  pages : 1-8
+  number : 
+-
+  ENTRYTYPE : article
+  ID : Rappe1990
+  author : Rappe, A.M. and Rabe, K.M. and Kaxiras, E.S. and Joannopoulos, J.D.
+  title : Optimized pseudopotentials
+  journal : Phys. Rev. B
+  year : 1990
+  volume : 41
+  pages : 1227--1230
+  numpages : 0
+  doi : 10.1103/PhysRevB.41.1227
+  publisher : American Physical Society
+  issue : 2
+-
+  ENTRYTYPE : article
+  ID : Rauch2011
+  author : Rauch, C. and Makkonen, I. and Tuomisto, F.
+  title : Identifying vacancy complexes in compound semiconductors with positron annihilation spectroscopy: A case study of {I}n{N}
+  journal : Phys. Rev. B
+  year : 2011
+  volume : 84
+  pages : 125201
+  publisher : APS
+  number : 12
+-
+  ENTRYTYPE : article
+  ID : Resta1994
+  author : Resta, R. 
+  title : Macroscopic polarization in crystalline dielectrics: the geometric phase approach
+  journal : Rev. Mod. Phys.
+  year : 1994
+  volume : 66
+  pages : 899--915
+-
+  ENTRYTYPE : article
+  ID : Restrepo2009
+  author : Restrepo, O. D. and Varga, K. and Pantelides, S. T.
+  title : First-principles calculations of electron mobilities in silicon: Phonon and Coulomb scattering
+  journal : App. Phys. Lett.
+  year : 2009
+  volume : 94
+  pages : 
+  doi : 10.1063/1.3147189
+  url : http://scitation.aip.org/content/aip/journal/apl/94/21/10.1063/1.3147189
+  number : 21
+  eid : 212103
+-
+  ENTRYTYPE : article
+  ID : Rieger1999
+  author : Rieger, M. and Steinbeck, L. and White, I. D. and Rojas, H. N. and Godby, R. W.
+  title : The {GW} space-time method for the self-energy of large systems
+  journal : Comp. Phys. Comm.
+  year : 1999
+  volume : 117
+  pages : 211--228
+  doi : 10.1016/S0010-4655(98)00174-X
+  number : 3
+-
+  ENTRYTYPE : article
+  ID : Rohlfing2000
+  author : Rohlfing, M. and Louie, S.G.
+  title : Electron-hole excitations and optical spectra from first principles
+  journal : Phys. Rev. B
+  year : 2000
+  volume : 62
+  pages : 4927--4944
+  publisher : American Physical Society
+  doi : 10.1103/PhysRevB.62.4927
+  file : Rohlfing2000.pdf:Rohlfing2000.pdf:PDF;Rohlfing2000.pdf:Rohlfing2000.pdf:PDF
+  issue : 8
+-
+  ENTRYTYPE : article
+  ID : Romanperez2009
+  author : Rom\'an-P\'erez, G. and Soler, J.M.
+  title : Efficient Implementation of a {V}an der {W}aals Density Functional: Application to Double-Wall Carbon Nanotubes
+  journal : Phys. Rev. Lett.
+  year : 2009
+  volume : 103
+  pages : 096102
+  doi : 10.1103/PhysRevLett.103.096102
+-
+  ENTRYTYPE : mastersthesis
+  ID : Rostgaard2006
+  author : C. Rostgaard
+  title : Exact exchange in density functional calculations
+  year : 2006
+  school : Technical University of Denmark
+  url : https://wiki.fysik.dtu.dk/gpaw/_downloads/rostgaard_master.pdf
+  address : Lyngby
+-
+  ENTRYTYPE : article
+  ID : Rubel2014
+  author : Rubel, O. and Bokhanchuk, A. and Ahmed, S. J. and Assmann, E.
+  title : Unfolding the band structure of disordered solids: from bound states to high-mobility Kane fermions
+  journal : Phys. Rev. B
+  year : 2014
+  volume : 90
+  pages : 115202
+-
+  ENTRYTYPE : article
+  ID : Rutishauser1970
+  author : Rutishauser, H.
+  title : Simultaneous iteration method for symmetric matrices
+  journal : Numerische Mathematik
+  year : 1970
+  volume : 16
+  pages : 205--223
+  publisher : Springer
+  number : 3
+-
+  ENTRYTYPE : article
+  ID : Sakuma2013
+  author : Sakuma, R. and Aryasetiawan, F.
+  title : First-principles calculations of dynamical screened interactions for the transition metal oxides {MO} ({M}={M}n, {F}e, {C}o, {N}i)
+  journal : Phys. Rev. B
+  year : 2013
+  volume : 87
+  pages : 165118
+  doi : 10.1103/PhysRevB.87.165118
+  number : 16
+-
+  ENTRYTYPE : article
+  ID : Savin1992
+  author : Savin, A. and Jepsen, O. and Flad, J. and Andersen, O. K. and Preuss, H. and von Schnering, H. G.
+  title : Electron Localization in Solid-State Structures of the Elements: the Diamond Structure
+  journal : Angewandte Chemie International Edition in English
+  year : 1992
+  volume : 31
+  pages : 187--188
+  doi : 10.1002/anie.199201871
+  number : 2
+-
+  ENTRYTYPE : article
+  ID : Savrasov1996
+  author : Savrasov, S.Y. and Savrasov, D.Y.
+  title : Electron-phonon interactions and related physical properties of metals from linear-response theory
+  journal : Phys. Rev. B
+  year : 1996
+  volume : 54
+  pages : 16487
+-
+  ENTRYTYPE : article
+  ID : Sharma2003
+  author : Sharma, S. and Dewhurst, J. K. and Ambrosch-Draxl, C.
+  title : Linear and second-order optical response of {III}-{V} monolayer superlattices
+  journal : Phys. Rev. B
+  year : 2003
+  volume : 67
+  pages : 165332
+  doi : 10.1103/PhysRevB.67.165332
+-
+  ENTRYTYPE : article
+  ID : Sharma2004
+  author : Sharma, S. and {A}mbrosch-{D}raxl, C.
+  title : {S}econd-{H}armonic Optical Response from First Principles
+  journal : Phys. Scripta
+  year : 2004
+  volume : 2004
+  pages : 128
+  url : http://iopscience.iop.org/article/10.1238/Physica.Topical.109a00128
+-
+  ENTRYTYPE : article
+  ID : Shih2012
+  author : Shih, B.-C. and Zhang, Y. and Zhang, W. and Zhang, P.
+  title : Screened Coulomb interaction of localized electrons in solids from first principles
+  journal : Phys. Rev. B
+  year : 2012
+  volume : 85
+  pages : 045132
+  doi : 10.1103/PhysRevB.85.045132
+-
+  ENTRYTYPE : article
+  ID : Shishkin2006
+  author : Shishkin, M. and Kresse, G.
+  title : Implementation and performance of the frequency-{dependentGWmethod} within the {PAW} framework
+  journal : Phys. Rev. B
+  year : 2006
+  volume : 74
+  publisher : American Physical Society (APS)
+  doi : 10.1103/physrevb.74.035101
+  issn : 1098-0121, 1550-235X
+  source : Crossref
+  month : ul, number = {3
+-
+  ENTRYTYPE : article
+  ID : Silvestrelli2008
+  author : Silvestrelli, P. L.
+  title : van der {W}aals Interactions in {DFT} Made Easy by {W}annier Functions
+  journal : Phys. Rev. Lett.
+  year : 2008
+  volume : 100
+  pages : 053002
+  number : 
+-
+  ENTRYTYPE : article
+  ID : Silvestrelli2009
+  author : Silvestrelli, P. L.
+  title : van der {W}aals Interactions in Density Functional Theory Using {W}annier Functions
+  journal : J. Phys. Chem. A
+  year : 2009
+  volume : 113
+  pages : 5224
+  number : 
+-
+  ENTRYTYPE : article
+  ID : Silvestrelli2013
+  author : Silvestrelli, P. L.
+  title : van der {W}aals interactions in density functional theory by combining the quantum harmonic oscillator-model with localized {W}annier functions
+  journal : J. Chem. Phys.
+  year : 2013
+  volume : 139
+  pages : 054106
+  number : 
+-
+  ENTRYTYPE : article
+  ID : Sipe1993
+  author : Sipe, J. E. and Ghahramani, E.
+  title : Nonlinear optical response of semiconductors in the independent-particle approximation
+  journal : Phys. Rev. B
+  year : 1993
+  volume : 48
+  pages : 11705--11722
+  doi : 10.1103/PhysRevB.48.11705
+  url : http://link.aps.org/doi/10.1103/PhysRevB.48.11705
+  issue : 16
+-
+  ENTRYTYPE : article
+  ID : Snyder2008
+  author : Snyder, G. J. and Toberer, E. S.
+  title : Complex thermoelectric materials
+  journal : Nature Materials
+  year : 2008
+  volume : 7
+  pages : 105--114
+  number : 2
+-
+  ENTRYTYPE : article
+  ID : Souza2002
+  author : Souza, I.  and \'I\~niguez, J.  and Vanderbilt, D. 
+  title : First-Principles Approach to Insulators in Finite Electric Fields
+  journal : Phys. Rev. Lett.
+  year : 2002
+  volume : 89
+  pages : 117602
+-
+  ENTRYTYPE : article
+  ID : Sterne1991
+  author : Sterne, P.A. and Kaiser, J.H.
+  title : First-principles calculation of positron lifetimes in solids
+  journal : Phys. Rev. B
+  year : 1991
+  volume : 43
+  pages : 13892
+  publisher : APS
+  number : 17
+-
+  ENTRYTYPE : article
+  ID : Torrent2008
+  author : Marc Torrent and Fran\c{c}ois Jollet and Fran\c{c}ois Bottin and Gilles Z\'erah and Xavier Gonze
+  title : Implementation of the projector augmented-wave method in the {ABINIT} code: Application to the study of iron under pressure
+  journal : Computational Materials Science
+  year : 2008
+  volume : 42
+  pages : 337 - 351
+  note : 
+  doi : 10.1016/j.commatsci.2007.07.020
+  url : http://www.sciencedirect.com/science/article/pii/S0927025607002108
+  issn : 0927-0256
+  number : 2
+  keywords : Iron under pressure
+-
+  ENTRYTYPE : article
+  ID : Tran2009
+  author : Tran, F. and Blaha, P.
+  title : Accurate Band Gaps of Semiconductors and Insulators with a Semilocal Exchange-Correlation Potential
+  journal : Phys. Rev. Lett.
+  year : 2009
+  volume : 102
+  pages : 226401
+  numpages : 4
+  doi : 10.1103/PhysRevLett.102.226401
+  url : http://link.aps.org/doi/10.1103/PhysRevLett.102.226401
+  publisher : American Physical Society
+  issue : 22
+-
+  ENTRYTYPE : misc
+  ID : Tremblay2017
+  author : Andr\'e-Marie Tremblay
+  title : Probl\`eme \`a N-corps
+  year : 2017
+  url : https://www.physique.usherbrooke.ca/pages/en/node/3436
+  note : Notes de cours
+  howpublished : available <a href="https://www.physique.usherbrooke.ca/pages/en/node/3436">here</a>
+-
+  ENTRYTYPE : article
+  ID : Troullier1991
+  author : Troullier,N. and Martins,J.L.
+  title : Efficient pseudopotentials for plane-wave calculation
+  journal : Phys. Rev. B
+  year : 1991
+  volume : 43
+  pages : 1993
+-
+  ENTRYTYPE : article
+  ID : Tuckerman1996
+  author : M. E. Tuckerman and D. Marx and M. L. Klein and M. Parrinello
+  title : Efficient and general algorithms for path integral {C}ar--{P}arrinello molecular dynamics
+  journal : J. Chem. Phys.
+  year : 1996
+  volume : 104
+  pages : 5579
+-
+  ENTRYTYPE : article
+  ID : Tuomisto2013
+  author : Tuomisto, F. and Makkonen, I.
+  title : Defect identification in semiconductors with positron annihilation: Experiment and theory
+  journal : Rev. Mod. Phys.
+  year : 2013
+  volume : 85
+  pages : 1583
+  numpages : 0
+  doi : 10.1103/RevModPhys.85.1583
+  publisher : American Physical Society
+  issue : 4
+-
+  ENTRYTYPE : article
+  ID : Uehara2000
+  author : Kentaro Uehara and John S. Tse
+  title : Calculations of transport properties with the linearized augmented plane-wave method
+  journal : Phys. Rev. B
+  year : 2000
+  volume : 61
+  pages : 1639
+-
+  ENTRYTYPE : article
+  ID : Vanderbilt1998
+  author : D. Vanderbilt and R. D. {K}ing-{S}mith
+  title : Electronic polarization in the ultrasoft pseudopotential formalism
+  journal : arXiv/cond-mat
+  year : 1998
+  url : https://arxiv.org/abs/cond-mat/9801177
+  eprint : 9801177
+-
+  ENTRYTYPE : article
+  ID : Vantroeye2016
+  author : B. Van Troeye and M. Torrent and X. Gonze
+  title : Interatomic force constants including the DFT-D dispersion contribution
+  journal : Phys. Rev. B
+  year : 2016
+  volume : 93
+  pages : 144304
+-
+  ENTRYTYPE : article
+  ID : Vasiliev1998
+  author : I. Vasiliev and S. Ogut and J. R. Chelikowsky
+  title : Ab initio Excitation Spectra and Collective Electronic Response in Atoms and Clusters
+  journal : Phys. Rev. Lett.
+  year : 1999
+  volume : 82
+  pages : 1919
+  doi : 10.1103/PhysRevLett.82.1919
+-
+  ENTRYTYPE : article
+  ID : Vaugier2012
+  author : L. Vaugier and H. Jiang and S. Biermann
+  title : Hubbard {U} and Hund exchange {J} in transition metal oxides: Screening versus localization trends from constrained random phase approximation
+  journal : Phys. Rev. B
+  year : 2012
+  volume : 86
+  pages : 165105
+-
+  ENTRYTYPE : article
+  ID : Veithen2002
+  author : Veithen, M. and Gonze, X. and Ghosez, Ph.
+  title : Electron localization: Band-by-band decomposition and application to oxides
+  journal : Physical Review B - Condensed Matter and Materials Physics
+  year : 2002
+  volume : 66
+  pages : 235113:1-10
+-
+  ENTRYTYPE : article
+  ID : Veithen2005
+  author : M. Veithen and X. Gonze and Ph. Ghosez
+  title : Nonlinear optical susceptibilities, Raman efficiencies, and electrooptic tensors from first--principles density functional theory
+  journal : Phys. Rev. B
+  year : 2005
+  volume : 71
+  pages : 125107
+  doi : 10.1103/PhysRevB.71.125107
+-
+  ENTRYTYPE : article
+  ID : Veithen2005a
+  author : M. Veithen and  Ph. Ghosez
+  title : Temperature dependence of the electro-optic tensor and refractive indices of Ba Ti O 3 from first principles
+  journal : Phys. Rev. B
+  year : 2005
+  volume : 71
+  pages : 132101
+  doi : 10.1103/PhysRevB.71.132101
+-
+  ENTRYTYPE : article
+  ID : Wang1998
+  author : Wang, L.-W. and Bellaiche, L. and Wei, S.-H. and Zunger, A.
+  title : Majority Representation of Alloy Electronic States
+  journal : Phys. Rev. Lett.
+  year : 1998
+  volume : 80
+  pages : 4725
+-
+  ENTRYTYPE : article
+  ID : Wang2013
+  author : Wang, H. and LaLonde, A. D. and Pei, Y. and Snyder, G. J.
+  title : The Criteria for Beneficial Disorder in Thermoelectric Solid Solutions
+  journal : Adv. Funct. Mater.
+  year : 2013
+  volume : 23
+  pages : 1586--1596
+  number : 12
+-
+  ENTRYTYPE : article
+  ID : Waroquiers2013
+  author : Waroquiers, D. and Lherbier, A. and Miglio, A. and Stankovski, M. and Ponc\'e, S. and Oliveira, M.J.T. and Giantomassi, M. and Rignanese, G.-M. and Gonze, X.
+  title : Band widths and gaps from the {T}ran-{B}laha functional: Comparison with many-body perturbation theory
+  journal : Phys. Rev. B
+  year : 2013
+  volume : 87
+  pages : 075121
+  doi : 
+-
+  ENTRYTYPE : article
+  ID : Weinan2007
+  author : Weinan, E. and Ren, W. and Vanden-Eijnden, E.
+  title : Simplified and improved string method for computing the minimum energy paths in barrier-crossing events
+  journal : The Journal of Chemical Physics
+  year : 2007
+  volume : 126
+  pages : 164103
+  publisher : AIP Publishing
+  number : 16
+-
+  ENTRYTYPE : article
+  ID : Werner2006
+  author : Werner, P. and Comanac, A. and de Medici, L. and Troyer, M. and Millis, A.J.
+  title : Continuous-Time Solver for Quantum Impurity Models
+  journal : Phys. Rev. Lett.
+  year : 2006
+  volume : 97
+  pages : 076405
+  publisher : American Physical Society
+  doi : 10.1103/PhysRevLett.97.076405
+  timestamp : 2013.05.22
+  number : 7
+  owner : amadonb
+  refid : 10.1103/PhysRevLett.97.076405
+-
+  ENTRYTYPE : article
+  ID : Wiktor2013
+  author : Wiktor, J. and Jomard, G. and Torrent, M. and Bertolus, M.
+  title : Electronic structure investigation of energetics and positron lifetimes of fully relaxed monovacancies with various charge states in 3{C}-{S}i{C} and 6{H}-{S}i{C}
+  journal : Phys. Rev. B
+  year : 2013
+  volume : 87
+  pages : 235207
+  numpages : 12
+  doi : 10.1103/PhysRevB.87.235207
+  publisher : American Physical Society
+-
+  ENTRYTYPE : article
+  ID : Wiktor2014
+  author : Wiktor, J. and Kerbiriou, X. and Jomard, G. and Esnouf, S. and Barthe, M.-F. and Bertolus, M.
+  title : Positron annihilation spectroscopy investigation of vacancy clusters in silicon carbide: Combining experiments and electronic structure calculations
+  journal : Phys. Rev. B
+  year : 2014
+  volume : 89
+  pages : 155203
+  publisher : APS
+  number : 15
+-
+  ENTRYTYPE : article
+  ID : Wiktor2014a
+  author : Wiktor, J. and Barthe, M.-F. and Jomard, G. and Torrent, M. and Freyss, M. and Bertolus, M.
+  title : Coupled experimental and {DFT}+{U} investigation of positron lifetimes in {U}{O}$_2$
+  journal : Phys. Rev. B
+  year : 2014
+  volume : 90
+  pages : 184101
+  publisher : APS
+  number : 18
+-
+  ENTRYTYPE : article
+  ID : Wiktor2014b
+  author : Wiktor, J. and Jomard, G. and Bertolus, M.
+  title : Electronic structure calculations of positron lifetimes in {S}i{C}: Self-consistent schemes and relaxation effect
+  journal : Nucl. Instrum. Meth.
+  year : 2014
+  volume : 327
+  pages : 63
+  publisher : Elsevier
+  doi : 10.1016/j.nimb.2013.09.050
+-
+  ENTRYTYPE : article
+  ID : Wiktor2015
+  author : Wiktor, J. and Jomard, G. and Torrent, M.
+  title : Two-component density functional theory within the projector augmented-wave approach: Accurate and self-consistent computations of positron lifetimes and momentum distributions
+  journal : Phys. Rev. B
+  year : 2015
+  volume : 92
+  pages : 125113
+  numpages : 15
+  doi : 10.1103/PhysRevB.92.125113
+  url : http://link.aps.org/doi/10.1103/PhysRevB.92.125113
+  publisher : American Physical Society
+  month : Sep
+  issue : 12
+-
+  ENTRYTYPE : article
+  ID : Wiser1963
+  author : Wiser, Nathan
+  title : Dielectric Constant with Local Field Effects Included
+  journal : Phys. Rev.
+  year : 1963
+  volume : 129
+  pages : 62-69
+  publisher : American Physical Society (APS)
+  doi : 10.1103/physrev.129.62
+  issn : 0031-899X
+  source : Crossref
+  month : an, number = {1
+-
+  ENTRYTYPE : article
+  ID : Xu2014
+  author : Xu, B. and Verstraete, M. J.
+  title : First Principles Explanation of the Positive Seebeck Coefficient of {L}ithium
+  journal : Phys. Rev. Lett.
+  year : 2014
+  volume : 112
+  pages : 196603
+  numpages : 5
+  doi : 10.1103/PhysRevLett.112.196603
+  publisher : American Physical Society
+  issue : 19
+-
+  ENTRYTYPE : article
+  ID : Zhou2006
+  author : Zhou, Y. and Saad, Y. and Tiago, M.L. and Chelikowsky, J.R.
+  title : Parallel self-consistent-field calculations via Chebyshev-filtered subspace acceleration
+  journal : Phys. Rev. E
+  year : 2006
+  volume : 74
+  pages : 066704
+  numpages : 8
+  doi : 10.1103/PhysRevE.74.066704
+  url : http://link.aps.org/doi/10.1103/PhysRevE.74.066704
+  publisher : American Physical Society
+  issue : 6
+-
+  ENTRYTYPE : article
+  ID : Zhou2006a
+  author : Zhou, Y. and Saad, Y. and Tiago, M.L and Chelikowsky, J. R.
+  title : Self-consistent-field calculations using Chebyshev-filtered subspace iteration
+  journal : J. Comp. Phys.
+  year : 2006
+  volume : 219
+  pages : 172--184
+  publisher : Elsevier
+  number : 1
+-
+  ENTRYTYPE : book
+  ID : Ziman1960
+  author : Ziman, J. M.
+  title : Electrons and phonons
+  year : 1960
+  publisher : Oxford University Press
+-
+  ENTRYTYPE : article
+  ID : Zwanziger2008
+  author : Zwanziger, J. W. and Torrent, M.
+  title : First-Principles Calculation of Electric Field Gradients in Metals, Semiconductors, and Insulators
+  journal : Applied Magnetic Resonance
+  year : 2008
+  volume : 33
+  pages : 447--456
+  issn : 1613-7507
+  url : 10.1007/s00723-008-0080-1
+  number : 4
+  doi : 10.1007/s00723-008-0080-1
+-
+  ENTRYTYPE : article
+  ID : Zwanziger2009
+  author : J. W. Zwanziger
+  title : Computation of M\"ossbauer isomer shifts from first principles
+  journal : Journal of Physics: Condensed Matter
+  year : 2009
+  volume : 21
+  pages : 195501
+  doi : 10.1088/0953-8984/21/19/195501
+-
+  ENTRYTYPE : article
+  ID : Zwanziger2009a
+  author : Zwanziger, J. W.
+  title : First-principles study of the nuclear quadrupole resonance parameters and orbital ordering in {LaTiO}$_3$
+  journal : Phys. Rev. B
+  year : 2009
+  volume : 79
+  pages : 033112
+  numpages : 4
+  doi : 10.1103/PhysRevB.79.033112
+  url : https://link.aps.org/doi/10.1103/PhysRevB.79.033112
+  publisher : American Physical Society
+  month : Jan
+  issue : 3
+-
+  ENTRYTYPE : article
+  ID : Zwanziger2012
+  author : Zwanziger, J.W. and Galbraith, J. and Kipouros, Y. and Torrent, M. and Giantomassi, M. and Gonze, X.
+  title : Finite homogeneous electric fields in the projector augmented wave formalism: Applications to linear and nonlinear response
+  journal : Comput. Mater. Sci.
+  year : 2012
+  volume : 58
+  pages : 113--118

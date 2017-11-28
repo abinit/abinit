@@ -58,4 +58,5 @@
 #%%   Here, we only test the parallelisation over FFT and kpoints:
 #%%   npband*npfft*npkpt=1*2*2=4 processors.
 #%%   In test tY.in we check other distributions for guarantee.
+#%% topics = parallelism
 #%%<END TEST_INFO>

@@ -28,8 +28,8 @@
 !! PARENTS
 !!      cg_rotate,chkgrp,classify_bands,debug_tools,dfpt_nstdy,get_full_kgrid
 !!      get_npert_rbz,getkgrid,ingeo,m_ab7_symmetry,m_crystal,m_ddb,m_dvdb
-!!      m_dynmat,m_fft_mesh,m_fock,m_ptgroups,matpointsym,memory_eval,optic
-!!      read_gkk,setsym,strainsym,thmeig,wfconv
+!!      m_dynmat,m_fft_mesh,m_fock,m_ptgroups,m_tdep_sym,matpointsym
+!!      memory_eval,optic,read_gkk,setsym,strainsym,thmeig,wfconv
 !!
 !! CHILDREN
 !!

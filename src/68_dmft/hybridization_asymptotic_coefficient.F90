@@ -68,13 +68,11 @@ subroutine hybridization_asymptotic_coefficient(cryst_struc,paw_dmft,pawang,hybr
  type(pawang_type), intent(in) :: pawang
  type(matlu_type), intent(inout) :: hybri_coeff(paw_dmft%natom)
 !Local variables ------------------------------
- type(oper_type)  :: self_minus_hdc
  type(oper_type)  :: ham_a
  type(oper_type)  :: ham_b
  type(oper_type)  :: ham_squarelocal
  type(oper_type)  :: ham_squareks
  integer :: iband1,iband2,ikpt,isppol
- character(len=500) :: message
 !************************************************************************
 
 ! call init_oper(paw_dmft,self_minus_hdc)

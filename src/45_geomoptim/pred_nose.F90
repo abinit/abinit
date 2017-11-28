@@ -103,7 +103,7 @@ subroutine pred_nose(ab_mover,hist,itime,ntime,zDEBUG,iexit)
  logical  :: ready
 
 !arrays
- real(dp) :: acell(3),acell_next(3),favg_(3)
+ real(dp) :: acell(3),acell_next(3)
  real(dp) :: rprimd(3,3),rprimd_next(3,3)
  real(dp) :: gprimd(3,3)
  real(dp) :: gmet(3,3)
@@ -476,7 +476,7 @@ subroutine pred_nose(ab_mover,hist,itime,ntime,zDEBUG,iexit)
 !### 06. Update the history with the prediction
 
 !Increase indexes
- hist%ihist=hist%ihist+1
+ hist%ihist=abihist_findIndex(hist,+1)
 
  call var2hist(acell,hist,ab_mover%natom,rprimd,xred,zDEBUG)
  hist%vel(:,:,hist%ihist)=vel(:,:)

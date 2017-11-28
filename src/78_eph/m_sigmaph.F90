@@ -360,12 +360,12 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
  integer,parameter :: dummy_npw=1,tim_getgh1c=1,berryopt0=0
  integer,parameter :: useylmgr=0,useylmgr1=0,master=0,ndat1=1
  integer :: my_rank,nproc,mband,my_minb,my_maxb,nsppol,nkpt,iq_ibz
- integer :: cplex,db_iqpt,natom,natom3,ipc,ipc1,ipc2,nspinor
+ integer :: cplex,db_iqpt,natom,natom3,ipc,nspinor
  integer :: ibsum_kq,ib_k,band,num_smallw,ibsum
  integer :: idir,ipert,ip1,ip2,idir1,ipert1,idir2,ipert2
  integer :: ik_ibz,ikq_ibz,isym_k,isym_kq,trev_k,trev_kq !,!timerev_q,
  integer :: spin,istwf_k,istwf_kq,istwf_kqirr,npw_k,npw_kq,npw_kqirr
- integer :: mpw,ierr,iw,it !ipw
+ integer :: mpw,ierr,it !ipw
  integer :: n1,n2,n3,n4,n5,n6,nspden,do_ftv1q,nu
  integer :: sij_opt,usecprj,usevnl,optlocal,optnl,opt_gvnl1
  integer :: nfft,nfftf,mgfft,mgfftf,nkpg,nkpg1
@@ -381,11 +381,11 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
  type(sigmaph_t) :: sigma
  character(len=500) :: msg
 !arrays
- integer :: g0_k(3),g0bz_kq(3),g0_kq(3),symq(4,2,cryst%nsym),dummy_gvec(3,dummy_npw)
+ integer :: g0_k(3),g0_kq(3),dummy_gvec(3,dummy_npw)
  integer :: work_ngfft(18),gmax(3) !!g0ibz_kq(3),
  integer :: indkk_kq(1,6)
  integer,allocatable :: gtmp(:,:),kg_k(:,:),kg_kq(:,:),nband(:,:)
- real(dp) :: kk(3),kq(3),kk_ibz(3),kq_ibz(3),qpt(3),phfrq(3*cryst%natom),lf(2),rg(2),res(2)
+ real(dp) :: kk(3),kq(3),kk_ibz(3),kq_ibz(3),qpt(3),phfrq(3*cryst%natom)
  real(dp) :: wqnu,nqnu,gkk2,eig0nk,eig0mk,eig0mkq,ediff,f_mkq !,f_nk
  real(dp) :: displ_cart(2,3,cryst%natom,3*cryst%natom),displ_red(2,3,cryst%natom,3*cryst%natom)
  real(dp),allocatable :: grad_berry(:,:),kinpw1(:),kpg1_k(:,:),kpg_k(:,:),dkinpw(:)
@@ -1217,8 +1217,8 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, dtfil, comm) r
 !Local variables ------------------------------
 !scalars
  integer,parameter :: master=0,brav1=1,occopt3=3,qptopt1=1
- integer :: my_rank,ik,my_nshiftq,nct,my_mpw,cnt,nproc,iq_ibz,ik_ibz
- integer :: onpw,ii,ipw,ierr,it,timerev_k,spin,gap_err,ikcalc,gw_qprange,ibstop
+ integer :: my_rank,ik,my_nshiftq,my_mpw,cnt,nproc,iq_ibz,ik_ibz
+ integer :: onpw,ii,ipw,ierr,it,spin,gap_err,ikcalc,gw_qprange,ibstop
  integer :: nk_found,ifo,jj
 #ifdef HAVE_NETCDF
  integer :: ncid,ncerr
@@ -1230,8 +1230,8 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, dtfil, comm) r
  type(ebands_t) :: tmp_ebands
  type(gaps_t) :: gaps
 !arrays
- integer :: qptrlatt(3,3),indkk_k(1,6),gmax(3),my_gmax(3),kpos(6)
- integer :: symk(4,2,cryst%nsym),val_indeces(ebands%nkpt, ebands%nsppol)
+ integer :: qptrlatt(3,3),indkk_k(1,6),my_gmax(3),kpos(6)
+ integer :: val_indeces(ebands%nkpt, ebands%nsppol)
  integer,allocatable :: gtmp(:,:)
  real(dp) :: my_shiftq(3,1),temp_range(2),kk(3),kq(3)
 
@@ -1825,7 +1825,7 @@ subroutine sigmaph_solve(self, ikcalc, spin, ebands)
 !Local variables-------------------------------
 !arrays
  integer :: shape3(3),shape4(4),shape5(5)
- real(dp), ABI_CONTIGUOUS pointer :: rdata3(:,:,:),rdata4(:,:,:,:),rdata5(:,:,:,:,:)
+!real(dp), ABI_CONTIGUOUS pointer :: rdata4(:,:,:,:),rdata5(:,:,:,:,:)
 
 ! *************************************************************************
 

@@ -12,7 +12,7 @@
  Corning Inc. and other collaborators, see ~abinit/doc/developers/contributors.txt .
  Please read ~abinit/doc/users/acknowledgments.html for suggested
  acknowledgments of the ABINIT effort.
- For more information, see http://www.abinit.org .
+ For more information, see https://www.abinit.org .
 
 .Starting date : Fri 17 Feb 2017.
 - ( at 11h30 )
@@ -31,7 +31,7 @@
 
  Flags :
      ifcflag         1
-   prt_effpo         3
+   prt_model         1
      strcpli        -1
  Molecular Dynamics :
         temp    1000.0
@@ -130,7 +130,7 @@
 
 ================================================================================
 
- Generation of the xml file for the reference structure in t98_MPI2_sys.xml
+ Generation of the xml file for the model in t98_MPI2_model.xml
 
 ================================================================================
 

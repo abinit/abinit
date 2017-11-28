@@ -34,6 +34,7 @@ MODULE m_geometry
  public :: vdotw              ! Scalar product between two reduced vectors either in real or reciprocal space.
  public :: wigner_seitz       ! Find the grid of points falling inside the Wigner-Seitz cell.
  public :: phdispl_cart2red   ! Calculate the displacement vectors for all branches in reduced coordinates.
+ public :: spinrot_cmat       ! Construct 2x2 complex matrix representing rotation operator in spin-space.
 
  interface normv
   module procedure normv_rdp_vector
@@ -596,7 +597,7 @@ end subroutine wigner_seitz
 
 !----------------------------------------------------------------------
 
-!!****f* defs_elphon/phdispl_cart2red
+!!****f* m_geometry/phdispl_cart2red
 !! NAME
 !!  phdispl_cart2red
 !!
@@ -672,6 +673,59 @@ subroutine phdispl_cart2red(natom,gprimd,displ_cart,displ_red)
  end do !jbranch
 
 end subroutine phdispl_cart2red
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_geometry/spinrot_cmat
+!! NAME
+!!  spinrot_cmat
+!!
+!! FUNCTION
+!!  Construct 2x2 complex matrix representing rotation operator in spin-space.
+!!
+!! INPUTS
+!!  spinrot(4)=components of the spinor rotation matrix computed by getspinrot
+!!
+!! OUTPUT
+!!  spinrot(2,2)=Rotation matrix (complex array)
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+pure function spinrot_cmat(spinrot)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'spinrot_cmat'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+ real(dp),intent(in) :: spinrot(4)
+ complex(dpc) :: spinrot_cmat(2,2)
+
+! *************************************************************************
+
+ ! Rotation in spinor space (same equations as in wfconv)
+ spinrot_cmat(1,1) = spinrot(1) + j_dpc*spinrot(4)
+ spinrot_cmat(1,2) = spinrot(3) + j_dpc*spinrot(2)
+ spinrot_cmat(2,1) =-spinrot(3) + j_dpc*spinrot(2)
+ spinrot_cmat(2,2) = spinrot(1) - j_dpc*spinrot(4)
+
+ ! My equation
+ !spinrot_cmat(1,1) = spinrot(1) - j_dpc*spinrot(4)
+ !spinrot_cmat(1,2) =-spinrot(3) - j_dpc*spinrot(2)
+ !spinrot_cmat(2,1) = spinrot(3) - j_dpc*spinrot(2)
+ !spinrot_cmat(2,2) = spinrot(1) + j_dpc*spinrot(4)
+
+end function spinrot_cmat
 !!***
 
 !----------------------------------------------------------------------

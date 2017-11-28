@@ -29,8 +29,6 @@
 !!  the inner loop. One variable size array is needed for this (gq).
 !!
 !! INPUTS
-!!  gmet(3,3)=metrix tensor in G space in Bohr**-2.
-!!  gprimd(3,3)=reciprocal space dimensional primitive translations
 !!  gsqcut=cutoff value on G**2 for sphere inside fft box.
 !!  idir=direction of the current perturbation
 !!  ipert=type of the perturbation
@@ -40,6 +38,7 @@
 !!  ngfft(18)=contain all needed information about 3D FFT,
 !!     see ~abinit/doc/input_variables/vargs.htm#ngfft
 !!  rhog(2,nfft)=array for Fourier transform of GS electron density
+!!  rprimd(3,3)=dimensional primitive translations in real space (bohr)
 !!
 !! OUTPUT
 !!  vhartr1(nfft)=Inhomogeneous term in strain-perturbation-induced Hartree
@@ -49,7 +48,7 @@
 !!      dfpt_nselt,dfpt_nstpaw,dfpt_rhotov
 !!
 !! CHILDREN
-!!      fourdp,ptabs_fourdp
+!!      fourdp,metric,ptabs_fourdp
 !!
 !! SOURCE
 
@@ -60,8 +59,8 @@
 #include "abi_common.h"
 
 
-subroutine hartrestr(gmet,gprimd,gsqcut,idir,ipert,mpi_enreg,natom,nfft,ngfft,&
-&  paral_kgb,rhog,vhartr1)
+subroutine hartrestr(gsqcut,idir,ipert,mpi_enreg,natom,nfft,ngfft,&
+&  paral_kgb,rhog,rprimd,vhartr1)
 
  use defs_basis
  use defs_abitypes
@@ -74,6 +73,7 @@ subroutine hartrestr(gmet,gprimd,gsqcut,idir,ipert,mpi_enreg,natom,nfft,ngfft,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'hartrestr'
+ use interfaces_41_geometry
  use interfaces_53_ffts
 !End of the abilint section
 
@@ -86,7 +86,7 @@ subroutine hartrestr(gmet,gprimd,gsqcut,idir,ipert,mpi_enreg,natom,nfft,ngfft,&
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: ngfft(18)
- real(dp),intent(in) :: gmet(3,3),gprimd(3,3),rhog(2,nfft)
+ real(dp),intent(in) :: rhog(2,nfft),rprimd(3,3)
  real(dp),intent(out) :: vhartr1(nfft)
 
 !Local variables-------------------------------
@@ -95,14 +95,14 @@ subroutine hartrestr(gmet,gprimd,gsqcut,idir,ipert,mpi_enreg,natom,nfft,ngfft,&
  integer :: i1,i2,i23,i3,id2,id3,ig,ig2,ig3,ii,ii1,ing,istr,ka,kb,n1,n2,n3
  real(dp),parameter :: tolfix=1.000000001_dp
  real(dp) :: cutoff,ddends,den,dgsds,gqg2p3,gqgm12,gqgm13,gqgm23,gs,gs2,gs3
- real(dp) :: term
+ real(dp) :: term,ucvol
  character(len=500) :: message
 !arrays
  integer,save :: idx(12)=(/1,1,2,2,3,3,3,2,3,1,2,1/)
  integer :: id(3)
  integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:)
  integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
- real(dp) :: dgmetds(3,3),gqr(3)
+ real(dp) :: dgmetds(3,3),gmet(3,3),gprimd(3,3),gqr(3),rmet(3,3)
  real(dp),allocatable :: gq(:,:),work1(:,:)
 
 ! *************************************************************************
@@ -113,6 +113,8 @@ subroutine hartrestr(gmet,gprimd,gsqcut,idir,ipert,mpi_enreg,natom,nfft,ngfft,&
 &   'so this routine for the strain perturbation should not be called.'
    MSG_BUG(message)
  end if
+
+ call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
 
  n1=ngfft(1) ; n2=ngfft(2) ; n3=ngfft(3)
 

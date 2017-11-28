@@ -36,7 +36,7 @@ chkexit 0
   kptopt 0
  nkpt 1
  occ 160
- tsmear 0.025724516
+ tphysel 0.025724516
  #Timing info
  timopt -1
 xred
@@ -123,4 +123,5 @@ vel
 #%% description = 
 #%%   Test of molecular dynamics of B atoms, in the isokinetic
 #%%   ensemble, based on the Thomas-Fermi functional (very fast, even with 32 atoms).
+#%% topics = Recursion
 #%%<END TEST_INFO>

@@ -17,7 +17,6 @@ inp_files = [
 #"si_kpt_band_fft.in",
 #"t_bandfft.in",
 #"t_kpt+spin.in"
-#"t9.in",
 "t01.in",
 "t02.in",
 "t03.in",
@@ -25,6 +24,7 @@ inp_files = [
 "t06.in", 
 "t07.in", 
 "t08.in",
+"t09.in",
 "t21.in",
 "t22.in",
 "-t23.in", # disabled
@@ -67,4 +67,6 @@ inp_files = [
 "t98.in",
 "t99.in",
 "t100.in",
+"t101.in",
+"t102.in"
 ]

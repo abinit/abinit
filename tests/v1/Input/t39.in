@@ -79,4 +79,5 @@
 #%%   for this distance. Get total energy of -0.981 839  Ha .
 #%%   Note that the spin-polarization is not complete.
 #%%   Non-spin -polarized configuration (nsppol=1) gives -0.976 126  Ha .
+#%% topics = spinpolarisation
 #%%<END TEST_INFO>

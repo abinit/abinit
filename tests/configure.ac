@@ -1,4 +1,4 @@
-# -*- Autoconf -*-
+ -*- Autoconf -*-
 #
 # Copyright (C) 2011-2017 ABINIT Group (Yann Pouillon)
 #
@@ -25,7 +25,7 @@
 
 # Initialize Autoconf
 AC_PREREQ(2.62)
-AC_INIT([ABINIT-Test-Suite],[8.5.1],
+AC_INIT([ABINIT-Test-Suite],[8.7.2],
   [https://bugs.launchpad.net/abinit/],[abinit-test])
 AC_REVISION([Autotools support for the ABINIT Test Suite])
 AC_CONFIG_AUX_DIR([config/gnu])

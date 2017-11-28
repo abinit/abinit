@@ -2354,7 +2354,7 @@ subroutine pawpsp_calc(core_mesh,epsatm,ffspl,imainmesh,ixc,lnmax,&
 &   .and.(rvloc_mesh%rstep==pawrad%rstep).and.(rvloc_mesh%lstep==pawrad%lstep)) then
      pawtab%vhtnzc(1:pawtab%mesh_size)=rvlocr(1:pawtab%mesh_size)
      pawtab%has_vhtnzc=2
-   else if ((.not.(reduced_vloc)).and.(vloc_mesh%mesh_type==pawrad%mesh_type)&
+   else if ((vloc_mesh%mesh_type==pawrad%mesh_type)&
 &     .and.(vloc_mesh%rstep==pawrad%rstep).and.(vloc_mesh%lstep==pawrad%lstep)) then
      pawtab%vhtnzc(1:pawtab%mesh_size)=vlocr(1:pawtab%mesh_size)
      pawtab%has_vhtnzc=2
@@ -2505,7 +2505,6 @@ subroutine pawpsp_calc(core_mesh,epsatm,ffspl,imainmesh,ixc,lnmax,&
 !==================================================
 !Compute atomic contribution to Dij (Dij0)
 !if not already in memory
-
  if ((.not.has_dij0).and.(pawtab%has_kij==2.or.pawtab%has_kij==-1)) then
    LIBPAW_ALLOCATE(pawtab%dij0,(pawtab%lmn2_size))
    if (reduced_vloc) then
@@ -2517,7 +2516,6 @@ subroutine pawpsp_calc(core_mesh,epsatm,ffspl,imainmesh,ixc,lnmax,&
    end if
    has_dij0=.true.
  end if
-
 !==================================================
 !Compute kinetic operator contribution to Dij
 
@@ -3509,7 +3507,7 @@ subroutine pawpsp_17in(epsatm,ffspl,icoulomb,ipsp,ixc,lmax,&
    call wrtout(std_out,  msg,'COLL')
  else
    has_v_minushalf=0
-   LIBPAW_ALLOCATE(v_minushalf,(0))
+!   LIBPAW_ALLOCATE(v_minushalf,(0))
  end if
 !---------------------------------
 !Eventually read "numeric" shapefunctions (if shape_type=-1)
@@ -3630,10 +3628,19 @@ subroutine pawpsp_17in(epsatm,ffspl,icoulomb,ipsp,ixc,lmax,&
 
  if (vlocopt>0) then
    LIBPAW_ALLOCATE(pawtab%dij0,(pawtab%lmn2_size))
+!   if (allocated(v_minushalf)) then
+!   call atompaw_dij0(pawtab%indlmn,kij,pawtab%lmn_size,ncore,0,pawtab,pawrad,core_mesh,&
+!&                    vloc_mesh,vlocr,znucl,v_minushalf)
+!   else
    call atompaw_dij0(pawtab%indlmn,kij,pawtab%lmn_size,ncore,0,pawtab,pawrad,core_mesh,&
 &                    vloc_mesh,vlocr,znucl)
- end if
+!   end if
 
+ end if
+ if (allocated(v_minushalf)) then
+   vlocr(1:vloc_mesh%mesh_size)=vlocr(1:vloc_mesh%mesh_size)+v_minushalf(1:vloc_mesh%mesh_size)/sqrt(fourpi)
+   LIBPAW_DEALLOCATE(v_minushalf)
+ end if
 !Keep eventualy Kij in memory
  if (pawtab%has_kij==1.or.vlocopt==0) then
    LIBPAW_ALLOCATE(pawtab%kij,(pawtab%lmn2_size))

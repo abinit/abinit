@@ -81,4 +81,5 @@ nbdbuf 0
 #%%   To compute the polarization, the finite
 #%%   difference expression of the ddk and the second-order
 #%%   energy derivatives.
+#%% topics = Berry
 #%%<END TEST_INFO>

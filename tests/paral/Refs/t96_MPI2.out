@@ -12,7 +12,7 @@
  Corning Inc. and other collaborators, see ~abinit/doc/developers/contributors.txt .
  Please read ~abinit/doc/users/acknowledgments.html for suggested
  acknowledgments of the ABINIT effort.
- For more information, see http://www.abinit.org .
+ For more information, see https://www.abinit.org .
 
 .Starting date : Fri 17 Feb 2017.
 - ( at 11h30 )
@@ -31,7 +31,7 @@
 
  Flags :
      ifcflag         1
-   prt_effpo        -1
+   prt_model         3
      strcpli        -1
  Molecular Dynamics :
         temp    1000.0
@@ -42,6 +42,8 @@
          asr         2
  Interatomic Force Constants Inputs :
       dipdip         1
+dipdip_range         2         2         2
+  dipdip_prt         1
       ifcana         0
       ifcout     20000
       natifc         4
@@ -126,7 +128,10 @@
 
  Extraction of the stress tensor (unit: GPa) and forces (unit: Ha/bohr)
 
- Warning : Stress Tensor and forces are set to zero (not available in the DDB)
+ --- !WARNING:
+     The stress tensor of the reference structure is not specify
+     The stress tensor will be set to zero
+ ---
 
 ================================================================================
 
@@ -297,7 +302,7 @@
 
 ================================================================================
 
- Generation of the xml file for the reference structure in t96_MPI2_sys.xml
+ Generation of the xml file for the model in t96_MPI2_sys.xml
 
 ================================================================================
 

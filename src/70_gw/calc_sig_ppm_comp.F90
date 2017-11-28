@@ -16,25 +16,25 @@
 !!
 !! INPUTS
 !!  nomega=number of frequencies to consider
-!!  npwc= number of G vectors in the plasmon pole 
+!!  npwc= number of G vectors in the plasmon pole
 !!  npwc1= 1 if ppmodel==3, =npwc if ppmodel== 4, 1 for all the other cases
 !!  npwc2= 1 if ppmodel==3, =1    if ppmodel== 4, 1 for all the other cases
 !!  npwx=number of G vectors in rhotwgp
 !!  ppmodel=plasmon pole model
-!!  theta_mu_minus_e0i= $\theta(\mu-\epsilon_{k-q,b1,s}), defines if the state is occupied or not 
+!!  theta_mu_minus_e0i= $\theta(\mu-\epsilon_{k-q,b1,s}), defines if the state is occupied or not
 !!  zcut=small imaginary part to avoid the divergence. (see related input variable)
-!!  omegame0i(nomega)=frequencies where evaluate \Sigma_c ($\omega$ - $\epsilon_i$ 
+!!  omegame0i(nomega)=frequencies where evaluate \Sigma_c ($\omega$ - $\epsilon_i$
 !!  otq(npwc,npwc2)=plasmon pole parameters for this q-point
 !!  botsq(npwc,npwc1)=plasmon pole parameters for this q-point
 !!  eig(npwc,npwc)=the eigvectors of the symmetrized inverse dielectric matrix for this q point
 !!   (first index for G, second index for bands)
-!!  rhotwgp(npwx)=oscillator matrix elements divided by |q+G| i.e 
-!!    $\frac{\langle b1 k-q s | e^{-i(q+G)r | b2 k s \rangle}{|q+G|}$ 
+!!  rhotwgp(npwx)=oscillator matrix elements divided by |q+G| i.e
+!!    $\frac{\langle b1 k-q s | e^{-i(q+G)r | b2 k s \rangle}{|q+G|}$
 !!
 !! OUTPUT
 !!  sigcme(nomega) (to be described), only relevant if ppm3 or ppm4
 !!
-!!  ket(npwc,nomega): 
+!!  ket(npwc,nomega):
 !!
 !!  In case of ppmodel==1,2 it contains
 !!

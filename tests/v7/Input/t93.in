@@ -80,4 +80,5 @@ iatprj_bs 1 1
 #%% keywords = 
 #%% description = 
 #%%   anaddb test electron phonon coupling transport in inelastic Variational Approximation, on bcc Li
+#%% topics = PhononWidth, ElPhonTransport
 #%%<END TEST_INFO>

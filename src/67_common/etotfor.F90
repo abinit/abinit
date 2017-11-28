@@ -51,7 +51,7 @@
 !!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
 !!  ngrvdw=size of grvdw(:,:); can be 0 or natom according to dtset%vdw_xc
 !!  nhat(nfft,nspden*usepaw)= -PAW only- compensation density
-!!  nkxc=second dimension of the array kxc, see rhohxc.f for a description
+!!  nkxc=second dimension of the array kxc, see rhotoxc.f for a description
 !!  ntypat=number of types of atoms in unit cell.
 !!  nvresid(nfft,nspden)=potential or density residual
 !!  n1xccc=dimension of xccc1d ; 0 if no XC core correction is used
@@ -107,6 +107,9 @@
 !!   | e_vdw_dftd(IN)=VdW DFT-D energy
 !!   | e_hartree(IN)=Hartree part of total energy (hartree units)
 !!   | e_corepsp(IN)=psp core-core energy
+!!   | e_hybcomp_E0(IN)=energy compensation energy for the hybrid functionals at frozen density
+!!   | e_hybcomp_v0(IN)=potential compensation energy for the hybrid functionals at frozen density
+!!   | e_hybcomp_v (IN)=potential compensation energy for the hybrid functionals at self-consistent density
 !!   | e_kinetic(IN)=kinetic energy part of total energy.
 !!   | e_nonlocalpsp(IN)=nonlocal pseudopotential part of total energy.
 !!   | e_xc(IN)=exchange-correlation energy (hartree)
@@ -328,7 +331,8 @@ subroutine etotfor(atindx1,deltae,diffor,dtefield,dtset,&
    if (optene==0) then
      etotal = energies%e_kinetic + energies%e_hartree + energies%e_xc + &
 &     energies%e_localpsp + energies%e_corepsp + energies%e_fock+&
-&     energies%e_entropy + energies%e_elecfield + energies%e_magfield
+&     energies%e_entropy + energies%e_elecfield + energies%e_magfield+&
+&     energies%e_hybcomp_E0 - energies%e_hybcomp_v0 + energies%e_hybcomp_v
      etotal = etotal + energies%e_ewald + energies%e_chempot + energies%e_vdw_dftd
      if (usepaw==0) etotal = etotal + energies%e_nonlocalpsp
      if (usepaw/=0) etotal = etotal + energies%e_paw
@@ -338,7 +342,8 @@ subroutine etotfor(atindx1,deltae,diffor,dtefield,dtset,&
    if (optene==1) then
      etotal = energies%e_eigenvalues - energies%e_hartree + energies%e_xc &
 &     - energies%e_xcdc + energies%e_corepsp - energies%e_corepspdc+ energies%e_fock- energies%e_fockdc &
-&     + energies%e_entropy + energies%e_elecfield + energies%e_magfield
+&     + energies%e_entropy + energies%e_elecfield + energies%e_magfield &
+&     + energies%e_hybcomp_E0 - energies%e_hybcomp_v0
      etotal = etotal + energies%e_ewald + energies%e_chempot + energies%e_vdw_dftd
      if (usepaw/=0) etotal = etotal + energies%e_pawdc
    end if
@@ -408,14 +413,14 @@ subroutine etotfor(atindx1,deltae,diffor,dtefield,dtset,&
 &   abs(dtset%densfor_pred)<=6.and.abs(dtset%densfor_pred)/=5)
 
 !  If residual is a density residual (and forces from residual asked),
-!  has to convert it into a potential residualbefore calling forces routine
+!  has to convert it into a potential residual before calling forces routine
    if (apply_residual) then
      ABI_ALLOCATE(resid,(nfft,dtset%nspden))
      option=0; if (dtset%densfor_pred<0) option=1
      optnc=1;if (dtset%nspden==4.and.(abs(dtset%densfor_pred)==4.or.abs(dtset%densfor_pred)==6)) optnc=2
      call nres2vres(dtset,gsqcut,usepaw,kxc,mpi_enreg,my_natom,nfft,ngfft,nhat,&
 &     nkxc,nvresid,n3xccc,optnc,option,pawang,pawfgrtab,pawrhoij,pawtab,&
-&     rhor,rprimd,usepaw,resid,xccc3d,xred)
+&     rhor,rprimd,usepaw,resid,xccc3d,xred,vxc)
    else
      resid => nvresid
    end if

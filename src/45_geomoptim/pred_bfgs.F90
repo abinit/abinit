@@ -98,7 +98,7 @@ logical,intent(in) :: zDEBUG
 
 !Local variables-------------------------------
 !scalars
-integer  :: ndim,cycl_main
+integer  :: ihist_prev,ndim,cycl_main
 integer, parameter :: npul=0
 integer  :: ierr,ii,jj,kk,nitpul
 real(dp),save :: ucvol0
@@ -457,8 +457,8 @@ real(dp) :: xred(3,ab_mover%natom),strten(6)
 
  else
    if(ionmov==3)then
-
-     etotal_prev=hist%etot(hist%ihist-1)
+     ihist_prev = abihist_findIndex(hist,-1)
+     etotal_prev=hist%etot(ihist_prev)
 !    Here the BFGS algorithm, modified to take into account the energy
      call brdene(etotal,etotal_prev,hessin,ndim,vin,vin_prev,vout,vout_prev)
    end if
@@ -503,7 +503,7 @@ real(dp) :: xred(3,ab_mover%natom),strten(6)
 !### 08. Update the history with the prediction
 
 !Increase indexes
- hist%ihist=hist%ihist+1
+ hist%ihist = abihist_findIndex(hist,+1)
 
 !Transfer vin  to xred, acell and rprim
  call xfpack_vin2x(acell, acell0, ab_mover%natom, ndim,&
@@ -519,7 +519,8 @@ real(dp) :: xred(3,ab_mover%natom),strten(6)
 !Fill the history with the variables
 !xred, acell, rprimd, vel
  call var2hist(acell,hist,ab_mover%natom,rprimd,xred,zDEBUG)
- hist%vel(:,:,hist%ihist)=hist%vel(:,:,hist%ihist-1)
+ ihist_prev = abihist_findIndex(hist,-1)
+ hist%vel(:,:,hist%ihist)=hist%vel(:,:,ihist_prev)
 
  if(zDEBUG)then
    write (std_out,*) 'residual:'

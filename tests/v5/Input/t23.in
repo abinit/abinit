@@ -84,4 +84,7 @@ diemac 9.0
 #%%   The first dataset is for normal ground-state calculation at zero electric field. 
 #%%   The second dataset is for ground-state calculation at finite electric field. 
 #%%   The final datasetis the linear-response calculation at finite electric field.
+#%% topics = Berry
+#%%<END TEST_INFO>
+#%%<END TEST_INFO>
 #%%<END TEST_INFO>

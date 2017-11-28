@@ -1,6 +1,6 @@
 #   HCP Mg; optimization of the two cell parameters.
 
- ndtset 5
+ ndtset 7
 
 #First dataset : optimisation of volume only
  optcell1 1
@@ -16,6 +16,18 @@
 
 #Fifth dataset : optimize a
  optcell5 9
+
+#Sixth dataset : full optimisation, insufficient dilatmx, but use chkdilatmx=0  => will perform the optimization
+ optcell6 2
+ dilatmx6 1.01
+ chkdilatmx6 0
+
+#Seventh dataset : full optimisation, but insufficient dilatmx => will stop
+ optcell7 2
+ dilatmx7 1.01
+#Actually, stop before the dilatmx condition is violated three times.
+ ntime7 4
+
 
 #Common data
  acell  2*5.8d0 9.4d0
@@ -70,4 +82,7 @@
 #%%   Magnesium HCP. Optimize the cell volume and shape using different constraints.
 #%%   Checks whether the stresses are symmetric, and whether the optimisation algorithm does
 #%%   not break the symmetry.
+#%%   Also checks the possibility to disable the stop after violation of the condition related to dilatmx.
+#%%   This is done in dataset 6. The optimization delivers acell values slightly different from those of dataset 2.
+#%% topics = GeoOpt
 #%%<END TEST_INFO>

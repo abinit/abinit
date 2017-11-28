@@ -50,7 +50,7 @@
 #include "abi_common.h"
 
 
-subroutine printmagvtk(mpi_enreg,nspden,nfft,ngfft,rhor,rprimd,fname)
+subroutine printmagvtk(mpi_enreg,cplex,nspden,nfft,ngfft,rhor,rprimd,fname)
     
  use defs_basis
  use m_errors
@@ -70,21 +70,20 @@ subroutine printmagvtk(mpi_enreg,nspden,nfft,ngfft,rhor,rprimd,fname)
 !Arguments ------------------------------------
 !scalars
  type(MPI_type),intent(in)   :: mpi_enreg
- integer,intent(in)          :: nfft,nspden
+ integer,intent(in)          :: nfft,nspden,cplex
 !arrays
  integer,intent(in)          :: ngfft(18)
- real(dp),intent(in)         :: rhor(nfft,nspden),rprimd(3,3)
+ real(dp),intent(in)         :: rhor(cplex*nfft,nspden),rprimd(3,3)
  character(len=*),intent(in) :: fname
 
 !Local variables-------------------------------
 !scalars
  integer :: denvtk,nfields
  integer :: nx,ny,nz,nfft_tot
- integer :: ii,jj,kk,ind
+ integer :: ii,jj,kk,ind,jfft
  integer :: mpi_comm,mpi_head,mpi_rank,ierr
  real    :: rx,ry,rz
- integer :: me_fft,nproc_fft,i1,i2,i3,ir
- real(dp):: den,magn(3)
+ integer :: nproc_fft,ir
  character(len=500) :: msg
 !arrays
  real(dp),allocatable :: rhorfull(:,:)
@@ -120,6 +119,8 @@ subroutine printmagvtk(mpi_enreg,nspden,nfft,ngfft,rhor,rprimd,fname)
    nfields=2
  end if
 
+ nfields=nfields*cplex
+
   ! FFT mesh specifications: full grid
  nx=ngfft(1)        ! number of points along 1st lattice vector
  ny=ngfft(2)        ! number of points along 2nd lattice vector
@@ -135,32 +136,25 @@ subroutine printmagvtk(mpi_enreg,nspden,nfft,ngfft,rhor,rprimd,fname)
 
   ! Create array to host full FFT mesh
  if(mpi_rank==mpi_head)then
-   ABI_ALLOCATE(rhorfull,(nfft_tot,nspden))
+   ABI_ALLOCATE(rhorfull,(cplex*nfft_tot,nspden))
  end if
 
-  ! Fill up the mesh
+  ! Fill in the full mesh
  if(nproc_fft==1)then
    rhorfull=rhor
  else
    do ir=1,nspden
-     call xmpi_gather(rhor(:,ir),nfft,rhorfull(:,ir),nfft,mpi_head,mpi_comm,ierr)
+     call xmpi_gather(rhor(:,ir),cplex*nfft,rhorfull(:,ir),cplex*nfft,mpi_head,mpi_comm,ierr)
    end do
  end if
 
  if(mpi_rank==mpi_head)then
-
-    !write(std_out,*)
-    !write(std_out,*) 'DEV: my_isppoltab(2):,' ,mpi_enreg%my_isppoltab(:)
-    !write(std_out,*) 'DEV: nproc_spinor   :,' ,mpi_enreg%nproc_spinor
-    !write(std_out,*) 'DEV: comm_spinor,fft:,' ,mpi_enreg%comm_spinorfft,mpi_enreg%comm_fft
-    !write(std_out,*)
 
     ! Open the output vtk file
    if (open_file(fname,msg,newunit=denvtk,status='replace',form='formatted') /=0) then
      MSG_WARNING(msg)
      RETURN
    end if
-
 
     ! Write the header of the output vtk file
    write(denvtk,"(a)") '# vtk DataFile Version 2.0'
@@ -186,67 +180,175 @@ subroutine printmagvtk(mpi_enreg,nspden,nfft,ngfft,rhor,rprimd,fname)
 
     ! Write out information about field defined on the FFT mesh
    write(denvtk,"(a,i18)") 'POINT_DATA ',nfft_tot
-   write(denvtk,"(a,i6)") 'FIELD Densities ',nfields
+   write(denvtk,"(a,i6)")  'FIELD Densities ',nfields
 
 
     ! Write out different fields depending on the number of density matrix components
    if(nspden==1)then
+     
       !single component, so just write out the density
-     write(denvtk,"(a,i18,a)") 'rho 1 ',nfft_tot,' double'
-     do kk=0,nz-1
-       do jj=0,ny-1
-         do ii=0,nx-1
-           ind=1+ii+nx*(jj+ny*kk)
-           write(denvtk,'(f16.8)') rhorfull(ind,1)
+     if(cplex==1) then
+       write(denvtk,"(a,i18,a)") 'rho 1 ',nfft_tot,' double'
+       do kk=0,nz-1
+         do jj=0,ny-1
+           do ii=0,nx-1
+             ind=1+ii+nx*(jj+ny*kk)
+             write(denvtk,'(f16.8)') rhorfull(ind,1)
+           end do
          end do
        end do
-     end do
+     else
+       write(denvtk,"(a,i18,a)") 'Re_rho 1 ',nfft_tot,' double'
+       do kk=0,nz-1
+         do jj=0,ny-1
+           do ii=0,nx-1
+             ind=2*(1+ii+nx*(jj+ny*kk))-1
+             write(denvtk,'(f16.8)') rhorfull(ind,1)
+           end do
+         end do
+       end do
+       write(denvtk,"(a,i18,a)") 'Im_rho 1 ',nfft_tot,' double'
+       do kk=0,nz-1
+         do jj=0,ny-1
+           do ii=0,nx-1
+             ind=2*(1+ii+nx*(jj+ny*kk))
+             write(denvtk,'(f16.8)') rhorfull(ind,1)
+           end do
+         end do
+       end do
+     end if
 
    else if(nspden==2)then
 
       !two component, write the density for spin_up and spin_down channels
-     write(denvtk,"(a,i18,a)") 'rho_up 1 ',nfft_tot,' double'
-     do kk=0,nz-1
-       do jj=0,ny-1
-         do ii=0,nx-1
-           ind=1+ii+nx*(jj+ny*kk)
-           write(denvtk,'(f16.8)') rhorfull(ind,1)
+     if(cplex==1) then
+       
+       write(denvtk,"(a,i18,a)") 'rho 1 ',nfft_tot,' double'
+       do kk=0,nz-1
+         do jj=0,ny-1
+           do ii=0,nx-1
+             ind=1+ii+nx*(jj+ny*kk)
+             write(denvtk,'(f16.8)') rhorfull(ind,1)
+           end do
          end do
        end do
-     end do
-     write(denvtk,"(a,i18,a)") 'rho_dwn 1 ',nfft_tot,' double'
-     do kk=0,nz-1
-       do jj=0,ny-1
-         do ii=0,nx-1
-           ind=1+ii+nx*(jj+ny*kk)
-           write(denvtk,'(f16.8)') rhorfull(ind,2)
+       write(denvtk,"(a,i18,a)") 'mag 1 ',nfft_tot,' double'
+       do kk=0,nz-1
+         do jj=0,ny-1
+           do ii=0,nx-1
+             ind=1+ii+nx*(jj+ny*kk)
+             write(denvtk,'(f16.8)') 2*rhorfull(ind,2)-rhorfull(ind,1)
+           end do
          end do
        end do
-     end do
+       
+     else
+       
+       write(denvtk,"(a,i18,a)") 'Re_rho 1 ',nfft_tot,' double'
+       do kk=0,nz-1
+         do jj=0,ny-1
+           do ii=0,nx-1
+             ind=2*(1+ii+nx*(jj+ny*kk))-1
+             write(denvtk,'(f16.8)') rhorfull(ind,1)
+           end do
+         end do
+       end do
+       write(denvtk,"(a,i18,a)") 'Im_rho 1 ',nfft_tot,' double'
+       do kk=0,nz-1
+         do jj=0,ny-1
+           do ii=0,nx-1
+             ind=2*(1+ii+nx*(jj+ny*kk))
+             write(denvtk,'(f16.8)') rhorfull(ind,1)
+           end do
+         end do
+       end do
+       write(denvtk,"(a,i18,a)") 'Re_mag 1 ',nfft_tot,' double'
+       do kk=0,nz-1
+         do jj=0,ny-1
+           do ii=0,nx-1
+             ind=2*(1+ii+nx*(jj+ny*kk))-1
+             write(denvtk,'(f16.8)') 2*rhorfull(ind,2)-rhorfull(ind,1)
+           end do
+         end do
+       end do
+       write(denvtk,"(a,i18,a)") 'Im_mag 1 ',nfft_tot,' double'
+       do kk=0,nz-1
+         do jj=0,ny-1
+           do ii=0,nx-1
+             ind=2*(1+ii+nx*(jj+ny*kk))
+             write(denvtk,'(f16.8)') 2*rhorfull(ind,2)-rhorfull(ind,1)
+           end do
+         end do
+       end do
+       
+     end if   
 
-   else
+   else  !here is the last option: nspden==4
 
-      !four component, write the density (scalar field) and magnetization density (vector field)
-     write(denvtk,"(a,i18,a)") 'rho0 1 ',nfft_tot,' double'
-     do kk=0,nz-1
-       do jj=0,ny-1
-         do ii=0,nx-1
-           ind=1+ii+nx*(jj+ny*kk)
-           write(denvtk,'(f16.8)') rhorfull(ind,1)
+     if(cplex==1) then
+       
+        !four component, write the density (scalar field) and magnetization density (vector field)
+       write(denvtk,"(a,i18,a)") 'rho 1 ',nfft_tot,' double'
+       do kk=0,nz-1
+         do jj=0,ny-1
+           do ii=0,nx-1
+             ind=1+ii+nx*(jj+ny*kk)
+             write(denvtk,'(f16.8)') rhorfull(ind,1)
+           end do
          end do
        end do
-     end do
-     write(denvtk,"(a,i18,a)") 'magnetization 3 ',nfft_tot,' double'
-     do kk=0,nz-1
-       do jj=0,ny-1
-         do ii=0,nx-1
-           ind=1+ii+nx*(jj+ny*kk)
-           write(denvtk,'(3f16.8)') rhorfull(ind,2),rhorfull(ind,3),rhorfull(ind,4)
+       write(denvtk,"(a,i18,a)") 'mag 3 ',nfft_tot,' double'
+       do kk=0,nz-1
+         do jj=0,ny-1
+           do ii=0,nx-1
+             ind=1+ii+nx*(jj+ny*kk)
+             write(denvtk,'(3f16.8)') rhorfull(ind,2),rhorfull(ind,3),rhorfull(ind,4)
+           end do
          end do
        end do
-     end do
+       
+     else
+       
+       write(denvtk,"(a,i18,a)") 'Re_rho 1 ',nfft_tot,' double'
+       do kk=0,nz-1
+         do jj=0,ny-1
+           do ii=0,nx-1
+             ind=2*(1+ii+nx*(jj+ny*kk))-1
+             write(denvtk,'(f16.8)') rhorfull(ind,1)
+           end do
+         end do
+       end do
+       write(denvtk,"(a,i18,a)") 'Im_rho 1 ',nfft_tot,' double'
+       do kk=0,nz-1
+         do jj=0,ny-1
+           do ii=0,nx-1
+             ind=2*(1+ii+nx*(jj+ny*kk))
+             write(denvtk,'(f16.8)') rhorfull(ind,1)
+           end do
+         end do
+       end do
+       write(denvtk,"(a,i18,a)") 'Re_mag 3 ',nfft_tot,' double'
+       do kk=0,nz-1
+         do jj=0,ny-1
+           do ii=0,nx-1
+             ind=2*(1+ii+nx*(jj+ny*kk))-1
+             write(denvtk,'(3f16.8)') rhorfull(ind,2),rhorfull(ind,3),rhorfull(ind,4)
+           end do
+         end do
+       end do
+       write(denvtk,"(a,i18,a)") 'Im_mag 3 ',nfft_tot,' double'
+       do kk=0,nz-1
+         do jj=0,ny-1
+           do ii=0,nx-1
+             ind=2*(1+ii+nx*(jj+ny*kk))
+             write(denvtk,'(3f16.8)') rhorfull(ind,2),rhorfull(ind,3),rhorfull(ind,4)
+           end do
+         end do
+       end do
+       
+     end if
 
-   end if
+   end if ! nspden options condition
 
    close (denvtk)
 

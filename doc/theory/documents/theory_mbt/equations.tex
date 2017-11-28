@@ -1,0 +1,206 @@
+\documentclass[a4paper,reqno,11pt,twoside]{book}
+
+\input{packages.tex}
+\input{macros.tex}
+
+\begin{document}
+
+\begin{equation}
+\ee(1, 2) = \delta(1, 2) - \int v(1, 3)\tchi(3, 2)\dd(3)
+\end{equation}
+
+\begin{equation}
+\ee_{\GG_1\GG_2}(\qq;\ww) = \delta_{\GG_1,\GG_2} - v(\qq, \GG_1) \tchi_{\GG_1\GG_2}(\qq;\ww)
+\end{equation}
+
+\begin{equation}
+W = v + (\ee^{-1} - 1) v
+\end{equation}
+
+
+\begin{equation}
+\label{eq:GW_space_frequency}
+\Sigma(\rr_1,\rr_2;\ww) = 
+%\lim_{\delta \rarr 0^+}
+\dfrac{i}{\twopi} \int e^{i\ww'\delta^+} G(\rr_1,\rr_2;\ww+\ww') W(\rr_1,\rr_2;\ww')\dd\ww'
+\end{equation}
+
+ Macro epsilon with and without LFE
+
+$\ee_M^{\LF}(\ww)$
+
+\begin{equation}
+\label{eq:abs_LFE}
+\ee_M^{\LF}(\ww) = \lim_{\qq \rarr 0} \dfrac{1}{\ee^{-1}_{0 0}(\qq,\ww)}
+\end{equation}
+
+$\ee_M^\NLF(\ww)$
+
+\begin{equation}
+\label{eq:abs_NLFE}
+\ee_M^\NLF(\ww) = \lim_{\qq \rarr 0} {\ee_{0 0}(\qq,\ww)}
+\end{equation}
+
+%\begin{equation}\nonumber
+%\ee_M(\ww) = 1 - \lim_{\qq  \rightarrow 0} \vc(\qq)\,\tchi_{00}(\qq;\ww)
+%\end{equation}
+
+ Oscillators
+
+\begin{equation}
+\label{eq:def_oscillator}
+M^{b_1b_2}_\GG (\kk,\qq) \df
+\<\kmq,b_1|e^{-i(\qpG)\cdot\rr}|\kk,b_2\> = 
+ \sum_{\GG'=1} 
+ u_{\kmq b_1}^\*(\GG')u_{\kk b_2}(\GG+\GG')
+%= 
+% \\
+% = \int u_{\overline{\kmq} b_1}^\*(\rr) e^{-i(\GG-\GGo)\cdot \rr}\, u_{\kk b_2}(\rr)\dd\rr
+% = \hat\mcF \bigl[ u_{\overline{\kmq} b_1} u_{\kk b_2}^\* \bigr] (\GG-\GGo).
+\end{equation}
+
+ Spectral method
+
+$\tchi^\mcS(\ww')$ 
+
+$\ww'$
+
+
+\begin{multline}
+\label{eq:im_part_chi0}
+ \tchi^\mcS_{\GG_1\GG_2}(\qq,\ww') = \\
+ = \dfrac{2}{V} \sum_{\substack{\kk \\ b_1 b_2}} \,
+ \,\Bigl[ f(\varepsilon_{b_1\kmq})-f(\varepsilon_{b_2\kk}) \Bigr]
+ \times 
+ %\\
+ M^{b_1 b_2}_{\GG_1}(\kk,\qq) \Bigl[{M^{b_1 b_2}_{\GG_2}}(\kk,\qq)\Bigr]^\*\,
+ {\sign(\ww')\,
+ \delta(\ww'-\varepsilon_{b_1\kmq}+\varepsilon_{b_2\kk})}
+\end{multline}
+
+
+\begin{equation}
+\label{eq:chi0_Hilbert_transform}
+ {\tchio}_{\GG_1\GG_2} (\qq,\ww) = 
+ \int_0^{+\infty} \tchi^\mcS_{\GG_1\GG_2} (\qq,\ww') 
+ \times \biggl(\frac{1}{\ww-\ww'+i\delta}-\frac{1}{\ww+\ww'-i\delta}\biggr)\dd\ww'
+\end{equation}
+
+
+Sigma
+
+
+\begin{equation}
+W = v + (\ee^{-1}-1) v
+\end{equation}
+
+\begin{equation}
+\Sigma(\rr_1,\rr_2;\ww) \df \Sigma_x(\rr_1,\rr_2) + \Sigma_c(\rr_1,\rr_2;\ww)
+\end{equation}
+
+\begin{equation}\label{eq:Sigma_x}
+\Sigma_x(\rr_1,\rr_2)=  
+-\sum_\kk^\BZ \sum_\nu^\text{occ} \Psi_{n\kk}(\rr_1){\Psi^\*_{n\kk}}(\rr_2)\,\vc(\rr_1,\rr_2)
+\end{equation}
+
+
+\begin{equation}
+\label{eq:diag_mat_el_Sigma_x}
+ \<b_1\kkt|\oSigma_x|b_1\kkt\> =
+ -\dfrac{\fourpi}{V} \sum_{\nu}^\occ \sum_\qq^\BZ \sum_{\GG}
+  \dfrac{\abs{M_\GG^{b_1b_1}(\kkt,\qq)}^2}{\abs{\qpG}^2}
+\end{equation}
+
+\begin{equation}
+\label{eq:mat_el_Sigma_c}
+\<b_1\kkt|\oSigma_c(\ww)|b_2\kkt\> = 
+\dfrac{i}{\twopi V}
+\sum_\qq^\BZ \sum_{\GG_1\GG_2}\sum_{n=1}^\pinf
+\Bigl[M_{\GG_1}^{nb_1}(\kkt,\qq)\Bigr]^\* M_{\GG_2}^{nb_2}(\kkt,\qq)\,\tilde v_{\GG_1 \GG_2}(\qq)\,
+J_{\GG_1\GG_2}^{\,n \kkt-\qq}(\qq,\ww)
+\end{equation}
+
+
+ ppmodel
+
+\begin{equation}
+\label{eq:ppmodel_imag}
+\Im\,\ee^{-1}_{\GG_1\GG_2}(\qq,\ww) = 
+A_{\GG_1\GG_2}(\qq)\,
+\bigl[
+\delta(\ww-\ww_{\GG_1\GG_2}(\qq)) - 
+\delta(\ww+\ww_{\GG_1\GG_2}(\qq))
+\bigr]
+\end{equation}
+
+\begin{equation}
+\label{eq:ppmodel_real}
+\Re\,\ee^{-1}_{\GG_1 \GG_2} (\qq,\ww) = 
+\delta_{\GG_1 \GG_2} + \dfrac{\Omega_{\GG_1\GG_2}^2(\qq)}{\ww^2-\wwt^2_{\GG_1\GG_2}(\qq)}
+\end{equation}
+
+
+ CD method
+
+\begin{multline}
+\label{eq:GW_CD}
+\Sigma_c(\ww) = \dfrac{i}{\twopi} \Bigl\{ 
+ \twopi\,i \sum_{z_p}^\mcC \lim_{z\rarr z_p} G(z)\,\Wc(z)\,(z-z_p) -\int_\minf^\pinf G(\ww+i\ww')\,\Wc(i\ww') \dd(i\ww')
+ \Bigr\}.
+\end{multline}
+
+\begin{equation}
+\Wc(\qq,\ww)_{\GG_1\GG_2} \df 
+%\tac_{\GG_1\GG_2}(\qq,\ww)
+\bigl(\eet^{-1}_{\GG_1\GG_2}(\qq,\ww) -\delta_{\GG_1,\GG_2}\bigr)
+\,\tvc_{\GG_1\GG_2}(\qq)
+\end{equation}
+
+
+Notations
+
+$(1) \df (\rr_1,t_1)$ 
+
+$\vc(\rr_1,\rr_2)$ 
+
+\begin{equation}
+\delta(12) = \delta(\rr_1-\rr_2)\,\delta(t_1-t_2)
+\end{equation}
+%
+\begin{equation}
+\int \dd1 = \int \ddrr_1 \int_{-\infty}^{+\infty} \dd t_1
+\end{equation}
+%
+\begin{equation}
+v(12)= \vc(\rr_1,\rr_2)\,\delta(t_1-t_2)
+\end{equation}
+%
+\begin{equation}
+1^+ = (\rr_1,t_1 + \eta)_{\eta  \rarr 0^+}
+\end{equation}
+
+\begin{alignat}{2}\label{eq:FT_1point_convention}
+ u(\rr)= \sum_\GG u(\GG)e^{i\GG\cdot\rr}, &\quad
+ u(\GG) = \frac{1}{\Omega} \int_\Omega u(\rr)e^{-i\GG\cdot\rr}\dd\rr
+\end{alignat}
+
+
+\begin{equation}\label{eq:IFT_2points_convention}
+ f(\rr_1,\rr_2)= \frac{1}{V} \sum_{\substack{\qq \\ \GG_1 \GG_2}}  
+ e^{i (\qq +\GG_1) \cdot \rr_1}\,f_{\GG_1 \GG_2}(\qq)\,e^{-i (\qq+\GG_2) \cdot \rr_2} 
+\end{equation}
+
+\begin{equation}\label{eq:FT_2points_convention}
+ f_{\GG_1\GG_2}(\qq) = \frac{1}{V} \iint_V                                                     
+ e^{-i(\qq+\GG_1) \cdot \rr_1}\,f(\rr_1, \rr_2)\,e^{i (\qq+\GG_2) \cdot \rr_2}\dd\rr_1\dd\rr_2 
+\end{equation}
+
+The volume of the unit cell is denoted with $\Omega$, while $V$ is the total volume of the crystal 
+
+\begin{equation}\label{eq:Poles of G and W}
+ G(\ww-\ww')  
+ W(\ww')
+\end{equation}
+
+
+\end{document}

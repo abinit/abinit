@@ -355,8 +355,7 @@ end subroutine dtset_chkneu
 !!  dtout <type(dataset_type)>
 !!
 !! PARENTS
-!!      calc_vhxc_me,chkinp,dfpt_looppert,driver,gwls_hamiltonian,hybrid_corr
-!!      m_io_kss,m_kxc,xchybrid_ncpp_cc
+!!      chkinp,dfpt_looppert,driver,gwls_hamiltonian,m_io_kss
 !!
 !! CHILDREN
 !!
@@ -411,6 +410,8 @@ subroutine dtset_copy(dtout, dtin)
  dtout%accuracy           = dtin%accuracy
  dtout%adpimd             = dtin%adpimd
  dtout%autoparal          = dtin%autoparal
+ dtout%auxc_ixc           = dtin%auxc_ixc
+ dtout%auxc_scal          = dtin%auxc_scal
  dtout%awtr               = dtin%awtr
  dtout%bandpp             = dtin%bandpp
  dtout%bdeigrf            = dtin%bdeigrf
@@ -423,11 +424,11 @@ subroutine dtset_copy(dtout, dtin)
  dtout%cd_customnimfrqs   = dtin%cd_customnimfrqs
  dtout%cd_frqim_method    = dtin%cd_frqim_method
  dtout%cd_full_grid       = dtin%cd_full_grid
+ dtout%chkdilatmx         = dtin%chkdilatmx
  dtout%chkexit            = dtin%chkexit
  dtout%chkprim            = dtin%chkprim
  dtout%chksymbreak        = dtin%chksymbreak
  dtout%cineb_start        = dtin%cineb_start
- dtout%cgtyphf            = dtin%cgtyphf
  dtout%delayperm          = dtin%delayperm
  dtout%diismemory         = dtin%diismemory
  dtout%dmatpuopt          = dtin%dmatpuopt
@@ -511,6 +512,8 @@ subroutine dtset_copy(dtout, dtin)
  dtout%pawfatbnd          = dtin%pawfatbnd
  dtout%fermie_nest        = dtin%fermie_nest
  dtout%fftgw              = dtin%fftgw
+ dtout%fockdownsampling  = dtin%fockdownsampling
+ dtout%fockoptmix         = dtin%fockoptmix
  dtout%freqim_alpha       = dtin%freqim_alpha
  dtout%freqremin          = dtin%freqremin
  dtout%freqremax          = dtin%freqremax
@@ -554,7 +557,6 @@ subroutine dtset_copy(dtout, dtin)
  dtout%gwpara             = dtin%gwpara
  dtout%gwgamma            = dtin%gwgamma
  dtout%gwrpacorr          = dtin%gwrpacorr
- dtout%gwfockmix          = dtin%gwfockmix
  dtout%gw_customnfreqsp   = dtin%gw_customnfreqsp
  dtout%gw_nqlwl           = dtin%gw_nqlwl
  dtout%gw_nstep           = dtin%gw_nstep
@@ -566,9 +568,9 @@ subroutine dtset_copy(dtout, dtin)
  dtout%gw_sctype          = dtin%gw_sctype
  dtout%gw_sigxcore        = dtin%gw_sigxcore
  dtout%gw_toldfeig        = dtin%gw_toldfeig
- dtout%gwls_sternheimer_kmax= dtin%gwls_sternheimer_kmax
+ dtout%gwls_stern_kmax= dtin%gwls_stern_kmax
  dtout%gwls_npt_gauss_quad  = dtin%gwls_npt_gauss_quad
- dtout%gwls_dielectric_model= dtin%gwls_dielectric_model
+ dtout%gwls_diel_model= dtin%gwls_diel_model
  dtout%gwls_print_debug     = dtin%gwls_print_debug
  dtout%gwls_nseeds          = dtin%gwls_nseeds
  dtout%gwls_n_proj_freq     = dtin%gwls_n_proj_freq
@@ -581,6 +583,10 @@ subroutine dtset_copy(dtout, dtin)
  dtout%gwls_correlation     = dtin%gwls_correlation
  dtout%gwls_first_seed      = dtin%gwls_first_seed
  dtout%gwls_recycle         = dtin%gwls_recycle
+ dtout%hyb_mixing      = dtin%hyb_mixing
+ dtout%hyb_mixing_sr   = dtin%hyb_mixing_sr
+ dtout%hyb_range_dft   = dtin%hyb_range_dft
+ dtout%hyb_range_fock  = dtin%hyb_range_fock
  dtout%iboxcut            = dtin%iboxcut
  dtout%icoulomb           = dtin%icoulomb
  dtout%icutcoul           = dtin%icutcoul
@@ -616,6 +622,7 @@ subroutine dtset_copy(dtout, dtin)
  dtout%istatr             = dtin%istatr
  dtout%istatshft          = dtin%istatshft
  dtout%ixc                = dtin%ixc
+ dtout%ixc_sigma          = dtin%ixc_sigma
  dtout%ixcpositron        = dtin%ixcpositron
  dtout%jdtset             = dtin%jdtset
  dtout%jellslab           = dtin%jellslab
@@ -804,6 +811,7 @@ subroutine dtset_copy(dtout, dtin)
  dtout%prtxml             = dtin%prtxml
  dtout%prt1dm             = dtin%prt1dm
  dtout%ptgroupma          = dtin%ptgroupma
+ dtout%qptopt             = dtin%qptopt
  dtout%random_atpos       = dtin%random_atpos
  dtout%recgratio          = dtin%recgratio
  dtout%recnpath           = dtin%recnpath
@@ -946,19 +954,18 @@ subroutine dtset_copy(dtout, dtin)
  dtout%ecutsigx           = dtin%ecutsigx
  dtout%ecutsm             = dtin%ecutsm
  dtout%ecutwfn            = dtin%ecutwfn
- dtout%effmass            = dtin%effmass
+ dtout%effmass_free       = dtin%effmass_free
  dtout%efmas_deg_tol      = dtin%efmas_deg_tol
  dtout%elph2_imagden      = dtin%elph2_imagden
  dtout%eshift             = dtin%eshift
  dtout%esmear             = dtin%esmear
  dtout%exchmix            = dtin%exchmix
  dtout%fband              = dtin%fband
- dtout%gwls_model_parameter = dtin%gwls_model_parameter
- dtout%gwls_second_model_parameter = dtin%gwls_second_model_parameter
- dtout%spinmagntarget     = dtin%spinmagntarget
+ dtout%focktoldfe         = dtin%focktoldfe
  dtout%friction           = dtin%friction
  dtout%fxcartfactor       = dtin%fxcartfactor
  dtout%ga_opt_percent     = dtin%ga_opt_percent
+ dtout%gwls_model_parameter = dtin%gwls_model_parameter
  dtout%kptnrm             = dtin%kptnrm
  dtout%kptrlen            = dtin%kptrlen
  dtout%maxestep           = dtin%maxestep
@@ -984,6 +991,7 @@ subroutine dtset_copy(dtout, dtin)
  dtout%rectolden          = dtin%rectolden
  dtout%dfpt_sciss         = dtin%dfpt_sciss
  dtout%mbpt_sciss         = dtin%mbpt_sciss
+ dtout%spinmagntarget     = dtin%spinmagntarget
  dtout%spbroad            = dtin%spbroad
  dtout%spnorbscl          = dtin%spnorbscl
  dtout%stmbias            = dtin%stmbias
@@ -1130,6 +1138,8 @@ subroutine dtset_copy(dtout, dtin)
 
  call alloc_copy( dtin%kptns, dtout%kptns)
 
+ call alloc_copy( dtin%kptns_hf, dtout%kptns_hf)
+
  call alloc_copy( dtin%mixalch_orig, dtout%mixalch_orig)
 
  call alloc_copy( dtin%nucdipmom, dtout%nucdipmom)
@@ -1199,8 +1209,8 @@ end subroutine dtset_copy
 !!  dtset <type(dataset_type)>=free all allocated allocatable.
 !!
 !! PARENTS
-!!      calc_vhxc_me,chkinp,dfpt_looppert,driver,gwls_hamiltonian,hybrid_corr
-!!      m_ab7_invars_f90,m_io_kss,m_kxc,mover_effpot,xchybrid_ncpp_cc
+!!      chkinp,dfpt_looppert,driver,gwls_hamiltonian,m_ab7_invars_f90,m_io_kss
+!!      mover_effpot
 !!
 !! CHILDREN
 !!
@@ -1358,6 +1368,9 @@ subroutine dtset_free(dtset)
  end if
  if (allocated(dtset%kptns))       then
    ABI_DEALLOCATE(dtset%kptns)
+ end if
+ if (allocated(dtset%kptns_hf))       then
+   ABI_DEALLOCATE(dtset%kptns_hf)
  end if
  if (allocated(dtset%mixalch_orig))     then
    ABI_DEALLOCATE(dtset%mixalch_orig)

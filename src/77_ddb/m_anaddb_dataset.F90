@@ -104,6 +104,7 @@ module m_anaddb_dataset
   integer :: polflag
   integer :: prtdos
   integer :: prt_ifc
+  integer :: prtddb
   integer :: prtmbm
   integer :: prtfsurf
   integer :: prtnest
@@ -136,6 +137,7 @@ module m_anaddb_dataset
   integer :: qrefine(3)
   integer :: kptrlatt(3,3)
   integer :: kptrlatt_fine(3,3)
+  integer :: thermal_supercell(3,3)
 
 ! Real(dp)
   real(dp) :: a2fsmear
@@ -298,7 +300,7 @@ end subroutine anaddb_dtset_free
 !!    FIXME: move checks to chkin9?
 !!
 !! PARENTS
-!!      anaddb,m_effective_potential
+!!      anaddb
 !!
 !! CHILDREN
 !!      chkvars_in_string,inupper
@@ -313,6 +315,7 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
 #undef ABI_FUNC
 #define ABI_FUNC 'invars9'
  use interfaces_14_hidewrite
+ use interfaces_32_util
  use interfaces_42_parser
 !End of the abilint section
 
@@ -329,6 +332,7 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
  integer,parameter :: vrsddb=100401 !Set routine version number here:
  integer,parameter :: jdtset=1
  integer :: ii,iph1,iph2,marr,tread,start
+ integer :: idet
  character(len=500) :: message
  character(len=fnlen) :: path
 !arrays
@@ -1100,6 +1104,22 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
    anaddb_dtset%ifcout = -1 ! this forces output of all IFC
  end if
 
+!Default is no output of the DDB to file
+ anaddb_dtset%prtddb = 0
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prtddb',tread,'INT')
+ if(tread==1) anaddb_dtset%prtddb = intarr(1)
+ if(anaddb_dtset%prtddb < 0 .or. anaddb_dtset%prtddb > 1) then
+   write(message, '(a,i0,5a)' )&
+&   'prtf_ddb is ',anaddb_dtset%prtddb,'. The only allowed values',ch10,&
+&   'are 0 (no output) or 1 (print DDB and DDB.nc files)',ch10,  &
+&   'Action: correct prtddb in your input file.'
+   MSG_ERROR(message)
+ end if
+! check that ifcflag is set
+ if (anaddb_dtset%prtddb /= 0 .and. anaddb_dtset%ifcflag == 0) then
+   anaddb_dtset%ifcflag = 1 ! this forces the use of IFC
+ end if
+
  anaddb_dtset%prtmbm=0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prtmbm',tread,'INT')
  if(tread==1) anaddb_dtset%prtmbm=intarr(1)
@@ -1280,6 +1300,22 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
    write(message, '(a,f10.3,3a)' )&
 &   'tempermin is ',anaddb_dtset%tempermin,', which is lower than 0 .',ch10,&
 &   'Action: correct tempermin in your input file.'
+   MSG_ERROR(message)
+ end if
+
+ anaddb_dtset%thermal_supercell(:,:)=0
+ marr = 9
+ ABI_DEALLOCATE(intarr)
+ ABI_DEALLOCATE(dprarr)
+ ABI_ALLOCATE(intarr,(marr))
+ ABI_ALLOCATE(dprarr,(marr))
+ call intagm(dprarr,intarr,jdtset,marr,9,string(1:lenstr),'thermal_supercell',tread,'INT')
+ if(tread==1) anaddb_dtset%thermal_supercell(1:3,1:3)=reshape(intarr(1:9),(/3,3/))
+ call mati3det(anaddb_dtset%thermal_supercell, idet)
+ if(sum(abs(anaddb_dtset%thermal_supercell))>0 .and. idet == 0) then
+   write(message, '(a,9I6,5a)' )&
+&   'thermal_supercell is ',anaddb_dtset%thermal_supercell,', but the matrix must be non singular',ch10,&
+&   'with a non zero determinant.',ch10,'Action: correct thermal_supercell in your input file.'
    MSG_ERROR(message)
  end if
 
@@ -2189,8 +2225,8 @@ subroutine anaddb_chkvars(string)
 !O
  list_vars=trim(list_vars)//' outboltztrap'
 !P
- list_vars=trim(list_vars)//' piezoflag polflag prtdos prt_ifc prtmbm prtfsurf prtnest prtphbands'
- list_vars=trim(list_vars)//' prtsrlr prtvol prtbltztrp'
+ list_vars=trim(list_vars)//' piezoflag polflag prtddb prtdos prt_ifc prtmbm prtfsurf'
+ list_vars=trim(list_vars)//' prtnest prtphbands prtsrlr prtvol prtbltztrp'
 !Q
  list_vars=trim(list_vars)//' qrefine qgrid_type q1shft q2shft qnrml1 qnrml2 qpath qph1l qph2l'
 !R
@@ -2198,7 +2234,7 @@ subroutine anaddb_chkvars(string)
 !S
  list_vars=trim(list_vars)//' selectz symdynmat symgkq'
 !T
- list_vars=trim(list_vars)//' targetpol telphint thmflag temperinc tempermin thmtol'
+ list_vars=trim(list_vars)//' targetpol telphint thmflag temperinc tempermin thermal_supercell thmtol'
 !U
  list_vars=trim(list_vars)//' use_k_fine'
 !V
