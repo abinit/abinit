@@ -71,4 +71,5 @@ w90iniprj2 1
 #%% description = Argon FCC
 #%%   Test the approach of Ambrosetti and Silvestrelli to assess van der Waals interactions.   
 #%% references = http://arxiv.org/abs/1111.6737
+#%% topics = vdw, Wannier
 #%%<END TEST_INFO>

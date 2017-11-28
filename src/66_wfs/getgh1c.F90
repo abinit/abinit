@@ -276,6 +276,7 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
        ABI_DEALLOCATE(gh1c_sp)
      end if
    else ! Non-Collinear magnetism for nvloc=4
+
      if (gs_hamkq%nspinor==2) then
        ABI_ALLOCATE(gh1c1,(2,npw1))
        ABI_ALLOCATE(gh1c2,(2,npw1))
@@ -1030,7 +1031,7 @@ subroutine getgh1c_setup(gs_hamkq,rf_hamkq,dtset,psps,kpoint,kpq,idir,ipert,&   
 !Compute (1/2) (2 Pi)**2 (k+q+G)**2:
  ABI_ALLOCATE(kinpw1,(npw1_k))
  kinpw1(:)=zero
- call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass,gmet,kg1_k,kinpw1,kpq,npw1_k,0,0)
+ call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass_free,gmet,kg1_k,kinpw1,kpq,npw1_k,0,0)
 
  ABI_ALLOCATE(dkinpw,(npw_k)) ! 1st derivative (1st direction)
  dkinpw(:)=zero
@@ -1046,15 +1047,15 @@ subroutine getgh1c_setup(gs_hamkq,rf_hamkq,dtset,psps,kpoint,kpq,idir,ipert,&   
 !-- k-point perturbation (1st-derivative)
  if (ipert==natom+1) then
 !  Compute the derivative of the kinetic operator vs k
-   call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass,gmet,kg_k,dkinpw,kpoint,npw_k,idir,0) ! 1st derivative
+   call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass_free,gmet,kg_k,dkinpw,kpoint,npw_k,idir,0) ! 1st derivative
  end if
 
 !-- k-point perturbation (2nd-derivative)
  if (ipert==natom+10.or.ipert==natom+11) then
 !  Compute the derivative of the kinetic operator vs k in kinpw, second and first orders
    if(ipert==natom+10 .and. idir<=3) then
-     call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass,gmet,kg_k,dkinpw,kpoint,npw_k,idir,0) ! 1st derivative
-     call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass,gmet,kg_k,ddkinpw,kpoint,npw_k,idir,idir) ! 2nd derivative
+     call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass_free,gmet,kg_k,dkinpw,kpoint,npw_k,idir,0) ! 1st derivative
+     call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass_free,gmet,kg_k,ddkinpw,kpoint,npw_k,idir,idir) ! 2nd derivative
    else
      select case(idir)
 !      Diagonal terms :
@@ -1088,10 +1089,10 @@ subroutine getgh1c_setup(gs_hamkq,rf_hamkq,dtset,psps,kpoint,kpq,idir,ipert,&   
        idir1 = 2
        idir2 = 1
      end select
-     call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass,gmet,kg_k,dkinpw,kpoint,npw_k,idir1,0) !  1st derivative, idir1
+     call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass_free,gmet,kg_k,dkinpw,kpoint,npw_k,idir1,0) !  1st derivative, idir1
      if(ipert==natom+10) then
-       call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass,gmet,kg_k,dkinpw2,kpoint,npw_k,idir2,0) ! 1st derivative, idir2
-       call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass,gmet,kg_k,ddkinpw,kpoint,npw_k,idir1,idir2) ! 2nd derivative
+       call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass_free,gmet,kg_k,dkinpw2,kpoint,npw_k,idir2,0) ! 1st derivative, idir2
+       call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass_free,gmet,kg_k,ddkinpw,kpoint,npw_k,idir1,idir2) ! 2nd derivative
      end if
    end if
  end if
@@ -1101,7 +1102,7 @@ subroutine getgh1c_setup(gs_hamkq,rf_hamkq,dtset,psps,kpoint,kpq,idir,ipert,&   
    if (ipert==natom+3) istr=idir
    if (ipert==natom+4) istr=idir+3
 !  Compute the derivative of the kinetic operator vs strain
-   call kpgstr(dkinpw,dtset%ecut,dtset%ecutsm,dtset%effmass,gmet,gprimd,istr,kg_k,kpoint,npw_k)
+   call kpgstr(dkinpw,dtset%ecut,dtset%ecutsm,dtset%effmass_free,gmet,gprimd,istr,kg_k,kpoint,npw_k)
  end if
 
 !===== Load the k/k+q dependent parts of the Hamiltonian

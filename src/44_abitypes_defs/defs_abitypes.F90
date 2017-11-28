@@ -169,6 +169,7 @@ type dataset_type
  integer :: accuracy
  integer :: adpimd
  integer :: autoparal
+ integer :: auxc_ixc
  integer :: awtr
  integer :: bandpp
  integer :: bdeigrf
@@ -182,11 +183,11 @@ type dataset_type
  integer :: cd_full_grid
  integer :: cd_frqim_method
  integer :: cd_customnimfrqs
+ integer :: chkdilatmx
  integer :: chkexit
  integer :: chkprim
  integer :: chksymbreak
  integer :: cineb_start
- integer :: cgtyphf
  integer :: delayperm
  integer :: diismemory
  integer :: dmatpuopt
@@ -234,6 +235,7 @@ type dataset_type
  integer :: exchn2n3d
  integer :: extrapwf
  integer :: fftgw
+ integer :: fockoptmix
  integer :: frzfermi
  integer :: ga_algor
  integer :: ga_fitness
@@ -276,9 +278,9 @@ type dataset_type
  integer :: gw_sigxcore
 
  ! GWLS
- integer :: gwls_sternheimer_kmax       ! number of Lanczos steps taken by the gw_sternheimer routine
+ integer :: gwls_stern_kmax       ! number of Lanczos steps taken by the gw_sternheimer routine
  integer :: gwls_npt_gauss_quad         ! number of points used in Gaussian quadrature in gw_sternheimer routine
- integer :: gwls_dielectric_model       ! switch to determine which dielectic model should be used in integration
+ integer :: gwls_diel_model       ! switch to determine which dielectic model should be used in integration
  integer :: gwls_print_debug            ! switch to determine what to print out for debugging
  integer :: gwls_nseeds                 ! number of seeds in the Lanczos description of the dielectric matrix
  integer :: gwls_n_proj_freq            ! Number of projection frequencies to be used for the construction of the sternheimer basis
@@ -333,6 +335,7 @@ type dataset_type
  integer :: istatr
  integer :: istatshft
  integer :: ixc
+ integer :: ixc_sigma
  integer :: ixcpositron
  integer :: jdtset !  jdtset contains the current dataset number
  integer :: jellslab
@@ -519,6 +522,7 @@ type dataset_type
  integer :: prtxml
  integer :: prt1dm
  integer :: ptgroupma
+ integer :: qptopt
  integer :: random_atpos
  integer :: recgratio
  integer :: recnpath
@@ -599,6 +603,7 @@ type dataset_type
  integer :: d3e_pert2_dir(3)
  integer :: d3e_pert3_atpol(2)
  integer :: d3e_pert3_dir(3)
+ integer :: fockdownsampling(3)
  integer :: jfielddir(3)
  integer :: kptrlatt(3,3)
  integer :: kptrlatt_orig(3,3)=0
@@ -645,6 +650,7 @@ type dataset_type
 
 !Real
  real(dp) :: adpimd_gamma
+ real(dp) :: auxc_scal
  real(dp) :: bmass
  real(dp) :: boxcutmin
  real(dp) :: bxctmindg
@@ -653,6 +659,7 @@ type dataset_type
  real(dp) :: charge
  real(dp) :: cpus
  real(dp) :: ddamp
+ real(dp) :: dfpt_sciss
  real(dp) :: diecut
  real(dp) :: diegap
  real(dp) :: dielam
@@ -672,7 +679,7 @@ type dataset_type
  real(dp) :: ecutsigx
  real(dp) :: ecutsm
  real(dp) :: ecutwfn
- real(dp) :: effmass
+ real(dp) :: effmass_free
  real(dp) :: efmas_deg_tol
  real(dp) :: elph2_imagden
  real(dp) :: eshift
@@ -680,7 +687,7 @@ type dataset_type
  real(dp) :: exchmix
  real(dp) :: fband
  real(dp) :: fermie_nest
- real(dp) :: spinmagntarget
+ real(dp) :: focktoldfe
  real(dp) :: freqim_alpha
  real(dp) :: freqremin
  real(dp) :: freqremax
@@ -690,14 +697,17 @@ type dataset_type
  real(dp) :: fxcartfactor
  real(dp) :: ga_opt_percent
  real(dp) :: gwencomp
- real(dp) :: gwfockmix
  real(dp) :: gwls_model_parameter         ! Parameter used in modelization of dielectric function
- real(dp) :: gwls_second_model_parameter  ! another Parameter used in modelization of dielectric function
  real(dp) :: gw_toldfeig
+ real(dp) :: hyb_mixing
+ real(dp) :: hyb_mixing_sr
+ real(dp) :: hyb_range_dft
+ real(dp) :: hyb_range_fock
  real(dp) :: kptnrm
  real(dp) :: kptrlen
  real(dp) :: magcon_lambda
  real(dp) :: maxestep
+ real(dp) :: mbpt_sciss
  real(dp) :: mdf_epsinf
  real(dp) :: mdwall
  real(dp) :: mep_mxstep
@@ -720,12 +730,11 @@ type dataset_type
  real(dp) :: rectolden
  real(dp) :: rhoqpmix
  real(dp) :: rcut
- real(dp) :: dfpt_sciss
  real(dp) :: slabwsrad
  real(dp) :: slabzbeg
  real(dp) :: slabzend
- real(dp) :: mbpt_sciss
  real(dp) :: spbroad
+ real(dp) :: spinmagntarget
  real(dp) :: spnorbscl
  real(dp) :: stmbias
  real(dp) :: strfact
@@ -822,6 +831,7 @@ type dataset_type
  real(dp), allocatable :: kptgw(:,:)        !SET2NULL  ! kptgw(3,nkptgw)
  real(dp), allocatable :: kptns(:,:)        !SET2NULL  ! kptns(3,nkpt) k-points renormalized and shifted.
                                         !  The ones that should be used inside the code.
+ real(dp), allocatable :: kptns_hf(:,:)     !SET2NULL  ! kpthf(3,nkptns_hf)
 
  real(dp), allocatable :: mixalch_orig(:,:,:) !SET2NULL  ! mixalch_orig(npspalch,ntypalch,nimage)
  real(dp), allocatable :: nucdipmom(:,:)      !SET2NULL  ! nucdipmom(3,natom)

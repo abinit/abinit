@@ -233,8 +233,8 @@ CONTAINS  !=====================================================================
 !!
 !! PARENTS
 !!      dfpt_looppert,eig2tot,gwls_hamiltonian,m_crystal_io,m_ddb
-!!      m_effective_potential,m_effective_potential_file,mover,optic,outddbnc
-!!      outscfcv,vtorho
+!!      m_effective_potential,m_effective_potential_file,m_tdep_abitypes,mover
+!!      optic,outscfcv,respfn,vtorho
 !!
 !! CHILDREN
 !!      mati3inv,sg_multable
@@ -316,7 +316,7 @@ subroutine crystal_init(amu,Cryst,space_group,natom,npsp,ntypat,nsym,rprimd,typa
  call xred2xcart(natom,rprimd,Cryst%xcart,Cryst%xred)
 
  ABI_MALLOC(Cryst%title,(ntypat))
- Cryst%title=title
+ Cryst%title = title
  !
  ! === Generate index table of atoms, in order for them to be used type after type ===
  ABI_MALLOC(Cryst%atindx,(natom))
@@ -390,7 +390,7 @@ subroutine crystal_init(amu,Cryst,space_group,natom,npsp,ntypat,nsym,rprimd,typa
  ! * indsym(4,  isym,iat) gives iat_sym in the original unit cell.
  ! * indsym(1:3,isym,iat) gives the lattice vector $R_0$.
  !
- ABI_MALLOC(indsym,(4,Cryst%nsym,natom))
+ ABI_MALLOC(indsym,(4,Cryst%nsym,natom)); indsym(:,:,:)=zero
  tolsym8=tol8
  call symatm(indsym,natom,Cryst%nsym,Cryst%symrec,Cryst%tnons,tolsym8,Cryst%typat,Cryst%xred)
 
@@ -417,10 +417,11 @@ end subroutine crystal_init
 !!  Destroy the dynamic arrays in a crystal_t data type.
 !!
 !! PARENTS
-!!      anaddb,bethe_salpeter,dfpt_looppert,eig2tot,eph,gstate,gwls_hamiltonian
-!!      m_ddk,m_dvdb,m_effective_potential,m_effective_potential_file
-!!      m_gruneisen,m_ioarr,m_iowf,m_wfd,m_wfk,mlwfovlp_qp,mover,mrgscr,optic
-!!      outddbnc,outscfcv,screening,sigma,vtorho,wfk_analyze
+!!      anaddb,bethe_salpeter,cut3d,dfpt_looppert,eig2tot,eph,fold2Bloch,gstate
+!!      gwls_hamiltonian,m_ddk,m_dvdb,m_effective_potential
+!!      m_effective_potential_file,m_gruneisen,m_ioarr,m_iowf,m_wfd,m_wfk
+!!      mlwfovlp_qp,mover,mrgscr,optic,outscfcv,respfn,screening,sigma,vtorho
+!!      wfk_analyze
 !!
 !! CHILDREN
 !!      mati3inv,sg_multable
@@ -526,8 +527,8 @@ end subroutine crystal_free
 !!  Only printing
 !!
 !! PARENTS
-!!      eph,gwls_hamiltonian,m_dvdb,m_effective_potential,m_gruneisen,setup_bse
-!!      setup_screening,setup_sigma,wfk_analyze
+!!      eph,gwls_hamiltonian,m_dvdb,m_gruneisen,setup_bse,setup_screening
+!!      setup_sigma,wfk_analyze
 !!
 !! CHILDREN
 !!      mati3inv,sg_multable
@@ -693,15 +694,15 @@ end subroutine print_symmetries
 !! ntypat = number of typat
 !! npsp =  number of pseudopotentials
 !! znucl = Nuclear charge for each type of pseudopotential
-!! 
+!!
 !! OUTPUT
 !! symbols = array with the symbol of each atoms
 !!
 !! PARENTS
-!!      m_effective_potential_file
+!!      m_effective_potential_file,m_polynomial_coeff
 !!
 !! CHILDREN
-!!      isfile,wrtout
+!!      mati3inv,sg_multable
 !!
 !! SOURCE
 

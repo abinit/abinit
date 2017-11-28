@@ -80,4 +80,5 @@ diemac 9.0
 #%%   (important). The choice q should be multiple of the smallest
 #%%   spacing of the k-point mesh. The run takes about 2 minutes
 #%%   WARNING : HAS BEEN TRANSFERRED TO tests/seq
+#%% topics = Berry
 #%%<END TEST_INFO>

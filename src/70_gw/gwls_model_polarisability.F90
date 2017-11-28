@@ -45,7 +45,7 @@ private
 !!***
 
 real(dp), public :: model_polarizability_epsilon_0  ! model parameter
-integer          :: model_polarizability_model_type ! how is epsilon_0 used to model?
+!integer          :: model_polarizability_model_type ! how is epsilon_0 used to model?
 
 
 real(dp), allocatable, private :: psir_model(:,:,:,:), psir_ext_model(:,:,:,:)

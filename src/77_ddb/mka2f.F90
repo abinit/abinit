@@ -91,7 +91,7 @@ subroutine mka2f(Cryst,ifc,a2f_1d,dos_phon,elph_ds,kptrlatt,mustar)
  integer :: natom,iFSqpt,ibranch,iomega,nbranch,na2f,nsppol,nkpt,nrpt
  integer :: isppol,jbranch,unit_a2f,unit_phdos,ep_scalprod
  integer :: itemp, ntemp = 100
- real(dp) :: temp, intlinewidth
+ real(dp) :: temp
  real(dp) :: a2fprefactor,avgelphg,avglambda,avgomlog,diagerr
  real(dp) :: lambda_2,lambda_3,lambda_4,lambda_5
  real(dp) :: spinfact

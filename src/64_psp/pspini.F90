@@ -201,6 +201,10 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,level,pawrad,pawtab,
    if (has_shapefncg)paw_options(6)=1
    if (has_wvl)      paw_options(7)=1
    if (has_tproj)    paw_options(8)=1
+   !if (dtset%prtvclmb /= 0) then
+   paw_options(3) = 1
+   paw_options(4) = 1
+   !end if
  end if
 
 !Determine whether the spin-orbit characteristic has changed

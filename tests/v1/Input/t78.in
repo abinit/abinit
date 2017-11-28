@@ -94,4 +94,5 @@
 #%%   2 special k point Si in 2-atom diamond unit cell.
 #%%   Optimization of unit cell volume (optcell=1).
 #%%   Use 2 datasets, and the variable getcell.
+#%% topics = GeoOpt
 #%%<END TEST_INFO>

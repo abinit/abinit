@@ -51,4 +51,5 @@ maxatd   14.0   # Important to include enough starting atoms,
 #%%   and (20,20) gives 11.9980. But in the latter case,
 #%%   the CPU time required is multiplied by about
 #%%   10 when compared to the present setting.
+#%% topics = Bader
 #%%<END TEST_INFO>

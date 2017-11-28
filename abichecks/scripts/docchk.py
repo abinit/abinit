@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+#Should be rewritten, to take advantage of the database of input variables (abivars.yml).
+#Would be much faster...
 "Check documentation and input variables"
 from __future__ import division, print_function, absolute_import #unicode_literals, 
 
@@ -51,18 +53,20 @@ def main(home_dir, verbose=False):
   print( " ============================================================= ")
   print( " ABINIT Input variables: Regenerate html from abinit_vars.yml  ")
   print( " ============================================================= ")
-  pathdocinputdir = os.path.join(home_dir, "doc/input_variables")
-  cmd = "cd " + pathdocinputdir + " ; rm -f html_automatically_generated/allvariables.html ; python abi_yml2html.py > abi_yml2html.log"
+  pathdocdir = os.path.join(home_dir, "doc")
+  cmd = "cd " + pathdocdir + " ; rm -f input_variables/generated_files/varset_allvars.html ; ./generate_doc.py > generate_doc.log"
   os.system(cmd)
-  cmd = "cd " + pathdocinputdir + " ; python abi_check.py > abi_check.log"
+  pathpymodsdir = os.path.join(home_dir, "doc/pymods")
+  cmd = "cd " + pathpymodsdir + " ; python abi_check.py > abi_check.log"
   os.system(cmd)
-  pathlogfile = os.path.join(home_dir, "doc/input_variables/abi_yml2html.log")
 
-  with open(pathlogfile) as logfile:
+  pathlogfile = os.path.join(home_dir, "doc/generate_doc.log")
+  with open(pathlogfile) as f:
+    logfile=f.readlines()
     for line in logfile:
-        print(line)
-  pathcheckfile = os.path.join(home_dir, "doc/input_variables/abi_check.log")
+        print(line[:-2])
 
+  pathcheckfile = os.path.join(home_dir, "doc/pymods/abi_check.log")
   with open(pathcheckfile) as checkfile:
     for line in checkfile:
         print(line)
@@ -70,8 +74,8 @@ def main(home_dir, verbose=False):
   print( " ============================================================= ")
   print( " ABINIT Input variables: Check in documentation                ")
   print( " ============================================================= ")
-  varhtml = glob.glob(os.path.join(home_dir, "doc/input_variables/html_automatically_generated/var*html"))
-  varallvars = glob.glob(os.path.join(home_dir, "doc/input_variables/html_automatically_generated/allvariables.html"))
+  varhtml = glob.glob(os.path.join(home_dir, "doc/input_variables/generated_files/var*html"))
+  varallvars = glob.glob(os.path.join(home_dir, "doc/input_variables/generated_files/varset_allvars.html"))
   ret_code = 0
   for iwords in range(len(words)):
       deffiles = []
@@ -93,9 +97,9 @@ def main(home_dir, verbose=False):
               deffiles.append(varallvars[ivarallvars])
 
       if len(deffiles) > 0:
-          if verbose: print("SUCCESS: ",words[iwords]," appears in ",len(deffiles)," allvariables.html file as well")
+          if verbose: print("SUCCESS: ",words[iwords]," appears in ",len(deffiles)," varset_allvars.html file as well")
       else:
-          print("FAIL: ",words[iwords]," does not appear in the central allvariables.html file ")
+          print("FAIL: ",words[iwords]," does not appear in the central varset_allvars.html file ")
           ret_code += 1
 
   print( " ============================================================= ")
@@ -132,6 +136,8 @@ def main(home_dir, verbose=False):
           ret_code += 1
 
   varfile.close()
+
+###################################################################################################
                   
   # construct list of key words appearing in anaddb input
   invars9f90 = os.path.join(home_dir, "src/77_ddb/m_anaddb_dataset.F90")
@@ -164,14 +170,14 @@ def main(home_dir, verbose=False):
   print(" ============================================================= ")
   print(" ANADDB Input variables: Check in documentation                ")
   print(" ============================================================= ")
-  varhtml = os.path.join(home_dir, "doc/users/anaddb_help.html")
+  varhtml = os.path.join(home_dir, "doc/input_variables/generated_files/varset_allvars.html")
   for iwords in range(len(words)):
       with open(varhtml) as fh: varhtmldata = fh.read()
-      if words[iwords] in varhtmldata:
-          if verbose: print ("SUCCESS: ",words[iwords]," appears in ",varhtml)
+      if words[iwords]+"@anaddb" in varhtmldata:
+          if verbose: print ("SUCCESS: "+words[iwords].strip()+"@anaddb appears in "+varhtml)
       else:
-          print ("FAIL: ",words[iwords]," does not appear ",varhtml)
-          ret_code += 1
+          print ("FAIL: "+words[iwords].strip()+"@anaddb does not appear in "+varhtml)
+          
 
   print( " ============================================================= ")
   print( " ANADDB Input variables: Check in test suite                   ")

@@ -12,7 +12,7 @@
  Corning Inc. and other collaborators, see ~abinit/doc/developers/contributors.txt .
  Please read ~abinit/doc/users/acknowledgments.html for suggested
  acknowledgments of the ABINIT effort.
- For more information, see http://www.abinit.org .
+ For more information, see https://www.abinit.org .
 
 .Starting date : Mon  4 Apr 2016.
 - ( at 07h33 )
@@ -162,6 +162,7 @@
    9 => output .xsf file for XCrysDen
   11 => compute atomic charge using the Hirshfeld method
   14 => Gaussian/cube wavefunction module
+  15 => Write data to netcdf file
 
  Your choice is 11
 

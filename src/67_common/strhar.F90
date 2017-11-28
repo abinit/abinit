@@ -18,13 +18,12 @@
 !!  ehart=Hartree energy (hartree)
 !!  gsqcut=cutoff value on $G^2$ for (large) sphere inside fft box.
 !!  $gsqcut=(boxcut^2)*ecut/(2._dp*(\pi^2))$
-!!  gprimd(3,3)=reciprocal space dimensional primitive translations
 !!  mpi_enreg=informations about MPI parallelization
 !!  nfft=(effective) number of FFT grid points (for this processor)
 !!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
 !!  rhog(2,nfft)=Fourier transform of charge density (bohr^-3)
 !!  rhog(2,nfft)= optional argument: Fourier transform of a second charge density (bohr^-3)
-!!  ucvol=unit cell volume (bohr^3)
+!!  rprimd(3,3)=dimensional primitive translations in real space (bohr)
 !!
 !! OUTPUT
 !!  harstr(6)=components of Hartree part of stress tensor
@@ -36,7 +35,7 @@
 !!      stress
 !!
 !! CHILDREN
-!!      ptabs_fourdp,timab,xmpi_sum
+!!      metric,ptabs_fourdp,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -47,7 +46,7 @@
 #include "abi_common.h"
 
 
-subroutine strhar(ehart,gprimd,gsqcut,harstr,mpi_enreg,nfft,ngfft,rhog,ucvol,&
+subroutine strhar(ehart,gsqcut,harstr,mpi_enreg,nfft,ngfft,rhog,rprimd,&
 &                 rhog2) ! optional argument
 
  use defs_basis
@@ -63,6 +62,7 @@ subroutine strhar(ehart,gprimd,gsqcut,harstr,mpi_enreg,nfft,ngfft,rhog,ucvol,&
 #undef ABI_FUNC
 #define ABI_FUNC 'strhar'
  use interfaces_18_timing
+ use interfaces_41_geometry
 !End of the abilint section
 
  implicit none
@@ -70,11 +70,11 @@ subroutine strhar(ehart,gprimd,gsqcut,harstr,mpi_enreg,nfft,ngfft,rhog,ucvol,&
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nfft
- real(dp),intent(in) :: ehart,gsqcut,ucvol
+ real(dp),intent(in) :: ehart,gsqcut
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: ngfft(18)
- real(dp),intent(in) :: gprimd(3,3),rhog(2,nfft)
+ real(dp),intent(in) :: rprimd(3,3),rhog(2,nfft)
  real(dp),intent(in),optional :: rhog2(2,nfft)
  real(dp),intent(out) :: harstr(6)
 
@@ -82,9 +82,9 @@ subroutine strhar(ehart,gprimd,gsqcut,harstr,mpi_enreg,nfft,ngfft,rhog,ucvol,&
 !scalars
  integer,parameter :: im=2,re=1
  integer :: i1,i2,i3,id1,id2,id3,ierr,ig1,ig2,ig3,ii,irho2,me_fft,n1,n2,n3,nproc_fft
- real(dp) :: cutoff,gsquar,rhogsq,tolfix=1.000000001_dp
+ real(dp) :: cutoff,gsquar,rhogsq,tolfix=1.000000001_dp,ucvol
 !arrays
- real(dp) :: gcart(3),tsec(2)
+ real(dp) :: gcart(3),gmet(3,3),gprimd(3,3),rmet(3,3),tsec(2)
  integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:)
  integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
 
@@ -94,6 +94,8 @@ subroutine strhar(ehart,gprimd,gsqcut,harstr,mpi_enreg,nfft,ngfft,rhog,ucvol,&
 
  harstr(:)=zero
 !ehtest=0.0_dp (used for testing)
+
+ call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
 
  irho2=0;if (present(rhog2)) irho2=1
 

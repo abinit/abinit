@@ -90,23 +90,20 @@ logical,intent(in) :: zDEBUG
 
 !Local variables-------------------------------
 !scalars
-integer :: info
+integer :: info,ihist_prev
 integer  :: ndim,cycl_main
 integer, parameter :: npul=0
-integer  :: ierr,ii,jj,kk,nitpul
+integer  :: ii,jj,kk
 real(dp),save :: ucvol0
-real(dp) :: ucvol,det
+real(dp) :: ucvol
 real(dp) :: etotal
-real(dp) :: favg,alpha0
+real(dp) :: favg
 
 !arrays
-integer,allocatable :: ipiv(:)
 real(dp),allocatable :: diag(:)
 real(dp),allocatable,save :: hessin(:,:),vin(:),vin_prev(:)
 real(dp),allocatable,save :: vout(:),vout_prev(:)
 real(dp),allocatable,save ::vinres(:,:),vin1(:,:)
-real(dp),allocatable ::  amat(:,:),amatinv(:,:),alpha(:,:)
-real(dp),allocatable :: rwork(:)
 real(dp),save :: acell0(3) ! Initial acell
 real(dp),save :: rprimd0(3,3) ! Initial rprimd
 real(dp) :: acell(3)
@@ -409,7 +406,7 @@ real(dp) :: strten(6)
 !### 08. Update the history with the prediction
 
 !Increase indexes
- hist%ihist=hist%ihist+1
+ hist%ihist = abihist_findIndex(hist,+1)
 
 !Transfer vin  to xred, acell and rprim
  call xfpack_vin2x(acell, acell0, ab_mover%natom, ndim,&
@@ -425,7 +422,8 @@ real(dp) :: strten(6)
 !Fill the history with the variables
 !xcart, xred, acell, rprimd
  call var2hist(acell,hist,ab_mover%natom,rprimd,xred,zDEBUG)
- hist%vel(:,:,hist%ihist)=hist%vel(:,:,hist%ihist-1)
+ ihist_prev = abihist_findIndex(hist,-1)
+ hist%vel(:,:,hist%ihist)=hist%vel(:,:,ihist_prev)
 
  if(zDEBUG)then
    write (std_out,*) 'residual:'

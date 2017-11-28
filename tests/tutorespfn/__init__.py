@@ -10,7 +10,7 @@ keywords = [
 
 subsuites = [
 "elast",
-"emp",
+"depes",
 "eph",
 "ffield",
 "nlo",
@@ -21,16 +21,16 @@ subsuites = [
 
 #: List of input files
 inp_files = [
+"tdepes_1.in",
+"tdepes_2.in",
+"tdepes_3.in",
+"tdepes_4.in",
 "telast_1.in",
 "telast_2.in",
 "telast_3.in",
 "telast_4.in",
 "telast_5.in",
 "telast_6.in",
-"temp_1.in",
-"temp_2.in",
-"temp_3.in",
-"temp_4.in",
 "teph_1.in",
 "teph_2.in",
 "teph_3.in",

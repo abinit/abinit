@@ -71,4 +71,5 @@ qph1l
 #%% authors = M. Verstraete 
 #%% keywords = EPH
 #%% description = anaddb Input file for electron-phonon calculations.
+#%% topics = PhononWidth
 #%%<END TEST_INFO>

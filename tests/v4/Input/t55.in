@@ -66,4 +66,5 @@ nbdbuf 0
 #%%   LiNbO3, rhombohedral.
 #%%   Test finite electric field
 #%%   Check the corectness of the symmetry operations with non-zero tnons.
+#%% topics = Berry
 #%%<END TEST_INFO>

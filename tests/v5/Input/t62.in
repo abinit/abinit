@@ -92,4 +92,5 @@
 #%%   2.391 eV (1Pi), 4.593 eV (2Sigma+), 5.418 eV (5Sigma+),
 #%%   and to the experimental values (see the above paper)
 #%%   2.56 eV/2.484 eV , 5.51 eV , 6.71 eV.
+#%% topics = TDDFT
 #%%<END TEST_INFO>

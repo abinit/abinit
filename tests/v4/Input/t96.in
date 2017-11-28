@@ -45,4 +45,5 @@ iscf 17 # Needed for electron-positron
 #%% description = 
 #%%   Al FCC, in conventional cell (4 atoms/cell).
 #%%   Positron calculation : lifetime and decay rate.
+#%% topics = positron
 #%%<END TEST_INFO>

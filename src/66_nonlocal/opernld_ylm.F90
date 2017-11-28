@@ -69,12 +69,14 @@
 !!      if choice=6 : enlout(36+18*natom)   -> 2nd deriv. of energy wrt 2 strains (elast. tensor) and
 !!                                             2nd deriv. of energy wrt to atm. pos and strain (internal strain)
 !!      if choice=8 : enlout(6)             -> 2nd deriv. of energy wrt 2 k
+!!      if choice=81: enlout(18)            -> 2nd deriv. of energy wrt k and right k
 !! --If (paw_opt==3)
 !!      if choice=1 : enlout(1)             -> contribution to <c|S|c> (note: not including <c|c>)
 !!      if choice=2 : enlout(3*natom)       -> contribution to <c|dS/d_atm.pos|c>
 !!      if choice=54: enlout(18*natom)      -> 2nd deriv. of energy wrt atm. pos and right k (Born eff. charge)
 !!      if choice=55: enlout(36)            -> 2nd deriv. of energy wrt strain and right k (piezoelastic tensor)
 !!      if choice=8 : enlout(6)             -> 2nd deriv. of energy wrt 2 k
+!!      if choice=81: enlout(18)            -> 2nd deriv. of energy wrt k and right k
 !! --If (paw_opt==4)
 !!      not available
 !!
@@ -615,9 +617,9 @@ subroutine opernld_ylm(choice,cplex,cplex_fac,ddkk,dgxdt,dgxdtfac,dgxdtfac_sij,d
              end do
            end do
          end do
+         enlout(1:18)=enlout(1:18)+enljj(1:18)
        end do
      end do
-     enlout(1:18)=enlout(1:18)+enljj(1:18)
      ABI_DEALLOCATE(cft)
      ABI_DEALLOCATE(cfu)
      ABI_DEALLOCATE(enljj)
@@ -940,9 +942,9 @@ subroutine opernld_ylm(choice,cplex,cplex_fac,ddkk,dgxdt,dgxdtfac,dgxdtfac_sij,d
              end do
            end do
          end do
+         enlout(1:18)=enlout(1:18)+enljj(1:18)
        end do
      end do
-     enlout(1:18)=enlout(1:18)+enljj(1:18)
      ABI_DEALLOCATE(cft)
      ABI_DEALLOCATE(cfu)
      ABI_DEALLOCATE(enljj)

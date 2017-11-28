@@ -25,6 +25,7 @@ sources = [
 "echo_xc_name.F90",
 "invcb.F90",
 "m_libxc_functionals.F90",
+"m_xc_noncoll.F90",
 "mkdenpos.F90",
 "size_dvxc.F90",
 "xchcth.F90",

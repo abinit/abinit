@@ -121,7 +121,7 @@ subroutine dfpt_mkvxcgga(cplex,gprimd,kxc,mpi_enreg,nfft,ngfft,&
 
 !Local variables-------------------------------
 !scalars
- integer :: ii,ir,ishift,ispden,mgga,ngrad,nspgrad
+ integer :: ii,ir,ishift,mgga,ngrad,nspgrad
  logical :: test_nhat
  real(dp) :: coeff_grho,coeff_grho_corr,coeff_grho_dn,coeff_grho_up
  real(dp) :: coeffim_grho,coeffim_grho_corr,coeffim_grho_dn,coeffim_grho_up

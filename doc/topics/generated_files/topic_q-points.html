@@ -1,0 +1,97 @@
+<!--                                                                                     -->
+<!-- This file has been produced by generate_doc.py using different .yml  or .bib files. -->
+<!-- It is useless to modify it. Modify the related .yml  or .bib files instead.         -->
+<!--                                                                                     -->
+<html>
+<head><title>q-points </title>
+<link rel=stylesheet type="text/css" href="../../formabinit.css">
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  jax: ["input/TeX","output/HTML-CSS"],
+  tex2jax: {inlineMath: [['$','$']]},
+  displayAlign: "center",
+  TeX: { equationNumbers: { autoNumber: "AMS" } }
+});
+</script>
+<script type="text/javascript" async
+src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+</head>
+<body bgcolor="#ffffff">
+
+<hr>
+<a name="top"></a>
+
+<h1>Wavevectors for phonons</h1>
+<h3>This page gives hints on how to set parameters related to the phonon wavevectors (q-points) in DFPT calculations with the ABINIT package.
+<hr>
+
+<h5>Copyright (C) 2016-2017 ABINIT group (FJ)
+<script type="text/javascript" src="../../js_files/copyright.js"> </script>
+</h5>
+
+<script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
+
+ Mentioned in &nbsp; <a href="../../topics/generated_files/topic_Phonons.html">topic_Phonons</a>, &nbsp; <a href="../../users/generated_files/help_features.html#6">help_features#6</a>. 
+ <hr>
+ <h3><b>Table of content: </b></h3> 
+ <ul> <li>1. <a href="topic_q-points.html#1">Introduction.</a><li>2. <a href="topic_q-points.html#2">Related input variables.</a></ul>
+
+&nbsp; 
+<HR ALIGN=left> 
+<a name="1">&nbsp;</a>
+<h3><b>1. Introduction.</b></h3>
+
+
+Like the electronic wavefunctions, the collective atomic displacements
+that are eigenmodes of the corresponding periodic Hamiltonian
+can be characterized by a wavevector, denoted q-point.
+<p>In ABINIT, DFPT calculations for one dataset are done for one specific
+q-point, that must be specified. In the simplest case, the user gives
+the corresponding q-point for each dataset, setting <a href="../../input_variables/generated_files/varset_gstate.html#nqpt">nqpt</a>=1 and specifying the corresponding single <a href="../../input_variables/generated_files/varset_gstate.html#qpt">qpt</a>.
+However, very often, it is needed to run calculations for dozens or hundreds of
+q-points. Hence, the following mechanism has been set: the use can specify a set of q points,
+using input variables similar to the k-points, and then, for each dataset, the number of the 
+q-point in the set is indicated thanks to <a href="../../input_variables/generated_files/varset_gstate.html#iqpt">iqpt</a>. This applies to the generation of q-point grids as well as to
+q-point paths to produce phonon band structures.
+<p>The input variables for specifying q-points in ANADDB are specified in <a href="../../topics/generated_files/topic_Phonons.html#">topic_Phonons</a> and <a href="../../topics/generated_files/topic_PhononBands.html#">topic_PhononBands</a>.
+<br><br><a href=#top>Go to the top</a>
+
+
+
+
+&nbsp; 
+<hr> 
+<a name="2">&nbsp;</a>
+<h3><b>2. Related input variables.</b></h3>
+
+
+<p>Basic input variables:<p>... <a href="../../input_variables/generated_files/varset_gstate.html#iqpt">iqpt</a>   [Index for QPoinT generation]<br>
+... <a href="../../input_variables/generated_files/varset_gstate.html#ngqpt">ngqpt</a>   [Number of Grid pointsfor Q PoinTs generation]<br>
+... <a href="../../input_variables/generated_files/varset_gstate.html#nqpt">nqpt</a>   [Number of Q - POINTs]<br>
+... <a href="../../input_variables/generated_files/varset_gstate.html#qptopt">qptopt</a>   [QPoinTs OPTion]<br>
+<p>Useful input variables:<p>... <a href="../../input_variables/generated_files/varset_gstate.html#nshiftq">nshiftq</a>   [Number of SHIFTs for Q point grids]<br>
+... <a href="../../input_variables/generated_files/varset_eph.html#ph_intmeth">ph_intmeth</a>   [PHonons: INTegration METHod]<br>
+... <a href="../../input_variables/generated_files/varset_eph.html#ph_ndivsm">ph_ndivsm</a>   [PHonons: Number of DIVisions for sampling the SMallest segment]<br>
+... <a href="../../input_variables/generated_files/varset_dfpt.html#ph_ngqpt">ph_ngqpt</a>   [PHonons: Number of Grid points for Q-PoinT mesh.]<br>
+... <a href="../../input_variables/generated_files/varset_eph.html#ph_nqpath">ph_nqpath</a>   [PHonons: Number of Q-points defining the PATH]<br>
+... <a href="../../input_variables/generated_files/varset_eph.html#ph_nqshift">ph_nqshift</a>   [PHonons: Number of Q-SHIFTs]<br>
+... <a href="../../input_variables/generated_files/varset_dfpt.html#ph_qpath">ph_qpath</a>   [Phonons: Q-PATH]<br>
+... <a href="../../input_variables/generated_files/varset_eph.html#ph_qshift">ph_qshift</a>   [PHonons: Q-SHIFTs for mesh.]<br>
+... <a href="../../input_variables/generated_files/varset_eph.html#ph_smear">ph_smear</a>   [PHonons: SMEARing factor]<br>
+... <a href="../../input_variables/generated_files/varset_eph.html#ph_wstep">ph_wstep</a>   [PHonons: frequency(W)  STEP.]<br>
+... <a href="../../input_variables/generated_files/varset_gstate.html#qpt">qpt</a>   [Q PoinT]<br>
+... <a href="../../input_variables/generated_files/varset_gstate.html#qptnrm">qptnrm</a>   [Q PoinTs NoRMalization]<br>
+... <a href="../../input_variables/generated_files/varset_gstate.html#qptrlatt">qptrlatt</a>   [Q - PoinTs grid : Real space LATTice]<br>
+... <a href="../../input_variables/generated_files/varset_gstate.html#shiftq">shiftq</a>   [SHIFT for Q points]<br>
+... <a href="../../input_variables/generated_files/varset_gstate.html#wtq">wtq</a>   [WeighTs for the current Q-points]<br>
+
+<br><br><a href=#top>Go to the top</a>
+
+
+
+<script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
+
+</body>
+</html>
+

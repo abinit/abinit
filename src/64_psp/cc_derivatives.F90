@@ -29,7 +29,7 @@
 !!  xccc1d(n1xccc,6)= 1D core charge function and its five first derivatives
 !!
 !! PARENTS
-!!      psp6cc_drh,psp9in,upf2abinit
+!!      psp6cc_drh,upf2abinit
 !!
 !! CHILDREN
 !!      spline,splint
@@ -121,7 +121,7 @@ subroutine cc_derivatives(rad,ff,ff1,ff2,mmax,n1xccc,rchrg,xccc1d)
 !normalize gg2
 !gg2(:)=gg2(:)*rchrg**2
 
-!reallocate work otherwise the calls to spline crash
+!reallocate work otherwise the calls to spline crash (n1xccc /= mmax)
  ABI_DEALLOCATE(work)
  ABI_ALLOCATE(work,(n1xccc))
 

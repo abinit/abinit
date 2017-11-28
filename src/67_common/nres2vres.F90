@@ -31,7 +31,7 @@
 !! nfft=(effective) number of FFT grid points (for this processor)
 !! ngfft(18)=contain all needed information about 3D FFT
 !! nhat(nfft,nspden*usepaw)= -PAW only- compensation density
-!! nkxc=second dimension of the array kxc, see rhohxc.F90 for a description
+!! nkxc=second dimension of the array kxc, see rhotoxc.F90 for a description
 !! nresid(nfft,nspden)= the input density residual
 !! n3xccc=dimension of the xccc3d array (0 or nfft).
 !! optnc=option for non-collinear magnetism (nspden=4):
@@ -51,6 +51,9 @@
 !! xccc3d(n3xccc)=3D core electron density for XC core correction (bohr^-3)
 !! xred(3,natom)=reduced dimensionless atomic coordinates
 !!
+!! === optional inputs ===
+!! vxc(cplex*nfft,nspden)=XC GS potential 
+!!
 !! OUTPUT
 !! vresid(nfft,nspden)= the output potential residual
 !!
@@ -59,7 +62,7 @@
 !!
 !! CHILDREN
 !!      dfpt_mkvxc,dfpt_mkvxc_noncoll,fourdp,hartre,metric,pawmknhat
-!!      psolver_hartree,rhohxc
+!!      psolver_hartree,rhotoxc,xcdata_init
 !!
 !! SOURCE
 
@@ -71,12 +74,13 @@
 
 subroutine nres2vres(dtset,gsqcut,izero,kxc,mpi_enreg,my_natom,nfft,ngfft,nhat,&
 &                 nkxc,nresid,n3xccc,optnc,optxc,pawang,pawfgrtab,pawrhoij,pawtab,&
-&                 rhor,rprimd,usepaw,vresid,xccc3d,xred)
+&                 rhor,rprimd,usepaw,vresid,xccc3d,xred,vxc)
 
  use defs_basis
  use defs_abitypes
  use m_errors
  use m_xmpi
+ use m_xcdata
 
  use m_pawang,   only : pawang_type
  use m_pawtab,   only : pawtab_type
@@ -112,6 +116,7 @@ subroutine nres2vres(dtset,gsqcut,izero,kxc,mpi_enreg,my_natom,nfft,ngfft,nhat,&
  type(pawfgrtab_type),intent(inout) :: pawfgrtab(my_natom*usepaw)
  type(pawrhoij_type),intent(in) :: pawrhoij(my_natom*usepaw)
  type(pawtab_type),intent(in) :: pawtab(dtset%ntypat*usepaw)
+ real(dp),intent(in) :: vxc(nfft,dtset%nspden) !FR TODO:cplex?
 
 !Local variables-------------------------------
 !scalars
@@ -119,6 +124,7 @@ subroutine nres2vres(dtset,gsqcut,izero,kxc,mpi_enreg,my_natom,nfft,ngfft,nhat,&
  logical :: has_nkxc_gga
  real(dp) :: dum,energy,m_norm_min,ucvol,vxcavg
  character(len=500) :: message
+ type(xcdata_type) :: xcdata
 !arrays
  integer :: nk3xc
  real(dp) :: dummy6(6),gmet(3,3),gprimd(3,3),qq(3),rmet(3,3)
@@ -197,7 +203,7 @@ subroutine nres2vres(dtset,gsqcut,izero,kxc,mpi_enreg,my_natom,nfft,ngfft,nhat,&
 
 !  Compute VH(n^res)(r)
    if (dtset%icoulomb == 0) then
-     call hartre(1,gmet,gsqcut,izero,mpi_enreg,nfft,ngfft,dtset%paral_kgb,qq,nresg,vhres)
+     call hartre(1,gsqcut,izero,mpi_enreg,nfft,ngfft,dtset%paral_kgb,nresg,rprimd,vhres)
    else
      comm=mpi_enreg%comm_cell
      nproc=xmpi_comm_size(comm)
@@ -213,14 +219,16 @@ subroutine nres2vres(dtset,gsqcut,izero,kxc,mpi_enreg,my_natom,nfft,ngfft,nhat,&
 
 !    Collinear magnetism or non-polarized
      if (dtset%nspden/=4) then
+       !Note: imposing usexcnhat=1 avoid nhat to be substracted
        call dfpt_mkvxc(1,dtset%ixc,kxc,mpi_enreg,nfft,ngfft,nhat,usepaw,nhatgr,nhatgrdim,&
 &       nkxc,dtset%nspden,0,2,dtset%paral_kgb,qq,nresid,rprimd,1,vresid,dummy)
      else
-!FR      call routine for Non-collinear magnetism
+!FR    call routine for Non-collinear magnetism
        ABI_ALLOCATE(rhor0,(nfft,dtset%nspden))
        rhor0(:,:)=rhor(:,:)-nresid(:,:)
-       call dfpt_mkvxc_noncoll(1,dtset%ixc,kxc,mpi_enreg,nfft,ngfft,nhat,usepaw,nhatgr,nhatgrdim,&
-&       nkxc,nkxc_cur,dtset%nspden,0,2,2,optxc,dtset%paral_kgb,qq,rhor0,nresid,rprimd,1,vresid,xccc3d)
+       !Note: imposing usexcnhat=1 avoid nhat to be substracted
+       call dfpt_mkvxc_noncoll(1,dtset%ixc,kxc,mpi_enreg,nfft,ngfft,nhat,usepaw,nhat,usepaw,nhatgr,nhatgrdim,&
+&       nkxc,nkxc_cur,dtset%nspden,0,2,2,dtset%paral_kgb,qq,rhor0,nresid,rprimd,1,vxc,vresid,xccc3d)
        ABI_DEALLOCATE(rhor0)  
      end if
 
@@ -240,13 +248,17 @@ subroutine nres2vres(dtset,gsqcut,izero,kxc,mpi_enreg,my_natom,nfft,ngfft,nhat,&
 
 !  Compute VH(n^res) and XC kernel (Kxc) together
    ABI_ALLOCATE(kxc_cur,(nfft,nkxc_cur))
+
    option=2;if (dtset%xclevel==2.and.optxc==0) option=12
 
-!  to be adjusted for the call rhohxc
+   call hartre(1,gsqcut,izero,mpi_enreg,nfft,ngfft,dtset%paral_kgb,nresg,rprimd,vhres)
+   call xcdata_init(xcdata,dtset=dtset)
+
+!  To be adjusted for the call to rhotoxc
    nk3xc=1
-   call rhohxc(dtset,energy,gsqcut,izero,kxc_cur,mpi_enreg,nfft,ngfft,&
-&   nhat,usepaw,nhatgr,nhatgrdim,nkxc_cur,nk3xc,dtset%nspden,n3xccc,option,nresg,&
-&   rhor0,rprimd,dummy6,usexcnhat,vhres,vresid,vxcavg,xccc3d)  !vresid=work space
+   call rhotoxc(energy,kxc_cur,mpi_enreg,nfft,ngfft,&
+&   nhat,usepaw,nhatgr,nhatgrdim,nkxc_cur,nk3xc,n3xccc,option,dtset%paral_kgb,&
+&   rhor0,rprimd,dummy6,usexcnhat,vresid,vxcavg,xccc3d,xcdata,vhartr=vhres)  !vresid=work space
    if (dtset%nspden/=4)  then
      ABI_DEALLOCATE(rhor0)
    end if
@@ -261,8 +273,8 @@ subroutine nres2vres(dtset,gsqcut,izero,kxc,mpi_enreg,my_natom,nfft,ngfft,nhat,&
 !FR      call routine for Non-collinear magnetism
      ABI_ALLOCATE(rhor0,(nfft,dtset%nspden))
      rhor0(:,:)=rhor(:,:)-nresid(:,:)
-     call dfpt_mkvxc_noncoll(1,dtset%ixc,kxc_cur,mpi_enreg,nfft,ngfft,nhat,usepaw,nhatgr,nhatgrdim,&
-&     nkxc,nkxc_cur,dtset%nspden,0,2,2,optxc,dtset%paral_kgb,qq,rhor0,nresid,rprimd,1,vresid,xccc3d)
+     call dfpt_mkvxc_noncoll(1,dtset%ixc,kxc_cur,mpi_enreg,nfft,ngfft,nhat,usepaw,nhat,usepaw,nhatgr,nhatgrdim,&
+&     nkxc,nkxc_cur,dtset%nspden,0,2,2,dtset%paral_kgb,qq,rhor0,nresid,rprimd,1,vxc,vresid,xccc3d)
      ABI_DEALLOCATE(rhor0)
    end if
 

@@ -196,4 +196,5 @@ optdriver7   5
 #%%   Compute different response functions, then
 #%%   perform a computation of 3rd derivative of total energy.
 #%%   (to be described in more detail)
+#%% topics = nonlinear
 #%%<END TEST_INFO>

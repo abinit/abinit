@@ -772,7 +772,6 @@ subroutine print_green(char1,green,option,paw_dmft,pawprtvol,opt_wt,opt_decim)
  character(len=10) :: tag_at
  character(len=3) :: tag_ik
  real(dp) :: re, ima
- real(dp) :: tsec(2)
  complex(dpc), allocatable :: sf(:),sf_corr(:)
 ! *********************************************************************
  if(present(opt_wt)) then
@@ -1460,7 +1459,7 @@ subroutine integrate_green(cryst_struc,green,paw_dmft&
 
 !local variables-------------------------------
  real(dp) :: tsec(2)
- integer :: iatom,ib,ib1,icomp_chloc,ierr,ifreq,ikpt,im,im1,ispinor,ispinor1,is
+ integer :: iatom,ib,ib1,icomp_chloc,ifreq,ikpt,im,im1,ispinor,ispinor1,is
  integer :: mband,mbandc,myproc,natom,ndim,nkpt,nproc,nspinor
  integer :: nsppol,option
  integer :: optksloc,spacecomm,optaftsolv,optnonxsum
@@ -2528,7 +2527,6 @@ subroutine add_int_fct(ifreq,ff,ldiag,omega_current,option,integral,temp,wgt_wlo
  real(dp), intent(in) :: temp, wgt_wlo
 
 !local variables-------------------------------
- character(len=500) :: message
  real(dp)  :: omega
 ! *********************************************************************
  omega=aimag(omega_current)
@@ -3246,8 +3244,8 @@ end subroutine occup_green_tau
 
 !Local variables ------------------------------
 ! scalars
- integer :: ifreq,iatom,iband,ikpt,im1,isppol,ispinor
- integer :: lpawu,mbandc,natom,nspinor,nsppol,nkpt
+ integer :: ifreq,iband,ikpt,isppol
+ integer :: mbandc,natom,nspinor,nsppol,nkpt
  character(len=500) :: message
 ! arrays
 !************************************************************************

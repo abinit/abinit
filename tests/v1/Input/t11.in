@@ -48,4 +48,5 @@ xred 3*0
 #%% description = 
 #%%   Isolated Helium atom. Treated with LDA, Teter rational polynomial parametrization (4/93) (ixc=1).
 #%%   The total energy is -2.8275 Ha.
+#%% topics = xc
 #%%<END TEST_INFO>

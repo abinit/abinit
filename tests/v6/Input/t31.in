@@ -1,22 +1,22 @@
 #test silicon crystal
  ndtset 4
 
-#First dataset  : SC run with LDA and effmass=1.00
- effmass1 1.00
+#First dataset  : SC run with LDA and effmass_free=1.00
+ effmass_free1 1.00
  ixc1     7
 
-#Second dataset : SC run with mGGA fake1 (alpha=1-1/effmass) effmass=1.01
- effmass2 1.01
+#Second dataset : SC run with mGGA fake1 (alpha=1-1/effmass_free) effmass=1.01
+ effmass_free2 1.01
  ixc2     31
 
 #Third dataset  : (same as dataset 1 but with spin)
- effmass3 1.00
+ effmass_free3 1.00
  ixc3     7
  nspden3  2
  nsppol3  2    spinmagntarget3 0.0d0
 
 #Fourth dataset : (same as dataset 2 but with spin)
- effmass4 1.01
+ effmass_free4 1.01
  ixc4     31
  nspden4  2
  nsppol4  2    spinmagntarget4 0.0d0
@@ -59,8 +59,8 @@
 #%% description = 
 #%%   Tests series for the mGGA implementation (from 31 to 33)
 #%%   Silicon bulk. Two datasets are run. One (classic) LDA calculation with ixc 7.
-#%%   One with a fake native mGGA (fake1, i.e. ixc 31) and using effmass=1.01.
+#%%   One with a fake native mGGA (fake1, i.e. ixc 31) and using effmass_free=1.01.
 #%%   Both calculation should give the same total energy (change in kinetic energy due to
-#%%   effmass is compensated by the fake mGGA using kinetic energy density: taur).
+#%%   effmass_free is compensated by the fake mGGA using kinetic energy density: taur).
 #%%   (Two other datasets are also run for spin polarized case)
 #%%<END TEST_INFO>

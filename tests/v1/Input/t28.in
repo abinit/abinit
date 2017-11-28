@@ -68,4 +68,5 @@
 #%%   the stress calculation. Output of the code are as follows :
 #%%   Energy=-2.835212586 Ha, volume=68.814809 Bohr^3, 
 #%%   stress=6.03381838E-04 Ha/Bohr^3
+#%% topics = xc
 #%%<END TEST_INFO>

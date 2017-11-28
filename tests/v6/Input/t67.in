@@ -36,7 +36,8 @@ ndtset 10    udtset 2 5
 
 #Parameters of the SCF cycles
 #****************************
-   nstep       100
+#  nstep       100
+   nstep       26 
 
 
 #Plane wave basis
@@ -130,4 +131,5 @@ nbdbuf 0
 #%%   The DFPT with ngkpt 320 1 1 gives 0.022279 .
 #%%   (To obtain the finite-difference results, one has to reactivate the dtset 15 case)
 #%%   Cannot be executed on more that 1 MPI proc due to different values of nband_k 
+#%% topics = nonlinear
 #%%<END TEST_INFO>

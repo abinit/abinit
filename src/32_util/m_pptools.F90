@@ -641,11 +641,10 @@ subroutine printbxsf(eigen,ewind,fermie,gprimd,kptrlatt,mband,&
  integer :: iband,ik1,ik2,ik3,ikgrid,ikpt,indx
  integer :: isppol,isym,maxband,minband,nk1,nk2,nk3,nkptfull,ubxsf,timrev
  integer :: symkptrank, nsymfm, isymfm
- real(dp) :: ene,dksqmax
+ real(dp) :: ene
  character(len=500) :: msg
  type(kptrank_type) :: kptrank_t
 !arrays
- integer :: indkk_kq(1,6)
  integer,allocatable :: fulltoirred(:),symrecfm(:,:,:)
  real(dp) :: kptgrid(3),gmet(3,3)
 

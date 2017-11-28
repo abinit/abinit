@@ -87,4 +87,5 @@ prtden 0
 #%%   It starts with the two atoms separated by 2 Bohr, move the atoms using ionmov=1
 #%%   and each 10 move steps it increases the ecut but preserving the last positions (xcart)
 #%%   taking the last wavefunction and taking the last values of the velocities.
+#%% topics = MolecularDynamics
 #%%<END TEST_INFO>

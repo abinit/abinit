@@ -1,0 +1,17 @@
+- !components 
+    name      : printing 
+    keyword   : Printing settings
+    authors   : FJ
+    howto     : print some useful quantities
+    header    : default
+    title     : <h1>General printing options</h1>
+    subtitle  : default
+    copyright : default
+    links     : default
+    introduction : |
+      Many quantities are computed, but not reported in the main ABINIT output file.
+      <br>
+      On demand, they can be printed thanks to the following prt&langle;suffix&rangle; input variables.
+      Usually, a corresponding file suffixed with _&langle;suffix&rangle; will be printed.
+      In other cases, the main output will be modified to contain the data.
+    end : default 

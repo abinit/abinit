@@ -70,4 +70,5 @@
 #%% description = 
 #%%   Response of magnetic metal to external magnetic field.
 #%%   First, ground state wf is computed, then dfpt calculation.
+#%% topics = DFPT
 #%%<END TEST_INFO>

@@ -152,4 +152,5 @@ shiftk5            0.22 0.24 0.26
 #%%   In t33, bs_interp_mode 2
 #%%   In t34, bs_interp_mode 3
 #%%   In t35, Rohlfing-Louie
+#%% topics = BSE
 #%%<END TEST_INFO>

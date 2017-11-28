@@ -61,4 +61,5 @@
 #%% description = 
 #%%   This tests make use of the irdwfkfine variable instead of the getwfkfine variable used in the
 #%%   previous test. The third q-point is computed here.
+#%% topics = TDepES
 #%%<END TEST_INFO>

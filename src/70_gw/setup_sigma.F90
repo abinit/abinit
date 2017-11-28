@@ -73,7 +73,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
 &                            get_bz_item, has_IBZ_item, find_qmesh
  use m_ebands,        only : ebands_init, enclose_degbands, get_valence_idx, ebands_update_occ, ebands_report_gap, &
 &                            get_gaps, gaps_free, gaps_t, gaps_print
- use m_vcoul,         only : vcoul_t, vcoul_init
+ use m_vcoul,         only : vcoul_t, vcoul_init, vcoul_free
  use m_fft_mesh,      only : setmesh
  use m_gsphere,       only : gsphere_t, gsph_init, merge_and_sort_kg, gsph_extend, setshells
  use m_screening,     only : init_er_from_file, epsilonm1_results
@@ -81,6 +81,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
  use m_pawrhoij,      only : pawrhoij_type, pawrhoij_alloc, pawrhoij_copy, pawrhoij_free
  use m_io_kss,        only : make_gvec_kss
  use m_wfk,           only : wfk_read_eigenvalues
+ use m_xcdata,        only : get_xclevel
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -119,10 +120,10 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
 !Local variables-------------------------------
 !scalars
  integer,parameter :: pertcase0=0,master=0
- integer :: bantot,enforce_sym,ib,ibtot,ii,ikcalc,ikibz,io,isppol,itypat,jj,method
- integer :: mod10,mod100,mqmem,mband,ng_kss,nsheps,ikcalc2bz,ierr,gap_err,ng
- integer :: gwc_nfftot,gwx_nfftot,nqlwl,test_npwkss,my_rank,nprocs,ik,nk_found,ifo,timrev
- integer :: iqbz,isym,iq_ibz,itim,ic,pinv,ig1,ng_sigx,spin,gw_qprange !band
+ integer :: bantot,enforce_sym,gwcalctyp,ib,ibtot,icutcoul_eff,ii,ikcalc,ikibz,io,isppol,itypat,jj,method
+ integer :: mod10,mqmem,mband,ng_kss,nsheps,ikcalc2bz,ierr,gap_err,ng
+ integer :: gwc_nfftot,gwx_nfftot,nqlwl,test_npwkss,my_rank,nprocs,ik,nk_found,ifo,timrev,usefock_ixc
+ integer :: iqbz,isym,iq_ibz,itim,ic,pinv,ig1,ng_sigx,spin,gw_qprange,ivcoul_init,nvcoul_init,xclevel_ixc
  real(dp),parameter :: OMEGASIMIN=0.01d0,tol_enediff=0.001_dp*eV_Ha
  real(dp) :: domegas,domegasi,ucvol,rcut
  logical,parameter :: linear_imag_mesh=.TRUE.
@@ -140,33 +141,36 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
  real(dp),pointer :: energies_p(:,:,:)
  real(dp),allocatable :: doccde(:),eigen(:),occfact(:),qlwl(:,:)
  type(Pawrhoij_type),allocatable :: Pawrhoij(:)
+ type(vcoul_t) :: Vcp_ks
 
 ! *************************************************************************
 
  DBG_ENTER('COLL')
 
- ! === Check for calculations that are not implemented ===
+ ! Check for calculations that are not implemented
  ltest=ALL(Dtset%nband(1:Dtset%nkpt*Dtset%nsppol)==Dtset%nband(1))
  ABI_CHECK(ltest,'Dtset%nband(:) must be constant')
 
  my_rank = xmpi_comm_rank(comm); nprocs  = xmpi_comm_size(comm)
- !
- ! === Basic parameters ===
+
+ ! Basic parameters
  Sigp%ppmodel    = Dtset%ppmodel
  Sigp%gwcalctyp  = Dtset%gwcalctyp
  Sigp%nbnds      = Dtset%nband(1)
  Sigp%symsigma   = Dtset%symsigma
  Sigp%zcut       = Dtset%zcut
- Sigp%mbpt_sciss   = Dtset%mbpt_sciss
+ Sigp%mbpt_sciss = Dtset%mbpt_sciss
+
  timrev=  2 ! This information is not reported in the header
             ! 1 => do not use time-reversal symmetry
             ! 2 => take advantage of time-reversal symmetry
- !
+ if (any(dtset%kptopt == [3, 4])) timrev = 1
+
  ! === For HF, SEX or COHSEX use Hybertsen-Louie PPM (only $\omega=0$) ===
  ! * Use fake screening for HF.
  ! FIXME Why, we should not redefine Sigp%ppmodel
+ gwcalctyp=Sigp%gwcalctyp
  mod10 =MOD(Sigp%gwcalctyp,10)
- mod100=MOD(Sigp%gwcalctyp,100)
  if (mod10==5.or.mod10==6.or.mod10==7) Sigp%ppmodel=2
  if (mod10<5.and.MOD(Sigp%gwcalctyp,1)/=1) then ! * One shot GW (PPM or contour deformation).
    if (Dtset%nomegasrd==1) then ! avoid division by zero!
@@ -178,14 +182,15 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
      Sigp%maxomega4sd = Dtset%omegasrdmax
      Sigp%deltae     = (2*Sigp%maxomega4sd)/(Sigp%nomegasrd-1)
    endif
- else ! * For AC no need to evaluate derivative by finite differences.
+ else
+   ! For AC no need to evaluate derivative by finite differences.
    Sigp%nomegasrd  =1
    Sigp%maxomega4sd=zero
    Sigp%deltae     =zero
  end if
- !
- !=== For analytic continuation define the number of imaginary frequencies for Sigma ===
- ! * Tests show than more than 12 freqs in the Pade approximant worsen the results!
+
+ ! For analytic continuation define the number of imaginary frequencies for Sigma
+ ! Tests show than more than 12 freqs in the Pade approximant worsen the results!
  Sigp%nomegasi=0
 
  if (mod10==1) then
@@ -230,13 +235,12 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
 
    ltest=(Sigp%omegasimax>0.1d-4.and.Sigp%nomegasi>0)
    ABI_CHECK(ltest,'Wrong value of omegasimax or nomegasi')
-
    if (Sigp%gwcalctyp/=1) then ! only one shot GW is allowed for AC.
      MSG_ERROR("SC-GW with analytic continuation is not coded")
    end if
  end if
 
- if (Sigp%symsigma/=0.and.mod100>=20) then
+ if (Sigp%symsigma/=0.and.gwcalctyp>=20) then
    MSG_WARNING("SC-GW with symmetries is still under development. Use at your own risk!")
  end if
 
@@ -300,14 +304,14 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
    !Sigp%omega_r(1)=0
  end if
 
- ! === Dimensional primitive translations rprimd (from input), gprimd, metrics and unit cell volume ===
+ ! Dimensional primitive translations rprimd (from input), gprimd, metrics and unit cell volume
  call mkrdim(acell,rprim,rprimd)
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
- !
+
  Sigp%npwwfn=Dtset%npwwfn
  Sigp%npwx  =Dtset%npwsigx
- !
- ! === Read parameters of the WFK, verifify them and retrieve all G-vectors ===
+
+ ! Read parameters of the WFK, verifify them and retrieve all G-vectors.
  call wfk_read_eigenvalues(wfk_fname,energies_p,Hdr_wfk,comm)
  mband = MAXVAL(Hdr_wfk%nband)
 
@@ -331,14 +335,14 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
      write(std_out,*)" gvec_kss ",ig1,"/",ng,gvec_kss(:,ig1),test_gvec_kss(:,ig1)
    end if
  end do
- ABI_CHECK(ierr==0,"Mismatch between gvec_kss and test_gvec_kss")
+ ABI_CHECK(ierr == 0, "Mismatch between gvec_kss and test_gvec_kss")
 
  ABI_FREE(test_gvec_kss)
 
- ! === Get important dimensions from the WFK header ===
+ ! Get important dimensions from the WFK header
  Sigp%nsppol =Hdr_wfk%nsppol
  Sigp%nspinor=Hdr_wfk%nspinor
- Sigp%nsig_ab=Hdr_wfk%nspinor**2  !FIXME Is it useful calculating only diagonal terms?
+ Sigp%nsig_ab=Hdr_wfk%nspinor**2  ! TODO Is it useful calculating only diagonal terms?
 
  if (Sigp%nbnds>mband) then
    Sigp%nbnds    =mband
@@ -349,10 +353,10 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
 &    'calculation will proceed with nbnds = ',mband,ch10
    MSG_WARNING(msg)
  end if
- !
- ! === Check input ===
+
+ ! Check input
  if (Sigp%ppmodel==3.or.Sigp%ppmodel==4) then
-   if (mod100>=10) then
+   if (gwcalctyp>=10) then
      write(msg,'(a,i3,a)')' The ppmodel chosen and gwcalctyp ',Dtset%gwcalctyp,' are not compatible. '
      MSG_ERROR(msg)
    end if
@@ -362,7 +366,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
    end if
  end if
 
- ! === Create crystal_t data type ===
+ ! Create crystal_t data type
  call crystal_from_hdr(Cryst,Hdr_wfk,timrev,remove_inv)
  call crystal_print(Cryst)
 
@@ -375,8 +379,8 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
    MSG_WARNING(msg)
  end if
 
- if (Sigp%npwx>ng_kss) then ! Have to recalcuate the (large) sphere for Sigma_x.
-
+ if (Sigp%npwx>ng_kss) then
+   ! Have to recalcuate the (large) sphere for Sigma_x.
    pinv=1; if (remove_inv.and.Cryst%timrev==2) pinv=-1
    gamma_point(:,1) = (/zero,zero,zero/); nullify(gsphere_sigx_p)
 
@@ -402,8 +406,11 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
    ABI_FREE(gsphere_sigx_p)
  end if
 
- !==== Set up of the k-points and tables in the whole BZ ===
+ ! Set up of the k-points and tables in the whole BZ ===
+ ! TODO Recheck symmorphy and inversion
  call kmesh_init(Kmesh,Cryst,Hdr_wfk%nkpt,Hdr_wfk%kptns,Dtset%kptopt,wrap_1zone=.FALSE.)
+ !call kmesh_init(Kmesh,Cryst,Hdr_wfk%nkpt,Hdr_wfk%kptns,Dtset%kptopt,wrap_1zone=.TRUE.)
+
  ! Some required information are not filled up inside kmesh_init
  ! So doing it here, even though it is not clean
  Kmesh%kptrlatt(:,:) =Dtset%kptrlatt(:,:)
@@ -411,15 +418,11 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
  ABI_ALLOCATE(Kmesh%shift,(3,Kmesh%nshift))
  Kmesh%shift(:,:)    =Dtset%shiftk(:,1:Dtset%nshiftk)
 
- !call kmesh_init(Kmesh,Cryst,Hdr_wfk%nkpt,Hdr_wfk%kptns,Dtset%kptopt,wrap_1zone=.TRUE.)
-
  call kmesh_print(Kmesh,"K-mesh for the wavefunctions",std_out,Dtset%prtvol,"COLL")
  call kmesh_print(Kmesh,"K-mesh for the wavefunctions",ab_out, 0,           "COLL")
 
  ! === Initialize the band structure datatype ===
  ! * Copy WFK energies and occupations up to Sigp%nbnds==Dtset%nband(:)
- ! TODO Recheck symmorphy and inversion
-
  bantot=SUM(Dtset%nband(1:Dtset%nkpt*Dtset%nsppol))
  ABI_MALLOC(doccde,(bantot))
  ABI_MALLOC(eigen,(bantot))
@@ -440,9 +443,9 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
    end do
  end do
  ABI_FREE(energies_p)
- !
- ! * Make sure that Dtset%wtk==Kmesh%wt due to the dirty treatment of
- !   symmetry operations in the old GW code (symmorphy and inversion)
+
+ ! Make sure that Dtset%wtk==Kmesh%wt due to the dirty treatment of
+ ! symmetry operations in the old GW code (symmorphy and inversion)
  ltest=(ALL(ABS(Dtset%wtk(1:Kmesh%nibz)-Kmesh%wt(1:Kmesh%nibz))<tol6))
  ABI_CHECK(ltest,'Mismatch between Dtset%wtk and Kmesh%wt')
 
@@ -458,9 +461,9 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
  ABI_FREE(eigen)
  ABI_FREE(npwarr)
 
-!=== Calculate KS occupation numbers and ks_vbk(nkibz,nsppol) ====
-!* ks_vbk gives the (valence|last Fermi band) index for each k and spin.
-!* spinmagntarget is passed to fermi.F90 to fix the problem with newocc in case of magnetic metals
+ ! Calculate KS occupation numbers and ks_vbk(nkibz,nsppol) ====
+ ! ks_vbk gives the (valence|last Fermi band) index for each k and spin.
+ ! spinmagntarget is passed to fermi.F90 to fix the problem with newocc in case of magnetic metals
  call ebands_update_occ(KS_BSt,Dtset%spinmagntarget,prtvol=0)
 
  gap_err = get_gaps(KS_BSt, gaps)
@@ -470,23 +473,22 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
  ABI_MALLOC(val_indeces,(KS_BSt%nkpt,KS_BSt%nsppol))
  val_indeces = get_valence_idx(KS_BSt)
 
- ! === Create Sigma header ===
+ ! Create Sigma header
  ! TODO Fix problems with symmorphy and k-points
  call hdr_init(KS_BSt,codvsn,Dtset,Hdr_out,Pawtab,pertcase0,Psps,wvl)
 
- ! === Get Pawrhoij from the header of the WFK file ===
+ ! Get Pawrhoij from the header of the WFK file
  ABI_DT_MALLOC(Pawrhoij,(Cryst%natom*Dtset%usepaw))
  if (Dtset%usepaw==1) then
    call pawrhoij_alloc(Pawrhoij,1,Dtset%nspden,Dtset%nspinor,Dtset%nsppol,Cryst%typat,pawtab=Pawtab)
    call pawrhoij_copy(Hdr_wfk%Pawrhoij,Pawrhoij)
  end if
-
  call hdr_update(hdr_out,bantot,1.0d20,1.0d20,1.0d20,Cryst%rprimd,occfact,Pawrhoij,Cryst%xred,dtset%amu_orig(:,1))
 
  ABI_FREE(occfact)
  call pawrhoij_free(Pawrhoij)
  ABI_DT_FREE(Pawrhoij)
- !
+
  ! ===========================================================
  ! ==== Setup of k-points and bands for the GW corrections ====
  ! ===========================================================
@@ -535,7 +537,6 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
 
      if (gw_qprange>0) then
        ! All k-points: Add buffer of bands above and below the Fermi level.
-
        do spin=1,Sigp%nsppol
          do ik=1,Sigp%nkptgw
            Sigp%minbnd(ik,spin) = MAX(val_indeces(ik,spin) - gw_qprange, 1)
@@ -629,7 +630,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
  ! Make sure that all the degenerate states are included.
  ! * We will have to average the GW corrections over degenerate states if symsigma=1 is used.
  ! * KS states belonging to the same irreducible representation should be included in the basis set used for SCGW.
- if (Sigp%symsigma/=0 .or. mod100>=10) then
+ if (Sigp%symsigma/=0 .or. gwcalctyp>=10) then
    do isppol=1,Sigp%nsppol
      do ikcalc=1,Sigp%nkptgw
 
@@ -690,7 +691,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
  end do
  !
  ! Warn the user if SCGW run and not all the k-points are included.
- if (mod100>=10 .and. Sigp%nkptgw/=Hdr_wfk%nkpt) then
+ if (gwcalctyp>=10 .and. Sigp%nkptgw/=Hdr_wfk%nkpt) then
    write(msg,'(3a,2(a,i0),2a)')ch10,&
 &    " COMMENT: In a self-consistent GW run, the QP corrections should be calculated for all the k-points of the KSS file ",ch10,&
 &    " but nkptgw= ",Sigp%nkptgw," and WFK nkpt= ",Hdr_wfk%nkpt,ch10,&
@@ -709,7 +710,8 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
  ! * By default the entire matrix is read and used,
  ! * Define consistently npweps and ecuteps for \Sigma_c according the input
  if (Dtset%npweps>0.or.Dtset%ecuteps>0) then
-   if (Dtset%npweps>0) Dtset%ecuteps=zero   ! This should not happen: the Dtset array should not be modified after having been initialized.
+   ! This should not happen: the Dtset array should not be modified after having been initialized.
+   if (Dtset%npweps>0) Dtset%ecuteps=zero
    nsheps=0
    call setshells(Dtset%ecuteps,Dtset%npweps,nsheps,Dtset%nsym,gmet,gprimd,Dtset%symrel,'eps',ucvol)
  end if
@@ -747,8 +749,8 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
    end if
    Er%npwe=Sigp%npwc
    Dtset%npweps=Er%npwe
-
    call kmesh_init(Qmesh,Cryst,Er%nqibz,Er%qibz,Dtset%kptopt)
+
  else
    Er%npwe     =1
    Sigp%npwc   =1
@@ -780,13 +782,11 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
  ! * -one is used because we loop over all the possibile differences, unlike screening
 
  call get_ng0sh(Sigp%nkptgw,Sigp%kptgw,Kmesh%nbz,Kmesh%bz,Qmesh%nbz,Qmesh%bz,-one,ng0sh_opt)
-
- call wrtout(std_out, sjoin('optimal value for ng0sh ', ltoa(ng0sh_opt)), "COLL")
+ call wrtout(std_out, sjoin(' Optimal value for ng0sh ', ltoa(ng0sh_opt)), "COLL")
  Sigp%mG0=ng0sh_opt
 
  ! G-sphere for W and Sigma_c is initialized from the SCR file.
  call gsph_init(Gsph_c,Cryst,Er%npwe,gvec=Er%gvec)
-
  call gsph_init(Gsph_x,Cryst,Sigp%npwx,gvec=gvec_kss)
 
  ! === Make biggest G-sphere of Sigp%npwvec vectors ===
@@ -835,25 +835,80 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
    qlwl(:,:)=Dtset%gw_qlwl(:,1:nqlwl)
  end if
 
- rcut = Dtset%rcut
- if ((Dtset%gwcalctyp < 200) .and. (Dtset%gwcalctyp > 100)) then
-    if (Dtset%rcut < tol6) then
-      rcut = 9.090909 ! default value for HSE06
-    end if
- end if
+!The Coulomb interaction used here might have two terms : 
+!the first term generates the usual sigma self-energy, but possibly, one should subtract
+!from it the Coulomb interaction already present in the Kohn-Sham basis, 
+!if the usefock associated to ixc is one.
+!The latter excludes (in the present implementation) mod(Dtset%gwcalctyp,10)==5
+ nvcoul_init=1
+ call get_xclevel(Dtset%ixc,xclevel_ixc,usefock_ixc)
+ if(usefock_ixc==1)then
+   nvcoul_init=2
+   if(mod(Dtset%gwcalctyp,10)==5)then
+     write(msg,'(4a,i3,a,i3,4a,i5)')ch10,&
+&     ' The starting wavefunctions were obtained from self-consistent calculations in the planewave basis set',ch10,&
+&     ' with ixc = ',Dtset%ixc,' associated with usefock =',usefock_ixc,ch10,&
+&     ' In this case, the present implementation does not allow that the self-energy for sigma corresponds to',ch10,&
+&     '  mod(gwcalctyp,10)==5, while your gwcalctyp= ',Dtset%gwcalctyp
+     MSG_ERROR(msg)
+   endif
+ endif
 
-#if 1
- if (Gsph_x%ng > Gsph_c%ng) then
-   call vcoul_init(Vcp,Gsph_x,Cryst,Qmesh,Kmesh,rcut,Dtset%icutcoul,Dtset%vcutgeo,&
-&    Dtset%ecutsigx,Gsph_x%ng,nqlwl,qlwl,ngfftf,comm)
- else
-   call vcoul_init(Vcp,Gsph_c,Cryst,Qmesh,Kmesh,rcut,Dtset%icutcoul,Dtset%vcutgeo,&
-&    Dtset%ecutsigx,Gsph_c%ng,nqlwl,qlwl,ngfftf,comm)
- end if
-#else
-   call vcoul_init(Vcp,Gsph_Max,Cryst,Qmesh,Kmesh,rcut,Dtset%icutcoul,Dtset%vcutgeo,&
-&  Dtset%ecutsigx,Sigp%npwx,nqlwl,qlwl,ngfftf,comm)
-#endif
+ do ivcoul_init=1,nvcoul_init
+   rcut = Dtset%rcut
+   icutcoul_eff=Dtset%icutcoul
+   Sigp%sigma_mixing=one
+   if( mod(Dtset%gwcalctyp,10)==5 .or. ivcoul_init==2)then
+     if(abs(Dtset%hyb_mixing)>tol8)then
+!      Warning : the absolute value is needed, because of the singular way used to define the default for this input variable
+       Sigp%sigma_mixing=abs(Dtset%hyb_mixing)
+     else if(abs(Dtset%hyb_mixing_sr)>tol8)then
+       Sigp%sigma_mixing=abs(Dtset%hyb_mixing_sr)
+       icutcoul_eff=5
+     endif
+     if(abs(rcut)<tol6 .and. abs(Dtset%hyb_range_fock)>tol8)rcut=one/Dtset%hyb_range_fock
+   endif
+
+!#if 1
+   if(ivcoul_init==1)then
+
+     if (Gsph_x%ng > Gsph_c%ng) then
+       call vcoul_init(Vcp,Gsph_x,Cryst,Qmesh,Kmesh,rcut,icutcoul_eff,Dtset%vcutgeo,&
+&        Dtset%ecutsigx,Gsph_x%ng,nqlwl,qlwl,ngfftf,comm)
+     else
+       call vcoul_init(Vcp,Gsph_c,Cryst,Qmesh,Kmesh,rcut,icutcoul_eff,Dtset%vcutgeo,&
+&        Dtset%ecutsigx,Gsph_c%ng,nqlwl,qlwl,ngfftf,comm)
+     end if
+
+   else
+
+!    Use a temporary Vcp_ks to compute the Coulomb interaction already present in the Fock part of the Kohn-Sham Hamiltonian
+     if (Gsph_x%ng > Gsph_c%ng) then
+       call vcoul_init(Vcp_ks,Gsph_x,Cryst,Qmesh,Kmesh,rcut,icutcoul_eff,Dtset%vcutgeo,&
+&        Dtset%ecutsigx,Gsph_x%ng,nqlwl,qlwl,ngfftf,comm)
+     else
+       call vcoul_init(Vcp_ks,Gsph_c,Cryst,Qmesh,Kmesh,rcut,icutcoul_eff,Dtset%vcutgeo,&
+&        Dtset%ecutsigx,Gsph_c%ng,nqlwl,qlwl,ngfftf,comm)
+     end if
+
+!    Now compute the residual Coulomb interaction
+     Vcp%vc_sqrt_resid=sqrt(Vcp%vc_sqrt**2-Sigp%sigma_mixing*Vcp_ks%vc_sqrt**2)
+     Vcp%i_sz_resid=Vcp%i_sz-Sigp%sigma_mixing*Vcp_ks%i_sz
+!    The mixing factor has already been accounted for, so set it back to one
+     Sigp%sigma_mixing=one
+     call vcoul_free(Vcp_ks)
+
+!DEBUG
+     write(std_out,'(a)')' setup_sigma : the residual Coulomb interaction has been computed'
+!ENDDEBUG
+
+   endif
+!#else
+!   call vcoul_init(Vcp,Gsph_Max,Cryst,Qmesh,Kmesh,rcut,icutcoul_eff,ivcoul_init,Dtset%vcutgeo,&
+!&    Dtset%ecutsigx,Sigp%npwx,nqlwl,qlwl,ngfftf,comm)
+!#endif
+
+ enddo
 
 #if 0
  ! Using the random q for the optical limit is one of the reasons
@@ -968,10 +1023,6 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
    if (Sigp%gwcomp==1) MSG_ERROR("AC with extrapolar technique not implemented")
  end if
 
- if (Sigp%nspinor==2) then
-   ABI_CHECK(Sigp%symsigma==0,'symsigma=1 and nspinor=2 not implemented')
- end if
-
  call gaps_free(gaps)
 
  ABI_FREE(val_indeces)
@@ -1036,7 +1087,7 @@ subroutine sigma_tables(Sigp,Kmesh,Bnd_sym)
 
 !Local variables-------------------------------
 !scalars
- integer :: mod100,spin,ikcalc,ik_ibz,bmin,bmax,bcol,brow
+ integer :: gwcalctyp,spin,ikcalc,ik_ibz,bmin,bmax,bcol,brow
  integer :: ii,idx_x,idx_c,irr_idx1,irr_idx2
 !arrays
  integer,allocatable :: sigc_bidx(:),sigx_bidx(:)
@@ -1044,7 +1095,7 @@ subroutine sigma_tables(Sigp,Kmesh,Bnd_sym)
 
 ! *************************************************************************
 
- mod100=MOD(Sigp%gwcalctyp,100)
+ gwcalctyp=Sigp%gwcalctyp
 
  ! Recreate the Sig_ij tables taking advantage of the classification of the bands.
  if (allocated(Sigp%Sigxij_tab)) then
@@ -1074,7 +1125,7 @@ subroutine sigma_tables(Sigp,Kmesh,Bnd_sym)
      ik_ibz = Kmesh%tab(Sigp%kptgw2bz(ikcalc))
 
      if (use_sym_at(ik_ibz,spin)) then
-       if (mod100<20) then
+       if (gwcalctyp<20) then
          MSG_ERROR("You should not be here!")
        end if
 
@@ -1139,7 +1190,7 @@ subroutine sigma_tables(Sigp,Kmesh,Bnd_sym)
        ABI_DT_MALLOC(Sigp%Sigcij_tab(ikcalc,spin)%col,(bmin:bmax))
        ABI_DT_MALLOC(Sigp%Sigxij_tab(ikcalc,spin)%col,(bmin:bmax))
 
-       if (mod100<20) then  ! QP wavefunctions == KS, therefore only diagonal elements are calculated.
+       if (gwcalctyp<20) then  ! QP wavefunctions == KS, therefore only diagonal elements are calculated.
          do bcol=bmin,bmax
            ABI_MALLOC(Sigp%Sigcij_tab(ikcalc,spin)%col(bcol)%bidx,(1:1))
            Sigp%Sigcij_tab(ikcalc,spin)%col(bcol)%size1= 1

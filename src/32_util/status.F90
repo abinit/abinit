@@ -122,7 +122,7 @@ subroutine status(counter,filstat,istat,level,routine)
    nm_counter(2,1)='jdtset     ='
 
    nm_levels(3)   ='ab7_invars_load     '
-   ncounter(3)=0   
+   ncounter(3)=0
    nm_counter(3,1)='            '
 
 !  Optdriver=0

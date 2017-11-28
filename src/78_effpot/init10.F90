@@ -24,8 +24,10 @@
 !! 2. File names refer to following files, in order:
 !!     (1) Formatted input file
 !!     (2) Formatted output file
-!!     (3) Input Derivative Database (DDB file)
-!!     (4-12) Input Derivative Database (XML format)
+!!     (3) Input for reference structure and harmonic part (DDB file or XML)
+!!     (4) Input for XML with polynomial coefficients (DDB file)
+!!     (5) Input for HIST file
+!!     (6-14) Input Derivative Database (XML format)
 !! 
 !! PARENTS
 !!      multibinit

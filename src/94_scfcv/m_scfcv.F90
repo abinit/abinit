@@ -481,7 +481,7 @@ end subroutine scfcv_destroy
 !! NOTES
 !!
 !! PARENTS
-!!      gstate,mover,pawuj_drive
+!!      gstate,mover,mover_effpot,pawuj_drive
 !!
 !! CHILDREN
 !!      scfcv

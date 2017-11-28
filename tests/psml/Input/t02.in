@@ -1,4 +1,4 @@
-# Test Fe XML pseudopotential with and without sppol
+# Test Fe XML pseudopotential with and without sppol - PSP8 reference
 
 ndtset 2
 nsppol1 1
@@ -6,12 +6,13 @@ nsppol2 2
 spinat2 0 0 5.0
 
 acell 3*2.870 Angstr
-ecut 8
+ecut 10
 kptopt 1
 ngkpt 6 6 6
 occopt 4
 tsmear 0.001
-nstep 20
+nstep1 20
+nstep2 40
 natom 1
 ntypat 1
 typat 1
@@ -22,8 +23,10 @@ rprim
 -0.5  0.5  0.5
  0.5 -0.5  0.5
  0.5  0.5 -0.5
-tolwfr 1.0d-14
-nband 9
+toldfe1 1.0d-8
+toldfe2 1.0d-5
+nband 12
+ixc -101130
 
 ## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
@@ -32,12 +35,13 @@ nband 9
 #%% [files]
 #%% files_to_test = 
 #%%  t02.out, tolnlines = 32, tolabs = 1.1e-06, tolrel = 9.00e-01
-#%% psp_files = 26fe.GGA.psml
+#%% psp_files = 26_Fe_psml.psp8
 #%% [paral_info]
 #%% max_nprocs = 14
 #%% [extra_info]
-#%% authors = M. Verstraete
+#%% authors = M. Verstraete, Y. Pouillon
 #%% keywords = NC
 #%% description = 
-#%%   Bulk iron, with and without spin-polarization 
+#%%   Bulk iron, with and without spin-polarization, to compare with the PSML
+#%%   results of t06 and t10
 #%%<END TEST_INFO>

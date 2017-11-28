@@ -136,4 +136,5 @@ ixc     7
 #%%   Similar to t65, the main difference is that symmetries are used both in chi0 and sigma and also
 #%%   the extrapolar term is symmetrized. Using a larger G-sphere for wavefunctions wrt t65 in order to
 #%%   reduce the number of G1-G2 vectors falling outside the "ecutwfn" sphere (see completchi0_deltapart.F90).
+#%% topics = GW
 #%%<END TEST_INFO>

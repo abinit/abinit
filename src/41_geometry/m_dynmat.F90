@@ -54,6 +54,8 @@ module m_dynmat
  public :: cart39               ! Transform a vector from reduced coordinates to cartesian coordinates,
                                 !   taking into account the perturbation from which it was derived,
                                 !   and also check the existence of the new values.
+ public :: d2cart_to_red        ! Transform a second-derivative matrix
+                                ! from cartesian to reduced coordinate.
  public :: chkph3               ! Check the completeness of the dynamical matrix
  public :: chneu9               ! Imposition of the Acoustic sum rule on the Effective charges
  public :: d2sym3               ! Build (nearly) all the other matrix elements that can be build using symmetries.
@@ -971,6 +973,168 @@ subroutine cart39(flg1,flg2,gprimd,ipert,natom,rprimd,vec1,vec2)
  end if
 
 end subroutine cart39
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_dynmat/d2cart_to_red
+!! NAME
+!! d2cart_to_red
+!!
+!!
+!! FUNCTION
+!! Transform a second-derivative matrix from cartesian
+!! coordinates to reduced coordinate. Also,
+!! 1) remove the ionic part of the effective charges,
+!! 2) remove the vacuum polarisation from the dielectric tensor
+!!    and scale it with the unit cell volume
+!! In short, does the inverse operation of cart29.
+!!
+!! INPUTS
+!!  d2cart(2,3,mpert,3,mpert)=
+!!    second-derivative matrix in cartesian coordinates
+!!  gprimd(3,3)=basis vector in the reciprocal space
+!!  rprimd(3,3)=basis vector in the real space
+!!  mpert =maximum number of ipert
+!!  natom=number of atom
+!!
+!! OUTPUT
+!!  d2red(2,3,mpert,3,mpert)=
+!!    second-derivative matrix in reduced coordinates
+!!
+!! PARENTS
+!!      ddb_interpolate
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine d2cart_to_red(d2cart, d2red, gprimd, rprimd, mpert, natom, &
+&                        ntypat,typat,ucvol,zion)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'd2cart_to_red'
+!End of the abilint section
+
+ implicit none
+
+!Arguments -------------------------------
+!scalars
+ integer,intent(in) :: mpert,natom,ntypat
+ real(dp),intent(in) :: ucvol
+!arrays
+ integer,intent(in) :: typat(natom)
+ real(dp),intent(in) :: d2cart(2,3,mpert,3,mpert)
+ real(dp),intent(out) :: d2red(2,3,mpert,3,mpert)
+ real(dp),intent(in) :: gprimd(3,3),rprimd(3,3)
+ real(dp),intent(in) :: zion(ntypat)
+
+!Local variables -------------------------
+!scalars
+ integer :: idir1,idir2,ii,ipert1,ipert2
+ real(dp) :: fac
+!arrays
+ integer :: flg1(3),flg2(3)
+ real(dp) :: vec1(3),vec2(3)
+
+! *********************************************************************
+
+ flg1 = one
+ flg2 = one
+
+ d2red = d2cart
+
+!Remove the ionic charges to z to get the change in effective charges
+ do ipert1=1,natom
+   do idir1=1,3
+     d2red(1,idir1,ipert1,idir1,natom+2)=&
+&     d2red(1,idir1,ipert1,idir1,natom+2) - zion(typat(ipert1))
+   end do
+ end do
+ do ipert2=1,natom
+   do idir2=1,3
+     d2red(1,idir2,natom+2,idir2,ipert2)=&
+&     d2red(1,idir2,natom+2,idir2,ipert2) - zion(typat(ipert2))
+   end do
+ end do
+
+ ! Remove the vacuum polarizability from the dielectric tensor
+ do idir1=1,3
+   d2red(1,idir1,natom+2,idir1,natom+2)=&
+&   d2red(1,idir1,natom+2,idir1,natom+2) - 1.0_dp
+ end do
+
+! Scale the dielectric tensor with the volue of the unit cell
+ do idir1=1,3
+   do idir2=1,3
+     do ii=1,2
+       d2red(ii,idir1,natom+2,idir2,natom+2)=&
+&       - (ucvol / four_pi) * d2red(ii,idir1,natom+2,idir2,natom+2)
+     end do
+   end do
+ end do
+
+!For the piezoelectric tensor, takes into account the volume of the unit cell
+ do ipert2=natom+3,natom+4
+   do idir1=1,3
+     do idir2=1,3
+       do ii=1,2
+         d2red(ii,idir1,natom+2,idir2,ipert2)=&
+&         (ucvol)*d2red(ii,idir1,natom+2,idir2,ipert2)
+         d2red(ii,idir2,ipert2,idir1,natom+2)=&
+&         (ucvol)*d2red(ii,idir2,ipert2,idir1,natom+2)
+       end do
+     end do
+   end do
+ end do
+
+! Reduced coordinates transformation (in two steps)
+! Note that rprimd and gprimd are swapped, compared to what cart39 expects
+! A factor of (2pi) ** 2 is added to transform the electric field perturbations
+
+!First step
+ do ipert1=1,mpert
+   do ipert2=1,mpert
+     fac = one; if (ipert2==natom+2) fac = two_pi ** 2
+
+     do ii=1,2
+       do idir1=1,3
+         do idir2=1,3
+           vec1(idir2)=d2red(ii,idir1,ipert1,idir2,ipert2)
+         end do
+         call cart39(flg1,flg2,rprimd,ipert2,natom,gprimd,vec1,vec2)
+         do idir2=1,3
+           d2red(ii,idir1,ipert1,idir2,ipert2)=vec2(idir2) * fac
+         end do
+       end do
+     end do
+   end do
+ end do
+
+!Second step
+ do ipert1=1,mpert
+   fac = one; if (ipert1==natom+2) fac = two_pi ** 2
+
+   do ipert2=1,mpert
+     do ii=1,2
+       do idir2=1,3
+         do idir1=1,3
+           vec1(idir1)=d2red(ii,idir1,ipert1,idir2,ipert2)
+         end do
+         call cart39(flg1,flg2,rprimd,ipert1,natom,gprimd,vec1,vec2)
+         do idir1=1,3
+           d2red(ii,idir1,ipert1,idir2,ipert2)=vec2(idir1) * fac
+         end do
+       end do
+     end do
+   end do
+ end do
+
+
+end subroutine d2cart_to_red
 !!***
 
 !----------------------------------------------------------------------
@@ -2278,16 +2442,16 @@ end subroutine wings3
 !! rpt(3,nprt)= Canonical coordinates of the R points in the unit cell
 !!  These coordinates are normalized (=> * acell(3)!!)
 !! wghatm(natom,natom,nrpt)= Weight associated to the couple of atoms and the R vector
-!! atmfrc(2,3,natom,3,natom,nrpt)= Interatomic Forces
+!! atmfrc(3,natom,3,natom,nrpt)= Interatomic Forces
 !!
 !! OUTPUT
-!! atmfrc(2,3,natom,3,natom,nrpt)= ASR-imposed Interatomic Forces
+!! atmfrc(3,natom,3,natom,nrpt)= ASR-imposed Interatomic Forces
 !!
 !! TODO
 !! List of ouput should be included.
 !!
 !! PARENTS
-!!      ddb_hybrid,m_ifc
+!!      ddb_hybrid,m_ifc,m_tdep_abitypes
 !!
 !! CHILDREN
 !!
@@ -2309,7 +2473,7 @@ subroutine asrif9(asr,atmfrc,natom,nrpt,rpt,wghatm)
  integer,intent(in) :: asr,natom,nrpt
 !arrays
  real(dp),intent(in) :: rpt(3,nrpt),wghatm(natom,natom,nrpt)
- real(dp),intent(inout) :: atmfrc(2,3,natom,3,natom,nrpt)
+ real(dp),intent(inout) :: atmfrc(3,natom,3,natom,nrpt)
 
 !Local variables -------------------------
 !scalars
@@ -2347,21 +2511,21 @@ subroutine asrif9(asr,atmfrc,natom,nrpt,rpt,wghatm)
 !          either in a symmetrical manner, or an unsymmetrical one.
            if(asr==1)then
              do irpt=1,nrpt
-               sumifc=sumifc+wghatm(ia,ib,irpt)*atmfrc(1,mu,ia,nu,ib,irpt)
+               sumifc=sumifc+wghatm(ia,ib,irpt)*atmfrc(mu,ia,nu,ib,irpt)
              end do
            else if(asr==2)then
              do irpt=1,nrpt
                sumifc=sumifc+&
-&               (wghatm(ia,ib,irpt)*atmfrc(1,mu,ia,nu,ib,irpt)+&
-&               wghatm(ia,ib,irpt)*atmfrc(1,nu,ia,mu,ib,irpt))/2
+&               (wghatm(ia,ib,irpt)*atmfrc(mu,ia,nu,ib,irpt)+&
+&               wghatm(ia,ib,irpt)*atmfrc(nu,ia,mu,ib,irpt))/2
              end do
            end if
          end do
 
 !        Correct the self-interaction in order to fulfill the ASR
-         atmfrc(1,mu,ia,nu,ia,izero)=atmfrc(1,mu,ia,nu,ia,izero)-sumifc
+         atmfrc(mu,ia,nu,ia,izero)=atmfrc(mu,ia,nu,ia,izero)-sumifc
          if(asr==2)then
-           atmfrc(1,nu,ia,mu,ia,izero)=atmfrc(1,mu,ia,nu,ia,izero)
+           atmfrc(nu,ia,mu,ia,izero)=atmfrc(mu,ia,nu,ia,izero)
          end if
 
        end do
@@ -2486,7 +2650,7 @@ end subroutine make_bigbox
 !!  (output only if choice=1)
 !!
 !! PARENTS
-!!      m_dynmat,m_effective_potential_file
+!!      m_dynmat
 !!
 !! CHILDREN
 !!
@@ -3213,7 +3377,7 @@ end subroutine dist9
 !! spqpt(3,nqpt)= Reduced coordinates of the q vectors in reciprocal space
 !!
 !! OUTPUT
-!! atmfrc(2,3,natom,3,natom,nrpt)= Interatomic Forces in real space !!
+!! atmfrc(3,natom,3,natom,nrpt)= Interatomic Forces in real space !!
 !!  We used the imaginary part just for debugging !
 !!
 !! PARENTS
@@ -3239,7 +3403,7 @@ subroutine ftifc_q2r(atmfrc,dynmat,gprim,natom,nqpt,nrpt,rpt,spqpt)
  integer,intent(in) :: natom,nqpt,nrpt
 !arrays
  real(dp),intent(in) :: gprim(3,3),rpt(3,nrpt),spqpt(3,nqpt)
- real(dp),intent(out) :: atmfrc(2,3,natom,3,natom,nrpt)
+ real(dp),intent(out) :: atmfrc(3,natom,3,natom,nrpt)
  real(dp),intent(in) :: dynmat(2,3,natom,3,natom,nqpt)
 
 !Local variables -------------------------
@@ -3278,7 +3442,7 @@ subroutine ftifc_q2r(atmfrc,dynmat,gprim,natom,nqpt,nrpt,rpt,spqpt)
          do ia=1,natom
            do mu=1,3
 !            Real and imaginary part of the interatomic forces
-             atmfrc(1,mu,ia,nu,ib,irpt)=atmfrc(1,mu,ia,nu,ib,irpt)&
+             atmfrc(mu,ia,nu,ib,irpt)=atmfrc(mu,ia,nu,ib,irpt)&
 &             +re*dynmat(1,mu,ia,nu,ib,iqpt)&
 &             +im*dynmat(2,mu,ia,nu,ib,iqpt)
 !            The imaginary part should be equal to zero !!!!!!
@@ -3314,8 +3478,7 @@ end subroutine ftifc_q2r
 !!   to obtain dynamical matrices (reciprocal space).
 !!
 !! INPUTS
-!! atmfrc(2,3,natom,3,natom,nrpt)= Interatomic Forces in real space
-!!  We use the imaginary part just for debugging!
+!! atmfrc(3,natom,3,natom,nrpt)= Interatomic Forces in real space
 !! gprim(3,3)= Normalized coordinates in reciprocal space
 !! natom= Number of atoms in the unit cell
 !! nqpt= Number of q points in the Brillouin zone
@@ -3352,7 +3515,7 @@ subroutine ftifc_r2q(atmfrc,dynmat,gprim,natom,nqpt,nrpt,rpt,spqpt,wghatm)
 !arrays
  real(dp),intent(in) :: gprim(3,3),rpt(3,nrpt),spqpt(3,nqpt)
  real(dp),intent(in) :: wghatm(natom,natom,nrpt)
- real(dp),intent(in) :: atmfrc(2,3,natom,3,natom,nrpt)
+ real(dp),intent(in) :: atmfrc(3,natom,3,natom,nrpt)
  real(dp),intent(out) :: dynmat(2,3,natom,3,natom,nqpt)
 
 !Local variables -------------------------
@@ -3391,11 +3554,11 @@ subroutine ftifc_r2q(atmfrc,dynmat,gprim,natom,nqpt,nrpt,rpt,spqpt,wghatm)
              do mu=1,3
 !              Real and imaginary part of the dynamical matrices
                dynmat(1,mu,ia,nu,ib,iqpt)=dynmat(1,mu,ia,nu,ib,iqpt)&
-&               +factr*atmfrc(1,mu,ia,nu,ib,irpt)
+&               +factr*atmfrc(mu,ia,nu,ib,irpt)
 !              Atmfrc should be real
 !              &       -im*wghatm(ia,ib,irpt)*atmfrc(2,mu,ia,nu,ib,irpt)
                dynmat(2,mu,ia,nu,ib,iqpt)=dynmat(2,mu,ia,nu,ib,iqpt)&
-&               +facti*atmfrc(1,mu,ia,nu,ib,irpt)
+&               +facti*atmfrc(mu,ia,nu,ib,irpt)
 !              Atmfrc should be real
 !              &        +re*wghatm(ia,ib,irpt)*atmfrc(2,mu,ia,nu,ib,irpt)
              end do
@@ -3427,8 +3590,7 @@ end subroutine ftifc_r2q
 !! nrpt= Number of R points in the Big Box
 !! rpt(3,nprt)= Canonical coordinates of the R points in the unit cell
 !!   These coordinates are normalized (=> * acell(3)!!)
-!! atmfrc(2,3,natom,3,natom,nrpt)= Interatomic Forces in real space
-!!  We use the imaginary part just for debugging!
+!! atmfrc(3,natom,3,natom,nrpt)= Interatomic Forces in real space
 !! wghatm(natom,natom,nrpt)= Weights associated to a pair of atoms and to a R vector
 !!
 !! OUTPUT
@@ -3460,7 +3622,7 @@ subroutine dynmat_dq(qpt,natom,gprim,nrpt,rpt,atmfrc,wghatm,dddq)
 !arrays
  real(dp),intent(in) :: gprim(3,3),rpt(3,nrpt),qpt(3)
  real(dp),intent(in) :: wghatm(natom,natom,nrpt)
- real(dp),intent(in) :: atmfrc(2,3,natom,3,natom,nrpt)
+ real(dp),intent(in) :: atmfrc(3,natom,3,natom,nrpt)
  real(dp),intent(out) :: dddq(2,3,natom,3,natom,3)
 
 !Local variables -------------------------
@@ -3498,8 +3660,8 @@ subroutine dynmat_dq(qpt,natom,gprim,nrpt,rpt,atmfrc,wghatm,dddq)
              ! Real and imaginary part of the dynamical matrices
              ! Atmfrc should be real
              do ii=1,3
-               dddq(1,mu,ia,nu,ib,ii) = dddq(1,mu,ia,nu,ib,ii) + fact(1,ii) * atmfrc(1,mu,ia,nu,ib,irpt)
-               dddq(2,mu,ia,nu,ib,ii) = dddq(2,mu,ia,nu,ib,ii) + fact(2,ii) * atmfrc(1,mu,ia,nu,ib,irpt)
+               dddq(1,mu,ia,nu,ib,ii) = dddq(1,mu,ia,nu,ib,ii) + fact(1,ii) * atmfrc(mu,ia,nu,ib,irpt)
+               dddq(2,mu,ia,nu,ib,ii) = dddq(2,mu,ia,nu,ib,ii) + fact(2,ii) * atmfrc(mu,ia,nu,ib,irpt)
              end do
            end do
          end do
@@ -5141,7 +5303,7 @@ end subroutine nanal9
 !!
 !! INPUTS
 !! acell(3)=length scales by which rprim is to be multiplied
-!! atmfrc(2,3,natom,3,natom,nrpt) = Interatomic Forces in real space
+!! atmfrc(3,natom,3,natom,nrpt) = Interatomic Forces in real space
 !!  (imaginary part only for debugging)
 !! dielt(3,3) = dielectric tensor
 !! dipdip= if 0, no dipole-dipole interaction was subtracted in atmfrc
@@ -5168,7 +5330,7 @@ end subroutine nanal9
 !! d2cart(2,3,mpert,3,mpert)=dynamical matrix obtained for the wavevector qpt (normalized using qphnrm)
 !!
 !! PARENTS
-!!      anaddb,m_effective_potential_file,m_ifc,m_phonons
+!!      anaddb,ddb_interpolate,m_effective_potential_file,m_ifc,m_phonons
 !!
 !! CHILDREN
 !!
@@ -5197,7 +5359,7 @@ subroutine gtdyn9(acell,atmfrc,dielt,dipdip,&
  real(dp),intent(in) :: rmet(3,3),rprim(3,3),rpt(3,nrpt)
  real(dp),intent(in) :: trans(3,natom),wghatm(natom,natom,nrpt),xred(3,natom)
  real(dp),intent(in) :: zeff(3,3,natom)
- real(dp),intent(in) :: atmfrc(2,3,natom,3,natom,nrpt)
+ real(dp),intent(in) :: atmfrc(3,natom,3,natom,nrpt)
  real(dp),intent(in) :: dyewq0(3,3,natom)
  real(dp),intent(out) :: d2cart(2,3,mpert,3,mpert)
 

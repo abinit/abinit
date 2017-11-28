@@ -534,7 +534,7 @@ subroutine pred_verlet(ab_mover,hist,ionmov,itime,ntime,zDEBUG,iexit)
 !### 08. Update the history with the prediction
 
 !Increase indexes
- hist%ihist=hist%ihist+1
+ hist%ihist=abihist_findIndex(hist,+1)
 
 !Fill the history with the variables
 !xred, acell, rprimd, vel
