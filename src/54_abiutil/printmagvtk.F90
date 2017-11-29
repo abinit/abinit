@@ -78,7 +78,7 @@ subroutine printmagvtk(mpi_enreg,cplex,nspden,nfft,ngfft,rhor,rprimd,fname)
 
 !Local variables-------------------------------
 !scalars
- integer :: denvtk,denxyz,nfields
+ integer :: denvtk,denxyz,denxyz_im,nfields
  integer :: nx,ny,nz,nfft_tot
  integer :: ii,jj,kk,ind,jfft,ispden
  integer :: mpi_comm,mpi_head,mpi_rank,ierr
@@ -157,10 +157,21 @@ subroutine printmagvtk(mpi_enreg,cplex,nspden,nfft,ngfft,rhor,rprimd,fname)
      RETURN
    end if
 
-   if (open_file("DEN.xyz",msg,newunit=denxyz,status='replace',form='formatted') /=0) then
-     MSG_WARNING(msg)
-     RETURN
-   end if
+   if(cplex==1) then
+     if (open_file("DEN.xyz",msg,newunit=denxyz,status='replace',form='formatted') /=0) then
+       MSG_WARNING(msg)
+       RETURN
+     end if
+   else if (cplex==2) then
+     if (open_file("DEN_re.xyz",msg,newunit=denxyz,status='replace',form='formatted') /=0) then
+       MSG_WARNING(msg)
+       RETURN
+     end if
+     if (open_file("DEN_im.xyz",msg,newunit=denxyz_im,status='replace',form='formatted') /=0) then
+       MSG_WARNING(msg)
+       RETURN
+     end if
+   endif
 
     ! Write the header of the output vtk file
    write(denvtk,"(a)") '# vtk DataFile Version 2.0'
@@ -188,12 +199,22 @@ subroutine printmagvtk(mpi_enreg,cplex,nspden,nfft,ngfft,rhor,rprimd,fname)
          rz=(dble(ii)/nx)*rprimd(3,1)+(dble(jj)/ny)*rprimd(3,2)+(dble(kk)/nz)*rprimd(3,3)
          write(denvtk,'(3f16.8)') rx,ry,rz  !coordinates of the grid point
          ind=1+ii+nx*(jj+ny*kk)
-         write(denxyz,outformat) rx,ry,rz,(rhorfull(ind,ispden),ispden=1,nspden)
+         if (cplex==1) then
+           write(denxyz,outformat) rx,ry,rz,(rhorfull(ind,ispden),ispden=1,nspden)
+         else
+           write(denxyz,outformat)    rx,ry,rz,(rhorfull(2*ind-1,ispden),ispden=1,nspden)
+           write(denxyz_im,outformat) rx,ry,rz,(rhorfull(2*ind  ,ispden),ispden=1,nspden)
+         endif
        end do
      end do
    end do
-
-   close(denxyz)
+   
+   if(cplex==1) then
+     close(denxyz)
+   else
+     close(denxyz)
+     close(denxyz_im)
+   endif
 
     ! Write out information about field defined on the FFT mesh
    write(denvtk,"(a,i18)") 'POINT_DATA ',nfft_tot
