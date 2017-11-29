@@ -2728,9 +2728,11 @@ recursive subroutine computeCombinaisonFromList(cell,compatibleCoeffs,list_coeff
          possible = .false.
        end if
 !      Check the nbody flag
-       if(nbody_in /= 0 .and. power_disp-count(powers==0) > nbody_in) then
-         possible = .false.
-         compatible = .false.
+       if(nbody_in /= 0)then
+         if(power_disp-count(powers==0) > nbody_in) then
+           possible = .false.
+           compatible = .false.
+         end if
        end if
 
        if(possible) then
