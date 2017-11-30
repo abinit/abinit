@@ -419,7 +419,7 @@ subroutine effective_potential_file_read(filename,eff_pot,inp,comm,hist)
 &         ' with NetCDF in order to fit the polynomial coefficients'
         call wrtout(std_out,message,'COLL') 
         call wrtout(ab_out,message,'COLL')
-        call effective_potential_file_readMDfile(filename,hist)
+        call effective_potential_file_readMDfile(filename,hist,option=inp%fit_ts_option)
       else
        write(message, '(3a)' )&
 &         'There is no hist argument ',ch10,&
@@ -3409,6 +3409,9 @@ end subroutine coeffs_xml2effpot
 !!
 !! INPUTS
 !! filename = path of the file
+!! option,optional   = 0 (default), the stress is printed in the MD File
+!!                     1, the force on the cell is printed in the MD File (-1 * stress),
+!!                        in this case, we multiply the stress by -1 in order to get the stresse
 !!
 !! OUTPUT
 !! hist<type(abihist)> = datatype with the  history of the MD
@@ -3420,7 +3423,7 @@ end subroutine coeffs_xml2effpot
 !!
 !! SOURCE
 
-subroutine effective_potential_file_readMDfile(filename,hist)
+subroutine effective_potential_file_readMDfile(filename,hist,option)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -3434,12 +3437,13 @@ subroutine effective_potential_file_readMDfile(filename,hist)
 
 !Arguments ------------------------------------
 !scalars
+ integer,optional :: option 
 !arrays
  type(abihist),intent(inout) :: hist
  character(len=fnlen),intent(in) :: filename
 !Local variables-------------------------------
 !scalar
- integer :: ia,ii,mu,nu,natom,nstep,type
+ integer :: ia,ii,mu,nu,natom,nstep,type,option_in
  integer :: ios=0, unit_md=24
 !arrays
  character (len=10000) :: readline,line
@@ -3450,9 +3454,15 @@ subroutine effective_potential_file_readMDfile(filename,hist)
 
  call effective_potential_file_getType(filename,type)
 
+ option_in = 0
+ if(present(option))then
+   option_in = option
+ end if
+ 
  if(type==40)then
 !  Netcdf type
    call read_md_hist(filename,hist,.FALSE.,.FALSE.,.FALSE.)
+
  else if(type==41)then
 
 !  ASCII file
@@ -3498,8 +3508,16 @@ subroutine effective_potential_file_readMDfile(filename,hist)
    end do
    close(unit_md)
    ABI_DEALLOCATE(xcart)
+     
  end if!end if type
+
+   if((type==40 .or. type==41).and.option == 1)then
+!    multiply by -1 if the current strten -1*stress, we need only stress...
+     hist%strten(:,:) = -1 * hist%strten(:,:)
+   end if
+
  
+
 end subroutine effective_potential_file_readMDfile
 !!***
 

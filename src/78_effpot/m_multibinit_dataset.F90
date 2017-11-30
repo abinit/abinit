@@ -82,6 +82,7 @@ module m_multibinit_dataset
   integer :: fit_ncycle
   integer :: fit_nbancoeff
   integer :: fit_nfixcoeff
+  integer :: fit_ts_option
   integer :: ifcana
   integer :: ifcflag
   integer :: ifcout
@@ -251,6 +252,7 @@ subroutine multibinit_dtset_init(multibinit_dtset,natom)
  multibinit_dtset%fit_cutoff=0 
  multibinit_dtset%fit_nbancoeff=0
  multibinit_dtset%fit_ncycle=0
+ multibinit_dtset%fit_ts_option=0
  multibinit_dtset%fit_nfixcoeff=0
  multibinit_dtset%fit_option=0
  multibinit_dtset%fit_SPCoupling=1
@@ -645,6 +647,17 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
 &   'fit_nfixcoeff is',multibinit_dtset%fit_nfixcoeff,', but the only allowed values',ch10,&
 &   'are -1 or positives for multibinit.',ch10,&
 &   'Action: correct fit_nfixcoeff in your input file.'
+   MSG_ERROR(message)
+ end if
+
+ multibinit_dtset%fit_ts_option=0
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'fit_ts_option',tread,'INT')
+ if(tread==1) multibinit_dtset%fit_ts_option=intarr(1)
+ if(multibinit_dtset%fit_ts_option<0.or.multibinit_dtset%fit_ts_option>1)then
+   write(message, '(a,i8,a,a,a,a,a)' )&
+&   'fit_ts_option is',multibinit_dtset%fit_ts_option,', but the only allowed values',ch10,&
+&   'are positives for multibinit.',ch10,&
+&   'Action: correct fit_ts_option in your input file.'
    MSG_ERROR(message)
  end if
 
@@ -1677,6 +1690,7 @@ subroutine outvars_multibinit (multibinit_dtset,nunit)
    write(nunit,'(1x,a16,I3.1)')'      fit_option',multibinit_dtset%fit_option
    write(nunit,'(1x,a16,I3.1)')'      fit_ncycle',multibinit_dtset%fit_ncycle
    write(nunit,'(1x,a16,3i3)') '        fit_grid',multibinit_dtset%fit_grid
+   write(nunit,'(1x,a16,I3.1)')'   fit_ts_option',multibinit_dtset%fit_ts_option
    write(nunit,'(1x,a16,2i3)') '  fit_rangePower',multibinit_dtset%fit_rangePower
    write(nunit,'(1x,a16,I3)')  '  fit_anhaStrain',multibinit_dtset%fit_anhaStrain
    write(nunit,'(1x,a16,I3)')  '  fit_SPCoupling',multibinit_dtset%fit_SPCoupling

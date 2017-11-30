@@ -38,7 +38,7 @@ module m_fit_polynomial_coeff
  use m_effective_potential,only : effective_potential_freeCoeffs,effective_potential_setCoeffs
  use m_effective_potential_file, only : effective_potential_file_mapHistToRef
  use m_io_tools,   only : open_file,get_unit
- use m_abihist, only : abihist,abihist_free,abihist_init,abihist_copy
+ use m_abihist, only : abihist,abihist_free,abihist_init,abihist_copy,write_md_hist,var2hist
  use m_random_zbq
  use m_fit_data
 
@@ -1759,8 +1759,7 @@ subroutine fit_polynomial_coeff_getFS(coefficients,du_delta,displacement,energy_
    end do
  end do
 
-! multiply by -1
- strten_out(:,:,:)  = -1 * strten_out(:,:,:)
+ ! multiply by -1
  fcart_out(:,:,:,:) = -1 * fcart_out(:,:,:,:)
 
 end subroutine fit_polynomial_coeff_getFS
@@ -1820,12 +1819,16 @@ subroutine fit_polynomial_coeff_computeMSE(eff_pot,hist,mse,msef,mses,natom,ntim
  type(abihist),intent(in) :: hist
 !Local variables-------------------------------
 !scalar
- integer :: ii,ia,mu,unit_ts
+ integer :: ii,ia,mu,unit_ts,unit_stress
+! integer :: ifirst
  real(dp):: energy,energy_harm
  logical :: need_anharmonic = .TRUE.,need_print=.FALSE.
 !arrays
  real(dp):: fcart(3,natom),fred(3,natom),strten(6),rprimd(3,3),xred(3,natom)
  character(len=500) :: msg
+! type(abihist) :: hist_out
+! character(len=200) :: filename_hist
+
 ! *************************************************************************
 
 !Do some checks
@@ -1843,13 +1846,21 @@ subroutine fit_polynomial_coeff_computeMSE(eff_pot,hist,mse,msef,mses,natom,ntim
    need_anharmonic = compute_anharmonic
  end if
 
- if(present(print_file))then   
+ if(present(print_file))then
+!   call abihist_init(hist_out,natom,ntime,.false.,.false.)   
    need_print=print_file
    unit_ts = 563
-   if (open_file('fit_diff_model.dat',msg,unit=unit_ts,form="formatted",&
+   unit_stress = 564
+   
+   if (open_file('fit_diff_energy.dat',msg,unit=unit_ts,form="formatted",&
 &     status="replace",action="write") /= 0) then
      MSG_ERROR(msg)
    end if
+   if (open_file('fit_diff_stress.dat',msg,unit=unit_stress,form="formatted",&
+&     status="replace",action="write") /= 0) then
+     MSG_ERROR(msg)
+   end if
+
  end if
 
  mse  = zero
@@ -1867,9 +1878,23 @@ subroutine fit_polynomial_coeff_computeMSE(eff_pot,hist,mse,msef,mses,natom,ntim
 
    if(need_print)then
      WRITE(unit_ts ,'(I10,5(F23.14))') ii,hist%etot(ii),energy_harm,energy,&
-&                                       abs(hist%etot(ii) - energy_harm),&
-&                                       abs(hist%etot(ii) - energy)
+&                                       abs(hist%etot(ii) - energy_harm),abs(hist%etot(ii) - energy)
+     WRITE(unit_stress,'(I10,12(F23.14))') ii,hist%strten(:,ii),strten(:)
    end if
+
+!    ifirst=merge(0,1,(ii>1))
+!    filename_hist = trim("test.nc")  
+!    hist_out%fcart(:,:,hist_out%ihist) = hist%fcart(:,:,ii)
+!    hist_out%strten(:,hist_out%ihist)  = hist%strten(:,ii)
+!    hist_out%etot(hist_out%ihist)      = hist%etot(ii)
+!    hist_out%entropy(hist_out%ihist)   = hist%entropy(ii)
+!    hist_out%time(hist_out%ihist)      = real(ii,kind=dp)
+!    call vel2hist(ab_mover%amass,hist,vel,vel_cell)
+!    call var2hist(hist%acell(:,ii),hist_out,natom,hist%rprimd(:,:,ii),hist%xred(:,:,ii),.false.)
+!    call write_md_hist(hist_out,filename_hist,ifirst,ii,natom,eff_pot%crystal%ntypat,&
+! &                    eff_pot%supercell%typat,eff_pot%crystal%amu,eff_pot%crystal%znucl,&
+! &                    real(100,dp),(/real(100,dp),real(100,dp)/))
+
    mse  = mse  + abs(hist%etot(ii) - energy)
    do ia=1,natom
      do mu=1,3
@@ -1887,8 +1912,11 @@ subroutine fit_polynomial_coeff_computeMSE(eff_pot,hist,mse,msef,mses,natom,ntim
 
  if(need_print)then
    close(unit_ts)
+   close(unit_stress)
  end if
- 
+
+! call abihist_free(hist_out)
+
 end subroutine fit_polynomial_coeff_computeMSE
 !!***
 

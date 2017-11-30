@@ -416,13 +416,12 @@ subroutine fit_data_compute(fit_data,eff_pot,hist,comm,verbose)
 !  Compute \Omega^{2} and ucvol for each time
    call metric(gmet,gprimd,-1,rmet,hist%rprimd(:,:,itime),ucvol(itime))
 !  Formula: sqomega(itime) = (((ucvol(itime)**(-2.))* ((natom)**(0.5)))**(-1.0/3.0))**2
-!  Compact form:
+!   Compact form:
    sqomega(itime) = ((ucvol(itime)**(4.0/3.0)) / ((natom)**(1/3.0)))
 
 !  Compute the difference between History and model (fixed part)
    fcart_diff(:,:,itime) =  hist%fcart(:,:,itime) - fcart_fixed(:,:,itime)
    energy_diff(itime)    =  hist%etot(itime) - energy
-   strten_fixed = -1 * strten_fixed
    strten_diff(:,itime)  =  hist%strten(:,itime) - strten_fixed(:,itime)
  end do
    

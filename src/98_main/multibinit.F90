@@ -263,7 +263,7 @@ program multibinit
      call wrtout(std_out,message,'COLL') 
      call wrtout(ab_out,message,'COLL') 
      if(filnam(5)/=''.and.filnam(5)/='no')then
-       call effective_potential_file_readMDfile(filnam(5),hist)
+       call effective_potential_file_readMDfile(filnam(5),hist,option=inp%fit_ts_option)
        if (hist%mxhist == 0)then
          write(message, '(5a)' )&
 &         'The MD ',trim(filnam(5)),' file is not correct ',ch10,&
