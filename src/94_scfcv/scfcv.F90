@@ -1910,7 +1910,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
 !need to reorder them (from atom-sorted to unsorted)
  if (psps%usepaw==1.and.usecprj==1) then
    iorder_cprj=1
-!   call pawcprj_reorder(cprj,atindx1)
+   call pawcprj_reorder(cprj,atindx1)
    if (dtset%positron/=0) then
      if (electronpositron%dimcprj>0) then
        call pawcprj_reorder(electronpositron%cprj_ep,atindx1)
