@@ -45,7 +45,7 @@ module m_fit_polynomial_coeff
  implicit none
 
  public :: fit_polynomial_coeff_computeGF
- public :: fit_polynomial_coeff_computeMSE
+ public :: fit_polynomial_coeff_computeMSD
  public :: fit_polynomial_coeff_fit
  public :: fit_polynomial_coeff_getFS
  public :: fit_polynomial_coeff_getPositive
@@ -102,6 +102,7 @@ CONTAINS  !=====================================================================
 
 subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,power_disps,&
 &                                   nbancoeff,ncycle_in,nfixcoeff,option,comm,cutoff_in,&
+&                                   fit_tolMSDF,fit_tolMSDS,fit_tolMSDE,fit_tolMSDFS,&  
 &                                   positive,verbose,anharmstr,spcoupling)
 
 
@@ -123,7 +124,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
  integer,intent(in) :: power_disps(2)
  type(effective_potential_type),target,intent(inout) :: eff_pot
  type(abihist),intent(inout) :: hist
- real(dp),optional,intent(in) :: cutoff_in
+ real(dp),optional,intent(in) :: cutoff_in,fit_tolMSDF,fit_tolMSDS,fit_tolMSDE,fit_tolMSDFS
  logical,optional,intent(in) :: verbose,positive,anharmstr,spcoupling
 !Local variables-------------------------------
 !scalar
@@ -131,9 +132,9 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
  integer :: master,my_rank,my_ncoeff,ncoeff_model,ncoeff_tot,natom_sc,ncell,ncycle
  integer :: ncycle_tot,ncycle_max,nproc,ntime,nsweep,size_mpi
  integer :: rank_to_send
- real(dp) :: cutoff,time
+ real(dp) :: cutoff,time,tolMSDF,tolMSDS,tolMSDE,tolMSDFS
  real(dp),parameter :: HaBohr_meVAng = 27.21138386 / 0.529177249
- logical :: iam_master,need_verbose,need_positive
+ logical :: iam_master,need_verbose,need_positive,converge
  logical :: need_anharmstr,need_spcoupling,ditributed_coefficients
 !arrays
  real(dp) :: mingf(4)
@@ -172,6 +173,12 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
  need_spcoupling = .TRUE.
  if(present(spcoupling)) need_spcoupling = spcoupling
 
+!Set the tolerance for the fit
+ tolMSDF=zero;tolMSDS=zero;tolMSDE=zero;tolMSDFS=zero
+ if(present(fit_tolMSDF)) tolMSDF  = fit_tolMSDF
+ if(present(fit_tolMSDS)) tolMSDS  = fit_tolMSDS
+ if(present(fit_tolMSDE)) tolMSDE  = fit_tolMSDE
+ if(present(fit_tolMSDFS))tolMSDFS = fit_tolMSDFS
 !we set to the lenght of the cell parameters
  cutoff = zero
  if(present(cutoff_in))then
@@ -449,7 +456,6 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
 !If some coeff are imposed by the input, we need to fill the arrays 
 !with this coeffs and broadcast to the others CPUs :
  if(ncycle_tot>=1)then
-
    do icycle = 1,ncycle_tot
      list_coeffs_tmp(icycle) = icycle
      rank_to_send = 0
@@ -467,15 +473,13 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
          exit
        end if
      end do
-     if(ditributed_coefficients)then
-!      Need to send the rank with the chosen coefficient
-       call xmpi_sum(rank_to_send, comm, ierr)
-!      Boadcast the coefficient
-       call xmpi_bcast(energy_coeffs_tmp(icycle,:), rank_to_send, comm, ierr)
-       call xmpi_bcast(fcart_coeffs_tmp(:,:,icycle,:) , rank_to_send, comm, ierr)
-       call xmpi_bcast(strten_coeffs_tmp(:,:,icycle), rank_to_send, comm, ierr)
-       call polynomial_coeff_broadcast(coeffs_tmp(icycle), rank_to_send, comm)
-     end if
+!    Need to send the rank with the chosen coefficient
+     call xmpi_sum(rank_to_send, comm, ierr)
+!    Boadcast the coefficient
+     call xmpi_bcast(energy_coeffs_tmp(icycle,:), rank_to_send, comm, ierr)
+     call xmpi_bcast(fcart_coeffs_tmp(:,:,icycle,:) , rank_to_send, comm, ierr)
+     call xmpi_bcast(strten_coeffs_tmp(:,:,icycle), rank_to_send, comm, ierr)
+     call polynomial_coeff_broadcast(coeffs_tmp(icycle), rank_to_send, comm)     
    end do
  end if
 
@@ -519,7 +523,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
  case(1)
    !Option 1, we select the coefficients one by one
    if(need_verbose.and.ncycle > 0)then
-     write(message,'(a,3x,a,10x,a,14x,a,14x,a,14x,a)') " N","Selecting","MSEE","MSEFS","MSEF","MSES"
+     write(message,'(a,3x,a,10x,a,14x,a,14x,a,14x,a)') " N","Selecting","MSDE","MSDFS","MSDF","MSDS"
      call wrtout(ab_out,message,'COLL') 
      write(message,'(4x,a,6x,a,8x,a,8x,a,8x,a)') "Coefficient","(meV/f.u.)","(eV^2/A^2)","(eV^2/A^2)",&
 &                                            "(eV^2/A^2)"
@@ -556,7 +560,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
          call wrtout(std_out,message,'COLL')
        end if
        
-       write(message,'(2x,a,12x,a,14x,a,13x,a,14x,a)') " Testing","MSEE","MSEFS","MSEF","MSES"
+       write(message,'(2x,a,12x,a,14x,a,13x,a,14x,a)') " Testing","MSDE","MSDFS","MSDF","MSDS"
        call wrtout(std_out,message,'COLL') 
        write(message,'(a,7x,a,8x,a,8x,a,8x,a)') " Coefficient","(meV/f.u.)","(eV^2/A^2)","(eV^2/A^2)",&
 &                                            "(eV^2/A^2)"
@@ -584,7 +588,6 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
 &                                      info,list_coeffs_tmp(1:icycle),natom_sc,icycle,&
 &                                      ncycle_max,ntime,strten_coeffs_tmp,fit_data%strten_diff,&
 &                                      fit_data%training_set%sqomega)
-
        if(info==0)then
          if (need_positive)then
            if (any(coeff_values(nfixcoeff+1:icycle) < zero)) then
@@ -700,8 +703,55 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
      end if
 
      ncycle_tot = ncycle_tot + 1
-!    Need to define stopping criteria
 
+!    Check the stopping criterion
+     converge = .false.
+     if(tolMSDE  > zero)then
+       if(abs(tolMSDE) > abs(mingf(4)*1000*Ha_eV / ncell))then
+         write(message,'(2a,ES18.10,a,ES18.10,a)') ch10," Fit process complete =>",&
+&                                                mingf(4)*1000*Ha_eV / ncell ," < ",tolMSDE,&
+&                                              ' for MSDE'
+         converge = .true.
+       end if       
+     end if
+     if(tolMSDF  > zero) then
+       if(abs(tolMSDF) > abs(mingf(2)*HaBohr_meVAng**2))then
+         write(message,'(2a,ES18.10,a,ES18.10,a)') ch10," Fit process complete =>",&
+&                                                  mingf(2)*HaBohr_meVAng**2 ," < ",tolMSDF,&
+&                                              ' for MSDF'
+         converge = .true.
+       end if
+     end if
+     if(tolMSDS  > zero) then
+       if(abs(tolMSDS) > abs(mingf(3)*HaBohr_meVAng**2))then
+         write(message,'(2a,ES18.10,a,ES18.10,a)') ch10," Fit process complete =>",&
+&                                                  mingf(3)*HaBohr_meVAng**2 ," < ",tolMSDS,&
+&                                              ' for MSDS'
+         converge = .true.
+       end if
+     end if
+     if(tolMSDFS > zero)then
+       if(abs(tolMSDFS) > abs(mingf(1)*HaBohr_meVAng**2))then
+         write(message,'(2a,ES18.10,a,ES18.10,a)') ch10," Fit process complete =>",&
+&                                                  mingf(1)*HaBohr_meVAng**2 ," < ",tolMSDFS,&
+&                                              ' for MSDFS'
+         converge = .true.
+       end if
+     end if
+     if(converge)then
+       call wrtout(ab_out,message,'COLL')
+       call wrtout(std_out,message,'COLL')
+       exit
+     else
+       if(any((/abs(tolMSDE),abs(tolMSDF),abs(tolMSDS),abs(tolMSDFS)/) > tol20) .and.&
+&         icycle_tmp == ncycle)then
+         write(message,'(2a,I0,a)') ch10," WARNING: ",ncycle,&
+&                                   " cycles was not enougth to converge the fit process"
+         call wrtout(ab_out,message,'COLL')
+         call wrtout(std_out,message,'COLL')       
+       end if
+     end if
+     
    end do
 
  case(2)
@@ -722,7 +772,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
      if(nproc>1) write(message,'(2a)') trim(message)," (only print result of the master)"     
      call wrtout(std_out,message,'COLL')
      call wrtout(ab_out,message,'COLL')       
-     write(message,'(a,2x,a,9x,a,14x,a,13x,a,14x,a)') ch10," Iteration ","MSEE","MSEFS","MSEF","MSES"
+     write(message,'(a,2x,a,9x,a,14x,a,13x,a,14x,a)') ch10," Iteration ","MSDE","MSDFS","MSDF","MSdS"
      call wrtout(std_out,message,'COLL') 
      write(message,'(a,5x,a,8x,a,8x,a,8x,a)') "              ","(meV/f.u.)","(eV^2/A^2)","(eV^2/A^2)",&
 &                                            "(eV^2/A^2)"
@@ -838,7 +888,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
 &                               check=.false.)
    end do
  end select
-
+ 
 !This routine solves the linear system proposed by C.Escorihuela-Sayalero see PRB95,094115(2017)
  if(ncycle_tot > 0)then
 
@@ -846,7 +896,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
 &                                  info,list_coeffs_tmp(1:ncycle_tot),natom_sc,ncycle_tot,&
 &                                  ncycle_max,ntime,strten_coeffs_tmp,&
 &                                  fit_data%strten_diff,fit_data%training_set%sqomega)
-   
+
    if(need_verbose) then   
      write(message, '(3a)') ch10,' Fitted coefficients at the end of the fit process: '
      call wrtout(ab_out,message,'COLL')
@@ -889,8 +939,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
 
 !  Set the final set of coefficients into the eff_pot type
    call effective_potential_setCoeffs(coeffs_tmp(1:ncycle_tot),eff_pot,ncycle_tot)
-
-   call fit_polynomial_coeff_computeMSE(eff_pot,hist,gf_values(4,1),gf_values(2,1),gf_values(1,1),&
+   call fit_polynomial_coeff_computeMSD(eff_pot,hist,gf_values(4,1),gf_values(2,1),gf_values(1,1),&
 &                                       natom_sc,ntime,fit_data%training_set%sqomega,&
 &                                       compute_anharmonic=.TRUE.,print_file=.TRUE.)
    
@@ -1309,7 +1358,6 @@ subroutine fit_polynomial_coeff_solve(coefficients,fcart_coeffs,fcart_diff,&
 ! if (INFO==N+1) then
 !   coefficients = zero
 ! end if
-
  call DSGESV(N,NRHS,A,LDA,IPIV,B,LDB,coefficients,LDX,WORK,SWORK,ITER,INFO)
 
 !other routine
@@ -1759,17 +1807,17 @@ subroutine fit_polynomial_coeff_getFS(coefficients,du_delta,displacement,energy_
    end do
  end do
 
- ! multiply by -1
+! multiply by -1
  fcart_out(:,:,:,:) = -1 * fcart_out(:,:,:,:)
 
 end subroutine fit_polynomial_coeff_getFS
 !!***
 
 
-!!****f* m_fit_polynomial_coeff/fit_polynomial_coeff_computeMSE
+!!****f* m_fit_polynomial_coeff/fit_polynomial_coeff_computeMSD
 !!
 !! NAME
-!! fit_polynomial_coeff_computeMSE
+!! fit_polynomial_coeff_computeMSD
 !!
 !! FUNCTION
 !! Compute the Mean square error of the energy, forces and stresses
@@ -1796,14 +1844,14 @@ end subroutine fit_polynomial_coeff_getFS
 !!
 !! SOURCE
 
-subroutine fit_polynomial_coeff_computeMSE(eff_pot,hist,mse,msef,mses,natom,ntime,sqomega,&
+subroutine fit_polynomial_coeff_computeMSD(eff_pot,hist,mse,msef,mses,natom,ntime,sqomega,&
 &                                          compute_anharmonic,print_file)
 
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'fit_polynomial_coeff_computeMSE'
+#define ABI_FUNC 'fit_polynomial_coeff_computeMSD'
 !End of the abilint section
 
  implicit none
@@ -1917,7 +1965,7 @@ subroutine fit_polynomial_coeff_computeMSE(eff_pot,hist,mse,msef,mses,natom,ntim
 
 ! call abihist_free(hist_out)
 
-end subroutine fit_polynomial_coeff_computeMSE
+end subroutine fit_polynomial_coeff_computeMSD
 !!***
 
 !!      m_fit_polynomial_coeff,multibinit

@@ -128,6 +128,10 @@ module m_multibinit_dataset
   real(dp) :: energy_reference
   real(dp) :: fit_boundTemp
   real(dp) :: fit_cutoff
+  real(dp) :: fit_tolMSDF
+  real(dp) :: fit_tolMSDS
+  real(dp) :: fit_tolMSDE
+  real(dp) :: fit_tolMSDFS
   real(dp) :: temperature
   real(dp) :: rifcsph
   real(dp) :: conf
@@ -257,6 +261,10 @@ subroutine multibinit_dtset_init(multibinit_dtset,natom)
  multibinit_dtset%fit_option=0
  multibinit_dtset%fit_SPCoupling=1
  multibinit_dtset%fit_generateTerm=1
+ multibinit_dtset%fit_tolMSDE=zero
+ multibinit_dtset%fit_tolMSDS=zero
+ multibinit_dtset%fit_tolMSDF=zero
+ multibinit_dtset%fit_tolMSDFS=zero
  multibinit_dtset%ifcana=0
  multibinit_dtset%ifcflag=1
  multibinit_dtset%ifcout=-1
@@ -1164,7 +1172,7 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
    MSG_ERROR(message)
  end if
 
- !F
+!F
   multibinit_dtset%fit_anhaStrain=0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'fit_anhaStrain',tread,'INT')
  if(tread==1) multibinit_dtset%fit_anhaStrain=intarr(1)
@@ -1304,6 +1312,50 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
      MSG_ERROR(message)
    end if
  end do
+
+ multibinit_dtset%fit_tolMSDE=0
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'fit_tolMSDE',tread,'DPR')
+ if(tread==1) multibinit_dtset%fit_tolMSDE=dprarr(1)
+ if(multibinit_dtset%fit_tolMSDE<0)then
+   write(message, '(a,i8,a,a,a,a,a)' )&
+&   'fit_tolMSDE is',multibinit_dtset%fit_tolMSDE,', but the only allowed values',ch10,&
+&   'are positives for multibinit.',ch10,&
+&   'Action: correct fit_tolMSDE in your input file.'
+   MSG_ERROR(message)
+ end if
+
+ multibinit_dtset%fit_tolMSDF=0
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'fit_tolMSDF',tread,'DPR')
+ if(tread==1) multibinit_dtset%fit_tolMSDF=dprarr(1)
+ if(multibinit_dtset%fit_tolMSDF<0)then
+   write(message, '(a,i8,a,a,a,a,a)' )&
+&   'fit_tolMSDF is',multibinit_dtset%fit_tolMSDF,', but the only allowed values',ch10,&
+&   'are positives for multibinit.',ch10,&
+&   'Action: correct fit_tolMSDF in your input file.'
+   MSG_ERROR(message)
+ end if
+
+ multibinit_dtset%fit_tolMSDS=0
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'fit_tolMSDS',tread,'DPR')
+ if(tread==1) multibinit_dtset%fit_tolMSDS=dprarr(1)
+ if(multibinit_dtset%fit_tolMSDS<0)then
+   write(message, '(a,i8,a,a,a,a,a)' )&
+&   'fit_tolMSDS is',multibinit_dtset%fit_tolMSDS,', but the only allowed values',ch10,&
+&   'are positives for multibinit.',ch10,&
+&   'Action: correct fit_tolMSDS in your input file.'
+   MSG_ERROR(message)
+ end if
+
+ multibinit_dtset%fit_tolMSDFS=0
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'fit_tolMSDFS',tread,'DPR')
+ if(tread==1) multibinit_dtset%fit_tolMSDFS=dprarr(1)
+ if(multibinit_dtset%fit_tolMSDFS<0)then
+   write(message, '(a,i8,a,a,a,a,a)' )&
+&   'fit_tolMSDFS is',multibinit_dtset%fit_tolMSDFS,', but the only allowed values',ch10,&
+&   'are positives for multibinit.',ch10,&
+&   'Action: correct fit_tolMSDFS in your input file.'
+   MSG_ERROR(message)
+ end if
 
 !G
 
@@ -1581,6 +1633,44 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
    end if
  end do
 
+!Check if only one tolerance is specify
+ if(abs(multibinit_dtset%fit_tolMSDF) >zero .and. abs(multibinit_dtset%fit_tolMSDS) >zero) then
+   write(message, '(3a)' ) &
+&           ' There is two tolerance flags for the fit: fit_tolMSDF and fit_tolMSDS',ch10,&
+&            'Action: Put only one tolerance flag'
+   MSG_BUG(message)
+ end if
+ if(abs(multibinit_dtset%fit_tolMSDF) >zero .and. abs(multibinit_dtset%fit_tolMSDE) >zero)then
+   write(message, '(3a)' ) &
+&           ' There is two tolerance flags for the fit: fit_tolMSDF and fit_tolMSDE',ch10,&
+&            'Action: Put only one tolerance flag'
+   MSG_BUG(message)
+ end if
+ if(abs(multibinit_dtset%fit_tolMSDF) >zero .and. abs(multibinit_dtset%fit_tolMSDFS) >zero)then
+   write(message, '(3a)' ) &
+&           ' There is two tolerance flags for the fit: fit_tolMSDF and fit_tolMSDFS',ch10,&
+&            'Action: Put only one tolerance flag'
+   MSG_BUG(message)   
+ end if
+ if(abs(multibinit_dtset%fit_tolMSDS) >zero .and. abs(multibinit_dtset%fit_tolMSDE) >zero)then
+   write(message, '(3a)' ) &
+&           ' There is two tolerance flags for the fit: fit_tolMSDS and fit_tolMSDE',ch10,&
+&            'Action: Put only one tolerance flag'
+   MSG_BUG(message)
+ end if
+ if(abs(multibinit_dtset%fit_tolMSDS) >zero .and. abs(multibinit_dtset%fit_tolMSDFS) >zero)then
+   write(message, '(3a)' ) &
+&           ' There is two tolerance flags for the fit: fit_tolMSDS and fit_tolMSDFS',ch10,&
+&            'Action: Put only one tolerance flag'
+   MSG_BUG(message)
+ end if
+ if(abs(multibinit_dtset%fit_tolMSDE) >zero .and. abs(multibinit_dtset%fit_tolMSDFS) >zero)then
+   write(message, '(3a)' ) &
+&           ' There is two tolerance flags for the fit: fit_tolMSDE and fit_tolMSDFS',ch10,&
+&            'Action: Put only one tolerance flag'
+   MSG_BUG(message)
+ end if
+ 
 end subroutine invars10
 !!***
 
@@ -1686,15 +1776,27 @@ subroutine outvars_multibinit (multibinit_dtset,nunit)
    write(nunit,'(a)')' Fit the coefficients :'
    write(nunit,'(1x,a16,I3.1)')'       fit_coeff',multibinit_dtset%fit_coeff
    write(nunit,'(1x,a16,I3.1)')'fit_generateTerm',multibinit_dtset%fit_generateTerm
-   write(nunit,'(1x,a16,F3.1)')'      fit_cutoff',multibinit_dtset%fit_cutoff
+   if(multibinit_dtset%fit_tolMSDE > 0)then
+     write(nunit,'(1x,a16,es16.8)')'    fit_tolMSDE',multibinit_dtset%fit_tolMSDE
+   end if
+   if(multibinit_dtset%fit_tolMSDF > 0)then
+     write(nunit,'(1x,a16,es16.8)')'    fit_tolMSDF',multibinit_dtset%fit_tolMSDF
+   end if
+   if(multibinit_dtset%fit_tolMSDS > 0)then
+     write(nunit,'(1x,a16,es16.8)')'    fit_tolMSDS',multibinit_dtset%fit_tolMSDS
+   end if
+   if(multibinit_dtset%fit_tolMSDFS > 0)then
+     write(nunit,'(1x,a16,es16.8)')'   fit_tolMSDFS',multibinit_dtset%fit_tolMSDFS
+   end if   
+   write(nunit,'(1x,a16,es16.8)')'      fit_cutoff',multibinit_dtset%fit_cutoff
    write(nunit,'(1x,a16,I3.1)')'      fit_option',multibinit_dtset%fit_option
-   write(nunit,'(1x,a16,I3.1)')'      fit_ncycle',multibinit_dtset%fit_ncycle
+   write(nunit,'(1x,a16,2x,I0)')'      fit_ncycle',multibinit_dtset%fit_ncycle   
    write(nunit,'(1x,a16,3i3)') '        fit_grid',multibinit_dtset%fit_grid
    write(nunit,'(1x,a16,I3.1)')'   fit_ts_option',multibinit_dtset%fit_ts_option
    write(nunit,'(1x,a16,2i3)') '  fit_rangePower',multibinit_dtset%fit_rangePower
    write(nunit,'(1x,a16,I3)')  '  fit_anhaStrain',multibinit_dtset%fit_anhaStrain
    write(nunit,'(1x,a16,I3)')  '  fit_SPCoupling',multibinit_dtset%fit_SPCoupling
-   write(nunit,'(1x,a16,I3)')  '   fit_nbancoeff',multibinit_dtset%fit_nbancoeff
+   write(nunit,'(1x,a16,I3)')  '   fit_nbancoeff',multibinit_dtset%fit_nbancoeff   
    write(nunit,'(1x,a16)',advance='no')'   fit_bancoeff'
    write(nunit,'(4x,9i6)') (multibinit_dtset%fit_bancoeff(ii),ii=1,multibinit_dtset%fit_nbancoeff)
    write(nunit,'(1x,a16,I3)')  '   fit_nfixcoeff',multibinit_dtset%fit_nfixcoeff

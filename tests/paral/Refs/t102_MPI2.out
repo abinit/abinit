@@ -36,7 +36,7 @@
  Fit the coefficients :
         fit_coeff  1
  fit_generateTerm  1
-       fit_cutoff0.0
+       fit_cutoff  0.00000000E+00
        fit_option  0
        fit_ncycle  2
          fit_grid  1  1  1
@@ -182,7 +182,7 @@ dipdip_range         1         1         1
    Forces          :   7.3678367059221732E-03
    Stresses        :   1.3855272847976559E-04
 
- N   Selecting          MSEE              MSEFS              MSEF              MSES
+ N   Selecting          MSDE              MSDFS              MSDF              MSDS
     Coefficient      (meV/f.u.)        (eV^2/A^2)        (eV^2/A^2)        (eV^2/A^2)
  3     3           1.9687718713E+00  4.0002877311E-03  3.8455541872E-03  1.5473354390E-04
  4     4           2.0033066300E+00  3.7875227245E-03  3.6336183034E-03  1.5390442116E-04

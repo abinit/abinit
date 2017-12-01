@@ -823,7 +823,9 @@ end subroutine polynomial_coeff_MPIrecv
 !! unit = optional,unit of the output file
 !! newfile = optional, TRUE the coefficients are print in new XML (print the headers)
 !!                     FALSE (requieres unit) will not print the headers
-!!
+!! replace = optional, TRUE replace filename if filename exists
+!!                     FALSE, default not replace if filename exists
+!! 
 !! OUTPUT
 !!
 !! PARENTS
@@ -835,7 +837,7 @@ end subroutine polynomial_coeff_MPIrecv
 !!
 !! SOURCE
 
-subroutine polynomial_coeff_writeXML(coeffs,ncoeff,filename,unit,newfile)
+subroutine polynomial_coeff_writeXML(coeffs,ncoeff,filename,unit,newfile,replace)
 
  use defs_basis
  use m_errors
@@ -855,7 +857,7 @@ subroutine polynomial_coeff_writeXML(coeffs,ncoeff,filename,unit,newfile)
 !scalars
   integer, intent(in) :: ncoeff
   integer,optional,intent(in) :: unit
-  logical,optional,intent(in) :: newfile
+  logical,optional,intent(in) :: newfile,replace
 !arrays
   type(polynomial_coeff_type), intent(in) :: coeffs(ncoeff)
   character(len=fnlen),optional,intent(in) :: filename
@@ -863,7 +865,7 @@ subroutine polynomial_coeff_writeXML(coeffs,ncoeff,filename,unit,newfile)
 !scalar
  integer :: icoeff,idisp,iterm
  integer :: unit_xml
- logical :: need_header = .TRUE.
+ logical :: need_header = .TRUE.,need_to_replace = .FALSE.
  character(len=500) :: message
  character(len=fnlen) :: namefile
  character(len=1)  :: direction
@@ -882,11 +884,16 @@ subroutine polynomial_coeff_writeXML(coeffs,ncoeff,filename,unit,newfile)
    namefile='coefficients.xml'
  end if
 
+ if(present(replace))then
+   need_to_replace = replace
+ end if
+ 
  if(present(newfile))then
    if (newfile) then
      unit_xml = get_unit()
      need_header = .TRUE.
-     call isfile(namefile,'new')
+
+     if(.not. need_to_replace) call isfile(namefile,'new')
    else
      if(.not.present(unit))then
        write(message,'(a,a)')' You  need to specified the unit' 

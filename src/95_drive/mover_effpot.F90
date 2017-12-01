@@ -575,9 +575,9 @@ implicit none
        model_bound = 0
        model_ncoeffbound = 0
        
-       do ii=1,inp%fit_boundTerm
+       do ii=2,inp%fit_boundTerm
 !       Compute the number of possible combination         
-         nmodels = factorial(ncoeff_bound) / (factorial(ii)*factorial(ncoeff_bound-ii))
+         nmodels = 2*factorial(ncoeff_bound) / (factorial(ii)*factorial(ncoeff_bound-ii))
 
          write(message, '(5a,I0,a,I0,a)')ch10,'--',ch10,' Try to bound the model ',&
 &         'with ', ii,' additional positive terms (',nmodels,') possibilities'
@@ -738,7 +738,7 @@ implicit none
 &       ncoeff+model_ncoeffbound)
 
        call fit_polynomial_coeff_fit(effective_potential,(/0/),(/0/),hist,0,(/0,0/),1,0,&
-&       -1,1,comm,verbose=.false.,positive=.false.,anharmstr=.false.)
+&       -1,1,comm,verbose=.false.)
        
        write(message, '(3a)') ch10,' Fitted coefficients at the end of the fit bound process: '
        call wrtout(ab_out,message,'COLL')
