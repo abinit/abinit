@@ -395,10 +395,29 @@ subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
      end do
 
    else if(dtset%nspden==4)then
-     vzeeman(1)=-half*dtset%zeemanfield(3)    ! v_upup
-     vzeeman(2)= half*dtset%zeemanfield(3)    ! v_dndn
-     vzeeman(3)=-half*dtset%zeemanfield(1)    ! Re(v_updn)
-     vzeeman(4)= half*dtset%zeemanfield(2)    ! Im(v_updn)
+     !vzeeman(1)=-half*dtset%zeemanfield(3)    ! v_upup
+     !vzeeman(2)= half*dtset%zeemanfield(3)    ! v_dndn
+     !vzeeman(3)=-half*dtset%zeemanfield(1)    ! Re(v_updn)
+     !vzeeman(4)= half*dtset%zeemanfield(2)    ! Im(v_updn)
+
+     nx=ngfft(1); ny=ngfft(2); nz=ngfft(3)
+     do kk=0,nz-1
+       do jj=0,ny-1
+         do ii=0,nx-1
+           ipt=1+ii+nx*(jj+ny*kk)
+           !rx=(dble(ii)/nx)*rprimd(1,1)+(dble(jj)/ny)*rprimd(1,2)+(dble(kk)/nz)*rprimd(1,3)
+           !ry=(dble(ii)/nx)*rprimd(2,1)+(dble(jj)/ny)*rprimd(2,2)+(dble(kk)/nz)*rprimd(2,3)
+           !rz=(dble(ii)/nx)*rprimd(3,1)+(dble(jj)/ny)*rprimd(3,2)+(dble(kk)/nz)*rprimd(3,3)
+           vzeemanHarm(ipt,1)= -half*dtset%zeemanfield(3)*cos(2*PI*(dble(ii)/dble(nx)))
+           vzeemanHarm(ipt,2)=  half*dtset%zeemanfield(3)*cos(2*PI*(dble(ii)/dble(nx)))
+           vzeemanHarm(ipt,3)= -half*dtset%zeemanfield(1)*cos(2*PI*(dble(ii)/dble(nx)))
+           vzeemanHarm(ipt,4)=  half*dtset%zeemanfield(2)*cos(2*PI*(dble(ii)/dble(nx)))
+         end do
+       end do
+     end do
+
+
+
    end if
  end if
 

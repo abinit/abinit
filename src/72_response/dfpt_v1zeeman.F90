@@ -19,13 +19,13 @@
 !!  nfft   = numbder of fft grid points
 !!  cplex  = complex or real density matrix
 !!  idir   = direction of the perturbing field in Cartesian frame
-!!           0: identity matrix at each fft point is returned (density-density response)
 !!           1: along x
 !!           2: along y
 !!           3: along z
+!!           4: identity matrix at each fft point is returned (for density-density response)
 !!
 !! OUTPUT
-!!  v1zeeman(nfft*cplex,nspden)= 1st order Zeeman potential, or Identity matrix for dir=0
+!!  v1zeeman(nfft*cplex,nspden)= 1st order Zeeman potential, or Identity matrix (electrostatic potential) for idir=4
 !!
 !! SIDE EFFECTS
 !!
@@ -130,38 +130,38 @@ subroutine dfpt_v1zeeman(nspden,nfft,cplex,idir,v1zeeman)
      enddo
    else if (nspden==4) then
      select case(idir)
-     case(1)
+     case(1) !along x, v1=-sigma_x
        do ifft=1,nfft
-         v1zeeman(2*ifft-1,1)= 0.0e0
-         v1zeeman(2*ifft  ,1)= 0.0e0
-         v1zeeman(2*ifft-1,2)= 0.0e0
-         v1zeeman(2*ifft  ,2)= 0.0e0
+         v1zeeman(2*ifft-1,1)= 0.0e0 !Re[V^11]
+         v1zeeman(2*ifft  ,1)= 0.0e0 !Im[V^11]
+         v1zeeman(2*ifft-1,2)= 0.0e0 !Re[V^22]
+         v1zeeman(2*ifft  ,2)= 0.0e0 !Im[V^22]
          v1zeeman(2*ifft-1,3)=-0.5e0 !Re[V^12]
-         v1zeeman(2*ifft  ,3)= 0.0e0
-         v1zeeman(2*ifft-1,4)= 0.0e0
-         v1zeeman(2*ifft  ,4)=-0.5e0 !Im[i.V^12]
+         v1zeeman(2*ifft  ,3)= 0.0e0 !Im[V^12]
+         v1zeeman(2*ifft-1,4)= 0.0e0 !Re[i.V^21]=Im[V^12]
+         v1zeeman(2*ifft  ,4)=-0.5e0 !Im[i.V^21]=Re[V^12]
        enddo
-     case(2)
+     case(2) !along y, v1 = -sigma_y
        do ifft=1,nfft
-         v1zeeman(2*ifft-1,1)= 0.0e0
-         v1zeeman(2*ifft  ,1)= 0.0e0
-         v1zeeman(2*ifft-1,2)= 0.0e0
-         v1zeeman(2*ifft  ,2)= 0.0e0
-         v1zeeman(2*ifft-1,3)= 0.0e0
+         v1zeeman(2*ifft-1,1)= 0.0e0 !Re[V^11]
+         v1zeeman(2*ifft  ,1)= 0.0e0 !Im[V^11]
+         v1zeeman(2*ifft-1,2)= 0.0e0 !Re[V^22]
+         v1zeeman(2*ifft  ,2)= 0.0e0 !Im[V^22]
+         v1zeeman(2*ifft-1,3)= 0.0e0 !Re[V^12]
          v1zeeman(2*ifft  ,3)=+0.5e0 !Im[V^12]
-         v1zeeman(2*ifft-1,4)=-0.5e0 !Re[i.V^12]
-         v1zeeman(2*ifft  ,4)= 0.0e0
+         v1zeeman(2*ifft-1,4)=+0.5e0 !Re[i.V^21]=Im[V^12]
+         v1zeeman(2*ifft  ,4)= 0.0e0 !Im[i.V^21]=Re[V^12]
        enddo
      case(3)
        do ifft=1,nfft
-         v1zeeman(2*ifft-1,1)=-0.5e0
-         v1zeeman(2*ifft  ,1)= 0.0e0
-         v1zeeman(2*ifft-1,2)= 0.5e0
-         v1zeeman(2*ifft  ,2)= 0.0e0
-         v1zeeman(2*ifft-1,3)= 0.0e0
-         v1zeeman(2*ifft  ,3)= 0.0e0
-         v1zeeman(2*ifft-1,4)= 0.0e0
-         v1zeeman(2*ifft  ,4)= 0.0e0
+         v1zeeman(2*ifft-1,1)=-0.5e0 !Re[V^11]
+         v1zeeman(2*ifft  ,1)= 0.0e0 !Im[V^11]
+         v1zeeman(2*ifft-1,2)= 0.5e0 !Re[V^22]
+         v1zeeman(2*ifft  ,2)= 0.0e0 !Im[V^22]
+         v1zeeman(2*ifft-1,3)= 0.0e0 !Re[V^12]
+         v1zeeman(2*ifft  ,3)= 0.0e0 !Im[V^12]
+         v1zeeman(2*ifft-1,4)= 0.0e0 !Re[i.V^21]
+         v1zeeman(2*ifft  ,4)= 0.0e0 !Im[i.V^21]
        enddo
      end select
    endif

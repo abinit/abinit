@@ -183,7 +183,7 @@ subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat,nhatdim,nh
 !  -- Rotate back Vxc(r)^(1)
    if (optnc==1) then
      if (option==0) then
-       do ifft=1,nfft
+       do ifft=1,cplex*nfft
          vxc1(ifft,1:2)=half*(vxc1_diag(ifft,1)+vxc1_diag(ifft,2))
          vxc1(ifft,3:4)=zero
        end do

@@ -380,12 +380,16 @@ subroutine dfpt_accrho(counter,cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,&
      re0_up=zero;im0_up=zero;re1_up=zero;im1_up=zero;re0_down=zero;im0_down=zero
      re1_down=zero;im1_down=zero
 !    The factor 2 is not the spin factor (see Eq.44 of PRB55,10337 (1997))
+!    SPr: the following treatment with factor=2 is ok for perturbations not breaking the 
+!         time reversal symmetry of the Hamiltonian (due to Kramer's degeneracy) hence 
+!         not applicable for magnetic field perturbation, for phonons with SOC, H^(0) has
+!         time reversal symmetry, to check if H^(1) breaks it
      weight=two*occ_k(iband)*wtk_k/gs_hamkq%ucvol
      if (cplex==2) then
        do i3=1,n3
          do i2=1,n2
            do i1=1,n1
-             !SPr
+             
              re0_up=wfraug_up(1,i1,i2,i3)  ;     im0_up=wfraug_up(2,i1,i2,i3)
              re1_up=wfraug1_up(1,i1,i2,i3) ;     im1_up=wfraug1_up(2,i1,i2,i3)
              re0_down=wfraug_down(1,i1,i2,i3)  ; im0_down=wfraug_down(2,i1,i2,i3)
@@ -395,14 +399,16 @@ subroutine dfpt_accrho(counter,cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,&
              rhoaug1(2*i1-1,i2,i3,4)=rhoaug1(2*i1-1,i2,i3,4)+weight*(re0_down*re1_down+im0_down*im1_down) ! n_dndn
              rhoaug1(2*i1  ,i2,i3,4)=rhoaug1(2*i1  ,i2,i3,4)+weight*(re0_down*im1_down-im0_down*re1_down)
 
-             rhoaug1(2*i1-1,i2,i3,2)=rhoaug1(2*i1-1,i2,i3,2)+weight*(re0_up*re1_down+im0_up*im1_down+&
-&                                                                    re0_down*re1_up+im0_down*im1_up)
-             rhoaug1(2*i1  ,i2,i3,2)=rhoaug1(2*i1-1,i2,i3,2)+weight*(re0_up*im1_down-im0_up*re1_down+&
-&                                                                    re0_down*im1_up-im0_down*re1_up)
-             rhoaug1(2*i1-1,i2,i3,3)=rhoaug1(2*i1-1,i2,i3,3)+weight*(re0_down*re1_up+im0_down*im1_up+&
-&                                                                    re0_up*re1_down+im0_up*im1_down)
-             rhoaug1(2*i1  ,i2,i3,3)=rhoaug1(2*i1-1,i2,i3,3)+weight*(re0_down*im1_up-im0_down*re1_up+&
-&                                                                    re0_up*im1_down-im0_up*re1_down)
+             rhoaug1(2*i1-1,i2,i3,2)=rhoaug1(2*i1-1,i2,i3,2)+weight*(re1_up*re0_down+im1_up*im0_down)&!Re[m1x]
+&                                                           +weight*(re1_down*re0_up+im1_down*im0_up)
+             rhoaug1(2*i1  ,i2,i3,2)=rhoaug1(2*i1  ,i2,i3,2)+weight*(-re1_up*im0_down+im1_up*re0_down)&!Im[m1x]
+&                                                           +weight*(-re1_down*im0_up+im1_down*re0_up)
+             
+             rhoaug1(2*i1-1,i2,i3,3)=rhoaug1(2*i1-1,i2,i3,3)+weight*(+re1_up*im0_down-im1_up*re0_down)&!Re[m1y]
+&                                                           +weight*(-re1_down*im0_up+im1_down*re0_up)
+             rhoaug1(2*i1  ,i2,i3,3)=rhoaug1(2*i1  ,i2,i3,3)+weight*(+re1_up*re0_down+im1_up*im0_down)&!Im[m1y]
+&                                                           +weight*(-re1_down*re0_up-im1_down*im0_up)
+
            end do
          end do
        end do

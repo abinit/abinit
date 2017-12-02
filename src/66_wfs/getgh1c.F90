@@ -304,7 +304,7 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
        ABI_DEALLOCATE(vlocal1_tmp)
        cplex1=2
        ABI_ALLOCATE(vlocal1_tmp,(cplex1*gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6))
-!      gh1c3=(re(v12)-im(v12))*phi1
+!      gh1c3=(re(v12)-im(v12))*phi1 => v^21*phi1
        if(rf_hamkq%cplex==1) then
          do i3=1,gs_hamkq%n6
            do i2=1,gs_hamkq%n5
@@ -315,7 +315,7 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
            end do
          end do
        else
-       !SPr: different deffinition of potential components for cplex=2 (see dotprod_vn)
+       !SPr: modified definition of local potential components for cplex=2 (see dotprod_vn)
          do i3=1,gs_hamkq%n6
            do i2=1,gs_hamkq%n5
              do i1=1,gs_hamkq%n4
@@ -329,7 +329,7 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
 &       gs_hamkq%istwf_k,gs_hamkq%kg_k,gs_hamkq%kg_kp,gs_hamkq%mgfft,mpi_enreg,1,gs_hamkq%ngfft,&
 &       npw,npw1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,2,mpi_enreg%paral_kgb,tim_fourwf,weight,weight,&
 &       use_gpu_cuda=gs_hamkq%use_gpu_cuda)
-!      gh1c4=(re(v12)+im(v12))*phi2
+!      gh1c4=(re(v12)+im(v12))*phi2 => v^12*phi1
        do i3=1,gs_hamkq%n6
          do i2=1,gs_hamkq%n5
            do i1=1,gs_hamkq%n4
