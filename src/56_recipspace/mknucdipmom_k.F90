@@ -14,10 +14,19 @@
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! INPUTS
+!! gmet(3,3)=metric for reciprocal space vectors
+!! kg(3,npw)=reduced planewave coordinates at current k point
+!! kpt(3)=current k point, reduced coordinates
+!! natom=number of atoms in cell
+!! nucdipmom(3,natom)=nuclear dipole moment vectors, at each atom
+!! npw=number of planewaves
+!! rprimd(3,3)=real space translation vectors
+!! ucvol=unit cell volume
+!! xred(3,natom)=location of atoms in unit cell, in reduced coordinates
 !!
 !! OUTPUT
 !!  nucdipmom_k(2,npw*(npw+1)/2) = nuclear dipole moment Hamiltonian matrix, in
-!!                                 lower diagonal Hermitian packed storage
+!!                                 lower diagonal Hermitian packed storage, at current k point
 !!
 !! SIDE EFFECTS
 !!

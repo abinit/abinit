@@ -18,6 +18,7 @@
 !!
 !! INPUTS
 !! cwavef(2,npw*nspinor*ndat)=planewave coefficients of wavefunction.
+!! gs_ham <type(gs_hamiltonian_type)>=all data for the Hamiltonian to be applied
 !! my_nspinor=number of spinorial components of the wavefunctions (on current proc)
 !! ndat=number of FFT to do in //
 !!
@@ -25,7 +26,6 @@
 !! ghcnd(2,npw*my_nspinor*ndat)=matrix elements <G|H_ND|C>
 !!
 !! SIDE EFFECTS
-!! gs_ham <type(gs_hamiltonian_type)>=all data for the Hamiltonian to be applied
 !!
 !! NOTES
 !! Application of <k^prime|H|k> or <k|H|k^prime> not implemented!
@@ -63,7 +63,6 @@ subroutine getghcnd(cwavef,ghcnd,gs_ham,my_nspinor,ndat)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'getghcnd'
- use interfaces_32_util
 !End of the abilint section
 
  implicit none
@@ -108,15 +107,15 @@ subroutine getghcnd(cwavef,ghcnd,gs_ham,my_nspinor,ndat)
  ! ABI_ALLOCATE(hggc,(cwavedim))
  ! ABI_ALLOCATE(inwave,(cwavedim))
 
- ! Hand-coded A.cwave (715 sec)
+ ! Hand-coded H_ND.cwave (715 sec) Least memory, ok performance
  ghcnd=zero
  npw = gs_ham%npw_k
  ndp_index = 0
  do col=1, npw
     colr = cwavef(1,col)
     coli = cwavef(2,col)
-    coldx = (2*npw-col+2)*(col-1)/2 ! columns already completed, each
-    ! one less than the one before, starting with npw in col 1
+    coldx = (2*npw-col+2)*(col-1)/2 ! elements of columns already completed, each
+    ! one less planewave than the one before, starting with npw in col 1
     do row = col+1, npw  ! row == col term is strictly zero
        ndp_index = coldx + row - col + 1
        Aijr = gs_ham%nucdipmom_k(1,ndp_index)
@@ -130,7 +129,7 @@ subroutine getghcnd(cwavef,ghcnd,gs_ham,my_nspinor,ndat)
     end do
  end do
 
- ! MATMUL with real objects (1631 sec)
+ ! MATMUL with real objects (1631 sec) most memory, worst performance
  ! cwavedim = gs_ham%npw_k*my_nspinor*ndat
  ! ghcnd(1:2,1:cwavedim)=zero
  ! ABI_ALLOCATE(hreal,(cwavedim,cwavedim))
@@ -156,7 +155,7 @@ subroutine getghcnd(cwavef,ghcnd,gs_ham,my_nspinor,ndat)
  ! ABI_DEALLOCATE(cwavereal)
  ! ABI_DEALLOCATE(cwaveimag)
 
- ! BLAS with real objects (1401 sec)
+ ! BLAS with real objects (1401 sec) most memory, poor performance
  ! cwavedim = gs_ham%npw_k*my_nspinor*ndat
  ! ghcnd(1:2,1:cwavedim)=zero
  ! ABI_ALLOCATE(hreal,(cwavedim,cwavedim))
@@ -191,7 +190,7 @@ subroutine getghcnd(cwavef,ghcnd,gs_ham,my_nspinor,ndat)
  ! ABI_DEALLOCATE(cwaveimag)
  ! ABI_DEALLOCATE(work)
 
- ! MATMUL with complex objects (1353 sec)
+ ! MATMUL with complex objects (1353 sec) much memory, poor performance
  ! cwavedim = gs_ham%npw_k*my_nspinor*ndat
  ! ABI_ALLOCATE(hgg,(cwavedim,cwavedim))
  ! ABI_ALLOCATE(inwave,(cwavedim))
@@ -217,7 +216,7 @@ subroutine getghcnd(cwavef,ghcnd,gs_ham,my_nspinor,ndat)
  ! ABI_DEALLOCATE(inwave)
  ! ABI_DEALLOCATE(work)
 
- ! BLAS with complex objects (656 sec)
+ ! BLAS with complex objects (656 sec) much memory, best performance
  ! cwavedim = gs_ham%npw_k*my_nspinor*ndat
  ! cwavedimp = cwavedim*(cwavedim+1)/2
  ! ABI_ALLOCATE(hgg,(cwavedimp))
