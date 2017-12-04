@@ -522,7 +522,8 @@ implicit none
        cutoff = cutoff / 3.0
        
        call polynomial_coeff_getNorder(coeffs_bound,effective_potential%crystal,cutoff,&
-&       ncoeff_bound,ncoeff_bound_tot,inp%fit_boundPower,2,comm,anharmstr=inp%fit_anhaStrain==1,&
+&       ncoeff_bound,ncoeff_bound_tot,inp%fit_boundPower,2,sc_size,&
+&       comm,anharmstr=inp%fit_anhaStrain==1,&
 &       spcoupling=inp%fit_SPCoupling==1,verbose=.true.,distributed=.false.,&
 &       only_even_power=.true.,only_odd_power=.false.)
 

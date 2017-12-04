@@ -31,7 +31,7 @@ module m_polynomial_coeff
  use m_polynomial_term
  use m_sort,only : sort_dp
  use m_crystal,only : crystal_t,symbols_crystal
- use m_supercell, only: getPBCIndexes_supercell,distance_supercell
+ use m_supercell, only: getPBCIndexes_supercell,distance_supercell,findBound_supercell
  use m_xmpi
 
  implicit none
@@ -1289,7 +1289,10 @@ end subroutine polynomial_coeff_evaluate
 !! list_symstr(nstr_sym,nsym) = array with the list of the strain  and the symmetrics
 !! nstr_sym = number of coefficient for the strain
 !! ncoeff_sym = number of coefficient for the IFC
-!!
+!! sc_size(3) = optional,size of the supercell used for the fit.
+!!               For example if you want to fit 2x2x2 cell the interation
+!!               Sr-Ti and Sr-Ti[2 0 0] will be identical for the fit process
+!!               If check_pbc is true we remove these kind of terms
 !!
 !! PARENTS
 !!      m_polynomial_coeff
@@ -1301,7 +1304,7 @@ end subroutine polynomial_coeff_evaluate
 !! SOURCE
 
 subroutine polynomial_coeff_getList(cell,crystal,cutoff,dist,list_symcoeff,list_symstr,&
-&                                   natom,nstr_sym,ncoeff_sym,nrpt)
+&                                   natom,nstr_sym,ncoeff_sym,nrpt,sc_size)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1323,6 +1326,7 @@ subroutine polynomial_coeff_getList(cell,crystal,cutoff,dist,list_symcoeff,list_
  real(dp),intent(in):: dist(natom,natom,nrpt)
  type(crystal_t), intent(in) :: crystal
  integer,allocatable,intent(out) :: list_symcoeff(:,:,:),list_symstr(:,:)
+ integer,optional,intent(in) :: sc_size(3)
 !Local variables-------------------------------
 !scalar
  integer :: ia,ib,icoeff,icoeff2,icoeff_tot,icoeff_tmp,idisy1,idisy2,ii
@@ -1332,10 +1336,10 @@ subroutine polynomial_coeff_getList(cell,crystal,cutoff,dist,list_symcoeff,list_
  integer :: nsym,shift_atm1(3)
  integer :: shift_atm2(3)
  real(dp):: tolsym8
- logical :: found
+ logical :: found,check_pbc
 !arrays
- integer :: sym(3,3)
- integer :: transl(3)
+ integer :: sym(3,3),sc_size_in(3)
+ integer :: transl(3),min_range(3),max_range(3)
  integer,allocatable :: blkval(:,:,:,:,:),list(:),list_symcoeff_tmp(:,:,:),list_symcoeff_tmp2(:,:,:)
  integer,allocatable :: list_symstr_tmp(:,:),indsym(:,:,:) ,symrec(:,:,:)
  real(dp),allocatable :: tnons(:,:)
@@ -1367,6 +1371,17 @@ subroutine polynomial_coeff_getList(cell,crystal,cutoff,dist,list_symcoeff,list_
    end if
  end do
 
+ !Set the size of the interaction
+ check_pbc = .FALSE.
+ sc_size_in = 0
+ min_range = 0; max_range = 0
+ if(present(sc_size))then
+   sc_size_in = sc_size
+   do mu=1,3
+     call findBound_supercell(min_range(mu),max_range(mu),sc_size_in(mu))
+   end do
+ end if
+ 
 !Obtain a list of rotated atom labels:
  ABI_ALLOCATE(indsym,(4,nsym,natom))
  ABI_ALLOCATE(symrec,(3,3,nsym))
@@ -1401,7 +1416,7 @@ subroutine polynomial_coeff_getList(cell,crystal,cutoff,dist,list_symcoeff,list_
      end select
    end if
    do isym=1,nsym
-!  Get the symmetry matrix 
+!  Get the symmetry matrix
      sym(:,:) = crystal%symrel(:,:,isym)
      do idisy1=1,3
        do idisy2=1,3
@@ -1458,6 +1473,7 @@ subroutine polynomial_coeff_getList(cell,crystal,cutoff,dist,list_symcoeff,list_
  icoeff_tot = 1
  list_symcoeff_tmp = 0
 
+ 
 !2-Fill atom list
 !Big loop over generic atom 
  do ia=1,natom
@@ -1470,7 +1486,7 @@ subroutine polynomial_coeff_getList(cell,crystal,cutoff,dist,list_symcoeff,list_
 !    Get the irpt and ib
      irpt=(list(ii)-1)/natom+1     
      ib=list(ii)-natom*(irpt-1)
-     if(dist(ia,ib,irpt) > cutoff ) then
+     if(dist(ia,ib,irpt) > cutoff) then
 !      If this distance is superior to the cutoff, we don't compute
        blkval(:,ia,:,ib,irpt)= 0
        if(irpt==irpt_ref)blkval(:,ib,:,ia,irpt)= 0
@@ -1516,7 +1532,7 @@ subroutine polynomial_coeff_getList(cell,crystal,cutoff,dist,list_symcoeff,list_
 
 !            Put information into array indsym: translations and label
              shift_atm2(:)= transl(:) - shift_atm1(:)
-
+             
              found = .false.
              do irpt3=1,nrpt
                if(cell(1,irpt3)==shift_atm2(1).and.&
@@ -1526,7 +1542,6 @@ subroutine polynomial_coeff_getList(cell,crystal,cutoff,dist,list_symcoeff,list_
                  irpt_sym = irpt3
                end if
              end do
-             
 !            Now that a symmetric perturbation has been obtained,
 !            including the expression of the symmetry matrix, see
 !            if the symmetric perturbations are available
@@ -1586,7 +1601,7 @@ subroutine polynomial_coeff_getList(cell,crystal,cutoff,dist,list_symcoeff,list_
 !1/ step remove the zero coeff in this array
  ncoeff = 0
  do icoeff = 1,ncoeff_max
-   if(.not.(all(list_symcoeff_tmp(:,icoeff,1)==0)))then
+     if(.not.(all(list_symcoeff_tmp(:,icoeff,1)==0)))then
      ncoeff = ncoeff + 1
    end if
  end do
@@ -1598,7 +1613,7 @@ subroutine polynomial_coeff_getList(cell,crystal,cutoff,dist,list_symcoeff,list_
    if(.not.(all(list_symcoeff_tmp(:,icoeff_tmp,1)==0)))then
      icoeff = icoeff + 1
      list_symcoeff_tmp2(1:5,icoeff,:) = list_symcoeff_tmp(1:5,icoeff_tmp,:)
-   end if
+     end if
  end do
 
 
@@ -1666,6 +1681,23 @@ subroutine polynomial_coeff_getList(cell,crystal,cutoff,dist,list_symcoeff,list_
        end if
      end if
    end do
+ end do
+
+ 
+!Check if the atom 2 is not (with the PBC) is in the same cell than
+!the atom 1. For example if you want to fit 2x2x2 cell the interation
+!Sr-Ti and Sr-Ti[2 0 0] will be identical for the fit process...     
+!If check_pbc is true we remove these kind of terms
+ do icoeff = 1,ncoeff
+   if(.not.(all(list_symcoeff_tmp2(:,icoeff,1)==0)))then
+     do mu=1,3
+       if(min_range(mu) > cell(mu,list_symcoeff_tmp2(4,icoeff,1)) .or. &
+&       cell(mu,list_symcoeff_tmp2(4,icoeff,1)) > max_range(mu))then
+         list_symcoeff_tmp2(:,icoeff,:)=0
+         exit
+       end if
+     end do
+   end if
  end do
 
 !3/ Remove useless terms like opposites
@@ -1771,6 +1803,10 @@ end subroutine polynomial_coeff_getList
 !! power_disps(2) = array with the minimal and maximal power_disp to be computed
 !! option = 0 compute all terms
 !!          1 still in development
+!! sc_size(3) = optional,size of the supercell used for the fit.
+!!               For example if you want to fit 2x2x2 cell the interation
+!!               Sr-Ti and Sr-Ti[2 0 0] will be identical for the fit process
+!!               If check_pbc is true we remove these kind of terms
 !! comm = MPI communicator
 !! anharmstr = logical, optional : TRUE, the anharmonic strain is computed (\eta)^power_disp ...
 !!                                   FALSE, (default) the anharmonic strain are not computed
@@ -1795,7 +1831,7 @@ end subroutine polynomial_coeff_getList
 !! SOURCE
 
 subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_tot,power_disps,&
-&                                     option,comm,anharmstr,spcoupling,distributed,&
+&                                     option,sc_size,comm,anharmstr,spcoupling,distributed,&
 &                                     only_odd_power,only_even_power,verbose)
 
 
@@ -1816,7 +1852,7 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
  logical,optional,intent(in) :: anharmstr,spcoupling,distributed,verbose
  logical,optional,intent(in) :: only_odd_power,only_even_power
 !arrays
- integer,intent(in) :: power_disps(2)
+ integer,intent(in) :: power_disps(2),sc_size(3)
  type(crystal_t), intent(inout) :: crystal
  type(polynomial_coeff_type),allocatable,intent(inout) :: coefficients(:)
 !Local variables-------------------------------
@@ -1890,7 +1926,6 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
  xcart(:,:) = crystal%xcart(:,:)
  xred(:,:)  = crystal%xred(:,:)
 
-!Set the size of the interaction
  ncell =  (/int(anint(cutoff/rprimd(1,1))+1),&
 &          int(anint(cutoff/rprimd(2,2))+1),&
 &          int(anint(cutoff/rprimd(3,3))+1)/)
@@ -1958,7 +1993,7 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
    call wrtout(std_out,message,'COLL')
  end if
  call polynomial_coeff_getList(cell,crystal,cutoff,dist,list_symcoeff,list_symstr,&
-&                              natom,nstr_sym,ncoeff_sym,nrpt)
+&                              natom,nstr_sym,ncoeff_sym,nrpt,sc_size=sc_size)
 
  ABI_DEALLOCATE(dist)
  ABI_DEALLOCATE(rpt)

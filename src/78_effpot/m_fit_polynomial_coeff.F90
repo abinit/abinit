@@ -179,7 +179,10 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
  if(present(fit_tolMSDS)) tolMSDS  = fit_tolMSDS
  if(present(fit_tolMSDE)) tolMSDE  = fit_tolMSDE
  if(present(fit_tolMSDFS))tolMSDFS = fit_tolMSDFS
-!we set to the lenght of the cell parameters
+ !we set variables
+ do ii = 1, 3
+   sc_size(ii) = eff_pot%supercell%rlatt(ii,ii)
+ end do
  cutoff = zero
  if(present(cutoff_in))then
    cutoff = cutoff_in
@@ -236,7 +239,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
    end if
 
    call polynomial_coeff_getNorder(coeffs_tmp,eff_pot%crystal,cutoff,my_ncoeff,ncoeff_tot,power_disps,&
-&                                  0,comm,anharmstr=need_anharmstr,spcoupling=need_spcoupling,&
+&                                  0,sc_size,comm,anharmstr=need_anharmstr,spcoupling=need_spcoupling,&
 &                                  distributed=.true.)
  end if
 
@@ -296,10 +299,10 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
  call xmpi_barrier(comm)
 
 !Write the XML with the coefficient before the fit process 
-! if(iam_master)then
-    filename = "terms_set.xml"
-!    call polynomial_coeff_writeXML(my_coeffs,my_ncoeff,filename=filename,newfile=.true.)
-! end if
+if(iam_master)then
+  filename = "terms_set.xml"
+!  call polynomial_coeff_writeXML(my_coeffs,my_ncoeff,filename=filename,newfile=.true.)
+end if
 
 !Reset the output (we free the memory)
  call effective_potential_freeCoeffs(eff_pot)
@@ -416,10 +419,6 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
  ABI_ALLOCATE(energy_coeffs,(my_ncoeff,ntime))
  ABI_ALLOCATE(fcart_coeffs,(3,natom_sc,my_ncoeff,ntime))
  ABI_ALLOCATE(strten_coeffs,(6,ntime,my_ncoeff))
-
- do ii = 1, 3
-   sc_size(ii) = eff_pot%supercell%rlatt(ii,ii)
- end do
 
  call fit_polynomial_coeff_getFS(my_coeffs,fit_data%training_set%du_delta,&
 &                                fit_data%training_set%displacement,&
