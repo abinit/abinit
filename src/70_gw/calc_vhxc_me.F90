@@ -254,40 +254,44 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,nfftf,ngfftf,&
  ! FABIEN's development
  ! Hybrid functional treatment
  if(Mflags%has_vxcval_hybrid==1) then
-   if(libxc_functionals_check()) then
 
-     call wrtout(std_out,' Hybrid functional xc potential is being set')
-     ixc_sigma=Dtset%ixc_sigma
-     call get_auxc_ixc(auxc_ixc,ixc_sigma)
-     call xcdata_init(xcdata_hybrid,dtset=Dtset,auxc_ixc=auxc_ixc,ixc=ixc_sigma)
-     call libxc_functionals_init(ixc_sigma,Dtset%nspden,xc_functionals=xc_funcs_hybrid)
+   call wrtout(std_out,' Hybrid functional xc potential is being set')
+   ixc_sigma=Dtset%ixc_sigma
+   call get_auxc_ixc(auxc_ixc,ixc_sigma)
+   call xcdata_init(xcdata_hybrid,dtset=Dtset,auxc_ixc=auxc_ixc,ixc=ixc_sigma)
+ 
+   if(ixc_sigma<0)then
+     if(libxc_functionals_check()) then
+       call libxc_functionals_init(ixc_sigma,Dtset%nspden,xc_functionals=xc_funcs_hybrid)
+!      Do not forget, negative values of hyb_mixing(_sr),hyb_range_* means that they have been user-defined.
+       if (dtset%ixc==-402.or.dtset%ixc==-406.or.dtset%ixc==-427.or.dtset%ixc==-428 .or. dtset%ixc==-456 .or. &
+&        min(Dtset%hyb_mixing,Dtset%hyb_mixing_sr,Dtset%hyb_range_dft,Dtset%hyb_range_fock)<-tol8)then
+         call libxc_functionals_set_hybridparams(hyb_range=abs(Dtset%hyb_range_dft),&
+&          hyb_mixing=abs(Dtset%hyb_mixing),hyb_mixing_sr=abs(Dtset%hyb_mixing_sr),xc_functionals=xc_funcs_hybrid)
+       endif
+     else
+       call wrtout(std_out, 'LIBXC is not present: hybrid functionals are not available')
+     end if
+   end if
 
-!    Do not forget, negative values of hyb_mixing(_sr),hyb_range_* means that they have been user-defined.
-     if (dtset%ixc==-406.or.dtset%ixc==-427.or.dtset%ixc==-428 .or. &
-&      min(Dtset%hyb_mixing,Dtset%hyb_mixing_sr,Dtset%hyb_range_dft,Dtset%hyb_range_fock)<-tol8)then
-       call libxc_functionals_set_hybridparams(hyb_range=abs(Dtset%hyb_range_dft),&
-&        hyb_mixing=abs(Dtset%hyb_mixing),hyb_mixing_sr=abs(Dtset%hyb_mixing_sr),xc_functionals=xc_funcs_hybrid)
-     endif
-     write(msg, '(a, f4.2)') ' Fock fraction = ', max(Dtset%hyb_mixing,Dtset%hyb_mixing_sr)
-     call wrtout(std_out,msg,'COLL')
-     write(msg, '(a, f5.2, a)') ' Fock inverse screening length = ',Dtset%hyb_range_dft, ' (bohr^-1)'
-     call wrtout(std_out,msg,'COLL')
+   write(msg, '(a, f4.2)') ' Fock fraction = ', max(Dtset%hyb_mixing,Dtset%hyb_mixing_sr)
+   call wrtout(std_out,msg,'COLL')
+   write(msg, '(a, f5.2, a)') ' Fock inverse screening length = ',Dtset%hyb_range_dft, ' (bohr^-1)'
+   call wrtout(std_out,msg,'COLL')
 
-     ABI_MALLOC(vxc_val_hybrid,(nfftf,nspden))
+   ABI_MALLOC(vxc_val_hybrid,(nfftf,nspden))
 
+   if(ixc_sigma<0)then
      call rhotoxc(enxc_hybrid_val,kxc_,MPI_enreg_seq,nfftf,ngfftf,&
 &     nhat,Wfd%usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,n3xccc_,option,dtset%paral_kgb,rhor,Cryst%rprimd,&
 &     strsxc,usexcnhat,vxc_val_hybrid,vxcval_hybrid_avg,xccc3d_,xcdata_hybrid,xc_funcs=xc_funcs_hybrid)
-
-     ! Fix the libxc module with the original settings
      call libxc_functionals_end(xc_functionals=xc_funcs_hybrid)
-!    if(Dtset%ixc<0) then
-!      call libxc_functionals_init(Dtset%ixc,Dtset%nspden)
-!    end if
-
    else
-     call wrtout(std_out, 'LIBXC is not present: hybrid functionals are not available')
+     call rhotoxc(enxc_hybrid_val,kxc_,MPI_enreg_seq,nfftf,ngfftf,&
+&     nhat,Wfd%usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,n3xccc_,option,dtset%paral_kgb,rhor,Cryst%rprimd,&
+&     strsxc,usexcnhat,vxc_val_hybrid,vxcval_hybrid_avg,xccc3d_,xcdata_hybrid)
    end if
+
  endif
 
  ABI_FREE(xccc3d_)

@@ -41,7 +41,8 @@
         Moreover, it is the only technique available in ABINIT to compute the imaginary part of &Sigma;(&omega;) 
         and the spectral function A(&omega;).
 
-        <p> It is possible to disable the full computation, and actually do an Hartree-Fock, screened exchange or COHSEX calculation.
+        <p> It is possible to disable the full computation, and actually do an Hartree-Fock, screened exchange, COHSEX or hybrid functional calculation.
+        <p> The calculation is done in a precomputed basis set, that can be Kohn-Sham (e.g. PBE) or generalized Kohn-Sham (e.g. HSE06).
         <p> As vertex corrections, the bootstrap kernel and others can be included in the self-consistent W. The Faleev method, see PRL 93, 126406 (2004), is implemented.
         <p> Convergence over the number of unoccupied band is much improved with respect to usual implementations of GW, 
         thanks to the "extrapolar" method.
