@@ -180,8 +180,8 @@ subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
 !scalars
  integer :: nk3xc,ifft,ipositron,ispden,nfftot,offset
  integer :: mpi_comm_sphgrid,ixc_current
- integer :: ii,jj,kk,ipt,nx,ny,nz           !SPr: to remove
- real(dp):: rx,ry,rz                        !SPr: to remove
+ !integer :: ii,jj,kk,ipt,nx,ny,nz           !SPr: debug
+ !real(dp):: rx,ry,rz                        !SPr: debug
  real(dp) :: doti,e_xcdc_vxctau
  logical :: add_tfw_,calc_xcdc,with_vxctau
  logical :: is_hybrid_ncpp,wvlbigdft=.false.
@@ -189,7 +189,7 @@ subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
 !arrays
  real(dp) :: evxc,tsec(2),vmean(dtset%nspden),vzeeman(dtset%nspden)
  real(dp),allocatable :: rhowk(:,:),Vmagconstr(:,:),vnew(:,:),xcart(:,:)
- real(dp),allocatable :: vzeemanHarm(:,:)
+ !real(dp),allocatable :: vzeemanHarm(:,:)   !SPr: debug Zeeman field q/=0 real space
 
 ! *********************************************************************
 
@@ -363,8 +363,8 @@ subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
 !EB <-- vzeeman might have to be allocated correctly --> to be checked
 ! vzeeman = 1/2 ( -B_z, -B_x + iB_y ; -B_x - iB_y , B_z)
  vzeeman(:) = zero
- ABI_ALLOCATE(vzeemanHarm,(nfft,dtset%nspden))  ! to remove
- vzeemanHarm(:,:) = zero                        ! to remove
+ !ABI_ALLOCATE(vzeemanHarm,(nfft,dtset%nspden))  ! SPr: debug stuff
+ !vzeemanHarm(:,:) = zero                        !
  if (any(abs(dtset%zeemanfield(:))>tol8)) then
    if(dtset%nspden==2)then
 !    EB The collinear case has to be checked :
@@ -376,47 +376,46 @@ subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
 !                                     v(2)    => v_dndn
 !         verified by comparing collinear and non-collinear calculations
      
-     vzeeman(1) = zero !-half*dtset%zeemanfield(3)  ! v_upup
-     vzeeman(2) = zero ! half*dtset%zeemanfield(3)  ! v_dndn
+     vzeeman(1) =-half*dtset%zeemanfield(3)  ! v_upup
+     vzeeman(2) = half*dtset%zeemanfield(3)  ! v_dndn
 
 
-     nx=ngfft(1); ny=ngfft(2); nz=ngfft(3)
-     do kk=0,nz-1
-       do jj=0,ny-1
-         do ii=0,nx-1
-           ipt=1+ii+nx*(jj+ny*kk)
-           !rx=(dble(ii)/nx)*rprimd(1,1)+(dble(jj)/ny)*rprimd(1,2)+(dble(kk)/nz)*rprimd(1,3)
-           !ry=(dble(ii)/nx)*rprimd(2,1)+(dble(jj)/ny)*rprimd(2,2)+(dble(kk)/nz)*rprimd(2,3)
-           !rz=(dble(ii)/nx)*rprimd(3,1)+(dble(jj)/ny)*rprimd(3,2)+(dble(kk)/nz)*rprimd(3,3)
-           vzeemanHarm(ipt,1)= -half*dtset%zeemanfield(3)*cos(2*PI*(dble(ii)/dble(nx)))
-           vzeemanHarm(ipt,2)=  half*dtset%zeemanfield(3)*cos(2*PI*(dble(ii)/dble(nx)))
-         end do
-       end do
-     end do
+     !nx=ngfft(1); ny=ngfft(2); nz=ngfft(3)
+     !do kk=0,nz-1
+     !  do jj=0,ny-1
+     !    do ii=0,nx-1
+     !      ipt=1+ii+nx*(jj+ny*kk)
+     !      !rx=(dble(ii)/nx)*rprimd(1,1)+(dble(jj)/ny)*rprimd(1,2)+(dble(kk)/nz)*rprimd(1,3)
+     !      !ry=(dble(ii)/nx)*rprimd(2,1)+(dble(jj)/ny)*rprimd(2,2)+(dble(kk)/nz)*rprimd(2,3)
+     !      !rz=(dble(ii)/nx)*rprimd(3,1)+(dble(jj)/ny)*rprimd(3,2)+(dble(kk)/nz)*rprimd(3,3)
+     !      vzeemanHarm(ipt,1)= -half*dtset%zeemanfield(3)*cos(2*PI*(dble(ii)/dble(nx)))
+     !      vzeemanHarm(ipt,2)=  half*dtset%zeemanfield(3)*cos(2*PI*(dble(ii)/dble(nx)))
+     !    end do
+     !  end do
+     !end do
 
    else if(dtset%nspden==4)then
-     !vzeeman(1)=-half*dtset%zeemanfield(3)    ! v_upup
-     !vzeeman(2)= half*dtset%zeemanfield(3)    ! v_dndn
-     !vzeeman(3)=-half*dtset%zeemanfield(1)    ! Re(v_updn)
-     !vzeeman(4)= half*dtset%zeemanfield(2)    ! Im(v_updn)
 
-     nx=ngfft(1); ny=ngfft(2); nz=ngfft(3)
-     do kk=0,nz-1
-       do jj=0,ny-1
-         do ii=0,nx-1
-           ipt=1+ii+nx*(jj+ny*kk)
-           !rx=(dble(ii)/nx)*rprimd(1,1)+(dble(jj)/ny)*rprimd(1,2)+(dble(kk)/nz)*rprimd(1,3)
-           !ry=(dble(ii)/nx)*rprimd(2,1)+(dble(jj)/ny)*rprimd(2,2)+(dble(kk)/nz)*rprimd(2,3)
-           !rz=(dble(ii)/nx)*rprimd(3,1)+(dble(jj)/ny)*rprimd(3,2)+(dble(kk)/nz)*rprimd(3,3)
-           vzeemanHarm(ipt,1)= -half*dtset%zeemanfield(3)*cos(2*PI*(dble(ii)/dble(nx)))
-           vzeemanHarm(ipt,2)=  half*dtset%zeemanfield(3)*cos(2*PI*(dble(ii)/dble(nx)))
-           vzeemanHarm(ipt,3)= -half*dtset%zeemanfield(1)*cos(2*PI*(dble(ii)/dble(nx)))
-           vzeemanHarm(ipt,4)=  half*dtset%zeemanfield(2)*cos(2*PI*(dble(ii)/dble(nx)))
-         end do
-       end do
-     end do
+     vzeeman(1)=-half*dtset%zeemanfield(3)    ! v_upup
+     vzeeman(2)= half*dtset%zeemanfield(3)    ! v_dndn
+     vzeeman(3)=-half*dtset%zeemanfield(1)    ! Re(v_updn)
+     vzeeman(4)= half*dtset%zeemanfield(2)    ! Im(v_updn)
 
-
+     !nx=ngfft(1); ny=ngfft(2); nz=ngfft(3)
+     !do kk=0,nz-1
+     !  do jj=0,ny-1
+     !    do ii=0,nx-1
+     !      ipt=1+ii+nx*(jj+ny*kk)
+     !      !rx=(dble(ii)/nx)*rprimd(1,1)+(dble(jj)/ny)*rprimd(1,2)+(dble(kk)/nz)*rprimd(1,3)
+     !      !ry=(dble(ii)/nx)*rprimd(2,1)+(dble(jj)/ny)*rprimd(2,2)+(dble(kk)/nz)*rprimd(2,3)
+     !      !rz=(dble(ii)/nx)*rprimd(3,1)+(dble(jj)/ny)*rprimd(3,2)+(dble(kk)/nz)*rprimd(3,3)
+     !      vzeemanHarm(ipt,1)= -half*dtset%zeemanfield(3)*cos(2*PI*(dble(ii)/dble(nx)))
+     !      vzeemanHarm(ipt,2)=  half*dtset%zeemanfield(3)*cos(2*PI*(dble(ii)/dble(nx)))
+     !      vzeemanHarm(ipt,3)= -half*dtset%zeemanfield(1)*cos(2*PI*(dble(ii)/dble(nx)))
+     !      vzeemanHarm(ipt,4)=  half*dtset%zeemanfield(2)*cos(2*PI*(dble(ii)/dble(nx)))
+     !    end do
+     !  end do
+     !end do
 
    end if
  end if
@@ -449,7 +448,7 @@ subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
      do ispden=1,min(dtset%nspden,2)
        do ifft=1,nfft
          vnew(ifft,ispden)=vhartr(ifft)+vpsp(ifft)+vxc(ifft,ispden)+vzeeman(ispden)+Vmagconstr(ifft,ispden)
-         vnew(ifft,ispden)=vnew(ifft,ispden)+vzeemanHarm(ifft,ispden)
+         !vnew(ifft,ispden)=vnew(ifft,ispden)+vzeemanHarm(ifft,ispden)
          if(mod(dtset%fockoptmix,100)==11)vnew(ifft,ispden)=vnew(ifft,ispden)+vxc_hybcomp(ifft,ispden)
          vresidnew(ifft,ispden)=vnew(ifft,ispden)-vtrial(ifft,ispden)
        end do
@@ -459,7 +458,7 @@ subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
        do ispden=3,4
          do ifft=1,nfft
            vnew(ifft,ispden)=vxc(ifft,ispden)+vzeeman(ispden)+Vmagconstr(ifft,ispden)
-           vnew(ifft,ispden)=vnew(ifft,ispden)+vzeemanHarm(ifft,ispden)
+           !vnew(ifft,ispden)=vnew(ifft,ispden)+vzeemanHarm(ifft,ispden)
            if(mod(dtset%fockoptmix,100)==11)vnew(ifft,ispden)=vnew(ifft,ispden)+vxc_hybcomp(ifft,ispden)
            vresidnew(ifft,ispden)=vnew(ifft,ispden)-vtrial(ifft,ispden)
          end do
@@ -535,7 +534,7 @@ subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
      do ispden=1,min(dtset%nspden,2)
        do ifft=1,nfft
          vtrial(ifft,ispden)=vhartr(ifft)+vpsp(ifft)+vxc(ifft,ispden)+vzeeman(ispden)+Vmagconstr(ifft,ispden)
-         vtrial(ifft,ispden)=vtrial(ifft,ispden)+vzeemanHarm(ifft,ispden)
+         !vtrial(ifft,ispden)=vtrial(ifft,ispden)+vzeemanHarm(ifft,ispden)
          if(mod(dtset%fockoptmix,100)==11)vtrial(ifft,ispden)=vtrial(ifft,ispden)+vxc_hybcomp(ifft,ispden)
        end do
      end do
@@ -543,7 +542,7 @@ subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
 !$OMP PARALLEL DO
        do ifft=1,nfft
          vtrial(ifft,3:4)=vxc(ifft,3:4)+vzeeman(3:4)+Vmagconstr(ifft,3:4)
-         vtrial(ifft,3:4)=vtrial(ifft,3:4)+vzeemanHarm(ifft,3:4)
+         !vtrial(ifft,3:4)=vtrial(ifft,3:4)+vzeemanHarm(ifft,3:4)
          if(mod(dtset%fockoptmix,100)==11)vtrial(ifft,3:4)=vtrial(ifft,3:4)+vxc_hybcomp(ifft,3:4)
        end do
      end if
@@ -571,7 +570,7 @@ subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
  end if
 
  ABI_DEALLOCATE(Vmagconstr)
- ABI_DEALLOCATE(vzeemanHarm)
+ !ABI_DEALLOCATE(vzeemanHarm) SPr: debug for q/=0 magnetic field
 
  call timab(945,2,tsec)
  call timab(940,2,tsec)

@@ -353,7 +353,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  real(dp) :: ucvol,vxcavg,elmag1
  character(len=500) :: msg
  character(len=fnlen) :: fi1o
- character(len=fnlen) :: fi1o_vtk
+!character(len=fnlen) :: fi1o_vtk
  integer  :: prtopt
  type(ab7_mixing_object) :: mix
  type(efield_type) :: dtefield
@@ -1224,8 +1224,8 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &     dtset%ntypat,ab_out,dtset%ratsph,rhor1,rprimd,dtset%typat,ucvol,xred,&
 &     prtopt,cplex,intgden=intgden,dentot=dentot)
      !debug: write out the vtk first-order density components
-     call appdig(pertcase,dtfil%fnameabo_den,fi1o_vtk)
-     call printmagvtk(mpi_enreg,cplex,nspden,nfftf,ngfftf,rhor1,rprimd,adjustl(adjustr(fi1o_vtk)//".vtk"))
+     !call appdig(pertcase,dtfil%fnameabo_den,fi1o_vtk)
+     !call printmagvtk(mpi_enreg,cplex,nspden,nfftf,ngfftf,rhor1,rprimd,adjustl(adjustr(fi1o_vtk)//".vtk"))
      !compute the contributions to susceptibility from different attomic spheres:
    end if
  end if
