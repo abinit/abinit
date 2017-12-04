@@ -1,0 +1,76 @@
+# Test for non-collinear dfpt response with B field (rfmagn input variable)
+# bcc Fe, GS spin along y; low ecut, coarse kpt grid
+
+  ndtset  2
+
+  prtvol  1
+
+  natom   1
+  znucl   26
+  ntypat  1
+  typat   1
+  spinat  0.0 2.5 0.0
+
+  nsppol  1  # single spin chanel
+  nspinor 2  # spinor wavefunctions
+  nspden  4  # full, NC density matrix
+
+  so_psp  0
+
+  acell   3*5.42
+  xred    0.0  0.0  0.0
+  nband   22
+  ecut    30.0
+  tsmear  0.01
+  occopt  3
+
+  nstep   50
+  rprim  -0.5  0.5  0.5
+          0.5 -0.5  0.5
+          0.5  0.5 -0.5
+
+  ixc     7  # DFPT response in NC works only with LSDA
+
+  istwfk   8*1
+  kptopt   3
+  ngkpt    2 2 2
+  nshiftk  1
+  shiftk   0.0  0.0  0.0
+
+#####################################################
+# Dataset 1 (gs run to get wf and den)
+#####################################################
+  iscf1    7
+  tolvrs1  1.0d-16
+
+#####################################################
+# Dataset 2 (dfpt run to get B-field response)
+#####################################################
+
+ toldfe2    1.0d-6
+ getwfk2    1
+ rfmagn2    1
+  rfdir2    0 1 0
+   nqpt2    1
+    qpt2    0.0 0.0 0.0
+  prtwf2   -1
+
+
+## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% test_chain = t67.in
+#%% [files]
+#%% files_to_test = 
+#%%   t67.out, tolnlines = 4, tolabs = 0.001, tolrel = 0.001, fld_options = -easy
+#%% psp_files = 26fe.pspnc
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = S. PROKHORENKO
+#%% keywords = DFPT
+#%% description = 
+#%%   Response of magnetic metal to external magnetic field parallel to spin direction.
+#%% topics = DFPT
+#%%<END TEST_INFO>
