@@ -81,8 +81,8 @@
 !!      dfpt_nstpaw,newfermie1
 !!
 !! CHILDREN
-!!      free_my_atmtab,get_my_atmtab,pawdensities,pawdijhartree,pawxc_dfpt,pawxcm_dfpt
-!!      timab,xmpi_sum
+!!      free_my_atmtab,get_my_atmtab,pawdensities,pawdijhartree,pawxc_dfpt
+!!      pawxcm_dfpt,timab,xmpi_sum
 !!
 !! SOURCE
 

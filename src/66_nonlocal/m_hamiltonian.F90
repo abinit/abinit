@@ -1026,8 +1026,8 @@ end subroutine init_hamiltonian
 !!
 !! PARENTS
 !!      d2frnl,dfpt_nsteltwf,dfpt_nstpaw,dfpt_nstwf,dfpt_rhofermi,dfptnl_resp
-!!      energy,fock2ACE,fock_getghc,forstrnps,getgh1c,gwls_hamiltonian
-!!      ks_ddiago,m_io_kss,m_shirley,nonlop_test,vtorho,wfd_vnlpsi
+!!      energy,fock2ACE,forstrnps,getgh1c,gwls_hamiltonian,ks_ddiago,m_io_kss
+!!      m_shirley,nonlop_test,vtorho,wfd_vnlpsi
 !!
 !! CHILDREN
 !!      destroy_mpi_enreg,initmpi_seq,kpgsph,wrtout

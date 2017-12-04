@@ -612,7 +612,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
    if( ANY(optdriver == [RUNL_SCREENING]) )then
      call chkdpr(0,0,cond_string,cond_values,ierr,'ecuteps',dt%ecuteps,1,0.0_dp,iout)
      if (dt%ecuteps <= 0) then
-       MSG_ERROR_NOSTOP("ecutesp must be > 0 if optdriver == 3", ierr)
+       MSG_ERROR_NOSTOP("ecuteps must be > 0 if optdriver == 3", ierr)
      end if
      if(dt%fftgw<20 .and. dt%fftgw/=0)then
        if(dt%ecutwfn<dt%ecuteps-tol8)then
@@ -662,7 +662,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
        !  MSG_ERROR_NOSTOP("Self-energy with symsigma 1 and nspinor 2 not implemented", ierr)
        !end if
        if (optdriver == RUNL_SIGMA .and. &
-           any(mod(dt%gwcalctyp, 10) == [SIG_GW_AC, SIG_QPGW_PPM, SIG_QPGW_CD])) then
+       any(mod(dt%gwcalctyp, 10) == [SIG_GW_AC, SIG_QPGW_PPM, SIG_QPGW_CD])) then
          MSG_ERROR_NOSTOP("analytic-continuation, model GW with nspinor 2 are not implemented", ierr)
        end if
        !if (optdriver == RUNL_SIGMA .and. mod(dt%gwcalctyp, 100) >= 10) then

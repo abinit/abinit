@@ -55,7 +55,7 @@
 !!         [5] B. Barbiellini, M.J. Puska, T. Torsti and R.M.Nieminen, Phys. Rev. B 51, 7341 (1994)
 !!
 !! PARENTS
-!!      m_pawxc,rhotoxc,rhohxcpositron
+!!      m_pawxc,rhohxcpositron,rhotoxc
 !!
 !! CHILDREN
 !!      invcb

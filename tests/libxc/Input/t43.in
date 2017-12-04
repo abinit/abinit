@@ -24,10 +24,8 @@ getwfk1     0
 getwfk      1        # Obtain WFK file from previous dataset
 ecutwfn     11.5     # Planewaves to be used to represent the wavefunctions
 ecutsigx    11.5     # Planewaves to be used to represent the exchange operator
-gwcalctyp   125
- icutcoul   5          # short-range exchange only
-     rcut   9.090909   # corresponds to omega = 1/rc = 0.11 bohr^1
-ixc_sigma  -428
+gwcalctyp   25
+ ixc_sigma  -428
 
 # Dataset2: Calculation of the HSE06 with the default mixing (0.25).
 optdriver2  4 

@@ -35,7 +35,7 @@ src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-
  Mentioned in &nbsp; <a href="../../topics/generated_files/topic_GW.html">topic_GW</a>, &nbsp; <a href="../../users/generated_files/help_features.html#7">help_features#7</a>. 
  <hr>
  <h3><b>Table of content: </b></h3> 
- <ul> <li>1. <a href="topic_SelfEnergy.html#1">Introduction.</a><li>2. <a href="topic_SelfEnergy.html#2">Related lesson(s) of the tutorial.</a><li>3. <a href="topic_SelfEnergy.html#3">Related input variables.</a><li>4. <a href="topic_SelfEnergy.html#4">References.</a></ul>
+ <ul> <li>1. <a href="topic_SelfEnergy.html#1">Introduction.</a><li>2. <a href="topic_SelfEnergy.html#2">Related lesson(s) of the tutorial.</a><li>3. <a href="topic_SelfEnergy.html#3">Related input variables.</a><li>4. <a href="topic_SelfEnergy.html#4">Selected input files.</a><li>5. <a href="topic_SelfEnergy.html#5">References.</a></ul>
 
 &nbsp; 
 <HR ALIGN=left> 
@@ -75,7 +75,8 @@ On the other hand, it is the preferred approach for calculating the QP correctio
 Moreover, it is the only technique available in ABINIT to compute the imaginary part of &Sigma;(&omega;) 
 and the spectral function A(&omega;).
 
-<p> It is possible to disable the full computation, and actually do an Hartree-Fock, screened exchange or COHSEX calculation.
+<p> It is possible to disable the full computation, and actually do an Hartree-Fock, screened exchange, COHSEX or hybrid functional calculation.
+<p> The calculation is done in a precomputed basis set, that can be Kohn-Sham (e.g. PBE) or generalized Kohn-Sham (e.g. HSE06).
 <p> As vertex corrections, the bootstrap kernel and others can be included in the self-consistent W. The Faleev method, see PRL 93, 126406 (2004), is implemented.
 <p> Convergence over the number of unoccupied band is much improved with respect to usual implementations of GW, 
 thanks to the "extrapolar" method.
@@ -163,11 +164,25 @@ including many-body effects).</li>
 <br><br><a href=#top>Go to the top</a>
 
 
-
 &nbsp; 
 <HR ALIGN=left> 
 <a name="4">&nbsp;</a>
-<h3><b>4. References.</b></h3>
+<h3><b>4. Selected input files.</b></h3>
+
+
+<i><b>WARNING</b> : as of ABINITv8.6.x, the list of input files provided in the specific section of the topics Web pages is still to be reviewed/tuned. In some cases, it will be adequate, and in other cases, it might be incomplete, or perhaps even useless.</i>
+<br><br>The user can find some related example input files in the ABINIT package in the directory /tests, or on the Web:
+<p> tests/libxc/Input: <a href="../../tests/libxc/Input/t44.in">t44.in</a> 
+<a href="../../tests/libxc/Input/t45.in">t45.in</a> 
+<br>
+
+<br><br><a href=#top>Go to the top</a>
+
+
+&nbsp; 
+<HR ALIGN=left> 
+<a name="5">&nbsp;</a>
+<h3><b>5. References.</b></h3>
 
 
 <br> <a href="../../biblio/generated_files/bib_biblio.html#Godby1989">[Godby1989]</a>  R. W. Godby and R. J. Needs, "Metal-insulator transition in Kohn-Sham theory and quasiparticle theory", Phys. Rev. Lett. 62, 1169 (1989). <br> DOI: <a href="https://doi.org/10.1103/PhysRevLett.62.1169">10.1103/PhysRevLett.62.1169</a>.<br>

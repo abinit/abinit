@@ -101,9 +101,9 @@
 !!      scfcv
 !!
 !! CHILDREN
-!!      dotprod_vn,mag_constr,mean_fftr,psolver_rhohxc,rhotoxc,rhohxcpositron
-!!      sqnorm_v,timab,wvl_psitohpsi,wvl_vtrial_abi2big,xchybrid_ncpp_cc
-!!      xred2xcart
+!!      dotprod_vn,hartre,mag_constr,mean_fftr,psolver_rhohxc,rhohxcpositron
+!!      rhotoxc,sqnorm_v,timab,wvl_psitohpsi,wvl_vtrial_abi2big,xcdata_init
+!!      xchybrid_ncpp_cc,xred2xcart
 !!
 !! SOURCE
 
@@ -245,17 +245,17 @@ subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
      if (ipositron==0) then
        if(.not.is_hybrid_ncpp .or. mod(dtset%fockoptmix,100)==11)then
          call rhotoxc(energies%e_xc,kxc,mpi_enreg,nfft,ngfft,&
-&          nhat,usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,n3xccc,optxc,dtset%paral_kgb,&
-&          rhor,rprimd,strsxc,usexcnhat,vxc,vxcavg,xccc3d,xcdata,&
-&          taug=taug,taur=taur,vhartr=vhartr,vxctau=vxctau,add_tfw=add_tfw_)
+&         nhat,usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,n3xccc,optxc,dtset%paral_kgb,&
+&         rhor,rprimd,strsxc,usexcnhat,vxc,vxcavg,xccc3d,xcdata,&
+&         taug=taug,taur=taur,vhartr=vhartr,vxctau=vxctau,add_tfw=add_tfw_)
          if(mod(dtset%fockoptmix,100)==11)then
            energies%e_xc=energies%e_xc*dtset%auxc_scal
            vxc(:,:)=vxc(:,:)*dtset%auxc_scal
-         endif
+         end if
        else
          call xchybrid_ncpp_cc(dtset,energies%e_xc,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,&
-&          strsxc,vxcavg,xccc3d,vxc=vxc)
-       endif
+&         strsxc,vxcavg,xccc3d,vxc=vxc)
+       end if
      else
        call rhotoxc(energies%e_xc,kxc,mpi_enreg,nfft,ngfft,&
 &       nhat,usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,n3xccc,optxc,dtset%paral_kgb,&
@@ -316,7 +316,7 @@ subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
 !    Compute second compensation energy for hybrid functionals
      call dotprod_vn(1,rhor,energies%e_hybcomp_v,doti,nfft,nfftot,1,1,vxc_hybcomp,ucvol,&
 &     mpi_comm_sphgrid=mpi_comm_sphgrid)
-   endif
+   end if
  end if
 
  calc_xcdc=.false.

@@ -42,8 +42,8 @@
 !!    in electrons/bohr**5 (in case of meta GGA)
 !!
 !! PARENTS
-!!      afterscfloop,dfpt_mkvxcgga,dfpt_mkvxcstrgga,gammapositron_fft,rhotoxc
-!!      rhohxcpositron
+!!      afterscfloop,dfpt_mkvxcgga,dfpt_mkvxcstrgga,gammapositron_fft
+!!      rhohxcpositron,rhotoxc
 !!
 !! CHILDREN
 !!      fourdp,phase,ptabs_fourdp,timab
