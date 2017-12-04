@@ -623,7 +623,7 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
 !      TODO : MJV: check that magnetic constraint works also for nspden 2 or add input variable condition
 !              EB: ispden=2 is rho_up only: to be tested
 !             SPr: for ispden=2, both components should be used (e.g. see definition for vzeeman)?
-!      vtrial(ifft,1) = vtrial(ifft,1) + Vmagconstr(ifft,1) !SPr: added the first component here
+       vtrial(ifft,1) = vtrial(ifft,1) + Vmagconstr(ifft,1) !SPr: added the first component here
        vtrial(ifft,2) = vtrial(ifft,2) + Vmagconstr(ifft,2)
      end do !ifft
    end if
