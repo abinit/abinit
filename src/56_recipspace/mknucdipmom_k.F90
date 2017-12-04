@@ -62,9 +62,8 @@ subroutine mknucdipmom_k(gmet,kg,kpt,natom,nucdipmom,nucdipmom_k,npw,rprimd,ucvo
  
 !Local variables-------------------------------
 !scalars
- integer :: atom_nd_tot,iatom,ig,igp,ndp_index
- real(dp) :: dg2,permeability,phasefac
- complex(dpc) :: cmatelem,cperm,cphase
+ integer :: atom_nd_tot,col,iatom,ndp_index,row
+ real(dp) :: crossfac,dg2,permeability,permfac,phasefac
  !arrays
  integer :: atom_nd(natom)
  real(dp) :: cprod(3),cprod_cart(3),dgp_red(3), gpk_red(3)
@@ -77,7 +76,7 @@ subroutine mknucdipmom_k(gmet,kg,kpt,natom,nucdipmom,nucdipmom_k,npw,rprimd,ucvo
 ! change it there also for consistency
  permeability=5.325135453D-5
  ! will need 4*pi*i*(\mu_0/four\pi)
- cperm = cmplx(zero,four_pi*permeability,kind=dpc)
+ permfac = four_pi*permeability
 
  ! make list of atoms with non-zero nuclear magnetic dipoles
  atom_nd_tot = 0
@@ -87,24 +86,26 @@ subroutine mknucdipmom_k(gmet,kg,kpt,natom,nucdipmom,nucdipmom_k,npw,rprimd,ucvo
        atom_nd(atom_nd_tot) = iatom
     end if
  end do
-       
- do ig=1,npw ! enumerate plane waves G
+
+ ndp_index = 0
+ do col=1,npw ! enumerate plane waves G
     ! form k + G at this k point for current plane wave (this is the ket |k+G> )
     ! in reduced coordinates
-   gpk_red(1)=dble(kg(1,ig))+kpt(1)
-   gpk_red(2)=dble(kg(2,ig))+kpt(2)
-   gpk_red(3)=dble(kg(3,ig))+kpt(3)
+   gpk_red(1)=dble(kg(1,col))+kpt(1)
+   gpk_red(2)=dble(kg(2,col))+kpt(2)
+   gpk_red(3)=dble(kg(3,col))+kpt(3)
 
-   do igp=1,ig ! enumerate lower diagonal from 1 to G
+   do row=col,npw ! enumerate lower diagonal from 1 to G
       ! index of the current matrix element, in lower triangular packed storage
-      ndp_index = igp+ig*(ig-1)/2
+      ! "packed sequentially, column by column"
+      ndp_index = ndp_index + 1
       nucdipmom_k(:,ndp_index) = zero
       
       ! form G-G' = \Delta G at this k pt (this is the bra <k+G'| )
       ! in reduced coordinates
-      dgp_red(1)=dble(kg(1,ig)-kg(1,igp))
-      dgp_red(2)=dble(kg(2,ig)-kg(2,igp))
-      dgp_red(3)=dble(kg(3,ig)-kg(3,igp))
+      dgp_red(1)=dble(kg(1,col)-kg(1,row))
+      dgp_red(2)=dble(kg(2,col)-kg(2,row))
+      dgp_red(3)=dble(kg(3,col)-kg(3,row))
 
       ! compute |\Delta G|^2
       ! must use gmet metric because G's are in reduced coords in reciprocal space
@@ -132,13 +133,12 @@ subroutine mknucdipmom_k(gmet,kg,kpt,natom,nucdipmom,nucdipmom_k,npw,rprimd,ucvo
       ! might be retrievable from ph1d, need to check
       do iatom = 1, atom_nd_tot
          phasefac = two_pi*DOT_PRODUCT(dgp_red,xred(:,atom_nd(iatom)))
-         cphase=cmplx(cos(phasefac),sin(phasefac),kind=dpc)
-         cmatelem = cperm*cphase*DOT_PRODUCT(nucdipmom(:,iatom),cprod_cart)
-         nucdipmom_k(1,ndp_index) = nucdipmom_k(1,ndp_index) + real(cmatelem)
-         nucdipmom_k(2,ndp_index) = nucdipmom_k(2,ndp_index) + aimag(cmatelem)
+         crossfac = DOT_PRODUCT(nucdipmom(:,iatom),cprod_cart)
+         nucdipmom_k(1,ndp_index) = nucdipmom_k(1,ndp_index) - permfac*crossfac*sin(phasefac)
+         nucdipmom_k(2,ndp_index) = nucdipmom_k(2,ndp_index) + permfac*crossfac*cos(phasefac)
       end do ! end loop over atoms with nonzero dipoles
 
-   end do ! end loop over G' = 1 to G
+   end do ! end loop over G' = G to npw
 
  end do ! end loop over G = 1 to npw
 
