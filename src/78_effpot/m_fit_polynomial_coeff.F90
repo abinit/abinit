@@ -179,10 +179,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
  if(present(fit_tolMSDS)) tolMSDS  = fit_tolMSDS
  if(present(fit_tolMSDE)) tolMSDE  = fit_tolMSDE
  if(present(fit_tolMSDFS))tolMSDFS = fit_tolMSDFS
- !we set variables
- do ii = 1, 3
-   sc_size(ii) = eff_pot%supercell%rlatt(ii,ii)
- end do
+
  cutoff = zero
  if(present(cutoff_in))then
    cutoff = cutoff_in
@@ -208,7 +205,17 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
 
  ditributed_coefficients = .true.
  if(option==2) ditributed_coefficients = .false.
- 
+
+!if the number of atoms in reference supercell into effpot is not correct,
+!wrt to the number of atom in the hist, we set map the hist and set the good supercell
+ if (size(hist%xred,2) /= eff_pot%supercell%natom) then
+   call effective_potential_file_mapHistToRef(eff_pot,hist,comm,verbose=need_verbose)
+ end if
+!we get the size of the supercell in the hist
+ do ii = 1, 3
+   sc_size(ii) = eff_pot%supercell%rlatt(ii,ii)
+ end do
+
 !Get the list of coefficients to fit:
 !get from the eff_pot type (from the input)
 !or
@@ -306,13 +313,6 @@ end if
 
 !Reset the output (we free the memory)
  call effective_potential_freeCoeffs(eff_pot)
-
-!if the number of atoms in reference supercell into effpot is not correct,
-!wrt to the number of atom in the hist, we set map the hist and set the good 
-!supercell
- if (size(hist%xred,2) /= eff_pot%supercell%natom) then
-   call effective_potential_file_mapHistToRef(eff_pot,hist,comm,verbose=need_verbose)
- end if
 
 
 !Check if ncycle_in is not zero or superior to ncoeff_tot

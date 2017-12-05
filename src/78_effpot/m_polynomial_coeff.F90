@@ -848,7 +848,6 @@ subroutine polynomial_coeff_writeXML(coeffs,ncoeff,filename,unit,newfile,replace
 #undef ABI_FUNC
 #define ABI_FUNC 'polynomial_coeff_writeXML'
  use interfaces_14_hidewrite
- use interfaces_32_util
 !End of the abilint section
 
   implicit none
