@@ -6,7 +6,6 @@
 #iomode 1
 
 ngfft 24 24 24
-ngfftdg 36 36 36
 getwfk -1
 paral_kgb 1
 
@@ -30,7 +29,7 @@ prtvclmb 1
 #prtgden 1
 #prtlden 1
 
-ndtset 5
+ndtset 6
 
 # Dataset 1
 # Output the GS WFK with MPI-FFT.
@@ -58,6 +57,13 @@ nstep4 11
 paral_kgb5 0 
 iomode5 0  # CG with MPI-IO is buggy!
 nstep5 1   # Only one step, as WFK are read from previous dataset.
+
+
+# Dataset 6
+# Read previous WFK file and DEN file with interpolation of rhor(r)
+ngfft6 32 32 32
+getden6 -1
+npband6 1 npkpt6 1 npfft6 4
 
 # SCF parameters
 ecut 25. 

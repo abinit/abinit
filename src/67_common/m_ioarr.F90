@@ -1163,7 +1163,7 @@ subroutine read_rhor(fname, cplex, nspden, nfft, ngfft, pawread, mpi_enreg, orho
 
    need_interp = any(ohdr%ngfft(1:3) /= ngfft(1:3))
    if (need_interp .and. allow_interp__) then
-     call wrtout(std_out," read_rhor: FFT meshes differ, performing Fourier interpolation.","COLL")
+     MSG_COMMENT("Real space meshes (DEN file, input rhor) are different. Will interpolate rhor(r).")
 
 #if 0
      ABI_CHECK(cplex == 1, "cplex != 1 not coded!")
