@@ -1222,7 +1222,7 @@ subroutine pawtab_print(Pawtab,header,unit,prtvol,mode_paral)
   call wrtout(my_unt,msg,my_mode)
   write(msg,'(a,i4)')'  Has vhnzc ...................................... ',Pawtab(ityp)%has_vhnzc
   call wrtout(my_unt,msg,my_mode)
-  write(msg,'(a,i4)')'  Has vminushalf.................................. ',Pawtab(ityp)%has_vhnzc
+  write(msg,'(a,i4)')'  Has vminushalf ................................. ',Pawtab(ityp)%has_vminushalf
   call wrtout(my_unt,msg,my_mode)
   write(msg,'(a,i4)')'  Has nabla ...................................... ',Pawtab(ityp)%has_nabla
   call wrtout(my_unt,msg,my_mode)
@@ -2215,7 +2215,7 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
      ii=ii+siz_vhnzc
    end if
    if (siz_vminushalf>0) then
-     list_dpr(ii:ii+siz_vminushalf-1)=pawtab%vminushalf(1:siz_vhnzc)
+     list_dpr(ii:ii+siz_vminushalf-1)=pawtab%vminushalf(1:siz_vminushalf)
      ii=ii+siz_vminushalf
    end if
 !Reals in datastructures (read from psp file)
