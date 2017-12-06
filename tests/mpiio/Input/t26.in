@@ -62,7 +62,7 @@ prtdos5 3
 ngfftdg6 48 48 48
 getden6 -1
 npband6 1 npkpt6 1 npfft6 4
-pw_unbal_thresh6 40  # Deactivate load balancing procedure (error on ubu_gnu_4.9_triqs and ubu_intel_17.0_openmpi)
+getwfk6 1
 
 # SCF parameters
 ecut 15. 
