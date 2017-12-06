@@ -293,7 +293,12 @@ P           mkmem6         10
           prtvpsp           1
            prtvxc           1
            prt1dm           1
-  pw_unbal_thresh      1.00000000E+01
+  pw_unbal_thresh1     1.00000000E+01
+  pw_unbal_thresh2     1.00000000E+01
+  pw_unbal_thresh3     1.00000000E+01
+  pw_unbal_thresh4     1.00000000E+01
+  pw_unbal_thresh5     1.00000000E+01
+  pw_unbal_thresh6     4.00000000E+01
             rprim      0.0000000000E+00  5.0000000000E-01  5.0000000000E-01
                        5.0000000000E-01  0.0000000000E+00  5.0000000000E-01
                        5.0000000000E-01  5.0000000000E-01  0.0000000000E+00
@@ -1828,7 +1833,12 @@ P           mkmem6         10
           prtvpsp           1
            prtvxc           1
            prt1dm           1
-  pw_unbal_thresh      1.00000000E+01
+  pw_unbal_thresh1     1.00000000E+01
+  pw_unbal_thresh2     1.00000000E+01
+  pw_unbal_thresh3     1.00000000E+01
+  pw_unbal_thresh4     1.00000000E+01
+  pw_unbal_thresh5     1.00000000E+01
+  pw_unbal_thresh6     4.00000000E+01
             rprim      0.0000000000E+00  5.0000000000E-01  5.0000000000E-01
                        5.0000000000E-01  0.0000000000E+00  5.0000000000E-01
                        5.0000000000E-01  5.0000000000E-01  0.0000000000E+00

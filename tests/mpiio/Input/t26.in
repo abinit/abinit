@@ -57,13 +57,12 @@ paral_kgb5 0
 iomode5 0  # CG with MPI-IO is buggy!
 prtdos5 3
 
-
 # Dtaset 6
 # Read previous WFK file and DEN file with interpolation of rhor(r)
 ngfftdg6 48 48 48
 getden6 -1
 npband6 1 npkpt6 1 npfft6 4
-
+pw_unbal_thresh6 40  # Deactivate load balancing procedure (error on ubu_gnu_4.9_triqs and ubu_intel_17.0_openmpi)
 
 # SCF parameters
 ecut 15. 
