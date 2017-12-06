@@ -73,7 +73,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
 &                            get_bz_item, has_IBZ_item, find_qmesh
  use m_ebands,        only : ebands_init, enclose_degbands, get_valence_idx, ebands_update_occ, ebands_report_gap, &
 &                            get_gaps, gaps_free, gaps_t, gaps_print
- use m_vcoul,         only : vcoul_t, vcoul_init
+ use m_vcoul,         only : vcoul_t, vcoul_init, vcoul_free
  use m_fft_mesh,      only : setmesh
  use m_gsphere,       only : gsphere_t, gsph_init, merge_and_sort_kg, gsph_extend, setshells
  use m_screening,     only : init_er_from_file, epsilonm1_results
@@ -81,6 +81,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
  use m_pawrhoij,      only : pawrhoij_type, pawrhoij_alloc, pawrhoij_copy, pawrhoij_free
  use m_io_kss,        only : make_gvec_kss
  use m_wfk,           only : wfk_read_eigenvalues
+ use m_xcdata,        only : get_xclevel
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -121,8 +122,8 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
  integer,parameter :: pertcase0=0,master=0
  integer :: bantot,enforce_sym,gwcalctyp,ib,ibtot,icutcoul_eff,ii,ikcalc,ikibz,io,isppol,itypat,jj,method
  integer :: mod10,mqmem,mband,ng_kss,nsheps,ikcalc2bz,ierr,gap_err,ng
- integer :: gwc_nfftot,gwx_nfftot,nqlwl,test_npwkss,my_rank,nprocs,ik,nk_found,ifo,timrev
- integer :: iqbz,isym,iq_ibz,itim,ic,pinv,ig1,ng_sigx,spin,gw_qprange
+ integer :: gwc_nfftot,gwx_nfftot,nqlwl,test_npwkss,my_rank,nprocs,ik,nk_found,ifo,timrev,usefock_ixc
+ integer :: iqbz,isym,iq_ibz,itim,ic,pinv,ig1,ng_sigx,spin,gw_qprange,ivcoul_init,nvcoul_init,xclevel_ixc
  real(dp),parameter :: OMEGASIMIN=0.01d0,tol_enediff=0.001_dp*eV_Ha
  real(dp) :: domegas,domegasi,ucvol,rcut
  logical,parameter :: linear_imag_mesh=.TRUE.
@@ -140,6 +141,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
  real(dp),pointer :: energies_p(:,:,:)
  real(dp),allocatable :: doccde(:),eigen(:),occfact(:),qlwl(:,:)
  type(Pawrhoij_type),allocatable :: Pawrhoij(:)
+ type(vcoul_t) :: Vcp_ks
 
 ! *************************************************************************
 
@@ -833,32 +835,80 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
    qlwl(:,:)=Dtset%gw_qlwl(:,1:nqlwl)
  end if
 
- rcut = Dtset%rcut
- icutcoul_eff=Dtset%icutcoul
- Sigp%sigma_mixing=one
- if(mod(Dtset%gwcalctyp,10)==5)then
-   if(abs(Dtset%hyb_mixing)>tol8)then
-!    Warning : the absolute value is needed, because of the singular way used to define the default for this input variable
-     Sigp%sigma_mixing=abs(Dtset%hyb_mixing)
-   else if(abs(Dtset%hyb_mixing_sr)>tol8)then
-     Sigp%sigma_mixing=abs(Dtset%hyb_mixing_sr)
-     icutcoul_eff=5
+!The Coulomb interaction used here might have two terms : 
+!the first term generates the usual sigma self-energy, but possibly, one should subtract
+!from it the Coulomb interaction already present in the Kohn-Sham basis, 
+!if the usefock associated to ixc is one.
+!The latter excludes (in the present implementation) mod(Dtset%gwcalctyp,10)==5
+ nvcoul_init=1
+ call get_xclevel(Dtset%ixc,xclevel_ixc,usefock_ixc)
+ if(usefock_ixc==1)then
+   nvcoul_init=2
+   if(mod(Dtset%gwcalctyp,10)==5)then
+     write(msg,'(4a,i3,a,i3,4a,i5)')ch10,&
+&     ' The starting wavefunctions were obtained from self-consistent calculations in the planewave basis set',ch10,&
+&     ' with ixc = ',Dtset%ixc,' associated with usefock =',usefock_ixc,ch10,&
+&     ' In this case, the present implementation does not allow that the self-energy for sigma corresponds to',ch10,&
+&     '  mod(gwcalctyp,10)==5, while your gwcalctyp= ',Dtset%gwcalctyp
+     MSG_ERROR(msg)
    endif
-   if(abs(rcut)<tol6 .and. abs(Dtset%hyb_range_fock)>tol8)rcut=one/Dtset%hyb_range_fock
  endif
 
-#if 1
- if (Gsph_x%ng > Gsph_c%ng) then
-   call vcoul_init(Vcp,Gsph_x,Cryst,Qmesh,Kmesh,rcut,icutcoul_eff,Dtset%vcutgeo,&
-&    Dtset%ecutsigx,Gsph_x%ng,nqlwl,qlwl,ngfftf,comm)
- else
-   call vcoul_init(Vcp,Gsph_c,Cryst,Qmesh,Kmesh,rcut,icutcoul_eff,Dtset%vcutgeo,&
-&    Dtset%ecutsigx,Gsph_c%ng,nqlwl,qlwl,ngfftf,comm)
- end if
-#else
-   call vcoul_init(Vcp,Gsph_Max,Cryst,Qmesh,Kmesh,rcut,icutcoul_eff,Dtset%vcutgeo,&
-&  Dtset%ecutsigx,Sigp%npwx,nqlwl,qlwl,ngfftf,comm)
-#endif
+ do ivcoul_init=1,nvcoul_init
+   rcut = Dtset%rcut
+   icutcoul_eff=Dtset%icutcoul
+   Sigp%sigma_mixing=one
+   if( mod(Dtset%gwcalctyp,10)==5 .or. ivcoul_init==2)then
+     if(abs(Dtset%hyb_mixing)>tol8)then
+!      Warning : the absolute value is needed, because of the singular way used to define the default for this input variable
+       Sigp%sigma_mixing=abs(Dtset%hyb_mixing)
+     else if(abs(Dtset%hyb_mixing_sr)>tol8)then
+       Sigp%sigma_mixing=abs(Dtset%hyb_mixing_sr)
+       icutcoul_eff=5
+     endif
+     if(abs(rcut)<tol6 .and. abs(Dtset%hyb_range_fock)>tol8)rcut=one/Dtset%hyb_range_fock
+   endif
+
+!#if 1
+   if(ivcoul_init==1)then
+
+     if (Gsph_x%ng > Gsph_c%ng) then
+       call vcoul_init(Vcp,Gsph_x,Cryst,Qmesh,Kmesh,rcut,icutcoul_eff,Dtset%vcutgeo,&
+&        Dtset%ecutsigx,Gsph_x%ng,nqlwl,qlwl,ngfftf,comm)
+     else
+       call vcoul_init(Vcp,Gsph_c,Cryst,Qmesh,Kmesh,rcut,icutcoul_eff,Dtset%vcutgeo,&
+&        Dtset%ecutsigx,Gsph_c%ng,nqlwl,qlwl,ngfftf,comm)
+     end if
+
+   else
+
+!    Use a temporary Vcp_ks to compute the Coulomb interaction already present in the Fock part of the Kohn-Sham Hamiltonian
+     if (Gsph_x%ng > Gsph_c%ng) then
+       call vcoul_init(Vcp_ks,Gsph_x,Cryst,Qmesh,Kmesh,rcut,icutcoul_eff,Dtset%vcutgeo,&
+&        Dtset%ecutsigx,Gsph_x%ng,nqlwl,qlwl,ngfftf,comm)
+     else
+       call vcoul_init(Vcp_ks,Gsph_c,Cryst,Qmesh,Kmesh,rcut,icutcoul_eff,Dtset%vcutgeo,&
+&        Dtset%ecutsigx,Gsph_c%ng,nqlwl,qlwl,ngfftf,comm)
+     end if
+
+!    Now compute the residual Coulomb interaction
+     Vcp%vc_sqrt_resid=sqrt(Vcp%vc_sqrt**2-Sigp%sigma_mixing*Vcp_ks%vc_sqrt**2)
+     Vcp%i_sz_resid=Vcp%i_sz-Sigp%sigma_mixing*Vcp_ks%i_sz
+!    The mixing factor has already been accounted for, so set it back to one
+     Sigp%sigma_mixing=one
+     call vcoul_free(Vcp_ks)
+
+!DEBUG
+     write(std_out,'(a)')' setup_sigma : the residual Coulomb interaction has been computed'
+!ENDDEBUG
+
+   endif
+!#else
+!   call vcoul_init(Vcp,Gsph_Max,Cryst,Qmesh,Kmesh,rcut,icutcoul_eff,ivcoul_init,Dtset%vcutgeo,&
+!&    Dtset%ecutsigx,Sigp%npwx,nqlwl,qlwl,ngfftf,comm)
+!#endif
+
+ enddo
 
 #if 0
  ! Using the random q for the optical limit is one of the reasons
