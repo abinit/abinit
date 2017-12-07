@@ -965,7 +965,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     511.875     511.840
 == DATASET  6 ==================================================================
 -   nproc =    4
 
- mkfilename : getwfk/=0, take file _WFK from output of DATASET   5.
+ mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
 
  mkfilename : getden/=0, take file _DEN from output of DATASET   5.
 
@@ -992,7 +992,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     511.875     511.840
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t27_MPI4o_DS5_WFK
+-inwffil : will read wavefunctions from disk file t27_MPI4o_DS1_WFK
 _setup2: Arith. and geom. avg. npw (full set) are     134.313     134.277
 
 ================================================================================
