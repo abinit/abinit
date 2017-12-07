@@ -58,8 +58,8 @@
 !! center=3        C-face centered
 !!
 !! PARENTS
-!!      ingeo,inqpt,m_ab7_symmetry,m_effective_potential_file,m_use_ga,symanal
-!!      symbrav,thmeig
+!!      ingeo,inqpt,m_ab7_symmetry,m_effective_potential_file,m_tdep_sym
+!!      m_use_ga,symanal,symbrav,thmeig
 !!
 !! CHILDREN
 !!      holocell,matr3inv,smallprim,symrelrot,wrtout

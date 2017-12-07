@@ -244,7 +244,7 @@ subroutine xcpbe(exci,npts,nspden,option,order,rho_updn,vxci,ndvxci,ngr2,nd2vxci
 
 !Checks the compatibility between the presence of dvxci and ndvxci
  if(ndvxci /=0 .neqv. present(dvxci))then
-   message = ' If ndvxci/=0 there must the optional arguments dvxci'
+   message = ' If ndvxci/=0 there must the optional argument dvxci'
    MSG_BUG(message)
  end if
 
@@ -275,7 +275,7 @@ subroutine xcpbe(exci,npts,nspden,option,order,rho_updn,vxci,ndvxci,ngr2,nd2vxci
  if (present(grho2_updn)) then
    if (ngr2/=2*nspden-1 ) then
      write(message, '(a,2i6)' )&
-&      ' ngr2 must be 2*nspden-1 ! ngr2,nspden=',ngr2,nspden
+&     ' ngr2 must be 2*nspden-1 ! ngr2,nspden=',ngr2,nspden
      MSG_BUG(message)
    end if
  end if

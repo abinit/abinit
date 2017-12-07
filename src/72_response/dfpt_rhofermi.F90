@@ -626,8 +626,8 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
        do ispden=1,4
          call fftpac(ispden,mpi_enreg,nspden,cplex*n1,n2,n3,cplex*n4,n5,n6,dtset%ngfft,rhorfermi,rhoaug4(:,:,:,ispden),1)
        end do
-     endif
-   endif
+     end if
+   end if
 
  end do ! End loop over spins
  
@@ -726,9 +726,9 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
 
  if(nspden==4) then
 ! FR SPr symrhg will manage correctly this rearrangement
-     rhorfermi(:,2)=rhorfermi(:,2)+(rhorfermi(:,1)+rhorfermi(:,4))    !(n+mx)
-     rhorfermi(:,3)=rhorfermi(:,3)+(rhorfermi(:,1)+rhorfermi(:,4))    !(n+my)
-     call timab(17,2,tsec)
+   rhorfermi(:,2)=rhorfermi(:,2)+(rhorfermi(:,1)+rhorfermi(:,4))    !(n+mx)
+   rhorfermi(:,3)=rhorfermi(:,3)+(rhorfermi(:,1)+rhorfermi(:,4))    !(n+my)
+   call timab(17,2,tsec)
  end if
 
 !Symmetrize the density

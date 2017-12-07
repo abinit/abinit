@@ -14179,7 +14179,7 @@
     defaultval: 1
     dimensions: scalar
     excludes: null
-    mnemonics: Index of eXchange-Correlation functional - ADVanced functional
+    mnemonics: Index of eXchange-Correlation functional used for self-energy calculations (SIGMA)
     requires: mod([[gwcalctyp]],10)==5
     text: |-
         <p>When [[gwcalctyp]]==5, 15 or 25, [[ixc_sigma]] gives the identifier of the advanced functional (usually a hybrid) that

@@ -121,7 +121,8 @@
 !!      scfcv
 !!
 !! CHILDREN
-!!      dotprod_vn,fourdp,metric,pawdenpot,pawmknhat,rhotoxc,timab,xmpi_sum
+!!      dotprod_vn,fourdp,hartre,metric,pawdenpot,pawmknhat,rhotoxc,timab
+!!      xcdata_init,xmpi_sum
 !!
 !! SOURCE
 

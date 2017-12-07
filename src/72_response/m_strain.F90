@@ -206,7 +206,7 @@ end subroutine strain_free
 !!  strain = structure with all information of strain
 !!
 !! PARENTS
-!!      compute_anharmonics,m_effective_potential,m_fit_polynomial_coeff
+!!      compute_anharmonics,m_effective_potential,m_fit_data
 !!
 !! CHILDREN
 !!      wrtout

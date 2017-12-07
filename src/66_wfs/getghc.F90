@@ -135,6 +135,9 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlc,lambda,mpi_enreg,nd
  logical :: k1_eq_k2,have_to_reequilibrate,has_fock
  logical :: nspinor1TreatedByThisProc,nspinor2TreatedByThisProc
  real(dp) :: ghcim,ghcre,weight
+!DEBUG
+ real(dp) :: energy_,doti
+!ENDDEBUG
  character(len=500) :: msg
 !arrays
  integer, pointer :: gbound_k1(:,:),gbound_k2(:,:),kg_k1(:,:),kg_k2(:,:)

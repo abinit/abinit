@@ -443,7 +443,10 @@ CONTAINS  !=====================================================================
 !!      debug_tools,m_shirley,m_wfd
 !!
 !! CHILDREN
-!!      fft_ug,get_bz_item
+!!      nhatgrid,paw_pwaves_lmn_free,paw_pwaves_lmn_init,pawfgrtab_free
+!!      pawfgrtab_init,pawfgrtab_print,pawtab_get_lsize,printxsf
+!!      wfd_change_ngfft,wfd_distribute_bands,wfd_get_ur,wfd_paw_get_aeur
+!!      wrtout
 !!
 !! SOURCE
 
@@ -607,7 +610,10 @@ end subroutine kdata_init
 !!      m_wfd
 !!
 !! CHILDREN
-!!      fft_ug,get_bz_item
+!!      nhatgrid,paw_pwaves_lmn_free,paw_pwaves_lmn_init,pawfgrtab_free
+!!      pawfgrtab_init,pawfgrtab_print,pawtab_get_lsize,printxsf
+!!      wfd_change_ngfft,wfd_distribute_bands,wfd_get_ur,wfd_paw_get_aeur
+!!      wrtout
 !!
 !! SOURCE
 
@@ -667,7 +673,10 @@ end subroutine kdata_free_0D
 !! PARENTS
 !!
 !! CHILDREN
-!!      fft_ug,get_bz_item
+!!      nhatgrid,paw_pwaves_lmn_free,paw_pwaves_lmn_init,pawfgrtab_free
+!!      pawfgrtab_init,pawfgrtab_print,pawtab_get_lsize,printxsf
+!!      wfd_change_ngfft,wfd_distribute_bands,wfd_get_ur,wfd_paw_get_aeur
+!!      wrtout
 !!
 !! SOURCE
 
@@ -712,7 +721,10 @@ end subroutine kdata_free_1D
 !!      m_wfd
 !!
 !! CHILDREN
-!!      fft_ug,get_bz_item
+!!      nhatgrid,paw_pwaves_lmn_free,paw_pwaves_lmn_init,pawfgrtab_free
+!!      pawfgrtab_init,pawfgrtab_print,pawtab_get_lsize,printxsf
+!!      wfd_change_ngfft,wfd_distribute_bands,wfd_get_ur,wfd_paw_get_aeur
+!!      wrtout
 !!
 !! SOURCE
 
@@ -766,7 +778,10 @@ end subroutine copy_kdata_0D
 !! PARENTS
 !!
 !! CHILDREN
-!!      fft_ug,get_bz_item
+!!      nhatgrid,paw_pwaves_lmn_free,paw_pwaves_lmn_init,pawfgrtab_free
+!!      pawfgrtab_init,pawfgrtab_print,pawtab_get_lsize,printxsf
+!!      wfd_change_ngfft,wfd_distribute_bands,wfd_get_ur,wfd_paw_get_aeur
+!!      wrtout
 !!
 !! SOURCE
 
@@ -845,7 +860,10 @@ end subroutine copy_kdata_1D
 !!      screening,sigma,wfk_analyze
 !!
 !! CHILDREN
-!!      fft_ug,get_bz_item
+!!      nhatgrid,paw_pwaves_lmn_free,paw_pwaves_lmn_init,pawfgrtab_free
+!!      pawfgrtab_init,pawfgrtab_print,pawtab_get_lsize,printxsf
+!!      wfd_change_ngfft,wfd_distribute_bands,wfd_get_ur,wfd_paw_get_aeur
+!!      wrtout
 !!
 !! SOURCE
 
@@ -1130,7 +1148,10 @@ end subroutine wfd_init
 !!      sigma,wfk_analyze
 !!
 !! CHILDREN
-!!      fft_ug,get_bz_item
+!!      nhatgrid,paw_pwaves_lmn_free,paw_pwaves_lmn_init,pawfgrtab_free
+!!      pawfgrtab_init,pawfgrtab_print,pawtab_get_lsize,printxsf
+!!      wfd_change_ngfft,wfd_distribute_bands,wfd_get_ur,wfd_paw_get_aeur
+!!      wrtout
 !!
 !! SOURCE
 
@@ -1235,7 +1256,10 @@ end subroutine wfd_free
 !!      screening,sigma
 !!
 !! CHILDREN
-!!      fft_ug,get_bz_item
+!!      nhatgrid,paw_pwaves_lmn_free,paw_pwaves_lmn_init,pawfgrtab_free
+!!      pawfgrtab_init,pawfgrtab_print,pawtab_get_lsize,printxsf
+!!      wfd_change_ngfft,wfd_distribute_bands,wfd_get_ur,wfd_paw_get_aeur
+!!      wrtout
 !!
 !! SOURCE
 
@@ -1549,7 +1573,10 @@ end function wfd_xdotc
 !!      bethe_salpeter,m_shirley,sigma
 !!
 !! CHILDREN
-!!      fft_ug,get_bz_item
+!!      nhatgrid,paw_pwaves_lmn_free,paw_pwaves_lmn_init,pawfgrtab_free
+!!      pawfgrtab_init,pawfgrtab_print,pawtab_get_lsize,printxsf
+!!      wfd_change_ngfft,wfd_distribute_bands,wfd_get_ur,wfd_paw_get_aeur
+!!      wrtout
 !!
 !! SOURCE
 
@@ -1607,7 +1634,10 @@ end subroutine wfd_reset_ur_cprj
 !!      calc_sigc_me,calc_sigx_me,cohsex_me
 !!
 !! CHILDREN
-!!      fft_ug,get_bz_item
+!!      nhatgrid,paw_pwaves_lmn_free,paw_pwaves_lmn_init,pawfgrtab_free
+!!      pawfgrtab_init,pawfgrtab_print,pawtab_get_lsize,printxsf
+!!      wfd_change_ngfft,wfd_distribute_bands,wfd_get_ur,wfd_paw_get_aeur
+!!      wrtout
 !!
 !! SOURCE
 
@@ -1668,7 +1698,10 @@ end subroutine wfd_get_many_ur
 !!      m_gkk,m_phgamma,m_phpi,m_sigmaph
 !!
 !! CHILDREN
-!!      fft_ug,get_bz_item
+!!      nhatgrid,paw_pwaves_lmn_free,paw_pwaves_lmn_init,pawfgrtab_free
+!!      pawfgrtab_init,pawfgrtab_print,pawtab_get_lsize,printxsf
+!!      wfd_change_ngfft,wfd_distribute_bands,wfd_get_ur,wfd_paw_get_aeur
+!!      wrtout
 !!
 !! SOURCE
 
@@ -1739,7 +1772,10 @@ end subroutine wfd_copy_cg
 !!      m_shirley,m_wfd,prep_calc_ucrpa,wfd_mkrho
 !!
 !! CHILDREN
-!!      fft_ug,get_bz_item
+!!      nhatgrid,paw_pwaves_lmn_free,paw_pwaves_lmn_init,pawfgrtab_free
+!!      pawfgrtab_init,pawfgrtab_print,pawtab_get_lsize,printxsf
+!!      wfd_change_ngfft,wfd_distribute_bands,wfd_get_ur,wfd_paw_get_aeur
+!!      wrtout
 !!
 !! SOURCE
 
@@ -1823,7 +1859,10 @@ end subroutine wfd_get_ur
 !!      m_wfd
 !!
 !! CHILDREN
-!!      fft_ug,get_bz_item
+!!      nhatgrid,paw_pwaves_lmn_free,paw_pwaves_lmn_init,pawfgrtab_free
+!!      pawfgrtab_init,pawfgrtab_print,pawtab_get_lsize,printxsf
+!!      wfd_change_ngfft,wfd_distribute_bands,wfd_get_ur,wfd_paw_get_aeur
+!!      wrtout
 !!
 !! SOURCE
 
@@ -1874,7 +1913,10 @@ end subroutine wfd_nullify
 !!      sigma
 !!
 !! CHILDREN
-!!      fft_ug,get_bz_item
+!!      nhatgrid,paw_pwaves_lmn_free,paw_pwaves_lmn_init,pawfgrtab_free
+!!      pawfgrtab_init,pawfgrtab_print,pawtab_get_lsize,printxsf
+!!      wfd_change_ngfft,wfd_distribute_bands,wfd_get_ur,wfd_paw_get_aeur
+!!      wrtout
 !!
 !! SOURCE
 
@@ -1974,7 +2016,10 @@ end subroutine wfd_print
 !! PARENTS
 !!
 !! CHILDREN
-!!      fft_ug,get_bz_item
+!!      nhatgrid,paw_pwaves_lmn_free,paw_pwaves_lmn_init,pawfgrtab_free
+!!      pawfgrtab_init,pawfgrtab_print,pawtab_get_lsize,printxsf
+!!      wfd_change_ngfft,wfd_distribute_bands,wfd_get_ur,wfd_paw_get_aeur
+!!      wrtout
 !!
 !! SOURCE
 
@@ -2076,7 +2121,10 @@ end subroutine wfd_mkall_ur
 !!      classify_bands,m_wfd
 !!
 !! CHILDREN
-!!      fft_ug,get_bz_item
+!!      nhatgrid,paw_pwaves_lmn_free,paw_pwaves_lmn_init,pawfgrtab_free
+!!      pawfgrtab_init,pawfgrtab_print,pawtab_get_lsize,printxsf
+!!      wfd_change_ngfft,wfd_distribute_bands,wfd_get_ur,wfd_paw_get_aeur
+!!      wrtout
 !!
 !! SOURCE
 
@@ -2220,7 +2268,10 @@ end subroutine wfd_ug2cprj
 !! PARENTS
 !!
 !! CHILDREN
-!!      fft_ug,get_bz_item
+!!      nhatgrid,paw_pwaves_lmn_free,paw_pwaves_lmn_init,pawfgrtab_free
+!!      pawfgrtab_init,pawfgrtab_print,pawtab_get_lsize,printxsf
+!!      wfd_change_ngfft,wfd_distribute_bands,wfd_get_ur,wfd_paw_get_aeur
+!!      wrtout
 !!
 !! SOURCE
 
@@ -2300,7 +2351,10 @@ end subroutine wave_init_0D
 !!      m_wfd
 !!
 !! CHILDREN
-!!      fft_ug,get_bz_item
+!!      nhatgrid,paw_pwaves_lmn_free,paw_pwaves_lmn_init,pawfgrtab_free
+!!      pawfgrtab_init,pawfgrtab_print,pawtab_get_lsize,printxsf
+!!      wfd_change_ngfft,wfd_distribute_bands,wfd_get_ur,wfd_paw_get_aeur
+!!      wrtout
 !!
 !! SOURCE
 
@@ -2385,7 +2439,10 @@ end subroutine wave_free_0D
 !!      m_wfd
 !!
 !! CHILDREN
-!!      fft_ug,get_bz_item
+!!      nhatgrid,paw_pwaves_lmn_free,paw_pwaves_lmn_init,pawfgrtab_free
+!!      pawfgrtab_init,pawfgrtab_print,pawtab_get_lsize,printxsf
+!!      wfd_change_ngfft,wfd_distribute_bands,wfd_get_ur,wfd_paw_get_aeur
+!!      wrtout
 !!
 !! SOURCE
 
@@ -2460,7 +2517,10 @@ end subroutine wave_free_3D
 !!      m_wfd
 !!
 !! CHILDREN
-!!      fft_ug,get_bz_item
+!!      nhatgrid,paw_pwaves_lmn_free,paw_pwaves_lmn_init,pawfgrtab_free
+!!      pawfgrtab_init,pawfgrtab_print,pawtab_get_lsize,printxsf
+!!      wfd_change_ngfft,wfd_distribute_bands,wfd_get_ur,wfd_paw_get_aeur
+!!      wrtout
 !!
 !! SOURCE
 
@@ -2539,7 +2599,10 @@ end subroutine wave_copy_0D
 !! PARENTS
 !!
 !! CHILDREN
-!!      fft_ug,get_bz_item
+!!      nhatgrid,paw_pwaves_lmn_free,paw_pwaves_lmn_init,pawfgrtab_free
+!!      pawfgrtab_init,pawfgrtab_print,pawtab_get_lsize,printxsf
+!!      wfd_change_ngfft,wfd_distribute_bands,wfd_get_ur,wfd_paw_get_aeur
+!!      wrtout
 !!
 !! SOURCE
 
@@ -2606,7 +2669,10 @@ end subroutine copy_wave_3D
 !!      m_shirley,m_wfd
 !!
 !! CHILDREN
-!!      fft_ug,get_bz_item
+!!      nhatgrid,paw_pwaves_lmn_free,paw_pwaves_lmn_init,pawfgrtab_free
+!!      pawfgrtab_init,pawfgrtab_print,pawtab_get_lsize,printxsf
+!!      wfd_change_ngfft,wfd_distribute_bands,wfd_get_ur,wfd_paw_get_aeur
+!!      wrtout
 !!
 !! SOURCE
 
@@ -2708,7 +2774,10 @@ end subroutine wfd_push_ug
 !!      m_wfd
 !!
 !! CHILDREN
-!!      fft_ug,get_bz_item
+!!      nhatgrid,paw_pwaves_lmn_free,paw_pwaves_lmn_init,pawfgrtab_free
+!!      pawfgrtab_init,pawfgrtab_print,pawtab_get_lsize,printxsf
+!!      wfd_change_ngfft,wfd_distribute_bands,wfd_get_ur,wfd_paw_get_aeur
+!!      wrtout
 !!
 !! SOURCE
 
@@ -3210,7 +3279,10 @@ end function wfd_ihave
 !!      m_wfd
 !!
 !! CHILDREN
-!!      fft_ug,get_bz_item
+!!      nhatgrid,paw_pwaves_lmn_free,paw_pwaves_lmn_init,pawfgrtab_free
+!!      pawfgrtab_init,pawfgrtab_print,pawtab_get_lsize,printxsf
+!!      wfd_change_ngfft,wfd_distribute_bands,wfd_get_ur,wfd_paw_get_aeur
+!!      wrtout
 !!
 !! SOURCE
 
@@ -3270,7 +3342,10 @@ end subroutine wfd_mybands
 !!      m_wfd
 !!
 !! CHILDREN
-!!      fft_ug,get_bz_item
+!!      nhatgrid,paw_pwaves_lmn_free,paw_pwaves_lmn_init,pawfgrtab_free
+!!      pawfgrtab_init,pawfgrtab_print,pawtab_get_lsize,printxsf
+!!      wfd_change_ngfft,wfd_distribute_bands,wfd_get_ur,wfd_paw_get_aeur
+!!      wrtout
 !!
 !! SOURCE
 
@@ -3348,7 +3423,10 @@ end subroutine wfd_show_bkstab
 !!      m_wfd
 !!
 !! CHILDREN
-!!      fft_ug,get_bz_item
+!!      nhatgrid,paw_pwaves_lmn_free,paw_pwaves_lmn_init,pawfgrtab_free
+!!      pawfgrtab_init,pawfgrtab_print,pawtab_get_lsize,printxsf
+!!      wfd_change_ngfft,wfd_distribute_bands,wfd_get_ur,wfd_paw_get_aeur
+!!      wrtout
 !!
 !! SOURCE
 
@@ -3411,7 +3489,10 @@ end subroutine wfd_bands_of_rank
 !! PARENTS
 !!
 !! CHILDREN
-!!      fft_ug,get_bz_item
+!!      nhatgrid,paw_pwaves_lmn_free,paw_pwaves_lmn_init,pawfgrtab_free
+!!      pawfgrtab_init,pawfgrtab_print,pawtab_get_lsize,printxsf
+!!      wfd_change_ngfft,wfd_distribute_bands,wfd_get_ur,wfd_paw_get_aeur
+!!      wrtout
 !!
 !! SOURCE
 
@@ -3475,7 +3556,10 @@ end subroutine wfd_get_ug
 !! PARENTS
 !!
 !! CHILDREN
-!!      fft_ug,get_bz_item
+!!      nhatgrid,paw_pwaves_lmn_free,paw_pwaves_lmn_init,pawfgrtab_free
+!!      pawfgrtab_init,pawfgrtab_print,pawtab_get_lsize,printxsf
+!!      wfd_change_ngfft,wfd_distribute_bands,wfd_get_ur,wfd_paw_get_aeur
+!!      wrtout
 !!
 !! SOURCE
 
@@ -3538,7 +3622,10 @@ end subroutine wfd_ptr_ug
 !! PARENTS
 !!
 !! CHILDREN
-!!      fft_ug,get_bz_item
+!!      nhatgrid,paw_pwaves_lmn_free,paw_pwaves_lmn_init,pawfgrtab_free
+!!      pawfgrtab_init,pawfgrtab_print,pawtab_get_lsize,printxsf
+!!      wfd_change_ngfft,wfd_distribute_bands,wfd_get_ur,wfd_paw_get_aeur
+!!      wrtout
 !!
 !! SOURCE
 
@@ -3606,7 +3693,10 @@ end subroutine wfd_ptr_ur
 !!      bethe_salpeter,m_haydock
 !!
 !! CHILDREN
-!!      fft_ug,get_bz_item
+!!      nhatgrid,paw_pwaves_lmn_free,paw_pwaves_lmn_init,pawfgrtab_free
+!!      pawfgrtab_init,pawfgrtab_print,pawtab_get_lsize,printxsf
+!!      wfd_change_ngfft,wfd_distribute_bands,wfd_get_ur,wfd_paw_get_aeur
+!!      wrtout
 !!
 !! SOURCE
 
@@ -3680,7 +3770,10 @@ end subroutine wfd_wave_free
 !!      m_wfd
 !!
 !! CHILDREN
-!!      fft_ug,get_bz_item
+!!      nhatgrid,paw_pwaves_lmn_free,paw_pwaves_lmn_init,pawfgrtab_free
+!!      pawfgrtab_init,pawfgrtab_print,pawtab_get_lsize,printxsf
+!!      wfd_change_ngfft,wfd_distribute_bands,wfd_get_ur,wfd_paw_get_aeur
+!!      wrtout
 !!
 !! SOURCE
 
@@ -3866,10 +3959,13 @@ end function wfd_everybody_has_ug
 !!  Wfd%bks_tab
 !!
 !! PARENTS
-!!      gw_tools,m_wfd,wfd_mkrho
+!!      m_sigma,m_wfd,wfd_mkrho
 !!
 !! CHILDREN
-!!      fft_ug,get_bz_item
+!!      nhatgrid,paw_pwaves_lmn_free,paw_pwaves_lmn_init,pawfgrtab_free
+!!      pawfgrtab_init,pawfgrtab_print,pawtab_get_lsize,printxsf
+!!      wfd_change_ngfft,wfd_distribute_bands,wfd_get_ur,wfd_paw_get_aeur
+!!      wrtout
 !!
 !! SOURCE
 
@@ -3931,7 +4027,10 @@ end subroutine wfd_update_bkstab
 !!      m_shirley,m_wfd
 !!
 !! CHILDREN
-!!      fft_ug,get_bz_item
+!!      nhatgrid,paw_pwaves_lmn_free,paw_pwaves_lmn_init,pawfgrtab_free
+!!      pawfgrtab_init,pawfgrtab_print,pawtab_get_lsize,printxsf
+!!      wfd_change_ngfft,wfd_distribute_bands,wfd_get_ur,wfd_paw_get_aeur
+!!      wrtout
 !!
 !! SOURCE
 
@@ -4013,10 +4112,13 @@ end subroutine wfd_set_mpicomm
 !!   my_band_list(1:my_nband)=The band indices for this node
 !!
 !! PARENTS
-!!      cchi0q0_intraband,gw_tools,m_wfd
+!!      cchi0q0_intraband,m_sigma,m_wfd,sigma
 !!
 !! CHILDREN
-!!      fft_ug,get_bz_item
+!!      nhatgrid,paw_pwaves_lmn_free,paw_pwaves_lmn_init,pawfgrtab_free
+!!      pawfgrtab_init,pawfgrtab_print,pawtab_get_lsize,printxsf
+!!      wfd_change_ngfft,wfd_distribute_bands,wfd_get_ur,wfd_paw_get_aeur
+!!      wrtout
 !!
 !! SOURCE
 
@@ -4112,7 +4214,10 @@ end subroutine wfd_distribute_bands
 !!      bethe_salpeter,screening,sigma
 !!
 !! CHILDREN
-!!      fft_ug,get_bz_item
+!!      nhatgrid,paw_pwaves_lmn_free,paw_pwaves_lmn_init,pawfgrtab_free
+!!      pawfgrtab_init,pawfgrtab_print,pawtab_get_lsize,printxsf
+!!      wfd_change_ngfft,wfd_distribute_bands,wfd_get_ur,wfd_paw_get_aeur
+!!      wrtout
 !!
 !! SOURCE
 !!
@@ -4316,7 +4421,10 @@ end function wfd_iterator_bks
 !!      wfd_pawrhoij
 !!
 !! CHILDREN
-!!      fft_ug,get_bz_item
+!!      nhatgrid,paw_pwaves_lmn_free,paw_pwaves_lmn_init,pawfgrtab_free
+!!      pawfgrtab_init,pawfgrtab_print,pawtab_get_lsize,printxsf
+!!      wfd_change_ngfft,wfd_distribute_bands,wfd_get_ur,wfd_paw_get_aeur
+!!      wrtout
 !!
 !! SOURCE
 
@@ -4406,7 +4514,10 @@ end subroutine wfd_bks_distrb
 !! PARENTS
 !!
 !! CHILDREN
-!!      fft_ug,get_bz_item
+!!      nhatgrid,paw_pwaves_lmn_free,paw_pwaves_lmn_init,pawfgrtab_free
+!!      pawfgrtab_init,pawfgrtab_print,pawtab_get_lsize,printxsf
+!!      wfd_change_ngfft,wfd_distribute_bands,wfd_get_ur,wfd_paw_get_aeur
+!!      wrtout
 !!
 !! SOURCE
 
@@ -4496,7 +4607,10 @@ end subroutine wfd_sanity_check
 !!      m_wfd
 !!
 !! CHILDREN
-!!      fft_ug,get_bz_item
+!!      nhatgrid,paw_pwaves_lmn_free,paw_pwaves_lmn_init,pawfgrtab_free
+!!      pawfgrtab_init,pawfgrtab_print,pawtab_get_lsize,printxsf
+!!      wfd_change_ngfft,wfd_distribute_bands,wfd_get_ur,wfd_paw_get_aeur
+!!      wrtout
 !!
 !! SOURCE
 
@@ -4582,7 +4696,10 @@ end subroutine wfd_dump_errinfo
 !!      calc_optical_mels,calc_vhxc_me,cchi0q0
 !!
 !! CHILDREN
-!!      fft_ug,get_bz_item
+!!      nhatgrid,paw_pwaves_lmn_free,paw_pwaves_lmn_init,pawfgrtab_free
+!!      pawfgrtab_init,pawfgrtab_print,pawtab_get_lsize,printxsf
+!!      wfd_change_ngfft,wfd_distribute_bands,wfd_get_ur,wfd_paw_get_aeur
+!!      wrtout
 !!
 !! SOURCE
 
@@ -4657,7 +4774,10 @@ end subroutine wfd_distribute_bbp
 !!      cchi0,m_wfd
 !!
 !! CHILDREN
-!!      fft_ug,get_bz_item
+!!      nhatgrid,paw_pwaves_lmn_free,paw_pwaves_lmn_init,pawfgrtab_free
+!!      pawfgrtab_init,pawfgrtab_print,pawtab_get_lsize,printxsf
+!!      wfd_change_ngfft,wfd_distribute_bands,wfd_get_ur,wfd_paw_get_aeur
+!!      wrtout
 !!
 !! SOURCE
 
@@ -4798,7 +4918,10 @@ end subroutine wfd_distribute_kb_kpbp
 !!      m_shirley,m_wfd,prep_calc_ucrpa,sigma,wfd_pawrhoij,wfd_vnlpsi
 !!
 !! CHILDREN
-!!      fft_ug,get_bz_item
+!!      nhatgrid,paw_pwaves_lmn_free,paw_pwaves_lmn_init,pawfgrtab_free
+!!      pawfgrtab_init,pawfgrtab_print,pawtab_get_lsize,printxsf
+!!      wfd_change_ngfft,wfd_distribute_bands,wfd_get_ur,wfd_paw_get_aeur
+!!      wrtout
 !!
 !! SOURCE
 
@@ -4920,7 +5043,10 @@ end subroutine wfd_get_cprj
 !!      wfk_analyze
 !!
 !! CHILDREN
-!!      fft_ug,get_bz_item
+!!      nhatgrid,paw_pwaves_lmn_free,paw_pwaves_lmn_init,pawfgrtab_free
+!!      pawfgrtab_init,pawfgrtab_print,pawtab_get_lsize,printxsf
+!!      wfd_change_ngfft,wfd_distribute_bands,wfd_get_ur,wfd_paw_get_aeur
+!!      wrtout
 !!
 !! SOURCE
 
@@ -5081,7 +5207,10 @@ end function wfd_iam_master
 !!      sigma,wfk_analyze
 !!
 !! CHILDREN
-!!      fft_ug,get_bz_item
+!!      nhatgrid,paw_pwaves_lmn_free,paw_pwaves_lmn_init,pawfgrtab_free
+!!      pawfgrtab_init,pawfgrtab_print,pawtab_get_lsize,printxsf
+!!      wfd_change_ngfft,wfd_distribute_bands,wfd_get_ur,wfd_paw_get_aeur
+!!      wrtout
 !!
 !! SOURCE
 
@@ -5255,10 +5384,12 @@ end subroutine wfd_test_ortho
 !!  Wfd<wfd_t>
 !!
 !! PARENTS
-!!      cchi0q0_intraband
 !!
 !! CHILDREN
-!!      fft_ug,get_bz_item
+!!      nhatgrid,paw_pwaves_lmn_free,paw_pwaves_lmn_init,pawfgrtab_free
+!!      pawfgrtab_init,pawfgrtab_print,pawtab_get_lsize,printxsf
+!!      wfd_change_ngfft,wfd_distribute_bands,wfd_get_ur,wfd_paw_get_aeur
+!!      wrtout
 !!
 !! SOURCE
 
@@ -5310,11 +5441,13 @@ end subroutine wfd_barrier
 !!  [ur_kibz(Wfd%nfft*Wfd%nspinor)]= Optional output: u(r) in the IBZ.
 !!
 !! PARENTS
-!!      calc_sigc_me,calc_sigx_me,cchi0,cchi0q0,cohsex_me,debug_tools
-!!      exc_build_block,exc_plot,m_bseinterp,m_shirley
+!!      debug_tools,exc_plot,m_bseinterp,m_shirley
 !!
 !! CHILDREN
-!!      fft_ug,get_bz_item
+!!      nhatgrid,paw_pwaves_lmn_free,paw_pwaves_lmn_init,pawfgrtab_free
+!!      pawfgrtab_init,pawfgrtab_print,pawtab_get_lsize,printxsf
+!!      wfd_change_ngfft,wfd_distribute_bands,wfd_get_ur,wfd_paw_get_aeur
+!!      wrtout
 !!
 !! SOURCE
 
@@ -5501,7 +5634,10 @@ end subroutine wfd_sym_ur
 !! PARENTS
 !!
 !! CHILDREN
-!!      fft_ug,get_bz_item
+!!      nhatgrid,paw_pwaves_lmn_free,paw_pwaves_lmn_init,pawfgrtab_free
+!!      pawfgrtab_init,pawfgrtab_print,pawtab_get_lsize,printxsf
+!!      wfd_change_ngfft,wfd_distribute_bands,wfd_get_ur,wfd_paw_get_aeur
+!!      wrtout
 !!
 !! SOURCE
 
@@ -5691,7 +5827,10 @@ end subroutine wfd_write_wfk
 !!      wfk_analyze
 !!
 !! CHILDREN
-!!      fft_ug,get_bz_item
+!!      nhatgrid,paw_pwaves_lmn_free,paw_pwaves_lmn_init,pawfgrtab_free
+!!      pawfgrtab_init,pawfgrtab_print,pawtab_get_lsize,printxsf
+!!      wfd_change_ngfft,wfd_distribute_bands,wfd_get_ur,wfd_paw_get_aeur
+!!      wrtout
 !!
 !! SOURCE
 
@@ -5988,7 +6127,10 @@ end subroutine wfd_read_wfk
 !! PARENTS
 !!
 !! CHILDREN
-!!      fft_ug,get_bz_item
+!!      nhatgrid,paw_pwaves_lmn_free,paw_pwaves_lmn_init,pawfgrtab_free
+!!      pawfgrtab_init,pawfgrtab_print,pawtab_get_lsize,printxsf
+!!      wfd_change_ngfft,wfd_distribute_bands,wfd_get_ur,wfd_paw_get_aeur
+!!      wrtout
 !!
 !! SOURCE
 
@@ -6125,7 +6267,10 @@ end subroutine wfd_from_wfk
 !!      prep_calc_ucrpa,wfk_analyze
 !!
 !! CHILDREN
-!!      fft_ug,get_bz_item
+!!      nhatgrid,paw_pwaves_lmn_free,paw_pwaves_lmn_init,pawfgrtab_free
+!!      pawfgrtab_init,pawfgrtab_print,pawtab_get_lsize,printxsf
+!!      wfd_change_ngfft,wfd_distribute_bands,wfd_get_ur,wfd_paw_get_aeur
+!!      wrtout
 !!
 !! SOURCE
 
@@ -6268,7 +6413,10 @@ end subroutine wfd_paw_get_aeur
 !! PARENTS
 !!
 !! CHILDREN
-!!      fft_ug,get_bz_item
+!!      nhatgrid,paw_pwaves_lmn_free,paw_pwaves_lmn_init,pawfgrtab_free
+!!      pawfgrtab_init,pawfgrtab_print,pawtab_get_lsize,printxsf
+!!      wfd_change_ngfft,wfd_distribute_bands,wfd_get_ur,wfd_paw_get_aeur
+!!      wrtout
 !!
 !! SOURCE
 

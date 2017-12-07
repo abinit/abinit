@@ -88,17 +88,17 @@
 !!      dfpt_eltfrkin,dfpt_eltfrloc,dfpt_eltfrxc,dfpt_ewald,dfpt_gatherdy
 !!      dfpt_looppert,dfpt_phfrq,dfpt_prtph,ebands_free,efmasdeg_free_array
 !!      efmasfr_free_array,eig2tot,eigen_meandege,elph2_fanddw,elt_ewald
-!!      exit_check,fourdp,getcut,getph,hdr_free,hdr_init,hdr_update,initrhoij
-!!      initylmg,inwffil,irreducible_set_pert,kpgio,littlegroup_q,matr3inv
-!!      mkcore,mklocl,mkrho,newocc,nhatgrid,outddbnc,paw_an_free,paw_an_init
-!!      paw_an_nullify,paw_gencond,paw_ij_free,paw_ij_init,paw_ij_nullify
-!!      pawdenpot,pawdij,pawexpiqr,pawfgr_destroy,pawfgr_init,pawfgrtab_free
-!!      pawfgrtab_init,pawinit,pawmknhat,pawpuxinit,pawrhoij_alloc
-!!      pawrhoij_bcast,pawrhoij_copy,pawrhoij_free,pawrhoij_nullify
-!!      pawtab_get_lsize,prteigrs,pspini,q0dy3_apply,q0dy3_calc,read_rhor
-!!      rhotoxc,setsym,setsymrhoij,setup1,status,symdij,symmetrize_xred,sytens
-!!      timab,transgrid,vdw_dftd2,vdw_dftd3,wffclose,wings3,wrtloctens,wrtout
-!!      xmpi_bcast
+!!      exit_check,fourdp,getcut,getph,hartre,hdr_free,hdr_init,hdr_update
+!!      initrhoij,initylmg,inwffil,irreducible_set_pert,kpgio,littlegroup_q
+!!      matr3inv,mkcore,mklocl,mkrho,newocc,nhatgrid,outddbnc,paw_an_free
+!!      paw_an_init,paw_an_nullify,paw_gencond,paw_ij_free,paw_ij_init
+!!      paw_ij_nullify,pawdenpot,pawdij,pawexpiqr,pawfgr_destroy,pawfgr_init
+!!      pawfgrtab_free,pawfgrtab_init,pawinit,pawmknhat,pawpuxinit
+!!      pawrhoij_alloc,pawrhoij_bcast,pawrhoij_copy,pawrhoij_free
+!!      pawrhoij_nullify,pawtab_get_lsize,prteigrs,pspini,q0dy3_apply
+!!      q0dy3_calc,read_rhor,rhotoxc,setsym,setsymrhoij,setup1,status,symdij
+!!      symmetrize_xred,sytens,timab,transgrid,vdw_dftd2,vdw_dftd3,wffclose
+!!      wings3,wrtloctens,wrtout,xcdata_init,xmpi_bcast
 !!
 !! SOURCE
 
@@ -236,7 +236,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  real(dp) :: dummy6(6),gmet(3,3),gmet_for_kg(3,3),gprimd(3,3),gprimd_for_kg(3,3),qphon(3)
  real(dp) :: rmet(3,3),rprimd(3,3),rprimd_for_kg(3,3),strn_dummy6(6),strv_dummy6(6),strsxc(6),tsec(2)
  real(dp),parameter :: k0(3)=(/zero,zero,zero/)
- real(dp),allocatable :: amass(:),becfrnl(:,:,:),bxc(:),cg(:,:),d2bbb(:,:,:,:,:,:),d2cart(:,:,:,:,:)
+ real(dp),allocatable :: amass(:),becfrnl(:,:,:),cg(:,:),d2bbb(:,:,:,:,:,:),d2cart(:,:,:,:,:)
  real(dp),allocatable :: d2cart_bbb(:,:,:,:,:,:),d2eig0(:,:,:,:,:)
  real(dp),allocatable :: d2k0(:,:,:,:,:),d2lo(:,:,:,:,:),d2loc0(:,:,:,:,:)
  real(dp),allocatable :: d2matr(:,:,:,:,:),d2nfr(:,:,:,:,:),d2nl(:,:,:,:,:),d2ovl(:,:,:,:,:)
@@ -679,9 +679,10 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
      has_dijnd=1; req_cplex_dij=2
    end if
    if (rfphon/=0.or.rfelfd==1.or.rfelfd==3.or.rfstrs/=0.or.rf2_dkde/=0) then
-     has_kxc=1;nkxc1=2*dtset%nspden-1                   ! LDA
+     has_kxc=1;nkxc1=2*min(dtset%nspden,2)-1            ! LDA
      if(dtset%xclevel==2.and.dtset%nspden==1) nkxc1=7   ! GGA non-polarized
      if(dtset%xclevel==2.and.dtset%nspden==2) nkxc1=19  ! GGA polarized
+     if (dtset%nspden==4) nkxc1=nkxc1+3  ! Non-coll.: need to store 3 additional arrays in kxc
    end if
    call paw_an_init(paw_an,dtset%natom,dtset%ntypat,nkxc1,dtset%nspden,&
 &   cplex,dtset%pawxcdev,dtset%typat,pawang,pawtab,has_vxc=1,has_vxc_ex=1,has_kxc=has_kxc,&
@@ -856,15 +857,13 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  call check_kxc(dtset%ixc,dtset%optdriver)
  ABI_ALLOCATE(kxc,(nfftf,nkxc))
  ABI_ALLOCATE(vxc,(nfftf,dtset%nspden))
- ABI_ALLOCATE(bxc,(nfftf))
- bxc(:) = 0.0d0
 
  _IBM6("Before rhotoxc")
 
  call xcdata_init(xcdata,dtset=dtset)
  call rhotoxc(enxc,kxc,mpi_enreg,nfftf,ngfftf,&
 & nhat,nhatdim,nhatgr,nhatgrdim,nkxc,nk3xc,n3xccc,option,dtset%paral_kgb,rhor,&
-& rprimd,strsxc,usexcnhat,vxc,vxcavg,xccc3d,xcdata,bxc=bxc,vhartr=vhartr)
+& rprimd,strsxc,usexcnhat,vxc,vxcavg,xccc3d,xcdata,vhartr=vhartr)
 
 !Compute local + Hxc potential, and subtract mean potential.
  ABI_ALLOCATE(vtrial,(nfftf,dtset%nspden))
@@ -1227,7 +1226,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
      call dfpt_dyxc1(atindx,blkflgfrx1,dyfrx1,gmet,gsqcut,dtset%ixc,kxc,mgfftf,mpert,mpi_enreg,&
 &     psps%mqgrid_vl,natom,nfftf,ngfftf,nkxc,dtset%nspden,&
 &     ntypat,psps%n1xccc,dtset%paral_kgb,psps,pawtab,ph1df,psps%qgrid_vl,qphon,&
-&     rfdir,rfpert,rprimd,timrev,dtset%typat,ucvol,psps%usepaw,psps%xcccrc,psps%xccc1d,xred,rhor=rhor,bxc=bxc,vxc=vxc)
+&     rfdir,rfpert,rprimd,timrev,dtset%typat,ucvol,psps%usepaw,psps%xcccrc,psps%xccc1d,xred,rhor=rhor,vxc=vxc)
    else
      call dfpt_dyxc1(atindx,blkflgfrx1,dyfrx1,gmet,gsqcut,dtset%ixc,kxc,mgfftf,mpert,mpi_enreg,&
 &     psps%mqgrid_vl,natom,nfftf,ngfftf,nkxc,dtset%nspden,&
@@ -1326,7 +1325,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 &   ddkfil,dtfil,dtset,dyew,dyfrlo,dyfrnl,dyfrx1,dyfrx2,dyvdw,dyfr_cplex,dyfr_nondiag,&
 &   d2bbb,d2lo,d2nl,d2ovl,efmasdeg,efmasfr,eigbrd,eig2nkq,&
 &   eltcore,elteew,eltfrhar,eltfrkin,eltfrloc,eltfrnl,eltfrxc,eltvdw,&
-&   etotal,fermie,iexit,indsym,kxc,bxc,&
+&   etotal,fermie,iexit,indsym,kxc,&
 &   dtset%mkmem,mkqmem,mk1mem,mpert,mpi_enreg,my_natom,nattyp,&
 &   nfftf,nhat,dtset%nkpt,nkxc,dtset%nspden,dtset%nsym,occ,&
 &   paw_an,paw_ij,pawang,pawfgr,pawfgrtab,pawrad,pawrhoij,pawtab,&
@@ -1345,7 +1344,6 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  call wrtout(std_out,message,'COLL')
 
  ABI_DEALLOCATE(vxc)
- ABI_DEALLOCATE(bxc)
 
  if (dtset%prepanl==1.and.(rf2_dkdk/=0 .or. rf2_dkde/=0)) then
    ABI_DEALLOCATE(rfpert_nl)

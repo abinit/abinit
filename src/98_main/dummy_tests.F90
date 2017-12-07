@@ -36,9 +36,8 @@
 !! PARENTS
 !!
 !! CHILDREN
-!!      abi_io_redirect,abimem_init,abinit_doctor,ddb_hdr_free
-!!      ddb_hdr_open_read,get_command_argument,herald,mblktyp1,mblktyp5,timein
-!!      wrtout,xmpi_init
+!!      abi_io_redirect,abimem_init,test_dummy,test_same_actual_arg
+!!      test_unused_arg,xmpi_init
 !!
 !! SOURCE
 
@@ -61,10 +60,7 @@ program dummy_tests
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dummy_tests'
- use interfaces_14_hidewrite
- use interfaces_18_timing
  use interfaces_32_util
- use interfaces_51_manage_mpi
 !End of the abilint section
 
  implicit none

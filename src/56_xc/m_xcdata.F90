@@ -137,8 +137,11 @@ contains
 !! SIDE EFFECTS
 !!
 !! PARENTS
+!!      calc_vhxc_me,energy,m_kxc,nonlinear,nres2vres,odamix,prcref,prcref_PMA
+!!      respfn,rhotov,scfcv,setvtr,xchybrid_ncpp_cc
 !!
 !! CHILDREN
+!!      get_xclevel
 !!
 !! SOURCE
 
@@ -232,8 +235,10 @@ end subroutine xcdata_init
 !! SIDE EFFECTS
 !!
 !! PARENTS
+!!      invars2,m_xcdata
 !!
 !! CHILDREN
+!!      get_xclevel
 !!
 !! SOURCE
 
@@ -320,8 +325,10 @@ end subroutine get_xclevel
 !! SIDE EFFECTS
 !!
 !! PARENTS
+!!      calc_vhxc_me,invars2
 !!
 !! CHILDREN
+!!      get_xclevel
 !!
 !! SOURCE
 

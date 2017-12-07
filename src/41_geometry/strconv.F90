@@ -31,7 +31,8 @@
 !! in cartesian coordinates to reduced coordinates
 !!
 !! PARENTS
-!!      d2frnl,mkcore,mkcore_paw,mkcore_wvl,nonlop_pl,nonlop_ylm,stresssym
+!!      ctocprj,d2frnl,mkcore,mkcore_paw,mkcore_wvl,nonlop_pl,nonlop_ylm
+!!      stresssym
 !!
 !! CHILDREN
 !!

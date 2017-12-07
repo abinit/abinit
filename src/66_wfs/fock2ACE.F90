@@ -71,8 +71,8 @@
 !!      bandfft_kpt_restoretabs,bandfft_kpt_savetabs,destroy_hamiltonian
 !!      dotprod_g,fock_getghc,init_hamiltonian,load_k_hamiltonian
 !!      load_spin_hamiltonian,mkffnl,mkkpg,pawcprj_alloc,pawcprj_free
-!!      pawcprj_get,pawcprj_reorder,prep_bandfft_tabs,timab,xmpi_sum
-!!      zpotrf,ztrtrs
+!!      pawcprj_get,pawcprj_reorder,prep_bandfft_tabs,timab,xmpi_sum,zpotrf
+!!      ztrtrs
 !!
 !! SOURCE
 

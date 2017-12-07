@@ -121,10 +121,11 @@
 !!      bethe_salpeter,scfcv,screening,sigma
 !!
 !! CHILDREN
-!!      atm2fft,denspot_set_history,dotprod_vn,ewald,ionion_realspace
+!!      atm2fft,denspot_set_history,dotprod_vn,ewald,hartre,ionion_realspace
 !!      ionion_surface,jellium,mag_constr,mkcore,mkcore_alt,mkcore_wvl,mklocl
-!!      psolver_rhohxc,rhotoxc,rhohxcpositron,spatialchempot,timab,vdw_dftd2
-!!      vdw_dftd3,wvl_psitohpsi,wvl_vtrial_abi2big,xchybrid_ncpp_cc,xred2xcart
+!!      psolver_rhohxc,rhohxcpositron,rhotoxc,spatialchempot,timab,vdw_dftd2
+!!      vdw_dftd3,wvl_psitohpsi,wvl_vtrial_abi2big,xcdata_init,xchybrid_ncpp_cc
+!!      xred2xcart
 !!
 !! SOURCE
 
@@ -479,13 +480,13 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
      if (dtset%icoulomb == 0 .and. dtset%usewvl == 0) then
        if(option/=0 .and. option/=10)then
          call hartre(1,gsqcut,psps%usepaw,mpi_enreg,nfft,ngfft,dtset%paral_kgb,rhog,rprimd,vhartr)
-       endif
+       end if
        call xcdata_init(xcdata,dtset=dtset)
        if(mod(dtset%fockoptmix,100)==11)then
          xcdatahyb=xcdata
 !        Setup the auxiliary xc functional information 
          call xcdata_init(xcdata,dtset=dtset,auxc_ixc=0,ixc=dtset%auxc_ixc) 
-       endif
+       end if
 !      Use the periodic solver to compute Hxc
        nk3xc=1
        if (ipositron==0) then
@@ -496,14 +497,14 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
            option_eff=option
            if(xcdata%xclevel==2.and.(nkxc==3-2*mod(xcdata%nspden,2))) option_eff=12
            call rhotoxc(energies%e_xc,kxc,mpi_enreg,nfft,ngfft,&
-&            nhat,psps%usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,n3xccc,&
-&            option_eff,dtset%paral_kgb,rhor,rprimd,strsxc,usexcnhat,vxc,vxcavg,xccc3d,xcdata,&
-&            taug=taug,taur=taur,vhartr=vhartr,vxctau=vxctau,add_tfw=add_tfw_)
+&           nhat,psps%usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,n3xccc,&
+&           option_eff,dtset%paral_kgb,rhor,rprimd,strsxc,usexcnhat,vxc,vxcavg,xccc3d,xcdata,&
+&           taug=taug,taur=taur,vhartr=vhartr,vxctau=vxctau,add_tfw=add_tfw_)
          else
 !          Only when is_hybrid_ncpp, and moreover, the xc functional is not the auxiliary xc functional, then call xchybrid_ncpp_cc
            call xchybrid_ncpp_cc(dtset,energies%e_xc,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,&
-&            strsxc,vxcavg,xccc3d,vxc=vxc)
-         endif
+&           strsxc,vxcavg,xccc3d,vxc=vxc)
+         end if
 
 !        Possibly compute energies%e_hybcomp_E0
          if(mod(dtset%fockoptmix,100)==11)then
@@ -513,13 +514,13 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
              option_eff=option
              if(xcdata%xclevel==2.and.(nkxc==3-2*mod(xcdata%nspden,2))) option_eff=12
              call rhotoxc(energies%e_hybcomp_E0,kxc,mpi_enreg,nfft,ngfft,&
-&              nhat,psps%usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,n3xccc,&
-&              option,dtset%paral_kgb,rhor,rprimd,strsxc,usexcnhat,vxc_hybcomp,vxcavg,xccc3d,xcdatahyb,&
-&              taug=taug,taur=taur,vhartr=vhartr,vxctau=vxctau,add_tfw=add_tfw_)
+&             nhat,psps%usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,n3xccc,&
+&             option,dtset%paral_kgb,rhor,rprimd,strsxc,usexcnhat,vxc_hybcomp,vxcavg,xccc3d,xcdatahyb,&
+&             taug=taug,taur=taur,vhartr=vhartr,vxctau=vxctau,add_tfw=add_tfw_)
            else
              call xchybrid_ncpp_cc(dtset,energies%e_hybcomp_E0,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,&
-&              strsxc,vxcavg,xccc3d,vxc=vxc_hybcomp)
-           endif
+&             strsxc,vxcavg,xccc3d,vxc=vxc_hybcomp)
+           end if
 
 !          Combine hybrid and auxiliary quantities
            energies%e_xc=energies%e_xc*dtset%auxc_scal
@@ -527,7 +528,7 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
            vxc(:,:)=vxc(:,:)*dtset%auxc_scal
            vxc_hybcomp(:,:)=vxc_hybcomp(:,:)-vxc(:,:)
 
-         endif
+         end if
 
        else if (ipositron==2) then
 !        Not yet able to deal fully with the full XC kernel in case of GGA + spin
@@ -606,7 +607,7 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
 !  Adds the compensating vxc for hybrids
    if(mod(dtset%fockoptmix,100)==11)then
      vtrial(:,:)=vtrial(:,:)+vxc_hybcomp(:,:)
-   endif
+   end if
 
    if(dtset%usewvl==1) then
      call wvl_vtrial_abi2big(1,vtrial,wvl%den)
@@ -705,10 +706,10 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
  if(mod(dtset%fockoptmix,100)==11)then
    if (.not. wvlbigdft) then
      call dotprod_vn(1,rhor,energies%e_hybcomp_v0,doti,nfft,nfftot,1,1,vxc_hybcomp,ucvol_local,&
-&      mpi_comm_sphgrid=mpi_comm_sphgrid)
+&     mpi_comm_sphgrid=mpi_comm_sphgrid)
      energies%e_hybcomp_v=energies%e_hybcomp_v0
-   endif 
- endif 
+   end if 
+ end if 
 
  if (optene==2.or.optene==4 .and. .not. wvlbigdft) then
 !  Compute local psp energy eei

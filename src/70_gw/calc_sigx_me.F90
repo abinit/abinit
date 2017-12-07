@@ -85,12 +85,12 @@
 !!      sigma
 !!
 !! CHILDREN
-!!      cwtime,esymm_symmetrize_mels,findqg0,get_bz_item,get_uug,gsph_fft_tabs
+!!      cwtime,esymm_symmetrize_mels,findqg0,get_bz_item,gsph_fft_tabs
 !!      hermitianize,littlegroup_print,paw_cross_rho_tw_g,paw_rho_tw_g
 !!      paw_symcprj,pawcprj_alloc,pawcprj_copy,pawcprj_free,pawmknhat_psipsi
 !!      pawpwij_free,pawpwij_init,rho_tw_g,rotate_fft_mesh,sigma_distribute_bks
 !!      timab,wfd_change_ngfft,wfd_get_cprj,wfd_get_many_ur,wfd_get_ur
-!!      wfd_paw_get_aeur,wfd_sym_ur,wrtout,xmpi_sum
+!!      wfd_paw_get_aeur,wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -171,9 +171,9 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
 !scalars
  integer,parameter :: tim_fourdp=2,ndat1=1
  integer,parameter :: use_pawnhat=0,ider0=0
- integer :: izero,iab,ib_sum,ib,ib1,ib2,ierr,ig,ig_rot,ii,iik,itim_q,i2
+ integer :: gwcalctyp,izero,iab,ib_sum,ib,ib1,ib2,ierr,ig,ig_rot,ii,iik,itim_q,i2
  integer :: ik_bz,ik_ibz,isym_q,iq_bz,iq_ibz,spin,isym,jb,is_idx
- integer :: jik,jk_bz,jk_ibz,kb,mod100,nspinor,nsppol,ifft
+ integer :: jik,jk_bz,jk_ibz,kb,nspinor,nsppol,ifft
  integer :: nq_summed,ibsp,dimcprj_gw,dim_rtwg
  integer :: spad,spadx1,spadx2,irow,npw_k,ndegs,wtqm,wtqp,my_nbks
  integer :: isym_kgw,isym_ki,gwx_mgfft,use_padfft,use_padfftf,gwx_fftalga,gwx_fftalgb
@@ -218,7 +218,7 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
  call cwtime(cpu_time,wall_time,gflops,"start")
 
  ! Initialize some values.
- mod100=MOD(Sigp%gwcalctyp,100)
+ gwcalctyp=Sigp%gwcalctyp
  nspinor = Wfd%nspinor; nsppol = Wfd%nsppol; npwx = sigp%npwx
  dim_rtwg = 1; if (nspinor == 2) dim_rtwg = 2
  spinor_padx = RESHAPE([0, 0, npwx, npwx, 0, npwx, npwx, 0], [2, 4])
@@ -257,7 +257,7 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
  can_symmetrize = .FALSE.
  if (Sigp%symsigma>0) then
    can_symmetrize = .TRUE.
-   if (mod100 >= 20) then
+   if (gwcalctyp >= 20) then
      do spin=1,Wfd%nsppol
        can_symmetrize(spin) = .not. esymm_failed(QP_sym(spin))
        if (.not.can_symmetrize(spin)) then
@@ -509,7 +509,7 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
      ! The same relation holds for 0-D systems, but not in 1-D or 2D systems. It depends on S.
      do ig=1,npwx
        ig_rot = Gsph_x%rottb(ig,itim_q,isym_q)
-       vc_sqrt_qbz(ig_rot)=Vcp%vc_sqrt(ig,iq_ibz)
+       vc_sqrt_qbz(ig_rot)=Vcp%vc_sqrt_resid(ig,iq_ibz)
      end do
 
      ! Sum over (occupied) bands.
@@ -586,7 +586,8 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
 
            if (nspinor==1) then
              rhotwg_ki(1,jb) = czero_gw
-             if (ib_sum == jb) rhotwg_ki(1,jb) = CMPLX(SQRT(Vcp%i_sz), 0.0_gwp)
+             !Note the use of i_sz_resid and not i_sz, to account for the possibility to have generalized KS basis set from hybrid
+             if (ib_sum == jb) rhotwg_ki(1,jb) = CMPLX(SQRT(Vcp%i_sz_resid), 0.0_gwp)
              !rhotwg_ki(1,jb) = czero_gw ! DEBUG
            else
              npw_k = Wfd%npwarr(ik_ibz)
@@ -595,9 +596,9 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
                cg_sum => Wfd%Wave(ib_sum,ik_ibz,spin)%ug
                cg_jb  => Wfd%Wave(jb,jk_ibz,spin)%ug
                ctmp = xdotc(npw_k, cg_sum(1:), 1, cg_jb(1:), 1)
-               rhotwg_ki(1, jb) = CMPLX(SQRT(Vcp%i_sz), 0.0_gwp) * real(ctmp)
+               rhotwg_ki(1, jb) = CMPLX(SQRT(Vcp%i_sz_resid), 0.0_gwp) * real(ctmp)
                ctmp = xdotc(npw_k, cg_sum(npw_k+1:), 1, cg_jb(npw_k+1:), 1)
-               rhotwg_ki(npwx+1, jb) = CMPLX(SQRT(Vcp%i_sz), 0.0_gwp) * real(ctmp)
+               rhotwg_ki(npwx+1, jb) = CMPLX(SQRT(Vcp%i_sz_resid), 0.0_gwp) * real(ctmp)
              end if
              !rhotwg_ki(1, jb) = zero; rhotwg_ki(npwx+1, jb) = zero
              ! PAW is missing
@@ -612,8 +613,8 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
          rhotwgp(:) = rhotwg_ki(:,kb)
 
          ! Loop over the non-zero row elements of this column.
-         ! If mod100 <  20: only diagonal elements since QP == KS.
-         ! If mod100 >= 20:
+         ! If gwcalctyp <  20: only diagonal elements since QP == KS.
+         ! If gwcalctyp >= 20:
          !      * Only off-diagonal elements connecting states with same character.
          !      * Only the upper triangle if HF, SEX, or COHSEX.
          do irow=1,Sigxij_tab(spin)%col(kb)%size1
@@ -709,7 +710,7 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
        sym_sigx(ib,ib,:) = sym_sigx(ib,ib,:) / ndegs
      end do
 
-     if (mod100 >= 20) then
+     if (gwcalctyp >= 20) then
        call esymm_symmetrize_mels(QP_sym(spin),ib1,ib2,sigx(:,:,:,spin),sym_sigx(:,:,1))
      end if
 
@@ -730,7 +731,7 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
    end if
  end do
 
- if (mod100>=20) then
+ if (gwcalctyp>=20) then
    ! Reconstruct the full sigma_x matrix from the upper triangle.
    if (nspinor == 1) then
      do spin=1,nsppol
