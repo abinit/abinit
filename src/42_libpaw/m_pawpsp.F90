@@ -3500,6 +3500,7 @@ subroutine pawpsp_17in(epsatm,ffspl,icoulomb,ipsp,ixc,lmax,&
    end if
    has_v_minushalf=1
    LIBPAW_ALLOCATE(pawtab%vminushalf,(vloc_mesh%mesh_size))
+   pawtab%vminus_mesh_size=vloc_mesh%mesh_size
    pawtab%vminushalf(1:vloc_mesh%mesh_size)=paw_setup(ipsploc)%LDA_minus_half_potential%data(1:vloc_mesh%mesh_size)/sqrt(fourpi)
    write(msg,'(a,i1)') &
 &   ' Radial grid used for LDA-1/2 potential is grid ',ivlocmesh

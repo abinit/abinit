@@ -226,6 +226,9 @@ MODULE m_pawtab
   integer :: core_mesh_size
    ! Dimension of radial mesh for core density
 
+  integer :: vminus_mesh_size
+   ! Dimension of radial mesh for vminushalf
+
   integer :: partialwave_mesh_size
    ! Dimension of radial mesh for partial waves (phi, tphi)
    ! May be different from pawrad%mesh_size and pawtab%mesh_size
@@ -639,6 +642,7 @@ subroutine pawtab_nullify_0D(Pawtab)
  Pawtab%mesh_size=0
  Pawtab%partialwave_mesh_size=0
  Pawtab%core_mesh_size=0
+ Pawtab%vminus_mesh_size=0
  Pawtab%tnvale_mesh_size=0
  Pawtab%shape_type=-10
 
@@ -900,6 +904,7 @@ subroutine pawtab_free_0D(Pawtab)
  Pawtab%mesh_size=0
  Pawtab%partialwave_mesh_size=0
  Pawtab%core_mesh_size=0
+ Pawtab%vminus_mesh_size=0
  Pawtab%tnvale_mesh_size=0
  Pawtab%shape_type=-10
  
@@ -1454,10 +1459,10 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
 
 !Integers (read from psp file)
 !-------------------------------------------------------------------------
-!  basis_size,has_fock,has_kij,has_shapefncg,has_nabla,has_tproj,has_tvale,has_vhtnzc,has_vhnzc
-!  has_wvl,ij_size,l_size,lmn_size,lmn2_size,mesh_size,partialwave_mesh_size,core_mesh_size
+!  basis_size,has_fock,has_kij,has_shapefncg,has_nabla,has_tproj,has_tvale,has_vhtnzc,has_vhnzc,has_vminushalf
+!  has_wvl,ij_size,l_size,lmn_size,lmn2_size,mesh_size,partialwave_mesh_size,core_mesh_size, vminus_mesh_size
 !  tnvale_mesh_size,mqgrid,shape_lambda,shape_type,usetcore,usexcnhat
-   nn_int=nn_int+23
+   nn_int=nn_int+25
 
 !Integers (depending on the parameters of the calculation)
 !-------------------------------------------------------------------------
@@ -1524,7 +1529,8 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
    siz_tcorespl=0 ; siz_tphi=0     ; siz_tproj=0
    siz_tvalespl=0 ; siz_vhtnzc=0   ; siz_vhnzc=0
    siz_vminushalf=0
-   nn_int=nn_int+16
+   nn_int=nn_int+17
+
    if (allocated(pawtab%coredens)) then
      siz_coredens=size(pawtab%coredens)             !(core_mesh_size)
      if (siz_coredens/=pawtab%core_mesh_size) &
@@ -1610,9 +1616,10 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
    end if
    if (allocated(pawtab%vminushalf)) then
      siz_vminushalf=size(pawtab%vminushalf)                 !(mesh_size)
-     if (siz_vminushalf/=pawtab%mesh_size) msg=trim(msg)//' vvminushalf'
+     if (siz_vminushalf/=pawtab%vminus_mesh_size) msg=trim(msg)//' vvminushalf'
      nn_dpr=nn_dpr+siz_vminushalf
    end if
+
 !Reals arrays (depending on the parameters of the calculation)
 !-------------------------------------------------------------------------
    siz_dltij=0    ; siz_dshpfunc=0 ; siz_eijkl=0    ; siz_eijkl_sr=0
@@ -1846,6 +1853,7 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
    list_int(ii)=pawtab%mesh_size  ;ii=ii+1
    list_int(ii)=pawtab%partialwave_mesh_size  ;ii=ii+1
    list_int(ii)=pawtab%core_mesh_size  ;ii=ii+1
+   list_int(ii)=pawtab%vminus_mesh_size  ;ii=ii+1
    list_int(ii)=pawtab%tnvale_mesh_size  ;ii=ii+1
    list_int(ii)=pawtab%mqgrid  ;ii=ii+1
    list_int(ii)=pawtab%shape_lambda  ;ii=ii+1
@@ -1997,6 +2005,7 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
    pawtab%mesh_size=list_int(ii)  ;ii=ii+1
    pawtab%partialwave_mesh_size=list_int(ii)  ;ii=ii+1
    pawtab%core_mesh_size=list_int(ii)  ;ii=ii+1
+   pawtab%vminus_mesh_size=list_int(ii)  ;ii=ii+1
    pawtab%tnvale_mesh_size=list_int(ii)  ;ii=ii+1
    pawtab%mqgrid=list_int(ii)  ;ii=ii+1
    pawtab%shape_lambda=list_int(ii)  ;ii=ii+1
@@ -2124,7 +2133,7 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
 
  end if ! me/=0
  LIBPAW_DEALLOCATE(list_int)
-
+ 
 !Broadcast all the reals
 !=========================================================================
 
@@ -2332,7 +2341,6 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
 
    end if ! full_broadcast
    ii=ii-1
-
    if (ii/=nn_dpr+nn_dpr_arr) then
      msg='the number of loaded reals is not correct!'
      MSG_BUG(msg)
