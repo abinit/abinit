@@ -12737,7 +12737,7 @@
            [[irdwfq]]=1)
           </li>
           <li>
-           =2 =&gt; SCF cycle, simple mixing of the potential
+           =2 =&gt; SCF cycle, simple mixing of the potential with the preconditioned potential residual (in the usual case, the latter is defined by [[diemix]], [[diemac]] and [[dielng]])
           </li>
           <li>
            =3 =&gt; SCF cycle, Anderson mixing of the potential

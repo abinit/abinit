@@ -94,7 +94,9 @@ MODULE m_scf_history
    ! Number of independant spin components for density
 
   integer :: usecg
-   ! usecg=1 if the extrapolation of the wavefunctions is active
+   ! usecg=0 if the extrapolation/mixing of the density/potential is active but not the one of the wavefunction
+   ! usecg=1 if the extrapolation/mixing of the density/potential and wavefunctions is active
+   ! usecg=2 if the extrapolation/mixing of the wavefunctions is active but not the one of the density/potential
 
   real(dp) :: alpha
    ! alpha mixing coefficient for the prediction of density and wavefunctions
@@ -173,9 +175,14 @@ CONTAINS !===========================================================
 !! INPUTS
 !!  dtset <type(dataset_type)>=all input variables in this dataset
 !!  mpi_enreg=MPI-parallelisation information
+!!  usecg= if ==0 => no handling of wfs, if==1 => handling of density/potential AND wfs, if==2 => ONLY handling of wfs
 !!
 !! SIDE EFFECTS
 !!  scf_history=<type(scf_history_type)>=scf_history datastructure
+!!    hindex is always allocated
+!!    The density/potential arrays that are possibly allocated are : atmrho_last, deltarhor, 
+!!      pawrhoij, pawrhoij_last, rhor_last, taur_last, xreddiff, xred_last.
+!!    The wfs arrays that are possibly allocated are : cg and cprj
 !!
 !! PARENTS
 !!      gstate
@@ -204,7 +211,7 @@ subroutine scf_history_init(dtset,mpi_enreg,scf_history)
 
 !Local variables-------------------------------
 !scalars
- integer :: jj,mband_cprj,my_natom,my_nspinor,nfft
+ integer :: jj,mband_cprj,my_natom,my_nspinor,nfft,usecg,wfmixalg
 !arrays
 
 !************************************************************************
@@ -215,11 +222,13 @@ subroutine scf_history_init(dtset,mpi_enreg,scf_history)
    call scf_history_nullify(scf_history)
  else
 
+   scf_history%usecg=usecg
+
    nfft=dtset%nfft
    if (dtset%usepaw==1.and.(dtset%pawecutdg>=1.0000001_dp*dtset%ecut)) nfft=dtset%nfftdg
    my_natom=mpi_enreg%my_natom
 
-   if (scf_history%history_size>=0) then
+   if (scf_history%history_size>=0 .and. usecg<2) then
      ABI_ALLOCATE(scf_history%rhor_last,(nfft,dtset%nspden))
      ABI_ALLOCATE(scf_history%taur_last,(nfft,dtset%nspden*dtset%usekden))
      ABI_ALLOCATE(scf_history%xred_last,(3,dtset%natom))
@@ -238,11 +247,9 @@ subroutine scf_history_init(dtset,mpi_enreg,scf_history)
      scf_history%beta=zero
      scf_history%icall=0
 
-     scf_history%usecg=0
      scf_history%mcg=0
      scf_history%mcprj=0
-     if (dtset%extrapwf>0) then
-       scf_history%usecg=1
+     if (usecg>0) then
        my_nspinor=max(1,dtset%nspinor/mpi_enreg%nproc_spinor)
        scf_history%mcg=dtset%mpw*my_nspinor*dtset%mband*dtset%mkmem*dtset%nsppol
        if (dtset%usepaw==1) then
@@ -254,18 +261,20 @@ subroutine scf_history_init(dtset,mpi_enreg,scf_history)
 
      ABI_ALLOCATE(scf_history%hindex,(scf_history%history_size))
      scf_history%hindex(:)=0
-     ABI_ALLOCATE(scf_history%deltarhor,(nfft,dtset%nspden,scf_history%history_size))
-     ABI_ALLOCATE(scf_history%xreddiff,(3,dtset%natom,scf_history%history_size))
-     ABI_ALLOCATE(scf_history%atmrho_last,(nfft))
 
-     if (dtset%usepaw==1) then
-       ABI_DATATYPE_ALLOCATE(scf_history%pawrhoij,(my_natom,scf_history%history_size))
-       do jj=1,scf_history%history_size
-         call pawrhoij_nullify(scf_history%pawrhoij(:,jj))
-       end do
+     if (usecg<2) then 
+       ABI_ALLOCATE(scf_history%deltarhor,(nfft,dtset%nspden,scf_history%history_size))
+       ABI_ALLOCATE(scf_history%xreddiff,(3,dtset%natom,scf_history%history_size))
+       ABI_ALLOCATE(scf_history%atmrho_last,(nfft))
+       if (dtset%usepaw==1) then
+         ABI_DATATYPE_ALLOCATE(scf_history%pawrhoij,(my_natom,scf_history%history_size))
+         do jj=1,scf_history%history_size
+           call pawrhoij_nullify(scf_history%pawrhoij(:,jj))
+         end do
+       endif
      end if
 
-     if (scf_history%usecg==1) then
+     if (scf_history%usecg>0) then
        ABI_ALLOCATE(scf_history%cg,(2,scf_history%mcg,scf_history%history_size))
        if (dtset%usepaw==1) then
          ABI_DATATYPE_ALLOCATE(scf_history%cprj,(dtset%natom,scf_history%mcprj,scf_history%history_size))
@@ -411,7 +420,6 @@ subroutine scf_history_nullify(scf_history)
 
  !@scf_history_type
  scf_history%history_size=-1
- scf_history%usecg=0
  scf_history%icall=0
  scf_history%mcprj=0
  scf_history%mcg=0

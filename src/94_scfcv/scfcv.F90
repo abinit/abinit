@@ -1,4 +1,4 @@
-!{\src2tex{textfont=tt}}
+{\src2tex{textfont=tt}}
 !!****f* ABINIT/scfcv
 !! NAME
 !! scfcv
@@ -297,7 +297,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
  integer,parameter :: level=110,response=0,cplex1=1
  integer :: afford,bantot,choice
  integer :: computed_forces,cplex,cplex_hf,ctocprj_choice,dbl_nnsclo,dielop,dielstrt,dimdmat
- integer :: forces_needed,errid,has_dijhat,has_dijnd,has_vhartree,has_dijfock,usefock
+ integer :: forces_needed,errid,has_dijhat,has_dijnd,has_vhartree,has_dijfock,history_size,usefock
 !integer :: dtset_iprcel
  integer :: iatom,ider,idir,ierr,iexit,ii,ikpt,impose_dmat,denpot
  integer :: initialized0,iorder_cprj,ipert,ipositron,isave_den,isave_kden,iscf10,ispden
@@ -309,7 +309,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
  integer :: quit_sum,req_cplex_dij,rdwrpaw,shft,spaceComm,spaceComm_fft,spaceComm_wvl,spaceComm_grid
  integer :: stress_needed,sz1,sz2,unit_out
  integer :: usecprj,usexcnhat,use_hybcomp
- integer :: my_quit,quitsum_request,timelimit_exit
+ integer :: my_quit,quitsum_request,timelimit_exit,usecg,wfmixalg
  integer ABI_ASYNC :: quitsum_async
  real(dp) :: boxcut,compch_fft,compch_sph,deltae,diecut,diffor,ecut
  real(dp) :: ecutf,ecutsus,edum,elast,etotal,evxc,fermie,gsqcut,hyb_mixing,hyb_mixing_sr
@@ -363,6 +363,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
  real(dp),allocatable :: vhartr(:),vpsp(:),vtrial(:,:)
  real(dp),allocatable :: vxc(:,:),vxc_hybcomp(:,:),vxctau(:,:,:),workr(:,:),xccc3d(:),ylmdiel(:,:)
  real(dp),pointer :: elfr(:,:),grhor(:,:,:),lrhor(:,:)
+ type(scf_history_type),pointer :: scf_history_wf
  type(pawcprj_type),allocatable :: cprj(:,:)
  type(paw_an_type),allocatable :: paw_an(:)
  type(paw_ij_type),allocatable :: paw_ij(:)
@@ -589,9 +590,12 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
  ABI_ALLOCATE(vpsp,(nfftf))
  ABI_ALLOCATE(vxc,(nfftf,dtset%nspden))
  ABI_ALLOCATE(vxctau,(nfftf,dtset%nspden,4*dtset%usekden))
+
+ wfmixalg=dtset%fockoptmix/100
  use_hybcomp=0 
  if(mod(dtset%fockoptmix,100)==11)use_hybcomp=1
  ABI_ALLOCATE(vxc_hybcomp,(nfftf,dtset%nspden*use_hybcomp))
+
  ngrvdw=0;if (dtset%vdw_xc>=5.and.dtset%vdw_xc<=7) ngrvdw=dtset%natom
  ABI_ALLOCATE(grvdw,(3,ngrvdw))
  grchempottn(:,:)=zero
@@ -1087,7 +1091,15 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
 &         dtset%nsppol,dtset%ntypat,dtset%paral_kgb,ph1d,psps,rmet,dtset%typat,ucvol,dtfil%unpaw,&
 &         xred,ylm,ylmgr)
        end if
-     end if
+       if(wfmixalg/=0)then
+         if(wfmixalg==2)history_size=1
+         if(wfmixalg==3)history_size=5
+         if(wfmixalg==4)history_size=7
+         scf_history_wf%history_size=history_size
+         usecg=2
+         call scf_history_init(dtset,mpi_enreg,usecg,scf_history_wf)
+       endif
+     endif
 
      !Fock energy
      energies%e_exactX=zero
@@ -1096,6 +1108,12 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
      end if
 
      if (istep==1 .or. istep_updatedfock==fock%fock_common%nnsclo_hf) then
+
+       !Possibly mix the wavefunctions from different steps before computing the Fock operator
+       if(wfmixalg/=0)then
+!        call wf_mixing(cg,cprj,istep_updatedfock,scf_history)
+       endif
+
        ! Update data relative to the occupied states in fock
        call fock_updatecwaveocc(cg,cprj,dtset,fock,indsym,istep,mcg,mcprj,mpi_enreg,nattyp,npwarr,occ,ucvol)
        istep_updatedfock=1
@@ -1870,6 +1888,13 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
  if (dtset%iscf > 0) then
    call ab7_mixing_deallocate(mix)
  end if
+
+ if (usefock==1)then
+   if(wfmixalg/=0)then
+     call scf_history_free(scf_history_wf)
+   endif
+ end if
+
 
  if (quit==1.and.nstep==1) initialized=1
 
