@@ -191,7 +191,7 @@ CONTAINS !===========================================================
 !!
 !! SOURCE
 
-subroutine scf_history_init(dtset,mpi_enreg,scf_history)
+subroutine scf_history_init(dtset,mpi_enreg,usecg,scf_history)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -204,6 +204,7 @@ subroutine scf_history_init(dtset,mpi_enreg,scf_history)
 
 !Arguments ------------------------------------
 !scalars
+ integer, intent(in) :: usecg
  type(dataset_type),intent(in) :: dtset
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
@@ -211,7 +212,7 @@ subroutine scf_history_init(dtset,mpi_enreg,scf_history)
 
 !Local variables-------------------------------
 !scalars
- integer :: jj,mband_cprj,my_natom,my_nspinor,nfft,usecg,wfmixalg
+ integer :: jj,mband_cprj,my_natom,my_nspinor,nfft,wfmixalg
 !arrays
 
 !************************************************************************
