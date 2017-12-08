@@ -190,7 +190,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
  use m_mpinfo,           only : destroy_mpi_enreg, iwrite_fftdatar
  use m_ioarr,            only : ioarr, fftdatar_write_from_hdr
  use m_results_gs ,      only : results_gs_type
- use m_scf_history,      only : scf_history_type
+ use m_scf_history,      only : scf_history_type, scf_history_init, scf_history_free
  use m_energies,         only : energies_type, energies_init, energies_copy
  use m_electronpositron, only : electronpositron_type,electronpositron_calctype
  use m_pawang,           only : pawang_type
