@@ -1414,7 +1414,7 @@ subroutine pawpsp_read_corewf(energy_cor,indlmn_core,lcor,lmncmax,ncor,nphicor,r
  integer :: ib,i1,i2,il,ilm,ilmn,iln,ios,jln,nmesh,npts,unt
  real(dp) :: noccor,r1,r2
  logical :: ex,oldformat,usexml
- character(len=8) :: dum
+ character(len=8) :: dum,dum1,dum2,dum3,dum4
  character(len=80) :: fline
  character(len=500) :: filename_,msg
 !arrays
@@ -1564,8 +1564,9 @@ subroutine pawpsp_read_corewf(energy_cor,indlmn_core,lcor,lmncmax,ncor,nphicor,r
    LIBPAW_ALLOCATE(phi_cor,(npts,nphicor))
    LIBPAW_ALLOCATE(rad,(npts))
    do iln=1,nphicor
-     read(unt,'("# n=",i4," l=",i4," nocc=",f15.7," energy=",f15.7)') &
-&       ncor(iln),lcor(iln),noccor,energy_cor(iln)
+     read(unt,'(a4,i4,a3,i4,a6,f15.7,a8,f15.7)') &
+&     dum1,ncor(iln),dum2,lcor(iln),dum3,noccor,dum4,energy_cor(iln)
+
      do jln=1,npts
        read(unt,*) rad(jln),phi_cor(jln,iln)
      end do
