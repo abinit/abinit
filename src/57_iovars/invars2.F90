@@ -2041,6 +2041,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nctime',tread,'INT')
  if(tread==1) dtset%nctime=intarr(1)
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'orbmag',tread,'INT')
+ if(tread==1) dtset%orbmag=intarr(1)
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ortalg',tread,'INT')
  if(tread==1) then
    dtset%ortalg=intarr(1)

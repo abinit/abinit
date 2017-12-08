@@ -540,6 +540,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    if(dtsets(idtset)%usedmft>0) dtsets(idtset)%optforces=0
    dtsets(idtset)%optstress=1
    dtsets(idtset)%optnlxccc=1
+   dtsets(idtset)%orbmag=0
    if (dtsets(idtset)%usepaw==0) then
      dtsets(idtset)%ortalg=2
 !    dtsets(idtset)%ortalg=999

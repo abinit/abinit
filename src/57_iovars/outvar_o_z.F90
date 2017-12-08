@@ -237,6 +237,9 @@
  intarr(1,:)=dtsets(:)%optstress
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'optstress','INT',0)
 
+ intarr(1,:)=dtsets(:)%orbmag
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'orbmag','INT',0)
+
  intarr(1,:)=dtsets(:)%ortalg
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'ortalg','INT',0,firstchar=firstchar_gpu)
 
