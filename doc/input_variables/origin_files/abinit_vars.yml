@@ -31550,7 +31550,7 @@
     dimensions: scalar
     excludes: null
     mnemonics: WaveFunctions MIXing factor
-    requires: '[[usefock]] > 0 and [[nnsclo_hf]] >0 and [[fockoptmix]]/100
+    requires: '[[usefock]] > 0 and [[nnsclohf]] >0 and [[fockoptmix]]/100
         > 0'
     text: |-
         When the wavefunctions are determined using a SCF double loop (hybrid functionals), [[wfmix]] provides the mixing factor to obtain the new input wavefunctions by the combination of the earlier input wavefunctions and corresponding (DFT-preconditioned) output wavefunctions at the level of the outer loop, according to the algorithm specified by [[fockoptmix]]/100.
