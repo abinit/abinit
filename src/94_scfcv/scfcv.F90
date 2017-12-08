@@ -1,4 +1,4 @@
-{\src2tex{textfont=tt}}
+!{\src2tex{textfont=tt}}
 !!****f* ABINIT/scfcv
 !! NAME
 !! scfcv
