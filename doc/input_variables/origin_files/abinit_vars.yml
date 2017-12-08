@@ -15285,6 +15285,28 @@
     varset: aim
     vartype: integer
 - !variable
+    abivarname: ldaminushalf
+    characteristics: null
+    commentdefault: null
+    commentdims: null
+    defaultval: !multiplevalue
+        number: null
+        value: 0
+    dimensions:
+    - '[[ntypat]]'
+    excludes: null
+    mnemonics: LDA minus half
+    requires: null
+    text: |-
+        For each type of atom, gives whether a LDA-1/2 calculation is to be performed.
+        <br />
+        [[ldaminushalf]] =0 : the LDA-1/2 approach is not used.
+        <br />
+        [[ldaminushalf]] =1 : the LDA-1/2 approach is used.
+    topics: LDAminushalf_compulsory
+    varset: paw
+    vartype: integer
+- !variable
     abivarname: lexexch
     characteristics: null
     commentdefault: null

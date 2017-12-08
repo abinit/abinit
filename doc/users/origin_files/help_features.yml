@@ -261,6 +261,7 @@ sec9:
  body: |
   <ol>
    <li>[[topic:positron|Positron calculations]]</li>
+   <li>[[topic:LDAminushalf|The LDA-1/2 approach]] (not in production)</li>
   </ol>
 
 ## Each section must have a title, that will form the table of content.
