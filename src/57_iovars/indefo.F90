@@ -767,6 +767,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%vprtrb(1:2)=zero
 !  W
    dtsets(idtset)%wtatcon(:,:,:)=zero
+   dtsets(idtset)%wfmix=one
    dtsets(idtset)%wfk_task=0
    dtsets(idtset)%wtk=one
    dtsets(idtset)%wvl_crmult  = 6._dp

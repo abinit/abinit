@@ -779,6 +779,7 @@ type dataset_type
  real(dp) :: vdw_df_tolerance
  real(dp) :: vdw_df_zab
  real(dp) :: vis
+ real(dp) :: wfmix
  real(dp) :: wtq
  real(dp) :: wvl_hgrid
  real(dp) :: wvl_crmult
