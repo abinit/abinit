@@ -25,7 +25,7 @@
 !! xred(3,natom)=location of atoms in unit cell, in reduced coordinates
 !!
 !! OUTPUT
-!!  nucdipmom_k(2,npw*(npw+1)/2) = nuclear dipole moment Hamiltonian matrix, in
+!!  nucdipmom_k(npw*(npw+1)/2) = nuclear dipole moment Hamiltonian matrix, in
 !!                                 lower diagonal Hermitian packed storage, at current k point
 !!
 !! SIDE EFFECTS
@@ -67,12 +67,13 @@ subroutine mknucdipmom_k(gmet,kg,kpt,natom,nucdipmom,nucdipmom_k,npw,rprimd,ucvo
  !arrays
  integer,intent(in) :: kg(3,npw)
  real(dp),intent(in) :: gmet(3,3),kpt(3),nucdipmom(3,natom),rprimd(3,3),xred(3,natom)
- real(dp),intent(out) :: nucdipmom_k(2,npw*(npw+1)/2)
+ complex(dpc),intent(out) :: nucdipmom_k(npw*(npw+1)/2)
  
 !Local variables-------------------------------
 !scalars
  integer :: atom_nd_tot,col,iatom,ndp_index,row
- real(dp) :: crossfac,dg2,permeability,permfac,phasefac
+ real(dp) :: crossfac,dg2,permeability,phasefac
+ complex(dpc) :: cpermfac,cphasefac
  !arrays
  integer :: atom_nd(natom)
  real(dp) :: cprod(3),cprod_cart(3),dgp_red(3), gpk_red(3)
@@ -85,7 +86,7 @@ subroutine mknucdipmom_k(gmet,kg,kpt,natom,nucdipmom,nucdipmom_k,npw,rprimd,ucvo
 ! change it there also for consistency
  permeability=5.325135453D-5
  ! will need 4*pi*i*(\mu_0/four\pi)
- permfac = four_pi*permeability
+ cpermfac = CMPLX(zero,four_pi*permeability)
 
  ! make list of atoms with non-zero nuclear magnetic dipoles
  atom_nd_tot = 0
@@ -108,7 +109,7 @@ subroutine mknucdipmom_k(gmet,kg,kpt,natom,nucdipmom,nucdipmom_k,npw,rprimd,ucvo
       ! index of the current matrix element, in lower triangular packed storage
       ! "packed sequentially, column by column"
       ndp_index = ndp_index + 1
-      nucdipmom_k(:,ndp_index) = zero
+      nucdipmom_k(ndp_index) = czero
       
       ! form G-G' = \Delta G at this k pt (this is the bra <k+G'| )
       ! in reduced coordinates
@@ -121,7 +122,7 @@ subroutine mknucdipmom_k(gmet,kg,kpt,natom,nucdipmom,nucdipmom_k,npw,rprimd,ucvo
       dg2 = DOT_PRODUCT(dgp_red,MATMUL(gmet,dgp_red))
       ! if \Delta G = 0, Hamiltonian term is zero and move on to next one
       if (abs(dg2)<tol8) then
-         nucdipmom_k(1:2,ndp_index)=zero
+         nucdipmom_k(ndp_index)=czero
          cycle
       end if
 
@@ -142,9 +143,9 @@ subroutine mknucdipmom_k(gmet,kg,kpt,natom,nucdipmom,nucdipmom_k,npw,rprimd,ucvo
       ! might be retrievable from ph1d, need to check
       do iatom = 1, atom_nd_tot
          phasefac = two_pi*DOT_PRODUCT(dgp_red,xred(:,atom_nd(iatom)))
+         cphasefac = CMPLX(cos(phasefac),sin(phasefac))
          crossfac = DOT_PRODUCT(nucdipmom(:,iatom),cprod_cart)
-         nucdipmom_k(1,ndp_index) = nucdipmom_k(1,ndp_index) - permfac*crossfac*sin(phasefac)
-         nucdipmom_k(2,ndp_index) = nucdipmom_k(2,ndp_index) + permfac*crossfac*cos(phasefac)
+         nucdipmom_k(ndp_index) = nucdipmom_k(ndp_index) + cpermfac*cphasefac*crossfac
       end do ! end loop over atoms with nonzero dipoles
 
    end do ! end loop over G' = G to npw
