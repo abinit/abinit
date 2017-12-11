@@ -342,6 +342,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  real(dp),allocatable :: grnlnk(:,:),kinpw(:),kpg_k(:,:),occ_k(:),ph3d(:,:,:)
  real(dp),allocatable :: pwnsfacq(:,:),resid_k(:),rhoaug(:,:,:,:),rhowfg(:,:),rhowfr(:,:)
  real(dp),allocatable :: vlocal(:,:,:,:),vlocal_tmp(:,:,:),vxctaulocal(:,:,:,:,:),ylm_k(:,:),zshift(:)
+ complex(dpc),allocatable :: nucdipmom_k(:)
  type(pawcprj_type),allocatable :: cprj_tmp(:,:)
  type(oper_type) :: lda_occup
  type(pawrhoij_type),pointer :: pawrhoij_unsym(:)
@@ -803,6 +804,17 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 &         psps%usepaw,psps%useylm,ylm_k,ylmgr)
        end if
 
+!     compute and load nuclear dipole Hamiltonian at current k point
+       if(any(abs(gs_hamk%nucdipmom)>0.0)) then
+          if(allocated(nucdipmom_k)) then
+             ABI_DEALLOCATE(nucdipmom_k)
+          end if
+          ABI_ALLOCATE(nucdipmom_k,(npw_k*(npw_k+1)/2))
+          call mknucdipmom_k(gmet,kg_k,kpoint,natom,gs_hamk%nucdipmom,nucdipmom_k,npw_k,rprimd,ucvol,xred)
+          call load_k_hamiltonian(gs_hamk,nucdipmom_k=nucdipmom_k)
+       end if
+       
+
 !      Load k-dependent part in the Hamiltonian datastructure
 !       - Compute 3D phase factors
 !       - Prepare various tabs in case of band-FFT parallelism
@@ -891,6 +903,9 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        ABI_DEALLOCATE(kinpw)
        ABI_DEALLOCATE(kg_k)
        ABI_DEALLOCATE(kpg_k)
+       if(allocated(nucdipmom_k)) then
+          ABI_DEALLOCATE(nucdipmom_k)
+       end if
        ABI_DEALLOCATE(ylm_k)
        ABI_DEALLOCATE(ph3d)
        ABI_DEALLOCATE(cgq)
