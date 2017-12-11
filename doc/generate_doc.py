@@ -282,15 +282,18 @@ for abivarname in tests_for_abivars.keys():
   usage_report+=" [%s/%s] in tuto %s tests."%(ntests_abivarname_in_tuto,ntests_executable_in_tuto,executable)
   maxtests=10
   if ntests_abivarname>0 :
-    if ntests_abivarname<maxtests or ntests_abivarname_in_tuto<maxtests :
+    if ntests_abivarname<maxtests or ntests_abivarname_in_tuto<maxtests or ntests_abivarname_in_tuto==0 :
       only_tuto=0
-      if not ntests_abivarname<maxtests:
+      if not (ntests_abivarname<maxtests) and ntests_abivarname_in_tuto!=0 :
         only_tuto=1
         usage_report+=" Tuto test list: {"
       else:
         only_tuto=0
-        usage_report+=" Test list: {"
-      counter=0
+        if ntests_abivarname<maxtests :
+          usage_report+=" Test list: {"
+        else :
+          usage_report+=" Examples in tests: {"
+      counter=0 ; ntests=0
       for tests_dir in yml_in["tests_dirs"]:
         if len(dir_ID_for_tests[tests_dir])>0 and (only_tuto==0 or "tuto"==tests_dir[:4]):
           if counter>0:
@@ -299,9 +302,14 @@ for abivarname in tests_for_abivars.keys():
           usage_report+="%s:["%(tests_dir)
           for (i,test) in enumerate(dir_ID_for_tests[tests_dir]):
             usage_report+='<a href="../../tests/%s/Input/t%s.in">%s</a>'%(tests_dir,test,test)
+            ntests+=1
+            if ntests==maxtests:
+              break
             if not i==len(dir_ID_for_tests[tests_dir])-1:
               usage_report+=','
           usage_report+=']'
+          if ntests==maxtests:
+            break
       usage_report+="}."
     else:
       usage_report+=" Too many tests to report (>%s)."%(maxtests)
