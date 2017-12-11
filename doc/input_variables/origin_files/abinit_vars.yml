@@ -15447,7 +15447,7 @@
     characteristics: null
     commentdefault: null
     commentdims: null
-    defaultval: 0.05
+    defaultval: 0.01
     dimensions: scalar
     excludes: null
     mnemonics: MAGnetization CONstraint LAMBDA parameter
