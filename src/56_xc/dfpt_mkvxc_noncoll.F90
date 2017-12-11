@@ -165,11 +165,10 @@ subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat,nhatdim,nh
    ABI_ALLOCATE(m_norm,(nfft))
 
 !  -- Rotate rho(r)^(1)
-   if(option/=0) then
-!    SPr: for option=0 the rhor is not used, only core density xccc3d1
-     call rotate_mag(rhor1_,rhor1_diag,mag,nfft,cplex,mag_norm_out=m_norm,&
-&                    rho_out_format=2)
-   end if
+!  SPr: for option=0 the rhor is not used, only core density xccc3d1
+!       rotate_mag is only to compute the m_norm
+   call rotate_mag(rhor1_,rhor1_diag,mag,nfft,cplex,mag_norm_out=m_norm,&
+&                  rho_out_format=2)
 
 !  -- Compute Vxc(r)^(1)=Kxc(r).rho(r)^(1)_rotated
 !  Note for PAW: nhat has already been substracted; don't use it in dfpt_mkvxc
@@ -183,10 +182,7 @@ subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat,nhatdim,nh
 !  -- Rotate back Vxc(r)^(1)
    if (optnc==1) then
      if (option==0) then
-       do ifft=1,cplex*nfft
-         vxc1(ifft,1:2)=half*(vxc1_diag(ifft,1)+vxc1_diag(ifft,2))
-         vxc1(ifft,3:4)=zero
-       end do
+       call rotate_back_mag(vxc1_diag,vxc1,mag,nfft,mag_norm_in=m_norm)
      else
        call rotate_back_mag_dfpt(vxc1_diag,vxc1,vxc,kxc,rhor1_,mag,nfft,cplex,&
 &                                mag_norm_in=m_norm)
