@@ -10,7 +10,7 @@
 !!  Also accumulate zero-order potential part of the 2nd-order total energy (if needed)
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2017 ABINIT group (MT)
+!! Copyright (C) 2009-2017 ABINIT group (MT, SPr)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

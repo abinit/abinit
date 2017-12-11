@@ -350,6 +350,8 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  dfpt_scfcv_retcode = -1
  nsppol = dtset%nsppol; nspinor = dtset%nspinor
 
+ kramers_deg=.true.
+
 !Obtain dimensional translations in reciprocal space gprimd,
 !metrics and unit cell volume, from rprimd. Also output rprimd, gprimd and ucvol
  call mkrdim(dtset%acell_orig(1:3,1),dtset%rprim_orig(1:3,1:3,1),rprimd)
@@ -1874,6 +1876,11 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      ABI_DEALLOCATE(gh1c_set)
      ABI_DEALLOCATE(gh0c1_set)
      ABI_DEALLOCATE(cg1_active)
+     if(.not.kramers_deg) then
+       ABI_DEALLOCATE(gh1c_set_mq)
+       ABI_DEALLOCATE(gh0c1_set_mq)
+       ABI_DEALLOCATE(cg1_active_mq)
+     endif
 
    end if ! End of the check of hasty exit
 

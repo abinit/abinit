@@ -9,7 +9,7 @@
 !! optimum and optionally to compute mixed derivatives of energy.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2017 ABINIT group (XG, DRH, MB, XW, MT)
+!! Copyright (C) 1999-2017 ABINIT group (XG, DRH, MB, XW, MT, SPr)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -847,7 +847,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg_mq,cg1,cg1_mq,cg1_active,cg1_activ
 &     occkq,occ_rbz,optres,paw_ij,paw_ij1,pawang,pawang1,pawfgr,pawfgrtab,pawrhoij,&
 &     pawrhoij1,pawtab,phnons1,ph1d,dtset%prtvol,psps,pwindall,qmat,resid,residm,rhog1,&
 &     rhor1_pq,rmet,rprimd,symaf1,symrc1,symrl1,ucvol,usecprj,useylmgr1,ddk_f,&
-&     vtrial,vtrial1_pq,wtk_rbz,xred,ylm,ylm1,ylmgr1)
+&     vtrial,vtrial1_mq,wtk_rbz,xred,ylm,ylm1,ylmgr1)
    endif
 
    if (dtset%berryopt== 4.or.dtset%berryopt== 6.or.dtset%berryopt== 7.or.&
