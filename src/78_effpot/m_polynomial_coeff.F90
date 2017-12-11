@@ -33,7 +33,11 @@ module m_polynomial_coeff
  use m_crystal,only : crystal_t,symbols_crystal
  use m_supercell, only: getPBCIndexes_supercell,distance_supercell,findBound_supercell
  use m_xmpi
+#ifdef HAVE_MPI2
+ use mpi
+#endif
 
+ 
  implicit none
 
  public :: polynomial_coeff_broadcast
@@ -1485,7 +1489,7 @@ subroutine polynomial_coeff_getList(cell,crystal,cutoff,dist,list_symcoeff,list_
 !    Get the irpt and ib
      irpt=(list(ii)-1)/natom+1     
      ib=list(ii)-natom*(irpt-1)
-     if(dist(ia,ib,irpt) > cutoff) then
+     if(dist(ia,ib,irpt) >= cutoff) then
 !      If this distance is superior to the cutoff, we don't compute
        blkval(:,ia,:,ib,irpt)= 0
        if(irpt==irpt_ref)blkval(:,ib,:,ia,irpt)= 0
@@ -2125,7 +2129,12 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
  list_combinaison = 0
 
  my_size = my_ncoeff*power_disps(2)
- call xmpi_scatterv(list_combinaison_tmp,buffsize,buffdispl,list_combinaison,my_size,master,comm,ierr)
+
+#if defined HAVE_MPI
+ call MPI_SCATTERV(list_combinaison_tmp,buffsize,buffdispl,MPI_INTEGER,list_combinaison,my_size,&
+&                  MPI_INTEGER,master,comm,ierr)
+#endif
+
  ABI_DEALLOCATE(buffdispl)
  ABI_DEALLOCATE(buffsize)
  if(iam_master) then

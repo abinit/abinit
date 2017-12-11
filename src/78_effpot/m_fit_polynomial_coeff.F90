@@ -180,17 +180,6 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
  if(present(fit_tolMSDE)) tolMSDE  = fit_tolMSDE
  if(present(fit_tolMSDFS))tolMSDFS = fit_tolMSDFS
 
- cutoff = zero
- if(present(cutoff_in))then
-   cutoff = cutoff_in
- end if 
- if(abs(cutoff)<tol16)then
-   do ii=1,3
-     cutoff = cutoff + eff_pot%crystal%rprimd(ii,ii)
-   end do
-   cutoff = cutoff / 3.0
- end if
-
  if(need_verbose) then
    write(message,'(a,(80a))') ch10,('=',ii=1,80)
    call wrtout(ab_out,message,'COLL')
@@ -211,6 +200,19 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
  if (size(hist%xred,2) /= eff_pot%supercell%natom) then
    call effective_potential_file_mapHistToRef(eff_pot,hist,comm,verbose=need_verbose)
  end if
+
+!Set the cut off
+ cutoff = zero 
+ if(present(cutoff_in))then
+   cutoff = cutoff_in
+ end if 
+ if(abs(cutoff)<tol16)then
+   do ii=1,3
+     cutoff = cutoff + eff_pot%supercell%rprimd(ii,ii) / 2.0
+   end do
+   cutoff = cutoff / 3.0
+ end if
+
 !we get the size of the supercell in the hist
  do ii = 1, 3
    sc_size(ii) = eff_pot%supercell%rlatt(ii,ii)
