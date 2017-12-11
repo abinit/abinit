@@ -1092,9 +1092,12 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
 &         xred,ylm,ylmgr)
        end if
        if(wfmixalg/=0)then
-         if(wfmixalg==2)history_size=1
-         if(wfmixalg==3)history_size=5
-         if(wfmixalg==4)history_size=7
+         if(wfmixalg==2)then 
+           history_size=1
+           scf_history_wf%alpha=dtset%wfmix
+         endif
+         if(wfmixalg==3)history_size=2
+         if(wfmixalg==4)history_size=3
          scf_history_wf%history_size=history_size
          usecg=2
          call scf_history_init(dtset,mpi_enreg,usecg,scf_history_wf)
@@ -1109,9 +1112,11 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
 
      if (istep==1 .or. istep_updatedfock==fock%fock_common%nnsclo_hf) then
 
+HERE
        !Possibly mix the wavefunctions from different steps before computing the Fock operator
        if(wfmixalg/=0)then
-!        call wf_mixing(cg,cprj,istep_updatedfock,scf_history)
+         call wf_mixing(atindx1,cg,cprj,dtset,istep_updatedfock,mcg,mcprj,mpi_enreg,&
+&         nattyp,npwarr,psps%ntypat,pawtab,scf_history,psps%usepaw)
        endif
 
        ! Update data relative to the occupied states in fock

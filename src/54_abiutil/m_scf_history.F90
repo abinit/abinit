@@ -5,7 +5,8 @@
 !!
 !! FUNCTION
 !!  This module provides the definition of the scf_history_type used to store
-!!  various arrays obtained from previous SCF cycles (density, positions...).
+!!  various arrays obtained from previous SCF cycles (density, positions, wavefunctions ...),
+!!  as needed by the specific SCF algorithm.
 !!
 !! COPYRIGHT
 !! Copyright (C) 2011-2017 ABINIT group (MT)
@@ -76,7 +77,7 @@ MODULE m_scf_history
    !    history_size previous values of these data
 
   integer :: icall
-   ! Number of call for the routine extraprho
+   ! Number of call for the routine extraprho or wf_mixing
 
   integer :: mcg
    ! Size of cg array
@@ -98,8 +99,12 @@ MODULE m_scf_history
    ! usecg=1 if the extrapolation/mixing of the density/potential and wavefunctions is active
    ! usecg=2 if the extrapolation/mixing of the wavefunctions is active but not the one of the density/potential
 
+  integer :: wfmixalg
+   ! algorithm used to mix the wavefunctions (in case usecg=2)
+
   real(dp) :: alpha
    ! alpha mixing coefficient for the prediction of density and wavefunctions
+   ! In the case of wavefunction simple mixing, contain wfmix factor
 
   real(dp) :: beta
    ! beta mixing coefficient for the prediction of density and wavefunctions
@@ -107,10 +112,21 @@ MODULE m_scf_history
 ! Integer arrays
 
   integer,allocatable :: hindex(:)
-   ! hindex(history_size)
    ! Indexes of SCF cycles in the history
+   !
+   ! For the density-based schemes (with or without wavefunctions) : 
+   ! hindex(history_size)
    ! hindex(1) is the newest SCF cycle
    ! hindex(history_size) is the oldest SCF cycle
+   !
+   ! For wavefunction-based schemes (outer loop of a double loop SCF):
+   ! hindex(2*history_size+1)
+   ! The odd indices refer to the out wavefunction,
+   ! the even indices refer to the in wavefunction (not all such wavefunctions being stored, though). 
+   ! hindex(1:2) is the newest SCF cycle, hindex(3:4) is the SCF cycle before the newest one ... In case of an 
+   ! algorithm based on a biorthogonal ensemble of wavefunctions, the reference is stored in hindex(2*history_size+1)
+   ! When the index points to a location beyond history_size, the corresponding wavefunction set must be reconstructed
+   ! from the existing wavefunctions sets (to be implemented)
 
 ! Real (real(dp)) arrays
 
@@ -120,7 +136,7 @@ MODULE m_scf_history
 
    real(dp),allocatable :: deltarhor(:,:,:)
     ! deltarhor(nfft,nspden,history_size)
-    ! Diference between electronic density (in real space)
+    ! Difference between electronic density (in real space)
     ! and sum of atomic densities at the end of each SCF cycle of history
 
    real(dp),allocatable :: atmrho_last(:)
@@ -224,6 +240,7 @@ subroutine scf_history_init(dtset,mpi_enreg,usecg,scf_history)
  else
 
    scf_history%usecg=usecg
+   scf_history%wfmixalg=dtset%fockoptmix/100
 
    nfft=dtset%nfft
    if (dtset%usepaw==1.and.(dtset%pawecutdg>=1.0000001_dp*dtset%ecut)) nfft=dtset%nfftdg
@@ -260,7 +277,11 @@ subroutine scf_history_init(dtset,mpi_enreg,usecg,scf_history)
        end if
      end if
 
-     ABI_ALLOCATE(scf_history%hindex,(scf_history%history_size))
+     if (usecg<2) then
+       ABI_ALLOCATE(scf_history%hindex,(scf_history%history_size))
+     else
+       ABI_ALLOCATE(scf_history%hindex,(2*scf_history%history_size+1))
+     endif
      scf_history%hindex(:)=0
 
      if (usecg<2) then 
