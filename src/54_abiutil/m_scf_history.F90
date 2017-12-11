@@ -261,7 +261,6 @@ subroutine scf_history_init(dtset,mpi_enreg,usecg,scf_history)
      scf_history%natom=dtset%natom
      scf_history%nfft=nfft
      scf_history%nspden=dtset%nspden
-     scf_history%alpha=zero
      scf_history%beta=zero
      scf_history%icall=0
 
@@ -279,8 +278,10 @@ subroutine scf_history_init(dtset,mpi_enreg,usecg,scf_history)
 
      if (usecg<2) then
        ABI_ALLOCATE(scf_history%hindex,(scf_history%history_size))
+       scf_history%alpha=zero
      else
        ABI_ALLOCATE(scf_history%hindex,(2*scf_history%history_size+1))
+       scf_history%alpha=dtset%wfmix
      endif
      scf_history%hindex(:)=0
 

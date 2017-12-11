@@ -363,7 +363,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
  real(dp),allocatable :: vhartr(:),vpsp(:),vtrial(:,:)
  real(dp),allocatable :: vxc(:,:),vxc_hybcomp(:,:),vxctau(:,:,:),workr(:,:),xccc3d(:),ylmdiel(:,:)
  real(dp),pointer :: elfr(:,:),grhor(:,:,:),lrhor(:,:)
- type(scf_history_type),pointer :: scf_history_wf
+ type(scf_history_type) :: scf_history_wf
  type(pawcprj_type),allocatable :: cprj(:,:)
  type(paw_an_type),allocatable :: paw_an(:)
  type(paw_ij_type),allocatable :: paw_ij(:)
@@ -1092,15 +1092,21 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
 &         xred,ylm,ylmgr)
        end if
        if(wfmixalg/=0)then
-         if(wfmixalg==2)then 
-           history_size=1
-           scf_history_wf%alpha=dtset%wfmix
-         endif
+         if(wfmixalg==2)history_size=1
          if(wfmixalg==3)history_size=2
          if(wfmixalg==4)history_size=3
          scf_history_wf%history_size=history_size
          usecg=2
+!DEBUG
+         write(std_out,*)' scfcv : will call scf_history_init'
+         write(std_out,*)' dtset%wfmix,scf_history_wf%alpha=',dtset%wfmix,scf_history_wf%alpha
+         call flush(std_out)
+!ENDDEBUG
          call scf_history_init(dtset,mpi_enreg,usecg,scf_history_wf)
+!DEBUG
+         write(std_out,*)' scfcv : exit scf_history_init'
+         call flush(std_out)
+!ENDDEBUG
        endif
      endif
 
@@ -1114,8 +1120,17 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
 
        !Possibly mix the wavefunctions from different steps before computing the Fock operator
        if(wfmixalg/=0)then
+!DEBUG
+         write(std_out,*)' scfcv : will call wf_mixing'
+         write(std_out,*)' dtset%wfmix,scf_history_wf%alpha=',dtset%wfmix,scf_history_wf%alpha
+         call flush(std_out)
+!ENDDEBUG
          call wf_mixing(atindx1,cg,cprj,dtset,istep_updatedfock,mcg,mcprj,mpi_enreg,&
-&         nattyp,npwarr,pawtab,scf_history)
+&         nattyp,npwarr,pawtab,scf_history_wf)
+!DEBUG
+         write(std_out,*)' scfcv : exit wf_mixing'
+         call flush(std_out)
+!ENDDEBUG
        endif
 
        ! Update data relative to the occupied states in fock

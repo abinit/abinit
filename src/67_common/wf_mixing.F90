@@ -90,7 +90,7 @@ subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
  integer :: ia,iat,iatom,iband_max,iband_max1,iband_min,iband_min1,ibd,ibg,iblockbd,iblockbd1,icg,icgb,icgb1
  integer :: ierr,ig,ii,ikpt,ilmn1,ilmn2,inc,indh,ind2
  integer :: isize,isppol,istwf_k,itypat,kk,klmn,me_distrb,my_nspinor
- integer :: nband_k,nblockbd,nprocband,npw_k,npw_nk,ntypat,ortalgo,spaceComm_band,usepaw
+ integer :: nband_k,nblockbd,nprocband,npw_k,npw_nk,ntypat,ortalgo,spaceComm_band,usepaw,wfmixalg
  real(dp) :: dotr,dotr1,doti,doti1
  !character(len=500) :: message
 !arrays
@@ -104,10 +104,16 @@ subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
 
 ! *************************************************************************
 
+!DEBUG
+ write(std_out,*)' wf_mixing : enter '
+ write(std_out,*)' istep,scf_history%alpha=',istep,scf_history%alpha
+!ENDDEBUG
+
  if (istep==0) return
 
  ntypat=dtset%ntypat
  usepaw=dtset%usepaw
+ wfmixalg=scf_history%wfmixalg
 
 !Useful array
  if (usepaw==1) then
@@ -119,7 +125,7 @@ subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
  indh=1
 
 !First step
- if (istep==1) then
+ if (istep==1 .or. (wfmixalg==2 .and. abs(scf_history%alpha-one)<tol8) ) then
    scf_history%cg(:,:,1)=cg(:,:)
    if(usepaw==1) then
      scf_history%cprj(:,:,1)=cprj(:,:)
