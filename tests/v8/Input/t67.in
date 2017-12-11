@@ -63,7 +63,7 @@
 #%% test_chain = t67.in
 #%% [files]
 #%% files_to_test = 
-#%%   t67.out, tolnlines = 4, tolabs = 0.003, tolrel = 0.3, fld_options = -easy
+#%%   t67.out, tolnlines = 6, tolabs = 0.004, tolrel = 0.4, fld_options = -easy
 #%% psp_files = 26fe.pspnc
 #%% [paral_info]
 #%% max_nprocs = 1
