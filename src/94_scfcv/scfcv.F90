@@ -1112,11 +1112,10 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
 
      if (istep==1 .or. istep_updatedfock==fock%fock_common%nnsclo_hf) then
 
-HERE
        !Possibly mix the wavefunctions from different steps before computing the Fock operator
        if(wfmixalg/=0)then
          call wf_mixing(atindx1,cg,cprj,dtset,istep_updatedfock,mcg,mcprj,mpi_enreg,&
-&         nattyp,npwarr,psps%ntypat,pawtab,scf_history,psps%usepaw)
+&         nattyp,npwarr,pawtab,scf_history)
        endif
 
        ! Update data relative to the occupied states in fock

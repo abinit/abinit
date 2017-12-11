@@ -65,32 +65,31 @@ subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'extrapwf'
+#define ABI_FUNC 'wf_mixing'
  use interfaces_32_util
- use interfaces_41_geometry
- use interfaces_56_recipspace
- use interfaces_66_nonlocal
+ use interfaces_66_wfs
 !End of the abilint section
 
  implicit none
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: istep,mcg
+ integer,intent(in) :: istep,mcg,mcprj
  type(MPI_type),intent(in) :: mpi_enreg
  type(dataset_type),intent(in) :: dtset
  type(scf_history_type),intent(inout) :: scf_history
 !arrays
  integer,intent(in) :: atindx1(dtset%natom),nattyp(dtset%ntypat)
  integer,intent(in) :: npwarr(dtset%nkpt)
- real(dp), intent(inout) :: cg(2,mcg),cprj(dtset%natom,mcprj)
+ real(dp), intent(inout) :: cg(2,mcg)
+ type(pawcprj_type),intent(inout) :: cprj(dtset%natom,mcprj)
  type(pawtab_type),intent(in) :: pawtab(dtset%ntypat*dtset%usepaw)
 
 !Local variables-------------------------------
 !scalars
  integer :: ia,iat,iatom,iband_max,iband_max1,iband_min,iband_min1,ibd,ibg,iblockbd,iblockbd1,icg,icgb,icgb1
  integer :: ierr,ig,ii,ikpt,ilmn1,ilmn2,inc,indh,ind2
- integer :: isize,isppol,istwf_k,itypat,klmn,me_distrb,my_nspinor
+ integer :: isize,isppol,istwf_k,itypat,kk,klmn,me_distrb,my_nspinor
  integer :: nband_k,nblockbd,nprocband,npw_k,npw_nk,ntypat,ortalgo,spaceComm_band,usepaw
  real(dp) :: dotr,dotr1,doti,doti1
  !character(len=500) :: message
@@ -101,7 +100,7 @@ subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
  real(dp),allocatable :: dum(:,:)
  real(dp),allocatable :: mnm(:,:,:),snm(:,:,:)
  real(dp),allocatable :: work(:,:),work1(:,:)
- type(pawcprj_type),allocatable :: cprj(:,:),cprj_k(:,:),cprj_kh(:,:),cprj_k3(:,:)
+ type(pawcprj_type),allocatable :: cprj_k(:,:),cprj_kh(:,:),cprj_k3(:,:)
 
 ! *************************************************************************
 
@@ -320,11 +319,11 @@ subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
 !      Wavefunction alignment (istwfk=1 ?)
        ABI_ALLOCATE(work,(2,npw_nk*my_nspinor*nblockbd))
        ABI_ALLOCATE(work1,(2,npw_nk*my_nspinor*nblockbd))
-       work1(:,:)=scf_history%cg(:,icg+1:icg+my_nspinor*nblockbd*npw_nk,ind1)
+       work1(:,:)=scf_history%cg(:,icg+1:icg+my_nspinor*nblockbd*npw_nk,indh)
        call zgemm('N','N',npw_nk*my_nspinor,nband_k,nband_k,dcmplx(1._dp), &
 &       work1,npw_nk*my_nspinor, &
 &       mnm,nblockbd,dcmplx(0._dp),work,npw_nk*my_nspinor)
-       scf_history%cg(:,1+icg:npw_nk*my_nspinor*nblockbd+icg,ind1)=work(:,:)
+       scf_history%cg(:,1+icg:npw_nk*my_nspinor*nblockbd+icg,indh)=work(:,:)
        ABI_DEALLOCATE(work1)
 
 !      If paw, must also align cprj from history
@@ -354,7 +353,7 @@ subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
        inc=npw_nk*my_nspinor
        do iblockbd=1,nblockbd
          cg(:,icg+1+ibd:icg+inc+ibd)=scf_history%cg(:,1+icg+ibd:icg+ibd+inc,indh)&
-&          +alpha*(cg(:,icg+1+ibd:ibd+icg+inc)-scf_history%cg(:,1+icg+ibd:icg+ibd+inc,indh)
+&          +scf_history%alpha*(cg(:,icg+1+ibd:ibd+icg+inc)-scf_history%cg(:,1+icg+ibd:icg+ibd+inc,indh))
          if(usepaw==1) then
            alpha(1)=one-scf_history%alpha;alpha(2)=zero
            beta(1)=scf_history%alpha;beta(2)=zero
