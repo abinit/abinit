@@ -1108,6 +1108,8 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kmq_rbz,mpi_enreg,mpw1_mq,nkpt_rbz)
      !number of plane waves at k+q and k-q should be in principle the same to reconstruct rhor1_pq (?)
      !mpw1=max(mpw1,mpw1_tmp)
+   else
+     mpw1_mq=0
    end if
    call timab(143,2,tsec)
 
@@ -1244,7 +1246,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
        if (ireadwf0==1) then
          call WffClose(wffkq,ierr)
        end if
-     endif
+     end if
    end if
    ! Update energies GS energies at k + q
    call put_eneocc_vect(ebands_kq, "eig", eigenq)
@@ -1334,6 +1336,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 &     ' dfpt_looppert : total number of electrons, from k and k+q',ch10,&
 &     '  fully or partially occupied states are',dtset%nelect,' and',nelectkq,'.'
      call wrtout(ab_out,message,'COLL')
+     call wrtout(std_out,message,'COLL')
      if (.not.kramers_deg) then
        call getnel(docckde_mq,dosdeltae,eigen_mq,entropy,fermie,maxocc,dtset%mband,&
 &       nband_rbz,nelectkq,nkpt_rbz,dtset%nsppol,occk_mq,dtset%occopt,option,&
@@ -1343,8 +1346,8 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 &       ' dfpt_looppert : total number of electrons, from k and k-q',ch10,&
 &       '  fully or partially occupied states are',dtset%nelect,' and',nelectkq,'.'
        call wrtout(ab_out,message,'COLL')
+       call wrtout(std_out,message,'COLL')
      endif
-     call wrtout(std_out,message,'COLL')
    end if
 
 !  Debug message
@@ -1429,7 +1432,6 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
    ABI_ALLOCATE(resid,(dtset%mband*nkpt_rbz*dtset%nsppol))
    call timab(144,1,tsec)
    call status(pertcase,dtfil%filstat,iexit,level,'call inwffil  ')
-   !SPr: to see if the initialization of cg1_mq is needed...
    call inwffil(ask_accurate,cg1,dtset,dtset%ecut,ecut_eff,eigen1,dtset%exchn2n3d,&
 &   formeig,hdr,&
 &   dtfil%ireadwf,istwfk_rbz,kg1,kpq_rbz,dtset%localrdwf,&
@@ -1445,6 +1447,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
    if(.not.kramers_deg) then
      ABI_ALLOCATE(eigen1_mq,(2*dtset%mband*dtset%mband*nkpt_rbz*dtset%nsppol))
      ABI_ALLOCATE(resid_mq,(dtset%mband*nkpt_rbz*dtset%nsppol))
+     !initialize cg1_mq:
      call timab(144,1,tsec)
      call status(pertcase,dtfil%filstat,iexit,level,'call inwffil  ')
      call inwffil(ask_accurate,cg1_mq,dtset,dtset%ecut,ecut_eff,eigen1_mq,dtset%exchn2n3d,&
@@ -1709,20 +1712,20 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
        else
          !Magnetic field perturbation
          call wrtout(std_out," Initializing rhor1 guess based on the ground state XC magnetic field", "COLL")
-         if (kramers_deg) then
-           call dfpt_init_mag1(ipert,idir,rhor1,rhor,cplex,nfftf,nspden,vxc,kxc,nkxc)
-         else
+         
+         call dfpt_init_mag1(ipert,idir,rhor1,rhor,cplex,nfftf,nspden,vxc,kxc,nkxc)
+         
+         if(.not.kramers_deg) then
            !to add later a possibility of non-zero q in dfpt_init_mag1
-           call dfpt_init_mag1(ipert,idir,rhor1_pq,rhor,cplex,nfftf,nspden,vxc,kxc,nkxc)
-           rhor1=rhor1_pq
+           rhor1_pq=rhor1
            call dfpt_init_mag1(ipert,idir,rhor1_mq,rhor,cplex,nfftf,nspden,vxc,kxc,nkxc)
          endif
        end if
 
        call fourdp(cplex,rhog1,rhor1,-1,mpi_enreg,nfftf,ngfftf,dtset%paral_kgb,0)
        if (.not.kramers_deg) then
-         call fourdp(cplex,rhog1_pq,rhor1_pq,-1,mpi_enreg,nfftf,ngfftf,dtset%paral_kgb,0)
-         rhog1=rhog1_pq
+         !call fourdp(cplex,rhog1_pq,rhor1_pq,-1,mpi_enreg,nfftf,ngfftf,dtset%paral_kgb,0)
+         rhog1_pq=rhog1
          call fourdp(cplex,rhog1_mq,rhor1_mq,-1,mpi_enreg,nfftf,ngfftf,dtset%paral_kgb,0)
        endif
      end if
@@ -1789,24 +1792,49 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 
 !    Main calculation: get 1st-order wavefunctions from Sternheimer equation (SCF cycle)
 !    if ipert==natom+10 or natom+11 : get 2nd-order wavefunctions
-     call dfpt_scfcv(atindx,blkflg,cg,cgq,cg_mq,cg1,cg1_mq,cg1_active,cg1_active_mq,cplex,cprj,cprjq,cpus,&
-&     dielt,dim_eig2rf,doccde_rbz,docckqde,docckde_mq,dtfil,dtset_tmp,&
-&     d2bbb,d2lo,d2nl,d2ovl,eberry,edocc,eeig0,eew,efrhar,efrkin,efrloc,efrnl,efrx1,efrx2,&
-&     ehart01,ehart1,eigenq,eigen_mq,eigen0,eigen1,eigen1_mq,eii,ek0,ek1,eloc0,elpsp1,&
-&     enl0,enl1,eovl1,epaw1,etotal,evdw,exc1,fermie,gh0c1_set,gh0c1_set_mq,gh1c_set,gh1c_set_mq,hdr,idir,&
-&     indkpt1,indsy1,initialized,ipert,irrzon1,istwfk_rbz,&
-&     kg,kg1,kg1_mq,kpt_rbz,kxc,mgfftf,mkmem_rbz,mkqmem_rbz,mk1mem_rbz,&
-&     mpert,mpi_enreg,mpw,mpw1,mpw1_mq,my_natom,&
-&     nattyp,nband_rbz,ncpgr,nfftf,ngfftf,nhat,nkpt,nkpt_rbz,nkxc,&
-&     npwarr,npwar1,npwar1_mq,nspden,&
-&     nsym1,n3xccc,occkq,occk_mq,occ_rbz,&
-&     paw_an_pert,paw_ij_pert,pawang,pawang1,pawfgr,pawfgrtab_pert,pawrad,pawrhoij_pert,pawrhoij1,pawtab,&
-&     pertcase,phnons1,ph1d,ph1df,prtbbb,psps,&
-&     dtset%qptn,resid,resid_mq,residm,residm_mq,rhog,rhog1,rhog1_pq,rhog1_mq,&
-&     rhor,rhor1,rhor1_pq,rhor1_mq,rprimd,symaf1,symrc1,symrl1,&
-&     usecprj,useylmgr,useylmgr1,ddk_f,vpsp1,vtrial,vxc,&
-&     wtk_rbz,xccc3d1,xred,ylm,ylm1,ylmgr,ylmgr1,zeff,dfpt_scfcv_retcode,&
-&     kramers_deg)
+     if (kramers_deg) then
+       call dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,&
+&       dielt,dim_eig2rf,doccde_rbz,docckqde,dtfil,dtset_tmp,&
+&       d2bbb,d2lo,d2nl,d2ovl,eberry,edocc,eeig0,eew,efrhar,efrkin,efrloc,efrnl,efrx1,efrx2,&
+&       ehart01,ehart1,eigenq,eigen0,eigen1,eii,ek0,ek1,eloc0,elpsp1,&
+&       enl0,enl1,eovl1,epaw1,etotal,evdw,exc1,fermie,gh0c1_set,gh1c_set,hdr,idir,&
+&       indkpt1,indsy1,initialized,ipert,irrzon1,istwfk_rbz,&
+&       kg,kg1,kpt_rbz,kxc,mgfftf,mkmem_rbz,mkqmem_rbz,mk1mem_rbz,&
+&       mpert,mpi_enreg,mpw,mpw1,mpw1_mq,my_natom,&
+&       nattyp,nband_rbz,ncpgr,nfftf,ngfftf,nhat,nkpt,nkpt_rbz,nkxc,&
+&       npwarr,npwar1,nspden,&
+&       nsym1,n3xccc,occkq,occ_rbz,&
+&       paw_an_pert,paw_ij_pert,pawang,pawang1,pawfgr,pawfgrtab_pert,pawrad,pawrhoij_pert,pawrhoij1,pawtab,&
+&       pertcase,phnons1,ph1d,ph1df,prtbbb,psps,&
+&       dtset%qptn,resid,residm,rhog,rhog1,&
+&       rhor,rhor1,rprimd,symaf1,symrc1,symrl1,&
+&       usecprj,useylmgr,useylmgr1,ddk_f,vpsp1,vtrial,vxc,&
+&       wtk_rbz,xccc3d1,xred,ylm,ylm1,ylmgr,ylmgr1,zeff,dfpt_scfcv_retcode,&
+&       kramers_deg)
+     else
+       call dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,&
+&       dielt,dim_eig2rf,doccde_rbz,docckqde,dtfil,dtset_tmp,&
+&       d2bbb,d2lo,d2nl,d2ovl,eberry,edocc,eeig0,eew,efrhar,efrkin,efrloc,efrnl,efrx1,efrx2,&
+&       ehart01,ehart1,eigenq,eigen0,eigen1,eii,ek0,ek1,eloc0,elpsp1,&
+&       enl0,enl1,eovl1,epaw1,etotal,evdw,exc1,fermie,gh0c1_set,gh1c_set,hdr,idir,&
+&       indkpt1,indsy1,initialized,ipert,irrzon1,istwfk_rbz,&
+&       kg,kg1,kpt_rbz,kxc,mgfftf,mkmem_rbz,mkqmem_rbz,mk1mem_rbz,&
+&       mpert,mpi_enreg,mpw,mpw1,mpw1_mq,my_natom,&
+&       nattyp,nband_rbz,ncpgr,nfftf,ngfftf,nhat,nkpt,nkpt_rbz,nkxc,&
+&       npwarr,npwar1,nspden,&
+&       nsym1,n3xccc,occkq,occ_rbz,&
+&       paw_an_pert,paw_ij_pert,pawang,pawang1,pawfgr,pawfgrtab_pert,pawrad,pawrhoij_pert,pawrhoij1,pawtab,&
+&       pertcase,phnons1,ph1d,ph1df,prtbbb,psps,&
+&       dtset%qptn,resid,residm,rhog,rhog1,&
+&       rhor,rhor1,rprimd,symaf1,symrc1,symrl1,&
+&       usecprj,useylmgr,useylmgr1,ddk_f,vpsp1,vtrial,vxc,&
+&       wtk_rbz,xccc3d1,xred,ylm,ylm1,ylmgr,ylmgr1,zeff,dfpt_scfcv_retcode,&
+&       kramers_deg,&
+&       cg_mq=cg_mq,cg1_mq=cg1_mq,cg1_active_mq=cg1_active_mq,docckde_mq=docckde_mq,eigen_mq=eigen_mq,&
+&       eigen1_mq=eigen1_mq,gh0c1_set_mq=gh0c1_set_mq,gh1c_set_mq=gh1c_set_mq,&
+&       kg1_mq=kg1_mq,npwar1_mq=npwar1_mq,occk_mq=occk_mq,resid_mq=resid_mq,residm_mq=residm_mq,&
+&       rhog1_pq=rhog1_pq,rhog1_mq=rhog1_mq,rhor1_pq=rhor1_pq,rhor1_mq=rhor1_mq)
+     endif
 
      _IBM6("after dfpt_scfcv")
 

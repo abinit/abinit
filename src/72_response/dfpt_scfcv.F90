@@ -191,23 +191,25 @@
 
 #include "abi_common.h"
 
-subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg_mq,cg1,cg1_mq,cg1_active,cg1_active_mq,cplex,cprj,cprjq,cpus,&
-&  dielt,dim_eig2rf,doccde_rbz,docckqde,docckde_mq,dtfil,dtset,&
+subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,&
+&  dielt,dim_eig2rf,doccde_rbz,docckqde,dtfil,dtset,&
 &  d2bbb,d2lo,d2nl,d2ovl,eberry,edocc,eeig0,eew,efrhar,efrkin,efrloc,efrnl,efrx1,efrx2,&
-&  ehart01,ehart1,eigenq,eigen_mq,eigen0,eigen1,eigen1_mq,eii,ek0,ek1,eloc0,elpsp1,&
-&  enl0,enl1,eovl1,epaw1,etotal,evdw,exc1,fermie,gh0c1_set,gh0c1_set_mq,gh1c_set,gh1c_set_mq,hdr,idir,indkpt1,&
+&  ehart01,ehart1,eigenq,eigen0,eigen1,eii,ek0,ek1,eloc0,elpsp1,&
+&  enl0,enl1,eovl1,epaw1,etotal,evdw,exc1,fermie,gh0c1_set,gh1c_set,hdr,idir,indkpt1,&
 &  indsy1,initialized,ipert,irrzon1,istwfk_rbz,&
-&  kg,kg1,kg1_mq,kpt_rbz,kxc,mgfftf,mkmem,mkqmem,mk1mem,&
+&  kg,kg1,kpt_rbz,kxc,mgfftf,mkmem,mkqmem,mk1mem,&
 &  mpert,mpi_enreg,mpw,mpw1,mpw1_mq,my_natom,nattyp,nband_rbz,ncpgr,&
-&  nfftf,ngfftf,nhat,nkpt,nkpt_rbz,nkxc,npwarr,npwar1,npwar1_mq,nspden,&
-&  nsym1,n3xccc,occkq,occk_mq,occ_rbz,&
+&  nfftf,ngfftf,nhat,nkpt,nkpt_rbz,nkxc,npwarr,npwar1,nspden,&
+&  nsym1,n3xccc,occkq,occ_rbz,&
 &  paw_an,paw_ij,pawang,pawang1,pawfgr,pawfgrtab,pawrad,pawrhoij,pawrhoij1,pawtab,&
 &  pertcase,phnons1,ph1d,ph1df,&
-&  prtbbb,psps,qphon,resid,resid_mq,residm,residm_mq,rhog,rhog1,rhog1_pq,rhog1_mq,&
-&  rhor,rhor1,rhor1_pq,rhor1_mq,rprimd,symaf1,symrc1,symrl1,&
+&  prtbbb,psps,qphon,resid,residm,rhog,rhog1,&
+&  rhor,rhor1,rprimd,symaf1,symrc1,symrl1,&
 &  usecprj,useylmgr,useylmgr1,ddk_f,vpsp1,vtrial,vxc,&
 &  wtk_rbz,xccc3d1,xred,ylm,ylm1,ylmgr,ylmgr1,zeff,conv_retcode,&
-&  kramers_deg)
+&  kramers_deg,&
+&  cg_mq,cg1_mq,cg1_active_mq,docckde_mq,eigen_mq,eigen1_mq,gh0c1_set_mq,gh1c_set_mq,&
+&  kg1_mq,npwar1_mq,occk_mq,resid_mq,residm_mq,rhog1_pq,rhog1_mq,rhor1_pq,rhor1_mq)
 
  use defs_basis
  use defs_datatypes
@@ -280,14 +282,14 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg_mq,cg1,cg1_mq,cg1_active,cg1_activ
  integer,intent(in) :: kg(3,mpw*mkmem),kg1(3,mpw1*mk1mem),nattyp(psps%ntypat)
  integer,intent(in) :: nband_rbz(nkpt_rbz*dtset%nsppol)
  integer,intent(in) :: npwar1(nkpt_rbz),npwarr(nkpt_rbz)
- integer,intent(in) :: npwar1_mq(nkpt_rbz)     !-q duplicate
- integer,intent(in) :: kg1_mq(3,mpw1_mq*mk1mem)!
+ integer,optional,intent(in) :: npwar1_mq(nkpt_rbz)     !-q duplicate
+ integer,optional,intent(in) :: kg1_mq(3,mpw1_mq*mk1mem)!
  integer,intent(in) :: symaf1(nsym1),symrc1(3,3,nsym1),symrl1(3,3,nsym1)
  integer,intent(out) :: conv_retcode
  real(dp),intent(in) :: cpus,eew,efrhar,efrkin,efrloc,efrnl,efrx1,efrx2,eii
  real(dp),intent(out) :: eberry,edocc,eeig0,ehart01,ehart1,ek0,ek1,eloc0,elpsp1,enl0
  real(dp),intent(out) :: enl1,eovl1,epaw1,etotal,evdw,exc1,residm
- real(dp),intent(out) :: residm_mq       !-q duplicate
+ real(dp),optional,intent(out) :: residm_mq       !-q duplicate
  real(dp),intent(inout) :: fermie
  real(dp),intent(in) :: qphon(3)
 ! nfft**(1-1/nsym1) is 1 if nsym1==1, and nfft otherwise
@@ -298,16 +300,16 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg_mq,cg1,cg1_mq,cg1_active,cg1_activ
  real(dp),intent(out) :: gh1c_set(2,mpw1*dtset%nspinor*dtset%mband*mk1mem*dtset%nsppol*dim_eig2rf)
  real(dp),intent(out) :: gh0c1_set(2,mpw1*dtset%nspinor*dtset%mband*mk1mem*dtset%nsppol*dim_eig2rf)
  real(dp),intent(in)  :: cgq(2,mpw1*dtset%nspinor*dtset%mband*mkqmem*dtset%nsppol)
- real(dp),intent(inout) :: cg1_mq(2,mpw1_mq*dtset%nspinor*dtset%mband*mk1mem*dtset%nsppol)                  !start -q duplicates
- real(dp),intent(out)   :: cg1_active_mq(2,mpw1_mq*dtset%nspinor*dtset%mband*mk1mem*dtset%nsppol*dim_eig2rf)!
- real(dp),intent(out)   :: gh1c_set_mq(2,mpw1_mq*dtset%nspinor*dtset%mband*mk1mem*dtset%nsppol*dim_eig2rf)  !
- real(dp),intent(out)   :: gh0c1_set_mq(2,mpw1_mq*dtset%nspinor*dtset%mband*mk1mem*dtset%nsppol*dim_eig2rf) !
- real(dp),intent(in)    :: cg_mq(2,mpw1_mq*dtset%nspinor*dtset%mband*mkqmem*dtset%nsppol)                   !
- real(dp),intent(in)    :: eigen_mq(dtset%mband*nkpt_rbz*dtset%nsppol)                                      !
- real(dp),intent(in)    :: docckde_mq(dtset%mband*nkpt_rbz*dtset%nsppol)                                    !
- real(dp),intent(out)   :: eigen1_mq(2*dtset%mband*dtset%mband*nkpt_rbz*dtset%nsppol)                       !
- real(dp),intent(in)    :: occk_mq(dtset%mband*nkpt_rbz*dtset%nsppol)                                       !
- real(dp),intent(out)   :: resid_mq(dtset%mband*nkpt_rbz*nspden)                                            !end
+ real(dp),optional,intent(inout) :: cg1_mq(2,mpw1_mq*dtset%nspinor*dtset%mband*mk1mem*dtset%nsppol)                  !start -q duplicates
+ real(dp),optional,intent(out)   :: cg1_active_mq(2,mpw1_mq*dtset%nspinor*dtset%mband*mk1mem*dtset%nsppol*dim_eig2rf)!
+ real(dp),optional,intent(out)   :: gh1c_set_mq(2,mpw1_mq*dtset%nspinor*dtset%mband*mk1mem*dtset%nsppol*dim_eig2rf)  !
+ real(dp),optional,intent(out)   :: gh0c1_set_mq(2,mpw1_mq*dtset%nspinor*dtset%mband*mk1mem*dtset%nsppol*dim_eig2rf) !
+ real(dp),optional,intent(in)    :: cg_mq(2,mpw1_mq*dtset%nspinor*dtset%mband*mkqmem*dtset%nsppol)                   !
+ real(dp),optional,intent(in)    :: eigen_mq(dtset%mband*nkpt_rbz*dtset%nsppol)                                      !
+ real(dp),optional,intent(in)    :: docckde_mq(dtset%mband*nkpt_rbz*dtset%nsppol)                                    !
+ real(dp),optional,intent(out)   :: eigen1_mq(2*dtset%mband*dtset%mband*nkpt_rbz*dtset%nsppol)                       !
+ real(dp),optional,intent(in)    :: occk_mq(dtset%mband*nkpt_rbz*dtset%nsppol)                                       !
+ real(dp),optional,intent(out)   :: resid_mq(dtset%mband*nkpt_rbz*nspden)                                            !end
  real(dp),intent(out) :: d2bbb(2,3,3,mpert,dtset%mband,dtset%mband*prtbbb)
  real(dp),intent(out) :: d2lo(2,3,mpert,3,mpert),d2nl(2,3,mpert,3,mpert)
  real(dp),intent(out) :: d2ovl(2,3,mpert,3,mpert*psps%usepaw)
@@ -326,8 +328,8 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg_mq,cg1,cg1_mq,cg1_active,cg1_activ
  real(dp),intent(out) :: resid(dtset%mband*nkpt_rbz*nspden)
  real(dp),intent(in) :: rhog(2,nfftf),rhor(nfftf,nspden),rprimd(3,3)
  real(dp),intent(inout) :: rhog1(2,nfftf),rhor1(cplex*nfftf,nspden),xred(3,dtset%natom)
- real(dp),intent(inout) :: rhog1_pq(2,nfftf),rhor1_pq(cplex*nfftf,nspden)                                 !+q/-q duplicates
- real(dp),intent(inout) :: rhog1_mq(2,nfftf),rhor1_mq(cplex*nfftf,nspden)                                 !
+ real(dp),optional,intent(inout) :: rhog1_pq(2,nfftf),rhor1_pq(cplex*nfftf,nspden)                                 !+q/-q duplicates
+ real(dp),optional,intent(inout) :: rhog1_mq(2,nfftf),rhor1_mq(cplex*nfftf,nspden)                                 !
  real(dp),target,intent(in) :: vtrial(nfftf,nspden)
  real(dp),intent(in) :: vpsp1(cplex*nfftf),vxc(nfftf,nspden)
  real(dp),intent(in) :: wtk_rbz(nkpt_rbz),xccc3d1(cplex*n3xccc)
@@ -369,6 +371,8 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg_mq,cg1,cg1_mq,cg1_active,cg1_activ
  real(dp) :: born,born_bar,boxcut,deltae,diffor,diel_q,dum,ecut,ecutf,elast
  real(dp) :: epawdc1_dum,evar,fe1fixed,fermie1,gsqcut,qphon_norm,maxfor,renorm,res2,res3,residm2
  real(dp) :: ucvol,vxcavg,elmag1
+ real(dp) :: eberry_mq,edocc_mq,eeig0_mq,ehart01_mq,ehart1_mq,ek0_mq,ek1_mq,eloc0_mq,elpsp1_mq,enl0_mq
+ real(dp) :: enl1_mq,eovl1_mq,epaw1_mq,etotal_mq,evdw_mq,exc1_mq,fermie1_mq,deltae_mq,elmag1_mq
  character(len=500) :: msg
  character(len=fnlen) :: fi1o
 !character(len=fnlen) :: fi1o_vtk
@@ -456,6 +460,12 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg_mq,cg1,cg1_mq,cg1_active,cg1_activ
  edocc=zero ; eeig0=zero ; ehart01=zero ; ehart1=zero ; ek0=zero ; ek1=zero
  eloc0=zero ; elpsp1=zero ; enl0=zero ; enl1=zero ; eovl1=zero; exc1=zero
  deltae=zero ; fermie1=zero ; epaw1=zero ; eberry=zero ; elmag1=zero
+
+!This might be taken away later
+ edocc_mq=zero ; eeig0_mq=zero ; ehart01_mq=zero ; ehart1_mq=zero ; ek0_mq=zero ; ek1_mq=zero
+ eloc0_mq=zero ; elpsp1_mq=zero ; enl0_mq=zero ; enl1_mq=zero ; eovl1_mq=zero; exc1_mq=zero
+ deltae_mq=zero ; fermie1_mq=zero ; epaw1_mq=zero ; eberry_mq=zero ; elmag1_mq=zero
+
 
 !Examine tolerance criteria, and eventually  print a line to the output
 !file (with choice=1, the only non-dummy arguments of scprqt are
@@ -837,16 +847,17 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg_mq,cg1,cg1_mq,cg1_active,cg1_activ
 
    if (.not.kramers_deg) then
      rhor1_pq=rhor1
+     rhog1_pq=rhog1
      vtrial1_pq=vtrial1
-     call dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
-&     dbl_nnsclo,dim_eig2rf,doccde_rbz,docckqde,dtefield,dtfil,dtset,edocc,&
-&     eeig0,eigenq,eigen0,eigen1,ek0,ek1,eloc0,enl0,enl1,fermie1,gh0c1_set,gh1c_set,&
-&     gmet,gprimd,idir,indsy1,ipert,irrzon1,istwfk_rbz,kg,kg1,kpt_rbz,dtset%mband,&
-&     mkmem,mkqmem,mk1mem,mpi_enreg,mpw,mpw1,my_natom,dtset%natom,nband_rbz,ncpgr,nfftf,&
+     call dfpt_vtorho(cg,cg_mq,cg1_mq,cg1_active_mq,cplex,cprj,cprjq,cprj1,&
+&     dbl_nnsclo,dim_eig2rf,doccde_rbz,docckde_mq,dtefield,dtfil,dtset,edocc_mq,&
+&     eeig0_mq,eigen_mq,eigen0,eigen1_mq,ek0_mq,ek1_mq,eloc0_mq,enl0_mq,enl1_mq,fermie1_mq,gh0c1_set_mq,gh1c_set_mq,&
+&     gmet,gprimd,idir,indsy1,ipert,irrzon1,istwfk_rbz,kg,kg1_mq,kpt_rbz,dtset%mband,&
+&     mkmem,mkqmem,mk1mem,mpi_enreg,mpw,mpw1_mq,my_natom,dtset%natom,nband_rbz,ncpgr,nfftf,&
 &     nhat1,nkpt_rbz,npwarr,npwar1,res2,nspden,dtset%nsppol,nsym1,dtset%ntypat,nvresid1,&
-&     occkq,occ_rbz,optres,paw_ij,paw_ij1,pawang,pawang1,pawfgr,pawfgrtab,pawrhoij,&
-&     pawrhoij1,pawtab,phnons1,ph1d,dtset%prtvol,psps,pwindall,qmat,resid,residm,rhog1,&
-&     rhor1_pq,rmet,rprimd,symaf1,symrc1,symrl1,ucvol,usecprj,useylmgr1,ddk_f,&
+&     occk_mq,occ_rbz,optres,paw_ij,paw_ij1,pawang,pawang1,pawfgr,pawfgrtab,pawrhoij,&
+&     pawrhoij1,pawtab,phnons1,ph1d,dtset%prtvol,psps,pwindall,qmat,resid_mq,residm_mq,rhog1_mq,&
+&     rhor1_mq,rmet,rprimd,symaf1,symrc1,symrl1,ucvol,usecprj,useylmgr1,ddk_f,&
 &     vtrial,vtrial1_mq,wtk_rbz,xred,ylm,ylm1,ylmgr1)
    endif
 
