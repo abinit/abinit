@@ -28,7 +28,7 @@ prtfc 1
 natsph 1
 iatsph 2
 
-ndtset 5
+ndtset 6
 
 # Dataset 1
 # Output the GS WFK with MPI-FFT.
@@ -56,6 +56,13 @@ nstep4 5  #   Improves the portability of the test
 paral_kgb5 0 
 iomode5 0  # CG with MPI-IO is buggy!
 prtdos5 3
+
+# Dtaset 6
+# Read previous WFK file and DEN file with interpolation of rhor(r)
+ngfftdg6 48 48 48
+getden6 -1
+npband6 1 npkpt6 1 npfft6 4
+getwfk6 1
 
 # SCF parameters
 ecut 15. 
