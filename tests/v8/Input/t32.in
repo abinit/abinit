@@ -32,6 +32,7 @@ ecut  20.0         # Maximal kinetic energy cut-off, in Hartree
 pawecutdg 30.0
 nband 8
 occopt 7
+ixc 7
 tsmear 0.005
 #Definition of the k-point grid
 kptopt 1          # Option for the automatic generation of k points, taking
