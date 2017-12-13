@@ -350,7 +350,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  dfpt_scfcv_retcode = -1
  nsppol = dtset%nsppol; nspinor = dtset%nspinor
 
- kramers_deg=.true.
+ kramers_deg=.false.
 
 !Obtain dimensional translations in reciprocal space gprimd,
 !metrics and unit cell volume, from rprimd. Also output rprimd, gprimd and ucvol
