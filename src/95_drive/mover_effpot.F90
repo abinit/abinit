@@ -70,7 +70,7 @@ subroutine mover_effpot(inp,filnam,effective_potential,option,comm,hist)
  use m_effective_potential,only : effective_potential_type
  use m_fit_polynomial_coeff, only : polynomial_coeff_writeXML
  use m_fit_polynomial_coeff, only : fit_polynomial_coeff_fit,genereList
- use m_fit_polynomial_coeff, only : fit_polynomial_coeff_getPositive
+ use m_fit_polynomial_coeff, only : fit_polynomial_coeff_getPositive,fit_polynomial_coeff_getCoeffBound
  use m_electronpositron,   only : electronpositron_type
  use m_polynomial_coeff,only : polynomial_coeff_getNorder
  use m_pawang,       only : pawang_type, pawang_free
@@ -520,8 +520,11 @@ implicit none
          cutoff = cutoff + effective_potential%crystal%rprimd(ii,ii)
        end do
        cutoff = cutoff / 3.0
-       
-       call polynomial_coeff_getNorder(coeffs_bound,effective_potential%crystal,cutoff,&
+
+!       call fit_polynomial_coeff_getCoeffBound(effective_potential,coeffs_bound,&
+!&                                              hist,ncoeff_bound,comm,verbose=.true.)
+
+        call polynomial_coeff_getNorder(coeffs_bound,effective_potential%crystal,cutoff,&
 &       ncoeff_bound,ncoeff_bound_tot,inp%fit_boundPower,2,sc_size,&
 &       comm,anharmstr=inp%fit_anhaStrain==1,&
 &       spcoupling=inp%fit_SPCoupling==1,verbose=.false.,distributed=.false.,&

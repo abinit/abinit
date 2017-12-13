@@ -1101,7 +1101,7 @@ subroutine effective_potential_setCoeffs(coeffs,eff_pot,ncoeff)
 ! Check if the strain coupling is present
  do ii=1,ncoeff
    do jj=1,coeffs(ii)%nterm
-     if (any(coeffs(ii)%terms(jj)%direction(:) < 0)) then
+     if (coeffs(ii)%terms(jj)%nstrain > 0) then
        has_straincoupling = .TRUE.
      end if
    end do

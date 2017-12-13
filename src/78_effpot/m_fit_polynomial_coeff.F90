@@ -49,6 +49,7 @@ module m_fit_polynomial_coeff
  public :: fit_polynomial_coeff_fit
  public :: fit_polynomial_coeff_getFS
  public :: fit_polynomial_coeff_getPositive
+ public :: fit_polynomial_coeff_getCoeffBound
  public :: fit_polynomial_coeff_solve
  public :: fit_polynomial_printSystemFiles
  public :: genereList
@@ -1203,6 +1204,254 @@ subroutine fit_polynomial_coeff_getPositive(eff_pot,hist,coeff_values,isPositive
 end subroutine fit_polynomial_coeff_getPositive
 !!***
 
+!!****f* m_fit_polynomial_coeff/fit_polynomial_coeff_getCoeffBound
+!!
+!! NAME
+!! fit_polynomial_coeff_getCoeffBound
+!!
+!! FUNCTION
+!! This routine fit a list of possible model.
+!! Return in the isPositive array:
+!!   0 if the model ii does not contain possive coefficients
+!!   1 if the model ii contain possive coefficients
+!!
+!! INPUTS
+!! eff_pot<type(effective_potential)> = effective potential
+!! hist<type(abihist)> = The history of the MD (or snapshot of DFT
+!! comm = MPI communicator
+!! verbose  = optional, flag for the verbose mode
+!!
+!! OUTPUT
+!!
+!!
+!! PARENTS
+!!      mover_effpot
+!!
+!! CHILDREN
+!!      destroy_supercell,generelist,init_supercell,xred2xcart
+!!
+!! SOURCE
+
+subroutine fit_polynomial_coeff_getCoeffBound(eff_pot,coeffs_out,hist,ncoeff_bound,comm,verbose)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'fit_polynomial_coeff_getCoeffBound'
+ use interfaces_14_hidewrite
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+ !scalars
+ integer,intent(in) :: comm
+ integer,intent(out) :: ncoeff_bound
+ logical,optional,intent(in) :: verbose
+!arrays
+ type(abihist),intent(inout) :: hist
+ type(effective_potential_type),target,intent(inout) :: eff_pot
+ type(polynomial_coeff_type),allocatable,intent(out) :: coeffs_out(:)
+!Local variables-------------------------------
+!scalar
+ integer :: counter,icoeff,icoeff_bound,idisp,istrain,ii
+ integer :: istart,iterm,ndisp,nstrain,nterm,ncoeff_model,ncoeff_in,ncoeff_max
+ real(dp):: weight
+ logical :: need_verbose
+!arrays
+ integer,allocatable :: atindx(:,:),cells(:,:,:),direction(:)
+ integer,allocatable :: power_disps(:),power_strain(:),strain(:)
+ type(polynomial_term_type),dimension(:),allocatable :: terms
+ integer,allocatable :: odd_coeff(:),need_bound(:)
+ type(polynomial_coeff_type),pointer :: coeffs_in(:)
+ type(polynomial_coeff_type),allocatable :: coeffs_test(:)
+ character(len=5),allocatable :: symbols(:)
+ character(len=200):: name
+ character(len=500) :: msg
+! *************************************************************************
+
+
+!set the inputs varaibles 
+ ncoeff_model =  eff_pot%anharmonics_terms%ncoeff
+ coeffs_in => eff_pot%anharmonics_terms%coefficients
+
+!Do check
+ if(ncoeff_model == 0)then
+   write(msg,'(a)')'ncoeff_model must be different to 0'
+   MSG_BUG(msg)
+ end if
+
+!Map the hist in order to be consistent with the supercell into reference_effective_potential
+ call effective_potential_file_mapHistToRef(eff_pot,hist,comm)
+
+!Initialisation of optional arguments
+ need_verbose = .TRUE.
+ if(present(verbose)) need_verbose = verbose
+
+ write(msg, '(a)' ) ' Detection of the unbound coefficients'
+ if(need_verbose)call wrtout(std_out,msg,'COLL')
+
+!Allocation
+ ncoeff_max = 2 * ncoeff_model
+ ABI_ALLOCATE(odd_coeff,(ncoeff_max))
+ ABI_ALLOCATE(need_bound,(ncoeff_max))
+
+ ABI_ALLOCATE(symbols,(eff_pot%crystal%natom))
+ call symbols_crystal(eff_pot%crystal%natom,eff_pot%crystal%ntypat,eff_pot%crystal%npsp,&
+&                     symbols,eff_pot%crystal%typat,eff_pot%crystal%znucl)
+
+
+ ABI_DATATYPE_ALLOCATE(coeffs_test,(ncoeff_max))
+
+ do icoeff=1,ncoeff_model
+   call polynomial_coeff_init(coeffs_in(icoeff)%coefficient,coeffs_in(icoeff)%nterm,&
+&                             coeffs_test(icoeff),coeffs_in(icoeff)%terms,&
+&                             coeffs_in(icoeff)%name,check=.false.)
+ end do
+ 
+!array to know which coeff has to be bound
+ need_bound(:) = 1
+ counter = 0
+ ncoeff_in = ncoeff_model
+ 
+ do while(.not.all(need_bound == 0).and.counter<20)
+!  Get the coefficients with odd coefficient
+   odd_coeff = 0
+   if(counter>0) then
+     need_bound(1:ncoeff_in) = 0
+     icoeff_bound = ncoeff_in
+   else     
+     icoeff_bound = 1
+   end if
+   
+   do icoeff=icoeff_bound,ncoeff_model     
+     if(any(mod(coeffs_in(icoeff)%terms(1)%power_disp(:),2)/=0))then
+       odd_coeff(icoeff) = 1
+     end if
+     if(any(mod(coeffs_in(icoeff)%terms(1)%power_strain(:),2)/=0))then
+       odd_coeff(icoeff) = 1
+     end if
+     if(odd_coeff(icoeff) == 0 .and. coeffs_in(icoeff)%coefficient > zero) then
+       need_bound(icoeff) = 0
+     else
+        need_bound(icoeff) = 1
+     end if
+   end do
+   if(need_verbose)then
+     write(msg, '(a)' ) ' The following coefficients need to be bound:'
+     call wrtout(std_out,msg,'COLL')
+     do icoeff=1,ncoeff_model
+       if(need_bound(icoeff) == 1)then
+         write(msg, '(2a)' ) ' =>',trim(coeffs_in(icoeff)%name)
+         call wrtout(std_out,msg,'COLL')
+       end if
+     end do
+   end if
+
+
+   icoeff_bound = ncoeff_in + 1
+   if(counter==0)then
+     istart = 1     
+   else
+     istart = ncoeff_in
+   end if
+
+   ncoeff_bound = count(need_bound(istart:ncoeff_model)==1)
+   
+   do icoeff=istart,ncoeff_model
+     if(need_bound(icoeff)==1)then
+       
+       nterm = coeffs_in(icoeff)%nterm
+       ndisp = coeffs_in(icoeff)%terms(1)%ndisp
+       nstrain = coeffs_in(icoeff)%terms(1)%nstrain
+
+       ABI_ALLOCATE(terms,(nterm))
+       ABI_ALLOCATE(atindx,(2,ndisp))
+       ABI_ALLOCATE(cells,(3,2,ndisp))
+       ABI_ALLOCATE(direction,(ndisp))
+       ABI_ALLOCATE(power_disps,(ndisp))
+       ABI_ALLOCATE(power_strain,(nstrain))
+       ABI_ALLOCATE(strain,(nstrain))
+
+       do iterm=1,coeffs_in(icoeff)%nterm       
+         atindx(:,:) = coeffs_in(icoeff)%terms(iterm)%atindx(:,:)
+         cells(:,:,:) = coeffs_in(icoeff)%terms(iterm)%cell(:,:,:)
+         direction(:) = coeffs_in(icoeff)%terms(iterm)%direction(:)
+         power_strain(:) = coeffs_in(icoeff)%terms(iterm)%power_strain(:)       
+         power_disps(:) = coeffs_in(icoeff)%terms(iterm)%power_disp(:) 
+         strain(:) =  coeffs_in(icoeff)%terms(iterm)%strain(:)
+         weight =  1       
+         do idisp=1,ndisp
+           if(mod(power_disps(idisp),2) /= 0) then
+             power_disps(idisp) = power_disps(idisp) + 1
+           else
+             power_disps(idisp) = power_disps(idisp) + 2
+           end if
+         end do
+         do istrain=1,nstrain
+           if(mod(power_strain(istrain),2) /= 0)then
+             power_strain(istrain) = power_strain(istrain) + 1
+           else
+             if(power_strain(istrain) < 4 ) power_strain(istrain) = power_strain(istrain) + 2
+           end if
+         end do
+       
+         call polynomial_term_init(atindx,cells,direction,ndisp,nstrain,terms(iterm),&
+&                                  power_disps,power_strain,strain,weight,check=.false.)
+       end do
+       
+       name = ""
+       call polynomial_coeff_init(one,nterm,coeffs_test(icoeff_bound),terms,name,check=.false.)
+       call polynomial_coeff_getName(name,coeffs_test(icoeff_bound),symbols,recompute=.TRUE.)
+       call polynomial_coeff_SetName(name,coeffs_test(icoeff_bound))
+       
+!      Deallocate the terms
+       do iterm=1,nterm
+         call polynomial_term_free(terms(iterm))
+       end do
+       ABI_DEALLOCATE(terms)
+       ABI_DEALLOCATE(atindx)
+       ABI_DEALLOCATE(cells)
+       ABI_DEALLOCATE(direction)
+       ABI_DEALLOCATE(power_disps)
+       ABI_DEALLOCATE(power_strain)
+       ABI_DEALLOCATE(strain)
+
+       icoeff_bound = icoeff_bound  + 1
+
+     end if    
+   end do
+
+
+   if(counter==0)ncoeff_model = ncoeff_model + ncoeff_bound
+   call effective_potential_setCoeffs(coeffs_test,eff_pot,ncoeff_model)
+   call fit_polynomial_coeff_fit(eff_pot,(/0/),(/0/),hist,0,(/0,0/),1,0,&
+&             -1,1,comm,verbose=.true.,positive=.false.)
+
+   coeffs_in => eff_pot%anharmonics_terms%coefficients       
+   
+   counter = counter + 1
+ end do
+
+!  Deallocation
+ do ii=ncoeff_model,ncoeff_max
+   call polynomial_coeff_free(coeffs_test(ii))
+ end do
+
+!Deallocation
+ do icoeff=1,ncoeff_max
+   call polynomial_coeff_free(coeffs_test(icoeff))
+ end do
+ ABI_DATATYPE_DEALLOCATE(coeffs_test)
+ ABI_DEALLOCATE(odd_coeff)
+ ABI_DEALLOCATE(need_bound)
+ ABI_DEALLOCATE(symbols)
+
+end subroutine fit_polynomial_coeff_getCoeffBound
+!!***
+
+
 !!****f* m_fit_polynomial_coeff/fit_polynomial_coeff_solve
 !!
 !! NAME
@@ -1364,13 +1613,12 @@ subroutine fit_polynomial_coeff_solve(coefficients,fcart_coeffs,fcart_diff,&
 !other routine
 ! call dgesv(N,NRHS,A,LDA,IPIV,B,LDB,INFO)
 ! coefficients = B(:,NRHS)
-
  !U is nonsingular
  if (INFO==N+2) then
    coefficients = zero
  end if
 
- if(any(abs(coefficients)>1.0E5))then
+ if(any(abs(coefficients)>1.0E10))then
    INFO = 1
    coefficients = zero
  end if

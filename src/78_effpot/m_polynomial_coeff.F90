@@ -2089,7 +2089,9 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
 &                   only_odd_power=need_only_odd_power,only_even_power=need_only_even_power)
    ABI_DEALLOCATE(list_coeff)
    ABI_DEALLOCATE(compatibleCoeffs)
-   
+
+ else
+   ABI_ALLOCATE(list_combinaison_tmp,(1,1))
  end if
  
  ABI_DEALLOCATE(xcart)
@@ -2128,19 +2130,14 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
  ABI_ALLOCATE(list_combinaison,(power_disps(2),my_ncoeff))
  list_combinaison = 0
 
- my_size = my_ncoeff*power_disps(2)
-
-#if defined HAVE_MPI
- call MPI_SCATTERV(list_combinaison_tmp,buffsize,buffdispl,MPI_INTEGER,list_combinaison,my_size,&
-&                  MPI_INTEGER,master,comm,ierr)
-#endif
-
+ my_size = my_ncoeff*power_disps(2) 
+ call xmpi_scatterv(list_combinaison_tmp,buffsize,buffdispl,list_combinaison,my_size,master,&
+&                   comm,ierr)
+ 
  ABI_DEALLOCATE(buffdispl)
  ABI_DEALLOCATE(buffsize)
- if(iam_master) then
-   ABI_DEALLOCATE(list_combinaison_tmp)
- end if
-
+ ABI_DEALLOCATE(list_combinaison_tmp)
+ 
  !Compute the coefficients from the list of combinaison
  if(need_verbose .and. nproc > 1)then
    write(message,'(1a)')' Compute the coefficients'
