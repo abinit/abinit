@@ -734,10 +734,6 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &     nkxc,nspden,n3xccc,optene,option,dtset%paral_kgb,dtset%qptn,&
 &     rhog,rhog1,rhor,rhor1,rprimd,ucvol,psps%usepaw,usexcnhat,vhartr1,vpsp1,&
 &     nvresid1,res2,vtrial1,vxc,vxc1,xccc3d1)
-     write(*,*) 'DEBUG: initial potential guess energies'
-     write(*,*) 'DEBUG: ene pq:',ehart01,ehart1,elpsp1,exc1,elmag1
-     write(*,*) 'DEBUG: pot pq:',vtrial1(1,:)
-     write(*,*) 'DEBUG: pot pq:',vhartr1(1:4)
 
      if(.not.kramers_deg) then
        vtrial1_pq=vtrial1 !save trial potential at +q
@@ -751,10 +747,6 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &       nkxc,nspden,n3xccc,optene,option,dtset%paral_kgb,-dtset%qptn,&
 &       rhog,rhog1_mq,rhor,rhor1_mq,rprimd,ucvol,psps%usepaw,usexcnhat,vhartr1_mq,vpsp1,&
 &       nvresid1_mq,res2_mq,vtrial1_mq,vxc,vxc1_mq,xccc3d1)
-       write(*,*) 'DEBUG: ene mq:',ehart01_mq,ehart1_mq,elpsp1_mq,exc1_mq,elmag1_mq
-       write(*,*) 'DEBUG: rho1mq:',rhor1_mq(1,:)
-       write(*,*) 'DEBUG: pot mq:',vtrial1_mq(1,:)
-       write(*,*) 'DEBUG: pot mq:',vhartr1_mq(1:4)
        !outputs: 
 !!               vtrial1(cplex*nfft,nspden)= new value of 1st-order trial potential
 !!               vhartr1(cplex*nfft)=1-order Hartree potential (not output if size=0)
@@ -889,8 +881,6 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &     dtset%pawnzlm,pawrad,pawrhoij1,pawrhoijfermi,pawtab,dtset%pawxcdev,&
 &     dtset%prtvol,rhorfermi,ucvol,psps%usepaw,usexcnhat,vtrial1,vxc1,dtset%xclevel,&
 &     mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
-     write(*,*) 'DEBUG: rhorfermi=',rhorfermi(1,:)
-     write(*,*) 'DEBUG: fe1fixed=',fe1fixed
      if (.not.kramers_deg) then
        !fermie1_mq is updated as well
        call newfermie1(cplex,fermie1_mq,fe1fixed_mq,ipert,istep,dtset%ixc,my_natom,dtset%natom,&
@@ -901,8 +891,6 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 !!      only output is fermie1=derivative of fermi energy wrt perturbation
 !!          at input  : old value
 !!          at output : updated value
-        write(*,*) 'DEBUG: rhorfermi_mq=',rhorfermi_mq(1,:)
-        write(*,*) 'DEBUG: fe1fixed_mq=',fe1fixed_mq
      end if
    end if
 
@@ -912,8 +900,6 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 !  #######################e1magh###############################################
 !  Compute the 1st-order density rho1 from the 1st-order trial potential
 !  ----------------------------------------------------------------------
-   write(*,*) 'DEBUG: cg1_pq=',cg1(:,1),cg1(:,2)
-   write(*,*) 'DEBUG: cg1_mq=',cg1_mq(:,1),cg1_mq(:,2)
    call dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
 &   dbl_nnsclo,dim_eig2rf,doccde_rbz,docckqde,dtefield,dtfil,dtset,dtset%qptn,edocc,&
 &   eeig0,eigenq,eigen0,eigen1,ek0,ek1,eloc0,enl0,enl1,fermie1,gh0c1_set,gh1c_set,&
@@ -924,15 +910,11 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &   pawrhoij1,pawtab,phnons1,ph1d,dtset%prtvol,psps,pwindall,qmat,resid,residm,rhog1,&
 &   rhor1,rmet,rprimd,symaf1,symrc1,symrl1,ucvol,usecprj,useylmgr1,ddk_f,&
 &   vtrial,vtrial1,wtk_rbz,xred,ylm,ylm1,ylmgr1)
-   write(*,*) 'DEBUG: after first dfpt_vtorho'
-   write(*,*) 'DEBUG: energies=',eeig0,ek0,ek1,eloc0,enl0,enl1,fermie1
    if (.not.kramers_deg) then
      rhor1_pq=rhor1 !at this stage rhor1_pq contains only one term of the 1st order density at +q
      rhog1_pq=rhog1 !same for rhog1_pq
      !get the second term related to 1st order wf at -q
      !set here dtset%q to -dtset%q
-     write(*,*) 'DEBUG: cg_pq=',cgq(:,1),cgq(:,2)
-     write(*,*) 'DEBUG: cg_mq=',cg_mq(:,1),cg_mq(:,2)
      call dfpt_vtorho(cg,cg_mq,cg1_mq,cg1_active_mq,cplex,cprj,cprjq,cprj1,&
 &     dbl_nnsclo,dim_eig2rf,doccde_rbz,docckde_mq,dtefield,dtfil,dtset,-dtset%qptn,edocc_mq,&
 &     eeig0_mq,eigen_mq,eigen0,eigen1_mq,ek0_mq,ek1_mq,eloc0_mq,enl0_mq,enl1_mq,fermie1_mq,gh0c1_set_mq,gh1c_set_mq,&
@@ -943,7 +925,6 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &     pawrhoij1,pawtab,phnons1,ph1d,dtset%prtvol,psps,pwindall,qmat,resid_mq,residm_mq,rhog1_mq,&
 &     rhor1_mq,rmet,rprimd,symaf1,symrc1,symrl1,ucvol,usecprj,useylmgr1,ddk_f,&
 &     vtrial,vtrial1_mq,wtk_rbz,xred,ylm,ylm1,ylmgr1)
-      write(*,*) 'DEBUG: energies_mq=',eeig0_mq,ek0_mq,ek1_mq,eloc0_mq,enl0_mq,enl1_mq,fermie1_mq
      !set here dtset%q to -dtset%q
 !!    cg1(2,mpw*nspinor*mband*mk1mem*nsppol)=updated wavefunctions, orthogonalized to the occupied states
 !!    cg1_active(2,mpw1*nspinor*mband*mk1mem*nsppol)=pw coefficients of RF

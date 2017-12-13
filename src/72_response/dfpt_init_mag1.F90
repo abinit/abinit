@@ -84,7 +84,11 @@ subroutine dfpt_init_mag1(ipert,idir,rhor1,rhor0,cplex,nfft,nspden,vxc0,kxc0,nkx
        m1_norm=-half*(1/bxc1)
        rhor1(ipt,1)=zero             ! rho_up+rho_dwn    => charge density
        rhor1(ipt,2)=half*m1_norm     ! rho_up=1/2(rho+m) => half*m
-     enddo   
+     enddo
+   else
+     do ipt=1,cplex*nfft
+       rhor1(ipt,:)=zero
+     enddo
    endif
  else if(nspden==4) then
    if(cplex==1) then
@@ -113,7 +117,10 @@ subroutine dfpt_init_mag1(ipert,idir,rhor1,rhor0,cplex,nfft,nspden,vxc0,kxc0,nkx
        !write(*,*) ipt,mdir(3),m1_norm,rhor1(ipt,2),rhor1(ipt,3),rhor1(ipt,4)
        !write(*,*) ipt,bxc1,bxc0
      enddo
-
+   else
+     do ipt=1,cplex*nfft
+       rhor1(ipt,:)=zero
+     enddo
    endif
  endif
 
