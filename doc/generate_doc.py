@@ -82,7 +82,7 @@ list_infos_dir.append({"dir_name":"input_variables","root_filname":"",
 list_infos_dir.append({"dir_name":"theory","root_filname":"theorydoc",
                                                     "yml_files":["theorydocs"]})
 list_infos_dir.append({"dir_name":"topics","root_filname":"topic",
-                                                    "yml_files":["default_topic","list_of_topics","list_tribes","tests_dirs"]})
+                                                    "yml_files":["default_topic","list_of_topics","list_relevances","tests_dirs"]})
 list_infos_dir.append({"dir_name":"tutorial","root_filname":"lesson",
                                                     "yml_files":["lessons"]})
 list_infos_dir.append({"dir_name":"users","root_filname":"help",
@@ -95,7 +95,7 @@ msgs={"bibfiles"       :"as database input file for the list of generated files 
       "theorydocs"     :"as database input file for the list of theory documents ...",
       "default_topic"  :"to initialize the topic html files with default values ...",
       "list_of_topics" :"as database input file for the list of topics ...",
-      "list_tribes"    :"as database input file for the list of tribes ...",
+      "list_relevances":"as database input file for the list of relevances ...",
       "tests_dirs"     :"as database input file for the list of directories in which automatic test input files are present ...",
       "lessons"        :"as database input file for the list of lessons ...",
       "helps"          :"as database input file for the list of help files in the users directory ..."}
@@ -282,15 +282,18 @@ for abivarname in tests_for_abivars.keys():
   usage_report+=" [%s/%s] in tuto %s tests."%(ntests_abivarname_in_tuto,ntests_executable_in_tuto,executable)
   maxtests=10
   if ntests_abivarname>0 :
-    if ntests_abivarname<maxtests or ntests_abivarname_in_tuto<maxtests :
+    if ntests_abivarname<maxtests or ntests_abivarname_in_tuto<maxtests or ntests_abivarname_in_tuto==0 :
       only_tuto=0
-      if not ntests_abivarname<maxtests:
+      if not (ntests_abivarname<maxtests) and ntests_abivarname_in_tuto!=0 :
         only_tuto=1
         usage_report+=" Tuto test list: {"
       else:
         only_tuto=0
-        usage_report+=" Test list: {"
-      counter=0
+        if ntests_abivarname<maxtests :
+          usage_report+=" Test list: {"
+        else :
+          usage_report+=" Examples in tests: {"
+      counter=0 ; ntests=0
       for tests_dir in yml_in["tests_dirs"]:
         if len(dir_ID_for_tests[tests_dir])>0 and (only_tuto==0 or "tuto"==tests_dir[:4]):
           if counter>0:
@@ -299,9 +302,14 @@ for abivarname in tests_for_abivars.keys():
           usage_report+="%s:["%(tests_dir)
           for (i,test) in enumerate(dir_ID_for_tests[tests_dir]):
             usage_report+='<a href="../../tests/%s/Input/t%s.in">%s</a>'%(tests_dir,test,test)
+            ntests+=1
+            if ntests==maxtests:
+              break
             if not i==len(dir_ID_for_tests[tests_dir])-1:
               usage_report+=','
           usage_report+=']'
+          if ntests==maxtests:
+            break
       usage_report+="}."
     else:
       usage_report+=" Too many tests to report (>%s)."%(maxtests)
@@ -754,40 +762,40 @@ for i, var in enumerate(abinit_vars):
       if chars!="":
         cur_content += '<br><font id="characteristic">Characteristic: '+make_links(chars,var.abivarname,allowed_link_seeds,backlinks,backlink)+'</font>\n'
     # Topics
-    list_tribenames=[]
-    for tribe in yml_in["list_tribes"]:
-      list_tribenames.append(tribe[0].strip())
+    list_relevancenames=[]
+    for relevance in yml_in["list_relevances"]:
+      list_relevancenames.append(relevance[0].strip())
     if var.topics is not None :
       vartopics=var.topics
-      topics_name_tribe = vartopics.split(',')
-      if len(topics_name_tribe)==0:
-        print("\n Missing topic_tribe for abivarname %s."%(var.abivarname))
+      topics_name_relevance = vartopics.split(',')
+      if len(topics_name_relevance)==0:
+        print("\n Missing topic_relevance for abivarname %s."%(var.abivarname))
         topic_error+=1
       else:
-        if len(topics_name_tribe)>1:
+        if len(topics_name_relevance)>1:
           cur_content += '<br><font id="characteristic">Mentioned in topics: '
         else:
           cur_content += '<br><font id="characteristic">Mentioned in topic: '
-        for i, topic_name_tribe in enumerate(topics_name_tribe):
-          name_tribe = topic_name_tribe.split('_')
-          if not len(name_tribe)==2:
-            print("\n Ill-formed topic_name_tribe %s for abivarname %s."%(topic_name_tribe,var.abivarname))
+        for i, topic_name_relevance in enumerate(topics_name_relevance):
+          name_relevance = topic_name_relevance.split('_')
+          if not len(name_relevance)==2:
+            print("\n Ill-formed topic_name_relevance %s for abivarname %s."%(topic_name_relevance,var.abivarname))
             topic_error+=1
           else:
-            if not name_tribe[0].strip() in list_of_topics:
-              print("\n For input variable %s, name of topic '%s' is given. However this name of topic is not in list_of_topics.yml ."%(var.abivarname.strip(),name_tribe[0].strip()))
+            if not name_relevance[0].strip() in list_of_topics:
+              print("\n For input variable %s, name of topic '%s' is given. However this name of topic is not in list_of_topics.yml ."%(var.abivarname.strip(),name_relevance[0].strip()))
               topic_error+=1
-            if not name_tribe[1].strip() in list_tribenames:
-              print("\n For input variable %s, name of tribe '%s' is given. However this name of tribe is not in list_tribes.yml ."%(var.abivarname.strip(),name_tribe[1].strip()))
+            if not name_relevance[1].strip() in list_relevancenames:
+              print("\n For input variable %s, name of relevance '%s' is given. However this name of relevance is not in list_relevances.yml ."%(var.abivarname.strip(),name_relevance[1].strip()))
               topic_error+=1
-            cur_content += '<a href="../../topics/generated_files/topic_'+name_tribe[0].strip()+'.html">'+name_tribe[0].strip()+'</a>'
-            if i!=len(topics_name_tribe)-1:
+            cur_content += '<a href="../../topics/generated_files/topic_'+name_relevance[0].strip()+'.html">'+name_relevance[0].strip()+'</a>'
+            if i!=len(topics_name_relevance)-1:
               cur_content+=", "
             else:
               cur_content+="."
       cur_content += "</font>\n"
     else:
-      print(" No topic_tribe for abivarname %s"%(var.abivarname))
+      print(" No topic_relevance for abivarname %s"%(var.abivarname))
       topic_error+=1
     # Occurrence in input files, except when internal_only
     internal_only=0
@@ -940,10 +948,10 @@ found = dict()
 for topic_name in list_of_topics:
   topic_abivars[topic_name] = ""
 
-for (tribekey, tribeval) in yml_in["list_tribes"]:
+for (relevancekey, relevanceval) in yml_in["list_relevances"]:
 
   if debug == 1:
-    print("\nWork on "+tribekey+"\n")
+    print("\nWork on "+relevancekey+"\n")
 
   for topic_name in list_of_topics:
     found[topic_name] = 0
@@ -951,13 +959,13 @@ for (tribekey, tribeval) in yml_in["list_tribes"]:
   for i, var in enumerate(abinit_vars):
     try:
       if var.topics is not None:
-        topics_name_tribe = var.topics.split(',')
-        for i, topic_name_tribe in enumerate(topics_name_tribe):
-          name_tribe = topic_name_tribe.split('_')
-          if tribekey==name_tribe[1].strip() :
-            topic_name=name_tribe[0].strip()
+        topics_name_relevance = var.topics.split(',')
+        for i, topic_name_relevance in enumerate(topics_name_relevance):
+          name_relevance = topic_name_relevance.split('_')
+          if relevancekey==name_relevance[1].strip() :
+            topic_name=name_relevance[0].strip()
             if found[topic_name]==0 :
-              topic_abivars[topic_name] += "<p>"+tribeval+":<p>"
+              topic_abivars[topic_name] += "<p>"+relevanceval+":<p>"
               found[topic_name] = 1
             abivarname=var.abivarname
             if var.characteristics is not None and '[[INTERNAL_ONLY]]' in var.characteristics:

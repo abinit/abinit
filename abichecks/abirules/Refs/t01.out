@@ -10,7 +10,7 @@ Read input_variables/origin_files/varsets.yml as database input file for the lis
 Read theory/origin_files/theorydocs.yml as database input file for the list of theory documents ..
 Read topics/origin_files/default_topic.yml to initialize the topic html files with default values ..
 Read topics/origin_files/list_of_topics.yml as database input file for the list of topics ..
-Read topics/origin_files/list_tribes.yml as database input file for the list of tribes ..
+Read topics/origin_files/list_relevances.yml as database input file for the list of relevances ..
 Read topics/origin_files/tests_dirs.yml as database input file for the list of directories in which automatic test input files are present ..
 Read tutorial/origin_files/lessons.yml as database input file for the list of lessons ..
 Read users/origin_files/helps.yml as database input file for the list of help files in the users directory ..
