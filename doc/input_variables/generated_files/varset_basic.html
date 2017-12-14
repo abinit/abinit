@@ -915,8 +915,8 @@ einterp(2:4): Order of B-spline for the three reduced directions. Cubic spline (
 <br><font id="characteristic">Mentioned in topics: <a href="../../topics/generated_files/topic_SCFAlgorithms.html">SCFAlgorithms</a>, <a href="../../topics/generated_files/topic_TDDFT.html">TDDFT</a>, <a href="../../topics/generated_files/topic_ElecBandStructure.html">ElecBandStructure</a>.</font>
 <br><font id="smalltext">Moderately used: [259/920] in abinit tests, [41/136] in tuto abinit tests. Too many tests to report (>10).</font>
 <br><font id="vartype">Variable type: integer</font>
-<br><font id="default">Default is 0 if <a href="../../input_variables/generated_files/varset_basic.html#usewvl">usewvl</a>==1,
-17 if <a href="../../input_variables/generated_files/varset_internal.html#usepaw">usepaw</a>==1,
+<br><font id="default">Default is 17 if <a href="../../input_variables/generated_files/varset_internal.html#usepaw">usepaw</a>==1,
+0 if <a href="../../input_variables/generated_files/varset_basic.html#usewvl">usewvl</a>==1,
 7 otherwise.
 </font>
 <br><font id="text">
@@ -1090,7 +1090,7 @@ or indirectly by the maximum Kohn-Sham excitation energy
 <br><font id="mnemonics">Mnemonics: Index of eXchange-Correlation functional</font>
 <br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Mentioned in topics: <a href="../../topics/generated_files/topic_xc.html">xc</a>, <a href="../../topics/generated_files/topic_Hybrids.html">Hybrids</a>, <a href="../../topics/generated_files/topic_TDDFT.html">TDDFT</a>.</font>
-<br><font id="smalltext">Moderately used: [331/920] in abinit tests, [44/136] in tuto abinit tests. Too many tests to report (>10).</font>
+<br><font id="smalltext">Moderately used: [332/920] in abinit tests, [44/136] in tuto abinit tests. Too many tests to report (>10).</font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 1 (Comment: Default corresponds to Teter parametrization. However, if all the pseudopotentials have the same value of pspxc, the initial value of ixc will be that common value)</font>
 <br><font id="text">
@@ -2217,7 +2217,7 @@ each component must lie in [ -<a href="../../input_variables/generated_files/var
 <br><font id="mnemonics">Mnemonics: K - PoinTs NoRMalization</font>
 <br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_k-points.html">k-points</a>.</font>
-<br><font id="smalltext">Moderately used: [98/920] in abinit tests, [0/136] in tuto abinit tests. Tuto test list: {}.</font>
+<br><font id="smalltext">Moderately used: [98/920] in abinit tests, [0/136] in tuto abinit tests. Examples in tests: {etsf_io:[<a href="../../tests/etsf_io/Input/t00.in">00</a>,<a href="../../tests/etsf_io/Input/t09.in">09</a>],fast:[<a href="../../tests/fast/Input/t03.in">03</a>,<a href="../../tests/fast/Input/t04.in">04</a>,<a href="../../tests/fast/Input/t05.in">05</a>,<a href="../../tests/fast/Input/t06.in">06</a>,<a href="../../tests/fast/Input/t07.in">07</a>,<a href="../../tests/fast/Input/t08.in">08</a>,<a href="../../tests/fast/Input/t09.in">09</a>,<a href="../../tests/fast/Input/t11.in">11</a>]}.</font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 1</font>
 <br><font id="text">
@@ -3799,7 +3799,7 @@ metalic systems may be slow to converge.
 <br><font id="mnemonics">Mnemonics: WeighTs for K points</font>
 <br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_k-points.html">k-points</a>.</font>
-<br><font id="smalltext">Moderately used: [222/920] in abinit tests, [0/136] in tuto abinit tests. Tuto test list: {}.</font>
+<br><font id="smalltext">Moderately used: [222/920] in abinit tests, [0/136] in tuto abinit tests. Examples in tests: {etsf_io:[<a href="../../tests/etsf_io/Input/t00.in">00</a>,<a href="../../tests/etsf_io/Input/t09.in">09</a>,<a href="../../tests/etsf_io/Input/t21.in">21</a>,<a href="../../tests/etsf_io/Input/t22.in">22</a>],fast:[<a href="../../tests/fast/Input/t00.in">00</a>,<a href="../../tests/fast/Input/t01.in">01</a>,<a href="../../tests/fast/Input/t02.in">02</a>,<a href="../../tests/fast/Input/t03.in">03</a>,<a href="../../tests/fast/Input/t04.in">04</a>,<a href="../../tests/fast/Input/t05.in">05</a>]}.</font>
 <br><font id="vartype">Variable type: real(<a href="../../input_variables/generated_files/varset_basic.html#nkpt">nkpt</a>)</font>
 <br><font id="default">Default is <a href="../../input_variables/generated_files/varset_basic.html#nkpt">nkpt</a>*1.0 (Comment: Except when <a href="../../input_variables/generated_files/varset_basic.html#kptopt">kptopt</a>/=0)</font>
 <br><font id="text">
