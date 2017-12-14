@@ -218,7 +218,7 @@ program multibinit
 !Read the coefficient from fit
  if(filnam(4)/=''.and.filnam(4)/='no')then
    call effective_potential_file_getType(filnam(4),filetype)
-   if(filetype==3) then
+   if(filetype==3.or.filetype==23) then
      call effective_potential_file_read(filnam(4),reference_effective_potential,inp,comm)
    else
      write(message,'(a,(80a),3a)') ch10,('=',ii=1,80),ch10,ch10,&
