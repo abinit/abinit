@@ -2150,11 +2150,11 @@ subroutine fit_polynomial_coeff_computeMSD(eff_pot,hist,mse,msef,mses,natom,ntim
    unit_stress = get_unit()
    
    if (open_file('fit_diff_energy.dat',msg,unit=unit_ts,form="formatted",&
-&     status="replace",action="write") /= 0) then
+&     status="unknown",action="write") /= 0) then
      MSG_ERROR(msg)
    end if
    if (open_file('fit_diff_stress.dat',msg,unit=unit_stress,form="formatted",&
-&     status="replace",action="write") /= 0) then
+&     status="unknown",action="write") /= 0) then
      MSG_ERROR(msg)
    end if
 
