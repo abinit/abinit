@@ -3398,7 +3398,15 @@ subroutine ddb_to_dtset(comm,dtset,filename,psps)
  end if
  ABI_ALLOCATE(dtset%rprim_orig,(3,3,mxnimage))
  dtset%rprim_orig(1:3,1:3,1) = ddb_hdr%rprim(:,:)
- 
+
+ if (allocated(dtset%rprimd_orig)) then
+   ABI_DEALLOCATE(dtset%rprimd_orig)
+ end if
+ ABI_ALLOCATE(dtset%rprimd_orig,(3,3,mxnimage))
+ dtset%rprimd_orig(:,1,1) = ddb_hdr%rprim(:,1) * dtset%acell_orig(1,1)
+ dtset%rprimd_orig(:,2,1) = ddb_hdr%rprim(:,2) * dtset%acell_orig(2,1)
+ dtset%rprimd_orig(:,3,1) = ddb_hdr%rprim(:,3) * dtset%acell_orig(3,1)
+
  if (allocated(dtset%amu_orig)) then
    ABI_DEALLOCATE(dtset%amu_orig)
  end if
