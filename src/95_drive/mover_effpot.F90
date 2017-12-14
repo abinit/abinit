@@ -580,27 +580,31 @@ implicit none
        model_ncoeffbound = 0
        
        do ii=2,inp%fit_boundTerm
-!       Compute the number of possible combination         
-         nmodels = 2*factorial(ncoeff_bound) / (factorial(ii)*factorial(ncoeff_bound-ii))
+!        Compute the number of possible combination
+         ABI_ALLOCATE(list_bound,(nmodels,ii))
+         ABI_ALLOCATE(list_tmp,(ii))
+         list_bound = 0; list_tmp = 0; kk = 0;  jj = 1
+
+!       Generate the list of possible combinaison 1st count
+         call genereList(kk,jj,ii,ncoeff_bound,list_tmp,list_bound,nmodels,.false.)
+         nmodels = kk
 
          write(message, '(5a,I0,a,I0,a)')ch10,'--',ch10,' Try to bound the model ',&
 &         'with ', ii,' additional positive terms (',nmodels,') possibilities'
          call wrtout(std_out,message,'COLL')
 
+!        allocate and generate combinaisons
+         ABI_DEALLOCATE(list_bound)
+         ABI_DEALLOCATE(list_tmp)
          ABI_ALLOCATE(coeff_values,(nmodels,ncoeff+ii))         
          ABI_ALLOCATE(listcoeff_bound,(nmodels,ncoeff+ii))
          ABI_ALLOCATE(list_bound,(nmodels,ii))
          ABI_ALLOCATE(list_tmp,(ii))
          ABI_ALLOCATE(isPositive,(nmodels))
-         list_bound = 0
-         listcoeff_bound = 0
-         list_tmp = 0
-         isPositive = 0
-         kk = 1
-         jj = 1
-         
-!       Generate the list of possible combinaison
-         call genereList(kk,jj,ii,ncoeff_bound,list_tmp,list_bound,nmodels)
+         list_bound = 0;  listcoeff_bound = 0;  list_tmp = 0; isPositive = 0; kk = 0; jj = 1
+         call genereList(kk,jj,ii,ncoeff_bound,list_tmp,list_bound,nmodels,.true.)
+
+!        Generate the models         
          do jj=1,nmodels
            listcoeff_bound(jj,1:ncoeff) = listcoeff(1:ncoeff)
            listcoeff_bound(jj,ncoeff+1:ncoeff+ii) = list_bound(jj,:) + ncoeff
