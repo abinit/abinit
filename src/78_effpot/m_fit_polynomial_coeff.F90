@@ -2146,15 +2146,15 @@ subroutine fit_polynomial_coeff_computeMSD(eff_pot,hist,mse,msef,mses,natom,ntim
  if(present(print_file))then
 !   call abihist_init(hist_out,natom,ntime,.false.,.false.)   
    need_print=print_file
-   unit_ts = 563
-   unit_stress = 564
+   unit_ts = get_unit()
+   unit_stress = get_unit()
    
    if (open_file('fit_diff_energy.dat',msg,unit=unit_ts,form="formatted",&
-&     status="replace",action="write") /= 0) then
+&     status="unknown",action="write") /= 0) then
      MSG_ERROR(msg)
    end if
    if (open_file('fit_diff_stress.dat',msg,unit=unit_stress,form="formatted",&
-&     status="replace",action="write") /= 0) then
+&     status="unknown",action="write") /= 0) then
      MSG_ERROR(msg)
    end if
 
@@ -2460,7 +2460,7 @@ subroutine fit_polynomial_printSystemFiles(eff_pot,hist)
 end subroutine fit_polynomial_printSystemFiles
 !!***
 
-recursive subroutine genereList(i,m,m_max,n_max,list,list_out,size)
+recursive subroutine genereList(i,m,m_max,n_max,list,list_out,size,compute)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -2475,6 +2475,7 @@ recursive subroutine genereList(i,m,m_max,n_max,list,list_out,size)
 !scalar
  integer, intent(in) :: m_max,n_max,m,size
  integer, intent(inout) :: i
+ logical,intent(in) :: compute
 !arrays
  integer, intent(out) :: list(m_max),list_out(size,m_max)
 !Local variables ---------------------------------------
@@ -2484,16 +2485,16 @@ recursive subroutine genereList(i,m,m_max,n_max,list,list_out,size)
  
 ! *************************************************************************
  if (m > m_max) then
-   list_out(i,:) = list(:)
    i = i + 1
+   if(compute)list_out(i,:) = list(:)
  else
    do n = 1, n_max
      if (m == 1)then
        list(m) = n
-       call genereList (i, m + 1,m_max,n_max,list,list_out,size)
+       call genereList (i, m + 1,m_max,n_max,list,list_out,size,compute)
      else if (n > list(m - 1)) then
        list(m) = n
-       call genereList (i, m + 1,m_max,n_max,list,list_out,size)
+       call genereList (i, m + 1,m_max,n_max,list,list_out,size,compute)
      end if
    end do
  end if
