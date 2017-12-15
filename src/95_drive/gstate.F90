@@ -1330,8 +1330,8 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 &   dtset%mband,mcg,dtset%mkmem,mpi_enreg,dtset%mpw,dtset%natom,&
 &   dtset%nband,dtset%nkpt,npwarr,dtset%nsppol,&
 &   occ,resid,response,dtfil%unwff2,wvl%wfs,wvl%descr)
-    !SPr: add input variable managing the .vtk file OUTPUT (Please don't remove the next commented line)
-    !call printmagvtk(mpi_enreg,cplex1,dtset%nspden,nfftf,ngfftf,rhor,rprimd,'DEN.vtk')
+   !SPr: add input variable managing the .vtk file OUTPUT (Please don't remove the next commented line)
+   !call printmagvtk(mpi_enreg,cplex1,dtset%nspden,nfftf,ngfftf,rhor,rprimd,'DEN.vtk')
  end if
 
  if (dtset%prtwf==2) then
