@@ -35,6 +35,7 @@ module m_polynomial_conf
 
  public :: polynomial_conf_init
  public :: polynomial_conf_free
+!AM_2017Need to debug this routine 
  public :: polynomial_conf_evaluate
 !!***
 
@@ -211,8 +212,8 @@ subroutine polynomial_conf_free(polynomial_conf)
    ABI_DEALLOCATE(polynomial_conf%cutoff_disp)
  end if
 
- polynomial_conf%power_disp    = zero
- polynomial_conf%power_strain  = zero
+ polynomial_conf%power_disp    = 0
+ polynomial_conf%power_strain  = 0
  polynomial_conf%factor_disp   = zero
  polynomial_conf%factor_strain = zero
  polynomial_conf%cutoff_strain = zero
@@ -301,6 +302,7 @@ subroutine polynomial_conf_evaluate(disp,disp_ref,energy,factor_disp,factor_stra
   fcart(:,:) = zero
   strten(:) = zero
 
+  write(std_out,*) factor_strain,index_cells,power_strain,strain,strain_ref
   do icell = 1,ncell
     ii = (cells(icell)-1)*natom_uc
     do ia = 1, natom_uc
@@ -309,12 +311,9 @@ subroutine polynomial_conf_evaluate(disp,disp_ref,energy,factor_disp,factor_stra
       do mu=1,3
         diff_tmp = diff_tmp + disp(mu,kk)**2
       end do
-      
       diff_tmp = diff_tmp**0.5
-
 !     Compute diff between ref and curent displacement
       diff = diff_tmp - disp_ref(ia)
-
 !     Accumule energy
       energy =  energy + (sign(half, diff)+half)*(factor_disp*((diff_tmp/disp_ref(ia))**power_disp))
     end do

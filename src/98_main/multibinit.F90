@@ -56,6 +56,7 @@ program multibinit
  use m_multibinit_dataset
  use m_effective_potential_file
  use m_abihist
+ use m_ab7_invars
  use m_io_tools,   only : get_unit, flush_unit,open_file
  use m_fstrings,   only : int2char4,replace
  use m_time ,      only : asctime
@@ -89,8 +90,9 @@ program multibinit
  character(len=24) :: codename,start_datetime
  character(len=strlen) :: string
  character(len=fnlen) :: filnam(17),tmpfilename,name
+ character(len=fnlen) :: filstat
  character(len=500) :: message
- type(multibinit_dataset_type) :: inp
+ type(multibinit_dtset_type) :: inp
  type(effective_potential_type) :: reference_effective_potential
  type(abihist) :: hist
  type(args_t) :: args
@@ -139,6 +141,10 @@ program multibinit
 !Initialise the code : write heading, and read names of files.
  call init10(filnam,comm)
 
+! Call the parser from the parser module.
+ filstat = trim("_STATUS")
+ call ab7_invars_set_flags(.true., .true., status_file = filstat, timab_tsec = tsec)
+ 
 !******************************************************************
 
  call timein(tcpu,twall)
@@ -180,7 +186,7 @@ program multibinit
  call wrtout(ab_out,message,'COLL')
  call wrtout(std_out,message,'COLL')
 
- call effective_potential_file_getDimSystem(filnam(3),natom,ntypat,nph1l,nrpt,comm)
+ call effective_potential_file_getDimSystem(filnam(3),natom,ntypat,nph1l,nrpt)
  
 !Read the input file, and store the information in a long string of characters
 !strlen from defs_basis module
@@ -212,7 +218,7 @@ program multibinit
 !Read the coefficient from fit
  if(filnam(4)/=''.and.filnam(4)/='no')then
    call effective_potential_file_getType(filnam(4),filetype)
-   if(filetype==3) then
+   if(filetype==3.or.filetype==23) then
      call effective_potential_file_read(filnam(4),reference_effective_potential,inp,comm)
    else
      write(message,'(a,(80a),3a)') ch10,('=',ii=1,80),ch10,ch10,&
@@ -257,7 +263,7 @@ program multibinit
      call wrtout(std_out,message,'COLL') 
      call wrtout(ab_out,message,'COLL') 
      if(filnam(5)/=''.and.filnam(5)/='no')then
-       call effective_potential_file_readMDfile(filnam(5),hist)
+       call effective_potential_file_readMDfile(filnam(5),hist,option=inp%fit_ts_option)
        if (hist%mxhist == 0)then
          write(message, '(5a)' )&
 &         'The MD ',trim(filnam(5)),' file is not correct ',ch10,&
@@ -329,9 +335,11 @@ program multibinit
      else if (option==1.or.option==2)then
 !      option = 1
        call fit_polynomial_coeff_fit(reference_effective_potential,&
-&       inp%fit_bancoeff,inp%fit_fixcoeff,hist,&
+&       inp%fit_bancoeff,inp%fit_fixcoeff,hist,inp%fit_generateTerm,&
 &       inp%fit_rangePower,inp%fit_nbancoeff,inp%fit_ncycle,&
 &       inp%fit_nfixcoeff,option,comm,cutoff_in=inp%fit_cutoff,&
+&       fit_tolMSDF=inp%fit_tolMSDF,fit_tolMSDS=inp%fit_tolMSDS,fit_tolMSDE=inp%fit_tolMSDE,&
+&       fit_tolMSDFS=inp%fit_tolMSDFS,&
 &       verbose=.true.,positive=.false.,&
 &       anharmstr=inp%fit_anhaStrain==1,&
 &       spcoupling=inp%fit_SPCoupling==1)
