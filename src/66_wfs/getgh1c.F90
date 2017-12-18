@@ -12,7 +12,7 @@
 !! If required, <G|S^(1)|C> is returned in gs1c (S=overlap - PAW only)
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (XG, DRH, MT)
+!! Copyright (C) 1998-2017 ABINIT group (XG, DRH, MT, SPr)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -316,11 +316,12 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
          end do
        else
        !SPr: modified definition of local potential components for cplex=2 (see dotprod_vn)
+       !also, v21==v12* not always holds (e.g. magnetic field perturbation)
          do i3=1,gs_hamkq%n6
            do i2=1,gs_hamkq%n5
              do i1=1,gs_hamkq%n4
-               vlocal1_tmp(2*i1-1,i2,i3)= rf_hamkq%vlocal1(2*i1-1,i2,i3,3)
-               vlocal1_tmp(2*i1  ,i2,i3)=-rf_hamkq%vlocal1(2*i1  ,i2,i3,3)
+               vlocal1_tmp(2*i1-1,i2,i3)= rf_hamkq%vlocal1(2*i1  ,i2,i3,4)
+               vlocal1_tmp(2*i1  ,i2,i3)=-rf_hamkq%vlocal1(2*i1-1,i2,i3,4)
              end do
            end do
          end do
@@ -329,14 +330,26 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
 &       gs_hamkq%istwf_k,gs_hamkq%kg_k,gs_hamkq%kg_kp,gs_hamkq%mgfft,mpi_enreg,1,gs_hamkq%ngfft,&
 &       npw,npw1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,2,mpi_enreg%paral_kgb,tim_fourwf,weight,weight,&
 &       use_gpu_cuda=gs_hamkq%use_gpu_cuda)
-!      gh1c4=(re(v12)+im(v12))*phi2 => v^12*phi1
-       do i3=1,gs_hamkq%n6
-         do i2=1,gs_hamkq%n5
-           do i1=1,gs_hamkq%n4
-             vlocal1_tmp(2*i1,i2,i3)=-vlocal1_tmp(2*i1,i2,i3)
+!      gh1c4=(re(v12)+im(v12))*phi2 => v^12*phi2
+       if(rf_hamkq%cplex==1) then
+         do i3=1,gs_hamkq%n6
+           do i2=1,gs_hamkq%n5
+             do i1=1,gs_hamkq%n4
+               vlocal1_tmp(2*i1,i2,i3)=-vlocal1_tmp(2*i1,i2,i3)
+             end do
            end do
          end do
-       end do
+       else
+         !for cplex=2 and time-reversal breaking perturbations,v21/=v12*
+         do i3=1,gs_hamkq%n6
+           do i2=1,gs_hamkq%n5
+             do i1=1,gs_hamkq%n4
+               vlocal1_tmp(2*i1-1,i2,i3)= rf_hamkq%vlocal1(2*i1-1,i2,i3,3)
+               vlocal1_tmp(2*i1  ,i2,i3)= rf_hamkq%vlocal1(2*i1  ,i2,i3,3)
+             end do
+           end do
+         end do
+       endif
        call fourwf(cplex1,vlocal1_tmp,cwavef2,gh1c4,work,gs_hamkq%gbound_k,gs_hamkq%gbound_kp,&
 &       gs_hamkq%istwf_k,gs_hamkq%kg_k,gs_hamkq%kg_kp,gs_hamkq%mgfft,mpi_enreg,1,gs_hamkq%ngfft,&
 &       npw,npw1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,2,mpi_enreg%paral_kgb,tim_fourwf,weight,weight,&

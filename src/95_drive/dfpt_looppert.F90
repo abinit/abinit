@@ -1716,7 +1716,6 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
          call dfpt_init_mag1(ipert,idir,rhor1,rhor,cplex,nfftf,nspden,vxc,kxc,nkxc)
          
          if(.not.kramers_deg) then
-           !to add later a possibility of non-zero q in dfpt_init_mag1
            rhor1_pq=rhor1
            call dfpt_init_mag1(ipert,idir,rhor1_mq,rhor,cplex,nfftf,nspden,vxc,kxc,nkxc)
          endif
