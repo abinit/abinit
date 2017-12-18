@@ -235,10 +235,10 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsph
 
 ! EB - Compute magnetization of the whole cell
  if (nspden==2) then
-   mag_coll=0
+   mag_coll=zero
 !  rho_up=0
 !  rho_dn=0
-   rho_tot=0
+   rho_tot=zero
    do ifft=1,nfft
 !   rho_up=rho_up+rhor(ifft,2)
 !   rho_dn=rho_dn+(rhor(ifft,2)-rhor(ifft,1))
@@ -251,10 +251,10 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsph
 !  rho_dn=rho_dn*ucvol/dble(nfftot)
 !  rho_tot=rho_tot*ucvol/dble(nfftot) 
  else if (nspden==4) then
-   rho_tot=0
-   mag_x=0
-   mag_y=0
-   mag_z=0
+   rho_tot=zero
+   mag_x=zero
+   mag_y=zero
+   mag_z=zero
    do ifft=1,nfft
      rho_tot=rho_tot+rhor(ifft,1)
      mag_x=mag_x+rhor(ifft,2)

@@ -434,7 +434,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
 #endif
 !  M
    dtsets(idtset)%magconon = 0
-   dtsets(idtset)%magcon_lambda = 10.0_dp
+   dtsets(idtset)%magcon_lambda = 0.01_dp
    dtsets(idtset)%max_ncpus = 0
    dtsets(idtset)%mbpt_sciss=zero
    dtsets(idtset)%mband = -1
