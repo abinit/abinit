@@ -1897,11 +1897,11 @@ For a cluster, this procedure will only generate the Gamma point.
 <br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_MagMom.html">MagMom</a>.</font>
 <br><font id="smalltext">Rarely used: [1/920] in abinit tests, [0/136] in tuto abinit tests. Test list: {v7:[<a href="../../tests/v7/Input/t05.in">05</a>]}.</font>
 <br><font id="vartype">Variable type: real</font>
-<br><font id="default">Default is 10.0</font>
+<br><font id="default">Default is 0.01</font>
 <br><font id="text">
 <p>
 <p>
- This variable gives the amplitude of the constraint imposed on the magnetization vectors on each atom (turned on with flag variable <a href="../../input_variables/generated_files/varset_gstate.html#magconon">magconon</a>). Typical values for lambda are 10 to a few hundred. The energy will vary strongly and convergence will be difficult if lambda is too large. The constraint will be weak and the magnetization will not be close to <a href="../../input_variables/generated_files/varset_gstate.html#spinat">spinat</a> if lambda is too small. See variable <a href="../../input_variables/generated_files/varset_gstate.html#magconon">magconon</a> for more details.
+ This variable gives the amplitude of the constraint imposed on the magnetization vectors on each atom (turned on with flag variable <a href="../../input_variables/generated_files/varset_gstate.html#magconon">magconon</a>). Typical values for lambda are 0.001 to 0.1. The SCF convergence will be difficult if lambda is too large. If lambda is too small, the constraint will not be very effective and it will give magnetization not close to the desired <a href="../../input_variables/generated_files/varset_gstate.html#spinat">spinat</a> target. In case of convergence problem, it can help to start with a small value of lambda and to increase it by reading the wavefunction obtained with a lower lambda value. See variable <a href="../../input_variables/generated_files/varset_gstate.html#magconon">magconon</a> for more details.
 </p>
 </font>
 
