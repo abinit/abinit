@@ -86,6 +86,10 @@ subroutine printmagvtk(mpi_enreg,cplex,nspden,nfft,ngfft,rhor,rprimd,fname)
  integer :: nproc_fft,ir
  character(len=500) :: msg
  character(len=10)  :: outformat
+ character(len=50)   :: fname_vtk
+ character(len=50)   :: fname_xyz
+ character(len=50)   :: fname_xyz_re
+ character(len=50)   :: fname_xyz_im
 !arrays
  real(dp),allocatable :: rhorfull(:,:)
 
@@ -110,7 +114,12 @@ subroutine printmagvtk(mpi_enreg,cplex,nspden,nfft,ngfft,rhor,rprimd,fname)
 
  DBG_EXIT("COLL")
 
-!write(std_out,*) ' Writing out .vtk file: ',fname
+ fname_vtk=adjustl(adjustr(fname)//".vtk")
+ fname_xyz=adjustl(adjustr(fname)//".xyz")
+ fname_xyz_re=adjustl(adjustr(fname)//"_re.xyz")
+ fname_xyz_im=adjustl(adjustr(fname)//"_im.xyz")
+ !write(std_out,*) ' Writing out .vtk file: ',fname_vtk
+ !write(std_out,*) ' Writing out .xyz file: ',fname_xyz
 
   !if 1 or two component density then write out either 1 or 2 scalar density fields
   !if 4, then write one scalar field (density) and one vector field (magnetization density)
@@ -152,22 +161,22 @@ subroutine printmagvtk(mpi_enreg,cplex,nspden,nfft,ngfft,rhor,rprimd,fname)
  if(mpi_rank==mpi_head)then
 
     ! Open the output vtk file
-   if (open_file(fname,msg,newunit=denvtk,status='replace',form='formatted') /=0) then
+   if (open_file(fname_vtk,msg,newunit=denvtk,status='replace',form='formatted') /=0) then
      MSG_WARNING(msg)
      RETURN
    end if
 
    if(cplex==1) then
-     if (open_file("DEN.xyz",msg,newunit=denxyz,status='replace',form='formatted') /=0) then
+     if (open_file(fname_xyz,msg,newunit=denxyz,status='replace',form='formatted') /=0) then
        MSG_WARNING(msg)
        RETURN
      end if
    else if (cplex==2) then
-     if (open_file("DEN_re.xyz",msg,newunit=denxyz,status='replace',form='formatted') /=0) then
+     if (open_file(fname_xyz_re,msg,newunit=denxyz,status='replace',form='formatted') /=0) then
        MSG_WARNING(msg)
        RETURN
      end if
-     if (open_file("DEN_im.xyz",msg,newunit=denxyz_im,status='replace',form='formatted') /=0) then
+     if (open_file(fname_xyz_im,msg,newunit=denxyz_im,status='replace',form='formatted') /=0) then
        MSG_WARNING(msg)
        RETURN
      end if

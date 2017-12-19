@@ -180,7 +180,7 @@ subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
 !scalars
  integer :: nk3xc,ifft,ipositron,ispden,nfftot,offset
  integer :: mpi_comm_sphgrid,ixc_current
- !integer :: ii,jj,kk,ipt,nx,ny,nz           !SPr: debug
+ integer :: ii,jj,kk,ipt,nx,ny,nz           !SPr: debug
  !real(dp):: rx,ry,rz                        !SPr: debug
  real(dp) :: doti,e_xcdc_vxctau
  logical :: add_tfw_,calc_xcdc,with_vxctau
@@ -189,7 +189,7 @@ subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
 !arrays
  real(dp) :: evxc,tsec(2),vmean(dtset%nspden),vzeeman(dtset%nspden)
  real(dp),allocatable :: rhowk(:,:),Vmagconstr(:,:),vnew(:,:),xcart(:,:)
- !real(dp),allocatable :: vzeemanHarm(:,:)   !SPr: debug Zeeman field q/=0 real space
+!real(dp),allocatable :: vzeemanHarm(:,:)   !SPr: debug Zeeman field q/=0 real space
 
 ! *********************************************************************
 
@@ -363,8 +363,8 @@ subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
 !EB <-- vzeeman might have to be allocated correctly --> to be checked
 ! vzeeman = 1/2 ( -B_z, -B_x + iB_y ; -B_x - iB_y , B_z)
  vzeeman(:) = zero
- !ABI_ALLOCATE(vzeemanHarm,(nfft,dtset%nspden))  ! SPr: debug stuff
- !vzeemanHarm(:,:) = zero                        !
+! ABI_ALLOCATE(vzeemanHarm,(nfft,dtset%nspden))  ! SPr: debug stuff
+! vzeemanHarm(:,:) = zero                        !
  if (any(abs(dtset%zeemanfield(:))>tol8)) then
    if(dtset%nspden==2)then
 !    EB The collinear case has to be checked :
@@ -379,6 +379,8 @@ subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
      vzeeman(1) =-half*dtset%zeemanfield(3)  ! v_upup
      vzeeman(2) = half*dtset%zeemanfield(3)  ! v_dndn
 
+     !vzeeman(1) = zero  ! v_upup
+     !vzeeman(2) = zero  ! v_dndn
 
      !nx=ngfft(1); ny=ngfft(2); nz=ngfft(3)
      !do kk=0,nz-1
@@ -400,6 +402,11 @@ subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
      vzeeman(2)= half*dtset%zeemanfield(3)    ! v_dndn
      vzeeman(3)=-half*dtset%zeemanfield(1)    ! Re(v_updn)
      vzeeman(4)= half*dtset%zeemanfield(2)    ! Im(v_updn)
+
+     !vzeeman(1)=0.0
+     !vzeeman(2)=0.0
+     !vzeeman(3)=0.0
+     !vzeeman(4)=0.0
 
      !nx=ngfft(1); ny=ngfft(2); nz=ngfft(3)
      !do kk=0,nz-1
@@ -570,7 +577,7 @@ subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
  end if
 
  ABI_DEALLOCATE(Vmagconstr)
- !ABI_DEALLOCATE(vzeemanHarm) SPr: debug for q/=0 magnetic field
+ !ABI_DEALLOCATE(vzeemanHarm) !SPr: debug for q/=0 magnetic field
 
  call timab(945,2,tsec)
  call timab(940,2,tsec)

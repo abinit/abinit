@@ -366,6 +366,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  integer :: my_quit,quitsum_request,timelimit_exit,varid,ncerr,ncid
  integer ABI_ASYNC :: quitsum_async
  integer :: rdwrpaw,spaceComm,sz1,sz2,usexcnhat,Z_kappa
+ integer :: dbl_nnsclo_mq,ifft,pqmq !-q duplicate for dbl_nnsclo, pqmq = indicator for potential mixing
  logical :: need_fermie1,paral_atom,use_nhat_gga
  real(dp) :: wtime_step,now,prev
  real(dp) :: born,born_bar,boxcut,deltae,diffor,diel_q,dum,ecut,ecutf,elast
@@ -376,7 +377,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  real(dp) :: enl1_mq,eovl1_mq,epaw1_mq,etotal_mq,evar_mq,evdw_mq,exc1_mq,fermie1_mq,deltae_mq,elmag1_mq
  character(len=500) :: msg
  character(len=fnlen) :: fi1o
-!character(len=fnlen) :: fi1o_vtk
+ character(len=fnlen) :: fi1o_vtk
  integer  :: prtopt
  type(ab7_mixing_object) :: mix
  type(efield_type) :: dtefield
@@ -463,7 +464,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  eloc0=zero ; elpsp1=zero ; enl0=zero ; enl1=zero ; eovl1=zero; exc1=zero
  deltae=zero ; fermie1=zero ; epaw1=zero ; eberry=zero ; elmag1=zero
  elast_mq=zero
-
+ dbl_nnsclo_mq=0
 !This might be taken away later
  edocc_mq=zero ; eeig0_mq=zero ; ehart01_mq=zero ; ehart1_mq=zero ; ek0_mq=zero ; ek1_mq=zero
  eloc0_mq=zero ; elpsp1_mq=zero ; enl0_mq=zero ; enl1_mq=zero ; eovl1_mq=zero; exc1_mq=zero
@@ -737,28 +738,14 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 
      if(.not.kramers_deg) then
        vtrial1_pq=vtrial1 !save trial potential at +q
-       rhor1_mq=rhor1
-       rhog1_mq=rhog1
+       !rhor1_mq=rhor1
+       !rhog1_mq=rhog1
        !get initial guess for vtrial1 at -q
-!!               optres=0: the trial potential residual is computed ; the input potential value is kept 
-!!                      1: the new value of the trial potential is computed in place of the input value <= this one here (option=1)
        call dfpt_rhotov(cplex,ehart01_mq,ehart1_mq,elpsp1_mq,exc1_mq,elmag1_mq,gmet,gprimd,gsqcut,idir,ipert,&
 &       dtset%ixc,kxc,mpi_enreg,dtset%natom,nfftf,ngfftf,nhat,nhat1,nhat1gr,nhat1grdim,&
 &       nkxc,nspden,n3xccc,optene,option,dtset%paral_kgb,-dtset%qptn,&
 &       rhog,rhog1_mq,rhor,rhor1_mq,rprimd,ucvol,psps%usepaw,usexcnhat,vhartr1_mq,vpsp1,&
 &       nvresid1_mq,res2_mq,vtrial1_mq,vxc,vxc1_mq,xccc3d1)
-       !outputs: 
-!!               vtrial1(cplex*nfft,nspden)= new value of 1st-order trial potential
-!!               vhartr1(cplex*nfft)=1-order Hartree potential (not output if size=0)
-!!               vxc1(cplex*nfft,nspden)= 1st-order XC potential (not output if size=0)
-!!               ==== if optene==1
-!!                ehart01=inhomogeneous 1st-order Hartree part of 2nd-order total energy
-!!                ehart1=1st-order Hartree part of 2nd-order total energy
-!!                exc1=1st-order exchange-correlation part of 2nd-order total energy
-!!                elpsp1=1st-order local pseudopot. part of 2nd-order total energy.
-!!               ==== if optres==0
-!!                vresid1(cplex*nfft,nspden)=potential residual
-!!                vres2=square of the norm of the residual
      endif
 
 !    For Q=0 and metallic occupation, initialize quantities needed to
@@ -800,13 +787,6 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &         paw_ij,pawang,pawang1,pawfgr,pawfgrtab,pawrad,pawrhoijfermi,pawtab,&
 &         phnons1,ph1d,dtset%prtvol,psps,rhorfermi_mq,rmet,rprimd,symaf1,symrc1,symrl1,&
 &         ucvol,usecprj,useylmgr1,vtrial,vxc,wtk_rbz,xred,ylm,ylm1,ylmgr1)
-!!        OUTPUT
-!!             eigen1(2*mband*mband*nkpt_rbz*nsppol)=array for holding eigenvalues
-!!                                 (hartree) - only digonal elements computed here
-!!             fe1fixed=fixed contribution to the first-order Fermi energy
-!!             (nonlocal and kinetic in the case of strain)
-!!             nhatfermi(cplex*nfftf,nspden)=fermi-level compensation charge density (PAW only)
-!!             rhorfermi(cplex*nfftf,nspden)=fermi-level electronic density
        end if
 !        call calcdensph(gmet,mpi_enreg,dtset%natom,nfftf,ngfftf,nspden,&
 !&        dtset%ntypat,ab_out,dtset%ratsph,rhorfermi,rprimd,dtset%typat,ucvol,xred,&
@@ -882,15 +862,12 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &     dtset%prtvol,rhorfermi,ucvol,psps%usepaw,usexcnhat,vtrial1,vxc1,dtset%xclevel,&
 &     mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
      if (.not.kramers_deg) then
-       !fermie1_mq is updated as well
+       !fermie1_mq is updated as well at "-q"
        call newfermie1(cplex,fermie1_mq,fe1fixed_mq,ipert,istep,dtset%ixc,my_natom,dtset%natom,&
 &       nfftf,nfftotf,nhatfermi,nspden,dtset%ntypat,dtset%occopt,paw_an,paw_an1,paw_ij1,pawang,&
 &       dtset%pawnzlm,pawrad,pawrhoij1,pawrhoijfermi,pawtab,dtset%pawxcdev,&
 &       dtset%prtvol,rhorfermi_mq,ucvol,psps%usepaw,usexcnhat,vtrial1_mq,vxc1_mq,dtset%xclevel,&
 &       mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
-!!      only output is fermie1=derivative of fermi energy wrt perturbation
-!!          at input  : old value
-!!          at output : updated value
      end if
    end if
 
@@ -900,6 +877,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 !  #######################e1magh###############################################
 !  Compute the 1st-order density rho1 from the 1st-order trial potential
 !  ----------------------------------------------------------------------
+
    call dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
 &   dbl_nnsclo,dim_eig2rf,doccde_rbz,docckqde,dtefield,dtfil,dtset,dtset%qptn,edocc,&
 &   eeig0,eigenq,eigen0,eigen1,ek0,ek1,eloc0,enl0,enl1,fermie1,gh0c1_set,gh1c_set,&
@@ -914,9 +892,8 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
      rhor1_pq=rhor1 !at this stage rhor1_pq contains only one term of the 1st order density at +q
      rhog1_pq=rhog1 !same for rhog1_pq
      !get the second term related to 1st order wf at -q
-     !set here dtset%q to -dtset%q
      call dfpt_vtorho(cg,cg_mq,cg1_mq,cg1_active_mq,cplex,cprj,cprjq,cprj1,&
-&     dbl_nnsclo,dim_eig2rf,doccde_rbz,docckde_mq,dtefield,dtfil,dtset,-dtset%qptn,edocc_mq,&
+&     dbl_nnsclo_mq,dim_eig2rf,doccde_rbz,docckde_mq,dtefield,dtfil,dtset,-dtset%qptn,edocc_mq,&
 &     eeig0_mq,eigen_mq,eigen0,eigen1_mq,ek0_mq,ek1_mq,eloc0_mq,enl0_mq,enl1_mq,fermie1_mq,gh0c1_set_mq,gh1c_set_mq,&
 &     gmet,gprimd,idir,indsy1,ipert,irrzon1,istwfk_rbz,kg,kg1_mq,kpt_rbz,dtset%mband,&
 &     mkmem,mkqmem,mk1mem,mpi_enreg,mpw,mpw1_mq,my_natom,dtset%natom,nband_rbz,ncpgr,nfftf,&
@@ -925,35 +902,16 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &     pawrhoij1,pawtab,phnons1,ph1d,dtset%prtvol,psps,pwindall,qmat,resid_mq,residm_mq,rhog1_mq,&
 &     rhor1_mq,rmet,rprimd,symaf1,symrc1,symrl1,ucvol,usecprj,useylmgr1,ddk_f,&
 &     vtrial,vtrial1_mq,wtk_rbz,xred,ylm,ylm1,ylmgr1)
-     !set here dtset%q to -dtset%q
-!!    cg1(2,mpw*nspinor*mband*mk1mem*nsppol)=updated wavefunctions, orthogonalized to the occupied states
-!!    cg1_active(2,mpw1*nspinor*mband*mk1mem*nsppol)=pw coefficients of RF
-!!      wavefunctions at k,q. They are orthogonalized to the active.
-!!    eigen1(2*mband*mband*nkpt_rbz*nsppol)=array for holding eigenvalues
-!!      (hartree)
-!!    edocc=correction to 2nd-order total energy coming from changes of occupation
-!!    eeig0=0th-order eigenenergies part of 2nd-order total energy
-!!    ek0=0th-order kinetic energy part of 2nd-order total energy.
-!!    ek1=1st-order kinetic energy part of 2nd-order total energy
-!!      (not for phonons)
-!!    eloc0=0th-order local (psp+vxc+Hart) part of 2nd-order total energy
-!!    enl0=0th-order nonlocal pseudopot. part of 2nd-order total energy.
-!!    enl1=1st-order nonlocal pseudopot. part of 2nd-order total energy.
-!!    gh1c_set(2,mpw1*nspinor*mband*mk1mem*nsppol*dim_eig2rf)= set of <G|H^{(1)}|nK>
-!!    gh0c1_set(2,mpw1*nspinor*mband*mk1mem*nsppol*dim_eig2rf)= set of <G|H^{(0)}|\Psi^{(1)}>
-!!        The wavefunction is orthogonal to the active space (for metals). It is not
-!!        coherent with cg1.
-!!    resid(mband*nkpt_rbz*nsppol)=residuals for each band over all k points.
-!!    residm=maximum value from resid array (except for nbdbuf highest bands)
-!!    rhog1(2,nfftf)=RF electron density in reciprocal space
-!!    ==== if optres==1
-!!      nres2=square of the norm of the residual
-!!      nvresid1(cplex*nfftf,nspden)=1st-order density residual
-!!    ==== if psps%usepaw==1
-!!      cprj1(natom,nspinor*mband*mk1mem*nsppol*usecprj)=
-!!                1st-order wave functions at k,q projected with non-local projectors:
-!!                cprj1=<p_i|C1nk,q> where p_i is a non-local projector
-!!      nhat1(cplex*nfftf,nspden*psps%usepaw)=1st-order compensation charge density
+     !reconstruct the +q and -q densities, this might bug if fft parallelization is used, todo...
+     do ifft=1,nfftf
+       rhor1_pq(2*ifft-1,:) = half*(rhor1(2*ifft-1,:)+rhor1_mq(2*ifft-1,:))
+       rhor1_pq(2*ifft  ,:) = half*(rhor1(2*ifft  ,:)-rhor1_mq(2*ifft  ,:))
+       rhor1_mq(2*ifft-1,:) = rhor1_pq(2*ifft-1,:)
+       rhor1_mq(2*ifft  ,:) =-rhor1_pq(2*ifft  ,:)
+     enddo
+     rhor1=rhor1_pq
+     call fourdp(cplex,rhog1,rhor1(:,1),-1,mpi_enreg,nfftf,ngfftf,dtset%paral_kgb,0)
+     call fourdp(cplex,rhog1_mq,rhor1_mq(:,1),-1,mpi_enreg,nfftf,ngfftf,dtset%paral_kgb,0)
    endif
 
    if (dtset%berryopt== 4.or.dtset%berryopt== 6.or.dtset%berryopt== 7.or.&
@@ -1042,6 +1000,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &     nspden,n3xccc,optene,optres,dtset%paral_kgb,dtset%qptn,rhog,rhog1,rhor,rhor1,&
 &     rprimd,ucvol,psps%usepaw,usexcnhat,vhartr1,vpsp1,nvresid1,res2,vtrial1,vxc,vxc1,xccc3d1)
      if(.not.kramers_deg) then
+       !SPr: in fact no need to compute the new trial potential here, to rectify..
        call dfpt_rhotov(cplex,ehart01_mq,ehart1_mq,elpsp1_mq,exc1_mq,elmag1_mq,gmet,gprimd,gsqcut,idir,ipert,&
 &       dtset%ixc,kxc,mpi_enreg,dtset%natom,nfftf,ngfftf,nhat,nhat1,nhat1gr,nhat1grdim,nkxc,&
 &       nspden,n3xccc,optene,optres,dtset%paral_kgb,-dtset%qptn,rhog,rhog1_mq,rhor,rhor1_mq,&
@@ -1115,8 +1074,21 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &       initialized,iscf_mod,ispmix,istep,mix,pawfgr%coatofin,&
 &       mpi_enreg,my_natom,nfftf,nfftmix,ngfftf,ngfftmix,npawmix,pawrhoij1,&
 &       qphon,rhor1,rprimd,psps%usepaw,nvresid1,vtrial1)
+       if (.not.kramers_deg) then
+       !same problem as with density reconstruction, TODO proper fft parallelization...
+         do ifft=1,nfftf
+           vtrial1_mq(2*ifft-1,1)=+vtrial1(2*ifft-1,1)
+           vtrial1_mq(2*ifft-1,2)=+vtrial1(2*ifft-1,2)
+           vtrial1_mq(2*ifft  ,1)=-vtrial1(2*ifft  ,1)
+           vtrial1_mq(2*ifft  ,2)=-vtrial1(2*ifft  ,2)
+           vtrial1_mq(2*ifft-1,3)= vtrial1(2*ifft  ,4) !Re[V^12]
+           vtrial1_mq(2*ifft  ,3)= vtrial1(2*ifft-1,4) !Im[V^12],see definition of v(:,4) cplex=2 case 
+           vtrial1_mq(2*ifft  ,4)= vtrial1(2*ifft-1,3) !Re[V^21]=Re[V^12]
+           vtrial1_mq(2*ifft-1,4)= vtrial1(2*ifft  ,3) !Re[V^21]=Re[V^12]
+         enddo
+       endif
        initialized=1
-     end if
+    end if
    end if
 
 !  ######################################################################
@@ -1398,9 +1370,10 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &     dtset%ntypat,ab_out,dtset%ratsph,rhor1,rprimd,dtset%typat,ucvol,xred,&
 &     prtopt,cplex,intgden=intgden,dentot=dentot)
      !debug: write out the vtk first-order density components
-     !call appdig(pertcase,dtfil%fnameabo_den,fi1o_vtk)
-     !call printmagvtk(mpi_enreg,cplex,nspden,nfftf,ngfftf,rhor1,rprimd,adjustl(adjustr(fi1o_vtk)//".vtk"))
-     !compute the contributions to susceptibility from different attomic spheres:
+!    call appdig(pertcase,dtfil%fnameabo_den,fi1o_vtk)
+!    call printmagvtk(mpi_enreg,cplex,nspden,nfftf,ngfftf,rhor1,rprimd,adjustl(adjustr(fi1o_vtk)//"_PQ"))
+!    call printmagvtk(mpi_enreg,cplex,nspden,nfftf,ngfftf,rhor1,rprimd,adjustl(adjustr(fi1o_vtk)//"_MQ"))
+     !SPr: add calculation of the contributions to susceptibility from all attomic spheres
    end if
  end if
 

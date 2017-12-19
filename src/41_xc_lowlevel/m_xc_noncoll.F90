@@ -377,7 +377,7 @@ subroutine rotate_back_mag_dfpt(vxc1_in,vxc1_out,vxc,kxc,rho1,mag,vectsize,cplex
  real(dp) :: m_dot_m1_re,m_dot_m1_im
  real(dp) :: fact_re,fact_im,bxc
 !arrays
- real(dp)     :: vxc_diag(2)
+ real(dp)     :: vxc_diag(2),v21tmp(2)
  complex(dpc) :: r1tmp(2,2),u0(2,2),u0_1(2,2),u0_1r1(2,2),u0v1(2,2)
  complex(dpc) :: rho1_updn(2,2),v1tmp(2,2),vxc1tmp(2,2)
  complex(dpc) :: rho1_offdiag(2)
@@ -731,14 +731,14 @@ subroutine rotate_back_mag_dfpt(vxc1_in,vxc1_out,vxc,kxc,rho1,mag,vectsize,cplex
          vxc1_out(ipt,4) = vxc1_out(ipt,4) + bxc_over_m*(-my1 + mdiry*m_dot_m1 ) !
 
        else
-!        Compute bxc^(0)/|m| from kxc (|m^(0)| -> zero limit)
+         !Compute bxc^(0)/|m| from kxc (|m^(0)| -> zero limit)
          bxc_over_m = half*(half*(kxc(ipt,1)+kxc(ipt,3))-kxc(ipt,2))
          vxc1_out(ipt,1)= dvdn + bxc_over_m*mz1
          vxc1_out(ipt,2)= dvdn - bxc_over_m*mz1
          vxc1_out(ipt,3)= bxc_over_m*mx1
          vxc1_out(ipt,4)=-bxc_over_m*my1
        end if
-
+        
      end do ! ipt
 
    case(2)
@@ -773,14 +773,14 @@ subroutine rotate_back_mag_dfpt(vxc1_in,vxc1_out,vxc,kxc,rho1,mag,vectsize,cplex
          vxc1_out(2*ipt  ,2)= dvdn_im-dvdz_im*mdirz
          !NOTE: change of definition of the potential matrix components
          !      vxc1_out(:,3) =   V_updn
-         !      vxc1_out(:,4) = i.V_updn
+         !      vxc1_out(:,4) = i.V_dnup
 
          !  V^12 =   dvdz*mx/|m| - i.dvdz*my/|m| = (Re[dvdz]*mx/|m| + Im[dvdz]*my/|m|) + i.(Im[dvdz]*mx/|m| - Re[dvdz]*my/|m|) => vxc1(:,3)
-         !i.V^12 = i.dvdz*mx/|m| +   dvdz*my/|m| = (Re[dvdz]*my/|m| - Im[dvdz]*mx/|m|) + i.(Im[dvdz]*my/|m| + Re[dvdz]*mx/|m|) => vxc1(:,4)
-         ! no need for explicit formulas for vxc1(:,4), it will be computed later from vxc1(:,3)
-         vxc1_out(2*ipt-1,3)= dvdz_re*mdirx + dvdz_im*mdiry   !Re[  V^12]
-         vxc1_out(2*ipt  ,3)= dvdz_im*mdirx - dvdz_re*mdiry   !Im[  V^12]
-
+         !  V^21 =   dvdz*mx/|m| + i.dvdz*my/|m| = (Re[dvdz]*mx/|m| - Im[dvdz]*my/|m|) + i.(Im[dvdz]*mx/|m| + Re[dvdz]*my/|m|)
+         vxc1_out(2*ipt-1,3)= dvdz_re*mdirx + dvdz_im*mdiry   !Re[V^12]
+         vxc1_out(2*ipt  ,3)= dvdz_im*mdirx - dvdz_re*mdiry   !Im[V^12]
+         vxc1_out(2*ipt-1,4)= dvdz_re*mdirx - dvdz_im*mdiry   !Re[V^21]
+         vxc1_out(2*ipt  ,4)= dvdz_im*mdirx + dvdz_re*mdiry   !Im[V^21]
          !remaining contributions:
          m_dot_m1_re= mdirx*mx1_re + mdiry*my1_re + mdirz*mz1_re
          m_dot_m1_im= mdirx*mx1_im + mdiry*my1_im + mdirz*mz1_im
@@ -794,13 +794,22 @@ subroutine rotate_back_mag_dfpt(vxc1_in,vxc1_out,vxc,kxc,rho1,mag,vectsize,cplex
          vxc1_out(2*ipt-1,2) = vxc1_out(2*ipt-1,2) + bxc_over_m*(-mz1_re + mdirz*m_dot_m1_re ) ! Re[V^22]
          vxc1_out(2*ipt  ,2) = vxc1_out(2*ipt  ,2) + bxc_over_m*(-mz1_im + mdirz*m_dot_m1_im ) ! Im[V^22]
 
-         !    v12  += bxc_over_m*(   (mx1    - mdirx*m_dot_m1   ) + i.(-my1    + mdiry*m_dot_m1   )   )  <= see cplex=1
+         !    v12  += bxc_over_m*(   (mx1    - mdirx*m_dot_m1   ) - i.( my1    - mdiry*m_dot_m1   )   )  <= see cplex=1
          ! Re[v12] += bxc_over_m*(   (mx1_re - mdirx*m_dot_m1_re) +   ( my1_im - mdiry*m_dot_m1_im)   )
          ! Im[v12] += bxc_over_m*(   (mx1_im - mdirx*m_dot_m1_im) +   (-my1_re + mdiry*m_dot_m1_re)   )
          vxc1_out(2*ipt-1,3) = vxc1_out(2*ipt-1,3) + bxc_over_m*( mx1_re - mdirx*m_dot_m1_re ) ! Re[V^12]
          vxc1_out(2*ipt-1,3) = vxc1_out(2*ipt-1,3) + bxc_over_m*( my1_im - mdiry*m_dot_m1_im ) ! Re[V^12]
          vxc1_out(2*ipt  ,3) = vxc1_out(2*ipt  ,3) + bxc_over_m*( mx1_im - mdirx*m_dot_m1_im ) ! Im[V^12]
          vxc1_out(2*ipt  ,3) = vxc1_out(2*ipt  ,3) + bxc_over_m*(-my1_re + mdiry*m_dot_m1_re ) ! Im[V^12]
+         
+         !    v21  += bxc_over_m*(   (mx1    - mdirx*m_dot_m1   ) + i.( my1    - mdiry*m_dot_m1   )   )
+         ! Re[v21] += bxc_over_m*(   (mx1_re - mdirx*m_dot_m1_re) +   (-my1_im + mdiry*m_dot_m1_im)   )
+         ! Im[v21] += bxc_over_m*(   (mx1_im - mdirx*m_dot_m1_im) +   ( my1_re - mdiry*m_dot_m1_re)   )
+         ! the 4th component is actually not v21, but rather i.v21, this will be adjusted later
+         vxc1_out(2*ipt-1,4) = vxc1_out(2*ipt-1,4) + bxc_over_m*( mx1_re - mdirx*m_dot_m1_re ) ! Re[V^21]
+         vxc1_out(2*ipt-1,4) = vxc1_out(2*ipt-1,4) + bxc_over_m*(-my1_im + mdiry*m_dot_m1_im ) ! Re[V^21]
+         vxc1_out(2*ipt  ,4) = vxc1_out(2*ipt  ,4) + bxc_over_m*( mx1_im - mdirx*m_dot_m1_im ) ! Im[V^21]
+         vxc1_out(2*ipt  ,4) = vxc1_out(2*ipt  ,4) + bxc_over_m*( my1_re - mdiry*m_dot_m1_re ) ! Im[V^21]
 
        else
 !        Compute Bxc/|m| from Kxc (|m^(0)| -> zero limit)
@@ -812,11 +821,16 @@ subroutine rotate_back_mag_dfpt(vxc1_in,vxc1_out,vxc,kxc,rho1,mag,vectsize,cplex
 
          vxc1_out(2*ipt-1,3)= bxc_over_m*(mx1_re+my1_im)
          vxc1_out(2*ipt  ,3)= bxc_over_m*(mx1_im-my1_re)
+         vxc1_out(2*ipt-1,4)= bxc_over_m*(mx1_re-my1_im)
+         vxc1_out(2*ipt  ,4)= bxc_over_m*(mx1_im+my1_re) 
        end if
 
-       !finally reconstruct i.V^12 from V^12
-       vxc1_out(2*ipt-1,4) = vxc1_out(2*ipt  ,3)  ! Re[i.V^21]= Re[ i.Re[V^21] - Im[V^21] ] = Im[V^12]
-       vxc1_out(2*ipt  ,4) = vxc1_out(2*ipt-1,3)  ! Im[i.V^21]= Im[ i.Re[V^21] - Im[V^21] ] = Re[V^12]
+       !finally reconstruct i.V^21 from V^21
+       v21tmp(1) = vxc1_out(2*ipt-1,4) !Re[V^21]
+       v21tmp(2) = vxc1_out(2*ipt  ,4) !Im[V^21]
+
+       vxc1_out(2*ipt-1,4) =-v21tmp(2) ! Re[i.V^21]=-Im[V^21]
+       vxc1_out(2*ipt  ,4) = v21tmp(1) ! Im[i.V^21]= Re[V^21]
 
      end do ! ipt
 
