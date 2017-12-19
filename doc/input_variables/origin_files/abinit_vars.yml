@@ -15610,14 +15610,14 @@
     characteristics: null
     commentdefault: null
     commentdims: null
-    defaultval: 10.0
+    defaultval: 0.01
     dimensions: scalar
     excludes: null
     mnemonics: MAGnetization CONstraint LAMBDA parameter
     requires: null
     text: |-
         <p>
-         This variable gives the amplitude of the constraint imposed on the magnetization vectors on each atom (turned on with flag variable [[magconon]]). Typical values for lambda are 10 to a few hundred. The energy will vary strongly and convergence will be difficult if lambda is too large. The constraint will be weak and the magnetization will not be close to [[spinat]] if lambda is too small. See variable [[magconon]] for more details.
+         This variable gives the amplitude of the constraint imposed on the magnetization vectors on each atom (turned on with flag variable [[magconon]]). Typical values for lambda are 0.001 to 0.1. The SCF convergence will be difficult if lambda is too large. If lambda is too small, the constraint will not be very effective and it will give magnetization not close to the desired [[spinat]] target. In case of convergence problem, it can help to start with a small value of lambda and to increase it by reading the wavefunction obtained with a lower lambda value. See variable [[magconon]] for more details.
         </p>
     topics: MagMom_useful
     varset: gstate

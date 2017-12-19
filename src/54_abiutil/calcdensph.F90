@@ -264,10 +264,10 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsph
  end if
 
  if(nspden==2) then
-   mag_coll=0
-   mag_coll_im=0
-   rho_tot=0
-   rho_tot_im=0
+   mag_coll=zero
+   mag_coll_im=zero
+   rho_tot=zero
+   rho_tot_im=zero
    do ifft=1,nfft
      jfft=(cmplex_den+1)*ifft
 !    rho_up=rho_up+rhor(ifft,2)
@@ -286,7 +286,7 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsph
 !  rho_up=rho_up*ucvol/dble(nfftot)
 !  rho_dn=rho_dn*ucvol/dble(nfftot)
 !  rho_tot=rho_tot*ucvol/dble(nfftot) 
- elseif(nspden==4) then
+ else if(nspden==4) then
    rho_tot=0
    rho_tot_im=0
    mag_x=0
