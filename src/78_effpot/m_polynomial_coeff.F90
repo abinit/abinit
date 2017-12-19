@@ -128,7 +128,7 @@ subroutine polynomial_coeff_init(coefficient,nterm,polynomial_coeff,terms,name,c
  real(dp),intent(in) :: coefficient
  logical,optional,intent(in) :: check
 !arrays
- character(len=100),optional,intent(in) :: name
+ character(len=200),optional,intent(in) :: name
  type(polynomial_term_type),intent(in) :: terms(nterm)
  type(polynomial_coeff_type), intent(out) :: polynomial_coeff
 !Local variables-------------------------------
@@ -139,7 +139,7 @@ subroutine polynomial_coeff_init(coefficient,nterm,polynomial_coeff,terms,name,c
  logical :: check_in = .false.
 !arrays
  real(dp) :: weights(nterm)
- character(len=100) :: name_tmp
+ character(len=200) :: name_tmp
 ! *************************************************************************
  
 !First free before initilisation
@@ -404,7 +404,7 @@ subroutine polynomial_coeff_getName(name,natom,polynomial_coeff,symbols,recomput
  integer,optional,intent(in) :: iterm
 !arrays
  character(len=5),intent(in) :: symbols(:)
- character(len=100),intent(out):: name
+ character(len=200),intent(out):: name
  type(polynomial_coeff_type),optional, intent(in) :: polynomial_coeff
  logical,optional,intent(in) :: recompute
 !Local variables-------------------------------
