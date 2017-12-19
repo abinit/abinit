@@ -315,7 +315,7 @@ enable_optim="no"
 
 # Fortran compiler additional custom flags
 #
-FCFLAGS_EXTRA="-Wno-implicit-interface"
+FCFLAGS_EXTRA="-Wall"
 
 # Forced Fortran compiler flags
 # Note: will override build-system configuration - USE AT YOUR OWN RISKS!
