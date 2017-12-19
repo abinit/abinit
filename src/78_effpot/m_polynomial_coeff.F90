@@ -59,7 +59,7 @@ module m_polynomial_coeff
 
  type, public :: polynomial_coeff_type
 
-   character(len=100) :: name = ""
+   character(len=200) :: name = ""
 !     Name of the polynomial_coeff (Sr_y-O1_y)^3) for example
 
    integer :: nterm = zero

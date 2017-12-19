@@ -153,7 +153,7 @@ program mrgddb
        'Action: change mddb in mrgddb.f90 and recompile.'
        MSG_ERROR(msg)
      end if
-     filnam(nfiles_cli) = arg(1:fnlen)
+     filnam(nfiles_cli) = trim(arg)
    end if
  end do
 
