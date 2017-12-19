@@ -939,7 +939,7 @@ recursive subroutine computeNorder(cell,coeffs_out,compatibleCoeffs,list_coeff,l
  integer,allocatable :: atindx(:,:)
  integer,allocatable :: cells(:,:,:),dir_int(:)
  integer,allocatable :: powers(:)
- character(len=100):: name
+ character(len=200):: name
  type(polynomial_term_type),dimension(:),allocatable :: terms
  type(polynomial_coeff_type),allocatable :: coeffs_tmp(:)
 ! *************************************************************************
@@ -3654,7 +3654,7 @@ subroutine fit_polynomial_coeff_getOrder1(cell,coeffs_out,cutoff_in,list_symcoef
  integer,allocatable :: powers(:)
  character(len=1) :: dir_char(3)
  character(len=1) :: mutodir(9) = (/"x","y","z","1","2","3","4","5","6"/)
- character(len=100):: name
+ character(len=200):: name
  character(len=500) :: message
  type(polynomial_term_type),dimension(:),allocatable :: terms
  type(polynomial_coeff_type),allocatable :: coeffs_tmp(:)
