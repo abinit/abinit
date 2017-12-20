@@ -33,7 +33,7 @@ of the name (keywords) of the "internal" variables
 that are not controlled by the user directly, but are derived from input variables.
 They are mentioned in the documentation because it is easier to understand the 
 behaviour of some input variables thanks to the explanation of such internal variables.
-In the <a href="../../input_variables/generated_files/varset_allvars.html#">database</a> of all input variables, they are prepended with the sign %.
+In the <a href="../../variables/generated_files/varset_allvars.html#">database</a> of all input variables, they are prepended with the sign %.
 <script type="text/javascript" src="../../js_files/generic_advice.js"> </script>
 <hr>
 
@@ -100,33 +100,33 @@ In the <a href="../../input_variables/generated_files/varset_allvars.html#">data
 <br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#INTERNAL_ONLY">INTERNAL_ONLY</a></font>
 <br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_k-points.html">k-points</a>.</font>
-<br><font id="vartype">Variable type: real(3,<a href="../../input_variables/generated_files/varset_basic.html#nkpt">nkpt</a>)</font>
+<br><font id="vartype">Variable type: real(3,<a href="../../variables/generated_files/varset_basic.html#nkpt">nkpt</a>)</font>
 <br><font id="default">No default</font>
 <br><font id="text">
 <p>
 <p>
- If <a href="../../input_variables/generated_files/varset_gstate.html#nqpt">nqpt</a>=0, or if one is
+ If <a href="../../variables/generated_files/varset_gstate.html#nqpt">nqpt</a>=0, or if one is
 doing a reponse calculation,
 this internal variable is derived from
-<a href="../../input_variables/generated_files/varset_basic.html#kpt">kpt</a> and <a href="../../input_variables/generated_files/varset_basic.html#kptnrm">kptnrm</a>:
+<a href="../../variables/generated_files/varset_basic.html#kpt">kpt</a> and <a href="../../variables/generated_files/varset_basic.html#kptnrm">kptnrm</a>:
 <b>kptns</b>(1:3,:)=
-<a href="../../input_variables/generated_files/varset_basic.html#kpt">kpt</a>(1:3,:)/
-<a href="../../input_variables/generated_files/varset_basic.html#kptnrm">kptnrm</a>, so that
-it is <a href="../../input_variables/generated_files/varset_basic.html#kpt">kpt</a> renormalized by
-<a href="../../input_variables/generated_files/varset_basic.html#kptnrm">kptnrm</a>.
+<a href="../../variables/generated_files/varset_basic.html#kpt">kpt</a>(1:3,:)/
+<a href="../../variables/generated_files/varset_basic.html#kptnrm">kptnrm</a>, so that
+it is <a href="../../variables/generated_files/varset_basic.html#kpt">kpt</a> renormalized by
+<a href="../../variables/generated_files/varset_basic.html#kptnrm">kptnrm</a>.
  <br />
- If <a href="../../input_variables/generated_files/varset_gstate.html#nqpt">nqpt</a>=1 and one is
+ If <a href="../../variables/generated_files/varset_gstate.html#nqpt">nqpt</a>=1 and one is
 not doing a ground-state calculation,
 this internal variable is derived from
-<a href="../../input_variables/generated_files/varset_basic.html#kpt">kpt</a>,<a href="../../input_variables/generated_files/varset_basic.html#kptnrm">kptnrm</a>
-and <a href="../../input_variables/generated_files/varset_internal.html#qptn">qptn</a>
+<a href="../../variables/generated_files/varset_basic.html#kpt">kpt</a>,<a href="../../variables/generated_files/varset_basic.html#kptnrm">kptnrm</a>
+and <a href="../../variables/generated_files/varset_internal.html#qptn">qptn</a>
 <b>kptns</b>(1:3,:)=
-<a href="../../input_variables/generated_files/varset_basic.html#kpt">kpt</a>(1:3,:)/
-<a href="../../input_variables/generated_files/varset_basic.html#kptnrm">kptnrm</a>+
-<a href="../../input_variables/generated_files/varset_internal.html#qptn">qptn</a>(1:3), so that
-it is <a href="../../input_variables/generated_files/varset_basic.html#kpt">kpt</a> renormalized by
-<a href="../../input_variables/generated_files/varset_basic.html#kptnrm">kptnrm</a>, then shifted
-by <a href="../../input_variables/generated_files/varset_internal.html#qptn">qptn</a>(1:3).
+<a href="../../variables/generated_files/varset_basic.html#kpt">kpt</a>(1:3,:)/
+<a href="../../variables/generated_files/varset_basic.html#kptnrm">kptnrm</a>+
+<a href="../../variables/generated_files/varset_internal.html#qptn">qptn</a>(1:3), so that
+it is <a href="../../variables/generated_files/varset_basic.html#kpt">kpt</a> renormalized by
+<a href="../../variables/generated_files/varset_basic.html#kptnrm">kptnrm</a>, then shifted
+by <a href="../../variables/generated_files/varset_internal.html#qptn">qptn</a>(1:3).
 </p>
 </font>
 
@@ -139,13 +139,13 @@ by <a href="../../input_variables/generated_files/varset_internal.html#qptn">qpt
 <br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#INTERNAL_ONLY">INTERNAL_ONLY</a></font>
 <br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_k-points.html">k-points</a>.</font>
-<br><font id="vartype">Variable type: real(3,<a href="../../input_variables/generated_files/varset_basic.html#nkpthf">nkpthf</a>)</font>
+<br><font id="vartype">Variable type: real(3,<a href="../../variables/generated_files/varset_basic.html#nkpthf">nkpthf</a>)</font>
 <br><font id="default">No default</font>
 <br><font id="text">
 <p>
 <p>
 <b>kptns_hf</b> is the subset of the full Brillouin Zone k point grid for wavefunctions,
-used to build the Fock operator, see <a href="../../input_variables/generated_files/varset_gstate.html#fockdownsampling">fockdownsampling</a>.
+used to build the Fock operator, see <a href="../../variables/generated_files/varset_gstate.html#fockdownsampling">fockdownsampling</a>.
 </p>
 </font>
 
@@ -166,7 +166,7 @@ used to build the Fock operator, see <a href="../../input_variables/generated_fi
  This internal variable derives
 the maximum number of bands
 over all k-points and spin-polarisation from
-<a href="../../input_variables/generated_files/varset_basic.html#nband">nband</a>(1:nkpt*nsppol).
+<a href="../../variables/generated_files/varset_basic.html#nband">nband</a>(1:nkpt*nsppol).
 </p>
 </font>
 
@@ -185,7 +185,7 @@ over all k-points and spin-polarisation from
 <p>
 <p>
  This internal variable contains the maximum of
-<a href="../../input_variables/generated_files/varset_gstate.html#ngfft">ngfft</a>(1:3).
+<a href="../../variables/generated_files/varset_gstate.html#ngfft">ngfft</a>(1:3).
 </p>
 </font>
 
@@ -204,7 +204,7 @@ over all k-points and spin-polarisation from
 <p>
 <p>
  This internal variable contains the maximum of
-<a href="../../input_variables/generated_files/varset_paw.html#ngfftdg">ngfftdg</a>(1:3).
+<a href="../../variables/generated_files/varset_paw.html#ngfftdg">ngfftdg</a>(1:3).
 </p>
 </font>
 
@@ -224,11 +224,11 @@ over all k-points and spin-polarisation from
 <p>
  This internal variable gives the maximum of the number of
 plane waves over all k-points. It is computed
-from <a href="../../input_variables/generated_files/varset_basic.html#ecut">ecut</a> and the description
+from <a href="../../variables/generated_files/varset_basic.html#ecut">ecut</a> and the description
 of the cell, provided by
-<a href="../../input_variables/generated_files/varset_basic.html#acell">acell</a>,
-<a href="../../input_variables/generated_files/varset_basic.html#rprim">rprim</a>, and/or
-<a href="../../input_variables/generated_files/varset_basic.html#angdeg">angdeg</a>.
+<a href="../../variables/generated_files/varset_basic.html#acell">acell</a>,
+<a href="../../variables/generated_files/varset_basic.html#rprim">rprim</a>, and/or
+<a href="../../variables/generated_files/varset_basic.html#angdeg">angdeg</a>.
 </p>
 </font>
 
@@ -244,13 +244,13 @@ of the cell, provided by
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">No default</font>
 <br><br><font id="requires">
-Only relevant if <a href="../../input_variables/generated_files/varset_paw.html#usepawu">usepawu</a>==1
+Only relevant if <a href="../../variables/generated_files/varset_paw.html#usepawu">usepawu</a>==1
 </font>
 <br><font id="text">
 <p>
 <p>
  This internal variable gives the number of atoms on which the LDA/GGA+U method
-is applied. This value is determined from <a href="../../input_variables/generated_files/varset_paw.html#lpawu">lpawu</a>.
+is applied. This value is determined from <a href="../../variables/generated_files/varset_paw.html#lpawu">lpawu</a>.
 </p>
 </font>
 
@@ -270,7 +270,7 @@ is applied. This value is determined from <a href="../../input_variables/generat
 <p>
  This internal variable gives the number of dynamical images,
 immediately deduced from the number of non-zero values present in
-<a href="../../input_variables/generated_files/varset_rlx.html#dynimage">dynimage</a>.
+<a href="../../variables/generated_files/varset_rlx.html#dynimage">dynimage</a>.
 It is used to dimension many memory-consuming arrays (one copy for each image),
 e.g. the wavefunction array (cg), the density array (rho), etc .
 </p>
@@ -286,7 +286,7 @@ e.g. the wavefunction array (cg), the density array (rho), etc .
 <br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#INTERNAL_ONLY">INTERNAL_ONLY</a></font>
 <br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_BandOcc.html">BandOcc</a>.</font>
 <br><font id="vartype">Variable type: real</font>
-<br><font id="default">Default is <a href="../../input_variables/generated_files/varset_external.html#AUTO_FROM_PSP">AUTO_FROM_PSP</a></font>
+<br><font id="default">Default is <a href="../../variables/generated_files/varset_external.html#AUTO_FROM_PSP">AUTO_FROM_PSP</a></font>
 <br><font id="text">
 <p>
 <p>
@@ -294,9 +294,9 @@ e.g. the wavefunction array (cg), the density array (rho), etc .
 cell, as computed from the sum of the valence electrons
 related to each atom (given in the pseudopotential, where it is called
 "zion"), and the input variable
-<a href="../../input_variables/generated_files/varset_gstate.html#charge">charge</a>:
+<a href="../../variables/generated_files/varset_gstate.html#charge">charge</a>:
  <br />
- <b>nelect</b>=zion-<a href="../../input_variables/generated_files/varset_gstate.html#charge">charge</a>.
+ <b>nelect</b>=zion-<a href="../../variables/generated_files/varset_gstate.html#charge">charge</a>.
 </p>
 </font>
 
@@ -314,13 +314,13 @@ related to each atom (given in the pseudopotential, where it is called
 <br><font id="text">
 <p>
 <p>
- If space parallelisation is not used (that is, if <a href="../../input_variables/generated_files/varset_paral.html#paral_kgb">paral_kgb</a>==0),
+ If space parallelisation is not used (that is, if <a href="../../variables/generated_files/varset_paral.html#paral_kgb">paral_kgb</a>==0),
 this internal variable gives the number of Fast Fourier Transform
 points in the grid generated by
-<a href="../../input_variables/generated_files/varset_gstate.html#ngfft">ngfft</a>(1:3). It is simply the
-product of the three components of <a href="../../input_variables/generated_files/varset_gstate.html#ngfft">ngfft</a>.
+<a href="../../variables/generated_files/varset_gstate.html#ngfft">ngfft</a>(1:3). It is simply the
+product of the three components of <a href="../../variables/generated_files/varset_gstate.html#ngfft">ngfft</a>.
  <br />
- If space parallelisation is used (that is, if <a href="../../input_variables/generated_files/varset_paral.html#paral_kgb">paral_kgb</a>==1), then it becomes the
+ If space parallelisation is used (that is, if <a href="../../variables/generated_files/varset_paral.html#paral_kgb">paral_kgb</a>==1), then it becomes the
 number of Fast Fourier Transform points attributed to the
 particular processor. It is no longer the above-mentioned simple product,
 but a number usually close to this product divided by the
@@ -342,13 +342,13 @@ number of processors on which the space is shared.
 <br><font id="text">
 <p>
 <p>
- If space parallelisation is not used (that is, if <a href="../../input_variables/generated_files/varset_paral.html#paral_kgb">paral_kgb</a>==0),
+ If space parallelisation is not used (that is, if <a href="../../variables/generated_files/varset_paral.html#paral_kgb">paral_kgb</a>==0),
 this internal variable gives the number of Fast Fourier Transform
 points in the (double) grid generated by
-<a href="../../input_variables/generated_files/varset_paw.html#ngfftdg">ngfftdg</a>(1:3). It is simply the
-product of the three components of <a href="../../input_variables/generated_files/varset_paw.html#ngfftdg">ngfftdg</a>.
+<a href="../../variables/generated_files/varset_paw.html#ngfftdg">ngfftdg</a>(1:3). It is simply the
+product of the three components of <a href="../../variables/generated_files/varset_paw.html#ngfftdg">ngfftdg</a>.
  <br />
- If space parallelisation is used (that is, if <a href="../../input_variables/generated_files/varset_paral.html#paral_kgb">paral_kgb</a>==1), then it becomes the
+ If space parallelisation is used (that is, if <a href="../../variables/generated_files/varset_paral.html#paral_kgb">paral_kgb</a>==1), then it becomes the
 number of Fast Fourier Transform points attributed to the
 particular processor. It is no longer the above-mentioned simple product,
 but a number usually close to this product divided by the
@@ -373,7 +373,7 @@ number of processors on which the space is shared.
  <b>npweps</b> determines the size of the planewave set used to represent the independent-particle
 susceptibility $\chi^{(0)}_{KS}$, the dielectric matrix $\epsilon$ and its inverse.
  <br />
-It is an internal variable, determined from <a href="../../input_variables/generated_files/varset_gw.html#ecuteps">ecuteps</a>.
+It is an internal variable, determined from <a href="../../variables/generated_files/varset_gw.html#ecuteps">ecuteps</a>.
 </p>
 </font>
 
@@ -394,7 +394,7 @@ It is an internal variable, determined from <a href="../../input_variables/gener
  <b>npwsigx</b> determines the cut-off energy of the planewave set used to generate the
 exchange part of the self-energy operator.
  <br />
-It is an internal variable, determed from <a href="../../input_variables/generated_files/varset_gw.html#ecutsigx">ecutsigx</a>.
+It is an internal variable, determed from <a href="../../variables/generated_files/varset_gw.html#ecutsigx">ecutsigx</a>.
 </p>
 </font>
 
@@ -414,7 +414,7 @@ It is an internal variable, determed from <a href="../../input_variables/generat
 <p>
  <b>npwwfn</b> is the size of the planewave set used to represent the wavefunctions
 in the formula that generates the independent-particle susceptibility $\chi^{(0)}_{KS}$.
-It is an internal variable, determined from <a href="../../input_variables/generated_files/varset_gw.html#ecutwfn">ecutwfn</a>.
+It is an internal variable, determined from <a href="../../variables/generated_files/varset_gw.html#ecutwfn">ecutwfn</a>.
 </p>
 </font>
 
@@ -430,19 +430,19 @@ It is an internal variable, determined from <a href="../../input_variables/gener
 <br><font id="vartype">Variable type: real(3)</font>
 <br><font id="default">Default is 3*0</font>
 <br><br><font id="requires">
-Only relevant if <a href="../../input_variables/generated_files/varset_gstate.html#nqpt">nqpt</a>==1
+Only relevant if <a href="../../variables/generated_files/varset_gstate.html#nqpt">nqpt</a>==1
 </font>
 <br><font id="text">
 <p>
 <p>
- Only used if <a href="../../input_variables/generated_files/varset_gstate.html#nqpt">nqpt</a>=1.
+ Only used if <a href="../../variables/generated_files/varset_gstate.html#nqpt">nqpt</a>=1.
  <br />
  In ground-state calculation,
 the vector <b>qptn</b>(1:3) is added to
 each renormalized k point (whatever the value of
-<a href="../../input_variables/generated_files/varset_basic.html#kptopt">kptopt</a> that was used)
+<a href="../../variables/generated_files/varset_basic.html#kptopt">kptopt</a> that was used)
 to generate the normalized, shifted, set of k-points
-<a href="../../input_variables/generated_files/varset_internal.html#kptns">kptns</a>(1:3,1:
+<a href="../../variables/generated_files/varset_internal.html#kptns">kptns</a>(1:3,1:
  <b>
   nkpt
  </b>
@@ -453,15 +453,15 @@ to generate the normalized, shifted, set of k-points
 is the wavevector of the phonon-type calculation.
  <br />
  <b>qptn</b>(1:3) can be produced on the basis of
-the different methods described in <a href="../../input_variables/generated_files/varset_gstate.html#qptopt">qptopt</a>,
-like using <a href="../../input_variables/generated_files/varset_gstate.html#qpt">qpt</a>(1:3)
-with renormalisation provided by <a href="../../input_variables/generated_files/varset_gstate.html#qptnrm">qptnrm</a>,
+the different methods described in <a href="../../variables/generated_files/varset_gstate.html#qptopt">qptopt</a>,
+like using <a href="../../variables/generated_files/varset_gstate.html#qpt">qpt</a>(1:3)
+with renormalisation provided by <a href="../../variables/generated_files/varset_gstate.html#qptnrm">qptnrm</a>,
 or using the other possibilities defined by
-<a href="../../input_variables/generated_files/varset_gstate.html#iqpt">iqpt</a>,
-<a href="../../input_variables/generated_files/varset_gstate.html#ngqpt">ngqpt</a>,
-<a href="../../input_variables/generated_files/varset_gstate.html#nshiftq">nshiftq</a>,
-<a href="../../input_variables/generated_files/varset_gstate.html#qptrlatt">qptrlatt</a>,
-<a href="../../input_variables/generated_files/varset_gstate.html#shiftq">shiftq</a>,
+<a href="../../variables/generated_files/varset_gstate.html#iqpt">iqpt</a>,
+<a href="../../variables/generated_files/varset_gstate.html#ngqpt">ngqpt</a>,
+<a href="../../variables/generated_files/varset_gstate.html#nshiftq">nshiftq</a>,
+<a href="../../variables/generated_files/varset_gstate.html#qptrlatt">qptrlatt</a>,
+<a href="../../variables/generated_files/varset_gstate.html#shiftq">shiftq</a>,
  <br />
  For insulators, there is no restriction on the
 q-points to be used for the perturbations. By contrast,
@@ -488,7 +488,7 @@ modification of the code).
 <br><font id="text">
 <p>
 <p>
- This internal variable is automatically set to 1 when the value of <a href="../../input_variables/generated_files/varset_basic.html#ixc">ixc</a>  refers to an Hartree-Fock calculation or hybrid functionals.
+ This internal variable is automatically set to 1 when the value of <a href="../../variables/generated_files/varset_basic.html#ixc">ixc</a>  refers to an Hartree-Fock calculation or hybrid functionals.
  <ul>
   <li>
    0 =&gt; No use of exact exchange.
@@ -510,7 +510,7 @@ modification of the code).
 <br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#INTERNAL_ONLY">INTERNAL_ONLY</a></font>
 <br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_PAW.html">PAW</a>.</font>
 <br><font id="vartype">Variable type: integer</font>
-<br><font id="default">Default is <a href="../../input_variables/generated_files/varset_external.html#AUTO_FROM_PSP">AUTO_FROM_PSP</a></font>
+<br><font id="default">Default is <a href="../../variables/generated_files/varset_external.html#AUTO_FROM_PSP">AUTO_FROM_PSP</a></font>
 <br><font id="text">
 <p>
 <p>
@@ -538,7 +538,7 @@ with either type of calculation.
 <p>
 <p>
  This internal variable is set to 1 when the recursion method is
-activated (see <a href="../../input_variables/generated_files/varset_dev.html#tfkinfunc">tfkinfunc</a>).
+activated (see <a href="../../variables/generated_files/varset_dev.html#tfkinfunc">tfkinfunc</a>).
 </p>
 </font>
 
@@ -556,7 +556,7 @@ activated (see <a href="../../input_variables/generated_files/varset_dev.html#tf
 <br><font id="text">
 <p>
 <p>
- Automatically determined from the value of <a href="../../input_variables/generated_files/varset_basic.html#ixc">ixc</a>.
+ Automatically determined from the value of <a href="../../variables/generated_files/varset_basic.html#ixc">ixc</a>.
  <ul>
   <li>
    0 =&gt; No XC contribution.
@@ -583,8 +583,8 @@ activated (see <a href="../../input_variables/generated_files/varset_dev.html#tf
 <br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#INTERNAL_ONLY">INTERNAL_ONLY</a></font>
 <br><font id="characteristic">Mentioned in topics: <a href="../../topics/generated_files/topic_AtomTypes.html">AtomTypes</a>, <a href="../../topics/generated_files/topic_PseudosPAW.html">PseudosPAW</a>.</font>
-<br><font id="vartype">Variable type: real(<a href="../../input_variables/generated_files/varset_basic.html#ntypat">ntypat</a>)</font>
-<br><font id="default">Default is <a href="../../input_variables/generated_files/varset_external.html#AUTO_FROM_PSP">AUTO_FROM_PSP</a></font>
+<br><font id="vartype">Variable type: real(<a href="../../variables/generated_files/varset_basic.html#ntypat">ntypat</a>)</font>
+<br><font id="default">Default is <a href="../../variables/generated_files/varset_external.html#AUTO_FROM_PSP">AUTO_FROM_PSP</a></font>
 <br><font id="text">
 <p>
 <p>

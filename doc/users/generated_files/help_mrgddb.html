@@ -84,17 +84,17 @@ and the second part lists the 2DTEs and 3DTEs.
 
 The merging code will check if the following variables are exactly
 the same in the different input DDB : natom,
-<a href="../../input_variables/generated_files/varset_basic.html#ntypat">ntypat</a>, <a href="../../input_variables/generated_files/varset_basic.html#nband">nband</a>, <a href="../../input_variables/generated_files/varset_basic.html#acell">acell</a>, <a href="../../input_variables/generated_files/varset_rlx.html#amu">amu</a>, <a href="../../input_variables/generated_files/varset_basic.html#ecut">ecut</a>, <a href="../../input_variables/generated_files/varset_basic.html#ixc">ixc</a>, lloc, <a href="../../input_variables/generated_files/varset_gstate.html#ngfft">ngfft</a>, <a href="../../input_variables/generated_files/varset_gstate.html#occ">occ</a>, <a href="../../input_variables/generated_files/varset_basic.html#rprim">rprim</a>,
-<a href="../../input_variables/generated_files/varset_basic.html#typat">typat</a>, <a href="../../input_variables/generated_files/varset_basic.html#xred">xred</a>, zion.
+<a href="../../variables/generated_files/varset_basic.html#ntypat">ntypat</a>, <a href="../../variables/generated_files/varset_basic.html#nband">nband</a>, <a href="../../variables/generated_files/varset_basic.html#acell">acell</a>, <a href="../../variables/generated_files/varset_rlx.html#amu">amu</a>, <a href="../../variables/generated_files/varset_basic.html#ecut">ecut</a>, <a href="../../variables/generated_files/varset_basic.html#ixc">ixc</a>, lloc, <a href="../../variables/generated_files/varset_gstate.html#ngfft">ngfft</a>, <a href="../../variables/generated_files/varset_gstate.html#occ">occ</a>, <a href="../../variables/generated_files/varset_basic.html#rprim">rprim</a>,
+<a href="../../variables/generated_files/varset_basic.html#typat">typat</a>, <a href="../../variables/generated_files/varset_basic.html#xred">xred</a>, zion.
 
-For <a href="../../input_variables/generated_files/varset_basic.html#nband">nband</a> and <a href="../../input_variables/generated_files/varset_gstate.html#occ">occ</a>, the value of <a href="../../input_variables/generated_files/varset_basic.html#occopt">occopt</a> is taken into account
+For <a href="../../variables/generated_files/varset_basic.html#nband">nband</a> and <a href="../../variables/generated_files/varset_gstate.html#occ">occ</a>, the value of <a href="../../variables/generated_files/varset_basic.html#occopt">occopt</a> is taken into account
 (see abinit help file). If possible, MRGDDB will produce
 a DDB with occopt=0.
 
 In case of two different data sets, the code will print an error message and stop.
 The code cannot merge two DDB that have been generated
 using two different geometries
-or convergence (<a href="../../input_variables/generated_files/varset_basic.html#ecut">ecut</a>, ...) parameters.
+or convergence (<a href="../../variables/generated_files/varset_basic.html#ecut">ecut</a>, ...) parameters.
 
 The only exception is connected to the possibility to use Time-reversal
 symmetry to decrease the number of special k points when the

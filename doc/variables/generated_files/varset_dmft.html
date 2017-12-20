@@ -107,13 +107,13 @@ variables to be used in the main input file of the abinit code.
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
 <br><br><font id="requires">
-Only relevant if <a href="../../input_variables/generated_files/varset_dev.html#usedmft">usedmft</a>==1 and <a href="../../input_variables/generated_files/varset_dmft.html#dmft_solv">dmft_solv</a>==5
+Only relevant if <a href="../../variables/generated_files/varset_dev.html#usedmft">usedmft</a>==1 and <a href="../../variables/generated_files/varset_dmft.html#dmft_solv">dmft_solv</a>==5
 </font>
 <br><font id="text">
 <p>
 If 1, enable the calculation of the entropy  within the DMFT framework and so allows the calculation of the total energy (free energy).
-In the current implementation, this is only possible with <a href="../../input_variables/generated_files/varset_dmft.html#dmft_solv">dmft_solv</a>=5 (Continuous Time Quantum Monte Carlo).
-See also the input variable <a href="../../input_variables/generated_files/varset_dmft.html#dmft_nlambda">dmft_nlambda</a>.
+In the current implementation, this is only possible with <a href="../../variables/generated_files/varset_dmft.html#dmft_solv">dmft_solv</a>=5 (Continuous Time Quantum Monte Carlo).
+See also the input variable <a href="../../variables/generated_files/varset_dmft.html#dmft_nlambda">dmft_nlambda</a>.
 </font>
 
 <br><br><a href=#top>Go to the top</a>
@@ -169,7 +169,7 @@ See also the input variable <a href="../../input_variables/generated_files/varse
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 6</font>
 <br><br><font id="requires">
-Only relevant if <a href="../../input_variables/generated_files/varset_dev.html#usedmft">usedmft</a>==1 and <a href="../../input_variables/generated_files/varset_dmft.html#dmft_entropy">dmft_entropy</a>==1
+Only relevant if <a href="../../variables/generated_files/varset_dev.html#usedmft">usedmft</a>==1 and <a href="../../variables/generated_files/varset_dmft.html#dmft_entropy">dmft_entropy</a>==1
 </font>
 <br><font id="text">
 <p>
@@ -255,7 +255,7 @@ Its value must be greater or equal to 3.
  Choice of solver for the Impurity model.
  <ul>
   <li>
-   0=&gt; No solver and U=0, J=0 (see <a href="../../input_variables/generated_files/varset_paw.html#upawu">upawu</a> and <a href="../../input_variables/generated_files/varset_paw.html#jpawu">jpawu</a>).
+   0=&gt; No solver and U=0, J=0 (see <a href="../../variables/generated_files/varset_paw.html#upawu">upawu</a> and <a href="../../variables/generated_files/varset_paw.html#jpawu">jpawu</a>).
   </li>
   <li>
    1=&gt; LDA+U self-energy is used (for testing purpose)
@@ -300,20 +300,20 @@ CTQMC calculations are much more time consuming that Hubbard I calculations. Nev
     An example of a config .ac file to compile ABINIT with TRIQS can be found in ~/doc/build/config-examples/ubu_gnu_4.9_triqs.ac.
  <br />
  See the useful variables for CT-QMC solver :
-<a href="../../input_variables/generated_files/varset_dev.html#dmftctqmc_basis">dmftctqmc_basis</a>,
-<a href="../../input_variables/generated_files/varset_dmft.html#dmftctqmc_check">dmftctqmc_check</a>,
-<a href="../../input_variables/generated_files/varset_dmft.html#dmftctqmc_correl">dmftctqmc_correl</a>,
-<a href="../../input_variables/generated_files/varset_dmft.html#dmftctqmc_gmove">dmftctqmc_gmove</a>,
-<a href="../../input_variables/generated_files/varset_dmft.html#dmftctqmc_grnns">dmftctqmc_grnns</a>,
-<a href="../../input_variables/generated_files/varset_dmft.html#dmftctqmc_meas">dmftctqmc_meas</a>,
-<a href="../../input_variables/generated_files/varset_dmft.html#dmftctqmc_mrka">dmftctqmc_mrka</a>,
-<a href="../../input_variables/generated_files/varset_dmft.html#dmftctqmc_mov">dmftctqmc_mov</a>,
-<a href="../../input_variables/generated_files/varset_dmft.html#dmftctqmc_order">dmftctqmc_order</a>,
-<a href="../../input_variables/generated_files/varset_dmft.html#dmftctqmc_triqs_nleg">dmftctqmc_triqs_nleg</a>,
-<a href="../../input_variables/generated_files/varset_dmft.html#dmftqmc_l">dmftqmc_l</a>,
-<a href="../../input_variables/generated_files/varset_dmft.html#dmftqmc_n">dmftqmc_n</a>,
-<a href="../../input_variables/generated_files/varset_dmft.html#dmftqmc_seed">dmftqmc_seed</a>,
-<a href="../../input_variables/generated_files/varset_dmft.html#dmftqmc_therm">dmftqmc_therm</a>
+<a href="../../variables/generated_files/varset_dev.html#dmftctqmc_basis">dmftctqmc_basis</a>,
+<a href="../../variables/generated_files/varset_dmft.html#dmftctqmc_check">dmftctqmc_check</a>,
+<a href="../../variables/generated_files/varset_dmft.html#dmftctqmc_correl">dmftctqmc_correl</a>,
+<a href="../../variables/generated_files/varset_dmft.html#dmftctqmc_gmove">dmftctqmc_gmove</a>,
+<a href="../../variables/generated_files/varset_dmft.html#dmftctqmc_grnns">dmftctqmc_grnns</a>,
+<a href="../../variables/generated_files/varset_dmft.html#dmftctqmc_meas">dmftctqmc_meas</a>,
+<a href="../../variables/generated_files/varset_dmft.html#dmftctqmc_mrka">dmftctqmc_mrka</a>,
+<a href="../../variables/generated_files/varset_dmft.html#dmftctqmc_mov">dmftctqmc_mov</a>,
+<a href="../../variables/generated_files/varset_dmft.html#dmftctqmc_order">dmftctqmc_order</a>,
+<a href="../../variables/generated_files/varset_dmft.html#dmftctqmc_triqs_nleg">dmftctqmc_triqs_nleg</a>,
+<a href="../../variables/generated_files/varset_dmft.html#dmftqmc_l">dmftqmc_l</a>,
+<a href="../../variables/generated_files/varset_dmft.html#dmftqmc_n">dmftqmc_n</a>,
+<a href="../../variables/generated_files/varset_dmft.html#dmftqmc_seed">dmftqmc_seed</a>,
+<a href="../../variables/generated_files/varset_dmft.html#dmftqmc_therm">dmftqmc_therm</a>
 </p>
 </font>
 
@@ -398,7 +398,7 @@ the DMFT Loop needs a better convergence criterion.
 <p>
 <p>
  <b>dmftbandf</b> is the last band taken into account in the Projected Local
-Orbitals scheme of DFT+DMFT. With <a href="../../input_variables/generated_files/varset_dmft.html#dmftbandi">dmftbandi</a>, they define the energy window used to define Wannier Functions.
+Orbitals scheme of DFT+DMFT. With <a href="../../variables/generated_files/varset_dmft.html#dmftbandi">dmftbandi</a>, they define the energy window used to define Wannier Functions.
 (see  Amadon, B., Lechermann, F., Georges, A., Jollet, F., Wehling, T. O., and Lichtenstein, A. I. Phys. Rev. B 77(20), (2008).)
 </p>
 </font>
@@ -419,7 +419,7 @@ Orbitals scheme of DFT+DMFT. With <a href="../../input_variables/generated_files
 <p>
 <p>
  <b>dmftbandi</b> is the first band taken into account in the Projected Local
-Orbitals scheme of LDA+DMFT. With <a href="../../input_variables/generated_files/varset_dmft.html#dmftbandf">dmftbandf</a>, they define the energy window used to define Wannier Functions.
+Orbitals scheme of LDA+DMFT. With <a href="../../variables/generated_files/varset_dmft.html#dmftbandf">dmftbandf</a>, they define the energy window used to define Wannier Functions.
 (see  Amadon, B., Lechermann, F., Georges, A., Jollet, F., Wehling, T. O., and Lichtenstein, A. I. Phys. Rev. B 77(20), (2008).)
 </p>
 </font>
@@ -458,7 +458,7 @@ Only for developer purposes.
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
 <br><br><font id="requires">
-Only relevant if <a href="../../input_variables/generated_files/varset_dmft.html#dmft_solv">dmft_solv</a>==5
+Only relevant if <a href="../../variables/generated_files/varset_dmft.html#dmft_solv">dmft_solv</a>==5
 </font>
 <br><font id="text">
 <p>
@@ -496,7 +496,7 @@ Should only be used for debugging.
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
 <br><br><font id="requires">
-Only relevant if <a href="../../input_variables/generated_files/varset_dmft.html#dmft_solv">dmft_solv</a>==5
+Only relevant if <a href="../../variables/generated_files/varset_dmft.html#dmft_solv">dmft_solv</a>==5
 </font>
 <br><font id="text">
 <p>
@@ -528,7 +528,7 @@ Slow down the simulation.
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
 <br><br><font id="requires">
-Only relevant if <a href="../../input_variables/generated_files/varset_dmft.html#dmft_solv">dmft_solv</a>==5
+Only relevant if <a href="../../variables/generated_files/varset_dmft.html#dmft_solv">dmft_solv</a>==5
 </font>
 <br><font id="text">
 <p>
@@ -553,7 +553,7 @@ A value of 5000 means that a global move is tried every 5000 Monte Carlo sweep.
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
 <br><br><font id="requires">
-Only relevant if <a href="../../input_variables/generated_files/varset_dmft.html#dmft_solv">dmft_solv</a>==5
+Only relevant if <a href="../../variables/generated_files/varset_dmft.html#dmft_solv">dmft_solv</a>==5
 </font>
 <br><font id="text">
 <p>
@@ -585,7 +585,7 @@ This is a good approximation only if there is enough Monte Carlo sweeps per cpu.
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 1</font>
 <br><br><font id="requires">
-Only relevant if <a href="../../input_variables/generated_files/varset_dmft.html#dmft_solv">dmft_solv</a>==5
+Only relevant if <a href="../../variables/generated_files/varset_dmft.html#dmft_solv">dmft_solv</a>==5
 </font>
 <br><font id="text">
 <p>
@@ -609,7 +609,7 @@ Example : 2 means the measure is perform every two sweeps.
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
 <br><br><font id="requires">
-Only relevant if <a href="../../input_variables/generated_files/varset_dmft.html#dmft_solv">dmft_solv</a>==5
+Only relevant if <a href="../../variables/generated_files/varset_dmft.html#dmft_solv">dmft_solv</a>==5
 </font>
 <br><font id="text">
 <p>
@@ -641,7 +641,7 @@ This option should only be use with very small number (&lt;1000) of Monte Carlo 
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
 <br><br><font id="requires">
-Only relevant if <a href="../../input_variables/generated_files/varset_dmft.html#dmft_solv">dmft_solv</a>==5
+Only relevant if <a href="../../variables/generated_files/varset_dmft.html#dmft_solv">dmft_solv</a>==5
 </font>
 <br><font id="text">
 <p>
@@ -673,7 +673,7 @@ The result can be plotted using the "Markov_id.dat" file
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
 <br><br><font id="requires">
-Only relevant if <a href="../../input_variables/generated_files/varset_dmft.html#dmft_solv">dmft_solv</a>==5
+Only relevant if <a href="../../variables/generated_files/varset_dmft.html#dmft_solv">dmft_solv</a>==5
 </font>
 <br><font id="text">
 <p>
@@ -698,7 +698,7 @@ The result is written in the "Perturbation.dat" file.
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 30</font>
 <br><br><font id="requires">
-Only relevant if <a href="../../input_variables/generated_files/varset_dmft.html#dmft_solv">dmft_solv</a>==6 or 7
+Only relevant if <a href="../../variables/generated_files/varset_dmft.html#dmft_solv">dmft_solv</a>==6 or 7
 </font>
 <br><font id="text">
 <p>
@@ -724,14 +724,14 @@ Only relevant if <a href="../../input_variables/generated_files/varset_dmft.html
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
 <br><br><font id="requires">
-Only relevant if <a href="../../input_variables/generated_files/varset_dmft.html#dmft_solv">dmft_solv</a>>=4
+Only relevant if <a href="../../variables/generated_files/varset_dmft.html#dmft_solv">dmft_solv</a>>=4
 </font>
 <br><font id="text">
 <p>
 <p>
  <br />
  Number of time slices used to represent the time green function.
-This value should be carefully chosen according to Niquist frequency and the <a href="../../input_variables/generated_files/varset_gstate.html#tsmear">tsmear</a> value.
+This value should be carefully chosen according to Niquist frequency and the <a href="../../variables/generated_files/varset_gstate.html#tsmear">tsmear</a> value.
 </p>
 </font>
 
@@ -748,7 +748,7 @@ This value should be carefully chosen according to Niquist frequency and the <a 
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 0.0</font>
 <br><br><font id="requires">
-Only relevant if <a href="../../input_variables/generated_files/varset_dmft.html#dmft_solv">dmft_solv</a>>=4
+Only relevant if <a href="../../variables/generated_files/varset_dmft.html#dmft_solv">dmft_solv</a>>=4
 </font>
 <br><font id="text">
 <p>
@@ -769,9 +769,9 @@ Only relevant if <a href="../../input_variables/generated_files/varset_dmft.html
 <br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_DMFT.html">DMFT</a>.</font>
 <br><font id="smalltext">Rarely used: [2/920] in abinit tests, [0/136] in tuto abinit tests. Test list: {v7:[<a href="../../tests/v7/Input/t28.in">28</a>,<a href="../../tests/v7/Input/t29.in">29</a>]}.</font>
 <br><font id="vartype">Variable type: integer</font>
-<br><font id="default">Default is <a href="../../input_variables/generated_files/varset_basic.html#jdtset">jdtset</a></font>
+<br><font id="default">Default is <a href="../../variables/generated_files/varset_basic.html#jdtset">jdtset</a></font>
 <br><br><font id="requires">
-Only relevant if <a href="../../input_variables/generated_files/varset_dmft.html#dmft_solv">dmft_solv</a>>=4
+Only relevant if <a href="../../variables/generated_files/varset_dmft.html#dmft_solv">dmft_solv</a>>=4
 </font>
 <br><font id="text">
 <p>
@@ -781,7 +781,7 @@ Only relevant if <a href="../../input_variables/generated_files/varset_dmft.html
  <br />
  Should not be relevant except for testing purpose.
  <br />
- NOTE : If the CT-QMC (<a href="../../input_variables/generated_files/varset_dmft.html#dmft_solv">dmft_solv</a>=5) is used on many CPUs, each CPU initializes its random number generator with dmftqmc_seed+rank where rank is the rank of the cpu in the MPI communicator.
+ NOTE : If the CT-QMC (<a href="../../variables/generated_files/varset_dmft.html#dmft_solv">dmft_solv</a>=5) is used on many CPUs, each CPU initializes its random number generator with dmftqmc_seed+rank where rank is the rank of the cpu in the MPI communicator.
 </p>
 </font>
 
@@ -798,7 +798,7 @@ Only relevant if <a href="../../input_variables/generated_files/varset_dmft.html
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 1000</font>
 <br><br><font id="requires">
-Only relevant if <a href="../../input_variables/generated_files/varset_dmft.html#dmft_solv">dmft_solv</a>==5
+Only relevant if <a href="../../variables/generated_files/varset_dmft.html#dmft_solv">dmft_solv</a>==5
 </font>
 <br><font id="text">
 <p>

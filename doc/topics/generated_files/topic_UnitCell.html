@@ -45,10 +45,10 @@ src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-
 
 ABINIT needs three dimensioned non-coplanar vectors, forming the unit cell, to set up the real space lattice.
 <p>
-An initial set of three vectors, specified in real space by <a href="../../input_variables/generated_files/varset_basic.html#rprim">rprim</a> or as unit vectors with angles <a href="../../input_variables/generated_files/varset_basic.html#angdeg">angdeg</a>,
-are dimensioned in a second step using scaling factors as specified by <a href="../../input_variables/generated_files/varset_basic.html#acell">acell</a> or by rescaling their cartesian coordinates, 
-as specified by <a href="../../input_variables/generated_files/varset_basic.html#scalecart">scalecart</a>. Internally, only the final result, <a href="../../input_variables/generated_files/varset_basic.html#rprimd">rprimd</a> matters.
-The most detailed explanation can be found by looking at <a href="../../input_variables/generated_files/varset_basic.html#rprim">rprim</a>.
+An initial set of three vectors, specified in real space by <a href="../../variables/generated_files/varset_basic.html#rprim">rprim</a> or as unit vectors with angles <a href="../../variables/generated_files/varset_basic.html#angdeg">angdeg</a>,
+are dimensioned in a second step using scaling factors as specified by <a href="../../variables/generated_files/varset_basic.html#acell">acell</a> or by rescaling their cartesian coordinates, 
+as specified by <a href="../../variables/generated_files/varset_basic.html#scalecart">scalecart</a>. Internally, only the final result, <a href="../../variables/generated_files/varset_basic.html#rprimd">rprimd</a> matters.
+The most detailed explanation can be found by looking at <a href="../../variables/generated_files/varset_basic.html#rprim">rprim</a>.
 <p>
 Note that ABINIT expects the mixed product of the three vectors (R1xR2).R3 to be positive. 
 If it is not the case, exchange two of them.
@@ -56,9 +56,9 @@ If it is not the case, exchange two of them.
 More information about the way the real space lattice, 
 the reciprocal lattice, and symmetries are defined in ABINIT can be found <a href="../documents/geometry.pdf">here</a>.
 <p><b>Smart symmetriser</b><p>
-ABINIT has also a smart symmetriser capability, when <a href="../../input_variables/generated_files/varset_geo.html#spgroup">spgroup</a>!=0 and <a href="../../input_variables/generated_files/varset_geo.html#brvltt">brvltt</a>=-1. 
+ABINIT has also a smart symmetriser capability, when <a href="../../variables/generated_files/varset_geo.html#spgroup">spgroup</a>!=0 and <a href="../../variables/generated_files/varset_geo.html#brvltt">brvltt</a>=-1. 
 In this case, the CONVENTIONAL unit cell must be input through the usual 
-input variables <a href="../../input_variables/generated_files/varset_basic.html#rprim">rprim</a>, <a href="../../input_variables/generated_files/varset_basic.html#angdeg">angdeg</a>, <a href="../../input_variables/generated_files/varset_basic.html#acell">acell</a> and/or <a href="../../input_variables/generated_files/varset_basic.html#scalecart">scalecart</a>. 
+input variables <a href="../../variables/generated_files/varset_basic.html#rprim">rprim</a>, <a href="../../variables/generated_files/varset_basic.html#angdeg">angdeg</a>, <a href="../../variables/generated_files/varset_basic.html#acell">acell</a> and/or <a href="../../variables/generated_files/varset_basic.html#scalecart">scalecart</a>. 
 ABINIT will fold the conventional unit to the primitive cell, 
 and also generate all the nuclei positions from the irreducible ones. 
 See <a href="../../topics/generated_files/topic_SmartSymm.html#">SmartSymm</a>.
@@ -82,14 +82,14 @@ See <a href="../../topics/generated_files/topic_SmartSymm.html#">SmartSymm</a>.
 <h3><b>3. Related input variables.</b></h3>
 
 
-<p>Basic input variables:<p>... <a href="../../input_variables/generated_files/varset_basic.html#acell">acell</a>   [CELL lattice vector scaling]<br>
-... <a href="../../input_variables/generated_files/varset_basic.html#rprim">rprim</a>   [Real space PRIMitive translations]<br>
-<p>Useful input variables:<p>... <a href="../../input_variables/generated_files/varset_basic.html#angdeg">angdeg</a>   [ANGles in DEGrees]<br>
-... <a href="../../input_variables/generated_files/varset_geo.html#brvltt">brvltt</a>   [BRaVais LaTTice type]<br>
-... <a href="../../input_variables/generated_files/varset_gstate.html#chkprim">chkprim</a>   [CHecK whether the cell is PRIMitive]<br>
-... <a href="../../input_variables/generated_files/varset_basic.html#scalecart">scalecart</a>   [SCALE CARTesian coordinates]<br>
-... <a href="../../input_variables/generated_files/varset_geo.html#spgroup">spgroup</a>   [SPace GROUP number]<br>
-<p>Relevant internal variables:<p>... <a href="../../input_variables/generated_files/varset_basic.html#rprimd">%rprimd</a>   [Real space PRIMitive translations, Dimensional]<br>
+<p>Basic input variables:<p>... <a href="../../variables/generated_files/varset_basic.html#acell">acell</a>   [CELL lattice vector scaling]<br>
+... <a href="../../variables/generated_files/varset_basic.html#rprim">rprim</a>   [Real space PRIMitive translations]<br>
+<p>Useful input variables:<p>... <a href="../../variables/generated_files/varset_basic.html#angdeg">angdeg</a>   [ANGles in DEGrees]<br>
+... <a href="../../variables/generated_files/varset_geo.html#brvltt">brvltt</a>   [BRaVais LaTTice type]<br>
+... <a href="../../variables/generated_files/varset_gstate.html#chkprim">chkprim</a>   [CHecK whether the cell is PRIMitive]<br>
+... <a href="../../variables/generated_files/varset_basic.html#scalecart">scalecart</a>   [SCALE CARTesian coordinates]<br>
+... <a href="../../variables/generated_files/varset_geo.html#spgroup">spgroup</a>   [SPace GROUP number]<br>
+<p>Relevant internal variables:<p>... <a href="../../variables/generated_files/varset_basic.html#rprimd">%rprimd</a>   [Real space PRIMitive translations, Dimensional]<br>
 
 <br><br><a href=#top>Go to the top</a>
 

@@ -63,9 +63,9 @@ In these cases, pair-wise terms (and 3-body corrections for DFT-D3 and DFT-D3(BJ
 The implementation includes the contributions of these methods to forces and stresses, in view of geometry optimization, as well as
 to first-order response functions like dynamical matrices, clamped elastic constants and internal strain coupling parameters.
 
-<p>To activate DFT-D dispersion correction, two keywords are in use: <a href="../../input_variables/generated_files/varset_vdw.html#vdw_xc">vdw_xc</a> = 5/6/7 to choose between DFT-D2, DFT-D3 and DFT-D3(BJ), and <a href="../../input_variables/generated_files/varset_vdw.html#vdw_tol">vdw_tol</a>, 
-to control the inclusion of largely distant pairs (those giving a contribution below <a href="../../input_variables/generated_files/varset_vdw.html#vdw_tol">vdw_tol</a> are ignored). 
-It is also possible to include 3-body corrections <a href="../../biblio/generated_files/bib_biblio.html#Grimme2010">[Grimme2010]</a> (for ground-state only) with the keyword <a href="../../input_variables/generated_files/varset_vdw.html#vdw_tol_3bt">vdw_tol_3bt</a>, which also controls the tolerance over this term. 
+<p>To activate DFT-D dispersion correction, two keywords are in use: <a href="../../variables/generated_files/varset_vdw.html#vdw_xc">vdw_xc</a> = 5/6/7 to choose between DFT-D2, DFT-D3 and DFT-D3(BJ), and <a href="../../variables/generated_files/varset_vdw.html#vdw_tol">vdw_tol</a>, 
+to control the inclusion of largely distant pairs (those giving a contribution below <a href="../../variables/generated_files/varset_vdw.html#vdw_tol">vdw_tol</a> are ignored). 
+It is also possible to include 3-body corrections <a href="../../biblio/generated_files/bib_biblio.html#Grimme2010">[Grimme2010]</a> (for ground-state only) with the keyword <a href="../../variables/generated_files/varset_vdw.html#vdw_tol_3bt">vdw_tol_3bt</a>, which also controls the tolerance over this term. 
 
 <p>Methods based on maximally localized Wannier functions (MLWFs) to calculate vdW energy 
 corrections have also been implemented in ABINIT. In this case the pair-wise terms come from 
@@ -73,16 +73,16 @@ contributions of pairs of MLWFs rather than from atoms. Among the implemented me
 it is found vdW-WF1 <a href="../../biblio/generated_files/bib_biblio.html#Silvestrelli2008">[Silvestrelli2008]</a>,<a href="../../biblio/generated_files/bib_biblio.html#Silvestrelli2009">[Silvestrelli2009]</a> vdW-WF2 <a href="../../biblio/generated_files/bib_biblio.html#Ambrosetti2012">[Ambrosetti2012]</a> and vdW-QHO-WF <a href="../../biblio/generated_files/bib_biblio.html#Silvestrelli2013">[Silvestrelli2013]</a>. A full description of the 
 implementation of vdW-WF1 is reported in <a href="../../biblio/generated_files/bib_biblio.html#Espejo2012">[Espejo2012]</a>. 
 
-<p>Selection of one of these 3 methods is achieved by using  <a href="../../input_variables/generated_files/varset_vdw.html#vdw_xc">vdw_xc</a>=10/11/14 respectivelly. 
+<p>Selection of one of these 3 methods is achieved by using  <a href="../../variables/generated_files/varset_vdw.html#vdw_xc">vdw_xc</a>=10/11/14 respectivelly. 
 Since vdW-WF1 and vdW-WF2 methods are approximations for the dispersion energy of non overlapping electronic 
 densities, it is necessary to define the interacting fragments of the system whose 
 dispersion energy is going to be calculated. The latter is achieved by using the input variables 
-<a href="../../input_variables/generated_files/varset_vdw.html#vdw_nfrag">vdw_nfrag</a> and <a href="../../input_variables/generated_files/varset_vdw.html#vdw_typfrag">vdw_typfrag</a> to define the number of interacting 
+<a href="../../variables/generated_files/varset_vdw.html#vdw_nfrag">vdw_nfrag</a> and <a href="../../variables/generated_files/varset_vdw.html#vdw_typfrag">vdw_typfrag</a> to define the number of interacting 
 fragments in the unit cell and to assign each atom to a fragment. A given MLWF belongs to the same fragment
 as its closer atom. The need for defining the interacting fragments is overridden in the vdW-QHO-WF, for which 
 these input variables are not used. When dealing with periodic systems the input variable 
-<a href="../../input_variables/generated_files/varset_vdw.html#vdw_supercell">vdw_supercell</a> controls the number of neighbor unit cells that will be included 
-in the calculation. Each one of the 3 components of <a href="../../input_variables/generated_files/varset_vdw.html#vdw_supercell">vdw_supercell</a> 
+<a href="../../variables/generated_files/varset_vdw.html#vdw_supercell">vdw_supercell</a> controls the number of neighbor unit cells that will be included 
+in the calculation. Each one of the 3 components of <a href="../../variables/generated_files/varset_vdw.html#vdw_supercell">vdw_supercell</a> 
 indicates the maximum number of cells along both positive or negative directions of the corresponding primitive vector. 
 This is useful for studying the spacial convergency of the vdW energy. 
 It should be noticed that the user must set the variables associated to 
@@ -98,38 +98,38 @@ the calculation of MLWFs and that the resulting vdW energies strongly depend on 
 <h3><b>2. Related input variables.</b></h3>
 
 
-<p>Compulsory input variables:<p>... <a href="../../input_variables/generated_files/varset_vdw.html#vdw_tol">vdw_tol</a>   [Van Der Waals TOLerance]<br>
-... <a href="../../input_variables/generated_files/varset_vdw.html#vdw_xc">vdw_xc</a>   [Van Der Waals eXchange-Correlation functional]<br>
-<p>Basic input variables:<p>... <a href="../../input_variables/generated_files/varset_vdw.html#vdw_nfrag">vdw_nfrag</a>   [Van Der Waals Number of interacting FRAGments]<br>
-... <a href="../../input_variables/generated_files/varset_vdw.html#vdw_supercell">vdw_supercell</a>   [Van Der Waals correction from Wannier functions in SUPERCELL]<br>
-... <a href="../../input_variables/generated_files/varset_vdw.html#vdw_tol_3bt">vdw_tol_3bt</a>   [Van Der Waals TOLerance for 3-Body Term]<br>
-... <a href="../../input_variables/generated_files/varset_vdw.html#vdw_typfrag">vdw_typfrag</a>   [Van Der Waals TYPe of FRAGment]<br>
-<p>Useful input variables:<p>... <a href="../../input_variables/generated_files/varset_vdw.html#irdvdw">irdvdw</a>   [Integer that governs the ReaDing of _VDW files]<br>
-... <a href="../../input_variables/generated_files/varset_files.html#prtwf">prtwf</a>   [PRinT the WaveFunction]<br>
-<p>Input variables for experts:<p>... <a href="../../input_variables/generated_files/varset_vdw.html#vdw_df_acutmin">vdw_df_acutmin</a>   [vdW-DF MINimum Angular CUT-off]<br>
-... <a href="../../input_variables/generated_files/varset_vdw.html#vdw_df_aratio">vdw_df_aratio</a>   [vdW-DF Angle RATIO between the highest and
+<p>Compulsory input variables:<p>... <a href="../../variables/generated_files/varset_vdw.html#vdw_tol">vdw_tol</a>   [Van Der Waals TOLerance]<br>
+... <a href="../../variables/generated_files/varset_vdw.html#vdw_xc">vdw_xc</a>   [Van Der Waals eXchange-Correlation functional]<br>
+<p>Basic input variables:<p>... <a href="../../variables/generated_files/varset_vdw.html#vdw_nfrag">vdw_nfrag</a>   [Van Der Waals Number of interacting FRAGments]<br>
+... <a href="../../variables/generated_files/varset_vdw.html#vdw_supercell">vdw_supercell</a>   [Van Der Waals correction from Wannier functions in SUPERCELL]<br>
+... <a href="../../variables/generated_files/varset_vdw.html#vdw_tol_3bt">vdw_tol_3bt</a>   [Van Der Waals TOLerance for 3-Body Term]<br>
+... <a href="../../variables/generated_files/varset_vdw.html#vdw_typfrag">vdw_typfrag</a>   [Van Der Waals TYPe of FRAGment]<br>
+<p>Useful input variables:<p>... <a href="../../variables/generated_files/varset_vdw.html#irdvdw">irdvdw</a>   [Integer that governs the ReaDing of _VDW files]<br>
+... <a href="../../variables/generated_files/varset_files.html#prtwf">prtwf</a>   [PRinT the WaveFunction]<br>
+<p>Input variables for experts:<p>... <a href="../../variables/generated_files/varset_vdw.html#vdw_df_acutmin">vdw_df_acutmin</a>   [vdW-DF MINimum Angular CUT-off]<br>
+... <a href="../../variables/generated_files/varset_vdw.html#vdw_df_aratio">vdw_df_aratio</a>   [vdW-DF Angle RATIO between the highest and
 lowest angles.]<br>
-... <a href="../../input_variables/generated_files/varset_vdw.html#vdw_df_damax">vdw_df_damax</a>   [vdW-DF Delta for Angles, MAXimum ]<br>
-... <a href="../../input_variables/generated_files/varset_vdw.html#vdw_df_damin">vdw_df_damin</a>   [vdW-DF Delta for Angles, MINimum]<br>
-... <a href="../../input_variables/generated_files/varset_vdw.html#vdw_df_dcut">vdw_df_dcut</a>   [vdW-DF D-mesh CUT-off]<br>
-... <a href="../../input_variables/generated_files/varset_vdw.html#vdw_df_dratio">vdw_df_dratio</a>   [vdW-DF, between the highest and
+... <a href="../../variables/generated_files/varset_vdw.html#vdw_df_damax">vdw_df_damax</a>   [vdW-DF Delta for Angles, MAXimum ]<br>
+... <a href="../../variables/generated_files/varset_vdw.html#vdw_df_damin">vdw_df_damin</a>   [vdW-DF Delta for Angles, MINimum]<br>
+... <a href="../../variables/generated_files/varset_vdw.html#vdw_df_dcut">vdw_df_dcut</a>   [vdW-DF D-mesh CUT-off]<br>
+... <a href="../../variables/generated_files/varset_vdw.html#vdw_df_dratio">vdw_df_dratio</a>   [vdW-DF, between the highest and
 lowest D, RATIO.]<br>
-... <a href="../../input_variables/generated_files/varset_vdw.html#vdw_df_dsoft">vdw_df_dsoft</a>   [vdW-DF Distance for SOFTening.]<br>
-... <a href="../../input_variables/generated_files/varset_vdw.html#vdw_df_gcut">vdw_df_gcut</a>   [vdW-DF G-space CUT-off]<br>
-... <a href="../../input_variables/generated_files/varset_vdw.html#vdw_df_ndpts">vdw_df_ndpts</a>   [vdW-DF Number of D-mesh PoinTS]<br>
-... <a href="../../input_variables/generated_files/varset_vdw.html#vdw_df_ngpts">vdw_df_ngpts</a>   [vdW-DF Number of G-mesh PoinTS]<br>
-... <a href="../../input_variables/generated_files/varset_vdw.html#vdw_df_nqpts">vdw_df_nqpts</a>   [vdW-DF Number of Q-mesh PoinTS]<br>
-... <a href="../../input_variables/generated_files/varset_vdw.html#vdw_df_nrpts">vdw_df_nrpts</a>   [vdW-DF Number of R-PoinTS]<br>
-... <a href="../../input_variables/generated_files/varset_vdw.html#vdw_df_nsmooth">vdw_df_nsmooth</a>   [vdW-DF Number of SMOOTHening iterations]<br>
-... <a href="../../input_variables/generated_files/varset_vdw.html#vdw_df_phisoft">vdw_df_phisoft</a>   [vdW-DF PHI value SOFTening.]<br>
-... <a href="../../input_variables/generated_files/varset_vdw.html#vdw_df_qcut">vdw_df_qcut</a>   [vdW-DF Q-mesh CUT-off]<br>
-... <a href="../../input_variables/generated_files/varset_vdw.html#vdw_df_qratio">vdw_df_qratio</a>   [vdW-DF, between highest and lowest Q, RATIO .]<br>
-... <a href="../../input_variables/generated_files/varset_vdw.html#vdw_df_rcut">vdw_df_rcut</a>   [vdW-DF Real-space CUT-off]<br>
-... <a href="../../input_variables/generated_files/varset_vdw.html#vdw_df_rsoft">vdw_df_rsoft</a>   [vdW-DF radius SOFTening.]<br>
-... <a href="../../input_variables/generated_files/varset_vdw.html#vdw_df_threshold">vdw_df_threshold</a>   [vdW-DF energy calculation THRESHOLD]<br>
-... <a href="../../input_variables/generated_files/varset_vdw.html#vdw_df_tolerance">vdw_df_tolerance</a>   [vdW-DF global TOLERANCE.]<br>
-... <a href="../../input_variables/generated_files/varset_vdw.html#vdw_df_tweaks">vdw_df_tweaks</a>   [vdW-DF TWEAKS.]<br>
-... <a href="../../input_variables/generated_files/varset_vdw.html#vdw_df_zab">vdw_df_zab</a>   [vdW-DF ZAB parameter]<br>
+... <a href="../../variables/generated_files/varset_vdw.html#vdw_df_dsoft">vdw_df_dsoft</a>   [vdW-DF Distance for SOFTening.]<br>
+... <a href="../../variables/generated_files/varset_vdw.html#vdw_df_gcut">vdw_df_gcut</a>   [vdW-DF G-space CUT-off]<br>
+... <a href="../../variables/generated_files/varset_vdw.html#vdw_df_ndpts">vdw_df_ndpts</a>   [vdW-DF Number of D-mesh PoinTS]<br>
+... <a href="../../variables/generated_files/varset_vdw.html#vdw_df_ngpts">vdw_df_ngpts</a>   [vdW-DF Number of G-mesh PoinTS]<br>
+... <a href="../../variables/generated_files/varset_vdw.html#vdw_df_nqpts">vdw_df_nqpts</a>   [vdW-DF Number of Q-mesh PoinTS]<br>
+... <a href="../../variables/generated_files/varset_vdw.html#vdw_df_nrpts">vdw_df_nrpts</a>   [vdW-DF Number of R-PoinTS]<br>
+... <a href="../../variables/generated_files/varset_vdw.html#vdw_df_nsmooth">vdw_df_nsmooth</a>   [vdW-DF Number of SMOOTHening iterations]<br>
+... <a href="../../variables/generated_files/varset_vdw.html#vdw_df_phisoft">vdw_df_phisoft</a>   [vdW-DF PHI value SOFTening.]<br>
+... <a href="../../variables/generated_files/varset_vdw.html#vdw_df_qcut">vdw_df_qcut</a>   [vdW-DF Q-mesh CUT-off]<br>
+... <a href="../../variables/generated_files/varset_vdw.html#vdw_df_qratio">vdw_df_qratio</a>   [vdW-DF, between highest and lowest Q, RATIO .]<br>
+... <a href="../../variables/generated_files/varset_vdw.html#vdw_df_rcut">vdw_df_rcut</a>   [vdW-DF Real-space CUT-off]<br>
+... <a href="../../variables/generated_files/varset_vdw.html#vdw_df_rsoft">vdw_df_rsoft</a>   [vdW-DF radius SOFTening.]<br>
+... <a href="../../variables/generated_files/varset_vdw.html#vdw_df_threshold">vdw_df_threshold</a>   [vdW-DF energy calculation THRESHOLD]<br>
+... <a href="../../variables/generated_files/varset_vdw.html#vdw_df_tolerance">vdw_df_tolerance</a>   [vdW-DF global TOLERANCE.]<br>
+... <a href="../../variables/generated_files/varset_vdw.html#vdw_df_tweaks">vdw_df_tweaks</a>   [vdW-DF TWEAKS.]<br>
+... <a href="../../variables/generated_files/varset_vdw.html#vdw_df_zab">vdw_df_zab</a>   [vdW-DF ZAB parameter]<br>
 
 <br><br><a href=#top>Go to the top</a>
 

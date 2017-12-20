@@ -122,7 +122,7 @@ variables to be used in the main input file of the abinit code.
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is -1</font>
 <br><br><font id="requires">
-Only relevant if <a href="../../input_variables/generated_files/varset_dfpt.html#ieig2rf">ieig2rf</a> in [1,2,3,4,5]
+Only relevant if <a href="../../variables/generated_files/varset_dfpt.html#ieig2rf">ieig2rf</a> in [1,2,3,4,5]
 </font>
 <br><font id="text">
 <p>
@@ -149,16 +149,16 @@ that is, if the user is performing second-order eigenvalue calculations using re
 <br><font id="vartype">Variable type: integer(2)</font>
 <br><font id="default">Default is [1, 1]</font>
 <br><br><font id="requires">
-Only relevant if <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>==5 (non-linear response computations)
+Only relevant if <a href="../../variables/generated_files/varset_gstate.html#optdriver">optdriver</a>==5 (non-linear response computations)
 </font>
 <br><font id="text">
 <p>
 <p>
 Controls the range of atoms for which displacements will be considered
 in non-linear computations (using the 2n+1 theorem), for the 1st perturbation.<br />
-May take values from 1 to <a href="../../input_variables/generated_files/varset_basic.html#natom">natom</a>, with
+May take values from 1 to <a href="../../variables/generated_files/varset_basic.html#natom">natom</a>, with
 <b>d3e_pert1_atpol</b>(1)&lt;=<b>d3e_pert1_atpol</b>(2).<br />
-See <a href="../../input_variables/generated_files/varset_dfpt.html#rfatpol">rfatpol</a> for additional details.
+See <a href="../../variables/generated_files/varset_dfpt.html#rfatpol">rfatpol</a> for additional details.
 </p>
 </font>
 
@@ -174,7 +174,7 @@ See <a href="../../input_variables/generated_files/varset_dfpt.html#rfatpol">rfa
 <br><font id="vartype">Variable type: integer(3)</font>
 <br><font id="default">Default is [0, 0, 0]</font>
 <br><br><font id="requires">
-Only relevant if <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>==5 (non-linear response computations)
+Only relevant if <a href="../../variables/generated_files/varset_gstate.html#optdriver">optdriver</a>==5 (non-linear response computations)
 </font>
 <br><font id="text">
 <p>
@@ -184,7 +184,7 @@ Gives the directions to be considered in non-linear computations
 The three elements corresponds to the three primitive
 vectors, either in real space (atomic displacement),
 or in reciprocal space (electric field perturbation).<br />
-See <a href="../../input_variables/generated_files/varset_dfpt.html#rfdir">rfdir</a> for additional details.
+See <a href="../../variables/generated_files/varset_dfpt.html#rfdir">rfdir</a> for additional details.
 </p>
 </font>
 
@@ -200,7 +200,7 @@ See <a href="../../input_variables/generated_files/varset_dfpt.html#rfdir">rfdir
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
 <br><br><font id="requires">
-Only relevant if <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>==5 (non-linear response computations)
+Only relevant if <a href="../../variables/generated_files/varset_gstate.html#optdriver">optdriver</a>==5 (non-linear response computations)
 </font>
 <br><font id="text">
 <p>
@@ -208,7 +208,7 @@ Only relevant if <a href="../../input_variables/generated_files/varset_gstate.ht
 Turns on electric field perturbation in non-linear computation, as 1st perturbation.
 Actually, such calculations requires first the non-self-consistent calculation
 of derivatives with respect to k, independently of the electric field perturbation itself.<br />
-See <a href="../../input_variables/generated_files/varset_dfpt.html#rfelfd">rfelfd</a> for additional details.
+See <a href="../../variables/generated_files/varset_dfpt.html#rfelfd">rfelfd</a> for additional details.
 </p>
 </font>
 
@@ -224,13 +224,13 @@ See <a href="../../input_variables/generated_files/varset_dfpt.html#rfelfd">rfel
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
 <br><br><font id="requires">
-Only relevant if <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>==5 (non-linear response computations)
+Only relevant if <a href="../../variables/generated_files/varset_gstate.html#optdriver">optdriver</a>==5 (non-linear response computations)
 </font>
 <br><font id="text">
 <p>
 <p>
 Turns on atomic displacement perturbation in non-linear computation, as 1st perturbation.<br />
-See <a href="../../input_variables/generated_files/varset_dfpt.html#rfphon">rfphon</a> for additional details.
+See <a href="../../variables/generated_files/varset_dfpt.html#rfphon">rfphon</a> for additional details.
 </p>
 </font>
 
@@ -246,16 +246,16 @@ See <a href="../../input_variables/generated_files/varset_dfpt.html#rfphon">rfph
 <br><font id="vartype">Variable type: integer(2)</font>
 <br><font id="default">Default is [1, 1]</font>
 <br><br><font id="requires">
-Only relevant if <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>==5 (non-linear response computations)
+Only relevant if <a href="../../variables/generated_files/varset_gstate.html#optdriver">optdriver</a>==5 (non-linear response computations)
 </font>
 <br><font id="text">
 <p>
 <p>
 Controls the range of atoms for which displacements will be considered
 in non-linear computations (using the 2n+1 theorem), for the 2nd perturbation.<br />
-May take values from 1 to <a href="../../input_variables/generated_files/varset_basic.html#natom">natom</a>, with
+May take values from 1 to <a href="../../variables/generated_files/varset_basic.html#natom">natom</a>, with
 <b>d3e_pert2_atpol</b>(1)&lt;=<b>d3e_pert2_atpol</b>(2).<br />
-See <a href="../../input_variables/generated_files/varset_dfpt.html#rfatpol">rfatpol</a> for additional details.
+See <a href="../../variables/generated_files/varset_dfpt.html#rfatpol">rfatpol</a> for additional details.
 </p>
 </font>
 
@@ -271,7 +271,7 @@ See <a href="../../input_variables/generated_files/varset_dfpt.html#rfatpol">rfa
 <br><font id="vartype">Variable type: integer(3)</font>
 <br><font id="default">Default is [0, 0, 0]</font>
 <br><br><font id="requires">
-Only relevant if <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>==5 (non-linear response computations)
+Only relevant if <a href="../../variables/generated_files/varset_gstate.html#optdriver">optdriver</a>==5 (non-linear response computations)
 </font>
 <br><font id="text">
 <p>
@@ -281,7 +281,7 @@ Gives the directions to be considered in non-linear computations
 The three elements corresponds to the three primitive
 vectors, either in real space (atomic displacement),
 or in reciprocal space (electric field perturbation).<br />
-See <a href="../../input_variables/generated_files/varset_dfpt.html#rfdir">rfdir</a> for additional details.
+See <a href="../../variables/generated_files/varset_dfpt.html#rfdir">rfdir</a> for additional details.
 </p>
 </font>
 
@@ -297,7 +297,7 @@ See <a href="../../input_variables/generated_files/varset_dfpt.html#rfdir">rfdir
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
 <br><br><font id="requires">
-Only relevant if <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>==5 (non-linear response computations)
+Only relevant if <a href="../../variables/generated_files/varset_gstate.html#optdriver">optdriver</a>==5 (non-linear response computations)
 </font>
 <br><font id="text">
 <p>
@@ -305,7 +305,7 @@ Only relevant if <a href="../../input_variables/generated_files/varset_gstate.ht
 Turns on electric field perturbation in non-linear computation, as 2nd perturbation.
 Actually, such calculations requires first the non-self-consistent calculation
 of derivatives with respect to k, independently of the electric field perturbation itself.<br />
-See <a href="../../input_variables/generated_files/varset_dfpt.html#rfelfd">rfelfd</a> for additional details.
+See <a href="../../variables/generated_files/varset_dfpt.html#rfelfd">rfelfd</a> for additional details.
 </p>
 </font>
 
@@ -321,13 +321,13 @@ See <a href="../../input_variables/generated_files/varset_dfpt.html#rfelfd">rfel
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
 <br><br><font id="requires">
-Only relevant if <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>==5 (non-linear response computations)
+Only relevant if <a href="../../variables/generated_files/varset_gstate.html#optdriver">optdriver</a>==5 (non-linear response computations)
 </font>
 <br><font id="text">
 <p>
 <p>
 Turns on atomic displacement perturbation in non-linear computation, as 2nd perturbation.<br />
-See <a href="../../input_variables/generated_files/varset_dfpt.html#rfphon">rfphon</a> for additional details.
+See <a href="../../variables/generated_files/varset_dfpt.html#rfphon">rfphon</a> for additional details.
 </p>
 </font>
 
@@ -343,16 +343,16 @@ See <a href="../../input_variables/generated_files/varset_dfpt.html#rfphon">rfph
 <br><font id="vartype">Variable type: integer(2)</font>
 <br><font id="default">Default is [1, 1]</font>
 <br><br><font id="requires">
-Only relevant if <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>==5 (non-linear response computations)
+Only relevant if <a href="../../variables/generated_files/varset_gstate.html#optdriver">optdriver</a>==5 (non-linear response computations)
 </font>
 <br><font id="text">
 <p>
 <p>
 Controls the range of atoms for which displacements will be considered
 in non-linear computations (using the 2n+1 theorem), for the 3rd perturbation.<br />
-May take values from 1 to <a href="../../input_variables/generated_files/varset_basic.html#natom">natom</a>, with
+May take values from 1 to <a href="../../variables/generated_files/varset_basic.html#natom">natom</a>, with
 <b>d3e_pert3_atpol</b>(1)&lt;=<b>d3e_pert3_atpol</b>(2).<br />
-See <a href="../../input_variables/generated_files/varset_dfpt.html#rfatpol">rfatpol</a> for additional details.
+See <a href="../../variables/generated_files/varset_dfpt.html#rfatpol">rfatpol</a> for additional details.
 </p>
 </font>
 
@@ -368,7 +368,7 @@ See <a href="../../input_variables/generated_files/varset_dfpt.html#rfatpol">rfa
 <br><font id="vartype">Variable type: integer(3)</font>
 <br><font id="default">Default is [0, 0, 0]</font>
 <br><br><font id="requires">
-Only relevant if <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>==5 (non-linear response computations)
+Only relevant if <a href="../../variables/generated_files/varset_gstate.html#optdriver">optdriver</a>==5 (non-linear response computations)
 </font>
 <br><font id="text">
 <p>
@@ -378,7 +378,7 @@ Gives the directions to be considered in non-linear computations
 The three elements corresponds to the three primitive
 vectors, either in real space (atomic displacement),
 or in reciprocal space (electric field perturbation).<br />
-See <a href="../../input_variables/generated_files/varset_dfpt.html#rfdir">rfdir</a> for additional details.
+See <a href="../../variables/generated_files/varset_dfpt.html#rfdir">rfdir</a> for additional details.
 </p>
 </font>
 
@@ -394,7 +394,7 @@ See <a href="../../input_variables/generated_files/varset_dfpt.html#rfdir">rfdir
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
 <br><br><font id="requires">
-Only relevant if <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>==5 (non-linear response computations)
+Only relevant if <a href="../../variables/generated_files/varset_gstate.html#optdriver">optdriver</a>==5 (non-linear response computations)
 </font>
 <br><font id="text">
 <p>
@@ -402,7 +402,7 @@ Only relevant if <a href="../../input_variables/generated_files/varset_gstate.ht
 Turns on electric field perturbation in non-linear computation, as 3rd perturbation.
 Actually, such calculations requires first the non-self-consistent calculation
 of derivatives with respect to k, independently of the electric field perturbation itself.<br />
-See <a href="../../input_variables/generated_files/varset_dfpt.html#rfelfd">rfelfd</a> for additional details.
+See <a href="../../variables/generated_files/varset_dfpt.html#rfelfd">rfelfd</a> for additional details.
 </p>
 </font>
 
@@ -418,13 +418,13 @@ See <a href="../../input_variables/generated_files/varset_dfpt.html#rfelfd">rfel
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
 <br><br><font id="requires">
-Only relevant if <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>==5 (non-linear response computations)
+Only relevant if <a href="../../variables/generated_files/varset_gstate.html#optdriver">optdriver</a>==5 (non-linear response computations)
 </font>
 <br><font id="text">
 <p>
 <p>
 Turns on atomic displacement perturbation in non-linear computation, as 3rd perturbation.<br />
-See <a href="../../input_variables/generated_files/varset_dfpt.html#rfphon">rfphon</a> for additional details.
+See <a href="../../variables/generated_files/varset_dfpt.html#rfphon">rfphon</a> for additional details.
 </p>
 </font>
 
@@ -455,8 +455,8 @@ used in response function calculations.
 '<a href="../../users/generated_files/help_abinit.html#ENERGY">ENERGY</a>' characteristics.
 (1 Ha=27.2113845 eV)
  <br />
- Typical use is for response to electric field (<a href="../../input_variables/generated_files/varset_dfpt.html#rfelfd">rfelfd</a>=3),
-but NOT for d/dk (<a href="../../input_variables/generated_files/varset_dfpt.html#rfelfd">rfelfd</a>=2) and phonon responses.
+ Typical use is for response to electric field (<a href="../../variables/generated_files/varset_dfpt.html#rfelfd">rfelfd</a>=3),
+but NOT for d/dk (<a href="../../variables/generated_files/varset_dfpt.html#rfelfd">rfelfd</a>=2) and phonon responses.
 </p>
 </font>
 
@@ -477,7 +477,7 @@ but NOT for d/dk (<a href="../../input_variables/generated_files/varset_dfpt.htm
  Turns on effective mass tensor calculations.
  Such calculations requires the non-self-consistent calculation
  of derivatives with respect to k, in the same dataset.
- It must therefore be used with <a href="../../input_variables/generated_files/varset_dfpt.html#rfelfd">rfelfd</a>=2.
+ It must therefore be used with <a href="../../variables/generated_files/varset_dfpt.html#rfelfd">rfelfd</a>=2.
  <br />
  <ul>
   <li>
@@ -491,9 +491,9 @@ but NOT for d/dk (<a href="../../input_variables/generated_files/varset_dfpt.htm
 
 <p>
 At the present time, both norm-conserving (NC) and PAW calculations are supported.
-Also, for PAW calculations only, <a href="../../input_variables/generated_files/varset_gstate.html#nspinor">nspinor</a>==2 and <a href="../../input_variables/generated_files/varset_paw.html#pawspnorb">pawspnorb</a>==1
+Also, for PAW calculations only, <a href="../../variables/generated_files/varset_gstate.html#nspinor">nspinor</a>==2 and <a href="../../variables/generated_files/varset_paw.html#pawspnorb">pawspnorb</a>==1
 (i.e. spin-orbit (SO) calculations) is supported. NC SO calculations are NOT currently
-supported. Also, for both NC and PAW, <a href="../../input_variables/generated_files/varset_gstate.html#nspden">nspden</a>/=1 and <a href="../../input_variables/generated_files/varset_basic.html#nsppol">nsppol</a>/=1 are NOT supported.
+supported. Also, for both NC and PAW, <a href="../../variables/generated_files/varset_gstate.html#nspden">nspden</a>/=1 and <a href="../../variables/generated_files/varset_basic.html#nsppol">nsppol</a>/=1 are NOT supported.
 </p>
 </font>
 
@@ -506,10 +506,10 @@ supported. Also, for both NC and PAW, <a href="../../input_variables/generated_f
 <br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_EffMass.html">EffMass</a>.</font>
 <br><font id="smalltext">Rarely used: [3/920] in abinit tests, [0/136] in tuto abinit tests. Test list: {v7:[<a href="../../tests/v7/Input/t80.in">80</a>,<a href="../../tests/v7/Input/t81.in">81</a>,<a href="../../tests/v7/Input/t82.in">82</a>]}.</font>
-<br><font id="vartype">Variable type: integer(2,<a href="../../input_variables/generated_files/varset_basic.html#nkpt">nkpt</a>)</font>
+<br><font id="vartype">Variable type: integer(2,<a href="../../variables/generated_files/varset_basic.html#nkpt">nkpt</a>)</font>
 <br><font id="default">Default is The full range of band available in the calculation for each k-point.</font>
 <br><br><font id="requires">
-Only relevant if <a href="../../input_variables/generated_files/varset_dfpt.html#efmas">efmas</a>==1
+Only relevant if <a href="../../variables/generated_files/varset_dfpt.html#efmas">efmas</a>==1
 </font>
 <br><font id="text">
 <p>
@@ -532,12 +532,12 @@ even if they were not part of the user specified range.
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
 <br><br><font id="requires">
-Only relevant if <a href="../../input_variables/generated_files/varset_dfpt.html#efmas">efmas</a>==1
+Only relevant if <a href="../../variables/generated_files/varset_dfpt.html#efmas">efmas</a>==1
 </font>
 <br><font id="text">
 <p>
 <p>
-Allows the user to calculate the scalar effective mass of all bands specified by <a href="../../input_variables/generated_files/varset_dfpt.html#efmas_bands">efmas_bands</a> along
+Allows the user to calculate the scalar effective mass of all bands specified by <a href="../../variables/generated_files/varset_dfpt.html#efmas_bands">efmas_bands</a> along
 specific directions in reciprocal space. This is particularly useful when considering degenerate bands,
 which are usually warped, and thus cannot have their dispersion (hessian) and effective mass expressed as
 a tensor. This allows the user to see the more complex angular behavior of effective masses in these cases,
@@ -545,12 +545,12 @@ for instance.
 </p>
 
 <p>
-When <b>efmas_calc_dirs</b>==0, no directions are read from the input file (using <a href="../../input_variables/generated_files/varset_dfpt.html#efmas_dirs">efmas_dirs</a>) and the
+When <b>efmas_calc_dirs</b>==0, no directions are read from the input file (using <a href="../../variables/generated_files/varset_dfpt.html#efmas_dirs">efmas_dirs</a>) and the
 effective masses along the 3 cartesian directions are output by default.
 </p>
 
 <p>
-When <b>efmas_calc_dirs</b>==1, 2 or 3, <a href="../../input_variables/generated_files/varset_dfpt.html#efmas_n_dirs">efmas_n_dirs</a> directions are read from <a href="../../input_variables/generated_files/varset_dfpt.html#efmas_dirs">efmas_dirs</a>, assuming
+When <b>efmas_calc_dirs</b>==1, 2 or 3, <a href="../../variables/generated_files/varset_dfpt.html#efmas_n_dirs">efmas_n_dirs</a> directions are read from <a href="../../variables/generated_files/varset_dfpt.html#efmas_dirs">efmas_dirs</a>, assuming
 cartesian, reduced or angular (theta,phi) coordinates, respectively. In the case <b>efmas_calc_dirs</b>==3,
 2 real values per directions are read, whereas 3 real values are read in the two other cases.
 </p>
@@ -568,12 +568,12 @@ cartesian, reduced or angular (theta,phi) coordinates, respectively. In the case
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 1</font>
 <br><br><font id="requires">
-Only relevant if <a href="../../input_variables/generated_files/varset_dfpt.html#efmas">efmas</a>>0
+Only relevant if <a href="../../variables/generated_files/varset_dfpt.html#efmas">efmas</a>>0
 </font>
 <br><font id="text">
 <p>
 <p>
-Activate (==1) or not (==0) the treatment of degenerate bands (within a criterion <a href="../../input_variables/generated_files/varset_dfpt.html#efmas_deg_tol">efmas_deg_tol</a>)
+Activate (==1) or not (==0) the treatment of degenerate bands (within a criterion <a href="../../variables/generated_files/varset_dfpt.html#efmas_deg_tol">efmas_deg_tol</a>)
 using the transport equivalent effective mass idea
 (see <a href="https://doi.org/10.1103/PhysRevB.89.155131">PRB 89 155131 (2014)</a>).
 </p>
@@ -591,13 +591,13 @@ using the transport equivalent effective mass idea
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 1e-05</font>
 <br><br><font id="requires">
-Only relevant if <a href="../../input_variables/generated_files/varset_dfpt.html#efmas_deg">efmas_deg</a>==1
+Only relevant if <a href="../../variables/generated_files/varset_dfpt.html#efmas_deg">efmas_deg</a>==1
 </font>
 <br><font id="text">
 <p>
 <p>
 Energy difference below which 2 bands are considered degenerate
-(and treated using the formalism activated with <a href="../../input_variables/generated_files/varset_dfpt.html#efmas_deg">efmas_deg</a>==1).
+(and treated using the formalism activated with <a href="../../variables/generated_files/varset_dfpt.html#efmas_deg">efmas_deg</a>==1).
 <b>efmas_deg_tol</b> has the '<a href="../../users/generated_files/help_abinit.html#ENERGY">ENERGY</a>' characteristics.
 </p>
 </font>
@@ -614,7 +614,7 @@ Energy difference below which 2 bands are considered degenerate
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 3</font>
 <br><br><font id="requires">
-Only relevant if <a href="../../input_variables/generated_files/varset_dfpt.html#efmas">efmas</a>==1
+Only relevant if <a href="../../variables/generated_files/varset_dfpt.html#efmas">efmas</a>==1
 </font>
 <br><font id="text">
 <p>
@@ -647,17 +647,17 @@ the line immediately after the effective mass.
 <br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_EffMass.html">EffMass</a>.</font>
 <br><font id="smalltext">Rarely used: [2/920] in abinit tests, [0/136] in tuto abinit tests. Test list: {v7:[<a href="../../tests/v7/Input/t80.in">80</a>,<a href="../../tests/v7/Input/t82.in">82</a>]}.</font>
-<br><font id="vartype">Variable type: real(3 or 2,<a href="../../input_variables/generated_files/varset_dfpt.html#efmas_n_dirs">efmas_n_dirs</a>)</font>
+<br><font id="vartype">Variable type: real(3 or 2,<a href="../../variables/generated_files/varset_dfpt.html#efmas_n_dirs">efmas_n_dirs</a>)</font>
 <br><font id="default">Default is 0</font>
 <br><br><font id="requires">
-Only relevant if <a href="../../input_variables/generated_files/varset_dfpt.html#efmas_calc_dirs">efmas_calc_dirs</a>>0
+Only relevant if <a href="../../variables/generated_files/varset_dfpt.html#efmas_calc_dirs">efmas_calc_dirs</a>>0
 </font>
 <br><font id="text">
 <p>
 <p>
-List of <a href="../../input_variables/generated_files/varset_dfpt.html#efmas_n_dirs">efmas_n_dirs</a> directions to be considered according to the value of <a href="../../input_variables/generated_files/varset_dfpt.html#efmas_calc_dirs">efmas_calc_dirs</a>.
-The directions are specified by 3 real values if <a href="../../input_variables/generated_files/varset_dfpt.html#efmas_calc_dirs">efmas_calc_dirs</a>==1 or 2 and by
-2 real values if <a href="../../input_variables/generated_files/varset_dfpt.html#efmas_calc_dirs">efmas_calc_dirs</a>==3.
+List of <a href="../../variables/generated_files/varset_dfpt.html#efmas_n_dirs">efmas_n_dirs</a> directions to be considered according to the value of <a href="../../variables/generated_files/varset_dfpt.html#efmas_calc_dirs">efmas_calc_dirs</a>.
+The directions are specified by 3 real values if <a href="../../variables/generated_files/varset_dfpt.html#efmas_calc_dirs">efmas_calc_dirs</a>==1 or 2 and by
+2 real values if <a href="../../variables/generated_files/varset_dfpt.html#efmas_calc_dirs">efmas_calc_dirs</a>==3.
 </p>
 </font>
 
@@ -673,12 +673,12 @@ The directions are specified by 3 real values if <a href="../../input_variables/
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
 <br><br><font id="requires">
-Only relevant if <a href="../../input_variables/generated_files/varset_dfpt.html#efmas_calc_dirs">efmas_calc_dirs</a>>0
+Only relevant if <a href="../../variables/generated_files/varset_dfpt.html#efmas_calc_dirs">efmas_calc_dirs</a>>0
 </font>
 <br><font id="text">
 <p>
 <p>
-Number of directions in <a href="../../input_variables/generated_files/varset_dfpt.html#efmas_dirs">efmas_dirs</a>, to be considered according to <a href="../../input_variables/generated_files/varset_dfpt.html#efmas_calc_dirs">efmas_calc_dirs</a>.
+Number of directions in <a href="../../variables/generated_files/varset_dfpt.html#efmas_dirs">efmas_dirs</a>, to be considered according to <a href="../../variables/generated_files/varset_dfpt.html#efmas_calc_dirs">efmas_calc_dirs</a>.
 </p>
 </font>
 
@@ -694,7 +694,7 @@ Number of directions in <a href="../../input_variables/generated_files/varset_df
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 1000</font>
 <br><br><font id="requires">
-Only relevant if <a href="../../input_variables/generated_files/varset_dfpt.html#efmas">efmas</a>==1 and <a href="../../input_variables/generated_files/varset_dfpt.html#efmas_bands">efmas_bands</a>==(degenerate band index)
+Only relevant if <a href="../../variables/generated_files/varset_dfpt.html#efmas">efmas</a>==1 and <a href="../../variables/generated_files/varset_dfpt.html#efmas_bands">efmas_bands</a>==(degenerate band index)
 </font>
 <br><font id="text">
 <p>
@@ -720,7 +720,7 @@ The default value gives a tensor accurate to the 4th decimal in Ge.
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 0.0</font>
 <br><br><font id="requires">
-Only relevant if <a href="../../input_variables/generated_files/varset_dfpt.html#ieig2rf">ieig2rf</a> != 0
+Only relevant if <a href="../../variables/generated_files/varset_dfpt.html#ieig2rf">ieig2rf</a> != 0
 </font>
 <br><font id="text">
 <p>
@@ -758,7 +758,7 @@ specified in Ha (the default), Ry, eV or Kelvin, since
 <br><font id="text">
 <p>
 <p>
-When <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>==7, select the task to be performed.
+When <a href="../../variables/generated_files/varset_gstate.html#optdriver">optdriver</a>==7, select the task to be performed.
  The choice is among :
  <br />
  <b>eph_task</b>=1 : phonon linewidth
@@ -780,7 +780,7 @@ When <a href="../../input_variables/generated_files/varset_gstate.html#optdriver
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 0.01</font>
 <br><br><font id="requires">
-Only relevant if <a href="../../input_variables/generated_files/varset_dfpt.html#smdelta">smdelta</a> != 0
+Only relevant if <a href="../../variables/generated_files/varset_dfpt.html#smdelta">smdelta</a> != 0
 </font>
 <br><font id="text">
 <p>
@@ -857,7 +857,7 @@ if set to 1, allows to suppress this contribution, but this is incorrect.
  This option is preferable for large system to <b>ieig2rf</b>=4 as the GKK files take less much less disk space and memory (but run a little bit slower).
  Note that <b>ieig2rf</b>=5 can only be used if Abinit is compiled with NETCDF support.
  <br />
- Related variables : <a href="../../input_variables/generated_files/varset_dfpt.html#bdeigrf">bdeigrf</a>,<a href="../../input_variables/generated_files/varset_dfpt.html#elph2_imagden">elph2_imagden</a>,<a href="../../input_variables/generated_files/varset_dev.html#getgam_eig2nkq">getgam_eig2nkq</a>,<a href="../../input_variables/generated_files/varset_dfpt.html#smdelta">smdelta</a>
+ Related variables : <a href="../../variables/generated_files/varset_dfpt.html#bdeigrf">bdeigrf</a>,<a href="../../variables/generated_files/varset_dfpt.html#elph2_imagden">elph2_imagden</a>,<a href="../../variables/generated_files/varset_dev.html#getgam_eig2nkq">getgam_eig2nkq</a>,<a href="../../variables/generated_files/varset_dfpt.html#smdelta">smdelta</a>
 </p>
 </font>
 
@@ -875,7 +875,7 @@ if set to 1, allows to suppress this contribution, but this is incorrect.
 <br><font id="text">
 <p>
 This variable defines the q-mesh used to compute the phonon DOS and the Eliashberg function via Fourier interpolation.
-Related input variables: <a href="../../input_variables/generated_files/varset_eph.html#ph_qshift">ph_qshift</a> and <a href="../../input_variables/generated_files/varset_eph.html#ph_nqshift">ph_nqshift</a>.
+Related input variables: <a href="../../variables/generated_files/varset_eph.html#ph_qshift">ph_qshift</a> and <a href="../../variables/generated_files/varset_eph.html#ph_nqshift">ph_nqshift</a>.
 </font>
 
 <br><br><a href=#top>Go to the top</a>
@@ -890,12 +890,12 @@ Related input variables: <a href="../../input_variables/generated_files/varset_e
 <br><font id="vartype">Variable type: real(3,ph_nqpath)</font>
 <br><font id="default">Default is None</font>
 <br><br><font id="requires">
-Only relevant if specified(<a href="../../input_variables/generated_files/varset_eph.html#ph_nqpath">ph_nqpath</a>)
+Only relevant if specified(<a href="../../variables/generated_files/varset_eph.html#ph_nqpath">ph_nqpath</a>)
 </font>
 <br><font id="text">
 <p>
 This array contains the list of special q-points used to construct the q-path for phonon band structures and phonon linewidths.
-See also <a href="../../input_variables/generated_files/varset_eph.html#ph_nqpath">ph_nqpath</a> and [<a href="../../input_variables/generated_files/varset_eph.html#ph_ndivsm">ph_ndivsm</a>.
+See also <a href="../../variables/generated_files/varset_eph.html#ph_nqpath">ph_nqpath</a> and [<a href="../../variables/generated_files/varset_eph.html#ph_ndivsm">ph_ndivsm</a>.
 </font>
 
 <br><br><a href=#top>Go to the top</a>
@@ -952,7 +952,7 @@ along the three directions explicitly, and (ii) to keep the full number of k-poi
 of all the perturbations (all atoms in all directions) for the chosen set
 of (irreducible) q-points. To impose this and prevent ABINIT from using
 symmetry to reduce the number of perturbations, set <b>prepgkk</b> to 1.
-Use in conjunction with <a href="../../input_variables/generated_files/varset_files.html#prtgkk">prtgkk</a>.
+Use in conjunction with <a href="../../variables/generated_files/varset_files.html#prtgkk">prtgkk</a>.
 </p>
 </font>
 
@@ -996,7 +996,7 @@ UNUSABLE (in development)
 Activates computation of second derivatives of wavefunctions with respect to wavevectors.
 This is not strictly a response function but is a needed auxiliary quantity in the calculations
 of 3rd-order derivatives of the energy (non-linear response).
-The directions for the derivatives are determined by <a href="../../input_variables/generated_files/varset_dfpt.html#rfdir">rfdir</a> (TO BE CORRECTED!).
+The directions for the derivatives are determined by <a href="../../variables/generated_files/varset_dfpt.html#rfdir">rfdir</a> (TO BE CORRECTED!).
  <ul>
   <li>
    0=&gt;no derivative calculation
@@ -1047,7 +1047,7 @@ the largest effective charge.
   </li>
  </ul>
  The treatment of the acoustic sum rule and charge neutrality sum rule is finer at the level of the ANADDB utility,
-with the two independent input variables <a href="../../input_variables/generated_files/varset_anaddb.html#asr@anaddb">asr</a> and <a href="../../input_variables/generated_files/varset_anaddb.html#chneut@anaddb">chneut</a>.
+with the two independent input variables <a href="../../variables/generated_files/varset_anaddb.html#asr@anaddb">asr</a> and <a href="../../variables/generated_files/varset_anaddb.html#chneut@anaddb">chneut</a>.
 </p>
 </font>
 
@@ -1072,7 +1072,7 @@ in phonon calculations (atomic polarizations), using the 2n+1 theorem.
  These values are only relevant to phonon response function
 calculations.
  <br />
- May take values from 1 to <a href="../../input_variables/generated_files/varset_basic.html#natom">natom</a>, with <b>rfatpol</b>(1)&lt;=<b>rfatpol</b>(2).
+ May take values from 1 to <a href="../../variables/generated_files/varset_basic.html#natom">natom</a>, with <b>rfatpol</b>(1)&lt;=<b>rfatpol</b>(2).
  <br />
  The atoms to be moved will be defined by the
  <br />
@@ -1081,13 +1081,13 @@ calculations.
  do iatpol=<b>rfatpol</b>(1),<b>rfatpol</b>(2)
  <br />
  For the calculation of a full dynamical matrix, use
-<b>rfatpol</b>(1)=1 and <b>rfatpol</b>(2)=<a href="../../input_variables/generated_files/varset_basic.html#natom">natom</a>, together with
-<a href="../../input_variables/generated_files/varset_dfpt.html#rfdir">rfdir</a> 1 1 1 . For selected elements of the
+<b>rfatpol</b>(1)=1 and <b>rfatpol</b>(2)=<a href="../../variables/generated_files/varset_basic.html#natom">natom</a>, together with
+<a href="../../variables/generated_files/varset_dfpt.html#rfdir">rfdir</a> 1 1 1 . For selected elements of the
 dynamical matrix, use different values of <b>rfatpol</b> and/or
-<a href="../../input_variables/generated_files/varset_dfpt.html#rfdir">rfdir</a>. The name 'iatpol' is used for the part of the
-internal variable ipert when it runs from 1 to <a href="../../input_variables/generated_files/varset_basic.html#natom">natom</a>. The
+<a href="../../variables/generated_files/varset_dfpt.html#rfdir">rfdir</a>. The name 'iatpol' is used for the part of the
+internal variable ipert when it runs from 1 to <a href="../../variables/generated_files/varset_basic.html#natom">natom</a>. The
 internal variable ipert can also assume values larger
-than <a href="../../input_variables/generated_files/varset_basic.html#natom">natom</a>,
+than <a href="../../variables/generated_files/varset_basic.html#natom">natom</a>,
 denoting perturbations of electric field or stress type (see
  <a href="../../users/generated_files/help_respfn.html">
   the response function help file
@@ -1113,8 +1113,8 @@ denoting perturbations of electric field or stress type (see
  Activates computation of derivatives of ground state
 wavefunctions with respect to wavevectors. This is not strictly a response
 function but is a needed auxiliary quantity in the electric field
-calculations (see <a href="../../input_variables/generated_files/varset_dfpt.html#rfelfd">rfelfd</a>) The directions for the
-derivatives are determined by <a href="../../input_variables/generated_files/varset_dfpt.html#rfdir">rfdir</a>.
+calculations (see <a href="../../variables/generated_files/varset_dfpt.html#rfelfd">rfelfd</a>) The directions for the
+derivatives are determined by <a href="../../variables/generated_files/varset_dfpt.html#rfdir">rfdir</a>.
  <ul>
   <li>
    0=&gt;no derivative calculation
@@ -1122,7 +1122,7 @@ derivatives are determined by <a href="../../input_variables/generated_files/var
   <li>
    1=&gt;calculation of first derivatives of wavefunctions with respect to k points
 (d/dk calculation). The exact same functionality is provided by
-<a href="../../input_variables/generated_files/varset_dfpt.html#rfelfd">rfelfd</a> = 2.
+<a href="../../variables/generated_files/varset_dfpt.html#rfelfd">rfelfd</a> = 2.
   </li>
  </ul>
 </p>
@@ -1145,7 +1145,7 @@ derivatives are determined by <a href="../../input_variables/generated_files/var
  Gives the directions
 to be considered for response function calculations
 (also for the Berry phase computation of the polarization, see
-the <a href="../../input_variables/generated_files/varset_ffield.html#berryopt">berryopt</a> input variable).
+the <a href="../../variables/generated_files/varset_ffield.html#berryopt">berryopt</a> input variable).
  <br />
  The three elements corresponds to the three primitive
 vectors, either in real space (phonon calculations),
@@ -1157,9 +1157,9 @@ shielding, or the effective
 charge tensors.
  <br />
  If equal to 1, response functions, as defined
-by <a href="../../input_variables/generated_files/varset_dfpt.html#rfddk">rfddk</a>,
-<a href="../../input_variables/generated_files/varset_dfpt.html#rfelfd">rfelfd</a>, <a href="../../input_variables/generated_files/varset_dfpt.html#rfphon">rfphon</a>, <b>rfdir</b>
-and <a href="../../input_variables/generated_files/varset_dfpt.html#rfatpol">rfatpol</a>, are to be computed
+by <a href="../../variables/generated_files/varset_dfpt.html#rfddk">rfddk</a>,
+<a href="../../variables/generated_files/varset_dfpt.html#rfelfd">rfelfd</a>, <a href="../../variables/generated_files/varset_dfpt.html#rfphon">rfphon</a>, <b>rfdir</b>
+and <a href="../../variables/generated_files/varset_dfpt.html#rfatpol">rfatpol</a>, are to be computed
 for the corresponding direction. If 0, this direction
 should not be considered.
 </p>
@@ -1294,7 +1294,7 @@ to run phonon response function calculations.
 <p>
  Used to run strain response-function
 calculations (e.g. needed to get elastic constants). Define, with
-<a href="../../input_variables/generated_files/varset_dfpt.html#rfdir">rfdir</a>, the set of perturbations.
+<a href="../../variables/generated_files/varset_dfpt.html#rfdir">rfdir</a>, the set of perturbations.
  <ul>
   <li>
    0=&gt;no strain perturbation
@@ -1427,7 +1427,7 @@ only the pairs of occupied and unoccupied states for which the
 Kohn-Sham energy difference is less than <b>td_maxene</b>.
 The default value 0.0 means that all pairs are taken into account.
  <br />
- See <a href="../../input_variables/generated_files/varset_dfpt.html#td_mexcit">td_mexcit</a> for an alternative
+ See <a href="../../variables/generated_files/varset_dfpt.html#td_mexcit">td_mexcit</a> for an alternative
 way to decrease N.
 </p>
 </font>
@@ -1459,7 +1459,7 @@ the first <b>td_mexcit</b> pairs of occupied and unoccupied states, ordered
 with respect to increasing Kohn-Sham energy difference.
 However, when <b>td_mexcit</b> is zero, all pairs are allowed.
  <br />
- See <a href="../../input_variables/generated_files/varset_dfpt.html#td_maxene">td_maxene</a>
+ See <a href="../../variables/generated_files/varset_dfpt.html#td_maxene">td_maxene</a>
  for an alternative
 way to decrease N.
 </p>

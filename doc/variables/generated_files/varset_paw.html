@@ -124,7 +124,7 @@ variables to be used in the main input file of the abinit code.
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 2.0</font>
 <br><br><font id="requires">
-Only relevant if <a href="../../input_variables/generated_files/varset_internal.html#usepaw">usepaw</a>==1
+Only relevant if <a href="../../variables/generated_files/varset_internal.html#usepaw">usepaw</a>==1
 </font>
 <br><font id="text">
 <p>
@@ -156,10 +156,10 @@ required level of accuracy.
 <br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Mentioned in topics: <a href="../../topics/generated_files/topic_DFT+U.html">DFT+U</a>, <a href="../../topics/generated_files/topic_ElecDOS.html">ElecDOS</a>.</font>
 <br><font id="smalltext">Moderately used: [11/920] in abinit tests, [2/136] in tuto abinit tests. Tuto test list: {tutorial:[<a href="../../tests/tutorial/Input/tdftu_3.in">dftu_3</a>,<a href="../../tests/tutorial/Input/tdftu_4.in">dftu_4</a>]}.</font>
-<br><font id="vartype">Variable type: real(2*max(<a href="../../input_variables/generated_files/varset_paw.html#lpawu">lpawu</a>)+1,2*max(<a href="../../input_variables/generated_files/varset_paw.html#lpawu">lpawu</a>)+1,max(<a href="../../input_variables/generated_files/varset_basic.html#nsppol">nsppol</a>, <a href="../../input_variables/generated_files/varset_gstate.html#nspinor">nspinor</a>),<a href="../../input_variables/generated_files/varset_internal.html#natpawu">natpawu</a>)</font>
+<br><font id="vartype">Variable type: real(2*max(<a href="../../variables/generated_files/varset_paw.html#lpawu">lpawu</a>)+1,2*max(<a href="../../variables/generated_files/varset_paw.html#lpawu">lpawu</a>)+1,max(<a href="../../variables/generated_files/varset_basic.html#nsppol">nsppol</a>, <a href="../../variables/generated_files/varset_gstate.html#nspinor">nspinor</a>),<a href="../../variables/generated_files/varset_internal.html#natpawu">natpawu</a>)</font>
 <br><font id="default">Default is *-10.0</font>
 <br><br><font id="requires">
-Only relevant if <a href="../../input_variables/generated_files/varset_internal.html#usepaw">usepaw</a>==1 and <a href="../../input_variables/generated_files/varset_paw.html#usepawu">usepawu</a>==1 and <a href="../../input_variables/generated_files/varset_paw.html#usedmatpu">usedmatpu</a>!=0
+Only relevant if <a href="../../variables/generated_files/varset_internal.html#usepaw">usepaw</a>==1 and <a href="../../variables/generated_files/varset_paw.html#usepawu">usepawu</a>==1 and <a href="../../variables/generated_files/varset_paw.html#usedmatpu">usedmatpu</a>!=0
 </font>
 <br><font id="text">
 <p>
@@ -167,14 +167,14 @@ Only relevant if <a href="../../input_variables/generated_files/varset_internal.
  For Ground state calculations only.
  <br />
  Gives the value of an initial density matrix used in LDA+U and kept
-fixed during the first abs(<a href="../../input_variables/generated_files/varset_paw.html#usedmatpu">usedmatpu</a>) SCF iterations.
+fixed during the first abs(<a href="../../variables/generated_files/varset_paw.html#usedmatpu">usedmatpu</a>) SCF iterations.
  <br />
- Only components corresponding to <a href="../../input_variables/generated_files/varset_paw.html#lpawu">lpawu</a> angular momentum are requested.
+ Only components corresponding to <a href="../../variables/generated_files/varset_paw.html#lpawu">lpawu</a> angular momentum are requested.
  <br />
- Restriction: In order to use dmatpawu, <a href="../../input_variables/generated_files/varset_paw.html#lpawu">lpawu</a> must be identical for all atom types (or -1).
+ Restriction: In order to use dmatpawu, <a href="../../variables/generated_files/varset_paw.html#lpawu">lpawu</a> must be identical for all atom types (or -1).
  <br />
  The occupation matrix is in the basis of real spherical harmonics Slm (note that this differs from the choice made when
- <a href="../../input_variables/generated_files/varset_files.html#prtdosm">prtdosm</a>=1
+ <a href="../../variables/generated_files/varset_files.html#prtdosm">prtdosm</a>=1
  , that is in the basis of complex spherical harmonics).
 They are ordered by increasing m, and are defined e.g. in <a href="../../biblio/generated_files/bib_biblio.html#Blancoa1997">[Blancoa1997]</a>
  </a>
@@ -201,18 +201,18 @@ For the case l=2 (d states), the five columns corresponds respectively to (the n
  <br />
  <b>dmatpawu</b> must always be given as a "spin-up" occupation matrix (and eventually a "spin-down" matrix).
 Be aware that its physical meaning depends on the magnetic properties imposed to the system
-(with <a href="../../input_variables/generated_files/varset_basic.html#nsppol">nsppol</a>,
-<a href="../../input_variables/generated_files/varset_gstate.html#nspinor">nspinor</a>,
-<a href="../../input_variables/generated_files/varset_gstate.html#nspden">nspden</a>):
+(with <a href="../../variables/generated_files/varset_basic.html#nsppol">nsppol</a>,
+<a href="../../variables/generated_files/varset_gstate.html#nspinor">nspinor</a>,
+<a href="../../variables/generated_files/varset_gstate.html#nspden">nspden</a>):
  <br />
  <ul>
   <li>
    <b>
     Non-magnetic system
    </b>
-   (<a href="../../input_variables/generated_files/varset_basic.html#nsppol">nsppol</a>=1,
-<a href="../../input_variables/generated_files/varset_gstate.html#nspinor">nspinor</a>=1,
-<a href="../../input_variables/generated_files/varset_gstate.html#nspden">nspden</a>=1):
+   (<a href="../../variables/generated_files/varset_basic.html#nsppol">nsppol</a>=1,
+<a href="../../variables/generated_files/varset_gstate.html#nspinor">nspinor</a>=1,
+<a href="../../variables/generated_files/varset_gstate.html#nspden">nspden</a>=1):
    <br />
    One (2lpawu+1)x(2lpawu+1) <b>dmatpawu</b> matrix is given for each atom on which +U is applied.
    <br />
@@ -222,9 +222,9 @@ Be aware that its physical meaning depends on the magnetic properties imposed to
    <b>
     Ferromagnetic spin-polarized (collinear) system
    </b>
-   (<a href="../../input_variables/generated_files/varset_basic.html#nsppol">nsppol</a>=2,
-<a href="../../input_variables/generated_files/varset_gstate.html#nspinor">nspinor</a>=1,
-<a href="../../input_variables/generated_files/varset_gstate.html#nspden">nspden</a>=2):
+   (<a href="../../variables/generated_files/varset_basic.html#nsppol">nsppol</a>=2,
+<a href="../../variables/generated_files/varset_gstate.html#nspinor">nspinor</a>=1,
+<a href="../../variables/generated_files/varset_gstate.html#nspden">nspden</a>=2):
    <br />
    Two (2lpawu+1)x(2lpawu+1) <b>dmatpawu</b> matrices are given for each atom on which +U is applied.
    <br />
@@ -234,9 +234,9 @@ Be aware that its physical meaning depends on the magnetic properties imposed to
    <b>
     Anti-ferromagnetic spin-polarized (collinear) system
    </b>
-   (<a href="../../input_variables/generated_files/varset_basic.html#nsppol">nsppol</a>=1,
-<a href="../../input_variables/generated_files/varset_gstate.html#nspinor">nspinor</a>=1,
-<a href="../../input_variables/generated_files/varset_gstate.html#nspden">nspden</a>=2):
+   (<a href="../../variables/generated_files/varset_basic.html#nsppol">nsppol</a>=1,
+<a href="../../variables/generated_files/varset_gstate.html#nspinor">nspinor</a>=1,
+<a href="../../variables/generated_files/varset_gstate.html#nspden">nspden</a>=2):
    <br />
    One (2lpawu+1)x(2lpawu+1) <b>dmatpawu</b> matrix is given for each atom on which +U is applied.
    <br />
@@ -246,9 +246,9 @@ Be aware that its physical meaning depends on the magnetic properties imposed to
    <b>
     Non-collinear magnetic system
    </b>
-   (<a href="../../input_variables/generated_files/varset_basic.html#nsppol">nsppol</a>=1,
-<a href="../../input_variables/generated_files/varset_gstate.html#nspinor">nspinor</a>=2,
-<a href="../../input_variables/generated_files/varset_gstate.html#nspden">nspden</a>=4):
+   (<a href="../../variables/generated_files/varset_basic.html#nsppol">nsppol</a>=1,
+<a href="../../variables/generated_files/varset_gstate.html#nspinor">nspinor</a>=2,
+<a href="../../variables/generated_files/varset_gstate.html#nspden">nspden</a>=4):
    <br />
    Two (2lpawu+1)x(2lpawu+1) <b>dmatpawu</b> matrices are given for each atom on which +U is applied.
    <br />
@@ -256,13 +256,13 @@ Be aware that its physical meaning depends on the magnetic properties imposed to
 (defined as n_up=(n+|m|)/2 and n_dn=(n-|m|)/2), where m is the integrated magnetization vector).
    <br />
    The direction of the magnetization (which is also the direction of n_up and n_dn) is given by
-<a href="../../input_variables/generated_files/varset_gstate.html#spinat">spinat</a>.
+<a href="../../variables/generated_files/varset_gstate.html#spinat">spinat</a>.
    <br />
    <i>
     Warning: unlike collinear case, atoms having the same magnetization magnitude with different directions
 must be given the same occupation matrix;
     <br />
-    the magnetization will be oriented by the value of <a href="../../input_variables/generated_files/varset_gstate.html#spinat">spinat</a>
+    the magnetization will be oriented by the value of <a href="../../variables/generated_files/varset_gstate.html#spinat">spinat</a>
 (this is the case for antiferro-magnetism).
    </i>
   </li>
@@ -270,9 +270,9 @@ must be given the same occupation matrix;
    <b>
     Non-collinear magnetic system with zero magnetization
    </b>
-   (<a href="../../input_variables/generated_files/varset_basic.html#nsppol">nsppol</a>=1,
-<a href="../../input_variables/generated_files/varset_gstate.html#nspinor">nspinor</a>=2,
-<a href="../../input_variables/generated_files/varset_gstate.html#nspden">nspden</a>=1):
+   (<a href="../../variables/generated_files/varset_basic.html#nsppol">nsppol</a>=1,
+<a href="../../variables/generated_files/varset_gstate.html#nspinor">nspinor</a>=2,
+<a href="../../variables/generated_files/varset_gstate.html#nspden">nspden</a>=1):
    <br />
    Two (2lpawu+1)x(2lpawu+1) <b>dmatpawu</b> matrices are given for each atom on which +U is applied.
    <br />
@@ -297,7 +297,7 @@ must be given the same occupation matrix;
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 2</font>
 <br><br><font id="requires">
-Only relevant if <a href="../../input_variables/generated_files/varset_internal.html#usepaw">usepaw</a>==1 and <a href="../../input_variables/generated_files/varset_paw.html#usepawu">usepawu</a>==1
+Only relevant if <a href="../../variables/generated_files/varset_internal.html#usepaw">usepaw</a>==1 and <a href="../../variables/generated_files/varset_paw.html#usepawu">usepawu</a>==1
 </font>
 <br><font id="text">
 <p>
@@ -341,7 +341,7 @@ atomic wavefunction of the correlated subspace is a normalized atomic eigenfunct
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
 <br><br><font id="requires">
-Only relevant if <a href="../../input_variables/generated_files/varset_internal.html#usepaw">usepaw</a>==1 and <a href="../../input_variables/generated_files/varset_paw.html#usepawu">usepawu</a>==1 and <a href="../../input_variables/generated_files/varset_gstate.html#nspden">nspden</a> != 4
+Only relevant if <a href="../../variables/generated_files/varset_internal.html#usepaw">usepaw</a>==1 and <a href="../../variables/generated_files/varset_paw.html#usepawu">usepawu</a>==1 and <a href="../../variables/generated_files/varset_gstate.html#nspden">nspden</a> != 4
 </font>
 <br><font id="text">
 <p>
@@ -379,7 +379,7 @@ Only relevant if <a href="../../input_variables/generated_files/varset_internal.
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is ['0.625 for d electron', '0.6681 for f electron']</font>
 <br><br><font id="requires">
-Only relevant if <a href="../../input_variables/generated_files/varset_internal.html#usepaw">usepaw</a>==1 and (<a href="../../input_variables/generated_files/varset_paw.html#usepawu">usepawu</a>==1 or <a href="../../input_variables/generated_files/varset_dev.html#usedmft">usedmft</a>==1)
+Only relevant if <a href="../../variables/generated_files/varset_internal.html#usepaw">usepaw</a>==1 and (<a href="../../variables/generated_files/varset_paw.html#usepawu">usepawu</a>==1 or <a href="../../variables/generated_files/varset_dev.html#usedmft">usedmft</a>==1)
 </font>
 <br><font id="text">
 <p>
@@ -402,13 +402,13 @@ dependent screened coulomb interaction.
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 0.4943</font>
 <br><br><font id="requires">
-Only relevant if (<a href="../../input_variables/generated_files/varset_paw.html#usepawu">usepawu</a>==1 or <a href="../../input_variables/generated_files/varset_dev.html#usedmft">usedmft</a>==1) and <a href="../../input_variables/generated_files/varset_paw.html#lpawu">lpawu</a>=3
+Only relevant if (<a href="../../variables/generated_files/varset_paw.html#usepawu">usepawu</a>==1 or <a href="../../variables/generated_files/varset_dev.html#usedmft">usedmft</a>==1) and <a href="../../variables/generated_files/varset_paw.html#lpawu">lpawu</a>=3
 </font>
 <br><font id="text">
 <p>
 <p>
 Gives the ratio of Slater Integrals F6 and F2.
-It is used with <a href="../../input_variables/generated_files/varset_paw.html#f4of2_sla">f4of2_sla</a>==3 in DFT+U or DFT+DMFT for the calculation of the orbital dependent screened coulomb interaction.
+It is used with <a href="../../variables/generated_files/varset_paw.html#f4of2_sla">f4of2_sla</a>==3 in DFT+U or DFT+DMFT for the calculation of the orbital dependent screened coulomb interaction.
 </p>
 </font>
 
@@ -451,19 +451,19 @@ FFT box (useful for tests).
 <br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#ENERGY">ENERGY</a></font>
 <br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_DFT+U.html">DFT+U</a>.</font>
 <br><font id="smalltext">Moderately used: [34/920] in abinit tests, [4/136] in tuto abinit tests. Tuto test list: {tutoparal:[<a href="../../tests/tutoparal/Input/tdmft_2.in">dmft_2</a>],tutorial:[<a href="../../tests/tutorial/Input/tdftu_2.in">dftu_2</a>,<a href="../../tests/tutorial/Input/tdftu_3.in">dftu_3</a>,<a href="../../tests/tutorial/Input/tdftu_4.in">dftu_4</a>]}.</font>
-<br><font id="vartype">Variable type: real(<a href="../../input_variables/generated_files/varset_basic.html#ntypat">ntypat</a>)</font>
+<br><font id="vartype">Variable type: real(<a href="../../variables/generated_files/varset_basic.html#ntypat">ntypat</a>)</font>
 <br><font id="default">Default is *0</font>
 <br><br><font id="requires">
-Only relevant if <a href="../../input_variables/generated_files/varset_internal.html#usepaw">usepaw</a>==1 and <a href="../../input_variables/generated_files/varset_paw.html#usepawu">usepawu</a>==1
+Only relevant if <a href="../../variables/generated_files/varset_internal.html#usepaw">usepaw</a>==1 and <a href="../../variables/generated_files/varset_paw.html#usepawu">usepawu</a>==1
 </font>
 <br><font id="text">
 <p>
 <p>
  Gives the value of the screened exchange interaction between correlated
-electrons corresponding to <a href="../../input_variables/generated_files/varset_paw.html#lpawu">lpawu</a>
+electrons corresponding to <a href="../../variables/generated_files/varset_paw.html#lpawu">lpawu</a>
 for each species.
  <br />
- In the case where <a href="../../input_variables/generated_files/varset_paw.html#lpawu">lpawu</a> =-1,
+ In the case where <a href="../../variables/generated_files/varset_paw.html#lpawu">lpawu</a> =-1,
 the value is not used.
 </p>
 </font>
@@ -477,7 +477,7 @@ the value is not used.
 <br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_LDAminushalf.html">LDAminushalf</a>.</font>
 <br><font id="smalltext">Rarely used: [1/920] in abinit tests, [0/136] in tuto abinit tests. Test list: {v8:[<a href="../../tests/v8/Input/t32.in">32</a>]}.</font>
-<br><font id="vartype">Variable type: integer(<a href="../../input_variables/generated_files/varset_basic.html#ntypat">ntypat</a>)</font>
+<br><font id="vartype">Variable type: integer(<a href="../../variables/generated_files/varset_basic.html#ntypat">ntypat</a>)</font>
 <br><font id="default">Default is *0</font>
 <br><font id="text">
 <p>
@@ -497,10 +497,10 @@ For each type of atom, gives whether a LDA-1/2 calculation is to be performed.
 <br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_xc.html">xc</a>.</font>
 <br><font id="smalltext">Rarely used: [1/920] in abinit tests, [0/136] in tuto abinit tests. Test list: {v5:[<a href="../../tests/v5/Input/t18.in">18</a>]}.</font>
-<br><font id="vartype">Variable type: integer(<a href="../../input_variables/generated_files/varset_basic.html#ntypat">ntypat</a>)</font>
+<br><font id="vartype">Variable type: integer(<a href="../../variables/generated_files/varset_basic.html#ntypat">ntypat</a>)</font>
 <br><font id="default">Default is -1</font>
 <br><br><font id="requires">
-Only relevant if <a href="../../input_variables/generated_files/varset_paw.html#useexexch">useexexch</a>==1
+Only relevant if <a href="../../variables/generated_files/varset_paw.html#useexexch">useexexch</a>==1
 </font>
 <br><font id="text">
 <p>
@@ -519,10 +519,10 @@ on which to apply the exact exchange correction.
 <br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_DFT+U.html">DFT+U</a>.</font>
 <br><font id="smalltext">Moderately used: [41/920] in abinit tests, [6/136] in tuto abinit tests. Tuto test list: {tutoparal:[<a href="../../tests/tutoparal/Input/tdmft_2.in">dmft_2</a>],tutorial:[<a href="../../tests/tutorial/Input/tdftu_2.in">dftu_2</a>,<a href="../../tests/tutorial/Input/tdftu_3.in">dftu_3</a>,<a href="../../tests/tutorial/Input/tdftu_4.in">dftu_4</a>,<a href="../../tests/tutorial/Input/tudet_1.in">udet_1</a>,<a href="../../tests/tutorial/Input/tudet_2.in">udet_2</a>]}.</font>
-<br><font id="vartype">Variable type: integer(<a href="../../input_variables/generated_files/varset_basic.html#ntypat">ntypat</a>)</font>
+<br><font id="vartype">Variable type: integer(<a href="../../variables/generated_files/varset_basic.html#ntypat">ntypat</a>)</font>
 <br><font id="default">Default is *-1</font>
 <br><br><font id="requires">
-Only relevant if <a href="../../input_variables/generated_files/varset_paw.html#usepawu">usepawu</a>==1 or <a href="../../input_variables/generated_files/varset_paw.html#usepawu">usepawu</a>== 2
+Only relevant if <a href="../../variables/generated_files/varset_paw.html#usepawu">usepawu</a>==1 or <a href="../../variables/generated_files/varset_paw.html#usepawu">usepawu</a>== 2
 </font>
 <br><font id="text">
 <p>
@@ -533,8 +533,8 @@ values 2 or 3 are allowed)&nbsp; on which to apply the LDA+U correction.
  <ul>
   <li>
    If equal to 2 (d-orbitals)&nbsp; or 3 (f-orbitals), values of
-<a href="../../input_variables/generated_files/varset_paw.html#upawu">upawu</a> and&nbsp;
-<a href="../../input_variables/generated_files/varset_paw.html#jpawu">jpawu</a> are used in the calculation.
+<a href="../../variables/generated_files/varset_paw.html#upawu">upawu</a> and&nbsp;
+<a href="../../variables/generated_files/varset_paw.html#jpawu">jpawu</a> are used in the calculation.
   </li>
   <li>
    If equal to -1: do not apply LDA+U correction on the species.
@@ -560,7 +560,7 @@ values 2 or 3 are allowed)&nbsp; on which to apply the LDA+U correction.
 <p>
  Maximum number of wavevectors used to sample the local part of the potential, in PAW.
 Actually referred to as mqgrid_vl internally. Should change name to the latter ...
-See also <a href="../../input_variables/generated_files/varset_dev.html#mqgrid">mqgrid</a>
+See also <a href="../../variables/generated_files/varset_dev.html#mqgrid">mqgrid</a>
 </p>
 </font>
 
@@ -576,7 +576,7 @@ See also <a href="../../input_variables/generated_files/varset_dev.html#mqgrid">
 <br><font id="vartype">Variable type: integer(3)</font>
 <br><font id="default">Default is [0, 0, 0]</font>
 <br><br><font id="requires">
-Only relevant if <a href="../../input_variables/generated_files/varset_internal.html#usepaw">usepaw</a>==1
+Only relevant if <a href="../../variables/generated_files/varset_internal.html#usepaw">usepaw</a>==1
 </font>
 <br><font id="text">
 <p>
@@ -597,11 +597,11 @@ grid" only used for PAW calculations.
 <br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_PAW.html">PAW</a>.</font>
 <br><font id="smalltext">Rarely used: [2/920] in abinit tests, [0/136] in tuto abinit tests. Test list: {v5:[<a href="../../tests/v5/Input/t17.in">17</a>],v7:[<a href="../../tests/v7/Input/t32.in">32</a>]}.</font>
 <br><font id="vartype">Variable type: integer</font>
-<br><font id="default">Default is 2 if <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>==0 and <a href="../../input_variables/generated_files/varset_rlx.html#ionmov">ionmov</a><6 and <a href="../../input_variables/generated_files/varset_paw.html#pawspnorb">pawspnorb</a>==1 and <a href="../../input_variables/generated_files/varset_basic.html#iscf">iscf</a>>=10 and (<a href="../../input_variables/generated_files/varset_basic.html#kptopt">kptopt</a> !=1 or <a href="../../input_variables/generated_files/varset_basic.html#kptopt">kptopt</a>!=2) and <a href="../../input_variables/generated_files/varset_internal.html#usepaw">usepaw</a>==1,
+<br><font id="default">Default is 2 if <a href="../../variables/generated_files/varset_gstate.html#optdriver">optdriver</a>==0 and <a href="../../variables/generated_files/varset_rlx.html#ionmov">ionmov</a><6 and <a href="../../variables/generated_files/varset_paw.html#pawspnorb">pawspnorb</a>==1 and <a href="../../variables/generated_files/varset_basic.html#iscf">iscf</a>>=10 and (<a href="../../variables/generated_files/varset_basic.html#kptopt">kptopt</a> !=1 or <a href="../../variables/generated_files/varset_basic.html#kptopt">kptopt</a>!=2) and <a href="../../variables/generated_files/varset_internal.html#usepaw">usepaw</a>==1,
 1 otherwise.
 </font>
 <br><br><font id="requires">
-Only relevant if <a href="../../input_variables/generated_files/varset_internal.html#usepaw">usepaw</a>==1
+Only relevant if <a href="../../variables/generated_files/varset_internal.html#usepaw">usepaw</a>==1
 </font>
 <br><font id="text">
 <p>
@@ -623,16 +623,16 @@ When
  This is needed when time-reversal symmetry is broken (typically when spin-orbit coupling is activated).
  <br />
  <br />
- Note for ground-state calculations (<a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>=0):
+ Note for ground-state calculations (<a href="../../variables/generated_files/varset_gstate.html#optdriver">optdriver</a>=0):
  <br />
  The imaginary part of PAW augmentation occupancies is only used for the computation of the total energy by "direct scheme";
-this is only necessary when SCF mixing on potential is chosen (<a href="../../input_variables/generated_files/varset_basic.html#iscf">iscf</a>&lt;10).
+this is only necessary when SCF mixing on potential is chosen (<a href="../../variables/generated_files/varset_basic.html#iscf">iscf</a>&lt;10).
  <br />
- When SCF mixing on density is chosen (<a href="../../input_variables/generated_files/varset_basic.html#iscf">iscf</a>&gt;=10), the "direct" decomposition
+ When SCF mixing on density is chosen (<a href="../../variables/generated_files/varset_basic.html#iscf">iscf</a>&gt;=10), the "direct" decomposition
 of energy is only printed out without being used. It is thus possible to use <b>pawcpxocc</b>=1 in the latter case.
  <br />
- In order to save CPU time, when molecular dynamics is selected (<a href="../../input_variables/generated_files/varset_rlx.html#ionmov">ionmov</a>&gt;=6) and
-SCF mixing done on density (<a href="../../input_variables/generated_files/varset_basic.html#iscf">iscf</a>&gt;=10), <b>pawcpxocc</b>=2 is (by default) set to
+ In order to save CPU time, when molecular dynamics is selected (<a href="../../variables/generated_files/varset_rlx.html#ionmov">ionmov</a>&gt;=6) and
+SCF mixing done on density (<a href="../../variables/generated_files/varset_basic.html#iscf">iscf</a>&gt;=10), <b>pawcpxocc</b>=2 is (by default) set to
  <b>
   1
  </b>
@@ -651,7 +651,7 @@ SCF mixing done on density (<a href="../../input_variables/generated_files/varse
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
 <br><br><font id="requires">
-Only relevant if (<a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>==3 or <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>==4) and <a href="../../input_variables/generated_files/varset_internal.html#usepaw">usepaw</a>==1
+Only relevant if (<a href="../../variables/generated_files/varset_gstate.html#optdriver">optdriver</a>==3 or <a href="../../variables/generated_files/varset_gstate.html#optdriver">optdriver</a>==4) and <a href="../../variables/generated_files/varset_internal.html#usepaw">usepaw</a>==1
 </font>
 <br><font id="text">
 <p>
@@ -678,7 +678,7 @@ is taken into account in the computation of the oscillator strengths. Hence, the
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is -1 (Comment: pawecutdg MUST be specified for PAW calculations.)</font>
 <br><br><font id="requires">
-Only relevant if <a href="../../input_variables/generated_files/varset_internal.html#usepaw">usepaw</a>==1
+Only relevant if <a href="../../variables/generated_files/varset_internal.html#usepaw">usepaw</a>==1
 </font>
 <br><font id="text">
 <p>
@@ -688,11 +688,11 @@ Only relevant if <a href="../../input_variables/generated_files/varset_internal.
 spherical grid around each atom).
  <br />
  <b>pawecutdg</b> must be larger or equal to
-<a href="../../input_variables/generated_files/varset_basic.html#ecut">ecut</a>. If it is equal to it, then no fine
+<a href="../../variables/generated_files/varset_basic.html#ecut">ecut</a>. If it is equal to it, then no fine
 grid is used. The results are not very accurate, but the computations
 proceed quite fast.
  <br />
- For typical PAW computations, where <a href="../../input_variables/generated_files/varset_basic.html#ecut">ecut</a>
+ For typical PAW computations, where <a href="../../variables/generated_files/varset_basic.html#ecut">ecut</a>
 is on the order of 15 Ha, <b>pawecutdg</b> must be tested according to what you want to do. For calculations that do not require a high accuracy (molecular dynamics for instance) a value of 20 Ha is enough. For calculations that require a high accuracy (response fonctions for instance) it should be on the order of 30 Ha.
 Choosing a larger value should not increase the accuracy, but does not slow down the
 computation either, only the memory. The choice made for this variable DOES have a bearing
@@ -715,7 +715,7 @@ or derived quantities, like forces, but also on the two values of the
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
 <br><br><font id="requires">
-Only relevant if <a href="../../input_variables/generated_files/varset_internal.html#usepaw">usepaw</a>==1 
+Only relevant if <a href="../../variables/generated_files/varset_internal.html#usepaw">usepaw</a>==1 
 </font>
 <br><font id="text">
 <p>
@@ -723,7 +723,7 @@ Only relevant if <a href="../../input_variables/generated_files/varset_internal.
 For Ground-State calculations and non self-consistent calculations only.
  <br />
  This option can be used to plot band structure. For each atom (specified by
-<a href="../../input_variables/generated_files/varset_gstate.html#natsph">natsph</a> and <a href="../../input_variables/generated_files/varset_gstate.html#iatsph">iatsph</a>), each angular momentum, and each
+<a href="../../variables/generated_files/varset_gstate.html#natsph">natsph</a> and <a href="../../variables/generated_files/varset_gstate.html#iatsph">iatsph</a>), each angular momentum, and each
 spin polarisation, the band structure is written in files (such as e.g. FATBANDS_at0001_Ni_is2_l2_m-1). Each file
 contains the eigenvalue, and the contribution of angular momentum L, and projection of angular momentum M,
 (for the corresponding wavefunction) to the PAW density inside the PAW sphere
@@ -761,7 +761,7 @@ Relevant values are:
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 10</font>
 <br><br><font id="requires">
-Only relevant if <a href="../../input_variables/generated_files/varset_internal.html#usepaw">usepaw</a>==1
+Only relevant if <a href="../../variables/generated_files/varset_internal.html#usepaw">usepaw</a>==1
 </font>
 <br><font id="text">
 <p>
@@ -797,7 +797,7 @@ or derived quantities, like forces, but also on the two values of the
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 10</font>
 <br><br><font id="requires">
-Only relevant if <a href="../../input_variables/generated_files/varset_internal.html#usepaw">usepaw</a>==1
+Only relevant if <a href="../../variables/generated_files/varset_internal.html#usepaw">usepaw</a>==1
 </font>
 <br><font id="text">
 <p>
@@ -824,11 +824,11 @@ Other parts of augmentation occupancies are not included in the mixing process.
 <br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_PAW.html">PAW</a>.</font>
 <br><font id="smalltext">Moderately used: [14/920] in abinit tests, [0/136] in tuto abinit tests. Examples in tests: {etsf_io:[<a href="../../tests/etsf_io/Input/t00.in">00</a>,<a href="../../tests/etsf_io/Input/t09.in">09</a>],paral:[<a href="../../tests/paral/Input/t27.in">27</a>],v4:[<a href="../../tests/v4/Input/t04.in">04</a>,<a href="../../tests/v4/Input/t05.in">05</a>,<a href="../../tests/v4/Input/t06.in">06</a>,<a href="../../tests/v4/Input/t07.in">07</a>,<a href="../../tests/v4/Input/t94.in">94</a>],v5:[<a href="../../tests/v5/Input/t31.in">31</a>,<a href="../../tests/v5/Input/t32.in">32</a>]}.</font>
 <br><font id="vartype">Variable type: integer</font>
-<br><font id="default">Default is 0 if <a href="../../input_variables/generated_files/varset_paral.html#npfft">npfft</a>==1,
+<br><font id="default">Default is 0 if <a href="../../variables/generated_files/varset_paral.html#npfft">npfft</a>==1,
 1 otherwise.
 </font>
 <br><br><font id="requires">
-Only relevant if <a href="../../input_variables/generated_files/varset_internal.html#usepaw">usepaw</a>==1
+Only relevant if <a href="../../variables/generated_files/varset_internal.html#usepaw">usepaw</a>==1
 </font>
 <br><font id="text">
 <p>
@@ -841,16 +841,16 @@ Only relevant if <a href="../../input_variables/generated_files/varset_internal.
   pawmixdg=1
  </b>
  the density/potential is mixed in REAL space using the fine FFT grid
-(defined by <a href="../../input_variables/generated_files/varset_paw.html#pawecutdg">pawecutdg</a> or <a href="../../input_variables/generated_files/varset_paw.html#ngfftdg">ngfftdg</a>).
+(defined by <a href="../../variables/generated_files/varset_paw.html#pawecutdg">pawecutdg</a> or <a href="../../variables/generated_files/varset_paw.html#ngfftdg">ngfftdg</a>).
  <br />
  - If
  <b>
   pawmixdg=0
  </b>
  the density/potential is mixed in RECIPROCAL space using the coarse FFT grid
-(defined by <a href="../../input_variables/generated_files/varset_basic.html#ecut">ecut</a> or <a href="../../input_variables/generated_files/varset_gstate.html#ngfft">ngfft</a>).
-Only components of the coarse grid are mixed using the scheme defined by <a href="../../input_variables/generated_files/varset_basic.html#iscf">iscf</a>;
-other components are only precondionned by <a href="../../input_variables/generated_files/varset_gstate.html#diemix">diemix</a> and simply mixed.
+(defined by <a href="../../variables/generated_files/varset_basic.html#ecut">ecut</a> or <a href="../../variables/generated_files/varset_gstate.html#ngfft">ngfft</a>).
+Only components of the coarse grid are mixed using the scheme defined by <a href="../../variables/generated_files/varset_basic.html#iscf">iscf</a>;
+other components are only precondionned by <a href="../../variables/generated_files/varset_gstate.html#diemix">diemix</a> and simply mixed.
  <br />
  This option is useful to save memory and does not affect numerical accuracy of converged results.
 If
@@ -858,22 +858,22 @@ If
   pawmixdg=1
  </b>
  , density and corresponding residual are stored for previous iterations and are
-REAL arrays of size <a href="../../input_variables/generated_files/varset_internal.html#nfftdg">nfftdg</a>.
+REAL arrays of size <a href="../../variables/generated_files/varset_internal.html#nfftdg">nfftdg</a>.
 If
  <b>
   pawmixdg=0
  </b>
  , density and corresponding residual are stored
-for previous iterations and are COMPLEX arrays of size <a href="../../input_variables/generated_files/varset_internal.html#nfft">nfft</a>.
+for previous iterations and are COMPLEX arrays of size <a href="../../variables/generated_files/varset_internal.html#nfft">nfft</a>.
 The memory saving is particularly efficient when using the Pulay mixing
-(<a href="../../input_variables/generated_files/varset_basic.html#iscf">iscf</a>=7 or 17).
+(<a href="../../variables/generated_files/varset_basic.html#iscf">iscf</a>=7 or 17).
  <br />
  <br />
  In
  <b>
   wavelet
  </b>
- calculations <a href="../../input_variables/generated_files/varset_basic.html#usewvl">usewvl</a>=1:
+ calculations <a href="../../variables/generated_files/varset_basic.html#usewvl">usewvl</a>=1:
  <br />
  - pawmixdg is set to 1 by default.
  <br />
@@ -895,7 +895,7 @@ The memory saving is particularly efficient when using the Pulay mixing
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 1</font>
 <br><br><font id="requires">
-Only relevant if <a href="../../input_variables/generated_files/varset_internal.html#usepaw">usepaw</a>==1
+Only relevant if <a href="../../variables/generated_files/varset_internal.html#usepaw">usepaw</a>==1
 </font>
 <br><font id="text">
 <p>
@@ -925,7 +925,7 @@ by this choice. It is recommended to test the validity of this approximation bef
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 13</font>
 <br><br><font id="requires">
-Only relevant if <a href="../../input_variables/generated_files/varset_internal.html#usepaw">usepaw</a>==1
+Only relevant if <a href="../../variables/generated_files/varset_internal.html#usepaw">usepaw</a>==1
 </font>
 <br><font id="text">
 <p>
@@ -933,7 +933,7 @@ Only relevant if <a href="../../input_variables/generated_files/varset_internal.
  Number of phi angles (longitude) used to discretize the
 data on the atomic spheres. This discretization is completely
 defined by <b>pawnphi</b>
-and <a href="../../input_variables/generated_files/varset_paw.html#pawntheta">pawntheta</a>.
+and <a href="../../variables/generated_files/varset_paw.html#pawntheta">pawntheta</a>.
 </p>
 </font>
 
@@ -949,7 +949,7 @@ and <a href="../../input_variables/generated_files/varset_paw.html#pawntheta">pa
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 12</font>
 <br><br><font id="requires">
-Only relevant if <a href="../../input_variables/generated_files/varset_internal.html#usepaw">usepaw</a>==1
+Only relevant if <a href="../../variables/generated_files/varset_internal.html#usepaw">usepaw</a>==1
 </font>
 <br><font id="text">
 <p>
@@ -957,7 +957,7 @@ Only relevant if <a href="../../input_variables/generated_files/varset_internal.
  Number of theta angles (latitude) used to discretize the
 data on the atomic spheres. This discretization is completely
 defined by <b>pawntheta</b>
-and <a href="../../input_variables/generated_files/varset_paw.html#pawnphi">pawnphi</a>.
+and <a href="../../variables/generated_files/varset_paw.html#pawnphi">pawnphi</a>.
 </p>
 </font>
 
@@ -973,7 +973,7 @@ and <a href="../../input_variables/generated_files/varset_paw.html#pawnphi">pawn
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 1</font>
 <br><br><font id="requires">
-Only relevant if <a href="../../input_variables/generated_files/varset_internal.html#usepaw">usepaw</a>==1
+Only relevant if <a href="../../variables/generated_files/varset_internal.html#usepaw">usepaw</a>==1
 </font>
 <br><font id="text">
 <p>
@@ -1002,7 +1002,7 @@ those found to be non-zero will be computed ; thus the first iteration is more c
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
 <br><br><font id="requires">
-Only relevant if <a href="../../input_variables/generated_files/varset_internal.html#usepaw">usepaw</a>==1
+Only relevant if <a href="../../variables/generated_files/varset_internal.html#usepaw">usepaw</a>==1
 </font>
 <br><font id="text">
 <p>
@@ -1032,8 +1032,8 @@ It can be redundant as &rho;<sub>ij</sub> is contained in
 </ul>
 This has only an influence on the efficiency of the mixing algorithm.<br>
 In cas of mixing problems, the first suggestion is to increase the size of the history
-(see <a href="../../input_variables/generated_files/varset_dev.html#npulayit">npulayit</a>). Then it is also possible to play with the parameters of
-the Kerker mixing: <a href="../../input_variables/generated_files/varset_gstate.html#diemix">diemix</a>, <a href="../../input_variables/generated_files/varset_gstate.html#diemac">diemac</a>, etc...
+(see <a href="../../variables/generated_files/varset_dev.html#npulayit">npulayit</a>). Then it is also possible to play with the parameters of
+the Kerker mixing: <a href="../../variables/generated_files/varset_gstate.html#diemix">diemix</a>, <a href="../../variables/generated_files/varset_gstate.html#diemac">diemac</a>, etc...
 </p>
 </font>
 
@@ -1079,7 +1079,7 @@ Kresse in PRB 74. 035101
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 5.0</font>
 <br><br><font id="requires">
-Only relevant if <a href="../../input_variables/generated_files/varset_internal.html#usepaw">usepaw</a>==1
+Only relevant if <a href="../../variables/generated_files/varset_internal.html#usepaw">usepaw</a>==1
 </font>
 <br><font id="text">
 <p>
@@ -1119,14 +1119,14 @@ the volume of the overlap of two spheres by the volume of the smallest sphere.
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
 <br><br><font id="requires">
-Only relevant if <a href="../../input_variables/generated_files/varset_internal.html#usepaw">usepaw</a>==1
+Only relevant if <a href="../../variables/generated_files/varset_internal.html#usepaw">usepaw</a>==1
 </font>
 <br><font id="text">
 <p>
 <b>
  Deprecated :
 </b>
-See the <a href="../../input_variables/generated_files/varset_files.html#prtden">prtden</a>.
+See the <a href="../../variables/generated_files/varset_files.html#prtden">prtden</a>.
 <p>
 </p>
 </font>
@@ -1143,7 +1143,7 @@ See the <a href="../../input_variables/generated_files/varset_files.html#prtden"
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
 <br><br><font id="requires">
-Only relevant if <a href="../../input_variables/generated_files/varset_internal.html#usepaw">usepaw</a>==1 and <a href="../../input_variables/generated_files/varset_files.html#prtdos">prtdos</a>==3
+Only relevant if <a href="../../variables/generated_files/varset_internal.html#usepaw">usepaw</a>==1 and <a href="../../variables/generated_files/varset_files.html#prtdos">prtdos</a>==3
 </font>
 <br><font id="text">
 <p>
@@ -1183,7 +1183,7 @@ Only relevant if <a href="../../input_variables/generated_files/varset_internal.
  <br />
  - This a (very) good approximation of total DOS, provided that (1) the PAW local basis is complete, (2) the electronic charge is mostly contained in PAW spheres.
  <br />
- - In that case, the <a href="../../input_variables/generated_files/varset_gstate.html#ratsph">ratsph</a> variable is automatically set to the PAW radius.
+ - In that case, the <a href="../../variables/generated_files/varset_gstate.html#ratsph">ratsph</a> variable is automatically set to the PAW radius.
 </p>
 </font>
 
@@ -1199,7 +1199,7 @@ Only relevant if <a href="../../input_variables/generated_files/varset_internal.
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
 <br><br><font id="requires">
-Only relevant if <a href="../../input_variables/generated_files/varset_internal.html#usepaw">usepaw</a>==1
+Only relevant if <a href="../../variables/generated_files/varset_internal.html#usepaw">usepaw</a>==1
 </font>
 <br><font id="text">
 <p>
@@ -1237,7 +1237,7 @@ PAW+U, rotation matrices of sphercal harmonics.
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
 <br><br><font id="requires">
-Only relevant if <a href="../../input_variables/generated_files/varset_internal.html#usepaw">usepaw</a>==1
+Only relevant if <a href="../../variables/generated_files/varset_internal.html#usepaw">usepaw</a>==1
 </font>
 <br><font id="text">
 <p>
@@ -1249,7 +1249,7 @@ contribution inside each PAW sphere needed to reconstruct the correct nodal shap
  </b>
  causes the generation of a file  _AE_WFK that contains the full
 wavefunctions in real space on the fine FFT grid defined by
-<a href="../../input_variables/generated_files/varset_paw.html#pawecutdg">pawecutdg</a> or <a href="../../input_variables/generated_files/varset_paw.html#ngfftdg">ngfftdg</a>.
+<a href="../../variables/generated_files/varset_paw.html#pawecutdg">pawecutdg</a> or <a href="../../variables/generated_files/varset_paw.html#ngfftdg">ngfftdg</a>.
 Limitations: At present (v6.0),
  <b>
   pawprtwf=1
@@ -1261,7 +1261,7 @@ as the _AW_WFK file is written using the NETCDF file format following the ETSF-I
 wavefunctions in real space. If the code is run entirely in serial, additional output is made of various
 contributions to the all-electron wavefunction. By default the full available set of bands and k-points are
 ouput, but a single band and k-point index can be requested by using the variables
-<a href="../../input_variables/generated_files/varset_dev.html#pawprt_b">pawprt_b</a> and <a href="../../input_variables/generated_files/varset_dev.html#pawprt_k">pawprt_k</a>.
+<a href="../../variables/generated_files/varset_dev.html#pawprt_b">pawprt_b</a> and <a href="../../variables/generated_files/varset_dev.html#pawprt_k">pawprt_k</a>.
 </p>
 </font>
 
@@ -1275,11 +1275,11 @@ ouput, but a single band and k-point index can be requested by using the variabl
 <br><font id="characteristic">Mentioned in topics: <a href="../../topics/generated_files/topic_PAW.html">PAW</a>, <a href="../../topics/generated_files/topic_spinpolarisation.html">spinpolarisation</a>.</font>
 <br><font id="smalltext">Rarely used: [9/920] in abinit tests, [1/136] in tuto abinit tests. Test list: {gpu:[<a href="../../tests/gpu/Input/t03.in">03</a>],mpiio:[<a href="../../tests/mpiio/Input/t28.in">28</a>],paral:[<a href="../../tests/paral/Input/t28.in">28</a>],tutorial:[<a href="../../tests/tutorial/Input/tspin_6.in">spin_6</a>],v5:[<a href="../../tests/v5/Input/t16.in">16</a>,<a href="../../tests/v5/Input/t17.in">17</a>],v6:[<a href="../../tests/v6/Input/t49.in">49</a>],v7:[<a href="../../tests/v7/Input/t21.in">21</a>,<a href="../../tests/v7/Input/t82.in">82</a>]}.</font>
 <br><font id="vartype">Variable type: integer</font>
-<br><font id="default">Default is 1 if <a href="../../input_variables/generated_files/varset_gstate.html#nspinor">nspinor</a>==2,
+<br><font id="default">Default is 1 if <a href="../../variables/generated_files/varset_gstate.html#nspinor">nspinor</a>==2,
 0 otherwise.
 </font>
 <br><br><font id="requires">
-Only relevant if <a href="../../input_variables/generated_files/varset_internal.html#usepaw">usepaw</a>==1
+Only relevant if <a href="../../variables/generated_files/varset_internal.html#usepaw">usepaw</a>==1
 </font>
 <br><font id="text">
 <p>
@@ -1292,9 +1292,9 @@ Only relevant if <a href="../../input_variables/generated_files/varset_internal.
  <br />
  If <b>pawspnorb</b>=1, spin-orbit will be added.
  <br />
- If the wavefunction is spinorial (that is, if <a href="../../input_variables/generated_files/varset_gstate.html#nspinor">nspinor</a>=2),
+ If the wavefunction is spinorial (that is, if <a href="../../variables/generated_files/varset_gstate.html#nspinor">nspinor</a>=2),
  there is no reason not to include the spin-orbit interaction, so that the default value of <b>pawspnorb</b>
- becomes 1 when <a href="../../input_variables/generated_files/varset_gstate.html#nspinor">nspinor</a>=2.
+ becomes 1 when <a href="../../variables/generated_files/varset_gstate.html#nspinor">nspinor</a>=2.
  <br />
  Note that only the all-electron "on-site" contribution to the Hamiltonian is taken into account;
 this is a very good approximation but requires the
@@ -1318,16 +1318,16 @@ contained in the PAW sphere
   <br />
  </div>
  <br />
- Also note that, when spin-orbit coupling is activated and there is some magnetization <a href="../../input_variables/generated_files/varset_gstate.html#nspden">nspden</a>=4, the time-reversal symmetry is broken.
+ Also note that, when spin-orbit coupling is activated and there is some magnetization <a href="../../variables/generated_files/varset_gstate.html#nspden">nspden</a>=4, the time-reversal symmetry is broken.
  <br />
- The use of <a href="../../input_variables/generated_files/varset_basic.html#kptopt">kptopt</a>=1 or <a href="../../input_variables/generated_files/varset_basic.html#kptopt">kptopt</a>=2 is thus
-forbidden. It is advised to use <a href="../../input_variables/generated_files/varset_basic.html#kptopt">kptopt</a>=3 (no symmetry used to generate k-points)
-or <a href="../../input_variables/generated_files/varset_basic.html#kptopt">kptopt</a>=4 (only spatial symmetries used to generate k-points).
+ The use of <a href="../../variables/generated_files/varset_basic.html#kptopt">kptopt</a>=1 or <a href="../../variables/generated_files/varset_basic.html#kptopt">kptopt</a>=2 is thus
+forbidden. It is advised to use <a href="../../variables/generated_files/varset_basic.html#kptopt">kptopt</a>=3 (no symmetry used to generate k-points)
+or <a href="../../variables/generated_files/varset_basic.html#kptopt">kptopt</a>=4 (only spatial symmetries used to generate k-points).
  <br />
- Be careful if you choose to use <a href="../../input_variables/generated_files/varset_basic.html#kptopt">kptopt</a>=0 (k-points given by hand); Time-reversal symmetry
+ Be careful if you choose to use <a href="../../variables/generated_files/varset_basic.html#kptopt">kptopt</a>=0 (k-points given by hand); Time-reversal symmetry
 has to be avoided.
  <br />
- An artificial scaling of the spin-orbit can be introduced thanks to the <a href="../../input_variables/generated_files/varset_paw.html#spnorbscl">spnorbscl</a> input variable.
+ An artificial scaling of the spin-orbit can be introduced thanks to the <a href="../../variables/generated_files/varset_paw.html#spnorbscl">spnorbscl</a> input variable.
 </p>
 </font>
 
@@ -1343,7 +1343,7 @@ has to be avoided.
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 1</font>
 <br><br><font id="requires">
-Only relevant if <a href="../../input_variables/generated_files/varset_internal.html#usepaw">usepaw</a>=1
+Only relevant if <a href="../../variables/generated_files/varset_internal.html#usepaw">usepaw</a>=1
 </font>
 <br><font id="text">
 <p>
@@ -1387,7 +1387,7 @@ a re-computed each time they are needed and CPU time increases.
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
 <br><br><font id="requires">
-Only relevant if <a href="../../input_variables/generated_files/varset_internal.html#usepaw">usepaw</a>==1 and <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>==0 
+Only relevant if <a href="../../variables/generated_files/varset_internal.html#usepaw">usepaw</a>==1 and <a href="../../variables/generated_files/varset_gstate.html#optdriver">optdriver</a>==0 
 </font>
 <br><font id="text">
 <p>
@@ -1395,7 +1395,7 @@ Only relevant if <a href="../../input_variables/generated_files/varset_internal.
 Ground-State calculation only.
  <br />
  When a sophisticated preconditioning scheme is selected for the SCF cycle of a Ground-State calculation
-(<a href="../../input_variables/generated_files/varset_gstate.html#iprcel">iprcel</a>&gt;0), the computation of the susceptibility matrix
+(<a href="../../variables/generated_files/varset_gstate.html#iprcel">iprcel</a>&gt;0), the computation of the susceptibility matrix
 is required several times during the cycle. This computation is computer time consuming, especially
 -- within PAW -- because of the inclusion of additional terms due to the compensation charge density.
 As only a crude valuation of the susceptibilty matrix is needed (to evaluate a preconditioning matrix),
@@ -1426,7 +1426,7 @@ This approximation could be unfavourable in some cases; in the latter, we advise
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 1</font>
 <br><br><font id="requires">
-Only relevant if <a href="../../input_variables/generated_files/varset_internal.html#usepaw">usepaw</a>==1
+Only relevant if <a href="../../variables/generated_files/varset_internal.html#usepaw">usepaw</a>==1
 </font>
 <br><font id="text">
 <p>
@@ -1459,7 +1459,7 @@ When <b>pawusecp</b>=1, then the cprj are computed once and then kept in memory.
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 1</font>
 <br><br><font id="requires">
-Only relevant if <a href="../../input_variables/generated_files/varset_internal.html#usepaw">usepaw</a>==1
+Only relevant if <a href="../../variables/generated_files/varset_internal.html#usepaw">usepaw</a>==1
 </font>
 <br><font id="text">
 <p>
@@ -1495,7 +1495,7 @@ developed onto lm-moments at order 2 (can be memory/CPU consuming)
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
 <br><br><font id="requires">
-Only relevant if <a href="../../input_variables/generated_files/varset_internal.html#usepaw">usepaw</a>==1, <a href="../../input_variables/generated_files/varset_paw.html#quadmom">quadmom</a>
+Only relevant if <a href="../../variables/generated_files/varset_internal.html#usepaw">usepaw</a>==1, <a href="../../variables/generated_files/varset_paw.html#quadmom">quadmom</a>
 </font>
 <br><font id="text">
 <p>
@@ -1503,17 +1503,17 @@ Only relevant if <a href="../../input_variables/generated_files/varset_internal.
  <ul>
   <li>
    If nonzero, calculate the electric field gradient at each atomic site in the unit cell. Using
-this option requires <a href="../../input_variables/generated_files/varset_paw.html#quadmom">quadmom</a> to be set as well.
+this option requires <a href="../../variables/generated_files/varset_paw.html#quadmom">quadmom</a> to be set as well.
 Values will be written to main output file (search for Electric Field Gradient). If prtefg=1,
 only the quadrupole coupling in MHz and asymmetry are reported. If prtefg=2, the full electric field
 gradient tensors in atomic units are also given, showing separate contributions from the valence
 electrons, the ion cores, and the PAW reconstruction. If prtefg=3, then in addition to the prtefg=2 output,
 the EFGs are computed using an ionic point charge model. This is useful for comparing the accurate PAW-based
 results to those of simple ion-only models. Use of prtefg=3 requires that the variable
-<a href="../../input_variables/generated_files/varset_paw.html#ptcharge">ptcharge</a> be set as well.
+<a href="../../variables/generated_files/varset_paw.html#ptcharge">ptcharge</a> be set as well.
    <br />
    The option prtefg is compatible with spin polarized calculations
-(see <a href="../../input_variables/generated_files/varset_gstate.html#nspden">nspden</a>) and also LDA+U (see <a href="../../input_variables/generated_files/varset_paw.html#usepawu">usepawu</a>).
+(see <a href="../../variables/generated_files/varset_gstate.html#nspden">nspden</a>) and also LDA+U (see <a href="../../variables/generated_files/varset_paw.html#usepawu">usepawu</a>).
   </li>
  </ul>
 </p>
@@ -1531,7 +1531,7 @@ results to those of simple ion-only models. Use of prtefg=3 requires that the va
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
 <br><br><font id="requires">
-Only relevant if <a href="../../input_variables/generated_files/varset_internal.html#usepaw">usepaw</a>==1
+Only relevant if <a href="../../variables/generated_files/varset_internal.html#usepaw">usepaw</a>==1
 </font>
 <br><font id="text">
 <p>
@@ -1559,7 +1559,7 @@ PAW on-site corrections in addition to the contribution from the valence pseudo-
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
 <br><br><font id="requires">
-Only relevant if <a href="../../input_variables/generated_files/varset_internal.html#usepaw">usepaw</a>==1
+Only relevant if <a href="../../variables/generated_files/varset_internal.html#usepaw">usepaw</a>==1
 </font>
 <br><font id="text">
 <p>
@@ -1581,10 +1581,10 @@ Only relevant if <a href="../../input_variables/generated_files/varset_internal.
 <br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_EFG.html">EFG</a>.</font>
 <br><font id="smalltext">Rarely used: [1/920] in abinit tests, [0/136] in tuto abinit tests. Test list: {v5:[<a href="../../tests/v5/Input/t35.in">35</a>]}.</font>
-<br><font id="vartype">Variable type: real(<a href="../../input_variables/generated_files/varset_basic.html#ntypat">ntypat</a>)</font>
+<br><font id="vartype">Variable type: real(<a href="../../variables/generated_files/varset_basic.html#ntypat">ntypat</a>)</font>
 <br><font id="default">Default is *0</font>
 <br><br><font id="requires">
-Only relevant if <a href="../../input_variables/generated_files/varset_internal.html#usepaw">usepaw</a>==1 and <a href="../../input_variables/generated_files/varset_paw.html#prtefg">prtefg</a>>=3 
+Only relevant if <a href="../../variables/generated_files/varset_internal.html#usepaw">usepaw</a>==1 and <a href="../../variables/generated_files/varset_paw.html#prtefg">prtefg</a>>=3 
 </font>
 <br><font id="text">
 <p>
@@ -1593,11 +1593,11 @@ Only relevant if <a href="../../input_variables/generated_files/varset_internal.
  <ul>
   <li>
    Array of point charges, in atomic units, of the nuclei. In the normal computation of electric field gradients
-(see <a href="../../input_variables/generated_files/varset_paw.html#prtefg">prtefg</a>) the ionic contribution is calculated from the core charges of the atomic
+(see <a href="../../variables/generated_files/varset_paw.html#prtefg">prtefg</a>) the ionic contribution is calculated from the core charges of the atomic
 sites. Thus for example in a PAW data set for oxygen where the core is 1s<sup>2</sup>, the core charge is +6 (total nuclear charge
 minus core electron charge). In point charge models, which are much less accurate than PAW calculations, all atomic sites
 are treated as ions with charges determined by their valence states. In such a case oxygen almost always would have a
-point charge of -2. The present variable taken together with <a href="../../input_variables/generated_files/varset_paw.html#prtefg">prtefg</a> performs a full
+point charge of -2. The present variable taken together with <a href="../../variables/generated_files/varset_paw.html#prtefg">prtefg</a> performs a full
 PAW computation of the electric field gradient and also a simple point charge computation. The user inputs whatever
 point charges he/she wishes for each atom type.
   </li>
@@ -1614,10 +1614,10 @@ point charges he/she wishes for each atom type.
 <br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_EFG.html">EFG</a>.</font>
 <br><font id="smalltext">Rarely used: [8/920] in abinit tests, [1/136] in tuto abinit tests. Test list: {libxc:[<a href="../../tests/libxc/Input/t10.in">10</a>],tutorial:[<a href="../../tests/tutorial/Input/tnuc_1.in">nuc_1</a>],v5:[<a href="../../tests/v5/Input/t31.in">31</a>,<a href="../../tests/v5/Input/t32.in">32</a>,<a href="../../tests/v5/Input/t33.in">33</a>,<a href="../../tests/v5/Input/t35.in">35</a>],v6:[<a href="../../tests/v6/Input/t44.in">44</a>,<a href="../../tests/v6/Input/t49.in">49</a>]}.</font>
-<br><font id="vartype">Variable type: real(<a href="../../input_variables/generated_files/varset_basic.html#ntypat">ntypat</a>)</font>
+<br><font id="vartype">Variable type: real(<a href="../../variables/generated_files/varset_basic.html#ntypat">ntypat</a>)</font>
 <br><font id="default">Default is *0</font>
 <br><br><font id="requires">
-Only relevant if <a href="../../input_variables/generated_files/varset_internal.html#usepaw">usepaw</a>==1 and <a href="../../input_variables/generated_files/varset_paw.html#prtefg">prtefg</a>>=1 
+Only relevant if <a href="../../variables/generated_files/varset_internal.html#usepaw">usepaw</a>==1 and <a href="../../variables/generated_files/varset_paw.html#prtefg">prtefg</a>>=1 
 </font>
 <br><font id="text">
 <p>
@@ -1625,10 +1625,10 @@ Only relevant if <a href="../../input_variables/generated_files/varset_internal.
  <ul>
   <li>
    Array of quadrupole moments, in barns, of the nuclei. These values are used in conjunction with the
-electric field gradients computed with <a href="../../input_variables/generated_files/varset_paw.html#prtefg">prtefg</a> to calculate the quadrupole
+electric field gradients computed with <a href="../../variables/generated_files/varset_paw.html#prtefg">prtefg</a> to calculate the quadrupole
 couplings in MHz, as well as the asymmetries. Note that the electric field gradient at a nuclear site is independent of
 the nuclear quadrupole moment, thus the quadrupole moment of a nucleus can be input as 0, and the
-option <a href="../../input_variables/generated_files/varset_paw.html#prtefg">prtefg</a>=2 used to determine the electric field gradient at the site.
+option <a href="../../variables/generated_files/varset_paw.html#prtefg">prtefg</a>=2 used to determine the electric field gradient at the site.
   </li>
  </ul>
 </p>
@@ -1646,7 +1646,7 @@ option <a href="../../input_variables/generated_files/varset_paw.html#prtefg">pr
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 1.0</font>
 <br><br><font id="requires">
-Only relevant if <a href="../../input_variables/generated_files/varset_internal.html#usepaw">usepaw</a>==1 and <a href="../../input_variables/generated_files/varset_paw.html#pawspnorb">pawspnorb</a>>= 1 
+Only relevant if <a href="../../variables/generated_files/varset_internal.html#usepaw">usepaw</a>==1 and <a href="../../variables/generated_files/varset_paw.html#pawspnorb">pawspnorb</a>>= 1 
 </font>
 <br><font id="text">
 <p>
@@ -1667,20 +1667,20 @@ but are not expected to correspond to any physical situation.
 <br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#ENERGY">ENERGY</a></font>
 <br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_DFT+U.html">DFT+U</a>.</font>
 <br><font id="smalltext">Moderately used: [34/920] in abinit tests, [4/136] in tuto abinit tests. Tuto test list: {tutoparal:[<a href="../../tests/tutoparal/Input/tdmft_2.in">dmft_2</a>],tutorial:[<a href="../../tests/tutorial/Input/tdftu_2.in">dftu_2</a>,<a href="../../tests/tutorial/Input/tdftu_3.in">dftu_3</a>,<a href="../../tests/tutorial/Input/tdftu_4.in">dftu_4</a>]}.</font>
-<br><font id="vartype">Variable type: real(<a href="../../input_variables/generated_files/varset_basic.html#ntypat">ntypat</a>)</font>
+<br><font id="vartype">Variable type: real(<a href="../../variables/generated_files/varset_basic.html#ntypat">ntypat</a>)</font>
 <br><font id="default">Default is *0</font>
 <br><br><font id="requires">
-Only relevant if <a href="../../input_variables/generated_files/varset_internal.html#usepaw">usepaw</a>==1 and <a href="../../input_variables/generated_files/varset_paw.html#usepawu">usepawu</a>==1
+Only relevant if <a href="../../variables/generated_files/varset_internal.html#usepaw">usepaw</a>==1 and <a href="../../variables/generated_files/varset_paw.html#usepawu">usepawu</a>==1
 </font>
 <br><font id="text">
 <p>
 <p>
  Gives the value of the
 screened coulomb interaction between correlated electrons corresponding
-to <a href="../../input_variables/generated_files/varset_paw.html#lpawu">lpawu</a> for each species.
+to <a href="../../variables/generated_files/varset_paw.html#lpawu">lpawu</a> for each species.
  <br />
  In the case where
-<a href="../../input_variables/generated_files/varset_paw.html#lpawu">lpawu</a>
+<a href="../../variables/generated_files/varset_paw.html#lpawu">lpawu</a>
 =-1, the value is not used.
  <br />
  In the case of a GW calculation, the U interaction defined by <b>upawu</b> will be REMOVED from the self energy.
@@ -1722,12 +1722,12 @@ upawu4   5.5 eV   ! This is for the screening calculation
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
 <br><br><font id="requires">
-Only relevant if <a href="../../input_variables/generated_files/varset_internal.html#usepaw">usepaw</a>==1 and <a href="../../input_variables/generated_files/varset_paw.html#usepawu">usepawu</a>==1
+Only relevant if <a href="../../variables/generated_files/varset_internal.html#usepaw">usepaw</a>==1 and <a href="../../variables/generated_files/varset_paw.html#usepawu">usepawu</a>==1
 </font>
 <br><font id="text">
 <p>
 <p>
- When <b>usedmatpu</b>/=0, an initial density matrix (given by <a href="../../input_variables/generated_files/varset_paw.html#dmatpawu">dmatpawu</a>
+ When <b>usedmatpu</b>/=0, an initial density matrix (given by <a href="../../variables/generated_files/varset_paw.html#dmatpawu">dmatpawu</a>
 keyword) is used and kept fixed during the first ABS(<b>usedmatpu</b>) SCF steps.
  <br />
  This starting value of the density matrix can be useful to find the correct ground state.
@@ -1738,7 +1738,7 @@ of the initial density matrix.
 If the symmetry is not respected in the input, the matrix is however automatically symmetrised.
  <br />
  <br />
- The sign of <b>usedmatpu</b> has influence only when <a href="../../input_variables/generated_files/varset_rlx.html#ionmov">ionmov</a>/=0 (dynamics or relaxation):
+ The sign of <b>usedmatpu</b> has influence only when <a href="../../variables/generated_files/varset_rlx.html#ionmov">ionmov</a>/=0 (dynamics or relaxation):
  <br />
  - When <b>usedmatpu</b>&gt;0, the density matrix is kept constant only at first ionic step
  <br />
@@ -1759,14 +1759,14 @@ If the symmetry is not respected in the input, the matrix is however automatical
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
 <br><br><font id="requires">
-Only relevant if <a href="../../input_variables/generated_files/varset_internal.html#usepaw">usepaw</a>==1
+Only relevant if <a href="../../variables/generated_files/varset_internal.html#usepaw">usepaw</a>==1
 </font>
 <br><font id="text">
 <p>
 <p>
  When <b>useexexch</b>=1, the hybrid functional PBE0 is used
 in PAW, inside PAW spheres only, and only for correlated orbitals given by
-<a href="../../input_variables/generated_files/varset_paw.html#lexexch">lexexch</a>. To change the ratio of exact exchange, see also <a href="../../input_variables/generated_files/varset_dev.html#exchmix">exchmix</a>.
+<a href="../../variables/generated_files/varset_paw.html#lexexch">lexexch</a>. To change the ratio of exact exchange, see also <a href="../../variables/generated_files/varset_dev.html#exchmix">exchmix</a>.
 </p>
 </font>
 
@@ -1782,7 +1782,7 @@ in PAW, inside PAW spheres only, and only for correlated orbitals given by
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
 <br><br><font id="requires">
-Only relevant if <a href="../../input_variables/generated_files/varset_internal.html#usepaw">usepaw</a>==1
+Only relevant if <a href="../../variables/generated_files/varset_internal.html#usepaw">usepaw</a>==1
 </font>
 <br><font id="text">
 <p>
@@ -1813,13 +1813,13 @@ Eq. (8) of Ref[3]).
    </li>
   </ul>
  </ul>
- If LDA+U is activated (<b>usepawu</b>=1 or 2), the <a href="../../input_variables/generated_files/varset_paw.html#lpawu">lpawu</a>,
-<a href="../../input_variables/generated_files/varset_paw.html#upawu">upawu</a> and <a href="../../input_variables/generated_files/varset_paw.html#jpawu">jpawu</a> input variables are read.
+ If LDA+U is activated (<b>usepawu</b>=1 or 2), the <a href="../../variables/generated_files/varset_paw.html#lpawu">lpawu</a>,
+<a href="../../variables/generated_files/varset_paw.html#upawu">upawu</a> and <a href="../../variables/generated_files/varset_paw.html#jpawu">jpawu</a> input variables are read.
  <br />
  The implementation is done inside PAW augmentation regions only (cf Ref [4]). The initial density matrix can be
-given in the input file (see  <a href="../../input_variables/generated_files/varset_paw.html#usedmatpu">usedmatpu</a>).
+given in the input file (see  <a href="../../variables/generated_files/varset_paw.html#usedmatpu">usedmatpu</a>).
 The expression of the density matrix is chosen thanks to
-<a href="../../input_variables/generated_files/varset_paw.html#dmatpuopt">dmatpuopt</a>. See also
+<a href="../../variables/generated_files/varset_paw.html#dmatpuopt">dmatpuopt</a>. See also
  <a href="../../users/How_to_use_LDA_plus_U.txt">
   How_to_use_LDA_plus_U.txt
  </a>
@@ -1838,7 +1838,7 @@ including the screening, even if the U value does not play explicitly a role in 
 wavefunctions will be different anyhow).
  <br />
  It is possible to perform calculations of the type GW+U_prime @ DFT+U , so keeping a smaller U interaction in the GW calculation, by subtracting
-a smaller U than the one used in the DFT calculation. See the description of the <a href="../../input_variables/generated_files/varset_paw.html#upawu">upawu</a> input variable.
+a smaller U than the one used in the DFT calculation. See the description of the <a href="../../variables/generated_files/varset_paw.html#upawu">upawu</a> input variable.
  <br />
  References:
  <br />
@@ -1899,7 +1899,7 @@ a smaller U than the one used in the DFT calculation. See the description of the
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is -1</font>
 <br><br><font id="requires">
-Only relevant if <a href="../../input_variables/generated_files/varset_internal.html#usepaw">usepaw</a>==1
+Only relevant if <a href="../../variables/generated_files/varset_internal.html#usepaw">usepaw</a>==1
 </font>
 <br><font id="text">
 <p>
