@@ -526,7 +526,7 @@ subroutine dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eig
 !FR SPr EB non-collinear magnetism
            if (nspden==4.and.present(rhor).and.present(vxc)) then
              optnc=1
-             call dfpt_mkvxc_noncoll(1,dtset%ixc,kxc,mpi_enreg,nfft,ngfft,rhodummy,0,rhodummy,0,rhodummy,0,&
+             call dfpt_mkvxc_noncoll(cplex,dtset%ixc,kxc,mpi_enreg,nfft,ngfft,rhodummy,0,rhodummy,0,rhodummy,0,&
 &             nkxc,nkxc,nspden,n3xccc,optnc,option,dtset%paral_kgb,dtset%qptn,rhodummy,rhodummy,&
 &             rprimd,0,vxc,vxc1,xccc3d1)
            else

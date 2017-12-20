@@ -119,7 +119,7 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,level,pawrad,pawtab,
  integer :: comm_mpi_,ierr,ii,ilang,ilmn,ilmn0,iproj,ipsp,ipspalch
  integer :: ispin,itypalch,itypat,mtypalch,npsp,npspalch,ntypalch
  integer :: ntypat,ntyppure,paw_size
- logical :: has_kij,has_tproj,has_tvale,has_nabla,has_shapefncg,has_wvl
+ logical :: has_kij,has_tproj,has_tvale,has_nabla,has_shapefncg,has_vminushalf,has_wvl
  real(dp),save :: ecore_old=zero,gsqcut_old=zero,gsqcutdg_old=zero
  real(dp) :: dq,epsatm_psp,qmax,rmax,xcccrc
  character(len=500) :: message
@@ -128,8 +128,8 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,level,pawrad,pawtab,
  type(nctab_t) :: nctab_dum
  type(nctab_t),pointer :: nctab_ptr
 !arrays
- integer :: paw_options(8)
- integer,save :: paw_options_old(8)=(/-1,-1,-1,-1,-1,-1,-1,-1/)
+ integer :: paw_options(9)
+ integer,save :: paw_options_old(9)=(/-1,-1,-1,-1,-1,-1,-1,-1,-1/)
  integer,save :: pspso_old(npspmax),pspso_zero(npspmax)
  integer,allocatable :: indlmn_alch(:,:,:),new_pspso(:)
  integer,pointer :: indlmn(:,:)
@@ -195,12 +195,14 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,level,pawrad,pawtab,
    has_shapefncg=(dtset%optdriver==RUNL_GSTATE.and.((dtset%iprcel>=20.and.dtset%iprcel<70).or.dtset%iprcel>=80))
    has_wvl=(dtset%usewvl==1.or.dtset%icoulomb/=0)
    has_tproj=(dtset%usewvl==1) ! projectors will be free at the end of the psp reading
-   if (has_kij)      paw_options(1)=1
-   if (has_tvale)    paw_options(2)=1
-   if (has_nabla)    paw_options(5)=1
-   if (has_shapefncg)paw_options(6)=1
-   if (has_wvl)      paw_options(7)=1
-   if (has_tproj)    paw_options(8)=1
+   has_vminushalf=(maxval(dtset%ldaminushalf)==1)
+   if (has_kij)       paw_options(1)=1
+   if (has_tvale)     paw_options(2)=1
+   if (has_nabla)     paw_options(5)=1
+   if (has_shapefncg) paw_options(6)=1
+   if (has_wvl)       paw_options(7)=1
+   if (has_tproj)     paw_options(8)=1
+   if (has_vminushalf)paw_options(9)=1
    !if (dtset%prtvclmb /= 0) then
    paw_options(3) = 1
    paw_options(4) = 1
@@ -284,6 +286,10 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,level,pawrad,pawtab,
 &     has_vhnzc=paw_options(3),has_vhtnzc=paw_options(4),&
 &     has_nabla=paw_options(5),has_shapefncg=paw_options(6),&
 &     has_wvl=paw_options(7),has_tproj=paw_options(8))
+! the following have to be included in pawtab_set_flags
+     do ipsp=1,psps%ntypat
+       pawtab(ipsp)%has_vminushalf=dtset%ldaminushalf(ipsp)
+     end do
    end if
 
 !  Read atomic pseudopotential data and get transforms

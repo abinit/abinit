@@ -980,13 +980,13 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 
  if (has_to_init) then
    if (dtset%iscf>0 .or. (dtset%iscf==0 .and. dtset%usewvl==1 )) then ! .and. dtset%usepaw==1)) then
-     if(dtfil%ireadden/=0.and.dtset%positron<=0)then
 
+     if(dtfil%ireadden/=0.and.dtset%positron<=0)then
        ! Read density
        rdwrpaw=psps%usepaw; if(dtfil%ireadwf/=0) rdwrpaw=0
        if (dtset%usewvl==0) then
          call read_rhor(dtfil%fildensin, cplex1, dtset%nspden, nfftf, ngfftf, rdwrpaw, &
-         mpi_enreg, rhor, hdr_den, pawrhoij, comm, check_hdr=hdr)
+         mpi_enreg, rhor, hdr_den, pawrhoij, comm, check_hdr=hdr, allow_interp=.True.)
          results_gs%etotal = hdr_den%etot; call hdr_free(hdr_den)
        else
          fform=52 ; accessfil=0
@@ -1005,7 +1005,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
        ! Read kinetic energy density
        if(dtfil%ireadkden/=0 .and. dtset%usekden==1 )then
          call read_rhor(dtfil%filkdensin, cplex1, dtset%nspden, nfftf, ngfftf, rdwrpaw, &
-         mpi_enreg, taur, hdr_den, pawrhoij, comm, check_hdr=hdr)
+         mpi_enreg, taur, hdr_den, pawrhoij, comm, check_hdr=hdr, allow_interp=.True.)
          call hdr_free(hdr_den)
        end if
 
@@ -1332,8 +1332,8 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 &   dtset%mband,mcg,dtset%mkmem,mpi_enreg,dtset%mpw,dtset%natom,&
 &   dtset%nband,dtset%nkpt,npwarr,dtset%nsppol,&
 &   occ,resid,response,dtfil%unwff2,wvl%wfs,wvl%descr)
-    !SPr: add input variable managing the .vtk file OUTPUT (Please don't remove the next commented line)
-    !call printmagvtk(mpi_enreg,cplex1,dtset%nspden,nfftf,ngfftf,rhor,rprimd,'DEN.vtk')
+   !SPr: add input variable managing the .vtk file OUTPUT (Please don't remove the next commented line)
+   !call printmagvtk(mpi_enreg,cplex1,dtset%nspden,nfftf,ngfftf,rhor,rprimd,'DEN')
  end if
 
  if (dtset%prtwf==2) then

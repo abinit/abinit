@@ -190,7 +190,7 @@ subroutine anharmonics_terms_init(anharmonics_terms,natom,ncoeff,&
    call anharmonics_terms_setElasticDispCoupling(anharmonics_terms,natom,elastic_displacement)
  end if
 
- anharmonics_terms%ncoeff = zero
+ anharmonics_terms%ncoeff = 0
 
 !Allocation of the coefficient
   if(present(coeffs))then
@@ -335,7 +335,7 @@ subroutine anharmonics_terms_freeCoeffs(anharmonics_terms)
     ABI_DATATYPE_DEALLOCATE(anharmonics_terms%coefficients)
   end if
 
-  anharmonics_terms%ncoeff = zero
+  anharmonics_terms%ncoeff = 0
 
 end subroutine anharmonics_terms_freeCoeffs
 !!***
@@ -617,7 +617,7 @@ subroutine anharmonics_terms_setStrainPhononCoupling(anharmonics_terms,natom,pho
    else
      ABI_DEALLOCATE(anharmonics_terms%phonon_strain(ii)%atmfrc)
      ABI_DEALLOCATE(anharmonics_terms%phonon_strain(ii)%cell)
-     anharmonics_terms%phonon_strain(ii)%nrpt = zero
+     anharmonics_terms%phonon_strain(ii)%nrpt = 0
    end if
  end do
 
@@ -765,7 +765,7 @@ subroutine anharmonics_terms_evaluateElastic(disp,energy,fcart,natom,natom_uc,nc
  has_elastic3rd    = .FALSE.
  has_elastic4th    = .FALSE.
  has_elastic_displ = .FALSE.
- d1=zero;d2=zero
+ d1=0;d2=0
  
 !Set the flags
  if(present(elastic3rd)) has_elastic3rd = .TRUE.

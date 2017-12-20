@@ -106,6 +106,7 @@ subroutine indefo1(dtset)
  dtset%kptopt=0
 !L
  dtset%lexexch(:)=-1
+ dtset%ldaminushalf(:)=0
  dtset%lpawu(:)=-1
 !M
  dtset%maxestep=0.005d0
