@@ -68,7 +68,7 @@
 !!         (nfftf=nfft for norm-conserving potential runs)
 !!  nfftdiel=number of fft grid points for the computation of the diel matrix
 !!  ngfftdiel(18)=contain all needed information about 3D FFT, for dielectric matrix,
-!!                see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!                see ~abinit/doc/variables/vargs.htm#ngfft
 !!  nkxc=second dimension of the array kxc, see rhotoxc.f for a description
 !!  npwarr(nkpt)=number of planewaves in basis at this k point
 !!  npwdiel=size of the susmat array.

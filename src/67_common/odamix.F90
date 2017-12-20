@@ -45,7 +45,7 @@
 !!  mpi_enreg=information about MPI parallelization
 !!  my_natom=number of atoms treated by current processor
 !!  nfft=(effective) number of FFT grid points (for this processor)
-!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !!  nkxc=second dimension of the array kxc, see rhotoxc.f for a description
 !!  ntypat=number of types of atoms in unit cell.
 !!  nvresid(nfft,nspden)=potential or density residual

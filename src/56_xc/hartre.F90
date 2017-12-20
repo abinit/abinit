@@ -30,7 +30,7 @@
 !!  izero=if 1, unbalanced components of Vhartree(g) are set to zero
 !!  mpi_enreg=information about MPI parallelization
 !!  nfft=(effective) number of FFT grid points (for this processor)
-!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !!  [qpt(3)=reduced coordinates for a wavevector to be combined with the G vectors (needed if cplex==2).]
 !!  rhog(2,nfft)=electron density in G space
 !!  rprimd(3,3)=dimensional primitive translations in real space (bohr)

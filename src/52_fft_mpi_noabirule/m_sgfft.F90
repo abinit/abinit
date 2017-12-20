@@ -270,7 +270,7 @@ end subroutine fft_cc_one_nothreadsafe
 !!  +1 for transforming from G to r 
 !!  -1 for transforming from r to G.
 !! nfft=(effective) number of FFT grid points (for this processor)
-!! ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!! ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !!
 !! OUTPUT
 !!  (see side effects)
@@ -4095,7 +4095,7 @@ end subroutine sg_fftrisc
 !!  kg_kin(3,npwin)=reduced planewave coordinates, input
 !!  kg_kout(3,npwout)=reduced planewave coordinates, output
 !!  mgfft=maximum size of 1D FFTs
-!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !!  npwin=number of elements in fofgin array (for option 0, 1 and 2)
 !!  npwout=number of elements in fofgout array (for option 2 and 3)
 !!  n4,n5,n6=ngfft(4),ngfft(5),ngfft(6), dimensions of fofr.
@@ -5021,7 +5021,7 @@ end subroutine fftrisc_one_nothreadsafe
 !!  npwin=number of elements in fofgin array (for option 0, 1 and 2)
 !!  npwout=number of elements in fofgout array (for option 2 and 3)
 !!  mgfft=maximum size of 1D FFTs
-!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !!  n4,n5,n6=ngfft(4),ngfft(5),ngfft(6), dimensions of fofr.
 !!  option= if 0: do direct FFT
 !!          if 1: do direct FFT, then sum the density

@@ -22,7 +22,7 @@ top_dir        = os.path.join(test_dir,"..")
 doc_dir        = os.path.join(top_dir,"doc")
 
 # The documentation resources:
-inp_dir        = os.path.join(doc_dir, "input_variables")
+inp_dir        = os.path.join(doc_dir, "variables")
 doc_index_file = os.path.join(inp_dir, "generated_files/varset_allvars.html")
 
 # The source resource:

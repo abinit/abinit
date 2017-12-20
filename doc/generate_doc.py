@@ -77,7 +77,7 @@ if cmdline_params != [] :
 list_infos_dir=[]
 list_infos_dir.append({"dir_name":"biblio","root_filname":"bib",
                                                     "yml_files":["bibfiles"]})
-list_infos_dir.append({"dir_name":"input_variables","root_filname":"",
+list_infos_dir.append({"dir_name":"variables","root_filname":"",
                                                     "yml_files":["abinit_vars","characteristics","list_externalvars","varsets"]})
 list_infos_dir.append({"dir_name":"theory","root_filname":"theorydoc",
                                                     "yml_files":["theorydocs"]})
@@ -698,7 +698,7 @@ for i, varset_info in enumerate(varsets):
 # Constitute the body of information for the external parameters, stored for the appropriate varset in all_contents[varset]
 
 for (key, value) in list_externalvars:
-  backlink= ' &nbsp; <a href="../../input_variables/generated_files/varset_external.html#%s">%s</a>' %(key,key)
+  backlink= ' &nbsp; <a href="../../variables/generated_files/varset_external.html#%s">%s</a>' %(key,key)
   cur_content = '<br><font id="title"><a name="%s">%s</a></font>\n'%(key,key)
   cur_content += '<br><font id="text">\n'
   cur_content += '<p>\n'+make_links(value,key,allowed_link_seeds,backlinks,backlink)+'\n'
@@ -740,7 +740,7 @@ for i, var in enumerate(abinit_vars):
   varset = var.varset
   all_vars[varset].append([var.abivarname,var.mnemonics])
   cur_content = ""
-  backlink=' &nbsp; <a href="../../input_variables/generated_files/varset_%s.html#%s">%s</a> ' %(varset,var.abivarname,var.abivarname)
+  backlink=' &nbsp; <a href="../../variables/generated_files/varset_%s.html#%s">%s</a> ' %(varset,var.abivarname,var.abivarname)
 
   try:
     # Title
@@ -914,7 +914,7 @@ defaultClick(true);\n\
   suppl={"toc":toc_body , "content":all_contents[varset]}
   suppl_components[varset]=suppl
 
-rc=assemble_html(varsets,suppl_components,"input_variables","varset",allowed_link_seeds,backlinks)
+rc=assemble_html(varsets,suppl_components,"variables","varset",allowed_link_seeds,backlinks)
 
 ################################################################################
 ################################################################################
@@ -970,7 +970,7 @@ for (relevancekey, relevanceval) in yml_in["list_relevances"]:
             abivarname=var.abivarname
             if var.characteristics is not None and '[[INTERNAL_ONLY]]' in var.characteristics:
               abivarname = '%'+abivarname
-            topic_abivars[topic_name] += '... <a href="../../input_variables/generated_files/varset_'+var.varset+'.html#'+var.abivarname+'">'+abivarname+'</a>   '
+            topic_abivars[topic_name] += '... <a href="../../variables/generated_files/varset_'+var.varset+'.html#'+var.abivarname+'">'+abivarname+'</a>   '
             topic_abivars[topic_name] += "["+var.mnemonics+"]<br>\n"
     except:
       if debug==1 :
@@ -1087,16 +1087,16 @@ for topic_name in list_of_topics:
   item_toc=0
   item_list=[]
   title={ "introduction":"Introduction." , "examples":"Example(s)", "tutorials":"Related lesson(s) of the tutorial." ,
-          "input_variables":"Related input variables." , "input_files":"Selected input files." , "references":"References."}
+          "variables":"Related input variables." , "input_files":"Selected input files." , "references":"References."}
   sec_number={}
   toc=" <h3><b>Table of content: </b></h3> \n <ul> "
-  for j in ["introduction","examples","tutorials","input_variables","input_files","references"] :
+  for j in ["introduction","examples","tutorials","variables","input_files","references"] :
     sec_number[j]="0"
     try :
       extract_j=getattr(topic,j).strip()
     except :
       extract_j=""
-    if (extract_j != "" and extract_j!= "default") or (j=="input_variables" and topic_abivars[topic_name]!="") or (j=="input_files" and topic_infiles[topic_name]!="") or (j=="references" and topic_refs!=""):
+    if (extract_j != "" and extract_j!= "default") or (j=="variables" and topic_abivars[topic_name]!="") or (j=="input_files" and topic_infiles[topic_name]!="") or (j=="references" and topic_refs!=""):
       item_toc += 1
       item_num="%d" % item_toc
       sec_number[j]=item_num
@@ -1107,7 +1107,7 @@ for topic_name in list_of_topics:
   #Generate a first version of the html file, in the order "header" ... up to the "end"
   #Take the info from the component "default" if there is no information on the specific component provided in the yml file.
   topic_html=""
-  for j in ["header","title","subtitle","copyright","links","backlinks","toc","introduction","examples","tutorials","input_variables","input_files","references","links","end"]:
+  for j in ["header","title","subtitle","copyright","links","backlinks","toc","introduction","examples","tutorials","variables","input_files","references","links","end"]:
     if j == "backlinks":
       backlinks_str=backlinks["topic_"+topic_name]
       backlinks_formatted=format_backlinks(backlinks_str)
@@ -1117,7 +1117,7 @@ for topic_name in list_of_topics:
         raise ValueError(" Topic %s not (yet) mentioned in the file help_feature.yml. Please correct this omission.")
     elif j == "toc":
       topic_html += toc
-    elif j == "input_variables":
+    elif j == "variables":
       if sec_number[j]!="0" :
         topic_html+= '\n&nbsp; \n<hr> \n<a name=\"'+sec_number[j]+'\">&nbsp;</a>\n<h3><b>'+sec_number[j]+'. '+title[j]+'</b></h3>\n\n\n'
         topic_html+= topic_abivars[topic_name]
@@ -1216,9 +1216,9 @@ if 0:
           for var in abinit_vars:
             abivarname=var.abivarname
             for varset in ["bas","fil","ff","gs","rf","int","par","bse","dev","dmft","eph","geo","gw","paw","rlx","vdw","w90","optic","aim","anaddb"]:
-              #string_old='<a href="../../input_variables/generated_files/var%s.html#%s" onclick="return (false);">%s</a>'%(varset,abivarname,abivarname)
-              string_old='<a href="../../input_variables/generated_files/var%s.html#%s" target="kwimg" onclick="return (false);>%s</a>'%(varset,abivarname,abivarname)
-              #string_old='<a href="../../input_variables/generated_files/var%s.html#%s">            %s</a>'%(varset,abivarname,abivarname)
+              #string_old='<a href="../../variables/generated_files/var%s.html#%s" onclick="return (false);">%s</a>'%(varset,abivarname,abivarname)
+              string_old='<a href="../../variables/generated_files/var%s.html#%s" target="kwimg" onclick="return (false);>%s</a>'%(varset,abivarname,abivarname)
+              #string_old='<a href="../../variables/generated_files/var%s.html#%s">            %s</a>'%(varset,abivarname,abivarname)
               string_new="[["+abivarname+"]]"
               file_str=file_str.replace(string_old,string_new)
 

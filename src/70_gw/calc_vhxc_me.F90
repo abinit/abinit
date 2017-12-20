@@ -19,7 +19,7 @@
 !!  Mflags
 !!   that of the basis sphere--appropriate for charge density rho(G),Hartree potential, and pseudopotentials
 !!  Dtset <type(dataset_type)>=all input variables in this dataset
-!!  ngfftf(18)contain all needed information about 3D fine FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  ngfftf(18)contain all needed information about 3D fine FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !!  nfftf=number of points in the fine FFT mesh (for this processor)
 !!  Pawtab(Dtset%ntypat*Dtset%usepaw) <type(pawtab_type)>=paw tabulated starting data
 !!  Paw_an(natom) <type(paw_an_type)>=paw arrays given on angular mesh

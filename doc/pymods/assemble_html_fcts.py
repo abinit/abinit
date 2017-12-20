@@ -193,15 +193,15 @@ def make_links(text,cur_key,allowed_link_seeds,backlinks,backlink):
       linkseed=namespace+'_'+key
 
     #The allowed namespaces are:
-    dic_namespaces={"aim":"input_variables/generated_files",
-                    "anaddb":"input_variables/generated_files",
+    dic_namespaces={"aim":"variables/generated_files",
+                    "anaddb":"variables/generated_files",
                     "bib":"biblio/generated_files",
                     "help":"users/generated_files",
                     "lesson":"tutorial/generated_files",
-                    "optic":"input_variables/generated_files",
+                    "optic":"variables/generated_files",
                     "theorydoc":"theory/generated_files",
                     "topic":"topics/generated_files",
-                    "varset":"input_variables/generated_files"}
+                    "varset":"variables/generated_files"}
 
     #Actually for the internal links, make the selection on the linkseed at present ... this should be changed ...
     #Might be changed, later ...
@@ -231,10 +231,10 @@ def make_links(text,cur_key,allowed_link_seeds,backlinks,backlink):
         return '<a href="../../%s/%s.html#%s">%s</a>' %(dir,linkseed,section,webtext)
 
       #Treat everything else
-      elif "input_variable in " in value:
+      elif "variable in " in value:
         # This is a link to an input variable
         filename=value[18:]
-        return '<a href="../../input_variables/generated_files/varset_%s.html#%s">%s</a>' %(filename,linkseed,webtext)
+        return '<a href="../../variables/generated_files/varset_%s.html#%s">%s</a>' %(filename,linkseed,webtext)
       elif value=="characteristic":
         return '<a href="../../users/generated_files/help_abinit.html#%s">%s</a>' %(key,webtext)
       elif value=="in_tests":
@@ -373,7 +373,7 @@ def assemble_html(origin_yml_files,suppl_components,dir_name,root_filname,allowe
     doc_html=""
     for j in ["header","title","subtitle","purpose","advice","intro","copyright","links","menu",
               "tofcontent_header","toc",
-              "introduction","examples","tutorials","input_variables","input_files","references",
+              "introduction","examples","tutorials","variables","input_files","references",
               "content","body","sections",
               "links","end"]:
 
@@ -435,7 +435,7 @@ def assemble_html(origin_yml_files,suppl_components,dir_name,root_filname,allowe
 
   all_files_html=""
   spec={'users':'help files','tutorial':'lessons of the tutorial',
-        'theory':'theory documents','input_variables':'varsets','biblio':'generated files in the biblio directory'}
+        'theory':'theory documents','variables':'varsets','biblio':'generated files in the biblio directory'}
   for j in ["header","title","subtitle","copyright","links","toc_all","links","end"]:
     if j == "toc_all":
       all_files_html += toc_all

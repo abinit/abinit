@@ -99,7 +99,7 @@ CONTAINS  !=====================================================================
 !!    4 for MPI_IO
 !! cplex=1 for real array, 2 for complex
 !! nfft=Number of FFT points treated by this node.
-!! ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!! ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !! dtset <type(dataset_type)>=all input variables for this dataset
 !! fform=integer specification for data type:
 !!   2 for wf; 52 for density; 102 for potential
@@ -675,7 +675,7 @@ end subroutine ioarr
 !! iomode=
 !! hdr <type(hdr_type)>=the header of wf, den and pot files
 !! crystal<crystal_t>= data type gathering info on symmetries and unit cell (used if etsf_io)
-!! ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!! ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !! cplex=1 for real array, 2 for complex
 !! nfft=Number of FFT points treated by this node.
 !! nspden=Number of spin-density components.
