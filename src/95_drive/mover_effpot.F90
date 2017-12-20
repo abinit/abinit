@@ -603,7 +603,6 @@ implicit none
          ABI_ALLOCATE(isPositive,(nmodels))
          list_bound = 0;  listcoeff_bound = 0;  list_tmp = 0; isPositive = 0; kk = 0; jj = 1
          call genereList(kk,jj,ii,ncoeff_bound,list_tmp,list_bound,nmodels,.true.)
-
 !        Generate the models         
          do jj=1,nmodels
            listcoeff_bound(jj,1:ncoeff) = listcoeff(1:ncoeff)
@@ -612,7 +611,6 @@ implicit none
          
 !        Reset the simulation
          call effective_potential_setCoeffs(coeffs_all,effective_potential,ncoeff+ncoeff_bound)
-
          call fit_polynomial_coeff_getPositive(effective_potential,hist,coeff_values,&
 &         isPositive,listcoeff_bound,ncoeff+ii,ncoeff,nmodels,comm,verbose=.false.)
          if(all(isPositive == 0)) then

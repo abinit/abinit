@@ -36,6 +36,7 @@ module m_fit_polynomial_coeff
  use m_strain,only : strain_type,strain_get
  use m_effective_potential,only : effective_potential_type, effective_potential_evaluate
  use m_effective_potential,only : effective_potential_freeCoeffs,effective_potential_setCoeffs
+ use m_effective_potential,only : effective_potential_getDisp
  use m_effective_potential_file, only : effective_potential_file_mapHistToRef
  use m_io_tools,   only : open_file,get_unit
  use m_abihist, only : abihist,abihist_free,abihist_init,abihist_copy,write_md_hist,var2hist
@@ -944,7 +945,7 @@ end if
    call fit_polynomial_coeff_computeMSD(eff_pot,hist,gf_values(4,1),gf_values(2,1),gf_values(1,1),&
 &                                       natom_sc,ntime,fit_data%training_set%sqomega,&
 &                                       compute_anharmonic=.TRUE.,print_file=.TRUE.)
-   
+
  else
    if(need_verbose) then
      write(message, '(9a)' )ch10,&
@@ -1112,7 +1113,7 @@ subroutine fit_polynomial_coeff_getPositive(eff_pot,hist,coeff_values,isPositive
  do ii = 1,ncoeff_tot
    list_coeffs(ii) = ii
  end do
- 
+
 !Get the decomposition for each coefficients of the forces and stresses for 
 !each atoms and each step  equations 11 & 12 of  PRB95,094115(2017) 
  if(need_verbose)then
@@ -2116,11 +2117,11 @@ subroutine fit_polynomial_coeff_computeMSD(eff_pot,hist,mse,msef,mses,natom,ntim
  type(abihist),intent(in) :: hist
 !Local variables-------------------------------
 !scalar
- integer :: ii,ia,mu,unit_ts,unit_stress
+ integer :: ii,ia,mu,unit_energy,unit_stress
 ! integer :: ifirst
  real(dp):: energy,energy_harm
  logical :: need_anharmonic = .TRUE.,need_print=.FALSE.
-!arrays
+ !arrays
  real(dp):: fcart(3,natom),fred(3,natom),strten(6),rprimd(3,3),xred(3,natom)
  character(len=500) :: msg
 ! type(abihist) :: hist_out
@@ -2128,7 +2129,7 @@ subroutine fit_polynomial_coeff_computeMSD(eff_pot,hist,mse,msef,mses,natom,ntim
 
 ! *************************************************************************
 
-!Do some checks
+ !Do some checks
  if(ntime /= hist%mxhist)then
    write(msg,'(a)')'ntime is not correct'
    MSG_BUG(msg)
@@ -2146,13 +2147,13 @@ subroutine fit_polynomial_coeff_computeMSD(eff_pot,hist,mse,msef,mses,natom,ntim
  if(present(print_file))then
 !   call abihist_init(hist_out,natom,ntime,.false.,.false.)   
    need_print=print_file
-   unit_ts = get_unit()
-   unit_stress = get_unit()
-   
-   if (open_file('fit_diff_energy.dat',msg,unit=unit_ts,form="formatted",&
+   unit_energy = get_unit()
+   if (open_file('fit_diff_energy.dat',msg,unit=unit_energy,form="formatted",&
 &     status="unknown",action="write") /= 0) then
      MSG_ERROR(msg)
    end if
+   
+   unit_stress = get_unit()
    if (open_file('fit_diff_stress.dat',msg,unit=unit_stress,form="formatted",&
 &     status="unknown",action="write") /= 0) then
      MSG_ERROR(msg)
@@ -2163,7 +2164,7 @@ subroutine fit_polynomial_coeff_computeMSD(eff_pot,hist,mse,msef,mses,natom,ntim
  mse  = zero
  msef = zero
  mses = zero
-
+ 
  do ii=1,ntime
    xred(:,:)   = hist%xred(:,:,ii)
    rprimd(:,:) = hist%rprimd(:,:,ii)
@@ -2174,7 +2175,7 @@ subroutine fit_polynomial_coeff_computeMSD(eff_pot,hist,mse,msef,mses,natom,ntim
 &                                    xred=xred,compute_anharmonic=need_anharmonic,verbose=.false.)
 
    if(need_print)then
-     WRITE(unit_ts ,'(I10,5(F23.14))') ii,hist%etot(ii),energy_harm,energy,&
+     WRITE(unit_energy ,'(I10,5(F23.14))') ii,hist%etot(ii),energy_harm,energy,&
 &                                       abs(hist%etot(ii) - energy_harm),abs(hist%etot(ii) - energy)
      WRITE(unit_stress,'(I10,12(F23.14))') ii,hist%strten(:,ii),strten(:)
    end if
@@ -2208,7 +2209,7 @@ subroutine fit_polynomial_coeff_computeMSD(eff_pot,hist,mse,msef,mses,natom,ntim
  mses = mses / (6*ntime)
 
  if(need_print)then
-   close(unit_ts)
+   close(unit_energy)
    close(unit_stress)
  end if
 

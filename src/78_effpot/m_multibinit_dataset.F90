@@ -726,12 +726,12 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
  multibinit_dtset%dynamics=0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dynamics',tread,'INT')
  if(tread==1) multibinit_dtset%dynamics=intarr(1)
- if(multibinit_dtset%dynamics/=0.and.&
+ if(multibinit_dtset%dynamics/=0.and.multibinit_dtset%dynamics/=6.and.&
 &   multibinit_dtset%dynamics/=12.and.multibinit_dtset%dynamics/=13&
 &   .and.multibinit_dtset%dynamics/=24.and.multibinit_dtset%dynamics/=25) then
    write(message, '(a,i8,a,a,a,a,a)' )&
 &   'dynamics is',multibinit_dtset%dynamics,', but the only allowed values',ch10,&
-&   'are 12 or  13 (see ionmov in abinit documentation).',ch10,&
+&   'are 6,12,24,25 or  13 (see ionmov in abinit documentation).',ch10,&
 &   'Action: correct dynamics in your input file.'
    MSG_ERROR(message)
  end if
@@ -1756,7 +1756,7 @@ subroutine outvars_multibinit (multibinit_dtset,nunit)
      write(nunit,'(3x,a9,3F12.1)')'    bmass',multibinit_dtset%bmass
      write(nunit,'(3x,a9,3I10)')'     nnos',multibinit_dtset%nnos
      write(nunit,'(3x,a12)',advance='no')'    qmass  '
-     write(nunit,'(3x,15i10)') (multibinit_dtset%qmass(ii),ii=1,multibinit_dtset%nnos)
+     write(nunit,'(3x,15F12.10)') (multibinit_dtset%qmass(ii),ii=1,multibinit_dtset%nnos)
    end if
  end if
 
