@@ -157,7 +157,7 @@ infos_html:
           tmp-infos-$(VERSION)/theory \
           tmp-infos-$(VERSION)/topics \
           tmp-infos-$(VERSION)/tutorial \
-          tmp-infos-$(VERSION)/users \
+          tmp-infos-$(VERSION)/guide \
           tmp-infos-$(VERSION)/js_files \
           tmp-infos-$(VERSION)/formabinit.css \
           tmp-infos-$(VERSION)/known_problems \
@@ -237,7 +237,7 @@ binary_package_lite:
 
 dist-lite: distdir
 	tardir=$(distdir) && \
-	  cd $(distdir)/doc; rm -rf build* inp* t* users  && \
+	  cd $(distdir)/doc; rm -rf build* inp* t* guide  && \
 	  cd ../tests; rm -rf v* tuto* Psps* paral mpiio libxc gpu fast bigdft* && \
 	  cd ../abichecks; rm -rf abirules buildsys && \
 	  cd ../..; \

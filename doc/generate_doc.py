@@ -640,13 +640,13 @@ allowed_link_seeds={}
 # Groups of seeds
 
 for var in abinit_vars:
-  allowed_link_seeds[var.abivarname]="input_variable in "+var.varset
+  allowed_link_seeds[var.abivarname]="variable in "+var.varset
 
 for item in yml_in["characteristics"]:
   allowed_link_seeds[item]="characteristic"
 
 for item in list_externalvars:
-  allowed_link_seeds[item[0]]="input_variable in external"
+  allowed_link_seeds[item[0]]="variable in external"
 
 for i, varset_info in enumerate(varsets):
   varset = varset_info.name
