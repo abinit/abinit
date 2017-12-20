@@ -305,7 +305,7 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsph
      mag_x_im=mag_x_im+rhor(jfft,2)
      mag_y_im=mag_y_im+rhor(jfft,3)
      mag_z_im=mag_z_im+rhor(jfft,4)
-   enddo
+   end do
    rho_tot=rho_tot*ucvol/dble(nfftot)
    mag_x=mag_x*ucvol/dble(nfftot)
    mag_y=mag_y*ucvol/dble(nfftot)
@@ -314,7 +314,7 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsph
    mag_x_im=mag_x_im*ucvol/dble(nfftot)
    mag_y_im=mag_y_im*ucvol/dble(nfftot)
    mag_z_im=mag_z_im*ucvol/dble(nfftot)
- endif
+ end if
 
 !MPI parallelization
  if(mpi_enreg%nproc_fft>1)then
@@ -487,7 +487,7 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsph
      write(message, '(a,e16.8)') '     n^(1)    = ', rho_tot
    else
      write(message, '(a,e16.8,a,e16.8)') '  Re[n^(1)] = ', rho_tot,"   Im[n^(1)] = ",rho_tot_im
-   endif
+   end if
    call wrtout(nunit,message,'COLL')
 
    if(nspden==2) then
@@ -496,26 +496,26 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsph
        write(message, '(a,e16.8)') '     m^(1)    = ', mag_coll
      else
        write(message, '(a,e16.8,a,e16.8)') '  Re[m^(1)] = ', mag_coll,"   Im[m^(1)] = ",mag_coll_im
-     endif
+     end if
      call wrtout(nunit,message,'COLL')
 
    elseif (nspden==4) then
-       if(cmplex_den==0) then
-         write(message, '(a,e16.8)') '     mx^(1)   = ', mag_x
-         call wrtout(nunit,message,'COLL')
-         write(message, '(a,e16.8)') '     my^(1)   = ', mag_y
-         call wrtout(nunit,message,'COLL')
-         write(message, '(a,e16.8)') '     mz^(1)   = ', mag_z
-         call wrtout(nunit,message,'COLL')
-       else
-         write(message, '(a,e16.8,a,e16.8)') '  Re[mx^(1)]= ',  mag_x, "   Im[mx^(1)]= ", mag_x_im
-         call wrtout(nunit,message,'COLL')
-         write(message, '(a,e16.8,a,e16.8)') '  Re[my^(1)]= ',  mag_y, "   Im[my^(1)]= ", mag_y_im
-         call wrtout(nunit,message,'COLL')
-         write(message, '(a,e16.8,a,e16.8)') '  Re[mz^(1)]= ',  mag_z, "   Im[mz^(1)]= ", mag_z_im
-         call wrtout(nunit,message,'COLL')
-       endif
-    endif
+     if(cmplex_den==0) then
+       write(message, '(a,e16.8)') '     mx^(1)   = ', mag_x
+       call wrtout(nunit,message,'COLL')
+       write(message, '(a,e16.8)') '     my^(1)   = ', mag_y
+       call wrtout(nunit,message,'COLL')
+       write(message, '(a,e16.8)') '     mz^(1)   = ', mag_z
+       call wrtout(nunit,message,'COLL')
+     else
+       write(message, '(a,e16.8,a,e16.8)') '  Re[mx^(1)]= ',  mag_x, "   Im[mx^(1)]= ", mag_x_im
+       call wrtout(nunit,message,'COLL')
+       write(message, '(a,e16.8,a,e16.8)') '  Re[my^(1)]= ',  mag_y, "   Im[my^(1)]= ", mag_y_im
+       call wrtout(nunit,message,'COLL')
+       write(message, '(a,e16.8,a,e16.8)') '  Re[mz^(1)]= ',  mag_z, "   Im[mz^(1)]= ", mag_z_im
+       call wrtout(nunit,message,'COLL')
+     end if
+   end if
 
    write(message, '(3a)') ch10,' ------------------------------------------------------------------------',ch10
    call wrtout(nunit,message,'COLL')

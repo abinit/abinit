@@ -269,16 +269,16 @@ implicit none
 
 !    else
 !    Need to init some values
-     ABI_ALLOCATE(symrel,(3,3,dtset%nsym))
-     symrel = 1
-     call alloc_copy(symrel,dtset%symrel)
-     ABI_ALLOCATE(tnons,(3,dtset%nsym))
-     tnons = zero
-     call alloc_copy(tnons,dtset%tnons)
-     call alloc_copy(effective_potential%supercell%typat,dtset%typat)
-     call alloc_copy(effective_potential%crystal%znucl,dtset%znucl)
-     ABI_DEALLOCATE(symrel)
-     ABI_DEALLOCATE(tnons)
+   ABI_ALLOCATE(symrel,(3,3,dtset%nsym))
+   symrel = 1
+   call alloc_copy(symrel,dtset%symrel)
+   ABI_ALLOCATE(tnons,(3,dtset%nsym))
+   tnons = zero
+   call alloc_copy(tnons,dtset%tnons)
+   call alloc_copy(effective_potential%supercell%typat,dtset%typat)
+   call alloc_copy(effective_potential%crystal%znucl,dtset%znucl)
+   ABI_DEALLOCATE(symrel)
+   ABI_DEALLOCATE(tnons)
 !   end if
    
    !array
@@ -524,7 +524,7 @@ implicit none
 !       call fit_polynomial_coeff_getCoeffBound(effective_potential,coeffs_bound,&
 !&                                              hist,ncoeff_bound,comm,verbose=.true.)
 
-        call polynomial_coeff_getNorder(coeffs_bound,effective_potential%crystal,cutoff,&
+       call polynomial_coeff_getNorder(coeffs_bound,effective_potential%crystal,cutoff,&
 &       ncoeff_bound,ncoeff_bound_tot,inp%fit_boundPower,2,sc_size,&
 &       comm,anharmstr=inp%fit_anhaStrain==1,&
 &       spcoupling=inp%fit_SPCoupling==1,verbose=.false.,distributed=.false.,&

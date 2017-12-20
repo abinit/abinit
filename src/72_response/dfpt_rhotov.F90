@@ -151,10 +151,10 @@
  if (nspden==4) then
    if(usepaw==1) then
      MSG_ERROR('DFPT with nspden=4 works only for norm-conserving psp!')
-   endif
+   end if
    if(cplex==2) then
      MSG_WARNING('DFPT with nspden=4 and qpt!=(0,0,0) is under development')
-   endif
+   end if
  end if
 
 !Get size of FFT grid
@@ -186,7 +186,7 @@
  if(ipert==natom+5)then
    ABI_ALLOCATE(v1zeeman,(cplex*nfft,nspden))
    call dfpt_v1zeeman(nspden,nfft,cplex,idir,v1zeeman)
- endif
+ end if
 
 !------ Compute 1st-order Hartree potential (and energy) ----------------------
 
@@ -324,7 +324,7 @@
 
    if (ipert==natom+5) then
      vresid1 = vresid1 + v1zeeman
-   endif
+   end if
 !  Compute square norm vres2 of potential residual vresid
    call sqnorm_v(cplex,nfft,vres2,nspden,optres,vresid1)
 
@@ -350,7 +350,7 @@
 
    if (ipert==natom+5) then
      vtrial1 = vtrial1 + v1zeeman
-   endif
+   end if
 
  end if
 

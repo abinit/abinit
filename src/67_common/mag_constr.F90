@@ -192,8 +192,8 @@ subroutine mag_constr(natom,spinat,nspden,magconon,magcon_lambda,rprimd, &
 !              Calculate the scalar product of the fixed mag. mom. vector and calculated mag. mom. vector
 !              This is actually the size of the projection of the calc. mag. mom. vector on the fixed mag. mom. vector
                intgden_proj=spinat_norm(1,iatom)*intgden(2,iatom)+ &
-&                           spinat_norm(2,iatom)*intgden(3,iatom)+ &
-&                           spinat_norm(3,iatom)*intgden(4,iatom)
+&               spinat_norm(2,iatom)*intgden(3,iatom)+ &
+&               spinat_norm(3,iatom)*intgden(4,iatom)
 
                cmm_x=intgden(2,iatom)
                cmm_x=cmm_x-spinat_norm(1,iatom)*intgden_proj
