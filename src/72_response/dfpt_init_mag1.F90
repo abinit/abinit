@@ -33,8 +33,7 @@
 !! NOTES
 !!
 !! PARENTS
-!!
-!!  dfpt_looppert.F90
+!!      dfpt_looppert
 !!
 !! CHILDREN
 !!

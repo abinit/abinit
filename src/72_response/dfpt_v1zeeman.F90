@@ -39,8 +39,7 @@
 !!  For cplex=2, the definition is (V_upup,V_dndn,V_updn,i.V_updn)
 !!
 !! PARENTS
-!!
-!!  dfpt_rhotov
+!!      dfpt_rhotov
 !!
 !! CHILDREN
 !!

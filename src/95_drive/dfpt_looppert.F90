@@ -97,9 +97,9 @@
 !! CHILDREN
 !!      appdig,atom_gauss,crystal_free,crystal_init,ctocprj,ddb_free
 !!      ddb_from_file,ddb_hdr_free,ddb_hdr_init,ddb_hdr_open_write,dfpt_atm2fft
-!!      dfpt_mkcore,dfpt_mkrho,dfpt_prtene,dfpt_scfcv,dfpt_vlocal
-!!      disable_timelimit,distrb2,dtset_copy,dtset_free,ebands_free,ebands_init
-!!      efmas_main,eig2stern,eigen_meandege,eigr2d_free,eigr2d_init
+!!      dfpt_init_mag1,dfpt_mkcore,dfpt_mkrho,dfpt_prtene,dfpt_scfcv
+!!      dfpt_vlocal,disable_timelimit,distrb2,dtset_copy,dtset_free,ebands_free
+!!      ebands_init,efmas_main,eig2stern,eigen_meandege,eigr2d_free,eigr2d_init
 !!      eigr2d_ncwrite,exit_check,fourdp,getcgqphase,getcut,getmpw,getnel,getph
 !!      gkk_free,gkk_init,gkk_ncwrite,hdr_copy,hdr_free,hdr_init,hdr_update
 !!      initmpi_band,initylmg,inwffil,kpgio,littlegroup_pert,localfilnam

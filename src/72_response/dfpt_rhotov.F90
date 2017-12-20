@@ -73,8 +73,8 @@
 !!      dfpt_scfcv
 !!
 !! CHILDREN
-!!      dfpt_mkvxc,dfpt_mkvxc_noncoll,dfpt_mkvxcstr,dotprod_vn,hartre,hartrestr
-!!      sqnorm_v,timab
+!!      dfpt_mkvxc,dfpt_mkvxc_noncoll,dfpt_mkvxcstr,dfpt_v1zeeman,dotprod_vn
+!!      hartre,hartrestr,sqnorm_v,timab
 !!
 !! SOURCE
 

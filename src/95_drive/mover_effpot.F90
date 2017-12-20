@@ -31,13 +31,13 @@
 !!      multibinit
 !!
 !! CHILDREN
-!!      alloc_copy,ddb_to_dtset,destroy_mpi_enreg,destroy_results_gs,dtset_free
-!!      effective_potential_file_gettype,effective_potential_setcoeffs
-!!      effective_potential_setsupercell,fit_polynomial_coeff_fit
-!!      fit_polynomial_coeff_getpositive,generelist,init_results_gs,mover
+!!      alloc_copy,args_gs_free,destroy_mpi_enreg,destroy_results_gs,dtset_free
+!!      effective_potential_setcoeffs,effective_potential_setsupercell
+!!      fit_polynomial_coeff_fit,fit_polynomial_coeff_getpositive,generelist
+!!      init_results_gs,mover,paw_setup_free,pawrad_free,pawtab_free
 !!      polynomial_coeff_free,polynomial_coeff_getnorder,polynomial_coeff_init
-!!      polynomial_coeff_setcoefficient,polynomial_coeff_writexml,scfcv_destroy
-!!      scfcv_run,wrtout,xcart2xred,xred2xcart
+!!      polynomial_coeff_setcoefficient,polynomial_coeff_writexml,psps_free
+!!      scfcv_destroy,wrtout,xcart2xred,xmpi_barrier,xred2xcart
 !!
 !! SOURCE
 

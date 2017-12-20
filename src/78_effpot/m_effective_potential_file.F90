@@ -462,7 +462,7 @@ end subroutine effective_potential_file_read
 !!             41 ASCII file with history of MD or snapshot
 !!
 !! PARENTS
-!!      m_effective_potential_file,mover_effpot,multibinit
+!!      m_effective_potential_file,multibinit
 !!
 !! CHILDREN
 !!
