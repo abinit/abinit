@@ -233,7 +233,7 @@ def make_links(text,cur_key,allowed_link_seeds,backlinks,backlink):
       #Treat everything else
       elif "variable in " in value:
         # This is a link to an input variable
-        filename=value[18:]
+        filename=value[12:]
         return '<a href="../../variables/generated_files/varset_%s.html#%s">%s</a>' %(filename,linkseed,webtext)
       elif value=="characteristic":
         return '<a href="../../guide/generated_files/help_abinit.html#%s">%s</a>' %(key,webtext)
