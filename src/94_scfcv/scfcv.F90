@@ -301,7 +301,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
 !integer :: dtset_iprcel
  integer :: iatom,ider,idir,ierr,iexit,ii,ikpt,impose_dmat,denpot
  integer :: initialized0,iorder_cprj,ipert,ipositron,isave_den,isave_kden,iscf10,ispden
- integer :: ispmix,istep,istep_mix,istep_updatedfock,itypat,izero,lmax_diel,lpawumax,mband_cprj,mcprj,me,me_wvl
+ integer :: ispmix,istep,istep_fock_outer,istep_mix,istep_updatedfock,itypat,izero,lmax_diel,lpawumax,mband_cprj,mcprj,me,me_wvl
  integer :: mgfftdiel,mgfftf,moved_atm_inside,moved_rhor,my_nspinor,n1xccc
  integer :: n3xccc,ncpgr,nfftdiel,nfftmix,nfftmix_per_nfft,nfftotf,ngrvdw,nhatgrdim,nk3xc,nkxc
  integer :: npawmix,npwdiel,nstep,nzlmopt,optcut,optcut_hf,optene,optgr0,optgr0_hf
@@ -506,6 +506,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
  if (dtset%tfkinfunc==12) tfw_activated=.true.
  ipert=0;idir=0;cplex=1
  istep_mix=1
+ istep_fock_outer=1
  ipositron=electronpositron_calctype(electronpositron)
  unit_out=0;if (dtset%prtvol >= 10) unit_out=ab_out
  nfftotf=product(ngfftf(1:3))
@@ -1125,8 +1126,9 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
          write(std_out,*)' dtset%wfmix,scf_history_wf%alpha=',dtset%wfmix,scf_history_wf%alpha
          call flush(std_out)
 !ENDDEBUG
-         call wf_mixing(atindx1,cg,cprj,dtset,istep_updatedfock,mcg,mcprj,mpi_enreg,&
+         call wf_mixing(atindx1,cg,cprj,dtset,istep_fock_outer,mcg,mcprj,mpi_enreg,&
 &         nattyp,npwarr,pawtab,scf_history_wf)
+         istep_fock_outer=istep_fock_outer+1
 !DEBUG
          write(std_out,*)' scfcv : exit wf_mixing'
          call flush(std_out)
