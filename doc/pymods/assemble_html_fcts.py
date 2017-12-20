@@ -196,7 +196,7 @@ def make_links(text,cur_key,allowed_link_seeds,backlinks,backlink):
     dic_namespaces={"aim":"variables/generated_files",
                     "anaddb":"variables/generated_files",
                     "bib":"biblio/generated_files",
-                    "help":"users/generated_files",
+                    "help":"guide/generated_files",
                     "lesson":"tutorial/generated_files",
                     "optic":"variables/generated_files",
                     "theorydoc":"theory/generated_files",
@@ -236,7 +236,7 @@ def make_links(text,cur_key,allowed_link_seeds,backlinks,backlink):
         filename=value[18:]
         return '<a href="../../variables/generated_files/varset_%s.html#%s">%s</a>' %(filename,linkseed,webtext)
       elif value=="characteristic":
-        return '<a href="../../users/generated_files/help_abinit.html#%s">%s</a>' %(key,webtext)
+        return '<a href="../../guide/generated_files/help_abinit.html#%s">%s</a>' %(key,webtext)
       elif value=="in_tests":
         return '<a href="../../%s">&#126;abinit/%s</a>' %(key,key)
       elif value=="bibID":
@@ -434,7 +434,7 @@ def assemble_html(origin_yml_files,suppl_components,dir_name,root_filname,allowe
     toc_all = toc_all + '<br><a href="%s.html"/>%s</a> [%s] \n' %(full_filname,name,dic_subtitles[name])
 
   all_files_html=""
-  spec={'users':'help files','tutorial':'lessons of the tutorial',
+  spec={'guide':'help files','tutorial':'lessons of the tutorial',
         'theory':'theory documents','variables':'varsets','biblio':'generated files in the biblio directory'}
   for j in ["header","title","subtitle","copyright","links","toc_all","links","end"]:
     if j == "toc_all":

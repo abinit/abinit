@@ -85,7 +85,7 @@ list_infos_dir.append({"dir_name":"topics","root_filname":"topic",
                                                     "yml_files":["default_topic","list_of_topics","list_relevances","tests_dirs"]})
 list_infos_dir.append({"dir_name":"tutorial","root_filname":"lesson",
                                                     "yml_files":["lessons"]})
-list_infos_dir.append({"dir_name":"users","root_filname":"help",
+list_infos_dir.append({"dir_name":"guide","root_filname":"help",
                                                     "yml_files":["helps"]})
 msgs={"bibfiles"       :"as database input file for the list of generated files in the biblio directory ...",
       "abinit_vars"    :"as database input file for the input variables and their characteristics ...",
@@ -98,7 +98,7 @@ msgs={"bibfiles"       :"as database input file for the list of generated files 
       "list_relevances":"as database input file for the list of relevances ...",
       "tests_dirs"     :"as database input file for the list of directories in which automatic test input files are present ...",
       "lessons"        :"as database input file for the list of lessons ...",
-      "helps"          :"as database input file for the list of help files in the users directory ..."}
+      "helps"          :"as database input file for the list of help files in the guide directory ..."}
 
 path_file='biblio/origin_files/abiref.bib'
 with open(path_file) as f:
@@ -922,7 +922,7 @@ rc=assemble_html(varsets,suppl_components,"variables","varset",allowed_link_seed
 # Assemble the html files to be generated from the yml information.
 # In order : tutorial, files lessons_*
 #            theory, files theorydoc_*
-#            users,  files help_*
+#            guide,  files help_*
 
 ################################################################################
 

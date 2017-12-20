@@ -22,7 +22,7 @@
 #   switch -i will include some internal variables (with % sign)
 # By default, this script assumes that the input file is to be used by the
 # "abinit" module. Another module than "abinit" can be specified using the
-# -m MODULE option. The file doc/users/MODULE_help.html must exist and should
+# -m MODULE option. The file doc/guide/MODULE_help.html must exist and should
 # contain the complete list of variables for MODULE with the same format than
 # the file doc/input_variables/generated_files/varset_allvars.html . At the time of the current version
 # of the present script, only "aim" and "anaddb" comply to this requirement.
@@ -50,7 +50,7 @@ if ($Module eq 'abinit') {
   $InVarsFile = "doc/input_variables/generated_files/varset_allvars.html";
   }
 else {
-  $InVarsFile = "doc/users/$Module".'_help.html';
+  $InVarsFile = "doc/guide/$Module".'_help.html';
   }
 if ($ARGV[$CurArg] eq '-i') {	# include %internal variables
   $internal = 1;		# turn on flag
@@ -66,7 +66,7 @@ if (! -f $inputFile) {
   exit 28;
   }
 
-# if the doc/users/Module_Help.html file cannot be found, try from the
+# if the doc/guide/Module_Help.html file cannot be found, try from the
 # parent and grandparent directories in case the current one is a tests one.
 if (! -f $InVarsFile) {
   if (-f "../$InVarsFile") {
