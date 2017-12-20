@@ -18,7 +18,7 @@
 !! INPUTS
 !!  atindx1(dtset%natom)=index table for atoms, inverse of atindx
 !!  dtset <type(dataset_type)>=all input variables in this dataset
-!!  istep=number of call the routine
+!!  istep=number of call the routine (usually the outer loop in the SCF double loop)
 !!  mcg=size of wave-functions array (cg) =mpw*nspinor*mband*mkmem*nsppol
 !!  mcprj=size of cprj array 
 !!  mpi_enreg=information about MPI parallelization
@@ -107,6 +107,8 @@ subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
 !DEBUG
  write(std_out,*)' wf_mixing : enter '
  write(std_out,*)' istep,scf_history%alpha=',istep,scf_history%alpha
+ write(std_out,*)' cg(1:2,1:2)=',cg(1:2,1:2)
+ write(std_out,*)' scf_history%cg(1:2,1:2,1)=',scf_history%cg(1:2,1:2,1)
 !ENDDEBUG
 
  if (istep==0) return
@@ -130,8 +132,8 @@ subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
    if(usepaw==1) then
      scf_history%cprj(:,:,1)=cprj(:,:)
    end if
- else
 
+ else
 !From 2nd step
 
 !  Init parallelism
@@ -390,91 +392,6 @@ subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
          ibd=ibd+inc
        end do ! end loop on iblockbd
 
-!------Section of code coming from extrapwf---------------------------------------
-!      Wavefunction extrapolation
-!      ibd=0
-!      inc=npw_nk*my_nspinor
-!      ABI_ALLOCATE(deltawf2,(2,npw_nk*my_nspinor))
-!      ABI_ALLOCATE(wf1,(2,npw_nk*my_nspinor))
-!      ABI_ALLOCATE(deltawf1,(2,npw_nk*my_nspinor))
-!      do iblockbd=1,nblockbd
-!        deltawf2(:,:)=scf_history%cg(:,1+icg+ibd:icg+ibd+inc,ind2)
-!        wf1(:,:)=scf_history%cg(:,1+icg+ibd:icg+ibd+inc,ind1)
-!!        wf1(2,1)=zero;deltawf2(2,1)=zero
-
-!         call dotprod_g(dotr,doti,istwf_k,npw_nk*my_nspinor,2,cg(:,icg+1+ibd:ibd+icg+inc),cg(:,icg+1+ibd:ibd+icg+inc),&
-!&         mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
-!         call dotprod_g(dotr1,doti1,istwf_k,npw_nk*my_nspinor,2,cg(:,icg+1+ibd:ibd+icg+inc),wf1,&
-!&         mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
-!         if(usepaw==1) then
-!           ia =0
-!           do itypat=1,ntypat
-!             do iat=1+ia,nattyp(itypat)+ia
-!               do ilmn1=1,pawtab(itypat)%lmn_size
-!                 do ilmn2=1,ilmn1
-!                   klmn=((ilmn1-1)*ilmn1)/2+ilmn2
-!                   dotr=dotr+pawtab(itypat)%sij(klmn)*(cprj_k(iat,iblockbd)%cp(1,ilmn1)*cprj_k(iat,iblockbd)%cp(1,ilmn2)+&
-!&                   cprj_k(iat,iblockbd)%cp(2,ilmn1)*cprj_k(iat,iblockbd)%cp(2,ilmn2))
-!                   doti=doti+pawtab(itypat)%sij(klmn)*(cprj_k(iat,iblockbd)%cp(1,ilmn1)*cprj_k(iat,iblockbd)%cp(2,ilmn2)-&
-!&                   cprj_k(iat,iblockbd)%cp(2,ilmn1)*cprj_k(iat,iblockbd)%cp(1,ilmn2))
-!                   dotr1=dotr1+pawtab(itypat)%sij(klmn)*(cprj_k(iat,iblockbd)%cp(1,ilmn1)*cprj_kh(iat,iblockbd)%cp(1,ilmn2)+&
-!&                   cprj_k(iat,iblockbd)%cp(2,ilmn1)*cprj_kh(iat,iblockbd)%cp(2,ilmn2))
-!                   doti1=doti1+pawtab(itypat)%sij(klmn)*(cprj_k(iat,iblockbd)%cp(1,ilmn1)*cprj_kh(iat,iblockbd)%cp(2,ilmn2)-&
-!&                   cprj_k(iat,iblockbd)%cp(2,ilmn1)*cprj_kh(iat,iblockbd)%cp(1,ilmn2))
-!                 end do
-!                 do ilmn2=ilmn1+1,pawtab(itypat)%lmn_size
-!                   klmn=((ilmn2-1)*ilmn2)/2+ilmn1
-!                   dotr=dotr+pawtab(itypat)%sij(klmn)*(cprj_k(iat,iblockbd)%cp(1,ilmn1)*cprj_k(iat,iblockbd)%cp(1,ilmn2)+&
-!&                   cprj_k(iat,iblockbd)%cp(2,ilmn1)*cprj_k(iat,iblockbd)%cp(2,ilmn2))
-!                   doti=doti+pawtab(itypat)%sij(klmn)*(cprj_k(iat,iblockbd)%cp(1,ilmn1)*cprj_k(iat,iblockbd)%cp(2,ilmn2)-&
-!&                   cprj_k(iat,iblockbd)%cp(2,ilmn1)*cprj_k(iat,iblockbd)%cp(1,ilmn2))
-!                   dotr1=dotr1+pawtab(itypat)%sij(klmn)*(cprj_k(iat,iblockbd)%cp(1,ilmn1)*cprj_kh(iat,iblockbd)%cp(1,ilmn2)+&
-!&                   cprj_k(iat,iblockbd)%cp(2,ilmn1)*cprj_kh(iat,iblockbd)%cp(2,ilmn2))
-!                   doti1=doti1+pawtab(itypat)%sij(klmn)*(cprj_k(iat,iblockbd)%cp(1,ilmn1)*cprj_kh(iat,iblockbd)%cp(2,ilmn2)-&
-!&                   cprj_k(iat,iblockbd)%cp(2,ilmn1)*cprj_kh(iat,iblockbd)%cp(1,ilmn2))
-!                 end do
-!               end do
-!             end do
-!             ia=ia+nattyp(itypat)
-!           end do
-!         end if
-!         dotr=sqrt(dotr**2+doti**2)
-!         dotr1=sqrt(dotr1**2+doti1**2)
-!         write(std_out,*)'DOTR, DOTR1',dotr,dotr1
-!         dotr=dotr1/dotr
-!         write(std_out,*)'DOTR',dotr
-
-!        Compute the difference of wavefunctions
-!        deltawf1=zero
-!        if(dotr>=0.9d0) then
-!          deltawf1(:,:)=cg(:,icg+1+ibd:ibd+icg+inc)-wf1(:,:)
-!          if(usepaw==1) then
-!            alpha(1)=one;alpha(2)=zero
-!            beta(1)=-one;beta(2)=zero
-!            ia =0
-!            call pawcprj_zaxpby(alpha,beta,cprj_k(:,iblockbd:iblockbd),cprj_kh(:,iblockbd:iblockbd))
-!          end if
-!          istep1=istep
-!        else
-!          istep1=1
-!        end if
-
-!         scf_history%cg(:,1+icg+ibd:icg+ibd+inc,ind1)=cg(:,icg+1+ibd:ibd+icg+inc)
-!         scf_history%cg(:,1+icg+ibd:icg+ibd+inc,ind2)=deltawf1(:,:)
-!         if(usepaw==1) then
-!           call pawcprj_put(atindx1,cprj_k,scf_history%cprj(:,:,ind1),dtset%natom,1,ibg,ikpt,1,isppol,&
-!&           dtset%mband,dtset%mkmem,dtset%natom,nblockbd,nblockbd,dimcprj,my_nspinor,dtset%nsppol,0,&
-!&           mpicomm=mpi_enreg%comm_kpt,mpi_comm_band=spaceComm_band,proc_distrb=mpi_enreg%proc_distrb)
-!           call pawcprj_put(atindx1,cprj_kh,scf_history%cprj(:,:,ind2),dtset%natom,1,ibg,ikpt,1,isppol,&
-!&           dtset%mband,dtset%mkmem,dtset%natom,nblockbd,nblockbd,dimcprj,my_nspinor,dtset%nsppol,0,&
-!&           mpicomm=mpi_enreg%comm_kpt,mpi_comm_band=spaceComm_band,proc_distrb=mpi_enreg%proc_distrb)
-!         end if
-
-!         cg(:,icg+1+ibd:ibd+icg+inc)=cg(:,icg+1+ibd:ibd+icg+inc)+scf_history%alpha*deltawf1(:,:) &
-!&         +scf_history%beta *deltawf2(:,:)
-
-!       end do ! end loop on iblockbd
-
        ABI_DEALLOCATE(cwavef)
        ABI_DEALLOCATE(cwavefh)
        ABI_DEALLOCATE(snm)
@@ -503,6 +420,12 @@ subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
    end if
 
  end if ! istep>=2
+
+!DEBUG
+ write(std_out,*)' wf_mixing : exit '
+ write(std_out,*)' cg(1:2,1:2)=',cg(1:2,1:2)
+ write(std_out,*)' scf_history%cg(1:2,1:2,1)=',scf_history%cg(1:2,1:2,1)
+!ENDDEBUG
 
  if (usepaw==1) then
    ABI_DEALLOCATE(dimcprj)

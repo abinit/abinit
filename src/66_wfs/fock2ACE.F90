@@ -415,6 +415,10 @@ subroutine fock2ACE(cg,cprj,fock,istwfk,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_e
        end do
      end do
 
+!    DEBUG
+     fock%fockACE(ikpt,isppol)%xi=zero
+!    ENDDEBUG
+
      ABI_DEALLOCATE(wi)
      ABI_DEALLOCATE(mkl)
      
