@@ -48,7 +48,7 @@
 #endif
 
 #include "abi_common.h"
-#if defined HAVE_LIBXC 
+#if defined HAVE_LIBXC
 #include "xc_version.h"
 #endif
 
@@ -1053,9 +1053,9 @@ function libxc_functionals_ismgga(xc_functionals)
  end if
 
 !DEBUG
- write(std_out,*)' libxc_functionals_ismgga : present(xc_functionals)=',present(xc_functionals)
+! write(std_out,*)' libxc_functionals_ismgga : present(xc_functionals)=',present(xc_functionals)
 !write(std_out,*)' libxc_functionals_ismgga : xc_func%abi_ixc=',xc_func%abi_ixc
- write(std_out,*)' libxc_functionals_ismgga : libxc_functionals_ismgga=',libxc_functionals_ismgga 
+! write(std_out,*)' libxc_functionals_ismgga : libxc_functionals_ismgga=',libxc_functionals_ismgga
 !ENDDEBUG
 
 end function libxc_functionals_ismgga
@@ -1836,9 +1836,9 @@ function libxc_functionals_gga_from_hybrid(gga_id,hybrid_id,xc_functionals)
  if(trial_id(1)==402 .or. trial_id(2)==402)then
    libxc_functionals_gga_from_hybrid=.true.
    if (present(gga_id)) then
-     gga_id(1)=0    
+     gga_id(1)=0
      gga_id(2)=-1402 ! This corresponds to a native ABINIT functional,
-                     ! actually a composite from different LibXC functionals! 
+                     ! actually a composite from different LibXC functionals!
      write(std_out,*)' libxc_functionals_gga_from_hybrid, return with gga_id=',gga_id
    endif
    return

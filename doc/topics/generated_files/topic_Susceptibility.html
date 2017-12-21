@@ -32,10 +32,10 @@ src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-
 
 <script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
 
- Mentioned in &nbsp; <a href="../../topics/generated_files/topic_GW.html">topic_GW</a>, &nbsp; <a href="../../users/generated_files/help_features.html#7">help_features#7</a>. 
+ Mentioned in &nbsp; <a href="../../guide/generated_files/help_features.html#7">help_features#7</a>, &nbsp; <a href="../../topics/generated_files/topic_GW.html">topic_GW</a>. 
  <hr>
  <h3><b>Table of content: </b></h3> 
- <ul> <li>1. <a href="topic_Susceptibility.html#1">Introduction.</a><li>2. <a href="topic_Susceptibility.html#2">Related input variables.</a></ul>
+ <ul> <li>1. <a href="topic_Susceptibility.html#1">Introduction.</a><li>2. <a href="topic_Susceptibility.html#2">Related input variables.</a><li>3. <a href="topic_Susceptibility.html#3">Selected input files.</a></ul>
 
 &nbsp; 
 <HR ALIGN=left> 
@@ -45,6 +45,8 @@ src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-
 
 <p>In the independent-particle approximation, the frequency-dependent susceptibility matrix, and 
 related screened interaction matrix, and inverse dielectric matrix can be computed.
+<p>This can be done on top of eigenfunctions and eigenvalues obtained from Kohn-Sham, generalized Kohn-Sham (e.g. hybrid functionals),
+as well as self-consistent quasiparticle methodology in the (generalized) Kohn-Sham basis.
 <p>This is a prerequisite to many-body perturbation theory calculations, see <a href="../../topics/generated_files/topic_GW.html#">topic_GW</a> and <a href="../../topics/generated_files/topic_BSE.html#">topic_BSE</a>, to which we refer.
 <p>The frequency meshes, used e.g. for integration along the real and imaginary axes, on which the 
  susceptibility matrices (and related matrices) have to be computed are described in <a href="../../topics/generated_files/topic_FrequencyMeshMBPT.html#">topic_FrequencyMeshMBPT</a>.
@@ -59,41 +61,55 @@ related screened interaction matrix, and inverse dielectric matrix can be comput
 <h3><b>2. Related input variables.</b></h3>
 
 
-<p>Compulsory input variables:<p>... <a href="../../input_variables/generated_files/varset_gw.html#ecuteps">ecuteps</a>   [Energy CUT-off for EPSilon (the dielectric matrix)]<br>
-... <a href="../../input_variables/generated_files/varset_gw.html#ecutwfn">ecutwfn</a>   [Energy CUT-off for WaveFunctioNs]<br>
-... <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>   [OPTions for the DRIVER]<br>
-<p>Basic input variables:<p>... <a href="../../input_variables/generated_files/varset_paral.html#gwpara">gwpara</a>   [GW PARAllelization level]<br>
-... <a href="../../input_variables/generated_files/varset_gw.html#icutcoul">icutcoul</a>   [Integer that governs the CUT-off for COULomb interaction]<br>
-... <a href="../../input_variables/generated_files/varset_gw.html#nomegasf">nomegasf</a>   [Number of OMEGA to evaluate the Spectral Function]<br>
-... <a href="../../input_variables/generated_files/varset_gw.html#rcut">rcut</a>   [Radius of the CUT-off for coulomb interaction]<br>
-... <a href="../../input_variables/generated_files/varset_gw.html#vcutgeo">vcutgeo</a>   [V (potential) CUT-off GEOmetry]<br>
-<p>Useful input variables:<p>... <a href="../../input_variables/generated_files/varset_gw.html#awtr">awtr</a>   [evaluate the Adler-Wiser expression of $\chi^{0}_{KS}$ assuming Time-Reversal]<br>
-... <a href="../../input_variables/generated_files/varset_files.html#getqps">getqps</a>   [GET QuasiParticle Structure]<br>
-... <a href="../../input_variables/generated_files/varset_gw.html#gwencomp">gwencomp</a>   [GW ENergy for COMPleteness]<br>
-... <a href="../../input_variables/generated_files/varset_files.html#irdqps">irdqps</a>   [Integer that governs the ReaDing of QuasiParticle Structure]<br>
-... <a href="../../input_variables/generated_files/varset_gw.html#mbpt_sciss">mbpt_sciss</a>   [Many Body Perturbation Theory SCISSor operator]<br>
-... <a href="../../input_variables/generated_files/varset_gw.html#nbandkss">nbandkss</a>   [Number of BANDs in the KSS file]<br>
-... <a href="../../input_variables/generated_files/varset_gw.html#nqptdm">nqptdm</a>   [Number of Q-PoinTs for the Dielectric Matrix]<br>
-... <a href="../../input_variables/generated_files/varset_gw.html#qptdm">qptdm</a>   [Q-PoinTs for the Dielectric Matrix]<br>
-... <a href="../../input_variables/generated_files/varset_gw.html#spbroad">spbroad</a>   [SPectral BROADening]<br>
-... <a href="../../input_variables/generated_files/varset_gw.html#spmeth">spmeth</a>   [SPectral METHod]<br>
-<p>Relevant internal variables:<p>... <a href="../../input_variables/generated_files/varset_internal.html#npweps">%npweps</a>   [Number of PlaneWaves for EPSilon (the dielectric matrix)]<br>
-... <a href="../../input_variables/generated_files/varset_internal.html#npwwfn">%npwwfn</a>   [Number of PlaneWaves for WaveFunctioNs]<br>
-<p>Input variables for experts:<p>... <a href="../../input_variables/generated_files/varset_gw.html#fftgw">fftgw</a>   [FFT for GW calculation]<br>
-... <a href="../../input_variables/generated_files/varset_gw.html#gw_invalid_freq">gw_invalid_freq</a>   [GW treatment of INVALID FREQuency for Hybertsen-Louie PPM]<br>
-... <a href="../../input_variables/generated_files/varset_gw.html#gw_nqlwl">gw_nqlwl</a>   [GW, Number of Q-points for the Long Wave-Length Limit]<br>
-... <a href="../../input_variables/generated_files/varset_gw.html#gw_qlwl">gw_qlwl</a>   [GW, Q-points for the Long Wave-Length limit]<br>
-... <a href="../../input_variables/generated_files/varset_gw.html#gwgamma">gwgamma</a>   [GW GAMMA]<br>
-... <a href="../../input_variables/generated_files/varset_gw.html#gwmem">gwmem</a>   [GW MEMory]<br>
-... <a href="../../input_variables/generated_files/varset_gw.html#inclvkb">inclvkb</a>   [INCLude VKB]<br>
-... <a href="../../input_variables/generated_files/varset_files.html#kssform">kssform</a>   [Kohn Sham Structure file FORMat]<br>
-... <a href="../../input_variables/generated_files/varset_gw.html#npwkss">npwkss</a>   [Number of PlaneWaves in the KSS file]<br>
-... <a href="../../input_variables/generated_files/varset_paw.html#pawoptosc">pawoptosc</a>   [PAW - OPTion for the computation of the OSCillator matrix elements]<br>
-... <a href="../../input_variables/generated_files/varset_gw.html#symchi">symchi</a>   [SYMmetryze \chi_o]<br>
-... <a href="../../input_variables/generated_files/varset_gw.html#zcut">zcut</a>   [Z-CUT]<br>
+<p>Compulsory input variables:<p>... <a href="../../variables/generated_files/varset_gw.html#ecuteps">ecuteps</a>   [Energy CUT-off for EPSilon (the dielectric matrix)]<br>
+... <a href="../../variables/generated_files/varset_gw.html#ecutwfn">ecutwfn</a>   [Energy CUT-off for WaveFunctioNs]<br>
+... <a href="../../variables/generated_files/varset_gstate.html#optdriver">optdriver</a>   [OPTions for the DRIVER]<br>
+<p>Basic input variables:<p>... <a href="../../variables/generated_files/varset_paral.html#gwpara">gwpara</a>   [GW PARAllelization level]<br>
+... <a href="../../variables/generated_files/varset_gw.html#icutcoul">icutcoul</a>   [Integer that governs the CUT-off for COULomb interaction]<br>
+... <a href="../../variables/generated_files/varset_gw.html#nomegasf">nomegasf</a>   [Number of OMEGA to evaluate the Spectral Function]<br>
+... <a href="../../variables/generated_files/varset_gw.html#rcut">rcut</a>   [Radius of the CUT-off for coulomb interaction]<br>
+... <a href="../../variables/generated_files/varset_gw.html#vcutgeo">vcutgeo</a>   [V (potential) CUT-off GEOmetry]<br>
+<p>Useful input variables:<p>... <a href="../../variables/generated_files/varset_gw.html#awtr">awtr</a>   [evaluate the Adler-Wiser expression of $\chi^{0}_{KS}$ assuming Time-Reversal]<br>
+... <a href="../../variables/generated_files/varset_files.html#getqps">getqps</a>   [GET QuasiParticle Structure]<br>
+... <a href="../../variables/generated_files/varset_gw.html#gwencomp">gwencomp</a>   [GW ENergy for COMPleteness]<br>
+... <a href="../../variables/generated_files/varset_files.html#irdqps">irdqps</a>   [Integer that governs the ReaDing of QuasiParticle Structure]<br>
+... <a href="../../variables/generated_files/varset_gw.html#mbpt_sciss">mbpt_sciss</a>   [Many Body Perturbation Theory SCISSor operator]<br>
+... <a href="../../variables/generated_files/varset_gw.html#nbandkss">nbandkss</a>   [Number of BANDs in the KSS file]<br>
+... <a href="../../variables/generated_files/varset_gw.html#nqptdm">nqptdm</a>   [Number of Q-PoinTs for the Dielectric Matrix]<br>
+... <a href="../../variables/generated_files/varset_gw.html#qptdm">qptdm</a>   [Q-PoinTs for the Dielectric Matrix]<br>
+... <a href="../../variables/generated_files/varset_gw.html#spbroad">spbroad</a>   [SPectral BROADening]<br>
+... <a href="../../variables/generated_files/varset_gw.html#spmeth">spmeth</a>   [SPectral METHod]<br>
+<p>Relevant internal variables:<p>... <a href="../../variables/generated_files/varset_internal.html#npweps">%npweps</a>   [Number of PlaneWaves for EPSilon (the dielectric matrix)]<br>
+... <a href="../../variables/generated_files/varset_internal.html#npwwfn">%npwwfn</a>   [Number of PlaneWaves for WaveFunctioNs]<br>
+<p>Input variables for experts:<p>... <a href="../../variables/generated_files/varset_gw.html#fftgw">fftgw</a>   [FFT for GW calculation]<br>
+... <a href="../../variables/generated_files/varset_gw.html#gw_invalid_freq">gw_invalid_freq</a>   [GW treatment of INVALID FREQuency for Hybertsen-Louie PPM]<br>
+... <a href="../../variables/generated_files/varset_gw.html#gw_nqlwl">gw_nqlwl</a>   [GW, Number of Q-points for the Long Wave-Length Limit]<br>
+... <a href="../../variables/generated_files/varset_gw.html#gw_qlwl">gw_qlwl</a>   [GW, Q-points for the Long Wave-Length limit]<br>
+... <a href="../../variables/generated_files/varset_gw.html#gwgamma">gwgamma</a>   [GW GAMMA]<br>
+... <a href="../../variables/generated_files/varset_gw.html#gwmem">gwmem</a>   [GW MEMory]<br>
+... <a href="../../variables/generated_files/varset_gw.html#inclvkb">inclvkb</a>   [INCLude VKB]<br>
+... <a href="../../variables/generated_files/varset_files.html#kssform">kssform</a>   [Kohn Sham Structure file FORMat]<br>
+... <a href="../../variables/generated_files/varset_gw.html#npwkss">npwkss</a>   [Number of PlaneWaves in the KSS file]<br>
+... <a href="../../variables/generated_files/varset_paw.html#pawoptosc">pawoptosc</a>   [PAW - OPTion for the computation of the OSCillator matrix elements]<br>
+... <a href="../../variables/generated_files/varset_gw.html#symchi">symchi</a>   [SYMmetryze \chi_o]<br>
+... <a href="../../variables/generated_files/varset_gw.html#zcut">zcut</a>   [Z-CUT]<br>
 
 <br><br><a href=#top>Go to the top</a>
 
+
+&nbsp; 
+<HR ALIGN=left> 
+<a name="3">&nbsp;</a>
+<h3><b>3. Selected input files.</b></h3>
+
+
+<i><b>WARNING</b> : as of ABINITv8.6.x, the list of input files provided in the specific section of the topics Web pages is still to be reviewed/tuned. In some cases, it will be adequate, and in other cases, it might be incomplete, or perhaps even useless.</i>
+<br><br>The user can find some related example input files in the ABINIT package in the directory /tests, or on the Web:
+<p> tests/libxc/Input: <a href="../../tests/libxc/Input/t44.in">t44.in</a> 
+<a href="../../tests/libxc/Input/t45.in">t45.in</a> 
+<br>
+
+<br><br><a href=#top>Go to the top</a>
 
 
 <script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>

@@ -1414,7 +1414,7 @@ subroutine pawpsp_read_corewf(energy_cor,indlmn_core,lcor,lmncmax,ncor,nphicor,r
  integer :: ib,i1,i2,il,ilm,ilmn,iln,ios,jln,nmesh,npts,unt
  real(dp) :: noccor,r1,r2
  logical :: ex,oldformat,usexml
- character(len=8) :: dum
+ character(len=8) :: dum,dum1,dum2,dum3,dum4
  character(len=80) :: fline
  character(len=500) :: filename_,msg
 !arrays
@@ -1564,8 +1564,9 @@ subroutine pawpsp_read_corewf(energy_cor,indlmn_core,lcor,lmncmax,ncor,nphicor,r
    LIBPAW_ALLOCATE(phi_cor,(npts,nphicor))
    LIBPAW_ALLOCATE(rad,(npts))
    do iln=1,nphicor
-     read(unt,'("# n=",i4," l=",i4," nocc=",f15.7," energy=",f15.7)') &
-&       ncor(iln),lcor(iln),noccor,energy_cor(iln)
+     read(unt,'(a4,i4,a3,i4,a6,f15.7,a8,f15.7)') &
+&     dum1,ncor(iln),dum2,lcor(iln),dum3,noccor,dum4,energy_cor(iln)
+
      do jln=1,npts
        read(unt,*) rad(jln),phi_cor(jln,iln)
      end do
@@ -2983,7 +2984,7 @@ subroutine pawpsp_17in(epsatm,ffspl,icoulomb,ipsp,ixc,lmax,&
 !arrays
  integer,allocatable :: nprj(:)
  real(dp),allocatable :: kij(:),ncore(:)
- real(dp),allocatable :: shpf(:,:),tncore(:),tnvale(:),tproj(:,:),vhnzc(:),vlocr(:),v_minushalf(:)
+ real(dp),allocatable :: shpf(:,:),tncore(:),tnvale(:),tproj(:,:),vhnzc(:),vlocr(:)
  real(dp),allocatable :: work1(:),work2(:),work3(:),work4(:)
  type(pawrad_type),allocatable :: radmesh(:)
 
@@ -3499,16 +3500,23 @@ subroutine pawpsp_17in(epsatm,ffspl,icoulomb,ipsp,ixc,lmax,&
      MSG_ERROR(msg)
    end if
    has_v_minushalf=1
-   LIBPAW_ALLOCATE(v_minushalf,(vloc_mesh%mesh_size))
-   v_minushalf(1:vloc_mesh%mesh_size)=paw_setup(ipsploc)%LDA_minus_half_potential%data(1:vloc_mesh%mesh_size)/sqrt(fourpi)
+   LIBPAW_ALLOCATE(pawtab%vminushalf,(vloc_mesh%mesh_size))
+   pawtab%vminus_mesh_size=vloc_mesh%mesh_size
+   pawtab%vminushalf(1:vloc_mesh%mesh_size)=paw_setup(ipsploc)%LDA_minus_half_potential%data(1:vloc_mesh%mesh_size)/sqrt(fourpi)
    write(msg,'(a,i1)') &
 &   ' Radial grid used for LDA-1/2 potential is grid ',ivlocmesh
    call wrtout(ab_out,msg,'COLL')
    call wrtout(std_out,  msg,'COLL')
  else
    has_v_minushalf=0
-!   LIBPAW_ALLOCATE(v_minushalf,(0))
  end if
+ if(has_v_minushalf==0.and.pawtab%has_vminushalf==1) then
+   write(msg, '(a)' )&
+&     'The LDA-1/2 potential must be given in the XML PAW datafile.'
+   MSG_ERROR(msg)
+ end if
+
+
 !---------------------------------
 !Eventually read "numeric" shapefunctions (if shape_type=-1)
  if (pawtab%shape_type==-1) then
@@ -3628,19 +3636,13 @@ subroutine pawpsp_17in(epsatm,ffspl,icoulomb,ipsp,ixc,lmax,&
 
  if (vlocopt>0) then
    LIBPAW_ALLOCATE(pawtab%dij0,(pawtab%lmn2_size))
-!   if (allocated(v_minushalf)) then
-!   call atompaw_dij0(pawtab%indlmn,kij,pawtab%lmn_size,ncore,0,pawtab,pawrad,core_mesh,&
-!&                    vloc_mesh,vlocr,znucl,v_minushalf)
-!   else
+   if (allocated(pawtab%vminushalf).and.pawtab%has_vminushalf==1) then
+     vlocr(1:vloc_mesh%mesh_size)=vlocr(1:vloc_mesh%mesh_size)+pawtab%vminushalf(1:vloc_mesh%mesh_size)
+   end if
    call atompaw_dij0(pawtab%indlmn,kij,pawtab%lmn_size,ncore,0,pawtab,pawrad,core_mesh,&
 &                    vloc_mesh,vlocr,znucl)
-!   end if
+ end if
 
- end if
- if (allocated(v_minushalf)) then
-   vlocr(1:vloc_mesh%mesh_size)=vlocr(1:vloc_mesh%mesh_size)+v_minushalf(1:vloc_mesh%mesh_size)/sqrt(fourpi)
-   LIBPAW_DEALLOCATE(v_minushalf)
- end if
 !Keep eventualy Kij in memory
  if (pawtab%has_kij==1.or.vlocopt==0) then
    LIBPAW_ALLOCATE(pawtab%kij,(pawtab%lmn2_size))

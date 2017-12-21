@@ -27,7 +27,7 @@
 !!  my_natom=number of atoms treated by current processor
 !!  natom=total number of atoms in cell
 !!  nattyp(ntypat)= # atoms of each type.
-!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !!  ntypat=number of types of atoms in unit cell
 !!  optcut= option for the cut-off radius of spheres:
 !!          if optcut=0, cut-off radius=pawtab%rshp=cut-off radius of compensation charge

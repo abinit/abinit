@@ -441,6 +441,7 @@ subroutine invars0(dtsets,istatr,istatshft,lenstr,&
    ABI_ALLOCATE(dtsets(idtset)%jpawu,(mxntypat,mxnimage))
    ABI_ALLOCATE(dtsets(idtset)%kberry,(3,20))
    ABI_ALLOCATE(dtsets(idtset)%lexexch,(mxntypat))
+   ABI_ALLOCATE(dtsets(idtset)%ldaminushalf,(mxntypat))
    ABI_ALLOCATE(dtsets(idtset)%lpawu,(mxntypat))
    ABI_ALLOCATE(dtsets(idtset)%mixalch_orig,(npsp,mxntypat,mxnimage))
    ABI_ALLOCATE(dtsets(idtset)%nucdipmom,(3,mxnatom))

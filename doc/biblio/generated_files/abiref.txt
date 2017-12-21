@@ -57,6 +57,7 @@
 [Daubechies1992]  I. Daubechies, "10 Lectures on Wavelets" (Society for Industrial and Applied Mathematics ({SIAM}, 3600 {M}arket {S}treet, {F}loor 6, {P}hiladelphia, {PA} 19104), , 1992).
 [Dion2004]  M. Dion, H. Rydberg, E. Schr\"oder, D. C. Langreth and B. I. Lundqvist, "Van der Waals Density Functional for General Geometries", Phys. Rev. Lett. 92, 246401 (2004). <br> DOI: <a href="https://doi.org/10.1103/PhysRevLett.92.246401">10.1103/PhysRevLett.92.246401</a>.
 [Espejo2012]  C. Espejo, T. Rangel, Y. Pouillon, A. H. Romero and X. Gonze, "Wannier functions approach to van der {W}aals} interactions in {ABINIT}", Comp. Phys. Comm. 183, 480 (2012).
+[Ferreira2008]  L.G. Ferreira, M. Marques and L.K. Teles, "Approximation to density functional theory for the calculation of band gaps of semiconductors", Phys. Rev. B 78, 125116 (2008).
 [Fetter1971]  A.L. Fetter and J.D. Walecka, "Quantum Theory of Many-Particle Systems", McGraw-Hill, New York ,  (1971).
 [Folegati2007]  P. Folegati, I. Makkonen, R. Ferragut and M.J. Puska, "Analysis of electron-positron momentum spectra of metallic alloys as supported by first-principles calculations", Phys. Rev. B 75, 054201 (2007).
 [Fresard1997]  Raymond Fr\'esard and Gabriel Kotliar, "Interplay of Mott transition and ferromagnetism in the orbitally degenerate Hubbard model", Phys. Rev. B 56, 12909 (1997).

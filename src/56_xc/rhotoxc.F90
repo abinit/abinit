@@ -19,7 +19,7 @@
 !! INPUTS
 !!  mpi_enreg=information about MPI parallelization
 !!  nfft=(effective) number of FFT grid points (for this processor)
-!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !!  nhat(nfft,xcdata%nspden*nhatdim)= -PAW only- compensation density
 !!  nhatdim= -PAW only- 0 if nhat array is not used ; 1 otherwise
 !!  nhatgr(nfft,xcdata%nspden,3*nhatgrdim)= -PAW only- cartesian gradients of compensation density

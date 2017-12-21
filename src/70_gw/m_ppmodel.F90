@@ -746,7 +746,7 @@ end subroutine ppm_init
 !!  nomega=number of frequencies in $\epsilon^{-1}$
 !!  omega=frequencies in epsm1
 !!  epsm1=the inverse dielctric matrix
-!!  ngfftf(18)=contain all needed information about the 3D fine FFT mesh, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  ngfftf(18)=contain all needed information about the 3D fine FFT mesh, see ~abinit/doc/variables/vargs.htm#ngfft
 !!  gprimd(3,3)=dimensional primitive translations for reciprocal space ($\textrm{bohr}^{-1}$)
 !!  nfftf=the number of points in the FFT mesh (for this processor)
 !!  rhor_tot(nfftf)=the total charge in real space
@@ -1454,7 +1454,7 @@ end subroutine cppm1par
 !!  qpt(3)=The coordinates of the q-point in the IBZ.
 !!  epsm1(npwc,npwc)=symmetrized inverse dielectric (static limit is used)
 !!  gmet(3,3)=metric in reciprocal space
-!!  ngfftf(18)=contain all needed information about the 3D fine FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  ngfftf(18)=contain all needed information about the 3D fine FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !!  npwc=number of plane waves in epsm1
 !!  rhor(nfftf)=charge density on the real space FFT grid
 !!  nfftf= total number of points in the fine FFT mesh  (for this processor)
@@ -1683,7 +1683,7 @@ end subroutine cppm2par
 !!
 !! INPUTS
 !! epsm1(npwc,npwc))= symmetrized inverse dielectric
-!! ngfftf(18)=contain all needed information about 3D fine FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!! ngfftf(18)=contain all needed information about 3D fine FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !! npwc=number of plane waves in epsm1
 !! qratio=(q+G1).(q+G2)/(|q+G1|.|q+G2|)
 !! rhor(nfftf)=charge density on the real space FFT grid
@@ -1964,7 +1964,7 @@ end subroutine cppm3par
 !!  qpt(3)=Reduced coordinates of the q-point.
 !!  epsm1(npwc,npwc)=symmetrized inverse dielectric matrix.
 !!  gprimd(3,3)=dimensional primitive translations for reciprocal space ($\textrm{bohr}^{-1}$)
-!!  ngfftf(18)=contain all needed information about 3D fine FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  ngfftf(18)=contain all needed information about 3D fine FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !!  npwc=number of plane waves in epsm1
 !!  rhor(nfftf)=charge density on the real space FFT grid
 !!  gvec(3,npwc)=G vectors in reduced coordinated
@@ -2544,7 +2544,7 @@ end subroutine calc_sig_ppm
 !!  nomega=number of frequencies in $\epsilon^{-1}$
 !!  omega=frequencies in epsm1_ggw
 !!  epsm1_ggw(npwe,npwe,nomega)=the inverse dielctric matrix
-!!  ngfftf(18)=contain all needed information about the 3D fine FFT mesh, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  ngfftf(18)=contain all needed information about the 3D fine FFT mesh, see ~abinit/doc/variables/vargs.htm#ngfft
 !!  gprimd(3,3)=dimensional primitive translations for reciprocal space ($\textrm{bohr}^{-1}$)
 !!  nfftf=the number of points in the FFT mesh (for this processor)
 !!  rhor_tot(nfftf)=the total charge in real space
@@ -2700,7 +2700,7 @@ end subroutine ppm_symmetrizer
 !!  nomega=number of frequencies in $\epsilon^{-1}$
 !!  omega=frequencies in epsm1_ggw
 !!  epsm1_ggw(npwe,npwe,nomega)=the inverse dielctric matrix
-!!  ngfftf(18)=contain all needed information about the 3D fine FFT mesh, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  ngfftf(18)=contain all needed information about the 3D fine FFT mesh, see ~abinit/doc/variables/vargs.htm#ngfft
 !!  gprimd(3,3)=dimensional primitive translations for reciprocal space ($\textrm{bohr}^{-1}$)
 !!  nfftf=the number of points in the FFT mesh (for this processor)
 !!  rhor_tot(nfftf)=the total charge in real space

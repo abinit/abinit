@@ -18,7 +18,7 @@
 !!
 !! INPUTS
 !! codvsn=Code version
-!! ngfft_gw(18)=Information about 3D FFT for density and potentials, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!! ngfft_gw(18)=Information about 3D FFT for density and potentials, see ~abinit/doc/variables/vargs.htm#ngfft
 !! acell(3)=Length scales of primitive translations (bohr)
 !! rprim(3,3)=Dimensionless real space primitive translations.
 !! Dtset<dataset_type>=All input variables for this dataset.
@@ -36,7 +36,7 @@
 !! Vcp<vcoul_t>=Structure gathering information on the Coulomb interaction in reciprocal space,
 !!   including a possible cutoff in real space.
 !! ngfft_osc(18)=Contain all needed information about the 3D FFT for the oscillator matrix elements.
-!!   See ~abinit/doc/input_variables/vargs.htm#ngfft
+!!   See ~abinit/doc/variables/vargs.htm#ngfft
 !! Bsp<excparam>=Basic parameters defining the Bethe-Salpeter run. Completely initialed in output.
 !! Hdr_wfk<Hdr_type>=The header of the WFK file.
 !! Hdr_bse<Hdr_type>=Local header initialized from the parameters used for the Bethe-Salpeter calculation.
@@ -284,7 +284,7 @@ subroutine setup_bse(codvsn,acell,rprim,ngfftf,ngfft_osc,Dtset,Dtfil,BS_files,Ps
    ! Init Qmesh from the K-mesh reported in the WFK file.
    call find_qmesh(Qmesh,Cryst,Kmesh)
 
-   ! The G-sphere for W and Sigma_c is initialized from ecutesp.
+   ! The G-sphere for W and Sigma_c is initialized from ecuteps.
    call gsph_init(Gsph_c,Cryst,0,ecut=Dtset%ecuteps)
    Dtset%npweps = Gsph_c%ng 
  end if

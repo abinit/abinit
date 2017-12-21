@@ -32,7 +32,7 @@
 !!         1: compute gsqcut for boxcut=1 (sphere_cutoff=box_cutoff)
 !! iout=unit number for output file
 !! kpt(3)=input k vector (reduced coordinates--in terms of reciprocal lattice primitive translations)
-!! ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!! ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !!
 !! OUTPUT
 !! boxcut=defined above (dimensionless), ratio of basis sphere

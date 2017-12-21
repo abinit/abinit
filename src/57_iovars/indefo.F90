@@ -433,6 +433,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%kssform=1
 !  L
    dtsets(idtset)%localrdwf=1
+
 #if defined HAVE_LOTF
    dtsets(idtset)%lotf_classic=5
    dtsets(idtset)%lotf_nitex=10
@@ -441,7 +442,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
 #endif
 !  M
    dtsets(idtset)%magconon = 0
-   dtsets(idtset)%magcon_lambda = 10.0_dp
+   dtsets(idtset)%magcon_lambda = 0.01_dp
    dtsets(idtset)%max_ncpus = 0
    dtsets(idtset)%mbpt_sciss=zero
    dtsets(idtset)%mband = -1

@@ -699,7 +699,7 @@ end subroutine print_symmetries
 !! symbols = array with the symbol of each atoms
 !!
 !! PARENTS
-!!      m_effective_potential_file,m_polynomial_coeff
+!!      m_effective_potential_file,m_fit_polynomial_coeff,m_polynomial_coeff
 !!
 !! CHILDREN
 !!      mati3inv,sg_multable

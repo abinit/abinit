@@ -1,0 +1,1474 @@
+<!--                                                                                     -->
+<!-- This file has been produced by generate_doc.py using different .yml  or .bib files. -->
+<!-- It is useless to modify it. Modify the related .yml  or .bib files instead.         -->
+<!--                                                                                     -->
+<html>
+<head><title>Description of DFPT variables.</title>
+<link rel=stylesheet type="text/css" href="../../formabinit.css">
+<link rel=stylesheet type="text/css" href="../formabinit.css">
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  jax: ["input/TeX","output/HTML-CSS"],
+  tex2jax: {inlineMath: [['$','$']]},
+  displayAlign: "center",
+  TeX: { equationNumbers: { autoNumber: "AMS" } }
+});
+</script>
+<script type="text/javascript" async
+src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+</head>
+<body bgcolor="#ffffff">
+
+<hr>
+<a name="top"></a>
+
+<h1>ABINIT, DFPT input variables:</h1>
+
+<h2>List and description.
+</h2>
+<hr>
+<p>This document lists and provides the description
+of the name (keywords) of the "DFPT" input
+variables to be used in the main input file of the abinit code.
+
+<script type="text/javascript" src="../../js_files/generic_advice.js"> </script>
+<hr>
+
+<h5>Copyright (C) 1998-2017 ABINIT group (DCA,XG,RC,YG,FJ)
+<script type="text/javascript" src="../../js_files/copyright.js"> </script>
+</h5> 
+
+<script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
+
+<script type="text/javascript" src="../../js_files/list_htmlfiles_input_variables.js"> </script>
+
+<a name="list"></a>
+<h3><b> Content of the file : alphabetical list of "DFPT" variables.</b></h3>
+
+<br><a id='A'></a>A.
+ <br><a id='B'></a>B.
+ <a href="#bdeigrf">bdeigrf</a>&nbsp;&nbsp;
+ <br><a id='C'></a>C.
+ <br><a id='D'></a>D.
+ <a href="#d3e_pert1_atpol">d3e_pert1_atpol</a>&nbsp;&nbsp;
+ <a href="#d3e_pert1_dir">d3e_pert1_dir</a>&nbsp;&nbsp;
+ <a href="#d3e_pert1_elfd">d3e_pert1_elfd</a>&nbsp;&nbsp;
+ <a href="#d3e_pert1_phon">d3e_pert1_phon</a>&nbsp;&nbsp;
+ <a href="#d3e_pert2_atpol">d3e_pert2_atpol</a>&nbsp;&nbsp;
+ <a href="#d3e_pert2_dir">d3e_pert2_dir</a>&nbsp;&nbsp;
+ <a href="#d3e_pert2_elfd">d3e_pert2_elfd</a>&nbsp;&nbsp;
+ <a href="#d3e_pert2_phon">d3e_pert2_phon</a>&nbsp;&nbsp;
+ <a href="#d3e_pert3_atpol">d3e_pert3_atpol</a>&nbsp;&nbsp;
+ <a href="#d3e_pert3_dir">d3e_pert3_dir</a>&nbsp;&nbsp;
+ <a href="#d3e_pert3_elfd">d3e_pert3_elfd</a>&nbsp;&nbsp;
+ <a href="#d3e_pert3_phon">d3e_pert3_phon</a>&nbsp;&nbsp;
+ <a href="#dfpt_sciss">dfpt_sciss</a>&nbsp;&nbsp;
+ <br><a id='E'></a>E.
+ <a href="#efmas">efmas</a>&nbsp;&nbsp;
+ <a href="#efmas_bands">efmas_bands</a>&nbsp;&nbsp;
+ <a href="#efmas_calc_dirs">efmas_calc_dirs</a>&nbsp;&nbsp;
+ <a href="#efmas_deg">efmas_deg</a>&nbsp;&nbsp;
+ <a href="#efmas_deg_tol">efmas_deg_tol</a>&nbsp;&nbsp;
+ <a href="#efmas_dim">efmas_dim</a>&nbsp;&nbsp;
+ <a href="#efmas_dirs">efmas_dirs</a>&nbsp;&nbsp;
+ <a href="#efmas_n_dirs">efmas_n_dirs</a>&nbsp;&nbsp;
+ <a href="#efmas_ntheta">efmas_ntheta</a>&nbsp;&nbsp;
+ <a href="#elph2_imagden">elph2_imagden</a>&nbsp;&nbsp;
+ <a href="#eph_task">eph_task</a>&nbsp;&nbsp;
+ <a href="#esmear">esmear</a>&nbsp;&nbsp;
+ <br><a id='F'></a>F.
+ <a href="#frzfermi">frzfermi</a>&nbsp;&nbsp;
+ <br><a id='G'></a>G.
+ <br><a id='H'></a>H.
+ <br><a id='I'></a>I.
+ <a href="#ieig2rf">ieig2rf</a>&nbsp;&nbsp;
+ <br><a id='J'></a>J.
+ <br><a id='K'></a>K.
+ <br><a id='L'></a>L.
+ <br><a id='M'></a>M.
+ <br><a id='N'></a>N.
+ <br><a id='O'></a>O.
+ <br><a id='P'></a>P.
+ <a href="#ph_ngqpt">ph_ngqpt</a>&nbsp;&nbsp;
+ <a href="#ph_qpath">ph_qpath</a>&nbsp;&nbsp;
+ <a href="#prepanl">prepanl</a>&nbsp;&nbsp;
+ <a href="#prepgkk">prepgkk</a>&nbsp;&nbsp;
+ <a href="#prtbbb">prtbbb</a>&nbsp;&nbsp;
+ <br><a id='Q'></a>Q.
+ <br><a id='R'></a>R.
+ <a href="#rf2_dkdk">rf2_dkdk</a>&nbsp;&nbsp;
+ <a href="#rfasr">rfasr</a>&nbsp;&nbsp;
+ <a href="#rfatpol">rfatpol</a>&nbsp;&nbsp;
+ <a href="#rfddk">rfddk</a>&nbsp;&nbsp;
+ <a href="#rfdir">rfdir</a>&nbsp;&nbsp;
+ <a href="#rfelfd">rfelfd</a>&nbsp;&nbsp;
+ <a href="#rfmagn">rfmagn</a>&nbsp;&nbsp;
+ <a href="#rfmeth">rfmeth</a>&nbsp;&nbsp;
+ <a href="#rfphon">rfphon</a>&nbsp;&nbsp;
+ <a href="#rfstrs">rfstrs</a>&nbsp;&nbsp;
+ <a href="#rfuser">rfuser</a>&nbsp;&nbsp;
+ <br><a id='S'></a>S.
+ <a href="#smdelta">smdelta</a>&nbsp;&nbsp;
+ <br><a id='T'></a>T.
+ <a href="#td_maxene">td_maxene</a>&nbsp;&nbsp;
+ <a href="#td_mexcit">td_mexcit</a>&nbsp;&nbsp;
+<br><br><hr>
+<br><font id="title"><a name="bdeigrf">bdeigrf</a></font>
+<br><font id="mnemonics">Mnemonics: BanD for second-order EIGenvalues from Response-Function</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_TDepES.html">TDepES</a>.</font>
+<br><font id="smalltext">Moderately used: [10/920] in abinit tests, [0/136] in tuto abinit tests. Examples in tests: {paral:[<a href="../../tests/paral/Input/t59.in">59</a>,<a href="../../tests/paral/Input/t60.in">60</a>],v6:[<a href="../../tests/v6/Input/t37.in">37</a>,<a href="../../tests/v6/Input/t50.in">50</a>,<a href="../../tests/v6/Input/t54.in">54</a>,<a href="../../tests/v6/Input/t58.in">58</a>,<a href="../../tests/v6/Input/t61.in">61</a>,<a href="../../tests/v6/Input/t68.in">68</a>],v7:[<a href="../../tests/v7/Input/t55.in">55</a>,<a href="../../tests/v7/Input/t83.in">83</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is -1</font>
+<br><br><font id="requires">
+Only relevant if <a href="../../variables/generated_files/varset_dfpt.html#ieig2rf">ieig2rf</a> in [1,2,3,4,5]
+</font>
+<br><font id="text">
+<p>
+<p>
+that is, if the user is performing second-order eigenvalue calculations using response-functions.
+ <br />
+ <br />
+ The variable <b>bdeigrf</b> is the maximum number of bands for which the second-order eigenvalues must be calculated: the full number of bands is still used during the computation of these corrections.
+ <br />
+ <br />
+ If <b>bdeigrf</b> is set to -1, the code will automatically set <b>bdeigrf</b> equal to nband.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="d3e_pert1_atpol">d3e_pert1_atpol</a></font>
+<br><font id="mnemonics">Mnemonics: 3rd Derivative of Energy, mixed PERTurbation 1: limits of ATomic POLarisations</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_nonlinear.html">nonlinear</a>.</font>
+<br><font id="smalltext">Moderately used: [11/920] in abinit tests, [2/136] in tuto abinit tests. Tuto test list: {tutorespfn:[<a href="../../tests/tutorespfn/Input/tnlo_11.in">nlo_11</a>,<a href="../../tests/tutorespfn/Input/tnlo_2.in">nlo_2</a>]}.</font>
+<br><font id="vartype">Variable type: integer(2)</font>
+<br><font id="default">Default is [1, 1]</font>
+<br><br><font id="requires">
+Only relevant if <a href="../../variables/generated_files/varset_gstate.html#optdriver">optdriver</a>==5 (non-linear response computations)
+</font>
+<br><font id="text">
+<p>
+<p>
+Controls the range of atoms for which displacements will be considered
+in non-linear computations (using the 2n+1 theorem), for the 1st perturbation.<br />
+May take values from 1 to <a href="../../variables/generated_files/varset_basic.html#natom">natom</a>, with
+<b>d3e_pert1_atpol</b>(1)&lt;=<b>d3e_pert1_atpol</b>(2).<br />
+See <a href="../../variables/generated_files/varset_dfpt.html#rfatpol">rfatpol</a> for additional details.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="d3e_pert1_dir">d3e_pert1_dir</a></font>
+<br><font id="mnemonics">Mnemonics: 3rd Derivative of Energy, mixed PERTurbation 1: DIRections</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_nonlinear.html">nonlinear</a>.</font>
+<br><font id="smalltext">Moderately used: [11/920] in abinit tests, [2/136] in tuto abinit tests. Tuto test list: {tutorespfn:[<a href="../../tests/tutorespfn/Input/tnlo_11.in">nlo_11</a>,<a href="../../tests/tutorespfn/Input/tnlo_2.in">nlo_2</a>]}.</font>
+<br><font id="vartype">Variable type: integer(3)</font>
+<br><font id="default">Default is [0, 0, 0]</font>
+<br><br><font id="requires">
+Only relevant if <a href="../../variables/generated_files/varset_gstate.html#optdriver">optdriver</a>==5 (non-linear response computations)
+</font>
+<br><font id="text">
+<p>
+<p>
+Gives the directions to be considered in non-linear computations
+(using the 2n+1 theorem), for the 1st perturbation.<br />
+The three elements corresponds to the three primitive
+vectors, either in real space (atomic displacement),
+or in reciprocal space (electric field perturbation).<br />
+See <a href="../../variables/generated_files/varset_dfpt.html#rfdir">rfdir</a> for additional details.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="d3e_pert1_elfd">d3e_pert1_elfd</a></font>
+<br><font id="mnemonics">Mnemonics: 3rd Derivative of Energy, mixed PERTurbation 1: ELectric FielD</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_nonlinear.html">nonlinear</a>.</font>
+<br><font id="smalltext">Moderately used: [11/920] in abinit tests, [2/136] in tuto abinit tests. Tuto test list: {tutorespfn:[<a href="../../tests/tutorespfn/Input/tnlo_11.in">nlo_11</a>,<a href="../../tests/tutorespfn/Input/tnlo_2.in">nlo_2</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><br><font id="requires">
+Only relevant if <a href="../../variables/generated_files/varset_gstate.html#optdriver">optdriver</a>==5 (non-linear response computations)
+</font>
+<br><font id="text">
+<p>
+<p>
+Turns on electric field perturbation in non-linear computation, as 1st perturbation.
+Actually, such calculations requires first the non-self-consistent calculation
+of derivatives with respect to k, independently of the electric field perturbation itself.<br />
+See <a href="../../variables/generated_files/varset_dfpt.html#rfelfd">rfelfd</a> for additional details.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="d3e_pert1_phon">d3e_pert1_phon</a></font>
+<br><font id="mnemonics">Mnemonics: 3rd Derivative of Energy, mixed PERTurbation 1: PHONons</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_nonlinear.html">nonlinear</a>.</font>
+<br><font id="smalltext">Moderately used: [11/920] in abinit tests, [2/136] in tuto abinit tests. Tuto test list: {tutorespfn:[<a href="../../tests/tutorespfn/Input/tnlo_11.in">nlo_11</a>,<a href="../../tests/tutorespfn/Input/tnlo_2.in">nlo_2</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><br><font id="requires">
+Only relevant if <a href="../../variables/generated_files/varset_gstate.html#optdriver">optdriver</a>==5 (non-linear response computations)
+</font>
+<br><font id="text">
+<p>
+<p>
+Turns on atomic displacement perturbation in non-linear computation, as 1st perturbation.<br />
+See <a href="../../variables/generated_files/varset_dfpt.html#rfphon">rfphon</a> for additional details.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="d3e_pert2_atpol">d3e_pert2_atpol</a></font>
+<br><font id="mnemonics">Mnemonics: 3rd Derivative of Energy, mixed PERTurbation 2: limits of ATomic POLarisations</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_nonlinear.html">nonlinear</a>.</font>
+<br><font id="smalltext">Rarely used: [1/920] in abinit tests, [0/136] in tuto abinit tests. Test list: {v3:[<a href="../../tests/v3/Input/t83.in">83</a>]}.</font>
+<br><font id="vartype">Variable type: integer(2)</font>
+<br><font id="default">Default is [1, 1]</font>
+<br><br><font id="requires">
+Only relevant if <a href="../../variables/generated_files/varset_gstate.html#optdriver">optdriver</a>==5 (non-linear response computations)
+</font>
+<br><font id="text">
+<p>
+<p>
+Controls the range of atoms for which displacements will be considered
+in non-linear computations (using the 2n+1 theorem), for the 2nd perturbation.<br />
+May take values from 1 to <a href="../../variables/generated_files/varset_basic.html#natom">natom</a>, with
+<b>d3e_pert2_atpol</b>(1)&lt;=<b>d3e_pert2_atpol</b>(2).<br />
+See <a href="../../variables/generated_files/varset_dfpt.html#rfatpol">rfatpol</a> for additional details.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="d3e_pert2_dir">d3e_pert2_dir</a></font>
+<br><font id="mnemonics">Mnemonics: 3rd Derivative of Energy, mixed PERTurbation 2: DIRections</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_nonlinear.html">nonlinear</a>.</font>
+<br><font id="smalltext">Moderately used: [11/920] in abinit tests, [2/136] in tuto abinit tests. Tuto test list: {tutorespfn:[<a href="../../tests/tutorespfn/Input/tnlo_11.in">nlo_11</a>,<a href="../../tests/tutorespfn/Input/tnlo_2.in">nlo_2</a>]}.</font>
+<br><font id="vartype">Variable type: integer(3)</font>
+<br><font id="default">Default is [0, 0, 0]</font>
+<br><br><font id="requires">
+Only relevant if <a href="../../variables/generated_files/varset_gstate.html#optdriver">optdriver</a>==5 (non-linear response computations)
+</font>
+<br><font id="text">
+<p>
+<p>
+Gives the directions to be considered in non-linear computations
+(using the 2n+1 theorem), for the 2nd perturbation.<br />
+The three elements corresponds to the three primitive
+vectors, either in real space (atomic displacement),
+or in reciprocal space (electric field perturbation).<br />
+See <a href="../../variables/generated_files/varset_dfpt.html#rfdir">rfdir</a> for additional details.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="d3e_pert2_elfd">d3e_pert2_elfd</a></font>
+<br><font id="mnemonics">Mnemonics: 3rd Derivative of Energy, mixed PERTurbation 2: ELectric FielD</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_nonlinear.html">nonlinear</a>.</font>
+<br><font id="smalltext">Moderately used: [11/920] in abinit tests, [2/136] in tuto abinit tests. Tuto test list: {tutorespfn:[<a href="../../tests/tutorespfn/Input/tnlo_11.in">nlo_11</a>,<a href="../../tests/tutorespfn/Input/tnlo_2.in">nlo_2</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><br><font id="requires">
+Only relevant if <a href="../../variables/generated_files/varset_gstate.html#optdriver">optdriver</a>==5 (non-linear response computations)
+</font>
+<br><font id="text">
+<p>
+<p>
+Turns on electric field perturbation in non-linear computation, as 2nd perturbation.
+Actually, such calculations requires first the non-self-consistent calculation
+of derivatives with respect to k, independently of the electric field perturbation itself.<br />
+See <a href="../../variables/generated_files/varset_dfpt.html#rfelfd">rfelfd</a> for additional details.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="d3e_pert2_phon">d3e_pert2_phon</a></font>
+<br><font id="mnemonics">Mnemonics: 3rd Derivative of Energy, mixed PERTurbation 2: PHONons</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_nonlinear.html">nonlinear</a>.</font>
+<br><font id="smalltext">Rarely used: [1/920] in abinit tests, [0/136] in tuto abinit tests. Test list: {v3:[<a href="../../tests/v3/Input/t83.in">83</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><br><font id="requires">
+Only relevant if <a href="../../variables/generated_files/varset_gstate.html#optdriver">optdriver</a>==5 (non-linear response computations)
+</font>
+<br><font id="text">
+<p>
+<p>
+Turns on atomic displacement perturbation in non-linear computation, as 2nd perturbation.<br />
+See <a href="../../variables/generated_files/varset_dfpt.html#rfphon">rfphon</a> for additional details.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="d3e_pert3_atpol">d3e_pert3_atpol</a></font>
+<br><font id="mnemonics">Mnemonics: 3rd Derivative of Energy, mixed PERTurbation 3: limits of ATomic POLarisations</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_nonlinear.html">nonlinear</a>.</font>
+<br><font id="smalltext">Rarely used: [1/920] in abinit tests, [0/136] in tuto abinit tests. Test list: {v3:[<a href="../../tests/v3/Input/t83.in">83</a>]}.</font>
+<br><font id="vartype">Variable type: integer(2)</font>
+<br><font id="default">Default is [1, 1]</font>
+<br><br><font id="requires">
+Only relevant if <a href="../../variables/generated_files/varset_gstate.html#optdriver">optdriver</a>==5 (non-linear response computations)
+</font>
+<br><font id="text">
+<p>
+<p>
+Controls the range of atoms for which displacements will be considered
+in non-linear computations (using the 2n+1 theorem), for the 3rd perturbation.<br />
+May take values from 1 to <a href="../../variables/generated_files/varset_basic.html#natom">natom</a>, with
+<b>d3e_pert3_atpol</b>(1)&lt;=<b>d3e_pert3_atpol</b>(2).<br />
+See <a href="../../variables/generated_files/varset_dfpt.html#rfatpol">rfatpol</a> for additional details.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="d3e_pert3_dir">d3e_pert3_dir</a></font>
+<br><font id="mnemonics">Mnemonics: 3rd Derivative of Energy, mixed PERTurbation 3: DIRections</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_nonlinear.html">nonlinear</a>.</font>
+<br><font id="smalltext">Moderately used: [11/920] in abinit tests, [2/136] in tuto abinit tests. Tuto test list: {tutorespfn:[<a href="../../tests/tutorespfn/Input/tnlo_11.in">nlo_11</a>,<a href="../../tests/tutorespfn/Input/tnlo_2.in">nlo_2</a>]}.</font>
+<br><font id="vartype">Variable type: integer(3)</font>
+<br><font id="default">Default is [0, 0, 0]</font>
+<br><br><font id="requires">
+Only relevant if <a href="../../variables/generated_files/varset_gstate.html#optdriver">optdriver</a>==5 (non-linear response computations)
+</font>
+<br><font id="text">
+<p>
+<p>
+Gives the directions to be considered in non-linear computations
+(using the 2n+1 theorem), for the 3rd perturbation.<br />
+The three elements corresponds to the three primitive
+vectors, either in real space (atomic displacement),
+or in reciprocal space (electric field perturbation).<br />
+See <a href="../../variables/generated_files/varset_dfpt.html#rfdir">rfdir</a> for additional details.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="d3e_pert3_elfd">d3e_pert3_elfd</a></font>
+<br><font id="mnemonics">Mnemonics: 3rd Derivative of Energy, mixed PERTurbation 3: ELectric FielD</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_nonlinear.html">nonlinear</a>.</font>
+<br><font id="smalltext">Moderately used: [11/920] in abinit tests, [2/136] in tuto abinit tests. Tuto test list: {tutorespfn:[<a href="../../tests/tutorespfn/Input/tnlo_11.in">nlo_11</a>,<a href="../../tests/tutorespfn/Input/tnlo_2.in">nlo_2</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><br><font id="requires">
+Only relevant if <a href="../../variables/generated_files/varset_gstate.html#optdriver">optdriver</a>==5 (non-linear response computations)
+</font>
+<br><font id="text">
+<p>
+<p>
+Turns on electric field perturbation in non-linear computation, as 3rd perturbation.
+Actually, such calculations requires first the non-self-consistent calculation
+of derivatives with respect to k, independently of the electric field perturbation itself.<br />
+See <a href="../../variables/generated_files/varset_dfpt.html#rfelfd">rfelfd</a> for additional details.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="d3e_pert3_phon">d3e_pert3_phon</a></font>
+<br><font id="mnemonics">Mnemonics: 3rd Derivative of Energy, mixed PERTurbation 3: PHONons</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_nonlinear.html">nonlinear</a>.</font>
+<br><font id="smalltext">Rarely used: [1/920] in abinit tests, [0/136] in tuto abinit tests. Test list: {v3:[<a href="../../tests/v3/Input/t83.in">83</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><br><font id="requires">
+Only relevant if <a href="../../variables/generated_files/varset_gstate.html#optdriver">optdriver</a>==5 (non-linear response computations)
+</font>
+<br><font id="text">
+<p>
+<p>
+Turns on atomic displacement perturbation in non-linear computation, as 3rd perturbation.<br />
+See <a href="../../variables/generated_files/varset_dfpt.html#rfphon">rfphon</a> for additional details.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="dfpt_sciss">dfpt_sciss</a></font>
+<br><font id="mnemonics">Mnemonics: DFPT SCISSor operator</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../guide/generated_files/help_abinit.html#ENERGY">ENERGY</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_DFPT.html">DFPT</a>.</font>
+<br><font id="smalltext">Rarely used: [1/920] in abinit tests, [0/136] in tuto abinit tests. Test list: {v7:[<a href="../../tests/v7/Input/t46.in">46</a>]}.</font>
+<br><font id="vartype">Variable type: real</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p>
+ It is the value of the "scissors operator", the
+shift of conduction band eigenvalues,
+used in response function calculations.
+ <br />
+ Can be specified in Ha (the default), Ry, eV or Kelvin, since
+ <b>
+  ecut
+ </b>
+ has the
+'<a href="../../guide/generated_files/help_abinit.html#ENERGY">ENERGY</a>' characteristics.
+(1 Ha=27.2113845 eV)
+ <br />
+ Typical use is for response to electric field (<a href="../../variables/generated_files/varset_dfpt.html#rfelfd">rfelfd</a>=3),
+but NOT for d/dk (<a href="../../variables/generated_files/varset_dfpt.html#rfelfd">rfelfd</a>=2) and phonon responses.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="efmas">efmas</a></font>
+<br><font id="mnemonics">Mnemonics: EFfective MASs</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_EffMass.html">EffMass</a>.</font>
+<br><font id="smalltext">Rarely used: [3/920] in abinit tests, [0/136] in tuto abinit tests. Test list: {v7:[<a href="../../tests/v7/Input/t80.in">80</a>,<a href="../../tests/v7/Input/t81.in">81</a>,<a href="../../tests/v7/Input/t82.in">82</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p>
+ Turns on effective mass tensor calculations.
+ Such calculations requires the non-self-consistent calculation
+ of derivatives with respect to k, in the same dataset.
+ It must therefore be used with <a href="../../variables/generated_files/varset_dfpt.html#rfelfd">rfelfd</a>=2.
+ <br />
+ <ul>
+  <li>
+   0=&gt;no effective mass tensor calculation
+  </li>
+  <li>
+   1=&gt;effective mass tensor calculation
+  </li>
+ </ul>
+</p>
+
+<p>
+At the present time, both norm-conserving (NC) and PAW calculations are supported.
+Also, for PAW calculations only, <a href="../../variables/generated_files/varset_gstate.html#nspinor">nspinor</a>==2 and <a href="../../variables/generated_files/varset_paw.html#pawspnorb">pawspnorb</a>==1
+(i.e. spin-orbit (SO) calculations) is supported. NC SO calculations are NOT currently
+supported. Also, for both NC and PAW, <a href="../../variables/generated_files/varset_gstate.html#nspden">nspden</a>/=1 and <a href="../../variables/generated_files/varset_basic.html#nsppol">nsppol</a>/=1 are NOT supported.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="efmas_bands">efmas_bands</a></font>
+<br><font id="mnemonics">Mnemonics: EFfective MASs, BANDS to be treated.</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_EffMass.html">EffMass</a>.</font>
+<br><font id="smalltext">Rarely used: [3/920] in abinit tests, [0/136] in tuto abinit tests. Test list: {v7:[<a href="../../tests/v7/Input/t80.in">80</a>,<a href="../../tests/v7/Input/t81.in">81</a>,<a href="../../tests/v7/Input/t82.in">82</a>]}.</font>
+<br><font id="vartype">Variable type: integer(2,<a href="../../variables/generated_files/varset_basic.html#nkpt">nkpt</a>)</font>
+<br><font id="default">Default is The full range of band available in the calculation for each k-point.</font>
+<br><br><font id="requires">
+Only relevant if <a href="../../variables/generated_files/varset_dfpt.html#efmas">efmas</a>==1
+</font>
+<br><font id="text">
+<p>
+<p>
+This variable controls the range of bands for which the effective mass is to be calculated.
+If a band is degenerate, all other bands of the degenerate group will automatically be treated,
+even if they were not part of the user specified range.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="efmas_calc_dirs">efmas_calc_dirs</a></font>
+<br><font id="mnemonics">Mnemonics: EFfective MASs, CALCulate along DIRectionS</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_EffMass.html">EffMass</a>.</font>
+<br><font id="smalltext">Rarely used: [2/920] in abinit tests, [0/136] in tuto abinit tests. Test list: {v7:[<a href="../../tests/v7/Input/t80.in">80</a>,<a href="../../tests/v7/Input/t82.in">82</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><br><font id="requires">
+Only relevant if <a href="../../variables/generated_files/varset_dfpt.html#efmas">efmas</a>==1
+</font>
+<br><font id="text">
+<p>
+<p>
+Allows the user to calculate the scalar effective mass of all bands specified by <a href="../../variables/generated_files/varset_dfpt.html#efmas_bands">efmas_bands</a> along
+specific directions in reciprocal space. This is particularly useful when considering degenerate bands,
+which are usually warped, and thus cannot have their dispersion (hessian) and effective mass expressed as
+a tensor. This allows the user to see the more complex angular behavior of effective masses in these cases,
+for instance.
+</p>
+
+<p>
+When <b>efmas_calc_dirs</b>==0, no directions are read from the input file (using <a href="../../variables/generated_files/varset_dfpt.html#efmas_dirs">efmas_dirs</a>) and the
+effective masses along the 3 cartesian directions are output by default.
+</p>
+
+<p>
+When <b>efmas_calc_dirs</b>==1, 2 or 3, <a href="../../variables/generated_files/varset_dfpt.html#efmas_n_dirs">efmas_n_dirs</a> directions are read from <a href="../../variables/generated_files/varset_dfpt.html#efmas_dirs">efmas_dirs</a>, assuming
+cartesian, reduced or angular (theta,phi) coordinates, respectively. In the case <b>efmas_calc_dirs</b>==3,
+2 real values per directions are read, whereas 3 real values are read in the two other cases.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="efmas_deg">efmas_deg</a></font>
+<br><font id="mnemonics">Mnemonics: EFfective MASs, activate DEGenerate formalism</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_EffMass.html">EffMass</a>.</font>
+<br><font id="smalltext">Rarely used: [1/920] in abinit tests, [0/136] in tuto abinit tests. Test list: {v7:[<a href="../../tests/v7/Input/t82.in">82</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 1</font>
+<br><br><font id="requires">
+Only relevant if <a href="../../variables/generated_files/varset_dfpt.html#efmas">efmas</a>>0
+</font>
+<br><font id="text">
+<p>
+<p>
+Activate (==1) or not (==0) the treatment of degenerate bands (within a criterion <a href="../../variables/generated_files/varset_dfpt.html#efmas_deg_tol">efmas_deg_tol</a>)
+using the transport equivalent effective mass idea
+(see <a href="https://doi.org/10.1103/PhysRevB.89.155131">PRB 89 155131 (2014)</a>).
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="efmas_deg_tol">efmas_deg_tol</a></font>
+<br><font id="mnemonics">Mnemonics: EFfective MASs, DEGeneracy TOLerance</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_EffMass.html">EffMass</a>.</font>
+<br><font id="smalltext">Rarely used: [1/920] in abinit tests, [0/136] in tuto abinit tests. Test list: {v7:[<a href="../../tests/v7/Input/t82.in">82</a>]}.</font>
+<br><font id="vartype">Variable type: real</font>
+<br><font id="default">Default is 1e-05</font>
+<br><br><font id="requires">
+Only relevant if <a href="../../variables/generated_files/varset_dfpt.html#efmas_deg">efmas_deg</a>==1
+</font>
+<br><font id="text">
+<p>
+<p>
+Energy difference below which 2 bands are considered degenerate
+(and treated using the formalism activated with <a href="../../variables/generated_files/varset_dfpt.html#efmas_deg">efmas_deg</a>==1).
+<b>efmas_deg_tol</b> has the '<a href="../../guide/generated_files/help_abinit.html#ENERGY">ENERGY</a>' characteristics.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="efmas_dim">efmas_dim</a></font>
+<br><font id="mnemonics">Mnemonics: EFfective MASs, DIMension of the effective mass tensor</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_EffMass.html">EffMass</a>.</font>
+<br><font id="smalltext">Rarely used: [1/920] in abinit tests, [0/136] in tuto abinit tests. Test list: {v7:[<a href="../../tests/v7/Input/t80.in">80</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 3</font>
+<br><br><font id="requires">
+Only relevant if <a href="../../variables/generated_files/varset_dfpt.html#efmas">efmas</a>==1
+</font>
+<br><font id="text">
+<p>
+<p>
+For 2D or 1D systems, the band dispersion goes to 0 perpendicular to the system,
+which causes the inverse effective mass to be singular, i.e. the effective mass
+to be NaN. This keyword circumvents the problem by eliminating the troublesome dimensions
+from the inverse effective mass.
+</p>
+
+<p>
+In 2D, the Z axis is ignored and, in 1D, the Z and Y axis are ignored.
+</p>
+
+<p>
+Also, note that in the 2D degenerate case, a subtlety arises: the 'transport equivalent'
+effective mass does not determine the scale of the transport tensors (conductivity and others).
+Therefore, for this specific case, the factor by which these transport tensors should be scaled
+once determined from the 'transport equivatlent' effective mass tensor is output separately on
+the line immediately after the effective mass.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="efmas_dirs">efmas_dirs</a></font>
+<br><font id="mnemonics">Mnemonics: EFfective MASs, DIRectionS to be calculated</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_EffMass.html">EffMass</a>.</font>
+<br><font id="smalltext">Rarely used: [2/920] in abinit tests, [0/136] in tuto abinit tests. Test list: {v7:[<a href="../../tests/v7/Input/t80.in">80</a>,<a href="../../tests/v7/Input/t82.in">82</a>]}.</font>
+<br><font id="vartype">Variable type: real(3 or 2,<a href="../../variables/generated_files/varset_dfpt.html#efmas_n_dirs">efmas_n_dirs</a>)</font>
+<br><font id="default">Default is 0</font>
+<br><br><font id="requires">
+Only relevant if <a href="../../variables/generated_files/varset_dfpt.html#efmas_calc_dirs">efmas_calc_dirs</a>>0
+</font>
+<br><font id="text">
+<p>
+<p>
+List of <a href="../../variables/generated_files/varset_dfpt.html#efmas_n_dirs">efmas_n_dirs</a> directions to be considered according to the value of <a href="../../variables/generated_files/varset_dfpt.html#efmas_calc_dirs">efmas_calc_dirs</a>.
+The directions are specified by 3 real values if <a href="../../variables/generated_files/varset_dfpt.html#efmas_calc_dirs">efmas_calc_dirs</a>==1 or 2 and by
+2 real values if <a href="../../variables/generated_files/varset_dfpt.html#efmas_calc_dirs">efmas_calc_dirs</a>==3.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="efmas_n_dirs">efmas_n_dirs</a></font>
+<br><font id="mnemonics">Mnemonics: EFfective MASs, Number of DIRectionS</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_EffMass.html">EffMass</a>.</font>
+<br><font id="smalltext">Rarely used: [2/920] in abinit tests, [0/136] in tuto abinit tests. Test list: {v7:[<a href="../../tests/v7/Input/t80.in">80</a>,<a href="../../tests/v7/Input/t82.in">82</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><br><font id="requires">
+Only relevant if <a href="../../variables/generated_files/varset_dfpt.html#efmas_calc_dirs">efmas_calc_dirs</a>>0
+</font>
+<br><font id="text">
+<p>
+<p>
+Number of directions in <a href="../../variables/generated_files/varset_dfpt.html#efmas_dirs">efmas_dirs</a>, to be considered according to <a href="../../variables/generated_files/varset_dfpt.html#efmas_calc_dirs">efmas_calc_dirs</a>.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="efmas_ntheta">efmas_ntheta</a></font>
+<br><font id="mnemonics">Mnemonics: EFfective MASs, Number of points for integration w/r to THETA</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_EffMass.html">EffMass</a>.</font>
+<br><font id="smalltext">Rarely used: [3/920] in abinit tests, [0/136] in tuto abinit tests. Test list: {v7:[<a href="../../tests/v7/Input/t80.in">80</a>,<a href="../../tests/v7/Input/t81.in">81</a>,<a href="../../tests/v7/Input/t82.in">82</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 1000</font>
+<br><br><font id="requires">
+Only relevant if <a href="../../variables/generated_files/varset_dfpt.html#efmas">efmas</a>==1 and <a href="../../variables/generated_files/varset_dfpt.html#efmas_bands">efmas_bands</a>==(degenerate band index)
+</font>
+<br><font id="text">
+<p>
+<p>
+When a band is degenerate, the usual definition of effective mass becomes invalid.
+However, it is still possible to define a 'transport equivalent mass tensor' that
+reproduces the contribution of the band to the conductivity tensor.
+To obtain this tensor, an integration over the solid sphere is required.
+The default value gives a tensor accurate to the 4th decimal in Ge.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="elph2_imagden">elph2_imagden</a></font>
+<br><font id="mnemonics">Mnemonics: ELectron-PHonon interaction at 2nd order : IMAGinary shift of the DENominator</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../guide/generated_files/help_abinit.html#ENERGY">ENERGY</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_TDepES.html">TDepES</a>.</font>
+<br><font id="smalltext">Moderately used: [13/920] in abinit tests, [3/136] in tuto abinit tests. Tuto test list: {tutorespfn:[<a href="../../tests/tutorespfn/Input/tdepes_1.in">depes_1</a>,<a href="../../tests/tutorespfn/Input/tdepes_3.in">depes_3</a>,<a href="../../tests/tutorespfn/Input/tdepes_4.in">depes_4</a>]}.</font>
+<br><font id="vartype">Variable type: real</font>
+<br><font id="default">Default is 0.0</font>
+<br><br><font id="requires">
+Only relevant if <a href="../../variables/generated_files/varset_dfpt.html#ieig2rf">ieig2rf</a> != 0
+</font>
+<br><font id="text">
+<p>
+<p>
+that is, if the user is performing performing second-order eigenvalue calculations using response-functions.
+ <br />
+ <br />
+ The variable <b>elph2_imagden</b> determines the imaginary shift of the denominator of the sum-over-states
+in the perturbation denominator, (e_{nk}-e_{n'k'}+i <b>elph2_imagden</b>).
+One should use a width comparable with the Debye frequency or the maximum phonon frequency.
+ <br />
+ Can be
+specified in Ha (the default), Ry, eV or Kelvin, since
+ <b>
+  ecut
+ </b>
+ has the
+'<a href="../../guide/generated_files/help_abinit.html#ENERGY">ENERGY</a>' characteristics.
+(1 Ha=27.2113845 eV)
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="eph_task">eph_task</a></font>
+<br><font id="mnemonics">Mnemonics: Electron-PHonon: Task</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../guide/generated_files/help_abinit.html#DEVELOP">DEVELOP</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_ElPhonInt.html">ElPhonInt</a>.</font>
+<br><font id="smalltext">Rarely used: [3/920] in abinit tests, [0/136] in tuto abinit tests. Test list: {v7:[<a href="../../tests/v7/Input/t89.in">89</a>],v8:[<a href="../../tests/v8/Input/t44.in">44</a>,<a href="../../tests/v8/Input/t65.in">65</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 1</font>
+<br><font id="text">
+<p>
+<p>
+When <a href="../../variables/generated_files/varset_gstate.html#optdriver">optdriver</a>==7, select the task to be performed.
+ The choice is among :
+ <br />
+ <b>eph_task</b>=1 : phonon linewidth
+ <br />
+ <b>eph_task</b>=2 : electron-phonon coupling elements
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="esmear">esmear</a></font>
+<br><font id="mnemonics">Mnemonics: Eigenvalue SMEARing</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../guide/generated_files/help_abinit.html#ENERGY">ENERGY</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_TDepES.html">TDepES</a>.</font>
+<br><font id="smalltext">Rarely used: [1/920] in abinit tests, [0/136] in tuto abinit tests. Test list: {v6:[<a href="../../tests/v6/Input/t60.in">60</a>]}.</font>
+<br><font id="vartype">Variable type: real</font>
+<br><font id="default">Default is 0.01</font>
+<br><br><font id="requires">
+Only relevant if <a href="../../variables/generated_files/varset_dfpt.html#smdelta">smdelta</a> != 0
+</font>
+<br><font id="text">
+<p>
+<p>
+that is, if the user is performing simulations of the electronic lifetimes induced by the electron-phonon coupling.
+ <br />
+ <br />
+ The variable <b>esmear</b> determines the width of the functions approximating the delta function, \delta(e_{nk}-e_{n'k'}),
+present in the expression of the lifetimes. One should use a width comparable with the Debye frequency or the maximum phonon frequency.
+ <br />
+ Can be specified in Ha (the default), Ry, eV or Kelvin, since
+ <b>
+  ecut
+ </b>
+ has the
+'<a href="../../guide/generated_files/help_abinit.html#ENERGY">ENERGY</a>' characteristics.
+(1 Ha=27.2113845 eV)
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="frzfermi">frzfermi</a></font>
+<br><font id="mnemonics">Mnemonics: FReeZe FERMI energy</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_DFPT.html">DFPT</a>.</font>
+<br><font id="smalltext">Rarely used: [2/920] in abinit tests, [0/136] in tuto abinit tests. Test list: {v3:[<a href="../../tests/v3/Input/t75.in">75</a>],v6:[<a href="../../tests/v6/Input/t89.in">89</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p>
+Can be used to suppress artificially the first-order change of
+Fermi energy, in case of Response Function calculation
+for metals at Q=0.
+The input variable <b>frzfermi</b>,
+if set to 1, allows to suppress this contribution, but this is incorrect.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="ieig2rf">ieig2rf</a></font>
+<br><font id="mnemonics">Mnemonics: Integer for second-order EIGenvalues from Response-Function</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_TDepES.html">TDepES</a>.</font>
+<br><font id="smalltext">Moderately used: [20/920] in abinit tests, [3/136] in tuto abinit tests. Tuto test list: {tutorespfn:[<a href="../../tests/tutorespfn/Input/tdepes_1.in">depes_1</a>,<a href="../../tests/tutorespfn/Input/tdepes_3.in">depes_3</a>,<a href="../../tests/tutorespfn/Input/tdepes_4.in">depes_4</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p>
+ If <b>ieig2rf</b> is greater then 0, the code will produce a file, named with the trailing suffix _EIGR2D, containing the second-order electronic eigenvalues for the perturbation. These files are used in the calculation of the thermal correction to the electronic eigenvalues.
+ <br />
+ <br />
+ If <b>ieig2rf</b> is set to 1, the second-order electronic eigenvalues will be calculated from the DFPT method (Sternheimer).
+ <br />
+ If <b>ieig2rf</b> is set to 2, the second-order electronic eigenvalues will be calculated from the Allen-Cardona method. (sum over states)
+ <br />
+ If <b>ieig2rf</b> is set to 3, the second-order electronic eigenvalues will be calculated from the DFPT method (sum over states) but using a different part of the code. This is equivalent to <b>ieig2rf</b> = 1 [debuging]
+ <br />
+ If <b>ieig2rf</b> is set to 4, the second-order electronic eigenvalues will be calculated from the dynamical DFPT method (Sternheimer).
+ The code will generate _EIGR2D.nc files that contain the electron-phonon matrix element squared on the space orthogonal to the active space.
+ The code will also produce _FAN.nc files that contain the electron-phonon matrix elements squared.
+ Note that <b>ieig2rf</b>=4 can only be used if Abinit is compiled with NETCDF support.
+ <br />
+ If <b>ieig2rf</b> is set to 5, the second-order electronic eigenvalues will be calculated from the dynamical DFPT method (Sternheimer).
+ The code will generate _EIGR2D.nc files that contain the electron-phonon matrix element square on the space orthogonal to the active space.
+ The code will also produce _GKK.nc files that contain electron-phonon matrix elements.
+ This option is preferable for large system to <b>ieig2rf</b>=4 as the GKK files take less much less disk space and memory (but run a little bit slower).
+ Note that <b>ieig2rf</b>=5 can only be used if Abinit is compiled with NETCDF support.
+ <br />
+ Related variables : <a href="../../variables/generated_files/varset_dfpt.html#bdeigrf">bdeigrf</a>,<a href="../../variables/generated_files/varset_dfpt.html#elph2_imagden">elph2_imagden</a>,<a href="../../variables/generated_files/varset_dev.html#getgam_eig2nkq">getgam_eig2nkq</a>,<a href="../../variables/generated_files/varset_dfpt.html#smdelta">smdelta</a>
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="ph_ngqpt">ph_ngqpt</a></font>
+<br><font id="mnemonics">Mnemonics: PHonons: Number of Grid points for Q-PoinT mesh.</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_q-points.html">q-points</a>.</font>
+<br><font id="smalltext">Rarely used: [2/920] in abinit tests, [0/136] in tuto abinit tests. Test list: {v7:[<a href="../../tests/v7/Input/t88.in">88</a>],v8:[<a href="../../tests/v8/Input/t44.in">44</a>]}.</font>
+<br><font id="vartype">Variable type: integer(3)</font>
+<br><font id="default">Default is [20, 20, 20]</font>
+<br><font id="text">
+<p>
+This variable defines the q-mesh used to compute the phonon DOS and the Eliashberg function via Fourier interpolation.
+Related input variables: <a href="../../variables/generated_files/varset_eph.html#ph_qshift">ph_qshift</a> and <a href="../../variables/generated_files/varset_eph.html#ph_nqshift">ph_nqshift</a>.
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="ph_qpath">ph_qpath</a></font>
+<br><font id="mnemonics">Mnemonics: Phonons: Q-PATH</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_q-points.html">q-points</a>.</font>
+<br><font id="smalltext">Rarely used: [2/920] in abinit tests, [0/136] in tuto abinit tests. Test list: {v7:[<a href="../../tests/v7/Input/t88.in">88</a>],v8:[<a href="../../tests/v8/Input/t44.in">44</a>]}.</font>
+<br><font id="vartype">Variable type: real(3,ph_nqpath)</font>
+<br><font id="default">Default is None</font>
+<br><br><font id="requires">
+Only relevant if specified(<a href="../../variables/generated_files/varset_eph.html#ph_nqpath">ph_nqpath</a>)
+</font>
+<br><font id="text">
+<p>
+This array contains the list of special q-points used to construct the q-path for phonon band structures and phonon linewidths.
+See also <a href="../../variables/generated_files/varset_eph.html#ph_nqpath">ph_nqpath</a> and [<a href="../../variables/generated_files/varset_eph.html#ph_ndivsm">ph_ndivsm</a>.
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="prepanl">prepanl</a></font>
+<br><font id="mnemonics">Mnemonics: PREPAre Non-Linear response calculation</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_nonlinear.html">nonlinear</a>.</font>
+<br><font id="smalltext">Moderately used: [10/920] in abinit tests, [2/136] in tuto abinit tests. Tuto test list: {tutorespfn:[<a href="../../tests/tutorespfn/Input/tnlo_10.in">nlo_10</a>,<a href="../../tests/tutorespfn/Input/tnlo_2.in">nlo_2</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p>
+ The computation of third-order derivatives from the 2n+1 theorem
+requires the first-order wavefunctions and densities obtained from
+a linear response calculation. The standard approach in a linear
+response calculation is (i) to compute only the
+irreducible perturbations, and (ii) to use symmetries to
+reduce the number of k-points for the k-point integration.
+ <br />
+ This approach cannot be applied, presently (v4.1),
+if the first-order wavefunctions are to be used to compute third-order derivatives.
+First, for electric fields, the code needs the derivatives
+along the three directions. Still, in case of phonons, only the
+irreducible perturbations are required.
+Second, for both electric fields and phonons, the wavefunctions
+must be available in half the BZ (kptopt=2), or the full BZ (kptopt=3).
+ <br />
+ During the linear response calculation, in order to prepare a non-linear
+calculation, one should put <b>prepanl</b> to 1 in order
+to force ABINIT (i) to compute the electric field perturbation
+along the three directions explicitly, and (ii) to keep the full number of k-points.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="prepgkk">prepgkk</a></font>
+<br><font id="mnemonics">Mnemonics: PREPAre GKK calculation</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_ElPhonInt.html">ElPhonInt</a>.</font>
+<br><font id="smalltext">Rarely used: [5/920] in abinit tests, [1/136] in tuto abinit tests. Test list: {tutorespfn:[<a href="../../tests/tutorespfn/Input/teph_1.in">eph_1</a>],v5:[<a href="../../tests/v5/Input/t85.in">85</a>],v6:[<a href="../../tests/v6/Input/t72.in">72</a>,<a href="../../tests/v6/Input/t90.in">90</a>],v7:[<a href="../../tests/v7/Input/t90.in">90</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p>
+ The calculation of electron-phonon coupling quantities requires the presence
+of all the perturbations (all atoms in all directions) for the chosen set
+of (irreducible) q-points. To impose this and prevent ABINIT from using
+symmetry to reduce the number of perturbations, set <b>prepgkk</b> to 1.
+Use in conjunction with <a href="../../variables/generated_files/varset_files.html#prtgkk">prtgkk</a>.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="prtbbb">prtbbb</a></font>
+<br><font id="mnemonics">Mnemonics: PRinT Band-By-Band decomposition</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topics: <a href="../../topics/generated_files/topic_printing.html">printing</a>, <a href="../../topics/generated_files/topic_Output.html">Output</a>.</font>
+<br><font id="smalltext">Rarely used: [1/920] in abinit tests, [0/136] in tuto abinit tests. Test list: {v3:[<a href="../../tests/v3/Input/t77.in">77</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p>
+ If <b>prtbbb</b> is 1, print the band-by-band decomposition of
+Born effective charges and localization tensor, in case they are computed.
+See Ph. Ghosez and X. Gonze, J. Phys.: Condens. Matter 12, 9179 (2000).
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="rf2_dkdk">rf2_dkdk</a></font>
+<br><font id="mnemonics">Mnemonics: Response Function : 2nd Derivative of wavefunctions with respect to K</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_DFPT.html">DFPT</a>.</font>
+<br><font id="smalltext">Rarely used: [0/920] in abinit tests, [0/136] in tuto abinit tests.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p>
+UNUSABLE (in development)
+</p>
+<p>
+Activates computation of second derivatives of wavefunctions with respect to wavevectors.
+This is not strictly a response function but is a needed auxiliary quantity in the calculations
+of 3rd-order derivatives of the energy (non-linear response).
+The directions for the derivatives are determined by <a href="../../variables/generated_files/varset_dfpt.html#rfdir">rfdir</a> (TO BE CORRECTED!).
+ <ul>
+  <li>
+   0=&gt;no derivative calculation
+  </li>
+  <li>
+   1=&gt;calculation along diagonal directions (d2/(dk_i dk_i), natom+10 is activated)
+  </li>
+  <li>
+   2=&gt;calculation along off-diagonal directions (d2/(dk_i dk_j), natom+11 is activated)
+  </li>
+  <li>
+   3=&gt;calculation along all directions (both natom+10 and natom+11 are activated)
+  </li>
+ </ul>
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="rfasr">rfasr</a></font>
+<br><font id="mnemonics">Mnemonics: Response Function : Acoustic Sum Rule</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_Phonons.html">Phonons</a>.</font>
+<br><font id="smalltext">Rarely used: [4/920] in abinit tests, [0/136] in tuto abinit tests. Test list: {v5:[<a href="../../tests/v5/Input/t24.in">24</a>],v6:[<a href="../../tests/v6/Input/t37.in">37</a>],v7:[<a href="../../tests/v7/Input/t50.in">50</a>,<a href="../../tests/v7/Input/t51.in">51</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p>
+ Control the evaluation of the
+acoustic sum rule in effective charges and dynamical matrix at Gamma
+within a response function calculation (not active at the level of producing the DDB, but
+at the level of the phonon eigenfrequencies output).
+ <ul>
+  <li>
+   0 =&gt; no acoustic sum rule imposed
+  </li>
+  <li>
+   1 =&gt; acoustic sum rule imposed for dynamical matrix at Gamma, and charge neutrality imposed with
+extra charge evenly distributed among atoms
+  </li>
+  <li>
+   2 =&gt; acoustic sum rule imposed for dynamical matrix at Gamma, and charge neutrality imposed with
+extra charge given proportionally to those atoms with
+the largest effective charge.
+  </li>
+ </ul>
+ The treatment of the acoustic sum rule and charge neutrality sum rule is finer at the level of the ANADDB utility,
+with the two independent input variables <a href="../../variables/generated_files/varset_anaddb.html#asr@anaddb">asr</a> and <a href="../../variables/generated_files/varset_anaddb.html#chneut@anaddb">chneut</a>.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="rfatpol">rfatpol</a></font>
+<br><font id="mnemonics">Mnemonics: Response Function : ATomic POLarisation</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topics: <a href="../../topics/generated_files/topic_DFPT.html">DFPT</a>, <a href="../../topics/generated_files/topic_Elastic.html">Elastic</a>, <a href="../../topics/generated_files/topic_Phonons.html">Phonons</a>.</font>
+<br><font id="smalltext">Moderately used: [138/920] in abinit tests, [14/136] in tuto abinit tests. Too many tests to report (>10).</font>
+<br><font id="vartype">Variable type: integer(2)</font>
+<br><font id="default">Default is [1, 1]</font>
+<br><font id="text">
+<p>
+<p>
+ Control the range
+of atoms for which displacements will be considered
+in phonon calculations (atomic polarizations), using the 2n+1 theorem.
+ <br />
+ These values are only relevant to phonon response function
+calculations.
+ <br />
+ May take values from 1 to <a href="../../variables/generated_files/varset_basic.html#natom">natom</a>, with <b>rfatpol</b>(1)&lt;=<b>rfatpol</b>(2).
+ <br />
+ The atoms to be moved will be defined by the
+ <br />
+ do-loop variable iatpol :
+ <br />
+ do iatpol=<b>rfatpol</b>(1),<b>rfatpol</b>(2)
+ <br />
+ For the calculation of a full dynamical matrix, use
+<b>rfatpol</b>(1)=1 and <b>rfatpol</b>(2)=<a href="../../variables/generated_files/varset_basic.html#natom">natom</a>, together with
+<a href="../../variables/generated_files/varset_dfpt.html#rfdir">rfdir</a> 1 1 1 . For selected elements of the
+dynamical matrix, use different values of <b>rfatpol</b> and/or
+<a href="../../variables/generated_files/varset_dfpt.html#rfdir">rfdir</a>. The name 'iatpol' is used for the part of the
+internal variable ipert when it runs from 1 to <a href="../../variables/generated_files/varset_basic.html#natom">natom</a>. The
+internal variable ipert can also assume values larger
+than <a href="../../variables/generated_files/varset_basic.html#natom">natom</a>,
+denoting perturbations of electric field or stress type (see
+ <a href="../../users/generated_files/help_respfn.html">
+  the response function help file
+ </a>
+ ).
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="rfddk">rfddk</a></font>
+<br><font id="mnemonics">Mnemonics: Response Function with respect to Derivative with respect to K</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_DFPT.html">DFPT</a>.</font>
+<br><font id="smalltext">Rarely used: [1/920] in abinit tests, [0/136] in tuto abinit tests. Test list: {v5:[<a href="../../tests/v5/Input/t30.in">30</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p>
+ Activates computation of derivatives of ground state
+wavefunctions with respect to wavevectors. This is not strictly a response
+function but is a needed auxiliary quantity in the electric field
+calculations (see <a href="../../variables/generated_files/varset_dfpt.html#rfelfd">rfelfd</a>) The directions for the
+derivatives are determined by <a href="../../variables/generated_files/varset_dfpt.html#rfdir">rfdir</a>.
+ <ul>
+  <li>
+   0=&gt;no derivative calculation
+  </li>
+  <li>
+   1=&gt;calculation of first derivatives of wavefunctions with respect to k points
+(d/dk calculation). The exact same functionality is provided by
+<a href="../../variables/generated_files/varset_dfpt.html#rfelfd">rfelfd</a> = 2.
+  </li>
+ </ul>
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="rfdir">rfdir</a></font>
+<br><font id="mnemonics">Mnemonics: Response Function : DIRections</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topics: <a href="../../topics/generated_files/topic_DFPT.html">DFPT</a>, <a href="../../topics/generated_files/topic_Elastic.html">Elastic</a>, <a href="../../topics/generated_files/topic_Phonons.html">Phonons</a>.</font>
+<br><font id="smalltext">Moderately used: [194/920] in abinit tests, [27/136] in tuto abinit tests. Too many tests to report (>10).</font>
+<br><font id="vartype">Variable type: integer(3)</font>
+<br><font id="default">Default is [0, 0, 0]</font>
+<br><font id="text">
+<p>
+<p>
+ Gives the directions
+to be considered for response function calculations
+(also for the Berry phase computation of the polarization, see
+the <a href="../../variables/generated_files/varset_ffield.html#berryopt">berryopt</a> input variable).
+ <br />
+ The three elements corresponds to the three primitive
+vectors, either in real space (phonon calculations),
+or in reciprocal space (d/dk, homogeneous electric field, homogeneous magnetic field
+calculations). So, they generate a basis
+for the generation of the dynamical matrix or
+the macroscopic dielectric tensor or magnetic susceptibility and magnetic
+shielding, or the effective
+charge tensors.
+ <br />
+ If equal to 1, response functions, as defined
+by <a href="../../variables/generated_files/varset_dfpt.html#rfddk">rfddk</a>,
+<a href="../../variables/generated_files/varset_dfpt.html#rfelfd">rfelfd</a>, <a href="../../variables/generated_files/varset_dfpt.html#rfphon">rfphon</a>, <b>rfdir</b>
+and <a href="../../variables/generated_files/varset_dfpt.html#rfatpol">rfatpol</a>, are to be computed
+for the corresponding direction. If 0, this direction
+should not be considered.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="rfelfd">rfelfd</a></font>
+<br><font id="mnemonics">Mnemonics: Response Function with respect to the ELectric FielD</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topics: <a href="../../topics/generated_files/topic_EffMass.html">EffMass</a>, <a href="../../topics/generated_files/topic_DFPT.html">DFPT</a>.</font>
+<br><font id="smalltext">Moderately used: [70/920] in abinit tests, [11/136] in tuto abinit tests. Too many tests to report (>10).</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p>
+ Turns on electric field response
+function calculations. Actually, such calculations
+requires first the non-self-consistent calculation
+of derivatives with respect to k, independently of the
+electric field perturbation itself.
+ <ul>
+  <li>
+   0=&gt;no electric field perturbation
+  </li>
+  <li>
+   1=&gt;full calculation, with first the
+derivative of ground-state wavefunction with
+respect to k (d/dk calculation), by a
+non-self-consistent calculation, then the generation of
+the first-order response to an homogeneous
+electric field
+  </li>
+  <li>
+   2=&gt;only the derivative of ground-state wavefunctions with
+respect to k
+  </li>
+  <li>
+   3=&gt;only the generation of the first-order response
+to the electric field,
+assuming that the data on derivative of ground-state
+wavefunction with respect to k is available on disk.
+  </li>
+ </ul>
+ (Note : because the tolerances to be used for derivatives or
+homogeneous electric field are different, one often does the
+calculation of derivatives in a separate dataset, followed by
+calculation of electric field response as well as phonon.
+ <br />
+ The options 2 and 3 proves useful in that context ;
+also, in case a scissor shift is to be used,
+it is usually not applied for the d/dk response).
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="rfmagn">rfmagn</a></font>
+<br><font id="mnemonics">Mnemonics: Response Function with respect to MAGNetic B-field perturbation</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_DFPT.html">DFPT</a>.</font>
+<br><font id="smalltext">Rarely used: [1/920] in abinit tests, [0/136] in tuto abinit tests. Test list: {v8:[<a href="../../tests/v8/Input/t20.in">20</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p>
+ It must be equal to 1
+ to run response function calculations with respect to external magnetic field.
+ Currently, orbital magnetism is not taken into account and the perturbing potential
+ has Zeeman form.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="rfmeth">rfmeth</a></font>
+<br><font id="mnemonics">Mnemonics: Response Function METHod</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_DFPT.html">DFPT</a>.</font>
+<br><font id="smalltext">Rarely used: [0/920] in abinit tests, [0/136] in tuto abinit tests.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 1</font>
+<br><font id="text">
+<p>
+<p>
+ Selects method used in
+response function calculations. Presently, only 1
+is allowed.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="rfphon">rfphon</a></font>
+<br><font id="mnemonics">Mnemonics: Response Function with respect to PHONons</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_DFPT.html">DFPT</a>.</font>
+<br><font id="smalltext">Moderately used: [139/920] in abinit tests, [14/136] in tuto abinit tests. Too many tests to report (>10).</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p>
+ It must be equal to 1
+to run phonon response function calculations.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="rfstrs">rfstrs</a></font>
+<br><font id="mnemonics">Mnemonics: Response Function with respect to STRainS</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topics: <a href="../../topics/generated_files/topic_DFPT.html">DFPT</a>, <a href="../../topics/generated_files/topic_Elastic.html">Elastic</a>.</font>
+<br><font id="smalltext">Moderately used: [24/920] in abinit tests, [5/136] in tuto abinit tests. Tuto test list: {tutorespfn:[<a href="../../tests/tutorespfn/Input/telast_2.in">elast_2</a>,<a href="../../tests/tutorespfn/Input/telast_5.in">elast_5</a>,<a href="../../tests/tutorespfn/Input/telast_6.in">elast_6</a>,<a href="../../tests/tutorespfn/Input/tffield_2.in">ffield_2</a>,<a href="../../tests/tutorespfn/Input/tnlo_3.in">nlo_3</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p>
+ Used to run strain response-function
+calculations (e.g. needed to get elastic constants). Define, with
+<a href="../../variables/generated_files/varset_dfpt.html#rfdir">rfdir</a>, the set of perturbations.
+ <ul>
+  <li>
+   0=&gt;no strain perturbation
+  </li>
+  <li>
+   1=&gt;only uniaxial strain(s) (ipert=natom+3 is activated)
+  </li>
+  <li>
+   2=&gt;only shear strain(s) (ipert=natom+4 is activated)
+  </li>
+  <li>
+   3=&gt;both uniaxial and shear strain(s) (both ipert=natom+3 and ipert=natom+4 are activated)
+  </li>
+ </ul>
+ See the possible restrictions on the use of strain perturbations, in the
+ <a href="../../users/generated_files/help_respfn.html#1">
+  respfn help file
+ </a>
+ .
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="rfuser">rfuser</a></font>
+<br><font id="mnemonics">Mnemonics: Response Function, USER-defined</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_DFPT.html">DFPT</a>.</font>
+<br><font id="smalltext">Rarely used: [0/920] in abinit tests, [0/136] in tuto abinit tests.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p>
+ Available to the developpers, to activate
+the use of ipert=natom+6 and ipert=natom+7, two sets of perturbations
+that the developpers can define.
+ <br />
+ <ul>
+  <li>
+   0=&gt;no computations for ipert=natom+6 or ipert=natom+7
+  </li>
+  <li>
+   1=&gt;response with respect to perturbation natom+6 will be computed
+  </li>
+  <li>
+   2=&gt;response with respect to perturbation natom+7 will be computed
+  </li>
+  <li>
+   3=&gt;responses with respect to perturbations natom+6 and natom+7 will be computed
+  </li>
+ </ul>
+</p>
+<p>
+ In order to define and use correctly the new perturbations,
+the developper might have to include code lines or additional routines
+at the level of the following routines :
+dfpt_cgwf.F90, dfpt_dyout.F90, dfpt_symph.F90, dfpt_dyout.F90, dfpt_etot.F90,
+littlegroup_pert.F90, dfpt_looppert.F90, dfpt_mkcor.F90, dfpt_nstdy.F90,
+dfpt_nstwf.F90, respfn.F90, dfpt_scfcv.F90, irreducible_set_pert.F90,
+dfpt_vloca.F90, dfpt_vtorho.F90, dfpt_vtowfk.F90.
+In these routines, the developper should pay a particular
+attention to the rfpert array, defined in the routine respfn.F90 ,
+as well as to the ipert local variable.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="smdelta">smdelta</a></font>
+<br><font id="mnemonics">Mnemonics: SMeared DELTA function</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_TDepES.html">TDepES</a>.</font>
+<br><font id="smalltext">Moderately used: [19/920] in abinit tests, [3/136] in tuto abinit tests. Tuto test list: {tutorespfn:[<a href="../../tests/tutorespfn/Input/tdepes_1.in">depes_1</a>,<a href="../../tests/tutorespfn/Input/tdepes_3.in">depes_3</a>,<a href="../../tests/tutorespfn/Input/tdepes_4.in">depes_4</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p>
+ When <b>smdelta</b> in non-zero, it will trigger the calculation of the imaginary part of the second-order electronic eigenvalues, which can be related to the electronic lifetimes. The delta function is evaluated using:
+ <br />
+ <ul>
+  <li>
+   when <b>smdelta</b> == 1, Fermi-Dirac smearing : 0.25_dp/(cosh(xx/2.0_dp)**2
+  </li>
+  <li>
+   when <b>smdelta</b> == 2, Cold smearing by Marzari using the parameter a=-.5634 (minimization of the bump): exp(-xx2)/sqrt(pi) * (1.5d0+xx*(-a*1.5d0+xx*(-1.0d0+a*xx)))
+  </li>
+  <li>
+   when <b>smdelta</b> == 3, Cold smearing by Marzari using the parameter a=-.8165 (monotonic function in the tail): as 2 but different a
+  </li>
+  <li>
+   when <b>smdelta</b> == 4, Smearing of Methfessel and Paxton (PRB40,3616(1989)) with Hermite polynomial of degree 2, corresponding to "Cold smearing" of N. Marzari with a=0 (so, same smeared delta function as smdelta=2, with different a).
+  </li>
+  <li>
+   when <b>smdelta</b> == 5, Gaussian smearing :  1.0d0*exp(-xx**2)/sqrt(pi)
+  </li>
+ </ul>
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="td_maxene">td_maxene</a></font>
+<br><font id="mnemonics">Mnemonics: Time-Dependent dft : MAXimal kohn-sham ENErgy difference</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_TDDFT.html">TDDFT</a>.</font>
+<br><font id="smalltext">Rarely used: [1/920] in abinit tests, [0/136] in tuto abinit tests. Test list: {v1:[<a href="../../tests/v1/Input/t69.in">69</a>]}.</font>
+<br><font id="vartype">Variable type: real</font>
+<br><font id="default">Default is 0.0</font>
+<br><font id="text">
+<p>
+<p>
+ The Matrix to be diagonalized in the Casida framework
+(see "Time-Dependent Density Functional Response Theory of Molecular
+systems: Theory, Computational Methods, and Functionals", by M.E. Casida,
+in Recent Developments and Applications of Modern Density Functional
+Theory, edited by J.M. Seminario (Elsevier, Amsterdam, 1996).)
+is a NxN matrix, where, by default, N is the product of
+the number of occupied states by the number of unoccupied states.
+ <br />
+ The input variable <b>td_maxene</b> allows to diminish N : it selects
+only the pairs of occupied and unoccupied states for which the
+Kohn-Sham energy difference is less than <b>td_maxene</b>.
+The default value 0.0 means that all pairs are taken into account.
+ <br />
+ See <a href="../../variables/generated_files/varset_dfpt.html#td_mexcit">td_mexcit</a> for an alternative
+way to decrease N.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="td_mexcit">td_mexcit</a></font>
+<br><font id="mnemonics">Mnemonics: Time-Dependent dft : Maximal number of EXCITations</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_TDDFT.html">TDDFT</a>.</font>
+<br><font id="smalltext">Rarely used: [1/920] in abinit tests, [0/136] in tuto abinit tests. Test list: {v1:[<a href="../../tests/v1/Input/t69.in">69</a>]}.</font>
+<br><font id="vartype">Variable type: real</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p>
+ The Matrix to be diagonalized in the Casida framework
+(see "Time-Dependent Density Functional Response Theory of Molecular
+systems: Theory, Computational Methods, and Functionals", by M.E. Casida,
+in Recent Developments and Applications of Modern Density Functional
+Theory, edited by J.M. Seminario (Elsevier, Amsterdam, 1996).)
+is a NxN matrix, where, by default, N is the product of
+the number of occupied states by the number of unoccupied states.
+ <br />
+ The input variable <b>td_mexcit</b> allows to diminish N : it selects
+the first <b>td_mexcit</b> pairs of occupied and unoccupied states, ordered
+with respect to increasing Kohn-Sham energy difference.
+However, when <b>td_mexcit</b> is zero, all pairs are allowed.
+ <br />
+ See <a href="../../variables/generated_files/varset_dfpt.html#td_maxene">td_maxene</a>
+ for an alternative
+way to decrease N.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+<script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
+
+</body>
+</html>
+

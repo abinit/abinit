@@ -432,7 +432,6 @@ end subroutine abimem_get_info
 !!    == .false. compact format
 !!
 !! PARENTS
-!!      m_errors
 !!
 !! CHILDREN
 !!      date_and_time,mpi_abort

@@ -19,7 +19,7 @@
 !! INPUTS
 !!  nfft=number of fft grid points
 !!  nspden=number of spin-density components
-!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !!  dielar(7)=input parameters for dielectric matrix:
 !!                diecut,dielng,diemac,diemix,diegap,dielam,diemixmag.
 !!  gprimd(3,3)=dimensional primitive translations in fourier space (bohr**-1)

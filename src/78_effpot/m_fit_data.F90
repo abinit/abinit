@@ -258,8 +258,8 @@ subroutine fit_data_free(fit_data)
 ! *************************************************************************
 
 ! Reset integer values
-  fit_data%ntime = zero
-  fit_data%natom = zero
+  fit_data%ntime = 0
+  fit_data%natom = 0
 
 ! Deallocate arrays  
   if(allocated(fit_data%energy_diff)) then
@@ -416,19 +416,18 @@ subroutine fit_data_compute(fit_data,eff_pot,hist,comm,verbose)
 !  Compute \Omega^{2} and ucvol for each time
    call metric(gmet,gprimd,-1,rmet,hist%rprimd(:,:,itime),ucvol(itime))
 !  Formula: sqomega(itime) = (((ucvol(itime)**(-2.))* ((natom)**(0.5)))**(-1.0/3.0))**2
-!  Compact form:
+!   Compact form:
    sqomega(itime) = ((ucvol(itime)**(4.0/3.0)) / ((natom)**(1/3.0)))
 
 !  Compute the difference between History and model (fixed part)
    fcart_diff(:,:,itime) =  hist%fcart(:,:,itime) - fcart_fixed(:,:,itime)
    energy_diff(itime)    =  hist%etot(itime) - energy
-   strten_fixed = -1 * strten_fixed
    strten_diff(:,itime)  =  hist%strten(:,itime) - strten_fixed(:,itime)
  end do
    
 !Check if the initial stresses of the reference is set to the potential
- if(all(eff_pot%strten(:)==zero))then
-   ii = zero
+ if(all(abs(eff_pot%strten(:))<tol16))then
+   ii = 0
 !  Try to find if any snapshot corresponding to the reference, 
 !  in order to fill the initial stresses...
    found = .FALSE.
@@ -603,8 +602,8 @@ subroutine training_set_free(ts)
 ! *************************************************************************
 
 ! Reset integer values
-  ts%ntime = zero
-  ts%natom = zero
+  ts%ntime = 0
+  ts%natom = 0
 
 ! Deallocate arrays  
   if(allocated(ts%displacement)) then

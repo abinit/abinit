@@ -10,7 +10,7 @@
 !!  Also accumulate zero-order potential part of the 2nd-order total energy (if needed)
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2017 ABINIT group (MT)
+!! Copyright (C) 2009-2017 ABINIT group (MT, SPr)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -149,7 +149,6 @@ subroutine dfpt_accrho(counter,cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,&
  real(dp),pointer :: vlocal(:,:,:,:)=>null()
  type(pawcprj_type),allocatable :: cwaveprj_tmp(:,:)
 
-
 ! *********************************************************************
  DBG_ENTER("COLL")
 
@@ -157,7 +156,6 @@ subroutine dfpt_accrho(counter,cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,&
 
 !Initializations
  ABI_ALLOCATE(rhoaug,(gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,gs_hamkq%nvloc))
- ABI_ALLOCATE(wfraug1,(2,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6))
  n1=gs_hamkq%ngfft(1);n2=gs_hamkq%ngfft(2);n3=gs_hamkq%ngfft(3)
  if (option==2.or.option==3) eloc0_k=zero
  if (option==2.or.option==3) vlocal => gs_hamkq%vlocal
@@ -165,6 +163,8 @@ subroutine dfpt_accrho(counter,cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,&
 !Loop on spinorial components
 ! TODO : double loop on spinors for full rhoaug1 matrix if nspden =4
  if (gs_hamkq%nvloc/=4) then  ! see later EB FR
+   ABI_ALLOCATE(wfraug1,(2,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6))
+
    do ispinor=1,nspinor
 
      if (prtvol>=10) then
@@ -242,7 +242,6 @@ subroutine dfpt_accrho(counter,cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,&
 
 !    The factor 2 is not the spin factor (see Eq.44 of PRB55,10337 (1997))
        weight=two*occ_k(iband)*wtk_k/gs_hamkq%ucvol
-
 !    Accumulate 1st-order density
        if (cplex==2) then
          do i3=1,n3
@@ -271,9 +270,8 @@ subroutine dfpt_accrho(counter,cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,&
      end if ! option
 
    end do ! Loop on spinorial components if nspden=1 or 2
-   ABI_DEALLOCATE(rhoaug)
-   ABI_DEALLOCATE(wfraug1)
 
+   ABI_DEALLOCATE(wfraug1)
  else ! nvloc = 4
 ! The same lines of code are in 72_response/dfpt_mkrho.F90
 ! TODO merge these lines in a single routine??!!
@@ -282,6 +280,9 @@ subroutine dfpt_accrho(counter,cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,&
    end if
    ABI_ALLOCATE(wfraug1_up,(2,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6))
    ABI_ALLOCATE(wfraug1_down,(2,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6))
+
+   wfraug1_up(:,:,:,:)=zero
+   wfraug1_down(:,:,:,:)=zero
 
 !  Part devoted to the accumulation of the 0-order potential part of the 2nd-order total energy
 !  --------------------------------------------------------------------------------------------
@@ -293,13 +294,13 @@ subroutine dfpt_accrho(counter,cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,&
 &     gs_hamkq%istwf_k,gs_hamkq%kg_kp,gs_hamkq%kg_kp,gs_hamkq%mgfft,mpi_enreg,1,gs_hamkq%ngfft,&
 &     gs_hamkq%npw_kp,1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,0,mpi_enreg%paral_kgb,tim_fourwf,&
 &     weight,weight,use_gpu_cuda=gs_hamkq%use_gpu_cuda)
+     nullify(cwavef_up)
 
      cwavef_down => cwavef(:,1+npw1_k:2*npw1_k) ! wfs down spin-polarized
      call fourwf(cplex,rhoaug(:,:,:,1),cwavef_down,dummy,wfraug1_down,gs_hamkq%gbound_kp,gs_hamkq%gbound_kp,&
 &     gs_hamkq%istwf_k,gs_hamkq%kg_kp,gs_hamkq%kg_kp,gs_hamkq%mgfft,mpi_enreg,1,gs_hamkq%ngfft,&
 &     gs_hamkq%npw_kp,1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,0,mpi_enreg%paral_kgb,tim_fourwf,&
 &     weight,weight,use_gpu_cuda=gs_hamkq%use_gpu_cuda)
-     nullify(cwavef_up)
      nullify(cwavef_down)
    end if
    if (option==2.or.option==3) then
@@ -321,7 +322,6 @@ subroutine dfpt_accrho(counter,cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,&
          end do
        end do
      end do
-
 !    Local potential energy of this band
      eloc0_k=eloc0_k+two*valuer/dble(gs_hamkq%nfft)
    end if ! option
@@ -329,20 +329,40 @@ subroutine dfpt_accrho(counter,cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,&
 !  Part devoted to the accumulation of the 1st-order density
 !  ---------------------------------------------------------
 
+! first order
+! 
    if (option==1.or.option==3) then
-!    Build the four components of rho. We use only norm quantities and, so fourwf.
-     ABI_ALLOCATE(wfraug_up,(2,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6))
-     ABI_ALLOCATE(wfraug_down,(2,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6))    
+
+     !SPr: condition on wf_corrected not to do FFTs of the same Bloch functions
+     if (wf_corrected==1) then
+       cwave1_up => cwave1(:,1:npw1_k)
+       cwave1_down => cwave1(:,1+npw1_k:2*npw1_k)
+       wfraug1_up(:,:,:,:)=zero
+       wfraug1_down(:,:,:,:)=zero
+
+       call fourwf(cplex,rhoaug(:,:,:,1),cwave1_up,dummy,wfraug1_up,gs_hamkq%gbound_kp,gs_hamkq%gbound_kp,&
+&       gs_hamkq%istwf_k,gs_hamkq%kg_kp,gs_hamkq%kg_kp,gs_hamkq%mgfft,mpi_enreg,1,gs_hamkq%ngfft,&
+&       gs_hamkq%npw_kp,1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,0,mpi_enreg%paral_kgb,tim_fourwf,&
+&       weight,weight,use_gpu_cuda=gs_hamkq%use_gpu_cuda)
+       nullify(cwave1_up)
+
+       call fourwf(cplex,rhoaug(:,:,:,1),cwave1_down,dummy,wfraug1_down,gs_hamkq%gbound_kp,gs_hamkq%gbound_kp,&
+&       gs_hamkq%istwf_k,gs_hamkq%kg_kp,gs_hamkq%kg_kp,gs_hamkq%mgfft,mpi_enreg,1,gs_hamkq%ngfft,&
+&       gs_hamkq%npw_kp,1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,0,mpi_enreg%paral_kgb,tim_fourwf,&
+&       weight,weight,use_gpu_cuda=gs_hamkq%use_gpu_cuda)
+       nullify(cwave1_down)
+     end if
+
+
 ! EB FR build spinorial wavefunctions
 ! zero order
      cwave0_up => cwave0(:,1:npw_k)
      cwave0_down => cwave0(:,1+npw_k:2*npw_k)
-! first order
-     cwave1_up => cwave1(:,1:npw_k)
-     cwave1_down => cwave1(:,1+npw_k:2*npw_k)
-
-!    The factor 2 is not the spin factor (see Eq.44 of PRB55,10337 (1997))
-     weight=two*occ_k(iband)*wtk_k/gs_hamkq%ucvol
+     ABI_ALLOCATE(wfraug_up,(2,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6))
+     ABI_ALLOCATE(wfraug_down,(2,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6))    
+     wfraug_up(:,:,:,:)=zero
+     wfraug_down(:,:,:,:)=zero
+!
      !density components
      !GS wfk Fourrier Tranform
      ! EB FR in the fourwf calls rhoaug(:,:,:,2) is a dummy argument
@@ -350,22 +370,22 @@ subroutine dfpt_accrho(counter,cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,&
 &     gs_hamkq%istwf_k,gs_hamkq%kg_k,gs_hamkq%kg_k,gs_hamkq%mgfft,mpi_enreg,1,gs_hamkq%ngfft,&
 &     gs_hamkq%npw_k,1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,0,mpi_enreg%paral_kgb,tim_fourwf,&
 &     weight,weight,use_gpu_cuda=gs_hamkq%use_gpu_cuda)
+     nullify(cwave0_up)
      call fourwf(1,rhoaug(:,:,:,2),cwave0_down,dummy,wfraug_down,gs_hamkq%gbound_k,gs_hamkq%gbound_k,&
 &     gs_hamkq%istwf_k,gs_hamkq%kg_k,gs_hamkq%kg_k,gs_hamkq%mgfft,mpi_enreg,1,gs_hamkq%ngfft,&
 &     gs_hamkq%npw_k,1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,0,mpi_enreg%paral_kgb,tim_fourwf,&
 &     weight,weight,use_gpu_cuda=gs_hamkq%use_gpu_cuda)
-     !1st order wfk Fourrier Transform
-     call fourwf(1,rhoaug1(:,:,:,2),cwave1_up,dummy,wfraug1_up,gs_hamkq%gbound_k,gs_hamkq%gbound_k,&
-&     gs_hamkq%istwf_k,gs_hamkq%kg_k,gs_hamkq%kg_k,gs_hamkq%mgfft,mpi_enreg,1,gs_hamkq%ngfft,&
-&     gs_hamkq%npw_k,1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,0,mpi_enreg%paral_kgb,tim_fourwf,&
-&     weight,weight,use_gpu_cuda=gs_hamkq%use_gpu_cuda)
-     call fourwf(1,rhoaug1(:,:,:,2),cwave1_down,dummy,wfraug1_down,gs_hamkq%gbound_k,gs_hamkq%gbound_k,&
-&     gs_hamkq%istwf_k,gs_hamkq%kg_k,gs_hamkq%kg_k,gs_hamkq%mgfft,mpi_enreg,1,gs_hamkq%ngfft,&
-&     gs_hamkq%npw_k,1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,0,mpi_enreg%paral_kgb,tim_fourwf,&
-&     weight,weight,use_gpu_cuda=gs_hamkq%use_gpu_cuda)
+     nullify(cwave0_down)
 !    Accumulate 1st-order density (x component)
      re0_up=zero;im0_up=zero;re1_up=zero;im1_up=zero;re0_down=zero;im0_down=zero
      re1_down=zero;im1_down=zero
+!    The factor 2 is not the spin factor (see Eq.44 of PRB55,10337 (1997))
+!    SPr: the following treatment with factor=2 is ok for perturbations not breaking the 
+!         time reversal symmetry of the Hamiltonian (due to Kramer's degeneracy) hence 
+!         not applicable for magnetic field perturbation (for phonons with SOC, H^(0) has
+!         time reversal symmetry though). The formulas below are rectified in dfpt_scfcv
+!         in case of broken time-reversal upon reconstructing rhor1_pq and rhor1_mq.
+     weight=two*occ_k(iband)*wtk_k/gs_hamkq%ucvol
      if (cplex==2) then
        do i3=1,n3
          do i2=1,n2
@@ -374,16 +394,23 @@ subroutine dfpt_accrho(counter,cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,&
              re1_up=wfraug1_up(1,i1,i2,i3) ;     im1_up=wfraug1_up(2,i1,i2,i3)
              re0_down=wfraug_down(1,i1,i2,i3)  ; im0_down=wfraug_down(2,i1,i2,i3)
              re1_down=wfraug1_down(1,i1,i2,i3) ; im1_down=wfraug1_down(2,i1,i2,i3)
+             !SPr: in case of +q/-q calculation, the factor will be corrected later from dfpt_scfcv level
+             !     along with the reconstruction of correct rhor1_{+q} and rhor1_{-q} 
+             !     here, rhoaug1_{sigma,sigma'} = \sum_{n,k} u1_{sigma} u0*_{sigma'} independent of the sign of q
              rhoaug1(2*i1-1,i2,i3,1)=rhoaug1(2*i1-1,i2,i3,1)+weight*(re0_up*re1_up+im0_up*im1_up) !n_upup
-             rhoaug1(2*i1  ,i2,i3,1)=zero ! imag part of n_upup at k
+             rhoaug1(2*i1  ,i2,i3,1)=rhoaug1(2*i1  ,i2,i3,1)+weight*(re0_up*im1_up-im0_up*re1_up) 
              rhoaug1(2*i1-1,i2,i3,4)=rhoaug1(2*i1-1,i2,i3,4)+weight*(re0_down*re1_down+im0_down*im1_down) ! n_dndn
-             rhoaug1(2*i1  ,i2,i3,4)=zero ! imag part of n_dndn at k
-             rhoaug1(2*i1-1,i2,i3,2)=rhoaug1(2*i1-1,i2,i3,2)+weight*(re1_up*re0_down+re0_up*re1_down &
-&             +im0_up*im1_down+im0_down*im1_up) ! mx; the factor two is inside weight
-             rhoaug1(2*i1  ,i2,i3,2)=zero ! imag part of mx
-             rhoaug1(2*i1-1,i2,i3,3)=rhoaug1(2*i1-1,i2,i3,3)+weight*(re1_up*im0_down-im1_up*re0_down &
-&             +re0_up*im1_down-im0_up*re1_down) ! my; the factor two is inside weight
-             rhoaug1(2*i1  ,i2,i3,3)=zero ! imag part of my at k
+             rhoaug1(2*i1  ,i2,i3,4)=rhoaug1(2*i1  ,i2,i3,4)+weight*(re0_down*im1_down-im0_down*re1_down)
+
+             rhoaug1(2*i1-1,i2,i3,2)=rhoaug1(2*i1-1,i2,i3,2)+weight*(re1_up*re0_down+im1_up*im0_down)& !Re[m1x]
+&            +weight*(re1_down*re0_up+im1_down*im0_up)
+             rhoaug1(2*i1  ,i2,i3,2)=rhoaug1(2*i1  ,i2,i3,2)+weight*(-re1_up*im0_down+im1_up*re0_down)& !Im[m1x]
+&            +weight*(-re1_down*im0_up+im1_down*re0_up)
+             
+             rhoaug1(2*i1-1,i2,i3,3)=rhoaug1(2*i1-1,i2,i3,3)+weight*(+re1_up*im0_down-im1_up*re0_down)& !Re[m1y]
+&            +weight*(-re1_down*im0_up+im1_down*re0_up)
+             rhoaug1(2*i1  ,i2,i3,3)=rhoaug1(2*i1  ,i2,i3,3)+weight*(+re1_up*re0_down+im1_up*im0_down)& !Im[m1y]
+&            +weight*(-re1_down*re0_up-im1_down*im0_up)
            end do
          end do
        end do
@@ -418,6 +445,8 @@ subroutine dfpt_accrho(counter,cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,&
    ABI_DEALLOCATE(wfraug1_down)
 
  end if ! nvloc /= 4
+
+ ABI_DEALLOCATE(rhoaug)
 
 !Part devoted to the accumulation of the 1st-order occupation matrix in PAW case
 ! TODO: parse for more nspden 4 dependencies on spinors
