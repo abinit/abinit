@@ -873,8 +873,8 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,lm_size,lmselect,nhat,nkxc,nrad,nspd
 
 !Local variables-------------------------------
 !scalars
- integer :: ii,ilm,ipts,ir,ispden,iwarn,lm_size_eff,mgga,ndvxc,nd2vxc,ngr2,ngrad,npts
- integer :: nspden_eff,nspden_updn,nspgrad,nvxcdgr,order
+ integer :: ii,ilm,ipts,ir,ispden,iwarn,lm_size_eff,mgga,ndvxc,nd2vxc,ngr2,ngrad
+ integer :: nkxc_updn,npts,nspden_eff,nspden_updn,nspgrad,nvxcdgr,order
  real(dp) :: dvdn,dvdz,enxcr,factor,vxcrho
  character(len=500) :: msg
 !arrays
@@ -893,8 +893,9 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,lm_size,lmselect,nhat,nkxc,nrad,nspd
 !----------------------------------------------------------------------
 !----- Check options
 !----------------------------------------------------------------------
- if(nspden==4.and.nkxc>0) then
-   msg='Kxc for nspden=4 not implemented!'
+ nkxc_updn=merge(nkxc-3,nkxc,nkxc==6.or.nkxc==19)
+ if(nkxc_updn>3) then
+   msg='Kxc for GGA not implemented!'
    MSG_ERROR(msg)
  end if
  if(nspden==4.and.xclevel==2) then
@@ -950,7 +951,7 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,lm_size,lmselect,nhat,nkxc,nrad,nspd
  if (option/=3.and.option/=4) vxc(:,:,:)=zero
  if (nkxc>0) kxc(:,:,:)=zero
  mgga=0 !metaGGA contributions are not taken into account here
- order=1;if (nkxc>0) order=2 ! to which der. of the energy the computation must be done
+ order=1;if (nkxc_updn>0) order=2 ! to which der. of the energy the computation must be done
 
  if (xclevel==0.or.ixc==0) then
    msg='Note that no xc is applied (ixc=0).'
@@ -1097,24 +1098,24 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,lm_size,lmselect,nhat,nkxc,nrad,nspd
 !    ----------------------------------------------------------------------
 !    ----- Accumulate and store XC kernel
 !    ----------------------------------------------------------------------
-     if (nkxc>0.and.ndvxc>0) then
+     if (nkxc_updn>0.and.ndvxc>0) then
        if (nkxc==1.and.ndvxc==15) then
          kxc(1:nrad,ipts,1)=half*(dvxci(1:nrad,1)+dvxci(1:nrad,9)+dvxci(1:nrad,10))
-       else if ((nkxc==3.or.nkxc==6).and.ndvxc==15) then
+       else if (nkxc_updn==3.and.ndvxc==15) then
          kxc(1:nrad,ipts,1)=dvxci(1:nrad,1)+dvxci(1:nrad,9)
          kxc(1:nrad,ipts,2)=dvxci(1:nrad,10)
          kxc(1:nrad,ipts,3)=dvxci(1:nrad,2)+dvxci(1:nrad,11)
-       else if (nkxc==7.and.ndvxc==8) then
+       else if (nkxc_updn==7.and.ndvxc==8) then
          kxc(1:nrad,ipts,1)=half*dvxci(1:nrad,1)
          kxc(1:nrad,ipts,2)=half*dvxci(1:nrad,3)
          kxc(1:nrad,ipts,3)=quarter*dvxci(1:nrad,5)
          kxc(1:nrad,ipts,4)=eighth*dvxci(1:nrad,7)
-       else if (nkxc==7.and.ndvxc==15) then
+       else if (nkxc_updn==7.and.ndvxc==15) then
          kxc(1:nrad,ipts,1)=half*(dvxci(1:nrad,1)+dvxci(1:nrad,9)+dvxci(1:nrad,10))
          kxc(1:nrad,ipts,2)=half*dvxci(1:nrad,3)+dvxci(1:nrad,12)
          kxc(1:nrad,ipts,3)=quarter*dvxci(1:nrad,5)+dvxci(1:nrad,13)
          kxc(1:nrad,ipts,4)=eighth*dvxci(1:nrad,7)+dvxci(1:nrad,15)
-       else if ((nkxc==19.or.nkxc==22).and.ndvxc==15) then
+       else if (nkxc_updn==19.and.ndvxc==15) then
          kxc(1:nrad,ipts,1)=dvxci(1:nrad,1)+dvxci(1:nrad,9)
          kxc(1:nrad,ipts,2)=dvxci(1:nrad,10)
          kxc(1:nrad,ipts,3)=dvxci(1:nrad,2)+dvxci(1:nrad,11)
@@ -1132,11 +1133,11 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,lm_size,lmselect,nhat,nkxc,nrad,nspd
          kxc(1:nrad,ipts,1:nkxc)=zero
          kxc(1:nrad,ipts,1:min(nkxc,ndvxc))=dvxci(1:nrad,1:min(nkxc,ndvxc))
        end if
-       if (nkxc==7) then
+       if (nkxc_updn==7) then
          kxc(1:nrad,ipts,5)=rhonow(1:nrad,1,2)
          kxc(1:nrad,ipts,6)=rhonow(1:nrad,1,3)
          kxc(1:nrad,ipts,7)=rhonow(1:nrad,1,4)
-       else if (nkxc==19.or.nkxc==22) then
+       else if (nkxc_updn==19) then
          kxc(1:nrad,ipts,14)=rhonow(1:nrad,1,2)
          kxc(1:nrad,ipts,15)=rhonow(1:nrad,2,2)
          kxc(1:nrad,ipts,16)=rhonow(1:nrad,1,3)
@@ -1144,11 +1145,11 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,lm_size,lmselect,nhat,nkxc,nrad,nspd
          kxc(1:nrad,ipts,18)=rhonow(1:nrad,1,4)
          kxc(1:nrad,ipts,19)=rhonow(1:nrad,2,4)
        end if
-       if (nkxc==6.or.nkxc==22) then
-         kxc(1:nrad,ipts,nkxc-2)=rhonow(1:nrad,2,1)
-         kxc(1:nrad,ipts,nkxc-1)=rhonow(1:nrad,3,1)
-         kxc(1:nrad,ipts,nkxc  )=rhonow(1:nrad,4,1)
-       end if
+     end if
+     if (nkxc>=nkxc_updn+3) then
+       kxc(1:nrad,ipts,nkxc_updn+1)=rhonow(1:nrad,2,1)
+       kxc(1:nrad,ipts,nkxc_updn+2)=rhonow(1:nrad,3,1)
+       kxc(1:nrad,ipts,nkxc_updn+3)=rhonow(1:nrad,4,1)
      end if
 
 !    ----------------------------------------------------------------------
@@ -1775,9 +1776,9 @@ subroutine pawxc_dfpt(corexc1,cplex_den,cplex_vxc,d2enxc,ixc,kxc,lm_size,lmselec
 !arrays
  logical,intent(in) :: lmselect(lm_size)
  real(dp),intent(in) :: corexc1(cplex_den*nrad)
- real(dp),intent(in) :: vxc(nrad,pawang%angl_size,nspden)
  real(dp),intent(in) :: nhat1(cplex_den*nrad,lm_size,nspden*((usexcnhat+1)/2))
  real(dp),intent(in),target :: kxc(nrad,pawang%angl_size,nkxc)
+ real(dp),intent(in),target :: vxc(nrad,pawang%angl_size,nspden)
  real(dp),intent(in),target :: rhor1(cplex_den*nrad,lm_size,nspden)
  real(dp),intent(inout),target :: vxc1(cplex_vxc*nrad,pawang%angl_size,nspden)
 
@@ -1802,8 +1803,10 @@ subroutine pawxc_dfpt(corexc1,cplex_den,cplex_vxc,d2enxc,ixc,kxc,lm_size,lmselec
  real(dp),allocatable :: dgxc1(:),drho1(:,:),drho1core(:,:),dylmdr(:,:,:)
  real(dp),allocatable :: ff(:),gg(:),grho1arr(:,:,:),gxc1(:,:,:,:)
  real(dp),allocatable,target :: rhohat1(:,:,:),rho1arr(:,:)
- real(dp), LIBPAW_CONTIGUOUS pointer :: kxc_(:,:),mag(:,:),rho1_(:,:,:),rho1arr_(:,:)
- real(dp), LIBPAW_CONTIGUOUS pointer :: vxc1_(:,:,:),vxc1_diag(:,:),vxc1_nc(:,:),vxc1_updn(:,:,:)
+ real(dp), LIBPAW_CONTIGUOUS pointer :: kxc_(:,:),mag(:,:)
+ real(dp), LIBPAW_CONTIGUOUS pointer :: rho1_(:,:,:),rho1_nc(:,:),rho1_updn(:,:)
+ real(dp), LIBPAW_CONTIGUOUS pointer :: vxc_(:,:),vxc1_(:,:,:),vxc1_diag(:,:)
+ real(dp), LIBPAW_CONTIGUOUS pointer :: vxc1_nc(:,:),vxc1_updn(:,:,:)
 #ifdef LIBPAW_ISO_C_BINDING
  type(C_PTR) :: cptr
 #endif
@@ -1819,11 +1822,11 @@ subroutine pawxc_dfpt(corexc1,cplex_den,cplex_vxc,d2enxc,ixc,kxc,lm_size,lmselec
    MSG_BUG(msg)
  end if
  if(option/=3) then
-   if (xclevel==1.and.nkxc/=2*min(nspden,2)-1) then
+   if (xclevel==1.and.nkxc/=2*min(nspden,2)-1+3*(nspden/4)) then
      msg='nkxc must be 1 or 3 for LDA!'
      MSG_BUG(msg)
    end if
-   if(xclevel==2.and.nkxc/=12*min(nspden,2)-5) then
+   if(xclevel==2.and.nkxc/=12*min(nspden,2)-5+3*(nspden/4)) then
      msg='nkxc should be 7 or 19 for GGA!'
      MSG_BUG(msg)
    end if
@@ -1924,11 +1927,12 @@ subroutine pawxc_dfpt(corexc1,cplex_den,cplex_vxc,d2enxc,ixc,kxc,lm_size,lmselec
  if (option/=3) then
 
    if (nspden/=4) then
-     rho1arr_ => rho1arr
+     rho1_updn => rho1arr
      vxc1_updn => vxc1_
    else
-     LIBPAW_ALLOCATE(rho1arr_,(cplex_den*nrad,nspden_updn))
-     LIBPAW_ALLOCATE(vxc1_updn,(nrad,npts,nspden_updn))
+     LIBPAW_ALLOCATE(rho1_updn,(cplex_den*nrad,nspden_updn))
+     LIBPAW_ALLOCATE(vxc1_updn,(cplex_vxc*nrad,npts,nspden_updn))
+     LIBPAW_ALLOCATE(rho1_nc,(cplex_den*nrad*npts,nspden))
      LIBPAW_ALLOCATE(mag,(nrad,3))
    end if
 
@@ -1952,10 +1956,18 @@ subroutine pawxc_dfpt(corexc1,cplex_den,cplex_vxc,d2enxc,ixc,kxc,lm_size,lmselec
 
 !    Non-collinear magnetism: rotate magnetization and get a collinear density
      if (nspden==4) then
+       !Store non rotated rho^(1) for future use
+       ii=(ipts-1)*cplex_den*nrad
+       do ispden=1,nspden
+         rho1_nc(ii+1:ii+cplex_den*nrad,ispden)=rho1arr(1:cplex_den*nrad,ispden)
+       end do
+       !Extract magnetization from kxc
        do ii=1,3
          mag(1:nrad,ii)=kxc(:,ipts,ii)
        end do
-       call pawxc_rotate_mag(rho1arr,rho1arr_,mag,nrad,rho_out_format=2)
+       !Rotate rhoarr1 -> rhoarr1_
+       !Should use cplex_den
+       call pawxc_rotate_mag(rho1arr,rho1_updn,mag,nrad,rho_out_format=2)
      end if
 
 !    =======================================================================
@@ -1967,22 +1979,22 @@ subroutine pawxc_dfpt(corexc1,cplex_den,cplex_vxc,d2enxc,ixc,kxc,lm_size,lmselec
        if (nspden_updn==1) then
          if (cplex_vxc==1) then
            if (cplex_den==1) then  ! cplex_vxc==1 and cplex_den==1
-             vxc1_updn(1:nrad,ipts,1)=kxc(1:nrad,ipts,1)*rho1arr_(1:nrad,1)
+             vxc1_updn(1:nrad,ipts,1)=kxc(1:nrad,ipts,1)*rho1_updn(1:nrad,1)
            else                    ! cplex_vxc==1 and cplex_den==2
              do ir=1,nrad
-               vxc1_updn(ir,ipts,1)=kxc(ir,ipts,1)*rho1arr_(2*ir-1,1)
+               vxc1_updn(ir,ipts,1)=kxc(ir,ipts,1)*rho1_updn(2*ir-1,1)
              end do
            end if
          else
            if (cplex_den==1) then  ! cplex_vxc==2 and cplex_den==1
              do ir=1,nrad
-               vxc1_updn(2*ir-1,ipts,1)=kxc(ir,ipts,1)*rho1arr_(ir,1)
+               vxc1_updn(2*ir-1,ipts,1)=kxc(ir,ipts,1)*rho1_updn(ir,1)
                vxc1_updn(2*ir  ,ipts,1)=zero
              end do
            else                    ! cplex_vxc==2 and cplex_den==2
              do ir=1,nrad
-               vxc1_updn(2*ir-1,ipts,1)=kxc(ir,ipts,1)*rho1arr_(2*ir-1,1)
-               vxc1_updn(2*ir  ,ipts,1)=kxc(ir,ipts,1)*rho1arr_(2*ir  ,1)
+               vxc1_updn(2*ir-1,ipts,1)=kxc(ir,ipts,1)*rho1_updn(2*ir-1,1)
+               vxc1_updn(2*ir  ,ipts,1)=kxc(ir,ipts,1)*rho1_updn(2*ir  ,1)
              end do
            end if
          end if
@@ -1992,14 +2004,14 @@ subroutine pawxc_dfpt(corexc1,cplex_den,cplex_vxc,d2enxc,ixc,kxc,lm_size,lmselec
          if (cplex_vxc==1) then
            if (cplex_den==1) then  ! cplex_vxc==1 and cplex_den==1
              do ir=1,nrad
-               rho1_up=rho1arr_(ir,2);rho1_dn=rho1arr_(ir,1)-rho1_up
+               rho1_up=rho1_updn(ir,2);rho1_dn=rho1_updn(ir,1)-rho1_up
                vxc1_updn(ir,ipts,1)=kxc(ir,ipts,1)*rho1_up+kxc(ir,ipts,2)*rho1_dn
                vxc1_updn(ir,ipts,2)=kxc(ir,ipts,2)*rho1_up+kxc(ir,ipts,3)*rho1_dn
              end do
            else                    ! cplex_vxc==1 and cplex_den==2
              do ir=1,nrad
                jr=2*ir-1
-               rho1_up=rho1arr_(jr,2);rho1_dn=rho1arr_(jr,1)-rho1_up
+               rho1_up=rho1_updn(jr,2);rho1_dn=rho1_updn(jr,1)-rho1_up
                vxc1_updn(ir,ipts,1)=kxc(ir,ipts,1)*rho1_up+kxc(ir,ipts,2)*rho1_dn
                vxc1_updn(ir,ipts,2)=kxc(ir,ipts,2)*rho1_up+kxc(ir,ipts,3)*rho1_dn
              end do
@@ -2008,15 +2020,15 @@ subroutine pawxc_dfpt(corexc1,cplex_den,cplex_vxc,d2enxc,ixc,kxc,lm_size,lmselec
            if (cplex_den==1) then  ! cplex_vxc==2 and cplex_den==1
              do ir=1,nrad
                jr=2*ir-1
-               rho1_up=rho1arr_(ir,2);rho1_dn=rho1arr_(ir,1)-rho1_up
+               rho1_up=rho1_updn(ir,2);rho1_dn=rho1_updn(ir,1)-rho1_up
                vxc1_updn(jr,ipts,1)=kxc(ir,ipts,1)*rho1_up+kxc(ir,ipts,2)*rho1_dn
                vxc1_updn(jr,ipts,2)=kxc(ir,ipts,2)*rho1_up+kxc(ir,ipts,3)*rho1_dn
              end do
            else                    ! cplex_vxc==2 and cplex_den==2
              do ir=1,nrad
                jr=2*ir
-               rho1_up  =rho1arr_(jr-1,2);rho1_dn  =rho1arr_(jr-1,1)-rho1_up
-               rho1im_up=rho1arr_(jr  ,2);rho1im_dn=rho1arr_(jr  ,1)-rho1im_up
+               rho1_up  =rho1_updn(jr-1,2);rho1_dn  =rho1_updn(jr-1,1)-rho1_up
+               rho1im_up=rho1_updn(jr  ,2);rho1im_dn=rho1_updn(jr  ,1)-rho1im_up
                vxc1_updn(jr-1,ipts,1)=kxc(ir,ipts,1)*rho1_up  +kxc(ir,ipts,2)*rho1_dn
                vxc1_updn(jr  ,ipts,1)=kxc(ir,ipts,1)*rho1im_up+kxc(ir,ipts,2)*rho1im_dn
                vxc1_updn(jr-1,ipts,2)=kxc(ir,ipts,2)*rho1_up  +kxc(ir,ipts,3)*rho1_dn
@@ -2126,8 +2138,8 @@ subroutine pawxc_dfpt(corexc1,cplex_den,cplex_vxc,d2enxc,ixc,kxc,lm_size,lmselec
 
            g0(:)=kxc(ir,ipts,5:7) ; g1(:)=grho1arr(jr,1,1:3)
            grho_grho1=dot_product(g0,g1)
-           coeff_grho=kxc(ir,ipts,3)*rho1arr_(jr,1)+kxc(ir,ipts,4)*grho_grho1
-           vxc1_updn(kr,ipts,1)=kxc(ir,ipts,1)*rho1arr_(jr,1)+kxc(ir,ipts,3)*grho_grho1
+           coeff_grho=kxc(ir,ipts,3)*rho1_updn(jr,1)+kxc(ir,ipts,4)*grho_grho1
+           vxc1_updn(kr,ipts,1)=kxc(ir,ipts,1)*rho1_updn(jr,1)+kxc(ir,ipts,3)*grho_grho1
            gxc1r(:,1)=g1(:)*kxc(ir,ipts,2)+g0(:)*coeff_grho
            !Accumulate gxc1_lm moments as Intg[gxc1(omega).Ylm(omega).d_omega]
            do ilm=1,pawang%ylm_size
@@ -2140,8 +2152,8 @@ subroutine pawxc_dfpt(corexc1,cplex_den,cplex_vxc,d2enxc,ixc,kxc,lm_size,lmselec
              if (cplex_den==2) then
                g1im(:)=grho1arr(jr+1,1,1:3)
                grho_grho1im=dot_product(g0,g1im)
-               coeff_grhoim=kxc(ir,ipts,3)*rho1arr_(jr+1,1)+kxc(ir,ipts,4)*grho_grho1im
-               vxc1_updn(kr+1,ipts,1)=kxc(ir,ipts,1)*rho1arr_(jr+1,1)+kxc(ir,ipts,3)*grho_grho1im
+               coeff_grhoim=kxc(ir,ipts,3)*rho1_updn(jr+1,1)+kxc(ir,ipts,4)*grho_grho1im
+               vxc1_updn(kr+1,ipts,1)=kxc(ir,ipts,1)*rho1_updn(jr+1,1)+kxc(ir,ipts,3)*grho_grho1im
                gxc1i(:,1)=g1im(:)*kxc(ir,ipts,2)+g0(:)*coeff_grhoim
                !Accumulate gxc1_lm moments as Intg[gxc1(omega).Ylm(omega).d_omega]
                do ilm=1,pawang%ylm_size
@@ -2162,7 +2174,7 @@ subroutine pawxc_dfpt(corexc1,cplex_den,cplex_vxc,d2enxc,ixc,kxc,lm_size,lmselec
          do ir=1,nrad
            jr=cplex_den*(ir-1)+1 ; kr=cplex_vxc*(ir-1)+1
 
-           rho1_up=rho1arr_(jr,2);rho1_dn=rho1arr_(jr,1)-rho1_up
+           rho1_up=rho1_updn(jr,2);rho1_dn=rho1_updn(jr,1)-rho1_up
            g0_up(1)=kxc(ir,ipts,15);g0_dn(1)=kxc(ir,ipts,14)-kxc(ir,ipts,15)
            g0_up(2)=kxc(ir,ipts,17);g0_dn(2)=kxc(ir,ipts,16)-kxc(ir,ipts,17)
            g0_up(3)=kxc(ir,ipts,19);g0_dn(3)=kxc(ir,ipts,18)-kxc(ir,ipts,19)
@@ -2206,7 +2218,7 @@ subroutine pawxc_dfpt(corexc1,cplex_den,cplex_vxc,d2enxc,ixc,kxc,lm_size,lmselec
 
            if (cplex_vxc==2) then
              if (cplex_den==2) then
-               rho1im_up=rho1arr_(jr+1,2);rho1im_dn=rho1arr_(jr+1,1)-rho1im_up
+               rho1im_up=rho1_updn(jr+1,2);rho1im_dn=rho1_updn(jr+1,1)-rho1im_up
                g1im_up(:)=grho1arr(jr+1,2,:);g1im_dn(:)=grho1arr(jr+1,1,:)-grho1arr(jr+1,2,:)
                g1im(:)=g1im_up(:)+g1im_dn(:)
                grho_grho1im_up=dot_product(g0_up,g1im_up)
@@ -2261,12 +2273,11 @@ subroutine pawxc_dfpt(corexc1,cplex_den,cplex_vxc,d2enxc,ixc,kxc,lm_size,lmselec
    end do
 
 !  Deallocate memory
-   LIBPAW_DEALLOCATE(vxc1_updn)
    if (xclevel==2.and.usecore==1)  then
      LIBPAW_DEALLOCATE(drho1core)
    end if
    if (nspden==4) then
-     LIBPAW_DEALLOCATE(rho1arr_)
+     LIBPAW_DEALLOCATE(rho1_updn)
      LIBPAW_DEALLOCATE(mag)
    end if
 
@@ -2340,30 +2351,37 @@ subroutine pawxc_dfpt(corexc1,cplex_den,cplex_vxc,d2enxc,ixc,kxc,lm_size,lmselec
     ! %@1$ xlf v15 compiler requires a auxilliary cptr variable
 #ifdef LIBPAW_ISO_C_BINDING
    cptr=c_loc(vxc1_updn(1,1,1))
-   call c_f_pointer(cptr,vxc1_diag,shape=[nrad*npts,nspden_updn])
+   call c_f_pointer(cptr,vxc1_diag,shape=[cplex_vxc*nrad*npts,nspden_updn])
    cptr=c_loc(vxc1_(1,1,1))
-   call c_f_pointer(cptr,vxc1_nc,shape=[nrad*npts,nspden])
+   call c_f_pointer(cptr,vxc1_nc,shape=[cplex_vxc*nrad*npts,nspden])
+   cptr=c_loc(vxc(1,1,1))
+   call c_f_pointer(cptr,vxc_,shape=[nrad*npts,nspden])
    cptr=c_loc(kxc(1,1,1))
    call c_f_pointer(cptr,kxc_,shape=[nrad*npts,3])
    cptr=c_loc(kxc(1,1,nkxc-2))
    call c_f_pointer(cptr,mag,shape=[nrad*npts,3])
 #else
-   LIBPAW_ALLOCATE(vxc1_diag,(nrad*npts,nspden_updn))
-   LIBPAW_ALLOCATE(vxc1_nc,(nrad*npts,nspden))
+   LIBPAW_ALLOCATE(vxc1_diag,(cplex_vxc*nrad*npts,nspden_updn))
+   LIBPAW_ALLOCATE(vxc1_nc,(cplex_vxc*nrad*npts,nspden))
+   LIBPAW_ALLOCATE(vxc_,(nrad*npts,nspden))
    LIBPAW_ALLOCATE(kxc_,(nrad*npts,3))
    LIBPAW_ALLOCATE(mag,(nrad*npts,3))
-   vxc1_diag=reshape(vxc1_updn,[nrad*npts,nspden_updn])
+   vxc1_diag=reshape(vxc1_updn,[cplex_vxc*nrad*npts,nspden_updn])
+   vxc_=reshape(vxc(1:cplex_vxc*nrad,1:npts,1:nspden),[cplex_vxc*nrad*npts,nspden])
    kxc_=reshape(kxc(1:nrad,1:npts,1:3),[nrad*npts,3])
    mag=reshape(kxc(1:nrad,1:npts,nkxc-2:nkxc),[nrad*npts,3])
 #endif
-   call pawxc_rotate_back_mag_dfpt(vxc1_diag,vxc1_nc,vxc,kxc_,rho1arr,mag,nrad*npts)
+   !Should use cplex_den and cplex_vxc
+   call pawxc_rotate_back_mag_dfpt(vxc1_diag,vxc1_nc,vxc_,kxc_,rho1_nc,mag,nrad*npts)
 #ifndef LIBPAW_ISO_C_BINDING
-   vxc1_=reshape(vxc1_nc,[nrad,npts,nspden])
+   vxc1_=reshape(vxc1_nc,[cplex_vxc*nrad,npts,nspden])
    LIBPAW_DEALLOCATE(vxc1_diag)
    LIBPAW_DEALLOCATE(vxc1_nc)
+   LIBPAW_DEALLOCATE(vxc_)
    LIBPAW_DEALLOCATE(kxc_)
    LIBPAW_DEALLOCATE(mag)
 #endif
+   LIBPAW_DEALLOCATE(rho1_nc)
    LIBPAW_DEALLOCATE(vxc1_updn)
  end if
 
