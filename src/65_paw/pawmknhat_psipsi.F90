@@ -33,7 +33,7 @@
 !!  my_natom=number of atoms treated by current processor
 !!  natom=total number of atoms in cell
 !!  nfft=number of point on the rectangular fft grid
-!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !!  nhat12_grdim= 0 if grnhat12 array is not used ; 1 otherwise
 !!  ntypat=number of types of atoms in unit cell.
 !!  paral_kgb=--optional-- 1 if "band-FFT" parallelism is activated (only needed when comm_fft is present)

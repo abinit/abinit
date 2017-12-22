@@ -92,9 +92,9 @@ You might use the file&#160;<span style="color: rgb(0, 102, 0);">tudet_1.files</
 <span style="color: rgb(0, 102, 0); font-weight: bold;">tudet_1.files</span> in your work directory, and run ABINIT: 
 </p><pre style="margin-left: 40px;"><span style="color: rgb(153, 0, 0);">abinit &#60; tudet_1.files &#62; tudet_1.log </span> </pre>
 In the meantime, you can read the input file and see that this is a usual DFT+U calculation, with U=0. 
-This setting allows us to read the occupations of the Fe 3d orbitals (<a href="../../input_variables/generated_files/varset_paw.html#lpawu">lpawu</a> 2). 
+This setting allows us to read the occupations of the Fe 3d orbitals (<a href="../../variables/generated_files/varset_paw.html#lpawu">lpawu</a> 2). 
 The cell contains 2 atoms. This is the minimum to get reasonable response matrices. 
-We converge the electronic structure to a high accuracy (<a href="../../input_variables/generated_files/varset_basic.html#tolvrs">tolvrs</a> 10d-12), which usually allows to 
+We converge the electronic structure to a high accuracy (<a href="../../variables/generated_files/varset_basic.html#tolvrs">tolvrs</a> 10d-12), which usually allows to 
 determine occupations with a precision of 10d-10. The ecut is chosen very low, in order to accelerate calculations. <br>
 We do not suppress the writing of the _WFK file, because this is the input for the calculations of U. 
 <p> Once this calculation has finished, run the second one: 
@@ -114,22 +114,22 @@ symatm: atom number    1 is reached starting at atom <br>
 <p>This is important. Otherwise the occupation numbers have no freedom to evolve separately on the atoms surrounding the atom on which you apply the perturbation.</p>
 
 <p> You can generate these symmetries, in a separate run, where you specify the atom where the perturbation is done as a different species. From the output
-you read the number of symmetries (<a href="../../input_variables/generated_files/varset_basic.html#nsym">nsym</a>), 
-the symmetry relations (<a href="../../input_variables/generated_files/varset_basic.html#symrel">symrel</a>) 
-and the non-symmorphic vectors (<a href="../../input_variables/generated_files/varset_basic.html#tnons">tnons</a>tnons). 
+you read the number of symmetries (<a href="../../variables/generated_files/varset_basic.html#nsym">nsym</a>), 
+the symmetry relations (<a href="../../variables/generated_files/varset_basic.html#symrel">symrel</a>) 
+and the non-symmorphic vectors (<a href="../../variables/generated_files/varset_basic.html#tnons">tnons</a>tnons). 
 This is already done here and
-inserted in the tudet_2.in file. Note that you can alternatively just break all the symmetries (<a href="../../input_variables/generated_files/varset_basic.html#nsym">nsym</a>=1), 
+inserted in the tudet_2.in file. Note that you can alternatively just break all the symmetries (<a href="../../variables/generated_files/varset_basic.html#nsym">nsym</a>=1), 
 or break specific symmetries by displacing
 the impurity atom in the preliminary run. However, for the determination of U, the positions should be the ideal positions and only the symmetry should be
 reduced. </p>
 
-<p> For the rest, usually it is enough to set "<a href="../../input_variables/generated_files/varset_dev.html#macro_uj">macro_uj</a> 1" to run the calculation of U. 
-Note also, that the "<a href="../../input_variables/generated_files/varset_files.html#irdwfk">irdwfk</a> 1" and the "<a href="../../input_variables/generated_files/varset_basic.html#tolvrs">tolvrs</a> 1d-8" need not be
-set explicitly, because they are the defaults with <a href="../../input_variables/generated_files/varset_dev.html#macro_uj">macro_uj</a> 1.  
+<p> For the rest, usually it is enough to set "<a href="../../variables/generated_files/varset_dev.html#macro_uj">macro_uj</a> 1" to run the calculation of U. 
+Note also, that the "<a href="../../variables/generated_files/varset_files.html#irdwfk">irdwfk</a> 1" and the "<a href="../../variables/generated_files/varset_basic.html#tolvrs">tolvrs</a> 1d-8" need not be
+set explicitly, because they are the defaults with <a href="../../variables/generated_files/varset_dev.html#macro_uj">macro_uj</a> 1.  
 </p>
 
 <p>  Once the calculation tudet_2 is converged, you can have look at the output. 
-You can see, that the atomic shift (<a href="../../input_variables/generated_files/varset_ffield.html#atvshift">atvshift</a>) is automatically set: </p>
+You can see, that the atomic shift (<a href="../../variables/generated_files/varset_ffield.html#atvshift">atvshift</a>) is automatically set: </p>
 <pre style="margin-left: 40px;">
          atvshift      0.00367    0.00367    0.00367    0.00367    0.00367
                        0.00367    0.00367    0.00367    0.00367    0.00367
@@ -158,11 +158,11 @@ r_max indicates the maximal distance of the impurity atoms in that supercell.
 The column U indicates the actual U you calculated and should use in your further calculations. 
 U_ASA is an estimate of U for more extended projectors and U_\inf is the estimate for a projector extended even further. </p>
 
-<p> Although it is enough to set "<a href="../../input_variables/generated_files/varset_dev.html#macro_uj">macro_uj</a> 1", 
+<p> Although it is enough to set "<a href="../../variables/generated_files/varset_dev.html#macro_uj">macro_uj</a> 1", 
 you can further tune your runs.  As a standard, the potential shift to the 1st atom treated in DFT+U, 
-with a potential shift of 0.1 eV. If you wish to determine U on the second atom you put "<a href="../../input_variables/generated_files/varset_dev.html#pawujat">pawujat</a> 2". 
+with a potential shift of 0.1 eV. If you wish to determine U on the second atom you put "<a href="../../variables/generated_files/varset_dev.html#pawujat">pawujat</a> 2". 
 To change the size of the potential shift use 
-e.g. "<a href="../../input_variables/generated_files/varset_dev.html#pawujv">pawujv</a> 0.05 eV". 
+e.g. "<a href="../../variables/generated_files/varset_dev.html#pawujv">pawujv</a> 0.05 eV". 
 Our tests show that 0.1 eV is the optimal value, but the linear response is linear in a wide range (1-0.001 eV).</p>  
 <br><br><a href=#top>Go to the top</a>
 <hr>
@@ -203,7 +203,7 @@ Then, run ujdet:
 As you can see, U has now been extrapolated to a supercell containing 432 atoms.</p>
 
 The value of U depends strongly on the extension of the projectors used in the calculation. If you want to use U in LMTO-ASA calculations you can use the 
-keyword <a href="../../input_variables/generated_files/varset_dev.html#pawujrad">pawujrad</a> in the ujdet.in file to get grips of the U you want to use there. 
+keyword <a href="../../variables/generated_files/varset_dev.html#pawujrad">pawujrad</a> in the ujdet.in file to get grips of the U you want to use there. 
 Just uncomment the line and add the ASA-radius of the specific atom e.g.
 
 <pre style="margin-left: 40px;">  pawujrad 2.5 </pre>

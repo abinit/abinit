@@ -13,7 +13,7 @@ except ImportError:
 strict=1
 
 def main():
-  path = '../input_variables/origin_files/'
+  path = '../variables/origin_files/'
   path_topics = '../topics/origin_files/'
   path_abinit_vars = path+'abinit_vars.yml'
   with open(path+'characteristics.yml', 'r') as f:
@@ -27,11 +27,11 @@ def main():
     topics = yaml.load(f)
     for i,item in enumerate(topics) :
        topics[i]=item.strip()
-  with open(path_topics+'list_tribes.yml', 'r') as f:
-    tribes = yaml.load(f)
-    tribe_names=[]
-    for item in tribes:
-      tribe_names.append(item[0].strip())
+  with open(path_topics+'list_relevances.yml', 'r') as f:
+    relevances = yaml.load(f)
+    relevance_names=[]
+    for item in relevances:
+      relevance_names.append(item[0].strip())
 
   retcode = 0
 
@@ -104,19 +104,19 @@ def main():
 
     if strict==1:
       if var.topics is None:
-        print('FAIL: ', abivarname, ' does not have at least one topic and the associated tribe')
+        print('FAIL: ', abivarname, ' does not have at least one topic and the associated relevance')
         retcode += 1
       else:
-        topics_name_tribe = var.topics.split(',')
-        for topic_name_tribe in topics_name_tribe:
-          name_tribe = topic_name_tribe.split('_')
-          if not name_tribe[0].strip() in topics:
-            print('FAIL: ', abivarname, ' delivers topicname_tribe ',name_tribe,
-                  ' with topicname ',name_tribe[0].strip(),' that does not belong to the allowed list')
+        topics_name_relevance = var.topics.split(',')
+        for topic_name_relevance in topics_name_relevance:
+          name_relevance = topic_name_relevance.split('_')
+          if not name_relevance[0].strip() in topics:
+            print('FAIL: ', abivarname, ' delivers topicname_relevance ',name_relevance,
+                  ' with topicname ',name_relevance[0].strip(),' that does not belong to the allowed list')
             retcode += 1
-          if not name_tribe[1].strip() in tribe_names:
-            print('FAIL: ', abivarname, ' delivers topicname_tribe ',name_tribe,
-                  ' with tribe ',name_tribe[1].strip(),' that does not belong to the allowed list')
+          if not name_relevance[1].strip() in relevance_names:
+            print('FAIL: ', abivarname, ' delivers topicname_relevance ',name_relevance,
+                  ' with relevance ',name_relevance[1].strip(),' that does not belong to the allowed list')
             retcode += 1
 
     if var.characteristics is not None:

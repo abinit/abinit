@@ -676,6 +676,15 @@
   pages : 480
 -
   ENTRYTYPE : article
+  ID : Ferreira2008
+  author : Ferreira, L.G. and Marques, M. and Teles, L.K.
+  title : Approximation to density functional theory for the calculation of band gaps of semiconductors
+  journal : Phys. Rev. B
+  year : 2008
+  volume : 78
+  pages : 125116
+-
+  ENTRYTYPE : article
   ID : Fetter1971
   author : A.L. Fetter and J.D. Walecka
   title : Quantum Theory of Many-Particle Systems

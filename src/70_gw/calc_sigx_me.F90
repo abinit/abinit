@@ -32,7 +32,7 @@
 !!    %ktab(nbz)= table giving for each k-point in the BZ (kBZ), the corresponding
 !!    %ktabi(nbz)= for each k-point in the BZ defines whether inversion has to be considered
 !!    %ktabp(nbz)= phase factor associated to tnons
-!! gwx_ngfft(18)=Information about 3D FFT for the oscillator strengths, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!! gwx_ngfft(18)=Information about 3D FFT for the oscillator strengths, see ~abinit/doc/variables/vargs.htm#ngfft
 !! gwx_nfftot=number of points of the FFT grid for GW wavefunctions
 !! Vcp <vcoul_t datatype> containing information on the cutoff technique
 !!    %vc_sqrt(npwx,nqibz)= square-root of the coulombian potential for q-points in the IBZ
@@ -509,7 +509,7 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
      ! The same relation holds for 0-D systems, but not in 1-D or 2D systems. It depends on S.
      do ig=1,npwx
        ig_rot = Gsph_x%rottb(ig,itim_q,isym_q)
-       vc_sqrt_qbz(ig_rot)=Vcp%vc_sqrt(ig,iq_ibz)
+       vc_sqrt_qbz(ig_rot)=Vcp%vc_sqrt_resid(ig,iq_ibz)
      end do
 
      ! Sum over (occupied) bands.
@@ -586,7 +586,8 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
 
            if (nspinor==1) then
              rhotwg_ki(1,jb) = czero_gw
-             if (ib_sum == jb) rhotwg_ki(1,jb) = CMPLX(SQRT(Vcp%i_sz), 0.0_gwp)
+             !Note the use of i_sz_resid and not i_sz, to account for the possibility to have generalized KS basis set from hybrid
+             if (ib_sum == jb) rhotwg_ki(1,jb) = CMPLX(SQRT(Vcp%i_sz_resid), 0.0_gwp)
              !rhotwg_ki(1,jb) = czero_gw ! DEBUG
            else
              npw_k = Wfd%npwarr(ik_ibz)
@@ -595,9 +596,9 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
                cg_sum => Wfd%Wave(ib_sum,ik_ibz,spin)%ug
                cg_jb  => Wfd%Wave(jb,jk_ibz,spin)%ug
                ctmp = xdotc(npw_k, cg_sum(1:), 1, cg_jb(1:), 1)
-               rhotwg_ki(1, jb) = CMPLX(SQRT(Vcp%i_sz), 0.0_gwp) * real(ctmp)
+               rhotwg_ki(1, jb) = CMPLX(SQRT(Vcp%i_sz_resid), 0.0_gwp) * real(ctmp)
                ctmp = xdotc(npw_k, cg_sum(npw_k+1:), 1, cg_jb(npw_k+1:), 1)
-               rhotwg_ki(npwx+1, jb) = CMPLX(SQRT(Vcp%i_sz), 0.0_gwp) * real(ctmp)
+               rhotwg_ki(npwx+1, jb) = CMPLX(SQRT(Vcp%i_sz_resid), 0.0_gwp) * real(ctmp)
              end if
              !rhotwg_ki(1, jb) = zero; rhotwg_ki(npwx+1, jb) = zero
              ! PAW is missing

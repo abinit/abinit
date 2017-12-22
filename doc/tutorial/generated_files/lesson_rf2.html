@@ -129,12 +129,12 @@ used for the electronic structure : all q wavevectors should connect two k point
 wavevectors from this grid.
 <p>
 Such a set of q wavevectors can be generated straightforwardly by running a GS calculation with
-<a href="../../input_variables/generated_files/varset_basic.html#kptopt">kptopt</a>=1,
-<a href="../../input_variables/generated_files/varset_basic.html#nshiftk">nshiftk</a>=1,
-<a href="../../input_variables/generated_files/varset_basic.html#shiftk">shiftk</a>=0 0 0 (to include gamma) and taking the output kpt set
+<a href="../../variables/generated_files/varset_basic.html#kptopt">kptopt</a>=1,
+<a href="../../variables/generated_files/varset_basic.html#nshiftk">nshiftk</a>=1,
+<a href="../../variables/generated_files/varset_basic.html#shiftk">shiftk</a>=0 0 0 (to include gamma) and taking the output kpt set
 file as this qpt set. One might set
-<a href="../../input_variables/generated_files/varset_basic.html#nstep">nstep</a>=1 and
-<a href="../../input_variables/generated_files/varset_gstate.html#nline">nline</a>=1, so only one iteration runs.
+<a href="../../variables/generated_files/varset_basic.html#nstep">nstep</a>=1 and
+<a href="../../variables/generated_files/varset_gstate.html#nline">nline</a>=1, so only one iteration runs.
 <br>
 The input file ~abinit/tests/tutorespfn/Input/trf2_2.in is precisely an input file that can be used to
 generate such a set of k points. Copy it in the present Work_rf2 directly,
@@ -216,21 +216,21 @@ selected set of input variables, with also some input variables common to many o
 different tasks. The list of tasks to be done in one run is governed by different flags.
 Here is the list of flags :
 <ul>
-<li><a href="../../input_variables/generated_files/varset_anaddb.html#dieflag@anaddb">dieflag</a> </li>
-<li><a href="../../input_variables/generated_files/varset_anaddb.html#elaflag@anaddb">elaflag</a> </li>
-<li><a href="../../input_variables/generated_files/varset_anaddb.html#elphflag@anaddb">elphflag</a> </li>
-<li><a href="../../input_variables/generated_files/varset_anaddb.html#ifcflag@anaddb">ifcflag</a> </li>
-<li><a href="../../input_variables/generated_files/varset_anaddb.html#instrflag@anaddb">instrflag</a> </li>
-<li><a href="../../input_variables/generated_files/varset_anaddb.html#nlflag@anaddb">nlflag</a> </li>
-<li><a href="../../input_variables/generated_files/varset_anaddb.html#piezoflag@anaddb">piezoflag</a> </li>
-<li><a href="../../input_variables/generated_files/varset_anaddb.html#polflag@anaddb">polflag</a> </li>
-<li><a href="../../input_variables/generated_files/varset_anaddb.html#thmflag@anaddb">thmflag</a> </li>
+<li><a href="../../variables/generated_files/varset_anaddb.html#dieflag@anaddb">dieflag</a> </li>
+<li><a href="../../variables/generated_files/varset_anaddb.html#elaflag@anaddb">elaflag</a> </li>
+<li><a href="../../variables/generated_files/varset_anaddb.html#elphflag@anaddb">elphflag</a> </li>
+<li><a href="../../variables/generated_files/varset_anaddb.html#ifcflag@anaddb">ifcflag</a> </li>
+<li><a href="../../variables/generated_files/varset_anaddb.html#instrflag@anaddb">instrflag</a> </li>
+<li><a href="../../variables/generated_files/varset_anaddb.html#nlflag@anaddb">nlflag</a> </li>
+<li><a href="../../variables/generated_files/varset_anaddb.html#piezoflag@anaddb">piezoflag</a> </li>
+<li><a href="../../variables/generated_files/varset_anaddb.html#polflag@anaddb">polflag</a> </li>
+<li><a href="../../variables/generated_files/varset_anaddb.html#thmflag@anaddb">thmflag</a> </li>
 </ul>
 Please, take some time to read the description of each of these flags.
 Note that some of these flags might be required to allow to run another task.
 <p>
 In this tutorial, we will focus on the flags
-<a href="../../input_variables/generated_files/varset_anaddb.html#ifcflag@anaddb">ifcflag</a> and <a href="../../input_variables/generated_files/varset_anaddb.html#thmflag@anaddb">thmflag</a>.
+<a href="../../variables/generated_files/varset_anaddb.html#ifcflag@anaddb">ifcflag</a> and <a href="../../variables/generated_files/varset_anaddb.html#thmflag@anaddb">thmflag</a>.
 <br><br><a href=#top>Go to the top</a>
 <hr>
 <br><a name="ifcs"> </a>
@@ -239,15 +239,15 @@ In this tutorial, we will focus on the flags
  <p>You can copy the files ~abinit/tests/tutorespfn/Input/trf2_4.in and ~abinit/tests/tutorespfn/Input/trf2_4.files to the Work_rf2 directory.
 <br>
 Edit the file trf2_4.in .
-Note that <a href="../../input_variables/generated_files/varset_anaddb.html#ifcflag@anaddb">ifcflag</a>
+Note that <a href="../../variables/generated_files/varset_anaddb.html#ifcflag@anaddb">ifcflag</a>
 is activated. Related input variables can be split in three groups.
 <p>
 The first group of variables define the grid of q wavevectors :
 <ul>
-<li><a href="../../input_variables/generated_files/varset_anaddb.html#brav@anaddb">brav</a></li>
-<li><a href="../../input_variables/generated_files/varset_anaddb.html#ngqpt@anaddb">ngqpt</a></li>
-<li><a href="../../input_variables/generated_files/varset_anaddb.html#nqshft@anaddb">nqshft</a></li>
-<li><a href="../../input_variables/generated_files/varset_anaddb.html#q1shft@anaddb">q1shft</a></li>
+<li><a href="../../variables/generated_files/varset_anaddb.html#brav@anaddb">brav</a></li>
+<li><a href="../../variables/generated_files/varset_anaddb.html#ngqpt@anaddb">ngqpt</a></li>
+<li><a href="../../variables/generated_files/varset_anaddb.html#nqshft@anaddb">nqshft</a></li>
+<li><a href="../../variables/generated_files/varset_anaddb.html#q1shft@anaddb">q1shft</a></li>
 </ul>
 Unfortunately, the names of input variables and their meaning is not
 exactly the same as the names used to generate the k points in ABINIT.
@@ -258,19 +258,19 @@ The second group of variables allows to impose some known constraint
 on the dynamical matrices and Born effective charges before proceeding
 with the analysis :
 <ul>
-<li><a href="../../input_variables/generated_files/varset_anaddb.html#asr@anaddb">asr</a></li>
-<li><a href="../../input_variables/generated_files/varset_anaddb.html#chneut@anaddb">chneut</a></li>
+<li><a href="../../variables/generated_files/varset_anaddb.html#asr@anaddb">asr</a></li>
+<li><a href="../../variables/generated_files/varset_anaddb.html#chneut@anaddb">chneut</a></li>
 </ul>
 Please, read carefully the explanation for these input variables.
 <p>
 Finally, a third group of variables is related specifically to the
 analysis of the Interatomic Force Constants :
 <ul>
-<li><a href="../../input_variables/generated_files/varset_anaddb.html#dipdip@anaddb">dipdip</a></li>
-<li><a href="../../input_variables/generated_files/varset_anaddb.html#ifcana@anaddb">ifcana</a></li>
-<li><a href="../../input_variables/generated_files/varset_anaddb.html#ifcout@anaddb">ifcout</a></li>
-<li><a href="../../input_variables/generated_files/varset_anaddb.html#natifc@anaddb">natifc</a></li>
-<li><a href="../../input_variables/generated_files/varset_anaddb.html#atifc@anaddb">atifc</a></li>
+<li><a href="../../variables/generated_files/varset_anaddb.html#dipdip@anaddb">dipdip</a></li>
+<li><a href="../../variables/generated_files/varset_anaddb.html#ifcana@anaddb">ifcana</a></li>
+<li><a href="../../variables/generated_files/varset_anaddb.html#ifcout@anaddb">ifcout</a></li>
+<li><a href="../../variables/generated_files/varset_anaddb.html#natifc@anaddb">natifc</a></li>
+<li><a href="../../variables/generated_files/varset_anaddb.html#atifc@anaddb">atifc</a></li>
 </ul>
 Here also, spend some time to read the associated documentation.
 <p>
@@ -298,7 +298,7 @@ Try to find the following paragraph :
        of the generic atom along z.
 </pre>
 The interatomic force constants are output for the nuclei specified
-by the input variable <a href="../../input_variables/generated_files/varset_anaddb.html#atifc@anaddb">atifc</a>.
+by the input variable <a href="../../variables/generated_files/varset_anaddb.html#atifc@anaddb">atifc</a>.
 Here, only atom 1 is considered. The IFCs with respect to the other nuclei
 is given, by order of increasing distance. For each pair of nuclei involving
 atom 1, there is first the output of the IFCs in cartesian coordinates,
@@ -316,20 +316,20 @@ into a longitudinal and a transverse component.
  <p>You can copy the files ~abinit/tests/tutorespfn/Input/trf2_5.in and ~abinit/tests/tutorespfn/Input/trf2_5.files to the Work_rf2 directory.
 <br>
 Edit the file trf2_5.in .
-Note that <a href="../../input_variables/generated_files/varset_anaddb.html#ifcflag@anaddb">ifcflag</a> is again activated. Indeed, in order to compute a phonon band structure
+Note that <a href="../../variables/generated_files/varset_anaddb.html#ifcflag@anaddb">ifcflag</a> is again activated. Indeed, in order to compute a phonon band structure
 using the Fourier interpolation, the IFCs are required.
 This is why the two first groups of variables, needed to generate
 the IFCs are still defined. The third group of variables is now restricted to
-<a href="../../input_variables/generated_files/varset_anaddb.html#dipdip@anaddb">dipdip</a> only.
+<a href="../../variables/generated_files/varset_anaddb.html#dipdip@anaddb">dipdip</a> only.
 <p>
 Then, come the input variables needed to define the list of q wavevectors
 in the band structure :
 <ul>
-<a href="../../input_variables/generated_files/varset_anaddb.html#eivec@anaddb">eivec</a>: flag to turn on the analysis of phonon eigenvectors</li>
-<a href="../../input_variables/generated_files/varset_anaddb.html#nph1l@anaddb">nph1l</a> number of q-points for phonon interpolation</li>
-<a href="../../input_variables/generated_files/varset_anaddb.html#qph1l@anaddb">qph1l</a> list of q-points for phonon interpolation</li>
-<a href="../../input_variables/generated_files/varset_anaddb.html#nph2l@anaddb">nph2l</a> number of q-directions for LO-TO correction</li>
-<a href="../../input_variables/generated_files/varset_anaddb.html#qph2l@anaddb">qph2l</a> list of q-directions for LO-TO correction</li>
+<a href="../../variables/generated_files/varset_anaddb.html#eivec@anaddb">eivec</a>: flag to turn on the analysis of phonon eigenvectors</li>
+<a href="../../variables/generated_files/varset_anaddb.html#nph1l@anaddb">nph1l</a> number of q-points for phonon interpolation</li>
+<a href="../../variables/generated_files/varset_anaddb.html#qph1l@anaddb">qph1l</a> list of q-points for phonon interpolation</li>
+<a href="../../variables/generated_files/varset_anaddb.html#nph2l@anaddb">nph2l</a> number of q-directions for LO-TO correction</li>
+<a href="../../variables/generated_files/varset_anaddb.html#qph2l@anaddb">qph2l</a> list of q-directions for LO-TO correction</li>
 </ul>
 <p>
 Now, you should issue :
@@ -404,16 +404,16 @@ and have a look at them.
 The same DDB as for trf2_4 and trf2_5 is used, namely trf2_3.ddb.out. The following additional input
 variables are present :
 <ul>
-<li><a href="../../input_variables/generated_files/varset_anaddb.html#thmflag@anaddb">thmflag</a></li>
-<li><a href="../../input_variables/generated_files/varset_anaddb.html#ng2qpt@anaddb">ng2qpt</a></li>
-<li><a href="../../input_variables/generated_files/varset_anaddb.html#ngrids@anaddb">ngrids</a></li>
-<li><a href="../../input_variables/generated_files/varset_anaddb.html#q2shft@anaddb">q2shft</a></li>
-<li><a href="../../input_variables/generated_files/varset_anaddb.html#nchan@anaddb">nchan</a></li>
-<li><a href="../../input_variables/generated_files/varset_anaddb.html#nwchan@anaddb">nwchan</a></li>
-<li><a href="../../input_variables/generated_files/varset_anaddb.html#thmtol@anaddb">thmtol</a></li>
-<li><a href="../../input_variables/generated_files/varset_anaddb.html#ntemper@anaddb">ntemper</a></li>
-<li><a href="../../input_variables/generated_files/varset_anaddb.html#temperinc@anaddb">temperinc</a></li>
-<li><a href="../../input_variables/generated_files/varset_anaddb.html#tempermin@anaddb">tempermin</a></li>
+<li><a href="../../variables/generated_files/varset_anaddb.html#thmflag@anaddb">thmflag</a></li>
+<li><a href="../../variables/generated_files/varset_anaddb.html#ng2qpt@anaddb">ng2qpt</a></li>
+<li><a href="../../variables/generated_files/varset_anaddb.html#ngrids@anaddb">ngrids</a></li>
+<li><a href="../../variables/generated_files/varset_anaddb.html#q2shft@anaddb">q2shft</a></li>
+<li><a href="../../variables/generated_files/varset_anaddb.html#nchan@anaddb">nchan</a></li>
+<li><a href="../../variables/generated_files/varset_anaddb.html#nwchan@anaddb">nwchan</a></li>
+<li><a href="../../variables/generated_files/varset_anaddb.html#thmtol@anaddb">thmtol</a></li>
+<li><a href="../../variables/generated_files/varset_anaddb.html#ntemper@anaddb">ntemper</a></li>
+<li><a href="../../variables/generated_files/varset_anaddb.html#temperinc@anaddb">temperinc</a></li>
+<li><a href="../../variables/generated_files/varset_anaddb.html#tempermin@anaddb">tempermin</a></li>
 </ul>
 Examine the input file, the input variables, then run anaddb (as usual ...).
 Then, edit the output file.

@@ -32,7 +32,7 @@ src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-
 
 <script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
 
- Mentioned in &nbsp; <a href="../../users/generated_files/help_features.html#2.1">help_features#2.1</a>. 
+ Mentioned in &nbsp; <a href="../../guide/generated_files/help_features.html#2.1">help_features#2.1</a>. 
  <hr>
  <h3><b>Table of content: </b></h3> 
  <ul> <li>1. <a href="topic_crystal.html#1">Introduction.</a><li>2. <a href="topic_crystal.html#2">Related lesson(s) of the tutorial.</a><li>3. <a href="topic_crystal.html#3">Related input variables.</a><li>4. <a href="topic_crystal.html#4">Selected input files.</a></ul>
@@ -45,25 +45,25 @@ src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-
 
 In addition to the <a href="../../topics/generated_files/topic_UnitCell.html#">Specification of the unit cell</a> and <a href="../../topics/generated_files/topic_AtomTypes.html#">Atom types</a>, ABINIT must know
 the number of atoms inside the cell, their type, and position. 
-This is described by <a href="../../input_variables/generated_files/varset_basic.html#natom">natom</a>, <a href="../../input_variables/generated_files/varset_basic.html#typat">typat</a> and one of <a href="../../input_variables/generated_files/varset_basic.html#xred">xred</a>, <a href="../../input_variables/generated_files/varset_basic.html#xcart">xcart</a> and <a href="../../input_variables/generated_files/varset_basic.html#xangst">xangst</a>.
+This is described by <a href="../../variables/generated_files/varset_basic.html#natom">natom</a>, <a href="../../variables/generated_files/varset_basic.html#typat">typat</a> and one of <a href="../../variables/generated_files/varset_basic.html#xred">xred</a>, <a href="../../variables/generated_files/varset_basic.html#xcart">xcart</a> and <a href="../../variables/generated_files/varset_basic.html#xangst">xangst</a>.
 <p>
 ABINIT can automatically detect the Bravais lattice and space group,
-and generate symmetries (e.g. <a href="../../input_variables/generated_files/varset_basic.html#nsym">nsym</a>,<a href="../../input_variables/generated_files/varset_basic.html#symrel">symrel</a>,<a href="../../input_variables/generated_files/varset_basic.html#tnons">tnons</a>), 
-from the primitive cell and the position of atoms (provided they are not too inaccurate, see <a href="../../input_variables/generated_files/varset_geo.html#tolsym">tolsym</a>). 
+and generate symmetries (e.g. <a href="../../variables/generated_files/varset_basic.html#nsym">nsym</a>,<a href="../../variables/generated_files/varset_basic.html#symrel">symrel</a>,<a href="../../variables/generated_files/varset_basic.html#tnons">tnons</a>), 
+from the primitive cell and the position of atoms (provided they are not too inaccurate, see <a href="../../variables/generated_files/varset_geo.html#tolsym">tolsym</a>). 
 For this purpose, in the magnetic case, ABINIT will also take into account the input atomic spin, through 
-the knowledge of <a href="../../input_variables/generated_files/varset_gstate.html#spinat">spinat</a>.
+the knowledge of <a href="../../variables/generated_files/varset_gstate.html#spinat">spinat</a>.
 <p>
-Alternatively, ABINIT can start from the specification of symmetries (either from <a href="../../input_variables/generated_files/varset_geo.html#spgroup">spgroup</a> or from the
-list of symmetries - <a href="../../input_variables/generated_files/varset_basic.html#nsym">nsym</a>,<a href="../../input_variables/generated_files/varset_basic.html#symrel">symrel</a>,<a href="../../input_variables/generated_files/varset_basic.html#tnons">tnons</a>) 
+Alternatively, ABINIT can start from the specification of symmetries (either from <a href="../../variables/generated_files/varset_geo.html#spgroup">spgroup</a> or from the
+list of symmetries - <a href="../../variables/generated_files/varset_basic.html#nsym">nsym</a>,<a href="../../variables/generated_files/varset_basic.html#symrel">symrel</a>,<a href="../../variables/generated_files/varset_basic.html#tnons">tnons</a>) 
 and generate the atomic positions from the asymmetric (irreducible) 
 part of the primitive cell. This is described in the <a href="../../topics/generated_files/topic_SmartSymm.html#">Smart Symmetrizer</a> topic.
-<p>ABINIT can treat antiferromagnetic symmetry operations, see <a href="../../input_variables/generated_files/varset_gstate.html#symafm">symafm</a>.
+<p>ABINIT can treat antiferromagnetic symmetry operations, see <a href="../../variables/generated_files/varset_gstate.html#symafm">symafm</a>.
 <p>
-In ABINIT, a database with the 230 spatial groups of symmetry (see <a href="../../input_variables/generated_files/varset_geo.html#spgroup">spgroup</a>) 
-and the 1191 Shubnikov anti-ferromagnetic space groups is present (see also <a href="../../input_variables/generated_files/varset_geo.html#spgroupma">spgroupma</a> and <a href="../../input_variables/generated_files/varset_geo.html#genafm">genafm</a>).
+In ABINIT, a database with the 230 spatial groups of symmetry (see <a href="../../variables/generated_files/varset_geo.html#spgroup">spgroup</a>) 
+and the 1191 Shubnikov anti-ferromagnetic space groups is present (see also <a href="../../variables/generated_files/varset_geo.html#spgroupma">spgroupma</a> and <a href="../../variables/generated_files/varset_geo.html#genafm">genafm</a>).
 <p>There is also a (non-graphical) atom manipulator in ABINIT, see <a href="../../topics/generated_files/topic_AtomManipulator.html#">AtomManipulator</a>.
-<p>ABINIT can read XYZ files, see <a href="../../input_variables/generated_files/varset_geo.html#xyzfile">xyzfile</a>.
-<p>Atomic positions can also be generated at random, see <a href="../../input_variables/generated_files/varset_rlx.html#random_atpos">random_atpos</a>.
+<p>ABINIT can read XYZ files, see <a href="../../variables/generated_files/varset_geo.html#xyzfile">xyzfile</a>.
+<p>Atomic positions can also be generated at random, see <a href="../../variables/generated_files/varset_rlx.html#random_atpos">random_atpos</a>.
 <p>Details about the way the crystal structure is defined in ABINIT can be found <a href="../documents/geometry.pdf">here</a>.
 <br><br><a href=#top>Go to the top</a>
 
@@ -97,23 +97,23 @@ studies ...</li>
 <h3><b>3. Related input variables.</b></h3>
 
 
-<p>Compulsory input variables:<p>... <a href="../../input_variables/generated_files/varset_basic.html#xangst">xangst</a>   [vectors (X) of atom positions in cartesian coordinates -length in ANGSTrom-]<br>
-... <a href="../../input_variables/generated_files/varset_basic.html#xcart">xcart</a>   [vectors (X) of atom positions in CARTesian coordinates]<br>
-... <a href="../../input_variables/generated_files/varset_basic.html#xred">xred</a>   [vectors (X) of atom positions in REDuced coordinates]<br>
-<p>Basic input variables:<p>... <a href="../../input_variables/generated_files/varset_basic.html#natom">natom</a>   [Number of ATOMs]<br>
-... <a href="../../input_variables/generated_files/varset_basic.html#ntypat">ntypat</a>   [Number of TYPes of AToms]<br>
-... <a href="../../input_variables/generated_files/varset_basic.html#typat">typat</a>   [TYPe of AToms]<br>
-<p>Useful input variables:<p>... <a href="../../input_variables/generated_files/varset_gstate.html#chkprim">chkprim</a>   [CHecK whether the cell is PRIMitive]<br>
-... <a href="../../input_variables/generated_files/varset_basic.html#nsym">nsym</a>   [Number of SYMmetry operations]<br>
-... <a href="../../input_variables/generated_files/varset_geo.html#spgroup">spgroup</a>   [SPace GROUP number]<br>
-... <a href="../../input_variables/generated_files/varset_gstate.html#spinat">spinat</a>   [SPIN for AToms]<br>
-... <a href="../../input_variables/generated_files/varset_basic.html#symrel">symrel</a>   [SYMmetry in REaL space]<br>
-... <a href="../../input_variables/generated_files/varset_basic.html#tnons">tnons</a>   [Translation NON-Symmorphic vectors]<br>
-... <a href="../../input_variables/generated_files/varset_geo.html#tolsym">tolsym</a>   [TOLERANCE for SYMmetries]<br>
-... <a href="../../input_variables/generated_files/varset_geo.html#xyzfile">xyzfile</a>   [XYZ FILE input for geometry]<br>
-<p>Input variables for experts:<p>... <a href="../../input_variables/generated_files/varset_dev.html#maxnsym">maxnsym</a>   [MAXimum Number of SYMetries]<br>
-... <a href="../../input_variables/generated_files/varset_rlx.html#random_atpos">random_atpos</a>   [RANDOM ATomic POSitions]<br>
-... <a href="../../input_variables/generated_files/varset_dev.html#symmorphi">symmorphi</a>   [SYMMORPHIc symmetry operation selection]<br>
+<p>Compulsory input variables:<p>... <a href="../../variables/generated_files/varset_basic.html#xangst">xangst</a>   [vectors (X) of atom positions in cartesian coordinates -length in ANGSTrom-]<br>
+... <a href="../../variables/generated_files/varset_basic.html#xcart">xcart</a>   [vectors (X) of atom positions in CARTesian coordinates]<br>
+... <a href="../../variables/generated_files/varset_basic.html#xred">xred</a>   [vectors (X) of atom positions in REDuced coordinates]<br>
+<p>Basic input variables:<p>... <a href="../../variables/generated_files/varset_basic.html#natom">natom</a>   [Number of ATOMs]<br>
+... <a href="../../variables/generated_files/varset_basic.html#ntypat">ntypat</a>   [Number of TYPes of AToms]<br>
+... <a href="../../variables/generated_files/varset_basic.html#typat">typat</a>   [TYPe of AToms]<br>
+<p>Useful input variables:<p>... <a href="../../variables/generated_files/varset_gstate.html#chkprim">chkprim</a>   [CHecK whether the cell is PRIMitive]<br>
+... <a href="../../variables/generated_files/varset_basic.html#nsym">nsym</a>   [Number of SYMmetry operations]<br>
+... <a href="../../variables/generated_files/varset_geo.html#spgroup">spgroup</a>   [SPace GROUP number]<br>
+... <a href="../../variables/generated_files/varset_gstate.html#spinat">spinat</a>   [SPIN for AToms]<br>
+... <a href="../../variables/generated_files/varset_basic.html#symrel">symrel</a>   [SYMmetry in REaL space]<br>
+... <a href="../../variables/generated_files/varset_basic.html#tnons">tnons</a>   [Translation NON-Symmorphic vectors]<br>
+... <a href="../../variables/generated_files/varset_geo.html#tolsym">tolsym</a>   [TOLERANCE for SYMmetries]<br>
+... <a href="../../variables/generated_files/varset_geo.html#xyzfile">xyzfile</a>   [XYZ FILE input for geometry]<br>
+<p>Input variables for experts:<p>... <a href="../../variables/generated_files/varset_dev.html#maxnsym">maxnsym</a>   [MAXimum Number of SYMetries]<br>
+... <a href="../../variables/generated_files/varset_rlx.html#random_atpos">random_atpos</a>   [RANDOM ATomic POSitions]<br>
+... <a href="../../variables/generated_files/varset_dev.html#symmorphi">symmorphi</a>   [SYMMORPHIc symmetry operation selection]<br>
 
 <br><br><a href=#top>Go to the top</a>
 

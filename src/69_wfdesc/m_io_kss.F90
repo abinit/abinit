@@ -1063,7 +1063,7 @@ end subroutine make_gvec_kss
 !!  vtrial(nfftf,nspden)=the trial potential
 !!  xred(3,natom)=reduced dimensionless atomic coordinates
 !!  eigen(mband,nkpt,nsppol)=array for holding eigenvalues (hartree)
-!!  ngfftc(18)=Info about 3D FFT for the coarse mesh, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  ngfftc(18)=Info about 3D FFT for the coarse mesh, see ~abinit/doc/variables/vargs.htm#ngfft
 !!  [Electronpositron] <electronpositron_type>=quantities for the electron-positron annihilation.
 !!
 !! PARENTS

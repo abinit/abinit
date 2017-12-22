@@ -32,7 +32,7 @@
 !!  -1 for transforming from r to G.
 !! mpi_enreg=information about MPI parallelization
 !! nfft=(effective) number of FFT grid points (for this processor)
-!! ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!! ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !! paral_kgb=Flag related to the kpoint-band-fft parallelism
 !! tim_fourdp=timing code of the calling routine (can be set to 0 if not attributed)
 !!

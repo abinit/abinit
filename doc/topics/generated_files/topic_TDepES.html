@@ -32,7 +32,7 @@ src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-
 
 <script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
 
- Mentioned in &nbsp; <a href="../../topics/generated_files/topic_ElPhonInt.html">topic_ElPhonInt</a>, &nbsp; <a href="../../users/generated_files/help_features.html#6">help_features#6</a>. 
+ Mentioned in &nbsp; <a href="../../guide/generated_files/help_features.html#6">help_features#6</a>, &nbsp; <a href="../../topics/generated_files/topic_ElPhonInt.html">topic_ElPhonInt</a>. 
  <hr>
  <h3><b>Table of content: </b></h3> 
  <ul> <li>1. <a href="topic_TDepES.html#1">Introduction.</a><li>2. <a href="topic_TDepES.html#2">Related lesson(s) of the tutorial.</a><li>3. <a href="topic_TDepES.html#3">Related input variables.</a><li>4. <a href="topic_TDepES.html#4">Selected input files.</a><li>5. <a href="topic_TDepES.html#5">References.</a></ul>
@@ -51,18 +51,18 @@ The AHC implementation can be used with any XC functional working with the respo
 and requires the use of norm-conserving pseudopotentials. NetCDF support is mandatory.
 
 <p>The AHC implementation in ABINIT is built on a Sternheimer approach to efficiently compute the sum over highly energetic bands appearing in the AHC equations <a href="../../biblio/generated_files/bib_biblio.html#Gonze2011">[Gonze2011]</a>.
-Such behavior is controlled by the input variable <a href="../../input_variables/generated_files/varset_dfpt.html#ieig2rf">ieig2rf</a>. 
-<p>The <b>k</b>-point convergence can be strongly improved by restoring the charge neutrality through the reading of the Born effective charge and dielectric tensor (controlled by the input variable <a href="../../input_variables/generated_files/varset_files.html#getddb">getddb</a>). More information on the importance of charge neutrality fulfillment can be found in <a href="../../biblio/generated_files/bib_biblio.html#Ponce2015">[Ponce2015]</a>.
-The value of <a href="../../input_variables/generated_files/varset_dfpt.html#elph2_imagden">elph2_imagden</a> sets the imaginary shifts used to smooth numerical instabilities in the denominator of the sum-over-states expression.  
-<p>We have checked that the implementation correctly holds for arbitrarily small <a href="../../input_variables/generated_files/varset_dfpt.html#elph2_imagden">elph2_imagden</a> parameters, <a href="../../biblio/generated_files/bib_biblio.html#Ponce2015">[Ponce2015]</a>.  
-The input variable <a href="../../input_variables/generated_files/varset_dfpt.html#smdelta">smdelta</a> triggers the calculation of the electronic lifetime and the value of the smearing delta function can be specified through <a href="../../input_variables/generated_files/varset_dfpt.html#esmear">esmear</a>. 
-<p>A double grid can be used to speed-up the calculations with <a href="../../input_variables/generated_files/varset_dev.html#getwfkfine">getwfkfine</a> or <a href="../../input_variables/generated_files/varset_dev.html#irdwfkfine">irdwfkfine</a>.
-The variable <a href="../../input_variables/generated_files/varset_dev.html#getgam_eig2nkq">getgam_eig2nkq</a> gives the contribution at &Gamma; so that the Debye-Waller term can be computed. This variable is only relevant for calculations of AHC using the abinit program only. 
+Such behavior is controlled by the input variable <a href="../../variables/generated_files/varset_dfpt.html#ieig2rf">ieig2rf</a>. 
+<p>The <b>k</b>-point convergence can be strongly improved by restoring the charge neutrality through the reading of the Born effective charge and dielectric tensor (controlled by the input variable <a href="../../variables/generated_files/varset_files.html#getddb">getddb</a>). More information on the importance of charge neutrality fulfillment can be found in <a href="../../biblio/generated_files/bib_biblio.html#Ponce2015">[Ponce2015]</a>.
+The value of <a href="../../variables/generated_files/varset_dfpt.html#elph2_imagden">elph2_imagden</a> sets the imaginary shifts used to smooth numerical instabilities in the denominator of the sum-over-states expression.  
+<p>We have checked that the implementation correctly holds for arbitrarily small <a href="../../variables/generated_files/varset_dfpt.html#elph2_imagden">elph2_imagden</a> parameters, <a href="../../biblio/generated_files/bib_biblio.html#Ponce2015">[Ponce2015]</a>.  
+The input variable <a href="../../variables/generated_files/varset_dfpt.html#smdelta">smdelta</a> triggers the calculation of the electronic lifetime and the value of the smearing delta function can be specified through <a href="../../variables/generated_files/varset_dfpt.html#esmear">esmear</a>. 
+<p>A double grid can be used to speed-up the calculations with <a href="../../variables/generated_files/varset_dev.html#getwfkfine">getwfkfine</a> or <a href="../../variables/generated_files/varset_dev.html#irdwfkfine">irdwfkfine</a>.
+The variable <a href="../../variables/generated_files/varset_dev.html#getgam_eig2nkq">getgam_eig2nkq</a> gives the contribution at &Gamma; so that the Debye-Waller term can be computed. This variable is only relevant for calculations of AHC using the abinit program only. 
 It is nonetheless recommended to use the provided python post-processing script temperature_para.py with its module rf_mods.py in the directory  scripts/post_processing/ to allow for more flexibility. The python scripts support multi-threading.
 
 <p>The following steps are required to perform an AHC calculation:
 <li>Perform a response function calculation at <b>q</b>=&Gamma; with electric field perturbation.</li>
-<li>Perform phonon calculations and produce the EPC for a large set of wavevectors <b>q</b>, reading the Born effective charge and dielectric tensor with <a href="../../input_variables/generated_files/varset_files.html#getddb">getddb</a>.</li>
+<li>Perform phonon calculations and produce the EPC for a large set of wavevectors <b>q</b>, reading the Born effective charge and dielectric tensor with <a href="../../variables/generated_files/varset_files.html#getddb">getddb</a>.</li>
 <li>Gather and compute the impact of the electron-phonon coupling on the electronic eigenenergies using the temperature_para.py python script.</li>  
 
 <p>The outputs of the script are provided in text and NetCDF format to allow for later reading inside ABINIT. This could be used in the future developments of ABINIT to compute temperature-dependent optical properties for example. 
@@ -89,15 +89,15 @@ the temperature dependence of the electronic structure</a>.</li>
 <h3><b>3. Related input variables.</b></h3>
 
 
-<p>Compulsory input variables:<p>... <a href="../../input_variables/generated_files/varset_dfpt.html#ieig2rf">ieig2rf</a>   [Integer for second-order EIGenvalues from Response-Function]<br>
-... <a href="../../input_variables/generated_files/varset_dfpt.html#smdelta">smdelta</a>   [SMeared DELTA function]<br>
-<p>Basic input variables:<p>... <a href="../../input_variables/generated_files/varset_dfpt.html#bdeigrf">bdeigrf</a>   [BanD for second-order EIGenvalues from Response-Function]<br>
-... <a href="../../input_variables/generated_files/varset_dfpt.html#elph2_imagden">elph2_imagden</a>   [ELectron-PHonon interaction at 2nd order : IMAGinary shift of the DENominator]<br>
-<p>Useful input variables:<p>... <a href="../../input_variables/generated_files/varset_dfpt.html#esmear">esmear</a>   [Eigenvalue SMEARing]<br>
-... <a href="../../input_variables/generated_files/varset_files.html#getddb">getddb</a>   [GET the DDB from ...]<br>
-... <a href="../../input_variables/generated_files/varset_dev.html#getgam_eig2nkq">getgam_eig2nkq</a>   [GET the GAMma phonon data EIG2NKQ from dataset]<br>
-... <a href="../../input_variables/generated_files/varset_dev.html#getwfkfine">getwfkfine</a>   [GET the fine grid wavefunctions from _WFK file]<br>
-... <a href="../../input_variables/generated_files/varset_dev.html#irdwfkfine">irdwfkfine</a>   [Integer that governs the ReaDing of the grid _WFK file on the FINE grid]<br>
+<p>Compulsory input variables:<p>... <a href="../../variables/generated_files/varset_dfpt.html#ieig2rf">ieig2rf</a>   [Integer for second-order EIGenvalues from Response-Function]<br>
+... <a href="../../variables/generated_files/varset_dfpt.html#smdelta">smdelta</a>   [SMeared DELTA function]<br>
+<p>Basic input variables:<p>... <a href="../../variables/generated_files/varset_dfpt.html#bdeigrf">bdeigrf</a>   [BanD for second-order EIGenvalues from Response-Function]<br>
+... <a href="../../variables/generated_files/varset_dfpt.html#elph2_imagden">elph2_imagden</a>   [ELectron-PHonon interaction at 2nd order : IMAGinary shift of the DENominator]<br>
+<p>Useful input variables:<p>... <a href="../../variables/generated_files/varset_dfpt.html#esmear">esmear</a>   [Eigenvalue SMEARing]<br>
+... <a href="../../variables/generated_files/varset_files.html#getddb">getddb</a>   [GET the DDB from ...]<br>
+... <a href="../../variables/generated_files/varset_dev.html#getgam_eig2nkq">getgam_eig2nkq</a>   [GET the GAMma phonon data EIG2NKQ from dataset]<br>
+... <a href="../../variables/generated_files/varset_dev.html#getwfkfine">getwfkfine</a>   [GET the fine grid wavefunctions from _WFK file]<br>
+... <a href="../../variables/generated_files/varset_dev.html#irdwfkfine">irdwfkfine</a>   [Integer that governs the ReaDing of the grid _WFK file on the FINE grid]<br>
 
 <br><br><a href=#top>Go to the top</a>
 

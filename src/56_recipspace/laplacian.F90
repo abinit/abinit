@@ -19,7 +19,7 @@
 !!  mpi_enreg=informations about MPI parallelization
 !!  nfft=number of points of the fft grid
 !!  nfunc=number of functions on the grid for which the laplacian is to be calculated
-!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !!  paral_kgb=flag controlling (k,g,bands) parallelization
 !!  (optional) rdfuncr(nfft,nfunc)=real(dp) discretized functions in real space
 !!  rdfuncg_in TO BE DESCRIBED SB 090901

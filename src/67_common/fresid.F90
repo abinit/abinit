@@ -26,7 +26,7 @@
 !!  | xclevel= level of the XC functional
 !! mpi_enreg=information about MPI parallelization
 !! nfft=(effective) number of FFT grid points (for this processor)
-!! ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!! ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !! ntypat=number of types of atoms in cell.
 !! option=see below
 !! pawtab(ntypat*dtset%usepaw) <type(pawtab_type)>=paw tabulated starting data

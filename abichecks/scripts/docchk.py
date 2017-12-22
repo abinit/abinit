@@ -54,7 +54,7 @@ def main(home_dir, verbose=False):
   print( " ABINIT Input variables: Regenerate html from abinit_vars.yml  ")
   print( " ============================================================= ")
   pathdocdir = os.path.join(home_dir, "doc")
-  cmd = "cd " + pathdocdir + " ; rm -f input_variables/generated_files/varset_allvars.html ; ./generate_doc.py > generate_doc.log"
+  cmd = "cd " + pathdocdir + " ; rm -f variables/generated_files/varset_allvars.html ; ./generate_doc.py > generate_doc.log"
   os.system(cmd)
   pathpymodsdir = os.path.join(home_dir, "doc/pymods")
   cmd = "cd " + pathpymodsdir + " ; python abi_check.py > abi_check.log"
@@ -74,8 +74,8 @@ def main(home_dir, verbose=False):
   print( " ============================================================= ")
   print( " ABINIT Input variables: Check in documentation                ")
   print( " ============================================================= ")
-  varhtml = glob.glob(os.path.join(home_dir, "doc/input_variables/generated_files/var*html"))
-  varallvars = glob.glob(os.path.join(home_dir, "doc/input_variables/generated_files/varset_allvars.html"))
+  varhtml = glob.glob(os.path.join(home_dir, "doc/variables/generated_files/var*html"))
+  varallvars = glob.glob(os.path.join(home_dir, "doc/variables/generated_files/varset_allvars.html"))
   ret_code = 0
   for iwords in range(len(words)):
       deffiles = []
@@ -170,7 +170,7 @@ def main(home_dir, verbose=False):
   print(" ============================================================= ")
   print(" ANADDB Input variables: Check in documentation                ")
   print(" ============================================================= ")
-  varhtml = os.path.join(home_dir, "doc/input_variables/generated_files/varset_allvars.html")
+  varhtml = os.path.join(home_dir, "doc/variables/generated_files/varset_allvars.html")
   for iwords in range(len(words)):
       with open(varhtml) as fh: varhtmldata = fh.read()
       if words[iwords]+"@anaddb" in varhtmldata:

@@ -31,7 +31,7 @@
 !!  nband(nkpt*nsppol)=number of bands being considered per k point
 !!  nkpt=number of k points
 !!  ngfft(18)=contain all needed information about 3D FFT, i
-!!    see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!    see ~abinit/doc/variables/vargs.htm#ngfft
 !!  npwarr(nkpt)=number of planewaves at each k point, and boundary
 !!  nspinor=number of spinorial components of the wavefunctions
 !!  nsppol=1 for unpolarized, 2 for polarized

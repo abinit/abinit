@@ -952,7 +952,9 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    call intagm(dprarr,intarr,jdtset,marr,dtset%ntypat,string(1:lenstr),'lexexch',tread,'INT')
    if(tread==1) dtset%lexexch(1:dtset%ntypat)=intarr(1:dtset%ntypat)
  end if
-
+! LDA minus half keyword
+ call intagm(dprarr,intarr,jdtset,marr,dtset%ntypat,string(1:lenstr),'ldaminushalf',tread,'INT')
+ if(tread==1) dtset%ldaminushalf(1:dtset%ntypat)=intarr(1:dtset%ntypat)
 !Some plowan data
  dtset%plowan_natom=0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'plowan_natom',tread,'INT')

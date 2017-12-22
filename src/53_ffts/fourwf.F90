@@ -53,7 +53,7 @@
 !! mgfft=maximum size of 1D FFTs
 !! mpi_enreg=information about MPI parallelization
 !! ndat=number of FFT to do in //
-!! ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!! ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !! npwin=number of elements in fofgin array (for option 0, 1 and 2)
 !! npwout=number of elements in fofgout array (for option 2 and 3)
 !! n4,n5,n6=ngfft(4),ngfft(5),ngfft(6), dimensions of fofr.

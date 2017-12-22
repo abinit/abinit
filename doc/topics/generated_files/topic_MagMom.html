@@ -32,7 +32,7 @@ src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-
 
 <script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
 
- Mentioned in &nbsp; <a href="../../users/generated_files/help_features.html#2.5">help_features#2.5</a>. 
+ Mentioned in &nbsp; <a href="../../guide/generated_files/help_features.html#2.5">help_features#2.5</a>. 
  <hr>
  <h3><b>Table of content: </b></h3> 
  <ul> <li>1. <a href="topic_MagMom.html#1">Introduction.</a><li>2. <a href="topic_MagMom.html#2">Related input variables.</a><li>3. <a href="topic_MagMom.html#3">Selected input files.</a><li>4. <a href="topic_MagMom.html#4">References.</a></ul>
@@ -52,9 +52,9 @@ src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-
 
 <p>The function f(x) = x<sup>2</sup>(3+x(1+x(-6+3x))), is applied to smooth the transition near the edge of the sphere around <b>R</b><sub>i</sub>, over a thickness r<sub>s</sub> (by default 0.05 bohr, and f is set to 0 for | <b>r</b>-<b>R</b><sub>i</sub>|> r<sub>s</sub>). This minimizes discontinuous variations of the potential from iteration to iteration.
 
-<p>The constraint is managed by the keyword <a href="../../input_variables/generated_files/varset_gstate.html#magconon">magconon</a>. Value 1 gives a constraint on the direction (<b>c</b> = <b>m</b> - <b>s</b><sub>i</sub> (<b>s</b><sub>i</sub>.<b>m</b>), value 2 gives a full constraint on the vector (<b>c</b> = <b>m</b> - <b>s</b><sub>i</sub>), with respect to the keyword <a href="../../input_variables/generated_files/varset_gstate.html#spinat">spinat</a> (<b>s</b><sub>i</sub> above), giving a 3-vector for each atom. The latter is quite a stringent constraint, and often may not converge. The former value usually works, provided sufficient precision is given for the calculation of the magnetic moment (kinetic energy cutoff in particular).
+<p>The constraint is managed by the keyword <a href="../../variables/generated_files/varset_gstate.html#magconon">magconon</a>. Value 1 gives a constraint on the direction (<b>c</b> = <b>m</b> - <b>s</b><sub>i</sub> (<b>s</b><sub>i</sub>.<b>m</b>), value 2 gives a full constraint on the vector (<b>c</b> = <b>m</b> - <b>s</b><sub>i</sub>), with respect to the keyword <a href="../../variables/generated_files/varset_gstate.html#spinat">spinat</a> (<b>s</b><sub>i</sub> above), giving a 3-vector for each atom. The latter is quite a stringent constraint, and often may not converge. The former value usually works, provided sufficient precision is given for the calculation of the magnetic moment (kinetic energy cutoff in particular).
 
-<p>The strength of the constraint is given by the keyword <a href="../../input_variables/generated_files/varset_gstate.html#magcon_lambda">magcon_lambda</a> (&lambda; above - real valued). Typical values are 10<sup>-2</sup> but vary strongly with system type: this value should be started small (here the constraint may not be enforced fully) and increased. A too large value leads to oscillations of the magnetization (the equivalent of charge sloshing) which do not converge.  A corresponding Lagrange penalty term is added to the total energy, and is printed to the log file, along with the effective magnetic field being applied. In an ideal case the energy penalty term should go to 0 (the constraint is fully satisfied).
+<p>The strength of the constraint is given by the keyword <a href="../../variables/generated_files/varset_gstate.html#magcon_lambda">magcon_lambda</a> (&lambda; above - real valued). Typical values are 10<sup>-2</sup> but vary strongly with system type: this value should be started small (here the constraint may not be enforced fully) and increased. A too large value leads to oscillations of the magnetization (the equivalent of charge sloshing) which do not converge.  A corresponding Lagrange penalty term is added to the total energy, and is printed to the log file, along with the effective magnetic field being applied. In an ideal case the energy penalty term should go to 0 (the constraint is fully satisfied).
 <br><br><a href=#top>Go to the top</a>
 
 
@@ -66,10 +66,10 @@ src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-
 <h3><b>2. Related input variables.</b></h3>
 
 
-<p>Useful input variables:<p>... <a href="../../input_variables/generated_files/varset_gstate.html#magcon_lambda">magcon_lambda</a>   [MAGnetization CONstraint LAMBDA parameter]<br>
-... <a href="../../input_variables/generated_files/varset_gstate.html#magconon">magconon</a>   [turn MAGnetization CONstraint ON]<br>
-... <a href="../../input_variables/generated_files/varset_gstate.html#ratsph">ratsph</a>   [Radii of the ATomic SPHere(s)]<br>
-... <a href="../../input_variables/generated_files/varset_gstate.html#spinat">spinat</a>   [SPIN for AToms]<br>
+<p>Useful input variables:<p>... <a href="../../variables/generated_files/varset_gstate.html#magcon_lambda">magcon_lambda</a>   [MAGnetization CONstraint LAMBDA parameter]<br>
+... <a href="../../variables/generated_files/varset_gstate.html#magconon">magconon</a>   [turn MAGnetization CONstraint ON]<br>
+... <a href="../../variables/generated_files/varset_gstate.html#ratsph">ratsph</a>   [Radii of the ATomic SPHere(s)]<br>
+... <a href="../../variables/generated_files/varset_gstate.html#spinat">spinat</a>   [SPIN for AToms]<br>
 
 <br><br><a href=#top>Go to the top</a>
 

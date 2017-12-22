@@ -38,7 +38,7 @@
 !!  natom=number of atoms in cell.
 !!  nband(nkpt)=number of bands at each k point
 !!  nfft=number of FFT grid points
-!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !!  nkpt=number of k points in Brillouin zone
 !!  nloalg(3)=governs the choice of the algorithm for non-local operator.
 !!  npwarr(nkpt)=number of planewaves in basis and boundary at each k

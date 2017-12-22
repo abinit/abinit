@@ -235,7 +235,7 @@ end subroutine xcdata_init
 !! SIDE EFFECTS
 !!
 !! PARENTS
-!!      invars2,m_xcdata
+!!      invars2,m_xcdata,setup_sigma
 !!
 !! CHILDREN
 !!      get_xclevel

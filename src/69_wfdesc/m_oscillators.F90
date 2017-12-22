@@ -79,7 +79,7 @@ CONTAINS  !=====================================================================
 !! i2=1 if kbz2 = Sk2, 2 if kbz2 = -Sk_2 (k_2 is in the IBZ)
 !! ktabr1(nr),ktabr2(nr)= tables R^-1(r-t) for the two k-points
 !! ktabp1,ktabp2 = phase factors for non-simmorphic symmetries e^{-i 2\pi kbz.\tau}
-!! ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!! ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !! npwvec=number of plane waves (in the sphere if map2sphere==1, in the FFT box if map2sphere==1)
 !! nr=number of FFT grid points
 !! ndat=Number of wavefunctions to transform.
@@ -232,7 +232,7 @@ end subroutine rho_tw_g
 !! npw=number of plane waves in the sphere.
 !! nr=number of FFT grid points
 !! ndat=Number of wavefunctions to transform.
-!! ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!! ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !! use_padfft=
 !!             1 if matrix elements are calculated via zero-padded FFT.
 !!             0 R-->G Transform in done on the full FFT box.
@@ -338,7 +338,7 @@ end subroutine get_uug
 !! time2=1 if kbz2 = Sk2, 2 if kbz2 = -Sk_2 (k_2 is in the IBZ)
 !! ktabr1(nr),ktabr2(nr)= tables R^-1(r-t) for the two k-points
 !! ktabp1,ktabp2 = phase factors for non-simmorphic symmetries e^{-i 2\pi kbz.\tau}
-!! ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!! ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !! npw=number of plane waves (in the sphere if map2sphere==1, in the FFT box if map2sphere==1)
 !! nr=number of FFT grid points
 !! ndat=Number of wavefunctions to transform.

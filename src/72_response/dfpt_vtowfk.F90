@@ -355,6 +355,7 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
      end do
    end do
 
+
 !  If electric field, the derivative of the wf should be read, and multiplied by i.
    if(test_ddk==1) then
      ii = wfk_findk(ddk_f(1), gs_hamkq%kpt_k)
