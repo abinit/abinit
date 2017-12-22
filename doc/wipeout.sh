@@ -75,20 +75,20 @@ rm -f \
   theory/vanderbilt-anaddb-notes.pdf \
   theory/wavefunction.out \
   theory/wavefunction.pdf \
-  users/AbinitBandStructureMaker_manual.out \
-  users/AbinitBandStructureMaker_manual.pdf \
-  users/aimhelp.out \
-  users/aimhelp.pdf \
-  users/conducti_manual.out \
-  users/conducti_manual.pdf \
-  users/conductivity_paw_manu.out \
-  users/conductivity_paw_manu.pdf \
-  users/elphon_manual.out \
-  users/elphon_manual.pdf \
-  users/linear_optics_paw.out \
-  users/linear_optics_paw.pdf \
-  users/xtalinput.out \
-  users/xtalinput.pdf \
+  guide/AbinitBandStructureMaker_manual.out \
+  guide/AbinitBandStructureMaker_manual.pdf \
+  guide/aimhelp.out \
+  guide/aimhelp.pdf \
+  guide/conducti_manual.out \
+  guide/conducti_manual.pdf \
+  guide/conductivity_paw_manu.out \
+  guide/conductivity_paw_manu.pdf \
+  guide/elphon_manual.out \
+  guide/elphon_manual.pdf \
+  guide/linear_optics_paw.out \
+  guide/linear_optics_paw.pdf \
+  guide/xtalinput.out \
+  guide/xtalinput.pdf \
   versioning/bzr-quickref.out \
   versioning/bzr-quickref.pdf
 rm -rf abinit-doc-[0-9]*

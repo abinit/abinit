@@ -641,6 +641,17 @@ subroutine outvar_i_n (dtsets,iout,&
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,narr,&
 & narrm,ncid,ndtset_alloc,'lexexch','INT',multivals%ntypat)
 
+!ldaminushalf
+ do idtset=0,ndtset_alloc       ! specific size for each dataset
+   narrm(idtset)=dtsets(idtset)%ntypat
+   if(idtset==0)narrm(idtset)=mxvals%ntypat
+   if (narrm(idtset)>0) then
+     intarr(1:narrm(idtset),idtset)=dtsets(idtset)%ldaminushalf(1:narrm(idtset))
+   end if
+ end do
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,narr,&
+& narrm,ncid,ndtset_alloc,'ldaminushalf','INT',multivals%ntypat)
+
 !localrdwf
  intarr(1,:)=dtsets(:)%localrdwf
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'localrdwf','INT',0)

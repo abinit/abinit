@@ -39,7 +39,7 @@
 !! Cprj(natom,nspinor*mband*mkmem*nsppol)=<p_lmn|Cnk> coefficients for each WF |Cnk>
 !!   and each |p_lmn> non-local projector
 !! npwarr(nkpt)=Number of plane waves at each k-point
-!! ngfftf(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!! ngfftf(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !!  Note that ngfftf refers to the fine mesh.
 !! kg(3,mpw*mkmem)=reduced planewave coordinates
 !! Hdr<hdr_type>=the header of wf, den and pot files

@@ -10,7 +10,7 @@
 #
 #    ABINIT is a project of the Universite Catholique de Louvain,
 #    Corning Inc. and other collaborators, see ~abinit/doc/developers/contributors.txt.
-#    Please read ~abinit/doc/users/acknowledgments.html for suggested
+#    Please read ~abinit/doc/biblio/generated_files/bib_acknow.html for suggested
 #    acknowledgments of the ABINIT effort.
 #
 #    For more information, see https://www.abinit.org .

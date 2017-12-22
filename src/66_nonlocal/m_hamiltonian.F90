@@ -333,10 +333,10 @@ module m_hamiltonian
    ! kpg_kp(3,npw_fft_kp)
    ! k^prime+G vector coordinates at k^prime
 
-  real(dp), ABI_CONTIGUOUS pointer :: nucdipmom_k(:,:) => null()
-   ! nucdipmom_k(2,npw_k*(npw_k+1)/2)
-   ! nuclear dipole moment Hamiltonian in reciprocal space, stored as
-   ! lower triangular part of Hermitian matrix
+  ! real(dp), ABI_CONTIGUOUS pointer :: nucdipmom_k(:,:) => null()
+  !  ! nucdipmom_k(2,npw_k*(npw_k+1)/2)
+  !  ! nuclear dipole moment Hamiltonian in reciprocal space, stored as
+  !  ! lower triangular part of Hermitian matrix
 
   real(dp), ABI_CONTIGUOUS pointer :: phkpxred(:,:) => null()
    ! phkpxred(2,natom)
@@ -362,6 +362,13 @@ module m_hamiltonian
   real(dp), ABI_CONTIGUOUS pointer :: xred(:,:) => null()
    ! xred(3,natom)
    ! reduced coordinates of atoms (dimensionless)
+
+! ===== Complex array points
+
+  complex(dpc), ABI_CONTIGUOUS pointer :: nucdipmom_k(:) => null()
+   ! nucdipmom_k(npw_k*(npw_k+1)/2)
+   ! nuclear dipole moment Hamiltonian in reciprocal space, stored as
+   ! lower triangular part of Hermitian matrix
 
  
 ! ===== Structured datatype pointers
@@ -686,11 +693,14 @@ subroutine destroy_hamiltonian(Ham)
  if (associated(Ham%kg_kp)) nullify(Ham%kg_kp)
  if (associated(Ham%kpg_k)) nullify(Ham%kpg_k)
  if (associated(Ham%kpg_kp)) nullify(Ham%kpg_kp)
- if (associated(Ham%nucdipmom_k)) nullify(Ham%nucdipmom_k)
+ ! if (associated(Ham%nucdipmom_k)) nullify(Ham%nucdipmom_k)
  if (associated(Ham%ffnl_k)) nullify(Ham%ffnl_k)
  if (associated(Ham%ffnl_kp)) nullify(Ham%ffnl_kp)
  if (associated(Ham%ph3d_k)) nullify(Ham%ph3d_k)
  if (associated(Ham%ph3d_kp)) nullify(Ham%ph3d_kp)
+
+! Complex pointers
+ if (associated(Ham%nucdipmom_k)) nullify(Ham%nucdipmom_k)
 
 ! Real arrays
  if (allocated(Ham%ekb_spin))   then
@@ -1058,7 +1068,8 @@ subroutine load_k_hamiltonian(ham,ffnl_k,fockACE_k,gbound_k,istwf_k,kinpw_k,&
  integer,intent(in),optional,target :: gbound_k(:,:),kg_k(:,:)
  real(dp),intent(in),optional :: kpt_k(3)
  real(dp),intent(in),optional,target :: ffnl_k(:,:,:,:),kinpw_k(:),kpg_k(:,:),ph3d_k(:,:,:)
- real(dp),intent(in),optional,target :: nucdipmom_k(:,:)
+ ! real(dp),intent(in),optional,target :: nucdipmom_k(:,:)
+ complex(dpc),intent(in),optional,target :: nucdipmom_k(:)
  type(fock_ACE_type),intent(in),optional,target :: fockACE_k
 
 !Local variables-------------------------------

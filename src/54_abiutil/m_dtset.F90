@@ -1077,6 +1077,8 @@ subroutine dtset_copy(dtout, dtin)
 
  call alloc_copy( dtin%lexexch, dtout%lexexch)
 
+ call alloc_copy( dtin%ldaminushalf, dtout%ldaminushalf)
+ 
  call alloc_copy( dtin%lpawu, dtout%lpawu)
 
  call alloc_copy( dtin%nband, dtout%nband)
@@ -1268,6 +1270,9 @@ subroutine dtset_free(dtset)
  end if
  if (allocated(dtset%lexexch))     then
    ABI_DEALLOCATE(dtset%lexexch)
+ end if
+ if (allocated(dtset%ldaminushalf))     then
+   ABI_DEALLOCATE(dtset%ldaminushalf)
  end if
  if (allocated(dtset%lpawu))       then
    ABI_DEALLOCATE(dtset%lpawu)

@@ -34,6 +34,7 @@
 !!      getghc
 !!
 !! CHILDREN
+!!      zhpmv
 !!
 !! NOTES
 !!  This routine applies the Hamiltonian due to an array of magnetic dipoles located
@@ -77,10 +78,10 @@ subroutine getghcnd(cwavef,ghcnd,gs_ham,my_nspinor,ndat)
 
 !Local variables-------------------------------
 !scalars
- integer :: row,col,coldx,ndp_index,npw
- real(dp) :: Aijr, Aiji,coli,colr,rowi,rowr
+ integer :: cwavedim,igp
  character(len=500) :: message
  !arrays
+ complex(dpc),allocatable :: inwave(:),hggc(:)
 
 ! *********************************************************************
 
@@ -101,169 +102,28 @@ subroutine getghcnd(cwavef,ghcnd,gs_ham,my_nspinor,ndat)
    MSG_BUG(message)
  end if
 
-! size of incoming wavefunction
- ! cwavedim = gs_ham%npw_k*my_nspinor*ndat
- ! ABI_ALLOCATE(hgg,(cwavedim*(cwavedim+1)/2))
- ! ABI_ALLOCATE(hggc,(cwavedim))
- ! ABI_ALLOCATE(inwave,(cwavedim))
+ cwavedim = gs_ham%npw_k*my_nspinor*ndat
+ ABI_ALLOCATE(hggc,(cwavedim))
+ ABI_ALLOCATE(inwave,(cwavedim))
 
- ! Hand-coded H_ND.cwave (715 sec) Least memory, ok performance
- ghcnd=zero
- npw = gs_ham%npw_k
- ndp_index = 0
- do col=1, npw
-    colr = cwavef(1,col)
-    coli = cwavef(2,col)
-    coldx = (2*npw-col+2)*(col-1)/2 ! elements of columns already completed, each
-    ! one less planewave than the one before, starting with npw in col 1
-    do row = col+1, npw  ! row == col term is strictly zero
-       ndp_index = coldx + row - col + 1
-       Aijr = gs_ham%nucdipmom_k(1,ndp_index)
-       Aiji = gs_ham%nucdipmom_k(2,ndp_index)
-       rowr = cwavef(1,row)
-       rowi = cwavef(2,row)
-       ghcnd(1,row) = ghcnd(1,row) + Aijr*colr - Aiji*coli
-       ghcnd(2,row) = ghcnd(2,row) + Aijr*coli + Aiji*colr
-       ghcnd(1,col) = ghcnd(1,col) + Aijr*rowr + Aiji*rowi
-       ghcnd(2,col) = ghcnd(2,col) + Aijr*rowi - Aiji*rowr
-    end do
+ do igp = 1, gs_ham%npw_k
+   inwave(igp) = cmplx(cwavef(1,igp),cwavef(2,igp),kind=dpc)
  end do
 
- ! MATMUL with real objects (1631 sec) most memory, worst performance
- ! cwavedim = gs_ham%npw_k*my_nspinor*ndat
- ! ghcnd(1:2,1:cwavedim)=zero
- ! ABI_ALLOCATE(hreal,(cwavedim,cwavedim))
- ! ABI_ALLOCATE(himag,(cwavedim,cwavedim))
- ! ABI_ALLOCATE(cwavereal,(cwavedim))
- ! ABI_ALLOCATE(cwaveimag,(cwavedim))
- ! cwavereal(1:cwavedim) = cwavef(1,1:cwavedim)
- ! cwaveimag(1:cwavedim) = cwavef(2,1:cwavedim)
- ! ndp_index = 0
- ! do col=1, gs_ham%npw_k
- !    do row = col, gs_ham%npw_k 
- !       ndp_index = ndp_index + 1
- !       hreal(row,col) = gs_ham%nucdipmom_k(1,ndp_index)
- !       hreal(col,row) = hreal(row,col)
- !       himag(row,col) = gs_ham%nucdipmom_k(2,ndp_index)
- !       himag(col,row) = -himag(row,col)
- !    end do
- ! end do
- ! ghcnd(1,1:cwavedim) = MATMUL(hreal,cwavereal) - MATMUL(himag,cwaveimag)
- ! ghcnd(2,1:cwavedim) = MATMUL(hreal,cwaveimag) + MATMUL(himag,cwavereal)
- ! ABI_DEALLOCATE(hreal)
- ! ABI_DEALLOCATE(himag)
- ! ABI_DEALLOCATE(cwavereal)
- ! ABI_DEALLOCATE(cwaveimag)
+! apply hamiltonian hgg to input wavefunction inwave, result in hggc
+ call ZHPMV('L',cwavedim,cone,gs_ham%nucdipmom_k,inwave,1,czero,hggc,1)
 
- ! BLAS with real objects (1401 sec) most memory, poor performance
- ! cwavedim = gs_ham%npw_k*my_nspinor*ndat
- ! ghcnd(1:2,1:cwavedim)=zero
- ! ABI_ALLOCATE(hreal,(cwavedim,cwavedim))
- ! ABI_ALLOCATE(himag,(cwavedim,cwavedim))
- ! ABI_ALLOCATE(cwavereal,(cwavedim))
- ! ABI_ALLOCATE(cwaveimag,(cwavedim))
- ! cwavereal(1:cwavedim) = cwavef(1,1:cwavedim)
- ! cwaveimag(1:cwavedim) = cwavef(2,1:cwavedim)
- ! ndp_index = 0
- ! do col=1, gs_ham%npw_k
- !    do row = col, gs_ham%npw_k 
- !       ndp_index = ndp_index + 1
- !       hreal(row,col) = gs_ham%nucdipmom_k(1,ndp_index)
- !       hreal(col,row) = hreal(row,col)
- !       himag(row,col) = gs_ham%nucdipmom_k(2,ndp_index)
- !       himag(col,row) = -himag(row,col)
- !    end do
- ! end do
+ do igp=1,gs_ham%npw_k
+   ghcnd(1,igp) = dreal(hggc(igp))
+   ghcnd(2,igp) = dimag(hggc(igp))
+ end do
 
- ! ABI_ALLOCATE(work,(cwavedim))
- ! call DGEMV('N',cwavedim,cwavedim,1.0D0,hreal,cwavedim,cwavereal,1,0.0D0,work,1)
- ! call DGEMV('N',cwavedim,cwavedim,-1.0D0,himag,cwavedim,cwaveimag,1,1.0D0,work,1)
- ! ghcnd(1,1:cwavedim) = work(1:cwavedim)
-
- ! call DGEMV('N',cwavedim,cwavedim,1.0D0,hreal,cwavedim,cwaveimag,1,0.0D0,work,1)
- ! call DGEMV('N',cwavedim,cwavedim,1.0D0,himag,cwavedim,cwavereal,1,1.0D0,work,1)
- ! ghcnd(2,1:cwavedim) = work(1:cwavedim)
- 
- ! ABI_DEALLOCATE(hreal)
- ! ABI_DEALLOCATE(himag)
- ! ABI_DEALLOCATE(cwavereal)
- ! ABI_DEALLOCATE(cwaveimag)
- ! ABI_DEALLOCATE(work)
-
- ! MATMUL with complex objects (1353 sec) much memory, poor performance
- ! cwavedim = gs_ham%npw_k*my_nspinor*ndat
- ! ABI_ALLOCATE(hgg,(cwavedim,cwavedim))
- ! ABI_ALLOCATE(inwave,(cwavedim))
- ! ABI_ALLOCATE(work,(cwavedim))
- ! ndp_index = 0
- ! do col=1, gs_ham%npw_k
- !    inwave(col)=CMPLX(cwavef(1,col),cwavef(2,col),kind=dpc)
- !    do row = col, gs_ham%npw_k 
- !       ndp_index = ndp_index + 1
- !       hgg(row,col) = CMPLX(gs_ham%nucdipmom_k(1,ndp_index),gs_ham%nucdipmom_k(2,ndp_index),kind=dpc)
- !       hgg(col,row) = CONJG(hgg(row,col))
- !    end do
- ! end do
-
- ! work = MATMUL(hgg,inwave)
- ! do col = 1, cwavedim
- !    ghcnd(1,col) = REAL(work(col))
- !    ghcnd(2,col) = AIMAG(work(col))
- ! end do
- 
-
- ! ABI_DEALLOCATE(hgg)
- ! ABI_DEALLOCATE(inwave)
- ! ABI_DEALLOCATE(work)
-
- ! BLAS with complex objects (656 sec) much memory, best performance
- ! cwavedim = gs_ham%npw_k*my_nspinor*ndat
- ! cwavedimp = cwavedim*(cwavedim+1)/2
- ! ABI_ALLOCATE(hgg,(cwavedimp))
- ! ABI_ALLOCATE(inwave,(cwavedim))
- ! ABI_ALLOCATE(work,(cwavedim))
- ! ndp_index = 0
- ! do col=1, gs_ham%npw_k
- !    inwave(col)=CMPLX(cwavef(1,col),cwavef(2,col),kind=dpc)
- !    do row = col, gs_ham%npw_k 
- !       ndp_index = ndp_index + 1
- !       hgg(ndp_index) = CMPLX(gs_ham%nucdipmom_k(1,ndp_index),gs_ham%nucdipmom_k(2,ndp_index),kind=dpc)
- !    end do
- ! end do
-
- ! call zhpmv('L',cwavedim,cone,hgg,inwave,1,czero,work,1)
-
- ! do col = 1, cwavedim
- !    ghcnd(1,col) = REAL(work(col))
- !    ghcnd(2,col) = AIMAG(work(col))
- ! end do
- 
- 
- ! ABI_DEALLOCATE(hgg)
- ! ABI_DEALLOCATE(inwave)
- ! ABI_DEALLOCATE(work)
-
-!  do igp = 1, gs_ham%npw_k
-!    inwave(igp) = cmplx(cwavef(1,igp),cwavef(2,igp),kind=dpc)
-!  end do
-
-!  do igp = 1, gs_ham%npw_k*(gs_ham%npw_k+1)/2
-!     hgg(igp) = cmplx(gs_ham%nucdipmom_k(1,igp),gs_ham%nucdipmom_k(2,igp),kind=dpc)
-!  end do
-
-! ! apply hamiltonian hgg to input wavefunction inwave, result in hggc
-!  call zhpmv('L',cwavedim,cone,hgg,inwave,1,czero,hggc,1)
-
-!  do igp=1,gs_ham%npw_k
-!    ghcnd(1,igp) = dreal(hggc(igp))
-!    ghcnd(2,igp) = dimag(hggc(igp))
-!  end do
+ ABI_DEALLOCATE(hggc)
+ ABI_DEALLOCATE(inwave)
 
 ! ghcnd=zero
 
  ! ABI_DEALLOCATE(hgg)
- ! ABI_DEALLOCATE(hggc)
- ! ABI_DEALLOCATE(inwave)
 
 end subroutine getghcnd
 !!***
