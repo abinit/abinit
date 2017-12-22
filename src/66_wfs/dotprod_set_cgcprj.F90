@@ -70,15 +70,15 @@ subroutine dotprod_set_cgcprj(atindx1,cg1,cg2,cprj1,cprj2,dimcprj,&
 & mpi_enreg,natom,nattyp,nbd1,nbd2,npw,nspinor,nsppol,ntypat,pawtab,smn,usepaw)
 
  use defs_basis
+ use defs_abitypes
+ use m_xmpi
  use m_pawtab, only : pawtab_type
  use m_pawcprj, only : pawcprj_type, pawcprj_alloc, pawcprj_get, pawcprj_free
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'wf_mixing'
- use interfaces_32_util
- use interfaces_66_wfs
+#define ABI_FUNC 'dotprod_set_cgcprj'
 !End of the abilint section
 
  implicit none
@@ -98,7 +98,7 @@ subroutine dotprod_set_cgcprj(atindx1,cg1,cg2,cprj1,cprj2,dimcprj,&
 
 !Local variables-------------------------------
 !scalars
- integer :: ia,iat,itypat,ibd1,ibd2,icgb1,icgb2,ig,isppol
+ integer :: ia,iat,itypat,ibd1,ibd2,icgb1,icgb2,ig
  integer :: ilmn1,ilmn2,klmn
  real(dp) :: dotr,doti
 !arrays
