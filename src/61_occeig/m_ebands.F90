@@ -3366,6 +3366,7 @@ end subroutine edos_write
 
 integer function edos_ncwrite(edos, ncid) result(ncerr)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
