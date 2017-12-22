@@ -1180,7 +1180,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
    call chkint_eq(0,0,cond_string,cond_values,ierr,'ixcpositron',dt%ixcpositron,8,(/0,-1,1,11,2,3,31,4/),iout)
 
 !  ixcrot
-   call chkint_eq(0,0,cond_string,cond_values,ierr,'ixcpositron',dt%ixcrot,3,(/1,2,3/),iout)
+   call chkint_eq(0,0,cond_string,cond_values,ierr,'ixcrot',dt%ixcrot,3,(/1,2,3/),iout)
  
 !  kptnrm and kpt
 !  Coordinates components must be between -1 and 1.
