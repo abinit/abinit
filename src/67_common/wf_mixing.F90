@@ -199,11 +199,11 @@ subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
 
 !       This is a copy of the  subroutine
 !       subroutine dotprod_set_cgcprj(atindx1,cg1,cg2,cprj1,cprj2,dimcprj,&
-!&        ibg1,ibg2,icg1,icg2,ikpt,isppol,istwf,mband,mcg,mcg,mcprj,mcprj,mkmem,&
+!&        ibg1,ibg2,icg1,icg2,ikpt,isppol,istwf,mband,mcg1,mcg2,mcprj1,mcprj2,mkmem,&
 !&        mpi_enreg,natom,nattyp,nbd1,nbd2,npw,nspinor,nsppol,ntypat,pawtab,smn,usepaw)
 
        call dotprod_set_cgcprj(atindx1,cg,scf_history%cg(:,:,indh),cprj,scf_history%cprj(:,:,indh),dimcprj,&
-&        ibg,ibg,icg,icg,ikpt,isppol,istwf,mband,mcg1,mcg2,mcprj1,mcprj2,dtset%mkmem,&
+&        ibg,ibg,icg,icg,ikpt,isppol,istwf_k,dtset%mband,mcg,mcg,mcprj,mcprj,dtset%mkmem,&
 &        mpi_enreg,dtset%natom,nattyp,nband_k,nband_k,npw_nk,my_nspinor,dtset%nsppol,ntypat,pawtab,smn,usepaw)
 
 !      Allocate arrays for a wave-function (or a block of WFs)
@@ -366,8 +366,10 @@ subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
        ABI_ALLOCATE(dmn,(2,nband_k,nband_k))
        do iblockbd=1,nblockbd
          do iblockbd1=1,nblockbd
-HERE
-           dmn(1,iblockbd,:)=dmn(1,iblockbd,:)+mmn(1,iblockbd,iblockbd1)*snm(1,iblockbd1,:)
+           dmn(1,:,iblockbd)=dmn(1,:,iblockbd)&
+&           +mmn(1,:,iblockbd1)*smn(1,iblockbd1,iblockbd)-mmn(2,:,iblockbd1)*smn(2,iblockbd1,iblockbd)
+           dmn(2,iblockbd,:)=dmn(2,iblockbd,:)&
+&           +mmn(1,:,iblockbd1)*smn(2,iblockbd1,iblockbd)+mmn(2,:,iblockbd1)*smn(1,iblockbd1,iblockbd)
          enddo
        enddo
        do iblockbd=1,nblockbd
@@ -408,14 +410,14 @@ HERE
              cwavefh(2,ig)=scf_history%cg(2,ig+icgb1,indh)
            end do
            call dotprod_g(dotr,doti,istwf_k,npw_k*my_nspinor,2,cwavef,cwavefh,mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
-           snm(1,iblockbd1,iblockbd)=dotr
-           snm(2,iblockbd1,iblockbd)=doti
+           smn(1,iblockbd1,iblockbd)=dotr
+           smn(2,iblockbd1,iblockbd)=doti
 !          End loop over bands iblockbd1
            icgb1=icgb1+npw_k*my_nspinor*nprocband
          end do
          write(std_out, '(a,i4)')' iblockbd=',iblockbd
-         write(std_out, '(a,8f12.4)')' Real:',snm(1,1:nblockbd,iblockbd)
-         write(std_out, '(a,8f12.4)')' Imag:',snm(2,1:nblockbd,iblockbd)
+         write(std_out, '(a,8f12.4)')' Real:',smn(1,1:nblockbd,iblockbd)
+         write(std_out, '(a,8f12.4)')' Imag:',smn(2,1:nblockbd,iblockbd)
 !        End loop over bands iblockbd
          icgb=icgb+npw_k*my_nspinor*nprocband
        end do

@@ -70,15 +70,15 @@ subroutine dotprod_set_cgcprj(atindx1,cg1,cg2,cprj1,cprj2,dimcprj,&
 & mpi_enreg,natom,nattyp,nbd1,nbd2,npw,nspinor,nsppol,ntypat,pawtab,smn,usepaw)
 
  use defs_basis
+ use defs_abitypes
+ use m_xmpi
  use m_pawtab, only : pawtab_type
  use m_pawcprj, only : pawcprj_type, pawcprj_alloc, pawcprj_get, pawcprj_free
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'wf_mixing'
- use interfaces_32_util
- use interfaces_66_wfs
+#define ABI_FUNC 'dotprod_set_cgcprj'
 !End of the abilint section
 
  implicit none
@@ -90,9 +90,9 @@ subroutine dotprod_set_cgcprj(atindx1,cg1,cg2,cprj1,cprj2,dimcprj,&
  integer, intent(in) :: natom,nbd1,nbd2,npw,nspinor,nsppol,ntypat,usepaw
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
- integer,intent(in) :: atindx1(natom),dimcprj(natom),nattyp(ntypat)
- integer,intent(out) :: smn(nbd1,nbd2)
+ integer, intent(in) :: atindx1(natom),dimcprj(natom),nattyp(ntypat)
  real(dp), intent(in) :: cg1(2,mcg1),cg2(2,mcg2)
+ real(dp), intent(out) :: smn(2,nbd1,nbd2)
  type(pawcprj_type),intent(in) :: cprj1(natom,mcprj1),cprj2(natom,mcprj2)
  type(pawtab_type),intent(in) :: pawtab(ntypat*usepaw)
 
@@ -103,7 +103,7 @@ subroutine dotprod_set_cgcprj(atindx1,cg1,cg2,cprj1,cprj2,dimcprj,&
  real(dp) :: dotr,doti
 !arrays
  real(dp),allocatable :: cwavef1(:,:),cwavef2(:,:)
- type(pawcprj_type),intent(in) :: cprj1_k(:,:),cprj2_k(:,:)
+ type(pawcprj_type),allocatable :: cprj1_k(:,:),cprj2_k(:,:)
 
 ! *************************************************************************
 
