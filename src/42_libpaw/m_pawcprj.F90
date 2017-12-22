@@ -1154,7 +1154,7 @@ end subroutine pawcprj_output
 !!  cprj(dimcp,nspinor*mband*mkmem*nsppol)=input cprj (used if mkmem/=0)
 !!  dimcp=first dimension of cprj_k,cprj arrays (1 or natom)
 !!  iband1=index of first band
-!!  ibg=shift if cprj array to locate current k-point
+!!  ibg=shift in cprj array to locate current k-point
 !!  [icpgr]= (optional argument) if present, only component icpgr of
 !!           input cprj gradient is copied into output cprj
 !!           Not used if cprj(:,:)%ncpgr<icpgr (mkmem>0)
