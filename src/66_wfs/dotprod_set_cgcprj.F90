@@ -98,7 +98,7 @@ subroutine dotprod_set_cgcprj(atindx1,cg1,cg2,cprj1,cprj2,dimcprj,&
 
 !Local variables-------------------------------
 !scalars
- integer :: ia,iat,itypat,ibd1,ibd2,icgb1,icgb2,ig,isppol
+ integer :: ia,iat,itypat,ibd1,ibd2,icgb1,icgb2,ig
  integer :: ilmn1,ilmn2,klmn
  real(dp) :: dotr,doti
 !arrays
@@ -143,7 +143,7 @@ subroutine dotprod_set_cgcprj(atindx1,cg1,cg2,cprj1,cprj2,dimcprj,&
      do ig=1,npw*nspinor
        cwavef2(1,ig)=cg2(1,ig+icgb2)
        cwavef2(2,ig)=cg2(2,ig+icgb2)
-     end if
+     end do
 
      if(usepaw==1) then
        call pawcprj_alloc(cprj2_k,cprj2(1,1)%ncpgr,dimcprj)
