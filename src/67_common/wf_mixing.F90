@@ -98,7 +98,7 @@ subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
  integer,allocatable :: bufsize(:),bufsize_wf(:),bufdisp(:),bufdisp_wf(:),dimcprj(:),npw_block(:),npw_disp(:)
  real(dp),allocatable :: al(:,:),cwavef(:,:),cwavefh(:,:),cwavef_tmp(:,:)
  real(dp),allocatable :: dum(:,:)
- real(dp),allocatable :: mnm(:,:,:),snm(:,:,:)
+ real(dp),allocatable :: dnm(:,:,:),mnm(:,:,:),snm(:,:,:)
  real(dp),allocatable :: work(:,:),work1(:,:)
  type(pawcprj_type),allocatable :: cprj_k(:,:),cprj_kh(:,:),cprj_k3(:,:)
 
@@ -125,6 +125,15 @@ subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
 
 !Index for the wavefunction stored in scf_history
  indh=1
+
+!DEBUG
+! if(istep==1)then
+!   scf_history%cg(:,:,1)=cg(:,:)
+! else
+!   cg(:,:)=scf_history%cg(:,:,1)
+! endif
+! return
+!ENDDEBUG
 
 !First step
  if (istep==1 .or. (wfmixalg==2 .and. abs(scf_history%alpha-one)<tol8) ) then
@@ -221,6 +230,10 @@ subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
        ABI_ALLOCATE(snm,(2,nblockbd,nblockbd))
        snm=zero
 
+!DEBUG
+       write(std_out,*)' Compute the S matrix, whose matrix elements are scalar products.'
+!ENDDEBUG
+
        do iblockbd=1,nblockbd
          iband_min=1+(iblockbd-1)*nprocband
          iband_max=iblockbd*nprocband
@@ -307,6 +320,12 @@ subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
 
          end do
 
+!DEBUG
+         write(std_out, '(a,i4)')' iblockbd=',iblockbd
+         write(std_out, '(a,8f12.4)')' Real:',snm(1,1:nblockbd,iblockbd)
+         write(std_out, '(a,8f12.4)')' Imag:',snm(2,1:nblockbd,iblockbd)
+!ENDDEBUG
+
 !        End loop over bands iblockbd
          icgb=icgb+npw_k*my_nspinor*nprocband
        end do
@@ -323,6 +342,30 @@ subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
        end do
        call ztrtrs("L","N","N",nband_k,nband_k,snm,nband_k,mnm,nband_k,ierr)
 
+!DEBUG
+!Print the M matrix
+       write(std_out,*)' Print the M matrix.'
+       do iblockbd=1,nblockbd
+         write(std_out, '(a,i4)')' iblockbd=',iblockbd
+         write(std_out, '(a,8f12.4)')' Real:',mnm(1,1:nblockbd,iblockbd)
+         write(std_out, '(a,8f12.4)')' Imag:',mnm(2,1:nblockbd,iblockbd)
+       end do
+       write(std_out,*)' Check M * S = 1.'
+       ABI_ALLOCATE(dnm,(2,nband_k,nband_k))
+       do iblockbd=1,nblockbd
+         do iblockbd1=1,nblockbd
+HERE
+           dnm(1,iblockbd,:)=dnm(1,iblockbd,:)+mnm(1,iblockbd,iblockbd1)*snm(1,iblockbd1,:)
+         enddo
+       enddo
+       do iblockbd=1,nblockbd
+         write(std_out, '(a,i4)')' iblockbd=',iblockbd
+         write(std_out, '(a,8f12.4)')' Real:',dnm(1,1:nblockbd,iblockbd)
+         write(std_out, '(a,8f12.4)')' Imag:',dnm(2,1:nblockbd,iblockbd)
+       end do
+!ENDDEBUG
+
+
 !      This is the simple mixing case : the wavefunction from scf_history is biorthogonalized to cg, taken as reference
 !      Wavefunction alignment (istwfk=1 ?)
        ABI_ALLOCATE(work,(2,npw_nk*my_nspinor*nblockbd))
@@ -331,7 +374,42 @@ subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
        call zgemm('N','N',npw_nk*my_nspinor,nband_k,nband_k,dcmplx(1._dp), &
 &       work1,npw_nk*my_nspinor, &
 &       mnm,nblockbd,dcmplx(0._dp),work,npw_nk*my_nspinor)
+!DEBUG
+!      Should update, but perhaps this zgemm is incorrect
        scf_history%cg(:,1+icg:npw_nk*my_nspinor*nblockbd+icg,indh)=work(:,:)
+!ENDDEBUG
+
+!DEBUG
+!      This is a check that now the cwavefh is biorthogonal to the cwavef
+!      Calculate Snm=<cg|S|cg_hist>
+       write(std_out,*)' Compute the bi-orthogonal matrix elements. This should give the unit matrix.'
+       icgb=icg
+       do iblockbd=1,nblockbd
+         do ig=1,npw_k*my_nspinor
+           cwavef(1,ig)=cg(1,ig+icgb)
+           cwavef(2,ig)=cg(2,ig+icgb)
+         end do
+         icgb1=icg
+         do iblockbd1=1,nblockbd
+           do ig=1,npw_k*my_nspinor
+             cwavefh(1,ig)=scf_history%cg(1,ig+icgb1,indh)
+             cwavefh(2,ig)=scf_history%cg(2,ig+icgb1,indh)
+           end do
+           call dotprod_g(dotr,doti,istwf_k,npw_k*my_nspinor,2,cwavef,cwavefh,mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
+           snm(1,iblockbd1,iblockbd)=dotr
+           snm(2,iblockbd1,iblockbd)=doti
+!          End loop over bands iblockbd1
+           icgb1=icgb1+npw_k*my_nspinor*nprocband
+         end do
+         write(std_out, '(a,i4)')' iblockbd=',iblockbd
+         write(std_out, '(a,8f12.4)')' Real:',snm(1,1:nblockbd,iblockbd)
+         write(std_out, '(a,8f12.4)')' Imag:',snm(2,1:nblockbd,iblockbd)
+!        End loop over bands iblockbd
+         icgb=icgb+npw_k*my_nspinor*nprocband
+       end do
+       stop
+!ENDDEBUG
+
        ABI_DEALLOCATE(work1)
 
 !      If paw, must also align cprj from history
@@ -360,6 +438,7 @@ subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
        ibd=0  
        inc=npw_nk*my_nspinor
        do iblockbd=1,nblockbd
+!        scf_history%alpha contains dtset%wfmix in the simple mixing case.
          cg(:,icg+1+ibd:icg+inc+ibd)=scf_history%cg(:,1+icg+ibd:icg+ibd+inc,indh)&
 &          +scf_history%alpha*(cg(:,icg+1+ibd:ibd+icg+inc)-scf_history%cg(:,1+icg+ibd:icg+ibd+inc,indh))
          if(usepaw==1) then

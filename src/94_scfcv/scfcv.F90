@@ -1119,6 +1119,12 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
 
      if (istep==1 .or. istep_updatedfock==fock%fock_common%nnsclo_hf) then
 
+       istep_updatedfock=1
+
+!DEBUG
+!      if(istep==1)then
+!ENDDEBUG
+  
        !Possibly mix the wavefunctions from different steps before computing the Fock operator
        if(wfmixalg/=0)then
 !DEBUG
@@ -1137,7 +1143,6 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
 
        ! Update data relative to the occupied states in fock
        call fock_updatecwaveocc(cg,cprj,dtset,fock,indsym,istep,mcg,mcprj,mpi_enreg,nattyp,npwarr,occ,ucvol)
-       istep_updatedfock=1
        ! Possibly (re)compute the ACE operator 
        if(fock%fock_common%use_ACE/=0) then
          call fock2ACE(cg,cprj,fock,dtset%istwfk,kg,dtset%kptns,dtset%mband,mcg,mcprj,dtset%mgfft,&
@@ -1157,6 +1162,10 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
        if(fock%fock_common%nnsclo_hf==1)then
          fock%fock_common%fock_converged=.TRUE.
        end if
+
+!DEBUG
+!      endif
+!ENDDEBUG
 
        !Depending on fockoptmix, possibly restart the mixing procedure for the potential
        if(mod(dtset%fockoptmix,10)==1)then
