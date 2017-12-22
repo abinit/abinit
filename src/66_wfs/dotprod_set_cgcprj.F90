@@ -90,9 +90,9 @@ subroutine dotprod_set_cgcprj(atindx1,cg1,cg2,cprj1,cprj2,dimcprj,&
  integer, intent(in) :: natom,nbd1,nbd2,npw,nspinor,nsppol,ntypat,usepaw
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
- integer,intent(in) :: atindx1(natom),dimcprj(natom),nattyp(ntypat)
- integer,intent(out) :: smn(nbd1,nbd2)
+ integer, intent(in) :: atindx1(natom),dimcprj(natom),nattyp(ntypat)
  real(dp), intent(in) :: cg1(2,mcg1),cg2(2,mcg2)
+ real(dp), intent(out) :: smn(2,nbd1,nbd2)
  type(pawcprj_type),intent(in) :: cprj1(natom,mcprj1),cprj2(natom,mcprj2)
  type(pawtab_type),intent(in) :: pawtab(ntypat*usepaw)
 
@@ -103,7 +103,7 @@ subroutine dotprod_set_cgcprj(atindx1,cg1,cg2,cprj1,cprj2,dimcprj,&
  real(dp) :: dotr,doti
 !arrays
  real(dp),allocatable :: cwavef1(:,:),cwavef2(:,:)
- type(pawcprj_type),intent(in) :: cprj1_k(:,:),cprj2_k(:,:)
+ type(pawcprj_type),allocatable :: cprj1_k(:,:),cprj2_k(:,:)
 
 ! *************************************************************************
 
@@ -143,7 +143,7 @@ subroutine dotprod_set_cgcprj(atindx1,cg1,cg2,cprj1,cprj2,dimcprj,&
      do ig=1,npw*nspinor
        cwavef2(1,ig)=cg2(1,ig+icgb2)
        cwavef2(2,ig)=cg2(2,ig+icgb2)
-     end if
+     end do
 
      if(usepaw==1) then
        call pawcprj_alloc(cprj2_k,cprj2(1,1)%ncpgr,dimcprj)
