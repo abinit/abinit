@@ -22,6 +22,7 @@ sources = [
  "m_bandfft_kpt.F90",  # Modules first
  "m_invovl.F90",
  "chebfi.F90",
+ "dotprod_set_cgcprj.F90",
  "fxphas.F90",
  "getdc1.F90",
  "getghcnd.F90",

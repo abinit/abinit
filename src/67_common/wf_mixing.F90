@@ -98,7 +98,7 @@ subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
  integer,allocatable :: bufsize(:),bufsize_wf(:),bufdisp(:),bufdisp_wf(:),dimcprj(:),npw_block(:),npw_disp(:)
  real(dp),allocatable :: al(:,:),cwavef(:,:),cwavefh(:,:),cwavef_tmp(:,:)
  real(dp),allocatable :: dum(:,:)
- real(dp),allocatable :: dnm(:,:,:),mnm(:,:,:),snm(:,:,:)
+ real(dp),allocatable :: dmn(:,:,:),mmn(:,:,:),smn(:,:,:)
  real(dp),allocatable :: work(:,:),work1(:,:)
  type(pawcprj_type),allocatable :: cprj_k(:,:),cprj_kh(:,:),cprj_k3(:,:)
 
@@ -197,171 +197,183 @@ subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
          npw_nk=npw_k
        end if
 
+!       This is a copy of the  subroutine
+!       subroutine dotprod_set_cgcprj(atindx1,cg1,cg2,cprj1,cprj2,dimcprj,&
+!&        ibg1,ibg2,icg1,icg2,ikpt,isppol,istwf,mband,mcg,mcg,mcprj,mcprj,mkmem,&
+!&        mpi_enreg,natom,nattyp,nbd1,nbd2,npw,nspinor,nsppol,ntypat,pawtab,smn,usepaw)
+
+       call dotprod_set_cgcprj(atindx1,cg,scf_history%cg(:,:,indh),cprj,scf_history%cprj(:,:,indh),dimcprj,&
+&        ibg,ibg,icg,icg,ikpt,isppol,istwf,mband,mcg1,mcg2,mcprj1,mcprj2,dtset%mkmem,&
+&        mpi_enreg,dtset%natom,nattyp,nband_k,nband_k,npw_nk,my_nspinor,dtset%nsppol,ntypat,pawtab,smn,usepaw)
+
 !      Allocate arrays for a wave-function (or a block of WFs)
-       ABI_ALLOCATE(cwavef,(2,npw_nk*my_nspinor))
-       ABI_ALLOCATE(cwavefh,(2,npw_nk*my_nspinor))
-       if (nprocband>1) then
-         isize=2*my_nspinor;bufsize(:)=isize*npw_block(:);bufdisp(:)=isize*npw_disp(:)
-         isize=2*my_nspinor*npw_k;bufsize_wf(:)=isize
-         do ii=1,nprocband
-           bufdisp_wf(ii)=(ii-1)*isize
-         end do
-       end if
+!      ABI_ALLOCATE(cwavef,(2,npw_nk*my_nspinor))
+!      ABI_ALLOCATE(cwavefh,(2,npw_nk*my_nspinor))
+!      if (nprocband>1) then
+!        isize=2*my_nspinor;bufsize(:)=isize*npw_block(:);bufdisp(:)=isize*npw_disp(:)
+!        isize=2*my_nspinor*npw_k;bufsize_wf(:)=isize
+!        do ii=1,nprocband
+!          bufdisp_wf(ii)=(ii-1)*isize
+!        end do
+!      end if
 
 !      Space biorthogonalization
 
 !      Loop over bands or blocks of bands
        nblockbd=nband_k/nprocband
-       icgb=icg
+!      icgb=icg
 
-       if(usepaw==1) then
-         ABI_DATATYPE_ALLOCATE( cprj_k,(dtset%natom,my_nspinor*nblockbd))
-         call pawcprj_alloc(cprj_k,cprj(1,1)%ncpgr,dimcprj)
-         call pawcprj_get(atindx1,cprj_k,cprj,dtset%natom,1,ibg,ikpt,1,isppol,dtset%mband,&
-&         dtset%mkmem,dtset%natom,nblockbd,nblockbd,my_nspinor,dtset%nsppol,0,&
-&         mpicomm=mpi_enreg%comm_kpt,proc_distrb=mpi_enreg%proc_distrb)
-         ABI_DATATYPE_ALLOCATE( cprj_kh,(dtset%natom,my_nspinor*nblockbd))
-         call pawcprj_alloc(cprj_kh,scf_history%cprj(1,1,indh)%ncpgr,dimcprj)
-         call pawcprj_get(atindx1,cprj_kh,scf_history%cprj(:,:,indh),dtset%natom,1,ibg,ikpt,1,isppol,&
-&         dtset%mband,dtset%mkmem,dtset%natom,nblockbd,nblockbd,my_nspinor,dtset%nsppol,0,&
-&         mpicomm=mpi_enreg%comm_kpt,proc_distrb=mpi_enreg%proc_distrb)
-       end if  !end usepaw=1
+!      if(usepaw==1) then
+!        ABI_DATATYPE_ALLOCATE( cprj_k,(dtset%natom,my_nspinor*nblockbd))
+!        call pawcprj_alloc(cprj_k,cprj(1,1)%ncpgr,dimcprj)
+!        call pawcprj_get(atindx1,cprj_k,cprj,dtset%natom,1,ibg,ikpt,1,isppol,dtset%mband,&
+!&         dtset%mkmem,dtset%natom,nblockbd,nblockbd,my_nspinor,dtset%nsppol,0,&
+!&         mpicomm=mpi_enreg%comm_kpt,proc_distrb=mpi_enreg%proc_distrb)
+!         ABI_DATATYPE_ALLOCATE( cprj_kh,(dtset%natom,my_nspinor*nblockbd))
+!         call pawcprj_alloc(cprj_kh,scf_history%cprj(1,1,indh)%ncpgr,dimcprj)
+!         call pawcprj_get(atindx1,cprj_kh,scf_history%cprj(:,:,indh),dtset%natom,1,ibg,ikpt,1,isppol,&
+!&         dtset%mband,dtset%mkmem,dtset%natom,nblockbd,nblockbd,my_nspinor,dtset%nsppol,0,&
+!&         mpicomm=mpi_enreg%comm_kpt,proc_distrb=mpi_enreg%proc_distrb)
+!       end if  !end usepaw=1
 
-       ABI_ALLOCATE(snm,(2,nblockbd,nblockbd))
-       snm=zero
+       ABI_ALLOCATE(smn,(2,nblockbd,nblockbd))
 
 !DEBUG
        write(std_out,*)' Compute the S matrix, whose matrix elements are scalar products.'
 !ENDDEBUG
+!       smn=zero
 
-       do iblockbd=1,nblockbd
-         iband_min=1+(iblockbd-1)*nprocband
-         iband_max=iblockbd*nprocband
+!      do iblockbd=1,nblockbd
+!        iband_min=1+(iblockbd-1)*nprocband
+!        iband_max=iblockbd*nprocband
 
-         if(xmpi_paral==1.and.mpi_enreg%paral_kgb/=1) then
-           if (proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,iband_min,iband_max,isppol,me_distrb)) cycle
-         end if
+!        if(xmpi_paral==1.and.mpi_enreg%paral_kgb/=1) then
+!          if (proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,iband_min,iband_max,isppol,me_distrb)) cycle
+!        end if
 
 !        Extract wavefunction information
-         if (nprocband>1) then
+!        if (nprocband>1) then
 !          Special treatment for band-fft //
-           ABI_ALLOCATE(cwavef_tmp,(2,npw_k*my_nspinor*nprocband))
-           do ig=1,npw_k*my_nspinor*nprocband
-             cwavef_tmp(1,ig)=cg(1,ig+icgb)
-             cwavef_tmp(2,ig)=cg(2,ig+icgb)
-           end do
-           call xmpi_alltoallv(cwavef_tmp,bufsize_wf,bufdisp_wf,cwavef,bufsize,bufdisp,spaceComm_band,ierr)
-           ABI_DEALLOCATE(cwavef_tmp)
-         else
-           do ig=1,npw_k*my_nspinor
-             cwavef(1,ig)=cg(1,ig+icgb)
-             cwavef(2,ig)=cg(2,ig+icgb)
-           end do
-         end if
+!          ABI_ALLOCATE(cwavef_tmp,(2,npw_k*my_nspinor*nprocband))
+!          do ig=1,npw_k*my_nspinor*nprocband
+!            cwavef_tmp(1,ig)=cg(1,ig+icgb)
+!            cwavef_tmp(2,ig)=cg(2,ig+icgb)
+!          end do
+!          call xmpi_alltoallv(cwavef_tmp,bufsize_wf,bufdisp_wf,cwavef,bufsize,bufdisp,spaceComm_band,ierr)
+!          ABI_DEALLOCATE(cwavef_tmp)
+!        else
+!          do ig=1,npw_k*my_nspinor
+!            cwavef(1,ig)=cg(1,ig+icgb)
+!            cwavef(2,ig)=cg(2,ig+icgb)
+!          end do
+!        end if
 
-         icgb1=icg
+!        icgb1=icg
 
-         do iblockbd1=1,nblockbd
-           iband_min1=1+(iblockbd1-1)*nprocband
-           iband_max1=iblockbd1*nprocband
+!        do iblockbd1=1,nblockbd
+!          iband_min1=1+(iblockbd1-1)*nprocband
+!          iband_max1=iblockbd1*nprocband
 
-           if(xmpi_paral==1.and.mpi_enreg%paral_kgb/=1) then
-             if (proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,iband_min1,iband_max1,isppol,me_distrb)) cycle
-           end if
+!          if(xmpi_paral==1.and.mpi_enreg%paral_kgb/=1) then
+!            if (proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,iband_min1,iband_max1,isppol,me_distrb)) cycle
+!          end if
 
 !          Extract wavefunction information
 
-           if (nprocband>1) then
+!          if (nprocband>1) then
 !            Special treatment for band-fft //
-             ABI_ALLOCATE(cwavef_tmp,(2,npw_k*my_nspinor*nprocband))
-             do ig=1,npw_k*my_nspinor*nprocband
-               cwavef_tmp(1,ig)=scf_history%cg(1,ig+icgb1,indh)
-               cwavef_tmp(2,ig)=scf_history%cg(2,ig+icgb1,indh)
-             end do
-             call xmpi_alltoallv(cwavef_tmp,bufsize_wf,bufdisp_wf,cwavefh,bufsize,bufdisp,spaceComm_band,ierr)
-             ABI_DEALLOCATE(cwavef_tmp)
-           else
-             do ig=1,npw_k*my_nspinor
-               cwavefh(1,ig)=scf_history%cg(1,ig+icgb1,indh)
-               cwavefh(2,ig)=scf_history%cg(2,ig+icgb1,indh)
-             end do
-           end if
+!            ABI_ALLOCATE(cwavef_tmp,(2,npw_k*my_nspinor*nprocband))
+!            do ig=1,npw_k*my_nspinor*nprocband
+!              cwavef_tmp(1,ig)=scf_history%cg(1,ig+icgb1,indh)
+!              cwavef_tmp(2,ig)=scf_history%cg(2,ig+icgb1,indh)
+!            end do
+!            call xmpi_alltoallv(cwavef_tmp,bufsize_wf,bufdisp_wf,cwavefh,bufsize,bufdisp,spaceComm_band,ierr)
+!            ABI_DEALLOCATE(cwavef_tmp)
+!          else
+!            do ig=1,npw_k*my_nspinor
+!              cwavefh(1,ig)=scf_history%cg(1,ig+icgb1,indh)
+!              cwavefh(2,ig)=scf_history%cg(2,ig+icgb1,indh)
+!            end do
+!          end if
 
-!          Calculate Snm=<cg|S|cg_hist>
-           call dotprod_g(dotr,doti,istwf_k,npw_k*my_nspinor,2,cwavef,cwavefh,mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
-           if(usepaw==1) then
-             ia =0
-             do itypat=1,ntypat
-               do iat=1+ia,nattyp(itypat)+ia
-                 do ilmn1=1,pawtab(itypat)%lmn_size
-                   do ilmn2=1,ilmn1
-                     klmn=((ilmn1-1)*ilmn1)/2+ilmn2
-                     dotr=dotr+pawtab(itypat)%sij(klmn)*(cprj_k(iat,iblockbd)%cp(1,ilmn1)*cprj_kh(iat,iblockbd1)%cp(1,ilmn2)+&
-&                     cprj_k(iat,iblockbd)%cp(2,ilmn1)*cprj_kh(iat,iblockbd1)%cp(2,ilmn2))
-                     doti=doti+pawtab(itypat)%sij(klmn)*(cprj_k(iat,iblockbd)%cp(1,ilmn1)*cprj_kh(iat,iblockbd1)%cp(2,ilmn2)-&
-&                     cprj_k(iat,iblockbd)%cp(2,ilmn1)*cprj_kh(iat,iblockbd1)%cp(1,ilmn2))
-                   end do
-                   do ilmn2=ilmn1+1,pawtab(itypat)%lmn_size
-                     klmn=((ilmn2-1)*ilmn2)/2+ilmn1
-                     dotr=dotr+pawtab(itypat)%sij(klmn)*(cprj_k(iat,iblockbd)%cp(1,ilmn1)*cprj_kh(iat,iblockbd1)%cp(1,ilmn2)+&
-&                     cprj_k(iat,iblockbd)%cp(2,ilmn1)*cprj_kh(iat,iblockbd1)%cp(2,ilmn2))
-                     doti=doti+pawtab(itypat)%sij(klmn)*(cprj_k(iat,iblockbd)%cp(1,ilmn1)*cprj_kh(iat,iblockbd1)%cp(2,ilmn2)-&
-&                     cprj_k(iat,iblockbd)%cp(2,ilmn1)*cprj_kh(iat,iblockbd1)%cp(1,ilmn2))
-                   end do
-                 end do
-               end do
-               ia=ia+nattyp(itypat)
-             end do
-           end if
-           snm(1,iblockbd1,iblockbd)=dotr
-           snm(2,iblockbd1,iblockbd)=doti
+!          Calculate Smn=<cg|S|cg_hist>
+!          call dotprod_g(dotr,doti,istwf_k,npw_k*my_nspinor,2,cwavef,cwavefh,mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
+!          if(usepaw==1) then
+!            ia =0
+!            do itypat=1,ntypat
+!              do iat=1+ia,nattyp(itypat)+ia
+!                do ilmn1=1,pawtab(itypat)%lmn_size
+!                  do ilmn2=1,ilmn1
+!                    klmn=((ilmn1-1)*ilmn1)/2+ilmn2
+!                    dotr=dotr+pawtab(itypat)%sij(klmn)*(cprj_k(iat,iblockbd)%cp(1,ilmn1)*cprj_kh(iat,iblockbd1)%cp(1,ilmn2)+&
+!&                     cprj_k(iat,iblockbd)%cp(2,ilmn1)*cprj_kh(iat,iblockbd1)%cp(2,ilmn2))
+!                     doti=doti+pawtab(itypat)%sij(klmn)*(cprj_k(iat,iblockbd)%cp(1,ilmn1)*cprj_kh(iat,iblockbd1)%cp(2,ilmn2)-&
+!&                     cprj_k(iat,iblockbd)%cp(2,ilmn1)*cprj_kh(iat,iblockbd1)%cp(1,ilmn2))
+!                   end do
+!                   do ilmn2=ilmn1+1,pawtab(itypat)%lmn_size
+!                     klmn=((ilmn2-1)*ilmn2)/2+ilmn1
+!                     dotr=dotr+pawtab(itypat)%sij(klmn)*(cprj_k(iat,iblockbd)%cp(1,ilmn1)*cprj_kh(iat,iblockbd1)%cp(1,ilmn2)+&
+!&                     cprj_k(iat,iblockbd)%cp(2,ilmn1)*cprj_kh(iat,iblockbd1)%cp(2,ilmn2))
+!                     doti=doti+pawtab(itypat)%sij(klmn)*(cprj_k(iat,iblockbd)%cp(1,ilmn1)*cprj_kh(iat,iblockbd1)%cp(2,ilmn2)-&
+!&                     cprj_k(iat,iblockbd)%cp(2,ilmn1)*cprj_kh(iat,iblockbd1)%cp(1,ilmn2))
+!                   end do
+!                 end do
+!               end do
+!               ia=ia+nattyp(itypat)
+!             end do
+!           end if
+!           smn(1,iblockbd1,iblockbd)=dotr
+!           smn(2,iblockbd1,iblockbd)=doti
 !          End loop over bands iblockbd1
-           icgb1=icgb1+npw_k*my_nspinor*nprocband
+!           icgb1=icgb1+npw_k*my_nspinor*nprocband
 
-         end do
-
-!DEBUG
-         write(std_out, '(a,i4)')' iblockbd=',iblockbd
-         write(std_out, '(a,8f12.4)')' Real:',snm(1,1:nblockbd,iblockbd)
-         write(std_out, '(a,8f12.4)')' Imag:',snm(2,1:nblockbd,iblockbd)
-!ENDDEBUG
+!         end do
 
 !        End loop over bands iblockbd
-         icgb=icgb+npw_k*my_nspinor*nprocband
-       end do
+!         icgb=icgb+npw_k*my_nspinor*nprocband
+!       end do
+
+!DEBUG
+       do iblockbd=1,nband_k
+         write(std_out, '(a,i4)')' iblockbd=',iblockbd
+         write(std_out, '(a,8f12.4)')' Real:',smn(1,1:nblockbd,iblockbd)
+         write(std_out, '(a,8f12.4)')' Imag:',smn(2,1:nblockbd,iblockbd)
+       enddo
+!ENDDEBUG
+
 
 !      Invert S matrix, which is hermitian. 
-!      Cholesky factorisation of snm=Lx(trans(L)*. On output mkl=L being a lower triangular matrix.
-       call zpotrf("L",nband_k,snm,nband_k,ierr)
+!      Cholesky factorisation of smn=Lx(trans(L)*. On output mkl=L being a lower triangular matrix.
+       call zpotrf("L",nband_k,smn,nband_k,ierr)
 
 !      Calculate M=S^-1
-       ABI_ALLOCATE(mnm,(2,nband_k,nband_k))
-       mnm=zero
+       ABI_ALLOCATE(mmn,(2,nband_k,nband_k))
+       mmn=zero
        do kk=1,nband_k
-         mnm(1,kk,kk)=one
+         mmn(1,kk,kk)=one
        end do
-       call ztrtrs("L","N","N",nband_k,nband_k,snm,nband_k,mnm,nband_k,ierr)
+       call ztrtrs("L","N","N",nband_k,nband_k,smn,nband_k,mmn,nband_k,ierr)
 
 !DEBUG
 !Print the M matrix
        write(std_out,*)' Print the M matrix.'
        do iblockbd=1,nblockbd
          write(std_out, '(a,i4)')' iblockbd=',iblockbd
-         write(std_out, '(a,8f12.4)')' Real:',mnm(1,1:nblockbd,iblockbd)
-         write(std_out, '(a,8f12.4)')' Imag:',mnm(2,1:nblockbd,iblockbd)
+         write(std_out, '(a,8f12.4)')' Real:',mmn(1,1:nblockbd,iblockbd)
+         write(std_out, '(a,8f12.4)')' Imag:',mmn(2,1:nblockbd,iblockbd)
        end do
        write(std_out,*)' Check M * S = 1.'
-       ABI_ALLOCATE(dnm,(2,nband_k,nband_k))
+       ABI_ALLOCATE(dmn,(2,nband_k,nband_k))
        do iblockbd=1,nblockbd
          do iblockbd1=1,nblockbd
 HERE
-           dnm(1,iblockbd,:)=dnm(1,iblockbd,:)+mnm(1,iblockbd,iblockbd1)*snm(1,iblockbd1,:)
+           dmn(1,iblockbd,:)=dmn(1,iblockbd,:)+mmn(1,iblockbd,iblockbd1)*snm(1,iblockbd1,:)
          enddo
        enddo
        do iblockbd=1,nblockbd
          write(std_out, '(a,i4)')' iblockbd=',iblockbd
-         write(std_out, '(a,8f12.4)')' Real:',dnm(1,1:nblockbd,iblockbd)
-         write(std_out, '(a,8f12.4)')' Imag:',dnm(2,1:nblockbd,iblockbd)
+         write(std_out, '(a,8f12.4)')' Real:',dmn(1,1:nblockbd,iblockbd)
+         write(std_out, '(a,8f12.4)')' Imag:',dmn(2,1:nblockbd,iblockbd)
        end do
 !ENDDEBUG
 
@@ -373,7 +385,7 @@ HERE
        work1(:,:)=scf_history%cg(:,icg+1:icg+my_nspinor*nblockbd*npw_nk,indh)
        call zgemm('N','N',npw_nk*my_nspinor,nband_k,nband_k,dcmplx(1._dp), &
 &       work1,npw_nk*my_nspinor, &
-&       mnm,nblockbd,dcmplx(0._dp),work,npw_nk*my_nspinor)
+&       mmn,nblockbd,dcmplx(0._dp),work,npw_nk*my_nspinor)
 !DEBUG
 !      Should update, but perhaps this zgemm is incorrect
        scf_history%cg(:,1+icg:npw_nk*my_nspinor*nblockbd+icg,indh)=work(:,:)
@@ -381,7 +393,7 @@ HERE
 
 !DEBUG
 !      This is a check that now the cwavefh is biorthogonal to the cwavef
-!      Calculate Snm=<cg|S|cg_hist>
+!      Calculate Smn=<cg|S|cg_hist>
        write(std_out,*)' Compute the bi-orthogonal matrix elements. This should give the unit matrix.'
        icgb=icg
        do iblockbd=1,nblockbd
@@ -421,8 +433,8 @@ HERE
          do iblockbd=1,nblockbd
            ii=(iblockbd-1)*my_nspinor
            do iblockbd1=1,nblockbd
-             al(1,iblockbd1)=mnm(1,iblockbd,iblockbd1)
-             al(2,iblockbd1)=mnm(2,iblockbd,iblockbd1)
+             al(1,iblockbd1)=mmn(1,iblockbd,iblockbd1)
+             al(2,iblockbd1)=mmn(2,iblockbd,iblockbd1)
            end do
            call pawcprj_lincom(al,cprj_kh,cprj_k3,nblockbd)
            call pawcprj_copy(cprj_k3,cprj_kh(:,ii+1:ii+my_nspinor))
@@ -431,7 +443,7 @@ HERE
          call pawcprj_free(cprj_k3)
          ABI_DATATYPE_DEALLOCATE(cprj_k3)
        end if
-       ABI_DEALLOCATE(mnm)
+       ABI_DEALLOCATE(mmn)
        ABI_DEALLOCATE(work)
 
 !      Wavefunction extrapolation, simple mixing case
@@ -473,7 +485,7 @@ HERE
 
        ABI_DEALLOCATE(cwavef)
        ABI_DEALLOCATE(cwavefh)
-       ABI_DEALLOCATE(snm)
+       ABI_DEALLOCATE(smn)
        if(usepaw==1) then
          call pawcprj_free(cprj_k)
          ABI_DATATYPE_DEALLOCATE(cprj_k)
