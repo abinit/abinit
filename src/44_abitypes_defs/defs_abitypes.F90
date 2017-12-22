@@ -337,6 +337,7 @@ type dataset_type
  integer :: ixc
  integer :: ixc_sigma
  integer :: ixcpositron
+ integer :: ixcrot
  integer :: jdtset !  jdtset contains the current dataset number
  integer :: jellslab
  integer :: kptopt

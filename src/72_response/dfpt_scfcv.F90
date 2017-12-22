@@ -734,7 +734,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &     dtset%ixc,kxc,mpi_enreg,dtset%natom,nfftf,ngfftf,nhat,nhat1,nhat1gr,nhat1grdim,&
 &     nkxc,nspden,n3xccc,optene,option,dtset%paral_kgb,dtset%qptn,&
 &     rhog,rhog1,rhor,rhor1,rprimd,ucvol,psps%usepaw,usexcnhat,vhartr1,vpsp1,&
-&     nvresid1,res2,vtrial1,vxc,vxc1,xccc3d1)
+&     nvresid1,res2,vtrial1,vxc,vxc1,xccc3d1,dtset%ixcrot)
 
      if(.not.kramers_deg) then
        vtrial1_pq=vtrial1 !save trial potential at +q
@@ -745,7 +745,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &       dtset%ixc,kxc,mpi_enreg,dtset%natom,nfftf,ngfftf,nhat,nhat1,nhat1gr,nhat1grdim,&
 &       nkxc,nspden,n3xccc,optene,option,dtset%paral_kgb,-dtset%qptn,&
 &       rhog,rhog1_mq,rhor,rhor1_mq,rprimd,ucvol,psps%usepaw,usexcnhat,vhartr1_mq,vpsp1,&
-&       nvresid1_mq,res2_mq,vtrial1_mq,vxc,vxc1_mq,xccc3d1)
+&       nvresid1_mq,res2_mq,vtrial1_mq,vxc,vxc1_mq,xccc3d1,dtset%ixcrot)
      endif
 
 !    For Q=0 and metallic occupation, initialize quantities needed to
@@ -998,13 +998,14 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
      call dfpt_rhotov(cplex,ehart01,ehart1,elpsp1,exc1,elmag1,gmet,gprimd,gsqcut,idir,ipert,&
 &     dtset%ixc,kxc,mpi_enreg,dtset%natom,nfftf,ngfftf,nhat,nhat1,nhat1gr,nhat1grdim,nkxc,&
 &     nspden,n3xccc,optene,optres,dtset%paral_kgb,dtset%qptn,rhog,rhog1,rhor,rhor1,&
-&     rprimd,ucvol,psps%usepaw,usexcnhat,vhartr1,vpsp1,nvresid1,res2,vtrial1,vxc,vxc1,xccc3d1)
+&     rprimd,ucvol,psps%usepaw,usexcnhat,vhartr1,vpsp1,nvresid1,res2,vtrial1,vxc,vxc1,xccc3d1,dtset%ixcrot)
      if(.not.kramers_deg) then
        !SPr: in fact no need to compute the new trial potential here, to rectify..
        call dfpt_rhotov(cplex,ehart01_mq,ehart1_mq,elpsp1_mq,exc1_mq,elmag1_mq,gmet,gprimd,gsqcut,idir,ipert,&
 &       dtset%ixc,kxc,mpi_enreg,dtset%natom,nfftf,ngfftf,nhat,nhat1,nhat1gr,nhat1grdim,nkxc,&
 &       nspden,n3xccc,optene,optres,dtset%paral_kgb,-dtset%qptn,rhog,rhog1_mq,rhor,rhor1_mq,&
-&       rprimd,ucvol,psps%usepaw,usexcnhat,vhartr1_mq,vpsp1,nvresid1_mq,res2_mq,vtrial1_mq,vxc,vxc1_mq,xccc3d1)
+&       rprimd,ucvol,psps%usepaw,usexcnhat,vhartr1_mq,vpsp1,nvresid1_mq,res2_mq,vtrial1_mq,vxc,vxc1_mq,xccc3d1,&
+&       dtset%ixcrot)
      endif
    end if
 

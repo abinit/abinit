@@ -624,6 +624,7 @@ subroutine dtset_copy(dtout, dtin)
  dtout%ixc                = dtin%ixc
  dtout%ixc_sigma          = dtin%ixc_sigma
  dtout%ixcpositron        = dtin%ixcpositron
+ dtout%ixcrot             = dtin%ixcrot
  dtout%jdtset             = dtin%jdtset
  dtout%jellslab           = dtin%jellslab
  dtout%kptopt             = dtin%kptopt

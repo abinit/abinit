@@ -417,6 +417,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%ixc=1
    dtsets(idtset)%ixc_sigma=1
    dtsets(idtset)%ixcpositron=1
+   dtsets(idtset)%ixcrot=3
 !  J
    dtsets(idtset)%f4of2_sla(:)=-one
    dtsets(idtset)%f6of2_sla(:)=-one

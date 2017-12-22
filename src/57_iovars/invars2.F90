@@ -1316,6 +1316,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
  end if
  ixc_current=dtset%ixc
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ixcrot',tread,'INT')
+ if(tread==1) dtset%ixcrot=intarr(1)
+
 !Read the ixc for an advanced functional
 !If present, and relevant (only specific values for gcalctyp), the other internal variable will be adjusted to this other functional)
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ixc_sigma',tread,'INT')
