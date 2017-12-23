@@ -32,7 +32,7 @@ src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-
 
 <script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
 
- Mentioned in &nbsp; <a href="../../topics/generated_files/topic_Phonons.html">topic_Phonons</a>, &nbsp; <a href="../../users/generated_files/help_features.html#2.5">help_features#2.5</a>. 
+ Mentioned in &nbsp; <a href="../../guide/generated_files/help_features.html#2.5">help_features#2.5</a>, &nbsp; <a href="../../topics/generated_files/topic_Phonons.html">topic_Phonons</a>. 
  <hr>
  <h3><b>Table of content: </b></h3> 
  <ul> <li>1. <a href="topic_Berry.html#1">Introduction.</a><li>2. <a href="topic_Berry.html#2">Related lesson(s) of the tutorial.</a><li>3. <a href="topic_Berry.html#3">Related input variables.</a><li>4. <a href="topic_Berry.html#4">Selected input files.</a><li>5. <a href="topic_Berry.html#5">References.</a></ul>
@@ -60,7 +60,7 @@ states do not depend explicitly on ionic position <a href="../../biblio/generate
 
 <p>The generalisation to fixed D-field or fixed reduced fields are also available, as described in M. Stengel, N.A. Spaldin and D. Vanderbilt, Nat. Phys. 5,304 (2009).
 
-<p>The polarization and finite electric field calculation in ABINIT is accessed through the variables <a href="../../input_variables/generated_files/varset_ffield.html#berryopt">berryopt</a> and <a href="../../input_variables/generated_files/varset_ffield.html#efield">efield</a>. In addition, 
+<p>The polarization and finite electric field calculation in ABINIT is accessed through the variables <a href="../../variables/generated_files/varset_ffield.html#berryopt">berryopt</a> and <a href="../../variables/generated_files/varset_ffield.html#efield">efield</a>. In addition, 
 displacement fields and mixed boundary conditions (a mix of electric field and displacement field) can be computed as well.
 <br><br><a href=#top>Go to the top</a>
 
@@ -87,21 +87,21 @@ thanks to the Berry phase approach).</li>
 <h3><b>3. Related input variables.</b></h3>
 
 
-<p>Compulsory input variables:<p>... <a href="../../input_variables/generated_files/varset_ffield.html#berryopt">berryopt</a>   [BERRY phase OPTions]<br>
-<p>Basic input variables:<p>... <a href="../../input_variables/generated_files/varset_ffield.html#bdberry">bdberry</a>   [BanD limits for BERRY phase]<br>
-... <a href="../../input_variables/generated_files/varset_ffield.html#dfield">dfield</a>   [Displacement FIELD]<br>
-... <a href="../../input_variables/generated_files/varset_ffield.html#efield">efield</a>   [Electric FIELD]<br>
-... <a href="../../input_variables/generated_files/varset_ffield.html#jfielddir">jfielddir</a>   [electric/displacement FIELD DIRection]<br>
-... <a href="../../input_variables/generated_files/varset_ffield.html#kberry">kberry</a>   [K wavevectors for BERRY phase computation]<br>
-... <a href="../../input_variables/generated_files/varset_ffield.html#nberry">nberry</a>   [Number of BERRY phase computations]<br>
-<p>Useful input variables:<p>... <a href="../../input_variables/generated_files/varset_ffield.html#berrysav">berrysav</a>   [BERRY SAVe]<br>
-... <a href="../../input_variables/generated_files/varset_ffield.html#ddamp">ddamp</a>   [electric Displacement field DAMPing parameter]<br>
-... <a href="../../input_variables/generated_files/varset_ffield.html#maxestep">maxestep</a>   [MAXimum Electric field STEP]<br>
-... <a href="../../input_variables/generated_files/varset_ffield.html#polcen">polcen</a>   [POLarization for CENtrosymmetric geometry]<br>
-... <a href="../../input_variables/generated_files/varset_ffield.html#red_dfield">red_dfield</a>   [REDuced Displacement FIELD]<br>
-... <a href="../../input_variables/generated_files/varset_ffield.html#red_efield">red_efield</a>   [REDuced Electric FIELD]<br>
-... <a href="../../input_variables/generated_files/varset_ffield.html#red_efieldbar">red_efieldbar</a>   [REDuced Electric FIELD BAR]<br>
-<p>Input variables for experts:<p>... <a href="../../input_variables/generated_files/varset_ffield.html#berrystep">berrystep</a>   [BERRY phase : multiple STEP]<br>
+<p>Compulsory input variables:<p>... <a href="../../variables/generated_files/varset_ffield.html#berryopt">berryopt</a>   [BERRY phase OPTions]<br>
+<p>Basic input variables:<p>... <a href="../../variables/generated_files/varset_ffield.html#bdberry">bdberry</a>   [BanD limits for BERRY phase]<br>
+... <a href="../../variables/generated_files/varset_ffield.html#dfield">dfield</a>   [Displacement FIELD]<br>
+... <a href="../../variables/generated_files/varset_ffield.html#efield">efield</a>   [Electric FIELD]<br>
+... <a href="../../variables/generated_files/varset_ffield.html#jfielddir">jfielddir</a>   [electric/displacement FIELD DIRection]<br>
+... <a href="../../variables/generated_files/varset_ffield.html#kberry">kberry</a>   [K wavevectors for BERRY phase computation]<br>
+... <a href="../../variables/generated_files/varset_ffield.html#nberry">nberry</a>   [Number of BERRY phase computations]<br>
+<p>Useful input variables:<p>... <a href="../../variables/generated_files/varset_ffield.html#berrysav">berrysav</a>   [BERRY SAVe]<br>
+... <a href="../../variables/generated_files/varset_ffield.html#ddamp">ddamp</a>   [electric Displacement field DAMPing parameter]<br>
+... <a href="../../variables/generated_files/varset_ffield.html#maxestep">maxestep</a>   [MAXimum Electric field STEP]<br>
+... <a href="../../variables/generated_files/varset_ffield.html#polcen">polcen</a>   [POLarization for CENtrosymmetric geometry]<br>
+... <a href="../../variables/generated_files/varset_ffield.html#red_dfield">red_dfield</a>   [REDuced Displacement FIELD]<br>
+... <a href="../../variables/generated_files/varset_ffield.html#red_efield">red_efield</a>   [REDuced Electric FIELD]<br>
+... <a href="../../variables/generated_files/varset_ffield.html#red_efieldbar">red_efieldbar</a>   [REDuced Electric FIELD BAR]<br>
+<p>Input variables for experts:<p>... <a href="../../variables/generated_files/varset_ffield.html#berrystep">berrystep</a>   [BERRY phase : multiple STEP]<br>
 
 <br><br><a href=#top>Go to the top</a>
 

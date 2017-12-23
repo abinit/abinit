@@ -17,7 +17,7 @@
 !!  related by a symmetry operation to the point q summed over (see csigme).
 !!  This index is also used to treat the integrable coulombian singularity at q=0
 !! ngfft(18)=contain all needed information about 3D FFT for GW wavefuntions,
-!!  see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  see ~abinit/doc/variables/vargs.htm#ngfft
 !! nsig_ab=Number of components in the self-energy operator (1 for collinear magnetism)
 !! npwc=number of plane waves in $\tilde epsilon^{-1}$
 !! nspinor=Number of spinorial components.
@@ -171,7 +171,7 @@ end subroutine calc_coh
 !!  related by a symmetry operation to the point q summed over (see csigme).
 !!  This index is also used to treat the integrable coulombian singularity at q=0
 !! ngfft(18)=contain all needed information about 3D FFT for GW wavefuntions,
-!!  see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  see ~abinit/doc/variables/vargs.htm#ngfft
 !! nsig_ab=Number of components in the self-energy operator (1 for collinear magnetism)
 !! npwc=number of plane waves in $\tilde epsilon^{-1}$
 !! nspinor=Number of spinorial components.

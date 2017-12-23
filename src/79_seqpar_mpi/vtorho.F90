@@ -68,7 +68,7 @@
 !!         (nfftf=nfft for norm-conserving potential runs)
 !!  nfftdiel=number of fft grid points for the computation of the diel matrix
 !!  ngfftdiel(18)=contain all needed information about 3D FFT, for dielectric matrix,
-!!                see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!                see ~abinit/doc/variables/vargs.htm#ngfft
 !!  nkxc=second dimension of the array kxc, see rhotoxc.f for a description
 !!  npwarr(nkpt)=number of planewaves in basis at this k point
 !!  npwdiel=size of the susmat array.
@@ -806,12 +806,12 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
 !     compute and load nuclear dipole Hamiltonian at current k point
        if(any(abs(gs_hamk%nucdipmom)>0.0)) then
-          if(allocated(nucdipmom_k)) then
-             ABI_DEALLOCATE(nucdipmom_k)
-          end if
-          ABI_ALLOCATE(nucdipmom_k,(npw_k*(npw_k+1)/2))
-          call mknucdipmom_k(gmet,kg_k,kpoint,natom,gs_hamk%nucdipmom,nucdipmom_k,npw_k,rprimd,ucvol,xred)
-          call load_k_hamiltonian(gs_hamk,nucdipmom_k=nucdipmom_k)
+         if(allocated(nucdipmom_k)) then
+           ABI_DEALLOCATE(nucdipmom_k)
+         end if
+         ABI_ALLOCATE(nucdipmom_k,(npw_k*(npw_k+1)/2))
+         call mknucdipmom_k(gmet,kg_k,kpoint,natom,gs_hamk%nucdipmom,nucdipmom_k,npw_k,rprimd,ucvol,xred)
+         call load_k_hamiltonian(gs_hamk,nucdipmom_k=nucdipmom_k)
        end if
        
 
@@ -904,7 +904,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        ABI_DEALLOCATE(kg_k)
        ABI_DEALLOCATE(kpg_k)
        if(allocated(nucdipmom_k)) then
-          ABI_DEALLOCATE(nucdipmom_k)
+         ABI_DEALLOCATE(nucdipmom_k)
        end if
        ABI_DEALLOCATE(ylm_k)
        ABI_DEALLOCATE(ph3d)

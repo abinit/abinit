@@ -121,7 +121,7 @@ contains
 !! OUTPUT
 !!
 !! PARENTS
-!!      abinit
+!!      abinit,multibinit
 !!
 !! CHILDREN
 !!

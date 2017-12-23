@@ -3319,7 +3319,6 @@ end subroutine ddb_write_blok
 !! OUTPUT
 !!
 !! PARENTS
-!!      mover_effpot
 !!
 !! CHILDREN
 !!      ddb_hdr_free,ddb_hdr_open_read

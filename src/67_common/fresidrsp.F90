@@ -34,7 +34,7 @@
 !! mqgrid=number of grid pts in q array for atomic density spline n^AT(q)
 !! nattyp(ntypat)=number of atoms of each type in cell
 !! nfft=(effective) number of FFT grid points (for this processor)
-!! ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!! ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !! ntypat=number of types of atoms in cell.
 !! psps <type(pseudopotential_type)>=variables related to pseudopotentials
 !! pawtab(ntypat*usepaw) <type(pawtab_type)>=paw tabulated starting data

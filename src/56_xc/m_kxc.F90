@@ -1037,7 +1037,7 @@ end subroutine kxc_eok
 !! Cryst<crystal_t>=Info on the crystal structure.
 !! ixc = choice for the exchange-correlation potential.
 !! ngfft(18)=contain all needed information about 3D FFT,
-!!  see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  see ~abinit/doc/variables/vargs.htm#ngfft
 !! nfft_tot = Total number of points on the FFT grid.
 !! nspden=Number of independent spin densities.
 !! rhor(nfft_tot,nspden) = the charge density on the full FFT grid.
@@ -1302,7 +1302,7 @@ end subroutine kxc_driver
 !! Cryst<crystal_t>=Info on the unit cell.
 !! ixc = choice for the exchange-correlation potential.
 !! ngfft(18)=contain all needed information about 3D FFT,
-!!  see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  see ~abinit/doc/variables/vargs.htm#ngfft
 !! nfft = total number of points on the FFT grid.
 !! rhor(nfft,nspden) = the charge density on the FFT grid.
 !!  (total in first half and spin-up in second half if nsppol=2)

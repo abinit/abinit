@@ -348,7 +348,7 @@ end subroutine polynomial_coeff_setCoefficient
 !! polynomial_coeff<type(polynomial_coeff)> = polynomial_coeff datatype
 !!
 !! PARENTS
-!!      m_effective_potential_file
+!!      m_effective_potential_file,m_fit_polynomial_coeff,m_polynomial_coeff
 !!
 !! CHILDREN
 !!      polynomial_coeff_free,polynomial_coeff_getname,polynomial_coeff_init
@@ -402,7 +402,7 @@ end subroutine polynomial_coeff_setName
 !! name = name xof the coefficients
 !!
 !! PARENTS
-!!      m_effective_potential_file,m_polynomial_coeff
+!!      m_effective_potential_file,m_fit_polynomial_coeff,m_polynomial_coeff
 !!
 !! CHILDREN
 !!      polynomial_coeff_free,polynomial_coeff_getname,polynomial_coeff_init
@@ -550,7 +550,7 @@ end subroutine polynomial_coeff_getName
 !!                              other nodes returns with a completely initialized instance.
 !!
 !! PARENTS
-!!      m_effective_potential_file,m_fit_polynomial_coeff
+!!      m_effective_potential_file,m_fit_polynomial_coeff,m_polynomial_coeff
 !!
 !! CHILDREN
 !!      polynomial_coeff_free,polynomial_coeff_getname,polynomial_coeff_init
@@ -650,7 +650,7 @@ end subroutine polynomial_coeff_broadcast
 !!   polynomial_coeff<type(polynomial_coeff)> = polynomial_coeff datatype
 !!
 !! PARENTS
-!!      m_fit_polynomial_coeff
+!!      m_polynomial_coeff
 !!
 !! CHILDREN
 !!      polynomial_coeff_free,polynomial_coeff_getname,polynomial_coeff_init
@@ -726,7 +726,7 @@ end subroutine polynomial_coeff_MPIsend
 !!   coefficients<type(polynomial_coefficent_type)>=  polynomial_coeff datatype
 !!
 !! PARENTS
-!!      m_fit_polynomial_coeff
+!!      m_polynomial_coeff
 !!
 !! CHILDREN
 !!      polynomial_coeff_free,polynomial_coeff_getname,polynomial_coeff_init
@@ -2919,6 +2919,8 @@ end function getCoeffFromList
 !!      m_polynomial_coeff
 !!
 !! CHILDREN
+!!      polynomial_coeff_free,polynomial_coeff_getname,polynomial_coeff_init
+!!      polynomial_term_free,polynomial_term_init,wrtout
 !!
 !! SOURCE
 

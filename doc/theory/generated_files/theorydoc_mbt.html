@@ -445,21 +445,21 @@ where only the transitions between valence (<i>v</i>) and conduction states (<i>
 (for simplicity we have assumed a semiconductor with time-reversal invariance, 
 the conventions used for the Fourier transform are discussed in the <a href="#notations">notation</a> section).
 <p>
-The number of bands used to compute the polarizability is specified by <a href="../../input_variables/generated_files/varset_basic.html#nband">nband</a>,
-while <a href="../../input_variables/generated_files/varset_gw.html#zcut">zcut</a> gives the small complex shift used to avoid the divergences in the denominators.
+The number of bands used to compute the polarizability is specified by <a href="../../variables/generated_files/varset_basic.html#nband">nband</a>,
+while <a href="../../variables/generated_files/varset_gw.html#zcut">zcut</a> gives the small complex shift used to avoid the divergences in the denominators.
 The frequency mesh is defined by the set of variables
-<a href="../../input_variables/generated_files/varset_gw.html#nfreqre">nfreqre</a>, <a href="../../input_variables/generated_files/varset_gw.html#nfreqim">nfreqim</a>, <a href="../../input_variables/generated_files/varset_gw.html#freqremax">freqremax</a>, and <a href="../../input_variables/generated_files/varset_gw.html#freqremin">freqremin</a>
+<a href="../../variables/generated_files/varset_gw.html#nfreqre">nfreqre</a>, <a href="../../variables/generated_files/varset_gw.html#nfreqim">nfreqim</a>, <a href="../../variables/generated_files/varset_gw.html#freqremax">freqremax</a>, and <a href="../../variables/generated_files/varset_gw.html#freqremin">freqremin</a>
 (a number of more exotic grid choices are available through input variables beginning with gw_... or cd_...,
-e.g. <a href="../../input_variables/generated_files/varset_gw.html#gw_frqim_inzgrid">gw_frqim_inzgrid</a>).
+e.g. <a href="../../variables/generated_files/varset_gw.html#gw_frqim_inzgrid">gw_frqim_inzgrid</a>).
 </p>
 <p>
 <i>M</i> is a shorthand notation to denote the matrix element of a plane wave sandwiched 
 between two wavefunctions (i.e. oscillator matrix elements).
-The number of planewaves (PW) used to describe the wavefunctions is determined by <a href="../../input_variables/generated_files/varset_gw.html#ecutwfn">ecutwfn</a>
+The number of planewaves (PW) used to describe the wavefunctions is determined by <a href="../../variables/generated_files/varset_gw.html#ecutwfn">ecutwfn</a>
 
 while the number of <i>G</i>-vectors used to describe the polarizability 
 (i.e. the number of <i>G</i> vectors in the oscillator matrix elements) is 
-determined by <a href="../../input_variables/generated_files/varset_gw.html#ecuteps">ecuteps</a>.
+determined by <a href="../../variables/generated_files/varset_gw.html#ecuteps">ecuteps</a>.
 The oscillators are ubiquitous in the Many-Body part of ABINIT and their 
 calculation represents one of the most CPU intensive part of the execution.
 For this reason we devote <a href="#6">section 6</a> 
@@ -480,7 +480,7 @@ the action of any symmetry operation of the crystalline space group:
 so that only the <b>q</b>-points in the irreducible Brillouin zone (IBZ) have to be calculated explicitly. 
 <!--
 The use of symmetries is switched on/off with 
-<a href="../../input_variables/generated_files/varset_gw.html#awtr">awtr</a> (time-reversal), and <a href="../../input_variables/generated_files/varset_gw.html#symchi">symchi</a> (crystal symmetries).
+<a href="../../variables/generated_files/varset_gw.html#awtr">awtr</a> (time-reversal), and <a href="../../variables/generated_files/varset_gw.html#symchi">symchi</a> (crystal symmetries).
 -->
 <p>
 In frequency and reciprocal space, the microscopic dielectric function is related to the
@@ -535,7 +535,7 @@ number of points in the FFT box, moreover the code implements refined algorithms
 <p>
 There can be a significant speed-up in this component depending on the numerical FFT library used. 
 If possible, it should always be advantageous to link and use the FFTW3 library in GW calculations 
-(controlled by setting  <a href="../../input_variables/generated_files/varset_dev.html#fftalg">fftalg</a> 312). 
+(controlled by setting  <a href="../../variables/generated_files/varset_dev.html#fftalg">fftalg</a> 312). 
 The performance of
 the various FFT libraries for a given type of calculation can be benchmarked with the <b>fftprof</b> utility.
 </p>
@@ -565,7 +565,7 @@ the real space representation of the orbitals at the price of a reasonable incre
 the memory allocated. However, for very memory demanding calculations, the real space orbitals
 can be calculated on the fly with an increase in computational time instead. This option 
 is controlled by the second digit of the input variable 
-<a href="../../input_variables/generated_files/varset_gw.html#gwmem">gwmem</a>.
+<a href="../../variables/generated_files/varset_gw.html#gwmem">gwmem</a>.
 </p>
 <p>
 The third term in the equation defining the oscillators makes it clear that the product 
@@ -573,12 +573,12 @@ of the periodic part of the orbitals has non-zero Fourier components in a sphere
 whose radius is 2&times;<i>R<sub>wfn</sub></i> where <i>R<sub>wfn</sub></i> is the radius of 
 the <b>G</b>-sphere used for the wavefunctions (set by
 
-<a href="../../input_variables/generated_files/varset_gw.html#ecutwfn">ecutwfn</a>). To avoid 
+<a href="../../variables/generated_files/varset_gw.html#ecutwfn">ecutwfn</a>). To avoid 
 aliasing errors in the FFT one should therefore use an FFT box that encloses the 
 sphere with radius 2&times;<i>R<sub>wfn</sub></i>, 
 but this leads to a significant increase in the computing effort as well as in the 
 memory requirements. The input variable 
-<a href="../../input_variables/generated_files/varset_gw.html#fftgw">fftgw</a> specifies
+<a href="../../variables/generated_files/varset_gw.html#fftgw">fftgw</a> specifies
 how to setup the FFT box for the oscillators and should be used to test how the aliasing 
 errors affect the final results. The default setting of <b>fftgw 21</b> is safe, a setting 
 of <b>fftgw 11</b> is fast but can be inaccurate, and a setting of <b>fftgw 31</b> gives 
@@ -590,7 +590,7 @@ the maximum possible accuracy at a significant computational cost.
 <h3><b>7. Hilbert transform method</b></h3>
  <p>The computational effort for the evaluation of the RPA polarizability 
 with the Adler-Wiser expression scales linearly with the number of frequencies computed 
-(<a href="../../input_variables/generated_files/varset_gw.html#nfreqre">nfreqre</a> and <a href="../../input_variables/generated_files/varset_gw.html#nfreqim">nfreqim</a>),
+(<a href="../../variables/generated_files/varset_gw.html#nfreqre">nfreqre</a> and <a href="../../variables/generated_files/varset_gw.html#nfreqim">nfreqim</a>),
 albeit with a large prefactor which increases with the fourth power of the number of atoms. 
 The main reason for the linear scaling is that the frequency dependence cannot be factorised 
 out of the sum over transitions, hence a distinct and expensive summation over transitions 
@@ -612,14 +612,14 @@ algorithm proposed in <a href="../../biblio/generated_files/bib_biblio.html#Miya
 has to be evaluated in terms of electronic transitions between valence and conduction states.
 The Dirac delta function can be approximated either by means of a triangular function centered 
 at the energy transition following <a href="../../biblio/generated_files/bib_biblio.html#Shishkin2006">[Shishkin2006]</a> or a gaussian approximant 
-following <a href="../../biblio/generated_files/bib_biblio.html#Miyake2000">[Miyake2000]</a> (see the related input variables  <a href="../../input_variables/generated_files/varset_gw.html#spmeth">spmeth</a>, and <a href="../../input_variables/generated_files/varset_gw.html#spbroad">spbroad</a>).
+following <a href="../../biblio/generated_files/bib_biblio.html#Miyake2000">[Miyake2000]</a> (see the related input variables  <a href="../../variables/generated_files/varset_gw.html#spmeth">spmeth</a>, and <a href="../../variables/generated_files/varset_gw.html#spbroad">spbroad</a>).
 The spectral function is evaluated on a linear frequency mesh which covers the entire set
 of transition energies included in the calculation. 
-The number of points in the mesh is given by <a href="../../input_variables/generated_files/varset_gw.html#nomegasf">nomegasf</a>.
+The number of points in the mesh is given by <a href="../../variables/generated_files/varset_gw.html#nomegasf">nomegasf</a>.
 
 <p>
 The evaluation of the spectral function is rather efficient thanks to the presence of the 
-delta-function in the expression above. For example, when  <a href="../../input_variables/generated_files/varset_gw.html#spmeth">spmeth</a>=1,
+delta-function in the expression above. For example, when  <a href="../../variables/generated_files/varset_gw.html#spmeth">spmeth</a>=1,
 the CPU time required to compute the spectral function on an arbitrarily dense frequency 
 mesh is just twice that required by a single static computation based on the standard  Adler-Wiser expression.
 </p>
@@ -639,9 +639,9 @@ The price to be paid, however, is that a large table for the spectral function
 has to be stored in memory and a Hilbert transform has to be performed for each pair 
 (<b>G</b><sub>1</sub>, <b>G</b><sub>2</sub>).
 Since the computing time required for the transform scales quadratically with the number of 
-vectors in the polarizability (governed by <a href="../../input_variables/generated_files/varset_gw.html#ecuteps">ecuteps</a>),
+vectors in the polarizability (governed by <a href="../../variables/generated_files/varset_gw.html#ecuteps">ecuteps</a>),
 the CPU time spent in this part will overcome the computing time of the standard Adler-Wiser 
-formalism for large <a href="../../input_variables/generated_files/varset_gw.html#ecuteps">ecuteps</a>.
+formalism for large <a href="../../variables/generated_files/varset_gw.html#ecuteps">ecuteps</a>.
 A theoretical estimate of the crossover point is hard to give because it depends on many 
 factors. However, if many frequencies are needed, such as for the evaluation of optical spectra, 
 or accurate contour deformation integrations, or even mapping full grids in the complex plane, 
@@ -683,7 +683,7 @@ while the dynamic part &#931;<sub>c</sub>(&#969;) accounts for correlation effec
 
 <p>It is important to stress that, for computational efficiency, the
 code does not compute the full self-energy operator by default.
-Only its matrix elements for the states specified by <a href="../../input_variables/generated_files/varset_gw.html#kptgw">kptgw</a> and <a href="../../input_variables/generated_files/varset_gw.html#bdgw">bdgw</a>
+Only its matrix elements for the states specified by <a href="../../variables/generated_files/varset_gw.html#kptgw">kptgw</a> and <a href="../../variables/generated_files/varset_gw.html#bdgw">bdgw</a>
 are computed and used to obtain the QP corrections.
 </p>
 <p>
@@ -695,10 +695,10 @@ When expressed in reciprocal space, the diagonal matrix elements of the exchange
 The evaluation of these terms represents a minor fraction of the overall CPU time since only 
 occupied states are involved. However we should always keep in mind that, due to the long 
 range of the bare Coulomb interaction, the convergence with respect to the number of plane 
-waves used in the oscillators <i>M</i> (<a href="../../input_variables/generated_files/varset_gw.html#ecutsigx">ecutsigx</a>) is usually 
+waves used in the oscillators <i>M</i> (<a href="../../variables/generated_files/varset_gw.html#ecutsigx">ecutsigx</a>) is usually 
 slow, much slower than the convergence of the correlation part, which is short-ranged. This plane
 wave cutoff can be converged independently of others if necessary, and given a much larger value 
-in comparison to <a href="../../input_variables/generated_files/varset_basic.html#ecut">ecut</a>,  <a href="../../input_variables/generated_files/varset_gw.html#ecutwfn">ecutwfn</a> and  <a href="../../input_variables/generated_files/varset_gw.html#ecuteps">ecuteps</a>.
+in comparison to <a href="../../variables/generated_files/varset_basic.html#ecut">ecut</a>,  <a href="../../variables/generated_files/varset_gw.html#ecutwfn">ecutwfn</a> and  <a href="../../variables/generated_files/varset_gw.html#ecuteps">ecuteps</a>.
 <p>
 Another point worth noting is the presence in the expression of the Coulomb 
 singularity for |<b>q</b>+<b>G</b>| &#8594; 0. From a mathematical point of view, 
@@ -708,7 +708,7 @@ On the other hand, only a finite number of <b>q</b>-points can be used for pract
 and a careful numerical treatment is needed to avoid an exceedingly slow convergence with respect to the BZ sampling. 
 To accelerate the convergence in the number of <b>q</b>-points, the code implements several 
 techniques proposed in the literature. We refer to the documentation of 
-<a href="../../input_variables/generated_files/varset_gw.html#icutcoul">icutcoul</a> for  a more extensive discussion.
+<a href="../../variables/generated_files/varset_gw.html#icutcoul">icutcoul</a> for  a more extensive discussion.
 </p>
 <p>
 The expression for the matrix elements of the correlation part is instead given by:
@@ -724,21 +724,21 @@ The explicit expression for <i>J</i> depends on the method used to treat the scr
 The code implements four different plasmon-pole techniques to model the frequency dependence of
 <b>W</b> in an efficient but approximate way, alternatively, it is possible to use the more sophisticated 
 frequency integration of the contour deformation method [[Lebegue2003]
-for accurate QP calculations (see the related variables <a href="../../input_variables/generated_files/varset_gw.html#ppmodel">ppmodel</a> and <a href="../../input_variables/generated_files/varset_gw.html#gwcalctyp">gwcalctyp</a>).
+for accurate QP calculations (see the related variables <a href="../../variables/generated_files/varset_gw.html#ppmodel">ppmodel</a> and <a href="../../variables/generated_files/varset_gw.html#gwcalctyp">gwcalctyp</a>).
 </p>
 <p>
 The double sum over <b>G</b>-vectors is performed for all the plane waves contained within
-a sphere of energy <a href="../../input_variables/generated_files/varset_gw.html#ecuteps">ecuteps</a> 
+a sphere of energy <a href="../../variables/generated_files/varset_gw.html#ecuteps">ecuteps</a> 
 (it cannot be larger than the value used to generate the SCR file).
 For each state, the correlated matrix elements are evaluated on a linear frequency mesh centered 
 around the initial KS energy and the derivative needed for the renormalization 
-factor is obtained numerically (see <a href="../../input_variables/generated_files/varset_gw.html#nomegasrd">nomegasrd</a> and <a href="../../input_variables/generated_files/varset_gw.html#omegasrdmax">omegasrdmax</a>).
+factor is obtained numerically (see <a href="../../variables/generated_files/varset_gw.html#nomegasrd">nomegasrd</a> and <a href="../../variables/generated_files/varset_gw.html#omegasrdmax">omegasrdmax</a>).
 </p>
 
 <p>
 Note that here, in contrast to the exchange term, the sum over the band index <i>n</i> should extend up to 
 infinity although in practice only a finite number of states 
-can be used (specified by <a href="../../input_variables/generated_files/varset_basic.html#nband">nband</a>).
+can be used (specified by <a href="../../variables/generated_files/varset_basic.html#nband">nband</a>).
 </p>
 <br><br><a href=#top>Go to the top</a>
 <hr>
@@ -750,7 +750,7 @@ of the frequency dependence of the screened interaction, which is needed for the
 Due to the ragged behavior of <i>G</i>(&#969;) and <i>W</i>(&#969;)
 along the real axis, numerous real frequencies are in principle
 required to converge the results (note that the maximum frequencies
-needed are now reported if <a href="../../input_variables/generated_files/varset_files.html#prtvol">prtvol</a> &gt; 9). 
+needed are now reported if <a href="../../variables/generated_files/varset_files.html#prtvol">prtvol</a> &gt; 9). 
 On the other hand, since the fine details of <i>W</i>(&#969;) are integrated over, 
 it is reasonable to expect that approximate models, able to capture the main physical features of 
 the screened interaction, should give sufficiently accurate results with a considerably reduction 
@@ -761,10 +761,10 @@ that are derived from first principles, i.e. without any adjustable external par
 
 <p>
 Four different plasmon-pole techniques are available in ABINIT and 
-the input variable <a href="../../input_variables/generated_files/varset_gw.html#ppmodel">ppmodel</a> selects the method to be used.
+the input variable <a href="../../variables/generated_files/varset_gw.html#ppmodel">ppmodel</a> selects the method to be used.
 </p>
 <p>
-When <a href="../../input_variables/generated_files/varset_gw.html#ppmodel">ppmodel</a>=1,2
+When <a href="../../variables/generated_files/varset_gw.html#ppmodel">ppmodel</a>=1,2
 the frequency dependence of the inverse dielectric function is modeled according to
 </p>
 
@@ -785,17 +785,17 @@ A_{\GG_1\GG_2}(\qq)\,
 \end{equation}
 
 The two models differ in the approach used to compute the parameters. 
-<a href="../../input_variables/generated_files/varset_gw.html#ppmodel">ppmodel</a>=1 derives the parameters such that the inverse dielectric matrix is correctly reproduced at 
+<a href="../../variables/generated_files/varset_gw.html#ppmodel">ppmodel</a>=1 derives the parameters such that the inverse dielectric matrix is correctly reproduced at 
 two different explicitly calculated frequencies: the static limit (&#969; = 0) and an additional 
-imaginary point located at <a href="../../input_variables/generated_files/varset_gw.html#ppmfrq">ppmfrq</a>. Unless the user overrides 
+imaginary point located at <a href="../../variables/generated_files/varset_gw.html#ppmfrq">ppmfrq</a>. Unless the user overrides 
 this, the default value is calculated from the average electronic density of the system.
-The plasmon-pole parameters of  <a href="../../input_variables/generated_files/varset_gw.html#ppmodel">ppmodel</a>=2
+The plasmon-pole parameters of  <a href="../../variables/generated_files/varset_gw.html#ppmodel">ppmodel</a>=2
 are calculated so as to reproduce the static limit exactly and to 
 fulfill a generalized frequency sum rule relating the imaginary part of the many-body inverse 
 dielectric matrix to the plasma frequency and the charge density <a href="../../biblio/generated_files/bib_biblio.html#Hybertsen1986">[Hybertsen1986]</a>
 
 <p>
-For a discussion of the models corresponding to <a href="../../input_variables/generated_files/varset_gw.html#ppmodel">ppmodel</a>=3,4 we refer the reader to the 
+For a discussion of the models corresponding to <a href="../../variables/generated_files/varset_gw.html#ppmodel">ppmodel</a>=3,4 we refer the reader to the 
 original papers cited in the documentation of the variable.
 <br><br><a href=#top>Go to the top</a>
 <hr>

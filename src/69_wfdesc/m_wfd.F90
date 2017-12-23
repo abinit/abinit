@@ -299,7 +299,7 @@ MODULE m_wfd
 
 !arrays
   integer :: ngfft(18)
-   ! Information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+   ! Information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 
   integer :: nloalg(3)
    ! Governs the choice of the algorithm for nonlocal operator. See doc.
@@ -831,7 +831,7 @@ end subroutine copy_kdata_1D
 !!  Cryst<crystal_t>=Object defining the unit cell and its symmetries.
 !!  Pawtab(ntypat*usepaw)<type(pawtab_type)>=PAW tabulated starting data.
 !!  Psps<Pseudopotential_type>=datatype storing data on the pseudopotentials.
-!!  ngfft(18)=All needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  ngfft(18)=All needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !!  nkibz=Number of irreducible k-points.
 !!  npwwfn=Number of plane waves for u(G).
 !!  nsppol=Number of independent spin polarizations.
@@ -6116,7 +6116,7 @@ end subroutine wfd_read_wfk
 !!  iomode=Option specifying the fileformat as well as the IO mode to be used.
 !!  Psps<pseudopotential_type>=variables related to pseudopotentials
 !!  Pawtab(ntypat*usepaw)<type(pawtab_type)>=paw tabulated starting data.
-!!  ngfft(18)=Information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  ngfft(18)=Information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !!  nloalg(3)=Governs the choice of the algorithm for nonlocal operator. See doc.
 !!  keep_ur=Logical flag defining whether the set of u(r) should be saved in memory
 !!  comm=MPI communicator

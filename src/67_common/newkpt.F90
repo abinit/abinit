@@ -70,7 +70,7 @@
 !!  nband2(nkpt2*nsppol2)=desired number of bands at each k point
 !!  ngfft1(18)=all needed information about 3D FFT, for the input wf file
 !!  ngfft2(18)=all needed information about 3D FFT, for the output wf file
-!!             see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!             see ~abinit/doc/variables/vargs.htm#ngfft
 !!  nkpt1, nkpt2=number of k points in each set
 !!  npwarr1(nkpt1)=array holding npw for each k point (input wf file).
 !!  npwarr2(nkpt2)=array holding npw for each k point (output wf file).

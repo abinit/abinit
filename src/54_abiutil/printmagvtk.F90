@@ -180,7 +180,7 @@ subroutine printmagvtk(mpi_enreg,cplex,nspden,nfft,ngfft,rhor,rprimd,fname)
        MSG_WARNING(msg)
        RETURN
      end if
-   endif
+   end if
 
     ! Write the header of the output vtk file
    write(denvtk,"(a)") '# vtk DataFile Version 2.0'
@@ -196,7 +196,7 @@ subroutine printmagvtk(mpi_enreg,cplex,nspden,nfft,ngfft,rhor,rprimd,fname)
      outformat="(5e16.8)"
    else
      outformat="(7e16.8)"
-   endif
+   end if
 
     ! Write out information about grid points
    do kk=0,nz-1
@@ -213,7 +213,7 @@ subroutine printmagvtk(mpi_enreg,cplex,nspden,nfft,ngfft,rhor,rprimd,fname)
          else
            write(denxyz,outformat)    rx,ry,rz,(rhorfull(2*ind-1,ispden),ispden=1,nspden)
            write(denxyz_im,outformat) rx,ry,rz,(rhorfull(2*ind  ,ispden),ispden=1,nspden)
-         endif
+         end if
        end do
      end do
    end do
@@ -223,7 +223,7 @@ subroutine printmagvtk(mpi_enreg,cplex,nspden,nfft,ngfft,rhor,rprimd,fname)
    else
      close(denxyz)
      close(denxyz_im)
-   endif
+   end if
 
     ! Write out information about field defined on the FFT mesh
    write(denvtk,"(a,i18)") 'POINT_DATA ',nfft_tot

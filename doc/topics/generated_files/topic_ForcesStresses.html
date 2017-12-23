@@ -32,7 +32,7 @@ src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-
 
 <script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
 
- Mentioned in &nbsp; <a href="../../users/generated_files/help_features.html#2.4">help_features#2.4</a>. 
+ Mentioned in &nbsp; <a href="../../guide/generated_files/help_features.html#2.4">help_features#2.4</a>. 
  <hr>
  <h3><b>Table of content: </b></h3> 
  <ul> <li>1. <a href="topic_ForcesStresses.html#1">Introduction.</a><li>2. <a href="topic_ForcesStresses.html#2">Related lesson(s) of the tutorial.</a><li>3. <a href="topic_ForcesStresses.html#3">Related input variables.</a><li>4. <a href="topic_ForcesStresses.html#4">Selected input files.</a></ul>
@@ -57,14 +57,14 @@ Stress can also be computed. This feature is available for all
 the cases where the total energy can be computed (except wavelets).
 The decomposition of the stresses in their different
 components can be provided. A smearing scheme applied to the kinetic
-energy <a href="../../input_variables/generated_files/varset_rlx.html#ecutsm">ecutsm</a> allows one to get smooth energy curves as a function of
-lattice parameters and angles. A target stress can be given by the user (<a href="../../input_variables/generated_files/varset_rlx.html#strtarget">strtarget</a>), the
+energy <a href="../../variables/generated_files/varset_rlx.html#ecutsm">ecutsm</a> allows one to get smooth energy curves as a function of
+lattice parameters and angles. A target stress can be given by the user (<a href="../../variables/generated_files/varset_rlx.html#strtarget">strtarget</a>), the
 geometry optimization algorithm will try to find the primitive cell and atomic positions
 that deliver that target stress.
-<p> The computation of forces and stresses is optional, see <a href="../../input_variables/generated_files/varset_dev.html#optforces">optforces</a> and <a href="../../input_variables/generated_files/varset_gstate.html#optstress">optstress</a>. 
-They are used to define SCF stopping criteria (<a href="../../input_variables/generated_files/varset_basic.html#toldff">toldff</a>, <a href="../../input_variables/generated_files/varset_basic.html#tolrff">tolrff</a>) or geometry optimization
-stopping criteria (<a href="../../input_variables/generated_files/varset_rlx.html#tolmxf">tolmxf</a>). For the geometry optimization, combined cell shape and
-atomic position optimization need a conversion scale, set by <a href="../../input_variables/generated_files/varset_rlx.html#strprecon">strprecon</a>.
+<p> The computation of forces and stresses is optional, see <a href="../../variables/generated_files/varset_dev.html#optforces">optforces</a> and <a href="../../variables/generated_files/varset_gstate.html#optstress">optstress</a>. 
+They are used to define SCF stopping criteria (<a href="../../variables/generated_files/varset_basic.html#toldff">toldff</a>, <a href="../../variables/generated_files/varset_basic.html#tolrff">tolrff</a>) or geometry optimization
+stopping criteria (<a href="../../variables/generated_files/varset_rlx.html#tolmxf">tolmxf</a>). For the geometry optimization, combined cell shape and
+atomic position optimization need a conversion scale, set by <a href="../../variables/generated_files/varset_rlx.html#strprecon">strprecon</a>.
 <br><br><a href=#top>Go to the top</a>
 
 
@@ -97,12 +97,12 @@ studies ...</li>
 <h3><b>3. Related input variables.</b></h3>
 
 
-<p>Basic input variables:<p>... <a href="../../input_variables/generated_files/varset_dev.html#optforces">optforces</a>   [OPTions for the calculation of FORCES]<br>
-... <a href="../../input_variables/generated_files/varset_gstate.html#optstress">optstress</a>   [OPTion for the computation of STRESS]<br>
-... <a href="../../input_variables/generated_files/varset_basic.html#toldff">toldff</a>   [TOLerance on the DiFference of Forces]<br>
-... <a href="../../input_variables/generated_files/varset_basic.html#tolrff">tolrff</a>   [TOLerance on the Relative diFference of Forces]<br>
-<p>Useful input variables:<p>... <a href="../../input_variables/generated_files/varset_rlx.html#strprecon">strprecon</a>   [STRess PRECONditioner]<br>
-... <a href="../../input_variables/generated_files/varset_rlx.html#strtarget">strtarget</a>   [STRess TARGET]<br>
+<p>Basic input variables:<p>... <a href="../../variables/generated_files/varset_dev.html#optforces">optforces</a>   [OPTions for the calculation of FORCES]<br>
+... <a href="../../variables/generated_files/varset_gstate.html#optstress">optstress</a>   [OPTion for the computation of STRESS]<br>
+... <a href="../../variables/generated_files/varset_basic.html#toldff">toldff</a>   [TOLerance on the DiFference of Forces]<br>
+... <a href="../../variables/generated_files/varset_basic.html#tolrff">tolrff</a>   [TOLerance on the Relative diFference of Forces]<br>
+<p>Useful input variables:<p>... <a href="../../variables/generated_files/varset_rlx.html#strprecon">strprecon</a>   [STRess PRECONditioner]<br>
+... <a href="../../variables/generated_files/varset_rlx.html#strtarget">strtarget</a>   [STRess TARGET]<br>
 
 <br><br><a href=#top>Go to the top</a>
 

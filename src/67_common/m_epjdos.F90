@@ -1204,7 +1204,7 @@ end subroutine recip_ylm
 !!  kg_k    = G vector indices
 !!  natom   = number of atoms
 !!  mpi_enreg=information about MPI parallelization
-!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !!  npw_k   = number of plane waves for this kpoint
 !!  ph1d    = phase factors for different atoms for all G vectors
 !!  rmax(natom) = max radius to integrate to (in bohr)

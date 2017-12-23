@@ -527,10 +527,10 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  ABI_ALLOCATE(vhartr1,(cplex*nfftf))
  ABI_ALLOCATE(vtrial1,(cplex*nfftf,nspden))
  if(.not.kramers_deg) then
-    ABI_ALLOCATE(vhartr1_mq,(cplex*nfftf))
-    ABI_ALLOCATE(vtrial1_pq,(cplex*nfftf,nspden))
-    ABI_ALLOCATE(vtrial1_mq,(cplex*nfftf,nspden))
- endif
+   ABI_ALLOCATE(vhartr1_mq,(cplex*nfftf))
+   ABI_ALLOCATE(vtrial1_pq,(cplex*nfftf,nspden))
+   ABI_ALLOCATE(vtrial1_mq,(cplex*nfftf,nspden))
+ end if
 ! TODO: for non collinear case this should always be nspden, in NCPP case as well!!!
  ABI_ALLOCATE(vxc1,(cplex*nfftf,nspden*(1-usexcnhat))) ! Not always needed
  vtrial1_tmp => vtrial1   ! this is to avoid errors when vtrial1_tmp is unused
@@ -556,7 +556,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
    ABI_ALLOCATE(nvresid1,(0,0))
    if(.not.kramers_deg) then
      ABI_ALLOCATE(nvresid1_mq,(0,0))
-   endif
+   end if
  end if
  if(nstep>0 .and. iscf_mod>0) then
    dielar(1)=dtset%diecut;dielar(2)=dtset%dielng
@@ -746,7 +746,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &       nkxc,nspden,n3xccc,optene,option,dtset%paral_kgb,-dtset%qptn,&
 &       rhog,rhog1_mq,rhor,rhor1_mq,rprimd,ucvol,psps%usepaw,usexcnhat,vhartr1_mq,vpsp1,&
 &       nvresid1_mq,res2_mq,vtrial1_mq,vxc,vxc1_mq,xccc3d1)
-     endif
+     end if
 
 !    For Q=0 and metallic occupation, initialize quantities needed to
 !    compute the first-order Fermi energy
@@ -755,7 +755,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
        ABI_ALLOCATE(rhorfermi,(cplex*nfftf,nspden))
        if(.not.kramers_deg) then
          ABI_ALLOCATE(rhorfermi_mq,(cplex*nfftf,nspden))
-       endif
+       end if
        if (psps%usepaw==1.and.usexcnhat==0) then
          ABI_ALLOCATE(nhatfermi,(cplex*nfftf,nspden))
        else
@@ -908,11 +908,11 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
        rhor1_pq(2*ifft  ,:) = half*(rhor1(2*ifft  ,:)-rhor1_mq(2*ifft  ,:))
        rhor1_mq(2*ifft-1,:) = rhor1_pq(2*ifft-1,:)
        rhor1_mq(2*ifft  ,:) =-rhor1_pq(2*ifft  ,:)
-     enddo
+     end do
      rhor1=rhor1_pq
      call fourdp(cplex,rhog1,rhor1(:,1),-1,mpi_enreg,nfftf,ngfftf,dtset%paral_kgb,0)
      call fourdp(cplex,rhog1_mq,rhor1_mq(:,1),-1,mpi_enreg,nfftf,ngfftf,dtset%paral_kgb,0)
-   endif
+   end if
 
    if (dtset%berryopt== 4.or.dtset%berryopt== 6.or.dtset%berryopt== 7.or.&
 &   dtset%berryopt==14.or.dtset%berryopt==16.or.dtset%berryopt==17) then
@@ -1005,7 +1005,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &       dtset%ixc,kxc,mpi_enreg,dtset%natom,nfftf,ngfftf,nhat,nhat1,nhat1gr,nhat1grdim,nkxc,&
 &       nspden,n3xccc,optene,optres,dtset%paral_kgb,-dtset%qptn,rhog,rhog1_mq,rhor,rhor1_mq,&
 &       rprimd,ucvol,psps%usepaw,usexcnhat,vhartr1_mq,vpsp1,nvresid1_mq,res2_mq,vtrial1_mq,vxc,vxc1_mq,xccc3d1)
-     endif
+     end if
    end if
 
 !  ######################################################################
@@ -1056,7 +1056,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &       nstep,occ_rbz,0,prtfor,0,&
 &       quit,res2_mq,resid_mq,residm_mq,response,&
 &       tollist,psps%usepaw,vxcavg,wtk_rbz,xred,conv_retcode)
-     endif
+     end if
      call timab(152,2,tsec)
 
 !    If criteria in scprqt say to quit, then exit the loop over istep
@@ -1085,10 +1085,10 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
            vtrial1_mq(2*ifft  ,3)= vtrial1(2*ifft-1,4) !Im[V^12],see definition of v(:,4) cplex=2 case 
            vtrial1_mq(2*ifft  ,4)= vtrial1(2*ifft-1,3) !Re[V^21]=Re[V^12]
            vtrial1_mq(2*ifft-1,4)= vtrial1(2*ifft  ,3) !Re[V^21]=Re[V^12]
-         enddo
-       endif
+         end do
+       end if
        initialized=1
-    end if
+     end if
    end if
 
 !  ######################################################################

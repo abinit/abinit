@@ -152,12 +152,12 @@ infos_html:
 	cp -fr tmp-infos-$(VERSION)/inst*_notes/inst*_v$(ABINIT_VERSION_MAJOR).$(ABINIT_VERSION_MINOR).html tmp-infos-$(VERSION)/install_notes/install.html
 	tar -cvf infos_html-$(VERSION).tar                \
           tmp-infos-$(VERSION)/biblio \
-          tmp-infos-$(VERSION)/input_variables \
+          tmp-infos-$(VERSION)/variables \
           tmp-infos-$(VERSION)/tests \
           tmp-infos-$(VERSION)/theory \
           tmp-infos-$(VERSION)/topics \
           tmp-infos-$(VERSION)/tutorial \
-          tmp-infos-$(VERSION)/users \
+          tmp-infos-$(VERSION)/guide \
           tmp-infos-$(VERSION)/js_files \
           tmp-infos-$(VERSION)/formabinit.css \
           tmp-infos-$(VERSION)/known_problems \
@@ -237,7 +237,7 @@ binary_package_lite:
 
 dist-lite: distdir
 	tardir=$(distdir) && \
-	  cd $(distdir)/doc; rm -rf build* inp* t* users  && \
+	  cd $(distdir)/doc; rm -rf build* inp* t* guide  && \
 	  cd ../tests; rm -rf v* tuto* Psps* paral mpiio libxc gpu fast bigdft* && \
 	  cd ../abichecks; rm -rf abirules buildsys && \
 	  cd ../..; \

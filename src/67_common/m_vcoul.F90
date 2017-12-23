@@ -1490,7 +1490,7 @@ end subroutine vcoul_print
 !!  Vcp<vcoul_t>=the datatype to be destroyed
 !!
 !! PARENTS
-!!      bethe_salpeter,gwls_hamiltonian,mrgscr,screening,sigma
+!!      bethe_salpeter,gwls_hamiltonian,mrgscr,screening,setup_sigma,sigma
 !!
 !! CHILDREN
 !!      calck0,paw_jbessel,quadrature

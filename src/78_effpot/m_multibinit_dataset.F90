@@ -197,7 +197,6 @@ contains
 !! Should be executed by one processor only.
 !!
 !! PARENTS
-!!      multibinit
 !!
 !! CHILDREN
 !!

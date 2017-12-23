@@ -40,7 +40,7 @@
 !!  mpi_enreg=informations about MPI parallelization
 !!  mpw=maximum number of planewaves as dimensioned in calling routine
 !!  nband(nkpt*nsppol)=number of bands at each k point
-!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !!  nkpt=number of k points
 !!  npwarr(nkpt)=array holding npw for each k point.
 !!  nsppol=1 for unpolarized, 2 for spin-polarized
