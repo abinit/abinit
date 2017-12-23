@@ -71,6 +71,7 @@ subroutine dotprod_set_cgcprj(atindx1,cg1,cg2,cprj1,cprj2,dimcprj,&
 
  use defs_basis
  use defs_abitypes
+ use m_cgtools
  use m_xmpi
  use m_pawtab, only : pawtab_type
  use m_pawcprj, only : pawcprj_type, pawcprj_alloc, pawcprj_get, pawcprj_free
@@ -108,7 +109,8 @@ subroutine dotprod_set_cgcprj(atindx1,cg1,cg2,cprj1,cprj2,dimcprj,&
 ! *************************************************************************
 
 !DEBUG
-!write(std_out,*)' dotprod_set_cgcprj : enter '
+ write(std_out,*)' dotprod_set_cgcprj : enter '
+ write(std_out,*)' dotprod_set_cgcprj : npw, nspinor=',npw,nspinor
 !ENDDEBUG
 
  ABI_ALLOCATE(cwavef1,(2,npw*nspinor))
@@ -181,14 +183,18 @@ subroutine dotprod_set_cgcprj(atindx1,cg1,cg2,cprj1,cprj2,dimcprj,&
      end if
      smn(1,ibd1,ibd2)=dotr
      smn(2,ibd1,ibd2)=doti
-!    End loop over bands ibd1
-     icgb1=icgb1+npw*nspinor
+!    End loop over bands ibd2
+     icgb2=icgb2+npw*nspinor
 
    end do
 
-!  End loop over bands ibd2
-   icgb2=icgb2+npw*nspinor
+!  End loop over bands ibd1
+   icgb1=icgb1+npw*nspinor
  end do
+
+!DEBUG
+!write(std_out,*)' smn=',smn
+!ENDDEBUG
 
  ABI_DEALLOCATE(cwavef1)
  ABI_DEALLOCATE(cwavef2)
