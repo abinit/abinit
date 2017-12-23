@@ -258,114 +258,7 @@ subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
        enddo
 !ENDDEBUG
 
-       ABI_ALLOCATE(smn_debug,(2,nblockbd,nblockbd))
-       smn_debug=zero
-
-       do iblockbd=1,nblockbd
-         iband_min=1+(iblockbd-1)*nprocband
-         iband_max=iblockbd*nprocband
-
-         if(xmpi_paral==1.and.mpi_enreg%paral_kgb/=1) then
-           if (proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,iband_min,iband_max,isppol,me_distrb)) cycle
-         end if
-
-!        Extract wavefunction information
-         if (nprocband>1) then
-!          Special treatment for band-fft //
-           ABI_ALLOCATE(cwavef_tmp,(2,npw_k*my_nspinor*nprocband))
-           do ig=1,npw_k*my_nspinor*nprocband
-             cwavef_tmp(1,ig)=cg(1,ig+icgb)
-             cwavef_tmp(2,ig)=cg(2,ig+icgb)
-           end do
-           call xmpi_alltoallv(cwavef_tmp,bufsize_wf,bufdisp_wf,cwavef,bufsize,bufdisp,spaceComm_band,ierr)
-           ABI_DEALLOCATE(cwavef_tmp)
-         else
-           do ig=1,npw_k*my_nspinor
-             cwavef(1,ig)=cg(1,ig+icgb)
-             cwavef(2,ig)=cg(2,ig+icgb)
-           end do
-         end if
-
-         icgb1=icg
-
-         do iblockbd1=1,nblockbd
-           iband_min1=1+(iblockbd1-1)*nprocband
-           iband_max1=iblockbd1*nprocband
-
-           if(xmpi_paral==1.and.mpi_enreg%paral_kgb/=1) then
-             if (proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,iband_min1,iband_max1,isppol,me_distrb)) cycle
-           end if
-
-!          Extract wavefunction information
-
-           if (nprocband>1) then
-!            Special treatment for band-fft //
-             ABI_ALLOCATE(cwavef_tmp,(2,npw_k*my_nspinor*nprocband))
-             do ig=1,npw_k*my_nspinor*nprocband
-               cwavef_tmp(1,ig)=scf_history%cg(1,ig+icgb1,indh)
-               cwavef_tmp(2,ig)=scf_history%cg(2,ig+icgb1,indh)
-             end do
-             call xmpi_alltoallv(cwavef_tmp,bufsize_wf,bufdisp_wf,cwavefh,bufsize,bufdisp,spaceComm_band,ierr)
-             ABI_DEALLOCATE(cwavef_tmp)
-           else
-             do ig=1,npw_k*my_nspinor
-               cwavefh(1,ig)=scf_history%cg(1,ig+icgb1,indh)
-               cwavefh(2,ig)=scf_history%cg(2,ig+icgb1,indh)
-             end do
-           end if
-
-!          Calculate Smn=<cg|S|cg_hist>
-           call dotprod_g(dotr,doti,istwf_k,npw_k*my_nspinor,2,cwavef,cwavefh,mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
-           if(usepaw==1) then
-             ia =0
-             do itypat=1,ntypat
-               do iat=1+ia,nattyp(itypat)+ia
-                 do ilmn1=1,pawtab(itypat)%lmn_size
-                   do ilmn2=1,ilmn1
-                     klmn=((ilmn1-1)*ilmn1)/2+ilmn2
-                     dotr=dotr+pawtab(itypat)%sij(klmn)*(cprj_k(iat,iblockbd)%cp(1,ilmn1)*cprj_kh(iat,iblockbd1)%cp(1,ilmn2)+&
-&                     cprj_k(iat,iblockbd)%cp(2,ilmn1)*cprj_kh(iat,iblockbd1)%cp(2,ilmn2))
-                     doti=doti+pawtab(itypat)%sij(klmn)*(cprj_k(iat,iblockbd)%cp(1,ilmn1)*cprj_kh(iat,iblockbd1)%cp(2,ilmn2)-&
-&                     cprj_k(iat,iblockbd)%cp(2,ilmn1)*cprj_kh(iat,iblockbd1)%cp(1,ilmn2))
-                   end do
-                   do ilmn2=ilmn1+1,pawtab(itypat)%lmn_size
-                     klmn=((ilmn2-1)*ilmn2)/2+ilmn1
-                     dotr=dotr+pawtab(itypat)%sij(klmn)*(cprj_k(iat,iblockbd)%cp(1,ilmn1)*cprj_kh(iat,iblockbd1)%cp(1,ilmn2)+&
-&                     cprj_k(iat,iblockbd)%cp(2,ilmn1)*cprj_kh(iat,iblockbd1)%cp(2,ilmn2))
-                     doti=doti+pawtab(itypat)%sij(klmn)*(cprj_k(iat,iblockbd)%cp(1,ilmn1)*cprj_kh(iat,iblockbd1)%cp(2,ilmn2)-&
-&                     cprj_k(iat,iblockbd)%cp(2,ilmn1)*cprj_kh(iat,iblockbd1)%cp(1,ilmn2))
-                   end do
-                 end do
-               end do
-               ia=ia+nattyp(itypat)
-             end do
-           end if
-           smn_debug(1,iblockbd,iblockbd1)=dotr
-           smn_debug(2,iblockbd,iblockbd1)=doti
-!          End loop over bands iblockbd1
-           icgb1=icgb1+npw_k*my_nspinor*nprocband
-
-         end do
-
-!        End loop over bands iblockbd
-         icgb=icgb+npw_k*my_nspinor*nprocband
-       end do
-
-!DEBUG
-       do iblockbd=1,nband_k
-         write(std_out, '(a,i4)')' iblockbd=',iblockbd
-         write(std_out, '(a,8f12.4)')' Real:',smn_debug(1,1:nblockbd,iblockbd)
-         write(std_out, '(a,8f12.4)')' Imag:',smn_debug(2,1:nblockbd,iblockbd)
-       enddo
-       if(maxval(abs(smn-smn_debug))>tol8)then
-         write(std_out,*)' wf_mixing : smn and smn_debug do not agree '
-         stop
-       endif
-!      smn=smn_debug
-!ENDDEBUG
-
-!      Invert S matrix, which is NOT hermitian. 
-
+!      Invert S matrix, that is NOT hermitian. 
 !      Calculate M=S^-1
        ABI_ALLOCATE(mmn,(2,nband_k,nband_k))
        mmn=zero
@@ -373,12 +266,9 @@ subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
          mmn(1,kk,kk)=one
        end do
 
-!      Cholesky factorisation of smn=Lx(trans(L)*. On output mkl=L being a lower triangular matrix.
-!      call zpotrf("L",nband_k,smn,nband_k,ierr)
-!      call ztrtrs("L","N","N",nband_k,nband_k,smn,nband_k,mmn,nband_k,ierr)
-
        ABI_ALLOCATE(smn_,(2,nband_k,nband_k))
        ABI_ALLOCATE(ipiv,(nband_k))
+!      For debuggning purposes, the smn matrix is preserved (later, M * S = 1 is checked ...)
 !      The smn_ arrays stores a copy of the smn array, and will be destroyed by the following inverse call
        smn_=smn
        call zgesv(nband_k,nband_k,smn_,nband_k,ipiv,mmn,nband_k,ierr)
@@ -430,15 +320,35 @@ subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
 !ENDDEBUG
 
 
-!      This is the simple mixing case : the wavefunction from scf_history is biorthogonalized to cg, taken as reference
+!      (This is the simple mixing case) 
+!      The wavefunction from scf_history is biorthogonalized to cg, taken as reference
 !      Wavefunction alignment (istwfk=1 ?)
+
+!DEBUG  (Old coding)
        ABI_ALLOCATE(work,(2,npw_nk*my_nspinor*nblockbd))
        ABI_ALLOCATE(work1,(2,npw_nk*my_nspinor*nblockbd))
        work1(:,:)=scf_history%cg(:,icg+1:icg+my_nspinor*nblockbd*npw_nk,indh)
+!ENDDEBUG
+      
+
+!      This is the list of args of lincom_cgcprj
+!      subroutine lincom_cgcprj(alpha_mn,cg,dimcprj,&
+!&         icg,inplace,mcg,mcprj,natom,nband_in,nband_out,npw,nspinor,usepaw)
+
+!      This is the new coding
+       inplace=1
+       call lincom_cgcprj(mmn,scf_history%cg(:,:,indh),dimcprj,&
+&         icg,inplace,mcg,mcprj,dtset%natom,nband_k,nband_k,npw_k,my_nspinor,usepaw)
+
+!DEBUG
+!      This is the old coding
        call zgemm('N','N',npw_nk*my_nspinor,nband_k,nband_k,dcmplx(1._dp), &
 &       work1,npw_nk*my_nspinor, &
 &       mmn,nblockbd,dcmplx(0._dp),work,npw_nk*my_nspinor)
-       scf_history%cg(:,1+icg:npw_nk*my_nspinor*nblockbd+icg,indh)=work(:,:)
+       if(maxval(abs(scf_history%cg(:,1+icg:npw_nk*my_nspinor*nblockbd+icg,indh)-work(:,:)))>tol8)then
+         MSG_ERROR(' The old and new coding do not agree ')
+       endif
+!      scf_history%cg(:,1+icg:npw_nk*my_nspinor*nblockbd+icg,indh)=work(:,:)
 
 !      If paw, must also align cprj from history
        if (usepaw==1) then
@@ -453,6 +363,7 @@ subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
              al(2,iblockbd1)=mmn(2,iblockbd,iblockbd1)
            end do
            call pawcprj_lincom(al,cprj_kh,cprj_k3,nblockbd)
+!          This seems incorrect : cprj_kh is overwritten while its original values are still supposed to be used !
            call pawcprj_copy(cprj_k3,cprj_kh(:,ii+1:ii+my_nspinor))
          end do
          ABI_DEALLOCATE(al)
@@ -462,6 +373,7 @@ subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
        ABI_DEALLOCATE(mmn)
        ABI_DEALLOCATE(work)
        ABI_DEALLOCATE(work1)
+!ENDDEBUG
 
 !DEBUG
 !      This is a check that now the scf_history%cg(:,:,indh) is biorthogonal to the cg

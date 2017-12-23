@@ -33,6 +33,7 @@ sources = [
  "getgh1c.F90",
  "getgh2c.F90",
  "getgsc.F90",
+ "lincom_cgcprj.F90",
  "m_bandfft_kpt.F90",
  "m_esymm.F90",
  "multithreaded_getghc.F90",
