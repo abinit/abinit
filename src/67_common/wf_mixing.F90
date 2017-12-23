@@ -95,10 +95,12 @@ subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
  !character(len=500) :: message
 !arrays
  real(dp) :: alpha(2),beta(2)
- integer,allocatable :: bufsize(:),bufsize_wf(:),bufdisp(:),bufdisp_wf(:),dimcprj(:),npw_block(:),npw_disp(:)
+ integer,allocatable :: bufsize(:),bufsize_wf(:),bufdisp(:),bufdisp_wf(:)
+ integer,allocatable :: ipiv(:),dimcprj(:),npw_block(:),npw_disp(:)
  real(dp),allocatable :: al(:,:),cwavef(:,:),cwavefh(:,:),cwavef_tmp(:,:)
  real(dp),allocatable :: dum(:,:)
- real(dp),allocatable :: dmn(:,:,:),mmn(:,:,:),smn(:,:,:),smn_debug(:,:,:)
+ real(dp),allocatable :: dmn(:,:,:),dmn_debug(:,:,:),mmn(:,:,:)
+ real(dp),allocatable :: smn(:,:,:),smn_(:,:,:),smn_debug(:,:,:)
  real(dp),allocatable :: work(:,:),work1(:,:)
  type(pawcprj_type),allocatable :: cprj_k(:,:),cprj_kh(:,:),cprj_k3(:,:)
 
@@ -354,17 +356,30 @@ subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
 
 !      Invert S matrix, which is NOT hermitian. 
 
-
-!      Cholesky factorisation of smn=Lx(trans(L)*. On output mkl=L being a lower triangular matrix.
-       call zpotrf("L",nband_k,smn,nband_k,ierr)
-
 !      Calculate M=S^-1
        ABI_ALLOCATE(mmn,(2,nband_k,nband_k))
        mmn=zero
        do kk=1,nband_k
          mmn(1,kk,kk)=one
        end do
-       call ztrtrs("L","N","N",nband_k,nband_k,smn,nband_k,mmn,nband_k,ierr)
+
+!      Cholesky factorisation of smn=Lx(trans(L)*. On output mkl=L being a lower triangular matrix.
+!      call zpotrf("L",nband_k,smn,nband_k,ierr)
+!      call ztrtrs("L","N","N",nband_k,nband_k,smn,nband_k,mmn,nband_k,ierr)
+
+       ABI_ALLOCATE(smn_,(2,nband_k,nband_k))
+       ABI_ALLOCATE(ipiv,(nband_k))
+!      The smn_ arrays stores a copy of the smn array, and will be destroyed by the following inverse call
+       smn_=smn
+       call zgesv(nband_k,nband_k,smn_,nband_k,ipiv,mmn,nband_k,ierr)
+       ABI_DEALLOCATE(ipiv)
+       ABI_DEALLOCATE(smn_)
+!DEBUG
+       if(ierr/=0)then
+         write(std_out,*)' wf_mixing : the call to cgesv general inversion routine returned an error code ierr=',ierr
+         stop
+       endif
+!ENDDEBUG
 
 !DEBUG
 !Print the M matrix
@@ -376,6 +391,7 @@ subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
        end do
        write(std_out,*)' Check M * S = 1.'
        ABI_ALLOCATE(dmn,(2,nband_k,nband_k))
+       dmn=zero
        do iblockbd=1,nblockbd
          do iblockbd1=1,nblockbd
            dmn(1,:,iblockbd)=dmn(1,:,iblockbd)&
@@ -384,11 +400,23 @@ subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
 &           +mmn(1,:,iblockbd1)*smn(2,iblockbd1,iblockbd)+mmn(2,:,iblockbd1)*smn(1,iblockbd1,iblockbd)
          enddo
        enddo
+       write(std_out,*)' Print the M*S matrix.'
        do iblockbd=1,nblockbd
          write(std_out, '(a,i4)')' iblockbd=',iblockbd
          write(std_out, '(a,8f12.4)')' Real:',dmn(1,1:nblockbd,iblockbd)
          write(std_out, '(a,8f12.4)')' Imag:',dmn(2,1:nblockbd,iblockbd)
        end do
+       ABI_ALLOCATE(dmn_debug,(2,nband_k,nband_k))
+       dmn_debug=zero
+       do kk=1,nband_k
+         dmn_debug(1,kk,kk)=one
+       end do
+       if(maxval(abs(dmn-dmn_debug))>tol8)then
+         write(std_out,*)' wf_mixing : dmn and dmn_debug do not agree '
+         stop
+       endif
+       ABI_DEALLOCATE(dmn)
+       ABI_DEALLOCATE(dmn_debug)
 !ENDDEBUG
 
 
