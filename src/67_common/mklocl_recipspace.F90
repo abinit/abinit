@@ -28,7 +28,7 @@
 !!  natom=number of atoms in unit cell.
 !!  nattyp(ntypat)=number of atoms of each type in cell.
 !!  nfft=(effective) number of FFT grid points (for this processor)
-!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !!  ntypat=number of types of atoms.
 !!  option= (see above)
 !!  ph1d(2,3*(2*mgfft+1)*natom)=1-dim structure factor phase information.

@@ -823,7 +823,7 @@ end function dvdb_get_pinfo
 !!  iqpt=Index of the q-point in dvdb%qpts
 !!  cplex=1 if real, 2 if complex potentials.
 !!  nfft=Number of fft-points treated by this processors
-!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !!
 !! OUTPUT
 !!  ierr=Non-zero if error.
@@ -964,7 +964,7 @@ end function dvdb_read_onev1
 !! INPUTS
 !!  iqpt=Index of the q-point in dvdb%qpts
 !!  nfft=Number of fft-points treated by this processors
-!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !!  comm=MPI communicator
 !!
 !! OUTPUT
@@ -1788,7 +1788,7 @@ end subroutine rotate_fqg
 !!  nqshift=Number of shifts used to generated the ab-initio q-mesh.
 !!  qshift(3,nqshift)=The shifts of the ab-initio q-mesh.
 !!  nfft=Number of fft-points treated by this processors
-!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !!  comm=MPI communicator
 !!
 !! PARENTS
@@ -2160,7 +2160,7 @@ end subroutine dvdb_ftinterp_setup
 !! INPUTS
 !!  qpt(3)=q-point in reduced coordinates.
 !!  nfft=Number of fft-points treated by this processors
-!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !!  comm=MPI communicator
 !!
 !! OUTPUT
@@ -2291,7 +2291,7 @@ end subroutine dvdb_ftinterp_qpt
 !!  nqshift=Number of shifts used to generated the ab-initio q-mesh.
 !!  qshift(3,nqshift)=The shifts of the ab-initio q-mesh.
 !!  nfft=Number of fft-points treated by this processors
-!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !!  nrpt=Number of R-points = number of q-points in the full BZ
 !!  nspden=Number of spin densities.
 !!  ipert=index of the perturbation to be treated [1,natom3]
@@ -2648,7 +2648,7 @@ end subroutine dvdb_get_v1scf_rpt
 !! INPUTS
 !!  qpt(3)=q-point in reduced coordinates.
 !!  nfft=Number of fft-points treated by this processors
-!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !!  nrpt=Number of R-points = number of q-points in the full BZ
 !!  nspden=Number of spin densities.
 !!  ipert=index of the perturbation to be treated [1,natom3]
@@ -2777,7 +2777,7 @@ end subroutine dvdb_get_v1scf_qpt
 !!  nqshift=Number of shifts used to generated the ab-initio q-mesh.
 !!  qshift(3,nqshift)=The shifts of the ab-initio q-mesh.
 !!  nfft=Number of fft-points treated by this processors
-!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !!  nfftf=Number of fft-points on the fine grid for interpolated potential
 !!  ngfftf(18)=information on 3D FFT for interpolated potential
 !!  comm=MPI communicator

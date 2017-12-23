@@ -74,7 +74,7 @@
 !!  nattyp(ntypat)=number of atoms of each type in cell.
 !!  nfft=number of fft grid points
 !!  nfftprc=size of FFT grid on which the potential residual will be preconditionned
-!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !!  ngfftprc(18)=contain all needed information about 3D FFT for the grid corresponding to nfftprc
 !!  nkxc=second dimension of the array kxc, see rhotoxc.F90 for a description
 !!  npawmix=-PAW only- number of spherical part elements to be mixed

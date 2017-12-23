@@ -163,7 +163,7 @@ subroutine dfpt_accrho(counter,cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,&
 !Loop on spinorial components
 ! TODO : double loop on spinors for full rhoaug1 matrix if nspden =4
  if (gs_hamkq%nvloc/=4) then  ! see later EB FR
- ABI_ALLOCATE(wfraug1,(2,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6))
+   ABI_ALLOCATE(wfraug1,(2,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6))
 
    do ispinor=1,nspinor
 
@@ -402,15 +402,15 @@ subroutine dfpt_accrho(counter,cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,&
              rhoaug1(2*i1-1,i2,i3,4)=rhoaug1(2*i1-1,i2,i3,4)+weight*(re0_down*re1_down+im0_down*im1_down) ! n_dndn
              rhoaug1(2*i1  ,i2,i3,4)=rhoaug1(2*i1  ,i2,i3,4)+weight*(re0_down*im1_down-im0_down*re1_down)
 
-             rhoaug1(2*i1-1,i2,i3,2)=rhoaug1(2*i1-1,i2,i3,2)+weight*(re1_up*re0_down+im1_up*im0_down)&!Re[m1x]
-&                                                           +weight*(re1_down*re0_up+im1_down*im0_up)
-             rhoaug1(2*i1  ,i2,i3,2)=rhoaug1(2*i1  ,i2,i3,2)+weight*(-re1_up*im0_down+im1_up*re0_down)&!Im[m1x]
-&                                                           +weight*(-re1_down*im0_up+im1_down*re0_up)
+             rhoaug1(2*i1-1,i2,i3,2)=rhoaug1(2*i1-1,i2,i3,2)+weight*(re1_up*re0_down+im1_up*im0_down)& !Re[m1x]
+&            +weight*(re1_down*re0_up+im1_down*im0_up)
+             rhoaug1(2*i1  ,i2,i3,2)=rhoaug1(2*i1  ,i2,i3,2)+weight*(-re1_up*im0_down+im1_up*re0_down)& !Im[m1x]
+&            +weight*(-re1_down*im0_up+im1_down*re0_up)
              
-             rhoaug1(2*i1-1,i2,i3,3)=rhoaug1(2*i1-1,i2,i3,3)+weight*(+re1_up*im0_down-im1_up*re0_down)&!Re[m1y]
-&                                                           +weight*(-re1_down*im0_up+im1_down*re0_up)
-             rhoaug1(2*i1  ,i2,i3,3)=rhoaug1(2*i1  ,i2,i3,3)+weight*(+re1_up*re0_down+im1_up*im0_down)&!Im[m1y]
-&                                                           +weight*(-re1_down*re0_up-im1_down*im0_up)
+             rhoaug1(2*i1-1,i2,i3,3)=rhoaug1(2*i1-1,i2,i3,3)+weight*(+re1_up*im0_down-im1_up*re0_down)& !Re[m1y]
+&            +weight*(-re1_down*im0_up+im1_down*re0_up)
+             rhoaug1(2*i1  ,i2,i3,3)=rhoaug1(2*i1  ,i2,i3,3)+weight*(+re1_up*re0_down+im1_up*im0_down)& !Im[m1y]
+&            +weight*(-re1_down*re0_up-im1_down*im0_up)
            end do
          end do
        end do

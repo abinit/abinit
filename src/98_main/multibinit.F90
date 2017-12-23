@@ -22,16 +22,16 @@
 !! PARENTS
 !!
 !! CHILDREN
-!!      abi_io_redirect,abihist_bcast,abihist_free,abimem_init,abinit_doctor
-!!      compute_anharmonics,effective_potential_file_getdimsystem
-!!      effective_potential_file_gettype,effective_potential_file_maphisttoref
-!!      effective_potential_file_read,effective_potential_file_readmdfile
-!!      effective_potential_free,effective_potential_setconfinement
-!!      effective_potential_writenetcdf,effective_potential_writexml
-!!      fit_polynomial_coeff_fit,fit_polynomial_printsystemfiles,flush_unit
-!!      herald,init10,instrng,inupper,invars10,isfile,mover_effpot
-!!      multibinit_dtset_free,outvars_multibinit,timein,wrtout,xmpi_bcast
-!!      xmpi_init,xmpi_sum
+!!      ab7_invars_set_flags,abi_io_redirect,abihist_bcast,abihist_free
+!!      abimem_init,abinit_doctor,compute_anharmonics
+!!      effective_potential_file_getdimsystem,effective_potential_file_gettype
+!!      effective_potential_file_maphisttoref,effective_potential_file_read
+!!      effective_potential_file_readmdfile,effective_potential_free
+!!      effective_potential_setconfinement,effective_potential_writenetcdf
+!!      effective_potential_writexml,fit_polynomial_coeff_fit
+!!      fit_polynomial_printsystemfiles,flush_unit,herald,init10,instrng
+!!      inupper,invars10,isfile,mover_effpot,multibinit_dtset_free
+!!      outvars_multibinit,timein,wrtout,xmpi_bcast,xmpi_init,xmpi_sum
 !!
 !! SOURCE
 

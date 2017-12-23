@@ -39,8 +39,7 @@
 !!  For cplex=2, the definition is (V_upup,V_dndn,V_updn,i.V_updn)
 !!
 !! PARENTS
-!!
-!!  dfpt_rhotov
+!!      dfpt_rhotov
 !!
 !! CHILDREN
 !!
@@ -127,7 +126,7 @@ subroutine dfpt_v1zeeman(nspden,nfft,cplex,idir,v1zeeman)
        v1zeeman(2*ifft  ,1)  = 0.0e0
        v1zeeman(2*ifft-1,2)  = 0.5e0
        v1zeeman(2*ifft  ,2)  = 0.0e0
-     enddo
+     end do
    else if (nspden==4) then
      select case(idir)
      case(1) !along x, v1=-sigma_x
@@ -140,7 +139,7 @@ subroutine dfpt_v1zeeman(nspden,nfft,cplex,idir,v1zeeman)
          v1zeeman(2*ifft  ,3)= 0.0e0 !Im[V^12]
          v1zeeman(2*ifft-1,4)= 0.0e0 !Re[i.V^21]=Im[V^12]
          v1zeeman(2*ifft  ,4)=-0.5e0 !Im[i.V^21]=Re[V^12]
-       enddo
+       end do
      case(2) !along y, v1 = -sigma_y
        do ifft=1,nfft
          v1zeeman(2*ifft-1,1)= 0.0e0 !Re[V^11]
@@ -151,7 +150,7 @@ subroutine dfpt_v1zeeman(nspden,nfft,cplex,idir,v1zeeman)
          v1zeeman(2*ifft  ,3)=+0.5e0 !Im[V^12]
          v1zeeman(2*ifft-1,4)=+0.5e0 !Re[i.V^21]=Im[V^12]
          v1zeeman(2*ifft  ,4)= 0.0e0 !Im[i.V^21]=Re[V^12]
-       enddo
+       end do
      case(3)
        do ifft=1,nfft
          v1zeeman(2*ifft-1,1)=-0.5e0 !Re[V^11]
@@ -162,9 +161,9 @@ subroutine dfpt_v1zeeman(nspden,nfft,cplex,idir,v1zeeman)
          v1zeeman(2*ifft  ,3)= 0.0e0 !Im[V^12]
          v1zeeman(2*ifft-1,4)= 0.0e0 !Re[i.V^21]
          v1zeeman(2*ifft  ,4)= 0.0e0 !Im[i.V^21]
-       enddo
+       end do
      end select
-   endif
+   end if
  end select !cplex
 
 end subroutine dfpt_v1zeeman

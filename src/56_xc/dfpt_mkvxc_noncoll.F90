@@ -23,7 +23,7 @@
 !!  mpi_enreg=information about MPI parallelization
 !!  nfft=(effective) number of FFT grid points (for this processor)
 !!  ngfft(18)=contain all needed information about 3D FFT,
-!!     see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!     see ~abinit/doc/variables/vargs.htm#ngfft
 !!  nhat(nfft,nspden*nhatdim)= -PAW only- GS compensation density
 !!  nhatdim= -PAW only- 1 if nhat array is used ; 0 otherwise
 !!  nhat1(cplex*nfft,nspden*nhat1dim)= -PAW only- 1st-order compensation density
@@ -168,7 +168,7 @@ subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat,nhatdim,nh
 !  SPr: for option=0 the rhor is not used, only core density xccc3d1
 !       rotate_mag is only to compute the m_norm
    call rotate_mag(rhor1_,rhor1_diag,mag,nfft,cplex,mag_norm_out=m_norm,&
-&                  rho_out_format=2)
+&   rho_out_format=2)
 
 !  -- Compute Vxc(r)^(1)=Kxc(r).rho(r)^(1)_rotated
 !  Note for PAW: nhat has already been substracted; don't use it in dfpt_mkvxc
@@ -185,7 +185,7 @@ subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat,nhatdim,nh
        call rotate_back_mag(vxc1_diag,vxc1,mag,nfft,mag_norm_in=m_norm)
      else
        call rotate_back_mag_dfpt(vxc1_diag,vxc1,vxc,kxc,rhor1_,mag,nfft,cplex,&
-&                                mag_norm_in=m_norm)
+&       mag_norm_in=m_norm)
      end if
    else
      call rotate_back_mag(vxc1_diag,vxc1,mag,nfft,mag_norm_in=m_norm)

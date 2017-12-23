@@ -325,7 +325,7 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
              end do
            end do
          end do
-       endif
+       end if
        call fourwf(cplex1,vlocal1_tmp,cwavef1,gh1c3,work,gs_hamkq%gbound_k,gs_hamkq%gbound_kp,&
 &       gs_hamkq%istwf_k,gs_hamkq%kg_k,gs_hamkq%kg_kp,gs_hamkq%mgfft,mpi_enreg,1,gs_hamkq%ngfft,&
 &       npw,npw1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,2,mpi_enreg%paral_kgb,tim_fourwf,weight,weight,&
@@ -349,7 +349,7 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
              end do
            end do
          end do
-       endif
+       end if
        call fourwf(cplex1,vlocal1_tmp,cwavef2,gh1c4,work,gs_hamkq%gbound_k,gs_hamkq%gbound_kp,&
 &       gs_hamkq%istwf_k,gs_hamkq%kg_k,gs_hamkq%kg_kp,gs_hamkq%mgfft,mpi_enreg,1,gs_hamkq%ngfft,&
 &       npw,npw1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,2,mpi_enreg%paral_kgb,tim_fourwf,weight,weight,&

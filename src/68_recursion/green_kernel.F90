@@ -19,7 +19,7 @@
 !!  inf_ucvol=volume of infinitesimal cell
 !!  mult=variance of the Gaussian (=rtrotter/beta)
 !!  mpi_enreg=information about MPI parallelization
-!!  ngfft=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  ngfft=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !!  nfft=total number of fft grid points
 !!  debug_rec=debugging variable
 !! 
