@@ -9,6 +9,9 @@
 !! that are known in the cg+cprj representation
 !! Smn=<wf1m|wf2n>
 !!
+!! Can also treat the case of the computation of scalar products within one set of nband wavefunctions
+!! without recomputing already computed matrix elements (define hermitian=1)
+!!
 !! This implementation is NOT band-parallelized
 !! Also, it is far of being optimal at the level of linear algebra, and involves extra copying
 !! that are detrimental for performance...
@@ -27,8 +30,9 @@
 !!  cprj1(natom,mcprj1) <type(pawcprj_type)>= projected input wave functions <Proj_i|Cnk> with NL projectors in the first set,
 !!  cprj2(natom,mcprj2) <type(pawcprj_type)>= projected input wave functions <Proj_i|Cnk> with NL projectors in the second set,
 !!  dimcprj(natom)=number of lmn components in the <p_{lmn}^i|\psi> for the i-th atom
-!!  ibg1=shift in cprj1 array to locate current k-point
-!!  ibg2=shift in cprj2 array to locate current k-point
+!!  hermitian= if 1, consider that the Smn matrix is hermitian, and do not recompute already computed matrix elements.
+!!  ibg1=shift in cprj1 array to locate current k-point ! Might be 0, in which case cprj1 is not copied internally, which saves some time/space
+!!  ibg2=shift in cprj2 array to locate current k-point ! Might be 0, in which case cprj2 is not copied internally, which saves some time/space
 !!  icg1=shift in cg1 array to locate current k-point
 !!  icg2=shift in cg2 array to locate current k-point
 !!  ikpt=current k point index
@@ -38,12 +42,15 @@
 !!  mcg2=second dimension of cg2 array (mpw*nspinor*mband2*mkmem*nsppol)
 !!  mcprj1=second dimension of cprj1 array 
 !!  mcprj2=second dimension of cprj2 array 
+!!  mkmem=number of k points which can fit in memory
 !!  mpi_enreg=information about MPI parallelization
+!!  natom=number of atoms
 !!  nattyp(ntypat)=number of atoms of each type in cell.
 !!  nbd1=number of bands for the first set of wavefunctions
 !!  nbd2=number of bands for the second set of wavefunctions
 !!  npw=number of planewaves in basis at this k point
 !!  nspinor=number of spinor components
+!!  nsppol=number of spin polarizations
 !!  ntypat=number of types of atoms
 !!  pawtab(dtset%ntypat*dtset%usepaw) <type(pawtab_type)>=paw tabulated starting data
 !!  usepaw=1 if PAW is activated
@@ -65,7 +72,7 @@
 
 #include "abi_common.h"
 
-subroutine dotprod_set_cgcprj(atindx1,cg1,cg2,cprj1,cprj2,dimcprj,&
+subroutine dotprod_set_cgcprj(atindx1,cg1,cg2,cprj1,cprj2,dimcprj,hermitian,&
 & ibg1,ibg2,icg1,icg2,ikpt,isppol,istwf,mband,mcg1,mcg2,mcprj1,mcprj2,mkmem,&
 & mpi_enreg,natom,nattyp,nbd1,nbd2,npw,nspinor,nsppol,ntypat,pawtab,smn,usepaw)
 
@@ -86,7 +93,7 @@ subroutine dotprod_set_cgcprj(atindx1,cg1,cg2,cprj1,cprj2,dimcprj,&
 
 !Arguments ------------------------------------
 !scalars
- integer, intent(in) :: ibg1,ibg2,icg1,icg2,ikpt,isppol,istwf
+ integer, intent(in) :: hermitian,ibg1,ibg2,icg1,icg2,ikpt,isppol,istwf
  integer, intent(in) :: mkmem,mband,mcg1,mcg2,mcprj1,mcprj2
  integer, intent(in) :: natom,nbd1,nbd2,npw,nspinor,nsppol,ntypat,usepaw
  type(MPI_type),intent(in) :: mpi_enreg
@@ -100,7 +107,7 @@ subroutine dotprod_set_cgcprj(atindx1,cg1,cg2,cprj1,cprj2,dimcprj,&
 !Local variables-------------------------------
 !scalars
  integer :: ia,iat,itypat,ibd1,ibd2,icgb1,icgb2,ig
- integer :: ilmn1,ilmn2,klmn
+ integer :: ilmn1,ilmn2,klmn,max_nbd2
  real(dp) :: dotr,doti
 !arrays
  real(dp),allocatable :: cwavef1(:,:),cwavef2(:,:)
@@ -112,6 +119,12 @@ subroutine dotprod_set_cgcprj(atindx1,cg1,cg2,cprj1,cprj2,dimcprj,&
  write(std_out,*)' dotprod_set_cgcprj : enter '
  write(std_out,*)' dotprod_set_cgcprj : npw, nspinor=',npw,nspinor
 !ENDDEBUG
+
+ if(hermitian==1)then
+   if(nbd1/=nbd2)then
+     MSG_ERROR(' With hermitian==1, nb1 and nb2 must be equal ')
+   endif
+ endif
 
  ABI_ALLOCATE(cwavef1,(2,npw*nspinor))
  ABI_ALLOCATE(cwavef2,(2,npw*nspinor))
@@ -128,7 +141,7 @@ subroutine dotprod_set_cgcprj(atindx1,cg1,cg2,cprj1,cprj2,dimcprj,&
      cwavef1(1,ig)=cg1(1,ig+icgb1)
      cwavef1(2,ig)=cg1(2,ig+icgb1)
    end do
-   if(usepaw==1) then
+   if(usepaw==1 .and. ibg1/=0) then
      call pawcprj_alloc(cprj1_k,cprj1(1,1)%ncpgr,dimcprj)
      call pawcprj_get(atindx1,cprj1_k,cprj1,natom,1,ibg1,ikpt,1,isppol,mband,&
 &         mkmem,natom,nbd1,nbd1,nspinor,nsppol,0,&
@@ -136,7 +149,9 @@ subroutine dotprod_set_cgcprj(atindx1,cg1,cg2,cprj1,cprj2,dimcprj,&
    endif
 
    icgb2=icg2
-   do ibd2=1,nbd2
+   max_nbd2=nbd2
+   if(hermitian==1)max_nbd2=ibd1
+   do ibd2=1,max_nbd2
 
 !    XG171222 Note that this copy step, being inside the ibd1 loop, is quite detrimental.
 !    It might be reduced by copying several cwavef2, and use a ZGEMM type of approach.
@@ -147,7 +162,7 @@ subroutine dotprod_set_cgcprj(atindx1,cg1,cg2,cprj1,cprj2,dimcprj,&
        cwavef2(2,ig)=cg2(2,ig+icgb2)
      end do
 
-     if(usepaw==1) then
+     if(usepaw==1 .and. ibg2/=0) then
        call pawcprj_alloc(cprj2_k,cprj2(1,1)%ncpgr,dimcprj)
        call pawcprj_get(atindx1,cprj2_k,cprj2,natom,1,ibg2,ikpt,1,isppol,mband,&
 &         mkmem,natom,nbd2,nbd2,nspinor,nsppol,0,&
@@ -160,24 +175,83 @@ subroutine dotprod_set_cgcprj(atindx1,cg1,cg2,cprj1,cprj2,dimcprj,&
      if(usepaw==1) then
        ia =0
        do itypat=1,ntypat
-         do iat=1+ia,nattyp(itypat)+ia
-           do ilmn1=1,pawtab(itypat)%lmn_size
-             do ilmn2=1,ilmn1
-               klmn=((ilmn1-1)*ilmn1)/2+ilmn2
-               dotr=dotr+pawtab(itypat)%sij(klmn)*(cprj1(iat,ibd1)%cp(1,ilmn1)*cprj2(iat,ibd2)%cp(1,ilmn2)+&
-&               cprj1(iat,ibd1)%cp(2,ilmn1)*cprj2(iat,ibd2)%cp(2,ilmn2))
-               doti=doti+pawtab(itypat)%sij(klmn)*(cprj1(iat,ibd1)%cp(1,ilmn1)*cprj2(iat,ibd2)%cp(2,ilmn2)-&
-&               cprj1(iat,ibd1)%cp(2,ilmn1)*cprj2(iat,ibd2)%cp(1,ilmn2))
-             end do
-             do ilmn2=ilmn1+1,pawtab(itypat)%lmn_size
-               klmn=((ilmn2-1)*ilmn2)/2+ilmn1
-               dotr=dotr+pawtab(itypat)%sij(klmn)*(cprj1(iat,ibd1)%cp(1,ilmn1)*cprj2(iat,ibd2)%cp(1,ilmn2)+&
-&               cprj1(iat,ibd1)%cp(2,ilmn1)*cprj2(iat,ibd2)%cp(2,ilmn2))
-               doti=doti+pawtab(itypat)%sij(klmn)*(cprj1(iat,ibd1)%cp(1,ilmn1)*cprj2(iat,ibd2)%cp(2,ilmn2)-&
-&               cprj1(iat,ibd1)%cp(2,ilmn1)*cprj2(iat,ibd2)%cp(1,ilmn2))
+         if(ibg1/=0 .and. ibg2/=0)then
+           do iat=1+ia,nattyp(itypat)+ia
+             do ilmn1=1,pawtab(itypat)%lmn_size
+               do ilmn2=1,ilmn1
+                 klmn=((ilmn1-1)*ilmn1)/2+ilmn2
+                 dotr=dotr+pawtab(itypat)%sij(klmn)*(cprj1_k(iat,ibd1)%cp(1,ilmn1)*cprj2_k(iat,ibd2)%cp(1,ilmn2)+&
+&                 cprj1_k(iat,ibd1)%cp(2,ilmn1)*cprj2_k(iat,ibd2)%cp(2,ilmn2))
+                 doti=doti+pawtab(itypat)%sij(klmn)*(cprj1_k(iat,ibd1)%cp(1,ilmn1)*cprj2_k(iat,ibd2)%cp(2,ilmn2)-&
+&                 cprj1_k(iat,ibd1)%cp(2,ilmn1)*cprj2_k(iat,ibd2)%cp(1,ilmn2))
+               end do
+               do ilmn2=ilmn1+1,pawtab(itypat)%lmn_size
+                 klmn=((ilmn2-1)*ilmn2)/2+ilmn1
+                 dotr=dotr+pawtab(itypat)%sij(klmn)*(cprj1_k(iat,ibd1)%cp(1,ilmn1)*cprj2_k(iat,ibd2)%cp(1,ilmn2)+&
+&                 cprj1_k(iat,ibd1)%cp(2,ilmn1)*cprj2_k(iat,ibd2)%cp(2,ilmn2))
+                 doti=doti+pawtab(itypat)%sij(klmn)*(cprj1_k(iat,ibd1)%cp(1,ilmn1)*cprj2_k(iat,ibd2)%cp(2,ilmn2)-&
+&                 cprj1_k(iat,ibd1)%cp(2,ilmn1)*cprj2_k(iat,ibd2)%cp(1,ilmn2))
+               end do
              end do
            end do
-         end do
+         else if(ibg1/=0 .and. ibg2==0)then
+           do iat=1+ia,nattyp(itypat)+ia
+             do ilmn1=1,pawtab(itypat)%lmn_size
+               do ilmn2=1,ilmn1
+                 klmn=((ilmn1-1)*ilmn1)/2+ilmn2
+                 dotr=dotr+pawtab(itypat)%sij(klmn)*(cprj1_k(iat,ibd1)%cp(1,ilmn1)*cprj2(iat,ibd2)%cp(1,ilmn2)+&
+&                 cprj1_k(iat,ibd1)%cp(2,ilmn1)*cprj2(iat,ibd2)%cp(2,ilmn2))
+                 doti=doti+pawtab(itypat)%sij(klmn)*(cprj1_k(iat,ibd1)%cp(1,ilmn1)*cprj2(iat,ibd2)%cp(2,ilmn2)-&
+&                 cprj1_k(iat,ibd1)%cp(2,ilmn1)*cprj2(iat,ibd2)%cp(1,ilmn2))
+               end do
+               do ilmn2=ilmn1+1,pawtab(itypat)%lmn_size
+                 klmn=((ilmn2-1)*ilmn2)/2+ilmn1
+                 dotr=dotr+pawtab(itypat)%sij(klmn)*(cprj1_k(iat,ibd1)%cp(1,ilmn1)*cprj2(iat,ibd2)%cp(1,ilmn2)+&
+&                 cprj1_k(iat,ibd1)%cp(2,ilmn1)*cprj2(iat,ibd2)%cp(2,ilmn2))
+                 doti=doti+pawtab(itypat)%sij(klmn)*(cprj1_k(iat,ibd1)%cp(1,ilmn1)*cprj2(iat,ibd2)%cp(2,ilmn2)-&
+&                 cprj1_k(iat,ibd1)%cp(2,ilmn1)*cprj2(iat,ibd2)%cp(1,ilmn2))
+               end do
+             end do
+           end do
+         else if(ibg1==0 .and. ibg2/=0)then
+           do iat=1+ia,nattyp(itypat)+ia
+             do ilmn1=1,pawtab(itypat)%lmn_size
+               do ilmn2=1,ilmn1
+                 klmn=((ilmn1-1)*ilmn1)/2+ilmn2
+                 dotr=dotr+pawtab(itypat)%sij(klmn)*(cprj1(iat,ibd1)%cp(1,ilmn1)*cprj2_k(iat,ibd2)%cp(1,ilmn2)+&
+&                 cprj1(iat,ibd1)%cp(2,ilmn1)*cprj2_k(iat,ibd2)%cp(2,ilmn2))
+                 doti=doti+pawtab(itypat)%sij(klmn)*(cprj1(iat,ibd1)%cp(1,ilmn1)*cprj2_k(iat,ibd2)%cp(2,ilmn2)-&
+&                 cprj1(iat,ibd1)%cp(2,ilmn1)*cprj2_k(iat,ibd2)%cp(1,ilmn2))
+               end do
+               do ilmn2=ilmn1+1,pawtab(itypat)%lmn_size
+                 klmn=((ilmn2-1)*ilmn2)/2+ilmn1
+                 dotr=dotr+pawtab(itypat)%sij(klmn)*(cprj1(iat,ibd1)%cp(1,ilmn1)*cprj2_k(iat,ibd2)%cp(1,ilmn2)+&
+&                 cprj1(iat,ibd1)%cp(2,ilmn1)*cprj2_k(iat,ibd2)%cp(2,ilmn2))
+                 doti=doti+pawtab(itypat)%sij(klmn)*(cprj1_k(iat,ibd1)%cp(1,ilmn1)*cprj2_k(iat,ibd2)%cp(2,ilmn2)-&
+&                 cprj1(iat,ibd1)%cp(2,ilmn1)*cprj2_k(iat,ibd2)%cp(1,ilmn2))
+               end do
+             end do
+           end do
+         else if(ibg1==0 .and. ibg2==0)then
+           do iat=1+ia,nattyp(itypat)+ia
+             do ilmn1=1,pawtab(itypat)%lmn_size
+               do ilmn2=1,ilmn1
+                 klmn=((ilmn1-1)*ilmn1)/2+ilmn2
+                 dotr=dotr+pawtab(itypat)%sij(klmn)*(cprj1(iat,ibd1)%cp(1,ilmn1)*cprj2(iat,ibd2)%cp(1,ilmn2)+&
+&                 cprj1(iat,ibd1)%cp(2,ilmn1)*cprj2(iat,ibd2)%cp(2,ilmn2))
+                 doti=doti+pawtab(itypat)%sij(klmn)*(cprj1(iat,ibd1)%cp(1,ilmn1)*cprj2(iat,ibd2)%cp(2,ilmn2)-&
+&                 cprj1(iat,ibd1)%cp(2,ilmn1)*cprj2(iat,ibd2)%cp(1,ilmn2))
+               end do
+               do ilmn2=ilmn1+1,pawtab(itypat)%lmn_size
+                 klmn=((ilmn2-1)*ilmn2)/2+ilmn1
+                 dotr=dotr+pawtab(itypat)%sij(klmn)*(cprj1(iat,ibd1)%cp(1,ilmn1)*cprj2(iat,ibd2)%cp(1,ilmn2)+&
+&                 cprj1(iat,ibd1)%cp(2,ilmn1)*cprj2(iat,ibd2)%cp(2,ilmn2))
+                 doti=doti+pawtab(itypat)%sij(klmn)*(cprj1(iat,ibd1)%cp(1,ilmn1)*cprj2(iat,ibd2)%cp(2,ilmn2)-&
+&                 cprj1(iat,ibd1)%cp(2,ilmn1)*cprj2(iat,ibd2)%cp(1,ilmn2))
+               end do
+             end do
+           end do
+         endif
          ia=ia+nattyp(itypat)
        end do
      end if
@@ -192,6 +266,16 @@ subroutine dotprod_set_cgcprj(atindx1,cg1,cg2,cprj1,cprj2,dimcprj,&
    icgb1=icgb1+npw*nspinor
  end do
 
+!Complete the matrix if hermitian
+ if(hermitian==1)then
+   do ibd1=1,nbd1-1
+     do ibd2=ibd1+1,nbd2
+       smn(1,ibd1,ibd2)= smn(1,ibd2,ibd1)
+       smn(2,ibd1,ibd2)=-smn(2,ibd2,ibd1)
+     enddo
+   enddo
+ endif
+
 !DEBUG
 !write(std_out,*)' smn=',smn
 !ENDDEBUG
@@ -199,10 +283,14 @@ subroutine dotprod_set_cgcprj(atindx1,cg1,cg2,cprj1,cprj2,dimcprj,&
  ABI_DEALLOCATE(cwavef1)
  ABI_DEALLOCATE(cwavef2)
  if(usepaw==1) then
-   call pawcprj_free(cprj1_k)
-   ABI_DATATYPE_DEALLOCATE(cprj1_k)
-   call pawcprj_free(cprj2_k)
-   ABI_DATATYPE_DEALLOCATE(cprj2_k)
+   if(ibg1/=0)then
+     call pawcprj_free(cprj1_k)
+     ABI_DATATYPE_DEALLOCATE(cprj1_k)
+   endif
+   if(ibg2/=0)then
+     call pawcprj_free(cprj2_k)
+     ABI_DATATYPE_DEALLOCATE(cprj2_k)
+   endif
  end if
 
 end subroutine dotprod_set_cgcprj
