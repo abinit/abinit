@@ -87,7 +87,8 @@ subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
 
 !Local variables-------------------------------
 !scalars
- integer :: ia,iat,iatom,iband_max,iband_max1,iband_min,iband_min1,ibd,ibg,iblockbd,iblockbd1,icg,icgb,icgb1
+ integer :: hermitian,ia,iat,iatom
+ integer :: iband_max,iband_max1,iband_min,iband_min1,ibd,ibg,iblockbd,iblockbd1,icg,icgb,icgb1
  integer :: ierr,ig,ii,ikpt,ilmn1,ilmn2,inc,indh,ind2,inplace
  integer :: isize,isppol,istwf_k,itypat,kk,klmn,me_distrb,my_nspinor
  integer :: nband_k,nblockbd,nprocband,npw_k,npw_nk,ntypat,ortalgo,spaceComm_band,usepaw,wfmixalg
@@ -245,8 +246,8 @@ subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
 !DEBUG
        write(std_out,*)' Compute the S matrix, whose matrix elements are scalar products.'
 !ENDDEBUG
-
-       call dotprod_set_cgcprj(atindx1,cg,scf_history%cg(:,:,indh),cprj,scf_history%cprj(:,:,indh),dimcprj,&
+       hermitian=0
+       call dotprod_set_cgcprj(atindx1,cg,scf_history%cg(:,:,indh),cprj,scf_history%cprj(:,:,indh),dimcprj,hermitian,&
 &        ibg,ibg,icg,icg,ikpt,isppol,istwf_k,dtset%mband,mcg,mcg,mcprj,mcprj,dtset%mkmem,&
 &        mpi_enreg,dtset%natom,nattyp,nband_k,nband_k,npw_nk,my_nspinor,dtset%nsppol,ntypat,pawtab,smn,usepaw)
 
@@ -338,7 +339,7 @@ subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
 !      This is the new coding
        inplace=1
        call lincom_cgcprj(mmn,scf_history%cg(:,:,indh),cprj_kh,dimcprj,&
-&         icg,inplace,mcg,mcprj,dtset%natom,nband_k,nband_k,npw_k,my_nspinor,usepaw)
+&         icg,inplace,mcg,my_nspinor*nband_k,dtset%natom,nband_k,nband_k,npw_k,my_nspinor,usepaw)
 
 !DEBUG
 !      This is the old coding
@@ -379,8 +380,8 @@ subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
 !      This is a check that now the scf_history%cg(:,:,indh) is biorthogonal to the cg
 !      Calculate Smn=<cg|S|cg_hist>
        write(std_out,*)' Check that the biorthogonalized scf_history%cg is indeed biorthogonal to cg'
-       call dotprod_set_cgcprj(atindx1,cg,scf_history%cg(:,:,indh),cprj,scf_history%cprj(:,:,indh),dimcprj,&
-&        ibg,ibg,icg,icg,ikpt,isppol,istwf_k,dtset%mband,mcg,mcg,mcprj,mcprj,dtset%mkmem,&
+       call dotprod_set_cgcprj(atindx1,cg,scf_history%cg(:,:,indh),cprj,cprj_kh,dimcprj,&
+&        ibg,0,icg,icg,ikpt,isppol,istwf_k,dtset%mband,mcg,mcg,mcprj,my_nspinor*nblockbd,dtset%mkmem,&
 &        mpi_enreg,dtset%natom,nattyp,nband_k,nband_k,npw_nk,my_nspinor,dtset%nsppol,ntypat,pawtab,smn,usepaw)
        do iblockbd=1,nband_k
          write(std_out, '(a,i4)')' iblockbd=',iblockbd
@@ -408,8 +409,8 @@ subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
 !      This is a check that the new cg is biorthogonal to the cg_ref
 !      Calculate Smn=<cg|S|cg_hist>
        write(std_out,*)' Check that the new extrapolated cg is biorthogonal to cg_ref'
-       call dotprod_set_cgcprj(atindx1,cg,cg_ref,cprj,cprj_ref,dimcprj,&
-&        ibg,ibg,icg,icg,ikpt,isppol,istwf_k,dtset%mband,mcg,mcg,mcprj,mcprj,dtset%mkmem,&
+       call dotprod_set_cgcprj(atindx1,cg,cg_ref,cprj_k,cprj_ref,dimcprj,&
+&        0,ibg,icg,icg,ikpt,isppol,istwf_k,dtset%mband,mcg,mcg,mcprj,my_nspinor*nblockbd,dtset%mkmem,&
 &        mpi_enreg,dtset%natom,nattyp,nband_k,nband_k,npw_nk,my_nspinor,dtset%nsppol,ntypat,pawtab,smn,usepaw)
        do iblockbd=1,nband_k
          write(std_out, '(a,i4)')' iblockbd=',iblockbd
@@ -418,22 +419,41 @@ subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
        enddo
 !ENDDEBUG
 
+!DEBUG
+!      For checking purposes
+       cg_ref=cg
+!ENDDEBUG
 
+!      Back to usual orthonormalization 
+! HERE should place new routine cgcproj_cholesky
+!        subroutine cgcproj_cholesky(atindx1,cg,cprj_k,dimcprj,icg,ikpt,isppol,istwf,mcg,mcprj,mkmem,&
+!&  mpi_enreg,natom,nband,npw,nspinor,nsppol,ntypat,pawtab,usepaw)
+
+       call cgcproj_cholesky(atindx1,cg,cprj_k,dimcprj,icg,ikpt,isppol,istwf_k,mcg,my_nspinor*nblockbd,dtset%mkmem,&
+&        mpi_enreg,dtset%natom,nband_k,npw_nk,my_nspinor,dtset%nsppol,ntypat,pawtab,usepaw)
+
+!DEBUG
+!      Old algorithm, only valid for norm conserving case
+!      (borrowed from vtowfk and wfconv - which is problematic for PAW).
 !      Back to usual orthonormalization (borrowed from vtowfk and wfconv - which is problematic for PAW).
        ortalgo=mpi_enreg%paral_kgb
 !      There are dummy arguments as PAW is not implemented with gsc in the present status !! 
        ABI_ALLOCATE(dum,(2,0))
 !      Warning :  for the band-fft parallelism, perhaps npw_k has to be used instead of npw_nk
-       call pw_orthon(icg,0,istwf_k,mcg,0,npw_nk*my_nspinor,nband_k,ortalgo,dum,usepaw,cg,&
+       call pw_orthon(icg,0,istwf_k,mcg,0,npw_nk*my_nspinor,nband_k,ortalgo,dum,usepaw,cg_ref,&
 &        mpi_enreg%me_g0,mpi_enreg%comm_bandspinorfft)
        ABI_DEALLOCATE(dum)
+       if(maxval(abs(cg-cg_ref))>tol8)then
+         MSG_ERROR(' The old and new coding for orthogonalisation do not agree ')
+       endif
+!ENDDEBUG
 
 !DEBUG
-!      This is a check that the new cg is orthonotmalized
+!      This is a check that the new cg is orthonormalized
 !      Calculate Smn=<cg|S|cg>
        write(std_out,*)' Check that the final extrapolated cg is orthonormalized '
-       call dotprod_set_cgcprj(atindx1,cg,cg,cprj,cprj,dimcprj,&
-&        ibg,ibg,icg,icg,ikpt,isppol,istwf_k,dtset%mband,mcg,mcg,mcprj,mcprj,dtset%mkmem,&
+       call dotprod_set_cgcprj(atindx1,cg,cg,cprj_k,cprj_k,dimcprj,&
+&        0,0,icg,icg,ikpt,isppol,istwf_k,dtset%mband,mcg,mcg,mcprj,mcprj,dtset%mkmem,&
 &        mpi_enreg,dtset%natom,nattyp,nband_k,nband_k,npw_nk,my_nspinor,dtset%nsppol,ntypat,pawtab,smn,usepaw)
        do iblockbd=1,nband_k
          write(std_out, '(a,i4)')' iblockbd=',iblockbd
@@ -442,7 +462,6 @@ subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
        enddo
 !      stop
 !ENDDEBUG
-
 
 !      Store the newly extrapolated wavefunctions, orthonormalized, in scf_history
        ibd=0
