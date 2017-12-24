@@ -67,6 +67,14 @@
 #include "abi_common.h"
 
 subroutine lincom_cgcprj(alpha_mn,cg,dimcprj,
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'lincom_cgcprj'
+!End of the abilint section
+
   icg,inplace,mcg,mcprj,natom,nband_in,nband_out,npw,nspinor,usepaw, &
 & cgout,cprjout,icgout,mcgout,mcprjout) ! optional args
 
