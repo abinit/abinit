@@ -119,7 +119,6 @@ subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
  cg_ref(:,:)=cg(:,:)
  ABI_DATATYPE_ALLOCATE(cprj_ref,(dtset%natom,mcprj))
  cprj_ref(:,:)=cprj(:,:)
-
 !ENDDEBUG
 
  if (istep==0) return
@@ -429,7 +428,7 @@ subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
        ABI_DEALLOCATE(dum)
 
 !DEBUG
-!      This is a check that the new cg is orthonotmalized
+!      This is a check that the new cg is orthonormalized
 !      Calculate Smn=<cg|S|cg>
        write(std_out,*)' Check that the final extrapolated cg is orthonormalized '
        call dotprod_set_cgcprj(atindx1,cg,cg,cprj,cprj,dimcprj,&
