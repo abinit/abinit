@@ -100,7 +100,7 @@ subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
  real(dp),allocatable :: al(:,:),cwavef(:,:),cwavefh(:,:),cwavef_tmp(:,:)
  real(dp),allocatable :: dum(:,:)
  real(dp),allocatable :: dmn(:,:,:),dmn_debug(:,:,:),mmn(:,:,:)
- real(dp),allocatable :: smn(:,:,:),smn_(:,:,:),smn_debug(:,:,:)
+ real(dp),allocatable :: smn(:,:,:),smn_(:,:,:)
  real(dp),allocatable :: work(:,:),work1(:,:)
  type(pawcprj_type),allocatable :: cprj_k(:,:),cprj_kh(:,:),cprj_k3(:,:)
 !DEBUG
@@ -227,13 +227,13 @@ subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
        nblockbd=nband_k/nprocband
        icgb=icg
 
+       ABI_DATATYPE_ALLOCATE( cprj_k,(dtset%natom,my_nspinor*nblockbd))
+       ABI_DATATYPE_ALLOCATE( cprj_kh,(dtset%natom,my_nspinor*nblockbd))
        if(usepaw==1) then
-         ABI_DATATYPE_ALLOCATE( cprj_k,(dtset%natom,my_nspinor*nblockbd))
          call pawcprj_alloc(cprj_k,cprj(1,1)%ncpgr,dimcprj)
          call pawcprj_get(atindx1,cprj_k,cprj,dtset%natom,1,ibg,ikpt,1,isppol,dtset%mband,&
 &         dtset%mkmem,dtset%natom,nblockbd,nblockbd,my_nspinor,dtset%nsppol,0,&
 &         mpicomm=mpi_enreg%comm_kpt,proc_distrb=mpi_enreg%proc_distrb)
-         ABI_DATATYPE_ALLOCATE( cprj_kh,(dtset%natom,my_nspinor*nblockbd))
          call pawcprj_alloc(cprj_kh,scf_history%cprj(1,1,indh)%ncpgr,dimcprj)
          call pawcprj_get(atindx1,cprj_kh,scf_history%cprj(:,:,indh),dtset%natom,1,ibg,ikpt,1,isppol,&
 &         dtset%mband,dtset%mkmem,dtset%natom,nblockbd,nblockbd,my_nspinor,dtset%nsppol,0,&
@@ -460,12 +460,11 @@ subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
        ABI_DEALLOCATE(cwavef)
        ABI_DEALLOCATE(cwavefh)
        ABI_DEALLOCATE(smn)
-       ABI_DEALLOCATE(smn_debug)
+       ABI_DATATYPE_DEALLOCATE(cprj_k)
+       ABI_DATATYPE_DEALLOCATE(cprj_kh)
        if(usepaw==1) then
          call pawcprj_free(cprj_k)
-         ABI_DATATYPE_DEALLOCATE(cprj_k)
          call pawcprj_free(cprj_kh)
-         ABI_DATATYPE_DEALLOCATE(cprj_kh)
        end if
 
        ibg=ibg+my_nspinor*nband_k
