@@ -60,7 +60,7 @@ subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
 
  use m_pawtab, only : pawtab_type
  use m_pawcprj, only : pawcprj_type, pawcprj_alloc, pawcprj_copy, pawcprj_get, pawcprj_lincom, &
-&                      pawcprj_free, pawcprj_zaxpby, pawcprj_put, pawcprj_getdim
+&                      pawcprj_free, pawcprj_axpby, pawcprj_put, pawcprj_getdim
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -88,13 +88,13 @@ subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
 !Local variables-------------------------------
 !scalars
  integer :: ia,iat,iatom,iband_max,iband_max1,iband_min,iband_min1,ibd,ibg,iblockbd,iblockbd1,icg,icgb,icgb1
- integer :: ierr,ig,ii,ikpt,ilmn1,ilmn2,inc,indh,ind2
+ integer :: ierr,ig,ii,ikpt,ilmn1,ilmn2,inc,indh,ind2,inplace
  integer :: isize,isppol,istwf_k,itypat,kk,klmn,me_distrb,my_nspinor
  integer :: nband_k,nblockbd,nprocband,npw_k,npw_nk,ntypat,ortalgo,spaceComm_band,usepaw,wfmixalg
  real(dp) :: dotr,dotr1,doti,doti1
  !character(len=500) :: message
 !arrays
- real(dp) :: alpha(2),beta(2)
+ real(dp) :: alpha,beta
  integer,allocatable :: bufsize(:),bufsize_wf(:),bufdisp(:),bufdisp_wf(:)
  integer,allocatable :: ipiv(:),dimcprj(:),npw_block(:),npw_disp(:)
  real(dp),allocatable :: al(:,:),cwavef(:,:),cwavefh(:,:),cwavef_tmp(:,:)
@@ -332,12 +332,12 @@ subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
       
 
 !      This is the list of args of lincom_cgcprj
-!      subroutine lincom_cgcprj(alpha_mn,cg,dimcprj,&
+!      subroutine lincom_cgcprj(alpha_mn,cg,cprj,dimcprj,&
 !&         icg,inplace,mcg,mcprj,natom,nband_in,nband_out,npw,nspinor,usepaw)
 
 !      This is the new coding
        inplace=1
-       call lincom_cgcprj(mmn,scf_history%cg(:,:,indh),dimcprj,&
+       call lincom_cgcprj(mmn,scf_history%cg(:,:,indh),cprj_kh,dimcprj,&
 &         icg,inplace,mcg,mcprj,dtset%natom,nband_k,nband_k,npw_k,my_nspinor,usepaw)
 
 !DEBUG
@@ -397,9 +397,9 @@ subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
          cg(:,icg+1+ibd:icg+inc+ibd)=scf_history%cg(:,1+icg+ibd:icg+ibd+inc,indh)&
 &          +scf_history%alpha*(cg(:,icg+1+ibd:ibd+icg+inc)-scf_history%cg(:,1+icg+ibd:icg+ibd+inc,indh))
          if(usepaw==1) then
-           alpha(1)=one-scf_history%alpha;alpha(2)=zero
-           beta(1)=scf_history%alpha;beta(2)=zero
-           call pawcprj_zaxpby(alpha,beta,cprj_kh(:,iblockbd:iblockbd),cprj_k(:,iblockbd:iblockbd))
+           alpha=one-scf_history%alpha
+           beta=scf_history%alpha
+           call pawcprj_axpby(alpha,beta,cprj_kh(:,iblockbd:iblockbd),cprj_k(:,iblockbd:iblockbd))
          endif
          ibd=ibd+inc
        end do ! end loop on iblockbd

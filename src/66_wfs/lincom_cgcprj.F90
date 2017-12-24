@@ -66,20 +66,12 @@
 
 #include "abi_common.h"
 
-subroutine lincom_cgcprj(alpha_mn,cg,dimcprj,
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'lincom_cgcprj'
-!End of the abilint section
-
-  icg,inplace,mcg,mcprj,natom,nband_in,nband_out,npw,nspinor,usepaw, &
-& cgout,cprjout,icgout,mcgout,mcprjout) ! optional args
+ subroutine lincom_cgcprj(alpha_mn,cg,cprj,dimcprj,&
+& icg,inplace,mcg,mcprj,natom,nband_in,nband_out,npw,nspinor,usepaw, & 
+& cgout,cprjout,icgout) ! optional args
 
  use defs_basis
-#use defs_abitypes
+ use m_errors 
  use m_pawcprj, only : pawcprj_type, pawcprj_alloc, pawcprj_lincom, pawcprj_free
 
 !This section has been created automatically by the script Abilint (TD).
@@ -94,14 +86,14 @@ subroutine lincom_cgcprj(alpha_mn,cg,dimcprj,
 !scalars
  integer, intent(in) :: icg,inplace,mcg,mcprj
  integer, intent(in) :: natom,nband_in,nband_out,npw,nspinor,usepaw
- integer, intent(in),optional :: icgout,mcgout,mcprjout
+ integer, intent(in),optional :: icgout
 !arrays
  integer, intent(in) :: dimcprj(natom)
  real(dp), intent(inout) :: cg(2,mcg)
  real(dp), intent(in) :: alpha_mn(2,nband_out,nband_in)
- real(dp), intent(out),optional :: cgout(2,mcgout)
+ real(dp), intent(out),optional :: cgout(:,:)
  type(pawcprj_type),intent(inout) :: cprj(natom,mcprj)
- type(pawcprj_type),intent(out),optional :: cprjout(natom,mcprjout)
+ type(pawcprj_type),intent(out),optional :: cprjout(:,:)
 
 !Local variables-------------------------------
 !scalars
@@ -136,9 +128,9 @@ subroutine lincom_cgcprj(alpha_mn,cg,dimcprj,
 &  alpha_mn,nband_in,dcmplx(0._dp),cgout_,npw*nspinor)
 
  if(inplace==1)then
-   cg(:,icg+1:icg+npw*nspinor*nband_out)=chgout_
+   cg(:,icg+1:icg+npw*nspinor*nband_out)=cgout_
  else
-   cgout(:,icg+1:icg+npw*nspinor*nband_out)=chgout_
+   cgout(:,icg+1:icg+npw*nspinor*nband_out)=cgout_
  endif
  ABI_DEALLOCATE(cgout_)
 
