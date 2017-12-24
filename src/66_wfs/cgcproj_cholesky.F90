@@ -1,7 +1,7 @@
 !{\src2tex{textfont=tt}}
-!!****m* ABINIT/cgcproj_cholesky
+!!****m* ABINIT/cgcprj_cholesky
 !! NAME
-!!  cgcproj_cholesky
+!!  cgcprj_cholesky
 !!
 !! FUNCTION
 !! Cholesky orthonormalization of the vectors stored in cg+cprj mode.
@@ -53,27 +53,19 @@
 
 #include "abi_common.h"
 
- subroutine cgcproj_cholesky(atindx1,cg,cprj_k,dimcprj,icg,ikpt,isppol,istwf,mcg,mcprj,mkmem,&
+ subroutine cgcprj_cholesky(atindx1,cg,cprj_k,dimcprj,icg,ikpt,isppol,istwf,mcg,mcprj,mkmem,&
 &  mpi_enreg,natom,nband,npw,nspinor,nsppol,ntypat,pawtab,usepaw)
 
  use defs_basis
- use m_errors
- use m_xmpi
-
- implicit none
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cgcproj_cholesky'
- use interfaces_14_hidewrite
-!End of the abilint section
+ use defs_abitypes
+ use m_pawtab, only : pawtab_type
+ use m_pawcprj, only : pawcprj_type
 
  implicit none
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: icg,ikpt,isppo,istwf,mcg,mcprj,mkmem
+ integer,intent(in) :: icg,ikpt,isppol,istwf,mcg,mcprj,mkmem
  integer,intent(in) :: natom,nband,npw,nspinor,nsppol,ntypat,usepaw
 !arrays
  integer, intent(in) :: atindx1(natom),dimcprj(natom),nattyp(ntypat)
@@ -86,7 +78,7 @@
 !scalars
  integer :: hermitian,ii,inplace
 !arrays
- real(dp) :: dmn(:,:,:),smn(:,:,:)
+ real(dp), allocatable :: dmn(:,:,:),smn(:,:,:)
 
 ! *************************************************************************
 
@@ -116,5 +108,5 @@
 
  ABI_DEALLOCATE(smn)
 
- end subroutine cgcproj_cholesky
+ end subroutine cgcprj_cholesky
 !!***
