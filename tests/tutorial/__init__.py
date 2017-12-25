@@ -16,6 +16,7 @@ subsuites = [
 "gw1",
 "gw2",
 "dftu",
+"nuc",
 "paw1",
 "paw2",
 "positron",
