@@ -1181,6 +1181,9 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 
 !  ixcrot
    call chkint_eq(0,0,cond_string,cond_values,ierr,'ixcrot',dt%ixcrot,3,(/1,2,3/),iout)
+
+!  tim1rev
+   call chkint_eq(0,0,cond_string,cond_values,ierr,'tim1rev',dt%tim1rev,2,(/0,1/),iout)
  
 !  kptnrm and kpt
 !  Coordinates components must be between -1 and 1.

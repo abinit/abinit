@@ -2213,6 +2213,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'strprecon',tread,'DPR')
  if(tread==1) dtset%strprecon=dprarr(1)
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'tim1rev',tread,'INT')
+ if (tread==1) dtset%tim1rev=intarr(1)
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'xc_denpos',tread,'DPR')
  if(tread==1) dtset%xc_denpos=dprarr(1)
 

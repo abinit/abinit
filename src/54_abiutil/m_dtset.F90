@@ -847,6 +847,7 @@ subroutine dtset_copy(dtout, dtin)
  dtout%symsigma           = dtin%symsigma
  dtout%td_mexcit          = dtin%td_mexcit
  dtout%tfkinfunc          = dtin%tfkinfunc
+ dtout%tim1rev            = dtin%tim1rev
  dtout%timopt             = dtin%timopt
  dtout%use_gemm_nonlop    = dtin%use_gemm_nonlop
  dtout%use_gpu_cuda       = dtin%use_gpu_cuda

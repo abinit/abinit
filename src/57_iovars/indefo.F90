@@ -708,6 +708,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%td_maxene=zero
    dtsets(idtset)%td_mexcit=0
    dtsets(idtset)%tfw_toldfe=0.000001_dp
+   dtsets(idtset)%tim1rev = 1
    dtsets(idtset)%tl_nprccg = 30
    dtsets(idtset)%tl_radius = zero
    dtsets(idtset)%tphysel=zero
