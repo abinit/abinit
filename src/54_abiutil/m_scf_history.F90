@@ -228,7 +228,7 @@ subroutine scf_history_init(dtset,mpi_enreg,usecg,scf_history)
 
 !Local variables-------------------------------
 !scalars
- integer :: jj,mband_cprj,my_natom,my_nspinor,nfft,wfmixalg
+ integer :: jj,mband_cprj,my_natom,my_nspinor,nfft
 !arrays
 
 !************************************************************************
