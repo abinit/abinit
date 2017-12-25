@@ -54,7 +54,7 @@
 !!  mpw0=maximum number of planewaves on disk file
 !!  nban_dp_rd(nkpt0*nsppol0)=number of bands to be read at each k point
 !!  nband(nkpt*nsppol)=number of bands at each k point
-!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !!  nkassoc=dimension of indkk0 array
 !!  nkpt=number of k points expected
 !!  nkpt0=number of k points on disk

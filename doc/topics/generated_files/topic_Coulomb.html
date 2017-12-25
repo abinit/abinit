@@ -32,7 +32,7 @@ src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-
 
 <script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
 
- Mentioned in &nbsp; <a href="../../users/generated_files/help_features.html#2.2">help_features#2.2</a>. 
+ Mentioned in &nbsp; <a href="../../guide/generated_files/help_features.html#2.2">help_features#2.2</a>. 
  <hr>
  <h3><b>Table of content: </b></h3> 
  <ul> <li>1. <a href="topic_Coulomb.html#1">Introduction.</a><li>2. <a href="topic_Coulomb.html#2">Related input variables.</a><li>3. <a href="topic_Coulomb.html#3">Selected input files.</a><li>4. <a href="topic_Coulomb.html#4">References.</a></ul>
@@ -44,18 +44,18 @@ src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-
 
 
 <p>ABINIT can treat charged systems (e.g. either for molecules, or for dopants in a supercell), 
-using the <a href="../../input_variables/generated_files/varset_gstate.html#charge">charge</a> input variable. A careful convergence study with respect to the cell size must however be done.
+using the <a href="../../variables/generated_files/varset_gstate.html#charge">charge</a> input variable. A careful convergence study with respect to the cell size must however be done.
 <p>Depending on the dimension, different treatment of the Coulomb interaction can be enforced, 
-governed by <a href="../../input_variables/generated_files/varset_gstate.html#icoulomb">icoulomb</a> for grouns-state calculations, 
-and by <a href="../../input_variables/generated_files/varset_gw.html#icutcoul">icutcoul</a> for GW calculations. Some development effort is needed in ABINIT to rationalize the situation.
+governed by <a href="../../variables/generated_files/varset_gstate.html#icoulomb">icoulomb</a> for grouns-state calculations, 
+and by <a href="../../variables/generated_files/varset_gw.html#icutcoul">icutcoul</a> for GW calculations. Some development effort is needed in ABINIT to rationalize the situation.
 
-<p>Additional information concerning <a href="../../input_variables/generated_files/varset_paw.html#usepotzero">usepotzero</a>. It is well known that the electrostatic potential (arising from ion-ion, ion-electron, and electron-electron interactions) is ill-defined within periodic boundary conditions.
+<p>Additional information concerning <a href="../../variables/generated_files/varset_paw.html#usepotzero">usepotzero</a>. It is well known that the electrostatic potential (arising from ion-ion, ion-electron, and electron-electron interactions) is ill-defined within periodic boundary conditions.
 However, it is less well known that the total energy of a charged cell is also ill-defined.
 In fact, after a careful derivation in <a href="../../biblio/generated_files/bib_biblio.html#Bruneval2014">[Bruneval2014]</a>, it was shown that the above two statements are tightly linked:
 when the number of electrons differs from the number of protons in a cell, the necessary compensating background that enforces the overall charge neutrality
 is sensitive to the arbitrary average electrostatic potential.
 
-<p>ABINIT offers the possibility to choose which convention to use for the average electrostatic potential with the keyword <a href="../../input_variables/generated_files/varset_paw.html#usepotzero">usepotzero</a>.
+<p>ABINIT offers the possibility to choose which convention to use for the average electrostatic potential with the keyword <a href="../../variables/generated_files/varset_paw.html#usepotzero">usepotzero</a>.
 <p>In PAW, one can choose among 3 options:
 <li>the average of smooth electrostatic potential is set to zero;</li>
 <li>the average of all-electron electrostatic potential is set to zero;</li>
@@ -75,11 +75,11 @@ is sensitive to the arbitrary average electrostatic potential.
 <h3><b>2. Related input variables.</b></h3>
 
 
-<p>Basic input variables:<p>... <a href="../../input_variables/generated_files/varset_gstate.html#charge">charge</a>   [CHARGE]<br>
-<p>Useful input variables:<p>... <a href="../../input_variables/generated_files/varset_gstate.html#icoulomb">icoulomb</a>   [Index for the Coulomb TReaTMenT]<br>
-... <a href="../../input_variables/generated_files/varset_gw.html#icutcoul">icutcoul</a>   [Integer that governs the CUT-off for COULomb interaction]<br>
-... <a href="../../input_variables/generated_files/varset_paw.html#usepotzero">usepotzero</a>   [USE POTential ZERO]<br>
-<p>Input variables for experts:<p>... <a href="../../input_variables/generated_files/varset_dev.html#nscforder">nscforder</a>   [Nth - SCaling Function ORDER]<br>
+<p>Basic input variables:<p>... <a href="../../variables/generated_files/varset_gstate.html#charge">charge</a>   [CHARGE]<br>
+<p>Useful input variables:<p>... <a href="../../variables/generated_files/varset_gstate.html#icoulomb">icoulomb</a>   [Index for the Coulomb TReaTMenT]<br>
+... <a href="../../variables/generated_files/varset_gw.html#icutcoul">icutcoul</a>   [Integer that governs the CUT-off for COULomb interaction]<br>
+... <a href="../../variables/generated_files/varset_paw.html#usepotzero">usepotzero</a>   [USE POTential ZERO]<br>
+<p>Input variables for experts:<p>... <a href="../../variables/generated_files/varset_dev.html#nscforder">nscforder</a>   [Nth - SCaling Function ORDER]<br>
 
 <br><br><a href=#top>Go to the top</a>
 

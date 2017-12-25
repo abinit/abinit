@@ -21,7 +21,7 @@
 !! iscf=(<= 0  =>non-SCF), >0 => SCF
 !! natom=number of atoms in unit cell
 !! nfft=(effective) number of FFT grid points (for this processor)
-!! ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!! ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !! nspden=number of spin-density components
 !! nsppol=1 for unpolarized, 2 for spin-polarized
 !! nsym=number of symmetries in space group (at least 1)

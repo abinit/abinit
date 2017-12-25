@@ -92,6 +92,7 @@ CONTAINS
 !!      dfpt_mkvxc_noncoll,m_pawxc
 !!
 !! CHILDREN
+!!      rotate_back_mag_dfpt
 !!
 !! SOURCE
 
@@ -238,6 +239,7 @@ end subroutine rotate_mag
 !!      dfpt_mkvxc_noncoll,m_pawxc
 !!
 !! CHILDREN
+!!      rotate_back_mag_dfpt
 !!
 !! SOURCE
 
@@ -333,9 +335,10 @@ end subroutine rotate_back_mag
 !!  vxc1_out(vectsize,4)=output 1st-order non-collinear XC potential
 !!
 !! PARENTS
-!!      dfpt_mkvxc_noncoll,m_pawxc
+!!      dfpt_mkvxc_noncoll,m_pawxc,m_xc_noncoll
 !!
 !! CHILDREN
+!!      rotate_back_mag_dfpt
 !!
 !! SOURCE
 
@@ -890,6 +893,7 @@ end subroutine rotate_back_mag_dfpt
 !! PARENTS
 !!
 !! CHILDREN
+!!      rotate_back_mag_dfpt
 !!
 !! SOURCE
 

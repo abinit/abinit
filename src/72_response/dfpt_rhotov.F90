@@ -28,7 +28,7 @@
 !!  mpi_enreg=information about MPI parallelization
 !!  natom=number of atoms in cell.
 !!  nfft=(effective) number of FFT grid points (for this processor)
-!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !!  nhat(nfft,nspden*nhatdim)= -PAW only- compensation density
 !!  nhat1(cplex*nfft,2nspden*usepaw)= -PAW only- 1st-order compensation density
 !!  nhat1gr(cplex*nfft,nspden,3*nhat1grdim)= -PAW only- gradients of 1st-order compensation density
@@ -73,8 +73,8 @@
 !!      dfpt_scfcv
 !!
 !! CHILDREN
-!!      dfpt_mkvxc,dfpt_mkvxc_noncoll,dfpt_mkvxcstr,dotprod_vn,hartre,hartrestr
-!!      sqnorm_v,timab
+!!      dfpt_mkvxc,dfpt_mkvxc_noncoll,dfpt_mkvxcstr,dfpt_v1zeeman,dotprod_vn
+!!      hartre,hartrestr,sqnorm_v,timab
 !!
 !! SOURCE
 
@@ -183,7 +183,7 @@
  if(ipert==natom+5)then
    ABI_ALLOCATE(v1zeeman,(cplex*nfft,nspden))
    call dfpt_v1zeeman(nspden,nfft,cplex,idir,v1zeeman)
- endif
+ end if
 
 !------ Compute 1st-order Hartree potential (and energy) ----------------------
 
@@ -320,7 +320,7 @@
 
    if (ipert==natom+5) then
      vresid1 = vresid1 + v1zeeman
-   endif
+   end if
 !  Compute square norm vres2 of potential residual vresid
    call sqnorm_v(cplex,nfft,vres2,nspden,optres,vresid1)
 
@@ -346,7 +346,7 @@
 
    if (ipert==natom+5) then
      vtrial1 = vtrial1 + v1zeeman
-   endif
+   end if
 
  end if
 

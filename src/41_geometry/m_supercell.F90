@@ -726,7 +726,7 @@ end subroutine getPBCIndexes_supercell
 !! max = maximum of the range
 !!
 !! PARENTS
-!!      m_effective_potential
+!!      m_effective_potential,m_polynomial_coeff
 !!
 !! CHILDREN
 !!

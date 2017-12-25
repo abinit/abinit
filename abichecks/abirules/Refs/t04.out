@@ -10,6 +10,7 @@ ddb_internalstr.F90 = line: 54, var: 'crystal' [77_ddb]
 ddb_internalstr.F90 = line: 54, var: 'msize' [77_ddb]
 ddb_interpolate.F90 = line: 40, var: 'asrq0' [77_ddb]
 dfpt_etot.F90 = line: 74, var: 'elmag1' [72_response]
+dfpt_init_mag1.F90 = line: 49, var: 'ipert' [72_response]
 dfpt_mkvxc_noncoll.F90 = line: 73, var: 'nhat1gr' [56_xc]
 dfpt_mkvxc_noncoll.F90 = line: 73, var: 'nkxc_cur' [56_xc]
 dfpt_nstpaw.F90 = line: 159, var: 'nkpt' [72_response]
@@ -40,7 +41,7 @@ m_ddb.F90 = line: 1137, var: 'dimekb' [72_response]
 m_ddb.F90 = line: 1138, var: 'lmnmax' [72_response]
 m_ddb.F90 = line: 1140, var: 'occopt' [72_response]
 m_ddb.F90 = line: 1141, var: 'usepaw' [72_response]
-m_ddb.F90 = line: 3330, var: 'psps' [72_response]
+m_ddb.F90 = line: 3329, var: 'psps' [72_response]
 m_ddk.F90 = line: 401, var: 'comm' [72_response]
 m_dens.F90 = line: 81, var: 'znucl' [54_abiutil]
 m_dummy.F90 = line: 35, var: 'unused_arg' [32_util]
@@ -105,5 +106,5 @@ psp9in.F90 = line: 81, var: 'qgrid_vl' [64_psp]
 psp9in.F90 = line: 82, var: 'nctab' [64_psp]
 pspini.F90 = line: 72, var: 'level' [64_psp]
 **********************************************************************
-Warning count = 103
+Warning count = 104
 **********************************************************************

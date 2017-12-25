@@ -13,7 +13,7 @@ except ImportError:
 strict=1
 
 def main():
-  path = '../input_variables/origin_files/'
+  path = '../variables/origin_files/'
   path_topics = '../topics/origin_files/'
   path_abinit_vars = path+'abinit_vars.yml'
   with open(path+'characteristics.yml', 'r') as f:
