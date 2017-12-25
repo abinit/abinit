@@ -79,6 +79,7 @@ subroutine dotprod_set_cgcprj(atindx1,cg1,cg2,cprj1,cprj2,dimcprj,hermitian,&
  use defs_basis
  use defs_abitypes
  use m_cgtools
+ use m_errors
  use m_xmpi
  use m_pawtab, only : pawtab_type
  use m_pawcprj, only : pawcprj_type, pawcprj_alloc, pawcprj_get, pawcprj_free

@@ -379,7 +379,8 @@ subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
 !      This is a check that now the scf_history%cg(:,:,indh) is biorthogonal to the cg
 !      Calculate Smn=<cg|S|cg_hist>
        write(std_out,*)' Check that the biorthogonalized scf_history%cg is indeed biorthogonal to cg'
-       call dotprod_set_cgcprj(atindx1,cg,scf_history%cg(:,:,indh),cprj,cprj_kh,dimcprj,&
+       hermitian=0
+       call dotprod_set_cgcprj(atindx1,cg,scf_history%cg(:,:,indh),cprj,cprj_kh,dimcprj,hermitian,&
 &        ibg,0,icg,icg,ikpt,isppol,istwf_k,dtset%mband,mcg,mcg,mcprj,my_nspinor*nblockbd,dtset%mkmem,&
 &        mpi_enreg,dtset%natom,nattyp,nband_k,nband_k,npw_nk,my_nspinor,dtset%nsppol,ntypat,pawtab,smn,usepaw)
        do iblockbd=1,nband_k
@@ -408,7 +409,8 @@ subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
 !      This is a check that the new cg is biorthogonal to the cg_ref
 !      Calculate Smn=<cg|S|cg_hist>
        write(std_out,*)' Check that the new extrapolated cg is biorthogonal to cg_ref'
-       call dotprod_set_cgcprj(atindx1,cg,cg_ref,cprj_k,cprj_ref,dimcprj,&
+       hermitian=0
+       call dotprod_set_cgcprj(atindx1,cg,cg_ref,cprj_k,cprj_ref,dimcprj,hermitian,&
 &        0,ibg,icg,icg,ikpt,isppol,istwf_k,dtset%mband,mcg,mcg,mcprj,my_nspinor*nblockbd,dtset%mkmem,&
 &        mpi_enreg,dtset%natom,nattyp,nband_k,nband_k,npw_nk,my_nspinor,dtset%nsppol,ntypat,pawtab,smn,usepaw)
        do iblockbd=1,nband_k
@@ -424,11 +426,11 @@ subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
 !ENDDEBUG
 
 !      Back to usual orthonormalization 
-! HERE should place new routine cgcproj_cholesky
-!        subroutine cgcproj_cholesky(atindx1,cg,cprj_k,dimcprj,icg,ikpt,isppol,istwf,mcg,mcprj,mkmem,&
+! HERE should place new routine cgcprj_cholesky
+!        subroutine cgcprj_cholesky(atindx1,cg,cprj_k,dimcprj,icg,ikpt,isppol,istwf,mcg,mcprj,mkmem,&
 !&  mpi_enreg,natom,nband,npw,nspinor,nsppol,ntypat,pawtab,usepaw)
 
-       call cgcproj_cholesky(atindx1,cg,cprj_k,dimcprj,icg,ikpt,isppol,istwf_k,mcg,my_nspinor*nblockbd,dtset%mkmem,&
+       call cgcprj_cholesky(atindx1,cg,cprj_k,dimcprj,icg,ikpt,isppol,istwf_k,mcg,my_nspinor*nblockbd,dtset%mkmem,&
 &        mpi_enreg,dtset%natom,nband_k,npw_nk,my_nspinor,dtset%nsppol,ntypat,pawtab,usepaw)
 
 !DEBUG
@@ -451,7 +453,8 @@ subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
 !      This is a check that the new cg is orthonormalized
 !      Calculate Smn=<cg|S|cg>
        write(std_out,*)' Check that the final extrapolated cg is orthonormalized '
-       call dotprod_set_cgcprj(atindx1,cg,cg,cprj_k,cprj_k,dimcprj,&
+       hermitian=1
+       call dotprod_set_cgcprj(atindx1,cg,cg,cprj_k,cprj_k,dimcprj,hermitian,&
 &        0,0,icg,icg,ikpt,isppol,istwf_k,dtset%mband,mcg,mcg,mcprj,mcprj,dtset%mkmem,&
 &        mpi_enreg,dtset%natom,nattyp,nband_k,nband_k,npw_nk,my_nspinor,dtset%nsppol,ntypat,pawtab,smn,usepaw)
        do iblockbd=1,nband_k
