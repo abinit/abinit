@@ -431,7 +431,7 @@ subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
 !&  mpi_enreg,natom,nband,npw,nspinor,nsppol,ntypat,pawtab,usepaw)
 
        call cgcprj_cholesky(atindx1,cg,cprj_k,dimcprj,icg,ikpt,isppol,istwf_k,mcg,my_nspinor*nblockbd,dtset%mkmem,&
-&        mpi_enreg,dtset%natom,nband_k,npw_nk,my_nspinor,dtset%nsppol,ntypat,pawtab,usepaw)
+&        mpi_enreg,dtset%natom,nattyp,nband_k,npw_nk,my_nspinor,dtset%nsppol,ntypat,pawtab,usepaw)
 
 !DEBUG
 !      Old algorithm, only valid for norm conserving case
