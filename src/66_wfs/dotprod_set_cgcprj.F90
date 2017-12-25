@@ -79,6 +79,7 @@ subroutine dotprod_set_cgcprj(atindx1,cg1,cg2,cprj1,cprj2,dimcprj,hermitian,&
  use defs_basis
  use defs_abitypes
  use m_cgtools
+ use m_errors
  use m_xmpi
  use m_pawtab, only : pawtab_type
  use m_pawcprj, only : pawcprj_type, pawcprj_alloc, pawcprj_get, pawcprj_free
@@ -227,7 +228,7 @@ subroutine dotprod_set_cgcprj(atindx1,cg1,cg2,cprj1,cprj2,dimcprj,hermitian,&
                  klmn=((ilmn2-1)*ilmn2)/2+ilmn1
                  dotr=dotr+pawtab(itypat)%sij(klmn)*(cprj1(iat,ibd1)%cp(1,ilmn1)*cprj2_k(iat,ibd2)%cp(1,ilmn2)+&
 &                 cprj1(iat,ibd1)%cp(2,ilmn1)*cprj2_k(iat,ibd2)%cp(2,ilmn2))
-                 doti=doti+pawtab(itypat)%sij(klmn)*(cprj1_k(iat,ibd1)%cp(1,ilmn1)*cprj2_k(iat,ibd2)%cp(2,ilmn2)-&
+                 doti=doti+pawtab(itypat)%sij(klmn)*(cprj1(iat,ibd1)%cp(1,ilmn1)*cprj2_k(iat,ibd2)%cp(2,ilmn2)-&
 &                 cprj1(iat,ibd1)%cp(2,ilmn1)*cprj2_k(iat,ibd2)%cp(1,ilmn2))
                end do
              end do

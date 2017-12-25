@@ -72,6 +72,7 @@
 
  use defs_basis
  use m_errors 
+ use m_profiling_abi
  use m_pawcprj, only : pawcprj_type, pawcprj_alloc, pawcprj_lincom, pawcprj_free
 
 !This section has been created automatically by the script Abilint (TD).
@@ -130,7 +131,7 @@
  if(inplace==1)then
    cg(:,icg+1:icg+npw*nspinor*nband_out)=cgout_
  else
-   cgout(:,icg+1:icg+npw*nspinor*nband_out)=cgout_
+   cgout(:,icgout+1:icgout+npw*nspinor*nband_out)=cgout_
  endif
  ABI_DEALLOCATE(cgout_)
 

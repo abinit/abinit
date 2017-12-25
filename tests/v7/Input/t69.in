@@ -82,6 +82,6 @@ nbandhf2 4         # number of occupied states
 #%% [extra_info]
 #%% authors = X. Gonze
 #%% keywords = HF, PBE0, FAILS_IFMPI
-#%% description = Test of Fock in sequential case, with auxiliary XC functional.
+#%% description = Test of Fock in sequential case, with simple mixing and NC psps
 #%% topics = Hybrids
 #%%<END TEST_INFO>

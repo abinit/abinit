@@ -228,7 +228,7 @@ subroutine scf_history_init(dtset,mpi_enreg,usecg,scf_history)
 
 !Local variables-------------------------------
 !scalars
- integer :: jj,mband_cprj,my_natom,my_nspinor,nfft,wfmixalg
+ integer :: jj,mband_cprj,my_natom,my_nspinor,nfft
 !arrays
 
 !************************************************************************
@@ -299,9 +299,8 @@ subroutine scf_history_init(dtset,mpi_enreg,usecg,scf_history)
 
      if (scf_history%usecg>0) then
        ABI_ALLOCATE(scf_history%cg,(2,scf_history%mcg,scf_history%history_size))
-       if (dtset%usepaw==1) then
-         ABI_DATATYPE_ALLOCATE(scf_history%cprj,(dtset%natom,scf_history%mcprj,scf_history%history_size))
-       end if
+!      Note that the allocation is made even when usepaw==0. Still, scf_history%mcprj=0 ...
+       ABI_DATATYPE_ALLOCATE(scf_history%cprj,(dtset%natom,scf_history%mcprj,scf_history%history_size))
      end if
 
    end if

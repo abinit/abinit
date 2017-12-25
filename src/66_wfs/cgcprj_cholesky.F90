@@ -28,6 +28,7 @@
 !!  mkmem=number of k points which can fit in memory
 !!  mpi_enreg=information about MPI parallelization
 !!  natom=number of atoms
+!!  nattyp(ntypat)=number of atoms of each type in cell.
 !!  nband=number of bands
 !!  npw=number of planewaves in basis at this k point
 !!  nspinor=number of spinor components
@@ -54,7 +55,7 @@
 #include "abi_common.h"
 
  subroutine cgcprj_cholesky(atindx1,cg,cprj_k,dimcprj,icg,ikpt,isppol,istwf,mcg,mcprj,mkmem,&
-&  mpi_enreg,natom,nband,npw,nspinor,nsppol,ntypat,pawtab,usepaw)
+&  mpi_enreg,natom,nattyp,nband,npw,nspinor,nsppol,ntypat,pawtab,usepaw)
 
  use defs_basis
  use defs_abitypes
@@ -83,7 +84,7 @@
 
 !Local variables ------------------------------
 !scalars
- integer :: hermitian,ii,inplace
+ integer :: hermitian,ierr,ii,inplace
 !arrays
  real(dp), allocatable :: dmn(:,:,:),smn(:,:,:)
 
