@@ -434,18 +434,20 @@ subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
 &        mpi_enreg,dtset%natom,nattyp,nband_k,npw_nk,my_nspinor,dtset%nsppol,ntypat,pawtab,usepaw)
 
 !DEBUG
-!      Old algorithm, only valid for norm conserving case
-!      (borrowed from vtowfk and wfconv - which is problematic for PAW).
-!      Back to usual orthonormalization (borrowed from vtowfk and wfconv - which is problematic for PAW).
-       ortalgo=mpi_enreg%paral_kgb
-!      There are dummy arguments as PAW is not implemented with gsc in the present status !! 
-       ABI_ALLOCATE(dum,(2,0))
-!      Warning :  for the band-fft parallelism, perhaps npw_k has to be used instead of npw_nk
-       call pw_orthon(icg,0,istwf_k,mcg,0,npw_nk*my_nspinor,nband_k,ortalgo,dum,usepaw,cg_ref,&
-&        mpi_enreg%me_g0,mpi_enreg%comm_bandspinorfft)
-       ABI_DEALLOCATE(dum)
-       if(maxval(abs(cg-cg_ref))>tol8)then
-         MSG_ERROR(' The old and new coding for orthogonalisation do not agree ')
+       if(usepaw==0)then
+!        Old algorithm, only valid for norm conserving case
+!        (borrowed from vtowfk and wfconv - which is problematic for PAW).
+!        Back to usual orthonormalization (borrowed from vtowfk and wfconv - which is problematic for PAW).
+         ortalgo=mpi_enreg%paral_kgb
+!        There are dummy arguments as PAW is not implemented with gsc in the present status !! 
+         ABI_ALLOCATE(dum,(2,0))
+!        Warning :  for the band-fft parallelism, perhaps npw_k has to be used instead of npw_nk
+         call pw_orthon(icg,0,istwf_k,mcg,0,npw_nk*my_nspinor,nband_k,ortalgo,dum,usepaw,cg_ref,&
+&          mpi_enreg%me_g0,mpi_enreg%comm_bandspinorfft)
+         ABI_DEALLOCATE(dum)
+         if(maxval(abs(cg-cg_ref))>tol8)then
+           MSG_ERROR(' The old and new coding for orthogonalisation do not agree ')
+         endif
        endif
 !ENDDEBUG
 
@@ -481,12 +483,12 @@ subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
        ABI_DEALLOCATE(cwavef)
        ABI_DEALLOCATE(cwavefh)
        ABI_DEALLOCATE(smn)
-       ABI_DATATYPE_DEALLOCATE(cprj_k)
-       ABI_DATATYPE_DEALLOCATE(cprj_kh)
        if(usepaw==1) then
          call pawcprj_free(cprj_k)
          call pawcprj_free(cprj_kh)
        end if
+       ABI_DATATYPE_DEALLOCATE(cprj_k)
+       ABI_DATATYPE_DEALLOCATE(cprj_kh)
 
        ibg=ibg+my_nspinor*nband_k
        icg=icg+my_nspinor*nband_k*npw_k

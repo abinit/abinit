@@ -17,18 +17,14 @@ diemix 1.0
 ndtset 2         # Two datasets : 1) LDA 2) PBE0
 
 #Definition of the unit cell
-acell 3*10.217         # Data from PRB 48, 5058
+acell 3*6.740652601
 rprim  0.0  0.5  0.5   # In lessons 1 and 2, these primitive vectors 
        0.5  0.0  0.5   # (to be scaled by acell) were 1 0 0  0 1 0  0 0 1 
        0.5  0.5  0.0   # that is, the default.
 
 #Definition of the atom types
 ntypat 1          # There is only one type of atom
-znucl 14          # The keyword "znucl" refers to the atomic number of the 
-                  # possible type(s) of atom. The pseudopotential(s) 
-                  # mentioned in the "files" file must correspond
-                  # to the type(s) of atom. Here, the only type is Silicon.
-                         
+znucl  6 
 
 #Definition of the atoms
 natom 2           # There are two atoms
@@ -41,7 +37,10 @@ xred              # This keyword indicate that the location of the atoms
                   # interpreter capabilities of ABINIT)
 
 #Definition of the planewave basis set
-ecut  6.0         # Maximal kinetic energy cut-off, in Hartree
+ecut 10.0         # Maximal kinetic energy cut-off, in Hartree
+pawecutdg  12.0         # Maximal kinetic energy cut-off, in Hartree
+
+nband 4
 
 #Definition of the k-point grid
 kptopt 1          # Option for the automatic generation of k points, taking
@@ -76,7 +75,7 @@ nbandhf2 4         # number of occupied states
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = t71.out, tolnlines=0, tolabs=0.0, tolrel=0.0
-#%% psp_files= Si.GGA-PBE-rpaw-1.55.abinit
+#%% psp_files= C.GGA_X_PBE+GGA_C_PBE-paw.xml
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]
