@@ -152,9 +152,6 @@
    if(usepaw==1) then
      MSG_ERROR('DFPT with nspden=4 works only for norm-conserving psp!')
    endif
-   if(cplex==2) then
-     MSG_WARNING('DFPT with nspden=4 and qpt!=(0,0,0) is under development')
-   endif
  end if
 
 !Get size of FFT grid
@@ -243,7 +240,6 @@
      call dotprod_vn(cplex,rhor1,elpsp1 ,doti,nfft,nfftot,1     ,1,vpsp1,ucvol)
      if (ipert==natom+5) then
        call dotprod_vn(cplex,rhor1,elmag1 ,doti,nfft,nfftot,nspden,1,v1zeeman,ucvol)
-       !write(*,*) 'elmag1=',elmag1 Debug
      end if
    else
      if (usexcnhat/=0) then

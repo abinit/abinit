@@ -1000,7 +1000,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &     nspden,n3xccc,optene,optres,dtset%paral_kgb,dtset%qptn,rhog,rhog1,rhor,rhor1,&
 &     rprimd,ucvol,psps%usepaw,usexcnhat,vhartr1,vpsp1,nvresid1,res2,vtrial1,vxc,vxc1,xccc3d1,dtset%ixcrot)
      if(.not.kramers_deg) then
-       !SPr: in fact no need to compute the new trial potential here, to rectify..
+       !SPr: in fact no need to compute the new trial potential here, rhor1 at -q is c.c. of rhor1 at +q, to rectify..
        call dfpt_rhotov(cplex,ehart01_mq,ehart1_mq,elpsp1_mq,exc1_mq,elmag1_mq,gmet,gprimd,gsqcut,idir,ipert,&
 &       dtset%ixc,kxc,mpi_enreg,dtset%natom,nfftf,ngfftf,nhat,nhat1,nhat1gr,nhat1grdim,nkxc,&
 &       nspden,n3xccc,optene,optres,dtset%paral_kgb,-dtset%qptn,rhog,rhog1_mq,rhor,rhor1_mq,&
@@ -1033,11 +1033,12 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
      call dfpt_etot(dtset%berryopt,deltae,eberry,edocc,eeig0,eew,efrhar,efrkin,&
 &     efrloc,efrnl,efrx1,efrx2,ehart1,ek0,ek1,eii,elast,eloc0,elpsp1,&
 &     enl0,enl1,epaw1,etotal,evar,evdw,exc1,elmag1,ipert,dtset%natom,optene)
-     if(.not.kramers_deg) then
-       call dfpt_etot(dtset%berryopt,deltae_mq,eberry_mq,edocc_mq,eeig0_mq,eew,efrhar,efrkin,&
-&       efrloc,efrnl,efrx1,efrx2,ehart1_mq,ek0_mq,ek1_mq,eii,elast_mq,eloc0_mq,elpsp1_mq,&
-&       enl0_mq,enl1_mq,epaw1_mq,etotal_mq,evar_mq,evdw,exc1_mq,elmag1_mq,ipert,dtset%natom,optene)
-     end if
+!    !debug: compute the d2E/d-qd+q energy, should be equal to the one from previous line
+!    if(.not.kramers_deg) then
+!      call dfpt_etot(dtset%berryopt,deltae_mq,eberry_mq,edocc_mq,eeig0_mq,eew,efrhar,efrkin,&
+!&       efrloc,efrnl,efrx1,efrx2,ehart1_mq,ek0_mq,ek1_mq,eii,elast_mq,eloc0_mq,elpsp1_mq,&
+!&       enl0_mq,enl1_mq,epaw1_mq,etotal_mq,evar_mq,evdw,exc1_mq,elmag1_mq,ipert,dtset%natom,optene)
+!     end if
 
      call timab(152,1,tsec)
      choice=2
@@ -1049,15 +1050,16 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &     nstep,occ_rbz,0,prtfor,0,&
 &     quit,res2,resid,residm,response,&
 &     tollist,psps%usepaw,vxcavg,wtk_rbz,xred,conv_retcode)
-     if(.not.kramers_deg) then
-       call scprqt(choice,cpus,deltae_mq,diffor,dtset,eigen0,&
-&       etotal_mq,favg,fcart,fermie,dtfil%fnametmp_eig,dtfil%filnam_ds(1),&
-&       1,iscf_mod,istep,kpt_rbz,maxfor,&
-&       mvdum,mpi_enreg,nband_rbz,nkpt_rbz,&
-&       nstep,occ_rbz,0,prtfor,0,&
-&       quit,res2_mq,resid_mq,residm_mq,response,&
-&       tollist,psps%usepaw,vxcavg,wtk_rbz,xred,conv_retcode)
-     endif
+!     !debug: print the information about  
+!     if(.not.kramers_deg) then
+!       call scprqt(choice,cpus,deltae_mq,diffor,dtset,eigen0,&
+!&       etotal_mq,favg,fcart,fermie,dtfil%fnametmp_eig,dtfil%filnam_ds(1),&
+!&       1,iscf_mod,istep,kpt_rbz,maxfor,&
+!&       mvdum,mpi_enreg,nband_rbz,nkpt_rbz,&
+!&       nstep,occ_rbz,0,prtfor,0,&
+!&       quit,res2_mq,resid_mq,residm_mq,response,&
+!&       tollist,psps%usepaw,vxcavg,wtk_rbz,xred,conv_retcode)
+!     endif
      call timab(152,2,tsec)
 
 !    If criteria in scprqt say to quit, then exit the loop over istep

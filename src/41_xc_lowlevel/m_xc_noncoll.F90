@@ -399,8 +399,8 @@ subroutine rotate_back_mag_dfpt(option,vxc1_in,vxc1_out,vxc,kxc,rho1,mag,vectsiz
      MSG_ERROR('Cannot use Kxc from GGA!')
  end if
 
- if(rotation_method==1.and.cplex==2) then
-     MSG_ERROR('rotation_method=1 is not available for cplex=2 case!')
+ if((rotation_method==1.or.rotation_method==2).and.cplex==2) then
+     MSG_ERROR('rotation_method=1 and 2 are not available for cplex=2 case! use ixcrot=3')
  endif
 
 
