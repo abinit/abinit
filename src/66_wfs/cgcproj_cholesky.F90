@@ -61,6 +61,13 @@
  use m_pawtab, only : pawtab_type
  use m_pawcprj, only : pawcprj_type
 
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'cgcprj_cholesky'
+ use interfaces_66_wfs, except_this_one => cgcprj_cholesky
+!End of the abilint section
+
  implicit none
 
 !Arguments ------------------------------------
