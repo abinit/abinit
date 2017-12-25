@@ -1,7 +1,7 @@
 # Crystalline silicon : computation of the total energy using Fock functional,
 # without an auxiliary XC functional for the SCF cycle, 
 # and some over relaxation in a simple mixing scheme..
-# Norm-conserving
+# PAW
 
  nstep 61          # Maximal number of SCF cycles
  fockoptmix 201
@@ -75,13 +75,13 @@ nbandhf2 4         # number of occupied states
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% files_to_test = t69.out, tolnlines=0, tolabs=0.0, tolrel=0.0
-#%% psp_files= 14si.pspgth
+#%% files_to_test = t71.out, tolnlines=0, tolabs=0.0, tolrel=0.0
+#%% psp_files= Si.GGA-PBE-rpaw-1.55.abinit
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]
 #%% authors = X. Gonze
 #%% keywords = HF, PBE0, FAILS_IFMPI
-#%% description = Test of Fock in sequential case, with simple mixing and NC psps
+#%% description = Test of Fock in sequential case, with simple mixing and PAW
 #%% topics = Hybrids
 #%%<END TEST_INFO>
