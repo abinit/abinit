@@ -7,6 +7,7 @@
  fockoptmix 201
  nnsclohf2 4       
  ixc2 40           # Calculation with Hartree-Fock functional
+ fockdownsampling2 0 0 0 # Keep only the Gamma point to define the Fock operator
 
  wfmix 1.5         # Apparently, this calue is quite optimal in this case.
 
