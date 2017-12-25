@@ -86,8 +86,20 @@ plowan_lcalc3   2
 plowan_projcalc3  5
 
 plowan_realspace3  1
-plowan_nt3  2
-plowan_it3  0 0 0 1 0 0
+plowan_nt3  13
+plowan_it3 0  0  0 
+           1  0  0 
+          -1  0  0 
+           0  1  0 
+           0 -1  0 
+           0  0  1 
+           0  0 -1 
+           1 -1  0 
+          -1  1  0 
+           0  1 -1 
+           0 -1  1 
+           1  0 -1 
+          -1  0  1 
 
 # -----------------------------------------------------------------
 #   Fourth dataset, to print the band structure along critical lines
@@ -108,6 +120,21 @@ plowan_lcalc4   2
 plowan_projcalc4  5
 
 
+plowan_realspace4  2
+plowan_nt4  13
+plowan_it4 0  0  0 
+           1  0  0 
+          -1  0  0 
+           0  1  0 
+           0 -1  0 
+           0  0  1 
+           0  0 -1 
+           1 -1  0 
+          -1  1  0 
+           0  1 -1 
+           0 -1  1 
+           1  0 -1 
+          -1  0  1 
 
 
 
@@ -132,15 +159,15 @@ kptbounds4  0.0 0.0 0.0 #Gamma
 #%% need_cpp_vars = !HAVE_MPI_IO_DEFAULT, !HAVE_NETCDF_DEFAULT
 #%% [files]
 #%% files_to_test = 
-#%%   t71.out, tolnlines = 5, tolabs = 1.0E-15, tolrel = 1.0E-20, fld_options = 
+#%%   t77.out, tolnlines = 5, tolabs = 1.0E-15, tolrel = 1.0E-20, fld_options = 
 #%% psp_files = Cu_LDA_abinit
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]
-#%% authors = A. Gerossier, B. Amadon
+#%% authors = A. Gerossier and B. Amadon
 #%% keywords = PAW, Projected_Wannier 
 #%% description = 
-#%%    Calculation of Projected Wannier functions and compute band structure 
-#%%    in the d orbital Wannier basis
+#%%    Calculation of Projected Wannier functions and compute 
+#%%    a simplified interpolated band structure 
 #%% topics = Wannier, ElecBandStructure
 #%%<END TEST_INFO>
