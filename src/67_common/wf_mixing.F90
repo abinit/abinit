@@ -245,6 +245,8 @@ subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
        write(std_out,*)' Compute the S matrix, whose matrix elements are scalar products.'
 !ENDDEBUG
        hermitian=0
+!      Note that cprj_k might have been used instead of cprj , in which case the first ibg should have been 0
+!      Note that cprj_kh might have been used instead of scf_history%cprj(:,:,indh)a , in which case the second ibg should have been 0
        call dotprod_set_cgcprj(atindx1,cg,scf_history%cg(:,:,indh),cprj,scf_history%cprj(:,:,indh),dimcprj,hermitian,&
 &        ibg,ibg,icg,icg,ikpt,isppol,istwf_k,dtset%mband,mcg,mcg,mcprj,mcprj,dtset%mkmem,&
 &        mpi_enreg,dtset%natom,nattyp,nband_k,nband_k,npw_nk,my_nspinor,dtset%nsppol,ntypat,pawtab,smn,usepaw)
@@ -267,7 +269,7 @@ subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
 
        ABI_ALLOCATE(smn_,(2,nband_k,nband_k))
        ABI_ALLOCATE(ipiv,(nband_k))
-!      For debuggning purposes, the smn matrix is preserved (later, M * S = 1 is checked ...)
+!      For debugging purposes, the smn matrix is preserved (later, M * S = 1 is checked ...)
 !      The smn_ arrays stores a copy of the smn array, and will be destroyed by the following inverse call
        smn_=smn
        call zgesv(nband_k,nband_k,smn_,nband_k,ipiv,mmn,nband_k,ierr)
@@ -324,9 +326,9 @@ subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
 !      Wavefunction alignment (istwfk=1 ?)
 
 !DEBUG  (Old coding)
-       ABI_ALLOCATE(work,(2,npw_nk*my_nspinor*nblockbd))
-       ABI_ALLOCATE(work1,(2,npw_nk*my_nspinor*nblockbd))
-       work1(:,:)=scf_history%cg(:,icg+1:icg+my_nspinor*nblockbd*npw_nk,indh)
+!      ABI_ALLOCATE(work,(2,npw_nk*my_nspinor*nblockbd))
+!      ABI_ALLOCATE(work1,(2,npw_nk*my_nspinor*nblockbd))
+!      work1(:,:)=scf_history%cg(:,icg+1:icg+my_nspinor*nblockbd*npw_nk,indh)
 !ENDDEBUG
       
 
@@ -341,38 +343,38 @@ subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
 
 !DEBUG
 !      This is the old coding
-       call zgemm('N','N',npw_nk*my_nspinor,nband_k,nband_k,dcmplx(1._dp), &
-&       work1,npw_nk*my_nspinor, &
-&       mmn,nblockbd,dcmplx(0._dp),work,npw_nk*my_nspinor)
-       if(maxval(abs(scf_history%cg(:,1+icg:npw_nk*my_nspinor*nblockbd+icg,indh)-work(:,:)))>tol8)then
-         MSG_ERROR(' The old and new coding do not agree ')
-       endif
+!       call zgemm('N','N',npw_nk*my_nspinor,nband_k,nband_k,dcmplx(1._dp), &
+!&       work1,npw_nk*my_nspinor, &
+!&       mmn,nblockbd,dcmplx(0._dp),work,npw_nk*my_nspinor)
+!       if(maxval(abs(scf_history%cg(:,1+icg:npw_nk*my_nspinor*nblockbd+icg,indh)-work(:,:)))>tol8)then
+!         MSG_ERROR(' The old and new coding do not agree ')
+!       endif
 !      scf_history%cg(:,1+icg:npw_nk*my_nspinor*nblockbd+icg,indh)=work(:,:)
 
 !      If paw, must also align cprj from history
-       if (usepaw==1) then
+!       if (usepaw==1) then
 !        New version (MT):
-         ABI_DATATYPE_ALLOCATE(cprj_k3,(dtset%natom,my_nspinor))
-         call pawcprj_alloc(cprj_k3,cprj_kh(1,1)%ncpgr,dimcprj)
-         ABI_ALLOCATE(al,(2,nblockbd))
-         do iblockbd=1,nblockbd
-           ii=(iblockbd-1)*my_nspinor
-           do iblockbd1=1,nblockbd
-             al(1,iblockbd1)=mmn(1,iblockbd,iblockbd1)
-             al(2,iblockbd1)=mmn(2,iblockbd,iblockbd1)
-           end do
-           call pawcprj_lincom(al,cprj_kh,cprj_k3,nblockbd)
+!         ABI_DATATYPE_ALLOCATE(cprj_k3,(dtset%natom,my_nspinor))
+!         call pawcprj_alloc(cprj_k3,cprj_kh(1,1)%ncpgr,dimcprj)
+!         ABI_ALLOCATE(al,(2,nblockbd))
+!         do iblockbd=1,nblockbd
+!           ii=(iblockbd-1)*my_nspinor
+!           do iblockbd1=1,nblockbd
+!             al(1,iblockbd1)=mmn(1,iblockbd,iblockbd1)
+!             al(2,iblockbd1)=mmn(2,iblockbd,iblockbd1)
+!           end do
+!           call pawcprj_lincom(al,cprj_kh,cprj_k3,nblockbd)
 !          This seems incorrect : cprj_kh is overwritten while its original values are still supposed to be used !
-           call pawcprj_copy(cprj_k3,cprj_kh(:,ii+1:ii+my_nspinor))
-         end do
-         ABI_DEALLOCATE(al)
-         call pawcprj_free(cprj_k3)
-         ABI_DATATYPE_DEALLOCATE(cprj_k3)
-       end if
-       ABI_DEALLOCATE(mmn)
-       ABI_DEALLOCATE(work)
-       ABI_DEALLOCATE(work1)
+!           call pawcprj_copy(cprj_k3,cprj_kh(:,ii+1:ii+my_nspinor))
+!         end do
+!         ABI_DEALLOCATE(al)
+!         call pawcprj_free(cprj_k3)
+!         ABI_DATATYPE_DEALLOCATE(cprj_k3)
+!      end if
+!      ABI_DEALLOCATE(work)
+!      ABI_DEALLOCATE(work1)
 !ENDDEBUG
+       ABI_DEALLOCATE(mmn)
 
 !DEBUG
 !      This is a check that now the scf_history%cg(:,:,indh) is biorthogonal to the cg
