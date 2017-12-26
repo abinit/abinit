@@ -307,7 +307,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
  integer :: npawmix,npwdiel,nstep,nzlmopt,optcut,optcut_hf,optene,optgr0,optgr0_hf
  integer :: optgr1,optgr2,optgr1_hf,optgr2_hf,option,optrad,optrad_hf,optres,optxc,prtfor,prtxml,quit
  integer :: quit_sum,req_cplex_dij,rdwrpaw,shft,spaceComm,spaceComm_fft,spaceComm_wvl,spaceComm_grid
- integer :: stress_needed,sz1,sz2,unit_out
+ integer :: stress_needed,sz1,sz2,tim_mkrho,unit_out
  integer :: usecprj,usexcnhat,use_hybcomp
  integer :: my_quit,quitsum_request,timelimit_exit,usecg,wfmixalg
  integer ABI_ASYNC :: quitsum_async
@@ -1141,6 +1141,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
 !ENDDEBUG
          !Update the density, from the newly mixed cg.
          !Be careful: in PAW, rho does not include the compensation density (added later) !
+         tim_mkrho=6
          if (psps%usepaw==1) then
            ABI_ALLOCATE(rhowfg,(2,dtset%nfft))
            ABI_ALLOCATE(rhowfr,(dtset%nfft,dtset%nspden))
