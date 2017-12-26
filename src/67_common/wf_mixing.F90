@@ -104,21 +104,21 @@ subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
  real(dp),allocatable :: work(:,:),work1(:,:)
  type(pawcprj_type),allocatable :: cprj_k(:,:),cprj_kh(:,:),cprj_k3(:,:)
 !DEBUG
- real(dp),allocatable :: cg_ref(:,:)
- type(pawcprj_type),allocatable :: cprj_ref(:,:)
+!real(dp),allocatable :: cg_ref(:,:)
+!type(pawcprj_type),allocatable :: cprj_ref(:,:)
 !ENDDEBUG
 
 ! *************************************************************************
 
 !DEBUG
- write(std_out,*)' wf_mixing : enter '
- write(std_out,*)' istep,scf_history%alpha=',istep,scf_history%alpha
- write(std_out,*)' cg(1:2,1:2)=',cg(1:2,1:2)
- write(std_out,*)' scf_history%cg(1:2,1:2,1)=',scf_history%cg(1:2,1:2,1)
- ABI_ALLOCATE(cg_ref,(2,mcg))
- cg_ref(:,:)=cg(:,:)
- ABI_DATATYPE_ALLOCATE(cprj_ref,(dtset%natom,mcprj))
- cprj_ref(:,:)=cprj(:,:)
+!write(std_out,*)' wf_mixing : enter '
+!write(std_out,*)' istep,scf_history%alpha=',istep,scf_history%alpha
+!write(std_out,*)' cg(1:2,1:2)=',cg(1:2,1:2)
+!write(std_out,*)' scf_history%cg(1:2,1:2,1)=',scf_history%cg(1:2,1:2,1)
+!ABI_ALLOCATE(cg_ref,(2,mcg))
+!cg_ref(:,:)=cg(:,:)
+!ABI_DATATYPE_ALLOCATE(cprj_ref,(dtset%natom,mcprj))
+!cprj_ref(:,:)=cprj(:,:)
 !ENDDEBUG
 
  if (istep==0) return
@@ -137,12 +137,18 @@ subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
  indh=1
 
 !DEBUG
-! if(istep==1)then
-!   scf_history%cg(:,:,1)=cg(:,:)
-! else
-!   cg(:,:)=scf_history%cg(:,:,1)
-! endif
-! return
+ if(istep==1)then
+   scf_history%cg(:,:,1)=cg(:,:)
+   if(usepaw==1) then
+     scf_history%cprj(:,:,1)=cprj(:,:)
+   end if
+ else
+   cg(:,:)=scf_history%cg(:,:,1)
+   if(usepaw==1) then
+     cprj(:,:)=scf_history%cprj(:,:,1)
+   end if
+ endif
+ return
 !ENDDEBUG
 
 !First step
@@ -242,7 +248,7 @@ subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
        ABI_ALLOCATE(smn,(2,nblockbd,nblockbd))
 
 !DEBUG
-       write(std_out,*)' Compute the S matrix, whose matrix elements are scalar products.'
+!      write(std_out,*)' Compute the S matrix, whose matrix elements are scalar products.'
 !ENDDEBUG
        hermitian=0
 !      Note that cprj_k might have been used instead of cprj , in which case the first ibg should have been 0
@@ -252,11 +258,11 @@ subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
 &        mpi_enreg,dtset%natom,nattyp,nband_k,nband_k,npw_nk,my_nspinor,dtset%nsppol,ntypat,pawtab,smn,usepaw)
 
 !DEBUG
-       do iblockbd=1,nband_k
-         write(std_out, '(a,i4)')' iblockbd=',iblockbd
-         write(std_out, '(a,8f12.4)')' Real:',smn(1,1:nblockbd,iblockbd)
-         write(std_out, '(a,8f12.4)')' Imag:',smn(2,1:nblockbd,iblockbd)
-       enddo
+!      do iblockbd=1,nband_k
+!        write(std_out, '(a,i4)')' iblockbd=',iblockbd
+!        write(std_out, '(a,8f12.4)')' Real:',smn(1,1:nblockbd,iblockbd)
+!        write(std_out, '(a,8f12.4)')' Imag:',smn(2,1:nblockbd,iblockbd)
+!      enddo
 !ENDDEBUG
 
 !      Invert S matrix, that is NOT hermitian. 
@@ -284,40 +290,40 @@ subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
 
 !DEBUG
 !Print the M matrix
-       write(std_out,*)' Print the M matrix.'
-       do iblockbd=1,nblockbd
-         write(std_out, '(a,i4)')' iblockbd=',iblockbd
-         write(std_out, '(a,8f12.4)')' Real:',mmn(1,1:nblockbd,iblockbd)
-         write(std_out, '(a,8f12.4)')' Imag:',mmn(2,1:nblockbd,iblockbd)
-       end do
-       write(std_out,*)' Check M * S = 1.'
-       ABI_ALLOCATE(dmn,(2,nband_k,nband_k))
-       dmn=zero
-       do iblockbd=1,nblockbd
-         do iblockbd1=1,nblockbd
-           dmn(1,:,iblockbd)=dmn(1,:,iblockbd)&
-&           +mmn(1,:,iblockbd1)*smn(1,iblockbd1,iblockbd)-mmn(2,:,iblockbd1)*smn(2,iblockbd1,iblockbd)
-           dmn(2,iblockbd,:)=dmn(2,iblockbd,:)&
-&           +mmn(1,:,iblockbd1)*smn(2,iblockbd1,iblockbd)+mmn(2,:,iblockbd1)*smn(1,iblockbd1,iblockbd)
-         enddo
-       enddo
-       write(std_out,*)' Print the M*S matrix.'
-       do iblockbd=1,nblockbd
-         write(std_out, '(a,i4)')' iblockbd=',iblockbd
-         write(std_out, '(a,8f12.4)')' Real:',dmn(1,1:nblockbd,iblockbd)
-         write(std_out, '(a,8f12.4)')' Imag:',dmn(2,1:nblockbd,iblockbd)
-       end do
-       ABI_ALLOCATE(dmn_debug,(2,nband_k,nband_k))
-       dmn_debug=zero
-       do kk=1,nband_k
-         dmn_debug(1,kk,kk)=one
-       end do
-       if(maxval(abs(dmn-dmn_debug))>tol8)then
-         write(std_out,*)' wf_mixing : dmn and dmn_debug do not agree '
-         stop
-       endif
-       ABI_DEALLOCATE(dmn)
-       ABI_DEALLOCATE(dmn_debug)
+!       write(std_out,*)' Print the M matrix.'
+!       do iblockbd=1,nblockbd
+!         write(std_out, '(a,i4)')' iblockbd=',iblockbd
+!         write(std_out, '(a,8f12.4)')' Real:',mmn(1,1:nblockbd,iblockbd)
+!         write(std_out, '(a,8f12.4)')' Imag:',mmn(2,1:nblockbd,iblockbd)
+!       end do
+!       write(std_out,*)' Check M * S = 1.'
+!       ABI_ALLOCATE(dmn,(2,nband_k,nband_k))
+!       dmn=zero
+!       do iblockbd=1,nblockbd
+!         do iblockbd1=1,nblockbd
+!           dmn(1,:,iblockbd)=dmn(1,:,iblockbd)&
+!&           +mmn(1,:,iblockbd1)*smn(1,iblockbd1,iblockbd)-mmn(2,:,iblockbd1)*smn(2,iblockbd1,iblockbd)
+!           dmn(2,iblockbd,:)=dmn(2,iblockbd,:)&
+!&           +mmn(1,:,iblockbd1)*smn(2,iblockbd1,iblockbd)+mmn(2,:,iblockbd1)*smn(1,iblockbd1,iblockbd)
+!         enddo
+!       enddo
+!       write(std_out,*)' Print the M*S matrix.'
+!       do iblockbd=1,nblockbd
+!         write(std_out, '(a,i4)')' iblockbd=',iblockbd
+!         write(std_out, '(a,8f12.4)')' Real:',dmn(1,1:nblockbd,iblockbd)
+!         write(std_out, '(a,8f12.4)')' Imag:',dmn(2,1:nblockbd,iblockbd)
+!       end do
+!       ABI_ALLOCATE(dmn_debug,(2,nband_k,nband_k))
+!       dmn_debug=zero
+!       do kk=1,nband_k
+!         dmn_debug(1,kk,kk)=one
+!       end do
+!       if(maxval(abs(dmn-dmn_debug))>tol8)then
+!         write(std_out,*)' wf_mixing : dmn and dmn_debug do not agree '
+!         stop
+!      endif
+!      ABI_DEALLOCATE(dmn)
+!      ABI_DEALLOCATE(dmn_debug)
 !ENDDEBUG
 
 
@@ -378,17 +384,17 @@ subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
 !DEBUG
 !      This is a check that now the scf_history%cg(:,:,indh) is biorthogonal to the cg
 !      Calculate Smn=<cg|S|cg_hist>
-       write(std_out,*)' Check that the biorthogonalized scf_history%cg is indeed biorthogonal to cg'
-       hermitian=0
-       call dotprod_set_cgcprj(atindx1,cg,scf_history%cg(:,:,indh),cprj,cprj_kh,dimcprj,hermitian,&
-&        ibg,0,icg,icg,ikpt,isppol,istwf_k,dtset%mband,mcg,mcg,mcprj,my_nspinor*nblockbd,dtset%mkmem,&
-&        mpi_enreg,dtset%natom,nattyp,nband_k,nband_k,npw_nk,my_nspinor,dtset%nsppol,ntypat,pawtab,smn,usepaw)
-       do iblockbd=1,nband_k
-         write(std_out, '(a,i4)')' iblockbd=',iblockbd
-         write(std_out, '(a,8f12.4)')' Real:',smn(1,1:nblockbd,iblockbd)
-         write(std_out, '(a,8f12.4)')' Imag:',smn(2,1:nblockbd,iblockbd)
-       enddo
-       stop
+!       write(std_out,*)' Check that the biorthogonalized scf_history%cg is indeed biorthogonal to cg'
+!       hermitian=0
+!       call dotprod_set_cgcprj(atindx1,cg,scf_history%cg(:,:,indh),cprj,cprj_kh,dimcprj,hermitian,&
+!&        ibg,0,icg,icg,ikpt,isppol,istwf_k,dtset%mband,mcg,mcg,mcprj,my_nspinor*nblockbd,dtset%mkmem,&
+!&        mpi_enreg,dtset%natom,nattyp,nband_k,nband_k,npw_nk,my_nspinor,dtset%nsppol,ntypat,pawtab,smn,usepaw)
+!       do iblockbd=1,nband_k
+!         write(std_out, '(a,i4)')' iblockbd=',iblockbd
+!         write(std_out, '(a,8f12.4)')' Real:',smn(1,1:nblockbd,iblockbd)
+!         write(std_out, '(a,8f12.4)')' Imag:',smn(2,1:nblockbd,iblockbd)
+!       enddo
+!      stop
 !ENDDEBUG
 
 !      Wavefunction extrapolation, simple mixing case
@@ -409,21 +415,21 @@ subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
 !DEBUG
 !      This is a check that the new cg is biorthogonal to the cg_ref
 !      Calculate Smn=<cg|S|cg_hist>
-       write(std_out,*)' Check that the new extrapolated cg is biorthogonal to cg_ref'
-       hermitian=0
-       call dotprod_set_cgcprj(atindx1,cg,cg_ref,cprj_k,cprj_ref,dimcprj,hermitian,&
-&        0,ibg,icg,icg,ikpt,isppol,istwf_k,dtset%mband,mcg,mcg,mcprj,my_nspinor*nblockbd,dtset%mkmem,&
-&        mpi_enreg,dtset%natom,nattyp,nband_k,nband_k,npw_nk,my_nspinor,dtset%nsppol,ntypat,pawtab,smn,usepaw)
-       do iblockbd=1,nband_k
-         write(std_out, '(a,i4)')' iblockbd=',iblockbd
-         write(std_out, '(a,8f12.4)')' Real:',smn(1,1:nblockbd,iblockbd)
-         write(std_out, '(a,8f12.4)')' Imag:',smn(2,1:nblockbd,iblockbd)
-       enddo
+!       write(std_out,*)' Check that the new extrapolated cg is biorthogonal to cg_ref'
+!       hermitian=0
+!       call dotprod_set_cgcprj(atindx1,cg,cg_ref,cprj_k,cprj_ref,dimcprj,hermitian,&
+!&        0,ibg,icg,icg,ikpt,isppol,istwf_k,dtset%mband,mcg,mcg,mcprj,my_nspinor*nblockbd,dtset%mkmem,&
+!&        mpi_enreg,dtset%natom,nattyp,nband_k,nband_k,npw_nk,my_nspinor,dtset%nsppol,ntypat,pawtab,smn,usepaw)
+!       do iblockbd=1,nband_k
+!         write(std_out, '(a,i4)')' iblockbd=',iblockbd
+!         write(std_out, '(a,8f12.4)')' Real:',smn(1,1:nblockbd,iblockbd)
+!         write(std_out, '(a,8f12.4)')' Imag:',smn(2,1:nblockbd,iblockbd)
+!       enddo
 !ENDDEBUG
 
 !DEBUG
 !      For checking purposes
-       cg_ref=cg
+!       cg_ref=cg
 !ENDDEBUG
 
 !      Back to usual orthonormalization 
@@ -435,37 +441,37 @@ subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
 &        mpi_enreg,dtset%natom,nattyp,nband_k,npw_nk,my_nspinor,dtset%nsppol,ntypat,pawtab,usepaw)
 
 !DEBUG
-       if(usepaw==0)then
+!       if(usepaw==0)then
 !        Old algorithm, only valid for norm conserving case
 !        (borrowed from vtowfk and wfconv - which is problematic for PAW).
 !        Back to usual orthonormalization (borrowed from vtowfk and wfconv - which is problematic for PAW).
-         ortalgo=mpi_enreg%paral_kgb
+!         ortalgo=mpi_enreg%paral_kgb
 !        There are dummy arguments as PAW is not implemented with gsc in the present status !! 
-         ABI_ALLOCATE(dum,(2,0))
+!         ABI_ALLOCATE(dum,(2,0))
 !        Warning :  for the band-fft parallelism, perhaps npw_k has to be used instead of npw_nk
-         call pw_orthon(icg,0,istwf_k,mcg,0,npw_nk*my_nspinor,nband_k,ortalgo,dum,usepaw,cg_ref,&
-&          mpi_enreg%me_g0,mpi_enreg%comm_bandspinorfft)
-         ABI_DEALLOCATE(dum)
-         if(maxval(abs(cg-cg_ref))>tol8)then
-           MSG_ERROR(' The old and new coding for orthogonalisation do not agree ')
-         endif
-       endif
+!         call pw_orthon(icg,0,istwf_k,mcg,0,npw_nk*my_nspinor,nband_k,ortalgo,dum,usepaw,cg_ref,&
+!&          mpi_enreg%me_g0,mpi_enreg%comm_bandspinorfft)
+!         ABI_DEALLOCATE(dum)
+!         if(maxval(abs(cg-cg_ref))>tol8)then
+!           MSG_ERROR(' The old and new coding for orthogonalisation do not agree ')
+!         endif
+!       endif
 !ENDDEBUG
 
 !DEBUG
 !      This is a check that the new cg is orthonormalized
 !      Calculate Smn=<cg|S|cg>
-       write(std_out,*)' Check that the final extrapolated cg is orthonormalized '
-       hermitian=1
-       call dotprod_set_cgcprj(atindx1,cg,cg,cprj_k,cprj_k,dimcprj,hermitian,&
-&        0,0,icg,icg,ikpt,isppol,istwf_k,dtset%mband,mcg,mcg,mcprj,mcprj,dtset%mkmem,&
-&        mpi_enreg,dtset%natom,nattyp,nband_k,nband_k,npw_nk,my_nspinor,dtset%nsppol,ntypat,pawtab,smn,usepaw)
-       do iblockbd=1,nband_k
-         write(std_out, '(a,i4)')' iblockbd=',iblockbd
-         write(std_out, '(a,8f12.4)')' Real:',smn(1,1:nblockbd,iblockbd)
-         write(std_out, '(a,8f12.4)')' Imag:',smn(2,1:nblockbd,iblockbd)
-       enddo
-!      stop
+!       write(std_out,*)' Check that the final extrapolated cg is orthonormalized '
+!       hermitian=1
+!       call dotprod_set_cgcprj(atindx1,cg,cg,cprj_k,cprj_k,dimcprj,hermitian,&
+!&        0,0,icg,icg,ikpt,isppol,istwf_k,dtset%mband,mcg,mcg,mcprj,mcprj,dtset%mkmem,&
+!&        mpi_enreg,dtset%natom,nattyp,nband_k,nband_k,npw_nk,my_nspinor,dtset%nsppol,ntypat,pawtab,smn,usepaw)
+!       do iblockbd=1,nband_k
+!         write(std_out, '(a,i4)')' iblockbd=',iblockbd
+!         write(std_out, '(a,8f12.4)')' Real:',smn(1,1:nblockbd,iblockbd)
+!         write(std_out, '(a,8f12.4)')' Imag:',smn(2,1:nblockbd,iblockbd)
+!       enddo
+!       stop
 !ENDDEBUG
 
 !      Store the newly extrapolated wavefunctions, orthonormalized, in scf_history
@@ -511,11 +517,11 @@ subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
  end if ! istep>=2
 
 !DEBUG
- write(std_out,*)' wf_mixing : exit '
- write(std_out,*)' cg(1:2,1:2)=',cg(1:2,1:2)
- write(std_out,*)' scf_history%cg(1:2,1:2,1)=',scf_history%cg(1:2,1:2,1)
- ABI_DEALLOCATE(cg_ref)
- ABI_DATATYPE_DEALLOCATE(cprj_ref)
+! write(std_out,*)' wf_mixing : exit '
+! write(std_out,*)' cg(1:2,1:2)=',cg(1:2,1:2)
+! write(std_out,*)' scf_history%cg(1:2,1:2,1)=',scf_history%cg(1:2,1:2,1)
+! ABI_DEALLOCATE(cg_ref)
+! ABI_DATATYPE_DEALLOCATE(cprj_ref)
 !ENDDEBUG
 
  ABI_DEALLOCATE(dimcprj)

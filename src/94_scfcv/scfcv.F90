@@ -358,7 +358,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
  real(dp),allocatable :: grchempottn(:,:),grewtn(:,:),grhf(:,:),grnl(:),grvdw(:,:),grxc(:,:)
  real(dp),allocatable :: kxc(:,:),nhat(:,:),nhatgr(:,:,:),nvresid(:,:)
  real(dp),allocatable :: ph1d(:,:),ph1ddiel(:,:),ph1df(:,:)
- real(dp),allocatable :: phnonsdiel(:,:,:),shiftvector(:)
+ real(dp),allocatable :: phnonsdiel(:,:,:),rhowfg(:,:),rhowfr(:,:),shiftvector(:)
  real(dp),allocatable :: susmat(:,:,:,:,:),synlgr(:,:)
  real(dp),allocatable :: vhartr(:),vpsp(:),vtrial(:,:)
  real(dp),allocatable :: vxc(:,:),vxc_hybcomp(:,:),vxctau(:,:,:),workr(:,:),xccc3d(:),ylmdiel(:,:)
@@ -1126,7 +1126,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
 !ENDDEBUG
   
        !Possibly mix the wavefunctions from different steps before computing the Fock operator
-       if(wfmixalg/=0)then
+       if(wfmixalg/=0 .and. .not. (wfmixalg==2 .and. abs(scf_history%alpha-one)<tol8) )then
 !DEBUG
          write(std_out,*)' scfcv : will call wf_mixing'
          write(std_out,*)' dtset%wfmix,scf_history_wf%alpha=',dtset%wfmix,scf_history_wf%alpha
@@ -1139,7 +1139,26 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
          write(std_out,*)' scfcv : exit wf_mixing'
 !        call flush(std_out)
 !ENDDEBUG
-       endif
+         !Update the density, from the newly mixed cg.
+         !Be careful: in PAW, rho does not include the compensation density (added later) !
+         if (psps%usepaw==1) then
+           ABI_ALLOCATE(rhowfg,(2,dtset%nfft))
+           ABI_ALLOCATE(rhowfr,(dtset%nfft,dtset%nspden))
+!          write(std_out,*) "mkrhogstate"
+           call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,&
+&           mpi_enreg,npwarr,occ,paw_dmft,phnons,rhowfg,rhowfr,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs)
+           call transgrid(1,mpi_enreg,dtset%nspden,+1,1,1,dtset%paral_kgb,pawfgr,rhowfg,rhog,rhowfr,rhor)
+           ABI_DEALLOCATE(rhowfg)
+           ABI_DEALLOCATE(rhowfr)
+         else
+           call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,&
+&            mpi_enreg,npwarr,occ,paw_dmft,phnons,rhog,rhor,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs)
+           if(dtset%usekden==1)then
+             call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,&
+&             mpi_enreg,npwarr,occ,paw_dmft,phnons,taug,taur,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,option=1)
+           end if
+         end if
+       end if
 
        ! Update data relative to the occupied states in fock
        call fock_updatecwaveocc(cg,cprj,dtset,fock,indsym,istep,mcg,mcprj,mpi_enreg,nattyp,npwarr,occ,ucvol)
