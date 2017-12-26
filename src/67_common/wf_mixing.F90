@@ -346,33 +346,32 @@ subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
 !       call zgemm('N','N',npw_nk*my_nspinor,nband_k,nband_k,dcmplx(1._dp), &
 !&       work1,npw_nk*my_nspinor, &
 !&       mmn,nblockbd,dcmplx(0._dp),work,npw_nk*my_nspinor)
-!       if(maxval(abs(scf_history%cg(:,1+icg:npw_nk*my_nspinor*nblockbd+icg,indh)-work(:,:)))>tol8)then
-!         MSG_ERROR(' The old and new coding do not agree ')
-!       endif
-!      scf_history%cg(:,1+icg:npw_nk*my_nspinor*nblockbd+icg,indh)=work(:,:)
+!      if(maxval(abs(scf_history%cg(:,1+icg:npw_nk*my_nspinor*nblockbd+icg,indh)-work(:,:)))>tol8)then
+!        MSG_ERROR(' The old and new coding do not agree ')
+!      endif
+!       scf_history%cg(:,1+icg:npw_nk*my_nspinor*nblockbd+icg,indh)=work(:,:)
 
 !      If paw, must also align cprj from history
 !       if (usepaw==1) then
-!        New version (MT):
-!         ABI_DATATYPE_ALLOCATE(cprj_k3,(dtset%natom,my_nspinor))
+!       New version (MT):
+!         ABI_DATATYPE_ALLOCATE(cprj_k3,(dtset%natom,my_nspinor*nblockbd))
 !         call pawcprj_alloc(cprj_k3,cprj_kh(1,1)%ncpgr,dimcprj)
 !         ABI_ALLOCATE(al,(2,nblockbd))
 !         do iblockbd=1,nblockbd
 !           ii=(iblockbd-1)*my_nspinor
 !           do iblockbd1=1,nblockbd
-!             al(1,iblockbd1)=mmn(1,iblockbd,iblockbd1)
-!             al(2,iblockbd1)=mmn(2,iblockbd,iblockbd1)
-!           end do
-!           call pawcprj_lincom(al,cprj_kh,cprj_k3,nblockbd)
-!          This seems incorrect : cprj_kh is overwritten while its original values are still supposed to be used !
-!           call pawcprj_copy(cprj_k3,cprj_kh(:,ii+1:ii+my_nspinor))
-!         end do
-!         ABI_DEALLOCATE(al)
-!         call pawcprj_free(cprj_k3)
-!         ABI_DATATYPE_DEALLOCATE(cprj_k3)
-!      end if
-!      ABI_DEALLOCATE(work)
-!      ABI_DEALLOCATE(work1)
+!            al(1,iblockbd1)=mmn(1,iblockbd1,iblockbd)
+!            al(2,iblockbd1)=mmn(2,iblockbd1,iblockbd)
+!          end do
+!          call pawcprj_lincom(al,cprj_kh,cprj_k3(:,ii+1:ii+my_nspinor),nblockbd)
+!        end do
+!        call pawcprj_copy(cprj_k3,cprj_kh)
+!        ABI_DEALLOCATE(al)
+!        call pawcprj_free(cprj_k3)
+!        ABI_DATATYPE_DEALLOCATE(cprj_k3)
+!     end if
+!     ABI_DEALLOCATE(work)
+!     ABI_DEALLOCATE(work1)
 !ENDDEBUG
        ABI_DEALLOCATE(mmn)
 
@@ -389,6 +388,7 @@ subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
          write(std_out, '(a,8f12.4)')' Real:',smn(1,1:nblockbd,iblockbd)
          write(std_out, '(a,8f12.4)')' Imag:',smn(2,1:nblockbd,iblockbd)
        enddo
+       stop
 !ENDDEBUG
 
 !      Wavefunction extrapolation, simple mixing case
