@@ -149,6 +149,7 @@
      enddo
      call pawcprj_lincom(al,cprj,cprjout_(:,ii+1:ii+nspinor),nband_in)
    enddo
+   ABI_DEALLOCATE(al)
 
    if(inplace==1)then
      cprj=cprjout_
