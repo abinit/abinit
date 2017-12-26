@@ -115,6 +115,7 @@
 & icg,inplace,mcg,mcprj,natom,nband,nband,npw,nspinor,usepaw)
 
  ABI_DEALLOCATE(smn)
+ ABI_DEALLOCATE(dmn)
 
  end subroutine cgcprj_cholesky
 !!***
