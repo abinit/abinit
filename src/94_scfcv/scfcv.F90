@@ -1168,8 +1168,15 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
            ABI_DEALLOCATE(rhowfr)
 
          else
+!DEBUG
+           write(std_out,*)' scfcv : recompute the density after the wf mixing '
+!ENDDEBUG
            call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,&
 &            mpi_enreg,npwarr,occ,paw_dmft,phnons,rhog,rhor,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs)
+!DEBUG
+           write(std_out,*)' scfcv : for debugging purposes, set rhor to zero '
+           rhor=zero
+!ENDDEBUG
            if(dtset%usekden==1)then
              call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,&
 &             mpi_enreg,npwarr,occ,paw_dmft,phnons,taug,taur,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,option=1)

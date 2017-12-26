@@ -137,18 +137,18 @@ subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
  indh=1
 
 !DEBUG
- if(istep==1)then
-   scf_history%cg(:,:,1)=cg(:,:)
-   if(usepaw==1) then
-     scf_history%cprj(:,:,1)=cprj(:,:)
-   end if
- else
-   cg(:,:)=scf_history%cg(:,:,1)
-   if(usepaw==1) then
-     cprj(:,:)=scf_history%cprj(:,:,1)
-   end if
- endif
- return
+! if(istep==1)then
+!   scf_history%cg(:,:,1)=cg(:,:)
+!   if(usepaw==1) then
+!     scf_history%cprj(:,:,1)=cprj(:,:)
+!   end if
+! else
+!   cg(:,:)=scf_history%cg(:,:,1)
+!   if(usepaw==1) then
+!     cprj(:,:)=scf_history%cprj(:,:,1)
+!   end if
+! endif
+! return
 !ENDDEBUG
 
 !First step
