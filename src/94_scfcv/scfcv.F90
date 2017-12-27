@@ -1139,6 +1139,9 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
          write(std_out,*)' scfcv : exit wf_mixing'
 !        call flush(std_out)
 !ENDDEBUG
+
+!DEBUG
+         if(.false.)then
          !Update the density, from the newly mixed cg and cprj.
          !Be careful: in PAW, rho does not include the compensation density (added later) !
          tim_mkrho=6
@@ -1174,8 +1177,8 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
            call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,&
 &            mpi_enreg,npwarr,occ,paw_dmft,phnons,rhog,rhor,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs)
 !DEBUG
-           write(std_out,*)' scfcv : for debugging purposes, set rhor to zero '
-           rhor=zero
+!          write(std_out,*)' scfcv : for debugging purposes, set rhor to zero '
+!          rhor=zero
 !ENDDEBUG
            if(dtset%usekden==1)then
              call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,&
@@ -1183,6 +1186,8 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
            end if
          end if
        end if
+       endif
+!ENDDEBUG
 
        ! Update data relative to the occupied states in fock
        call fock_updatecwaveocc(cg,cprj,dtset,fock,indsym,istep,mcg,mcprj,mpi_enreg,nattyp,npwarr,occ,ucvol)
