@@ -170,13 +170,12 @@ subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
 
        npw_k=npwarr(ikpt)
 
-       scf_history%cg(:icg_hist+1:icg_hist+my_nspinor*npw_k*nbdmix,indh)=cg(:,icg+1:icg+my_nspinor*npw_k*nbdmix)
+       scf_history%cg(:,icg_hist+1:icg_hist+my_nspinor*npw_k*nbdmix,indh)=cg(:,icg+1:icg+my_nspinor*npw_k*nbdmix)
        if(usepaw==1) then
 !        scf_history%cprj(:,ibg_hist+1:ibg_hist+my_nspinor*nbdmix,1)=cprj(:,ibg+1:ibg+my_nspinor*nbdmix)
          call pawcprj_get(atindx1,cprj_k,cprj,dtset%natom,1,ibg,ikpt,1,isppol,dtset%mband,&
 &          dtset%mkmem,dtset%natom,nbdmix,nband_k,my_nspinor,dtset%nsppol,0,&
 &          mpicomm=mpi_enreg%comm_kpt,proc_distrb=mpi_enreg%proc_distrb)
-         endif
          call pawcprj_put(atindx1,cprj_k,scf_history%cprj(:,:,indh),dtset%natom,1,ibg_hist,ikpt,1,isppol,&
 &         nbdmix,dtset%mkmem,dtset%natom,nbdmix,nbdmix,dimcprj,my_nspinor,dtset%nsppol,0,&
 &         mpicomm=mpi_enreg%comm_kpt,mpi_comm_band=spaceComm_band,proc_distrb=mpi_enreg%proc_distrb)
@@ -264,7 +263,7 @@ subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
        beta=one-scf_history%alpha
        cg(:,icg+1:icg+my_nspinor*npw_k*nbdmix)=&
 &        alpha*cg(:,icg+1:icg+my_nspinor*npw_k*nbdmix)&
-&        +beta*scf_history%cg(:icg_hist+1:icg_hist+my_nspinor*npw_k*nbdmix,indh) 
+&        +beta*scf_history%cg(:,icg_hist+1:icg_hist+my_nspinor*npw_k*nbdmix,indh) 
        do ibdmix=1,nbdmix
          if(usepaw==1) then
            call pawcprj_axpby(beta,alpha,cprj_kh(:,ibdmix:ibdmix),cprj_k(:,ibdmix:ibdmix))
@@ -276,7 +275,7 @@ subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
 &        mpi_enreg,dtset%natom,nattyp,nbdmix,npw_k,my_nspinor,dtset%nsppol,ntypat,pawtab,usepaw)
 
 !      Store the newly extrapolated wavefunctions, orthonormalized, in scf_history
-       scf_history%cg(:icg_hist+1:icg_hist+my_nspinor*npw_k*nbdmix,indh)=cg(:,icg+1:icg+my_nspinor*npw_k*nbdmix)
+       scf_history%cg(:,icg_hist+1:icg_hist+my_nspinor*npw_k*nbdmix,indh)=cg(:,icg+1:icg+my_nspinor*npw_k*nbdmix)
        do ibdmix=1,nbdmix
          if(usepaw==1) then
            call pawcprj_put(atindx1,cprj_k,scf_history%cprj(:,:,indh),dtset%natom,1,ibg_hist,ikpt,1,isppol,&
