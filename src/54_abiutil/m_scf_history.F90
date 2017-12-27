@@ -268,9 +268,11 @@ subroutine scf_history_init(dtset,mpi_enreg,usecg,scf_history)
      scf_history%mcprj=0
      if (usecg>0) then
        my_nspinor=max(1,dtset%nspinor/mpi_enreg%nproc_spinor)
-       scf_history%mcg=dtset%mpw*my_nspinor*dtset%mband*dtset%mkmem*dtset%nsppol
+       scf_history%mcg=dtset%mpw*my_nspinor*dtset%nbandhf*dtset%mkmem*dtset%nsppol
+       if(dtset%extrapwf/=0)scf_history%mcg=dtset%mpw*my_nspinor*dtset%mband*dtset%mkmem*dtset%nsppol
        if (dtset%usepaw==1) then
-         mband_cprj=dtset%mband
+         mband_cprj=dtset%nbandhf
+         if(dtset%extrapwf/=0)mband_cprj=dtset%mband
          if (dtset%paral_kgb/=0) mband_cprj=mband_cprj/mpi_enreg%nproc_band
          scf_history%mcprj=my_nspinor*mband_cprj*dtset%mkmem*dtset%nsppol
        end if
