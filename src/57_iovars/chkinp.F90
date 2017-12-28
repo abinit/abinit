@@ -795,11 +795,6 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 
 !  fockoptmix
    call chkint_eq(0,0,cond_string,cond_values,ierr,'fockoptmix',dt%fockoptmix,5,(/0,1,11,201,211/),iout)
-   if(dt%extrapwf/=0)then
-     cond_string(1)='extrapwf' ; cond_values(1)=dt%extrapwf
-!    Make sure that dt%fockoptmix is 0, 1 or 11 (wfmixalg==0)
-     call chkint_eq(1,1,cond_string,cond_values,ierr,'fockoptmix',dt%fockoptmix,3,(/0,1,11/),iout)
-   end if
    if(dt%paral_kgb/=0)then
      cond_string(1)='paral_kgb' ; cond_values(1)=dt%paral_kgb
 !    Make sure that dt%fockoptmix is 0, 1 or 11 (wfmixalg==0)

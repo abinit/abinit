@@ -134,7 +134,7 @@ subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
  icg=0
  icg_hist=0
  ibg=0
-
+ ibg_hist=0
 
 !Useful array
  ABI_ALLOCATE(dimcprj,(dtset%natom))
@@ -142,11 +142,17 @@ subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
    call pawcprj_getdim(dimcprj,dtset%natom,nattyp,ntypat,dtset%typat,pawtab,'O')
  end if
 
+ if(istep==1)then
+   do indh=1,scf_history%history_size
+     call pawcprj_alloc(scf_history%cprj(:,:,indh),0,dimcprj)
+   enddo
+ endif
+
  ABI_DATATYPE_ALLOCATE(cprj_k,(dtset%natom,my_nspinor*nbdmix))
  ABI_DATATYPE_ALLOCATE(cprj_kh,(dtset%natom,my_nspinor*nbdmix))
  if(usepaw==1) then
-   call pawcprj_alloc(cprj_k,cprj(1,1)%ncpgr,dimcprj)
-   call pawcprj_alloc(cprj_kh,cprj(1,1)%ncpgr,dimcprj)
+   call pawcprj_alloc(cprj_k,0,dimcprj)
+   call pawcprj_alloc(cprj_kh,0,dimcprj)
  endif
  ABI_ALLOCATE(smn,(2,nbdmix,nbdmix))
  ABI_ALLOCATE(mmn,(2,nbdmix,nbdmix))

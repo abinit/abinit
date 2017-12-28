@@ -1393,7 +1393,7 @@ end subroutine pawcprj_get
 !!  cprj_k(dimcp,nspinor*nband) <type(pawcprj_type)>= input cprj datastructure
 !!  dimcp=first dimension of cprj_k,cprjnk arrays (1 or natom)
 !!  iband1=index of first band
-!!  ibg=shift if cprjnk array to locate current k-point
+!!  ibg=shift in cprj array to locate current k-point
 !!  ikpt=index of current k-point
 !!  iorder=0 if cprj ordering does not change during reading
 !!         1 if cprj ordering changes during writing, depending on content of atind array:
