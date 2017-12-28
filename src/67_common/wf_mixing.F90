@@ -88,21 +88,18 @@ subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
 !Local variables-------------------------------
 !scalars
  integer :: hermitian
- integer :: ibd,ibdmix,ibg,ibg_hist,icg,icg_hist,icgb
- integer :: ierr,ii,ikpt,inc,indh,inplace
- integer :: isize,isppol,istwf_k,kk,me_distrb,my_nspinor
- integer :: nband_k,nbdmix,npw_k,ntypat,ortalgo,spaceComm_band,usepaw,wfmixalg
+ integer :: ibdmix,ibg,ibg_hist,icg,icg_hist,icgb
+ integer :: ierr,ikpt,indh,inplace
+ integer :: isppol,istwf_k,kk,me_distrb,my_nspinor
+ integer :: nband_k,nbdmix,npw_k,ntypat,spaceComm_band,usepaw,wfmixalg
  !character(len=500) :: message
 !arrays
  real(dp) :: alpha,beta
- integer,allocatable :: bufsize(:),bufsize_wf(:),bufdisp(:),bufdisp_wf(:)
- integer,allocatable :: ipiv(:),dimcprj(:),npw_block(:),npw_disp(:)
- real(dp),allocatable :: al(:,:),cwavef(:,:),cwavefh(:,:)
- real(dp),allocatable :: dum(:,:)
- real(dp),allocatable :: dmn(:,:,:),dmn_debug(:,:,:),mmn(:,:,:)
+ integer,allocatable :: ipiv(:),dimcprj(:)
+ real(dp),allocatable :: cwavef(:,:),cwavefh(:,:)
+ real(dp),allocatable :: mmn(:,:,:)
  real(dp),allocatable :: smn(:,:,:)
- real(dp),allocatable :: work(:,:),work1(:,:)
- type(pawcprj_type),allocatable :: cprj_k(:,:),cprj_kh(:,:),cprj_k3(:,:)
+ type(pawcprj_type),allocatable :: cprj_k(:,:),cprj_kh(:,:)
 !DEBUG
 !real(dp),allocatable :: cg_ref(:,:)
 !type(pawcprj_type),allocatable :: cprj_ref(:,:)
