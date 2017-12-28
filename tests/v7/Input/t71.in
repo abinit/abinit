@@ -6,6 +6,7 @@
  nstep 61        # Maximal number of SCF cycles
  fockoptmix 201
  nnsclohf2 4       
+ ixc1 11           # Explitic use of the native PBE functional 
  ixc2 40           # Calculation with Hartree-Fock functional
  fockdownsampling2 0 0 0 # Keep only the Gamma point to define the Fock operator
 
