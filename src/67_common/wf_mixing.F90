@@ -161,7 +161,10 @@ subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
  indh=1
 
 !First step
- if (istep==1 .or. (wfmixalg==2 .and. abs(scf_history%alpha-one)<tol8) ) then
+!DEBUG
+ if(istep==1)then
+!if (istep==1 .or. (wfmixalg==2 .and. abs(scf_history%alpha-one)<tol8) ) then
+!ENDDEBUG
 
 !  Simply store the wavefunctions and cprj. However, nband_k might be different from nbandhf...
 !  LOOP OVER SPINS
@@ -196,6 +199,40 @@ subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
      enddo
    enddo
 
+!DEBUG
+ else if(.true.)then
+!  Bring back the wavefunctions and cprj. 
+!  LOOP OVER SPINS
+   do isppol=1,dtset%nsppol
+
+!    BIG FAT k POINT LOOP
+     do ikpt=1,dtset%nkpt
+
+!      Select k point to be treated by this proc
+       nband_k=dtset%nband(ikpt+(isppol-1)*dtset%nkpt)
+       if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,isppol,me_distrb)) cycle
+
+       npw_k=npwarr(ikpt)
+
+       cg(:,icg+1:icg+my_nspinor*npw_k*nbdmix)=scf_history%cg(:,icg_hist+1:icg_hist+my_nspinor*npw_k*nbdmix,indh)
+       if(usepaw==1) then
+         call pawcprj_get(atindx1,cprj_k,scf_history%cprj(:,:,indh),dtset%natom,1,ibg_hist,ikpt,1,isppol,nbdmix,&
+&          dtset%mkmem,dtset%natom,nbdmix,nbdmix,my_nspinor,dtset%nsppol,0,&
+&          mpicomm=mpi_enreg%comm_kpt,proc_distrb=mpi_enreg%proc_distrb)
+         call pawcprj_put(atindx1,cprj_k,cprj,dtset%natom,1,ibg,ikpt,1,isppol,dtset%mband,&
+&         dtset%mkmem,dtset%natom,nbdmix,nband_k,dimcprj,my_nspinor,dtset%nsppol,0,&
+&         mpicomm=mpi_enreg%comm_kpt,mpi_comm_band=spaceComm_band,proc_distrb=mpi_enreg%proc_distrb)
+       end if
+
+!      Update the counters
+       ibg=ibg+my_nspinor*nband_k
+       ibg_hist=ibg_hist+my_nspinor*nbdmix
+       icg=icg+my_nspinor*nband_k*npw_k
+       icg_hist=icg_hist+my_nspinor*nbdmix*npw_k
+
+     enddo
+   enddo
+!ENDDEBUG
  else
 !From 2nd step
 
