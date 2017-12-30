@@ -1093,9 +1093,11 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
 &         xred,ylm,ylmgr)
        end if
        if(wfmixalg/=0)then
+         spare_mem=0
+         if(spare_mem==1)history_size=wfmixalg-1
+         if(spare_mem==0)history_size=2*(wfmixalg-1)
+!        Specific case of simple mixing : always history_size=1
          if(wfmixalg==2)history_size=1
-         if(wfmixalg==3)history_size=2
-         if(wfmixalg==4)history_size=3
          scf_history_wf%history_size=history_size
          usecg=2
 !DEBUG
