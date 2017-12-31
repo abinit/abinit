@@ -165,8 +165,8 @@ subroutine fock2ACE(cg,cprj,fock,istwfk,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_e
  call timab(921,1,tsec)
 
 !DEBUG
- if(counter>0)return
- counter=counter+1
+!if(counter>0)return
+!counter=counter+1
 !ENDDEBUG
 
 !Init mpicomm and me

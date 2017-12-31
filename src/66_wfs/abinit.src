@@ -24,6 +24,7 @@ sources = [
  "chebfi.F90",
  "cgcprj_cholesky.F90",
  "dotprod_set_cgcprj.F90",
+ "dotprodm_sumdiag_cgcprj.F90",
  "fxphas.F90",
  "getdc1.F90",
  "getghcnd.F90",

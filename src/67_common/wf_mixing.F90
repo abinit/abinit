@@ -89,8 +89,8 @@ subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
 !scalars
  integer :: hermitian
  integer :: ibdmix,ibg,ibg_hist,icg,icg_hist,icgb
- integer :: ierr,ikpt,indh,inplace
- integer :: isppol,istwf_k,kk,me_distrb,my_nspinor
+ integer :: ierr,ikpt,indh,ind_biorthog,ind_newwf,ind_residual,inplace
+ integer :: isppol,istep_cycle,istep_new,istwf_k,kk,me_distrb,my_nspinor
  integer :: nband_k,nbdmix,npw_k,nset1,nset2,ntypat
  integer :: shift_set1,shift_set2,spaceComm_band,spare_mem,usepaw,wfmixalg
  !character(len=500) :: message
@@ -129,7 +129,7 @@ subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
  spaceComm_band=xmpi_comm_self
 
  spare_mem=0
- if(scf_history_wf%history_size==wfmixalg-1)spare_mem=1
+ if(scf_history%history_size==wfmixalg-1)spare_mem=1
 
  icg=0
  icg_hist=0
@@ -169,14 +169,14 @@ subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
 !previous input (that was stored in indh=1), then generate the next input, which is stored again in indh=1
 
 !When the storage is not spared: 
-- the even values of indh store the (computed here) biorthogonalized input cgcprj, then the residual
-- the odd values of indh store the biorthogonalized output cgcprj (coming as argument)
+!- the values of indh from 2 to wfmixalg store the (computed here) biorthogonalized input cgcprj, then the residual
+!- the values of indh from wfmixalg+1 to 2*wfmixalg-1 store the biorthogonalized output cgcprj (coming as argument)
 
 !First step
 !DEBUG
- if(istep==1)then
-!if (istep==1 .or. (wfmixalg==2 .and. abs(scf_history%alpha-one)<tol8) ) then
+!if(istep==1)then
 !ENDDEBUG
+if (istep==1 .or. (wfmixalg==2 .and. abs(scf_history%alpha-one)<tol8) ) then
 
    indh=2   ! This input wavefunction is NOT the reference
    if(wfmixalg==2)indh=1 ! But this does not matter in the simple mixing case that has history_size=1
@@ -215,7 +215,7 @@ subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
    enddo
 
 !DEBUG
- else if(.true.)then
+ else if(.false.)then
 !  Bring back the wavefunctions and cprj. 
 !  LOOP OVER SPINS
    do isppol=1,dtset%nsppol
@@ -328,7 +328,7 @@ subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
          inplace=0
          call lincom_cgcprj(mmn,cg,cprj_k,dimcprj,&
 &         icg,inplace,mcg,my_nspinor*nbdmix,dtset%natom,nbdmix,nbdmix,npw_k,my_nspinor,usepaw,&
-&         cgout=scf_history%cg(:,:,ind_biorthog),cprjout=scf_history%cprj(:,:,ind_biorthog)),icgout=icg_hist)
+&         cgout=scf_history%cg(:,:,ind_biorthog),cprjout=scf_history%cprj(:,:,ind_biorthog),icgout=icg_hist)
        endif
 
 !      Finalize this first part of the computation, depending on the algorithm and the step.
@@ -377,30 +377,30 @@ subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
        else
 
 !        Compute the residual of the wavefunctions for this istep, that replaces the previously stored set of (biorthogonalized) input wavefunctions
-         scf_history%cg(:,icg_hist+1:icg_hist+my_nspinor*npw_k*nbdmix,ind_res)=&
+         scf_history%cg(:,icg_hist+1:icg_hist+my_nspinor*npw_k*nbdmix,ind_residual)=&
 &          scf_history%cg(:,icg_hist+1:icg_hist+my_nspinor*npw_k*nbdmix,ind_biorthog)&
-&          -scf_history%cg(:,icg_hist+1:icg_hist+my_nspinor*npw_k*nbdmix,ind_res)
+&          -scf_history%cg(:,icg_hist+1:icg_hist+my_nspinor*npw_k*nbdmix,ind_residual)
          if(usepaw==1) then
            do ibdmix=1,nbdmix
-             call pawcprj_axpby(one,-one,scf_history%cprj(:,ibdmix:ibdmix,ind_biorthog),scf_history%cprj(:,ibdmix:ibdmix,ind_res))
+             call pawcprj_axpby(one,-one,scf_history%cprj(:,ibdmix:ibdmix,ind_biorthog),scf_history%cprj(:,ibdmix:ibdmix,ind_residual))
            end do ! end loop on ibdmix
          endif
          
-!         subroutine dotprod_sumdiag_cgcprj(atindx1,cg_set,cprj_set,dimcprj,&
+!         subroutine dotprodm_sumdiag_cgcprj(atindx1,cg_set,cprj_set,dimcprj,&
 !& ibg,icg,ikpt,isppol,istwf,mband,mcg,mcprj,mkmem,&
 !& mpi_enreg,mset,natom,nattyp,nbd,npw,nset1,nset2,nspinor,nsppol,ntypat,&
 !& shift_set1,shift_set2,pawtab,smn,usepaw)
 
-         nset1=1 ; shift_set1=ind_res-1
-         nset2=minval(istep-1,wfmixalg-1) ; shift_set1=1
+         nset1=1 ; shift_set1=ind_residual-1
+         nset2=min(istep-1,wfmixalg-1) ; shift_set2=1
          ABI_ALLOCATE(residuals,(2,1,nset2))
-         call dotprod_sumdiag_cgcprj(atindx1,cg_set,cprj_set,dimcprj,&
-&         ibg,icg,ikpt,isppol,istwf,nbdix,mcg,mcprj,mkmem,&
-&         mpi_enreg,mset,natom,nattyp,nbdmix,npw,nset1,nset2,nspinor,nsppol,ntypat,&
+         call dotprodm_sumdiag_cgcprj(atindx1,scf_history%cg,scf_history%cprj,dimcprj,&
+&         ibg,icg,ikpt,isppol,istwf_k,nbdmix,mcg,mcprj,dtset%mkmem,&
+&         mpi_enreg,scf_history%history_size,dtset%natom,nattyp,nbdmix,npw_k,nset1,nset2,my_nspinor,dtset%nsppol,ntypat,&
 &         shift_set1,shift_set2,pawtab,residuals,usepaw)
 
 !        Should accumulate the res_k_mn, including k point parallelism ...
-         ABI_ALLOCATE(residuals)
+         ABI_DEALLOCATE(residuals)
 
        endif
 
@@ -434,7 +434,7 @@ subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
  ABI_DEALLOCATE(dimcprj)
  ABI_DEALLOCATE(mmn)
  ABI_DEALLOCATE(smn)
- if(allocated(res_mn)then
+ if(allocated(res_mn))then
    ABI_DEALLOCATE(res_mn)
  endif
 

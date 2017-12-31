@@ -70,7 +70,7 @@
 
 #include "abi_common.h"
 
-subroutine dotprod_sumdiag_cgcprj(atindx1,cg_set,cprj_set,dimcprj,&
+subroutine dotprodm_sumdiag_cgcprj(atindx1,cg_set,cprj_set,dimcprj,&
 & ibg,icg,ikpt,isppol,istwf,mband,mcg,mcprj,mkmem,&
 & mpi_enreg,mset,natom,nattyp,nbd,npw,nset1,nset2,nspinor,nsppol,ntypat,&
 & shift_set1,shift_set2,pawtab,smn,usepaw)
@@ -86,7 +86,7 @@ subroutine dotprod_sumdiag_cgcprj(atindx1,cg_set,cprj_set,dimcprj,&
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'dotprod_sumdiag_cgcprj'
+#define ABI_FUNC 'dotprodm_sumdiag_cgcprj'
 !End of the abilint section
 
  implicit none
@@ -94,7 +94,7 @@ subroutine dotprod_sumdiag_cgcprj(atindx1,cg_set,cprj_set,dimcprj,&
 !Arguments ------------------------------------
 !scalars
  integer, intent(in) :: ibg,icg,ikpt,isppol,istwf
- integer, intent(in) :: mband,mcg,mcprj,mkmem,mset,
+ integer, intent(in) :: mband,mcg,mcprj,mkmem,mset 
  integer, intent(in) :: natom,nbd,npw,nset1,nset2,nspinor,nsppol,ntypat
  integer, intent(in) :: shift_set1,shift_set2,usepaw
  type(MPI_type),intent(in) :: mpi_enreg
@@ -117,7 +117,7 @@ subroutine dotprod_sumdiag_cgcprj(atindx1,cg_set,cprj_set,dimcprj,&
 ! *************************************************************************
 
 !DEBUG
- write(std_out,*)' dotprod_sumdiag_cgcprj : enter '
+ write(std_out,*)' dotprodm_sumdiag_cgcprj : enter '
 !ENDDEBUG
 
  ABI_ALLOCATE(cwavef1,(2,npw*nspinor))
@@ -153,7 +153,7 @@ subroutine dotprod_sumdiag_cgcprj(atindx1,cg_set,cprj_set,dimcprj,&
      do iset2=1,nset2
 
        ind_set2=iset2+shift_set2
-       if(ind_set2<ind_set1 .and. ind_set2>shift_iset1)then
+       if(ind_set2<ind_set1 .and. ind_set2>shift_set1)then
          continue ! These matrix elements have already been computed, the smn matrix will be completed later.
 
        else if(ind_set1/=ind_set2)then
@@ -196,6 +196,7 @@ subroutine dotprod_sumdiag_cgcprj(atindx1,cg_set,cprj_set,dimcprj,&
              end do
              ia=ia+nattyp(itypat)
            end do
+         endif ! usepaw
 
        else 
 !        Diagonal part : no need to extract another wavefunction, and the scalar product must be real
@@ -222,8 +223,9 @@ subroutine dotprod_sumdiag_cgcprj(atindx1,cg_set,cprj_set,dimcprj,&
              end do
              ia=ia+nattyp(itypat)
            end do
+         endif ! usepaw
 
-       endif
+       endif ! Compare ind_set1 and ind_set2
  
        smn(1,iset1,iset2)=smn(1,iset1,iset2)+dotr
        smn(2,iset1,iset2)=smn(2,iset1,iset2)+doti
@@ -237,10 +239,10 @@ subroutine dotprod_sumdiag_cgcprj(atindx1,cg_set,cprj_set,dimcprj,&
 
 !Complete the matrix, using its hermitian property.
  do iset1=1,nset1
-   ind_set1=iset1+shift_iset1
+   ind_set1=iset1+shift_set1
    do iset2=1,nset2
-     ind_set2=iset2+shift_iset2
-     if(ind_set2<ind_set1 .and. ind_set2>shift_iset1)then
+     ind_set2=iset2+shift_set2
+     if(ind_set2<ind_set1 .and. ind_set2>shift_set1)then
        smn(1,iset1,iset2)= smn(1,iset2,iset1)
        smn(2,iset1,iset2)=-smn(2,iset2,iset1)
      endif
@@ -260,5 +262,5 @@ subroutine dotprod_sumdiag_cgcprj(atindx1,cg_set,cprj_set,dimcprj,&
    ABI_DATATYPE_DEALLOCATE(cprj2_k)
  end if
 
-end subroutine dotprod_sumdiag_cgcprj
+end subroutine dotprodm_sumdiag_cgcprj
 !!***
