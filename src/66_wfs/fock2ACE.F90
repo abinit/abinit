@@ -142,7 +142,7 @@ subroutine fock2ACE(cg,cprj,fock,istwfk,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_e
  integer :: npw_k,spaceComm
  integer :: use_ACE_old
  integer :: blocksize,iblock,jblock,iblocksize,jblocksize,nblockbd
- integer, save :: counter=0
+!integer, save :: counter=0
  type(gs_hamiltonian_type) :: gs_hamk
  logical :: compute_gbound
  character(len=500) :: msg

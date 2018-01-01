@@ -382,13 +382,15 @@ if (istep==1 .or. (wfmixalg==2 .and. abs(scf_history%alpha-one)<tol8) ) then
 
        else
 
-!        Compute the residual of the wavefunctions for this istep, that replaces the previously stored set of (biorthogonalized) input wavefunctions
+!        Compute the residual of the wavefunctions for this istep, 
+!        that replaces the previously stored set of (biorthogonalized) input wavefunctions
          scf_history%cg(:,icg_hist+1:icg_hist+my_nspinor*npw_k*nbdmix,ind_residual)=&
 &          scf_history%cg(:,icg_hist+1:icg_hist+my_nspinor*npw_k*nbdmix,ind_biorthog)&
 &          -scf_history%cg(:,icg_hist+1:icg_hist+my_nspinor*npw_k*nbdmix,ind_residual)
          if(usepaw==1) then
            do ibdmix=1,nbdmix
-             call pawcprj_axpby(one,-one,scf_history%cprj(:,ibdmix:ibdmix,ind_biorthog),scf_history%cprj(:,ibdmix:ibdmix,ind_residual))
+             call pawcprj_axpby(one,-one,scf_history%cprj(:,ibdmix:ibdmix,ind_biorthog),&
+&             scf_history%cprj(:,ibdmix:ibdmix,ind_residual))
            end do ! end loop on ibdmix
          endif
          
@@ -406,7 +408,8 @@ if (istep==1 .or. (wfmixalg==2 .and. abs(scf_history%alpha-one)<tol8) ) then
 &          (alpha-one)*scf_history%cg(:,icg_hist+1:icg_hist+my_nspinor*npw_k*nbdmix,ind_residual)
          if(usepaw==1) then
            do ibdmix=1,nbdmix
-             call pawcprj_axpby((alpha-one),one,scf_history%cprj(:,ibdmix:ibdmix,ind_residual),scf_history%cprj(:,ibdmix:ibdmix,ind_biorthog))
+             call pawcprj_axpby((alpha-one),one,scf_history%cprj(:,ibdmix:ibdmix,ind_residual),&
+&             scf_history%cprj(:,ibdmix:ibdmix,ind_biorthog))
            end do ! end loop on ibdmix
          endif
 
