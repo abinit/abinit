@@ -133,6 +133,7 @@ MODULE m_scf_history
    real(dp),allocatable :: cg(:,:,:)
     ! cg(2,mcg,history_size)
     ! wavefunction coefficients needed for each SCF cycle of history
+    ! Might also contain the wf residuals
 
    real(dp),allocatable :: deltarhor(:,:,:)
     ! deltarhor(nfft,nspden,history_size)
@@ -159,6 +160,11 @@ MODULE m_scf_history
    real(dp),allocatable :: xred_last(:,:)
     ! xred_last(3,natom)
     ! Last computed atomic positions (reduced coordinates)
+
+   real(dp),allocatable :: dotprod_sumdiag_cgcprj_ij(:,:,:)
+    ! dotprod_sumdiag_cgcprj_mn(2,history_size,history_size)
+    ! Container for the scalar products between aligned sets of wavefunctions or their residuals
+    ! S_ij=Sum_nk <wf_nk(set i)|wf_nk(set j)> possibly with some weighting factor that might depend on nk.
 
 ! Structured datatypes arrays
 
@@ -305,6 +311,11 @@ subroutine scf_history_init(dtset,mpi_enreg,usecg,scf_history)
        ABI_DATATYPE_ALLOCATE(scf_history%cprj,(dtset%natom,scf_history%mcprj,scf_history%history_size))
      end if
 
+     if (scf_history%usecg==2)then
+!      This relatively small matrix is always allocated when usecg==1, even if not used
+       ABI_ALLOCATE(scf_history%dotprod_sumdiag_cgcprj_ij,(2,scf_history%history_size,scf_history%history_size))
+     endif
+
    end if
  end if
 
@@ -393,6 +404,9 @@ subroutine scf_history_free(scf_history)
  end if
  if (allocated(scf_history%cg))           then
    ABI_DEALLOCATE(scf_history%cg)
+ end if
+ if (allocated(scf_history%dotprod_sumdiag_cgcprj_ij))           then
+   ABI_DEALLOCATE(scf_history%dotprod_sumdiag_cgcprj_ij)
  end if
 
  scf_history%history_size=-1
