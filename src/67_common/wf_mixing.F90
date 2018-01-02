@@ -90,7 +90,7 @@ subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
 !scalars
  integer :: hermitian
  integer :: ibdmix,ibdsp,ibg,ibg_hist,icg,icg_hist
- integer :: ierr,ii,jj,ikpt,indh,ind_biorthog,ind_newwf,ind_residual,inplace
+ integer :: ierr,ikpt,indh,ind_biorthog,ind_newwf,ind_residual,inplace
  integer :: iset2,isppol,istep_cycle,istep_new,istwf_k,kk,me_distrb,my_nspinor
  integer :: nband_k,nbdmix,npw_k,nset1,nset2,ntypat
  integer :: shift_set1,shift_set2,spaceComm_band,spare_mem,usepaw,wfmixalg
