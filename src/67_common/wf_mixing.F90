@@ -461,7 +461,7 @@ if (istep==1 .or. (wfmixalg==2 .and. abs(scf_history_wf%alpha-one)<tol8) ) then
    ibg_hist=0
    ABI_ALLOCATE(al,(2,nset2))
    do iset2=1,nset2
-     al(1,iset2)=real(coeffs(iset2)) ; al(1,iset2)=imag(coeffs(iset2))
+     al(1,iset2)=real(coeffs(iset2)) ; al(1,iset2)=aimag(coeffs(iset2))
    enddo
 
 !  LOOP OVER SPINS
