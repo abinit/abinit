@@ -126,6 +126,7 @@ sources = [
  "vso_realspace_local.F90",
  "vtorhotf.F90",
  "waveformat.F90",
+ "wf_mixing.F90",
  "wvl_initro.F90",
  "wvl_mkrho.F90"]
 

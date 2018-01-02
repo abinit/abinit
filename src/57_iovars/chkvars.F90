@@ -241,7 +241,7 @@ subroutine chkvars (string)
  list_vars=trim(list_vars)//' vdw_df_tweaks vdw_df_zab'
  list_vars=trim(list_vars)//' vel vel_cell vis vprtrb'
 !W
- list_vars=trim(list_vars)//' wfoptalg wtatcon wtk wtq'
+ list_vars=trim(list_vars)//' wfmix wfoptalg wtatcon wtk wtq'
  list_vars=trim(list_vars)//' wvl_bigdft_comp wvl_crmult wvl_frmult wvl_hgrid wvl_ngauss wvl_nprccg'
  list_vars=trim(list_vars)//' w90iniprj w90prtunk'
 !X

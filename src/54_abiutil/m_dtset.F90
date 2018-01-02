@@ -1023,6 +1023,7 @@ subroutine dtset_copy(dtout, dtin)
  dtout%vdw_tol            = dtin%vdw_tol
  dtout%vdw_tol_3bt        = dtin%vdw_tol_3bt
  dtout%vis                = dtin%vis
+ dtout%wfmix              = dtin%wfmix
  dtout%wfk_task           = dtin%wfk_task
  dtout%wtq                = dtin%wtq
  dtout%wvl_hgrid          = dtin%wvl_hgrid
