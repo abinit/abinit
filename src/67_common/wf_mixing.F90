@@ -90,7 +90,7 @@ subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
 !scalars
  integer :: hermitian
  integer :: ibdmix,ibdsp,ibg,ibg_hist,icg,icg_hist
- integer :: ierr,ikpt,indh,ind_biorthog,ind_newwf,ind_residual,inplace
+ integer :: ierr,ikpt,indh,ind_biorthog,ind_biorthog_eff,ind_newwf,ind_residual,inplace
  integer :: iset2,isppol,istep_cycle,istep_new,istwf_k,kk,me_distrb,my_nspinor
  integer :: nband_k,nbdmix,npw_k,nset1,nset2,ntypat
  integer :: shift_set1,shift_set2,spaceComm_band,spare_mem,usepaw,wfmixalg
@@ -104,6 +104,7 @@ subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
  complex(dpc),allocatable :: coeffs(:)
  type(pawcprj_type),allocatable :: cprj_k(:,:),cprj_kh(:,:)
 !DEBUG
+!real(dp),allocatable :: cg_temp(:,:)
 !real(dp),allocatable :: cg_ref(:,:)
 !type(pawcprj_type),allocatable :: cprj_ref(:,:)
 !ENDDEBUG
@@ -111,14 +112,21 @@ subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
 ! *************************************************************************
 
 !DEBUG
-!write(std_out,*)' wf_mixing : enter '
+ write(std_out,*)
+ write(std_out,*)' wf_mixing : enter, istep= ',istep
+ call flush(std_out)
 !write(std_out,*)' istep,scf_history_wf%alpha=',istep,scf_history_wf%alpha
-!write(std_out,*)' cg(1:2,1:2)=',cg(1:2,1:2)
-!write(std_out,*)' scf_history_wf%cg(1:2,1:2,1)=',scf_history_wf%cg(1:2,1:2,1)
+ write(std_out,*)' cg(1,1)=',cg(1,1)
+ write(std_out,*)' scf_history_wf%cg(1,1,1:5)=',scf_history_wf%cg(1,1,1:5)
 !ABI_ALLOCATE(cg_ref,(2,mcg))
 !cg_ref(:,:)=cg(:,:)
 !ABI_DATATYPE_ALLOCATE(cprj_ref,(dtset%natom,mcprj))
 !cprj_ref(:,:)=cprj(:,:)
+       write(std_out,*)' scf_history_wf%dotprod_sumdiag_cgcprj_ij(:,2,2)=',&
+&       scf_history_wf%dotprod_sumdiag_cgcprj_ij(:,2,2)
+       call flush(std_out)
+!ENDDEBUG
+
 !ENDDEBUG
 
  if (istep==0) return
@@ -165,13 +173,15 @@ subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
  ABI_ALLOCATE(mmn,(2,nbdmix,nbdmix))
 
  if(wfmixalg>2)then
-   nset1=1 ; shift_set1=ind_residual-1
-   nset2=min(istep-1,wfmixalg-1) ; shift_set2=1
+   nset1=1 
+   nset2=min(istep-1,wfmixalg-1) 
    ABI_ALLOCATE(dotprod_res_k,(2,1,nset2))
    ABI_ALLOCATE(dotprod_res,(2,1,nset2))
    ABI_ALLOCATE(res_mn,(2,wfmixalg-1,wfmixalg-1)) 
    dotprod_res=zero
-   scf_history_wf%dotprod_sumdiag_cgcprj_ij=zero
+   if(istep==1)then
+     scf_history_wf%dotprod_sumdiag_cgcprj_ij=zero
+   endif
  endif
 
 !Explanation for the index for the wavefunction stored in scf_history_wf
@@ -193,6 +203,11 @@ if (istep==1 .or. (wfmixalg==2 .and. abs(scf_history_wf%alpha-one)<tol8) ) then
 
    indh=2   ! This input wavefunction is NOT the reference
    if(wfmixalg==2)indh=1 ! But this does not matter in the simple mixing case that has history_size=1
+
+!DEBUG
+   write(std_out,*)' wf_mixing : store wavefunctions at indh=',indh
+   call flush(std_out)
+!ENDDEBUG
 
 !  Simply store the wavefunctions and cprj. However, nband_k might be different from nbandhf...
 !  LOOP OVER SPINS
@@ -226,6 +241,12 @@ if (istep==1 .or. (wfmixalg==2 .and. abs(scf_history_wf%alpha-one)<tol8) ) then
 
      enddo
    enddo
+
+!DEBUG
+   write(std_out,*)' wf_mixing : stored wavefunctions at indh=',indh
+   call flush(std_out)
+!ENDDEBUG
+
 
 !DEBUG
  else if(.false.)then
@@ -267,7 +288,7 @@ if (istep==1 .or. (wfmixalg==2 .and. abs(scf_history_wf%alpha-one)<tol8) ) then
 !  First part of the computation : biorthogonalization, and computation of the residual (possibly, prediction of the next input in the case of simple mixing)
 !  Index for the wavefunctions stored in scf_history_wf whose scalar products with the argument cgcprj will have to be computed.
    indh=1   ! This input wavefunction is the reference
-   if(wfmixalg/=2 .and. istep==1)indh=2 ! except in the first step of the rmm-diis
+   if(wfmixalg/=2 .and. istep==2)indh=2 ! except for istep=2 in the rmm-diis
 
    if(wfmixalg>2)then
 !    istep inside the cycle defined by wfmixalg, and next index. Then, indices of the wavefunction sets.
@@ -276,6 +297,16 @@ if (istep==1 .or. (wfmixalg==2 .and. abs(scf_history_wf%alpha-one)<tol8) ) then
      ind_biorthog=1+wfmixalg+istep_cycle
      ind_residual=2+istep_cycle
      ind_newwf=2+istep_new
+     shift_set1=ind_residual-1
+     shift_set2=1
+
+!DEBUG
+   write(std_out,*)' wf_mixing : different indices :'
+   write(std_out,*)' istep_cycle, istep_new=',istep_cycle, istep_new
+   write(std_out,*)' ind_biorthog, ind_residual, ind_newwf=',ind_biorthog, ind_residual, ind_newwf
+   call flush(std_out)
+!ENDDEBUG
+
    endif
 
 !  LOOP OVER SPINS
@@ -303,13 +334,19 @@ if (istep==1 .or. (wfmixalg==2 .and. abs(scf_history_wf%alpha-one)<tol8) ) then
        end if  !end usepaw=1
 
 !DEBUG
-!      write(std_out,*)' Compute the S matrix, whose matrix elements are scalar products.'
+       write(std_out,*)' '
+       write(std_out,*)' Compute the S matrix, whose matrix elements are scalar products.'
 !ENDDEBUG
        hermitian=0
-       call dotprod_set_cgcprj(atindx1,cg,scf_history_wf%cg(:,:,indh),cprj_k,cprj_kh,dimcprj,hermitian,&
-&        0,0,icg,icg_hist,ikpt,isppol,istwf_k,nbdmix,mcg,mcg,mcprj,mcprj,dtset%mkmem,&
-&        mpi_enreg,dtset%natom,nattyp,nbdmix,nbdmix,npw_k,my_nspinor,dtset%nsppol,ntypat,pawtab,smn,usepaw)
-
+       if(wfmixalg==2 .or. istep==2)then
+         call dotprod_set_cgcprj(atindx1,cg,scf_history_wf%cg(:,:,indh),cprj_k,cprj_kh,dimcprj,hermitian,&
+&          0,0,icg,icg_hist,ikpt,isppol,istwf_k,nbdmix,mcg,mcg,mcprj,mcprj,dtset%mkmem,&
+&          mpi_enreg,dtset%natom,nattyp,nbdmix,nbdmix,npw_k,my_nspinor,dtset%nsppol,ntypat,pawtab,smn,usepaw)
+       else
+         call dotprod_set_cgcprj(atindx1,scf_history_wf%cg(:,:,indh),cg,cprj_kh,cprj_k,dimcprj,hermitian,&
+&          0,0,icg,icg_hist,ikpt,isppol,istwf_k,nbdmix,mcg,mcg,mcprj,mcprj,dtset%mkmem,&
+&          mpi_enreg,dtset%natom,nattyp,nbdmix,nbdmix,npw_k,my_nspinor,dtset%nsppol,ntypat,pawtab,smn,usepaw)
+       endif
 
 !      Invert S matrix, that is NOT hermitian. 
 !      Calculate M=S^-1
@@ -317,6 +354,10 @@ if (istep==1 .or. (wfmixalg==2 .and. abs(scf_history_wf%alpha-one)<tol8) ) then
        do kk=1,nbdmix
          mmn(1,kk,kk)=one
        end do
+
+!DEBUG
+       write(std_out,*)'  Will call zgesv, nbdmix=',nbdmix
+!ENDDEBUG
 
        ABI_ALLOCATE(ipiv,(nbdmix))
 !      The smn is destroyed by the following inverse call
@@ -330,15 +371,30 @@ if (istep==1 .or. (wfmixalg==2 .and. abs(scf_history_wf%alpha-one)<tol8) ) then
 
 !      The M matrix is used to compute the biorthogonalized set of wavefunctions, and to store it at the proper place
        if(wfmixalg==2 .or. istep==2)then
+
+!DEBUG
+       write(std_out,*)' Compute the biorthogonalized set of wavefunctions, at istep=2, and store it at the proper place'
+       call flush(std_out)
+!ENDDEBUG
+
          inplace=1
          call lincom_cgcprj(mmn,scf_history_wf%cg(:,:,indh),cprj_kh,dimcprj,&
 &         icg_hist,inplace,mcg,my_nspinor*nbdmix,dtset%natom,nbdmix,nbdmix,npw_k,my_nspinor,usepaw)
        else
+
+!DEBUG
+       write(std_out,*)' Compute the biorthogonalized set of wavefunctions, at istep/=2,',&
+&       ' and store it at the proper place, ind_biorthog=', ind_biorthog
+       call flush(std_out)
+!ENDDEBUG
+
          inplace=0
          call lincom_cgcprj(mmn,cg,cprj_k,dimcprj,&
 &         icg,inplace,mcg,my_nspinor*nbdmix,dtset%natom,nbdmix,nbdmix,npw_k,my_nspinor,usepaw,&
 &         cgout=scf_history_wf%cg(:,:,ind_biorthog),cprjout=scf_history_wf%cprj(:,:,ind_biorthog),icgout=icg_hist)
        endif
+
+!      The biorthogonalised set of wavefunctions is now stored at the proper place
 
 !      Finalize this first part of the computation, depending on the algorithm and the step.
 
@@ -369,32 +425,50 @@ if (istep==1 .or. (wfmixalg==2 .and. abs(scf_history_wf%alpha-one)<tol8) ) then
            end do ! end loop on ibdmix
          end if
 
-       else if (istep==2)then
+       else  !  wfmixalg/=2
+!        RMM-DIIS
 
-!        Store the argument wf as the reference for all future steps, in scf_history_wf with index 1..
-         scf_history_wf%cg(:,icg_hist+1:icg_hist+my_nspinor*npw_k*nbdmix,1)=cg(:,icg+1:icg+my_nspinor*npw_k*nbdmix)
-         if(usepaw==1) then
-           do ibdmix=1,nbdmix
-             call pawcprj_put(atindx1,cprj_k,scf_history_wf%cprj(:,:,1),dtset%natom,1,ibg_hist,ikpt,1,isppol,&
-&             nbdmix,dtset%mkmem,dtset%natom,nbdmix,nbdmix,dimcprj,my_nspinor,dtset%nsppol,0,&
-&             mpicomm=mpi_enreg%comm_kpt,mpi_comm_band=spaceComm_band,proc_distrb=mpi_enreg%proc_distrb)
-           end do ! end loop on ibdmix
-         end if
+         if (istep==2)then
+!DEBUG
+           write(std_out,*)' Store the argument wf as the reference for all future steps, in scf_history_wf with index 1'
+           call flush(std_out)
+!ENDDEBUG
+!          Store the argument wf as the reference for all future steps, in scf_history_wf with index 1. 
+           scf_history_wf%cg(:,icg_hist+1:icg_hist+my_nspinor*npw_k*nbdmix,1)=cg(:,icg+1:icg+my_nspinor*npw_k*nbdmix)
+           if(usepaw==1) then
+             do ibdmix=1,nbdmix
+               call pawcprj_put(atindx1,cprj_k,scf_history_wf%cprj(:,:,1),dtset%natom,1,ibg_hist,ikpt,1,isppol,&
+&               nbdmix,dtset%mkmem,dtset%natom,nbdmix,nbdmix,dimcprj,my_nspinor,dtset%nsppol,0,&
+&               mpicomm=mpi_enreg%comm_kpt,mpi_comm_band=spaceComm_band,proc_distrb=mpi_enreg%proc_distrb)
+             end do ! end loop on ibdmix
+           end if
+         endif
 
-       else
+!DEBUG
+         write(std_out,*)' istep > 2, compute the residual of the wavefunctions for this step '
+         call flush(std_out)
+!ENDDEBUG
+         ind_biorthog_eff=ind_biorthog
+         if(istep==2)ind_biorthog_eff=1 ! The argument wf has not been stored in ind_biorthog
 
 !        Compute the residual of the wavefunctions for this istep, 
 !        that replaces the previously stored set of (biorthogonalized) input wavefunctions
          scf_history_wf%cg(:,icg_hist+1:icg_hist+my_nspinor*npw_k*nbdmix,ind_residual)=&
-&          scf_history_wf%cg(:,icg_hist+1:icg_hist+my_nspinor*npw_k*nbdmix,ind_biorthog)&
+&          scf_history_wf%cg(:,icg_hist+1:icg_hist+my_nspinor*npw_k*nbdmix,ind_biorthog_eff)&
 &          -scf_history_wf%cg(:,icg_hist+1:icg_hist+my_nspinor*npw_k*nbdmix,ind_residual)
          if(usepaw==1) then
            do ibdmix=1,nbdmix
-             call pawcprj_axpby(one,-one,scf_history_wf%cprj(:,ibdmix:ibdmix,ind_biorthog),&
+             call pawcprj_axpby(one,-one,scf_history_wf%cprj(:,ibdmix:ibdmix,ind_biorthog_eff),&
 &             scf_history_wf%cprj(:,ibdmix:ibdmix,ind_residual))
            end do ! end loop on ibdmix
          endif
          
+
+!DEBUG
+         write(std_out,*)' will call dotprodm_sumdiag_cgcprj'
+         call flush(std_out)
+!ENDDEBUG
+
 !        Compute the new scalar products to fill the res_mn matrix
          call dotprodm_sumdiag_cgcprj(atindx1,scf_history_wf%cg,scf_history_wf%cprj,dimcprj,&
 &         ibg,icg,ikpt,isppol,istwf_k,nbdmix,mcg,mcprj,dtset%mkmem,&
@@ -404,11 +478,20 @@ if (istep==1 .or. (wfmixalg==2 .and. abs(scf_history_wf%alpha-one)<tol8) ) then
          dotprod_res=dotprod_res+dotprod_res_k
 
 !        scf_history_wf for index ind_biorthog will contain the extrapolated wavefunctions (and no more the output of the SCF loop).
+!DEBUG
+         write(std_out,*)' %cg(1,1,ind_biorthog) biorthogonalized, but before extrapolation=',scf_history_wf%cg(1,1,ind_biorthog)
+!ENDDEBUG
          scf_history_wf%cg(:,icg_hist+1:icg_hist+my_nspinor*npw_k*nbdmix,ind_biorthog)=&
-&          scf_history_wf%cg(:,icg_hist+1:icg_hist+my_nspinor*npw_k*nbdmix,ind_biorthog)+&
+&          scf_history_wf%cg(:,icg_hist+1:icg_hist+my_nspinor*npw_k*nbdmix,ind_biorthog_eff)+&
 &          (alpha-one)*scf_history_wf%cg(:,icg_hist+1:icg_hist+my_nspinor*npw_k*nbdmix,ind_residual)
+!DEBUG
+         write(std_out,*)' %cg(1,1,ind_biorthog) biorthogonalized, after extrapolation=',scf_history_wf%cg(1,1,ind_biorthog)
+!ENDDEBUG
          if(usepaw==1) then
            do ibdmix=1,nbdmix
+             if(ind_biorthog/=ind_biorthog_eff)then
+               scf_history_wf%cprj(:,ibdmix:ibdmix,ind_biorthog)=scf_history_wf%cprj(:,ibdmix:ibdmix,ind_biorthog_eff) 
+             endif
              call pawcprj_axpby((alpha-one),one,scf_history_wf%cprj(:,ibdmix:ibdmix,ind_residual),&
 &             scf_history_wf%cprj(:,ibdmix:ibdmix,ind_biorthog))
            end do ! end loop on ibdmix
@@ -428,19 +511,57 @@ if (istep==1 .or. (wfmixalg==2 .and. abs(scf_history_wf%alpha-one)<tol8) ) then
 
  end if ! istep>=2
 
- if(wfmixalg>2)then
+ if(wfmixalg>2 .and. istep>1)then
+
+!DEBUG
+       write(std_out,*)' '
+       write(std_out,*)' Entering the residual minimisation part '
+       write(std_out,*)' '
+       call flush(std_out)
+!ENDDEBUG
 
    call timab(48,1,tsec)
-   call xmpi_sum(dotprod_res,mpi_enreg%comm_kpt,ierr) 
+   call xmpi_sum(dotprod_res,mpi_enreg%comm_kpt,ierr)
    call timab(48,2,tsec)
+
+!DEBUG
+       write(std_out,*)' Computed the residual cross product :'
+       write(std_out,*)' dotprod_res(:,1,1:nset2)=',dotprod_res(:,1,1:nset2)
+       write(std_out,*)' scf_history_wf%dotprod_sumdiag_cgcprj_ij(:,2,2)=',&
+&       scf_history_wf%dotprod_sumdiag_cgcprj_ij(:,2,2)
+       write(std_out,*)' '
+       call flush(std_out)
+!ENDDEBUG
+
 
    scf_history_wf%dotprod_sumdiag_cgcprj_ij(:,1+shift_set1,1+shift_set2:nset2+shift_set2)=dotprod_res(:,1,1:nset2)
    scf_history_wf%dotprod_sumdiag_cgcprj_ij(1,1+shift_set2:nset2+shift_set2,1+shift_set1)=dotprod_res(1,1,1:nset2)
    scf_history_wf%dotprod_sumdiag_cgcprj_ij(2,1+shift_set2:nset2+shift_set2,1+shift_set1)=-dotprod_res(2,1,1:nset2)
 
+!DEBUG
+   if(istep==2)then
+
+!    Extract the relevant matrix R_mn
+     res_mn(:,1:nset2,1:nset2)=&
+&     scf_history_wf%dotprod_sumdiag_cgcprj_ij(:,1+shift_set2:nset2+shift_set2,1+shift_set2:nset2+shift_set2)
+     write(std_out,*)' The matrix res_mn(:,1:nset2,1:nset2) is :'
+     write(std_out,*)res_mn(:,1:nset2,1:nset2)
+     call flush(std_out)
+   endif
+!ENDDEBUG
+ endif ! wfmixalg>2 and istep>1
+
+ if(wfmixalg>2 .and. istep>2)then
+
 !  Extract the relevant matrix R_mn
    res_mn(:,1:nset2,1:nset2)=&
 &   scf_history_wf%dotprod_sumdiag_cgcprj_ij(:,1+shift_set2:nset2+shift_set2,1+shift_set2:nset2+shift_set2)
+
+!DEBUG
+       write(std_out,*)' The matrix res_mn(:,1:nset2,1:nset2) is :'
+       write(std_out,*)res_mn(:,1:nset2,1:nset2)
+       call flush(std_out)
+!ENDDEBUG
 
 !  Solve R_mn \alpha_n = 1_m
    ABI_ALLOCATE(ipiv,(nset2))
@@ -453,6 +574,15 @@ if (istep==1 .or. (wfmixalg==2 .and. abs(scf_history_wf%alpha-one)<tol8) ) then
    sum_coeffs=sum(coeffs)
    coeffs=coeffs/sum_coeffs
 
+!DEBUG
+       write(std_out,*)' The coefficients that minimize the residual have been found'
+       write(std_out,*)' coeffs =',coeffs
+       call flush(std_out)
+!ENDDEBUG
+ endif ! wfmixalg>2 and istep>2
+
+  if(wfmixalg>2 .and. istep>1)then
+
 !  Find the new "input" wavefunction, bi-orthogonalized, and store it replacing the adequate "old" input wavefunction.
 
    icg=0
@@ -460,9 +590,22 @@ if (istep==1 .or. (wfmixalg==2 .and. abs(scf_history_wf%alpha-one)<tol8) ) then
    ibg=0
    ibg_hist=0
    ABI_ALLOCATE(al,(2,nset2))
-   do iset2=1,nset2
-     al(1,iset2)=real(coeffs(iset2)) ; al(1,iset2)=aimag(coeffs(iset2))
-   enddo
+   if(istep>2)then
+     do iset2=1,nset2
+       al(1,iset2)=real(coeffs(iset2)) ; al(2,iset2)=aimag(coeffs(iset2))
+     enddo
+   else
+     al(1,1)=one ; al(2,1)=zero
+   endif
+
+!DEBUG
+!      write(std_out,*)' Overload the coefficients, in order to simulate a simple mixing with wfmix '
+!      write(std_out,*)' Set al(1,ind_biorthog-3)=one, for ind_biorthog=',ind_biorthog
+!      write(std_out,*)' This will feed scf_history for set ind_biorthog-3+wfmixalg=',ind_biorthog-3+wfmixalg
+!      al(:,:)=zero
+!      al(1,ind_biorthog-3)=one
+!      call flush(std_out)
+!ENDDEBUG
 
 !  LOOP OVER SPINS
    do isppol=1,dtset%nsppol
@@ -477,30 +620,50 @@ if (istep==1 .or. (wfmixalg==2 .and. abs(scf_history_wf%alpha-one)<tol8) ) then
        istwf_k=dtset%istwfk(ikpt)
        npw_k=npwarr(ikpt)
 
-!      Make the appropriate linear combination
-       cg(:,icg+1:icg+my_nspinor*npw_k*nband_k)=zero
-       do iset2=1,nset2
-         cg(1,icg+1:icg+my_nspinor*npw_k*nband_k)=cg(1,icg+1:icg+my_nspinor*npw_k*nband_k)&
-&          +al(1,iset2)*scf_history_wf%cg(1,icg_hist+1:icg_hist+my_nspinor*npw_k*nbdmix,iset2+shift_set2)&
-&          -al(2,iset2)*scf_history_wf%cg(2,icg_hist+1:icg_hist+my_nspinor*npw_k*nbdmix,iset2+shift_set2)
-         cg(2,icg+1:icg+my_nspinor*npw_k*nband_k)=cg(2,icg+1:icg+my_nspinor*npw_k*nband_k)&
-&          +al(1,iset2)*scf_history_wf%cg(2,icg_hist+1:icg_hist+my_nspinor*npw_k*nbdmix,iset2+shift_set2)&        
-&          +al(2,iset2)*scf_history_wf%cg(1,icg_hist+1:icg_hist+my_nspinor*npw_k*nbdmix,iset2+shift_set2)
-       enddo
-!      Note the storage in cprj_k
+       if(istep>2)then
+!        Make the appropriate linear combination (from the extrapolated wfs)
+         cg(:,icg+1:icg+my_nspinor*npw_k*nband_k)=zero
+         do iset2=1,nset2
+!DEBUG
+           write(std_out,*)' Mix, iset2,al(:,iset2),scf_history_wf%cg(1,1,iset2+wfmixalg)=',&
+&            iset2,al(:,iset2),scf_history_wf%cg(1,1,iset2+wfmixalg)
+!ENDDEBUG
+           cg(1,icg+1:icg+my_nspinor*npw_k*nband_k)=cg(1,icg+1:icg+my_nspinor*npw_k*nband_k)&
+&            +al(1,iset2)*scf_history_wf%cg(1,icg_hist+1:icg_hist+my_nspinor*npw_k*nbdmix,iset2+wfmixalg)&
+&            -al(2,iset2)*scf_history_wf%cg(2,icg_hist+1:icg_hist+my_nspinor*npw_k*nbdmix,iset2+wfmixalg)
+           cg(2,icg+1:icg+my_nspinor*npw_k*nband_k)=cg(2,icg+1:icg+my_nspinor*npw_k*nband_k)&
+&            +al(1,iset2)*scf_history_wf%cg(2,icg_hist+1:icg_hist+my_nspinor*npw_k*nbdmix,iset2+wfmixalg)&        
+&            +al(2,iset2)*scf_history_wf%cg(1,icg_hist+1:icg_hist+my_nspinor*npw_k*nbdmix,iset2+wfmixalg)
+         enddo
+       else ! One needs a simple copy from the extrapolated wavefunctions
+         cg(:,icg+1:icg+my_nspinor*npw_k*nband_k)=scf_history_wf%cg(:,icg_hist+1:icg_hist+my_nspinor*npw_k*nbdmix,1+wfmixalg)
+       endif
+!      Note the storage in cprj_k. By the way, a simple copy might also be used in case istep=2.
        if(usepaw==1) then
          do ibdsp=1,my_nspinor*nbdmix
-           call pawcprj_lincom(al,scf_history_wf%cprj(:,ibdsp,1+shift_set2:nset2+shift_set2),cprj_k(:,ibdsp:ibdsp),nset2)
+           call pawcprj_lincom(al,scf_history_wf%cprj(:,ibdsp,1+wfmixalg:nset2+wfmixalg),cprj_k(:,ibdsp:ibdsp),nset2)
          enddo
        endif
 
 !      Store the newly extrapolated wavefunctions for this k point, still bi-orthonormalized, in scf_history_wf
+!DEBUG
+       write(std_out,*)' Store the newly extrapolated wavefunctions for this k point, still bi-orthonormalized, in scf_history_wf'
+       write(std_out,*)' cg(1,1)',cg(1,1)
+!      write(std_out,*)' %cg(1,1,ind_biorthog) biorthogonalized, after extrapolation=',scf_history_wf%cg(1,1,ind_biorthog)
+       call flush(std_out)
+!ENDDEBUG
+
        scf_history_wf%cg(:,icg_hist+1:icg_hist+my_nspinor*npw_k*nbdmix,ind_newwf)=cg(:,icg+1:icg+my_nspinor*npw_k*nbdmix)
        if(usepaw==1) then
          call pawcprj_put(atindx1,cprj_k,scf_history_wf%cprj(:,:,ind_newwf),dtset%natom,1,ibg_hist,ikpt,1,isppol,&
 &         nbdmix,dtset%mkmem,dtset%natom,nbdmix,nbdmix,dimcprj,my_nspinor,dtset%nsppol,0,&
 &         mpicomm=mpi_enreg%comm_kpt,mpi_comm_band=spaceComm_band,proc_distrb=mpi_enreg%proc_distrb)
        end if
+
+!DEBUG
+       write(std_out,*)' Back to usual orthonormalization for the cg and cprj_k'
+       call flush(std_out)
+!ENDDEBUG
 
 !      Back to usual orthonormalization for the cg and cprj_k
        call cgcprj_cholesky(atindx1,cg,cprj_k,dimcprj,icg,ikpt,isppol,istwf_k,mcg,my_nspinor*nband_k,dtset%mkmem,&
@@ -523,16 +686,25 @@ if (istep==1 .or. (wfmixalg==2 .and. abs(scf_history_wf%alpha-one)<tol8) ) then
 !    End loop over spins
    end do
 
-   ABI_DEALLOCATE(coeffs)
+   if(istep>2)then
+     ABI_DEALLOCATE(coeffs)
+   endif
 
- endif ! wfmixalg>2
+ endif ! wfmixalg>2 and istep>1
 
 !DEBUG
-! write(std_out,*)' wf_mixing : exit '
+  write(std_out,*)' wf_mixing : exit '
+       write(std_out,*)' scf_history_wf%dotprod_sumdiag_cgcprj_ij(:,2,2)=',&
+&       scf_history_wf%dotprod_sumdiag_cgcprj_ij(:,2,2)
+
+ write(std_out,*)' cg(1,1)=',cg(1,1)
+ write(std_out,*)' scf_history_wf%cg(1,1,1:5)=',scf_history_wf%cg(1,1,1:5)
+  write(std_out,*)
 ! write(std_out,*)' cg(1:2,1:2)=',cg(1:2,1:2)
 ! write(std_out,*)' scf_history_wf%cg(1:2,1:2,1)=',scf_history_wf%cg(1:2,1:2,1)
 ! ABI_DEALLOCATE(cg_ref)
 ! ABI_DATATYPE_DEALLOCATE(cprj_ref)
+
 !ENDDEBUG
 
  if(usepaw==1) then

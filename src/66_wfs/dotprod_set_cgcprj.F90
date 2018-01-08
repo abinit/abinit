@@ -120,6 +120,8 @@ subroutine dotprod_set_cgcprj(atindx1,cg1,cg2,cprj1,cprj2,dimcprj,hermitian,&
 !DEBUG
  write(std_out,*)' dotprod_set_cgcprj : enter '
  write(std_out,*)' dotprod_set_cgcprj : npw, nspinor=',npw,nspinor
+ write(std_out,*)' dotprod_set_cgcprj : usepaw,nbd1,nbd2=',usepaw,nbd1,nbd2
+ call flush(std_out)
 !ENDDEBUG
 
  if(hermitian==1)then
