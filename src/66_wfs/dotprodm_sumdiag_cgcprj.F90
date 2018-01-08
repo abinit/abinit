@@ -117,8 +117,8 @@ subroutine dotprodm_sumdiag_cgcprj(atindx1,cg_set,cprj_set,dimcprj,&
 ! *************************************************************************
 
 !DEBUG
- write(std_out,*)' dotprodm_sumdiag_cgcprj : enter '
- call flush(std_out)
+!write(std_out,*)' dotprodm_sumdiag_cgcprj : enter '
+!call flush(std_out)
 !ENDDEBUG
 
  ABI_ALLOCATE(cwavef1,(2,npw*nspinor))
@@ -139,12 +139,6 @@ subroutine dotprodm_sumdiag_cgcprj(atindx1,cg_set,cprj_set,dimcprj,&
    do iset1=1,nset1
 
      ind_set1=iset1+shift_set1
-
-!DEBUG
-     write(std_out,*)' icgb,ind_set1,shift_set1=',icgb,ind_set1,shift_set1
-     write(std_out,*)' size cg_set =',size(cg_set,1),size(cg_set,2),size(cg_set,3) 
-     call flush(std_out)
-!ENDDEBUG
 
 !    Extract wavefunction information
      do ig=1,npw*nspinor
@@ -239,10 +233,6 @@ subroutine dotprodm_sumdiag_cgcprj(atindx1,cg_set,cprj_set,dimcprj,&
        smn(1,iset1,iset2)=smn(1,iset1,iset2)+dotr
        smn(2,iset1,iset2)=smn(2,iset1,iset2)+doti
 
-!DEBUG 
-       write(std_out,*)' dotprodm... : ind_set1,ind_set2,ibd,dotr,doti=',ind_set1,ind_set2,ibd,dotr,doti
-!ENDDEBUG
-
      enddo ! iset2
    enddo ! iset1
 
@@ -261,11 +251,6 @@ subroutine dotprodm_sumdiag_cgcprj(atindx1,cg_set,cprj_set,dimcprj,&
      endif
    enddo
  enddo
-
-!DEBUG
- write(std_out,*)' smn=',smn
- call flush(std_out)
-!ENDDEBUG
 
  ABI_DEALLOCATE(cwavef1)
  ABI_DEALLOCATE(cwavef2)

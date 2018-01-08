@@ -106,9 +106,9 @@
 ! *************************************************************************
 
 !DEBUG
- write(std_out,*)' lincom_cgcprj : enter '
- write(std_out,*)' lincom_cgcprj : npw, nspinor=',npw,nspinor
- write(std_out,*)' lincom_cgcprj : icgout=',icgout
+!write(std_out,*)' lincom_cgcprj : enter '
+!write(std_out,*)' lincom_cgcprj : npw, nspinor=',npw,nspinor
+!write(std_out,*)' lincom_cgcprj : icgout=',icgout
 !ENDDEBUG
 
  if(inplace==0)then
@@ -133,11 +133,6 @@
    cg(:,icg+1:icg+npw*nspinor*nband_out)=cgout_
  else
    cgout(:,icgout+1:icgout+npw*nspinor*nband_out)=cgout_
-!DEBUG
-!  ABI_DEALLOCATE(cgout_)
-!  write(std_out,*)' lincom_cgcprj : deallocated cgout_ without copying it'
-!  stop
-!ENDDEBUG
  endif
  ABI_DEALLOCATE(cgout_)
 

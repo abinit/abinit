@@ -1101,25 +1101,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
          if(wfmixalg==2)history_size=1
          scf_history_wf%history_size=history_size
          usecg=2
-!DEBUG
-!        write(std_out,*)' scfcv : will call scf_history_init'
-!        write(std_out,*)' dtset%wfmix,scf_history_wf%alpha=',dtset%wfmix,scf_history_wf%alpha
-!        call flush(std_out)
-!ENDDEBUG
          call scf_history_init(dtset,mpi_enreg,usecg,scf_history_wf)
-
-!DEBUG
-   write(std_out,*)' scfcv : after scf_history_init'
-   write(std_out,*)' scfcv : dtset%mkmem=',dtset%mkmem
-   write(std_out,*)' size(scf_history_wf%cprj(:,:,:),1)=',size(scf_history_wf%cprj(:,:,:),1)
-   write(std_out,*)' size(scf_history_wf%cprj(:,:,:),2)=',size(scf_history_wf%cprj(:,:,:),2)
-   write(std_out,*)' size(scf_history_wf%cprj(:,:,:),3)=',size(scf_history_wf%cprj(:,:,:),3)
-!  stop
-!ENDDEBUG
-!DEBUG
-!        write(std_out,*)' scfcv : exit scf_history_init'
-!        call flush(std_out)
-!ENDDEBUG
        endif
      endif
 
@@ -1133,24 +1115,11 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
 
        istep_updatedfock=1
 
-!DEBUG
-!      if(istep==1)then
-!ENDDEBUG
-  
        !Possibly mix the wavefunctions from different steps before computing the Fock operator
        if(wfmixalg/=0 .and. .not. (wfmixalg==2 .and. abs(scf_history_wf%alpha-one)<tol8) )then
-!DEBUG
-         write(std_out,*)' scfcv : will call wf_mixing'
-         write(std_out,*)' dtset%wfmix,scf_history_wf%alpha=',dtset%wfmix,scf_history_wf%alpha
-!        call flush(std_out)
-!ENDDEBUG
          call wf_mixing(atindx1,cg,cprj,dtset,istep_fock_outer,mcg,mcprj,mpi_enreg,&
 &         nattyp,npwarr,pawtab,scf_history_wf)
          istep_fock_outer=istep_fock_outer+1
-!DEBUG
-         write(std_out,*)' scfcv : exit wf_mixing'
-!        call flush(std_out)
-!ENDDEBUG
 
 !DEBUG
          if(.false.)then
