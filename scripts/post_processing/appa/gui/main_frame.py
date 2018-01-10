@@ -215,6 +215,14 @@ class MainFrame(QtGui.QMainWindow):
             else:
                 self.showError("This file can't be read by APPA")
 
+            #The file is not good for appa
+            if (self.goodFile == False):
+                self.showError("This file can't be read by APPA")
+                try:
+                    del self.progressbar
+                except:
+                    pass;
+
 
     def read(self,pathFile):
         TEMP = Read.MolecularDynamicFile(pathFile)

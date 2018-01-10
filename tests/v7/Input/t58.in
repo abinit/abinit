@@ -43,6 +43,7 @@
  nqpt4     1
  qpt4      1/150 0.0 0.0
  tolwfr4   1.0d-16
+ kptopt4   1 
 
 # Computation at q without getddb to cancel the divergence (el-ph)
  getwfk5   1
@@ -57,6 +58,8 @@
  rfatpol5  1 2          # Treat displacements of all atoms
  rfdir5    1 1 1        # Do all directions 
  tolwfr5   1.0d-16
+ kptopt5   3            # this was previously not needed because nsym is set to 1
+                        # if symmetries are later checked and used kptopt can not be 1
 
 # Computation at q with getddb to cancel the divergence (el-ph)
  getddb6   3
@@ -72,6 +75,7 @@
  rfatpol6  1 2          # Treat displacements of all atoms
  rfdir6    1 1 1        # Do all directions 
  tolwfr6   1.0d-16
+ kptopt6   3 
 
 # Computation at q with irdddb to cancel the divergence (el-ph)
 # irdddb7    3
@@ -129,4 +133,5 @@
 #%%  Diamond. Test the getddb variable that cancels the divergence in el-ph for small q-points
 #%%  Such divergence is induced by a residual electric field.
 #%%  Note: The Fan terms in DATASET 6 should be different (renormalized) from the one of DATASET 5. 
+#%% topics = TDepES
 #%%<END TEST_INFO>

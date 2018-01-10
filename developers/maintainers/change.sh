@@ -8,13 +8,10 @@
 for file in "$@"
 do
  echo "working on $file"
- rm -f tmp.file1 tmp.file2 tmp.file3
- sed -e 's/#%%<BEGIN TEST_INFO>/AAAA/' $file > tmp.file1
- sed -e '/AAAA/a\\#%%<BEGIN TEST_INFO>' tmp.file1 > tmp.file2
- sed -e 's!AAAA!## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r!' tmp.file2 > tmp.file3
-#sed -e 's!#%%<BEGIN TEST_INFO>!## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r \\#%%<BEGIN TEST_INFO>!' $file > tmp.file
+ rm -f tmp.file 
+ sed -e 's!doc/input_variables!doc/variables!' $file > tmp.file
  echo "changes done "
  # put the modified file at the correct place
- mv tmp.file3 $file
+ mv tmp.file $file
  echo "file $file written "
 done

@@ -4,7 +4,7 @@
 !! m_ppmodel
 !!
 !! FUNCTION
-!!  Module containing the definition of the ppmodel_t used to deal with 
+!!  Module containing the definition of the ppmodel_t used to deal with
 !!  the plasmonpole technique. Methods to operate on the object are also provided.
 !!
 !! COPYRIGHT
@@ -84,56 +84,56 @@ MODULE m_ppmodel
  type,public :: ppmodel_t
 
    !integers
-   integer :: dm2_botsq                          
+   integer :: dm2_botsq
    ! =npwc if ppmodel=1,2; =1 if ppmodel=3,4
 
-   integer :: dm_eig                             
+   integer :: dm_eig
    ! =npwc if ppmodel=3;   =0 if ppmodel=1,2,4
 
-   integer :: dm2_otq                            
+   integer :: dm2_otq
    ! =npwc if ppmodel=1,2; =1 if ppmodel=3,4
 
    integer :: invalid_freq
    ! what to do when PPM frequencies are invalid
 
-   integer :: model                              
+   integer :: model
    ! The type of Plasmonpole model
 
-   integer :: mqmem                              
+   integer :: mqmem
    ! =nqibz if in-core solutions, =0 for out-of-core for which the last dimension in the PPm arrays has size 1.
 
-   integer :: nqibz                              
+   integer :: nqibz
    ! Number of q-points in the IBZ
 
-   integer :: npwc                               
+   integer :: npwc
    ! Number of G vectors in $\tilde \epsilon $
 
-   integer :: userho                             
+   integer :: userho
    ! 1 if the ppmodel requires rho(G).
 
    integer :: iq_bz=0
    ! The index of the q-point in the BZ that is referenced by the internal pointer.
-                                                                     
+
    integer :: bigomegatwsq_qbz_stat = PPM_ISPOINTER
    ! Status of bigomegatwsq.
-                                                                     
+
    integer :: omegatw_qbz_stat = PPM_ISPOINTER
    ! Status of omegatw_qbz.
-                                                                     
+
    integer :: eigpot_qbz_stat = PPM_ISPOINTER
    ! Status of new_eigpot_qbz_stat.
 
-   real(dp) :: drude_plsmf                       
+   real(dp) :: drude_plsmf
    ! Drude plasma frequency
 
-   real(dp) :: force_plsmf=zero                  
+   real(dp) :: force_plsmf=zero
    ! Force plasma frequency to that set by ppmfreq (not used if set zero).
 
    ! arrays
    logical,allocatable :: keep_q(:)
-   ! .TRUE. if the ppmodel tables for this q in the IBZ are kept in memory. 
+   ! .TRUE. if the ppmodel tables for this q in the IBZ are kept in memory.
 
-   integer,allocatable :: has_q(:) 
+   integer,allocatable :: has_q(:)
    ! Flag defining the status of the tables for the different q. See the PPM_TAB flags.
 
    type(array2_gwpc_t),pointer :: bigomegatwsq_qbz   => null()
@@ -148,11 +148,11 @@ MODULE m_ppmodel
    type(array2_gwpc_t),allocatable :: bigomegatwsq(:)
    ! bigomegatwsq(nqibz)%value(npwc,dm2_botsq)
    ! Plasmon pole parameters $\tilde\Omega^2_{G Gp}(q)$.
-                                                             
+
    type(array2_gwpc_t),allocatable :: omegatw(:)
    ! omegatw(nqibz)%value(npwc,dm2_otq)
    ! Plasmon pole parameters $\tilde\omega_{G Gp}(q)$.
-                                                             
+
    type(array2_gwpc_t),allocatable :: eigpot(:)
    ! eigpot(nqibz)%value(dm_eig,dm_eig)
    ! Eigvectors of the symmetrized inverse dielectric matrix
@@ -164,11 +164,11 @@ MODULE m_ppmodel
  public :: ppm_nullify              ! Nullify all pointers
  public :: ppm_init                 ! Initialize dimensions and pointers
  public :: ppm_free                 ! Destruction method.
- public :: setup_ppmodel            ! Main Driver 
- public :: new_setup_ppmodel        ! Main Driver 
+ public :: setup_ppmodel            ! Main Driver
+ public :: new_setup_ppmodel        ! Main Driver
  public :: getem1_from_PPm          ! Reconstruct e^{-1}(w) from PPm.
  public :: getem1_from_PPm_one_ggp  ! Reconstruct e^{-1}(w) from PPm for one G,G' pair
- public :: get_ppm_eigenvalues       
+ public :: get_ppm_eigenvalues
  public :: calc_sig_ppm             ! Matrix elements of the self-energy with ppmodel.
  public :: ppm_times_ket            ! Matrix elements of the self-energy with ppmodel.
  public :: ppm_symmetrizer
@@ -186,35 +186,35 @@ CONTAINS  !=====================================================================
 !!  Calculates the plasmonpole matrix elements in the full BZ zone.
 !!
 !! INPUTS
-!!  PPm<ppmodel_t>=data type containing information on the plasmonpole technique 
+!!  PPm<ppmodel_t>=data type containing information on the plasmonpole technique
 !!  Gsph<gsphere_t>=data related to the G-sphere
 !!    %grottb
-!!    %phmSGt 
+!!    %phmSGt
 !!  Qmesh<kmesh_t>=Info on the q-mesh
 !!    %nbz=number if q-points in the BZ
 !!    %tab(nbz)=index of the symmeric q-point in the IBZ, for each point in the BZ
-!!    %tabo(nbz)=the operation that rotates q_ibz onto \pm q_bz (depending on tabi) 
+!!    %tabo(nbz)=the operation that rotates q_ibz onto \pm q_bz (depending on tabi)
 !!    %tabi(nbz)=-1 if time-reversal has to be considered, 1 otherwise
 !!  iq_bz=Index of the q-point in the BZ where PPmodel parameters have to be symmetrized
 !!
 !! OUTPUT
-!!  botsq 
+!!  botsq
 !!  otq
 !!  eig (only if PPm%ppmodel==3)
 !!
 !! NOTES
 !!  In the present implementation we are not considering a possible umklapp vector G0.
-!!  In this case,indeed, the equation is different since we have to consider G-G0. 
+!!  In this case,indeed, the equation is different since we have to consider G-G0.
 !!  There is however a check in sigma
-!! 
+!!
 !!  * Remember the symmetry properties of \tilde\espilon^{-1}
 !!    If q_bz=Sq_ibz+G0:
-!! 
+!!
 !!    $\epsilon^{-1}_{SG1-G0,SG2-G0}(q_bz) = e^{+iS(G2-G1).\tau}\epsilon^{-1}_{G1,G2)}(q)
 !!
 !!    If time-reversal symmetry can be used then :
 !!    $\epsilon^{-1}_{G1,G2}(-q_bz) = e^{+i(G1-G2).\tau}\epsilon^{-1}_{-S^{-1}(G1+Go),-S^{-1}(G2+G0)}^*(q)
-!! 
+!!
 !! * Notice that eig is used only if PPm%model==3
 !!
 !! PARENTS
@@ -224,7 +224,7 @@ CONTAINS  !=====================================================================
 !!
 !! SOURCE
 
-subroutine ppm_get_qbz(PPm,Gsph,Qmesh,iq_bz,botsq,otq,eig) 
+subroutine ppm_get_qbz(PPm,Gsph,Qmesh,iq_bz,botsq,otq,eig)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -237,7 +237,7 @@ subroutine ppm_get_qbz(PPm,Gsph,Qmesh,iq_bz,botsq,otq,eig)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: iq_bz 
+ integer,intent(in) :: iq_bz
  type(ppmodel_t),target,intent(inout) :: PPm
  type(gsphere_t),target,intent(in) :: Gsph
  type(kmesh_t),intent(in) :: Qmesh
@@ -248,7 +248,7 @@ subroutine ppm_get_qbz(PPm,Gsph,Qmesh,iq_bz,botsq,otq,eig)
  integer :: ii,jj,iq_ibz,itim_q,isym_q,iq_curr,isg1,isg2
  !character(len=500) :: msg
 !arrays
- integer,pointer :: grottb(:)
+ integer, ABI_CONTIGUOUS pointer :: grottb(:)
  complex(gwpc),ABI_CONTIGUOUS pointer :: phsgt(:),bigomegatwsq(:,:),omegatw(:,:)
 ! *********************************************************************
 
@@ -263,27 +263,25 @@ subroutine ppm_get_qbz(PPm,Gsph,Qmesh,iq_bz,botsq,otq,eig)
 
  !call get_bz_item(Qmesh,iq_bz,qbz,iq_ibz,isym_q,itim_q,isirred=q_isirred)
 
- iq_curr=iq_ibz; if (PPm%mqmem==0) iq_curr=1 
+ iq_curr=iq_ibz; if (PPm%mqmem==0) iq_curr=1
 
  grottb => Gsph%rottb (1:PPm%npwc,itim_q,isym_q)
- phsgt  => Gsph%phmSGt(1:PPm%npwc,isym_q) 
+ phsgt  => Gsph%phmSGt(1:PPm%npwc,isym_q)
 
  bigomegatwsq => PPm%bigomegatwsq(iq_curr)%vals
  omegatw      => PPm%omegatw(iq_curr)%vals
- !
+
  ! Symmetrize the PPM parameters
  SELECT CASE (PPm%model)
-
- CASE (PPM_GODBY_NEEDS, PPM_HYBERTSEN_LOUIE) 
-   ! * Plasmon pole frequencies otq are invariant under symmetry 
-
+ CASE (PPM_GODBY_NEEDS, PPM_HYBERTSEN_LOUIE)
+   ! Plasmon pole frequencies otq are invariant under symmetry
 !$omp parallel do private(isg1, isg2)
    do jj=1,PPm%npwc
      isg2 = grottb(jj)
      do ii=1,PPm%npwc
        isg1 = grottb(ii)
        botsq(isg1,isg2) = bigomegatwsq(ii,jj)*phsgt(ii)*CONJG(phsgt(jj))
-       otq  (isg1,isg2) = omegatw(ii,jj)  
+       otq  (isg1,isg2) = omegatw(ii,jj)
      end do
    end do
 
@@ -293,8 +291,8 @@ subroutine ppm_get_qbz(PPm,Gsph,Qmesh,iq_bz,botsq,otq,eig)
    !
    ! $\omega^2_{ii}(q_bz) = \omega^2_{ii}(q)$        (otq array)
    ! $\alpha_{ii}(q_bz)   = \alpha_{ii}(q)$          (botq array
-   ! $\Phi_{SG-G0}(q_bz)  = \Phi_{G}(q) e^{-iSG.t}$  (eigenvectors of e^{-1}, eig array) 
-   !   
+   ! $\Phi_{SG-G0}(q_bz)  = \Phi_{G}(q) e^{-iSG.t}$  (eigenvectors of e^{-1}, eig array)
+   !
    do ii=1,PPm%npwc ! DM bands index
      botsq(ii,1) = bigomegatwsq(ii,1)
      otq  (ii,1) = omegatw     (ii,1)
@@ -307,10 +305,10 @@ subroutine ppm_get_qbz(PPm,Gsph,Qmesh,iq_bz,botsq,otq,eig)
  CASE (PPM_ENGEL_FARID)
    ! * For notations see pag 23 of Quasiparticle Calculations in solid (Aulbur et al)
    ! If q_bz=Sq_ibz+G0 then:
-   !   
+   !
    ! $\omega^2_{ii}(q_bz) = \omega^2_{ii}(q)$        (otq array)
-   ! $y_{SG-G0}(q_bz)     = y_{G}(q) e^{-iSG.t}$     (y=Lx) 
-   !   
+   ! $y_{SG-G0}(q_bz)     = y_{G}(q) e^{-iSG.t}$     (y=Lx)
+   !
    do ii=1,PPm%npwc ! DM bands index
      otq(ii,1) = omegatw(ii,1)
      do jj=1,PPm%npwc
@@ -318,17 +316,17 @@ subroutine ppm_get_qbz(PPm,Gsph,Qmesh,iq_bz,botsq,otq,eig)
      end do
    end do
 
- CASE DEFAULT 
+ CASE DEFAULT
    MSG_BUG(sjoin('Wrong PPm%model:',itoa(PPm%model)))
  END SELECT
  !
  ! * Take into account time-reversal symmetry.
- if (itim_q==2) then 
+ if (itim_q==2) then
 !$omp parallel workshare
-   botsq=CONJG(botsq) 
+   botsq=CONJG(botsq)
 !$omp end parallel workshare
  end if
- 
+
 end subroutine ppm_get_qbz
 !!***
 
@@ -340,7 +338,7 @@ end subroutine ppm_get_qbz
 !!
 !! FUNCTION
 !!  Nullify dynamic entities in a ppmodel_t object.
-!! 
+!!
 !! INPUTS
 !!
 !! OUTPUT
@@ -456,21 +454,21 @@ subroutine ppm_free(PPm)
  ABI_FREE(PPm%eigpot)
 
 #else
- if (allocated(PPm%bigomegatwsq)) then 
+ if (allocated(PPm%bigomegatwsq)) then
    do iq_ibz=1,dim_q
      call array_free(PPm%bigomegatwsq(iq_ibz))
    end do
    ABI_DT_FREE(PPm%bigomegatwsq)
  end if
  !
- if (allocated(PPm%omegatw)) then 
+ if (allocated(PPm%omegatw)) then
    do iq_ibz=1,dim_q
      call array_free(PPm%omegatw(iq_ibz))
    end do
    ABI_DT_FREE(PPm%omegatw)
  end if
  !
- if (allocated(PPm%eigpot)) then 
+ if (allocated(PPm%eigpot)) then
    do iq_ibz=1,dim_q
      call array_free(PPm%eigpot(iq_ibz))
    end do
@@ -584,11 +582,11 @@ subroutine ppm_table_free(PPm,iq_ibz)
    call array_free(PPm%bigomegatwsq(iq_ibz))
  end if
 
- if (allocated(PPm%omegatw)) then 
+ if (allocated(PPm%omegatw)) then
    call array_free(PPm%omegatw(iq_ibz))
  end if
 
- if (allocated(PPm%eigpot)) then 
+ if (allocated(PPm%eigpot)) then
    call array_free(PPm%eigpot(iq_ibz))
  end if
 
@@ -611,7 +609,7 @@ end subroutine ppm_table_free
 !! drude_plsmf=
 !!
 !! SIDE EFFECTS
-!!  PPm<ppmodel_t>=Arrays needed to store the ppmodel parameters are allocated with 
+!!  PPm<ppmodel_t>=Arrays needed to store the ppmodel parameters are allocated with
 !!   proper dimensions according to the plasmon-pole model.
 !!
 !! PARENTS
@@ -641,7 +639,7 @@ subroutine ppm_init(PPm,mqmem,nqibz,npwe,ppmodel,drude_plsmf,invalid_freq)
 !scalars
  integer :: dim_q,iq_ibz,ierr
  logical :: ltest
- !character(len=500) :: msg      
+ !character(len=500) :: msg
 ! *********************************************************************
 
  DBG_ENTER("COLL")
@@ -661,28 +659,28 @@ subroutine ppm_init(PPm,mqmem,nqibz,npwe,ppmodel,drude_plsmf,invalid_freq)
  PPm%model       = ppmodel
  PPm%drude_plsmf = drude_plsmf
  PPm%userho      = 0
- if (ANY(ppmodel==(/PPM_HYBERTSEN_LOUIE, PPM_LINDEN_HORSH, PPM_ENGEL_FARID/))) PPm%userho=1 
+ if (ANY(ppmodel==(/PPM_HYBERTSEN_LOUIE, PPM_LINDEN_HORSH, PPM_ENGEL_FARID/))) PPm%userho=1
 
  ABI_MALLOC(PPm%keep_q,(nqibz))
  PPm%keep_q=.FALSE.; if (PPm%mqmem>0) PPm%keep_q=.TRUE.
 
  ABI_MALLOC(PPm%has_q,(nqibz))
- PPm%has_q=PPM_NOTAB       
+ PPm%has_q=PPM_NOTAB
  !
  ! Full q-mesh is stored or out-of-memory solution.
  dim_q=PPm%nqibz; if (PPm%mqmem==0) dim_q=1
-                                                    
+
  ABI_DT_MALLOC(PPm%bigomegatwsq, (dim_q))
  ABI_DT_MALLOC(PPm%omegatw,(dim_q))
  ABI_DT_MALLOC(PPm%eigpot,(dim_q))
 
  SELECT CASE (PPm%model)
 
- CASE (PPM_NONE) 
+ CASE (PPM_NONE)
    MSG_WARNING("Called with ppmodel==0")
    PPm%dm2_botsq = 0
    PPm%dm2_otq   = 0
-   PPm%dm_eig    = 0 
+   PPm%dm_eig    = 0
    RETURN
 
  CASE (PPM_GODBY_NEEDS, PPM_HYBERTSEN_LOUIE)
@@ -691,7 +689,7 @@ subroutine ppm_init(PPm,mqmem,nqibz,npwe,ppmodel,drude_plsmf,invalid_freq)
    PPm%dm_eig    = 1 ! Should be set to 0, but g95 doesnt like zero-sized arrays
 
  CASE (PPM_LINDEN_HORSH)
-   PPm%dm2_botsq = 1  
+   PPm%dm2_botsq = 1
    PPm%dm2_otq   = 1
    PPm%dm_eig    = PPm%npwc
 
@@ -724,7 +722,7 @@ subroutine ppm_init(PPm,mqmem,nqibz,npwe,ppmodel,drude_plsmf,invalid_freq)
  end do
 
  DBG_EXIT("COLL")
- 
+
 end subroutine ppm_init
 !!***
 
@@ -735,7 +733,7 @@ end subroutine ppm_init
 !! setup_ppmodel
 !!
 !! FUNCTION
-!!  Initialize some values of several arrays of the PPm datastructure 
+!!  Initialize some values of several arrays of the PPm datastructure
 !!  that are used in case of plasmonpole calculations
 !!  This is a wrapper around different plasmonpole routines.
 !!
@@ -747,18 +745,18 @@ end subroutine ppm_init
 !!  npwe=number of G vectors for the correlation part
 !!  nomega=number of frequencies in $\epsilon^{-1}$
 !!  omega=frequencies in epsm1
-!!  epsm1=the inverse dielctric matrix 
-!!  ngfftf(18)=contain all needed information about the 3D fine FFT mesh, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  epsm1=the inverse dielctric matrix
+!!  ngfftf(18)=contain all needed information about the 3D fine FFT mesh, see ~abinit/doc/variables/vargs.htm#ngfft
 !!  gprimd(3,3)=dimensional primitive translations for reciprocal space ($\textrm{bohr}^{-1}$)
 !!  nfftf=the number of points in the FFT mesh (for this processor)
 !!  rhor_tot(nfftf)=the total charge in real space
-!!  PPm<ppmodel_t>: 
-!!    %ppmodel=the type of  plasmonpole model 
+!!  PPm<ppmodel_t>:
+!!    %ppmodel=the type of  plasmonpole model
 !!
 !! OUTPUT
 !!
 !! SIDE EFFECTS
-!!  PPm<ppmodel_t>: 
+!!  PPm<ppmodel_t>:
 !!  == if ppmodel 1 or 2 ==
 !!   %omegatw and %bigomegatwsq
 !!  == if ppmodel 3 ==
@@ -808,7 +806,7 @@ subroutine setup_ppmodel(PPm,Cryst,Qmesh,npwe,nomega,omega,epsm1,nfftf,gvec,ngff
  real(dp) :: n_at_G_zero
  logical :: single_q
  character(len=500) :: msg
-!scalars  
+!scalars
  real(dp) :: qpt(3)
 ! *************************************************************************
 
@@ -819,18 +817,18 @@ subroutine setup_ppmodel(PPm,Cryst,Qmesh,npwe,nomega,omega,epsm1,nfftf,gvec,ngff
  ! === if iqiA is present, then consider only one qpoint to save memory ===
  ! * This means the object has been already initialized
  nqiA=Qmesh%nibz; single_q=.FALSE.
- if (PRESENT(iqiA)) then 
+ if (PRESENT(iqiA)) then
    nqiA=1; single_q=.TRUE.
  end if
  !
- ! Allocate plasmonpole parameters 
+ ! Allocate plasmonpole parameters
  ! TODO ppmodel==1 by default, should be set to 0 if AC and CD
  SELECT CASE (PPm%model)
 
  CASE (PPM_NONE)
    MSG_COMMENT(' Skipping Plasmompole model calculation')
 
- CASE (PPM_GODBY_NEEDS) 
+ CASE (PPM_GODBY_NEEDS)
    ! * Note: the q-dependency enters only through epsilon^-1.
    do iq_ibz=1,nqiA
      call cppm1par(npwe,nomega,omega,PPm%drude_plsmf,&
@@ -849,14 +847,14 @@ subroutine setup_ppmodel(PPm,Cryst,Qmesh,npwe,nomega,omega,epsm1,nfftf,gvec,ngff
    if (PPm%force_plsmf>tol6) then ! Integrate the real-space density
       n_at_G_zero = SUM(rhor_tot(:))/nfftf
       ! Change the prefactor
-      write(msg,'(2(a,es16.8))') 'Forced ppmfreq:',PPm%force_plsmf*Ha_eV,' nelec/ucvol:',n_at_G_zero 
+      write(msg,'(2(a,es16.8))') 'Forced ppmfreq:',PPm%force_plsmf*Ha_eV,' nelec/ucvol:',n_at_G_zero
       MSG_WARNING(msg)
       PPm%force_plsmf = (PPm%force_plsmf**2)/(four_pi*n_at_G_zero)
       do iq_ibz=1,PPm%nqibz
         PPm%bigomegatwsq(iq_ibz)%vals = PPm%force_plsmf * PPm%bigomegatwsq(iq_ibz)%vals
         PPm%omegatw(iq_ibz)%vals      = PPm%force_plsmf * PPm%omegatw(iq_ibz)%vals
       end do
-      write(msg,'(a,es16.8)') 'Plasma frequency forced in HL ppmodel, new prefactor is:',PPm%force_plsmf 
+      write(msg,'(a,es16.8)') 'Plasma frequency forced in HL ppmodel, new prefactor is:',PPm%force_plsmf
       MSG_WARNING(msg)
    end if
 
@@ -865,7 +863,7 @@ subroutine setup_ppmodel(PPm,Cryst,Qmesh,npwe,nomega,omega,epsm1,nfftf,gvec,ngff
      qpt = Qmesh%ibz(:,iq_ibz); if (single_q) qpt=Qmesh%ibz(:,iqiA)
 
      call cppm3par(qpt,npwe,epsm1(:,:,1,iq_ibz),ngfftf,gvec,Cryst%gprimd,rhor_tot,nfftf,&
-&      PPm%bigomegatwsq(iq_ibz)%vals,PPm%omegatw(iq_ibz)%vals(:,1),PPm%eigpot(iq_ibz)%vals) 
+&      PPm%bigomegatwsq(iq_ibz)%vals,PPm%omegatw(iq_ibz)%vals(:,1),PPm%eigpot(iq_ibz)%vals)
    end do
 
  CASE (PPM_ENGEL_FARID)  ! TODO Check better double precision, this routine is in a messy state
@@ -902,7 +900,7 @@ end subroutine setup_ppmodel
 !! SIDE EFFECTS
 !!
 !! PARENTS
-!!      m_ppmodel,sigma
+!!      m_ppmodel
 !!
 !! CHILDREN
 !!
@@ -933,7 +931,7 @@ subroutine getem1_from_ppm(PPm,mpwc,iqibz,zcut,nomega,omega,Vcp,em1q,only_ig1,on
 !Local variables-------------------------------
 !scalars
  integer :: ig1,ig2,io,idm,ig1_min,ig2_min,ig1_max,ig2_max
- real(dp) :: den 
+ real(dp) :: den
  complex(dpc) :: qpg1,qpg2,ug1,ug2
  complex(dpc) :: delta,em1ggp,otw,zzpq,yg1,yg2,bot1,bot2,chig1g2
  !character(len=500) :: msg
@@ -979,7 +977,7 @@ subroutine getem1_from_ppm(PPm,mpwc,iqibz,zcut,nomega,omega,Vcp,em1q,only_ig1,on
    end do !io
 
  case (PPM_LINDEN_HORSH)
-   !TODO Check coefficients 
+   !TODO Check coefficients
    do io=1,nomega
      !
      do ig2=ig2_min,ig2_max
@@ -1002,7 +1000,7 @@ subroutine getem1_from_ppm(PPm,mpwc,iqibz,zcut,nomega,omega,Vcp,em1q,only_ig1,on
        end do !ig1
      end do !ig2
      !
-   end do !iomega 
+   end do !iomega
 
  case (PPM_ENGEL_FARID)
    ! Make e^-1
@@ -1013,7 +1011,7 @@ subroutine getem1_from_ppm(PPm,mpwc,iqibz,zcut,nomega,omega,Vcp,em1q,only_ig1,on
        do ig1=ig1_min,ig1_max
          qpg1=one/Vcp%vc_sqrt(ig1,iqibz)
 
-         chig1g2=czero 
+         chig1g2=czero
          do idm=1,PPm%npwc
            otw =PPm%omegatw(iqibz)%vals(idm,1)
            bot1=PPm%bigomegatwsq(iqibz)%vals(ig1,idm)
@@ -1085,7 +1083,7 @@ subroutine getem1_from_ppm_one_ggp(PPm,iqibz,zcut,nomega,omega,Vcp,em1q,ig1,ig2)
 !Local variables-------------------------------
 !scalars
  integer :: io,idm !,ig1_min,ig2_min,ig2_max
- real(dp) :: den 
+ real(dp) :: den
  complex(dpc) :: qpg1,qpg2,ug1,ug2
  complex(dpc) :: delta,em1ggp,otw,zzpq,yg1,yg2,bot1,bot2,chig1g2
  !character(len=500) :: msg
@@ -1111,7 +1109,7 @@ subroutine getem1_from_ppm_one_ggp(PPm,iqibz,zcut,nomega,omega,Vcp,em1q,ig1,ig2)
    end do !io
 
  case (PPM_LINDEN_HORSH)
-   !TODO Check coefficients 
+   !TODO Check coefficients
    do io=1,nomega
      em1ggp=czero
      do idm=1,PPm%npwc
@@ -1128,7 +1126,7 @@ subroutine getem1_from_ppm_one_ggp(PPm,iqibz,zcut,nomega,omega,Vcp,em1q,ig1,ig2)
 
      if (ig2==ig1) em1ggp=em1ggp+one
      em1q(io)=em1ggp
-   end do !iomega 
+   end do !iomega
 
  case (PPM_ENGEL_FARID)
    ! Make e^-1
@@ -1137,7 +1135,7 @@ subroutine getem1_from_ppm_one_ggp(PPm,iqibz,zcut,nomega,omega,Vcp,em1q,ig1,ig2)
      qpg2=one/Vcp%vc_sqrt(ig2,iqibz)
      qpg1=one/Vcp%vc_sqrt(ig1,iqibz)
 
-     chig1g2=czero 
+     chig1g2=czero
      do idm=1,PPm%npwc
        otw =PPm%omegatw(iqibz)%vals(idm,1)
        bot1=PPm%bigomegatwsq(iqibz)%vals(ig1,idm)
@@ -1168,7 +1166,7 @@ end subroutine getem1_from_ppm_one_ggp
 !!
 !! FUNCTION
 !!  Constructs the inverse dielectri matrix starting from the plasmon-pole
-!!  parameters and calculates the frequency-dependent eigenvalues for each 
+!!  parameters and calculates the frequency-dependent eigenvalues for each
 !!  of the nomega frequencies specifies in the array omega.
 !!
 !! INPUTS
@@ -1230,7 +1228,7 @@ subroutine get_ppm_eigenvalues(PPm,iqibz,zcut,nomega,omega,Vcp,eigenvalues)
    if (ABS(REAL(omega(iomega)))>0.00001) then
      !if (.TRUE.) then
      ! === Eigenvalues for a generic complex matrix ===
-                                                                                                           
+
      lwork=4*2*PPm%npwc
      ABI_MALLOC(wwc,(PPm%npwc))
      ABI_MALLOC(work,(lwork))
@@ -1239,16 +1237,16 @@ subroutine get_ppm_eigenvalues(PPm,iqibz,zcut,nomega,omega,Vcp,eigenvalues)
      ABI_MALLOC(vs,(PPm%npwc,PPm%npwc))
      ABI_MALLOC(Afull,(PPm%npwc,PPm%npwc))
      Afull=em1q(:,:,iomega)
-                                                                                                           
+
      !for the moment no sort, maybe here I should sort using the real part?
      call ZGEES('V','N',sortcplx,PPm%npwc,Afull,PPm%npwc,sdim,wwc,vs,PPm%npwc,work,lwork,rwork,bwork,info)
-     if (info/=0) then 
+     if (info/=0) then
       write(msg,'(2a,i10)')' get_ppm_eigenvalues : Error in ZGEES, diagonalizing complex matrix, info = ',info
-      call wrtout(std_out,msg,'COLL') 
+      call wrtout(std_out,msg,'COLL')
      end if
-                                                                                                          
+
      eigenvalues(:,iomega)=wwc(:)
-                                                                                                           
+
      ABI_FREE(wwc)
      ABI_FREE(work)
      ABI_FREE(rwork)
@@ -1256,7 +1254,7 @@ subroutine get_ppm_eigenvalues(PPm,iqibz,zcut,nomega,omega,Vcp,eigenvalues)
      ABI_FREE(vs)
      ABI_FREE(Afull)
 
-   else 
+   else
      ! === Hermitian Case ===
      lwork=2*PPm%npwc-1
      ABI_MALLOC(ww,(PPm%npwc))
@@ -1268,7 +1266,7 @@ subroutine get_ppm_eigenvalues(PPm,iqibz,zcut,nomega,omega,Vcp,eigenvalues)
      ABI_CHECK(ierr==0, "out of memory in Adpp")
 
      write(std_out,*) 'in hermitian'
- 
+
      idx=0
      do ig2=1,PPm%npwc
        do ig1=1,ig2
@@ -1280,12 +1278,12 @@ subroutine get_ppm_eigenvalues(PPm,iqibz,zcut,nomega,omega,Vcp,eigenvalues)
      ! For the moment we require also the eigenvectors.
      call ZHPEV('V','U',PPm%npwc,Adpp,ww,eigvec,PPm%npwc,work,rwork,info)
 
-     if (info/=0) then 
+     if (info/=0) then
        write(msg,'(2a,i10)')' get_ppm_eigenvalues : Error diagonalizing matrix, info = ',info
-       call wrtout(std_out,msg,'COLL') 
+       call wrtout(std_out,msg,'COLL')
      end if
      negw = (COUNT((REAL(ww)<tol6)))
-     if (negw/=0) then 
+     if (negw/=0) then
        write(msg,'(a,i0,a,i0,a,f8.4)')&
 &       'Found negative eigenvalues. No. ',negw,' at iqibz= ',iqibz,' minval= ',MINVAL(REAL(ww))
         MSG_WARNING(msg)
@@ -1397,8 +1395,8 @@ subroutine cppm1par(npwc,nomega,omega,omegaplasma,epsm1,omegatw,bigomegatwsq)
  ! ================================================================
  ! === Calculate plasmon-pole A parameter A=epsilon^-1(0)-delta ===
  ! ================================================================
- do ig=1,npwc  
-   do igp=1,npwc  
+ do ig=1,npwc
+   do igp=1,npwc
      epsm1_io0  = epsm1(ig,igp,io0)
      epsm1_ioe0 = epsm1(ig,igp,ioe0)
 
@@ -1406,11 +1404,11 @@ subroutine cppm1par(npwc,nomega,omega,omegaplasma,epsm1,omegatw,bigomegatwsq)
      if (ig==igp) AA=AA-one
 
      ! === Calculate plasmon-pole omega-twiddle-square parameter ===
-     ! XG201009 Strangely, the next formula does not work with gcc43-debug 
+     ! XG201009 Strangely, the next formula does not work with gcc43-debug
      ! omegatwsq=(AA/(epsm1_io0-epsm1_ioe0)-one)*e0**2
      ! This seems to be due to precision issue at the level of division by a complex whose norm squared
-     ! is below the smallest representable number.    
-     ! After many trials, I have decided to shift the difference by a small number ... well, not so small ... 
+     ! is below the smallest representable number.
+     ! After many trials, I have decided to shift the difference by a small number ... well, not so small ...
      ! for numerical issues
      diff=epsm1_io0-epsm1_ioe0
      diff=diff+cmplx(tol10,tol10)
@@ -1456,20 +1454,20 @@ end subroutine cppm1par
 !!  qpt(3)=The coordinates of the q-point in the IBZ.
 !!  epsm1(npwc,npwc)=symmetrized inverse dielectric (static limit is used)
 !!  gmet(3,3)=metric in reciprocal space
-!!  ngfftf(18)=contain all needed information about the 3D fine FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  ngfftf(18)=contain all needed information about the 3D fine FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !!  npwc=number of plane waves in epsm1
 !!  rhor(nfftf)=charge density on the real space FFT grid
 !!  nfftf= total number of points in the fine FFT mesh  (for this processor)
 !!  invalid_freq: what to do when PPM omega is found negative or imaginary
 !!     0) drop it (default as specified in Hybersen-Louie original GW paper)
 !!     1) set to 1 hartree
-!!     2) set to infinity 
+!!     2) set to infinity
 !!
 !! OUTPUT
 !!  bigomegatwsq(npwc,npwc)= squared bare plasma frequencies
 !!   \Omega^2_{G1 G2}(q) = 4\pi \frac {(q+G1).(q+G2)}/{|q+G1|^2} n(G1-G2)
 !!  omegatw(npwc,npwc)= plasmon frequencies \tilde\omega_{G1 G2}(q) where:
-!!  \tilde\omega^2_{G1 G2}(q) = 
+!!  \tilde\omega^2_{G1 G2}(q) =
 !!    \frac {\Omega^2_{G1 G2}(q)} {\delta_{G1 G2}-\tilde\epsilon^{-1}_{G1 G2} (q, \omega=0)}
 !!
 !! PARENTS
@@ -1516,7 +1514,7 @@ subroutine cppm2par(qpt,npwc,epsm1,ngfftf,gvec,gprimd,rhor,nfftf,gmet,bigomegatw
 !arrays
  real(dp) :: qlist(3,1)
  real(dp),allocatable :: tmp_rhor(:),qratio(:,:),qplusg(:),rhog_dp(:,:)
- complex(gwpc),allocatable :: omegatwsq(:,:) 
+ complex(gwpc),allocatable :: omegatwsq(:,:)
  complex(gwpc),allocatable :: rhog(:),rhogg(:,:),temp(:,:)  !MG these should be double precision TODO
 !*************************************************************************
 
@@ -1532,8 +1530,8 @@ subroutine cppm2par(qpt,npwc,epsm1,ngfftf,gvec,gprimd,rhor,nfftf,gmet,bigomegatw
  ! === Compute the density in G space rhor(R)--> rhog(G) ===
  ABI_MALLOC(rhog_dp,(2,nfftf))
  ABI_MALLOC(rhog,(nfftf))
- ngfft1=ngfftf(1) 
- ngfft2=ngfftf(2) 
+ ngfft1=ngfftf(1)
+ ngfft2=ngfftf(2)
  ngfft3=ngfftf(3)
 
  ABI_MALLOC(tmp_rhor,(nfftf))
@@ -1543,7 +1541,7 @@ subroutine cppm2par(qpt,npwc,epsm1,ngfftf,gvec,gprimd,rhor,nfftf,gmet,bigomegatw
 
  rhog(1:nfftf)=CMPLX(rhog_dp(1,1:nfftf),rhog_dp(2,1:nfftf))
  !
- ! Calculate the FFT index of each (G-Gp) vector and assign 
+ ! Calculate the FFT index of each (G-Gp) vector and assign
  ! the value of the correspondent density simultaneously
  ABI_STAT_MALLOC(rhogg,(npwc,npwc), ierr)
  ABI_CHECK(ierr==0, "out of memory rhogg")
@@ -1554,14 +1552,14 @@ subroutine cppm2par(qpt,npwc,epsm1,ngfftf,gvec,gprimd,rhor,nfftf,gmet,bigomegatw
      gmgp_idx = g2ifft(gvec(:,ig)-gvec(:,igp),ngfftf)
      if (gmgp_idx/=0) then
        rhogg(ig,igp)=rhog(gmgp_idx)
-     else 
+     else
        ierr=ierr+1
-       rhogg(ig,igp)=czero 
+       rhogg(ig,igp)=czero
      end if
    end do
  end do
 
- if (ierr/=0) then 
+ if (ierr/=0) then
    write(msg,'(a,i4,3a)')&
 &   'Found ',ierr,' G1-G2 vectors falling outside the FFT box. ',ch10,&
 &   'Enlarge the FFT mesh to get rid of this problem. '
@@ -1580,15 +1578,15 @@ subroutine cppm2par(qpt,npwc,epsm1,ngfftf,gvec,gprimd,rhor,nfftf,gmet,bigomegatw
  ABI_CHECK(ierr==0, 'out of memory in omegatwsq')
 
  temp = -epsm1(:,:)
- ! 
+ !
  ! RS still not obvious for me whether one shall use the symmetrized inverse DM or the unsymmetrized one
  ! the default here is to use the symmetrized one, I must discuss this with XG
- ! 
+ !
  ! MG it turns out that using the symmetrized inverse DM in the plasmon-pole
- ! equations give the same results for the squared plasmon frequencies omegatwsq while the 
- ! squared bare plasma frequencies bigomegatwsq related to the symmetrized dielectric matrix 
- ! are obtained multipling by |q+G1|/|q+G2|   
- ! 
+ ! equations give the same results for the squared plasmon frequencies omegatwsq while the
+ ! squared bare plasma frequencies bigomegatwsq related to the symmetrized dielectric matrix
+ ! are obtained multipling by |q+G1|/|q+G2|
+ !
  if (.not.use_symmetrized) then
    qlist(:,1) = qpt
    call cmod_qpg(1,1,qlist,npwc,gvec,gprimd,qplusg) !MG TODO here take care of small q
@@ -1609,11 +1607,11 @@ subroutine cppm2par(qpt,npwc,epsm1,ngfftf,gvec,gprimd,rhor,nfftf,gmet,bigomegatw
      ! Set to an arbitrary value the omegawsq which become negative or imaginary
      ! in principle these correspond to cases where the imaginary part of epsm1 does not have
      ! a well defined peak. The imaginary part of epsm1 in these cases oscillates  with a small amplitude
-     ! since the amplitude A_GGpr=-pi/2*bigomegatwsq/omegatw, 
+     ! since the amplitude A_GGpr=-pi/2*bigomegatwsq/omegatw,
      ! it follows that bigomegatwsq shall be set to zero for these cases
      if ( REAL(omegatwsq(ig,igp))<= tol12 .or. AIMAG(omegatwsq(ig,igp))**2*tol12> REAL(omegatwsq(ig,igp))**2) then
        nimwp=nimwp+1
-       
+
        if ( invalid_freq == 1 ) then
        ! set omegatwsq to 1 hartree
          omegatwsq(ig,igp)=cone
@@ -1628,18 +1626,18 @@ subroutine cppm2par(qpt,npwc,epsm1,ngfftf,gvec,gprimd,rhor,nfftf,gmet,bigomegatw
          if ( ig == igp ) AA = AA - one
          omegatw(ig,igp)=SQRT(REAL(omegatwsq(ig,igp)))
          bigomegatwsq(ig,igp)=-AA*omegatw(ig,igp)**2
-       else  
+       else
        ! simply ignore all cases of omegatw with imaginary values
          bigomegatwsq(ig,igp)=(0.,0.)
          omegatw(ig,igp)=(ten,0.)
        end if
-       if (check_imppf) then 
+       if (check_imppf) then
          write(msg,'(a,2i8)')' Imaginary plasmon frequency at : ',ig,igp
          call wrtout(std_out,msg,'COLL')
-       end if 
-     else 
+       end if
+     else
        ! this part has been added to deal with systems without inversion symmetry
-       ! this new implementation gives the same results as the previous one if 
+       ! this new implementation gives the same results as the previous one if
        ! omegatwsq is a pure real number and has the advantage of being an improved
        ! approach for systems without an inversion center.
        lambda=ABS(omegatwsq(ig,igp))
@@ -1681,11 +1679,11 @@ end subroutine cppm2par
 !!
 !! FUNCTION
 !! Calculate the plasmon-pole parameters using the von Linden-Horsh model (PRB 37, 8351, 1988)
-!! (see also Pag 22 of Quasiparticle Calculations in Solids. Aulbur et. al)  
+!! (see also Pag 22 of Quasiparticle Calculations in Solids. Aulbur et. al)
 !!
 !! INPUTS
-!! epsm1(npwc,npwc))= symmetrized inverse dielectric 
-!! ngfftf(18)=contain all needed information about 3D fine FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!! epsm1(npwc,npwc))= symmetrized inverse dielectric
+!! ngfftf(18)=contain all needed information about 3D fine FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !! npwc=number of plane waves in epsm1
 !! qratio=(q+G1).(q+G2)/(|q+G1|.|q+G2|)
 !! rhor(nfftf)=charge density on the real space FFT grid
@@ -1696,7 +1694,7 @@ end subroutine cppm2par
 !!  omegatw(npwc,npwc)= plasmon pole positions
 !!  bigomegatwsq(npwc,npwc)=(E_{q,ii}^{-1}-1)*omegatw
 !!   where E^{-1} is the eigenvalue of the inverse dielectric matrix
-!!  eigtot(npwc,npwc)=the eigvectors of the symmetrized inverse dielectric matrix 
+!!  eigtot(npwc,npwc)=the eigvectors of the symmetrized inverse dielectric matrix
 !!   (first index for G, second index for bands)
 !!
 !! PARENTS
@@ -1786,14 +1784,14 @@ subroutine cppm3par(qpt,npwc,epsm1,ngfftf,gvec,gprimd,rhor,nfftf,bigomegatwsq,om
      gmgp_idx = g2ifft(gvec(:,ig)-gvec(:,igp),ngfftf)
      if (gmgp_idx/=0) then
        rhogg(ig,igp)=rhog(gmgp_idx)
-     else 
+     else
        ierr=ierr+1
-       rhogg(ig,igp)=czero 
+       rhogg(ig,igp)=czero
      end if
    end do
  end do
 
- if (ierr/=0) then 
+ if (ierr/=0) then
    write(msg,'(a,i4,3a)')&
 &   'Found ',ierr,' G1-G2 vectors falling outside the FFT box. ',ch10,&
 &   'Enlarge the FFT mesh to get rid of this problem. '
@@ -1806,7 +1804,7 @@ subroutine cppm3par(qpt,npwc,epsm1,ngfftf,gvec,gprimd,rhor,nfftf,bigomegatwsq,om
 
  do ig=1,npwc
    if (qiszero) then
-     ! To be discussed with Riad, here we should use the small q 
+     ! To be discussed with Riad, here we should use the small q
      ! to be consistent and consider the limit q-->0
      gpq(:)=gvec(:,ig)
    else
@@ -1878,12 +1876,12 @@ subroutine cppm3par(qpt,npwc,epsm1,ngfftf,gvec,gprimd,rhor,nfftf,bigomegatwsq,om
    MSG_ERROR(msg)
  end if
  !
- ! Calculate the PPM parameters and the eigenpotentials needed for 
+ ! Calculate the PPM parameters and the eigenpotentials needed for
  ! the calculation of the generalized overlap matrix
  ! Note: the eigenpotentials has to be calculated on the FFT (G-Gp) index
  !
  ! Save eigenvectors of \tilde\epsilon^{-1}
- ! MG well it is better to save \Theta otherwise 
+ ! MG well it is better to save \Theta otherwise
  ! we have to calculare \Theta for each band, spin, k-point but oh well
  eigtot=eigvec
 
@@ -1891,17 +1889,17 @@ subroutine cppm3par(qpt,npwc,epsm1,ngfftf,gvec,gprimd,rhor,nfftf,bigomegatwsq,om
  call cmod_qpg(1,1,qlist,npwc,gvec,gprimd,qplusg) !MG TODO here take care of small q
  !
  ! Basic Equation:
- ! 
+ !
  ! \Theta_{q,ii}(G)=\Psi_{q,ii}(G)/|q+G|
- ! where \Psi_{q,ii}(G) is the eigenvector of \tilde\epsilon^{-1} 
+ ! where \Psi_{q,ii}(G) is the eigenvector of \tilde\epsilon^{-1}
 
- ! \tilde\omega_{ii,q}^2= 4\pi (1-eigenval(ii,q))) 
- ! \sum_{G,Gp} \Theta^*_{q,ii}(G) (q+G)\cdot(q+Gp) n(G-Gp) \Theta_{q,ii}(Gp) 
+ ! \tilde\omega_{ii,q}^2= 4\pi (1-eigenval(ii,q)))
+ ! \sum_{G,Gp} \Theta^*_{q,ii}(G) (q+G)\cdot(q+Gp) n(G-Gp) \Theta_{q,ii}(Gp)
 
  do ii=1,npwc !DM band
    ! Calculate \Theta_{q,ii}(G)
    ! why the first element is not modified? if the problem is the small value of qplusg(1)
-   ! we could multiply by sqrt(mod((q+G)(q+G'))) and then add the sing at the end 
+   ! we could multiply by sqrt(mod((q+G)(q+G'))) and then add the sing at the end
    if (qiszero)then
      eigvec(2:,ii)=eigvec(2:,ii)/qplusg(2:)
    else
@@ -1921,7 +1919,7 @@ subroutine cppm3par(qpt,npwc,epsm1,ngfftf,gvec,gprimd,rhor,nfftf,bigomegatwsq,om
    num=one-eigval(ii)
    if (num<=zero) then
 !    here I think we should set bigomegatwsq=0 and omegatw to an arbitrary value
-!    maybe we can output a warning TO BE discussed with Riad 
+!    maybe we can output a warning TO BE discussed with Riad
      if (ABS(num)<1.0d-4) then
        num=1.0d-5
      else
@@ -1930,7 +1928,7 @@ subroutine cppm3par(qpt,npwc,epsm1,ngfftf,gvec,gprimd,rhor,nfftf,bigomegatwsq,om
    end if
 
    omegatw(ii)=SQRT(4*pi*REAL(zz(ii))/num)
-   ! this should be \alpha = 2\pi omegatw * (1-eigenval) 
+   ! this should be \alpha = 2\pi omegatw * (1-eigenval)
    ! MG check this, in the review I found a factor 2\pi, maybe it is reintroduced later
    bigomegatwsq(ii,1)=num*omegatw(ii)
  end do
@@ -1966,10 +1964,10 @@ end subroutine cppm3par
 !!  qpt(3)=Reduced coordinates of the q-point.
 !!  epsm1(npwc,npwc)=symmetrized inverse dielectric matrix.
 !!  gprimd(3,3)=dimensional primitive translations for reciprocal space ($\textrm{bohr}^{-1}$)
-!!  ngfftf(18)=contain all needed information about 3D fine FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  ngfftf(18)=contain all needed information about 3D fine FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !!  npwc=number of plane waves in epsm1
 !!  rhor(nfftf)=charge density on the real space FFT grid
-!!  gvec(3,npwc)=G vectors in reduced coordinated 
+!!  gvec(3,npwc)=G vectors in reduced coordinated
 !!
 !! OUTPUT
 !!  bigomegatwsq(npwc,npwc)=plasmon-pole strength
@@ -2062,14 +2060,14 @@ subroutine cppm4par(qpt,npwc,epsm1,ngfftf,gvec,gprimd,rhor,nfftf,bigomegatwsq,om
      gmgp_idx = g2ifft(gvec(:,ig)-gvec(:,igp),ngfftf)
      if (gmgp_idx/=0) then
        rhogg(ig,igp)=rhog(gmgp_idx)
-     else 
+     else
        ierr=ierr+1
-       rhogg(ig,igp)=czero 
+       rhogg(ig,igp)=czero
      end if
    end do
  end do
 
- if (ierr/=0) then 
+ if (ierr/=0) then
    write(msg,'(a,i0,3a)')&
 &   'Found ',ierr,' G1-G2 vectors falling outside the FFT box. ',ch10,&
 &   'Enlarge the FFT mesh to get rid of this problem. '
@@ -2140,7 +2138,7 @@ subroutine cppm4par(qpt,npwc,epsm1,ngfftf,gvec,gprimd,rhor,nfftf,bigomegatwsq,om
 
  call xhegv(1,"Vectors","Upper",npwc,chitmps,mtemp,eigval)
  !
- ! Eigenvectors are normalized as : X_i^* M X_j = \delta_{ij}    
+ ! Eigenvectors are normalized as : X_i^* M X_j = \delta_{ij}
  eigvec(:,:)=chitmps(:,:)
  ABI_FREE(mtemp)
  ABI_FREE(chitmps)
@@ -2172,7 +2170,7 @@ subroutine cppm4par(qpt,npwc,epsm1,ngfftf,gvec,gprimd,rhor,nfftf,bigomegatwsq,om
    ! contribution to the self correlation energy
 
    if (eigval(ii)>=zero) then
-     eigval(ii) = -1.0d-4 
+     eigval(ii) = -1.0d-4
      if (eigval(ii)>1.0d-3) then
        eigval(ii) = -1.0d-22
        write(msg,'(a,i6,a,es16.6)')&
@@ -2184,7 +2182,7 @@ subroutine cppm4par(qpt,npwc,epsm1,ngfftf,gvec,gprimd,rhor,nfftf,bigomegatwsq,om
    ! === Save plasmon energies ===
    omegatw(ii)=SQRT(-1/eigval(ii))
    !
-   ! Calculate and save scaled plasmon-pole eigenvectors 
+   ! Calculate and save scaled plasmon-pole eigenvectors
    ! defined as \sqrt{4\pi} \frac{Mx}{\sqrt{\tilde\omega} |q+G|}
    tmp1(:)=eigvec(:,ii)
 
@@ -2239,7 +2237,7 @@ end subroutine cppm4par
 !!
 !! INPUTS
 !!  npwc=number of planewaves considered (used for the correlation part)
-!!  gvec(3,npwc)=reduced coordinates of the plane waves 
+!!  gvec(3,npwc)=reduced coordinates of the plane waves
 !!  q(3)=coordinates of q points
 !!  gmet(3,3)=metric in reciprocal space
 !!  gprimd(3,3)=reciprocal lattice vectors
@@ -2282,9 +2280,7 @@ subroutine cqratio(npwc,gvec,q,gmet,gprimd,qratio)
 
 !************************************************************************
 
- b1=two_pi*gprimd(:,1)
- b2=two_pi*gprimd(:,2)
- b3=two_pi*gprimd(:,3)
+ b1=two_pi*gprimd(:,1); b2=two_pi*gprimd(:,2); b3=two_pi*gprimd(:,3)
 
  norm(:)=zero; qratio=zero
 
@@ -2305,13 +2301,10 @@ subroutine cqratio(npwc,gvec,q,gmet,gprimd,qratio)
 &        ( gpq(1)*b1(ii) +  gpq(2)*b2(ii) + gpq(3)*b3(ii))*&
 &        (gppq(1)*b1(ii) + gppq(2)*b2(ii) +gppq(3)*b3(ii))
      end do
-!    
-!    Now calculate qratio = (q+G).(q+Gp)/|q+G|^2 
-!    when |q+G|^2 and (q+G).(q+Gp) are both zero
-!    set (q+G).(q+Gp)/|q+G|^2 = 1
-!    when |q+G|^2 is zero and |q+Gp| is not zero
-!    set (q+G).(q+Gp)/|q+G|^2 = 0
-!    
+
+!    Now calculate qratio = (q+G).(q+Gp)/|q+G|^2
+!    when |q+G|^2 and (q+G).(q+Gp) are both zero set (q+G).(q+Gp)/|q+G|^2 = 1
+!    when |q+G|^2 is zero and |q+Gp| is not zero set (q+G).(q+Gp)/|q+G|^2 = 0
      if (norm(ig)<0.001) then
        if (norm(igp)<0.001) then     ! Case q=0 and G=Gp=0
          qratio(ig,igp)=one
@@ -2345,9 +2338,9 @@ end subroutine cqratio
 !!  nspinor=Number of spinorial components.
 !!  npwc=Number of G vectors in the plasmon pole.
 !!  npwx=number of G vectors in rhotwgp, i.e. no. of G-vectors for the exchange part.
-!!  theta_mu_minus_e0i= $\theta(\mu-\epsilon_{k-q,b1,s}), defines if the state is occupied or not 
+!!  theta_mu_minus_e0i= $\theta(\mu-\epsilon_{k-q,b1,s}), defines if the state is occupied or not
 !!  zcut=Small imaginary part to avoid the divergence. (see related input variable)
-!!  omegame0i(nomega)=Frequencies used to evaluate \Sigma_c ($\omega$ - $\epsilon_i)$ 
+!!  omegame0i(nomega)=Frequencies used to evaluate \Sigma_c ($\omega$ - $\epsilon_i)$
 !!  otq(npwc,dm2_otq)=Plasmon pole parameters for this q-point.
 !!  PPm<ppmodel_t>=structure gathering info on the Plasmon-pole technique.
 !!     %model=type plasmon pole model
@@ -2358,16 +2351,15 @@ end subroutine cqratio
 !!  eig(dm_eig,dm_eig)=The eigvectors of the symmetrized inverse dielectric matrix for this q point
 !!   (first index for G, second index for bands)
 !!  rhotwgp(npwx)=oscillator matrix elements divided by |q+G| i.e.
-!!    $\frac{\langle b1 k-q s | e^{-i(q+G)r | b2 k s \rangle}{|q+G|}$ 
+!!    $\frac{\langle b1 k-q s | e^{-i(q+G)r | b2 k s \rangle}{|q+G|}$
 !!
 !! OUTPUT
 !!  sigcme(nomega) (to be described), only relevant if ppm3 or ppm4
-!!  ket(npwc,nomega): 
-!!   === model==1,2 ====
-!!
-!!   ket(G,omega) = Sum_G2       conjg(rhotw(G)) * Omega(G,G2) * rhotw(G2)
-!!                          ---------------------------------------------------
-!!                            2 omegatw(G,G2) (omega-E_i + omegatw(G,G2)(2f-1))
+!!  ket(npwc,nomega):
+!!  === model==1,2 ====
+!!    ket(G,omega) = Sum_G2       conjg(rhotw(G)) * Omega(G,G2) * rhotw(G2)
+!!                            ---------------------------------------------------
+!!                             2 omegatw(G,G2) (omega-E_i + omegatw(G,G2)(2f-1))
 !!
 !! PARENTS
 !!      calc_sigc_me
@@ -2413,24 +2405,19 @@ subroutine calc_sig_ppm(PPm,nspinor,npwc,nomega,rhotwgp,botsq,otq,&
 !*************************************************************************
 
  SELECT CASE (PPm%model)
-
  CASE (PPM_GODBY_NEEDS, PPM_HYBERTSEN_LOUIE)
-
    fully_occupied =(ABS(theta_mu_minus_e0i-one)<0.001)
    totally_empty  =(ABS(theta_mu_minus_e0i    )<0.001)
 
    do ispinor=1,nspinor
+     spadx=(ispinor-1)*npwx; spadc=(ispinor-1)*npwc
 
-     spadx=(ispinor-1)*npwx
-     spadc=(ispinor-1)*npwc
-
-     if (.not.totally_empty) then  
+     if (.not.totally_empty) then
        ! \Bomega^2_{G1G2}/\omegat_{G1G2} M_{G1,G2}. \theta(\mu-e_s) / (\omega+\omegat_{G1G2}-e_s-i\delta)
        twofm1_zcut=zcut
 !$omp parallel do private(omegame0i_io, rhotwgdp_igp, otw, num, den)
        do ios=1,nomega
          omegame0i_io=omegame0i(ios)
-         !
          do igp=1,npwc
            rhotwgdp_igp=rhotwgp(spadx+igp)
            do ig=1,npwc
@@ -2445,17 +2432,15 @@ subroutine calc_sig_ppm(PPm,nspinor,npwc,nomega,rhotwgp,botsq,otq,&
              end if
            end do !ig
          end do !igp
-         !
        end do !ios
      end if !not totally empty
 
-     if (.not.(fully_occupied)) then 
+     if (.not.(fully_occupied)) then
        ! \Bomega^2_{G1G2}/\omegat_{G1G2} M_{G1,G2}. \theta(e_s-\mu) / (\omega-\omegat_{G1G2}-e_s+i\delta)
        twofm1_zcut=-zcut
 !$omp parallel do private(omegame0i_io, rhotwgdp_igp, otw, num, den)
        do ios=1,nomega
          omegame0i_io=omegame0i(ios)
-         !
          do igp=1,npwc
            rhotwgdp_igp=rhotwgp(spadx+igp)
            do ig=1,npwc
@@ -2479,12 +2464,9 @@ subroutine calc_sig_ppm(PPm,nspinor,npwc,nomega,rhotwgp,botsq,otq,&
    ket=ket*half
 
  CASE (PPM_LINDEN_HORSH,PPM_ENGEL_FARID)
+   ABI_CHECK(nspinor == 1, "nspinor/=1 not allowed")
 
-   if (nspinor/=1) then
-     MSG_ERROR("nspinor/=1 not allowed")
-   end if
-   !
-   ! * rho-twiddle(G) is formed, introduce rhotwgdpcc, for speed reason
+   ! rho-twiddle(G) is formed, introduce rhotwgdpcc, for speed reason
    ABI_MALLOC(rhotwgdpcc,(npwx))
 
    ff=theta_mu_minus_e0i      ! occupation number f (include poles if ...)
@@ -2499,25 +2481,25 @@ subroutine calc_sig_ppm(PPm,nspinor,npwc,nomega,rhotwgp,botsq,otq,&
        num=czero_gw
 
        SELECT CASE (PPm%model)
-
-       CASE (PPM_LINDEN_HORSH) ! * Calculate \beta (eq. 106 pag 47) 
+       CASE (PPM_LINDEN_HORSH)
+         ! Calculate \beta (eq. 106 pag 47)
          do ig=1,npwc
            num=num+rhotwgdpcc(ig)*eig(ig,ii)
          end do
-         numf=num*CONJG(num) !MG this means that we cannot do SCGW 
+         numf=num*CONJG(num) !MG this means that we cannot do SCGW
          numf=numf*botsq(ii,1)
 
        CASE (PPM_ENGEL_FARID)
          do ig=1,npwc
            num=num+rhotwgdpcc(ig)*botsq(ig,ii)
          end do
-         numf=num*CONJG(num) !MG this means that we cannot do SCGW 
+         numf=num*CONJG(num) !MG this means that we cannot do SCGW
 
-       CASE DEFAULT 
+       CASE DEFAULT
          MSG_ERROR("Wrong PPm%model")
        END SELECT
 
-       !numf=num*CONJG(num) !MG this means that we cannot do SCGW 
+       !numf=num*CONJG(num) !MG this means that we cannot do SCGW
        !if (PPm%model==3) numf=numf*botsq(ii,1)
 
        otw=DBLE(otq(ii,1)) ! in principle otw -> otw - ieta
@@ -2526,7 +2508,7 @@ subroutine calc_sig_ppm(PPm,nspinor,npwc,nomega,rhotwgp,botsq,otq,&
        if (den**2>zcut**2) then
          inv_den=one/den
          ct=ct+numf*inv_den
-       else 
+       else
          inv_den=one/((den**2+twofm1_zcut**2))
          ct=ct+numf*CMPLX(den,twofm1_zcut)*inv_den
        end if
@@ -2561,15 +2543,15 @@ end subroutine calc_sig_ppm
 !!  npwe=number of G vectors for the correlation part
 !!  nomega=number of frequencies in $\epsilon^{-1}$
 !!  omega=frequencies in epsm1_ggw
-!!  epsm1_ggw(npwe,npwe,nomega)=the inverse dielctric matrix 
-!!  ngfftf(18)=contain all needed information about the 3D fine FFT mesh, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  epsm1_ggw(npwe,npwe,nomega)=the inverse dielctric matrix
+!!  ngfftf(18)=contain all needed information about the 3D fine FFT mesh, see ~abinit/doc/variables/vargs.htm#ngfft
 !!  gprimd(3,3)=dimensional primitive translations for reciprocal space ($\textrm{bohr}^{-1}$)
 !!  nfftf=the number of points in the FFT mesh (for this processor)
 !!  rhor_tot(nfftf)=the total charge in real space
 !!
 !! SIDE EFFECTS
 !!  PPm<ppmodel_t>=data type containing information on the plasmonpole technique.
-!!  Internal tables are modified so that they (point|store) the plasmon-pole parameters 
+!!  Internal tables are modified so that they (point|store) the plasmon-pole parameters
 !!  for the specified q-point in the BZ.
 !!
 !! PARENTS
@@ -2610,7 +2592,6 @@ subroutine ppm_symmetrizer(PPm,iq_bz,Cryst,Qmesh,Gsph,npwe,nomega,omega,epsm1_gg
  !character(len=500) :: msg
 !arrays
  real(dp) :: qbz(3)
- !complex(gwpc),pointer :: botsq(:,:),otq(:,:),eig(:,:)
 ! *********************************************************************
 
  !@ppmodel_t
@@ -2624,24 +2605,23 @@ subroutine ppm_symmetrizer(PPm,iq_bz,Cryst,Qmesh,Gsph,npwe,nomega,omega,epsm1_gg
  !itim_q=(3-Qmesh%tabi(iq_bz))/2
 
  call get_bz_item(Qmesh,iq_bz,qbz,iq_ibz,isym_q,itim_q,isirred=q_isirred)
- iq_curr=iq_ibz; if (PPm%mqmem==0) iq_curr=1 
+ iq_curr=iq_ibz; if (PPm%mqmem==0) iq_curr=1
  !
  ! =======================================================
  ! ==== Branching for in-core or out-of-core solution ====
  ! =======================================================
  !
- if (PPm%has_q(iq_ibz)==PPM_NOTAB) then 
+ if (PPm%has_q(iq_ibz)==PPM_NOTAB) then
    ! Allocate the tables for this q_ibz
    call ppm_mallocq(PPm,iq_ibz)
  end if
 
- if (PPm%has_q(iq_ibz)==PPM_TAB_ALLOCATED) then 
+ if (PPm%has_q(iq_ibz)==PPM_TAB_ALLOCATED) then
    ! Calculate the ppmodel tables for this q_ibz
    call new_setup_ppmodel(PPm,iq_ibz,Cryst,Qmesh,npwe,nomega,omega,epsm1_ggw,nfftf,Gsph%gvec,ngfftf,rhor_tot) !Optional
  end if
- !
- !
- if (q_isirred) then 
+
+ if (q_isirred) then
    ! Symmetrization is not needed.
    if (PPm%bigomegatwsq_qbz_stat==PPM_ISALLOCATED)  then
      ABI_FREE(PPm%bigomegatwsq_qbz%vals)
@@ -2652,34 +2632,33 @@ subroutine ppm_symmetrizer(PPm,iq_bz,Cryst,Qmesh,Gsph,npwe,nomega,omega,epsm1_gg
    if (PPm%eigpot_qbz_stat==PPM_ISALLOCATED)  then
      ABI_FREE(PPm%eigpot_qbz%vals)
    end if
-   !
+
    ! Point the data in memory and change the status.
-   PPm%bigomegatwsq_qbz => PPm%bigomegatwsq(iq_ibz)  
+   PPm%bigomegatwsq_qbz => PPm%bigomegatwsq(iq_ibz)
    PPm%bigomegatwsq_qbz_stat = PPM_ISPOINTER
 
-   PPm%omegatw_qbz => PPm%omegatw(iq_ibz)  
+   PPm%omegatw_qbz => PPm%omegatw(iq_ibz)
    PPm%omegatw_qbz_stat = PPM_ISPOINTER
 
-   PPm%eigpot_qbz => PPm%eigpot(iq_ibz)  
+   PPm%eigpot_qbz => PPm%eigpot(iq_ibz)
    PPm%eigpot_qbz_stat = PPM_ISPOINTER
- else 
-   !
+ else
    ! Allocate memory if not done yet.
-   if (PPm%bigomegatwsq_qbz_stat==PPM_ISPOINTER) then 
+   if (PPm%bigomegatwsq_qbz_stat==PPM_ISPOINTER) then
       nullify(PPm%bigomegatwsq_qbz)
       ABI_STAT_MALLOC(PPm%bigomegatwsq_qbz%vals, (PPm%npwc,PPm%dm2_botsq), ierr)
       ABI_CHECK(ierr==0, "out of memory bigomegatwsq")
       PPm%bigomegatwsq_qbz_stat=PPM_ISALLOCATED
    end if
 
-   if (PPm%omegatw_qbz_stat==PPM_ISPOINTER) then 
+   if (PPm%omegatw_qbz_stat==PPM_ISPOINTER) then
       nullify(PPm%omegatw_qbz)
       ABI_STAT_MALLOC(PPm%omegatw_qbz%vals,(PPm%npwc,PPm%dm2_otq), ierr)
       ABI_CHECK(ierr==0, "out of memory omegatw")
       PPm%omegatw_qbz_stat=PPM_ISALLOCATED
    end if
 
-   if (PPm%eigpot_qbz_stat==PPM_ISPOINTER) then 
+   if (PPm%eigpot_qbz_stat==PPM_ISPOINTER) then
      nullify(PPm%eigpot_qbz)
      ABI_STAT_MALLOC(PPm%eigpot_qbz%vals,(PPm%dm_eig,PPm%dm_eig), ierr)
      ABI_CHECK(ierr==0, "out of memory eigpot")
@@ -2693,7 +2672,7 @@ subroutine ppm_symmetrizer(PPm,iq_bz,Cryst,Qmesh,Gsph,npwe,nomega,omega,epsm1_gg
    !eig   => PPm%eigpot_qbz%vals
 
    call ppm_get_qbz(PPm,Gsph,Qmesh,iq_bz,PPm%bigomegatwsq_qbz%vals,&
-&    PPm%omegatw_qbz%vals,PPm%eigpot_qbz%vals) 
+&    PPm%omegatw_qbz%vals,PPm%eigpot_qbz%vals)
 
    ! Release the table in the IBZ if required.
    if (.not.PPm%keep_q(iq_ibz)) call ppm_table_free(PPm,iq_ibz)
@@ -2709,7 +2688,7 @@ end subroutine ppm_symmetrizer
 !! new_setup_ppmodel
 !!
 !! FUNCTION
-!!  Initialize some values of several arrays of the PPm datastructure 
+!!  Initialize some values of several arrays of the PPm datastructure
 !!  that are used in case of plasmonpole calculations
 !!  Just a wrapper around different plasmonpole routines.
 !!
@@ -2720,15 +2699,15 @@ end subroutine ppm_symmetrizer
 !!  npwe=number of G vectors for the correlation part
 !!  nomega=number of frequencies in $\epsilon^{-1}$
 !!  omega=frequencies in epsm1_ggw
-!!  epsm1_ggw(npwe,npwe,nomega)=the inverse dielctric matrix 
-!!  ngfftf(18)=contain all needed information about the 3D fine FFT mesh, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  epsm1_ggw(npwe,npwe,nomega)=the inverse dielctric matrix
+!!  ngfftf(18)=contain all needed information about the 3D fine FFT mesh, see ~abinit/doc/variables/vargs.htm#ngfft
 !!  gprimd(3,3)=dimensional primitive translations for reciprocal space ($\textrm{bohr}^{-1}$)
 !!  nfftf=the number of points in the FFT mesh (for this processor)
 !!  rhor_tot(nfftf)=the total charge in real space
-!!  PPm<ppmodel_t>: 
+!!  PPm<ppmodel_t>:
 !!
 !! SIDE EFFECTS
-!!  PPm<ppmodel_t>: 
+!!  PPm<ppmodel_t>:
 !!  == if ppmodel 1 or 2 ==
 !!   %omegatw and %bigomegatwsq
 !!  == if ppmodel 3 ==
@@ -2774,7 +2753,7 @@ subroutine new_setup_ppmodel(PPm,iq_ibz,Cryst,Qmesh,npwe,nomega,omega,epsm1_ggw,
 !scalars
  real(dp) :: n_at_G_zero
  character(len=500) :: msg
-!scalars  
+!scalars
  real(dp) :: qpt(3)
 ! *************************************************************************
 
@@ -2789,14 +2768,14 @@ subroutine new_setup_ppmodel(PPm,iq_ibz,Cryst,Qmesh,npwe,nomega,omega,epsm1_ggw,
  qpt = Qmesh%ibz(:,iq_ibz)
  PPm%has_q(iq_ibz) = PPM_TAB_STORED
  !
- ! Calculate plasmonpole parameters 
+ ! Calculate plasmonpole parameters
  ! TODO ppmodel==1 by default, should be set to 0 if AC and CD
  SELECT CASE (PPm%model)
 
  CASE (PPM_NONE)
    MSG_COMMENT('Skipping Plasmonpole model calculation')
 
- CASE (PPM_GODBY_NEEDS) 
+ CASE (PPM_GODBY_NEEDS)
    ! Note: the q-dependency enters only through epsilon^-1.
    call cppm1par(npwe,nomega,omega,PPm%drude_plsmf,epsm1_ggw,&
 &     PPm%omegatw(iq_ibz)%vals,PPm%bigomegatwsq(iq_ibz)%vals)
@@ -2809,19 +2788,19 @@ subroutine new_setup_ppmodel(PPm,iq_ibz,Cryst,Qmesh,npwe,nomega,omega,epsm1_ggw,
    if (PPm%force_plsmf>tol6) then ! Integrate the real-space density
       n_at_G_zero = SUM(rhor_tot(:))/nfftf
       ! Change the prefactor
-      write(msg,'(2(a,es16.8))') 'Forced ppmfreq:',PPm%force_plsmf*Ha_eV,' nelec/ucvol:',n_at_G_zero 
+      write(msg,'(2(a,es16.8))') 'Forced ppmfreq:',PPm%force_plsmf*Ha_eV,' nelec/ucvol:',n_at_G_zero
       MSG_WARNING(msg)
       PPm%force_plsmf = (PPm%force_plsmf**2)/(four_pi*n_at_G_zero)
       PPm%bigomegatwsq(iq_ibz)%vals = PPm%force_plsmf * PPm%bigomegatwsq(iq_ibz)%vals
       PPm%omegatw(iq_ibz)%vals      = PPm%force_plsmf * PPm%omegatw(iq_ibz)%vals
-      write(msg,'(a,es16.8)') 'Plasma frequency forced in HL ppmodel, new prefactor is:',PPm%force_plsmf 
+      write(msg,'(a,es16.8)') 'Plasma frequency forced in HL ppmodel, new prefactor is:',PPm%force_plsmf
       MSG_WARNING(msg)
    end if
 
- CASE (PPM_LINDEN_HORSH) 
+ CASE (PPM_LINDEN_HORSH)
    ! TODO Check better double precision, this routine is in a messy state
    call cppm3par(qpt,npwe,epsm1_ggw(:,:,1),ngfftf,gvec,Cryst%gprimd,rhor_tot,nfftf,&
-&                PPm%bigomegatwsq(iq_ibz)%vals,PPm%omegatw(iq_ibz)%vals(:,1),PPm%eigpot(iq_ibz)%vals) 
+&                PPm%bigomegatwsq(iq_ibz)%vals,PPm%omegatw(iq_ibz)%vals(:,1),PPm%eigpot(iq_ibz)%vals)
 
  CASE (PPM_ENGEL_FARID)  ! TODO Check better double precision, this routine is in a messy state
    if ((ALL(ABS(qpt)<1.0e-3))) qpt = GW_Q0_DEFAULT ! FIXME
@@ -2853,9 +2832,9 @@ end subroutine new_setup_ppmodel
 !!  nspinor=Number of spinorial components.
 !!  npwc=Number of G vectors in the plasmon pole.
 !!  npwx=number of G vectors in rhotwgp, i.e. no. of G-vectors for the exchange part.
-!!  theta_mu_minus_e0i= $\theta(\mu-\epsilon_{k-q,b1,s}), defines if the state is occupied or not 
+!!  theta_mu_minus_e0i= $\theta(\mu-\epsilon_{k-q,b1,s}), defines if the state is occupied or not
 !!  zcut=Small imaginary part to avoid the divergence. (see related input variable)
-!!  omegame0i(nomega)=Frequencies used to evaluate \Sigma_c ($\omega$ - $\epsilon_i)$ 
+!!  omegame0i(nomega)=Frequencies used to evaluate \Sigma_c ($\omega$ - $\epsilon_i)$
 !!  PPm<ppmodel_t>=structure gathering info on the Plasmon-pole technique.
 !!     %model=type plasmon pole model
 !!     %dm2_botsq= 1 if model==3, =npwc if model== 4, 1 for all the other cases
@@ -2866,11 +2845,11 @@ end subroutine new_setup_ppmodel
 !!       (first index for G, second index for bands)
 !!     %otq(npwc,dm2_otq)=Plasmon pole parameters for this q-point.
 !!  rhotwgp(npwx)=oscillator matrix elements divided by |q+G| i.e.
-!!    $\frac{\langle b1 k-q s | e^{-i(q+G)r | b2 k s \rangle}{|q+G|}$ 
+!!    $\frac{\langle b1 k-q s | e^{-i(q+G)r | b2 k s \rangle}{|q+G|}$
 !!
 !! OUTPUT
 !!  sigcme(nomega) (to be described), only relevant if ppm3 or ppm4
-!!  ket(npwc,nomega): 
+!!  ket(npwc,nomega):
 !!   === model==1,2 ====
 !!
 !!   ket(G,omega) = Sum_G2       conjg(rhotw(G)) * Omega(G,G2) * rhotw(G2)
@@ -2901,7 +2880,6 @@ subroutine ppm_times_ket(PPm,nspinor,npwc,nomega,rhotwgp,omegame0i,zcut,theta_mu
  type(ppmodel_t),intent(in) :: PPm
 !arrays
  real(dp),intent(in) :: omegame0i(nomega)
- !complex(gwpc),intent(in) :: botsq(npwc,PPm%dm2_botsq),eig(PPm%dm_eig,PPm%dm_eig),otq(npwc,PPm%dm2_otq)
  complex(gwpc),intent(in) :: rhotwgp(npwx*nspinor)
  complex(gwpc),intent(inout) :: ket(npwc*nspinor,nomega)
  complex(gwpc),intent(out) :: sigcme(nomega)
@@ -2912,29 +2890,23 @@ subroutine ppm_times_ket(PPm,nspinor,npwc,nomega,rhotwgp,omegame0i,zcut,theta_mu
  real(dp) :: den,ff,inv_den,omegame0i_io,otw,twofm1,twofm1_zcut
  complex(gwpc) :: ct,num,numf,rhotwgdp_igp
  logical :: fully_occupied,totally_empty
- !character(len=500) :: msg
 !arrays
  complex(gwpc),allocatable :: rhotwgdpcc(:)
- complex(gwpc),pointer :: botsq(:,:),eig(:,:),otq(:,:)
+ complex(gwpc), ABI_CONTIGUOUS pointer :: botsq(:,:),eig(:,:),otq(:,:)
 
 !*************************************************************************
 
  SELECT CASE (PPm%model)
-
  CASE (PPM_GODBY_NEEDS, PPM_HYBERTSEN_LOUIE)
-
    botsq  => PPm%bigomegatwsq_qbz%vals !(1:npwc,1:PPm%dm2_botsq)
    otq    => PPm%omegatw_qbz%vals      !(1:npwc,1:PPm%dm2_otq)
-
    fully_occupied =(ABS(theta_mu_minus_e0i-one)<0.001)
    totally_empty  =(ABS(theta_mu_minus_e0i    )<0.001)
 
    do ispinor=1,nspinor
+     spadx=(ispinor-1)*npwx; spadc=(ispinor-1)*npwc
 
-     spadx=(ispinor-1)*npwx
-     spadc=(ispinor-1)*npwc
-
-     if (.not.totally_empty) then  
+     if (.not.totally_empty) then
        ! \Bomega^2_{G1G2}/\omegat_{G1G2} M_{G1,G2}. \theta(\mu-e_s) / (\omega+\omegat_{G1G2}-e_s-i\delta)
        twofm1_zcut=zcut
 !$omp parallel do private(omegame0i_io, rhotwgdp_igp, otw, num, den)
@@ -2957,7 +2929,7 @@ subroutine ppm_times_ket(PPm,nspinor,npwc,nomega,rhotwgp,omegame0i,zcut,theta_mu
        end do !ios
      end if !not totally empty
 
-     if (.not.(fully_occupied)) then 
+     if (.not.(fully_occupied)) then
        ! \Bomega^2_{G1G2}/\omegat_{G1G2} M_{G1,G2}. \theta(e_s-\mu) / (\omega-\omegat_{G1G2}-e_s+i\delta)
        twofm1_zcut=-zcut
 !$omp parallel do private(omegame0i_io, rhotwgdp_igp, otw, num, den)
@@ -2987,16 +2959,13 @@ subroutine ppm_times_ket(PPm,nspinor,npwc,nomega,rhotwgp,omegame0i,zcut,theta_mu
 !$omp end parallel workshare
 
  CASE (PPM_LINDEN_HORSH,PPM_ENGEL_FARID)
-
-   if (nspinor/=1) then
-     MSG_ERROR("nspinor/=1 not allowed")
-   end if
+   ABI_CHECK(nspinor == 1, "nspinor/=1 not allowed")
 
    botsq => PPm%bigomegatwsq_qbz%vals !(1:npwc,1:PPm%dm2_botsq)
-   otq   => PPm%omegatw_qbz%vals       !(1:npwc,1:PPm%dm2_otq)
+   otq   => PPm%omegatw_qbz%vals      !(1:npwc,1:PPm%dm2_otq)
    eig   => PPm%eigpot_qbz%vals       !(1:PPm%dm_eig,1:PPm%dm_eig)
-   !
-   ! * rho-twiddle(G) is formed, introduce rhotwgdpcc, for speed reason
+
+   ! rho-twiddle(G) is formed, introduce rhotwgdpcc, for speed reason
    ABI_MALLOC(rhotwgdpcc,(npwx))
 
    ff=theta_mu_minus_e0i      ! occupation number f (include poles if ...)
@@ -3011,25 +2980,25 @@ subroutine ppm_times_ket(PPm,nspinor,npwc,nomega,rhotwgp,omegame0i,zcut,theta_mu
        num=czero_gw
 
        SELECT CASE (PPm%model)
-
-       CASE (PPM_LINDEN_HORSH) ! * Calculate \beta (eq. 106 pag 47) 
+       CASE (PPM_LINDEN_HORSH)
+         ! Calculate \beta (eq. 106 pag 47)
          do ig=1,npwc
            num=num+rhotwgdpcc(ig)*eig(ig,ii)
          end do
-         numf=num*CONJG(num) !MG this means that we cannot do SCGW 
+         numf=num*CONJG(num) !MG this means that we cannot do SCGW
          numf=numf*botsq(ii,1)
 
        CASE (PPM_ENGEL_FARID)
          do ig=1,npwc
            num=num+rhotwgdpcc(ig)*botsq(ig,ii)
          end do
-         numf=num*CONJG(num) !MG this means that we cannot do SCGW 
+         numf=num*CONJG(num) !MG this means that we cannot do SCGW
 
-       CASE DEFAULT 
+       CASE DEFAULT
          MSG_ERROR("Wrong PPm%model")
        END SELECT
 
-       !numf=num*CONJG(num) !MG this means that we cannot do SCGW 
+       !numf=num*CONJG(num) !MG this means that we cannot do SCGW
        !if (PPm%model==3) numf=numf*botsq(ii,1)
 
        otw=DBLE(otq(ii,1)) ! in principle otw -> otw - ieta
@@ -3038,7 +3007,7 @@ subroutine ppm_times_ket(PPm,nspinor,npwc,nomega,rhotwgp,omegame0i,zcut,theta_mu
        if (den**2>zcut**2) then
          inv_den=one/den
          ct=ct+numf*inv_den
-       else 
+       else
          inv_den=one/((den**2+twofm1_zcut**2))
          ct=ct+numf*CMPLX(den,twofm1_zcut)*inv_den
        end if

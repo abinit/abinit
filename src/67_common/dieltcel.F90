@@ -21,8 +21,8 @@
 !!  kxc(nfft,nkxc)=exchange-correlation kernel,
 !!       needed if the electronic dielectric matrix is computed
 !!  nfft=(effective) number of FFT grid points (for this processor)
-!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
-!!  nkxc=second dimension of the array kxc, see rhohxc.f for a description
+!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
+!!  nkxc=second dimension of the array kxc, see rhotoxc.f for a description
 !!  npwdiel=size of the dielinv and susmat arrays.
 !!  nspden=number of spin-density components
 !!  occopt=option for occupancies

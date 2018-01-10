@@ -28,7 +28,7 @@
 !! natom=number of atoms in cell.
 !! nattyp(ntypat)=number of atoms of each type in cell.
 !! nfft=(effective) number of FFT grid points (for this processor)
-!! ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!! ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !! ntypat=number of types of atoms in cell.
 !! nspden=number of spin-density components
 !! psps<type(pseudopotential_type)>=variables related to pseudopotentials
@@ -413,7 +413,12 @@ subroutine initro(atindx,densty,gmet,gsqcut,izero,mgfft,mpi_enreg,mqgrid,natom,n
      rhor(:,ispden)=work(:)
 
    end do ! End loop on spins
- end if
+
+!  Non-collinear magnetism: avoid zero magnetization, because it produces numerical instabilities
+!    Add a small real to the magnetization
+   if (all(abs(spinat(:,:))<tol10)) rhor(:,4)=rhor(:,4)+tol14
+
+ end if ! nspden==4
 
  ABI_DEALLOCATE(length)
  ABI_DEALLOCATE(use_gaussian)

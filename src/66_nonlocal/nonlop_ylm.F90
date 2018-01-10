@@ -106,7 +106,7 @@
 !!  mpi_enreg=information about MPI parallelization
 !!  natom=number of atoms in cell
 !!  nattyp(ntypat)=number of atoms of each type
-!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !!  nkpgin,nkpgout=second sizes of arrays kpgin/kpgout
 !!  nloalg(3)=governs the choice of the algorithm for nonlocal operator
 !!  nnlout=dimension of enlout (when signs=1 and choice>0):
@@ -387,7 +387,7 @@
 !signs=2, less choices
  if (signs==2) then
    check=(choice==0.or.choice==1.or.choice==2.or.choice==3 .or.&
-&   choice==5.or.choice==51.or.choice==52.or.choice==53.or.&
+&   choice==5.or.choice==51.or.choice==52.or.choice==53.or.choice==54.or.&
 &   choice==7.or.choice==8.or.choice==81)
    ABI_CHECK(check,'BUG: choice not compatible (for signs=2)')
  end if
@@ -396,7 +396,7 @@
    check=(idir>=1.and.idir<=6)
    ABI_CHECK(check,'BUG: choice=3 and signs=2 requires 1<=idir<=6')
 !1<=idir<=9 is required when choice==8/81 and signs=2
- else if ((choice==8.or.choice==81).and.signs==2) then
+ else if ((choice==8.or.choice==81.or.choice==54).and.signs==2) then
    check=(idir>=1.and.idir<=9)
    ABI_CHECK(check,'BUG: choice=8/81 and signs=2 requires 1<=idir<=9')
  else
@@ -491,6 +491,10 @@
    if(signs==1) ndgxdt=6
    if(signs==1) ndgxdtfac=6
    if(signs==1) nd2gxdt=9
+   if(signs==2) ndgxdt=1
+   if(signs==2) nd2gxdt=1
+   if(signs==2) ndgxdtfac=1
+   if(signs==2) nd2gxdtfac=1
  end if
  if (choice==55) then
    if(signs==1) ndgxdt=9
@@ -561,11 +565,11 @@
 
 !Eventually re-compute (k+G) vectors (and related data)
  nkpgin_=0
- if (choice==2) nkpgin_=3
+ if (choice==2.or.choice==54) nkpgin_=3
  if (signs==1) then
    if (choice==4.or.choice==24) nkpgin_=9
    if (choice==3.or.choice==23.or.choice==6) nkpgin_=3
-   if (choice==54.or.choice==55) nkpgin_=3
+   if (choice==55) nkpgin_=3
  end if
  if (nkpgin<nkpgin_) then
    ABI_ALLOCATE(kpgin_,(npwin,nkpgin_))
@@ -575,7 +579,7 @@
    kpgin_  => kpgin
  end if
  nkpgout_=0
- if (choice==2.and.signs==2) nkpgout_=3
+ if ((choice==2.or.choice==54).and.signs==2) nkpgout_=3
  if (nkpgout<nkpgout_) then
    ABI_ALLOCATE(kpgout_,(npwout,nkpgout_))
    call mkkpg(kgout,kpgout_,kptout,nkpgout_,npwout)
@@ -683,10 +687,11 @@
          if (choice==5.or.choice==51.or.choice==52.or.choice==53.or. &
 &         choice==8.or.choice==81) cplex_dgxdt(:) = 2
          if (choice==54.and.signs==1) cplex_dgxdt(4:6) = 2
+         if (choice==54.and.signs==2) cplex_dgxdt(:)   = 2
          if (choice==55.and.signs==1) cplex_dgxdt(7:9) = 2
        end if
        if(nd2gxdt > 0) then
-         if (choice==54.and.signs==1) cplex_d2gxdt(1:9) = 2
+         if (choice==54) cplex_d2gxdt(:) = 2
          if (choice==55.and.signs==1) cplex_d2gxdt(1:18)= 2
        end if
 
@@ -706,6 +711,7 @@
          ndgxdt_stored = cprjin(1,1)%ncpgr
          ishift=0
          if (((choice==2).or.(choice==3)).and.(ndgxdt_stored>ndgxdt).and.(signs==2)) ishift=idir-ndgxdt
+         if ((choice==2).and.(ndgxdt_stored==9).and.(signs==2)) ishift=ishift+6
          if (choice==2.and.(ndgxdt_stored>ndgxdt).and.(signs==1)) ishift=ndgxdt_stored-ndgxdt
          if(cplex == 2) then
            do ispinor=1,nspinor

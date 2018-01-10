@@ -4,8 +4,9 @@
 !! mkkpg
 !!
 !! FUNCTION
-!! Compute all (k+G) vectors (in reduced coordinates) for given k point.
-!! Eventually compute related data
+!! Compute all (k+G) vectors (dp, in reduced coordinates) for given k point,
+!! from integer coordinates of G vectors.
+!! Eventually compute related data.
 !!
 !! COPYRIGHT
 !! Copyright (C) 1998-2017 ABINIT group (MT)
@@ -27,8 +28,9 @@
 !!
 !! PARENTS
 !!      ctocprj,d2frnl,debug_tools,dfpt_nstpaw,dfpt_nstwf,dfpt_rhofermi
-!!      dfptnl_resp,forstrnps,getcprj,getgh1c,ks_ddiago,m_io_kss,m_shirley
-!!      m_wfd,nonlop_ylm,prep_bandfft_tabs,vtorho,wfd_vnlpsi
+!!      dfptnl_resp,fock2ACE,forstrnps,getcprj,getgh1c,ks_ddiago,m_io_kss
+!!      m_shirley,m_wfd,nonlop_test,nonlop_ylm,prep_bandfft_tabs,vtorho
+!!      wfd_vnlpsi
 !!
 !! CHILDREN
 !!

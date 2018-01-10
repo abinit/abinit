@@ -41,7 +41,7 @@
 !!  natom =number of atoms in unit cell
 !!  nband(nkpt*nsppol)=number of bands at each k point, for each polarization
 !!  nfft  =(effective) number of FFT grid points (for one processor)
-!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !!  nkpt  =number of k points
 !!  nloalg(3)=governs the choice of the algorithm for non-local operator.
 !!  nspden=number of spin-density components
@@ -79,7 +79,7 @@
 !!  or a constant larger than 30)
 !! After this estimation, an amount of (176 + 55 + 6*natom) Kbytes is added
 !! to take into account the static arrays declared
-!! in rhohxc and daughter routines (at maximum 22*1000 dp numbers),
+!! in rhotoxc and daughter routines (at maximum 22*1000 dp numbers),
 !! as well as other arrays like
 !! character(len=500) :: message (present in about 100 routines), or the different
 !! arrays allocated in move.f, brdmin.f, gstate.f (xf array) or pspini.f

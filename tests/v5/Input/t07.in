@@ -103,4 +103,5 @@
 #%%   with storage of the wave-functions (positron=-10).
 #%%   Each dataset computes the positron lifetime and annihilation rate
 #%%   after the SCF iterations.
+#%% topics = positron
 #%%<END TEST_INFO>

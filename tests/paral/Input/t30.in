@@ -36,7 +36,6 @@
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% exclude_hosts = ibm@ibm6
 #%% exclude_builders = ubu_intel_16.0_mpich, ubu_intel_15.0_mpich
 #%% [files]
 #%% psp_files = 6c_lda.paw
@@ -51,4 +50,5 @@
 #%% description = 
 #%%    Chebyshev, C-diamond, Bulk, 2 atoms, paral_kgb, with PAW.
 #%%    Also test gemm_nonlop
+#%% topics = parallelism
 #%%<END TEST_INFO>

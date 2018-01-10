@@ -81,9 +81,11 @@ MODULE m_xmpi
  integer,public,parameter :: xmpi_info_null      = 0
 #endif
 
+#ifdef HAVE_MPI
  integer,save,private  :: xmpi_tag_ub=32767
  ! The tag upper bound value must be at least 32767. An MPI implementation is free to make
  ! the value of MPI_TAG_UB larger than this hence xmpi_tag_ub is redefined when MPI is init in xmpi_init.
+#endif
 
  ! Size in bytes of the entries used in MPI datatypes.
  integer,save, public ABI_PROTECTED:: xmpi_bsize_ch =0
@@ -417,9 +419,12 @@ end interface xmpi_min
 !----------------------------------------------------------------------
 
 interface xmpi_recv
+  module procedure xmpi_recv_char
   module procedure xmpi_recv_intv
   module procedure xmpi_recv_int1d
   module procedure xmpi_recv_int2d
+  module procedure xmpi_recv_int3d
+  module procedure xmpi_recv_dp
   module procedure xmpi_recv_dp1d
   module procedure xmpi_recv_dp2d
   module procedure xmpi_recv_dp3d
@@ -454,9 +459,12 @@ end interface xmpi_isend
 !----------------------------------------------------------------------
 
 interface xmpi_send
+  module procedure xmpi_send_char
   module procedure xmpi_send_intv
   module procedure xmpi_send_int1d
   module procedure xmpi_send_int2d
+  module procedure xmpi_send_int3d
+  module procedure xmpi_send_dp
   module procedure xmpi_send_dp1d
   module procedure xmpi_send_dp2d
   module procedure xmpi_send_dp3d
@@ -572,9 +580,9 @@ CONTAINS  !===========================================================
 !!  None
 !!
 !! PARENTS
-!!      abinit,aim,anaddb,band2eps,bsepostproc,conducti,cut3d,fftprof
-!!      fold2Bloch,ioprof,lapackprof,macroave,mrgddb,mrgdv,mrggkk,mrgscr
-!!      multibinit,optic,ujdet,vdw_kernelgen
+!!      abinit,aim,anaddb,band2eps,bsepostproc,conducti,cut3d,dummy_tests
+!!      fftprof,fold2Bloch,ioprof,lapackprof,macroave,mrgddb,mrgdv,mrggkk
+!!      mrgscr,multibinit,optic,tdep,ujdet,vdw_kernelgen
 !!
 !! CHILDREN
 !!      mpi_type_commit,mpi_type_size,xmpi_abort,xmpio_type_struct
@@ -594,10 +602,13 @@ subroutine xmpi_init()
 
 !Local variables-------------------
  integer :: mpierr,ierr,unt
- logical :: exists,isopen
+ logical :: exists
 #ifdef HAVE_MPI
- integer :: attribute_val,required,provided
+ integer :: attribute_val
  logical :: lflag
+#ifdef HAVE_OPENMP
+ integer :: required,provided
+#endif
 #endif
 
 ! *************************************************************************
@@ -711,7 +722,7 @@ end function xmpi_get_unit
 !!
 !! PARENTS
 !!      aim,anaddb,band2eps,bsepostproc,conducti,cut3d,eph,fold2Bloch
-!!      lapackprof,macroave,mrggkk,multibinit,optic,ujdet,vdw_kernelgen
+!!      lapackprof,macroave,mrggkk,optic,tdep,ujdet,vdw_kernelgen
 !!
 !! CHILDREN
 !!      mpi_type_commit,mpi_type_size,xmpi_abort,xmpio_type_struct
@@ -1810,13 +1821,14 @@ end subroutine xmpi_comm_translate_ranks
 !!  comm=MPI communicator
 !!
 !! PARENTS
-!!      alloc_hamilt_gpu,atomden,calc_optical_mels,calc_ucrpa,chebfi,cohsex_me
+!!      alloc_hamilt_gpu,atomden,calc_optical_mels,calc_ucrpa,chebfi
 !!      datafordmft,denfgr,dfpt_nselt,dfpt_nstpaw,dfpt_scfcv,exc_build_block
 !!      fermisolverec,getcgqphase,gstateimg,iofn1,ks_ddiago,m_abihist,m_bse_io
-!!      m_exc_diago,m_exc_itdiago,m_exc_spectra,m_green,m_haydock,m_hdr
-!!      m_io_redirect,m_ioarr,m_iowf,m_plowannier,m_sigmaph,m_slk,m_wfd
-!!      m_wffile,m_wfk,mlwfovlp,mlwfovlp_pw,mover,outkss,pawmkaewf
-!!      qmc_prep_ctqmc,rf2_init,sigma,tddft,vtorho,vtorhorec,wfk_analyze
+!!      m_dvdb,m_exc_diago,m_exc_itdiago,m_exc_spectra,m_fit_polynomial_coeff
+!!      m_green,m_haydock,m_hdr,m_io_redirect,m_ioarr,m_iowf,m_plowannier
+!!      m_sigmaph,m_slk,m_wfd,m_wffile,m_wfk,mlwfovlp,mlwfovlp_pw,mover
+!!      mover_effpot,outkss,pawmkaewf,qmc_prep_ctqmc,rf2_init,sigma,tddft
+!!      vtorho,vtorhorec,wfk_analyze
 !!
 !! CHILDREN
 !!      mpi_type_commit,mpi_type_size,xmpi_abort,xmpio_type_struct
@@ -2858,7 +2870,7 @@ subroutine xmpio_get_info_frm(bsize_frm,mpi_type_frm,comm)
 !scalars
  integer,parameter :: master=0
  integer :: spt,ept,ii
- integer :: f90_unt,ierr,iimax,mpio_fh,bsize_int,mpierr
+ integer :: f90_unt,iimax,mpio_fh,bsize_int,mpierr
  integer(XMPI_OFFSET_KIND) :: offset,rml
  character(len=fnlen) :: fname
  character(len=500) :: errmsg
@@ -4199,7 +4211,8 @@ subroutine xmpio_write_frmarkers(fh,offset,sc_mode,nfrec,bsize_frecord,ierr)
 !Local variables-------------------------------
 !scalars
  integer :: nb,irec,frmarkers_type,jj,bsize_frm,mpi_type_frm,mpierr,myfh
- integer(XMPI_OFFSET_KIND) :: displ,my_offset
+ integer(XMPI_OFFSET_KIND) :: displ
+!integer(XMPI_OFFSET_KIND) :: my_offset
 !character(len=500) :: msg
 !arrays
  integer(kind=int16),allocatable :: bufdelim2(:)

@@ -32,8 +32,8 @@
 !!         natvshift  =maximal value of input natvshift for all the datasets
 !!         nconeq     =maximal value of input nconeq for all the datasets
 !!         nimage     =maximal value of input nimage for all the datasets
-!!         nkptgw     =maximal value of input nkptgw for all the datasets
 !!         nkpt       =maximal value of input nkpt for all the datasets
+!!         nkptgw     =maximal value of input nkptgw for all the datasets
 !!         nnos       =maximal value of input nnos for all the datasets
 !!         nqptdm     =maximal value of input nqptdm for all the datasets
 !!         nspinor    =maximal value of input nspinor for all the datasets
@@ -108,13 +108,14 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
 !Local variables-------------------------------
 !scalars
  integer,parameter :: nkpt_max=50
- integer :: idtset,ii,iimage,ga_n_rules,nn
+ integer :: defo,idtset,ii,iimage,ga_n_rules,nn
  integer :: lpawu1,narr,mxnsp
  integer :: natom,nimfrqs,nimage
  integer :: ntypalch,ntypat,size1,size2,tmpimg0
  logical :: compute_static_images
  real(dp) :: cpus
  character(len=1) :: firstchar_fftalg,firstchar_gpu
+ character(len=14) :: str_hyb
 !arrays
  integer,allocatable :: narrm(:)
  integer,allocatable :: nimagem(:),prtimg(:,:)
@@ -242,6 +243,12 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
 
  intarr(1,:)=dtsets(:)%autoparal
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'autoparal','INT',0)
+
+ intarr(1,:)=dtsets(:)%auxc_ixc
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'auxc_ixc','INT',0)
+
+ dprarr(1,:)=dtsets(:)%auxc_scal
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'auxc_scal','DPR',0)
 
  intarr(1,:)=dtsets(:)%awtr
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'awtr','INT',0)
@@ -426,9 +433,6 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
    call prttagm(dprarr,intarr,iout,jdtset_,2,marr,2,narrm,ncid,ndtset_alloc,'cd_subset_freq','INT',0)
  end if
 
- intarr(1,:)=dtsets(:)%cgtyphf
- call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'cgtyphf','INT',0)
-
  dprarr(1,:)=dtsets(:)%charge
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'charge','DPR',0)
 
@@ -455,8 +459,14 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
 &   narrm,ncid,ndtset_alloc,'chempot','DPR',1) 
  end if
  
+ intarr(1,:)=dtsets(:)%chkdilatmx
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'chksymbreak','INT',0)
+
  intarr(1,:)=dtsets(:)%chkexit
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'chkexit','INT',0)
+
+ intarr(1,:)=dtsets(:)%chkprim
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'chkprim','INT',0)
 
  intarr(1,:)=dtsets(:)%chksymbreak
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'chksymbreak','INT',0)
@@ -690,8 +700,8 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
  dprarr(1,:)=dtsets(:)%ecutwfn
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'ecutwfn','ENE',0)
 
- dprarr(1,:)=dtsets(:)%effmass
- call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'effmass','DPR',0)
+ dprarr(1,:)=dtsets(:)%effmass_free
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'effmass_free','DPR',0)
 
  dprarr(1,:)=dtsets(:)%efield(1)
  dprarr(2,:)=dtsets(:)%efield(2)
@@ -868,6 +878,25 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
  intarr(1,:)=dtsets(:)%fftgw
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'fftgw','INT',0)
 
+ intarr(1,:)=dtsets(:)%fockoptmix
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'fockoptmix','INT',0)
+
+ dprarr(1,:)=dtsets(:)%focktoldfe
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'focktoldfe','DPR',0)
+
+ intarr(1,:)=dtsets(:)%fockdownsampling(1)
+ intarr(2,:)=dtsets(:)%fockdownsampling(2)
+ intarr(3,:)=dtsets(:)%fockdownsampling(3)
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,3,narrm,ncid,ndtset_alloc,'fockdownsampling','INT',0)
+!DEBUG
+! write(std_out,*)' outvar_a_h : echo fockdownsampling ...'
+! write(std_out,*)' dtsets(0)%fockdownsampling(1:3)=',dtsets(0)%fockdownsampling(1:3)
+! write(std_out,*)' dtsets(1)%fockdownsampling(1:3)=',dtsets(1)%fockdownsampling(1:3)
+! write(std_out,*)' dtsets(2)%fockdownsampling(1:3)=',dtsets(2)%fockdownsampling(1:3)
+! write(std_out,*)' dtsets(3)%fockdownsampling(1:3)=',dtsets(3)%fockdownsampling(1:3)
+! call prttagm(dprarr,intarr,std_out,jdtset_,2,marr,3,narrm,ncid,ndtset_alloc,'fockdownsampling','INT',0)
+!ENDDEBUG
+
  dprarr(1,:)=dtsets(:)%freqim_alpha
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'freqim_alpha','DPR',0)
 
@@ -1041,9 +1070,6 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
  dprarr(1,:)=dtsets(:)%gwencomp
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'gwencomp','ENE',0)
 
- dprarr(1,:)=dtsets(:)%gwfockmix
- call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'gwfockmix','DPR',0)
-
  intarr(1,:)=dtsets(:)%gwgamma
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'gwgamma','INT',0)
 
@@ -1128,6 +1154,37 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
  dprarr(1,:)=dtsets(:)%gw_toldfeig
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'gw_toldfeig','ENE',0)
 
+!DEBUG
+!write(std_out,*)' hyb_mixing=',dtsets(0:ndtset_alloc)%hyb_mixing
+!write(std_out,*)' hyb_mixing_sr=',dtsets(0:ndtset_alloc)%hyb_mixing_sr
+!write(std_out,*)' hyb_mixing_dft=',dtsets(0:ndtset_alloc)%hyb_range_dft
+!write(std_out,*)' hyb_mixing_fock=',dtsets(0:ndtset_alloc)%hyb_range_fock
+!ENDDEBUG
+
+!Special treatment of the default values for the hybrid functional parameters.
+ do ii=1,4
+   if(ii==1)dprarr(1,:)=dtsets(:)%hyb_mixing
+   if(ii==2)dprarr(1,:)=dtsets(:)%hyb_mixing_sr
+   if(ii==3)dprarr(1,:)=dtsets(:)%hyb_range_dft
+   if(ii==4)dprarr(1,:)=dtsets(:)%hyb_range_fock
+   defo=1
+   do idtset=1,ndtset_alloc
+     if(dprarr(1,idtset)<-tol8 .and. abs(dprarr(1,idtset)+999.0_dp)>tol8)defo=0
+   end do
+   if(defo==0)then
+     do idtset=1,ndtset_alloc
+!      Change the sign of user defined input value 
+       if(dprarr(1,idtset)<-tol8 .and. abs(dprarr(1,idtset)+999.0_dp)>tol8)then 
+         dprarr(1,idtset)=abs(dprarr(1,idtset))
+       end if
+     end do
+     if(ii==1)str_hyb='hyb_mixing'
+     if(ii==2)str_hyb='hyb_mixing_sr'
+     if(ii==3)str_hyb='hyb_range_dft'
+     if(ii==4)str_hyb='hyb_range_fock'
+     call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,str_hyb,'DPR',0)
+   end if
+ end do
 
 !###########################################################
 !## Deallocation for generic arrays, and for n-z variables

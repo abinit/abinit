@@ -20,12 +20,12 @@
 !!     if 2, COMPLEX
 !!  idir=direction of the current perturbation
 !!  ipert=type of the perturbation
-!!  kxc(nfft,nkxc)=exchange and correlation kernel (see rhohxc.f)
+!!  kxc(nfft,nkxc)=exchange and correlation kernel (see rhotoxc.f)
 !!  mpi_enreg=information about MPI parallelization
 !!  natom=number of atoms in cell.
 !!  nfft=(effective) number of FFT grid points (for this processor)
 !!  ngfft(18)=contain all needed information about 3D FFT,
-!!     see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!     see ~abinit/doc/variables/vargs.htm#ngfft
 !!  nhat(nfft,nspden*nhatdim)= -PAW only- compensation density
 !!  nhat1(cplex*nfft,2nspden*usepaw)= -PAW only- 1st-order compensation density
 !!  nkxc=second dimension of the kxc array

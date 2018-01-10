@@ -1340,7 +1340,7 @@ end subroutine sg2002_mpiforw_wf
 !! INPUTS
 !! cplex=1 if fofr is real, 2 if fofr is complex
 !! nfft=(effective) number of FFT grid points (for this processor)
-!! ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!! ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !! ndat=Numbre of FFT transforms
 !! isign=sign of Fourier transform exponent: current convention uses
 !!    +1 for transforming from G to r 

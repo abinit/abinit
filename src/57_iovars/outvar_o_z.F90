@@ -1115,6 +1115,9 @@
  intarr(1,:)=dtsets(:)%useexexch
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'useexexch','INT',0)
 
+ intarr(1,:)=dtsets(:)%usefock
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'usefock','INT',0)
+
  intarr(1,:)=dtsets(:)%usepotzero
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'usepotzero','INT',0)
 
@@ -1283,6 +1286,9 @@
 !###########################################################
 !### 03. Print all the input variables (W)
 !##
+
+ dprarr(1,:)=dtsets(:)%wfmix
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'wfmix','DPR',0)
 
  intarr(1,0:ndtset_alloc)=dtsets(0:ndtset_alloc)%wfk_task
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'wfk_task','INT',0)

@@ -35,6 +35,7 @@ MODULE m_gruneisen
  use m_crystal_io
  use m_tetrahedron
  use m_ddb
+ use m_ddb_hdr
  use m_ifc
  use m_cgtools
  use m_nctk
@@ -147,9 +148,10 @@ type(gruns_t) function gruns_new(ddb_paths, inp, comm) result(new)
 
 !Local variables-------------------------------
  integer,parameter :: natifc0=0,master=0
- integer :: ivol,iblock,msym,dimekb,lmnmax,mband,mblktyp,natom,nblok,nkpt,ntypat,usepaw,ddbun
+ integer :: ivol,iblock,natom,ddbun
  integer :: nprocs,my_rank,ierr
  character(len=500) :: msg
+ type(ddb_hdr_type) :: ddb_hdr
 !arrays
  integer,allocatable :: atifc0(:)
  real(dp) :: dielt(3,3)
@@ -169,7 +171,12 @@ type(gruns_t) function gruns_new(ddb_paths, inp, comm) result(new)
  ddbun = get_unit()
  do ivol=1,new%nvols
    call wrtout(ab_out, sjoin(" Reading DDB file:", ddb_paths(ivol)))
-   call ddb_getdims(dimekb,ddb_paths(ivol),lmnmax,mband,mblktyp,msym,natom,nblok,nkpt,ntypat,ddbun,usepaw,DDB_VERSION,comm)
+   call ddb_hdr_open_read(ddb_hdr,ddb_paths(ivol),ddbun,DDB_VERSION,&
+&                         dimonly=1)
+   natom = ddb_hdr%natom
+
+   call ddb_hdr_free(ddb_hdr)
+
    ABI_MALLOC(atifc0, (natom))
    atifc0 = 0
    call ddb_from_file(new%ddb_vol(ivol), ddb_paths(ivol), inp%brav, natom, natifc0, atifc0, new%cryst_vol(ivol), comm)
@@ -280,7 +287,7 @@ subroutine gruns_fourq(gruns, qpt, wvols, gvals, dwdq, phdispl_cart)
 
 !Local variables-------------------------------
 !scalars
- integer :: ivol,ii,natom3,nu
+ integer :: ivol,natom3,nu
  real(dp) :: fact
 !arrays
  real(dp) :: dot(2)
@@ -899,8 +906,8 @@ subroutine gruns_anaddb(inp, prefix, comm)
  end if
 
  ! Compute speed of sound for V0.
- if (inp%vs_qrad_tolms(1) > zero) then
-   call ifc_speedofsound(gruns%ifc_vol(iv0), gruns%cryst_vol(iv0), inp%vs_qrad_tolms, ncid, comm)
+ if (inp%vs_qrad_tolkms(1) > zero) then
+   call ifc_speedofsound(gruns%ifc_vol(iv0), gruns%cryst_vol(iv0), inp%vs_qrad_tolkms, ncid, comm)
  end if
 
  ! Now treat the second list of vectors (only at the Gamma point, but can include non-analyticities)

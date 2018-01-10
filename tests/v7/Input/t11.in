@@ -17,7 +17,7 @@
  ecut 75
 
 #Brillouin zone sampling (not relevant for TF)
- tsmear      0.1469972355
+ tphysel     0.1469972355
  kptopt      0
  nkpt        1
  occopt      0
@@ -104,4 +104,5 @@
 #%% Test the temperature-dependent XC functional (ixc=50)
 #%% (Ichimaru et al Phys. Rep. 149, 91-205 (1987)
 #%% Test the von Weizsacker gradient correction (tfkinfunc=11 or 12)
+#%% topics = Recursion
 #%%<END TEST_INFO>

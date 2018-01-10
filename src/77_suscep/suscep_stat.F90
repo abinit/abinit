@@ -52,7 +52,7 @@
 !!                 suscep. matrix has to be evaluated, i.e. for SCF precondictioning)
 !!  nfftdiel=number of fft grid points for the computation of the diel matrix
 !!  ngfftdiel(18)=contain all needed information about 3D FFT, for dielectric matrix,
-!!    see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!    see ~abinit/doc/variables/vargs.htm#ngfft
 !!  nkpt=number of k points
 !!  npwarr(nkpt)=number of planewaves and boundary planewaves
 !!   at each k, for going from the WF sphere to the medium size FFT grid.

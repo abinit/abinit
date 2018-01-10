@@ -92,4 +92,5 @@ jpawu2  0.7583333333333333  0.0  0.0  eV
 #%% authors = B. Amadon, J. Bieder 
 #%% keywords = DMFT, CTQMC, FAILS_IFMPI
 #%% description = Test CT-QMC within DMFT for VSrO3 NSCF over density
+#%% topics = DMFT
 #%%<END TEST_INFO>

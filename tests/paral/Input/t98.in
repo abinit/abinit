@@ -2,9 +2,10 @@
 #Test for multibinit, just read xml and generate the effective potential into XML file
 #without the regeneration of the dipole-dipole interaction
 ##############################################################################
-prt_effpot = 3
+prt_model = 1
 
 dipdip = 0
+dipdip_prt = 0
 n_cell =   2 2 2
 dynamics =  12
 temperature = 1000
@@ -23,22 +24,22 @@ ntime  = 50
 #%% system_xml = t98_sys.xml
 #%% files_to_test = 
 #%%   t98_MPI1.out, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy;
-#%%   t98_MPI1_sys.xml, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy
+#%%   t98_MPI1_model.xml, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy
 #%% [NCPU_2]
 #%% system_xml = t98_sys.xml
 #%% files_to_test = 
 #%%   t98_MPI2.out, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy;
-#%%   t98_MPI2_sys.xml, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy
+#%%   t98_MPI2_model.xml, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy
 #%% [NCPU_4]
 #%% system_xml = t98_sys.xml
 #%% files_to_test = 
 #%%   t98_MPI4.out, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy;
-#%%   t98_MPI4_sys.xml, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy
+#%%   t98_MPI4_model.xml, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy
 #%% [NCPU_10]
 #%% system_xml = t98_sys.xml
 #%% files_to_test = 
 #%%   t98_MPI10.out, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy;
-#%%   t98_MPI10_sys.xml, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy
+#%%   t98_MPI10_model.xml, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy
 #%% [extra_info]
 #%% authors = A. MARTIN
 #%% keywords = Effective potential, multibinit

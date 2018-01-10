@@ -15,7 +15,7 @@
 !! INPUTS
 !!  kg_k(3,npw_k)=dimensionless coords of G vecs (integer)
 !!  mpi_enreg=information about MPI parallelization
-!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !!  npw_k=number of planewaves
 !!
 !! OUTPUT

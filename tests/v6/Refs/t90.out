@@ -12,7 +12,7 @@
  Corning Inc. and other collaborators, see ~abinit/doc/developers/contributors.txt .
  Please read ~abinit/doc/users/acknowledgments.html for suggested
  acknowledgments of the ABINIT effort.
- For more information, see http://www.abinit.org .
+ For more information, see https://www.abinit.org .
 
 .Starting date : Mon 24 Feb 2014.
 - ( at 00h49 )
@@ -2042,7 +2042,7 @@ P          mk1mem12        64
     2  20.947  27.069    1   1.9326638        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     2.82741504495369    0.09256629068341    1.82586447305099   rchrg,fchrg,qchrg
- pspatm: epsatm=   66.67453488
+ pspatm : epsatm=   66.67453488
          --- l  ekb(1:nproj) -->
              1    0.915537
              2   -8.015692
@@ -3732,7 +3732,7 @@ P newkpt: treating     10 bands with npw=      90 for ikpt=  13 by node    0
     2  20.947  27.069    1   1.9326638        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     2.82741504495369    0.09256629068341    1.82586447305099   rchrg,fchrg,qchrg
- pspatm: epsatm=   66.67453488
+ pspatm : epsatm=   66.67453488
          --- l  ekb(1:nproj) -->
              1    0.915537
              2   -8.015692
@@ -5925,7 +5925,7 @@ P newkpt: treating     10 bands with npw=      91 for ikpt=  40 by node    0
     2  20.947  27.069    1   1.9326638        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     2.82741504495369    0.09256629068341    1.82586447305099   rchrg,fchrg,qchrg
- pspatm: epsatm=   66.67453488
+ pspatm : epsatm=   66.67453488
          --- l  ekb(1:nproj) -->
              1    0.915537
              2   -8.015692
@@ -7943,7 +7943,7 @@ P newkpt: treating     10 bands with npw=      91 for ikpt=  20 by node    0
     2  20.947  27.069    1   1.9326638        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     2.82741504495369    0.09256629068341    1.82586447305099   rchrg,fchrg,qchrg
- pspatm: epsatm=   66.67453488
+ pspatm : epsatm=   66.67453488
          --- l  ekb(1:nproj) -->
              1    0.915537
              2   -8.015692
@@ -10204,7 +10204,7 @@ P newkpt: treating     10 bands with npw=      91 for ikpt=  40 by node    0
     2  20.947  27.069    1   1.9326638        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     2.82741504495369    0.09256629068341    1.82586447305099   rchrg,fchrg,qchrg
- pspatm: epsatm=   66.67453488
+ pspatm : epsatm=   66.67453488
          --- l  ekb(1:nproj) -->
              1    0.915537
              2   -8.015692
@@ -14258,7 +14258,7 @@ P newkpt: treating     10 bands with npw=      84 for ikpt=  36 by node    0
     2  20.947  27.069    1   1.9326638        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     2.82741504495369    0.09256629068341    1.82586447305099   rchrg,fchrg,qchrg
- pspatm: epsatm=   66.67453488
+ pspatm : epsatm=   66.67453488
          --- l  ekb(1:nproj) -->
              1    0.915537
              2   -8.015692
@@ -16608,7 +16608,7 @@ P newkpt: treating     10 bands with npw=      95 for ikpt=  50 by node    0
     2  20.947  27.069    1   1.9326638        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     2.82741504495369    0.09256629068341    1.82586447305099   rchrg,fchrg,qchrg
- pspatm: epsatm=   66.67453488
+ pspatm : epsatm=   66.67453488
          --- l  ekb(1:nproj) -->
              1    0.915537
              2   -8.015692
@@ -18958,7 +18958,7 @@ P newkpt: treating     10 bands with npw=      95 for ikpt=  50 by node    0
     2  20.947  27.069    1   1.9326638        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     2.82741504495369    0.09256629068341    1.82586447305099   rchrg,fchrg,qchrg
- pspatm: epsatm=   66.67453488
+ pspatm : epsatm=   66.67453488
          --- l  ekb(1:nproj) -->
              1    0.915537
              2   -8.015692
@@ -21308,7 +21308,7 @@ P newkpt: treating     10 bands with npw=      95 for ikpt=  50 by node    0
     2  20.947  27.069    1   1.9326638        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     2.82741504495369    0.09256629068341    1.82586447305099   rchrg,fchrg,qchrg
- pspatm: epsatm=   66.67453488
+ pspatm : epsatm=   66.67453488
          --- l  ekb(1:nproj) -->
              1    0.915537
              2   -8.015692
@@ -24714,7 +24714,7 @@ P          mk1mem12        64
  Note also that it will be of great value to readers of publications presenting these results,
  to read papers enabling them to understand the theoretical formalism and details
  of the ABINIT implementation.
- For information on why they are suggested, see also http://www.abinit.org/about/?text=acknowledgments.
+ For information on why they are suggested, see also https://www.abinit.org/about/?text=acknowledgments.
 
  [1] First-principles responses of solids to atomic displacements and homogeneous electric fields:,
  implementation of a conjugate-gradient algorithm. X. Gonze, Phys. Rev. B55, 10337 (1997).
@@ -24734,7 +24734,7 @@ P          mk1mem12        64
  Computer Phys. Comm. 180, 2582-2615 (2009).
  Comment : the third generic paper describing the ABINIT project.
  Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
- is available at http://www.abinit.org/about/ABINIT_CPC_v10.pdf .
+ is available at https://www.abinit.org/about/ABINIT_CPC_v10.pdf .
  The licence allows the authors to put it on the Web.
 
  [4] A brief introduction to the ABINIT software package.
@@ -24745,7 +24745,7 @@ P          mk1mem12        64
  Comment : the second generic paper describing the ABINIT project. Note that this paper
  should be cited especially if you are using the GW part of ABINIT, as several authors
  of this part are not in the list of authors of the first or third paper.
- The .pdf of the latter paper is available at http://www.abinit.org/about/zfk_0505-06_558-562.pdf.
+ The .pdf of the latter paper is available at https://www.abinit.org/about/zfk_0505-06_558-562.pdf.
  Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
  the licence allows the authors to put it on the Web).
 

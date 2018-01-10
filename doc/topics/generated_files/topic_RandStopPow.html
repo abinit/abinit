@@ -1,0 +1,115 @@
+<!--                                                                                     -->
+<!-- This file has been produced by generate_doc.py using different .yml  or .bib files. -->
+<!-- It is useless to modify it. Modify the related .yml  or .bib files instead.         -->
+<!--                                                                                     -->
+<html>
+<head><title>Random stopping power </title>
+<link rel=stylesheet type="text/css" href="../../formabinit.css">
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  jax: ["input/TeX","output/HTML-CSS"],
+  tex2jax: {inlineMath: [['$','$']]},
+  displayAlign: "center",
+  TeX: { equationNumbers: { autoNumber: "AMS" } }
+});
+</script>
+<script type="text/javascript" async
+src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+</head>
+<body bgcolor="#ffffff">
+
+<hr>
+<a name="top"></a>
+
+<h1>Random electronic stopping power</h1>
+<h3>This page gives hints on how to perform random stopping power calculation with the ABINIT package.
+<hr>
+
+<h5>Copyright (C) 2016-2017 ABINIT group (FB)
+<script type="text/javascript" src="../../js_files/copyright.js"> </script>
+</h5>
+
+<script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
+
+ Mentioned in &nbsp; <a href="../../guide/generated_files/help_features.html#7">help_features#7</a>. 
+ <hr>
+ <h3><b>Table of content: </b></h3> 
+ <ul> <li>1. <a href="topic_RandStopPow.html#1">Introduction.</a><li>2. <a href="topic_RandStopPow.html#2">Related input variables.</a><li>3. <a href="topic_RandStopPow.html#3">Selected input files.</a><li>4. <a href="topic_RandStopPow.html#4">References.</a></ul>
+
+&nbsp; 
+<HR ALIGN=left> 
+<a name="1">&nbsp;</a>
+<h3><b>1. Introduction.</b></h3>
+
+
+<p>The slowing down of a swift charged particle inside condensed matter has been a subject of intense interest
+since the advent of quantum-mechanics.
+The Lindhard formula <a href="../../biblio/generated_files/bib_biblio.html#Lindhard1954">[Lindhard1954]</a> that gives the polarizability of the free electron gas has been developed specifically for this purpose.
+The kinetic energy lost by the impinging particle by unit of path length is named the stopping power.
+For large velocities, the stopping power is dominated by its electronic contribution: the arriving particle induces electronic excitations in the target.
+These electronic excitations in the target can be related to the inverse dielectric function &epsilon;<sup>-1</sup>(<b>q</b>,&omega;)
+provided that linear response theory is valid.
+<p>As a consequence, the electronic stopping power randomized over all the possible impact parameters reads
+
+<p>S(<b>v</b>) = (4&pi; Z<sup>2</sup>/N<sub><b>q</b></sub> &Omega;|<b>v</b>|)&sum;<sub><b>q</b></sub>&sum;<sub><b>G</b></sub>
+Im{-&epsilon;<sup>-1</sup>[<b>q</b>,<b>v.</b>(<b>q</b>+<b>G</b>)]} (<b>v.</b>(<b>q</b>+<b>G</b>)/|<b>q</b>+<b>G</b>|<sup>2</sup>),
+<p>where Z and <b>v</b> are respectively the charge and the velocity of the impinging particle,
+&Omega; is the unit cell volume, N<sub><b>q</b></sub> is the number of <b>q</b>-points in the first Brillouin zone,
+and <b>G</b> are reciprocal lattice vectors.
+<p>Apart from an overall factor of 2, this equation is identical to the formula published <a href="../../biblio/generated_files/bib_biblio.html#Campillo1998">[Campillo1998]</a>.
+
+<p>The GW module of ABINIT gives access to the full inverse dielectric function for a grid of frequencies &omega;.
+Then, the implementation of the above equation is a post-processing employing a spline interpolation of the inverse dielectric function in order to evaluate
+it at &omega;=<b>v.</b>(<b>q</b>+<b>G</b>).
+The energy cutoff on <b>G</b> is governed by the <a href="../../variables/generated_files/varset_gw.html#ecuteps">ecuteps</a>, as in the GW module.
+The integer <a href="../../variables/generated_files/varset_gw.html#npvel">npvel</a> and the cartesian vector <a href="../../variables/generated_files/varset_gw.html#pvelmax">pvelmax</a> control the discretization of the particle velocity.
+<p>Note that the absolute convergence of the random electronic stopping power is a delicate matter that generally requires thousands of empty states together with large values of the energy cutoff.
+<br><br><a href=#top>Go to the top</a>
+
+
+
+
+&nbsp; 
+<hr> 
+<a name="2">&nbsp;</a>
+<h3><b>2. Related input variables.</b></h3>
+
+
+<p>Compulsory input variables:<p>... <a href="../../variables/generated_files/varset_gw.html#ecuteps">ecuteps</a>   [Energy CUT-off for EPSilon (the dielectric matrix)]<br>
+... <a href="../../variables/generated_files/varset_gw.html#npvel">npvel</a>   [Number of Particle VELocities]<br>
+<p>Basic input variables:<p>... <a href="../../variables/generated_files/varset_gw.html#pvelmax">pvelmax</a>   [Particle VELocity MAXimum]<br>
+
+<br><br><a href=#top>Go to the top</a>
+
+
+&nbsp; 
+<HR ALIGN=left> 
+<a name="3">&nbsp;</a>
+<h3><b>3. Selected input files.</b></h3>
+
+
+<i><b>WARNING</b> : as of ABINITv8.6.x, the list of input files provided in the specific section of the topics Web pages is still to be reviewed/tuned. In some cases, it will be adequate, and in other cases, it might be incomplete, or perhaps even useless.</i>
+<br><br>The user can find some related example input files in the ABINIT package in the directory /tests, or on the Web:
+<p> tests/v7/Input: <a href="../../tests/v7/Input/t16.in">t16.in</a> 
+<br>
+
+<br><br><a href=#top>Go to the top</a>
+
+
+&nbsp; 
+<HR ALIGN=left> 
+<a name="4">&nbsp;</a>
+<h3><b>4. References.</b></h3>
+
+
+<br> <a href="../../biblio/generated_files/bib_biblio.html#Campillo1998">[Campillo1998]</a>  I. Campillo, J. M. Pitarke and A. G. Eguiluz, "Electronic stopping power of aluminum crystal", Phys. Rev. B 58, 10307 - 10314 (1998). <br> DOI: <a href="https://doi.org/10.1103/PhysRevB.58.10307">10.1103/PhysRevB.58.10307</a>.<br>
+<br> <a href="../../biblio/generated_files/bib_biblio.html#Lindhard1954">[Lindhard1954]</a>  J. Lindhard, "On the properties of a gas of charged particles", Mat. Fys. Medd. Dan. Vid. Selsk. 28, 8 (1954).<br>
+<p>
+<br><br><a href=#top>Go to the top</a>
+
+<script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
+
+</body>
+</html>
+

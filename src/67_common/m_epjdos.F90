@@ -378,7 +378,7 @@ subroutine dos_calcnwrite(dos,dtset,crystal,ebands,fildata,comm)
 !Local variables-------------------------------
 !scalars
  integer,parameter :: bcorr0=0,master=0
- integer :: iat,iband,iene,ifract,ikpt,isppol,natsph,natsph_extra,nkpt,nsppol,i1,i2
+ integer :: iat,iband,iene,ikpt,isppol,natsph,natsph_extra,nkpt,nsppol,i1,i2
  integer :: nene,prtdos,unitdos,ierr,prtdosm,paw_dos_flag,mbesslang,ndosfraction
  integer :: my_rank,nprocs,cnt,ifrac,ii
  real(dp),parameter :: dos_max=9999.9999_dp
@@ -1204,7 +1204,7 @@ end subroutine recip_ylm
 !!  kg_k    = G vector indices
 !!  natom   = number of atoms
 !!  mpi_enreg=information about MPI parallelization
-!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !!  npw_k   = number of plane waves for this kpoint
 !!  ph1d    = phase factors for different atoms for all G vectors
 !!  rmax(natom) = max radius to integrate to (in bohr)

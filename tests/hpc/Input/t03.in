@@ -1,0 +1,119 @@
+#ABINIT - INPUT FILE
+#BATIO3 29 ATOMS (one O vacancy) - RESPONSE FUNCTION
+
+#Process distribution (parallelism) - TO BE ADAPTED
+autoparal 1
+bandpp 2
+
+#DATASETS
+ndtset 2
+
+#Dataset 1 - Ground state
+kptopt1 1
+tolwfr1 1.d-12
+prtwf1 1
+paral_kgb1 1
+
+#Dataset 2 - Response function
+kptopt2 3
+toldfe2 1.d-8
+rfphon2 1
+getwfk2 1
+rfatpol2 1 1
+rfdir2 0 0 1
+nqpt2 1
+qpt2 0.0 0.375 0.0
+
+
+
+#Plane wave basis
+ecut 8.
+pawecutdg 10.
+
+#K-points and symetries
+ngkpt 8 8 1
+kptopt 1
+nsym 0
+chksymbreak 0
+
+#Electronic configuration
+nband 128
+occopt 1
+
+#SCF cycle
+nstep 50
+diemac 30.
+nbdbuf 11
+
+#Activation/deactivation of I/O
+optforces 2
+optstress 1
+prtwf 0
+prtden 0
+prteig 0
+timopt 0
+
+#Simulation cell
+acell 12. 8. 4. angstrom
+rprim 1. 0. 0. 0. 1. 0. 0. 0. 1.
+natom 29
+znucl 56 22 8
+ntypat 3
+typat 1   2   3   3   3   1   2   3   3   3   
+      1   2   3   3   3   1   2   3   3   3   
+      1   2   3   3   3   1   2   3   3  !3
+chkprim 0
+
+#Atomic positions
+xred
+              0.00000000000000e+00   0.00000000000000e+00   0.00000000000000e+00
+              1.66666666666667e-01   2.50000000000000e-01   5.00000000000000e-01
+              1.66666666666667e-01   2.50000000000000e-01   0.00000000000000e+00
+              1.66666666666667e-01   0.00000000000000e+00   5.00000000000000e-01
+              0.00000000000000e+00   2.50000000000000e-01   5.00000000000000e-01
+              0.00000000000000e+00   5.00000000000000e-01   0.00000000000000e+00
+              1.66666666666667e-01   7.50000000000000e-01   5.00000000000000e-01
+              1.66666666666667e-01   7.50000000000000e-01   0.00000000000000e+00
+              1.66666666666667e-01   5.00000000000000e-01   5.00000000000000e-01
+              0.00000000000000e+00   7.50000000000000e-01   5.00000000000000e-01
+              3.33333333333333e-01   0.00000000000000e+00   0.00000000000000e+00
+              5.00000000000000e-01   2.50000000000000e-01   5.00000000000000e-01
+              5.00000000000000e-01   2.50000000000000e-01   0.00000000000000e+00
+              5.00000000000000e-01   0.00000000000000e+00   5.00000000000000e-01
+              3.33333333333333e-01   2.50000000000000e-01   5.00000000000000e-01
+              3.33333333333333e-01   5.00000000000000e-01   0.00000000000000e+00
+              5.00000000000000e-01   7.50000000000000e-01   5.00000000000000e-01
+              5.00000000000000e-01   7.50000000000000e-01   0.00000000000000e+00
+              5.00000000000000e-01   5.00000000000000e-01   5.00000000000000e-01
+              3.33333333333333e-01   7.50000000000000e-01   5.00000000000000e-01
+              6.66666666666667e-01   0.00000000000000e+00   0.00000000000000e+00
+              8.33333333333333e-01   2.50000000000000e-01   5.00000000000000e-01
+              8.33333333333333e-01   2.50000000000000e-01   0.00000000000000e+00
+              8.33333333333333e-01   0.00000000000000e+00   5.00000000000000e-01
+              6.66666666666667e-01   2.50000000000000e-01   5.00000000000000e-01
+              6.66666666666667e-01   5.00000000000000e-01   0.00000000000000e+00
+              8.33333333333333e-01   7.50000000000000e-01   5.00000000000000e-01
+              8.33333333333333e-01   7.50000000000000e-01   0.00000000000000e+00
+              8.33333333333333e-01   5.00000000000000e-01   5.00000000000000e-01
+              !6.66666666666667e-01   7.50000000000000e-01   5.00000000000000e-01
+
+## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% psp_files = ba.hpc.paw.xml, ti.hpc.paw.xml, o.hpc.paw.xml
+#%% [paral_info]
+#%% nprocs_to_test = 32, 64, 128
+#%% max_nprocs = 128
+#%% [NCPU_32]
+#%% files_to_test = t03_MPI32.out, tolnlines=   0,   tolabs=  0.0,      tolrel= 0.0
+#%% [NCPU_64]
+#%% files_to_test = t03_MPI64.out, tolnlines=   0,   tolabs=  0.0,      tolrel= 0.0
+#%% [NCPU_128]
+#%% files_to_test = t03_MPI128.out, tolnlines=   0,   tolabs=  0.0,      tolrel= 0.0
+#%% [extra_info]
+#%% keywords = PAW,HPC
+#%% authors = M. Torrent
+#%% description = BATIO3 29 atoms (one O vacancy) - Response function - HPC test
+#%%<END TEST_INFO>

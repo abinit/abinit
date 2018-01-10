@@ -102,4 +102,5 @@
 #%%   Test of ground state with different occs(7 and 0),
 #%%   and also ionmov 2. Only with 0 and 4 procs.
 #%%   Similar to test R, except istwfk.
+#%% topics = parallelism, MolecularDynamics
 #%%<END TEST_INFO>

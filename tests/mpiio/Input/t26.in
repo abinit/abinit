@@ -28,7 +28,7 @@ prtfc 1
 natsph 1
 iatsph 2
 
-ndtset 5
+ndtset 6
 
 # Dataset 1
 # Output the GS WFK with MPI-FFT.
@@ -49,12 +49,20 @@ npband3 4 npkpt3 1 npfft3 1
 getwfk4 0
 getden4 -1
 npband4 2 npkpt4 1 npfft4 2
+nstep4 5  #   Improves the portability of the test
 
 # Dataset 5
 # Read previous WFK file with the simple band-by-band CG solver.
 paral_kgb5 0 
 iomode5 0  # CG with MPI-IO is buggy!
 prtdos5 3
+
+# Dtaset 6
+# Read previous WFK file and DEN file with interpolation of rhor(r)
+ngfftdg6 48 48 48
+getden6 -1
+npband6 1 npkpt6 1 npfft6 4
+getwfk6 1
 
 # SCF parameters
 ecut 15. 
@@ -86,6 +94,7 @@ natom 2
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
+#%% exclude_builders = ubu_intel_13.1_openmpi
 #%% [files]
 #%% psp_files = 6c_lda.paw
 #%% [paral_info]

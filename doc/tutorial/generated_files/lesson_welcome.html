@@ -1,0 +1,328 @@
+<!--                                                                                     -->
+<!-- This file has been produced by generate_doc.py using different .yml  or .bib files. -->
+<!-- It is useless to modify it. Modify the related .yml  or .bib files instead.         -->
+<!--                                                                                     -->
+<html>
+<head><title>Welcome</title>
+<link rel=stylesheet type="text/css" href="../../formabinit.css">
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  jax: ["input/TeX","output/HTML-CSS"],
+  tex2jax: {inlineMath: [['$','$']]},
+  displayAlign: "center",
+  TeX: { equationNumbers: { autoNumber: "AMS" } }
+});
+</script>
+<script type="text/javascript" async
+src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+</head>
+<body bgcolor="#ffffff">
+
+<hr>
+<a name="top"></a>
+
+<h1>ABINIT tutorial. Welcome...</h1>
+
+<h2>Overview of the ABINIT tutorial.</h2>
+<hr>
+<p>The lessons of this tutorial are aimed at teaching the use of ABINIT, in the
+UNIX/Linux OS and its variants (Mac OS X, AIX ...). They might be used
+for other operating systems, but the commands have to be adapted.</p>
+
+<p>Note that they can be accessed from the ABINIT web site as well as
+from your local ~abinit/doc/tutorial/generated_files/lesson_welcome.html file.  The latter
+solution is of course preferable, as the response time will not depend
+on the network traffic.</p>
+<hr>
+<h5>Copyright (C) 2000-2017 ABINIT group (XG)
+<script type="text/javascript" src="../../js_files/copyright.js"> </script>
+</h5> 
+
+<script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
+
+<a name="list"></a>
+<h3><b> Welcome. Table of content:</b></h3>
+
+<p>At present, more than thirty lessons are available.  Each of them is
+at most two hours of student work.  Lessons 1-4 cover the basics, other
+lectures are more specialized.
+There are dependencies between lessons. The following schema should
+help you to understand these dependencies. In blue, one has the basic lessons. The blocks in red
+represents additional lessons related to ground-state features of ABINIT. Response-function
+features of ABINIT are explained in the lessons in the green blocks. Finally,
+the Many-Body Perturbation Theory capabilities are demonstrated in the lessons belonging to the violet blocks.
+The right-hand side blocks gather the lessons related to the parallelism inside ABINIT.
+</p>
+
+<center>
+<map id="map1" name="map1"> 
+<area shape="rect" coords="120  , 5 ,260 , 80 " href="lesson_base1.html" /> <!--2,3,4-->
+
+<area shape="rect" coords="30  ,135 ,170 ,160 " href="lesson_spin.html" />
+
+<area shape="rect" coords="30  ,165 , 99 ,189 " href="lesson_paw1.html" />
+<area shape="rect" coords="100 ,165 ,129 ,189 " href="lesson_paw2.html" />
+<area shape="rect" coords="130 ,165 ,170 ,189 " href="lesson_paw3.html" />
+<area shape="rect" coords="30  ,190 ,170 ,240 " href="lesson_nuc.html" /> 
+
+<area shape="rect" coords="30  ,245 , 99 ,272 " href="lesson_dftu.html" />
+<area shape="rect" coords="100 ,245 ,170 ,272 " href="lesson_dmft.html" />
+<area shape="rect" coords="30  ,273 ,100 ,300 " href="lesson_ucalc_crpa.html" />
+<area shape="rect" coords="100 ,273 ,170 ,300 " href="lesson_udet.html" />
+
+<area shape="rect" coords="30  ,305 ,170 ,330 " href="lesson_ffield.html" />
+
+<area shape="rect" coords="30  ,335 ,170 ,360 " href="lesson_positron.html" />
+
+<area shape="rect" coords="30  ,370 ,170 ,395 " href="lesson_tddft.html" />
+
+<area shape="rect" coords="30  ,400 ,170 ,425 " href="lesson_analysis_tools.html" />
+
+<area shape="rect" coords="30  ,430 ,170 ,455 " href="lesson_fold2bloch.html" />
+
+<area shape="rect" coords="30  ,460 ,170 ,485 " href="lesson_wannier90.html" />
+
+<area shape="rect" coords="30  ,490 ,170 ,515" href="lesson_source_code.html" />
+
+<area shape="rect" coords="230  ,135 ,376 ,199 " href="lesson_rf1.html" />
+<area shape="rect" coords="230  ,215 ,376 ,245 " href="lesson_optic.html" />
+<area shape="rect" coords="230  ,265 ,376 ,289 " href="lesson_rf2.html" />
+<area shape="rect" coords="230  ,290 ,376 ,309 " href="lesson_eph.html" /> 
+<area shape="rect" coords="230  ,310 ,376 ,334 " href="lesson_tdepes.html" /> 
+<area shape="rect" coords="230  ,335 ,327 ,365 " href="lesson_elastic.html" /> 
+<area shape="rect" coords="328  ,335 ,376 ,365 " href="lesson_nlo.html" /> 
+
+<area shape="rect" coords="360  ,420 ,456 ,465 " href="lesson_gw1.html" />
+<area shape="rect" coords="360  ,480 ,456 ,502 " href="lesson_gw2.html" /> 
+<area shape="rect" coords="360  ,503 ,456 ,525 " href="lesson_bse.html" /> 
+
+<area shape="rect" coords="530  , 5 ,670 , 80 " href="lesson_basepar.html" />
+
+<area shape="rect" coords="520  ,125 ,695 ,175 " href="lesson_paral_gspw.html" />
+<area shape="rect" coords="520  ,180 ,695 ,235 " href="lesson_paral_moldyn.html" />
+<area shape="rect" coords="520  ,240 ,695 ,300 " href="lesson_paral_images.html" />
+<area shape="rect" coords="520  ,305 ,695 ,365 " href="lesson_paral_gswvl.html" />
+
+<area shape="rect" coords="520  ,380 ,695 ,435 " href="lesson_paral_dfpt.html" />
+
+<area shape="rect" coords="520  ,445 ,695 ,500 " href="lesson_paral_mbt.html" />
+</map>
+
+<img style="height: 540px; width: 720px;" alt="Schema 1" src="../documents/lesson_welcome/tutorial_flowchart_v6.png" usemap="#map1"/>
+</center>
+
+<p>Before following the tutorials, you should have read the <a
+href="../../users/generated_files/help_new_user.html"> "new user's guide"</a>, as well as
+the pages 1045-1058 of the paper "<cite>Iterative minimization
+techniques for ab initio total-energy calculations: molecular dynamics
+and conjugate gradients</cite>", by <cite>M.C. Payne, M.P. Teter, D.C.
+Allan, T.A. Arias and J.D. Joannopoulos, Rev. Mod. Phys. 64, 1045
+(1992)</cite> or, if you have more time, you should browse through the
+Chaps. 1 to 13 , and appendices L and M of the book <cite>Electronic
+Structure. Basic Theory and Practical Methods. R. M. Martin.  Cambridge
+University Press (2004) ISBN 0 521 78285 6.</cite> The latter reference
+is a must if you have not yet used another electronic structure code or
+a Quantum Chemistry package.</p>
+
+<p>After the tutorial, you might find it useful to learn about the test
+cases contained in the subdirectories of ~abinit/tests/, e.g. the
+directories fast, v1, v2, ... , that provide many example input files.
+You should have a look at the README files of these directories.</p>
+
+<p>Additional information can be found in the ~abinit/doc directory,
+including the description of the ABINIT project, guide lines for
+developpers, more on the use of the code (tuning) ...</p>
+<hr>
+
+<h3>Brief description of each lesson's content</h3>
+
+<p><b>I. The lessons 1-4 present the basic concepts, and form a global
+entity: you should not skip any of these.</b></p>
+<ul>
+  <li><a href="lesson_base1.html">The lesson 1</a> deals with the H2
+  molecule : get the total energy, the electronic energies, the charge
+  density, the bond length, the atomisation energy </li>
+  <li><a href="lesson_base2.html">The lesson 2</a> deals again with the H2
+  molecule: convergence studies, LDA versus GGA </li>
+  <li><a href="lesson_base3.html">The lesson 3</a> deals with crystalline
+  silicon (an insulator): the definition of a k-point grid, the smearing
+  of the cut-off energy, the computation of a band structure, and again,
+  convergence studies ...</li>
+  <li><a href="lesson_base4.html">The lesson 4</a> deals with crystalline
+  aluminum (a metal), and its surface: occupation numbers, smearing the
+  Fermi-Dirac distribution, the surface energy, and again, convergence
+  studies ...</li>
+</ul>
+
+<p><b>Other lessons present more specialized topics.</b></p>
+
+<p><b>II. There is a group of lessons that can be started without any other prerequisite than the lessons 1 to 4, and that you can do in any order (there are some exceptions, though):</b></p>
+<ul>
+  <li><a href="lesson_spin.html">The lesson on spin in ABINIT</a>
+  presents the properties related to spin: spin-polarized calculations
+  and spin-orbit coupling. </li>
+  <li><a href="lesson_paw1.html">The lesson on the use of PAW (PAW1)</a>
+  presents the Projector-Augmented Wave method, implemented in ABINIT as
+  an alternative to norm-conserving pseudopotentials, with a sizeable
+  accuracy and CPU time advantage.</li>
+  <li><a href="lesson_paw2.html">The lesson on the generation of PAW
+  atomic data files (PAW2)</a> presents the generation of atomic data
+  for use with the PAW method. Prerequisite : PAW1.</li>
+  <li><a href="lesson_paw3.html">The lesson on the validation of a PAW
+  atomic datafile (PAW3)</a> demonstrates how to test a generated PAW
+  dataset using ABINIT, against the ELK all-electron code, for diamond
+  and magnesium. Prerequisite : PAW1 and PAW2.</li>
+  <li><a href="lesson_nuc.html">The lesson on the properties of the nuclei</a> 
+  shows how to compute the electric field gradient. Prerequisite : PAW1.</li>
+  <li><a href="lesson_wannier90.html">The lesson on Wannier90</a> deals
+  with the Wannier90 library to obtain Maximally Localized Wannier
+  Functions.</li>
+  <li><a href="lesson_ffield.html">The lesson on polarization and finite
+  electric field</a> deals with the computation of the polarization of
+  an insulator (e.g. ferroelectric, or dielectric material) thanks to
+  the Berry phase approach, and also presents the computation of
+  materials properties in the presence of a finite electric field (also
+  thanks to the Berry phase approach).</li>
+  <li><a href="lesson_positron.html">The lesson on electron-positron annihilation</a> 
+  shows how to perform Two-Component Density-Functional Theory (TCDFT) calculations 
+  in the PAW framework to obtain 
+  the positron lifetime in the perfect material,
+  the lifetime of a positron localized in a vacancy,
+  the electron-positron momentum distribution  
+  wavefunctions and densities.
+  <li><a href="lesson_analysis_tools.html">The lesson on Analysis
+  Tools</a> deals with the use of the CUT3D utility to analyse
+  wavefunctions and densities.</li>
+  <li><a href="lesson_fold2bloch.html">The lesson on the fold2bloch
+  postprocessor</a> deals with the use of the fold2Bloch utility to 
+  unfold band structures from supercell calculations.</li>
+  <li><a href="lesson_dftu.html">The lesson on DFT+U</a> shows
+  how to perform a DFT+U calculation using ABINIT, and will lead to
+  compute the projected DOS of NiO. Prerequisite : PAW1.</li>
+  <li><a href="lesson_dmft.html">The lesson on DFT+DMFT</a> shows
+  how to perform a DFT+DMFT calculation on SrVO3 using projected Wannier functions. Prerequisite : DFT+U.</li>
+  <li><a href="lesson_ucalc_crpa.html">The lesson on the calculation of effective interactions U and J by the cRPA method</a> shows how to determine the U value with the constrained Random Phase Approximation using projected Wannier orbitals.  Prerequisite : DFT+U.</li>
+  <li><a href="lesson_udet.html">The lesson on the determination of U
+  for DFT+U</a> shows how to determine the U value with the linear response method, to be used in the
+  DFT+U approach. Prerequisite : DFT+U.</li>
+  <li><a href="lesson_tddft.html">The lesson on TDDFT</a> deals with the
+  computation of the excitation spectrum of finite systems, thanks to
+  the Time-Dependent Density Functional Theory approach, in the
+  Cassida formalism.</li>
+  <li><a href="lesson_source_code.html">The lesson "Source code"</a>
+  introduces the user to the development of new functionalities in
+  ABINIT: in this lesson, one learns how to add a new input variable
+  ...</li>
+</ul>
+
+<p><b>III. There is an additional group of lessons on density-functional perturbation theory
+(phonons, optics, dielectric constant, electron-phonon interaction,
+elastic response, non-linear optics, Raman coefficients,
+piezoelectricity ...), for which some common additional information are
+needed:</b></p>
+<ul>
+  <li><a href="lesson_rf1.html">The lesson DFPT 1 (RF1 - response function 1)</a>
+  presents the basics of DFPT within ABINIT. The example
+  given is the study of dynamical and dielectric properties of AlAs (an
+  insulator): phonons at Gamma, dielectric constant, Born effective
+  charges, LO-TO splitting, phonons in the whole Brillouin zone. The
+  creation of the "Derivative Data Base" (DDB) is presented.</li>
+  <li><a href="lesson_rf2.html">The lesson DFPT 2 (RF2 - response function 2)</a>
+  presents the analysis of the DDBs that have been introduced in the
+  preceeding lesson RF1.  The computation of the interatomic forces and
+  the computation of thermodynamical properties is an outcome of this
+  lesson.</li>
+</ul>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b><i>The additional information given by lesson DFPT1 opens the door to</i></b>
+<ul>
+  <a href="lesson_optic.html">The lesson on Optic</a>, the utility that
+  allows to obtain the frequency dependent linear optical dielectric
+  function and the frequency dependent second order nonlinear optical
+  susceptibility, in the simple "Sum-Over-State" approximation.</li>
+</ul>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b><i>The additional information given by lesson DFPT1 and DFPT2 opens
+  the door to a group of lessons that can be followed independently of
+  each other: </i></b> 
+<ul>
+  <li><a href="lesson_eph.html">The lesson on the
+  electron-phonon interaction</a> presents the use of the utility MRGKK
+  and ANADDB to examine the electron-phonon interaction and the
+  subsequent calculation of superconductivity temperature (for bulk
+  systems).</li>
+  <li><a href="lesson_tdepes.html">The lesson on temperature dependence of the electronic structure</a>
+  presents the computation of the temperature dependence of the electronic structure, 
+  the zero-point motion effect, the lifetim/broadening of eigenenergies.</li>
+  <li><a href="lesson_elastic.html">The lesson on the elastic
+  properties</a> presents the computation with respect to the strain
+  perturbation and its responses: elastic constants,
+  piezoelectricity.</li>
+  <li><a href="lesson_nlo.html">The lesson on static non-linear
+  properties</a> presents the computation of responses beyond the linear
+  order, within Density-Functional Perturbation Theory (beyond the
+  simple Sum-Over-State approximation): Raman scattering efficiencies
+  (non-resonant case), non-linear electronic susceptibility,
+  electro-optic effect.  Comparison with the finite field technique
+  (combining DFPT calculatons with finite
+  difference calculations), is also provided.</li>
+</ul>
+<p><b>IV. There is another additional group of lessons on many-body 
+perturbation theory (GW approximation, Bethe-Salpeter equation),
+to be done sequentially):
+</b></p>
+<ul>
+ <li><a href="lesson_gw1.html">The first lesson on GW (GW1)</a> deals with
+  the computation of the quasi-particle band gap of Silicon 
+  (semiconductor), in the GW approximation (much better than the
+  Kohn-Sham LDA band structure), with a plasmon-pole model. </li>
+  <li><a href="lesson_gw2.html">The second lesson on GW (GW2)</a> deals with
+  the computation of the quasi-particle band structure of Aluminum, in
+  the GW approximation (so, much better than the Kohn-Sham LDA band
+  structure) without using the plasmon-pole model. </li>
+  <li><a href="lesson_bse.html">The lesson on the Bethe-Salpeter Equation (BSE)</a> deals with the
+  computation of the macroscopic dielectric function of Silicon within
+  the Bethe-Salpeter equation. </li>
+</ul>
+<p><b>V. Concerning parallelism, there is another set of specialized
+lessons. For each of these lessons, you are supposed to be familiarized
+with the corresponding tutorial for the sequential calculation.</b></p>
+<ul>
+  <li><a href="lesson_basepar.html">An introduction on ABINIT in
+  Parallel</a> should be read before going to the next lessons about
+  parallelism. One simple example of parallelism in ABINIT will be
+  shown.</li>
+  <li><a href="lesson_paral_gspw.html">Parallelism for ground-state
+  calculations, with plane waves</a> presents the combined k-point (K),
+  plane-wave (G), band (B), spin/spinor parallelism of ABINIT (so, the
+  "KGB" parallelism), for the computation of total energy, density, and
+  ground state properties </li>
+  <li><a href="lesson_paral_moldyn.html">Parallelism for molecular
+  dynamics calculations</a></li>
+  <li><a href="lesson_paral_images.html">Parallelism based on "images"</a>,
+  e.g. for the determination of transitions paths (NEB or string method), or for PIMD,
+  that can be activated alone, or on top of other parallelisms, e.g. the "KGB" parallelism for force
+  calculations.</li>
+  <li><a href="lesson_paral_gswvl.html">Parallelism for ground-state
+  calculations, with wavelets</a> presents the parallelism of ABINIT,
+  when wavelets are used as a basis function instead of planewaves, for
+  the computation of total energy, density, and ground state properties</li>
+  <li><a href="lesson_paral_dfpt.html">Parallelism of DFPT
+  calculations</a> - you need to be familiarized with the calculation of
+  response properties within ABINIT, see the tutorial <a
+  href="lesson_rf1.html"> DFPT 1 (RF1)</a></li>
+  <li><a href="lesson_paral_mbt.html">Parallelism of Many-Body
+  Perturbation calculations (GW)</a> allows to speed up the calculation of
+  accurate electronic structures (quasi-particle band structure,
+  including many-body effects).</li>
+</ul>
+
+<p>NOTE that not all features of ABINIT are covered by these
+tutorials. For a complete feature list, please see the
+<a href="../../guide/generated_files/help_features.html#">features help file</a>. For examples on how to use these
+features, please see the ~abinit/tests/* directories and their
+accompanying README files.</p>
+<script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
+
+</body>
+</html>
+

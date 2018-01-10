@@ -70,9 +70,9 @@
 !!  nattyp(ntypat)=number of atoms of each type in cell.
 !!  nfft=(effective) number of FFT grid points (for this processor)
 !!  nfftmix=dimension of FFT grid used to mix the densities (used in PAW only)
-!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !!  ngfftmix(18)=contain all needed information about 3D FFT, for the grid corresponding to nfftmix
-!!  nkxc=second dimension of the array kxc, see rhohxc.f for a description
+!!  nkxc=second dimension of the array kxc, see rhotoxc.f for a description
 !!  npawmix=-PAW only- number of spherical part elements to be mixed
 !!  npwdiel=number of planewaves for dielectric matrix
 !!  nstep=number of steps expected in iterations.

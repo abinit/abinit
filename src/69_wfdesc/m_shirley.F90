@@ -1798,7 +1798,7 @@ subroutine shirley_hks(Wsh,kpt,spin,Ham_k,Cryst,Psps,Pawtab,Pawang,Paw_ij,sh_siz
  ABI_MALLOC(half_gsq,(npw_k))
  ABI_MALLOC(wsg,(npw_k))
 
- ! TODO Add new overloaded interface. effmass option!
+ ! TODO Add new overloaded interface. effmass_free option!
  do ig=1,npw_k
    kdotg(ig)    = two_pi**2 * DOT_PRODUCT(k4intp,MATMUL(Cryst%gmet,kg_k(:,ig)))
    half_gsq(ig) = half * vdotw(one*kg_k(:,ig),one*kg_k(:,ig),Cryst%gmet,"G")
@@ -2288,10 +2288,10 @@ subroutine shirley_interp(Wsh,jobz,Dtset,Cryst,Psps,Pawtab,Pawfgr,Pawang,Pawrad,
        ! FIXME here there is a problem with Wd%ecut and Dtset%ecut.
        !if (ikpt==1) write(std_out,*)" CHECK: Dtset%ecut=",Dtset%ecut," Wsh%ecut= ",Wsh%ecut
        !call init_ddiago_ctl(Diago_ctl,"No Vectors",spin,nspinor,Wsh%ecut,kpoint,nloalg,Cryst%gmet,&
-       !&   nband_k=nband_k,effmass=Dtset%effmass,istwf_k=istwf1,prtvol=prtvol)
+       !&   nband_k=nband_k,effmass_free=Dtset%effmass_free,istwf_k=istwf1,prtvol=prtvol)
 
        call init_ddiago_ctl(Diago_ctl,"No Vectors",spin,nspinor,Dtset%ecut,kpoint,nloalg,Cryst%gmet,&
-&        nband_k=nband_k,effmass=Dtset%effmass,istwf_k=istwf1,prtvol=prtvol)
+&        nband_k=nband_k,effmass_free=Dtset%effmass_free,istwf_k=istwf1,prtvol=prtvol)
 
        nullify(diag_ene)
        nullify(diag_vec)

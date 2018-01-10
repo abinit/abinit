@@ -70,4 +70,5 @@ vdw_tol 1d-8 # Tolerance on the pair-wise term (1d-12 is safer for convergence p
 #%%   In this test the following properties are thus tested: contribution
 #%%   to the energy and to the stress of DFT-D3(BJ) as well as 
 #%%   the contribution to the elastic constants and internal strains
+#%% topics = vdw
 #%%<END TEST_INFO>

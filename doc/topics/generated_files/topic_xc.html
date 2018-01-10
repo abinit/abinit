@@ -1,0 +1,177 @@
+<!--                                                                                     -->
+<!-- This file has been produced by generate_doc.py using different .yml  or .bib files. -->
+<!-- It is useless to modify it. Modify the related .yml  or .bib files instead.         -->
+<!--                                                                                     -->
+<html>
+<head><title>Exchange-correlation </title>
+<link rel=stylesheet type="text/css" href="../../formabinit.css">
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  jax: ["input/TeX","output/HTML-CSS"],
+  tex2jax: {inlineMath: [['$','$']]},
+  displayAlign: "center",
+  TeX: { equationNumbers: { autoNumber: "AMS" } }
+});
+</script>
+<script type="text/javascript" async
+src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+</head>
+<body bgcolor="#ffffff">
+
+<hr>
+<a name="top"></a>
+
+<h1>Exchange and correlation functionals</h1>
+<h3>This page gives hints on how to set parameters related to the exchange and correlation functionals with the ABINIT package.
+<hr>
+
+<h5>Copyright (C) 2016-2017 ABINIT group (FJ)
+<script type="text/javascript" src="../../js_files/copyright.js"> </script>
+</h5>
+
+<script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
+
+ Mentioned in &nbsp; <a href="../../guide/generated_files/help_features.html#2.2">help_features#2.2</a>. 
+ <hr>
+ <h3><b>Table of content: </b></h3> 
+ <ul> <li>1. <a href="topic_xc.html#1">Introduction.</a><li>2. <a href="topic_xc.html#2">Related lesson(s) of the tutorial.</a><li>3. <a href="topic_xc.html#3">Related input variables.</a><li>4. <a href="topic_xc.html#4">Selected input files.</a><li>5. <a href="topic_xc.html#5">References.</a></ul>
+
+&nbsp; 
+<HR ALIGN=left> 
+<a name="1">&nbsp;</a>
+<h3><b>1. Introduction.</b></h3>
+
+
+Total energy computation in ABINIT is done according to Density Functional
+Theory (DFT). Although formally exact, an approximate exchange-correlation (XC) functional must be chosen.
+This is governed by the input variable <a href="../../variables/generated_files/varset_basic.html#ixc">ixc</a>. 
+<br/>However, the pseudopotentials (or PAW data sets) are
+constructed for one specific XC functional. If <a href="../../variables/generated_files/varset_basic.html#ixc">ixc</a> is not specified, ABINIT will simply
+take the <a href="../../variables/generated_files/varset_basic.html#ixc">ixc</a> of the given pseudopoential(s) - hoping they are coherent with each others.
+One introduces an error by using a pseudopotential generated with an XC functional
+that is not the same as the one explicitly specified by <a href="../../variables/generated_files/varset_basic.html#ixc">ixc</a>. However, 
+ABINIT will nevertheless do the calculation.
+
+<p>Many exchange-correlation functionals are available (see the list in the description of <a href="../../variables/generated_files/varset_basic.html#ixc">ixc</a>),
+through two different implementations : one is the native ABINIT implementation,
+the other is the ETSF library of XC functionals (LibXC is a plug-in to ABINIT).
+In the native ABINIT set,
+most of the important local approximations (LDA) are
+available, including the Perdew-Zunger one. Two different local spin density
+(LSD) are available, including the Perdew Wang 92, and one due to M. Teter.
+The Perdew-Burke-Ernzerhof,  the revPBE, the RPBE
+and the HCTH GGAs (spin unpolarized as well as polarized)
+are also available.
+
+<br/>In the LibXC 2.0 library, as interfaced with ABINIT,
+there are 24 functional forms of the 3D LDA type, and over 80 functional forms of the GGA type.
+They can be used with norm-conserving pseudopotentials as well as PAW atomic data.
+Also, some metaGGA can be used with ABINIT (norm-conserving case only).
+For response-function type calculations, the native ABINIT LDA and GGA kernels 
+can be used as well as the LibXC ones.
+<br/>
+<h4><b>Hybrid functionals:</b></h4>
+<br/>The exchange can also be computed on the basis of the Fock expression (exact exchange), and the correlation
+can be computed on the basis of the RPA approximation (see the GW section).
+<a href="topic_Hybrids.html">Hybrid functionals</a> calculations (HSE06, PBE0, B3LYP) can be performed.
+The implementation of the exact exchange, correlation and hybrid does not deliver the forces and stresses at present,
+at the exception of forces with norm-conserving pseudopotentials.
+
+<h4><b>Local exact exchange:</b></h4>
+<p>
+When <a href="../../variables/generated_files/varset_paw.html#useexexch">useexexch</a>=1, the hybrid functional PBE0 is used in PAW, 
+inside PAW spheres only, and only for correlated orbitals given by <a href="../../variables/generated_files/varset_paw.html#lexexch">lexexch</a>. 
+To change the ratio of exact exchange, see also <a href="../../variables/generated_files/varset_dev.html#exchmix">exchmix</a>. 
+The implementation of local exact exchange in ABINIT is provided in <a href="../../biblio/generated_files/bib_biblio.html#Jollet2009">[Jollet2009]</a>. 
+See useful input variables <a href="../../variables/generated_files/varset_dev.html#exchmix">exchmix</a>, <a href="../../variables/generated_files/varset_paw.html#lexexch">lexexch</a> and <a href="../../variables/generated_files/varset_paw.html#useexexch">useexexch</a>.
+<br/>
+
+<br/>
+<h4><b>Van der Waals functionals:</b></h4>
+<br/>Several <a href="topic_vdw.html">Van der Waals functionals</a> are available : Grimme (D2, D3, D3(Becke-Johnson)), Silvestrelli.
+<br><br><a href=#top>Go to the top</a>
+
+
+
+&nbsp; 
+<HR ALIGN=left> 
+<a name="2">&nbsp;</a>
+<h3><b>2. Related lesson(s) of the tutorial.</b></h3>
+
+
+<li>The <a href="../../tutorial/generated_files/lesson_base2.html#">lesson_base2</a> deals with the H<sub>2</sub>
+molecule: convergence studies, LDA versus GGA </li>
+<br><br><a href=#top>Go to the top</a>
+
+
+&nbsp; 
+<hr> 
+<a name="3">&nbsp;</a>
+<h3><b>3. Related input variables.</b></h3>
+
+
+<p>Basic input variables:<p>... <a href="../../variables/generated_files/varset_basic.html#ixc">ixc</a>   [Index of eXchange-Correlation functional]<br>
+<p>Useful input variables:<p>... <a href="../../variables/generated_files/varset_dev.html#exchmix">exchmix</a>   [EXCHange MIXing]<br>
+... <a href="../../variables/generated_files/varset_paw.html#lexexch">lexexch</a>   [value of angular momentum L for EXact EXCHange]<br>
+... <a href="../../variables/generated_files/varset_paw.html#useexexch">useexexch</a>   [USE of EXact EXCHange]<br>
+<p>Relevant internal variables:<p>... <a href="../../variables/generated_files/varset_internal.html#xclevel">%xclevel</a>   [eXchange Correlation functional LEVEL]<br>
+<p>Input variables for experts:<p>... <a href="../../variables/generated_files/varset_dev.html#densty">densty</a>   [initial DENSity for each TYpe of atom]<br>
+... <a href="../../variables/generated_files/varset_dev.html#intxc">intxc</a>   [INTerpolation for eXchange-Correlation]<br>
+... <a href="../../variables/generated_files/varset_gw.html#ixc_sigma">ixc_sigma</a>   [Index of eXchange-Correlation functional used for self-energy calculations (SIGMA)]<br>
+... <a href="../../variables/generated_files/varset_dev.html#optnlxccc">optnlxccc</a>   [OPTion for the calculation of Non-Linear eXchange-Correlation Core Correction]<br>
+... <a href="../../variables/generated_files/varset_gstate.html#usekden">usekden</a>   [USE Kinetic energy DENsity]<br>
+... <a href="../../variables/generated_files/varset_dev.html#xc_denpos">xc_denpos</a>   [eXchange-Correlation - DENsity POSitivity value]<br>
+... <a href="../../variables/generated_files/varset_dev.html#xc_tb09_c">xc_tb09_c</a>   [Value of the c parameter in the eXchange-Correlation TB09 functional]<br>
+
+<br><br><a href=#top>Go to the top</a>
+
+
+&nbsp; 
+<HR ALIGN=left> 
+<a name="4">&nbsp;</a>
+<h3><b>4. Selected input files.</b></h3>
+
+
+<i><b>WARNING</b> : as of ABINITv8.6.x, the list of input files provided in the specific section of the topics Web pages is still to be reviewed/tuned. In some cases, it will be adequate, and in other cases, it might be incomplete, or perhaps even useless.</i>
+<br><br>The user can find some related example input files in the ABINIT package in the directory /tests, or on the Web:
+<p> tests/v1/Input: <a href="../../tests/v1/Input/t10.in">t10.in</a> 
+<a href="../../tests/v1/Input/t11.in">t11.in</a> 
+<a href="../../tests/v1/Input/t12.in">t12.in</a> 
+<a href="../../tests/v1/Input/t13.in">t13.in</a> 
+<a href="../../tests/v1/Input/t14.in">t14.in</a> 
+<a href="../../tests/v1/Input/t15.in">t15.in</a> 
+<a href="../../tests/v1/Input/t16.in">t16.in</a> 
+<a href="../../tests/v1/Input/t17.in">t17.in</a> 
+<a href="../../tests/v1/Input/t18.in">t18.in</a> 
+<a href="../../tests/v1/Input/t19.in">t19.in</a> 
+<a href="../../tests/v1/Input/t20.in">t20.in</a> 
+<a href="../../tests/v1/Input/t21.in">t21.in</a> 
+<a href="../../tests/v1/Input/t22.in">t22.in</a> 
+<a href="../../tests/v1/Input/t23.in">t23.in</a> 
+<a href="../../tests/v1/Input/t24.in">t24.in</a> 
+<a href="../../tests/v1/Input/t25.in">t25.in</a> 
+<a href="../../tests/v1/Input/t28.in">t28.in</a> 
+<a href="../../tests/v1/Input/t29.in">t29.in</a> 
+<a href="../../tests/v1/Input/t30.in">t30.in</a> 
+<p> tests/v5/Input: <a href="../../tests/v5/Input/t18.in">t18.in</a> 
+<br>
+
+<br><br><a href=#top>Go to the top</a>
+
+
+&nbsp; 
+<HR ALIGN=left> 
+<a name="5">&nbsp;</a>
+<h3><b>5. References.</b></h3>
+
+
+<br> <a href="../../biblio/generated_files/bib_biblio.html#Jollet2009">[Jollet2009]</a>  F. Jollet, G. Jomard, B. Amadon, J.P. Crocombette and D. Torumba, "Hybrid functional for correlated electrons in the projector augmented-wave formalism: Study of multiple minima for actinide oxides", Phys. Rev. B 80, 235109 (2009).<br>
+<p>
+<br><br><a href=#top>Go to the top</a>
+
+<script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
+
+</body>
+</html>
+

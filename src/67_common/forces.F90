@@ -51,7 +51,7 @@
 !!  n3xccc=dimension of the xccc3d array (0 or nfft).
 !!  nattyp(ntypat)=number of atoms of each type
 !!  nfft=(effective) number of FFT grid points (for this processor)
-!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !!  ngrvdw=size of grvdw(:,:); can be 0 or natom according to dtset%vdw_xc
 !!  ntypat=number of types of atoms
 !!  pawrad(ntypat*usepaw) <type(pawrad_type)>=paw radial mesh and related data
@@ -186,9 +186,9 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,&
 !scalars
  integer :: coredens_method,fdir,iatom,idir,indx,ipositron,itypat,mu
  integer :: optatm,optdyfr,opteltfr,optgr,option,optn,optn2,optstr,optv,vloc_method
- real(dp) :: eei_dum,ucvol,ucvol_local,vol_element
+ real(dp) :: eei_dum1,eei_dum2,ucvol,ucvol_local,vol_element
  logical :: calc_epaw3_forces, efield_flag
- logical :: is_hybrid_ncpp,wvlbigdft=.false.
+ logical :: is_hybrid_ncpp
 !arrays
  integer :: qprtrb_dum(3)
  real(dp) :: dummy6(6),ep3(3),fioncart(3),gmet(3,3),gprimd(3,3) 
@@ -287,7 +287,7 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,&
    ABI_ALLOCATE(dyfrlo_dum,(3,3,dtset%natom))
    ABI_ALLOCATE(grtn_indx,(3,dtset%natom))
    ABI_ALLOCATE(v_dum,(nfft))
-   call mklocl(dtset,dyfrlo_dum,eei_dum,gmet,gprimd,grtn_indx,gsqcut,dummy6,mgfft,&
+   call mklocl(dtset,dyfrlo_dum,eei_dum1,gmet,gprimd,grtn_indx,gsqcut,dummy6,mgfft,&
 &   mpi_enreg,dtset%natom,nattyp,nfft,ngfft,dtset%nspden,ntypat,option,pawtab,ph1d,psps,&
 &   qprtrb_dum,rhog,rhor,rprimd,ucvol,vprtrb_dum,v_dum,wvl,wvl_den,xred)
    do iatom=1,dtset%natom
@@ -315,8 +315,8 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,&
      ABI_ALLOCATE(dyfrx2_dum,(3,3,dtset%natom))
      ABI_ALLOCATE(xccc3d_dum,(n3xccc))
      if (is_hybrid_ncpp) then
-       call xchybrid_ncpp_cc(dtset,eei_dum,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,&
-&       dummy6,eei_dum,xccc3d_dum,grxc=grxc,xcccrc=psps%xcccrc,xccc1d=psps%xccc1d,xred=xred,n1xccc=n1xccc)
+       call xchybrid_ncpp_cc(dtset,eei_dum1,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,&
+&       dummy6,eei_dum2,xccc3d_dum,grxc=grxc,xcccrc=psps%xcccrc,xccc1d=psps%xccc1d,xred=xred,n1xccc=n1xccc)
      else
        if (psps%usewvl==0.and.psps%usepaw==0.and.dtset%icoulomb==0) then
          call mkcore(dummy6,dyfrx2_dum,grxc,mpi_enreg,dtset%natom,nfft,dtset%nspden,ntypat,&
@@ -457,8 +457,8 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,&
  grtn(:,:)=grl(:,:)+grchempottn(:,:)+grewtn(:,:)+synlgr(:,:)+grxc(:,:)
 ! grtn(:,:)=grl(:,:)+grewtn(:,:)+synlgr(:,:)+grxc(:,:)
 
- if (usefock==1 .and. associated(fock).and.fock%optfor) then
-   grtn(:,:)=grtn(:,:)+fock%forces(:,:)
+ if (usefock==1 .and. associated(fock).and.fock%fock_common%optfor) then
+   grtn(:,:)=grtn(:,:)+fock%fock_common%forces(:,:)
  end if
  if (ngrvdw==dtset%natom) grtn(:,:)=grtn(:,:)+grvdw(:,:)
 ! note that fionred is subtracted, because it really is a force and we need to

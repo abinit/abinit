@@ -70,4 +70,5 @@ jpawu  0.0350 0.0  # values in Hartree
 #%%   The cut-off is unrealistic. This test tests the
 #%%   following part of the code :
 #%%   * paw LDA+U (pawpupot, pawpuenergy, pawpuinit)
+#%% topics = DFT+U
 #%%<END TEST_INFO>

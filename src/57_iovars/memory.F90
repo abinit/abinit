@@ -53,7 +53,7 @@
 !!  ngfftf(18)=contain all needed information about 3D FFT (fine grid, if PAW)
 !!  ngfft(18) =contain all needed information about 3D FFT (coarse grid, if PAW)
 !!  ngfftdiel(18)=contain all needed information about 3D FFT, dielectric case,
-!!                 see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!                 see ~abinit/doc/variables/vargs.htm#ngfft
 !!    for susceptibility and dielectric matrices
 !!  nimage=number of images (replicas) of the cell
 !!  nkpt  =number of k points
@@ -106,7 +106,7 @@
 !!  or a constant larger than 30)
 !! After this estimation, an amount of (176 + 55 + 6*natom) Kbytes is added
 !! to take into account the static arrays declared
-!! in rhohxc and daughter routines (at maximum 22*1000 dp numbers),
+!! in rhotoxc and daughter routines (at maximum 22*1000 dp numbers),
 !! as well as other arrays like
 !! character(len=500) :: message (present in about 100 routines), or the different
 !! arrays allocated in move.f, brdmin.f, gstate.f (xf array) or pspini.f
@@ -119,7 +119,7 @@
 !! driver - gstate - (move or brdmin) - scfcv - vtorho - vtowfk -
 ! !!     cgwf - getghc - fourwf or (nonlop+opernl)
 !! 3) the xc chain :
-!! driver - gstate - (move or brdmin) - scfcv - (vresfo) - rhohxc - xcden
+!! driver - gstate - (move or brdmin) - scfcv - (vresfo) - rhotoxc - xcden
 !! 4) the mkrho chain :
 !! driver - gstate - (move or brdmin) - scfcv - vtorho - mkrho
 !! 5) the fourdp chain :
@@ -581,7 +581,7 @@ subroutine memory(n1xccc,extrapwf,getcell,idtset,icoulomb,intxc,ionmov,iout,dens
    cadd(25)=cadd(25)+(1+3*pawnhatxc*(ngrad/2))*nspden*nfftf       !nhat,nhatgr
  end if
 
-!(3)                     in rhohxc, xcden -------------------------------
+!(3)                     in rhotoxc, xcden -------------------------------
 
  if(xclevel/=0)then
    if(n1xccc/=0)then
@@ -603,7 +603,7 @@ subroutine memory(n1xccc,extrapwf,getcell,idtset,icoulomb,intxc,ionmov,iout,dens
    end if
  end if
  if(iscf>0)then
-!  In this case, rhohxc is called from rhotov also,
+!  In this case, rhotoxc is called from rhotov also,
 !  for which vresid was allocated in scfcv
 !  vresid
    cfftf(35)=nspden               ; dttyp(35)=8
@@ -614,7 +614,7 @@ subroutine memory(n1xccc,extrapwf,getcell,idtset,icoulomb,intxc,ionmov,iout,dens
    cadd(36) = ngfft(4) * ngfft(5) * ngfft(6) - nfft
  end if
 
-!Note : in hartre, called by rhohxc, one uses
+!Note : in hartre, called by rhotoxc, one uses
 !2 dp arrays of total size 3*nfft,
 !and 2 arrays of total size 4*n4*n5*n6 for fourdp
 !This will be smaller than the total use for symrhg

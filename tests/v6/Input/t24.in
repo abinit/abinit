@@ -62,4 +62,5 @@ ngkpt 4 4 4
 #%%   Hydrogen diatomic molecule in a cell, close to BCC
 #%%   Test the string method : 6 images, exploring the transition
 #%%   path. Similar to test 22 (but with string).
+#%% topics = TransPath
 #%%<END TEST_INFO>

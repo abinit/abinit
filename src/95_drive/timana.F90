@@ -264,7 +264,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(78)='nonlop(dyfrnl)                  '
  names(79)='nonlop(ddk)                     '
  names(80)='etotfor/=forces                 '
- names(81)='xc:pot                          ' ! rhohxc_coll, except the call to hartre.f
+ names(81)='xc:pot                          ' ! rhotoxc_coll, except the call to hartre.f
  names(82)='xc:fourdp                       '
  names(83)='newvtr/rho(3):io                '; basic(83)=1
  names(84)='suscep                          '
@@ -713,6 +713,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(793)='mkrho%energy                    '
  names(794)='mkrho%respfn                    '
  names(795)='mkrho%afterscfloop              '
+ names(796)='mkrho%scfcv                     '
  names(798)='mkrho/=                         '; basic(798)=1
  names(799)='mkrho/=+fourwf                  '
 
@@ -769,7 +770,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(938)='outkss(write)                   '
 
  names(940)='rhotov                          '
- names(941)='rhotov(rhohxc)                  '
+ names(941)='rhotov(rhotoxc)                 '
  names(942)='rhotov(dotprod_vn)              '
  names(943)='rhotov(PSolver_rhohxc)          '
  names(944)='rhotov(rhohxcpositron)          '
@@ -1178,8 +1179,8 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
 !      vtowfk (3) = vtowfk (afterloop) - nonlop%vtowfk - prep_nonlop%vtowfk - fourwf%vtowfk - prep_fourwf%vtowfk - vtowfk(nonlocalpart)
      tslots(:7)=(/-591,30,-222,-572,-842,-537,-586/)
    case(43) 
-!      mkrho = mkrho%gstate + mkrho%vtorho + mkrho%energy + mkrho%respfn + mkrho%afterscfloop
-     tslots(:6)=(/790,791,792,793,794,795/)
+!      mkrho = mkrho%gstate + mkrho%vtorho + mkrho%energy + mkrho%respfn + mkrho%afterscfloop + mkrho%scfcv
+     tslots(:7)=(/790,791,792,793,794,795,796/)
    case(44) 
 !      Estimate the complement of dmft (in vtorho, only)
      tslots(:9)=(/-626, 991,-620,-621,-622,-623,-624,-625,-627/)
@@ -1218,7 +1219,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
 !For the following sections, the number of counts is non standard, and thus these sections have not been placed
 !in the previous doloop.
 
-!Compute xc part of rhohxc and dfpt_mkvxc, minus the calls to fourdp inside that part
+!Compute xc part of rhotoxc and dfpt_mkvxc, minus the calls to fourdp inside that part
  ncount(11)=ncount(81)+ncount(181)
  times(1:2,11)=times(1:2,81)+times(1:2,181)-times(1:2,82)
  ftimes(1:2,11)=ftimes(1:2,81)+ftimes(1:2,181)-ftimes(1:2,82)
@@ -1379,7 +1380,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
 
    write(ount,'(a,t35,a,t43,a,t51,a,t60,a,t66,a,t82,a,3x,a7,1x,a10)')&
 &   '- routine        ','cpu','%','wall','%', ' number of calls ',' Gflops ', &
-    'Speedup', 'Efficacity'
+   'Speedup', 'Efficacity'
    write(ount,'(a,t35,a,t43,a,t51,a,t60,a,t66,a,t78,a)')&
 &   '-                ','   ',' ','    ',' ','  (-1=no count)'
 

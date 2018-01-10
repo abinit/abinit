@@ -1,0 +1,133 @@
+<!--                                                                                     -->
+<!-- This file has been produced by generate_doc.py using different .yml  or .bib files. -->
+<!-- It is useless to modify it. Modify the related .yml  or .bib files instead.         -->
+<!--                                                                                     -->
+<html>
+<head><title>Optic </title>
+<link rel=stylesheet type="text/css" href="../../formabinit.css">
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  jax: ["input/TeX","output/HTML-CSS"],
+  tex2jax: {inlineMath: [['$','$']]},
+  displayAlign: "center",
+  TeX: { equationNumbers: { autoNumber: "AMS" } }
+});
+</script>
+<script type="text/javascript" async
+src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+</head>
+<body bgcolor="#ffffff">
+
+<hr>
+<a name="top"></a>
+
+<h1>Linear and non-linear optics</h1>
+<h3>This page gives hints on how to compute linear and non-linear optical properties in the independent-particle approximation with the ABINIT package.
+<hr>
+
+<h5>Copyright (C) 2016-2017 ABINIT group (SS,XG,YG)
+<script type="text/javascript" src="../../js_files/copyright.js"> </script>
+</h5>
+
+<script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
+
+ Mentioned in &nbsp; <a href="../../guide/generated_files/help_features.html#7">help_features#7</a>, &nbsp; <a href="../../guide/generated_files/help_optic.html#3">help_optic#3</a>. 
+ <hr>
+ <h3><b>Table of content: </b></h3> 
+ <ul> <li>1. <a href="topic_Optic.html#1">Introduction.</a><li>2. <a href="topic_Optic.html#2">Related lesson(s) of the tutorial.</a><li>3. <a href="topic_Optic.html#3">Related input variables.</a><li>4. <a href="topic_Optic.html#4">Selected input files.</a></ul>
+
+&nbsp; 
+<HR ALIGN=left> 
+<a name="1">&nbsp;</a>
+<h3><b>1. Introduction.</b></h3>
+
+
+<p>Optical and non-linear optical properties can be computed with different levels of approximation.
+<p>The simplest (and fastest) approach relies on the
+independent-particle approximation (IPA): the electrons are supposed
+independent of each other when reacting to the optical perturbation (even if the initial computation of the
+band structure includes interactions in a mean-field sense, like with DFT). 
+This approximation is also referred to as a "Sum-Over-States" approach (SOS).
+This neglects all electron-hole interaction (so no excitonic effects), but might provide meaningful results
+in many case, sometimes even quantitatively. A first problem is linked with the erroneous
+band gap of the material, but this might be corrected by a scissor approximation, see e.g. <a href="../../variables/generated_files/varset_optic.html#scissor@optic">scissor@optic</a>. 
+<p>In ABINIT one can either work in the IPA (see below), or take into account the excitonic effects, see <a href="../../topics/generated_files/topic_BSE.html#">topic_BSE</a>.
+<p>
+In the ABINIT package, there are two different utilities to compute optical response 
+in the independent-particle approximation : <a href="../../guide/generated_files/help_optic.html#">optic</a> and conducti. They have been developed independently
+of each other, and thus overlap significantly.
+The first one permits to cover the linear and non-linear optical properties as a function of the frequency. 
+It provides the optical dielectric tensor, the second-harmonic generation (SHG) as well as the optical rectification
+tensor (or electro-optic tensor) - without the contribution from the nuclei displacements. For the further inclusion
+of the contribution from nuclei displacements, see <a href="../../topics/generated_files/topic_nonlinear.html#">topic_nonlinear</a>.
+<p>The second utility "conducti" has more capabilities only at the linear level, but provides
+electronic conductivity, dielectric tensor, index of refraction, reflectivity, absorption, 
+the thermal conductivity, and the thermopower 
+(electron transport, high temperature, Kubo-Greenwood formalism) real as well as imaginary part.
+<br><br><a href=#top>Go to the top</a>
+
+
+
+&nbsp; 
+<HR ALIGN=left> 
+<a name="2">&nbsp;</a>
+<h3><b>2. Related lesson(s) of the tutorial.</b></h3>
+
+
+<li>See 
+<a href="../../tutorial/generated_files/lesson_optic.html">The lesson on Optic</a>, the utility that
+allows to obtain the frequency dependent linear optical dielectric
+function and the frequency dependent second order nonlinear optical
+susceptibility, in the simple "Sum-Over-State" approximation.</li>
+<br><br><a href=#top>Go to the top</a>
+
+
+&nbsp; 
+<hr> 
+<a name="3">&nbsp;</a>
+<h3><b>3. Related input variables.</b></h3>
+
+
+<p>Basic input variables:<p>... <a href="../../variables/generated_files/varset_optic.html#broadening@optic">broadening@optic</a>   [BROADENING]<br>
+... <a href="../../variables/generated_files/varset_optic.html#ddkfile@optic">ddkfile@optic</a>   [DDK FILE]<br>
+... <a href="../../variables/generated_files/varset_optic.html#domega@optic">domega@optic</a>   [Delta OMEGA]<br>
+... <a href="../../variables/generated_files/varset_optic.html#lin_comp@optic">lin_comp@optic</a>   [LINear COMPonents]<br>
+... <a href="../../variables/generated_files/varset_optic.html#maxomega@optic">maxomega@optic</a>   [MAXimum value of OMEGA]<br>
+... <a href="../../variables/generated_files/varset_optic.html#nonlin_comp@optic">nonlin_comp@optic</a>   [NON-LINear COMPonents]<br>
+... <a href="../../variables/generated_files/varset_optic.html#num_lin_comp@optic">num_lin_comp@optic</a>   [NUMber of LINear COMPonents]<br>
+... <a href="../../variables/generated_files/varset_optic.html#num_nonlin_comp@optic">num_nonlin_comp@optic</a>   [NUMber of NON-LINear COMPonents]<br>
+... <a href="../../variables/generated_files/varset_optic.html#scissor@optic">scissor@optic</a>   [SCISSOR operator]<br>
+... <a href="../../variables/generated_files/varset_optic.html#tolerance@optic">tolerance@optic</a>   [TOLERANCE]<br>
+... <a href="../../variables/generated_files/varset_optic.html#wfkfile@optic">wfkfile@optic</a>   [WaveFunction K FILE]<br>
+
+<br><br><a href=#top>Go to the top</a>
+
+
+&nbsp; 
+<HR ALIGN=left> 
+<a name="4">&nbsp;</a>
+<h3><b>4. Selected input files.</b></h3>
+
+
+<i><b>WARNING</b> : as of ABINITv8.6.x, the list of input files provided in the specific section of the topics Web pages is still to be reviewed/tuned. In some cases, it will be adequate, and in other cases, it might be incomplete, or perhaps even useless.</i>
+<br><br>The user can find some related example input files in the ABINIT package in the directory /tests, or on the Web:
+<p> tests/v4/Input: <a href="../../tests/v4/Input/t56.in">t56.in</a> 
+<a href="../../tests/v4/Input/t57.in">t57.in</a> 
+<p> tests/v67mbpt/Input: <a href="../../tests/v67mbpt/Input/t52.in">t52.in</a> 
+<a href="../../tests/v67mbpt/Input/t53.in">t53.in</a> 
+<p> tests/v7/Input: <a href="../../tests/v7/Input/t41.in">t41.in</a> 
+<a href="../../tests/v7/Input/t42.in">t42.in</a> 
+<a href="../../tests/v7/Input/t47.in">t47.in</a> 
+<a href="../../tests/v7/Input/t48.in">t48.in</a> 
+<a href="../../tests/v7/Input/t49.in">t49.in</a> 
+<br>
+
+<br><br><a href=#top>Go to the top</a>
+
+
+<script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
+
+</body>
+</html>
+

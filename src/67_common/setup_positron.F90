@@ -51,7 +51,7 @@
 !!  ngfft(18)=contain all needed information about 3D FFT
 !!  ngrvdw=size of grvdw(:,:); can be 0 or natom according to dtset%vdw_xc
 !!  nhat(nfftf,nspden*usepaw)= -PAW only- compensation density
-!!  nkxc=second dimension of the array kxc, see rhohxc.f for a description
+!!  nkxc=second dimension of the array kxc, see rhotoxc.f for a description
 !!  npwarr(nkpt)=number of planewaves in basis and on boundary for each k
 !!  nvresid(nfftf,nspden)=array for the residual of the density/potential
 !!  optres=0 if the potential residual has to be used for forces corrections
@@ -204,6 +204,7 @@ type(fock_type),pointer, intent(inout) :: fock
  real(dp) :: maxocc,nelect,occlast,occtmp,rhotmp
  character(len=69) :: TypeCalcStrg
  character(len=500) :: message
+ character(len=fnlen) :: fname
  type(energies_type) :: energies_tmp
  type(wvl_data) :: wvl
  type(hdr_type) :: hdr_den
@@ -378,7 +379,8 @@ type(fock_type),pointer, intent(inout) :: fock
 !    ----- Read from disk
      if (dtset%positron>0) then
        rdwrpaw=dtset%usepaw
-       call read_rhor(dtfil%fildensin, cplex1, dtset%nspden, nfft, ngfft, rdwrpaw, mpi_enreg, electronpositron%rhor_ep, &
+       fname=trim(dtfil%fildensin);if (dtset%positron==2) fname=trim(dtfil%fildensin)//'_POSITRON'
+       call read_rhor(trim(fname), cplex1, dtset%nspden, nfft, ngfft, rdwrpaw, mpi_enreg, electronpositron%rhor_ep, &
        hdr_den, electronpositron%pawrhoij_ep, comm_cell, check_hdr=hdr)
        etotal_read = hdr_den%etot; call hdr_free(hdr_den)
        call fourdp(1,rhog_ep,electronpositron%rhor_ep,-1,mpi_enreg,nfft,ngfft,dtset%paral_kgb,0)
@@ -552,7 +554,7 @@ type(fock_type),pointer, intent(inout) :: fock
      call fourdp(1,rhog_ep,electronpositron%rhor_ep,-1,mpi_enreg,nfft,ngfft,dtset%paral_kgb,0)
    end if
    if (history_level/=-1) then
-     call hartre(1,gmet,gsqcut,dtset%usepaw,mpi_enreg,nfft,ngfft,dtset%paral_kgb,qphon,rhog_ep,&
+     call hartre(1,gsqcut,dtset%usepaw,mpi_enreg,nfft,ngfft,dtset%paral_kgb,rhog_ep,rprimd,&
 &     electronpositron%vha_ep)
      electronpositron%vha_ep=-electronpositron%vha_ep
    else

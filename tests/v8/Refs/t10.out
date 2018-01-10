@@ -12,7 +12,7 @@
  Corning Inc. and other collaborators, see ~abinit/doc/developers/contributors.txt .
  Please read ~abinit/doc/users/acknowledgments.html for suggested
  acknowledgments of the ABINIT effort.
- For more information, see http://www.abinit.org .
+ For more information, see https://www.abinit.org .
 
 .Starting date : Fri 17 Feb 2017.
 - ( at 11h27 )
@@ -31,7 +31,7 @@
 
  Flags :
      ifcflag         1
-   prt_effpo         3
+   prt_model         1
      strcpli        -1
  Molecular Dynamics :
         temp    1000.0
@@ -42,6 +42,8 @@
          asr         2
  Interatomic Force Constants Inputs :
       dipdip         1
+dipdip_range         2         2         2
+  dipdip_prt         1
       ifcana         0
       ifcout   2000000
       natifc         4
@@ -139,7 +141,7 @@
 
 ================================================================================
 
- Generation of the xml file for the reference structure in t10_sys.xml
+ Generation of the xml file for the model in t10_model.xml
 
 ================================================================================
 
@@ -159,7 +161,7 @@
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
- Energy of the reference strucure          : -1.3716141297331200E+02 Hartree
+ Energy of the reference structure         : -1.3716141297331200E+02 Hartree
  Energy of the ifc part                    :  2.8100823811412389E-30 Hartree
 
     >>>>>>>>> Etotal= -1.37161412973312E+02
@@ -186,7 +188,7 @@
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
- Energy of the reference strucure          : -1.3716141297331200E+02 Hartree
+ Energy of the reference structure         : -1.3716141297331200E+02 Hartree
  Energy of the ifc part                    :  2.4447906769250070E-03 Hartree
 
     >>>>>>>>> Etotal= -1.37158968182635E+02
@@ -213,7 +215,7 @@
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
- Energy of the reference strucure          : -1.3716141297331200E+02 Hartree
+ Energy of the reference structure         : -1.3716141297331200E+02 Hartree
  Energy of the ifc part                    :  9.6584453514362029E-03 Hartree
 
     >>>>>>>>> Etotal= -1.37151754527961E+02
@@ -240,7 +242,7 @@
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
- Energy of the reference strucure          : -1.3716141297331200E+02 Hartree
+ Energy of the reference structure         : -1.3716141297331200E+02 Hartree
  Energy of the ifc part                    :  2.1269719197746111E-02 Hartree
 
     >>>>>>>>> Etotal= -1.37140143254114E+02
@@ -267,7 +269,7 @@
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
- Energy of the reference strucure          : -1.3716141297331200E+02 Hartree
+ Energy of the reference structure         : -1.3716141297331200E+02 Hartree
  Energy of the ifc part                    :  3.6631495574025306E-02 Hartree
 
     >>>>>>>>> Etotal= -1.37124781477738E+02
@@ -294,7 +296,7 @@
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
- Energy of the reference strucure          : -1.3716141297331200E+02 Hartree
+ Energy of the reference structure         : -1.3716141297331200E+02 Hartree
  Energy of the ifc part                    :  5.4786501941412401E-02 Hartree
 
     >>>>>>>>> Etotal= -1.37106626471371E+02
@@ -321,7 +323,7 @@
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
- Energy of the reference strucure          : -1.3716141297331200E+02 Hartree
+ Energy of the reference structure         : -1.3716141297331200E+02 Hartree
  Energy of the ifc part                    :  7.4441040626503252E-02 Hartree
 
     >>>>>>>>> Etotal= -1.37086971932685E+02
@@ -348,7 +350,7 @@
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
- Energy of the reference strucure          : -1.3716141297331200E+02 Hartree
+ Energy of the reference structure         : -1.3716141297331200E+02 Hartree
  Energy of the ifc part                    :  9.3978454187876176E-02 Hartree
 
     >>>>>>>>> Etotal= -1.37067434519124E+02
@@ -375,7 +377,7 @@
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
- Energy of the reference strucure          : -1.3716141297331200E+02 Hartree
+ Energy of the reference structure         : -1.3716141297331200E+02 Hartree
  Energy of the ifc part                    :  1.1155831996558613E-01 Hartree
 
     >>>>>>>>> Etotal= -1.37049854653346E+02
@@ -402,7 +404,7 @@
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
- Energy of the reference strucure          : -1.3716141297331200E+02 Hartree
+ Energy of the reference structure         : -1.3716141297331200E+02 Hartree
  Energy of the ifc part                    :  1.2534315601734997E-01 Hartree
 
     >>>>>>>>> Etotal= -1.37036069817295E+02
@@ -429,7 +431,7 @@
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
- Energy of the reference strucure          : -1.3716141297331200E+02 Hartree
+ Energy of the reference structure         : -1.3716141297331200E+02 Hartree
  Energy of the ifc part                    :  1.3384602904204188E-01 Hartree
 
     >>>>>>>>> Etotal= -1.37027566944270E+02
@@ -456,7 +458,7 @@
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
- Energy of the reference strucure          : -1.3716141297331200E+02 Hartree
+ Energy of the reference structure         : -1.3716141297331200E+02 Hartree
  Energy of the ifc part                    :  1.3629958806720499E-01 Hartree
 
     >>>>>>>>> Etotal= -1.37025113385245E+02
@@ -483,7 +485,7 @@
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
- Energy of the reference strucure          : -1.3716141297331200E+02 Hartree
+ Energy of the reference structure         : -1.3716141297331200E+02 Hartree
  Energy of the ifc part                    :  1.3287599871117228E-01 Hartree
 
     >>>>>>>>> Etotal= -1.37028536974601E+02
@@ -510,7 +512,7 @@
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
- Energy of the reference strucure          : -1.3716141297331200E+02 Hartree
+ Energy of the reference structure         : -1.3716141297331200E+02 Hartree
  Energy of the ifc part                    :  1.2463296991678630E-01 Hartree
 
     >>>>>>>>> Etotal= -1.37036780003395E+02
@@ -537,7 +539,7 @@
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
- Energy of the reference strucure          : -1.3716141297331200E+02 Hartree
+ Energy of the reference structure         : -1.3716141297331200E+02 Hartree
  Energy of the ifc part                    :  1.1321651081425527E-01 Hartree
 
     >>>>>>>>> Etotal= -1.37048196462498E+02
@@ -564,7 +566,7 @@
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
- Energy of the reference strucure          : -1.3716141297331200E+02 Hartree
+ Energy of the reference structure         : -1.3716141297331200E+02 Hartree
  Energy of the ifc part                    :  1.0047820474460256E-01 Hartree
 
     >>>>>>>>> Etotal= -1.37060934768567E+02
@@ -591,7 +593,7 @@
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
- Energy of the reference strucure          : -1.3716141297331200E+02 Hartree
+ Energy of the reference structure         : -1.3716141297331200E+02 Hartree
  Energy of the ifc part                    :  8.8161160182498630E-02 Hartree
 
     >>>>>>>>> Etotal= -1.37073251813130E+02
@@ -618,7 +620,7 @@
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
- Energy of the reference strucure          : -1.3716141297331200E+02 Hartree
+ Energy of the reference structure         : -1.3716141297331200E+02 Hartree
  Energy of the ifc part                    :  7.7718068359484097E-02 Hartree
 
     >>>>>>>>> Etotal= -1.37083694904953E+02
@@ -645,7 +647,7 @@
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
- Energy of the reference strucure          : -1.3716141297331200E+02 Hartree
+ Energy of the reference structure         : -1.3716141297331200E+02 Hartree
  Energy of the ifc part                    :  7.0244034230804511E-02 Hartree
 
     >>>>>>>>> Etotal= -1.37091168939081E+02
@@ -672,7 +674,7 @@
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
- Energy of the reference strucure          : -1.3716141297331200E+02 Hartree
+ Energy of the reference structure         : -1.3716141297331200E+02 Hartree
  Energy of the ifc part                    :  6.6476550623059932E-02 Hartree
 
     >>>>>>>>> Etotal= -1.37094936422689E+02
@@ -699,7 +701,7 @@
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
- Energy of the reference strucure          : -1.3716141297331200E+02 Hartree
+ Energy of the reference structure         : -1.3716141297331200E+02 Hartree
  Energy of the ifc part                    :  6.6820225718945983E-02 Hartree
 
     >>>>>>>>> Etotal= -1.37094592747593E+02
@@ -726,7 +728,7 @@
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
- Energy of the reference strucure          : -1.3716141297331200E+02 Hartree
+ Energy of the reference structure         : -1.3716141297331200E+02 Hartree
  Energy of the ifc part                    :  7.1369798832826153E-02 Hartree
 
     >>>>>>>>> Etotal= -1.37090043174479E+02
@@ -753,7 +755,7 @@
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
- Energy of the reference strucure          : -1.3716141297331200E+02 Hartree
+ Energy of the reference structure         : -1.3716141297331200E+02 Hartree
  Energy of the ifc part                    :  7.9918698260609114E-02 Hartree
 
     >>>>>>>>> Etotal= -1.37081494275051E+02
@@ -780,7 +782,7 @@
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
- Energy of the reference strucure          : -1.3716141297331200E+02 Hartree
+ Energy of the reference structure         : -1.3716141297331200E+02 Hartree
  Energy of the ifc part                    :  9.1949804097556279E-02 Hartree
 
     >>>>>>>>> Etotal= -1.37069463169214E+02
@@ -807,7 +809,7 @@
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
- Energy of the reference strucure          : -1.3716141297331200E+02 Hartree
+ Energy of the reference structure         : -1.3716141297331200E+02 Hartree
  Energy of the ifc part                    :  1.0661281045519164E-01 Hartree
 
     >>>>>>>>> Etotal= -1.37054800162857E+02
@@ -834,7 +836,7 @@
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
- Energy of the reference strucure          : -1.3716141297331200E+02 Hartree
+ Energy of the reference structure         : -1.3716141297331200E+02 Hartree
  Energy of the ifc part                    :  1.2270227564125416E-01 Hartree
 
     >>>>>>>>> Etotal= -1.37038710697671E+02
@@ -861,7 +863,7 @@
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
- Energy of the reference strucure          : -1.3716141297331200E+02 Hartree
+ Energy of the reference structure         : -1.3716141297331200E+02 Hartree
  Energy of the ifc part                    :  1.3866434500262356E-01 Hartree
 
     >>>>>>>>> Etotal= -1.37022748628309E+02
@@ -888,7 +890,7 @@
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
- Energy of the reference strucure          : -1.3716141297331200E+02 Hartree
+ Energy of the reference structure         : -1.3716141297331200E+02 Hartree
  Energy of the ifc part                    :  1.5267512839166567E-01 Hartree
 
     >>>>>>>>> Etotal= -1.37008737844920E+02
@@ -915,7 +917,7 @@
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
- Energy of the reference strucure          : -1.3716141297331200E+02 Hartree
+ Energy of the reference structure         : -1.3716141297331200E+02 Hartree
  Energy of the ifc part                    :  1.6283556774021132E-01 Hartree
 
     >>>>>>>>> Etotal= -1.36998577405572E+02
@@ -942,7 +944,7 @@
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
- Energy of the reference strucure          : -1.3716141297331200E+02 Hartree
+ Energy of the reference structure         : -1.3716141297331200E+02 Hartree
  Energy of the ifc part                    :  1.6749177992936265E-01 Hartree
 
     >>>>>>>>> Etotal= -1.36993921193383E+02
@@ -969,7 +971,7 @@
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
- Energy of the reference strucure          : -1.3716141297331200E+02 Hartree
+ Energy of the reference structure         : -1.3716141297331200E+02 Hartree
  Energy of the ifc part                    :  1.6560652255590463E-01 Hartree
 
     >>>>>>>>> Etotal= -1.36995806450756E+02
@@ -996,7 +998,7 @@
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
- Energy of the reference strucure          : -1.3716141297331200E+02 Hartree
+ Energy of the reference structure         : -1.3716141297331200E+02 Hartree
  Energy of the ifc part                    :  1.5702481342372712E-01 Hartree
 
     >>>>>>>>> Etotal= -1.37004388159888E+02
@@ -1023,7 +1025,7 @@
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
- Energy of the reference strucure          : -1.3716141297331200E+02 Hartree
+ Energy of the reference structure         : -1.3716141297331200E+02 Hartree
  Energy of the ifc part                    :  1.4248951076478167E-01 Hartree
 
     >>>>>>>>> Etotal= -1.37018923462547E+02
@@ -1050,7 +1052,7 @@
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
- Energy of the reference strucure          : -1.3716141297331200E+02 Hartree
+ Energy of the reference structure         : -1.3716141297331200E+02 Hartree
  Energy of the ifc part                    :  1.2339716286782881E-01 Hartree
 
     >>>>>>>>> Etotal= -1.37038015810444E+02
@@ -1077,7 +1079,7 @@
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
- Energy of the reference strucure          : -1.3716141297331200E+02 Hartree
+ Energy of the reference structure         : -1.3716141297331200E+02 Hartree
  Energy of the ifc part                    :  1.0142816919318280E-01 Hartree
 
     >>>>>>>>> Etotal= -1.37059984804119E+02
@@ -1104,7 +1106,7 @@
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
- Energy of the reference strucure          : -1.3716141297331200E+02 Hartree
+ Energy of the reference structure         : -1.3716141297331200E+02 Hartree
  Energy of the ifc part                    :  7.8214142136690465E-02 Hartree
 
     >>>>>>>>> Etotal= -1.37083198831175E+02
@@ -1131,7 +1133,7 @@
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
- Energy of the reference strucure          : -1.3716141297331200E+02 Hartree
+ Energy of the reference structure         : -1.3716141297331200E+02 Hartree
  Energy of the ifc part                    :  5.5129103533914252E-02 Hartree
 
     >>>>>>>>> Etotal= -1.37106283869778E+02
@@ -1158,7 +1160,7 @@
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
- Energy of the reference strucure          : -1.3716141297331200E+02 Hartree
+ Energy of the reference structure         : -1.3716141297331200E+02 Hartree
  Energy of the ifc part                    :  3.3203891093139336E-02 Hartree
 
     >>>>>>>>> Etotal= -1.37128209082219E+02
@@ -1185,7 +1187,7 @@
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
- Energy of the reference strucure          : -1.3716141297331200E+02 Hartree
+ Energy of the reference structure         : -1.3716141297331200E+02 Hartree
  Energy of the ifc part                    :  1.3121675718412407E-02 Hartree
 
     >>>>>>>>> Etotal= -1.37148291297594E+02
@@ -1212,7 +1214,7 @@
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
- Energy of the reference strucure          : -1.3716141297331200E+02 Hartree
+ Energy of the reference structure         : -1.3716141297331200E+02 Hartree
  Energy of the ifc part                    : -4.7481510633982441E-03 Hartree
 
     >>>>>>>>> Etotal= -1.37166161124375E+02
@@ -1239,7 +1241,7 @@
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
- Energy of the reference strucure          : -1.3716141297331200E+02 Hartree
+ Energy of the reference structure         : -1.3716141297331200E+02 Hartree
  Energy of the ifc part                    : -2.0305208933061935E-02 Hartree
 
     >>>>>>>>> Etotal= -1.37181718182245E+02
@@ -1266,7 +1268,7 @@
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
- Energy of the reference strucure          : -1.3716141297331200E+02 Hartree
+ Energy of the reference structure         : -1.3716141297331200E+02 Hartree
  Energy of the ifc part                    : -3.3675016685557710E-02 Hartree
 
     >>>>>>>>> Etotal= -1.37195087989998E+02
@@ -1293,7 +1295,7 @@
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
- Energy of the reference strucure          : -1.3716141297331200E+02 Hartree
+ Energy of the reference structure         : -1.3716141297331200E+02 Hartree
  Energy of the ifc part                    : -4.5170249910018487E-02 Hartree
 
     >>>>>>>>> Etotal= -1.37206583223222E+02
@@ -1320,7 +1322,7 @@
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
- Energy of the reference strucure          : -1.3716141297331200E+02 Hartree
+ Energy of the reference structure         : -1.3716141297331200E+02 Hartree
  Energy of the ifc part                    : -5.5253876634743210E-02 Hartree
 
     >>>>>>>>> Etotal= -1.37216666849947E+02
@@ -1347,7 +1349,7 @@
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
- Energy of the reference strucure          : -1.3716141297331200E+02 Hartree
+ Energy of the reference structure         : -1.3716141297331200E+02 Hartree
  Energy of the ifc part                    : -6.4499625155067644E-02 Hartree
 
     >>>>>>>>> Etotal= -1.37225912598467E+02
@@ -1374,7 +1376,7 @@
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
- Energy of the reference strucure          : -1.3716141297331200E+02 Hartree
+ Energy of the reference structure         : -1.3716141297331200E+02 Hartree
  Energy of the ifc part                    : -7.3545493564802958E-02 Hartree
 
     >>>>>>>>> Etotal= -1.37234958466877E+02
@@ -1401,7 +1403,7 @@
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
- Energy of the reference strucure          : -1.3716141297331200E+02 Hartree
+ Energy of the reference structure         : -1.3716141297331200E+02 Hartree
  Energy of the ifc part                    : -8.3038376398903560E-02 Hartree
 
     >>>>>>>>> Etotal= -1.37244451349711E+02
@@ -1428,7 +1430,7 @@
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
- Energy of the reference strucure          : -1.3716141297331200E+02 Hartree
+ Energy of the reference structure         : -1.3716141297331200E+02 Hartree
  Energy of the ifc part                    : -9.3572154004827268E-02 Hartree
 
     >>>>>>>>> Etotal= -1.37254985127317E+02
@@ -1455,7 +1457,7 @@
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
- Energy of the reference strucure          : -1.3716141297331200E+02 Hartree
+ Energy of the reference structure         : -1.3716141297331200E+02 Hartree
  Energy of the ifc part                    : -1.0562673616788780E-01 Hartree
 
     >>>>>>>>> Etotal= -1.37267039709480E+02
@@ -1482,7 +1484,7 @@
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
- Energy of the reference strucure          : -1.3716141297331200E+02 Hartree
+ Energy of the reference structure         : -1.3716141297331200E+02 Hartree
  Energy of the ifc part                    : -1.1951937470464283E-01 Hartree
 
     >>>>>>>>> Etotal= -1.37280932348017E+02

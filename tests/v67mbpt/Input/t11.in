@@ -198,4 +198,5 @@ bs_freq_mesh8      0 10.0 0.1 eV
 #%%   The last dataset solves the BSE problem including the coupling between resonant and
 #%%   anti-resonant transition via brute force diagonalization. 
 #%%   Shiva is disabled because the coupling part is unstable on this machine
+#%% topics = BSE
 #%%<END TEST_INFO>

@@ -22,13 +22,13 @@ in the ABINIT project :
 - Mitsubishi Chemical Corp (M. Mikami).
 - l'Ecole Polytechnique de Palaiseau (L. Reining)
 - Rutgers University (D. Hamann, D. Vanderbilt)
-- U. de Montréal (M. Coté)
+- U. de Montr\'{e}al (M. Cot\'{e})
 - le Commissariat a l'Energie Atomique, Grenoble (T. Deutsch, D. Caliste),
 - CINVESTAV, Queretaro, Mexico (A. Romero),
 
 Coming now to individuals,
 
-recent direct contributors to ABINIT (versions 8.0 to 8.2) are :
+recent direct contributors to ABINIT (versions 8.0 to 8.6) are :
 name                      email
 Flavio Abreu Araujo       flavio.abreuaraujo@uclouvain.be
 Florian Altvater          altvater@berkeley.edu
@@ -39,6 +39,8 @@ Lucas Baguet              lucas.baguet@cea.fr
 Jean-Michel Beuken        jean-michel.beuken@uclouvain.be
 Jordan Bieder             jordan.bieder@cea.fr
 Anton Bokhanchuk          antonbokhanchuk@gmail.com
+Fran\c{c}ois Bottin           francois.bottin@cea.fr
+Yohann Bouchet            yohann.bouchet@cea.fr
 Eric Bousquet             eric.Bousquet@ulg.ac.be
 Fabien Bruneval           fabien.bruneval@cea.fr
 Damien Caliste            damien.caliste@cea.fr
@@ -49,17 +51,21 @@ Muriel Delaveau           muriel.delaveau@cea.fr
 Camilo Espejo             utadeocespejo@gmail.com
 Gregory Geneste           gregory.geneste@cea.fr
 Alexis Gerossier          alexis.gerossier@supelec.fr
+Philippe Ghosez           philippe.ghosez@ulg.ac.be
 Matteo Giantomassi        matteo.giantomassi@uclouvain.be
+Olivier Gingras           olivier.gingras.1@umontreal.ca
 Yannick Gillet            yannick.gillet@uclouvain.be
 Xavier Gonze              xavier.gonze@uclouvain.be
 Francois Jollet           francois.jollet@cea.fr
 Jonathan Laflamme Janssen laflammejanssenjonathan@gmail.com
+Javier Junquera           javier.junquera@unican.es
 R. Laasner
 Alexandre Martin          alexandre.martin@ulg.ac.be
 Cyril Martins             cyril.martins@cea.fr
 Francesco Naccarato       fnaccarato89@gmail.com
 Alfredo Pasquarello       Alfredo.Pasquarello@epfl.ch
 Guido Petretto            guido.petretto@uclouvain.be
+Nicholas Pike             Nicholas.pike@ulg.ac.be
 Valentin Planes           valentinplanes@live.fr
 Samuel Ponce              samuel.ponce@uclouvain.be
 Yann Pouillon             yann.pouillon@materialsevolution.es

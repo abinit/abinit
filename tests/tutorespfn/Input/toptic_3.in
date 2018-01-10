@@ -1,7 +1,7 @@
-#Prepare the computation of linear optic properties (for the imaginary spectrum only)
-#of GaAs crystal : ground-state with few bands,
-#then non-SCF with a larger number of bands, then ddk for different directions
-#Note that the k point sampling shoud be finer for significant results. The cut-off energy is also too low.
+# Prepare the computation of linear optic properties (for the imaginary spectrum only)
+# of GaAs crystal : ground-state with few bands,
+# then non-SCF with a larger number of bands, then ddk for different directions
+# Note that the k point sampling shoud be finer for significant results. The cut-off energy is also too low.
 
  ndtset 6
 
@@ -10,28 +10,28 @@
   nstep1 25   
  kptopt1 1
  nbdbuf1 0
- prtden1 1   getden1 0   getwfk1 0    ! Usual file handling data
+ prtden1 1   getden1 0   getwfk1 0    # Usual file handling data
 
 #Second dataset : NSC run with large number of bands, and points in the IBZ
     iscf2 -2  
-   nband2  9  ! Minimal number of bands for linear optics (imaginary part of the spectrum)
+   nband2  9  # Minimal number of bands for linear optics (imaginary part of the spectrum)
    nstep2 25
   kptopt2  1
-  getwfk2  1   getden2 1   ! Usual file handling data
+  getwfk2  1   getden2 1   # Usual file handling data
 
 #Third dataset : NSC run with large number of bands, and points in the the full BZ
     iscf3 -2  
-   nband3  9  ! Minimal number of bands for linear optics (imaginary part of the spectrum)
+   nband3  9  # Minimal number of bands for linear optics (imaginary part of the spectrum)
    nstep3 25
-  kptopt3  2  ! Time-reversal symmetry can be used in the present implementation for linear optics
-  getwfk3  2   getden3 1   ! Usual file handling data
+  kptopt3  2  # Time-reversal symmetry can be used in the present implementation for linear optics
+  getwfk3  2   getden3 1   # Usual file handling data
 
 
 #Fourth dataset : ddk response function along axis 1
    iscf4 -3
-  nband4  9   ! Minimal number of bands for linear optics (imaginary part of the spectrum)
+  nband4  9   # Minimal number of bands for linear optics (imaginary part of the spectrum)
   nstep4  1  nline4  0     prtwf4   3
- kptopt4  2   ! Time-reversal symmetry can be used in the present implementation for linear optics
+ kptopt4  2   # Time-reversal symmetry can be used in the present implementation for linear optics
 
    nqpt4  1  qpt4  0.0d0 0.0d0 0.0d0 
   rfdir4  1 0 0
@@ -40,9 +40,9 @@
 
 #Fifth dataset : ddk response function along axis 2
    iscf5 -3
-  nband5  9   ! Minimal number of bands for linear optics (imaginary part of the spectrum)
+  nband5  9   # Minimal number of bands for linear optics (imaginary part of the spectrum)
   nstep5  1  nline5  0    prtwf5  3
- kptopt5  2   ! Time-reversal symmetry can be used in the present implementation for linear optics
+ kptopt5  2   # Time-reversal symmetry can be used in the present implementation for linear optics
 
    nqpt5  1  qpt5  0.0d0 0.0d0 0.0d0
   rfdir5  0 1 0
@@ -51,9 +51,9 @@
 
 #Sixth dataset : ddk response function along axis 3
    iscf6 -3
-  nband6  9   ! Minimal number of bands for linear optics (imaginary part of the spectrum)
+  nband6  9   # Minimal number of bands for linear optics (imaginary part of the spectrum)
   nstep6  1  nline6  0    prtwf6  3
- kptopt6  2   ! Time-reversal symmetry can be used in the present implementation for linear optics
+ kptopt6  2   # Time-reversal symmetry can be used in the present implementation for linear optics
 
    nqpt6  1  qpt6  0.0d0 0.0d0 0.0d0
   rfdir6  0 0 1
@@ -67,12 +67,12 @@
          0.5 0.0 0.0
          0.0 0.5 0.0
          0.0 0.0 0.5
- ngkpt  3*4        ! This is much too low : should be at least 24x24x24
+ ngkpt  3*4        # This is much too low : should be at least 24x24x24
 
  acell   3*10.60
  amu 69.72  74.9216
  diemac 10.0
- ecut 2.00             ! This is also too low
+ ecut 2.00             # This is also too low
  ixc 3
  natom  2  nbdbuf 2
  ntypat  2
@@ -81,8 +81,6 @@
  tnons 72*0.0
  typat  1 2  tolwfr  1.e-20
  znucl  31 33
-
-
 
 ## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>

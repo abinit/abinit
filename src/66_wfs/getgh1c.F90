@@ -12,7 +12,7 @@
 !! If required, <G|S^(1)|C> is returned in gs1c (S=overlap - PAW only)
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (XG, DRH, MT)
+!! Copyright (C) 1998-2017 ABINIT group (XG, DRH, MT, SPr)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -128,7 +128,7 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
  real(dp) :: enlout(1),tsec(2),svectout_dum(1,1),vectout_dum(1,1)
  real(dp),allocatable :: cwave_sp(:,:),cwavef1(:,:),cwavef2(:,:)
  real(dp),allocatable :: gh1c_sp(:,:),gh1c1(:,:),gh1c2(:,:),gh1c3(:,:),gh1c4(:,:),gvnl2(:,:)
- real(dp),allocatable :: nonlop_out(:,:),vlocal_tmp(:,:,:),work(:,:,:,:)
+ real(dp),allocatable :: nonlop_out(:,:),vlocal1_tmp(:,:,:),work(:,:,:,:)
  real(dp),ABI_CONTIGUOUS pointer :: gvnl1_(:,:)
  real(dp),pointer :: dkinpw(:),kinpw1(:)
  type(pawcprj_type),allocatable,target :: cwaveprj_tmp(:,:)
@@ -282,7 +282,7 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
        ABI_ALLOCATE(gh1c3,(2,npw1))
        ABI_ALLOCATE(gh1c4,(2,npw1))
        gh1c1(:,:)=zero; gh1c2(:,:)=zero; gh1c3(:,:)=zero ;  gh1c4(:,:)=zero
-       ABI_ALLOCATE(vlocal_tmp,(gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6))
+       ABI_ALLOCATE(vlocal1_tmp,(rf_hamkq%cplex*gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6)) !SPr: notation/dimension corrected vlocal_tmp -> vlocal1_tmp
        ABI_ALLOCATE(cwavef1,(2,npw))
        ABI_ALLOCATE(cwavef2,(2,npw))
        do ipw=1,npw
@@ -290,46 +290,71 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
          cwavef2(1:2,ipw)=cwave(1:2,ipw+npw)
        end do
 !      gh1c1=v11*phi1
-       vlocal_tmp(:,:,:)=rf_hamkq%vlocal1(:,:,:,1)
-       call fourwf(rf_hamkq%cplex,vlocal_tmp,cwavef1,gh1c1,work,gs_hamkq%gbound_k,gs_hamkq%gbound_kp,&
+       vlocal1_tmp(:,:,:)=rf_hamkq%vlocal1(:,:,:,1)
+       call fourwf(rf_hamkq%cplex,vlocal1_tmp,cwavef1,gh1c1,work,gs_hamkq%gbound_k,gs_hamkq%gbound_kp,&
 &       gs_hamkq%istwf_k,gs_hamkq%kg_k,gs_hamkq%kg_kp,gs_hamkq%mgfft,mpi_enreg,1,gs_hamkq%ngfft,&
 &       npw,npw1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,2,mpi_enreg%paral_kgb,tim_fourwf,weight,weight,&
 &       use_gpu_cuda=gs_hamkq%use_gpu_cuda)
 !      gh1c2=v22*phi2
-       vlocal_tmp(:,:,:)=rf_hamkq%vlocal1(:,:,:,2)
-       call fourwf(rf_hamkq%cplex,vlocal_tmp,cwavef2,gh1c2,work,gs_hamkq%gbound_k,gs_hamkq%gbound_kp,&
+       vlocal1_tmp(:,:,:)=rf_hamkq%vlocal1(:,:,:,2)
+       call fourwf(rf_hamkq%cplex,vlocal1_tmp,cwavef2,gh1c2,work,gs_hamkq%gbound_k,gs_hamkq%gbound_kp,&
 &       gs_hamkq%istwf_k,gs_hamkq%kg_k,gs_hamkq%kg_kp,gs_hamkq%mgfft,mpi_enreg,1,gs_hamkq%ngfft,&
 &       npw,npw1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,2,mpi_enreg%paral_kgb,tim_fourwf,weight,weight,&
 &       use_gpu_cuda=gs_hamkq%use_gpu_cuda)
-       ABI_DEALLOCATE(vlocal_tmp)
+       ABI_DEALLOCATE(vlocal1_tmp)
        cplex1=2
-       ABI_ALLOCATE(vlocal_tmp,(cplex1*gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6))
-!      gh1c3=(re(v12)-im(v12))*phi1
-       do i3=1,gs_hamkq%n6
-         do i2=1,gs_hamkq%n5
-           do i1=1,gs_hamkq%n4
-             vlocal_tmp(2*i1-1,i2,i3)= rf_hamkq%vlocal1(i1,i2,i3,3)
-             vlocal_tmp(2*i1  ,i2,i3)=-rf_hamkq%vlocal1(i1,i2,i3,4)
+       ABI_ALLOCATE(vlocal1_tmp,(cplex1*gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6))
+!      gh1c3=(re(v12)-im(v12))*phi1 => v^21*phi1
+       if(rf_hamkq%cplex==1) then
+         do i3=1,gs_hamkq%n6
+           do i2=1,gs_hamkq%n5
+             do i1=1,gs_hamkq%n4
+               vlocal1_tmp(2*i1-1,i2,i3)= rf_hamkq%vlocal1(i1,i2,i3,3)
+               vlocal1_tmp(2*i1  ,i2,i3)=-rf_hamkq%vlocal1(i1,i2,i3,4)
+             end do
            end do
          end do
-       end do
-       call fourwf(cplex1,vlocal_tmp,cwavef1,gh1c3,work,gs_hamkq%gbound_k,gs_hamkq%gbound_kp,&
+       else
+       !SPr: modified definition of local potential components for cplex=2 (see dotprod_vn)
+       !also, v21==v12* not always holds (e.g. magnetic field perturbation)
+         do i3=1,gs_hamkq%n6
+           do i2=1,gs_hamkq%n5
+             do i1=1,gs_hamkq%n4
+               vlocal1_tmp(2*i1-1,i2,i3)= rf_hamkq%vlocal1(2*i1  ,i2,i3,4)
+               vlocal1_tmp(2*i1  ,i2,i3)=-rf_hamkq%vlocal1(2*i1-1,i2,i3,4)
+             end do
+           end do
+         end do
+       end if
+       call fourwf(cplex1,vlocal1_tmp,cwavef1,gh1c3,work,gs_hamkq%gbound_k,gs_hamkq%gbound_kp,&
 &       gs_hamkq%istwf_k,gs_hamkq%kg_k,gs_hamkq%kg_kp,gs_hamkq%mgfft,mpi_enreg,1,gs_hamkq%ngfft,&
 &       npw,npw1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,2,mpi_enreg%paral_kgb,tim_fourwf,weight,weight,&
 &       use_gpu_cuda=gs_hamkq%use_gpu_cuda)
-!      gh1c4=(re(v12)+im(v12))*phi2
-       do i3=1,gs_hamkq%n6
-         do i2=1,gs_hamkq%n5
-           do i1=1,gs_hamkq%n4
-             vlocal_tmp(2*i1,i2,i3)=-vlocal_tmp(2*i1,i2,i3)
+!      gh1c4=(re(v12)+im(v12))*phi2 => v^12*phi2
+       if(rf_hamkq%cplex==1) then
+         do i3=1,gs_hamkq%n6
+           do i2=1,gs_hamkq%n5
+             do i1=1,gs_hamkq%n4
+               vlocal1_tmp(2*i1,i2,i3)=-vlocal1_tmp(2*i1,i2,i3)
+             end do
            end do
          end do
-       end do
-       call fourwf(cplex1,vlocal_tmp,cwavef2,gh1c4,work,gs_hamkq%gbound_k,gs_hamkq%gbound_kp,&
+       else
+         !for cplex=2 and time-reversal breaking perturbations,v21/=v12*
+         do i3=1,gs_hamkq%n6
+           do i2=1,gs_hamkq%n5
+             do i1=1,gs_hamkq%n4
+               vlocal1_tmp(2*i1-1,i2,i3)= rf_hamkq%vlocal1(2*i1-1,i2,i3,3)
+               vlocal1_tmp(2*i1  ,i2,i3)= rf_hamkq%vlocal1(2*i1  ,i2,i3,3)
+             end do
+           end do
+         end do
+       end if
+       call fourwf(cplex1,vlocal1_tmp,cwavef2,gh1c4,work,gs_hamkq%gbound_k,gs_hamkq%gbound_kp,&
 &       gs_hamkq%istwf_k,gs_hamkq%kg_k,gs_hamkq%kg_kp,gs_hamkq%mgfft,mpi_enreg,1,gs_hamkq%ngfft,&
 &       npw,npw1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,2,mpi_enreg%paral_kgb,tim_fourwf,weight,weight,&
 &       use_gpu_cuda=gs_hamkq%use_gpu_cuda)
-       ABI_DEALLOCATE(vlocal_tmp)
+       ABI_DEALLOCATE(vlocal1_tmp)
 !      Build gh1c from pieces
 !      gh1c_1 = (v11, v12) (psi1) matrix vector product
 !      gh1c_2 = (v12*,v22) (psi2)
@@ -842,7 +867,7 @@ subroutine rf_transgrid_and_pack(isppol,nspden,usepaw,cplex,nfftf,nfft,ngfft,nvl
    vtrial_ptr=>vtrial
    vtrial1_ptr=>vtrial1
    ABI_ALLOCATE(vlocal_tmp,(n4,n5,n6))
-   ABI_ALLOCATE(vlocal1_tmp,(n4,n5,n6))
+   ABI_ALLOCATE(vlocal1_tmp,(cplex*n4,n5,n6))
    if (usepaw==0.or.pawfgr%usefinegrid==0) then
      do ispden=1,nspden
        call fftpac(ispden,mpi_enreg,nspden,n1,n2,n3,n4,n5,n6,ngfft,vtrial_ptr,vlocal_tmp,2)
@@ -1030,7 +1055,7 @@ subroutine getgh1c_setup(gs_hamkq,rf_hamkq,dtset,psps,kpoint,kpq,idir,ipert,&   
 !Compute (1/2) (2 Pi)**2 (k+q+G)**2:
  ABI_ALLOCATE(kinpw1,(npw1_k))
  kinpw1(:)=zero
- call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass,gmet,kg1_k,kinpw1,kpq,npw1_k,0,0)
+ call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass_free,gmet,kg1_k,kinpw1,kpq,npw1_k,0,0)
 
  ABI_ALLOCATE(dkinpw,(npw_k)) ! 1st derivative (1st direction)
  dkinpw(:)=zero
@@ -1046,15 +1071,15 @@ subroutine getgh1c_setup(gs_hamkq,rf_hamkq,dtset,psps,kpoint,kpq,idir,ipert,&   
 !-- k-point perturbation (1st-derivative)
  if (ipert==natom+1) then
 !  Compute the derivative of the kinetic operator vs k
-   call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass,gmet,kg_k,dkinpw,kpoint,npw_k,idir,0) ! 1st derivative
+   call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass_free,gmet,kg_k,dkinpw,kpoint,npw_k,idir,0) ! 1st derivative
  end if
 
 !-- k-point perturbation (2nd-derivative)
  if (ipert==natom+10.or.ipert==natom+11) then
 !  Compute the derivative of the kinetic operator vs k in kinpw, second and first orders
    if(ipert==natom+10 .and. idir<=3) then
-     call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass,gmet,kg_k,dkinpw,kpoint,npw_k,idir,0) ! 1st derivative
-     call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass,gmet,kg_k,ddkinpw,kpoint,npw_k,idir,idir) ! 2nd derivative
+     call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass_free,gmet,kg_k,dkinpw,kpoint,npw_k,idir,0) ! 1st derivative
+     call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass_free,gmet,kg_k,ddkinpw,kpoint,npw_k,idir,idir) ! 2nd derivative
    else
      select case(idir)
 !      Diagonal terms :
@@ -1088,10 +1113,10 @@ subroutine getgh1c_setup(gs_hamkq,rf_hamkq,dtset,psps,kpoint,kpq,idir,ipert,&   
        idir1 = 2
        idir2 = 1
      end select
-     call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass,gmet,kg_k,dkinpw,kpoint,npw_k,idir1,0) !  1st derivative, idir1
+     call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass_free,gmet,kg_k,dkinpw,kpoint,npw_k,idir1,0) !  1st derivative, idir1
      if(ipert==natom+10) then
-       call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass,gmet,kg_k,dkinpw2,kpoint,npw_k,idir2,0) ! 1st derivative, idir2
-       call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass,gmet,kg_k,ddkinpw,kpoint,npw_k,idir1,idir2) ! 2nd derivative
+       call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass_free,gmet,kg_k,dkinpw2,kpoint,npw_k,idir2,0) ! 1st derivative, idir2
+       call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass_free,gmet,kg_k,ddkinpw,kpoint,npw_k,idir1,idir2) ! 2nd derivative
      end if
    end if
  end if
@@ -1101,7 +1126,7 @@ subroutine getgh1c_setup(gs_hamkq,rf_hamkq,dtset,psps,kpoint,kpq,idir,ipert,&   
    if (ipert==natom+3) istr=idir
    if (ipert==natom+4) istr=idir+3
 !  Compute the derivative of the kinetic operator vs strain
-   call kpgstr(dkinpw,dtset%ecut,dtset%ecutsm,dtset%effmass,gmet,gprimd,istr,kg_k,kpoint,npw_k)
+   call kpgstr(dkinpw,dtset%ecut,dtset%ecutsm,dtset%effmass_free,gmet,gprimd,istr,kg_k,kpoint,npw_k)
  end if
 
 !===== Load the k/k+q dependent parts of the Hamiltonian

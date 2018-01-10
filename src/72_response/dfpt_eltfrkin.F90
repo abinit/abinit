@@ -18,7 +18,7 @@
 !!  cg(2,mpw*nspinor*mband*mkmem*nsppol)=<G|Cnk>=Fourier coefficients of wavefunction
 !!  ecut=cut-off energy for plane wave basis sphere (Ha)
 !!  ecutsm=smearing energy for plane wave kinetic energy (Ha) (NOT NEEDED !)
-!!  effmass=effective mass for electrons (1. in common case)
+!!  effmass_free=effective mass for electrons (1. in common case)
 !!  istwfk(nkpt)=input option parameter that describes the storage of wfs
 !!  kg(3,mpw*mkmem)=work array for coordinates of G vectors in basis
 !!  kptns(3,nkpt)=coordinates of k points in terms of reciprocal space
@@ -31,7 +31,7 @@
 !!  nband(nkpt*nsppol)=number of bands being considered per k point
 !!  nkpt=number of k points
 !!  ngfft(18)=contain all needed information about 3D FFT, i
-!!    see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!    see ~abinit/doc/variables/vargs.htm#ngfft
 !!  npwarr(nkpt)=number of planewaves at each k point, and boundary
 !!  nspinor=number of spinorial components of the wavefunctions
 !!  nsppol=1 for unpolarized, 2 for polarized
@@ -59,7 +59,7 @@
 #include "abi_common.h"
 
 
-subroutine dfpt_eltfrkin(cg,eltfrkin,ecut,ecutsm,effmass,&
+subroutine dfpt_eltfrkin(cg,eltfrkin,ecut,ecutsm,effmass_free,&
 &  istwfk,kg,kptns,mband,mgfft,mkmem,mpi_enreg,&
 &  mpw,nband,nkpt,ngfft,npwarr,nspinor,nsppol,occ,rprimd,wtk)
 
@@ -85,7 +85,7 @@ subroutine dfpt_eltfrkin(cg,eltfrkin,ecut,ecutsm,effmass,&
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: mband,mgfft,mkmem,mpw,nkpt,nspinor,nsppol
- real(dp),intent(in) :: ecut,ecutsm,effmass
+ real(dp),intent(in) :: ecut,ecutsm,effmass_free
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: istwfk(nkpt),kg(3,mpw*mkmem),nband(nkpt*nsppol)
@@ -175,7 +175,7 @@ subroutine dfpt_eltfrkin(cg,eltfrkin,ecut,ecutsm,effmass,&
 
        cwavef(:,1:npw_k*nspinor)=cg(:,1+(iband-1)*npw_k*nspinor+icg:iband*npw_k*nspinor+icg)
 
-       call d2kindstr2(cwavef,ecut,ecutsm,effmass,ekinout,gmet,gprimd,&
+       call d2kindstr2(cwavef,ecut,ecutsm,effmass_free,ekinout,gmet,gprimd,&
 &       istwf_k,kg_k,kpoint,npw_k,nspinor)
 
        eltfrkink(:,:)=eltfrkink(:,:)+ occ(iband+bdtot_index)* reshape(ekinout(:), (/6,6/) )

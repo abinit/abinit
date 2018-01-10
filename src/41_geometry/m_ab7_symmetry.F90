@@ -839,7 +839,7 @@ contains
     type(symmetry_type), intent(inout) :: sym
     integer, intent(out) :: errno
 
-    integer :: berryopt, jellslab, noncol, nzchempot
+    integer :: berryopt, jellslab, noncol
     integer :: use_inversion
     real(dp), pointer :: spinAt_(:,:)
     integer  :: sym_(3, 3, AB7_MAX_SYMMETRIES)

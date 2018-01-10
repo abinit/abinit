@@ -1,0 +1,214 @@
+#title 	    {	font-family	    : Verdana,Arial,Courier	  ;
+				font-style	    : regular				  ;
+				font-weight		: bold	 				  ;
+				font-size	    : 20px	 				  ;
+				color			: #000000				  ;
+				text-decoration : none					  ;
+				text-transform  : none	 				  ;
+			}
+#mnemonics   {	font-family	    : Arial,Courier,Verdana	  ;
+				font-style	    : regular;
+				font-weight		: regular;
+				font-size	    : 14px	 				  ;
+				color			: #000000				  ;
+				text-decoration : none					  ;
+				text-transform  : none	 				  ;
+			}
+#characteristic{	font-family	    : Arial,Courier,Verdana	  ;
+				font-style	    : regular;
+				font-weight		: regular;
+				font-size	    : 14px	 				  ;
+				color			: #000000				  ;
+				text-decoration : none					  ;
+				text-transform  : none	 				  ;
+			}
+#vartype{	font-family	    : Arial,Courier,Verdana	  ;
+				font-style	    : regular;
+				font-weight	    : regular;
+				font-size	    : 14px	;
+				color		    : #000000				  ;
+				text-decoration : none					  ;
+				text-transform  : none	 				  ;
+			}
+#text      {	font-family	    : Verdana,Arial,Courier	  ;
+				font-style	    : regular;
+				font-weight		: regular				  ;
+				font-size	    : 12px	 				  ;
+				color			: #000000				  ;
+				text-decoration : none					  ;
+				text-transform  : none	 				  ;
+			}
+#smalltext      {    font-family         : Verdana,Arial,Courier       ;
+                                font-style          : regular;
+                                font-weight             : regular                                 ;
+                                font-size           : 10px                                        ;
+                                color                   : #000000                                 ;
+                                text-decoration : none                                    ;
+                                text-transform  : none                                    ;
+                        }
+
+#default    {	font-family	    : Verdana,Arial,Courier	  ;
+				font-style	    : italic;
+				font-weight	    : regular				  ;
+				font-size	    : 14px	 				  ;
+				color			: #000000				  ;
+				text-decoration : none					  ;
+				text-transform  : none	 				  ;
+			}
+
+ /* For mobile phones: */
+[class*="col-"] {
+  width: 100%;
+}
+@media only screen and (min-width: 600px) {
+  /* For tablets: */
+  .col-s-1 {width: 8.33%;}
+  .col-s-2 {width: 16.66%;}
+  .col-s-3 {width: 25%;}
+  .col-s-4 {width: 33.33%;}
+  .col-s-5 {width: 41.66%;}
+  .col-s-6 {width: 50%;}
+  .col-s-7 {width: 58.33%;}
+  .col-s-8 {width: 66.66%;}
+  .col-s-9 {width: 75%;}
+  .col-s-10 {width: 83.33%;}
+  .col-s-11 {width: 91.66%;}
+  .col-s-12 {width: 100%;}
+}
+@media only screen and (min-width: 768px) {
+  /* For desktop: */
+  .col-m-1 {width: 8.33%;}
+  .col-m-2 {width: 16.66%;}
+  .col-m-3 {width: 25%;}
+  .col-m-4 {width: 33.33%;}
+  .col-m-5 {width: 41.66%;}
+  .col-m-6 {width: 50%;}
+  .col-m-7 {width: 58.33%;}
+  .col-m-8 {width: 66.66%;}
+  .col-m-9 {width: 75%;}
+  .col-m-10 {width: 83.33%;}
+  .col-m-11 {width: 91.66%;}
+  .col-m-12 {width: 100%;}
+} 
+
+@media only screen and (min-width: 900px) {
+  /* For tablets: */
+  .col-l-1 {width: 8.33%;}
+  .col-l-2 {width: 16.66%;}
+  .col-l-3 {width: 25%;}
+  .col-l-4 {width: 33.33%;}
+  .col-l-5 {width: 41.66%;}
+  .col-l-6 {width: 50%;}
+  .col-l-7 {width: 58.33%;}
+  .col-l-8 {width: 66.66%;}
+  .col-l-9 {width: 75%;}
+  .col-l-10 {width: 83.33%;}
+  .col-l-11 {width: 91.66%;}
+  .col-l-12 {width: 100%;}
+}
+@media only screen and (min-width: 1200px) {
+  /* For desktop: */
+  .col-xl-1 {width: 8.33%;}
+  .col-xl-2 {width: 16.66%;}
+  .col-xl-3 {width: 25%;}
+  .col-xl-4 {width: 33.33%;}
+  .col-xl-5 {width: 41.66%;}
+  .col-xl-6 {width: 50%;}
+  .col-xl-7 {width: 58.33%;}
+  .col-xl-8 {width: 66.66%;}
+  .col-xl-9 {width: 75%;}
+  .col-xl-10 {width: 83.33%;}
+  .col-xl-11 {width: 91.66%;}
+  .col-xl-12 {width: 100%;}
+} 
+
+@media only screen and (min-width: 1536px) {
+  /* For desktop: */
+  .col-xxl-1 {width: 8.33%;}
+  .col-xxl-2 {width: 16.66%;}
+  .col-xxl-3 {width: 25%;}
+  .col-xxl-4 {width: 33.33%;}
+  .col-xxl-5 {width: 41.66%;}
+  .col-xxl-6 {width: 50%;}
+  .col-xxl-7 {width: 58.33%;}
+  .col-xxl-8 {width: 66.66%;}
+  .col-xxl-9 {width: 75%;}
+  .col-xxl-10 {width: 83.33%;}
+  .col-xxl-11 {width: 91.66%;}
+  .col-xxl-12 {width: 100%;}
+} 
+
+
+ /* Style the tab */
+div.TabsLetter {
+    overflow: hidden;
+    border: 1px solid #ccc;
+    background-color: #f1f1f1;
+}
+
+/* Style the buttons inside the tab */
+div.TabsLetter a {
+  background-color: inherit;
+  float: left;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  padding: 14px 16px;
+  transition: 0.3s;
+  text-decoration: none; /* Remove default text underline */
+  color: #999;
+}
+
+/* Change background color of buttons on hover */
+div.TabsLetter a:hover {
+  background-color: #ddd;
+  color: #111;
+}
+
+/* Create an active/current tablink class */
+div.TabsLetter a.active {
+  background-color: #ccc;
+  color: #111;
+}
+
+/* Style the tab content */
+.TabContentLetter {
+  display: none;
+  padding: 6px 12px;
+  //border: 1px solid #ccc;
+  border-top: none;
+} 
+
+ul#Letters, ul.TabContentLetter {
+  list-style: none;
+  overflow: hidden;
+}
+
+ul#Letters {
+  padding: 0px;
+  margin: 0px;
+  border: 1px solid #ccc;
+  border-top: none;
+}
+
+.TabContentLetter li {
+  //display: inline;
+  float: left;
+}
+
+.TabContentLetter li a {
+  text-decoration: none; /* Remove default text underline */
+  color: #666; /* Add a hover effect to all links, except for headers */
+  display: block; /* Make it into a block element to fill the whole list */
+}
+
+li.HeaderLetter {
+  display: none;
+  width: 100%;
+  border-bottom: 1px solid #ccc;
+}
+
+.TabContentLetter li a:hover:not(.header) {
+  color: #111; /* Add a hover effect to all links, except for headers */
+  background-color:#eee;
+}

@@ -1,0 +1,907 @@
+## This YAML file contains the introduction as well as the body of the html lesson.
+## In order to modify the other parts, modify the file lessons.html .
+
+## This is the introduction ...
+intro : |
+  <p>This lesson aims at showing how to perform a calculation in
+  the
+  frame of the PAW method. </p>
+  <ul></ul>You will learn how to launch a PAW calculation and what are
+  the main
+  input
+  variables that govern convergence and numerical efficiency.<br>
+  It is supposed that you already know how to use ABINIT in the
+  norm-conserving pseudopotential case.<br>
+  <p>This lesson should take about 1.5 hour. </p>
+
+## Now come the different sections, numbered.
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec1:
+ title: "Summary of the PAW method"
+ tag: summary
+ body: |
+  The PAW (Projector Augmented-Wave) method has been
+  introduced by Peter Bl&ouml;chl in 1994. As he says, "<span style="font-style: italic;">The projector
+  augmented-wave method is an extension of augmented wave methods and the
+  pseudopotential approach, which combines their traditions into a
+  unified
+  electronic structure method</span>".<br>
+  It is based on a linear and invertible transformation (the PAW
+  transformation) that connects the "true" wavefunctions <span style="font-weight: bold;">&#936;</span><sub style="font-weight: bold;">n</sub>
+  with
+  "auxiliary"
+  (or "pseudo") soft wavefunctions<span style="position: relative; top: -8pt; left: 8pt; font-weight: bold;">&#126;</span><span style="font-weight: bold;">&#936;</span><sub style="font-weight: bold;">n</sub>
+  : </p>
+  <div style="margin-left: 80px;">|<span style="font-weight: bold; color: rgb(204, 0, 0);">&#936;</span><sub style="font-weight: bold; color: rgb(204, 0, 0);">n&gt;
+  &nbsp;=</sub><span style="position: relative; top: -8pt; left: 8pt; font-weight: bold; color: rgb(204, 0, 0);">~</span><span style="font-weight: bold; color: rgb(204, 0, 0);">|&#936;</span><sub style="font-weight: bold; color: rgb(204, 0, 0);">n</sub><span style="font-weight: bold; color: rgb(204, 0, 0);">&gt;+&nbsp;
+  &#931;&nbsp;(&#966;</span><sub style="font-weight: bold; color: rgb(204, 0, 0);">i&nbsp;
+  </sub><span style="font-weight: bold; color: rgb(204, 0, 0);">-</span><span style="position: relative; top: -5pt; left: 6pt; font-weight: bold; color: rgb(204, 0, 0);">~</span><span style="font-weight: bold; color: rgb(204, 0, 0);">&#966;</span><sub style="font-weight: bold; color: rgb(204, 0, 0);">i</sub><span style="font-weight: bold; color: rgb(204, 0, 0);">)
+  &lt;</span><span style="position: relative; top: -5pt; left: 6pt; font-weight: bold; color: rgb(204, 0, 0);">~</span><span style="font-weight: bold; color: rgb(204, 0, 0);">p</span><sub style="font-weight: bold; color: rgb(204, 0, 0);">i&nbsp;</sub><span style="font-weight: bold; color: rgb(204, 0, 0);"> |</span><span style="position: relative; top: -8pt; left: 8pt; font-weight: bold; color: rgb(204, 0, 0);">~</span><span style="font-weight: bold; color: rgb(204, 0, 0);">&#936;</span><sub style="font-weight: bold; color: rgb(204, 0, 0);">n </sub><span style="font-weight: bold; color: rgb(204, 0, 0);">&gt;</span>
+  </div><p><span style="font-style: italic;"></span>This
+  relation
+  is based on
+  the definition of atomic spheres (<span style="font-style: italic;">augmentation
+  regions</span>) of radius&nbsp; <span style="font-style: italic; font-weight: bold;">r</span><sub style="font-style: italic; font-weight: bold;">c</sub>,
+  around the atoms of the
+  system in which the <span style="font-style: italic;">partial
+  waves</span>&nbsp; <span style="position: relative; top: -5pt; left: 6pt;"></span><span style="font-weight: bold;">| &#966;</span><sub style="font-weight: bold;">i</sub><span style="font-weight: bold;">&gt;</span>
+  form a basis
+  of atomic wavefunctions; <span style="font-weight: bold;">|</span><span style="position: relative; top: -5pt; left: 6pt; font-weight: bold;">~</span><span style="font-weight: bold;">&#966;</span><sub style="font-weight: bold;">i</sub><span style="font-weight: bold;">&gt;</span>
+  are <span style="font-style: italic;">"pseudized" partial
+  waves</span> (obtained from <span style="font-weight: bold;">|
+  </span><span style="position: relative; top: -5pt; left: 6pt; font-weight: bold;"></span><span style="font-weight: bold;">&#966;</span><sub style="font-weight: bold;">i</sub><span style="font-weight: bold;">&gt;</span>), and <span style="position: relative; top: -5pt; left: 6pt; font-weight: bold;">~</span><span style="font-weight: bold;">p</span><sub style="font-weight: bold;">i</sub>
+  are dual functions
+  of
+  the&nbsp;<span style="font-weight: bold;">|</span><span style="position: relative; top: -5pt; left: 6pt; font-weight: bold;">~</span><span style="font-weight: bold;">&#966;</span><sub style="font-weight: bold;">i</sub><span style="font-weight: bold;">&gt;</span> called
+  projectors.<br>
+  It is therefore possible to write every quantity depending on&nbsp;<span style="font-weight: bold;">&#936;</span><sub style="font-weight: bold;">n</sub>
+  (density, energy, Hamiltonian) as a function of<span style="position: relative; top: -8pt; left: 8pt; font-weight: bold;">~</span><span style="font-weight: bold;">&#936;</span><sub style="font-weight: bold;">n</sub>
+  and to find<span style="position: relative; top: -8pt; left: 8pt; font-weight: bold;">~</span><span style="font-weight: bold;">&#936;</span><sub style="font-weight: bold;">n</sub>
+  by solving self-consistent equations.
+  </p><p>The PAW method has two main advantages:<br>
+  &nbsp; - From<span style="position: relative; top: -8pt; left: 8pt; font-weight: bold;">~</span><span style="font-weight: bold;">&#936;</span><sub style="font-weight: bold;">n</sub>,
+  it is always
+  possible to obtain the true&nbsp;"all electron"
+  wavefunction<span style="position: relative; top: -8pt; left: 8pt; font-weight: bold;"> </span><span style="font-weight: bold;">&#936;</span><sub style="font-weight: bold;">n</sub>.<br>
+  &nbsp; - The convergency is comparable
+  to an ultrasoft pseudopotential one.
+  </p><p>From a practical point of view (user's point of view), a PAW calculation is rather
+  similar to a norm-conserving pseudopotential one. Most noticeably, one will have to use
+  a special atomic data file
+  (<span style="font-style: italic; font-weight: bold;">PAW dataset</span>)
+  that contains the&nbsp;&nbsp;<span style="font-weight: bold;"></span><span style="position: relative; top: -5pt; left: 6pt; font-weight: bold;"></span><span style="font-weight: bold;">&#966;</span><sub style="font-weight: bold;">i</sub><span style="font-weight: bold;">,</span><span style="font-weight: bold;"></span><span style="position: relative; top: -5pt; left: 6pt; font-weight: bold;">~</span><span style="font-weight: bold;">&#966;</span><sub style="font-weight: bold;">i</sub><span style="font-weight: bold;"> and</span> <span style="font-style: italic;"></span><span style="font-weight: bold;"></span><span style="position: relative; top: -5pt; left: 6pt; font-weight: bold;">~</span><span style="font-weight: bold;">p</span><sub style="font-weight: bold;">i</sub>
+  and that plays
+  the same role as a pseudopotential file.
+  </p><p>It is highly recommended to read the following papers to
+  understand
+  correctly the basic concepts of the PAW method:
+  [[Bloechl1994]] and [[Kresse1999]].
+  <p>The implementation of the PAW method in <span style="font-weight: bold;">ABINIT</span> is detailed
+  in  [[Torrent2008]], describing specific notations and formulations
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec2:
+ title: "Using PAW with ABINIT"
+ tag: pawABINIT
+ body: |
+  <i>Before continuing, you might
+  consider to work in a different
+  subdirectory as for the other lessons. Why not "Work_paw1" ?
+  </i><i>In what follows, the name of files are
+  mentioned as if
+  you were in this subdirectory.<br>
+  All the input files can be found in the </i><i><span style="color: rgb(0, 102, 0);">~abinit/tests/tutorial/Input</span>
+  directory.</i></p><p><i>You can compare your results with reference
+  output files located in </i><i><span style="color: rgb(0, 102, 0);">~abinit/tests/tutorial/Refs</span>
+  and </i><i><span style="color: rgb(0, 102, 0);">~abinit/tests/tutorial/Refs/tpaw1_addons
+  </span></i><i>directories (for the present tutorial they are named
+  tpaw1_*.out).</i></p>
+  <p>The input file&nbsp;<span style="color: rgb(0, 102, 0);">tpaw1_1.in</span>
+  is an example of a file
+  that contains data for computing the total energy for&nbsp;<span style="font-weight: bold; color: rgb(153, 0, 0);">diamond</span>
+  at the experimental volume (within the LDA exchange-correlation
+  functional).
+  You might use the file&nbsp;<span style="color: rgb(0, 102, 0);">tpaw1_1.files</span>
+  (with a standard
+  norm-conserving pseudopotential)
+  as a "files" file, and get the corresponding output file
+  (it is available as <span style="color: rgb(0, 102, 0);">../Refs/tpaw1_1.out</span>).
+  <br>
+  Copy the files&nbsp;<span style="color: rgb(0, 102, 0); font-weight: bold;">tpaw1_1.in</span>
+  and&nbsp;<span style="color: rgb(0, 102, 0); font-weight: bold;">tpaw1_1.files</span>
+  in your work
+  directory, and run ABINIT:
+  </p><pre style="margin-left: 40px;"><span style="color: rgb(153, 0, 0);">abinit &lt; tpaw1_1.files &gt; tmp-log</span>
+  </pre>In the meantime, you can read the input file and see that there
+  is no
+  PAW input
+  variable.<br>
+  ABINIT should run very quickly...<br>
+  <br>Now, open the&nbsp;<span style="color: rgb(0, 102, 0);">tpaw1_1.files</span>
+  and modify the last line; replace the&nbsp;<span style="font-weight: bold; color: rgb(0, 102, 0);">6c.pspnc</span>
+  file by&nbsp;<span style="font-weight: bold; color: rgb(0, 102, 0);">6c.lda.atompaw</span>.
+  <p>Run ABINIT again:</p>
+  <pre style="margin-left: 40px;"><span style="color: rgb(153, 0, 0);">abinit &lt; tpaw1_1.files &gt; tmp-log</span></pre><p><span style="text-decoration: underline;">Your
+  run should stop before end !</span> &nbsp;The input file
+  is missing a mandatory argument:&nbsp;[[pawecutdg]]<span style="font-weight: bold;"></span>
+  !!</p>
+  <p>Add the line "<span style="font-weight: bold;">pawecutdg
+  50.</span>" in the &nbsp;<span style="color: rgb(0, 102, 0);">tpaw1_1.in&nbsp;</span>file
+  and run ABINIT again.<br>
+  Now ABINIT runs to the end.<span style="font-style: italic;"></span></p><p><span style="font-style: italic;">Note
+  that the time needed for the PAW run is greater than the time needed
+  for the norm-conserving pseudopotential run; indeed, at constant value
+  of plane wave cut-off energy [[ecut]] 
+  PAW requires more computational
+  resources:</span><span style="font-style: italic;">&nbsp;&nbsp;&nbsp; -
+  the "on-site"
+  contributions have to be computed,</span><span style="font-style: italic;">&nbsp;&nbsp;&nbsp;
+  <br>
+  -&nbsp;the nonlocal contribution of the PAW dataset uses 2 projectors
+  per angular momentum, while the nonlocal contribution of the present
+  norm-conserving pseudopotential&nbsp; uses only one.</span><span style="font-style: italic;"><br>
+  However,
+  as the plane wave cut-off energy required by PAW is much
+  smaller&nbsp;than the cut-off needed for the norm-conserving
+  pseudopotential (see next section), a PAW calculation will actually
+  require less CPU time.</span></p>
+  <p>Let's open the output file and have a look inside (be
+  careful, it is the last output file of the tpaw1_1 series).<br>
+  Compared to an output file for a norm-conserving pseudopotential run,
+  an
+  output file for PAW contains
+  the following specific topics:</p>
+  <p><span style="font-weight: bold; text-decoration: underline;">At
+  the beginning of the file:</span>
+  </p><div style="margin-left: 40px;">- Some specific default
+  PAW input variables ([[ngfftdg]],
+  [[pawecutdg]],
+  and [[useylm]])
+  are mentioned in the
+  section:
+  </div><p style="color: rgb(0, 153, 0); margin-left: 80px;"><font size="-1">-outvars:
+  echo values
+  of preprocessed input variables --------</font></p>
+  <p style="margin-left: 40px;">- The use of two FFT grids,
+  mentioned as:</p>
+  <p style="font-family: monospace; margin-left: 80px; color: rgb(0, 153, 0);">&nbsp;Coarse
+  grid specifications (used for wave-functions):<br>
+  <br>&nbsp;getcut: wavevector=&nbsp; 0.0000&nbsp;
+  0.0000&nbsp; 0.0000&nbsp; ngfft=&nbsp; 18&nbsp;
+  18&nbsp; 18<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  ecut(hartree)=&nbsp;&nbsp;&nbsp;&nbsp;
+  15.000&nbsp;&nbsp; =&gt; boxcut(ratio)=&nbsp;&nbsp;
+  2.17276<br>
+  <br>&nbsp;Fine grid specifications (used for densities):<br>
+  <br>&nbsp;getcut: wavevector=&nbsp; 0.0000&nbsp;
+  0.0000&nbsp; 0.0000&nbsp; ngfft=&nbsp; 32&nbsp;
+  32&nbsp; 32<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  ecut(hartree)=&nbsp;&nbsp;&nbsp;&nbsp;
+  50.000&nbsp;&nbsp; =&gt; boxcut(ratio)=&nbsp;&nbsp;
+  2.10918
+  </p><div style="margin-left: 40px;">- A specific description
+  of the <span style="font-style: italic;">PAW dataset</span>
+  (you might
+  follow
+  the tutorial PAW2, devoted to the building of the PAW atomic data, for
+  a complete understanding of the file):
+  </div><div style="margin-left: 80px;"><big><font style="font-family: monospace; color: rgb(0, 153, 0);" size="-1"><big><br>
+  &nbsp;Pseudopotential
+  format is: paw4<br>
+  &nbsp;basis_size (lnmax)=&nbsp; 4 (lmn_size=&nbsp; 8),
+  orbitals=&nbsp;&nbsp; 0&nbsp;&nbsp;
+  0&nbsp;&nbsp; 1&nbsp;&nbsp; 1<br>
+  &nbsp;Spheres core radius: rc_sph= 1.50000000<br>
+  &nbsp;4 radial meshes are used:<br>
+  &nbsp; - mesh 1: r(i)=AA*[exp(BB*(i-1))-1], size= 505 , AA=
+  0.21824E-02 BB= 0.13095E-01<br>
+  &nbsp; - mesh 2: r(i)=AA*[exp(BB*(i-1))-1], size= 500 , AA=
+  0.21824E-02 BB= 0.13095E-01<br>
+  &nbsp; - mesh 3: r(i)=AA*[exp(BB*(i-1))-1], size= 530 , AA=
+  0.21824E-02 BB= 0.13095E-01<br>
+  &nbsp; - mesh 4: r(i)=AA*[exp(BB*(i-1))-1], size= 644 , AA=
+  0.21824E-02 BB= 0.13095E-01<br>
+  &nbsp;Shapefunction is SIN type:
+  shapef(r)=[sin(pi*r/rshp)/(pi*r/rshp)]**2<br>
+  &nbsp;Radius for shape functions = sphere core radius<br>
+  &nbsp;Radial grid used for partial waves is grid 1<br>
+  &nbsp;Radial grid used for projectors is grid 2<br>
+  &nbsp;Radial grid used for (t)core density is grid 3<br>
+  &nbsp;Radial grid used for Vloc is grid 4<br>
+  &nbsp;Radial grid used for pseudo valence density is grid 4</big></font></big>
+  </div><p><span style="font-weight: bold; text-decoration: underline;">After
+  the SCF cycle section:</span>
+  </p><div style="margin-left: 40px;">- The value of the
+  integrated compensation charge evaluated by two different numerical methodologies
+  (remember: PAW atomic dataset are not norm-conserving pseudopotentials); it is
+  given&nbsp;calculated in the augmentation regions (PAW spheres) on
+  the
+  "spherical" grid and also in the whole simulation cell on the "FFT"
+  grid. A discussion on these two values will be done in a
+  forthcoming section.
+  </div><div style="margin-left: 80px;"><big><font style="font-family: monospace; color: rgb(0, 153, 0);" size="-1"><big>&nbsp;PAW
+  TEST:<br>
+  &nbsp;==== Compensation charge inside spheres ============<br>
+  &nbsp;The following values must be close to each other ...<br>
+  &nbsp;Compensation charge over spherical meshes
+  =&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0.413178580356274<br>
+  &nbsp;Compensation charge over fine fft
+  grid&nbsp;&nbsp;&nbsp;
+  =&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0.413177280314290
+  </big></font></big></div><div style="margin-left: 40px;"><br>- &nbsp;
+  Information concerning the non-local term
+  (<span style="font-style: italic;">pseudopotential
+  strength</span> <span style="font-style: italic;">Dij</span>
+  ) and the spherical density matrix (<span style="font-style: italic;">augmentation
+  wave
+  occupancies Rhoij</span>)
+  </div><p style="margin-left: 80px; font-family: monospace; color: rgb(0, 153, 0);"><big><font size="-1"><big><small>&nbsp;==== Results
+  concerning PAW augmentation regions ====<br>
+  &nbsp;<br>
+  &nbsp;Total pseudopotential strength Dij (hartree):<br>
+  &nbsp;Atom #&nbsp; 1<br>
+  &nbsp;&nbsp; ...<br>
+  &nbsp;Atom #&nbsp; 2<br>
+  &nbsp;&nbsp; ...</small>
+  </big></font></big></p><p style="margin-left: 80px;"><big style="color: rgb(0, 153, 0);"><font style="font-family: monospace;" size="-1"><big>Augmentation
+  waves occupancies Rhoij:<br>
+  &nbsp;Atom #&nbsp; 1<br>
+  &nbsp; ...<br>
+  &nbsp;Atom #&nbsp; 2<br>
+  &nbsp; ...</big></font></big>
+  </p><p><span style="font-weight: bold; text-decoration: underline;">At
+  the end of the file:</span>
+  </p><div style="margin-left: 40px;">- The decomposition of
+  the total energy both by direct calculation and
+  double counting calculation:
+  </div><div style="margin-left: 80px;"><big><font style="font-family: monospace; color: rgb(0, 153, 0);" size="-1"><big>--------------------------------------------------------------------------------<br>
+  &nbsp;Components of total free energy (in Hartree) :<br>
+  <br>&nbsp;&nbsp;&nbsp; Kinetic energy&nbsp; =&nbsp;
+  6.40164318808980E+00<br>
+  &nbsp;&nbsp;&nbsp; Hartree energy&nbsp; =&nbsp;
+  9.63456708252837E-01<br>
+  &nbsp;&nbsp;&nbsp; XC
+  energy&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; =
+  -3.53223656186138E+00<br>
+  &nbsp;&nbsp;&nbsp; Ewald
+  energy&nbsp;&nbsp;&nbsp; = -1.27864121210521E+01<br>
+  &nbsp;&nbsp;&nbsp; PspCore energy&nbsp; =&nbsp;
+  5.41017918797015E-01<br>
+  &nbsp;&nbsp;&nbsp; Loc. psp. energy= -5.27003595856857E+00<br>
+  &nbsp;&nbsp;&nbsp; Spherical terms =&nbsp;
+  2.15689044331394E+00<br>
+  &nbsp;&nbsp;&nbsp; &gt;&gt;&gt;&gt;&gt;
+  Internal E= -1.15256763830284E+01<br>
+  <br>&nbsp;"Double-counting" decomposition of free energy:<br>
+  &nbsp;&nbsp;&nbsp; Band
+  energy&nbsp;&nbsp;&nbsp;&nbsp; =&nbsp;
+  6.87331579398577E-01<br>
+  &nbsp;&nbsp;&nbsp; Ewald
+  energy&nbsp;&nbsp;&nbsp; = -1.27864121210521E+01<br>
+  &nbsp;&nbsp;&nbsp; PspCore energy&nbsp; =&nbsp;
+  5.41017918797015E-01<br>
+  &nbsp;&nbsp;&nbsp; Dble-C XC-energy=&nbsp;
+  1.22161340385476E-01<br>
+  &nbsp;&nbsp;&nbsp; Spherical terms = -8.97688814082645E-02<br>
+  &nbsp;&nbsp;&nbsp; &gt;&gt;&gt;&gt;&gt;
+  Internal E= -1.15256701638793E+01<br>
+  <br>&nbsp; &gt;Total energy in
+  eV&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  = -3.13629604304723E+02<br>
+  &nbsp;&nbsp;&gt;Total DC energy in
+  eV&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  = -3.13629435073068E+02</big></font></big>
+  </div><p>Note that the total energy calculated in PAW is not the same
+  as the one obtained
+  in the norm-conserving pseudopotential case.
+  This is normal: in the norm-conserving potential case, the
+  energy reference has been arbitrarily modified by the pseudopotential construction procedure.
+  Comparing total energies computed with different
+  PAW potentials is more meaningful : most of the  parts of the energy
+  are calculated exactly, and
+  in general you should be able to compare numbers for (valence)<i> energies</i>
+  between different PAW potentials or
+  different codes.</p>
+
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec3:
+ title: "The convergence on plane-wave cut-off"
+ tag: ecut
+ body: |
+  As in the usual case, the critical convergence parameter is the cut-off
+  defining the size of the plane-wave basis...
+  <p><b>3.a</b><b> Computing the convergence in
+  ecut for&nbsp;<span style="color: rgb(153, 0, 0);">diamond</span>
+  in
+  the norm-conserving case</b></p>
+  The input file&nbsp;<span style="color: rgb(0, 102, 0); font-weight: bold;">tpaw1_2.in</span>
+  contains data for computing the convergence in ecut for&nbsp;<span style="font-weight: bold; color: rgb(153, 0, 0);">diamond</span>
+  (at experimental volume).
+  There are 9 datasets, for which&nbsp;[[ecut]]
+  increases from 8 Ha to 24 Ha
+  by step of 2 Ha.<br>
+  You might use the&nbsp;<span style="color: rgb(0, 102, 0); font-weight: bold;">tpaw1_2.files</span>
+  file (with a standard
+  norm-conserving pseudopotential), and run ABINIT:<br>
+  <pre style="margin-left: 40px;"><span style="color: rgb(153, 0, 0);">abinit &lt; tpaw1_2.files &gt; tmp-log</span>
+  </pre>You
+  should obtain the values (output file <span style="color: rgb(0, 102, 0);">tpaw1_2.out</span>) :
+  <p style="margin-left: 80px;"><big><font style="font-family: monospace;" size="-1"><big><span style="color: rgb(0, 153, 0);">&nbsp;&nbsp;&nbsp;
+  etotal1&nbsp; -1.1628880677E+01</span><br>
+  <span style="color: rgb(0, 153, 0);">&nbsp;&nbsp;&nbsp;
+  etotal2&nbsp; -1.1828052470E+01</span><br>
+  <span style="color: rgb(0, 153, 0);">&nbsp;&nbsp;&nbsp;
+  etotal3&nbsp; -1.1921833945E+01</span><br>
+  <span style="color: rgb(0, 153, 0);">&nbsp;&nbsp;&nbsp;
+  etotal4&nbsp; -1.1976374633E+01</span><br>
+  <span style="color: rgb(0, 153, 0);">&nbsp;&nbsp;&nbsp;
+  etotal5&nbsp; -1.2017601960E+01</span><br>
+  <span style="color: rgb(0, 153, 0);">&nbsp;&nbsp;&nbsp;
+  etotal6&nbsp; -1.2046855404E+01</span><br>
+  <span style="color: rgb(0, 153, 0);">&nbsp;&nbsp;&nbsp;
+  etotal7&nbsp; -1.2062173253E+01</span><br>
+  <span style="color: rgb(0, 153, 0);">&nbsp;&nbsp;&nbsp;
+  etotal8&nbsp; -1.2069642342E+01</span><br>
+  <span style="color: rgb(0, 153, 0);">&nbsp;&nbsp;&nbsp;
+  etotal9&nbsp; -1.2073328672E+01</span></big></font></big>
+  </p><p>You can check that the
+  <span style="font-weight: bold; font-style: italic;">
+  etotal</span>
+  convergence (at the 1 mHartree level) is not achieved for&nbsp;<span style="font-style: italic; font-weight: bold;">ecut</span>=24
+  Hartree.</p>
+  <p><b>3.b</b><b> Computing the convergence in
+  ecut for <span style="color: rgb(153, 0, 0);">diamond</span>
+  in
+  the PAW case</b></p>
+  <p>Use the same input files as in section 1.a.<br>
+  Again, modify the last line of&nbsp;<span style="color: rgb(0, 102, 0);">tpaw1_2.files</span>,
+  replacing the&nbsp;<span style="font-weight: bold; color: rgb(0, 102, 0);">6c.pspnc</span>
+  file by <span style="font-weight: bold; color: rgb(0, 102, 0);">6c.lda.atompaw</span>.<br>
+  Run ABINIT again and open the output file (it should be <span style="color: rgb(0, 102, 0);">tpaw1_2.outA</span>)<br>
+  You should obtain the values:</p>
+  <div style="margin-left: 80px;"><big><font style="color: rgb(0, 153, 0);" size="-1"><big><span style="font-family: monospace;">&nbsp;&nbsp;&nbsp;
+  etotal1&nbsp; -1.1474828697E+01<br>
+  &nbsp;&nbsp;&nbsp; etotal2&nbsp; -1.1518675625E+01<br>
+  &nbsp;&nbsp;&nbsp; etotal3&nbsp; -1.1524581240E+01<br>
+  &nbsp;&nbsp;&nbsp; etotal4&nbsp; -1.1525548758E+01<br>
+  &nbsp;&nbsp;&nbsp; etotal5&nbsp; -1.1525741818E+01<br>
+  &nbsp;&nbsp;&nbsp; etotal6&nbsp; -1.1525865084E+01<br>
+  &nbsp;&nbsp;&nbsp; etotal7&nbsp; -1.1525926864E+01<br>
+  &nbsp;&nbsp;&nbsp; etotal8&nbsp; -1.1525947400E+01<br>
+  &nbsp;&nbsp;&nbsp; etotal9&nbsp; -1.1525954817E+01</span></big></font><font size="-1"><big><span style="font-family: monospace;"></span></big></font></big>
+  </div><p>You can check that:<br>
+  The <span style="font-weight: bold; font-style: italic;">etotal</span>
+  convergence (at 1 mHartree) is achieved for 12&lt;=<span style="font-style: italic; font-weight: bold;">ecut</span>&lt;=14
+  Hartree (etotal4 is within 1 mHartree of the final value); <br>The <span style="font-weight: bold; font-style: italic;">
+  etotal</span>
+  convergence (at 0.1 mHartree) is achieved for&nbsp;16&lt;=<span style="font-style: italic; font-weight: bold;">ecut</span>&lt;=18
+  Hartree (etotal6 is within 0.1 mHartree of the final value).</p>
+  <p>So with the same input, a PAW calculation for
+  diamond needs a lower cutoff, compared to a norm-conserving
+  pseudopotential
+  calculation. </p>
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec4:
+ title: "The convergence on the double grid FFT cut-off"
+ tag: pawecutdg
+ body: |
+  In a<span style="font-style: italic;">
+  norm-conserving pseudopotential</span> calculation, the (plane wave) density
+  grid is (at least)
+  twice
+  bigger than the wavefunctions grid, in each direction. In
+  a <span style="font-style: italic;">PAW</span>
+  calculation, the (plane wave) density grid is tunable thanks to the
+  input variable [[pawecutdg]]
+  (PAW: ECUT for Double Grid). This is needed because of the mapping of
+  &nbsp;objects (densities, potentials) located in
+  the augmentation regions (PAW spheres) onto the global FFT grid.<br>
+  The number of points
+  of the Fourier grid located in the spheres must be high enough to
+  preserve the accuracy. It is determined from the cut-off
+  energy&nbsp; [[pawecutdg]]. An
+  alternative
+  is to use directly the input variable [[ngfftdg]].
+  One of
+  the most sensitive objects affected by this "grid transfer" is the
+  compensation charge density; its integral over the augmentation
+  regions (on spherical grids) must cancel with its integral over the
+  whole simulation cell (on the FFT grid).</p>
+  <p>Use now the input file&nbsp;<span style="color: rgb(0, 102, 0); font-weight: bold;">tpaw1_3.in</span>
+  and the associated <span style="color: rgb(0, 102, 0); font-weight: bold;">tpaw1_3.files</span>
+  file.<br>
+  The only difference with the <span style="color: rgb(0, 102, 0);">tpaw1_2.in</span>
+  file is that [[ecut]]
+  is fixed to 12 Ha,
+  while [[pawecutdg]]
+  runs from 12 to 39 Ha.
+  </p><p>Launch ABINIT with these files; you should obtain the values
+  (file <span style="color: rgb(0, 102, 0);">tpaw1_3.out</span>):
+  </p><div style="margin-left: 80px;"><big><font style="font-family: monospace; color: rgb(0, 153, 0);" size="-1"><big>&nbsp;&nbsp;&nbsp;
+  etotal1&nbsp; -1.1524629595E+01<br>
+  &nbsp;&nbsp;&nbsp; etotal2&nbsp; -1.1524595840E+01<br>
+  &nbsp;&nbsp;&nbsp; etotal3&nbsp; -1.1524585370E+01<br>
+  &nbsp;&nbsp;&nbsp; etotal4&nbsp; -1.1524580630E+01<br>
+  &nbsp;&nbsp;&nbsp; etotal5&nbsp; -1.1524584720E+01<br>
+  &nbsp;&nbsp;&nbsp; etotal6&nbsp; -1.1524583573E+01<br>
+  &nbsp;&nbsp;&nbsp; etotal7&nbsp; -1.1524582786E+01<br>
+  &nbsp;&nbsp;&nbsp; etotal8&nbsp; -1.1524582633E+01<br>
+  &nbsp;&nbsp;&nbsp; etotal9&nbsp; -1.1524582213E+01<br>
+  &nbsp;&nbsp;&nbsp; etotal10 -1.1524582316E+01</big></font></big>
+  </div><p>We see that the variation of the energy wit respect to this parameter is well below
+  the 1 mHa level. In principle, it should be sufficient to choose <span style="font-weight: bold;">pawecutdg</span>=12 Ha in order to obtain an energy change lower than 1 <span style="font-style: italic;">mHa</span>. In practice, it is better to keep a security margin. Here, for <span style="font-weight: bold;">pawecutdg</span>=24 Ha
+  (5th
+  dataset), the energy change is lower than 0.001 <span style="font-style: italic;">mHa</span><code></code>: this choice will be more than enough.</p>
+  <p>Note the steps
+  in the convergence. They are due to the sudden (integer) changes in the grid size
+  (see the output values for&nbsp; [[ngfftdg]]) which do not occur
+  for each increase of&nbsp;[[pawecutdg]]. To avoid troubles due to these steps, it is better to choose a value of pawecutdg slightly higher.<br>
+  </p>
+  
+  <p>The&nbsp;convergence
+  of
+  the compensation charge has a similar behaviour; it is possible to
+  check it in the output file, just after the SCF cycle by looking at:</p>
+  <div style="margin-left: 80px;"><big><font style="font-family: monospace; color: rgb(0, 153, 0);" size="-1"><big>&nbsp;PAW
+  TEST:<br>
+  &nbsp;==== Compensation charge inside spheres ============</big></font></big><big><font style="font-family: monospace; color: rgb(0, 153, 0);" size="-1"><big><br>&nbsp;The
+  following values must be close...</big></font></big><br><big><font style="font-family: monospace; color: rgb(0, 153, 0);" size="-1"><big>&nbsp;Compensation
+  charge over spherical meshes
+  =&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0.409392121335747</big></font></big><br><big><font style="font-family: monospace; color: rgb(0, 153, 0);" size="-1"><big>&nbsp;</big></font></big><big><font style="font-family: monospace; color: rgb(0, 153, 0);" size="-1"><big>Compensation
+  charge over fine fft
+  grid&nbsp;&nbsp;&nbsp;
+  =&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0.409392418241149</big></font></big><big><font style="font-family: monospace; color: rgb(0, 153, 0);" size="-1"><big>
+  </big></font></big></div><p>The two values of the integrated
+  compensation charge
+  density
+  must be close to each other.<br>
+  <span style="font-style: italic;">Note
+  that, for numerical reasons, they cannot be exactly the same
+  (integration over a radial grid does not use the same scheme as
+  integration over a FFT grid).</span></p>
+  <span style="text-decoration: underline;">Additional test:</span><br>
+  We want now to check the convergence in [[ecut]]
+  with a fixed value
+  of 24 Ha for [[pawecutdg]].
+  Modify the file<span style="color: rgb(0, 102, 0);">
+  tpaw1_2.in</span>, setting pawecutdg to 24 Ha, and launch ABINIT
+  again...<br>
+  You should obtain the values :<br>
+  <small style="color: rgb(0, 153, 0);"></small><div style="margin-left: 80px;"><big><small style="color: rgb(0, 153, 0);"><span style="font-family: monospace;"><span style="font-family: mon;">&nbsp;&nbsp;&nbsp;
+  etotal1&nbsp; -1.1474831477E+01<br>
+  &nbsp;&nbsp;&nbsp; etotal2&nbsp; -1.1518678975E+01<br>
+  &nbsp;&nbsp;&nbsp; etotal3&nbsp; -1.1524584720E+01<br>
+  &nbsp;&nbsp;&nbsp; etotal4&nbsp; -1.1525552267E+01<br>
+  &nbsp;&nbsp;&nbsp; etotal5&nbsp; -1.1525745330E+01<br>
+  &nbsp;&nbsp;&nbsp; etotal6&nbsp; -1.1525868591E+01<br>
+  &nbsp;&nbsp;&nbsp; etotal7&nbsp; -1.1525930368E+01<br>
+  &nbsp;&nbsp;&nbsp; etotal8&nbsp; -1.1525950904E+01<br>
+  &nbsp;&nbsp;&nbsp; etotal9&nbsp; -1.1525958319E+01</span></span></small></big>
+  </div><br>You can check again that:<br>
+  The <span style="font-weight: bold; font-style: italic;">etotal</span>
+  convergence (at the 1 mHartree level) is achieved for 12&lt;=<span style="font-style: italic; font-weight: bold;">ecut</span>&lt;=14
+  Hartree ;
+  <br>
+  The
+  <span style="font-weight: bold; font-style: italic;">
+  etotal</span>
+  convergence (at the 0.1 mHartree level) is achieved for&nbsp;16&lt;=<span style="font-style: italic; font-weight: bold;">ecut</span>&lt;=18
+  Hartree.
+  <br>
+  <span style="text-decoration: underline;"><br>Note 1:</span><br>
+  Associated with the input variable [[pawecutdg]]
+  is the input variable [[ngfftdg]]:
+  it
+  gives the size of the FFT grid associated with [[pawecutdg]].
+  Note that [[pawecutdg]]
+  is only useful to define the FFT grid for the density in a convenient
+  way. You can therefore tune directly [[ngfftdg]]
+  to define the
+  size of the FFT
+  grid for the density.<br>
+  <br><span style="text-decoration: underline;">Note 2:</span><br>
+  Although [[pawecutdg]]
+  should always be checked, in practice, a common use it to put it bigger than&nbsp;[[ecut]]
+  and keep it constant during
+  all calculations. Increasing&nbsp;<span style="text-decoration: underline;"></span>[[pawecutdg]]
+  slightly changes the CPU execution time, but above all it is
+  memory-consuming.<br>
+  Note that, if [[ecut]] is already high,
+  there is no need for a high&nbsp;[[pawecutdg]].<span style="text-decoration: underline;"></span><br>
+  Last warning: when testing [[ecut]]
+  convergency, <span style="text-decoration: underline;"></span>[[pawecutdg]]
+  has to remain constant to obtain consistent results.
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec5:
+ title: "Plotting PAW contributions to the Density of States (DOS)"
+ tag: dos
+ body: |
+  We use now the input file&nbsp;<span style="color: rgb(0, 102, 0); font-weight: bold;">tpaw1_4.in</span>
+  and the associated <span style="color: rgb(0, 102, 0); font-weight: bold;">tpaw1_4.files</span>
+  file.<br>
+  ABINIT is now asked to compute the Density Of State (DOS) (see
+  the&nbsp; [[prtdos]]&nbsp;keyword in the
+  input file). Also note that more k-points are used in order to increase
+  the accuracy of the DOS. [[ecut]]
+  is set to 12 Ha,
+  while [[pawecutdg]] is 24 Ha.
+  </p><p>Launch ABINIT with these files; you should obtain the <span style="color: rgb(0, 102, 0);">tpaw1_4.out</span> and
+  the DOS file (<span style="color: rgb(0, 153, 0); font-weight: bold;">tpaw1_4o_DOS</span>):</p>
+  <pre style="margin-left: 40px;"><span style="color: rgb(153, 0, 0);">abinit &lt; tpaw1_4.files &gt; tmp-log</span>
+  </pre><p>You
+  can plot the DOS file if you want; for this purpose, use a
+  graphical tool and plot column 3 with respect to column 2.
+  If you use the "xmgrace" tool,<span style="text-decoration: line-through;"></span><span style="text-decoration: line-through;"></span>
+  launch:</p>
+  <pre style="margin-left: 40px;"><span style="color: rgb(153, 0, 0);">xmgrace -block tpaw1_4o_DOS -bxy 1:2</span></pre><p>At
+  this stage, you have the usual plot for a DOS; nothing
+  specific to PAW.</p>
+  <p>Now, edit the&nbsp;<span style="color: rgb(0, 102, 0); font-weight: bold;">tpaw1_4.in</span>
+  file,&nbsp;comment the "<span style="font-family: monospace; color: rgb(0, 153, 0);"></span>[[prtdos]]
+  1", and uncomment (or add):</p>
+  <div style="margin-left: 80px;"><span style="font-family: monospace; color: rgb(0, 153, 0);">prtdos
+  3&nbsp; pawprtdos 1</span>
+  <span style="font-family: monospace; color: rgb(0, 153, 0);">natsph
+  1 iatsph 1 ratsph 1.5</span>
+  </div><p>The "&nbsp;[[prtdos]]
+  3<span style="font-family: monospace;"></span>"
+  statement now requires the output of the projected DOS; "[[natsph]]
+  1&nbsp; [[iatsph]] 1&nbsp; [[ratsph]]
+  1.5" selects the first carbon atom as the center of projection, and
+  sets the
+  radius of the projection area to 1.5 atomic units (this is exactly the
+  radius of the PAW augmentation regions: generally the best choice).<br>
+  The "[[pawprtdos]] 1" is&nbsp;specific
+  to PAW. With this option, ABINIT is asked to compute all the
+  contributions to the projected DOS.<br>
+  Let's remember that:</p>
+  <div style="margin-left: 80px;">|<span style="font-weight: bold; color: rgb(204, 0, 0);">&#936;</span><sub style="font-weight: bold; color: rgb(204, 0, 0);">n&gt;
+  &nbsp;=</sub><span style="position: relative; top: -8pt; left: 8pt; font-weight: bold; color: rgb(204, 0, 0);">~</span><span style="font-weight: bold; color: rgb(204, 0, 0);">|&#936;</span><sub style="font-weight: bold; color: rgb(204, 0, 0);">n</sub><span style="font-weight: bold; color: rgb(204, 0, 0);">&gt;+&nbsp;
+  &#931;&nbsp;(&#966;</span><sub style="font-weight: bold; color: rgb(204, 0, 0);">i&nbsp;
+  </sub><span style="font-weight: bold; color: rgb(204, 0, 0);">-</span><span style="position: relative; top: -5pt; left: 6pt; font-weight: bold; color: rgb(204, 0, 0);">~</span><span style="font-weight: bold; color: rgb(204, 0, 0);">&#966;</span><sub style="font-weight: bold; color: rgb(204, 0, 0);">i</sub><span style="font-weight: bold; color: rgb(204, 0, 0);">)
+  &lt;</span><span style="position: relative; top: -5pt; left: 6pt; font-weight: bold; color: rgb(204, 0, 0);">~</span><span style="font-weight: bold; color: rgb(204, 0, 0);">p</span><sub style="font-weight: bold; color: rgb(204, 0, 0);">i&nbsp;</sub><span style="font-weight: bold; color: rgb(204, 0, 0);"> |</span><span style="position: relative; top: -8pt; left: 8pt; font-weight: bold; color: rgb(204, 0, 0);">~</span><span style="font-weight: bold; color: rgb(204, 0, 0);">&#936;</span><sub style="font-weight: bold; color: rgb(204, 0, 0);">n </sub><span style="font-weight: bold; color: rgb(204, 0, 0);">&gt;</span>
+  </div><p>Within PAW, the total projected DOS has 3 contributions:<br>
+  1- the smooth plane-waves contribution (from<span style="font-weight: bold; color: black;"></span><span style="position: relative; top: -8pt; left: 8pt; font-weight: bold; color: black;">~</span><span style="font-weight: bold; color: black;">|&#936;</span><sub style="font-weight: bold; color: black;">n</sub><span style="font-weight: bold; color: black;">&gt;</span><span style="color: black;">)</span><span style="font-weight: bold; color: black;"></span><span style="position: relative; top: -5pt; left: 6pt; font-weight: bold; color: black;"></span><span style="font-weight: bold; color: black;"></span><span style="position: relative; top: -5pt; left: 6pt; font-weight: bold; color: black;"></span><span style="font-weight: bold; color: black;"></span><span style="position: relative; top: -8pt; left: 8pt; font-weight: bold; color: black;"></span><span style="color: black;"><br>
+  2- the all-electron on-site contribution (from&nbsp;</span><span style="font-weight: bold; color: black;">&#966;</span><sub style="font-weight: bold; color: black;">i&nbsp;&nbsp;</sub><span style="font-weight: bold; color: black;"></span><span style="position: relative; top: -5pt; left: 6pt; font-weight: bold; color: black;"></span><span style="font-weight: bold; color: black;">&lt;</span><span style="position: relative; top: -5pt; left: 6pt; font-weight: bold; color: black;">~</span><span style="font-weight: bold; color: black;">p</span><sub style="font-weight: bold; color: black;">i&nbsp;</sub><span style="font-weight: bold;"> |</span><span style="position: relative; top: -8pt; left: 8pt; font-weight: bold;">~</span><span style="font-weight: bold;">&#936;</span><sub style="font-weight: bold;">n
+  </sub><span style="font-weight: bold;">&gt;</span>)<br>
+  3- the pseudo on-site contribution (from<span style="font-weight: bold;"></span><span style="position: relative; top: -8pt; left: 8pt; font-weight: bold;"></span><span style="font-weight: bold;"></span><span style="font-weight: bold;"></span><span style="font-weight: bold;"></span><span style="position: relative; top: -5pt; left: 6pt; font-weight: bold;">~</span><span style="font-weight: bold;">&#966;</span><sub style="font-weight: bold;">i</sub><span style="font-weight: bold;">
+  &lt;</span><span style="position: relative; top: -5pt; left: 6pt; font-weight: bold;">~</span><span style="font-weight: bold;">p</span><sub style="font-weight: bold;">i&nbsp;</sub><span style="font-weight: bold;"> |</span><span style="position: relative; top: -8pt; left: 8pt; font-weight: bold;">~</span><span style="font-weight: bold;">&#936;</span><sub style="font-weight: bold;">n
+  </sub><span style="font-weight: bold;">&gt;</span>).
+  </p>Launch ABINIT again (with the modified input file). You get a new
+  DOS
+  file, named <span style="color: rgb(0, 153, 0); font-weight: bold;">tpaw1_4o_DOS_AT0001</span>.<br>
+  You
+  can edit it and look inside; it contains the 3 PAW contributions
+  (mentioned above) for each angular momentum. In the diamond case, only
+  <span style="font-style: italic;">l=0</span> and <span style="font-style: italic;">l=1</span> momenta are
+  treated.<br>
+  Now, plot the file, using the 7th, 12th and 17th columns with respect to
+  the 2nd one; it plots the 3 PAW contributions for <span style="font-weight: bold; font-style: italic;">l=0</span>
+  (the total DOS is the sum of the three contributions).<br>
+  If you use the "xmgrace" tool,<span style="text-decoration: line-through;"></span> launch:
+  <pre style="margin-left: 40px;"><span style="color: rgb(153, 0, 0);">xmgrace -block tpaw1_4o_DOS_AT0001 -bxy 1:7 -bxy 1:12 -bxy 1:17</span></pre>You
+  should get this:<br>
+  <img style="height: 446px; width: 434px;" alt="Projected DOS - 4 proj" src="../documents/lesson_paw1/DOS-4proj.jpg"><br>As you can see, the smooth PW
+  contribution and the PS on-site
+  contribution are close.<br>
+  So, in a first approach, they cancel; we could approximate the DOS by
+  the AE on-site
+  part taken alone.<br>
+  That is exactly what is done when&nbsp;[[pawprtdos]]=2;
+  in that case, only the AE on-site contribution is computed and given
+  as&nbsp;a
+  good approximation of the total projected DOS. The main advantage of
+  this option is the&nbsp;decrease of the CPU time needed to
+  compute
+  the DOS (it is instantaneously computed).<br>
+  <br><span style="font-weight: bold;">But, as you will see in
+  the next section, this approximation is only valid when:</span>
+  <div style="margin-left: 40px;"><span style="font-weight: bold;"> (1) the</span><span style="position: relative; top: -8pt; left: 8pt; font-weight: bold;"></span><span style="font-weight: bold;"></span><span style="position: relative; top: -5pt; left: 6pt; font-weight: bold;">~</span><span style="font-weight: bold;">&#966;</span><sub style="font-weight: bold;">i</sub><span style="font-weight: bold;"> basis is complete enough <br></span>
+  <span style="font-weight: bold;">(2) the electronic density
+  is mainly contained in the sphere defined by [[ratsph]].
+  </span></div>
+
+
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec6:
+ title: "Testing the completeness of the PAW partial wave basis"
+ tag: completeness
+ body: |
+  Note that, in the previous section, we used a "standard" PAW
+  dataset,
+  with 2 partial waves per angular momentum. It is generally the best
+  compromise between the completeness of the partial wave basis and the
+  efficiency of the PAW dataset (the more partial waves you have, the
+  longer the CPU time used by ABINIT is).<br>
+  Let's have a look at the<span style="color: rgb(0, 153, 0);">
+  ~abinit/tests/Psps_for_tests/6c.lda.atompaw</span> file. The
+  sixth line indicates the number of partial waves and their <span style="font-style: italic;">l</span> angular momentum.
+  In the present file, "0 0 1 1" means "<span style="font-style: italic;">two
+  l=0 partial waves, two l=1
+  partial waves</span>".<br>
+  Now, let's open the <span style="color: rgb(0, 153, 0);">
+  ~abinit/tests/Psps_for_tests/6c.lda.test-2proj.atompaw</span>&nbsp;and
+  <span style="color: rgb(0, 153, 0);">~abinit/tests/Psps_for_tests/6c.lda.test-6proj.atompaw</span>
+  files. In the first file, only one partial wave per <span style="font-style: italic;">l</span> is present; in
+  the second one, 3 partial waves per <span style="font-style: italic;">l</span>
+  are present. In
+  other words, the completeness of the partial wave basis increases when
+  you use <span style="color: rgb(0, 153, 0);">6c.lda.test-2proj.atompaw</span>,
+  <span style="color: rgb(0, 153, 0);">6c.lda.atompaw</span>&nbsp;and&nbsp;<span style="color: rgb(0, 153, 0);">6c.lda.test-6proj.atompaw</span>.<br>
+  <br>Now, let's plot the DOS for the two new PAW datasets.<br>
+  <div style="margin-left: 40px;">- First, save the existing
+  <span style="color: rgb(0, 153, 0);">tpaw1_4o_DOS</span><span style="color: rgb(0, 153, 0);">_AT0001</span> file,
+  naming it, for instance,&nbsp;<span style="color: rgb(0, 153, 0); font-weight: bold;">tpaw1_4o_4proj_DOS_AT0001</span>.<br>
+  - Open the <span style="color: rgb(0, 102, 0); font-weight: bold;">tpaw1_4.files</span>
+  file and modify it in order to use the&nbsp;<span style="color: rgb(0, 153, 0);">6c.lda.test-2proj.atompaw</span>
+  PAW dataset.<br>
+  - Launch ABINIT again.<br>
+  - Save the new <span style="color: rgb(0, 153, 0);">tpaw1_4o_DOS_AT0001</span>
+  file, naming it, for instance,&nbsp;<span style="color: rgb(0, 153, 0); font-weight: bold;">tpaw1_4o_2proj_DOS</span><span style="color: rgb(0, 153, 0); font-weight: bold;">_AT0001</span>.<br>
+  - Open the <span style="color: rgb(0, 102, 0); font-weight: bold;">tpaw1_4.files</span>
+  file and modify it in order to use the&nbsp;<span style="color: rgb(0, 153, 0);">6c.lda.test-6proj.atompaw</span>
+  PAW dataset.<br>
+  - Launch ABINIT again.<br>
+  - Save the new <span style="color: rgb(0, 153, 0);">tpaw1_4o_DOS</span><span style="color: rgb(0, 153, 0);">_AT0001</span> file,
+  naming it, for instance,&nbsp;<span style="color: rgb(0, 153, 0); font-weight: bold;">tpaw1_4o_6proj_DOS</span><span style="color: rgb(0, 153, 0); font-weight: bold;">_AT0001</span>.
+  </div><br>Then, plot the contributions to the projected DOS for the two
+  new DOS
+  files. You should get:<br>
+  <img style="width: 434px; height: 446px;" alt="Projected DOS - 2 proj" src="../documents/lesson_paw1/DOS-2proj.jpg"><img style="width: 434px; height: 446px;" alt="Projected DOS - 6 proj" src="../documents/lesson_paw1/DOS-6proj.jpg"><br>Adding the DOS obtained in the
+  previous section to the comparison, you
+  immediately see that <span style="text-decoration: underline;">the
+  superposition
+  of the Smooth part DOS and the PS on-site DOS depends on the
+  completeness of the partial wave basis</span> !<br>
+  <br>Now, you can have a look at the 3 output files (one for each PAW
+  dataset)... for instance in a comparison tool.<br>
+  A way to estimate the completeness of the partial wave basis is to
+  compare derivatives of total energy; if you look at the <span style="font-weight: bold; text-decoration: underline;">stress
+  stensor</span>:<br>
+  <br><div style="margin-left: 40px;">For the 2 partial-wave
+  bases:<span style="color: rgb(0, 153, 0); font-family: monospace;">
+  &nbsp;-1.0866668849E-03 -1.0866668849E-03
+  -1.0866668849E-03&nbsp; 0.&nbsp; 0.&nbsp; 0.</span><br>
+  For the 4 partial-wave basis:<span style="font-family: monospace; color: rgb(0, 153, 0);">
+  &nbsp; 4.1504385879E-04&nbsp; 4.1504385879E-04&nbsp;
+  4.1504385879E-04 &nbsp;0.&nbsp; 0.&nbsp; 0.</span><br>
+  For the 6 partial-wave basis:<span style="font-family: monospace; color: rgb(0, 153, 0);">
+  &nbsp; 4.1469803037E-04&nbsp; 4.1469803037E-04&nbsp;
+  4.1469803037E-04&nbsp; 0.&nbsp; 0.&nbsp; 0.</span>
+  </div><br>The 2 partial-wave basis is clearly not complete; the 4
+  partial-wave
+  basis results are correct...<br>Such a test is useful to estimate the
+  precision we can expect on the stress tensor
+  (at least due to the partial wave basis).<br>
+  <br>You can compare other results in the 3 output files: <span style="font-style: italic;">total energy</span>,
+  &nbsp;<span style="font-style: italic;">eigenvalues</span>, <span style="font-style: italic;">occupations</span>...<br>
+  Also notice that the dimensions of the PAW on-site quantities change:
+  have a look at "<span style="font-family: monospace; color: rgb(0, 153, 0);">Pseudopotential
+  strength Dij</span>" or "<span style="font-family: monospace; color: rgb(0, 153, 0);">Augmentation
+  waves occupancies Rhoij</span>" sections...<br>
+  <br><span style="font-style: italic;">Note: if you want to
+  learn how to generate PAW datasets with different partial wave bases,
+  you might
+  follow
+  the tutorial PAW2.</span>
+
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec7:
+ title: "Checking the validity of PAW results"
+ tag: checking
+ body: |
+  As usual, the validity of a "pseudopotential" (PAW dataset) has to
+  be
+  checked by comparison, on known structures, with known results. In the
+  case of <span style="font-weight: bold; color: rgb(153, 0, 0);">diamond</span>,
+  lots of computations and experimental results exist.<br><span style="font-weight: bold;">
+  Very important remark: the validity (<span style="font-style: italic;">completeness
+  of plane wave basis and partial wave basis</span>) of PAW calculations
+  should always
+  be checked by comparison with all-electrons computation results (or
+  with other existing
+  PAW results); it should not be done by comparison with experimental
+  results.</span><br>
+  As the PAW method has the same accuracy than all-electron methods,
+  results should be very close.<br>
+  <br>Concerning <span style="color: rgb(153, 0, 0); font-weight: bold;">diamond</span>,
+  all-electron results can be found (for instance) in <span style="font-style: italic;">PRB 55, 2005 (1997)</span>.<br>
+  With the famous <span style="font-weight: bold;">WIEN2K</span>
+  code (which uses the <span style="font-style: italic;">FP-LAPW</span>
+  method), all-electron equilibrium parameters for diamond (for LDA) are:<br>
+  <br><div style="margin-left: 40px;"><span style="color: rgb(153, 0, 0); font-weight: bold;">a<sub>0</sub>
+  = 3.54 angstrom</span>
+  <span style="color: rgb(153, 0, 0); font-weight: bold;">B
+  = 470 GPa</span>
+  </div><br>Experiments give:<br>
+  <br><div style="margin-left: 40px;">a<sub>0</sub>
+  = 3.56 angstrom<br>
+  B = 443 GPa
+  </div><br>Let's test with ABINIT.<br>
+  We use now the input file&nbsp;<span style="color: rgb(0, 102, 0); font-weight: bold;">tpaw1_5.in</span>
+  and the associated <span style="color: rgb(0, 102, 0); font-weight: bold;">tpaw1_5.files</span>
+  file.<br>
+  ABINIT is now asked to compute values of etotal for several cell
+  parameters around 3.54 angstrom, using the standard PAW dataset.<br>
+  Launch ABINIT with these files; you should obtain the <span style="color: rgb(0, 102, 0);">tpaw1_5.out.</span>
+  <pre style="margin-left: 40px;"><span style="color: rgb(153, 0, 0);">abinit &lt; tpaw1_5.files &gt; tmp-log</span>
+  </pre>From
+  the <span style="color: rgb(0, 102, 0);">tpaw1_5.out</span>
+  file, you can extract the 7 values of <span style="font-style: italic;">acell</span>
+  and 7 values
+  of <span style="font-style: italic;">etotal</span>,
+  then put them into a file and plot it with a graphical tool. You should
+  get:<br>
+  <img style="width: 590px; height: 411px;" alt="diamond: etotal vs acell" src="../documents/lesson_paw1/etotal-acell.jpg"><br>From this curve, you can
+  extract the cell values of <span style="font-weight: bold;">a<sub>0</sub></span>
+  and <span style="font-weight: bold;">B</span> (with
+  the method of your choice, for example by a <span style="font-style: italic;">Birch-Murnhagan</span>
+  spline fit).<br>
+  You get:<br>
+  <div style="margin-left: 40px;"><span style="color: rgb(153, 0, 0); font-weight: bold;">a<sub>0</sub>
+  = 3.535 angstrom</span>
+  <span style="color: rgb(153, 0, 0); font-weight: bold;">B
+  = 465 GPa</span>
+  </div><br>These results are in excellent agreement with FP-LAPW ones !
+
+## Each section must have a title, that will form the table of content.
+## This table of content is automatically generated. A tag is also requested, to allow easier maintenance of external links.
+## Note the small (one space) indentation for the title and body keys.
+sec8:
+ title: "Additional comments about PAW in ABINIT"
+ tag: additional
+ body: |
+  <b>8.a</b><b> Mixing scheme for
+  the Self-Consistent cycle; decomposition of the total energy.</b></p>
+  The use of an efficient mixing scheme in the self-consistent loop is a
+  crucial point to minimize
+  the number of steps to achieve convergence. This mixing can be done on
+  the potential or on the valence density. By default, in a
+  norm-conserving
+  pseudopotential calculation, the mixing is done on the potential; but,
+  for technical reasons, this choice is not optimal for PAW calculations.
+  Thus, by default, the mixing is done on the density when PAW is
+  activated.<br>
+  The mixing scheme can be controlled by the [[iscf]]
+  variable (please, read again
+  the different options of this input variable).<br>
+  By default,&nbsp;[[iscf]]=<span style="font-weight: bold;">7</span> for norm-conserving
+  pseudopotentials, while
+  [[iscf]]=
+  <span style="font-weight: bold;">17</span> for PAW...<br>
+  To compare both schemes, you can edit the <span style="color: rgb(0, 153, 0); font-weight: bold;">tpaw1_1.in</span>
+  file and try [[iscf]]=7 or 17 and compare
+  the
+  behaviour of the SC cycle in both cases; as you can see, final total
+  energy is the same but the way to reach it is completely different.<br>
+  <br>Now, have a look at the end of the file and focus on the "<big><font style="font-family: monospace; color: rgb(0, 153, 0);" size="-1"><big>Components
+  of total free energy"</big></font></big>;
+  the total
+  energy is decomposed according to both schemes; at very high
+  convergence of the SCF cycle (very small potential or density
+  residual), these two values should be the same. But it has been
+  observed
+  that the converged value was reached more rapidly by the direct energy,
+  when the mixing is on the potential, and by the double counting energy
+  when the mixing is on the density. Thus, by default, in the output
+  file is to print the direct energy when the mixing is on the
+  potential,
+  and the double counting energy when the mixing is on the density.<br>
+  <br>You can try (using the <span style="color: rgb(0, 153, 0);">tpaw1_1.in</span>&nbsp;file)
+  to decrease the values of&nbsp;[[tolvrs]]
+  and look at the difference between both values of energy.<br>
+  <br>Also note that PAW <span style="font-style: italic; font-weight: bold;">&#961;</span><sub style="font-style: italic; font-weight: bold;">ij</sub> quantities
+  (occupancies of
+  partial
+  waves) also are mixed during the SC cycle; by default, the mixing is
+  done in the same way as the density.
+
+  <br><br><p><b>8.b</b><b> Overlap of
+  PAW spheres</b></p><p>In
+  principle, the PAW formalism is only valid for non-overlapping
+  augmentation
+  regions (PAW spheres). But, in usual cases, a small overlap between
+  spheres is acceptable.<br>By
+  default, ABINIT checks that the distances between atoms are large
+  enough to avoid overlap; a "small" voluminal overlap of 5% is accepted
+  by default. This value can be tuned with the&nbsp;[[pawovlp]]&nbsp;input keyword. The overlap
+  check can even be by-passed with&nbsp;[[pawovlp]]=-1.</p><p><span style="text-decoration: underline;">Important warning</span>:
+  while a small overlap can be acceptable for the augmentation regions,
+  an overlap of the compensation charge densities has to be avoided. The
+  compensation charge density is defined by a radius (named <span style="font-style: italic; font-weight: bold;">r</span><sub style="font-style: italic; font-weight: bold;">shape</sub>
+  in the PAW dataset file) and an analytical shape function. The overlap
+  related to the compensation charge radius is checked by ABINIT and a
+  WARNING is eventually printed...</p><p>Also note that you can control
+  the compensation charge radius and shape function while generating the
+  PAW dataset (see tutorial PAW2).
+
+  </p><b></b><p><b>8.c</b><b>
+  Printing volume for PAW</b></p>If you want to get more detailed output
+  concerning the PAW computation, you can use the&nbsp;[[pawprtvol]] input keyword. See its
+  description in the user's manual...<br>It is particularly useful to
+  print details about pseudopotential strength (<span style="font-style: italic; font-weight: bold;">D</span><sub style="font-style: italic; font-weight: bold;">ij</sub>) or partial
+  waves occupancies (<span style="font-style: italic; font-weight: bold;">&#961;</span><sub style="font-style: italic; font-weight: bold;">ij</sub>).
+
+  <br><p><b>8.d</b><b>
+  Additional PAW input variables</b></p>Looking at the 
+  [[varset:basic|~abinit/doc/input_variables/varset_basic.html]] file, you can find input ABINIT keywords specific to PAW. They are to
+  be used when tuning the computation, in order to gain accuracy or save
+  CPU time.<br>
+  <span style="font-weight: bold;">Warning : in a standard computation, these
+  variables should not be modified !</span>
+  
+  <br>
+  <br>Variables that can be used to gain accuracy (in ascending order of
+  importance):<br>
+  <div style="margin-left: 40px;">[[pawxcdev]]: control the accuracy of
+  exchange-correlation on-site potentials (try pawxcdev=2 to increase
+  accuracy).<br> [[mqgriddg]]: control the
+  accuracy of spline fits to transfer densities/potentials from FFT grid
+  to spherical grid.
+  <br> [[pawnzlm]]: control the computation of moments of spherical densities that should be zero by symmetry. </div>
+  
+  <br> Variables that can be used to save memory (in
+  ascending order of importance):<br>
+  <div style="margin-left: 40px;">[[pawstgylm]]: control the storage of
+  spherical harmonics computed around atoms. </div><div style="margin-left: 40px;">[[pawmixdg]]: control on which grid the
+  potential/density is mixed during SCF cycles.<br> [[pawlcutd]]: control the number of angular
+  momenta to take into account in on-site densities.<br> [[pawlmix]]: control the number of <span style="font-style: italic;">&#961;</span><sub style="font-style: italic;">ij</sub> to be mixed during SCF cycle.
+  </div>
+  
+  <br> Variables that can be used to save
+  CPU time (in ascending order of importance):
+  <div style="margin-left: 40px;">
+   [[pawnhatxc]]: control the numerical
+  treatment of gradients of compensation charge density in case of GGA<br>
+  [[pawstgylm]]: control the storage of
+  spherical harmonics computed around atoms.<br>[[pawlcutd]]: control the number of angular
+  momenta to take into account in on-site densities.<br> [[pawlmix]]: control the number of <span style="font-style: italic;">&#961;</span><sub style="font-style: italic;">ij</sub> to be mixed during SCF cycle.<br>
+  [[bxctmindg]]: can be used to decrease the
+  size of fine FFT grid for a given value of pawecutdg. </div><div style="margin-left: 40px;"> </div><p>The above list is not exhaustive. several other keywords can be used to tune ABINIT PAW calculations.</p>
+  <p><b><br>
+  </b></p>
+  <p><b>8.e</b><b> PAW+U</b></p>
+  If the system under study contains strongly correlated electrons, 
+  the&nbsp;<span style="font-style: italic; font-weight: bold;">LDA+U</span> method can be useful. 
+  It is controlled by the&nbsp;
+  [[usepawu]],
+  &nbsp;
+  [[lpawu]], 
+  [[upawu]] and 
+  [[jpawu]] input keywords. Note that the
+  formalism implemented in ABINIT is approximate, i.e. it is only valid if:
+  <br>
+  <div style="margin-left: 40px;">(1) the<span style="position: relative; top: -8pt; left: 8pt;"></span><span style="position: relative; top: -5pt; left: 6pt;">~</span>&#966;<sub>i</sub>
+  basis is complete enough ;
+  <br> (2) the electronic density is mainly
+  contained in the PAW sphere.
+  <br> <span style="font-weight: bold;"></span></div>
+  The approximation done here is the same as the one explained in the 5th
+  section of this tutorial: considering that smooth PW contributions and
+  PS on-site contributions are closely related, only the AE on-site
+  contribution is computed; it is indeed a very good approximation.<br>
+  <br>Converging a Self-Consistent Cycle, or ensuring the global minimum
+  is reached, with PAW+U is sometimes difficult. Using [[usedmatpu]] and [[dmatpawu]] can help...<br>
+  

@@ -22,7 +22,7 @@
 !!    if 2, COMPLEX
 !!  ecut=cut-off energy for plane wave basis sphere (Ha)
 !!  ecutsm=smearing energy for plane wave kinetic energy (Ha)
-!!  effmass=effective mass for electrons (1. in common case)
+!!  effmass_free=effective mass for electrons (1. in common case)
 !!  gmet(3,3)=reciprocal space metric tensor in bohr**-2.
 !!  gprimd(3,3)=dimensional reciprocal space primitive translations
 !!  gsqcut=cutoff on (k+G)^2 (bohr^-2)
@@ -48,7 +48,7 @@
 !!  nband_rbz(nkpt_rbz*nsppol)=number of bands at each RF k point for each spin
 !!  nfft=(effective) number of FFT grid points (for this processor)
 !!  ngfft(18)=contain all needed information about 3D FFT,
-!!    see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!    see ~abinit/doc/variables/vargs.htm#ngfft
 !!  nkpt_rbz=number of k points in the reduced BZ for this perturbation
 !!  nkxc=second dimension of the kxc array. If /=0,
 !!   the exchange-correlation kernel must be computed.
@@ -106,7 +106,7 @@
 
 
 subroutine dfpt_nselt(blkflg,cg,cg1,cplex,&
-& d2bbb,d2lo,d2nl,ecut,ecutsm,effmass,&
+& d2bbb,d2lo,d2nl,ecut,ecutsm,effmass_free,&
 & gmet,gprimd,gsqcut,idir,&
 & ipert,istwfk_rbz,kg,kg1,kpt_rbz,kxc,mband,mgfft,&
 & mkmem,mk1mem,mpert,mpi_enreg,mpsang,mpw,mpw1,&
@@ -147,7 +147,7 @@ subroutine dfpt_nselt(blkflg,cg,cg1,cplex,&
  integer,intent(in) :: mkmem,mpert,mpsang,mpw,mpw1,natom,nfft,nkpt_rbz
  integer,intent(in) :: nkxc,nspden,nspinor,nsppol,nsym1,ntypat
  integer,intent(in) :: paral_kgb,prtbbb
- real(dp),intent(in) :: ecut,ecutsm,effmass,gsqcut,ucvol
+ real(dp),intent(in) :: ecut,ecutsm,effmass_free,gsqcut,ucvol
  type(MPI_type),intent(in) :: mpi_enreg
  type(pseudopotential_type),intent(in) :: psps
 !arrays
@@ -326,7 +326,7 @@ subroutine dfpt_nselt(blkflg,cg,cg1,cplex,&
 !    and update of rhor1 to this k-point and this spin polarization.
 
 !    Note that dfpt_nsteltwf is called with kpoint, while kpt is used inside dfpt_vtowfk
-     call dfpt_nsteltwf(cg,cg1,d2nl_k,ecut,ecutsm,effmass,gs_hamk,icg,icg1,ikpt,isppol,&
+     call dfpt_nsteltwf(cg,cg1,d2nl_k,ecut,ecutsm,effmass_free,gs_hamk,icg,icg1,ikpt,isppol,&
 &     istwf_k,kg_k,kg1_k,kpoint,mband,mkmem,mk1mem,mpert,mpi_enreg,mpw,mpw1,natom,nband_k,&
 &     npw_k,npw1_k,nspinor,nsppol,ntypat,occ_k,psps,rmet,wtk_k,ylm_k,ylmgr_k)
      d2nl(:,:,:,idir,ipert)=d2nl(:,:,:,idir,ipert)+d2nl_k(:,:,:)
@@ -435,8 +435,8 @@ subroutine dfpt_nselt(blkflg,cg,cg1,cplex,&
 &     ucvol,psps%vlspl,vpsp1)
 
 !    Get first-order hartree potential.
-     call hartrestr(gmet,gprimd,gsqcut,idir1,ipert1,mpi_enreg,natom,nfft,ngfft,&
-&     paral_kgb,rhog,vhartr01)
+     call hartrestr(gsqcut,idir1,ipert1,mpi_enreg,natom,nfft,ngfft,&
+&     paral_kgb,rhog,rprimd,vhartr01)
 
 !    Get first-order exchange-correlation potential
      if(psps%n1xccc/=0)then

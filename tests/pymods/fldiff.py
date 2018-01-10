@@ -854,7 +854,7 @@ function toggle(obj) {
 
           index is the sequential index of the significant difference<br>
           (pos1, pos2) gives the position in the two files<br>
-          counter counts the occurence of each type of differences per line<br>
+          counter counts the occurrence of each type of differences per line<br>
 
         Codes:<br>
         "s" for string <br>

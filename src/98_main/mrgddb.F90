@@ -38,8 +38,9 @@
 !! PARENTS
 !!
 !! CHILDREN
-!!      abi_io_redirect,abimem_init,abinit_doctor,ddb_getdims
-!!      get_command_argument,herald,mblktyp1,mblktyp5,timein,wrtout,xmpi_init
+!!      abi_io_redirect,abimem_init,abinit_doctor,ddb_hdr_free
+!!      ddb_hdr_open_read,get_command_argument,herald,mblktyp1,mblktyp5,timein
+!!      wrtout,xmpi_init
 !!
 !! SOURCE
 
@@ -56,11 +57,12 @@ program mrgddb
  use m_profiling_abi
  use m_errors
  use m_xmpi
+ use m_ddb_hdr
 
  use m_time ,        only : asctime
  use m_io_tools,     only : file_exists
  use m_fstrings,     only : sjoin
- use m_ddb,          only : ddb_getdims, DDB_VERSION
+ use m_ddb,          only : DDB_VERSION
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -77,12 +79,13 @@ program mrgddb
 !Local variables-------------------------------
 !scalars
  integer,parameter :: mddb=5000,ddbun=2 ! mddb=maximum number of databases (cannot be made dynamic)
- integer :: chkopt,dummy,dummy1,dummy2,dummy3,dummy4,dummy5,dummy6,dummy7
+ integer :: chkopt,dummy,dummy1,dummy2,dummy3,dummy4,dummy5,dummy6,dummy7,ios
  integer :: iddb,ii,mblktyp,mblktyptmp,nddb,nfiles_cli,nargs,msym,comm,my_rank,fcnt
  real(dp) :: tcpu,tcpui,twall,twalli
  logical :: cannot_overwrite=.True.
  character(len=24) :: codename
  character(len=fnlen) :: dscrpt
+ type(ddb_hdr_type) :: ddb_hdr
 !arrays
  real(dp) :: tsec(2)
  character(len=fnlen) :: filnam(mddb+1)
@@ -150,7 +153,7 @@ program mrgddb
        'Action: change mddb in mrgddb.f90 and recompile.'
        MSG_ERROR(msg)
      end if
-     filnam(nfiles_cli) = arg
+     filnam(nfiles_cli) = trim(arg)
    end if
  end do
 
@@ -196,9 +199,19 @@ program mrgddb
      write(std_out,'(a,a)' )' ',trim(filnam(2))
    else
      do iddb=1,nddb
-       write(std_out,*)' Give name for derivative database number',iddb,' : '
-       read(std_in, '(a)' ) filnam(iddb+1)
-       write(std_out,'(a,a)' )' ',trim(filnam(iddb+1))
+       !Added to catch error message if the number of input ddbs is greater than the 
+       !actually number of ddb files entered by the user.
+       read(std_in, '(a)',IOSTAT =ios ) filnam(iddb+1)
+       if (ios < 0) then
+         write(msg, '(a,i0,a,a,a,a)' )&
+&         'The number of input ddb files: ',nddb,' exceeds the number ',&
+&         'of ddb file names.', ch10, &
+&         'Action: change the number of ddb files in the mrgddb input file.'
+         MSG_ERROR(msg) 
+       else 
+         write(std_out,*)' Give name for derivative database number',iddb,' : '
+         write(std_out,'(a,a)' )' ',trim(filnam(iddb+1))
+       end if
      end do
    end if
 
@@ -218,10 +231,13 @@ program mrgddb
  ! msym = maximum number of symmetry elements in space group
  mblktyptmp=1
  do iddb=1,nddb
-   call ddb_getdims(dummy,filnam(iddb+1),dummy1,dummy2,mblktyp,&
-&   msym,dummy3,dummy4,dummy5,dummy6,ddbun,dummy7,DDB_VERSION,comm)
+   call ddb_hdr_open_read(ddb_hdr,filnam(iddb+1),ddbun,DDB_VERSION,&
+&   dimonly=1)
 
-   if(mblktyp > mblktyptmp) mblktyptmp = mblktyp
+   if(ddb_hdr%mblktyp > mblktyptmp) mblktyptmp = ddb_hdr%mblktyp
+
+   call ddb_hdr_free(ddb_hdr)
+
  end do
 
  mblktyp = mblktyptmp

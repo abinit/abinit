@@ -122,14 +122,14 @@ CONTAINS
 !!      calc_wf_qp,cchi0,cchi0q0,cchi0q0_intraband,cgwf,chebfi,classify_bands
 !!      cohsex_me,ctocprj,d2frnl,datafordmft,debug_tools,dfpt_accrho,dfpt_cgwf
 !!      dfpt_looppert,dfpt_nstpaw,dfpt_scfcv,dfpt_vtowfk,dfpt_wfkfermi,energy
-!!      exc_build_block,exc_build_ham,exc_plot,extrapwf,forstrnps,getgh1c
-!!      getgh2c,getghc,getgsc,initberry,ks_ddiago,m_electronpositron,m_fock
-!!      m_invovl,m_io_kss,m_pawcprj,m_plowannier,m_shirley,m_wfd
-!!      make_grad_berry,nonlop,optics_paw,optics_paw_core,outkss
-!!      partial_dos_fractions_paw,paw_symcprj,pawmkaewf,pawmkrhoij,posdoppler
-!!      prep_calc_ucrpa,rf2_init,scfcv,setup_positron,sigma,smatrix_pawinit
-!!      suscep_stat,update_e_field_vars,vtorho,vtowfk,wfd_pawrhoij,wfd_vnlpsi
-!!      wvl_hpsitopsi
+!!      exc_build_block,exc_build_ham,exc_plot,extrapwf,fock2ACE,forstr
+!!      forstrnps,getgh1c,getgh2c,getghc,getgsc,initberry,ks_ddiago
+!!      m_electronpositron,m_fock,m_invovl,m_io_kss,m_pawcprj,m_plowannier
+!!      m_shirley,m_wfd,make_grad_berry,nonlop,optics_paw,optics_paw_core
+!!      outkss,partial_dos_fractions_paw,paw_symcprj,pawmkaewf,pawmkrhoij
+!!      posdoppler,prep_calc_ucrpa,rf2_init,scfcv,setup_positron,sigma
+!!      smatrix_pawinit,suscep_stat,update_e_field_vars,vtorho,vtowfk
+!!      wfd_pawrhoij,wfd_vnlpsi,wvl_hpsitopsi
 !!
 !! CHILDREN
 !!      xmpi_sum
@@ -207,14 +207,14 @@ end subroutine pawcprj_alloc
 !!      calc_wf_qp,cchi0,cchi0q0,cchi0q0_intraband,cgwf,chebfi,classify_bands
 !!      cohsex_me,ctocprj,d2frnl,datafordmft,debug_tools,dfpt_accrho,dfpt_cgwf
 !!      dfpt_looppert,dfpt_nstpaw,dfpt_scfcv,dfpt_vtowfk,dfpt_wfkfermi,energy
-!!      exc_build_block,exc_build_ham,exc_plot,extrapwf,forstrnps,getgh1c
-!!      getgh2c,getghc,getgsc,ks_ddiago,m_efield,m_electronpositron,m_fock
-!!      m_gkk,m_invovl,m_io_kss,m_pawcprj,m_phgamma,m_phpi,m_plowannier
-!!      m_scf_history,m_shirley,m_sigmaph,m_wfd,make_grad_berry,nonlop
-!!      optics_paw,optics_paw_core,outkss,partial_dos_fractions_paw,paw_symcprj
-!!      pawmkaewf,pawmkrhoij,posdoppler,prep_calc_ucrpa,rf2_init,scfcv
-!!      setup_positron,sigma,smatrix_pawinit,suscep_stat,update_e_field_vars
-!!      vtorho,vtowfk,wfd_pawrhoij,wfd_vnlpsi
+!!      exc_build_block,exc_build_ham,exc_plot,extrapwf,fock2ACE,forstr
+!!      forstrnps,getgh1c,getgh2c,getghc,getgsc,ks_ddiago,m_efield
+!!      m_electronpositron,m_fock,m_gkk,m_invovl,m_io_kss,m_pawcprj,m_phgamma
+!!      m_phpi,m_plowannier,m_scf_history,m_shirley,m_sigmaph,m_wfd
+!!      make_grad_berry,nonlop,optics_paw,optics_paw_core,outkss
+!!      partial_dos_fractions_paw,paw_symcprj,pawmkaewf,pawmkrhoij,posdoppler
+!!      prep_calc_ucrpa,rf2_init,scfcv,setup_positron,sigma,smatrix_pawinit
+!!      suscep_stat,update_e_field_vars,vtorho,vtowfk,wfd_pawrhoij,wfd_vnlpsi
 !!
 !! CHILDREN
 !!      xmpi_sum
@@ -805,7 +805,6 @@ end subroutine pawcprj_zaxpby
  integer :: iatm,iatom, ibct, ibnd, ibsp, ibst, icpgr, iin, il, il0, im
  integer :: ilmn, iln, iln0, ilpm, indexi, ispinor, itypat, jatm,jatom, mm, nlmn
  real(dp) :: kdotL, phr, phi
- logical :: order
 !arrays
  real(dp) :: rl(3), t1(2), t2(2)
 
@@ -1155,7 +1154,7 @@ end subroutine pawcprj_output
 !!  cprj(dimcp,nspinor*mband*mkmem*nsppol)=input cprj (used if mkmem/=0)
 !!  dimcp=first dimension of cprj_k,cprj arrays (1 or natom)
 !!  iband1=index of first band
-!!  ibg=shift if cprj array to locate current k-point
+!!  ibg=shift in cprj array to locate current k-point
 !!  [icpgr]= (optional argument) if present, only component icpgr of
 !!           input cprj gradient is copied into output cprj
 !!           Not used if cprj(:,:)%ncpgr<icpgr (mkmem>0)
@@ -1188,7 +1187,7 @@ end subroutine pawcprj_output
 !!
 !! PARENTS
 !!      berryphase_new,cgwf,datafordmft,dfpt_nstpaw,dfpt_vtowfk,dfpt_wfkfermi
-!!      extrapwf,forstrnps,m_plowannier,make_grad_berry,optics_paw
+!!      extrapwf,fock2ACE,forstrnps,m_plowannier,make_grad_berry,optics_paw
 !!      optics_paw_core,pawmkrhoij,posdoppler,rf2_init,smatrix_pawinit
 !!      suscep_stat
 !!
@@ -1394,7 +1393,7 @@ end subroutine pawcprj_get
 !!  cprj_k(dimcp,nspinor*nband) <type(pawcprj_type)>= input cprj datastructure
 !!  dimcp=first dimension of cprj_k,cprjnk arrays (1 or natom)
 !!  iband1=index of first band
-!!  ibg=shift if cprjnk array to locate current k-point
+!!  ibg=shift in cprj array to locate current k-point
 !!  ikpt=index of current k-point
 !!  iorder=0 if cprj ordering does not change during reading
 !!         1 if cprj ordering changes during writing, depending on content of atind array:
@@ -1635,7 +1634,7 @@ end subroutine pawcprj_put
 !!  cprj(:,:) <type(pawcprj_type)>= cprj datastructure
 !!
 !! PARENTS
-!!      forstrnps,ks_ddiago,scfcv
+!!      fock2ACE,forstrnps,ks_ddiago,scfcv
 !!
 !! CHILDREN
 !!      xmpi_sum
@@ -2877,8 +2876,9 @@ end subroutine pawcprj_bcast
 !!  dimcprj(natom)=Number of nlm elements in the <p_{lmn}^i|\psi> matrix elements for i=1,...,natom.
 !!
 !! PARENTS
-!!      afterscfloop,berryphase_new,dfpt_looppert,dfpt_scfcv,extrapwf,getghc
-!!      initberry,m_fock,m_hamiltonian,mlwfovlp_qp,outkss,scfcv,smatrix_pawinit
+!!      afterscfloop,berryphase_new,dfpt_looppert,dfpt_scfcv,extrapwf,forstr
+!!      getghc,initberry,m_fock,m_hamiltonian,mlwfovlp_qp,outkss,scfcv
+!!      smatrix_pawinit
 !!
 !! CHILDREN
 !!      xmpi_sum

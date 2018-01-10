@@ -7,7 +7,7 @@
 !! FUNCTION
 !! Initialize k points (list of k points, weights, storage)
 !! for one particular dataset, characterized by jdtset.
-!! Note that nkpt can be computed by calling this routine with
+!! Note that nkpt (and nkpthf) can be computed by calling this routine with
 !! input value of nkpt=0, provided kptopt/=0.
 !!
 !! COPYRIGHT
@@ -46,8 +46,9 @@
 !! vacuum(3)=for each direction, 0 if no vacuum, 1 if vacuum
 !!
 !! OUTPUT
+!! fockdownsampling(3)=echo of input variable fockdownsampling(3)
 !! kptnrm=normalisation of k points
-!! kptrlatt_orig(3,3)=Original value of kptrlatt as specfied in the input file (if kptopt/=0)
+!! kptrlatt_orig(3,3)=Original value of kptrlatt as specified in the input file (if kptopt/=0)
 !! kptrlatt(3,3)=k-point lattice specification (if kptopt/=0)
 !! kptrlen=length of the smallest real space supercell vector
 !! nshiftk_orig=Original number of k-point shifts (0 if not read)
@@ -56,6 +57,7 @@
 !! If nkpt/=0  the following arrays are also output :
 !!  istwfk(nkpt)=option parameters that describes the storage of wfs
 !!  kpt(3,nkpt)=reduced coordinates of k points.
+!!  kpthf(3,nkpthf)=reduced coordinates of k points for Fock operator.
 !!  wtk(nkpt)=weight assigned to each k point.
 !! ngkpt(3)=Number of divisions along the three reduced directions
 !!   (0 signals that this variable has not been used.
@@ -67,6 +69,7 @@
 !! nkpt=number of k points
 !!  if non-zero at input, is only an input variable
 !!  if zero at input, its actual value will be computed
+!! nkpthf=number of k points for Fock operator, computed if nkpt=0 at input
 !!
 !! NOTES
 !! Warning: this routine can be called with nkpt=0 (in which
@@ -88,9 +91,9 @@
 
 #include "abi_common.h"
 
-subroutine inkpts(bravais,chksymbreak,iout,iscf,istwfk,jdtset,&
-& kpt,kptopt,kptnrm,kptrlatt_orig,kptrlatt,kptrlen,lenstr,msym,&
-& nkpt,nqpt,ngkpt,nshiftk,nshiftk_orig,shiftk_orig,nsym,&
+subroutine inkpts(bravais,chksymbreak,fockdownsampling,iout,iscf,istwfk,jdtset,&
+& kpt,kpthf,kptopt,kptnrm,kptrlatt_orig,kptrlatt,kptrlen,lenstr,msym,&
+& nkpt,nkpthf,nqpt,ngkpt,nshiftk,nshiftk_orig,shiftk_orig,nsym,&
 & occopt,qptn,response,rprimd,shiftk,string,symafm,symrel,vacuum,wtk,&
 & impose_istwf_1) ! Optional argument
 
@@ -119,15 +122,16 @@ subroutine inkpts(bravais,chksymbreak,iout,iscf,istwfk,jdtset,&
  integer,intent(in) :: chksymbreak,iout,iscf,jdtset,kptopt,lenstr,msym,nqpt,nsym,occopt
  integer,intent(in) :: response
  integer,intent(in),optional :: impose_istwf_1
- integer,intent(inout) :: nkpt
+ integer,intent(inout) :: nkpt,nkpthf
  integer,intent(out) :: nshiftk,nshiftk_orig
+ integer,intent(out) :: fockdownsampling(3)
  real(dp),intent(out) :: kptnrm,kptrlen
  character(len=*),intent(in) :: string
 !arrays
  integer,intent(in) :: bravais(11),symafm(msym),symrel(3,3,msym),vacuum(3)
  integer,intent(out) :: istwfk(nkpt),kptrlatt(3,3),kptrlatt_orig(3,3),ngkpt(3)
  real(dp),intent(in) :: rprimd(3,3),qptn(3)
- real(dp),intent(out) :: kpt(3,nkpt),shiftk(3,210),wtk(nkpt),shiftk_orig(3,210)
+ real(dp),intent(out) :: kpt(3,nkpt),kpthf(3,nkpthf),shiftk(3,210),wtk(nkpt),shiftk_orig(3,210)
 
 !Local variables-------------------------------
 !scalars
@@ -155,7 +159,7 @@ subroutine inkpts(bravais,chksymbreak,iout,iscf,istwfk,jdtset,&
  kptrlatt_orig = 0; kptrlatt = 0
  nshiftk_orig = 1; nshiftk = 1
 
- ! MG: FIXME These values should be initialzed because they are intent(out)
+ ! MG: FIXME These values should be initialized because they are intent(out)
  ! but several tests fails. So we keep this bug to avoid problems somewhere else
  ! The initialization of the kpoints should be rewritten in a cleaner way
  ! without all these side effects!
@@ -407,9 +411,13 @@ subroutine inkpts(bravais,chksymbreak,iout,iscf,istwfk,jdtset,&
 
    end if
 
+   fockdownsampling(:)=1
+   call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'fockdownsampling',tread,'INT')
+   if(tread==1)fockdownsampling=intarr(1:3)
+
    call getkgrid(chksymbreak,0,iscf,kpt,kptopt,kptrlatt,kptrlen,&
 &   msym,nkpt,nkpt_computed,nshiftk,nsym,rprimd,&
-&   shiftk,symafm,symrel,vacuum,wtk)
+&   shiftk,symafm,symrel,vacuum,wtk,nkpthf=nkpthf,kpthf=kpthf,downsampling=fockdownsampling)
 
    kptnrm=one
 
@@ -431,6 +439,7 @@ subroutine inkpts(bravais,chksymbreak,iout,iscf,istwfk,jdtset,&
  end if
 
 !The k point number has been computed, and, if nkpt/=0, also the list of k points.
+!Also nkpthf has been computed, and, if nkpt/=0, also the list kpthf.
 
 !Now, determine istwfk, and eventually shift the k points by the value of qptn.
 

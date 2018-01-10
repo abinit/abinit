@@ -189,10 +189,10 @@ subroutine nullify_mpi_enreg(MPI_enreg)
 !!      abinit,bethe_salpeter,bsepostproc,calc_vhxc_me,conducti,cut3d
 !!      debug_tools,dfpt_nstpaw,dieltcel,eph,fftprof,gwls_hamiltonian,inwffil
 !!      ks_ddiago,lapackprof,linear_optics_paw,m_cut3d,m_dvdb,m_fft,m_fft_prof
-!!      m_fftcore,m_gsphere,m_hamiltonian,m_ioarr,m_kxc,m_pawpwij,m_ppmodel
-!!      m_screening,m_wfd,m_wfk,mlwfovlp_qp,mover_effpot,mrggkk,mrgscr
-!!      partial_dos_fractions,posdoppler,scfcv,screening,sigma,suscep_stat,susk
-!!      suskmm,ujdet,vdw_kernelgen,wfk_analyze
+!!      m_fftcore,m_fock,m_gsphere,m_hamiltonian,m_ioarr,m_kxc,m_pawpwij
+!!      m_ppmodel,m_screening,m_wfd,m_wfk,mlwfovlp_qp,mover_effpot,mrggkk
+!!      mrgscr,partial_dos_fractions,posdoppler,scfcv,screening,sigma
+!!      suscep_stat,susk,suskmm,ujdet,vdw_kernelgen,wfk_analyze
 !!
 !! CHILDREN
 !!
@@ -281,7 +281,7 @@ end subroutine destroy_mpi_enreg
 !!  MPI_enreg2<MPI_type>=output mpi_enreg datastructure
 !!
 !! PARENTS
-!!      gwls_hamiltonian,inwffil,m_fft_prof,m_wfd
+!!      gwls_hamiltonian,inwffil,m_fft_prof,m_fock,m_wfd
 !!
 !! CHILDREN
 !!
@@ -1223,7 +1223,9 @@ logical function iwrite_fftdatar(mpi_enreg) result(ans)
  ans = (xmpi_paral==0 .or. &                                  ! No MPI
   (mpi_enreg%paral_kgb==0 .and. mpi_enreg%me==0) .or. &       ! paral_kgb=0 does not use MPI-FFT and cartesian communicators. 
   (mpi_enreg%paral_kgb==1 .and. mpi_enreg%me_band==0 .and. &  ! select procs in one FFT communicator.
-  mpi_enreg%me_kpt==0 .and. mpi_enreg%me_spinor==0))
+  mpi_enreg%me_kpt==0 .and. mpi_enreg%me_spinor==0) .or.   &
+  (mpi_enreg%paral_pert==1 .and. mpi_enreg%me_cell==0) & ! Group master in perturbation communicator.
+  )
 
 end function iwrite_fftdatar
 !!***

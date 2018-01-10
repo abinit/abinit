@@ -68,8 +68,8 @@
 !!         (nfftf=nfft for norm-conserving potential runs)
 !!  nfftdiel=number of fft grid points for the computation of the diel matrix
 !!  ngfftdiel(18)=contain all needed information about 3D FFT, for dielectric matrix,
-!!                see ~abinit/doc/input_variables/vargs.htm#ngfft
-!!  nkxc=second dimension of the array kxc, see rhohxc.f for a description
+!!                see ~abinit/doc/variables/vargs.htm#ngfft
+!!  nkxc=second dimension of the array kxc, see rhotoxc.f for a description
 !!  npwarr(nkpt)=number of planewaves in basis at this k point
 !!  npwdiel=size of the susmat array.
 !!  ntypat=number of types of atoms in unit cell.
@@ -212,7 +212,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  use m_pawtab,             only : pawtab_type
  use m_paw_ij,             only : paw_ij_type
  use m_pawfgrtab,          only : pawfgrtab_type
- use m_pawrhoij,           only : pawrhoij_type, pawrhoij_alloc, pawrhoij_free, pawrhoij_io
+ use m_pawrhoij,           only : pawrhoij_type, pawrhoij_alloc, pawrhoij_free, pawrhoij_io, pawrhoij_get_nspden
  use m_pawcprj,            only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_getdim
  use m_pawfgr,             only : pawfgr_type
  use m_energies,           only : energies_type
@@ -226,7 +226,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  use m_oper,               only : oper_type,init_oper,destroy_oper
  use m_io_tools,           only : flush_unit
  use m_abi2big,            only : wvl_occ_abi2big,wvl_rho_abi2big,wvl_occopt_abi2big
- use m_fock,               only : fock_type,fock_updateikpt,fock_calc_ene
+ use m_fock,               only : fock_type,fock_ACE_type,fock_updateikpt,fock_calc_ene
  use m_invovl,             only : make_invovl
  use m_gemm_nonlop
 #if defined HAVE_BIGDFT
@@ -322,7 +322,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  integer :: mwarning,my_nspinor,n1,n2,n3,n4,n5,n6,nband_eff
  integer :: nband_k,nband_cprj_k,nbuf,neglect_pawhat,nfftot,nkpg,nkpt1,nnn,nnsclo_now
  integer :: nproc_distrb,npw_k,nspden_rhoij,option,prtvol
- integer :: spaceComm_distrb,usecprj_local,usetimerev
+ integer :: spaceComm_distrb,usecprj_local,usefock_ACE,usetimerev
  logical :: berryflag,computesusmat,fixed_occ
  logical :: locc_test,paral_atom,remove_inv,usefock,with_vxctau
  logical :: do_last_ortho,wvlbigdft=.false.
@@ -338,10 +338,11 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  real(dp),allocatable :: EigMin(:,:),buffer1(:),buffer2(:),cgq(:,:)
  real(dp),allocatable :: cgrkxc(:,:),cgrvtrial(:,:),doccde(:)
  real(dp),allocatable :: dphasek(:,:),eig_k(:),ek_k(:),ek_k_nd(:,:,:),eknk(:),eknk_nd(:,:,:,:,:)
- real(dp),allocatable :: enl_k(:),enlnk(:),focknk(:),ffnl(:,:,:,:),grnl_k(:,:), xcart(:,:)
+ real(dp),allocatable :: enl_k(:),enlnk(:),focknk(:),fockfornk(:,:,:),ffnl(:,:,:,:),grnl_k(:,:), xcart(:,:)
  real(dp),allocatable :: grnlnk(:,:),kinpw(:),kpg_k(:,:),occ_k(:),ph3d(:,:,:)
  real(dp),allocatable :: pwnsfacq(:,:),resid_k(:),rhoaug(:,:,:,:),rhowfg(:,:),rhowfr(:,:)
  real(dp),allocatable :: vlocal(:,:,:,:),vlocal_tmp(:,:,:),vxctaulocal(:,:,:,:,:),ylm_k(:,:),zshift(:)
+ complex(dpc),allocatable :: nucdipmom_k(:)
  type(pawcprj_type),allocatable :: cprj_tmp(:,:)
  type(oper_type) :: lda_occup
  type(pawrhoij_type),pointer :: pawrhoij_unsym(:)
@@ -381,6 +382,9 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
 !Check that fock is present if want to use fock option
  usefock = (dtset%usefock==1 .and. associated(fock))
+ usefock_ACE=0
+ if (usefock) usefock_ACE=fock%fock_common%use_ACE
+ 
 
 !Init MPI
  spaceComm_distrb=mpi_enreg%comm_cell
@@ -431,6 +435,10 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
    if (usefock) then
      ABI_ALLOCATE(focknk,(mbdkpsp))
      focknk=zero
+     if (optforces>0)then
+       ABI_ALLOCATE(fockfornk,(3,natom,mbdkpsp))
+       fockfornk=zero
+     end if
    end if
    eknk(:)=zero;enlnk(:)=zero
    if (optforces>0) grnlnk(:,:)=zero
@@ -775,8 +783,8 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
 !      Compute (1/2) (2 Pi)**2 (k+G)**2:
        ABI_ALLOCATE(kinpw,(npw_k))
-!       call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass,gmet,kg_k,kinpw,kpoint,npw_k)
-       call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass,gmet,kg_k,kinpw,kpoint,npw_k,0,0)
+!       call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass_free,gmet,kg_k,kinpw,kpoint,npw_k)
+       call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass_free,gmet,kg_k,kinpw,kpoint,npw_k,0,0)
 
 !      Compute (k+G) vectors (only if useylm=1)
        nkpg=3*optforces*dtset%nloalg(3)
@@ -796,15 +804,34 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 &         psps%usepaw,psps%useylm,ylm_k,ylmgr)
        end if
 
+!     compute and load nuclear dipole Hamiltonian at current k point
+       if(any(abs(gs_hamk%nucdipmom)>0.0)) then
+         if(allocated(nucdipmom_k)) then
+           ABI_DEALLOCATE(nucdipmom_k)
+         end if
+         ABI_ALLOCATE(nucdipmom_k,(npw_k*(npw_k+1)/2))
+         call mknucdipmom_k(gmet,kg_k,kpoint,natom,gs_hamk%nucdipmom,nucdipmom_k,npw_k,rprimd,ucvol,xred)
+         call load_k_hamiltonian(gs_hamk,nucdipmom_k=nucdipmom_k)
+       end if
+       
+
 !      Load k-dependent part in the Hamiltonian datastructure
 !       - Compute 3D phase factors
 !       - Prepare various tabs in case of band-FFT parallelism
 !       - Load k-dependent quantities in the Hamiltonian
        ABI_ALLOCATE(ph3d,(2,npw_k,gs_hamk%matblk))
-       call load_k_hamiltonian(gs_hamk,kpt_k=dtset%kptns(:,ikpt),istwf_k=istwf_k,npw_k=npw_k,&
-&       kinpw_k=kinpw,kg_k=kg_k,kpg_k=kpg_k,ffnl_k=ffnl,ph3d_k=ph3d,&
-&       compute_ph3d=(mpi_enreg%paral_kgb/=1.or.istep<=1),&
-&       compute_gbound=(mpi_enreg%paral_kgb/=1))
+       
+       if(usefock_ACE/=0) then
+         call load_k_hamiltonian(gs_hamk,kpt_k=dtset%kptns(:,ikpt),istwf_k=istwf_k,npw_k=npw_k,&
+&         kinpw_k=kinpw,kg_k=kg_k,kpg_k=kpg_k,ffnl_k=ffnl,fockACE_k=fock%fockACE(ikpt,isppol),ph3d_k=ph3d,&
+&         compute_ph3d=(mpi_enreg%paral_kgb/=1.or.istep<=1),&
+&         compute_gbound=(mpi_enreg%paral_kgb/=1))
+       else
+         call load_k_hamiltonian(gs_hamk,kpt_k=dtset%kptns(:,ikpt),istwf_k=istwf_k,npw_k=npw_k,&
+&         kinpw_k=kinpw,kg_k=kg_k,kpg_k=kpg_k,ffnl_k=ffnl,ph3d_k=ph3d,&
+&         compute_ph3d=(mpi_enreg%paral_kgb/=1.or.istep<=1),&
+&         compute_gbound=(mpi_enreg%paral_kgb/=1))
+       end if
 
 !      Load band-FFT tabs (transposed k-dependent arrays)
        if (mpi_enreg%paral_kgb==1) then
@@ -847,11 +874,11 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
 !      Update the value of ikpt,isppol in fock_exchange and allocate the memory space to perform HF calculation.
        if (usefock) then
-         call fock_updateikpt(fock,ikpt,isppol)
+         call fock_updateikpt(fock%fock_common,ikpt,isppol)
        end if
        if ((psps%usepaw==1).and.(usefock)) then
-         if (fock%optfor) then
-           fock%forces_ikpt=zero
+         if ((fock%fock_common%optfor).and.(usefock_ACE==0)) then
+           fock%fock_common%forces_ikpt=zero
          end if
        end if
 
@@ -876,6 +903,9 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        ABI_DEALLOCATE(kinpw)
        ABI_DEALLOCATE(kg_k)
        ABI_DEALLOCATE(kpg_k)
+       if(allocated(nucdipmom_k)) then
+         ABI_DEALLOCATE(nucdipmom_k)
+       end if
        ABI_DEALLOCATE(ylm_k)
        ABI_DEALLOCATE(ph3d)
        ABI_DEALLOCATE(cgq)
@@ -899,7 +929,10 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 !      Save eigenvalues (hartree), residuals (hartree**2)
        eigen(1+bdtot_index : nband_k+bdtot_index) = eig_k(:)
        eknk (1+bdtot_index : nband_k+bdtot_index) = ek_k (:)
-       if(usefock)    focknk (1+bdtot_index : nband_k+bdtot_index) = fock%eigen_ikpt (:)
+       if(usefock) then
+         focknk (1+bdtot_index : nband_k+bdtot_index) = fock%fock_common%eigen_ikpt (:)
+         if (optforces>0) fockfornk(:,:,1+bdtot_index : nband_k+bdtot_index) = fock%fock_common%forces_ikpt(:,:,:)
+       end if
        if(paw_dmft%use_dmft==1) eknk_nd(isppol,ikpt,:,:,:) = ek_k_nd(:,:,:)
        resid(1+bdtot_index : nband_k+bdtot_index) = resid_k(:)
        if (optforces>0) grnlnk(:,1+bdtot_index : nband_k+bdtot_index) = grnl_k(:,:)
@@ -914,14 +947,14 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
              energies%e_eigenvalues = energies%e_eigenvalues + dtset%wtk(ikpt)*occ_k(iband)*eig_k(iband)
              energies%e_nonlocalpsp = energies%e_nonlocalpsp + dtset%wtk(ikpt)*occ_k(iband)*enl_k(iband)
              if (optforces>0) grnl(:)=grnl(:)+dtset%wtk(ikpt)*occ_k(iband)*grnl_k(:,iband)
-             if (usefock) energies%e_fock=energies%e_fock + half*fock%eigen_ikpt(iband)*occ_k(iband)*dtset%wtk(ikpt)
+             if (usefock) energies%e_fock=energies%e_fock + half*fock%fock_common%eigen_ikpt(iband)*occ_k(iband)*dtset%wtk(ikpt)
            end if
          end do
 
 !        Calculate Fock contribution to the total energy if required
          if ((psps%usepaw==1).and.(usefock)) then
-           if (fock%optfor) then
-             call fock_calc_ene(dtset,fock,energies%e_exactX,ikpt,nband_k,occ_k)
+           if ((fock%fock_common%optfor).and.(usefock_ACE==0)) then
+             call fock_calc_ene(dtset,fock%fock_common,energies%e_exactX,ikpt,nband_k,occ_k)
            end if
          end if
        end if
@@ -981,8 +1014,8 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
    call timab(988,1,tsec)
    if (usefock) then
-     if(fock%optfor) then
-       call xmpi_sum(fock%forces,mpi_enreg%comm_kpt,ierr)
+     if(fock%fock_common%optfor) then
+       call xmpi_sum(fock%fock_common%forces,mpi_enreg%comm_kpt,ierr)
      end if
    end if
 !  Electric field: compute string-averaged change in Zak phase
@@ -1015,7 +1048,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        call timab(989,1,tsec)
 
 !      If needed, exchange the values of eigen,resid,eknk,enlnk,grnlnk
-       ABI_ALLOCATE(buffer1,((4+3*natom*optforces+dtset%usefock)*mbdkpsp))
+       ABI_ALLOCATE(buffer1,((4+3*natom*optforces+dtset%usefock+3*natom*dtset%usefock*optforces)*mbdkpsp))
        if(paw_dmft%use_dmft==1) then
          ABI_ALLOCATE(buffer2,(mb2dkpsp*paw_dmft%use_dmft))
        end if
@@ -1029,7 +1062,13 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
          buffer1(index1+1:index1+3*natom*mbdkpsp)=reshape(grnlnk,(/(3*natom)*mbdkpsp/) )
          index1=index1+3*natom*mbdkpsp
        end if
-       if (usefock) buffer1(1+index1:index1+mbdkpsp)=focknk(:)
+       if (usefock) then
+         buffer1(1+index1:index1+mbdkpsp)=focknk(:)
+         if (optforces>0) then
+           index1=index1+mbdkpsp
+           buffer1(index1+1:index1+3*natom*mbdkpsp)=reshape(fockfornk,(/(3*natom)*mbdkpsp/) )
+         end if
+       end if
        if(paw_dmft%use_dmft==1) then
          nnn=0
          do ikpt=1,dtset%nkpt
@@ -1066,7 +1105,13 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        if (optforces>0) then
          grnlnk(:,:)=reshape(buffer1(index1+1:index1+3*natom*mbdkpsp),(/3*natom,mbdkpsp/) )
        end if
-       if (usefock) focknk(:)=buffer1(1+index1:index1+mbdkpsp)
+       if (usefock) then
+         focknk(:)=buffer1(1+index1:index1+mbdkpsp)
+         if (optforces>0) then
+           index1=index1+mbdkpsp
+           fockfornk(:,:,:)=reshape(buffer1(index1+1:index1+3*natom*mbdkpsp),(/3,natom,mbdkpsp/) )
+         end if
+       end if
        if(paw_dmft%use_dmft==1) then
          nnn=0
          do ikpt=1,dtset%nkpt
@@ -1240,7 +1285,10 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
      energies%e_eigenvalues = zero
      energies%e_kinetic     = zero
      energies%e_nonlocalpsp = zero
-     if (usefock) energies%e_fock     = zero
+     if (usefock) then 
+       energies%e_fock     = zero
+       if (optforces>0) fock%fock_common%forces=zero
+     end if
      if (optforces>0) grnl(:)=zero
      if(paw_dmft%use_dmft>=1) then
        ebandlda               = zero
@@ -1291,6 +1339,8 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 &             dtset%wtk(ikpt)*occ(bdtot_index)*enlnk(bdtot_index)
              if (usefock) then
                energies%e_fock=energies%e_fock + half*focknk(bdtot_index)*occ(bdtot_index)*dtset%wtk(ikpt)
+               if (optforces>0) fock%fock_common%forces(:,:)=fock%fock_common%forces(:,:)+&
+&               dtset%wtk(ikpt)*occ(bdtot_index)*fockfornk(:,:,bdtot_index)
              end if
              if (optforces>0) grnl(:)=grnl(:)+dtset%wtk(ikpt)*occ(bdtot_index)*grnlnk(:,bdtot_index)
            end if
@@ -1350,7 +1400,10 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
        nbuf=2*mbdkpsp+dtset%nfft*dtset%nspden+3+3*natom*optforces
 !      * If Hartree-Fock calculation, the exact exchange energy is k-dependent.
-       if(dtset%usefock==1) nbuf=nbuf+1
+       if(dtset%usefock==1) then
+         nbuf=nbuf+1
+         if (optforces>0) nbuf=nbuf+3*natom
+       end if
        if(iscf==-1 .or. iscf==-2)nbuf=2*mbdkpsp
        ABI_ALLOCATE(buffer1,(nbuf))
 !      Pack eigen,resid,rho[wf]r,grnl,enl,ek
@@ -1372,6 +1425,10 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
          if (dtset%usefock==1) then
            buffer1(index1+1) = energies%e_fock
            index1=index1+1
+           if (optforces>0)then
+             buffer1(index1+1:index1+3*natom)=reshape(fock%fock_common%forces,(/3*natom/))
+             index1=index1+3*natom
+           end if
          end if
          if (optforces>0) buffer1(index1+1:index1+3*natom)=grnl(1:3*natom)
        end if
@@ -1412,6 +1469,10 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
          if (dtset%usefock==1) then
            energies%e_fock = buffer1(index1+1)
            index1=index1+1
+           if (optforces>0) then
+             fock%fock_common%forces(:,:)=reshape(buffer1(index1+1:index1+3*natom),(/3,natom/))
+             index1=index1+3*natom
+           end if
          end if
          if (optforces>0) grnl(1:3*natom)=buffer1(index1+1:index1+3*natom)
        end if
@@ -1473,6 +1534,9 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
    ABI_DEALLOCATE(eknk)
    if (usefock) then
      ABI_DEALLOCATE(focknk)
+     if (optforces>0)then
+       ABI_DEALLOCATE(fockfornk)
+     end if
    end if
    ABI_DEALLOCATE(eknk_nd)
    ABI_DEALLOCATE(grnlnk)
@@ -1548,7 +1612,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
      call timab(555,1,tsec)
      if (paral_atom) then
        ABI_DATATYPE_ALLOCATE(pawrhoij_unsym,(natom))
-       nspden_rhoij=dtset%nspden;if (dtset%pawspnorb>0.and.dtset%nspinor==2) nspden_rhoij=4
+       nspden_rhoij=pawrhoij_get_nspden(dtset%nspden,dtset%nspinor,dtset%pawspnorb)
        call pawrhoij_alloc(pawrhoij_unsym,dtset%pawcpxocc,nspden_rhoij,dtset%nspinor,&
 &       dtset%nsppol,dtset%typat,pawtab=pawtab,use_rhoijp=0)
      else
@@ -1897,7 +1961,7 @@ subroutine wvl_nscf_loop_bigdft()
  integer,parameter :: iscf_=-1       !do not do a SCF cycle
  logical,parameter :: do_scf=.false. !do not do a SCF cycle
  logical,parameter :: wvlbigdft=.true.
- real(dp) :: dum,eexctx,eh,ekin,eloc,enl,esicdc,evxc,exc
+ real(dp) :: eexctx,eh,ekin,eloc,enl,esicdc,evxc,exc
 
 ! *************************************************************************
 

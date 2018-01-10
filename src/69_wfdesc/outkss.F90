@@ -647,7 +647,7 @@ subroutine outkss(crystal,Dtfil,Dtset,ecut,gmet,gprimd,Hdr,&
          call timab(936,1,tsec)
 
          call init_ddiago_ctl(Diago_ctl,"Vectors",isppol,dtset%nspinor,ecut_eff,Dtset%kptns(:,ikpt),Dtset%nloalg,gmet,&
-&         nband_k=nbandkssk(ikpt),effmass=Dtset%effmass,istwf_k=Dtset%istwfk(ikpt),prtvol=Dtset%prtvol)
+&         nband_k=nbandkssk(ikpt),effmass_free=Dtset%effmass_free,istwf_k=Dtset%istwfk(ikpt),prtvol=Dtset%prtvol)
 
          call ks_ddiago(Diago_ctl,nbandkssk(ikpt),Dtset%nfft,mgfft,Dtset%ngfft,natom,&
 &         Dtset%typat,nfft,dtset%nspinor,nspden,nsppol,Pawtab,Pawfgr,Paw_ij_all,&
@@ -983,7 +983,7 @@ contains
 !!  mpsang= 1+maximum angular momentum for nonlocal pseudopotentials
 !!  mpw=maximum dimensioned size of npw.
 !!  natom=number of atoms in cell.
-!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !!  nkpt=number of k points.
 !!  nspinor=number of spinorial components of the wavefunctions
 !!  nsym=number of symmetries in space group

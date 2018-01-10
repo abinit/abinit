@@ -7,7 +7,7 @@
 !! Main routine for analysis of the interatomic force constants and associated properties.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2017 ABINIT group (XG,DCA,JCC,CL,XW)
+!! Copyright (C) 1999-2017 ABINIT group (XG,DCA,JCC,CL,XW,GA)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -24,14 +24,16 @@
 !! CHILDREN
 !!      abi_io_redirect,abimem_init,abinit_doctor,anaddb_dtset_free,anaddb_init
 !!      asrq0_apply,asrq0_free,crystal_free,ddb_diel,ddb_elast,ddb_free
-!!      ddb_from_file,ddb_getdims,ddb_internalstr,ddb_piezo,dfpt_phfrq
-!!      dfpt_prtph,dfpt_symph,elast_ncwrite,electrooptic,elphon,flush_unit
-!!      gruns_anaddb,gtblk9,gtdyn9,harmonic_thermo,herald,ifc_free,ifc_init
-!!      ifc_outphbtrap,ifc_print,ifc_speedofsound,ifc_write,instrng,int2char4
-!!      inupper,invars9,isfile,mkphbs,mkphdos,nctk_defwrite_nonana_terms
-!!      outvars_anaddb,phdos_free,phdos_ncwrite,phdos_print,phdos_print_debye
-!!      phdos_print_msqd,phdos_print_thermo,ramansus,relaxpol,thmeig,timein
-!!      wrtout,xmpi_bcast,xmpi_end,xmpi_init,xmpi_sum
+!!      ddb_from_file,ddb_hdr_free,ddb_hdr_open_read,ddb_internalstr
+!!      ddb_interpolate,ddb_piezo,dfpt_phfrq,dfpt_prtph,dfpt_symph
+!!      elast_ncwrite,electrooptic,elphon,flush_unit,gruns_anaddb,gtblk9,gtdyn9
+!!      harmonic_thermo,herald,ifc_free,ifc_init,ifc_outphbtrap,ifc_print
+!!      ifc_speedofsound,ifc_write,instrng,int2char4,inupper,invars9,isfile
+!!      mkphbs,mkphdos,nctk_defwrite_nonana_terms,outvars_anaddb,phdos_free
+!!      phdos_ncwrite,phdos_print,phdos_print_debye,phdos_print_msqd
+!!      phdos_print_thermo,ramansus,relaxpol,thermal_supercell_free
+!!      thermal_supercell_make,thermal_supercell_print,thmeig,timein,wrtout
+!!      xmpi_bcast,xmpi_end,xmpi_init,xmpi_sum
 !!
 !! SOURCE
 
@@ -51,6 +53,7 @@ program anaddb
  use m_errors
  use m_ifc
  use m_ddb
+ use m_ddb_hdr
  use m_phonons
  use m_gruneisen
  use iso_c_binding
@@ -67,6 +70,7 @@ program anaddb
  use m_crystal,        only : crystal_t, crystal_free
  use m_crystal_io,     only : crystal_ncwrite
  use m_dynmat,         only : gtdyn9, dfpt_phfrq
+ use m_supercell
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -88,9 +92,9 @@ program anaddb
 !Define input and output unit numbers (some are defined in defs_basis -all should be there ...):
  integer,parameter :: ddbun=2,master=0 ! FIXME: these should not be reserved unit numbers!
  integer,parameter :: rftyp4=4
- integer :: dimekb,comm,iatom,iblok,iblok_stress,idir,ii,index
- integer :: ierr,iphl2,lenstr,lmnmax,mband,mtyp,mpert,msize,natom,nblok,nblok2
- integer :: nkpt,nsym,ntypat,option,usepaw,nproc,my_rank,ana_ncid
+ integer :: dimekb,comm,iatom,iblok,iblok_stress,iblok_tmp,idir,ii,index
+ integer :: ierr,iphl2,lenstr,mtyp,mpert,msize,natom
+ integer :: nsym,ntypat,option,usepaw,nproc,my_rank,ana_ncid
  logical :: iam_master
  integer :: rfelfd(4),rfphon(4),rfstrs(4),ngqpt_coarse(3)
  integer,allocatable :: d2flg(:)
@@ -111,14 +115,15 @@ program anaddb
  character(len=24) :: start_datetime
  character(len=strlen) :: string
  character(len=fnlen) :: filnam(7),elph_base_name,tmpfilename
- character(len=fnlen) :: phdos_fname
  character(len=500) :: message
  type(anaddb_dataset_type) :: inp
  type(phonon_dos_type) :: Phdos
  type(ifc_type) :: Ifc,Ifc_coarse
  type(ddb_type) :: ddb
+ type(ddb_hdr_type) :: ddb_hdr
  type(asrq0_t) :: asrq0
  type(crystal_t) :: Crystal
+ type(supercell_type), allocatable :: thm_scells(:)
 #ifdef HAVE_NETCDF
  integer :: phdos_ncid, ec_ncid, ncerr
 #endif
@@ -169,7 +174,16 @@ program anaddb
 !******************************************************************
 
  ! Must read natom from the DDB before being able to allocate some arrays needed for invars9
- call ddb_getdims(dimekb,filnam(3),lmnmax,mband,mtyp,msym,natom,nblok,nkpt,ntypat,ddbun,usepaw,DDB_VERSION,comm)
+
+ call ddb_hdr_open_read(ddb_hdr,filnam(3),ddbun,DDB_VERSION,comm=comm, &
+& dimonly=1)
+
+ natom = ddb_hdr%natom
+ ntypat = ddb_hdr%ntypat
+ mtyp = ddb_hdr%mblktyp
+ usepaw = ddb_hdr%usepaw
+
+ call ddb_hdr_free(ddb_hdr)
 
  mpert=natom+6
  msize=3*mpert*3*mpert; if (mtyp==3) msize=msize*3*mpert
@@ -216,8 +230,16 @@ program anaddb
  call wrtout(std_out,message,'COLL')
  call wrtout(ab_out,message,'COLL')
 
+ ! DEBUG
+ !write(*,*) 'anaddb: natom=', natom
+ ! END DEBUG
  call ddb_from_file(ddb,filnam(3),inp%brav,natom,inp%natifc,inp%atifc,Crystal,comm, prtvol=inp%prtvol)
  nsym = Crystal%nsym
+ ! DEBUG
+ !do ii=1,Crystal%ntypat
+ !  write(*,*)'anaddb: amu=', crystal%amu(ii)
+ !end do
+ ! END DEBUG
 
  ! Acoustic Sum Rule
  ! In case the interatomic forces are not calculated, the
@@ -263,6 +285,11 @@ program anaddb
  ! Get Dielectric Tensor and Effective Charges
  ! (initialized to one_3D and zero if the derivatives are not available in the DDB file)
  iblok = ddb_get_dielt_zeff(ddb,crystal,inp%rfmeth,inp%chneut,inp%selectz,dielt,zeff)
+ ! Try to get dielt, in case just the DDE are present
+ if (iblok == 0) then
+   iblok_tmp = ddb_get_dielt(ddb,inp%rfmeth,dielt)
+ end if
+
  !if (iblok == 0) then
  !  call wrtout(std_out, sjoin("- Cannot find dielectric tensor and Born effective charges in DDB file:", filnam(3)))
  !  call wrtout(std_out, "Values initialized with zeros")
@@ -433,8 +460,8 @@ program anaddb
    call ifc_print(ifc, unit=std_out)
 
    ! Compute speed of sound.
-   if (inp%vs_qrad_tolms(1) > zero) then
-     call ifc_speedofsound(ifc, crystal, inp%vs_qrad_tolms, ana_ncid, comm)
+   if (inp%vs_qrad_tolkms(1) > zero) then
+     call ifc_speedofsound(ifc, crystal, inp%vs_qrad_tolkms, ana_ncid, comm)
      !call ifc_test_phinterp(ifc, crystal, [8,8,8], 1, [zero,zero,zero], [3,3,3], comm, test_dwdq=.True.)
      !stop
    end if
@@ -455,6 +482,12 @@ program anaddb
 
 !**********************************************************************
 
+ if (sum(abs(inp%thermal_supercell))>0 .and. inp%ifcflag==1) then
+   ABI_ALLOCATE(thm_scells, (inp%ntemper))
+   call thermal_supercell_make(Crystal, Ifc, inp%ntemper, inp%thermal_supercell, inp%tempermin, inp%temperinc, thm_scells)
+   call thermal_supercell_print(filnam(2), inp%ntemper, inp%tempermin, inp%temperinc, thm_scells)
+ end if
+
 !Phonon density of states calculation, Start if interatomic forces have been calculated
  if (inp%ifcflag==1 .and. any(inp%prtdos==[1, 2])) then
    write(message,'(a,(80a),4a)')ch10,('=',ii=1,80),ch10,ch10,' Calculation of phonon density of states ',ch10
@@ -464,7 +497,7 @@ program anaddb
    call mkphdos(Phdos,Crystal,Ifc, inp%prtdos,inp%dosdeltae,inp%dossmear, inp%ng2qpt, inp%q2shft, comm)
 
    if (iam_master) then
-     call phdos_print_msqd(Phdos, strcat(filnam(2), "_MSQD_T"), inp%ntemper, inp%tempermin, inp%temperinc)
+     call phdos_print_msqd(Phdos, filnam(2), inp%ntemper, inp%tempermin, inp%temperinc)
      call phdos_print(Phdos, strcat(filnam(2), "_PHDOS"))
      call phdos_print_debye(Phdos, Crystal%ucvol)
      call phdos_print_thermo(PHdos, strcat(filnam(2), "_THERMO"), inp%ntemper, inp%tempermin, inp%temperinc)
@@ -515,34 +548,45 @@ program anaddb
 
 !***********************************************************************
 
-!Test thmeig
-! MG: FIXME
-! =====================================================================================================
-! COULD SOMEONE PLEASE CLEAN THE INTERFACE OF THMEIG? WHY DO WE HAVE SO MANY VARIABLES WITH INTENT(OUT)
-! =====================================================================================================
-! real(dp),intent(out) :: ucvol !new
-! integer,intent(inout) :: natom,nkpt,nsym,ntypat,occopt,nblok2 !new in ==> inout
-! integer,intent(out) :: symrel(3,3,msym)
-! integer,intent(out) :: indsym(4,nsym,natom),symrec(3,3,msym) !new
-! integer,intent(inout) :: typat(natom),atifc(natom)! new in ==> inout
-! real(dp),intent(out) :: zion(ntypat),tnons(3,msym),gmet(3,3) !new
-! real(dp),intent(out) :: gprim(3,3),rmet(3,3),xcart(3,natom) !new
-! real(dp),intent(inout) :: acell(3),amu(ntypat),rprim(3,3),xred(3,natom)! new in ==> inout
+ ! Interpolate the DDB onto the first list of vectors and write the file.
+
+ if (inp%prtddb==1 .and. inp%ifcflag==1) then
+
+   call ddb_hdr_open_read(ddb_hdr,filnam(3),ddbun,DDB_VERSION)
+
+   close(ddbun)
+
+   call ddb_interpolate(Ifc,Crystal,inp,ddb,ddb_hdr,asrq0,filnam(2),comm)
+
+   call ddb_hdr_free(ddb_hdr)
+
+ end if 
+
+!***********************************************************************
+
  if (inp%thmflag>=3 .and. inp%thmflag<=8) then
 
-!  Obtain the number of bloks contained in this file.
-   call ddb_getdims(dimekb,filnam(5),lmnmax,mband,mtyp,msym,natom,nblok2,nkpt,ntypat,ddbun,usepaw,DDB_VERSION,comm)
+    ! DEBUG
+    !call ddb_hdr_open_read(ddb_hdr,filnam(5),ddbun,DDB_VERSION,&
+    ! &                     dimonly=1)
+   
+    !mband = ddb_hdr%mband
+    !msym = ddb_hdr%msym
+    !natom = ddb_hdr%natom
+    !nblok2 = ddb_hdr%nblok
+    !nkpt = ddb_hdr%nkpt
+    !ntypat = ddb_hdr%ntypat
+    !usepaw = ddb_hdr%usepaw
+   
+    !call ddb_hdr_free(ddb_hdr)
+    ! END DEBUG
 
    !write(std_out,*)'Entering thmeig: '
    elph_base_name=trim(filnam(2))//"_ep"
-   call thmeig(inp%a2fsmear,ddb%acell,ddb%amu,inp,asrq0%d2asr,&
-&   elph_base_name,mband,mpert,msize,natom,nkpt,inp%ntemper,&
-&   ntypat,ddb%rprim,inp%telphint,inp%temperinc,&
-&   inp%tempermin,inp%thmflag,Crystal%typat,Crystal%xred,&
-&   ddb,ddbun,dimekb,filnam(5),ab_out,& !new
-&  lmnmax,msym,nblok2,Crystal%nsym,ddb%occopt,Crystal%symrel,Crystal%tnons,usepaw,Crystal%zion,& !new
-&  Crystal%symrec,inp%natifc,Crystal%gmet,ddb%gprim,Crystal%indsym,Crystal%rmet,inp%atifc,& !new
-&  Crystal%ucvol,Crystal%xcart,comm) !new
+
+   call thmeig(inp,ddb,Crystal,elph_base_name,filnam(5),&
+&   ddbun,ab_out,natom,mpert,msize,asrq0%d2asr,comm)
+
  end if
 
 !**********************************************************************
@@ -825,12 +869,14 @@ program anaddb
  ABI_DEALLOCATE(zeff)
  ABI_DEALLOCATE(instrain)
 
-  50 continue
+ 50 continue
+
  call asrq0_free(asrq0)
  call ifc_free(Ifc)
  call crystal_free(Crystal)
  call ddb_free(ddb)
  call anaddb_dtset_free(inp)
+ call thermal_supercell_free(inp%ntemper, thm_scells)
 
  ! Close files
  if (iam_master) then

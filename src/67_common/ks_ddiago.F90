@@ -49,7 +49,7 @@
 !!  comm=MPI communicator.
 !!  [Electronpositron] <electronpositron_type>=quantities for the electron-positron annihilation.
 !!  nfftc=Number of points in the coarse FFT mesh.
-!!  ngfftc(18)=Info about 3D FFT for the coarse mesh, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  ngfftc(18)=Info about 3D FFT for the coarse mesh, see ~abinit/doc/variables/vargs.htm#ngfft
 !!  Diago_ctl<ddiago_ctl_type>=Datatype storing variables and options controlling the direct diagonalization.
 !!
 !! OUTPUT
@@ -169,7 +169,7 @@ subroutine ks_ddiago(Diago_ctl,nband_k,nfftc,mgfftc,ngfftc,natom,&
  integer :: my_rank,optder
  integer :: ispden,ndat,type_calc,sij_opt,igsp2,cplex_ghg
  integer :: iband,iorder_cprj,ibs1,ibs2
- real(dp) :: cfact,ucvol,ecutsm,effmass,lambda,size_mat,ecut
+ real(dp) :: cfact,ucvol,ecutsm,effmass_free,lambda,size_mat,ecut
  logical :: do_full_diago
  character(len=50) :: jobz,range
  character(len=80) :: frmt1,frmt2
@@ -218,7 +218,7 @@ subroutine ks_ddiago(Diago_ctl,nband_k,nfftc,mgfftc,ngfftc,natom,&
  nloalg  = Diago_ctl%nloalg
  ecut    = Diago_ctl%ecut
  ecutsm  = Diago_ctl%ecutsm
- effmass = Diago_ctl%effmass
+ effmass_free = Diago_ctl%effmass_free
  prtvol  = Diago_ctl%prtvol
 
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
@@ -347,8 +347,8 @@ subroutine ks_ddiago(Diago_ctl,nband_k,nfftc,mgfftc,ngfftc,natom,&
 !==== Kinetic energy ====
 !========================
  ABI_MALLOC(kinpw,(npw_k))
-! call mkkin(ecut,ecutsm,effmass,gmet,kg_k,kinpw,kpoint,npw_k)
- call mkkin(ecut,ecutsm,effmass,gmet,kg_k,kinpw,kpoint,npw_k,0,0)
+! call mkkin(ecut,ecutsm,effmass_free,gmet,kg_k,kinpw,kpoint,npw_k)
+ call mkkin(ecut,ecutsm,effmass_free,gmet,kg_k,kinpw,kpoint,npw_k,0,0)
 !
 !================================
 !==== Non-local form factors ====

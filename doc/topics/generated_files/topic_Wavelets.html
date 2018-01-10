@@ -1,0 +1,140 @@
+<!--                                                                                     -->
+<!-- This file has been produced by generate_doc.py using different .yml  or .bib files. -->
+<!-- It is useless to modify it. Modify the related .yml  or .bib files instead.         -->
+<!--                                                                                     -->
+<html>
+<head><title>Wavelets </title>
+<link rel=stylesheet type="text/css" href="../../formabinit.css">
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  jax: ["input/TeX","output/HTML-CSS"],
+  tex2jax: {inlineMath: [['$','$']]},
+  displayAlign: "center",
+  TeX: { equationNumbers: { autoNumber: "AMS" } }
+});
+</script>
+<script type="text/javascript" async
+src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+</head>
+<body bgcolor="#ffffff">
+
+<hr>
+<a name="top"></a>
+
+<h1>Wavelets</h1>
+<h3>This page gives hints on how to perform calculations on a wavelet basis with the ABINIT package.
+<hr>
+
+<h5>Copyright (C) 2016-2017 ABINIT group (MT)
+<script type="text/javascript" src="../../js_files/copyright.js"> </script>
+</h5>
+
+<script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
+
+ Mentioned in &nbsp; <a href="../../guide/generated_files/help_features.html#2.3">help_features#2.3</a>, &nbsp; <a href="../../topics/generated_files/topic_PAW.html">topic_PAW</a>, &nbsp; <a href="../../topics/generated_files/topic_Planewaves.html">topic_Planewaves</a>. 
+ <hr>
+ <h3><b>Table of content: </b></h3> 
+ <ul> <li>1. <a href="topic_Wavelets.html#1">Introduction.</a><li>2. <a href="topic_Wavelets.html#2">Related lesson(s) of the tutorial.</a><li>3. <a href="topic_Wavelets.html#3">Related input variables.</a><li>4. <a href="topic_Wavelets.html#4">Selected input files.</a><li>5. <a href="topic_Wavelets.html#5">References.</a></ul>
+
+&nbsp; 
+<HR ALIGN=left> 
+<a name="1">&nbsp;</a>
+<h3><b>1. Introduction.</b></h3>
+
+
+<p> A wavelet basis (instead of a plane wave basis) can be used in ABINIT.
+With a wavelet basis, one can perform basic static DFT calculations 
+with selected norm-conserving pseudopotentials (HGH or GTH pseudopotentials <a href="../../biblio/generated_files/bib_biblio.html#Genovese2008">[Genovese2008]</a>), 
+but also with PAW atomic data <a href="../../biblio/generated_files/bib_biblio.html#Rangel2016">[Rangel2016]</a>).
+Available also : the finite size corrections to the
+total energy, restart on wavefunctions following the ETSF norm and geometry
+relaxation using BFGS. Molecular dynamic is also available for test purposes.
+<p>However, DFPT or excited-state calculations (except &Delta;-SCF) cannot be performed.
+<br><br><a href=#top>Go to the top</a>
+
+
+
+&nbsp; 
+<HR ALIGN=left> 
+<a name="2">&nbsp;</a>
+<h3><b>2. Related lesson(s) of the tutorial.</b></h3>
+
+
+<li><a href="../../tutorial/generated_files/lesson_paral_gswvl.html">Parallelism for ground-state
+calculations, with wavelets</a> presents the parallelism of ABINIT,
+when wavelets are used as a basis function instead of planewaves, for
+the computation of total energy, density, and ground state properties</li>
+<br><br><a href=#top>Go to the top</a>
+
+
+&nbsp; 
+<hr> 
+<a name="3">&nbsp;</a>
+<h3><b>3. Related input variables.</b></h3>
+
+
+<p>Compulsory input variables:<p>... <a href="../../variables/generated_files/varset_basic.html#usewvl">usewvl</a>   [Use WaVeLet basis set]<br>
+<p>Basic input variables:<p>... <a href="../../variables/generated_files/varset_gstate.html#wvl_crmult">wvl_crmult</a>   [WaVeLet Coarse grid Radius MULTiplier]<br>
+... <a href="../../variables/generated_files/varset_gstate.html#wvl_frmult">wvl_frmult</a>   [WaVeLet Fine grid Radius MULTiplier]<br>
+... <a href="../../variables/generated_files/varset_basic.html#wvl_hgrid">wvl_hgrid</a>   [WaVeLet H step GRID]<br>
+<p>Useful input variables:<p>... <a href="../../variables/generated_files/varset_gstate.html#nwfshist">nwfshist</a>   [Number of WaveFunctionS HISTory]<br>
+... <a href="../../variables/generated_files/varset_gstate.html#tl_radius">tl_radius</a>   [TaiL expansion RADIUS]<br>
+<p>Input variables for experts:<p>... <a href="../../variables/generated_files/varset_gstate.html#tl_nprccg">tl_nprccg</a>   [TaiL maximum Number of PReConditionner Conjugate Gradient iterations]<br>
+... <a href="../../variables/generated_files/varset_gstate.html#wvl_bigdft_comp">wvl_bigdft_comp</a>   [WaVeLet BigDFT Comparison]<br>
+... <a href="../../variables/generated_files/varset_gstate.html#wvl_ngauss">wvl_ngauss</a>   [WaVeLet Number of GAUSSians]<br>
+... <a href="../../variables/generated_files/varset_gstate.html#wvl_nprccg">wvl_nprccg</a>   [WaVeLet maximum Number of PReConditionner Conjugate Gradient iterations]<br>
+
+<br><br><a href=#top>Go to the top</a>
+
+
+&nbsp; 
+<HR ALIGN=left> 
+<a name="4">&nbsp;</a>
+<h3><b>4. Selected input files.</b></h3>
+
+
+<i><b>WARNING</b> : as of ABINITv8.6.x, the list of input files provided in the specific section of the topics Web pages is still to be reviewed/tuned. In some cases, it will be adequate, and in other cases, it might be incomplete, or perhaps even useless.</i>
+<br><br>The user can find some related example input files in the ABINIT package in the directory /tests, or on the Web:
+<p> tests/bigdft/Input: <a href="../../tests/bigdft/Input/t01.in">t01.in</a> 
+<a href="../../tests/bigdft/Input/t02.in">t02.in</a> 
+<a href="../../tests/bigdft/Input/t03.in">t03.in</a> 
+<a href="../../tests/bigdft/Input/t04.in">t04.in</a> 
+<a href="../../tests/bigdft/Input/t05.in">t05.in</a> 
+<a href="../../tests/bigdft/Input/t06.in">t06.in</a> 
+<a href="../../tests/bigdft/Input/t07.in">t07.in</a> 
+<a href="../../tests/bigdft/Input/t09.in">t09.in</a> 
+<a href="../../tests/bigdft/Input/t10.in">t10.in</a> 
+<a href="../../tests/bigdft/Input/t11.in">t11.in</a> 
+<a href="../../tests/bigdft/Input/t12.in">t12.in</a> 
+<a href="../../tests/bigdft/Input/t14.in">t14.in</a> 
+<a href="../../tests/bigdft/Input/t16.in">t16.in</a> 
+<a href="../../tests/bigdft/Input/t17.in">t17.in</a> 
+<a href="../../tests/bigdft/Input/t18.in">t18.in</a> 
+<a href="../../tests/bigdft/Input/t31.in">t31.in</a> 
+<a href="../../tests/bigdft/Input/t32.in">t32.in</a> 
+<a href="../../tests/bigdft/Input/t33.in">t33.in</a> 
+<a href="../../tests/bigdft/Input/t34.in">t34.in</a> 
+<p> tests/bigdft_paral/Input: <a href="../../tests/bigdft_paral/Input/t01.in">t01.in</a> 
+<a href="../../tests/bigdft_paral/Input/t02.in">t02.in</a> 
+<br>
+
+<br><br><a href=#top>Go to the top</a>
+
+
+&nbsp; 
+<HR ALIGN=left> 
+<a name="5">&nbsp;</a>
+<h3><b>5. References.</b></h3>
+
+
+<br> <a href="../../biblio/generated_files/bib_biblio.html#Genovese2008">[Genovese2008]</a>  L. Genovese, L. Neelov, S. Goedecker, T. Deutsch, S. Alireza Ghasemi, A. Willand, D. Caliste, O. Zilberberg, M. Rayson, A. Bergman and R. Schneider, "Daubechies wavelets as a basis set for density functional pseudopotential calculations", J. Chem. Phys. 129, 014109 (2008).<br>
+<br> <a href="../../biblio/generated_files/bib_biblio.html#Rangel2016">[Rangel2016]</a>  T. Rangel, D. Caliste, L. Genovese and M. Torrent, "A wavelet-based Projector Augmented-Wave (PAW) method: Reaching frozen-core all-electron precision with a systematic, adaptive and localized wavelet basis set", Computer Physics Communication 208, 1-8 (2016).<br>
+<p>
+<br><br><a href=#top>Go to the top</a>
+
+<script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
+
+</body>
+</html>
+
