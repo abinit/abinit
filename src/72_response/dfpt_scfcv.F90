@@ -1050,7 +1050,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &     nstep,occ_rbz,0,prtfor,0,&
 &     quit,res2,resid,residm,response,&
 &     tollist,psps%usepaw,vxcavg,wtk_rbz,xred,conv_retcode)
-!     !debug: print the information about  
+!     !debug: print the information about residuals at "-q"
 !     if(.not.kramers_deg) then
 !       call scprqt(choice,cpus,deltae_mq,diffor,dtset,eigen0,&
 !&       etotal_mq,favg,fcart,fermie,dtfil%fnametmp_eig,dtfil%filnam_ds(1),&
