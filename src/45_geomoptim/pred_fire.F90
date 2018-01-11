@@ -64,7 +64,7 @@
 #endif
 
 #include "abi_common.h"
-subroutine pred_fire(ab_mover, ab_xfh,forstr,hist,ab_mover%ionmov,itime,DEBUG,iexit)
+subroutine pred_fire(ab_mover, ab_xfh,forstr,hist,ionmov,itime,DEBUG,iexit)
  use defs_basis
  use m_profiling_abi
  use m_abimover
