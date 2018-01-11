@@ -50,6 +50,7 @@ sources = [
  "getcgqphase.F90",
  "init_e_field_vars.F90",
  "initberry.F90",
+ "initorbmag.F90",
  "initmv.F90",
  "initro.F90",
  "ionion_realspace.F90",

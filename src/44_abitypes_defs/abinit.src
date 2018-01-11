@@ -24,6 +24,7 @@ sources = [
  "m_efield.F90",
  "m_efmas_defs.F90",
  "m_energies.F90",
+ "m_orbmag.F90",
  "m_results_gs.F90",
  "m_results_img.F90",
  "m_results_respfn.F90"
