@@ -15,7 +15,7 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Thu 11 Jan 2018.
-- ( at 16h40 )
+- ( at 17h49 )
   
 - input  file    -> t68.in
 - output file    -> t68.out
@@ -119,7 +119,7 @@ P          mk1mem           8
           spgroup           1
            spinat      0.0000000000E+00  0.0000000000E+00  2.1500000000E+00
           tim1rev           0
-           tolvrs      1.00000000E-08
+           toldfe      1.00000000E-03 Hartree
             typat      1
               wtk        0.12500    0.12500    0.12500    0.12500    0.12500    0.12500
                          0.12500    0.12500
@@ -265,25 +265,18 @@ P newkpt: treating     16 bands with npw=     630 for ikpt=   8 by node    0
  ETOT 15   9.9306482933482     -2.014E-03 1.422E+01 4.226E-04
  ETOT 16   9.9304897682555     -1.585E-04 6.709E-04 9.932E-05
  ETOT 17   9.9299240111525     -5.658E-04 1.422E+01 4.184E-05
- ETOT 18   9.9294166381488     -5.074E-04 2.958E-04 1.765E-06
- ETOT 19   9.9292344236836     -1.822E-04 1.422E+01 5.480E-07
- ETOT 20   9.9291572670202     -7.716E-05 1.324E-04 2.961E-06
- ETOT 21   9.9291519899835     -5.277E-06 1.422E+01 1.614E-07
- ETOT 22   9.9291122871369     -3.970E-05 5.985E-05 9.342E-08
- ETOT 23   9.9290785743444     -3.371E-05 1.422E+01 1.253E-07
- ETOT 24   9.9290558698318     -2.270E-05 2.715E-05 1.197E-08
- ETOT 25   9.9290480436458     -7.826E-06 1.422E+01 1.773E-09
 
- At SCF step   25       vres2   =  1.77E-09 < tolvrs=  1.00E-08 =>converged.
+ At SCF step   17, etot is converged : 
+  for the second time, diff in etot=  5.658E-04 < toldfe=  1.000E-03
 
  ------------------------------------------------------------------------
  Integrals of the first order density n^(1) and magnetization m^(1):
  ------------------------------------------------------------------------
 
-  Re[n^(1)] =  -0.90612429E+00   Im[n^(1)] =   0.91961489E-07
-  Re[mx^(1)]=   0.42438698E+01   Im[mx^(1)]=  -0.23419020E-05
-  Re[my^(1)]=  -0.82550591E+01   Im[my^(1)]=   0.16719757E-05
-  Re[mz^(1)]=   0.19858096E+02   Im[mz^(1)]=  -0.16248578E-07
+  Re[n^(1)] =  -0.90606087E+00   Im[n^(1)] =  -0.13970884E-04
+  Re[mx^(1)]=   0.42445283E+01   Im[mx^(1)]=  -0.24248741E-05
+  Re[my^(1)]=  -0.82563399E+01   Im[my^(1)]=   0.18326308E-05
+  Re[mz^(1)]=   0.19858972E+02   Im[mz^(1)]=   0.23008735E-05
 
  ------------------------------------------------------------------------
 
@@ -291,18 +284,18 @@ P newkpt: treating     16 bands with npw=     630 for ikpt=   8 by node    0
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   1.1679E-01; max=  1.4219E+01
+ Mean square residual over all n,k,spin=   1.1680E-01; max=  1.4219E+01
 
  Eight components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
-     kin0=   2.39043485E+00 eigvalue=   3.41535347E-01  local=  -4.00454788E-01
+     kin0=   2.39062752E+00 eigvalue=   3.41559826E-01  local=  -4.00477141E-01
  4,5,6: 1st-order hamiltonian combined with 1st and 0th-order wfs
- loc psp =   0.00000000E+00  Hartree=   1.01546741E+00     xc=  -9.46614665E+00
+ loc psp =   0.00000000E+00  Hartree=   1.01553324E+00     xc=  -9.46756624E+00
  note that "loc psp" includes a xc core correction that could be resolved
  7,8,9: eventually, occupation + non-local contributions
-    edocc=   1.71921567E+01     enl0=  -1.14394482E+00   enl1=   0.00000000E+00
+    edocc=   1.71943083E+01     enl0=  -1.14406144E+00   enl1=   0.00000000E+00
  1-9 gives the relaxation energy (to be shifted if some occ is /=2.0)
-   erelax=   9.92904804E+00
+   erelax=   9.92992401E+00
 ================================================================================
 
  ---- first-order wavefunction calculations are completed ----
@@ -323,7 +316,7 @@ P newkpt: treating     16 bands with npw=     630 for ikpt=   8 by node    0
             acell      5.4200000000E+00  5.4200000000E+00  5.4200000000E+00 Bohr
               amu      5.58470000E+01
              ecut      3.00000000E+01 Hartree
-           etotal      9.9290480436E+00
+           etotal      9.9299240112E+00
             fcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
 -          fftalg         312
            irdwfk           1
@@ -392,7 +385,7 @@ P          mk1mem           8
            strten      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
           tim1rev           0
-           tolvrs      1.00000000E-08
+           toldfe      1.00000000E-03 Hartree
             typat      1
               wtk        0.12500    0.12500    0.12500    0.12500    0.12500    0.12500
                          0.12500    0.12500
@@ -469,10 +462,10 @@ P          mk1mem           8
 - Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7
 - Comment : the original paper describing the ABINIT project.
 -
-- Proc.   0 individual time (sec): cpu=         46.2  wall=         46.2
+- Proc.   0 individual time (sec): cpu=         31.6  wall=         31.6
 
 ================================================================================
 
  Calculation completed.
 .Delivered  19 WARNINGs and   3 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         46.2  wall=         46.2
++Overall time at end (sec) : cpu=         31.6  wall=         31.6

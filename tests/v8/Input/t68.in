@@ -43,7 +43,7 @@
   prtdensph 1
   nstep     50
 
-   tolvrs  1.0d-8
+   toldfe  1.0d-3
    ixcrot  3    # direct evaluation of the xc potential
   tim1rev  0    # perturbation breaks time reversal symmetry
    irdwfk  1
