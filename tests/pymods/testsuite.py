@@ -2688,6 +2688,26 @@ class MultibinitTest(BaseTest):
 
         return t_stdin.getvalue()
 
+class TdepTest(BaseTest):
+    """
+    Class for TDEP tests. Redefine the make_stdin method of BaseTest
+    """
+    def make_stdin(self):
+        t_stdin = StringIO()
+
+        inp_fname = self.cygwin_path(self.inp_fname)  # cygwin
+        inp_fname = os.path.basename(inp_fname)
+        t_stdin.write( inp_fname + "\n")              # 1) formatted input file
+
+        md_hist_fname =  os.path.join(self.inp_dir,self.md_hist)
+        if not os.path.isfile(md_hist_fname):
+            self.exceptions.append(self.Error("%s no such hist file: " % md_hist_fname))
+
+        md_hist_fname = self.cygwin_path(md_hist_fname)
+        t_stdin.write(md_hist_fname + "\n") 
+
+        return t_stdin.getvalue()
+
 
 class AimTest(BaseTest):
     """
@@ -2791,6 +2811,7 @@ def exec2class(exec_name):
         "band2eps": Band2epsTest,
         "optic": OpticTest,
         "multibinit": MultibinitTest,
+        "tdep": TdepTest,
     }.get(exec_name, BaseTest)
 
 

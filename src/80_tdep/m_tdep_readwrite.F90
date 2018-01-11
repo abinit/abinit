@@ -178,7 +178,8 @@ contains
   character (len=8) :: date
   character (len=10) :: time
   character (len=5) :: zone
-  character(len=7) :: filename
+  character(len=500) :: filename
+  character(len=500) :: inputfilename
   integer :: values(8)  
   type(Input_Variables_type),intent(out) :: InVar
   type(abihist) :: Hist
@@ -239,6 +240,18 @@ contains
 
 ! Check if a NetCDF file is available
   filename='HIST.nc'
+  inputfilename='input.in'
+  write(InVar%stdout,'(x,a)',err=10) ' Give name for input file '
+  read(*, '(a)',err=10) inputfilename
+  write(InVar%stdout, '(x,a)',err=10) trim(inputfilename)
+10 continue
+  write(InVar%stdout,'(x,a)',err=11) ' Give name for HIST file '
+  read(*, '(a)',err=11) filename
+  write(InVar%stdout, '(x,a)',err=11) trim(filename)
+11 continue
+  if ( inputfilename == "" ) inputfilename='input.in'
+  if ( filename == "" ) filename='HIST.nc'
+
 
 #if defined HAVE_NETCDF
  !Open netCDF file
@@ -273,7 +286,7 @@ contains
 
 ! Write version, copyright, date...
   write(InVar%stdout,*) ' '
-  open(unit=40,file='input.in')
+  open(unit=40,file=inputfilename)
   read(40,*) string
   if (string.eq.NormalMode) then
     write(InVar%stdout,'(a,f6.1,a)') '.Version ', version_value,' of PHONONS'
