@@ -1,5 +1,6 @@
-# Test for non-collinear dfpt response with B field at q/=0
-# bcc bulk Fe, low ecut, coarse kpt grid
+# Test for non-collinear dfpt response of simple metal to B field at q/=0
+# bcc bulk Fe, low ecut, coarse kpt grid,
+# perturbing magnetic field is parallel to gs spin orientation
 
   nsym    1
   ndtset  2
@@ -53,7 +54,7 @@
   tim1rev2  0    # perturbation breaks time reversal symmetry
    getwfk2 -1
    rfmagn2  1
-    rfdir2  1 1 1
+    rfdir2  0 0 1
      nqpt2  1
       qpt2  0.5 0.0 0.0
 
