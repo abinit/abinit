@@ -219,7 +219,7 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
 
  need_writeHIST=.TRUE.
  if(present(writeHIST)) need_writeHIST = writeHIST
- 
+
  call status(0,dtfil%filstat,iexit,level,'init          ')
 
  if ( size(amass) /= scfcv_args%dtset%natom ) then
@@ -275,6 +275,7 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
 !12. Isokinetic ensemble molecular dynamics
 !13. Isothermal/isenthalpic ensemble molecular dynamics
 !14. Symplectic algorithm Runge-Kutta-Nystrom SRKNa14
+!15. Fast inertial relaxation engine method for relaxation.
 !20. Ionic positions relaxation using DIIS
 !21. Steepest descent algorithm
 !23. LOTF method
@@ -372,11 +373,11 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
      call abihist_free(hist_prev)
    end if
 !  If restarxf specifies to start to the last iteration
-   if (hist_prev%mxhist>0.and.ab_mover%restartxf==-3)then     
+   if (hist_prev%mxhist>0.and.ab_mover%restartxf==-3)then
      acell(:)   =hist_prev%acell(:,hist_prev%mxhist)
      rprimd(:,:)=hist_prev%rprimd(:,:,hist_prev%mxhist)
-     xred(:,:)  =hist_prev%xred(:,:,hist_prev%mxhist)  
-     call abihist_free(hist_prev)     
+     xred(:,:)  =hist_prev%xred(:,:,hist_prev%mxhist)
+     call abihist_free(hist_prev)
    end if
 
  end if !if (ab_mover%restartxf<=0)
@@ -480,7 +481,7 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
      if (have_timelimit_in(ABI_FUNC)) then
        if (itime > 2) then
          call xmpi_wait(quitsum_request,ierr)
-         if (quitsum_async > 0) then 
+         if (quitsum_async > 0) then
            write(message,"(3a)")"Approaching time limit ",trim(sec2str(get_timelimit())),&
 &           ". Will exit itime loop in mover."
            if(need_verbose)MSG_COMMENT(message)
@@ -504,7 +505,7 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
 !  ### 09. Loop for icycle (From 1 to ncycles)
    do icycle=1,ncycle
      itime_hist = (itime-1)*ncycle + icycle ! Store the time step in of the history
-     
+
 !    ###########################################################
 !    ### 10. Output for each icycle (and itime)
      if(need_verbose)then
@@ -591,7 +592,7 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
 !        MAIN CALL TO SELF-CONSISTENT FIELD ROUTINE
          if (need_scfcv_cycle) then
            call dtfil_init_time(dtfil,iapp)
-           call scfcv_run(scfcv_args,electronpositron,rhog,rhor,rprimd,xred,xred_old,conv_retcode)   
+           call scfcv_run(scfcv_args,electronpositron,rhog,rhor,rprimd,xred,xred_old,conv_retcode)
            if (conv_retcode == -1) then
              message = "Scf cycle returned conv_retcode == -1 (timelimit is approaching), this should not happen inside mover"
              MSG_WARNING(message)
@@ -607,7 +608,7 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
 
 !          Check if the simulation does not diverged...
            if(itime > 3 .and.ABS(scfcv_args%results_gs%etotal - hist%etot(1)) > 1E4)then
-!            We set to false the flag corresponding to the bound 
+!            We set to false the flag corresponding to the bound
              effective_potential%anharmonics_terms%bounded = .FALSE.
              if(need_verbose.and.me==master)then
                message = "The simulation is diverging, please check your effective potential"
@@ -617,7 +618,7 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
              iexit=1
              stat4xml="Failed"
            else
-!            We set to true the flag corresponding to the bound 
+!            We set to true the flag corresponding to the bound
              effective_potential%anharmonics_terms%bounded = .TRUE.
            end if
          end if
@@ -803,6 +804,8 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
          call pred_isothermal(ab_mover,hist,itime,mttk_vars,ntime,DEBUG,iexit)
        case (14)
          call pred_srkna14(ab_mover,hist,icycle,DEBUG,iexit,skipcycle)
+       case (15)
+         call pred_fire(ab_mover, ab_xfh,preconforstr, hist, itime, ntime, DEBUG, iexit)
        case (20)
          call pred_diisrelax(ab_mover,hist,itime,ntime,DEBUG,iexit)
        case (21)

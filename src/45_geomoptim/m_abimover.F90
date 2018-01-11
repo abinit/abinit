@@ -778,7 +778,7 @@ character(len=fnlen), target, intent(in) :: filnam_ds(:)   ! dtfil%filnam_ds(5)
 !  Name of specs%method
    specs%method = 'Conjugate gradient algorithm'
 !  Number of history
-   specs%nhist = 3   
+   specs%nhist = 3
 !  This is the initialization for ionmov==12
 !  -------------------------------------------
  case (12)
@@ -822,6 +822,19 @@ character(len=fnlen), target, intent(in) :: filnam_ds(:)   ! dtfil%filnam_ds(5)
    specs%method = 'Symplectic algorithm Runge-Kutta-Nystrom SRKNa14'
 !  Number of history
    specs%nhist = 3
+
+!  This is the initialization for ionmov==15
+!  -------------------------------------------
+case (15)
+!  Values use in XML Output
+   specs%type4xml='FIRE'
+   specs%isVused=.TRUE.  ! Velocities are used
+   specs%isARused=.TRUE.
+   specs%crit4xml='tolmxf'
+!  Name of specs%method
+   specs%method = 'Fast inertial relaxation engine'
+!  Number of history
+   specs%nhist = 2
 !  This is the initialization for ionmov==20
 !  -------------------------------------------
  case (20)
