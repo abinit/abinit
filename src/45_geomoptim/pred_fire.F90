@@ -35,12 +35,13 @@
 !! For the initials of contributors,
 !! see ~abinit/doc/developers/contributors.txt .
 !!
+
 !! INPUTS
 !! ab_mover <type(abimover)> : Datatype with all the information
 !!                                needed by the preditor
 !! itime  : Index of the present iteration
 !! ntime  : Maximal number of iterations
-!! ionmov : (6 or 7) Specific kind of VERLET
+!! ionmov : (15) FIRE. Not used in function. just to keep the same format as bfgs.
 !! zDEBUG : if true print some debugging information
 !!
 !! OUTPUT
@@ -49,14 +50,12 @@
 !! hist <type(abihist)> : History of positions,forces
 !!                               acell, rprimd, stresses
 !!
-!! NOTES
-!!
 !! PARENTS
 !!      mover
 !!
 !! CHILDREN
-!!      fcart2fred,hist2var,metric,mkrdim,var2hist,wrtout,xcart2xred
-!!      xfpack_f2vout,xfpack_vin2x,xfpack_x2vin,xred2xcart
+!!      fcart2fred,hist2var,lbfgs_destroy,lbfgs_init,metric,mkrdim,var2hist
+!!      xfh_recover_new,xfpack_f2vout,xfpack_vin2x,xfpack_x2vin
 !!
 !! SOURCE
 
@@ -65,8 +64,7 @@
 #endif
 
 #include "abi_common.h"
-subroutine pred_fire(ab_mover, ab_xfh,preconforstr, hist, itime, ntime, DEBUG, iexit)
-
+subroutine pred_fire(ab_mover, ab_xfh,forstr,hist,ab_mover%ionmov,itime,DEBUG,iexit)
  use defs_basis
  use m_profiling_abi
  use m_abimover
@@ -89,9 +87,9 @@ subroutine pred_fire(ab_mover, ab_xfh,preconforstr, hist, itime, ntime, DEBUG, i
  type(ab_xfh_type),intent(inout)    :: ab_xfh
  type(abiforstr),intent(in) :: forstr
  type(abihist),intent(inout) :: hist
+ integer, intent(in) :: ionmov
  integer,intent(in) :: itime
  integer,intent(in) :: ntime
- integer,intent(in) :: ionmov
  integer,intent(in) :: iexit
  logical,intent(in) :: zDEBUG
 
@@ -105,25 +103,34 @@ real(dp),save :: ucvol0
 real(dp) :: ucvol,det
 real(dp) :: etotal,etotal_prev
 real(dp) :: favg
-real(dp),save :: hh
-real (dp) :: dtinc, dtdec, dtmax, alphadec
+! time step, damping factor initially dtion
+real(dp),save :: dtratio, alpha
+! dtinc: increment of dtratio
+! dtdec: decrement of dtratio
+! dtmax: maximum allowd value of dtratio
+! alphadec: decrement of alpha
+! alpha0: initial value of alpha
+! mixold: if energy goes up, linear mix old and new coordinates. mixold
+real (dp), parameter :: dtinc=1.1, dtdec=0.5, dtmax=10,0, alphadec=0.99, alpha0=0.1, mixold=0.9
+! v.dot.f
+real (dp) :: vf
+! number of v.dot.f >0
 integer, save :: ndownhill
-! time step is dtion
-real(dp), save :: hh
+! reset_lattice: whether to reset lattice if energy goes up.
+logical, parameter :: reset_lattice = .true.
 
 !arrays
-real(dp) :: acell(3),strten(6)
-real(dp) :: rprim(3,3),rprimd(3,3)
+real(dp) :: acell(3),strten(6), acell_prev(3), acell0(3,3)
+real(dp) :: rprim(3,3),rprimd(3,3), rprim_prev(3,3), rprimd_prev(3,3), rprimd0(3,3)
 real(dp) :: xred(3,ab_mover%natom),xcart(3,ab_mover%natom)
+real(dp) :: xred_prev(3,ab_mover%natom),xcart_prev(3,ab_mover%natom)
+real(dp) :: vel_prev(3,ab_mover%natom)
+! velocity are saved
 real(dp), save :: vel(3,ab_mover%natom)
 real(dp) :: residual(3,ab_mover%natom),residual_corrected(3,ab_mover%natom)
-real(dp),allocatable,save :: vin(:),vout(:)
-
-! PaRaMeters
-dtinc=1.1_dp
-dtdec=0.5_dp
-dtmax=1.0_dp
-alphadec=0.99_dp
+real(dp),allocatable,save :: vin(:),vout(:),vin_prev(:), vout_prev(:)
+! velocity but correspoing to vin&vout
+real(dp),allocatable,save :: vel_ioncell(:)
 
 
 
@@ -137,6 +144,15 @@ alphadec=0.99_dp
    end if
    if (allocated(vout))          then
      ABI_DEALLOCATE(vout)
+   end if
+   if (allocated(vin_prev))           then
+     ABI_DEALLOCATE(vin_prev)
+   end if
+   if (allocated(vout_prev))          then
+     ABI_DEALLOCATE(vout_prev)
+   end if
+   if (allocated(vel_ioncell))          then
+     ABI_DEALLOCATE(vel_ioncell)
    end if
    return
  end if
@@ -167,14 +183,21 @@ alphadec=0.99_dp
    if (allocated(vout))          then
      ABI_DEALLOCATE(vout)
    end if
+   if (allocated(vin_prev))           then
+     ABI_DEALLOCATE(vin_prev)
+   end if
+   if (allocated(vout_prev))          then
+     ABI_DEALLOCATE(vout_prev)
+   end if
+   if (allocated(vel_ioncell))          then
+     ABI_DEALLOCATE(vel_ioncell)
+   end if
+
    ABI_ALLOCATE(vin,(ndim))
    ABI_ALLOCATE(vout,(ndim))
-
-! initialize values
-   ndownhill=0
-   if (ab_mover%dtion>0)then
-     hh = ab_mover%dtion
-   end if
+   ABI_ALLOCATE(vin_prev,(ndim))
+   ABI_ALLOCATE(vout_prev,(ndim))
+   ABI_ALLOCATE(vel_ioncell,(ndim))
  end if
 
 !##########################################################
@@ -188,12 +211,24 @@ alphadec=0.99_dp
    rprim(ii,1:3)=rprimd(ii,1:3)/acell(1:3)
  end do
 
+ ihist = abihist_findIndex(hist, 0)
+ ihist_prev  = abihist_findIndex(hist,-1)
+
  call xred2xcart(ab_mover%natom,rprimd,xcart,xred)
  fcart(:,:)  =hist%fcart(:,:,hist%ihist)
  strten(:)  =hist%strten(:,hist%ihist)
- vel(:,:)   =hist%vel(:,:,hist%ihist)
- etotal     =hist%etot(hist%ihist)
+ if(itime!=1) then
+   vel(:,:)   =hist%vel(:,:,hist%ihist)
+ else
+    vel(:,:)=0.0_dp
+ endif
+ etotal=hist%etot(hist%ihist)
 
+ if(itime==1) then
+     etotal_prev=0.0
+ else
+     etotal_prev=hist%etot(ihst_prev)
+ endif
 
 !Fill the residual with forces (No preconditioning)
 !Or the preconditioned forces
@@ -231,25 +266,119 @@ alphadec=0.99_dp
 
  residual_corrected(:,:)=residual(:,:)
  if(ab_mover%nconeq==0)then
-   amass_tot=sum(ab_mover%amass(:))
    do kk=1,3
      if (kk/=3.or.ab_mover%jellslab==0) then
-       favg=sum(fred_corrected(kk,:))/dble(ab_mover%natom)
-       fred_corrected(kk,:)=fred_corrected(kk,:)-favg*ab_mover%amass(:)/amass_tot
+       favg=sum(residual_corrected(ii,:))/dble(ab_mover%natom)
+       residual_corrected(ii,:)=residual_corrected(ii,:)-favg
      end if
    end do
  end if
 
+!write(std_out,*) 'FIRE 04'
 !##########################################################
 !### 04. Fill the vectors vin and vout
 
 !Initialize input vectors : first vin, then vout
- call xfpack_x2vin(acell, acell0, ab_mover%natom, ndim,&
-& ab_mover%nsym, ab_mover%optcell, rprim, rprimd,&
+call xfpack_x2vin(acell, acell0, ab_mover%natom, ndim,&
+& ab_mover%nsym, ab_mover%optcell, rprim, rprimd0,&
 & ab_mover%symrel, ucvol, ucvol0, vin, xred)
- call xfpack_f2vout(fred_corrected, ab_mover%natom, ndim,&
+!end if
+
+ call xfpack_f2vout(residual_corrected, ab_mover%natom, ndim,&
 & ab_mover%optcell, ab_mover%strtarget, strten, ucvol,&
 & vout)
+
+
+!write(std_out,*) 'FIRE 05'
+!##########################################################
+!### 05. iniialize FIRE
+if ( itime==1 ) then
+   ndownhill=0
+   alpha=alpha0
+   if (ab_mover%dtion>0)then
+     dtratio = 1.0
+   end if
+end if
+
+!write(std_out,*) 'FIRE 06'
+!##########################################################
+!### 06. update timestep
+! Note that vin & vout are in reduced coordinates.
+vf=dot_product(vin, vout)
+if ( vf > 0.0_dp .and. (etotal- etotal_prev <0.0_dp) ) then
+    ndownhill=ndownhill+1
+    vel_ioncell(:)=(1.0-alpha)*vel_ioncell(:) + alpha* vout *  &
+&               sqrt(dot_product(vel_ioncell)/dot_product(vout))
+    if ( ndownhill>min_downhill ) then
+        dtratio = dtratio * dtinc
+        alpha = alpha * alphadec
+    end if
+else
+    ndownhill=0
+    vel_ioncell(:)=0.0
+    alpha=alpha0
+    dtratio = dtratio*dtdec
+endif
+
+! reset_lattice to last step if energy is increased.
+if ( etotal - etotal_prev >0.0 ) then
+    vin= vin*(1-mixold)+vin_prev*mixold
+end if
+
+!write(std_out,*) 'FIRE 08'
+!##########################################################
+!### 08. MD step. update vel_ioncell
+
+! Here mass is not used: all masses=1
+vel_ioncell = vel_ioncell + dtratio*ab_mover%dtion* vout
+vin = vin + dtratio*ab_mover%dtion* vout
+
+!Implement fixing of atoms : put back old values for fixed
+!components
+ do kk=1,ab_mover%natom
+   do jj=1,3
+!    Warning : implemented in reduced coordinates
+     if ( ab_mover%iatfix(jj,kk)==1) then
+       vin(jj+(kk-1)*3)=vin_prev(jj+(kk-1)*3)
+     end if
+   end do
+ end do
+
+!write(std_out,*) 'FIRE 08'
+!##########################################################
+!### 08. update hist.
+
+!Increase indexes
+ hist%ihist = abihist_findIndex(hist,+1)
+
+!Transfer vin  to xred, acell and rprim
+ call xfpack_vin2x(acell, acell0, ab_mover%natom, ndim,&
+& ab_mover%nsym, ab_mover%optcell, rprim, rprimd0,&
+& ab_mover%symrel, ucvol, ucvol0,&
+& vin, xred)
+
+ if(ab_mover%optcell/=0)then
+   call mkrdim(acell,rprim,rprimd)
+   call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
+ end if
+
+!Fill the history with the variables
+!xcart, xred, acell, rprimd
+ call var2hist(acell,hist,ab_mover%natom,rprimd,xred,zDEBUG)
+ ihist_prev = abihist_findIndex(hist,-1)
+ hist%vel(:,:,hist%ihist)=hist%vel(:,:,ihist_prev)
+
+ if(zDEBUG)then
+   write (std_out,*) 'residual:'
+   do kk=1,ab_mover%natom
+     write (std_out,*) residual(:,kk)
+   end do
+   write (std_out,*) 'strten:'
+   write (std_out,*) strten(1:3),ch10,strten(4:6)
+   write (std_out,*) 'etotal:'
+   write (std_out,*) etotal
+ end if
+
 
 end subroutine pred_fire
 !!***
