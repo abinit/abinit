@@ -374,7 +374,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  real(dp) :: ucvol,vxcavg,elmag1
  real(dp) :: res2_mq,fe1fixed_mq,elast_mq
  real(dp) :: eberry_mq,edocc_mq,eeig0_mq,ehart01_mq,ehart1_mq,ek0_mq,ek1_mq,eloc0_mq,elpsp1_mq,enl0_mq
- real(dp) :: enl1_mq,eovl1_mq,epaw1_mq,etotal_mq,evar_mq,evdw_mq,exc1_mq,fermie1_mq,deltae_mq,elmag1_mq
+ real(dp) :: enl1_mq,eovl1_mq,epaw1_mq,evdw_mq,exc1_mq,fermie1_mq,deltae_mq,elmag1_mq
  character(len=500) :: msg
  character(len=fnlen) :: fi1o
  character(len=fnlen) :: fi1o_vtk

@@ -372,7 +372,7 @@ subroutine rotate_back_mag_dfpt(option,vxc1_in,vxc1_out,vxc,kxc,rho1,mag,vectsiz
  integer  :: ipt,rotation_method
  logical  :: has_mag_norm
  logical  :: small_angle
- real(dp) :: bxc_over_m,d1,d2,d3,d4,dum,dvdn,dvdz,fact,m_dot_m1,m_norm
+ real(dp) :: bxc_over_m,d1,d2,d3,d4,dvdn,dvdz,fact,m_dot_m1,m_norm
  real(dp) :: dvdn_re,dvdn_im,dvdz_re,dvdz_im
  complex(dpc) :: rho_updn
  real(dp) :: mdirx,mdiry,mdirz,mxy,mx1,my1,mz1,wx,wy,wx1,wy1
@@ -381,7 +381,7 @@ subroutine rotate_back_mag_dfpt(option,vxc1_in,vxc1_out,vxc,kxc,rho1,mag,vectsiz
  real(dp) :: wy1_re,wy1_im
  real(dp) :: mx1_re,mx1_im,my1_re,my1_im,mz1_re,mz1_im
  real(dp) :: m_dot_m1_re,m_dot_m1_im
- real(dp) :: fact_re,fact_im,bxc
+ real(dp) :: bxc
 !arrays
  real(dp)     :: vxc_diag(2),v21tmp(2)
  complex(dpc) :: r1tmp(2,2),u0(2,2),u0_1(2,2),u0_1r1(2,2),u0v1(2,2)
@@ -916,10 +916,10 @@ subroutine test_rotations(option,cplex)
 !Local variables-------------------------------                                  
  real(dp) :: m0(1,3),vxc0(1,4),kxc(1,3)
  real(dp) :: n1(cplex,4),vxc1_in(cplex,4),vxc1_out(cplex,4)
- real(dp) :: delta_12(cplex,4),delta_23(cplex,4)
- real(dp) :: m0_norm,dvdn,dvdz,err12,err23,wrong_comp
+ real(dp) :: delta_23(cplex,4) !,delta_12(cplex,4)
+ real(dp) :: m0_norm,dvdn,dvdz,err23 !,wrong_comp!,err12
  real(dp) :: theta0,phi0,theta1,phi1,err,m1_norm
- integer  :: ii,dir0,dir1
+ integer  :: dir0,dir1
 ! *************************************************************************
 
  DBG_ENTER("COLL")
