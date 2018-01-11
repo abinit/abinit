@@ -65,10 +65,10 @@
 #%% test_chain = t67.in
 #%% [files]
 #%% files_to_test =
-#%%   t67.out, tolnlines = 100, tolabs = 0.001, tolrel = 0.001, fld_options=-easy
+#%%   t67.out, tolnlines = 100, tolabs = 0.002, tolrel = 0.002, fld_options=-easy
 #%% psp_files = 26fe.pspnc
 #%% [paral_info]
-#%% max_nprocs = 4
+#%% max_nprocs = 1
 #%% [extra_info]
 #%% authors = S. PROKHORENKO
 #%% keywords = DFPT

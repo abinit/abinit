@@ -76,6 +76,7 @@ subroutine dfpt_init_mag1(ipert,idir,rhor1,rhor0,cplex,nfft,nspden,vxc0,kxc0,nkx
 ! *************************************************************************
 
  if (nspden==2) then
+
    if(cplex==1) then
      do ipt=1,nfft
        bxc1=half*(half*(kxc0(ipt,1)+kxc0(ipt,3))-kxc0(ipt,2)) ! d/dm Bxc
@@ -89,6 +90,7 @@ subroutine dfpt_init_mag1(ipert,idir,rhor1,rhor0,cplex,nfft,nspden,vxc0,kxc0,nkx
        rhor1(ipt,:)=zero
      end do
    end if
+
  else if(nspden==4) then
 
    fdir=zero
@@ -120,9 +122,11 @@ subroutine dfpt_init_mag1(ipert,idir,rhor1,rhor0,cplex,nfft,nspden,vxc0,kxc0,nkx
        rhor1(2*ipt  ,3)=zero
        rhor1(2*ipt  ,4)=zero
 
+       rhor1(2*ipt-1,1)=zero; rhor1(2*ipt,1)=zero
+       rhor1(2*ipt-1,2)=zero; rhor1(2*ipt,2)=zero
+       rhor1(2*ipt-1,3)=zero; rhor1(2*ipt,3)=zero
+       rhor1(2*ipt-1,4)=zero; rhor1(2*ipt,4)=zero
 
-       rhor1(2*ipt-1,:)=zero
-       rhor1(2*ipt  ,:)=zero
      end if
    end do
  end if
