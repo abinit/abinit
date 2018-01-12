@@ -374,7 +374,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  real(dp) :: ucvol,vxcavg,elmag1
  real(dp) :: res2_mq,fe1fixed_mq,elast_mq
  real(dp) :: eberry_mq,edocc_mq,eeig0_mq,ehart01_mq,ehart1_mq,ek0_mq,ek1_mq,eloc0_mq,elpsp1_mq,enl0_mq
- real(dp) :: enl1_mq,eovl1_mq,epaw1_mq,etotal_mq,evar_mq,evdw_mq,exc1_mq,fermie1_mq,deltae_mq,elmag1_mq
+ real(dp) :: enl1_mq,eovl1_mq,epaw1_mq,evdw_mq,exc1_mq,fermie1_mq,deltae_mq,elmag1_mq
  character(len=500) :: msg
  character(len=fnlen) :: fi1o
  character(len=fnlen) :: fi1o_vtk
@@ -741,11 +741,16 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
        !rhor1_mq=rhor1
        !rhog1_mq=rhog1
        !get initial guess for vtrial1 at -q
-       call dfpt_rhotov(cplex,ehart01_mq,ehart1_mq,elpsp1_mq,exc1_mq,elmag1_mq,gmet,gprimd,gsqcut,idir,ipert,&
-&       dtset%ixc,kxc,mpi_enreg,dtset%natom,nfftf,ngfftf,nhat,nhat1,nhat1gr,nhat1grdim,&
-&       nkxc,nspden,n3xccc,optene,option,dtset%paral_kgb,-dtset%qptn,&
-&       rhog,rhog1_mq,rhor,rhor1_mq,rprimd,ucvol,psps%usepaw,usexcnhat,vhartr1_mq,vpsp1,&
-&       nvresid1_mq,res2_mq,vtrial1_mq,vxc,vxc1_mq,xccc3d1,dtset%ixcrot)
+        do ifft=1,nfftf
+           vtrial1_mq(2*ifft-1,1)=+vtrial1(2*ifft-1,1)
+           vtrial1_mq(2*ifft-1,2)=+vtrial1(2*ifft-1,2)
+           vtrial1_mq(2*ifft  ,1)=-vtrial1(2*ifft  ,1)
+           vtrial1_mq(2*ifft  ,2)=-vtrial1(2*ifft  ,2)
+           vtrial1_mq(2*ifft-1,3)= vtrial1(2*ifft  ,4) !Re[V^12]
+           vtrial1_mq(2*ifft  ,3)= vtrial1(2*ifft-1,4) !Im[V^12],see definition of v(:,4) cplex=2 case 
+           vtrial1_mq(2*ifft  ,4)= vtrial1(2*ifft-1,3) !Re[V^21]=Re[V^12]
+           vtrial1_mq(2*ifft-1,4)= vtrial1(2*ifft  ,3) !Re[V^21]=Re[V^12]
+        end do
      endif
 
 !    For Q=0 and metallic occupation, initialize quantities needed to
@@ -999,14 +1004,6 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &     dtset%ixc,kxc,mpi_enreg,dtset%natom,nfftf,ngfftf,nhat,nhat1,nhat1gr,nhat1grdim,nkxc,&
 &     nspden,n3xccc,optene,optres,dtset%paral_kgb,dtset%qptn,rhog,rhog1,rhor,rhor1,&
 &     rprimd,ucvol,psps%usepaw,usexcnhat,vhartr1,vpsp1,nvresid1,res2,vtrial1,vxc,vxc1,xccc3d1,dtset%ixcrot)
-     if(.not.kramers_deg) then
-       !SPr: in fact no need to compute the new trial potential here, rhor1 at -q is c.c. of rhor1 at +q, to rectify..
-       call dfpt_rhotov(cplex,ehart01_mq,ehart1_mq,elpsp1_mq,exc1_mq,elmag1_mq,gmet,gprimd,gsqcut,idir,ipert,&
-&       dtset%ixc,kxc,mpi_enreg,dtset%natom,nfftf,ngfftf,nhat,nhat1,nhat1gr,nhat1grdim,nkxc,&
-&       nspden,n3xccc,optene,optres,dtset%paral_kgb,-dtset%qptn,rhog,rhog1_mq,rhor,rhor1_mq,&
-&       rprimd,ucvol,psps%usepaw,usexcnhat,vhartr1_mq,vpsp1,nvresid1_mq,res2_mq,vtrial1_mq,vxc,vxc1_mq,xccc3d1,&
-&       dtset%ixcrot)
-     endif
    end if
 
 !  ######################################################################

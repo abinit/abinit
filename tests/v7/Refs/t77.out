@@ -17,10 +17,10 @@
 .Starting date : Mon  4 Apr 2016.
 - ( at 12h05 )
   
-- input  file    -> t72.in
-- output file    -> t72.out
-- root for input  files -> t72i
-- root for output files -> t72o
+- input  file    -> t77.in
+- output file    -> t77.out
+- root for input  files -> t77i
+- root for output files -> t77o
 
 
  DATASET    1 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
@@ -729,7 +729,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      84.333      84.147
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  6.822000000000  6.822000000000  6.822000000000 bohr
               =  3.610046917001  3.610046917001  3.610046917001 angstroms
- prteigrs : about to open file t72o_DS1_EIG
+ prteigrs : about to open file t77o_DS1_EIG
  Fermi (or HOMO) energy (hartree) =   0.13621   Average Vxc (hartree)=  -0.55081
  Eigenvalues (hartree) for nkpt=   4  k points:
  kpt#   1, nband= 30, wtk=  0.03704, kpt=  0.0000  0.0000  0.0000 (reduced coord)
@@ -917,7 +917,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      84.333      84.147
  frms,max,avg= 0.0000000E+00 0.0000000E+00  -1.466E-04  2.505E-04 -9.663E-05 e/A
  length scales=  6.822000000000  6.822000000000  6.822000000000 bohr
               =  3.610046917001  3.610046917001  3.610046917001 angstroms
- prteigrs : about to open file t72o_DS2_EIG
+ prteigrs : about to open file t77o_DS2_EIG
  Fermi (or HOMO) energy (hartree) =   0.13620   Average Vxc (hartree)=  -0.55081
  Eigenvalues (hartree) for nkpt=  14  k points:
  kpt#   1, nband= 30, wtk=  0.03704, kpt=  0.0000  0.0000  0.0000 (reduced coord)
@@ -1011,7 +1011,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      84.333      84.147
          ecut(hartree)=     12.000   => boxcut(ratio)=   2.12700
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t72o_DS2_WFK
+-inwffil : will read wavefunctions from disk file t77o_DS2_WFK
 _setup2: Arith. and geom. avg. npw (full set) are      84.333      84.147
 
 ================================================================================
@@ -1155,7 +1155,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      84.333      84.147
  frms,max,avg= 0.0000000E+00 0.0000000E+00  -1.466E-04  2.505E-04 -9.664E-05 e/A
  length scales=  6.822000000000  6.822000000000  6.822000000000 bohr
               =  3.610046917001  3.610046917001  3.610046917001 angstroms
- prteigrs : about to open file t72o_DS3_EIG
+ prteigrs : about to open file t77o_DS3_EIG
  Fermi (or HOMO) energy (hartree) =   0.13620   Average Vxc (hartree)=  -0.55081
  Eigenvalues (hartree) for nkpt=  14  k points:
  kpt#   1, nband= 30, wtk=  0.03704, kpt=  0.0000  0.0000  0.0000 (reduced coord)
@@ -1249,7 +1249,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      84.333      84.147
 
 
 ================================================================================
- prteigrs : about to open file t72o_DS4_EIG
+ prteigrs : about to open file t77o_DS4_EIG
  Non-SCF case, kpt    1 (  0.00000  0.00000  0.00000), residuals and eigenvalues=
   1.29E-11  2.56E-11  1.48E-11  2.48E-11  4.14E-11  1.12E-11  3.84E-12  1.94E-12
   4.40E-12  1.80E-12  9.58E-12  7.85E-12  2.80E-12  2.10E-12  6.17E-13  3.43E-12
@@ -1869,7 +1869,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      84.333      84.147
     1      0.00000000000000     0.00000000000000     0.00000000000000
  length scales=  6.822000000000  6.822000000000  6.822000000000 bohr
               =  3.610046917001  3.610046917001  3.610046917001 angstroms
- prteigrs : about to open file t72o_DS4_EIG
+ prteigrs : about to open file t77o_DS4_EIG
  Eigenvalues (hartree) for nkpt=  41  k points:
  kpt#   1, nband= 30, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -3.77544   -2.32172   -2.32172   -2.32172   -0.13064    0.09911    0.09911    0.09911

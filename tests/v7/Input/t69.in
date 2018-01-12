@@ -1,32 +1,34 @@
 # Crystalline silicon : computation of the total energy using Fock functional,
 # without an auxiliary XC functional for the SCF cycle, 
 # and some over relaxation in a simple mixing scheme..
-# PAW
+# Norm-conserving
 
- nstep 61        # Maximal number of SCF cycles
+ nstep 61          # Maximal number of SCF cycles
  fockoptmix 201
  nnsclohf2 4       
- ixc1 11           # Explitic use of the native PBE functional 
  ixc2 40           # Calculation with Hartree-Fock functional
- fockdownsampling2 0 0 0 # Keep only the Gamma point to define the Fock operator
 
- wfmix 1.3         # Apparently, this value is quite optimal in this case.
+ wfmix 1.5         # Apparently, this value is quite optimal in this case.
 
 iscf 7
 diemac 1.0
 diemix 1.0
 
-ndtset 2         # Two datasets : 1) LDA 2) HF
+ndtset 2         # Two datasets : 1) LDA 2) PBE0
 
 #Definition of the unit cell
-acell 3*6.740652601
+acell 3*10.217         # Data from PRB 48, 5058
 rprim  0.0  0.5  0.5   # In lessons 1 and 2, these primitive vectors 
        0.5  0.0  0.5   # (to be scaled by acell) were 1 0 0  0 1 0  0 0 1 
        0.5  0.5  0.0   # that is, the default.
 
 #Definition of the atom types
 ntypat 1          # There is only one type of atom
-znucl  6 
+znucl 14          # The keyword "znucl" refers to the atomic number of the 
+                  # possible type(s) of atom. The pseudopotential(s) 
+                  # mentioned in the "files" file must correspond
+                  # to the type(s) of atom. Here, the only type is Silicon.
+                         
 
 #Definition of the atoms
 natom 2           # There are two atoms
@@ -39,10 +41,7 @@ xred              # This keyword indicate that the location of the atoms
                   # interpreter capabilities of ABINIT)
 
 #Definition of the planewave basis set
-ecut 10.0         # Maximal kinetic energy cut-off, in Hartree
-pawecutdg  12.0         # Maximal kinetic energy cut-off, in Hartree
-
-nband 4
+ecut  6.0         # Maximal kinetic energy cut-off, in Hartree
 
 #Definition of the k-point grid
 kptopt 1          # Option for the automatic generation of k points, taking
@@ -76,13 +75,13 @@ nbandhf2 4         # number of occupied states
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% files_to_test = t71.out, tolnlines=0, tolabs=0.0, tolrel=0.0
-#%% psp_files= C.GGA_X_PBE+GGA_C_PBE-paw.xml
+#%% files_to_test = t69.out, tolnlines=0, tolabs=0.0, tolrel=0.0
+#%% psp_files= 14si.pspgth
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]
 #%% authors = X. Gonze
 #%% keywords = HF, PBE0, FAILS_IFMPI
-#%% description = Test of Fock in sequential case, with simple mixing and PAW
+#%% description = Test of Fock in sequential case, with simple mixing and NC psps
 #%% topics = Hybrids
 #%%<END TEST_INFO>

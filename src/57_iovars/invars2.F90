@@ -2225,6 +2225,10 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
  call intagm(dprarr,intarr,jdtset,marr,3*dtset%natsph_extra,string(1:lenstr),'xredsph_extra',tread,'DPR')
  if(tread==1) dtset%xredsph_extra=reshape(dprarr(1:3*dtset%natsph_extra), (/3,dtset%natsph_extra/))
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'wfmix',tread,'DPR')
+ if(tread==1) dtset%wfmix=dprarr(1)
+
+
 !WVL - Wavelets related values
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'wvl_hgrid',tread,'DPR')
