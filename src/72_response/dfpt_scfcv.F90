@@ -751,11 +751,6 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
            vtrial1_mq(2*ifft  ,4)= vtrial1(2*ifft-1,3) !Re[V^21]=Re[V^12]
            vtrial1_mq(2*ifft-1,4)= vtrial1(2*ifft  ,3) !Re[V^21]=Re[V^12]
         end do
-       !call dfpt_rhotov(cplex,ehart01_mq,ehart1_mq,elpsp1_mq,exc1_mq,elmag1_mq,gmet,gprimd,gsqcut,idir,ipert,&
-&      ! dtset%ixc,kxc,mpi_enreg,dtset%natom,nfftf,ngfftf,nhat,nhat1,nhat1gr,nhat1grdim,&
-&      ! nkxc,nspden,n3xccc,optene,option,dtset%paral_kgb,-dtset%qptn,&
-&      ! rhog,rhog1_mq,rhor,rhor1_mq,rprimd,ucvol,psps%usepaw,usexcnhat,vhartr1_mq,vpsp1,&
-&      ! nvresid1_mq,res2_mq,vtrial1_mq,vxc,vxc1_mq,xccc3d1,dtset%ixcrot)
      endif
 
 !    For Q=0 and metallic occupation, initialize quantities needed to
@@ -1009,14 +1004,6 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &     dtset%ixc,kxc,mpi_enreg,dtset%natom,nfftf,ngfftf,nhat,nhat1,nhat1gr,nhat1grdim,nkxc,&
 &     nspden,n3xccc,optene,optres,dtset%paral_kgb,dtset%qptn,rhog,rhog1,rhor,rhor1,&
 &     rprimd,ucvol,psps%usepaw,usexcnhat,vhartr1,vpsp1,nvresid1,res2,vtrial1,vxc,vxc1,xccc3d1,dtset%ixcrot)
-     !if(.not.kramers_deg) then
-     !  !SPr: in fact no need to compute the new trial potential here, rhor1 at -q is c.c. of rhor1 at +q, to rectify..
-     !  call dfpt_rhotov(cplex,ehart01_mq,ehart1_mq,elpsp1_mq,exc1_mq,elmag1_mq,gmet,gprimd,gsqcut,idir,ipert,&
-&    !   dtset%ixc,kxc,mpi_enreg,dtset%natom,nfftf,ngfftf,nhat,nhat1,nhat1gr,nhat1grdim,nkxc,&
-&    !   nspden,n3xccc,optene,optres,dtset%paral_kgb,-dtset%qptn,rhog,rhog1_mq,rhor,rhor1_mq,&
-&    !   rprimd,ucvol,psps%usepaw,usexcnhat,vhartr1_mq,vpsp1,nvresid1_mq,res2_mq,vtrial1_mq,vxc,vxc1_mq,xccc3d1,&
-&    !   dtset%ixcrot)
-     !endif
    end if
 
 !  ######################################################################
